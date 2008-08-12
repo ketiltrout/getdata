@@ -188,7 +188,7 @@ off_t getdata(DIRFILE* dirfile, const char *field_code, off_t first_frame,
 /*    return value: the number of frames in the dirfile, or zero on error  */
 /*                                                                         */
 /***************************************************************************/
-unsigned long get_n_frames(DIRFILE* dirfile);
+off_t get_n_frames(DIRFILE* dirfile);
 
 
 /***************************************************************************/

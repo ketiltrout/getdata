@@ -2511,11 +2511,11 @@ off_t getdata(DIRFILE* D, const char *field_code, off_t first_frame,
 /*    Get the number of frames available                                   */
 /*                                                                         */
 /***************************************************************************/
-unsigned long get_n_frames(DIRFILE* D)
+off_t get_n_frames(DIRFILE* D)
 {
   char raw_data_filename[FILENAME_MAX];
   struct stat statbuf;
-  unsigned long nf;
+  off_t nf;
 
   if (!D || (D->flags & GD_INVALID)) {/* don't crash */
     _GD_SetGetDataError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
