@@ -12,39 +12,11 @@
 #endif
 
 #ifdef STDC_HEADERS
-#include <inttypes.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <unistd.h>
-#endif
-
-#ifdef HAVE_ASSERT_H
-#include <assert.h>
-#endif
-
-#ifdef HAVE_MATH_H
-#include <math.h>
-#endif
-
-#ifdef HAVE_FCNTL_H
-#include <fcntl.h>
-#endif
-
-#ifdef HAVE_LIBGEN_H
-#include <libgen.h>
-#endif
-
-#ifdef HAVE_CTYPE_H
-#include <ctype.h>
 #endif
 
 #include "getdata_internal.h"
-
-#define MAX_LINE_LENGTH FILENAME_MAX
-#define MAX_IN_COLS 12 /* lincom needs = 3 * MAX_LINCOM + 3 ; */
 
 static struct {
   unsigned int n;
@@ -58,7 +30,8 @@ static DIRFILE _GD_GlobalErrors = {
   .error = 0,
   .suberror = 0,
   .error_string = _GD_GlobalErrorString,
-  .error_file = _GD_GlobalErrorFile
+  .error_file = _GD_GlobalErrorFile,
+  .flags = GD_INVALID
 };
 
 /* _GD_CopyGlobalError: Copy the last error message to the global error buffer.
@@ -104,13 +77,9 @@ static DIRFILE* _GD_GetDirfile(const char *filedir)
 
   _GD_Dirfiles.D[_GD_Dirfiles.n - 1] = dirfile_open(filedir, 0);
 
-  /* Error encountered, free the memory */ 
-  if (_GD_Dirfiles.D[_GD_Dirfiles.n - 1]->error != GD_E_OK) {
-    dirfile_close(_GD_Dirfiles.D[_GD_Dirfiles.n - 1]);
-    _GD_Dirfiles.n--; /* no need to free.  The next realloc will just do
-                         nothing */
-    return NULL;
-  }
+  /* Error encountered -- the dirfile will shortly be deleted */
+  if (_GD_Dirfiles.D[_GD_Dirfiles.n - 1]->error != GD_E_OK)
+    return _GD_Dirfiles.D[--_GD_Dirfiles.n];
 
   return _GD_Dirfiles.D[_GD_Dirfiles.n - 1];
 }
@@ -179,6 +148,7 @@ int GetNFrames(const char *filename_in, int *error_code, const void *unused)
 
   if (D->error) {
     *error_code = _GD_CopyGlobalError(D);
+    dirfile_close(D);
     return 0;
   }
 
@@ -207,6 +177,7 @@ int GetSamplesPerFrame(const char *filename_in, const char *field_code,
 
   if (D->error) {
     *error_code = _GD_CopyGlobalError(D);
+    dirfile_close(D);
     return 0;
   }
 

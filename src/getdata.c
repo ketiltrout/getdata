@@ -32,7 +32,7 @@
 #endif
 
 #ifdef HAVE_DIRENT_H
-# include <dirent.h>
+#include <dirent.h>
 #endif
 
 #ifdef HAVE_ERRNO_H
@@ -53,7 +53,6 @@
 
 #include "getdata_internal.h"
 
-#define MAX_LINE_LENGTH 4096
 #define MAX_IN_COLS (3 * GD_MAX_LINCOM + 3) /* for lincom */
 
 /* The following has been extracted from internal.cpp from kjs */
@@ -2486,7 +2485,7 @@ int _GD_DoField(DIRFILE *D, const char *field_code, int first_frame,
 int getdata(DIRFILE* D, const char *field_code, int first_frame, int first_samp,
     int num_frames, int num_samp, gd_type_t return_type, void *data_out)
 {
-  if (!D) {/* don't crash */
+  if (!D || (D->flags & GD_INVALID)) {/* don't crash */
     _GD_SetGetDataError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
     return 0;
   }
@@ -2514,7 +2513,7 @@ unsigned long get_n_frames(DIRFILE* D)
   struct stat statbuf;
   unsigned long nf;
 
-  if (!D) {/* don't crash */
+  if (!D || (D->flags & GD_INVALID)) {/* don't crash */
     _GD_SetGetDataError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
     return 0;
   }
@@ -2546,7 +2545,7 @@ unsigned long get_n_frames(DIRFILE* D)
 /***************************************************************************/
 unsigned int get_samples_per_frame(DIRFILE* D, const char *field_code)
 {
-  if (!D) {/* don't crash */
+  if (!D || (D->flags & GD_INVALID)) {/* don't crash */
     _GD_SetGetDataError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
     return 0;
   }

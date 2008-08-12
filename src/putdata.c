@@ -13,24 +13,14 @@
 
 #ifdef STDC_HEADERS
 #include <inttypes.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
-#include <sys/types.h>
 #include <unistd.h>
-#endif
-
-#ifdef HAVE_ASSERT_H
-#include <assert.h>
 #endif
 
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
-#endif
-
-#ifdef HAVE_LIBGEN_H
-#include <libgen.h>
 #endif
 
 #include "getdata_internal.h"
@@ -364,6 +354,11 @@ static int _GD_DoFieldOut(DIRFILE *D, const char *field_code, int first_frame,
 int putdata(DIRFILE* D, const char *field_code, int first_frame, int first_samp,
     int num_frames, int num_samp, gd_type_t data_type, void *data_in)
 {
+  if (!D || (D->flags & GD_INVALID)) {/* don't crash */
+    _GD_SetGetDataError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    return 0;
+  }
+
   _GD_ClearGetDataError(D);
 
   if (data_type == GD_INT32_ALT)

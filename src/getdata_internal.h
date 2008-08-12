@@ -15,6 +15,12 @@
 /* maximum number of recursions */
 #define GD_MAX_RECURSE_LEVEL  32
 
+/* maximum length of a format file line */
+#ifndef FILENAME_MAX
+#  define FILENAME_MAX 4096
+#endif
+#define MAX_LINE_LENGTH FILENAME_MAX
+
 /* Suberror codes */
 #define GD_E_OPEN_NOT_DIRFILE  0
 #define GD_E_OPEN_NOT_EXIST    1
