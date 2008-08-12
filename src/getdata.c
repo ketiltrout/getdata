@@ -13,6 +13,9 @@
 
 #ifdef STDC_HEADERS
 #include <inttypes.h>
+#include <ctype.h>
+#include <errno.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -27,16 +30,8 @@
 #define assert(...)
 #endif
 
-#ifdef HAVE_CTYPE_H
-#include <ctype.h>
-#endif
-
 #ifdef HAVE_DIRENT_H
 #include <dirent.h>
-#endif
-
-#ifdef HAVE_ERRNO_H
-#include <errno.h>
 #endif
 
 #ifdef HAVE_FCNTL_H
@@ -45,10 +40,6 @@
 
 #ifdef HAVE_LIBGEN_H
 #include <libgen.h>
-#endif
-
-#ifdef HAVE_MATH_H
-#include <math.h>
 #endif
 
 #include "getdata_internal.h"

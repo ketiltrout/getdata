@@ -60,7 +60,7 @@ dnl libraries
 AC_CHECK_LIB(m,ceil,,AC_MSG_ERROR([Can't find libm!]))
 
 dnl headers
-AC_CHECK_HEADERS(ctype.h errno.h fcntl.h libgen.h math.h)
+AC_CHECK_HEADERS(fcntl.h libgen.h)
 AC_HEADER_ASSERT
 AC_HEADER_DIRENT
 AC_SYS_LARGEFILE
