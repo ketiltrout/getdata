@@ -142,6 +142,9 @@ static int _GD_GetLine(FILE *fp, char *line, int* linenum)
 void _GD_SetGetDataError(DIRFILE* D, int error, int suberror,
     const char* format_file, int line, const char* token)
 {
+  if (!D)
+    return;
+
   D->error = error;
   D->suberror = suberror;
   D->error_line = line;

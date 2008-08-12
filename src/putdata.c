@@ -29,11 +29,6 @@ static int _GD_DoFieldOut(DIRFILE* D, const char *field_code,
     int first_frame, int first_samp, int num_frames, int num_samp,
     gd_type_t data_type, const void *data_in);
 
-/***************************************************************************/
-/*                                                                         */
-/* Look to see if the output field code belongs to a raw.  If so, parse it.*/
-/*                                                                         */
-/***************************************************************************/
 static int _GD_DoRawOut(DIRFILE *D, struct RawEntryType *R, int first_frame,
     int first_samp, int num_frames, int num_samp, gd_type_t data_type,
     const void *data_in)
@@ -120,11 +115,6 @@ static int _GD_DoRawOut(DIRFILE *D, struct RawEntryType *R, int first_frame,
   return n_wrote;
 }
 
-/***************************************************************************/
-/*                                                                         */
-/*   Look to see if output field belongs to a linterp.  If so, parse it.   */
-/*                                                                         */
-/***************************************************************************/
 static int _GD_DoLinterpOut(DIRFILE* D, struct LinterpEntryType *I,
     int first_frame, int first_samp, int num_frames, int num_samp,
     gd_type_t data_type, const void *data_in)
@@ -159,11 +149,6 @@ static int _GD_DoLinterpOut(DIRFILE* D, struct LinterpEntryType *I,
   return n_wrote;
 }
 
-/***************************************************************************/
-/*                                                                         */
-/*   Look to see if output field belongs to a lincom.  If so, parse it.    */
-/*                                                                         */
-/***************************************************************************/
 static int _GD_DoLincomOut(DIRFILE* D, struct LincomEntryType *L,
     int first_frame, int first_samp, int num_frames, int num_samp,
     gd_type_t data_type, const void *data_in)
@@ -207,11 +192,6 @@ static int _GD_DoLincomOut(DIRFILE* D, struct LincomEntryType *L,
   return n_wrote;
 }
 
-/***************************************************************************/
-/*                                                                         */
-/*   Look to see if output field belongs to a bitfield.  If so, parse it.  */
-/*                                                                         */
-/***************************************************************************/
 static int _GD_DoBitOut(DIRFILE* D, struct BitEntryType *B, int first_frame,
     int first_samp, int num_frames, int num_samp, gd_type_t data_type,
     const void *data_in)
@@ -283,6 +263,20 @@ static int _GD_DoBitOut(DIRFILE* D, struct BitEntryType *B, int first_frame,
   return n_wrote;
 }
 
+static int _GD_DoPhaseOut(DIRFILE* D, struct PhaseEntryType *P, int first_frame,
+    int first_samp, int num_frames, int num_samp, gd_type_t data_type,
+    const void *data_in)
+{
+  int n_wrote;
+
+  D->recurse_level++;
+  n_wrote = _GD_DoFieldOut(D, P->raw_field, first_frame, first_samp + P->shift,
+      num_frames, num_samp, data_type, data_in);
+  D->recurse_level--;
+
+  return n_wrote;
+}
+
 /***************************************************************************/
 /*                                                                         */
 /*  _GD_DoFieldOut: Do one output field once F has been identified         */
@@ -324,8 +318,8 @@ static int _GD_DoFieldOut(DIRFILE *D, const char *field_code, int first_frame,
       _GD_SetGetDataError(D, GD_E_BAD_PUT_CODE, 0, NULL, 0, field_code);
       return 0;
     case GD_PHASE_ENTRY:
-      _GD_SetGetDataError(D, GD_E_BAD_PUT_CODE, 0, NULL, 0, field_code);
-      return 0;
+      return _GD_DoPhaseOut(D, ENTRY(Phase, entry), first_frame, first_samp,
+          num_frames, num_samp, data_type, data_in);
   }
 
   _GD_SetGetDataError(D, GD_E_INTERNAL_ERROR, 0, __FILE__, __LINE__, NULL);
