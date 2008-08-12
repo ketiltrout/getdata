@@ -2,7 +2,7 @@ C. B. Netterfield <netterfield@astro.utoronto.ca> developed the orignal
 dirfile standard and created the first getdata library.
 
 D. V. Wiebe <dvw@ketiltrout.net> developed the "large dirfile extension"
-(AKA Standards Version 1) and currently maintains getdata and the dirfile
+(AKA Standards Version 3) and currently maintains getdata and the dirfile
 standards.
 
 Ted Kisner <tskisner.public@gmail.com> wrote the putdata library.
