@@ -56,8 +56,6 @@
 #define MAX_LINE_LENGTH 4096
 #define MAX_IN_COLS (3 * GD_MAX_LINCOM + 3) /* for lincom */
 
-#undef DIRFILE_DEBUG
-
 /* The following has been extracted from internal.cpp from kjs */
 
 /*

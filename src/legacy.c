@@ -46,8 +46,6 @@
 #define MAX_LINE_LENGTH FILENAME_MAX
 #define MAX_IN_COLS 12 /* lincom needs = 3 * MAX_LINCOM + 3 ; */
 
-#undef DIRFILE_DEBUG
-
 static struct {
   unsigned int n;
   DIRFILE** D;

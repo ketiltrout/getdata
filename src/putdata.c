@@ -35,14 +35,6 @@
 
 #include "getdata_internal.h"
 
-#undef DIRFILE_DEBUG
-
-/* The following has been extracted from internal.cpp from kjs */
-
-/*
- ** For systems without NAN, this is a NAN in IEEE double format.
- */
-
 static int _GD_DoFieldOut(DIRFILE* D, const char *field_code,
     int first_frame, int first_samp, int num_frames, int num_samp,
     gd_type_t data_type, const void *data_in);
@@ -64,7 +56,7 @@ static int _GD_DoRawOut(DIRFILE *D, struct RawEntryType *R, int first_frame,
   s0 = first_samp + first_frame * (int)(R->samples_per_frame);
   ns = num_samp + num_frames * (int)(R->samples_per_frame);
 
-#ifdef DIRFILE_DEBUG
+#ifdef GETDATA_DEBUG
   fprintf(stdout,"DoRawOut:  file pointer for field %s = %d\n", field_code,
       R->fp);
 #endif
@@ -74,7 +66,7 @@ static int _GD_DoRawOut(DIRFILE *D, struct RawEntryType *R, int first_frame,
 
     sprintf(datafilename, "%s/%s", D->name, R->file);
 
-#ifdef DIRFILE_DEBUG
+#ifdef GETDATA_DEBUG
     fprintf(stdout,"DoRawOut:  stat(%s) = %d\n", datafilename,
         stat(datafilename, &statbuf));
 #endif
@@ -93,7 +85,7 @@ static int _GD_DoRawOut(DIRFILE *D, struct RawEntryType *R, int first_frame,
       }
     }
 
-#ifdef DIRFILE_DEBUG
+#ifdef GETDATA_DEBUG
     fprintf(stdout, "DoRawOut:  opening file %s for writing\n",
         datafilename);
 #endif
@@ -101,7 +93,7 @@ static int _GD_DoRawOut(DIRFILE *D, struct RawEntryType *R, int first_frame,
     /* make sure that file is in read / write mode        */
     /* if not, close file and reopen in read / write mode */
 
-#ifdef DIRFILE_DEBUG
+#ifdef GETDATA_DEBUG
     fprintf(stdout, "DoRawOut:  file is already open\n");
 #endif
 
@@ -129,7 +121,7 @@ static int _GD_DoRawOut(DIRFILE *D, struct RawEntryType *R, int first_frame,
   n_wrote = ((int)write(R->fp, databuffer, (size_t)(R->size) * (size_t)ns)) /
     (R->size);
 
-#ifdef DIRFILE_DEBUG
+#ifdef GETDATA_DEBUG
   fprintf(stdout,"DoRawOut:  %d samples\n", (int)*n_write);
 #endif
 
@@ -262,7 +254,7 @@ static int _GD_DoBitOut(DIRFILE* D, struct BitEntryType *B, int first_frame,
   /* first, READ the field in so that we can change the bits    */
   /* do not check error code, since the field may not exist yet */
 
-#ifdef DIRFILE_DEBUG
+#ifdef GETDATA_DEBUG
   fprintf(stdout,"DoBitOut:  reading in bitfield %s\n",B->raw_field);
 #endif
 
@@ -279,7 +271,7 @@ static int _GD_DoBitOut(DIRFILE* D, struct BitEntryType *B, int first_frame,
 
   highmask = 1 << (B->bitnum);
   lowmask = ~highmask;
-#ifdef DIRFILE_DEBUG
+#ifdef GETDATA_DEBUG
   fprintf(stdout,"DoBitOut:  bitnum = %d highmask = %u lowmask = %u\n",
       B->bitnum, highmask, lowmask);
 #endif

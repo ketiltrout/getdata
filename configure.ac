@@ -31,6 +31,22 @@ else
   AC_SUBST(GETDATA_IFACE_AGE, [0])
 fi
 
+AC_ARG_ENABLE(debug, AS_HELP_STRING([--enable-debug],
+              [Enable debugging messages]),
+              [
+               case "${enableval}" in
+                 yes) enable_debug="yes" ;;
+                 *) enable_debug="no";
+               esac
+              ], [ enable_debug="no" ])
+
+AC_MSG_CHECKING([whether to enable debugging messages])
+AC_MSG_RESULT([$enable_debug])
+if test "x$enable_debug" == "xyes"; then
+  AC_DEFINE([GETDATA_DEBUG], [],
+            [ Define to enable debugging messages ])
+fi
+
 dnl Programs
 AC_PROG_CC
 AC_HEADER_STDC
