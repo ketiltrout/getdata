@@ -21,6 +21,12 @@
 #endif
 #define MAX_LINE_LENGTH FILENAME_MAX
 
+/* fseeko &c. */
+#ifndef HAVE_FSEEKO
+#define fseeko fseek
+#define fteelo ftell
+#endif
+
 /* Suberror codes */
 #define GD_E_OPEN_NOT_DIRFILE  0
 #define GD_E_OPEN_NOT_EXIST    1
@@ -107,8 +113,8 @@ void* _GD_Alloc(DIRFILE* D, char type, int n);
 void _GD_ClearGetDataError(DIRFILE* D);
 void _GD_ConvertType(DIRFILE* D, const void *data_in, char in_type,
     void *data_out, char out_type, int n);
-int  _GD_DoField(DIRFILE *D, const char *field_code, int first_frame,
-    int first_samp, int num_frames, int num_samp, char return_type,
+off_t  _GD_DoField(DIRFILE *D, const char *field_code, off_t first_frame,
+    off_t first_samp, off_t num_frames, off_t num_samp, gd_type_t return_type,
     void *data_out);
 unsigned int  _GD_GetSPF(const char *field_code, DIRFILE* D);
 struct gd_entry_t* _GD_FindField(DIRFILE* D, const char* field_code);

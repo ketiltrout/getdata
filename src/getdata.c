@@ -1684,9 +1684,10 @@ unsigned int _GD_GetSPF(const char *field_code, DIRFILE* D)
 }
 
 static void _GD_FixEndianness(DIRFILE* D, char* databuffer, size_t size,
-    int n_read)
+    off_t n_read)
 {
-  int i, j;
+  off_t i;
+  int j;
   char b;
 
   if (size == 1)
@@ -1702,11 +1703,11 @@ static void _GD_FixEndianness(DIRFILE* D, char* databuffer, size_t size,
 
 /* _GD_DoRaw:  Read from a raw.  Returns number of samples read.
 */
-static int _GD_DoRaw(DIRFILE *D, struct RawEntryType *R,
-    int first_frame, int first_samp, int num_frames, int num_samp,
+static off_t _GD_DoRaw(DIRFILE *D, struct RawEntryType *R,
+    off_t first_frame, off_t first_samp, off_t num_frames, off_t num_samp,
     gd_type_t return_type, void *data_out)
 {
-  int s0, ns, samples_read, n_read = 0;
+  off_t s0, ns, samples_read, n_read = 0;
   char datafilename[FILENAME_MAX];
   void *databuffer;
 
@@ -1980,14 +1981,14 @@ static void _GD_MultiplyData(DIRFILE* D, void *A, int spfA, void *B, int spfB,
 
 /* _GD_DoLincom:  Read from a lincom.  Returns number of samples read.
 */
-static int _GD_DoLincom(DIRFILE *D, struct LincomEntryType *L,
-    int first_frame, int first_samp, int num_frames, int num_samp,
+static off_t _GD_DoLincom(DIRFILE *D, struct LincomEntryType *L,
+    off_t first_frame, off_t first_samp, off_t num_frames, off_t num_samp,
     gd_type_t return_type, void *data_out)
 {
   void *tmpbuf;
   int i;
-  int spf1, spf2, num_samp2, first_samp2;
-  int n_read, n_read2;
+  int spf1, spf2;
+  off_t n_read, n_read2, num_samp2, first_samp2;
 
   D->recurse_level++;
   spf1 = _GD_GetSPF(L->in_fields[0], D);
@@ -2061,13 +2062,13 @@ static int _GD_DoLincom(DIRFILE *D, struct LincomEntryType *L,
 
 /* _GD_DoMultiply:  Read from a multiply.  Returns number of samples read.
 */
-static int _GD_DoMultiply(DIRFILE *D, struct MultiplyEntryType* M,
-    int first_frame, int first_samp, int num_frames, int num_samp,
+static off_t _GD_DoMultiply(DIRFILE *D, struct MultiplyEntryType* M,
+    off_t first_frame, off_t first_samp, off_t num_frames, off_t num_samp,
     gd_type_t return_type, void *data_out)
 {
   void *tmpbuf;
-  int spf1, spf2, num_samp2, first_samp2;
-  int n_read, n_read2;
+  int spf1, spf2;
+  off_t n_read, n_read2, num_samp2, first_samp2;
 
   D->recurse_level++;
 
@@ -2129,15 +2130,15 @@ static int _GD_DoMultiply(DIRFILE *D, struct MultiplyEntryType* M,
 
 /* _GD_DoBit:  Read from a bitfield.  Returns number of samples read.
 */
-static int _GD_DoBit(DIRFILE *D, struct BitEntryType *B,
-    int first_frame, int first_samp, int num_frames, int num_samp,
+static off_t _GD_DoBit(DIRFILE *D, struct BitEntryType *B,
+    off_t first_frame, off_t first_samp, off_t num_frames, off_t num_samp,
     gd_type_t return_type, void *data_out)
 {
   uint64_t *tmpbuf;
-  int i;
+  off_t i;
   int spf;
-  int ns;
-  int n_read;
+  off_t ns;
+  off_t n_read;
 
   const uint64_t mask = (B->numbits == 64) ? 0xffffffffffffffffULL :
     ((uint64_t)1 << B->numbits) - 1;
@@ -2179,11 +2180,11 @@ static int _GD_DoBit(DIRFILE *D, struct BitEntryType *B,
 
 /* _GD_DoPhase:  Read from a phase.  Returns number of samples read.
 */
-static int _GD_DoPhase(DIRFILE *D, struct PhaseEntryType *P,
-    int first_frame, int first_samp, int num_frames, int num_samp,
+static off_t _GD_DoPhase(DIRFILE *D, struct PhaseEntryType *P,
+    off_t first_frame, off_t first_samp, off_t num_frames, off_t num_samp,
     gd_type_t return_type, void *data_out)
 {
-  int n_read;
+  off_t n_read;
 
   D->recurse_level++;
   n_read = _GD_DoField(D, P->raw_field, first_frame, first_samp + P->shift,
@@ -2377,11 +2378,11 @@ void _GD_LinterpData(DIRFILE* D, const void *data, gd_type_t type, int npts,
 
 /* _GD_DoLinterp:  Read from a linterp.  Returns number of samples read.
 */
-static int _GD_DoLinterp(DIRFILE *D, struct LinterpEntryType* I,
-    int first_frame, int first_samp, int num_frames, int num_samp,
+static off_t _GD_DoLinterp(DIRFILE *D, struct LinterpEntryType* I,
+    off_t first_frame, off_t first_samp, off_t num_frames, off_t num_samp,
     gd_type_t return_type, void *data_out)
 {
-  int n_read = 0;
+  off_t n_read = 0;
 
   if (I->n_interp < 0) {
     _GD_ReadLinterpFile(D, I);
@@ -2404,11 +2405,11 @@ static int _GD_DoLinterp(DIRFILE *D, struct LinterpEntryType* I,
 
 /* _GD_DoField: Locate the field in the database and read it.
 */
-int _GD_DoField(DIRFILE *D, const char *field_code, int first_frame,
-    int first_samp, int num_frames, int num_samp, gd_type_t return_type,
+off_t _GD_DoField(DIRFILE *D, const char *field_code, off_t first_frame,
+    off_t first_samp, off_t num_frames, off_t num_samp, gd_type_t return_type,
     void *data_out)
 {
-  int n_read = 0;
+  off_t n_read = 0;
   struct gd_entry_t* entry;
 
   if (D->recurse_level >= GD_MAX_RECURSE_LEVEL) {
@@ -2484,8 +2485,9 @@ int _GD_DoField(DIRFILE *D, const char *field_code, int first_frame,
 /*    return value: returns number of samples actually read into data_out  */
 /*                                                                         */
 /***************************************************************************/
-int getdata(DIRFILE* D, const char *field_code, int first_frame, int first_samp,
-    int num_frames, int num_samp, gd_type_t return_type, void *data_out)
+off_t getdata(DIRFILE* D, const char *field_code, off_t first_frame,
+    off_t first_samp, off_t num_frames, off_t num_samp, gd_type_t return_type,
+    void *data_out)
 {
   if (!D || (D->flags & GD_INVALID)) {/* don't crash */
     _GD_SetGetDataError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);

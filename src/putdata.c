@@ -25,15 +25,15 @@
 
 #include "getdata_internal.h"
 
-static int _GD_DoFieldOut(DIRFILE* D, const char *field_code,
-    int first_frame, int first_samp, int num_frames, int num_samp,
+static off_t _GD_DoFieldOut(DIRFILE* D, const char *field_code,
+    off_t first_frame, off_t first_samp, off_t num_frames, off_t num_samp,
     gd_type_t data_type, const void *data_in);
 
-static int _GD_DoRawOut(DIRFILE *D, struct RawEntryType *R, int first_frame,
-    int first_samp, int num_frames, int num_samp, gd_type_t data_type,
-    const void *data_in)
+static off_t _GD_DoRawOut(DIRFILE *D, struct RawEntryType *R,
+    off_t first_frame, off_t first_samp, off_t num_frames, off_t num_samp,
+    gd_type_t data_type, const void *data_in)
 {
-  int s0, ns, n_wrote;
+  off_t s0, ns, n_wrote;
   char datafilename[FILENAME_MAX];
   void *databuffer;
   struct stat statbuf;
@@ -115,13 +115,13 @@ static int _GD_DoRawOut(DIRFILE *D, struct RawEntryType *R, int first_frame,
   return n_wrote;
 }
 
-static int _GD_DoLinterpOut(DIRFILE* D, struct LinterpEntryType *I,
-    int first_frame, int first_samp, int num_frames, int num_samp,
+static off_t _GD_DoLinterpOut(DIRFILE* D, struct LinterpEntryType *I,
+    off_t first_frame, off_t first_samp, off_t num_frames, off_t num_samp,
     gd_type_t data_type, const void *data_in)
 {
   int spf;
-  int ns;
-  int n_wrote;
+  off_t ns;
+  off_t n_wrote;
 
   if (I->n_interp < 0) {
     _GD_ReadLinterpFile(D, I);
@@ -149,12 +149,12 @@ static int _GD_DoLinterpOut(DIRFILE* D, struct LinterpEntryType *I,
   return n_wrote;
 }
 
-static int _GD_DoLincomOut(DIRFILE* D, struct LincomEntryType *L,
-    int first_frame, int first_samp, int num_frames, int num_samp,
+static off_t _GD_DoLincomOut(DIRFILE* D, struct LincomEntryType *L,
+    off_t first_frame, off_t first_samp, off_t num_frames, off_t num_samp,
     gd_type_t data_type, const void *data_in)
 {
   int spf;
-  int ns, n_wrote;
+  off_t ns, n_wrote;
   void* tmpbuf;
 
   /* we cannot write to LINCOM fields that are a linear combination */
@@ -199,16 +199,16 @@ static int _GD_DoLincomOut(DIRFILE* D, struct LincomEntryType *L,
   return n_wrote;
 }
 
-static int _GD_DoBitOut(DIRFILE* D, struct BitEntryType *B, int first_frame,
-    int first_samp, int num_frames, int num_samp, gd_type_t data_type,
-    const void *data_in)
+static off_t _GD_DoBitOut(DIRFILE* D, struct BitEntryType *B,
+    off_t first_frame, off_t first_samp, off_t num_frames, off_t num_samp,
+    gd_type_t data_type, const void *data_in)
 {
   uint64_t *tmpbuf;
   uint64_t *readbuf;
-  int i, n_wrote;
+  off_t i, n_wrote;
   int spf;
-  int ns;
-  int n_read;
+  off_t ns;
+  off_t n_read;
 
   const uint64_t mask = (B->numbits == 64) ? 0xffffffffffffffffULL :
     ((uint64_t)1 << B->numbits) - 1;
@@ -270,11 +270,11 @@ static int _GD_DoBitOut(DIRFILE* D, struct BitEntryType *B, int first_frame,
   return n_wrote;
 }
 
-static int _GD_DoPhaseOut(DIRFILE* D, struct PhaseEntryType *P, int first_frame,
-    int first_samp, int num_frames, int num_samp, gd_type_t data_type,
-    const void *data_in)
+static off_t _GD_DoPhaseOut(DIRFILE* D, struct PhaseEntryType *P,
+    off_t first_frame, off_t first_samp, off_t num_frames, off_t num_samp,
+    gd_type_t data_type, const void *data_in)
 {
-  int n_wrote;
+  off_t n_wrote;
 
   D->recurse_level++;
   n_wrote = _GD_DoFieldOut(D, P->raw_field, first_frame, first_samp + P->shift,
@@ -289,9 +289,9 @@ static int _GD_DoPhaseOut(DIRFILE* D, struct PhaseEntryType *P, int first_frame,
 /*  _GD_DoFieldOut: Do one output field once F has been identified         */
 /*                                                                         */
 /***************************************************************************/
-static int _GD_DoFieldOut(DIRFILE *D, const char *field_code, int first_frame,
-    int first_samp, int num_frames, int num_samp, gd_type_t data_type,
-    const void *data_in)
+static off_t _GD_DoFieldOut(DIRFILE *D, const char *field_code,
+    off_t first_frame, off_t first_samp, off_t num_frames, off_t num_samp,
+    gd_type_t data_type, const void *data_in)
 {
   struct gd_entry_t* entry;
 
@@ -352,8 +352,9 @@ static int _GD_DoFieldOut(DIRFILE *D, const char *field_code, int first_frame,
 /*    return value: returns # of samples actually written to file          */
 /*                                                                         */
 /***************************************************************************/
-int putdata(DIRFILE* D, const char *field_code, int first_frame, int first_samp,
-    int num_frames, int num_samp, gd_type_t data_type, void *data_in)
+off_t putdata(DIRFILE* D, const char *field_code, off_t first_frame,
+    off_t first_samp, off_t num_frames, off_t num_samp, gd_type_t data_type,
+    void *data_in)
 {
   if (!D || (D->flags & GD_INVALID)) {/* don't crash */
     _GD_SetGetDataError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);

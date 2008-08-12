@@ -175,8 +175,8 @@ void dirfile_close(DIRFILE* dirfile);
 /*    return value: number of samples actually retrieved                   */
 /*                                                                         */
 /***************************************************************************/
-int getdata(DIRFILE* dirfile, const char *field_code, int first_frame,
-    int first_samp, int num_frames, int num_samp, gd_type_t return_type,
+off_t getdata(DIRFILE* dirfile, const char *field_code, off_t first_frame,
+    off_t first_samp, off_t num_frames, off_t num_samp, gd_type_t return_type,
     void *data_out);
 
 /***************************************************************************/
@@ -225,8 +225,9 @@ unsigned int get_samples_per_frame(DIRFILE* dirfile, const char *field_code);
 /*    return value: number of samples actually stored                      */
 /*                                                                         */
 /***************************************************************************/
-int putdata(DIRFILE* D, const char *field_code, int first_frame, int first_samp,
-    int num_frames, int num_samp, gd_type_t data_type, void *data_in);
+off_t putdata(DIRFILE* D, const char *field_code, off_t first_frame,
+    off_t first_samp, off_t num_frames, off_t num_samp, gd_type_t data_type,
+    void *data_in);
 
 @INCLUDE_LEGACY@
 #endif

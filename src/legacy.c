@@ -122,8 +122,8 @@ int GetData(const char *filename_in, const char *field_code,
     return 0;
   }
 
-  nread = getdata(D, field_code, first_frame, first_samp, num_frames,
-      num_samp, return_type, data_out);
+  nread = (int)getdata(D, field_code, (off_t)first_frame, (off_t)first_samp,
+      (off_t)num_frames, (off_t)num_samp, return_type, data_out);
   *error_code = _GD_CopyGlobalError(D);
 
   return nread;
@@ -207,8 +207,8 @@ int PutData(const char *filename_in, const char *field_code,
     return 0;
   }
 
-  n_write = putdata(D, field_code, first_frame, first_samp, num_frames,
-      num_samp, data_type, data_in);
+  n_write = (int)putdata(D, field_code, (off_t)first_frame, (off_t)first_samp,
+      (off_t)num_frames, (off_t)num_samp, data_type, data_in);
   *error_code = _GD_CopyGlobalError(D);
 
   return n_write;

@@ -63,6 +63,7 @@ dnl headers
 AC_CHECK_HEADERS(ctype.h errno.h fcntl.h libgen.h math.h)
 AC_HEADER_ASSERT
 AC_HEADER_DIRENT
+AC_SYS_LARGEFILE
 
 dnl types
 AC_C_BIGENDIAN
