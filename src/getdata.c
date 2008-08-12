@@ -99,9 +99,6 @@ const char *GD_ERROR_CODES[GD_N_ERROR_CODES] = {"Success",
   "Bad DIRFILE",
   "Cannot write non-RAW data",
   "Could not open field file for writing",
-  "Could not close read-only field file",
-  "Could not write to field file (already in use)",
-  "Could not allocate file lock struct",
   "Cannot write to LINCOM with multiple raw fields"
 };
 

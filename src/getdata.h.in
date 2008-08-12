@@ -23,12 +23,9 @@
 
 #define GD_E_BAD_PUT_CODE     16
 #define GD_E_PUT_RAWFIELD     17
-#define GD_E_CLOSE_RDONLY     18
-#define GD_E_WRITE_LOCK       19
-#define GD_E_FLOCK_ALLOC      20
-#define GD_E_MULT_LINCOM      21
+#define GD_E_MULT_LINCOM      18
 
-#define GD_N_ERROR_CODES      22
+#define GD_N_ERROR_CODES      19
 
 extern const char *GD_ERROR_CODES[GD_N_ERROR_CODES];
 
