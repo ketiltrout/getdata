@@ -102,8 +102,7 @@ const char *GD_ERROR_CODES[GD_N_ERROR_CODES] = {"Success",
   "Could not close read-only field file",
   "Could not write to field file (already in use)",
   "Could not allocate file lock struct",
-  "Cannot write to LINCOM with multiple raw fields",
-  "Error in Endian conversion"
+  "Cannot write to LINCOM with multiple raw fields"
 };
 
 /* _GD_GetLine: read non-comment line from format file.  The line is placed in
@@ -879,7 +878,7 @@ static FILE* _GD_CreateDirfile(DIRFILE* D, const char* format_file,
 
   /* unable to read the format file */
   if (format_error == EACCES || dir_error == EACCES) {
-    _GD_SetGetDataError(D, GD_E_OPEN_FORMAT, GD_E_OPEN_NO_ACCESS, format_file,
+    _GD_SetGetDataError(D, GD_E_OPEN, GD_E_OPEN_NO_ACCESS, format_file,
         0, NULL);
     return NULL;
   }
@@ -887,14 +886,14 @@ static FILE* _GD_CreateDirfile(DIRFILE* D, const char* format_file,
   /* the directory exists, but it's not a dirfile, do nothing else -- even if we
    * were asked to truncate it */
   if (!dir_error && format_error) {
-    _GD_SetGetDataError(D, GD_E_OPEN_FORMAT, GD_E_OPEN_NOT_DIRFILE, format_file,
+    _GD_SetGetDataError(D, GD_E_OPEN, GD_E_OPEN_NOT_DIRFILE, format_file,
         0, NULL);
     return NULL;
   }
 
   /* Couldn't open the file, and we weren't asked to create it */
   if (format_error && !(flags & GD_CREAT)) {
-    _GD_SetGetDataError(D, GD_E_OPEN_FORMAT, GD_E_OPEN_NOT_EXIST, format_file,
+    _GD_SetGetDataError(D, GD_E_OPEN, GD_E_OPEN_NOT_EXIST, format_file,
         format_error, NULL);
     return NULL;
   }

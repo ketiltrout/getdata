@@ -27,9 +27,8 @@
 #define GD_E_WRITE_LOCK       19
 #define GD_E_FLOCK_ALLOC      20
 #define GD_E_MULT_LINCOM      21
-#define GD_E_ENDIAN_ERROR     22
 
-#define GD_N_ERROR_CODES      23
+#define GD_N_ERROR_CODES      22
 
 extern const char *GD_ERROR_CODES[GD_N_ERROR_CODES];
 

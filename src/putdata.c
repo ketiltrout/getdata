@@ -174,8 +174,15 @@ static int _GD_DoLincomOut(DIRFILE* D, struct LincomEntryType *L,
   D->recurse_level--;
   ns = num_samp + num_frames * (int)spf;
 
+  if (D->error != GD_E_OK)
+    return 0;
+
   /* writeable copy */
   tmpbuf = _GD_Alloc(D, data_type, ns);
+
+  if (tmpbuf == NULL)
+    return 0;
+
   memcpy(tmpbuf, data_in, ns * _GD_TypeSize(data_type));
 
   _GD_ScaleData(D, tmpbuf, data_type, ns, 1 / L->m[0], -L->b[0] / L->m[0]);
@@ -202,8 +209,14 @@ static int _GD_DoBitOut(DIRFILE* D, struct BitEntryType *B, int first_frame,
   int spf;
   int ns;
   int n_read;
-  unsigned highmask;
-  unsigned lowmask;
+
+  const uint64_t mask = (B->numbits == 64) ? 0xffffffffffffffffULL :
+    ((uint64_t)1 << B->numbits) - 1;
+
+#ifdef GETDATA_DEBUG
+  fprintf(stdout,"DoBitOut:  bitnum = %d numbits = %d mask = %llx\n",
+      B->bitnum, B->numbits, mask);
+#endif
 
   D->recurse_level++;
   spf = _GD_GetSPF(B->raw_field, D);
@@ -215,8 +228,12 @@ static int _GD_DoBitOut(DIRFILE* D, struct BitEntryType *B, int first_frame,
   ns = num_samp + num_frames * (int)spf;
 
   tmpbuf = _GD_Alloc(D, GD_UINT64, ns);
-  memset(tmpbuf, 0, sizeof(uint64_t) * ns);
   readbuf = _GD_Alloc(D, GD_UINT64, ns);
+
+  if (tmpbuf == NULL || readbuf == NULL)
+    return 0;
+
+  memset(tmpbuf, 0, sizeof(uint64_t) * ns);
   memset(readbuf, 0, sizeof(uint64_t) * ns);
 
   _GD_ConvertType(D, data_in, data_type, (void*)tmpbuf, GD_UINT64, ns);
@@ -235,24 +252,14 @@ static int _GD_DoBitOut(DIRFILE* D, struct BitEntryType *B, int first_frame,
 
   D->recurse_level--;
 
-  _GD_ClearGetDataError(D);
+  /* error encountered, abort */
+  if (D->error != GD_E_OK)
+    return 0;
 
-  /* now go through and set the correct bit in each field value */
-
-  highmask = 1 << (B->bitnum);
-  lowmask = ~highmask;
-#ifdef GETDATA_DEBUG
-  fprintf(stdout,"DoBitOut:  bitnum = %d highmask = %u lowmask = %u\n",
-      B->bitnum, highmask, lowmask);
-#endif
-
-  /* FIXME: Multibit */
-  for (i = 0; i < ns; i++) {
-    if (tmpbuf[i]) /*set the bit to 1*/
-      readbuf[i] = readbuf[i] | highmask;
-    else /*set the bit to 0*/
-      readbuf[i] = readbuf[i] & lowmask;
-  }
+  /* now go through and set the correct bits in each field value */
+  for (i = 0; i < ns; i++)
+    readbuf[i] = (readbuf[i] & ~(mask << B->bitnum)) |
+      (tmpbuf[i] & mask) << B->bitnum;
 
   /* write the modified data out */
   n_wrote = _GD_DoFieldOut(D, B->raw_field, first_frame, first_samp,
