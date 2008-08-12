@@ -1,0 +1,170 @@
+.\" dirfile_open.3.  The dirfile_open man page.
+.TH dirfile_open 3 "11 August 2008" "Version 0.2.0" "GETDATA"
+.SH NAME
+dirfile_open \(em open or create a dirfile
+.SH SYNOPSIS
+.B #include <getdata.h>
+.HP
+.nh
+.ad l
+.BI "DIRFILE* dirfile_open(const char *" dirfilename ", unsigned int " flags );
+.hy
+.ad n
+.SH DESCRIPTION
+The
+.BR dirfile_open ()
+function opens or creates the dirfile specified by
+.IR dirfilename ,
+returning a DIRFILE object associated with it.  Opening a dirfile will cause the
+library to read and parse the dirfile's format file (see
+.BR dirfile-format (5)).
+
+The 
+.I flags
+parameter may contain zero or more of the following flags bitwise-or'd together:
+.TP
+.B GD_BIG_ENDIAN
+Specifies that raw data on disk is stored as big-endian data (most significant
+byte first).  Specifying this flag along with the contradictory
+.BR GD_LITTLE_ENDIAN 
+will cause the library to assume that the endianness of the data is opposite to
+that of the native architecture.
+
+This flag is ignored completely if an
+.B ENDIAN
+directive occurs in the dirfile format file, unless
+.B GD_FORCE_ENDIAN
+is also specified.
+.TP
+.B GD_CREAT
+An empty dirfile will be created, if one does not already exist.  If the dirfile
+directory does not already exist, it will be created.  An empty format file will
+also be created.  The directory will have have mode
+.BR S_IRWXU " | " S_IRWXG " | "  S_IRWXO 
+(0777), as modified by the process's umask value (see
+.BR umask (2)).
+The format file will have mode
+.BR S_IRUSR " | " S_IWUSR " | "  S_IRGRP " | "  S_IWGRP " | " S_IROTH " | " S_IWOTH
+(0666), also modified by the process's umask.
+
+The owner of the dirfile directory and format file will be the effective user ID
+of the process.  Group ownership follows the rules outlined in
+.BR mkdir (2).
+.TP
+.B GD_EXCL
+Ensure that this call creates a dirfile: when specified along with
+.BR GD_CREAT ,
+the call will fail if the dirfile specified by
+.I dirfilename
+already exists.  This flag is ignored if
+.B GD_CREAT
+is not specified.
+.TP
+.B GD_FORCE_ENDIAN
+Specifies that
+.B ENDIAN
+directives (see
+.BR dirfile-format (5))
+found in the dirfile format file should be ignored.  When specified with one of
+.BR GD_BIG_ENDIAN " or " GD_LITTLE_ENDIAN ,
+the endianness specified will be assumed.  If this flag is specified with
+neither of those flags, the dirfile will be assumed to have the endiannes of the
+native architecture.
+.TP
+.B GD_LITTLE_ENDIAN
+Specifies that raw data on disk is stored as little-endian data (least
+significant byte first).  Specifying this flag along with the contradictory
+.BR GD_BIG_ENDIAN 
+will cause the library to assume that the endianness of the data is opposite to
+that of the native architecture.
+
+This flag is ignored completely if an
+.B ENDIAN
+directive occurs in the dirfile format file, unless
+.B GD_FORCE_ENDIAN
+is also specified.
+.TP
+.B GD_PEDANTIC
+Specifies that unrecognised lines found during the parsing of the format file
+should always cause a fatal error.  Without this flag, if a
+.B VERSION
+directive (see
+.BR dirfile-format (5))
+indicates that the dirfile being opened conforms Standards Version newer than
+the version understood by the library, unrecognised lines will be silently
+ingored.
+.TP
+.B GD_TRUNC
+If
+.I dirfilename
+specifies an already existing dirfile, it will be truncated before opening.
+Since
+.BR dirfile_open ()
+decides whether
+.I dirfilename
+specifies an existing dirfile before attempting to parse the dirfile,
+.I dirfilename
+is considered to specify an existing dirfile if it refers to a directory
+containing a regular file called
+.BR format .
+
+Truncation occurs by deleting every regular file in the specified directory,
+whether the files were referred to by the dirfile before truncation or not.
+Accordingly, this flag should be used with caution.  Subdirectories are
+left untouched.  If the dirfile does not exist, this flag is ignored.
+
+
+.SH RETURN VALUE
+A call to
+.BR dirfile_open ()
+always returns a pointer to a newly allocated DIRFILE object.  If an error
+occurred, the DIRFILE object will be flagged as invalid and
+.IR dirfile -> error
+will be set to a non-zero error value.  Possible error values are:
+.TP 8
+.B GD_E_ALLOC
+The library was unable to allocate memory.
+.TP
+.B GD_E_CREAT
+The library was unable to create the dirfile, or the dirfile exists and both
+.BR GD_CREAT " and " GD_EXCL
+were specified.
+.TP
+.B GD_E_FORMAT
+A syntax error occurred in the format file.
+.TP
+.B GD_E_INTERNAL_ERROR
+An internal error occurred in the library while trying to perform the task.
+This indicates a bug in the library.  Please report the incident to the
+maintainer.
+.TP
+.B GD_E_OPEN_FORMAT
+The dirfile format file could not be opened, or
+.I dirfilename
+does not specify a valid dirfile.
+.TP
+.B GD_E_OPEN_INCLUDE
+A file specified in an
+.B INCLUDE
+directive could not be opened.
+.TP
+.B GD_E_RECURSE_LEVEL
+Too many levels of recursion were encountered while trying to resolve
+.IR field_code .
+This usually indicates a circular dependency in field specification in the
+dirfile.
+.TP
+.B GD_E_TRUNC
+The library was unable to truncate the dirfile.
+.P
+A descriptive error string for the last error encountered can be obtained from
+a call to
+.BR getdata_error_string (3).
+When finished with it, the DIRFILE object may be deallocated with a call to
+.BR dirfile_close (3),
+even if the open failed.
+.SH SEE ALSO
+.BR dirfile (5),
+.BR dirfile_close (3),
+.BR getdata (3),
+.BR getdata_error_string (3)

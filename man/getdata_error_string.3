@@ -1,0 +1,43 @@
+.\" getdata_error_string.3.  The getdata_error_string man page.
+.TH getdata_error_string 3 "11 August 2008" "Version 0.2.0" "GETDATA"
+.SH NAME
+getdata_error_string \(em report a getdata library error
+.SH SYNOPSIS
+.B #include <getdata.h>
+.HP
+.nh
+.ad l
+.BI "char *getdata_error_string(DIRFILE *" dirfile ", char *" buffer ", size_t
+.IB buflen );
+.hy
+.ad n
+.SH DESCRIPTION
+The
+.BR getdata_error_string ()
+function returns a string describing the last library error encountered while
+operating on 
+.IR dirfile .
+The string is writen to the user-supplied buffer
+.IR buffer .
+At most
+.I buflen
+characters will be writen, including a terminating null.
+
+The 
+.I dirfile
+parameter should point to a DIRFILE object previously created by a call to
+.BR dirfile_open (3).
+
+.SH RETURN VALUE
+The
+.BR getdata_error_string ()
+function returns 
+.IR buffer ,
+or NULL if buflen is less than one.  The error state of
+.I dirfile
+is unchanged.
+.SH SEE ALSO
+.BR dirfile_open (3),
+.BR getdata (3),
+.BR get_n_frames (3),
+.BR get_samples_per_frame (3)

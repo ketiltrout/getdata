@@ -1,0 +1,61 @@
+.\" get_samples_per_frame.3.  The get_samples_per_frame man page.
+.TH get_samples_per_frame 3 "11 August 2008" "Version 0.2.0" "GETDATA"
+.SH NAME
+get_samples_per_frame \(em returns the samples per frame for a field in a
+dirfile
+.SH SYNOPSIS
+.B #include <getdata.h>
+.HP
+.nh
+.ad l
+.BI "unsigned int get_samples_per_frame(DIRFILE *" dirfile ", const char *" field_code );
+.hy
+.ad n
+.SH DESCRIPTION
+The
+.BR get_samples_per_frame ()
+function queries a dirfile(5) database specified by
+.I dirfile
+and returns the number of samples per frame for the field
+.IR field_code .
+
+The 
+.I dirfile
+parameter must point to a valid DIRFILE object previously created by a call to
+.BR dirfile_open (3).
+
+.SH RETURN VALUE
+Upon successful completion,
+.BR get_samples_per_frame ()
+returns the number of samples per frame for the field specified.  On error, it
+returns zero and sets
+.IR dirfile -> error
+to a non-zero error value.  Possible error values are:
+.TP 8
+.B GD_E_BAD_CODE
+The field specified by
+.I field_code
+was not found in the database.
+.TP
+.B GD_E_BAD_DIRFILE
+The supplied dirfile was invalid.
+.TP
+.B GD_E_INTERNAL_ERROR
+An internal error occurred in the library while trying to perform the task.
+This indicates a bug in the library.  Please report the incident to the
+maintainer.
+.TP
+.B GD_E_RECURSE_LEVEL
+Too many levels of recursion were encountered while trying to resolve
+.IR field_code .
+This usually indicates a circular dependency in field specification in the
+dirfile.
+.P
+A descriptive error string for the last error encountered can be obtained from
+a call to
+.BR getdata_error_string (3).
+.SH SEE ALSO
+.BR dirfile (5),
+.BR dirfile_open (3),
+.BR getdata (3),
+.BR getdata_error_string (3)

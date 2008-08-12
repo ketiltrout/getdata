@@ -1,0 +1,354 @@
+.\" dirfile-format.5.  The dirfile format file man page.
+.TH dirfile\-format 5 "8 August 2008" "Standards Version 5" "DATA FORMATS"
+.SH NAME
+dirfile\-format \(em the dirfile database format specification file
+.SH DESCRIPTION
+The
+.I dirfile format
+file fully specifies the raw and derived timestreams and auxiliary information
+for a
+.BR dirfile (5)
+database.
+
+The format file is a case sensitive ASCII text file called
+.B format
+located in the dirfile directory.
+
+.SH SYNTAX
+The format file is composed of field specification lines and directive lines,
+optionally separated by blank lines or lines containing only whitespace.
+The hash mark
+.RB ( # )
+is the comment delimiter; any text following the comment delimiter to the end of
+the line is ignored.
+
+Both field specification lines and directive lines consist of several words
+separated by whitespace.  The first word of a directive line is always a
+.IR "reserved word" .
+The first word of a field specification line is never a reserved word.
+
+There are four 
+.IR "reserved words" ,
+which cannot be used as field names in the dirfile.  Instead these specify
+directives:
+.TP
+.B ENDIAN
+The ENDIAN directive specifies the endianness of the raw data in the database.
+In previous versions of the Dirfile Standard, raw data was always assumed to be
+little-endian.  This assumption has been removed.  The assumed endianness of raw
+data in dirfiles which omit this directive is implementation dependant.  Syntax
+is:
+.SP
+.RS
+.IP
+.B ENDIAN
+.IR ( big | little )
+.RE
+.TP
+.B FRAMEOFFSET
+The FRAMEOFFSET directive specifies the frame number of the first frame in the
+database.  Syntax is:
+.SP
+.RS
+.IP
+.BI FRAMEOFFSET\~ <integer>
+.RE
+.TP
+.B INCLUDE
+The INCLUDE directive specifies another file to parse for additional format
+specification for the dirfile.  The inclusion is treated as if the lines of the
+included file were pasted verbatim in place of the INCLUDE directive line.  The
+exception to this is that raw fields specified in the included file will be
+looked for in the directory containing the included file and not in the
+directory containing the parent format file.  The included file may be
+specified either with an absolute path, or else a relative path from the
+current file.  Syntax is:
+.SP
+.RS
+.IP
+.BI INCLUDE\~ <file>
+.RE
+.TP
+.B VERSION
+The VERSION directive specifies the particular version of the Dirfile Standards
+to which the dirfile format file conforms.  This directive should occur before
+any version dependent syntax is encountered.  As of Standards Version 5, no such
+syntax exists, and this directive is provided primarily to ease forward
+compatibility.  Syntax is:
+.SP
+.RS
+.IP
+.BI VERSION\~ <integer>
+.RE
+.PP
+Like the rest of the format file, these reserved words are case sensitive.
+Except for the INCLUDE directive, each instance of which must be processed
+independently, if multiple instances of a directive are present in a dirfile
+format file, only the last such instance will be honoured.
+
+Any line which does not start with a
+.I reserved word
+is assumed to be a field specification line.  The first word in a field
+specification line is the field name.  The field name consists of one or more
+non-whitespace characters.  The field name may not be
+.B INDEX
+or
+.BR FILEFRAM ,
+which are synonyms for a special, implicit field which contains the integer
+frame index.  Field names are case sensitive.  The second word in the field
+specification line is the field type.  The meaning of subsequent words depends
+on the field type.
+
+There are five field types:
+.TP
+.B RAW
+The RAW field type specifies raw timestreams on disk.  In this case, the field
+name should correspond to the name of the file containing the timestream.
+Syntax is:
+.RS
+.PP
+.I <field-name>
+.B RAW
+.I <type> <sample-rate>
+
+where
+.I sample-rate
+is the number of samples per dirfile frame for the timestream and
+.I type
+is a word specifying the native data format type:
+.RS
+.TP
+.I UINT8
+unsigned 8-bit integer
+.TP
+.I INT8
+signed 8-bit integer
+.TP
+.I UINT16
+unsigned 16-bit integer
+.TP
+.I INT16
+signed 16-bit integer
+.TP
+.I UINT32
+unsigned 32-bit integer
+.TP
+.I INT32
+signed 32-bit integer
+.TP
+.I UINT64
+unsigned 64-bit integer
+.TP
+.I INT64
+signed 64-bit integer
+.TP
+.IR FLOAT32 \~or\~ FLOAT
+IEEE-754 standard 32-bit single precision floating point number
+.TP
+.IR FLOAT64 \~or\~ DOUBLE
+IEEE-754 standard 64-bit double precision floating point number
+.RE
+
+For backwards compatibility, implementations should also recognise the following
+single character type aliases in use prior to Standards Version 5:
+.RS
+.TP
+.I c
+UINT8
+.TP
+.I u
+UINT16
+.TP
+.I s
+INT16
+.TP
+.I U
+UINT32
+.TP
+.IR i ,\~ S
+INT32
+.TP
+.IR f
+FLOAT32
+.TP
+.IR d
+FLOAT64
+.RE
+
+Types
+.IR INT8 ,\~ UINT64 ,
+and
+.I INT64
+are not supported before Standards Version 5, so no character aliases exist for
+these types.
+.RE
+.TP
+.B LINCOM
+The LINCOM field type is the linear combination of one, two or three input
+fields.  Syntax is:
+.RS
+.IP
+.I <field-name>
+.B LINCOM
+.IR "<field1> <a1> <b1>"\~ [ "<field2> <a2> <b2>"\~ [ "<field3> <a3> <b3>" ]]
+.PP
+The derived field will be computed as:
+.IP
+field-name[n] = (a1 * field1[n] + b1) + (a2 * field2[n2] + b2) + (a3 * field3[n3] + b3)
+.PP
+with the
+.I field2
+and
+.I field3
+terms included only if specified and the indicies
+.I n2
+and
+.I n3
+computed appropriately for the (potentially differing) sample rates of the
+input fields.  The resultant field will have the same sample rate as
+.IR field1 .
+.RE
+.TP
+.B LINTERP
+The LINTERP field type specifies a table look up based on another dirfile field.
+Syntax is:
+.RS
+.IP
+.I <field-name>
+.B LINTERP
+.I <input> <table>
+.PP
+where
+.I input
+is the input field for the table lookup and
+.I table
+is the complete path to the lookup table file for the field.  The lookup table
+file is an ASCII text file with two whitespace separated columns of
+.I x
+and
+.I y
+values.  Values are linearly interpolated between the points specified in the
+lookup table.
+.RE
+.TP
+.B MULTIPLY
+The MULTIPLY field type is the product of two fields.  Syntax is:
+.RS
+.IP
+.I <field-name>
+.B MULTIPLY
+.I <field1> <field2>
+.PP
+The derived field will be computed as:
+.IP
+field-name[n] = field1[n] * field2[n2]
+.PP
+with the index
+.I n2
+computed appropriately for the (potentially differing) sample rates of the
+input fields.  The resultant field will have the same sample rate as
+.IR field1 .
+.RE
+.TP
+.B BIT
+The BIT field type extacts one or more bits out of an input field.  Syntax is:
+.RS
+.IP
+.I <field-name>
+.B BIT
+.I <input> <first-bit> [<bits>]
+.PP
+which specifies
+.I field-name
+to be the value of bits
+.I first-bit
+through
+.IR first-bit + bits -1
+of the input field
+.IR input ,
+when
+.I input
+is converted from its native type to an (endianness corrected) unsigned 64-bit
+integer.  If
+.I bits
+is omitted, it is assumed to be 1.
+
+.RE
+.TP
+.B PHASE
+The PHASE field type shifts an input field by a specified number of samples.  Syntax is:
+.RS
+.IP
+.I <field-name>
+.B PHASE
+.I <input> <shift>
+.PP
+which specifies
+.I field-name
+to be the input field,
+.IR input ,
+shifted by
+.I shift
+samples.  A positive
+.I shift
+indicates a shift forward in time.  Results of shifting past the beginning- or end-of-file is
+implementation dependent.
+
+.SH STANDARDS VERSIONS
+
+This document describes Version 5 of the Dirfile Standards.
+
+Version 5 of the Standards (August 2008) added
+.B VERSION
+and
+.BR ENDIAN ,
+and removed the restriction on field name length.  It also introduced the data
+types
+.IR INT8 ,\~ INT64 ,
+and
+.IR UINT64 ,
+the new-style type specifiers, and increased the range of the
+.B BIT
+field type from 32 to 64 bits.
+
+Version 4 of the Standards (October 2006) added the
+.B PHASE
+field type.
+
+Version 3 of the Standards (January 2006) added
+.B INCLUDE 
+and increased the allowed length of a field name from 16 to 50 characters.
+
+Version 2 of the Standards (September 2005) added the
+.B MULTIPLY
+field type.
+
+Version 1 of the Standards (November 2004) added
+.B FRAMEOFFSET
+and the optional fourth argument to the
+.B BIT
+field type.
+
+Version 0 of the Standards (before March 2003) refers to the dirfile standards
+supported by the
+.BR getdata (3)
+library orignally introduced into the
+.BR kst (1)
+sources, which contained support for all other features covered by this
+document.
+
+.SH AUTHORS
+
+The dirfile specification was developed by C. B. Netterfield
+.nh
+<netterfield@astro.utoronto.ca>
+.hy 1
+
+Since Standards Version 3, the dirfile specification has been maintained by
+D. V. Wiebe
+.nh
+<dwiebe@physics.utoronto.ca>
+.hy 1
+
+.SH SEE ALSO
+.BR dirfile (5)

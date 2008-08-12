@@ -1,0 +1,31 @@
+.\" dirfile_close.3.  The dirfile_close man page.
+.TH dirfile_close 3 "11 August 2008" "Version 0.2.0" "GETDATA"
+.SH NAME
+dirfile_close \(em close a dirfile and free associated memory.
+.SH SYNOPSIS
+.B #include <getdata.h>
+.HP
+.nh
+.ad l
+.BI "void dirfile_close(DIRFILE *" dirfile );
+.hy
+.ad n
+.SH DESCRIPTION
+The
+.BR dirfile_close ()
+function closes all filehandles associated with
+.I dirfile
+and frees associated memory.  If
+.I dirfile
+is NULL, nothing happens.
+
+The
+.BR dirfile_close ()
+function should be called on all pointers returned by
+.BR dirfile_open (3),
+even if the call to that function failed.
+.SH RETURN VALUE
+.BR dirfile_close ()
+returns no value, and always succeeds.
+.SH SEE ALSO
+.BR dirfile_open (3)

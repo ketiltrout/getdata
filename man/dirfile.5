@@ -1,0 +1,80 @@
+.\" dirfile.5.  The dirfile man page.
+.TH dirfile 5 "8 August 2008" "Standards Version 5" "DATA FORMATS"
+.SH NAME
+dirfile \(em a filesystem based database format for time-ordered binary data
+.SH DESCRIPTION
+The
+.I dirfile
+database format is designed to provide a fast, simple format for storing and
+reading binary time-ordered data.  Dirfiles can be read using the GetData
+library.
+
+The dirfile database is centred around one or more time-ordered data streams (a
+.IR timestream ).
+Each timestream is writen to disk in a separate file, in its native binary
+format.  The name of these timestream files correspond to the timestream's
+.IR "field name" .
+Two timestreams may have different constant sampling frequencies and mechanisms
+exist within the dirfile format to ensure these timestreams remain properly
+sequenced in time.
+
+To do this, the timestreams in the dirfile are subdivided into
+.IR frames .
+Each frame contains an integer number of samples of each timestream.  When
+synchronous retrieval of data from more than one timestream is required,
+position in the dirfile can be specified in frames, which will ensure
+synchronicity.
+
+The timestream files are all located in a central directory, known as the
+.IR "dirfile directory" .
+The dirfile as a whole may be refered to by it's dirfile directory.
+
+Included in the dirfile along with the timestreams is the
+.IR "dirfile format specification" ,
+which is an ASCII text file called
+.B format
+located in the dirfile directory.  For information of the format of this file,
+see
+.BR dirfile\-format (5).
+
+In addition to the raw fields on disk, the dirfile format specification may
+also specify
+.I derived fields
+which are calculated from one or more raw or derived timestreams.  Derived
+fields behave identically to raw fields when read via GetData.  See
+.BR dirfile\-format (5)
+for a complete list of derived field types.
+
+Dirfiles are designed to be writen to and read simultaneously. The dirfile
+specification dictates that the first raw field specified in the
+.B format
+file is the prototypical timestream: all other timestreams are assumed to have
+at least as many frames as the prototypical timestream has, and the size of the
+prototypical timestream is used as the size of the dirfile as a whole.
+
+Version 3 of the Dirfile Standards introduced the
+.I "large dirfile"
+extension.  This extension added the ability to distribute the dirfile format
+specification among multiple files in addition to the 
+.B format
+file, as well as the ability to house portions of the database in
+.IR subdirfiles .
+These subdirfiles may be fully fledged dirfiles in their own right, but may also
+be contained within a larger, parent dirfile.  See
+.BR dirfile\-format (5)
+for information on specifying these subdirfiles.
+
+.SH AUTHORS
+
+The dirfile specification was developed by C. B. Netterfield
+.nh
+<netterfield@astro.utoronto.ca>.
+.hy 1
+
+The dirfile specification is now maintained by D. V. Wiebe
+.nh
+<dvw@ketiltrout.net>.
+.hy 1
+
+.SH SEE ALSO
+.BR dirfile\-format (5)
