@@ -7,8 +7,8 @@ getdata \(em retreive data from a dirfile database
 .HP
 .nh
 .ad l
-.BI "int getdata(DIRFILE *" dirfile ", const char *" field_code ", int"
-.IB first_frame ", int " first_sample ", int " num_frames ", int"
+.BI "off_t getdata(DIRFILE *" dirfile ", const char *" field_code ", off_t"
+.IB first_frame ", off_t " first_sample ", off_t " num_frames ", off_t"
 .IB num_samples ", gd_type_t " return_type ", void *" data_out );
 .hy
 .ad n
