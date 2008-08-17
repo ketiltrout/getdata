@@ -68,6 +68,18 @@ if test "x$enable_debug" == "xyes"; then
             [ Define to enable debugging messages ])
 fi
 
+AC_ARG_ENABLE(checkdirfile, AS_HELP_STRING([--disable-checkdirfile],
+              [Don't build or install the checkdirfile utility]),
+              [
+               case "${enableval}" in
+                 no) make_checkdirfile="no" ;;
+                 *) make_checkdirfile="yes" ;;
+               esac
+              ], [ make_checkdirfile="yes" ])
+AC_MSG_CHECKING([whether to compile and install checkdirfile])
+AC_MSG_RESULT([$make_checkdirfile])
+AM_CONDITIONAL(MAKE_CHECKDIRFILE, test "x$make_checkdirfile" = "xyes")
+
 dnl Programs
 AC_PROG_CC
 dnl Using C99 where possible defines NAN
@@ -115,6 +127,7 @@ fi
 
 dnl output
 AC_CONFIG_FILES([Makefile])
+AC_CONFIG_FILES([bin/Makefile])
 AC_CONFIG_FILES([man/Makefile])
 AC_CONFIG_FILES([src/Makefile])
 dnl (because I keep modifying getdata.h instead of getdata.h.in)

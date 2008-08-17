@@ -21,4 +21,11 @@
 #
 AUTOMAKE_OPTIONS = foreign
 
-SUBDIRS = src bin man test
+LDADD=../src/libgetdata.la
+INCLUDES=-Wall
+
+if MAKE_CHECKDIRFILE
+CHECKDIRFILE=checkdirfile
+endif
+
+bin_PROGRAMS=$(CHECKDIRFILE)
