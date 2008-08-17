@@ -1,5 +1,27 @@
 .\" dirfile_open.3.  The dirfile_open man page.
-.TH dirfile_open 3 "11 August 2008" "Version 0.2.0" "GETDATA"
+.\"
+.\" (C) 2008 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" This program is free software; you can redistribute it and/or modify
+.\" it under the terms of the GNU General Public License as published by
+.\" the Free Software Foundation; either version 2 of the License, or
+.\" (at your option) any later version.
+.\"
+.\" The GNU C Library is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+.\" Lesser General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU Lesser General Public
+.\" License along with the GNU C Library; if not, write to the Free
+.\" Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
+.\" 02111-1307 USA.
+.\"
+.TH dirfile_open 3 "11 August 2008" "Version 0.3.0" "GETDATA"
 .SH NAME
 dirfile_open \(em open or create a dirfile
 .SH SYNOPSIS
@@ -21,7 +43,13 @@ library to read and parse the dirfile's format file (see
 
 The 
 .I flags
-parameter may contain zero or more of the following flags bitwise-or'd together:
+parameter should include one of the
+.IR "access modes" :
+.B GD_RDONLY
+(read-only) or 
+.BR GD_RDWR
+(read-write), and may also contain zero or more of the following flags
+bitwise-or'd together:
 .TP
 .B GD_BIG_ENDIAN
 Specifies that raw data on disk is stored as big-endian data (most significant
@@ -37,9 +65,9 @@ directive occurs in the dirfile format file, unless
 is also specified.
 .TP
 .B GD_CREAT
-An empty dirfile will be created, if one does not already exist.  If the dirfile
-directory does not already exist, it will be created.  An empty format file will
-also be created.  The directory will have have mode
+An empty dirfile will be created, if one does not already exist.  This will
+create both the dirfile directory and an empty format file.  The directory will
+have have mode
 .BR S_IRWXU " | " S_IRWXG " | "  S_IRWXO 
 (0777), as modified by the process's umask value (see
 .BR umask (2)).
@@ -106,7 +134,8 @@ specifies an existing dirfile before attempting to parse the dirfile,
 .I dirfilename
 is considered to specify an existing dirfile if it refers to a directory
 containing a regular file called
-.BR format .
+.BR format ,
+regardless of the content or form of that file.
 
 Truncation occurs by deleting every regular file in the specified directory,
 whether the files were referred to by the dirfile before truncation or not.
@@ -117,11 +146,27 @@ left untouched.  If the dirfile does not exist, this flag is ignored.
 .SH RETURN VALUE
 A call to
 .BR dirfile_open ()
-always returns a pointer to a newly allocated DIRFILE object.  If an error
-occurred, the DIRFILE object will be flagged as invalid and
+always returns a pointer to a newly allocated DIRFILE object.  The DIRFILE
+object is an opaque structure which is guaranteed to have at least a member
+called
+.I error
+which is of type
+.IR int .
+If an error occurred,
 .IR dirfile -> error
-will be set to a non-zero error value.  Possible error values are:
+will be set to a non-zero error value.  The DIRFILE object will also be
+internally flagged as invalid.  Possible error values are:
 .TP 8
+.B GD_E_ACCMODE
+The library was asked to create or truncate a dirfile opened read-only (i.e.
+.B GD_CREAT
+or
+.B GD_TRUNC
+was specified in
+.I flags
+along with
+.BR GD_RDONLY ).
+.TP
 .B GD_E_ALLOC
 The library was unable to allocate memory.
 .TP
@@ -147,12 +192,6 @@ does not specify a valid dirfile.
 A file specified in an
 .B INCLUDE
 directive could not be opened.
-.TP
-.B GD_E_RECURSE_LEVEL
-Too many levels of recursion were encountered while trying to resolve
-.IR field_code .
-This usually indicates a circular dependency in field specification in the
-dirfile.
 .TP
 .B GD_E_TRUNC
 The library was unable to truncate the dirfile.

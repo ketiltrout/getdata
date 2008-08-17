@@ -1,12 +1,26 @@
-/*                           (C) 2002 C. Barth Netterfield */
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
+/* (C) 2002-2005 C. Barth Netterfield
+ * (C) 2003-2005 Theodore Kisner
+ * (C) 2005-2008 D. V. Wiebe
+ *
+ ***************************************************************************
+ *
+ * This file is part of the GetData project.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * The GNU C Library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with the GNU C Library; if not, write to the Free
+ * Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
+ * 02111-1307 USA.
+ */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -46,22 +60,21 @@ static int _GD_CopyGlobalError(DIRFILE* D)
   return _GD_GlobalErrors.error = D->error;
 }
 
-/* GetDataErrorString: Write a descriptive message in the supplied buffer
- *       describing the last library error.  The message may be truncated but
- *       will be null terminated.  Returns buffer, or NULL if buflen < 1.
+/* legacy wrapper for getdata_error_string()
  */
 char* GetDataErrorString(char* buffer, size_t buflen)
 {
   return getdata_error_string(&_GD_GlobalErrors, buffer, buflen);
 }
 
-/* _GD_GetDirfile: Locate the legacy DIRFILE given the filespec.
+/* _GD_GetDirfile: Locate the legacy DIRFILE given the filespec.  This started
+ * life as GetFormat...
  */
 static DIRFILE* _GD_GetDirfile(const char *filedir)
 {
   int i_dirfile;
 
-  /** first check to see if we have already read it **/
+  /* first check to see if we have already read it */
   for (i_dirfile = 0; i_dirfile < _GD_Dirfiles.n; i_dirfile++) {
     if (strncmp(filedir, _GD_Dirfiles.D[i_dirfile]->name, FILENAME_MAX) == 0) {
       _GD_ClearGetDataError(_GD_Dirfiles.D[i_dirfile]);
@@ -69,13 +82,15 @@ static DIRFILE* _GD_GetDirfile(const char *filedir)
     }
   }
 
-  /** if we get here, the file has not yet been read */
-  /** Allocate the memory, then fill.  If we have an error, */
+  /* if we get here, the file has not yet been read */
+  /* Allocate the memory, then fill.  If we have an error, */
   /*  we will have to free the memory... */
   _GD_Dirfiles.n++;
   _GD_Dirfiles.D = realloc(_GD_Dirfiles.D, _GD_Dirfiles.n * sizeof(DIRFILE*));
 
-  _GD_Dirfiles.D[_GD_Dirfiles.n - 1] = dirfile_open(filedir, 0);
+  /* Legacy dirfiles must be opened read-write, since we never know if
+   * they'll be used with putdata at some point */
+  _GD_Dirfiles.D[_GD_Dirfiles.n - 1] = dirfile_open(filedir, GD_RDWR);
 
   /* Error encountered -- the dirfile will shortly be deleted */
   if (_GD_Dirfiles.D[_GD_Dirfiles.n - 1]->error != GD_E_OK)
@@ -84,28 +99,10 @@ static DIRFILE* _GD_GetDirfile(const char *filedir)
   return _GD_Dirfiles.D[_GD_Dirfiles.n - 1];
 }
 
-/***************************************************************************/
-/*                                                                         */
-/*  GetData: read BLAST format files.                                      */
-/*    filename_in: the name of the file directory (raw files are in here)  */
-/*    field_code: the name of the field you want to read                   */
-/*    first_frame, first_samp: the first sample read is                    */
-/*              first_samp + samples_per_frame*first_frame                 */
-/*    num_frames, num_samps: the number of samples read is                 */
-/*              num_samps + samples_per_frame*num_frames                   */
-/*    return_type: data type of *data_out:                                 */
-/*           GD_INT8,  GD_INT16,   GD_INT32,  GD_INT64                     */
-/*          GD_UINT8, GD_UINT16,  GD_UINT32, GD_UINT64                     */
-/*                               GD_FLOAT32, GD_FLOAT64                    */
-/*    void *data_out: array to put the data                                */
-/*    *error_code: error code is returned here.                            */
-/*                                                                         */
-/*    return value: returns number of samples actually read into data_out  */
-/*                                                                         */
-/***************************************************************************/
+/* legacy interface to getdata() */
 int GetData(const char *filename_in, const char *field_code,
     int first_frame, int first_samp, int num_frames, int num_samp,
-    gd_type_t return_type, void *data_out, int *error_code)
+    char return_type, void *data_out, int *error_code)
 {
   DIRFILE* D;
   char filename[FILENAME_MAX];
@@ -122,23 +119,24 @@ int GetData(const char *filename_in, const char *field_code,
     return 0;
   }
 
-  nread = (int)getdata(D, field_code, (off_t)first_frame, (off_t)first_samp,
-      (off_t)num_frames, (off_t)num_samp, return_type, data_out);
+  nread = (int)getdata64(D, field_code, (off64_t)first_frame,
+      (off64_t)first_samp, (size_t)num_frames, (size_t)num_samp,
+      _GD_LegacyType(return_type), data_out);
   *error_code = _GD_CopyGlobalError(D);
 
   return nread;
 }
 
-/***************************************************************************/
-/*                                                                         */
-/*    Get the number of frames available                                   */
-/*                                                                         */
-/***************************************************************************/
+/* legacy interface to get_n_frames() --- the third argument to this function
+ * has been ignored since at least 2005 (and why does it come after
+ * error_code?)
+ */
 int GetNFrames(const char *filename_in, int *error_code, const void *unused)
 {
   DIRFILE* D;
   char filename[FILENAME_MAX];
   int nf;
+  (void)unused;
 
   strncpy(filename, filename_in, FILENAME_MAX);
   if (filename[strlen(filename) - 1] == '/')
@@ -148,21 +146,17 @@ int GetNFrames(const char *filename_in, int *error_code, const void *unused)
 
   if (D->error) {
     *error_code = _GD_CopyGlobalError(D);
-    dirfile_close(D);
     return 0;
   }
 
-  nf = get_n_frames(D);
+  nf = (int)get_n_frames(D);
   *error_code = _GD_CopyGlobalError(D);
 
   return nf;
 }
 
-/***************************************************************************/
-/*                                                                         */
-/*    Get the number of samples for each frame for the given field         */
-/*                                                                         */
-/***************************************************************************/
+/* legacy interface to get_samples_per_frame()
+ */
 int GetSamplesPerFrame(const char *filename_in, const char *field_code,
     int *error_code)
 {
@@ -177,19 +171,20 @@ int GetSamplesPerFrame(const char *filename_in, const char *field_code,
 
   if (D->error) {
     *error_code = _GD_CopyGlobalError(D);
-    dirfile_close(D);
     return 0;
   }
 
-  int spf = get_samples_per_frame(D, field_code);
+  int spf = (int)get_samples_per_frame(D, field_code);
   *error_code = _GD_CopyGlobalError(D);
 
   return spf;
 }
 
+/* legacy interface to putdata()
+ */
 int PutData(const char *filename_in, const char *field_code,
     int first_frame, int first_samp, int num_frames, int num_samp,
-    gd_type_t data_type, void *data_in, int *error_code)
+    char data_type, const void *data_in, int *error_code)
 {
   DIRFILE* D;
   int n_write = 0;
@@ -201,14 +196,14 @@ int PutData(const char *filename_in, const char *field_code,
 
   D = _GD_GetDirfile(filename);
 
-  if (D->error != GD_E_OK) {
+  if (D->error) {
     *error_code = _GD_CopyGlobalError(D);
-    dirfile_close(D);
     return 0;
   }
 
-  n_write = (int)putdata(D, field_code, (off_t)first_frame, (off_t)first_samp,
-      (off_t)num_frames, (off_t)num_samp, data_type, data_in);
+  n_write = (int)putdata64(D, field_code, (off64_t)first_frame,
+      (off64_t)first_samp, (size_t)num_frames, (size_t)num_samp,
+      _GD_LegacyType(data_type), data_in);
   *error_code = _GD_CopyGlobalError(D);
 
   return n_write;

@@ -1,5 +1,32 @@
+# (C) 2008 D. V. Wiebe
+#
+##########################################################################
+#
+# This file is part of the GetData project.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# The GNU C Library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public
+# License along with the GNU C Library; if not, write to the Free
+# Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
+# 02111-1307 USA.
+#
 AUTOMAKE_OPTIONS = foreign
+
+if HAVE_OFF64_T
+LFS_transitional_mans = getdata64.3 get_n_frames64.3 putdata64.3
+else
+LFS_transitional_mans =
+endif
 
 dist_man_MANS = dirfile_open.3 dirfile_close.3 getdata.3 \
 								getdata_error_string.3 get_samples_per_frame.3 get_n_frames.3 \
-								dirfile.5 dirfile-format.5
+								putdata.3 dirfile.5 dirfile-format.5 $(LFS_transitional_mans)

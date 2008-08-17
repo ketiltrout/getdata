@@ -1,5 +1,27 @@
 .\" get_n_frames.3.  The get_n_frames man page.
-.TH get_n_frames 3 "11 August 2008" "Version 0.2.0" "GETDATA"
+.\"
+.\" (C) 2008 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" This program is free software; you can redistribute it and/or modify
+.\" it under the terms of the GNU General Public License as published by
+.\" the Free Software Foundation; either version 2 of the License, or
+.\" (at your option) any later version.
+.\"
+.\" The GNU C Library is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+.\" Lesser General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU Lesser General Public
+.\" License along with the GNU C Library; if not, write to the Free
+.\" Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
+.\" 02111-1307 USA.
+.\"
+.TH get_n_frames 3 "11 August 2008" "Version 0.3.0" "GETDATA"
 .SH NAME
 get_n_frames \(em report the size of a dirfile
 .SH SYNOPSIS
@@ -37,12 +59,14 @@ to a non-zero error value.  Possible error values are:
 .B GD_E_BAD_DIRFILE
 The supplied dirfile was invalid.
 .TP
-.B GD_E_NO_RAWFIELDS
+.B GD_E_EMPTY
 The dirfile format file defines no raw fields, or else none of the raw fields
 defined could be accessed.  As a result, the database is effectevely empty.
 .TP
-.B GD_E_OPEN_RAWFIELD
-The first raw field defined in the format file could not be found on disk.
+.B GD_E_RAW_IO
+An attempt to
+.BR stat (2)
+the file associated with first raw field defined in the format failed.
 .P
 A descriptive error string for the last error encountered can be obtained from
 a call to

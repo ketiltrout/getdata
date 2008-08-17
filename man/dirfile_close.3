@@ -1,5 +1,27 @@
 .\" dirfile_close.3.  The dirfile_close man page.
-.TH dirfile_close 3 "11 August 2008" "Version 0.2.0" "GETDATA"
+.\"
+.\" (C) 2008 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" This program is free software; you can redistribute it and/or modify
+.\" it under the terms of the GNU General Public License as published by
+.\" the Free Software Foundation; either version 2 of the License, or
+.\" (at your option) any later version.
+.\"
+.\" The GNU C Library is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+.\" Lesser General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU Lesser General Public
+.\" License along with the GNU C Library; if not, write to the Free
+.\" Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
+.\" 02111-1307 USA.
+.\"
+.TH dirfile_close 3 "11 August 2008" "Version 0.3.0" "GETDATA"
 .SH NAME
 dirfile_close \(em close a dirfile and free associated memory.
 .SH SYNOPSIS
@@ -23,7 +45,11 @@ The
 .BR dirfile_close ()
 function should be called on all pointers returned by
 .BR dirfile_open (3),
-even if the call to that function failed.
+even if the call to that function failed.  After
+.BR dirfile_close ()
+returns, the pointer
+.I dirfile
+should be considered invalid.
 .SH RETURN VALUE
 .BR dirfile_close ()
 returns no value, and always succeeds.

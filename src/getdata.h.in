@@ -1,60 +1,125 @@
+/* (C) 2002-2005 C. Barth Netterfield
+ * (C) 2003-2005 Theodore Kisner
+ * (C) 2005-2008 D. V. Wiebe
+ *
+ ***************************************************************************
+ *
+ * This file is part of the GetData project.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * The GNU C Library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with the GNU C Library; if not, write to the Free
+ * Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
+ * 02111-1307 USA.
+ */
+
+/* @configure_input@ */
+
 #ifndef GETDATA_H
 #define GETDATA_H
 
+/* one or more of these should give us:
+ *    size_t, off_t, __REDIRECT, &c. 
+ */
+#include <sys/types.h>
+#include <unistd.h>
+
+/* For FILENAME_MAX */
+#include <stdio.h>
+
 #define DIRFILE_STANDARDS_VERSION 5
 
-#define GD_E_OK                0
+/* if these haven't been defined by the above includes, define them now */
+#ifdef __GNUC__
+# ifndef __attribute_deprecated__
+#  define __attribute_deprecated__ __attribute__ ((__deprecated__))
+# endif
+
+# ifndef __THROW
+#  ifdef __cplusplus
+#   define __THROW throw()
+#  else
+#   define __THROW __attribute__ ((__nothrow__))
+#  endif
+# endif
+
+# ifndef __nonnull
+#  define __nonnull(arg) __attribute__ ((__nonnull__ arg))
+# endif
+
+/* not GCC */
+#else
+# ifndef __attribute_deprecated__
+#  define __attribute_deprecated__
+# endif
+# ifndef __THROW
+#  define __THROW
+# endif
+# ifndef __nonnull
+#  define __nonnull
+# endif
+#endif
+
+/* error codes */
+#define GD_E_OK                0 /* this must be zero */
 #define GD_E_OPEN              1
-#define GD_E_OPEN_FORMAT       (GD_E_OPEN) /* backwards compatability */
 #define GD_E_FORMAT            2
 #define GD_E_TRUNC             3
 #define GD_E_CREAT             4
 #define GD_E_BAD_CODE          5
-#define GD_E_BAD_RETURN_TYPE   6
-#define GD_E_OPEN_RAWFIELD     7
+#define GD_E_BAD_TYPE          6
+#define GD_E_RAW_IO            7
 #define GD_E_OPEN_INCLUDE      8
 #define GD_E_INTERNAL_ERROR    9
-#define GD_E_NO_RAW_FIELDS    10
+#define GD_E_EMPTY            10
 #define GD_E_ALLOC            11
-#define GD_E_NO_RAWFIELDS     12
+#define GD_E_RANGE            12
 #define GD_E_OPEN_LINFILE     13
 #define GD_E_RECURSE_LEVEL    14
 #define GD_E_BAD_DIRFILE      15
+#define GD_E_BAD_PUT_FIELD    16
+#define GD_E_ACCMODE          17
 
-#define GD_E_BAD_PUT_CODE     16
-#define GD_E_PUT_RAWFIELD     17
-#define GD_E_MULT_LINCOM      18
+#define GD_N_ERROR_CODES      18
 
-#define GD_N_ERROR_CODES      19
-
-extern const char *GD_ERROR_CODES[GD_N_ERROR_CODES];
-
-/* For FILENAME_MAX */
-#include <stdio.h>
+extern const char const *GD_ERROR_CODES[GD_N_ERROR_CODES]
+__attribute_deprecated__;
 
 #ifndef FILENAME_MAX
 #  define FILENAME_MAX 4096
 #endif
 #define GD_MAX_LINCOM 3
 
+/* field types */
 #define GD_RAW_ENTRY      0
 #define GD_LINCOM_ENTRY   1
 #define GD_LINTERP_ENTRY  2
 #define GD_BIT_ENTRY      3
 #define GD_MULTIPLY_ENTRY 4
 #define GD_PHASE_ENTRY    5
+
 /* Incomplete, generic entry struct */
 struct gd_entry_t {
-  const char* field;
-  int field_type;
+  const char const* field;
+  const int field_type;
 };
 
-/* The DIRFILE struct.  It includes an opaque pointer to the getdata struct,
- * as well as library error data.  .error should be considered the only public
- * member */
+/* The DIRFILE struct.  */
 struct _GD_DIRFILE {
-  /* Error reporting */
+  /* Error reporting -- this is the only public member. */
   int error;
+
+  /* Everything below this comment should be considered interal to the library
+   * and not part of the official API */
 
   /* field count */
   unsigned int n_entries;
@@ -81,55 +146,10 @@ struct _GD_DIRFILE {
 
 typedef struct _GD_DIRFILE DIRFILE;
 
-
-/* Data types */
-typedef char gd_type_t;
-#define GD_UNKNOWN   '\0'
-#define GD_NULL      'n'
-#define GD_INT8      'c'
-#define GD_UINT8     '\1'
-#define GD_INT16     's'
-#define GD_UINT16    'u'
-#define GD_INT32     'S'
-#define GD_INT32_ALT 'i' /* for readdata backwards compatibility */
-#define GD_UINT32    'U'
-#define GD_INT64     '\2'
-#define GD_UINT64    '\3'
-#define GD_FLOAT32   'f'
-#define GD_FLOAT64   'd'
-#define GD_FLOAT     GD_FLOAT32
-#define GD_DOUBLE    GD_FLOAT64
-
-/***************************************************************************/
-/*                                                                         */
-/*    getdata_error_string: Write a descriptive message in the supplied    */
-/*    buffer describing the last library error associated with the         */
-/*    supplied buffer.  The message may be truncated but will be null      */
-/*    terminated.                                                          */
-/*                                                                         */
-/*      dirfile: the dirfile to check for a library error                  */
-/*      buffer : memory into which to write the string                     */
-/*      buflen : length of the buffer.  The function will not write        */
-/*               more than buflen characters (including the trailing '\0') */
-/*                                                                         */
-/*    return value: buffer or NULL if buflen < 1                           */
-/*                                                                         */
-/***************************************************************************/
-char* getdata_error_string(DIRFILE* dirfile, char* buffer, size_t buflen);
-
-/***************************************************************************/
-/*                                                                         */
-/*    dirfile_open: Attempt to open and parse the specified dirfile.       */
-/*                                                                         */
-/*      dirfilename: The path to the dirfile                               */
-/*      flags:       Bitwise or'd flags                                    */
-/*                                                                         */
-/*    return value: a pointer to a valid, new DIRFILE object.  On, error   */
-/*    a valid DIRFILE pointer is still returned, but only the error flags  */
-/*    be set.  After both success and failure, the DIRFILE object can be   */
-/*    cleaned up by calling dirfile_close.                                 */
-/*                                                                         */
-/***************************************************************************/
+/* dirfile_flags */
+#define GD_ACCMODE            03
+#define GD_RDONLY             00 /* open read only */
+#define GD_RDWR               02 /* open read/write */
 #define GD_CREAT            0100 /* create the dirfile if it doesn't exist */
 #define GD_EXCL             0200 /* force creation: fail on existence */
 #define GD_TRUNC           01000 /* truncate dirfile (scary!) */
@@ -138,93 +158,99 @@ char* getdata_error_string(DIRFILE* dirfile, char* buffer, size_t buflen);
 #define GD_FORCE_ENDIAN 01000000 /* override endiandess */
 #define GD_PEDANTIC     02000000 /* be pedantic */
 #define GD_INVALID      04000000 /* the dirfile is invalid */
-DIRFILE* dirfile_open(const char* dirfilename, unsigned int flags);
 
-/***************************************************************************/
-/*                                                                         */
-/*    dirfile_open: Attempt to close the provided dirfile and free.        */
-/*                                                                         */
-/*      dirfile: The dirfile to close                                      */
-/*                                                                         */
-/*    return value: none: dirfile_close always succeeds.                   */
-/*                                                                         */
-/***************************************************************************/
-void dirfile_close(DIRFILE* dirfile);
+/* Data types -- No valid type may contain 0x40.  This will automatically
+ * invalidate any attempt to use the old-style character types as gd_type_t's */
+#define GD_SIZE8     0x01
+#define GD_SIZE16    0x02
+#define GD_SIZE32    0x04
+#define GD_SIZE64    0x08
+#define GD_SIZE(x)   (x & 0x0f)
 
-/***************************************************************************/
-/*                                                                         */
-/*    getdata: Retrieve the specified vector from the supplied dirfile.    */
-/*    The deprecated GetData does the dirfile look-up by directory name    */
-/*                                                                         */
-/*      dirfile            : The dirfile to query                          */
-/*      field_code         : The field to return                           */
-/*      first_frame, first_samp: the first sample read is                  */
-/*                first_samp + samples_per_frame * first_frame             */
-/*      num_frames, num_samps: the number of samples read is               */
-/*                num_samps + samples_per_frame * num_frames               */
-/*      return_type: data type of *data_out:                               */
-/*           GD_INT8,  GD_INT16,   GD_INT32,  GD_INT64                     */
-/*          GD_UINT8, GD_UINT16,  GD_UINT32, GD_UINT64                     */
-/*                               GD_FLOAT32, GD_FLOAT64                    */
-/*      data_out: pointer to a sufficiently large area of memory to        */
-/*           write the data                                                */
-/*                                                                         */
-/*    return value: number of samples actually retrieved                   */
-/*                                                                         */
-/***************************************************************************/
-off_t getdata(DIRFILE* dirfile, const char *field_code, off_t first_frame,
-    off_t first_samp, off_t num_frames, off_t num_samp, gd_type_t return_type,
-    void *data_out);
+#define GD_SIGNED    0x10
+#define GD_IEEE754   0x20
 
-/***************************************************************************/
-/*                                                                         */
-/*    get_n_frmaes: Return the number of frames in the supplied dirfile.   */
-/*                                                                         */
-/*      dirfile            : The dirfile to query                          */
-/*                                                                         */
-/*    return value: the number of frames in the dirfile, or zero on error  */
-/*                                                                         */
-/***************************************************************************/
-off_t get_n_frames(DIRFILE* dirfile);
+typedef enum {
+  GD_NULL    = 0,
+  GD_UNKNOWN = 0xf0,  /* GD_SIZE(GD_UNKNOWN) must evaluate to zero */
+  GD_UINT8   = GD_SIZE8,
+  GD_INT8    = GD_SIZE8  | GD_SIGNED,
+  GD_UINT16  = GD_SIZE16,
+  GD_INT16   = GD_SIZE16 | GD_SIGNED,
+  GD_UINT32  = GD_SIZE32,
+  GD_INT32   = GD_SIZE32 | GD_SIGNED,
+  GD_UINT64  = GD_SIZE64,
+  GD_INT64   = GD_SIZE64 | GD_SIGNED,
+  GD_FLOAT32 = GD_SIZE32 | GD_IEEE754,
+  GD_FLOAT64 = GD_SIZE64 | GD_IEEE754
+} gd_type_t;
+#define GD_FLOAT     GD_FLOAT32
+#define GD_DOUBLE    GD_FLOAT64
 
+extern char* getdata_error_string(const DIRFILE* dirfile, char* buffer,
+    size_t buflen) __THROW __nonnull ((1, 2));
 
-/***************************************************************************/
-/*                                                                         */
-/*    get_samples_per_frame: Return the number of samples per frame for    */
-/*    the given field in the supplied dirfile.                             */
-/*                                                                         */
-/*      dirfile            : The dirfile to query                          */
-/*      field_code         : The field in question                         */
-/*                                                                         */
-/*    return value: the number of samples per frame for the given field    */
-/*      or zero on error                                                   */
-/*                                                                         */
-/***************************************************************************/
-unsigned int get_samples_per_frame(DIRFILE* dirfile, const char *field_code);
+extern void dirfile_close(DIRFILE* dirfile) __THROW __nonnull ((1));
 
-/***************************************************************************/
-/*                                                                         */
-/*    putdata: Store the specified vector from the supplied dirfile.       */
-/*    The deprecated GetData does the dirfile look-up by directory name    */
-/*                                                                         */
-/*      dirfile            : The dirfile to query                          */
-/*      field_code         : The field to store                            */
-/*      first_frame, first_samp: the first sample written is               */
-/*                first_samp + samples_per_frame * first_frame             */
-/*      num_frames, num_samps: the number of samples written is            */
-/*                num_samps + samples_per_frame * num_frames               */
-/*      return_type: data type of *data_in:                                */
-/*           GD_INT8,  GD_INT16,   GD_INT32,   GD_INT64                    */
-/*          GD_UINT8, GD_UINT16,  GD_UINT32,  GD_UINT64                    */
-/*                               GD_FLOAT32, GD_FLOAT64                    */
-/*      data_in: pointer to the data to write                              */
-/*                                                                         */
-/*    return value: number of samples actually stored                      */
-/*                                                                         */
-/***************************************************************************/
-off_t putdata(DIRFILE* D, const char *field_code, off_t first_frame,
-    off_t first_samp, off_t num_frames, off_t num_samp, gd_type_t data_type,
-    void *data_in);
+extern unsigned int get_samples_per_frame(DIRFILE* dirfile,
+    const char *field_code) __THROW __nonnull ((1, 2));
+
+/* dirfile_open(), getdata(), and putdata() contain calls to open(), making them
+ * cancellation points.  As a result we cannot mark them with __THROW.
+ */
+extern DIRFILE* dirfile_open(const char* dirfilename,
+    unsigned int flags) __nonnull ((1));
+
+/* the following functions are _FILE_OFFSET_BITS sensitive */
+#ifndef __USE_FILE_OFFSET64
+extern off_t get_n_frames(DIRFILE* dirfile) __THROW __nonnull ((1));
+
+extern size_t getdata(DIRFILE* dirfile, const char *field_code,
+    off_t first_frame, off_t first_sample, size_t num_frames,
+    size_t num_samples, gd_type_t return_type,
+    void *data_out) __nonnull ((1, 2));
+
+extern size_t putdata(DIRFILE* dirfile, const char *field_code,
+    off_t first_frame, off_t first_sample, size_t num_frames,
+    size_t num_samples, gd_type_t data_type,
+    const void *data_in) __nonnull ((1, 2));
+#else
+# ifdef __REDIRECT_NTH
+extern off_t __REDIRECT_NTH (get_n_frames, (DIRFILE* dirfile), get_n_frames64);
+# else
+#  define get_n_frames get_n_frames64
+# endif
+
+# ifdef __REDIRECT
+extern size_t __REDIRECT (getdata, (DIRFILE* dirfile, const char *field_code,
+      __off64_t first_frame, __off64_t first_samp, size_t num_frames,
+      size_t num_samp, gd_type_t return_type, void *data_out),
+    getdata64) __nonnull ((1, 2));
+
+extern size_t __REDIRECT (putdata, (DIRFILE* dirfile, const char *field_code,
+      __off64_t first_frame, __off64_t first_sample, size_t num_frames,
+      size_t num_samples, gd_type_t data_type, const void *data_in),
+    putdata64) __nonnull ((1, 2));
+# else
+#  define getdata getdata64
+#  define putdata putdata64
+# endif
+#endif
+
+/* if requested, declare the LFS transitional extension */
+#ifdef __USE_LARGEFILE64
+extern __off64_t get_n_frames64(DIRFILE* dirfile) __THROW __nonnull ((1));
+
+extern size_t getdata64(DIRFILE* dirfile, const char *field_code,
+    __off64_t first_frame, __off64_t first_samp, size_t num_frames,
+    size_t num_samp, gd_type_t return_type, void *data_out) __nonnull ((1, 2));
+
+extern size_t putdata64(DIRFILE* dirfile, const char *field_code,
+    __off64_t first_frame, __off64_t first_sample, size_t num_frames,
+    size_t num_samples, gd_type_t data_type,
+    const void *data_in) __nonnull ((1, 2));
+#endif
 
 @INCLUDE_LEGACY@
+
 #endif

@@ -1,113 +1,109 @@
-/*                           (C) 2002 C. Barth Netterfield */
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
+/* (C) 2003-2005 C. Barth Netterfield
+ * (C) 2003-2005 Theodore Kisner
+ * (C) 2005-2008 D. V. Wiebe
+ *
+ ***************************************************************************
+ *
+ * This file is part of the GetData project.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * The GNU C Library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with the GNU C Library; if not, write to the Free
+ * Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
+ * 02111-1307 USA.
+ */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
 #ifdef STDC_HEADERS
 #include <inttypes.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/stat.h>
-#include <unistd.h>
-#endif
-
-#ifdef HAVE_FCNTL_H
 #include <fcntl.h>
+#include <string.h>
+#include <stdlib.h>
 #endif
 
 #include "getdata_internal.h"
 
-static off_t _GD_DoFieldOut(DIRFILE* D, const char *field_code,
-    off_t first_frame, off_t first_samp, off_t num_frames, off_t num_samp,
+static size_t _GD_DoFieldOut(DIRFILE* D, const char *field_code,
+    off64_t first_frame, off64_t first_samp, size_t num_frames, size_t num_samp,
     gd_type_t data_type, const void *data_in);
 
-static off_t _GD_DoRawOut(DIRFILE *D, struct RawEntryType *R,
-    off_t first_frame, off_t first_samp, off_t num_frames, off_t num_samp,
+static size_t _GD_DoRawOut(DIRFILE *D, struct RawEntryType *R,
+    off64_t first_frame, off64_t first_samp, size_t num_frames, size_t num_samp,
     gd_type_t data_type, const void *data_in)
 {
-  off_t s0, ns, n_wrote;
+  off64_t s0;
+  size_t ns, n_wrote;
   char datafilename[FILENAME_MAX];
   void *databuffer;
-  struct stat statbuf;
 
-  s0 = first_samp + first_frame * (int)(R->samples_per_frame);
-  ns = num_samp + num_frames * (int)(R->samples_per_frame);
+  s0 = first_samp + first_frame * R->samples_per_frame;
+  ns = num_samp + num_frames * R->samples_per_frame;
+
+  if (s0 < 0) {
+    _GD_SetGetDataError(D, GD_E_RANGE, 0, NULL, 0, NULL);
+    return 0;
+  }
 
 #ifdef GETDATA_DEBUG
-  fprintf(stdout,"DoRawOut:  file pointer for field %s = %d\n", field_code,
+  fprintf(stdout,"DoRawOut:  file pointer for field %s = %d\n", R->field,
       R->fp);
 #endif
+
+  databuffer = _GD_Alloc(D, R->data_type, ns);
+
+  _GD_ConvertType(D, data_in, data_type, databuffer, R->data_type, ns);
+
+  if (D->error) { /* bad input type */
+    free(databuffer);
+    return 0;
+  }
+
+  if (D->flags &
+#ifdef WORDS_BIGENDIAN
+      GD_LITTLE_ENDIAN
+#else
+      GD_BIG_ENDIAN
+#endif
+     )
+    _GD_FixEndianness(D, databuffer, R->size, ns);
+
+  /* write data to file.  Note that if the first sample is beyond     */
+  /* the current end of file, a gap will result (see lseek(2)) */
 
   if (R->fp < 0) {
     /* open file for reading / writing if not already opened */
 
     sprintf(datafilename, "%s/%s", D->name, R->file);
 
-#ifdef GETDATA_DEBUG
-    fprintf(stdout,"DoRawOut:  stat(%s) = %d\n", datafilename,
-        stat(datafilename, &statbuf));
-#endif
-
-    if(stat(datafilename, &statbuf) == 0){
-      R->fp = open(datafilename, O_RDWR);
-      if (R->fp < 0) {
-        _GD_SetGetDataError(D, GD_E_PUT_RAWFIELD, 0, NULL, 0, NULL);
-        return 0;
-      }
-    } else {
-      R->fp = open(datafilename, O_RDWR | O_CREAT, 0644);
-      if (R->fp < 0) {
-        _GD_SetGetDataError(D, GD_E_PUT_RAWFIELD, 0, NULL, 0, NULL);
-        return 0;
-      }
+    R->fp = open(datafilename, O_RDWR | O_CREAT, 0666);
+    if (R->fp < 0) {
+      _GD_SetGetDataError(D, GD_E_RAW_IO, 0, NULL, 0, NULL);
+      return 0;
     }
 
 #ifdef GETDATA_DEBUG
     fprintf(stdout, "DoRawOut:  opening file %s for writing\n",
         datafilename);
 #endif
-  } else {
-    /* make sure that file is in read / write mode        */
-    /* if not, close file and reopen in read / write mode */
-
-#ifdef GETDATA_DEBUG
-    fprintf(stdout, "DoRawOut:  file is already open\n");
-#endif
-
-    sprintf(datafilename, "%s/%s", D->name, R->file);
-    if (close(R->fp) < 0) {
-      _GD_SetGetDataError(D, GD_E_PUT_RAWFIELD, 0, NULL, 0, NULL);
-      return 0;
-    } else {
-      R->fp = open(datafilename, O_RDWR);
-    }
-    if (R->fp < 0) {
-      _GD_SetGetDataError(D, GD_E_PUT_RAWFIELD, 0, NULL, 0, NULL);
-      return 0;
-    }
   }
-
-  databuffer = _GD_Alloc(D, R->data_type, ns);
-
-  _GD_ConvertType(D, data_in, data_type, databuffer, R->data_type, ns);
-
-  /* write data to file.  Note that if the first sample is beyond     */
-  /* the current end of file, the gap will be filled with zero bytes. */
 
   lseek(R->fp, s0 * (int)(R->size), SEEK_SET);
   n_wrote = ((int)write(R->fp, databuffer, (size_t)(R->size) * (size_t)ns)) /
     (R->size);
 
 #ifdef GETDATA_DEBUG
-  fprintf(stdout,"DoRawOut:  %d samples\n", (int)*n_write);
+  fprintf(stdout,"DoRawOut:  %d samples\n", n_wrote);
 #endif
 
   free(databuffer);
@@ -115,13 +111,13 @@ static off_t _GD_DoRawOut(DIRFILE *D, struct RawEntryType *R,
   return n_wrote;
 }
 
-static off_t _GD_DoLinterpOut(DIRFILE* D, struct LinterpEntryType *I,
-    off_t first_frame, off_t first_samp, off_t num_frames, off_t num_samp,
+static size_t _GD_DoLinterpOut(DIRFILE* D, struct LinterpEntryType *I,
+    off64_t first_frame, off64_t first_samp, size_t num_frames, size_t num_samp,
     gd_type_t data_type, const void *data_in)
 {
   int spf;
-  off_t ns;
-  off_t n_wrote;
+  size_t ns;
+  size_t n_wrote;
 
   if (I->n_interp < 0) {
     _GD_ReadLinterpFile(D, I);
@@ -149,19 +145,19 @@ static off_t _GD_DoLinterpOut(DIRFILE* D, struct LinterpEntryType *I,
   return n_wrote;
 }
 
-static off_t _GD_DoLincomOut(DIRFILE* D, struct LincomEntryType *L,
-    off_t first_frame, off_t first_samp, off_t num_frames, off_t num_samp,
+static size_t _GD_DoLincomOut(DIRFILE* D, struct LincomEntryType *L,
+    off64_t first_frame, off64_t first_samp, size_t num_frames, size_t num_samp,
     gd_type_t data_type, const void *data_in)
 {
   int spf;
-  off_t ns, n_wrote;
+  size_t ns, n_wrote;
   void* tmpbuf;
 
   /* we cannot write to LINCOM fields that are a linear combination */
   /* of more than one raw field (no way to know how to split data). */
 
   if (L->n_infields > 1) {
-    _GD_SetGetDataError(D, GD_E_MULT_LINCOM, 0, NULL, 0, L->field);
+    _GD_SetGetDataError(D, GD_E_BAD_PUT_FIELD, 0, NULL, 0, L->field);
     return 0;
   }
 
@@ -183,7 +179,7 @@ static off_t _GD_DoLincomOut(DIRFILE* D, struct LincomEntryType *L,
   if (tmpbuf == NULL)
     return 0;
 
-  memcpy(tmpbuf, data_in, ns * _GD_TypeSize(data_type));
+  memcpy(tmpbuf, data_in, ns * GD_SIZE(data_type));
 
   _GD_ScaleData(D, tmpbuf, data_type, ns, 1 / L->m[0], -L->b[0] / L->m[0]);
 
@@ -199,16 +195,16 @@ static off_t _GD_DoLincomOut(DIRFILE* D, struct LincomEntryType *L,
   return n_wrote;
 }
 
-static off_t _GD_DoBitOut(DIRFILE* D, struct BitEntryType *B,
-    off_t first_frame, off_t first_samp, off_t num_frames, off_t num_samp,
+static size_t _GD_DoBitOut(DIRFILE* D, struct BitEntryType *B,
+    off64_t first_frame, off64_t first_samp, size_t num_frames, size_t num_samp,
     gd_type_t data_type, const void *data_in)
 {
   uint64_t *tmpbuf;
   uint64_t *readbuf;
-  off_t i, n_wrote;
+  size_t i, n_wrote;
   int spf;
-  off_t ns;
-  off_t n_read;
+  size_t ns;
+  size_t n_read;
 
   const uint64_t mask = (B->numbits == 64) ? 0xffffffffffffffffULL :
     ((uint64_t)1 << B->numbits) - 1;
@@ -270,11 +266,11 @@ static off_t _GD_DoBitOut(DIRFILE* D, struct BitEntryType *B,
   return n_wrote;
 }
 
-static off_t _GD_DoPhaseOut(DIRFILE* D, struct PhaseEntryType *P,
-    off_t first_frame, off_t first_samp, off_t num_frames, off_t num_samp,
+static size_t _GD_DoPhaseOut(DIRFILE* D, struct PhaseEntryType *P,
+    off64_t first_frame, off64_t first_samp, size_t num_frames, size_t num_samp,
     gd_type_t data_type, const void *data_in)
 {
-  off_t n_wrote;
+  size_t n_wrote;
 
   D->recurse_level++;
   n_wrote = _GD_DoFieldOut(D, P->raw_field, first_frame, first_samp + P->shift,
@@ -284,13 +280,8 @@ static off_t _GD_DoPhaseOut(DIRFILE* D, struct PhaseEntryType *P,
   return n_wrote;
 }
 
-/***************************************************************************/
-/*                                                                         */
-/*  _GD_DoFieldOut: Do one output field once F has been identified         */
-/*                                                                         */
-/***************************************************************************/
-static off_t _GD_DoFieldOut(DIRFILE *D, const char *field_code,
-    off_t first_frame, off_t first_samp, off_t num_frames, off_t num_samp,
+static size_t _GD_DoFieldOut(DIRFILE *D, const char *field_code,
+    off64_t first_frame, off64_t first_samp, size_t num_frames, size_t num_samp,
     gd_type_t data_type, const void *data_in)
 {
   struct gd_entry_t* entry;
@@ -304,7 +295,7 @@ static off_t _GD_DoFieldOut(DIRFILE *D, const char *field_code,
   entry = _GD_FindField(D, field_code);
 
   if (entry == NULL) { /* No match */
-    _GD_SetGetDataError(D, GD_E_BAD_PUT_CODE, 0, NULL, 0, field_code);
+    _GD_SetGetDataError(D, GD_E_BAD_CODE, 0, NULL, 0, field_code);
     return 0;
   }
 
@@ -322,7 +313,7 @@ static off_t _GD_DoFieldOut(DIRFILE *D, const char *field_code,
       return _GD_DoBitOut(D, ENTRY(Bit, entry), first_frame, first_samp,
           num_frames, num_samp, data_type, data_in);
     case GD_MULTIPLY_ENTRY:
-      _GD_SetGetDataError(D, GD_E_BAD_PUT_CODE, 0, NULL, 0, field_code);
+      _GD_SetGetDataError(D, GD_E_BAD_PUT_FIELD, 0, NULL, 0, field_code);
       return 0;
     case GD_PHASE_ENTRY:
       return _GD_DoPhaseOut(D, ENTRY(Phase, entry), first_frame, first_samp,
@@ -333,41 +324,36 @@ static off_t _GD_DoFieldOut(DIRFILE *D, const char *field_code,
   return 0;
 }
 
-/***************************************************************************/
-/*                                                                         */
-/*  PutData: write BLAST format RAW files.                                 */
-/*    filename_in: the name of the file directory (raw files are in here)  */
-/*    field_code: the name of the field you want to write                  */
-/*    first_frame, first_samp: the first sample written is                 */
-/*              first_samp + samples_per_frame*first_frame                 */
-/*    num_frames, num_samps: the number of samples written is              */
-/*              num_samps + samples_per_frame*num_frames                   */
-/*    data_type: data type of *data_in.  's': 16 bit signed                */
-/*              'u' 16bit unsigned 'S' 32bit signed 'U' 32bit unsigned     */
-/*              'c' 8 bit unsigned 'f' 32bit float 'd' 64bit double        */
-/*    void *data_in: array containing the data                             */
-/*    *error_code: error code is returned here. If error_code == NULL,     */
-/*               PutData prints the error message and exits                */
-/*                                                                         */
-/*    return value: returns # of samples actually written to file          */
-/*                                                                         */
-/***************************************************************************/
-off_t putdata(DIRFILE* D, const char *field_code, off_t first_frame,
-    off_t first_samp, off_t num_frames, off_t num_samp, gd_type_t data_type,
-    void *data_in)
+/* this function is little more than a public boilerplate for _GD_DoFieldOut */
+size_t putdata64(DIRFILE* D, const char *field_code, off64_t first_frame,
+    off64_t first_samp, size_t num_frames, size_t num_samp, gd_type_t data_type,
+    const void *data_in)
 {
-  if (!D || (D->flags & GD_INVALID)) {/* don't crash */
+  if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetGetDataError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    return 0;
+  }
+
+  if ((D->flags & GD_ACCMODE) != GD_RDWR) {
+    _GD_SetGetDataError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
     return 0;
   }
 
   _GD_ClearGetDataError(D);
 
-  if (data_type == GD_INT32_ALT)
-    data_type = GD_INT32;
+  first_frame -= D->frame_offset;
 
   return _GD_DoFieldOut(D, field_code, first_frame, first_samp, num_frames,
       num_samp, data_type, data_in);
+}
+
+/* 32(ish)-bit wrapper for the 64-bit version, when needed */
+size_t putdata(DIRFILE* D, const char *field_code, off_t first_frame,
+    off_t first_samp, size_t num_frames, size_t num_samp, gd_type_t data_type,
+    const void *data_in)
+{
+  return putdata64(D, field_code, first_frame, first_samp, num_frames, num_samp,
+      data_type, data_in);
 }
 /* vim: ts=2 sw=2 et
 */

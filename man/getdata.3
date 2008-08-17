@@ -1,5 +1,27 @@
 .\" getdata.3.  The getdata man page.
-.TH getdata 3 "11 August 2008" "Version 0.2.0" "GETDATA"
+.\"
+.\" (C) 2008 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" This program is free software; you can redistribute it and/or modify
+.\" it under the terms of the GNU General Public License as published by
+.\" the Free Software Foundation; either version 2 of the License, or
+.\" (at your option) any later version.
+.\"
+.\" The GNU C Library is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+.\" Lesser General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU Lesser General Public
+.\" License along with the GNU C Library; if not, write to the Free
+.\" Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
+.\" 02111-1307 USA.
+.\"
+.TH getdata 3 "11 August 2008" "Version 0.3.0" "GETDATA"
 .SH NAME
 getdata \(em retreive data from a dirfile database
 .SH SYNOPSIS
@@ -7,8 +29,8 @@ getdata \(em retreive data from a dirfile database
 .HP
 .nh
 .ad l
-.BI "off_t getdata(DIRFILE *" dirfile ", const char *" field_code ", off_t"
-.IB first_frame ", off_t " first_sample ", off_t " num_frames ", off_t"
+.BI "size_t getdata(DIRFILE *" dirfile ", const char *" field_code ", off_t"
+.IB first_frame ", off_t " first_sample ", size_t " num_frames ", size_t"
 .IB num_samples ", gd_type_t " return_type ", void *" data_out );
 .hy
 .ad n
@@ -45,7 +67,7 @@ as measured from the start of the dirfile, where
 .I samples_per_frame
 is the number of samples per frame as returned by
 .BR get_samples_per_frame (3).
-The number of samples fetched is, similarly
+The number of samples fetched is, similarly,
 .RS
 .IR num_frames " * " samples_per_frame " + " num_samples .
 .RE
@@ -103,16 +125,21 @@ is ignored and may be NULL.
 
 The return type of the data need not be the same as the type of the data stored
 in the database.  Type conversion will be performed as necessary to return the
-desired type.  The parameter
+requested type.  The parameter
 .I data_out
 must point to a valid memory location of sufficient size to hold all data
 requested.
 .SH RETURN VALUE
 In all cases,
 .BR getdata ()
-returns the number of samples successfully read from the database.  If the
-end-of-field is encountered before the requested number of samples have been
-read, a short count will result.  The library does not considered this an error.
+returns the number of samples (not bytes) successfully read from the database.
+If the end-of-field is encountered before the requested number of samples have
+been read, a short count will result.  The library does not considered this an
+error.  Requests for data before the beginning-of-field marker, which may have
+been shifted from frame zero by the presence of a
+.B FRAMEOFFSET
+directive, will result in the the data being padded at the front by NaN or zero
+depending on whether the return type is of floating point or integral type.
 
 If an error has occured,
 .IR dirfile -> error
@@ -123,27 +150,30 @@ The library was unable to allocate memory.
 .TP
 .B GD_E_BAD_CODE
 The field specified by
-.I field_code
-was not found in the database.
+.IR field_code ,
+or one of the fields it uses for input, was not found in the database.
 .TP
 .B GD_E_BAD_DIRFILE
-The supplied dirfile was invalid.
+An invalid
+.I dirfile
+was supplied.
 .TP
-.B GE_E_BAD_RETURN_TYPE
-The value of
+.B GD_E_BAD_TYPE
+An invalid
 .I return_type
-was not one of the recognised values.
+was specified.
 .TP
 .B GD_E_INTERNAL_ERROR
 An internal error occurred in the library while trying to perform the task.
 This indicates a bug in the library.  Please report the incident to the
 maintainer.
 .TP
-.B GD_E_OPEN_RAWFIELD
-An error occurred while trying to open a file on disk containing a raw field.
-.TP
 .B GD_E_OPEN_LINFILE
 An error occurred while trying to read a LINTERP table from disk.
+.TP
+.B GD_E_RAW_IO
+An error occurred while trying to open or read from a file on disk containing
+a raw field.
 .TP
 .B GD_E_RECURSE_LEVEL
 Too many levels of recursion were encountered while trying to resolve
@@ -155,6 +185,50 @@ dirfile.
 A descriptive error string for the last error encountered can be obtained from
 a call to
 .BR getdata_error_string (3).
+.SH LIMITATIONS
+The
+.B PHASE
+field type is poorly defined, since a forward-shifted
+.B PHASE
+field will always encounter the end-of-field marker before its input field does.
+This has ramifications when using
+.BR getdata ()
+with streaming data.  The Dirfile
+Standards make tacit admission to this problem by indicating the results of
+reading a
+.B PHASE
+field beyond the beginning- or end-of-frame is "implementation dependent" (see
+.BR dirfile-format (5)).
+As will any other field,
+.BR getdata ()
+will return a short count whenever a read from a
+.B PHASE
+field encounters the end-of-field marker.
+
+Backward-shifted
+.B PHASE
+fields do not suffer from this problem, since
+.BR getdata ()
+pads reads past the beginning-of-field marker with NaN or zero as appropriate.
+Database creators who wish to use the
+.B PHASE
+field type with streaming data are encouraged to work around this limitation
+by only using backward-shifted 
+.B PHASE
+fields, by writing
+.B RAW
+data at the maximal time lag, and then back-shifting all data which should have
+been writen earlier.  Another possible work-around is to write
+systematically less data to the first
+.B RAW
+field in proportion to the maximal forward phase shift.  This method will work
+with applications which respect the database size reported by
+.BR get_n_frames (3)
+resulting in these applications effectively ignoring all frames past the frame
+containing the maximally forward-shifted
+.B PHASE
+field's end-of-field marker.
+
 .SH SEE ALSO
 .BR dirfile (5),
 .BR dirfile_open (3),
