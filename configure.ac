@@ -48,8 +48,7 @@ AC_MSG_RESULT([$include_legacy_api])
 AM_CONDITIONAL(INCLUDE_LEGACY_API, test "x$include_legacy_api" != "xno")
 
 if test "x$include_legacy_api" != "xno"; then
-  AC_SUBST(INCLUDE_LEGACY, ["/* include the legacy API */
-#include <getdata_legacy.h>"])
+  AC_DEFINE([GETDATA_LEGACY_API], [], [ This symbol is defined whenever the library contains the legacy API ])
 fi
 
 AC_ARG_ENABLE(debug, AS_HELP_STRING([--enable-debug],
@@ -131,6 +130,6 @@ AC_CONFIG_FILES([bin/Makefile])
 AC_CONFIG_FILES([man/Makefile])
 AC_CONFIG_FILES([src/Makefile])
 dnl (because I keep modifying getdata.h instead of getdata.h.in)
-AC_CONFIG_FILES([src/getdata.h], [chmod a-w src/getdata.h])
+AC_CONFIG_HEADERS([src/getdata.h], [chmod a-w src/getdata.h])
 AC_CONFIG_FILES([test/Makefile])
 AC_OUTPUT

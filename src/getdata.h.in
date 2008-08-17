@@ -22,8 +22,6 @@
  * 02111-1307 USA.
  */
 
-/* @configure_input@ */
-
 #ifndef GETDATA_H
 #define GETDATA_H
 
@@ -251,6 +249,12 @@ extern size_t putdata64(DIRFILE* dirfile, const char *field_code,
     const void *data_in) __nonnull ((1, 2));
 #endif
 
-@INCLUDE_LEGACY@
+/* If this symbol is defined here, the legacy API is present in the library */
+#undef GETDATA_LEGACY_API
+
+/* include the legacy api, if present */
+#ifdef GETDATA_LEGACY_API
+#include <getdata_legacy.h>
+#endif
 
 #endif
