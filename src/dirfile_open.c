@@ -523,7 +523,7 @@ static void _GD_ParseFormatFile(FILE* fp, DIRFILE *D, const char* filedir,
         break;
       }
 
-      /* If we got here, we managed to open the inlcuded file; parse it */
+      /* If we got here, we managed to open the included file; parse it */
       *IncludeList = realloc(*IncludeList, ++(*i_include) * sizeof(char*));
       (*IncludeList)[*i_include - 1] = strdup(in_cols[1]);
 

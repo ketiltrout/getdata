@@ -49,7 +49,7 @@ extern int GetData(const char *dirfilename, const char *field_code,
 
 /* legacy API for get_n_frames() */
 extern int GetNFrames(const char *dirfilename, int *error_code,
-    const void *unsued) __nonnull ((1, 2)) __attribute_deprecated__;
+    const void *unused) __nonnull ((1, 2)) __attribute_deprecated__;
 
 /* legacy API for get_samples_per_frame() */
 extern int GetSamplesPerFrame(const char *dirfilename, const char *field_code,

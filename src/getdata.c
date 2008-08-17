@@ -61,7 +61,7 @@ static __attribute__ ((__const__)) double __NAN()
 #define NAN __NAN()
 #endif /* !defined(NAN) */
 
-/* _GD_FillFileFrame: fill dataout with frame indicies
+/* _GD_FillFileFrame: fill dataout with frame indices
 */
 static void _GD_FillFileFrame(void *dataout, char rtype, off64_t s0, size_t n)
 {

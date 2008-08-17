@@ -118,7 +118,7 @@ struct _GD_DIRFILE {
   /* Error reporting -- this is the only public member. */
   int error;
 
-  /* Everything below this comment should be considered interal to the library
+  /* Everything below this comment should be considered internal to the library
    * and not part of the official API */
 
   /* field count */
@@ -155,7 +155,7 @@ typedef struct _GD_DIRFILE DIRFILE;
 #define GD_TRUNC           01000 /* truncate dirfile (scary!) */
 #define GD_BIG_ENDIAN    0200000 /* assume big-endian raw data */
 #define GD_LITTLE_ENDIAN 0400000 /* assume litte-endian raw data */
-#define GD_FORCE_ENDIAN 01000000 /* override endiandess */
+#define GD_FORCE_ENDIAN 01000000 /* override endianness */
 #define GD_PEDANTIC     02000000 /* be pedantic */
 #define GD_INVALID      04000000 /* the dirfile is invalid */
 

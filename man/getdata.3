@@ -23,7 +23,7 @@
 .\"
 .TH getdata 3 "11 August 2008" "Version 0.3.0" "GETDATA"
 .SH NAME
-getdata \(em retreive data from a dirfile database
+getdata \(em retrieve data from a dirfile database
 .SH SYNOPSIS
 .B #include <getdata.h>
 .HP
@@ -141,7 +141,7 @@ been shifted from frame zero by the presence of a
 directive, will result in the the data being padded at the front by NaN or zero
 depending on whether the return type is of floating point or integral type.
 
-If an error has occured,
+If an error has occurred,
 .IR dirfile -> error
 will be set to a non-zero value.  Possible error values are:
 .TP 8
@@ -218,7 +218,7 @@ by only using backward-shifted
 fields, by writing
 .B RAW
 data at the maximal time lag, and then back-shifting all data which should have
-been writen earlier.  Another possible work-around is to write
+been written earlier.  Another possible work-around is to write
 systematically less data to the first
 .B RAW
 field in proportion to the maximal forward phase shift.  This method will work

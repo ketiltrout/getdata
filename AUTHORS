@@ -1,4 +1,4 @@
-C. B. Netterfield <netterfield@astro.utoronto.ca> developed the orignal
+C. B. Netterfield <netterfield@astro.utoronto.ca> developed the original
 dirfile standard and created the first getdata library.
 
 D. V. Wiebe <dvw@ketiltrout.net> developed the "large dirfile extension"
@@ -10,7 +10,7 @@ Ted Kisner <tskisner.public@gmail.com> wrote the putdata library.
 Eli Fidler <eli@staikos.net> ported putdata to this version of the getdata
 library.
 
-Matt Truch <matt@truch.net> has provided bugfixes and maintains the Fedora
+Matt Truch <matt@truch.net> has provided bug fixes and maintains the Fedora
 packages.
 
 George Staikos <staikos@kde.org> maintained the getdata library as part of

@@ -27,7 +27,7 @@ dirfile\-format \(em the dirfile database format specification file
 .SH DESCRIPTION
 The
 .I dirfile format
-file fully specifies the raw and derived timestreams and auxiliary information
+file fully specifies the raw and derived time streams and auxiliary information
 for a
 .BR dirfile (5)
 database.
@@ -58,7 +58,7 @@ directives:
 The ENDIAN directive specifies the endianness of the raw data in the database.
 In previous versions of the Dirfile Standard, raw data was always assumed to be
 little-endian.  This assumption has been removed.  The assumed endianness of raw
-data in dirfiles which omit this directive is implementation dependant.  Syntax
+data in dirfiles which omit this directive is implementation dependent.  Syntax
 is:
 .SP
 .RS
@@ -124,8 +124,8 @@ on the field type.
 There are five field types:
 .TP
 .B RAW
-The RAW field type specifies raw timestreams on disk.  In this case, the field
-name should correspond to the name of the file containing the timestream.
+The RAW field type specifies raw time streams on disk.  In this case, the field
+name should correspond to the name of the file containing the time stream.
 Syntax is:
 .RS
 .PP
@@ -135,7 +135,7 @@ Syntax is:
 
 where
 .I sample-rate
-is the number of samples per dirfile frame for the timestream and
+is the number of samples per dirfile frame for the time stream and
 .I type
 is a word specifying the native data format type:
 .RS
@@ -222,7 +222,7 @@ with the
 .I field2
 and
 .I field3
-terms included only if specified and the indicies
+terms included only if specified and the indices
 .I n2
 and
 .I n3
@@ -273,7 +273,7 @@ input fields.  The resultant field will have the same sample rate as
 .RE
 .TP
 .B BIT
-The BIT field type extacts one or more bits out of an input field.  Syntax is:
+The BIT field type extracts one or more bits out of an input field.  Syntax is:
 .RS
 .IP
 .I <field-name>
@@ -354,7 +354,7 @@ field type.
 Version 0 of the Standards (before March 2003) refers to the dirfile standards
 supported by the
 .BR getdata (3)
-library orignally introduced into the
+library originally introduced into the
 .BR kst (1)
 sources, which contained support for all other features covered by this
 document.

@@ -93,7 +93,7 @@ char* getdata_error_string(const DIRFILE* D, char* buffer, size_t buflen)
   ptr = buffer + strlen(buffer);
   buflen -= strlen(buffer);
 
-  /* add the anciliary data - we use snprintfs here to ensure the resultant
+  /* add the ancillary data - we use snprintfs here to ensure the resultant
    * string is properly null terminated (while not overflowing the buffer) */
   switch (D->error) {
     case GD_E_INTERNAL_ERROR: /* internal error: report line and source file
@@ -116,7 +116,7 @@ char* getdata_error_string(const DIRFILE* D, char* buffer, size_t buflen)
           break;
       }
       break;
-    case GD_E_CREAT: /* couldn't create the dirifle */
+    case GD_E_CREAT: /* couldn't create the dirfile */
       snprintf(ptr, buflen, " %s: ", D->error_file);
       buflen -= strlen(ptr);
       ptr += strlen(ptr);
@@ -196,7 +196,7 @@ char* getdata_error_string(const DIRFILE* D, char* buffer, size_t buflen)
           break;
         case GD_E_FORMAT_BAD_LINE: /* couldn't make heads nor tails of the
                                          line -- ie. a mistyped keyword &c. */
-          snprintf(ptr, buflen, "line indecypherable");
+          snprintf(ptr, buflen, "line indecipherable");
           break;
         case GD_E_FORMAT_RES_NAME: /* field name reserved */
           snprintf(ptr, buflen, "field name is reserved");

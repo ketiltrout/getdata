@@ -30,7 +30,7 @@
  *  - samples per frame is always unsigned int
  *  - variables holding offsets or file sizes should be of type off64_t (which
  *    may be simply off_t, depending on local LFS support)
- *  - variables holings object sizes or counts of items read or writen should
+ *  - variables holding object sizes or counts of items read or written should
  *    be of type size_t
  *  - public functions taking or returning types of off64_t should have both
  *    a off_t prototype and and off64_t type prototype.

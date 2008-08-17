@@ -32,26 +32,26 @@ reading binary time-ordered data.  Dirfiles can be read using the GetData
 library.
 
 The dirfile database is centred around one or more time-ordered data streams (a
-.IR timestream ).
-Each timestream is writen to disk in a separate file, in its native binary
-format.  The name of these timestream files correspond to the timestream's
+.IR "time stream" ).
+Each time stream is written to disk in a separate file, in its native binary
+format.  The name of these time stream files correspond to the time stream's
 .IR "field name" .
-Two timestreams may have different constant sampling frequencies and mechanisms
-exist within the dirfile format to ensure these timestreams remain properly
+Two time streams may have different constant sampling frequencies and mechanisms
+exist within the dirfile format to ensure these time streams remain properly
 sequenced in time.
 
-To do this, the timestreams in the dirfile are subdivided into
+To do this, the time streams in the dirfile are subdivided into
 .IR frames .
-Each frame contains an integer number of samples of each timestream.  When
-synchronous retrieval of data from more than one timestream is required,
+Each frame contains an integer number of samples of each time stream.  When
+synchronous retrieval of data from more than one time stream is required,
 position in the dirfile can be specified in frames, which will ensure
 synchronicity.
 
-The timestream files are all located in a central directory, known as the
+The time stream files are all located in a central directory, known as the
 .IR "dirfile directory" .
-The dirfile as a whole may be refered to by it's dirfile directory.
+The dirfile as a whole may be referred to by its dirfile directory.
 
-Included in the dirfile along with the timestreams is the
+Included in the dirfile along with the time streams is the
 .IR "dirfile format specification" ,
 which is an ASCII text file called
 .B format
@@ -62,17 +62,17 @@ see
 In addition to the raw fields on disk, the dirfile format specification may
 also specify
 .I derived fields
-which are calculated from one or more raw or derived timestreams.  Derived
+which are calculated from one or more raw or derived time streams.  Derived
 fields behave identically to raw fields when read via GetData.  See
 .BR dirfile\-format (5)
 for a complete list of derived field types.
 
-Dirfiles are designed to be writen to and read simultaneously. The dirfile
+Dirfiles are designed to be written to and read simultaneously. The dirfile
 specification dictates that the first raw field specified in the
 .B format
-file is the prototypical timestream: all other timestreams are assumed to have
-at least as many frames as the prototypical timestream has, and the size of the
-prototypical timestream is used as the size of the dirfile as a whole.
+file is the prototypical time stream: all other time streams are assumed to have
+at least as many frames as the prototypical time stream has, and the size of the
+prototypical time stream is used as the size of the dirfile as a whole.
 
 Version 3 of the Dirfile Standards introduced the
 .I "large dirfile"

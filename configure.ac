@@ -26,7 +26,7 @@ dnl libgetdata current interface version
 AC_SUBST(GETDATA_IFACE_VERSION, [1])
 dnl libgetdata current interface implementation revision
 AC_SUBST(GETDATA_IMPL_REVISION, [0])
-dnl libgetdata intefrace age (current interface - oldest supported interface)
+dnl libgetdata interface age (current interface - oldest supported interface)
 dnl   this must be 0 and not 1 because, although we still support the old
 dnl   interface, the error codes have changed.
 AC_SUBST(GETDATA_IFACE_AGE, [0])
@@ -80,7 +80,7 @@ AC_ENABLE_SHARED
 AC_PROG_LIBTOOL
 
 dnl libraries
-AC_CHECK_LIB(m,ceil,,AC_MSG_ERROR([Can't find libm!]))
+AC_CHECK_LIB(m,ceil)
 
 dnl headers
 AC_CHECK_HEADERS(fcntl.h libgen.h)
@@ -117,7 +117,7 @@ dnl output
 AC_CONFIG_FILES([Makefile])
 AC_CONFIG_FILES([man/Makefile])
 AC_CONFIG_FILES([src/Makefile])
-dnl (because I keep modifing getdata.h instead of getdata.h.in)
+dnl (because I keep modifying getdata.h instead of getdata.h.in)
 AC_CONFIG_FILES([src/getdata.h], [chmod a-w src/getdata.h])
 AC_CONFIG_FILES([test/Makefile])
 AC_OUTPUT
