@@ -63,7 +63,11 @@ typedef off_t off64_t
 #define GD_MAX_RECURSE_LEVEL  32
 
 /* maximum length of a format file line */
-#define MAX_LINE_LENGTH FILENAME_MAX
+#if (FILENAME_MAX < 256)
+# define MAX_LINE_LENGTH 256
+#else
+# define MAX_LINE_LENGTH FILENAME_MAX
+#endif
 
 /* Suberror codes */
 #define GD_E_OPEN_NOT_DIRFILE  0
