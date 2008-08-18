@@ -9,14 +9,14 @@ dnl it under the terms of the GNU General Public License as published by
 dnl the Free Software Foundation; either version 2 of the License, or
 dnl (at your option) any later version.
 dnl
-dnl The GNU C Library is distributed in the hope that it will be useful,
+dnl GetData is distributed in the hope that it will be useful,
 dnl but WITHOUT ANY WARRANTY; without even the implied warranty of
 dnl MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 dnl Lesser General Public License for more details.
 dnl
 dnl You should have received a copy of the GNU Lesser General Public
-dnl License along with the GNU C Library; if not, write to the Free
-dnl Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
+dnl License along with GetDat; if not, write to the Free Software
+dnl Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
 dnl 02111-1307 USA.
 dnl
 AC_INIT([getdata], [0.3.0], [dwiebe@physics.utoronto.ca])
