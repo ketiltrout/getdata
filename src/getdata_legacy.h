@@ -29,17 +29,13 @@
 #error "Never use <getdata_legacy.h> directly; include <getdata.h> instead."
 #endif
 
-/* this symbol is defined to allow programs to decide whether they can
- * use the legacy API or not at compile time */
-#define GETDATA_LEGACY_API
-
 /* comments about cancellation points and __THROW found in getdata.h apply
  * here too...
  */
 
 /* legacy API for getdata_error_string() */
-extern char* GetDataErrorString(char* buffer, size_t buflen) __nonnull ((1))
-  __THROW __attribute_deprecated__;
+extern char* GetDataErrorString(char* buffer, size_t buflen) __THROW
+  __nonnull ((1)) __attribute_deprecated__;
 
 /* legacy API for getdata() */
 extern int GetData(const char *dirfilename, const char *field_code,

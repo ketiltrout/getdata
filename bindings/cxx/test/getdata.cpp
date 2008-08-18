@@ -1,10 +1,4 @@
-/* Attempt to read UINT8 */
-#include "../src/getdata.h"
-
-
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
+#include "dirfile.h"
 #include <fcntl.h>
 #include <string.h>
 #include <errno.h>
@@ -34,11 +28,9 @@ int main(void)
   write(fd, data_data, 256);
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
-  int n = getdata(D, "data", 5, 0, 1, 0, GD_UINT8, c);
-  int error = D->error;
-
-  dirfile_close(D);
+  Dirfile dirfile = Dirfile(filedir);
+  size_t n = dirfile.GetData("data", 5, 0, 1, 0, Dirfile::UInt8, c);
+  int error = dirfile.Error();
 
   unlink(data);
   unlink(format);

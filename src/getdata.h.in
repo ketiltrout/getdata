@@ -89,8 +89,7 @@
 
 #define GD_N_ERROR_CODES      18
 
-extern const char const *GD_ERROR_CODES[GD_N_ERROR_CODES]
-__attribute_deprecated__;
+extern const char *GD_ERROR_CODES[GD_N_ERROR_CODES] __attribute_deprecated__;
 
 #ifndef FILENAME_MAX
 #  define FILENAME_MAX 4096
@@ -107,7 +106,7 @@ __attribute_deprecated__;
 
 /* Incomplete, generic entry struct */
 struct gd_entry_t {
-  const char const* field;
+  const char *field;
   const int field_type;
 };
 
