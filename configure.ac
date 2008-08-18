@@ -12,9 +12,9 @@ dnl
 dnl GetData is distributed in the hope that it will be useful,
 dnl but WITHOUT ANY WARRANTY; without even the implied warranty of
 dnl MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-dnl Lesser General Public License for more details.
+dnl General Public License for more details.
 dnl
-dnl You should have received a copy of the GNU Lesser General Public
+dnl You should have received a copy of the GNU General Public
 dnl License along with GetDat; if not, write to the Free Software
 dnl Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
 dnl 02111-1307 USA.
