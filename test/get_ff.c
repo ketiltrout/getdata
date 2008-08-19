@@ -13,7 +13,6 @@
 int main(void)
 {
   const char* filedir = __TEST__ "dirfile";
-  printf("%s\n", filedir);
   const char* format = __TEST__ "dirfile/format";
   const char* data = __TEST__ "dirfile/data";
   const char* format_data = "data RAW UINT8 8\n";
