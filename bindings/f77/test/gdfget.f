@@ -1,13 +1,13 @@
 C     Attempt to read INT8 via the F77 bindings
       PROGRAM GETTST
       INCLUDE "getdata.f"
-      CHARACTER*256 fildir
+      CHARACTER*12 fildir
       PARAMETER (fildir = 'test_dirfile')
-      CHARACTER*256 frmat
+      CHARACTER*19 frmat
       PARAMETER (frmat = 'test_dirfile/format')
-      CHARACTER*256 dat
+      CHARACTER*17 dat
       PARAMETER (dat = 'test_dirfile/data')
-      CHARACTER*256 frmdat
+      CHARACTER*15 frmdat
       PARAMETER (frmdat = 'data RAW INT8 8')
       INTEGER*1 c(8)
       INTEGER*1 datdat(80)
@@ -15,7 +15,6 @@ C     Attempt to read INT8 via the F77 bindings
       INTEGER d;
       INTEGER n;
       INTEGER e;
-      CHARACTER*256 erstr
 
       DO 10 i = 1, 8
       c(i) = 0;
@@ -29,7 +28,7 @@ C     Attempt to read INT8 via the F77 bindings
    20 CONTINUE
 
       OPEN(1, FILE=frmat, STATUS='NEW')
-      WRITE(1, *) TRIM(frmdat)
+      WRITE(1, *) frmdat
       CLOSE(1, STATUS='KEEP')
 
       OPEN(1, FILE=dat, FORM='UNFORMATTED', ACCESS='DIRECT', RECL=80,
