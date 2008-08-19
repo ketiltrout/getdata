@@ -18,7 +18,7 @@ int main(void)
   const char* format_data = "data RAW UINT8 8\n";
   unsigned char c[8];
   unsigned char data_data[256];
-  int fd, i;
+  int fd;
 
   memset(c, 0, 8);
   mkdir(filedir, 0777);

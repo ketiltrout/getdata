@@ -14,11 +14,9 @@ int main(void)
 {
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
-  const char* data = __TEST__ "dirfile/data";
   const char* format_data = "data RAW UINT8 8\nFRAMEOFFSET 10000";
   uint8_t c[8];
   int fd;
-  struct stat buf;
 
   mkdir(filedir, 0777);
 
