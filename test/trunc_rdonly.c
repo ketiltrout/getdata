@@ -11,9 +11,9 @@
 
 int main(void)
 {
-  const char* filedir = __FILE__ "dirfile";
-  const char* format = __FILE__ "dirfile/format";
-  const char* data = __FILE__ "dirfile/data";
+  const char* filedir = __TEST__ "dirfile";
+  const char* format = __TEST__ "dirfile/format";
+  const char* data = __TEST__ "dirfile/data";
   int fd;
 
   mkdir(filedir, 0777);

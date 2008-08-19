@@ -10,7 +10,7 @@
 
 int main(void)
 {
-  const char* filedir = __FILE__ "dirfile";
+  const char* filedir = __TEST__ "dirfile";
 
   DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
   size_t n = get_n_frames(D);

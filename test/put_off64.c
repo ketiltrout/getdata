@@ -21,9 +21,9 @@ int main(void)
 #ifdef SKIP_TEST
   return 77;
 #else
-  const char* filedir = __FILE__ "dirfile";
-  const char* format = __FILE__ "dirfile/format";
-  const char* data = __FILE__ "dirfile/data";
+  const char* filedir = __TEST__ "dirfile";
+  const char* format = __TEST__ "dirfile/format";
+  const char* data = __TEST__ "dirfile/data";
   const char* format_data = "data RAW UINT8 8\n";
   uint8_t c[8], d;
   int fd, i;

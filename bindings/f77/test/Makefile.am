@@ -19,7 +19,7 @@
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
 #
 AUTOMAKE_OPTIONS = foreign
-FFLAGS += -I..
+FFLAGS += -I$(srcdir)/..
 
 LDADD=../libfgetdata.la
 TESTS=gdfget

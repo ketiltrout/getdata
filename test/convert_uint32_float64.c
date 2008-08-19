@@ -12,9 +12,9 @@
 
 int main(void)
 {
-  const char* filedir = __FILE__ "dirfile";
-  const char* format = __FILE__ "dirfile/format";
-  const char* data = __FILE__ "dirfile/data";
+  const char* filedir = __TEST__ "dirfile";
+  const char* format = __TEST__ "dirfile/format";
+  const char* data = __TEST__ "dirfile/data";
   const char* format_data = "data RAW UINT32 8\n";
   uint32_t  data_data[256];
   double c[8];

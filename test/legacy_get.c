@@ -15,9 +15,9 @@ int main(void)
 #ifndef GETDATA_LEGACY_API
   return 77; /* skipped */
 #else
-  const char* filedir = __FILE__ "dirfile";
-  const char* format = __FILE__ "dirfile/format";
-  const char* data = __FILE__ "dirfile/data";
+  const char* filedir = __TEST__ "dirfile";
+  const char* format = __TEST__ "dirfile/format";
+  const char* data = __TEST__ "dirfile/data";
   const char* format_data = "data RAW UINT8 8\n";
   unsigned char c[8];
   unsigned char data_data[256];

@@ -11,8 +11,8 @@
 
 int main(void)
 {
-  const char* filedir = __FILE__ "dirfile";
-  const char* format = __FILE__ "dirfile/format";
+  const char* filedir = __TEST__ "dirfile";
+  const char* format = __TEST__ "dirfile/format";
   const char* format_data = "data RAW UINT8 0\n";
   int fd;
 

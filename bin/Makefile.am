@@ -22,10 +22,11 @@
 AUTOMAKE_OPTIONS = foreign
 
 LDADD=../src/libgetdata.la
-INCLUDES=-Wall
+INCLUDES=-Wall -I$(top_srcdir)/src
 
 if MAKE_CHECKDIRFILE
 CHECKDIRFILE=checkdirfile
 endif
 
 bin_PROGRAMS=$(CHECKDIRFILE)
+checkdirfile_SOURCES=checkdirfile.c ../src/getdata.h ../src/getdata_legacy.h

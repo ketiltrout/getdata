@@ -10,7 +10,7 @@
 
 int main(void)
 {
-  const char* filedir = __FILE__ "dirfile";
+  const char* filedir = __TEST__ "dirfile";
 
   mkdir(filedir, 0777);
 

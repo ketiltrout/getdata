@@ -12,8 +12,8 @@
 
 int main(void)
 {
-  const char* filedir = __FILE__ "dirfile";
-  const char* format = __FILE__ "dirfile/format";
+  const char* filedir = __TEST__ "dirfile";
+  const char* format = __TEST__ "dirfile/format";
   const char* format_data = "lincom LINCOM 1 data 2 3\n";
   unsigned char c = 0;
   int fd;

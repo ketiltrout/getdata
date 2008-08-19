@@ -12,9 +12,9 @@
 
 int main(void)
 {
-  const char* filedir = __FILE__ "dirfile";
-  const char* format = __FILE__ "dirfile/format";
-  const char* data = __FILE__ "dirfile/data";
+  const char* filedir = __TEST__ "dirfile";
+  const char* format = __TEST__ "dirfile/format";
+  const char* data = __TEST__ "dirfile/data";
   const char* format_data = "lincom LINCOM 3 data 2 3 data 1 0 data 10 4\ndata RAW UINT8 1\n";
   unsigned char c = 0;
   unsigned char data_data[256];

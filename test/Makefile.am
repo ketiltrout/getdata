@@ -28,7 +28,7 @@ PUT_OFF64=put_off64
 endif
 
 LDADD=../src/libgetdata.la
-INCLUDES=-Wall
+INCLUDES=-Wall -I$(top_srcdir)/src -D__TEST__=\"$@\"
 TESTS=convert_uint8_int8      convert_uint8_uint16   convert_uint8_int16     \
 			convert_uint8_uint32    convert_uint8_int32    convert_uint8_float32   \
 			convert_uint8_uint64    convert_uint8_int64    convert_uint8_float64   \
@@ -90,4 +90,4 @@ TESTS=convert_uint8_int8      convert_uint8_uint16   convert_uint8_int16     \
 check_PROGRAMS=$(TESTS)
 
 clean-local:
-	rm -rf *cdirfile
+	rm -rf *odirfile

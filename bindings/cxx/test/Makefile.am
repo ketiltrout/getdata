@@ -19,7 +19,7 @@
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
 #
 AUTOMAKE_OPTIONS = foreign
-INCLUDES = -Wall -I..
+INCLUDES = -Wall -I$(srcdir)/.. -I$(top_srcdir)/src -D__TEST__=\"$@\"
 LDADD=../libdirfile.la
 TESTS=getdata nframes putdata spf
 
@@ -31,4 +31,4 @@ spf_SOURCES=spf.cpp
 check_PROGRAMS=${TESTS}
 
 clean-local:
-	rm -rf *cppdirfile
+	rm -rf *odirfile

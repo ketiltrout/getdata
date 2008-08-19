@@ -19,7 +19,7 @@
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
 #
 AUTOMAKE_OPTIONS = foreign
-INCLUDES = -Wall
+INCLUDES = -Wall -I$(top_srcdir)/src
 
 SUBDIRS = test
 

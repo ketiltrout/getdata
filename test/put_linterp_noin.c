@@ -12,9 +12,9 @@
 
 int main(void)
 {
-  const char* filedir = __FILE__ "dirfile";
-  const char* format = __FILE__ "dirfile/format";
-  const char* table = __FILE__ "dirfile/table";
+  const char* filedir = __TEST__ "dirfile";
+  const char* format = __TEST__ "dirfile/format";
+  const char* table = __TEST__ "dirfile/table";
   const char* format_data = "linterp LINTERP data ./table\n";
   int8_t c[8], d;
   int fd, i;
