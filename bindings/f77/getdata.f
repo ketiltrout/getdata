@@ -127,3 +127,21 @@ C     Corresponding to GD_FLOAT32
 C     Corresponding to GD_FLOAT64
       INTEGER GD_F64
       PARAMETER (GD_F64=40)
+
+C Externals
+C     Corresponding to dirfile_open(3)
+      EXTERNAL GDFOPN
+C     Corresponding to dirfile_close(3)
+      EXTERNAL GDFCLS
+C     Corresponding to getdata(3)
+      EXTERNAL GDFGET
+C     Corresponding to get_n_frames(3)
+      EXTERNAL GDFNFR
+C     Corresponding to get_samples_per_frame(3)
+      EXTERNAL GDFSPF
+C     Corresponding to putdata(3)
+      EXTERNAL GDFPUT
+C     Returns the dirfile->error member
+      EXTERNAL GDFERR
+C     Corresponding to getdata_error_string(3)
+      EXTERNAL GDFSTR
