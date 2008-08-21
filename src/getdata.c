@@ -63,7 +63,8 @@ static __attribute__ ((__const__)) double __NAN()
 
 /* _GD_FillFileFrame: fill dataout with frame indices
 */
-static void _GD_FillFileFrame(void *dataout, char rtype, off64_t s0, size_t n)
+static void _GD_FillFileFrame(void *dataout, gd_type_t rtype, off64_t s0,
+    size_t n)
 {
   size_t i;
 
@@ -123,39 +124,39 @@ void _GD_ConvertType(DIRFILE* D, const void *data_in, gd_type_t in_type,
           return;
         case GD_UINT8:
           for (i = 0; i < n; i++)
-            ((int8_t*)data_out)[i] = ((int8_t*)data_in)[i];
+            ((uint8_t*)data_out)[i] = (uint8_t)((int8_t*)data_in)[i];
           return;
         case GD_INT16:
           for (i = 0; i < n; i++)
-            ((int16_t*)data_out)[i] = ((int8_t*)data_in)[i];
+            ((int16_t*)data_out)[i] = (int16_t)((int8_t*)data_in)[i];
           return;
         case GD_UINT16:
           for (i = 0; i < n; i++)
-            ((uint16_t*)data_out)[i] = ((int8_t*)data_in)[i];
+            ((uint16_t*)data_out)[i] = (uint16_t)((int8_t*)data_in)[i];
           return;
         case GD_INT32:
           for (i = 0; i < n; i++)
-            ((int32_t*)data_out)[i] = ((int8_t*)data_in)[i];
+            ((int32_t*)data_out)[i] = (int32_t)((int8_t*)data_in)[i];
           return;
         case GD_UINT32:
           for (i = 0; i < n; i++)
-            ((uint32_t*)data_out)[i] = ((int8_t*)data_in)[i];
+            ((uint32_t*)data_out)[i] = (uint32_t)((int8_t*)data_in)[i];
           return;
         case GD_INT64:
           for (i = 0; i < n; i++)
-            ((int64_t*)data_out)[i] = ((int8_t*)data_in)[i];
+            ((int64_t*)data_out)[i] = (int64_t)((int8_t*)data_in)[i];
           return;
         case GD_UINT64:
           for (i = 0; i < n; i++)
-            ((uint64_t*)data_out)[i] = ((int8_t*)data_in)[i];
+            ((uint64_t*)data_out)[i] = (uint64_t)((int8_t*)data_in)[i];
           return;
         case GD_FLOAT:
           for (i = 0; i < n; i++)
-            ((float*)data_out)[i] = ((int8_t*)data_in)[i];
+            ((float*)data_out)[i] = (float)((int8_t*)data_in)[i];
           return;
         case GD_DOUBLE:
           for (i = 0; i < n; i++)
-            ((double*)data_out)[i] = ((int8_t*)data_in)[i];
+            ((double*)data_out)[i] = (double)((int8_t*)data_in)[i];
           return;
         default:
           break;
@@ -165,42 +166,42 @@ void _GD_ConvertType(DIRFILE* D, const void *data_in, gd_type_t in_type,
       switch (out_type) {
         case GD_INT8:
           for (i = 0; i < n; i++)
-            ((int8_t*)data_out)[i] = ((uint8_t*)data_in)[i];
+            ((int8_t*)data_out)[i] = (int8_t)((uint8_t*)data_in)[i];
           return;
         case GD_UINT8:
           memcpy(data_out, data_in, n * sizeof(uint8_t));
           return;
         case GD_INT16:
           for (i = 0; i < n; i++)
-            ((int16_t*)data_out)[i] = ((uint8_t*)data_in)[i];
+            ((int16_t*)data_out)[i] = (int16_t)((uint8_t*)data_in)[i];
           return;
         case GD_UINT16:
           for (i = 0; i < n; i++)
-            ((uint16_t*)data_out)[i] = ((uint8_t*)data_in)[i];
+            ((uint16_t*)data_out)[i] = (uint16_t)((uint8_t*)data_in)[i];
           return;
         case GD_INT32:
           for (i = 0; i < n; i++)
-            ((int32_t*)data_out)[i] = ((uint8_t*)data_in)[i];
+            ((int32_t*)data_out)[i] = (int32_t)((uint8_t*)data_in)[i];
           return;
         case GD_UINT32:
           for (i = 0; i < n; i++)
-            ((uint32_t*)data_out)[i] = ((uint8_t*)data_in)[i];
+            ((uint32_t*)data_out)[i] = (uint32_t)((uint8_t*)data_in)[i];
           return;
         case GD_INT64:
           for (i = 0; i < n; i++)
-            ((int64_t*)data_out)[i] = ((uint8_t*)data_in)[i];
+            ((int64_t*)data_out)[i] = (int64_t)((uint8_t*)data_in)[i];
           return;
         case GD_UINT64:
           for (i = 0; i < n; i++)
-            ((uint64_t*)data_out)[i] = ((uint8_t*)data_in)[i];
+            ((uint64_t*)data_out)[i] = (uint64_t)((uint8_t*)data_in)[i];
           return;
         case GD_FLOAT:
           for (i = 0; i < n; i++)
-            ((float*)data_out)[i] = ((uint8_t*)data_in)[i];
+            ((float*)data_out)[i] = (float)((uint8_t*)data_in)[i];
           return;
         case GD_DOUBLE:
           for (i = 0; i < n; i++)
-            ((double*)data_out)[i] = ((uint8_t*)data_in)[i];
+            ((double*)data_out)[i] = (double)((uint8_t*)data_in)[i];
           return;
         default:
           break;
@@ -210,42 +211,42 @@ void _GD_ConvertType(DIRFILE* D, const void *data_in, gd_type_t in_type,
       switch (out_type) {
         case GD_INT8:
           for (i = 0; i < n; i++)
-            ((int8_t*)data_out)[i] = ((int16_t*)data_in)[i];
+            ((int8_t*)data_out)[i] = (int8_t)((int16_t*)data_in)[i];
           return;
         case GD_UINT8:
           for (i = 0; i < n; i++)
-            ((uint8_t*)data_out)[i] = ((int16_t*)data_in)[i];
+            ((uint8_t*)data_out)[i] = (uint8_t)((int16_t*)data_in)[i];
           return;
         case GD_INT16:
           memcpy(data_out, data_in, n * sizeof(int16_t));
           return;
         case GD_UINT16:
           for (i = 0; i < n; i++)
-            ((uint16_t*)data_out)[i] = ((int16_t*)data_in)[i];
+            ((uint16_t*)data_out)[i] = (uint16_t)((int16_t*)data_in)[i];
           return;
         case GD_INT32:
           for (i = 0; i < n; i++)
-            ((int32_t*)data_out)[i] = ((int16_t*)data_in)[i];
+            ((int32_t*)data_out)[i] = (int32_t)((int16_t*)data_in)[i];
           return;
         case GD_UINT32:
           for (i = 0; i < n; i++)
-            ((uint32_t*)data_out)[i] = ((uint16_t*)data_in)[i];
+            ((uint32_t*)data_out)[i] = (uint32_t)((uint16_t*)data_in)[i];
           return;
         case GD_INT64:
           for (i = 0; i < n; i++)
-            ((int64_t*)data_out)[i] = ((int16_t*)data_in)[i];
+            ((int64_t*)data_out)[i] = (int64_t)((int16_t*)data_in)[i];
           return;
         case GD_UINT64:
           for (i = 0; i < n; i++)
-            ((uint64_t*)data_out)[i] = ((uint16_t*)data_in)[i];
+            ((uint64_t*)data_out)[i] = (uint64_t)((uint16_t*)data_in)[i];
           return;
         case GD_FLOAT:
           for (i = 0; i < n; i++)
-            ((float*)data_out)[i] = ((uint16_t*)data_in)[i];
+            ((float*)data_out)[i] = (float)((uint16_t*)data_in)[i];
           return;
         case GD_DOUBLE:
           for (i = 0; i < n; i++)
-            ((double*)data_out)[i] = ((uint16_t*)data_in)[i];
+            ((double*)data_out)[i] = (double)((uint16_t*)data_in)[i];
           return;
         default:
           break;
@@ -255,42 +256,42 @@ void _GD_ConvertType(DIRFILE* D, const void *data_in, gd_type_t in_type,
       switch (out_type) {
         case GD_INT8:
           for (i = 0; i < n; i++)
-            ((int8_t*)data_out)[i] = ((uint16_t*)data_in)[i];
+            ((int8_t*)data_out)[i] = (int8_t)((uint16_t*)data_in)[i];
           return;
         case GD_UINT8:
           for (i = 0; i < n; i++)
-            ((uint8_t*)data_out)[i] = ((uint16_t*)data_in)[i];
+            ((uint8_t*)data_out)[i] = (uint8_t)((uint16_t*)data_in)[i];
           return;
         case GD_INT16:
           for (i = 0; i < n; i++)
-            ((int16_t*)data_out)[i] = ((uint16_t*)data_in)[i];
+            ((int16_t*)data_out)[i] = (int16_t)((uint16_t*)data_in)[i];
           return;
         case GD_UINT16:
           memcpy(data_out, data_in, n * sizeof(uint16_t));
           return;
         case GD_INT32:
           for (i = 0; i < n; i++)
-            ((int32_t*)data_out)[i] = ((uint16_t*)data_in)[i];
+            ((int32_t*)data_out)[i] = (int32_t)((uint16_t*)data_in)[i];
           return;
         case GD_UINT32:
           for (i = 0; i < n; i++)
-            ((uint32_t*)data_out)[i] = ((uint16_t*)data_in)[i];
+            ((uint32_t*)data_out)[i] = (uint32_t)((uint16_t*)data_in)[i];
           return;
         case GD_INT64:
           for (i = 0; i < n; i++)
-            ((int64_t*)data_out)[i] = ((uint16_t*)data_in)[i];
+            ((int64_t*)data_out)[i] = (int64_t)((uint16_t*)data_in)[i];
           return;
         case GD_UINT64:
           for (i = 0; i < n; i++)
-            ((uint64_t*)data_out)[i] = ((uint16_t*)data_in)[i];
+            ((uint64_t*)data_out)[i] = (uint64_t)((uint16_t*)data_in)[i];
           return;
         case GD_FLOAT:
           for (i = 0; i < n; i++)
-            ((float*)data_out)[i] = ((uint16_t*)data_in)[i];
+            ((float*)data_out)[i] = (float)((uint16_t*)data_in)[i];
           return;
         case GD_DOUBLE:
           for (i = 0; i < n; i++)
-            ((double*)data_out)[i] = ((uint16_t*)data_in)[i];
+            ((double*)data_out)[i] = (double)((uint16_t*)data_in)[i];
           return;
         default:
           break;
@@ -300,42 +301,42 @@ void _GD_ConvertType(DIRFILE* D, const void *data_in, gd_type_t in_type,
       switch (out_type) {
         case GD_INT8:
           for (i = 0; i < n; i++)
-            ((int8_t*) data_out)[i]=((int32_t*)data_in)[i];
+            ((int8_t*) data_out)[i] = (int8_t)((int32_t*)data_in)[i];
           return;
         case GD_UINT8:
           for (i = 0; i < n; i++)
-            ((uint8_t*) data_out)[i]=((int32_t*)data_in)[i];
+            ((uint8_t*) data_out)[i] = (uint8_t)((int32_t*)data_in)[i];
           return;
         case GD_INT16:
           for (i = 0; i < n; i++)
-            ((int16_t*)data_out)[i]=((int32_t*)data_in)[i];
+            ((int16_t*)data_out)[i] = (int16_t)((int32_t*)data_in)[i];
           return;
         case GD_UINT16:
           for (i = 0; i < n; i++)
-            ((uint16_t*)data_out)[i]=((int32_t*)data_in)[i];
+            ((uint16_t*)data_out)[i] = (uint16_t)((int32_t*)data_in)[i];
           return;
         case GD_INT32:
           memcpy(data_out, data_in, n * sizeof(int32_t));
           return;
         case GD_UINT32:
           for (i = 0; i < n; i++)
-            ((uint32_t*)data_out)[i]=((int32_t*)data_in)[i];
+            ((uint32_t*)data_out)[i] = (uint32_t)((int32_t*)data_in)[i];
           return;
         case GD_INT64:
           for (i = 0; i < n; i++)
-            ((int64_t*)data_out)[i]=((int32_t*)data_in)[i];
+            ((int64_t*)data_out)[i] = (int64_t)((int32_t*)data_in)[i];
           return;
         case GD_UINT64:
           for (i = 0; i < n; i++)
-            ((uint64_t*)data_out)[i]=((int32_t*)data_in)[i];
+            ((uint64_t*)data_out)[i] = (uint64_t)((int32_t*)data_in)[i];
           return;
         case GD_FLOAT:
           for (i = 0; i < n; i++)
-            ((float*)data_out)[i]=((int32_t*)data_in)[i];
+            ((float*)data_out)[i] = (float)((int32_t*)data_in)[i];
           return;
         case GD_DOUBLE:
           for (i = 0; i < n; i++)
-            ((double*)data_out)[i]=((int32_t*)data_in)[i];
+            ((double*)data_out)[i] = (double)((int32_t*)data_in)[i];
           return;
         default:
           break;
@@ -345,42 +346,42 @@ void _GD_ConvertType(DIRFILE* D, const void *data_in, gd_type_t in_type,
       switch (out_type) {
         case GD_INT8:
           for (i = 0; i < n; i++)
-            ((int8_t*) data_out)[i]= ((uint32_t*)data_in)[i];
+            ((int8_t*) data_out)[i] = (int8_t)((uint32_t*)data_in)[i];
           return;
         case GD_UINT8:
           for (i = 0; i < n; i++)
-            ((uint8_t*) data_out)[i]= ((uint32_t*)data_in)[i];
+            ((uint8_t*) data_out)[i] = (uint8_t)((uint32_t*)data_in)[i];
           return;
         case GD_INT16:
           for (i = 0; i < n; i++)
-            ((int16_t*)data_out)[i]= ((uint32_t*)data_in)[i];
+            ((int16_t*)data_out)[i] = (int16_t)((uint32_t*)data_in)[i];
           return;
         case GD_UINT16:
           for (i = 0; i < n; i++)
-            ((uint16_t*)data_out)[i]= ((uint32_t*)data_in)[i];
+            ((uint16_t*)data_out)[i] = (uint16_t)((uint32_t*)data_in)[i];
           return;
         case GD_INT32:
           for (i = 0; i < n; i++)
-            ((int32_t*)data_out)[i]= ((uint32_t*)data_in)[i];
+            ((int32_t*)data_out)[i] = (int32_t)((uint32_t*)data_in)[i];
           return;
         case GD_UINT32:
           memcpy(data_out, data_in, n * sizeof(uint32_t));
           return;
         case GD_INT64:
           for (i = 0; i < n; i++)
-            ((int64_t*)data_out)[i]= ((uint32_t*)data_in)[i];
+            ((int64_t*)data_out)[i] = (int64_t)((uint32_t*)data_in)[i];
           return;
         case GD_UINT64:
           for (i = 0; i < n; i++)
-            ((uint64_t*)data_out)[i]= ((uint32_t*)data_in)[i];
+            ((uint64_t*)data_out)[i] = (uint64_t)((uint32_t*)data_in)[i];
           return;
         case GD_FLOAT:
           for (i = 0; i < n; i++)
-            ((float*)data_out)[i]= ((uint32_t*)data_in)[i];
+            ((float*)data_out)[i] = (float)((uint32_t*)data_in)[i];
           return;
         case GD_DOUBLE:
           for (i = 0; i < n; i++)
-            ((double*)data_out)[i]= ((uint32_t*)data_in)[i];
+            ((double*)data_out)[i] = (double)((uint32_t*)data_in)[i];
           return;
         default:
           break;
@@ -390,42 +391,42 @@ void _GD_ConvertType(DIRFILE* D, const void *data_in, gd_type_t in_type,
       switch (out_type) {
         case GD_INT8:
           for (i = 0; i < n; i++)
-            ((int8_t*) data_out)[i]=((int64_t*)data_in)[i];
+            ((int8_t*) data_out)[i] = (int64_t)((int64_t*)data_in)[i];
           return;
         case GD_UINT8:
           for (i = 0; i < n; i++)
-            ((uint8_t*) data_out)[i]=((int64_t*)data_in)[i];
+            ((uint8_t*) data_out)[i] = (uint8_t)((int64_t*)data_in)[i];
           return;
         case GD_INT16:
           for (i = 0; i < n; i++)
-            ((int16_t*)data_out)[i]=((int64_t*)data_in)[i];
+            ((int16_t*)data_out)[i] = (int16_t)((int64_t*)data_in)[i];
           return;
         case GD_UINT16:
           for (i = 0; i < n; i++)
-            ((uint16_t*)data_out)[i]=((int64_t*)data_in)[i];
+            ((uint16_t*)data_out)[i] = (uint16_t)((int64_t*)data_in)[i];
           return;
         case GD_INT32:
           for (i = 0; i < n; i++)
-            ((int32_t*)data_out)[i]=((int64_t*)data_in)[i];
+            ((int32_t*)data_out)[i] = (int32_t)((int64_t*)data_in)[i];
           return;
         case GD_UINT32:
           for (i = 0; i < n; i++)
-            ((uint32_t*)data_out)[i]=((int64_t*)data_in)[i];
+            ((uint32_t*)data_out)[i] = (uint32_t)((int64_t*)data_in)[i];
           return;
         case GD_INT64:
           memcpy(data_out, data_in, n * sizeof(int64_t));
           return;
         case GD_UINT64:
           for (i = 0; i < n; i++)
-            ((uint64_t*)data_out)[i]=((int64_t*)data_in)[i];
+            ((uint64_t*)data_out)[i] = (uint64_t)((int64_t*)data_in)[i];
           return;
         case GD_FLOAT:
           for (i = 0; i < n; i++)
-            ((float*)data_out)[i]=((int64_t*)data_in)[i];
+            ((float*)data_out)[i] = (float)((int64_t*)data_in)[i];
           return;
         case GD_DOUBLE:
           for (i = 0; i < n; i++)
-            ((double*)data_out)[i]=((int64_t*)data_in)[i];
+            ((double*)data_out)[i] = (double)((int64_t*)data_in)[i];
           return;
         default:
           break;
@@ -435,42 +436,42 @@ void _GD_ConvertType(DIRFILE* D, const void *data_in, gd_type_t in_type,
       switch (out_type) {
         case GD_INT8:
           for (i = 0; i < n; i++)
-            ((int8_t*) data_out)[i]= ((uint64_t*)data_in)[i];
+            ((int8_t*) data_out)[i] = (int8_t)((uint64_t*)data_in)[i];
           return;
         case GD_UINT8:
           for (i = 0; i < n; i++)
-            ((uint8_t*) data_out)[i]= ((uint64_t*)data_in)[i];
+            ((uint8_t*) data_out)[i] = (uint8_t)((uint64_t*)data_in)[i];
           return;
         case GD_INT16:
           for (i = 0; i < n; i++)
-            ((int16_t*)data_out)[i]= ((uint64_t*)data_in)[i];
+            ((int16_t*)data_out)[i] = (int16_t)((uint64_t*)data_in)[i];
           return;
         case GD_UINT16:
           for (i = 0; i < n; i++)
-            ((uint16_t*)data_out)[i]= ((uint64_t*)data_in)[i];
+            ((uint16_t*)data_out)[i] = (uint16_t)((uint64_t*)data_in)[i];
           return;
         case GD_INT32:
           for (i = 0; i < n; i++)
-            ((int32_t*)data_out)[i]= ((uint64_t*)data_in)[i];
+            ((int32_t*)data_out)[i] = (int32_t)((uint64_t*)data_in)[i];
           return;
         case GD_UINT32:
           for (i = 0; i < n; i++)
-            ((uint32_t*)data_out)[i]= ((uint64_t*)data_in)[i];
+            ((uint32_t*)data_out)[i] = (uint32_t)((uint64_t*)data_in)[i];
           return;
         case GD_INT64:
           for (i = 0; i < n; i++)
-            ((int64_t*)data_out)[i]= ((uint64_t*)data_in)[i];
+            ((int64_t*)data_out)[i] = (int64_t)((uint64_t*)data_in)[i];
           return;
         case GD_UINT64:
           memcpy(data_out, data_in, n * sizeof(uint64_t));
           return;
         case GD_FLOAT:
           for (i = 0; i < n; i++)
-            ((float*)data_out)[i]= ((uint64_t*)data_in)[i];
+            ((float*)data_out)[i] = (float)((uint64_t*)data_in)[i];
           return;
         case GD_DOUBLE:
           for (i = 0; i < n; i++)
-            ((double*)data_out)[i]= ((uint64_t*)data_in)[i];
+            ((double*)data_out)[i] = (double)((uint64_t*)data_in)[i];
           return;
         default:
           break;
@@ -480,42 +481,42 @@ void _GD_ConvertType(DIRFILE* D, const void *data_in, gd_type_t in_type,
       switch (out_type) {
         case GD_INT8:
           for (i = 0; i < n; i++)
-            ((int8_t*) data_out)[i]=((float*)data_in)[i];
+            ((int8_t*) data_out)[i] = (int8_t)((float*)data_in)[i];
           return;
         case GD_UINT8:
           for (i = 0; i < n; i++)
-            ((uint8_t*) data_out)[i]=((float*)data_in)[i];
+            ((uint8_t*) data_out)[i] = (uint8_t)((float*)data_in)[i];
           return;
         case GD_INT16:
           for (i = 0; i < n; i++)
-            ((int16_t*)data_out)[i]=((float*)data_in)[i];
+            ((int16_t*)data_out)[i] = (int16_t)((float*)data_in)[i];
           return;
         case GD_UINT16:
           for (i = 0; i < n; i++)
-            ((uint16_t*)data_out)[i]=((float*)data_in)[i];
+            ((uint16_t*)data_out)[i] = (uint16_t)((float*)data_in)[i];
           return;
         case GD_INT32:
           for (i = 0; i < n; i++)
-            ((int32_t*)data_out)[i]=((float*)data_in)[i];
+            ((int32_t*)data_out)[i] = (int32_t)((float*)data_in)[i];
           return;
         case GD_UINT32:
           for (i = 0; i < n; i++)
-            ((uint32_t*)data_out)[i]=((float*)data_in)[i];
+            ((uint32_t*)data_out)[i] = (uint32_t)((float*)data_in)[i];
           return;
         case GD_INT64:
           for (i = 0; i < n; i++)
-            ((int64_t*)data_out)[i]=((float*)data_in)[i];
+            ((int64_t*)data_out)[i] = (int64_t)((float*)data_in)[i];
           return;
         case GD_UINT64:
           for (i = 0; i < n; i++)
-            ((uint64_t*)data_out)[i]=((float*)data_in)[i];
+            ((uint64_t*)data_out)[i] = (uint64_t)((float*)data_in)[i];
           return;
         case GD_FLOAT:
           memcpy(data_out, data_in, n * sizeof(float));
           return;
         case GD_DOUBLE:
           for (i = 0; i < n; i++)
-            ((double*)data_out)[i]=((float*)data_in)[i];
+            ((double*)data_out)[i] = (double)((float*)data_in)[i];
           return;
         default:
           break;
@@ -525,39 +526,39 @@ void _GD_ConvertType(DIRFILE* D, const void *data_in, gd_type_t in_type,
       switch (out_type) {
         case GD_INT8:
           for (i = 0; i < n; i++)
-            ((int8_t*) data_out)[i]=((double*)data_in)[i];
+            ((int8_t*) data_out)[i] = (int8_t)((double*)data_in)[i];
           return;
         case GD_UINT8:
           for (i = 0; i < n; i++)
-            ((uint8_t*) data_out)[i]=((double*)data_in)[i];
+            ((uint8_t*) data_out)[i] = (uint8_t)((double*)data_in)[i];
           return;
         case GD_INT16:
           for (i = 0; i < n; i++)
-            ((int16_t*)data_out)[i]=((double*)data_in)[i];
+            ((int16_t*)data_out)[i] = (int16_t)((double*)data_in)[i];
           return;
         case GD_UINT16:
           for (i = 0; i < n; i++)
-            ((uint16_t*)data_out)[i]=((double*)data_in)[i];
+            ((uint16_t*)data_out)[i] = (uint16_t)((double*)data_in)[i];
           return;
         case GD_INT32:
           for (i = 0; i < n; i++)
-            ((int32_t*)data_out)[i]=((double*)data_in)[i];
+            ((int32_t*)data_out)[i] = (int32_t)((double*)data_in)[i];
           return;
         case GD_UINT32:
           for (i = 0; i < n; i++)
-            ((uint32_t*)data_out)[i]=((double*)data_in)[i];
+            ((uint32_t*)data_out)[i] = (int32_t)((double*)data_in)[i];
           return;
         case GD_INT64:
           for (i = 0; i < n; i++)
-            ((int64_t*)data_out)[i]=((double*)data_in)[i];
+            ((int64_t*)data_out)[i] = (int64_t)((double*)data_in)[i];
           return;
         case GD_UINT64:
           for (i = 0; i < n; i++)
-            ((uint64_t*)data_out)[i]=((double*)data_in)[i];
+            ((uint64_t*)data_out)[i] = (uint64_t)((double*)data_in)[i];
           return;
         case GD_FLOAT:
           for (i = 0; i < n; i++)
-            ((float*)data_out)[i]=((double*)data_in)[i];
+            ((float*)data_out)[i] = (float)((double*)data_in)[i];
           return;
         case GD_DOUBLE:
           memcpy(data_out, data_in, n * sizeof(double));
@@ -622,14 +623,14 @@ struct gd_entry_t* _GD_FindField(DIRFILE* D, const char* field_code)
   return NULL;
 }
 
-void _GD_FixEndianness(DIRFILE* D, char* databuffer, size_t size, size_t ns)
+void _GD_FixEndianness(char* databuffer, size_t size, size_t ns)
 {
   size_t i;
   int j;
   char b;
 
 #ifdef GETDATA_DEBUG
-  printf("_GD_FixEndianness(%p, %p, %zi, %zi)\n", D, databuffer, size, ns);
+  printf("_GD_FixEndianness(%p, %zi, %zi)\n", databuffer, size, ns);
 #endif
 
   if (size == 1)
@@ -653,7 +654,7 @@ static size_t _GD_DoRaw(DIRFILE *D, struct RawEntryType *R,
   size_t ns, n_read = 0;
   ssize_t samples_read;
   char datafilename[FILENAME_MAX];
-  void *databuffer;
+  char *databuffer;
 
   s0 = first_samp + first_frame*R->samples_per_frame;
   ns = num_samp + num_frames*R->samples_per_frame;
@@ -708,8 +709,7 @@ static size_t _GD_DoRaw(DIRFILE *D, struct RawEntryType *R,
         GD_BIG_ENDIAN
 #endif
        )
-      _GD_FixEndianness(D, databuffer + n_read * R->size, R->size,
-          samples_read);
+      _GD_FixEndianness(databuffer + n_read * R->size, R->size, samples_read);
 
     n_read += samples_read;
   }
@@ -751,43 +751,43 @@ void _GD_ScaleData(DIRFILE* D, void *data, gd_type_t type, int npts, double m,
       break;
     case GD_INT8:
       for (i = 0; i < npts; i++)
-        ((int8_t*)data)[i] = ((double)((int8_t*)data)[i] * m + b);
+        ((int8_t*)data)[i] = (int8_t)(((int8_t*)data)[i] * m + b);
       break;
     case GD_UINT8:
       for (i = 0; i < npts; i++)
-        ((uint8_t*)data)[i] = ((double)((uint8_t*)data)[i] * m + b);
+        ((uint8_t*)data)[i] = (uint8_t)(((uint8_t*)data)[i] * m + b);
       break;
     case GD_INT16:
       for (i = 0; i < npts; i++)
-        ((int16_t*)data)[i] = ((double)((int16_t*)data)[i] * m + b);
+        ((int16_t*)data)[i] = (int16_t)(((int16_t*)data)[i] * m + b);
       break;
     case GD_UINT16:
       for (i = 0; i < npts; i++)
-        ((uint16_t*)data)[i] = ((double)((uint16_t*)data)[i] * m + b);
+        ((uint16_t*)data)[i] = (uint16_t)(((uint16_t*)data)[i] * m + b);
       break;
     case GD_INT32:
       for (i = 0; i < npts; i++)
-        ((int32_t*)data)[i] = ((double)((int32_t*)data)[i] * m + b);
+        ((int32_t*)data)[i] = (int32_t)(((int32_t*)data)[i] * m + b);
       break;
     case GD_UINT32:
       for (i = 0; i < npts; i++)
-        ((uint32_t*)data)[i] = ((double)((uint32_t*)data)[i] * m + b);
+        ((uint32_t*)data)[i] = (uint32_t)(((uint32_t*)data)[i] * m + b);
       break;
     case GD_INT64:
       for (i = 0; i < npts; i++)
-        ((int64_t*)data)[i] = ((double)((int64_t*)data)[i] * m + b);
+        ((int64_t*)data)[i] = (int64_t)(((int64_t*)data)[i] * m + b);
       break;
     case GD_UINT64:
       for (i = 0; i < npts; i++)
-        ((uint64_t*)data)[i] = ((double)((uint64_t*)data)[i] * m + b);
+        ((uint64_t*)data)[i] = (uint64_t)(((uint64_t*)data)[i] * m + b);
       break;
     case GD_FLOAT:
       for (i = 0; i < npts; i++)
-        ((float*)data)[i] = ((double)((float*)data)[i] * m + b);
+        ((float*)data)[i] = (float)(((float*)data)[i] * m + b);
       break;
     case GD_DOUBLE:
       for (i = 0; i < npts; i++)
-        ((double*)data)[i] = ((double)((double*)data)[i] * m + b);
+        ((double*)data)[i] = ((double*)data)[i] * m + b;
       break;
     default:
       _GD_SetGetDataError(D, GD_E_BAD_TYPE, type, NULL, 0, NULL);
@@ -809,35 +809,43 @@ static void _GD_AddData(DIRFILE* D, void *A, int spfA, void *B, int spfB,
       break;
     case GD_INT8:
       for (i = 0; i < n; i++)
-        ((int8_t*)A)[i] += ((int8_t*)B)[i * spfB / spfA];
+        ((int8_t*)A)[i] = (int8_t)(((int8_t*)A)[i] + (((int8_t*)B)[i *
+            spfB / spfA]));
       break;
     case GD_UINT8:
       for (i = 0; i < n; i++)
-        ((uint8_t*)A)[i] += ((uint8_t*)B)[i * spfB / spfA];
+        ((uint8_t*)A)[i] = (uint8_t)(((uint8_t*)A)[i] + (((uint8_t*)B)[i *
+            spfB / spfA]));
       break;
     case GD_INT16:
       for (i = 0; i < n; i++)
-        ((int16_t*)A)[i] += ((int16_t*)B)[i * spfB / spfA];
+        ((int16_t*)A)[i] = (int16_t)(((int16_t*)A)[i] + (((int16_t*)B)[i *
+            spfB / spfA]));
       break;
     case GD_UINT16:
       for (i = 0; i < n; i++)
-        ((uint16_t*)A)[i] += ((uint16_t*)B)[i * spfB / spfA];
+        ((uint16_t*)A)[i] = (uint16_t)(((uint16_t*)A)[i] + (((uint16_t*)B)[i *
+            spfB / spfA]));
       break;
     case GD_INT32:
       for (i = 0; i < n; i++)
-        ((int32_t*)A)[i] += ((int32_t*)B)[i * spfB / spfA];
+        ((int32_t*)A)[i] = (int32_t)(((int32_t*)A)[i] + (((int32_t*)B)[i *
+            spfB / spfA]));
       break;
     case GD_UINT32:
       for (i = 0; i < n; i++)
-        ((uint32_t*)A)[i] += ((uint32_t*)B)[i * spfB / spfA];
+        ((uint32_t*)A)[i] = (uint32_t)(((uint32_t*)A)[i] + (((uint32_t*)B)[i *
+            spfB / spfA]));
       break;
     case GD_INT64:
       for (i = 0; i < n; i++)
-        ((int64_t*)A)[i] += ((int64_t*)B)[i * spfB / spfA];
+        ((int64_t*)A)[i] = (int64_t)(((int64_t*)A)[i] + (((int64_t*)B)[i *
+            spfB / spfA]));
       break;
     case GD_UINT64:
       for (i = 0; i < n; i++)
-        ((uint64_t*)A)[i] += ((uint64_t*)B)[i * spfB / spfA];
+        ((uint64_t*)A)[i] = (uint64_t)(((uint64_t*)A)[i] + (((uint64_t*)B)[i *
+            spfB / spfA]));
       break;
     case GD_FLOAT:
       for (i = 0; i < n; i++)
@@ -857,8 +865,8 @@ static void _GD_AddData(DIRFILE* D, void *A, int spfA, void *B, int spfB,
 
 /* MultiplyData: Multiply A by B.  B is unchanged.
 */
-static void _GD_MultiplyData(DIRFILE* D, void *A, int spfA, void *B, int spfB,
-    gd_type_t type, int n)
+static void _GD_MultiplyData(DIRFILE* D, void *A, unsigned int spfA, void *B,
+    unsigned int spfB, gd_type_t type, int n)
 {
   int i;
 
@@ -867,35 +875,43 @@ static void _GD_MultiplyData(DIRFILE* D, void *A, int spfA, void *B, int spfB,
       break;
     case GD_INT8:
       for (i = 0; i < n; i++)
-        ((int8_t*)A)[i] *= ((int8_t*)B)[i * spfB / spfA];
+        ((int8_t*)A)[i] = (int8_t)(((int8_t*)A)[i] * (((int8_t*)B)[i * spfB /
+            spfA]));
       break;
     case GD_UINT8:
       for (i = 0; i < n; i++)
-        ((uint8_t*)A)[i] *= ((uint8_t*)B)[i * spfB / spfA];
+        ((uint8_t*)A)[i] = (uint8_t)(((uint8_t*)A)[i] * (((uint8_t*)B)[i * spfB
+            / spfA]));
       break;
     case GD_INT16:
       for (i = 0; i < n; i++)
-        ((int16_t*)A)[i] *= ((int16_t*)B)[i * spfB / spfA];
+        ((int16_t*)A)[i] = (int16_t)(((int16_t*)A)[i] * (((int16_t*)B)[i * spfB
+            / spfA]));
       break;
     case GD_UINT16:
       for (i = 0; i < n; i++)
-        ((uint16_t*)A)[i] *= ((uint16_t*)B)[i * spfB / spfA];
+        ((uint16_t*)A)[i] = (uint16_t)(((uint16_t*)A)[i] * (((uint16_t*)B)[i *
+            spfB / spfA]));
       break;
     case GD_INT32:
       for (i = 0; i < n; i++)
-        ((int32_t*)A)[i] *= ((int32_t*)B)[i * spfB / spfA];
+        ((int32_t*)A)[i] = (int32_t)(((int32_t*)A)[i] * (((int32_t*)B)[i *
+            spfB / spfA]));
       break;
     case GD_UINT32:
       for (i = 0; i < n; i++)
-        ((uint32_t*)A)[i] *= ((uint32_t*)B)[i * spfB / spfA];
+        ((uint32_t*)A)[i] = (uint32_t)(((uint32_t*)A)[i] * (((uint32_t*)B)[i *
+            spfB / spfA]));
       break;
     case GD_INT64:
       for (i = 0; i < n; i++)
-        ((int64_t*)A)[i] *= ((int64_t*)B)[i * spfB / spfA];
+        ((int64_t*)A)[i] = (int64_t)(((int64_t*)A)[i] * (((int64_t*)B)[i *
+            spfB / spfA]));
       break;
     case GD_UINT64:
       for (i = 0; i < n; i++)
-        ((uint64_t*)A)[i] *= ((uint64_t*)B)[i * spfB / spfA];
+        ((uint64_t*)A)[i] = (uint64_t)(((uint64_t*)A)[i] * (((uint64_t*)B)[i *
+            spfB / spfA]));
       break;
     case GD_FLOAT:
       for (i = 0; i < n; i++)
@@ -1274,7 +1290,7 @@ void _GD_LinterpData(DIRFILE* D, const void *data, gd_type_t type, int npts,
       break;
     case GD_INT64:
       for (i = 0; i < npts; i++) {
-        x = ((int64_t *)data)[i];
+        x = (double)((int64_t *)data)[i];
         idx = _GD_GetIndex(x, lx, idx, n_ln);
         ((int64_t *)data)[i] = (int64_t)(ly[idx] + (ly[idx + 1] - ly[idx]) /
           (lx[idx + 1] - lx[idx]) * (x - lx[idx]));
@@ -1282,7 +1298,7 @@ void _GD_LinterpData(DIRFILE* D, const void *data, gd_type_t type, int npts,
       break;
     case GD_UINT64:
       for (i = 0; i < npts; i++) {
-        x = ((uint64_t *)data)[i];
+        x = (double)((uint64_t *)data)[i];
         idx = _GD_GetIndex(x, lx, idx, n_ln);
         ((uint64_t *)data)[i] = (uint64_t)(ly[idx] + (ly[idx + 1] - ly[idx]) /
           (lx[idx + 1] - lx[idx]) * (x - lx[idx]));
@@ -1436,4 +1452,4 @@ size_t getdata(DIRFILE* D, const char *field_code, off_t first_frame,
       return_type, data_out);
 }
 /* vim: ts=2 sw=2 et tw=80
-*/
+ */

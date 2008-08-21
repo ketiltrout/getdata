@@ -48,7 +48,7 @@
 /* _GD_GetLine: read non-comment line from format file.  The line is placed in
  *       *line.  Returns 1 if successful, 0 if unsuccessful.
  */
-int __nonnull((1, 2, 3)) _GD_GetLine(FILE *fp, char *line, int* linenum)
+int __gd_nonnull((1, 2, 3)) _GD_GetLine(FILE *fp, char *line, int* linenum)
 {
   char *ret_val;
   int first_char;

@@ -59,6 +59,14 @@ typedef off_t off64_t
 #define assert(...)
 #endif
 
+#if defined HAVE_DECL_STRDUP && !HAVE_DECL_STRDUP
+extern char* strdup(const char* s);
+#endif
+
+#if defined HAVE_DECL_STRERROR_R && !HAVE_DECL_STRERROR_R
+char *strerror_r(int errnum, char *buf, size_t buflen);
+#endif
+
 /* maximum number of recursions */
 #define GD_MAX_RECURSE_LEVEL  32
 
@@ -148,29 +156,29 @@ struct PhaseEntryType {
   int shift;
 };
 
-void* _GD_Alloc(DIRFILE* D, gd_type_t type, int n) __nonnull ((1))
+void* _GD_Alloc(DIRFILE* D, gd_type_t type, int n) __gd_nonnull ((1))
   __attribute_malloc__ __THROW __wur;
-void _GD_ClearGetDataError(DIRFILE* D) __nonnull ((1)) __THROW;
+void _GD_ClearGetDataError(DIRFILE* D) __gd_nonnull ((1)) __THROW;
 void _GD_ConvertType(DIRFILE* D, const void *data_in, gd_type_t in_type,
-    void *data_out, gd_type_t out_type, size_t n) __nonnull ((1, 2, 4)) __THROW;
+    void *data_out, gd_type_t out_type, size_t n) __gd_nonnull ((1, 2, 4)) __THROW;
 size_t  _GD_DoField(DIRFILE *D, const char *field_code, off64_t first_frame,
     off64_t first_samp, size_t num_frames, size_t num_samp,
-    gd_type_t return_type, void *data_out) __nonnull ((1, 2));
-void _GD_FixEndianness(DIRFILE* D, char* databuffer, size_t size, size_t ns)
-  __nonnull ((1, 2));
-int _GD_GetLine(FILE *fp, char *line, int* linenum) __nonnull((1, 2, 3));
-unsigned int  _GD_GetSPF(const char *field_code, DIRFILE* D) __nonnull ((1, 2));
+    gd_type_t return_type, void *data_out) __gd_nonnull ((1, 2));
+void _GD_FixEndianness(char* databuffer, size_t size, size_t ns)
+  __gd_nonnull ((1));
+int _GD_GetLine(FILE *fp, char *line, int* linenum) __gd_nonnull((1, 2, 3));
+unsigned int  _GD_GetSPF(const char *field_code, DIRFILE* D) __gd_nonnull ((1, 2));
 struct gd_entry_t* _GD_FindField(DIRFILE* D, const char* field_code)
-  __nonnull ((1, 2)) __THROW;
+  __gd_nonnull ((1, 2)) __THROW;
 gd_type_t _GD_LegacyType(char c) __THROW __attribute__ ((__const__));
 void _GD_LinterpData(DIRFILE* D, const void *data, gd_type_t type, int npts,
-    double *lx, double *ly, int n_ln) __nonnull ((1, 2, 5, 6)) __THROW;
+    double *lx, double *ly, int n_ln) __gd_nonnull ((1, 2, 5, 6)) __THROW;
 void _GD_ReadLinterpFile(DIRFILE* D, struct LinterpEntryType *E)
-  __nonnull ((1, 2));
+  __gd_nonnull ((1, 2));
 void _GD_ScaleData(DIRFILE* D, void *data, gd_type_t type, int npts, double m,
-    double b) __nonnull ((1, 2)) __THROW;
+    double b) __gd_nonnull ((1, 2)) __THROW;
 void _GD_SetGetDataError(DIRFILE* D, int error, int suberror,
-    const char* format_file, int line, const char* token) __nonnull ((1))
+    const char* format_file, int line, const char* token) __gd_nonnull ((1))
   __THROW;
 
 /* typecast the generic EntryType to a particular field type */

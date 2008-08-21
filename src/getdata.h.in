@@ -36,6 +36,13 @@
 
 #define DIRFILE_STANDARDS_VERSION 5
 
+/* ICC ignores the __nonnull__ attribute */
+#ifdef __INTEL_COMPILER
+# define __gd_nonnull(...)
+#else
+# define __gd_nonnull __nonnull
+#endif
+
 /* if these haven't been defined by the above includes, define them now */
 #ifndef __attribute_deprecated__
 # define __attribute_deprecated__
@@ -44,7 +51,7 @@
 # define __THROW
 #endif
 #ifndef __nonnull
-# define __nonnull
+# define __nonnull(...)
 #endif
 
 /* error codes */
@@ -165,32 +172,32 @@ typedef enum {
 #define GD_DOUBLE    GD_FLOAT64
 
 extern char* getdata_error_string(const DIRFILE* dirfile, char* buffer,
-    size_t buflen) __THROW __nonnull ((1, 2));
+    size_t buflen) __THROW __gd_nonnull ((1, 2));
 
-extern void dirfile_close(DIRFILE* dirfile) __THROW __nonnull ((1));
+extern void dirfile_close(DIRFILE* dirfile) __THROW __gd_nonnull ((1));
 
 extern unsigned int get_samples_per_frame(DIRFILE* dirfile,
-    const char *field_code) __THROW __nonnull ((1, 2));
+    const char *field_code) __THROW __gd_nonnull ((1, 2));
 
 /* dirfile_open(), getdata(), and putdata() contain calls to open(), making them
  * cancellation points.  As a result we cannot mark them with __THROW.
  */
 extern DIRFILE* dirfile_open(const char* dirfilename,
-    unsigned int flags) __nonnull ((1));
+    unsigned int flags) __gd_nonnull ((1));
 
 /* the following functions are _FILE_OFFSET_BITS sensitive */
 #ifndef __USE_FILE_OFFSET64
-extern off_t get_n_frames(DIRFILE* dirfile) __THROW __nonnull ((1));
+extern off_t get_n_frames(DIRFILE* dirfile) __THROW __gd_nonnull ((1));
 
 extern size_t getdata(DIRFILE* dirfile, const char *field_code,
     off_t first_frame, off_t first_sample, size_t num_frames,
     size_t num_samples, gd_type_t return_type,
-    void *data_out) __nonnull ((1, 2));
+    void *data_out) __gd_nonnull ((1, 2));
 
 extern size_t putdata(DIRFILE* dirfile, const char *field_code,
     off_t first_frame, off_t first_sample, size_t num_frames,
     size_t num_samples, gd_type_t data_type,
-    const void *data_in) __nonnull ((1, 2));
+    const void *data_in) __gd_nonnull ((1, 2));
 #else
 # ifdef __REDIRECT_NTH
 extern off_t __REDIRECT_NTH (get_n_frames, (DIRFILE* dirfile), get_n_frames64);
@@ -202,12 +209,12 @@ extern off_t __REDIRECT_NTH (get_n_frames, (DIRFILE* dirfile), get_n_frames64);
 extern size_t __REDIRECT (getdata, (DIRFILE* dirfile, const char *field_code,
       __off64_t first_frame, __off64_t first_samp, size_t num_frames,
       size_t num_samp, gd_type_t return_type, void *data_out),
-    getdata64) __nonnull ((1, 2));
+    getdata64) __gd_nonnull ((1, 2));
 
 extern size_t __REDIRECT (putdata, (DIRFILE* dirfile, const char *field_code,
       __off64_t first_frame, __off64_t first_sample, size_t num_frames,
       size_t num_samples, gd_type_t data_type, const void *data_in),
-    putdata64) __nonnull ((1, 2));
+    putdata64) __gd_nonnull ((1, 2));
 # else
 #  define getdata getdata64
 #  define putdata putdata64
@@ -216,16 +223,16 @@ extern size_t __REDIRECT (putdata, (DIRFILE* dirfile, const char *field_code,
 
 /* if requested, declare the LFS transitional extension */
 #ifdef __USE_LARGEFILE64
-extern __off64_t get_n_frames64(DIRFILE* dirfile) __THROW __nonnull ((1));
+extern __off64_t get_n_frames64(DIRFILE* dirfile) __THROW __gd_nonnull ((1));
 
 extern size_t getdata64(DIRFILE* dirfile, const char *field_code,
     __off64_t first_frame, __off64_t first_samp, size_t num_frames,
-    size_t num_samp, gd_type_t return_type, void *data_out) __nonnull ((1, 2));
+    size_t num_samp, gd_type_t return_type, void *data_out) __gd_nonnull ((1, 2));
 
 extern size_t putdata64(DIRFILE* dirfile, const char *field_code,
     __off64_t first_frame, __off64_t first_sample, size_t num_frames,
     size_t num_samples, gd_type_t data_type,
-    const void *data_in) __nonnull ((1, 2));
+    const void *data_in) __gd_nonnull ((1, 2));
 #endif
 
 /* If this symbol is defined here, the legacy API is present in the library */

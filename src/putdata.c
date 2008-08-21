@@ -76,7 +76,7 @@ static size_t _GD_DoRawOut(DIRFILE *D, struct RawEntryType *R,
       GD_BIG_ENDIAN
 #endif
      )
-    _GD_FixEndianness(D, databuffer, R->size, ns);
+    _GD_FixEndianness(databuffer, R->size, ns);
 
   /* write data to file.  Note that if the first sample is beyond     */
   /* the current end of file, a gap will result (see lseek(2)) */
@@ -204,7 +204,6 @@ static size_t _GD_DoBitOut(DIRFILE* D, struct BitEntryType *B,
   size_t i, n_wrote;
   int spf;
   size_t ns;
-  size_t n_read;
 
   const uint64_t mask = (B->numbits == 64) ? 0xffffffffffffffffULL :
     ((uint64_t)1 << B->numbits) - 1;
@@ -243,8 +242,8 @@ static size_t _GD_DoBitOut(DIRFILE* D, struct BitEntryType *B,
 
   D->recurse_level++;
 
-  n_read = _GD_DoField(D, B->raw_field, first_frame, first_samp, num_frames,
-      num_samp, GD_UINT64, readbuf);
+  _GD_DoField(D, B->raw_field, first_frame, first_samp, 0, ns, GD_UINT64,
+      readbuf);
 
   D->recurse_level--;
 

@@ -22,6 +22,9 @@ dnl
 AC_INIT([getdata], [0.3.0], [dwiebe@physics.utoronto.ca])
 AM_INIT_AUTOMAKE([getdata], [0.3.0])
 
+dnl autoconf 2.60 or later is required to build configure
+AC_PREREQ([2.60])
+
 dnl libgetdata current interface version
 AC_SUBST(GETDATA_IFACE_VERSION, [1])
 dnl libgetdata current interface implementation revision
@@ -148,6 +151,9 @@ dnl headers
 AC_CHECK_HEADERS(fcntl.h libgen.h)
 AC_HEADER_ASSERT
 AC_HEADER_DIRENT
+
+dnl declarations
+AC_CHECK_DECLS([strdup, strerror_r])
 
 dnl types
 AC_C_CONST

@@ -122,7 +122,7 @@ void F77_FUNC(gdfget, GDFGET) (int* n_read, int* dirfile, char* field_code,
   char* out = malloc(*field_code_l + 1);
   *n_read = getdata(_GDF_GetDirfile(*dirfile), _GDF_CString(out, field_code,
         *field_code_l), *first_frame, *first_sample, *num_frames,
-      *num_samples, *return_type, data_out);
+      *num_samples, (gd_type_t)*return_type, data_out);
   free(out);
 }
 
@@ -151,7 +151,7 @@ void F77_FUNC(gdfput, GDFPUT) (int* n_wrote, int* dirfile,
   char* out = malloc(*field_code_l + 1);
   *n_wrote = getdata(_GDF_GetDirfile(*dirfile), _GDF_CString(out, field_code,
         *field_code_l), *first_frame, *first_sample, *num_frames,
-      *num_samples, *data_type, data_in);
+      *num_samples, (gd_type_t)*data_type, data_in);
   free(out);
 }
 
