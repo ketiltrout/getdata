@@ -37,34 +37,14 @@
 #define DIRFILE_STANDARDS_VERSION 5
 
 /* if these haven't been defined by the above includes, define them now */
-#ifdef __GNUC__
-# ifndef __attribute_deprecated__
-#  define __attribute_deprecated__ __attribute__ ((__deprecated__))
-# endif
-
-# ifndef __THROW
-#  ifdef __cplusplus
-#   define __THROW throw()
-#  else
-#   define __THROW __attribute__ ((__nothrow__))
-#  endif
-# endif
-
-# ifndef __nonnull
-#  define __nonnull(arg) __attribute__ ((__nonnull__ arg))
-# endif
-
-/* not GCC */
-#else
-# ifndef __attribute_deprecated__
-#  define __attribute_deprecated__
-# endif
-# ifndef __THROW
-#  define __THROW
-# endif
-# ifndef __nonnull
-#  define __nonnull
-# endif
+#ifndef __attribute_deprecated__
+# define __attribute_deprecated__
+#endif
+#ifndef __THROW
+# define __THROW
+#endif
+#ifndef __nonnull
+# define __nonnull
 #endif
 
 /* error codes */
