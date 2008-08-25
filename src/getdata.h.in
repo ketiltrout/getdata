@@ -76,8 +76,6 @@
 
 #define GD_N_ERROR_CODES      18
 
-extern const char *GD_ERROR_CODES[GD_N_ERROR_CODES] __attribute_deprecated__;
-
 #ifndef FILENAME_MAX
 #  define FILENAME_MAX 4096
 #endif

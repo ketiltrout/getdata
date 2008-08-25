@@ -508,7 +508,7 @@ static void _GD_ParseFormatFile(FILE* fp, DIRFILE *D, const char* filedir,
 
       /* If opening the file failed, set the error code and abort parsing. */
       if (new_fp == NULL) {
-        _GD_SetError(D, GD_E_OPEN_INCLUDE, 0, format_file, linenum,
+        _GD_SetError(D, GD_E_OPEN_INCLUDE, errno, format_file, linenum,
             new_format_file);
         break;
       }

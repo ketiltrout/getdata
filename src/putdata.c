@@ -27,6 +27,7 @@
 
 #ifdef STDC_HEADERS
 #include <inttypes.h>
+#include <errno.h>
 #include <fcntl.h>
 #include <string.h>
 #include <stdlib.h>
@@ -88,7 +89,7 @@ static size_t _GD_DoRawOut(DIRFILE *D, gd_entry_t *R,
 
     R->fp = open(datafilename, O_RDWR | O_CREAT, 0666);
     if (R->fp < 0) {
-      _GD_SetError(D, GD_E_RAW_IO, 0, NULL, 0, NULL);
+      _GD_SetError(D, GD_E_RAW_IO, 0, datafilename, errno, NULL);
       return 0;
     }
 

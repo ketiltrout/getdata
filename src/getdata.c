@@ -682,7 +682,7 @@ static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *R,
     R->fp = open(datafilename, ((D->flags & GD_ACCMODE) == GD_RDWR) ? O_RDWR :
         O_RDONLY);
     if (R->fp < 0) {
-      _GD_SetError(D, GD_E_RAW_IO, 0, NULL, 0, datafilename);
+      _GD_SetError(D, GD_E_RAW_IO, 0, datafilename, errno, NULL);
       return 0;
     }
   }
@@ -705,7 +705,7 @@ static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *R,
     samples_read = read(R->fp, databuffer + n_read * R->size, ns * R->size);
 
     if (samples_read == -1) {
-      _GD_SetError(D, GD_E_RAW_IO, 0, NULL, 0, datafilename);
+      _GD_SetError(D, GD_E_RAW_IO, 0, datafilename, errno, NULL);
       free(databuffer);
       return 0;
     }

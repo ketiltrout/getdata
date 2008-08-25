@@ -48,6 +48,28 @@ static DIRFILE _GD_GlobalErrors = {
   .flags = GD_INVALID
 };
 
+/* old error strings */
+const char const*GD_ERROR_CODES[GD_N_ERROR_CODES] = {
+  "Success",
+  "Error opening dirfile",
+  "Error in Format file",
+  "Error truncating dirfile",
+  "Error creating dirfile",
+  "Field code not found in File Format",
+  "Unrecognized data type",
+  "I/O error accessing field file",
+  "Could not open included Format file",
+  "Internal error",
+  "Memory allocation failed",
+  "No RAW fields defined",
+  "Could not open interpolation file",
+  "Too many levels of recursion",
+  "Bad DIRFILE",
+  "Cannot write to specified field",
+  "Read-only dirfile",
+  "Request out-of-range"
+};
+
 /* _GD_CopyGlobalError: Copy the last error message to the global error buffer.
  */
 static int _GD_CopyGlobalError(DIRFILE* D)

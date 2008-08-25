@@ -25,6 +25,7 @@
 #endif
 
 #ifdef STDC_HEADERS
+#include <errno.h>
 #include <sys/stat.h>
 #endif
 
@@ -35,6 +36,8 @@ off64_t get_n_frames64(DIRFILE* D)
   char raw_data_filename[FILENAME_MAX];
   struct stat64 statbuf;
   size_t nf;
+
+  _GD_ClearError(D);
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -50,7 +53,7 @@ off64_t get_n_frames64(DIRFILE* D)
   snprintf(raw_data_filename, FILENAME_MAX, "%s/%s", D->name,
       D->first_field->file);
   if (stat64(raw_data_filename, &statbuf) < 0) {
-    _GD_SetError(D, GD_E_RAW_IO, 0, NULL, 0, NULL);
+    _GD_SetError(D, GD_E_RAW_IO, 0, raw_data_filename, errno, NULL);
     return 0;
   }
 

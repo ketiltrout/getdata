@@ -29,6 +29,8 @@
 #error "Never use <getdata_legacy.h> directly; include <getdata.h> instead."
 #endif
 
+extern const char *GD_ERROR_CODES[GD_N_ERROR_CODES] __attribute_deprecated__;
+
 /* comments about cancellation points and __THROW found in getdata.h apply
  * here too...
  */
