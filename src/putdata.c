@@ -51,7 +51,7 @@ static size_t _GD_DoRawOut(DIRFILE *D, struct RawEntryType *R,
   ns = num_samp + num_frames * R->samples_per_frame;
 
   if (s0 < 0) {
-    _GD_SetGetDataError(D, GD_E_RANGE, 0, NULL, 0, NULL);
+    _GD_SetError(D, GD_E_RANGE, 0, NULL, 0, NULL);
     return 0;
   }
 
@@ -88,7 +88,7 @@ static size_t _GD_DoRawOut(DIRFILE *D, struct RawEntryType *R,
 
     R->fp = open(datafilename, O_RDWR | O_CREAT, 0666);
     if (R->fp < 0) {
-      _GD_SetGetDataError(D, GD_E_RAW_IO, 0, NULL, 0, NULL);
+      _GD_SetError(D, GD_E_RAW_IO, 0, NULL, 0, NULL);
       return 0;
     }
 
@@ -157,7 +157,7 @@ static size_t _GD_DoLincomOut(DIRFILE* D, struct LincomEntryType *L,
   /* of more than one raw field (no way to know how to split data). */
 
   if (L->n_infields > 1) {
-    _GD_SetGetDataError(D, GD_E_BAD_PUT_FIELD, 0, NULL, 0, L->field);
+    _GD_SetError(D, GD_E_BAD_PUT_FIELD, 0, NULL, 0, L->field);
     return 0;
   }
 
@@ -286,7 +286,7 @@ static size_t _GD_DoFieldOut(DIRFILE *D, const char *field_code,
   struct gd_entry_t* entry;
 
   if (D->recurse_level > 10) {
-    _GD_SetGetDataError(D, GD_E_RECURSE_LEVEL, 0, NULL, 0, field_code);
+    _GD_SetError(D, GD_E_RECURSE_LEVEL, 0, NULL, 0, field_code);
     return 0;
   }
 
@@ -294,7 +294,7 @@ static size_t _GD_DoFieldOut(DIRFILE *D, const char *field_code,
   entry = _GD_FindField(D, field_code);
 
   if (entry == NULL) { /* No match */
-    _GD_SetGetDataError(D, GD_E_BAD_CODE, 0, NULL, 0, field_code);
+    _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, field_code);
     return 0;
   }
 
@@ -312,14 +312,14 @@ static size_t _GD_DoFieldOut(DIRFILE *D, const char *field_code,
       return _GD_DoBitOut(D, ENTRY(Bit, entry), first_frame, first_samp,
           num_frames, num_samp, data_type, data_in);
     case GD_MULTIPLY_ENTRY:
-      _GD_SetGetDataError(D, GD_E_BAD_PUT_FIELD, 0, NULL, 0, field_code);
+      _GD_SetError(D, GD_E_BAD_PUT_FIELD, 0, NULL, 0, field_code);
       return 0;
     case GD_PHASE_ENTRY:
       return _GD_DoPhaseOut(D, ENTRY(Phase, entry), first_frame, first_samp,
           num_frames, num_samp, data_type, data_in);
   }
 
-  _GD_SetGetDataError(D, GD_E_INTERNAL_ERROR, 0, __FILE__, __LINE__, NULL);
+  _GD_SetError(D, GD_E_INTERNAL_ERROR, 0, __FILE__, __LINE__, NULL);
   return 0;
 }
 
@@ -329,16 +329,16 @@ size_t putdata64(DIRFILE* D, const char *field_code, off64_t first_frame,
     const void *data_in)
 {
   if (D->flags & GD_INVALID) {/* don't crash */
-    _GD_SetGetDataError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
     return 0;
   }
 
   if ((D->flags & GD_ACCMODE) != GD_RDWR) {
-    _GD_SetGetDataError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
+    _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
     return 0;
   }
 
-  _GD_ClearGetDataError(D);
+  _GD_ClearError(D);
 
   first_frame -= D->frame_offset;
 

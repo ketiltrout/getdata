@@ -37,12 +37,12 @@ off64_t get_n_frames64(DIRFILE* D)
   size_t nf;
 
   if (D->flags & GD_INVALID) {/* don't crash */
-    _GD_SetGetDataError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
     return 0;
   }
 
   if (D->first_field == NULL) {
-    _GD_SetGetDataError(D, GD_E_EMPTY, 0, NULL, 0, NULL);
+    _GD_SetError(D, GD_E_EMPTY, 0, NULL, 0, NULL);
     return 0;
   }
 
@@ -50,7 +50,7 @@ off64_t get_n_frames64(DIRFILE* D)
   snprintf(raw_data_filename, FILENAME_MAX, "%s/%s", D->name,
       ENTRY(Raw, D->first_field)->file);
   if (stat64(raw_data_filename, &statbuf) < 0) {
-    _GD_SetGetDataError(D, GD_E_RAW_IO, 0, NULL, 0, NULL);
+    _GD_SetError(D, GD_E_RAW_IO, 0, NULL, 0, NULL);
     return 0;
   }
 

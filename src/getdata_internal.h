@@ -158,7 +158,7 @@ struct PhaseEntryType {
 
 void* _GD_Alloc(DIRFILE* D, gd_type_t type, int n) __gd_nonnull ((1))
   __attribute_malloc__ __THROW __wur;
-void _GD_ClearGetDataError(DIRFILE* D) __gd_nonnull ((1)) __THROW;
+void _GD_ClearError(DIRFILE* D) __gd_nonnull ((1)) __THROW;
 void _GD_ConvertType(DIRFILE* D, const void *data_in, gd_type_t in_type,
     void *data_out, gd_type_t out_type, size_t n) __gd_nonnull ((1, 2, 4)) __THROW;
 size_t  _GD_DoField(DIRFILE *D, const char *field_code, off64_t first_frame,
@@ -177,7 +177,7 @@ void _GD_ReadLinterpFile(DIRFILE* D, struct LinterpEntryType *E)
   __gd_nonnull ((1, 2));
 void _GD_ScaleData(DIRFILE* D, void *data, gd_type_t type, int npts, double m,
     double b) __gd_nonnull ((1, 2)) __THROW;
-void _GD_SetGetDataError(DIRFILE* D, int error, int suberror,
+void _GD_SetError(DIRFILE* D, int error, int suberror,
     const char* format_file, int line, const char* token) __gd_nonnull ((1))
   __THROW;
 

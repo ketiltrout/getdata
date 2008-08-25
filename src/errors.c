@@ -51,9 +51,9 @@ const char const*GD_ERROR_CODES[GD_N_ERROR_CODES] = {
   "Request out-of-range"
 };
 
-/* _GD_SetGetDataError: Sets the global error variables for a library error
+/* _GD_SetError: Sets the global error variables for a library error
 */
-void _GD_SetGetDataError(DIRFILE* D, int error, int suberror,
+void _GD_SetError(DIRFILE* D, int error, int suberror,
     const char* format_file, int line, const char* token)
 {
   D->error = error;
@@ -65,9 +65,9 @@ void _GD_SetGetDataError(DIRFILE* D, int error, int suberror,
     strncpy(D->error_string, token, FILENAME_MAX);
 }
 
-/* _GD_ClearGetDataError: Everything's A-OK; clear the last error.
+/* _GD_ClearError: Everything's A-OK; clear the last error.
 */
-void _GD_ClearGetDataError(DIRFILE* D)
+void _GD_ClearError(DIRFILE* D)
 {
   D->error = GD_E_OK;
 }

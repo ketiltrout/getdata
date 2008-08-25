@@ -188,17 +188,16 @@ static gd_type_t _GD_RawType(const char* type)
 static void* _GD_ParseRaw(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
     int n_cols, const char* subdir, const char* format_file, int line)
 {
-  _GD_ClearGetDataError(D);
+  _GD_ClearError(D);
 
   if (n_cols < 4) {
-    _GD_SetGetDataError(D, GD_E_FORMAT, GD_E_FORMAT_N_COLS, format_file,
-        line, NULL);
+    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_COLS, format_file, line, NULL);
     return NULL;
   }
 
   struct RawEntryType* R = malloc(sizeof(struct RawEntryType));
   if (R == NULL) {
-    _GD_SetGetDataError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     return NULL;
   }
 
@@ -207,7 +206,7 @@ static void* _GD_ParseRaw(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
 
   R->file = malloc(FILENAME_MAX);
   if (R->file == NULL) {
-    _GD_SetGetDataError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     return R;
   }
 
@@ -217,16 +216,16 @@ static void* _GD_ParseRaw(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
   R->size = GD_SIZE(R->data_type);
 
   if (R->size == 0) {
-    _GD_SetGetDataError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_TYPE, format_file,
-        line, in_cols[2]);
+    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_TYPE, format_file, line,
+        in_cols[2]);
     return R;
   }
 
   R->samples_per_frame = atoi(in_cols[3]);
 
   if (R->samples_per_frame <= 0)
-    _GD_SetGetDataError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_SPF, format_file,
-        line, in_cols[3]);
+    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_SPF, format_file, line,
+        in_cols[3]);
 
   return R;
 }
@@ -238,17 +237,16 @@ static void* _GD_ParseLincom(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
 {
   int i;
 
-  _GD_ClearGetDataError(D);
+  _GD_ClearError(D);
 
   if (n_cols < 3) {
-    _GD_SetGetDataError(D, GD_E_FORMAT, GD_E_FORMAT_N_COLS, format_file,
-        line, NULL);
+    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_COLS, format_file, line, NULL);
     return NULL;
   }
 
   struct LincomEntryType* L = malloc(sizeof(struct LincomEntryType));
   if (L == NULL) {
-    _GD_SetGetDataError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     return NULL;
   }
 
@@ -257,26 +255,25 @@ static void* _GD_ParseLincom(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
   L->n_infields = atoi(in_cols[2]);
 
   if (L->field == NULL) {
-    _GD_SetGetDataError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     return L;
   }
 
   if ((L->n_infields < 1) || (L->n_infields > GD_MAX_LINCOM)) {
-    _GD_SetGetDataError(D, GD_E_FORMAT, GD_E_FORMAT_N_FIELDS, format_file,
-        line, in_cols[2]);
+    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_FIELDS, format_file, line,
+        in_cols[2]);
     return L;
   }
 
   if (n_cols < L->n_infields * 3 + 3) {
-    _GD_SetGetDataError(D, GD_E_FORMAT, GD_E_FORMAT_N_COLS, format_file,
-        line, NULL);
+    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_COLS, format_file, line, NULL);
     return L;
   }
 
   for (i = 0; i < L->n_infields; i++) {
     L->in_fields[i] = strdup(in_cols[i * 3 + 3]);
     if (L->in_fields[i] == NULL)
-      _GD_SetGetDataError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+      _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     L->m[i] = atof(in_cols[i * 3 + 4]);
     L->b[i] = atof(in_cols[i * 3 + 5]);
   }
@@ -291,17 +288,16 @@ static void* _GD_ParseLinterp(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
 {
   char temp_buffer[FILENAME_MAX];
 
-  _GD_ClearGetDataError(D);
+  _GD_ClearError(D);
 
   if (n_cols < 4) {
-    _GD_SetGetDataError(D, GD_E_FORMAT, GD_E_FORMAT_N_COLS, format_file,
-        line, NULL);
+    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_COLS, format_file, line, NULL);
     return NULL;
   }
 
   struct LinterpEntryType* L = malloc(sizeof(struct LinterpEntryType));
   if (L == NULL) {
-    _GD_SetGetDataError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     return NULL;
   }
 
@@ -323,7 +319,7 @@ static void* _GD_ParseLinterp(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
   }
 
   if (L->field == NULL || L->raw_field == NULL || L->linterp_file == NULL)
-    _GD_SetGetDataError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
 
   return L;
 }
@@ -333,17 +329,16 @@ static void* _GD_ParseLinterp(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
 static void* _GD_ParseMultiply(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
     int n_cols, const char* format_file, int line)
 {
-  _GD_ClearGetDataError(D);
+  _GD_ClearError(D);
 
   if (n_cols < 4) {
-    _GD_SetGetDataError(D, GD_E_FORMAT, GD_E_FORMAT_N_COLS, format_file,
-        line, NULL);
+    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_COLS, format_file, line, NULL);
     return NULL;
   }
 
   struct MultiplyEntryType* M = malloc(sizeof(struct MultiplyEntryType));
   if (M == NULL) {
-    _GD_SetGetDataError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     return NULL;
   }
 
@@ -353,7 +348,7 @@ static void* _GD_ParseMultiply(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
   M->in_fields[1] = strdup(in_cols[3]);
 
   if (M->field == NULL || M->in_fields[0] == NULL || M->in_fields[1] == NULL)
-    _GD_SetGetDataError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
 
   return M;
 }
@@ -363,17 +358,16 @@ static void* _GD_ParseMultiply(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
 static void* _GD_ParseBit(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
     int n_cols, const char* format_file, int line)
 {
-  _GD_ClearGetDataError(D);
+  _GD_ClearError(D);
 
   if (n_cols < 4) {
-    _GD_SetGetDataError(D, GD_E_FORMAT, GD_E_FORMAT_N_COLS, format_file,
-        line, NULL);
+    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_COLS, format_file, line, NULL);
     return NULL;
   }
 
   struct BitEntryType* B = malloc(sizeof(struct BitEntryType));
   if (B == NULL) {
-    _GD_SetGetDataError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     return NULL;
   }
 
@@ -382,7 +376,7 @@ static void* _GD_ParseBit(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
   B->raw_field = strdup(in_cols[2]);
 
   if (B->field == NULL || B->raw_field == NULL)
-    _GD_SetGetDataError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
 
   B->bitnum = atoi(in_cols[3]);
   if (n_cols > 4)
@@ -391,14 +385,11 @@ static void* _GD_ParseBit(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
     B->numbits = 1;
 
   if (B->numbits < 1)
-    _GD_SetGetDataError(D, GD_E_FORMAT, GD_E_FORMAT_NUMBITS, format_file,
-        line, NULL);
+    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_NUMBITS, format_file, line, NULL);
   else if (B->bitnum < 0)
-    _GD_SetGetDataError(D, GD_E_FORMAT, GD_E_FORMAT_BITNUM, format_file,
-        line, NULL);
+    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BITNUM, format_file, line, NULL);
   else if (B->bitnum + B->numbits - 1 > 63)
-    _GD_SetGetDataError(D, GD_E_FORMAT, GD_E_FORMAT_BITSIZE, format_file,
-        line, NULL);
+    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BITSIZE, format_file, line, NULL);
 
   return B;
 }
@@ -408,17 +399,16 @@ static void* _GD_ParseBit(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
 static void* _GD_ParsePhase(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
     int n_cols, const char* format_file, int line)
 {
-  _GD_ClearGetDataError(D);
+  _GD_ClearError(D);
 
   if (n_cols < 4) {
-    _GD_SetGetDataError(D, GD_E_FORMAT, GD_E_FORMAT_N_COLS, format_file,
-        line, NULL);
+    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_COLS, format_file, line, NULL);
     return NULL;
   }
 
   struct PhaseEntryType* P = malloc(sizeof(struct PhaseEntryType));
   if (P == NULL) {
-    _GD_SetGetDataError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     return NULL;
   }
 
@@ -428,7 +418,7 @@ static void* _GD_ParsePhase(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
   P->shift = atoi(in_cols[3]); /*shift*/
 
   if (P->field == NULL || P->raw_field == NULL)
-    _GD_SetGetDataError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
 
   /*FIXME make sure the shift is within the range of the raw field...*/
 
@@ -463,7 +453,7 @@ static void _GD_ParseFormatFile(FILE* fp, DIRFILE *D, const char* filedir,
       filedir, subdir, format_file, standards, IncludeList, *i_include);
 #endif
 
-  _GD_ClearGetDataError(D);
+  _GD_ClearError(D);
 
   /* start parsing */
   while (_GD_GetLine(fp, instring, &linenum)) {
@@ -485,8 +475,8 @@ static void _GD_ParseFormatFile(FILE* fp, DIRFILE *D, const char* filedir,
     }
 
     if (n_cols < 2) {
-      _GD_SetGetDataError(D, GD_E_FORMAT, GD_E_FORMAT_N_COLS, format_file,
-          linenum, NULL);
+      _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_COLS, format_file, linenum,
+          NULL);
 
       /* Directives */
 
@@ -518,7 +508,7 @@ static void _GD_ParseFormatFile(FILE* fp, DIRFILE *D, const char* filedir,
 
       /* If opening the file failed, set the error code and abort parsing. */
       if (new_fp == NULL) {
-        _GD_SetGetDataError(D, GD_E_OPEN_INCLUDE, 0, format_file, linenum,
+        _GD_SetError(D, GD_E_OPEN_INCLUDE, 0, format_file, linenum,
             new_format_file);
         break;
       }
@@ -528,7 +518,7 @@ static void _GD_ParseFormatFile(FILE* fp, DIRFILE *D, const char* filedir,
       (*IncludeList)[*i_include - 1] = strdup(in_cols[1]);
 
       if ((*IncludeList)[*i_include - 1] == NULL) {
-        _GD_SetGetDataError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+        _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
         return;
       }
 
@@ -553,8 +543,8 @@ static void _GD_ParseFormatFile(FILE* fp, DIRFILE *D, const char* filedir,
           D->flags |= GD_LITTLE_ENDIAN;
           D->flags &= ~GD_BIG_ENDIAN;
         } else 
-          _GD_SetGetDataError(D, GD_E_FORMAT, GD_E_FORMAT_ENDIAN, format_file,
-              linenum, NULL);
+          _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_ENDIAN, format_file, linenum,
+              NULL);
       }
     } else if (strcmp(in_cols[0], "VERSION") == 0) {
       standards = atoi(in_cols[1]);
@@ -564,8 +554,8 @@ static void _GD_ParseFormatFile(FILE* fp, DIRFILE *D, const char* filedir,
     } else if ((strcmp(in_cols[0], "INDEX") == 0) ||
         (strcmp(in_cols[0], "FILEFRAM") == 0))
     { /* reserved field names */
-      _GD_SetGetDataError(D, GD_E_FORMAT, GD_E_FORMAT_RES_NAME, format_file,
-          linenum, NULL);
+      _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_RES_NAME, format_file, linenum,
+          NULL);
     } else if (strcmp(in_cols[1], "RAW") == 0) {
       D->n_entries++;
       D->entries = realloc(D->entries, D->n_entries *
@@ -617,8 +607,8 @@ static void _GD_ParseFormatFile(FILE* fp, DIRFILE *D, const char* filedir,
     } else if (standards <= DIRFILE_STANDARDS_VERSION ||
         (D->flags & GD_PEDANTIC))
     {
-      _GD_SetGetDataError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_LINE, format_file,
-          linenum, NULL);
+      _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_LINE, format_file, linenum,
+          NULL);
     }
 
     /* break out of loop (so we can return) if we've encountered an error */
@@ -657,29 +647,27 @@ static FILE* _GD_CreateDirfile(DIRFILE* D, const char* format_file,
 
   /* unable to read the format file */
   if (format_error == EACCES || dir_error == EACCES) {
-    _GD_SetGetDataError(D, GD_E_OPEN, GD_E_OPEN_NO_ACCESS, format_file,
-        0, NULL);
+    _GD_SetError(D, GD_E_OPEN, GD_E_OPEN_NO_ACCESS, format_file, 0, NULL);
     return NULL;
   }
 
   /* the directory exists, but it's not a dirfile, do nothing else -- even if we
    * were asked to truncate it */
   if (!dir_error && format_error) {
-    _GD_SetGetDataError(D, GD_E_OPEN, GD_E_OPEN_NOT_DIRFILE, format_file,
-        0, NULL);
+    _GD_SetError(D, GD_E_OPEN, GD_E_OPEN_NOT_DIRFILE, format_file, 0, NULL);
     return NULL;
   }
 
   /* Couldn't open the file, and we weren't asked to create it */
   if (format_error && !(flags & GD_CREAT)) {
-    _GD_SetGetDataError(D, GD_E_OPEN, GD_E_OPEN_NOT_EXIST, format_file,
-        format_error, NULL);
+    _GD_SetError(D, GD_E_OPEN, GD_E_OPEN_NOT_EXIST, format_file, format_error,
+        NULL);
     return NULL;
   }
 
   /* It does exist, but we were asked to exclusively create it */
   if (!format_error && (flags & GD_CREAT) && (flags & GD_EXCL)) {
-    _GD_SetGetDataError(D, GD_E_CREAT, GD_E_CREAT_EXCL, filedir, 0, NULL);
+    _GD_SetError(D, GD_E_CREAT, GD_E_CREAT_EXCL, filedir, 0, NULL);
     fclose(fp);
     return NULL;
   }
@@ -700,14 +688,13 @@ static FILE* _GD_CreateDirfile(DIRFILE* D, const char* format_file,
 
     /* can't truncate a read-only dirfile */
     if ((flags & GD_ACCMODE) == GD_RDONLY) {
-      _GD_SetGetDataError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
+      _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
       return NULL;
     }
 
     /* This code is from defile */
     if ((dir = opendir(filedir)) == NULL) {
-      _GD_SetGetDataError(D, GD_E_TRUNC, GD_E_TRUNC_DIR, filedir, errno, 
-          NULL);
+      _GD_SetError(D, GD_E_TRUNC, GD_E_TRUNC_DIR, filedir, errno, NULL);
       return NULL;
     }
 
@@ -722,16 +709,14 @@ static FILE* _GD_CreateDirfile(DIRFILE* D, const char* format_file,
       strcpy(dirfile_end, lamb->d_name);
 
       if (stat(fullname, &statbuf)) {
-        _GD_SetGetDataError(D, GD_E_TRUNC, GD_E_TRUNC_STAT, fullname, errno, 
-            NULL);
+        _GD_SetError(D, GD_E_TRUNC, GD_E_TRUNC_STAT, fullname, errno, NULL);
         return NULL;
       }
 
       /* only delete regular files */
       if (S_ISREG(statbuf.st_mode)) {
         if (unlink(fullname)) {
-          _GD_SetGetDataError(D, GD_E_TRUNC, GD_E_TRUNC_UNLINK, fullname, errno,
-              NULL);
+          _GD_SetError(D, GD_E_TRUNC, GD_E_TRUNC_UNLINK, fullname, errno, NULL);
           return NULL;
         }
       }
@@ -743,22 +728,20 @@ static FILE* _GD_CreateDirfile(DIRFILE* D, const char* format_file,
   {
     /* can't create a read-only dirfile */
     if ((flags & GD_ACCMODE) == GD_RDONLY) {
-      _GD_SetGetDataError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
+      _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
       return NULL;
     }
 
     /* attempt to create the dirfile directory, if not present */
     if (dir_error) 
       if (mkdir(filedir, 00777) < 0) {
-        _GD_SetGetDataError(D, GD_E_CREAT, GD_E_CREAT_DIR, filedir, errno,
-            NULL);
+        _GD_SetError(D, GD_E_CREAT, GD_E_CREAT_DIR, filedir, errno, NULL);
         return NULL;
       }
 
     /* create a new, empty format file */
     if ((fp = fopen(format_file, "wt")) == NULL) {
-      _GD_SetGetDataError(D, GD_E_CREAT, GD_E_CREAT_FORMAT, format_file, errno,
-          NULL);
+      _GD_SetError(D, GD_E_CREAT, GD_E_CREAT_FORMAT, format_file, errno, NULL);
       return NULL;
     }
   }
@@ -785,7 +768,7 @@ DIRFILE* dirfile_open(const char* filedir, unsigned int flags)
 #endif
 
   D = malloc(sizeof(DIRFILE));
-  _GD_ClearGetDataError(D);
+  _GD_ClearError(D);
   D->recurse_level = 0;
 
   D->entries = NULL;
@@ -809,14 +792,14 @@ DIRFILE* dirfile_open(const char* filedir, unsigned int flags)
 
   IncludeList = malloc(sizeof(char*));
   if (IncludeList == NULL) {
-    _GD_SetGetDataError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     return D;
   }
 
   IncludeList[0] = strdup("format");
 
   if (IncludeList[0] == NULL) {
-    _GD_SetGetDataError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     free(IncludeList);
     return D;
   }
@@ -843,7 +826,7 @@ DIRFILE* dirfile_open(const char* filedir, unsigned int flags)
          * entry will end up after the qsort */
         D->first_field = malloc(sizeof(struct RawEntryType));
         if (D->first_field == NULL)
-          _GD_SetGetDataError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+          _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
         else
           memcpy(D->first_field, D->entries[i], sizeof(struct RawEntryType));
         break;
@@ -872,7 +855,7 @@ void dirfile_close(DIRFILE* D)
     if (D->entries[i]->field_type == GD_RAW_ENTRY)
       close(ENTRY(Raw, &D->entries[i])->fp);
 
-  _GD_ClearGetDataError(D);
+  _GD_ClearError(D);
   _GD_FreeD(D);
 }
 /* vim: ts=2 sw=2 et tw=80

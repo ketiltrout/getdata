@@ -38,7 +38,7 @@ unsigned int _GD_GetSPF(const char *field_code, DIRFILE* D)
   unsigned int spf = 0;
 
   if (D->recurse_level >= GD_MAX_RECURSE_LEVEL) {
-    _GD_SetGetDataError(D, GD_E_RECURSE_LEVEL, 0, NULL, 0, field_code);
+    _GD_SetError(D, GD_E_RECURSE_LEVEL, 0, NULL, 0, field_code);
     return 0;
   }
 
@@ -50,7 +50,7 @@ unsigned int _GD_GetSPF(const char *field_code, DIRFILE* D)
   entry = _GD_FindField(D, field_code);
 
   if (entry == NULL) {
-    _GD_SetGetDataError(D, GD_E_BAD_CODE, 0, NULL, 0, field_code);
+    _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, field_code);
     return 0;
   }
 
@@ -75,7 +75,7 @@ unsigned int _GD_GetSPF(const char *field_code, DIRFILE* D)
       spf = _GD_GetSPF(ENTRY(Linterp, entry)->raw_field, D);
       break;
     default:
-      _GD_SetGetDataError(D, GD_E_INTERNAL_ERROR, 0, __FILE__, __LINE__, NULL);
+      _GD_SetError(D, GD_E_INTERNAL_ERROR, 0, __FILE__, __LINE__, NULL);
   }
   D->recurse_level--;
   return spf;
@@ -86,11 +86,11 @@ unsigned int _GD_GetSPF(const char *field_code, DIRFILE* D)
 unsigned int get_samples_per_frame(DIRFILE* D, const char *field_code)
 {
   if (D->flags & GD_INVALID) {/* don't crash */
-    _GD_SetGetDataError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
     return 0;
   }
 
-  _GD_ClearGetDataError(D);
+  _GD_ClearError(D);
 
   return _GD_GetSPF(field_code, D);
 }

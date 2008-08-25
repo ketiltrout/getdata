@@ -77,7 +77,7 @@ static DIRFILE* _GD_GetDirfile(const char *filedir)
   /* first check to see if we have already read it */
   for (i_dirfile = 0; i_dirfile < _GD_Dirfiles.n; i_dirfile++) {
     if (strncmp(filedir, _GD_Dirfiles.D[i_dirfile]->name, FILENAME_MAX) == 0) {
-      _GD_ClearGetDataError(_GD_Dirfiles.D[i_dirfile]);
+      _GD_ClearError(_GD_Dirfiles.D[i_dirfile]);
       return _GD_Dirfiles.D[i_dirfile];
     }
   }

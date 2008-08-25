@@ -101,6 +101,8 @@ static void _GD_FillFileFrame(void *dataout, gd_type_t rtype, off64_t s0,
       for (i = 0; i < n; i++)
         ((double*)dataout)[i] = (double)(i + s0);
       break;
+    default:
+      break;
   }
 }
 
@@ -111,7 +113,7 @@ void _GD_ConvertType(DIRFILE* D, const void *data_in, gd_type_t in_type,
 {
   int i;
 
-  _GD_ClearGetDataError(D);
+  _GD_ClearError(D);
 
   if (out_type == GD_NULL) /* null return type: don't return data */
     return;
@@ -571,7 +573,7 @@ void _GD_ConvertType(DIRFILE* D, const void *data_in, gd_type_t in_type,
       break;
   }
 
-  _GD_SetGetDataError(D, GD_E_BAD_TYPE, in_type, NULL, 0, NULL);
+  _GD_SetError(D, GD_E_BAD_TYPE, in_type, NULL, 0, NULL);
 }
 
 
@@ -672,14 +674,14 @@ static size_t _GD_DoRaw(DIRFILE *D, struct RawEntryType *R,
     R->fp = open(datafilename, ((D->flags & GD_ACCMODE) == GD_RDWR) ? O_RDWR :
         O_RDONLY);
     if (R->fp < 0) {
-      _GD_SetGetDataError(D, GD_E_RAW_IO, 0, NULL, 0, datafilename);
+      _GD_SetError(D, GD_E_RAW_IO, 0, NULL, 0, datafilename);
       return 0;
     }
   }
 
   databuffer = malloc(ns * R->size);
   if (databuffer == NULL) {
-    _GD_SetGetDataError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     return 0;
   }
 
@@ -695,7 +697,7 @@ static size_t _GD_DoRaw(DIRFILE *D, struct RawEntryType *R,
     samples_read = read(R->fp, databuffer + n_read * R->size, ns * R->size);
 
     if (samples_read == -1) {
-      _GD_SetGetDataError(D, GD_E_RAW_IO, 0, NULL, 0, datafilename);
+      _GD_SetError(D, GD_E_RAW_IO, 0, NULL, 0, datafilename);
       free(databuffer);
       return 0;
     }
@@ -727,12 +729,12 @@ void* _GD_Alloc(DIRFILE* D, gd_type_t type, int n)
 {
   assert(n > 0);
 
-  _GD_ClearGetDataError(D);
+  _GD_ClearError(D);
 
   if (type == GD_NULL)
     return NULL;
   else if (GD_SIZE(type) == 0) {
-    _GD_SetGetDataError(D, GD_E_BAD_TYPE, type, NULL, 0, NULL);
+    _GD_SetError(D, GD_E_BAD_TYPE, type, NULL, 0, NULL);
     return NULL;
   }
 
@@ -790,11 +792,11 @@ void _GD_ScaleData(DIRFILE* D, void *data, gd_type_t type, int npts, double m,
         ((double*)data)[i] = ((double*)data)[i] * m + b;
       break;
     default:
-      _GD_SetGetDataError(D, GD_E_BAD_TYPE, type, NULL, 0, NULL);
+      _GD_SetError(D, GD_E_BAD_TYPE, type, NULL, 0, NULL);
       return;
   }
 
-  _GD_ClearGetDataError(D);
+  _GD_ClearError(D);
 }
 
 /* _GD_AddData: add vector B to vector A.  B is unchanged
@@ -856,11 +858,11 @@ static void _GD_AddData(DIRFILE* D, void *A, int spfA, void *B, int spfB,
         ((double*)A)[i] += ((double*)B)[i * spfB / spfA];
       break;
     default:
-      _GD_SetGetDataError(D, GD_E_BAD_TYPE, type, NULL, 0, NULL);
+      _GD_SetError(D, GD_E_BAD_TYPE, type, NULL, 0, NULL);
       return;
   }
 
-  _GD_ClearGetDataError(D);
+  _GD_ClearError(D);
 }
 
 /* MultiplyData: Multiply A by B.  B is unchanged.
@@ -922,11 +924,11 @@ static void _GD_MultiplyData(DIRFILE* D, void *A, unsigned int spfA, void *B,
         ((double*)A)[i] *= ((double*)B)[i * spfB / spfA];
       break;
     default:
-      _GD_SetGetDataError(D, GD_E_BAD_TYPE, type, NULL, 0, NULL);
+      _GD_SetError(D, GD_E_BAD_TYPE, type, NULL, 0, NULL);
       return;
   }
 
-  _GD_ClearGetDataError(D);
+  _GD_ClearError(D);
 }
 
 
@@ -1107,7 +1109,7 @@ static size_t _GD_DoBit(DIRFILE *D, struct BitEntryType *B,
   ns = num_samp + num_frames * spf;
   tmpbuf = (uint64_t *)malloc(ns * sizeof(uint64_t));
   if (tmpbuf == NULL) {
-    _GD_SetGetDataError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     return 0;
   }
 
@@ -1155,7 +1157,7 @@ static void _GD_MakeDummyLinterp(DIRFILE* D, struct LinterpEntryType *E)
   E->y = (double *)malloc(2*sizeof(double));
 
   if (E->x == NULL || E->y == NULL) {
-    _GD_SetGetDataError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     return;
   }
 
@@ -1177,7 +1179,7 @@ void _GD_ReadLinterpFile(DIRFILE* D, struct LinterpEntryType *E)
   fp = fopen(E->linterp_file, "r");
   if (fp == NULL) {
     _GD_MakeDummyLinterp(D, E);
-    _GD_SetGetDataError(D, GD_E_OPEN_LINFILE, GD_E_LINFILE_OPEN, NULL, 0,
+    _GD_SetError(D, GD_E_OPEN_LINFILE, GD_E_LINFILE_OPEN, NULL, 0,
         E->linterp_file);
     return;
   }
@@ -1189,7 +1191,7 @@ void _GD_ReadLinterpFile(DIRFILE* D, struct LinterpEntryType *E)
 
   if (i < 2) {
     _GD_MakeDummyLinterp(D, E);
-    _GD_SetGetDataError(D, GD_E_OPEN_LINFILE, GD_E_LINFILE_LENGTH, NULL, 0,
+    _GD_SetError(D, GD_E_OPEN_LINFILE, GD_E_LINFILE_LENGTH, NULL, 0,
         E->linterp_file);
     return;
   }
@@ -1198,7 +1200,7 @@ void _GD_ReadLinterpFile(DIRFILE* D, struct LinterpEntryType *E)
   E->x = (double *)malloc(i * sizeof(double));
   E->y = (double *)malloc(i * sizeof(double));
   if (E->x == NULL || E->y == NULL) {
-    _GD_SetGetDataError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     return;
   }
 
@@ -1210,7 +1212,7 @@ void _GD_ReadLinterpFile(DIRFILE* D, struct LinterpEntryType *E)
     sscanf(line, "%lg %lg",&(E->x[i]), &(E->y[i]));
   }
 
-  _GD_ClearGetDataError(D);
+  _GD_ClearError(D);
 }
 
 /* _GD_GetIndex: get LUT index.
@@ -1321,11 +1323,11 @@ void _GD_LinterpData(DIRFILE* D, const void *data, gd_type_t type, int npts,
       }
       break;
     default:
-      _GD_SetGetDataError(D, GD_E_BAD_TYPE, type, NULL, 0, NULL);
+      _GD_SetError(D, GD_E_BAD_TYPE, type, NULL, 0, NULL);
       return;
   }
 
-  _GD_ClearGetDataError(D);
+  _GD_ClearError(D);
 }
 
 /* _GD_DoLinterp:  Read from a linterp.  Returns number of samples read.
@@ -1370,7 +1372,7 @@ size_t _GD_DoField(DIRFILE *D, const char *field_code, off64_t first_frame,
 #endif
 
   if (D->recurse_level >= GD_MAX_RECURSE_LEVEL) {
-    _GD_SetGetDataError(D, GD_E_RECURSE_LEVEL, 0, NULL, 0, field_code);
+    _GD_SetError(D, GD_E_RECURSE_LEVEL, 0, NULL, 0, field_code);
     return 0;
   }
 
@@ -1382,7 +1384,7 @@ size_t _GD_DoField(DIRFILE *D, const char *field_code, off64_t first_frame,
       _GD_FillFileFrame(data_out, return_type, first_frame + first_samp +
           D->frame_offset, n_read);
     }
-    _GD_ClearGetDataError(D);
+    _GD_ClearError(D);
     return n_read;
   }
 
@@ -1390,7 +1392,7 @@ size_t _GD_DoField(DIRFILE *D, const char *field_code, off64_t first_frame,
   entry = _GD_FindField(D, field_code);
 
   if (entry == NULL) { /* No match */
-    _GD_SetGetDataError(D, GD_E_BAD_CODE, 0, NULL, 0, field_code);
+    _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, field_code);
     return 0;
   }
 
@@ -1416,7 +1418,7 @@ size_t _GD_DoField(DIRFILE *D, const char *field_code, off64_t first_frame,
   }
 
   /* Can't get here */
-  _GD_SetGetDataError(D, GD_E_INTERNAL_ERROR, 0, __FILE__, __LINE__, NULL);
+  _GD_SetError(D, GD_E_INTERNAL_ERROR, 0, __FILE__, __LINE__, NULL);
   return 0;
 }
 
@@ -1426,7 +1428,7 @@ size_t getdata64(DIRFILE* D, const char *field_code, off64_t first_frame,
     gd_type_t return_type, void *data_out)
 {
   if (D->flags & GD_INVALID) {/* don't crash */
-    _GD_SetGetDataError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
     return 0;
   }
 
@@ -1435,7 +1437,7 @@ size_t getdata64(DIRFILE* D, const char *field_code, off64_t first_frame,
       first_frame, first_samp, num_frames, num_samp, return_type, data_out);
 #endif
 
-  _GD_ClearGetDataError(D);
+  _GD_ClearError(D);
 
   first_frame -= D->frame_offset;
 
