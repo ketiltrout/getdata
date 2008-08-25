@@ -37,20 +37,26 @@ unsigned int _GD_GetSPF(const char *field_code, DIRFILE* D)
   gd_entry_t* entry;
   unsigned int spf = 0;
 
+  dtrace("\"%s\", %p", field_code, D);
+
   if (D->recurse_level >= GD_MAX_RECURSE_LEVEL) {
     _GD_SetError(D, GD_E_RECURSE_LEVEL, 0, NULL, 0, field_code);
+    dreturn("%u", 0);
     return 0;
   }
 
   if ((strcmp(field_code, "FILEFRAM") == 0) ||
-      (strcmp(field_code, "INDEX") == 0))
+      (strcmp(field_code, "INDEX") == 0)) {
+    dreturn("%u", 1);
     return 1;
+  }
 
   /* Find the field */
   entry = _GD_FindField(D, field_code);
 
   if (entry == NULL) {
     _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, field_code);
+    dreturn("%u", 0);
     return 0;
   }
 
@@ -70,6 +76,8 @@ unsigned int _GD_GetSPF(const char *field_code, DIRFILE* D)
       _GD_InternalError(D);
   }
   D->recurse_level--;
+
+  dreturn("%u", spf);
   return spf;
 }
 
@@ -77,14 +85,21 @@ unsigned int _GD_GetSPF(const char *field_code, DIRFILE* D)
  */
 unsigned int get_samples_per_frame(DIRFILE* D, const char *field_code)
 {
+  unsigned int spf = 0;
+
+  dtrace("%p, \"%s\"", D, field_code);
+
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%u", 0);
     return 0;
   }
 
   _GD_ClearError(D);
 
-  return _GD_GetSPF(field_code, D);
+  spf =  _GD_GetSPF(field_code, D);
+  dreturn("%u", spf);
+  return spf;
 }
 /* vim: ts=2 sw=2 et tw=80
 */

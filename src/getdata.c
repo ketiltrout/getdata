@@ -68,6 +68,8 @@ static void _GD_FillFileFrame(void *dataout, gd_type_t rtype, off64_t s0,
 {
   size_t i;
 
+  dtrace("%p, 0x%x, %lli, %zi", dataout, rtype, s0, n);
+
   switch (rtype) {
     case GD_INT8:
       for (i = 0; i < n; i++)
@@ -112,6 +114,8 @@ static void _GD_FillFileFrame(void *dataout, gd_type_t rtype, off64_t s0,
     default:
       break;
   }
+
+  dreturnvoid();
 }
 
 /* _GD_ConvertType: copy data to output buffer while converting type.
@@ -121,7 +125,9 @@ void _GD_ConvertType(DIRFILE* D, const void *data_in, gd_type_t in_type,
 {
   int i;
 
-  _GD_ClearError(D);
+  dtrace("%p, %p, 0x%x, %p, 0x%x, %zi", D, data_in, in_type, data_out, out_type,
+      n);
+  dreturnvoid();
 
   if (out_type == GD_NULL) /* null return type: don't return data */
     return;
@@ -593,8 +599,12 @@ static int _GD_FillZero(void *databuffer, gd_type_t type, off64_t s0, size_t ns)
   size_t i, nz = ns;
   const double NaN = NAN;
 
-  if (s0 >= 0)
+  dtrace("%p, 0x%x, %lli, %zi", databuffer, type, s0, ns);
+
+  if (s0 >= 0) {
+    dreturn("%i", 0);
     return 0;
+  }
 
   if (s0 + ns > 0)
     nz = -s0;
@@ -609,6 +619,8 @@ static int _GD_FillZero(void *databuffer, gd_type_t type, off64_t s0, size_t ns)
   } else 
     memset(databuffer, 0, nz * GD_SIZE(type));
 
+  dreturn("%i", nz);
+
   return (nz);
 }
 
@@ -619,6 +631,8 @@ gd_entry_t* _GD_FindField(DIRFILE* D, const char* field_code)
   int l = 0;
   int u = D->n_entries;
 
+  dtrace("%p, \"%s\"", D, field_code);
+
   while (l < u) {
     i = (l + u) / 2;
     c = strcmp(field_code, D->entries[i]->field);
@@ -626,10 +640,13 @@ gd_entry_t* _GD_FindField(DIRFILE* D, const char* field_code)
       u = i;
     else if (c > 0)
       l = i + 1;
-    else
+    else {
+      dreturn("%p", D->entries[i]);
       return D->entries[i];
+    }
   }
 
+  dreturn("%p", NULL);
   return NULL;
 }
 
@@ -639,12 +656,12 @@ void _GD_FixEndianness(char* databuffer, size_t size, size_t ns)
   int j;
   char b;
 
-#ifdef GETDATA_DEBUG
-  printf("_GD_FixEndianness(%p, %zi, %zi)\n", databuffer, size, ns);
-#endif
+  dtrace("%p, %zi, %zi", databuffer, size, ns);
 
-  if (size == 1)
+  if (size == 1) {
+    dreturnvoid();
     return;
+  }
 
   for (i = 0; i < ns; ++i)
     for (j = 0; j < size / 2; ++j) {
@@ -652,6 +669,8 @@ void _GD_FixEndianness(char* databuffer, size_t size, size_t ns)
       databuffer[size * (i + 1) - j - 1] = databuffer[size * i + j];
       databuffer[size * i + j] = b;
     }
+
+  dreturnvoid();
 }
 
 /* _GD_DoRaw:  Read from a raw.  Returns number of samples read.
@@ -666,14 +685,11 @@ static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *R,
   char datafilename[FILENAME_MAX];
   char *databuffer;
 
+  dtrace("%p, %p, %lli, %lli, %zi, %zi, 0x%x, %p)", D, R, first_frame,
+      first_samp, num_frames, num_samp, return_type, data_out);
+
   s0 = first_samp + first_frame*R->samples_per_frame;
   ns = num_samp + num_frames*R->samples_per_frame;
-
-#ifdef GETDATA_DEBUG
-  printf("_GD_DoRaw(%p, %p, %lli, %lli, %zi, %zi, %i, %p) %i\n", D, R,
-      first_frame, first_samp, num_frames, num_samp, return_type, data_out,
-      R->fp);
-#endif
 
   /** open the file (and cache the fp) if it hasn't been opened yet. */
   if (R->fp < 0) {
@@ -683,6 +699,7 @@ static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *R,
         O_RDONLY);
     if (R->fp < 0) {
       _GD_SetError(D, GD_E_RAW_IO, 0, datafilename, errno, NULL);
+      dreturn("%zi", 0);
       return 0;
     }
   }
@@ -690,6 +707,7 @@ static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *R,
   databuffer = malloc(ns * R->size);
   if (databuffer == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    dreturn("%zi", 0);
     return 0;
   }
 
@@ -707,6 +725,7 @@ static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *R,
     if (samples_read == -1) {
       _GD_SetError(D, GD_E_RAW_IO, 0, datafilename, errno, NULL);
       free(databuffer);
+      dreturn("%zi", 0);
       return 0;
     }
 
@@ -727,34 +746,44 @@ static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *R,
 
   free(databuffer);
 
+  dreturn("%zi", (D->error == GD_E_OK) ? n_read : 0);
   return (D->error == GD_E_OK) ? n_read : 0;
 }
 
 
 /* _GD_Alloc: allocate a buffer of the right type & size
 */
-void* _GD_Alloc(DIRFILE* D, gd_type_t type, int n)
+void* _GD_Alloc(DIRFILE* D, gd_type_t type, size_t n)
 {
+  void* ptr = NULL;
+
+  dtrace("%p, 0x%x, %zi", D, type, n);
   assert(n > 0);
 
-  _GD_ClearError(D);
-
-  if (type == GD_NULL)
-    return NULL;
-  else if (GD_SIZE(type) == 0) {
-    _GD_SetError(D, GD_E_BAD_TYPE, type, NULL, 0, NULL);
+  if (type == GD_NULL) {
+    dreturn("%p", NULL);
     return NULL;
   }
 
-  return malloc(n * GD_SIZE(type));
+  else if (GD_SIZE(type) == 0) {
+    _GD_SetError(D, GD_E_BAD_TYPE, type, NULL, 0, NULL);
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  ptr = malloc(n * GD_SIZE(type));
+  dreturn("%p", ptr);
+  return ptr;
 }
 
 /* _GD_ScaleData: Compute data = data * m + b, for scalar m and b.
 */
-void _GD_ScaleData(DIRFILE* D, void *data, gd_type_t type, int npts, double m,
-    double b)
+void _GD_ScaleData(DIRFILE* D, void *data, gd_type_t type, size_t npts,
+    double m, double b)
 {
   int i;
+
+  dtrace("%p, %p, 0x%x, %zi, %g, %g", D, data, type, npts, m, b);
 
   switch (type) {
     case GD_NULL:
@@ -801,10 +830,10 @@ void _GD_ScaleData(DIRFILE* D, void *data, gd_type_t type, int npts, double m,
       break;
     default:
       _GD_SetError(D, GD_E_BAD_TYPE, type, NULL, 0, NULL);
-      return;
+      break;
   }
 
-  _GD_ClearError(D);
+  dreturnvoid();
 }
 
 /* _GD_AddData: add vector B to vector A.  B is unchanged
@@ -869,8 +898,6 @@ static void _GD_AddData(DIRFILE* D, void *A, int spfA, void *B, int spfB,
       _GD_SetError(D, GD_E_BAD_TYPE, type, NULL, 0, NULL);
       return;
   }
-
-  _GD_ClearError(D);
 }
 
 /* MultiplyData: Multiply A by B.  B is unchanged.
@@ -935,8 +962,6 @@ static void _GD_MultiplyData(DIRFILE* D, void *A, unsigned int spfA, void *B,
       _GD_SetError(D, GD_E_BAD_TYPE, type, NULL, 0, NULL);
       return;
   }
-
-  _GD_ClearError(D);
 }
 
 
@@ -1184,11 +1209,14 @@ void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E)
   char line[MAX_LINE_LENGTH];
   int linenum = 0;
 
+  dtrace("%p, %p", D, E);
+
   fp = fopen(E->file, "r");
   if (fp == NULL) {
     _GD_MakeDummyLinterp(D, E);
     _GD_SetError(D, GD_E_OPEN_LINFILE, GD_E_LINFILE_OPEN, NULL, 0,
         E->file);
+    dreturnvoid();
     return;
   }
 
@@ -1201,6 +1229,7 @@ void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E)
     _GD_MakeDummyLinterp(D, E);
     _GD_SetError(D, GD_E_OPEN_LINFILE, GD_E_LINFILE_LENGTH, NULL, 0,
         E->file);
+    dreturnvoid();
     return;
   }
 
@@ -1209,6 +1238,7 @@ void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E)
   E->y = (double *)malloc(i * sizeof(double));
   if (E->x == NULL || E->y == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    dreturnvoid();
     return;
   }
 
@@ -1220,13 +1250,15 @@ void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E)
     sscanf(line, "%lg %lg",&(E->x[i]), &(E->y[i]));
   }
 
-  _GD_ClearError(D);
+  dreturnvoid();
 }
 
 /* _GD_GetIndex: get LUT index.
 */
-static int _GD_GetIndex(double x, double lx[], int idx, int n)
+static size_t _GD_GetIndex(double x, double lx[], size_t idx, size_t n)
 {
+  dtrace("%g, %p, %zi, %zi", x, lx, idx, n);
+
   /* Just linearly search - we're probably right to start    */
   /* increment until we are bigger */
   while ((idx < n - 2) && (x > lx[idx]))
@@ -1236,16 +1268,19 @@ static int _GD_GetIndex(double x, double lx[], int idx, int n)
   while ((idx > 0) && (x < lx[idx]))
     idx--;
 
+  dreturn("%zi", idx);
   return idx;
 }
 
 /* _GD_LinterpData: calibrate data using lookup table lx and ly
 */
-void _GD_LinterpData(DIRFILE* D, const void *data, gd_type_t type, int npts,
-    double *lx, double *ly, int n_ln)
+void _GD_LinterpData(DIRFILE* D, const void *data, gd_type_t type, size_t npts,
+    double *lx, double *ly, size_t n_ln)
 {
   int i, idx = 0;
   double x;
+
+  dtrace("%p, %p, 0x%x, %zi, %p, %p, %zi", D, data, type, npts, lx, ly, n_ln);
 
   switch (type) {
     case GD_NULL:
@@ -1332,10 +1367,10 @@ void _GD_LinterpData(DIRFILE* D, const void *data, gd_type_t type, int npts,
       break;
     default:
       _GD_SetError(D, GD_E_BAD_TYPE, type, NULL, 0, NULL);
-      return;
+      break;
   }
 
-  _GD_ClearError(D);
+  dreturnvoid();
 }
 
 /* _GD_DoLinterp:  Read from a linterp.  Returns number of samples read.
@@ -1346,10 +1381,15 @@ static size_t _GD_DoLinterp(DIRFILE *D, gd_entry_t* I,
 {
   size_t n_read = 0;
 
+  dtrace("%p, %p, %lli, %lli, %zi, %zi, 0x%x, %p", D, I, first_frame,
+      first_samp, num_frames, num_samp, return_type, data_out);
+
   if (I->count < 0) {
     _GD_ReadLinterpFile(D, I);
-    if (D->error != GD_E_OK)
+    if (D->error != GD_E_OK) {
+      dreturn("%zi", 0);
       return 0;
+    }
   }
 
   D->recurse_level++;
@@ -1357,11 +1397,14 @@ static size_t _GD_DoLinterp(DIRFILE *D, gd_entry_t* I,
       num_frames, num_samp, return_type, data_out);
   D->recurse_level--;
 
-  if (D->error != GD_E_OK)
+  if (D->error != GD_E_OK) {
+    dreturn("%zi", 0);
     return 0;
+  }
 
   _GD_LinterpData(D, data_out, return_type, n_read, I->x, I->y, I->count);
 
+  dreturn("%zi", n_read);
   return n_read;
 }
 
@@ -1374,13 +1417,12 @@ size_t _GD_DoField(DIRFILE *D, const char *field_code, off64_t first_frame,
   size_t n_read = 0;
   gd_entry_t* entry;
 
-#ifdef GETDATA_DEBUG
-  printf("_GD_DoField(%p, %s, %lli, %lli, %zi, %zi, %i, %p)\n", D, field_code,
+  dtrace("%p, \"%s\", %lli, %lli, %zi, %zi, 0x%x, %p", D, field_code,
       first_frame, first_samp, num_frames, num_samp, return_type, data_out);
-#endif
 
   if (D->recurse_level >= GD_MAX_RECURSE_LEVEL) {
     _GD_SetError(D, GD_E_RECURSE_LEVEL, 0, NULL, 0, field_code);
+    dreturn("%zi", 0);
     return 0;
   }
 
@@ -1392,7 +1434,7 @@ size_t _GD_DoField(DIRFILE *D, const char *field_code, off64_t first_frame,
       _GD_FillFileFrame(data_out, return_type, first_frame + first_samp +
           D->frame_offset, n_read);
     }
-    _GD_ClearError(D);
+    dreturn("%zi", 0);
     return n_read;
   }
 
@@ -1401,33 +1443,43 @@ size_t _GD_DoField(DIRFILE *D, const char *field_code, off64_t first_frame,
 
   if (entry == NULL) { /* No match */
     _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, field_code);
+    dreturn("%zi", 0);
     return 0;
   }
 
   switch (entry->field_type) {
     case GD_RAW_ENTRY:
-      return _GD_DoRaw(D, entry, first_frame, first_samp, num_frames, num_samp,
-          return_type, data_out);
+      n_read = _GD_DoRaw(D, entry, first_frame, first_samp, num_frames,
+          num_samp, return_type, data_out);
+      break;
     case GD_LINTERP_ENTRY:
-      return _GD_DoLinterp(D, entry, first_frame, first_samp, num_frames,
+      n_read = _GD_DoLinterp(D, entry, first_frame, first_samp, num_frames,
           num_samp, return_type, data_out);
+      break;
     case GD_LINCOM_ENTRY:
-      return _GD_DoLincom(D, entry, first_frame, first_samp, num_frames,
+      n_read = _GD_DoLincom(D, entry, first_frame, first_samp, num_frames,
           num_samp, return_type, data_out);
+      break;
     case GD_BIT_ENTRY:
-      return _GD_DoBit(D, entry, first_frame, first_samp, num_frames, num_samp,
-          return_type, data_out);
+      n_read = _GD_DoBit(D, entry, first_frame, first_samp, num_frames,
+          num_samp, return_type, data_out);
+      break;
     case GD_MULTIPLY_ENTRY:
-      return _GD_DoMultiply(D, entry, first_frame, first_samp, num_frames,
+      n_read = _GD_DoMultiply(D, entry, first_frame, first_samp, num_frames,
           num_samp, return_type, data_out);
+      break;
     case GD_PHASE_ENTRY:
-      return _GD_DoPhase(D, entry, first_frame, first_samp, num_frames,
+      n_read = _GD_DoPhase(D, entry, first_frame, first_samp, num_frames,
           num_samp, return_type, data_out);
+      break;
+    default:
+      /* Can't get here */
+      _GD_InternalError(D);
+      n_read = 0;
   }
 
-  /* Can't get here */
-  _GD_InternalError(D);
-  return 0;
+  dreturn("%zi", n_read);
+  return n_read;
 }
 
 /* this function is little more than a public boilerplate for _GD_DoField */
@@ -1435,22 +1487,26 @@ size_t getdata64(DIRFILE* D, const char *field_code, off64_t first_frame,
     off64_t first_samp, size_t num_frames, size_t num_samp,
     gd_type_t return_type, void *data_out)
 {
+  size_t n_read;
+
+  dtrace("%p, \"%s\", %lli, %lli, %zi, %zi, 0x%x, %p", D, field_code,
+      first_frame, first_samp, num_frames, num_samp, return_type, data_out);
+
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%zi", 0);
     return 0;
   }
-
-#ifdef GETDATA_DEBUG
-  printf("getdata64(%p, %s, %llu, %llu, %zi, %zi, %i, %p)\n", D, field_code,
-      first_frame, first_samp, num_frames, num_samp, return_type, data_out);
-#endif
 
   _GD_ClearError(D);
 
   first_frame -= D->frame_offset;
 
-  return _GD_DoField(D, field_code, first_frame, first_samp, num_frames,
+  n_read = _GD_DoField(D, field_code, first_frame, first_samp, num_frames,
       num_samp, return_type, data_out);
+
+  dreturn("%zi", n_read);
+  return n_read;
 }
 
 /* 32(ish)-bit wrapper for the 64-bit version, when needed */

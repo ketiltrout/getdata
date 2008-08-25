@@ -35,17 +35,21 @@ off64_t get_n_frames64(DIRFILE* D)
 {
   char raw_data_filename[FILENAME_MAX];
   struct stat64 statbuf;
-  size_t nf;
+  off64_t nf;
+
+  dtrace("%p", D);
 
   _GD_ClearError(D);
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%lli", 0LL);
     return 0;
   }
 
   if (D->first_field == NULL) {
     _GD_SetError(D, GD_E_EMPTY, 0, NULL, 0, NULL);
+    dreturn("%lli", 0LL);
     return 0;
   }
 
@@ -53,6 +57,7 @@ off64_t get_n_frames64(DIRFILE* D)
   snprintf(raw_data_filename, FILENAME_MAX, "%s/%s", D->name,
       D->first_field->file);
   if (stat64(raw_data_filename, &statbuf) < 0) {
+    dreturn("%lli", 0LL);
     _GD_SetError(D, GD_E_RAW_IO, 0, raw_data_filename, errno, NULL);
     return 0;
   }
@@ -61,6 +66,7 @@ off64_t get_n_frames64(DIRFILE* D)
       D->first_field->samples_per_frame);
   nf += D->frame_offset;
 
+  dreturn("%lli", nf);
   return nf;
 }
 

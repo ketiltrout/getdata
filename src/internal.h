@@ -59,6 +59,24 @@ typedef off_t off64_t
 #define assert(...)
 #endif
 
+/* debugging macros */
+#ifdef GETDATA_DEBUG
+const char* _gd_colnil(void);
+const char* _gd_coladd(void);
+const char* _gd_colsub(void);
+#define dtracevoid() printf("%s %s()\n", _gd_coladd(), __FUNCTION__)
+#define dtrace(fmt, ...) printf("%s %s(" fmt ")\n", _gd_coladd(), \
+    __FUNCTION__, __VA_ARGS__)
+#define dreturnvoid() printf("%s %s = (nil)\n", _gd_colsub(), __FUNCTION__)
+#define dreturn(fmt, ...) printf("%s %s = " fmt "\n", _gd_colsub(), \
+    __FUNCTION__, __VA_ARGS__)
+#else
+#define dtracevoid()
+#define dtrace(...)
+#define dreturnvoid()
+#define dreturn(...)
+#endif
+
 #if defined HAVE_DECL_STRDUP && !HAVE_DECL_STRDUP
 extern char* strdup(const char* s);
 #endif
@@ -106,7 +124,7 @@ char *strerror_r(int errnum, char *buf, size_t buflen);
 #define GD_E_LINFILE_OPEN      0
 #define GD_E_LINFILE_LENGTH    1
 
-void* _GD_Alloc(DIRFILE* D, gd_type_t type, int n) __gd_nonnull ((1))
+void* _GD_Alloc(DIRFILE* D, gd_type_t type, size_t n) __gd_nonnull ((1))
   __attribute_malloc__ __THROW __wur;
 void _GD_ClearError(DIRFILE* D) __gd_nonnull ((1)) __THROW;
 void _GD_ConvertType(DIRFILE* D, const void *data_in, gd_type_t in_type,
@@ -124,12 +142,12 @@ gd_entry_t* _GD_FindField(DIRFILE* D, const char* field_code)
 #define _GD_InternalError(D) \
     _GD_SetError(D, GD_E_INTERNAL_ERROR, 0, __FILE__, __LINE__, NULL);
 gd_type_t _GD_LegacyType(char c) __THROW __attribute__ ((__const__));
-void _GD_LinterpData(DIRFILE* D, const void *data, gd_type_t type, int npts,
-    double *lx, double *ly, int n_ln) __gd_nonnull ((1, 2, 5, 6)) __THROW;
+void _GD_LinterpData(DIRFILE* D, const void *data, gd_type_t type, size_t npts,
+    double *lx, double *ly, size_t n_ln) __gd_nonnull ((1, 2, 5, 6)) __THROW;
 void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E)
   __gd_nonnull ((1, 2));
-void _GD_ScaleData(DIRFILE* D, void *data, gd_type_t type, int npts, double m,
-    double b) __gd_nonnull ((1, 2)) __THROW;
+void _GD_ScaleData(DIRFILE* D, void *data, gd_type_t type, size_t npts,
+    double m, double b) __gd_nonnull ((1, 2)) __THROW;
 void _GD_SetError(DIRFILE* D, int error, int suberror, const char* format_file,
     int line, const char* token) __gd_nonnull ((1)) __THROW;
 

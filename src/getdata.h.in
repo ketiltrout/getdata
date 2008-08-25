@@ -121,10 +121,8 @@ typedef enum {
 struct _gd_unified_entry {
   char* field;
   int field_type;
-  union {
-    char* file;
-    char *in_fields[GD_MAX_LINCOM];
-  };
+  char* file;
+  char *in_fields[GD_MAX_LINCOM];
   union {
     int fp;
     int count;

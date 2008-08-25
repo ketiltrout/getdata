@@ -87,6 +87,7 @@ if test "x$enable_debug" = "xyes"; then
   AC_DEFINE([GETDATA_DEBUG], [],
             [ Define to enable debugging messages ])
 fi
+AM_CONDITIONAL(GETDATA_DEBUG, test "x$enable_debug" == "xyes")
 
 dnl checkdirfile
 AC_ARG_ENABLE(checkdirfile, AS_HELP_STRING([--disable-checkdirfile],

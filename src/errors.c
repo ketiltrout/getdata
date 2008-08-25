@@ -88,6 +88,9 @@ static const struct {
 void _GD_SetError(DIRFILE* D, int error, int suberror,
     const char* format_file, int line, const char* token)
 {
+  dtrace("%p, %i, %i, \"%s\", %i, \"%s\"", D, error, suberror, format_file,
+      line, token);
+
   D->error = error;
   D->suberror = suberror;
   D->error_line = line;
@@ -95,13 +98,19 @@ void _GD_SetError(DIRFILE* D, int error, int suberror,
     strncpy(D->error_file, format_file, FILENAME_MAX);
   if (token != NULL)
     strncpy(D->error_string, token, FILENAME_MAX);
+
+  dreturnvoid();
 }
 
 /* _GD_ClearError: Everything's A-OK; clear the last error.
 */
 void _GD_ClearError(DIRFILE* D)
 {
+  dtrace("%p", D);
+
   D->error = GD_E_OK;
+
+  dreturnvoid();
 }
 
 /* GetDataErrorString: Write a descriptive message in the supplied buffer
@@ -113,9 +122,13 @@ char* getdata_error_string(const DIRFILE* D, char* buffer, size_t buflen)
   char* ptr;
   int i, s = -1;
 
+  dtrace("%p, %p, %zi", D, buffer, buflen);
+
   /* Sanity check */
-  if (buffer == NULL || D == NULL || buflen < 1)
+  if (buffer == NULL || D == NULL || buflen < 1) {
+    dreturn("%p", NULL);
     return NULL;
+  }
 
   /* Find the error message */
   for (i = 0; s == -1; ++i) {
@@ -138,6 +151,7 @@ char* getdata_error_string(const DIRFILE* D, char* buffer, size_t buflen)
     }
   }
 
+  dreturn("\"%s\"", buffer);
   return buffer;
 }
 /* vim: ts=2 sw=2 et tw=80

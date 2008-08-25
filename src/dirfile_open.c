@@ -54,11 +54,14 @@ int _GD_GetLine(FILE *fp, char *line, int* linenum)
   int first_char;
   int i, len;
 
+  dtrace("%p, %p, %p", fp, line, linenum);
+
   do {
     ret_val = fgets(line, MAX_LINE_LENGTH, fp);
     (*linenum)++;
     first_char = 0;
-    while (line[first_char] == ' ' || line[first_char] == '\t') ++first_char;
+    while (line[first_char] == ' ' || line[first_char] == '\t')
+      ++first_char;
     line += first_char;
   } while (ret_val && (line[0] == '#' || line[0] == 0 || line[1] == 0));
 
@@ -71,8 +74,11 @@ int _GD_GetLine(FILE *fp, char *line, int* linenum)
         line[i] = '\0';
     }
 
+    dreturn("\"%s\"", line);
     return 1; /* a line was read */
   }
+
+  dreturn("%i", 0);
   return 0;  /* there were no valid lines */
 }
 
@@ -81,6 +87,8 @@ int _GD_GetLine(FILE *fp, char *line, int* linenum)
 static void _GD_FreeD(DIRFILE* D)
 {
   int i, j;
+
+  dtrace("%p", D);
 
   for (i = 0; i < D->n_entries; ++i) 
     if (D->entries[i] != NULL) {
@@ -115,6 +123,8 @@ static void _GD_FreeD(DIRFILE* D)
   free(D->entries);
   free(D->error_string);
   free(D->error_file);
+
+  dreturnvoid();
 }
 
 /* This function is needed outside the legacy API to handle old format
@@ -186,16 +196,19 @@ static gd_type_t _GD_RawType(const char* type)
 static void* _GD_ParseRaw(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
     int n_cols, const char* subdir, const char* format_file, int line)
 {
-  _GD_ClearError(D);
+  dtrace("%p, %p, %i, \"%s\", \"%s\", %i", D, in_cols, n_cols, subdir,
+      format_file, line);
 
   if (n_cols < 4) {
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_COLS, format_file, line, NULL);
+    dreturn("%p", NULL);
     return NULL;
   }
 
   gd_entry_t* R = malloc(sizeof(gd_entry_t));
   if (R == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    dreturn("%p", NULL);
     return NULL;
   }
 
@@ -205,6 +218,7 @@ static void* _GD_ParseRaw(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
   R->file = malloc(FILENAME_MAX);
   if (R->file == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    dreturn("%p", R);
     return R;
   }
 
@@ -216,6 +230,7 @@ static void* _GD_ParseRaw(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
   if (R->size == 0) {
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_TYPE, format_file, line,
         in_cols[2]);
+    dreturn("%p", R);
     return R;
   }
 
@@ -225,6 +240,7 @@ static void* _GD_ParseRaw(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_SPF, format_file, line,
         in_cols[3]);
 
+  dreturn("%p", R);
   return R;
 }
 
@@ -235,16 +251,18 @@ static void* _GD_ParseLincom(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
 {
   int i;
 
-  _GD_ClearError(D);
+  dtrace("%p, %p, %i, \"%s\", %i", D, in_cols, n_cols, format_file, line);
 
   if (n_cols < 3) {
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_COLS, format_file, line, NULL);
+    dreturn("%p", NULL);
     return NULL;
   }
 
   gd_entry_t* L = malloc(sizeof(gd_entry_t));
   if (L == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    dreturn("%p", NULL);
     return NULL;
   }
 
@@ -256,17 +274,20 @@ static void* _GD_ParseLincom(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
 
   if (L->field == NULL || L->m == NULL || L->b == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    dreturn("%p", L);
     return L;
   }
 
   if ((L->count < 1) || (L->count > GD_MAX_LINCOM)) {
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_FIELDS, format_file, line,
         in_cols[2]);
+    dreturn("%p", L);
     return L;
   }
 
   if (n_cols < L->count * 3 + 3) {
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_COLS, format_file, line, NULL);
+    dreturn("%p", L);
     return L;
   }
 
@@ -278,6 +299,7 @@ static void* _GD_ParseLincom(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
     L->b[i] = atof(in_cols[i * 3 + 5]);
   }
 
+  dreturn("%p", L);
   return L;
 }
 
@@ -288,16 +310,18 @@ static void* _GD_ParseLinterp(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
 {
   char temp_buffer[FILENAME_MAX];
 
-  _GD_ClearError(D);
+  dtrace("%p, %p, %i, \"%s\", %i", D, in_cols, n_cols, format_file, line);
 
   if (n_cols < 4) {
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_COLS, format_file, line, NULL);
+    dreturn("%p", NULL);
     return NULL;
   }
 
   gd_entry_t* L = malloc(sizeof(gd_entry_t));
   if (L == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    dreturn("%p", NULL);
     return NULL;
   }
 
@@ -312,15 +336,18 @@ static void* _GD_ParseLinterp(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
   else {
     /* non-absolute paths are relative to the format file's directory */
     L->file = malloc(FILENAME_MAX);
-    strcpy(temp_buffer, format_file);
-    strcpy(L->file, dirname(temp_buffer));
-    strcat(L->file, "/");
-    strcat(L->file, in_cols[3]);
+    if (L->file != NULL) {
+      strcpy(temp_buffer, format_file);
+      strcpy(L->file, dirname(temp_buffer));
+      strcat(L->file, "/");
+      strcat(L->file, in_cols[3]);
+    }
   }
 
   if (L->field == NULL || L->in_fields[0] == NULL || L->file == NULL)
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
 
+  dreturn("%p", L);
   return L;
 }
 
@@ -329,16 +356,18 @@ static void* _GD_ParseLinterp(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
 static void* _GD_ParseMultiply(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
     int n_cols, const char* format_file, int line)
 {
-  _GD_ClearError(D);
+  dtrace("%p, %p, %i, \"%s\", %i", D, in_cols, n_cols, format_file, line);
 
   if (n_cols < 4) {
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_COLS, format_file, line, NULL);
+    dreturn("%p", NULL);
     return NULL;
   }
 
   gd_entry_t* M = malloc(sizeof(gd_entry_t));
   if (M == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    dreturn("%p", NULL);
     return NULL;
   }
 
@@ -350,6 +379,7 @@ static void* _GD_ParseMultiply(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
   if (M->field == NULL || M->in_fields[0] == NULL || M->in_fields[1] == NULL)
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
 
+  dreturn("%p", M);
   return M;
 }
 
@@ -358,16 +388,18 @@ static void* _GD_ParseMultiply(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
 static void* _GD_ParseBit(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
     int n_cols, const char* format_file, int line)
 {
-  _GD_ClearError(D);
+  dtrace("%p, %p, %i, \"%s\", %i", D, in_cols, n_cols, format_file, line);
 
   if (n_cols < 4) {
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_COLS, format_file, line, NULL);
+    dreturn("%p", NULL);
     return NULL;
   }
 
   gd_entry_t* B = malloc(sizeof(gd_entry_t));
   if (B == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    dreturn("%p", NULL);
     return NULL;
   }
 
@@ -391,6 +423,7 @@ static void* _GD_ParseBit(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
   else if (B->bitnum + B->numbits - 1 > 63)
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BITSIZE, format_file, line, NULL);
 
+  dreturn("%p", B);
   return B;
 }
 
@@ -399,16 +432,18 @@ static void* _GD_ParseBit(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
 static void* _GD_ParsePhase(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
     int n_cols, const char* format_file, int line)
 {
-  _GD_ClearError(D);
+  dtrace("%p, %p, %i, \"%s\", %i", D, in_cols, n_cols, format_file, line);
 
   if (n_cols < 4) {
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_COLS, format_file, line, NULL);
+    dreturn("%p", NULL);
     return NULL;
   }
 
   gd_entry_t* P = malloc(sizeof(gd_entry_t));
   if (P == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    dreturn("%p", NULL);
     return NULL;
   }
 
@@ -420,8 +455,7 @@ static void* _GD_ParsePhase(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
   if (P->field == NULL || P->in_fields[0] == NULL)
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
 
-  /*FIXME make sure the shift is within the range of the raw field...*/
-
+  dreturn("%p", P);
   return P;
 }
 
@@ -448,12 +482,8 @@ static void _GD_ParseFormatFile(FILE* fp, DIRFILE *D, const char* filedir,
   int linenum = 0;
   int ws = 1;
 
-#ifdef GETDATA_DEBUG
-  printf("_GD_ParseFormatFile(%p, %p, %s, %s, %s, %i, %p, %i)\n", fp, D,
-      filedir, subdir, format_file, standards, IncludeList, *i_include);
-#endif
-
-  _GD_ClearError(D);
+  dtrace("%p, %p, \"%s\", \"%s\", \"%s\", %i, %p, %i", fp, D, filedir, subdir,
+      format_file, standards, IncludeList, *i_include);
 
   /* start parsing */
   while (_GD_GetLine(fp, instring, &linenum)) {
@@ -519,6 +549,7 @@ static void _GD_ParseFormatFile(FILE* fp, DIRFILE *D, const char* filedir,
 
       if ((*IncludeList)[*i_include - 1] == NULL) {
         _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+        dreturnvoid();
         return;
       }
 
@@ -616,6 +647,7 @@ static void _GD_ParseFormatFile(FILE* fp, DIRFILE *D, const char* filedir,
       break;
   }
 
+  dreturnvoid();
   return;
 }
 
@@ -631,6 +663,8 @@ static FILE* _GD_CreateDirfile(DIRFILE* D, const char* format_file,
   int dir_error = 0;
   int format_error = 0;
   FILE* fp = NULL;
+
+  dtrace("%p, \"%s\", \"%s\", 0%o", D, format_file, filedir, flags);
 
   /* naively try to open the format file */
   if ((fp = fopen(format_file, "r")) == NULL) {
@@ -648,6 +682,7 @@ static FILE* _GD_CreateDirfile(DIRFILE* D, const char* format_file,
   /* unable to read the format file */
   if (format_error == EACCES || dir_error == EACCES) {
     _GD_SetError(D, GD_E_OPEN, GD_E_OPEN_NO_ACCESS, format_file, 0, NULL);
+    dreturn("%p", NULL);
     return NULL;
   }
 
@@ -655,6 +690,7 @@ static FILE* _GD_CreateDirfile(DIRFILE* D, const char* format_file,
    * were asked to truncate it */
   if (!dir_error && format_error) {
     _GD_SetError(D, GD_E_OPEN, GD_E_OPEN_NOT_DIRFILE, format_file, 0, NULL);
+    dreturn("%p", NULL);
     return NULL;
   }
 
@@ -662,6 +698,7 @@ static FILE* _GD_CreateDirfile(DIRFILE* D, const char* format_file,
   if (format_error && !(flags & GD_CREAT)) {
     _GD_SetError(D, GD_E_OPEN, GD_E_OPEN_NOT_EXIST, format_file, format_error,
         NULL);
+    dreturn("%p", NULL);
     return NULL;
   }
 
@@ -669,6 +706,7 @@ static FILE* _GD_CreateDirfile(DIRFILE* D, const char* format_file,
   if (!format_error && (flags & GD_CREAT) && (flags & GD_EXCL)) {
     _GD_SetError(D, GD_E_CREAT, GD_E_CREAT_EXCL, filedir, 0, NULL);
     fclose(fp);
+    dreturn("%p", NULL);
     return NULL;
   }
 
@@ -689,12 +727,14 @@ static FILE* _GD_CreateDirfile(DIRFILE* D, const char* format_file,
     /* can't truncate a read-only dirfile */
     if ((flags & GD_ACCMODE) == GD_RDONLY) {
       _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
+      dreturn("%p", NULL);
       return NULL;
     }
 
     /* This code is from defile */
     if ((dir = opendir(filedir)) == NULL) {
       _GD_SetError(D, GD_E_TRUNC, GD_E_TRUNC_DIR, filedir, errno, NULL);
+      dreturn("%p", NULL);
       return NULL;
     }
 
@@ -710,6 +750,7 @@ static FILE* _GD_CreateDirfile(DIRFILE* D, const char* format_file,
 
       if (stat(fullname, &statbuf)) {
         _GD_SetError(D, GD_E_TRUNC, GD_E_TRUNC_STAT, fullname, errno, NULL);
+        dreturn("%p", NULL);
         return NULL;
       }
 
@@ -717,6 +758,7 @@ static FILE* _GD_CreateDirfile(DIRFILE* D, const char* format_file,
       if (S_ISREG(statbuf.st_mode)) {
         if (unlink(fullname)) {
           _GD_SetError(D, GD_E_TRUNC, GD_E_TRUNC_UNLINK, fullname, errno, NULL);
+          dreturn("%p", NULL);
           return NULL;
         }
       }
@@ -729,6 +771,7 @@ static FILE* _GD_CreateDirfile(DIRFILE* D, const char* format_file,
     /* can't create a read-only dirfile */
     if ((flags & GD_ACCMODE) == GD_RDONLY) {
       _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
+      dreturn("%p", NULL);
       return NULL;
     }
 
@@ -736,17 +779,20 @@ static FILE* _GD_CreateDirfile(DIRFILE* D, const char* format_file,
     if (dir_error) 
       if (mkdir(filedir, 00777) < 0) {
         _GD_SetError(D, GD_E_CREAT, GD_E_CREAT_DIR, filedir, errno, NULL);
+        dreturn("%p", NULL);
         return NULL;
       }
 
     /* create a new, empty format file */
     if ((fp = fopen(format_file, "wt")) == NULL) {
       _GD_SetError(D, GD_E_CREAT, GD_E_CREAT_FORMAT, format_file, errno, NULL);
+      dreturn("%p", NULL);
       return NULL;
     }
   }
 
   /* open succeeds */
+  dreturn("%p", fp);
   return fp;
 }
 
@@ -763,9 +809,7 @@ DIRFILE* dirfile_open(const char* filedir, unsigned int flags)
   char **IncludeList = NULL;
   int i_include;
 
-#ifdef GETDATA_DEBUG
-  printf("dirfile_open(%s, %x)\n", filedir, flags);
-#endif
+  dtrace("\"%s\", 0%o", filedir, flags);
 
   D = malloc(sizeof(DIRFILE));
   _GD_ClearError(D);
@@ -784,8 +828,10 @@ DIRFILE* dirfile_open(const char* filedir, unsigned int flags)
       (filedir[strlen(filedir) - 1] == '/') ? "" : "/");
 
   /* open the format file (or create it) */
-  if ((fp = _GD_CreateDirfile(D, format_file, filedir, flags)) == NULL)
+  if ((fp = _GD_CreateDirfile(D, format_file, filedir, flags)) == NULL) {
+    dreturn("%p", D);
     return D; /* errors have already been set */
+  }
 
   /* Parse the file.  This will take care of any necessary inclusions */
   i_include = 1;
@@ -793,6 +839,7 @@ DIRFILE* dirfile_open(const char* filedir, unsigned int flags)
   IncludeList = malloc(sizeof(char*));
   if (IncludeList == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    dreturn("%p", D);
     return D;
   }
 
@@ -801,6 +848,7 @@ DIRFILE* dirfile_open(const char* filedir, unsigned int flags)
   if (IncludeList[0] == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     free(IncludeList);
+    dreturn("%p", D);
     return D;
   }
 
@@ -813,8 +861,10 @@ DIRFILE* dirfile_open(const char* filedir, unsigned int flags)
     free(IncludeList[i]);
   free(IncludeList);
 
-  if (D->error != GD_E_OK)
+  if (D->error != GD_E_OK) {
+    dreturn("%p", D);
     return D;
+  }
 
   /* find the first raw field */
   for (i = 0; i < D->n_entries; i++) {
@@ -842,6 +892,7 @@ DIRFILE* dirfile_open(const char* filedir, unsigned int flags)
   if (D->error == GD_E_OK)
     D->flags &= ~GD_INVALID;
 
+  dreturn("%p", D);
   return D;
 }
 
@@ -851,12 +902,16 @@ void dirfile_close(DIRFILE* D)
 {
   int i;
 
+  dtrace("%p", D);
+
   for(i = 0; i < D->n_entries; ++i)
     if (D->entries[i]->field_type == GD_RAW_ENTRY)
       close(D->entries[i]->fp);
 
   _GD_ClearError(D);
   _GD_FreeD(D);
+
+  dreturnvoid();
 }
 /* vim: ts=2 sw=2 et tw=80
 */

@@ -27,6 +27,10 @@ LEGACY_C = legacy.c
 GETDATA_LEGACY_H = getdata_legacy.h
 endif
 
+if GETDATA_DEBUG
+DEBUG_C = debug.c
+endif
+
 BUILT_SOURCES = getdata.h
 
 nodist_include_HEADERS = getdata.h
@@ -34,6 +38,7 @@ include_HEADERS = ${GETDATA_LEGACY_H}
 
 lib_LTLIBRARIES = libgetdata.la
 libgetdata_la_SOURCES = getdata.c putdata.c dirfile_open.c errors.c nframes.c \
-												spf.c ${LEGACY_C} ${GETDATA_LEGACY_H} internal.h
+												spf.c ${LEGACY_C} ${GETDATA_LEGACY_H} internal.h \
+												${DEBUG_C}
 libgetdata_la_LDFLAGS = -version-info @GETDATA_IFACE_VERSION@:@GETDATA_IMPL_REVISION@:@GETDATA_IFACE_AGE@
 
