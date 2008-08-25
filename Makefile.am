@@ -21,4 +21,6 @@
 #
 AUTOMAKE_OPTIONS = foreign dist-bzip2
 
+EXTRA_DIST = README.cxx README.f77
+
 SUBDIRS = src bin man . test bindings
