@@ -34,6 +34,6 @@ include_HEADERS = ${GETDATA_LEGACY_H}
 
 lib_LTLIBRARIES = libgetdata.la
 libgetdata_la_SOURCES = getdata.c putdata.c dirfile_open.c errors.c nframes.c \
-												spf.c ${LEGACY_C} ${GETDATA_LEGACY_H} getdata_internal.h
+												spf.c ${LEGACY_C} ${GETDATA_LEGACY_H} internal.h
 libgetdata_la_LDFLAGS = -version-info @GETDATA_IFACE_VERSION@:@GETDATA_IMPL_REVISION@:@GETDATA_IFACE_AGE@
 
