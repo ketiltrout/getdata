@@ -88,6 +88,9 @@ static int _GDF_SetDirfile(DIRFILE* D)
 /* delete the supplied dirfile */
 static void _GDF_ClearDirfile(int d)
 {
+  if (d == 0)
+    return;
+
   DIRFILE* D = f77dirfiles[d];
 
   if (D) {
