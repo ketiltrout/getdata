@@ -33,7 +33,7 @@
 #include <string.h>
 #endif
 
-#include "getdata_internal.h"
+#include "internal.h"
 
 /* The following has been extracted from internal.cpp from kjs */
 

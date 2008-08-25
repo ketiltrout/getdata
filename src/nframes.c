@@ -29,7 +29,7 @@
 #include <sys/stat.h>
 #endif
 
-#include "getdata_internal.h"
+#include "internal.h"
 
 off64_t get_n_frames64(DIRFILE* D)
 {

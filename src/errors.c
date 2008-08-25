@@ -28,7 +28,7 @@
 #include <string.h>
 #endif
 
-#include "getdata_internal.h"
+#include "internal.h"
 
 /* Error strings. */
 static const struct {

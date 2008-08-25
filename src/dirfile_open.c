@@ -41,7 +41,7 @@
 #include <libgen.h>
 #endif
 
-#include "getdata_internal.h"
+#include "internal.h"
 
 #define MAX_IN_COLS (3 * GD_MAX_LINCOM + 3) /* for lincom */
 

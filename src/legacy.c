@@ -30,7 +30,7 @@
 #include <string.h>
 #endif
 
-#include "getdata_internal.h"
+#include "internal.h"
 
 static struct {
   unsigned int n;

@@ -33,7 +33,7 @@
 #include <stdlib.h>
 #endif
 
-#include "getdata_internal.h"
+#include "internal.h"
 
 static size_t _GD_DoFieldOut(DIRFILE* D, const char *field_code,
     off64_t first_frame, off64_t first_samp, size_t num_frames, size_t num_samp,
