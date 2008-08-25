@@ -1418,7 +1418,7 @@ size_t _GD_DoField(DIRFILE *D, const char *field_code, off64_t first_frame,
   }
 
   /* Can't get here */
-  _GD_SetError(D, GD_E_INTERNAL_ERROR, 0, __FILE__, __LINE__, NULL);
+  _GD_InternalError(D);
   return 0;
 }
 

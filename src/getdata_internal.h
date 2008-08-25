@@ -170,6 +170,8 @@ int _GD_GetLine(FILE *fp, char *line, int* linenum) __gd_nonnull((1, 2, 3));
 unsigned int  _GD_GetSPF(const char *field_code, DIRFILE* D) __gd_nonnull ((1, 2));
 struct gd_entry_t* _GD_FindField(DIRFILE* D, const char* field_code)
   __gd_nonnull ((1, 2)) __THROW;
+#define _GD_InternalError(D) \
+    _GD_SetError(D, GD_E_INTERNAL_ERROR, 0, __FILE__, __LINE__, NULL);
 gd_type_t _GD_LegacyType(char c) __THROW __attribute__ ((__const__));
 void _GD_LinterpData(DIRFILE* D, const void *data, gd_type_t type, int npts,
     double *lx, double *ly, int n_ln) __gd_nonnull ((1, 2, 5, 6)) __THROW;

@@ -319,7 +319,7 @@ static size_t _GD_DoFieldOut(DIRFILE *D, const char *field_code,
           num_frames, num_samp, data_type, data_in);
   }
 
-  _GD_SetError(D, GD_E_INTERNAL_ERROR, 0, __FILE__, __LINE__, NULL);
+  _GD_InternalError(D);
   return 0;
 }
 

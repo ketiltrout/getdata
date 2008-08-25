@@ -75,7 +75,7 @@ unsigned int _GD_GetSPF(const char *field_code, DIRFILE* D)
       spf = _GD_GetSPF(ENTRY(Linterp, entry)->raw_field, D);
       break;
     default:
-      _GD_SetError(D, GD_E_INTERNAL_ERROR, 0, __FILE__, __LINE__, NULL);
+      _GD_InternalError(D);
   }
   D->recurse_level--;
   return spf;
