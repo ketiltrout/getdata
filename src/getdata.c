@@ -91,7 +91,15 @@ static void _GD_FillFileFrame(void *dataout, gd_type_t rtype, off64_t s0,
       break;
     case GD_UINT32:
       for (i = 0; i < n; i++)
-        ((uint32_t*)dataout)[i] = (i + s0);
+        ((uint32_t*)dataout)[i] = (uint32_t)(i + s0);
+      break;
+    case GD_INT64:
+      for (i = 0; i < n; i++)
+        ((int64_t*)dataout)[i] = (int64_t)(i + s0);
+      break;
+    case GD_UINT64:
+      for (i = 0; i < n; i++)
+        ((uint64_t*)dataout)[i] = (uint64_t)(i + s0);
       break;
     case GD_FLOAT:
       for (i = 0; i < n; i++)
@@ -605,7 +613,7 @@ static int _GD_FillZero(void *databuffer, gd_type_t type, off64_t s0, size_t ns)
 }
 
 /* Binary search to find the field */
-struct gd_entry_t* _GD_FindField(DIRFILE* D, const char* field_code)
+gd_entry_t* _GD_FindField(DIRFILE* D, const char* field_code)
 {
   int i, c;
   int l = 0;
@@ -648,7 +656,7 @@ void _GD_FixEndianness(char* databuffer, size_t size, size_t ns)
 
 /* _GD_DoRaw:  Read from a raw.  Returns number of samples read.
 */
-static size_t _GD_DoRaw(DIRFILE *D, struct RawEntryType *R,
+static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *R,
     off64_t first_frame, off64_t first_samp, size_t num_frames, size_t num_samp,
     gd_type_t return_type, void *data_out)
 {
@@ -934,7 +942,7 @@ static void _GD_MultiplyData(DIRFILE* D, void *A, unsigned int spfA, void *B,
 
 /* _GD_DoLincom:  Read from a lincom.  Returns number of samples read.
 */
-static size_t _GD_DoLincom(DIRFILE *D, struct LincomEntryType *L,
+static size_t _GD_DoLincom(DIRFILE *D, gd_entry_t *L,
     off64_t first_frame, off64_t first_samp, size_t num_frames, size_t num_samp,
     gd_type_t return_type, void *data_out)
 {
@@ -965,8 +973,8 @@ static size_t _GD_DoLincom(DIRFILE *D, struct LincomEntryType *L,
 
   _GD_ScaleData(D, data_out, return_type, n_read, L->m[0], L->b[0]);
 
-  if (L->n_infields > 1) {
-    for (i = 1; i < L->n_infields; i++) {
+  if (L->count > 1) {
+    for (i = 1; i < L->count; i++) {
       D->recurse_level++;
 
       /* find the samples per frame of the next field */
@@ -1016,7 +1024,7 @@ static size_t _GD_DoLincom(DIRFILE *D, struct LincomEntryType *L,
 
 /* _GD_DoMultiply:  Read from a multiply.  Returns number of samples read.
 */
-static size_t _GD_DoMultiply(DIRFILE *D, struct MultiplyEntryType* M,
+static size_t _GD_DoMultiply(DIRFILE *D, gd_entry_t* M,
     off64_t first_frame, off64_t first_samp, size_t num_frames, size_t num_samp,
     gd_type_t return_type, void *data_out)
 {
@@ -1085,7 +1093,7 @@ static size_t _GD_DoMultiply(DIRFILE *D, struct MultiplyEntryType* M,
 
 /* _GD_DoBit:  Read from a bitfield.  Returns number of samples read.
 */
-static size_t _GD_DoBit(DIRFILE *D, struct BitEntryType *B,
+static size_t _GD_DoBit(DIRFILE *D, gd_entry_t *B,
     off64_t first_frame, off64_t first_samp, size_t num_frames, size_t num_samp,
     gd_type_t return_type, void *data_out)
 {
@@ -1100,7 +1108,7 @@ static size_t _GD_DoBit(DIRFILE *D, struct BitEntryType *B,
 
   /* if we got here, we found the field! */
   D->recurse_level++;
-  spf = _GD_GetSPF(B->raw_field, D);
+  spf = _GD_GetSPF(B->in_fields[0], D);
   D->recurse_level--;
 
   if (D->error != GD_E_OK)
@@ -1114,7 +1122,7 @@ static size_t _GD_DoBit(DIRFILE *D, struct BitEntryType *B,
   }
 
   D->recurse_level++;
-  n_read = _GD_DoField(D, B->raw_field, first_frame, first_samp,
+  n_read = _GD_DoField(D, B->in_fields[0], first_frame, first_samp,
       num_frames, num_samp, GD_UINT64, tmpbuf);
   D->recurse_level--;
 
@@ -1134,14 +1142,14 @@ static size_t _GD_DoBit(DIRFILE *D, struct BitEntryType *B,
 
 /* _GD_DoPhase:  Read from a phase.  Returns number of samples read.
 */
-static size_t _GD_DoPhase(DIRFILE *D, struct PhaseEntryType *P,
+static size_t _GD_DoPhase(DIRFILE *D, gd_entry_t *P,
     off64_t first_frame, off64_t first_samp, size_t num_frames, size_t num_samp,
     gd_type_t return_type, void *data_out)
 {
   size_t n_read;
 
   D->recurse_level++;
-  n_read = _GD_DoField(D, P->raw_field, first_frame, first_samp + P->shift,
+  n_read = _GD_DoField(D, P->in_fields[0], first_frame, first_samp + P->shift,
       num_frames, num_samp, return_type, data_out);
   D->recurse_level--;
 
@@ -1150,9 +1158,9 @@ static size_t _GD_DoPhase(DIRFILE *D, struct PhaseEntryType *P,
 
 /* _GD_MakeDummyLinterp: Make an empty linterp
 */
-static void _GD_MakeDummyLinterp(DIRFILE* D, struct LinterpEntryType *E)
+static void _GD_MakeDummyLinterp(DIRFILE* D, gd_entry_t *E)
 {
-  E->n_interp = 2;
+  E->count = 2;
   E->x = (double *)malloc(2*sizeof(double));
   E->y = (double *)malloc(2*sizeof(double));
 
@@ -1169,18 +1177,18 @@ static void _GD_MakeDummyLinterp(DIRFILE* D, struct LinterpEntryType *E)
 
 /* _GD_ReadLinterpFile: Read in the linterp data for this field
 */
-void _GD_ReadLinterpFile(DIRFILE* D, struct LinterpEntryType *E)
+void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E)
 {
   FILE *fp;
   int i;
   char line[MAX_LINE_LENGTH];
   int linenum = 0;
 
-  fp = fopen(E->linterp_file, "r");
+  fp = fopen(E->file, "r");
   if (fp == NULL) {
     _GD_MakeDummyLinterp(D, E);
     _GD_SetError(D, GD_E_OPEN_LINFILE, GD_E_LINFILE_OPEN, NULL, 0,
-        E->linterp_file);
+        E->file);
     return;
   }
 
@@ -1192,11 +1200,11 @@ void _GD_ReadLinterpFile(DIRFILE* D, struct LinterpEntryType *E)
   if (i < 2) {
     _GD_MakeDummyLinterp(D, E);
     _GD_SetError(D, GD_E_OPEN_LINFILE, GD_E_LINFILE_LENGTH, NULL, 0,
-        E->linterp_file);
+        E->file);
     return;
   }
 
-  E->n_interp = i;
+  E->count = i;
   E->x = (double *)malloc(i * sizeof(double));
   E->y = (double *)malloc(i * sizeof(double));
   if (E->x == NULL || E->y == NULL) {
@@ -1207,7 +1215,7 @@ void _GD_ReadLinterpFile(DIRFILE* D, struct LinterpEntryType *E)
   /* now read in the data */
   rewind(fp);
   linenum = 0;
-  for (i = 0; i < E->n_interp; i++) {
+  for (i = 0; i < E->count; i++) {
     _GD_GetLine(fp, line, &linenum);
     sscanf(line, "%lg %lg",&(E->x[i]), &(E->y[i]));
   }
@@ -1332,27 +1340,27 @@ void _GD_LinterpData(DIRFILE* D, const void *data, gd_type_t type, int npts,
 
 /* _GD_DoLinterp:  Read from a linterp.  Returns number of samples read.
 */
-static size_t _GD_DoLinterp(DIRFILE *D, struct LinterpEntryType* I,
+static size_t _GD_DoLinterp(DIRFILE *D, gd_entry_t* I,
     off64_t first_frame, off64_t first_samp, size_t num_frames, size_t num_samp,
     gd_type_t return_type, void *data_out)
 {
   size_t n_read = 0;
 
-  if (I->n_interp < 0) {
+  if (I->count < 0) {
     _GD_ReadLinterpFile(D, I);
     if (D->error != GD_E_OK)
       return 0;
   }
 
   D->recurse_level++;
-  n_read = _GD_DoField(D, I->raw_field, first_frame, first_samp,
+  n_read = _GD_DoField(D, I->in_fields[0], first_frame, first_samp,
       num_frames, num_samp, return_type, data_out);
   D->recurse_level--;
 
   if (D->error != GD_E_OK)
     return 0;
 
-  _GD_LinterpData(D, data_out, return_type, n_read, I->x, I->y, I->n_interp);
+  _GD_LinterpData(D, data_out, return_type, n_read, I->x, I->y, I->count);
 
   return n_read;
 }
@@ -1364,7 +1372,7 @@ size_t _GD_DoField(DIRFILE *D, const char *field_code, off64_t first_frame,
     gd_type_t return_type, void *data_out)
 {
   size_t n_read = 0;
-  struct gd_entry_t* entry;
+  gd_entry_t* entry;
 
 #ifdef GETDATA_DEBUG
   printf("_GD_DoField(%p, %s, %lli, %lli, %zi, %zi, %i, %p)\n", D, field_code,
@@ -1398,23 +1406,23 @@ size_t _GD_DoField(DIRFILE *D, const char *field_code, off64_t first_frame,
 
   switch (entry->field_type) {
     case GD_RAW_ENTRY:
-      return _GD_DoRaw(D, ENTRY(Raw, entry), first_frame, first_samp,
-          num_frames, num_samp, return_type, data_out);
+      return _GD_DoRaw(D, entry, first_frame, first_samp, num_frames, num_samp,
+          return_type, data_out);
     case GD_LINTERP_ENTRY:
-      return _GD_DoLinterp(D, ENTRY(Linterp, entry), first_frame, first_samp,
-          num_frames, num_samp, return_type, data_out);
+      return _GD_DoLinterp(D, entry, first_frame, first_samp, num_frames,
+          num_samp, return_type, data_out);
     case GD_LINCOM_ENTRY:
-      return _GD_DoLincom(D, ENTRY(Lincom, entry), first_frame, first_samp,
-          num_frames, num_samp, return_type, data_out);
+      return _GD_DoLincom(D, entry, first_frame, first_samp, num_frames,
+          num_samp, return_type, data_out);
     case GD_BIT_ENTRY:
-      return _GD_DoBit(D, ENTRY(Bit, entry), first_frame, first_samp,
-          num_frames, num_samp, return_type, data_out);
+      return _GD_DoBit(D, entry, first_frame, first_samp, num_frames, num_samp,
+          return_type, data_out);
     case GD_MULTIPLY_ENTRY:
-      return _GD_DoMultiply(D, ENTRY(Multiply, entry), first_frame, first_samp,
-          num_frames, num_samp, return_type, data_out);
+      return _GD_DoMultiply(D, entry, first_frame, first_samp, num_frames,
+          num_samp, return_type, data_out);
     case GD_PHASE_ENTRY:
-      return _GD_DoPhase(D, ENTRY(Phase, entry), first_frame, first_samp,
-          num_frames, num_samp, return_type, data_out);
+      return _GD_DoPhase(D, entry, first_frame, first_samp, num_frames,
+          num_samp, return_type, data_out);
   }
 
   /* Can't get here */

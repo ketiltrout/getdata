@@ -106,56 +106,6 @@ char *strerror_r(int errnum, char *buf, size_t buflen);
 #define GD_E_LINFILE_OPEN      0
 #define GD_E_LINFILE_LENGTH    1
 
-struct RawEntryType {
-  char* field;
-  int field_type;
-  char* file;
-  gd_type_t data_type;
-  int fp;
-  size_t size;
-  int samples_per_frame;
-};
-
-struct LincomEntryType {
-  char* field;
-  int field_type;
-  int n_infields;
-  char *in_fields[GD_MAX_LINCOM];
-  double m[GD_MAX_LINCOM];
-  double b[GD_MAX_LINCOM];
-};
-
-struct LinterpEntryType {
-  char* field;
-  int field_type;
-  char *raw_field;
-  char *linterp_file;
-  int n_interp;
-  double *x;
-  double *y;
-};
-
-struct MultiplyEntryType {
-  char* field;
-  int field_type;
-  char *in_fields[2];
-};
-
-struct BitEntryType {
-  char* field;
-  int field_type;
-  char *raw_field;
-  int bitnum;
-  int numbits;
-};
-
-struct PhaseEntryType {
-  char* field;
-  int field_type;
-  char *raw_field;
-  int shift;
-};
-
 void* _GD_Alloc(DIRFILE* D, gd_type_t type, int n) __gd_nonnull ((1))
   __attribute_malloc__ __THROW __wur;
 void _GD_ClearError(DIRFILE* D) __gd_nonnull ((1)) __THROW;
@@ -168,22 +118,19 @@ void _GD_FixEndianness(char* databuffer, size_t size, size_t ns)
   __gd_nonnull ((1));
 int _GD_GetLine(FILE *fp, char *line, int* linenum) __gd_nonnull((1, 2, 3));
 unsigned int  _GD_GetSPF(const char *field_code, DIRFILE* D) __gd_nonnull ((1, 2));
-struct gd_entry_t* _GD_FindField(DIRFILE* D, const char* field_code)
+gd_entry_t* _GD_FindField(DIRFILE* D, const char* field_code)
   __gd_nonnull ((1, 2)) __THROW;
 #define _GD_InternalError(D) \
     _GD_SetError(D, GD_E_INTERNAL_ERROR, 0, __FILE__, __LINE__, NULL);
 gd_type_t _GD_LegacyType(char c) __THROW __attribute__ ((__const__));
 void _GD_LinterpData(DIRFILE* D, const void *data, gd_type_t type, int npts,
     double *lx, double *ly, int n_ln) __gd_nonnull ((1, 2, 5, 6)) __THROW;
-void _GD_ReadLinterpFile(DIRFILE* D, struct LinterpEntryType *E)
+void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E)
   __gd_nonnull ((1, 2));
 void _GD_ScaleData(DIRFILE* D, void *data, gd_type_t type, int npts, double m,
     double b) __gd_nonnull ((1, 2)) __THROW;
 void _GD_SetError(DIRFILE* D, int error, int suberror,
     const char* format_file, int line, const char* token) __gd_nonnull ((1))
   __THROW;
-
-/* typecast the generic EntryType to a particular field type */
-#define ENTRY(a,b) ((struct a ## EntryType*)(b))
 
 #endif

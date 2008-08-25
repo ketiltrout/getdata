@@ -34,7 +34,7 @@
 */
 unsigned int _GD_GetSPF(const char *field_code, DIRFILE* D)
 {
-  struct gd_entry_t* entry;
+  gd_entry_t* entry;
   unsigned int spf = 0;
 
   if (D->recurse_level >= GD_MAX_RECURSE_LEVEL) {
@@ -57,22 +57,14 @@ unsigned int _GD_GetSPF(const char *field_code, DIRFILE* D)
   D->recurse_level++;
   switch(entry->field_type) {
     case GD_RAW_ENTRY:
-      spf = ENTRY(Raw, entry)->samples_per_frame;
+      spf = entry->samples_per_frame;
       break;
     case GD_LINCOM_ENTRY:
-      spf = _GD_GetSPF(ENTRY(Lincom, entry)->in_fields[0], D);
-      break;
     case GD_MULTIPLY_ENTRY:
-      spf = _GD_GetSPF(ENTRY(Multiply, entry)->in_fields[0], D);
-      break;
     case GD_BIT_ENTRY:
-      spf = _GD_GetSPF(ENTRY(Bit, entry)->raw_field, D);
-      break;
     case GD_PHASE_ENTRY:
-      spf = _GD_GetSPF(ENTRY(Phase, entry)->raw_field, D);
-      break;
     case GD_LINTERP_ENTRY:
-      spf = _GD_GetSPF(ENTRY(Linterp, entry)->raw_field, D);
+      spf = _GD_GetSPF(entry->in_fields[0], D);
       break;
     default:
       _GD_InternalError(D);

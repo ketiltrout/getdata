@@ -38,7 +38,7 @@ static size_t _GD_DoFieldOut(DIRFILE* D, const char *field_code,
     off64_t first_frame, off64_t first_samp, size_t num_frames, size_t num_samp,
     gd_type_t data_type, const void *data_in);
 
-static size_t _GD_DoRawOut(DIRFILE *D, struct RawEntryType *R,
+static size_t _GD_DoRawOut(DIRFILE *D, gd_entry_t *R,
     off64_t first_frame, off64_t first_samp, size_t num_frames, size_t num_samp,
     gd_type_t data_type, const void *data_in)
 {
@@ -111,7 +111,7 @@ static size_t _GD_DoRawOut(DIRFILE *D, struct RawEntryType *R,
   return n_wrote;
 }
 
-static size_t _GD_DoLinterpOut(DIRFILE* D, struct LinterpEntryType *I,
+static size_t _GD_DoLinterpOut(DIRFILE* D, gd_entry_t *I,
     off64_t first_frame, off64_t first_samp, size_t num_frames, size_t num_samp,
     gd_type_t data_type, const void *data_in)
 {
@@ -119,7 +119,7 @@ static size_t _GD_DoLinterpOut(DIRFILE* D, struct LinterpEntryType *I,
   size_t ns;
   size_t n_wrote;
 
-  if (I->n_interp < 0) {
+  if (I->count < 0) {
     _GD_ReadLinterpFile(D, I);
     if (D->error != GD_E_OK)
       return 0;
@@ -128,24 +128,24 @@ static size_t _GD_DoLinterpOut(DIRFILE* D, struct LinterpEntryType *I,
   /* Interpolate X(y) instead of Y(x) */
 
   D->recurse_level++;
-  spf = _GD_GetSPF(I->raw_field, D);
+  spf = _GD_GetSPF(I->in_fields[0], D);
   D->recurse_level--;
   ns = num_samp + num_frames * (int)spf;
 
-  _GD_LinterpData(D, data_in, data_type, ns, I->y, I->x, I->n_interp);
+  _GD_LinterpData(D, data_in, data_type, ns, I->y, I->x, I->count);
 
   if (D->error != GD_E_OK)
     return 0;
 
   D->recurse_level++;
-  n_wrote = _GD_DoFieldOut(D, I->raw_field, first_frame, first_samp,
+  n_wrote = _GD_DoFieldOut(D, I->in_fields[0], first_frame, first_samp,
       num_frames, num_samp, data_type, data_in);
   D->recurse_level--;
 
   return n_wrote;
 }
 
-static size_t _GD_DoLincomOut(DIRFILE* D, struct LincomEntryType *L,
+static size_t _GD_DoLincomOut(DIRFILE* D, gd_entry_t *L,
     off64_t first_frame, off64_t first_samp, size_t num_frames, size_t num_samp,
     gd_type_t data_type, const void *data_in)
 {
@@ -156,7 +156,7 @@ static size_t _GD_DoLincomOut(DIRFILE* D, struct LincomEntryType *L,
   /* we cannot write to LINCOM fields that are a linear combination */
   /* of more than one raw field (no way to know how to split data). */
 
-  if (L->n_infields > 1) {
+  if (L->count > 1) {
     _GD_SetError(D, GD_E_BAD_PUT_FIELD, 0, NULL, 0, L->field);
     return 0;
   }
@@ -195,7 +195,7 @@ static size_t _GD_DoLincomOut(DIRFILE* D, struct LincomEntryType *L,
   return n_wrote;
 }
 
-static size_t _GD_DoBitOut(DIRFILE* D, struct BitEntryType *B,
+static size_t _GD_DoBitOut(DIRFILE* D, gd_entry_t *B,
     off64_t first_frame, off64_t first_samp, size_t num_frames, size_t num_samp,
     gd_type_t data_type, const void *data_in)
 {
@@ -214,7 +214,7 @@ static size_t _GD_DoBitOut(DIRFILE* D, struct BitEntryType *B,
 #endif
 
   D->recurse_level++;
-  spf = _GD_GetSPF(B->raw_field, D);
+  spf = _GD_GetSPF(B->in_fields[0], D);
   D->recurse_level--;
 
   if (D->error != GD_E_OK)
@@ -237,12 +237,12 @@ static size_t _GD_DoBitOut(DIRFILE* D, struct BitEntryType *B,
   /* do not check error code, since the field may not exist yet */
 
 #ifdef GETDATA_DEBUG
-  fprintf(stdout,"DoBitOut:  reading in bitfield %s\n",B->raw_field);
+  fprintf(stdout,"DoBitOut:  reading in bitfield %s\n",B->in_fields[0]);
 #endif
 
   D->recurse_level++;
 
-  _GD_DoField(D, B->raw_field, first_frame, first_samp, 0, ns, GD_UINT64,
+  _GD_DoField(D, B->in_fields[0], first_frame, first_samp, 0, ns, GD_UINT64,
       readbuf);
 
   D->recurse_level--;
@@ -257,7 +257,7 @@ static size_t _GD_DoBitOut(DIRFILE* D, struct BitEntryType *B,
       (tmpbuf[i] & mask) << B->bitnum;
 
   /* write the modified data out */
-  n_wrote = _GD_DoFieldOut(D, B->raw_field, first_frame, first_samp,
+  n_wrote = _GD_DoFieldOut(D, B->in_fields[0], first_frame, first_samp,
       num_frames, num_samp, GD_UINT64, (void*)readbuf);
 
   free(readbuf);
@@ -265,14 +265,14 @@ static size_t _GD_DoBitOut(DIRFILE* D, struct BitEntryType *B,
   return n_wrote;
 }
 
-static size_t _GD_DoPhaseOut(DIRFILE* D, struct PhaseEntryType *P,
+static size_t _GD_DoPhaseOut(DIRFILE* D, gd_entry_t *P,
     off64_t first_frame, off64_t first_samp, size_t num_frames, size_t num_samp,
     gd_type_t data_type, const void *data_in)
 {
   size_t n_wrote;
 
   D->recurse_level++;
-  n_wrote = _GD_DoFieldOut(D, P->raw_field, first_frame, first_samp + P->shift,
+  n_wrote = _GD_DoFieldOut(D, P->in_fields[0], first_frame, first_samp + P->shift,
       num_frames, num_samp, data_type, data_in);
   D->recurse_level--;
 
@@ -283,7 +283,7 @@ static size_t _GD_DoFieldOut(DIRFILE *D, const char *field_code,
     off64_t first_frame, off64_t first_samp, size_t num_frames, size_t num_samp,
     gd_type_t data_type, const void *data_in)
 {
-  struct gd_entry_t* entry;
+  gd_entry_t* entry;
 
   if (D->recurse_level > 10) {
     _GD_SetError(D, GD_E_RECURSE_LEVEL, 0, NULL, 0, field_code);
@@ -300,23 +300,23 @@ static size_t _GD_DoFieldOut(DIRFILE *D, const char *field_code,
 
   switch (entry->field_type) {
     case GD_RAW_ENTRY:
-      return _GD_DoRawOut(D, ENTRY(Raw, entry), first_frame, first_samp,
-          num_frames, num_samp, data_type, data_in);
+      return _GD_DoRawOut(D, entry, first_frame, first_samp, num_frames,
+          num_samp, data_type, data_in);
     case GD_LINTERP_ENTRY:
-      return _GD_DoLinterpOut(D, ENTRY(Linterp, entry), first_frame, first_samp,
-          num_frames, num_samp, data_type, data_in);
+      return _GD_DoLinterpOut(D, entry, first_frame, first_samp, num_frames,
+          num_samp, data_type, data_in);
     case GD_LINCOM_ENTRY:
-      return _GD_DoLincomOut(D, ENTRY(Lincom, entry), first_frame, first_samp,
-          num_frames, num_samp, data_type, data_in);
+      return _GD_DoLincomOut(D, entry, first_frame, first_samp, num_frames,
+          num_samp, data_type, data_in);
     case GD_BIT_ENTRY:
-      return _GD_DoBitOut(D, ENTRY(Bit, entry), first_frame, first_samp,
-          num_frames, num_samp, data_type, data_in);
+      return _GD_DoBitOut(D, entry, first_frame, first_samp, num_frames,
+          num_samp, data_type, data_in);
     case GD_MULTIPLY_ENTRY:
       _GD_SetError(D, GD_E_BAD_PUT_FIELD, 0, NULL, 0, field_code);
       return 0;
     case GD_PHASE_ENTRY:
-      return _GD_DoPhaseOut(D, ENTRY(Phase, entry), first_frame, first_samp,
-          num_frames, num_samp, data_type, data_in);
+      return _GD_DoPhaseOut(D, entry, first_frame, first_samp, num_frames,
+          num_samp, data_type, data_in);
   }
 
   _GD_InternalError(D);

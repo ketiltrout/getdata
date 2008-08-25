@@ -48,14 +48,14 @@ off64_t get_n_frames64(DIRFILE* D)
 
   /* load the first valid raw field */
   snprintf(raw_data_filename, FILENAME_MAX, "%s/%s", D->name,
-      ENTRY(Raw, D->first_field)->file);
+      D->first_field->file);
   if (stat64(raw_data_filename, &statbuf) < 0) {
     _GD_SetError(D, GD_E_RAW_IO, 0, NULL, 0, NULL);
     return 0;
   }
 
-  nf = statbuf.st_size / (ENTRY(Raw, D->first_field)->size *
-      ENTRY(Raw, D->first_field)->samples_per_frame);
+  nf = statbuf.st_size / (D->first_field->size *
+      D->first_field->samples_per_frame);
   nf += D->frame_offset;
 
   return nf;

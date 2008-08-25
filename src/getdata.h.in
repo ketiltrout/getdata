@@ -91,11 +91,65 @@ extern const char *GD_ERROR_CODES[GD_N_ERROR_CODES] __attribute_deprecated__;
 #define GD_MULTIPLY_ENTRY 4
 #define GD_PHASE_ENTRY    5
 
-/* Incomplete, generic entry struct */
-struct gd_entry_t {
-  const char *field;
-  const int field_type;
+/* Data types -- No valid type may contain 0x40.  This will automatically
+ * invalidate any attempt to use the old-style character types as gd_type_t's */
+#define GD_SIZE8     0x01
+#define GD_SIZE16    0x02
+#define GD_SIZE32    0x04
+#define GD_SIZE64    0x08
+#define GD_SIZE(x)   (x & 0x0f)
+
+#define GD_SIGNED    0x10
+#define GD_IEEE754   0x20
+
+typedef enum {
+  GD_NULL    = 0,
+  GD_UNKNOWN = 0xf0,  /* GD_SIZE(GD_UNKNOWN) must evaluate to zero */
+  GD_UINT8   = GD_SIZE8,
+  GD_INT8    = GD_SIZE8  | GD_SIGNED,
+  GD_UINT16  = GD_SIZE16,
+  GD_INT16   = GD_SIZE16 | GD_SIGNED,
+  GD_UINT32  = GD_SIZE32,
+  GD_INT32   = GD_SIZE32 | GD_SIGNED,
+  GD_UINT64  = GD_SIZE64,
+  GD_INT64   = GD_SIZE64 | GD_SIGNED,
+  GD_FLOAT32 = GD_SIZE32 | GD_IEEE754,
+  GD_FLOAT64 = GD_SIZE64 | GD_IEEE754
+} gd_type_t;
+#define GD_FLOAT     GD_FLOAT32
+#define GD_DOUBLE    GD_FLOAT64
+
+/* Unified entry struct */
+struct _gd_unified_entry {
+  char* field;
+  int field_type;
+  union {
+    char* file;
+    char *in_fields[GD_MAX_LINCOM];
+  };
+  union {
+    int fp;
+    int count;
+    int bitnum;
+    int shift;
+  };
+  union {
+    unsigned int samples_per_frame;
+    int numbits;
+  };
+  union {
+    double* m;
+    double* x;
+    gd_type_t data_type;
+  };
+  union {
+    double* b;
+    double* y;
+    size_t size;
+  };
 };
+
+typedef struct _gd_unified_entry gd_entry_t;
 
 /* The DIRFILE struct.  */
 struct _GD_DIRFILE {
@@ -109,10 +163,10 @@ struct _GD_DIRFILE {
   unsigned int n_entries;
 
   /* field array */
-  struct gd_entry_t** entries;
+  gd_entry_t** entries;
 
   /* The first field */
-  struct gd_entry_t* first_field;
+  gd_entry_t* first_field;
 
   /* directory name */
   const char* name;
@@ -142,34 +196,6 @@ typedef struct _GD_DIRFILE DIRFILE;
 #define GD_FORCE_ENDIAN 01000000 /* override endianness */
 #define GD_PEDANTIC     02000000 /* be pedantic */
 #define GD_INVALID      04000000 /* the dirfile is invalid */
-
-/* Data types -- No valid type may contain 0x40.  This will automatically
- * invalidate any attempt to use the old-style character types as gd_type_t's */
-#define GD_SIZE8     0x01
-#define GD_SIZE16    0x02
-#define GD_SIZE32    0x04
-#define GD_SIZE64    0x08
-#define GD_SIZE(x)   (x & 0x0f)
-
-#define GD_SIGNED    0x10
-#define GD_IEEE754   0x20
-
-typedef enum {
-  GD_NULL    = 0,
-  GD_UNKNOWN = 0xf0,  /* GD_SIZE(GD_UNKNOWN) must evaluate to zero */
-  GD_UINT8   = GD_SIZE8,
-  GD_INT8    = GD_SIZE8  | GD_SIGNED,
-  GD_UINT16  = GD_SIZE16,
-  GD_INT16   = GD_SIZE16 | GD_SIGNED,
-  GD_UINT32  = GD_SIZE32,
-  GD_INT32   = GD_SIZE32 | GD_SIGNED,
-  GD_UINT64  = GD_SIZE64,
-  GD_INT64   = GD_SIZE64 | GD_SIGNED,
-  GD_FLOAT32 = GD_SIZE32 | GD_IEEE754,
-  GD_FLOAT64 = GD_SIZE64 | GD_IEEE754
-} gd_type_t;
-#define GD_FLOAT     GD_FLOAT32
-#define GD_DOUBLE    GD_FLOAT64
 
 extern char* getdata_error_string(const DIRFILE* dirfile, char* buffer,
     size_t buflen) __THROW __gd_nonnull ((1, 2));
@@ -227,7 +253,8 @@ extern __off64_t get_n_frames64(DIRFILE* dirfile) __THROW __gd_nonnull ((1));
 
 extern size_t getdata64(DIRFILE* dirfile, const char *field_code,
     __off64_t first_frame, __off64_t first_samp, size_t num_frames,
-    size_t num_samp, gd_type_t return_type, void *data_out) __gd_nonnull ((1, 2));
+    size_t num_samp, gd_type_t return_type, void *data_out)
+__gd_nonnull ((1, 2));
 
 extern size_t putdata64(DIRFILE* dirfile, const char *field_code,
     __off64_t first_frame, __off64_t first_sample, size_t num_frames,

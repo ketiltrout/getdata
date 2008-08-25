@@ -87,29 +87,27 @@ static void _GD_FreeD(DIRFILE* D)
       free((char*)D->entries[i]->field); /* cast away bogus constness */
       switch(D->entries[i]->field_type) {
         case GD_RAW_ENTRY:
-          free(ENTRY(Raw, D->entries[i])->file);
+          free(D->entries[i]->file);
           break;
         case GD_LINCOM_ENTRY:
-          for (j = 0; j < ENTRY(Lincom, D->entries[i])->n_infields; ++j)
-            free(ENTRY(Lincom, D->entries[i])->in_fields[j]);
+          for (j = 0; j < D->entries[i]->count; ++j)
+            free(D->entries[i]->in_fields[j]);
           break;
         case GD_LINTERP_ENTRY:
-          free(ENTRY(Linterp, D->entries[i])->raw_field);
-          free(ENTRY(Linterp, D->entries[i])->linterp_file);
-          if (ENTRY(Linterp, D->entries[i])->n_interp > 0) {
-            free(ENTRY(Linterp, D->entries[i])->x);
-            free(ENTRY(Linterp, D->entries[i])->y);
+          free(D->entries[i]->in_fields[0]);
+          free(D->entries[i]->file);
+          if (D->entries[i]->count > 0) {
+            free(D->entries[i]->x);
+            free(D->entries[i]->y);
           }
           break;
         case GD_MULTIPLY_ENTRY:
-          free(ENTRY(Multiply, D->entries[i])->in_fields[0]);
-          free(ENTRY(Multiply, D->entries[i])->in_fields[1]);
+          free(D->entries[i]->in_fields[0]);
+          free(D->entries[i]->in_fields[1]);
           break;
         case GD_BIT_ENTRY:
-          free(ENTRY(Bit, D->entries[i])->raw_field);
-          break;
         case GD_PHASE_ENTRY:
-          free(ENTRY(Phase, D->entries[i])->raw_field);
+          free(D->entries[i]->in_fields[0]);
           break;
       }
     }
@@ -195,7 +193,7 @@ static void* _GD_ParseRaw(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
     return NULL;
   }
 
-  struct RawEntryType* R = malloc(sizeof(struct RawEntryType));
+  gd_entry_t* R = malloc(sizeof(gd_entry_t));
   if (R == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     return NULL;
@@ -244,7 +242,7 @@ static void* _GD_ParseLincom(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
     return NULL;
   }
 
-  struct LincomEntryType* L = malloc(sizeof(struct LincomEntryType));
+  gd_entry_t* L = malloc(sizeof(gd_entry_t));
   if (L == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     return NULL;
@@ -252,25 +250,27 @@ static void* _GD_ParseLincom(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
 
   L->field = strdup(in_cols[0]);
   L->field_type = GD_LINCOM_ENTRY;
-  L->n_infields = atoi(in_cols[2]);
+  L->count = atoi(in_cols[2]);
+  L->m = malloc(sizeof(double) * L->count);
+  L->b = malloc(sizeof(double) * L->count);
 
-  if (L->field == NULL) {
+  if (L->field == NULL || L->m == NULL || L->b == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     return L;
   }
 
-  if ((L->n_infields < 1) || (L->n_infields > GD_MAX_LINCOM)) {
+  if ((L->count < 1) || (L->count > GD_MAX_LINCOM)) {
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_FIELDS, format_file, line,
         in_cols[2]);
     return L;
   }
 
-  if (n_cols < L->n_infields * 3 + 3) {
+  if (n_cols < L->count * 3 + 3) {
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_COLS, format_file, line, NULL);
     return L;
   }
 
-  for (i = 0; i < L->n_infields; i++) {
+  for (i = 0; i < L->count; i++) {
     L->in_fields[i] = strdup(in_cols[i * 3 + 3]);
     if (L->in_fields[i] == NULL)
       _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
@@ -295,7 +295,7 @@ static void* _GD_ParseLinterp(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
     return NULL;
   }
 
-  struct LinterpEntryType* L = malloc(sizeof(struct LinterpEntryType));
+  gd_entry_t* L = malloc(sizeof(gd_entry_t));
   if (L == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     return NULL;
@@ -303,22 +303,22 @@ static void* _GD_ParseLinterp(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
 
   L->field = strdup(in_cols[0]);
   L->field_type = GD_LINTERP_ENTRY;
-  L->raw_field = strdup(in_cols[2]);
-  L->n_interp = -1; /* linterp file not read yet */
+  L->in_fields[0] = strdup(in_cols[2]);
+  L->count = -1; /* linterp file not read yet */
 
 
   if (in_cols[3][0] == '/')
-    L->linterp_file = strdup(in_cols[3]);
+    L->file = strdup(in_cols[3]);
   else {
     /* non-absolute paths are relative to the format file's directory */
-    L->linterp_file = malloc(FILENAME_MAX);
+    L->file = malloc(FILENAME_MAX);
     strcpy(temp_buffer, format_file);
-    strcpy(L->linterp_file, dirname(temp_buffer));
-    strcat(L->linterp_file, "/");
-    strcat(L->linterp_file, in_cols[3]);
+    strcpy(L->file, dirname(temp_buffer));
+    strcat(L->file, "/");
+    strcat(L->file, in_cols[3]);
   }
 
-  if (L->field == NULL || L->raw_field == NULL || L->linterp_file == NULL)
+  if (L->field == NULL || L->in_fields[0] == NULL || L->file == NULL)
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
 
   return L;
@@ -336,7 +336,7 @@ static void* _GD_ParseMultiply(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
     return NULL;
   }
 
-  struct MultiplyEntryType* M = malloc(sizeof(struct MultiplyEntryType));
+  gd_entry_t* M = malloc(sizeof(gd_entry_t));
   if (M == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     return NULL;
@@ -365,7 +365,7 @@ static void* _GD_ParseBit(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
     return NULL;
   }
 
-  struct BitEntryType* B = malloc(sizeof(struct BitEntryType));
+  gd_entry_t* B = malloc(sizeof(gd_entry_t));
   if (B == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     return NULL;
@@ -373,9 +373,9 @@ static void* _GD_ParseBit(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
 
   B->field = strdup(in_cols[0]);
   B->field_type = GD_BIT_ENTRY;
-  B->raw_field = strdup(in_cols[2]);
+  B->in_fields[0] = strdup(in_cols[2]);
 
-  if (B->field == NULL || B->raw_field == NULL)
+  if (B->field == NULL || B->in_fields[0] == NULL)
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
 
   B->bitnum = atoi(in_cols[3]);
@@ -406,7 +406,7 @@ static void* _GD_ParsePhase(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
     return NULL;
   }
 
-  struct PhaseEntryType* P = malloc(sizeof(struct PhaseEntryType));
+  gd_entry_t* P = malloc(sizeof(gd_entry_t));
   if (P == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     return NULL;
@@ -414,10 +414,10 @@ static void* _GD_ParsePhase(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
 
   P->field = strdup(in_cols[0]);
   P->field_type = GD_PHASE_ENTRY;
-  P->raw_field = strdup(in_cols[2]); /* field */
+  P->in_fields[0] = strdup(in_cols[2]); /* field */
   P->shift = atoi(in_cols[3]); /*shift*/
 
-  if (P->field == NULL || P->raw_field == NULL)
+  if (P->field == NULL || P->in_fields[0] == NULL)
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
 
   /*FIXME make sure the shift is within the range of the raw field...*/
@@ -429,8 +429,8 @@ static void* _GD_ParsePhase(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
 */
 static int _GD_EntryCmp(const void *A, const void *B)
 {
-  return (strcmp((*(struct gd_entry_t **)A)->field,
-        (*(struct gd_entry_t **)B)->field));
+  return (strcmp((*(gd_entry_t **)A)->field,
+        (*(gd_entry_t **)B)->field));
 }
 
 /* _GD_ParseFormatFile: Perform the actual parsing of the format file.  This
@@ -820,15 +820,15 @@ DIRFILE* dirfile_open(const char* filedir, unsigned int flags)
   for (i = 0; i < D->n_entries; i++) {
     if (D->entries[i]->field_type == GD_RAW_ENTRY) {
       snprintf(raw_data_filename, FILENAME_MAX, "%s/%s", filedir,
-          ENTRY(Raw, D->entries[i])->file);
+          D->entries[i]->file);
       if (stat(raw_data_filename, &statbuf) >= 0) {
         /* This must be a deep copy because we don't know where this particular
          * entry will end up after the qsort */
-        D->first_field = malloc(sizeof(struct RawEntryType));
+        D->first_field = malloc(sizeof(gd_entry_t));
         if (D->first_field == NULL)
           _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
         else
-          memcpy(D->first_field, D->entries[i], sizeof(struct RawEntryType));
+          memcpy(D->first_field, D->entries[i], sizeof(gd_entry_t));
         break;
       }
     }
@@ -836,7 +836,7 @@ DIRFILE* dirfile_open(const char* filedir, unsigned int flags)
 
   /** Now sort the entries */
   if (D->n_entries > 1)
-    qsort(D->entries, D->n_entries, sizeof(struct gd_entry_t*), _GD_EntryCmp);
+    qsort(D->entries, D->n_entries, sizeof(gd_entry_t*), _GD_EntryCmp);
 
   /* Success! Clear invalid bit */
   if (D->error == GD_E_OK)
@@ -853,7 +853,7 @@ void dirfile_close(DIRFILE* D)
 
   for(i = 0; i < D->n_entries; ++i)
     if (D->entries[i]->field_type == GD_RAW_ENTRY)
-      close(ENTRY(Raw, &D->entries[i])->fp);
+      close(D->entries[i]->fp);
 
   _GD_ClearError(D);
   _GD_FreeD(D);
