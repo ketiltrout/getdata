@@ -29,4 +29,4 @@ CHECKDIRFILE=checkdirfile
 endif
 
 bin_PROGRAMS=$(CHECKDIRFILE)
-checkdirfile_SOURCES=checkdirfile.c ../src/getdata.h ../src/getdata_legacy.h
+checkdirfile_SOURCES=checkdirfile.c
