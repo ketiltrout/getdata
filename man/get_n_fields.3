@@ -1,0 +1,69 @@
+.\" get_n_fields.3.  The get_n_fields man page.
+.\"
+.\" (C) 2008 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" This program is free software; you can redistribute it and/or modify
+.\" it under the terms of the GNU General Public License as published by
+.\" the Free Software Foundation; either version 2 of the License, or
+.\" (at your option) any later version.
+.\"
+.\" GetData is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+.\" General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public
+.\" License along with GetData; if not, write to the Free Software
+.\" Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
+.\" 02111-1307 USA.
+.\"
+.TH get_n_fields 3 "26 August 2008" "Version 0.3.0" "GETDATA"
+.SH NAME
+get_n_fields \(em report the number of fields in a dirfile
+.SH SYNOPSIS
+.B #include <getdata.h>
+.HP
+.nh
+.ad l
+.BI "unsigned int get_n_fields(DIRFILE *" dirfile );
+.hy
+.ad n
+.SH DESCRIPTION
+The
+.BR get_n_fields ()
+function queries a dirfile(5) database specified by
+.I dirfile
+and returns the number of fields defined in the database.  Notably, this count
+does not include the implicit
+.I INDEX
+field.
+
+The 
+.I dirfile
+parameter must point to a valid DIRFILE object previously created by a call to
+.BR dirfile_open (3).
+
+.SH RETURN VALUE
+Upon successful completion,
+.BR get_n_fields ()
+returns the number of defined fields in the dirfile.  On error, it
+returns zero and sets
+.IR dirfile -> error
+to a non-zero error value.  Possible error values are:
+.TP 8
+.B GD_E_BAD_DIRFILE
+The supplied dirfile was invalid.
+.P
+A descriptive error string for the last error encountered can be obtained from
+a call to
+.BR getdata_error_string (3).
+.SH SEE ALSO
+.BR dirfile (5),
+.BR dirfile_open (3),
+.BR getdata (3),
+.BR getdata_error_string (3),
+.BR get_field_list (3)
