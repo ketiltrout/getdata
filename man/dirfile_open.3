@@ -202,6 +202,12 @@ a call to
 When finished with it, the DIRFILE object may be deallocated with a call to
 .BR dirfile_close (3),
 even if the open failed.
+.SH BUGS
+Although you can create and truncate dirfiles with this interface, no facilities
+yet exist to add fields to an empty dirfile (or modify its metadata in any other
+way), so this feature is of rather limited usefulness.  Functionality to
+manipulate dirfile meta-data is intended to be introduced in an upcoming release
+of GetData.
 .SH SEE ALSO
 .BR dirfile (5),
 .BR dirfile_close (3),

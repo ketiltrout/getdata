@@ -123,6 +123,7 @@ static void _GD_FreeD(DIRFILE* D)
   free(D->entries);
   free(D->error_string);
   free(D->error_file);
+  free(D->field_list);
 
   dreturnvoid();
 }
@@ -822,6 +823,7 @@ DIRFILE* dirfile_open(const char* filedir, unsigned int flags)
   D->frame_offset = 0;
   D->n_entries = 0;
   D->first_field = NULL;
+  D->field_list = NULL;
   D->flags = flags | GD_INVALID;
 
   snprintf(format_file, FILENAME_MAX, "%s%sformat", filedir,

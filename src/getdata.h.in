@@ -170,6 +170,9 @@ struct _GD_DIRFILE {
   /* recursion counter */
   int recurse_level;
 
+  /* field list */
+  const char** field_list;
+
   int frame_offset;
   int suberror;
   char* error_string;
@@ -200,6 +203,11 @@ extern void dirfile_close(DIRFILE* dirfile) __THROW __gd_nonnull ((1));
 
 extern unsigned int get_samples_per_frame(DIRFILE* dirfile,
     const char *field_code) __THROW __gd_nonnull ((1, 2));
+
+extern unsigned int get_n_fields(DIRFILE* dirfile) __THROW __gd_nonnull ((1));
+
+extern const char** get_field_list(DIRFILE* dirfile) __THROW __gd_nonnull ((1));
+
 
 /* dirfile_open(), getdata(), and putdata() contain calls to open(), making them
  * cancellation points.  As a result we cannot mark them with __THROW.

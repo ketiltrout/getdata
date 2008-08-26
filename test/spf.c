@@ -24,10 +24,14 @@ int main(void)
 
   DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
   unsigned int spf = get_samples_per_frame(D, "data");
+  int error = D->error;
   dirfile_close(D);
 
   unlink(format);
   rmdir(filedir);
+
+  if (error)
+    return 1;
 
   return (spf != 11);
 }
