@@ -20,7 +20,6 @@ dnl Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
 dnl 02111-1307 USA.
 dnl
 AC_INIT([getdata], [0.3.0], [dwiebe@physics.utoronto.ca])
-AM_INIT_AUTOMAKE([getdata], [0.3.0])
 
 dnl autoconf 2.60 or later is required to build configure
 AC_PREREQ([2.60])
@@ -34,20 +33,14 @@ dnl   this must be 0 and not 1 because, although we still support the old
 dnl   interface, the error codes have changed.
 AC_SUBST(GETDATA_IFACE_AGE, [0])
 
-dnl libdirfile current interface version
-AC_SUBST(DIRFILE_IFACE_VERSION, [0])
-dnl libdirfile current interface implementation revision
-AC_SUBST(DIRFILE_IMPL_REVISION, [0])
-dnl libdirfile interface age (current interface - oldest supported interface)
-AC_SUBST(DIRFILE_IFACE_AGE, [0])
+dnl libdirfile interface version info
+AC_SUBST(DIRFILE_VERSION, [0:0:0])
 
-dnl libfgetdata current interface version
-AC_SUBST(FGETDATA_IFACE_VERSION, [0])
-dnl libfgetdata current interface implementation revision
-AC_SUBST(FGETDATA_IMPL_REVISION, [0])
-dnl libfgetdata interface age (current interface - oldest supported interface)
-AC_SUBST(FGETDATA_IFACE_AGE, [0])
+dnl libfgetdata interface version info
+AC_SUBST(FGETDATA_VERSION, [0:0:0])
 
+dnl libf95getdata interface version info
+AC_SUBST(F95GETDATA_VERSION, [0:0:0])
 
 AC_CONFIG_SRCDIR([src/getdata.c])
 AC_CONFIG_HEADER([src/config.h])
@@ -115,6 +108,19 @@ AC_MSG_CHECKING([whether to include the C++ bindings])
 AC_MSG_RESULT([$make_cxxbindings])
 AM_CONDITIONAL(MAKE_CXXBINDINGS, test "x$make_cxxbindings" = "xyes")
 
+dnl Fortran 95 bindings
+AC_ARG_ENABLE(f95-bindings, AS_HELP_STRING([--disable-f95-bindings],
+              [Don't build the Fortran 95 bindings (libfgetdata)]),
+              [
+               case "${enableval}" in
+                 no) make_f95bindings="no" ;;
+                 *) make_f95bindings="yes" ;;
+               esac
+              ], [ make_f95bindings="yes" ])
+AC_MSG_CHECKING([whether to include the Fortran 95 bindings])
+AC_MSG_RESULT([$make_f95bindings])
+AM_CONDITIONAL(MAKE_F95BINDINGS, test "x$make_f95bindings" = "xyes")
+
 dnl Fortran 77 bindings
 AC_ARG_ENABLE(f77-bindings, AS_HELP_STRING([--disable-f77-bindings],
               [Don't build the Fortran 77 bindings (libfgetdata)]),
@@ -124,16 +130,25 @@ AC_ARG_ENABLE(f77-bindings, AS_HELP_STRING([--disable-f77-bindings],
                  *) make_f77bindings="yes" ;;
                esac
               ], [ make_f77bindings="yes" ])
+if test "x$make_f77bindings$make_f95bindings" = "xnoyes"; then
+  make_f77bindings="yes (required by Fortran 95 bindings)"
+fi
 AC_MSG_CHECKING([whether to include the Fortran 77 bindings])
 AC_MSG_RESULT([$make_f77bindings])
-AM_CONDITIONAL(MAKE_F77BINDINGS, test "x$make_f77bindings" = "xyes")
+AM_CONDITIONAL(MAKE_F77BINDINGS, test "x$make_f77bindings" != "xno")
 
 dnl Programs
+AM_INIT_AUTOMAKE([getdata], [0.3.0])
 AC_PROG_CC
-dnl Using C99 where possible defines NAN
+AC_PROG_CC_C_O
+dnl C99 isn't required, but it does define NAN, if we have it
 AC_PROG_CC_C99
 AC_PROG_CXX
+AC_PROG_CXX_C_O
+AC_PROG_F77
+AC_PROG_F77_C_O
 AC_PROG_FC
+AC_PROG_FC_C_O
 AC_HEADER_STDC
 AC_PROG_INSTALL
 AC_ENABLE_STATIC
@@ -141,8 +156,13 @@ AC_ENABLE_SHARED
 AC_PROG_LIBTOOL
 
 dnl F77 stuff
-if test "x$make_f77bindings" = "xyes"; then
+if test "x$make_f77bindings" != "xno"; then
   AC_F77_WRAPPERS
+  AC_PROG_SED
+  AC_CHECK_PROGS([DIFF], [diff], [not found])
+  if test "x$DIFF" == "xnot found"; then
+    AC_MSG_ERROR([`diff' is needed to build the Fortran bindings]) dnl`
+  fi
 fi
 
 dnl libraries

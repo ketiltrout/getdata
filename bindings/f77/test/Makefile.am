@@ -20,13 +20,32 @@
 #
 AUTOMAKE_OPTIONS = foreign
 FFLAGS += -I$(srcdir)/..
+FCFLAGS += -I$(srcdir)/..
+F95LDADD=../libf95getdata.la $(F77LDADD)
+F77LDADD=../libfgetdata.la
 
-LDADD=../libfgetdata.la
-TESTS=gdfget
+if MAKE_F95BINDINGS
+F95TESTS=fgetdata fget_field_list
+endif
+
+TESTS=gdfget $(F95TESTS)
 
 gdfget_SOURCES=gdfget.f
+gdfget_LDADD=$(F77LDADD)
 
-check_PROGRAMS=${TESTS}
+fgetdata_SOURCES=fgetdata.f95
+fgetdata_LDADD=$(F95LDADD)
+
+fget_field_list_SOURCES=fget_field_list.f95
+fget_field_list_LDADD=$(F95LDADD)
+
+check_PROGRAMS=$(TESTS)
+
+# libtool 1.5.x hack: treat FC stuff like F77
+LTFCCOMPILE = $(LIBTOOL) --tag=F77 $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+							--mode=compile $(FC) $(AM_FCFLAGS) $(FCFLAGS)
+FCLINK = $(LIBTOOL) --tag=F77 --mode=link $(FCLD) $(AM_FCFLAGS) $(FCFLAGS) \
+				 $(AM_LDFLAGS) $(LDFLAGS) -o $@
 
 clean-local:
 	rm -rf test_dirfile

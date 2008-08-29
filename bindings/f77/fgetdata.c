@@ -21,8 +21,9 @@
 
 #include "fgetdata.h"
 
-#include <stdio.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 
 /* Fortran 77 has no facility to take a pointer to a DIRFILE* object.
  * Instead, we keep a list of them here.  If we ever run out of these,
@@ -101,7 +102,7 @@ static void _GDF_ClearDirfile(int d)
 
 /* dirfile_open wrapper */
 void F77_FUNC(gdfopn, GDFOPN) (int* dirfile, const char* dirfilename,
-    int* dirfilename_l, int* flags)
+    const int* dirfilename_l, const int* flags)
 {
   char* out = malloc(*dirfilename_l + 1);
 
@@ -112,21 +113,70 @@ void F77_FUNC(gdfopn, GDFOPN) (int* dirfile, const char* dirfilename,
 }
 
 /* dirfile_close wrapper */
-void F77_FUNC(gdfcls, GDFCLS) (int* dirfile)
+void F77_FUNC(gdfcls, GDFCLS) (const int* dirfile)
 {
   _GDF_ClearDirfile(*dirfile);
 }
 
 /* getdata wrapper */
-void F77_FUNC(gdfget, GDFGET) (int* n_read, int* dirfile, char* field_code,
-    const int* field_code_l, int* first_frame, int* first_sample,
-    int* num_frames, int* num_samples, int* return_type, void* data_out)
+void F77_FUNC(gdfget, GDFGET) (int* n_read, const int* dirfile,
+    const char* field_code, const int* field_code_l,
+    const int* first_frame, const int* first_sample,
+    const int* num_frames, const int* num_samples, const int* return_type,
+    void* data_out)
 {
   char* out = malloc(*field_code_l + 1);
   *n_read = getdata(_GDF_GetDirfile(*dirfile), _GDF_CString(out, field_code,
         *field_code_l), *first_frame, *first_sample, *num_frames,
       *num_samples, (gd_type_t)*return_type, data_out);
   free(out);
+}
+
+/* Return the maximum field name length */
+void F77_FUNC(gdffnx, GDFFNX) (int* max, const int* dirfile)
+{
+  int i, len = 0;
+  DIRFILE* D = _GDF_GetDirfile(*dirfile);
+  unsigned int nfields = get_n_fields(D);
+  if (D->error)
+    return;
+
+  const char** fl = get_field_list(D);
+
+  for (i = 0; i < nfields; ++i)
+    if (strlen(fl[i]) > len)
+      len = strlen(fl[i]);
+
+  *max = len;
+}
+
+/* get_field_list wrapper -- this only returns one field name */
+void F77_FUNC(gdffdn, GDFFDN) (char* name, int* name_len, const int* dirfile,
+    const int* field_num)
+{
+  const char** fl;
+  int len;
+  DIRFILE* D = _GDF_GetDirfile(*dirfile);
+  unsigned int nfields = get_n_fields(D);
+  if (D->error)
+    return;
+
+  if (*field_num <= nfields) {
+    fl = get_field_list(D);
+    len = strlen(fl[*field_num - 1]);
+    if (len < *name_len) {
+      sprintf(name, "%-*s", *name_len, fl[*field_num -1]);
+      name[*name_len - 1] = ' ';
+    } else
+      *name_len = len + 1;
+  } else
+    *name_len = 0;
+}
+
+/* get_n_fields wrapper */
+void F77_FUNC(gdfnfd, GDFNFD) (int* nfields, int* dirfile)
+{
+  *nfields = get_n_fields(_GDF_GetDirfile(*dirfile));
 }
 
 /* get_n_frames wrapper */

@@ -28,4 +28,4 @@ include_HEADERS = dirfile.h
 lib_LTLIBRARIES=libdirfile.la
 libdirfile_la_SOURCES = dirfile.cpp dirfile.h
 libdirfile_la_LIBADD=../../src/libgetdata.la
-libdirfile_la_LDFLAGS = -version-info @DIRFILE_IFACE_VERSION@:@DIRFILE_IMPL_REVISION@:@DIRFILE_IFACE_AGE@
+libdirfile_la_LDFLAGS = -version-info @DIRFILE_VERSION@

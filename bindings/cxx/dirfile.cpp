@@ -38,17 +38,30 @@ int Dirfile::Error()
   return D->error;
 }
 
-const char* Dirfile::ErrorString()
+const char* Dirfile::ErrorString(size_t len)
 {
   if (error_string == NULL)
     error_string = new char[4096];
 
-  return getdata_error_string(D, error_string, 4096);
+  if (len > 4096)
+    len = 4096;
+
+  return getdata_error_string(D, error_string, len);
 }
 
 unsigned int Dirfile::SamplesPerFrame(const char* field_code)
 {
   return get_samples_per_frame(D, field_code);
+}
+
+unsigned int Dirfile::NFields()
+{
+  return get_n_fields(D);
+}
+
+const char** Dirfile::FieldList()
+{
+  return get_field_list(D);
 }
 
 off_t Dirfile::NFrames()

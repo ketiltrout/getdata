@@ -4,7 +4,7 @@ FORTRAN 77 BINDINGS FOR GETDATA
 This README describes the Fortran 77 bindings for the GetData library.  These
 bindings consist of a Fortran compatibility library `libfgetdata' (writen in
 C) and a Fortran 77 source file `getdata.f' which defines useful Fortran
-parameters and declares the external functions.
+parameters and declares the external subroutines.
 
 These bindings are designed to comply to the Fortran 77 standards.  As a result,
 identifiers are limited to six characters.   The compatibility library will
@@ -17,21 +17,24 @@ pointers are not used to refer to dirfile instances.  Instead, an integer
 dirfile unit number is used.  Space is available in the compatibility library
 for only 1023 dirfile units.  If an application attempts to open more than 1023
 dirfiles simultaneously, the compatibility library will emit an error message
-and raise SIGABRT.  Passing an invalid dirfile unit number to a function which
-requires one as input (other than GDFCLS, which will simply ignore it) will
-result in the call failing with error code GD_EBD (= GD_E_BAD_DIRFILE, see
+and raise SIGABRT.  Passing an invalid dirfile unit number to a subroutines
+which requires one as input (other than GDFCLS, which will simply ignore it)
+will result in the call failing with error code GD_EBD (= GD_E_BAD_DIRFILE, see
 below).
 
 Including getdata.f (which will be installed in the same directory as getdata.h)
 will define several convenient parameters including the DIRFILE flags, the data
-type specifiers, and error codes.  See below for a complete list.
+type specifiers, and error codes.  See below for a complete list.  If your
+Fortran 77 compiler supports the MIL STD 1753 (DoD Extension) INCLUDE statement
+(which any remotely modern compiler should), you can include this file in your
+Fortran program to define these constants.
 
 All integer type parameters passed to the compatibility library are of type
 INTEGER (ie. the native size of the platform).  As a result, largefile support
 will not be available in the Fortran 77 bindings on a 32-bit system.
 
-Available Functions
-===================
+Available Subroutines
+=====================
 
 * GDFOPN(dirfile_unit, dirfilename, dirfilename_len, flags)
   INTEGER dirfileunit, dirfilename_len, flags
@@ -39,7 +42,7 @@ Available Functions
 
   This wraps dirfile_open(3), with the same input arguments (dirfilename_len
   should contain the string length of dirfilename).  It returns the dirfile
-  unit number in dirfile_unit.  The flags should be a bitwise or'd list of flag
+  unit number in dirfile_unit.  The flags should be a bitwise "or"d list of flag
   parameters (see below).  This behaves analogously to dirfile_open() itself:
   it returns a valid dirfile unit even in case of error.
 
@@ -62,6 +65,32 @@ Available Functions
   read is returned in n_read.  The return_type parameter should be one of the
   parameters defined in getdata.f.  data_out must be of sufficient length and
   of appropriate data type width for the data returned.
+
+* GDFNFD(nfields, dirfile_unit)
+  INTEGER nframes, dirfile_unit
+
+  This wraps get_n_fields(3).  It takes the dirfile unit number as input and
+  returns the number of fields in the dirfile in nfields.
+
+* GDFFDX(field_max, dirfile_unit)
+  INTEGER field_max, dirfile_unit
+
+  This subroutine, which has no direct analogue in the C API, returns the
+  length of the longest field name defined in the dirfile.  It takes the
+  dirfile unit number as input and returns the length (in characters) of
+  the longest field name in the dirfile in field_max.
+ 
+* GDFFDN(name, name_len, dirfile_unit, field_num)
+  CHARACTER*<name_len> name
+  INTEGER name_len, dirfile_unit, field_num
+
+  This subroutine is the replacement for get_field_list(3).  In addition to
+  the dirfile unit, it returns in name a Fortran 77 string containing the
+  field name of the field indexed by field_num (which is should be a number
+  between 1 and the output of GDFNFD).  If the name of the field is longer
+  than name_len, it will return the actual length of the field in name_len
+  and not modify the name argument.  If field_num is out of range, name_len
+  will be set to zero, and name will not be modified.
 
 * GDFNFR(nframes, dirfile_unit)
   INTEGER nframes, dirfile_unit
@@ -148,7 +177,7 @@ Dirfile flags (required by GDFOPN):
 
 Data types (required by GDFGET and GDFPUT).  Note, because Fortran does not
 support unsigned data types, only signed datatypes are defined here.  The
-unsigned data type specifiers will still be accepted by these functions, and
+unsigned data type specifiers will still be accepted by these subroutines, and
 can be specified by litteral value (which can be obtained by examining
 getdata.h).  However, litteral values of constants defined in getdata.f and
 getdata.h should not be expected to remain the same from one release to another,

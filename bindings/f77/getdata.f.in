@@ -1,0 +1,49 @@
+C     (C) 2008 D. V. Wiebe
+C
+C     CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+C
+C     This file is part of the GetData project.
+C
+C     This program is free software; you can redistribute it and/or
+C     modify it under the terms of the GNU General Public License as
+C     published by the Free Software Foundation; either version 2 of the
+C     License, or (at your option) any later version.
+C
+C     GetData is distributed in the hope that it will be useful, but
+C     WITHOUT ANY WARRANTY; without even the implied warranty of
+C     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+C     General Public License for more details.
+C
+C     You should have received a copy of the GNU General Public License
+C     along with GetData; if not, write to the Free Software Foundation,
+C     Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
+C
+
+C     Fortran 77 parameters for getdata.  This file defines handy
+C     constants useful to Fortran programs
+
+      @PARAMETERS@
+
+C Externals
+C     Corresponding to dirfile_open(3)
+      EXTERNAL GDFOPN
+C     Corresponding to dirfile_close(3)
+      EXTERNAL GDFCLS
+C     Corresponding to getdata(3)
+      EXTERNAL GDFGET
+C     Returns the maximum field name length
+      EXTERNAL GDFFNX
+C     Corresponding to get_field_list(3) (sort of)
+      EXTERNAL GDFFDN
+C     Corresponding to get_n_fields(3)
+      EXTERNAL GDFNFD
+C     Corresponding to get_n_frames(3)
+      EXTERNAL GDFNFR
+C     Corresponding to get_samples_per_frame(3)
+      EXTERNAL GDFSPF
+C     Corresponding to putdata(3)
+      EXTERNAL GDFPUT
+C     Returns the dirfile->error member
+      EXTERNAL GDFERR
+C     Corresponding to getdata_error_string(3)
+      EXTERNAL GDFSTR

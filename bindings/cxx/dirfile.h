@@ -41,9 +41,11 @@ class Dirfile {
     ~Dirfile();
 
     int Error();
-    const char* ErrorString();
+    const char* ErrorString(size_t len = 4096);
     unsigned int SamplesPerFrame(const char* field_code);
     off_t NFrames();
+    unsigned int NFields();
+    const char** FieldList();
     size_t GetData(const char* field_code, off_t first_frame,
         off_t first_sample, size_t num_frames, size_t num_samples,
         DataType type, void* data_out);

@@ -21,21 +21,24 @@ that want access to this class should include dirfile.h.
   The Error method provides access to the error member of the underlying
   DIRFILE* object.
 
-* const char* Dirfile::ErrorString()
+* const char* Dirfile::ErrorString(size_t len = 4096)
 
   The ErrorString method will return a buffer containing a description of the
   last GetData library error as obtained from getdata_error_string(3).  This
   buffer is local to the object, and subsequent calls to ErrorString() will
-  overwrite the buffer.
+  overwrite the buffer.  The string written to the buffer will be at most
+  len characters long, up to a maximum of 4096 characters.
 
 * unsigned int Dirfile::SamplesPerFrame(const char* field_code)
-* off_t NFrames();
-* size_t GetData(const char* field_code, off_t first_frame, off_t first_sample,
-    size_t num_frames, size_t num_samples, Dirfile::DataType type,
-    void* data_out);
-* size_t PutData(const char* field_code, off_t first_frame, off_t first_sample,
-    size_t num_frames, size_t num_samples, Dirfile::DataType type,
-    const void* data_in);
+* const char** Dirfile::FieldList();
+* unsigned int Dirfile::NFields();
+* off_t Dirfile::NFrames();
+* size_t Dirfile::GetData(const char* field_code, off_t first_frame,
+    off_t first_sample, size_t num_frames, size_t num_samples,
+    Dirfile::DataType type, void* data_out);
+* size_t Dirfile::PutData(const char* field_code, off_t first_frame,
+    off_t first_sample, size_t num_frames, size_t num_samples,
+    Dirfile::DataType type, const void* data_in);
 
   These methods call the corresponding function from the C API on the C DIRFILE
   object associated with the C++ object.  Arguments of type Dirfile::DataType

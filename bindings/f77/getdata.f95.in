@@ -1,0 +1,334 @@
+!
+! (C) 2008 D. V. Wiebe
+!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!
+! This file is part of the GetData project.
+!
+! This program is free software; you can redistribute it and/or modify it
+! under the terms of the GNU General Public License as published by the
+! Free Software Foundation; either version 2 of the License, or (at your
+! option) any later version.
+!
+! GetData is distributed in the hope that it will be useful, but WITHOUT
+! ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+! FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+! for more details.
+!
+! You should have received a copy of the GNU General Public License along
+! with GetData; if not, write to the Free Software Foundation, Inc.,
+! 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
+!
+! -*- F95 -*-
+
+module getdata
+implicit none
+
+@PARAMETERS95@
+
+contains
+function fdirfile_open (dirfilename, flags)
+  integer :: fdirfile_open
+  character (len=*), intent (in) :: dirfilename
+  integer, intent (in) :: flags
+  integer :: dirfile
+
+  ! call f77 library
+  call gdfopn(dirfile, TRIM(dirfilename), LEN_TRIM(dirfilename), flags)
+  fdirfile_open = dirfile
+end function
+
+subroutine fdirfile_close (dirfile)
+  integer, intent(in) :: dirfile
+
+  ! call f77 library
+  call gdfcls(dirfile)
+end subroutine
+
+! getdata with return_type=GD_NULL
+function fgetdata_n (dirfile, field_code, first_frame, first_sample, &
+  num_frames, num_samples)
+  integer :: fgetdata_n
+  integer, intent(in) :: dirfile, first_frame, first_sample, num_frames
+  character (len=*), intent(in) :: field_code
+  integer, intent(in) :: num_samples
+  integer :: nread
+
+  ! call f77 library
+  call gdfget(nread, dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+  first_frame, first_sample, num_frames, num_samples, GD_NULL, 0)
+  fgetdata_n = nread
+end function
+
+! getdata with return_type=GD_INT8
+function fgetdata_i1 (dirfile, field_code, first_frame, first_sample, &
+  num_frames, num_samples, data_out)
+  integer :: fgetdata_i1
+  integer, intent(in) :: dirfile, first_frame, first_sample, num_frames
+  character (len=*), intent(in) :: field_code
+  integer, intent(in) :: num_samples
+  integer*1, dimension(:), intent(out) :: data_out
+  integer :: nread
+
+  ! call f77 library
+  call gdfget(nread, dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+  first_frame, first_sample, num_frames, num_samples, GD_INT8, data_out)
+  fgetdata_i1 = nread
+end function
+
+! getdata with return_type=GD_INT16
+function fgetdata_i2 (dirfile, field_code, first_frame, first_sample, &
+  num_frames, num_samples, data_out)
+  integer :: fgetdata_i2
+  integer, intent(in) :: dirfile, first_frame, first_sample, num_frames
+  character (len=*), intent(in) :: field_code
+  integer, intent(in) :: num_samples
+  integer*2, dimension(:), intent(out) :: data_out
+  integer :: nread
+
+  ! call f77 library
+  call gdfget(nread, dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+  first_frame, first_sample, num_frames, num_samples, GD_INT16, data_out)
+  fgetdata_i2 = nread
+end function
+
+! getdata with return_type=GD_INT32
+function fgetdata_i4 (dirfile, field_code, first_frame, first_sample, &
+  num_frames, num_samples, data_out)
+  integer :: fgetdata_i4
+  integer, intent(in) :: dirfile, first_frame, first_sample, num_frames
+  character (len=*), intent(in) :: field_code
+  integer, intent(in) :: num_samples
+  integer*4, dimension(:), intent(out) :: data_out
+  integer :: nread
+
+  ! call f77 library
+  call gdfget(nread, dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+  first_frame, first_sample, num_frames, num_samples, GD_INT32, data_out)
+  fgetdata_i4 = nread
+end function
+
+! getdata with return_type=GD_INT64
+function fgetdata_i8 (dirfile, field_code, first_frame, first_sample, &
+  num_frames, num_samples, data_out)
+  integer :: fgetdata_i8
+  integer, intent(in) :: dirfile, first_frame, first_sample, num_frames
+  character (len=*), intent(in) :: field_code
+  integer, intent(in) :: num_samples
+  integer*8, dimension(:), intent(out) :: data_out
+  integer :: nread
+
+  ! call f77 library
+  call gdfget(nread, dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+  first_frame, first_sample, num_frames, num_samples, GD_INT64, data_out)
+  fgetdata_i8 = nread
+end function
+
+! getdata with return_type=GD_FLOAT32
+function fgetdata_r4 (dirfile, field_code, first_frame, first_sample, &
+  num_frames, num_samples, data_out)
+  integer :: fgetdata_r4
+  integer, intent(in) :: dirfile, first_frame, first_sample, num_frames
+  character (len=*), intent(in) :: field_code
+  integer, intent(in) :: num_samples
+  real*4, dimension(:), intent(out) :: data_out
+  integer :: nread
+
+  ! call f77 library
+  call gdfget(nread, dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+  first_frame, first_sample, num_frames, num_samples, GD_FLOAT32, data_out)
+  fgetdata_r4 = nread
+end function
+
+! getdata with return_type=GD_FLOAT64
+function fgetdata_r8 (dirfile, field_code, first_frame, first_sample, &
+  num_frames, num_samples, data_out)
+  integer :: fgetdata_r8
+  integer, intent(in) :: dirfile, first_frame, first_sample, num_frames
+  character (len=*), intent(in) :: field_code
+  integer, intent(in) :: num_samples
+  real*8, dimension(:), intent(out) :: data_out
+  integer :: nread
+
+  ! call f77 library
+  call gdfget(nread, dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+  first_frame, first_sample, num_frames, num_samples, GD_FLOAT64, data_out)
+  fgetdata_r8 = nread
+end function
+
+function fget_n_fields (dirfile)
+  integer :: fget_n_fields
+  integer, intent(in) :: dirfile
+  integer :: nf
+
+  ! call f77 library
+  call gdfnfd(nf, dirfile)
+  fget_n_fields = nf
+end function
+
+function fget_field_name_max (dirfile)
+  integer :: fget_field_name_max
+  integer, intent(in) :: dirfile
+  integer :: max_len
+
+  ! call f77 library
+  call gdffnx(max_len, dirfile)
+  fget_field_name_max = max_len
+end function
+
+subroutine fget_field_list (field_list, dirfile, field_len)
+  character(len=*), dimension(:), intent(out) :: field_list
+  integer, intent(in) :: dirfile
+  integer, intent(inout) :: field_len
+  integer :: max_len, nfields, i
+
+  ! make sure the field list is large enough
+  max_len = fget_field_name_max(dirfile)
+
+  if (field_len .lt. max_len) then
+    field_len = max_len
+  else
+    nfields = fget_n_fields(dirfile)
+    do i=1,nfields
+      ! call f77 library
+      call gdffdn(field_list(i), field_len, dirfile, i)
+    end do
+  end if
+end subroutine
+
+function fget_n_frames (dirfile)
+  integer :: fget_n_frames
+  integer, intent(in) :: dirfile
+  integer :: nf
+
+  ! call f77 library
+  call gdfnfr(nf, dirfile)
+  fget_n_frames = nf
+end function
+
+function fget_samples_per_frame (dirfile, field_code)
+  integer :: fget_samples_per_frame
+  integer, intent(in) :: dirfile
+  character (len=*), intent(in) :: field_code
+  integer :: spf
+
+  ! call f77 library
+  call gdfspf(spf, dirfile, TRIM(field_code), LEN_TRIM(field_code))
+  fget_samples_per_frame = spf
+end function
+
+! putdata with data_type=GD_INT8
+function fputdata_i1 (dirfile, field_code, first_frame, first_sample, &
+  num_frames, num_samples, data_in)
+  integer :: fputdata_i1
+  integer, intent(in) :: dirfile, first_frame, first_sample, num_frames
+  character (len=*), intent(in) :: field_code
+  integer, intent(in) :: num_samples
+  integer*1, dimension(:), intent(in) :: data_in
+  integer :: nread
+
+  ! call f77 library
+  call gdfput(nread, dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+  first_frame, first_sample, num_frames, num_samples, GD_INT8, data_in)
+  fputdata_i1 = nread
+end function
+
+! putdata with data_type=GD_INT16
+function fputdata_i2 (dirfile, field_code, first_frame, first_sample, &
+  num_frames, num_samples, data_in)
+  integer :: fputdata_i2
+  integer, intent(in) :: dirfile, first_frame, first_sample, num_frames
+  character (len=*), intent(in) :: field_code
+  integer, intent(in) :: num_samples
+  integer*2, dimension(:), intent(in) :: data_in
+  integer :: nread
+
+  ! call f77 library
+  call gdfput(nread, dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+  first_frame, first_sample, num_frames, num_samples, GD_INT16, data_in)
+  fputdata_i2 = nread
+end function
+
+! putdata with data_type=GD_INT32
+function fputdata_i4 (dirfile, field_code, first_frame, first_sample, &
+  num_frames, num_samples, data_in)
+  integer :: fputdata_i4
+  integer, intent(in) :: dirfile, first_frame, first_sample, num_frames
+  character (len=*), intent(in) :: field_code
+  integer, intent(in) :: num_samples
+  integer*4, dimension(:), intent(in) :: data_in
+  integer :: nread
+
+  ! call f77 library
+  call gdfput(nread, dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+  first_frame, first_sample, num_frames, num_samples, GD_INT32, data_in)
+  fputdata_i4 = nread
+end function
+
+! putdata with data_type=GD_INT64
+function fputdata_i8 (dirfile, field_code, first_frame, first_sample, &
+  num_frames, num_samples, data_in)
+  integer :: fputdata_i8
+  integer, intent(in) :: dirfile, first_frame, first_sample, num_frames
+  character (len=*), intent(in) :: field_code
+  integer, intent(in) :: num_samples
+  integer*8, dimension(:), intent(in) :: data_in
+  integer :: nread
+
+  ! call f77 library
+  call gdfput(nread, dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+  first_frame, first_sample, num_frames, num_samples, GD_INT64, data_in)
+  fputdata_i8 = nread
+end function
+
+! putdata with data_type=GD_FLOAT32
+function fputdata_r4 (dirfile, field_code, first_frame, first_sample, &
+  num_frames, num_samples, data_in)
+  integer :: fputdata_r4
+  integer, intent(in) :: dirfile, first_frame, first_sample, num_frames
+  character (len=*), intent(in) :: field_code
+  integer, intent(in) :: num_samples
+  real*4, dimension(:), intent(in) :: data_in
+  integer :: nread
+
+  ! call f77 library
+  call gdfput(nread, dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+  first_frame, first_sample, num_frames, num_samples, GD_FLOAT32, data_in)
+  fputdata_r4 = nread
+end function
+
+! putdata with data_type=GD_FLOAT64
+function fputdata_r8 (dirfile, field_code, first_frame, first_sample, &
+  num_frames, num_samples, data_in)
+  integer :: fputdata_r8
+  integer, intent(in) :: dirfile, first_frame, first_sample, num_frames
+  character (len=*), intent(in) :: field_code
+  integer, intent(in) :: num_samples
+  real*8, dimension(:), intent(in) :: data_in
+  integer :: nread
+
+  ! call f77 library
+  call gdfput(nread, dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+  first_frame, first_sample, num_frames, num_samples, GD_FLOAT64, data_in)
+  fputdata_r8 = nread
+end function
+
+function fget_error (dirfile)
+  integer :: fget_error
+  integer, intent(in) :: dirfile
+  integer :: err
+
+  ! call f77 library
+  call gdferr(err, dirfile)
+  fget_error = err
+end function
+
+subroutine fgetdata_error_string (dirfile, buffer, len)
+  integer, intent(in) :: dirfile, len
+  character (len=*), intent(out) :: buffer
+
+  ! call f77 library
+  call gdfstr(dirfile, buffer, len)
+end subroutine
+
+end module
