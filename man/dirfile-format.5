@@ -21,7 +21,7 @@
 .\" Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
 .\" 02111-1307 USA.
 .\"
-.TH dirfile\-format 5 "8 August 2008" "Standards Version 5" "DATA FORMATS"
+.TH dirfile\-format 5 "29 August 2008" "Standards Version 5" "DATA FORMATS"
 .SH NAME
 dirfile\-format \(em the dirfile database format specification file
 .SH DESCRIPTION
@@ -212,9 +212,12 @@ fields.  Syntax is:
 .IP
 .I <field-name>
 .B LINCOM
-.IR "<field1> <a1> <b1>"\~ [ "<field2> <a2> <b2>"\~ [ "<field3> <a3> <b3>" ]]
+.IR "<n> <field1> <a1> <b1>"\~ [ "<field2> <a2> <b2>"\~ [ "<field3> <a3> <b3>" ]]
 .PP
-The derived field will be computed as:
+where
+.I n
+indicates the number of input fields (1, 2, or 3).  The derived field will be
+computed as:
 .IP
 field-name[n] = (a1 * field1[n] + b1) + (a2 * field2[n2] + b2) + (a3 * field3[n3] + b3)
 .PP
