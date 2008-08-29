@@ -102,7 +102,7 @@
 
 typedef enum {
   GD_NULL    = 0,
-  GD_UNKNOWN = 0xf0,  /* GD_SIZE(GD_UNKNOWN) must evaluate to zero */
+  GD_UNKNOWN = 0xb0,  /* GD_SIZE(GD_UNKNOWN) must evaluate to zero */
   GD_UINT8   = GD_SIZE8,
   GD_INT8    = GD_SIZE8  | GD_SIGNED,
   GD_UINT16  = GD_SIZE16,
