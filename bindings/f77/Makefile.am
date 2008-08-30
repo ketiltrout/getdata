@@ -29,6 +29,8 @@ F95_INC=getdata.mod
 F95_LIB=libf95getdata.la
 endif
 
+EXTRA_DIST=getdata.f.in getdata.f90.in
+
 SUBDIRS = test
 
 BUILT_SOURCES=getdata.f $(F95_INC)
@@ -42,7 +44,7 @@ libfgetdata_la_SOURCES = fgetdata.c fgetdata.h
 libfgetdata_la_LIBADD=../../src/libgetdata.la
 libfgetdata_la_LDFLAGS = -version-info @FGETDATA_VERSION@
 
-nodist_libf95getdata_la_SOURCES=getdata.f95
+nodist_libf95getdata_la_SOURCES=getdata.f90
 libf95getdata_la_LIBADD=libfgetdata.la ../../src/libgetdata.la
 libf95getdata_la_LDFLAGS = -version-info @F95GETDATA_VERSION@
 
@@ -56,7 +58,7 @@ getdata.mod: getdata.o
 
 clean-local:
 	rm -rf getdata.mod make_parameters.sed.in make_parameters.stamp \
-		make_parameters.sed getdata.f getdata.f95
+		make_parameters.sed getdata.f getdata.f90
 
 make_parameters.sed.in: make_parameters ../../src/getdata.h
 	./make_parameters
@@ -81,7 +83,7 @@ getdata.f: $(srcdir)/getdata.f.in make_parameters.sed
 	$(SED) $< -f make_parameters.sed > $@
 	chmod a-w $@
 
-getdata.f95: $(srcdir)/getdata.f95.in make_parameters.sed
+getdata.f90: $(srcdir)/getdata.f90.in make_parameters.sed
 	rm -f $@
 	$(SED) $< -f make_parameters.sed > $@
 	chmod a-w $@

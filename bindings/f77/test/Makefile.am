@@ -33,10 +33,10 @@ TESTS=gdfget $(F95TESTS)
 gdfget_SOURCES=gdfget.f
 gdfget_LDADD=$(F77LDADD)
 
-fgetdata_SOURCES=fgetdata.f95
+fgetdata_SOURCES=fgetdata.f90
 fgetdata_LDADD=$(F95LDADD)
 
-fget_field_list_SOURCES=fget_field_list.f95
+fget_field_list_SOURCES=fget_field_list.f90
 fget_field_list_LDADD=$(F95LDADD)
 
 check_PROGRAMS=$(TESTS)
