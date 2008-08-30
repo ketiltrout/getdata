@@ -201,10 +201,10 @@ extern char* getdata_error_string(const DIRFILE* dirfile, char* buffer,
 
 extern void dirfile_close(DIRFILE* dirfile) __THROW __gd_nonnull ((1));
 
-extern unsigned int get_samples_per_frame(DIRFILE* dirfile,
-    const char *field_code) __THROW __gd_nonnull ((1, 2));
+extern unsigned int get_spf(DIRFILE* dirfile, const char *field_code) __THROW
+__gd_nonnull ((1, 2));
 
-extern unsigned int get_n_fields(DIRFILE* dirfile) __THROW __gd_nonnull ((1));
+extern unsigned int get_nfields(DIRFILE* dirfile) __THROW __gd_nonnull ((1));
 
 extern const char** get_field_list(DIRFILE* dirfile) __THROW __gd_nonnull ((1));
 
@@ -217,7 +217,7 @@ extern DIRFILE* dirfile_open(const char* dirfilename,
 
 /* the following functions are _FILE_OFFSET_BITS sensitive */
 #ifndef __USE_FILE_OFFSET64
-extern off_t get_n_frames(DIRFILE* dirfile) __THROW __gd_nonnull ((1));
+extern off_t get_nframes(DIRFILE* dirfile) __THROW __gd_nonnull ((1));
 
 extern size_t getdata(DIRFILE* dirfile, const char *field_code,
     off_t first_frame, off_t first_sample, size_t num_frames,
@@ -230,9 +230,9 @@ extern size_t putdata(DIRFILE* dirfile, const char *field_code,
     const void *data_in) __gd_nonnull ((1, 2));
 #else
 # ifdef __REDIRECT_NTH
-extern off_t __REDIRECT_NTH (get_n_frames, (DIRFILE* dirfile), get_n_frames64);
+extern off_t __REDIRECT_NTH (get_nframes, (DIRFILE* dirfile), get_nframes64);
 # else
-#  define get_n_frames get_n_frames64
+#  define get_nframes get_nframes64
 # endif
 
 # ifdef __REDIRECT
@@ -253,7 +253,7 @@ extern size_t __REDIRECT (putdata, (DIRFILE* dirfile, const char *field_code,
 
 /* if requested, declare the LFS transitional extension */
 #ifdef __USE_LARGEFILE64
-extern __off64_t get_n_frames64(DIRFILE* dirfile) __THROW __gd_nonnull ((1));
+extern __off64_t get_nframes64(DIRFILE* dirfile) __THROW __gd_nonnull ((1));
 
 extern size_t getdata64(DIRFILE* dirfile, const char *field_code,
     __off64_t first_frame, __off64_t first_samp, size_t num_frames,

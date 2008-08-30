@@ -38,8 +38,8 @@ int main(void)
   for (i = 1; i < len + 1; ++i) {
     write_format(format, i);
     DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
-    unsigned int spf = get_samples_per_frame(D, "data");
-    size_t n = get_n_frames(D);
+    unsigned int spf = get_spf(D, "data");
+    size_t n = get_nframes(D);
     if (n != len / spf)
       return 1;
     dirfile_close(D);

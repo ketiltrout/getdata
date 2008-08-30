@@ -22,12 +22,12 @@
 AUTOMAKE_OPTIONS = foreign
 
 if HAVE_OFF64_T
-LFS_transitional_mans = getdata64.3 get_n_frames64.3 putdata64.3
+LFS_transitional_mans = getdata64.3 get_nframes64.3 putdata64.3
 else
 LFS_transitional_mans =
 endif
 
 dist_man_MANS = dirfile_open.3 dirfile_close.3 getdata.3 \
-								getdata_error_string.3 get_field_list.3 get_n_fields.3 \
-								get_n_frames.3 get_samples_per_frame.3 putdata.3 dirfile.5 \
-								dirfile-format.5 $(LFS_transitional_mans)
+								getdata_error_string.3 get_field_list.3 get_nfields.3 \
+								get_nframes.3 get_spf.3 putdata.3 dirfile.5 dirfile-format.5 \
+								$(LFS_transitional_mans)

@@ -31,7 +31,7 @@ int main(void)
   close(fd);
 
   DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
-  size_t n = get_n_frames64(D);
+  size_t n = get_nframes64(D);
   dirfile_close(D);
 
   unlink(data);

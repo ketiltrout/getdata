@@ -66,7 +66,7 @@ The first sample returned will be
 as measured from the start of the dirfile, where
 .I samples_per_frame
 is the number of samples per frame as returned by
-.BR get_samples_per_frame (3).
+.BR get_spf (3).
 The number of samples fetched is, similarly,
 .RS
 .IR num_frames " * " samples_per_frame " + " num_samples .
@@ -223,7 +223,7 @@ systematically less data to the first
 .B RAW
 field in proportion to the maximal forward phase shift.  This method will work
 with applications which respect the database size reported by
-.BR get_n_frames (3)
+.BR get_nframes (3)
 resulting in these applications effectively ignoring all frames past the frame
 containing the maximally forward-shifted
 .B PHASE
@@ -233,6 +233,6 @@ field's end-of-field marker.
 .BR dirfile (5),
 .BR dirfile_open (3),
 .BR getdata_error_string (3),
-.BR get_n_frames (3),
-.BR get_samples_per_frame (3),
+.BR get_nframes (3),
+.BR get_spf (3),
 .BR putdata (3)

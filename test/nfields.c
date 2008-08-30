@@ -26,7 +26,7 @@ int main(void)
   close(fd);
 
   DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
-  unsigned int nfields = get_n_fields(D);
+  unsigned int nfields = get_nfields(D);
   int error = D->error;
   dirfile_close(D);
 

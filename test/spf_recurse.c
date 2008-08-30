@@ -25,7 +25,7 @@ int main(void)
   close(fd);
 
   DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
-  unsigned int spf = get_samples_per_frame(D, "lincom");
+  unsigned int spf = get_spf(D, "lincom");
   int error = D->error;
   dirfile_close(D);
 

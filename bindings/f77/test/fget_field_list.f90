@@ -16,7 +16,7 @@ program get_int8
   close(1, status='keep')
 
   d = fdirfile_open(filedir, GD_RDONLY)
-  n = fget_n_fields(d)
+  n = fget_nfields(d)
   l = fget_field_name_max(d)
   e = fget_error(d)
   call fget_field_list(fl, d, c)

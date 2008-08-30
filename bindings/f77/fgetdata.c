@@ -137,7 +137,7 @@ void F77_FUNC(gdffnx, GDFFNX) (int* max, const int* dirfile)
 {
   int i, len = 0;
   DIRFILE* D = _GDF_GetDirfile(*dirfile);
-  unsigned int nfields = get_n_fields(D);
+  unsigned int nfields = get_nfields(D);
   if (D->error)
     return;
 
@@ -157,7 +157,7 @@ void F77_FUNC(gdffdn, GDFFDN) (char* name, int* name_len, const int* dirfile,
   const char** fl;
   int len;
   DIRFILE* D = _GDF_GetDirfile(*dirfile);
-  unsigned int nfields = get_n_fields(D);
+  unsigned int nfields = get_nfields(D);
   if (D->error)
     return;
 
@@ -173,24 +173,24 @@ void F77_FUNC(gdffdn, GDFFDN) (char* name, int* name_len, const int* dirfile,
     *name_len = 0;
 }
 
-/* get_n_fields wrapper */
+/* get_nfields wrapper */
 void F77_FUNC(gdfnfd, GDFNFD) (int* nfields, int* dirfile)
 {
-  *nfields = get_n_fields(_GDF_GetDirfile(*dirfile));
+  *nfields = get_nfields(_GDF_GetDirfile(*dirfile));
 }
 
-/* get_n_frames wrapper */
+/* get_nframes wrapper */
 void F77_FUNC(gdfnfr, GDFNFR) (int* nframes, int* dirfile)
 {
-  *nframes = get_n_frames(_GDF_GetDirfile(*dirfile));
+  *nframes = get_nframes(_GDF_GetDirfile(*dirfile));
 }
 
-/* get_samples_per_frame wrapper */
+/* get_spf wrapper */
 void F77_FUNC(gdfspf, GDFSPF) (int* spf, int* dirfile, const char* field_code,
     int* field_code_l)
 {
   char* out = malloc(*field_code_l + 1);
-  *spf = get_samples_per_frame(_GDF_GetDirfile(*dirfile),
+  *spf = get_spf(_GDF_GetDirfile(*dirfile),
       _GDF_CString(out, field_code, *field_code_l));
   free(out);
 }

@@ -45,11 +45,11 @@ extern int GetData(const char *dirfilename, const char *field_code,
     char return_type, void *data_out, int *error_code) __gd_nonnull ((1, 2, 9))
   __attribute_deprecated__;
 
-/* legacy API for get_n_frames() */
+/* legacy API for get_nframes() */
 extern int GetNFrames(const char *dirfilename, int *error_code,
     const void *unused) __gd_nonnull ((1, 2)) __attribute_deprecated__;
 
-/* legacy API for get_samples_per_frame() */
+/* legacy API for get_spf() */
 extern int GetSamplesPerFrame(const char *dirfilename, const char *field_code,
     int *error_code) __THROW __gd_nonnull ((1, 2, 3)) __attribute_deprecated__;
 

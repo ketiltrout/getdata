@@ -35,11 +35,11 @@ C     Returns the maximum field name length
       EXTERNAL GDFFNX
 C     Corresponding to get_field_list(3) (sort of)
       EXTERNAL GDFFDN
-C     Corresponding to get_n_fields(3)
+C     Corresponding to get_nfields(3)
       EXTERNAL GDFNFD
-C     Corresponding to get_n_frames(3)
+C     Corresponding to get_nframes(3)
       EXTERNAL GDFNFR
-C     Corresponding to get_samples_per_frame(3)
+C     Corresponding to get_spf(3)
       EXTERNAL GDFSPF
 C     Corresponding to putdata(3)
       EXTERNAL GDFPUT

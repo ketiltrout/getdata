@@ -45,11 +45,15 @@ unit numbers in place of C's dirfile pointers are:
 * subroutine fdirfile_open fdirfile_close (dirfile_unit)
   integer, intent(in) :: dirfile
 
-* integer function fget_n_fields (dirfile_unit)
+* integer function fget_nfields (dirfile_unit)
   integer, intent(in) :: dirfile_unit
 
-* integer function fget_n_frames (dirfile_unit)
+* integer function fget_nframes (dirfile_unit)
   integer, intent(in) :: dirfile_unit
+
+* integer function fget_spf (dirfile_unit, field_code)
+  integer, intent(in) :: dirfile
+  character (len=*), intent(in) :: field_code
 
 * integer function fgetdata_error_string (dirfile, buffer, len)
   integer, intent(in) :: dirfile, len

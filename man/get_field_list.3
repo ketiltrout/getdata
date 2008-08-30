@@ -49,7 +49,7 @@ parameter must point to a valid DIRFILE object previously created by a call to
 
 .SH RETURN VALUE
 Upon successful completion,
-.BR get_n_fields ()
+.BR get_field_list ()
 returns a pointer to an array of strings containing the names of all the fields
 defined in the dirfile database.  On error, it
 returns zero and sets
@@ -68,10 +68,10 @@ The array returned will be de-allocated by a call to
 and should not be de-allocated by the caller.  The list returned should not be
 assumed to be in any particular order.  The length of the array can be obtained
 from a call to
-.BR get_n_fields (3).
+.BR get_nfields (3).
 .SH SEE ALSO
 .BR dirfile (5),
 .BR dirfile_open (3),
 .BR getdata (3),
 .BR getdata_error_string (3),
-.BR get_n_fields (3)
+.BR get_nfields (3)

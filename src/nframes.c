@@ -31,7 +31,7 @@
 
 #include "internal.h"
 
-off64_t get_n_frames64(DIRFILE* D)
+off64_t get_nframes64(DIRFILE* D)
 {
   char raw_data_filename[FILENAME_MAX];
   struct stat64 statbuf;
@@ -71,9 +71,9 @@ off64_t get_n_frames64(DIRFILE* D)
 }
 
 /* 32(ish)-bit wrapper for the 64-bit version, when needed */
-off_t get_n_frames(DIRFILE* D)
+off_t get_nframes(DIRFILE* D)
 {
-  return (off_t)get_n_frames64(D);
+  return (off_t)get_nframes64(D);
 }
 /* vim: ts=2 sw=2 et tw=80
 */

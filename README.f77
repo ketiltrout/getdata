@@ -69,7 +69,7 @@ Available Subroutines
 * GDFNFD(nfields, dirfile_unit)
   INTEGER nframes, dirfile_unit
 
-  This wraps get_n_fields(3).  It takes the dirfile unit number as input and
+  This wraps get_nfields(3).  It takes the dirfile unit number as input and
   returns the number of fields in the dirfile in nfields.
 
 * GDFFDX(field_max, dirfile_unit)
@@ -95,16 +95,16 @@ Available Subroutines
 * GDFNFR(nframes, dirfile_unit)
   INTEGER nframes, dirfile_unit
 
-  This wraps get_n_frames(3).  It takes the dirfile unit number as input and
+  This wraps get_nframes(3).  It takes the dirfile unit number as input and
   returns the number of frames in the dirfile in nframes.
 
 * GDFSPF(spf, dirfile_unit, field_code, field_code_len)
   INTEGER spf, dirfile_unit, field_code_len
   CHARACTER*<n> field_code
 
-  This wraps get_samples_per_frame(3).  The field_code_len parameter should
-  contain the string length of field_code.  The number of samples per frame in
-  field_code will be returned in spf.
+  This wraps get_spf(3).  The field_code_len parameter should contain the
+  string length of field_code.  The number of samples per frame in field_code
+  will be returned in spf.
 
 * GDFPUT(n_wrote, dirfile_unit, field_code, field_code_len, first_frame,
   first_sample, num_frames, num_samples, data_type, data_in)

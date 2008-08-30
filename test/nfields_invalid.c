@@ -13,7 +13,7 @@ int main(void)
   const char* filedir = __TEST__ "dirfile";
 
   DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
-  unsigned int n = get_n_frames(D);
+  unsigned int n = get_nfields(D);
   int error = D->error;
   dirfile_close(D);
 

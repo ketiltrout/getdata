@@ -42,7 +42,7 @@ int main(int argc, char* argv[])
     dirfile_close(dirfile);
     return 1;
   }
-  off_t n = get_n_frames(dirfile);
+  off_t n = get_nframes(dirfile);
 
   if (dirfile->error) {
     printf("getdata error: %s\n", getdata_error_string(dirfile, getdata_error, 2048));

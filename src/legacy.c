@@ -149,7 +149,7 @@ int GetData(const char *filename_in, const char *field_code,
   return nread;
 }
 
-/* legacy interface to get_n_frames() --- the third argument to this function
+/* legacy interface to get_nframes() --- the third argument to this function
  * has been ignored since at least 2005 (and why does it come after
  * error_code?)
  */
@@ -171,13 +171,13 @@ int GetNFrames(const char *filename_in, int *error_code, const void *unused)
     return 0;
   }
 
-  nf = (int)get_n_frames(D);
+  nf = (int)get_nframes(D);
   *error_code = _GD_CopyGlobalError(D);
 
   return nf;
 }
 
-/* legacy interface to get_samples_per_frame()
+/* legacy interface to get_spf()
  */
 int GetSamplesPerFrame(const char *filename_in, const char *field_code,
     int *error_code)
@@ -196,7 +196,7 @@ int GetSamplesPerFrame(const char *filename_in, const char *field_code,
     return 0;
   }
 
-  int spf = (int)get_samples_per_frame(D, field_code);
+  int spf = (int)get_spf(D, field_code);
   *error_code = _GD_CopyGlobalError(D);
 
   return spf;

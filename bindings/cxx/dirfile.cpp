@@ -51,12 +51,12 @@ const char* Dirfile::ErrorString(size_t len)
 
 unsigned int Dirfile::SamplesPerFrame(const char* field_code)
 {
-  return get_samples_per_frame(D, field_code);
+  return get_spf(D, field_code);
 }
 
 unsigned int Dirfile::NFields()
 {
-  return get_n_fields(D);
+  return get_nfields(D);
 }
 
 const char** Dirfile::FieldList()
@@ -66,7 +66,7 @@ const char** Dirfile::FieldList()
 
 off_t Dirfile::NFrames()
 {
-  return get_n_frames(D);
+  return get_nframes(D);
 }
 
 size_t Dirfile::GetData(const char* field_code, off_t first_frame,

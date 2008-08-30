@@ -1,4 +1,4 @@
-.\" get_n_fields.3.  The get_n_fields man page.
+.\" get_nframes.3.  The get_nframes man page.
 .\"
 .\" (C) 2008 D. V. Wiebe
 .\"
@@ -21,26 +21,27 @@
 .\" Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
 .\" 02111-1307 USA.
 .\"
-.TH get_n_fields 3 "26 August 2008" "Version 0.3.0" "GETDATA"
+.TH get_nframes 3 "11 August 2008" "Version 0.3.0" "GETDATA"
 .SH NAME
-get_n_fields \(em report the number of fields in a dirfile
+get_nframes \(em report the size of a dirfile
 .SH SYNOPSIS
 .B #include <getdata.h>
 .HP
 .nh
 .ad l
-.BI "unsigned int get_n_fields(DIRFILE *" dirfile );
+.BI "off_t get_nframes(DIRFILE *" dirfile );
 .hy
 .ad n
 .SH DESCRIPTION
 The
-.BR get_n_fields ()
+.BR get_nframes ()
 function queries a dirfile(5) database specified by
 .I dirfile
-and returns the number of fields defined in the database.  Notably, this count
-does not include the implicit
-.I INDEX
-field.
+and returns the number of frames in the database.  Since different fields may
+have differing number of frames, the Dirfile Standards (see
+.BR dirfile (5))
+dictate that the number of frames in the database is defined to be equal to the
+number of frames in the first raw field specified in the format file.
 
 The 
 .I dirfile
@@ -49,14 +50,23 @@ parameter must point to a valid DIRFILE object previously created by a call to
 
 .SH RETURN VALUE
 Upon successful completion,
-.BR get_n_fields ()
-returns the number of defined fields in the dirfile.  On error, it
+.BR get_nframes ()
+returns the number of frames in the dirfile.  On error, it
 returns zero and sets
 .IR dirfile -> error
 to a non-zero error value.  Possible error values are:
 .TP 8
 .B GD_E_BAD_DIRFILE
 The supplied dirfile was invalid.
+.TP
+.B GD_E_EMPTY
+The dirfile format file defines no raw fields, or else none of the raw fields
+defined could be accessed.  As a result, the database is effectively empty.
+.TP
+.B GD_E_RAW_IO
+An attempt to
+.BR stat (2)
+the file associated with first raw field defined in the format failed.
 .P
 A descriptive error string for the last error encountered can be obtained from
 a call to
@@ -65,5 +75,4 @@ a call to
 .BR dirfile (5),
 .BR dirfile_open (3),
 .BR getdata (3),
-.BR getdata_error_string (3),
-.BR get_field_list (3)
+.BR getdata_error_string (3)

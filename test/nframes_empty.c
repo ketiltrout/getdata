@@ -17,7 +17,7 @@ int main(void)
   close(open(format, O_CREAT | O_EXCL | O_WRONLY, 0666));
 
   DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
-  size_t n = get_n_frames(D);
+  size_t n = get_nframes(D);
   int error = D->error;
   dirfile_close(D);
 

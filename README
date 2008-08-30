@@ -238,7 +238,7 @@ The first of these, _LARGEFILE64_SOURCE, if defined before including getdata.h,
 will enable the obsolete, transitional largefile extensions defined by the LFS.
 This will enable explicit support for large files by defining the 64-bit
 explicit type `off64_t', and result in getdata defining the explicitly 64-bit
-interfaces `getdata64', `putdata64', and `get_n_frames64'.  This macro is
+interfaces `getdata64', `putdata64', and `get_nframes64'.  This macro is
 largely obsolete, and using _FILE_OFFSET_BITS is preferred, if supported.
 
 The second macro, _FILE_OFFSET_BITS, determines the size of `off_t'.  If not
@@ -343,7 +343,7 @@ the new API:
     }
 
     /* Get size of the database */
-    off_t nf = get_n_frames(dirfile); /* again off_t */
+    off_t nf = get_nframes(dirfile); /* again off_t */
     if (dirfile->error) {
       printf("GetData error: %s\n",
           getdata_error_string(dirfile, error_buffer, 1024));
@@ -352,7 +352,7 @@ the new API:
     }
 
     /* Get samples-per-frame */
-    unsigned int spf = get_samples_per_frame(dirfile, field_name);
+    unsigned int spf = get_spf(dirfile, field_name);
     if (dirfile->error) {
       printf("GetData error: %s\n",
           getdata_error_string(dirfile, error_buffer, 1024));

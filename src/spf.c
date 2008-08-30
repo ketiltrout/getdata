@@ -83,7 +83,7 @@ unsigned int _GD_GetSPF(const char *field_code, DIRFILE* D)
 
 /* Get the number of samples for each frame for the given field
  */
-unsigned int get_samples_per_frame(DIRFILE* D, const char *field_code)
+unsigned int get_spf(DIRFILE* D, const char *field_code)
 {
   unsigned int spf = 0;
 

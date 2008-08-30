@@ -156,14 +156,14 @@ function fgetdata_r8 (dirfile, field_code, first_frame, first_sample, &
   fgetdata_r8 = nread
 end function
 
-function fget_n_fields (dirfile)
-  integer :: fget_n_fields
+function fget_nfields (dirfile)
+  integer :: fget_nfields
   integer, intent(in) :: dirfile
   integer :: nf
 
   ! call f77 library
   call gdfnfd(nf, dirfile)
-  fget_n_fields = nf
+  fget_nfields = nf
 end function
 
 function fget_field_name_max (dirfile)
@@ -188,7 +188,7 @@ subroutine fget_field_list (field_list, dirfile, field_len)
   if (field_len .lt. max_len) then
     field_len = max_len
   else
-    nfields = fget_n_fields(dirfile)
+    nfields = fget_nfields(dirfile)
     do i=1,nfields
       ! call f77 library
       call gdffdn(field_list(i), field_len, dirfile, i)
@@ -196,25 +196,25 @@ subroutine fget_field_list (field_list, dirfile, field_len)
   end if
 end subroutine
 
-function fget_n_frames (dirfile)
-  integer :: fget_n_frames
+function fget_nframes (dirfile)
+  integer :: fget_nframes
   integer, intent(in) :: dirfile
   integer :: nf
 
   ! call f77 library
   call gdfnfr(nf, dirfile)
-  fget_n_frames = nf
+  fget_nframes = nf
 end function
 
-function fget_samples_per_frame (dirfile, field_code)
-  integer :: fget_samples_per_frame
+function fget_spf (dirfile, field_code)
+  integer :: fget_spf
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: field_code
   integer :: spf
 
   ! call f77 library
   call gdfspf(spf, dirfile, TRIM(field_code), LEN_TRIM(field_code))
-  fget_samples_per_frame = spf
+  fget_spf = spf
 end function
 
 ! putdata with data_type=GD_INT8

@@ -30,7 +30,7 @@
 #include <getdata.h>
 #include "internal.h"
 
-unsigned int get_n_fields(DIRFILE* D)
+unsigned int get_nfields(DIRFILE* D)
 {
   dtrace("%p", D);
 

@@ -29,7 +29,7 @@ int main(void)
   close(fd);
 
   DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
-  unsigned int spf = get_samples_per_frame(D, "data");
+  unsigned int spf = get_spf(D, "data");
   dirfile_close(D);
 
   unlink(format1);
