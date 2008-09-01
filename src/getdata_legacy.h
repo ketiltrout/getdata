@@ -31,6 +31,15 @@
 
 extern const char *GD_ERROR_CODES[GD_N_ERROR_CODES] __attribute_deprecated__;
 
+/* Obviously not the same as the old FormatType, but it will have to do. */
+struct FormatType {
+  const char* FileDirName;
+  int file_offset;
+  const char* first_field;
+  const char** Entries;
+  int n_entries;
+};
+
 /* comments about cancellation points and __THROW found in getdata.h apply
  * here too...
  */

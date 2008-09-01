@@ -77,6 +77,14 @@ const char* _gd_colsub(void);
 #define dreturn(...)
 #endif
 
+#if defined HAVE_DECL_ATOLL && !HAVE_DECL_ATOLL
+# if defined HAVE_DECL_ATOQ && HAVE_DECL_ATOQ
+#  define atoll atoq
+# else
+#  define atoll atol
+# endif
+#endif
+
 #if defined HAVE_DECL_STRDUP && !HAVE_DECL_STRDUP
 extern char* strdup(const char* s);
 #endif

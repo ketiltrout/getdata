@@ -174,7 +174,7 @@ AC_HEADER_ASSERT
 AC_HEADER_DIRENT
 
 dnl declarations
-AC_CHECK_DECLS([strdup, strerror_r])
+AC_CHECK_DECLS([atoll, atoq, strdup, strerror_r])
 
 dnl types
 AC_C_CONST

@@ -174,7 +174,7 @@ struct _GD_DIRFILE {
   /* field list */
   const char** field_list;
 
-  int frame_offset;
+  off64_t frame_offset;
   int suberror;
   char* error_string;
   char* error_file;

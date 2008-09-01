@@ -524,7 +524,7 @@ static void _GD_ParseFormatFile(FILE* fp, DIRFILE *D, const char* filedir,
       /* Directives */
 
     } else if (strcmp(ptr, "FRAMEOFFSET") == 0) {
-      D->frame_offset = atoi(in_cols[1]);
+      D->frame_offset = atoll(in_cols[1]);
     } else if (strcmp(ptr, "INCLUDE") == 0) {
       int i, found = 0;
       char temp_buffer[FILENAME_MAX];

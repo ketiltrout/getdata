@@ -70,6 +70,8 @@ const char const*GD_ERROR_CODES[GD_N_ERROR_CODES] = {
   "Request out-of-range"
 };
 
+struct FormatType Format;
+
 /* _GD_CopyGlobalError: Copy the last error message to the global error buffer.
  */
 static int _GD_CopyGlobalError(DIRFILE* D)
@@ -92,9 +94,14 @@ char* GetDataErrorString(char* buffer, size_t buflen)
 /* _GD_GetDirfile: Locate the legacy DIRFILE given the filespec.  This started
  * life as GetFormat...
  */
-static DIRFILE* _GD_GetDirfile(const char *filedir)
+static DIRFILE* _GD_GetDirfile(const char *filename_in)
 {
   int i_dirfile;
+
+  char filedir[FILENAME_MAX];
+  strncpy(filedir, filename_in, FILENAME_MAX);
+  if (filedir[strlen(filedir) - 1] == '/')
+    filedir[strlen(filedir) - 1] = '\0';
 
   /* first check to see if we have already read it */
   for (i_dirfile = 0; i_dirfile < _GD_Dirfiles.n; i_dirfile++) {
@@ -121,18 +128,36 @@ static DIRFILE* _GD_GetDirfile(const char *filedir)
   return _GD_Dirfiles.D[_GD_Dirfiles.n - 1];
 }
 
+/* We're not going to go through all the bother of attempting to reconstruct
+ * the old-style FormatType, since we have neither the fields sorted into
+ * types, nor the old FooEntryType structs.  Instead, just return a combination
+ * of get_nfields and get_field_list, plus a few odds and ends */
+const struct FormatType *GetFormat(const char *filedir, int *error_code) {
+  DIRFILE *D = _GD_GetDirfile(filedir);
+
+  if (D->error) {
+    *error_code = _GD_CopyGlobalError(D);
+    return NULL;
+  }
+  
+  /* fill the structure -- like everything about the legacy API, this is
+   * not thread-safe */
+  Format.FileDirName = filedir; 
+  Format.file_offset = (int)D->frame_offset;
+  Format.first_field = (D->first_field) ? D->first_field->field : NULL;
+  Format.Entries = get_field_list(D);
+  Format.n_entries = get_nfields(D);
+
+  return &Format;
+}
+
 /* legacy interface to getdata() */
-int GetData(const char *filename_in, const char *field_code,
+int GetData(const char *filename, const char *field_code,
     int first_frame, int first_samp, int num_frames, int num_samp,
     char return_type, void *data_out, int *error_code)
 {
   DIRFILE* D;
-  char filename[FILENAME_MAX];
   int nread;
-
-  strncpy(filename, filename_in, FILENAME_MAX);
-  if (filename[strlen(filename) - 1] == '/')
-    filename[strlen(filename) - 1] = '\0';
 
   D = _GD_GetDirfile(filename);
 
@@ -153,16 +178,11 @@ int GetData(const char *filename_in, const char *field_code,
  * has been ignored since at least 2005 (and why does it come after
  * error_code?)
  */
-int GetNFrames(const char *filename_in, int *error_code, const void *unused)
+int GetNFrames(const char *filename, int *error_code, const void *unused)
 {
   DIRFILE* D;
-  char filename[FILENAME_MAX];
   int nf;
   (void)unused;
-
-  strncpy(filename, filename_in, FILENAME_MAX);
-  if (filename[strlen(filename) - 1] == '/')
-    filename[strlen(filename) - 1] = '\0';
 
   D = _GD_GetDirfile(filename);
 
@@ -179,15 +199,10 @@ int GetNFrames(const char *filename_in, int *error_code, const void *unused)
 
 /* legacy interface to get_spf()
  */
-int GetSamplesPerFrame(const char *filename_in, const char *field_code,
+int GetSamplesPerFrame(const char *filename, const char *field_code,
     int *error_code)
 {
-  DIRFILE* D = malloc(sizeof(DIRFILE));
-  char filename[FILENAME_MAX];
-
-  strncpy(filename, filename_in, FILENAME_MAX);
-  if (filename[strlen(filename) - 1] == '/')
-    filename[strlen(filename) - 1] = '\0';
+  DIRFILE* D;
 
   D = _GD_GetDirfile(filename);
 
@@ -204,17 +219,12 @@ int GetSamplesPerFrame(const char *filename_in, const char *field_code,
 
 /* legacy interface to putdata()
  */
-int PutData(const char *filename_in, const char *field_code,
+int PutData(const char *filename, const char *field_code,
     int first_frame, int first_samp, int num_frames, int num_samp,
     char data_type, const void *data_in, int *error_code)
 {
   DIRFILE* D;
   int n_write = 0;
-  char filename[FILENAME_MAX];
-
-  strncpy(filename, filename_in, FILENAME_MAX);
-  if (filename[strlen(filename) - 1] == '/')
-    filename[strlen(filename) - 1] = '\0';
 
   D = _GD_GetDirfile(filename);
 
