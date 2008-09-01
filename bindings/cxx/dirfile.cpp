@@ -33,6 +33,11 @@ Dirfile::~Dirfile()
   dirfile_close(D);
 }
 
+void Dirfile::Flush(const char* field_code)
+{
+  dirfile_flush(D, field_code);
+}
+
 int Dirfile::Error()
 {
   return D->error;
@@ -46,7 +51,7 @@ const char* Dirfile::ErrorString(size_t len)
   if (len > 4096)
     len = 4096;
 
-  return getdata_error_string(D, error_string, len);
+  return get_error_string(D, error_string, len);
 }
 
 unsigned int Dirfile::SamplesPerFrame(const char* field_code)

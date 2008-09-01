@@ -41,6 +41,7 @@ class Dirfile {
     ~Dirfile();
 
     int Error();
+    void Flush(const char* field_code = NULL);
     const char* ErrorString(size_t len = 4096);
     unsigned int SamplesPerFrame(const char* field_code);
     off_t NFrames();

@@ -82,11 +82,11 @@ static int _GD_CopyGlobalError(DIRFILE* D)
   return _GD_GlobalErrors.error = D->error;
 }
 
-/* legacy wrapper for getdata_error_string()
+/* legacy wrapper for get_error_string()
  */
 char* GetDataErrorString(char* buffer, size_t buflen)
 {
-  return getdata_error_string(&_GD_GlobalErrors, buffer, buflen);
+  return get_error_string(&_GD_GlobalErrors, buffer, buflen);
 }
 
 /* _GD_GetDirfile: Locate the legacy DIRFILE given the filespec.  This started

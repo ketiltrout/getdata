@@ -24,7 +24,7 @@ that want access to this class should include dirfile.h.
 * const char* Dirfile::ErrorString(size_t len = 4096)
 
   The ErrorString method will return a buffer containing a description of the
-  last GetData library error as obtained from getdata_error_string(3).  This
+  last GetData library error as obtained from get_error_string(3).  This
   buffer is local to the object, and subsequent calls to ErrorString() will
   overwrite the buffer.  The string written to the buffer will be at most
   len characters long, up to a maximum of 4096 characters.
@@ -33,6 +33,7 @@ that want access to this class should include dirfile.h.
 * const char** Dirfile::FieldList();
 * unsigned int Dirfile::NFields();
 * off_t Dirfile::NFrames();
+* void Dirfile::Flush(const char* field_code = NULL);
 * size_t Dirfile::GetData(const char* field_code, off_t first_frame,
     off_t first_sample, size_t num_frames, size_t num_samples,
     Dirfile::DataType type, void* data_out);

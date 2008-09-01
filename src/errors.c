@@ -59,6 +59,8 @@ static const struct {
     "Field name is reserved on line %3$i of %2$s", 0 },
   { GD_E_FORMAT, GD_E_FORMAT_ENDIAN,
     "Unrecognised endianness on line %3$i of %2$s", 0 },
+  { GD_E_FORMAT, GD_E_FORMAT_BAD_NAME,
+    "Bad field name on line %3$i of %2$s: %4$s", 0 },
   { GD_E_TRUNC, 0, "Error truncating %2$s: ", 1 },
   { GD_E_CREAT, GD_E_CREAT_DIR, "Unable to create directory %2$s: ", 1 },
   { GD_E_CREAT, GD_E_CREAT_FORMAT, "Unable to create format file %2$s: ", 1 },
@@ -113,11 +115,11 @@ void _GD_ClearError(DIRFILE* D)
   dreturnvoid();
 }
 
-/* GetDataErrorString: Write a descriptive message in the supplied buffer
- *       describing the last library error.  The message may be truncated but
- *       will be null terminated.  Returns buffer, or NULL if buflen < 1.
+/* Write a descriptive message in the supplied buffer describing the last
+ * library error.  The message may be truncated but will be null terminated.
+ * Returns buffer, or NULL if buflen < 1.
  */
-char* getdata_error_string(const DIRFILE* D, char* buffer, size_t buflen)
+char* get_error_string(const DIRFILE* D, char* buffer, size_t buflen)
 {
   char* ptr;
   int i, s = -1;

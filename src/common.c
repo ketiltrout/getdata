@@ -74,14 +74,14 @@ gd_entry_t* _GD_FindField(DIRFILE* D, const char* field_code)
 
   while (l < u) {
     i = (l + u) / 2;
-    c = strcmp(field_code, D->entries[i]->field);
+    c = strcmp(field_code, D->entry[i]->field);
     if (c < 0)
       u = i;
     else if (c > 0)
       l = i + 1;
     else {
-      dreturn("%p", D->entries[i]);
-      return D->entries[i];
+      dreturn("%p", D->entry[i]);
+      return D->entry[i];
     }
   }
 
@@ -204,11 +204,10 @@ void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E)
 
   dtrace("%p, %p", D, E);
 
-  fp = fopen(E->file, "r");
+  fp = fopen(E->table, "r");
   if (fp == NULL) {
     _GD_MakeDummyLinterp(D, E);
-    _GD_SetError(D, GD_E_OPEN_LINFILE, GD_E_LINFILE_OPEN, NULL, 0,
-        E->file);
+    _GD_SetError(D, GD_E_OPEN_LINFILE, GD_E_LINFILE_OPEN, NULL, 0, E->table);
     dreturnvoid();
     return;
   }
@@ -220,8 +219,7 @@ void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E)
 
   if (i < 2) {
     _GD_MakeDummyLinterp(D, E);
-    _GD_SetError(D, GD_E_OPEN_LINFILE, GD_E_LINFILE_LENGTH, NULL, 0,
-        E->file);
+    _GD_SetError(D, GD_E_OPEN_LINFILE, GD_E_LINFILE_LENGTH, NULL, 0, E->table);
     dreturnvoid();
     return;
   }
@@ -240,7 +238,7 @@ void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E)
   linenum = 0;
   for (i = 0; i < E->count; i++) {
     _GD_GetLine(fp, line, &linenum);
-    sscanf(line, "%lg %lg",&(E->x[i]), &(E->y[i]));
+    sscanf(line, "%lg %lg", &(E->x[i]), &(E->y[i]));
   }
 
   dreturnvoid();

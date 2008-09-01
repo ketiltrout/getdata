@@ -72,7 +72,7 @@ const char** get_field_list(DIRFILE* D)
   }
 
   for (i = 0; i < D->n_entries; ++i) {
-    fl[i] = D->entries[i]->field;
+    fl[i] = D->entry[i]->field;
   }
 
   D->field_list = (const char**)fl;

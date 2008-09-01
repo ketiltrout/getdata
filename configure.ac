@@ -19,7 +19,7 @@ dnl License along with GetData; if not, write to the Free Software
 dnl Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
 dnl 02111-1307 USA.
 dnl
-AC_INIT([getdata], [0.3.0], [dwiebe@physics.utoronto.ca])
+AC_INIT([getdata], [0.3.0], [getdata-devel@lists.sourceforge.net])
 
 dnl autoconf 2.60 or later is required to build configure
 AC_PREREQ([2.60])

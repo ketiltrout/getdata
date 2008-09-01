@@ -38,7 +38,7 @@ Available Subroutines
 
 * GDFOPN(dirfile_unit, dirfilename, dirfilename_len, flags)
   INTEGER dirfileunit, dirfilename_len, flags
-  CHARACTER*<n> dirfilename
+  CHARACTER*<dirfilename_len> dirfilename
 
   This wraps dirfile_open(3), with the same input arguments (dirfilename_len
   should contain the string length of dirfilename).  It returns the dirfile
@@ -54,10 +54,19 @@ Available Subroutines
   supplied dirfile unit number, which may be subsequently returned by a
   subsequent call to GDFOPN.
 
+* GDFFLS(dirfile_unit, field_code, field_code_len)
+  INTEGER dirfile_unit, field_code_len
+  CHARACTER*<field_code_len> field_code
+
+  This wraps dirfile_flush(3).  If field_code_len is zero, the entire dirfile
+  will be flushed, and field_code will be ignored.  Otherwise the field named
+  by field_code will be flushed.
+
 * GDFGET(n_read, dirfile_unit, field_code, field_code_len, first_frame,
   first_sample, num_frames, num_samples, return_type, data_out)
   INTEGER n_read, dirfile_unit, field_code_len, first_frame, first_sample
   INTEGER num_frames, num_samples, return_type
+  CHARACTER*<field_code_len> field_code
   <datatype>*<n> data_out
 
   This wraps getdata(3), with the same input arguments (field_code_len should
@@ -100,7 +109,7 @@ Available Subroutines
 
 * GDFSPF(spf, dirfile_unit, field_code, field_code_len)
   INTEGER spf, dirfile_unit, field_code_len
-  CHARACTER*<n> field_code
+  CHARACTER*<field_code_len> field_code
 
   This wraps get_spf(3).  The field_code_len parameter should contain the
   string length of field_code.  The number of samples per frame in field_code
@@ -110,6 +119,7 @@ Available Subroutines
   first_sample, num_frames, num_samples, data_type, data_in)
   INTEGER n_wrote, dirfile_unit, field_code_len, first_frame, first_sample
   INTEGER num_frames, num_samples, data_type
+  CHARACTER*<field_code_len> field_code
   <datatype>*<n> data_out
 
   This wraps putdata(3), with the same input arguments (field_code_len should
@@ -128,7 +138,7 @@ Available Subroutines
 * GDFSTR(dirfile_unit, buffer, buffer_len)
 
   This subroutine takes a dirfile unit as input and will write the error
-  string returned by getdata_error_string(3) in buffer, which is of length
+  string returned by get_error_string(3) in buffer, which is of length
   buffer_len.
 
 Defined Parameters

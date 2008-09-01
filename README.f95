@@ -42,8 +42,14 @@ unit numbers in place of C's dirfile pointers are:
   character (len=*), intent(in) :: dirfilename
   integer, intent(in) :: flags
 
-* subroutine fdirfile_open fdirfile_close (dirfile_unit)
+* subroutine fdirfile_close (dirfile_unit)
   integer, intent(in) :: dirfile
+
+* subroutine fdirfile_flush (dirfile_unit, field_code)
+  integer, intent(in) :: dirifle
+  character (len=*), intent(in) :: field_cde
+
+  (If field_code is the empty string, the entire dirfile will be flushed.)
 
 * integer function fget_nfields (dirfile_unit)
   integer, intent(in) :: dirfile_unit
@@ -55,7 +61,7 @@ unit numbers in place of C's dirfile pointers are:
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: field_code
 
-* integer function fgetdata_error_string (dirfile, buffer, len)
+* integer function fget_error_string (dirfile, buffer, len)
   integer, intent(in) :: dirfile, len
   character (len=<len>), intent(out) :: buffer
 
@@ -123,7 +129,7 @@ Other procedures in the Fortran 95 bindings are:
   This function returns the length of the longest field name defined in the
   dirfile.
 
-* subroutine (field_list, dirfile, field_len)
+* subroutine fget_field_list (field_list, dirfile, field_len)
   character (len=<field_len>) dimension(:), intent(out) :: field_list
   integer, intent(in) :: dirfile_unit
   integer, intent(inout) :: field_len

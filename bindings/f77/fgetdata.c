@@ -118,6 +118,22 @@ void F77_FUNC(gdfcls, GDFCLS) (const int* dirfile)
   _GDF_ClearDirfile(*dirfile);
 }
 
+/* dirfile_flush wrapper */
+void F77_FUNC(gdffls, GDFFLS) (const int* dirfile, const char* field_code,
+    const int* field_code_l)
+{
+  char* out;
+
+  if (field_code_l == 0)
+    dirfile_flush(_GDF_GetDirfile(*dirfile), NULL);
+  else {
+    out = malloc(*field_code_l + 1);
+    dirfile_flush(_GDF_GetDirfile(*dirfile), _GDF_CString(out, field_code,
+          *field_code_l));
+    free(out);
+  }
+}
+
 /* getdata wrapper */
 void F77_FUNC(gdfget, GDFGET) (int* n_read, const int* dirfile,
     const char* field_code, const int* field_code_l,
@@ -214,8 +230,8 @@ void F77_FUNC(gdferr, GDFERR) (int* error, int* dirfile)
   *error = _GDF_GetDirfile(*dirfile)->error;
 }
 
-/* getdata_error_string wrapper */
+/* get_error_string wrapper */
 void F77_FUNC(gdfstr, GDFSTR) (int* dirfile, char* buffer, int* len)
 {
-  getdata_error_string(_GDF_GetDirfile(*dirfile), buffer, *len);
+  get_error_string(_GDF_GetDirfile(*dirfile), buffer, *len);
 }

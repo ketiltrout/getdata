@@ -35,7 +35,7 @@ extern const char *GD_ERROR_CODES[GD_N_ERROR_CODES] __attribute_deprecated__;
  * here too...
  */
 
-/* legacy API for getdata_error_string() */
+/* legacy API for get_error_string() */
 extern char* GetDataErrorString(char* buffer, size_t buflen) __THROW
   __gd_nonnull ((1)) __attribute_deprecated__;
 

@@ -337,7 +337,7 @@ the new API:
         be free'd by calling dirfile_close() after checking the error state */
 
       printf("GetData error: %s\n",
-          getdata_error_string(dirfile, error_buffer, 1024));
+          get_error_string(dirfile, error_buffer, 1024));
       dirfile_close(dirfile);
       exit(1);
     }
@@ -346,7 +346,7 @@ the new API:
     off_t nf = get_nframes(dirfile); /* again off_t */
     if (dirfile->error) {
       printf("GetData error: %s\n",
-          getdata_error_string(dirfile, error_buffer, 1024));
+          get_error_string(dirfile, error_buffer, 1024));
       dirfile_close(dirfile);
       exit(1);
     }
@@ -355,7 +355,7 @@ the new API:
     unsigned int spf = get_spf(dirfile, field_name);
     if (dirfile->error) {
       printf("GetData error: %s\n",
-          getdata_error_string(dirfile, error_buffer, 1024));
+          get_error_string(dirfile, error_buffer, 1024));
       dirfile_close(dirfile);
       exit(1);
     }
@@ -369,7 +369,7 @@ the new API:
             nf - first_frame, 0, GD_FLOAT64, data_buffer);
     if (dirfile->error) {
       printf("GetData error: %s\n",
-          getdata_error_string(dirfile, error_buffer, 1024));
+          get_error_string(dirfile, error_buffer, 1024));
       dirfile_close(dirfile);
       exit(1);
     }

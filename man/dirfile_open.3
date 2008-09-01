@@ -198,7 +198,7 @@ The library was unable to truncate the dirfile.
 .P
 A descriptive error string for the last error encountered can be obtained from
 a call to
-.BR getdata_error_string (3).
+.BR get_error_string (3).
 When finished with it, the DIRFILE object may be deallocated with a call to
 .BR dirfile_close (3),
 even if the open failed.
@@ -212,4 +212,4 @@ of GetData.
 .BR dirfile (5),
 .BR dirfile_close (3),
 .BR getdata (3),
-.BR getdata_error_string (3)
+.BR get_error_string (3)

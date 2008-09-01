@@ -1,4 +1,3 @@
-!
 ! (C) 2008 D. V. Wiebe
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -43,6 +42,15 @@ subroutine fdirfile_close (dirfile)
 
   ! call f77 library
   call gdfcls(dirfile)
+end subroutine
+
+subroutine fdirfile_flush (dirfile, field_code)
+  integer, intent(in) :: dirfile
+  character (len=*), intent(in) :: field_code
+
+  ! call f77 library -- this will take care of figuring out whether
+  !                     field_code is empty or not
+  call gdffls(dirfile, TRIM(field_code), LEN_TRIM(field_code))
 end subroutine
 
 ! getdata with return_type=GD_NULL
@@ -323,7 +331,7 @@ function fget_error (dirfile)
   fget_error = err
 end function
 
-subroutine fgetdata_error_string (dirfile, buffer, len)
+subroutine fget_error_string (dirfile, buffer, len)
   integer, intent(in) :: dirfile, len
   character (len=*), intent(out) :: buffer
 

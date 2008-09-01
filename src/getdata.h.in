@@ -82,12 +82,10 @@
 #define GD_MAX_LINCOM 3
 
 /* field types */
-#define GD_RAW_ENTRY      0
-#define GD_LINCOM_ENTRY   1
-#define GD_LINTERP_ENTRY  2
-#define GD_BIT_ENTRY      3
-#define GD_MULTIPLY_ENTRY 4
-#define GD_PHASE_ENTRY    5
+typedef enum {
+  GD_RAW_ENTRY, GD_LINCOM_ENTRY, GD_LINTERP_ENTRY,
+  GD_BIT_ENTRY, GD_MULTIPLY_ENTRY, GD_PHASE_ENTRY
+} gd_entype_t;
 
 /* Data types -- No valid type may contain 0x40.  This will automatically
  * invalidate any attempt to use the old-style character types as gd_type_t's */
@@ -120,8 +118,11 @@ typedef enum {
 /* Unified entry struct */
 struct _gd_unified_entry {
   char* field;
-  int field_type;
-  char* file;
+  gd_entype_t field_type;
+  union {
+    char* file;
+    char* table;
+  };
   char *in_fields[GD_MAX_LINCOM];
   union {
     int fp;
@@ -159,7 +160,7 @@ struct _GD_DIRFILE {
   unsigned int n_entries;
 
   /* field array */
-  gd_entry_t** entries;
+  gd_entry_t** entry;
 
   /* The first field */
   gd_entry_t* first_field;
@@ -196,10 +197,8 @@ typedef struct _GD_DIRFILE DIRFILE;
 #define GD_PEDANTIC     02000000 /* be pedantic */
 #define GD_INVALID      04000000 /* the dirfile is invalid */
 
-extern char* getdata_error_string(const DIRFILE* dirfile, char* buffer,
+extern char* get_error_string(const DIRFILE* dirfile, char* buffer,
     size_t buflen) __THROW __gd_nonnull ((1, 2));
-
-extern void dirfile_close(DIRFILE* dirfile) __THROW __gd_nonnull ((1));
 
 extern unsigned int get_spf(DIRFILE* dirfile, const char *field_code) __THROW
 __gd_nonnull ((1, 2));
@@ -209,11 +208,16 @@ extern unsigned int get_nfields(DIRFILE* dirfile) __THROW __gd_nonnull ((1));
 extern const char** get_field_list(DIRFILE* dirfile) __THROW __gd_nonnull ((1));
 
 
-/* dirfile_open(), getdata(), and putdata() contain calls to open(), making them
+/* The following functions contain calls to I/O functions, making them
  * cancellation points.  As a result we cannot mark them with __THROW.
  */
-extern DIRFILE* dirfile_open(const char* dirfilename,
-    unsigned int flags) __gd_nonnull ((1));
+extern DIRFILE* dirfile_open(const char* dirfilename, unsigned int flags)
+  __gd_nonnull ((1));
+
+extern int dirfile_close(DIRFILE* dirfile);
+
+extern void dirfile_flush(DIRFILE* dirfile, const char* field_code)
+  __gd_nonnull ((1));
 
 /* the following functions are _FILE_OFFSET_BITS sensitive */
 #ifndef __USE_FILE_OFFSET64

@@ -52,7 +52,11 @@ The first word of a field specification line is never a reserved word.
 There are four 
 .IR "reserved words" ,
 which cannot be used as field names in the dirfile.  Instead these specify
-directives:
+directives.  Any reserved word may have a forward slash
+.RB ( / )
+prepended to it, without change in meaning.  Future versions of the Standards
+may require this to distinguish a directive line from a field specification
+line.
 .TP
 .B ENDIAN
 The ENDIAN directive specifies the endianness of the raw data in the database.
@@ -63,8 +67,8 @@ is:
 .SP
 .RS
 .IP
-.B ENDIAN
-.IR ( big | little )
+.B /ENDIAN
+.IR "( " big " | " little " )"
 .RE
 .TP
 .B FRAMEOFFSET
@@ -73,7 +77,7 @@ database.  Syntax is:
 .SP
 .RS
 .IP
-.BI FRAMEOFFSET\~ <integer>
+.BI /FRAMEOFFSET\~ <integer>
 .RE
 .TP
 .B INCLUDE
@@ -88,7 +92,7 @@ current file.  Syntax is:
 .SP
 .RS
 .IP
-.BI INCLUDE\~ <file>
+.BI /INCLUDE\~ <file>
 .RE
 .TP
 .B VERSION
@@ -100,7 +104,7 @@ compatibility.  Syntax is:
 .SP
 .RS
 .IP
-.BI VERSION\~ <integer>
+.BI /VERSION\~ <integer>
 .RE
 .PP
 Like the rest of the format file, these reserved words are case sensitive.
@@ -112,7 +116,11 @@ Any line which does not start with a
 .I reserved word
 is assumed to be a field specification line.  The first word in a field
 specification line is the field name.  The field name consists of one or more
-non-whitespace characters.  The field name may not be
+non-whitespace characters excluding the characters
+.IP
+.B #\t&\t/\t;\t<\t>\t\\\\\t|
+.PP
+which are reserved.  The field name may not be
 .B INDEX
 or
 .BR FILEFRAM ,
@@ -327,8 +335,8 @@ Version 5 of the Standards (August 2008) added
 .B VERSION
 and
 .BR ENDIAN ,
-and removed the restriction on field name length.  It also introduced the data
-types
+slash demarcation of reserved words, and removed the restriction on field
+name length.  It also introduced the data types
 .IR INT8 ,\~ INT64 ,
 and
 .IR UINT64 ,

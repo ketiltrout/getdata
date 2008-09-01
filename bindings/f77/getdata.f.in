@@ -29,6 +29,8 @@ C     Corresponding to dirfile_open(3)
       EXTERNAL GDFOPN
 C     Corresponding to dirfile_close(3)
       EXTERNAL GDFCLS
+C     Corresponding to dirfile_flush(3)
+      EXTERNAL GDFFLS
 C     Corresponding to getdata(3)
       EXTERNAL GDFGET
 C     Returns the maximum field name length
@@ -45,5 +47,5 @@ C     Corresponding to putdata(3)
       EXTERNAL GDFPUT
 C     Returns the dirfile->error member
       EXTERNAL GDFERR
-C     Corresponding to getdata_error_string(3)
+C     Corresponding to get_error_string(3)
       EXTERNAL GDFSTR

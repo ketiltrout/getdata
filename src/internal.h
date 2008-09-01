@@ -96,19 +96,18 @@ char *strerror_r(int errnum, char *buf, size_t buflen);
 #endif
 
 /* Suberror codes */
-#define GD_E_OPEN_NOT_DIRFILE  0
 #define GD_E_OPEN_NOT_EXIST    1
+#define GD_E_OPEN_NOT_DIRFILE  2
 #define GD_E_OPEN_NO_ACCESS    3
 
-#define GD_E_TRUNC_DIR         0
 #define GD_E_TRUNC_STAT        1
 #define GD_E_TRUNC_UNLINK      2
+#define GD_E_TRUNC_DIR         3
 
-#define GD_E_CREAT_DIR         0
 #define GD_E_CREAT_FORMAT      1
 #define GD_E_CREAT_EXCL        2
+#define GD_E_CREAT_DIR         3
 
-#define GD_E_FORMAT_BAD_TYPE   0
 #define GD_E_FORMAT_BAD_SPF    1
 #define GD_E_FORMAT_N_FIELDS   2
 #define GD_E_FORMAT_N_COLS     3
@@ -120,15 +119,18 @@ char *strerror_r(int errnum, char *buf, size_t buflen);
 #define GD_E_FORMAT_N_RAW     10
 #define GD_E_FORMAT_RES_NAME  11
 #define GD_E_FORMAT_ENDIAN    12
+#define GD_E_FORMAT_BAD_TYPE  13
+#define GD_E_FORMAT_BAD_NAME  14
 
-#define GD_E_LINFILE_OPEN      0
 #define GD_E_LINFILE_LENGTH    1
+#define GD_E_LINFILE_OPEN      2
 
 void* _GD_Alloc(DIRFILE* D, gd_type_t type, size_t n) __gd_nonnull ((1))
   __attribute_malloc__ __THROW __wur;
 void _GD_ClearError(DIRFILE* D) __gd_nonnull ((1)) __THROW;
 void _GD_ConvertType(DIRFILE* D, const void *data_in, gd_type_t in_type,
-    void *data_out, gd_type_t out_type, size_t n) __gd_nonnull ((1, 2, 4)) __THROW;
+    void *data_out, gd_type_t out_type, size_t n) __gd_nonnull ((1, 2, 4))
+  __THROW;
 size_t  _GD_DoField(DIRFILE *D, const char *field_code, off64_t first_frame,
     off64_t first_samp, size_t num_frames, size_t num_samp,
     gd_type_t return_type, void *data_out) __gd_nonnull ((1, 2));
