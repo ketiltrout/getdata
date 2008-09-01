@@ -59,6 +59,7 @@ getdata.mod: getdata.o
 clean-local:
 	rm -rf getdata.mod make_parameters.sed.in make_parameters.stamp \
 		make_parameters.sed getdata.f getdata.f90
+	rm -rf *~
 
 make_parameters.sed.in: make_parameters ../../src/getdata.h
 	./make_parameters

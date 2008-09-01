@@ -30,3 +30,6 @@ endif
 
 bin_PROGRAMS=$(CHECKDIRFILE)
 checkdirfile_SOURCES=checkdirfile.c
+
+clean-local:
+	rm -rf *~ 

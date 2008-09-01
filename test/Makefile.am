@@ -92,3 +92,4 @@ check_PROGRAMS=$(TESTS)
 
 clean-local:
 	rm -rf *odirfile
+	rm -rf *~ 

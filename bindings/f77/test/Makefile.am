@@ -49,3 +49,4 @@ FCLINK = $(LIBTOOL) --tag=F77 --mode=link $(FCLD) $(AM_FCFLAGS) $(FCFLAGS) \
 
 clean-local:
 	rm -rf test_dirfile
+	rm -rf *~

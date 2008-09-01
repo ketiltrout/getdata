@@ -82,80 +82,6 @@ int _GD_GetLine(FILE *fp, char *line, int* linenum)
   return 0;  /* there were no valid lines */
 }
 
-/* _GD_FreeD: free the DIRFILE and its subordinates
-*/
-static void _GD_FreeD(DIRFILE* D)
-{
-  int i, j;
-
-  dtrace("%p", D);
-
-  for (i = 0; i < D->n_entries; ++i) 
-    if (D->entries[i] != NULL) {
-      free((char*)D->entries[i]->field); /* cast away bogus constness */
-      switch(D->entries[i]->field_type) {
-        case GD_RAW_ENTRY:
-          free(D->entries[i]->file);
-          break;
-        case GD_LINCOM_ENTRY:
-          for (j = 0; j < D->entries[i]->count; ++j)
-            free(D->entries[i]->in_fields[j]);
-          break;
-        case GD_LINTERP_ENTRY:
-          free(D->entries[i]->in_fields[0]);
-          free(D->entries[i]->file);
-          if (D->entries[i]->count > 0) {
-            free(D->entries[i]->x);
-            free(D->entries[i]->y);
-          }
-          break;
-        case GD_MULTIPLY_ENTRY:
-          free(D->entries[i]->in_fields[0]);
-          free(D->entries[i]->in_fields[1]);
-          break;
-        case GD_BIT_ENTRY:
-        case GD_PHASE_ENTRY:
-          free(D->entries[i]->in_fields[0]);
-          break;
-      }
-    }
-
-  free(D->entries);
-  free(D->error_string);
-  free(D->error_file);
-  free(D->field_list);
-
-  dreturnvoid();
-}
-
-/* This function is needed outside the legacy API to handle old format
- * files
- */
-gd_type_t _GD_LegacyType(char c)
-{
-  switch (c) {
-    case 'n':
-      return GD_NULL;
-    case 'c':
-      return GD_UINT8;
-    case 'u':
-      return GD_UINT16;
-    case 's':
-      return GD_INT16;
-    case 'U':
-      return GD_UINT32;
-    case 'i':
-    case 'S':
-      return GD_INT32;
-    case 'f':
-      return GD_FLOAT32;
-    case 'd':
-      return GD_FLOAT64;
-  }
-
-  return GD_UNKNOWN;
-}
-
 static gd_type_t _GD_RawType(const char* type)
 {
   /* for backwards compatibility */
@@ -896,24 +822,6 @@ DIRFILE* dirfile_open(const char* filedir, unsigned int flags)
 
   dreturn("%p", D);
   return D;
-}
-
-/* dirfile_close: Close the specified dirfile and free memory
-*/
-void dirfile_close(DIRFILE* D)
-{
-  int i;
-
-  dtrace("%p", D);
-
-  for(i = 0; i < D->n_entries; ++i)
-    if (D->entries[i]->field_type == GD_RAW_ENTRY)
-      close(D->entries[i]->fp);
-
-  _GD_ClearError(D);
-  _GD_FreeD(D);
-
-  dreturnvoid();
 }
 /* vim: ts=2 sw=2 et tw=80
 */

@@ -29,3 +29,6 @@ F77_SUBDIR=f77
 endif
 
 SUBDIRS = ${CXX_SUBDIR} ${F77_SUBDIR}
+
+clean-local:
+	rm -rf *~ 
