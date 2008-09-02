@@ -45,43 +45,6 @@
 
 #define MAX_IN_COLS (3 * GD_MAX_LINCOM + 3) /* for lincom */
 
-/* _GD_GetLine: read non-comment line from format file.  The line is placed in
- *       *line.  Returns 1 if successful, 0 if unsuccessful.
- */
-int _GD_GetLine(FILE *fp, char *line, int* linenum)
-{
-  char *ret_val;
-  int first_char;
-  int i, len;
-
-  dtrace("%p, %p, %p", fp, line, linenum);
-
-  do {
-    ret_val = fgets(line, MAX_LINE_LENGTH, fp);
-    (*linenum)++;
-    first_char = 0;
-    while (line[first_char] == ' ' || line[first_char] == '\t')
-      ++first_char;
-    line += first_char;
-  } while (ret_val && (line[0] == '#' || line[0] == 0 || line[1] == 0));
-
-
-  if (ret_val) {
-    /* truncate comments from end of lines */
-    len = strlen(line);
-    for (i = 0; i < len; i++) {
-      if (line[i] == '#')
-        line[i] = '\0';
-    }
-
-    dreturn("\"%s\"", line);
-    return 1; /* a line was read */
-  }
-
-  dreturn("%i", 0);
-  return 0;  /* there were no valid lines */
-}
-
 static gd_type_t _GD_RawType(const char* type)
 {
   /* for backwards compatibility */

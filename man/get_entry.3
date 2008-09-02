@@ -1,0 +1,308 @@
+.\" get_entry.3.  The get_entry man page.
+.\"
+.\" (C) 2008 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" This program is free software; you can redistribute it and/or modify
+.\" it under the terms of the GNU General Public License as published by
+.\" the Free Software Foundation; either version 2 of the License, or
+.\" (at your option) any later version.
+.\"
+.\" GetData is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+.\" General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public
+.\" License along with GetData; if not, write to the Free Software
+.\" Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
+.\" 02111-1307 USA.
+.\"
+.TH get_entry 3 "2 September 2008" "Version 0.3.0" "GETDATA"
+.SH NAME
+get_entry \(em retrieve a dirfile field's metadata
+.SH SYNOPSIS
+.B #include <getdata.h>
+.HP
+.nh
+.ad l
+.BI "const gd_entry_t *get_entry(DIRFILE *" dirfile ", const char *" field_code );
+.hy
+.ad n
+.SH DESCRIPTION
+The
+.BR get_entry ()
+function queries a dirfile(5) database specified by
+.I dirfile
+and returns the metadata associated with the field specified by
+.IR field_code .
+
+The 
+.I dirfile
+parameter must point to a valid DIRFILE object previously created by a call to
+.BR dirfile_open (3).
+
+.SH RETURN VALUE
+Upon successful completion,
+.BR get_entry ()
+returns a pointer to an object of type
+.B gd_entry_t
+which is a structure whose members depend on the dirfile field type.  No
+part of the object pointed to should be considered writable by the caller.
+Attempting to write to it, may result in irreparable database corruption.  Deep
+copies should be made of the gd_entry_t object, if write access is needed.  See
+below for a description of the gd_entry_t type.
+.P
+On error,
+.BR get_entry ()
+returns NULL and sets
+.IR dirfile -> error
+to a non-zero error value.  Possible error values are:
+.TP 8
+.B GD_E_BAD_CODE
+The field specified by
+.I field_code
+was not found in the database.
+.TP
+.B GD_E_BAD_DIRFILE
+The supplied dirfile was invalid.
+.P
+A descriptive error string for the last error encountered can be obtained from
+a call to
+.BR get_error_string (3).
+.SH THE ENTRY TYPE
+Members available in the gd_entry_t structure depend on the field type
+described.  All gd_entry_t objects are guaranteed to have at least:
+.PP
+.in +4n
+.nf
+typedef struct {
+  ...
+
+  const char  *field;     /* field code */
+  gd_entype_t  field_type /* field type */
+
+  ...
+} gd_entry_t;
+.fi
+.in
+.P
+The
+.I field
+member is the field code of the entry (ie. its string name).
+.P
+The
+.I field_type
+member indicates the field type of the entry.  This is an integer type equal
+to one of the following symbols:
+.IP
+.nh
+.ad l
+.BR GD_RAW_ENTRY ,\~ GD_LINCOM_ENTRY ,\~ GD_LINTERP_ENTRY ,\~
+.BR GD_BIT_ENTRY ,\~ GD_MULTIPLY_ENTRY ,\~ GD_PHASE_ENTRY
+.ad n
+.hy
+.P
+Remaining fields in the gd_entry_t structure depend on the value of
+.IR field_type .
+Callers are advised to check
+.I field_type
+before attempting to access the remaining members.  Members for different
+field types may be stored in the same physical location in core.  Accordingly,
+attempting to access a member not declared for the appropriate field type will
+have unspecified results.
+.P
+The gd_entry_t struct may also contain private members containing data internal
+to the library.  Any member not mentioned below should not be considered part
+of the public API and may change name or meaning without notice.
+.SS RAW Members
+A gd_entry_t describing a
+.B RAW
+entry, will also provide:
+.PP
+.in +4n
+.nf
+typedef struct {
+  ...
+
+  const char   *file;              /* binary file name */
+  unsigned int  samples_per_frame; /* samples per frame on disk */
+  gd_type_t     data_type;         /* data type on disk */
+
+  ...
+} gd_entry_t;
+.fi
+.in
+.P
+The
+.I file
+member contains the full path to the binary file on disk.
+.P
+The
+.I samples_per_frame
+member contains the samples per frame of the binary data on disk.
+.P
+The
+.I data_type
+member indicates the data type of the binary data on disk.  See
+.IR getdata (3)
+for a list of valid values that a variable of type
+.B gd_type_t
+may take.
+.SS LINCOM Members
+A gd_entry_t describing a
+.B LINCOM
+entry, will also provide:
+.PP
+.in +4n
+.nf
+typedef struct {
+  ...
+
+  int         count;                    /* number of input fields */
+  const char *in_fields[GD_MAX_LINCOM]; /* input field code(s) */
+  double     *m;                        /* scale factor(s) */
+  double     *b;                        /* offset terms(s) */
+
+  ...
+} gd_entry_t;
+.fi
+.in
+.P
+The
+.I count
+member indicates the number of input fields.  It will be between one and
+.BR GD_MAX_LINCOM ,
+which is defined in getdata.h to the maximum number of input fields permitted
+by a
+.BR LINCOM .
+.P
+The
+.I in_fields
+member is an array of length
+.B GD_MAX_LINCOM
+containing the input field code(s).  Only the first
+.I count
+records from this array are initialised.  The remaining records will contain
+invalid data.
+.P
+The
+.I m
+and
+.I b
+members are arrays of the scale factor(s) and offset term(s) for the
+.BR LINCOM .
+Attempting to access more than the first
+.I count
+records from these array will result in undefined behaviour.
+.SS LINTERP Members
+A gd_entry_t describing a
+.B LINTERP
+entry, will also provide:
+.PP
+.in +4n
+.nf
+typedef struct {
+  ...
+
+  const char *table             /* linterp table filename */
+  const char *in_fields[1];     /* input field code */
+
+  ...
+} gd_entry_t;
+.fi
+.in
+.P
+The
+.I table
+member is the pathname to the look up table on disk.
+.P
+The
+.I in_fields
+member is an array of length 1 containing the input field code.
+.SS BIT Members
+A gd_entry_t describing a
+.B BIT
+entry, will also provide:
+.PP
+.in +4n
+.nf
+typedef struct {
+  ...
+
+  const char *in_fields[1];     /* input field code */
+  int         bitnum;           /* first bit */
+  int         numbits;          /* bit length */
+
+  ...
+} gd_entry_t;
+.fi
+.in
+.P
+The
+.I in_fields
+member is an array of length 1 containing the input field code.
+.P
+The
+.I bitnum
+member indicates the number of the first bit (counted from zero) extracted from
+the input.
+.P
+The
+.I numbits
+member indicates the number of bits which are extracted from the input.
+.SS MULTIPLY Members
+A gd_entry_t describing a
+.B MULTIPLY
+entry, will also provide:
+.PP
+.in +4n
+.nf
+typedef struct {
+  ...
+
+  const char *in_fields[2];     /* input field codes */
+
+  ...
+} gd_entry_t;
+.fi
+.in
+.P
+The
+.I in_fields
+member is an array of length 2 containing the input field codes.
+.SS PHASE Members
+A gd_entry_t describing a
+.B PHASE
+entry, will also provide:
+.PP
+.in +4n
+.nf
+typedef struct {
+  ...
+
+  const char *in_fields[1];     /* input field code */
+  int         shift;            /* phase shift */
+
+  ...
+} gd_entry_t;
+.fi
+.in
+.P
+The
+.I in_fields
+member is an array of length 1 containing the input field code.
+.P
+The
+.I shift
+member indicates the shift in samples.  A positive value indicates a shift
+forward in time (towards larger frame numbers).
+.SH SEE ALSO
+.BR dirfile (5),
+.BR dirfile_open (3),
+.BR getdata (3),
+.BR get_error_string (3),
+.BR get_field_list (3)

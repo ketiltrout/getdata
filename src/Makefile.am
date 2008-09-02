@@ -37,10 +37,12 @@ nodist_include_HEADERS = getdata.h
 include_HEADERS = ${GETDATA_LEGACY_H}
 
 lib_LTLIBRARIES = libgetdata.la
-libgetdata_la_SOURCES = close.c common.c ${DEBUG_C} errors.c field_list.c \
-												getdata.c ${LEGACY_C} nframes.c open.c putdata.c spf.c \
-												types.c ${GETDATA_LEGACY_H} internal.h
-libgetdata_la_LDFLAGS = -version-info @GETDATA_IFACE_VERSION@:@GETDATA_IMPL_REVISION@:@GETDATA_IFACE_AGE@
+libgetdata_la_SOURCES = close.c common.c ${DEBUG_C} entry.c errors.c \
+												field_list.c flush.c getdata.c ${LEGACY_C} nfields.c \
+												nframes.c open.c putdata.c spf.c types.c \
+												${GETDATA_LEGACY_H} internal.h
+libgetdata_la_LDFLAGS = -export-symbols-regex '^[^_]' \
+												-version-info @GETDATA_IFACE_VERSION@:@GETDATA_IMPL_REVISION@:@GETDATA_IFACE_AGE@
 
 clean-local:
 	rm -rf *~ 

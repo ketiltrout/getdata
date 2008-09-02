@@ -144,7 +144,8 @@ size_t  _GD_DoField(DIRFILE *D, const char *field_code, off64_t first_frame,
     gd_type_t return_type, void *data_out) __gd_nonnull ((1, 2));
 void _GD_FixEndianness(char* databuffer, size_t size, size_t ns)
   __gd_nonnull ((1));
-int _GD_GetLine(FILE *fp, char *line, int* linenum) __gd_nonnull((1, 2, 3));
+void _GD_Flush(DIRFILE* D, gd_entry_t *entry, const char* field_code);
+int _GD_GetLine(FILE *fp, char *line, int* linenum) __gd_nonnull ((1, 2, 3));
 unsigned int _GD_GetSPF(const char *field_code, DIRFILE* D)
   __gd_nonnull ((1, 2));
 gd_entry_t* _GD_FindField(DIRFILE* D, const char* field_code)

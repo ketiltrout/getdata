@@ -35,6 +35,43 @@
 
 #include "internal.h"
 
+/* _GD_GetLine: read non-comment line from format file.  The line is placed in
+ *       *line.  Returns 1 if successful, 0 if unsuccessful.
+ */
+int _GD_GetLine(FILE *fp, char *line, int* linenum)
+{
+  char *ret_val;
+  int first_char;
+  int i, len;
+
+  dtrace("%p, %p, %p", fp, line, linenum);
+
+  do {
+    ret_val = fgets(line, MAX_LINE_LENGTH, fp);
+    (*linenum)++;
+    first_char = 0;
+    while (line[first_char] == ' ' || line[first_char] == '\t')
+      ++first_char;
+    line += first_char;
+  } while (ret_val && (line[0] == '#' || line[0] == 0 || line[1] == 0));
+
+
+  if (ret_val) {
+    /* truncate comments from end of lines */
+    len = strlen(line);
+    for (i = 0; i < len; i++) {
+      if (line[i] == '#')
+        line[i] = '\0';
+    }
+
+    dreturn("\"%s\"", line);
+    return 1; /* a line was read */
+  }
+
+  dreturn("%i", 0);
+  return 0;  /* there were no valid lines */
+}
+
 /* This function is needed outside the legacy API to handle old format
  * files
  */

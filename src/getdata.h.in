@@ -212,6 +212,9 @@ extern unsigned int get_nfields(DIRFILE* dirfile) __THROW __gd_nonnull ((1));
 
 extern const char** get_field_list(DIRFILE* dirfile) __THROW __gd_nonnull ((1));
 
+extern const gd_entry_t* get_entry(DIRFILE* dirfile, const char* field_code)
+  __THROW __gd_nonnull ((1, 2));
+
 
 /* The following functions contain calls to I/O functions, making them
  * cancellation points.  As a result we cannot mark them with __THROW.

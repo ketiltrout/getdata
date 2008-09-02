@@ -23,43 +23,20 @@
 #include "config.h"
 #endif
 
-#ifdef STDC_HEADERS
-#include <stdlib.h>
-#endif
-
 #include "internal.h"
 
-const char** get_field_list(DIRFILE* D)
+unsigned int get_nfields(DIRFILE* D)
 {
   dtrace("%p", D);
 
-  unsigned int i;
-  char** fl;
-
   if (D->flags & GD_INVALID) {
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%p", NULL);
-    return NULL;
+    dreturn("%u", 0);
+    return 0;
   }
 
-  if (D->n_entries == 0) {
-    dreturn("%p", NULL);
-    return NULL;
-  }
+  _GD_ClearError(D);
 
-  fl = realloc((char**)D->field_list, sizeof(const char*) * D->n_entries);
-
-  if (fl == NULL) {
-    dreturn("%p", NULL);
-    return NULL;
-  }
-
-  for (i = 0; i < D->n_entries; ++i) {
-    fl[i] = D->entry[i]->field;
-  }
-
-  D->field_list = (const char**)fl;
-
-  dreturn("%p", D->field_list);
-  return D->field_list;
+  dreturn("%u", D->n_entries);
+  return D->n_entries;
 }

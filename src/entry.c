@@ -23,18 +23,13 @@
 #include "config.h"
 #endif
 
-#ifdef STDC_HEADERS
-#include <stdlib.h>
-#endif
-
 #include "internal.h"
 
-const char** get_field_list(DIRFILE* D)
+const gd_entry_t *get_entry(DIRFILE* D, const char* field_code)
 {
-  dtrace("%p", D);
+  const gd_entry_t *E;
 
-  unsigned int i;
-  char** fl;
+  dtrace("%p, \"%s\"", D, field_code);
 
   if (D->flags & GD_INVALID) {
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -42,24 +37,13 @@ const char** get_field_list(DIRFILE* D)
     return NULL;
   }
 
-  if (D->n_entries == 0) {
-    dreturn("%p", NULL);
-    return NULL;
-  }
+  _GD_ClearError(D);
 
-  fl = realloc((char**)D->field_list, sizeof(const char*) * D->n_entries);
+  E = _GD_FindField(D, field_code);
 
-  if (fl == NULL) {
-    dreturn("%p", NULL);
-    return NULL;
-  }
+  if (E == NULL)
+    _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, field_code);
 
-  for (i = 0; i < D->n_entries; ++i) {
-    fl[i] = D->entry[i]->field;
-  }
-
-  D->field_list = (const char**)fl;
-
-  dreturn("%p", D->field_list);
-  return D->field_list;
+  dreturn("%p", E);
+  return E;
 }

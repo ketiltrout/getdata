@@ -70,7 +70,7 @@ const char const*GD_ERROR_CODES[GD_N_ERROR_CODES] = {
   "Request out-of-range"
 };
 
-struct FormatType Format;
+static struct FormatType Format;
 
 /* _GD_CopyGlobalError: Copy the last error message to the global error buffer.
  */
