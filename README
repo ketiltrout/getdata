@@ -225,6 +225,23 @@ example from the legacy API to the new API is present as an Appendix at the end
 of this document.
 
 
+THE GETDATA HEADER FILE
+=======================
+
+The GetData header file, `getdata.h', installed in ${prefix}/include, declares
+the new API.  It also includes `getdata_legacy.h' (also installed) which
+declares the legacy API.  The legacy header should never be included directly.
+Defining the preprocessor symbol `NO_GETDATA_LEGACY_API' before including
+getdata.h will prevent the legacy API from being declared.  In cases when the
+legacy API is declared, getdata.h will define the symbol GETDATA_LEGACY_API,
+which can be used by callers to determine whether the legacy API is present at
+compile time.
+
+If the legacy API is not built (as a result of passing `--disable-legacy-api'
+to ./configure), getdata_legacy.h will not be installed, and the legacy API will
+never be declared.
+
+
 LARGEFILE SUPPORT
 =================
 

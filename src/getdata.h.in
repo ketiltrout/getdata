@@ -174,7 +174,12 @@ struct _GD_DIRFILE {
   /* field list */
   const char** field_list;
 
-  off64_t frame_offset;
+#ifndef __USE_FILE_OFFSET64
+  off_t
+#else
+    __off64_t
+#endif
+    frame_offset;
   int suberror;
   char* error_string;
   char* error_file;
@@ -270,8 +275,15 @@ extern size_t putdata64(DIRFILE* dirfile, const char *field_code,
     const void *data_in) __gd_nonnull ((1, 2));
 #endif
 
+/* The caller can disable the legacy API by defining GETDATA_NO_LEGACY_API
+ * before including getdata.h
+ */
+#ifndef NO_GETDATA_LEGACY_API
+
 /* If this symbol is defined here, the legacy API is present in the library */
 #undef GETDATA_LEGACY_API
+
+#endif
 
 /* include the legacy api, if present */
 #ifdef GETDATA_LEGACY_API
