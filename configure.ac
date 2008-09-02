@@ -96,7 +96,7 @@ AC_MSG_RESULT([$make_checkdirfile])
 AM_CONDITIONAL(MAKE_CHECKDIRFILE, test "x$make_checkdirfile" = "xyes")
 
 dnl C++ bindings
-AC_ARG_ENABLE(cxx-bindings, AS_HELP_STRING([--disable-cxx-bindings],
+AC_ARG_ENABLE(cplusplus, AS_HELP_STRING([--disable-cplusplus],
               [Don't build the C++ bindings (libdirfile)]),
               [
                case "${enableval}" in
@@ -108,31 +108,35 @@ AC_MSG_CHECKING([whether to include the C++ bindings])
 AC_MSG_RESULT([$make_cxxbindings])
 AM_CONDITIONAL(MAKE_CXXBINDINGS, test "x$make_cxxbindings" = "xyes")
 
-dnl Fortran 95 bindings
-AC_ARG_ENABLE(f95-bindings, AS_HELP_STRING([--disable-f95-bindings],
-              [Don't build the Fortran 95 bindings (libfgetdata)]),
-              [
-               case "${enableval}" in
-                 no) make_f95bindings="no" ;;
-                 *) make_f95bindings="yes" ;;
-               esac
-              ], [ make_f95bindings="yes" ])
-AC_MSG_CHECKING([whether to include the Fortran 95 bindings])
-AC_MSG_RESULT([$make_f95bindings])
-AM_CONDITIONAL(MAKE_F95BINDINGS, test "x$make_f95bindings" = "xyes")
-
 dnl Fortran 77 bindings
-AC_ARG_ENABLE(f77-bindings, AS_HELP_STRING([--disable-f77-bindings],
-              [Don't build the Fortran 77 bindings (libfgetdata)]),
+AC_ARG_ENABLE(fortran, AS_HELP_STRING([--disable-fortran],
+              [Don't build the Fortran 77 bindings (libfgetdata) nor the
+               Fortran 95 bindings (libf95getdata)]),
               [
                case "${enableval}" in
                  no) make_f77bindings="no" ;;
                  *) make_f77bindings="yes" ;;
                esac
               ], [ make_f77bindings="yes" ])
+
+dnl Fortran 95 bindings
+AC_ARG_ENABLE(fortran95, AS_HELP_STRING([--disable-fortran95],
+              [Don't build the Fortran 95 bindings (libfgetdata)]),
+              [
+               case "${enableval}" in
+                 no) make_f95bindings="no" ;;
+                 *) make_f95bindings="yes" ;;
+               esac
+              ], [ make_f95bindings="$make_f77bindings" ])
+
+AC_MSG_CHECKING([whether to include the Fortran 95 bindings])
+AC_MSG_RESULT([$make_f95bindings])
+AM_CONDITIONAL(MAKE_F95BINDINGS, test "x$make_f95bindings" = "xyes")
+
 if test "x$make_f77bindings$make_f95bindings" = "xnoyes"; then
   make_f77bindings="yes (required by Fortran 95 bindings)"
 fi
+
 AC_MSG_CHECKING([whether to include the Fortran 77 bindings])
 AC_MSG_RESULT([$make_f77bindings])
 AM_CONDITIONAL(MAKE_F77BINDINGS, test "x$make_f77bindings" != "xno")
