@@ -63,7 +63,7 @@ unsigned int _GD_GetSPF(const char *field_code, DIRFILE* D)
   D->recurse_level++;
   switch(entry->field_type) {
     case GD_RAW_ENTRY:
-      spf = entry->samples_per_frame;
+      spf = entry->spf;
       break;
     case GD_LINCOM_ENTRY:
     case GD_MULTIPLY_ENTRY:

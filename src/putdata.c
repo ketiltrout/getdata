@@ -51,8 +51,8 @@ static size_t _GD_DoRawOut(DIRFILE *D, gd_entry_t *R,
   dtrace("%p, %p, %lli, %lli, %zi, %zi, 0x%x, %p", D, R, first_frame,
       first_samp, num_frames, num_samp, data_type, data_in);
 
-  s0 = first_samp + first_frame * R->samples_per_frame;
-  ns = num_samp + num_frames * R->samples_per_frame;
+  s0 = first_samp + first_frame * R->spf;
+  ns = num_samp + num_frames * R->spf;
 
   if (s0 < 0) {
     _GD_SetError(D, GD_E_RANGE, 0, NULL, 0, NULL);
@@ -116,7 +116,7 @@ static size_t _GD_DoLinterpOut(DIRFILE* D, gd_entry_t *I,
   dtrace("%p, %p, %lli, %lli, %zi, %zi, 0x%x, %p", D, I, first_frame,
       first_samp, num_frames, num_samp, data_type, data_in);
 
-  if (I->count < 0) {
+  if (I->table_len < 0) {
     _GD_ReadLinterpFile(D, I);
     if (D->error != GD_E_OK) {
       dreturn("%zi", 0);
@@ -131,7 +131,7 @@ static size_t _GD_DoLinterpOut(DIRFILE* D, gd_entry_t *I,
   D->recurse_level--;
   ns = num_samp + num_frames * (int)spf;
 
-  _GD_LinterpData(D, data_in, data_type, ns, I->y, I->x, I->count);
+  _GD_LinterpData(D, data_in, data_type, ns, I->y, I->x, I->table_len);
 
   if (D->error != GD_E_OK) {
     dreturn("%zi", 0);
@@ -161,7 +161,7 @@ static size_t _GD_DoLincomOut(DIRFILE* D, gd_entry_t *L,
   /* we cannot write to LINCOM fields that are a linear combination */
   /* of more than one raw field (no way to know how to split data). */
 
-  if (L->count > 1) {
+  if (L->n_fields > 1) {
     _GD_SetError(D, GD_E_BAD_PUT_FIELD, 0, NULL, 0, L->field);
     dreturn("%zi", 0);
     return 0;

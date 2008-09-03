@@ -60,13 +60,13 @@ static void _GD_FreeD(DIRFILE* D)
         case GD_LINTERP_ENTRY:
           free(D->entry[i]->in_fields[0]);
           free(D->entry[i]->table);
-          if (D->entry[i]->count > 0) {
+          if (D->entry[i]->table_len > 0) {
             free(D->entry[i]->x);
             free(D->entry[i]->y);
           }
           break;
         case GD_LINCOM_ENTRY:
-          for (j = 2; j < D->entry[i]->count; ++j)
+          for (j = 2; j < D->entry[i]->n_fields; ++j)
             free(D->entry[i]->in_fields[j]);
           /* fall through */
         case GD_MULTIPLY_ENTRY:
@@ -110,7 +110,7 @@ int dirfile_close(DIRFILE* D)
 
   if (D->error) {
     dreturn("%i", 1);
-    return 1;
+    return -1;
   }
 
   _GD_FreeD(D);

@@ -1,0 +1,248 @@
+2008-09-02   D. V. Wiebe <getdata@ketiltrout.net>  svn:62
+	*	bindings/f77/test/Makefila.am: fix include directory
+
+	* src/getdata.h.in src/close.c src/common.c src/getdata.c src/nframes.c
+	src/open.c src/putdata.c src/spf.c: re-organised gd_entry_t again
+
+	* src/getdata.c (_GD_DoLincom): ensure we return 0 on error
+
+	* src/close.c (dirfile_close): return -1 instead of 1 on error
+
+	* src/entry.c (get_entry): instead of returning the library's internal
+	gd_entry_t, copy the relevant bits to a caller supplied object.  This should
+	be significantly more bullet proof against unintentional metadata corruption
+	* man/get_entry.3: update
+
+	* test/Makefile.am: clean up after tests
+
+2009-09-02  D. V. Wiebe <getdata@ketiltrout.net>  svn:61
+	* man/get_entry.3 src/Makefile.am src/entry.c src/getdata.h.in: added
+	get_entry()
+
+	* src/close.c src/flush.c: Split flush.c from close.c
+
+	* src/field_list.c src/nfields.c: Split nfields.c from field_list.c
+
+	* src/common.c src/open.c: Moved _GD_GetLine to common.c
+
+	* src/Makefile.am: Don't export internal symbols
+
+2009-09-02  D. V. Wiebe <getdata@ketiltrout.net>  svn:60
+	* README src/getdata.h.in: Add NO_GETDATA_LEGACY_API to getdata.h to permit
+	callers to not include the legacy API.
+
+2009-09-02  D. V. Wiebe <getdata@ketiltrout.net>  svn:59
+	* configure.ac: disable all fortran bindings with one option.  Rename
+	the bindings options.
+
+2008-09-01  D. V. Wiebe <getdata@ketiltrout.net>  svn:58
+	* src/getdata_legacy.c src/legacy.c: Re-implement GetFormat();
+
+	* src/getdata.h.in: store frame offset as off64_t
+
+	* man/dirfile_flush.3: added
+
+	* man/dirfile_close.3: corrected for changes made in revision 57
+
+2008-09-01  D. V. Wiebe <getdata@ketiltrout.net>  svn:57
+	* man/get_error_string.3 src/errors.c: Renamed getdata_error_string to
+	get_error_string so people don't think its relevance is exclusive to getdata()
+	
+	* src/internal.h: Suberror codes may not = 0.
+
+	* README.cxx README.f77 README.f95 bindings/cxx/dirfile.cpp
+	bindings/cxx/dirfile.h bindings/f77/fgetdata.c bindings/f77/getdata.f.in
+	bindings/f77/getdata.f90.in man/Makefile.am man/dirfile_close.3 src/close.c
+	src/getdata.h.in test/Makefile.am test/close.c test/close_bad.c
+	test/close_null.c test/flush.c test/flush_all.c test/flush_bad_code.c
+	test/flush_invalid.c test/flush_recurse.c: Added public function
+	dirfile_flush() along with corresponding C++, F77 and F95 bindings.
+	dirfile_close calls dirfile_flush and might now fail (if fsync(2) or
+	close(2) returns with an error); ergo, it now returns an integer success
+	value, since D->error can't be checked if the call was successful.
+	
+	* src/close.c (dirfile_close): per the man page, now always succeeds when
+	passed NULL.
+	
+	* man/dirfile-format.5 src/open.c test/Makefile.am test/parse_endian_slash.c
+	test/parse_foffs_slash.c test/parse_include_slash.c
+	test/parse_version_slash.c: reserved words in the format file may now have
+	an initial '/' to ensure they're treated as such.
+
+	* man/dirfile-format.5 src/errors.c src/open.c test/Makefile.am
+	test/parse_name.c: prohibit / \ < > # & | ; in field names. Of these, /
+	would confuse the filesystem (and is now used to optionally demarcate reserved
+	words), # is already cast out by GetLine().  We reserve the others for future
+	use.  Most of these are bash(1) metacharacters; ( and ) are the other
+	non-whitespace metacharacters in bash, but GetData allows them in field names.
+
+2008-09-01  D. V. Wiebe <getdata@ketiltrout.net>  svn:56
+	* src/open.c src/close.c: split up dirfile_open.c
+	* src/getdata.c src/types.c src/common.c: split up getdata.c
+
+2008-08-30  D. V. Wiebe <getdata@ketiltrout.net>  svn:54
+	* field_list.c: renamed get_n_fields() to get_nfields()
+	* nframes.c: renamed get_n_frames() to get_nframes()
+	* spf.c: renamed get_samples_per_frame() to get_spf()
+
+2008-08-30  D. V. Wiebe <getdata@ketiltrout.net>  svn:52 svn:53
+	* bindings/f77/Makefile.am bindings/f77/getdata.f90.in
+	bindings/f77/test/Makefile.am bindings/f77/test/fget_field_list.f90
+	bindings/f77/test/fgetdata.f90: Use .f90 instead of .f95 for free-form
+	Fortran souce code
+
+2008-08-29  D. V. Wiebe <getdata@ketiltrout.net>  svn:51
+	* man/README.cxx man/README.f77 bindings/cxx/dirfile.cpp
+	bindings/cxx/dirfile.h bindings/f77/fgetdata.c bindings/f77/getdata.f: added
+	get_n_fields and get_field_list to C++ and F77 bindings.
+
+	* bindings/f77/Makefile.am bindings/f77/getdata.f.in
+	bindings/f77/make_parameters.c : automatically generate parameters
+
+	* README.f95 bindings/f77/Makefile.am bindings/f77/getdata.f95.in
+	bindings/f77/test/Makefile.am bindings/f77/test/fget_field_list.f95
+	bindings/f77/test/fgetdata.f95 configure.ac: Added Fortran 95 bindings
+
+2008-08-29  D. V. Wiebe <getdata@ketiltrout.net>  svn:50
+	* man/dirfile-format.5: Fix a rather egregious omission
+
+2008-08-29  D. V. Wiebe <getdata@ketiltrout.net>  svn:49
+	* src/getdata.h.in: Change GD_UNKNOWN
+
+2008-08-26  D. V. Wiebe <getdata@ketiltrout.net>  svn:47 svn:48
+	* man/Makefile.am man/get_field_list.3 man/get_n_fields.3 src/Makefile.am
+	src/dirfile_open.c src/field_list.c src/getdata.h.in test/Makefile.am
+	test/flist.c test/flist_invalid.c test/nfields.c test/nfields_invalid.c: Add
+	get_n_fields and get_field_list functions
+
+	* man/dirfile_open.3: Add BUGS section
+
+2008-08-25  D. V. Wiebe <getdata@ketiltrout.net>  svn:45
+	* configure.ac src/Makefile.am src/debug.c src/dirfile_open.c src/errors.c
+	src/getdata.c src/internal.h src/nframes.c src/putdata.c src/spf.c: tracing
+	in debug mode
+
+2008-08-25  D. V. Wiebe <getdata@ketiltrout.net>  svn:41 svn:42 svn:43 svn:44
+	* src/getdata_internal.h: renamed to internal.h
+
+	* README.cxx README.f77: add
+
+2008-08-25  D. V. Wiebe <getdata@ketiltrout.net>  svn:40
+	* src/errors.c (getdata_error_string): Rewrote to get rid of the nested
+	switches and to collect the strings.
+
+	* src/errors.c src/getdata.h.in src/getdata_legacy.h src/legacy.c: Move
+	GD_ERROR_CODES to legacy.c and deprecate.
+
+	* src/dirfile_open.c src/getdata.c src/nframes.c src/putdata.c: Cleaned up
+	error reporting code
+
+2008-08-25  D. V. Wiebe <getdata@ketiltrout.net>  svn:38
+	* src/dirfile_open.c src/getdata.c src/getdata.h.in src/getdata_internal.h
+	nframes.c putdata.c spf.c: Replace the various different EntryType structs
+	with a single, unified one.  This also gets rid of the ENTRY() craziness.
+
+2008-08-25  D. V. Wiebe <getdata@ketiltrout.net>  svn:36 svn:37
+	* src/getdata.c src/getdata_internal.h src/putdata.c src/spf.c: Add
+	_GD_InternalError()
+	
+	* src/errors.c: Rename _GD_SetGetDataError and _GD_ClearGetDataError to
+	_GD_SetError and _GD_ClearError
+
+2008-08-25  D. V. Wiebe <getdata@ketiltrout.net>  svn:35
+	* bindings/f77/fgetdata.c (_GDF_ClearDirfile): Don't accidentally close
+	dirfile unit zero
+
+2008-08-21  D. V. Wiebe <getdata@ketiltrout.net>  svn:34
+	* bindings/f77/fgetdata.c configure.ac src/dirfile_open.c src/getdata.c
+	src/getdata.h.in src/getdata_internal.hsrc/getdata_legacy.h src/putdata.c:
+	Fixes for compilation with icc, mostly concerning type casting.
+
+	* configure.ac:  AC_PREREQ([2.60])
+
+	* Makefile.am: don't include getdata.h in the tarball
+
+2008-08-21  D. V. Wiebe <getdata@ketiltrout.net>  svn:33
+	* src/getdata.h.in: Be less clever defining stuff.
+
+2008-08-20  D. V. Wiebe <getdata@ketiltrout.net>  svn:32
+	* bindings/f77/getdata.f: Add EXTERNAL function declarations
+
+2008-08-19  D. V. Wiebe <getdata@ketiltrout.net>  svn:30
+	* bindings/f77/test/gdfget.f: Remove references to TRIM
+
+2008-08-19  D. V. Wiebe <getdata@ketiltrout.net>  svn:26 svn:27
+	* README: add
+
+	* Makefile.am: Remove explicit -lm
+
+2008-08-19  D. V. Wiebe <getdata@ketiltrout.net>  svn:25
+	* test/: Fix test suite for VPATH builds
+
+2008-08-18  D. V. Wiebe <getdata@ketiltrout.net>  svn:24
+	* Makefile.am configure.ac bindings/: Add C++ and Fortran 77 bindings.
+
+2008-08-17  D. V. Wiebe <getdata@ketiltrout.net>  svn:20 svn:21
+	* configure.ac getdata.h.in: Use AC_CONFIG_HEADERS with getdata.h
+
+	* INSTALL: This is the generic autoconf/libtool INSTALL document.
+
+2008-08-17  D. V. Wiebe <getdata@ketiltrout.net>  svn:19
+	* Makefile.am configure.ac bin/Makefile.am bin/checkdirfile.c: add
+	checkdirfile util
+
+2008-08-17  D. V. Wiebe <getdata@ketiltrout.net>  svn:18
+	* getdata_internal.h: If FILENAME_MAX is unreasonably small, still permit
+	roomy format file lines.
+
+2008-08-17  D. V. Wiebe <getdata@ketiltrout.net>  svn:16
+	* Makefile.am test/: added test suite
+
+	* man/get_n_frames64.3 man/getdata64.3 man/putdata.3 man/putdata64.3: added
+
+	* man/getdata.3: Added .SH LIMITATIONS
+
+	* src/dirfile_open.c src/errors.c src/getdata.c src/nframes.c src/spf.c:
+	split getdata.c into smaller pieces
+
+	* src/putdata.c (putdata): add support for access mode and frame offset
+
+2008-08-12  D. V. Wiebe <getdata@ketiltrout.net>  svn:13
+	* src/getdata.c src/getdata.h.in: rm unused error codes
+
+2008-08-12  D. V. Wiebe <getdata@ketiltrout.net>  svn:10 svn:11 svn:12
+	* configure.ac man/getdata.3 man/get_n_frames.3 src/getdata.c
+	src/getdata.h.in src/getdata_internal.h src/legacy.c src/putdata.c: LFS
+	support
+
+2008-08-12  D. V. Wiebe <getdata@ketiltrout.net>  svn:8
+	* src/getdata.c src/getdata.h.in: remove GD_E_ENDIAN_ERROR
+
+	* src/putdata.c (_GD_DoBitOut): Multibit putdata
+
+2008-08-12  D. V. Wiebe <getdata@ketiltrout.net>  svn:7
+	* man/dirfile_open.3: modern symbol
+
+2008-08-12  D. V. Wiebe <getdata@ketiltrout.net>  svn:6
+	* src/getdata.c (_GD_SetGetDataError): don't crash on NULL
+	
+	* src/putdata.c (_GD_DoPhaseOut): add
+
+2008-08-12  D. V. Wiebe <getdata@ketiltrout.net>  svn:5
+	* src/legacy.c: Don't SEGV on bad dirfiles
+	* src/getdata.c src/getdata_internal.h src/putdata.c: Check for invalid
+	DIRFILEs
+
+2008-08-12  D. V. Wiebe <getdata@ketiltrout.net>  svn:4
+	* configure.ac: --enable-debug
+	* src/getdata.c src/legacy.c src/putdata.c: rename DIRFILE_DEBUG to
+	GETDATA_DEBUG
+
+2008-08-12  D. V. Wiebe <getdata@ketiltrout.net>  svn:2
+	* AUTHORS COPYING Makefile.am configure.ac man/Makefile.am
+	man/dirfile-format.5 man/dirfile.5 man/dirfile_close.3 man/dirfile_open.3
+	get_n_frames.3 man/get_samples_per_frame.3 man/getdata.3
+	man/getdata_error_string.3 src/Makefile.am src/getdata.c src/getdata.h.in
+	src/getdata_internal.h src/getdata_legacy.h src/legacy.c src/putdata.c:
+	Initial import of getdata for sourceforge.net.  Previous history for getdata
+	can be found in the KDE subversion repository, for the kst project.

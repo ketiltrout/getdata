@@ -23,27 +23,62 @@
 #include "config.h"
 #endif
 
+#ifdef STDC_HEADERS
+#include <string.h>
+#endif
+
 #include "internal.h"
 
-const gd_entry_t *get_entry(DIRFILE* D, const char* field_code)
+int get_entry(DIRFILE* D, const char* field_code, gd_entry_t* entry)
 {
-  const gd_entry_t *E;
+  int i;
+  gd_entry_t *E;
 
-  dtrace("%p, \"%s\"", D, field_code);
+  dtrace("%p, \"%s\", %p", D, field_code, entry);
 
   if (D->flags & GD_INVALID) {
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%p", NULL);
-    return NULL;
+    dreturn("%i", 1);
+    return -1;
   }
 
   _GD_ClearError(D);
 
   E = _GD_FindField(D, field_code);
 
-  if (E == NULL)
+  if (E == NULL) {
     _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, field_code);
+    dreturn("%i", 1);
+    return -1;
+  }
 
-  dreturn("%p", E);
-  return E;
+  /* now copy to the user supplied buffer */
+  memcpy(entry, E, sizeof(gd_entry_t));
+
+  /* duplicate strings */
+  entry->field = strdup(E->field);
+
+  switch(E->field_type) {
+    case GD_RAW_ENTRY:
+      entry->file = strdup(E->file);
+      break;
+    case GD_LINCOM_ENTRY:
+      for (i = 0; i < E->n_fields; ++i)
+        entry->in_fields[i] = strdup(E->in_fields[i]);
+      break;
+    case GD_LINTERP_ENTRY:
+      entry->in_fields[0] = strdup(E->in_fields[0]);
+      entry->table = strdup(E->table);
+      break;
+    case GD_MULTIPLY_ENTRY:
+      entry->in_fields[1] = strdup(E->in_fields[1]);
+      /* fall through */
+    case GD_BIT_ENTRY:
+    case GD_PHASE_ENTRY:
+      entry->in_fields[0] = strdup(E->in_fields[0]);
+      break;
+  }
+
+  dreturn("%i", 0);
+  return 0;
 }

@@ -215,7 +215,7 @@ void _GD_ScaleData(DIRFILE* D, void *data, gd_type_t type, size_t npts,
 */
 static void _GD_MakeDummyLinterp(DIRFILE* D, gd_entry_t *E)
 {
-  E->count = 2;
+  E->table_len = 2;
   E->x = (double *)malloc(2*sizeof(double));
   E->y = (double *)malloc(2*sizeof(double));
 
@@ -261,7 +261,7 @@ void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E)
     return;
   }
 
-  E->count = i;
+  E->table_len = i;
   E->x = (double *)malloc(i * sizeof(double));
   E->y = (double *)malloc(i * sizeof(double));
   if (E->x == NULL || E->y == NULL) {
@@ -273,7 +273,7 @@ void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E)
   /* now read in the data */
   rewind(fp);
   linenum = 0;
-  for (i = 0; i < E->count; i++) {
+  for (i = 0; i < E->table_len; i++) {
     _GD_GetLine(fp, line, &linenum);
     sscanf(line, "%lg %lg", &(E->x[i]), &(E->y[i]));
   }

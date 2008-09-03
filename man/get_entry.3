@@ -29,7 +29,8 @@ get_entry \(em retrieve a dirfile field's metadata
 .HP
 .nh
 .ad l
-.BI "const gd_entry_t *get_entry(DIRFILE *" dirfile ", const char *" field_code );
+.BI "int get_entry(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "gd_entry_t *" entry );
 .hy
 .ad n
 .SH DESCRIPTION
@@ -45,20 +46,31 @@ The
 parameter must point to a valid DIRFILE object previously created by a call to
 .BR dirfile_open (3).
 
+The entry will be stored in the gd_entry_t struction indicated by the
+.I entry
+parameter, which must be allocated by the caller.  Members available in this
+structure depend on the field type of the field queried.  See below for a
+complete description of this data type.
+
+Strings members in 
+.BI * entry
+filled by this function (variously, depending on field type:
+.IR field ,\~ file ", the elements of the " in_fields "[] array, " table ;
+see below) will by dynamically allocated by
+.BR get_entry ()
+and should not point to allocated memory locations before calling this function.
+Only strings provided by the gd_entry_t for the particular field type described
+will be allocated.  These strings should be deallocated with
+.BR free (3)
+by the caller once they are no longer needed.
+
 .SH RETURN VALUE
 Upon successful completion,
 .BR get_entry ()
-returns a pointer to an object of type
-.B gd_entry_t
-which is a structure whose members depend on the dirfile field type.  No
-part of the object pointed to should be considered writable by the caller.
-Attempting to write to it, may result in irreparable database corruption.  Deep
-copies should be made of the gd_entry_t object, if write access is needed.  See
-below for a description of the gd_entry_t type.
-.P
+returns zero, and writes the field metadata in the supplied gd_entry_t buffer.
 On error,
 .BR get_entry ()
-returns NULL and sets
+returns -1 and sets
 .IR dirfile -> error
 to a non-zero error value.  Possible error values are:
 .TP 8
@@ -128,9 +140,9 @@ entry, will also provide:
 typedef struct {
   ...
 
-  const char   *file;              /* binary file name */
-  unsigned int  samples_per_frame; /* samples per frame on disk */
-  gd_type_t     data_type;         /* data type on disk */
+  const char   *file;         /* binary file name */
+  unsigned int  spf;          /* samples per frame on disk */
+  gd_type_t     data_type;    /* data type on disk */
 
   ...
 } gd_entry_t;
@@ -162,10 +174,10 @@ entry, will also provide:
 typedef struct {
   ...
 
-  int         count;                    /* number of input fields */
+  int         n_fields;                 /* number of input fields */
   const char *in_fields[GD_MAX_LINCOM]; /* input field code(s) */
-  double     *m;                        /* scale factor(s) */
-  double     *b;                        /* offset terms(s) */
+  double      m[GD_MAX_LINCOM];         /* scale factor(s) */
+  double      b[GD_MAX_LINCOM];         /* offset terms(s) */
 
   ...
 } gd_entry_t;
@@ -197,7 +209,7 @@ members are arrays of the scale factor(s) and offset term(s) for the
 .BR LINCOM .
 Attempting to access more than the first
 .I count
-records from these array will result in undefined behaviour.
+records from these array may result in undefined behaviour.
 .SS LINTERP Members
 A gd_entry_t describing a
 .B LINTERP

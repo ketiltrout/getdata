@@ -94,6 +94,13 @@ TESTS=close close_bad close_null \
 
 check_PROGRAMS=$(TESTS)
 
-clean-local:
+# clean up after the tests
+check-local:
+	$(MAKE) getdata-clean-dirs
+
+getdata-clean-dirs:
 	rm -rf *odirfile
+
+clean-local:
+	$(MAKE) getdata-clean-dirs
 	rm -rf *~ 

@@ -62,8 +62,7 @@ off64_t get_nframes64(DIRFILE* D)
     return 0;
   }
 
-  nf = statbuf.st_size / (D->first_field->size *
-      D->first_field->samples_per_frame);
+  nf = statbuf.st_size / (D->first_field->size * D->first_field->spf);
   nf += D->frame_offset;
 
   dreturn("%lli", nf);

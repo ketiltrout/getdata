@@ -119,30 +119,33 @@ typedef enum {
 struct _gd_unified_entry {
   char* field;
   gd_entype_t field_type;
-  union {
-    char* file;
-    char* table;
-  };
   char *in_fields[GD_MAX_LINCOM];
   union {
-    int fp;
-    int count;
-    int bitnum;
-    int shift;
-  };
-  union {
-    unsigned int samples_per_frame;
-    int numbits;
-  };
-  union {
-    double* m;
-    double* x;
-    gd_type_t data_type;
-  };
-  union {
-    double* b;
-    double* y;
-    size_t size;
+    struct { /* RAW */
+      char* file;
+      unsigned int spf;
+      gd_type_t data_type;
+      size_t size;
+
+      int fp; /* intenral */
+    };
+    struct { /* LINCOM */
+      int n_fields;
+      double m[GD_MAX_LINCOM];
+      double b[GD_MAX_LINCOM];
+    };
+    struct { /* LINTERP */
+      char* table;
+
+      int table_len; /* internal */
+      double* x; /* internal */
+      double* y; /* internal */
+    };
+    struct { /* BIT */
+      int bitnum;
+      int numbits;
+    };
+    int shift; /* PHASE */
   };
 };
 
@@ -212,7 +215,7 @@ extern unsigned int get_nfields(DIRFILE* dirfile) __THROW __gd_nonnull ((1));
 
 extern const char** get_field_list(DIRFILE* dirfile) __THROW __gd_nonnull ((1));
 
-extern const gd_entry_t* get_entry(DIRFILE* dirfile, const char* field_code)
+int get_entry(DIRFILE* D, const char* field_code, gd_entry_t* entry)
   __THROW __gd_nonnull ((1, 2));
 
 

@@ -153,9 +153,9 @@ static gd_entry_t* _GD_ParseRaw(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
     return R;
   }
 
-  R->samples_per_frame = atoi(in_cols[3]);
+  R->spf = atoi(in_cols[3]);
 
-  if (R->samples_per_frame <= 0)
+  if (R->spf <= 0)
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_SPF, format_file, line,
         in_cols[3]);
 
@@ -186,7 +186,6 @@ static gd_entry_t* _GD_ParseLincom(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
   }
 
   L->field_type = GD_LINCOM_ENTRY;
-  L->m = L->b = NULL;
   for (i = 0; i < GD_MAX_LINCOM; ++i)
     L->in_fields[i] = NULL;
 
@@ -199,30 +198,28 @@ static gd_entry_t* _GD_ParseLincom(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
     return L;
   }
 
-  L->count = atoi(in_cols[2]);
-  L->m = malloc(sizeof(double) * L->count);
-  L->b = malloc(sizeof(double) * L->count);
+  L->n_fields = atoi(in_cols[2]);
 
-  if (L->field == NULL || L->m == NULL || L->b == NULL) {
+  if (L->field == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     dreturn("%p", L);
     return L;
   }
 
-  if ((L->count < 1) || (L->count > GD_MAX_LINCOM)) {
+  if ((L->n_fields < 1) || (L->n_fields > GD_MAX_LINCOM)) {
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_FIELDS, format_file, line,
         in_cols[2]);
     dreturn("%p", L);
     return L;
   }
 
-  if (n_cols < L->count * 3 + 3) {
+  if (n_cols < L->n_fields * 3 + 3) {
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_COLS, format_file, line, NULL);
     dreturn("%p", L);
     return L;
   }
 
-  for (i = 0; i < L->count; i++) {
+  for (i = 0; i < L->n_fields; i++) {
     L->in_fields[i] = strdup(in_cols[i * 3 + 3]);
     if (L->in_fields[i] == NULL)
       _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
@@ -271,7 +268,7 @@ static gd_entry_t* _GD_ParseLinterp(DIRFILE* D,
   }
 
   L->in_fields[0] = strdup(in_cols[2]);
-  L->count = -1; /* linterp file not read yet */
+  L->table_len = -1; /* linterp file not read yet */
 
 
   if (in_cols[3][0] == '/')

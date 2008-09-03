@@ -166,8 +166,8 @@ static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *R,
   dtrace("%p, %p, %lli, %lli, %zi, %zi, 0x%x, %p)", D, R, first_frame,
       first_samp, num_frames, num_samp, return_type, data_out);
 
-  s0 = first_samp + first_frame*R->samples_per_frame;
-  ns = num_samp + num_frames*R->samples_per_frame;
+  s0 = first_samp + first_frame * R->spf;
+  ns = num_samp + num_frames * R->spf;
 
   /** open the file (and cache the fp) if it hasn't been opened yet. */
   if (R->fp < 0) {
@@ -389,14 +389,14 @@ static size_t _GD_DoLincom(DIRFILE *D, gd_entry_t *L,
 
   _GD_ScaleData(D, data_out, return_type, n_read, L->m[0], L->b[0]);
 
-  if (L->count > 1) {
-    for (i = 1; i < L->count; i++) {
+  if (L->n_fields > 1) {
+    for (i = 1; i < L->n_fields; i++) {
       D->recurse_level++;
 
       /* find the samples per frame of the next field */
       spf2 = _GD_GetSPF(L->in_fields[i], D);
       if (D->error != GD_E_OK)
-        return 1;
+        return 0;
 
       /* calculate the first sample and number of samples to read of the
        * next field */
@@ -583,7 +583,7 @@ static size_t _GD_DoLinterp(DIRFILE *D, gd_entry_t* I,
   dtrace("%p, %p, %lli, %lli, %zi, %zi, 0x%x, %p", D, I, first_frame,
       first_samp, num_frames, num_samp, return_type, data_out);
 
-  if (I->count < 0) {
+  if (I->table_len < 0) {
     _GD_ReadLinterpFile(D, I);
     if (D->error != GD_E_OK) {
       dreturn("%zi", 0);
@@ -601,7 +601,7 @@ static size_t _GD_DoLinterp(DIRFILE *D, gd_entry_t* I,
     return 0;
   }
 
-  _GD_LinterpData(D, data_out, return_type, n_read, I->x, I->y, I->count);
+  _GD_LinterpData(D, data_out, return_type, n_read, I->x, I->y, I->table_len);
 
   dreturn("%zi", n_read);
   return n_read;
