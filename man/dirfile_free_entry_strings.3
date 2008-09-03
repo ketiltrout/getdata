@@ -1,0 +1,78 @@
+.\" dirfile_free_entry_strings.3.  The dirfile_free_entry_strings man page.
+.\"
+.\" (C) 2008 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" This program is free software; you can redistribute it and/or modify
+.\" it under the terms of the GNU General Public License as published by
+.\" the Free Software Foundation; either version 2 of the License, or
+.\" (at your option) any later version.
+.\"
+.\" GetData is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+.\" General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public
+.\" License along with GetData; if not, write to the Free Software
+.\" Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
+.\" 02111-1307 USA.
+.\"
+.TH dirfile_free_entry_strings 3 "2 September 2008" "Version 0.3.0" "GETDATA"
+.SH NAME
+dirfile_free_entry_strings \(em free strings in a GetData gd_entry_t object
+.SH SYNOPSIS
+.B #include <getdata.h>
+.HP
+.nh
+.ad l
+.BI "gd_enrty_t *dirfile_free_entry_strings(gd_entry_t *" entry );
+.hy
+.ad n
+.SH DESCRIPTION
+The
+.BR dirfile_free_entry_strings ()
+function frees the character strings found in the gd_entry_t object
+.I entry
+which were previously allocated by a call to
+.BR get_entry (3).
+If
+.I entry
+is NULL, this function does nothing.
+
+If non-NULL,
+.I entry
+must point to a valid and properly initialised gd_entry_t object, such as that
+returned by
+.BR get_entry (3).
+As well, the caller may construct a properly initialised gd_entry_t object by
+first setting all bits to zero, then setting the field_type parameter to the
+desired gd_enntype_t symbol, and finally initialising only the members defined
+for that type.  The results of calling this function are undefined if the
+character strings pointed to by the string members of
+.I entry
+have not been allocated with
+.BR malloc (3),
+unless these pointer members are equal to NULL.
+
+See 
+.BR get_entry (3)
+for a complete description of the gd_entry_t data type.
+.SH RETURN VALUE
+A call to 
+.BR dirfile_free_entry_strings ()
+always returns its input,
+.IR entry .
+.SH NOTES
+This function is provided as a convenience only.  Callers may free strings
+allocated by
+.BR get_entry (3)
+themselves by simply calling
+.BR free (3)
+on the appropriate members for the given entry type, if they prefer to do so.
+.SH SEE ALSO
+.BR get_entry (3),
+.BR free (3)

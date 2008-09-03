@@ -25,9 +25,45 @@
 
 #ifdef STDC_HEADERS
 #include <string.h>
+#include <stdlib.h>
 #endif
 
 #include "internal.h"
+
+gd_entry_t* dirfile_free_entry_strings(gd_entry_t* entry)
+{
+  int i;
+
+  if (!entry || entry->field_type == GD_NO_ENTRY)
+    return entry;
+
+  free(entry->field);
+
+  switch(entry->field_type) {
+    case GD_RAW_ENTRY:
+      free(entry->field);
+      break;
+    case GD_LINCOM_ENTRY:
+      for (i = 0; i < entry->n_fields; ++i)
+        free(entry->in_fields[i]);
+      break;
+    case GD_LINTERP_ENTRY:
+      free(entry->in_fields[0]);
+      free(entry->table);
+      break;
+    case GD_MULTIPLY_ENTRY:
+      free(entry->in_fields[1]);
+      /* fall through */
+    case GD_BIT_ENTRY:
+    case GD_PHASE_ENTRY:
+      free(entry->in_fields[0]);
+      /* fall through */
+    case GD_NO_ENTRY:
+      break;
+  }
+
+  return entry;
+}
 
 int get_entry(DIRFILE* D, const char* field_code, gd_entry_t* entry)
 {
@@ -76,6 +112,8 @@ int get_entry(DIRFILE* D, const char* field_code, gd_entry_t* entry)
     case GD_BIT_ENTRY:
     case GD_PHASE_ENTRY:
       entry->in_fields[0] = strdup(E->in_fields[0]);
+      /* fall through */
+    case GD_NO_ENTRY:
       break;
   }
 

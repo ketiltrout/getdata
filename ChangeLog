@@ -1,3 +1,9 @@
+2009-09-03   D. V. Wiebe <getdata@ketiltrout.net>  svn:63
+	* src/getdata.h.in: add a GD_NO_ENTRY entry type
+
+	* man/dirfile_free_entry_strings man/get_entry.3 src/entry.c src/getdata.h.in:
+	add dirfile_free_entry_strings()
+
 2008-09-02   D. V. Wiebe <getdata@ketiltrout.net>  svn:62
 	*	bindings/f77/test/Makefila.am: fix include directory
 

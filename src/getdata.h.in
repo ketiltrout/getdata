@@ -17,7 +17,7 @@
  * General Public License for more details.
  *
  * You should have received a copy of the GNU General Public
- * License along with the GetData if not, write to the Free Software
+ * License along with GetData if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
  * 02111-1307 USA.
  */
@@ -83,7 +83,7 @@
 
 /* field types */
 typedef enum {
-  GD_RAW_ENTRY, GD_LINCOM_ENTRY, GD_LINTERP_ENTRY,
+  GD_NO_ENTRY = 0, GD_RAW_ENTRY, GD_LINCOM_ENTRY, GD_LINTERP_ENTRY,
   GD_BIT_ENTRY, GD_MULTIPLY_ENTRY, GD_PHASE_ENTRY
 } gd_entype_t;
 
@@ -217,6 +217,8 @@ extern const char** get_field_list(DIRFILE* dirfile) __THROW __gd_nonnull ((1));
 
 int get_entry(DIRFILE* D, const char* field_code, gd_entry_t* entry)
   __THROW __gd_nonnull ((1, 2));
+
+gd_entry_t *dirfile_free_entry_strings(gd_entry_t *entry) __THROW;
 
 
 /* The following functions contain calls to I/O functions, making them

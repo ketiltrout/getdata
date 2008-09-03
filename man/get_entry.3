@@ -62,7 +62,9 @@ and should not point to allocated memory locations before calling this function.
 Only strings provided by the gd_entry_t for the particular field type described
 will be allocated.  These strings should be deallocated with
 .BR free (3)
-by the caller once they are no longer needed.
+by the caller once they are no longer needed.  The
+.BR dirfile_free_entry_strings (3)
+function is provided as a convenience to do this.
 
 .SH RETURN VALUE
 Upon successful completion,
@@ -314,6 +316,7 @@ member indicates the shift in samples.  A positive value indicates a shift
 forward in time (towards larger frame numbers).
 .SH SEE ALSO
 .BR dirfile (5),
+.BR dirfile_free_entry_strings (3),
 .BR dirfile_open (3),
 .BR getdata (3),
 .BR get_error_string (3),
