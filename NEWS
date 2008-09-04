@@ -23,7 +23,7 @@ New in version 0.3.0:
   * Some error codes have been renamed, and others removed or added, in order to
     regularise error codes between getdata and putdata in the sundry versions.
     Furthermore, the underlying values of some of these codes have changed
-    (notably exlcuding GD_E_OK, which is guaranteed to be zero). Changes
+    (notably excluding GD_E_OK, which is guaranteed to be zero). Changes
     include:
 
       - GD_E_OPEN_FORMAT is now called GD_E_OPEN
@@ -50,5 +50,5 @@ New in version 0.3.0:
 
   Bindings
 
-  * Added bindings for C++ (libdirfile), Fotran 77 (libfgetdata), and
+  * Added bindings for C++ (libdirfile), Fortran 77 (libfgetdata), and
     Fortran 95 (libf95getdata)
