@@ -1,3 +1,13 @@
+2008-09-04   D. V. Wiebe <getdata@ketiltrout.net>  svn:73
+	* bindings/cxx/entry.h (Entry::Scale, Entry::Offset): fix return.
+
+	* src/flush.c (_GD_Flush): Handle GD_NO_ENTRY in switch
+
+	* test/dfes_bit.c test/dfes_linterp test/dfes_lincom test/dfes_multiply
+	test/dfes_phase test/dfes_raw test/flist test/flush_invalid
+	test/flush_bad_code test/flush_recurse: Remove unused variables
+	* test/entry_lincom: Include math.h
+
 2008-09-04   D. V. Wiebe <getdata@ketiltrout.net>  svn:68
 	* src/getdata_legacy.h src/legacy.c: Go through all the bother to
 	reconstruct the former FormatType for callers who use GetFormat()

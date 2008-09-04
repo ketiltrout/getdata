@@ -17,7 +17,7 @@ int main(void)
     "data1 RAW UINT8 1\n"
     "data2 RAW UINT8 1\n"
     "data3 RAW UINT8 1\n";
-  int fd, j;
+  int fd;
 
   mkdir(filedir, 0777);
 

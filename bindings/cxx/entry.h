@@ -84,12 +84,12 @@ namespace GetData {
 
       double Scale(int index = 0) {
         return (E.field_type == GD_LINCOM_ENTRY &&
-            CheckIndex(E.field_type, E.n_fields, index)) ?  E.m[index] : NULL;
+            CheckIndex(E.field_type, E.n_fields, index)) ?  E.m[index] : 0;
       }
 
       double Offset(int index = 0) {
         return (E.field_type == GD_LINCOM_ENTRY &&
-            CheckIndex(E.field_type, E.n_fields, index)) ?  E.b[index] : NULL;
+            CheckIndex(E.field_type, E.n_fields, index)) ?  E.b[index] : 0;
       }
 
       /* LINTERP methods */

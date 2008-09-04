@@ -17,7 +17,6 @@ int main(void)
     "in1 RAW UINT8 11\n"
     "lincom LINCOM 1 lincom 1 0\n";
   int fd;
-  unsigned char c[8];
 
   mkdir(filedir, 0777);
 

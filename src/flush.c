@@ -86,6 +86,8 @@ void _GD_Flush(DIRFILE* D, gd_entry_t *entry, const char* field_code)
     case GD_PHASE_ENTRY:
       if (entry->in_fields[0])
         _GD_Flush(D, _GD_FindField(D, entry->in_fields[0]), field_code);
+    case GD_NO_ENTRY:
+      break;
   }
 
   D->recurse_level--;
