@@ -45,6 +45,8 @@ AC_CONFIG_SRCDIR([src/getdata.c])
 AC_CONFIG_HEADER([src/config.h])
 
 dnl Features
+BUINDINGS_BUILT=
+BINDINGS_LEFT=
 
 dnl Legacy API
 AC_ARG_ENABLE(legacy-api, AS_HELP_STRING([--disable-legacy-api],
@@ -86,13 +88,13 @@ AC_ARG_ENABLE(checkdirfile, AS_HELP_STRING([--disable-checkdirfile],
               [Don't build or install the checkdirfile utility]),
               [
                case "${enableval}" in
-                 no) make_checkdirfile="no" ;;
-                 *) make_checkdirfile="yes" ;;
+                 no) make_checkdirfile="don't build" ;;
+                 *) make_checkdirfile="build" ;;
                esac
-              ], [ make_checkdirfile="yes" ])
+              ], [ make_checkdirfile="build" ])
 AC_MSG_CHECKING([whether to compile and install checkdirfile])
 AC_MSG_RESULT([$make_checkdirfile])
-AM_CONDITIONAL(MAKE_CHECKDIRFILE, test "x$make_checkdirfile" = "xyes")
+AM_CONDITIONAL(MAKE_CHECKDIRFILE, test "x$make_checkdirfile" = "xbuild")
 
 dnl C++ bindings
 AC_ARG_ENABLE(cplusplus, AS_HELP_STRING([--disable-cplusplus],
@@ -139,6 +141,32 @@ fi
 AC_MSG_CHECKING([whether to include the Fortran 77 bindings])
 AC_MSG_RESULT([$make_f77bindings])
 AM_CONDITIONAL(MAKE_F77BINDINGS, test "x$make_f77bindings" != "xno")
+
+if test "x$make_cxxbindings" != "xno"; then
+  BINDINGS_BUILT="${BINDINGS_BUILT} C++"
+else
+  BINDINGS_LEFT="${BINDINGS_LEFT} C++"
+fi
+
+if test "x$make_f77bindings" != "xno"; then
+  BINDINGS_BUILT="${BINDINGS_BUILT} Fortran-77"
+else
+  BINDINGS_LEFT="${BINDINGS_LEFT} Fortran-77"
+fi
+
+if test "x$make_f95bindings" != "xno"; then
+  BINDINGS_BUILT="${BINDINGS_BUILT} Fortran-95"
+else
+  BINDINGS_LEFT="${BINDINGS_LEFT} Fortran-95"
+fi
+
+if test "x$BINDINGS_BUILT" = "x"; then
+  BINDINGS_BUILT=" none"
+fi
+
+if test "x$BINDINGS_LEFT" = "x"; then
+  BINDINGS_LEFT=" none"
+fi
 
 dnl Programs
 AM_INIT_AUTOMAKE
@@ -222,4 +250,21 @@ AC_CONFIG_FILES([src/Makefile])
 dnl (because I keep modifying getdata.h instead of getdata.h.in)
 AC_CONFIG_HEADERS([src/getdata.h], [chmod a-w src/getdata.h])
 AC_CONFIG_FILES([test/Makefile])
+
 AC_OUTPUT
+dnl Handy summary
+
+echo
+echo "Configuration summary: "
+echo "  checkdirfile utility: ${make_checkdirfile}"
+echo "  Include legacy API:   ${include_legacy_api}"
+echo "  Enable debugging:     ${enable_debug}"
+if test "${enable_assert+set}" = set; then
+  echo "  Enable assertions:    no"
+else
+  echo "  Enable assertions:    yes"
+fi
+echo
+echo "  Bindings built:      ${BINDINGS_BUILT}"
+echo "  Bindings not built:  ${BINDINGS_LEFT}"
+echo
