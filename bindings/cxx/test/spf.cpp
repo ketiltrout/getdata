@@ -9,6 +9,8 @@
 #include <errno.h>
 #include <unistd.h>
 
+using namespace GetData;
+
 int main(void)
 {
   const char* filedir = __TEST__ "dirfile";

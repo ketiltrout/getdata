@@ -1,3 +1,18 @@
+2009-09-03   D. V. Wiebe <getdata@ketiltrout.net>  svn:64
+	* src/entry.c (dirfile_free_entry_strings): Fix double free
+
+	* bindings/cxx/dirfile.cpp bindings/cxx/dirfile.h: Use the GetData namespace
+
+	* bindings/cxx/Makefile.am bindings/cxx/dirfile.cpp bindings/cxx/dirfile.h
+	bindings/cxx/entry.cpp bindings/cxx/entry.h bindings/cxx/test/Makefile.am
+	bindings/cxx/test/entry.cpp: Add GetData::Entry class to abstractise
+	gd_entry_t as well as C++ bindings for get_entry().
+
+	* bindings/f77/fgetdata.c bindings/f77/getdata.f.in
+	bindings/f77/getdata.f90.in bindings/f77/make_parameters.c
+	bindings/f77/test/fget_entry.f90: Add Fotran
+	bindings for get_entry()
+
 2009-09-03   D. V. Wiebe <getdata@ketiltrout.net>  svn:63
 	* src/getdata.h.in: add a GD_NO_ENTRY entry type
 

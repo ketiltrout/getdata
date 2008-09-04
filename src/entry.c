@@ -34,14 +34,18 @@ gd_entry_t* dirfile_free_entry_strings(gd_entry_t* entry)
 {
   int i;
 
-  if (!entry || entry->field_type == GD_NO_ENTRY)
+  dtrace("%p", entry);
+
+  if (!entry || entry->field_type == GD_NO_ENTRY) {
+    dreturn("%p", entry);
     return entry;
+  }
 
   free(entry->field);
 
   switch(entry->field_type) {
     case GD_RAW_ENTRY:
-      free(entry->field);
+      free(entry->file);
       break;
     case GD_LINCOM_ENTRY:
       for (i = 0; i < entry->n_fields; ++i)
@@ -62,6 +66,7 @@ gd_entry_t* dirfile_free_entry_strings(gd_entry_t* entry)
       break;
   }
 
+  dreturn("%p", entry);
   return entry;
 }
 

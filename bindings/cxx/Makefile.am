@@ -15,18 +15,21 @@
 # for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with the GetData; if not, write to the Free Software Foundation,
+# along with GetData; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
 #
 AUTOMAKE_OPTIONS = foreign
+getdata_includedir = ${include_dir}/getdata
+
 INCLUDES = -Wall -I$(top_srcdir)/src
 
 SUBDIRS=test
 
-include_HEADERS = dirfile.h
+getdata_include_HEADERS = dirfile.h entry.h
 
 lib_LTLIBRARIES=libdirfile.la
-libdirfile_la_SOURCES = dirfile.cpp dirfile.h
+libdirfile_la_SOURCES = dirfile.cpp entry.cpp \
+												${getdata_include_HEADERS}
 libdirfile_la_LIBADD=../../src/libgetdata.la
 libdirfile_la_LDFLAGS = -version-info @DIRFILE_VERSION@
 

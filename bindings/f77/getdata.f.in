@@ -25,27 +25,41 @@ C     constants useful to Fortran programs
       @PARAMETERS@
 
 C Externals
-C     Corresponding to dirfile_open(3)
-      EXTERNAL GDFOPN
 C     Corresponding to dirfile_close(3)
       EXTERNAL GDFCLS
-C     Corresponding to dirfile_flush(3)
-      EXTERNAL GDFFLS
-C     Corresponding to getdata(3)
-      EXTERNAL GDFGET
-C     Returns the maximum field name length
-      EXTERNAL GDFFNX
+C     Corresponding to get_entry(3) for BIT fields
+      EXTERNAL GDFEBT
+C     Corresponding to get_entry(3) for LINCOM fields
+      EXTERNAL GDFELC
+C     Corresponding to get_entry(3) for LINTERP fields
+      EXTERNAL GDFELT
+C     Corresponding to get_entry(3) for MULTIPLY fields
+      EXTERNAL GDFEMT
+C     Corresponding to get_entry(3) for PHASE fields
+      EXTERNAL GDFEPH
+C     Returns the dirfile->error member
+      EXTERNAL GDFERR
+C     Corresponding to get_entry(3) for RAW fields
+      EXTERNAL GDFERW
 C     Corresponding to get_field_list(3) (sort of)
       EXTERNAL GDFFDN
+C     Returns the field type
+      EXTERNAL GDFFDT
+C     Corresponding to dirfile_flush(3)
+      EXTERNAL GDFFLS
+C     Returns the maximum field name length
+      EXTERNAL GDFFNX
+C     Corresponding to getdata(3)
+      EXTERNAL GDFGET
 C     Corresponding to get_nfields(3)
       EXTERNAL GDFNFD
 C     Corresponding to get_nframes(3)
       EXTERNAL GDFNFR
+C     Corresponding to dirfile_open(3)
+      EXTERNAL GDFOPN
 C     Corresponding to get_spf(3)
       EXTERNAL GDFSPF
-C     Corresponding to putdata(3)
-      EXTERNAL GDFPUT
-C     Returns the dirfile->error member
-      EXTERNAL GDFERR
 C     Corresponding to get_error_string(3)
       EXTERNAL GDFSTR
+C     Corresponding to putdata(3)
+      EXTERNAL GDFPUT

@@ -15,10 +15,12 @@
 // for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with the GetData; if not, write to the Free Software Foundation,
+// along with GetData; if not, write to the Free Software Foundation,
 // Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
 //
 #include "dirfile.h"
+
+using namespace GetData;
 
 Dirfile::Dirfile(const char* filedir, unsigned int flags)
 {
@@ -31,6 +33,11 @@ Dirfile::~Dirfile()
   if (error_string != NULL)
     delete error_string;
   dirfile_close(D);
+}
+
+Entry *Dirfile::Entry(const char* field_code)
+{
+  return new GetData::Entry(D, field_code);
 }
 
 void Dirfile::Flush(const char* field_code)
@@ -76,7 +83,7 @@ off_t Dirfile::NFrames()
 
 size_t Dirfile::GetData(const char* field_code, off_t first_frame,
     off_t first_sample, size_t num_frames, size_t num_samples,
-    Dirfile::DataType type, void* data_out)
+    DataType type, void* data_out)
 {
   return getdata(D, field_code, first_frame, first_sample, num_frames,
       num_samples, (gd_type_t)type, data_out);
@@ -84,7 +91,7 @@ size_t Dirfile::GetData(const char* field_code, off_t first_frame,
 
 size_t Dirfile::PutData(const char* field_code, off_t first_frame,
     off_t first_sample, size_t num_frames, size_t num_samples,
-    Dirfile::DataType type, const void* data_in)
+    DataType type, const void* data_in)
 {
   return putdata(D, field_code, first_frame, first_sample, num_frames,
       num_samples, (gd_type_t)type, data_in);

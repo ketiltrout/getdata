@@ -25,6 +25,14 @@ implicit none
 
 @PARAMETERS95@
 
+integer, parameter :: GD_FIELD_LEN=4096
+
+type gd_entry
+  integer :: field_type, n_fields, spf, data_type, bitnum, numbits, shift
+  character(len=GD_FIELD_LEN) :: field1, field2, field3
+  real*8, dimension(3) :: m, b
+end type
+
 contains
 function fdirfile_open (dirfilename, flags)
   integer :: fdirfile_open
@@ -338,5 +346,50 @@ subroutine fget_error_string (dirfile, buffer, len)
   ! call f77 library
   call gdfstr(dirfile, buffer, len)
 end subroutine
+
+function fget_entry (dirfile, field_code, ent)
+  integer :: fget_entry
+  integer, intent(in) :: dirfile
+  character (len=*), intent(in) :: field_code
+  type(gd_entry), intent(out) :: ent
+
+  ! the call may modify the lengths, so don't use parameters
+  integer :: len1 = GD_FIELD_LEN
+  integer :: len2 = GD_FIELD_LEN
+  integer :: len3 = GD_FIELD_LEN
+
+  ! get field type from f77 library
+  call gdffdt (fget_entry, dirfile, TRIM(field_code), LEN_TRIM(field_code))
+
+  if (fget_entry .EQ. GD_RAW_ENTRY) then
+    ! raw
+    call gdferw(ent%field1, len1, ent%spf, ent%data_type, dirfile, &
+    TRIM(field_code), LEN_TRIM(field_code))
+  else if (fget_entry .EQ. GD_LINCOM_ENTRY) then
+    ! lincom
+    call gdfelc(ent%n_fields, ent%field1, len1, ent%m(1), ent%b(1), &
+    ent%field2, len2, ent%m(2), ent%b(2), ent%field3, len3, ent%m(3), &
+    ent%b(3), dirfile, TRIM(field_code), LEN_TRIM(field_code))
+  else if (fget_entry .EQ. GD_LINTERP_ENTRY) then
+    ! linterp
+    call gdfelt(ent%field1, len1, ent%field2, len2, dirfile, TRIM(field_code), &
+    LEN_TRIM(field_code))
+  else if (fget_entry .EQ. GD_BIT_ENTRY) then
+    ! bit
+    call gdfebt(ent%field1, len1, ent%bitnum, ent%numbits, dirfile, &
+    TRIM(field_code), LEN_TRIM(field_code))
+  else if (fget_entry .EQ. GD_MULTIPLY_ENTRY) then
+    ! multiply
+    call gdfemt(ent%field1, len1, ent%field2, len2, dirfile, TRIM(field_code), &
+    LEN_TRIM(field_code))
+  else if (fget_entry .EQ. GD_PHASE_ENTRY) then
+    !phase
+    call gdfemt(ent%field1, len1, ent%shift, dirfile, TRIM(field_code), &
+    LEN_TRIM(field_code))
+  else
+    ! on the off chance we got a type we weren't prepared to deal with
+    fget_entry = GD_NO_ENTRY
+  end if
+end function
 
 end module

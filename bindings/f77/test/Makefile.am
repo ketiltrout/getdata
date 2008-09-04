@@ -15,7 +15,7 @@
 # for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with the GetData; if not, write to the Free Software Foundation,
+# along with GetData; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
 #
 AUTOMAKE_OPTIONS = foreign
@@ -25,7 +25,7 @@ F95LDADD=../libf95getdata.la $(F77LDADD)
 F77LDADD=../libfgetdata.la
 
 if MAKE_F95BINDINGS
-F95TESTS=fgetdata fget_field_list
+F95TESTS=fgetdata fget_field_list fget_entry
 endif
 
 TESTS=gdfget $(F95TESTS)
@@ -38,6 +38,9 @@ fgetdata_LDADD=$(F95LDADD)
 
 fget_field_list_SOURCES=fget_field_list.f90
 fget_field_list_LDADD=$(F95LDADD)
+
+fget_entry_SOURCES=fget_entry.f90
+fget_entry_LDADD=$(F95LDADD)
 
 check_PROGRAMS=$(TESTS)
 

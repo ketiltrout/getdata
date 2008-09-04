@@ -4,6 +4,8 @@
 #include <errno.h>
 #include <unistd.h>
 
+using namespace GetData;
+
 int main(void)
 {
   const char* filedir = __TEST__ "dirfile";
@@ -29,7 +31,7 @@ int main(void)
   close(fd);
 
   Dirfile dirfile = Dirfile(filedir);
-  size_t n = dirfile.GetData("data", 5, 0, 1, 0, Dirfile::UInt8, c);
+  size_t n = dirfile.GetData("data", 5, 0, 1, 0, UInt8, c);
   int error = dirfile.Error();
 
   unlink(data);

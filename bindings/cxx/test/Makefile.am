@@ -15,14 +15,15 @@
 # for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with the GetData; if not, write to the Free Software Foundation,
+# along with GetData; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
 #
 AUTOMAKE_OPTIONS = foreign
 INCLUDES = -Wall -I$(srcdir)/.. -I$(top_srcdir)/src -D__TEST__=\"$@\"
 LDADD=../libdirfile.la
-TESTS=getdata nframes putdata spf
+TESTS=entry getdata nframes putdata spf
 
+entry_SOURCES=entry.cpp
 getdata_SOURCES=getdata.cpp
 nframes_SOURCES=nframes.cpp
 putdata_SOURCES=putdata.cpp
