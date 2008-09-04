@@ -1,3 +1,15 @@
+2008-09-04   D. V. Wiebe <getdata@ketiltrout.net>  svn:68
+	* src/getdata_legacy.h src/legacy.c: Go through all the bother to
+	reconstruct the former FormatType for callers who use GetFormat()
+
+	* src/close.c (_GD_FreeD): Handle GD_NO_ENTRY in switch
+
+	* configure.ac: Use modern AM_INIT_AUTOMAKE invocation so as not to have
+	to repreat package name and package version.
+	* Makefile.am: Require automake 1.6
+
+	* NEWS: added
+
 2008-09-04   D. V. Wiebe <getdata@ketiltrout.net>  svn:67
 	* bindings/cxx/Makefile.am: Fix include dir
 
@@ -10,7 +22,6 @@
 	* README.cxx README.f77 README.f95: Update for get_entry() bindings
 
 2008-09-04   D. V. Wiebe <getdata@ketiltrout.net>  svn:66
-
 	* test/Makefile.am test/dfes_bit.c test/dfes_lincom.c test/dfes_linterp.c
 	test/dfes_multiply.c test/dfes_null.c test/dfes_phase.c test/dfes_raw.c
 	test/dfes_zero.c test/entry_bad_code.c test/entry_bit.c test/entry_invalid.c

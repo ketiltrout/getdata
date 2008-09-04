@@ -16,10 +16,9 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
  *
- * You should have received a copy of the GNU General Public
- * License along with GetData; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
- * 02111-1307 USA.
+ * You should have received a copy of the GNU General Public License along
+ * with GetData; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -70,7 +69,14 @@ const char const*GD_ERROR_CODES[GD_N_ERROR_CODES] = {
   "Request out-of-range"
 };
 
-static struct FormatType Format;
+static struct FormatType Format = {
+  .rawEntries = NULL,
+  .linterpEntries = NULL,
+  .multiplyEntries = NULL,
+  .mplexEntries = NULL,
+  .bitEntries = NULL,
+  .phaseEntries = NULL
+};
 
 /* _GD_CopyGlobalError: Copy the last error message to the global error buffer.
  */
@@ -128,12 +134,112 @@ static DIRFILE* _GD_GetDirfile(const char *filename_in)
   return _GD_Dirfiles.D[_GD_Dirfiles.n - 1];
 }
 
-/* We're not going to go through all the bother of attempting to reconstruct
- * the old-style FormatType, since we have neither the fields sorted into
- * types, nor the old FooEntryType structs.  Instead, just return a combination
- * of get_nfields and get_field_list, plus a few odds and ends */
+static void CopyRawEntry(struct RawEntryType* R, gd_entry_t* E)
+{
+  if (E == NULL)
+    return;
+
+  R->field = E->field;
+  
+  switch(E->data_type) {
+    case GD_UINT8:
+      R->type = 'c';
+      break;
+    case GD_UINT16:
+      R->type = 'u';
+      break;
+    case GD_INT16:
+      R->type = 's';
+      break;
+    case GD_UINT32:
+      R->type = 'U';
+      break;
+    case GD_INT32:
+      R->type = 'S';
+      break;
+    case GD_FLOAT32:
+      R->type = 'f';
+      break;
+    case GD_FLOAT64:
+      R->type = 'd';
+      break;
+    default: /* Well, this isn't right, but it's the best we can do. */
+      R->type = 'n';
+      break;
+  }
+
+  R->size = (int)E->size;
+  R->samples_per_frame = (int)E->spf;
+}
+
+static void CopyLincomEntry(struct LincomEntryType* L, gd_entry_t* E)
+{
+  int i;
+
+  if (E == NULL)
+    return;
+
+  L->field = E->field;
+  L->n_fields = E->n_fields;
+  for (i = 0; i < E->n_fields; ++i) {
+    L->in_fields[i] = E->in_fields[i];
+    L->m[i] = E->m[i];
+    L->b[i] = E->b[i];
+  }
+}
+
+static void CopyLinterpEntry(struct LinterpEntryType* L, gd_entry_t* E)
+{
+  if (E == NULL)
+    return;
+
+  L->field = E->field;
+  L->raw_field = E->in_fields[0];
+  L->linterp_file = E->table;
+}
+
+static void CopyBitEntry(struct BitEntryType* B, gd_entry_t* E)
+{
+  if (E == NULL)
+    return;
+
+  B->field = E->field;
+  B->raw_field = E->in_fields[0];
+  B->bitnum = E->bitnum;
+  B->numbits = E->numbits;
+}
+
+static void CopyMultiplyEntry(struct MultiplyEntryType* M, gd_entry_t* E)
+{
+  if (E == NULL)
+    return;
+
+  M->field = E->field;
+  M->in_fields[0] = E->in_fields[0];
+  M->in_fields[1] = E->in_fields[1];
+}
+
+static void CopyPhaseEntry(struct PhaseEntryType* P, gd_entry_t* E)
+{
+  if (E == NULL)
+    return;
+
+  P->field = E->field;
+  P->raw_field = E->in_fields[0];
+  P->shift = E->shift;
+}
+
+/* Okay, reconstruct the old FormatType.  This is painful. */
 const struct FormatType *GetFormat(const char *filedir, int *error_code) {
   DIRFILE *D = _GD_GetDirfile(filedir);
+  int i;
+
+  int nraw = 0;
+  int nlincom = 0;
+  int nlinterp = 0;
+  int nmultiply = 0;
+  int nbit = 0;
+  int nphase = 0;
 
   if (D->error) {
     *error_code = _GD_CopyGlobalError(D);
@@ -143,10 +249,80 @@ const struct FormatType *GetFormat(const char *filedir, int *error_code) {
   /* fill the structure -- like everything about the legacy API, this is
    * not thread-safe */
   Format.FileDirName = filedir; 
-  Format.file_offset = (int)D->frame_offset;
-  Format.first_field = (D->first_field) ? D->first_field->field : NULL;
-  Format.Entries = get_field_list(D);
-  Format.n_entries = get_nfields(D);
+  Format.frame_offset = (int)D->frame_offset;
+  CopyRawEntry(&Format.first_field, D->first_field);
+
+  /* Pass one: run through the entry list and count the number of different
+   * types */
+  Format.n_raw = 0; 
+  Format.n_lincom = 0; 
+  Format.n_linterp = 0; 
+  Format.n_multiply = 0; 
+  Format.n_mplex = 0; /* Erm... yeah... */
+  Format.n_bit = 0; 
+  Format.n_phase = 0; 
+  for (i = 0; i < D->n_entries; ++i) 
+    switch(D->entry[i]->field_type) {
+      case GD_RAW_ENTRY:
+        Format.n_raw++;
+        break;
+      case GD_LINCOM_ENTRY:
+        Format.n_lincom++;
+        break;
+      case GD_LINTERP_ENTRY:
+        Format.n_linterp++;
+        break;
+      case GD_BIT_ENTRY:
+        Format.n_bit++;
+        break;
+      case GD_MULTIPLY_ENTRY:
+        Format.n_multiply++;
+        break;
+      case GD_PHASE_ENTRY:
+        Format.n_phase++;
+        break;
+      default:
+        break;
+    }
+
+  /* Now reallocate the Entry arrays */
+  Format.rawEntries = realloc(Format.rawEntries,
+      Format.n_raw * sizeof(struct RawEntryType));
+  Format.lincomEntries = realloc(Format.lincomEntries,
+      Format.n_lincom * sizeof(struct LincomEntryType));
+  Format.linterpEntries = realloc(Format.linterpEntries,
+      Format.n_linterp * sizeof(struct LinterpEntryType));
+  Format.multiplyEntries = realloc(Format.multiplyEntries,
+      Format.n_multiply * sizeof(struct MultiplyEntryType));
+  Format.bitEntries = realloc(Format.bitEntries,
+      Format.n_bit * sizeof(struct BitEntryType));
+  Format.phaseEntries = realloc(Format.phaseEntries,
+      Format.n_phase * sizeof(struct PhaseEntryType));
+
+  /* Pass 2: Fill the Entry structs */
+  for (i = 0; i < D->n_entries; ++i)
+    switch(D->entry[i]->field_type) {
+      case GD_RAW_ENTRY:
+        CopyRawEntry(&Format.rawEntries[nraw++], D->entry[i]);
+        break;
+      case GD_LINCOM_ENTRY:
+        CopyLincomEntry(&Format.lincomEntries[nlincom++], D->entry[i]);
+        break;
+      case GD_LINTERP_ENTRY:
+        CopyLinterpEntry(&Format.linterpEntries[nlinterp++], D->entry[i]);
+        break;
+      case GD_BIT_ENTRY:
+        CopyBitEntry(&Format.bitEntries[nbit++], D->entry[i]);
+        break;
+      case GD_MULTIPLY_ENTRY:
+        CopyMultiplyEntry(&Format.multiplyEntries[nmultiply++], D->entry[i]);
+        break;
+      case GD_PHASE_ENTRY:
+        CopyPhaseEntry(&Format.phaseEntries[nphase++], D->entry[i]);
+        break;
+      default:
+        break;
+    }
 
   return &Format;
 }
@@ -198,7 +374,7 @@ int GetNFrames(const char *filename, int *error_code, const void *unused)
 }
 
 /* legacy interface to get_spf()
- */
+*/
 int GetSamplesPerFrame(const char *filename, const char *field_code,
     int *error_code)
 {
@@ -218,7 +394,7 @@ int GetSamplesPerFrame(const char *filename, const char *field_code,
 }
 
 /* legacy interface to putdata()
- */
+*/
 int PutData(const char *filename, const char *field_code,
     int first_frame, int first_samp, int num_frames, int num_samp,
     char data_type, const void *data_in, int *error_code)
@@ -241,4 +417,4 @@ int PutData(const char *filename, const char *field_code,
   return n_write;
 }
 /* vim: ts=2 sw=2 et
- */
+*/

@@ -14,10 +14,9 @@ dnl but WITHOUT ANY WARRANTY; without even the implied warranty of
 dnl MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 dnl General Public License for more details.
 dnl
-dnl You should have received a copy of the GNU General Public
-dnl License along with GetData; if not, write to the Free Software
-dnl Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
-dnl 02111-1307 USA.
+dnl You should have received a copy of the GNU General Public License
+dnl along with GetData; if not, write to the Free SoftwareFoundation, Inc.,
+dnl 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 dnl
 AC_INIT([getdata], [0.3.0], [getdata-devel@lists.sourceforge.net])
 
@@ -142,7 +141,7 @@ AC_MSG_RESULT([$make_f77bindings])
 AM_CONDITIONAL(MAKE_F77BINDINGS, test "x$make_f77bindings" != "xno")
 
 dnl Programs
-AM_INIT_AUTOMAKE([getdata], [0.3.0])
+AM_INIT_AUTOMAKE
 AC_PROG_CC
 AC_PROG_CC_C_O
 dnl C99 isn't required, but it does define NAN, if we have it

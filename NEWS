@@ -1,0 +1,54 @@
+New in version 0.3.0:
+
+  Dirfile Changes
+
+  * GetData now supports Dirfile Standards Version 5 which includes support
+    for signed 8-bit, and signed and unsigned 64-bit integer types.
+  * As part of Standards Version 5, the restriction on field name length has
+    been removed.  (The filesystem will impose an effective limit on RAW fields
+    of a few hundred character, and format file lines are limited to several
+    thousand.)
+  * The library can now convert between big and little endiannesses.  A
+    directive, ENDIAN (added in Standards Version 5), is available to specify
+    the byte-sex of a dirfile.
+
+  API Changes
+
+  * There is a new interface which fixes issues with thread safety and largefile
+    support in the old interface.  The old interface (referred to as the "legacy
+    API") is still supported, but doesn't fully implement Dirfile Standards
+    Version 5.  See the README for full details.
+  * putdata now respects FRAMEOFFSET.
+  * putdata can now write to PHASE fields, and multi-bit BIT fields.
+  * Some error codes have been renamed, and others removed or added, in order to
+    regularise error codes between getdata and putdata in the sundry versions.
+    Furthermore, the underlying values of some of these codes have changed
+    (notably exlcuding GD_E_OK, which is guaranteed to be zero). Changes
+    include:
+
+      - GD_E_OPEN_FORMAT is now called GD_E_OPEN
+      - GD_E_BAD_RETURN_TYPE is now called GD_E_BAD_TYPE
+      - GD_E_NO_RAW_FIELDS is now called GD_E_EMPTY
+      - PD_E_MULT_LINCOM is now called GD_E_BAD_PUT_FIELD
+      - GD_E_OPEN_RAWFIELD and PD_E_OPEN RAWFIELD are now both represented by
+          GD_E_RAW_IO
+      - PD_E_BAD_CODE is now handled by GD_E_BAD_CODE
+      - GD_E_FIELD, GD_E_SIZE_MISMATCH, ENDIAN_ERROR, CLOSE_ERROR are no longer
+        applicable and have been removed
+      - PD_E_CLOSE_RDONLY, PD_E_WRITE_LOCK, PD_E_FLOCK_ALLOC, which were were
+        defined in the header but never used, have been removed
+      - GD_E_TRUNC, GD_E_CREAT, GD_E_BAD_DIRFILE, GD_E_RANGE and GD_E_ACCMODE
+        are new
+
+    This affects the legacy API.
+  
+  Legacy API Changes
+
+  * The legacy API has been marked deprecated.
+  * Error codes have changed per the description above.
+  * Only the public members of FormatType are now initialised by GetFormat.
+
+  Bindings
+
+  * Added bindings for C++ (libdirfile), Fotran 77 (libfgetdata), and
+    Fortran 95 (libf95getdata)
