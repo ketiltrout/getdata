@@ -33,12 +33,24 @@ All integer type parameters passed to the compatibility library are of type
 INTEGER (ie. the native size of the platform).  As a result, largefile support
 will not be available in the Fortran 77 bindings on a 32-bit system.
 
+All character string arguments require also an integer indicating the size of
+the character buffer.  In cases where the bindings return string value, the
+value will not be returned if the string length supplied is too short.  In
+these cases, the character string will be left untouched, but the integer
+indicating the string length will be updated to indicate the required string
+length.  The exception to this is GDFSTR, which simply truncates the string
+it outputs, as the C API does.
+
 Available Subroutines
 =====================
 
 * GDFOPN(dirfile_unit, dirfilename, dirfilename_len, flags)
-  INTEGER dirfileunit, dirfilename_len, flags
-  CHARACTER*<dirfilename_len> dirfilename
+  
+  Output:
+    INTEGER dirfileunit
+  Input:
+    INTEGER dirfilename_len, flags
+    CHARACTER*<dirfilename_len> dirfilename
 
   This wraps dirfile_open(3), with the same input arguments (dirfilename_len
   should contain the string length of dirfilename).  It returns the dirfile
@@ -47,7 +59,9 @@ Available Subroutines
   it returns a valid dirfile unit even in case of error.
 
 * GDFCLS(dirfile_unit)
-  INTEGER dirfileu_nit
+
+  Input:
+    INTEGER dirfileu_nit
 
   This wraps dirfile_close(3).  The argument is the dirfile unit to close.
   In addition to closing the dirfile itself, this will also disassociate the
@@ -55,8 +69,10 @@ Available Subroutines
   subsequent call to GDFOPN.
 
 * GDFFLS(dirfile_unit, field_code, field_code_len)
-  INTEGER dirfile_unit, field_code_len
-  CHARACTER*<field_code_len> field_code
+
+  Input:
+    INTEGER dirfile_unit, field_code_len
+    CHARACTER*<field_code_len> field_code
 
   This wraps dirfile_flush(3).  If field_code_len is zero, the entire dirfile
   will be flushed, and field_code will be ignored.  Otherwise the field named
@@ -64,10 +80,14 @@ Available Subroutines
 
 * GDFGET(n_read, dirfile_unit, field_code, field_code_len, first_frame,
   first_sample, num_frames, num_samples, return_type, data_out)
-  INTEGER n_read, dirfile_unit, field_code_len, first_frame, first_sample
-  INTEGER num_frames, num_samples, return_type
-  CHARACTER*<field_code_len> field_code
-  <datatype>*<n> data_out
+
+  Output:
+    INTEGER n_read
+    <datatype>*<n> data_out
+  Input:
+    INTEGER dirfile_unit, field_code_len, first_frame, first_sample
+    INTEGER num_frames, num_samples, return_type
+    CHARACTER*<field_code_len> field_code
 
   This wraps getdata(3), with the same input arguments (field_code_len should
   contain the string length of the field_code).  The number of samples actually
@@ -76,13 +96,21 @@ Available Subroutines
   of appropriate data type width for the data returned.
 
 * GDFNFD(nfields, dirfile_unit)
-  INTEGER nframes, dirfile_unit
+
+  Output:
+    INTEGER nframes
+  Input:
+    INTEGER dirfile_unit
 
   This wraps get_nfields(3).  It takes the dirfile unit number as input and
   returns the number of fields in the dirfile in nfields.
 
 * GDFFDX(field_max, dirfile_unit)
-  INTEGER field_max, dirfile_unit
+
+  Output:
+    INTEGER field_max
+  Input:
+    INTEGER dirfile_unit
 
   This subroutine, which has no direct analogue in the C API, returns the
   length of the longest field name defined in the dirfile.  It takes the
@@ -90,8 +118,13 @@ Available Subroutines
   the longest field name in the dirfile in field_max.
  
 * GDFFDN(name, name_len, dirfile_unit, field_num)
-  CHARACTER*<name_len> name
-  INTEGER name_len, dirfile_unit, field_num
+
+  Output:
+    CHARACTER*<name_len> name
+  Input/Output:
+    INTEGER name_len
+  Input:
+    INTEGER dirfile_unit, field_num
 
   This subroutine is the replacement for get_field_list(3).  In addition to
   the dirfile unit, it returns in name a Fortran 77 string containing the
@@ -102,14 +135,22 @@ Available Subroutines
   will be set to zero, and name will not be modified.
 
 * GDFNFR(nframes, dirfile_unit)
-  INTEGER nframes, dirfile_unit
+
+  Output:
+    INTEGER nframes
+  Input:
+    INTEGER dirfile_unit
 
   This wraps get_nframes(3).  It takes the dirfile unit number as input and
   returns the number of frames in the dirfile in nframes.
 
 * GDFSPF(spf, dirfile_unit, field_code, field_code_len)
-  INTEGER spf, dirfile_unit, field_code_len
-  CHARACTER*<field_code_len> field_code
+
+  Output:
+    INTEGER spf
+  Input:
+    INTEGER dirfile_unit, field_code_len
+    CHARACTER*<field_code_len> field_code
 
   This wraps get_spf(3).  The field_code_len parameter should contain the
   string length of field_code.  The number of samples per frame in field_code
@@ -117,10 +158,14 @@ Available Subroutines
 
 * GDFPUT(n_wrote, dirfile_unit, field_code, field_code_len, first_frame,
   first_sample, num_frames, num_samples, data_type, data_in)
-  INTEGER n_wrote, dirfile_unit, field_code_len, first_frame, first_sample
-  INTEGER num_frames, num_samples, data_type
-  CHARACTER*<field_code_len> field_code
-  <datatype>*<n> data_out
+
+  Output:
+    INTEGER n_wrote
+  Input:
+    INTEGER dirfile_unit, field_code_len, first_frame, first_sample
+    INTEGER num_frames, num_samples, data_type
+    CHARACTER*<field_code_len> field_code
+    <datatype>*<n> data_out
 
   This wraps putdata(3), with the same input arguments (field_code_len should
   contain the string length of the field_code).  The number of samples actually
@@ -129,7 +174,11 @@ Available Subroutines
   of appropriate data type width for the data input.
 
 * GDFERR(error, dirfile_unit)
-  INTEGER error, dirfile_unit
+
+  Output:
+    INTEGER error
+  Input:
+    INTEGER dirfile_unit
 
   This subroutine takes a dirfile unit as input and returns the DIRFILE.error
   value associated with it in error.  The value of error will equal one of the
@@ -137,9 +186,125 @@ Available Subroutines
 
 * GDFSTR(dirfile_unit, buffer, buffer_len)
 
+  Output:
+    CHARACTER*<buffer_len> buffer
+  Input:
+    INTEGER dirfile_unit, buffer_len
+
   This subroutine takes a dirfile unit as input and will write the error
   string returned by get_error_string(3) in buffer, which is of length
   buffer_len.
+
+* GDFFDT(entry_type, dirfile_unit, field_code, field_code_len)
+
+  Output:
+    INTEGER type
+  Input:
+    INTEGER dirfile_unit, field_code_len
+    CHARACTER*<field_code_len> field_code
+
+  This subroutine returns the field type of the specified field_code in
+  entry_type.  The entry_type will be one of the entry type parameters listed
+  below.
+
+* GDFERW(spf, data_type, dirfile_unit, field_code, field_code_len)
+
+  Output: 
+    INTEGER spf, data_type
+  Input:
+    INTEGER dirfile_unit, field_code_len
+    CHARACTER*<field_code_len> field_code
+
+  This subroutine returns metadata describing a RAW field.  It returns the
+  samples-per-frame, and native data type in spf and data_type.  The
+  data_type will be one of the data type parameters listed below.  If field_code
+  is not found, or the field specified is not of RAW type, spf will be set to
+  zero.  In this case the value of data_type is unspecified.
+
+* GDFELC(nfields, infield1, infield1_len, m1, b1, infield2, infield2_len, m2,
+  b2, infield3, infield3_len, m3, b3, dirfile_unit, field_code, field_code_len)
+
+  Output:
+    INTEGER nfields
+    CHARACTER*<infield1_len> infield1
+    CHARACTER*<infield2_len> infield2
+    CHARACTER*<infield3_len> infield3
+    REAL*8 m1, b1, m2, b2, m3, b3
+  Input/Output:
+    INTEGER infield1_len, infield2_len, infield3_len
+  Input:
+    INTEGER dirfile_unit, field_code_len
+    CHARACTER*<field_code_len> field_code
+
+  This subroutine returns metadata describing a LINCOM field.  Although three
+  sets of arguments are required, only nfields of them will be updated.  If
+  field_code is not found, or the field specified is not of LINCOM type, nfields
+  will be set to zero.  In this case the value of the remaining data is
+  unspecified.
+
+* GDFELT(infield, infield_len, table, table_len, dirfile_unit, field_code,
+  field_code_len)
+
+  Output: 
+    CHARACTER*<infield_len> infield
+    CHARACTER*<table_len> table
+  Input/Output:
+    INTEGER infield_len, table_len
+  Input:
+    INTEGER dirfile_unit, field_code_len
+    CHARACTER*<field_code_len> field_code
+
+  This subroutine returns metadata describing a LINTERP field.  If field_code
+  is not found, or the field specified is not of LINTERP type, infield_len will
+  be set to zero.  In this case the value of the remaining data is unspecified.
+
+* GDFEBT(infield, infield_len, bitnum, numbits, dirfile_unit, field_code,
+  field_code_len)
+
+  Output: 
+    CHARACTER*<infield_len> infield
+    INTEGER bitnum, numbits
+  Input/Output:
+    INTEGER infield_len
+  Input:
+    INTEGER dirfile_unit, field_code_len
+    CHARACTER*<field_code_len> field_code
+
+  This subroutine returns metadata describing a BIT field.  If field_code
+  is not found, or the field specified is not of BIT type, infield_len will
+  be set to zero.  In this case the value of the remaining data is unspecified.
+
+* GDFEMT(infield1, infield1_len, infield2, infield2_len, dirfile_unit,
+  field_code, field_code_len)
+
+  Output: 
+    CHARACTER*<infield1_len> infield1
+    CHARACTER*<infield2_len> infield2
+  Input/Output:
+    INTEGER infield1_len, infield2_len
+  Input:
+    INTEGER dirfile_unit, field_code_len
+    CHARACTER*<field_code_len> field_code
+
+  This subroutine returns metadata describing a MULTIPLY field.  If field_code
+  is not found, or the field specified is not of MULTIPLY type, infield1_len
+  will be set to zero.  In this case the value of the remaining data is
+  unspecified.
+
+* GDFEPH(infield, infield_len, shift, dirfile_unit, field_code, field_code_len)
+
+  Output: 
+    CHARACTER*<infield_len> infield
+    INTEGER shift
+  Input/Output:
+    INTEGER infield_len
+  Input:
+    INTEGER dirfile_unit, field_code_len
+    CHARACTER*<field_code_len> field_code
+
+  This subroutine returns metadata describing a PHASE field.  If field_code
+  is not found, or the field specified is not of PHASE type, shift will
+  be set to zero.  In this case the value of the remaining data is unspecified.
 
 Defined Parameters
 ==================
@@ -185,20 +350,34 @@ Dirfile flags (required by GDFOPN):
   GD_FE           GD_FORCE_ENDIAN
   GD_PE           GD_PEDANTIC
 
-Data types (required by GDFGET and GDFPUT).  Note, because Fortran does not
-support unsigned data types, only signed datatypes are defined here.  The
-unsigned data type specifiers will still be accepted by these subroutines, and
-can be specified by litteral value (which can be obtained by examining
-getdata.h).  However, litteral values of constants defined in getdata.f and
-getdata.h should not be expected to remain the same from one release to another,
-so using litteral values should always be used done with caution.
+Entry types (required by GDFFDT):
+
+  F77 symbol      C symbol          Notes
+  ----------      ----------------- --------------------------------------
+  GD_NOE          GD_NO_ENTRY       Indicating an invalid field type
+  GD_RWE          GD_RAW_ENTRY
+  GD_LCE          GD_LINCOM_ENTRY
+  GD_LTE          GD_LINTERP_ENTRY
+  GD_BTE          GD_BIT_ENTRY
+  GD_MTE          GD_MULTIPLY_ENTRY
+  GD_PHE          GD_PHASE_ENTRY
+
+Data types (required by GDFGET and GDFPUT and GDFERW).  Note, Fortran does not
+support unsigned data types, but GDFERW may still return an unsigned type, so
+all types are defined here.  The unsigned data type specifiers will be accepted
+by the other subroutines, but the data returned may not be properly
+interpretable by Fortran 77.
 
   F77 symbol      C symbol          Notes
   ----------      ----------------- --------------------------------------
   GD_NUL          GD_NULL           Not suitable to be passed to GDFPUT
+  GD_U8           GD_UINT8
   GD_I8           GD_INT8
+  GD_U16          GD_UINT16
   GD_I16          GD_INT16
+  GD_U32          GD_UINT32
   GD_I32          GD_INT32
+  GD_U64          GD_UINT64
   GD_I64          GD_INT64
   GD_F32          GD_FLOAT32
   GD_F64          GD_FLOAT64

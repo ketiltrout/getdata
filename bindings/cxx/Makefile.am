@@ -19,7 +19,7 @@
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
 #
 AUTOMAKE_OPTIONS = foreign
-getdata_includedir = ${include_dir}/getdata
+getdata_includedir = ${includedir}/getdata
 
 INCLUDES = -Wall -I$(top_srcdir)/src
 

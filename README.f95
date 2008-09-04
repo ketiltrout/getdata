@@ -145,3 +145,31 @@ Other procedures in the Fortran 95 bindings are:
   integer, intent(in) :: dirfile_unit
  
   This returns the DIRFILE error associated with the supplied dirfile unit.
+
+* integer function fget_entry (dirfile_unit, field_code, ent)
+  integer, intent(in) :: dirfile_unit
+  character (len=*), intent(in) :: field_code
+  type(gd_entry), intent(out) :: ent
+
+  This fill ent with the metadata for field_code obtained by calling
+  get_entry(3).  It returns the field type, or GD_NO_ENTRY if an error occurred
+  in the get_entry() call.  The gd_enty type is defined in the getdata module
+  to be:
+
+  type gd_entry
+    integer :: field_type, n_fields, spf, data_type, bitnum, numbits, shift
+    character(len=GD_FIELD_LEN), dimension(3) :: field
+    real*8, dimension(3) :: m, b
+  end type
+
+  where GD_FIELD_LEN is a constant parameter equal to 4096.  Character strings
+  are all stored in field(:) according to the following table:
+
+    TYPE      FIELD(1)    FIELD(2)    FIELD(3)
+    --------  ----------  ----------  ----------
+    RAW        --          --          --
+    LINCOM    infield[0]  infield[1]  infield[2]
+    LINTERP   infield[0]  table        --
+    BIT       infield[0]   --          --
+    MULTIPLY  infield[0]  infield[1]   --
+    PHASE     infield[0]   --          --

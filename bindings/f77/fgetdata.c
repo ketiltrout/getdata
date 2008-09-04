@@ -292,7 +292,7 @@ void F77_FUNC(gdfelc, GDFELC) (int* nfields,
 
   if (get_entry(_GDF_GetDirfile(*dirfile), _GDF_CString(out, field_code,
           *field_code_l), &E) || E.field_type != GD_LINCOM_ENTRY)
-    *infield1_l = 0;
+    *nfields = 0;
   else {
     *nfields = E.n_fields;
     _GDF_FString(infield1, infield1_l, E.in_fields[0]);

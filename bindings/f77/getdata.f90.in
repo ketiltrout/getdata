@@ -29,7 +29,7 @@ integer, parameter :: GD_FIELD_LEN=4096
 
 type gd_entry
   integer :: field_type, n_fields, spf, data_type, bitnum, numbits, shift
-  character(len=GD_FIELD_LEN) :: field1, field2, field3
+  character(len=GD_FIELD_LEN), dimension(3) :: field
   real*8, dimension(3) :: m, b
 end type
 
@@ -367,24 +367,24 @@ function fget_entry (dirfile, field_code, ent)
     LEN_TRIM(field_code))
   else if (fget_entry .EQ. GD_LINCOM_ENTRY) then
     ! lincom
-    call gdfelc(ent%n_fields, ent%field1, len1, ent%m(1), ent%b(1), &
-    ent%field2, len2, ent%m(2), ent%b(2), ent%field3, len3, ent%m(3), &
+    call gdfelc(ent%n_fields, ent%field(1), len1, ent%m(1), ent%b(1), &
+    ent%field(2), len2, ent%m(2), ent%b(2), ent%field(3), len3, ent%m(3), &
     ent%b(3), dirfile, TRIM(field_code), LEN_TRIM(field_code))
   else if (fget_entry .EQ. GD_LINTERP_ENTRY) then
     ! linterp
-    call gdfelt(ent%field1, len1, ent%field2, len2, dirfile, TRIM(field_code), &
-    LEN_TRIM(field_code))
+    call gdfelt(ent%field(1), len1, ent%field(2), len2, dirfile, &
+    TRIM(field_code), LEN_TRIM(field_code))
   else if (fget_entry .EQ. GD_BIT_ENTRY) then
     ! bit
-    call gdfebt(ent%field1, len1, ent%bitnum, ent%numbits, dirfile, &
+    call gdfebt(ent%field(1), len1, ent%bitnum, ent%numbits, dirfile, &
     TRIM(field_code), LEN_TRIM(field_code))
   else if (fget_entry .EQ. GD_MULTIPLY_ENTRY) then
     ! multiply
-    call gdfemt(ent%field1, len1, ent%field2, len2, dirfile, TRIM(field_code), &
-    LEN_TRIM(field_code))
+    call gdfemt(ent%field(1), len1, ent%field(2), len2, dirfile, &
+    TRIM(field_code), LEN_TRIM(field_code))
   else if (fget_entry .EQ. GD_PHASE_ENTRY) then
     !phase
-    call gdfemt(ent%field1, len1, ent%shift, dirfile, TRIM(field_code), &
+    call gdfemt(ent%field(1), len1, ent%shift, dirfile, TRIM(field_code), &
     LEN_TRIM(field_code))
   else
     ! on the off chance we got a type we weren't prepared to deal with

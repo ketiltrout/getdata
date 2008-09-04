@@ -100,7 +100,7 @@ int main(void)
     GD_E_EMPTY, GD_E_ALLOC, GD_E_RANGE, GD_E_OPEN_LINFILE, GD_E_RECURSE_LEVEL,
     GD_E_BAD_DIRFILE, GD_E_BAD_PUT_FIELD, GD_E_ACCMODE);
 
-  fprintf(stream, "C Open flags\\\n"
+  fprintf(stream, "C Open flags\\\n\\\n"
       "C     Correponding to GD_RDONLY\\\n"
       "      INTEGER GD_RO\\\n"
       "      PARAMETER (GD_RO=%i)\\\n"
@@ -132,7 +132,7 @@ int main(void)
     GD_LITTLE_ENDIAN, GD_FORCE_ENDIAN, GD_PEDANTIC);
 
   fprintf(stream,
-      "C Field types\\\n"
+      "C Field types\\\n\\\n"
       "C     Correpsonding to GD_NO_ENTRY\\\n"
       "      INTEGER GD_NOE\\\n"
       "      PARAMETER (GD_NOE=%i)\\\n"
@@ -247,7 +247,9 @@ int main(void)
       GD_BIT_ENTRY, GD_MULTIPLY_ENTRY, GD_PHASE_ENTRY);
 
   fprintf(stream,
-      "! Data types -- F77 can't handle unsigned types, so we skip them\\\n"
+      "! Data types -- the unsigned type won't work when passed as a return\\\n"
+      "!               type, but we keep them anyways, since they might\\\n"
+      "!               appear as a result of calling fget_entry\\\n"
       "integer, parameter :: GD_NULL=%i\\\n"
       "integer, parameter :: GD_UINT8=%i\\\n"
       "integer, parameter :: GD_INT8=%i\\\n"
