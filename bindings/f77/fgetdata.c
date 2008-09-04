@@ -262,8 +262,8 @@ void F77_FUNC(gdffdt, GDFFDT) (int* type, const int* dirfile,
 }
 
 /* get_entry wrapper for RAW */
-void F77_FUNC(gdferw, GDFERW) (char* file, int* file_l, int* spf, int* dtype,
-    const int* dirfile, const char* field_code, const int* field_code_l)
+void F77_FUNC(gdferw, GDFERW) (int* spf, int* dtype, const int* dirfile,
+    const char* field_code, const int* field_code_l)
 {
   char* out = malloc(*field_code_l + 1);
   gd_entry_t E;
@@ -272,7 +272,6 @@ void F77_FUNC(gdferw, GDFERW) (char* file, int* file_l, int* spf, int* dtype,
           *field_code_l), &E) || E.field_type != GD_RAW_ENTRY)
     *spf = 0;
   else {
-    _GDF_FString(file, file_l, E.file);
     *spf = E.spf;
     *dtype = E.data_type;
   }

@@ -122,11 +122,11 @@ struct _gd_unified_entry {
   char *in_fields[GD_MAX_LINCOM];
   union {
     struct { /* RAW */
-      char* file;
       unsigned int spf;
       gd_type_t data_type;
       size_t size;
 
+      char* file; /* intenral */
       int fp; /* intenral */
     };
     struct { /* LINCOM */

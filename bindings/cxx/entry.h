@@ -69,10 +69,6 @@ namespace GetData {
       };
 
       /* RAW methods */
-      const char *File() {
-        return (E.field_type == GD_RAW_ENTRY) ? E.file : NULL;
-      };
-
       unsigned int SamplesPerFrame() {
         return (E.field_type == GD_RAW_ENTRY) ? E.spf : 0;
       };

@@ -135,25 +135,25 @@ int main(void)
       "C Field types\\\n"
       "C     Correpsonding to GD_NO_ENTRY\\\n"
       "      INTEGER GD_NOE\\\n"
-      "      PARAMETER (GD_NOE=%i\\\n"
+      "      PARAMETER (GD_NOE=%i)\\\n"
       "C     Correpsonding to GD_RAW_ENTRY\\\n"
       "      INTEGER GD_RWE\\\n"
-      "      PARAMETER (GD_RWE=%i\\\n"
+      "      PARAMETER (GD_RWE=%i)\\\n"
       "C     Correpsonding to GD_LINCOM_ENTRY\\\n"
       "      INTEGER GD_LCE\\\n"
-      "      PARAMETER (GD_LCE=%i\\\n"
+      "      PARAMETER (GD_LCE=%i)\\\n"
       "C     Correpsonding to GD_LINTERP_ENTRY\\\n"
       "      INTEGER GD_LTE\\\n"
-      "      PARAMETER (GD_LTE=%i\\\n"
+      "      PARAMETER (GD_LTE=%i)\\\n"
       "C     Correpsonding to GD_BIT_ENTRY\\\n"
       "      INTEGER GD_BTE\\\n"
-      "      PARAMETER (GD_BTE=%i\\\n"
+      "      PARAMETER (GD_BTE=%i)\\\n"
       "C     Correpsonding to GD_MULTIPLY_ENTRY\\\n"
       "      INTEGER GD_MTE\\\n"
-      "      PARAMETER (GD_MTE=%i\\\n"
+      "      PARAMETER (GD_MTE=%i)\\\n"
       "C     Correpsonding to GD_PHASE_ENTRY\\\n"
       "      INTEGER GD_PHE\\\n"
-      "      PARAMETER (GD_PHE=%i\\\n\\\n",
+      "      PARAMETER (GD_PHE=%i)\\\n\\\n",
       GD_NO_ENTRY, GD_RAW_ENTRY, GD_LINCOM_ENTRY, GD_LINTERP_ENTRY,
       GD_BIT_ENTRY, GD_MULTIPLY_ENTRY, GD_PHASE_ENTRY);
 

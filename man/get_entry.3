@@ -55,7 +55,7 @@ complete description of this data type.
 Strings members in 
 .BI * entry
 filled by this function (variously, depending on field type:
-.IR field ,\~ file ", the elements of the " in_fields "[] array, " table ;
+.IR field ", the elements of the " in_fields "[] array, " table ;
 see below) will by dynamically allocated by
 .BR get_entry ()
 and should not point to allocated memory locations before calling this function.
@@ -106,7 +106,11 @@ typedef struct {
 .P
 The
 .I field
-member is the field code of the entry (ie. its string name).
+member is the field code of the entry (ie. its string name).  If the call to
+.BR get_entry (3)
+is successful, this will be identical to the supplied
+.I field_code
+parameter.
 .P
 The
 .I field_type
@@ -142,7 +146,6 @@ entry, will also provide:
 typedef struct {
   ...
 
-  const char   *file;         /* binary file name */
   unsigned int  spf;          /* samples per frame on disk */
   gd_type_t     data_type;    /* data type on disk */
 
@@ -150,10 +153,6 @@ typedef struct {
 } gd_entry_t;
 .fi
 .in
-.P
-The
-.I file
-member contains the full path to the binary file on disk.
 .P
 The
 .I samples_per_frame

@@ -28,7 +28,7 @@ LFS_transitional_mans =
 endif
 
 dist_man_MANS = dirfile_close.3 dirfile_flush.3 dirfile_open.3 getdata.3 \
-								get_error_string.3 get_field_list.3 get_nfields.3 \
+								get_entry.3 get_error_string.3 get_field_list.3 get_nfields.3 \
 								get_nframes.3 get_spf.3 putdata.3 dirfile.5 dirfile-format.5 \
 								$(LFS_transitional_mans)
 

@@ -1,4 +1,20 @@
-2009-09-03   D. V. Wiebe <getdata@ketiltrout.net>  svn:64 svn:65
+2008-09-04   D. V. Wiebe <getdata@ketiltrout.net>  svn:66
+	* test/Makefile.am test/dfes_bit.c test/dfes_lincom.c test/dfes_linterp.c
+	test/dfes_multiply.c test/dfes_null.c test/dfes_phase.c test/dfes_raw.c
+	test/dfes_zero.c test/entry_bad_code.c test/entry_bit.c test/entry_invalid.c
+	test/entry_lincom.c test/entry_linterp.c test/entry_multiply.c
+	test/entry_phase.c test/entry_raw.c: Add test suite for get_entry() and
+	dirfile_free_entry_strings()
+
+	* bindings/cxx/entry.h bindings/cxx/test/entry.cpp bindings/f77/fgetdata.c
+	bindings/f77/getdata.f90.in bindings/f77/test/fget_entry.f90 man/get_entry.3
+	src/entry.c src/getdata.h.in: RAW filename should be internal
+
+	* bindings/f77/make_parameters.c: Fix parentheses around F77 parameters
+
+	* man/Makefile.am: install get_entry.3
+
+2008-09-03   D. V. Wiebe <getdata@ketiltrout.net>  svn:64 svn:65
 	* src/entry.c (dirfile_free_entry_strings): Fix double free
 
 	* bindings/cxx/dirfile.cpp bindings/cxx/dirfile.h: Use the GetData namespace
@@ -10,10 +26,9 @@
 
 	* bindings/f77/fgetdata.c bindings/f77/getdata.f.in
 	bindings/f77/getdata.f90.in bindings/f77/make_parameters.c
-	bindings/f77/test/fget_entry.f90: Add Fotran
-	bindings for get_entry()
+	bindings/f77/test/fget_entry.f90: Add Fotran bindings for get_entry()
 
-2009-09-03   D. V. Wiebe <getdata@ketiltrout.net>  svn:63
+2008-09-03   D. V. Wiebe <getdata@ketiltrout.net>  svn:63
 	* src/getdata.h.in: add a GD_NO_ENTRY entry type
 
 	* man/dirfile_free_entry_strings man/get_entry.3 src/entry.c src/getdata.h.in:

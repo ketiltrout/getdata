@@ -44,9 +44,6 @@ gd_entry_t* dirfile_free_entry_strings(gd_entry_t* entry)
   free(entry->field);
 
   switch(entry->field_type) {
-    case GD_RAW_ENTRY:
-      free(entry->file);
-      break;
     case GD_LINCOM_ENTRY:
       for (i = 0; i < entry->n_fields; ++i)
         free(entry->in_fields[i]);
@@ -62,6 +59,7 @@ gd_entry_t* dirfile_free_entry_strings(gd_entry_t* entry)
     case GD_PHASE_ENTRY:
       free(entry->in_fields[0]);
       /* fall through */
+    case GD_RAW_ENTRY:
     case GD_NO_ENTRY:
       break;
   }
@@ -100,9 +98,6 @@ int get_entry(DIRFILE* D, const char* field_code, gd_entry_t* entry)
   entry->field = strdup(E->field);
 
   switch(E->field_type) {
-    case GD_RAW_ENTRY:
-      entry->file = strdup(E->file);
-      break;
     case GD_LINCOM_ENTRY:
       for (i = 0; i < E->n_fields; ++i)
         entry->in_fields[i] = strdup(E->in_fields[i]);
@@ -118,6 +113,7 @@ int get_entry(DIRFILE* D, const char* field_code, gd_entry_t* entry)
     case GD_PHASE_ENTRY:
       entry->in_fields[0] = strdup(E->in_fields[0]);
       /* fall through */
+    case GD_RAW_ENTRY:
     case GD_NO_ENTRY:
       break;
   }

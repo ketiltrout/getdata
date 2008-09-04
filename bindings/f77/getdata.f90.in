@@ -363,8 +363,8 @@ function fget_entry (dirfile, field_code, ent)
 
   if (fget_entry .EQ. GD_RAW_ENTRY) then
     ! raw
-    call gdferw(ent%field1, len1, ent%spf, ent%data_type, dirfile, &
-    TRIM(field_code), LEN_TRIM(field_code))
+    call gdferw(ent%spf, ent%data_type, dirfile, TRIM(field_code), &
+    LEN_TRIM(field_code))
   else if (fget_entry .EQ. GD_LINCOM_ENTRY) then
     ! lincom
     call gdfelc(ent%n_fields, ent%field1, len1, ent%m(1), ent%b(1), &

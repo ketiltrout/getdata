@@ -24,7 +24,6 @@ program get_int8
 
   if (e .ne. GD_E_OK) call exit(1)
   if (n .ne. GD_RAW_ENTRY) call exit(1)
-  if (ent%field1 .ne. './data') call exit(1)
   if (ent%spf .ne. 8) call exit(1)
   if (ent%data_type .ne. GD_INT8) call exit(1)
 end program
