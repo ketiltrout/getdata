@@ -46,16 +46,17 @@ const char** get_field_list(DIRFILE* D)
     return NULL;
   }
 
-  fl = realloc((char**)D->field_list, sizeof(const char*) * D->n_entries);
+  fl = realloc((char**)D->field_list, sizeof(const char*) * (D->n_entries + 1));
 
   if (fl == NULL) {
+    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     dreturn("%p", NULL);
     return NULL;
   }
 
-  for (i = 0; i < D->n_entries; ++i) {
+  for (i = 0; i < D->n_entries; ++i)
     fl[i] = D->entry[i]->field;
-  }
+  fl[D->n_entries] = NULL;
 
   D->field_list = (const char**)fl;
 

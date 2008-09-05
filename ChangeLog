@@ -1,3 +1,8 @@
+2008-09-05   D. V. WIebe <getdata@ketiltrout.net>  svn:75
+	* man/get_field_list.3 src/field_list.c: NULL terminate the list.
+
+	* src/field_list.c (get_field_list): Return GD_E_ALLOC on malloc error.
+
 2008-09-04   D. V. Wiebe <getdata@ketiltrout.net>  svn:73
 	* bindings/cxx/entry.h (Entry::Scale, Entry::Offset): fix return.
 

@@ -50,11 +50,14 @@ parameter must point to a valid DIRFILE object previously created by a call to
 Upon successful completion,
 .BR get_field_list ()
 returns a pointer to an array of strings containing the names of all the fields
-defined in the dirfile database.  On error, it
-returns zero and sets
+defined in the dirfile database.  On error it
+returns NULL and sets
 .IR dirfile -> error
 to a non-zero error value.  Possible error values are:
 .TP 8
+.B GD_E_ALLOC
+The library was unable to allocate memory.
+.TP
 .B GD_E_BAD_DIRFILE
 The supplied dirfile was invalid.
 .P
@@ -65,8 +68,8 @@ a call to
 The array returned will be de-allocated by a call to
 .BR dirfile_close (3)
 and should not be de-allocated by the caller.  The list returned should not be
-assumed to be in any particular order.  The length of the array can be obtained
-from a call to
+assumed to be in any particular order.  The array is terminated by a NULL pointer.
+The number of strings in the array can be obtained from a call to
 .BR get_nfields (3).
 .SH SEE ALSO
 .BR dirfile (5),
