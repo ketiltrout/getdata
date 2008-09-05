@@ -1,3 +1,56 @@
+2008-09-05   D. V. WIebe <getdata@ketiltrout.net>  svn:77
+	* m4/c99.m4 configure.ac Makefile.am: Re-implement AC_PROG_CC_C99 as
+	GD_PROG_CC_C99 to fix `deprecated -c99' warning with icc.
+
+	* bindings/cxx/dirfile.h bindings/cxx/entry.h bindings/cxx/test/getdata.cpp
+	bindings/cxx/test/putdata.cpp bindings/f77/fgetdata.h
+	test/convert_float32_float64.c test/convert_float32_int16.c
+	test/convert_float32_int32.c test/convert_float32_int64.c
+	test/convert_float32_int8.c test/convert_float32_uint16.c
+	test/convert_float32_uint32.c test/convert_float32_uint64.c
+	test/convert_float32_uint8.c test/convert_float64_float32.c
+	test/convert_int16_float32.c test/convert_int16_float64.c
+	test/convert_int16_int32.c test/convert_int16_int64.c
+	test/convert_int16_int8.c test/convert_int16_uint16.c
+	test/convert_int16_uint32.c test/convert_int16_uint64.c
+	test/convert_int16_uint8.c test/convert_int32_float32.c
+	test/convert_int32_float64.c test/convert_int64_float32.c
+	test/convert_int64_float64.c test/convert_int8_float32.c
+	test/convert_int8_float64.c test/convert_int8_int16.c
+	test/convert_int8_int32.c test/convert_int8_int64.c
+	test/convert_int8_uint16.c test/convert_int8_uint32.c
+	test/convert_int8_uint64.c test/convert_int8_uint8.c
+	test/convert_uint16_float32.c test/convert_uint16_float64.c
+	test/convert_uint16_int16.c test/convert_uint16_int32.c
+	test/convert_uint16_int64.c test/convert_uint16_int8.c
+	test/convert_uint16_uint32.c test/convert_uint16_uint64.c
+	test/convert_uint16_uint8.c test/convert_uint32_float32.c
+	test/convert_uint32_float64.c test/convert_uint64_float32.c
+	test/convert_uint64_float64.c test/convert_uint8_float32.c
+	test/convert_uint8_float64.c test/convert_uint8_int16.c
+	test/convert_uint8_int32.c test/convert_uint8_int64.c
+	test/convert_uint8_int8.c test/convert_uint8_uint16.c
+	test/convert_uint8_uint32.c test/convert_uint8_uint64.c test/dfes_phase.c
+	test/dfes_raw.c test/flush.c test/flush_all.c test/get64.c test/get_bit.c
+	test/get_char.c test/get_endian16.c test/get_endian32.c test/get_endian64.c
+	test/get_endian8.c test/get_endian_float32.c test/get_endian_float64.c
+	test/get_ff.c test/get_float32.c test/get_float64.c test/get_foffs.c
+	test/get_fs.c test/get_int16.c test/get_int8.c test/get_lincom1.c
+	test/get_lincom2.c test/get_lincom3.c test/get_linterp.c
+	test/get_linterp_noin.c test/get_linterp_notab.c test/get_multiply.c
+	test/get_multiply_noin.c test/get_nonexistent.c test/get_null.c
+	test/get_off64.c test/get_phase.c test/get_sf.c test/get_ss.c
+	test/get_type.c test/get_uint16.c test/legacy_get.c test/legacy_put.c
+	test/nframes_spf.c test/put64.c test/put_bit.c test/put_char.c
+	test/put_endian16.c test/put_endian32.c test/put_endian64.c
+	test/put_endian8.c test/put_endian_float32.c test/put_endian_float64.c
+	test/put_ff.c test/put_float32.c test/put_float64.c test/put_foffs.c
+	test/put_fs.c test/put_int16.c test/put_int8.c test/put_lincom1.c
+	test/put_lincom2.c test/put_lincom_noin.c test/put_linterp.c
+	test/put_linterp_noin.c test/put_linterp_notab.c test/put_multiply.c
+	test/put_off64.c test/put_phase.c test/put_phase_noin.c test/put_sf.c
+	test/put_ss.c test/put_uint16.c: Fix compiler warnings
+
 2008-09-05   D. V. WIebe <getdata@ketiltrout.net>  svn:75
 	* man/get_field_list.3 src/field_list.c: NULL terminate the list.
 

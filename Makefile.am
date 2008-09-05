@@ -22,6 +22,8 @@ AUTOMAKE_OPTIONS = foreign dist-bzip2 check-news 1.6
 
 EXTRA_DIST = ChangeLog README.cxx README.f77 README.f95
 
+ACLOCAL_AMFLAGS = -I m4
+
 SUBDIRS = src bin man . test bindings
 
 clean-local:

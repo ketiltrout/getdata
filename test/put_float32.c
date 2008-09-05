@@ -8,6 +8,7 @@
 #include <fcntl.h>
 #include <string.h>
 #include <errno.h>
+#include <math.h>
 #include <unistd.h>
 
 int main(void)
@@ -24,7 +25,7 @@ int main(void)
   mkdir(filedir, 0777);
 
   for (i = 0; i < 8; ++i)
-    c[i] = 40 + i;
+    c[i] = (float)(40 + i);
 
   fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
   write(fd, format_data, strlen(format_data));
@@ -45,9 +46,9 @@ int main(void)
   i = 0;
   while (read(fd, &d, sizeof(float))) {
     if (i < 40 || i > 48) {
-      if (d != 0)
+      if (fabs(d) > 1e-10)
         return 1;
-    } else if (d != i)
+    } else if (fabs(d - i) > 1e-10)
       return 1;
     i++;
   }

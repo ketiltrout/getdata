@@ -173,7 +173,7 @@ AM_INIT_AUTOMAKE
 AC_PROG_CC
 AC_PROG_CC_C_O
 dnl C99 isn't required, but it does define NAN, if we have it
-AC_PROG_CC_C99
+GD_PROG_CC_C99
 AC_PROG_CXX
 AC_PROG_CXX_C_O
 AC_PROG_F77
@@ -199,13 +199,16 @@ fi
 dnl libraries
 AC_CHECK_LIB(m,ceil)
 
+dnl functions
+AC_CHECK_FUNCS([atoll atoq])
+
 dnl headers
 AC_CHECK_HEADERS(fcntl.h libgen.h)
 AC_HEADER_ASSERT
 AC_HEADER_DIRENT
 
 dnl declarations
-AC_CHECK_DECLS([atoll, atoq, strdup, strerror_r])
+AC_CHECK_DECLS([fsync, strdup, strerror_r])
 
 dnl types
 AC_C_CONST

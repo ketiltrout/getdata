@@ -48,7 +48,7 @@ static DIRFILE _GD_GlobalErrors = {
 };
 
 /* old error strings */
-const char const*GD_ERROR_CODES[GD_N_ERROR_CODES] = {
+const char *GD_ERROR_CODES[GD_N_ERROR_CODES] = {
   "Success",
   "Error opening dirfile",
   "Error in Format file",

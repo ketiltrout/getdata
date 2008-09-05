@@ -8,6 +8,7 @@
 #include <fcntl.h>
 #include <string.h>
 #include <errno.h>
+#include <math.h>
 #include <unistd.h>
 
 int main(void)
@@ -45,9 +46,9 @@ int main(void)
   i = 0;
   while (read(fd, &d, sizeof(double))) {
     if (i < 40 || i > 48) {
-      if (d != 0)
+      if (fabs(d) > 1e-10)
         return 1;
-    } else if (d != i)
+    } else if (fabs(d - i) > 1e-10)
       return 1;
     i++;
   }

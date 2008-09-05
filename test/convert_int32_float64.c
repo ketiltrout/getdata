@@ -1,6 +1,7 @@
 /* Attempt to read INT32 as FLOAT64 */
 #include "../src/getdata.h"
 
+#include <math.h>
 #include <inttypes.h>
 #include <stdlib.h>
 #include <sys/types.h>
@@ -36,20 +37,21 @@ int main(void)
 
   DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
   int n = getdata(D, "data", 5, 0, 1, 0, GD_FLOAT64, c);
-
-  if (D->error)
-    return 1;
-  if (n != 8)
-    return 1;
-  for (i = 0; i < 8; ++i)
-    if (c[i] != 40 + i)
-      return 1;
+  int error = D->error;
 
   dirfile_close(D);
 
   unlink(data);
   unlink(format);
   rmdir(filedir);
+
+  if (error)
+    return 1;
+  if (n != 8)
+    return 1;
+  for (i = 0; i < 8; ++i)
+    if (fabs(c[i] - 40 - i) > 1e-10)
+      return 1;
 
   return 0;
 }

@@ -10,7 +10,7 @@
 #include <errno.h>
 #include <unistd.h>
 
-int BigEndian(void)
+static int BigEndian(void)
 {
   union {
     long int li;
@@ -49,17 +49,18 @@ int main(void)
 
   DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
   int n = getdata(D, "data", 5, 0, 1, 0, GD_UINT64, &c);
-
-  if (D->error)
-    return 1;
-  if (n != 1)
-    return 1;
+  int error = D->error;
 
   dirfile_close(D);
 
   unlink(data);
   unlink(format);
   rmdir(filedir);
+
+  if (error)
+    return 1;
+  if (n != 1)
+    return 1;
 
   if (c != 0x50a0000050a0000LLU)
     return 1;

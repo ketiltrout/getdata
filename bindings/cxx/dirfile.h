@@ -66,6 +66,6 @@ namespace GetData {
 
       char* error_string;
   };
-};
+}
 
 #endif

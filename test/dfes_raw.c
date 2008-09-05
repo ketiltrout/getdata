@@ -25,7 +25,7 @@ int main(void)
   DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
   gd_entry_t E;
 
-  int n = get_entry(D, "data", &E);
+  get_entry(D, "data", &E);
   dirfile_free_entry_strings(&E);
 
   dirfile_close(D);

@@ -34,14 +34,15 @@ int main(void)
   DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
   int n = getdata(D, "linterp", 5, 0, 1, 0, GD_UINT8, &c);
   int error = D->error;
-  if (n != 0)
-    return 1;
 
   dirfile_close(D);
 
   unlink(table);
   unlink(format);
   rmdir(filedir);
+
+  if (n != 0)
+    return 1;
 
   return (error != GD_E_BAD_CODE);
 }

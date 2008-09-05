@@ -24,7 +24,7 @@ int main(void)
   mkdir(filedir, 0777);
 
   for (fd = 0; fd < 64; ++fd)
-    data_data[fd] = fd;
+    data_data[fd] = (unsigned char)fd;
 
   fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
   write(fd, format_data, strlen(format_data));
@@ -37,14 +37,15 @@ int main(void)
   DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
   int n = getdata(D, "linterp", 5, 0, 1, 0, GD_UINT8, &c);
   int error = D->error;
-  if (n != 0)
-    return 1;
 
   dirfile_close(D);
 
   unlink(data);
   unlink(format);
   rmdir(filedir);
+
+  if (n != 0)
+    return 1;
 
   return (error != GD_E_OPEN_LINFILE);
 }

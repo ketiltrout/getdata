@@ -118,6 +118,6 @@ namespace GetData {
     private:
       Entry(DIRFILE *dirfile, const char* field_code);
   };
-};
+}
 
 #endif

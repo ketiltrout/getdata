@@ -25,7 +25,7 @@ int main(void)
   mkdir(filedir, 0777);
 
   for (fd = 0; fd < 256; ++fd)
-    data_data[fd] = fd;
+    data_data[fd] = (unsigned char)fd;
 
   fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
   write(fd, format_data, strlen(format_data));

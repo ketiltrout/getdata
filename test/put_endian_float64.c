@@ -10,7 +10,7 @@
 #include <errno.h>
 #include <unistd.h>
 
-int BigEndian(void)
+static int BigEndian(void)
 {
   union {
     long int li;

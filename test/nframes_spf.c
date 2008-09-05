@@ -9,7 +9,7 @@
 #include <errno.h>
 #include <unistd.h>
 
-void write_format(const char* format, int spf)
+static void write_format(const char* format, int spf)
 {
   char format_data[100];
   int fd;

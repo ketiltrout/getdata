@@ -24,7 +24,7 @@ int main(void)
   mkdir(filedir, 0777);
 
   for (fd = 0; fd < 256; ++fd)
-    data_data[fd] = fd;
+    data_data[fd] = (float)fd;
 
   fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
   write(fd, format_data, strlen(format_data));
@@ -36,20 +36,21 @@ int main(void)
 
   DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
   int n = getdata(D, "data", 5, 0, 1, 0, GD_UINT64, c);
-
-  if (D->error)
-    return 1;
-  if (n != 8)
-    return 1;
-  for (i = 0; i < 8; ++i)
-    if (c[i] != 40 + i)
-      return 1;
+  int error = D->error;
 
   dirfile_close(D);
 
   unlink(data);
   unlink(format);
   rmdir(filedir);
+
+  if (error)
+    return 1;
+  if (n != 8)
+    return 1;
+  for (i = 0; i < 8; ++i)
+    if (c[i] != 40 + i)
+      return 1;
 
   return 0;
 }

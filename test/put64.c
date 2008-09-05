@@ -26,7 +26,7 @@ int main(void)
   mkdir(filedir, 0777);
 
   for (i = 0; i < 8; ++i)
-    c[i] = 40 + i;
+    c[i] = (uint8_t)(40 + i);
 
   fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
   write(fd, format_data, strlen(format_data));

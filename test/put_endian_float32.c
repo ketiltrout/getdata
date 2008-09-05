@@ -10,7 +10,7 @@
 #include <errno.h>
 #include <unistd.h>
 
-int BigEndian(void)
+static int BigEndian(void)
 {
   union {
     long int li;
@@ -26,7 +26,7 @@ int main(void)
   const char* format = __TEST__ "dirfile/format";
   const char* data = __TEST__ "dirfile/data";
   char format_data[1000];
-  float c = 4. / 3.;
+  float c = (float)(4. / 3.);
   int fd, i;
   const int big_endian = BigEndian();
   union {
