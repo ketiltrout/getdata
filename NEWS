@@ -52,3 +52,7 @@ New in version 0.3.0:
 
   * Added bindings for C++ (libdirfile), Fortran 77 (libfgetdata), and
     Fortran 95 (libf95getdata)
+
+  Miscellaneous
+
+  * A rudimentary, but thorough, test-suite has been made.
