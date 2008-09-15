@@ -28,3 +28,7 @@ SUBDIRS = src bin man . test bindings
 
 clean-local:
 	rm -rf *~ 
+
+dist-post: $(distdir).tar.gz $(distdir).tar.bz2
+	gpg -abo $(distdir).tar.gz.sig $(distdir).tar.gz
+	gpg -abo $(distdir).tar.bz2.sig $(distdir).tar.bz2
