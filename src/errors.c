@@ -67,7 +67,7 @@ static const struct {
     "Unable to create dirfile %2$s: already exists", 1 },
   { GD_E_BAD_CODE, 0, "Field not found: %4$s", 0 },
   { GD_E_BAD_TYPE, 0, "Unsupported data type: 0x%1$02x", 0 },
-  { GD_E_RAW_IO, 0, "Error accessing %4$s: ", 1 },
+  { GD_E_RAW_IO, 0, "Error accessing %2$s: ", 1 },
   { GD_E_OPEN_INCLUDE, 0,
     "Unable to open INCLUDEd file %4$s on line %3$i of %2$s: ", 2 },
   { GD_E_INTERNAL_ERROR, 0, "Internal error at [%2$s,%3$i]; "

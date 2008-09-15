@@ -1,4 +1,10 @@
-2008-09-05   D. V. WIebe <getdata@ketiltrout.net>  svn:77
+2008-09-15   D. V. Wiebe <getdata@ketiltrout.net>  svn:86
+	* errors.c: Fix GD_E_RAW_IO error string.
+
+2008-09-15   D. V. Wiebe <getdata@ketiltrout.net>
+	Getdata-0.3.0 released.
+
+2008-09-05   D. V. Wiebe <getdata@ketiltrout.net>  svn:77
 	* m4/c99.m4 configure.ac Makefile.am: Re-implement AC_PROG_CC_C99 as
 	GD_PROG_CC_C99 to fix `deprecated -c99' warning with icc.
 
