@@ -6,11 +6,11 @@ New in version 0.3.0:
     for signed 8-bit, and signed and unsigned 64-bit integer types.
   * As part of Standards Version 5, the restriction on field name length has
     been removed.  (The filesystem will impose an effective limit on RAW fields
-    of a few hundred character, and format file lines are limited to several
-    thousand.)
-  * The library can now convert between big and little endiannesses.  A
-    directive, ENDIAN (added in Standards Version 5), is available to specify
-    the byte-sex of a dirfile.
+    of a few hundred characters, and format file lines are limited to several
+    thousand, limiting derived field names.)
+  * The library can now convert between big and little endiannesses.  An
+    optional directive, ENDIAN, added in Standards Version 5, is available to
+    specify the byte-sex of a dirfile.
 
   API Changes
 
