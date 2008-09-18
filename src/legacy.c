@@ -100,7 +100,7 @@ char* GetDataErrorString(char* buffer, size_t buflen)
 /* _GD_GetDirfile: Locate the legacy DIRFILE given the filespec.  This started
  * life as GetFormat...
  */
-static DIRFILE* _GD_GetDirfile(const char *filename_in)
+static DIRFILE* _GD_GetDirfile(const char *filename_in, int mode)
 {
   int i_dirfile;
 
@@ -112,8 +112,20 @@ static DIRFILE* _GD_GetDirfile(const char *filename_in)
   /* first check to see if we have already read it */
   for (i_dirfile = 0; i_dirfile < _GD_Dirfiles.n; i_dirfile++) {
     if (strncmp(filedir, _GD_Dirfiles.D[i_dirfile]->name, FILENAME_MAX) == 0) {
-      _GD_ClearError(_GD_Dirfiles.D[i_dirfile]);
-      return _GD_Dirfiles.D[i_dirfile];
+      /* if the dirfile was previously opened read-only, close it so we can
+       * re-open it read-write */
+      if (mode == GD_RDWR && (_GD_Dirfiles.D[i_dirfile]->flags & GD_ACCMODE) ==
+          GD_RDONLY) {
+        /* close it */
+        dirfile_close(_GD_Dirfiles.D[i_dirfile]);
+
+        /* copy the last dirfile in the list over top of this one and decrement
+         * the counter -- next realloc will do nothing */
+        _GD_Dirfiles.D[i_dirfile] = _GD_Dirfiles.D[--_GD_Dirfiles.n];
+      } else {
+        _GD_ClearError(_GD_Dirfiles.D[i_dirfile]);
+        return _GD_Dirfiles.D[i_dirfile];
+      }
     }
   }
 
@@ -123,9 +135,8 @@ static DIRFILE* _GD_GetDirfile(const char *filename_in)
   _GD_Dirfiles.n++;
   _GD_Dirfiles.D = realloc(_GD_Dirfiles.D, _GD_Dirfiles.n * sizeof(DIRFILE*));
 
-  /* Legacy dirfiles must be opened read-write, since we never know if
-   * they'll be used with putdata at some point */
-  _GD_Dirfiles.D[_GD_Dirfiles.n - 1] = dirfile_open(filedir, GD_RDWR);
+  /* Open a dirfile */
+  _GD_Dirfiles.D[_GD_Dirfiles.n - 1] = dirfile_open(filedir, mode);
 
   /* Error encountered -- the dirfile will shortly be deleted */
   if (_GD_Dirfiles.D[_GD_Dirfiles.n - 1]->error != GD_E_OK)
@@ -231,7 +242,7 @@ static void CopyPhaseEntry(struct PhaseEntryType* P, gd_entry_t* E)
 
 /* Okay, reconstruct the old FormatType.  This is painful. */
 const struct FormatType *GetFormat(const char *filedir, int *error_code) {
-  DIRFILE *D = _GD_GetDirfile(filedir);
+  DIRFILE *D = _GD_GetDirfile(filedir, GD_RDONLY);
   int i;
 
   int nraw = 0;
@@ -335,7 +346,7 @@ int GetData(const char *filename, const char *field_code,
   DIRFILE* D;
   int nread;
 
-  D = _GD_GetDirfile(filename);
+  D = _GD_GetDirfile(filename, GD_RDONLY);
 
   if (D->error) {
     *error_code = _GD_CopyGlobalError(D);
@@ -360,7 +371,7 @@ int GetNFrames(const char *filename, int *error_code, const void *unused)
   int nf;
   (void)unused;
 
-  D = _GD_GetDirfile(filename);
+  D = _GD_GetDirfile(filename, GD_RDONLY);
 
   if (D->error) {
     *error_code = _GD_CopyGlobalError(D);
@@ -380,7 +391,7 @@ int GetSamplesPerFrame(const char *filename, const char *field_code,
 {
   DIRFILE* D;
 
-  D = _GD_GetDirfile(filename);
+  D = _GD_GetDirfile(filename, GD_RDONLY);
 
   if (D->error) {
     *error_code = _GD_CopyGlobalError(D);
@@ -402,7 +413,7 @@ int PutData(const char *filename, const char *field_code,
   DIRFILE* D;
   int n_write = 0;
 
-  D = _GD_GetDirfile(filename);
+  D = _GD_GetDirfile(filename, GD_RDWR);
 
   if (D->error) {
     *error_code = _GD_CopyGlobalError(D);

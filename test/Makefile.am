@@ -26,6 +26,11 @@ NF_OFF64=nframes_off64
 PUT_OFF64=put_off64
 endif
 
+if INCLUDE_LEGACY_API
+LEGACY_TESTS=legacy_get legacy_get_put legacy_get_rofs legacy_nframes \
+			legacy_nonexistent legacy_put legacy_spf
+endif
+
 LDADD=../src/libgetdata.la
 INCLUDES=-Wall -I$(top_srcdir)/src -D__TEST__=\"$@\"
 TESTS=close close_bad close_null \
@@ -70,11 +75,10 @@ TESTS=close close_bad close_null \
 			get_lincom2 get_lincom3 get_lincom_noin get_linterp get_linterp_noin \
 			get_linterp_notab get_multiply get_multiply_noin get_nonexistent \
 			get_null $(GET_OFF64) get_phase get_recurse get_sf get_ss get_type \
-			get_uint16 get_uint32 get_uint64 legacy_get legacy_nframes \
-			legacy_nonexistent legacy_put legacy_spf nfields nfields_invalid nframes \
-			nframes64 nframes_empty nframes_invalid $(NF_OFF64) nframes_spf open \
-			open_eaccess open_nonexistent open_notdirfile parse_badline parse_bit \
-			parse_bit4 parse_bit_bitnum parse_bit_bitsize parse_bit_ncols \
+			get_uint16 get_uint32 get_uint64 $(LEGACY_TESTS) nfields nfields_invalid \
+			nframes nframes64 nframes_empty nframes_invalid $(NF_OFF64) nframes_spf \
+			open open_eaccess open_nonexistent open_notdirfile parse_badline \
+			parse_bit parse_bit4 parse_bit_bitnum parse_bit_bitsize parse_bit_ncols \
 			parse_bit_numbits parse_endian_bad parse_endian_big parse_endian_force \
 			parse_endian_little parse_endian_slash parse_foffs parse_foffs_slash \
 			parse_include parse_include_nonexistent parse_include_slash parse_index \

@@ -1,3 +1,12 @@
+New in version ?.?.?:
+
+  Legacy API Changes
+
+  * Dirfiles are now opened in read-only mode, unless instantiated via
+    PutData(), allowing GetData() calls on read-only dirfiles.  If
+    PutData() is called on a dirfile previously opened read-only, it will be
+    re-opened in read-write mode.
+
 New in version 0.3.0:
 
   Dirfile Changes

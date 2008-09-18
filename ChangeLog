@@ -1,5 +1,13 @@
+2008-09-18   D. V. Wiebe <getdata@ketiltrout.net>  svn:90
+	* src/legacy.c (_GD_GetDirfile), test/legacy_get_rofs.c,
+	test/legacy_get_put.c: Open dirfiles read-only unless called via PutData().
+	Re-open read-only dirfile read-write when necessary.  Added two test-cases
+	for same.
+
+	* test/Makefile.am: Conditionally compile legacy tests.
+
 2008-09-15   D. V. Wiebe <getdata@ketiltrout.net>  svn:86
-	* errors.c: Fix GD_E_RAW_IO error string.
+	* src/errors.c: Fix GD_E_RAW_IO error string.
 
 2008-09-15   D. V. Wiebe <getdata@ketiltrout.net>
 	Getdata-0.3.0 released.
