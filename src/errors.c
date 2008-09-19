@@ -36,10 +36,12 @@ static const struct {
   const char* format; /* 1 = suberror, 2 = file, 3 = line, 4 = string */
   int adderr; /* 1 = append strerror(line), 2 = append sterror(suberror) */
 } error_string[] = {
+  /* GD_E_OPEN: 1 = suberror, 2 = filename */
   { GD_E_OPEN, GD_E_OPEN_NOT_DIRFILE, "Not a dirfile: %2$s", 0 },
   { GD_E_OPEN, GD_E_OPEN_NO_ACCESS,
     "Cannot open dirfile %2$s: permission denied", 0 },
   { GD_E_OPEN, GD_E_OPEN_NOT_EXIST, "Dirfile does not exist: %2$s", 0 },
+  /* GD_E_OPEN: 1 = suberror, 2 = formatfile, 3 = line number, 4 = token */
   { GD_E_FORMAT, GD_E_FORMAT_BAD_TYPE,
     "Bad raw field type on line %3$i of %2$s: %4$s", 0 },
   { GD_E_FORMAT, GD_E_FORMAT_BAD_SPF,
@@ -60,27 +62,43 @@ static const struct {
     "Unrecognised endianness on line %3$i of %2$s", 0 },
   { GD_E_FORMAT, GD_E_FORMAT_BAD_NAME,
     "Bad field name on line %3$i of %2$s: %4$s", 0 },
+  /* GD_E_CREAT: 1 = suberror, 2 = filename. 3 = errno */
   { GD_E_TRUNC, 0, "Error truncating %2$s: ", 1 },
+  /* GD_E_CREAT: 1 = suberror, 2 = filename, 3 = errno */
   { GD_E_CREAT, GD_E_CREAT_DIR, "Unable to create directory %2$s: ", 1 },
   { GD_E_CREAT, GD_E_CREAT_FORMAT, "Unable to create format file %2$s: ", 1 },
   { GD_E_CREAT, GD_E_CREAT_EXCL,
     "Unable to create dirfile %2$s: already exists", 1 },
+  /* GD_E_BAD_CODE: 4 = field code */
   { GD_E_BAD_CODE, 0, "Field not found: %4$s", 0 },
+  /* GD_E_BAD_TYPE: 1 = data type */
   { GD_E_BAD_TYPE, 0, "Unsupported data type: 0x%1$02x", 0 },
+  /* GD_E_RAW_IO: 1 = suberror, 3 = errno */
   { GD_E_RAW_IO, 0, "Error accessing %2$s: ", 1 },
+  /* GD_E_OPEN_INCLUDE: 1 = errno, 2 = format file, 3 = line, 4 = includefile */
   { GD_E_OPEN_INCLUDE, 0,
     "Unable to open INCLUDEd file %4$s on line %3$i of %2$s: ", 2 },
+  /* GD_E_INTERNAL_ERROR: 2 = source file, 3 = line */
   { GD_E_INTERNAL_ERROR, 0, "Internal error at [%2$s,%3$i]; "
-    "please report to the GetData maintainers", 0 },
+    "please report to " PACKAGE_BUGREPORT , 0 },
+  /* GD_E_EMPTY: (nothing) */
   { GD_E_EMPTY, 0, "Unable to query dirfile: no RAW field available", 0 },
+  /* GD_E_ALLOC: (nothing) */
   { GD_E_ALLOC, 0, "Memory allocation error", 0 },
+  /* GD_E_RANGE: (nothing) */
   { GD_E_RANGE, 0, "Request out of range", 0 },
+  /* GD_E_OPEN_LINFILE: 1 = suberror, 2 = errno, 4 = lutfile */
   { GD_E_OPEN_LINFILE, GD_E_LINFILE_LENGTH, "LINTERP table %4$s too short", 0 },
   { GD_E_OPEN_LINFILE, 0, "Error opening LINTERP table %4$s: ", 2 },
+  /* GD_E_RECURSE_LEVEL: 4 = fieldcode */
   { GD_E_RECURSE_LEVEL, 0, "Recursion too deep resolving field %4$s", 0 },
+  /* GD_E_BAD_DIRFILE: (nothing) */
   { GD_E_BAD_DIRFILE, 0, "Invalid dirfile", 0 },
+  /* GD_E_BAD_PUT_FIELD: 4 = fieldcode */
   { GD_E_BAD_PUT_FIELD, 0, "No method to write field %4$s", 0 },
+  /* GD_E_BAD_PUT_FIELD: (nothing) */
   { GD_E_ACCMODE, 0, "Dirfile has been opened read-only", 0 },
+  /* GD_E_OK: (nothing) */
   { 0, 0, "Success", 0} /* this must be the last error string defined */
 };
 

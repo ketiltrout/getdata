@@ -20,6 +20,7 @@
 #
 AUTOMAKE_OPTIONS = foreign
 INCLUDES = -Wall
+pkgconfigdir = @libdir@/pkgconfig
 
 if INCLUDE_LEGACY_API
 LEGACY_C = legacy.c
@@ -34,6 +35,10 @@ BUILT_SOURCES = getdata.h
 
 nodist_include_HEADERS = getdata.h
 include_HEADERS = ${GETDATA_LEGACY_H}
+
+if INSTALL_PKG_CONFIG
+pkgconfig_DATA = getdata.pc
+endif
 
 lib_LTLIBRARIES = libgetdata.la
 libgetdata_la_SOURCES = close.c common.c ${DEBUG_C} entry.c errors.c \

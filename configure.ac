@@ -109,6 +109,12 @@ AC_MSG_CHECKING([whether to include the C++ bindings])
 AC_MSG_RESULT([$make_cxxbindings])
 AM_CONDITIONAL(MAKE_CXXBINDINGS, test "x$make_cxxbindings" = "xyes")
 
+if test "x$make_cxxbindings" != "xno"; then
+  BINDINGS_BUILT="${BINDINGS_BUILT} C++"
+else
+  BINDINGS_LEFT="${BINDINGS_LEFT} C++"
+fi
+
 dnl Fortran 77 bindings
 AC_ARG_ENABLE(fortran, AS_HELP_STRING([--disable-fortran],
               [Don't build the Fortran 77 bindings (libfgetdata) nor the
@@ -142,12 +148,6 @@ AC_MSG_CHECKING([whether to include the Fortran 77 bindings])
 AC_MSG_RESULT([$make_f77bindings])
 AM_CONDITIONAL(MAKE_F77BINDINGS, test "x$make_f77bindings" != "xno")
 
-if test "x$make_cxxbindings" != "xno"; then
-  BINDINGS_BUILT="${BINDINGS_BUILT} C++"
-else
-  BINDINGS_LEFT="${BINDINGS_LEFT} C++"
-fi
-
 if test "x$make_f77bindings" != "xno"; then
   BINDINGS_BUILT="${BINDINGS_BUILT} Fortran-77"
 else
@@ -159,6 +159,20 @@ if test "x$make_f95bindings" != "xno"; then
 else
   BINDINGS_LEFT="${BINDINGS_LEFT} Fortran-95"
 fi
+
+dnl pkg-config
+AC_ARG_ENABLE(pkg-config, AS_HELP_STRING([--disable-pkg-config],
+              [Don't install the pkg-config metadata (getdata.pc)]),
+              [
+               case "${enableval}" in
+                 no) install_pkg_config="no" ;;
+                 *) install_pkg_config="yes" ;;
+               esac
+              ], [ install_pkg_config="yes" ])
+
+AC_MSG_CHECKING([whether to install pkg-config metadata])
+AC_MSG_RESULT([$install_pkg_config])
+AM_CONDITIONAL(INSTALL_PKG_CONFIG, test "x$install_pkg_config" = "xyes")
 
 if test "x$BINDINGS_BUILT" = "x"; then
   BINDINGS_BUILT=" none"
@@ -252,6 +266,7 @@ AC_CONFIG_FILES([man/Makefile])
 AC_CONFIG_FILES([src/Makefile])
 dnl (because I keep modifying getdata.h instead of getdata.h.in)
 AC_CONFIG_HEADERS([src/getdata.h], [chmod a-w src/getdata.h])
+AC_CONFIG_FILES([src/getdata.pc])
 AC_CONFIG_FILES([test/Makefile])
 
 AC_OUTPUT
@@ -267,6 +282,7 @@ if test "${enable_assert+set}" = set; then
 else
   echo "  Enable assertions:    yes"
 fi
+echo "  Install getdata.pc:   ${install_pkg_config}"
 echo
 echo "  Bindings built:      ${BINDINGS_BUILT}"
 echo "  Bindings not built:  ${BINDINGS_LEFT}"
