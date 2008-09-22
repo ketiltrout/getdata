@@ -1,3 +1,7 @@
+2008-09-22   D. V. Wiebe <getdata@ketiltrout.net>  svn:94
+	* bindings/cxx/entry.cpp: Use <cstring> instead of <string>.  Patch from
+	Matt.
+
 2008-09-18   D. V. Wiebe <getdata@ketiltrout.net>  svn:90
 	* src/legacy.c (_GD_GetDirfile), test/legacy_get_rofs.c,
 	test/legacy_get_put.c: Open dirfiles read-only unless called via PutData().

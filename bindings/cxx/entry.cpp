@@ -20,7 +20,7 @@
 //
 #include "entry.h"
 
-#include <string>
+#include <cstring>
 
 using namespace GetData;
 
