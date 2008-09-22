@@ -276,7 +276,7 @@ echo
 echo "Configuration summary: "
 echo "  checkdirfile utility: ${make_checkdirfile}"
 echo "  Include legacy API:   ${include_legacy_api}"
-echo "  Enable debugging:     ${enable_debug}"
+echo "  Debugging messages:   ${enable_debug}"
 if test "${enable_assert+set}" = set; then
   echo "  Enable assertions:    no"
 else
