@@ -32,8 +32,8 @@ dnl   this must be 0 and not 1 because, although we still support the old
 dnl   interface, the error codes have changed.
 AC_SUBST(GETDATA_IFACE_AGE, [0])
 
-dnl libdirfile interface version info
-AC_SUBST(DIRFILE_VERSION, [0:0:0])
+dnl libgetdata++ interface version info
+AC_SUBST(GETDATAXX_VERSION, [0:0:0])
 
 dnl libfgetdata interface version info
 AC_SUBST(FGETDATA_VERSION, [0:0:0])
@@ -98,7 +98,7 @@ AM_CONDITIONAL(MAKE_CHECKDIRFILE, test "x$make_checkdirfile" = "xbuild")
 
 dnl C++ bindings
 AC_ARG_ENABLE(cplusplus, AS_HELP_STRING([--disable-cplusplus],
-              [Don't build the C++ bindings (libdirfile)]),
+              [Don't build the C++ bindings (libgetdata++)]),
               [
                case "${enableval}" in
                  no) make_cxxbindings="no" ;;

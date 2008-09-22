@@ -27,11 +27,11 @@ SUBDIRS=test
 
 getdata_include_HEADERS = dirfile.h entry.h
 
-lib_LTLIBRARIES=libdirfile.la
-libdirfile_la_SOURCES = dirfile.cpp entry.cpp \
+lib_LTLIBRARIES=libgetdata++.la
+libgetdata___la_SOURCES = dirfile.cpp entry.cpp \
 												${getdata_include_HEADERS}
-libdirfile_la_LIBADD=../../src/libgetdata.la
-libdirfile_la_LDFLAGS = -version-info @DIRFILE_VERSION@
+libgetdata___la_LIBADD=../../src/libgetdata.la
+libgetdata___la_LDFLAGS = -version-info @GETDATAXX_VERSION@
 
 clean-local:
 	rm -rvf *~

@@ -1,3 +1,9 @@
+2008-09-22   D. V. Wiebe <getdata@ketiltrout.net>  svn:97
+	* configure.ac bindings/cxx/Makefile.am bindings/cxx/test/Makefile.am: Call
+	the C++ bindings libgetdata++ instead of libdirfile to be a little more
+	explicit about what it is.  This also allows installation alongside TK's
+	libdrifile.
+
 2008-09-22   D. V. Wiebe <getdata@ketiltrout.net>  svn:94
 	* bindings/cxx/entry.cpp: Use <cstring> instead of <string>.  Patch from
 	Matt.
