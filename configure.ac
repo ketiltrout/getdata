@@ -18,7 +18,7 @@ dnl You should have received a copy of the GNU General Public License
 dnl along with GetData; if not, write to the Free SoftwareFoundation, Inc.,
 dnl 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 dnl
-AC_INIT([getdata], [0.3.0], [getdata-devel@lists.sourceforge.net])
+AC_INIT([getdata], [0.3.1], [getdata-devel@lists.sourceforge.net])
 
 dnl autoconf 2.60 or later is required to build configure
 AC_PREREQ([2.60])
@@ -276,7 +276,7 @@ echo
 echo "Configuration summary: "
 echo "  checkdirfile utility: ${make_checkdirfile}"
 echo "  Include legacy API:   ${include_legacy_api}"
-echo "  Debugging messages:   ${enable_debug}"
+echo "  Verbose debugging:    ${enable_debug}"
 if test "${enable_assert+set}" = set; then
   echo "  Enable assertions:    no"
 else

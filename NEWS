@@ -1,4 +1,4 @@
-New in version ?.?.?:
+New in version 0.3.1:
 
   Legacy API Changes
 
@@ -6,6 +6,11 @@ New in version ?.?.?:
     PutData(), allowing GetData() calls on read-only dirfiles.  If
     PutData() is called on a dirfile previously opened read-only, it will be
     re-opened in read-write mode.
+
+  Bindings
+
+  * The C++ bindings, formerly called libdirfile, are now called libgetdata++
+    to be more explicit about what this library is.
 
 New in version 0.3.0:
 

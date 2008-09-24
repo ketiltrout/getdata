@@ -40,7 +40,7 @@ This package provides:
   * the C GetData library (libgetdata) including Unix manual pages
   * The handy checkdirfile utility, included also as an example
   * several bindings to the library from other languages:
-    - C++ (libdirfile)
+    - C++ (libgetdata++)
     - Fortran 77 (libfgetdata)
 
 Documentation for the various bindings, if present, can be found in files
@@ -51,9 +51,9 @@ DIRFILE STANDARDS VERSION 5
 ===========================
 
 A full list of features new to this release of GetData may be found in the
-file called `NEWS'.  This version of the GetData Library (0.3.0, August 2008),
-the first release on Sourceforge, has been released in conjunction with a new
-version of the Dirfile Standards, known as Standards Version 5.  This is the
+file called `NEWS'.  The 0.3.0 release of the GetData Library (August 2008),
+the first release on Sourceforge, was released in conjunction with a new
+version of the Dirfile Standards, known as Standards Version 5.  This was the
 first update to the Standards since October of 2006.
 
 Standards Version 5 introduces the following:
@@ -81,9 +81,9 @@ Standards Version 5 introduces the following:
     limited by the maximum length of a filename and the maximum length of a
     format file line, either of which will typically effectively limit field
     names to a few thousand characters.
-  * Forbidding the implicit fields INDEX and FILEFRAM to be defined in the format
-    file.  Previous Standards Versions allowed fields with these names to be
-    defined, but old GetData implementations would never let you access them,
+  * Forbidding the implicit fields INDEX and FILEFRAM to be defined in the
+    format file.  Previous Standards Versions allowed fields with these names to
+    be defined, but old GetData implementations would never let you access them,
     returning the implicit frame-count field instead.
   * 64-bit BIT fields.  Previous Standards Versions limited BITs to 32-bits.
     The size of any particular BIT field is still limited by the underlying RAW
