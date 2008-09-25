@@ -51,7 +51,7 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-  printf("syntax OK.  Found %lu frames\n", (unsigned long)n);
+  printf("syntax OK.  Found %llu frames.\n", (unsigned long long)n);
   dirfile_close(dirfile);
   return 0;
 }
