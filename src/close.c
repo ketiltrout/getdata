@@ -23,20 +23,7 @@
 #endif
 
 #ifdef STDC_HEADERS
-#include <ctype.h>
-#include <errno.h>
 #include <stdlib.h>
-#include <string.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#endif
-
-#ifdef HAVE_DIRENT_H
-#include <dirent.h>
-#endif
-
-#ifdef HAVE_LIBGEN_H
-#include <libgen.h>
 #endif
 
 #include "internal.h"
