@@ -41,7 +41,7 @@ pkgconfig_DATA = getdata.pc
 endif
 
 lib_LTLIBRARIES = libgetdata.la
-libgetdata_la_SOURCES = close.c common.c ${DEBUG_C} entry.c errors.c \
+libgetdata_la_SOURCES = add.c close.c common.c ${DEBUG_C} entry.c errors.c \
 												field_list.c flush.c getdata.c ${LEGACY_C} nfields.c \
 												nframes.c open.c putdata.c spf.c types.c \
 												${GETDATA_LEGACY_H} internal.h

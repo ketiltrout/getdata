@@ -72,8 +72,10 @@
 #define GD_E_BAD_DIRFILE      15
 #define GD_E_BAD_PUT_FIELD    16
 #define GD_E_ACCMODE          17
+#define GD_E_BAD_ENTRY        18
+#define GD_E_DUPLICATE        19
 
-#define GD_N_ERROR_CODES      18
+#define GD_N_ERROR_CODES      20
 
 #ifndef FILENAME_MAX
 #  define FILENAME_MAX 4096
@@ -219,6 +221,27 @@ int get_entry(DIRFILE* D, const char* field_code, gd_entry_t* entry)
 
 gd_entry_t *dirfile_free_entry_strings(gd_entry_t *entry) __THROW;
 
+int dirfile_add(DIRFILE* D, const gd_entry_t* entry)
+  __THROW __gd_nonnull ((1,2));
+
+int dirfile_add_raw(DIRFILE* D, const char* field_code, unsigned int spf,
+    gd_type_t data_type) __THROW __gd_nonnull ((1,2));
+
+int dirfile_add_lincom(DIRFILE* D, const char* field_code, int n_fields, ...)
+  __THROW __gd_nonnull ((1,2));
+
+int dirfile_add_linterp(DIRFILE* D, const char* field_code,
+    const char* in_field, const char* table) __THROW __gd_nonnull ((1,2,3,4));
+
+int dirfile_add_bit(DIRFILE* D, const char* field_code, const char* in_field,
+    int bitnum, int numbits) __THROW __gd_nonnull ((1,2,3));
+
+int dirfile_add_multiply(DIRFILE* D, const char* field_code,
+    const char* in_field1, const char* in_field2) __THROW
+__gd_nonnull ((1,2,3,4));
+
+int dirfile_add_phase(DIRFILE* D, const char* field_code, const char* in_field,
+    int shift) __THROW __gd_nonnull ((1,2,3));
 
 /* The following functions contain calls to I/O functions, making them
  * cancellation points.  As a result we cannot mark them with __THROW.

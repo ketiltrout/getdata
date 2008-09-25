@@ -1,3 +1,13 @@
+2008-09-25   D. V. Wiebe <getdata@ketiltrout.net>  svn:103
+	* src/open.c (_GD_ParseRaw _GD_ParseLincom _GD_ParseLinterp
+	_GD_ParseMultiply _GD_ParseBit _GD_ParsePhase): Fixed memory leaks
+
+	* src/errors.c (_GD_ClearError): Replaced with a macro of the same name
+	defined in internal.h.
+
+	* src/add.c: First part of dirfile_add(): input validation and add to
+	DIRFILE list.
+
 2008-09-22   D. V. Wiebe <getdata@ketiltrout.net>  svn:97
 	* configure.ac bindings/cxx/Makefile.am bindings/cxx/test/Makefile.am: Call
 	the C++ bindings libgetdata++ instead of libdirfile to be a little more
@@ -9,10 +19,9 @@
 	Matt.
 
 2008-09-18   D. V. Wiebe <getdata@ketiltrout.net>  svn:90
-	* src/legacy.c (_GD_GetDirfile), test/legacy_get_rofs.c,
-	test/legacy_get_put.c: Open dirfiles read-only unless called via PutData().
-	Re-open read-only dirfile read-write when necessary.  Added two test-cases
-	for same.
+	* src/legacy.c (_GD_GetDirfile) test/legacy_get_rofs.c test/legacy_get_put.c:
+	Open dirfiles read-only unless called via PutData().  Re-open read-only
+	dirfile read-write when necessary.  Added two test-cases for same.
 
 	* test/Makefile.am: Conditionally compile legacy tests.
 
@@ -81,7 +90,7 @@
 	* src/field_list.c (get_field_list): Return GD_E_ALLOC on malloc error.
 
 2008-09-04   D. V. Wiebe <getdata@ketiltrout.net>  svn:73
-	* bindings/cxx/entry.h (Entry::Scale, Entry::Offset): fix return.
+	* bindings/cxx/entry.h (Entry::Scale Entry::Offset): fix return.
 
 	* src/flush.c (_GD_Flush): Handle GD_NO_ENTRY in switch
 

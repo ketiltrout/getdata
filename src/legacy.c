@@ -54,7 +54,7 @@ const char *GD_ERROR_CODES[GD_N_ERROR_CODES] = {
   "Error in Format file",
   "Error truncating dirfile",
   "Error creating dirfile",
-  "Field code not found in File Format",
+  "Bad field code",
   "Unrecognized data type",
   "I/O error accessing field file",
   "Could not open included Format file",
@@ -66,7 +66,11 @@ const char *GD_ERROR_CODES[GD_N_ERROR_CODES] = {
   "Bad DIRFILE",
   "Cannot write to specified field",
   "Read-only dirfile",
-  "Request out-of-range"
+  "Request out-of-range",
+    /* Subsequent error codes are not supported by the legacy API, and
+     * hence not handled here */
+  NULL, /* GD_E_BAD_ENTRY */
+  NULL, /* GD_E_DUPLICATE */
 };
 
 static struct FormatType Format = {

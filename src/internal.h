@@ -138,31 +138,38 @@ char *strerror_r(int errnum, char *buf, size_t buflen);
 
 void* _GD_Alloc(DIRFILE* D, gd_type_t type, size_t n) __gd_nonnull ((1))
   __attribute_malloc__ __THROW __wur;
-void _GD_ClearError(DIRFILE* D) __gd_nonnull ((1)) __THROW;
+
+/* _GD_ClearError: Everything's A-OK; clear the last error. */
+#define _GD_ClearError(D) (D)->error = 0
+
 void _GD_ConvertType(DIRFILE* D, const void *data_in, gd_type_t in_type,
     void *data_out, gd_type_t out_type, size_t n) __gd_nonnull ((1, 2, 4))
   __THROW;
 size_t  _GD_DoField(DIRFILE *D, const char *field_code, off64_t first_frame,
     off64_t first_samp, size_t num_frames, size_t num_samp,
     gd_type_t return_type, void *data_out) __gd_nonnull ((1, 2));
+int _GD_EntryCmp(const void *A, const void *B);
 void _GD_FixEndianness(char* databuffer, size_t size, size_t ns)
   __gd_nonnull ((1));
 void _GD_Flush(DIRFILE* D, gd_entry_t *entry, const char* field_code);
 int _GD_GetLine(FILE *fp, char *line, int* linenum) __gd_nonnull ((1, 2, 3));
 unsigned int _GD_GetSPF(const char *field_code, DIRFILE* D)
   __gd_nonnull ((1, 2));
-gd_entry_t* _GD_FindField(DIRFILE* D, const char* field_code)
-  __gd_nonnull ((1, 2)) __THROW;
+gd_entry_t* _GD_FindField(DIRFILE* D, const char* field_code) __THROW
+  __gd_nonnull ((1, 2));
+
 #define _GD_InternalError(D) \
     _GD_SetError(D, GD_E_INTERNAL_ERROR, 0, __FILE__, __LINE__, NULL);
+
 gd_type_t _GD_LegacyType(char c) __THROW __attribute__ ((__const__));
 void _GD_LinterpData(DIRFILE* D, const void *data, gd_type_t type, size_t npts,
-    double *lx, double *ly, size_t n_ln) __gd_nonnull ((1, 2, 5, 6)) __THROW;
+    double *lx, double *ly, size_t n_ln) __THROW __gd_nonnull ((1, 2, 5, 6));
 void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E)
   __gd_nonnull ((1, 2));
 void _GD_ScaleData(DIRFILE* D, void *data, gd_type_t type, size_t npts,
-    double m, double b) __gd_nonnull ((1, 2)) __THROW;
+    double m, double b) __THROW __gd_nonnull ((1, 2));
 void _GD_SetError(DIRFILE* D, int error, int suberror, const char* format_file,
-    int line, const char* token) __gd_nonnull ((1)) __THROW;
+    int line, const char* token) __THROW __gd_nonnull ((1));
+char* _GD_ValidateField(const char* field_code) __gd_nonnull ((1));
 
 #endif

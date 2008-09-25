@@ -81,7 +81,7 @@ static gd_type_t _GD_RawType(const char* type)
 }
 
 /* Check for a valid field name -- returns input on error */
-static char* _GD_ValidateField(const char* field_code)
+char* _GD_ValidateField(const char* field_code)
 {
   size_t len = strlen(field_code);
   size_t i;
@@ -129,7 +129,7 @@ static gd_entry_t* _GD_ParseRaw(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
   if (R->field == in_cols[0]) {
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_NAME, format_file, line,
         in_cols[0]);
-    R->field = NULL;
+    free(R);
     dreturn("%p", R);
     return R;
   }
@@ -137,26 +137,28 @@ static gd_entry_t* _GD_ParseRaw(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
   R->file = malloc(FILENAME_MAX);
   if (R->file == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-    dreturn("%p", R);
-    return R;
+    dirfile_free_entry_strings(R);
+    free(R);
+    dreturn("%p", NULL);
+    return NULL;
   }
 
   snprintf((char*)R->file, FILENAME_MAX, "%s/%s", subdir, in_cols[0]);
   R->data_type = _GD_RawType(in_cols[2]);
   R->size = GD_SIZE(R->data_type);
 
-  if (R->size == 0) {
+  if (R->size == 0)
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_TYPE, format_file, line,
         in_cols[2]);
-    dreturn("%p", R);
-    return R;
-  }
-
-  R->spf = atoi(in_cols[3]);
-
-  if (R->spf <= 0)
+  else if ((R->spf = atoi(in_cols[3])) <= 0)
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_SPF, format_file, line,
         in_cols[3]);
+
+  if (D->error != GD_E_OK) {
+    dirfile_free_entry_strings(R);
+    free(R);
+    R = NULL;
+  }
 
   dreturn("%p", R);
   return R;
@@ -192,38 +194,33 @@ static gd_entry_t* _GD_ParseLincom(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
   if (L->field == in_cols[0]) {
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_NAME, format_file, line,
         in_cols[0]);
-    L->field = NULL;
-    dreturn("%p", L);
-    return L;
+    free(L);
+    dreturn("%p", NULL);
+    return NULL;
   }
 
   L->n_fields = atoi(in_cols[2]);
 
-  if (L->field == NULL) {
+  if (L->field == NULL)
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-    dreturn("%p", L);
-    return L;
-  }
-
-  if ((L->n_fields < 1) || (L->n_fields > GD_MAX_LINCOM)) {
+  else if ((L->n_fields < 1) || (L->n_fields > GD_MAX_LINCOM))
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_FIELDS, format_file, line,
         in_cols[2]);
-    dreturn("%p", L);
-    return L;
-  }
-
-  if (n_cols < L->n_fields * 3 + 3) {
+  else if (n_cols < L->n_fields * 3 + 3)
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_COLS, format_file, line, NULL);
-    dreturn("%p", L);
-    return L;
-  }
+  else
+    for (i = 0; i < L->n_fields; i++) {
+      L->in_fields[i] = strdup(in_cols[i * 3 + 3]);
+      if (L->in_fields[i] == NULL)
+        _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+      L->m[i] = atof(in_cols[i * 3 + 4]);
+      L->b[i] = atof(in_cols[i * 3 + 5]);
+    }
 
-  for (i = 0; i < L->n_fields; i++) {
-    L->in_fields[i] = strdup(in_cols[i * 3 + 3]);
-    if (L->in_fields[i] == NULL)
-      _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-    L->m[i] = atof(in_cols[i * 3 + 4]);
-    L->b[i] = atof(in_cols[i * 3 + 5]);
+  if (D->error != GD_E_OK) {
+    dirfile_free_entry_strings(L);
+    free(L);
+    L = NULL;
   }
 
   dreturn("%p", L);
@@ -261,9 +258,9 @@ static gd_entry_t* _GD_ParseLinterp(DIRFILE* D,
   if (L->field == in_cols[0]) {
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_NAME, format_file, line,
         in_cols[0]);
-    L->field = NULL;
-    dreturn("%p", L);
-    return L;
+    free(L);
+    dreturn("%p", NULL);
+    return NULL;
   }
 
   L->in_fields[0] = strdup(in_cols[2]);
@@ -283,8 +280,12 @@ static gd_entry_t* _GD_ParseLinterp(DIRFILE* D,
     }
   }
 
-  if (L->field == NULL || L->in_fields[0] == NULL || L->table == NULL)
+  if (L->field == NULL || L->in_fields[0] == NULL || L->table == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    dirfile_free_entry_strings(L);
+    free(L);
+    L = NULL;
+  }
 
   dreturn("%p", L);
   return L;
@@ -317,16 +318,20 @@ static gd_entry_t* _GD_ParseMultiply(DIRFILE* D,
   if (M->field == in_cols[0]) {
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_NAME, format_file, line,
         in_cols[0]);
-    M->field = NULL;
-    dreturn("%p", M);
-    return M;
+    free(M);
+    dreturn("%p", NULL);
+    return NULL;
   }
 
   M->in_fields[0] = strdup(in_cols[2]);
   M->in_fields[1] = strdup(in_cols[3]);
 
-  if (M->field == NULL || M->in_fields[0] == NULL || M->in_fields[1] == NULL)
+  if (M->field == NULL || M->in_fields[0] == NULL || M->in_fields[1] == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    dirfile_free_entry_strings(M);
+    free(M);
+    M = NULL;
+  }
 
   dreturn("%p", M);
   return M;
@@ -382,6 +387,12 @@ static gd_entry_t* _GD_ParseBit(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
   else if (B->bitnum + B->numbits - 1 > 63)
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BITSIZE, format_file, line, NULL);
 
+  if (D->error != GD_E_OK) {
+    dirfile_free_entry_strings(B);
+    free(B);
+    B = NULL;
+  }
+
   dreturn("%p", B);
   return B;
 }
@@ -413,16 +424,20 @@ static gd_entry_t* _GD_ParsePhase(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
   if (P->field == in_cols[0]) {
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_NAME, format_file, line,
         in_cols[0]);
-    P->field = NULL;
-    dreturn("%p", P);
-    return P;
+    free(P);
+    dreturn("%p", NULL);
+    return NULL;
   }
 
   P->in_fields[0] = strdup(in_cols[2]); /* field */
   P->shift = atoi(in_cols[3]); /*shift*/
 
-  if (P->field == NULL || P->in_fields[0] == NULL)
+  if (P->field == NULL || P->in_fields[0] == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    dirfile_free_entry_strings(P);
+    free(P);
+    P = NULL;
+  }
 
   dreturn("%p", P);
   return P;
@@ -430,7 +445,7 @@ static gd_entry_t* _GD_ParsePhase(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
 
 /* _GD_EntryCmp: Comparison functions for the entries
 */
-static int _GD_EntryCmp(const void *A, const void *B)
+int _GD_EntryCmp(const void *A, const void *B)
 {
   return (strcmp((*(gd_entry_t **)A)->field,
         (*(gd_entry_t **)B)->field));
@@ -561,42 +576,42 @@ static void _GD_ParseFormatFile(FILE* fp, DIRFILE *D, const char* filedir,
           NULL);
     } else if (strcmp(in_cols[1], "RAW") == 0) {
       D->n_entries++;
-      D->entry = realloc(D->entry, D->n_entries * sizeof(struct gt_entry_t**));
+      D->entry = realloc(D->entry, D->n_entries * sizeof(gd_entry_t**));
       D->entry[D->n_entries - 1] = _GD_ParseRaw(D, in_cols, n_cols, subdir,
           format_file, linenum);
       if (D->error != GD_E_OK)
         D->n_entries--;
     } else if (strcmp(in_cols[1], "LINCOM") == 0) {
       D->n_entries++;
-      D->entry = realloc(D->entry, D->n_entries * sizeof(struct gt_entry_t**));
+      D->entry = realloc(D->entry, D->n_entries * sizeof(gd_entry_t**));
       D->entry[D->n_entries - 1] = _GD_ParseLincom(D, in_cols, n_cols,
           format_file, linenum);
       if (D->error != GD_E_OK)
         D->n_entries--;
     } else if (strcmp(in_cols[1], "LINTERP") == 0) {
       D->n_entries++;
-      D->entry = realloc(D->entry, D->n_entries * sizeof(struct gt_entry_t**));
+      D->entry = realloc(D->entry, D->n_entries * sizeof(gd_entry_t**));
       D->entry[D->n_entries - 1] = _GD_ParseLinterp(D, in_cols, n_cols,
           format_file, linenum);
       if (D->error != GD_E_OK)
         D->n_entries--;
     } else if (strcmp(in_cols[1], "MULTIPLY") == 0) {
       D->n_entries++;
-      D->entry = realloc(D->entry, D->n_entries * sizeof(struct gt_entry_t**));
+      D->entry = realloc(D->entry, D->n_entries * sizeof(gd_entry_t**));
       D->entry[D->n_entries - 1] = _GD_ParseMultiply(D, in_cols, n_cols,
           format_file, linenum);
       if (D->error != GD_E_OK)
         D->n_entries--;
     } else if (strcmp(in_cols[1], "BIT") == 0) {
       D->n_entries++;
-      D->entry = realloc(D->entry, D->n_entries * sizeof(struct gt_entry_t**));
+      D->entry = realloc(D->entry, D->n_entries * sizeof(gd_entry_t**));
       D->entry[D->n_entries - 1] = _GD_ParseBit(D, in_cols, n_cols,
           format_file, linenum);
       if (D->error != GD_E_OK)
         D->n_entries--;
     } else if (strcmp(in_cols[1], "PHASE") == 0) {
       D->n_entries++;
-      D->entry = realloc(D->entry, D->n_entries * sizeof(struct gt_entry_t**));
+      D->entry = realloc(D->entry, D->n_entries * sizeof(gd_entry_t**));
       D->entry[D->n_entries - 1] = _GD_ParsePhase(D, in_cols, n_cols,
           format_file, linenum);
       if (D->error != GD_E_OK)

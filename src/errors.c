@@ -121,17 +121,6 @@ void _GD_SetError(DIRFILE* D, int error, int suberror,
   dreturnvoid();
 }
 
-/* _GD_ClearError: Everything's A-OK; clear the last error.
-*/
-void _GD_ClearError(DIRFILE* D)
-{
-  dtrace("%p", D);
-
-  D->error = GD_E_OK;
-
-  dreturnvoid();
-}
-
 /* Write a descriptive message in the supplied buffer describing the last
  * library error.  The message may be truncated but will be null terminated.
  * Returns buffer, or NULL if buflen < 1.
