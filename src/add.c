@@ -55,6 +55,13 @@ int dirfile_add(DIRFILE* D, const gd_entry_t* entry)
     return -1;
   }
 
+  /* check for include index out of range */
+  if (entry->format_file < 0 || entry->format_file >= D->n_include) {
+    _GD_SetError(D, GD_E_BAD_ENTRY, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
   /* New entry */
   E = malloc(sizeof(gd_entry_t));
   if (E == NULL) {
@@ -63,6 +70,7 @@ int dirfile_add(DIRFILE* D, const gd_entry_t* entry)
     return -1;
   }
   memset(E, 0, sizeof(gd_entry_t));
+  E->format_file = entry->format_file;
 
   /* Validate field code */
   E->field_type = entry->field_type;

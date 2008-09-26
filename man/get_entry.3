@@ -20,7 +20,7 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH get_entry 3 "2 September 2008" "Version 0.3.0" "GETDATA"
+.TH get_entry 3 "26 September 2008" "Version 0.4.0" "GETDATA"
 .SH NAME
 get_entry \(em retrieve a dirfile field's metadata
 .SH SYNOPSIS
@@ -95,8 +95,9 @@ described.  All gd_entry_t objects are guaranteed to have at least:
 typedef struct {
   ...
 
-  const char  *field;     /* field code */
-  gd_entype_t  field_type /* field type */
+  const char  *field;       /* field code */
+  gd_entype_t  field_type;  /* field type */
+  int          format_file; /* format file index */
 
   ...
 } gd_entry_t;
@@ -122,6 +123,20 @@ to one of the following symbols:
 .BR GD_BIT_ENTRY ,\~ GD_MULTIPLY_ENTRY ,\~ GD_PHASE_ENTRY
 .ad n
 .hy
+.P
+The 
+.I format_file
+member indicates the format file fragment in which this field is defined.  This
+is an integer index to the Dirfile's list of parsed format file fragments.  The
+name of the file corresponding to
+.I format_file
+may be obtained by calling
+.IR get_format_filename (3).
+A value of zero for this field indicates that the field is defined in the
+primary format file, the file called
+.B format
+in the root dirfile directory (see 
+.IR dirfile (5)).
 .P
 Remaining fields in the gd_entry_t structure depend on the value of
 .IR field_type .
@@ -318,4 +333,5 @@ forward in time (towards larger frame numbers).
 .BR dirfile_open (3),
 .BR getdata (3),
 .BR get_error_string (3),
-.BR get_field_list (3)
+.BR get_field_list (3),
+.BR get_format_filename (3)

@@ -124,6 +124,7 @@ static gd_entry_t* _GD_ParseRaw(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
   R->field_type = GD_RAW_ENTRY;
   R->file = NULL;
   R->fp = -1; /* file not opened yet */
+  R->format_file = D->n_include - 1;
 
   R->field = _GD_ValidateField(in_cols[0]);
   if (R->field == in_cols[0]) {
@@ -189,6 +190,7 @@ static gd_entry_t* _GD_ParseLincom(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
   L->field_type = GD_LINCOM_ENTRY;
   for (i = 0; i < GD_MAX_LINCOM; ++i)
     L->in_fields[i] = NULL;
+  L->format_file = D->n_include - 1;
 
   L->field = _GD_ValidateField(in_cols[0]);
   if (L->field == in_cols[0]) {
@@ -253,6 +255,7 @@ static gd_entry_t* _GD_ParseLinterp(DIRFILE* D,
   L->field_type = GD_LINTERP_ENTRY;
   L->in_fields[0] = NULL;
   L->table = NULL;
+  L->format_file = D->n_include - 1;
 
   L->field = _GD_ValidateField(in_cols[0]);
   if (L->field == in_cols[0]) {
@@ -313,6 +316,7 @@ static gd_entry_t* _GD_ParseMultiply(DIRFILE* D,
   }
   M->field_type = GD_MULTIPLY_ENTRY;
   M->in_fields[0] = M->in_fields[1] = NULL;
+  M->format_file = D->n_include - 1;
 
   M->field = _GD_ValidateField(in_cols[0]);
   if (M->field == in_cols[0]) {
@@ -359,6 +363,7 @@ static gd_entry_t* _GD_ParseBit(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
 
   B->field_type = GD_BIT_ENTRY;
   B->in_fields[0] = NULL;
+  B->format_file = D->n_include - 1;
 
   B->field = _GD_ValidateField(in_cols[0]);
   if (B->field == in_cols[0]) {
@@ -419,6 +424,7 @@ static gd_entry_t* _GD_ParsePhase(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
 
   P->field_type = GD_PHASE_ENTRY;
   P->in_fields[0] = NULL;
+  P->format_file = D->n_include - 1;
 
   P->field = _GD_ValidateField(in_cols[0]);
   if (P->field == in_cols[0]) {
@@ -456,8 +462,7 @@ int _GD_EntryCmp(const void *A, const void *B)
  *       once for each included file.
  */
 static void _GD_ParseFormatFile(FILE* fp, DIRFILE *D, const char* filedir,
-    const char* subdir, const char* format_file, int standards,
-    char*** IncludeList, int *i_include)
+    const char* subdir, const char* format_file, int standards)
 {
   char instring[MAX_LINE_LENGTH];
   const char* in_cols[MAX_IN_COLS];
@@ -466,8 +471,8 @@ static void _GD_ParseFormatFile(FILE* fp, DIRFILE *D, const char* filedir,
   int linenum = 0;
   int ws = 1;
 
-  dtrace("%p, %p, \"%s\", \"%s\", \"%s\", %i, %p, %i", fp, D, filedir, subdir,
-      format_file, standards, IncludeList, *i_include);
+  dtrace("%p, %p, \"%s\", \"%s\", \"%s\", %i", fp, D, filedir, subdir,
+      format_file, standards);
 
   /* start parsing */
   while (_GD_GetLine(fp, instring, &linenum)) {
@@ -508,8 +513,8 @@ static void _GD_ParseFormatFile(FILE* fp, DIRFILE *D, const char* filedir,
 
       /* Run through the include list to see if we've already included this
        * file */
-      for (i = 0; i < *i_include; ++i)
-        if (strcmp(in_cols[1], (*IncludeList)[i]) == 0) {
+      for (i = 0; i < D->n_include; ++i)
+        if (strcmp(in_cols[1], D->include_list[i]) == 0) {
           found = 1;
           break;
         }
@@ -531,10 +536,11 @@ static void _GD_ParseFormatFile(FILE* fp, DIRFILE *D, const char* filedir,
       }
 
       /* If we got here, we managed to open the included file; parse it */
-      *IncludeList = realloc(*IncludeList, ++(*i_include) * sizeof(char*));
-      (*IncludeList)[*i_include - 1] = strdup(in_cols[1]);
+      D->include_list = realloc(D->include_list, ++(D->n_include) *
+          sizeof(char*));
+      D->include_list[D->n_include - 1] = strdup(in_cols[1]);
 
-      if ((*IncludeList)[*i_include - 1] == NULL) {
+      if (D->include_list[D->n_include - 1] == NULL) {
         _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
         dreturnvoid();
         return;
@@ -550,7 +556,7 @@ static void _GD_ParseFormatFile(FILE* fp, DIRFILE *D, const char* filedir,
             dirname(temp_buffer));
 
       _GD_ParseFormatFile(new_fp, D, filedir, new_subdir, new_format_file,
-          standards, IncludeList, i_include);
+          standards);
       fclose(new_fp);
     } else if (strcmp(ptr, "ENDIAN") == 0) {
       if (!(D->flags & GD_FORCE_ENDIAN)) {
@@ -787,8 +793,6 @@ DIRFILE* dirfile_open(const char* filedir, unsigned int flags)
   DIRFILE* D;
   char format_file[FILENAME_MAX];
   char raw_data_filename[FILENAME_MAX];
-  char **IncludeList = NULL;
-  int i_include;
 
   dtrace("\"%s\", 0%o", filedir, flags);
 
@@ -805,6 +809,7 @@ DIRFILE* dirfile_open(const char* filedir, unsigned int flags)
   D->first_field = NULL;
   D->field_list = NULL;
   D->flags = flags | GD_INVALID;
+  D->n_include = 0;
 
   snprintf(format_file, FILENAME_MAX, "%s%sformat", filedir,
       (filedir[strlen(filedir) - 1] == '/') ? "" : "/");
@@ -816,32 +821,19 @@ DIRFILE* dirfile_open(const char* filedir, unsigned int flags)
   }
 
   /* Parse the file.  This will take care of any necessary inclusions */
-  i_include = 1;
+  D->n_include = 1;
 
-  IncludeList = malloc(sizeof(char*));
-  if (IncludeList == NULL) {
+  D->include_list = malloc(sizeof(char**));
+  if (D->include_list == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     dreturn("%p", D);
     return D;
   }
-
-  IncludeList[0] = strdup("format");
-
-  if (IncludeList[0] == NULL) {
-    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-    free(IncludeList);
-    dreturn("%p", D);
-    return D;
-  }
+  D->include_list[0] = "format";
 
   _GD_ParseFormatFile(fp, D, filedir, ".", format_file,
-      DIRFILE_STANDARDS_VERSION, &IncludeList, &i_include);
+      DIRFILE_STANDARDS_VERSION);
   fclose(fp);
-
-  /* Clean up IncludeList.  We don't need it anymore */
-  for (i = 0; i < i_include; ++i)
-    free(IncludeList[i]);
-  free(IncludeList);
 
   if (D->error != GD_E_OK) {
     dreturn("%p", D);

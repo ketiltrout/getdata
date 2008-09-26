@@ -1,0 +1,71 @@
+.\" get_nformats.3.  The get_nformats man page.
+.\"
+.\" (C) 2008 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" This program is free software; you can redistribute it and/or modify
+.\" it under the terms of the GNU General Public License as published by
+.\" the Free Software Foundation; either version 2 of the License, or
+.\" (at your option) any later version.
+.\"
+.\" GetData is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+.\" General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public License along
+.\" with GetData; if not, write to the Free Software Foundation, Inc.,
+.\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+.\"
+.TH get_nformats 3 "26 September 2008" "Version 0.4.0" "GETDATA"
+.SH NAME
+get_nformats \(em retrieve the number of parsed format file fragments from a dirfile
+.SH SYNOPSIS
+.B #include <getdata.h>
+.HP
+.nh
+.ad l
+.BI "int get_nformats(DIRFILE *" dirfile ", int " index );
+.hy
+.ad n
+.SH DESCRIPTION
+The
+.BR get_nformats ()
+function queries a dirfile(5) database specified by
+.I dirfile
+and returns the total number of parsed format file fragments in the database.
+
+The 
+.I dirfile
+parameter must point to a valid DIRFILE object previously created by a call to
+.BR dirfile_open (3).
+
+The format file fragment with
+.I index
+equal to zero is always the primary format file for the database (the file
+called 
+.B format
+in the root dirfile directory).
+
+The largest valid value of
+.I index
+may be obtained from a call to
+.IR get_nformats (3).
+
+.SH RETURN VALUE
+Upon successful completion,
+.BR get_nformats ()
+returns the total number of format file fragments which are defined in the
+dirfile.  If the supplied
+.I dirfile
+is invalid, 
+.BR get_nformats ()
+returns 0.  This function does not modify the
+.IR D->error .
+.SH SEE ALSO
+.BR dirfile (5),
+.BR dirfile_open (3),
+.BR get_format_filename (3)

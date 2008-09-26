@@ -121,6 +121,7 @@ struct _gd_unified_entry {
   char* field;
   gd_entype_t field_type;
   char *in_fields[GD_MAX_LINCOM];
+  int format_file;
   union {
     struct { /* RAW */
       unsigned int spf;
@@ -174,6 +175,10 @@ struct _GD_DIRFILE {
 
   /* recursion counter */
   int recurse_level;
+
+  /* include list */
+  char** include_list;
+  int n_include;
 
   /* field list */
   const char** field_list;
@@ -242,6 +247,10 @@ __gd_nonnull ((1,2,3,4));
 
 int dirfile_add_phase(DIRFILE* D, const char* field_code, const char* in_field,
     int shift) __THROW __gd_nonnull ((1,2,3));
+
+const char* get_format_filename(DIRFILE* D, int index) __THROW
+__gd_nonnull((1));
+int get_nformats(DIRFILE* D) __THROW __gd_nonnull((1));
 
 /* The following functions contain calls to I/O functions, making them
  * cancellation points.  As a result we cannot mark them with __THROW.
