@@ -23,13 +23,9 @@
 #endif
 
 #ifdef STDC_HEADERS
-#include <ctype.h>
-#include <errno.h>
 #include <stdlib.h>
-#include <string.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <unistd.h>
+#include <errno.h>
+#include <time.h>
 #endif
 
 #include "internal.h"
@@ -56,7 +52,7 @@ void _GD_Flush(DIRFILE* D, gd_entry_t *entry, const char* field_code)
   switch(entry->field_type) {
     case GD_RAW_ENTRY:
       if (entry->fp >= 0) {
-        if (fsync(entry->fp)) {
+        if (D->flags & GD_RDWR && fsync(entry->fp)) {
           _GD_SetError(D, GD_E_RAW_IO, 0, entry->file, errno, NULL);
         } else if (close(entry->fp)) {
           _GD_SetError(D, GD_E_RAW_IO, 0, entry->file, errno, NULL);
@@ -87,6 +83,200 @@ void _GD_Flush(DIRFILE* D, gd_entry_t *entry, const char* field_code)
   dreturnvoid();
 }
 
+static const char* _GD_TypeName(DIRFILE* D, gd_type_t data_type)
+{
+  switch(data_type) {
+    case GD_UINT8:
+      return "UINT8";
+    case GD_INT8:
+      return "INT8";
+    case GD_UINT16:
+      return "UINT16";
+    case GD_INT16:
+      return "INT16";
+    case GD_UINT32:
+      return "UINT32";
+    case GD_INT32:
+      return "INT32";
+    case GD_UINT64:
+      return "UINT64";
+    case GD_INT64:
+      return "INT64";
+    case GD_FLOAT32:
+      return "FLOAT32";
+    case GD_FLOAT64:
+      return "FLOAT64";
+    default:
+      _GD_InternalError(D);
+      return "";
+  }
+}
+
+/* Write a field specification line */
+static void _GD_FieldSpec(DIRFILE* D, FILE* stream, gd_entry_t* E) {
+  int i;
+
+  switch(E->field_type) {
+    case GD_RAW_ENTRY:
+      fprintf(stream, "%s RAW %s %u\n", E->field, _GD_TypeName(D, E->data_type),
+          E->spf);
+      break;
+    case GD_LINCOM_ENTRY:
+      fprintf(stream, "%s LINCOM %i", E->field, E->n_fields);
+      for (i = 0; i < E->n_fields; ++i)
+        fprintf(stream, " %s %.15g %.15g", E->in_fields[i], E->m[i], E->b[i]);
+      fputs("\n", stream);
+      break;
+    case GD_LINTERP_ENTRY:
+      fprintf(stream, "%s LINTERP %s %s\n", E->field, E->in_fields[0],
+          E->table);
+      break;
+    case GD_BIT_ENTRY:
+      fprintf(stream, "%s BIT %s %i %i\n", E->field, E->in_fields[0], E->bitnum,
+          E->numbits);
+      break;
+    case GD_MULTIPLY_ENTRY:
+      fprintf(stream, "%s MULTIPLY %s %s\n", E->field, E->in_fields[0],
+          E->in_fields[1]);
+      break;
+    case GD_PHASE_ENTRY:
+      fprintf(stream, "%s PHASE %s %i\n", E->field, E->in_fields[0], E->shift);
+      break;
+    case GD_NO_ENTRY:
+      _GD_InternalError(D);
+      break;
+  }
+}
+
+static void _GD_FlushMeta(DIRFILE* D)
+{
+  int i;
+  FILE* stream;
+  char buffer[MAX_LINE_LENGTH];
+  char temp_file[FILENAME_MAX];
+  char* ptr;
+  struct tm now;
+  time_t t;
+  int fd;
+
+  dtrace("%p", D);
+
+  if ((D->flags & GD_ACCMODE) == GD_RDONLY) {
+    /* nothing to do */
+    dreturnvoid();
+    return;
+  }
+
+  for (i = 0; i < D->n_include; ++i)
+    if (D->include_list[i].modified) {
+      /* open a temporary file */
+      snprintf(temp_file, MAX_LINE_LENGTH, "%s/format_XXXXXX", D->name);
+      fd = mkstemp(temp_file);
+      if (fd == -1) {
+        _GD_SetError(D, GD_E_OPEN_INCLUDE, errno, NULL, 0,
+            D->include_list[i].name);
+        break;
+      }
+      stream = fdopen(fd, "w");
+      if (stream == NULL) {
+        _GD_SetError(D, GD_E_OPEN_INCLUDE, errno, NULL, 0,
+            D->include_list[i].name);
+        break;
+      }
+
+      /* Introit */
+      t = time(NULL);
+      strftime(buffer, MAX_LINE_LENGTH, "%c", gmtime_r(&t, &now));
+
+      fprintf(stream, "# This is a dirfile format file.\n"
+          "# It was written using version %s of the GetData Library.\n"
+          "# Written on %s UTC", PACKAGE_VERSION, buffer);
+
+      if ((ptr = getenv("LOGNAME")) != NULL)
+        fprintf(stream, " by %s", ptr);
+      fputs(".\n\n", stream);
+
+      /* Regardless of the version of the input dirfile, we always write
+       * the latest version to disk -- this is present in every format file
+       * fragment as the first non-comment line for sanity's sake. */
+      fprintf(stream, "/VERSION %i\n", DIRFILE_STANDARDS_VERSION);
+
+      /* Global metadata */
+      if (i == 0) {
+        fprintf(stream, "/ENDIAN %s\n",
+#ifdef WORDS_BIGENDIAN
+            (D->flags & GD_LITTLE_ENDIAN) ? "little" : "big"
+#else
+            (D->flags & GD_BIG_ENDIAN) ? "big" : "little"
+#endif
+            );
+
+        if (D->frame_offset != 0)
+          fprintf(stream, "/FRAMEOFFSET %llu\n",
+              (unsigned long long)D->frame_offset);
+      }
+
+      /* The first field */
+      if (D->first_field != NULL) {
+        if (D->first_field->format_file == i)
+          _GD_FieldSpec(D, stream, D->first_field);
+        else
+          for (i = 0; i < D->n_include; ++i)
+            if (D->include_list[i].first && D->include_list[i].parent == i) {
+              fprintf(stream, "/INCLUDE %s\n", D->include_list[i].name);
+              break; /* There can be only one */
+            }
+      }
+      
+      /* The remaining includes */
+      for (i = 0; i < D->n_include; ++i)
+        if (D->include_list[i].parent == i && !D->include_list[i].first)
+          fprintf(stream, "/INCLUDE %s\n", D->include_list[i].name);
+
+      /* The fields */
+      for (i = 0; i < D->n_entries; ++i)
+        if (D->entry[i]->format_file == i)
+          _GD_FieldSpec(D, stream, D->entry[i]);
+
+      /* That's all, flush, sync, and close */
+      fflush(stream);
+      fsync(fd);
+      fclose(stream);
+      
+      /* If no error was encountered, move the temporary file over the
+       * old format file, otherwise abort */
+      if (D->error != GD_E_OK) {
+        unlink(temp_file);
+        break;
+        /* Only assume we've synced the file if the rename succeeds */
+      } else if (rename(temp_file, D->include_list[i].name)) {
+        _GD_SetError(D, GD_E_OPEN_INCLUDE, errno, NULL, 0,
+            D->include_list[i].name);
+        unlink(temp_file);
+      } else
+        D->include_list[i].modified = 0;
+    }
+
+  dreturnvoid();
+}
+
+void dirfile_flush_metadata(DIRFILE* D)
+{
+  dtrace("%p", D);
+
+  if (D->flags & GD_INVALID) { /* don't crash */
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturnvoid();
+    return;
+  }
+
+  _GD_ClearError(D);
+
+  _GD_FlushMeta(D);
+
+  dreturnvoid();
+}
+
 void dirfile_flush(DIRFILE* D, const char* field_code)
 {
   int i;
@@ -102,13 +292,15 @@ void dirfile_flush(DIRFILE* D, const char* field_code)
   _GD_ClearError(D);
 
   if (field_code == NULL) {
-    for (i = 0; i < D->n_entries; ++i)
-      if (D->entry[i]->field_type == GD_RAW_ENTRY)
-        _GD_Flush(D, D->entry[i], field_code);
+    _GD_FlushMeta(D);
+    if (!D->error)
+      for (i = 0; i < D->n_entries; ++i)
+        if (D->entry[i]->field_type == GD_RAW_ENTRY)
+          _GD_Flush(D, D->entry[i], NULL);
   } else
     _GD_Flush(D, _GD_FindField(D, field_code), field_code);
 
-  dreturnvoid();
+    dreturnvoid();
 }
 /* vim: ts=2 sw=2 et tw=80
 */

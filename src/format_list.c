@@ -32,7 +32,7 @@ const char* get_format_filename(DIRFILE* D, int index)
   if (index < 0 || D->flags & GD_INVALID || index >= D->n_include)
     return NULL;
 
-  return D->include_list[index];
+  return D->include_list[index].name;
 }
 
 int get_nformats(DIRFILE* D)

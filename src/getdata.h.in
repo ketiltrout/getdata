@@ -130,6 +130,7 @@ struct _gd_unified_entry {
 
       char* file; /* intenral */
       int fp; /* intenral */
+      int first; /* internal */
     };
     struct { /* LINCOM */
       int n_fields;
@@ -152,6 +153,9 @@ struct _gd_unified_entry {
 };
 
 typedef struct _gd_unified_entry gd_entry_t;
+
+/* Format file fragment metadata */
+struct gd_include_t;
 
 /* The DIRFILE struct.  */
 struct _GD_DIRFILE {
@@ -177,7 +181,7 @@ struct _GD_DIRFILE {
   int recurse_level;
 
   /* include list */
-  char** include_list;
+  struct gd_include_t* include_list;
   int n_include;
 
   /* field list */
@@ -230,26 +234,28 @@ int dirfile_add(DIRFILE* D, const gd_entry_t* entry)
   __THROW __gd_nonnull ((1,2));
 
 int dirfile_add_raw(DIRFILE* D, const char* field_code, unsigned int spf,
-    gd_type_t data_type) __THROW __gd_nonnull ((1,2));
+    gd_type_t data_type, int format_file) __THROW __gd_nonnull ((1,2));
 
-int dirfile_add_lincom(DIRFILE* D, const char* field_code, int n_fields, ...)
-  __THROW __gd_nonnull ((1,2));
+int dirfile_add_lincom(DIRFILE* D, const char* field_code, int format_file,
+    int n_fields, ...) __THROW __gd_nonnull ((1,2));
 
 int dirfile_add_linterp(DIRFILE* D, const char* field_code,
-    const char* in_field, const char* table) __THROW __gd_nonnull ((1,2,3,4));
+    const char* in_field, const char* table, int format_file) __THROW
+__gd_nonnull ((1,2,3,4));
 
 int dirfile_add_bit(DIRFILE* D, const char* field_code, const char* in_field,
-    int bitnum, int numbits) __THROW __gd_nonnull ((1,2,3));
+    int bitnum, int numbits, int format_file) __THROW __gd_nonnull ((1,2,3));
 
 int dirfile_add_multiply(DIRFILE* D, const char* field_code,
-    const char* in_field1, const char* in_field2) __THROW
+    const char* in_field1, const char* in_field2, int format_file) __THROW
 __gd_nonnull ((1,2,3,4));
 
 int dirfile_add_phase(DIRFILE* D, const char* field_code, const char* in_field,
-    int shift) __THROW __gd_nonnull ((1,2,3));
+    int shift, int format_file) __THROW __gd_nonnull ((1,2,3));
 
-const char* get_format_filename(DIRFILE* D, int index) __THROW
-__gd_nonnull((1));
+const char* get_format_filename(DIRFILE* D, int index)
+  __THROW __gd_nonnull((1));
+
 int get_nformats(DIRFILE* D) __THROW __gd_nonnull((1));
 
 /* The following functions contain calls to I/O functions, making them

@@ -39,6 +39,13 @@ int dirfile_add(DIRFILE* D, const gd_entry_t* entry)
 
   _GD_ClearError(D);
 
+  /* check access mode */
+  if ((D->flags & GD_ACCMODE) == GD_RDONLY) {
+    _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
   /* check for duplicate field */
   gd_entry_t* E = _GD_FindField(D, entry->field); 
 
@@ -165,6 +172,7 @@ int dirfile_add(DIRFILE* D, const gd_entry_t* entry)
   /* add the entry and resort the entry list */
   D->entry = realloc(D->entry, (D->n_entries + 1) * sizeof(gd_entry_t**));
   D->entry[D->n_entries++] = E;
+  D->include_list[E->format_file].modified = 1;
 
   qsort(D->entry, D->n_entries, sizeof(gd_entry_t*), _GD_EntryCmp);
 
@@ -174,15 +182,16 @@ int dirfile_add(DIRFILE* D, const gd_entry_t* entry)
 
 /* add a RAW entry */
 int dirfile_add_raw(DIRFILE* D, const char* field_code, unsigned int spf,
-    gd_type_t data_type)
+    gd_type_t data_type, int format_file)
 {
-  dtrace("%p, \"%s\", %i, %x", D, field_code, spf, data_type);
+  dtrace("%p, \"%s\", %i, %x %i", D, field_code, spf, data_type, format_file);
 
   gd_entry_t R;
   R.field = (char*)field_code;
   R.field_type = GD_RAW_ENTRY;
   R.spf = spf;
   R.data_type = data_type;
+  R.format_file = format_file;
   int error = dirfile_add(D, &R);
 
   dreturn("%i", error);
@@ -190,9 +199,10 @@ int dirfile_add_raw(DIRFILE* D, const char* field_code, unsigned int spf,
 }
 
 /* add a LINCOM entry -- this function is variadic */
-int dirfile_add_lincom(DIRFILE* D, const char* field_code, int n_fields, ...)
+int dirfile_add_lincom(DIRFILE* D, const char* field_code, int format_file,
+    int n_fields, ...)
 {
-  dtrace("%p, \"%s\", %i, ...", D, field_code, n_fields);
+  dtrace("%p, \"%s\", %i, %i, ...", D, field_code, format_file, n_fields);
 
   int i;
   va_list va;
@@ -200,6 +210,7 @@ int dirfile_add_lincom(DIRFILE* D, const char* field_code, int n_fields, ...)
   L.field = (char*)field_code;
   L.field_type = GD_LINCOM_ENTRY;
   L.n_fields = n_fields;
+  L.format_file = format_file;
 
   if (n_fields > 0) {
     va_start(va, n_fields);
@@ -225,15 +236,17 @@ int dirfile_add_lincom(DIRFILE* D, const char* field_code, int n_fields, ...)
 
 /* add a LINTERP entry */
 int dirfile_add_linterp(DIRFILE* D, const char* field_code,
-    const char* in_field, const char* table)
+    const char* in_field, const char* table, int format_file)
 {
-  dtrace("%p, \"%s\", \"%s\", \"%s\"", D, field_code, in_field, table);
+  dtrace("%p, \"%s\", \"%s\", \"%s\", %i", D, field_code, in_field, table,
+      format_file);
 
   gd_entry_t L;
   L.field = (char*)field_code;
   L.field_type = GD_LINTERP_ENTRY;
   L.in_fields[0] = (char*)in_field;
   L.table = (char*)table;
+  L.format_file = format_file;
   int error = dirfile_add(D, &L);
 
   dreturn("%i", error);
@@ -242,10 +255,10 @@ int dirfile_add_linterp(DIRFILE* D, const char* field_code,
 
 /* add a BIT entry */
 int dirfile_add_bit(DIRFILE* D, const char* field_code, const char* in_field,
-    int bitnum, int numbits)
+    int bitnum, int numbits, int format_file)
 {
-  dtrace("%p, \"%s\", \"%s\", %i, %i\n", D, field_code, in_field, bitnum,
-      numbits);
+  dtrace("%p, \"%s\", \"%s\", %i, %i, %i\n", D, field_code, in_field, bitnum,
+      numbits, format_file);
 
   gd_entry_t B;
   B.field = (char*)field_code;
@@ -253,6 +266,7 @@ int dirfile_add_bit(DIRFILE* D, const char* field_code, const char* in_field,
   B.in_fields[0] = (char*)in_field;
   B.bitnum = bitnum;
   B.numbits = numbits;
+  B.format_file = format_file;
   int error = dirfile_add(D, &B);
 
   dreturn("%i", error);
@@ -261,15 +275,17 @@ int dirfile_add_bit(DIRFILE* D, const char* field_code, const char* in_field,
 
 /* add a MULTIPLY entry */
 int dirfile_add_multiply(DIRFILE* D, const char* field_code,
-    const char* in_field1, const char* in_field2)
+    const char* in_field1, const char* in_field2, int format_file)
 {
-  dtrace("%p, \"%s\", \"%s\", \"%s\"", D, field_code, in_field1, in_field2);
+  dtrace("%p, \"%s\", \"%s\", \"%s\", %i", D, field_code, in_field1, in_field2,
+      format_file);
 
   gd_entry_t M;
   M.field = (char*)field_code;
   M.field_type = GD_MULTIPLY_ENTRY;
   M.in_fields[0] = (char*)in_field1;
   M.in_fields[1] = (char*)in_field2;
+  M.format_file = format_file;
   int error = dirfile_add(D, &M);
 
   dreturn("%i", error);
@@ -278,15 +294,16 @@ int dirfile_add_multiply(DIRFILE* D, const char* field_code,
 
 /* add a PHASE entry */
 int dirfile_add_phase(DIRFILE* D, const char* field_code, const char* in_field,
-    int shift)
+    int shift, int format_file)
 {
-  dtrace("%p, \"%s\", \"%s\", %i", D, field_code, in_field, shift);
+  dtrace("%p, \"%s\", \"%s\", %i", D, field_code, in_field, shift, format_file);
 
   gd_entry_t P;
   P.field = (char*)field_code;
   P.field_type = GD_PHASE_ENTRY;
   P.in_fields[0] = (char*)in_field;
   P.shift = shift;
+  P.format_file = format_file;
   int error = dirfile_add(D, &P);
 
   dreturn("%i", error);

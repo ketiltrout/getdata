@@ -67,10 +67,15 @@ static void _GD_FreeD(DIRFILE* D)
       }
     }
 
+  /* Item zero of include_list is always a static string */
+  for(i = 1; i < D->n_include; ++i)
+    free((char*)D->include_list[i].name);
+
   free(D->entry);
   free(D->error_string);
   free(D->error_file);
   free(D->field_list);
+  free(D->include_list);
 
   dreturnvoid();
 }

@@ -1,3 +1,20 @@
+2008-09-27   D. V. Wiebe <getdata@ketiltrout.net>  svn:106
+	* src/flush.c (_GD_Flush): Don't call fsync on read-only dirfiles.
+
+	* src/open.c (_GD_ParseFormatFile dirfile_open): Don't find the first raw
+	field at the end, but rather do it as we're scanning raw fields.  Also,
+	record some format file metadata: whether it contains the first raw field,
+	and whether it is modified.
+
+	* src/close.c (_GD_FreeD): free the include_list.
+
+	* src/internal.h: Minimum format file line length is 4096 characters.
+
+	* src/flish.c (_GD_FlushMeta dirfile_flush_metadata): flush metadata changes
+	to disk (ie. write format files).  Includes public function.
+
+	* src/add.c (dirfile_add): prevent adding to read-only dirfiles
+
 2008-09-26   D. V. Wiebe <getdata@ketiltrout.net>  svn:105
 	* man/get_entry.3 src/add.c src/getdata.h.in src/open.c: Expose include_list
 	to the public.  Add include index to each entry.

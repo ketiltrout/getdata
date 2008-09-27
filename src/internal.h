@@ -100,8 +100,8 @@ char *strerror_r(int errnum, char *buf, size_t buflen);
 #define GD_MAX_RECURSE_LEVEL  32
 
 /* maximum length of a format file line */
-#if (FILENAME_MAX < 256)
-# define MAX_LINE_LENGTH 256
+#if (FILENAME_MAX < 4096)
+# define MAX_LINE_LENGTH 4096
 #else
 # define MAX_LINE_LENGTH FILENAME_MAX
 #endif
@@ -135,6 +135,14 @@ char *strerror_r(int errnum, char *buf, size_t buflen);
 
 #define GD_E_LINFILE_LENGTH    1
 #define GD_E_LINFILE_OPEN      2
+
+/* Format file fragment metadata */
+struct gd_include_t {
+  const char* name;
+  int modified;
+  int parent;
+  int first;
+};
 
 void* _GD_Alloc(DIRFILE* D, gd_type_t type, size_t n) __gd_nonnull ((1))
   __attribute_malloc__ __THROW __wur;

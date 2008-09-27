@@ -460,9 +460,12 @@ int _GD_EntryCmp(const void *A, const void *B)
 /* _GD_ParseFormatFile: Perform the actual parsing of the format file.  This
  *       function is called from GetFormat once for the main format file and
  *       once for each included file.
+ *
+ *       Returns 0 unless this format file contains the first raw field.
  */
-static void _GD_ParseFormatFile(FILE* fp, DIRFILE *D, const char* filedir,
-    const char* subdir, const char* format_file, int standards)
+static int _GD_ParseFormatFile(FILE* fp, DIRFILE *D, const char* filedir,
+    const char* subdir, const char* format_file, int format_parent,
+    int standards)
 {
   char instring[MAX_LINE_LENGTH];
   const char* in_cols[MAX_IN_COLS];
@@ -470,6 +473,8 @@ static void _GD_ParseFormatFile(FILE* fp, DIRFILE *D, const char* filedir,
   int n_cols = 0;
   int linenum = 0;
   int ws = 1;
+  int me = D->n_include - 1;
+  int have_first = 0;
 
   dtrace("%p, %p, \"%s\", \"%s\", \"%s\", %i", fp, D, filedir, subdir,
       format_file, standards);
@@ -511,10 +516,14 @@ static void _GD_ParseFormatFile(FILE* fp, DIRFILE *D, const char* filedir,
       char new_subdir[FILENAME_MAX];
       FILE* new_fp = NULL;
 
+      /* create the format filename */
+      snprintf(new_format_file, FILENAME_MAX, "%s/%s/%s", filedir,
+          subdir, in_cols[1]);
+
       /* Run through the include list to see if we've already included this
        * file */
       for (i = 0; i < D->n_include; ++i)
-        if (strcmp(in_cols[1], D->include_list[i]) == 0) {
+        if (strcmp(new_format_file, D->include_list[i].name) == 0) {
           found = 1;
           break;
         }
@@ -524,8 +533,6 @@ static void _GD_ParseFormatFile(FILE* fp, DIRFILE *D, const char* filedir,
         continue;
 
       /* Otherwise, try to open the file */
-      snprintf(new_format_file, FILENAME_MAX, "%s/%s/%s", filedir,
-          subdir, in_cols[1]);
       new_fp = fopen(new_format_file, "r");
 
       /* If opening the file failed, set the error code and abort parsing. */
@@ -537,13 +544,21 @@ static void _GD_ParseFormatFile(FILE* fp, DIRFILE *D, const char* filedir,
 
       /* If we got here, we managed to open the included file; parse it */
       D->include_list = realloc(D->include_list, ++(D->n_include) *
-          sizeof(char*));
-      D->include_list[D->n_include - 1] = strdup(in_cols[1]);
-
-      if (D->include_list[D->n_include - 1] == NULL) {
+          sizeof(struct gd_include_t));
+      if (D->include_list == NULL) {
         _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-        dreturnvoid();
-        return;
+        dreturn("%i", have_first);
+        return have_first;
+      }
+      D->include_list[D->n_include - 1].name = strdup(new_format_file);
+      D->include_list[D->n_include - 1].modified = 0;
+      D->include_list[D->n_include - 1].parent = format_parent;
+      D->include_list[D->n_include - 1].first = 0;
+
+      if (D->include_list[D->n_include - 1].name == NULL) {
+        _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+        dreturn("%i", have_first);
+        return have_first;
       }
 
       /* extract the subdirectory name - dirname both returns a volatile string
@@ -555,8 +570,9 @@ static void _GD_ParseFormatFile(FILE* fp, DIRFILE *D, const char* filedir,
         snprintf(new_subdir, FILENAME_MAX, "%s/%s", subdir,
             dirname(temp_buffer));
 
-      _GD_ParseFormatFile(new_fp, D, filedir, new_subdir, new_format_file,
-          standards);
+      if (_GD_ParseFormatFile(new_fp, D, filedir, new_subdir, new_format_file,
+            me, standards))
+        D->include_list[me].first = 1;
       fclose(new_fp);
     } else if (strcmp(ptr, "ENDIAN") == 0) {
       if (!(D->flags & GD_FORCE_ENDIAN)) {
@@ -587,6 +603,18 @@ static void _GD_ParseFormatFile(FILE* fp, DIRFILE *D, const char* filedir,
           format_file, linenum);
       if (D->error != GD_E_OK)
         D->n_entries--;
+      else if (D->first_field == NULL) {
+        /* set the first field */
+        D->first_field = malloc(sizeof(gd_entry_t));
+        if (D->first_field == NULL)
+          _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+        else {
+          memcpy(D->first_field, D->entry[D->n_entries - 1],
+              sizeof(gd_entry_t));
+          have_first = 1;
+          D->include_list[me].first = 1;
+        }
+      }
     } else if (strcmp(in_cols[1], "LINCOM") == 0) {
       D->n_entries++;
       D->entry = realloc(D->entry, D->n_entries * sizeof(gd_entry_t**));
@@ -634,8 +662,8 @@ static void _GD_ParseFormatFile(FILE* fp, DIRFILE *D, const char* filedir,
       break;
   }
 
-  dreturnvoid();
-  return;
+  dreturn("%i", have_first);
+  return have_first;
 }
 
 /* attempt to open or create a new dirfile - set error appropriately */
@@ -787,12 +815,9 @@ static FILE* _GD_CreateDirfile(DIRFILE* D, const char* format_file,
 */
 DIRFILE* dirfile_open(const char* filedir, unsigned int flags)
 {
-  int i;
-  struct stat statbuf;
   FILE *fp;
   DIRFILE* D;
   char format_file[FILENAME_MAX];
-  char raw_data_filename[FILENAME_MAX];
 
   dtrace("\"%s\", 0%o", filedir, flags);
 
@@ -823,39 +848,23 @@ DIRFILE* dirfile_open(const char* filedir, unsigned int flags)
   /* Parse the file.  This will take care of any necessary inclusions */
   D->n_include = 1;
 
-  D->include_list = malloc(sizeof(char**));
+  D->include_list = malloc(sizeof(struct gd_include_t));
   if (D->include_list == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     dreturn("%p", D);
     return D;
   }
-  D->include_list[0] = "format";
+  D->include_list[0].name = "format";
+  D->include_list[0].modified = 0;
+  D->include_list[0].parent = -1;
 
-  _GD_ParseFormatFile(fp, D, filedir, ".", format_file,
+  _GD_ParseFormatFile(fp, D, filedir, ".", format_file, 0,
       DIRFILE_STANDARDS_VERSION);
   fclose(fp);
 
   if (D->error != GD_E_OK) {
     dreturn("%p", D);
     return D;
-  }
-
-  /* find the first raw field */
-  for (i = 0; i < D->n_entries; i++) {
-    if (D->entry[i]->field_type == GD_RAW_ENTRY) {
-      snprintf(raw_data_filename, FILENAME_MAX, "%s/%s", filedir,
-          D->entry[i]->file);
-      if (stat(raw_data_filename, &statbuf) >= 0) {
-        /* This must be a deep copy because we don't know where this particular
-         * entry will end up after the qsort */
-        D->first_field = malloc(sizeof(gd_entry_t));
-        if (D->first_field == NULL)
-          _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-        else
-          memcpy(D->first_field, D->entry[i], sizeof(gd_entry_t));
-        break;
-      }
-    }
   }
 
   /** Now sort the entries */
