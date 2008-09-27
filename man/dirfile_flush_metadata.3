@@ -1,4 +1,4 @@
-.\" dirfile_flush.3.  The dirfile_flush man page.
+.\" dirfile_flush_metadata.3.  The dirfile_flush_metadata man page.
 .\"
 .\" (C) 2008 D. V. Wiebe
 .\"
@@ -20,60 +20,51 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH dirfile_flush 3 "27 September 2008" "Version 0.4.0" "GETDATA"
+.TH dirfile_flush_metadata 3 "27 September 2008" "Version 0.4.0" "GETDATA"
 .SH NAME
-dirfile_flush \(em close a dirfile and free associated memory.
+dirfile_flush_metadata \(em close a dirfile and free associated memory.
 .SH SYNOPSIS
 .B #include <getdata.h>
 .HP
 .nh
 .ad l
-.BI "void dirfile_flush(DIRFILE *" dirfile ", const char *" field_code );
+.BI "void dirfile_flush_metadata(DIRFILE *" dirfile );
 .hy
 .ad n
 .SH DESCRIPTION
 The
-.BR dirfile_flush ()
-function flushes and closes all file handles associated with
-.IR field_code ,
-or its input(s), in the dirfile specified by
-.IR dirfile .
-As a special case, if
-.I field_code
-is NULL, all fields in
-.I dirfile
-will be flushed and closed.  In this special case, modified metadata will
-also be flushed to disk as if
-.BR dirfile_flush_metadata (3)
-has been called.
+.BR dirfile_flush_metadata ()
+function flushes all pending metadata changes in the dirfile specified by
+.I dirfile 
+to disk.  This is accomplished by re-writing the format file fragments
+containing modified metadata.  Format file fragments which are unchanged are
+not touched.
+.P
+This function fushes only metadata.  To flush the field data as well, call
+.BR dirfile_flush (3)
+instead.
 .SH RETURN VALUE
-.BR dirfile_flush ()
+.BR dirfile_flush_metadata ()
 returns no value.  On error, it will set
 .IR dirfile -> error
 to a non-zero error value.  Possible error values are:
 .TP 8
-.B GD_E_BAD_CODE
-The field specified by
-.I field_code
-was not found in the database.
-.TP
 .B GD_E_BAD_DIRFILE
 The supplied dirfile was invalid.
 .TP
-.B GD_E_RAW_IO
-An error occurred while trying to flush or close the field(s).
+.B GD_E_INTERNAL_ERROR
+An internal error occurred in the library while trying to perform the task.
+This indicates a bug in the library.  Please report the incident to the
+maintainer.
 .TP
-.B GD_E_RECURSE_LEVEL
-Too many levels of recursion were encountered while trying to resolve
-.IR field_code .
-This usually indicates a circular dependency in field specification in the
-dirfile.
+.B GD_E_OPEN_INCLUDE
+A temporary file could not be opened into which to write the modified metadata.
 .P
 A descriptive error string for the last error encountered can be obtained from
 a call to
 .BR get_error_string (3).
 .SH SEE ALSO
 .BR dirfile_open (3),
+.BR dirfile_flush (3),
 .BR dirfile_close (3),
-.BR durfile_flush_metadata (3),
 .BR get_error_string (3)
