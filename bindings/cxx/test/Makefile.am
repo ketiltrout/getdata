@@ -21,8 +21,9 @@
 AUTOMAKE_OPTIONS = foreign
 INCLUDES = -Wall -I$(srcdir)/.. -I$(top_srcdir)/src -D__TEST__=\"$@\"
 LDADD=../libgetdata++.la
-TESTS=entry getdata nframes putdata spf
+TESTS=addentry entry getdata nframes putdata spf
 
+addentry_SOURCES=addentry.cpp
 entry_SOURCES=entry.cpp
 getdata_SOURCES=getdata.cpp
 nframes_SOURCES=nframes.cpp

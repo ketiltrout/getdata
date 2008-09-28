@@ -15,7 +15,7 @@ int main(void)
   const char* format = __TEST__ "dirfile/format";
 
   DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_CREAT);
-  dirfile_add_raw(D, "new", 2, (gd_type_t)'c', 0);
+  dirfile_add_raw(D, "new", (gd_type_t)'c', 2, 0);
   int error = D->error;
 
   /* check */

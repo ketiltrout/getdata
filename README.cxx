@@ -13,7 +13,7 @@ Defined in getdata/dirfile.h, the Getdata::Dirfile class encapsulates the
 DIRFILE object, providing a thin wrapper to the C API.  The following methods
 are available:
 
-* Dirfile::Dirfile(const char* dirfilename, unsigned int flags = GD_RDWR);
+* Dirfile::Dirfile(const char* dirfilename, unsigned int flags = GD_RDWR)
 
   The constructor takes the name of the dirfile and the dirfile flags and will
   call dirfile_open(3) on the provided path name.  If flags is omitted, the
@@ -42,17 +42,21 @@ are available:
   created after calling get_entry with the supplied field_code.  See below for a
   description of the Entry class.
 
+* int Dirfile::Add(const Entry &entry)
 * unsigned int Dirfile::SamplesPerFrame(const char* field_code)
-* const char** Dirfile::FieldList();
-* void Dirfile::Flush(const char* field_code = NULL);
+* const char** Dirfile::FieldList()
+* void Dirfile::Flush(const char* field_code = NULL)
+* void Dirfile::FlushMetaData()
+* const char* Dirfile::FormatFilename(int index)
 * size_t Dirfile::GetData(const char* field_code, off_t first_frame,
     off_t first_sample, size_t num_frames, size_t num_samples,
-    Dirfile::DataType type, void* data_out);
-* unsigned int Dirfile::NFields();
-* off_t Dirfile::NFrames();
+    Dirfile::DataType type, void* data_out)
+* unsigned int Dirfile::NFields()
+* off_t Dirfile::NFrames()
+* int Dirfile::NFormats()
 * size_t Dirfile::PutData(const char* field_code, off_t first_frame,
     off_t first_sample, size_t num_frames, size_t num_samples,
-    Dirfile::DataType type, const void* data_in);
+    Dirfile::DataType type, const void* data_in)
 
   These methods call the corresponding function from the C API on the C DIRFILE
   object associated with the C++ object.  Arguments of type GetData::DataType
@@ -69,43 +73,68 @@ ENTRY CLASS
 Defined in getdata/entry.h, the GetData::Entry class encapsulates the gd_entry_t
 object.  The following methods are available:
 
-* Entry::Entry();
+* Entry::Entry()
 
   This will create an empty gd_entry_t object.
 
-* Entry::~Entry();
+* Entry::~Entry()
 
   This will take care of de-allcoating the gd_entry_t object and its allocated
   strings.
 
-* EntryType Type();
+* EntryType Type()
 
   This will return the field type of the Entry's field.  This will be one of:
 
     NoEntry, RawEntry, LincomEntry, LinterpEntry, BitEntry, MultiplyEntry,
     PhaseEntry
 
-* const char *Code();
+* const char *Code()
 
   This method returns the name of the field.  
 
-* unsigned int SamplesPerFrame();
-* DataType RawType();
-* int NFields();
-* int FirstBit();
-* int NumBits();
-* int Shift();
-* const char *Table();
+* int FormatFile()
+* unsigned int SamplesPerFrame()
+* DataType RawType()
+* int NFields()
+* int FirstBit()
+* int NumBits()
+* int Shift()
+* const char *Table()
 
   These methods will return the corresponding member of the gd_entry_t object.
   Only methods reasonable to be queried for the given field type will return
   meaningful results.
 
-* const char *Input(int index = 0);
-* double Scale(int index = 0);
-* double Offset(int index = 0);
+* const char *Input(int index = 0)
+* double Scale(int index = 0)
+* double Offset(int index = 0)
 
   These methods will return an element from  the gd_entry_t members in_fields[],
   m[], and b[], indexed by the supplied parameter.  Attempts to access elements
   out of range for the field that the Entry class describes will not return
   meaningful results.
+
+ENTRY CHILD CLASSES
+===================
+
+The following classes are provided to create Entry objects of the corresponding
+field type.
+
+* RawEntry::RawEntry(const char* field_code, DataType data_type,
+    unsigned int spf, int format_file = 0)
+
+* LincomEntry::LincomEntry(const char* field_code, int n_fields,
+    const char** in_fields, double* m, double* b, int format_file = 0)
+
+* LinterpEntry::LinterpEntry(const char* field_code, const char* in_field,
+    const char* table, int format_file = 0)
+
+* BitEntry::BitEntry(const char* field_code, const char* in_field, int bitnum,
+    int numbits = 1, int format_file = 0)
+
+* MultiplyEntry::MultiplyEntry(const char* field_code, const char* in_field1,
+    const char* in_field2, int format_file = 0)
+
+* PhaseEntry::PhaseEntry(const char* field_code, const char* in_field,
+    int shift, int format_file = 0)

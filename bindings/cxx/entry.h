@@ -40,13 +40,13 @@ namespace GetData {
   };
 
   enum EntryType {
-    NoEntry       = GD_NO_ENTRY,
-    RawEntry      = GD_RAW_ENTRY,
-    LincomEntry   = GD_LINCOM_ENTRY,
-    LinterpEntry  = GD_LINTERP_ENTRY,
-    BitEntry      = GD_BIT_ENTRY,
-    MultiplyEntry = GD_MULTIPLY_ENTRY,
-    PhaseEntry    = GD_PHASE_ENTRY
+    NoEntryType       = GD_NO_ENTRY,
+    RawEntryType      = GD_RAW_ENTRY,
+    LincomEntryType   = GD_LINCOM_ENTRY,
+    LinterpEntryType  = GD_LINTERP_ENTRY,
+    BitEntryType      = GD_BIT_ENTRY,
+    MultiplyEntryType = GD_MULTIPLY_ENTRY,
+    PhaseEntryType    = GD_PHASE_ENTRY
   };
 
   class Entry {
@@ -61,53 +61,55 @@ namespace GetData {
       const char *Code() { return E.field; };
 
       EntryType Type() { return (EntryType)E.field_type; };
+      
+      int FormatFile() { return E.format_file; };
 
       /* Specific data */
-      const char *Input(int index = 0) {
+      virtual const char *Input(int index = 0) {
         return (CheckIndex(E.field_type, E.n_fields, index)) ? 
             E.in_fields[index] : NULL;
       };
 
       /* RAW methods */
-      unsigned int SamplesPerFrame() {
+      virtual unsigned int SamplesPerFrame() {
         return (E.field_type == GD_RAW_ENTRY) ? E.spf : 0;
       };
 
-      DataType RawType() {
+      virtual DataType RawType() {
         return (E.field_type == GD_RAW_ENTRY) ? (DataType)E.data_type : Unknown;
       };
 
       /* LINCOM methods */
-      int NFields() {
+      virtual int NFields() {
         return (E.field_type == GD_LINCOM_ENTRY) ? E.n_fields : 0;
       };
 
-      double Scale(int index = 0) {
+      virtual double Scale(int index = 0) {
         return (E.field_type == GD_LINCOM_ENTRY &&
-            CheckIndex(E.field_type, E.n_fields, index)) ?  E.m[index] : 0;
+            CheckIndex(E.field_type, E.n_fields, index)) ? E.m[index] : 0;
       }
 
-      double Offset(int index = 0) {
+      virtual double Offset(int index = 0) {
         return (E.field_type == GD_LINCOM_ENTRY &&
-            CheckIndex(E.field_type, E.n_fields, index)) ?  E.b[index] : 0;
+            CheckIndex(E.field_type, E.n_fields, index)) ? E.b[index] : 0;
       }
 
       /* LINTERP methods */
-      const char *Table() {
+      virtual const char *Table() {
         return (E.field_type == GD_LINTERP_ENTRY) ? E.table : NULL;
       };
 
       /* BIT methods */
-      int FirstBit() {
+      virtual int FirstBit() {
         return (E.field_type == GD_BIT_ENTRY) ? E.bitnum : -1;
       };
 
-      int NumBits() {
+      virtual int NumBits() {
         return (E.field_type == GD_BIT_ENTRY) ? E.numbits : -1;
       };
 
       /* PHASE methods */
-      int Shift() {
+      virtual int Shift() {
         return (E.field_type == GD_PHASE_ENTRY) ? E.shift : 0;
       };
 
@@ -118,6 +120,100 @@ namespace GetData {
     private:
       Entry(DIRFILE *dirfile, const char* field_code);
   };
+
+  class RawEntry : public Entry {
+    public:
+      RawEntry(const char* field_code, DataType data_type, unsigned int spf,
+          int format_file = 0);
+
+      virtual unsigned int SamplesPerFrame() {
+        return E.spf;
+      };
+
+      virtual DataType RawType() {
+        return (DataType)E.data_type;
+      };
+  };
+
+  class LincomEntry : public Entry {
+    public:
+      LincomEntry(const char* field_code, int n_fields, const char** in_fields,
+          double* m, double* b, int format_file = 0);
+
+      virtual const char *Input(int index = 0) {
+        return (CheckIndex(E.field_type, E.n_fields, index)) ? 
+            E.in_fields[index] : NULL;
+      };
+
+      virtual int NFields() {
+        return E.n_fields;
+      };
+
+      virtual double Scale(int index = 0) {
+        return (CheckIndex(E.field_type, E.n_fields, index)) ? E.m[index] : 0;
+      };
+
+      virtual double Offset(int index = 0) {
+        return (CheckIndex(E.field_type, E.n_fields, index)) ? E.b[index] : 0;
+      };
+  };
+
+  class LinterpEntry : public Entry {
+    public:
+      LinterpEntry(const char* field_code, const char* in_field,
+          const char* table, int format_file = 0);
+
+      virtual const char *Input(int index = 0) {
+        return E.in_fields[0];
+      };
+
+      virtual const char *Table() {
+        return E.table;
+      };
+  };
+
+  class BitEntry : public Entry {
+    public:
+      BitEntry(const char* field_code, const char* in_field, int bitnum,
+          int numbits = 1, int format_file = 0);
+
+      virtual const char *Input(int index = 0) {
+        return E.in_fields[0];
+      };
+
+      virtual int FirstBit() {
+        return E.bitnum;
+      };
+
+      virtual int NumBits() {
+        return E.numbits;
+      };
+  };
+
+  class MultiplyEntry : public Entry {
+    public:
+      MultiplyEntry(const char* field_code, const char* in_field1,
+          const char* in_field2, int format_file = 0);
+
+      virtual const char *Input(int index = 0) {
+        return E.in_fields[(index == 0) ? 0 : 1];
+      };
+  };
+
+  class PhaseEntry : public Entry {
+    public:
+      PhaseEntry(const char* field_code, const char* in_field, int shift,
+          int format_file = 0);
+
+      virtual const char *Input(int index = 0) {
+        return E.in_fields[0];
+      };
+
+      virtual int Shift() {
+        return E.shift;
+      };
+  };
+
 }
 
 #endif

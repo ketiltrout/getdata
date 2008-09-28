@@ -219,39 +219,42 @@ extern unsigned int get_nfields(DIRFILE* dirfile) __THROW __gd_nonnull ((1));
 
 extern const char** get_field_list(DIRFILE* dirfile) __THROW __gd_nonnull ((1));
 
-int get_entry(DIRFILE* D, const char* field_code, gd_entry_t* entry)
+extern int get_entry(DIRFILE* D, const char* field_code, gd_entry_t* entry)
   __THROW __gd_nonnull ((1, 2));
 
-gd_entry_t *dirfile_free_entry_strings(gd_entry_t *entry) __THROW;
+extern gd_entry_t *dirfile_free_entry_strings(gd_entry_t *entry) __THROW;
 
-int dirfile_add(DIRFILE* D, const gd_entry_t* entry)
+extern int dirfile_add(DIRFILE* D, const gd_entry_t* entry)
   __THROW __gd_nonnull ((1,2));
 
-int dirfile_add_raw(DIRFILE* D, const char* field_code, unsigned int spf,
-    gd_type_t data_type, int format_file) __THROW __gd_nonnull ((1,2));
+extern int dirfile_add_raw(DIRFILE* D, const char* field_code,
+    gd_type_t data_type, unsigned int spf, int format_file)
+__THROW __gd_nonnull ((1,2));
 
-int dirfile_add_lincom(DIRFILE* D, const char* field_code, int n_fields,
+extern int dirfile_add_lincom(DIRFILE* D, const char* field_code, int n_fields,
     const char** in_fields, const double* m, const double* b, int format_file)
 __THROW __gd_nonnull ((1,2,4,5,6));
 
-int dirfile_add_linterp(DIRFILE* D, const char* field_code,
+extern int dirfile_add_linterp(DIRFILE* D, const char* field_code,
     const char* in_field, const char* table, int format_file) __THROW
 __gd_nonnull ((1,2,3,4));
 
-int dirfile_add_bit(DIRFILE* D, const char* field_code, const char* in_field,
-    int bitnum, int numbits, int format_file) __THROW __gd_nonnull ((1,2,3));
+extern int dirfile_add_bit(DIRFILE* D, const char* field_code,
+    const char* in_field, int bitnum, int numbits, int format_file)
+__THROW __gd_nonnull ((1,2,3));
 
-int dirfile_add_multiply(DIRFILE* D, const char* field_code,
+extern int dirfile_add_multiply(DIRFILE* D, const char* field_code,
     const char* in_field1, const char* in_field2, int format_file) __THROW
 __gd_nonnull ((1,2,3,4));
 
-int dirfile_add_phase(DIRFILE* D, const char* field_code, const char* in_field,
-    int shift, int format_file) __THROW __gd_nonnull ((1,2,3));
+extern int dirfile_add_phase(DIRFILE* D, const char* field_code,
+    const char* in_field, int shift, int format_file)
+__THROW __gd_nonnull ((1,2,3));
 
-const char* get_format_filename(const DIRFILE* D, int index)
+extern const char* get_format_filename(const DIRFILE* D, int index)
   __THROW __gd_nonnull((1));
 
-int get_nformats(const DIRFILE* D) __THROW __gd_nonnull((1));
+extern int get_nformats(const DIRFILE* D) __THROW __gd_nonnull((1));
 
 /* The following functions contain calls to I/O functions, making them
  * cancellation points.  As a result we cannot mark them with __THROW.

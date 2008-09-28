@@ -37,6 +37,8 @@ namespace GetData {
 
       ~Dirfile();
 
+      int Add(const GetData::Entry &entry);
+
       GetData::Entry* Entry(const char* field_code);
 
       int Error();
@@ -47,6 +49,10 @@ namespace GetData {
 
       void Flush(const char* field_code = NULL);
 
+      void FlushMetaData();
+
+      const char* Dirfile::FormatFileName(int index);
+
       size_t GetData(const char* field_code, off_t first_frame,
           off_t first_sample, size_t num_frames, size_t num_samples,
           DataType type, void* data_out);
@@ -54,6 +60,8 @@ namespace GetData {
       unsigned int NFields();
 
       off_t NFrames();
+
+      int Dirfile::NFormats();
 
       size_t PutData(const char* field_code, off_t first_frame,
           off_t first_sample, size_t num_frames, size_t num_samples,

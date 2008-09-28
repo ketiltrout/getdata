@@ -18,7 +18,7 @@ int main(void)
   struct stat buf;
 
   DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_CREAT | GD_TRUNC);
-  dirfile_add_raw(D, "new", 2, GD_UINT8, 0);
+  dirfile_add_raw(D, "new", GD_UINT8, 2, 0);
   dirfile_flush_metadata(D);
   int error = D->error;
 

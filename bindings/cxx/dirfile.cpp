@@ -35,6 +35,11 @@ Dirfile::~Dirfile()
   dirfile_close(D);
 }
 
+int Dirfile::Add(const GetData::Entry &entry)
+{
+  return dirfile_add(D, &entry.E);
+}
+
 Entry *Dirfile::Entry(const char* field_code)
 {
   return new GetData::Entry(D, field_code);
@@ -43,6 +48,11 @@ Entry *Dirfile::Entry(const char* field_code)
 void Dirfile::Flush(const char* field_code)
 {
   dirfile_flush(D, field_code);
+}
+
+void Dirfile::FlushMetaData()
+{
+  dirfile_flush_metadata(D);
 }
 
 int Dirfile::Error()
@@ -95,4 +105,14 @@ size_t Dirfile::PutData(const char* field_code, off_t first_frame,
 {
   return putdata(D, field_code, first_frame, first_sample, num_frames,
       num_samples, (gd_type_t)type, data_in);
+}
+
+const char* Dirfile::FormatFileName(int index)
+{
+  return get_format_filename(D, index);
+}
+
+int Dirfile::NFormats()
+{
+  return get_nformats(D);
 }

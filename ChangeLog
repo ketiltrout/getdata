@@ -1,4 +1,18 @@
-2008-09-29   D. V. Wiebe <getdata@ketiltrout.net>  svn:
+2008-09-28   D. V. Wiebe <getdata@ketiltrout.net>  svn:109
+	* bindings/cxx/dirfile.cpp bindings/cxx/dirfile.h bindings/cxx/entry.cpp
+	bindings/cxx/entry.h test/Makefile.am test/addentry.cpp: Add C++ support
+	for dirfile_add(), dirfile_flush_metadata(), get_format_filename(), and
+	get_nformats().
+
+	* bindings/f77/fgetdata.c bindings/f77/fgetdata.h bindings/f77/getdata.f.in
+	bindings/f77/getdata.f90.in bindings/f77/make_parameters.c: Add F77 and F95
+	bindings for dirfile_add(), dirfile_flush_metadata(), get_format_filename(),
+	and get_nformats().
+
+	* src/add.c (dirfile_add_raw): swap spf and data_type to correspond to the
+	ordering in the format file.
+
+2008-09-28   D. V. Wiebe <getdata@ketiltrout.net>  svn:108
 	* man/dirfile_add.3 man/dirfile_add_raw.3: Added.
 	* man/Makefile.am: Install all the mans previously forgotten about.  Also,
 	link to aliases.

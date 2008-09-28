@@ -215,8 +215,8 @@ int dirfile_add(DIRFILE* D, const gd_entry_t* entry)
 }
 
 /* add a RAW entry */
-int dirfile_add_raw(DIRFILE* D, const char* field_code, unsigned int spf,
-    gd_type_t data_type, int format_file)
+int dirfile_add_raw(DIRFILE* D, const char* field_code, gd_type_t data_type,
+    unsigned int spf, int format_file)
 {
   dtrace("%p, \"%s\", %i, %x %i", D, field_code, spf, data_type, format_file);
 

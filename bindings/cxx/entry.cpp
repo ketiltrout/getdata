@@ -61,3 +61,71 @@ int Entry::CheckIndex(gd_entype_t field_type, int n_fields, int index)
 
   return 1;
 }
+
+RawEntry::RawEntry(const char* field_code, DataType data_type, unsigned int spf,
+      int format_file) : Entry::Entry()
+{
+  E.field = strdup(field_code);
+  E.field_type = GD_RAW_ENTRY;
+  E.spf = spf;
+  E.data_type = (gd_type_t)data_type;
+  E.format_file = format_file;
+}
+
+LincomEntry::LincomEntry(const char* field_code, int n_fields,
+    const char** in_fields, double* m, double* b, int format_file) :
+  Entry::Entry()
+{
+  int i;
+
+  E.field = strdup(field_code);
+  E.field_type = GD_LINCOM_ENTRY;
+  E.n_fields = n_fields;
+  E.format_file = format_file;
+  for (i = 0; i < n_fields; ++i) {
+    E.in_fields[i] = strdup(in_fields[i]);
+    E.m[i] = m[i];
+    E.b[i] = b[i];
+  }
+}
+
+LinterpEntry::LinterpEntry(const char* field_code, const char* in_field,
+    const char* table, int format_file) : Entry::Entry()
+{
+  E.field = strdup(field_code);
+  E.field_type = GD_LINTERP_ENTRY;
+  E.in_fields[0] = strdup(in_field);
+  E.table = strdup(table);
+  E.format_file = format_file;
+}
+
+BitEntry::BitEntry(const char* field_code, const char* in_field, int bitnum,
+    int numbits, int format_file) : Entry::Entry()
+{
+  E.field = strdup(field_code);
+  E.field_type = GD_BIT_ENTRY;
+  E.in_fields[0] = strdup(in_field);
+  E.bitnum = bitnum;
+  E.numbits = numbits;
+  E.format_file = format_file;
+}
+
+MultiplyEntry::MultiplyEntry(const char* field_code, const char* in_field1,
+    const char* in_field2, int format_file) : Entry::Entry()
+{
+  E.field = strdup(field_code);
+  E.field_type = GD_MULTIPLY_ENTRY;
+  E.in_fields[0] = strdup(in_field1);
+  E.in_fields[1] = strdup(in_field2);
+  E.format_file = format_file;
+}
+
+PhaseEntry::PhaseEntry(const char* field_code, const char* in_field, int shift,
+    int format_file) : Entry::Entry()
+{
+  E.field = strdup(field_code);
+  E.field_type = GD_PHASE_ENTRY;
+  E.in_fields[0] = strdup(in_field);
+  E.shift = shift;
+  E.format_file = format_file;
+}

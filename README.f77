@@ -207,25 +207,27 @@ Available Subroutines
   entry_type.  The entry_type will be one of the entry type parameters listed
   below.
 
-* GDFERW(spf, data_type, dirfile_unit, field_code, field_code_len)
+* GDFERW(spf, data_type, format_file, dirfile_unit, field_code, field_code_len)
 
   Output: 
-    INTEGER spf, data_type
+    INTEGER spf, data_type, format_file
   Input:
     INTEGER dirfile_unit, field_code_len
     CHARACTER*<field_code_len> field_code
 
   This subroutine returns metadata describing a RAW field.  It returns the
-  samples-per-frame, and native data type in spf and data_type.  The
-  data_type will be one of the data type parameters listed below.  If field_code
-  is not found, or the field specified is not of RAW type, spf will be set to
-  zero.  In this case the value of data_type is unspecified.
+  samples-per-frame, native data type, and the format file index in spf and
+  data_type.  The data_type will be one of the data type parameters listed
+  below.  If field_code is not found, or the field specified is not of RAW type,
+  spf will be set to zero.  In this case the value of the other output
+  parameters is unspecified.
 
 * GDFELC(nfields, infield1, infield1_len, m1, b1, infield2, infield2_len, m2,
-  b2, infield3, infield3_len, m3, b3, dirfile_unit, field_code, field_code_len)
+  b2, infield3, infield3_len, m3, b3, format_file, dirfile_unit, field_code,
+  field_code_len)
 
   Output:
-    INTEGER nfields
+    INTEGER nfields, format_file
     CHARACTER*<infield1_len> infield1
     CHARACTER*<infield2_len> infield2
     CHARACTER*<infield3_len> infield3
@@ -242,12 +244,13 @@ Available Subroutines
   will be set to zero.  In this case the value of the remaining data is
   unspecified.
 
-* GDFELT(infield, infield_len, table, table_len, dirfile_unit, field_code,
-  field_code_len)
+* GDFELT(infield, infield_len, table, table_len, format_file, dirfile_unit,
+  field_code, field_code_len)
 
   Output: 
     CHARACTER*<infield_len> infield
     CHARACTER*<table_len> table
+    INTEGER format_file
   Input/Output:
     INTEGER infield_len, table_len
   Input:
@@ -258,12 +261,12 @@ Available Subroutines
   is not found, or the field specified is not of LINTERP type, infield_len will
   be set to zero.  In this case the value of the remaining data is unspecified.
 
-* GDFEBT(infield, infield_len, bitnum, numbits, dirfile_unit, field_code,
-  field_code_len)
+* GDFEBT(infield, infield_len, bitnum, numbits, format_file, dirfile_unit,
+  field_code, field_code_len)
 
   Output: 
     CHARACTER*<infield_len> infield
-    INTEGER bitnum, numbits
+    INTEGER bitnum, numbits, format_file
   Input/Output:
     INTEGER infield_len
   Input:
@@ -274,12 +277,13 @@ Available Subroutines
   is not found, or the field specified is not of BIT type, infield_len will
   be set to zero.  In this case the value of the remaining data is unspecified.
 
-* GDFEMT(infield1, infield1_len, infield2, infield2_len, dirfile_unit,
-  field_code, field_code_len)
+* GDFEMT(infield1, infield1_len, infield2, infield2_len, format_file,
+  dirfile_unit, field_code, field_code_len)
 
   Output: 
     CHARACTER*<infield1_len> infield1
     CHARACTER*<infield2_len> infield2
+    INTEGER format_file
   Input/Output:
     INTEGER infield1_len, infield2_len
   Input:
@@ -291,11 +295,12 @@ Available Subroutines
   will be set to zero.  In this case the value of the remaining data is
   unspecified.
 
-* GDFEPH(infield, infield_len, shift, dirfile_unit, field_code, field_code_len)
+* GDFEPH(infield, infield_len, shift, format_file, dirfile_unit, field_code,
+  field_code_len)
 
   Output: 
     CHARACTER*<infield_len> infield
-    INTEGER shift
+    INTEGER shift, format_file
   Input/Output:
     INTEGER infield_len
   Input:
@@ -305,6 +310,114 @@ Available Subroutines
   This subroutine returns metadata describing a PHASE field.  If field_code
   is not found, or the field specified is not of PHASE type, shift will
   be set to zero.  In this case the value of the remaining data is unspecified.
+
+* GDFARW(dirfile_unit, field_code, field_code_len, data_type, spf, format_file)
+
+  Input:
+    INTEGER dirfile_unit, field_code_len, data_type, spf, format_file
+    CHARACTER*<field_code_len> field_code
+
+  This subroutine adds a RAW field with the supplied parameters to the
+  specified format file fragment of the dirfile.
+
+* GDFALC(dirfile_unit, field_code, field_code_len, nfields, in_field1,
+  in_field1_len, m1, b1, in_field2, in_field2_len, m2, b2, in_field3,
+  in_field3_len, m3, b3, format_file)
+
+  Input:
+    INTEGER dirfile_unit, field_code_len, nfields, in_field1_len, in_field2_len
+    INTEGER in_field3_len, format_file
+    REAL*8 m1, b1, m2, b2, m3, b3
+    CHARACTER*<field_code_len> field_code
+    CHARACTER*<in_field1_len> in_field1
+    CHARACTER*<in_field2_len> in_field2
+    CHARACTER*<in_field3_len> in_field3
+
+  This subroutine adds a LINCOM field with the supplied parameters to the
+  specified format file fragment of the dirfile.  All three sets of input
+  parameters are required to be passed to the call, but only the first
+  nfield sets will be examined.
+
+* GDFALT(dirfile_unit, field_code, field_code_len, in_field, in_field_len,
+  table, table_len, format_file)
+
+  Input:
+    INTEGER dirfile_unit, field_code_len, in_field_len, table_len, format_file
+    CHARACTER*<field_code_len> field_code
+    CHARACTER*<in_field_len> in_field
+    CHARACTER*<table_len> table
+
+  This subroutine adds a LINTERP field with the supplied parameters to the
+  specified format file fragment of the dirfile.
+
+* GDFABT(dirfile_unit, field_code, field_code_len, in_field, in_field_len,
+  bitnum, numbits, format_file)
+
+  Input:
+    INTEGER dirfile_unit, field_code_len, in_field_len, bitnum, numbits
+    INTEGER format_file
+    CHARACTER*<field_code_len> field_code
+    CHARACTER*<in_field_len> in_field
+
+  This subroutine adds a BIT field with the supplied parameters to the
+  specified format file fragment of the dirfile.
+
+* GDFAMT(dirfile_unit, field_code, field_code_len, in_field1, in_field1_len,
+  in_field2, in_field2_len, format_file)
+
+  Input:
+    INTEGER dirfile_unit, field_code_len, in_field1_len, in_field2_len
+    INTEGER format_file
+    CHARACTER*<field_code_len> field_code
+    CHARACTER*<in_field1_len> in_field1
+    CHARACTER*<in_field2_len> in_field2
+
+  This subroutine adds a MULTIPLY field with the supplied parameters to the
+  specified format file fragment of the dirfile.
+
+
+* GDFAPH(dirfile_unit, field_code, field_code_len, in_field1, in_field1_len,
+  shift, format_file)
+
+  Input:
+    INTEGER dirfile_unit, field_code_len, in_field1_len, shift, format_file
+    CHARACTER*<field_code_len> field_code
+    CHARACTER*<in_field_len> in_field
+
+  This subroutine adds a PHASE field with the supplied parameters to the
+  specified format file fragment of the dirfile.
+
+* GDFFFN(filename, filename_len, dirfile_unit, ind)
+
+  Output:
+    CHARACTER*<infield_len> infield
+  Input/Output:
+    INTEGER infield_len
+  Input:
+    INTEGER ind
+
+  This subroutine returns the name of the format file frament indexed by ind.
+  If the name of the file is longer than filename_len, it will return the
+  actual length of the filename in filename_len and not modify the filename
+  argument.
+
+* GDFNFT(nformats, dirfile_unit)
+
+  Output:
+    INTEGER nformats
+  Input:
+    INTEGER dirfile_unit
+
+  This subroutine returns the number of format file fragments in the specified
+  dirfile.
+
+* GDFFLM(dirfile_unit)
+
+  Input:
+    INTEGER dirfile_unit
+
+  This subroutine wraps dirfile_flush_metadata(3), and will cause metadata
+  changes to be written to disk.
 
 Defined Parameters
 ==================
@@ -335,6 +448,8 @@ Error codes (returned by GDFERR):
   GD_EBD          GD_E_BAD_DIRFILE
   GD_EBP          GD_E_BAD_PUT_FIELD
   GD_EAC          GD_E_ACCMODE
+  GD_EBE          GD_E_BAD_ENTRY
+  GD_EDU          GD_E_DUPLICATE
 
 Dirfile flags (required by GDFOPN):
 

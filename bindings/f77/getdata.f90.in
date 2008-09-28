@@ -29,6 +29,7 @@ integer, parameter :: GD_FIELD_LEN=4096
 
 type gd_entry
   integer :: field_type, n_fields, spf, data_type, bitnum, numbits, shift
+  integer :: format_file
   character(len=GD_FIELD_LEN), dimension(3) :: field
   real*8, dimension(3) :: m, b
 end type
@@ -363,33 +364,86 @@ function fget_entry (dirfile, field_code, ent)
 
   if (fget_entry .EQ. GD_RAW_ENTRY) then
     ! raw
-    call gdferw(ent%spf, ent%data_type, dirfile, TRIM(field_code), &
-    LEN_TRIM(field_code))
+    call gdferw(ent%spf, ent%data_type, ent%format_file, dirfile, &
+    TRIM(field_code), LEN_TRIM(field_code))
   else if (fget_entry .EQ. GD_LINCOM_ENTRY) then
     ! lincom
     call gdfelc(ent%n_fields, ent%field(1), len1, ent%m(1), ent%b(1), &
     ent%field(2), len2, ent%m(2), ent%b(2), ent%field(3), len3, ent%m(3), &
-    ent%b(3), dirfile, TRIM(field_code), LEN_TRIM(field_code))
+    ent%b(3), ent%format_file, dirfile, TRIM(field_code), LEN_TRIM(field_code))
   else if (fget_entry .EQ. GD_LINTERP_ENTRY) then
     ! linterp
-    call gdfelt(ent%field(1), len1, ent%field(2), len2, dirfile, &
-    TRIM(field_code), LEN_TRIM(field_code))
+    call gdfelt(ent%field(1), len1, ent%field(2), len2, ent%format_file, &
+    dirfile, TRIM(field_code), LEN_TRIM(field_code))
   else if (fget_entry .EQ. GD_BIT_ENTRY) then
     ! bit
-    call gdfebt(ent%field(1), len1, ent%bitnum, ent%numbits, dirfile, &
-    TRIM(field_code), LEN_TRIM(field_code))
+    call gdfebt(ent%field(1), len1, ent%bitnum, ent%numbits, ent%format_file, &
+    dirfile, TRIM(field_code), LEN_TRIM(field_code))
   else if (fget_entry .EQ. GD_MULTIPLY_ENTRY) then
     ! multiply
-    call gdfemt(ent%field(1), len1, ent%field(2), len2, dirfile, &
-    TRIM(field_code), LEN_TRIM(field_code))
+    call gdfemt(ent%field(1), len1, ent%field(2), len2, ent%format_file, &
+    dirfile, TRIM(field_code), LEN_TRIM(field_code))
   else if (fget_entry .EQ. GD_PHASE_ENTRY) then
     !phase
-    call gdfemt(ent%field(1), len1, ent%shift, dirfile, TRIM(field_code), &
-    LEN_TRIM(field_code))
+    call gdfemt(ent%field(1), len1, ent%shift, ent%format_file, dirfile, &
+    TRIM(field_code), LEN_TRIM(field_code))
   else
     ! on the off chance we got a type we weren't prepared to deal with
     fget_entry = GD_NO_ENTRY
   end if
+  ent%field_type = fget_entry
 end function
 
+subroutine fdirfile_add (dirfile, field_code, ent)
+  integer, intent(in) :: dirfile
+  character (len=*), intent(in) :: field_code
+  type(gd_entry), intent(in) :: ent
+
+  if (ent%field_type .EQ. GD_RAW_ENTRY) then
+    call gdfarw(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+    ent%data_type, ent%spf, ent%format_file)
+  else if (ent%field_type .EQ. GD_LINCOM_ENTRY) then
+    call gdfalc(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+    ent%n_fields, TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), ent%m(1), &
+    ent%b(1), TRIM(ent%field(2)), LEN_TRIM(ent%field(2)), ent%m(2), ent%b(2), &
+    TRIM(ent%field(3)), LEN_TRIM(ent%field(3)), ent%m(3), ent%b(3), &
+    ent%format_file)
+  else if (ent%field_type .EQ. GD_LINTERP_ENTRY) then
+    call gdfalt(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+    TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), TRIM(ent%field(2)), &
+    LEN_TRIM(ent%field(2)), ent%format_file)
+  else if (ent%field_type .EQ. GD_BIT_ENTRY) then
+    call gdfabt(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+    TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), ent%bitnum, ent%numbits, &
+    ent%format_file)
+  else if (ent%field_type .EQ. GD_MULTIPLY_ENTRY) then
+    call gdfamt(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+    TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), TRIM(ent%field(2)), &
+    LEN_TRIM(ent%field(2)), ent%format_file)
+  else if (ent%field_type .EQ. GD_PHASE_ENTRY) then
+    call gdfaph(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+    TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), ent%shift, ent%format_file)
+  end if
+end subroutine
+
+function fget_format_filename (dirfile, ind)
+  character (len=GD_FIELD_LEN) :: fget_format_filename
+  integer, intent(in) :: dirfile, ind
+  integer :: l = 4096
+
+  call gdfffn(fget_format_filename, l, dirfile, ind)
+end function
+
+function fget_nformats (dirfile)
+  integer :: fget_nformats
+  integer, intent(in) :: dirfile
+
+  call gdfnft(fget_nformats, dirfile)
+end function
+
+subroutine fdirfile_flush_metadata (dirfile)
+  integer, intent(in) :: dirfile
+
+  call gdfflm(dirfile)
+end subroutine
 end module

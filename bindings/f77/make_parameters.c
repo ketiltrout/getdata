@@ -28,9 +28,22 @@
 
 #include "getdata.h"
 
+static void parameter(FILE* stream, const char* cname, const char* name,
+    int value, int free_form)
+{
+  if (free_form)
+    fprintf(stream, "integer, parameter :: %s=%i\\\n", cname, value);
+  else
+    fprintf(stream,
+        "C     Corresponding to %s\\\n"
+        "      INTEGER %s\\\n"
+        "      PARAMETER (%s=%i)\\\n", cname, name, name, value);
+}
+
 int main(void)
 {
   FILE* stream;
+  int i;
 
   stream = fopen("make_parameters.sed.in", "w");
   if (stream == NULL) {
@@ -38,231 +51,87 @@ int main(void)
     exit(1);
   }
 
-  fprintf(stream, "s/@PARAMETERS@/\\\n"
-      "C     Error codes\\\n"
-      "C     Corresponding to GD_E_OK\\\n"
-      "      INTEGER GD_EOK\\\n"
-      "      PARAMETER (GD_EOK=%i)\\\n"
-      "C     Corresponding to GD_E_OPEN\\\n"
-      "      INTEGER GD_EOP\\\n"
-      "      PARAMETER (GD_EOP=%i)\\\n"
-      "C     Corresponding to GD_E_FORMAT\\\n"
-      "      INTEGER GD_EFO\\\n"
-      "      PARAMETER (GD_EFO=%i)\\\n"
-      "C     Corresponding to GD_E_TRUNC\\\n"
-      "      INTEGER GD_ETR\\\n"
-      "      PARAMETER (GD_ETR=%i)\\\n"
-      "C     Corresponding to GD_E_CREAT\\\n"
-      "      INTEGER GD_ECR\\\n"
-      "      PARAMETER (GD_ECR=%i)\\\n"
-      "C     Corresponding to GD_E_BAD_CODE\\\n"
-      "      INTEGER GD_EBC\\\n"
-      "      PARAMETER (GD_EBC=%i)\\\n"
-      "C     Corresponding to GD_E_BAD_TYPE\\\n"
-      "      INTEGER GD_EBT\\\n"
-      "      PARAMETER (GD_EBT=%i)\\\n"
-      "C     Corresponding to GD_E_RAW_IO\\\n"
-      "      INTEGER GD_ERW\\\n"
-      "      PARAMETER (GD_ERW=%i)\\\n"
-      "C     Corresponding to GD_E_OPEN_INCLUDE\\\n"
-      "      INTEGER GD_EOI\\\n"
-      "      PARAMETER (GD_EOI=%i)\\\n"
-      "C     Corresponding to GD_E_INTERNAL_ERROR\\\n"
-      "      INTEGER GD_EIE\\\n"
-      "      PARAMETER (GD_EIE=%i)\\\n"
-      "C     Corresponding to GD_E_EMPTY\\\n"
-      "      INTEGER GD_EEM\\\n"
-      "      PARAMETER (GD_EEM=%i)\\\n"
-      "C     Corresponding to GD_E_ALLOC\\\n"
-      "      INTEGER GD_EAL\\\n"
-      "      PARAMETER (GD_EAL=%i)\\\n"
-      "C     Corresponding to GD_E_RANGE\\\n"
-      "      INTEGER GD_ERA\\\n"
-      "      PARAMETER (GD_ERA=%i)\\\n"
-      "C     Corresponding to GD_E_OPEN_LINFILE\\\n"
-      "      INTEGER GD_EOL\\\n"
-      "      PARAMETER (GD_EOL=%i)\\\n"
-      "C     Corresponding to GD_E_RECURSE_LEVEL\\\n"
-      "      INTEGER GD_ERL\\\n"
-      "      PARAMETER (GD_ERL=%i)\\\n"
-      "C     Corresponding to GD_E_BAD_DIRFILE\\\n"
-      "      INTEGER GD_EBD\\\n"
-      "      PARAMETER (GD_EBD=%i)\\\n"
-      "C     Corresponding to GD_E_BAD_PUT_FIELD\\\n"
-      "      INTEGER GD_EBP\\\n"
-      "      PARAMETER (GD_EBP=%i)\\\n"
-      "C     Corresponding to GD_E_ACCMODE\\\n"
-      "      INTEGER GD_EAC\\\n"
-      "      PARAMETER (GD_EAC=%i)\\\n",
-    GD_E_OK, GD_E_OPEN, GD_E_FORMAT, GD_E_TRUNC, GD_E_CREAT, GD_E_BAD_CODE,
-    GD_E_BAD_TYPE, GD_E_RAW_IO, GD_E_OPEN_INCLUDE, GD_E_INTERNAL_ERROR,
-    GD_E_EMPTY, GD_E_ALLOC, GD_E_RANGE, GD_E_OPEN_LINFILE, GD_E_RECURSE_LEVEL,
-    GD_E_BAD_DIRFILE, GD_E_BAD_PUT_FIELD, GD_E_ACCMODE);
+  for (i = 0; i < 2; ++i) {
+    if (i == 0)
+      fprintf(stream, "s/@PARAMETERS@/\\\nC     Error codes\\\n");
+    else
+      fprintf(stream, "s/@PARAMETERS95@/\\\n! Error codes\\\n");
 
-  fprintf(stream, "C Open flags\\\n\\\n"
-      "C     Correponding to GD_RDONLY\\\n"
-      "      INTEGER GD_RO\\\n"
-      "      PARAMETER (GD_RO=%i)\\\n"
-      "C     Corresponding to GD_RDWR\\\n"
-      "      INTEGER GD_RW\\\n"
-      "      PARAMETER (GD_RW=%i)\\\n"
-      "C     Corresponding to GD_CREAT\\\n"
-      "      INTEGER GD_CR\\\n"
-      "      PARAMETER (GD_CR=%i)\\\n"
-      "C     Corresponding to GD_EXCL\\\n"
-      "      INTEGER GD_EX\\\n"
-      "      PARAMETER (GD_EX=%i)\\\n"
-      "C     Corresponding to GD_TRUNC\\\n"
-      "      INTEGER GD_TR\\\n"
-      "      PARAMETER (GD_TR=%i)\\\n"
-      "C     Corresponding to GD_BIG_ENDIAN\\\n"
-      "      INTEGER GD_BE\\\n"
-      "      PARAMETER (GD_BE=%i)\\\n"
-      "C     Corresponding to GD_LITTLE_ENDIAN\\\n"
-      "      INTEGER GD_LE\\\n"
-      "      PARAMETER (GD_LE=%i)\\\n"
-      "C     Corresponding to GD_FORCE_ENDIAN\\\n"
-      "      INTEGER GD_FE\\\n"
-      "      PARAMETER (GD_FE=%i)\\\n"
-      "C     Corresponding to GD_PEDANTIC\\\n"
-      "      INTEGER GD_PE\\\n"
-      "      PARAMETER (GD_PE=%i)\\\n",
-    GD_RDONLY, GD_RDWR, GD_CREAT, GD_EXCL, GD_TRUNC, GD_BIG_ENDIAN,
-    GD_LITTLE_ENDIAN, GD_FORCE_ENDIAN, GD_PEDANTIC);
+    parameter(stream, "GD_E_OK",             "GD_EOK", GD_E_OK,             i);
+    parameter(stream, "GD_E_OPEN",           "GD_EOP", GD_E_OPEN,           i);
+    parameter(stream, "GD_E_FORMAT",         "GD_EFO", GD_E_FORMAT,         i);
+    parameter(stream, "GD_E_TRUNC",          "GD_ETR", GD_E_TRUNC,          i);
+    parameter(stream, "GD_E_CREAT",          "GD_ECR", GD_E_CREAT,          i);
+    parameter(stream, "GD_E_BAD_CODE",       "GD_EBC", GD_E_BAD_CODE,       i);
+    parameter(stream, "GD_E_BAD_TYPE",       "GD_EBT", GD_E_BAD_TYPE,       i);
+    parameter(stream, "GD_E_RAW_IO",         "GD_ERW", GD_E_RAW_IO,         i);
+    parameter(stream, "GD_E_OPEN_INCLUDE",   "GD_EOI", GD_E_OPEN_INCLUDE,   i);
+    parameter(stream, "GD_E_INTERNAL_ERROR", "GD_EIE", GD_E_INTERNAL_ERROR, i);
+    parameter(stream, "GD_E_EMPTY",          "GD_EEM", GD_E_EMPTY,          i);
+    parameter(stream, "GD_E_ALLOC",          "GD_EAL", GD_E_ALLOC,          i);
+    parameter(stream, "GD_E_RANGE",          "GD_ERA", GD_E_RANGE,          i);
+    parameter(stream, "GD_E_OPEN_LINFILE",   "GD_EOL", GD_E_OPEN_LINFILE,   i);
+    parameter(stream, "GD_E_RECURSE_LEVEL",  "GD_ERL", GD_E_RECURSE_LEVEL,  i);
+    parameter(stream, "GD_E_BAD_DIRFILE",    "GD_EBD", GD_E_BAD_DIRFILE,    i);
+    parameter(stream, "GD_E_BAD_PUT_FIELD",  "GD_EBP", GD_E_BAD_PUT_FIELD,  i);
+    parameter(stream, "GD_E_ACCMODE",        "GD_EAC", GD_E_ACCMODE,        i);
+    parameter(stream, "GD_E_BAD_ENTRY",      "GD_EBE", GD_E_BAD_ENTRY,      i);
+    parameter(stream, "GD_E_DUPLICATE",      "GD_EDU", GD_E_DUPLICATE,      i);
 
-  fprintf(stream,
-      "C Field types\\\n\\\n"
-      "C     Correpsonding to GD_NO_ENTRY\\\n"
-      "      INTEGER GD_NOE\\\n"
-      "      PARAMETER (GD_NOE=%i)\\\n"
-      "C     Correpsonding to GD_RAW_ENTRY\\\n"
-      "      INTEGER GD_RWE\\\n"
-      "      PARAMETER (GD_RWE=%i)\\\n"
-      "C     Correpsonding to GD_LINCOM_ENTRY\\\n"
-      "      INTEGER GD_LCE\\\n"
-      "      PARAMETER (GD_LCE=%i)\\\n"
-      "C     Correpsonding to GD_LINTERP_ENTRY\\\n"
-      "      INTEGER GD_LTE\\\n"
-      "      PARAMETER (GD_LTE=%i)\\\n"
-      "C     Correpsonding to GD_BIT_ENTRY\\\n"
-      "      INTEGER GD_BTE\\\n"
-      "      PARAMETER (GD_BTE=%i)\\\n"
-      "C     Correpsonding to GD_MULTIPLY_ENTRY\\\n"
-      "      INTEGER GD_MTE\\\n"
-      "      PARAMETER (GD_MTE=%i)\\\n"
-      "C     Correpsonding to GD_PHASE_ENTRY\\\n"
-      "      INTEGER GD_PHE\\\n"
-      "      PARAMETER (GD_PHE=%i)\\\n\\\n",
-      GD_NO_ENTRY, GD_RAW_ENTRY, GD_LINCOM_ENTRY, GD_LINTERP_ENTRY,
-      GD_BIT_ENTRY, GD_MULTIPLY_ENTRY, GD_PHASE_ENTRY);
+    if (i == 0)
+      fprintf(stream, "C Open flags\\\n\\\n");
+    else
+      fprintf(stream, "! Open flags\\\n\\\n");
 
-  fprintf(stream,
-      "C Data types -- the unsigned type won't work when passed as a return\\\n"
-      "C               type, but we keep them anyways, since they might\\\n"
-      "C               appear as a result of calling GDFERW\\\n"
-      "C     Corresponding to GD_NULL\\\n"
-      "      INTEGER GD_NUL\\\n"
-      "      PARAMETER (GD_NUL=%i)\\\n"
-      "C     Corresponding to GD_UINT8\\\n"
-      "      INTEGER GD_U8\\\n"
-      "      PARAMETER (GD_U8=%i)\\\n"
-      "C     Corresponding to GD_INT8\\\n"
-      "      INTEGER GD_I8\\\n"
-      "      PARAMETER (GD_I8=%i)\\\n"
-      "C     Corresponding to GD_UINT16\\\n"
-      "      INTEGER GD_U16\\\n"
-      "      PARAMETER (GD_U16=%i)\\\n"
-      "C     Corresponding to GD_INT16\\\n"
-      "      INTEGER GD_I16\\\n"
-      "      PARAMETER (GD_I16=%i)\\\n"
-      "C     Corresponding to GD_UINT32\\\n"
-      "      INTEGER GD_U32\\\n"
-      "      PARAMETER (GD_U32=%i)\\\n"
-      "C     Corresponding to GD_INT32\\\n"
-      "      INTEGER GD_I32\\\n"
-      "      PARAMETER (GD_I32=%i)\\\n"
-      "C     Corresponding to GD_UINT64\\\n"
-      "      INTEGER GD_U64\\\n"
-      "      PARAMETER (GD_U64=%i)\\\n"
-      "C     Corresponding to GD_INT64\\\n"
-      "      INTEGER GD_I64\\\n"
-      "      PARAMETER (GD_I64=%i)\\\n"
-      "C     Corresponding to GD_FLOAT32\\\n"
-      "      INTEGER GD_F32\\\n"
-      "      PARAMETER (GD_F32=%i)\\\n"
-      "C     Corresponding to GD_FLOAT64\\\n"
-      "      INTEGER GD_F64\\\n"
-      "      PARAMETER (GD_F64=%i)/\n",
-    GD_NULL, GD_UINT8, GD_INT8, GD_UINT16, GD_INT16, GD_UINT32, GD_INT32,
-    GD_UINT64, GD_INT64, GD_FLOAT32, GD_FLOAT64);
+    parameter(stream, "GD_RDONLY",           "GD_RO",  GD_RDONLY,           i);
+    parameter(stream, "GD_RDWR",             "GD_RW",  GD_RDWR,             i);
+    parameter(stream, "GD_CREAT",            "GD_CR",  GD_CREAT,            i);
+    parameter(stream, "GD_EXCL",             "GD_EX",  GD_EXCL,             i);
+    parameter(stream, "GD_TRUNC",            "GD_TR",  GD_TRUNC,            i);
+    parameter(stream, "GD_BIG_ENDIAN",       "GD_BE",  GD_BIG_ENDIAN,       i);
+    parameter(stream, "GD_LITTLE_ENDIAN",    "GD_LE",  GD_LITTLE_ENDIAN,    i);
+    parameter(stream, "GD_FORCE_ENDIAN",     "GD_FE",  GD_FORCE_ENDIAN,     i);
+    parameter(stream, "GD_PEDANTIC",         "GD_PE",  GD_PEDANTIC,         i);
 
-  fprintf(stream, "s/@PARAMETERS95@/\\\n"
-      "! Error codes\\\n"
-      "integer, parameter :: GD_E_OK=%i\\\n"
-      "integer, parameter :: GD_E_OPEN=%i\\\n"
-      "integer, parameter :: GD_E_FORMAT=%i\\\n"
-      "integer, parameter :: GD_E_TRUNC=%i\\\n"
-      "integer, parameter :: GD_E_CREAT=%i\\\n"
-      "integer, parameter :: GD_E_BAD_CODE=%i\\\n"
-      "integer, parameter :: GD_E_BAD_TYPE=%i\\\n"
-      "integer, parameter :: GD_E_RAW_IO=%i\\\n"
-      "integer, parameter :: GD_E_OPEN_INCLUDE=%i\\\n"
-      "integer, parameter :: GD_E_INTERNAL_ERROR=%i\\\n"
-      "integer, parameter :: GD_E_EMPTY=%i\\\n"
-      "integer, parameter :: GD_E_ALLOC=%i\\\n"
-      "integer, parameter :: GD_E_RANGE=%i\\\n"
-      "integer, parameter :: GD_E_OPEN_LINFILE=%i\\\n"
-      "integer, parameter :: GD_E_RECURSE_LEVEL=%i\\\n"
-      "integer, parameter :: GD_E_BAD_DIRFILE=%i\\\n"
-      "integer, parameter :: GD_E_BAD_PUT_FIELD=%i\\\n"
-      "integer, parameter :: GD_E_ACCMODE=%i\\\n\\\n",
-      GD_E_OK, GD_E_OPEN, GD_E_FORMAT, GD_E_TRUNC, GD_E_CREAT, GD_E_BAD_CODE,
-      GD_E_BAD_TYPE, GD_E_RAW_IO, GD_E_OPEN_INCLUDE, GD_E_INTERNAL_ERROR,
-      GD_E_EMPTY, GD_E_ALLOC, GD_E_RANGE, GD_E_OPEN_LINFILE, GD_E_RECURSE_LEVEL,
-      GD_E_BAD_DIRFILE, GD_E_BAD_PUT_FIELD, GD_E_ACCMODE);
+    if (i == 0)
+      fprintf(stream, "C Field types\\\n\\\n");
+    else
+      fprintf(stream, "! Field types\\\n\\\n");
 
-  fprintf(stream, "! Open flags\\\n"
-      "integer, parameter :: GD_RDONLY=%i\\\n"
-      "integer, parameter :: GD_RDWR=%i\\\n"
-      "integer, parameter :: GD_CREAT=%i\\\n"
-      "integer, parameter :: GD_EXCL=%i\\\n"
-      "integer, parameter :: GD_TRUNC=%i\\\n"
-      "integer, parameter :: GD_BIG_ENDIAN=%i\\\n"
-      "integer, parameter :: GD_LITTLE_ENDIAN=%i\\\n"
-      "integer, parameter :: GD_FORCE_ENDIAN=%i\\\n"
-      "integer, parameter :: GD_PEDANTIC=%i\\\n\\\n",
-      GD_RDONLY, GD_RDWR, GD_CREAT, GD_EXCL, GD_TRUNC, GD_BIG_ENDIAN,
-      GD_LITTLE_ENDIAN, GD_FORCE_ENDIAN, GD_PEDANTIC);
+    parameter(stream, "GD_NO_ENTRY",         "GD_NOE", GD_NO_ENTRY,         i);
+    parameter(stream, "GD_RAW_ENTRY",        "GD_RWE", GD_RAW_ENTRY,        i);
+    parameter(stream, "GD_LINCOM_ENTRY",     "GD_LCE", GD_LINCOM_ENTRY,     i);
+    parameter(stream, "GD_LINTERP_ENTRY",    "GD_LTE", GD_LINTERP_ENTRY,    i);
+    parameter(stream, "GD_BIT_ENTRY",        "GD_BTE", GD_BIT_ENTRY,        i);
+    parameter(stream, "GD_MULTIPLY_ENTRY",   "GD_MTE", GD_MULTIPLY_ENTRY,   i);
+    parameter(stream, "GD_PHASE_ENTRY",      "GD_PHE", GD_PHASE_ENTRY,      i);
 
-  fprintf(stream, "! Field types\\\n"
-      "integer, parameter :: GD_NO_ENTRY=%i\\\n"
-      "integer, parameter :: GD_RAW_ENTRY=%i\\\n"
-      "integer, parameter :: GD_LINCOM_ENTRY=%i\\\n"
-      "integer, parameter :: GD_LINTERP_ENTRY=%i\\\n"
-      "integer, parameter :: GD_BIT_ENTRY=%i\\\n"
-      "integer, parameter :: GD_MULTIPLY_ENTRY=%i\\\n"
-      "integer, parameter :: GD_PHASE_ENTRY=%i\\\n\\\n",
-      GD_NO_ENTRY, GD_RAW_ENTRY, GD_LINCOM_ENTRY, GD_LINTERP_ENTRY,
-      GD_BIT_ENTRY, GD_MULTIPLY_ENTRY, GD_PHASE_ENTRY);
+    if (i == 0)
+      fprintf(stream,
+          "C Data types -- the unsigned type won't work when passed as a\\\n"
+          "C               return type, but we keep them anyways, since\\\n"
+          "C               they might appear as a result of calling "
+          "GDFERW\\\n");
+    else
+      fprintf(stream,
+          "! Data types -- the unsigned type won't work when passed as a\\\n"
+          "!               return type, but we keep them anyways, since\\\n"
+          "!               they might appear as a result of calling "
+          "fget_entry\\\n");
 
-  fprintf(stream,
-      "! Data types -- the unsigned type won't work when passed as a return\\\n"
-      "!               type, but we keep them anyways, since they might\\\n"
-      "!               appear as a result of calling fget_entry\\\n"
-      "integer, parameter :: GD_NULL=%i\\\n"
-      "integer, parameter :: GD_UINT8=%i\\\n"
-      "integer, parameter :: GD_INT8=%i\\\n"
-      "integer, parameter :: GD_UINT16=%i\\\n"
-      "integer, parameter :: GD_INT16=%i\\\n"
-      "integer, parameter :: GD_UINT32=%i\\\n"
-      "integer, parameter :: GD_INT32=%i\\\n"
-      "integer, parameter :: GD_UINT64=%i\\\n"
-      "integer, parameter :: GD_INT64=%i\\\n"
-      "integer, parameter :: GD_FLOAT32=%i\\\n"
-      "integer, parameter :: GD_FLOAT64=%i\\\n/",
-    GD_NULL, GD_UINT8, GD_INT8, GD_UINT16, GD_INT16, GD_UINT32, GD_INT32,
-    GD_UINT64, GD_INT64, GD_FLOAT32, GD_FLOAT64);
-
+    parameter(stream, "GD_NULL",             "GD_NUL", GD_NULL,             i);
+    parameter(stream, "GD_UINT8",            "GD_U8",  GD_UINT8,            i);
+    parameter(stream, "GD_INT8",             "GD_I8",  GD_INT8,             i);
+    parameter(stream, "GD_UINT16",           "GD_U16", GD_UINT16,           i);
+    parameter(stream, "GD_INT16",            "GD_I16", GD_INT16,            i);
+    parameter(stream, "GD_UINT32",           "GD_U32", GD_UINT32,           i);
+    parameter(stream, "GD_INT32",            "GD_I32", GD_INT32,            i);
+    parameter(stream, "GD_UINT64",           "GD_U64", GD_UINT64,           i);
+    parameter(stream, "GD_INT64",            "GD_I64", GD_INT64,            i);
+    parameter(stream, "GD_FLOAT32",          "GD_F32", GD_FLOAT32,          i);
+    parameter(stream, "GD_FLOAT64",          "GD_F64", GD_FLOAT64,          i);
+    fprintf(stream, "/\n");
+  }
 
   fclose(stream);
 }
