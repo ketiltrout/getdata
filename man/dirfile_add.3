@@ -1,0 +1,98 @@
+.\" dirfile_add.3.  The dirfile_add man page.
+.\"
+.\" (C) 2008 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" This program is free software; you can redistribute it and/or modify
+.\" it under the terms of the GNU General Public License as published by
+.\" the Free Software Foundation; either version 2 of the License, or
+.\" (at your option) any later version.
+.\"
+.\" GetData is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+.\" General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public License along
+.\" with GetData; if not, write to the Free Software Foundation, Inc.,
+.\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+.\"
+.TH dirfile_add 3 "27 September 2008" "Version 0.4.0" "GETDATA"
+.SH NAME
+dirfile_add \(em add a field to a dirfile
+.SH SYNOPSIS
+.B #include <getdata.h>
+.HP
+.nh
+.ad l
+.BI "int dirfile_add(DIRFILE *" dirfile ", const gd_entry_t *" entry );
+.hy
+.ad n
+.SH DESCRIPTION
+The
+.BR dirfile_add ()
+function adds the field described by 
+.I entry
+to the dirfile specified by
+.IR dirfile .
+The form of
+.I entry
+is described in detail in the
+.BR get_entry (3)
+man page.  All relevant members of
+.I entry
+for the field type specified must be properly initialised.
+.SH RETURN VALUE
+On success,
+.BR dirfile_add ()
+returns zero.   On error, -1 is returned and 
+.IR dirfile -> error
+is set to a non-zero error value.  Possible error values are:
+.TP 8
+.B GD_E_ACCMODE
+The specified dirfile was opened read-only.
+.TP
+.B GD_E_ALLOC
+The library was unable to allocate memory.
+.TP
+.B GD_E_BAD_CODE
+The field code provided in
+.IR entry -> field
+contained invalid characters.
+.TP
+.B GD_E_BAD_DIRFILE
+The supplied dirfile was invalid.
+.TP
+.B GD_E_DUPLICATE
+The field code provided in 
+.IR entry -> field
+referred to a field already existing in
+.IR dirfile .
+.TP
+.B GD_E_BAD_ENTRY
+The
+.I entry
+parameter does not describe a valid field.
+.TP
+.B GD_E_BAD_TYPE
+The
+.IR entry -> data_type
+parameter provided with a RAW entry was invalid.
+.P
+A descriptive error string for the last error encountered can be obtained from
+a call to
+.BR get_error_string (3).
+.SH SEE ALSO
+.BR dirfile_add_bit (3),
+.BR dirfile_add_lincom (3),
+.BR dirfile_add_linterp (3),
+.BR dirfile_add_multiply (3),
+.BR dirfile_add_phase (3),
+.BR dirfile_add_raw (3),
+.BR dirfile_open (3),
+.BR durfile_flush_metadata (3),
+.BR get_error_string (3),
+.BR dirfile-format (5)

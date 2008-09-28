@@ -4,6 +4,7 @@
 #include <inttypes.h>
 #include <stdlib.h>
 #include <sys/types.h>
+#include <stdio.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <string.h>
@@ -41,7 +42,7 @@ int main(void)
 
   dirfile_close(D);
 
-  unlink(data);
+  unlink(table);
   unlink(format);
   rmdir(filedir);
 

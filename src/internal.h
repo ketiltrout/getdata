@@ -99,12 +99,15 @@ char *strerror_r(int errnum, char *buf, size_t buflen);
 /* maximum number of recursions */
 #define GD_MAX_RECURSE_LEVEL  32
 
-/* maximum length of a format file line */
-#if (FILENAME_MAX < 4096)
-# define MAX_LINE_LENGTH 4096
-#else
-# define MAX_LINE_LENGTH FILENAME_MAX
+/* For FILENAME_MAX */
+#include <stdio.h>
+
+#ifndef FILENAME_MAX
+#  define FILENAME_MAX 4096
 #endif
+
+/* maximum length of a format file line */
+#define MAX_LINE_LENGTH 4096
 
 /* Suberror codes */
 #define GD_E_OPEN_NOT_EXIST    1
@@ -136,9 +139,20 @@ char *strerror_r(int errnum, char *buf, size_t buflen);
 #define GD_E_LINFILE_LENGTH    1
 #define GD_E_LINFILE_OPEN      2
 
+#define GD_E_BAD_ENTRY_TYPE     1
+#define GD_E_BAD_ENTRY_FORMAT   2
+#define GD_E_BAD_ENTRY_SPF      3 
+#define GD_E_BAD_ENTRY_NFIELDS  4
+#define GD_E_BAD_ENTRY_NUMBITS  5
+#define GD_E_BAD_ENTRY_BITNUM   6
+#define GD_E_BAD_ENTRY_BITSIZE  7
+
 /* Format file fragment metadata */
 struct gd_include_t {
-  const char* name;
+  /* Canonical name (full path) */
+  char* cname;
+  /* External name (relative to the parent format file fragment) */
+  char* ename;
   int modified;
   int parent;
   int first;

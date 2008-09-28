@@ -28,7 +28,7 @@ get_nformats \(em retrieve the number of parsed format file fragments from a dir
 .HP
 .nh
 .ad l
-.BI "int get_nformats(DIRFILE *" dirfile ", int " index );
+.BI "int get_nformats(const DIRFILE *" dirfile ", int " index );
 .hy
 .ad n
 .SH DESCRIPTION
@@ -63,8 +63,8 @@ dirfile.  If the supplied
 .I dirfile
 is invalid, 
 .BR get_nformats ()
-returns 0.  This function does not modify the
-.IR D->error .
+returns zero.  This function does not modify
+.IR dirfile -> error .
 .SH SEE ALSO
 .BR dirfile (5),
 .BR dirfile_open (3),

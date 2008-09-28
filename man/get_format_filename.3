@@ -28,7 +28,7 @@ get_format_filename \(em retrieve a dirfile format file fragment name
 .HP
 .nh
 .ad l
-.BI "const char* get_format_filename(DIRFILE *" dirfile ", int " index );
+.BI "const char* get_format_filename(const DIRFILE *" dirfile ", int " index );
 .hy
 .ad n
 .SH DESCRIPTION
@@ -54,7 +54,6 @@ in the root dirfile directory).  The largest valid value of
 is one less than the total number of format file fragments, which may be
 obtained from a call to
 .BR get_nformats (3).
-
 .SH RETURN VALUE
 Upon successful completion,
 .BR get_format_filename ()
@@ -63,7 +62,7 @@ the specified format file fragment.  If index is out of range (less than zero
 or greater than or equal to the total number of format file fragments),
 .BR get_format_filename ()
 returns NULL.  This function does not modify
-.IR D->error .
+.IR dirfile -> error .
 .SH SEE ALSO
 .BR dirfile (5),
 .BR dirfile_open (3),

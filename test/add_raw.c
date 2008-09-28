@@ -1,4 +1,4 @@
-/* Truncating a read-only dirfile should fail cleanly */
+/* Add a RAW field */
 #include "../src/getdata.h"
 
 #include <stdlib.h>
@@ -6,6 +6,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <string.h>
+#include <errno.h>
 #include <unistd.h>
 
 int main(void)
@@ -13,15 +14,20 @@ int main(void)
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
 
-  mkdir(filedir, 0777);
-  close(open(format, O_CREAT | O_EXCL | O_WRONLY, 0666));
-  chmod(filedir, 0555);
+  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_CREAT);
+  dirfile_add_raw(D, "new", 2, GD_UINT8, 0);
+  int error = D->error;
 
-  DIRFILE* D = dirfile_open(filedir, GD_TRUNC);
+  /* check */
+  int n = get_nfields(D);
 
-  chmod(filedir, 0777);
+  dirfile_close(D);
+
   unlink(format);
   rmdir(filedir);
 
-  return (D->error != GD_E_TRUNC);
+  if (n != 1)
+    return 1;
+
+  return (error != GD_E_OK);
 }

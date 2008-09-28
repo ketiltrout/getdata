@@ -148,7 +148,7 @@ static gd_entry_t* _GD_ParseRaw(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
   R->data_type = _GD_RawType(in_cols[2]);
   R->size = GD_SIZE(R->data_type);
 
-  if (R->size == 0)
+  if (R->size == 0 || R->data_type & 0x40)
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_TYPE, format_file, line,
         in_cols[2]);
   else if ((R->spf = atoi(in_cols[3])) <= 0)
@@ -523,7 +523,7 @@ static int _GD_ParseFormatFile(FILE* fp, DIRFILE *D, const char* filedir,
       /* Run through the include list to see if we've already included this
        * file */
       for (i = 0; i < D->n_include; ++i)
-        if (strcmp(new_format_file, D->include_list[i].name) == 0) {
+        if (strcmp(new_format_file, D->include_list[i].cname) == 0) {
           found = 1;
           break;
         }
@@ -550,12 +550,15 @@ static int _GD_ParseFormatFile(FILE* fp, DIRFILE *D, const char* filedir,
         dreturn("%i", have_first);
         return have_first;
       }
-      D->include_list[D->n_include - 1].name = strdup(new_format_file);
+      D->include_list[D->n_include - 1].cname = strdup(new_format_file);
+      D->include_list[D->n_include - 1].ename = strdup(in_cols[1]);
       D->include_list[D->n_include - 1].modified = 0;
       D->include_list[D->n_include - 1].parent = format_parent;
       D->include_list[D->n_include - 1].first = 0;
 
-      if (D->include_list[D->n_include - 1].name == NULL) {
+      if (D->include_list[D->n_include - 1].cname == NULL ||
+          D->include_list[D->n_include - 1].ename == NULL)
+      {
         _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
         dreturn("%i", have_first);
         return have_first;
@@ -854,7 +857,9 @@ DIRFILE* dirfile_open(const char* filedir, unsigned int flags)
     dreturn("%p", D);
     return D;
   }
-  D->include_list[0].name = "format";
+  D->include_list[0].cname = strdup(format_file);
+  /* The root format file needs no external name */
+  D->include_list[0].ename = NULL;
   D->include_list[0].modified = 0;
   D->include_list[0].parent = -1;
 

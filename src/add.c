@@ -24,8 +24,11 @@
 
 #ifdef STDC_HEADERS
 #include <stdlib.h>
-#include <stdarg.h>
 #include <string.h>
+#endif
+
+#ifdef HAVE_LIBGEN_H
+#include <libgen.h>
 #endif
 
 #include "internal.h"
@@ -35,6 +38,7 @@ int dirfile_add(DIRFILE* D, const gd_entry_t* entry)
 {
   dtrace("%p, %p", D, entry);
 
+  char temp_buffer[FILENAME_MAX];
   int i;
 
   _GD_ClearError(D);
@@ -56,15 +60,23 @@ int dirfile_add(DIRFILE* D, const gd_entry_t* entry)
   }
 
   /* check for bad field type */
-  if (entry->field_type == GD_NO_ENTRY) {
-    _GD_SetError(D, GD_E_BAD_ENTRY, 0, NULL, 0, NULL);
+  if (entry->field_type != GD_RAW_ENTRY &&
+      entry->field_type != GD_LINCOM_ENTRY &&
+      entry->field_type != GD_LINTERP_ENTRY &&
+      entry->field_type != GD_BIT_ENTRY &&
+      entry->field_type != GD_MULTIPLY_ENTRY &&
+      entry->field_type != GD_PHASE_ENTRY)
+  {
+    _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_TYPE, NULL,
+        entry->field_type, NULL);
     dreturn("%i", -1);
     return -1;
   }
 
   /* check for include index out of range */
   if (entry->format_file < 0 || entry->format_file >= D->n_include) {
-    _GD_SetError(D, GD_E_BAD_ENTRY, 0, NULL, 0, NULL);
+    _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_FORMAT, NULL,
+        entry->format_file, NULL);
     dreturn("%i", -1);
     return -1;
   }
@@ -99,18 +111,35 @@ int dirfile_add(DIRFILE* D, const gd_entry_t* entry)
   {
     case GD_RAW_ENTRY:
       E->data_type = entry->data_type;
+      E->fp = -1;
+      E->first = 0;
       
       if ((E->file = malloc(FILENAME_MAX)) == NULL) {
         _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
         break;
       }
 
-      snprintf(E->file, FILENAME_MAX, "./%s", E->field);
+      strcpy(temp_buffer, D->include_list[E->format_file].cname);
+      snprintf(E->file, FILENAME_MAX, "%s/%s", dirname(temp_buffer), E->field);
 
-      if ((E->spf = entry->spf) < 0)
-        _GD_SetError(D, GD_E_BAD_ENTRY, 0, NULL, 0, NULL);
-      else if ((E->size = GD_SIZE(E->data_type)) == 0)
-        _GD_SetError(D, GD_E_BAD_ENTRY, 0, NULL, 0, NULL);
+      if ((E->spf = entry->spf) <= 0)
+        _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_SPF, NULL, entry->spf,
+            NULL);
+      else if (E->data_type & 0x40 || (E->size = GD_SIZE(E->data_type)) == 0)
+        _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, entry->data_type, NULL);
+      else if (D->first_field == NULL) {
+        E->first = 1; /* This is the first raw field? */
+        D->first_field = malloc(sizeof(gd_entry_t));
+        if (D->first_field == NULL) {
+          _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+          break;
+        }
+
+        memcpy(D->first_field, E, sizeof(gd_entry_t));
+        /* Tag the include list */
+        for (i = E->format_file; i != -1; i = D->include_list[i].parent)
+          D->include_list[i].first = D->include_list[i].modified = 1;
+      }
       break;
     case GD_LINCOM_ENTRY:
       E->n_fields = entry->n_fields;
@@ -118,7 +147,8 @@ int dirfile_add(DIRFILE* D, const gd_entry_t* entry)
       memcpy(E->b, entry->b, sizeof(double) * E->n_fields);
 
       if (E->n_fields < 1 || E->n_fields > GD_MAX_LINCOM)
-        _GD_SetError(D, GD_E_BAD_ENTRY, 0, NULL, 0, NULL);
+        _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_NFIELDS, NULL,
+            E->n_fields, NULL);
       else
         for (i = 0; i < E->n_fields; ++i)
           if ((E->in_fields[i] = strdup(entry->in_fields[i])) == NULL)
@@ -126,6 +156,7 @@ int dirfile_add(DIRFILE* D, const gd_entry_t* entry)
       break;
     case GD_LINTERP_ENTRY:
       E->table_len = -1;
+      E->x = E->y = NULL;
 
       if ((E->in_fields[0] = strdup(entry->in_fields[0])) == NULL)
         _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
@@ -145,11 +176,14 @@ int dirfile_add(DIRFILE* D, const gd_entry_t* entry)
       if ((E->in_fields[0] = strdup(entry->in_fields[0])) == NULL)
         _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
       else if (E->numbits < 1)
-        _GD_SetError(D, GD_E_BAD_ENTRY, 0, NULL, 0, NULL);
+        _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_NUMBITS, NULL, 
+            entry->numbits, NULL);
       else if (E->bitnum < 0)
-        _GD_SetError(D, GD_E_BAD_ENTRY, 0, NULL, 0, NULL);
+        _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_BITNUM, NULL, 
+            entry->bitnum, NULL);
       else if (E->bitnum + E->numbits - 1 > 63)
-        _GD_SetError(D, GD_E_BAD_ENTRY, 0, NULL, 0, NULL);
+        _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_BITSIZE, NULL, 
+            E->bitnum + E->numbits - 1, NULL);
       break;
     case GD_PHASE_ENTRY:
       E->shift = entry->shift;
@@ -199,34 +233,23 @@ int dirfile_add_raw(DIRFILE* D, const char* field_code, unsigned int spf,
 }
 
 /* add a LINCOM entry -- this function is variadic */
-int dirfile_add_lincom(DIRFILE* D, const char* field_code, int format_file,
-    int n_fields, ...)
+int dirfile_add_lincom(DIRFILE* D, const char* field_code, int n_fields,
+    const char** in_fields, const double* m, const double* b, int format_file)
 {
-  dtrace("%p, \"%s\", %i, %i, ...", D, field_code, format_file, n_fields);
+  dtrace("%p, \"%s\", %i, %p, %p, %p, %i", D, field_code, n_fields, in_fields,
+      m, b, format_file);
 
   int i;
-  va_list va;
   gd_entry_t L;
   L.field = (char*)field_code;
   L.field_type = GD_LINCOM_ENTRY;
   L.n_fields = n_fields;
   L.format_file = format_file;
 
-  if (n_fields > 0) {
-    va_start(va, n_fields);
-
-    L.in_fields[0] = va_arg(va, char*);
-    L.m[0] = va_arg(va, double);
-    L.b[0] = va_arg(va, double);
-
-    for (i = 1; i < GD_MAX_LINCOM; ++i)
-      if (n_fields > i) {
-        L.in_fields[i] = va_arg(va, char*);
-        L.m[i] = va_arg(va, double);
-        L.b[i] = va_arg(va, double);
-      }
-
-    va_end(va);
+  for (i = 0; i < n_fields; ++i) {
+    L.in_fields[i] = (char*)in_fields[i];
+    L.m[i] = m[i];
+    L.b[i] = b[i];
   }
   int error = dirfile_add(D, &L);
 
@@ -296,7 +319,8 @@ int dirfile_add_multiply(DIRFILE* D, const char* field_code,
 int dirfile_add_phase(DIRFILE* D, const char* field_code, const char* in_field,
     int shift, int format_file)
 {
-  dtrace("%p, \"%s\", \"%s\", %i", D, field_code, in_field, shift, format_file);
+  dtrace("%p, \"%s\", \"%s\", %i, %i", D, field_code, in_field, shift,
+      format_file);
 
   gd_entry_t P;
   P.field = (char*)field_code;

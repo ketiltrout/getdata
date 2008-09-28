@@ -150,7 +150,7 @@ static void _GD_FieldSpec(DIRFILE* D, FILE* stream, gd_entry_t* E) {
 
 static void _GD_FlushMeta(DIRFILE* D)
 {
-  int i;
+  int i, j;
   FILE* stream;
   char buffer[MAX_LINE_LENGTH];
   char temp_file[FILENAME_MAX];
@@ -173,14 +173,12 @@ static void _GD_FlushMeta(DIRFILE* D)
       snprintf(temp_file, MAX_LINE_LENGTH, "%s/format_XXXXXX", D->name);
       fd = mkstemp(temp_file);
       if (fd == -1) {
-        _GD_SetError(D, GD_E_OPEN_INCLUDE, errno, NULL, 0,
-            D->include_list[i].name);
+        _GD_SetError(D, GD_E_OPEN_INCLUDE, errno, NULL, 0, temp_file);
         break;
       }
       stream = fdopen(fd, "w");
       if (stream == NULL) {
-        _GD_SetError(D, GD_E_OPEN_INCLUDE, errno, NULL, 0,
-            D->include_list[i].name);
+        _GD_SetError(D, GD_E_OPEN_INCLUDE, errno, NULL, 0, temp_file);
         break;
       }
 
@@ -194,7 +192,7 @@ static void _GD_FlushMeta(DIRFILE* D)
 
       if ((ptr = getenv("LOGNAME")) != NULL)
         fprintf(stream, " by %s", ptr);
-      fputs(".\n\n", stream);
+      fputs(".\n", stream);
 
       /* Regardless of the version of the input dirfile, we always write
        * the latest version to disk -- this is present in every format file
@@ -221,22 +219,22 @@ static void _GD_FlushMeta(DIRFILE* D)
         if (D->first_field->format_file == i)
           _GD_FieldSpec(D, stream, D->first_field);
         else
-          for (i = 0; i < D->n_include; ++i)
-            if (D->include_list[i].first && D->include_list[i].parent == i) {
-              fprintf(stream, "/INCLUDE %s\n", D->include_list[i].name);
+          for (j = 0; j < D->n_include; ++j)
+            if (D->include_list[j].first && D->include_list[j].parent == i) {
+              fprintf(stream, "/INCLUDE %s\n", D->include_list[j].ename);
               break; /* There can be only one */
             }
       }
       
       /* The remaining includes */
-      for (i = 0; i < D->n_include; ++i)
-        if (D->include_list[i].parent == i && !D->include_list[i].first)
-          fprintf(stream, "/INCLUDE %s\n", D->include_list[i].name);
+      for (j = 0; j < D->n_include; ++j)
+        if (D->include_list[j].parent == i && !D->include_list[j].first)
+          fprintf(stream, "/INCLUDE %s\n", D->include_list[j].ename);
 
       /* The fields */
-      for (i = 0; i < D->n_entries; ++i)
-        if (D->entry[i]->format_file == i)
-          _GD_FieldSpec(D, stream, D->entry[i]);
+      for (j = 0; j < D->n_entries; ++j)
+        if (D->entry[j]->format_file == j && !D->entry[j]->first)
+          _GD_FieldSpec(D, stream, D->entry[j]);
 
       /* That's all, flush, sync, and close */
       fflush(stream);
@@ -249,10 +247,11 @@ static void _GD_FlushMeta(DIRFILE* D)
         unlink(temp_file);
         break;
         /* Only assume we've synced the file if the rename succeeds */
-      } else if (rename(temp_file, D->include_list[i].name)) {
+      } else if (rename(temp_file, D->include_list[i].cname)) {
         _GD_SetError(D, GD_E_OPEN_INCLUDE, errno, NULL, 0,
-            D->include_list[i].name);
+            D->include_list[i].cname);
         unlink(temp_file);
+        break;
       } else
         D->include_list[i].modified = 0;
     }

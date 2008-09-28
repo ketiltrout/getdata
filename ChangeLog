@@ -1,3 +1,39 @@
+2008-09-29   D. V. Wiebe <getdata@ketiltrout.net>  svn:
+	* man/dirfile_add.3 man/dirfile_add_raw.3: Added.
+	* man/Makefile.am: Install all the mans previously forgotten about.  Also,
+	link to aliases.
+
+	* src/add.c (dirfile_add_lincom): Don't use a variadic function, since in
+	obfuscates data typing.
+
+	* src/add.c (dirfile_add): Add suberror codes for GD_E_BAD_ENTRY.
+	Initialise internal data.  Initialise the first RAW field, if necessary.
+
+	* src/close.c src/flush.c src/open.c: Distinguish between "canonical"
+	format file names (ie.  the full path used to open the file) and
+	"external" names (ie. the relative path written to the parent format file).
+
+	* src/errors.c: Add strings for dirfile_add().
+
+	* src/getdata.h.in: Move FILENAME_MAX stuff into internal.h since it doesn't
+	need to be public anymore.
+	* src/internal.h: Always define MAX_LINE_LENGTH to 4096.
+
+	* test/Makefile.am test/add.c test/add_bit.c test/add_bit.c
+	test/add_bit_bitnum.c test/add_bit_bitsize.c test/add_bit_numbits.c
+	test/add_code.c test/add_duplicate.c test/add_format.c test/add_lincom.c
+	test/add_lincom_nfields.c test/add_linterp.c test/add_multiply.c
+	test/add_phase.c test/add_raw.c test/add_raw_spf.c test/add_raw_type.c
+	test/add_rdonly.c test/add_type.c test/error.c test/error_short.c
+	test/flush_meta.c test/format_filename.c test/format_filename_oor.c
+	test/nformats.c: Added tests for dirfile_add() and alternates,
+	get_error_string(), dirfile_flush_metadata(), get_format_filename(), and
+	get_nformats().
+
+	* test/Makefile.am: test put_linterp_noin, which has been around for a
+	while, but missing from the Makefile.
+	* test/trunc_readonly.c: Deleted.  (An old copy of trunc_rdonly.c)
+
 2008-09-27   D. V. Wiebe <getdata@ketiltrout.net>  svn:106
 	* src/flush.c (_GD_Flush): Don't call fsync on read-only dirfiles.
 

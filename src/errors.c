@@ -43,11 +43,11 @@ static const struct {
   { GD_E_OPEN, GD_E_OPEN_NOT_EXIST, "Dirfile does not exist: %2$s", 0 },
   /* GD_E_OPEN: 1 = suberror, 2 = formatfile, 3 = line number, 4 = token */
   { GD_E_FORMAT, GD_E_FORMAT_BAD_TYPE,
-    "Bad raw field type on line %3$i of %2$s: %4$s", 0 },
+    "Bad RAW field type on line %3$i of %2$s: %4$s", 0 },
   { GD_E_FORMAT, GD_E_FORMAT_BAD_SPF,
     "Samples per frame out of range on line %3$i of %2$s: %4$s", 0 },
   { GD_E_FORMAT, GD_E_FORMAT_N_FIELDS,
-    "Lincom field count out of range on line %3$i of %2$s: %4$s", 0 },
+    "LINCOM field count out of range on line %3$i of %2$s: %4$s", 0 },
   { GD_E_FORMAT, GD_E_FORMAT_N_COLS, "Missing column on line %3$i of %2$s", 0 },
   { GD_E_FORMAT, GD_E_FORMAT_NUMBITS,
     "Numbits out of range on line %3$i of %2$s", 0 },
@@ -98,6 +98,21 @@ static const struct {
   { GD_E_BAD_PUT_FIELD, 0, "No method to write field %4$s", 0 },
   /* GD_E_BAD_PUT_FIELD: (nothing) */
   { GD_E_ACCMODE, 0, "Dirfile has been opened read-only", 0 },
+  /* GD_E_BAD_ENTRY: 3 = parameter */
+  { GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_TYPE, "Invalid entry type: %3$i", 0 },
+  { GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_FORMAT, "Invalid format file index: %3$i",
+    0 },
+  { GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_SPF, "Samples per frame out of range: %3$i",
+    0 },
+  { GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_NFIELDS,
+    "LINCOM field count out of range: %3$i", 0 },
+  { GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_BITNUM, "Starting bit out of range: %3$i",
+    0 },
+  { GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_NUMBITS, "Numbits out of range: %3$i", 0 },
+  { GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_BITSIZE,
+    "End of bitfield out of range: %3$i", 0 },
+  /* GD_E_DUPLICATE 4 = name */
+  { GD_E_DUPLICATE, 0, "Field code already present: %4$i", 0 },
   /* GD_E_OK: (nothing) */
   { 0, 0, "Success", 0} /* this must be the last error string defined */
 };

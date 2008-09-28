@@ -27,15 +27,23 @@
 #endif
 
 #include "internal.h"
-const char* get_format_filename(DIRFILE* D, int index)
+const char* get_format_filename(const DIRFILE* D, int index)
 {
-  if (index < 0 || D->flags & GD_INVALID || index >= D->n_include)
-    return NULL;
+  dtrace("%p, %i", D, index);
 
-  return D->include_list[index].name;
+  if (index < 0 || D->flags & GD_INVALID || index >= D->n_include) {
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  dreturn("\"%s\"", D->include_list[index].cname);
+  return D->include_list[index].cname;
 }
 
-int get_nformats(DIRFILE* D)
+int get_nformats(const DIRFILE* D)
 {
+  dtrace("%p", D);
+
+  dreturn("%i", (D->flags & GD_INVALID) ? 0 : D->n_include);
   return (D->flags & GD_INVALID) ? 0 : D->n_include;
 }

@@ -1,0 +1,130 @@
+.\" dirfile_add_raw.3.  The dirfile_add_raw man page.
+.\"
+.\" (C) 2008 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" This program is free software; you can redistribute it and/or modify
+.\" it under the terms of the GNU General Public License as published by
+.\" the Free Software Foundation; either version 2 of the License, or
+.\" (at your option) any later version.
+.\"
+.\" GetData is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+.\" General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public License along
+.\" with GetData; if not, write to the Free Software Foundation, Inc.,
+.\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+.\"
+.TH dirfile_add_raw 3 "27 September 2008" "Version 0.4.0" "GETDATA"
+.SH NAME
+dirfile_add_raw, dirfile_add_bit, dirfile_add_lincom, dirfile_add_linterp,
+dirfile_add_multiply, dirfile_add_phase \(em add a field to a dirfile
+.SH SYNOPSIS
+.B #include <getdata.h>
+.HP
+.nh
+.ad l
+.BI "int dirfile_add_raw(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "unsigned int " spf ", gd_type_t " data_type ", int " format_file );
+.HP
+.BI "int dirfile_add_bit(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "const char *" in_field ", int " bitnum ", int " numbits ,
+.BI "int " format_file );
+.HP
+.BI "int dirfile_add_lincom(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "int " n_fields ", const char **" in_fields ", const double *" m ,
+.BI "const double *" b ", int " format_file );
+.HP
+.BI "int dirfile_add_linterp(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "const char *" in_field ", const char *" table ", int " format_file );
+.HP
+.BI "int dirfile_add_multiply(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "const char *" in_field1 ", const char *" in_field2 ", int " format_file );
+.HP
+.BI "int dirfile_add_phase(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "const char *" in_field ", int " phase ", int " format_file );
+.hy
+.ad n
+.SH DESCRIPTION
+These functions provide alternatives to using the
+.BR dirfile_add ()
+function to add a new field of the indicated type to the dirfile specified by
+.IR dirfile .
+.P
+In all of these calls,
+.I field_code
+indicates the name of the field to be added.  Further,
+.I format_file
+is the index of the format file fragment into which the field should be added.
+(To convert a format file index to its file name, see
+.BR get_format_filename (3).)
+The meaning and valid types of other arguments may be obtained from the
+.BR get_entry (3)
+and
+.BR dirfile-format (5)
+manual pages.
+.P
+The
+.BR dirfile_add_lincom ()
+function takes pointers to three arrays of length
+.I n_fields
+containing the input field names
+.RI ( in_fields ),
+the gain factors
+.RI ( m ),
+and the offset terms
+.RI ( b ).
+.SH RETURN VALUE
+On success, any of these functions returns zero.   On error, -1 is returned and 
+.IR dirfile -> error
+is set to a non-zero error value.  Possible error values are:
+.TP 8
+.B GD_E_ACCMODE
+The specified dirfile was opened read-only.
+.TP
+.B GD_E_ALLOC
+The library was unable to allocate memory.
+.TP
+.B GD_E_BAD_CODE
+The
+.IR field_code
+parameter contained invalid characters.
+.TP
+.B GD_E_BAD_DIRFILE
+The supplied dirfile was invalid.
+.TP
+.B GD_E_DUPLICATE
+The
+.IR field_code
+parameter referred to a field already existing in
+.IR dirfile .
+.TP
+.B GD_E_BAD_ENTRY
+One or more of the field parameters specified was invalid.
+.TP
+.B GD_E_BAD_TYPE
+The supplied
+.I data_type
+was invalid.
+.TP
+.B GD_E_BAD_TYPE
+The
+.IR data_type
+parameter provided to
+.BR dirfile_add_raw ()
+was invalid.
+.P
+A descriptive error string for the last error encountered can be obtained from
+a call to
+.BR get_error_string (3).
+.SH SEE ALSO
+.BR dirfile_add (3),
+.BR dirfile_open (3),
+.BR durfile_flush_metadata (3),
+.BR get_error_string (3),
+.BR dirfile-format (5)
