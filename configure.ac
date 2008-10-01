@@ -174,6 +174,17 @@ AC_MSG_CHECKING([whether to install pkg-config metadata])
 AC_MSG_RESULT([$install_pkg_config])
 AM_CONDITIONAL(INSTALL_PKG_CONFIG, test "x$install_pkg_config" = "xyes")
 
+dnl Slimlib
+AC_ARG_WITH(slimlib, AS_HELP_STRING([--with-slimlib=PREFIX],
+            [Use slimlib installed in PREFIX [[autodetect]]]),
+            [
+             case "${withval}" in
+               no) use_slimlib="no" ;;
+               yes) use_slimlib="yes"; slimlib_prefix= ;;
+               *) use_slimlib="yes"; slimlib_prefix="${withval}" ;;
+             esac
+             ], [ use_slimlib="yes"; slimlib_prefix=; ])
+
 if test "x$BINDINGS_BUILT" = "x"; then
   BINDINGS_BUILT=" none"
 fi
@@ -213,14 +224,48 @@ fi
 
 dnl libraries
 AC_CHECK_LIB(m,ceil)
+if test "x$use_slimlib" = "xyes"; then
+  saved_ldflags=$LDFLAGS
+  saved_libs=$LIBS
+  if test "x$slimlib_prefix" != "x"; then
+    LDFLAGS="$LDFLAGS -L$slimlib_prefix/lib"
+  fi
+  AC_CHECK_LIB(slim,slimopen)
+  LDFLAGS=$saved_ldflags
+  LIBS=$saved_libs
+fi
 
 dnl functions
 AC_CHECK_FUNCS([atoll atoq])
 
 dnl headers
 AC_CHECK_HEADERS(fcntl.h libgen.h)
+if test "x$use_slimlib" = "xyes"; then
+  saved_cppflags=$CPPFLAGS
+  if test "x$slimlib_prefix" != "x"; then
+    CPPFLAGS="$CPPFLAGS -I$slimlib_prefix/include"
+  fi
+  AC_CHECK_HEADERS([slimlib.h])
+  CPPFLAGS=$saved_cppflags
+fi
 AC_HEADER_ASSERT
 AC_HEADER_DIRENT
+
+dnl slimlib cleanup
+if test "x$ac_cv_header_slimlib_h" = "xyes" -a "x$ac_cv_lib_slim_slimopen" = "xyes"; then
+  SLIMLIB_CPPFLAGS="-I$slimlib_prefix/include"
+  if test "x$slimlib_prefix" = "x"; then
+    SLIMLIB_LDFLAGS="-lslim"
+  else 
+    SLIMLIB_LDFLAGS="-L$slimlib_prefix/lib -lslim"
+  fi
+  AC_SUBST(SLIMLIB_CPPFLAGS)
+  AC_SUBST(SLIMLIB_LDFLAGS)
+  AC_DEFINE([USE_SLIMLIB], [], [ Define to enable slimlib support ])
+else
+  use_slimlib="no";
+fi
+AM_CONDITIONAL(USE_SLIMLIB, test "x$use_slimlib" = "xyes")
 
 dnl declarations
 AC_CHECK_DECLS([fsync, strdup, strerror_r])
@@ -284,6 +329,7 @@ else
   echo "  Enable assertions:    yes"
 fi
 echo "  Install getdata.pc:   ${install_pkg_config}"
+echo "  Slimlib support:      ${use_slimlib}"
 echo
 echo "  Bindings built:      ${BINDINGS_BUILT}"
 echo "  Bindings not built:  ${BINDINGS_LEFT}"

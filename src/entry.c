@@ -18,16 +18,12 @@
  * with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include "internal.h"
 
 #ifdef STDC_HEADERS
 #include <string.h>
 #include <stdlib.h>
 #endif
-
-#include "internal.h"
 
 gd_entry_t* dirfile_free_entry_strings(gd_entry_t* entry)
 {
@@ -41,6 +37,7 @@ gd_entry_t* dirfile_free_entry_strings(gd_entry_t* entry)
   }
 
   free(entry->field);
+  free(entry->e);
 
   switch(entry->field_type) {
     case GD_LINCOM_ENTRY:

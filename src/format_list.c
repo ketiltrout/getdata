@@ -18,15 +18,12 @@
  * with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include "internal.h"
 
 #ifdef STDC_HEADERS
 #include <stdlib.h>
 #endif
 
-#include "internal.h"
 const char* get_format_filename(const DIRFILE* D, int index)
 {
   dtrace("%p, %i", D, index);

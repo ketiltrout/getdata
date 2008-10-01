@@ -18,17 +18,13 @@
  * with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include "internal.h"
 
 #ifdef STDC_HEADERS
 #include <stdlib.h>
 #include <errno.h>
 #include <time.h>
 #endif
-
-#include "internal.h"
 
 void _GD_Flush(DIRFILE* D, gd_entry_t *entry, const char* field_code)
 {
@@ -51,14 +47,14 @@ void _GD_Flush(DIRFILE* D, gd_entry_t *entry, const char* field_code)
 
   switch(entry->field_type) {
     case GD_RAW_ENTRY:
-      if (entry->fp >= 0) {
-        if (D->flags & GD_RDWR && fsync(entry->fp)) {
-          _GD_SetError(D, GD_E_RAW_IO, 0, entry->file, errno, NULL);
-        } else if (close(entry->fp)) {
-          _GD_SetError(D, GD_E_RAW_IO, 0, entry->file, errno, NULL);
+      if (entry->e->fp >= 0) {
+        if (D->flags & GD_RDWR && fsync(entry->e->fp)) {
+          _GD_SetError(D, GD_E_RAW_IO, 0, entry->e->file, errno, NULL);
+        } else if (close(entry->e->fp)) {
+          _GD_SetError(D, GD_E_RAW_IO, 0, entry->e->file, errno, NULL);
           D->recurse_level--;
         } else 
-          entry->fp = -1;
+          entry->e->fp = -1;
       }
       break;
     case GD_LINCOM_ENTRY:
@@ -233,7 +229,7 @@ static void _GD_FlushMeta(DIRFILE* D)
 
       /* The fields */
       for (j = 0; j < D->n_entries; ++j)
-        if (D->entry[j]->format_file == j && !D->entry[j]->first)
+        if (D->entry[j]->format_file == j && !D->entry[j]->e->first)
           _GD_FieldSpec(D, stream, D->entry[j]);
 
       /* That's all, flush, sync, and close */

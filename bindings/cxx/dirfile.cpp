@@ -57,7 +57,7 @@ void Dirfile::FlushMetaData()
 
 int Dirfile::Error()
 {
-  return D->error;
+  return get_error(D);
 }
 
 const char* Dirfile::ErrorString(size_t len)

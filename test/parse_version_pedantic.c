@@ -23,7 +23,7 @@ int main(void)
   close(fd);
 
   DIRFILE* D = dirfile_open(filedir, GD_RDONLY | GD_PEDANTIC);
-  int error = D->error;
+  int error = get_error(D);
   dirfile_close(D);
 
   unlink(format);

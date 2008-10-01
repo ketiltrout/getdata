@@ -19,15 +19,11 @@
  * with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include "internal.h"
 
 #ifdef STDC_HEADERS
 #include <string.h>
 #endif
-
-#include "internal.h"
 
 /* Error strings. */
 static const struct {
@@ -125,7 +121,7 @@ void _GD_SetError(DIRFILE* D, int error, int suberror,
   dtrace("%p, %i, %i, \"%s\", %i, \"%s\"", D, error, suberror, format_file,
       line, token);
 
-  D->error = error;
+  *D->user_error = D->error = error;
   D->suberror = suberror;
   D->error_line = line;
   if (format_file != NULL)
@@ -135,6 +131,30 @@ void _GD_SetError(DIRFILE* D, int error, int suberror,
 
   dreturnvoid();
 }
+
+/* Return the error */
+int get_error(const DIRFILE* D)
+{
+  dtrace("%p", get_error);
+
+  dreturn("%i", D->error);
+
+  return D->error;
+}
+
+/* Set the user's error location */
+void dirfile_user_error(DIRFILE* D, int* ptr)
+{
+  dtrace("%p, %p", D, ptr);
+
+  if (ptr == NULL)
+    D->user_error = &(D->ierror);
+  else
+    D->user_error = ptr;
+
+  dreturnvoid();
+}
+
 
 /* Write a descriptive message in the supplied buffer describing the last
  * library error.  The message may be truncated but will be null terminated.

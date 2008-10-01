@@ -5,5 +5,5 @@ int main(void)
 {
   DIRFILE* D = dirfile_open("a non_existant dirfile", 0);
 
-  return D->error != GD_E_OPEN;
+  return get_error(D) != GD_E_OPEN;
 }

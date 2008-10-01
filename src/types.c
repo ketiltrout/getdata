@@ -19,9 +19,7 @@
  * with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include "internal.h"
 
 #ifdef STDC_HEADERS
 #include <inttypes.h>
@@ -31,8 +29,6 @@
 #include <stdlib.h>
 #include <string.h>
 #endif
-
-#include "internal.h"
 
 /* _GD_ConvertType: copy data to output buffer while converting type.
 */

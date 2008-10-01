@@ -55,7 +55,7 @@ int main(void)
 
   DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
   int n = getdata(D, "data", 5, 0, 1, 0, GD_FLOAT32, &u.f);
-  int error = D->error;
+  int error = get_error(D);
 
   dirfile_close(D);
 

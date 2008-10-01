@@ -17,7 +17,7 @@ int main(void)
 
   DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_CREAT);
   dirfile_add_multiply(D, "new", "in1", "in2", 0);
-  int error = D->error;
+  int error = get_error(D);
 
   /* check */
   int n = get_nfields(D);

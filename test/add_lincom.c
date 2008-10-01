@@ -19,7 +19,7 @@ int main(void)
   const double m[2] = {1, 0.3};
   const double b[2] = {0, 0.9};
   dirfile_add_lincom(D, "new", 2, in_fields, m, b, 0);
-  int error = D->error;
+  int error = get_error(D);
 
   /* check */
   int n = get_nfields(D);

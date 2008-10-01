@@ -24,10 +24,10 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDWR);
+  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_UNENCODED);
   int n = putdata(D, "no-such-field", 5, 0, 1, 0, GD_UINT8, &c);
 
-  int error = D->error;
+  int error = get_error(D);
   dirfile_close(D);
 
   unlink(format);

@@ -18,9 +18,7 @@
  * with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include "internal.h"
 
 #ifdef STDC_HEADERS
 #include <stdlib.h>
@@ -91,16 +89,27 @@ int dirfile_add(DIRFILE* D, const gd_entry_t* entry)
   memset(E, 0, sizeof(gd_entry_t));
   E->format_file = entry->format_file;
 
+  E->e = malloc(sizeof(union _gd_private_entry));
+  if (E->e == NULL) {
+    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    free(E);
+    dreturn("%i", -1);
+    return -1;
+  }
+
   /* Validate field code */
   E->field_type = entry->field_type;
   E->field = _GD_ValidateField(entry->field);
   if (E->field == entry->field) {
     _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, NULL);
+    E->field = NULL;
+    dirfile_free_entry_strings(E);
     free(E);
     dreturn("%i", -1);
     return -1;
   } else if (E->field == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    dirfile_free_entry_strings(E);
     free(E);
     dreturn("%i", -1);
     return -1;
@@ -111,16 +120,18 @@ int dirfile_add(DIRFILE* D, const gd_entry_t* entry)
   {
     case GD_RAW_ENTRY:
       E->data_type = entry->data_type;
-      E->fp = -1;
-      E->first = 0;
+      E->e->fp = -1;
+      E->e->stream = NULL;
+      E->e->first = 0;
       
-      if ((E->file = malloc(FILENAME_MAX)) == NULL) {
+      if ((E->e->file = malloc(FILENAME_MAX)) == NULL) {
         _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
         break;
       }
 
       strcpy(temp_buffer, D->include_list[E->format_file].cname);
-      snprintf(E->file, FILENAME_MAX, "%s/%s", dirname(temp_buffer), E->field);
+      snprintf(E->e->file, FILENAME_MAX, "%s/%s", dirname(temp_buffer),
+          E->field);
 
       if ((E->spf = entry->spf) <= 0)
         _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_SPF, NULL, entry->spf,
@@ -128,7 +139,7 @@ int dirfile_add(DIRFILE* D, const gd_entry_t* entry)
       else if (E->data_type & 0x40 || (E->size = GD_SIZE(E->data_type)) == 0)
         _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, entry->data_type, NULL);
       else if (D->first_field == NULL) {
-        E->first = 1; /* This is the first raw field? */
+        E->e->first = 1; /* This is the first raw field? */
         D->first_field = malloc(sizeof(gd_entry_t));
         if (D->first_field == NULL) {
           _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
@@ -155,8 +166,8 @@ int dirfile_add(DIRFILE* D, const gd_entry_t* entry)
             _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
       break;
     case GD_LINTERP_ENTRY:
-      E->table_len = -1;
-      E->x = E->y = NULL;
+      E->e->table_len = -1;
+      E->e->x = E->e->y = NULL;
 
       if ((E->in_fields[0] = strdup(entry->in_fields[0])) == NULL)
         _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);

@@ -20,9 +20,7 @@
  * with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include "internal.h"
 
 #ifdef STDC_HEADERS
 #include <inttypes.h>
@@ -31,8 +29,6 @@
 #include <string.h>
 #include <stdlib.h>
 #endif
-
-#include "internal.h"
 
 static size_t _GD_DoFieldOut(DIRFILE* D, const char *field_code,
     off64_t first_frame, off64_t first_samp, size_t num_frames, size_t num_samp,
@@ -81,22 +77,57 @@ static size_t _GD_DoRawOut(DIRFILE *D, gd_entry_t *R,
   /* write data to file.  Note that if the first sample is beyond     */
   /* the current end of file, a gap will result (see lseek(2)) */
 
-  if (R->fp < 0) {
+  sprintf(datafilename, "%s/%s", D->name, R->e->file);
+
+  /* Figure out the dirfile encoding type, if required */
+  if ((D->flags & GD_ENCODING) == GD_AUTO_ENCODED)
+    D->flags = (D->flags & ~GD_ENCODING) |
+      _GD_ResolveEncoding(datafilename, 0, R->e);
+
+  /* If the encoding is still unknown, none of the candidate files exist;
+   * as a result, we don't know the intended encoding type */
+  if ((D->flags & GD_ENCODING) == GD_AUTO_ENCODED) {
+    _GD_SetError(D, GD_E_UNSUPPORTED, 0, NULL, 0, NULL);
+    dreturn("%zi", 0);
+    return 0;
+  }
+
+  /* Figure out the encoding subtype, if required */
+  if (R->e->encoding == GD_ENC_UNKNOWN)
+    _GD_ResolveEncoding(datafilename, D->flags & GD_ENCODING, R->e);
+
+  if (R->e->fp < 0) {
     /* open file for reading / writing if not already opened */
 
-    sprintf(datafilename, "%s/%s", D->name, R->file);
-
-    R->fp = open(datafilename, O_RDWR | O_CREAT, 0666);
-    if (R->fp < 0) {
+    if (encode[R->e->encoding].open == NULL) {
+      _GD_SetError(D, GD_E_UNSUPPORTED, 0, NULL, 0, NULL);
+      dreturn("%zi", 0);
+      return 0;
+    } else if ((*encode[R->e->encoding].open)(R->e, datafilename,
+          D->flags & GD_ACCMODE, 1))
+    {
       _GD_SetError(D, GD_E_RAW_IO, 0, datafilename, errno, NULL);
       dreturn("%zi", 0);
       return 0;
     }
   }
 
-  lseek(R->fp, s0 * (int)(R->size), SEEK_SET);
-  n_wrote = ((int)write(R->fp, databuffer, (size_t)(R->size) * (size_t)ns)) /
-    (R->size);
+  if (encode[R->e->encoding].seek == NULL) {
+    _GD_SetError(D, GD_E_UNSUPPORTED, 0, NULL, 0, NULL);
+    dreturn("%zi", 0);
+    return 0;
+  }
+
+  (*encode[R->e->encoding].seek)(R->e, s0, R->data_type, 1);
+
+  if (encode[R->e->encoding].write == NULL) {
+    _GD_SetError(D, GD_E_UNSUPPORTED, 0, NULL, 0, NULL);
+    dreturn("%zi", 0);
+    return 0;
+  }
+
+  n_wrote = (*encode[R->e->encoding].write)(R->e, databuffer, R->data_type, ns);
+  n_wrote /= R->size;
 
   free(databuffer);
 
@@ -115,7 +146,7 @@ static size_t _GD_DoLinterpOut(DIRFILE* D, gd_entry_t *I,
   dtrace("%p, %p, %lli, %lli, %zi, %zi, 0x%x, %p", D, I, first_frame,
       first_samp, num_frames, num_samp, data_type, data_in);
 
-  if (I->table_len < 0) {
+  if (I->e->table_len < 0) {
     _GD_ReadLinterpFile(D, I);
     if (D->error != GD_E_OK) {
       dreturn("%zi", 0);
@@ -130,7 +161,7 @@ static size_t _GD_DoLinterpOut(DIRFILE* D, gd_entry_t *I,
   D->recurse_level--;
   ns = num_samp + num_frames * (int)spf;
 
-  _GD_LinterpData(D, data_in, data_type, ns, I->y, I->x, I->table_len);
+  _GD_LinterpData(D, data_in, data_type, ns, I->e->y, I->e->x, I->e->table_len);
 
   if (D->error != GD_E_OK) {
     dreturn("%zi", 0);

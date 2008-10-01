@@ -44,9 +44,9 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDWR);
+  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_UNENCODED);
   int n = putdata(D, "data", 5, 0, 1, 0, GD_FLOAT64, &c);
-  int error = D->error;
+  int error = get_error(D);
 
   dirfile_close(D);
 

@@ -69,10 +69,11 @@
 #define GD_E_BAD_DIRFILE      15
 #define GD_E_BAD_PUT_FIELD    16
 #define GD_E_ACCMODE          17
-#define GD_E_BAD_ENTRY        18
-#define GD_E_DUPLICATE        19
+#define GD_E_UNSUPPORTED      18
+#define GD_E_BAD_ENTRY        19
+#define GD_E_DUPLICATE        20
 
-#define GD_N_ERROR_CODES      20
+#define GD_N_ERROR_CODES      21
 
 #define GD_MAX_LINCOM 3
 
@@ -110,6 +111,8 @@ typedef enum {
 #define GD_FLOAT     GD_FLOAT32
 #define GD_DOUBLE    GD_FLOAT64
 
+union _gd_private_entry;
+
 /* Unified entry struct */
 struct _gd_unified_entry {
   char* field;
@@ -121,93 +124,48 @@ struct _gd_unified_entry {
       unsigned int spf;
       gd_type_t data_type;
       size_t size;
-
-      char* file; /* intenral */
-      int fp; /* intenral */
-      int first; /* internal */
     };
     struct { /* LINCOM */
       int n_fields;
       double m[GD_MAX_LINCOM];
       double b[GD_MAX_LINCOM];
     };
-    struct { /* LINTERP */
-      char* table;
-
-      int table_len; /* internal */
-      double* x; /* internal */
-      double* y; /* internal */
-    };
+    char* table; /* LINTERP */
     struct { /* BIT */
       int bitnum;
       int numbits;
     };
     int shift; /* PHASE */
   };
+
+  union _gd_private_entry *e;
 };
 
 typedef struct _gd_unified_entry gd_entry_t;
 
-/* Format file fragment metadata */
-struct gd_include_t;
-
-/* The DIRFILE struct.  */
-struct _GD_DIRFILE {
-  /* Error reporting -- this is the only public member. */
-  int error;
-
-  /* Everything below this comment should be considered internal to the library
-   * and not part of the official API */
-
-  /* field count */
-  unsigned int n_entries;
-
-  /* field array */
-  gd_entry_t** entry;
-
-  /* The first field */
-  gd_entry_t* first_field;
-
-  /* directory name */
-  const char* name;
-
-  /* recursion counter */
-  int recurse_level;
-
-  /* include list */
-  struct gd_include_t* include_list;
-  int n_include;
-
-  /* field list */
-  const char** field_list;
-
-#ifndef __USE_FILE_OFFSET64
-  off_t
-#else
-    __off64_t
-#endif
-    frame_offset;
-  int suberror;
-  char* error_string;
-  char* error_file;
-  int error_line;
-  int flags;
-};
-
+/* The dirifle object */
 typedef struct _GD_DIRFILE DIRFILE;
 
 /* dirfile_flags */
-#define GD_ACCMODE            03
-#define GD_RDONLY             00 /* open read only */
-#define GD_RDWR               02 /* open read/write */
-#define GD_CREAT            0100 /* create the dirfile if it doesn't exist */
-#define GD_EXCL             0200 /* force creation: fail on existence */
-#define GD_TRUNC           01000 /* truncate dirfile (scary!) */
-#define GD_BIG_ENDIAN    0200000 /* assume big-endian raw data */
-#define GD_LITTLE_ENDIAN 0400000 /* assume litte-endian raw data */
-#define GD_FORCE_ENDIAN 01000000 /* override endianness */
-#define GD_PEDANTIC     02000000 /* be pedantic */
-#define GD_INVALID      04000000 /* the dirfile is invalid */
+#define GD_ACCMODE       0x0001
+#define GD_RDONLY        0x0000 /* open read only */
+#define GD_RDWR          0x0001 /* open read/write */
+
+#define GD_FORCE_ENDIAN  0x0002 /* override endianness */
+#define GD_BIG_ENDIAN    0x0004 /* assume big-endian raw data */
+#define GD_LITTLE_ENDIAN 0x0008 /* assume litte-endian raw data */
+#define GD_CREAT         0x0010 /* create the dirfile if it doesn't exist */
+#define GD_EXCL          0x0020 /* force creation: fail on existence */
+#define GD_TRUNC         0x0040 /* truncate dirfile (scary!) */
+#define GD_PEDANTIC      0x0080 /* be pedantic */
+
+#define GD_ENCODING      0x0F00 
+#define GD_AUTO_ENCODED  0x0000 /* Encoding scheme unknown */
+#define GD_UNENCODED     0x0100 /* Dirfile is not encoded */
+#define GD_TEXT_ENCODED  0x0200 /* Dirfile is text encoded */
+#define GD_SLIM_ENCODED  0x0300 /* Dirfile is slimlib encoded */
+#define GD_GZ_ENCODED    0x0400 /* Dirfile is gzip encoded */
+#define GD_BZ2_ENCODED   0x0500 /* Dirfile is bzip2 encoded */
 
 extern char* get_error_string(const DIRFILE* dirfile, char* buffer,
     size_t buflen) __THROW __gd_nonnull ((1, 2));
@@ -254,6 +212,10 @@ __THROW __gd_nonnull ((1,2,3));
 extern const char* get_format_filename(const DIRFILE* D, int index)
   __THROW __gd_nonnull((1));
 
+extern void dirfile_user_error(DIRFILE *D, int *ptr) __THROW __gd_nonnull ((1));
+
+extern int get_error(const DIRFILE* D) __THROW __gd_nonnull ((1));
+
 extern int get_nformats(const DIRFILE* D) __THROW __gd_nonnull((1));
 
 /* The following functions contain calls to I/O functions, making them
@@ -266,6 +228,8 @@ extern int dirfile_close(DIRFILE* dirfile);
 
 extern void dirfile_flush(DIRFILE* dirfile, const char* field_code)
   __gd_nonnull ((1));
+
+extern void dirfile_flush_metadata(DIRFILE* dirfile) __gd_nonnull ((1));
 
 /* the following functions are _FILE_OFFSET_BITS sensitive */
 #ifndef __USE_FILE_OFFSET64

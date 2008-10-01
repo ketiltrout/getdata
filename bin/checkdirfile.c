@@ -28,6 +28,7 @@ int main(int argc, char* argv[])
 {
   DIRFILE* dirfile;
   char getdata_error[2048];
+  int error;
 
   if (argc < 2) {
     printf("No dirfile.\n");
@@ -35,8 +36,9 @@ int main(int argc, char* argv[])
   }
 
   dirfile = dirfile_open(argv[1], GD_RDONLY);
+  dirfile_user_error(dirfile, &error);
 
-  if (dirfile->error) {
+  if (error) {
     printf("getdata error: %s\n", get_error_string(dirfile, getdata_error,
           2048));
     dirfile_close(dirfile);
@@ -44,7 +46,7 @@ int main(int argc, char* argv[])
   }
   off_t n = get_nframes(dirfile);
 
-  if (dirfile->error) {
+  if (error) {
     printf("getdata error: %s\n", get_error_string(dirfile, getdata_error,
           2048));
     dirfile_close(dirfile);

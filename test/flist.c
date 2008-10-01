@@ -28,7 +28,7 @@ int main(void)
   DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
   const char** field_list = get_field_list(D);
 
-  if (D->error)
+  if (get_error(D))
     return 1;
 
   if (field_list == NULL)

@@ -51,7 +51,7 @@ namespace GetData {
 
       void FlushMetaData();
 
-      const char* Dirfile::FormatFileName(int index);
+      const char* FormatFileName(int index);
 
       size_t GetData(const char* field_code, off_t first_frame,
           off_t first_sample, size_t num_frames, size_t num_samples,
@@ -61,7 +61,7 @@ namespace GetData {
 
       off_t NFrames();
 
-      int Dirfile::NFormats();
+      int NFormats();
 
       size_t PutData(const char* field_code, off_t first_frame,
           off_t first_sample, size_t num_frames, size_t num_samples,

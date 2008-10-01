@@ -27,7 +27,7 @@ int main(void)
   gd_entry_t E;
 
   int n = get_entry(D, "data", &E);
-  int error = D->error;
+  int error = get_error(D);
 
   dirfile_close(D);
   unlink(format);

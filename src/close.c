@@ -18,15 +18,11 @@
  * with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include "internal.h"
 
 #ifdef STDC_HEADERS
 #include <stdlib.h>
 #endif
-
-#include "internal.h"
 
 /* _GD_FreeD: free the DIRFILE and its subordinates
 */
@@ -41,14 +37,14 @@ static void _GD_FreeD(DIRFILE* D)
       free((char*)D->entry[i]->field); /* cast away bogus constness */
       switch(D->entry[i]->field_type) {
         case GD_RAW_ENTRY:
-          free(D->entry[i]->file);
+          free(D->entry[i]->e->file);
           break;
         case GD_LINTERP_ENTRY:
           free(D->entry[i]->in_fields[0]);
           free(D->entry[i]->table);
-          if (D->entry[i]->table_len > 0) {
-            free(D->entry[i]->x);
-            free(D->entry[i]->y);
+          if (D->entry[i]->e->table_len > 0) {
+            free(D->entry[i]->e->x);
+            free(D->entry[i]->e->y);
           }
           break;
         case GD_LINCOM_ENTRY:

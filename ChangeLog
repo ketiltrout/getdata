@@ -1,3 +1,19 @@
+2008-10-01   D. V. Wiebe <getdata@ketiltrout.net>  svn:110
+	* src/internal.h: Moved config.h inclusion to internal.h
+
+	* src/open.c: Added "." to the list of prohibited field code characcters.
+
+	* src/getdata.h.in, src/internal.h: Hide dirfile implementation from the
+	public.
+	* src/errors.c: Added get_error() and dirfile_user_error()
+
+	* src/getdata.c src/internal.h src/nframes.c src/open.c src/putdata.c
+	src/raw.c: Added encoding framework.
+
+	* src/getdata.c src/slim.c: Add slimlib encoding.
+
+	* src/ascii.c src/getdata.c: Add ASCII encoding.
+
 2008-09-28   D. V. Wiebe <getdata@ketiltrout.net>  svn:109
 	* bindings/cxx/dirfile.cpp bindings/cxx/dirfile.h bindings/cxx/entry.cpp
 	bindings/cxx/entry.h test/Makefile.am test/addentry.cpp: Add C++ support

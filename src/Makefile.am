@@ -19,8 +19,12 @@
 # 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 AUTOMAKE_OPTIONS = foreign
-INCLUDES = -Wall
+AM_CFLAGS = -Wall @SLIMLIB_CPPFLAGS@
 pkgconfigdir = @libdir@/pkgconfig
+
+if USE_SLIMLIB
+SLIM_C=slim.c
+endif
 
 if INCLUDE_LEGACY_API
 LEGACY_C = legacy.c
@@ -41,12 +45,13 @@ pkgconfig_DATA = getdata.pc
 endif
 
 lib_LTLIBRARIES = libgetdata.la
-libgetdata_la_SOURCES = add.c close.c common.c ${DEBUG_C} entry.c errors.c \
-												field_list.c flush.c format_list.c getdata.c \
-												${LEGACY_C} nfields.c nframes.c open.c putdata.c spf.c \
-												types.c ${GETDATA_LEGACY_H} internal.h
-libgetdata_la_LDFLAGS = -export-symbols-regex '^[^_]' \
+libgetdata_la_SOURCES = add.c ascii.c close.c common.c ${DEBUG_C} entry.c \
+												errors.c field_list.c flush.c format_list.c getdata.c \
+												${LEGACY_C} nfields.c nframes.c open.c putdata.c raw.c \
+												${SLIM_C} spf.c types.c ${GETDATA_LEGACY_H} internal.h
+libgetdata_la_LDFLAGS = $(SLIMLIB_LDFLAGS) -export-symbols-regex '^[^_]' \
 												-version-info @GETDATA_IFACE_VERSION@:@GETDATA_IMPL_REVISION@:@GETDATA_IFACE_AGE@
+
 
 clean-local:
 	rm -rf *~ 

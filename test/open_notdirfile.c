@@ -18,5 +18,5 @@ int main(void)
 
   rmdir(filedir);
 
-  return (D->error != GD_E_OPEN);
+  return (get_error(D) != GD_E_OPEN);
 }

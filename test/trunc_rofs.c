@@ -23,5 +23,5 @@ int main(void)
   unlink(format);
   rmdir(filedir);
 
-  return (D->error != GD_E_TRUNC);
+  return (get_error(D) != GD_E_TRUNC);
 }

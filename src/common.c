@@ -19,9 +19,7 @@
  * with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include "internal.h"
 
 #ifdef STDC_HEADERS
 #include <inttypes.h>
@@ -31,8 +29,6 @@
 #include <stdlib.h>
 #include <string.h>
 #endif
-
-#include "internal.h"
 
 /* _GD_GetLine: read non-comment line from format file.  The line is placed in
  *       *line.  Returns 1 if successful, 0 if unsuccessful.
@@ -212,21 +208,21 @@ void _GD_ScaleData(DIRFILE* D, void *data, gd_type_t type, size_t npts,
 
 /* _GD_MakeDummyLinterp: Make an empty linterp
 */
-static void _GD_MakeDummyLinterp(DIRFILE* D, gd_entry_t *E)
+static void _GD_MakeDummyLinterp(DIRFILE* D, union _gd_private_entry *e)
 {
-  E->table_len = 2;
-  E->x = (double *)malloc(2*sizeof(double));
-  E->y = (double *)malloc(2*sizeof(double));
+  e->table_len = 2;
+  e->x = (double *)malloc(2*sizeof(double));
+  e->y = (double *)malloc(2*sizeof(double));
 
-  if (E->x == NULL || E->y == NULL) {
+  if (e->x == NULL || e->y == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     return;
   }
 
-  E->x[0] = 0;
-  E->y[0] = 0;
-  E->x[1] = 1;
-  E->y[1] = 1;
+  e->x[0] = 0;
+  e->y[0] = 0;
+  e->x[1] = 1;
+  e->y[1] = 1;
 }
 
 /* _GD_ReadLinterpFile: Read in the linterp data for this field
@@ -242,7 +238,7 @@ void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E)
 
   fp = fopen(E->table, "r");
   if (fp == NULL) {
-    _GD_MakeDummyLinterp(D, E);
+    _GD_MakeDummyLinterp(D, E->e);
     _GD_SetError(D, GD_E_OPEN_LINFILE, GD_E_LINFILE_OPEN, NULL, 0, E->table);
     dreturnvoid();
     return;
@@ -254,16 +250,16 @@ void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E)
     i++;
 
   if (i < 2) {
-    _GD_MakeDummyLinterp(D, E);
+    _GD_MakeDummyLinterp(D, E->e);
     _GD_SetError(D, GD_E_OPEN_LINFILE, GD_E_LINFILE_LENGTH, NULL, 0, E->table);
     dreturnvoid();
     return;
   }
 
-  E->table_len = i;
-  E->x = (double *)malloc(i * sizeof(double));
-  E->y = (double *)malloc(i * sizeof(double));
-  if (E->x == NULL || E->y == NULL) {
+  E->e->table_len = i;
+  E->e->x = (double *)malloc(i * sizeof(double));
+  E->e->y = (double *)malloc(i * sizeof(double));
+  if (E->e->x == NULL || E->e->y == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     dreturnvoid();
     return;
@@ -272,9 +268,9 @@ void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E)
   /* now read in the data */
   rewind(fp);
   linenum = 0;
-  for (i = 0; i < E->table_len; i++) {
+  for (i = 0; i < E->e->table_len; i++) {
     _GD_GetLine(fp, line, &linenum);
-    sscanf(line, "%lg %lg", &(E->x[i]), &(E->y[i]));
+    sscanf(line, "%lg %lg", &(E->e->x[i]), &(E->e->y[i]));
   }
 
   dreturnvoid();

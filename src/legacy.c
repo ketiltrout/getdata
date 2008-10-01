@@ -20,16 +20,12 @@
  * with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include "internal.h"
 
 #ifdef STDC_HEADERS
 #include <stdlib.h>
 #include <string.h>
 #endif
-
-#include "internal.h"
 
 static struct {
   unsigned int n;
@@ -67,6 +63,7 @@ const char *GD_ERROR_CODES[GD_N_ERROR_CODES] = {
   "Cannot write to specified field",
   "Read-only dirfile",
   "Request out-of-range",
+  "Operation not supported for current encoding scheme",
     /* Subsequent error codes are not supported by the legacy API, and
      * hence not handled here */
   NULL, /* GD_E_BAD_ENTRY */
@@ -118,7 +115,7 @@ static DIRFILE* _GD_GetDirfile(const char *filename_in, int mode)
     if (strncmp(filedir, _GD_Dirfiles.D[i_dirfile]->name, FILENAME_MAX) == 0) {
       /* if the dirfile was previously opened read-only, close it so we can
        * re-open it read-write */
-      if (mode == GD_RDWR && (_GD_Dirfiles.D[i_dirfile]->flags & GD_ACCMODE) ==
+      if ((mode & GD_RDWR) && (_GD_Dirfiles.D[i_dirfile]->flags & GD_ACCMODE) ==
           GD_RDONLY) {
         /* close it */
         dirfile_close(_GD_Dirfiles.D[i_dirfile]);
@@ -417,7 +414,7 @@ int PutData(const char *filename, const char *field_code,
   DIRFILE* D;
   int n_write = 0;
 
-  D = _GD_GetDirfile(filename, GD_RDWR);
+  D = _GD_GetDirfile(filename, GD_RDWR | GD_UNENCODED);
 
   if (D->error) {
     *error_code = _GD_CopyGlobalError(D);

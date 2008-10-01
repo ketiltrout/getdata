@@ -25,7 +25,7 @@ int main(void)
   close(open(data, O_CREAT | O_EXCL | O_WRONLY, 0666));
 
   DIRFILE* D = dirfile_open(filedir, GD_RDONLY | GD_TRUNC);
-  int error = D->error;
+  int error = get_error(D);
   dirfile_close(D);
 
   if (unlink(data))

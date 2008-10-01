@@ -36,7 +36,7 @@ int main(void)
 
   DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
   int n = getdata(D, "data", 0, 40, 0, 8, GD_UINT8, c);
-  int error = D->error;
+  int error = get_error(D);
 
   dirfile_close(D);
 

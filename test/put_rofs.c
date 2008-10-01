@@ -27,10 +27,10 @@ int main(void)
 
   close(open(data, O_CREAT | O_EXCL | O_WRONLY, 0444));
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDWR);
+  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_UNENCODED);
   int n = putdata(D, "data", 5, 0, 1, 0, GD_UINT8, &c);
 
-  int error = D->error;
+  int error = get_error(D);
   dirfile_close(D);
 
   unlink(data);

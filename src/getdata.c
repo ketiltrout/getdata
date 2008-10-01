@@ -19,20 +19,17 @@
  * with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include "internal.h"
 
 #ifdef STDC_HEADERS
 #include <inttypes.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <sys/stat.h>
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
 #endif
-
-#include "internal.h"
 
 /* The following has been extracted from internal.cpp from kjs */
 
@@ -59,6 +56,24 @@ static __attribute__ ((__const__)) double __NAN()
 }
 #define NAN __NAN()
 #endif /* !defined(NAN) */
+
+/* encoding schemas */
+const struct encoding_t encode[] = {
+  { GD_UNENCODED,    "",
+    &_GD_RawOpen,
+    &_GD_RawSeek,
+    &_GD_RawRead,
+    &_GD_RawSize, &_GD_RawWrite, &_GD_RawSync, &_GD_RawClose },
+  { GD_TEXT_ENCODED, ".txt", &_GD_AsciiOpen, &_GD_AsciiSeek, &_GD_AsciiRead,
+    &_GD_AsciiSize, &_GD_AsciiWrite, &_GD_AsciiSync, &_GD_AsciiClose },
+#ifdef USE_SLIMLIB
+  { GD_SLIM_ENCODED, ".slm", &_GD_SlimOpen, &_GD_SlimSeek, &_GD_SlimRead,
+    &_GD_SlimSize, NULL, NULL, &_GD_SlimClose },
+#else
+  { GD_SLIM_ENCODED, ".slm", NULL, NULL, NULL, NULL, NULL, NULL, NULL },
+#endif
+  { GD_AUTO_ENCODED, "",     NULL, NULL, NULL, NULL, NULL, NULL, NULL },
+};
 
 /* _GD_FillFileFrame: fill dataout with frame indices
 */
@@ -150,6 +165,48 @@ static int _GD_FillZero(void *databuffer, gd_type_t type, off64_t s0, size_t ns)
   return (nz);
 }
 
+/* Figure out the encoding scheme */
+unsigned int _GD_ResolveEncoding(const char* name, unsigned int scheme,
+    union _gd_private_entry *e)
+{
+  char candidate[FILENAME_MAX];
+  char* ptr;
+  int i, len = strlen(name);
+  struct stat64 statbuf;
+
+  dtrace("\"%s\", 0x%08x, %p", name, scheme, e);
+
+  strcpy(candidate, name);
+  ptr = candidate + len;
+  len = FILENAME_MAX - len;
+
+  for (i = 0; encode[i].scheme != GD_AUTO_ENCODED; i++) {
+    if (scheme == 0 || scheme == encode[i].scheme) {
+      strcpy(ptr, encode[i].ext);
+
+      if (stat64(candidate, &statbuf) == 0) 
+        if (S_ISREG(statbuf.st_mode)) {
+          if (e != NULL)
+            e->encoding = i;
+          dreturn("%08x", encode[i].scheme);
+          return encode[i].scheme;
+        }
+    }
+  }
+
+  if (scheme != 0 && e != NULL) {
+    for (i = 0; encode[i].scheme != GD_AUTO_ENCODED; i++)
+      if (scheme == encode[i].scheme) {
+        e->encoding = i;
+        dreturn("0x%08x", encode[i].scheme);
+        return encode[i].scheme;;
+      }
+  }
+
+  dreturn("%08x", GD_AUTO_ENCODED);
+  return GD_AUTO_ENCODED;
+}
+
 /* _GD_DoRaw:  Read from a raw.  Returns number of samples read.
 */
 static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *R,
@@ -168,19 +225,6 @@ static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *R,
   s0 = first_samp + first_frame * R->spf;
   ns = num_samp + num_frames * R->spf;
 
-  /** open the file (and cache the fp) if it hasn't been opened yet. */
-  if (R->fp < 0) {
-    snprintf(datafilename, FILENAME_MAX, "%s/%s", D->name, R->file);
-    errno = 0;
-    R->fp = open(datafilename, ((D->flags & GD_ACCMODE) == GD_RDWR) ? O_RDWR :
-        O_RDONLY);
-    if (R->fp < 0) {
-      _GD_SetError(D, GD_E_RAW_IO, 0, datafilename, errno, NULL);
-      dreturn("%zi", 0);
-      return 0;
-    }
-  }
-
   databuffer = malloc(ns * R->size);
   if (databuffer == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
@@ -195,9 +239,56 @@ static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *R,
   }
 
   if (ns > 0) {
-    lseek64(R->fp, s0 * R->size, SEEK_SET);
+    /** open the file (and cache the fp) if it hasn't been opened yet. */
+    if (R->e->fp < 0) {
+      snprintf(datafilename, FILENAME_MAX, "%s/%s", D->name, R->e->file);
 
-    samples_read = read(R->fp, databuffer + n_read * R->size, ns * R->size);
+      /* Figure out the dirfile encoding type, if required */
+      if ((D->flags & GD_ENCODING) == GD_AUTO_ENCODED)
+        D->flags = (D->flags & ~GD_ENCODING) |
+          _GD_ResolveEncoding(datafilename, 0, R->e);
+
+      /* If the encoding is still unknown, none of the candidate files exist;
+       * complain and return */
+      if ((D->flags & GD_ENCODING) == GD_AUTO_ENCODED) {
+        _GD_SetError(D, GD_E_RAW_IO, 0, datafilename, ENOENT, NULL);
+        dreturn("%zi", 0);
+        return 0;
+      }
+
+      /* Figure out the encoding subtype, if required */
+      if (R->e->encoding == GD_ENC_UNKNOWN)
+        _GD_ResolveEncoding(datafilename, D->flags & GD_ENCODING, R->e);
+
+      if (encode[R->e->encoding].open == NULL) {
+        _GD_SetError(D, GD_E_UNSUPPORTED, 0, NULL, 0, NULL);
+        dreturn("%zi", 0);
+        return 0;
+      } else if ((*encode[R->e->encoding].open)(R->e, datafilename,
+            D->flags & GD_ACCMODE, 0))
+      {
+        _GD_SetError(D, GD_E_RAW_IO, 0, datafilename, errno, NULL);
+        dreturn("%zi", 0);
+        return 0;
+      }
+    }
+
+    if (encode[R->e->encoding].seek == NULL) {
+      _GD_SetError(D, GD_E_UNSUPPORTED, 0, NULL, 0, NULL);
+      dreturn("%zi", 0);
+      return 0;
+    }
+
+    (*encode[R->e->encoding].seek)(R->e, s0, R->data_type, 0);
+
+    if (encode[R->e->encoding].read == NULL) {
+      _GD_SetError(D, GD_E_UNSUPPORTED, 0, NULL, 0, NULL);
+      dreturn("%zi", 0);
+      return 0;
+    }
+
+    samples_read = (*encode[R->e->encoding].read)(R->e,
+        databuffer + n_read * R->size, R->data_type, ns);
 
     if (samples_read == -1) {
       _GD_SetError(D, GD_E_RAW_IO, 0, datafilename, errno, NULL);
@@ -582,7 +673,7 @@ static size_t _GD_DoLinterp(DIRFILE *D, gd_entry_t* I,
   dtrace("%p, %p, %lli, %lli, %zi, %zi, 0x%x, %p", D, I, first_frame,
       first_samp, num_frames, num_samp, return_type, data_out);
 
-  if (I->table_len < 0) {
+  if (I->e->table_len < 0) {
     _GD_ReadLinterpFile(D, I);
     if (D->error != GD_E_OK) {
       dreturn("%zi", 0);
@@ -591,8 +682,8 @@ static size_t _GD_DoLinterp(DIRFILE *D, gd_entry_t* I,
   }
 
   D->recurse_level++;
-  n_read = _GD_DoField(D, I->in_fields[0], first_frame, first_samp,
-      num_frames, num_samp, return_type, data_out);
+  n_read = _GD_DoField(D, I->in_fields[0], first_frame, first_samp, num_frames,
+      num_samp, return_type, data_out);
   D->recurse_level--;
 
   if (D->error != GD_E_OK) {
@@ -600,7 +691,8 @@ static size_t _GD_DoLinterp(DIRFILE *D, gd_entry_t* I,
     return 0;
   }
 
-  _GD_LinterpData(D, data_out, return_type, n_read, I->x, I->y, I->table_len);
+  _GD_LinterpData(D, data_out, return_type, n_read, I->e->x, I->e->y,
+      I->e->table_len);
 
   dreturn("%zi", n_read);
   return n_read;
@@ -716,4 +808,4 @@ size_t getdata(DIRFILE* D, const char *field_code, off_t first_frame,
       return_type, data_out);
 }
 /* vim: ts=2 sw=2 et tw=80
- */
+*/

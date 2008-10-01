@@ -14,7 +14,7 @@ int main(void)
 
   DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
   const char** fl = get_field_list(D);
-  int error = D->error;
+  int error = get_error(D);
   dirfile_close(D);
 
   if (fl != NULL)

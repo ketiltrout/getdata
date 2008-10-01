@@ -31,7 +31,7 @@ int main(void)
 
   DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
   dirfile_add(D, &E);
-  int error = D->error;
+  int error = get_error(D);
 
   /* check */
   int n = get_nfields(D);

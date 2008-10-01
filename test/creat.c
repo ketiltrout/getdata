@@ -15,7 +15,7 @@ int main(void)
   const char* format = __TEST__ "dirfile/format";
 
   DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_CREAT);
-  int error = D->error;
+  int error = get_error(D);
   dirfile_close(D);
 
   if (unlink(format))

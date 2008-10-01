@@ -24,7 +24,7 @@ int main(void)
 
   DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
   unsigned int spf = get_spf(D, "data");
-  int error = D->error;
+  int error = get_error(D);
   dirfile_close(D);
 
   unlink(format);

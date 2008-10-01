@@ -22,6 +22,10 @@
 #ifndef GETDATA_INTERNAL_H
 #define GETDATA_INTERNAL_H
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "getdata.h"
 
 /* Type conventions:
@@ -147,6 +151,45 @@ char *strerror_r(int errnum, char *buf, size_t buflen);
 #define GD_E_BAD_ENTRY_BITNUM   6
 #define GD_E_BAD_ENTRY_BITSIZE  7
 
+#define GD_ENC_NONE       0
+#define GD_ENC_ASCII      1
+#define GD_ENC_SLIM       2
+#define GD_ENC_GZ_HASHED  3
+#define GD_ENC_GZ_RAW     4
+#define GD_ENC_BZ2_HASHED 5
+#define GD_ENC_BZ2_RAW    6
+#define GD_ENC_UNKNOWN    7
+
+/* Unified entry struct */
+union _gd_private_entry {
+  struct { /* RAW */
+    char* file;
+    int fp;
+    void* stream;
+    int first;
+    int encoding;
+  };
+  struct { /* LINTERP */
+    int table_len; /* internal */
+    double* x; /* internal */
+    double* y; /* internal */
+  };
+};
+
+/* Encoding schemes */
+extern const struct encoding_t {
+  unsigned int scheme;
+  const char* ext;
+  int (*open)(union _gd_private_entry*, const char*, int, int);
+  off64_t (*seek)(union _gd_private_entry*, off64_t, gd_type_t, int);
+  ssize_t (*read)(union _gd_private_entry*, void*, gd_type_t, size_t);
+  off64_t (*size)(const char *, gd_type_t);
+  ssize_t (*write)(union _gd_private_entry*, const void*, gd_type_t,
+      size_t);
+  int (*sync)(union _gd_private_entry*);
+  int (*close)(union _gd_private_entry*);
+} encode[];
+
 /* Format file fragment metadata */
 struct gd_include_t {
   /* Canonical name (full path) */
@@ -158,11 +201,60 @@ struct gd_include_t {
   int first;
 };
 
+/* internal flags */
+#define GD_INVALID      0x80000000 /* the dirfile is invalid */
+
+/* The DIRFILE struct.  */
+struct _GD_DIRFILE {
+  /* Error reporting */
+  int error, ierror;
+
+  /* The caller's version */
+  int* user_error;
+
+  /* Everything below this comment should be considered internal to the library
+   * and not part of the official API */
+
+  /* field count */
+  unsigned int n_entries;
+
+  /* field array */
+  gd_entry_t** entry;
+
+  /* The first field */
+  gd_entry_t* first_field;
+
+  /* directory name */
+  const char* name;
+
+  /* recursion counter */
+  int recurse_level;
+
+  /* include list */
+  struct gd_include_t* include_list;
+  int n_include;
+
+  /* field list */
+  const char** field_list;
+
+#ifndef __USE_FILE_OFFSET64
+  off_t
+#else
+    __off64_t
+#endif
+    frame_offset;
+  int suberror;
+  char* error_string;
+  char* error_file;
+  int error_line;
+  unsigned int flags;
+};
+
 void* _GD_Alloc(DIRFILE* D, gd_type_t type, size_t n) __gd_nonnull ((1))
   __attribute_malloc__ __THROW __wur;
 
-/* _GD_ClearError: Everything's A-OK; clear the last error. */
-#define _GD_ClearError(D) (D)->error = 0
+  /* _GD_ClearError: Everything's A-OK; clear the last error. */
+#define _GD_ClearError(D) (D)->error = *(D)->user_error = 0
 
 void _GD_ConvertType(DIRFILE* D, const void *data_in, gd_type_t in_type,
     void *data_out, gd_type_t out_type, size_t n) __gd_nonnull ((1, 2, 4))
@@ -185,13 +277,52 @@ gd_entry_t* _GD_FindField(DIRFILE* D, const char* field_code) __THROW
 
 gd_type_t _GD_LegacyType(char c) __THROW __attribute__ ((__const__));
 void _GD_LinterpData(DIRFILE* D, const void *data, gd_type_t type, size_t npts,
-    double *lx, double *ly, size_t n_ln) __THROW __gd_nonnull ((1, 2, 5, 6));
+      double *lx, double *ly, size_t n_ln) __THROW __gd_nonnull ((1, 2, 5, 6));
 void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E)
   __gd_nonnull ((1, 2));
+unsigned int _GD_ResolveEncoding(const char* name, unsigned int scheme,
+    union _gd_private_entry *e);
 void _GD_ScaleData(DIRFILE* D, void *data, gd_type_t type, size_t npts,
-    double m, double b) __THROW __gd_nonnull ((1, 2));
+      double m, double b) __THROW __gd_nonnull ((1, 2));
 void _GD_SetError(DIRFILE* D, int error, int suberror, const char* format_file,
     int line, const char* token) __THROW __gd_nonnull ((1));
 char* _GD_ValidateField(const char* field_code) __gd_nonnull ((1));
 
+/* unencoded I/O methods */
+int _GD_RawOpen(union _gd_private_entry* entry, const char* name, int mode,
+    int creat);
+off64_t _GD_RawSeek(union _gd_private_entry* entry, off64_t count,
+    gd_type_t data_type, int pad);
+ssize_t _GD_RawRead(union _gd_private_entry *entry, void *ptr,
+    gd_type_t data_type, size_t nmemb);
+ssize_t _GD_RawWrite(union _gd_private_entry *entry, const void *ptr,
+    gd_type_t data_type, size_t nmemb);
+int _GD_RawSync(union _gd_private_entry *entry);
+int _GD_RawClose(union _gd_private_entry *entry);
+off64_t _GD_RawSize(const char *name, gd_type_t data_type);
+
+/* text I/O methods */
+int _GD_AsciiOpen(union _gd_private_entry* entry, const char* name, int mode,
+    int creat);
+off64_t _GD_AsciiSeek(union _gd_private_entry* entry, off64_t count,
+    gd_type_t data_type, int pad);
+ssize_t _GD_AsciiRead(union _gd_private_entry *entry, void *ptr,
+    gd_type_t data_type, size_t nmemb);
+ssize_t _GD_AsciiWrite(union _gd_private_entry *entry, const void *ptr,
+    gd_type_t data_type, size_t nmemb);
+int _GD_AsciiSync(union _gd_private_entry *entry);
+int _GD_AsciiClose(union _gd_private_entry *entry);
+off64_t _GD_AsciiSize(const char *name, gd_type_t data_type);
+
+#ifdef USE_SLIMLIB
+/* slimlib I/O methods */
+int _GD_SlimOpen(union _gd_private_entry* entry, const char* name, int mode,
+    int creat);
+off64_t _GD_SlimSeek(union _gd_private_entry* entry, off64_t count,
+    gd_type_t data_type, int pad);
+ssize_t _GD_SlimRead(union _gd_private_entry *entry, void *ptr,
+    gd_type_t data_type, size_t nmemb);
+int _GD_SlimClose(union _gd_private_entry *entry);
+off64_t _GD_SlimSize(const char *name, gd_type_t data_type);
+#endif
 #endif

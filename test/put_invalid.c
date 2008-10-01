@@ -13,9 +13,9 @@ int main(void)
   const char* filedir = __TEST__ "dirfile";
   char c[8];
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDWR);
+  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_UNENCODED);
   size_t n = putdata(D, "data", 5, 0, 1, 0, GD_UINT8, c);
-  int error = D->error;
+  int error = get_error(D);
   dirfile_close(D);
 
   if (n != 0)
