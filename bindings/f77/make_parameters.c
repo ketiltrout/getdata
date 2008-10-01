@@ -75,13 +75,14 @@ int main(void)
     parameter(stream, "GD_E_BAD_DIRFILE",    "GD_EBD", GD_E_BAD_DIRFILE,    i);
     parameter(stream, "GD_E_BAD_PUT_FIELD",  "GD_EBP", GD_E_BAD_PUT_FIELD,  i);
     parameter(stream, "GD_E_ACCMODE",        "GD_EAC", GD_E_ACCMODE,        i);
+    parameter(stream, "GD_E_UNSUPPORTED",    "GD_UNS", GD_E_UNSUPPORTED,    i);
     parameter(stream, "GD_E_BAD_ENTRY",      "GD_EBE", GD_E_BAD_ENTRY,      i);
     parameter(stream, "GD_E_DUPLICATE",      "GD_EDU", GD_E_DUPLICATE,      i);
 
     if (i == 0)
-      fprintf(stream, "C Open flags\\\n\\\n");
+      fprintf(stream, "\\\nC Open flags\\\n");
     else
-      fprintf(stream, "! Open flags\\\n\\\n");
+      fprintf(stream, "\\\n! Open flags\\\n");
 
     parameter(stream, "GD_RDONLY",           "GD_RO",  GD_RDONLY,           i);
     parameter(stream, "GD_RDWR",             "GD_RW",  GD_RDWR,             i);
@@ -92,11 +93,15 @@ int main(void)
     parameter(stream, "GD_LITTLE_ENDIAN",    "GD_LE",  GD_LITTLE_ENDIAN,    i);
     parameter(stream, "GD_FORCE_ENDIAN",     "GD_FE",  GD_FORCE_ENDIAN,     i);
     parameter(stream, "GD_PEDANTIC",         "GD_PE",  GD_PEDANTIC,         i);
+    parameter(stream, "GD_AUTO_ENCODED",     "GD_EA",  GD_AUTO_ENCODED,     i);
+    parameter(stream, "GD_UNENCODED",        "GD_EN",  GD_UNENCODED,        i);
+    parameter(stream, "GD_TEXT_ENCODED",     "GD_ET",  GD_TEXT_ENCODED,     i);
+    parameter(stream, "GD_SLIM_ENCODED",     "GD_ES",  GD_SLIM_ENCODED,     i);
 
     if (i == 0)
-      fprintf(stream, "C Field types\\\n\\\n");
+      fprintf(stream, "\\\nC Field types\\\n");
     else
-      fprintf(stream, "! Field types\\\n\\\n");
+      fprintf(stream, "\\\n! Field types\\\n");
 
     parameter(stream, "GD_NO_ENTRY",         "GD_NOE", GD_NO_ENTRY,         i);
     parameter(stream, "GD_RAW_ENTRY",        "GD_RWE", GD_RAW_ENTRY,        i);
@@ -108,14 +113,14 @@ int main(void)
 
     if (i == 0)
       fprintf(stream,
-          "C Data types -- the unsigned type won't work when passed as a\\\n"
-          "C               return type, but we keep them anyways, since\\\n"
+          "\\\nC Data types -- the unsigned type won't work when passed as\\\n"
+          "C               a return type, but we keep them anyways, since\\\n"
           "C               they might appear as a result of calling "
           "GDFERW\\\n");
     else
       fprintf(stream,
-          "! Data types -- the unsigned type won't work when passed as a\\\n"
-          "!               return type, but we keep them anyways, since\\\n"
+          "\\\n! Data types -- the unsigned type won't work when passed as\\\n"
+          "!               a return type, but we keep them anyways, since\\\n"
           "!               they might appear as a result of calling "
           "fget_entry\\\n");
 

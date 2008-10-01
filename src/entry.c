@@ -89,6 +89,7 @@ int get_entry(DIRFILE* D, const char* field_code, gd_entry_t* entry)
 
   /* now copy to the user supplied buffer */
   memcpy(entry, E, sizeof(gd_entry_t));
+  entry->e = NULL;
 
   /* duplicate strings */
   entry->field = strdup(E->field);

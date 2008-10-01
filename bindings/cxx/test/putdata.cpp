@@ -32,7 +32,7 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  Dirfile dirfile = Dirfile(filedir);
+  Dirfile dirfile = Dirfile(filedir, GD_RDWR | GD_UNENCODED);
   size_t n = dirfile.PutData("data", 5, 0, 1, 0, UInt8, c);
   int error = dirfile.Error();
 
