@@ -159,13 +159,11 @@ typedef struct _GD_DIRFILE DIRFILE;
 #define GD_TRUNC         0x0040 /* truncate dirfile (scary!) */
 #define GD_PEDANTIC      0x0080 /* be pedantic */
 
-#define GD_ENCODING      0x0F00 
+#define GD_ENCODING      0xF000 
 #define GD_AUTO_ENCODED  0x0000 /* Encoding scheme unknown */
-#define GD_UNENCODED     0x0100 /* Dirfile is not encoded */
-#define GD_TEXT_ENCODED  0x0200 /* Dirfile is text encoded */
-#define GD_SLIM_ENCODED  0x0300 /* Dirfile is slimlib encoded */
-#define GD_GZ_ENCODED    0x0400 /* Dirfile is gzip encoded */
-#define GD_BZ2_ENCODED   0x0500 /* Dirfile is bzip2 encoded */
+#define GD_UNENCODED     0x1000 /* Dirfile is not encoded */
+#define GD_TEXT_ENCODED  0x2000 /* Dirfile is text encoded */
+#define GD_SLIM_ENCODED  0x3000 /* Dirfile is slimlib encoded */
 
 extern char* get_error_string(const DIRFILE* dirfile, char* buffer,
     size_t buflen) __THROW __gd_nonnull ((1, 2));

@@ -20,7 +20,7 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH get_nframes 3 "11 August 2008" "Version 0.3.0" "GETDATA"
+.TH get_nframes 3 "2 October 2008" "Version 0.4.0" "GETDATA"
 .SH NAME
 get_nframes \(em report the size of a dirfile
 .SH SYNOPSIS
@@ -66,12 +66,19 @@ defined could be accessed.  As a result, the database is effectively empty.
 An attempt to
 .BR stat (2)
 the file associated with first raw field defined in the format failed.
+.TP
+.B GD_E_UNSUPPORTED
+Reading from dirfiles with the encoding scheme of the specified dirfile is not
+supported by the library.  See
+.BR dirfile-encoding (5)
+for details on dirfile encoding schemes.
 .P
 A descriptive error string for the last error encountered can be obtained from
 a call to
 .BR get_error_string (3).
 .SH SEE ALSO
 .BR dirfile (5),
+.BR dirfile-encoding (5),
 .BR dirfile_open (3),
 .BR getdata (3),
 .BR get_error_string (3)

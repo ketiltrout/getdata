@@ -20,7 +20,7 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH getdata 3 "11 August 2008" "Version 0.3.0" "GETDATA"
+.TH getdata 3 "2 October 2008" "Version 0.4.0" "GETDATA"
 .SH NAME
 getdata \(em retrieve data from a dirfile database
 .SH SYNOPSIS
@@ -179,6 +179,12 @@ Too many levels of recursion were encountered while trying to resolve
 .IR field_code .
 This usually indicates a circular dependency in field specification in the
 dirfile.
+.TP
+.B GD_E_UNSUPPORTED
+Reading from dirfiles with the encoding scheme of the specified dirfile is not
+supported by the library.  See
+.BR dirfile-encoding (5)
+for details on dirfile encoding schemes.
 .RE
 .P
 A descriptive error string for the last error encountered can be obtained from
@@ -230,6 +236,7 @@ field's end-of-field marker.
 
 .SH SEE ALSO
 .BR dirfile (5),
+.BR dirfile-encoding (5),
 .BR dirfile_open (3),
 .BR get_error_string (3),
 .BR get_nframes (3),

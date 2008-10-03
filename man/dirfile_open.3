@@ -20,7 +20,7 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH dirfile_open 3 "11 August 2008" "Version 0.3.0" "GETDATA"
+.TH dirfile_open 3 "2 October 2008" "Version 0.4.0" "GETDATA"
 .SH NAME
 dirfile_open \(em open or create a dirfile
 .SH SYNOPSIS
@@ -87,6 +87,16 @@ already exists.  This flag is ignored if
 .B GD_CREAT
 is not specified.
 .TP
+.B GD_FORCE_ENCODING
+Specifies that
+.B ENCODING
+directives (see
+.BR dirfile-format (5))
+found in the dirfile format file should be ignored.  The encoding scheme
+specified in
+.I flags
+will be used instead (see below).
+.TP
 .B GD_FORCE_ENDIAN
 Specifies that
 .B ENDIAN
@@ -139,8 +149,43 @@ regardless of the content or form of that file.
 Truncation occurs by deleting every regular file in the specified directory,
 whether the files were referred to by the dirfile before truncation or not.
 Accordingly, this flag should be used with caution.  Subdirectories are
-left untouched.  If the dirfile does not exist, this flag is ignored.
+left untouched.  Notably, this operation does not consider the presence of
+subdirfiles declared by
+.B INCLUDE
+directives.  If the dirfile does not exist, this flag is ignored.
 
+.P
+The
+.I flags
+parameter may also be bitwise or'd with one of the following symbols indicating
+the encoding scheme of the dirfile.  Like the endianness flags, the choice of
+encoding here is ignored if the encoding is specified in the dirfile itself,
+unless
+.B GD_FORCE_ENCODED
+is also specified.  If none of these symbols is present,
+.B GD_AUTO_ENCODED
+is assumed.  See
+.BR dirfile-encoding (5)
+for details on dirfile encoding schemes.
+.TP
+.B GD_AUTO_ENCODED
+Specifies that the encoding type is not known in advance, but should be detected
+by the GetData library.  Detection is accomplished by searching for raw data
+files with extensions appropriate to the encoding scheme.  This method will
+notably fail if the the library is called via
+.BR putdata (3)
+to create a previously non-existant raw field.  Once the library has determined
+the encoding scheme for the first time, it remembers it for subsequent calls.
+.TP
+.B GD_SLIM_ENCODED
+Specifies that raw data files are compressed using the slimlib library.
+.TP
+.B GD_TEXT_ENCODED
+Specifies that raw data files are encoded as text files containing one data
+sample per line.  
+.TP
+.B GD_UNENCODED
+Specifies that raw data files are not encoded, but written verbatim to disk.
 
 .SH RETURN VALUE
 A call to
@@ -201,14 +246,10 @@ a call to
 When finished with it, the DIRFILE object may be deallocated with a call to
 .BR dirfile_close (3),
 even if the open failed.
-.SH BUGS
-Although you can create and truncate dirfiles with this interface, no facilities
-yet exist to add fields to an empty dirfile (or modify its metadata in any other
-way), so this feature is of rather limited usefulness.  Functionality to
-manipulate dirfile meta-data is intended to be introduced in an upcoming release
-of GetData.
 .SH SEE ALSO
 .BR dirfile (5),
+.BR dirfile-encoding (5),
+.BR dirfile-format (5),
 .BR dirfile_close (3),
 .BR getdata (3),
 .BR get_error_string (3)

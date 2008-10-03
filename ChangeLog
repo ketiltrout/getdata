@@ -1,3 +1,13 @@
+2008-10-02   D. V. Wiebe <getdata@ketiltrout.net>  svn:112
+	* configure.ac: Locate `slim' and `unslim' binaries needed for slimlib
+	tests.
+
+	* test/Makefile.am test/ascii_get.c test/ascii_nframes.c test/ascii_put.c
+	test/slim_get.c test/slim_nframes.c test/slim_put.c: Add tests for ASCII
+	and slimlib encodings. (slim_put is currently always skipped.)
+
+	* src/ascii.c: Bug fixes.
+
 2008-10-01   D. V. Wiebe <getdata@ketiltrout.net>  svn:111
 	* src/entry.c: Properly initialise the private data in the gd_entry_t
 	object returned.

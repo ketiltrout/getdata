@@ -31,12 +31,16 @@ LEGACY_TESTS=legacy_get legacy_get_put legacy_get_rofs legacy_nframes \
 			legacy_nonexistent legacy_put legacy_spf
 endif
 
+if TEST_SLIMLIB
+SLIMLIB_TESTS=slim_get slim_nframes slim_put
+endif
+
 LDADD=../src/libgetdata.la
 INCLUDES=-Wall -I$(top_srcdir)/src -D__TEST__=\"$@\"
 TESTS=add add_bit add_bit_bitnum add_bit_bitsize add_bit_numbits add_code \
 			add_duplicate add_format add_lincom add_lincom_nfields add_linterp \
 			add_multiply add_phase add_raw add_raw_spf add_raw_type add_rdonly \
-			add_type close close_bad close_null \
+			add_type ascii_get ascii_nframes ascii_put close close_bad close_null \
       convert_uint8_int8      convert_uint8_uint16   convert_uint8_int16     \
 			convert_uint8_uint32    convert_uint8_int32    convert_uint8_float32   \
 			convert_uint8_uint64    convert_uint8_int64    convert_uint8_float64   \
@@ -99,8 +103,8 @@ TESTS=add add_bit add_bit_bitnum add_bit_bitsize add_bit_numbits add_code \
 			put_lincom1 put_lincom2 put_lincom_noin put_linterp put_linterp_noin \
 			put_linterp_notab put_multiply put_null $(PUT_OFF64) put_phase \
 			put_phase_noin put_rdonly put_recurse put_rofs put_sf put_ss put_type \
-			put_uint16 put_uint32 put_uint64 spf spf_lincom spf_multiply spf_recurse \
-			trunc trunc_rdonly trunc_rofs
+			put_uint16 put_uint32 put_uint64 $(SLIMLIB_TESTS) spf spf_lincom \
+			spf_multiply spf_recurse trunc trunc_rdonly trunc_rofs
 
 check_PROGRAMS=$(TESTS)
 

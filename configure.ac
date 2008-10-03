@@ -256,16 +256,32 @@ if test "x$ac_cv_header_slimlib_h" = "xyes" -a "x$ac_cv_lib_slim_slimopen" = "xy
   SLIMLIB_CPPFLAGS="-I$slimlib_prefix/include"
   if test "x$slimlib_prefix" = "x"; then
     SLIMLIB_LDFLAGS="-lslim"
+    SLIMLIB_SEARCHPATH="$PATH"
   else 
     SLIMLIB_LDFLAGS="-L$slimlib_prefix/lib -lslim"
+    SLIMLIB_SEARCHPATH="$slimlib_prefix/bin:$PATH"
   fi
   AC_SUBST(SLIMLIB_CPPFLAGS)
   AC_SUBST(SLIMLIB_LDFLAGS)
   AC_DEFINE([USE_SLIMLIB], [], [ Define to enable slimlib support ])
+
+  AC_PATH_PROGS(SLIM, [slim], [not found], [$SLIMLIB_SEARCHPATH])
+  AC_PATH_PROGS(UNSLIM, [unslim], [not found], [$SLIMLIB_SEARCHPATH])
+
+  if test "x$SLIM" != "xnot found"; then
+    AC_DEFINE_UNQUOTED([SLIM], ["$SLIM"],
+                       [ Define to the full path to the `slim' binary ])
+  fi
+
+  if test "x$UNSLIM" != "xnot found"; then
+    AC_DEFINE_UNQUOTED([UNSLIM], ["$UNSLIM"],
+                       [ Define to the full path to the `unslim' binary ])
+  fi
 else
   use_slimlib="no";
 fi
-AM_CONDITIONAL(USE_SLIMLIB, test "x$use_slimlib" = "xyes")
+AM_CONDITIONAL(USE_SLIMLIB, [test "x$use_slimlib" = "xyes"])
+AM_CONDITIONAL(TEST_SLIMLIB, [test "x$use_slimlib" = "xyes" -a "x$SLIM" != "xnot found" -a "x$UNSLIM" != "xnot found"])
 
 dnl declarations
 AC_CHECK_DECLS([fsync, strdup, strerror_r])
