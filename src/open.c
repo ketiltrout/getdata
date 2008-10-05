@@ -509,6 +509,139 @@ static gd_entry_t* _GD_ParsePhase(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
   return P;
 }
 
+/* _GD_ParseConst: parse CONST data type entry in formats file.
+*/
+static gd_entry_t* _GD_ParseConst(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
+    int n_cols, const char* format_file, int line)
+{
+  char fmt[50];
+
+  dtrace("%p, %p, %i, \"%s\", %i", D, in_cols, n_cols, format_file, line);
+
+  if (n_cols < 4) {
+    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_COLS, format_file, line, NULL);
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  gd_entry_t* C = malloc(sizeof(gd_entry_t));
+  if (C == NULL) {
+    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  C->e = malloc(sizeof(union _gd_private_entry));
+  if (C->e == NULL) {
+    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    free(C);
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  C->field_type = GD_CONST_ENTRY;
+  C->format_file = D->n_include - 1;
+
+  C->field = _GD_ValidateField(in_cols[0]);
+  if (C->field == in_cols[0]) {
+    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_NAME, format_file, line,
+        in_cols[0]);
+    C->field = NULL;
+    dirfile_free_entry_strings(C);
+    free(C);
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  if (C->field == NULL) {
+    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    dirfile_free_entry_strings(C);
+    free(C);
+    C = NULL;
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  C->const_type = _GD_RawType(in_cols[2]);
+
+  if (GD_SIZE(C->const_type) == 0 || C->data_type & 0x40) {
+    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_TYPE, format_file, line,
+        in_cols[2]);
+    dirfile_free_entry_strings(C);
+    free(C);
+    C = NULL;
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  _GD_ScanFormat(fmt, C->const_type);
+  if (C->const_type & GD_SIGNED)
+    sscanf(in_cols[3], fmt, C->e->iconst);
+  else if (C->const_type & GD_IEEE754)
+    sscanf(in_cols[3], fmt, C->e->dconst);
+  else
+    sscanf(in_cols[3], fmt, C->e->uconst);
+
+  dreturn("%p", C);
+  return C;
+}
+
+/* _GD_ParseString: parse STRING data type entry in formats file.
+*/
+static gd_entry_t* _GD_ParseString(DIRFILE* D, const char *in_cols[MAX_IN_COLS],
+    int n_cols, const char* format_file, int line)
+{
+  dtrace("%p, %p, %i, \"%s\", %i", D, in_cols, n_cols, format_file, line);
+
+  if (n_cols < 3) {
+    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_COLS, format_file, line, NULL);
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  gd_entry_t* S = malloc(sizeof(gd_entry_t));
+  if (S == NULL) {
+    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  S->e = malloc(sizeof(union _gd_private_entry));
+  if (S->e == NULL) {
+    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    free(S);
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  S->field_type = GD_STRING_ENTRY;
+  S->format_file = D->n_include - 1;
+  S->e->string = strdup(in_cols[2]);
+
+  S->field = _GD_ValidateField(in_cols[0]);
+  if (S->field == in_cols[0]) {
+    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_NAME, format_file, line,
+        in_cols[0]);
+    S->field = NULL;
+    dirfile_free_entry_strings(S);
+    free(S);
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  if (S->field == NULL || S->e->string == NULL) {
+    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    dirfile_free_entry_strings(S);
+    free(S);
+    S = NULL;
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  dreturn("%p", S);
+  return S;
+}
+
 /* _GD_EntryCmp: Comparison functions for the entries
 */
 int _GD_EntryCmp(const void *A, const void *B)
@@ -517,22 +650,65 @@ int _GD_EntryCmp(const void *A, const void *B)
         (*(gd_entry_t **)B)->field));
 }
 
+static int utf8encode (DIRFILE* D, const char* format_file, int linenum,
+    char** op, uint32_t value)
+{
+  dtrace("%p, %p, %llx", D, op, (long long)value);
+
+  if (value > 0x10FFFF || value == 0) {
+      _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_CHARACTER, format_file, linenum,
+          NULL);
+      dreturn("%i", 1);
+      return 1;
+  }
+
+  if (value <= 0x7F)
+    *((*op)++) = value;
+  else if (value <= 0x7FF) {
+    *((*op)++) = 0xC0 + (value >> 6);
+    *((*op)++) = 0x80 + (value & 0x3F);
+  } else if (value <= 0xFFFF) {
+    *((*op)++) = 0xE0 + (value >> 12);
+    *((*op)++) = 0x80 + ((value >> 6) & 0x3F);
+    *((*op)++) = 0x80 + (value & 0x3F);
+  } else {
+    *((*op)++) = 0xF0 + (value >> 18);
+    *((*op)++) = 0x80 + ((value >> 12) & 0x3F);
+    *((*op)++) = 0x80 + ((value >> 6) & 0x3F);
+    *((*op)++) = 0x80 + (value & 0x3F);
+  }
+
+  dreturn("%i", 0);
+  return 0;
+}
+
 /* _GD_ParseFormatFile: Perform the actual parsing of the format file.  This
  *       function is called from GetFormat once for the main format file and
  *       once for each included file.
  *
  *       Returns 0 unless this format file contains the first raw field.
  */
+#define ACC_MODE_NONE  0
+#define ACC_MODE_OCTAL 1
+#define ACC_MODE_HEX   2
+#define ACC_MODE_UTF8  3
 static int _GD_ParseFormatFile(FILE* fp, DIRFILE *D, const char* filedir,
     const char* subdir, const char* format_file, int format_parent,
     int standards)
 {
   char instring[MAX_LINE_LENGTH];
-  const char* in_cols[MAX_IN_COLS];
-  char* ptr;
+  char outstring[MAX_LINE_LENGTH];
+  const char *in_cols[MAX_IN_COLS];
+  char* ip;
+  char* op = outstring;
   int n_cols = 0;
   int linenum = 0;
+  int escaped_char = 0;
+  int quotated = 0;
   int ws = 1;
+  uint32_t accumulator = 0;
+  int n_acc = 0;
+  int acc_mode = ACC_MODE_NONE;
   int me = D->n_include - 1;
   int have_first = 0;
 
@@ -542,34 +718,170 @@ static int _GD_ParseFormatFile(FILE* fp, DIRFILE *D, const char* filedir,
   /* start parsing */
   while (_GD_GetLine(fp, instring, &linenum)) {
     n_cols = 0;
+    outstring[0] = '\0';
+
     /* tokenise the line */
-    for (ptr = instring; *ptr != '\0'; ++ptr) {
-      if (isspace(*ptr)) {
-        if (!ws)
-          *ptr = '\0';
-        ws = 1;
-      } else {
+    for (ip = instring; *ip != '\0'; ++ip) {
+      if (escaped_char) {
         if (ws) {
           if (n_cols >= MAX_IN_COLS)
             break; /* Ignore trailing data on the line */
-          in_cols[n_cols++] = ptr;
+          in_cols[n_cols++] = op;
         }
-        ws = 0;
+
+        if (acc_mode == ACC_MODE_OCTAL) {
+          if (*ip >= '0' && *ip <= '7') {
+            accumulator = accumulator * 8 + *ip - '0';
+            n_acc++;
+          }
+
+          if (n_acc == 3 || *ip < '0' || *ip > '7') {
+            if (accumulator == 0) {
+              _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_CHARACTER, format_file,
+                  linenum, NULL);
+              break;
+            }
+
+            *(op++) = accumulator;
+
+            if (n_acc != 3)
+              ip--; /* rewind */
+            escaped_char = 0;
+          }
+        } else if (acc_mode != ACC_MODE_NONE) {
+          if (isxdigit(*ip)) {
+            n_acc++;
+            if (*ip >= '0' && *ip <= '9')
+              accumulator = accumulator * 16 + *ip - '0';
+            else if (*ip >= 'A' && *ip <= 'F')
+              accumulator = accumulator * 16 + *ip - 'A';
+            else
+              accumulator = accumulator * 16 + *ip - 'a';
+          }
+
+          if (acc_mode == ACC_MODE_HEX && (n_acc == 2 || !isxdigit(*ip))) {
+            if (accumulator == 0) {
+              _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_CHARACTER, format_file,
+                  linenum, NULL);
+              break;
+            }
+
+            *(op++) = accumulator;
+
+            if (n_acc != 2)
+              ip--; /* rewind */
+            escaped_char = 0;
+          } else if (acc_mode == ACC_MODE_UTF8 && (n_acc == 7 ||
+                !isxdigit(*ip))) {
+
+            if (utf8encode(D, format_file, linenum, &op, accumulator))
+              break; /* syntax error */
+
+            if (n_acc != 7)
+              ip--; /* rewind */
+            escaped_char = 0;
+          }
+        } else {
+          switch(*ip) {
+            case 'a':
+              *(op++) = '\a';
+              escaped_char = 0;
+              break;
+            case 'b':
+              *(op++) = '\b';
+              escaped_char = 0;
+              break;
+            case 'e':
+              *(op++) = '\x1B';
+              escaped_char = 0;
+              break;
+            case 'f':
+              *(op++) = '\b';
+              escaped_char = 0;
+              break;
+            case 'n':
+              *(op++) = '\n';
+              escaped_char = 0;
+              break;
+            case 'r':
+              *(op++) = '\r';
+              escaped_char = 0;
+              break;
+            case 't':
+              *(op++) = '\t';
+              escaped_char = 0;
+              break;
+            case 'v':
+              *(op++) = '\v';
+              escaped_char = 0;
+              break;
+            case '0':
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+              n_acc = 1;
+              accumulator = *ip - '0';
+              acc_mode = ACC_MODE_OCTAL;
+              break;
+            case 'u':
+              n_acc = 0;
+              accumulator = 0;
+              acc_mode = ACC_MODE_UTF8;
+              break;
+            case 'x':
+              n_acc = 0;
+              accumulator = 0;
+              acc_mode = ACC_MODE_HEX;
+              break;
+            default:
+              *(op++) = *ip;
+              escaped_char = 0;
+          }
+        }
+      } else {
+        if (*ip == '\\')
+          escaped_char = 1;
+        else if (*ip == '"')
+          quotated = !quotated;
+        else if (!quotated && isspace(*ip)) {
+          if (!ws)
+            *(op++) = '\0';
+          ws = 1;
+        } else if (!quotated && *ip == '#') {
+          *op = '\0';
+          break;
+        } else {
+          if (ws) {
+            if (n_cols >= MAX_IN_COLS)
+              break; /* Ignore trailing data on the line */
+            in_cols[n_cols++] = op;
+          }
+          ws = 0;
+        }
       }
     }
 
     /* set up for possibly slashed reserved words */
-    ptr = (char*)in_cols[0] + ((in_cols[0][0] == '/') ? 1 : 0);
+    ip = (char*)in_cols[0] + ((in_cols[0][0] == '/') ? 1 : 0);
 
-    if (n_cols < 2) {
+    if (D->error) {
+      ; /* tokeniser threw an error */
+    } else if (quotated || escaped_char) { /* Unterminated token */
+      _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_UNTERM, format_file, linenum,
+          NULL);
+    } else if (n_cols < 2) {
       _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_COLS, format_file, linenum,
           NULL);
 
       /* Directives */
 
-    } else if (strcmp(ptr, "FRAMEOFFSET") == 0) {
+    } else if (strcmp(ip, "FRAMEOFFSET") == 0) {
       D->frame_offset = atoll(in_cols[1]);
-    } else if (strcmp(ptr, "INCLUDE") == 0) {
+    } else if (strcmp(ip, "INCLUDE") == 0) {
       int i, found = 0;
       char temp_buffer[FILENAME_MAX];
       char new_format_file[FILENAME_MAX];
@@ -637,7 +949,18 @@ static int _GD_ParseFormatFile(FILE* fp, DIRFILE *D, const char* filedir,
             me, standards))
         D->include_list[me].first = 1;
       fclose(new_fp);
-    } else if (strcmp(ptr, "ENDIAN") == 0) {
+    } else if (strcmp(ip, "ENCODING") == 0) {
+      if (!(D->flags & GD_FORCE_ENCODING)) {
+        if (strcmp(in_cols[1], "none") == 0)
+          D->flags = (D->flags & ~GD_ENCODING) | GD_UNENCODED;
+        else if (strcmp(in_cols[1], "slim") == 0)
+          D->flags = (D->flags & ~GD_ENCODING) | GD_SLIM_ENCODED;
+        else if (strcmp(in_cols[1], "text") == 0)
+          D->flags = (D->flags & ~GD_ENCODING) | GD_TEXT_ENCODED;
+        else
+          D->flags = (D->flags & ~GD_ENCODING) | GD_ENC_UNSUPPORTED;
+      }
+    } else if (strcmp(ip, "ENDIAN") == 0) {
       if (!(D->flags & GD_FORCE_ENDIAN)) {
         if (strcmp(in_cols[1], "big") == 0) {
           D->flags |= GD_BIG_ENDIAN;
@@ -649,7 +972,7 @@ static int _GD_ParseFormatFile(FILE* fp, DIRFILE *D, const char* filedir,
           _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_ENDIAN, format_file, linenum,
               NULL);
       }
-    } else if (strcmp(ptr, "VERSION") == 0) {
+    } else if (strcmp(ip, "VERSION") == 0) {
       standards = atoi(in_cols[1]);
 
       /* Field Types -- here we go back to in_cols */
@@ -710,6 +1033,20 @@ static int _GD_ParseFormatFile(FILE* fp, DIRFILE *D, const char* filedir,
       D->n_entries++;
       D->entry = realloc(D->entry, D->n_entries * sizeof(gd_entry_t**));
       D->entry[D->n_entries - 1] = _GD_ParsePhase(D, in_cols, n_cols,
+          format_file, linenum);
+      if (D->error != GD_E_OK)
+        D->n_entries--;
+    } else if (strcmp(in_cols[1], "CONST") == 0) {
+      D->n_entries++;
+      D->entry = realloc(D->entry, D->n_entries * sizeof(gd_entry_t**));
+      D->entry[D->n_entries - 1] = _GD_ParseConst(D, in_cols, n_cols,
+          format_file, linenum);
+      if (D->error != GD_E_OK)
+        D->n_entries--;
+    } else if (strcmp(in_cols[1], "STRING") == 0) {
+      D->n_entries++;
+      D->entry = realloc(D->entry, D->n_entries * sizeof(gd_entry_t**));
+      D->entry[D->n_entries - 1] = _GD_ParseString(D, in_cols, n_cols,
           format_file, linenum);
       if (D->error != GD_E_OK)
         D->n_entries--;

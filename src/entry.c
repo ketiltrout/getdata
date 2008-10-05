@@ -37,7 +37,6 @@ gd_entry_t* dirfile_free_entry_strings(gd_entry_t* entry)
   }
 
   free(entry->field);
-  free(entry->e);
 
   switch(entry->field_type) {
     case GD_LINCOM_ENTRY:
@@ -54,11 +53,18 @@ gd_entry_t* dirfile_free_entry_strings(gd_entry_t* entry)
     case GD_BIT_ENTRY:
     case GD_PHASE_ENTRY:
       free(entry->in_fields[0]);
-      /* fall through */
+      break;
+    case GD_STRING_ENTRY:
+      if (entry->e != NULL)
+        free(entry->e->string);
+      break;
+    case GD_CONST_ENTRY:
     case GD_RAW_ENTRY:
     case GD_NO_ENTRY:
       break;
   }
+
+  free(entry->e);
 
   dreturn("%p", entry);
   return entry;
@@ -111,6 +117,8 @@ int get_entry(DIRFILE* D, const char* field_code, gd_entry_t* entry)
       entry->in_fields[0] = strdup(E->in_fields[0]);
       /* fall through */
     case GD_RAW_ENTRY:
+    case GD_CONST_ENTRY:
+    case GD_STRING_ENTRY:
     case GD_NO_ENTRY:
       break;
   }

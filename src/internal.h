@@ -105,6 +105,7 @@ char *strerror_r(int errnum, char *buf, size_t buflen);
 
 /* For FILENAME_MAX */
 #include <stdio.h>
+#include <inttypes.h>
 
 #ifndef FILENAME_MAX
 #  define FILENAME_MAX 4096
@@ -139,6 +140,8 @@ char *strerror_r(int errnum, char *buf, size_t buflen);
 #define GD_E_FORMAT_ENDIAN    12
 #define GD_E_FORMAT_BAD_TYPE  13
 #define GD_E_FORMAT_BAD_NAME  14
+#define GD_E_FORMAT_UNTERM    15
+#define GD_E_FORMAT_CHARACTER 16
 
 #define GD_E_LINFILE_LENGTH    1
 #define GD_E_LINFILE_OPEN      2
@@ -174,6 +177,12 @@ union _gd_private_entry {
     double* x; /* internal */
     double* y; /* internal */
   };
+  union { /* CONST */
+    double dconst;
+    uint64_t uconst;
+    int64_t iconst;
+  };
+  char* string;
 };
 
 /* Encoding schemes */
@@ -202,7 +211,8 @@ struct gd_include_t {
 };
 
 /* internal flags */
-#define GD_INVALID      0x80000000 /* the dirfile is invalid */
+#define GD_ENC_UNSUPPORTED GD_ENCODING /* Dirfile encoding unsupported */
+#define GD_INVALID         0x80000000 /* the dirfile is invalid */
 
 /* The DIRFILE struct.  */
 struct _GD_DIRFILE {
@@ -284,6 +294,7 @@ unsigned int _GD_ResolveEncoding(const char* name, unsigned int scheme,
     union _gd_private_entry *e);
 void _GD_ScaleData(DIRFILE* D, void *data, gd_type_t type, size_t npts,
       double m, double b) __THROW __gd_nonnull ((1, 2));
+void _GD_ScanFormat(char* fmt, gd_type_t data_type);
 void _GD_SetError(DIRFILE* D, int error, int suberror, const char* format_file,
     int line, const char* token) __THROW __gd_nonnull ((1));
 char* _GD_ValidateField(const char* field_code) __gd_nonnull ((1));

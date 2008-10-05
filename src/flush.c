@@ -71,6 +71,8 @@ void _GD_Flush(DIRFILE* D, gd_entry_t *entry, const char* field_code)
     case GD_PHASE_ENTRY:
       if (entry->in_fields[0])
         _GD_Flush(D, _GD_FindField(D, entry->in_fields[0]), field_code);
+    case GD_CONST_ENTRY:
+    case GD_STRING_ENTRY:
     case GD_NO_ENTRY:
       break;
   }
@@ -108,9 +110,34 @@ static const char* _GD_TypeName(DIRFILE* D, gd_type_t data_type)
   }
 }
 
+static char* _GD_StringEscapeise (char* out, const char* in)
+{
+  char* ptr = out;
+  const char* HexDigit = "0123456789ABCDEF";
+
+  for (; *in != '\0'; ++in)
+    if (*in == '"') {
+      *(ptr++) = '\\';
+      *(ptr++) = '"';
+    } else if (*in == '\\') {
+      *(ptr++) = '\\';
+      *(ptr++) = '\\';
+    } else if (*in < 0x20) {
+      *(ptr++) = '\\';
+      *(ptr++) = 'x';
+      *(ptr++) = HexDigit[*in >> 8];
+      *(ptr++) = HexDigit[*in & 0xF];
+    } else
+      *(ptr++) = *in;
+  *ptr = '\0';
+
+  return out;
+}
+
 /* Write a field specification line */
 static void _GD_FieldSpec(DIRFILE* D, FILE* stream, gd_entry_t* E) {
   int i;
+  char buffer[MAX_LINE_LENGTH];
 
   switch(E->field_type) {
     case GD_RAW_ENTRY:
@@ -138,6 +165,20 @@ static void _GD_FieldSpec(DIRFILE* D, FILE* stream, gd_entry_t* E) {
     case GD_PHASE_ENTRY:
       fprintf(stream, "%s PHASE %s %i\n", E->field, E->in_fields[0], E->shift);
       break;
+    case GD_CONST_ENTRY:
+      if (E->const_type & GD_SIGNED)
+        fprintf(stream, "%s CONST %s %" PRIi64, E->field, _GD_TypeName(D,
+              E->const_type), E->e->iconst);
+      else if (E->const_type & GD_IEEE754)
+        fprintf(stream, "%s CONST %s %.16g", E->field, _GD_TypeName(D,
+              E->const_type), E->e->dconst);
+      else
+        fprintf(stream, "%s CONST %s %" PRIu64, E->field, _GD_TypeName(D,
+              E->const_type), E->e->uconst);
+      break;
+    case GD_STRING_ENTRY:
+      fprintf(stream, "%s STRING \"%s\"", E->field, _GD_StringEscapeise(buffer,
+            E->e->string));
     case GD_NO_ENTRY:
       _GD_InternalError(D);
       break;
@@ -221,7 +262,7 @@ static void _GD_FlushMeta(DIRFILE* D)
               break; /* There can be only one */
             }
       }
-      
+
       /* The remaining includes */
       for (j = 0; j < D->n_include; ++j)
         if (D->include_list[j].parent == i && !D->include_list[j].first)
@@ -236,7 +277,7 @@ static void _GD_FlushMeta(DIRFILE* D)
       fflush(stream);
       fsync(fd);
       fclose(stream);
-      
+
       /* If no error was encountered, move the temporary file over the
        * old format file, otherwise abort */
       if (D->error != GD_E_OK) {

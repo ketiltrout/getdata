@@ -58,6 +58,8 @@ static const struct {
     "Unrecognised endianness on line %3$i of %2$s", 0 },
   { GD_E_FORMAT, GD_E_FORMAT_BAD_NAME,
     "Bad field name on line %3$i of %2$s: %4$s", 0 },
+  { GD_E_FORMAT, GD_E_FORMAT_UNTERM,
+    "Unterminated token on line %3$i of %2$s", 0 },
   /* GD_E_CREAT: 1 = suberror, 2 = filename. 3 = errno */
   { GD_E_TRUNC, 0, "Error truncating %2$s: ", 1 },
   /* GD_E_CREAT: 1 = suberror, 2 = filename, 3 = errno */

@@ -34,9 +34,10 @@ unsigned int _GD_GetSPF(const char *field_code, DIRFILE* D)
 
   dtrace("\"%s\", %p", field_code, D);
 
-  if (D->recurse_level >= GD_MAX_RECURSE_LEVEL) {
+  if (++D->recurse_level >= GD_MAX_RECURSE_LEVEL) {
     _GD_SetError(D, GD_E_RECURSE_LEVEL, 0, NULL, 0, field_code);
     dreturn("%u", 0);
+    D->recurse_level--;
     return 0;
   }
 
@@ -55,7 +56,6 @@ unsigned int _GD_GetSPF(const char *field_code, DIRFILE* D)
     return 0;
   }
 
-  D->recurse_level++;
   switch(entry->field_type) {
     case GD_RAW_ENTRY:
       spf = entry->spf;
@@ -70,8 +70,8 @@ unsigned int _GD_GetSPF(const char *field_code, DIRFILE* D)
     default:
       _GD_InternalError(D);
   }
-  D->recurse_level--;
 
+  D->recurse_level--;
   dreturn("%u", spf);
   return spf;
 }

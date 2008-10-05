@@ -57,7 +57,12 @@ static void _GD_FreeD(DIRFILE* D)
         case GD_BIT_ENTRY:
         case GD_PHASE_ENTRY:
           free(D->entry[i]->in_fields[0]);
-          /* fall through */
+          break;
+        case GD_STRING_ENTRY:
+          if (D->entry[i]->e != NULL)
+            free(D->entry[i]->e->string);
+          break;
+        case GD_CONST_ENTRY:
         case GD_NO_ENTRY:
           break;
       }

@@ -156,9 +156,7 @@ static size_t _GD_DoLinterpOut(DIRFILE* D, gd_entry_t *I,
 
   /* Interpolate X(y) instead of Y(x) */
 
-  D->recurse_level++;
   spf = _GD_GetSPF(I->in_fields[0], D);
-  D->recurse_level--;
   ns = num_samp + num_frames * (int)spf;
 
   _GD_LinterpData(D, data_in, data_type, ns, I->e->y, I->e->x, I->e->table_len);
@@ -168,10 +166,8 @@ static size_t _GD_DoLinterpOut(DIRFILE* D, gd_entry_t *I,
     return 0;
   }
 
-  D->recurse_level++;
   n_wrote = _GD_DoFieldOut(D, I->in_fields[0], first_frame, first_samp,
       num_frames, num_samp, data_type, data_in);
-  D->recurse_level--;
 
   dreturn("%zi", n_wrote);
   return n_wrote;
@@ -197,13 +193,8 @@ static size_t _GD_DoLincomOut(DIRFILE* D, gd_entry_t *L,
     return 0;
   }
 
-  D->recurse_level++;
-
   /* do the inverse scaling */
-
-  D->recurse_level++;
   spf = _GD_GetSPF(L->in_fields[0], D);
-  D->recurse_level--;
   ns = num_samp + num_frames * (int)spf;
 
   if (D->error != GD_E_OK) {
@@ -233,8 +224,6 @@ static size_t _GD_DoLincomOut(DIRFILE* D, gd_entry_t *L,
       num_frames, num_samp, data_type, tmpbuf);
   free(tmpbuf);
 
-  D->recurse_level--;
-
   dreturn("%zi", n_wrote);
   return n_wrote;
 }
@@ -260,9 +249,7 @@ static size_t _GD_DoBitOut(DIRFILE* D, gd_entry_t *B,
       B->bitnum, B->numbits, mask);
 #endif
 
-  D->recurse_level++;
   spf = _GD_GetSPF(B->in_fields[0], D);
-  D->recurse_level--;
 
   if (D->error != GD_E_OK) {
     dreturn("%zi", 0);
@@ -291,12 +278,8 @@ static size_t _GD_DoBitOut(DIRFILE* D, gd_entry_t *B,
   fprintf(stdout,"DoBitOut:  reading in bitfield %s\n",B->in_fields[0]);
 #endif
 
-  D->recurse_level++;
-
   _GD_DoField(D, B->in_fields[0], first_frame, first_samp, 0, ns, GD_UINT64,
       readbuf);
-
-  D->recurse_level--;
 
   /* error encountered, abort */
   if (D->error != GD_E_OK) {
@@ -329,14 +312,48 @@ static size_t _GD_DoPhaseOut(DIRFILE* D, gd_entry_t *P,
   dtrace("%p, %p, %lli, %lli, %zi, %zi, 0x%x, %p", D, P, first_frame,
       first_samp, num_frames, num_samp, data_type, data_in);
 
-  D->recurse_level++;
   n_wrote = _GD_DoFieldOut(D, P->in_fields[0], first_frame, first_samp +
       P->shift, num_frames, num_samp, data_type, data_in);
-  D->recurse_level--;
 
   dreturn("%zi", n_wrote);
 
   return n_wrote;
+}
+
+static size_t _GD_DoConstOut(DIRFILE* D, gd_entry_t *C, gd_type_t data_type,
+    const void *data_in)
+{
+  dtrace("%p, %p, 0x%x, %p", D, C, data_type, data_in);
+
+  if (C->const_type & GD_SIGNED)
+    _GD_ConvertType(D, data_in, data_type, &C->e->iconst, GD_INT64, 1);
+  else if (C->const_type & GD_IEEE754)
+    _GD_ConvertType(D, data_in, data_type, &C->e->dconst, GD_FLOAT64, 1);
+  else
+    _GD_ConvertType(D, data_in, data_type, &C->e->uconst, GD_UINT64, 1);
+
+  if (D->error) { /* bad input type */
+    dreturn("%zi", 0);
+    return 0;
+  }
+
+  D->include_list[C->format_file].modified = 1;
+
+  dreturn("%i", 1);
+  return 1;
+}
+
+static size_t _GD_DoStringOut(DIRFILE* D, gd_entry_t *S, size_t num_samp,
+    const void *data_in)
+{
+  dtrace("%p, %p, %zi, %p", D, S, num_samp, data_in);
+
+  free(S->e->string);
+  S->e->string = strdup(data_in);
+  D->include_list[S->format_file].modified = 1;
+
+  dreturn("%i", 1);
+  return 1;
 }
 
 static size_t _GD_DoFieldOut(DIRFILE *D, const char *field_code,
@@ -349,8 +366,9 @@ static size_t _GD_DoFieldOut(DIRFILE *D, const char *field_code,
   dtrace("%p, \"%s\", %lli, %lli, %zi, %zi, 0x%x, %p", D, field_code,
       first_frame, first_samp, num_frames, num_samp, data_type, data_in);
 
-  if (D->recurse_level > 10) {
+  if (++D->recurse_level >= GD_MAX_RECURSE_LEVEL) {
     _GD_SetError(D, GD_E_RECURSE_LEVEL, 0, NULL, 0, field_code);
+    D->recurse_level--;
     dreturn("%zi", 0);
     return 0;
   }
@@ -360,6 +378,7 @@ static size_t _GD_DoFieldOut(DIRFILE *D, const char *field_code,
 
   if (entry == NULL) { /* No match */
     _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, field_code);
+    D->recurse_level--;
     dreturn("%zi", 0);
     return 0;
   }
@@ -388,11 +407,18 @@ static size_t _GD_DoFieldOut(DIRFILE *D, const char *field_code,
       n_wrote = _GD_DoPhaseOut(D, entry, first_frame, first_samp, num_frames,
           num_samp, data_type, data_in);
       break;
-    default:
+    case GD_CONST_ENTRY:
+      n_wrote = _GD_DoConstOut(D, entry, data_type, data_in);
+      break;
+    case GD_STRING_ENTRY:
+      n_wrote = _GD_DoStringOut(D, entry, num_samp, data_in);
+      break;
+    case GD_NO_ENTRY:
       _GD_InternalError(D);
       break;
   }
 
+  D->recurse_level--;
   dreturn("%zi", n_wrote);
   return n_wrote;
 }

@@ -20,7 +20,7 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH dirfile\-format 5 "29 August 2008" "Standards Version 5" "DATA FORMATS"
+.TH dirfile\-format 5 "3 October 2008" "Standards Version 6" "DATA FORMATS"
 .SH NAME
 dirfile\-format \(em the dirfile database format specification file
 .SH DESCRIPTION
@@ -31,55 +31,160 @@ for a
 .BR dirfile (5)
 database.
 
-The format file is a case sensitive ASCII text file called
+The format file is a case sensitive ASCII or UTF-8 text file called
 .B format
 located in the dirfile directory.
 
 .SH SYNTAX
 The format file is composed of field specification lines and directive lines,
 optionally separated by blank lines or lines containing only whitespace.
-The hash mark
+If unescaped (see below), the hash mark
 .RB ( # )
 is the comment delimiter; any text following the comment delimiter to the end of
 the line is ignored.
 
-Both field specification lines and directive lines consist of several words
-separated by whitespace.  The first word of a directive line is always a
+.SS Tokens
+Both field specification lines and directive lines consist of several tokens
+separated by whitespace.  The first token of a directive line is always a
 .IR "reserved word" .
-The first word of a field specification line is never a reserved word.
+The first token of a field specification line is never a reserved word.
 
-There are four 
+Since tokens are separated by whitespace, to include a whitespace character in
+a token, it must either be escaped by preceeding it by a backslash character
+.RB ( \e )
+or else by enclosing the token in quotation marks
+.RB ( """" ).
+The quotation marks themselves will be stripped from the token.  To include a
+literal quotation mark or backslash character in a token, it must be escaped
+.RB ( \e" " or " \e\e ).
+Similarly, a hash mark may be included in a token by including it in quotation
+marks
+.RB ( """#""" )
+or else by escaping it
+.RB ( \e# ).
+
+It is a syntax error to have a line which contains unmatched quotation marks, or
+in which the last character is the backslash character.
+
+Several characters when escaped by a preceeding backslash character are
+interpreted as special characters in tokens.  Some of these have already been
+mentioned.  They are:
+.RS
+.TP
+.B \e"
+a quotation mark character (ASCII 0x22 / U+0022)
+.TP
+.B \ea
+an alert (bell) character (ASCII 0x07 / U+0007)
+.TP
+.B \eb
+a backspace character (ASCII 0x08 / U+0008)
+.TP
+.B \ee
+an escape character (ASCII 0x1B / U+001B)
+.TP
+.B \ef
+a form-feed character (ASCII 0x0C / U+000C)
+.TP
+.B \en
+a line-feed character (ASCII 0x0A / U+000A)
+.TP
+.B \er
+a carraige return character (ASCII 0x0D / U+000D)
+.TP
+.B \et
+a horitontal tab character (ASCII 0x09 / U+0009)
+.TP
+.B \ev
+a vertical tab character (ASCII 0x0B / U+000B)
+.TP
+.B \e\e
+a backslash character (ASCII 0x5C / U+005C)
+.TP
+.BI \e ooo
+the single byte given by the octal number
+.IR ooo .
+.TP
+.BI \ex hh
+the single byte given by the hexidecimal number
+.IR hh .
+.TP
+.BI \eu hhhhhhh
+the UTF-8 byte sequence encoding the Unicode code point given by the hexidecimal
+number
+.IR hhhhhhh .
+It is a syntax error to provide a hexidecimal number greater than 10FFFF.
+.RE
+
+Any other character which is escaped is interpreted as the character itself.
+.RI ( i.e.
+.B \ec
+is interpreted as
+.BR c ).
+
+No token may contain the NULL character (ASCII 0x00 / U+0000).  Furthermore,
+although support is present to create UTF-8 byte sequences, tokens are not
+required to be valid UTF-8 sequences.  Any byte sequence not containing the NULL
+character forms a valid token.  (There may be further restrictions on allowed
+characters for a token in a given situation, for example, when used as a field
+name.)
+
+.SS Reserved Words
+
+There are six 
 .IR "reserved words" ,
-which cannot be used as field names in the dirfile.  Instead these specify
+which cannot be used as field names in the dirfile.  Instead, these specify
 directives.  Any reserved word may have a forward slash
 .RB ( / )
 prepended to it, without change in meaning.  Future versions of the Standards
 may require this to distinguish a directive line from a field specification
 line.
 .TP
-.B ENDIAN
+.B /ENCODING
+The ENCODING directive specifies the encoding scheme used to encode the dirfile.
+The encoding scheme may be one of the pre-defined names listed below, which are
+described in more detail in
+.BR dirfile-encoding (5),
+or any other site-specific encoding scheme.  The pre-defined scheme names are:
+.RS
+.TP
+.I none
+The dirfile is unencoded.
+.TP
+.I slim
+The dirfile is compressed using the slimlib library.
+.TP
+.I text
+The dirfile is text encoded.
+.PP
+Implementations should fail gracefully when encountering an unknown encoding
+scheme.  If no encoding scheme is specified, behaviour is implementaiton
+dependent.  Syntax is:
+.IP
+.BI /ENCODING\~ <scheme>
+.RE
+.TP
+.B /ENDIAN
 The ENDIAN directive specifies the endianness of the raw data in the database.
 In previous versions of the Dirfile Standard, raw data was always assumed to be
 little-endian.  This assumption has been removed.  The assumed endianness of raw
 data in dirfiles which omit this directive is implementation dependent.  Syntax
 is:
-.SP
 .RS
 .IP
 .B /ENDIAN
 .IR "( " big " | " little " )"
 .RE
 .TP
-.B FRAMEOFFSET
+.B /FRAMEOFFSET
 The FRAMEOFFSET directive specifies the frame number of the first frame in the
 database.  Syntax is:
-.SP
 .RS
 .IP
 .BI /FRAMEOFFSET\~ <integer>
 .RE
 .TP
-.B INCLUDE
+.B /INCLUDE
 The INCLUDE directive specifies another file to parse for additional format
 specification for the dirfile.  The inclusion is treated as if the lines of the
 included file were pasted verbatim in place of the INCLUDE directive line.  The
@@ -88,19 +193,50 @@ looked for in the directory containing the included file and not in the
 directory containing the parent format file.  The included file may be
 specified either with an absolute path, or else a relative path from the
 current file.  Syntax is:
-.SP
 .RS
 .IP
 .BI /INCLUDE\~ <file>
 .RE
 .TP
-.B VERSION
+.B /META
+The META directive specifies a metadata field attached to a particular parent
+field.  This directive is used to attach field metadata to the parent.  The
+field metadata may be of any allowed type.  Metadata field data are retrieved in
+exactly the same way as regular field data, but the field code specified will
+consist of the parent and metadata field names joined with a forward slash:
+.RS
+.IP
+.IB <parent-field> / <meta-field>
+.PP
+Syntax is:
+.IP
+.B /META
+.I <parent-field>
+{field specification line}
+.PP
+As an illustration of this concept,
+.IP
+.B /META 
+pfield meta
+.B CONST FLOAT64
+3.291882
+.PP
+provides a scalar metadatum called
+.I meta
+with value 3.291882 attached to the field
+.IR pfield .
+This particular metadata field may be referred to by the field code
+"pfield/meta".  Note that multiple parent fields may have metadata fields with
+the same name, since all references to metadata fields must include the parent
+field name.  Metadata fields may not themselves have further sub-metadata.
+.RE
+.TP
+.B /VERSION
 The VERSION directive specifies the particular version of the Dirfile Standards
 to which the dirfile format file conforms.  This directive should occur before
 any version dependent syntax is encountered.  As of Standards Version 5, no such
 syntax exists, and this directive is provided primarily to ease forward
 compatibility.  Syntax is:
-.SP
 .RS
 .IP
 .BI /VERSION\~ <integer>
@@ -111,105 +247,71 @@ Except for the INCLUDE directive, each instance of which must be processed
 independently, if multiple instances of a directive are present in a dirfile
 format file, only the last such instance will be honoured.
 
+.SS Field Specification Lines
+
 Any line which does not start with a
 .I reserved word
-is assumed to be a field specification line.  The first word in a field
+is assumed to be a field specification line.  The first token in a field
 specification line is the field name.  The field name consists of one or more
-non-whitespace characters excluding the characters
+characters, excluding both ASCII control characters, and the characters
 .IP
-.B #\t&\t/\t;\t<\t>\t\\\\\t|
+.B &\t/\t;\t<\t>\t\\\\\t|\t.
 .PP
 which are reserved.  The field name may not be
 .B INDEX
 nor
 .BR FILEFRAM ,
 which are synonyms for a special, implicit field which contains the integer
-frame index.  Field names are case sensitive.  The second word in the field
-specification line is the field type.  The meaning of subsequent words depends
+frame index.  Field names are case sensitive.  The second token in the field
+specification line is the field type.  The meaning of subsequent tokens depends
 on the field type.
 
 There are five field types:
 .TP
-.B RAW
-The RAW field type specifies raw time streams on disk.  In this case, the field
-name should correspond to the name of the file containing the time stream.
-Syntax is:
+.B BIT
+The BIT field type extracts one or more bits out of an input field.  Syntax is:
 .RS
-.PP
+.IP
 .I <field-name>
-.B RAW
-.I <type> <sample-rate>
-
+.B BIT
+.I <input> <first-bit> [<bits>]
+.PP
+which specifies
+.I field-name
+to be the value of bits
+.I first-bit
+through
+.IR first-bit + bits -1
+of the input field
+.IR input ,
+when
+.I input
+is converted from its native type to an (endianness corrected) unsigned 64-bit
+integer.  If
+.I bits
+is omitted, it is assumed to be 1.
+.RE
+.TP
+.B CONST
+The CONST field type is a scalar constant fully specified in the format file
+metadata.  Syntax is:
+.RS
+.IP
+.I <field-name>
+.B CONST
+.I <type> <value>
+.PP
 where
-.I sample-rate
-is the number of samples per dirfile frame for the time stream and
 .I type
-is a word specifying the native data format type:
-.RS
-.TP
-.I UINT8
-unsigned 8-bit integer
-.TP
-.I INT8
-signed 8-bit integer
-.TP
-.I UINT16
-unsigned 16-bit integer
-.TP
-.I INT16
-signed 16-bit integer
-.TP
-.I UINT32
-unsigned 32-bit integer
-.TP
-.I INT32
-signed 32-bit integer
-.TP
-.I UINT64
-unsigned 64-bit integer
-.TP
-.I INT64
-signed 64-bit integer
-.TP
-.IR FLOAT32 \~or\~ FLOAT
-IEEE-754 standard 32-bit single precision floating point number
-.TP
-.IR FLOAT64 \~or\~ DOUBLE
-IEEE-754 standard 64-bit double precision floating point number
-.RE
-
-For backwards compatibility, implementations should also recognise the following
-single character type aliases in use prior to Standards Version 5:
-.RS
-.TP
-.I c
-UINT8
-.TP
-.I u
-UINT16
-.TP
-.I s
-INT16
-.TP
-.I U
-UINT32
-.TP
-.IR i ,\~ S
-INT32
-.TP
-.IR f
-FLOAT32
-.TP
-.IR d
-FLOAT64
-.RE
-
-Types
-.IR INT8 ,\~ UINT64 ,
-and
-.I INT64
-are not supported before Standards Version 5, so no character aliases exist for
-these types.
+may be any supported native data type (see the description of the
+.B RAW
+field type below), and
+.I value
+is the numerical value of the constant interpreted as inciated by
+.IR type .
+Unlike most other field types,
+.B CONST
+is a scalar type with the constant value specified.
 .RE
 .TP
 .B LINCOM
@@ -282,31 +384,6 @@ input fields.  The resultant field will have the same sample rate as
 .IR field1 .
 .RE
 .TP
-.B BIT
-The BIT field type extracts one or more bits out of an input field.  Syntax is:
-.RS
-.IP
-.I <field-name>
-.B BIT
-.I <input> <first-bit> [<bits>]
-.PP
-which specifies
-.I field-name
-to be the value of bits
-.I first-bit
-through
-.IR first-bit + bits -1
-of the input field
-.IR input ,
-when
-.I input
-is converted from its native type to an (endianness corrected) unsigned 64-bit
-integer.  If
-.I bits
-is omitted, it is assumed to be 1.
-
-.RE
-.TP
 .B PHASE
 The PHASE field type shifts an input field by a specified number of samples.  Syntax is:
 .RS
@@ -325,10 +402,128 @@ samples.  A positive
 .I shift
 indicates a shift forward in time.  Results of shifting past the beginning- or end-of-file is
 implementation dependent.
+.RE
+.TP
+.B RAW
+The RAW field type specifies raw time streams on disk.  In this case, the field
+name should correspond to the name of the file containing the time stream.
+Syntax is:
+.RS
+.IP
+.I <field-name>
+.B RAW
+.I <type> <sample-rate>
+.PP
+where
+.I sample-rate
+is the number of samples per dirfile frame for the time stream and
+.I type
+is a token specifying the native data format type:
+.RS
+.TP
+.I UINT8
+unsigned 8-bit integer
+.TP
+.I INT8
+signed 8-bit integer
+.TP
+.I UINT16
+unsigned 16-bit integer
+.TP
+.I INT16
+signed 16-bit integer
+.TP
+.I UINT32
+unsigned 32-bit integer
+.TP
+.I INT32
+signed 32-bit integer
+.TP
+.I UINT64
+unsigned 64-bit integer
+.TP
+.I INT64
+signed 64-bit integer
+.TP
+.IR FLOAT32 \~or\~ FLOAT
+IEEE-754 standard 32-bit single precision floating point number
+.TP
+.IR FLOAT64 \~or\~ DOUBLE
+IEEE-754 standard 64-bit double precision floating point number
+.RE
+
+For backwards compatibility, implementations should also recognise the following
+single character type aliases in use prior to Standards Version 5:
+.RS
+.TP
+.I c
+UINT8
+.TP
+.I u
+UINT16
+.TP
+.I s
+INT16
+.TP
+.I U
+UINT32
+.TP
+.IR i ,\~ S
+INT32
+.TP
+.IR f
+FLOAT32
+.TP
+.IR d
+FLOAT64
+.RE
+
+Types
+.IR INT8 ,\~ UINT64 ,
+and
+.I INT64
+are not supported before Standards Version 5, so no character aliases exist for
+these types.
+.RE
+.TP
+.B STRING
+The STRING field type is a scalar string fully specified in the format file
+metadata.  Syntax is:
+.RS
+.IP
+.I <field-name>
+.B STRING
+.I <value>
+.PP
+where
+.I value
+is the string value of the field.  Note that
+.I value
+is a single token.  To include whitespace in the string, enclose
+.I value
+in quotation marks
+.RB ( """" ),
+or else escape it with the backslash character
+.RB ( \e ).
+Unlike most other field types,
+.B STRING
+is a scalar type with the constant string value specified.
+.RE
 
 .SH STANDARDS VERSIONS
 
-This document describes Version 5 of the Dirfile Standards.
+This document describes Version 6 of the Dirfile Standards.
+
+Version 6 of the Standards (October 2008) added
+.B /ENCODING
+and
+.BR /META ,
+and the
+.B CONST
+and
+.B STRING
+field types.  It also permitted whitespace in tokens and introduced the
+character escape sequences.
 
 Version 5 of the Standards (August 2008) added
 .B VERSION
@@ -383,4 +578,5 @@ D. V. Wiebe
 .hy 1
 
 .SH SEE ALSO
-.BR dirfile (5)
+.BR dirfile (5),
+.BR dirfile-encoding (5)

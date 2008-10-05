@@ -77,7 +77,7 @@ off64_t _GD_AsciiSeek(union _gd_private_entry* entry, off64_t count,
   return entry->fp;
 }
 
-static void _GD_read_format(char* fmt, gd_type_t data_type)
+void _GD_ScanFormat(char* fmt, gd_type_t data_type)
 {
   dtrace("%p, %x", fmt, data_type);
 
@@ -125,7 +125,7 @@ ssize_t _GD_AsciiRead(union _gd_private_entry *entry, void *ptr,
 {
   char fmt[50];
   ssize_t n = 0;
-  _GD_read_format(fmt, data_type);
+  _GD_ScanFormat(fmt, data_type);
   for (n = 0; n < nmemb; ++n) {
     if (feof(entry->stream))
       break;

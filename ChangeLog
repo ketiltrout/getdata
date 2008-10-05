@@ -1,3 +1,14 @@
+2008-10-05   D. V. Wiebe <getdata@ketiltrout.net>  svn:113
+	* src/add.c src/close.c src/entry.c src/flush.c src/getdata.c src/getdata.h.in
+	src/open.c src/putdata.: Add support for CONST, STRING, and ENCODING.
+
+	* src/common.c src/open.c: Added escape sequence and quoted token support.
+
+	* src/flush.c src/getdata.c src/putdata.c src/spf.c: Functions that check
+	recurse_level now also take care of incrementing and decrementing it.
+
+	* man/dirifle-format.5: Update for standards version six.
+
 2008-10-02   D. V. Wiebe <getdata@ketiltrout.net>  svn:112
 	* configure.ac: Locate `slim' and `unslim' binaries needed for slimlib
 	tests.

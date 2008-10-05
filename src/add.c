@@ -63,7 +63,10 @@ int dirfile_add(DIRFILE* D, const gd_entry_t* entry)
       entry->field_type != GD_LINTERP_ENTRY &&
       entry->field_type != GD_BIT_ENTRY &&
       entry->field_type != GD_MULTIPLY_ENTRY &&
-      entry->field_type != GD_PHASE_ENTRY)
+      entry->field_type != GD_MULTIPLY_ENTRY &&
+      entry->field_type != GD_PHASE_ENTRY &&
+      entry->field_type != GD_CONST_ENTRY &&
+      entry->field_type != GD_STRING_ENTRY)
   {
     _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_TYPE, NULL,
         entry->field_type, NULL);
@@ -201,6 +204,12 @@ int dirfile_add(DIRFILE* D, const gd_entry_t* entry)
 
       if ((E->in_fields[0] = strdup(entry->in_fields[0])) == NULL)
         _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+      break;
+    case GD_CONST_ENTRY:
+      if (E->data_type & 0x40 || (E->size = GD_SIZE(E->data_type)) == 0)
+        _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, entry->data_type, NULL);
+      break;
+    case GD_STRING_ENTRY:
       break;
     case GD_NO_ENTRY:
       _GD_InternalError(D); /* We've already verrified field_type is valid */

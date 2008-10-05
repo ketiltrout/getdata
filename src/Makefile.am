@@ -19,7 +19,7 @@
 # 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 AUTOMAKE_OPTIONS = foreign
-AM_CFLAGS = -Wall @SLIMLIB_CPPFLAGS@
+AM_CFLAGS = -Wall -Wunused @SLIMLIB_CPPFLAGS@
 pkgconfigdir = @libdir@/pkgconfig
 
 if USE_SLIMLIB

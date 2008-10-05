@@ -72,7 +72,7 @@ const struct encoding_t encode[] = {
 #else
   { GD_SLIM_ENCODED, ".slm", NULL, NULL, NULL, NULL, NULL, NULL, NULL },
 #endif
-  { GD_AUTO_ENCODED, "",     NULL, NULL, NULL, NULL, NULL, NULL, NULL },
+  { GD_ENC_UNSUPPORTED, "",  NULL, NULL, NULL, NULL, NULL, NULL, NULL },
 };
 
 /* _GD_FillFileFrame: fill dataout with frame indices
@@ -180,7 +180,7 @@ unsigned int _GD_ResolveEncoding(const char* name, unsigned int scheme,
   ptr = candidate + len;
   len = FILENAME_MAX - len;
 
-  for (i = 0; encode[i].scheme != GD_AUTO_ENCODED; i++) {
+  for (i = 0; encode[i].scheme != GD_ENC_UNSUPPORTED; i++) {
     if (scheme == 0 || scheme == encode[i].scheme) {
       strcpy(ptr, encode[i].ext);
 
@@ -458,7 +458,6 @@ static size_t _GD_DoLincom(DIRFILE *D, gd_entry_t *L,
   size_t n_read, n_read2, num_samp2;
   off64_t first_samp2;
 
-  D->recurse_level++;
   spf1 = _GD_GetSPF(L->in_fields[0], D);
   if (D->error != GD_E_OK)
     return 0;
@@ -467,8 +466,6 @@ static size_t _GD_DoLincom(DIRFILE *D, gd_entry_t *L,
    * returned */
   n_read = _GD_DoField(D, L->in_fields[0], first_frame, first_samp,
       num_frames, num_samp, return_type, data_out);
-
-  D->recurse_level--;
 
   if (D->error != GD_E_OK)
     return 0;
@@ -481,8 +478,6 @@ static size_t _GD_DoLincom(DIRFILE *D, gd_entry_t *L,
 
   if (L->n_fields > 1) {
     for (i = 1; i < L->n_fields; i++) {
-      D->recurse_level++;
-
       /* find the samples per frame of the next field */
       spf2 = _GD_GetSPF(L->in_fields[i], D);
       if (D->error != GD_E_OK)
@@ -502,7 +497,6 @@ static size_t _GD_DoLincom(DIRFILE *D, gd_entry_t *L,
       /* read the next field */
       n_read2 = _GD_DoField(D, L->in_fields[i], 0, first_samp2, 0, num_samp2,
           return_type, tmpbuf);
-      D->recurse_level--;
 
       if (D->error != GD_E_OK) {
         free(tmpbuf);
@@ -539,8 +533,6 @@ static size_t _GD_DoMultiply(DIRFILE *D, gd_entry_t* M,
   size_t n_read, n_read2, num_samp2;
   off64_t first_samp2;
 
-  D->recurse_level++;
-
   /* find the samples per frame of the first field */
   spf1 = _GD_GetSPF(M->in_fields[0], D);
   if (D->error != GD_E_OK)
@@ -551,16 +543,12 @@ static size_t _GD_DoMultiply(DIRFILE *D, gd_entry_t* M,
   n_read = _GD_DoField(D, M->in_fields[0], first_frame, first_samp,
       num_frames, num_samp, return_type, data_out);
 
-  D->recurse_level--;
-
   if (D->error != GD_E_OK)
     return 0;
 
   /* Nothing to multiply */
   if (n_read == 0)
     return 0;
-
-  D->recurse_level++;
 
   /* find the samples per frame of the second field */
   spf2 = _GD_GetSPF(M->in_fields[1], D);
@@ -581,7 +569,6 @@ static size_t _GD_DoMultiply(DIRFILE *D, gd_entry_t* M,
   /* read the second field */
   n_read2 = _GD_DoField(D, M->in_fields[1], 0, first_samp2, 0, num_samp2,
       return_type, tmpbuf);
-  D->recurse_level--;
   if (D->error != GD_E_OK) {
     free(tmpbuf);
     return 0;
@@ -613,9 +600,7 @@ static size_t _GD_DoBit(DIRFILE *D, gd_entry_t *B,
     ((uint64_t)1 << B->numbits) - 1;
 
   /* if we got here, we found the field! */
-  D->recurse_level++;
   spf = _GD_GetSPF(B->in_fields[0], D);
-  D->recurse_level--;
 
   if (D->error != GD_E_OK)
     return 0;
@@ -627,10 +612,8 @@ static size_t _GD_DoBit(DIRFILE *D, gd_entry_t *B,
     return 0;
   }
 
-  D->recurse_level++;
   n_read = _GD_DoField(D, B->in_fields[0], first_frame, first_samp,
       num_frames, num_samp, GD_UINT64, tmpbuf);
-  D->recurse_level--;
 
   if (D->error != GD_E_OK) {
     free(tmpbuf);
@@ -654,10 +637,8 @@ static size_t _GD_DoPhase(DIRFILE *D, gd_entry_t *P,
 {
   size_t n_read;
 
-  D->recurse_level++;
   n_read = _GD_DoField(D, P->in_fields[0], first_frame, first_samp + P->shift,
       num_frames, num_samp, return_type, data_out);
-  D->recurse_level--;
 
   return n_read;
 }
@@ -681,10 +662,8 @@ static size_t _GD_DoLinterp(DIRFILE *D, gd_entry_t* I,
     }
   }
 
-  D->recurse_level++;
   n_read = _GD_DoField(D, I->in_fields[0], first_frame, first_samp, num_frames,
       num_samp, return_type, data_out);
-  D->recurse_level--;
 
   if (D->error != GD_E_OK) {
     dreturn("%zi", 0);
@@ -696,6 +675,42 @@ static size_t _GD_DoLinterp(DIRFILE *D, gd_entry_t* I,
 
   dreturn("%zi", n_read);
   return n_read;
+}
+
+/* _GD_DoConst:  Read from a const.  Returns number of samples read (ie. 1).
+*/
+static size_t _GD_DoConst(DIRFILE *D, gd_entry_t *C, gd_type_t return_type,
+    void *data_out)
+{
+  dtrace("%p, %p, 0x%x, %p", D, C, return_type, data_out);
+
+  if (C->const_type & GD_SIGNED)
+    _GD_ConvertType(D, &C->e->iconst, GD_INT64, data_out, return_type, 1);
+  else if (C->const_type & GD_IEEE754)
+    _GD_ConvertType(D, &C->e->dconst, GD_FLOAT64, data_out, return_type, 1);
+  else
+    _GD_ConvertType(D, &C->e->uconst, GD_UINT64, data_out, return_type, 1);
+
+  if (D->error) { /* bad input type */
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  dreturn("%i", 1);
+  return 1;
+}
+
+/* _GD_DoString:  Read from a string.  Returns number of samples read (ie. 1).
+*/
+static size_t _GD_DoString(DIRFILE *D, gd_entry_t *S, size_t num_samp,
+    void *data_out)
+{
+  dtrace("%p, %p, %zi, %p", D, S, num_samp, data_out);
+
+  strncpy(data_out, S->e->string, num_samp); 
+
+  dreturn("%i", 1);
+  return 1;
 }
 
 /* _GD_DoField: Locate the field in the database and read it.
@@ -710,8 +725,9 @@ size_t _GD_DoField(DIRFILE *D, const char *field_code, off64_t first_frame,
   dtrace("%p, \"%s\", %lli, %lli, %zi, %zi, 0x%x, %p", D, field_code,
       first_frame, first_samp, num_frames, num_samp, return_type, data_out);
 
-  if (D->recurse_level >= GD_MAX_RECURSE_LEVEL) {
+  if (++D->recurse_level >= GD_MAX_RECURSE_LEVEL) {
     _GD_SetError(D, GD_E_RECURSE_LEVEL, 0, NULL, 0, field_code);
+    D->recurse_level--;
     dreturn("%zi", 0);
     return 0;
   }
@@ -724,6 +740,7 @@ size_t _GD_DoField(DIRFILE *D, const char *field_code, off64_t first_frame,
       _GD_FillFileFrame(data_out, return_type, first_frame + first_samp +
           D->frame_offset, n_read);
     }
+    D->recurse_level--;
     dreturn("%zi", 0);
     return n_read;
   }
@@ -733,6 +750,7 @@ size_t _GD_DoField(DIRFILE *D, const char *field_code, off64_t first_frame,
 
   if (entry == NULL) { /* No match */
     _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, field_code);
+    D->recurse_level--;
     dreturn("%zi", 0);
     return 0;
   }
@@ -762,12 +780,19 @@ size_t _GD_DoField(DIRFILE *D, const char *field_code, off64_t first_frame,
       n_read = _GD_DoPhase(D, entry, first_frame, first_samp, num_frames,
           num_samp, return_type, data_out);
       break;
-    default:
+    case GD_CONST_ENTRY:
+      n_read = _GD_DoConst(D, entry, return_type, data_out);
+      break;
+    case GD_STRING_ENTRY:
+      n_read = _GD_DoString(D, entry, num_samp, data_out);
+      break;
+    case GD_NO_ENTRY:
       /* Can't get here */
       _GD_InternalError(D);
       n_read = 0;
   }
 
+  D->recurse_level--;
   dreturn("%zi", n_read);
   return n_read;
 }

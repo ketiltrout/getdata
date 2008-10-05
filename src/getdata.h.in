@@ -30,7 +30,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#define DIRFILE_STANDARDS_VERSION 5
+#define DIRFILE_STANDARDS_VERSION 6
 
 /* ICC ignores the __nonnull__ attribute */
 #ifdef __INTEL_COMPILER
@@ -80,7 +80,8 @@
 /* field types */
 typedef enum {
   GD_NO_ENTRY = 0, GD_RAW_ENTRY, GD_LINCOM_ENTRY, GD_LINTERP_ENTRY,
-  GD_BIT_ENTRY, GD_MULTIPLY_ENTRY, GD_PHASE_ENTRY
+  GD_BIT_ENTRY, GD_MULTIPLY_ENTRY, GD_PHASE_ENTRY, GD_CONST_ENTRY,
+  GD_STRING_ENTRY
 } gd_entype_t;
 
 /* Data types -- No valid type may contain 0x40.  This will automatically
@@ -136,6 +137,7 @@ struct _gd_unified_entry {
       int numbits;
     };
     int shift; /* PHASE */
+    gd_type_t const_type; /* CONST */
   };
 
   union _gd_private_entry *e;
@@ -147,23 +149,24 @@ typedef struct _gd_unified_entry gd_entry_t;
 typedef struct _GD_DIRFILE DIRFILE;
 
 /* dirfile_flags */
-#define GD_ACCMODE       0x0001
-#define GD_RDONLY        0x0000 /* open read only */
-#define GD_RDWR          0x0001 /* open read/write */
+#define GD_ACCMODE        0x0001 /* mask */
+#define GD_RDONLY         0x0000 /* open read only */
+#define GD_RDWR           0x0001 /* open read/write */
 
-#define GD_FORCE_ENDIAN  0x0002 /* override endianness */
-#define GD_BIG_ENDIAN    0x0004 /* assume big-endian raw data */
-#define GD_LITTLE_ENDIAN 0x0008 /* assume litte-endian raw data */
-#define GD_CREAT         0x0010 /* create the dirfile if it doesn't exist */
-#define GD_EXCL          0x0020 /* force creation: fail on existence */
-#define GD_TRUNC         0x0040 /* truncate dirfile (scary!) */
-#define GD_PEDANTIC      0x0080 /* be pedantic */
+#define GD_FORCE_ENDIAN   0x0002 /* override endianness */
+#define GD_BIG_ENDIAN     0x0004 /* assume big-endian raw data */
+#define GD_LITTLE_ENDIAN  0x0008 /* assume litte-endian raw data */
+#define GD_CREAT          0x0010 /* create the dirfile if it doesn't exist */
+#define GD_EXCL           0x0020 /* force creation: fail on existence */
+#define GD_TRUNC          0x0040 /* truncate dirfile (scary!) */
+#define GD_PEDANTIC       0x0080 /* be pedantic */
+#define GD_FORCE_ENCODING 0x0100 /* override encoding scheme */
 
-#define GD_ENCODING      0xF000 
-#define GD_AUTO_ENCODED  0x0000 /* Encoding scheme unknown */
-#define GD_UNENCODED     0x1000 /* Dirfile is not encoded */
-#define GD_TEXT_ENCODED  0x2000 /* Dirfile is text encoded */
-#define GD_SLIM_ENCODED  0x3000 /* Dirfile is slimlib encoded */
+#define GD_ENCODING       0xF000 /* mask */
+#define GD_AUTO_ENCODED   0x0000 /* Encoding scheme unknown */
+#define GD_UNENCODED      0x1000 /* Dirfile is not encoded */
+#define GD_TEXT_ENCODED   0x2000 /* Dirfile is text encoded */
+#define GD_SLIM_ENCODED   0x3000 /* Dirfile is slimlib encoded */
 
 extern char* get_error_string(const DIRFILE* dirfile, char* buffer,
     size_t buflen) __THROW __gd_nonnull ((1, 2));

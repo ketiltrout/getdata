@@ -37,7 +37,6 @@ int _GD_GetLine(FILE *fp, char *line, int* linenum)
 {
   char *ret_val;
   int first_char;
-  int i, len;
 
   dtrace("%p, %p, %p", fp, line, linenum);
 
@@ -52,13 +51,6 @@ int _GD_GetLine(FILE *fp, char *line, int* linenum)
 
 
   if (ret_val) {
-    /* truncate comments from end of lines */
-    len = strlen(line);
-    for (i = 0; i < len; i++) {
-      if (line[i] == '#')
-        line[i] = '\0';
-    }
-
     dreturn("\"%s\"", line);
     return 1; /* a line was read */
   }
