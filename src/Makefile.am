@@ -19,7 +19,7 @@
 # 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 AUTOMAKE_OPTIONS = foreign
-AM_CFLAGS = -Wall -Wunused @SLIMLIB_CPPFLAGS@
+AM_CFLAGS = -Wall -Wextra @SLIMLIB_CPPFLAGS@
 pkgconfigdir = @libdir@/pkgconfig
 
 if USE_SLIMLIB
@@ -46,9 +46,10 @@ endif
 
 lib_LTLIBRARIES = libgetdata.la
 libgetdata_la_SOURCES = add.c ascii.c close.c common.c ${DEBUG_C} entry.c \
-												errors.c field_list.c flush.c format_list.c getdata.c \
-												${LEGACY_C} nfields.c nframes.c open.c putdata.c raw.c \
-												${SLIM_C} spf.c types.c ${GETDATA_LEGACY_H} internal.h
+												errors.c field_list.c flush.c format_list.c \
+												get_constant.c get_string.c getdata.c ${LEGACY_C} \
+												nfields.c nframes.c open.c putdata.c raw.c ${SLIM_C} \
+												spf.c types.c ${GETDATA_LEGACY_H} internal.h
 libgetdata_la_LDFLAGS = $(SLIMLIB_LDFLAGS) -export-symbols-regex '^[^_]' \
 												-version-info @GETDATA_IFACE_VERSION@:@GETDATA_IMPL_REVISION@:@GETDATA_IFACE_AGE@
 

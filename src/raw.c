@@ -28,7 +28,7 @@
 #include <errno.h>
 #endif
 
-int _GD_RawOpen(union _gd_private_entry* entry, const char* name, int mode,
+int _GD_RawOpen(struct _gd_private_entry* entry, const char* name, int mode,
     int creat)
 {
   dtrace("%p, \"%s\", %i, %i", entry, name, mode, creat);
@@ -39,31 +39,30 @@ int _GD_RawOpen(union _gd_private_entry* entry, const char* name, int mode,
   return (entry->fp < 0);
 }
 
-off64_t _GD_RawSeek(union _gd_private_entry* entry, off64_t count,
-    gd_type_t data_type, int pad)
+off64_t _GD_RawSeek(struct _gd_private_entry* entry, off64_t count,
+    gd_type_t data_type, int pad __gd_unused)
 {
-  (void)pad;
   return lseek64(entry->fp, count * GD_SIZE(data_type), SEEK_SET);
 }
 
-ssize_t _GD_RawRead(union _gd_private_entry *entry, void *ptr,
+ssize_t _GD_RawRead(struct _gd_private_entry *entry, void *ptr,
     gd_type_t data_type, size_t nmemb)
 {
   return read(entry->fp, ptr, nmemb * GD_SIZE(data_type));
 }
 
-ssize_t _GD_RawWrite(union _gd_private_entry *entry, const void *ptr,
+ssize_t _GD_RawWrite(struct _gd_private_entry *entry, const void *ptr,
     gd_type_t data_type, size_t nmemb)
 {
   return write(entry->fp, ptr, nmemb * GD_SIZE(data_type));
 }
 
-int _GD_RawSync(union _gd_private_entry *entry)
+int _GD_RawSync(struct _gd_private_entry *entry)
 {
   return fsync(entry->fp);
 }
 
-int _GD_RawClose(union _gd_private_entry *entry)
+int _GD_RawClose(struct _gd_private_entry *entry)
 {
   dtrace("%p", entry);
 

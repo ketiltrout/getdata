@@ -21,7 +21,7 @@
 AUTOMAKE_OPTIONS = foreign
 
 LDADD=../src/libgetdata.la
-INCLUDES=-Wall -I$(top_srcdir)/src
+INCLUDES=-Wall -Wextra -I$(top_srcdir)/src
 
 if MAKE_CHECKDIRFILE
 CHECKDIRFILE=checkdirfile

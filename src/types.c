@@ -35,7 +35,7 @@
 void _GD_ConvertType(DIRFILE* D, const void *data_in, gd_type_t in_type,
     void *data_out, gd_type_t out_type, size_t n)
 {
-  int i;
+  size_t i;
 
   dtrace("%p, %p, 0x%x, %p, 0x%x, %zi", D, data_in, in_type, data_out, out_type,
       n);
@@ -504,8 +504,7 @@ void _GD_ConvertType(DIRFILE* D, const void *data_in, gd_type_t in_type,
 
 void _GD_FixEndianness(char* databuffer, size_t size, size_t ns)
 {
-  size_t i;
-  int j;
+  size_t i, j;
   char b;
 
   dtrace("%p, %zi, %zi", databuffer, size, ns);

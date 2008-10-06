@@ -5,7 +5,7 @@ program get_int8
   character (len=*), parameter :: filedir='test95_dirfile'
   character (len=*), parameter :: frmat='test95_dirfile/format'
   character (len=*), parameter :: formatdata='data RAW INT8 8'
-  integer :: i, d, n, l, e, c=10
+  integer :: d, n, l, e, c=10
   character(len=10), dimension(1) :: fl
 
   call system ( 'rm -rf ' // filedir )

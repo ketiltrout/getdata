@@ -21,7 +21,7 @@
 AUTOMAKE_OPTIONS = foreign
 getdata_includedir = ${includedir}/getdata
 
-INCLUDES = -Wall -I$(top_srcdir)/src
+INCLUDES = -Wall -Wextra -I$(top_srcdir)/src
 
 SUBDIRS=test
 

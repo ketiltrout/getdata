@@ -28,6 +28,8 @@ extern "C" {
 #include <getdata.h>
 }
 
+#define __gd_unused __attribute__ (( unused ))
+
 namespace GetData {
 
   enum DataType {
@@ -163,7 +165,7 @@ namespace GetData {
       LinterpEntry(const char* field_code, const char* in_field,
           const char* table, int format_file = 0);
 
-      virtual const char *Input(int index = 0) {
+      virtual const char *Input(int __gd_unused index = 0) {
         return E.in_fields[0];
       };
 
@@ -177,7 +179,7 @@ namespace GetData {
       BitEntry(const char* field_code, const char* in_field, int bitnum,
           int numbits = 1, int format_file = 0);
 
-      virtual const char *Input(int index = 0) {
+      virtual const char *Input(int __gd_unused index = 0) {
         return E.in_fields[0];
       };
 
@@ -205,7 +207,7 @@ namespace GetData {
       PhaseEntry(const char* field_code, const char* in_field, int shift,
           int format_file = 0);
 
-      virtual const char *Input(int index = 0) {
+      virtual const char *Input(int __gd_unused index = 0) {
         return E.in_fields[0];
       };
 

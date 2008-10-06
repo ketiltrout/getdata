@@ -17,8 +17,8 @@ int main(void)
   const char* data = __TEST__ "dirfile/data";
   const char* format_data = "data RAW FLOAT32 8\n";
   float  data_data[256];
-  uint64_t c[8];
-  int fd, i;
+  uint64_t c[8], i;
+  int fd;
 
   memset(c, 0, 8);
   mkdir(filedir, 0777);

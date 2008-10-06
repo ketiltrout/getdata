@@ -85,11 +85,11 @@ int get_entry(DIRFILE* D, const char* field_code, gd_entry_t* entry)
 
   _GD_ClearError(D);
 
-  E = _GD_FindField(D, field_code);
+  E = _GD_GetEntry(D, field_code);
 
-  if (E == NULL) {
+  if (E == NULL) { /* INDEX's entry may not be requested */
     _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, field_code);
-    dreturn("%i", 1);
+    dreturn("%i", -1);
     return -1;
   }
 

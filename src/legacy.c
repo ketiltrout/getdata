@@ -103,7 +103,7 @@ char* GetDataErrorString(char* buffer, size_t buflen)
  */
 static DIRFILE* _GD_GetDirfile(const char *filename_in, int mode)
 {
-  int i_dirfile;
+  unsigned int i_dirfile;
 
   char filedir[FILENAME_MAX];
   strncpy(filedir, filename_in, FILENAME_MAX);
@@ -244,7 +244,7 @@ static void CopyPhaseEntry(struct PhaseEntryType* P, gd_entry_t* E)
 /* Okay, reconstruct the old FormatType.  This is painful. */
 const struct FormatType *GetFormat(const char *filedir, int *error_code) {
   DIRFILE *D = _GD_GetDirfile(filedir, GD_RDONLY);
-  int i;
+  unsigned int i;
 
   int nraw = 0;
   int nlincom = 0;
@@ -366,11 +366,11 @@ int GetData(const char *filename, const char *field_code,
  * has been ignored since at least 2005 (and why does it come after
  * error_code?)
  */
-int GetNFrames(const char *filename, int *error_code, const void *unused)
+int GetNFrames(const char *filename, int *error_code,
+    const void *unused __gd_unused)
 {
   DIRFILE* D;
   int nf;
-  (void)unused;
 
   D = _GD_GetDirfile(filename, GD_RDONLY);
 

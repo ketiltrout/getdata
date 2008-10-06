@@ -20,27 +20,36 @@
  */
 #include "internal.h"
 
-#ifdef STDC_HEADERS
-#include <stdlib.h>
-#endif
-
-const char* get_format_filename(const DIRFILE* D, unsigned int index)
+/* this function is little more than a public boilerplate for _GD_DoField */
+size_t get_constant(DIRFILE* D, const char *field_code, gd_type_t return_type,
+    void *data_out)
 {
-  dtrace("%p, %i", D, index);
+  size_t n_read;
+  gd_entry_t *entry;
 
-  if (D->flags & GD_INVALID || index >= D->n_include) {
-    dreturn("%p", NULL);
-    return NULL;
+  dtrace("%p, \"%s\", 0x%x, %p", D, field_code, return_type, data_out);
+
+  if (D->flags & GD_INVALID) {/* don't crash */
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%zi", 0);
+    return 0;
   }
 
-  dreturn("\"%s\"", D->include_list[index].cname);
-  return D->include_list[index].cname;
-}
+  _GD_ClearError(D);
 
-int get_nformats(const DIRFILE* D)
-{
-  dtrace("%p", D);
+  entry = _GD_GetEntry(D, field_code);
+    
+  if (D->error != GD_E_OK)
+    n_read = 0;
+  else if (entry && entry->field_type != GD_CONST_ENTRY) {
+    _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_GET, NULL, 0, field_code);
+    n_read = 0;
+  } else
+    n_read = _GD_DoField(D, entry, field_code, 0, 0, 0, 0, return_type,
+        data_out);
 
-  dreturn("%i", (D->flags & GD_INVALID) ? 0 : D->n_include);
-  return (D->flags & GD_INVALID) ? 0 : D->n_include;
+  dreturn("%zi", n_read);
+  return n_read;
 }
+/* vim: ts=2 sw=2 et tw=80
+*/

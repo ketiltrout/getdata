@@ -17,9 +17,8 @@ int main(void)
   const char* format = __TEST__ "dirfile/format";
   const char* table = __TEST__ "dirfile/table";
   const char* format_data = "linterp LINTERP data ./table\n";
-  int8_t c[8], d;
+  int8_t c[8];
   int fd, i;
-  struct stat buf;
 
   memset(c, 0, 8);
   mkdir(filedir, 0777);

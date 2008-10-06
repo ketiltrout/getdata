@@ -88,7 +88,7 @@ gd_type_t _GD_LegacyType(char c)
 }
 
 /* Binary search to find the field */
-gd_entry_t* _GD_FindField(DIRFILE* D, const char* field_code)
+static gd_entry_t* _GD_FindField(DIRFILE* D, const char* field_code)
 {
   int i, c;
   int l = 0;
@@ -111,6 +111,28 @@ gd_entry_t* _GD_FindField(DIRFILE* D, const char* field_code)
 
   dreturn("%p", NULL);
   return NULL;
+}
+
+/* _GD_GetEntry: Convert a field code into an entry pointer
+ */
+gd_entry_t* _GD_GetEntry(DIRFILE* D, const char* field_code)
+{
+  gd_entry_t* entry;
+  dtrace("%p, \"%s\"", D, field_code);
+
+  if ((strcmp(field_code,"FILEFRAM") == 0) ||
+      (strcmp(field_code,"INDEX") == 0)) {
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  entry = _GD_FindField(D, field_code);
+
+  if (entry == NULL) /* No match */
+    _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, field_code);
+
+  dreturn("%p", entry);
+  return entry;
 }
 
 /* _GD_Alloc: allocate a buffer of the right type & size
@@ -143,7 +165,7 @@ void* _GD_Alloc(DIRFILE* D, gd_type_t type, size_t n)
 void _GD_ScaleData(DIRFILE* D, void *data, gd_type_t type, size_t npts,
     double m, double b)
 {
-  int i;
+  size_t i;
 
   dtrace("%p, %p, 0x%x, %zi, %g, %g", D, data, type, npts, m, b);
 
@@ -200,7 +222,7 @@ void _GD_ScaleData(DIRFILE* D, void *data, gd_type_t type, size_t npts,
 
 /* _GD_MakeDummyLinterp: Make an empty linterp
 */
-static void _GD_MakeDummyLinterp(DIRFILE* D, union _gd_private_entry *e)
+static void _GD_MakeDummyLinterp(DIRFILE* D, struct _gd_private_entry *e)
 {
   e->table_len = 2;
   e->x = (double *)malloc(2*sizeof(double));
@@ -236,6 +258,8 @@ void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E)
     return;
   }
 
+  dtrace("[%p]1", E->e->entry[0]);
+
   /* first read the file to see how big it is */
   i = 0;
   while (_GD_GetLine(fp, line, &linenum))
@@ -248,6 +272,8 @@ void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E)
     return;
   }
 
+  dtrace("[%p]2", E->e->entry[0]);
+
   E->e->table_len = i;
   E->e->x = (double *)malloc(i * sizeof(double));
   E->e->y = (double *)malloc(i * sizeof(double));
@@ -256,6 +282,8 @@ void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E)
     dreturnvoid();
     return;
   }
+
+  dtrace("[%p]3", E->e->entry[0]);
 
   /* now read in the data */
   rewind(fp);
@@ -292,7 +320,8 @@ static size_t _GD_GetIndex(double x, double lx[], size_t idx, size_t n)
 void _GD_LinterpData(DIRFILE* D, const void *data, gd_type_t type, size_t npts,
     double *lx, double *ly, size_t n_ln)
 {
-  int i, idx = 0;
+  int idx = 0;
+  size_t i;
   double x;
 
   dtrace("%p, %p, 0x%x, %zi, %p, %p, %zi", D, data, type, npts, lx, ly, n_ln);

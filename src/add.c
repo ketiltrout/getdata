@@ -49,13 +49,15 @@ int dirfile_add(DIRFILE* D, const gd_entry_t* entry)
   }
 
   /* check for duplicate field */
-  gd_entry_t* E = _GD_FindField(D, entry->field); 
+  gd_entry_t* E = _GD_GetEntry(D, entry->field); 
 
-  if (E != NULL) { /* matched */
+  if (D->error == GD_E_OK) { /* matched */
     _GD_SetError(D, GD_E_DUPLICATE, 0, NULL, 0, NULL);
     dreturn("%i", -1);
     return -1;
   }
+
+  _GD_ClearError(D);
 
   /* check for bad field type */
   if (entry->field_type != GD_RAW_ENTRY &&
@@ -75,7 +77,7 @@ int dirfile_add(DIRFILE* D, const gd_entry_t* entry)
   }
 
   /* check for include index out of range */
-  if (entry->format_file < 0 || entry->format_file >= D->n_include) {
+  if (entry->format_file >= D->n_include) {
     _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_FORMAT, NULL,
         entry->format_file, NULL);
     dreturn("%i", -1);
@@ -92,7 +94,7 @@ int dirfile_add(DIRFILE* D, const gd_entry_t* entry)
   memset(E, 0, sizeof(gd_entry_t));
   E->format_file = entry->format_file;
 
-  E->e = malloc(sizeof(union _gd_private_entry));
+  E->e = malloc(sizeof(struct _gd_private_entry));
   if (E->e == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     free(E);
@@ -102,7 +104,7 @@ int dirfile_add(DIRFILE* D, const gd_entry_t* entry)
 
   /* Validate field code */
   E->field_type = entry->field_type;
-  E->field = _GD_ValidateField(entry->field);
+  E->field = _GD_ValidateField("", entry->field);
   if (E->field == entry->field) {
     _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, NULL);
     E->field = NULL;

@@ -1,3 +1,33 @@
+2008-10-06   D. V. Wiebe <getdata@ketiltrout.net>  svn:114
+	* test/error_error.c: Added.
+
+	* test/flush_recurse.c: Removed. _GD_Flush no longer resolves input fields.
+
+	* src/common.c (_GD_GetEntry): Added a _GD_FindField wrapper that
+	properly handles INDEX/FILEFRAM.
+
+	* src/open.c (_GD_ValidateField): Add field prefix needed for META fields.
+	* src/open.c (_GD_ParseFieldSpec): Split from _GD_ParseFormatFile to handle
+	both META and regular field specs.
+	* src/open.c (_GD_ParseFormatFile): Add /META support.
+
+	* src/open.c (_GD_ParseFormatFile): Fix the parser bug introduced in svn:113.
+
+	* src/open.c (_GD_CreateDirfile): Report the dirfile path not the format
+	file path in error strings.
+
+	* src/flush.c src/getdata.c src/putdata.c src/spf.c: Use pre-cached entry
+	pointers.
+
+	* src/get_constant.c src/get_string.c: Added.
+	* src/getdata.c (getdata64): Prevent calling getdata() with CONST or STRING
+	fields.
+
+	* src/errors.c: Got rid of the positional parameter C99 desicration which
+	GCC 4.3 complains about.  get_error_string() now builds the string itself.
+
+	* src/format_list.c (get_format_filename): make the index parameter unsigned.
+
 2008-10-05   D. V. Wiebe <getdata@ketiltrout.net>  svn:113
 	* src/add.c src/close.c src/entry.c src/flush.c src/getdata.c src/getdata.h.in
 	src/open.c src/putdata.: Add support for CONST, STRING, and ENCODING.

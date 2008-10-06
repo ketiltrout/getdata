@@ -73,7 +73,7 @@ int main(void)
     parameter(stream, "GD_E_OPEN_LINFILE",   "GD_EOL", GD_E_OPEN_LINFILE,   i);
     parameter(stream, "GD_E_RECURSE_LEVEL",  "GD_ERL", GD_E_RECURSE_LEVEL,  i);
     parameter(stream, "GD_E_BAD_DIRFILE",    "GD_EBD", GD_E_BAD_DIRFILE,    i);
-    parameter(stream, "GD_E_BAD_PUT_FIELD",  "GD_EBP", GD_E_BAD_PUT_FIELD,  i);
+    parameter(stream, "GD_E_BAD_FIELD_TYPE", "GD_EBF", GD_E_BAD_FIELD_TYPE, i);
     parameter(stream, "GD_E_ACCMODE",        "GD_EAC", GD_E_ACCMODE,        i);
     parameter(stream, "GD_E_UNSUPPORTED",    "GD_UNS", GD_E_UNSUPPORTED,    i);
     parameter(stream, "GD_E_BAD_ENTRY",      "GD_EBE", GD_E_BAD_ENTRY,      i);

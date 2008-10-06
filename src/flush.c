@@ -33,7 +33,6 @@ void _GD_Flush(DIRFILE* D, gd_entry_t *entry, const char* field_code)
   dtrace("%p, %p", D, entry);
 
   if (entry == NULL) {
-    _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, field_code);
     dreturnvoid();
     return;
   }
@@ -59,18 +58,15 @@ void _GD_Flush(DIRFILE* D, gd_entry_t *entry, const char* field_code)
       break;
     case GD_LINCOM_ENTRY:
       for (i = 2; i < GD_MAX_LINCOM; ++i)
-        if (entry->in_fields[i])
-          _GD_Flush(D, _GD_FindField(D, entry->in_fields[i]), field_code);
+        _GD_Flush(D, entry->e->entry[i], field_code);
       /* fallthrough */
     case GD_MULTIPLY_ENTRY:
-      if (entry->in_fields[1])
-        _GD_Flush(D, _GD_FindField(D, entry->in_fields[1]), field_code);
+      _GD_Flush(D, entry->e->entry[1], field_code);
       /* fallthrough */
     case GD_LINTERP_ENTRY:
     case GD_BIT_ENTRY:
     case GD_PHASE_ENTRY:
-      if (entry->in_fields[0])
-        _GD_Flush(D, _GD_FindField(D, entry->in_fields[0]), field_code);
+      _GD_Flush(D, entry->e->entry[0], field_code);
     case GD_CONST_ENTRY:
     case GD_STRING_ENTRY:
     case GD_NO_ENTRY:
@@ -187,7 +183,7 @@ static void _GD_FieldSpec(DIRFILE* D, FILE* stream, gd_entry_t* E) {
 
 static void _GD_FlushMeta(DIRFILE* D)
 {
-  int i, j;
+  unsigned int i, j;
   FILE* stream;
   char buffer[MAX_LINE_LENGTH];
   char temp_file[FILENAME_MAX];
@@ -270,7 +266,7 @@ static void _GD_FlushMeta(DIRFILE* D)
 
       /* The fields */
       for (j = 0; j < D->n_entries; ++j)
-        if (D->entry[j]->format_file == j && !D->entry[j]->e->first)
+        if (D->entry[j]->format_file == i && !D->entry[j]->e->first)
           _GD_FieldSpec(D, stream, D->entry[j]);
 
       /* That's all, flush, sync, and close */
@@ -315,7 +311,7 @@ void dirfile_flush_metadata(DIRFILE* D)
 
 void dirfile_flush(DIRFILE* D, const char* field_code)
 {
-  int i;
+  unsigned int i;
 
   dtrace("%p, \"%s\"", D, field_code);
 
@@ -334,9 +330,9 @@ void dirfile_flush(DIRFILE* D, const char* field_code)
         if (D->entry[i]->field_type == GD_RAW_ENTRY)
           _GD_Flush(D, D->entry[i], NULL);
   } else
-    _GD_Flush(D, _GD_FindField(D, field_code), field_code);
+    _GD_Flush(D, _GD_GetEntry(D, field_code), field_code);
 
-    dreturnvoid();
+  dreturnvoid();
 }
 /* vim: ts=2 sw=2 et tw=80
 */

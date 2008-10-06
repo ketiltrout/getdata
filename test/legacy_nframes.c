@@ -19,7 +19,7 @@ int main(void)
   const char* data = __TEST__ "dirfile/data";
   const char* format_data = "data RAW UINT8 1\n";
   int fd, error;
-  const int len = strlen(data);
+  const size_t len = strlen(data);
 
   mkdir(filedir, 0777);
 

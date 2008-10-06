@@ -27,9 +27,8 @@
 
 /* _GD_GetSPF: Get samples per frame for field
 */
-unsigned int _GD_GetSPF(const char *field_code, DIRFILE* D)
+unsigned int _GD_GetSPF(DIRFILE* D, gd_entry_t* entry, const char *field_code)
 {
-  gd_entry_t* entry;
   unsigned int spf = 0;
 
   dtrace("\"%s\", %p", field_code, D);
@@ -41,19 +40,9 @@ unsigned int _GD_GetSPF(const char *field_code, DIRFILE* D)
     return 0;
   }
 
-  if ((strcmp(field_code, "FILEFRAM") == 0) ||
-      (strcmp(field_code, "INDEX") == 0)) {
+  if (entry == NULL) { /* INDEX has one sample per frame */
     dreturn("%u", 1);
     return 1;
-  }
-
-  /* Find the field */
-  entry = _GD_FindField(D, field_code);
-
-  if (entry == NULL) {
-    _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, field_code);
-    dreturn("%u", 0);
-    return 0;
   }
 
   switch(entry->field_type) {
@@ -65,7 +54,14 @@ unsigned int _GD_GetSPF(const char *field_code, DIRFILE* D)
     case GD_BIT_ENTRY:
     case GD_PHASE_ENTRY:
     case GD_LINTERP_ENTRY:
-      spf = _GD_GetSPF(entry->in_fields[0], D);
+      if (entry->e->entry[0] == NULL) {
+        entry->e->entry[0] = _GD_GetEntry(D, entry->in_fields[0]);
+
+        if (D->error != GD_E_OK)
+          break;
+      }
+
+      spf = _GD_GetSPF(D, entry->e->entry[0], entry->in_fields[0]);
       break;
     default:
       _GD_InternalError(D);
@@ -77,10 +73,11 @@ unsigned int _GD_GetSPF(const char *field_code, DIRFILE* D)
 }
 
 /* Get the number of samples for each frame for the given field
- */
+*/
 unsigned int get_spf(DIRFILE* D, const char *field_code)
 {
   unsigned int spf = 0;
+  gd_entry_t* entry;
 
   dtrace("%p, \"%s\"", D, field_code);
 
@@ -92,7 +89,11 @@ unsigned int get_spf(DIRFILE* D, const char *field_code)
 
   _GD_ClearError(D);
 
-  spf =  _GD_GetSPF(field_code, D);
+  entry = _GD_GetEntry(D, field_code);
+
+  if (!D->error)
+    spf = _GD_GetSPF(D, entry, field_code);
+
   dreturn("%u", spf);
   return spf;
 }

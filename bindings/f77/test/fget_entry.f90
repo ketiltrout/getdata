@@ -5,7 +5,7 @@ program get_int8
   character (len=*), parameter :: filedir='test95_dirfile'
   character (len=*), parameter :: frmat='test95_dirfile/format'
   character (len=*), parameter :: formatdata='data RAW INT8 8'
-  integer :: i, d, n, e
+  integer :: d, n, e
   type(gd_entry) :: ent
 
   call system ( 'rm -rf ' // filedir )

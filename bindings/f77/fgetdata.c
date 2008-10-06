@@ -165,9 +165,9 @@ void F77_FUNC(gdfget, GDFGET) (int* n_read, const int* dirfile,
 /* Return the maximum field name length */
 void F77_FUNC(gdffnx, GDFFNX) (int* max, const int* dirfile)
 {
-  int i, len = 0;
+  size_t len = 0;
   DIRFILE* D = _GDF_GetDirfile(*dirfile);
-  unsigned int nfields = get_nfields(D);
+  unsigned int i, nfields = get_nfields(D);
   if (D->error)
     return;
 
@@ -190,7 +190,7 @@ void F77_FUNC(gdffdn, GDFFDN) (char* name, int* name_l, const int* dirfile,
   if (D->error)
     return;
 
-  if (*field_num <= nfields) {
+  if (*field_num <= (int)nfields) {
     fl = get_field_list(D);
     _GDF_FString(name, name_l, fl[*field_num - 1]);
   } else

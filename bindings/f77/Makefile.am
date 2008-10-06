@@ -19,7 +19,7 @@
 # 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 AUTOMAKE_OPTIONS = foreign
-INCLUDES = -Wall -I$(top_srcdir)/src
+INCLUDES = -Wall -Wextra -I$(top_srcdir)/src
 
 SED = @SED@
 DIFF = @DIFF@

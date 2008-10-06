@@ -14,7 +14,6 @@ int main(void)
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
   unsigned char c[8];
-  int fd;
 
   memset(c, 0, 8);
 

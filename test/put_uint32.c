@@ -47,7 +47,7 @@ int main(void)
     if (i < 40 || i > 48) {
       if (d != 0)
         return 1;
-    } else if (d != i)
+    } else if (d != (uint64_t)i)
       return 1;
     i++;
   }

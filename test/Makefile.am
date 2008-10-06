@@ -36,7 +36,7 @@ SLIMLIB_TESTS=slim_get slim_nframes slim_put
 endif
 
 LDADD=../src/libgetdata.la
-INCLUDES=-Wall -I$(top_srcdir)/src -D__TEST__=\"$@\"
+INCLUDES=-Wall -Wextra -I$(top_srcdir)/src -D__TEST__=\"$@\"
 TESTS=add add_bit add_bit_bitnum add_bit_bitsize add_bit_numbits add_code \
 			add_duplicate add_format add_lincom add_lincom_nfields add_linterp \
 			add_multiply add_phase add_raw add_raw_spf add_raw_type add_rdonly \
@@ -74,33 +74,33 @@ TESTS=add add_bit add_bit_bitnum add_bit_bitsize add_bit_numbits add_code \
 			creat creat_excl creat_rdonly dfes_bit dfes_lincom dfes_linterp \
 			dfes_multiply dfes_null dfes_phase dfes_raw dfes_zero entry_bad_code \
 			entry_bit entry_invalid entry_lincom entry_linterp entry_multiply \
-			entry_phase entry_raw error error_short flist flist_invalid flush \
-			flush_all flush_bad_code flush_invalid flush_meta flush_recurse \
-			format_filename format_filename_oor get64 get_bad_code \
-			get_bit get_char get_endian8 get_endian16 get_endian32 get_endian64 \
-			get_endian_float32 get_endian_float64 get_ff get_float32 get_float64 \
-			get_foffs get_fs get_int8 get_int16 get_int32 get_int64 get_invalid \
-			get_lincom1 get_lincom2 get_lincom3 get_lincom_noin get_linterp \
-			get_linterp_noin get_linterp_notab get_multiply get_multiply_noin \
-			get_nonexistent get_null $(GET_OFF64) get_phase get_recurse get_sf \
-			get_ss get_type get_uint16 get_uint32 get_uint64 $(LEGACY_TESTS) nfields \
-			nfields_invalid nformats nframes nframes64 nframes_empty nframes_invalid \
-			$(NF_OFF64) nframes_spf open open_eaccess open_nonexistent \
-			open_notdirfile parse_badline parse_bit parse_bit4 parse_bit_bitnum \
-			parse_bit_bitsize parse_bit_ncols parse_bit_numbits parse_endian_bad \
-			parse_endian_big parse_endian_force parse_endian_little \
-			parse_endian_slash parse_foffs parse_foffs_slash parse_include \
-			parse_include_nonexistent parse_include_slash parse_index parse_lincom \
-			parse_lincom_ncols1 parse_lincom_ncols2 parse_lincom_nfields \
-			parse_lincom_nofields parse_linterp parse_linterp_ncols parse_multiply \
-			parse_multiply_ncols parse_name parse_ncols parse_phase \
-			parse_phase_ncols parse_raw parse_raw_char parse_raw_ncols parse_raw_spf \
-			parse_raw_type parse_version parse_version_include \
-			parse_version_pedantic parse_version_slash put64 put_bad_code put_bit \
-			put_bof put_char put_endian8 put_endian16 put_endian32 put_endian64 \
-			put_endian_float32 put_endian_float64 put_ff put_float32 put_float64 \
-			put_foffs put_fs put_int8 put_int16 put_int32 put_int64 put_invalid \
-			put_lincom1 put_lincom2 put_lincom_noin put_linterp put_linterp_noin \
+			entry_phase entry_raw error error_error error_short flist flist_invalid \
+			flush flush_all flush_bad_code flush_invalid flush_meta format_filename \
+			format_filename_oor get64 get_bad_code get_bit get_char get_endian8 \
+			get_endian16 get_endian32 get_endian64 get_endian_float32 \
+			get_endian_float64 get_ff get_float32 get_float64 get_foffs get_fs \
+			get_int8 get_int16 get_int32 get_int64 get_invalid get_lincom1 \
+			get_lincom2 get_lincom3 get_lincom_noin get_linterp get_linterp_noin \
+			get_linterp_notab get_multiply get_multiply_noin get_nonexistent \
+			get_null $(GET_OFF64) get_phase get_recurse get_sf get_ss get_type \
+			get_uint16 get_uint32 get_uint64 $(LEGACY_TESTS) nfields nfields_invalid \
+			nformats nframes nframes64 nframes_empty nframes_invalid $(NF_OFF64) \
+			nframes_spf open open_eaccess open_nonexistent open_notdirfile \
+			parse_badline parse_bit parse_bit4 parse_bit_bitnum parse_bit_bitsize \
+			parse_bit_ncols parse_bit_numbits parse_endian_bad parse_endian_big \
+			parse_endian_force parse_endian_little parse_endian_slash parse_foffs \
+			parse_foffs_slash parse_include parse_include_nonexistent \
+			parse_include_slash parse_index parse_lincom parse_lincom_ncols1 \
+			parse_lincom_ncols2 parse_lincom_nfields parse_lincom_nofields \
+			parse_linterp parse_linterp_ncols parse_multiply parse_multiply_ncols \
+			parse_name parse_ncols parse_phase parse_phase_ncols parse_raw \
+			parse_raw_char parse_raw_ncols parse_raw_spf parse_raw_type \
+			parse_version parse_version_include parse_version_pedantic \
+			parse_version_slash put64 put_bad_code put_bit put_bof put_char \
+			put_endian8 put_endian16 put_endian32 put_endian64 put_endian_float32 \
+			put_endian_float64 put_ff put_float32 put_float64 put_foffs put_fs \
+			put_int8 put_int16 put_int32 put_int64 put_invalid put_lincom1 \
+			put_lincom2 put_lincom_noin put_linterp put_linterp_noin \
 			put_linterp_notab put_multiply put_null $(PUT_OFF64) put_phase \
 			put_phase_noin put_rdonly put_recurse put_rofs put_sf put_ss put_type \
 			put_uint16 put_uint32 put_uint64 $(SLIMLIB_TESTS) spf spf_lincom \

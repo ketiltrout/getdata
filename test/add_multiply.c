@@ -13,7 +13,6 @@ int main(void)
 {
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
-  int ok = 1;
 
   DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_CREAT);
   dirfile_add_multiply(D, "new", "in1", "in2", 0);

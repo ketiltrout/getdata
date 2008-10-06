@@ -67,7 +67,8 @@
 #define GD_E_OPEN_LINFILE     13
 #define GD_E_RECURSE_LEVEL    14
 #define GD_E_BAD_DIRFILE      15
-#define GD_E_BAD_PUT_FIELD    16
+#define GD_E_BAD_FIELD_TYPE   16
+#define GD_E_BAD_PUT_FIELD    GD_E_BAD_FIELD_TYPE
 #define GD_E_ACCMODE          17
 #define GD_E_UNSUPPORTED      18
 #define GD_E_BAD_ENTRY        19
@@ -112,14 +113,14 @@ typedef enum {
 #define GD_FLOAT     GD_FLOAT32
 #define GD_DOUBLE    GD_FLOAT64
 
-union _gd_private_entry;
+struct _gd_private_entry;
 
 /* Unified entry struct */
 struct _gd_unified_entry {
   char* field;
   gd_entype_t field_type;
   char *in_fields[GD_MAX_LINCOM];
-  int format_file;
+  unsigned int format_file;
   union {
     struct { /* RAW */
       unsigned int spf;
@@ -140,7 +141,7 @@ struct _gd_unified_entry {
     gd_type_t const_type; /* CONST */
   };
 
-  union _gd_private_entry *e;
+  struct _gd_private_entry *e;
 };
 
 typedef struct _gd_unified_entry gd_entry_t;
@@ -210,7 +211,7 @@ extern int dirfile_add_phase(DIRFILE* D, const char* field_code,
     const char* in_field, int shift, int format_file)
 __THROW __gd_nonnull ((1,2,3));
 
-extern const char* get_format_filename(const DIRFILE* D, int index)
+extern const char* get_format_filename(const DIRFILE* D, unsigned int index)
   __THROW __gd_nonnull((1));
 
 extern void dirfile_user_error(DIRFILE *D, int *ptr) __THROW __gd_nonnull ((1));

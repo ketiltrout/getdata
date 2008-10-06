@@ -30,11 +30,9 @@
 #include <slimlib.h>
 #endif
 
-int _GD_SlimOpen(union _gd_private_entry* entry, const char* name, int mode,
-    int creat)
+int _GD_SlimOpen(struct _gd_private_entry* entry, const char* name,
+    int mode __gd_unused, int creat __gd_unused)
 {
-  (void)mode;
-  (void)creat;
   char slimname[FILENAME_MAX];
   snprintf(slimname, FILENAME_MAX, "%s.slm", name);
   entry->stream = slimopen(slimname, "r" /* writing not supported */);
@@ -47,21 +45,20 @@ int _GD_SlimOpen(union _gd_private_entry* entry, const char* name, int mode,
   return 1;
 }
 
-off64_t _GD_SlimSeek(union _gd_private_entry* entry, off64_t count,
-    gd_type_t data_type, int pad)
+off64_t _GD_SlimSeek(struct _gd_private_entry* entry, off64_t count,
+    gd_type_t data_type, int pad __gd_unused)
 {
-  (void)pad;
   return (off64_t)slimseek(entry->stream, (off_t)count * GD_SIZE(data_type),
       SEEK_SET);
 }
 
-ssize_t _GD_SlimRead(union _gd_private_entry *entry, void *ptr,
+ssize_t _GD_SlimRead(struct _gd_private_entry *entry, void *ptr,
     gd_type_t data_type, size_t nmemb)
 {
   return slimread(ptr, GD_SIZE(data_type), nmemb, entry->stream);
 }
 
-int _GD_SlimClose(union _gd_private_entry *entry)
+int _GD_SlimClose(struct _gd_private_entry *entry)
 {
   int ret = slimclose(entry->stream);
   if (!ret) {

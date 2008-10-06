@@ -30,7 +30,7 @@
 #include <string.h>
 #endif
 
-int _GD_AsciiOpen(union _gd_private_entry* entry, const char* name, int mode,
+int _GD_AsciiOpen(struct _gd_private_entry* entry, const char* name, int mode,
     int creat)
 {
   char asciiname[FILENAME_MAX];
@@ -50,8 +50,8 @@ int _GD_AsciiOpen(union _gd_private_entry* entry, const char* name, int mode,
   return (entry->stream == NULL);
 }
 
-off64_t _GD_AsciiSeek(union _gd_private_entry* entry, off64_t count,
-    gd_type_t data_type, int pad)
+off64_t _GD_AsciiSeek(struct _gd_private_entry* entry, off64_t count,
+    gd_type_t data_type __gd_unused, int pad)
 {
   char line[64];
 
@@ -120,29 +120,31 @@ void _GD_ScanFormat(char* fmt, gd_type_t data_type)
   dreturn("[\"%s\"]", fmt);
 }
 
-ssize_t _GD_AsciiRead(union _gd_private_entry *entry, void *ptr,
+ssize_t _GD_AsciiRead(struct _gd_private_entry *entry, void *ptr,
     gd_type_t data_type, size_t nmemb)
 {
   char fmt[50];
-  ssize_t n = 0;
+  size_t n = 0;
+  ssize_t ret = 0;
   _GD_ScanFormat(fmt, data_type);
   for (n = 0; n < nmemb; ++n) {
     if (feof(entry->stream))
       break;
 
     if (fscanf(entry->stream, fmt, ptr + GD_SIZE(data_type) * n) < 1) {
-      n = -1;
+      ret = -1;
       break;
     }
   }
 
-  return n;
+  return (ret) ? ret : (ssize_t)n;
 }
 
-ssize_t _GD_AsciiWrite(union _gd_private_entry *entry, const void *ptr,
+ssize_t _GD_AsciiWrite(struct _gd_private_entry *entry, const void *ptr,
     gd_type_t data_type, size_t nmemb)
 {
-  ssize_t n;
+  ssize_t ret = 0;
+  size_t n;
 
   switch(data_type) {
     case GD_UINT8:
@@ -150,7 +152,7 @@ ssize_t _GD_AsciiWrite(union _gd_private_entry *entry, const void *ptr,
         if (fprintf(entry->stream, "%" PRIu8 "\n",
               *(uint8_t*)(ptr + GD_SIZE(data_type) * n)) < 0)
         {
-          n = -1;
+          ret = -1;
           break;
         }
       break;
@@ -159,7 +161,7 @@ ssize_t _GD_AsciiWrite(union _gd_private_entry *entry, const void *ptr,
         if (fprintf(entry->stream, "%" PRIi8 "\n",
               *(int8_t*)(ptr + GD_SIZE(data_type) * n)) < 0)
         {
-          n = -1;
+          ret = -1;
           break;
         }
       break;
@@ -168,7 +170,7 @@ ssize_t _GD_AsciiWrite(union _gd_private_entry *entry, const void *ptr,
         if (fprintf(entry->stream, "%" PRIu16 "\n",
               *(uint16_t*)(ptr + GD_SIZE(data_type) * n)) < 0)
         {
-          n = -1;
+          ret = -1;
           break;
         }
       break;
@@ -177,7 +179,7 @@ ssize_t _GD_AsciiWrite(union _gd_private_entry *entry, const void *ptr,
         if (fprintf(entry->stream, "%" PRIi16 "\n",
               *(int16_t*)(ptr + GD_SIZE(data_type) * n)) < 0)
         {
-          n = -1;
+          ret = -1;
           break;
         }
       break;
@@ -186,7 +188,7 @@ ssize_t _GD_AsciiWrite(union _gd_private_entry *entry, const void *ptr,
         if (fprintf(entry->stream, "%" PRIu32 "\n",
               *(uint32_t*)(ptr + GD_SIZE(data_type) * n)) < 0)
         {
-          n = -1;
+          ret = -1;
           break;
         }
       break;
@@ -195,7 +197,7 @@ ssize_t _GD_AsciiWrite(union _gd_private_entry *entry, const void *ptr,
         if (fprintf(entry->stream, "%" PRIi32 "\n",
               *(int32_t*)(ptr + GD_SIZE(data_type) * n)) < 0)
         {
-          n = -1;
+          ret = -1;
           break;
         }
       break;
@@ -204,7 +206,7 @@ ssize_t _GD_AsciiWrite(union _gd_private_entry *entry, const void *ptr,
         if (fprintf(entry->stream, "%" PRIu64 "\n",
               *(uint64_t*)(ptr + GD_SIZE(data_type) * n)) < 0)
         {
-          n = -1;
+          ret = -1;
           break;
         }
       break;
@@ -213,7 +215,7 @@ ssize_t _GD_AsciiWrite(union _gd_private_entry *entry, const void *ptr,
         if (fprintf(entry->stream, "%" PRIi64 "\n",
               *(int64_t*)(ptr + GD_SIZE(data_type) * n)) < 0)
         {
-          n = -1;
+          ret = -1;
           break;
         }
       break;
@@ -222,7 +224,7 @@ ssize_t _GD_AsciiWrite(union _gd_private_entry *entry, const void *ptr,
         if (fprintf(entry->stream, "%.7g\n",
               *(float*)(ptr + GD_SIZE(data_type) * n)) < 0)
         {
-          n = -1;
+          ret = -1;
           break;
         }
       break;
@@ -231,19 +233,19 @@ ssize_t _GD_AsciiWrite(union _gd_private_entry *entry, const void *ptr,
         if (fprintf(entry->stream, "%.16lg\n",
               *(double*)(ptr + GD_SIZE(data_type) * n)) < 0)
         {
-          n = -1;
+          ret = -1;
           break;
         }
       break;
     default:
-      n = -1;
+      ret = -1;
       break;
   }
 
-  return n;
+  return (ret) ? ret : (ssize_t)n;
 }
 
-int _GD_AsciiSync(union _gd_private_entry *entry)
+int _GD_AsciiSync(struct _gd_private_entry *entry)
 {
   int ret = fflush(entry->stream);
   if (ret)
@@ -252,7 +254,7 @@ int _GD_AsciiSync(union _gd_private_entry *entry)
   return fsync(fileno(entry->stream));
 }
 
-int _GD_AsciiClose(union _gd_private_entry *entry)
+int _GD_AsciiClose(struct _gd_private_entry *entry)
 {
   int ret = fclose(entry->stream);
   if (ret != EOF) {
@@ -263,9 +265,8 @@ int _GD_AsciiClose(union _gd_private_entry *entry)
   return 1;
 }
 
-off64_t _GD_AsciiSize(const char *name, gd_type_t data_type)
+off64_t _GD_AsciiSize(const char *name, gd_type_t data_type __gd_unused)
 {
-  (void)data_type;
   FILE* stream;
   char asciiname[FILENAME_MAX];
   snprintf(asciiname, FILENAME_MAX, "%s.txt", name);

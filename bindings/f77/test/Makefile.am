@@ -19,8 +19,8 @@
 # 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 AUTOMAKE_OPTIONS = foreign
-FFLAGS += -I..
-FCFLAGS += -I..
+FFLAGS += -I.. -Wall -Wextra
+FCFLAGS += -I.. -Wall -Wextra
 F95LDADD=../libf95getdata.la $(F77LDADD)
 F77LDADD=../libfgetdata.la
 

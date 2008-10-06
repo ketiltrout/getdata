@@ -28,7 +28,8 @@
 */
 static void _GD_FreeD(DIRFILE* D)
 {
-  int i, j;
+  unsigned int i;
+  int j;
 
   dtrace("%p", D);
 
@@ -69,7 +70,7 @@ static void _GD_FreeD(DIRFILE* D)
     }
 
   /* Item zero of include_list is always a static string */
-  for(i = 1; i < D->n_include; ++i) {
+  for (i = 1; i < D->n_include; ++i) {
     free(D->include_list[i].cname);
     free(D->include_list[i].ename);
   }
@@ -89,7 +90,7 @@ static void _GD_FreeD(DIRFILE* D)
 */
 int dirfile_close(DIRFILE* D)
 {
-  int i;
+  unsigned int i;
 
   dtrace("%p", D);
 

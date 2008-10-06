@@ -16,9 +16,9 @@ int main(void)
   const char* format = __TEST__ "dirfile/format";
   const char* data = __TEST__ "dirfile/data";
   const char* format_data = "data RAW UINT32 8\n";
-  uint32_t c[8];
+  uint32_t c[8], i;
   uint32_t data_data[128];
-  int fd, i;
+  int fd;
 
   memset(c, 0, 8);
   mkdir(filedir, 0777);
