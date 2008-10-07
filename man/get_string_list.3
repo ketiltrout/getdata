@@ -1,4 +1,4 @@
-.\" get_field_list.3.  The get_field_list man page.
+.\" get_string_list.3.  The get_string_list man page.
 .\"
 .\" (C) 2008 D. V. Wiebe
 .\"
@@ -20,26 +20,26 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH get_field_list 3 "8 October 2008" "Version 0.4.0" "GETDATA"
+.TH get_string_list 3 "8 October 2008" "Version 0.4.0" "GETDATA"
 .SH NAME
-get_field_list \(em retrieve a list of fields in a dirfile
+get_string_list \(em retrieve a list of string fields in a dirfile
 .SH SYNOPSIS
 .B #include <getdata.h>
 .HP
 .nh
 .ad l
-.BI "const char **get_field_list(DIRFILE *" dirfile );
+.BI "const char **get_string_list(DIRFILE *" dirfile );
 .hy
 .ad n
 .SH DESCRIPTION
 The
-.BR get_field_list ()
+.BR get_string_list ()
 function queries a dirfile(5) database specified by
 .I dirfile
-and returns a read-only list of names of the all fields defined in the database.
-Notably, this list does not include the implicit
-.I INDEX
-field, nor does it include /META subfields.
+and returns a read-only list of names of the all
+.B STRING
+type fields defined in the database.  Notably, this list does not include
+/META subfields.
 
 The 
 .I dirfile
@@ -50,20 +50,23 @@ The array returned will be de-allocated by a call to
 .BR dirfile_close (3)
 and should not be de-allocated by the caller.  The list returned should not be
 assumed to be in any particular order.  The array is terminated by a NULL
-pointer.  The number of strings in the array can be obtained from a call to
-.BR get_nfields (3).
+pointer.
 
 The caller may not modify any strings in the array, or the array itself.  Doing
 so may cause database corruption.  The pointer returned is guaranteed to be
 valid until
-.BR get_field_list ()
+.BR get_string_list ()
 is called again on the same DIRFILE object, or until the array is deallocated by
 a call to
 .BR dirfile_close (3).
 
+A corresponding list of string values for these fields may be obtained by
+calling
+.BR get_string_values (3).
+
 .SH RETURN VALUE
 Upon successful completion,
-.BR get_field_list ()
+.BR get_string_list ()
 returns a pointer to an array of strings containing the names of all the fields
 defined in the dirfile database.  On error it returns NULL and sets the dirfile
 error to a non-zero error value.  Possible error values are:
@@ -83,9 +86,7 @@ a call to
 .BR dirfile (5),
 .BR dirfile_open (3),
 .BR getdata (3),
-.BR get_constant_list (3),
 .BR get_error (3),
 .BR get_error_string (3),
-.BR get_nfields (3),
-.BR get_string_list (3),
-.BR get_vector_list (3)
+.BR get_field_list (3),
+.BR get_string_values (3)
