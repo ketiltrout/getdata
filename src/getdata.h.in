@@ -176,7 +176,12 @@ extern char* get_error_string(const DIRFILE* dirfile, char* buffer,
 extern unsigned int get_spf(DIRFILE* dirfile, const char *field_code) __THROW
 __gd_nonnull ((1, 2));
 
+extern unsigned int get_nvectors(DIRFILE* dirfile) __THROW __gd_nonnull ((1));
+
 extern unsigned int get_nfields(DIRFILE* dirfile) __THROW __gd_nonnull ((1));
+
+extern unsigned int get_nfields_by_type(DIRFILE* D, gd_entype_t type)
+  __THROW __gd_nonnull ((1));
 
 extern const char** get_constant_list(DIRFILE* dirfile)
   __THROW __gd_nonnull ((1));

@@ -225,6 +225,8 @@ static void _GD_FlushMeta(DIRFILE* D)
 
       if ((ptr = getenv("LOGNAME")) != NULL)
         fprintf(stream, " by %s", ptr);
+      if ((ptr = getenv("HOSTNAME")) != NULL)
+        fprintf(stream, "@%s", ptr);
       fputs(".\n", stream);
 
       /* Regardless of the version of the input dirfile, we always write

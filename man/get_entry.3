@@ -20,7 +20,7 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH get_entry 3 "6 October 2008" "Version 0.4.0" "GETDATA"
+.TH get_entry 3 "7 October 2008" "Version 0.4.0" "GETDATA"
 .SH NAME
 get_entry \(em retrieve a dirfile field's metadata
 .SH SYNOPSIS
@@ -121,7 +121,8 @@ to one of the following symbols:
 .nh
 .ad l
 .BR GD_RAW_ENTRY ,\~ GD_LINCOM_ENTRY ,\~ GD_LINTERP_ENTRY ,\~
-.BR GD_BIT_ENTRY ,\~ GD_MULTIPLY_ENTRY ,\~ GD_PHASE_ENTRY
+.BR GD_BIT_ENTRY ,\~ GD_MULTIPLY_ENTRY ,\~ GD_PHASE_ENTRY ,\~
+.BR GD_CONST_ENTRY ,\~ GD_STRING_ENTRY
 .ad n
 .hy
 .P
@@ -147,10 +148,6 @@ before attempting to access the remaining members.  Members for different
 field types may be stored in the same physical location in core.  Accordingly,
 attempting to access a member not declared for the appropriate field type will
 have unspecified results.
-.P
-The gd_entry_t struct may also contain private members containing data internal
-to the library.  Any member not mentioned below should not be considered part
-of the public API and may change name or meaning without notice.
 .SS RAW Members
 A gd_entry_t describing a
 .B RAW

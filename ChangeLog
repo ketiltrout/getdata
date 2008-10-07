@@ -1,3 +1,9 @@
+2008-10-07   D. V. Wiebe <getdata@ketiltrout.net>  svn:118
+	* src/flush.c: Add hostname to comments at the top of the format file.
+
+	* src/nfields (get_nvectors get_nfields_by_type): Added.
+	* man/get_nvectors.3 man/get_nfields_by_type.3: Added.
+
 2008-10-07   D. V. Wiebe <getdata@ketiltrout.net>  svn:115
 	* src/open.c: Record whether a field is meta.
 

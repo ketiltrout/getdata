@@ -35,3 +35,46 @@ unsigned int get_nfields(DIRFILE* D)
   dreturn("%u", D->n_entries - D->n_meta);
   return D->n_entries - D->n_meta;
 }
+
+unsigned int get_nvectors(DIRFILE* D)
+{
+  dtrace("%p", D);
+
+  if (D->flags & GD_INVALID) {
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%u", 0);
+    return 0;
+  }
+
+  _GD_ClearError(D);
+
+  dreturn("%u", D->n_entries - D->n_meta - D->n_string - D->n_const);
+  return D->n_entries - D->n_meta - D->n_string - D->n_const;
+}
+
+unsigned int get_nfields_by_type(DIRFILE* D, gd_entype_t type)
+{
+  unsigned int i, r = 0;
+
+  dtrace("%p", D);
+
+  if (D->flags & GD_INVALID) {
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%u", 0);
+    return 0;
+  }
+
+  _GD_ClearError(D);
+
+  if (type == GD_STRING_ENTRY)
+    r = D->n_string;
+  else if (type == GD_CONST_ENTRY)
+    r = D->n_const;
+  else
+    for (i = 0; i < D->n_entries; ++i)
+      if (D->entry[i]->field_type == type && !D->entry[i]->e->meta)
+        r++;
+
+  dreturn("%u", r);
+  return r;
+}
