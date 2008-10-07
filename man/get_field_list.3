@@ -20,7 +20,7 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH get_field_list 3 "26 August 2008" "Version 0.3.0" "GETDATA"
+.TH get_field_list 3 "8 October 2008" "Version 0.4.0" "GETDATA"
 .SH NAME
 get_field_list \(em retrieve a list of fields in a dirfile
 .SH SYNOPSIS
@@ -50,10 +50,8 @@ parameter must point to a valid DIRFILE object previously created by a call to
 Upon successful completion,
 .BR get_field_list ()
 returns a pointer to an array of strings containing the names of all the fields
-defined in the dirfile database.  On error it
-returns NULL and sets
-.IR dirfile -> error
-to a non-zero error value.  Possible error values are:
+defined in the dirfile database.  On error it returns NULL and sets the dirfile
+error to a non-zero error value.  Possible error values are:
 .TP 8
 .B GD_E_ALLOC
 The library was unable to allocate memory.
@@ -61,6 +59,8 @@ The library was unable to allocate memory.
 .B GD_E_BAD_DIRFILE
 The supplied dirfile was invalid.
 .P
+The dirfile error may be retrieved by calling
+.BR get_error (3).
 A descriptive error string for the last error encountered can be obtained from
 a call to
 .BR get_error_string (3).
@@ -75,5 +75,6 @@ The number of strings in the array can be obtained from a call to
 .BR dirfile (5),
 .BR dirfile_open (3),
 .BR getdata (3),
+.BR get_error (3),
 .BR get_error_string (3),
 .BR get_nfields (3)

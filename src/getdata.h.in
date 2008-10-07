@@ -71,10 +71,11 @@
 #define GD_E_BAD_PUT_FIELD    GD_E_BAD_FIELD_TYPE
 #define GD_E_ACCMODE          17
 #define GD_E_UNSUPPORTED      18
-#define GD_E_BAD_ENTRY        19
-#define GD_E_DUPLICATE        20
+#define GD_E_UNKNOWN_ENCODING 19
+#define GD_E_BAD_ENTRY        20
+#define GD_E_DUPLICATE        21
 
-#define GD_N_ERROR_CODES      21
+#define GD_N_ERROR_CODES      22
 
 #define GD_MAX_LINCOM 3
 
@@ -177,7 +178,20 @@ __gd_nonnull ((1, 2));
 
 extern unsigned int get_nfields(DIRFILE* dirfile) __THROW __gd_nonnull ((1));
 
+extern const char** get_constant_list(DIRFILE* dirfile)
+  __THROW __gd_nonnull ((1));
+
+extern const void* get_constant_values(DIRFILE* dirfile, gd_type_t return_type)
+  __THROW __gd_nonnull ((1));
+
 extern const char** get_field_list(DIRFILE* dirfile) __THROW __gd_nonnull ((1));
+
+extern const char** get_string_list(DIRFILE* dirfile) __THROW __gd_nonnull((1));
+
+extern const char** get_string_values(DIRFILE* dirfile)
+  __THROW __gd_nonnull ((1));
+
+extern const char** get_vector_list(DIRFILE* dirfile) __THROW __gd_nonnull((1));
 
 extern int get_entry(DIRFILE* D, const char* field_code, gd_entry_t* entry)
   __THROW __gd_nonnull ((1, 2));
@@ -213,8 +227,6 @@ __THROW __gd_nonnull ((1,2,3));
 
 extern const char* get_format_filename(const DIRFILE* D, unsigned int index)
   __THROW __gd_nonnull((1));
-
-extern void dirfile_user_error(DIRFILE *D, int *ptr) __THROW __gd_nonnull ((1));
 
 extern int get_error(const DIRFILE* D) __THROW __gd_nonnull ((1));
 

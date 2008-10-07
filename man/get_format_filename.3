@@ -20,7 +20,7 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH get_format_filename 3 "26 September 2008" "Version 0.4.0" "GETDATA"
+.TH get_format_filename 3 "6 October 2008" "Version 0.4.0" "GETDATA"
 .SH NAME
 get_format_filename \(em retrieve a dirfile format file fragment name
 .SH SYNOPSIS
@@ -61,8 +61,7 @@ returns a pointer to a read-only character string containing the file name of
 the specified format file fragment.  If index is out of range (less than zero
 or greater than or equal to the total number of format file fragments),
 .BR get_format_filename ()
-returns NULL.  This function does not modify
-.IR dirfile -> error .
+returns NULL.  This function does not modify the dirfile error.
 .SH SEE ALSO
 .BR dirfile (5),
 .BR dirfile_open (3),

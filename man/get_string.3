@@ -1,4 +1,4 @@
-.\" get_spf.3.  The get_spf man page.
+.\" get_string.3.  The get_string man page.
 .\"
 .\" (C) 2008 D. V. Wiebe
 .\"
@@ -20,37 +20,60 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH get_spf 3 "6 October 2008" "Version 0.4.0" "GETDATA"
+.TH get_string 3 "6 October 2008" "Version 0.4.0" "GETDATA"
 .SH NAME
-get_spf \(em returns the samples per frame for a field in a
-dirfile
+get_string \(em retrieve a scalar constant from a dirfile database
 .SH SYNOPSIS
-.B #include <getdata.h>
+.B #include <get_string.h>
 .HP
 .nh
 .ad l
-.BI "unsigned int get_spf(DIRFILE *" dirfile ", const char *" field_code );
+.BI "ssize_t get_string(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "size_t " len ", char *" data_out );
 .hy
 .ad n
 .SH DESCRIPTION
 The
-.BR get_spf ()
+.BR get_string ()
 function queries a dirfile(5) database specified by
 .I dirfile
-and returns the number of samples per frame for the field
+for the string scalar
 .IR field_code .
+The first
+.I len
+characters of the string scalar are stored in the user-supplied buffer
+.IR data_out .
 
 The 
 .I dirfile
 parameter must point to a valid DIRFILE object previously created by a call to
 .BR dirfile_open (3).
 
+If
+.I len
+equals zero, or if
+.I data_out
+equals NULL, no data will be copied to
+.IR data_out ,
+but the length of the string scalar will still be returned by
+.BR get_string ().
+Otherwise, the parameter
+.I data_out
+must point to a valid memory location of sufficient size to hold at least
+.I len
+characters.  If the length of the string scalar is greater than
+.IR len ", " data_out
+will not be null-terminated.
 .SH RETURN VALUE
-Upon successful completion,
-.BR get_spf ()
-returns the number of samples per frame for the field specified.  On error, it
-returns zero and sets the dirfile error
-to a non-zero error value.  Possible error values are:
+On success,
+.BR get_string ()
+returns the actual length of the specified string scalar.  A return return
+value greater than or equal to
+.I len
+indicates that the output string is not null terminated.
+
+On error, it returns -1 and sets the dirfile error to a non-zero
+value.  Possible error values are:
 .TP 8
 .B GD_E_BAD_CODE
 The field specified by
@@ -58,27 +81,46 @@ The field specified by
 was not found in the database.
 .TP
 .B GD_E_BAD_DIRFILE
-The supplied dirfile was invalid.
+An invalid
+.I dirfile
+was supplied.
+.TP
+.B GD_E_BAD_FIELD_TYPE
+The supplied
+.I field_code
+referred to a 
+.B CONST
+or 
+.B STRING
+field.  The caller should use
+.BR get_string (3),
+or
+.BR get_string (3)
+instead.
+.TP
+.B GD_E_BAD_TYPE
+An invalid
+.I return_type
+was specified.
 .TP
 .B GD_E_INTERNAL_ERROR
 An internal error occurred in the library while trying to perform the task.
 This indicates a bug in the library.  Please report the incident to the
 maintainer.
-.TP
-.B GD_E_RECURSE_LEVEL
-Too many levels of recursion were encountered while trying to resolve
-.IR field_code .
-This usually indicates a circular dependency in field specification in the
-dirfile.
 .P
 The dirfile error may be retrieved by calling
 .BR get_error (3).
-A descriptive error string for the last error encountered can be obtained from
+A descriptive error string for the last error encountered may be obtained from
 a call to
 .BR get_error_string (3).
 .SH SEE ALSO
 .BR dirfile (5),
+.BR dirfile-encoding (5),
 .BR dirfile_open (3),
 .BR getdata (3),
 .BR get_error (3),
-.BR get_error_string (3)
+.BR get_error_string (3),
+.BR get_nframes (3),
+.BR get_spf (3),
+.BR get_string (3),
+.BR putdata (3)

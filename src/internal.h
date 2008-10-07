@@ -171,6 +171,7 @@ char *strerror_r(int errnum, char *buf, size_t buflen);
 /* Unified entry struct */
 struct _gd_private_entry {
   gd_entry_t* entry[GD_MAX_LINCOM];
+  int meta;
   union {
     struct { /* RAW */
       char* file;
@@ -222,6 +223,13 @@ struct gd_include_t {
 #define GD_ENC_UNSUPPORTED GD_ENCODING /* Dirfile encoding unsupported */
 #define GD_INVALID         0x80000000 /* the dirfile is invalid */
 
+#define LIST_VALID_FIELD        0x01
+#define LIST_VALID_VECTOR       0x02
+#define LIST_VALID_STRING       0x04
+#define LIST_VALID_STRING_VALUE 0x08
+#define LIST_VALID_CONST        0x04
+#define LIST_VALID_CONST_VALUE  0x08
+
 /* The DIRFILE struct.  */
 struct _GD_DIRFILE {
   /* Error reporting */
@@ -235,6 +243,9 @@ struct _GD_DIRFILE {
 
   /* field count */
   unsigned int n_entries;
+  unsigned int n_string;
+  unsigned int n_const;
+  unsigned int n_meta;
 
   /* field array */
   gd_entry_t** entry;
@@ -252,8 +263,14 @@ struct _GD_DIRFILE {
   struct gd_include_t* include_list;
   unsigned int n_include;
 
-  /* field list */
+  /* field lists */
   const char** field_list;
+  const char** vector_list;
+  const char** string_list;
+  const char** string_value_list;
+  const char** const_list;
+  void* const_value_list;
+  int list_validity;
 
 #ifndef __USE_FILE_OFFSET64
   off_t

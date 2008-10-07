@@ -20,7 +20,7 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH putdata 3 "2 October 2008" "Version 0.4.0" "GETDATA"
+.TH putdata 3 "6 October 2008" "Version 0.4.0" "GETDATA"
 .SH NAME
 putdata \(em write data to a dirfile database
 .SH SYNOPSIS
@@ -129,8 +129,7 @@ In all cases,
 returns the number of samples (not bytes) successfully written to the database,
 which may be zero if an error has occurred.
 
-If an error has occurred,
-.IR dirfile -> error
+If an error has occurred, the dirfile error
 will be set to a non-zero value.  Possible error values are:
 .TP 8
 .B GD_E_ACCMODE
@@ -151,6 +150,18 @@ An invalid
 .I dirfile
 was supplied.
 .TP
+.B GD_E_BAD_FIELD_TYPE
+Either the field specified by
+.IR field_code ,
+or one of the fields it uses for input, was of
+.B MULTIPLY
+type, or
+.B LINCOM
+type with more than one input fields.  In this case,
+.BR putdata ()
+has no knowledge on how to partition the input data.  Alternately, the caller
+may have attempted to write to the implicit INDEX field, which is not possible.
+.TP
 .B GD_E_BAD_TYPE
 An invalid
 .I data_type
@@ -160,17 +171,6 @@ was specified.
 An internal error occurred in the library while trying to perform the task.
 This indicates a bug in the library.  Please report the incident to the
 maintainer.
-.TP
-.B GD_E_BAD_PUT_FIELD
-The field specified by
-.IR field_code ,
-or one of the fields it uses for input, was of
-.B MULTIPLY
-type, or
-.B LINCOM
-type with more than one input fields.  In this case,
-.BR putdata ()
-has no knowledge on how to partition the input data.
 .TP
 .B GD_E_OPEN_LINFILE
 An error occurred while trying to read a LINTERP table from disk.
@@ -197,6 +197,8 @@ supported by the library.  See
 for details on dirfile encoding schemes.
 .RE
 .P
+The dirfile error may be retrieved by calling
+.BR get_error (3).
 A descriptive error string for the last error encountered can be obtained from
 a call to
 .BR get_error_string (3).
@@ -204,5 +206,6 @@ a call to
 .BR dirfile (5),
 .BR dirfile-encoding (5),
 .BR dirfile_open (3),
+.BR get_error (3),
 .BR get_error_string (3),
 .BR get_spf (3)

@@ -20,7 +20,7 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH getdata 3 "2 October 2008" "Version 0.4.0" "GETDATA"
+.TH getdata 3 "6 October 2008" "Version 0.4.0" "GETDATA"
 .SH NAME
 getdata \(em retrieve data from a dirfile database
 .SH SYNOPSIS
@@ -140,8 +140,7 @@ been shifted from frame zero by the presence of a
 directive, will result in the the data being padded at the front by NaN or zero
 depending on whether the return type is of floating point or integral type.
 
-If an error has occurred,
-.IR dirfile -> error
+If an error has occurred, the dirfile error
 will be set to a non-zero value.  Possible error values are:
 .TP 8
 .B GD_E_ALLOC
@@ -156,6 +155,19 @@ or one of the fields it uses for input, was not found in the database.
 An invalid
 .I dirfile
 was supplied.
+.TP
+.B GD_E_BAD_FIELD_TYPE
+The supplied
+.I field_code
+referred to a 
+.B CONST
+or 
+.B STRING
+field.  The caller should use
+.BR get_constant (3),
+or
+.BR get_string (3)
+instead.
 .TP
 .B GD_E_BAD_TYPE
 An invalid
@@ -187,6 +199,8 @@ supported by the library.  See
 for details on dirfile encoding schemes.
 .RE
 .P
+The dirfile error may be retrieved by calling
+.BR get_error (3).
 A descriptive error string for the last error encountered can be obtained from
 a call to
 .BR get_error_string (3).
@@ -204,7 +218,7 @@ reading a
 .B PHASE
 field beyond the beginning- or end-of-field is "implementation dependent" (see
 .BR dirfile-format (5)).
-As will any other field,
+As with any other field,
 .BR getdata ()
 will return a short count whenever a read from a
 .B PHASE
@@ -238,7 +252,10 @@ field's end-of-field marker.
 .BR dirfile (5),
 .BR dirfile-encoding (5),
 .BR dirfile_open (3),
+.BR get_constant (3),
+.BR get_error (3),
 .BR get_error_string (3),
 .BR get_nframes (3),
 .BR get_spf (3),
+.BR get_string (3),
 .BR putdata (3)

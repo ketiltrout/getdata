@@ -88,7 +88,7 @@ static size_t _GD_DoRawOut(DIRFILE *D, gd_entry_t *R,
   /* If the encoding is still unknown, none of the candidate files exist;
    * as a result, we don't know the intended encoding type */
   if ((D->flags & GD_ENCODING) == GD_AUTO_ENCODED) {
-    _GD_SetError(D, GD_E_UNSUPPORTED, 0, NULL, 0, NULL);
+    _GD_SetError(D, GD_E_UNKNOWN_ENCODING, 0, NULL, 0, NULL);
     dreturn("%zi", 0);
     return 0;
   }

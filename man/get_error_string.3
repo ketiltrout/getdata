@@ -20,7 +20,7 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH get_error_string 3 "11 August 2008" "Version 0.3.0" "GETDATA"
+.TH get_error_string 3 "7 October 2008" "Version 0.4.0" "GETDATA"
 .SH NAME
 get_error_string \(em report a getdata library error
 .SH SYNOPSIS
@@ -35,7 +35,7 @@ get_error_string \(em report a getdata library error
 .SH DESCRIPTION
 The
 .BR get_error_string ()
-function returns a string describing the last library error encountered while
+function returns a string describing the last dirfile error encountered while
 operating on 
 .IR dirfile .
 The string is written to the user-supplied buffer
@@ -43,6 +43,8 @@ The string is written to the user-supplied buffer
 At most
 .I buflen
 characters will be written, including a terminating null.
+The numeric dirfile error itself may be obtained by calling
+.BR get_error (3).
 
 The 
 .I dirfile
@@ -59,6 +61,4 @@ or NULL if buflen is less than one.  The error state of
 is unchanged.
 .SH SEE ALSO
 .BR dirfile_open (3),
-.BR getdata (3),
-.BR get_nframes (3),
-.BR get_spf (3)
+.BR get_error (3).

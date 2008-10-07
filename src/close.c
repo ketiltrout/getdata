@@ -79,6 +79,11 @@ static void _GD_FreeD(DIRFILE* D)
   free(D->error_string);
   free(D->error_file);
   free(D->field_list);
+  free(D->vector_list);
+  free(D->string_list);
+  free(D->const_list);
+  free(D->string_value_list);
+  free(D->const_value_list);
   free(D->include_list);
 
   dreturnvoid();

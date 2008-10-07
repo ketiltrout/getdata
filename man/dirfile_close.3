@@ -20,7 +20,7 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH dirfile_close 3 "30 August 2008" "Version 0.3.0" "GETDATA"
+.TH dirfile_close 3 "6 October 2008" "Version 0.4.0" "GETDATA"
 .SH NAME
 dirfile_close \(em close a dirfile and free associated memory.
 .SH SYNOPSIS
@@ -55,9 +55,8 @@ should be considered invalid.
 .BR dirfile_close ()
 returns zero on success.  On error, it does not free
 .I dirfile
-and sets
-.IR dirfile -> error
-to a non-zero error value.  Possible error values are:
+and sets the dirfile error to a non-zero error value.  Possible error values
+are:
 .TP 8
 .B GD_E_RAW_IO
 An error occurred while trying to flush or close one or more open raw files.
@@ -67,10 +66,13 @@ will not be deallocated, and another call to
 .BR dirfile_close ()
 may be attempted.
 .P
+The dirfile error may be retrieved by calling
+.BR get_error (3).
 A descriptive error string for the last error encountered can be obtained from
 a call to
 .BR get_error_string (3).
 .SH SEE ALSO
 .BR dirfile_open (3),
 .BR dirfile_flush (3),
+.BR get_error (3),
 .BR get_error_string (3)

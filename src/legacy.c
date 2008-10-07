@@ -63,7 +63,8 @@ const char *GD_ERROR_CODES[GD_N_ERROR_CODES] = {
   "Cannot write to specified field",
   "Read-only dirfile",
   "Request out-of-range",
-  "Operation not supported for current encoding scheme",
+  "Operation not supported by current encoding scheme",
+  "Unable to discover encoding",
     /* Subsequent error codes are not supported by the legacy API, and
      * hence not handled here */
   NULL, /* GD_E_BAD_ENTRY */

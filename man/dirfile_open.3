@@ -20,7 +20,7 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH dirfile_open 3 "2 October 2008" "Version 0.4.0" "GETDATA"
+.TH dirfile_open 3 "6 October 2008" "Version 0.4.0" "GETDATA"
 .SH NAME
 dirfile_open \(em open or create a dirfile
 .SH SYNOPSIS
@@ -164,6 +164,10 @@ unless
 .B GD_FORCE_ENCODED
 is also specified.  If none of these symbols is present,
 .B GD_AUTO_ENCODED
+is assumed, unless the
+.BR dirfile_open ()
+call results in creation or truncation of the dirfile.  In that case,
+.B GD_UNENCODED
 is assumed.  See
 .BR dirfile-encoding (5)
 for details on dirfile encoding schemes.
@@ -174,8 +178,9 @@ by the GetData library.  Detection is accomplished by searching for raw data
 files with extensions appropriate to the encoding scheme.  This method will
 notably fail if the the library is called via
 .BR putdata (3)
-to create a previously non-existant raw field.  Once the library has determined
-the encoding scheme for the first time, it remembers it for subsequent calls.
+to create a previously non-existant raw field unless a read is first
+successfully performed on the dirfile.  Once the library has determined the
+encoding scheme for the first time, it remembers it for subsequent calls.
 .TP
 .B GD_SLIM_ENCODED
 Specifies that raw data files are compressed using the slimlib library.
@@ -196,10 +201,9 @@ called
 .I error
 which is of type
 .IR int .
-If an error occurred,
-.IR dirfile -> error
-will be set to a non-zero error value.  The DIRFILE object will also be
-internally flagged as invalid.  Possible error values are:
+If an error occurred, the dirfile error will be set to a non-zero error value.
+The DIRFILE object will also be internally flagged as invalid.  Possible error
+values are:
 .TP 8
 .B GD_E_ACCMODE
 The library was asked to create or truncate a dirfile opened read-only (i.e.
@@ -240,6 +244,8 @@ directive could not be opened.
 .B GD_E_TRUNC
 The library was unable to truncate the dirfile.
 .P
+The dirfile error may be retrieved by calling
+.BR get_error (3).
 A descriptive error string for the last error encountered can be obtained from
 a call to
 .BR get_error_string (3).
@@ -252,4 +258,5 @@ even if the open failed.
 .BR dirfile-format (5),
 .BR dirfile_close (3),
 .BR getdata (3),
+.BR get_error (3),
 .BR get_error_string (3)

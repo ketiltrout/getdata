@@ -1,4 +1,4 @@
-.\" get_nfields.3.  The get_nfields man page.
+.\" get_error.3.  The get_error man page.
 .\"
 .\" (C) 2008 D. V. Wiebe
 .\"
@@ -20,51 +20,37 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH get_nfields 3 "6 October 2008" "Version 0.4.0" "GETDATA"
+.TH get_error 3 "7 October 2008" "Version 0.4.0" "GETDATA"
 .SH NAME
-get_nfields \(em report the number of fields in a dirfile
+get_error \(em report a getdata library error
 .SH SYNOPSIS
 .B #include <getdata.h>
 .HP
 .nh
 .ad l
-.BI "unsigned int get_nfields(DIRFILE *" dirfile );
+.BI "int get_error(const DIRFILE *" dirfile );
 .hy
 .ad n
 .SH DESCRIPTION
 The
-.BR get_nfields ()
-function queries a dirfile(5) database specified by
+.BR get_error ()
+function returns the numeric dirfile error associated with the dirfile
 .I dirfile
-and returns the number of fields defined in the database.  Notably, this count
-does not include the implicit
-.I INDEX
-field.
+which is set by many GetData library functions.
 
 The 
 .I dirfile
-parameter must point to a valid DIRFILE object previously created by a call to
+parameter should point to a DIRFILE object previously created by a call to
 .BR dirfile_open (3).
 
-.SH RETURN VALUE
-Upon successful completion,
-.BR get_nfields ()
-returns the number of defined fields in the dirfile.  On error, it
-returns zero and sets the dirfile error
-to a non-zero error value.  Possible error values are:
-.TP 8
-.B GD_E_BAD_DIRFILE
-The supplied dirfile was invalid.
-.P
-The dirfile error may be retrieved by calling
-.BR get_error (3).
-A descriptive error string for the last error encountered can be obtained from
-a call to
+A textual description of the error may be obtained by calling
 .BR get_error_string (3).
+
+.SH RETURN VALUE
+The
+.BR get_error ()
+function always returns the dirfile error corresponding to the error state of
+the last library call on the supplied DIRFILE object.
 .SH SEE ALSO
-.BR dirfile (5),
 .BR dirfile_open (3),
-.BR getdata (3),
-.BR get_error (3),
-.BR get_error_string (3),
-.BR get_field_list (3)
+.BR get_error_string (3)

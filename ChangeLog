@@ -1,3 +1,29 @@
+2008-10-07   D. V. Wiebe <getdata@ketiltrout.net>  svn:115
+	* src/open.c: Record whether a field is meta.
+
+	* src/open.c: Count strings, constants and meta fields.
+
+	* src/open.c (_GD_CreateDirfile): If creating (or truncating) a dirfile,
+	assume GD_UNENCODED if GD_AUTO_ENCODED was specified.
+
+	* src/putdata.c (_GD_DoRawOut): Set GD_E_UNKNOWN_ENCODING instead of
+	GD_UNSUPPORTED if the encoding can't be figured out.
+
+	* src/field_list.c (get_constant_values get_constant_list get_string_values
+	get_string_list get_vector_list): Added.
+	* src/field_list.c (get_field_list): Don't return meta fields in the list.
+	* src/nfields.c: Return the number of non-meta fields.
+
+	* src/constant.c: Renamed from src/get_constant.c
+	* src/string.c: Renamed from src/get_string.c
+
+	* src/getdata.c (_GD_DoString): If num_samp == 0 or data_out is NULL, don't
+	copy the string.
+
+	* src/errors.c (dirfile_user_error): Removed per discussion with Barth.
+
+	* man/get_constant.3 man/get_error.3 man/get_string.3: Added.
+
 2008-10-06   D. V. Wiebe <getdata@ketiltrout.net>  svn:114
 	* test/error_error.c: Added.
 

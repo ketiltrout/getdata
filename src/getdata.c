@@ -761,10 +761,11 @@ static size_t _GD_DoString(gd_entry_t *S, size_t num_samp, void *data_out)
 {
   dtrace("%p, %zi, %p", S, num_samp, data_out);
 
-  strncpy(data_out, S->e->string, num_samp); 
+  if (num_samp > 0 && data_out != NULL)
+    strncpy(data_out, S->e->string, num_samp); 
 
-  dreturn("%i", 1);
-  return 1;
+  dreturn("%i", strlen(S->e->string));
+  return strlen(S->e->string);
 }
 
 /* _GD_DoField: Locate the field in the database and read it.

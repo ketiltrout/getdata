@@ -28,11 +28,11 @@ endif
 
 dist_man_MANS = dirfile_add.3 dirfile_add_raw.3 dirfile_close.3 \
 								dirfile_flush.3 dirfile_flush_metadata.3 \
-								dirfile_free_entry_strings.3 dirfile_open.3 get_entry.3 \
-								get_error_string.3 get_field_list.3 get_format_filename.3 \
-								get_nfields.3 get_nformats.3 get_nframes.3 get_spf.3 getdata.3 \
-								putdata.3 dirfile.5 dirfile-encoding.5 dirfile-format.5 \
-								$(LFS_transitional_mans)
+								dirfile_free_entry_strings.3 dirfile_open.3 get_constant.3 \
+								get_entry.3 get_error.3 get_error_string.3 get_field_list.3 \
+								get_format_filename.3 get_nfields.3 get_nformats.3 \
+								get_nframes.3 get_spf.3 getdata.3 putdata.3 dirfile.5 \
+								dirfile-encoding.5 dirfile-format.5 $(LFS_transitional_mans)
 
 install-data-hook:
 	cd $(DESTDIR)$(mandir)/man3 && \

@@ -20,7 +20,7 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH dirfile_flush_metadata 3 "27 September 2008" "Version 0.4.0" "GETDATA"
+.TH dirfile_flush_metadata 3 "6 October 2008" "Version 0.4.0" "GETDATA"
 .SH NAME
 dirfile_flush_metadata \(em close a dirfile and free associated memory.
 .SH SYNOPSIS
@@ -45,9 +45,8 @@ This function fushes only metadata.  To flush the field data as well, call
 instead.
 .SH RETURN VALUE
 .BR dirfile_flush_metadata ()
-returns no value.  On error, it will set
-.IR dirfile -> error
-to a non-zero error value.  Possible error values are:
+returns no value.  On error, it will set the dirfile error to a non-zero error
+value.  Possible error values are:
 .TP 8
 .B GD_E_BAD_DIRFILE
 The supplied dirfile was invalid.
@@ -60,6 +59,8 @@ maintainer.
 .B GD_E_OPEN_INCLUDE
 A temporary file could not be opened into which to write the modified metadata.
 .P
+The dirfile error may be retrieved by calling
+.BR get_error (3).
 A descriptive error string for the last error encountered can be obtained from
 a call to
 .BR get_error_string (3).
@@ -67,4 +68,5 @@ a call to
 .BR dirfile_open (3),
 .BR dirfile_flush (3),
 .BR dirfile_close (3),
+.BR get_error (3),
 .BR get_error_string (3)

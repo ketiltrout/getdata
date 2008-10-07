@@ -21,7 +21,7 @@
 #include "internal.h"
 
 /* this function is little more than a public boilerplate for _GD_DoField */
-size_t get_constant(DIRFILE* D, const char *field_code, gd_type_t return_type,
+ssize_t get_constant(DIRFILE* D, const char *field_code, gd_type_t return_type,
     void *data_out)
 {
   size_t n_read;
@@ -31,8 +31,8 @@ size_t get_constant(DIRFILE* D, const char *field_code, gd_type_t return_type,
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%zi", 0);
-    return 0;
+    dreturn("%zi", -1);
+    return -1;
   }
 
   _GD_ClearError(D);
@@ -48,8 +48,13 @@ size_t get_constant(DIRFILE* D, const char *field_code, gd_type_t return_type,
     n_read = _GD_DoField(D, entry, field_code, 0, 0, 0, 0, return_type,
         data_out);
 
+  if (D->error) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
   dreturn("%zi", n_read);
-  return n_read;
+  return (ssize_t)n_read;
 }
 /* vim: ts=2 sw=2 et tw=80
 */

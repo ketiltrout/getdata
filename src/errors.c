@@ -99,6 +99,11 @@ static const struct {
   { GD_E_BAD_FIELD_TYPE, GD_E_FIELD_GET, "Bad field type for field {4}", 0 },
   /* GD_E_ACCMODE: (nothing) */
   { GD_E_ACCMODE, 0, "Dirfile has been opened read-only", 0 },
+  /* GD_E_UNSUPPORTED: (nothing) */
+  { GD_E_UNSUPPORTED, 0, "Operation not supported by current encoding scheme",
+    0 },
+  /* GD_E_UNKNOWN_ENCODING: (nothing) */
+  { GD_E_UNKNOWN_ENCODING, 0, "Unable to determine encoding scheme", 0 },
   /* GD_E_BAD_ENTRY: 3 = parameter */
   { GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_TYPE, "Invalid entry type: {3}", 0 },
   { GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_FORMAT, "Invalid format file index: {3}",
@@ -147,20 +152,6 @@ int get_error(const DIRFILE* D)
   return D->error;
 }
 
-/* Set the user's error location */
-void dirfile_user_error(DIRFILE* D, int* ptr)
-{
-  dtrace("%p, %p", D, ptr);
-
-  if (ptr == NULL)
-    D->user_error = &(D->ierror);
-  else
-    D->user_error = ptr;
-
-  dreturnvoid();
-}
-
-
 /* Write a descriptive message in the supplied buffer describing the last
  * library error.  The message may be truncated but will be null terminated.
  * Returns buffer, or NULL if buflen < 1.
@@ -190,7 +181,8 @@ char* get_error_string(const DIRFILE* D, char* buffer, size_t buflen)
   }
 
   if (s == -1) /* Unhandled error */
-    snprintf(buffer, buflen, "Unknown error %i:%i", D->error, D->suberror);
+    snprintf(buffer, buflen, "Unknown error %i:%i. Please report to "
+        PACKAGE_BUGREPORT, D->error, D->suberror);
   else {
     for (ip = error_string[s].format; *ip != '\0' && op < bufend - 1; ++ip) {
       if (*ip == '{') {

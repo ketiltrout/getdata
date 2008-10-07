@@ -230,6 +230,9 @@ int dirfile_add(DIRFILE* D, const gd_entry_t* entry)
   D->entry[D->n_entries++] = E;
   D->include_list[E->format_file].modified = 1;
 
+  /* Invalidate the field lists */
+  D->list_validity = 0;
+
   qsort(D->entry, D->n_entries, sizeof(gd_entry_t*), _GD_EntryCmp);
 
   dreturn("%i", 0);

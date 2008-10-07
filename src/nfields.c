@@ -32,6 +32,6 @@ unsigned int get_nfields(DIRFILE* D)
 
   _GD_ClearError(D);
 
-  dreturn("%u", D->n_entries);
-  return D->n_entries;
+  dreturn("%u", D->n_entries - D->n_meta);
+  return D->n_entries - D->n_meta;
 }

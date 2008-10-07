@@ -131,6 +131,7 @@ static gd_entry_t* _GD_ParseRaw(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
   R->e->file = NULL;
   R->e->fp = -1; /* file not opened yet */
   R->e->stream = NULL; /* file not opened yet */
+  R->e->meta = (prefix[0] == '\0') ? 0 : 1;
   R->e->encoding = GD_ENC_UNKNOWN; /* don't know the encoding subscheme yet */
   R->format_file = D->n_include - 1;
 
@@ -212,6 +213,7 @@ static gd_entry_t* _GD_ParseLincom(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
     L->e->entry[i] = NULL;
   }
   L->format_file = D->n_include - 1;
+  L->e->meta = (prefix[0] == '\0') ? 0 : 1;
 
   L->field = _GD_ValidateField(prefix, in_cols[0]);
   if (L->field == in_cols[0]) {
@@ -286,6 +288,7 @@ static gd_entry_t* _GD_ParseLinterp(DIRFILE* D,
   L->field_type = GD_LINTERP_ENTRY;
   L->in_fields[0] = NULL;
   L->e->entry[0] = NULL;
+  L->e->meta = (prefix[0] == '\0') ? 0 : 1;
   L->table = NULL;
   L->format_file = D->n_include - 1;
 
@@ -360,6 +363,7 @@ static gd_entry_t* _GD_ParseMultiply(DIRFILE* D,
   M->field_type = GD_MULTIPLY_ENTRY;
   M->in_fields[0] = M->in_fields[1] = NULL;
   M->e->entry[0] = M->e->entry[1] = NULL;
+  M->e->meta = (prefix[0] == '\0') ? 0 : 1;
   M->format_file = D->n_include - 1;
 
   M->field = _GD_ValidateField(prefix, in_cols[0]);
@@ -418,6 +422,7 @@ static gd_entry_t* _GD_ParseBit(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
   B->field_type = GD_BIT_ENTRY;
   B->in_fields[0] = NULL;
   B->e->entry[0] = NULL;
+  B->e->meta = (prefix[0] == '\0') ? 0 : 1;
   B->format_file = D->n_include - 1;
 
   B->field = _GD_ValidateField(prefix, in_cols[0]);
@@ -490,6 +495,7 @@ static gd_entry_t* _GD_ParsePhase(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
   P->field_type = GD_PHASE_ENTRY;
   P->in_fields[0] = NULL;
   P->e->entry[0] = NULL;
+  P->e->meta = (prefix[0] == '\0') ? 0 : 1;
   P->format_file = D->n_include - 1;
 
   P->field = _GD_ValidateField(prefix, in_cols[0]);
@@ -549,6 +555,7 @@ static gd_entry_t* _GD_ParseConst(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
 
   C->field_type = GD_CONST_ENTRY;
   C->format_file = D->n_include - 1;
+  C->e->meta = (prefix[0] == '\0') ? 0 : 1;
 
   C->field = _GD_ValidateField(prefix, in_cols[0]);
   if (C->field == in_cols[0]) {
@@ -625,6 +632,7 @@ static gd_entry_t* _GD_ParseString(DIRFILE* D, const char *in_cols[MAX_IN_COLS],
   S->field_type = GD_STRING_ENTRY;
   S->format_file = D->n_include - 1;
   S->e->string = strdup(in_cols[2]);
+  S->e->meta = (prefix[0] == '\0') ? 0 : 1;
 
   S->field = _GD_ValidateField(prefix, in_cols[0]);
   if (S->field == in_cols[0]) {
@@ -756,6 +764,8 @@ static void _GD_ParseFieldSpec(DIRFILE* D, int n_cols,
         format_file, linenum);
     if (D->error != GD_E_OK)
       D->n_entries--;
+    else
+      D->n_const++;
   } else if (strcmp(in_cols[1], "STRING") == 0) {
     D->n_entries++;
     D->entry = realloc(D->entry, D->n_entries * sizeof(gd_entry_t**));
@@ -763,6 +773,8 @@ static void _GD_ParseFieldSpec(DIRFILE* D, int n_cols,
         format_file, linenum);
     if (D->error != GD_E_OK)
       D->n_entries--;
+    else
+      D->n_string++;
   } else if (standards <= DIRFILE_STANDARDS_VERSION ||
       (D->flags & GD_PEDANTIC))
   {
@@ -1078,6 +1090,8 @@ static int _GD_ParseFormatFile(FILE* fp, DIRFILE *D, const char* filedir,
           strcat(strcpy(ip, in_cols[1]), "/");
           _GD_ParseFieldSpec(D, n_cols - 2, in_cols + 2, ip, subdir,
               format_file, linenum, have_first, me, standards);
+          if (!D->error)
+            D->n_meta++;
           free(ip);
         }
       }
@@ -1106,7 +1120,7 @@ static int _GD_ParseFormatFile(FILE* fp, DIRFILE *D, const char* filedir,
 
 /* attempt to open or create a new dirfile - set error appropriately */
 static FILE* _GD_CreateDirfile(DIRFILE* D, const char* format_file,
-    const char* filedir, unsigned int flags)
+    const char* filedir)
 {
   struct stat statbuf;
   char fullname[FILENAME_MAX];
@@ -1117,7 +1131,7 @@ static FILE* _GD_CreateDirfile(DIRFILE* D, const char* format_file,
   int format_error = 0;
   FILE* fp = NULL;
 
-  dtrace("%p, \"%s\", \"%s\", 0%o", D, format_file, filedir, flags);
+  dtrace("%p, \"%s\", \"%s\"", D, format_file, filedir);
 
   /* naively try to open the format file */
   if ((fp = fopen(format_file, "r")) == NULL) {
@@ -1148,7 +1162,7 @@ static FILE* _GD_CreateDirfile(DIRFILE* D, const char* format_file,
   }
 
   /* Couldn't open the file, and we weren't asked to create it */
-  if (format_error && !(flags & GD_CREAT)) {
+  if (format_error && !(D->flags & GD_CREAT)) {
     _GD_SetError(D, GD_E_OPEN, GD_E_OPEN_NOT_EXIST, filedir, format_error,
         NULL);
     dreturn("%p", NULL);
@@ -1156,7 +1170,7 @@ static FILE* _GD_CreateDirfile(DIRFILE* D, const char* format_file,
   }
 
   /* It does exist, but we were asked to exclusively create it */
-  if (!format_error && (flags & GD_CREAT) && (flags & GD_EXCL)) {
+  if (!format_error && (D->flags & GD_CREAT) && (D->flags & GD_EXCL)) {
     _GD_SetError(D, GD_E_CREAT, GD_E_CREAT_EXCL, filedir, 0, NULL);
     fclose(fp);
     dreturn("%p", NULL);
@@ -1173,12 +1187,12 @@ static FILE* _GD_CreateDirfile(DIRFILE* D, const char* format_file,
    * Note that the rather lame definition of a dirfile at this point
    * (specifically, we haven't bothered to see if the format file is parsable)
    * could be problematic if users use GD_TRUNC cavalierly. */
-  if (flags & GD_TRUNC && !format_error) {
+  if (D->flags & GD_TRUNC && !format_error) {
     /* This file isn't going to be around much longer */
     fclose(fp);
 
     /* can't truncate a read-only dirfile */
-    if ((flags & GD_ACCMODE) == GD_RDONLY) {
+    if ((D->flags & GD_ACCMODE) == GD_RDONLY) {
       _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
       dreturn("%p", NULL);
       return NULL;
@@ -1219,10 +1233,10 @@ static FILE* _GD_CreateDirfile(DIRFILE* D, const char* format_file,
   }
 
   /* Create, if needed */
-  if ((flags & GD_CREAT && format_error) || (flags & GD_TRUNC))
+  if ((D->flags & GD_CREAT && format_error) || (D->flags & GD_TRUNC))
   {
     /* can't create a read-only dirfile */
-    if ((flags & GD_ACCMODE) == GD_RDONLY) {
+    if ((D->flags & GD_ACCMODE) == GD_RDONLY) {
       _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
       dreturn("%p", NULL);
       return NULL;
@@ -1242,6 +1256,10 @@ static FILE* _GD_CreateDirfile(DIRFILE* D, const char* format_file,
       dreturn("%p", NULL);
       return NULL;
     }
+
+    /* set GD_UNENCODED if GD_AUTO_ENCODED was specified */
+    if ((D->flags & GD_ENCODING) == GD_AUTO_ENCODED)
+      D->flags = (D->flags & ~GD_ENCODING) | GD_UNENCODED;
   }
 
   /* open succeeds */
@@ -1269,9 +1287,15 @@ DIRFILE* dirfile_open(const char* filedir, unsigned int flags)
   D->error_file = malloc(FILENAME_MAX);
   D->name = strdup(filedir);
   D->frame_offset = 0;
-  D->n_entries = 0;
+  D->n_entries = D->n_string = D->n_const = D->n_meta = 0;
   D->first_field = NULL;
   D->field_list = NULL;
+  D->vector_list = NULL;
+  D->const_list = NULL;
+  D->string_list = NULL;
+  D->string_value_list = NULL;
+  D->const_value_list = NULL;
+  D->list_validity = 0;
   D->flags = flags | GD_INVALID;
   D->n_include = 0;
 
@@ -1279,7 +1303,7 @@ DIRFILE* dirfile_open(const char* filedir, unsigned int flags)
       (filedir[strlen(filedir) - 1] == '/') ? "" : "/");
 
   /* open the format file (or create it) */
-  if ((fp = _GD_CreateDirfile(D, format_file, filedir, flags)) == NULL) {
+  if ((fp = _GD_CreateDirfile(D, format_file, filedir)) == NULL) {
     dreturn("%p", D);
     return D; /* errors have already been set */
   }

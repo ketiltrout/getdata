@@ -20,7 +20,7 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH dirfile_add_raw 3 "27 September 2008" "Version 0.4.0" "GETDATA"
+.TH dirfile_add_raw 3 "6 October 2008" "Version 0.4.0" "GETDATA"
 .SH NAME
 dirfile_add_raw, dirfile_add_bit, dirfile_add_lincom, dirfile_add_linterp,
 dirfile_add_multiply, dirfile_add_phase \(em add a field to a dirfile
@@ -81,8 +81,7 @@ and the offset terms
 .RI ( b ).
 .SH RETURN VALUE
 On success, any of these functions returns zero.   On error, -1 is returned and 
-.IR dirfile -> error
-is set to a non-zero error value.  Possible error values are:
+the dirfile error is set to a non-zero error value.  Possible error values are:
 .TP 8
 .B GD_E_ACCMODE
 The specified dirfile was opened read-only.
@@ -119,6 +118,8 @@ parameter provided to
 .BR dirfile_add_raw ()
 was invalid.
 .P
+The dirfile error may be retrieved by calling
+.BR get_error (3).
 A descriptive error string for the last error encountered can be obtained from
 a call to
 .BR get_error_string (3).
@@ -126,5 +127,6 @@ a call to
 .BR dirfile_add (3),
 .BR dirfile_open (3),
 .BR durfile_flush_metadata (3),
+.BR get_error (3),
 .BR get_error_string (3),
 .BR dirfile-format (5)
