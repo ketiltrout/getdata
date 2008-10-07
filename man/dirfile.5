@@ -20,7 +20,7 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH dirfile 5 "8 August 2008" "Standards Version 5" "DATA FORMATS"
+.TH dirfile 5 "7 October 2008" "Standards Version 6" "DATA FORMATS"
 .SH NAME
 dirfile \(em a filesystem based database format for time-ordered binary data
 .SH DESCRIPTION
@@ -33,7 +33,7 @@ library.
 The dirfile database is centred around one or more time-ordered data streams (a
 .IR "time stream" ).
 Each time stream is written to disk in a separate file, in its native binary
-format.  The name of these time stream files correspond to the time stream's
+format.  The name of these binary files correspond to the time stream's
 .IR "field name" .
 Two time streams may have different constant sampling frequencies and mechanisms
 exist within the dirfile format to ensure these time streams remain properly
@@ -46,7 +46,7 @@ synchronous retrieval of data from more than one time stream is required,
 position in the dirfile can be specified in frames, which will ensure
 synchronicity.
 
-The time stream files are all located in a central directory, known as the
+The binary files are all located in a central directory, known as the
 .IR "dirfile directory" .
 The dirfile as a whole may be referred to by its dirfile directory.
 
@@ -85,6 +85,11 @@ be contained within a larger, parent dirfile.  See
 .BR dirfile\-format (5)
 for information on specifying these subdirfiles.
 
+Version 6 of the Dirfile Standards added the ability to encode the binary files
+on disk.  Notably this can be used to compress these files.  See
+.BR dirfile\-encoding (5)
+for information on encoding schemes.
+
 .SH AUTHORS
 
 The dirfile specification was developed by C. B. Netterfield
@@ -98,4 +103,5 @@ The dirfile specification is now maintained by D. V. Wiebe
 .hy 1
 
 .SH SEE ALSO
+.BR dirfile\-encoding (5)
 .BR dirfile\-format (5)
