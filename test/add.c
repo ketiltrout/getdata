@@ -13,9 +13,10 @@ int main(void)
 {
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
+  const char* data = __TEST__ "dirfile/data";
 
   gd_entry_t E;
-  E.field =  "new";
+  E.field =  "data";
   E.field_type = GD_RAW_ENTRY;
   E.format_file = 0;
   E.spf = 2;
@@ -30,6 +31,7 @@ int main(void)
 
   dirfile_close(D);
 
+  unlink(data);
   unlink(format);
   rmdir(filedir);
 

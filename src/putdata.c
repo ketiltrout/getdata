@@ -471,7 +471,13 @@ size_t putdata64(DIRFILE* D, const char *field_code, off64_t first_frame,
 
   entry = _GD_GetEntry(D, field_code);
 
-  if (D->error == GD_E_OK)
+  if (D->error != GD_E_OK)
+    n_wrote = 0;
+  else if (entry && (entry->field_type == GD_CONST_ENTRY ||
+        entry->field_type == GD_STRING_ENTRY)) {
+    _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
+    n_wrote = 0;
+  } else 
     n_wrote = _GD_DoFieldOut(D, entry, field_code, first_frame, first_samp,
         num_frames, num_samp, data_type, data_in);
 

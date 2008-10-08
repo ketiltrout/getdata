@@ -23,6 +23,9 @@
 #ifdef STDC_HEADERS
 #include <stdlib.h>
 #include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #endif
 
 #ifdef HAVE_LIBGEN_H
@@ -32,12 +35,14 @@
 #include "internal.h"
 
 /* add an entry */
-int dirfile_add(DIRFILE* D, const gd_entry_t* entry)
+static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
 {
   dtrace("%p, %p", D, entry);
 
   char temp_buffer[FILENAME_MAX];
   int i;
+  gd_entry_t* E;
+  gd_entry_t* P = NULL;
 
   _GD_ClearError(D);
 
@@ -48,8 +53,27 @@ int dirfile_add(DIRFILE* D, const gd_entry_t* entry)
     return -1;
   }
 
+  /* check parent */
+  if (parent != NULL) {
+    /* make sure it's not a meta field already */
+    if (strchr(parent, '/') != NULL) {
+      _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, parent);
+      dreturn("%i", -1);
+      return -1;
+    }
+
+    P = _GD_GetEntry(D, parent);
+    if (D->error) {
+      dreturn("%i", -1);
+      return -1;
+    }
+
+    snprintf(temp_buffer, FILENAME_MAX, "%s/%s", parent, entry->field);
+  } else
+    snprintf(temp_buffer, FILENAME_MAX, "%s", entry->field);
+
   /* check for duplicate field */
-  gd_entry_t* E = _GD_GetEntry(D, entry->field); 
+  E = _GD_GetEntry(D, temp_buffer);
 
   if (D->error == GD_E_OK) { /* matched */
     _GD_SetError(D, GD_E_DUPLICATE, 0, NULL, 0, NULL);
@@ -77,7 +101,9 @@ int dirfile_add(DIRFILE* D, const gd_entry_t* entry)
   }
 
   /* check for include index out of range */
-  if (entry->format_file >= D->n_include) {
+  if (entry->format_file >= D->n_include &&
+      (entry->format_file != GD_FORMAT_AUTO || P == NULL))
+  {
     _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_FORMAT, NULL,
         entry->format_file, NULL);
     dreturn("%i", -1);
@@ -92,7 +118,10 @@ int dirfile_add(DIRFILE* D, const gd_entry_t* entry)
     return -1;
   }
   memset(E, 0, sizeof(gd_entry_t));
-  E->format_file = entry->format_file;
+  if (entry->format_file == GD_FORMAT_AUTO)
+    E->format_file = P->format_file;
+  else
+    E->format_file = entry->format_file;
 
   E->e = malloc(sizeof(struct _gd_private_entry));
   if (E->e == NULL) {
@@ -104,7 +133,7 @@ int dirfile_add(DIRFILE* D, const gd_entry_t* entry)
 
   /* Validate field code */
   E->field_type = entry->field_type;
-  E->field = _GD_ValidateField("", entry->field);
+  E->field = _GD_ValidateField((parent == NULL) ? "" : parent, entry->field);
   if (E->field == entry->field) {
     _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, NULL);
     E->field = NULL;
@@ -155,6 +184,9 @@ int dirfile_add(DIRFILE* D, const gd_entry_t* entry)
         /* Tag the include list */
         for (i = E->format_file; i != -1; i = D->include_list[i].parent)
           D->include_list[i].first = D->include_list[i].modified = 1;
+
+        /* create an empty file */
+        close(open(E->e->file, O_CREAT | O_TRUNC, 0666));
       }
       break;
     case GD_LINCOM_ENTRY:
@@ -239,6 +271,11 @@ int dirfile_add(DIRFILE* D, const gd_entry_t* entry)
   return 0;
 }
 
+int dirfile_add(DIRFILE* D, const gd_entry_t* entry)
+{
+  return _GD_Add(D, entry, NULL);
+}
+
 /* add a RAW entry */
 int dirfile_add_raw(DIRFILE* D, const char* field_code, gd_type_t data_type,
     unsigned int spf, int format_file)
@@ -251,13 +288,13 @@ int dirfile_add_raw(DIRFILE* D, const char* field_code, gd_type_t data_type,
   R.spf = spf;
   R.data_type = data_type;
   R.format_file = format_file;
-  int error = dirfile_add(D, &R);
+  int error = _GD_Add(D, &R, NULL);
 
   dreturn("%i", error);
   return error;
 }
 
-/* add a LINCOM entry -- this function is variadic */
+/* add a LINCOM entry */
 int dirfile_add_lincom(DIRFILE* D, const char* field_code, int n_fields,
     const char** in_fields, const double* m, const double* b, int format_file)
 {
@@ -276,7 +313,7 @@ int dirfile_add_lincom(DIRFILE* D, const char* field_code, int n_fields,
     L.m[i] = m[i];
     L.b[i] = b[i];
   }
-  int error = dirfile_add(D, &L);
+  int error = _GD_Add(D, &L, NULL);
 
   dreturn("%i", error);
   return error;
@@ -295,7 +332,7 @@ int dirfile_add_linterp(DIRFILE* D, const char* field_code,
   L.in_fields[0] = (char*)in_field;
   L.table = (char*)table;
   L.format_file = format_file;
-  int error = dirfile_add(D, &L);
+  int error = _GD_Add(D, &L, NULL);
 
   dreturn("%i", error);
   return error;
@@ -315,7 +352,7 @@ int dirfile_add_bit(DIRFILE* D, const char* field_code, const char* in_field,
   B.bitnum = bitnum;
   B.numbits = numbits;
   B.format_file = format_file;
-  int error = dirfile_add(D, &B);
+  int error = _GD_Add(D, &B, NULL);
 
   dreturn("%i", error);
   return error;
@@ -334,7 +371,7 @@ int dirfile_add_multiply(DIRFILE* D, const char* field_code,
   M.in_fields[0] = (char*)in_field1;
   M.in_fields[1] = (char*)in_field2;
   M.format_file = format_file;
-  int error = dirfile_add(D, &M);
+  int error = _GD_Add(D, &M, NULL);
 
   dreturn("%i", error);
   return error;
@@ -353,7 +390,7 @@ int dirfile_add_phase(DIRFILE* D, const char* field_code, const char* in_field,
   P.in_fields[0] = (char*)in_field;
   P.shift = shift;
   P.format_file = format_file;
-  int error = dirfile_add(D, &P);
+  int error = _GD_Add(D, &P, NULL);
 
   dreturn("%i", error);
   return error;
@@ -370,7 +407,7 @@ int dirfile_add_string(DIRFILE* D, const char* field_code, const char* value,
   S.field = (char*)field_code;
   S.field_type = GD_STRING_ENTRY;
   S.format_file = format_file;
-  int error = dirfile_add(D, &S);
+  int error = _GD_Add(D, &S, NULL);
 
   /* Actually store the string, now */
   if (!error) {
@@ -400,7 +437,193 @@ int dirfile_add_const(DIRFILE* D, const char* field_code, gd_type_t const_type,
   C.field_type = GD_CONST_ENTRY;
   C.const_type = const_type;
   C.format_file = format_file;
-  int error = dirfile_add(D, &C);
+  int error = _GD_Add(D, &C, NULL);
+
+  /* Actually store the constant, now */
+  if (!error) {
+    entry = _GD_GetEntry(D, field_code);
+
+    if (D->error == GD_E_OK)
+      _GD_DoFieldOut(D, entry, field_code, 0, 0, 0, 0, data_type, value);
+
+    if (D->error)
+      error = -1;
+  }
+
+  dreturn("%i", error);
+  return error;
+}
+
+int dirfile_add_meta(DIRFILE* D, gd_entry_t* entry, const char* parent)
+{
+  return _GD_Add(D, entry, parent);
+}
+
+/* add a META RAW entry */
+int dirfile_add_metaraw(DIRFILE* D, const char* field_code, const char* parent,
+    gd_type_t data_type, unsigned int spf)
+{
+  dtrace("%p, \"%s\", \"%s\", %i, %x %i", D, field_code, parent, spf,
+      data_type);
+
+  gd_entry_t R;
+  R.field = (char*)field_code;
+  R.field_type = GD_RAW_ENTRY;
+  R.spf = spf;
+  R.data_type = data_type;
+  R.format_file = GD_FORMAT_AUTO;
+  int error = _GD_Add(D, &R, parent);
+
+  dreturn("%i", error);
+  return error;
+}
+
+/* add a META LINCOM entry */
+int dirfile_add_metalincom(DIRFILE* D, const char* field_code,
+    const char* parent, int n_fields, const char** in_fields, const double* m,
+    const double* b)
+{
+  dtrace("%p, \"%s\", \"%s\", %i, %p, %p, %p, %i", D, field_code, parent,
+      n_fields, in_fields, m, b);
+
+  int i;
+  gd_entry_t L;
+  L.field = (char*)field_code;
+  L.field_type = GD_LINCOM_ENTRY;
+  L.n_fields = n_fields;
+  L.format_file = GD_FORMAT_AUTO;
+
+  for (i = 0; i < n_fields; ++i) {
+    L.in_fields[i] = (char*)in_fields[i];
+    L.m[i] = m[i];
+    L.b[i] = b[i];
+  }
+  int error = _GD_Add(D, &L, parent);
+
+  dreturn("%i", error);
+  return error;
+}
+
+/* add a META LINTERP entry */
+int dirfile_add_metalinterp(DIRFILE* D, const char* field_code,
+    const char* parent, const char* in_field, const char* table)
+{
+  dtrace("%p, \"%s\", \"%s\", \"%s\", \"%s\"", D, field_code, parent, in_field,
+      table, format_file);
+
+  gd_entry_t L;
+  L.field = (char*)field_code;
+  L.field_type = GD_LINTERP_ENTRY;
+  L.in_fields[0] = (char*)in_field;
+  L.table = (char*)table;
+  L.format_file = GD_FORMAT_AUTO;
+  int error = _GD_Add(D, &L, parent);
+
+  dreturn("%i", error);
+  return error;
+}
+
+/* add a META BIT entry */
+int dirfile_add_metabit(DIRFILE* D, const char* field_code, const char* parent,
+    const char* in_field, int bitnum, int numbits)
+{
+  dtrace("%p, \"%s\", \"%s\", \"%s\", %i, %in", D, field_code, parent, in_field,
+      bitnum, numbits);
+
+  gd_entry_t B;
+  B.field = (char*)field_code;
+  B.field_type = GD_BIT_ENTRY;
+  B.in_fields[0] = (char*)in_field;
+  B.bitnum = bitnum;
+  B.numbits = numbits;
+  B.format_file = GD_FORMAT_AUTO;
+  int error = _GD_Add(D, &B, parent);
+
+  dreturn("%i", error);
+  return error;
+}
+
+/* add a META MULTIPLY entry */
+int dirfile_add_metamultiply(DIRFILE* D, const char* field_code,
+    const char* parent, const char* in_field1, const char* in_field2)
+{
+  dtrace("%p, \"%s\", \"%s\", \"%s\", \"%s\", %i", D, field_code, parent,
+      in_field1, in_field2, format_file);
+
+  gd_entry_t M;
+  M.field = (char*)field_code;
+  M.field_type = GD_MULTIPLY_ENTRY;
+  M.in_fields[0] = (char*)in_field1;
+  M.in_fields[1] = (char*)in_field2;
+  M.format_file = GD_FORMAT_AUTO;
+  int error = _GD_Add(D, &M, parent);
+
+  dreturn("%i", error);
+  return error;
+}
+
+/* add a META PHASE entry */
+int dirfile_add_metaphase(DIRFILE* D, const char* field_code,
+    const char* parent, const char* in_field, int shift)
+{
+  dtrace("%p, \"%s\", \"%s\", \"%s\", %i, %i", D, field_code, parent, in_field,
+      shift);
+
+  gd_entry_t P;
+  P.field = (char*)field_code;
+  P.field_type = GD_PHASE_ENTRY;
+  P.in_fields[0] = (char*)in_field;
+  P.shift = shift;
+  P.format_file = GD_FORMAT_AUTO;
+  int error = _GD_Add(D, &P, parent);
+
+  dreturn("%i", error);
+  return error;
+}
+
+/* add a META STRING entry */
+int dirfile_add_metastring(DIRFILE* D, const char* field_code,
+    const char* parent, const char* value)
+{
+  dtrace("%p, \"%s\", \"%s\", \"%s\"", D, field_code, parent, value);
+
+  gd_entry_t *entry;
+  gd_entry_t S;
+  S.field = (char*)field_code;
+  S.field_type = GD_STRING_ENTRY;
+  S.format_file = GD_FORMAT_AUTO;
+  int error = _GD_Add(D, &S, parent);
+
+  /* Actually store the string, now */
+  if (!error) {
+    entry = _GD_GetEntry(D, field_code);
+
+    if (D->error == GD_E_OK)
+      _GD_DoFieldOut(D, entry, field_code, 0, 0, 0, 0, GD_NULL, value);
+
+    if (D->error)
+      error = -1;
+  }
+
+  dreturn("%i", error);
+  return error;
+}
+
+/* add a META CONST entry */
+int dirfile_add_metaconst(DIRFILE* D, const char* field_code,
+    const char* parent, gd_type_t const_type, gd_type_t data_type,
+    const void* value)
+{
+  dtrace("%p, \"%s\", \"%s\", 0x%x, 0x%x, %p, %i", D, field_code, parent,
+      const_type, data_type, value);
+
+  gd_entry_t *entry;
+  gd_entry_t C;
+  C.field = (char*)field_code;
+  C.field_type = GD_CONST_ENTRY;
+  C.const_type = const_type;
+  C.format_file = GD_FORMAT_AUTO;
+  int error = _GD_Add(D, &C, parent);
 
   /* Actually store the constant, now */
   if (!error) {

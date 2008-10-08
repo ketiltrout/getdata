@@ -149,7 +149,7 @@ char *strerror_r(int errnum, char *buf, size_t buflen);
 #define GD_E_LINFILE_OPEN      2
 
 #define GD_E_FIELD_PUT         1
-#define GD_E_FIELD_GET         2
+#define GD_E_FIELD_BAD         2
 
 #define GD_E_BAD_ENTRY_TYPE     1
 #define GD_E_BAD_ENTRY_FORMAT   2

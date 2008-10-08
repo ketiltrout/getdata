@@ -867,7 +867,7 @@ size_t getdata64(DIRFILE* D, const char *field_code, off64_t first_frame,
     n_read = 0;
   else if (entry && (entry->field_type == GD_CONST_ENTRY ||
         entry->field_type == GD_STRING_ENTRY)) {
-    _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_GET, NULL, 0, field_code);
+    _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
     n_read = 0;
   } else 
     n_read = _GD_DoField(D, entry, field_code, first_frame, first_samp,

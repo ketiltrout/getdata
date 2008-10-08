@@ -14,6 +14,7 @@ int main(void)
 {
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
+  const char* data = __TEST__ "dirfile/data";
   struct stat buf;
 
   DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_CREAT | GD_TRUNC);
@@ -26,6 +27,7 @@ int main(void)
   if (stat(format, &buf))
     return 1;
 
+  unlink(data);
   unlink(format);
   rmdir(filedir);
 

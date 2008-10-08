@@ -1,3 +1,16 @@
+2008-10-08   D. V. Wiebe <getdata@ketiltrout.net>  svn:120
+	* src/putdata.c (putdata64): Fail if passed a CONST or STRING field code.
+	* src/string.c (put_string): Added.
+	* src/constant.c (put_constant): Added.
+
+	* src/add.c (_GD_Add): Renamed from dirfile_add, which is now a boilerplate
+	stub for this internal function.  Added meta field support.
+	* src/add.c (dirfile_add_meta dirfile_add_metaraw dirfile_add_metalincom
+	dirfile_add_metalinterp dirfile_add_metabit dirfile_add_metamultiply
+	dirfile_add_metaphase dirfile_add_metastring dirfile_add_metaconst): Added.
+
+	* src/add.c (_GD_Add): create an empty raw file, when necessary.
+
 2008-10-07   D. V. Wiebe <getdata@ketiltrout.net>  svn:119
 	* src/add.c (dirfile_add_string dirfile_add_const): Added.
 	* man/dirfile_add_raw: Updated for dirfile_add_string and dirfile_add_const.

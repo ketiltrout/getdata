@@ -115,6 +115,7 @@ typedef enum {
 #define GD_DOUBLE    GD_FLOAT64
 
 struct _gd_private_entry;
+#define GD_FORMAT_AUTO 0xFFFF
 
 /* Unified entry struct */
 struct _gd_unified_entry {
