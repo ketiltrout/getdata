@@ -207,6 +207,9 @@ extern gd_entry_t *dirfile_free_entry_strings(gd_entry_t *entry) __THROW;
 extern int dirfile_add(DIRFILE* D, const gd_entry_t* entry)
   __THROW __gd_nonnull ((1,2));
 
+extern int dirfile_add_meta(DIRFILE* D, gd_entry_t* entry, const char* parent)
+  __THROW __gd_nonnull ((1,2,3));
+
 extern int dirfile_add_raw(DIRFILE* D, const char* field_code,
     gd_type_t data_type, unsigned int spf, int format_file)
 __THROW __gd_nonnull ((1,2));
@@ -216,20 +219,51 @@ extern int dirfile_add_lincom(DIRFILE* D, const char* field_code, int n_fields,
 __THROW __gd_nonnull ((1,2,4,5,6));
 
 extern int dirfile_add_linterp(DIRFILE* D, const char* field_code,
-    const char* in_field, const char* table, int format_file) __THROW
-__gd_nonnull ((1,2,3,4));
+    const char* in_field, const char* table, int format_file)
+__THROW __gd_nonnull ((1,2,3,4));
 
 extern int dirfile_add_bit(DIRFILE* D, const char* field_code,
     const char* in_field, int bitnum, int numbits, int format_file)
 __THROW __gd_nonnull ((1,2,3));
 
 extern int dirfile_add_multiply(DIRFILE* D, const char* field_code,
-    const char* in_field1, const char* in_field2, int format_file) __THROW
-__gd_nonnull ((1,2,3,4));
+    const char* in_field1, const char* in_field2, int format_file)
+__THROW __gd_nonnull ((1,2,3,4));
 
 extern int dirfile_add_phase(DIRFILE* D, const char* field_code,
     const char* in_field, int shift, int format_file)
 __THROW __gd_nonnull ((1,2,3));
+
+extern int dirfile_add_metaraw(DIRFILE* D, const char* field_code,
+    const char* parent, gd_type_t data_type, unsigned int spf)
+__THROW __gd_nonnull ((1,2,3));
+
+extern int dirfile_add_metalincom(DIRFILE* D, const char* field_code,
+    const char* parent, int n_fields, const char** in_fields, const double* m,
+    const double* b) __THROW __gd_nonnull((1,2,3,5,6,7));
+
+extern int dirfile_add_metalinterp(DIRFILE* D, const char* field_code,
+    const char* parent, const char* in_field, const char* table)
+__THROW __gd_nonnull ((1,2,3,4,5));
+
+extern int dirfile_add_metabit(DIRFILE* D, const char* field_code,
+    const char* parent, const char* in_field, int bitnum, int numbits)
+__THROW __gd_nonnull ((1,2,3,4));
+
+extern int dirfile_add_metamultiply(DIRFILE* D, const char* field_code,
+    const char* parent, const char* in_field1, const char* in_field2)
+__THROW __gd_nonnull ((1,2,3,4,5));
+
+extern int dirfile_add_metaphase(DIRFILE* D, const char* field_code,
+    const char* parent, const char* in_field, int shift)
+__THROW __gd_nonnull ((1,2,3,4));
+
+extern int dirfile_add_metastring(DIRFILE* D, const char* field_code,
+    const char* parent, const char* value) __THROW __gd_nonnull ((1,2,3,4));
+
+extern int dirfile_add_metaconst(DIRFILE* D, const char* field_code,
+    const char* parent, gd_type_t const_type, gd_type_t data_type,
+    const void* value) __THROW __gd_nonnull ((1,2,3,6));
 
 extern const char* get_format_filename(const DIRFILE* D, unsigned int index)
   __THROW __gd_nonnull((1));
@@ -237,6 +271,12 @@ extern const char* get_format_filename(const DIRFILE* D, unsigned int index)
 extern int get_error(const DIRFILE* D) __THROW __gd_nonnull ((1));
 
 extern int get_nformats(const DIRFILE* D) __THROW __gd_nonnull((1));
+
+extern size_t put_string(DIRFILE* D, const char *field_code, const char
+    *data_in) __THROW __gd_nonnull ((1, 2, 3));
+
+extern size_t put_constant(DIRFILE* D, const char *field_code,
+    gd_type_t data_type, const void *data_in) __THROW __gd_nonnull ((1, 2, 4));
 
 /* The following functions contain calls to I/O functions, making them
  * cancellation points.  As a result we cannot mark them with __THROW.
