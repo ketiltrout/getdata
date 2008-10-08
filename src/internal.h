@@ -233,13 +233,7 @@ struct gd_include_t {
 /* The DIRFILE struct.  */
 struct _GD_DIRFILE {
   /* Error reporting */
-  int error, ierror;
-
-  /* The caller's version */
-  int* user_error;
-
-  /* Everything below this comment should be considered internal to the library
-   * and not part of the official API */
+  int error;
 
   /* field count */
   unsigned int n_entries;
@@ -289,7 +283,7 @@ void* _GD_Alloc(DIRFILE* D, gd_type_t type, size_t n) __gd_nonnull ((1))
   __attribute_malloc__ __THROW __wur;
 
   /* _GD_ClearError: Everything's A-OK; clear the last error. */
-#define _GD_ClearError(D) (D)->error = *(D)->user_error = 0
+#define _GD_ClearError(D) (D)->error = 0
 
 void _GD_ConvertType(DIRFILE* D, const void *data_in, gd_type_t in_type,
     void *data_out, gd_type_t out_type, size_t n)

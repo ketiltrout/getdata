@@ -39,8 +39,9 @@ LDADD=../src/libgetdata.la
 INCLUDES=-Wall -Wextra -I$(top_srcdir)/src -D__TEST__=\"$@\"
 TESTS=add add_bit add_bit_bitnum add_bit_bitsize add_bit_numbits add_code \
 			add_duplicate add_format add_lincom add_lincom_nfields add_linterp \
-			add_multiply add_phase add_raw add_raw_spf add_raw_type add_rdonly \
-			add_type ascii_get ascii_nframes ascii_put close close_bad close_null \
+			add_many add_multiply add_phase add_raw add_raw_spf add_raw_type \
+			add_rdonly add_type ascii_get ascii_nframes ascii_put close close_bad \
+			close_null \
       convert_uint8_int8      convert_uint8_uint16   convert_uint8_int16     \
 			convert_uint8_uint32    convert_uint8_int32    convert_uint8_float32   \
 			convert_uint8_uint64    convert_uint8_int64    convert_uint8_float64   \

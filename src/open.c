@@ -83,17 +83,17 @@ char* _GD_ValidateField(const char* prefix, const char* field_code)
   size_t i;
   char* ptr;
 
-  dtrace("\"%s\"", field_code);
+  dtrace("\"%s\", \"%s\"", prefix, field_code);
 
   for (i = 0; i < len; ++i)
     if (strchr("/\\<>;|&.", field_code[i]) != NULL) {
-      dreturn("\"%s\"", field_code);
+      dreturn("%p", field_code);
       return (char*)field_code;
     }
 
-  ptr = malloc(strlen(field_code) + strlen(prefix));
+  ptr = malloc(strlen(field_code) + strlen(prefix) + 1);
   sprintf(ptr, "%s%s", prefix, field_code);
-  dreturn("%p", ptr);
+  dreturn("\"%s\"", ptr);
   return ptr;
 }
 
@@ -1278,7 +1278,6 @@ DIRFILE* dirfile_open(const char* filedir, unsigned int flags)
   dtrace("\"%s\", 0%o", filedir, flags);
 
   D = malloc(sizeof(DIRFILE));
-  D->user_error = &(D->ierror);
   _GD_ClearError(D);
   D->recurse_level = 0;
 

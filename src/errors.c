@@ -131,7 +131,7 @@ void _GD_SetError(DIRFILE* D, int error, int suberror,
   dtrace("%p, %i, %i, \"%s\", %i, \"%s\"", D, error, suberror, format_file,
       line, token);
 
-  *D->user_error = D->error = error;
+  D->error = error;
   D->suberror = suberror;
   D->error_line = line;
   if (format_file != NULL)

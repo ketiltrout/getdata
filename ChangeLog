@@ -1,8 +1,19 @@
+2008-10-08   D. V. Wiebe <getdata@ketiltrout.net>  svn:124
+	* src/open.c (_GD_ValidateField): Malloc one more byte for the terminating
+	NULL.  Crash report from Matt.
+	* test/add_many.c: Add testcase for same (from Matt).
+
+	* src/internal.h: Removed all instances of ierror and user_error in the
+	DIRFILE struct.
+
+	* src/add.c (_GD_Add): Properly compose metafield codes.  Always create
+	the empty binary file.
+
 2008-10-08   D. V. Wiebe <getdata@ketiltrout.net>  svn:123
 	* src/add.c: Fix debugging messages
 
 2008-10-08   D. V. Wiebe <getdata@ketiltrout.net>  svn:122
-	* man/Makefile.am: Fix install target
+	* man/Makefile.am: Fix install target (patch from Matt)
 
 2008-10-08   D. V. Wiebe <getdata@ketiltrout.net>  svn:121
 	* src/getdata.h.in: Add forward declarations for public functions.

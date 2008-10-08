@@ -133,7 +133,11 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
 
   /* Validate field code */
   E->field_type = entry->field_type;
-  E->field = _GD_ValidateField((parent == NULL) ? "" : parent, entry->field);
+  if (parent == NULL)
+    temp_buffer[0] = 0;
+  else 
+    snprintf(temp_buffer, FILENAME_MAX, "%s/", parent);
+  E->field = _GD_ValidateField(temp_buffer, entry->field);
   if (E->field == entry->field) {
     _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, NULL);
     E->field = NULL;
@@ -172,21 +176,24 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
             NULL);
       else if (E->data_type & 0x40 || (E->size = GD_SIZE(E->data_type)) == 0)
         _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, entry->data_type, NULL);
-      else if (D->first_field == NULL) {
-        E->e->first = 1; /* This is the first raw field? */
-        D->first_field = malloc(sizeof(gd_entry_t));
-        if (D->first_field == NULL) {
-          _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-          break;
-        }
-
-        memcpy(D->first_field, E, sizeof(gd_entry_t));
-        /* Tag the include list */
-        for (i = E->format_file; i != -1; i = D->include_list[i].parent)
-          D->include_list[i].first = D->include_list[i].modified = 1;
-
+      else {
         /* create an empty file */
         close(open(E->e->file, O_CREAT | O_TRUNC, 0666));
+
+        if (D->first_field == NULL) {
+          /* This is the first raw field */
+          E->e->first = 1;
+          D->first_field = malloc(sizeof(gd_entry_t));
+          if (D->first_field == NULL) {
+            _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+            break;
+          }
+
+          memcpy(D->first_field, E, sizeof(gd_entry_t));
+          /* Tag the include list */
+          for (i = E->format_file; i != -1; i = D->include_list[i].parent)
+            D->include_list[i].first = D->include_list[i].modified = 1;
+        }
       }
       break;
     case GD_LINCOM_ENTRY:
