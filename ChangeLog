@@ -1,3 +1,6 @@
+2008-10-08   D. V. Wiebe <getdata@ketiltrout.net>  svn:122
+	* man/Makefile.am: Fix install target
+
 2008-10-08   D. V. Wiebe <getdata@ketiltrout.net>  svn:121
 	* src/getdata.h.in: Add forward declarations for public functions.
 

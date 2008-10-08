@@ -45,7 +45,7 @@ install-data-hook:
 		$(LN_S) -f dirfile_add_raw.3 dirfile_add_linterp.3 && \
 		$(LN_S) -f dirfile_add_raw.3 dirfile_add_multiply.3 && \
 		$(LN_S) -f dirfile_add_raw.3 dirfile_add_phase.3 && \
-		$(LN_S) -f dirfile_add_raw.3 dirfile_add_string.3 &&
+		$(LN_S) -f dirfile_add_raw.3 dirfile_add_string.3
 
 clean-local:
 	rm -rf *~ 
