@@ -112,6 +112,13 @@ static gd_entry_t* _GD_ParseRaw(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
     return NULL;
   }
 
+  /* META RAW fields are prohibited */
+  if (prefix[0] != '\0') {
+    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_METARAW, format_file, line, NULL);
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
   gd_entry_t* R = malloc(sizeof(gd_entry_t));
   if (R == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
@@ -131,11 +138,11 @@ static gd_entry_t* _GD_ParseRaw(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
   R->e->file = NULL;
   R->e->fp = -1; /* file not opened yet */
   R->e->stream = NULL; /* file not opened yet */
-  R->e->meta = (prefix[0] == '\0') ? 0 : 1;
+  R->e->meta = 0;
   R->e->encoding = GD_ENC_UNKNOWN; /* don't know the encoding subscheme yet */
   R->format_file = D->n_include - 1;
 
-  R->field = _GD_ValidateField(prefix, in_cols[0]);
+  R->field = _GD_ValidateField("", in_cols[0]);
   if (R->field == in_cols[0]) {
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_NAME, format_file, line,
         in_cols[0]);

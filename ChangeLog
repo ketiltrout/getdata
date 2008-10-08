@@ -1,3 +1,8 @@
+2008-10-08   D. V. Wiebe <getdata@ketiltrout.net>  svn:125
+	* src/open.c (_GD_ParseRaw): Prohibit META RAW fields.
+	* src/add.c (_GD_Add): Ditto.
+	* src/add.c (dirfile_add_metaraw): Deleted.
+
 2008-10-08   D. V. Wiebe <getdata@ketiltrout.net>  svn:124
 	* src/open.c (_GD_ValidateField): Malloc one more byte for the terminating
 	NULL.  Crash report from Matt.

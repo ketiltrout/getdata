@@ -157,6 +157,13 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
   switch(entry->field_type)
   {
     case GD_RAW_ENTRY:
+      /* no METARAW fields allowed */
+      if (parent != NULL) {
+        _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_METARAW, NULL,
+            entry->field_type, NULL);
+        break;
+      }
+
       E->data_type = entry->data_type;
       E->e->fp = -1;
       E->e->stream = NULL;
@@ -464,25 +471,6 @@ int dirfile_add_const(DIRFILE* D, const char* field_code, gd_type_t const_type,
 int dirfile_add_meta(DIRFILE* D, gd_entry_t* entry, const char* parent)
 {
   return _GD_Add(D, entry, parent);
-}
-
-/* add a META RAW entry */
-int dirfile_add_metaraw(DIRFILE* D, const char* field_code, const char* parent,
-    gd_type_t data_type, unsigned int spf)
-{
-  dtrace("%p, \"%s\", \"%s\", %i, %x", D, field_code, parent, spf,
-      data_type);
-
-  gd_entry_t R;
-  R.field = (char*)field_code;
-  R.field_type = GD_RAW_ENTRY;
-  R.spf = spf;
-  R.data_type = data_type;
-  R.format_file = GD_FORMAT_AUTO;
-  int error = _GD_Add(D, &R, parent);
-
-  dreturn("%i", error);
-  return error;
 }
 
 /* add a META LINCOM entry */

@@ -144,6 +144,7 @@ char *strerror_r(int errnum, char *buf, size_t buflen);
 #define GD_E_FORMAT_BAD_TYPE  13
 #define GD_E_FORMAT_BAD_NAME  14
 #define GD_E_FORMAT_UNTERM    15
+#define GD_E_FORMAT_METARAW   16
 
 #define GD_E_LINFILE_LENGTH    1
 #define GD_E_LINFILE_OPEN      2
@@ -158,6 +159,7 @@ char *strerror_r(int errnum, char *buf, size_t buflen);
 #define GD_E_BAD_ENTRY_NUMBITS  5
 #define GD_E_BAD_ENTRY_BITNUM   6
 #define GD_E_BAD_ENTRY_BITSIZE  7
+#define GD_E_BAD_ENTRY_METARAW  8
 
 #define GD_ENC_NONE       0
 #define GD_ENC_ASCII      1

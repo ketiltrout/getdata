@@ -234,10 +234,6 @@ extern int dirfile_add_phase(DIRFILE* D, const char* field_code,
     const char* in_field, int shift, int format_file)
 __THROW __gd_nonnull ((1,2,3));
 
-extern int dirfile_add_metaraw(DIRFILE* D, const char* field_code,
-    const char* parent, gd_type_t data_type, unsigned int spf)
-__THROW __gd_nonnull ((1,2,3));
-
 extern int dirfile_add_metalincom(DIRFILE* D, const char* field_code,
     const char* parent, int n_fields, const char** in_fields, const double* m,
     const double* b) __THROW __gd_nonnull((1,2,3,5,6,7));
