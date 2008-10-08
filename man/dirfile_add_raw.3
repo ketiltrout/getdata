@@ -48,6 +48,13 @@ dirfile_add_multiply, dirfile_add_phase \(em add a field to a dirfile
 .HP
 .BI "int dirfile_add_phase(DIRFILE *" dirfile ", const char *" field_code ,
 .BI "const char *" in_field ", int " phase ", int " format_file );
+.HP
+.BI "int dirfile_add_string(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "const char *" value ", int " format_file );
+.HP
+.BI "int dirfile_add_const(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "gd_type_t " const_type ", gd_type_t " data_type ", void *" value ,
+.BI "int " format_file );
 .hy
 .ad n
 .SH DESCRIPTION
@@ -79,6 +86,21 @@ the gain factors
 .RI ( m ),
 and the offset terms
 .RI ( b ).
+.P
+The
+.BR dirfile_add_string ()
+and
+.BR dirfile_add_const ()
+functions both add the field and set the value of the field to
+.IR value .
+For
+.BR dirfile_add_const (),
+the
+.I const_type
+parameter specifies the storage type for the const, while
+.I data_type
+specifies the data type of the value pointed to by
+.IR value .
 .SH RETURN VALUE
 On success, any of these functions returns zero.   On error, -1 is returned and 
 the dirfile error is set to a non-zero error value.  Possible error values are:
@@ -105,11 +127,6 @@ parameter referred to a field already existing in
 .TP
 .B GD_E_BAD_ENTRY
 One or more of the field parameters specified was invalid.
-.TP
-.B GD_E_BAD_TYPE
-The supplied
-.I data_type
-was invalid.
 .TP
 .B GD_E_BAD_TYPE
 The

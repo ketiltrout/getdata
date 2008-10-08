@@ -292,11 +292,15 @@ void* _GD_Alloc(DIRFILE* D, gd_type_t type, size_t n) __gd_nonnull ((1))
 #define _GD_ClearError(D) (D)->error = *(D)->user_error = 0
 
 void _GD_ConvertType(DIRFILE* D, const void *data_in, gd_type_t in_type,
-    void *data_out, gd_type_t out_type, size_t n) __gd_nonnull ((1, 2, 4))
-  __THROW;
-  size_t  _GD_DoField(DIRFILE *D, gd_entry_t *entry, const char* field_code,
-      off64_t first_frame, off64_t first_samp, size_t num_frames, size_t num_samp,
-      gd_type_t return_type, void *data_out) __gd_nonnull ((1, 2, 3));
+    void *data_out, gd_type_t out_type, size_t n)
+__gd_nonnull ((1, 2, 4)) __THROW;
+size_t  _GD_DoField(DIRFILE *D, gd_entry_t *entry, const char* field_code,
+    off64_t first_frame, off64_t first_samp, size_t num_frames, size_t num_samp,
+    gd_type_t return_type, void *data_out) __gd_nonnull ((1, 2, 3));
+size_t _GD_DoFieldOut(DIRFILE* D, gd_entry_t* entry, const char *field_code,
+    off64_t first_frame, off64_t first_samp, size_t num_frames,
+    size_t num_samp, gd_type_t data_type, const void *data_in)
+__gd_nonnull ((1, 2, 3, 9));
 int _GD_EntryCmp(const void *A, const void *B);
 void _GD_FixEndianness(char* databuffer, size_t size, size_t ns)
   __gd_nonnull ((1));

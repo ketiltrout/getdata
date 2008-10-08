@@ -40,10 +40,12 @@ dist_man_MANS = dirfile_add.3 dirfile_add_raw.3 dirfile_close.3 \
 install-data-hook:
 	cd $(DESTDIR)$(mandir)/man3 && \
 		$(LN_S) -f dirfile_add_raw.3 dirfile_add_bit.3 && \
+		$(LN_S) -f dirfile_add_raw.3 dirfile_add_const.3 && \
 		$(LN_S) -f dirfile_add_raw.3 dirfile_add_lincom.3 && \
 		$(LN_S) -f dirfile_add_raw.3 dirfile_add_linterp.3 && \
 		$(LN_S) -f dirfile_add_raw.3 dirfile_add_multiply.3 && \
-		$(LN_S) -f dirfile_add_raw.3 dirfile_add_phase.3
+		$(LN_S) -f dirfile_add_raw.3 dirfile_add_phase.3 && \
+		$(LN_S) -f dirfile_add_raw.3 dirfile_add_string.3 &&
 
 clean-local:
 	rm -rf *~ 

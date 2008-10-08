@@ -30,11 +30,6 @@
 #include <stdlib.h>
 #endif
 
-static size_t _GD_DoFieldOut(DIRFILE* D, gd_entry_t* entry,
-    const char *field_code, off64_t first_frame, off64_t first_samp,
-    size_t num_frames, size_t num_samp, gd_type_t data_type,
-    const void *data_in);
-
 static size_t _GD_DoRawOut(DIRFILE *D, gd_entry_t *R,
     off64_t first_frame, off64_t first_samp, size_t num_frames, size_t num_samp,
     gd_type_t data_type, const void *data_in)
@@ -384,10 +379,9 @@ static size_t _GD_DoStringOut(DIRFILE* D, gd_entry_t *S, const void *data_in)
   return 1;
 }
 
-static size_t _GD_DoFieldOut(DIRFILE *D, gd_entry_t* entry,
-    const char *field_code, off64_t first_frame, off64_t first_samp,
-    size_t num_frames, size_t num_samp, gd_type_t data_type,
-    const void *data_in)
+size_t _GD_DoFieldOut(DIRFILE *D, gd_entry_t* entry, const char *field_code,
+    off64_t first_frame, off64_t first_samp, size_t num_frames, size_t num_samp,
+    gd_type_t data_type, const void *data_in)
 {
   size_t n_wrote = 0;
 

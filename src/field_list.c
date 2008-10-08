@@ -187,7 +187,7 @@ const char** get_string_list(DIRFILE* D)
     return NULL;
   }
 
-  for (i = 0; i < D->n_entries; ++i) {
+  for (i = n = 0; i < D->n_entries; ++i) {
     if (D->entry[i]->field_type == GD_STRING_ENTRY && !D->entry[i]->e->meta)
       fl[n++] = D->entry[i]->field;
   }

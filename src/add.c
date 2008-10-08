@@ -358,3 +358,61 @@ int dirfile_add_phase(DIRFILE* D, const char* field_code, const char* in_field,
   dreturn("%i", error);
   return error;
 }
+
+/* add a STRING entry */
+int dirfile_add_string(DIRFILE* D, const char* field_code, const char* value,
+    int format_file)
+{
+  dtrace("%p, \"%s\", \"%s\", %i", D, field_code, value, format_file);
+
+  gd_entry_t *entry;
+  gd_entry_t S;
+  S.field = (char*)field_code;
+  S.field_type = GD_STRING_ENTRY;
+  S.format_file = format_file;
+  int error = dirfile_add(D, &S);
+
+  /* Actually store the string, now */
+  if (!error) {
+    entry = _GD_GetEntry(D, field_code);
+
+    if (D->error == GD_E_OK)
+      _GD_DoFieldOut(D, entry, field_code, 0, 0, 0, 0, GD_NULL, value);
+
+    if (D->error)
+      error = -1;
+  }
+
+  dreturn("%i", error);
+  return error;
+}
+
+/* add a CONST entry */
+int dirfile_add_const(DIRFILE* D, const char* field_code, gd_type_t const_type,
+    gd_type_t data_type, const void* value, int format_file)
+{
+  dtrace("%p, \"%s\", 0x%x, 0x%x, %p, %i", D, field_code, const_type, data_type,
+      value, format_file);
+
+  gd_entry_t *entry;
+  gd_entry_t C;
+  C.field = (char*)field_code;
+  C.field_type = GD_CONST_ENTRY;
+  C.const_type = const_type;
+  C.format_file = format_file;
+  int error = dirfile_add(D, &C);
+
+  /* Actually store the constant, now */
+  if (!error) {
+    entry = _GD_GetEntry(D, field_code);
+
+    if (D->error == GD_E_OK)
+      _GD_DoFieldOut(D, entry, field_code, 0, 0, 0, 0, data_type, value);
+
+    if (D->error)
+      error = -1;
+  }
+
+  dreturn("%i", error);
+  return error;
+}

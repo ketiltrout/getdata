@@ -1,3 +1,7 @@
+2008-10-07   D. V. Wiebe <getdata@ketiltrout.net>  svn:119
+	* src/add.c (dirfile_add_string dirfile_add_const): Added.
+	* man/dirfile_add_raw: Updated for dirfile_add_string and dirfile_add_const.
+
 2008-10-07   D. V. Wiebe <getdata@ketiltrout.net>  svn:118
 	* src/flush.c: Add hostname to comments at the top of the format file.
 
