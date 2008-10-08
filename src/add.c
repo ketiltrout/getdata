@@ -463,7 +463,7 @@ int dirfile_add_meta(DIRFILE* D, gd_entry_t* entry, const char* parent)
 int dirfile_add_metaraw(DIRFILE* D, const char* field_code, const char* parent,
     gd_type_t data_type, unsigned int spf)
 {
-  dtrace("%p, \"%s\", \"%s\", %i, %x %i", D, field_code, parent, spf,
+  dtrace("%p, \"%s\", \"%s\", %i, %x", D, field_code, parent, spf,
       data_type);
 
   gd_entry_t R;
@@ -483,7 +483,7 @@ int dirfile_add_metalincom(DIRFILE* D, const char* field_code,
     const char* parent, int n_fields, const char** in_fields, const double* m,
     const double* b)
 {
-  dtrace("%p, \"%s\", \"%s\", %i, %p, %p, %p, %i", D, field_code, parent,
+  dtrace("%p, \"%s\", \"%s\", %i, %p, %p, %p", D, field_code, parent,
       n_fields, in_fields, m, b);
 
   int i;
@@ -509,7 +509,7 @@ int dirfile_add_metalinterp(DIRFILE* D, const char* field_code,
     const char* parent, const char* in_field, const char* table)
 {
   dtrace("%p, \"%s\", \"%s\", \"%s\", \"%s\"", D, field_code, parent, in_field,
-      table, format_file);
+      table);
 
   gd_entry_t L;
   L.field = (char*)field_code;
@@ -547,8 +547,8 @@ int dirfile_add_metabit(DIRFILE* D, const char* field_code, const char* parent,
 int dirfile_add_metamultiply(DIRFILE* D, const char* field_code,
     const char* parent, const char* in_field1, const char* in_field2)
 {
-  dtrace("%p, \"%s\", \"%s\", \"%s\", \"%s\", %i", D, field_code, parent,
-      in_field1, in_field2, format_file);
+  dtrace("%p, \"%s\", \"%s\", \"%s\", \"%s\"", D, field_code, parent,
+      in_field1, in_field2);
 
   gd_entry_t M;
   M.field = (char*)field_code;
@@ -566,7 +566,7 @@ int dirfile_add_metamultiply(DIRFILE* D, const char* field_code,
 int dirfile_add_metaphase(DIRFILE* D, const char* field_code,
     const char* parent, const char* in_field, int shift)
 {
-  dtrace("%p, \"%s\", \"%s\", \"%s\", %i, %i", D, field_code, parent, in_field,
+  dtrace("%p, \"%s\", \"%s\", \"%s\", %i", D, field_code, parent, in_field,
       shift);
 
   gd_entry_t P;
@@ -614,7 +614,7 @@ int dirfile_add_metaconst(DIRFILE* D, const char* field_code,
     const char* parent, gd_type_t const_type, gd_type_t data_type,
     const void* value)
 {
-  dtrace("%p, \"%s\", \"%s\", 0x%x, 0x%x, %p, %i", D, field_code, parent,
+  dtrace("%p, \"%s\", \"%s\", 0x%x, 0x%x, %p", D, field_code, parent,
       const_type, data_type, value);
 
   gd_entry_t *entry;

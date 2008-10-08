@@ -1,3 +1,6 @@
+2008-10-08   D. V. Wiebe <getdata@ketiltrout.net>  svn:123
+	* src/add.c: Fix debugging messages
+
 2008-10-08   D. V. Wiebe <getdata@ketiltrout.net>  svn:122
 	* man/Makefile.am: Fix install target
 
