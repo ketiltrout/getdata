@@ -106,10 +106,12 @@ static const char* _GD_TypeName(DIRFILE* D, gd_type_t data_type)
   }
 }
 
-static char* _GD_StringEscapeise (char* out, const char* in)
+static char* _GD_StringEscapeise(char* out, const char* in)
 {
   char* ptr = out;
   const char* HexDigit = "0123456789ABCDEF";
+
+  dtrace("%p, \"%s\"", out, in);
 
   for (; *in != '\0'; ++in)
     if (*in == '"') {
@@ -127,13 +129,17 @@ static char* _GD_StringEscapeise (char* out, const char* in)
       *(ptr++) = *in;
   *ptr = '\0';
 
+  dreturn("\"%s\"", out);
   return out;
 }
 
 /* Write a field specification line */
-static void _GD_FieldSpec(DIRFILE* D, FILE* stream, gd_entry_t* E) {
+static void _GD_FieldSpec(DIRFILE* D, FILE* stream, gd_entry_t* E)
+{
   int i;
   char buffer[MAX_LINE_LENGTH];
+
+  dtrace("%p, %p, %p", D, stream, E);
 
   switch(E->field_type) {
     case GD_RAW_ENTRY:
@@ -179,9 +185,11 @@ static void _GD_FieldSpec(DIRFILE* D, FILE* stream, gd_entry_t* E) {
       _GD_InternalError(D);
       break;
   }
+
+  dreturnvoid();
 }
 
-static void _GD_FlushMeta(DIRFILE* D)
+void _GD_FlushMeta(DIRFILE* D)
 {
   unsigned int i, j;
   FILE* stream;
@@ -332,7 +340,7 @@ void dirfile_flush(DIRFILE* D, const char* field_code)
         if (D->entry[i]->field_type == GD_RAW_ENTRY)
           _GD_Flush(D, D->entry[i], NULL);
   } else
-    _GD_Flush(D, _GD_GetEntry(D, field_code), field_code);
+    _GD_Flush(D, _GD_GetEntry(D, field_code, NULL), field_code);
 
   dreturnvoid();
 }

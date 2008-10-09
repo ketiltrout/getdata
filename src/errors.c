@@ -62,8 +62,10 @@ static const struct {
     "Bad field name on line {3} of {2}: {4}", 0 },
   { GD_E_FORMAT, GD_E_FORMAT_UNTERM,
     "Unterminated token on line {3} of {2}", 0 },
-  { GD_E_BAD_ENTRY, GD_E_FORMAT_METARAW,
-    "Invalid metafield type on line {3} or {2}", 0 },
+  { GD_E_FORMAT, GD_E_FORMAT_METARAW,
+    "Invalid metafield type on line {3} of {2}", 0 },
+  { GD_E_FORMAT, GD_E_FORMAT_NO_PARENT,
+    "Meta field defined before parent ({4}) on line {3} of {2}", 0 },
   /* GD_E_CREAT: 1 = suberror, 2 = filename. 3 = errno */
   { GD_E_TRUNC, 0, "Error truncating {2}: ", 1 },
   /* GD_E_CREAT: 1 = suberror, 2 = filename, 3 = errno */

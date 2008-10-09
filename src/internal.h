@@ -145,6 +145,8 @@ char *strerror_r(int errnum, char *buf, size_t buflen);
 #define GD_E_FORMAT_BAD_NAME  14
 #define GD_E_FORMAT_UNTERM    15
 #define GD_E_FORMAT_METARAW   16
+#define GD_E_FORMAT_NO_PARENT 17
+#define GD_E_FORMAT_DUPLICATE 18
 
 #define GD_E_LINFILE_LENGTH    1
 #define GD_E_LINFILE_OPEN      2
@@ -173,7 +175,10 @@ char *strerror_r(int errnum, char *buf, size_t buflen);
 /* Unified entry struct */
 struct _gd_private_entry {
   gd_entry_t* entry[GD_MAX_LINCOM];
-  int meta;
+  int n_meta;
+  int n_meta_string;
+  int n_meta_const;
+  gd_entry_t** meta_entry;
   union {
     struct { /* RAW */
       char* file;
@@ -300,12 +305,15 @@ __gd_nonnull ((1, 2, 3, 9));
 int _GD_EntryCmp(const void *A, const void *B);
 void _GD_FixEndianness(char* databuffer, size_t size, size_t ns)
   __gd_nonnull ((1));
-  void _GD_Flush(DIRFILE* D, gd_entry_t *entry, const char* field_code);
-  int _GD_GetLine(FILE *fp, char *line, int* linenum) __gd_nonnull ((1, 2, 3));
+void _GD_Flush(DIRFILE* D, gd_entry_t *entry, const char* field_code);
+void _GD_FlushMeta(DIRFILE* D) __gd_nonnull((1));
+int _GD_GetLine(FILE *fp, char *line, int* linenum) __gd_nonnull ((1, 2, 3));
 unsigned int _GD_GetSPF(DIRFILE* D, gd_entry_t* entry, const char *field_code)
   __gd_nonnull ((1, 2, 3));
-  gd_entry_t* _GD_GetEntry(DIRFILE* D, const char* field_code) __THROW
-  __gd_nonnull ((1, 2));
+gd_entry_t* _GD_GetEntry(DIRFILE* D, const char* field_code, int* next)
+  __THROW __gd_nonnull ((1, 2));
+void _GD_InsertSort(DIRFILE* D, gd_entry_t* E, int u)
+  __THROW __gd_nonnull ((1,2));
 
 #define _GD_InternalError(D) \
     _GD_SetError(D, GD_E_INTERNAL_ERROR, 0, __FILE__, __LINE__, NULL);
@@ -322,8 +330,8 @@ void _GD_ScaleData(DIRFILE* D, void *data, gd_type_t type, size_t npts,
 void _GD_ScanFormat(char* fmt, gd_type_t data_type);
 void _GD_SetError(DIRFILE* D, int error, int suberror, const char* format_file,
     int line, const char* token) __THROW __gd_nonnull ((1));
-char* _GD_ValidateField(const char* prefix, const char* field_code)
-  __gd_nonnull ((1));
+char* _GD_ValidateField(const gd_entry_t* parent, const char* field_code)
+  __gd_nonnull ((2));
 
   /* unencoded I/O methods */
   int _GD_RawOpen(struct _gd_private_entry* entry, const char* name, int mode,

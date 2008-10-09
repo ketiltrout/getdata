@@ -40,7 +40,7 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
   dtrace("%p, %p", D, entry);
 
   char temp_buffer[FILENAME_MAX];
-  int i;
+  int i, u;
   gd_entry_t* E;
   gd_entry_t* P = NULL;
 
@@ -62,7 +62,7 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
       return -1;
     }
 
-    P = _GD_GetEntry(D, parent);
+    P = _GD_GetEntry(D, parent, NULL);
     if (D->error) {
       dreturn("%i", -1);
       return -1;
@@ -73,7 +73,7 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
     snprintf(temp_buffer, FILENAME_MAX, "%s", entry->field);
 
   /* check for duplicate field */
-  E = _GD_GetEntry(D, temp_buffer);
+  E = _GD_GetEntry(D, temp_buffer, &u);
 
   if (D->error == GD_E_OK) { /* matched */
     _GD_SetError(D, GD_E_DUPLICATE, 0, NULL, 0, NULL);
@@ -133,11 +133,8 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
 
   /* Validate field code */
   E->field_type = entry->field_type;
-  if (parent == NULL)
-    temp_buffer[0] = 0;
-  else 
-    snprintf(temp_buffer, FILENAME_MAX, "%s/", parent);
-  E->field = _GD_ValidateField(temp_buffer, entry->field);
+  E->field = _GD_ValidateField(P, entry->field);
+
   if (E->field == entry->field) {
     _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, NULL);
     E->field = NULL;
@@ -153,6 +150,14 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
     return -1;
   }
 
+  /* Set meta indicies */
+  if (parent != NULL)
+    E->e->n_meta = -1;
+  else {
+    E->e->n_meta = E->e->n_meta_string = E->e->n_meta_const = 0;
+    E->e->meta_entry = NULL;
+  }
+
   /* Validate entry and add auxiliary data */
   switch(entry->field_type)
   {
@@ -164,10 +169,23 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
         break;
       }
 
+      /* If the encoding scheme is unknown, we can't add the field */
+      if ((D->flags & GD_ENCODING) == GD_AUTO_ENCODED) {
+        _GD_SetError(D, GD_E_UNKNOWN_ENCODING, 0, NULL, 0, NULL);
+        break;
+      }
+
+      /* If the encoding scheme is unsupported, we can't add the field */
+      if ((D->flags & GD_ENCODING) == GD_ENC_UNSUPPORTED) {
+        _GD_SetError(D, GD_E_UNSUPPORTED, 0, NULL, 0, NULL);
+        break;
+      }
+
       E->data_type = entry->data_type;
       E->e->fp = -1;
       E->e->stream = NULL;
       E->e->first = 0;
+      E->e->encoding = GD_ENC_UNKNOWN;
       
       if ((E->e->file = malloc(FILENAME_MAX)) == NULL) {
         _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
@@ -178,6 +196,9 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
       snprintf(E->e->file, FILENAME_MAX, "%s/%s", dirname(temp_buffer),
           E->field);
 
+      /* Set the subencoding subscheme */
+      _GD_ResolveEncoding(E->e->file, D->flags & GD_ENCODING, E->e);
+
       if ((E->spf = entry->spf) <= 0)
         _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_SPF, NULL, entry->spf,
             NULL);
@@ -185,7 +206,9 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
         _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, entry->data_type, NULL);
       else {
         /* create an empty file */
-        close(open(E->e->file, O_CREAT | O_TRUNC, 0666));
+        snprintf(temp_buffer, FILENAME_MAX, "%s%s", E->e->file,
+            encode[E->e->encoding].ext);
+        close(open(temp_buffer, O_CREAT | O_TRUNC, 0666));
 
         if (D->first_field == NULL) {
           /* This is the first raw field */
@@ -273,13 +296,12 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
 
   /* add the entry and resort the entry list */
   D->entry = realloc(D->entry, (D->n_entries + 1) * sizeof(gd_entry_t**));
-  D->entry[D->n_entries++] = E;
+  _GD_InsertSort(D, E, u);
+  D->n_entries++;
   D->include_list[E->format_file].modified = 1;
 
   /* Invalidate the field lists */
   D->list_validity = 0;
-
-  qsort(D->entry, D->n_entries, sizeof(gd_entry_t*), _GD_EntryCmp);
 
   dreturn("%i", 0);
   return 0;
@@ -287,7 +309,14 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
 
 int dirfile_add(DIRFILE* D, const gd_entry_t* entry)
 {
-  return _GD_Add(D, entry, NULL);
+  int ret;
+
+  dtrace("%p, %p", D, entry);
+
+  ret = _GD_Add(D, entry, NULL);
+
+  dreturn("%i", ret);
+  return ret;
 }
 
 /* add a RAW entry */
@@ -425,7 +454,7 @@ int dirfile_add_string(DIRFILE* D, const char* field_code, const char* value,
 
   /* Actually store the string, now */
   if (!error) {
-    entry = _GD_GetEntry(D, field_code);
+    entry = _GD_GetEntry(D, field_code, NULL);
 
     if (D->error == GD_E_OK)
       _GD_DoFieldOut(D, entry, field_code, 0, 0, 0, 0, GD_NULL, value);
@@ -455,7 +484,7 @@ int dirfile_add_const(DIRFILE* D, const char* field_code, gd_type_t const_type,
 
   /* Actually store the constant, now */
   if (!error) {
-    entry = _GD_GetEntry(D, field_code);
+    entry = _GD_GetEntry(D, field_code, NULL);
 
     if (D->error == GD_E_OK)
       _GD_DoFieldOut(D, entry, field_code, 0, 0, 0, 0, data_type, value);
@@ -470,7 +499,14 @@ int dirfile_add_const(DIRFILE* D, const char* field_code, gd_type_t const_type,
 
 int dirfile_add_meta(DIRFILE* D, gd_entry_t* entry, const char* parent)
 {
-  return _GD_Add(D, entry, parent);
+  int ret;
+
+  dtrace("%p, %p, \"%s\"", D, entry, parent);
+
+  ret = _GD_Add(D, entry, parent);
+
+  dreturn("%i", ret);
+  return ret;
 }
 
 /* add a META LINCOM entry */
@@ -591,7 +627,7 @@ int dirfile_add_metastring(DIRFILE* D, const char* field_code,
 
   /* Actually store the string, now */
   if (!error) {
-    entry = _GD_GetEntry(D, field_code);
+    entry = _GD_GetEntry(D, field_code, NULL);
 
     if (D->error == GD_E_OK)
       _GD_DoFieldOut(D, entry, field_code, 0, 0, 0, 0, GD_NULL, value);
@@ -622,7 +658,7 @@ int dirfile_add_metaconst(DIRFILE* D, const char* field_code,
 
   /* Actually store the constant, now */
   if (!error) {
-    entry = _GD_GetEntry(D, field_code);
+    entry = _GD_GetEntry(D, field_code, NULL);
 
     if (D->error == GD_E_OK)
       _GD_DoFieldOut(D, entry, field_code, 0, 0, 0, 0, data_type, value);

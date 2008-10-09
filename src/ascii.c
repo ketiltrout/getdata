@@ -73,7 +73,6 @@ off64_t _GD_AsciiSeek(struct _gd_private_entry* entry, off64_t count,
   }
 
   dreturn("%i", entry->fp);
-
   return entry->fp;
 }
 
@@ -126,6 +125,9 @@ ssize_t _GD_AsciiRead(struct _gd_private_entry *entry, void *ptr,
   char fmt[50];
   size_t n = 0;
   ssize_t ret = 0;
+
+  dtrace("%p, %p, 0x%x, %zi", entry, ptr, data_type, nmemb);
+
   _GD_ScanFormat(fmt, data_type);
   for (n = 0; n < nmemb; ++n) {
     if (feof(entry->stream))
@@ -137,6 +139,7 @@ ssize_t _GD_AsciiRead(struct _gd_private_entry *entry, void *ptr,
     }
   }
 
+  dreturn("%li", (ret) ? (long)ret : (long)n);
   return (ret) ? ret : (ssize_t)n;
 }
 
@@ -145,6 +148,8 @@ ssize_t _GD_AsciiWrite(struct _gd_private_entry *entry, const void *ptr,
 {
   ssize_t ret = 0;
   size_t n;
+
+  dtrace("%p, %p, 0x%x, %zi", entry, ptr, data_type, nmemb);
 
   switch(data_type) {
     case GD_UINT8:
@@ -242,26 +247,39 @@ ssize_t _GD_AsciiWrite(struct _gd_private_entry *entry, const void *ptr,
       break;
   }
 
+  dreturn("%li", (ret) ? (long)ret : (long)n);
   return (ret) ? ret : (ssize_t)n;
 }
 
 int _GD_AsciiSync(struct _gd_private_entry *entry)
 {
-  int ret = fflush(entry->stream);
-  if (ret)
-    return ret;
+  int ret;
 
-  return fsync(fileno(entry->stream));
+  dtrace("%p", entry);
+  
+  ret = fflush(entry->stream);
+
+  if (!ret)
+    ret = fsync(fileno(entry->stream));
+
+  dtrace("%i", ret);
+  return ret;
 }
 
 int _GD_AsciiClose(struct _gd_private_entry *entry)
 {
-  int ret = fclose(entry->stream);
+  int ret;
+  
+  dtrace("%p", entry);
+
+  ret = fclose(entry->stream);
   if (ret != EOF) {
     entry->fp = -1;
+    dreturn("%i", 0);
     return 0;
   }
 
+  dreturn("%i", 1);
   return 1;
 }
 
@@ -269,13 +287,18 @@ off64_t _GD_AsciiSize(const char *name, gd_type_t data_type __gd_unused)
 {
   FILE* stream;
   char asciiname[FILENAME_MAX];
+
+  dtrace("\"%s\", 0x%x", name, data_type);
+
   snprintf(asciiname, FILENAME_MAX, "%s.txt", name);
   off64_t n = 0;
 
   stream = fopen(asciiname, "r");
 
-  if (stream == NULL)
+  if (stream == NULL) {
+    dreturn("%i", -1);
     return -1;
+  }
 
   while (!feof(stream))
     if (fgets(asciiname, FILENAME_MAX, stream) != NULL)
@@ -283,5 +306,6 @@ off64_t _GD_AsciiSize(const char *name, gd_type_t data_type __gd_unused)
 
   fclose(stream);
 
+  dreturn("%lli", n);
   return n;
 }

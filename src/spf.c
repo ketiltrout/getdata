@@ -55,7 +55,7 @@ unsigned int _GD_GetSPF(DIRFILE* D, gd_entry_t* entry, const char *field_code)
     case GD_PHASE_ENTRY:
     case GD_LINTERP_ENTRY:
       if (entry->e->entry[0] == NULL) {
-        entry->e->entry[0] = _GD_GetEntry(D, entry->in_fields[0]);
+        entry->e->entry[0] = _GD_GetEntry(D, entry->in_fields[0], NULL);
 
         if (D->error != GD_E_OK)
           break;
@@ -89,7 +89,7 @@ unsigned int get_spf(DIRFILE* D, const char *field_code)
 
   _GD_ClearError(D);
 
-  entry = _GD_GetEntry(D, field_code);
+  entry = _GD_GetEntry(D, field_code, NULL);
 
   if (!D->error)
     spf = _GD_GetSPF(D, entry, field_code);

@@ -69,8 +69,7 @@ static void _GD_FreeD(DIRFILE* D)
       }
     }
 
-  /* Item zero of include_list is always a static string */
-  for (i = 1; i < D->n_include; ++i) {
+  for (i = 0; i < D->n_include; ++i) {
     free(D->include_list[i].cname);
     free(D->include_list[i].ename);
   }
@@ -106,6 +105,8 @@ int dirfile_close(DIRFILE* D)
 
   _GD_ClearError(D);
 
+  /* Flush */
+  _GD_FlushMeta(D);
   for(i = 0; i < D->n_entries; ++i)
     if (D->entry[i]->field_type == GD_RAW_ENTRY)
       _GD_Flush(D, D->entry[i], D->entry[i]->field);

@@ -37,7 +37,7 @@ size_t get_string(DIRFILE* D, const char *field_code, size_t len,
 
   _GD_ClearError(D);
 
-  entry = _GD_GetEntry(D, field_code);
+  entry = _GD_GetEntry(D, field_code, NULL);
     
   if (D->error != GD_E_OK)
     n_read = 0;
@@ -73,7 +73,7 @@ size_t put_string(DIRFILE* D, const char *field_code, const char *data_in)
 
   _GD_ClearError(D);
 
-  entry = _GD_GetEntry(D, field_code);
+  entry = _GD_GetEntry(D, field_code, NULL);
 
   if (D->error != GD_E_OK)
     n_wrote = 0;

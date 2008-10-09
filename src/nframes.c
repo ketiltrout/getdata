@@ -27,7 +27,6 @@
 
 off64_t get_nframes64(DIRFILE* D)
 {
-  char raw_data_filename[FILENAME_MAX];
   off64_t nf;
 
   dtrace("%p", D);
@@ -46,16 +45,12 @@ off64_t get_nframes64(DIRFILE* D)
     return 0;
   }
 
-  /* load the first valid raw field */
-  snprintf(raw_data_filename, FILENAME_MAX, "%s/%s", D->name,
-      D->first_field->e->file);
-
   /* Figure out encoding scheme, if necessary */
   if ((D->flags & GD_ENCODING) == GD_AUTO_ENCODED)
     D->flags = (D->flags & ~GD_ENCODING) |
-      _GD_ResolveEncoding(raw_data_filename, 0, D->first_field->e);
+      _GD_ResolveEncoding(D->first_field->e->file, 0, D->first_field->e);
   else if (D->first_field->e->encoding == GD_ENC_UNKNOWN)
-      _GD_ResolveEncoding(raw_data_filename, D->flags & GD_ENCODING,
+      _GD_ResolveEncoding(D->first_field->e->file, D->flags & GD_ENCODING,
           D->first_field->e);
 
   if (encode[D->first_field->e->encoding].size == NULL) {
@@ -64,10 +59,10 @@ off64_t get_nframes64(DIRFILE* D)
       return 0;
   }
 
-  nf = (*encode[D->first_field->e->encoding].size)(raw_data_filename,
+  nf = (*encode[D->first_field->e->encoding].size)(D->first_field->e->file,
       D->first_field->data_type);
   if (nf < 0) {
-    _GD_SetError(D, GD_E_RAW_IO, 0, raw_data_filename, errno, NULL);
+    _GD_SetError(D, GD_E_RAW_IO, 0, D->first_field->e->file, errno, NULL);
     dreturn("%lli", 0LL);
     return 0;
   }

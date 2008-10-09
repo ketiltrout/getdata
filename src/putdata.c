@@ -36,7 +36,6 @@ static size_t _GD_DoRawOut(DIRFILE *D, gd_entry_t *R,
 {
   off64_t s0;
   size_t ns, n_wrote;
-  char datafilename[FILENAME_MAX];
   void *databuffer;
 
   dtrace("%p, %p, %lli, %lli, %zi, %zi, 0x%x, %p", D, R, first_frame,
@@ -73,12 +72,10 @@ static size_t _GD_DoRawOut(DIRFILE *D, gd_entry_t *R,
   /* write data to file.  Note that if the first sample is beyond     */
   /* the current end of file, a gap will result (see lseek(2)) */
 
-  sprintf(datafilename, "%s/%s", D->name, R->e->file);
-
   /* Figure out the dirfile encoding type, if required */
   if ((D->flags & GD_ENCODING) == GD_AUTO_ENCODED)
     D->flags = (D->flags & ~GD_ENCODING) |
-      _GD_ResolveEncoding(datafilename, 0, R->e);
+      _GD_ResolveEncoding(R->e->file, 0, R->e);
 
   /* If the encoding is still unknown, none of the candidate files exist;
    * as a result, we don't know the intended encoding type */
@@ -90,7 +87,7 @@ static size_t _GD_DoRawOut(DIRFILE *D, gd_entry_t *R,
 
   /* Figure out the encoding subtype, if required */
   if (R->e->encoding == GD_ENC_UNKNOWN)
-    _GD_ResolveEncoding(datafilename, D->flags & GD_ENCODING, R->e);
+    _GD_ResolveEncoding(R->e->file, D->flags & GD_ENCODING, R->e);
 
   if (R->e->fp < 0) {
     /* open file for reading / writing if not already opened */
@@ -99,10 +96,10 @@ static size_t _GD_DoRawOut(DIRFILE *D, gd_entry_t *R,
       _GD_SetError(D, GD_E_UNSUPPORTED, 0, NULL, 0, NULL);
       dreturn("%zi", 0);
       return 0;
-    } else if ((*encode[R->e->encoding].open)(R->e, datafilename,
+    } else if ((*encode[R->e->encoding].open)(R->e, R->e->file,
           D->flags & GD_ACCMODE, 1))
     {
-      _GD_SetError(D, GD_E_RAW_IO, 0, datafilename, errno, NULL);
+      _GD_SetError(D, GD_E_RAW_IO, 0, R->e->file, errno, NULL);
       dreturn("%zi", 0);
       return 0;
     }
@@ -153,7 +150,7 @@ static size_t _GD_DoLinterpOut(DIRFILE* D, gd_entry_t *I,
   /* Interpolate X(y) instead of Y(x) */
 
   if (I->e->entry[0] == NULL) {
-    I->e->entry[0] = _GD_GetEntry(D, I->in_fields[0]);
+    I->e->entry[0] = _GD_GetEntry(D, I->in_fields[0], NULL);
 
     if (D->error != GD_E_OK)
       return 0;
@@ -197,7 +194,7 @@ static size_t _GD_DoLincomOut(DIRFILE* D, gd_entry_t *L,
   }
 
   if (L->e->entry[0] == NULL) {
-    L->e->entry[0] = _GD_GetEntry(D, L->in_fields[0]);
+    L->e->entry[0] = _GD_GetEntry(D, L->in_fields[0], NULL);
 
     if (D->error != GD_E_OK)
       return 0;
@@ -260,7 +257,7 @@ static size_t _GD_DoBitOut(DIRFILE* D, gd_entry_t *B,
 #endif
 
   if (B->e->entry[0] == NULL) {
-    B->e->entry[0] = _GD_GetEntry(D, B->in_fields[0]);
+    B->e->entry[0] = _GD_GetEntry(D, B->in_fields[0], NULL);
     
     if (D->error != GD_E_OK)
       return 0;
@@ -330,7 +327,7 @@ static size_t _GD_DoPhaseOut(DIRFILE* D, gd_entry_t *P,
       first_samp, num_frames, num_samp, data_type, data_in);
 
   if (P->e->entry[0] == NULL) {
-    P->e->entry[0] = _GD_GetEntry(D, P->in_fields[0]);
+    P->e->entry[0] = _GD_GetEntry(D, P->in_fields[0], NULL);
 
     if (D->error != GD_E_OK)
       return 0;
@@ -469,7 +466,7 @@ size_t putdata64(DIRFILE* D, const char *field_code, off64_t first_frame,
 
   first_frame -= D->frame_offset;
 
-  entry = _GD_GetEntry(D, field_code);
+  entry = _GD_GetEntry(D, field_code, NULL);
 
   if (D->error != GD_E_OK)
     n_wrote = 0;

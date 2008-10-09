@@ -59,10 +59,7 @@ static __attribute__ ((__const__)) double __NAN()
 
 /* encoding schemas */
 const struct encoding_t encode[] = {
-  { GD_UNENCODED,    "",
-    &_GD_RawOpen,
-    &_GD_RawSeek,
-    &_GD_RawRead,
+  { GD_UNENCODED, "", &_GD_RawOpen, &_GD_RawSeek, &_GD_RawRead,
     &_GD_RawSize, &_GD_RawWrite, &_GD_RawSync, &_GD_RawClose },
   { GD_TEXT_ENCODED, ".txt", &_GD_AsciiOpen, &_GD_AsciiSeek, &_GD_AsciiRead,
     &_GD_AsciiSize, &_GD_AsciiWrite, &_GD_AsciiSync, &_GD_AsciiClose },
@@ -181,7 +178,7 @@ unsigned int _GD_ResolveEncoding(const char* name, unsigned int scheme,
   len = FILENAME_MAX - len;
 
   for (i = 0; encode[i].scheme != GD_ENC_UNSUPPORTED; i++) {
-    if (scheme == 0 || scheme == encode[i].scheme) {
+    if (scheme == GD_AUTO_ENCODED || scheme == encode[i].scheme) {
       strcpy(ptr, encode[i].ext);
 
       if (stat64(candidate, &statbuf) == 0) 
@@ -195,7 +192,7 @@ unsigned int _GD_ResolveEncoding(const char* name, unsigned int scheme,
   }
 
   if (scheme != 0 && e != NULL) {
-    for (i = 0; encode[i].scheme != GD_AUTO_ENCODED; i++)
+    for (i = 0; encode[i].scheme != GD_ENC_UNSUPPORTED; i++)
       if (scheme == encode[i].scheme) {
         e->encoding = i;
         dreturn("0x%08x", encode[i].scheme);
@@ -216,7 +213,6 @@ static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *R,
   off64_t s0;
   size_t ns, n_read = 0;
   ssize_t samples_read;
-  char datafilename[FILENAME_MAX];
   char *databuffer;
 
   dtrace("%p, %p, %lli, %lli, %zi, %zi, 0x%x, %p)", D, R, first_frame,
@@ -241,33 +237,32 @@ static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *R,
   if (ns > 0) {
     /** open the file (and cache the fp) if it hasn't been opened yet. */
     if (R->e->fp < 0) {
-      snprintf(datafilename, FILENAME_MAX, "%s/%s", D->name, R->e->file);
 
       /* Figure out the dirfile encoding type, if required */
       if ((D->flags & GD_ENCODING) == GD_AUTO_ENCODED)
         D->flags = (D->flags & ~GD_ENCODING) |
-          _GD_ResolveEncoding(datafilename, 0, R->e);
+          _GD_ResolveEncoding(R->e->file, GD_AUTO_ENCODED, R->e);
 
       /* If the encoding is still unknown, none of the candidate files exist;
        * complain and return */
       if ((D->flags & GD_ENCODING) == GD_AUTO_ENCODED) {
-        _GD_SetError(D, GD_E_RAW_IO, 0, datafilename, ENOENT, NULL);
+        _GD_SetError(D, GD_E_RAW_IO, 0, R->e->file, ENOENT, NULL);
         dreturn("%zi", 0);
         return 0;
       }
 
       /* Figure out the encoding subtype, if required */
       if (R->e->encoding == GD_ENC_UNKNOWN)
-        _GD_ResolveEncoding(datafilename, D->flags & GD_ENCODING, R->e);
+        _GD_ResolveEncoding(R->e->file, D->flags & GD_ENCODING, R->e);
 
       if (encode[R->e->encoding].open == NULL) {
         _GD_SetError(D, GD_E_UNSUPPORTED, 0, NULL, 0, NULL);
         dreturn("%zi", 0);
         return 0;
-      } else if ((*encode[R->e->encoding].open)(R->e, datafilename,
+      } else if ((*encode[R->e->encoding].open)(R->e, R->e->file,
             D->flags & GD_ACCMODE, 0))
       {
-        _GD_SetError(D, GD_E_RAW_IO, 0, datafilename, errno, NULL);
+        _GD_SetError(D, GD_E_RAW_IO, 0, R->e->file, errno, NULL);
         dreturn("%zi", 0);
         return 0;
       }
@@ -291,7 +286,7 @@ static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *R,
         databuffer + n_read * R->size, R->data_type, ns);
 
     if (samples_read == -1) {
-      _GD_SetError(D, GD_E_RAW_IO, 0, datafilename, errno, NULL);
+      _GD_SetError(D, GD_E_RAW_IO, 0, R->e->file, errno, NULL);
       free(databuffer);
       dreturn("%zi", 0);
       return 0;
@@ -320,10 +315,12 @@ static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *R,
 
 /* _GD_AddData: add vector B to vector A.  B is unchanged
 */
-static void _GD_AddData(DIRFILE* D, void *A, int spfA, void *B, int spfB,
-    gd_type_t type, int n)
+static void _GD_AddData(DIRFILE* D, void *A, unsigned int spfA, void *B,
+    unsigned int spfB, gd_type_t type, size_t n)
 {
-  int i;
+  size_t i;
+
+  dtrace("%p, %p, %u, %p, %u, 0x%x, %zi", D, A, spfA, B, spfB, type, n);
 
   switch (type) {
     case GD_NULL: /* null read */
@@ -378,16 +375,20 @@ static void _GD_AddData(DIRFILE* D, void *A, int spfA, void *B, int spfB,
       break;
     default:
       _GD_SetError(D, GD_E_BAD_TYPE, type, NULL, 0, NULL);
-      return;
+      break;
   }
+
+  dreturnvoid();
 }
 
 /* MultiplyData: Multiply A by B.  B is unchanged.
 */
 static void _GD_MultiplyData(DIRFILE* D, void *A, unsigned int spfA, void *B,
-    unsigned int spfB, gd_type_t type, int n)
+    unsigned int spfB, gd_type_t type, size_t n)
 {
-  int i;
+  size_t i;
+
+  dtrace("%p, %p, %u, %p, %u, 0x%x, %zi", D, A, spfA, B, spfB, type, n);
 
   switch (type) {
     case GD_NULL: /* null read */
@@ -442,8 +443,10 @@ static void _GD_MultiplyData(DIRFILE* D, void *A, unsigned int spfA, void *B,
       break;
     default:
       _GD_SetError(D, GD_E_BAD_TYPE, type, NULL, 0, NULL);
-      return;
+      break;
   }
+
+  dreturnvoid();
 }
 
 /* _GD_DoLincom:  Read from a lincom.  Returns number of samples read.
@@ -458,28 +461,39 @@ static size_t _GD_DoLincom(DIRFILE *D, gd_entry_t *L,
   size_t n_read, n_read2, num_samp2;
   off64_t first_samp2;
 
+  dtrace("%p, %p, %lli, %lli, %zi, %zi, 0x%x, %p", D, L, first_frame,
+      first_samp, num_frames, num_samp, return_type, data_out);
+
   if (L->e->entry[0] == NULL) {
-    L->e->entry[0] = _GD_GetEntry(D, L->in_fields[0]);
-    
-    if (D->error != GD_E_OK)
+    L->e->entry[0] = _GD_GetEntry(D, L->in_fields[0], NULL);
+
+    if (D->error != GD_E_OK) {
+      dreturn ("%zi", 0);
       return 0;
+    }
   }
 
   spf1 = _GD_GetSPF(D, L->e->entry[0], L->in_fields[0]);
-  if (D->error != GD_E_OK)
+  if (D->error != GD_E_OK) {
+    dreturn ("%zi", 0);
     return 0;
+  }
 
   /* read and scale the first field and record the number of samples
    * returned */
   n_read = _GD_DoField(D, L->e->entry[0], L->in_fields[0], first_frame,
       first_samp, num_frames, num_samp, return_type, data_out);
 
-  if (D->error != GD_E_OK)
+  if (D->error != GD_E_OK) {
+    dreturn ("%zi", 0);
     return 0;
+  }
 
   /* Nothing to lincomise */
-  if (n_read == 0)
+  if (n_read == 0) {
+    dreturn ("%zi", 0);
     return 0;
+  }
 
   _GD_ScaleData(D, data_out, return_type, n_read, L->m[0], L->b[0]);
 
@@ -487,16 +501,20 @@ static size_t _GD_DoLincom(DIRFILE *D, gd_entry_t *L,
     for (i = 1; i < L->n_fields; i++) {
       /* Resolve the next field, if needed */
       if (L->e->entry[i] == NULL) {
-        L->e->entry[i] = _GD_GetEntry(D, L->in_fields[i]);
+        L->e->entry[i] = _GD_GetEntry(D, L->in_fields[i], NULL);
 
-        if (D->error != GD_E_OK)
+        if (D->error != GD_E_OK) {
+          dreturn ("%zi", 0);
           return 0;
+        }
       }
 
       /* find the samples per frame of the next field */
       spf2 = _GD_GetSPF(D, L->e->entry[i], L->in_fields[i]);
-      if (D->error != GD_E_OK)
+      if (D->error != GD_E_OK) {
+        dreturn ("%zi", 0);
         return 0;
+      }
 
       /* calculate the first sample and number of samples to read of the
        * next field */
@@ -506,8 +524,10 @@ static size_t _GD_DoLincom(DIRFILE *D, gd_entry_t *L,
       /* Allocate a temporary buffer for the next field */
       tmpbuf = _GD_Alloc(D, return_type, num_samp2);
 
-      if (D->error != GD_E_OK)
+      if (D->error != GD_E_OK) {
+        dreturn ("%zi", 0);
         return 0;
+      }
 
       /* read the next field */
       n_read2 = _GD_DoField(D, L->e->entry[i], L->in_fields[i], 0, first_samp2,
@@ -515,6 +535,7 @@ static size_t _GD_DoLincom(DIRFILE *D, gd_entry_t *L,
 
       if (D->error != GD_E_OK) {
         free(tmpbuf);
+        dreturn ("%zi", 0);
         return 0;
       }
 
@@ -522,6 +543,7 @@ static size_t _GD_DoLincom(DIRFILE *D, gd_entry_t *L,
 
       if (D->error != GD_E_OK) {
         free(tmpbuf);
+        dreturn ("%zi", 0);
         return 0;
       }
 
@@ -534,6 +556,7 @@ static size_t _GD_DoLincom(DIRFILE *D, gd_entry_t *L,
     }
   }
 
+  dreturn ("%zi", n_read);
   return n_read;
 }
 
@@ -548,41 +571,56 @@ static size_t _GD_DoMultiply(DIRFILE *D, gd_entry_t* M,
   size_t n_read, n_read2, num_samp2;
   off64_t first_samp2;
 
+  dtrace("%p, %p, %lli, %lli, %zi, %zi, 0x%x, %p", D, M, first_frame,
+      first_samp, num_frames, num_samp, return_type, data_out);
+
   /* find the samples per frame of the first field */
   if (M->e->entry[0] == NULL) {
-    M->e->entry[0] = _GD_GetEntry(D, M->in_fields[0]);
+    M->e->entry[0] = _GD_GetEntry(D, M->in_fields[0], NULL);
 
-    if (D->error != GD_E_OK)
+    if (D->error != GD_E_OK) {
+      dreturn ("%zi", 0);
       return 0;
+    }
   }
 
   spf1 = _GD_GetSPF(D, M->e->entry[0], M->in_fields[0]);
-  if (D->error != GD_E_OK)
+  if (D->error != GD_E_OK) {
+    dreturn ("%zi", 0);
     return 0;
+  }
 
   /* read the first field and record the number of samples
    * returned */
   n_read = _GD_DoField(D, M->e->entry[0], M->in_fields[0], first_frame,
       first_samp, num_frames, num_samp, return_type, data_out);
 
-  if (D->error != GD_E_OK)
+  if (D->error != GD_E_OK) {
+    dreturn ("%zi", 0);
     return 0;
+  }
 
   /* Nothing to multiply */
-  if (n_read == 0)
+  if (n_read == 0) {
+    dreturn ("%zi", 0);
     return 0;
+  }
 
   /* find the samples per frame of the second field */
   if (M->e->entry[1] == NULL) {
-    M->e->entry[1] = _GD_GetEntry(D, M->in_fields[1]);
+    M->e->entry[1] = _GD_GetEntry(D, M->in_fields[1], NULL);
 
-    if (D->error != GD_E_OK)
+    if (D->error != GD_E_OK) {
+      dreturn ("%zi", 0);
       return 0;
+    }
   }
 
   spf2 = _GD_GetSPF(D, M->e->entry[1], M->in_fields[1]);
-  if (D->error != GD_E_OK)
+  if (D->error != GD_E_OK) {
+    dreturn ("%zi", 0);
     return 0;
+  }
 
   /* calculate the first sample and number of samples to read of the
    * second field */
@@ -592,14 +630,17 @@ static size_t _GD_DoMultiply(DIRFILE *D, gd_entry_t* M,
   /* Allocate a temporary buffer for the second field */
   tmpbuf = _GD_Alloc(D, return_type, num_samp2);
 
-  if (D->error != GD_E_OK)
+  if (D->error != GD_E_OK) {
+    dreturn ("%zi", 0);
     return 0;
+  }
 
   /* read the second field */
   n_read2 = _GD_DoField(D, M->e->entry[1], M->in_fields[1], 0, first_samp2, 0,
       num_samp2, return_type, tmpbuf);
   if (D->error != GD_E_OK) {
     free(tmpbuf);
+    dreturn ("%zi", 0);
     return 0;
   }
 
@@ -610,6 +651,7 @@ static size_t _GD_DoMultiply(DIRFILE *D, gd_entry_t* M,
 
   free(tmpbuf);
 
+  dreturn("%zi", n_read);
   return n_read;
 }
 
@@ -625,25 +667,33 @@ static size_t _GD_DoBit(DIRFILE *D, gd_entry_t *B,
   size_t ns;
   size_t n_read;
 
+  dtrace("%p, %p, %lli, %lli, %zi, %zi, 0x%x, %p", D, B, first_frame,
+      first_samp, num_frames, num_samp, return_type, data_out);
+
   const uint64_t mask = (B->numbits == 64) ? 0xffffffffffffffffULL :
     ((uint64_t)1 << B->numbits) - 1;
 
   if (B->e->entry[0] == NULL) {
-    B->e->entry[0] = _GD_GetEntry(D, B->in_fields[0]);
+    B->e->entry[0] = _GD_GetEntry(D, B->in_fields[0], NULL);
 
-    if (D->error != GD_E_OK)
+    if (D->error != GD_E_OK) {
+      dreturn("%zi", 0);
       return 0;
+    }
   }
 
   spf = _GD_GetSPF(D, B->e->entry[0], B->in_fields[0]);
 
-  if (D->error != GD_E_OK)
+  if (D->error != GD_E_OK) {
+    dreturn("%zi", 0);
     return 0;
+  }
 
   ns = num_samp + num_frames * spf;
   tmpbuf = (uint64_t *)malloc(ns * sizeof(uint64_t));
   if (tmpbuf == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    dreturn("%zi", 0);
     return 0;
   }
 
@@ -652,6 +702,7 @@ static size_t _GD_DoBit(DIRFILE *D, gd_entry_t *B,
 
   if (D->error != GD_E_OK) {
     free(tmpbuf);
+    dreturn("%zi", 0);
     return 0;
   }
 
@@ -661,6 +712,7 @@ static size_t _GD_DoBit(DIRFILE *D, gd_entry_t *B,
   _GD_ConvertType(D, tmpbuf, GD_UINT64, data_out, return_type, n_read);
   free(tmpbuf);
 
+  dreturn("%zi", n_read);
   return n_read;
 }
 
@@ -672,16 +724,22 @@ static size_t _GD_DoPhase(DIRFILE *D, gd_entry_t *P,
 {
   size_t n_read;
 
-  if (P->e->entry[0] == NULL) {
-    P->e->entry[0] = _GD_GetEntry(D, P->in_fields[0]);
+  dtrace("%p, %p, %lli, %lli, %zi, %zi, 0x%x, %p", D, P, first_frame,
+      first_samp, num_frames, num_samp, return_type, data_out);
 
-    if (D->error != GD_E_OK)
+  if (P->e->entry[0] == NULL) {
+    P->e->entry[0] = _GD_GetEntry(D, P->in_fields[0], NULL);
+
+    if (D->error != GD_E_OK) {
+      dreturn("%zi", 0);
       return 0;
+    }
   }
 
   n_read = _GD_DoField(D, P->e->entry[0], P->in_fields[0], first_frame,
       first_samp + P->shift, num_frames, num_samp, return_type, data_out);
 
+  dreturn("%zi", n_read);
   return n_read;
 }
 
@@ -707,13 +765,13 @@ static size_t _GD_DoLinterp(DIRFILE *D, gd_entry_t* I,
   dtrace("[%p]", I->e->entry[0]);
 
   if (I->e->entry[0] == NULL) {
-    I->e->entry[0] = _GD_GetEntry(D, I->in_fields[0]);
+    I->e->entry[0] = _GD_GetEntry(D, I->in_fields[0], NULL);
 
-    if (D->error != GD_E_OK)
+    if (D->error != GD_E_OK) {
+      dreturn("%zi", 0);
       return 0;
+    }
   }
-
-  dtrace("[%p]", I->e->entry[0]);
 
   n_read = _GD_DoField(D, I->e->entry[0], I->in_fields[0], first_frame,
       first_samp, num_frames, num_samp, return_type, data_out);
@@ -725,8 +783,6 @@ static size_t _GD_DoLinterp(DIRFILE *D, gd_entry_t* I,
 
   _GD_LinterpData(D, data_out, return_type, n_read, I->e->x, I->e->y,
       I->e->table_len);
-
-  dtrace("[%p]", I->e->entry[0]);
 
   dreturn("%zi", n_read);
   return n_read;
@@ -861,8 +917,8 @@ size_t getdata64(DIRFILE* D, const char *field_code, off64_t first_frame,
 
   first_frame -= D->frame_offset;
 
-  entry = _GD_GetEntry(D, field_code);
-    
+  entry = _GD_GetEntry(D, field_code, NULL);
+
   if (D->error != GD_E_OK)
     n_read = 0;
   else if (entry && (entry->field_type == GD_CONST_ENTRY ||

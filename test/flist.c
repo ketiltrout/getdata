@@ -5,6 +5,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <stdio.h>
 #include <string.h>
 #include <errno.h>
 #include <unistd.h>
@@ -17,7 +18,7 @@ int main(void)
     "data1 RAW UINT8 1\n"
     "data2 RAW UINT8 1\n"
     "data3 RAW UINT8 1\n";
-  int fd;
+  int fd, r = 0;
 
   mkdir(filedir, 0777);
 
@@ -29,34 +30,36 @@ int main(void)
   const char** field_list = get_field_list(D);
 
   if (get_error(D))
-    return 1;
+    r = 1;
 
   if (field_list == NULL)
-    return 1;
+    r = 1;
 
-  for (fd = 0; fd < 3; ++fd) {
-    if (strlen(field_list[fd]) != 5)
-      return 1;
+  if (!r)
+    for (fd = 0; fd < 3; ++fd) {
+      printf("%i: %s\n", fd, field_list[fd]);
+      if (strlen(field_list[fd]) != 5)
+        r = 1;
 
-    if (field_list[fd][0] != 'd')
-      return 1;
+      if (field_list[fd][0] != 'd')
+        r = 1;
 
-    if (field_list[fd][1] != 'a')
-      return 1;
+      if (field_list[fd][1] != 'a')
+        r = 1;
 
-    if (field_list[fd][2] != 't')
-      return 1;
+      if (field_list[fd][2] != 't')
+        r = 1;
 
-    if (field_list[fd][3] != 'a')
-      return 1;
+      if (field_list[fd][3] != 'a')
+        r = 1;
 
-    if (field_list[fd][4] < '1' || field_list[fd][4] > '3')
-      return 1;
-  }
+      if (field_list[fd][4] < '1' || field_list[fd][4] > '3')
+        r = 1;
+    }
 
   dirfile_close(D);
   unlink(format);
   rmdir(filedir);
 
-  return 0;
+  return r;
 }

@@ -1,3 +1,27 @@
+2008-10-09   D. V. Wiebe <getdata@ketiltrout.net>  svn:127
+	* src/open.c (_GD_ValidateField): Now takes a pointer to the parent, rather
+	than the parent's name, and generates the / demaraction itself.
+
+	* src/open.c (_GD_ParseFormatFile): Determine META field's parent entry.
+	* src/open.c (_GD_ParseRaw _GD_ParseLincom _GD_ParseLinterp _GD_ParseBit
+	_GD_ParsePhase _GD_ParseConst _GD_ParseString _GD_ParseFieldSpec): Pass
+	around the parent's pointer, rather than its name.
+
+	* src/add.c (_GD_Add) src/open.c (_GD_ParseRaw): Remember the full path name.
+	* src/getdata.c (_GD_DoRaw) src/nframes.c (_GD_NFrames) src/putdata.c
+	(_GD_DoRawOut): No need to compose file name.
+
+	* src/open.c (_GD_ParseFieldSpec): Simplify the switch() code.  Also, check
+	for duplicates.
+	* src/common.c (_GD_InsertSort): Added.
+
+	* src/open.c (_GD_ParseFormatFile): Automatically handle /u and /ooo out of
+	range.
+
+	* src/close.c (_GD_FreeD): Clean up include_list[0], too.
+
+	* src/close.c (dirfile_close): Call _GD_FlushMeta().
+
 2008-10-08   D. V. Wiebe <getdata@ketiltrout.net>  svn:125
 	* src/open.c (_GD_ParseRaw): Prohibit META RAW fields.
 	* src/add.c (_GD_Add): Ditto.

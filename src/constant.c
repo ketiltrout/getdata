@@ -37,7 +37,7 @@ ssize_t get_constant(DIRFILE* D, const char *field_code, gd_type_t return_type,
 
   _GD_ClearError(D);
 
-  entry = _GD_GetEntry(D, field_code);
+  entry = _GD_GetEntry(D, field_code, NULL);
     
   if (D->error != GD_E_OK)
     n_read = 0;
@@ -80,7 +80,7 @@ size_t put_constant(DIRFILE* D, const char *field_code, gd_type_t data_type,
 
   _GD_ClearError(D);
 
-  entry = _GD_GetEntry(D, field_code);
+  entry = _GD_GetEntry(D, field_code, NULL);
 
   if (D->error != GD_E_OK)
     n_wrote = 0;

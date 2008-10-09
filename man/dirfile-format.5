@@ -38,10 +38,10 @@ located in the dirfile directory.
 .SH SYNTAX
 The format file is composed of field specification lines and directive lines,
 optionally separated by blank lines or lines containing only whitespace.
-If unescaped (see below), the hash mark
+Unless escaped (see below), the hash mark
 .RB ( # )
-is the comment delimiter; any text following the comment delimiter to the end of
-the line is ignored.
+is the comment delimiter; the comment delimiter, and any text following it to
+the end of the line, is ignored.
 
 .SS Tokens
 Both field specification lines and directive lines consist of several tokens
@@ -57,11 +57,10 @@ or else by enclosing the token in quotation marks
 The quotation marks themselves will be stripped from the token.  To include a
 literal quotation mark or backslash character in a token, it must be escaped
 .RB ( \e" " or " \e\e ).
-Similarly, a hash mark may be included in a token by including it in quotation
-marks
-.RB ( """#""" )
-or else by escaping it
-.RB ( \e# ).
+Similarly, a hash mark may be included in a token by including it in a quoted
+token or else by escaping it
+.RB ( \e# ),
+otherwise the hash mark will be understood as the comment delimiter.
 
 It is a syntax error to have a line which contains unmatched quotation marks, or
 in which the last character is the backslash character.
@@ -73,6 +72,9 @@ mentioned.  They are:
 .TP
 .B \e"
 a quotation mark character (ASCII 0x22 / U+0022)
+.TP
+.B \e#
+a hash mark character (ASCII 0x23 / U+0023)
 .TP
 .B \ea
 an alert (bell) character (ASCII 0x07 / U+0007)
@@ -113,7 +115,6 @@ the single byte given by the hexidecimal number
 the UTF-8 byte sequence encoding the Unicode code point given by the hexidecimal
 number
 .IR hhhhhhh .
-It is a syntax error to provide a hexidecimal number greater than 10FFFF.
 .RE
 
 Any other character which is escaped is interpreted as the character itself.
@@ -125,20 +126,19 @@ is interpreted as
 No token may contain the NULL character (ASCII 0x00 / U+0000).  Furthermore,
 although support is present to create UTF-8 byte sequences, tokens are not
 required to be valid UTF-8 sequences.  Any byte sequence not containing the NULL
-character forms a valid token.  (There may be further restrictions on allowed
-characters for a token in a given situation, for example, when used as a field
-name.)
+character forms a valid token.  However, there may be further restrictions on
+allowed characters for a token in a particular situation, (for example, when
+used as a field name).
 
 .SS Reserved Words
 
 There are six 
 .IR "reserved words" ,
 which cannot be used as field names in the dirfile.  Instead, these specify
-directives.  Any reserved word may have a forward slash
-.RB ( / )
-prepended to it, without change in meaning.  Future versions of the Standards
-may require this to distinguish a directive line from a field specification
-line.
+directives.  Any reserved word may omit its initial forward slash
+.RB ( / ),
+without change in meaning.  Future versions of the Standards may require the
+slash to distinguish a reserved word from a field name.
 .TP
 .B /ENCODING
 The ENCODING directive specifies the encoding scheme used to encode the dirfile.
@@ -208,7 +208,8 @@ consist of the parent and metadata field names joined with a forward slash:
 .IP
 .IB <parent-field> / <meta-field>
 .PP
-META fields of type RAW are prohibited.  Syntax is:
+META fields of type RAW are prohibited.  Furthermore, META fields may not be
+specified before their parent field is.  Syntax is:
 .IP
 .B /META
 .I <parent-field>
@@ -307,7 +308,7 @@ may be any supported native data type (see the description of the
 .B RAW
 field type below), and
 .I value
-is the numerical value of the constant interpreted as inciated by
+is the numerical value of the constant interpreted as indicated by
 .IR type .
 Unlike most other field types,
 .B CONST
@@ -503,7 +504,7 @@ is a single token.  To include whitespace in the string, enclose
 .I value
 in quotation marks
 .RB ( """" ),
-or else escape it with the backslash character
+or else escape the whitespace with the backslash character
 .RB ( \e ).
 Unlike most other field types,
 .B STRING

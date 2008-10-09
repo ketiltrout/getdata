@@ -26,7 +26,7 @@
 
 const void* get_constant_values(DIRFILE* D, gd_type_t return_type)
 {
-  dtrace("%p", D);
+  dtrace("%p, 0x%x", D, return_type);
 
   unsigned int i, n;
   void* fl;
@@ -51,7 +51,8 @@ const void* get_constant_values(DIRFILE* D, gd_type_t return_type)
   }
 
   for (i = n = 0; i < D->n_entries; ++i) {
-    if (D->entry[i]->field_type == GD_CONST_ENTRY && !D->entry[i]->e->meta)
+    if (D->entry[i]->field_type == GD_CONST_ENTRY &&
+        D->entry[i]->e->n_meta != -1)
       if (_GD_DoField(D, D->entry[i], D->entry[i]->field, 0, 0, 0, 0,
             return_type, fl + n++ * GD_SIZE(return_type)) != 1)
         break;
@@ -97,7 +98,8 @@ const char** get_constant_list(DIRFILE* D)
   }
 
   for (i = n = 0; i < D->n_entries; ++i) {
-    if (D->entry[i]->field_type == GD_CONST_ENTRY && !D->entry[i]->e->meta)
+    if (D->entry[i]->field_type == GD_CONST_ENTRY &&
+        D->entry[i]->e->n_meta != -1)
       fl[n++] = D->entry[i]->field;
   }
   fl[n] = NULL;
@@ -127,7 +129,7 @@ const char** get_string_values(DIRFILE* D)
     return NULL;
   }
 
-  if (D->list_validity == LIST_VALID_STRING_VALUE) {
+  if (D->list_validity & LIST_VALID_STRING_VALUE) {
     /* list already made */
     dreturn("%p", D->string_value_list);
     return D->string_value_list;
@@ -143,7 +145,8 @@ const char** get_string_values(DIRFILE* D)
   }
 
   for (i = n = 0; i < D->n_entries; ++i) {
-    if (D->entry[i]->field_type == GD_STRING_ENTRY && !D->entry[i]->e->meta)
+    if (D->entry[i]->field_type == GD_STRING_ENTRY &&
+        D->entry[i]->e->n_meta != -1)
       fl[n++] = D->entry[i]->e->string;
   }
   fl[i] = NULL;
@@ -173,7 +176,7 @@ const char** get_string_list(DIRFILE* D)
     return NULL;
   }
 
-  if (D->list_validity == LIST_VALID_STRING) {
+  if (D->list_validity & LIST_VALID_STRING) {
     /* list already made */
     dreturn("%p", D->string_list);
     return D->string_list;
@@ -188,7 +191,8 @@ const char** get_string_list(DIRFILE* D)
   }
 
   for (i = n = 0; i < D->n_entries; ++i) {
-    if (D->entry[i]->field_type == GD_STRING_ENTRY && !D->entry[i]->e->meta)
+    if (D->entry[i]->field_type == GD_STRING_ENTRY &&
+        D->entry[i]->e->n_meta != -1)
       fl[n++] = D->entry[i]->field;
   }
   fl[n] = NULL;
@@ -218,7 +222,7 @@ const char** get_vector_list(DIRFILE* D)
     return NULL;
   }
 
-  if (D->list_validity == LIST_VALID_VECTOR) {
+  if (D->list_validity & LIST_VALID_VECTOR) {
     /* list already made */
     dreturn("%p", D->vector_list);
     return D->vector_list;
@@ -235,7 +239,8 @@ const char** get_vector_list(DIRFILE* D)
 
   for (i = n = 0; i < D->n_entries; ++i) {
     if (D->entry[i]->field_type != GD_CONST_ENTRY && 
-        D->entry[i]->field_type != GD_STRING_ENTRY && !D->entry[i]->e->meta)
+        D->entry[i]->field_type != GD_STRING_ENTRY &&
+        D->entry[i]->e->n_meta != -1)
       fl[n++] = D->entry[i]->field;
   }
   fl[n] = NULL;
@@ -265,7 +270,7 @@ const char** get_field_list(DIRFILE* D)
     return NULL;
   }
 
-  if (D->list_validity == LIST_VALID_FIELD) {
+  if (D->list_validity & LIST_VALID_FIELD) {
     /* list already made */
     dreturn("%p", D->field_list);
     return D->field_list;
@@ -281,7 +286,7 @@ const char** get_field_list(DIRFILE* D)
   }
 
   for (i = n = 0; i < D->n_entries; ++i)
-    if (!D->entry[i]->e->meta)
+    if (D->entry[i]->e->n_meta != -1)
       fl[n++] = D->entry[i]->field;
   fl[n] = NULL;
 

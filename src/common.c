@@ -88,13 +88,13 @@ gd_type_t _GD_LegacyType(char c)
 }
 
 /* Binary search to find the field */
-static gd_entry_t* _GD_FindField(DIRFILE* D, const char* field_code)
+static gd_entry_t* _GD_FindField(DIRFILE* D, const char* field_code, int *next)
 {
   int i, c;
   int l = 0;
   int u = D->n_entries;
 
-  dtrace("%p, \"%s\"", D, field_code);
+  dtrace("%p, \"%s\", %p", D, field_code, next);
 
   while (l < u) {
     i = (l + u) / 2;
@@ -109,16 +109,32 @@ static gd_entry_t* _GD_FindField(DIRFILE* D, const char* field_code)
     }
   }
 
+  if (next != NULL) 
+    *next = u;
+
   dreturn("%p", NULL);
   return NULL;
 }
 
+/* Insertion sort the entry list */
+void _GD_InsertSort(DIRFILE* D, gd_entry_t* E, int u)
+{
+  dtrace("%p, %p, %i", D, E, u);
+
+  memmove(&D->entry[u + 1], &D->entry[u], sizeof(gd_entry_t*) *
+      (D->n_entries - u));
+
+  D->entry[u] = E;
+
+  dreturnvoid();
+}
+
 /* _GD_GetEntry: Convert a field code into an entry pointer
- */
-gd_entry_t* _GD_GetEntry(DIRFILE* D, const char* field_code)
+*/
+gd_entry_t* _GD_GetEntry(DIRFILE* D, const char* field_code, int* next)
 {
   gd_entry_t* entry;
-  dtrace("%p, \"%s\"", D, field_code);
+  dtrace("%p, \"%s\", %p", D, field_code, next);
 
   if ((strcmp(field_code,"FILEFRAM") == 0) ||
       (strcmp(field_code,"INDEX") == 0)) {
@@ -126,7 +142,7 @@ gd_entry_t* _GD_GetEntry(DIRFILE* D, const char* field_code)
     return NULL;
   }
 
-  entry = _GD_FindField(D, field_code);
+  entry = _GD_FindField(D, field_code, next);
 
   if (entry == NULL) /* No match */
     _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, field_code);
@@ -224,19 +240,22 @@ void _GD_ScaleData(DIRFILE* D, void *data, gd_type_t type, size_t npts,
 */
 static void _GD_MakeDummyLinterp(DIRFILE* D, struct _gd_private_entry *e)
 {
+  dtrace("%p, %p", D, e);
+
   e->table_len = 2;
   e->x = (double *)malloc(2*sizeof(double));
   e->y = (double *)malloc(2*sizeof(double));
 
-  if (e->x == NULL || e->y == NULL) {
+  if (e->x == NULL || e->y == NULL)
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-    return;
+  else {
+    e->x[0] = 0;
+    e->y[0] = 0;
+    e->x[1] = 1;
+    e->y[1] = 1;
   }
 
-  e->x[0] = 0;
-  e->y[0] = 0;
-  e->x[1] = 1;
-  e->y[1] = 1;
+  dreturnvoid();
 }
 
 /* _GD_ReadLinterpFile: Read in the linterp data for this field
@@ -417,4 +436,4 @@ void _GD_LinterpData(DIRFILE* D, const void *data, gd_type_t type, size_t npts,
   dreturnvoid();
 }
 /* vim: ts=2 sw=2 et tw=80
- */
+*/
