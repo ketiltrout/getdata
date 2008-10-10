@@ -155,6 +155,12 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
   else {
     E->e->n_meta = E->e->n_meta_string = E->e->n_meta_const = 0;
     E->e->meta_entry = NULL;
+    E->e->field_list = NULL;
+    E->e->vector_list = NULL;
+    E->e->string_list = NULL;
+    E->e->string_value_list = NULL;
+    E->e->const_list = NULL;
+    E->e->const_value_list = NULL;
   }
 
   /* Validate entry and add auxiliary data */
@@ -185,7 +191,7 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
       E->e->stream = NULL;
       E->e->first = 0;
       E->e->encoding = GD_ENC_UNKNOWN;
-      
+
       if ((E->e->file = malloc(FILENAME_MAX)) == NULL) {
         _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
         break;

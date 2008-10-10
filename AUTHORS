@@ -11,7 +11,7 @@ Ted Kisner <tskisner.public@gmail.com> wrote the PutData library
 Eli Fidler <eli@staikos.net> ported PutData to this version of the GetData
 library.
 
-Matt Truch <matt@truch.net> has provided bug fixes and maintains the Fedora
+Matthew Truch <matt@truch.net> has provided bug fixes and maintains the Fedora
 packages.
 
 Joseph Fowler <jfowler@princeton.edu> provided code which was adapted to

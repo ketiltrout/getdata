@@ -136,8 +136,7 @@ gd_entry_t* _GD_GetEntry(DIRFILE* D, const char* field_code, int* next)
   gd_entry_t* entry;
   dtrace("%p, \"%s\", %p", D, field_code, next);
 
-  if ((strcmp(field_code,"FILEFRAM") == 0) ||
-      (strcmp(field_code,"INDEX") == 0)) {
+  if ((strcmp(field_code,"INDEX") == 0)) {
     dreturn("%p", NULL);
     return NULL;
   }

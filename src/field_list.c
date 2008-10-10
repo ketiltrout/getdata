@@ -247,8 +247,7 @@ const char** get_vector_list(DIRFILE* D)
   }
 
   for (i = n = 0; i < D->n_entries; ++i) {
-    if (D->entry[i]->field_type != GD_CONST_ENTRY && 
-        D->entry[i]->field_type != GD_STRING_ENTRY &&
+    if (!(D->entry[i]->field_type & GD_SCALAR_ENTRY) &&
         D->entry[i]->e->n_meta != -1)
       fl[n++] = D->entry[i]->field;
   }

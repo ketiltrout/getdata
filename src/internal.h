@@ -316,7 +316,7 @@ void _GD_Flush(DIRFILE* D, gd_entry_t *entry, const char* field_code);
 void _GD_FlushMeta(DIRFILE* D);
 void _GD_FreeE(gd_entry_t* entry, int priv);
 int _GD_GetLine(FILE *fp, char *line, int* linenum);
-unsigned int _GD_GetSPF(DIRFILE* D, gd_entry_t* entry, const char *field_code);
+unsigned int _GD_GetSPF(DIRFILE* D, gd_entry_t* E);
 gd_entry_t* _GD_GetEntry(DIRFILE* D, const char* field_code, int* next);
 void _GD_InsertSort(DIRFILE* D, gd_entry_t* E, int u) __THROW;
 

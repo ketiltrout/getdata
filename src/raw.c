@@ -91,7 +91,7 @@ off64_t _GD_RawSize(const char *name, gd_type_t data_type)
 int _GD_RawTouch(const char* name)
 {
   dtrace("\"%s\"", name);
-  int fd = open(name, O_RDWR | O_CREAT | O_EXCL);
+  int fd = open(name, O_RDWR | O_CREAT | O_EXCL, 0666);
 
   if (fd != -1)
     fd = close(fd);

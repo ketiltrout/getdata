@@ -286,8 +286,7 @@ const char** get_meta_vector_list(DIRFILE* D, const char* parent)
   }
 
   for (i = n = 0; i < e->n_meta; ++i) {
-    if (e->meta_entry[i]->field_type != GD_CONST_ENTRY && 
-        e->meta_entry[i]->field_type != GD_STRING_ENTRY)
+    if (!(e->meta_entry[i]->field_type & GD_SCALAR_ENTRY))
       fl[n++] = e->meta_entry[i]->field + offs;
   }
   fl[n] = NULL;

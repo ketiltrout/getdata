@@ -260,17 +260,20 @@ characters, excluding both ASCII control characters, and the characters
 .PP
 which are reserved.  The field name may not be
 .B INDEX
-nor
-.BR FILEFRAM ,
-which are synonyms for a special, implicit field which contains the integer
-frame index.  Field names are case sensitive.  The second token in the field
-specification line is the field type.  The meaning of subsequent tokens depends
-on the field type.
+which is a special, implicit field which contains the integer frame index.
+Field names are case sensitive.  The second token in the field specification
+line is the field type.  The meaning of subsequent tokens depends on the field
+type.
 
-There are eight field types:
+There are eight field types.  Of these, six are of vector type
+.RB ( BIT ", " LINCOM ", " LINTERP ", " MULTIPLY ", " PHASE ", and " RAW )
+and two are of scalar type
+.RB ( CONST " and " STRING ).
+The possible fields types are:
 .TP
 .B BIT
-The BIT field type extracts one or more bits out of an input field.  Syntax is:
+The BIT vector field type extracts one or more bits out of an input vector
+field.  Syntax is:
 .RS
 .IP
 .I <field-name>
@@ -283,7 +286,7 @@ to be the value of bits
 .I first-bit
 through
 .IR first-bit + bits -1
-of the input field
+of the input vector field
 .IR input ,
 when
 .I input
@@ -294,7 +297,7 @@ is omitted, it is assumed to be 1.
 .RE
 .TP
 .B CONST
-The CONST field type is a scalar constant fully specified in the format file
+The CONST scalar field type is a constant fully specified in the format file
 metadata.  Syntax is:
 .RS
 .IP
@@ -310,14 +313,11 @@ field type below), and
 .I value
 is the numerical value of the constant interpreted as indicated by
 .IR type .
-Unlike most other field types,
-.B CONST
-is a scalar type with the constant value specified.
 .RE
 .TP
 .B LINCOM
-The LINCOM field type is the linear combination of one, two or three input
-fields.  Syntax is:
+The LINCOM vector field type is the linear combination of one, two or three
+input vector fields.  Syntax is:
 .RS
 .IP
 .I <field-name>
@@ -326,8 +326,8 @@ fields.  Syntax is:
 .PP
 where
 .I n
-indicates the number of input fields (1, 2, or 3).  The derived field will be
-computed as:
+indicates the number of input vector fields (1, 2, or 3).  The derived field
+will be computed as:
 .IP
 field-name[n] = (a1 * field1[n] + b1) + (a2 * field2[n2] + b2) + (a3 * field3[n3] + b3)
 .PP
@@ -345,8 +345,8 @@ input fields.  The resultant field will have the same sample rate as
 .RE
 .TP
 .B LINTERP
-The LINTERP field type specifies a table look up based on another dirfile field.
-Syntax is:
+The LINTERP vector field type specifies a table look up based on another vector
+field.  Syntax is:
 .RS
 .IP
 .I <field-name>
@@ -355,7 +355,7 @@ Syntax is:
 .PP
 where
 .I input
-is the input field for the table lookup and
+is the input vector field for the table lookup and
 .I table
 is the complete path to the lookup table file for the field.  The lookup table
 file is an ASCII text file with two whitespace separated columns of
@@ -367,7 +367,7 @@ lookup table.
 .RE
 .TP
 .B MULTIPLY
-The MULTIPLY field type is the product of two fields.  Syntax is:
+The MULTIPLY vector field type is the product of two vector fields.  Syntax is:
 .RS
 .IP
 .I <field-name>
@@ -386,7 +386,8 @@ input fields.  The resultant field will have the same sample rate as
 .RE
 .TP
 .B PHASE
-The PHASE field type shifts an input field by a specified number of samples.  Syntax is:
+The PHASE vector field type shifts an input vector field by the specified number
+of samples.  Syntax is:
 .RS
 .IP
 .I <field-name>
@@ -395,7 +396,7 @@ The PHASE field type shifts an input field by a specified number of samples.  Sy
 .PP
 which specifies
 .I field-name
-to be the input field,
+to be the input vector field,
 .IR input ,
 shifted by
 .I shift
@@ -406,8 +407,8 @@ implementation dependent.
 .RE
 .TP
 .B RAW
-The RAW field type specifies raw time streams on disk.  In this case, the field
-name should correspond to the name of the file containing the time stream.
+The RAW vector field type specifies raw time streams on disk.  In this case, the
+field name should correspond to the name of the file containing the time stream.
 Syntax is:
 .RS
 .IP
@@ -488,8 +489,8 @@ these types.
 .RE
 .TP
 .B STRING
-The STRING field type is a scalar string fully specified in the format file
-metadata.  Syntax is:
+The STRING scalar field type is a character string fully specified in the format
+file metadata.  Syntax is:
 .RS
 .IP
 .I <field-name>
@@ -506,9 +507,6 @@ in quotation marks
 .RB ( """" ),
 or else escape the whitespace with the backslash character
 .RB ( \e ).
-Unlike most other field types,
-.B STRING
-is a scalar type with the constant string value specified.
 .RE
 
 .SH STANDARDS VERSIONS

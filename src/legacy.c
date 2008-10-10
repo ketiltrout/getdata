@@ -65,10 +65,9 @@ const char *GD_ERROR_CODES[GD_N_ERROR_CODES] = {
   "Request out-of-range",
   "Operation not supported by current encoding scheme",
   "Unable to discover encoding",
-    /* Subsequent error codes are not supported by the legacy API, and
-     * hence not handled here */
   NULL, /* GD_E_BAD_ENTRY */
   NULL, /* GD_E_DUPLICATE */
+  "Scalar field found where vector field expected",
 };
 
 static struct FormatType Format = {

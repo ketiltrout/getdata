@@ -1,3 +1,23 @@
+2008-10-10   D. V. Wiebe <getdata@ketiltrout.net>  svn:130
+	* src/getdata.h.in: Incorporate a GD_SCALAR_ENTRY flag in gd_entype_t.
+	* src/field_list.c (get_nvectors) src/neta_list.c (get_nmeta_vectors):
+	Use GD_SCALAR_ENTRY.
+
+	* src/add.c (_GD_Add): Properly initialise the meta field lists in the private
+	entry to prevent crash on error.  (Reported by Matthew Truch)
+
+	* src/raw.c (_GD_RawTouch): Add mode to open call (patch from Matthew
+	Truch).
+	
+	* src/getdata.h.in: Add GD_E_DIMENSION
+	* src/getdata.c src/putdata.c src/spf.c: Detect and fail if a vector type
+	contains an input field that's a scalar.
+
+	* src/spf.c (_GD_GetSPF): Removed redunant field_code parameter.
+
+	* src/common.c (_GD_GetEntry): Removed FILEFRAM as an alias for INDEX per
+	discussion with Barth.
+
 2008-10-10   D. V. Wiebe <getdata@ketiltrout.net>  svn:129
 	* src/entry.c (_GD_FreeE): Renamed from dirfile_free_entry_strings (for
 	which a new boilerplate function has been created).  Separated cleaning up
@@ -19,7 +39,7 @@
 	test/parse_string.c test/parse_string_ncols.c test/parse_whitespace.c:
 	Added.
 
-	* src/add.c (_GD_Add): Encapsulate the file creation with a call to a
+	* src/add.c (_GD_Add): Encapsulate the file creation with a call to an
 	encoding specific *touch() function.
 	* src/raw.c (_GD_RawTouch): Added.  (Also used for the ASCII encoding).
 
@@ -62,8 +82,8 @@
 
 2008-10-08   D. V. Wiebe <getdata@ketiltrout.net>  svn:124
 	* src/open.c (_GD_ValidateField): Malloc one more byte for the terminating
-	NULL.  Crash report from Matt.
-	* test/add_many.c: Add testcase for same (from Matt).
+	NULL.  Crash report from Matthew Truch.
+	* test/add_many.c: Add testcase for same (from Matthew Truch).
 
 	* src/internal.h: Removed all instances of ierror and user_error in the
 	DIRFILE struct.
@@ -75,7 +95,7 @@
 	* src/add.c: Fix debugging messages
 
 2008-10-08   D. V. Wiebe <getdata@ketiltrout.net>  svn:122
-	* man/Makefile.am: Fix install target (patch from Matt)
+	* man/Makefile.am: Fix install target (patch from Matthew Truch)
 
 2008-10-08   D. V. Wiebe <getdata@ketiltrout.net>  svn:121
 	* src/getdata.h.in: Add forward declarations for public functions.
@@ -297,7 +317,7 @@
 
 2008-09-22   D. V. Wiebe <getdata@ketiltrout.net>  svn:94
 	* bindings/cxx/entry.cpp: Use <cstring> instead of <string>.  Patch from
-	Matt.
+	Matthew Truch.
 
 2008-09-18   D. V. Wiebe <getdata@ketiltrout.net>  svn:90
 	* src/legacy.c (_GD_GetDirfile) test/legacy_get_rofs.c test/legacy_get_put.c:

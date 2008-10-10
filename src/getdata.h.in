@@ -74,16 +74,24 @@
 #define GD_E_UNKNOWN_ENCODING 19
 #define GD_E_BAD_ENTRY        20
 #define GD_E_DUPLICATE        21
+#define GD_E_DIMENSION        22
 
-#define GD_N_ERROR_CODES      22
+#define GD_N_ERROR_CODES      23
 
 #define GD_MAX_LINCOM 3
 
+#define GD_SCALAR_ENTRY 0x100
 /* field types */
 typedef enum {
-  GD_NO_ENTRY = 0, GD_RAW_ENTRY, GD_LINCOM_ENTRY, GD_LINTERP_ENTRY,
-  GD_BIT_ENTRY, GD_MULTIPLY_ENTRY, GD_PHASE_ENTRY, GD_CONST_ENTRY,
-  GD_STRING_ENTRY
+  GD_NO_ENTRY       = 0x00,
+  GD_RAW_ENTRY      = 0x01,
+  GD_LINCOM_ENTRY   = 0x02,
+  GD_LINTERP_ENTRY  = 0x03,
+  GD_BIT_ENTRY      = 0x04,
+  GD_MULTIPLY_ENTRY = 0x05,
+  GD_PHASE_ENTRY    = 0x06,
+  GD_CONST_ENTRY    = GD_SCALAR_ENTRY + 0x01,
+  GD_STRING_ENTRY   = GD_SCALAR_ENTRY + 0x02,
 } gd_entype_t;
 
 /* Data types -- No valid type may contain 0x40.  This will automatically

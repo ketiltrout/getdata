@@ -27,41 +27,49 @@
 
 /* _GD_GetSPF: Get samples per frame for field
 */
-unsigned int _GD_GetSPF(DIRFILE* D, gd_entry_t* entry, const char *field_code)
+unsigned int _GD_GetSPF(DIRFILE* D, gd_entry_t* E)
 {
   unsigned int spf = 0;
 
-  dtrace("\"%s\", %p", field_code, D);
+  dtrace("%p, %p", D, E);
 
   if (++D->recurse_level >= GD_MAX_RECURSE_LEVEL) {
-    _GD_SetError(D, GD_E_RECURSE_LEVEL, 0, NULL, 0, field_code);
+    _GD_SetError(D, GD_E_RECURSE_LEVEL, 0, NULL, 0, E->field);
     dreturn("%u", 0);
     D->recurse_level--;
     return 0;
   }
 
-  if (entry == NULL) { /* INDEX has one sample per frame */
+  if (E == NULL) { /* INDEX has one sample per frame */
     dreturn("%u", 1);
     return 1;
   }
 
-  switch(entry->field_type) {
+  switch(E->field_type) {
     case GD_RAW_ENTRY:
-      spf = entry->spf;
+      spf = E->spf;
       break;
     case GD_LINCOM_ENTRY:
     case GD_MULTIPLY_ENTRY:
     case GD_BIT_ENTRY:
     case GD_PHASE_ENTRY:
     case GD_LINTERP_ENTRY:
-      if (entry->e->entry[0] == NULL) {
-        entry->e->entry[0] = _GD_GetEntry(D, entry->in_fields[0], NULL);
+      if (E->e->entry[0] == NULL) {
+        E->e->entry[0] = _GD_GetEntry(D, E->in_fields[0], NULL);
 
         if (D->error != GD_E_OK)
           break;
+
+        /* scalar entries not allowed */
+        if (E->e->entry[0]->field_type & GD_SCALAR_ENTRY) {
+          _GD_SetError(D, GD_E_DIMENSION, 0, E->field, 0,
+              E->e->entry[0]->field);
+          dreturn("%u", 0);
+          return 0;
+        }
       }
 
-      spf = _GD_GetSPF(D, entry->e->entry[0], entry->in_fields[0]);
+      spf = _GD_GetSPF(D, E->e->entry[0]);
       break;
     default:
       _GD_InternalError(D);
@@ -92,7 +100,7 @@ unsigned int get_spf(DIRFILE* D, const char *field_code)
   entry = _GD_GetEntry(D, field_code, NULL);
 
   if (!D->error)
-    spf = _GD_GetSPF(D, entry, field_code);
+    spf = _GD_GetSPF(D, entry);
 
   dreturn("%u", spf);
   return spf;
