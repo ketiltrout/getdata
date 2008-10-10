@@ -1,3 +1,12 @@
+2008-10-10   D. V. Wiebe <getdata@ketiltrout.net>  svn:131
+	* src/open.c (_GD_ParseFieldSpec): Properly propagate have_first to caller.
+
+	* src/open.c (_GD_ParseFormatFile _GD_ParseFormatLine): Split line
+	parsing (now in _GD_ParseFormatLine) from the format file loop (the little
+	bit remaining in _GD_ParseFormatFile).
+
+	* bindings/cxx/test/Makefile.am: Properly clean up after tests.
+
 2008-10-10   D. V. Wiebe <getdata@ketiltrout.net>  svn:130
 	* src/getdata.h.in: Incorporate a GD_SCALAR_ENTRY flag in gd_entype_t.
 	* src/field_list.c (get_nvectors) src/neta_list.c (get_nmeta_vectors):

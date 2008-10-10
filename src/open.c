@@ -676,12 +676,12 @@ static int utf8encode (DIRFILE* D, const char* format_file, int linenum,
  * specification */
 static gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols,
     const char* in_cols[MAX_IN_COLS], const gd_entry_t* parent,
-    const char* subdir, const char* format_file, int linenum, int have_first,
+    const char* subdir, const char* format_file, int linenum, int* have_first,
     int me, int standards)
 {
   gd_entry_t* E = NULL;
 
-  dtrace("%p, %i, %p, %p, \"%s\", \"%s\", %i, %i, %i, %i", D, n_cols, in_cols,
+  dtrace("%p, %i, %p, %p, \"%s\", \"%s\", %i, %p, %i, %i", D, n_cols, in_cols,
       parent, subdir, format_file, linenum, have_first, me, standards);
 
   D->entry = realloc(D->entry, (D->n_entries + 1) * sizeof(gd_entry_t*));
@@ -695,7 +695,7 @@ static gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols,
         _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
       else {
         memcpy(D->first_field, E, sizeof(gd_entry_t));
-        have_first = 1;
+        *have_first = 1;
         D->include_list[me].first = 1;
       }
     }
@@ -760,27 +760,53 @@ static gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols,
   return E;
 }
 
-/* _GD_ParseFormatFile: Perform the actual parsing of the format file.  This
+/* _GD_ParseFormatFile: Parse each line of the format file.  This
  *       function is called from GetFormat once for the main format file and
  *       once for each included file.
  *
+ *       Returns 0 unless this format file contains the first raw field.
+ */
+static int _GD_ParseFormatFile(FILE* fp, DIRFILE *D, const char* filedir,
+    const char* subdir, const char* format_file, int format_parent,
+    int standards)
+{
+  char instring[MAX_LINE_LENGTH];
+  int linenum = 0;
+  int have_first = 0;
+
+  dtrace("%p, %p, \"%s\", \"%s\", \"%s\", %i, %i", fp, D, filedir, subdir,
+      format_file, format_parent, standards);
+
+  /* start parsing */
+  while (_GD_GetLine(fp, instring, &linenum)) {
+    have_first = _GD_ParseFormatLine(D, instring, filedir, subdir, format_file,
+    format_parent, standards, linenum, have_first);
+
+    /* break out of loop (so we can return) if we've encountered an error */
+    if (D->error != GD_E_OK)
+      break;
+  }
+
+  dreturn("%i", have_first);
+  return have_first;
+}
+
+/* _GD_ParseFormatLine: Actually parse a single format file line.
  *       Returns 0 unless this format file contains the first raw field.
  */
 #define ACC_MODE_NONE  0
 #define ACC_MODE_OCTAL 1
 #define ACC_MODE_HEX   2
 #define ACC_MODE_UTF8  3
-static int _GD_ParseFormatFile(FILE* fp, DIRFILE *D, const char* filedir,
+int _GD_ParseFormatLine(DIRFILE *D, const char* instring, const char* filedir,
     const char* subdir, const char* format_file, int format_parent,
-    int standards)
+    int standards, int linenum, int have_first)
 {
-  char instring[MAX_LINE_LENGTH];
   char outstring[MAX_LINE_LENGTH];
   const char *in_cols[MAX_IN_COLS];
-  char* ip;
+  const char* ip;
   char* op = outstring;
   int n_cols = 0;
-  int linenum = 0;
   int escaped_char = 0;
   int quotated = 0;
   int ws = 1;
@@ -788,312 +814,309 @@ static int _GD_ParseFormatFile(FILE* fp, DIRFILE *D, const char* filedir,
   int n_acc = 0;
   int acc_mode = ACC_MODE_NONE;
   int me = D->n_include - 1;
-  int have_first = 0;
 
-  dtrace("%p, %p, \"%s\", \"%s\", \"%s\", %i", fp, D, filedir, subdir,
-      format_file, standards);
+  dtrace("%p, \"%s\", \"%s\", \"%s\", \"%s\", %i, %i, %i, %i, %i", D, instring,
+      filedir, subdir, format_file, format_parent, standards, linenum,
+      have_first);
 
   /* start parsing */
-  while (_GD_GetLine(fp, instring, &linenum)) {
-    n_cols = 0;
-    outstring[0] = '\0';
+  n_cols = 0;
+  outstring[0] = '\0';
 
-    /* tokenise the line */
-    for (ip = instring; *ip != '\0'; ++ip) {
-      if (escaped_char) {
+  /* tokenise the line */
+  for (ip = instring; *ip != '\0'; ++ip) {
+    if (escaped_char) {
+      if (ws) {
+        if (n_cols >= MAX_IN_COLS)
+          break; /* Ignore trailing data on the line */
+        in_cols[n_cols++] = op;
+      }
+
+      if (acc_mode == ACC_MODE_OCTAL) {
+        if (*ip >= '0' && *ip <= '7') {
+          accumulator = accumulator * 8 + *ip - '0';
+          n_acc++;
+        }
+
+        if (n_acc == 3 || accumulator > 037 || *ip < '0' || *ip > '7') {
+          if (accumulator == 0) {
+            _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_CHARACTER, format_file,
+                linenum, NULL);
+            break;
+          }
+
+          *(op++) = accumulator;
+
+          if (*ip < '0' || *ip > '7')
+            ip--; /* rewind */
+          escaped_char = 0;
+        }
+      } else if (acc_mode != ACC_MODE_NONE) {
+        if (isxdigit(*ip)) {
+          n_acc++;
+          if (*ip >= '0' && *ip <= '9')
+            accumulator = accumulator * 16 + *ip - '0';
+          else if (*ip >= 'A' && *ip <= 'F')
+            accumulator = accumulator * 16 + *ip - 'A';
+          else
+            accumulator = accumulator * 16 + *ip - 'a';
+        }
+
+        if (acc_mode == ACC_MODE_HEX && (n_acc == 2 || !isxdigit(*ip))) {
+          if (accumulator == 0) {
+            _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_CHARACTER, format_file,
+                linenum, NULL);
+            break;
+          }
+
+          *(op++) = accumulator;
+
+          if (!isxdigit(*ip))
+            ip--; /* rewind */
+          escaped_char = 0;
+        } else if (acc_mode == ACC_MODE_UTF8 && (n_acc == 7 ||
+              accumulator > 0x10FF || !isxdigit(*ip)))
+        {
+          if (utf8encode(D, format_file, linenum, &op, accumulator))
+            break; /* syntax error */
+
+          if (!isxdigit(*ip))
+            ip--; /* rewind */
+          escaped_char = 0;
+        }
+      } else {
+        switch(*ip) {
+          case 'a':
+            *(op++) = '\a';
+            escaped_char = 0;
+            break;
+          case 'b':
+            *(op++) = '\b';
+            escaped_char = 0;
+            break;
+          case 'e':
+            *(op++) = '\x1B';
+            escaped_char = 0;
+            break;
+          case 'f':
+            *(op++) = '\b';
+            escaped_char = 0;
+            break;
+          case 'n':
+            *(op++) = '\n';
+            escaped_char = 0;
+            break;
+          case 'r':
+            *(op++) = '\r';
+            escaped_char = 0;
+            break;
+          case 't':
+            *(op++) = '\t';
+            escaped_char = 0;
+            break;
+          case 'v':
+            *(op++) = '\v';
+            escaped_char = 0;
+            break;
+          case '0':
+          case '1':
+          case '2':
+          case '3':
+          case '4':
+          case '5':
+          case '6':
+          case '7':
+            n_acc = 1;
+            accumulator = *ip - '0';
+            acc_mode = ACC_MODE_OCTAL;
+            break;
+          case 'u':
+            n_acc = 0;
+            accumulator = 0;
+            acc_mode = ACC_MODE_UTF8;
+            break;
+          case 'x':
+            n_acc = 0;
+            accumulator = 0;
+            acc_mode = ACC_MODE_HEX;
+            break;
+          default:
+            *(op++) = *ip;
+            escaped_char = 0;
+        }
+      }
+    } else {
+      if (*ip == '\\')
+        escaped_char = 1;
+      else if (*ip == '"')
+        quotated = !quotated;
+      else if (!quotated && isspace(*ip)) {
+        if (!ws)
+          *(op++) = '\0';
+        ws = 1;
+      } else if (!quotated && *ip == '#') {
+        *op = '\0';
+        break;
+      } else {
         if (ws) {
           if (n_cols >= MAX_IN_COLS)
             break; /* Ignore trailing data on the line */
           in_cols[n_cols++] = op;
         }
-
-        if (acc_mode == ACC_MODE_OCTAL) {
-          if (*ip >= '0' && *ip <= '7') {
-            accumulator = accumulator * 8 + *ip - '0';
-            n_acc++;
-          }
-
-          if (n_acc == 3 || accumulator > 037 || *ip < '0' || *ip > '7') {
-            if (accumulator == 0) {
-              _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_CHARACTER, format_file,
-                  linenum, NULL);
-              break;
-            }
-
-            *(op++) = accumulator;
-
-            if (*ip < '0' || *ip > '7')
-              ip--; /* rewind */
-            escaped_char = 0;
-          }
-        } else if (acc_mode != ACC_MODE_NONE) {
-          if (isxdigit(*ip)) {
-            n_acc++;
-            if (*ip >= '0' && *ip <= '9')
-              accumulator = accumulator * 16 + *ip - '0';
-            else if (*ip >= 'A' && *ip <= 'F')
-              accumulator = accumulator * 16 + *ip - 'A';
-            else
-              accumulator = accumulator * 16 + *ip - 'a';
-          }
-
-          if (acc_mode == ACC_MODE_HEX && (n_acc == 2 || !isxdigit(*ip))) {
-            if (accumulator == 0) {
-              _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_CHARACTER, format_file,
-                  linenum, NULL);
-              break;
-            }
-
-            *(op++) = accumulator;
-
-            if (!isxdigit(*ip))
-              ip--; /* rewind */
-            escaped_char = 0;
-          } else if (acc_mode == ACC_MODE_UTF8 && (n_acc == 7 ||
-                accumulator > 0x10FF || !isxdigit(*ip)))
-          {
-            if (utf8encode(D, format_file, linenum, &op, accumulator))
-              break; /* syntax error */
-
-            if (!isxdigit(*ip))
-              ip--; /* rewind */
-            escaped_char = 0;
-          }
-        } else {
-          switch(*ip) {
-            case 'a':
-              *(op++) = '\a';
-              escaped_char = 0;
-              break;
-            case 'b':
-              *(op++) = '\b';
-              escaped_char = 0;
-              break;
-            case 'e':
-              *(op++) = '\x1B';
-              escaped_char = 0;
-              break;
-            case 'f':
-              *(op++) = '\b';
-              escaped_char = 0;
-              break;
-            case 'n':
-              *(op++) = '\n';
-              escaped_char = 0;
-              break;
-            case 'r':
-              *(op++) = '\r';
-              escaped_char = 0;
-              break;
-            case 't':
-              *(op++) = '\t';
-              escaped_char = 0;
-              break;
-            case 'v':
-              *(op++) = '\v';
-              escaped_char = 0;
-              break;
-            case '0':
-            case '1':
-            case '2':
-            case '3':
-            case '4':
-            case '5':
-            case '6':
-            case '7':
-              n_acc = 1;
-              accumulator = *ip - '0';
-              acc_mode = ACC_MODE_OCTAL;
-              break;
-            case 'u':
-              n_acc = 0;
-              accumulator = 0;
-              acc_mode = ACC_MODE_UTF8;
-              break;
-            case 'x':
-              n_acc = 0;
-              accumulator = 0;
-              acc_mode = ACC_MODE_HEX;
-              break;
-            default:
-              *(op++) = *ip;
-              escaped_char = 0;
-          }
-        }
-      } else {
-        if (*ip == '\\')
-          escaped_char = 1;
-        else if (*ip == '"')
-          quotated = !quotated;
-        else if (!quotated && isspace(*ip)) {
-          if (!ws)
-            *(op++) = '\0';
-          ws = 1;
-        } else if (!quotated && *ip == '#') {
-          *op = '\0';
-          break;
-        } else {
-          if (ws) {
-            if (n_cols >= MAX_IN_COLS)
-              break; /* Ignore trailing data on the line */
-            in_cols[n_cols++] = op;
-          }
-          ws = 0;
-          *(op++) = *ip;
-        }
+        ws = 0;
+        *(op++) = *ip;
       }
     }
+  }
 
-    /* set up for possibly slashed reserved words */
-    ip = (char*)in_cols[0] + ((in_cols[0][0] == '/') ? 1 : 0);
+  /* set up for possibly slashed reserved words */
+  ip = (char*)in_cols[0] + ((in_cols[0][0] == '/') ? 1 : 0);
 
-    if (D->error) {
-      ; /* tokeniser threw an error */
-    } else if (quotated || escaped_char) { /* Unterminated token */
-      _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_UNTERM, format_file, linenum,
-          NULL);
-    } else if (n_cols < 2) {
-      _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_COLS, format_file, linenum,
-          NULL);
+  if (D->error) {
+    ; /* tokeniser threw an error */
+  } else if (quotated || escaped_char) { /* Unterminated token */
+    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_UNTERM, format_file, linenum,
+        NULL);
+  } else if (n_cols < 2) {
+    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_COLS, format_file, linenum,
+        NULL);
 
-      /* Directives */
+    /* Directives */
 
-    } else if (strcmp(ip, "FRAMEOFFSET") == 0) {
-      D->frame_offset = atoll(in_cols[1]);
-    } else if (strcmp(ip, "INCLUDE") == 0) {
-      unsigned int i;
-      int found = 0;
-      char temp_buffer[FILENAME_MAX];
-      char new_format_file[FILENAME_MAX];
-      char new_subdir[FILENAME_MAX];
-      FILE* new_fp = NULL;
+  } else if (strcmp(ip, "FRAMEOFFSET") == 0) {
+    D->frame_offset = atoll(in_cols[1]);
+  } else if (strcmp(ip, "INCLUDE") == 0) {
+    unsigned int i;
+    int found = 0;
+    char temp_buffer[FILENAME_MAX];
+    char new_format_file[FILENAME_MAX];
+    char new_subdir[FILENAME_MAX];
+    FILE* new_fp = NULL;
 
-      /* create the format filename */
-      snprintf(new_format_file, FILENAME_MAX, "%s/%s/%s", filedir,
-          subdir, in_cols[1]);
+    /* create the format filename */
+    snprintf(new_format_file, FILENAME_MAX, "%s/%s/%s", filedir,
+        subdir, in_cols[1]);
 
-      /* Run through the include list to see if we've already included this
-       * file */
-      for (i = 0; i < D->n_include; ++i)
-        if (strcmp(new_format_file, D->include_list[i].cname) == 0) {
-          found = 1;
-          break;
-        }
-
-      /* If we found the file, we won't reopen it.  Continue parsing. */
-      if (found)
-        continue;
-
-      /* Otherwise, try to open the file */
-      new_fp = fopen(new_format_file, "r");
-
-      /* If opening the file failed, set the error code and abort parsing. */
-      if (new_fp == NULL) {
-        _GD_SetError(D, GD_E_OPEN_INCLUDE, errno, format_file, linenum,
-            new_format_file);
+    /* Run through the include list to see if we've already included this
+     * file */
+    for (i = 0; i < D->n_include; ++i)
+      if (strcmp(new_format_file, D->include_list[i].cname) == 0) {
+        found = 1;
         break;
       }
 
-      /* If we got here, we managed to open the included file; parse it */
-      D->include_list = realloc(D->include_list, ++(D->n_include) *
-          sizeof(struct gd_include_t));
-      if (D->include_list == NULL) {
-        _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-        dreturn("%i", have_first);
-        return have_first;
-      }
-      D->include_list[D->n_include - 1].cname = strdup(new_format_file);
-      D->include_list[D->n_include - 1].ename = strdup(in_cols[1]);
-      D->include_list[D->n_include - 1].modified = 0;
-      D->include_list[D->n_include - 1].parent = format_parent;
-      D->include_list[D->n_include - 1].first = 0;
+    /* If we found the file, we won't reopen it.  Continue parsing. */
+    if (found) {
+      dreturn("%i", have_first);
+      return have_first;
+    }
 
-      if (D->include_list[D->n_include - 1].cname == NULL ||
-          D->include_list[D->n_include - 1].ename == NULL)
-      {
-        _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-        dreturn("%i", have_first);
-        return have_first;
-      }
+    /* Otherwise, try to open the file */
+    new_fp = fopen(new_format_file, "r");
 
-      /* extract the subdirectory name - dirname both returns a volatile string
-       * and modifies its argument, ergo strcpy */
-      strcpy(temp_buffer, in_cols[1]);
-      if (strcmp(subdir, ".") == 0)
-        strcpy(new_subdir, dirname(temp_buffer));
+    /* If opening the file failed, set the error code and abort parsing. */
+    if (new_fp == NULL) {
+      _GD_SetError(D, GD_E_OPEN_INCLUDE, errno, format_file, linenum,
+          new_format_file);
+      dreturn("%i", have_first);
+      return have_first;
+    }
+
+    /* If we got here, we managed to open the included file; parse it */
+    D->include_list = realloc(D->include_list, ++(D->n_include) *
+        sizeof(struct gd_include_t));
+    if (D->include_list == NULL) {
+      _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+      dreturn("%i", have_first);
+      return have_first;
+    }
+    D->include_list[D->n_include - 1].cname = strdup(new_format_file);
+    D->include_list[D->n_include - 1].ename = strdup(in_cols[1]);
+    D->include_list[D->n_include - 1].modified = 0;
+    D->include_list[D->n_include - 1].parent = format_parent;
+    D->include_list[D->n_include - 1].first = 0;
+
+    if (D->include_list[D->n_include - 1].cname == NULL ||
+        D->include_list[D->n_include - 1].ename == NULL)
+    {
+      _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+      dreturn("%i", have_first);
+      return have_first;
+    }
+
+    /* extract the subdirectory name - dirname both returns a volatile string
+     * and modifies its argument, ergo strcpy */
+    strcpy(temp_buffer, in_cols[1]);
+    if (strcmp(subdir, ".") == 0)
+      strcpy(new_subdir, dirname(temp_buffer));
+    else
+      snprintf(new_subdir, FILENAME_MAX, "%s/%s", subdir,
+          dirname(temp_buffer));
+
+    if (_GD_ParseFormatFile(new_fp, D, filedir, new_subdir, new_format_file,
+          me, standards))
+      D->include_list[me].first = 1;
+    fclose(new_fp);
+  } else if (strcmp(ip, "ENCODING") == 0) {
+    if (!(D->flags & GD_FORCE_ENCODING)) {
+      if (strcmp(in_cols[1], "none") == 0)
+        D->flags = (D->flags & ~GD_ENCODING) | GD_UNENCODED;
+      else if (strcmp(in_cols[1], "slim") == 0)
+        D->flags = (D->flags & ~GD_ENCODING) | GD_SLIM_ENCODED;
+      else if (strcmp(in_cols[1], "text") == 0)
+        D->flags = (D->flags & ~GD_ENCODING) | GD_TEXT_ENCODED;
       else
-        snprintf(new_subdir, FILENAME_MAX, "%s/%s", subdir,
-            dirname(temp_buffer));
-
-      if (_GD_ParseFormatFile(new_fp, D, filedir, new_subdir, new_format_file,
-            me, standards))
-        D->include_list[me].first = 1;
-      fclose(new_fp);
-    } else if (strcmp(ip, "ENCODING") == 0) {
-      if (!(D->flags & GD_FORCE_ENCODING)) {
-        if (strcmp(in_cols[1], "none") == 0)
-          D->flags = (D->flags & ~GD_ENCODING) | GD_UNENCODED;
-        else if (strcmp(in_cols[1], "slim") == 0)
-          D->flags = (D->flags & ~GD_ENCODING) | GD_SLIM_ENCODED;
-        else if (strcmp(in_cols[1], "text") == 0)
-          D->flags = (D->flags & ~GD_ENCODING) | GD_TEXT_ENCODED;
-        else
-          D->flags = (D->flags & ~GD_ENCODING) | GD_ENC_UNSUPPORTED;
-      }
-    } else if (strcmp(ip, "ENDIAN") == 0) {
-      if (!(D->flags & GD_FORCE_ENDIAN)) {
-        if (strcmp(in_cols[1], "big") == 0) {
-          D->flags |= GD_BIG_ENDIAN;
-          D->flags &= ~GD_LITTLE_ENDIAN;
-        } else if (strcmp(in_cols[1], "little") == 0) {
-          D->flags |= GD_LITTLE_ENDIAN;
-          D->flags &= ~GD_BIG_ENDIAN;
-        } else 
-          _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_ENDIAN, format_file, linenum,
-              NULL);
-      }
-    } else if (strcmp(ip, "META") == 0) {
-      const gd_entry_t* P =  _GD_GetEntry(D, in_cols[1], NULL);
-      if (P == NULL)
-        _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_NO_PARENT, format_file,
-            linenum, in_cols[1]);
-      else if (n_cols < 4)
-        _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_COLS, format_file, linenum,
+        D->flags = (D->flags & ~GD_ENCODING) | GD_ENC_UNSUPPORTED;
+    }
+  } else if (strcmp(ip, "ENDIAN") == 0) {
+    if (!(D->flags & GD_FORCE_ENDIAN)) {
+      if (strcmp(in_cols[1], "big") == 0) {
+        D->flags |= GD_BIG_ENDIAN;
+        D->flags &= ~GD_LITTLE_ENDIAN;
+      } else if (strcmp(in_cols[1], "little") == 0) {
+        D->flags |= GD_LITTLE_ENDIAN;
+        D->flags &= ~GD_BIG_ENDIAN;
+      } else 
+        _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_ENDIAN, format_file, linenum,
             NULL);
-      else {
-        gd_entry_t* E = _GD_ParseFieldSpec(D, n_cols - 2, in_cols + 2, P,
-            subdir, format_file, linenum, have_first, me, standards);
-        if (!D->error) {
-          /* there is no need to sort this list */
-          P->e->meta_entry = realloc(P->e->meta_entry, (P->e->n_meta + 1) *
-              sizeof(gd_entry_t*));
-          P->e->meta_entry[P->e->n_meta++] = E;
-
-          D->n_meta++;
-          if (E->field_type == GD_CONST_ENTRY)
-            P->e->n_meta_const++;
-          else if (E->field_type == GD_STRING_ENTRY)
-            P->e->n_meta_string++;
-        }
-      }
-    } else if (strcmp(ip, "VERSION") == 0) {
-      standards = atoi(in_cols[1]);
-
-      /* Field Types -- here we go back to in_cols */
-
-    } else if ((strcmp(in_cols[0], "INDEX") == 0) ||
-        (strcmp(in_cols[0], "FILEFRAM") == 0))
-    { /* reserved field names */
-      _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_RES_NAME, format_file, linenum,
+    }
+  } else if (strcmp(ip, "META") == 0) {
+    const gd_entry_t* P =  _GD_GetEntry(D, in_cols[1], NULL);
+    if (P == NULL)
+      _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_NO_PARENT, format_file,
+          linenum, in_cols[1]);
+    else if (n_cols < 4)
+      _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_COLS, format_file, linenum,
           NULL);
-    } else
-      _GD_ParseFieldSpec(D, n_cols, in_cols, NULL, subdir, format_file, linenum,
-          have_first, me, standards);
+    else {
+      gd_entry_t* E = _GD_ParseFieldSpec(D, n_cols - 2, in_cols + 2, P,
+          subdir, format_file, linenum, &have_first, me, standards);
+      if (!D->error) {
+        /* there is no need to sort this list */
+        P->e->meta_entry = realloc(P->e->meta_entry, (P->e->n_meta + 1) *
+            sizeof(gd_entry_t*));
+        P->e->meta_entry[P->e->n_meta++] = E;
 
-    /* break out of loop (so we can return) if we've encountered an error */
-    if (D->error != GD_E_OK)
-      break;
-  }
+        D->n_meta++;
+        if (E->field_type == GD_CONST_ENTRY)
+          P->e->n_meta_const++;
+        else if (E->field_type == GD_STRING_ENTRY)
+          P->e->n_meta_string++;
+      }
+    }
+  } else if (strcmp(ip, "VERSION") == 0) {
+    standards = atoi(in_cols[1]);
+
+    /* Field Types -- here we go back to in_cols */
+
+  } else if ((strcmp(in_cols[0], "INDEX") == 0) ||
+      (strcmp(in_cols[0], "FILEFRAM") == 0))
+  { /* reserved field names */
+    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_RES_NAME, format_file, linenum,
+        NULL);
+  } else
+    _GD_ParseFieldSpec(D, n_cols, in_cols, NULL, subdir, format_file, linenum,
+        &have_first, me, standards);
 
   dreturn("%i", have_first);
   return have_first;

@@ -32,6 +32,13 @@ spf_SOURCES=spf.cpp
 
 check_PROGRAMS=${TESTS}
 
+# clean up after the tests
+check-local: check-TESTS
+	$(MAKE) getdata-clean-dirs
+
+getdata-clean-dirs:
+	rm -rvf *odirfile
+
 clean-local:
-	rm -rf *odirfile
+	$(MAKE) getdata-clean-dirs
 	rm -rf *~
