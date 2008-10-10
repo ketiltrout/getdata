@@ -60,16 +60,17 @@ static __attribute__ ((__const__)) double __NAN()
 /* encoding schemas */
 const struct encoding_t encode[] = {
   { GD_UNENCODED, "", &_GD_RawOpen, &_GD_RawSeek, &_GD_RawRead,
-    &_GD_RawSize, &_GD_RawWrite, &_GD_RawSync, &_GD_RawClose },
+    &_GD_RawSize, &_GD_RawWrite, &_GD_RawSync, &_GD_RawTouch, &_GD_RawClose },
   { GD_TEXT_ENCODED, ".txt", &_GD_AsciiOpen, &_GD_AsciiSeek, &_GD_AsciiRead,
-    &_GD_AsciiSize, &_GD_AsciiWrite, &_GD_AsciiSync, &_GD_AsciiClose },
+    &_GD_AsciiSize, &_GD_AsciiWrite, &_GD_AsciiSync, &_GD_RawTouch,
+    &_GD_AsciiClose },
 #ifdef USE_SLIMLIB
   { GD_SLIM_ENCODED, ".slm", &_GD_SlimOpen, &_GD_SlimSeek, &_GD_SlimRead,
-    &_GD_SlimSize, NULL, NULL, &_GD_SlimClose },
+    &_GD_SlimSize, NULL, NULL, NULL, &_GD_SlimClose },
 #else
-  { GD_SLIM_ENCODED, ".slm", NULL, NULL, NULL, NULL, NULL, NULL, NULL },
+  { GD_SLIM_ENCODED, ".slm", NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL },
 #endif
-  { GD_ENC_UNSUPPORTED, "",  NULL, NULL, NULL, NULL, NULL, NULL, NULL },
+  { GD_ENC_UNSUPPORTED, "",  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL },
 };
 
 /* _GD_FillFileFrame: fill dataout with frame indices

@@ -209,7 +209,7 @@ consist of the parent and metadata field names joined with a forward slash:
 .IB <parent-field> / <meta-field>
 .PP
 META fields of type RAW are prohibited.  Furthermore, META fields may not be
-specified before their parent field is.  Syntax is:
+specified before their parent field has been.  Syntax is:
 .IP
 .B /META
 .I <parent-field>
@@ -244,9 +244,9 @@ compatibility.  Syntax is:
 .RE
 .PP
 Like the rest of the format file, these reserved words are case sensitive.
-Except for the INCLUDE directive, each instance of which must be processed
-independently, if multiple instances of a directive are present in a dirfile
-format file, only the last such instance will be honoured.
+Except for the INCLUDE and META directives, each instance of which must be
+processed independently, if multiple instances of a directive are present in a
+dirfile format file, only the last such instance will be honoured.
 
 .SS Field Specification Lines
 
@@ -267,7 +267,7 @@ frame index.  Field names are case sensitive.  The second token in the field
 specification line is the field type.  The meaning of subsequent tokens depends
 on the field type.
 
-There are five field types:
+There are eight field types:
 .TP
 .B BIT
 The BIT field type extracts one or more bits out of an input field.  Syntax is:

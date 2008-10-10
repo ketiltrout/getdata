@@ -36,15 +36,12 @@ int main(void)
   close(fd);
 
   DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
-  unsigned int nfields = get_nfields(D);
+  unsigned int nfields = get_nmeta_fields_by_type(D, "raw9", GD_STRING_ENTRY);
   int error = get_error(D);
   dirfile_close(D);
 
   unlink(format);
   rmdir(filedir);
 
-  if (error)
-    return 1;
-
-  return (nfields != 7);
+  return (error != GD_E_BAD_CODE);
 }

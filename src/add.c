@@ -23,6 +23,7 @@
 #ifdef STDC_HEADERS
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -138,14 +139,12 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
   if (E->field == entry->field) {
     _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, NULL);
     E->field = NULL;
-    dirfile_free_entry_strings(E);
-    free(E);
+    _GD_FreeE(E, 1);
     dreturn("%i", -1);
     return -1;
   } else if (E->field == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-    dirfile_free_entry_strings(E);
-    free(E);
+    _GD_FreeE(E, 1);
     dreturn("%i", -1);
     return -1;
   }
@@ -204,26 +203,23 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
             NULL);
       else if (E->data_type & 0x40 || (E->size = GD_SIZE(E->data_type)) == 0)
         _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, entry->data_type, NULL);
-      else {
-        /* create an empty file */
-        snprintf(temp_buffer, FILENAME_MAX, "%s%s", E->e->file,
-            encode[E->e->encoding].ext);
-        close(open(temp_buffer, O_CREAT | O_TRUNC, 0666));
-
+      else if (encode[E->e->encoding].touch == NULL) 
+        _GD_SetError(D, GD_E_UNSUPPORTED, 0, NULL, 0, NULL);
+      else if ((*encode[E->e->encoding].touch)(E->e->file))
+        _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file, errno, NULL);
+      else if (D->first_field == NULL) {
+        /* This is the first raw field */
+        E->e->first = 1;
+        D->first_field = malloc(sizeof(gd_entry_t));
         if (D->first_field == NULL) {
-          /* This is the first raw field */
-          E->e->first = 1;
-          D->first_field = malloc(sizeof(gd_entry_t));
-          if (D->first_field == NULL) {
-            _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-            break;
-          }
-
-          memcpy(D->first_field, E, sizeof(gd_entry_t));
-          /* Tag the include list */
-          for (i = E->format_file; i != -1; i = D->include_list[i].parent)
-            D->include_list[i].first = D->include_list[i].modified = 1;
+          _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+          break;
         }
+
+        memcpy(D->first_field, E, sizeof(gd_entry_t));
+        /* Tag the include list */
+        for (i = E->format_file; i != -1; i = D->include_list[i].parent)
+          D->include_list[i].first = D->include_list[i].modified = 1;
       }
       break;
     case GD_LINCOM_ENTRY:
@@ -288,8 +284,7 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
   }
 
   if (D->error != GD_E_OK) {
-    dirfile_free_entry_strings(E);
-    free(E);
+    _GD_FreeE(E, 1);
     dreturn("%i", -1);
     return -1;
   }

@@ -25,15 +25,15 @@
 #include <stdlib.h>
 #endif
 
-gd_entry_t* dirfile_free_entry_strings(gd_entry_t* entry)
+void _GD_FreeE(gd_entry_t* entry, int priv)
 {
   int i;
 
-  dtrace("%p", entry);
+  dtrace("%p, %i", entry, priv);
 
   if (!entry || entry->field_type == GD_NO_ENTRY) {
-    dreturn("%p", entry);
-    return entry;
+    dreturnvoid();
+    return;
   }
 
   free(entry->field);
@@ -55,7 +55,7 @@ gd_entry_t* dirfile_free_entry_strings(gd_entry_t* entry)
       free(entry->in_fields[0]);
       break;
     case GD_STRING_ENTRY:
-      if (entry->e != NULL)
+      if (priv && entry->e != NULL)
         free(entry->e->string);
       break;
     case GD_CONST_ENTRY:
@@ -64,7 +64,26 @@ gd_entry_t* dirfile_free_entry_strings(gd_entry_t* entry)
       break;
   }
 
-  free(entry->e);
+  if (priv) {
+    free(entry->e->field_list);
+    free(entry->e->vector_list);
+    free(entry->e->string_list);
+    free(entry->e->string_value_list);
+    free(entry->e->const_list);
+    free(entry->e->const_value_list);
+    free(entry->e);
+    free(entry);
+  }
+
+  dreturnvoid();
+  return;
+}
+
+gd_entry_t* dirfile_free_entry_strings(gd_entry_t* entry)
+{
+  dtrace("%p", entry);
+
+  _GD_FreeE(entry, 0);
 
   dreturn("%p", entry);
   return entry;

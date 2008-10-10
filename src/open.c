@@ -123,70 +123,65 @@ static gd_entry_t* _GD_ParseRaw(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
     return NULL;
   }
 
-  gd_entry_t* R = malloc(sizeof(gd_entry_t));
-  if (R == NULL) {
+  gd_entry_t* E = malloc(sizeof(gd_entry_t));
+  if (E == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     dreturn("%p", NULL);
     return NULL;
   }
 
-  R->e = malloc(sizeof(struct _gd_private_entry));
-  if (R->e == NULL) {
+  E->e = malloc(sizeof(struct _gd_private_entry));
+  if (E->e == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-    free(R);
+    free(E);
     dreturn("%p", NULL);
     return NULL;
   }
 
-  R->field_type = GD_RAW_ENTRY;
-  R->e->file = NULL;
-  R->e->fp = -1; /* file not opened yet */
-  R->e->stream = NULL; /* file not opened yet */
-  R->e->n_meta = -1;
-  R->e->encoding = GD_ENC_UNKNOWN; /* don't know the encoding subscheme yet */
-  R->format_file = D->n_include - 1;
+  E->field_type = GD_RAW_ENTRY;
+  E->e->file = NULL;
+  E->e->fp = -1; /* file not opened yet */
+  E->e->stream = NULL; /* file not opened yet */
+  E->e->encoding = GD_ENC_UNKNOWN; /* don't know the encoding subscheme yet */
 
-  R->field = _GD_ValidateField(NULL, in_cols[0]);
-  if (R->field == in_cols[0]) {
+  E->field = _GD_ValidateField(NULL, in_cols[0]);
+  if (E->field == in_cols[0]) {
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_NAME, format_file, line,
         in_cols[0]);
-    R->field = NULL;
-    dirfile_free_entry_strings(R);
-    free(R);
+    E->field = NULL;
+    _GD_FreeE(E, 1);
     dreturn("%p", NULL);
     return NULL;
   }
 
-  R->e->file = malloc(FILENAME_MAX);
-  if (R->e->file == NULL) {
+  E->e->file = malloc(FILENAME_MAX);
+  if (E->e->file == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-    R->field = NULL;
-    dirfile_free_entry_strings(R);
-    free(R);
+    E->field = NULL;
+    _GD_FreeE(E, 1);
     dreturn("%p", NULL);
     return NULL;
   }
 
-  snprintf((char*)R->e->file, FILENAME_MAX, "%s/%s/%s", D->name, subdir,
+  snprintf((char*)E->e->file, FILENAME_MAX, "%s/%s/%s", D->name, subdir,
       in_cols[0]);
-  R->data_type = _GD_RawType(in_cols[2]);
-  R->size = GD_SIZE(R->data_type);
+  E->data_type = _GD_RawType(in_cols[2]);
+  E->size = GD_SIZE(E->data_type);
 
-  if (R->size == 0 || R->data_type & 0x40)
+  if (E->size == 0 || E->data_type & 0x40)
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_TYPE, format_file, line,
         in_cols[2]);
-  else if ((R->spf = atoi(in_cols[3])) <= 0)
+  else if ((E->spf = atoi(in_cols[3])) <= 0)
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_SPF, format_file, line,
         in_cols[3]);
 
   if (D->error != GD_E_OK) {
-    dirfile_free_entry_strings(R);
-    free(R);
-    R = NULL;
+    _GD_FreeE(E, 1);
+    E = NULL;
   }
 
-  dreturn("%p", R);
-  return R;
+  dreturn("%p", E);
+  return E;
 }
 
 /* _GD_ParseLincom: parse a LINCOM data type in the format file.
@@ -205,72 +200,62 @@ static gd_entry_t* _GD_ParseLincom(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
     return NULL;
   }
 
-  gd_entry_t* L = malloc(sizeof(gd_entry_t));
-  if (L == NULL) {
+  gd_entry_t* E = malloc(sizeof(gd_entry_t));
+  if (E == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     dreturn("%p", NULL);
     return NULL;
   }
 
-  L->e = malloc(sizeof(struct _gd_private_entry));
-  if (L->e == NULL) {
+  E->e = malloc(sizeof(struct _gd_private_entry));
+  if (E->e == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-    free(L);
+    free(E);
     dreturn("%p", NULL);
     return NULL;
   }
 
-  L->field_type = GD_LINCOM_ENTRY;
+  E->field_type = GD_LINCOM_ENTRY;
   for (i = 0; i < GD_MAX_LINCOM; ++i) {
-    L->in_fields[i] = NULL;
-    L->e->entry[i] = NULL;
-  }
-  L->format_file = D->n_include - 1;
-
-  if (parent == NULL)
-    L->e->n_meta = -1;
-  else {
-    L->e->n_meta = L->e->n_meta_string = L->e->n_meta_const = 0;
-    L->e->meta_entry = NULL;
+    E->in_fields[i] = NULL;
+    E->e->entry[i] = NULL;
   }
 
-  L->field = _GD_ValidateField(parent, in_cols[0]);
-  if (L->field == in_cols[0]) {
+  E->field = _GD_ValidateField(parent, in_cols[0]);
+  if (E->field == in_cols[0]) {
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_NAME, format_file, line,
         in_cols[0]);
-    L->field = NULL;
-    dirfile_free_entry_strings(L);
-    free(L);
+    E->field = NULL;
+    _GD_FreeE(E, 1);
     dreturn("%p", NULL);
     return NULL;
   }
 
-  L->n_fields = atoi(in_cols[2]);
+  E->n_fields = atoi(in_cols[2]);
 
-  if (L->field == NULL)
+  if (E->field == NULL)
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-  else if ((L->n_fields < 1) || (L->n_fields > GD_MAX_LINCOM))
+  else if ((E->n_fields < 1) || (E->n_fields > GD_MAX_LINCOM))
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_FIELDS, format_file, line,
         in_cols[2]);
-  else if (n_cols < L->n_fields * 3 + 3)
+  else if (n_cols < E->n_fields * 3 + 3)
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_COLS, format_file, line, NULL);
   else
-    for (i = 0; i < L->n_fields; i++) {
-      L->in_fields[i] = strdup(in_cols[i * 3 + 3]);
-      if (L->in_fields[i] == NULL)
+    for (i = 0; i < E->n_fields; i++) {
+      E->in_fields[i] = strdup(in_cols[i * 3 + 3]);
+      if (E->in_fields[i] == NULL)
         _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-      L->m[i] = atof(in_cols[i * 3 + 4]);
-      L->b[i] = atof(in_cols[i * 3 + 5]);
+      E->m[i] = atof(in_cols[i * 3 + 4]);
+      E->b[i] = atof(in_cols[i * 3 + 5]);
     }
 
   if (D->error != GD_E_OK) {
-    dirfile_free_entry_strings(L);
-    free(L);
-    L = NULL;
+    _GD_FreeE(E, 1);
+    E = NULL;
   }
 
-  dreturn("%p", L);
-  return L;
+  dreturn("%p", E);
+  return E;
 }
 
 /* _GD_ParseLinterp: parse a LINTERP data type in the format file.
@@ -290,71 +275,61 @@ static gd_entry_t* _GD_ParseLinterp(DIRFILE* D,
     return NULL;
   }
 
-  gd_entry_t* L = malloc(sizeof(gd_entry_t));
-  if (L == NULL) {
+  gd_entry_t* E = malloc(sizeof(gd_entry_t));
+  if (E == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     dreturn("%p", NULL);
     return NULL;
   }
 
-  L->e = malloc(sizeof(struct _gd_private_entry));
-  if (L->e == NULL) {
+  E->e = malloc(sizeof(struct _gd_private_entry));
+  if (E->e == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-    free(L);
+    free(E);
     dreturn("%p", NULL);
     return NULL;
   }
 
-  L->field_type = GD_LINTERP_ENTRY;
-  L->in_fields[0] = NULL;
-  L->e->entry[0] = NULL;
-  L->table = NULL;
-  L->format_file = D->n_include - 1;
+  E->field_type = GD_LINTERP_ENTRY;
+  E->in_fields[0] = NULL;
+  E->e->entry[0] = NULL;
+  E->table = NULL;
 
-  if (parent == NULL)
-    L->e->n_meta = -1;
-  else {
-    L->e->n_meta = L->e->n_meta_string = L->e->n_meta_const = 0;
-    L->e->meta_entry = NULL;
-  }
-
-  L->field = _GD_ValidateField(parent, in_cols[0]);
-  if (L->field == in_cols[0]) {
+  E->field = _GD_ValidateField(parent, in_cols[0]);
+  if (E->field == in_cols[0]) {
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_NAME, format_file, line,
         in_cols[0]);
-    L->field = NULL;
-    dirfile_free_entry_strings(L);
-    free(L);
+    E->field = NULL;
+    _GD_FreeE(E, 1);
     dreturn("%p", NULL);
     return NULL;
   }
 
-  L->in_fields[0] = strdup(in_cols[2]);
-  L->e->table_len = -1; /* linterp file not read yet */
+  E->in_fields[0] = strdup(in_cols[2]);
+  E->e->table_len = -1; /* linterp file not read yet */
 
 
   if (in_cols[3][0] == '/')
-    L->table = strdup(in_cols[3]);
+    E->table = strdup(in_cols[3]);
   else {
     /* non-absolute paths are relative to the format file's directory */
-    L->table = malloc(FILENAME_MAX);
-    if (L->table != NULL) {
+    E->table = malloc(FILENAME_MAX);
+    if (E->table != NULL) {
       strcpy(temp_buffer, format_file);
-      strcpy(L->table, dirname(temp_buffer));
-      strcat(L->table, "/");
-      strcat(L->table, in_cols[3]);
+      strcpy(E->table, dirname(temp_buffer));
+      strcat(E->table, "/");
+      strcat(E->table, in_cols[3]);
     }
   }
 
-  if (L->field == NULL || L->in_fields[0] == NULL || L->table == NULL) {
+  if (E->field == NULL || E->in_fields[0] == NULL || E->table == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-    dirfile_free_entry_strings(L);
-    free(L);
-    L = NULL;
+    _GD_FreeE(E, 1);
+    E = NULL;
   }
 
-  dreturn("%p", L);
-  return L;
+  dreturn("%p", E);
+  return E;
 }
 
 /* _GD_ParseMultiply: parse MULTIPLY data type entry in format file.
@@ -372,56 +347,46 @@ static gd_entry_t* _GD_ParseMultiply(DIRFILE* D,
     return NULL;
   }
 
-  gd_entry_t* M = malloc(sizeof(gd_entry_t));
-  if (M == NULL) {
+  gd_entry_t* E = malloc(sizeof(gd_entry_t));
+  if (E == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     dreturn("%p", NULL);
     return NULL;
   }
 
-  M->e = malloc(sizeof(struct _gd_private_entry));
-  if (M->e == NULL) {
+  E->e = malloc(sizeof(struct _gd_private_entry));
+  if (E->e == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-    free(M);
+    free(E);
     dreturn("%p", NULL);
     return NULL;
   }
 
-  M->field_type = GD_MULTIPLY_ENTRY;
-  M->in_fields[0] = M->in_fields[1] = NULL;
-  M->e->entry[0] = M->e->entry[1] = NULL;
-  M->format_file = D->n_include - 1;
+  E->field_type = GD_MULTIPLY_ENTRY;
+  E->in_fields[0] = E->in_fields[1] = NULL;
+  E->e->entry[0] = E->e->entry[1] = NULL;
 
-  if (parent != NULL)
-    M->e->n_meta = -1;
-  else {
-    M->e->n_meta = M->e->n_meta_string = M->e->n_meta_const = 0;
-    M->e->meta_entry = NULL;
-  }
-
-  M->field = _GD_ValidateField(parent, in_cols[0]);
-  if (M->field == in_cols[0]) {
+  E->field = _GD_ValidateField(parent, in_cols[0]);
+  if (E->field == in_cols[0]) {
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_NAME, format_file, line,
         in_cols[0]);
-    M->field = NULL;
-    dirfile_free_entry_strings(M);
-    free(M);
+    E->field = NULL;
+    _GD_FreeE(E, 1);
     dreturn("%p", NULL);
     return NULL;
   }
 
-  M->in_fields[0] = strdup(in_cols[2]);
-  M->in_fields[1] = strdup(in_cols[3]);
+  E->in_fields[0] = strdup(in_cols[2]);
+  E->in_fields[1] = strdup(in_cols[3]);
 
-  if (M->field == NULL || M->in_fields[0] == NULL || M->in_fields[1] == NULL) {
+  if (E->field == NULL || E->in_fields[0] == NULL || E->in_fields[1] == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-    dirfile_free_entry_strings(M);
-    free(M);
-    M = NULL;
+    _GD_FreeE(E, 1);
+    E = NULL;
   }
 
-  dreturn("%p", M);
-  return M;
+  dreturn("%p", E);
+  return E;
 }
 
 /* _GD_ParseBit: parse BIT data type entry in format file.
@@ -438,70 +403,60 @@ static gd_entry_t* _GD_ParseBit(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
     return NULL;
   }
 
-  gd_entry_t* B = malloc(sizeof(gd_entry_t));
-  if (B == NULL) {
+  gd_entry_t* E = malloc(sizeof(gd_entry_t));
+  if (E == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     dreturn("%p", NULL);
     return NULL;
   }
 
-  B->e = malloc(sizeof(struct _gd_private_entry));
-  if (B->e == NULL) {
+  E->e = malloc(sizeof(struct _gd_private_entry));
+  if (E->e == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-    free(B);
+    free(E);
     dreturn("%p", NULL);
     return NULL;
   }
 
-  B->field_type = GD_BIT_ENTRY;
-  B->in_fields[0] = NULL;
-  B->e->entry[0] = NULL;
-  B->format_file = D->n_include - 1;
+  E->field_type = GD_BIT_ENTRY;
+  E->in_fields[0] = NULL;
+  E->e->entry[0] = NULL;
 
-  if (parent == NULL)
-    B->e->n_meta = -1;
-  else {
-    B->e->n_meta = B->e->n_meta_string = B->e->n_meta_const = 0;
-    B->e->meta_entry = NULL;
-  }
-
-  B->field = _GD_ValidateField(parent, in_cols[0]);
-  if (B->field == in_cols[0]) {
+  E->field = _GD_ValidateField(parent, in_cols[0]);
+  if (E->field == in_cols[0]) {
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_NAME, format_file, line,
         in_cols[0]);
-    B->field = NULL;
-    dirfile_free_entry_strings(B);
-    free(B);
+    E->field = NULL;
+    _GD_FreeE(E, 1);
     dreturn("%p", NULL);
     return NULL;
   }
 
-  B->in_fields[0] = strdup(in_cols[2]);
+  E->in_fields[0] = strdup(in_cols[2]);
 
-  if (B->field == NULL || B->in_fields[0] == NULL)
+  if (E->field == NULL || E->in_fields[0] == NULL)
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
 
-  B->bitnum = atoi(in_cols[3]);
+  E->bitnum = atoi(in_cols[3]);
   if (n_cols > 4)
-    B->numbits = atoi(in_cols[4]);
+    E->numbits = atoi(in_cols[4]);
   else
-    B->numbits = 1;
+    E->numbits = 1;
 
-  if (B->numbits < 1)
+  if (E->numbits < 1)
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_NUMBITS, format_file, line, NULL);
-  else if (B->bitnum < 0)
+  else if (E->bitnum < 0)
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BITNUM, format_file, line, NULL);
-  else if (B->bitnum + B->numbits - 1 > 63)
+  else if (E->bitnum + E->numbits - 1 > 63)
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BITSIZE, format_file, line, NULL);
 
   if (D->error != GD_E_OK) {
-    dirfile_free_entry_strings(B);
-    free(B);
-    B = NULL;
+    _GD_FreeE(E, 1);
+    E = NULL;
   }
 
-  dreturn("%p", B);
-  return B;
+  dreturn("%p", E);
+  return E;
 }
 
 /* _GD_ParsePhase: parse PHASE data type entry in formats file.
@@ -518,56 +473,46 @@ static gd_entry_t* _GD_ParsePhase(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
     return NULL;
   }
 
-  gd_entry_t* P = malloc(sizeof(gd_entry_t));
-  if (P == NULL) {
+  gd_entry_t* E = malloc(sizeof(gd_entry_t));
+  if (E == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     dreturn("%p", NULL);
     return NULL;
   }
 
-  P->e = malloc(sizeof(struct _gd_private_entry));
-  if (P->e == NULL) {
+  E->e = malloc(sizeof(struct _gd_private_entry));
+  if (E->e == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-    free(P);
+    free(E);
     dreturn("%p", NULL);
     return NULL;
   }
 
-  P->field_type = GD_PHASE_ENTRY;
-  P->in_fields[0] = NULL;
-  P->e->entry[0] = NULL;
-  P->format_file = D->n_include - 1;
+  E->field_type = GD_PHASE_ENTRY;
+  E->in_fields[0] = NULL;
+  E->e->entry[0] = NULL;
 
-  if (parent == NULL)
-    P->e->n_meta = -1;
-  else {
-    P->e->n_meta = P->e->n_meta_string = P->e->n_meta_const = 0;
-    P->e->meta_entry = NULL;
-  }
-
-  P->field = _GD_ValidateField(parent, in_cols[0]);
-  if (P->field == in_cols[0]) {
+  E->field = _GD_ValidateField(parent, in_cols[0]);
+  if (E->field == in_cols[0]) {
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_NAME, format_file, line,
         in_cols[0]);
-    P->field = NULL;
-    dirfile_free_entry_strings(P);
-    free(P);
+    E->field = NULL;
+    _GD_FreeE(E, 1);
     dreturn("%p", NULL);
     return NULL;
   }
 
-  P->in_fields[0] = strdup(in_cols[2]); /* field */
-  P->shift = atoi(in_cols[3]); /*shift*/
+  E->in_fields[0] = strdup(in_cols[2]); /* field */
+  E->shift = atoi(in_cols[3]); /*shift*/
 
-  if (P->field == NULL || P->in_fields[0] == NULL) {
+  if (E->field == NULL || E->in_fields[0] == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-    dirfile_free_entry_strings(P);
-    free(P);
-    P = NULL;
+    _GD_FreeE(E, 1);
+    E = NULL;
   }
 
-  dreturn("%p", P);
-  return P;
+  dreturn("%p", E);
+  return E;
 }
 
 /* _GD_ParseConst: parse CONST data type entry in formats file.
@@ -575,8 +520,6 @@ static gd_entry_t* _GD_ParsePhase(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
 static gd_entry_t* _GD_ParseConst(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
     int n_cols, const gd_entry_t* parent, const char* format_file, int line)
 {
-  char fmt[50];
-
   dtrace("%p, %p, %i, %p, \"%s\", %i", D, in_cols, n_cols, parent, format_file,
       line);
 
@@ -586,73 +529,61 @@ static gd_entry_t* _GD_ParseConst(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
     return NULL;
   }
 
-  gd_entry_t* C = malloc(sizeof(gd_entry_t));
-  if (C == NULL) {
+  gd_entry_t* E = malloc(sizeof(gd_entry_t));
+  if (E == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     dreturn("%p", NULL);
     return NULL;
   }
 
-  C->e = malloc(sizeof(struct _gd_private_entry));
-  if (C->e == NULL) {
+  E->e = malloc(sizeof(struct _gd_private_entry));
+  if (E->e == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-    free(C);
+    free(E);
     dreturn("%p", NULL);
     return NULL;
   }
 
-  C->field_type = GD_CONST_ENTRY;
-  C->format_file = D->n_include - 1;
+  E->field_type = GD_CONST_ENTRY;
 
-  if (parent != NULL)
-    C->e->n_meta = -1;
-  else {
-    C->e->n_meta = C->e->n_meta_string = C->e->n_meta_const = 0;
-    C->e->meta_entry = NULL;
-  }
-
-  C->field = _GD_ValidateField(parent, in_cols[0]);
-  if (C->field == in_cols[0]) {
+  E->field = _GD_ValidateField(parent, in_cols[0]);
+  if (E->field == in_cols[0]) {
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_NAME, format_file, line,
         in_cols[0]);
-    C->field = NULL;
-    dirfile_free_entry_strings(C);
-    free(C);
+    E->field = NULL;
+    _GD_FreeE(E, 1);
     dreturn("%p", NULL);
     return NULL;
   }
 
-  if (C->field == NULL) {
+  if (E->field == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-    dirfile_free_entry_strings(C);
-    free(C);
-    C = NULL;
+    _GD_FreeE(E, 1);
+    E = NULL;
     dreturn("%p", NULL);
     return NULL;
   }
 
-  C->const_type = _GD_RawType(in_cols[2]);
+  E->const_type = _GD_RawType(in_cols[2]);
 
-  if (GD_SIZE(C->const_type) == 0 || C->data_type & 0x40) {
+  if (GD_SIZE(E->const_type) == 0 || E->data_type & 0x40) {
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_TYPE, format_file, line,
         in_cols[2]);
-    dirfile_free_entry_strings(C);
-    free(C);
-    C = NULL;
+    _GD_FreeE(E, 1);
+    E = NULL;
     dreturn("%p", NULL);
     return NULL;
   }
 
-  _GD_ScanFormat(fmt, C->const_type);
-  if (C->const_type & GD_SIGNED)
-    sscanf(in_cols[3], fmt, C->e->iconst);
-  else if (C->const_type & GD_IEEE754)
-    sscanf(in_cols[3], fmt, C->e->dconst);
+  if (E->const_type & GD_SIGNED)
+    sscanf(in_cols[3], "%" SCNi64, &E->e->iconst);
+  else if (E->const_type & GD_IEEE754)
+    sscanf(in_cols[3], "%lg", &E->e->dconst);
   else
-    sscanf(in_cols[3], fmt, C->e->uconst);
+    sscanf(in_cols[3], "%" SCNu64, &E->e->uconst);
 
-  dreturn("%p", C);
-  return C;
+  dreturn("%p", E);
+  return E;
 }
 
 /* _GD_ParseString: parse STRING data type entry in formats file.
@@ -669,62 +600,44 @@ static gd_entry_t* _GD_ParseString(DIRFILE* D, const char *in_cols[MAX_IN_COLS],
     return NULL;
   }
 
-  gd_entry_t* S = malloc(sizeof(gd_entry_t));
-  if (S == NULL) {
+  gd_entry_t* E = malloc(sizeof(gd_entry_t));
+  if (E == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     dreturn("%p", NULL);
     return NULL;
   }
 
-  S->e = malloc(sizeof(struct _gd_private_entry));
-  if (S->e == NULL) {
+  E->e = malloc(sizeof(struct _gd_private_entry));
+  if (E->e == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-    free(S);
+    free(E);
     dreturn("%p", NULL);
     return NULL;
   }
 
-  S->field_type = GD_STRING_ENTRY;
-  S->format_file = D->n_include - 1;
-  S->e->string = strdup(in_cols[2]);
+  E->field_type = GD_STRING_ENTRY;
+  E->e->string = strdup(in_cols[2]);
 
-  if (parent != NULL)
-    S->e->n_meta = -1;
-  else {
-    S->e->n_meta = S->e->n_meta_string = S->e->n_meta_const = 0;
-    S->e->meta_entry = NULL;
-  }
-
-  S->field = _GD_ValidateField(parent, in_cols[0]);
-  if (S->field == in_cols[0]) {
+  E->field = _GD_ValidateField(parent, in_cols[0]);
+  if (E->field == in_cols[0]) {
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_NAME, format_file, line,
         in_cols[0]);
-    S->field = NULL;
-    dirfile_free_entry_strings(S);
-    free(S);
+    E->field = NULL;
+    _GD_FreeE(E, 1);
     dreturn("%p", NULL);
     return NULL;
   }
 
-  if (S->field == NULL || S->e->string == NULL) {
+  if (E->field == NULL || E->e->string == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-    dirfile_free_entry_strings(S);
-    free(S);
-    S = NULL;
+    _GD_FreeE(E, 1);
+    E = NULL;
     dreturn("%p", NULL);
     return NULL;
   }
 
-  dreturn("%p", S);
-  return S;
-}
-
-/* _GD_EntryCmp: Comparison functions for the entries
-*/
-int _GD_EntryCmp(const void *A, const void *B)
-{
-  return (strcmp((*(gd_entry_t **)A)->field,
-        (*(gd_entry_t **)B)->field));
+  dreturn("%p", E);
+  return E;
 }
 
 static int utf8encode (DIRFILE* D, const char* format_file, int linenum,
@@ -761,7 +674,7 @@ static int utf8encode (DIRFILE* D, const char* format_file, int linenum,
 
 /* _GD_ParseFieldSpec: Parse a format file line fragment containing a field
  * specification */
-static void _GD_ParseFieldSpec(DIRFILE* D, int n_cols,
+static gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols,
     const char* in_cols[MAX_IN_COLS], const gd_entry_t* parent,
     const char* subdir, const char* format_file, int linenum, int have_first,
     int me, int standards)
@@ -798,11 +711,11 @@ static void _GD_ParseFieldSpec(DIRFILE* D, int n_cols,
     E = _GD_ParsePhase(D, in_cols, n_cols, parent, format_file, linenum);
   else if (strcmp(in_cols[1], "CONST") == 0) {
     E = _GD_ParseConst(D, in_cols, n_cols, parent, format_file, linenum);
-    if (D->error == GD_E_OK)
+    if (D->error == GD_E_OK && parent == NULL)
       D->n_const++;
   } else if (strcmp(in_cols[1], "STRING") == 0) {
     E = _GD_ParseString(D, in_cols, n_cols, parent, format_file, linenum);
-    if (D->error == GD_E_OK)
+    if (D->error == GD_E_OK && parent == NULL)
       D->n_string++;
   } else if (standards <= DIRFILE_STANDARDS_VERSION ||
       (D->flags & GD_PEDANTIC))
@@ -810,11 +723,28 @@ static void _GD_ParseFieldSpec(DIRFILE* D, int n_cols,
         NULL);
 
   if (D->error == GD_E_OK && E != NULL) {
+    /* the Format file fragment index */
+    E->format_file = D->n_include - 1;
+
+    /* Initialse the meta counts */
+    if (parent != NULL)
+      E->e->n_meta = -1;
+    else {
+      E->e->n_meta = E->e->n_meta_string = E->e->n_meta_const = 0;
+      E->e->meta_entry = NULL;
+      E->e->field_list = NULL;
+      E->e->vector_list = NULL;
+      E->e->string_list = NULL;
+      E->e->string_value_list = NULL;
+      E->e->const_list = NULL;
+      E->e->const_value_list = NULL;
+    }
+
     /* Check for duplicate */
     int u;
     const gd_entry_t* Q = _GD_GetEntry(D, E->field, &u);
 
-    if (D == GD_E_OK)
+    if (D->error == GD_E_OK)
       _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_DUPLICATE, format_file, linenum,
           D->include_list[Q->format_file].cname);
     else {
@@ -826,7 +756,8 @@ static void _GD_ParseFieldSpec(DIRFILE* D, int n_cols,
     }
   }
 
-  dreturnvoid();
+  dreturn("%p", E);
+  return E;
 }
 
 /* _GD_ParseFormatFile: Perform the actual parsing of the format file.  This
@@ -1126,15 +1057,23 @@ static int _GD_ParseFormatFile(FILE* fp, DIRFILE *D, const char* filedir,
       if (P == NULL)
         _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_NO_PARENT, format_file,
             linenum, in_cols[1]);
+      else if (n_cols < 4)
+        _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_COLS, format_file, linenum,
+            NULL);
       else {
-        if (n_cols < 4)
-          _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_COLS, format_file, linenum,
-              NULL);
-        else {
-          _GD_ParseFieldSpec(D, n_cols - 2, in_cols + 2, P, subdir,
-              format_file, linenum, have_first, me, standards);
-          if (!D->error)
-            D->n_meta++;
+        gd_entry_t* E = _GD_ParseFieldSpec(D, n_cols - 2, in_cols + 2, P,
+            subdir, format_file, linenum, have_first, me, standards);
+        if (!D->error) {
+          /* there is no need to sort this list */
+          P->e->meta_entry = realloc(P->e->meta_entry, (P->e->n_meta + 1) *
+              sizeof(gd_entry_t*));
+          P->e->meta_entry[P->e->n_meta++] = E;
+
+          D->n_meta++;
+          if (E->field_type == GD_CONST_ENTRY)
+            P->e->n_meta_const++;
+          else if (E->field_type == GD_STRING_ENTRY)
+            P->e->n_meta_string++;
         }
       }
     } else if (strcmp(ip, "VERSION") == 0) {
@@ -1317,7 +1256,7 @@ DIRFILE* dirfile_open(const char* filedir, unsigned int flags)
   DIRFILE* D;
   char format_file[FILENAME_MAX];
 
-  dtrace("\"%s\", 0%o", filedir, flags);
+  dtrace("\"%s\", 0x%x", filedir, flags);
 
   D = malloc(sizeof(DIRFILE));
   _GD_ClearError(D);

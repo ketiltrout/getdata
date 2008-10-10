@@ -1,6 +1,39 @@
+2008-10-10   D. V. Wiebe <getdata@ketiltrout.net>  svn:129
+	* src/entry.c (_GD_FreeE): Renamed from dirfile_free_entry_strings (for
+	which a new boilerplate function has been created).  Separated cleaning up
+	internal and externally created entries.  Internally, the library now
+	uses this function in all places where it used to call
+	dirfile_free_entry_strings.
+
+	* src/open.c (_GD_ParseRaw): n_meta should be zero.
+
+	* src/open.c (_GD_ParseFormatFile): fix duplicates check
+
+	* test/add_sort.c test/nfields_type.c test/nfields_type_invalid.c
+	test/nmeta.c test/nmeta_invalid.c test/nmeta_parent.c test/nmeta_type.c
+	test/nmeta_type_invalid.c test/nmeta_type_parent.c test/nmeta_vectors.c
+	test/nmeta_vectors_invalid.c test/nmeta_vectors_parent.c test/nvectors.c
+	test/nvectors_invalid.c test/parse_const.c test/parse_const_ncols.c
+	test/parse_duplicate.c test/parse_meta.c test/parse_meta_parent.c
+	test/parse_meta_raw.c test/parse_quote.c test/parse_sort.c
+	test/parse_string.c test/parse_string_ncols.c test/parse_whitespace.c:
+	Added.
+
+	* src/add.c (_GD_Add): Encapsulate the file creation with a call to a
+	encoding specific *touch() function.
+	* src/raw.c (_GD_RawTouch): Added.  (Also used for the ASCII encoding).
+
+	* src/meta_list.c: Fixed all functions to get them working.
+	* src/field_list.c: Call _GD_ClearError in all public functions.
+	* src/nmeta.c: Added (META version of nfields.c)
+
+	* src/open.c (_GD_ParseFieldSpec): Moved some repeated code out of the
+	ParseFoo functions and into this one.  Also, don't count META fields in
+	n_string or n_cost.
+
 2008-10-09   D. V. Wiebe <getdata@ketiltrout.net>  svn:127
 	* src/open.c (_GD_ValidateField): Now takes a pointer to the parent, rather
-	than the parent's name, and generates the / demaraction itself.
+	than the parent's name, and generates the "/" demarcation itself.
 
 	* src/open.c (_GD_ParseFormatFile): Determine META field's parent entry.
 	* src/open.c (_GD_ParseRaw _GD_ParseLincom _GD_ParseLinterp _GD_ParseBit

@@ -37,6 +37,8 @@ const void* get_constant_values(DIRFILE* D, gd_type_t return_type)
     return NULL;
   }
 
+  _GD_ClearError(D);
+
   if (D->n_const == 0) {
     dreturn("%p", NULL);
     return NULL;
@@ -59,7 +61,6 @@ const void* get_constant_values(DIRFILE* D, gd_type_t return_type)
   }
 
   D->const_value_list = fl;
-  D->list_validity |= LIST_VALID_CONST;
 
   dreturn("%p", D->const_value_list);
   return D->const_value_list;
@@ -77,6 +78,8 @@ const char** get_constant_list(DIRFILE* D)
     dreturn("%p", NULL);
     return NULL;
   }
+
+  _GD_ClearError(D);
 
   if (D->n_const == 0) {
     dreturn("%p", NULL);
@@ -123,6 +126,8 @@ const char** get_string_values(DIRFILE* D)
     dreturn("%p", NULL);
     return NULL;
   }
+
+  _GD_ClearError(D);
 
   if (D->n_string == 0) {
     dreturn("%p", NULL);
@@ -171,6 +176,8 @@ const char** get_string_list(DIRFILE* D)
     return NULL;
   }
 
+  _GD_ClearError(D);
+
   if (D->n_string == 0) {
     dreturn("%p", NULL);
     return NULL;
@@ -216,6 +223,8 @@ const char** get_vector_list(DIRFILE* D)
     dreturn("%p", NULL);
     return NULL;
   }
+
+  _GD_ClearError(D);
 
   if (D->n_entries == 0) {
     dreturn("%p", NULL);
@@ -265,6 +274,8 @@ const char** get_field_list(DIRFILE* D)
     return NULL;
   }
 
+  _GD_ClearError(D);
+
   if (D->n_entries == 0) {
     dreturn("%p", NULL);
     return NULL;
@@ -272,7 +283,7 @@ const char** get_field_list(DIRFILE* D)
 
   if (D->list_validity & LIST_VALID_FIELD) {
     /* list already made */
-    dreturn("%p", D->field_list);
+    dreturn("%p (old)", D->field_list);
     return D->field_list;
   }
 

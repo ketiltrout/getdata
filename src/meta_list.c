@@ -22,6 +22,7 @@
 
 #ifdef STDC_HEADERS
 #include <stdlib.h>
+#include <string.h>
 #endif
 
 const void* get_meta_constant_values(DIRFILE* D, const char* parent,
@@ -29,7 +30,7 @@ const void* get_meta_constant_values(DIRFILE* D, const char* parent,
 {
   dtrace("%p, \"%s\", 0x%x", D, parent, return_type);
 
-  unsigned int i, n;
+  int i, n;
   void* fl;
 
   if (D->flags & GD_INVALID) {
@@ -38,38 +39,51 @@ const void* get_meta_constant_values(DIRFILE* D, const char* parent,
     return NULL;
   }
 
-  if (D->n_const == 0) {
+  _GD_ClearError(D);
+
+  const gd_entry_t* P = _GD_GetEntry(D, parent, NULL);
+
+  if (P == NULL) {
+    _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, parent);
     dreturn("%p", NULL);
     return NULL;
   }
 
-  free(D->const_value_list);
-  fl = _GD_Alloc(D, return_type, D->n_const);
+  _GD_ClearError(D);
+
+  struct _gd_private_entry* e = P->e;
+
+  if (e->n_meta_const == 0) {
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  free(e->const_value_list);
+  fl = _GD_Alloc(D, return_type, e->n_meta_const);
 
   if (fl == NULL) {
     dreturn("%p", NULL);
     return NULL;
   }
 
-  for (i = n = 0; i < D->n_entries; ++i) {
-    if (D->entry[i]->field_type == GD_CONST_ENTRY)
-      if (_GD_DoField(D, D->entry[i], D->entry[i]->field, 0, 0, 0, 0,
+  for (i = n = 0; i < e->n_meta; ++i) {
+    if (e->meta_entry[i]->field_type == GD_CONST_ENTRY)
+      if (_GD_DoField(D, e->meta_entry[i], e->meta_entry[i]->field, 0, 0, 0, 0,
             return_type, fl + n++ * GD_SIZE(return_type)) != 1)
         break;
   }
 
-  D->const_value_list = fl;
-  D->list_validity |= LIST_VALID_CONST;
+  e->const_value_list = fl;
 
-  dreturn("%p", D->const_value_list);
-  return D->const_value_list;
+  dreturn("%p", e->const_value_list);
+  return e->const_value_list;
 }
 
 const char** get_meta_constant_list(DIRFILE* D, const char* parent)
 {
   dtrace("%p, \"%s\"", D, parent);
 
-  unsigned int i, n;
+  int i, n;
   char** fl;
 
   if (D->flags & GD_INVALID) {
@@ -78,18 +92,29 @@ const char** get_meta_constant_list(DIRFILE* D, const char* parent)
     return NULL;
   }
 
-  if (D->n_const == 0) {
+  _GD_ClearError(D);
+
+  const gd_entry_t* P = _GD_GetEntry(D, parent, NULL);
+
+  if (P == NULL) {
+    _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, parent);
     dreturn("%p", NULL);
     return NULL;
   }
 
-  if (D->list_validity & LIST_VALID_CONST) {
-    /* list already made */
-    dreturn("%p", D->const_list);
-    return D->const_list;
+  _GD_ClearError(D);
+
+  struct _gd_private_entry* e = P->e;
+
+  size_t offs = strlen(P->field) + 1;
+
+  if (e->n_meta_const == 0) {
+    dreturn("%p", NULL);
+    return NULL;
   }
 
-  fl = realloc((char**)D->const_list, sizeof(const char*) * (D->n_const + 1));
+  fl = realloc((char**)e->const_list, sizeof(const char*) *
+      (e->n_meta_const + 1));
 
   if (fl == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
@@ -97,24 +122,23 @@ const char** get_meta_constant_list(DIRFILE* D, const char* parent)
     return NULL;
   }
 
-  for (i = n = 0; i < D->n_entries; ++i) {
-    if (D->entry[i]->field_type == GD_CONST_ENTRY)
-      fl[n++] = D->entry[i]->field;
+  for (i = n = 0; i < e->n_meta; ++i) {
+    if (e->meta_entry[i]->field_type == GD_CONST_ENTRY)
+      fl[n++] = e->meta_entry[i]->field + offs;
   }
   fl[n] = NULL;
 
-  D->const_list = (const char**)fl;
-  D->list_validity |= LIST_VALID_CONST;
+  e->const_list = (const char**)fl;
 
-  dreturn("%p", D->const_list);
-  return D->const_list;
+  dreturn("%p", e->const_list);
+  return e->const_list;
 }
 
 const char** get_meta_string_values(DIRFILE* D, const char* parent)
 {
   dtrace("%p, \"%s\"", D, parent);
 
-  unsigned int i, n;
+  int i, n;
   char** fl;
 
   if (D->flags & GD_INVALID) {
@@ -123,19 +147,27 @@ const char** get_meta_string_values(DIRFILE* D, const char* parent)
     return NULL;
   }
 
-  if (D->n_string == 0) {
+  _GD_ClearError(D);
+
+  const gd_entry_t* P = _GD_GetEntry(D, parent, NULL);
+
+  if (P == NULL) {
+    _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, parent);
     dreturn("%p", NULL);
     return NULL;
   }
 
-  if (D->list_validity & LIST_VALID_STRING_VALUE) {
-    /* list already made */
-    dreturn("%p", D->string_value_list);
-    return D->string_value_list;
+  _GD_ClearError(D);
+
+  struct _gd_private_entry* e = P->e;
+
+  if (e->n_meta_string == 0) {
+    dreturn("%p", NULL);
+    return NULL;
   }
 
-  fl = realloc((char**)D->string_value_list, sizeof(const char*) *
-      (D->n_string + 1));
+  fl = realloc((char**)e->string_value_list, sizeof(const char*) *
+      (e->n_meta_string + 1));
 
   if (fl == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
@@ -143,24 +175,23 @@ const char** get_meta_string_values(DIRFILE* D, const char* parent)
     return NULL;
   }
 
-  for (i = n = 0; i < D->n_entries; ++i) {
-    if (D->entry[i]->field_type == GD_STRING_ENTRY)
-      fl[n++] = D->entry[i]->e->string;
+  for (i = n = 0; i < e->n_meta; ++i) {
+    if (e->meta_entry[i]->field_type == GD_STRING_ENTRY)
+      fl[n++] = e->meta_entry[i]->e->string;
   }
   fl[i] = NULL;
 
-  D->string_value_list = (const char**)fl;
-  D->list_validity |= LIST_VALID_STRING_VALUE;
+  e->string_value_list = (const char**)fl;
 
-  dreturn("%p", D->string_value_list);
-  return D->string_value_list;
+  dreturn("%p", e->string_value_list);
+  return e->string_value_list;
 }
 
 const char** get_meta_string_list(DIRFILE* D, const char* parent)
 {
   dtrace("%p, \"%s\"", D, parent);
 
-  unsigned int i, n;
+  int i, n;
   char** fl;
 
   if (D->flags & GD_INVALID) {
@@ -169,18 +200,29 @@ const char** get_meta_string_list(DIRFILE* D, const char* parent)
     return NULL;
   }
 
-  if (D->n_string == 0) {
+  _GD_ClearError(D);
+
+  const gd_entry_t* P = _GD_GetEntry(D, parent, NULL);
+
+  if (P == NULL) {
+    _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, parent);
     dreturn("%p", NULL);
     return NULL;
   }
 
-  if (D->list_validity & LIST_VALID_STRING) {
-    /* list already made */
-    dreturn("%p", D->string_list);
-    return D->string_list;
+  _GD_ClearError(D);
+
+  struct _gd_private_entry* e = P->e;
+
+  size_t offs = strlen(P->field) + 1;
+
+  if (e->n_meta_string == 0) {
+    dreturn("%p", NULL);
+    return NULL;
   }
 
-  fl = realloc((char**)D->string_list, sizeof(const char*) * (D->n_string + 1));
+  fl = realloc((char**)e->string_list, sizeof(const char*) *
+      (e->n_meta_string + 1));
 
   if (fl == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
@@ -188,24 +230,23 @@ const char** get_meta_string_list(DIRFILE* D, const char* parent)
     return NULL;
   }
 
-  for (i = n = 0; i < D->n_entries; ++i) {
-    if (D->entry[i]->field_type == GD_STRING_ENTRY)
-      fl[n++] = D->entry[i]->field;
+  for (i = n = 0; i < e->n_meta; ++i) {
+    if (e->meta_entry[i]->field_type == GD_STRING_ENTRY)
+      fl[n++] = e->meta_entry[i]->field + offs;
   }
   fl[n] = NULL;
 
-  D->string_list = (const char**)fl;
-  D->list_validity |= LIST_VALID_STRING;
+  e->string_list = (const char**)fl;
 
-  dreturn("%p", D->string_list);
-  return D->string_list;
+  dreturn("%p", e->string_list);
+  return e->string_list;
 }
 
 const char** get_meta_vector_list(DIRFILE* D, const char* parent)
 {
   dtrace("%p, \"%s\"", D, parent);
 
-  unsigned int i, n;
+  int i, n;
   char** fl;
 
   if (D->flags & GD_INVALID) {
@@ -214,19 +255,29 @@ const char** get_meta_vector_list(DIRFILE* D, const char* parent)
     return NULL;
   }
 
-  if (D->n_entries == 0) {
+  _GD_ClearError(D);
+
+  const gd_entry_t* P = _GD_GetEntry(D, parent, NULL);
+
+  if (P == NULL) {
+    _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, parent);
     dreturn("%p", NULL);
     return NULL;
   }
 
-  if (D->list_validity & LIST_VALID_VECTOR) {
-    /* list already made */
-    dreturn("%p", D->vector_list);
-    return D->vector_list;
+  _GD_ClearError(D);
+
+  struct _gd_private_entry* e = P->e;
+
+  size_t offs = strlen(P->field) + 1;
+
+  if (e->n_meta == 0) {
+    dreturn("%p", NULL);
+    return NULL;
   }
 
-  fl = realloc((char**)D->vector_list, sizeof(const char*) *
-      (D->n_entries + 1 - D->n_string - D->n_const - D->n_meta));
+  fl = realloc((char**)e->vector_list, sizeof(const char*) *
+      (e->n_meta + 1 - e->n_meta_string - e->n_meta_const));
 
   if (fl == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
@@ -234,25 +285,24 @@ const char** get_meta_vector_list(DIRFILE* D, const char* parent)
     return NULL;
   }
 
-  for (i = n = 0; i < D->n_entries; ++i) {
-    if (D->entry[i]->field_type != GD_CONST_ENTRY && 
-        D->entry[i]->field_type != GD_STRING_ENTRY)
-      fl[n++] = D->entry[i]->field;
+  for (i = n = 0; i < e->n_meta; ++i) {
+    if (e->meta_entry[i]->field_type != GD_CONST_ENTRY && 
+        e->meta_entry[i]->field_type != GD_STRING_ENTRY)
+      fl[n++] = e->meta_entry[i]->field + offs;
   }
   fl[n] = NULL;
 
-  D->vector_list = (const char**)fl;
-  D->list_validity |= LIST_VALID_VECTOR;
+  e->vector_list = (const char**)fl;
 
-  dreturn("%p", D->vector_list);
-  return D->vector_list;
+  dreturn("%p", e->vector_list);
+  return e->vector_list;
 }
 
 const char** get_meta_field_list(DIRFILE* D, const char* parent)
 {
   dtrace("%p, \"%s\"", D, parent);
 
-  unsigned int i, n;
+  int i, n;
   char** fl;
 
   if (D->flags & GD_INVALID) {
@@ -261,19 +311,29 @@ const char** get_meta_field_list(DIRFILE* D, const char* parent)
     return NULL;
   }
 
-  if (D->n_entries == 0) {
+  _GD_ClearError(D);
+
+  const gd_entry_t* P = _GD_GetEntry(D, parent, NULL);
+
+  if (P == NULL) {
+    _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, parent);
     dreturn("%p", NULL);
     return NULL;
   }
 
-  if (D->list_validity & LIST_VALID_FIELD) {
-    /* list already made */
-    dreturn("%p", D->field_list);
-    return D->field_list;
+  _GD_ClearError(D);
+
+  struct _gd_private_entry* e = P->e;
+
+  size_t offs = strlen(P->field) + 1;
+
+  if (e->n_meta == 0) {
+    dreturn("%p", NULL);
+    return NULL;
   }
 
-  fl = realloc((char**)D->field_list, sizeof(const char*) *
-      (D->n_entries + 1 - D->n_meta));
+  fl = realloc((char**)e->field_list, sizeof(const char*) *
+      (e->n_meta + 1));
 
   if (fl == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
@@ -281,14 +341,12 @@ const char** get_meta_field_list(DIRFILE* D, const char* parent)
     return NULL;
   }
 
-  for (i = n = 0; i < D->n_entries; ++i)
-    if (!D->entry[i]->e->n_meta)
-      fl[n++] = D->entry[i]->field;
+  for (i = n = 0; i < e->n_meta; ++i)
+    fl[n++] = e->meta_entry[i]->field + offs;
   fl[n] = NULL;
 
-  D->field_list = (const char**)fl;
-  D->list_validity |= LIST_VALID_FIELD;
+  e->field_list = (const char**)fl;
 
-  dreturn("%p", D->field_list);
-  return D->field_list;
+  dreturn("%p", e->field_list);
+  return e->field_list;
 }

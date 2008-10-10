@@ -77,7 +77,7 @@ static const struct {
   { GD_E_BAD_CODE, 0, "Field not found: {4}", 0 },
   /* GD_E_BAD_TYPE: 1 = data type */
   { GD_E_BAD_TYPE, 0, "Unsupported data type: {1}", 0 },
-  /* GD_E_RAW_IO: 1 = suberror, 3 = errno */
+  /* GD_E_RAW_IO: 1 = suberror, 2 = filename, 3 = errno */
   { GD_E_RAW_IO, 0, "Error accessing {2}: ", 1 },
   /* GD_E_OPEN_INCLUDE: 1 = errno, 2 = format file, 3 = line, 4 = includefile */
   { GD_E_OPEN_INCLUDE, 0,

@@ -87,3 +87,15 @@ off64_t _GD_RawSize(const char *name, gd_type_t data_type)
   dreturn("%lli", (long long)statbuf.st_size);
   return statbuf.st_size / GD_SIZE(data_type);
 }
+
+int _GD_RawTouch(const char* name)
+{
+  dtrace("\"%s\"", name);
+  int fd = open(name, O_RDWR | O_CREAT | O_EXCL);
+
+  if (fd != -1)
+    fd = close(fd);
+
+  dreturn("%i", fd);
+  return fd;
+}

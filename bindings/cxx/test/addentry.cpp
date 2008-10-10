@@ -17,7 +17,7 @@ int main(void)
 
   memset(c, 0, 8);
 
-  Dirfile dirfile = Dirfile(filedir, GD_CREAT | GD_RDWR);
+  Dirfile dirfile = Dirfile(filedir, GD_CREAT | GD_RDWR | GD_UNENCODED);
   RawEntry entry = RawEntry("data", UInt8, 8);
   dirfile.Add(entry);
   int error = dirfile.Error();

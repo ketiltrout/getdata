@@ -37,7 +37,6 @@ int main(void)
 
   if (!r)
     for (fd = 0; fd < 3; ++fd) {
-      printf("%i: %s\n", fd, field_list[fd]);
       if (strlen(field_list[fd]) != 5)
         r = 1;
 

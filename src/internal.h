@@ -163,22 +163,23 @@ char *strerror_r(int errnum, char *buf, size_t buflen);
 #define GD_E_BAD_ENTRY_BITSIZE  7
 #define GD_E_BAD_ENTRY_METARAW  8
 
-#define GD_ENC_NONE       0
-#define GD_ENC_ASCII      1
-#define GD_ENC_SLIM       2
-#define GD_ENC_GZ_HASHED  3
-#define GD_ENC_GZ_RAW     4
-#define GD_ENC_BZ2_HASHED 5
-#define GD_ENC_BZ2_RAW    6
-#define GD_ENC_UNKNOWN    7
-
 /* Unified entry struct */
 struct _gd_private_entry {
   gd_entry_t* entry[GD_MAX_LINCOM];
+
   int n_meta;
   int n_meta_string;
   int n_meta_const;
   gd_entry_t** meta_entry;
+
+  /* field lists */
+  const char** field_list;
+  const char** vector_list;
+  const char** string_list;
+  const char** string_value_list;
+  const char** const_list;
+  void* const_value_list;
+
   union {
     struct { /* RAW */
       char* file;
@@ -201,6 +202,15 @@ struct _gd_private_entry {
   };
 };
 
+#define GD_ENC_NONE       0
+#define GD_ENC_ASCII      1
+#define GD_ENC_SLIM       2
+#define GD_ENC_GZ_HASHED  3
+#define GD_ENC_GZ_RAW     4
+#define GD_ENC_BZ2_HASHED 5
+#define GD_ENC_BZ2_RAW    6
+#define GD_ENC_UNKNOWN    7
+
 /* Encoding schemes */
 extern const struct encoding_t {
   unsigned int scheme;
@@ -208,10 +218,11 @@ extern const struct encoding_t {
   int (*open)(struct _gd_private_entry*, const char*, int, int);
   off64_t (*seek)(struct _gd_private_entry*, off64_t, gd_type_t, int);
   ssize_t (*read)(struct _gd_private_entry*, void*, gd_type_t, size_t);
-  off64_t (*size)(const char *, gd_type_t);
+  off64_t (*size)(const char*, gd_type_t);
   ssize_t (*write)(struct _gd_private_entry*, const void*, gd_type_t,
       size_t);
   int (*sync)(struct _gd_private_entry*);
+  int (*touch)(const char*);
   int (*close)(struct _gd_private_entry*);
 } encode[];
 
@@ -235,7 +246,6 @@ struct gd_include_t {
 #define LIST_VALID_STRING       0x04
 #define LIST_VALID_STRING_VALUE 0x08
 #define LIST_VALID_CONST        0x04
-#define LIST_VALID_CONST_VALUE  0x08
 
 /* The DIRFILE struct.  */
 struct _GD_DIRFILE {
@@ -289,53 +299,46 @@ struct _GD_DIRFILE {
 void* _GD_Alloc(DIRFILE* D, gd_type_t type, size_t n) __gd_nonnull ((1))
   __attribute_malloc__ __THROW __wur;
 
-  /* _GD_ClearError: Everything's A-OK; clear the last error. */
+/* _GD_ClearError: Everything's A-OK; clear the last error. */
 #define _GD_ClearError(D) (D)->error = 0
 
 void _GD_ConvertType(DIRFILE* D, const void *data_in, gd_type_t in_type,
-    void *data_out, gd_type_t out_type, size_t n)
-__gd_nonnull ((1, 2, 4)) __THROW;
+    void *data_out, gd_type_t out_type, size_t n) __THROW;
 size_t  _GD_DoField(DIRFILE *D, gd_entry_t *entry, const char* field_code,
     off64_t first_frame, off64_t first_samp, size_t num_frames, size_t num_samp,
-    gd_type_t return_type, void *data_out) __gd_nonnull ((1, 2, 3));
+    gd_type_t return_type, void *data_out);
 size_t _GD_DoFieldOut(DIRFILE* D, gd_entry_t* entry, const char *field_code,
     off64_t first_frame, off64_t first_samp, size_t num_frames,
-    size_t num_samp, gd_type_t data_type, const void *data_in)
-__gd_nonnull ((1, 2, 3, 9));
+    size_t num_samp, gd_type_t data_type, const void *data_in);
 int _GD_EntryCmp(const void *A, const void *B);
-void _GD_FixEndianness(char* databuffer, size_t size, size_t ns)
-  __gd_nonnull ((1));
+void _GD_FixEndianness(char* databuffer, size_t size, size_t ns);
 void _GD_Flush(DIRFILE* D, gd_entry_t *entry, const char* field_code);
-void _GD_FlushMeta(DIRFILE* D) __gd_nonnull((1));
-int _GD_GetLine(FILE *fp, char *line, int* linenum) __gd_nonnull ((1, 2, 3));
-unsigned int _GD_GetSPF(DIRFILE* D, gd_entry_t* entry, const char *field_code)
-  __gd_nonnull ((1, 2, 3));
-gd_entry_t* _GD_GetEntry(DIRFILE* D, const char* field_code, int* next)
-  __THROW __gd_nonnull ((1, 2));
-void _GD_InsertSort(DIRFILE* D, gd_entry_t* E, int u)
-  __THROW __gd_nonnull ((1,2));
+void _GD_FlushMeta(DIRFILE* D);
+void _GD_FreeE(gd_entry_t* entry, int priv);
+int _GD_GetLine(FILE *fp, char *line, int* linenum);
+unsigned int _GD_GetSPF(DIRFILE* D, gd_entry_t* entry, const char *field_code);
+gd_entry_t* _GD_GetEntry(DIRFILE* D, const char* field_code, int* next);
+void _GD_InsertSort(DIRFILE* D, gd_entry_t* E, int u) __THROW;
 
 #define _GD_InternalError(D) \
-    _GD_SetError(D, GD_E_INTERNAL_ERROR, 0, __FILE__, __LINE__, NULL);
+  _GD_SetError(D, GD_E_INTERNAL_ERROR, 0, __FILE__, __LINE__, NULL);
 
-  gd_type_t _GD_LegacyType(char c) __THROW __attribute__ ((__const__));
-  void _GD_LinterpData(DIRFILE* D, const void *data, gd_type_t type, size_t npts,
-      double *lx, double *ly, size_t n_ln) __THROW __gd_nonnull ((1, 2, 5, 6));
-void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E)
-  __gd_nonnull ((1, 2));
-  unsigned int _GD_ResolveEncoding(const char* name, unsigned int scheme,
-      struct _gd_private_entry *e);
+gd_type_t _GD_LegacyType(char c);
+void _GD_LinterpData(DIRFILE* D, const void *data, gd_type_t type, size_t npts,
+      double *lx, double *ly, size_t n_ln);
+void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E);
+unsigned int _GD_ResolveEncoding(const char* name, unsigned int scheme,
+    struct _gd_private_entry *e);
 void _GD_ScaleData(DIRFILE* D, void *data, gd_type_t type, size_t npts,
-    double m, double b) __THROW __gd_nonnull ((1, 2));
+    double m, double b);
 void _GD_ScanFormat(char* fmt, gd_type_t data_type);
 void _GD_SetError(DIRFILE* D, int error, int suberror, const char* format_file,
-    int line, const char* token) __THROW __gd_nonnull ((1));
-char* _GD_ValidateField(const gd_entry_t* parent, const char* field_code)
-  __gd_nonnull ((2));
+    int line, const char* token);
+char* _GD_ValidateField(const gd_entry_t* parent, const char* field_code);
 
-  /* unencoded I/O methods */
-  int _GD_RawOpen(struct _gd_private_entry* entry, const char* name, int mode,
-      int creat);
+/* unencoded I/O methods */
+int _GD_RawOpen(struct _gd_private_entry* entry, const char* name, int mode,
+    int creat);
 off64_t _GD_RawSeek(struct _gd_private_entry* entry, off64_t count,
     gd_type_t data_type, int pad);
 ssize_t _GD_RawRead(struct _gd_private_entry *entry, void *ptr,
@@ -344,6 +347,7 @@ ssize_t _GD_RawWrite(struct _gd_private_entry *entry, const void *ptr,
     gd_type_t data_type, size_t nmemb);
 int _GD_RawSync(struct _gd_private_entry *entry);
 int _GD_RawClose(struct _gd_private_entry *entry);
+int _GD_RawTouch(const char *name);
 off64_t _GD_RawSize(const char *name, gd_type_t data_type);
 
 /* text I/O methods */
