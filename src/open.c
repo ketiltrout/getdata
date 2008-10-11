@@ -791,19 +791,14 @@ static int _GD_ParseFormatFile(FILE* fp, DIRFILE *D, const char* filedir,
   return have_first;
 }
 
-/* _GD_ParseFormatLine: Actually parse a single format file line.
- *       Returns 0 unless this format file contains the first raw field.
- */
+/* _GD_Tokenise: Tokenise a line.  Returns n_cols. */
 #define ACC_MODE_NONE  0
 #define ACC_MODE_OCTAL 1
 #define ACC_MODE_HEX   2
 #define ACC_MODE_UTF8  3
-int _GD_ParseFormatLine(DIRFILE *D, const char* instring, const char* filedir,
-    const char* subdir, const char* format_file, int format_parent,
-    int* standards, int linenum, int have_first)
+int _GD_Tokenise(DIRFILE *D, const char* instring, char* outstring,
+    const char** in_cols, const char* format_file, int linenum)
 {
-  char outstring[MAX_LINE_LENGTH];
-  const char *in_cols[MAX_IN_COLS];
   const char* ip;
   char* op = outstring;
   int n_cols = 0;
@@ -813,14 +808,10 @@ int _GD_ParseFormatLine(DIRFILE *D, const char* instring, const char* filedir,
   uint32_t accumulator = 0;
   int n_acc = 0;
   int acc_mode = ACC_MODE_NONE;
-  int me = D->n_include - 1;
 
-  dtrace("%p, \"%s\", \"%s\", \"%s\", \"%s\", %i, %p, %i, %i", D, instring,
-      filedir, subdir, format_file, format_parent, standards, linenum,
-      have_first);
+  dtrace("%p, \"%s\", %p, %p, \"%s\", %i", D, instring, outstring, in_cols,
+      format_file, linenum);
 
-  /* start parsing */
-  n_cols = 0;
   outstring[0] = '\0';
 
   /* tokenise the line */
@@ -969,23 +960,50 @@ int _GD_ParseFormatLine(DIRFILE *D, const char* instring, const char* filedir,
     }
   }
 
+  if (quotated || escaped_char) /* Unterminated token */
+    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_UNTERM, format_file, linenum,
+        NULL);
+
+  return n_cols;
+}
+
+/* _GD_ParseFormatLine: Actually parse a single format file line.
+ *       Returns 0 unless this format file contains the first raw field.
+ */
+#define ACC_MODE_NONE  0
+#define ACC_MODE_OCTAL 1
+#define ACC_MODE_HEX   2
+#define ACC_MODE_UTF8  3
+int _GD_ParseFormatLine(DIRFILE *D, const char* instring, const char* filedir,
+    const char* subdir, const char* format_file, int format_parent,
+    int* standards, int linenum, int have_first)
+{
+  char outstring[MAX_LINE_LENGTH];
+  const char *in_cols[MAX_IN_COLS];
+  const char* ptr;
+  int n_cols;
+  int me = D->n_include - 1;
+
+  dtrace("%p, \"%s\", \"%s\", \"%s\", \"%s\", %i, %p, %i, %i", D, instring,
+      filedir, subdir, format_file, format_parent, standards, linenum,
+      have_first);
+
+  n_cols = _GD_Tokenise(D, instring, outstring, in_cols, format_file, linenum);
+
   /* set up for possibly slashed reserved words */
-  ip = (char*)in_cols[0] + ((in_cols[0][0] == '/') ? 1 : 0);
+  ptr = (char*)in_cols[0] + ((in_cols[0][0] == '/') ? 1 : 0);
 
   if (D->error) {
     ; /* tokeniser threw an error */
-  } else if (quotated || escaped_char) { /* Unterminated token */
-    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_UNTERM, format_file, linenum,
-        NULL);
   } else if (n_cols < 2) {
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_COLS, format_file, linenum,
         NULL);
 
     /* Directives */
 
-  } else if (strcmp(ip, "FRAMEOFFSET") == 0) {
+  } else if (strcmp(ptr, "FRAMEOFFSET") == 0) {
     D->frame_offset = atoll(in_cols[1]);
-  } else if (strcmp(ip, "INCLUDE") == 0) {
+  } else if (strcmp(ptr, "INCLUDE") == 0) {
     unsigned int i;
     int found = 0;
     char temp_buffer[FILENAME_MAX];
@@ -1057,7 +1075,7 @@ int _GD_ParseFormatLine(DIRFILE *D, const char* instring, const char* filedir,
           me, standards))
       D->include_list[me].first = 1;
     fclose(new_fp);
-  } else if (strcmp(ip, "ENCODING") == 0) {
+  } else if (strcmp(ptr, "ENCODING") == 0) {
     if (!(D->flags & GD_FORCE_ENCODING)) {
       if (strcmp(in_cols[1], "none") == 0)
         D->flags = (D->flags & ~GD_ENCODING) | GD_UNENCODED;
@@ -1068,7 +1086,7 @@ int _GD_ParseFormatLine(DIRFILE *D, const char* instring, const char* filedir,
       else
         D->flags = (D->flags & ~GD_ENCODING) | GD_ENC_UNSUPPORTED;
     }
-  } else if (strcmp(ip, "ENDIAN") == 0) {
+  } else if (strcmp(ptr, "ENDIAN") == 0) {
     if (!(D->flags & GD_FORCE_ENDIAN)) {
       if (strcmp(in_cols[1], "big") == 0) {
         D->flags |= GD_BIG_ENDIAN;
@@ -1080,7 +1098,7 @@ int _GD_ParseFormatLine(DIRFILE *D, const char* instring, const char* filedir,
         _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_ENDIAN, format_file, linenum,
             NULL);
     }
-  } else if (strcmp(ip, "META") == 0) {
+  } else if (strcmp(ptr, "META") == 0) {
     const gd_entry_t* P =  _GD_GetEntry(D, in_cols[1], NULL);
     if (P == NULL)
       _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_NO_PARENT, format_file,
@@ -1104,7 +1122,7 @@ int _GD_ParseFormatLine(DIRFILE *D, const char* instring, const char* filedir,
           P->e->n_meta_string++;
       }
     }
-  } else if (strcmp(ip, "VERSION") == 0) {
+  } else if (strcmp(ptr, "VERSION") == 0) {
     *standards = atoi(in_cols[1]);
 
     /* Field Types -- here we go back to in_cols */
