@@ -768,13 +768,13 @@ static gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols,
  */
 static int _GD_ParseFormatFile(FILE* fp, DIRFILE *D, const char* filedir,
     const char* subdir, const char* format_file, int format_parent,
-    int standards)
+    int* standards)
 {
   char instring[MAX_LINE_LENGTH];
   int linenum = 0;
   int have_first = 0;
 
-  dtrace("%p, %p, \"%s\", \"%s\", \"%s\", %i, %i", fp, D, filedir, subdir,
+  dtrace("%p, %p, \"%s\", \"%s\", \"%s\", %i, %p", fp, D, filedir, subdir,
       format_file, format_parent, standards);
 
   /* start parsing */
@@ -800,7 +800,7 @@ static int _GD_ParseFormatFile(FILE* fp, DIRFILE *D, const char* filedir,
 #define ACC_MODE_UTF8  3
 int _GD_ParseFormatLine(DIRFILE *D, const char* instring, const char* filedir,
     const char* subdir, const char* format_file, int format_parent,
-    int standards, int linenum, int have_first)
+    int* standards, int linenum, int have_first)
 {
   char outstring[MAX_LINE_LENGTH];
   const char *in_cols[MAX_IN_COLS];
@@ -815,7 +815,7 @@ int _GD_ParseFormatLine(DIRFILE *D, const char* instring, const char* filedir,
   int acc_mode = ACC_MODE_NONE;
   int me = D->n_include - 1;
 
-  dtrace("%p, \"%s\", \"%s\", \"%s\", \"%s\", %i, %i, %i, %i, %i", D, instring,
+  dtrace("%p, \"%s\", \"%s\", \"%s\", \"%s\", %i, %p, %i, %i", D, instring,
       filedir, subdir, format_file, format_parent, standards, linenum,
       have_first);
 
@@ -1090,7 +1090,7 @@ int _GD_ParseFormatLine(DIRFILE *D, const char* instring, const char* filedir,
           NULL);
     else {
       gd_entry_t* E = _GD_ParseFieldSpec(D, n_cols - 2, in_cols + 2, P,
-          subdir, format_file, linenum, &have_first, me, standards);
+          subdir, format_file, linenum, &have_first, me, *standards);
       if (!D->error) {
         /* there is no need to sort this list */
         P->e->meta_entry = realloc(P->e->meta_entry, (P->e->n_meta + 1) *
@@ -1105,18 +1105,16 @@ int _GD_ParseFormatLine(DIRFILE *D, const char* instring, const char* filedir,
       }
     }
   } else if (strcmp(ip, "VERSION") == 0) {
-    standards = atoi(in_cols[1]);
+    *standards = atoi(in_cols[1]);
 
     /* Field Types -- here we go back to in_cols */
 
-  } else if ((strcmp(in_cols[0], "INDEX") == 0) ||
-      (strcmp(in_cols[0], "FILEFRAM") == 0))
-  { /* reserved field names */
+  } else if (strcmp(in_cols[0], "INDEX") == 0) /* reserved field name */
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_RES_NAME, format_file, linenum,
         NULL);
-  } else
+  else
     _GD_ParseFieldSpec(D, n_cols, in_cols, NULL, subdir, format_file, linenum,
-        &have_first, me, standards);
+        &have_first, me, *standards);
 
   dreturn("%i", have_first);
   return have_first;
@@ -1278,6 +1276,7 @@ DIRFILE* dirfile_open(const char* filedir, unsigned int flags)
   FILE *fp;
   DIRFILE* D;
   char format_file[FILENAME_MAX];
+  int standards = DIRFILE_STANDARDS_VERSION;
 
   dtrace("\"%s\", 0x%x", filedir, flags);
 
@@ -1326,8 +1325,7 @@ DIRFILE* dirfile_open(const char* filedir, unsigned int flags)
   D->include_list[0].modified = 0;
   D->include_list[0].parent = -1;
 
-  _GD_ParseFormatFile(fp, D, filedir, ".", format_file, 0,
-      DIRFILE_STANDARDS_VERSION);
+  _GD_ParseFormatFile(fp, D, filedir, ".", format_file, 0, &standards);
   fclose(fp);
 
   if (D->error != GD_E_OK) {

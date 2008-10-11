@@ -328,7 +328,7 @@ void _GD_LinterpData(DIRFILE* D, const void *data, gd_type_t type, size_t npts,
       double *lx, double *ly, size_t n_ln);
 int _GD_ParseFormatLine(DIRFILE *D, const char* instring, const char* filedir,
     const char* subdir, const char* format_file, int format_parent,
-    int standards, int linenum, int have_first);
+    int* standards, int linenum, int have_first);
 void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E);
 unsigned int _GD_ResolveEncoding(const char* name, unsigned int scheme,
     struct _gd_private_entry *e);

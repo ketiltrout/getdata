@@ -1,3 +1,7 @@
+2008-10-10   D. V. Wiebe <getdata@ketiltrout.net>  svn:132
+	* src/open.c (_GD_ParseFormatFile _GD_ParseFormatLine dirfile_open):
+	Properly propagate standards.
+
 2008-10-10   D. V. Wiebe <getdata@ketiltrout.net>  svn:131
 	* src/open.c (_GD_ParseFieldSpec): Properly propagate have_first to caller.
 
