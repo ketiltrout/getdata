@@ -970,10 +970,6 @@ int _GD_Tokenise(DIRFILE *D, const char* instring, char* outstring,
 /* _GD_ParseFormatLine: Actually parse a single format file line.
  *       Returns 0 unless this format file contains the first raw field.
  */
-#define ACC_MODE_NONE  0
-#define ACC_MODE_OCTAL 1
-#define ACC_MODE_HEX   2
-#define ACC_MODE_UTF8  3
 int _GD_ParseFormatLine(DIRFILE *D, const char* instring, const char* filedir,
     const char* subdir, const char* format_file, int format_parent,
     int* standards, int linenum, int have_first)
