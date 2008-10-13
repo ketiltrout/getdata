@@ -68,15 +68,15 @@
 #define GD_E_RECURSE_LEVEL    14
 #define GD_E_BAD_DIRFILE      15
 #define GD_E_BAD_FIELD_TYPE   16
-#define GD_E_BAD_PUT_FIELD    GD_E_BAD_FIELD_TYPE
 #define GD_E_ACCMODE          17
 #define GD_E_UNSUPPORTED      18
 #define GD_E_UNKNOWN_ENCODING 19
 #define GD_E_BAD_ENTRY        20
 #define GD_E_DUPLICATE        21
 #define GD_E_DIMENSION        22
+#define GD_E_BAD_INDEX        23
 
-#define GD_N_ERROR_CODES      23
+#define GD_N_ERROR_CODES      24
 
 #define GD_MAX_LINCOM 3
 
@@ -123,14 +123,13 @@ typedef enum {
 #define GD_DOUBLE    GD_FLOAT64
 
 struct _gd_private_entry;
-#define GD_FORMAT_AUTO 0xFFFF
 
 /* Unified entry struct */
 struct _gd_unified_entry {
   char* field;
   gd_entype_t field_type;
   char *in_fields[GD_MAX_LINCOM];
-  unsigned int format_file;
+  int format_file;
   union {
     struct { /* RAW */
       unsigned int spf;
@@ -212,15 +211,8 @@ extern int get_entry(DIRFILE* D, const char* field_code, gd_entry_t* entry)
 
 extern gd_entry_t *dirfile_free_entry_strings(gd_entry_t *entry) __THROW;
 
-extern int dirfile_add(DIRFILE* D, const gd_entry_t* entry)
-  __THROW __gd_nonnull ((1,2));
-
 extern int dirfile_add_meta(DIRFILE* D, gd_entry_t* entry, const char* parent)
   __THROW __gd_nonnull ((1,2,3));
-
-extern int dirfile_add_raw(DIRFILE* D, const char* field_code,
-    gd_type_t data_type, unsigned int spf, int format_file)
-__THROW __gd_nonnull ((1,2));
 
 extern int dirfile_add_lincom(DIRFILE* D, const char* field_code, int n_fields,
     const char** in_fields, const double* m, const double* b, int format_file)
@@ -242,45 +234,65 @@ extern int dirfile_add_phase(DIRFILE* D, const char* field_code,
     const char* in_field, int shift, int format_file)
 __THROW __gd_nonnull ((1,2,3));
 
-extern int dirfile_add_metalincom(DIRFILE* D, const char* field_code,
-    const char* parent, int n_fields, const char** in_fields, const double* m,
-    const double* b) __THROW __gd_nonnull((1,2,3,5,6,7));
+extern int dirfile_add_metalincom(DIRFILE* D, const char* parent,
+    const char* field_code, int n_fields, const char** in_fields,
+    const double* m, const double* b) __THROW __gd_nonnull((1,2,3,5,6,7));
 
-extern int dirfile_add_metalinterp(DIRFILE* D, const char* field_code,
-    const char* parent, const char* in_field, const char* table)
+extern int dirfile_add_metalinterp(DIRFILE* D, const char* parent,
+    const char* field_code, const char* in_field, const char* table)
 __THROW __gd_nonnull ((1,2,3,4,5));
 
-extern int dirfile_add_metabit(DIRFILE* D, const char* field_code,
-    const char* parent, const char* in_field, int bitnum, int numbits)
+extern int dirfile_add_metabit(DIRFILE* D, const char* parent,
+    const char* field_code, const char* in_field, int bitnum, int numbits)
 __THROW __gd_nonnull ((1,2,3,4));
 
-extern int dirfile_add_metamultiply(DIRFILE* D, const char* field_code,
-    const char* parent, const char* in_field1, const char* in_field2)
+extern int dirfile_add_metamultiply(DIRFILE* D, const char* parent,
+    const char* field_code, const char* in_field1, const char* in_field2)
 __THROW __gd_nonnull ((1,2,3,4,5));
 
-extern int dirfile_add_metaphase(DIRFILE* D, const char* field_code,
-    const char* parent, const char* in_field, int shift)
+extern int dirfile_add_metaphase(DIRFILE* D, const char* parent,
+    const char* field_code, const char* in_field, int shift)
 __THROW __gd_nonnull ((1,2,3,4));
 
-extern int dirfile_add_metastring(DIRFILE* D, const char* field_code,
-    const char* parent, const char* value) __THROW __gd_nonnull ((1,2,3,4));
+extern int dirfile_add_metastring(DIRFILE* D, const char* parent,
+    const char* field_code, const char* value) __THROW __gd_nonnull ((1,2,3,4));
 
-extern int dirfile_add_metaconst(DIRFILE* D, const char* field_code,
-    const char* parent, gd_type_t const_type, gd_type_t data_type,
+extern int dirfile_add_metaconst(DIRFILE* D, const char* parent,
+    const char* field_code, gd_type_t const_type, gd_type_t data_type,
     const void* value) __THROW __gd_nonnull ((1,2,3,6));
 
-extern const char* get_format_filename(const DIRFILE* D, unsigned int index)
+extern const char* get_format_filename(DIRFILE* D, int index)
   __THROW __gd_nonnull((1));
 
 extern int get_error(const DIRFILE* D) __THROW __gd_nonnull ((1));
 
-extern int get_nformats(const DIRFILE* D) __THROW __gd_nonnull((1));
+extern int get_nformats(DIRFILE* D) __THROW __gd_nonnull((1));
 
 extern size_t put_string(DIRFILE* D, const char *field_code, const char
     *data_in) __THROW __gd_nonnull ((1, 2, 3));
 
 extern size_t put_constant(DIRFILE* D, const char *field_code,
     gd_type_t data_type, const void *data_in) __THROW __gd_nonnull ((1, 2, 4));
+
+unsigned int get_nmeta_fields(DIRFILE* D, const char* parent);
+
+unsigned int get_nmeta_vectors(DIRFILE* D, const char* parent);
+
+unsigned int get_nmeta_fields_by_type(DIRFILE* D, const char* parent,
+    gd_entype_t type);
+
+const void* get_metaconstant_values(DIRFILE* D, const char* parent,
+    gd_type_t return_type);
+
+const char** get_metaconstant_list(DIRFILE* D, const char* parent);
+
+const char** get_metastring_values(DIRFILE* D, const char* parent);
+
+const char** get_metastring_list(DIRFILE* D, const char* parent);
+
+const char** get_metavector_list(DIRFILE* D, const char* parent);
+
+const char** get_metafield_list(DIRFILE* D, const char* parent);
 
 /* The following functions contain calls to I/O functions, making them
  * cancellation points.  As a result we cannot mark them with __THROW.
@@ -294,6 +306,17 @@ extern void dirfile_flush(DIRFILE* dirfile, const char* field_code)
   __gd_nonnull ((1));
 
 extern void dirfile_flush_metadata(DIRFILE* dirfile) __gd_nonnull ((1));
+
+extern int dirfile_add_raw(DIRFILE* D, const char* field_code,
+    gd_type_t data_type, unsigned int spf, int format_file) __gd_nonnull((1,2));
+
+extern int dirfile_add(DIRFILE* D, const gd_entry_t* entry) __gd_nonnull((1,2));
+
+extern int dirfile_add_spec(DIRFILE* D, int format_file, const char* line)
+  __gd_nonnull ((1,3));
+
+extern int dirfile_add_metaspec(DIRFILE* D, const char* parent,
+    const char* line) __gd_nonnull ((1,2,3));
 
 /* the following functions are _FILE_OFFSET_BITS sensitive */
 #ifndef __USE_FILE_OFFSET64

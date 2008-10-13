@@ -36,5 +36,5 @@ int main(void)
   if (n != 0)
     return 1;
 
-  return (error != GD_E_BAD_ENTRY);
+  return (error != GD_E_BAD_INDEX);
 }

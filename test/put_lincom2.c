@@ -45,5 +45,5 @@ int main(void)
   if (n != 0)
     return 1;
 
-  return (error != GD_E_BAD_PUT_FIELD);
+  return (error != GD_E_BAD_FIELD_TYPE);
 }

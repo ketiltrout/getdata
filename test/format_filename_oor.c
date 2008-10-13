@@ -34,6 +34,7 @@ int main(void)
   DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
   form0 = get_format_filename(D, -3000);
   form1 = get_format_filename(D, 1000);
+  int error = get_error(D);
   dirfile_close(D);
 
   unlink(format1);
@@ -41,6 +42,9 @@ int main(void)
   rmdir(filedir);
 
   if (form0 != NULL || form1 != NULL)
+    return 1;
+
+  if (error != GD_E_BAD_INDEX)
     return 1;
 
   return 0;

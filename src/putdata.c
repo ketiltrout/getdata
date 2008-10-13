@@ -73,13 +73,13 @@ static size_t _GD_DoRawOut(DIRFILE *D, gd_entry_t *E,
   /* the current end of file, a gap will result (see lseek(2)) */
 
   /* Figure out the dirfile encoding type, if required */
-  if ((D->flags & GD_ENCODING) == GD_AUTO_ENCODED)
-    D->flags = (D->flags & ~GD_ENCODING) |
-      _GD_ResolveEncoding(E->e->file, 0, E->e);
+  if (D->include_list[E->format_file].encoding == GD_AUTO_ENCODED)
+    D->include_list[E->format_file].encoding = _GD_ResolveEncoding(E->e->file,
+        D->include_list[E->format_file].encoding, E->e);
 
   /* If the encoding is still unknown, none of the candidate files exist;
    * as a result, we don't know the intended encoding type */
-  if ((D->flags & GD_ENCODING) == GD_AUTO_ENCODED) {
+  if (D->include_list[E->format_file].encoding == GD_AUTO_ENCODED) {
     _GD_SetError(D, GD_E_UNKNOWN_ENCODING, 0, NULL, 0, NULL);
     dreturn("%zi", 0);
     return 0;
@@ -87,7 +87,8 @@ static size_t _GD_DoRawOut(DIRFILE *D, gd_entry_t *E,
 
   /* Figure out the encoding subtype, if required */
   if (E->e->encoding == GD_ENC_UNKNOWN)
-    _GD_ResolveEncoding(E->e->file, D->flags & GD_ENCODING, E->e);
+    _GD_ResolveEncoding(E->e->file, D->include_list[E->format_file].encoding,
+        E->e);
 
   if (E->e->fp < 0) {
     /* open file for reading / writing if not already opened */

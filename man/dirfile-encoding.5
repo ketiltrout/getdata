@@ -47,6 +47,11 @@ Dirfile Standards, but, for purposes of interoperability, all dirfile
 implementations are encouraged to support the encoding implementation used by
 the GetData dirfile reference implmentation.
 
+An encoding scheme is local to the particular
+.I format file fragment
+in which it is indicated.  This allows a single dirfile to have binary files
+which are stored using multiple encodings, by having them defined in multiple
+fragments.
 
 The rest of this manual page discusses specifics of the encoding framework
 implemented in the GetData library.
@@ -56,6 +61,8 @@ implemented in the GetData library.
 The GetData library provides an encoding framework which abstracts data file
 I/O, allowing for generic support for a wide variety of encoding schemes.
 The only functions which make use of the encoding framework are
+.BR dirfile_add (3)
+(and its dirfile_add_... cousins),
 .BR getdata "(3), " get_nframes (3),
 and
 .BR putdata (3).
@@ -69,22 +76,15 @@ for file I/O via the encoding will fail with the
 .B GD_E_UNSUPPORTED
 error code.
 
-GetData discovers the encoding scheme of a particular dirfile by noting the
-filename extension of files associated with
-.B RAW
-fields.  Binary files which form an unencoded dirfile have no file extension.
-The file extension used by the other encodings are noted below.  Encoding
-discovery proceeds by searching for files with the known list of file extensions
-(in some unspecified order) and stopping when the first successful match is
-made.
-
-Because of this, when the dirfile has multiple data files with different,
-supported file extensions which could legitamilty be associated with a
-.B RAW
-field, the encoding scheme discovered by GetData is not well defined.  To
-prevent misidentification of the encoding scheme, a dirfile directory should
-only ever contain data files in one particular encoding (including no
-encoding).
+GetData discovers the encoding scheme of a particular RAW field by noting the
+filename extension of files associated with the field.  Binary files which form
+an unencoded dirfile have no file extension.  The file extension used by the
+other encodings are noted below.  Encoding discovery proceeds by searching for
+files with the known list of file extensions (in an unspecified order) and
+stopping when the first successful match is made.  Because of this, when the a
+field has multiple data files with different, supported file extensions which
+could legitamilty be associated with it, the encoding scheme discovered by
+GetData is not well defined.
 
 In addition to raw (unencoded) data, GetData supports two other encoding
 schemes:
@@ -113,9 +113,11 @@ library.  The slimlib library was developed at Princeton University to compress
 dirfile-like data.  It permits reasonably fast random-access reads.  The slimlib
 library currently lacks write capabilities; as a result, the Slim Encoding does
 not support
+.BR dirfile_add (3),
+nor
 .BR putdata (3).
 
-Slimlib has been released under the GPL, but as of the writing of this manual
+Slimlib has been released under the GPL but, as of the writing of this manual
 page, slimlib is not distributed via the Internet.  Slimlib was written by
 Joseph Fowler.  Interested parties should write to the slimlib author directly.
 

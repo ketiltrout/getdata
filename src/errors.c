@@ -66,6 +66,10 @@ static const struct {
     "Invalid metafield type on line {3} of {2}", 0 },
   { GD_E_FORMAT, GD_E_FORMAT_NO_PARENT,
     "Meta field defined before parent ({4}) on line {3} of {2}", 0 },
+  { GD_E_FORMAT, GD_E_FORMAT_DUPLICATE,
+    "Field code {4} on line {3} of {2} already defined", 0 },
+  { GD_E_FORMAT, GD_E_FORMAT_LOCATION,
+    "META in a different file than parent ({4}) on line {3} of {2}", 0 },
   /* GD_E_CREAT: 1 = suberror, 2 = filename. 3 = errno */
   { GD_E_TRUNC, 0, "Error truncating {2}: ", 1 },
   /* GD_E_CREAT: 1 = suberror, 2 = filename, 3 = errno */
@@ -110,8 +114,6 @@ static const struct {
   { GD_E_UNKNOWN_ENCODING, 0, "Unable to determine encoding scheme", 0 },
   /* GD_E_BAD_ENTRY: 3 = parameter */
   { GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_TYPE, "Invalid entry type: {3}", 0 },
-  { GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_FORMAT, "Invalid format file index: {3}",
-    0 },
   { GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_SPF, "Samples per frame out of range: {3}",
     0 },
   { GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_NFIELDS,
@@ -124,6 +126,8 @@ static const struct {
   { GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_METARAW, "Invalid metafield type: {3}", 0 },
   /* GD_E_DUPLICATE 4 = name */
   { GD_E_DUPLICATE, 0, "Field code already present: {4}", 0 },
+  /* GD_E_BAD_INDEX 3 = index */
+  { GD_E_BAD_INDEX, 0, "Invalid format file index: {3}", 0 },
   /* GD_E_OK: (nothing) */
   { 0, 0, "Success", 0} /* this must be the last error string defined */
 };

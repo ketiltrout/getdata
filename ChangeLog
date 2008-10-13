@@ -1,3 +1,64 @@
+2008-10-12   D. V. Wiebe <getdata@ketiltrout.net>  svn:135
+	* src/add.c (_GD_Add): Prohibit declaring METAs in a fragment not containing
+	its parent.
+	* src/open.c (_GD_ParseDirective): Ditto.
+	* src/getdata.h.in: GD_FORMAT_AUTO is no longer needed.
+
+	* src/internal.h src/open.c: MAX_IN_COLS moved to header.
+	* src/add.c (dirfile_add_metaspec dirfile_add_spec): Added.
+
+	* src/internal.h: Store subdir (sname) in include list.
+	* src/close.c (_GD_FreeD): free sname.
+	* src/open.c (_GD_ParseRaw _GD_ParseFieldSpec _GD_ParseDirective): Derive
+	subdir and other relevant information from the include_list, where possible.
+
+	* src/open.c (_GD_Tokenise): Allow specification of the empty string as "".
+	* src/open.c (_GD_ValidateField): Prohibit reserved words and the empty
+	string.
+
+	* src/add.c (_GD_Add): Provide defaults for CONST and STRING; properly
+	enumerate types.
+
+	* src/add.c: Add GD_INVALID checks to all public functions.
+
+	* src/add.c (dirfile_add_metalincom dirfile_add_metalinterp
+	dirfile_add_metabit dirfile_add_metamultiply dirfile_add_metaphase): Put
+	parent parameter before field_code to mimic the field spec order.
+
+	* src/flush.c (_GD_FieldSpec _GD_FlushMeta): Properly handle META fields.
+
+	* src/getdata.h.in: dirfile_add_raw dirfile_add dirfile_add_spec
+	dirfile_add_metaspec may all potentially call I/O functions; ergo, don't
+	mark them with THROW.o
+
+	* test/Makefile.am: Re-organise tests.
+	* test/add_meta_linterp_invalid.c test/add_meta_lincom_invalid.c
+	test/vlist_invalid.c test/add_raw_invalid.c test/vlist_meta.c
+	test/cvlist_invalid.c test/svlist_invalid.c test/cvlist.c test/svlist.c
+	test/add_meta_phase_invalid.c test/add_invalid.c test/add_meta_phase.c
+	test/add_phase_invalid.c test/add_spec_directive.c test/add_string.c
+	test/clist_invalid.c test/add_linterp_invalid.c test/add_meta_multiply.c
+	test/slist_invalid.c test/clist.c test/cvlist_meta_invalid.c
+	test/flist_meta_invalid.c test/slist.c test/svlist_meta_invalid.c
+	test/cvlist_meta.c test/vlist_meta_invalid.c test/svlist_meta.c
+	test/parse_string_null.c test/add_meta_linterp.c test/add_meta_lincom.c
+	test/vlist.c test/add_bit_invalid.c test/add_lincom_invalid.c
+	test/add_meta_bit_invalid.c test/add_meta_bit.c test/add_multiply_invalid.c
+	test/add_const.c test/add_meta_multiply_invalid.c test/clist_meta_invalid.c
+	test/add_meta.c test/add_spec_invalid.c test/slist_meta_invalid.c
+	test/clist_meta.c test/add_spec.c test/slist_meta.c test/flist_meta.c: Added
+	tests for the list functions, add_spec, and add_meta.
+
+	* src/include.c (_GD_Include): Extracted include file handler from
+	_GD_ParseDirective in src/open.c.
+	* src/include.c (dirfile_include): Added.
+
+	* src/add.c (_GD_Add) src/getdata.c (_GD_DoRaw) src/include.c (_GD_Include)
+	src/nframes.c (get_nframes64) src/putdata.c (_GD_DoRawOut): Make encodings
+	fragment specific.
+	* src/flush.c (_GD_FlushMeta): Write /ENCODING.
+
+
 2008-10-11   D. V. Wiebe <getdata@ketiltrout.net>  svn:134
 	* src/open.c (_GD_Tokenise _GD_ParseDirective _GD_ParseFieldSpec
 	_GD_ParseFormatFile): Okay, the parser is now in three pieces: tokeniser,

@@ -32,86 +32,149 @@ LEGACY_TESTS=legacy_get legacy_get_put legacy_get_rofs legacy_nframes \
 endif
 
 if TEST_SLIMLIB
-SLIMLIB_TESTS=slim_get slim_nframes slim_put
+SLIM_TESTS=slim_get slim_nframes slim_put
 endif
 
 LDADD=../src/libgetdata.la
 INCLUDES=-Wall -Wextra -I$(top_srcdir)/src -D__TEST__=\"$@\"
-TESTS=add add_bit add_bit_bitnum add_bit_bitsize add_bit_numbits add_code \
-			add_duplicate add_format add_lincom add_lincom_nfields add_linterp \
-			add_many add_multiply add_phase add_raw add_raw_spf add_raw_type \
-			add_rdonly add_sort add_type ascii_get ascii_nframes ascii_put close \
-			close_bad close_null \
-      convert_uint8_int8      convert_uint8_uint16   convert_uint8_int16     \
-			convert_uint8_uint32    convert_uint8_int32    convert_uint8_float32   \
-			convert_uint8_uint64    convert_uint8_int64    convert_uint8_float64   \
-			convert_int8_uint8      convert_int8_uint16    convert_int8_int16      \
-			convert_int8_uint32     convert_int8_int32     convert_int8_float32    \
-			convert_int8_uint64     convert_int8_int64     convert_int8_float64    \
-      convert_uint16_uint8    convert_uint16_int8    convert_uint16_int16    \
-			convert_uint16_uint32   convert_uint16_int32   convert_uint16_float32  \
-			convert_uint16_uint64   convert_uint16_int64   convert_uint16_float64  \
-			convert_int16_uint8     convert_int16_int8     convert_int16_uint16    \
-			convert_int16_uint32    convert_int16_int32    convert_int16_float32   \
-			convert_int16_uint64    convert_int16_int64    convert_int16_float64   \
-      convert_uint32_uint8    convert_uint32_int8    convert_uint32_uint16   \
-			convert_uint32_int16    convert_uint32_int32   convert_uint32_float32  \
-			convert_uint32_uint64   convert_uint32_int64   convert_uint32_float64  \
-			convert_int32_uint8     convert_int32_int8     convert_int32_uint16    \
-			convert_int32_int16     convert_int32_uint32   convert_int32_float32   \
-			convert_int32_uint64    convert_int32_int64    convert_int32_float64   \
-      convert_uint64_uint8    convert_uint64_int8    convert_uint64_uint16   \
-			convert_uint64_int16    convert_uint64_uint32  convert_uint64_int32    \
-			convert_uint64_float32  convert_uint64_int64   convert_uint64_float64  \
-			convert_int64_uint8     convert_int64_int8     convert_int64_uint16    \
-			convert_int64_int16     convert_int64_uint32   convert_int64_int32     \
-			convert_int64_float32   convert_int64_uint64   convert_int64_float64   \
-			convert_float32_uint8   convert_float32_int8   convert_float32_uint16  \
-			convert_float32_int16   convert_float32_uint32 convert_float32_int32   \
-			convert_float32_uint64  convert_float32_int64  convert_float32_float64 \
-			convert_float64_uint8   convert_float64_int8   convert_float64_uint16  \
-			convert_float64_int16   convert_float64_uint32 convert_float64_int32   \
-			convert_float64_uint64  convert_float64_int64  convert_float64_float32 \
-			creat creat_excl creat_rdonly dfes_bit dfes_lincom dfes_linterp \
-			dfes_multiply dfes_null dfes_phase dfes_raw dfes_zero entry_bad_code \
-			entry_bit entry_invalid entry_lincom entry_linterp entry_multiply \
-			entry_phase entry_raw error error_error error_short flist flist_invalid \
-			flush flush_all flush_bad_code flush_invalid flush_meta format_filename \
-			format_filename_oor get64 get_bad_code get_bit get_char get_endian8 \
-			get_endian16 get_endian32 get_endian64 get_endian_float32 \
-			get_endian_float64 get_ff get_float32 get_float64 get_foffs get_fs \
-			get_int8 get_int16 get_int32 get_int64 get_invalid get_lincom1 \
-			get_lincom2 get_lincom3 get_lincom_noin get_linterp get_linterp_noin \
-			get_linterp_notab get_multiply get_multiply_noin get_nonexistent \
-			get_null $(GET_OFF64) get_phase get_recurse get_sf get_ss get_type \
-			get_uint16 get_uint32 get_uint64 $(LEGACY_TESTS) nfields nfields_invalid \
-			nfields_type nfields_type_invalid nformats nframes nframes64 \
-			nframes_empty nframes_invalid $(NF_OFF64) nframes_spf nmeta \
-			nmeta_invalid nmeta_parent nmeta_type nmeta_type_invalid \
-			nmeta_type_parent nmeta_vectors nmeta_vectors_invalid \
-			nmeta_vectors_parent nvectors nvectors_invalid open open_eaccess \
-			open_nonexistent open_notdirfile parse_badline parse_bit parse_bit4 \
-			parse_bit_bitnum parse_bit_bitsize parse_bit_ncols parse_bit_numbits \
-			parse_const parse_const_ncols parse_duplicate parse_endian_bad \
-			parse_endian_big parse_endian_force parse_endian_little \
-			parse_endian_slash parse_foffs parse_foffs_slash parse_include \
-			parse_include_nonexistent parse_include_slash parse_index parse_lincom \
-			parse_lincom_ncols1 parse_lincom_ncols2 parse_lincom_nfields \
-			parse_lincom_nofields parse_linterp parse_linterp_ncols parse_meta \
-			parse_meta_parent parse_meta_raw parse_multiply parse_multiply_ncols \
-			parse_name parse_ncols parse_phase parse_phase_ncols parse_quote \
-			parse_raw parse_raw_char parse_raw_ncols parse_raw_spf parse_raw_type \
-			parse_sort parse_string parse_string_ncols parse_version \
-			parse_version_include parse_version_pedantic parse_version_slash \
-			parse_whitespace put64 put_bad_code put_bit put_bof put_char put_endian8 \
-			put_endian16 put_endian32 put_endian64 put_endian_float32 \
-			put_endian_float64 put_ff put_float32 put_float64 put_foffs put_fs \
-			put_int8 put_int16 put_int32 put_int64 put_invalid put_lincom1 \
-			put_lincom2 put_lincom_noin put_linterp put_linterp_noin \
-			put_linterp_notab put_multiply put_null $(PUT_OFF64) put_phase \
-			put_phase_noin put_rdonly put_recurse put_rofs put_sf put_ss put_type \
-			put_uint16 put_uint32 put_uint64 $(SLIMLIB_TESTS) spf spf_lincom \
-			spf_multiply spf_recurse trunc trunc_rdonly trunc_rofs
+
+ADD_TESTS=add add_bit add_bit_bitnum add_bit_bitsize add_bit_invalid \
+					add_bit_numbits add_code add_const add_duplicate add_format \
+					add_invalid add_lincom add_lincom_invalid add_lincom_nfields \
+					add_linterp add_linterp_invalid add_many add_meta add_meta_bit \
+					add_meta_bit_invalid add_meta_lincom add_meta_lincom_invalid \
+					add_meta_linterp add_meta_linterp_invalid add_meta_multiply \
+					add_meta_multiply_invalid add_meta_phase add_meta_phase_invalid \
+					add_multiply add_multiply_invalid add_phase add_phase_invalid \
+					add_raw add_raw_invalid add_raw_spf add_raw_type add_rdonly add_sort \
+					add_spec add_spec_directive add_spec_invalid add_string add_type
+
+ASCII_TESTS=ascii_get ascii_nframes ascii_put
+
+CLIST_TESTS=clist clist_invalid clist_meta clist_meta_invalid
+
+CVLIST_TESTS=cvlist cvlist_invalid cvlist_meta cvlist_meta_invalid
+
+CLOSE_TESTS=close close_bad close_null
+
+CONVERT_TESTS=convert_uint8_int8 convert_uint8_uint16 convert_uint8_int16 \
+							convert_uint8_uint32 convert_uint8_int32 convert_uint8_float32 \
+							convert_uint8_uint64 convert_uint8_int64 convert_uint8_float64 \
+							convert_int8_uint8 convert_int8_uint16 convert_int8_int16 \
+							convert_int8_uint32 convert_int8_int32 convert_int8_float32 \
+							convert_int8_uint64 convert_int8_int64 convert_int8_float64 \
+							convert_uint16_uint8 convert_uint16_int8 convert_uint16_int16 \
+							convert_uint16_uint32 convert_uint16_int32 \
+							convert_uint16_float32 convert_uint16_uint64 \
+							convert_uint16_int64 convert_uint16_float64 convert_int16_uint8 \
+							convert_int16_int8 convert_int16_uint16 convert_int16_uint32 \
+							convert_int16_int32 convert_int16_float32 convert_int16_uint64 \
+							convert_int16_int64 convert_int16_float64 convert_uint32_uint8 \
+							convert_uint32_int8 convert_uint32_uint16 convert_uint32_int16 \
+							convert_uint32_int32 convert_uint32_float32 \
+							convert_uint32_uint64 convert_uint32_int64 \
+							convert_uint32_float64 convert_int32_uint8 convert_int32_int8 \
+							convert_int32_uint16 convert_int32_int16 convert_int32_uint32 \
+							convert_int32_float32 convert_int32_uint64 convert_int32_int64 \
+							convert_int32_float64 convert_uint64_uint8 convert_uint64_int8 \
+							convert_uint64_uint16 convert_uint64_int16 convert_uint64_uint32 \
+							convert_uint64_int32 convert_uint64_float32 convert_uint64_int64 \
+							convert_uint64_float64 convert_int64_uint8 convert_int64_int8 \
+							convert_int64_uint16 convert_int64_int16 convert_int64_uint32 \
+							convert_int64_int32 convert_int64_float32 convert_int64_uint64 \
+							convert_int64_float64 convert_float32_uint8 convert_float32_int8 \
+							convert_float32_uint16 convert_float32_int16 \
+							convert_float32_uint32 convert_float32_int32 \
+							convert_float32_uint64 convert_float32_int64 \
+							convert_float32_float64 convert_float64_uint8 \
+							convert_float64_int8 convert_float64_uint16 \
+							convert_float64_int16 convert_float64_uint32 \
+							convert_float64_int32 convert_float64_uint64 \
+							convert_float64_int64 convert_float64_float32
+
+CREAT_TESTS=creat creat_excl creat_rdonly
+
+DFES_TESTS=dfes_bit dfes_lincom dfes_linterp dfes_multiply dfes_null \
+					 dfes_phase dfes_raw dfes_zero
+
+ENTRY_TESTS=entry_bad_code entry_bit entry_invalid entry_lincom entry_linterp \
+						entry_multiply entry_phase entry_raw
+
+ERROR_TESTS=error error_error error_short
+
+FLIST_TESTS=flist flist_invalid flist_meta flist_meta_invalid
+
+FLUSH_TESTS=flush flush_all flush_bad_code flush_invalid flush_meta
+
+FORMAT_TESTS=format_filename format_filename_oor
+
+GET_TESTS=get64 get_bad_code get_bit get_char get_endian8 get_endian16 \
+					get_endian32 get_endian64 get_endian_float32 get_endian_float64 \
+					get_ff get_float32 get_float64 get_foffs get_fs get_int8 get_int16 \
+					get_int32 get_int64 get_invalid get_lincom1 get_lincom2 get_lincom3 \
+					get_lincom_noin get_linterp get_linterp_noin get_linterp_notab \
+					get_multiply get_multiply_noin get_nonexistent get_null $(GET_OFF64) \
+					get_phase get_recurse get_sf get_ss get_type get_uint16 get_uint32 \
+					get_uint64
+
+NFIELDS_TESTS=nfields nfields_invalid nfields_type nfields_type_invalid
+
+NFORMATS_TESTS=nformats
+
+NFRAMES_TESTS=nframes nframes64 nframes_empty nframes_invalid $(NF_OFF64) \
+							nframes_spf
+
+NMETA_TESTS=nmeta nmeta_invalid nmeta_parent nmeta_type nmeta_type_invalid \
+						nmeta_type_parent nmeta_vectors nmeta_vectors_invalid \
+						nmeta_vectors_parent
+
+NVECTORS_TESTS=nvectors nvectors_invalid
+
+OPEN_TESTS=open open_eaccess open_nonexistent open_notdirfile
+
+PARSE_TESTS=parse_badline parse_bit parse_bit4 parse_bit_bitnum \
+						parse_bit_bitsize parse_bit_ncols parse_bit_numbits parse_const \
+						parse_const_ncols parse_duplicate parse_endian_bad \
+						parse_endian_big parse_endian_force parse_endian_little \
+						parse_endian_slash parse_foffs parse_foffs_slash parse_include \
+						parse_include_nonexistent parse_include_slash parse_index \
+						parse_lincom parse_lincom_ncols1 parse_lincom_ncols2 \
+						parse_lincom_nfields parse_lincom_nofields parse_linterp \
+						parse_linterp_ncols parse_meta parse_meta_parent parse_meta_raw \
+						parse_multiply parse_multiply_ncols parse_name parse_ncols \
+						parse_phase parse_phase_ncols parse_quote parse_raw parse_raw_char \
+						parse_raw_ncols parse_raw_spf parse_raw_type parse_sort \
+						parse_string parse_string_ncols parse_string_null parse_version \
+						parse_version_include parse_version_pedantic parse_version_slash \
+						parse_whitespace
+
+PUT_TESTS=put64 put_bad_code put_bit put_bof put_char put_endian8 put_endian16 \
+					put_endian32 put_endian64 put_endian_float32 put_endian_float64 \
+					put_ff put_float32 put_float64 put_foffs put_fs put_int8 put_int16 \
+					put_int32 put_int64 put_invalid put_lincom1 put_lincom2 \
+					put_lincom_noin put_linterp put_linterp_noin put_linterp_notab \
+					put_multiply put_null $(PUT_OFF64) put_phase put_phase_noin \
+					put_rdonly put_recurse put_rofs put_sf put_ss put_type put_uint16 \
+					put_uint32 put_uint64
+
+SLIST_TESTS=slist slist_invalid slist_meta slist_meta_invalid
+
+SVLIST_TESTS=svlist svlist_invalid svlist_meta svlist_meta_invalid
+
+SPF_TESTS=spf spf_lincom spf_multiply spf_recurse
+
+TRUNC_TESTS=trunc trunc_rdonly trunc_rofs
+
+VLIST_TESTS=vlist vlist_invalid vlist_meta vlist_meta_invalid
+
+TESTS=$(ADD_TESTS)      $(ASCII_TESTS)    $(CLIST_TESTS)    $(CVLIST_TESTS)   \
+			$(CLOSE_TESTS)    $(CONVERT_TESTS)  $(CREAT_TESTS)    $(DFES_TESTS)     \
+			$(ENTRY_TESTS)    $(ERROR_TESTS)    $(FLIST_TESTS)    $(FLUSH_TESTS)    \
+			$(FORMAT_TESTS)   $(GET_TESTS)      $(LEGACY_TESTS)   $(NFIELDS_TESTS)  \
+			$(NFORMATS_TESTS) $(NFRAMES_TESTS)  $(NMETA_TESTS)    $(NVECTORS_TESTS) \
+			$(OPEN_TESTS)     $(PARSE_TESTS)    $(PUT_TESTS)      $(SLIM_TESTS)     \
+			$(SLIST_TESTS)    $(SPF_TESTS)      $(SVLIST_TESTS)   $(TRUNC_TESTS)    \
+			$(VLIST_TESTS)
 
 check_PROGRAMS=$(TESTS)
 

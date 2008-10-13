@@ -16,7 +16,7 @@ int main(void)
   const char* data = __TEST__ "dirfile/data";
 
   gd_entry_t E;
-  E.field =  "data";
+  E.field = "data";
   E.field_type = GD_RAW_ENTRY;
   E.format_file = 0;
   E.spf = 2;

@@ -25,7 +25,7 @@
 #include <string.h>
 #endif
 
-const void* get_meta_constant_values(DIRFILE* D, const char* parent,
+const void* get_metaconstant_values(DIRFILE* D, const char* parent,
     gd_type_t return_type)
 {
   dtrace("%p, \"%s\", 0x%x", D, parent, return_type);
@@ -79,7 +79,7 @@ const void* get_meta_constant_values(DIRFILE* D, const char* parent,
   return e->const_value_list;
 }
 
-const char** get_meta_constant_list(DIRFILE* D, const char* parent)
+const char** get_metaconstant_list(DIRFILE* D, const char* parent)
 {
   dtrace("%p, \"%s\"", D, parent);
 
@@ -134,7 +134,7 @@ const char** get_meta_constant_list(DIRFILE* D, const char* parent)
   return e->const_list;
 }
 
-const char** get_meta_string_values(DIRFILE* D, const char* parent)
+const char** get_metastring_values(DIRFILE* D, const char* parent)
 {
   dtrace("%p, \"%s\"", D, parent);
 
@@ -187,7 +187,7 @@ const char** get_meta_string_values(DIRFILE* D, const char* parent)
   return e->string_value_list;
 }
 
-const char** get_meta_string_list(DIRFILE* D, const char* parent)
+const char** get_metastring_list(DIRFILE* D, const char* parent)
 {
   dtrace("%p, \"%s\"", D, parent);
 
@@ -242,7 +242,7 @@ const char** get_meta_string_list(DIRFILE* D, const char* parent)
   return e->string_list;
 }
 
-const char** get_meta_vector_list(DIRFILE* D, const char* parent)
+const char** get_metavector_list(DIRFILE* D, const char* parent)
 {
   dtrace("%p, \"%s\"", D, parent);
 
@@ -297,7 +297,7 @@ const char** get_meta_vector_list(DIRFILE* D, const char* parent)
   return e->vector_list;
 }
 
-const char** get_meta_field_list(DIRFILE* D, const char* parent)
+const char** get_metafield_list(DIRFILE* D, const char* parent)
 {
   dtrace("%p, \"%s\"", D, parent);
 

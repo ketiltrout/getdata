@@ -20,7 +20,7 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH dirfile\-format 5 "3 October 2008" "Standards Version 6" "DATA FORMATS"
+.TH dirfile\-format 5 "12 October 2008" "Standards Version 6" "DATA FORMATS"
 .SH NAME
 dirfile\-format \(em the dirfile database format specification file
 .SH DESCRIPTION
@@ -31,9 +31,14 @@ for a
 .BR dirfile (5)
 database.
 
-The format file is a case sensitive ASCII or UTF-8 text file called
+The format file is a case sensitive text file called
 .B format
-located in the dirfile directory.
+located in the dirfile directory.  The explicit text encoding is not specified
+by these standards, but must be 7-bit ASCII compatible. Examples of acceptable
+character encodings include all the ISO\~8859 character sets
+.RI ( i.e.
+Latin-1 through Latin-10, among others), as well as the UTF-8 encoding of
+Unicode and UCS.
 
 .SH SYNTAX
 The format file is composed of field specification lines and directive lines,
@@ -141,9 +146,9 @@ without change in meaning.  Future versions of the Standards may require the
 slash to distinguish a reserved word from a field name.
 .TP
 .B /ENCODING
-The ENCODING directive specifies the encoding scheme used to encode the dirfile.
-The encoding scheme may be one of the pre-defined names listed below, which are
-described in more detail in
+The ENCODING directive specifies the encoding scheme used to encode binary
+files in the dirfile.  The encoding scheme may be one of the pre-defined names
+listed below, which are described in more detail in
 .BR dirfile-encoding (5),
 or any other site-specific encoding scheme.  The pre-defined scheme names are:
 .RS
@@ -162,6 +167,13 @@ scheme.  If no encoding scheme is specified, behaviour is implementaiton
 dependent.  Syntax is:
 .IP
 .BI /ENCODING\~ <scheme>
+.PP
+A dirfile may have more than one encoding scheme.  The ENCODING directive
+indicates the encoding only of the binary files associated with RAW fields
+defined in the same format file fragment as the ENCODING directive itself.  As a
+result, RAW field specified in different fragments of a dirfile, may use
+different encodings.  If two ENCODING directives appear in a single fragment,
+only the last such directive will be honoured.
 .RE
 .TP
 .B /ENDIAN
@@ -185,14 +197,15 @@ database.  Syntax is:
 .RE
 .TP
 .B /INCLUDE
-The INCLUDE directive specifies another file to parse for additional format
-specification for the dirfile.  The inclusion is treated as if the lines of the
-included file were pasted verbatim in place of the INCLUDE directive line.  The
-exception to this is that raw fields specified in the included file will be
-looked for in the directory containing the included file and not in the
-directory containing the parent format file.  The included file may be
-specified either with an absolute path, or else a relative path from the
-current file.  Syntax is:
+The INCLUDE directive specifies another file (called a
+.IR "format file fragment" )
+to parse for additional format specification for the dirfile.  The inclusion is
+treated as if the lines of the fragment were pasted verbatim in place of the
+INCLUDE directive line.  The exception to this is that RAW fields specified in
+the fragment are located in the directory containing the fragment and not in the
+directory containing the parent format file, and the binary file encoding may be
+different for each fragment.  The fragment may be specified either with an
+absolute path, or else a relative path from the current file.  Syntax is:
 .RS
 .IP
 .BI /INCLUDE\~ <file>

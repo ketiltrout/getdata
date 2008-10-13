@@ -38,7 +38,7 @@
 /* add an entry */
 static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
 {
-  dtrace("%p, %p", D, entry);
+  dtrace("%p, %p, \"%s\"", D, entry, parent);
 
   char temp_buffer[FILENAME_MAX];
   int i, u;
@@ -90,7 +90,6 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
       entry->field_type != GD_LINTERP_ENTRY &&
       entry->field_type != GD_BIT_ENTRY &&
       entry->field_type != GD_MULTIPLY_ENTRY &&
-      entry->field_type != GD_MULTIPLY_ENTRY &&
       entry->field_type != GD_PHASE_ENTRY &&
       entry->field_type != GD_CONST_ENTRY &&
       entry->field_type != GD_STRING_ENTRY)
@@ -102,11 +101,10 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
   }
 
   /* check for include index out of range */
-  if (entry->format_file >= D->n_include &&
-      (entry->format_file != GD_FORMAT_AUTO || P == NULL))
+  if (P == NULL && (entry->format_file < 0 ||
+        entry->format_file >= D->n_include))
   {
-    _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_FORMAT, NULL,
-        entry->format_file, NULL);
+    _GD_SetError(D, GD_E_BAD_INDEX, 0, NULL, entry->format_file, NULL);
     dreturn("%i", -1);
     return -1;
   }
@@ -119,7 +117,7 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
     return -1;
   }
   memset(E, 0, sizeof(gd_entry_t));
-  if (entry->format_file == GD_FORMAT_AUTO)
+  if (P)
     E->format_file = P->format_file;
   else
     E->format_file = entry->format_file;
@@ -175,13 +173,13 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
       }
 
       /* If the encoding scheme is unknown, we can't add the field */
-      if ((D->flags & GD_ENCODING) == GD_AUTO_ENCODED) {
+      if (D->include_list[E->format_file].encoding == GD_AUTO_ENCODED) {
         _GD_SetError(D, GD_E_UNKNOWN_ENCODING, 0, NULL, 0, NULL);
         break;
       }
 
       /* If the encoding scheme is unsupported, we can't add the field */
-      if ((D->flags & GD_ENCODING) == GD_ENC_UNSUPPORTED) {
+      if (D->include_list[E->format_file].encoding == GD_ENC_UNSUPPORTED) {
         _GD_SetError(D, GD_E_UNSUPPORTED, 0, NULL, 0, NULL);
         break;
       }
@@ -197,12 +195,12 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
         break;
       }
 
-      strcpy(temp_buffer, D->include_list[E->format_file].cname);
-      snprintf(E->e->file, FILENAME_MAX, "%s/%s", dirname(temp_buffer),
-          E->field);
+      snprintf(E->e->file, FILENAME_MAX, "%s/%s/%s", D->name,
+          D->include_list[E->format_file].sname, E->field);
 
       /* Set the subencoding subscheme */
-      _GD_ResolveEncoding(E->e->file, D->flags & GD_ENCODING, E->e);
+      _GD_ResolveEncoding(E->e->file, D->include_list[E->format_file].encoding,
+          E->e);
 
       if ((E->spf = entry->spf) <= 0)
         _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_SPF, NULL, entry->spf,
@@ -279,10 +277,21 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
         _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
       break;
     case GD_CONST_ENTRY:
-      if (E->data_type & 0x40 || (E->size = GD_SIZE(E->data_type)) == 0)
-        _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, entry->data_type, NULL);
+      E->const_type = entry->const_type;
+      E->e->uconst = E->e->iconst = E->e->dconst = 0;
+      if (E->const_type & 0x40 || GD_SIZE(E->const_type) == 0)
+        _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, E->const_type, NULL);
+      else if (P == NULL)
+        D->n_const++;
+      else
+        P->e->n_meta_const++;
       break;
     case GD_STRING_ENTRY:
+      E->e->string = strdup("");
+      if (P == NULL)
+        D->n_string++;
+      else
+        P->e->n_meta_string++;
       break;
     case GD_NO_ENTRY:
       _GD_InternalError(D); /* We've already verrified field_type is valid */
@@ -295,8 +304,16 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
     return -1;
   }
 
+  if (P) {
+    P->e->meta_entry = realloc(P->e->meta_entry, (P->e->n_meta + 1) *
+        sizeof(gd_entry_t*));
+    P->e->meta_entry[P->e->n_meta] = E;
+    P->e->n_meta++;
+    D->n_meta++;
+  }
+
   /* add the entry and resort the entry list */
-  D->entry = realloc(D->entry, (D->n_entries + 1) * sizeof(gd_entry_t**));
+  D->entry = realloc(D->entry, (D->n_entries + 1) * sizeof(gd_entry_t*));
   _GD_InsertSort(D, E, u);
   D->n_entries++;
   D->include_list[E->format_file].modified = 1;
@@ -308,11 +325,115 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
   return 0;
 }
 
+/* add a META field by parsing a field spec */
+int dirfile_add_metaspec(DIRFILE* D, const char* parent, const char* line)
+{
+  char instring[MAX_LINE_LENGTH];
+  char outstring[MAX_LINE_LENGTH];
+  const char *in_cols[MAX_IN_COLS];
+  int n_cols;
+  int have_first; /* unused */
+  gd_entry_t* E = NULL;
+
+  dtrace("%p, \"%s\", \"%s\"", D, parent, line);
+
+  if (D->flags & GD_INVALID) {/* don't crash */
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  _GD_ClearError(D);
+
+  E = _GD_GetEntry(D, parent, NULL);
+  if (D->error) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  /* we do this to ensure line is not too long */
+  strncpy(instring, line, MAX_LINE_LENGTH - 1);
+  instring[MAX_LINE_LENGTH - 2] = '\0';
+
+  /* start parsing */
+  n_cols = _GD_Tokenise(D, instring, outstring, in_cols,
+      "dirfile_add_metaspec()", 0);
+
+  if (D->error) {
+    dreturn("%i", -1); /* tokeniser threw an error */
+    return -1;
+  }
+
+  /* Directive parsing is skipped -- The Field Spec parser will add the field */
+  E = _GD_ParseFieldSpec(D, n_cols, in_cols, NULL, "dirfile_add_metaspec()",
+      0, &have_first, E->format_file, DIRFILE_STANDARDS_VERSION, 1);
+
+  if (D->error) {
+    dreturn("%i", -1); /* field spec parser threw an error */
+    return -1;
+  }
+
+  dreturn("%i", 0);
+  return 0;
+}
+
+/* add a field by parsing a field spec */
+int dirfile_add_spec(DIRFILE* D, int format_file, const char* line)
+{
+  char instring[MAX_LINE_LENGTH];
+  char outstring[MAX_LINE_LENGTH];
+  const char *in_cols[MAX_IN_COLS];
+  int n_cols;
+  int have_first; /* unused */
+  gd_entry_t* E = NULL;
+
+  dtrace("%p, %i, \"%s\"", D, format_file, line);
+
+  if (D->flags & GD_INVALID) {/* don't crash */
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  _GD_ClearError(D);
+
+  /* we do this to ensure line is not too long */
+  strncpy(instring, line, MAX_LINE_LENGTH - 1);
+  instring[MAX_LINE_LENGTH - 2] = '\0';
+
+  /* start parsing */
+  n_cols = _GD_Tokenise(D, instring, outstring, in_cols, "dirfile_add_spec()",
+      0);
+
+  if (D->error) {
+    dreturn("%i", -1); /* tokeniser threw an error */
+    return -1;
+  }
+
+  /* Directive parsing is skipped -- The Field Spec parser will add the field */
+  E = _GD_ParseFieldSpec(D, n_cols, in_cols, NULL, "dirfile_add_spec()",
+      0, &have_first, format_file, DIRFILE_STANDARDS_VERSION, 1);
+
+  if (D->error) {
+    dreturn("%i", -1); /* field spec parser threw an error */
+    return -1;
+  }
+
+  dreturn("%i", 0);
+  return 0;
+}
+
 int dirfile_add(DIRFILE* D, const gd_entry_t* entry)
 {
   int ret;
 
   dtrace("%p, %p", D, entry);
+
+  if (D->flags & GD_INVALID) {/* don't crash */
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
 
   ret = _GD_Add(D, entry, NULL);
 
@@ -325,6 +446,12 @@ int dirfile_add_raw(DIRFILE* D, const char* field_code, gd_type_t data_type,
     unsigned int spf, int format_file)
 {
   dtrace("%p, \"%s\", %i, %x %i", D, field_code, spf, data_type, format_file);
+
+  if (D->flags & GD_INVALID) {/* don't crash */
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
 
   gd_entry_t R;
   R.field = (char*)field_code;
@@ -346,6 +473,13 @@ int dirfile_add_lincom(DIRFILE* D, const char* field_code, int n_fields,
       m, b, format_file);
 
   int i;
+
+  if (D->flags & GD_INVALID) {/* don't crash */
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
   gd_entry_t L;
   L.field = (char*)field_code;
   L.field_type = GD_LINCOM_ENTRY;
@@ -370,6 +504,12 @@ int dirfile_add_linterp(DIRFILE* D, const char* field_code,
   dtrace("%p, \"%s\", \"%s\", \"%s\", %i", D, field_code, in_field, table,
       format_file);
 
+  if (D->flags & GD_INVALID) {/* don't crash */
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
   gd_entry_t L;
   L.field = (char*)field_code;
   L.field_type = GD_LINTERP_ENTRY;
@@ -388,6 +528,12 @@ int dirfile_add_bit(DIRFILE* D, const char* field_code, const char* in_field,
 {
   dtrace("%p, \"%s\", \"%s\", %i, %i, %i\n", D, field_code, in_field, bitnum,
       numbits, format_file);
+
+  if (D->flags & GD_INVALID) {/* don't crash */
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
 
   gd_entry_t B;
   B.field = (char*)field_code;
@@ -409,6 +555,12 @@ int dirfile_add_multiply(DIRFILE* D, const char* field_code,
   dtrace("%p, \"%s\", \"%s\", \"%s\", %i", D, field_code, in_field1, in_field2,
       format_file);
 
+  if (D->flags & GD_INVALID) {/* don't crash */
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
   gd_entry_t M;
   M.field = (char*)field_code;
   M.field_type = GD_MULTIPLY_ENTRY;
@@ -428,6 +580,12 @@ int dirfile_add_phase(DIRFILE* D, const char* field_code, const char* in_field,
   dtrace("%p, \"%s\", \"%s\", %i, %i", D, field_code, in_field, shift,
       format_file);
 
+  if (D->flags & GD_INVALID) {/* don't crash */
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
   gd_entry_t P;
   P.field = (char*)field_code;
   P.field_type = GD_PHASE_ENTRY;
@@ -445,6 +603,12 @@ int dirfile_add_string(DIRFILE* D, const char* field_code, const char* value,
     int format_file)
 {
   dtrace("%p, \"%s\", \"%s\", %i", D, field_code, value, format_file);
+
+  if (D->flags & GD_INVALID) {/* don't crash */
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
 
   gd_entry_t *entry;
   gd_entry_t S;
@@ -475,6 +639,12 @@ int dirfile_add_const(DIRFILE* D, const char* field_code, gd_type_t const_type,
   dtrace("%p, \"%s\", 0x%x, 0x%x, %p, %i", D, field_code, const_type, data_type,
       value, format_file);
 
+  if (D->flags & GD_INVALID) {/* don't crash */
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
   gd_entry_t *entry;
   gd_entry_t C;
   C.field = (char*)field_code;
@@ -504,6 +674,12 @@ int dirfile_add_meta(DIRFILE* D, gd_entry_t* entry, const char* parent)
 
   dtrace("%p, %p, \"%s\"", D, entry, parent);
 
+  if (D->flags & GD_INVALID) {/* don't crash */
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
   ret = _GD_Add(D, entry, parent);
 
   dreturn("%i", ret);
@@ -511,19 +687,26 @@ int dirfile_add_meta(DIRFILE* D, gd_entry_t* entry, const char* parent)
 }
 
 /* add a META LINCOM entry */
-int dirfile_add_metalincom(DIRFILE* D, const char* field_code,
-    const char* parent, int n_fields, const char** in_fields, const double* m,
-    const double* b)
+int dirfile_add_metalincom(DIRFILE* D, const char* parent,
+    const char* field_code, int n_fields, const char** in_fields,
+    const double* m, const double* b)
 {
   dtrace("%p, \"%s\", \"%s\", %i, %p, %p, %p", D, field_code, parent,
       n_fields, in_fields, m, b);
 
   int i;
+
+  if (D->flags & GD_INVALID) {/* don't crash */
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
   gd_entry_t L;
   L.field = (char*)field_code;
   L.field_type = GD_LINCOM_ENTRY;
   L.n_fields = n_fields;
-  L.format_file = GD_FORMAT_AUTO;
+  L.format_file = 0;
 
   for (i = 0; i < n_fields; ++i) {
     L.in_fields[i] = (char*)in_fields[i];
@@ -537,18 +720,24 @@ int dirfile_add_metalincom(DIRFILE* D, const char* field_code,
 }
 
 /* add a META LINTERP entry */
-int dirfile_add_metalinterp(DIRFILE* D, const char* field_code,
-    const char* parent, const char* in_field, const char* table)
+int dirfile_add_metalinterp(DIRFILE* D, const char* parent,
+    const char* field_code, const char* in_field, const char* table)
 {
   dtrace("%p, \"%s\", \"%s\", \"%s\", \"%s\"", D, field_code, parent, in_field,
       table);
+
+  if (D->flags & GD_INVALID) {/* don't crash */
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
 
   gd_entry_t L;
   L.field = (char*)field_code;
   L.field_type = GD_LINTERP_ENTRY;
   L.in_fields[0] = (char*)in_field;
   L.table = (char*)table;
-  L.format_file = GD_FORMAT_AUTO;
+  L.format_file = 0;
   int error = _GD_Add(D, &L, parent);
 
   dreturn("%i", error);
@@ -556,11 +745,17 @@ int dirfile_add_metalinterp(DIRFILE* D, const char* field_code,
 }
 
 /* add a META BIT entry */
-int dirfile_add_metabit(DIRFILE* D, const char* field_code, const char* parent,
+int dirfile_add_metabit(DIRFILE* D, const char* parent, const char* field_code,
     const char* in_field, int bitnum, int numbits)
 {
   dtrace("%p, \"%s\", \"%s\", \"%s\", %i, %in", D, field_code, parent, in_field,
       bitnum, numbits);
+
+  if (D->flags & GD_INVALID) {/* don't crash */
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
 
   gd_entry_t B;
   B.field = (char*)field_code;
@@ -568,7 +763,7 @@ int dirfile_add_metabit(DIRFILE* D, const char* field_code, const char* parent,
   B.in_fields[0] = (char*)in_field;
   B.bitnum = bitnum;
   B.numbits = numbits;
-  B.format_file = GD_FORMAT_AUTO;
+  B.format_file = 0;
   int error = _GD_Add(D, &B, parent);
 
   dreturn("%i", error);
@@ -576,18 +771,24 @@ int dirfile_add_metabit(DIRFILE* D, const char* field_code, const char* parent,
 }
 
 /* add a META MULTIPLY entry */
-int dirfile_add_metamultiply(DIRFILE* D, const char* field_code,
-    const char* parent, const char* in_field1, const char* in_field2)
+int dirfile_add_metamultiply(DIRFILE* D, const char* parent,
+    const char* field_code, const char* in_field1, const char* in_field2)
 {
   dtrace("%p, \"%s\", \"%s\", \"%s\", \"%s\"", D, field_code, parent,
       in_field1, in_field2);
+
+  if (D->flags & GD_INVALID) {/* don't crash */
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
 
   gd_entry_t M;
   M.field = (char*)field_code;
   M.field_type = GD_MULTIPLY_ENTRY;
   M.in_fields[0] = (char*)in_field1;
   M.in_fields[1] = (char*)in_field2;
-  M.format_file = GD_FORMAT_AUTO;
+  M.format_file = 0;
   int error = _GD_Add(D, &M, parent);
 
   dreturn("%i", error);
@@ -595,18 +796,24 @@ int dirfile_add_metamultiply(DIRFILE* D, const char* field_code,
 }
 
 /* add a META PHASE entry */
-int dirfile_add_metaphase(DIRFILE* D, const char* field_code,
-    const char* parent, const char* in_field, int shift)
+int dirfile_add_metaphase(DIRFILE* D, const char* parent,
+    const char* field_code, const char* in_field, int shift)
 {
   dtrace("%p, \"%s\", \"%s\", \"%s\", %i", D, field_code, parent, in_field,
       shift);
+
+  if (D->flags & GD_INVALID) {/* don't crash */
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
 
   gd_entry_t P;
   P.field = (char*)field_code;
   P.field_type = GD_PHASE_ENTRY;
   P.in_fields[0] = (char*)in_field;
   P.shift = shift;
-  P.format_file = GD_FORMAT_AUTO;
+  P.format_file = 0;
   int error = _GD_Add(D, &P, parent);
 
   dreturn("%i", error);
@@ -614,16 +821,22 @@ int dirfile_add_metaphase(DIRFILE* D, const char* field_code,
 }
 
 /* add a META STRING entry */
-int dirfile_add_metastring(DIRFILE* D, const char* field_code,
-    const char* parent, const char* value)
+int dirfile_add_metastring(DIRFILE* D, const char* parent,
+    const char* field_code, const char* value)
 {
   dtrace("%p, \"%s\", \"%s\", \"%s\"", D, field_code, parent, value);
+
+  if (D->flags & GD_INVALID) {/* don't crash */
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
 
   gd_entry_t *entry;
   gd_entry_t S;
   S.field = (char*)field_code;
   S.field_type = GD_STRING_ENTRY;
-  S.format_file = GD_FORMAT_AUTO;
+  S.format_file = 0;
   int error = _GD_Add(D, &S, parent);
 
   /* Actually store the string, now */
@@ -642,19 +855,25 @@ int dirfile_add_metastring(DIRFILE* D, const char* field_code,
 }
 
 /* add a META CONST entry */
-int dirfile_add_metaconst(DIRFILE* D, const char* field_code,
-    const char* parent, gd_type_t const_type, gd_type_t data_type,
+int dirfile_add_metaconst(DIRFILE* D, const char* parent,
+    const char* field_code, gd_type_t const_type, gd_type_t data_type,
     const void* value)
 {
   dtrace("%p, \"%s\", \"%s\", 0x%x, 0x%x, %p", D, field_code, parent,
       const_type, data_type, value);
+
+  if (D->flags & GD_INVALID) {/* don't crash */
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
 
   gd_entry_t *entry;
   gd_entry_t C;
   C.field = (char*)field_code;
   C.field_type = GD_CONST_ENTRY;
   C.const_type = const_type;
-  C.format_file = GD_FORMAT_AUTO;
+  C.format_file = 0;
   int error = _GD_Add(D, &C, parent);
 
   /* Actually store the constant, now */

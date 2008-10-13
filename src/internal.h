@@ -109,6 +109,8 @@ char *strerror_r(int errnum, char *buf, size_t buflen);
 #include <stdio.h>
 #include <inttypes.h>
 
+#define MAX_IN_COLS (3 * GD_MAX_LINCOM + 5) /* for META lincom */
+
 #ifndef FILENAME_MAX
 #  define FILENAME_MAX 4096
 #endif
@@ -147,6 +149,7 @@ char *strerror_r(int errnum, char *buf, size_t buflen);
 #define GD_E_FORMAT_METARAW   16
 #define GD_E_FORMAT_NO_PARENT 17
 #define GD_E_FORMAT_DUPLICATE 18
+#define GD_E_FORMAT_LOCATION  19
 
 #define GD_E_LINFILE_LENGTH    1
 #define GD_E_LINFILE_OPEN      2
@@ -155,13 +158,12 @@ char *strerror_r(int errnum, char *buf, size_t buflen);
 #define GD_E_FIELD_BAD         2
 
 #define GD_E_BAD_ENTRY_TYPE     1
-#define GD_E_BAD_ENTRY_FORMAT   2
+#define GD_E_BAD_ENTRY_METARAW  2
 #define GD_E_BAD_ENTRY_SPF      3 
 #define GD_E_BAD_ENTRY_NFIELDS  4
 #define GD_E_BAD_ENTRY_NUMBITS  5
 #define GD_E_BAD_ENTRY_BITNUM   6
 #define GD_E_BAD_ENTRY_BITSIZE  7
-#define GD_E_BAD_ENTRY_METARAW  8
 
 /* Unified entry struct */
 struct _gd_private_entry {
@@ -230,10 +232,13 @@ extern const struct encoding_t {
 struct gd_include_t {
   /* Canonical name (full path) */
   char* cname;
+  /* Subdirectory name */
+  char* sname;
   /* External name (relative to the parent format file fragment) */
   char* ename;
   int modified;
-  unsigned int parent;
+  int parent;
+  unsigned int encoding;
   int first;
 };
 
@@ -272,7 +277,7 @@ struct _GD_DIRFILE {
 
   /* include list */
   struct gd_include_t* include_list;
-  unsigned int n_include;
+  int n_include;
 
   /* field lists */
   const char** field_list;
@@ -318,6 +323,8 @@ void _GD_FreeE(gd_entry_t* entry, int priv);
 int _GD_GetLine(FILE *fp, char *line, int* linenum);
 unsigned int _GD_GetSPF(DIRFILE* D, gd_entry_t* E);
 gd_entry_t* _GD_GetEntry(DIRFILE* D, const char* field_code, int* next);
+int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,
+    int linenum, int me, int encoding, int* standards, int flags);
 void _GD_InsertSort(DIRFILE* D, gd_entry_t* E, int u) __THROW;
 
 #define _GD_InternalError(D) \
@@ -326,9 +333,10 @@ void _GD_InsertSort(DIRFILE* D, gd_entry_t* E, int u) __THROW;
 gd_type_t _GD_LegacyType(char c);
 void _GD_LinterpData(DIRFILE* D, const void *data, gd_type_t type, size_t npts,
       double *lx, double *ly, size_t n_ln);
-int _GD_ParseDirective(DIRFILE *D, const char** in_cols, int n_cols,
-    const char* filedir, const char* subdir, const char* format_file,
-    int format_parent, int* standards, int linenum, int* have_first, int me);
+gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, const char** in_cols,
+    const gd_entry_t* parent, const char* format_file, int linenum,
+    int* have_first, unsigned int me, int standards, int creat);
+int _GD_ParseFormatFile(FILE* fp, DIRFILE *D, int me, int* standards);
 void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E);
 unsigned int _GD_ResolveEncoding(const char* name, unsigned int scheme,
     struct _gd_private_entry *e);
@@ -337,6 +345,8 @@ void _GD_ScaleData(DIRFILE* D, void *data, gd_type_t type, size_t npts,
 void _GD_ScanFormat(char* fmt, gd_type_t data_type);
 void _GD_SetError(DIRFILE* D, int error, int suberror, const char* format_file,
     int line, const char* token);
+int _GD_Tokenise(DIRFILE *D, const char* instring, char* outstring,
+    const char** in_cols, const char* format_file, int linenum);
 char* _GD_ValidateField(const gd_entry_t* parent, const char* field_code);
 
 /* unencoded I/O methods */

@@ -68,14 +68,14 @@ An empty dirfile will be created, if one does not already exist.  This will
 create both the dirfile directory and an empty format file.  The directory will
 have have mode
 .BR S_IRWXU " | " S_IRWXG " | "  S_IRWXO 
-(0777), as modified by the process's umask value (see
+(0777), modified by the caller's umask value (see
 .BR umask (2)).
 The format file will have mode
 .BR S_IRUSR " | " S_IWUSR " | "  S_IRGRP " | "  S_IWGRP " | " S_IROTH " | " S_IWOTH
-(0666), also modified by the process's umask.
+(0666), also modified by the caller's umask.
 
 The owner of the dirfile directory and format file will be the effective user ID
-of the process.  Group ownership follows the rules outlined in
+of the caller.  Group ownership follows the rules outlined in
 .BR mkdir (2).
 .TP
 .B GD_EXCL
@@ -83,9 +83,12 @@ Ensure that this call creates a dirfile: when specified along with
 .BR GD_CREAT ,
 the call will fail if the dirfile specified by
 .I dirfilename
-already exists.  This flag is ignored if
+already exists.  Behaviour of this flag is undefined if
 .B GD_CREAT
-is not specified.
+is not specified.  This flag suffers from all the limitations of the
+.B O_EXCL
+flag as indicated in
+.BR open (2).
 .TP
 .B GD_FORCE_ENCODING
 Specifies that
@@ -158,9 +161,9 @@ directives.  If the dirfile does not exist, this flag is ignored.
 The
 .I flags
 parameter may also be bitwise or'd with one of the following symbols indicating
-the encoding scheme of the dirfile.  Like the endianness flags, the choice of
-encoding here is ignored if the encoding is specified in the dirfile itself,
-unless
+the default encoding scheme of the dirfile.  Like the endianness flags, the
+choice of encoding here is ignored if the encoding is specified in the dirfile
+itself, unless
 .B GD_FORCE_ENCODED
 is also specified.  If none of these symbols is present,
 .B GD_AUTO_ENCODED

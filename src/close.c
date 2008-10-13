@@ -69,9 +69,10 @@ static void _GD_FreeD(DIRFILE* D)
       }
     }
 
-  for (i = 0; i < D->n_include; ++i) {
-    free(D->include_list[i].cname);
-    free(D->include_list[i].ename);
+  for (j = 0; j < D->n_include; ++j) {
+    free(D->include_list[j].cname);
+    free(D->include_list[j].sname);
+    free(D->include_list[j].ename);
   }
 
   free(D->entry);

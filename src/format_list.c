@@ -24,23 +24,36 @@
 #include <stdlib.h>
 #endif
 
-const char* get_format_filename(const DIRFILE* D, unsigned int index)
+const char* get_format_filename(DIRFILE* D, int index)
 {
   dtrace("%p, %i", D, index);
 
-  if (D->flags & GD_INVALID || index >= D->n_include) {
+  if (D->flags & GD_INVALID) {
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
     dreturn("%p", NULL);
     return NULL;
   }
+
+ if (index < 0 || index >= D->n_include) {
+    _GD_SetError(D, GD_E_BAD_INDEX, 0, NULL, 0, NULL);
+    dreturn("%p", NULL);
+    return NULL;
+ }
 
   dreturn("\"%s\"", D->include_list[index].cname);
   return D->include_list[index].cname;
 }
 
-int get_nformats(const DIRFILE* D)
+int get_nformats(DIRFILE* D)
 {
   dtrace("%p", D);
 
-  dreturn("%i", (D->flags & GD_INVALID) ? 0 : D->n_include);
-  return (D->flags & GD_INVALID) ? 0 : D->n_include;
+  if (D->flags & GD_INVALID) {
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  dreturn("%i", D->n_include);
+  return D->n_include;
 }

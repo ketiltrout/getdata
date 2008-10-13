@@ -76,7 +76,9 @@ prototypical time stream is used as the size of the dirfile as a whole.
 Version 3 of the Dirfile Standards introduced the
 .I "large dirfile"
 extension.  This extension added the ability to distribute the dirfile format
-specification among multiple files in addition to the 
+specification among multiple files (called
+.IR fragments )
+in addition to the 
 .B format
 file, as well as the ability to house portions of the database in
 .IR subdirfiles .
@@ -86,7 +88,10 @@ be contained within a larger, parent dirfile.  See
 for information on specifying these subdirfiles.
 
 Version 6 of the Dirfile Standards added the ability to encode the binary files
-on disk.  Notably this can be used to compress these files.  See
+on disk.  Each
+.I fragment
+may have its own encoding scheme. Notably this can be used to compress these
+files.  See
 .BR dirfile\-encoding (5)
 for information on encoding schemes.
 
