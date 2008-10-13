@@ -14,7 +14,6 @@ int main(void)
 {
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
-  uint8_t val = 0;
 
   DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_CREAT);
   dirfile_add_string(D, "data", "GD_UINT8", 0);

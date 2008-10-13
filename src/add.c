@@ -129,6 +129,7 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
     dreturn("%i", -1);
     return -1;
   }
+  memset(E->e, 0, sizeof(struct _gd_private_entry));
 
   /* Validate field code */
   E->field_type = entry->field_type;

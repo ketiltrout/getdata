@@ -43,5 +43,8 @@ int main(void)
   unlink(format);
   rmdir(filedir);
 
+  if (nfields != 0)
+    return 1;
+
   return (error != GD_E_BAD_CODE);
 }

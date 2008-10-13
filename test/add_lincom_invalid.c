@@ -11,7 +11,6 @@
 int main(void)
 {
   const char* filedir = __TEST__ "dirfile";
-  char c[8];
 
   DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
   const char* in_fields[2] = {"in1", "in2"};

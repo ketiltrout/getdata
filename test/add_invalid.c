@@ -11,7 +11,6 @@
 int main(void)
 {
   const char* filedir = __TEST__ "dirfile";
-  char c[8];
 
   gd_entry_t E;
   E.field =  "data";

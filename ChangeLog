@@ -1,4 +1,19 @@
-2008-10-12   D. V. Wiebe <getdata@ketiltrout.net>  svn:135
+2008-10-13   D. V. Wiebe <getdata@ketiltrout.net>  svn:137
+	* src/add.c (_GD_Add): Properly initialise the private entry after creating
+	it.  Crash report from Matthew Truch.
+
+	* test/add_meta_linterp_invalid.c test/add_meta_lincom_invalid.c
+	test/add_raw_invalid.c test/nmeta_vectors_parent.c test/nmeta_parent.c
+	test/add_meta_phase_invalid.c test/add_invalid.c test/add_phase_invalid.c
+	test/add_string.c test/add_linterp_invalid.c test/add_bit_invalid.c
+	test/add_lincom_invalid.c test/add_meta_bit_invalid.c
+	test/add_multiply_invalid.c test/add_meta_multiply_invalid.c
+	test/add_spec_invalid.c test/nmeta_type_parent.c: Fix compiler warning.
+
+	* getdata.h.in: Add declarations for dirfile_add_string() and
+	dirfile_add_const().
+
+2008-10-12   D. V. Wiebe <getdata@ketiltrout.net>  svn:136
 	* src/add.c (_GD_Add): Prohibit declaring METAs in a fragment not containing
 	its parent.
 	* src/open.c (_GD_ParseDirective): Ditto.
@@ -59,7 +74,7 @@
 	* src/flush.c (_GD_FlushMeta): Write /ENCODING.
 
 
-2008-10-11   D. V. Wiebe <getdata@ketiltrout.net>  svn:134
+2008-10-11   D. V. Wiebe <getdata@ketiltrout.net>  svn:135
 	* src/open.c (_GD_Tokenise _GD_ParseDirective _GD_ParseFieldSpec
 	_GD_ParseFormatFile): Okay, the parser is now in three pieces: tokeniser,
 	directive parser (formerly _GD_ParseFormatLine), and field spec parser, all

@@ -11,7 +11,6 @@
 int main(void)
 {
   const char* filedir = __TEST__ "dirfile";
-  char c[8];
 
   DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
   dirfile_add_metabit(D, "new", "meta", "input", 1, 1);
