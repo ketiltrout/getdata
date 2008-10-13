@@ -1,3 +1,10 @@
+2008-10-11   D. V. Wiebe <getdata@ketiltrout.net>  svn:134
+	* src/open.c (_GD_Tokenise _GD_ParseDirective _GD_ParseFieldSpec
+	_GD_ParseFormatFile): Okay, the parser is now in three pieces: tokeniser,
+	directive parser (formerly _GD_ParseFormatLine), and field spec parser, all
+	called from _GD_ParseFormatFile, which handles looping through a format file. 
+	This should be sufficiently functional for the upcoming features.
+
 2008-10-11   D. V. Wiebe <getdata@ketiltrout.net>  svn:133
 	* src/open.c (_GD_Tokenise _GD_ParseFormatLine): Split tokeniser from line
 	parser.

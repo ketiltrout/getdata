@@ -686,7 +686,13 @@ static gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols,
 
   D->entry = realloc(D->entry, (D->n_entries + 1) * sizeof(gd_entry_t*));
 
-  if (strcmp(in_cols[1], "RAW") == 0) {
+  if (n_cols < 2)
+    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_COLS, format_file, linenum,
+        NULL);
+  else if (strcmp(in_cols[0], "INDEX") == 0) /* reserved field name */
+    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_RES_NAME, format_file, linenum,
+        NULL);
+  else if (strcmp(in_cols[1], "RAW") == 0) {
     E = _GD_ParseRaw(D, in_cols, n_cols, parent, subdir, format_file, linenum);
     if (!D->error && D->first_field == NULL) {
       /* set the first field */
@@ -758,37 +764,6 @@ static gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols,
 
   dreturn("%p", E);
   return E;
-}
-
-/* _GD_ParseFormatFile: Parse each line of the format file.  This
- *       function is called from GetFormat once for the main format file and
- *       once for each included file.
- *
- *       Returns 0 unless this format file contains the first raw field.
- */
-static int _GD_ParseFormatFile(FILE* fp, DIRFILE *D, const char* filedir,
-    const char* subdir, const char* format_file, int format_parent,
-    int* standards)
-{
-  char instring[MAX_LINE_LENGTH];
-  int linenum = 0;
-  int have_first = 0;
-
-  dtrace("%p, %p, \"%s\", \"%s\", \"%s\", %i, %p", fp, D, filedir, subdir,
-      format_file, format_parent, standards);
-
-  /* start parsing */
-  while (_GD_GetLine(fp, instring, &linenum)) {
-    have_first = _GD_ParseFormatLine(D, instring, filedir, subdir, format_file,
-    format_parent, standards, linenum, have_first);
-
-    /* break out of loop (so we can return) if we've encountered an error */
-    if (D->error != GD_E_OK)
-      break;
-  }
-
-  dreturn("%i", have_first);
-  return have_first;
 }
 
 /* _GD_Tokenise: Tokenise a line.  Returns n_cols. */
@@ -967,36 +942,73 @@ int _GD_Tokenise(DIRFILE *D, const char* instring, char* outstring,
   return n_cols;
 }
 
-/* _GD_ParseFormatLine: Actually parse a single format file line.
+/* _GD_ParseFormatFile: Parse each line of the format file.  This
+ *       function is called from GetFormat once for the main format file and
+ *       once for each included file.
+ *
  *       Returns 0 unless this format file contains the first raw field.
  */
-int _GD_ParseFormatLine(DIRFILE *D, const char* instring, const char* filedir,
+static int _GD_ParseFormatFile(FILE* fp, DIRFILE *D, const char* filedir,
     const char* subdir, const char* format_file, int format_parent,
-    int* standards, int linenum, int have_first)
+    int* standards)
 {
+  char instring[MAX_LINE_LENGTH];
   char outstring[MAX_LINE_LENGTH];
   const char *in_cols[MAX_IN_COLS];
-  const char* ptr;
+  int linenum = 0;
+  int have_first = 0;
   int n_cols;
+  int match;
   int me = D->n_include - 1;
 
-  dtrace("%p, \"%s\", \"%s\", \"%s\", \"%s\", %i, %p, %i, %i", D, instring,
-      filedir, subdir, format_file, format_parent, standards, linenum,
-      have_first);
+  dtrace("%p, %p, \"%s\", \"%s\", \"%s\", %i, %p", fp, D, filedir, subdir,
+      format_file, format_parent, standards);
 
-  n_cols = _GD_Tokenise(D, instring, outstring, in_cols, format_file, linenum);
+  /* start parsing */
+  while (_GD_GetLine(fp, instring, &linenum)) {
+    n_cols = _GD_Tokenise(D, instring, outstring, in_cols, format_file,
+        linenum);
+
+    if (D->error)
+      break; /* tokeniser threw an error */
+
+    match = _GD_ParseDirective(D, in_cols, n_cols, filedir, subdir,
+        format_file, format_parent, standards, linenum, &have_first, me);
+
+    if (D->error)
+      break; /* directive parser threw an error */
+
+    if (!match)
+      _GD_ParseFieldSpec(D, n_cols, in_cols, NULL, subdir, format_file, linenum,
+          &have_first, me, *standards);
+
+    if (D->error)
+      break; /* field spec parser threw an error */
+  }
+
+  dreturn("%i", have_first);
+  return have_first;
+}
+
+/* _GD_ParseDirective: Actually parse a single format file line.
+ *       Returns 1 if a match was made.
+ */
+int _GD_ParseDirective(DIRFILE *D, const char** in_cols, int n_cols,
+    const char* filedir, const char* subdir, const char* format_file,
+    int format_parent, int* standards, int linenum, int* have_first, int me)
+{
+  const char* ptr;
+
+  dtrace("%p, %p, %i, \"%s\", \"%s\", \"%s\", %i, %p, %i, %p, %i", D, in_cols,
+      n_cols, filedir, subdir, format_file, format_parent, standards, linenum,
+      have_first, me);
 
   /* set up for possibly slashed reserved words */
   ptr = (char*)in_cols[0] + ((in_cols[0][0] == '/') ? 1 : 0);
 
-  if (D->error) {
-    ; /* tokeniser threw an error */
-  } else if (n_cols < 2) {
+  if (n_cols < 2) {
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_COLS, format_file, linenum,
         NULL);
-
-    /* Directives */
-
   } else if (strcmp(ptr, "FRAMEOFFSET") == 0) {
     D->frame_offset = atoll(in_cols[1]);
   } else if (strcmp(ptr, "INCLUDE") == 0) {
@@ -1021,8 +1033,8 @@ int _GD_ParseFormatLine(DIRFILE *D, const char* instring, const char* filedir,
 
     /* If we found the file, we won't reopen it.  Continue parsing. */
     if (found) {
-      dreturn("%i", have_first);
-      return have_first;
+      dreturn("%i", 1);
+      return 1;
     }
 
     /* Otherwise, try to open the file */
@@ -1032,8 +1044,8 @@ int _GD_ParseFormatLine(DIRFILE *D, const char* instring, const char* filedir,
     if (new_fp == NULL) {
       _GD_SetError(D, GD_E_OPEN_INCLUDE, errno, format_file, linenum,
           new_format_file);
-      dreturn("%i", have_first);
-      return have_first;
+      dreturn("%i", 1);
+      return 1;
     }
 
     /* If we got here, we managed to open the included file; parse it */
@@ -1041,8 +1053,8 @@ int _GD_ParseFormatLine(DIRFILE *D, const char* instring, const char* filedir,
         sizeof(struct gd_include_t));
     if (D->include_list == NULL) {
       _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-      dreturn("%i", have_first);
-      return have_first;
+      dreturn("%i", 1);
+      return 1;
     }
     D->include_list[D->n_include - 1].cname = strdup(new_format_file);
     D->include_list[D->n_include - 1].ename = strdup(in_cols[1]);
@@ -1054,8 +1066,8 @@ int _GD_ParseFormatLine(DIRFILE *D, const char* instring, const char* filedir,
         D->include_list[D->n_include - 1].ename == NULL)
     {
       _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-      dreturn("%i", have_first);
-      return have_first;
+      dreturn("%i", 1);
+      return 1;
     }
 
     /* extract the subdirectory name - dirname both returns a volatile string
@@ -1104,7 +1116,7 @@ int _GD_ParseFormatLine(DIRFILE *D, const char* instring, const char* filedir,
           NULL);
     else {
       gd_entry_t* E = _GD_ParseFieldSpec(D, n_cols - 2, in_cols + 2, P,
-          subdir, format_file, linenum, &have_first, me, *standards);
+          subdir, format_file, linenum, have_first, me, *standards);
       if (!D->error) {
         /* there is no need to sort this list */
         P->e->meta_entry = realloc(P->e->meta_entry, (P->e->n_meta + 1) *
@@ -1118,20 +1130,15 @@ int _GD_ParseFormatLine(DIRFILE *D, const char* instring, const char* filedir,
           P->e->n_meta_string++;
       }
     }
-  } else if (strcmp(ptr, "VERSION") == 0) {
+  } else if (strcmp(ptr, "VERSION") == 0)
     *standards = atoi(in_cols[1]);
+  else {
+    dreturn("%i", 0);
+    return 0;
+  }
 
-    /* Field Types -- here we go back to in_cols */
-
-  } else if (strcmp(in_cols[0], "INDEX") == 0) /* reserved field name */
-    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_RES_NAME, format_file, linenum,
-        NULL);
-  else
-    _GD_ParseFieldSpec(D, n_cols, in_cols, NULL, subdir, format_file, linenum,
-        &have_first, me, *standards);
-
-  dreturn("%i", have_first);
-  return have_first;
+  dreturn("%i", 1);
+  return 1;
 }
 
 /* attempt to open or create a new dirfile - set error appropriately */
