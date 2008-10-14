@@ -75,8 +75,9 @@
 #define GD_E_DUPLICATE        21
 #define GD_E_DIMENSION        22
 #define GD_E_BAD_INDEX        23
+#define GD_E_BAD_SCALAR       24
 
-#define GD_N_ERROR_CODES      24
+#define GD_N_ERROR_CODES      25
 
 #define GD_MAX_LINCOM 3
 
@@ -127,7 +128,7 @@ struct _gd_private_entry;
 
 /* Unified entry struct */
 struct _gd_unified_entry {
-  char* field;
+  char *field;
   gd_entype_t field_type;
   char *in_fields[GD_MAX_LINCOM];
   int format_file;
@@ -142,7 +143,7 @@ struct _gd_unified_entry {
       double m[GD_MAX_LINCOM];
       double b[GD_MAX_LINCOM];
     };
-    char* table; /* LINTERP */
+    char *table; /* LINTERP */
     struct { /* BIT */
       int bitnum;
       int numbits;

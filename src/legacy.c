@@ -69,6 +69,7 @@ const char *GD_ERROR_CODES[GD_N_ERROR_CODES] = {
   NULL, /* GD_E_DUPLICATE */
   "Scalar field found where vector field expected",
   NULL, /* GD_E_BAD_INDEX */
+  "Scalar field code not found",
 };
 
 static struct FormatType Format = {

@@ -23,6 +23,7 @@
 
 #ifdef STDC_HEADERS
 #include <ctype.h>
+#include <math.h>
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
@@ -115,6 +116,34 @@ char* _GD_ValidateField(const gd_entry_t* parent, const char* field_code)
   return ptr;
 }
 
+static char* _GD_SetScalar(const char* token, void* data, int type)
+{
+  char* ptr;
+  double d;
+
+  dtrace("\"%s\", %p, %i", token, data, type);
+
+  /* try to parse token as a double */
+  d = strtod(token, &ptr); 
+
+  /* there were trailing characters */
+  if (*ptr != '\0') {
+    ptr = strdup(token);
+    dreturn("\"%s\"", ptr);
+    return ptr;
+  }
+
+  if (type == GD_IEEE754)
+    *(double*)data = d;
+  else if (type == GD_SIGNED)
+    *(int*)data = (int)round(d);
+  else
+    *(unsigned int*)data = (unsigned int)round(d);
+
+  dreturn("%p", NULL);
+  return NULL;
+}
+
 /* _GD_ParseRaw: parse a RAW data type in the format file
 */
 static gd_entry_t* _GD_ParseRaw(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
@@ -187,9 +216,12 @@ static gd_entry_t* _GD_ParseRaw(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
   if (E->size == 0 || E->data_type & 0x40)
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_TYPE, format_file, line,
         in_cols[2]);
-  else if ((E->spf = atoi(in_cols[3])) <= 0)
-    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_SPF, format_file, line,
-        in_cols[3]);
+  else if ((E->e->scalar[0] = _GD_SetScalar(in_cols[3], &E->spf, 0)) == NULL) {
+    E->e->calculated = 1;
+    if (E->spf <= 0)
+      _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_SPF, format_file, line,
+          in_cols[3]);
+  }
 
   if (D->error != GD_E_OK) {
     _GD_FreeE(E, 1);
@@ -249,6 +281,7 @@ static gd_entry_t* _GD_ParseLincom(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
   }
 
   E->n_fields = atoi(in_cols[2]);
+  E->e->calculated = 1;
 
   if (E->field == NULL)
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
@@ -262,8 +295,14 @@ static gd_entry_t* _GD_ParseLincom(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
       E->in_fields[i] = strdup(in_cols[i * 3 + 3]);
       if (E->in_fields[i] == NULL)
         _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-      E->m[i] = atof(in_cols[i * 3 + 4]);
-      E->b[i] = atof(in_cols[i * 3 + 5]);
+
+      E->e->scalar[i * 2] = _GD_SetScalar(in_cols[i * 3 + 4], &E->m[i],
+          GD_IEEE754);
+      E->e->scalar[i * 2 + 1] = _GD_SetScalar(in_cols[i * 3 + 5], &E->b[i],
+          GD_IEEE754);
+
+      if (E->e->scalar[i * 2] != NULL || E->e->scalar[i * 2 + 1] != NULL)
+        E->e->calculated = 0;
     }
 
   if (D->error != GD_E_OK) {
@@ -311,6 +350,7 @@ static gd_entry_t* _GD_ParseLinterp(DIRFILE* D,
   E->field_type = GD_LINTERP_ENTRY;
   E->in_fields[0] = NULL;
   E->e->entry[0] = NULL;
+  E->e->calculated = 1;
   E->table = NULL;
 
   E->field = _GD_ValidateField(parent, in_cols[0]);
@@ -384,6 +424,7 @@ static gd_entry_t* _GD_ParseMultiply(DIRFILE* D,
   E->field_type = GD_MULTIPLY_ENTRY;
   E->in_fields[0] = E->in_fields[1] = NULL;
   E->e->entry[0] = E->e->entry[1] = NULL;
+  E->e->calculated = 1;
 
   E->field = _GD_ValidateField(parent, in_cols[0]);
   if (E->field == in_cols[0]) {
@@ -441,6 +482,7 @@ static gd_entry_t* _GD_ParseBit(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
   E->field_type = GD_BIT_ENTRY;
   E->in_fields[0] = NULL;
   E->e->entry[0] = NULL;
+  E->e->calculated = 1;
 
   E->field = _GD_ValidateField(parent, in_cols[0]);
   if (E->field == in_cols[0]) {
@@ -457,17 +499,21 @@ static gd_entry_t* _GD_ParseBit(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
   if (E->field == NULL || E->in_fields[0] == NULL)
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
 
-  E->bitnum = atoi(in_cols[3]);
+  
+  E->e->scalar[0] = _GD_SetScalar(in_cols[3], &E->bitnum, GD_SIGNED);
   if (n_cols > 4)
-    E->numbits = atoi(in_cols[4]);
+    E->e->scalar[1] = _GD_SetScalar(in_cols[4], &E->numbits, GD_SIGNED);
   else
     E->numbits = 1;
 
-  if (E->numbits < 1)
+  if (E->e->scalar[0] != NULL || E->e->scalar[1] != NULL)
+    E->e->calculated = 0;
+
+  if (E->e->scalar[0] == NULL && E->numbits < 1)
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_NUMBITS, format_file, line, NULL);
-  else if (E->bitnum < 0)
+  else if (E->e->scalar[1] == NULL && E->bitnum < 0)
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BITNUM, format_file, line, NULL);
-  else if (E->bitnum + E->numbits - 1 > 63)
+  else if (E->e->calculated && E->bitnum + E->numbits - 1 > 63)
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BITSIZE, format_file, line, NULL);
 
   if (D->error != GD_E_OK) {
@@ -524,13 +570,16 @@ static gd_entry_t* _GD_ParsePhase(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
   }
 
   E->in_fields[0] = strdup(in_cols[2]); /* field */
-  E->shift = atoi(in_cols[3]); /*shift*/
 
   if (E->field == NULL || E->in_fields[0] == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     _GD_FreeE(E, 1);
     E = NULL;
   }
+
+  if ((E->e->scalar[0] = _GD_SetScalar(in_cols[3], &E->shift, GD_SIGNED)) ==
+      NULL)
+    E->e->calculated = 1;
 
   dreturn("%p", E);
   return E;
@@ -567,6 +616,7 @@ static gd_entry_t* _GD_ParseConst(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
   memset(E->e, 0, sizeof(struct _gd_private_entry));
 
   E->field_type = GD_CONST_ENTRY;
+  E->e->calculated = 1;
 
   E->field = _GD_ValidateField(parent, in_cols[0]);
   if (E->field == in_cols[0]) {
@@ -640,6 +690,7 @@ static gd_entry_t* _GD_ParseString(DIRFILE* D, const char *in_cols[MAX_IN_COLS],
 
   E->field_type = GD_STRING_ENTRY;
   E->e->string = strdup(in_cols[2]);
+  E->e->calculated = 1;
 
   E->field = _GD_ValidateField(parent, in_cols[0]);
   if (E->field == in_cols[0]) {
@@ -663,7 +714,7 @@ static gd_entry_t* _GD_ParseString(DIRFILE* D, const char *in_cols[MAX_IN_COLS],
   return E;
 }
 
-static int utf8encode (DIRFILE* D, const char* format_file, int linenum,
+static int utf8encode(DIRFILE* D, const char* format_file, int linenum,
     char** op, uint32_t value)
 {
   dtrace("%p, %p, %llx", D, op, (long long)value);
@@ -1327,6 +1378,7 @@ DIRFILE* dirfile_open(const char* filedir, unsigned int flags)
     return D;
   }
   memset(D->entry[0]->e, 0, sizeof(struct _gd_private_entry));
+  D->entry[0]->e->calculated = 1;
 
   snprintf(format_file, FILENAME_MAX, "%s%sformat", filedir,
       (filedir[strlen(filedir) - 1] == '/') ? "" : "/");

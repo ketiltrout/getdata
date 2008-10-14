@@ -279,6 +279,9 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
     case GD_CONST_ENTRY:
       E->const_type = entry->const_type;
       E->e->uconst = E->e->iconst = E->e->dconst = 0;
+      E->e->n_client = 0;
+      E->e->client = NULL;
+
       if (E->const_type & 0x40 || GD_SIZE(E->const_type) == 0)
         _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, E->const_type, NULL);
       else if (P == NULL)

@@ -882,13 +882,13 @@ static size_t _GD_DoString(gd_entry_t *E, size_t num_samp, void *data_out)
 
 /* _GD_DoField: Locate the field in the database and read it.
 */
-size_t _GD_DoField(DIRFILE *D, gd_entry_t *entry, const char* field_code,
+size_t _GD_DoField(DIRFILE *D, gd_entry_t *E, const char* field_code,
     off64_t first_frame, off64_t first_samp, size_t num_frames, size_t num_samp,
     gd_type_t return_type, void *data_out)
 {
   size_t n_read = 0;
 
-  dtrace("%p, %p, \"%s\", %lli, %lli, %zi, %zi, 0x%x, %p", D, entry, field_code,
+  dtrace("%p, %p, \"%s\", %lli, %lli, %zi, %zi, 0x%x, %p", D, E, field_code,
       first_frame, first_samp, num_frames, num_samp, return_type, data_out);
 
   if (++D->recurse_level >= GD_MAX_RECURSE_LEVEL) {
@@ -898,29 +898,37 @@ size_t _GD_DoField(DIRFILE *D, gd_entry_t *entry, const char* field_code,
     return 0;
   }
 
-  switch (entry->field_type) {
+  if (!E->e->calculated)
+    _GD_CalculateEntry(D, E);
+
+  if (D->error) {
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  switch (E->field_type) {
     case GD_RAW_ENTRY:
-      n_read = _GD_DoRaw(D, entry, first_frame, first_samp, num_frames,
+      n_read = _GD_DoRaw(D, E, first_frame, first_samp, num_frames,
           num_samp, return_type, data_out);
       break;
     case GD_LINTERP_ENTRY:
-      n_read = _GD_DoLinterp(D, entry, first_frame, first_samp, num_frames,
+      n_read = _GD_DoLinterp(D, E, first_frame, first_samp, num_frames,
           num_samp, return_type, data_out);
       break;
     case GD_LINCOM_ENTRY:
-      n_read = _GD_DoLincom(D, entry, first_frame, first_samp, num_frames,
+      n_read = _GD_DoLincom(D, E, first_frame, first_samp, num_frames,
           num_samp, return_type, data_out);
       break;
     case GD_BIT_ENTRY:
-      n_read = _GD_DoBit(D, entry, first_frame, first_samp, num_frames,
+      n_read = _GD_DoBit(D, E, first_frame, first_samp, num_frames,
           num_samp, return_type, data_out);
       break;
     case GD_MULTIPLY_ENTRY:
-      n_read = _GD_DoMultiply(D, entry, first_frame, first_samp, num_frames,
+      n_read = _GD_DoMultiply(D, E, first_frame, first_samp, num_frames,
           num_samp, return_type, data_out);
       break;
     case GD_PHASE_ENTRY:
-      n_read = _GD_DoPhase(D, entry, first_frame, first_samp, num_frames,
+      n_read = _GD_DoPhase(D, E, first_frame, first_samp, num_frames,
           num_samp, return_type, data_out);
       break;
     case GD_INDEX_ENTRY:
@@ -932,10 +940,10 @@ size_t _GD_DoField(DIRFILE *D, gd_entry_t *entry, const char* field_code,
       }
       break;
     case GD_CONST_ENTRY:
-      n_read = _GD_DoConst(D, entry, return_type, data_out);
+      n_read = _GD_DoConst(D, E, return_type, data_out);
       break;
     case GD_STRING_ENTRY:
-      n_read = _GD_DoString(entry, num_samp, data_out);
+      n_read = _GD_DoString(E, num_samp, data_out);
       break;
     case GD_NO_ENTRY:
       /* Can't get here */

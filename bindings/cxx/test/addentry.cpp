@@ -13,6 +13,7 @@ int main(void)
 {
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
+  const char* data = __TEST__ "dirfile/data";
   unsigned char c[8];
 
   memset(c, 0, 8);
@@ -23,6 +24,7 @@ int main(void)
   int error = dirfile.Error();
   int n = dirfile.NFields();
 
+  unlink(data);
   unlink(format);
   rmdir(filedir);
 
@@ -41,7 +43,7 @@ int main(void)
   if (error)
     return 1;
 
-  if (n != 1)
+  if (n != 2)
     return 1;
 
   return 0;

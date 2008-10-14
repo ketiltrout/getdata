@@ -272,11 +272,26 @@ characters, excluding both ASCII control characters, and the characters
 .B &\t/\t;\t<\t>\t\\\\\t|\t.
 .PP
 which are reserved.  The field name may not be
-.B INDEX
+.I INDEX
 which is a special, implicit field which contains the integer frame index.
 Field names are case sensitive.  The second token in the field specification
 line is the field type.  The meaning of subsequent tokens depends on the field
 type.
+
+Some of the parameters in a field specification line, may be either literal
+numbers or else the field code of a
+.B CONST
+field containing the number.  Such parameters are indicated below.  Since it is
+possible to create a field name which is identical to a literal number, a
+parameter is assumed to be the name of a 
+.B CONST
+field only if the entire token cannot be parsed as a literal number using the
+rules outlined in
+.BR strtod (3).
+(So, for example, a
+.B CONST
+field whose code consists solely of digits can never be used as a parameter in a
+field specification line.)
 
 There are eight field types.  Of these, six are of vector type
 .RB ( BIT ", " LINCOM ", " LINTERP ", " MULTIPLY ", " PHASE ", and " RAW )
@@ -306,7 +321,11 @@ when
 is converted from its native type to an (endianness corrected) unsigned 64-bit
 integer.  If
 .I bits
-is omitted, it is assumed to be 1.
+is omitted, it is assumed to be 1.  Both
+.IR first-bit " and " bits
+may be either literal numbers, or else the field code of a
+.B CONST
+field type containing their values.
 .RE
 .TP
 .B CONST
@@ -355,6 +374,11 @@ and
 computed appropriately for the (potentially differing) sample rates of the
 input fields.  The resultant field will have the same sample rate as
 .IR field1 .
+Each supplied co-efficient
+.RI ( a1 ,\~ b1 ,\~ a2 ,
+&c.) may be either a litteral number, or else the field code of a
+.B CONST
+field type containing its value.
 .RE
 .TP
 .B LINTERP
@@ -415,8 +439,12 @@ shifted by
 .I shift
 samples.  A positive
 .I shift
-indicates a shift forward in time.  Results of shifting past the beginning- or end-of-file is
-implementation dependent.
+indicates a shift forward in time.  Results of shifting past the beginning- or
+end-of-file is implementation dependent.  The
+.I shift
+parameter may be either a literal number, or else the field code of a
+.B CONST
+field type containing its values.
 .RE
 .TP
 .B RAW
@@ -497,8 +525,14 @@ Types
 .IR INT8 ,\~ UINT64 ,
 and
 .I INT64
-are not supported before Standards Version 5, so no character aliases exist for
-these types.
+are not supported before Standards Version 5, so no single character type
+aliases exist for these types.
+
+The
+.I sample-rate
+parameter may be either a literal number, or else the name of a
+.B CONST
+field type containing its values.
 .RE
 .TP
 .B STRING
@@ -534,21 +568,29 @@ and the
 .B CONST
 and
 .B STRING
-field types.  It also permitted whitespace in tokens and introduced the
-character escape sequences.
+field types.  It permitted whitespace in tokens and introduced the character
+escape sequences, and allowed
+.B CONST
+fields to be used as parameters in field specification lines.  It also removed
+.I FILEFRAM
+as an alias for
+.IR INDEX ,
+and allowed '#' in field codes, but prohibited '.'.
 
 Version 5 of the Standards (August 2008) added
 .B VERSION
 and
 .BR ENDIAN ,
 slash demarcation of reserved words, and removed the restriction on field
-name length.  It also introduced the data types
+name length.  It introduced the data types
 .IR INT8 ,\~ INT64 ,
 and
 .IR UINT64 ,
 the new-style type specifiers, and increased the range of the
 .B BIT
-field type from 32 to 64 bits.
+field type from 32 to 64 bits.  It also prohibited the characters
+.B #&/;<>\e|
+in field codes.
 
 Version 4 of the Standards (October 2006) added the
 .B PHASE

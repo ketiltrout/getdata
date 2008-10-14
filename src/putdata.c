@@ -417,13 +417,13 @@ static size_t _GD_DoStringOut(DIRFILE* D, gd_entry_t *E, const void *data_in)
   return 1;
 }
 
-size_t _GD_DoFieldOut(DIRFILE *D, gd_entry_t* entry, const char *field_code,
+size_t _GD_DoFieldOut(DIRFILE *D, gd_entry_t* E, const char *field_code,
     off64_t first_frame, off64_t first_samp, size_t num_frames, size_t num_samp,
     gd_type_t data_type, const void *data_in)
 {
   size_t n_wrote = 0;
 
-  dtrace("%p, %p, \"%s\", %lli, %lli, %zi, %zi, 0x%x, %p", D, entry, field_code,
+  dtrace("%p, %p, \"%s\", %lli, %lli, %zi, %zi, 0x%x, %p", D, E, field_code,
       first_frame, first_samp, num_frames, num_samp, data_type, data_in);
 
   if (++D->recurse_level >= GD_MAX_RECURSE_LEVEL) {
@@ -433,21 +433,29 @@ size_t _GD_DoFieldOut(DIRFILE *D, gd_entry_t* entry, const char *field_code,
     return 0;
   }
 
-  switch (entry->field_type) {
+  if (!E->e->calculated)
+    _GD_CalculateEntry(D, E);
+
+  if (D->error) {
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  switch (E->field_type) {
     case GD_RAW_ENTRY:
-      n_wrote = _GD_DoRawOut(D, entry, first_frame, first_samp, num_frames,
+      n_wrote = _GD_DoRawOut(D, E, first_frame, first_samp, num_frames,
           num_samp, data_type, data_in);
       break;
     case GD_LINTERP_ENTRY:
-      n_wrote = _GD_DoLinterpOut(D, entry, first_frame, first_samp, num_frames,
+      n_wrote = _GD_DoLinterpOut(D, E, first_frame, first_samp, num_frames,
           num_samp, data_type, data_in);
       break;
     case GD_LINCOM_ENTRY:
-      n_wrote = _GD_DoLincomOut(D, entry, first_frame, first_samp, num_frames,
+      n_wrote = _GD_DoLincomOut(D, E, first_frame, first_samp, num_frames,
           num_samp, data_type, data_in);
       break;
     case GD_BIT_ENTRY:
-      n_wrote = _GD_DoBitOut(D, entry, first_frame, first_samp, num_frames,
+      n_wrote = _GD_DoBitOut(D, E, first_frame, first_samp, num_frames,
           num_samp, data_type, data_in);
       break;
     case GD_MULTIPLY_ENTRY:
@@ -455,14 +463,14 @@ size_t _GD_DoFieldOut(DIRFILE *D, gd_entry_t* entry, const char *field_code,
       _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_PUT, NULL, 0, field_code);
       break;
     case GD_PHASE_ENTRY:
-      n_wrote = _GD_DoPhaseOut(D, entry, first_frame, first_samp, num_frames,
+      n_wrote = _GD_DoPhaseOut(D, E, first_frame, first_samp, num_frames,
           num_samp, data_type, data_in);
       break;
     case GD_CONST_ENTRY:
-      n_wrote = _GD_DoConstOut(D, entry, data_type, data_in);
+      n_wrote = _GD_DoConstOut(D, E, data_type, data_in);
       break;
     case GD_STRING_ENTRY:
-      n_wrote = _GD_DoStringOut(D, entry, data_in);
+      n_wrote = _GD_DoStringOut(D, E, data_in);
       break;
     case GD_NO_ENTRY:
       _GD_InternalError(D);

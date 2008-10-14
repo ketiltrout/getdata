@@ -1,3 +1,27 @@
+2008-10-14   D. V. Wiebe <getdata@ketiltrout.net>  svn:139
+	* bindings/f77/test/fget_field_list.f90: Fix for new list and count function
+	behaviour.
+	* bindings/cxx/test/addentry.cpp: Fix for new get_nfields behaviour and
+	properly clean-up dirfile.
+
+	* src/entry.c (_GD_FreeE) src/internal.h: Add calculated and scalar[] array.
+	* src/open.c (_GD_SetScalar): Added.
+	* src/open.c (_GD_ParseRaw _GD_ParseLincom _GD_ParseLinterp
+	_GD_ParseMultiply _GD_ParseBit _GD_ParsePhase _GD_ParseConst
+	_GD_ParsePhase): Record non-numeric scalar tokens for deferred calculation.
+	Numeric tokens are detected using strtod().
+	* src/entry.c (_GD_GetScalar _GD_CalculateEntry): Added.
+	* src/entry.c (get_entry) src/getdata.c (_GD_DoField) src/putdata.c
+	(_GD_DoFieldOut): Call _GD_CalculateEntry when necessary.
+	* src/constant.c (put_constant): Reset clients after changing the constant.
+	* src/add.c (_GD_Add) src/open.c (_GD_ParseConst): Initialise client list.
+
+	* test/entry_bit_scalar.c test/entry_lincom_scalar.c
+	test/entry_phase_scalar.c test/entry_raw_scalar.c test/parse_bit_scalar.c
+	test/parse_lincom_scalar.c test/parse_phase_scalar.c
+	test/parse_raw_scalar.c test/entry_raw_scalar_code
+	test/entry_raw_scalar_type: Added.
+
 2008-10-14   D. V. Wiebe <getdata@ketiltrout.net>  svn:138
 	* src/field_list.c (get_string_values): Fix array out of bounds crash.
 

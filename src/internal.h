@@ -165,9 +165,15 @@ char *strerror_r(int errnum, char *buf, size_t buflen);
 #define GD_E_BAD_ENTRY_BITNUM   6
 #define GD_E_BAD_ENTRY_BITSIZE  7
 
+#define GD_E_SCALAR_CODE        1
+#define GD_E_SCALAR_TYPE        2
+
 /* Unified entry struct */
 struct _gd_private_entry {
   gd_entry_t* entry[GD_MAX_LINCOM];
+
+  int calculated;
+  char *scalar[GD_MAX_LINCOM * 2];
 
   int n_meta;
   int n_meta_string;
@@ -199,6 +205,8 @@ struct _gd_private_entry {
       double dconst;
       uint64_t uconst;
       int64_t iconst;
+      int n_client;
+      gd_entry_t** client;
     };
     char* string;
   };
@@ -301,26 +309,26 @@ struct _GD_DIRFILE {
   unsigned int flags;
 };
 
-void* _GD_Alloc(DIRFILE* D, gd_type_t type, size_t n) __gd_nonnull ((1))
-  __attribute_malloc__ __THROW __wur;
+void* _GD_Alloc(DIRFILE* D, gd_type_t type, size_t n);
+int _GD_CalculateEntry(DIRFILE* D, gd_entry_t* E);
 
 /* _GD_ClearError: Everything's A-OK; clear the last error. */
 #define _GD_ClearError(D) (D)->error = 0
 
 void _GD_ConvertType(DIRFILE* D, const void *data_in, gd_type_t in_type,
     void *data_out, gd_type_t out_type, size_t n) __THROW;
-size_t  _GD_DoField(DIRFILE *D, gd_entry_t *entry, const char* field_code,
+size_t  _GD_DoField(DIRFILE *D, gd_entry_t *E, const char* field_code,
     off64_t first_frame, off64_t first_samp, size_t num_frames, size_t num_samp,
     gd_type_t return_type, void *data_out);
-size_t _GD_DoFieldOut(DIRFILE* D, gd_entry_t* entry, const char *field_code,
+size_t _GD_DoFieldOut(DIRFILE* D, gd_entry_t *E, const char *field_code,
     off64_t first_frame, off64_t first_samp, size_t num_frames,
     size_t num_samp, gd_type_t data_type, const void *data_in);
 int _GD_EntryCmp(const void *A, const void *B);
 gd_entry_t* _GD_FindField(DIRFILE* D, const char* field_code, int *next);
 void _GD_FixEndianness(char* databuffer, size_t size, size_t ns);
-void _GD_Flush(DIRFILE* D, gd_entry_t *entry, const char* field_code);
+void _GD_Flush(DIRFILE* D, gd_entry_t *E, const char* field_code);
 void _GD_FlushMeta(DIRFILE* D);
-void _GD_FreeE(gd_entry_t* entry, int priv);
+void _GD_FreeE(gd_entry_t* E, int priv);
 int _GD_GetLine(FILE *fp, char *line, int* linenum);
 unsigned int _GD_GetSPF(DIRFILE* D, gd_entry_t* E);
 int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,

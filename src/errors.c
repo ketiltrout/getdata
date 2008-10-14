@@ -124,10 +124,15 @@ static const struct {
   { GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_BITSIZE,
     "End of bitfield out of range: {3}", 0 },
   { GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_METARAW, "Invalid metafield type: {3}", 0 },
-  /* GD_E_DUPLICATE 4 = name */
+  /* GD_E_DUPLICATE: 4 = name */
   { GD_E_DUPLICATE, 0, "Field code already present: {4}", 0 },
-  /* GD_E_BAD_INDEX 3 = index */
+  /* GD_E_BAD_INDEX: 3 = index */
   { GD_E_BAD_INDEX, 0, "Invalid format file index: {3}", 0 },
+  /* GD_E_BAD_SCALAR: 2 = parent field, 4 = scalar field */
+  { GD_E_BAD_SCALAR, GD_E_SCALAR_CODE,
+    "Scalar field {4} not found in definition of {2}", 0 },
+  { GD_E_BAD_SCALAR, GD_E_SCALAR_TYPE,
+    "Scalar field {4} has wrong type in definition of {2}", 0 },
   /* GD_E_OK: (nothing) */
   { 0, 0, "Success", 0} /* this must be the last error string defined */
 };

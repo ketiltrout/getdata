@@ -61,6 +61,7 @@ size_t put_constant(DIRFILE* D, const char *field_code, gd_type_t data_type,
     const void *data_in)
 {
   size_t n_wrote = 0;
+  int i;
   gd_entry_t *entry;
 
   dtrace("%p, \"%s\", 0x%x, %p", D, field_code, data_type, data_in);
@@ -88,6 +89,15 @@ size_t put_constant(DIRFILE* D, const char *field_code, gd_type_t data_type,
   else 
     n_wrote = _GD_DoFieldOut(D, entry, field_code, 0, 0, 0, 0, data_type,
         data_in);
+
+  /* Flag all clients as needing recalculation */
+  for (i = 0; i < entry->e->n_client; ++i)
+    entry->e->client[i]->e->calculated = 0;
+
+  /* Clear the client list */
+  free(entry->e->client);
+  entry->e->client = NULL;
+  entry->e->n_client = 0;
 
   dreturn("%zi", n_wrote);
   return n_wrote;

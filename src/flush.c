@@ -27,13 +27,13 @@
 #include <time.h>
 #endif
 
-void _GD_Flush(DIRFILE* D, gd_entry_t *entry, const char* field_code)
+void _GD_Flush(DIRFILE* D, gd_entry_t *E, const char* field_code)
 {
   int i;
 
-  dtrace("%p, %p", D, entry);
+  dtrace("%p, %p", D, E);
 
-  if (entry == NULL) {
+  if (E == NULL) {
     _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, field_code);
     dreturnvoid();
     return;
@@ -46,29 +46,29 @@ void _GD_Flush(DIRFILE* D, gd_entry_t *entry, const char* field_code)
     return;
   }
 
-  switch(entry->field_type) {
+  switch(E->field_type) {
     case GD_RAW_ENTRY:
-      if (entry->e->fp >= 0) {
-        if (D->flags & GD_RDWR && fsync(entry->e->fp)) {
-          _GD_SetError(D, GD_E_RAW_IO, 0, entry->e->file, errno, NULL);
-        } else if (close(entry->e->fp)) {
-          _GD_SetError(D, GD_E_RAW_IO, 0, entry->e->file, errno, NULL);
+      if (E->e->fp >= 0) {
+        if (D->flags & GD_RDWR && fsync(E->e->fp)) {
+          _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file, errno, NULL);
+        } else if (close(E->e->fp)) {
+          _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file, errno, NULL);
           D->recurse_level--;
         } else 
-          entry->e->fp = -1;
+          E->e->fp = -1;
       }
       break;
     case GD_LINCOM_ENTRY:
       for (i = 2; i < GD_MAX_LINCOM; ++i)
-        _GD_Flush(D, entry->e->entry[i], field_code);
+        _GD_Flush(D, E->e->entry[i], field_code);
       /* fallthrough */
     case GD_MULTIPLY_ENTRY:
-      _GD_Flush(D, entry->e->entry[1], field_code);
+      _GD_Flush(D, E->e->entry[1], field_code);
       /* fallthrough */
     case GD_LINTERP_ENTRY:
     case GD_BIT_ENTRY:
     case GD_PHASE_ENTRY:
-      _GD_Flush(D, entry->e->entry[0], field_code);
+      _GD_Flush(D, E->e->entry[0], field_code);
     case GD_CONST_ENTRY:
     case GD_STRING_ENTRY:
     case GD_INDEX_ENTRY:
