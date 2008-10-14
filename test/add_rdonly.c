@@ -41,7 +41,7 @@ int main(void)
   unlink(format);
   rmdir(filedir);
 
-  if (n != 1)
+  if (n != 2)
     return 1;
 
   return (error != GD_E_ACCMODE);

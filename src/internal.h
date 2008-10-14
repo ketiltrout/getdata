@@ -316,19 +316,19 @@ size_t _GD_DoFieldOut(DIRFILE* D, gd_entry_t* entry, const char *field_code,
     off64_t first_frame, off64_t first_samp, size_t num_frames,
     size_t num_samp, gd_type_t data_type, const void *data_in);
 int _GD_EntryCmp(const void *A, const void *B);
+gd_entry_t* _GD_FindField(DIRFILE* D, const char* field_code, int *next);
 void _GD_FixEndianness(char* databuffer, size_t size, size_t ns);
 void _GD_Flush(DIRFILE* D, gd_entry_t *entry, const char* field_code);
 void _GD_FlushMeta(DIRFILE* D);
 void _GD_FreeE(gd_entry_t* entry, int priv);
 int _GD_GetLine(FILE *fp, char *line, int* linenum);
 unsigned int _GD_GetSPF(DIRFILE* D, gd_entry_t* E);
-gd_entry_t* _GD_GetEntry(DIRFILE* D, const char* field_code, int* next);
 int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,
     int linenum, int me, int encoding, int* standards, int flags);
 void _GD_InsertSort(DIRFILE* D, gd_entry_t* E, int u) __THROW;
 
 #define _GD_InternalError(D) \
-  _GD_SetError(D, GD_E_INTERNAL_ERROR, 0, __FILE__, __LINE__, NULL);
+  _GD_SetError(D, GD_E_INTERNAL_ERROR, 0, __FILE__, __LINE__, NULL)
 
 gd_type_t _GD_LegacyType(char c);
 void _GD_LinterpData(DIRFILE* D, const void *data, gd_type_t type, size_t npts,

@@ -60,6 +60,7 @@ void _GD_FreeE(gd_entry_t* entry, int priv)
       break;
     case GD_CONST_ENTRY:
     case GD_RAW_ENTRY:
+    case GD_INDEX_ENTRY:
     case GD_NO_ENTRY:
       break;
   }
@@ -104,7 +105,7 @@ int get_entry(DIRFILE* D, const char* field_code, gd_entry_t* entry)
 
   _GD_ClearError(D);
 
-  E = _GD_GetEntry(D, field_code, NULL);
+  E = _GD_FindField(D, field_code, NULL);
 
   if (E == NULL) { /* INDEX's entry may not be requested */
     _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, field_code);
@@ -136,6 +137,7 @@ int get_entry(DIRFILE* D, const char* field_code, gd_entry_t* entry)
       entry->in_fields[0] = strdup(E->in_fields[0]);
       /* fall through */
     case GD_RAW_ENTRY:
+    case GD_INDEX_ENTRY:
     case GD_CONST_ENTRY:
     case GD_STRING_ENTRY:
     case GD_NO_ENTRY:

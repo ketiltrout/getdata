@@ -1,7 +1,6 @@
-/* Add a RAW field */
+/* Parser check */
 #include "../src/getdata.h"
 
-#include <inttypes.h>
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -14,21 +13,22 @@ int main(void)
 {
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
+  const char* format_data =
+    "META INDEX child CONST UINT8 1\n";
+  int fd;
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_CREAT);
-  dirfile_add_string(D, "data", "GD_UINT8", 0);
+  mkdir(filedir, 0777);
+
+  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
+  write(fd, format_data, strlen(format_data));
+  close(fd);
+
+  DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
   int error = get_error(D);
-
-  /* check */
-  int n = get_nfields(D);
-
   dirfile_close(D);
 
   unlink(format);
   rmdir(filedir);
-
-  if (n != 2)
-    return 1;
 
   return (error != GD_E_OK);
 }

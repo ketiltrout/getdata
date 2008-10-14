@@ -24,7 +24,7 @@
 size_t get_string(DIRFILE* D, const char *field_code, size_t len,
     char *data_out)
 {
-  size_t n_read;
+  size_t n_read = 0;
   gd_entry_t *entry;
 
   dtrace("%p, \"%s\", %zi, %p", D, field_code, len, data_out);
@@ -37,14 +37,13 @@ size_t get_string(DIRFILE* D, const char *field_code, size_t len,
 
   _GD_ClearError(D);
 
-  entry = _GD_GetEntry(D, field_code, NULL);
+  entry = _GD_FindField(D, field_code, NULL);
     
-  if (D->error != GD_E_OK)
-    n_read = 0;
-  else if (entry && entry->field_type != GD_STRING_ENTRY) {
+  if (entry == NULL)
+    _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, field_code);
+  else if (entry && entry->field_type != GD_STRING_ENTRY)
     _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
-    n_read = 0;
-  } else
+  else
     n_read = _GD_DoField(D, entry, field_code, 0, 0, 0, len, GD_NULL, data_out);
 
   dreturn("%zi", n_read);
@@ -73,14 +72,13 @@ size_t put_string(DIRFILE* D, const char *field_code, const char *data_in)
 
   _GD_ClearError(D);
 
-  entry = _GD_GetEntry(D, field_code, NULL);
+  entry = _GD_FindField(D, field_code, NULL);
 
-  if (D->error != GD_E_OK)
-    n_wrote = 0;
-  else if (entry && entry->field_type != GD_STRING_ENTRY) {
+  if (entry == NULL)
+    _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, field_code);
+  else if (entry->field_type != GD_STRING_ENTRY)
     _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
-    n_wrote = 0;
-  } else 
+  else 
     n_wrote = _GD_DoFieldOut(D, entry, field_code, 0, 0, 0, 0, GD_NULL,
         data_in);
 

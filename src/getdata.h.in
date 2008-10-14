@@ -90,6 +90,7 @@ typedef enum {
   GD_BIT_ENTRY      = 0x04,
   GD_MULTIPLY_ENTRY = 0x05,
   GD_PHASE_ENTRY    = 0x06,
+  GD_INDEX_ENTRY    = 0x07,
   GD_CONST_ENTRY    = GD_SCALAR_ENTRY + 0x01,
   GD_STRING_ENTRY   = GD_SCALAR_ENTRY + 0x02,
 } gd_entype_t;

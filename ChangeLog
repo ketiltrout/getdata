@@ -1,3 +1,26 @@
+2008-10-14   D. V. Wiebe <getdata@ketiltrout.net>  svn:138
+	* src/field_list.c (get_string_values): Fix array out of bounds crash.
+
+	* src/internal.h: Remove errant ; on _GD_InternalError macro.
+
+	* src/open.c (dirfile_open): Gave INDEX it's own explicit entry.  This
+	automatically allows defining /META fields for INDEX, per Barth's request.
+	This entry has the special type GD_INDEX_ENTRY.  Some other
+	simplifications/complications result.  First among these is that the list
+	functions and the counting functions now may include INDEX, as appropriate.
+	* test/add_lincom.c test/add_sort.c test/add_spec_directive.c
+	test/add_phase.c test/add_string.c test/add_multiply.c
+	test/add_bit_numbits.c test/add_bit_bitsize.c test/flist.c test/vlist.c
+	test/add_raw.c test/add_bit.c test/add_code.c test/add_duplicate.c
+	test/add_const.c test/nvectors.c test/add_type.c test/add_meta.c
+	test/parse_sort.c test/add_linterp.c test/add_format.c test/add_spec.c:
+	Update for new list and counting function behaviour.
+	* test/parse_meta_index.c: Added.
+	* src/common.c (_GD_GetEntry): Removed (no longer needed).  Callers call
+	_GD_FindField directly now, and must throw their own errors.
+	* src/getdata.c (_GD_DoField) src/putdata.c (_GD_DoFieldOut) src/spf.c
+	(_Get_SPF): Replaced INDEX special-casing with GD_INDEX_ENTRY handling.
+
 2008-10-13   D. V. Wiebe <getdata@ketiltrout.net>  svn:137
 	* src/add.c (_GD_Add): Properly initialise the private entry after creating
 	it.  Crash report from Matthew Truch.

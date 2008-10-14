@@ -140,13 +140,13 @@ PARSE_TESTS=parse_badline parse_bit parse_bit4 parse_bit_bitnum \
 						parse_include_nonexistent parse_include_slash parse_index \
 						parse_lincom parse_lincom_ncols1 parse_lincom_ncols2 \
 						parse_lincom_nfields parse_lincom_nofields parse_linterp \
-						parse_linterp_ncols parse_meta parse_meta_parent parse_meta_raw \
-						parse_multiply parse_multiply_ncols parse_name parse_ncols \
-						parse_phase parse_phase_ncols parse_quote parse_raw parse_raw_char \
-						parse_raw_ncols parse_raw_spf parse_raw_type parse_sort \
-						parse_string parse_string_ncols parse_string_null parse_version \
-						parse_version_include parse_version_pedantic parse_version_slash \
-						parse_whitespace
+						parse_linterp_ncols parse_meta parse_meta_index parse_meta_parent \
+						parse_meta_raw parse_multiply parse_multiply_ncols parse_name \
+						parse_ncols parse_phase parse_phase_ncols parse_quote parse_raw \
+						parse_raw_char parse_raw_ncols parse_raw_spf parse_raw_type \
+						parse_sort parse_string parse_string_ncols parse_string_null \
+						parse_version parse_version_include parse_version_pedantic \
+						parse_version_slash parse_whitespace
 
 PUT_TESTS=put64 put_bad_code put_bit put_bof put_char put_endian8 put_endian16 \
 					put_endian32 put_endian64 put_endian_float32 put_endian_float64 \

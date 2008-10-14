@@ -41,7 +41,7 @@ const void* get_metaconstant_values(DIRFILE* D, const char* parent,
 
   _GD_ClearError(D);
 
-  const gd_entry_t* P = _GD_GetEntry(D, parent, NULL);
+  const gd_entry_t* P = _GD_FindField(D, parent, NULL);
 
   if (P == NULL) {
     _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, parent);
@@ -94,7 +94,7 @@ const char** get_metaconstant_list(DIRFILE* D, const char* parent)
 
   _GD_ClearError(D);
 
-  const gd_entry_t* P = _GD_GetEntry(D, parent, NULL);
+  const gd_entry_t* P = _GD_FindField(D, parent, NULL);
 
   if (P == NULL) {
     _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, parent);
@@ -149,7 +149,7 @@ const char** get_metastring_values(DIRFILE* D, const char* parent)
 
   _GD_ClearError(D);
 
-  const gd_entry_t* P = _GD_GetEntry(D, parent, NULL);
+  const gd_entry_t* P = _GD_FindField(D, parent, NULL);
 
   if (P == NULL) {
     _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, parent);
@@ -202,7 +202,7 @@ const char** get_metastring_list(DIRFILE* D, const char* parent)
 
   _GD_ClearError(D);
 
-  const gd_entry_t* P = _GD_GetEntry(D, parent, NULL);
+  const gd_entry_t* P = _GD_FindField(D, parent, NULL);
 
   if (P == NULL) {
     _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, parent);
@@ -257,7 +257,7 @@ const char** get_metavector_list(DIRFILE* D, const char* parent)
 
   _GD_ClearError(D);
 
-  const gd_entry_t* P = _GD_GetEntry(D, parent, NULL);
+  const gd_entry_t* P = _GD_FindField(D, parent, NULL);
 
   if (P == NULL) {
     _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, parent);
@@ -312,7 +312,7 @@ const char** get_metafield_list(DIRFILE* D, const char* parent)
 
   _GD_ClearError(D);
 
-  const gd_entry_t* P = _GD_GetEntry(D, parent, NULL);
+  const gd_entry_t* P = _GD_FindField(D, parent, NULL);
 
   if (P == NULL) {
     _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, parent);

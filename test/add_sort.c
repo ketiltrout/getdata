@@ -42,27 +42,29 @@ int main (void)
     r = 1;
   else if (field_list == NULL)
     r = 1;
-  else if (field_list[0][0] != 'a')
+  else if (field_list[0][0] != 'I')
     r = 1;
-  else if (field_list[1][0] != 'b')
+  else if (field_list[1][0] != 'a')
     r = 1;
-  else if (field_list[2][0] != 'c')
+  else if (field_list[2][0] != 'b')
     r = 1;
-  else if (field_list[3][0] != 'd')
+  else if (field_list[3][0] != 'c')
     r = 1;
-  else if (field_list[4][0] != 'e')
+  else if (field_list[4][0] != 'd')
     r = 1;
-  else if (field_list[5][0] != 'f')
+  else if (field_list[5][0] != 'e')
     r = 1;
-  else if (field_list[6][0] != 'g')
+  else if (field_list[6][0] != 'f')
     r = 1;
-  else if (field_list[7][0] != 'h')
+  else if (field_list[7][0] != 'g')
     r = 1;
-  else if (field_list[8][0] != 'i')
+  else if (field_list[8][0] != 'h')
     r = 1;
-  else if (field_list[9][0] != 'j')
+  else if (field_list[9][0] != 'i')
     r = 1;
-  else if (field_list[10][0] != 'k')
+  else if (field_list[10][0] != 'j')
+    r = 1;
+  else if (field_list[11][0] != 'k')
     r = 1;
 
   unlink(k);

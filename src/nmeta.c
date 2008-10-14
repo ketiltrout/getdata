@@ -32,7 +32,7 @@ unsigned int get_nmeta_fields(DIRFILE* D, const char* parent)
 
   _GD_ClearError(D);
 
-  const gd_entry_t* P = _GD_GetEntry(D, parent, NULL);
+  const gd_entry_t* P = _GD_FindField(D, parent, NULL);
 
   if (P == NULL) {
     _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, parent);
@@ -58,7 +58,7 @@ unsigned int get_nmeta_vectors(DIRFILE* D, const char* parent)
 
   _GD_ClearError(D);
 
-  const gd_entry_t* P = _GD_GetEntry(D, parent, NULL);
+  const gd_entry_t* P = _GD_FindField(D, parent, NULL);
 
   if (P == NULL) {
     _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, parent);
@@ -88,7 +88,7 @@ unsigned int get_nmeta_fields_by_type(DIRFILE* D, const char* parent,
 
   _GD_ClearError(D);
 
-  const gd_entry_t* P = _GD_GetEntry(D, parent, NULL);
+  const gd_entry_t* P = _GD_FindField(D, parent, NULL);
 
   if (P == NULL) {
     _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, parent);

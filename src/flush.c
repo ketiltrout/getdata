@@ -34,6 +34,7 @@ void _GD_Flush(DIRFILE* D, gd_entry_t *entry, const char* field_code)
   dtrace("%p, %p", D, entry);
 
   if (entry == NULL) {
+    _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, field_code);
     dreturnvoid();
     return;
   }
@@ -70,6 +71,7 @@ void _GD_Flush(DIRFILE* D, gd_entry_t *entry, const char* field_code)
       _GD_Flush(D, entry->e->entry[0], field_code);
     case GD_CONST_ENTRY:
     case GD_STRING_ENTRY:
+    case GD_INDEX_ENTRY:
     case GD_NO_ENTRY:
       break;
   }
@@ -208,6 +210,10 @@ static void _GD_FieldSpec(DIRFILE* D, FILE* stream, gd_entry_t* E, int meta)
     case GD_STRING_ENTRY:
       fprintf(stream, "%s STRING \"%s\"", ptr, _GD_StringEscapeise(buffer,
             E->e->string));
+    case GD_INDEX_ENTRY:
+      /* INDEX is implicit, and it is an error to define it in the format
+       * file */
+      break;
     case GD_NO_ENTRY:
       _GD_InternalError(D);
       break;
@@ -384,7 +390,7 @@ void dirfile_flush(DIRFILE* D, const char* field_code)
         if (D->entry[i]->field_type == GD_RAW_ENTRY)
           _GD_Flush(D, D->entry[i], NULL);
   } else
-    _GD_Flush(D, _GD_GetEntry(D, field_code, NULL), field_code);
+    _GD_Flush(D, _GD_FindField(D, field_code, NULL), field_code);
 
     dreturnvoid();
 }

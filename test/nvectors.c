@@ -46,5 +46,5 @@ int main(void)
   if (error)
     return 1;
 
-  return (nfields != 4);
+  return (nfields != 5);
 }

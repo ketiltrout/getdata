@@ -467,9 +467,10 @@ static size_t _GD_DoLincom(DIRFILE *D, gd_entry_t *E,
       first_samp, num_frames, num_samp, return_type, data_out);
 
   if (E->e->entry[0] == NULL) {
-    E->e->entry[0] = _GD_GetEntry(D, E->in_fields[0], NULL);
+    E->e->entry[0] = _GD_FindField(D, E->in_fields[0], NULL);
 
-    if (D->error != GD_E_OK) {
+    if (E->e->entry[0] == NULL) {
+      _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, E->in_fields[0]);
       dreturn("%zi", 0);
       return 0;
     }
@@ -510,9 +511,10 @@ static size_t _GD_DoLincom(DIRFILE *D, gd_entry_t *E,
     for (i = 1; i < E->n_fields; i++) {
       /* Resolve the next field, if needed */
       if (E->e->entry[i] == NULL) {
-        E->e->entry[i] = _GD_GetEntry(D, E->in_fields[i], NULL);
+        E->e->entry[i] = _GD_FindField(D, E->in_fields[i], NULL);
 
-        if (D->error != GD_E_OK) {
+        if (E->e->entry[i] == NULL) {
+          _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, E->in_fields[i]);
           dreturn("%zi", 0);
           return 0;
         }
@@ -593,9 +595,10 @@ static size_t _GD_DoMultiply(DIRFILE *D, gd_entry_t* E,
 
   /* find the samples per frame of the first field */
   if (E->e->entry[0] == NULL) {
-    E->e->entry[0] = _GD_GetEntry(D, E->in_fields[0], NULL);
+    E->e->entry[0] = _GD_FindField(D, E->in_fields[0], NULL);
 
-    if (D->error != GD_E_OK) {
+    if (E->e->entry[0] == NULL) {
+      _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, E->in_fields[0]);
       dreturn("%zi", 0);
       return 0;
     }
@@ -632,10 +635,10 @@ static size_t _GD_DoMultiply(DIRFILE *D, gd_entry_t* E,
 
   /* find the samples per frame of the second field */
   if (E->e->entry[1] == NULL) {
-    E->e->entry[1] = _GD_GetEntry(D, E->in_fields[1], NULL);
+    E->e->entry[1] = _GD_FindField(D, E->in_fields[1], NULL);
 
-    if (D->error != GD_E_OK) {
-      dreturn("%zi", 0);
+    if (E->e->entry[0] == NULL) {
+      _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, E->in_fields[0]);
       return 0;
     }
 
@@ -705,9 +708,10 @@ static size_t _GD_DoBit(DIRFILE *D, gd_entry_t *E,
     ((uint64_t)1 << E->numbits) - 1;
 
   if (E->e->entry[0] == NULL) {
-    E->e->entry[0] = _GD_GetEntry(D, E->in_fields[0], NULL);
+    E->e->entry[0] = _GD_FindField(D, E->in_fields[0], NULL);
 
-    if (D->error != GD_E_OK) {
+    if (E->e->entry[0] == NULL) {
+      _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, E->in_fields[0]);
       dreturn("%zi", 0);
       return 0;
     }
@@ -766,9 +770,10 @@ static size_t _GD_DoPhase(DIRFILE *D, gd_entry_t *E,
       first_samp, num_frames, num_samp, return_type, data_out);
 
   if (E->e->entry[0] == NULL) {
-    E->e->entry[0] = _GD_GetEntry(D, E->in_fields[0], NULL);
+    E->e->entry[0] = _GD_FindField(D, E->in_fields[0], NULL);
 
-    if (D->error != GD_E_OK) {
+    if (E->e->entry[0] == NULL) {
+      _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, E->in_fields[0]);
       dreturn("%zi", 0);
       return 0;
     }
@@ -807,12 +812,11 @@ static size_t _GD_DoLinterp(DIRFILE *D, gd_entry_t* E,
     }
   }
 
-  dtrace("[%p]", E->e->entry[0]);
-
   if (E->e->entry[0] == NULL) {
-    E->e->entry[0] = _GD_GetEntry(D, E->in_fields[0], NULL);
+    E->e->entry[0] = _GD_FindField(D, E->in_fields[0], NULL);
 
-    if (D->error != GD_E_OK) {
+    if (E->e->entry[0] == NULL) {
+      _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, E->in_fields[0]);
       dreturn("%zi", 0);
       return 0;
     }
@@ -894,18 +898,6 @@ size_t _GD_DoField(DIRFILE *D, gd_entry_t *entry, const char* field_code,
     return 0;
   }
 
-  /* if Asking for "FILEFRAM" or "INDEX", just return it */
-  if (entry == NULL) {
-    n_read = num_frames + num_samp;
-    if (data_out != NULL) {
-      _GD_FillFileFrame(data_out, return_type, first_frame + first_samp +
-          D->frame_offset, n_read);
-    }
-    D->recurse_level--;
-    dreturn("%zi", 0);
-    return n_read;
-  }
-
   switch (entry->field_type) {
     case GD_RAW_ENTRY:
       n_read = _GD_DoRaw(D, entry, first_frame, first_samp, num_frames,
@@ -931,6 +923,14 @@ size_t _GD_DoField(DIRFILE *D, gd_entry_t *entry, const char* field_code,
       n_read = _GD_DoPhase(D, entry, first_frame, first_samp, num_frames,
           num_samp, return_type, data_out);
       break;
+    case GD_INDEX_ENTRY:
+      /* if Asking for "INDEX", just return it */
+      n_read = num_frames + num_samp;
+      if (data_out != NULL) {
+        _GD_FillFileFrame(data_out, return_type, first_frame + first_samp +
+            D->frame_offset, n_read);
+      }
+      break;
     case GD_CONST_ENTRY:
       n_read = _GD_DoConst(D, entry, return_type, data_out);
       break;
@@ -953,7 +953,7 @@ size_t getdata64(DIRFILE* D, const char *field_code, off64_t first_frame,
     off64_t first_samp, size_t num_frames, size_t num_samp,
     gd_type_t return_type, void *data_out)
 {
-  size_t n_read;
+  size_t n_read = 0;
   gd_entry_t* entry;
 
   dtrace("%p, \"%s\", %lli, %lli, %zi, %zi, 0x%x, %p", D, field_code,
@@ -969,14 +969,13 @@ size_t getdata64(DIRFILE* D, const char *field_code, off64_t first_frame,
 
   first_frame -= D->frame_offset;
 
-  entry = _GD_GetEntry(D, field_code, NULL);
+  entry = _GD_FindField(D, field_code, NULL);
 
-  if (D->error != GD_E_OK)
-    n_read = 0;
-  else if (entry && (entry->field_type & GD_SCALAR_ENTRY)) {
+  if (entry == NULL)
+    _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, field_code);
+  else if (entry->field_type & GD_SCALAR_ENTRY)
     _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
-    n_read = 0;
-  } else 
+  else 
     n_read = _GD_DoField(D, entry, field_code, first_frame, first_samp,
         num_frames, num_samp, return_type, data_out);
 

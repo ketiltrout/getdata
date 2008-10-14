@@ -88,7 +88,7 @@ gd_type_t _GD_LegacyType(char c)
 }
 
 /* Binary search to find the field */
-static gd_entry_t* _GD_FindField(DIRFILE* D, const char* field_code, int *next)
+gd_entry_t* _GD_FindField(DIRFILE* D, const char* field_code, int *next)
 {
   int i, c;
   int l = 0;
@@ -127,27 +127,6 @@ void _GD_InsertSort(DIRFILE* D, gd_entry_t* E, int u)
   D->entry[u] = E;
 
   dreturnvoid();
-}
-
-/* _GD_GetEntry: Convert a field code into an entry pointer
-*/
-gd_entry_t* _GD_GetEntry(DIRFILE* D, const char* field_code, int* next)
-{
-  gd_entry_t* entry;
-  dtrace("%p, \"%s\", %p", D, field_code, next);
-
-  if ((strcmp(field_code,"INDEX") == 0)) {
-    dreturn("%p", NULL);
-    return NULL;
-  }
-
-  entry = _GD_FindField(D, field_code, next);
-
-  if (entry == NULL) /* No match */
-    _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, field_code);
-
-  dreturn("%p", entry);
-  return entry;
 }
 
 /* _GD_Alloc: allocate a buffer of the right type & size

@@ -64,6 +64,7 @@ static void _GD_FreeD(DIRFILE* D)
             free(D->entry[i]->e->string);
           break;
         case GD_CONST_ENTRY:
+        case GD_INDEX_ENTRY:
         case GD_NO_ENTRY:
           break;
       }

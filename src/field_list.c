@@ -154,7 +154,7 @@ const char** get_string_values(DIRFILE* D)
         D->entry[i]->e->n_meta != -1)
       fl[n++] = D->entry[i]->e->string;
   }
-  fl[i] = NULL;
+  fl[n] = NULL;
 
   D->string_value_list = (const char**)fl;
   D->list_validity |= LIST_VALID_STRING_VALUE;

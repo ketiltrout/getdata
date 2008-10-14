@@ -63,8 +63,9 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
       return -1;
     }
 
-    P = _GD_GetEntry(D, parent, NULL);
-    if (D->error) {
+    P = _GD_FindField(D, parent, NULL);
+    if (P == NULL) {
+      _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, parent);
       dreturn("%i", -1);
       return -1;
     }
@@ -74,15 +75,13 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
     snprintf(temp_buffer, FILENAME_MAX, "%s", entry->field);
 
   /* check for duplicate field */
-  E = _GD_GetEntry(D, temp_buffer, &u);
+  E = _GD_FindField(D, temp_buffer, &u);
 
-  if (D->error == GD_E_OK) { /* matched */
+  if (E != NULL) { /* matched */
     _GD_SetError(D, GD_E_DUPLICATE, 0, NULL, 0, NULL);
     dreturn("%i", -1);
     return -1;
   }
-
-  _GD_ClearError(D);
 
   /* check for bad field type */
   if (entry->field_type != GD_RAW_ENTRY &&
@@ -136,7 +135,7 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
   E->field = _GD_ValidateField(P, entry->field);
 
   if (E->field == entry->field) {
-    _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, NULL);
+    _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, entry->field);
     E->field = NULL;
     _GD_FreeE(E, 1);
     dreturn("%i", -1);
@@ -294,6 +293,7 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
       else
         P->e->n_meta_string++;
       break;
+    case GD_INDEX_ENTRY:
     case GD_NO_ENTRY:
       _GD_InternalError(D); /* We've already verrified field_type is valid */
       break;
@@ -346,8 +346,9 @@ int dirfile_add_metaspec(DIRFILE* D, const char* parent, const char* line)
 
   _GD_ClearError(D);
 
-  E = _GD_GetEntry(D, parent, NULL);
-  if (D->error) {
+  E = _GD_FindField(D, parent, NULL);
+  if (E == NULL) {
+    _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, parent);
     dreturn("%i", -1);
     return -1;
   }
@@ -620,9 +621,11 @@ int dirfile_add_string(DIRFILE* D, const char* field_code, const char* value,
 
   /* Actually store the string, now */
   if (!error) {
-    entry = _GD_GetEntry(D, field_code, NULL);
+    entry = _GD_FindField(D, field_code, NULL);
 
-    if (D->error == GD_E_OK)
+    if (entry == NULL)
+      _GD_InternalError(D); /* We should be able to find it: we just added it */
+    else
       _GD_DoFieldOut(D, entry, field_code, 0, 0, 0, 0, GD_NULL, value);
 
     if (D->error)
@@ -656,9 +659,11 @@ int dirfile_add_const(DIRFILE* D, const char* field_code, gd_type_t const_type,
 
   /* Actually store the constant, now */
   if (!error) {
-    entry = _GD_GetEntry(D, field_code, NULL);
+    entry = _GD_FindField(D, field_code, NULL);
 
-    if (D->error == GD_E_OK)
+    if (entry == NULL)
+      _GD_InternalError(D); /* We should be able to find it: we just added it */
+    else
       _GD_DoFieldOut(D, entry, field_code, 0, 0, 0, 0, data_type, value);
 
     if (D->error)
@@ -842,9 +847,11 @@ int dirfile_add_metastring(DIRFILE* D, const char* parent,
 
   /* Actually store the string, now */
   if (!error) {
-    entry = _GD_GetEntry(D, field_code, NULL);
+    entry = _GD_FindField(D, field_code, NULL);
 
-    if (D->error == GD_E_OK)
+    if (entry == NULL)
+      _GD_InternalError(D); /* We should be able to find it: we just added it */
+    else
       _GD_DoFieldOut(D, entry, field_code, 0, 0, 0, 0, GD_NULL, value);
 
     if (D->error)
@@ -879,9 +886,11 @@ int dirfile_add_metaconst(DIRFILE* D, const char* parent,
 
   /* Actually store the constant, now */
   if (!error) {
-    entry = _GD_GetEntry(D, field_code, NULL);
+    entry = _GD_FindField(D, field_code, NULL);
 
-    if (D->error == GD_E_OK)
+    if (entry == NULL)
+      _GD_InternalError(D); /* We should be able to find it: we just added it */
+    else
       _GD_DoFieldOut(D, entry, field_code, 0, 0, 0, 0, data_type, value);
 
     if (D->error)

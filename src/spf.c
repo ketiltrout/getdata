@@ -40,11 +40,6 @@ unsigned int _GD_GetSPF(DIRFILE* D, gd_entry_t* E)
     return 0;
   }
 
-  if (E == NULL) { /* INDEX has one sample per frame */
-    dreturn("%u", 1);
-    return 1;
-  }
-
   switch(E->field_type) {
     case GD_RAW_ENTRY:
       spf = E->spf;
@@ -55,23 +50,29 @@ unsigned int _GD_GetSPF(DIRFILE* D, gd_entry_t* E)
     case GD_PHASE_ENTRY:
     case GD_LINTERP_ENTRY:
       if (E->e->entry[0] == NULL) {
-        E->e->entry[0] = _GD_GetEntry(D, E->in_fields[0], NULL);
+        E->e->entry[0] = _GD_FindField(D, E->in_fields[0], NULL);
 
-        if (D->error != GD_E_OK)
+        if (E->e->entry[0] == NULL) {
+          _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, E->in_fields[0]);
           break;
+        }
 
         /* scalar entries not allowed */
         if (E->e->entry[0]->field_type & GD_SCALAR_ENTRY) {
           _GD_SetError(D, GD_E_DIMENSION, 0, E->field, 0,
               E->e->entry[0]->field);
-          dreturn("%u", 0);
-          return 0;
+          break;
         }
       }
 
       spf = _GD_GetSPF(D, E->e->entry[0]);
       break;
-    default:
+    case GD_INDEX_ENTRY:
+      spf = 1;
+      break;
+    case GD_CONST_ENTRY:
+    case GD_STRING_ENTRY:
+    case GD_NO_ENTRY:
       _GD_InternalError(D);
   }
 
@@ -97,9 +98,13 @@ unsigned int get_spf(DIRFILE* D, const char *field_code)
 
   _GD_ClearError(D);
 
-  entry = _GD_GetEntry(D, field_code, NULL);
+  entry = _GD_FindField(D, field_code, NULL);
 
-  if (!D->error)
+  if (entry == NULL)
+    _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, field_code);
+  else if (entry->field_type & GD_SCALAR_ENTRY)
+    _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
+  else 
     spf = _GD_GetSPF(D, entry);
 
   dreturn("%u", spf);

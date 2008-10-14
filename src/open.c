@@ -790,9 +790,9 @@ gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, const char** in_cols,
 
     /* Check for duplicate */
     int u;
-    const gd_entry_t* Q = _GD_GetEntry(D, E->field, &u);
+    const gd_entry_t* Q = _GD_FindField(D, E->field, &u);
 
-    if (D->error == GD_E_OK)
+    if (Q)
       _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_DUPLICATE, format_file, linenum,
           D->include_list[Q->format_file].cname);
     else {
@@ -1039,7 +1039,7 @@ static int _GD_ParseDirective(DIRFILE *D, const char** in_cols, int n_cols,
             D->include_list[me].cname, linenum, NULL);
     }
   } else if (strcmp(ptr, "META") == 0) {
-    const gd_entry_t* P =  _GD_GetEntry(D, in_cols[1], NULL);
+    const gd_entry_t* P =  _GD_FindField(D, in_cols[1], NULL);
     if (P == NULL)
       _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_NO_PARENT,
           D->include_list[me].cname, linenum, in_cols[1]);
@@ -1284,12 +1284,11 @@ DIRFILE* dirfile_open(const char* filedir, unsigned int flags)
   _GD_ClearError(D);
   D->recurse_level = 0;
 
-  D->entry = NULL;
   D->error_string = malloc(FILENAME_MAX);
   D->error_file = malloc(FILENAME_MAX);
   D->name = strdup(filedir);
   D->frame_offset = 0;
-  D->n_entries = D->n_string = D->n_const = D->n_meta = 0;
+  D->n_string = D->n_const = D->n_meta = 0;
   D->first_field = NULL;
   D->field_list = NULL;
   D->vector_list = NULL;
@@ -1300,6 +1299,34 @@ DIRFILE* dirfile_open(const char* filedir, unsigned int flags)
   D->list_validity = 0;
   D->flags = flags | GD_INVALID;
   D->n_include = 0;
+
+  /* Add the INDEX entry */
+  D->n_entries = 1;
+
+  D->entry = malloc(sizeof(gd_entry_t*));
+  if (D->entry == NULL) {
+    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    dreturn("%p", D);
+    return D;
+  }
+
+  D->entry[0] = malloc(sizeof(gd_entry_t));
+  if (D->entry == NULL) {
+    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    dreturn("%p", D);
+    return D;
+  }
+  memset(D->entry[0], 0, sizeof(gd_entry_t));
+
+  D->entry[0]->field_type = GD_INDEX_ENTRY;
+  D->entry[0]->e = malloc(sizeof(struct _gd_private_entry));
+  D->entry[0]->field = strdup("INDEX");
+  if (D->entry[0]->field == NULL || D->entry[0]->e == NULL) {
+    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    dreturn("%p", D);
+    return D;
+  }
+  memset(D->entry[0]->e, 0, sizeof(struct _gd_private_entry));
 
   snprintf(format_file, FILENAME_MAX, "%s%sformat", filedir,
       (filedir[strlen(filedir) - 1] == '/') ? "" : "/");

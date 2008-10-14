@@ -29,7 +29,7 @@ int main(void)
   unlink(format);
   rmdir(filedir);
 
-  if (n != 0)
+  if (n != 1)
     return 1;
 
   return (error != GD_E_FORMAT);

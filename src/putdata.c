@@ -151,10 +151,13 @@ static size_t _GD_DoLinterpOut(DIRFILE* D, gd_entry_t *E,
   /* Interpolate X(y) instead of Y(x) */
 
   if (E->e->entry[0] == NULL) {
-    E->e->entry[0] = _GD_GetEntry(D, E->in_fields[0], NULL);
+    E->e->entry[0] = _GD_FindField(D, E->in_fields[0], NULL);
 
-    if (D->error != GD_E_OK)
+    if (E->e->entry[0] == NULL) {
+      _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, E->in_fields[0]);
+      dreturn("%zi", 0);
       return 0;
+    }
 
     /* scalar entries not allowed */
     if (E->e->entry[0]->field_type & GD_SCALAR_ENTRY) {
@@ -202,10 +205,13 @@ static size_t _GD_DoLincomOut(DIRFILE* D, gd_entry_t *E,
   }
 
   if (E->e->entry[0] == NULL) {
-    E->e->entry[0] = _GD_GetEntry(D, E->in_fields[0], NULL);
+    E->e->entry[0] = _GD_FindField(D, E->in_fields[0], NULL);
 
-    if (D->error != GD_E_OK)
+    if (E->e->entry[0] == NULL) {
+      _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, E->in_fields[0]);
+      dreturn("%zi", 0);
       return 0;
+    }
 
     /* scalar entries not allowed */
     if (E->e->entry[0]->field_type & GD_SCALAR_ENTRY) {
@@ -272,10 +278,13 @@ static size_t _GD_DoBitOut(DIRFILE* D, gd_entry_t *E,
 #endif
 
   if (E->e->entry[0] == NULL) {
-    E->e->entry[0] = _GD_GetEntry(D, E->in_fields[0], NULL);
+    E->e->entry[0] = _GD_FindField(D, E->in_fields[0], NULL);
     
-    if (D->error != GD_E_OK)
+    if (E->e->entry[0] == NULL) {
+      _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, E->in_fields[0]);
+      dreturn("%zi", 0);
       return 0;
+    }
 
     /* scalar entries not allowed */
     if (E->e->entry[0]->field_type & GD_SCALAR_ENTRY) {
@@ -349,10 +358,13 @@ static size_t _GD_DoPhaseOut(DIRFILE* D, gd_entry_t *E,
       first_samp, num_frames, num_samp, data_type, data_in);
 
   if (E->e->entry[0] == NULL) {
-    E->e->entry[0] = _GD_GetEntry(D, E->in_fields[0], NULL);
+    E->e->entry[0] = _GD_FindField(D, E->in_fields[0], NULL);
 
-    if (D->error != GD_E_OK)
+    if (E->e->entry[0] == NULL) {
+      _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, E->in_fields[0]);
+      dreturn("%zi", 0);
       return 0;
+    }
 
     /* scalar entries not allowed */
     if (E->e->entry[0]->field_type & GD_SCALAR_ENTRY) {
@@ -421,13 +433,6 @@ size_t _GD_DoFieldOut(DIRFILE *D, gd_entry_t* entry, const char *field_code,
     return 0;
   }
 
-  if (entry == NULL) { /* Attempt to write to INDEX will fail */
-    _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_PUT, NULL, 0, field_code);
-    D->recurse_level--;
-    dreturn("%zi", 0);
-    return 0;
-  }
-
   switch (entry->field_type) {
     case GD_RAW_ENTRY:
       n_wrote = _GD_DoRawOut(D, entry, first_frame, first_samp, num_frames,
@@ -446,6 +451,7 @@ size_t _GD_DoFieldOut(DIRFILE *D, gd_entry_t* entry, const char *field_code,
           num_samp, data_type, data_in);
       break;
     case GD_MULTIPLY_ENTRY:
+    case GD_INDEX_ENTRY:
       _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_PUT, NULL, 0, field_code);
       break;
     case GD_PHASE_ENTRY:
@@ -495,14 +501,13 @@ size_t putdata64(DIRFILE* D, const char *field_code, off64_t first_frame,
 
   first_frame -= D->frame_offset;
 
-  entry = _GD_GetEntry(D, field_code, NULL);
+  entry = _GD_FindField(D, field_code, NULL);
 
-  if (D->error != GD_E_OK)
-    n_wrote = 0;
-  else if (entry && (entry->field_type & GD_SCALAR_ENTRY)) {
+  if (entry == NULL)
+    _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, field_code);
+  else if (entry->field_type & GD_SCALAR_ENTRY)
     _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
-    n_wrote = 0;
-  } else 
+  else 
     n_wrote = _GD_DoFieldOut(D, entry, field_code, first_frame, first_samp,
         num_frames, num_samp, data_type, data_in);
 

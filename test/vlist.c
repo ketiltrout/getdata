@@ -42,26 +42,19 @@ int main(void)
       if (field_list[fd] == NULL)
         break;
 
-      if (strlen(field_list[fd]) != 5)
-        r = 1;
+      if (strcmp(field_list[fd], "data1") == 0)
+        continue;
+      else if (strcmp(field_list[fd], "data2") == 0)
+        continue;
+      else if (strcmp(field_list[fd], "data3") == 0)
+        continue;
+      else if (strcmp(field_list[fd], "INDEX") == 0)
+        continue;
 
-      if (field_list[fd][0] != 'd')
-        r = 1;
-
-      if (field_list[fd][1] != 'a')
-        r = 1;
-
-      if (field_list[fd][2] != 't')
-        r = 1;
-
-      if (field_list[fd][3] != 'a')
-        r = 1;
-
-      if (field_list[fd][4] < '1' || field_list[fd][4] > '3')
-        r = 1;
+      r = 1;
     }
 
-  if (fd != 3)
+  if (fd != 4)
     r = 1;
 
   dirfile_close(D);
