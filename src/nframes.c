@@ -40,7 +40,6 @@ off64_t get_nframes64(DIRFILE* D)
   }
 
   if (D->first_field == NULL) {
-    _GD_SetError(D, GD_E_EMPTY, 0, NULL, 0, NULL);
     dreturn("%lli", 0LL);
     return 0;
   }

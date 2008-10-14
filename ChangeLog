@@ -1,3 +1,9 @@
+2008-10-14   D. V. Wiebe <getdata@ketiltrout.net>  svn:140
+	* src/legacy.c src/errors.c src/nframes.c (get_nframes64): GD_E_EMPTY is
+	no-longer an error. (Per discussion with Barth.)
+
+	* bindings/f77/make_parameters.c: Updated.
+
 2008-10-14   D. V. Wiebe <getdata@ketiltrout.net>  svn:139
 	* bindings/f77/test/fget_field_list.f90: Fix for new list and count function
 	behaviour.

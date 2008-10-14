@@ -20,6 +20,10 @@
  */
 #include "internal.h"
 
+#ifdef STDC_HEADERS
+#include <stdlib.h>
+#endif
+
 /* this function is little more than a public boilerplate for _GD_DoField */
 ssize_t get_constant(DIRFILE* D, const char *field_code, gd_type_t return_type,
     void *data_out)

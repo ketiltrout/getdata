@@ -89,8 +89,6 @@ static const struct {
   /* GD_E_INTERNAL_ERROR: 2 = source file, 3 = line */
   { GD_E_INTERNAL_ERROR, 0, "Internal error at [{2},{3}]; "
     "please report to " PACKAGE_BUGREPORT , 0 },
-  /* GD_E_EMPTY: (nothing) */
-  { GD_E_EMPTY, 0, "Unable to query dirfile: no RAW field available", 0 },
   /* GD_E_ALLOC: (nothing) */
   { GD_E_ALLOC, 0, "Memory allocation error", 0 },
   /* GD_E_RANGE: (nothing) */

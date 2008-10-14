@@ -56,7 +56,6 @@ const char *GD_ERROR_CODES[GD_N_ERROR_CODES] = {
   "Could not open included Format file",
   "Internal error",
   "Memory allocation failed",
-  "No RAW fields defined",
   "Could not open interpolation file",
   "Too many levels of recursion",
   "Bad DIRFILE",

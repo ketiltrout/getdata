@@ -61,23 +61,22 @@
 #define GD_E_RAW_IO            7
 #define GD_E_OPEN_INCLUDE      8
 #define GD_E_INTERNAL_ERROR    9
-#define GD_E_EMPTY            10
-#define GD_E_ALLOC            11
-#define GD_E_RANGE            12
-#define GD_E_OPEN_LINFILE     13
-#define GD_E_RECURSE_LEVEL    14
-#define GD_E_BAD_DIRFILE      15
-#define GD_E_BAD_FIELD_TYPE   16
-#define GD_E_ACCMODE          17
-#define GD_E_UNSUPPORTED      18
-#define GD_E_UNKNOWN_ENCODING 19
-#define GD_E_BAD_ENTRY        20
-#define GD_E_DUPLICATE        21
-#define GD_E_DIMENSION        22
-#define GD_E_BAD_INDEX        23
-#define GD_E_BAD_SCALAR       24
+#define GD_E_ALLOC            10
+#define GD_E_RANGE            11
+#define GD_E_OPEN_LINFILE     12
+#define GD_E_RECURSE_LEVEL    13
+#define GD_E_BAD_DIRFILE      14
+#define GD_E_BAD_FIELD_TYPE   15
+#define GD_E_ACCMODE          16
+#define GD_E_UNSUPPORTED      17
+#define GD_E_UNKNOWN_ENCODING 18
+#define GD_E_BAD_ENTRY        19
+#define GD_E_DUPLICATE        20
+#define GD_E_DIMENSION        21
+#define GD_E_BAD_INDEX        22
+#define GD_E_BAD_SCALAR       23
 
-#define GD_N_ERROR_CODES      25
+#define GD_N_ERROR_CODES      24
 
 #define GD_MAX_LINCOM 3
 
