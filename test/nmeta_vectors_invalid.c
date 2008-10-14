@@ -13,7 +13,7 @@ int main(void)
   const char* filedir = __TEST__ "dirfile";
 
   DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
-  unsigned int n = get_nmeta_vectors(D, "raw1");
+  unsigned int n = get_nmetavectors(D, "raw1");
   int error = get_error(D);
   dirfile_close(D);
 

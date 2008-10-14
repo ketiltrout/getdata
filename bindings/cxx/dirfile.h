@@ -33,46 +33,91 @@ extern "C" {
 namespace GetData {
   class Dirfile {
     public:
-      Dirfile(const char* dirfilename, unsigned int flags = GD_RDWR);
+      Dirfile(const char *dirfilename, unsigned int flags = GD_RDWR);
 
       ~Dirfile();
 
       int Add(const GetData::Entry &entry);
 
-      GetData::Entry* Entry(const char* field_code);
+      int AddMeta(const GetData::Entry &entry, const char *parent);
+
+      int AddMetaSpec(const char *parent, const char *spec);
+
+      int AddSpec(const char *spec, int format_file = 0);
+
+      const void *ConstantValues(DataType type = Float64);
+
+      GetData::Entry* Entry(const char *field_code);
 
       int Error();
 
-      const char* ErrorString(size_t len = 4096);
+      const char *ErrorString(size_t len = 4096);
 
-      const char** FieldList();
+      const char **FieldList();
 
-      void Flush(const char* field_code = NULL);
+      const char **FieldListByType(EntryType type);
+
+      void Flush(const char *field_code = NULL);
 
       void FlushMetaData();
 
-      const char* FormatFileName(int index);
+      const char *FormatFileName(int index);
 
-      size_t GetData(const char* field_code, off_t first_frame,
+      size_t GetConstant(const char *field_code, DataType type, void *data_out);
+
+      size_t GetData(const char *field_code, off_t first_frame,
           off_t first_sample, size_t num_frames, size_t num_samples,
           DataType type, void* data_out);
 
+      size_t GetString(const char *field_code, size_t len, char *data_out);
+
+      int Include(const char *file, int format_file = 0,
+          unsigned int flags = 0);
+
+      const void *MetaConstantValues(const char *parent,
+          DataType type = Float64);
+
+      const char **MetaFieldList(const char *parent);
+
+      const char **MetaFieldListByType(const char *parent, EntryType type);
+
+      const char **MetaStringValues(const char *parent);
+
+      const char **MetaVectorList(const char *parent);
+
       unsigned int NFields();
+
+      unsigned int NFieldsByType(EntryType type);
+
+      unsigned int NMetaFieldsByType(const char *parent, EntryType type);
+
+      unsigned int NMetaVectors(const char *parent);
+
+      unsigned int NVectors();
 
       off_t NFrames();
 
       int NFormats();
 
-      size_t PutData(const char* field_code, off_t first_frame,
+      size_t PutConstant(const char *field_code, DataType type,
+          const void *data_in);
+
+      size_t PutData(const char *field_code, off_t first_frame,
           off_t first_sample, size_t num_frames, size_t num_samples,
           DataType type, const void* data_in);
 
-      unsigned int SamplesPerFrame(const char* field_code);
+      size_t PutString(const char *field_code, const char *data_in);
+
+      unsigned int SamplesPerFrame(const char *field_code);
+
+      const char **StringValues();
+
+      const char **VectorList();
 
     private:
       DIRFILE* D; 
 
-      char* error_string;
+      char *error_string;
   };
 }
 

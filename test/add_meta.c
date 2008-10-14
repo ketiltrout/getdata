@@ -31,7 +31,7 @@ int main(void)
 
   /* check */
   int n = get_nfields(D);
-  int m = get_nmeta_fields(D, "data");
+  int m = get_nmetafields(D, "data");
 
   dirfile_close(D);
 

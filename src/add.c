@@ -150,16 +150,6 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
   /* Set meta indicies */
   if (parent != NULL)
     E->e->n_meta = -1;
-  else {
-    E->e->n_meta = E->e->n_meta_string = E->e->n_meta_const = 0;
-    E->e->meta_entry = NULL;
-    E->e->field_list = NULL;
-    E->e->vector_list = NULL;
-    E->e->string_list = NULL;
-    E->e->string_value_list = NULL;
-    E->e->const_list = NULL;
-    E->e->const_value_list = NULL;
-  }
 
   /* Validate entry and add auxiliary data */
   switch(entry->field_type)
@@ -186,8 +176,6 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
 
       E->data_type = entry->data_type;
       E->e->fp = -1;
-      E->e->stream = NULL;
-      E->e->first = 0;
       E->e->encoding = GD_ENC_UNKNOWN;
 
       if ((E->e->file = malloc(FILENAME_MAX)) == NULL) {
@@ -241,7 +229,6 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
       break;
     case GD_LINTERP_ENTRY:
       E->e->table_len = -1;
-      E->e->x = E->e->y = NULL;
 
       if ((E->in_fields[0] = strdup(entry->in_fields[0])) == NULL)
         _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
@@ -278,9 +265,6 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
       break;
     case GD_CONST_ENTRY:
       E->const_type = entry->const_type;
-      E->e->uconst = E->e->iconst = E->e->dconst = 0;
-      E->e->n_client = 0;
-      E->e->client = NULL;
 
       if (E->const_type & 0x40 || GD_SIZE(E->const_type) == 0)
         _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, E->const_type, NULL);
@@ -324,6 +308,7 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
 
   /* Invalidate the field lists */
   D->list_validity = 0;
+  D->type_list_validity = 0;
 
   dreturn("%i", 0);
   return 0;
@@ -677,7 +662,7 @@ int dirfile_add_const(DIRFILE* D, const char* field_code, gd_type_t const_type,
   return error;
 }
 
-int dirfile_add_meta(DIRFILE* D, gd_entry_t* entry, const char* parent)
+int dirfile_add_meta(DIRFILE* D, const gd_entry_t* entry, const char* parent)
 {
   int ret;
 

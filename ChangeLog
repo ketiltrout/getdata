@@ -1,3 +1,36 @@
+2008-10-14   D. V. Wiebe <getdata@ketiltrout.net>  svn:143
+	* test/nframes_empty.c: Correct for removal of GD_E_EMPTY.
+
+	* README.cxx bindings/cxx/dirfile.h bindings/cxx/dirfile.cpp
+	bindings/cxx/entry.h: Added C++ bindings for new public functions.
+
+	* src/constant.c: get_constant returns size_t, not ssize_t, like the other
+	get_<foo>() functions.
+
+	* src/getdata.h.in: Add some missing public prototypes.
+	
+	* src/nfields.c src/nmeta.c: Removed the _ after nmeta in public function
+	names.
+	* test/nmeta_type.c test/nmeta_vectors_parent.c test/nmeta_parent.c
+	test/add_meta_phase.c test/add_meta_multiply.c test/nmeta_type_invalid.c
+	test/add_meta_linterp.c test/add_meta_lincom.c test/nmeta_invalid.c
+	test/nmeta.c test/nmeta_vectors_invalid.c test/add_meta_bit.c
+	test/add_meta.c test/nmeta_type_parent.c: Updated.
+
+	* src/close.c (_GD_FreeD) src/entry.c (_GD_FreeE) src/field_list.c
+	src/internal.h src/meta_list.c: Replaced get_constant_list() and
+	get_string_list() with get_field_list_by_type(), which reduces the amount of
+	duplicated code and provides a more flexible interface.  Similarly with the
+	META versions.
+	* test/clist.c test/clist_invalid.c test/clist_meta.c
+	test/clist_meta_invalid.c test/slist.c test/slist_invalid.c test/slist_meta.c
+	test/slist_meta_invalid.c: Removed.
+	* test/flist_type.c test/flist_type_invalid.c test/flist_type_meta.c
+	test/flist_type_meta_invalid.c: Added.
+
+	* src/open.c: Reduce paranoia by not re-zeroing memory already memset to
+	zero.
+
 2008-10-14   D. V. Wiebe <getdata@ketiltrout.net>  svn:140
 	* src/legacy.c src/errors.c src/nframes.c (get_nframes64): GD_E_EMPTY is
 	no-longer an error. (Per discussion with Barth.)

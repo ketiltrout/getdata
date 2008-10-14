@@ -20,7 +20,7 @@
  */
 #include "internal.h"
 
-unsigned int get_nmeta_fields(DIRFILE* D, const char* parent)
+unsigned int get_nmetafields(DIRFILE* D, const char* parent)
 {
   dtrace("%p", D);
 
@@ -46,7 +46,7 @@ unsigned int get_nmeta_fields(DIRFILE* D, const char* parent)
   return P->e->n_meta;
 }
 
-unsigned int get_nmeta_vectors(DIRFILE* D, const char* parent)
+unsigned int get_nmetavectors(DIRFILE* D, const char* parent)
 {
   dtrace("%p", D);
 
@@ -72,7 +72,7 @@ unsigned int get_nmeta_vectors(DIRFILE* D, const char* parent)
   return P->e->n_meta - P->e->n_meta_string - P->e->n_meta_const;
 }
 
-unsigned int get_nmeta_fields_by_type(DIRFILE* D, const char* parent,
+unsigned int get_nmetafields_by_type(DIRFILE* D, const char* parent,
     gd_entype_t type)
 {
   unsigned int r = 0;

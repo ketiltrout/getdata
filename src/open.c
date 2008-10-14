@@ -254,6 +254,7 @@ static gd_entry_t* _GD_ParseLincom(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
     dreturn("%p", NULL);
     return NULL;
   }
+  memset(E, 0, sizeof(gd_entry_t));
 
   E->e = malloc(sizeof(struct _gd_private_entry));
   if (E->e == NULL) {
@@ -337,6 +338,7 @@ static gd_entry_t* _GD_ParseLinterp(DIRFILE* D,
     dreturn("%p", NULL);
     return NULL;
   }
+  memset(E, 0, sizeof(gd_entry_t));
 
   E->e = malloc(sizeof(struct _gd_private_entry));
   if (E->e == NULL) {
@@ -411,6 +413,7 @@ static gd_entry_t* _GD_ParseMultiply(DIRFILE* D,
     dreturn("%p", NULL);
     return NULL;
   }
+  memset(E, 0, sizeof(gd_entry_t));
 
   E->e = malloc(sizeof(struct _gd_private_entry));
   if (E->e == NULL) {
@@ -469,6 +472,7 @@ static gd_entry_t* _GD_ParseBit(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
     dreturn("%p", NULL);
     return NULL;
   }
+  memset(E, 0, sizeof(gd_entry_t));
 
   E->e = malloc(sizeof(struct _gd_private_entry));
   if (E->e == NULL) {
@@ -545,6 +549,7 @@ static gd_entry_t* _GD_ParsePhase(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
     dreturn("%p", NULL);
     return NULL;
   }
+  memset(E, 0, sizeof(gd_entry_t));
 
   E->e = malloc(sizeof(struct _gd_private_entry));
   if (E->e == NULL) {
@@ -605,6 +610,7 @@ static gd_entry_t* _GD_ParseConst(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
     dreturn("%p", NULL);
     return NULL;
   }
+  memset(E, 0, sizeof(gd_entry_t));
 
   E->e = malloc(sizeof(struct _gd_private_entry));
   if (E->e == NULL) {
@@ -678,6 +684,7 @@ static gd_entry_t* _GD_ParseString(DIRFILE* D, const char *in_cols[MAX_IN_COLS],
     dreturn("%p", NULL);
     return NULL;
   }
+  memset(E, 0, sizeof(gd_entry_t));
 
   E->e = malloc(sizeof(struct _gd_private_entry));
   if (E->e == NULL) {
@@ -828,16 +835,6 @@ gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, const char** in_cols,
     /* Initialse the meta counts */
     if (parent != NULL)
       E->e->n_meta = -1;
-    else {
-      E->e->n_meta = E->e->n_meta_string = E->e->n_meta_const = 0;
-      E->e->meta_entry = NULL;
-      E->e->field_list = NULL;
-      E->e->vector_list = NULL;
-      E->e->string_list = NULL;
-      E->e->string_value_list = NULL;
-      E->e->const_list = NULL;
-      E->e->const_value_list = NULL;
-    }
 
     /* Check for duplicate */
     int u;
@@ -1332,24 +1329,12 @@ DIRFILE* dirfile_open(const char* filedir, unsigned int flags)
   dtrace("\"%s\", 0x%x", filedir, flags);
 
   D = malloc(sizeof(DIRFILE));
-  _GD_ClearError(D);
-  D->recurse_level = 0;
+  memset(D, 0, sizeof(DIRFILE));
 
   D->error_string = malloc(FILENAME_MAX);
   D->error_file = malloc(FILENAME_MAX);
   D->name = strdup(filedir);
-  D->frame_offset = 0;
-  D->n_string = D->n_const = D->n_meta = 0;
-  D->first_field = NULL;
-  D->field_list = NULL;
-  D->vector_list = NULL;
-  D->const_list = NULL;
-  D->string_list = NULL;
-  D->string_value_list = NULL;
-  D->const_value_list = NULL;
-  D->list_validity = 0;
   D->flags = flags | GD_INVALID;
-  D->n_include = 0;
 
   /* Add the INDEX entry */
   D->n_entries = 1;

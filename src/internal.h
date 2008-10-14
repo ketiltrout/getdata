@@ -183,9 +183,8 @@ struct _gd_private_entry {
   /* field lists */
   const char** field_list;
   const char** vector_list;
-  const char** string_list;
+  char** type_list[GD_N_ENTYPES];
   const char** string_value_list;
-  const char** const_list;
   void* const_value_list;
 
   union {
@@ -256,9 +255,7 @@ struct gd_include_t {
 
 #define LIST_VALID_FIELD        0x01
 #define LIST_VALID_VECTOR       0x02
-#define LIST_VALID_STRING       0x04
-#define LIST_VALID_STRING_VALUE 0x08
-#define LIST_VALID_CONST        0x04
+#define LIST_VALID_STRING_VALUE 0x04
 
 /* The DIRFILE struct.  */
 struct _GD_DIRFILE {
@@ -290,11 +287,11 @@ struct _GD_DIRFILE {
   /* field lists */
   const char** field_list;
   const char** vector_list;
-  const char** string_list;
+  const char** type_list[GD_N_ENTYPES];
   const char** string_value_list;
-  const char** const_list;
   void* const_value_list;
   int list_validity;
+  int type_list_validity;
 
 #ifndef __USE_FILE_OFFSET64
   off_t
@@ -308,6 +305,8 @@ struct _GD_DIRFILE {
   int error_line;
   unsigned int flags;
 };
+
+extern const gd_entype_t _gd_entype_index[GD_N_ENTYPES];
 
 void* _GD_Alloc(DIRFILE* D, gd_type_t type, size_t n);
 int _GD_CalculateEntry(DIRFILE* D, gd_entry_t* E);

@@ -13,7 +13,7 @@ int main(void)
   const char* filedir = __TEST__ "dirfile";
 
   DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
-  const char** fl = get_metaconstant_list(D, "parent");
+  const char** fl = get_field_list_by_type(D, GD_STRING_ENTRY);
   int error = get_error(D);
   dirfile_close(D);
 

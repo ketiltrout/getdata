@@ -23,7 +23,7 @@ int main(void)
   int error = get_error(D);
 
   /* check */
-  int n = get_nmeta_fields(D, "new");
+  int n = get_nmetafields(D, "new");
 
   dirfile_close(D);
 

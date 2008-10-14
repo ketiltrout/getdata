@@ -15,10 +15,11 @@ int main(void)
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
   const char* format_data =
-    "data1 CONST UINT8 1\n"
-    "data2 CONST UINT8 1\n"
-    "data3 CONST UINT8 1\n"
-    "data4 RAW UINT8 1\n";
+    "parent STRING UINT8 1\n"
+    "META parent data1 STRING UINT8 1\n"
+    "META parent data2 STRING UINT8 1\n"
+    "META parent data3 STRING UINT8 1\n"
+    "META parent data4 CONST UINT8 1\n";
   int fd, r = 0;
 
   mkdir(filedir, 0777);
@@ -28,7 +29,8 @@ int main(void)
   close(fd);
 
   DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
-  const char** field_list = get_constant_list(D);
+  const char** field_list = get_metafield_list_by_type(D, "parent",
+      GD_STRING_ENTRY);
 
   if (get_error(D))
     r = 1;

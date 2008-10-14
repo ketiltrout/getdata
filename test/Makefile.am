@@ -51,8 +51,6 @@ ADD_TESTS=add add_bit add_bit_bitnum add_bit_bitsize add_bit_invalid \
 
 ASCII_TESTS=ascii_get ascii_nframes ascii_put
 
-CLIST_TESTS=clist clist_invalid clist_meta clist_meta_invalid
-
 CVLIST_TESTS=cvlist cvlist_invalid cvlist_meta cvlist_meta_invalid
 
 CLOSE_TESTS=close close_bad close_null
@@ -104,7 +102,8 @@ ENTRY_TESTS=entry_bad_code entry_bit entry_bit_scalar entry_invalid \
 
 ERROR_TESTS=error error_error error_short
 
-FLIST_TESTS=flist flist_invalid flist_meta flist_meta_invalid
+FLIST_TESTS=flist flist_invalid flist_meta flist_meta_invalid flist_type \
+						flist_type_invalid flist_type_meta flist_type_meta_invalid
 
 FLUSH_TESTS=flush flush_all flush_bad_code flush_invalid flush_meta
 
@@ -160,8 +159,6 @@ PUT_TESTS=put64 put_bad_code put_bit put_bof put_char put_endian8 put_endian16 \
 					put_rdonly put_recurse put_rofs put_sf put_ss put_type put_uint16 \
 					put_uint32 put_uint64
 
-SLIST_TESTS=slist slist_invalid slist_meta slist_meta_invalid
-
 SVLIST_TESTS=svlist svlist_invalid svlist_meta svlist_meta_invalid
 
 SPF_TESTS=spf spf_lincom spf_multiply spf_recurse
@@ -170,14 +167,13 @@ TRUNC_TESTS=trunc trunc_rdonly trunc_rofs
 
 VLIST_TESTS=vlist vlist_invalid vlist_meta vlist_meta_invalid
 
-TESTS=$(ADD_TESTS)      $(ASCII_TESTS)    $(CLIST_TESTS)    $(CVLIST_TESTS)   \
-			$(CLOSE_TESTS)    $(CONVERT_TESTS)  $(CREAT_TESTS)    $(DFES_TESTS)     \
-			$(ENTRY_TESTS)    $(ERROR_TESTS)    $(FLIST_TESTS)    $(FLUSH_TESTS)    \
-			$(FORMAT_TESTS)   $(GET_TESTS)      $(LEGACY_TESTS)   $(NFIELDS_TESTS)  \
-			$(NFORMATS_TESTS) $(NFRAMES_TESTS)  $(NMETA_TESTS)    $(NVECTORS_TESTS) \
-			$(OPEN_TESTS)     $(PARSE_TESTS)    $(PUT_TESTS)      $(SLIM_TESTS)     \
-			$(SLIST_TESTS)    $(SPF_TESTS)      $(SVLIST_TESTS)   $(TRUNC_TESTS)    \
-			$(VLIST_TESTS)
+TESTS=$(ADD_TESTS)      $(ASCII_TESTS)    $(CVLIST_TESTS)   $(CLOSE_TESTS)    \
+			$(CONVERT_TESTS)  $(CREAT_TESTS)    $(DFES_TESTS)     $(ENTRY_TESTS)    \
+			$(ERROR_TESTS)    $(FLIST_TESTS)    $(FLUSH_TESTS)    $(FORMAT_TESTS)   \
+			$(GET_TESTS)      $(LEGACY_TESTS)   $(NFIELDS_TESTS)  $(NFORMATS_TESTS) \
+			$(NFRAMES_TESTS)  $(NMETA_TESTS)    $(NVECTORS_TESTS) $(OPEN_TESTS)     \
+			$(PARSE_TESTS)    $(PUT_TESTS)      $(SLIM_TESTS)     $(SPF_TESTS)      \
+			$(SVLIST_TESTS)   $(TRUNC_TESTS)    $(VLIST_TESTS)
 
 check_PROGRAMS=$(TESTS)
 

@@ -31,8 +31,8 @@ New in version 0.4.0:
     - by passing a field specification line to dirfile_add_spec()
     - by passing field parameters to one of the dirfile_add_<foo>() functions.
 
-  * Whole other format file fragments may also be added to the dirfile by calling
-    dirfile_include().
+  * Whole other format file fragments may also be added to the dirfile by
+    calling dirfile_include().
   * A function is now present (dirfile_flush_metadata()) to flush metadata
     changes to disk (by re-writing format file fragments).  dirfile_flush() and
     dirfile_close() will also flush metadata, if needed.

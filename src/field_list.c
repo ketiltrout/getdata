@@ -24,6 +24,14 @@
 #include <stdlib.h>
 #endif
 
+/* correspondence between type_list index and gd_enttype_t */
+const gd_entype_t _gd_entype_index[GD_N_ENTYPES] =
+{
+  GD_RAW_ENTRY, GD_LINCOM_ENTRY, GD_LINTERP_ENTRY, GD_BIT_ENTRY,
+  GD_MULTIPLY_ENTRY, GD_PHASE_ENTRY, GD_INDEX_ENTRY, GD_CONST_ENTRY,
+  GD_STRING_ENTRY
+};
+
 const void* get_constant_values(DIRFILE* D, gd_type_t return_type)
 {
   dtrace("%p, 0x%x", D, return_type);
@@ -64,54 +72,6 @@ const void* get_constant_values(DIRFILE* D, gd_type_t return_type)
 
   dreturn("%p", D->const_value_list);
   return D->const_value_list;
-}
-
-const char** get_constant_list(DIRFILE* D)
-{
-  dtrace("%p", D);
-
-  unsigned int i, n;
-  char** fl;
-
-  if (D->flags & GD_INVALID) {
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%p", NULL);
-    return NULL;
-  }
-
-  _GD_ClearError(D);
-
-  if (D->n_const == 0) {
-    dreturn("%p", NULL);
-    return NULL;
-  }
-
-  if (D->list_validity & LIST_VALID_CONST) {
-    /* list already made */
-    dreturn("%p", D->const_list);
-    return D->const_list;
-  }
-
-  fl = realloc((char**)D->const_list, sizeof(const char*) * (D->n_const + 1));
-
-  if (fl == NULL) {
-    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-    dreturn("%p", NULL);
-    return NULL;
-  }
-
-  for (i = n = 0; i < D->n_entries; ++i) {
-    if (D->entry[i]->field_type == GD_CONST_ENTRY &&
-        D->entry[i]->e->n_meta != -1)
-      fl[n++] = D->entry[i]->field;
-  }
-  fl[n] = NULL;
-
-  D->const_list = (const char**)fl;
-  D->list_validity |= LIST_VALID_CONST;
-
-  dreturn("%p", D->const_list);
-  return D->const_list;
 }
 
 const char** get_string_values(DIRFILE* D)
@@ -163,12 +123,13 @@ const char** get_string_values(DIRFILE* D)
   return D->string_value_list;
 }
 
-const char** get_string_list(DIRFILE* D)
+const char** get_field_list_by_type(DIRFILE* D, gd_entype_t type)
 {
-  dtrace("%p", D);
+  dtrace("%p, %x", D, type);
 
   unsigned int i, n;
   char** fl;
+  int index = -1;
 
   if (D->flags & GD_INVALID) {
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -178,18 +139,34 @@ const char** get_string_list(DIRFILE* D)
 
   _GD_ClearError(D);
 
-  if (D->n_string == 0) {
+  n = get_nfields_by_type(D, type);
+
+  if (n == 0 || D->error) {
     dreturn("%p", NULL);
     return NULL;
   }
 
-  if (D->list_validity & LIST_VALID_STRING) {
-    /* list already made */
-    dreturn("%p", D->string_list);
-    return D->string_list;
+  /* find the index -- get_nfields_by_type should have already tripped up
+   * if the type is invalid */
+  for (i = 0; i < GD_N_ENTYPES; ++i)
+    if (_gd_entype_index[i] == type) {
+      index = i;
+      break;
+    }
+
+  if (index == -1) {
+    _GD_InternalError(D);
+    dreturn("%p", NULL);
+    return NULL;
   }
 
-  fl = realloc((char**)D->string_list, sizeof(const char*) * (D->n_string + 1));
+  if (D->type_list_validity & (1 << index)) {
+    /* list already made */
+    dreturn("%p", D->string_value_list);
+    return D->string_value_list;
+  }
+
+  fl = realloc((char**)D->type_list[index], sizeof(const char*) * (n + 1));
 
   if (fl == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
@@ -204,11 +181,11 @@ const char** get_string_list(DIRFILE* D)
   }
   fl[n] = NULL;
 
-  D->string_list = (const char**)fl;
-  D->list_validity |= LIST_VALID_STRING;
+  D->type_list[index] = (const char**)fl;
+  D->type_list_validity |= 1 << index;
 
-  dreturn("%p", D->string_list);
-  return D->string_list;
+  dreturn("%p", D->type_list[index]);
+  return D->type_list[index];
 }
 
 const char** get_vector_list(DIRFILE* D)

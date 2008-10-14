@@ -79,61 +79,6 @@ const void* get_metaconstant_values(DIRFILE* D, const char* parent,
   return e->const_value_list;
 }
 
-const char** get_metaconstant_list(DIRFILE* D, const char* parent)
-{
-  dtrace("%p, \"%s\"", D, parent);
-
-  int i, n;
-  char** fl;
-
-  if (D->flags & GD_INVALID) {
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%p", NULL);
-    return NULL;
-  }
-
-  _GD_ClearError(D);
-
-  const gd_entry_t* P = _GD_FindField(D, parent, NULL);
-
-  if (P == NULL) {
-    _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, parent);
-    dreturn("%p", NULL);
-    return NULL;
-  }
-
-  _GD_ClearError(D);
-
-  struct _gd_private_entry* e = P->e;
-
-  size_t offs = strlen(P->field) + 1;
-
-  if (e->n_meta_const == 0) {
-    dreturn("%p", NULL);
-    return NULL;
-  }
-
-  fl = realloc((char**)e->const_list, sizeof(const char*) *
-      (e->n_meta_const + 1));
-
-  if (fl == NULL) {
-    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-    dreturn("%p", NULL);
-    return NULL;
-  }
-
-  for (i = n = 0; i < e->n_meta; ++i) {
-    if (e->meta_entry[i]->field_type == GD_CONST_ENTRY)
-      fl[n++] = e->meta_entry[i]->field + offs;
-  }
-  fl[n] = NULL;
-
-  e->const_list = (const char**)fl;
-
-  dreturn("%p", e->const_list);
-  return e->const_list;
-}
-
 const char** get_metastring_values(DIRFILE* D, const char* parent)
 {
   dtrace("%p, \"%s\"", D, parent);
@@ -187,11 +132,13 @@ const char** get_metastring_values(DIRFILE* D, const char* parent)
   return e->string_value_list;
 }
 
-const char** get_metastring_list(DIRFILE* D, const char* parent)
+const char** get_metafield_list_by_type(DIRFILE* D, const char* parent,
+    gd_entype_t type)
 {
-  dtrace("%p, \"%s\"", D, parent);
+  dtrace("%p, \"%s\", %x", D, parent, type);
 
-  int i, n;
+  int i, index = -1;
+  unsigned int n;
   char** fl;
 
   if (D->flags & GD_INVALID) {
@@ -210,19 +157,36 @@ const char** get_metastring_list(DIRFILE* D, const char* parent)
     return NULL;
   }
 
-  _GD_ClearError(D);
-
   struct _gd_private_entry* e = P->e;
-
   size_t offs = strlen(P->field) + 1;
+
+  n = get_nmetafields_by_type(D, parent, type);
+
+  if (n == 0 || D->error) {
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  /* find the index -- get_nfields_by_type should have already tripped up
+   * if the type is invalid */
+  for (i = 0; i < GD_N_ENTYPES; ++i)
+    if (_gd_entype_index[i] == type) {
+      index = i;
+      break;
+    }
+
+  if (index == -1) {
+    _GD_InternalError(D);
+    dreturn("%p", NULL);
+    return NULL;
+  }
 
   if (e->n_meta_string == 0) {
     dreturn("%p", NULL);
     return NULL;
   }
 
-  fl = realloc((char**)e->string_list, sizeof(const char*) *
-      (e->n_meta_string + 1));
+  fl = realloc(e->type_list[index], sizeof(const char*) * (n + 1));
 
   if (fl == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
@@ -236,10 +200,10 @@ const char** get_metastring_list(DIRFILE* D, const char* parent)
   }
   fl[n] = NULL;
 
-  e->string_list = (const char**)fl;
+  e->type_list[index] = fl;
 
-  dreturn("%p", e->string_list);
-  return e->string_list;
+  dreturn("%p", e->type_list[index]);
+  return (const char**)e->type_list[index];
 }
 
 const char** get_metavector_list(DIRFILE* D, const char* parent)

@@ -48,7 +48,10 @@ namespace GetData {
     LinterpEntryType  = GD_LINTERP_ENTRY,
     BitEntryType      = GD_BIT_ENTRY,
     MultiplyEntryType = GD_MULTIPLY_ENTRY,
-    PhaseEntryType    = GD_PHASE_ENTRY
+    PhaseEntryType    = GD_PHASE_ENTRY,
+    ConstEntryType    = GD_CONST_ENTRY,
+    StringEntryType   = GD_STRING_ENTRY,
+    IndexEntryType    = GD_INDEX_ENTRY
   };
 
   class Entry {

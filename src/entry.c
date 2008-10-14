@@ -73,9 +73,9 @@ void _GD_FreeE(gd_entry_t* entry, int priv)
       free(entry->e->scalar[i]);
     free(entry->e->field_list);
     free(entry->e->vector_list);
-    free(entry->e->string_list);
     free(entry->e->string_value_list);
-    free(entry->e->const_list);
+    for (i = 0; i < GD_N_ENTYPES; ++i)
+      free(entry->e->type_list[i]);
     free(entry->e->const_value_list);
     free(entry->e);
     free(entry);

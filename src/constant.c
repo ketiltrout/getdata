@@ -25,7 +25,7 @@
 #endif
 
 /* this function is little more than a public boilerplate for _GD_DoField */
-ssize_t get_constant(DIRFILE* D, const char *field_code, gd_type_t return_type,
+size_t get_constant(DIRFILE* D, const char *field_code, gd_type_t return_type,
     void *data_out)
 {
   size_t n_read = 0;
@@ -35,8 +35,8 @@ ssize_t get_constant(DIRFILE* D, const char *field_code, gd_type_t return_type,
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%zi", -1);
-    return -1;
+    dreturn("%zi", 0);
+    return 0;
   }
 
   _GD_ClearError(D);
@@ -52,12 +52,12 @@ ssize_t get_constant(DIRFILE* D, const char *field_code, gd_type_t return_type,
         data_out);
 
   if (D->error) {
-    dreturn("%i", -1);
-    return -1;
+    dreturn("%i", 0);
+    return 0;
   }
 
   dreturn("%zi", n_read);
-  return (ssize_t)n_read;
+  return n_read;
 }
 
 /* this function is little more than a public boilerplate for _GD_DoFieldOut */

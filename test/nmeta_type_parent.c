@@ -36,7 +36,7 @@ int main(void)
   close(fd);
 
   DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
-  unsigned int nfields = get_nmeta_fields_by_type(D, "raw9", GD_STRING_ENTRY);
+  unsigned int nfields = get_nmetafields_by_type(D, "raw9", GD_STRING_ENTRY);
   int error = get_error(D);
   dirfile_close(D);
 

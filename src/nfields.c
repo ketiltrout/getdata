@@ -66,14 +66,30 @@ unsigned int get_nfields_by_type(DIRFILE* D, gd_entype_t type)
 
   _GD_ClearError(D);
 
-  if (type == GD_STRING_ENTRY)
-    r = D->n_string;
-  else if (type == GD_CONST_ENTRY)
-    r = D->n_const;
-  else
-    for (i = 0; i < D->n_entries; ++i)
-      if (D->entry[i]->field_type == type && D->entry[i]->e->n_meta != -1)
-        r++;
+  switch(type) {
+    case GD_STRING_ENTRY:
+      r = D->n_string;
+      break;
+    case GD_CONST_ENTRY:
+      r = D->n_const;
+      break;
+    case GD_INDEX_ENTRY:
+      r = 1;
+      break;
+    case GD_RAW_ENTRY:
+    case GD_LINCOM_ENTRY:
+    case GD_LINTERP_ENTRY:
+    case GD_MULTIPLY_ENTRY:
+    case GD_BIT_ENTRY:
+    case GD_PHASE_ENTRY:
+      for (i = 0; i < D->n_entries; ++i)
+        if (D->entry[i]->field_type == type && D->entry[i]->e->n_meta != -1)
+          r++;
+      break;
+    case GD_NO_ENTRY:
+      _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_TYPE, NULL, type, NULL);
+      break;
+  }
 
   dreturn("%u", r);
   return r;

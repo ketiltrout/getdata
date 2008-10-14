@@ -27,5 +27,5 @@ int main(void)
   if (n != 0)
     return 1;
 
-  return (error != GD_E_EMPTY);
+  return (error != GD_E_OK);
 }
