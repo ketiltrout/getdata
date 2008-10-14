@@ -42,8 +42,8 @@ New in version 0.4.0:
     functions and their full (slashed) field code.
   * In addition to get_nfields() and get_field_list(), there are now
     corresponding functions that provide lists/counts of vectors
-    (get_vector_list()/get_nvectors()), constants (get_constant_list()/
-    get_nfields_by_type()), strings (get_string_list()), as well as functions
+    (get_vector_list()/get_nvectors()), particular field types
+    (get_field_list_by_type()/get_nfields_by_type()), as well as functions
     that provide lists of string values (get_string_values()) and constant
     values (get_const_values()).
   * Analogous functions for the add, list, and counting functions exist for
