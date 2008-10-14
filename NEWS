@@ -20,7 +20,7 @@ New in version 0.4.0:
       - Slimlib encoding (a compression library used by ACT)
 
   * "FILEFRAM" is no-longer supported as an alias for "INDEX".  This affects
-    GetData's implentation of all Standards Versions.  Code that made use of
+    GetData's implementation of all Standards Versions.  Code that made use of
     FILEFRAM will have to be updated to use INDEX instead.
 
   API Changes
@@ -31,7 +31,7 @@ New in version 0.4.0:
     - by passing a field specification line to dirfile_add_spec()
     - by passing field parameters to one of the dirfile_add_<foo>() functions.
 
-  * Whole other fomat file fragments may also be added to the dirfile by calling
+  * Whole other format file fragments may also be added to the dirfile by calling
     dirfile_include().
   * A function is now present (dirfile_flush_metadata()) to flush metadata
     changes to disk (by re-writing format file fragments).  dirfile_flush() and
@@ -46,7 +46,7 @@ New in version 0.4.0:
     get_nfields_by_type()), strings (get_string_list()), as well as functions
     that provide lists of string values (get_string_values()) and constant
     values (get_const_values()).
-  * Analagous functions for the add, list, and counting functions exist for
+  * Analogous functions for the add, list, and counting functions exist for
     META fields, as well.
   * Extra flags have been added to dirfile_open() to permit indicating the
     encoding type, if not specified in the dirfile itself.
