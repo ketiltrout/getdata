@@ -1,3 +1,85 @@
+New in version 0.4.0:
+  
+  Dirfile Changes
+
+  * GetData now supports Dirfile Standards Version 6.  Standards Version 6 adds
+    numerical (CONST) and string (STRING) scalar fields to the dirfile.
+  * CONST names can now appear as parameters in field specifications in certain
+    places in lieu of a literal number.
+  * The tokeniser has been re-written.  Any sequence of non-null bytes can now
+    form a valid token.  Field codes are may not have ASCII control characters
+    or the "reserved characters" &, /, ;, <, >, \, |, . but may contain any
+    other characters (including whitespace).
+  * Subordinate fields may now be attached to fields.  These subfields are
+    defined with the META directive, and referenced in most cases as
+    "<parent-field>/<subfield>".
+  * Binary files in dirfiles may now be "encoded".  In addition to raw
+    (unencoded) files, two encodings are currently supported:
+
+      - ASCII encoding (which is a simple proof-of-functionality encoding), and
+      - Slimlib encoding (a compression library used by ACT)
+
+  * "FILEFRAM" is no-longer supported as an alias for "INDEX".  This affects
+    GetData's implentation of all Standards Versions.  Code that made use of
+    FILEFRAM will have to be updated to use INDEX instead.
+
+  API Changes
+
+  * Fields may now be added to dirfiles in a number of different ways:
+
+    - by passing an gd_entry_t to dirfile_add()
+    - by passing a field specification line to dirfile_add_spec()
+    - by passing field parameters to one of the dirfile_add_<foo>() functions.
+
+  * Whole other fomat file fragments may also be added to the dirfile by calling
+    dirfile_include().
+  * A function is now present (dirfile_flush_metadata()) to flush metadata
+    changes to disk (by re-writing format file fragments).  dirfile_flush() and
+    dirfile_close() will also flush metadata, if needed.
+  * STRING and CONST values can be retrieved/set by calling (get,put)_string()
+    and (get,put)_constant().  (get,put)data() are only for vector type fields.
+  * META fields can be queried/set like normal fields using the get/put
+    functions and their full (slashed) field code.
+  * In addition to get_nfields() and get_field_list(), there are now
+    corresponding functions that provide lists/counts of vectors
+    (get_vector_list()/get_nvectors()), constants (get_constant_list()/
+    get_nfields_by_type()), strings (get_string_list()), as well as functions
+    that provide lists of string values (get_string_values()) and constant
+    values (get_const_values()).
+  * Analagous functions for the add, list, and counting functions exist for
+    META fields, as well.
+  * Extra flags have been added to dirfile_open() to permit indicating the
+    encoding type, if not specified in the dirfile itself.
+  * DIRFILE struct members, and get_entry private members, are now completely
+    hidden from the public interface.  Where previously callers could query
+    dirfile->error to check for an error, they must now call get_error(dirfile).
+    This change was made to reduce unintentional ABI breakage when modifying
+    internal library properties.
+
+  Library Changes
+
+  * INDEX is now a normal field.  It appears in the count/list functions.
+    Attempts to write to INDEX will fail.
+  * The GD_E_EMPTY error code has been removed: it is no longer an error to
+    query a dirfile containing no RAW fields.
+  * The presence of two fields in the dirfile with the same name is now detected
+    and will cause a syntax error when parsing the format file.  Previously,
+    such things were allowed, but only one of the synonym fields could ever
+    be queried. (Which field was returned was arbitrary.)
+  * Field code look-ups for input fields are now cached, which should result
+    in slightly better performance from the library.
+
+  Legacy API Changes
+
+  * Error codes which cannot be returned by the legacy API might not have a
+    corresponding string in GD_ERROR_CODES[].  Instead these entries would
+    simply be the NULL pointer.
+  * No facilities exist in the legacy API to set or query CONST or STRING
+    fields.  However, META fields of vector type can be queried/set using
+    GetData() and PutData(), as in the new API.
+
+|==============================================================================|
+
 New in version 0.3.1:
 
   Legacy API Changes
@@ -15,6 +97,8 @@ New in version 0.3.1:
   Miscellaneous
 
   * The package now includes pkg-config support for libgetdata.
+
+|==============================================================================|
 
 New in version 0.3.0:
 
