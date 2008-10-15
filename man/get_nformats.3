@@ -20,7 +20,7 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH get_nformats 3 "6 October 2008" "Version 0.4.0" "GETDATA"
+.TH get_nformats 3 "15 October 2008" "Version 0.4.0" "GETDATA"
 .SH NAME
 get_nformats \(em retrieve the number of parsed format file fragments from a dirfile
 .SH SYNOPSIS
@@ -59,11 +59,19 @@ may be obtained from a call to
 Upon successful completion,
 .BR get_nformats ()
 returns the total number of format file fragments which are defined in the
-dirfile.  If the supplied
-.I dirfile
-is invalid, 
+dirfile.  On error, 
 .BR get_nformats ()
-returns zero.  This function does not modify the dirfile error.
+returns zero and sets the dirfile error to a non-zero value.  Possible error
+values are:
+.TP 8
+.B GD_E_BAD_DIRFILE
+The supplied dirfile was invalid.
+.P
+The dirfile error may be retrieved by calling
+.BR get_error (3).
+A descriptive error string for the last error encountered can be obtained from
+a call to
+.BR get_error_string (3).
 .SH SEE ALSO
 .BR dirfile (5),
 .BR dirfile_open (3),

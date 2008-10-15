@@ -20,7 +20,7 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH get_format_filename 3 "6 October 2008" "Version 0.4.0" "GETDATA"
+.TH get_format_filename 3 "15 October 2008" "Version 0.4.0" "GETDATA"
 .SH NAME
 get_format_filename \(em retrieve a dirfile format file fragment name
 .SH SYNOPSIS
@@ -58,11 +58,26 @@ obtained from a call to
 Upon successful completion,
 .BR get_format_filename ()
 returns a pointer to a read-only character string containing the file name of
-the specified format file fragment.  If index is out of range (less than zero
-or greater than or equal to the total number of format file fragments),
+the specified format file fragment.  On error,
 .BR get_format_filename ()
-returns NULL.  This function does not modify the dirfile error.
+returns NULL and sets the dirfile error a non-zero error value.  Possible error
+values are:
+.TP 8
+.B GD_E_BAD_DIRFILE
+The supplied dirfile was invalid.
+.TP
+.B GD_E_BAD_INDEX
+The supplied index was out of range.
+.P
+The dirfile error may be retrieved by calling
+.BR get_error (3).
+A descriptive error string for the last error encountered can be obtained from
+a call to
+.BR get_error_string (3).
+
 .SH SEE ALSO
 .BR dirfile (5),
 .BR dirfile_open (3),
+.BR get_error(3).
+.BR get_error_string(3),
 .BR get_nformats (3)
