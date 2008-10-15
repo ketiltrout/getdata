@@ -118,6 +118,9 @@ GET_TESTS=get64 get_bad_code get_bit get_char get_endian8 get_endian16 \
 					get_phase get_recurse get_sf get_ss get_type get_uint16 get_uint32 \
 					get_uint64
 
+INCLUDE_TESTS=include include_accmode include_creat include_index \
+							include_invalid include_nonexistent
+
 NFIELDS_TESTS=nfields nfields_invalid nfields_type nfields_type_invalid
 
 NFORMATS_TESTS=nformats
@@ -170,10 +173,10 @@ VLIST_TESTS=vlist vlist_invalid vlist_meta vlist_meta_invalid
 TESTS=$(ADD_TESTS)      $(ASCII_TESTS)    $(CVLIST_TESTS)   $(CLOSE_TESTS)    \
 			$(CONVERT_TESTS)  $(CREAT_TESTS)    $(DFES_TESTS)     $(ENTRY_TESTS)    \
 			$(ERROR_TESTS)    $(FLIST_TESTS)    $(FLUSH_TESTS)    $(FORMAT_TESTS)   \
-			$(GET_TESTS)      $(LEGACY_TESTS)   $(NFIELDS_TESTS)  $(NFORMATS_TESTS) \
-			$(NFRAMES_TESTS)  $(NMETA_TESTS)    $(NVECTORS_TESTS) $(OPEN_TESTS)     \
-			$(PARSE_TESTS)    $(PUT_TESTS)      $(SLIM_TESTS)     $(SPF_TESTS)      \
-			$(SVLIST_TESTS)   $(TRUNC_TESTS)    $(VLIST_TESTS)
+			$(GET_TESTS)      $(INCLUDE_TESTS)  $(LEGACY_TESTS)   $(NFIELDS_TESTS)  \
+			$(NFORMATS_TESTS) $(NFRAMES_TESTS)  $(NMETA_TESTS)    $(NVECTORS_TESTS) \
+			$(OPEN_TESTS)     $(PARSE_TESTS)    $(PUT_TESTS)      $(SLIM_TESTS)     \
+			$(SPF_TESTS)      $(SVLIST_TESTS)   $(TRUNC_TESTS)    $(VLIST_TESTS)
 
 check_PROGRAMS=$(TESTS)
 

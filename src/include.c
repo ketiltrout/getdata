@@ -77,8 +77,14 @@ int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,
       return -1;
     }
     new_fp = fdopen(i, "r+");
-  } else
-    new_fp = fopen(temp_buf1, "r");
+  } else {
+    if (flags & (GD_CREAT | GD_TRUNC)) {
+      _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
+      dreturn("%i", -1);
+      return -1;
+    } else
+      new_fp = fopen(temp_buf1, "r");
+  }
 
   /* If opening the file failed, set the error code and abort parsing. */
   if (new_fp == NULL) {

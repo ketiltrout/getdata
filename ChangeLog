@@ -1,3 +1,10 @@
+2008-10-15   D. V. Wiebe <getdata@ketiltrout.net>  svn:148
+	* src/include.c (dirfile_include): Throw GD_E_ACCMODE if GD_CREAT or
+	GD_TRUNC are passed to a read-only dirfile.
+
+	* test/include.c test/include_invalid.c test/include_accmode.c
+	test/include_creat.c test/include_nonexistent.c: Added.
+
 2008-10-15   D. V. Wiebe <getdata@ketiltrout.net>  svn:147
 	* README.f77 bindings/f77/fgetdata.c bindings/ff7/fgetdata.h
 	bindings/f77/getdata.f.in: Add more Fortran 77 bindings.
