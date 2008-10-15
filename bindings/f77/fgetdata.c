@@ -180,6 +180,34 @@ void F77_FUNC(gdffnx, GDFFNX) (int* max, const int* dirfile)
   *max = len;
 }
 
+/* Return the maximum field name length for a meta list */
+void F77_FUNC(gdfmfx, GDFMFX) (int* max, const int* dirfile, const char* parent,
+    const int* parent_l)
+{
+  size_t len = 0;
+  DIRFILE* D = _GDF_GetDirfile(*dirfile);
+
+  char* pa = malloc(*parent_l + 1);
+  _GDF_CString(pa, parent, *parent_l);
+
+  unsigned int i, nfields = get_nmetafields(D, pa);
+
+  if (D->error) {
+    free(pa);
+    return;
+  }
+
+  const char** fl = get_metafield_list(D, pa);
+
+  for (i = 0; i < nfields; ++i)
+    if (strlen(fl[i]) > len)
+      len = strlen(fl[i]);
+
+  *max = len;
+
+  free(pa);
+}
+
 /* get_field_list wrapper -- this only returns one field name */
 void F77_FUNC(gdffdn, GDFFDN) (char* name, int* name_l, const int* dirfile,
     const int* field_num)
@@ -195,6 +223,31 @@ void F77_FUNC(gdffdn, GDFFDN) (char* name, int* name_l, const int* dirfile,
     _GDF_FString(name, name_l, fl[*field_num - 1]);
   } else
     *name_l = 0;
+}
+
+/* get_metafield_list wrapper -- this only returns one field name */
+void F77_FUNC(gdfmfn, GDFMFN) (char* name, int* name_l, const int* dirfile,
+    const char* parent, const int* parent_l, const int* field_num)
+{
+  const char** fl;
+  DIRFILE* D = _GDF_GetDirfile(*dirfile);
+
+  char* pa = malloc(*parent_l + 1);
+  _GDF_CString(pa, parent, *parent_l);
+
+  unsigned int nfields = get_nmetafields(D, pa);
+  if (D->error) {
+    free(pa);
+    return;
+  }
+
+  if (*field_num <= (int)nfields) {
+    fl = get_metafield_list(D, pa);
+    _GDF_FString(name, name_l, fl[*field_num - 1]);
+  } else
+    *name_l = 0;
+
+  free(pa);
 }
 
 /* get_nfields wrapper */
@@ -404,6 +457,25 @@ void F77_FUNC(gdfeph, GDFEPH) (char* in_field, int* in_field_l, int* shift,
   free(out);
 }
 
+/* get_entry wrapper for CONST */
+void F77_FUNC(gdfeco, GDFECO) (int* data_type, int* format_file,
+    const int* dirfile, const char* field_code, const int* field_code_l)
+{
+  char* out = malloc(*field_code_l + 1);
+  gd_entry_t E;
+
+  if (get_entry(_GDF_GetDirfile(*dirfile), _GDF_CString(out, field_code,
+          *field_code_l), &E) || E.field_type != GD_CONST_ENTRY)
+    *data_type = 0;
+  else {
+    *data_type = E.const_type;
+    *format_file = E.format_file;
+  }
+
+  dirfile_free_entry_strings(&E);
+  free(out);
+}
+
 /* get format file index for field */
 void F77_FUNC(gdfffi, GDFFFI) (int* format_file, const int* dirfile,
     const char* field_code, const int* field_code_l)
@@ -586,7 +658,7 @@ void F77_FUNC(gdfnve, GDFNVE) (int* nvectors, const int* dirfile)
   *nvectors = get_nvectors(_GDF_GetDirfile(*dirfile));
 }
 
-/* get_field_list_by_tyoe wrapper -- this only returns one field name */
+/* get_field_list_by_type wrapper -- this only returns one field name */
 void F77_FUNC(gdffnt, GDFFNT) (char* name, int* name_l, const int* dirfile,
     const int* type, const int* field_num)
 {
@@ -618,6 +690,57 @@ void F77_FUNC(gdfven, GDFVEN) (char* name, int* name_l, const int* dirfile,
     _GDF_FString(name, name_l, fl[*field_num - 1]);
   } else
     *name_l = 0;
+}
+
+/* get_metafield_list_by_type wrapper -- this only returns one field name */
+void F77_FUNC(gdfmft, GDFMFT) (char* name, int* name_l, const int* dirfile,
+    const char* parent, const int* parent_l, const int* type,
+    const int* field_num)
+{
+  const char** fl;
+  DIRFILE* D = _GDF_GetDirfile(*dirfile);
+
+  char* pa = malloc(*parent_l + 1);
+  _GDF_CString(pa, parent, *parent_l);
+
+  unsigned int nfields = get_nmetafields_by_type(D, pa, (gd_type_t)*type);
+  if (D->error) {
+    free(pa);
+    return;
+  }
+
+  if (*field_num <= (int)nfields) {
+    fl = get_metafield_list_by_type(D, pa, (gd_type_t)*type);
+    _GDF_FString(name, name_l, fl[*field_num - 1]);
+  } else
+    *name_l = 0;
+
+  free(pa);
+}
+
+/* get_metavector_list wrapper -- this only returns one field name */
+void F77_FUNC(gdfmvn, GDFMVN) (char* name, int* name_l, const int* dirfile,
+    const char* parent, const int* parent_l, const int* field_num)
+{
+  const char** fl;
+  DIRFILE* D = _GDF_GetDirfile(*dirfile);
+
+  char* pa = malloc(*parent_l + 1);
+  _GDF_CString(pa, parent, *parent_l);
+
+  unsigned int nfields = get_nmetavectors(D, pa);
+  if (D->error) {
+    free(pa);
+    return;
+  }
+
+  if (*field_num <= (int)nfields) {
+    fl = get_metavector_list(D, pa);
+    _GDF_FString(name, name_l, fl[*field_num - 1]);
+  } else
+    *name_l = 0;
+
+  free(pa);
 }
 
 /* dirfile_add_metalincom wrapper */
@@ -853,34 +976,35 @@ void F77_FUNC(gdfgst, GDFGST) (int* n_read, const int* dirfile,
 {
   char* fc = malloc(*field_code_l + 1);
   char* out = malloc(*len + 1);
+  int l = *len;
 
   *n_read = get_string(_GDF_GetDirfile(*dirfile), _GDF_CString(fc, field_code,
         *field_code_l), (size_t)len, out);
 
-  _GDF_FString(data_out, len, out);
+  _GDF_FString(data_out, &l, out);
   free(fc);
   free(out);
 }
 
 /* put_constant wrapper */
-void F77_FUNC(gdfpco, GDFPCO) (int* n_read, const int* dirfile,
-    const char* field_code, const int* field_code_l, const int* return_type,
-    const void* data_out)
+void F77_FUNC(gdfpco, GDFPCO) (int* n_wrote, const int* dirfile,
+    const char* field_code, const int* field_code_l, const int* data_type,
+    const void* data_in)
 {
   char* fc = malloc(*field_code_l + 1);
-  *n_read = put_constant(_GDF_GetDirfile(*dirfile), _GDF_CString(fc, field_code,
-        *field_code_l), (gd_type_t)*return_type, data_out);
+  *n_wrote = put_constant(_GDF_GetDirfile(*dirfile), _GDF_CString(fc,
+        field_code, *field_code_l), (gd_type_t)*data_type, data_in);
   free(fc);
 }
 
 /* put_string wrapper */
-void F77_FUNC(gdfpst, GDFPST) (int* n_read, const int* dirfile,
+void F77_FUNC(gdfpst, GDFPST) (int* n_wrote, const int* dirfile,
     const char* field_code, const int* field_code_l, const int* len,
     const char* data_in)
 {
   char* fc = malloc(*field_code_l + 1);
   char* in = malloc(*len + 1);
-  *n_read = put_string(_GDF_GetDirfile(*dirfile), _GDF_CString(fc, field_code,
+  *n_wrote = put_string(_GDF_GetDirfile(*dirfile), _GDF_CString(fc, field_code,
         *field_code_l), _GDF_CString(in, data_in, *len));
   free(fc);
   free(in);

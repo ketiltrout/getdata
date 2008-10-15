@@ -17,10 +17,10 @@ pointers are not used to refer to dirfile instances.  Instead, an integer
 dirfile unit number is used.  Space is available in the compatibility library
 for only 1023 dirfile units.  If an application attempts to open more than 1023
 dirfiles simultaneously, the compatibility library will emit an error message
-and raise SIGABRT.  Passing an invalid dirfile unit number to a subroutines
-which requires one as input (other than GDFCLS, which will simply ignore it)
-will result in the call failing with error code GD_EBD (= GD_E_BAD_DIRFILE, see
-below).
+on standard error and raise SIGABRT.  Passing an invalid dirfile unit number to
+a subroutines which requires one as input (other than GDFCLS, which will simply
+ignore it) will result in the call failing with error code GD_EBD
+(= GD_E_BAD_DIRFILE, see below).
 
 Including getdata.f (which will be installed in the same directory as getdata.h)
 will define several convenient parameters including the DIRFILE flags, the data
@@ -174,6 +174,19 @@ Available Subroutines
   dirfile unit number as input and returns the length (in characters) of
   the longest field name in the dirfile in field_max.
  
+* GDFMFX(field_max, dirfile_unit, parent, parent_len)
+
+  Output:
+    INTEGER field_max
+  Input:
+    INTEGER dirfile_unit, parent_len
+    CHARACTER*<parent_len> parent
+
+  This subroutine, which has no direct analogue in the C API, returns the
+  length of the longest field name defined in the dirfile for META fields of the
+  supplied parent field.  It returns the length (in characters) of the longest
+  META field name for the supplied parent in field_max.
+ 
 * GDFFDN(name, name_len, dirfile_unit, field_num)
 
   Output:
@@ -215,6 +228,45 @@ Available Subroutines
 
   This subroutine is the replacement for get_vector_list(3) and behaves in the
   same manner as GDFFDN.
+
+* GDFMFN(name, name_len, dirfile_unit, parent, parent_len, field_num)
+
+  Output:
+    CHARACTER*<name_len> name
+  Input/Output:
+    INTEGER name_len
+  Input:
+    INTEGER dirfile_unit, field_num, parent_len
+    CHARACTER*<parent_len> parent
+
+  This subroutine is the replacement for get_metafield_list(3) and behaves in
+  the same manner as GDFFDN.
+
+* GDFMFT(name, name_len, dirfile_unit, parent, parent_len, type, field_num)
+  
+  Output:
+    CHARACTER*<name_len> name
+  Input/Output:
+    INTEGER name_len
+  Input:
+    INTEGER dirfile_unit, field_num, parent_len, type
+    CHARACTER*<parent_len> parent
+
+  This subroutine is the replacement for get_metafield_list_by_type(3) and
+  behaves in the same manner as GDFFNT.
+    
+* GDFMVN(name, name_len, dirfile_unit, parent, parent_len, field_num)
+
+  Output:
+    CHARACTER*<name_len> name
+  Input/Output:
+    INTEGER name_len
+  Input:
+    INTEGER dirfile_unit, field_num, parent_len
+    CHARACTER*<parent_len> parent
+
+  This subroutine is the replacement for get_metavector_list(3) and behaves in
+  the same manner as GDFVEN.
 
 * GDFNFR(nframes, dirfile_unit)
 
@@ -420,6 +472,18 @@ Available Subroutines
 
   This subroutine returns metadata describing a PHASE field.  If field_code
   is not found, or the field specified is not of PHASE type, shift will
+  be set to zero.  In this case the value of the remaining data is unspecified.
+
+* GDFECO(const_type, format_file, dirfile_unit, field_code, field_code_len)
+
+  Output: 
+    INTEGER const_type, format_file
+  Input:
+    INTEGER dirfile_unit, field_code_len
+    CHARACTER*<field_code_len> field_code
+
+  This subroutine returns metadata describing a CONST field.  If field_code
+  is not found, or the field specified is not of CONST type, const_type will
   be set to zero.  In this case the value of the remaining data is unspecified.
 
 * GDFFFI(format_file, dirfile_unit, field_code, field_code_len

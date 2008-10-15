@@ -30,7 +30,7 @@
 
 /* If F77_FUNC isn't defined, we have no knowledge of the F77 mangling scheme */
 #ifndef F77_FUNC
-# error The F77_FUNC must be defined to build the F77 bindings
+# error The F77_FUNC macro must be defined to build the F77 bindings
 #endif
 
 #define GDF_N_DIRFILES 1024
@@ -226,3 +226,19 @@ void F77_FUNC(gdfnmt, GDFNMT) (int* nfields, const int* dirfile,
 
 void F77_FUNC(gdfnmv, GDFNMV) (int* nvectors, const int* dirfile,
     const char* parent, const int* parent_l);
+
+void F77_FUNC(gdfeco, GDFECO) (int* data_type, int* format_file,
+    const int* dirfile, const char* field_code, const int* field_code_l);
+
+void F77_FUNC(gdfmfx, GDFMFX) (int* max, const int* dirfile, const char* parent,
+    const int* parent_l);
+
+void F77_FUNC(gdfmfn, GDFMFN) (char* name, int* name_l, const int* dirfile,
+    const char* parent, const int* parent_l, const int* field_num);
+
+void F77_FUNC(gdfmft, GDFMFT) (char* name, int* name_l, const int* dirfile,
+    const char* parent, const int* parent_l, const int* type,
+    const int* field_num);
+
+void F77_FUNC(gdfmvn, GDFMVN) (char* name, int* name_l, const int* dirfile,
+    const char* parent, const int* parent_l, const int* field_num);

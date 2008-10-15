@@ -1,9 +1,16 @@
+2008-10-15   D. V. Wiebe <getdata@ketiltrout.net>  svn:147
+	* README.f77 bindings/f77/fgetdata.c bindings/ff7/fgetdata.h
+	bindings/f77/getdata.f.in: Add more Fortran 77 bindings.
+
+	* README.f95 bindings/f77/fgetdata.f90.in: Added Fortran 95 bindings for the
+	new public functions.
+
 2008-10-14   D. V. Wiebe <getdata@ketiltrout.net>  svn:146
 	* bindings/f77/fgetdata.c bindings/f77/fgetdata.h
 	bindings/f77/getdata.f90.in: Renamed GDFNFT to GDFNFO.
 
 	* README.f77 bindings/f77/fgetdata.c bindings/f77/fgetdata.h
-	bindings/f77/getdata.f.in bindings/f77/make_parameters.c: Added Fortran-77
+	bindings/f77/getdata.f.in bindings/f77/make_parameters.c: Added Fortran 77
 	bindings for the new public functions.
 
 2008-10-14   D. V. Wiebe <getdata@ketiltrout.net>  svn:143

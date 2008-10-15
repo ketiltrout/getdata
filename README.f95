@@ -12,17 +12,17 @@ preferred over the Fortran 77 bindings, since these bindings provide type
 safety and more legible symbols.
 
 As in the Fortran 77 bindings, dirfiles are referred to by "dirfile unit"
-numbers, which are internally converted to the C API DIRFILE pointers
-internally.  Space is available in the compatibility library for only 1023
-dirfile units.  If an application attempts to open more than 1023 dirfiles
-simultaneously, the compatibility library will emit an error message and raise
+numbers, which are internally converted to the C API DIRFILE pointers.
+Space is available in the compatibility library for only 1023 dirfile units.  If
+an application attempts to open more than 1023 dirfiles simultaneously, the
+compatibility library will emit an error message on standard error and raise
 SIGABRT.  Passing an invalid dirfile unit number to a procedure which requires
 one as input (other than fdirfile_close, which will simply ignore it) will
 result in the call failing with error code GD_E_BAD_DIRFILE.
 
-The "getdata" module, which these bindings define, is described in `getdata.mod'
-(which will be installed in the same directory as getdata.h).  The getdata
-module defines the same error codes (GD_E_OK, GD_E_OPEN, &c.), the same
+The "getdata" module, which these bindings define, is described in
+`getdata.mod', which will be installed in the same directory as getdata.h.  The
+getdata module defines the same error codes (GD_E_OK, GD_E_OPEN, &c.), the same
 open flags (GD_RDONLY, GD_CREAT, &c.) and the same data type specifiers
 (GD_INT8, GD_FLOAT32, &c.) as the C API.
 
@@ -61,6 +61,24 @@ unit numbers in place of C's DIRFILE pointers are:
 * integer function fget_nfields (dirfile_unit)
   integer, intent(in) :: dirfile_unit
 
+  * integer function fget_nfields_by_type (dirfile_unit, type)
+  integer, intent(in) :: dirfile_unit, type
+
+* integer function fget_nvectors (dirfile_unit)
+  integer, intent(in) :: dirfile_unit
+
+* integer function fget_nmetafields (dirfile_unit, parent)
+  integer, intent(in) :: dirfile_unit
+  character, intent(in) :: parent
+
+* integer function fget_nmetafields_by_type (dirfile_unit, parent, type)
+  integer, intent(in) :: dirfile_unit, type
+  character, intent(in) :: parent
+
+* integer function fget_nmetavectors (dirfile_unit, parent)
+  integer, intent(in) :: dirfile_unit
+  character, intent(in) :: parent
+
 * integer function fget_nformats (dirfile_unit)
   integer, intent(in) :: dirfile_unit
 
@@ -74,6 +92,27 @@ unit numbers in place of C's DIRFILE pointers are:
 * integer function fget_error_string (dirfile, buffer, len)
   integer, intent(in) :: dirfile, len
   character (len=<len>), intent(out) :: buffer
+
+* integer function fget_string (dirfile, field_code, length, data_out)
+  integer, intent(in) :: dirfile, length
+  character (len=*), intent(in) :: field_code
+  character (len=*), intent(out) :: data_out
+
+* integer function fput_string (dirfile, field_code, data_in)
+  integer, intent(in) :: dirfile
+  character (len=*), intent(in) :: field_code, data_in
+
+* subroutine fdirfile_add_spec (dirfile, format_file, spec)
+  integer, intent(in) :: dirfile, format_file
+  character (len=*), intent(in) :: spec
+
+* subroutine fdirfile_add_meta_spec (dirfile, parent, spec)
+  integer, intent(in) :: dirfile
+  character (len=*), intent(in) :: parent, spec
+
+* subroutine fdirfile_include (dirfile, inc_file, flags)
+  integer, intent(in) :: dirfile, format_file, flags
+  character (len=*), intent(in) :: inc_file
 
 In order to respect type safety, the getdata and putdata analogues endcode
 the datatype of their array in their function name, rather than as a parameter.
@@ -131,6 +170,18 @@ Otherwise, they behave the same as their C counterparts.
   No corresponding fputdata_n function exists, since GD_NULL is not an
   acceptable input data_type for putdata(3).
 
+  Analagously for get_constant and put_constant, for which only the _i1
+  versions are shown here:
+
+* integer function fget_constant_i1 (dirfile, field_code, data_out)
+  integer, intent(in) :: dirfile_unit
+  character (len=*), intent(in) :: field_code
+  <datatype>, intent(out) :: data_out
+* integer function fput_string_i1 (dirfile, field_code, data_in)
+  integer, intent(in) :: dirfile_unit
+  character (len=*), intent(in) :: field_code
+  <datatype>, intent(in) :: data_in
+
 Other procedures in the Fortran 95 bindings are:
 
 * integer fget_field_name_max (dirfile_unit)
@@ -138,6 +189,13 @@ Other procedures in the Fortran 95 bindings are:
 
   This function returns the length of the longest field name defined in the
   dirfile.
+
+* integer fget_metafield_name_max (dirfile_unit, parent)
+  integer, intent(in) :: dirfile_unit
+  character (len=*), intent(in) :: parent
+
+  This function returns the length of the longest field name defined in the
+  dirfile for META fields of the supplied parent field.
 
 * subroutine fget_field_list (field_list, dirfile, field_len)
   character (len=<field_len>) dimension(:), intent(out) :: field_list
@@ -150,6 +208,37 @@ Other procedures in the Fortran 95 bindings are:
   dirfile is longer than field_len, field_len will be set to this value (which
   is equivalent to the return value of fget_field_name_max) and field_list will
   remain untouched.  The character strings returned are Fortran strings.
+
+  Analogously:
+
+* subroutine fget_field_list_by_type (field_list, dirfile, entype, field_len)
+  character (len=<field_len>) dimension(:), intent(out) :: field_list
+  integer, intent(in) :: dirfile_unit, entype
+  integer, intent(inout) :: field_len
+* subroutine fget_vector_list (field_list, dirfile, field_len)
+  character (len=<field_len>) dimension(:), intent(out) :: field_list
+  integer, intent(in) :: dirfile_unit
+  integer, intent(inout) :: field_len
+
+  Also analogously, except that field_len will be equivalent to the return
+  value of fget_metafield_name_max, if too small:
+
+* subroutine fget_metafield_list (field_list, dirfile, field_len)
+  character (len=<field_len>) dimension(:), intent(out) :: field_list
+  integer, intent(in) :: dirfile_unit
+  integer, intent(inout) :: field_len
+  character (len=*), intent(in) :: parent
+* subroutine fget_metafield_list_by_type (field_list, dirfile, entype,
+  field_len)
+  character (len=<field_len>) dimension(:), intent(out) :: field_list
+  integer, intent(in) :: dirfile_unit, entype
+  integer, intent(inout) :: field_len
+  character (len=*), intent(in) :: parent
+* subroutine fget_metavector_list (field_list, dirfile, field_len)
+  character (len=<field_len>) dimension(:), intent(out) :: field_list
+  integer, intent(in) :: dirfile_unit
+  integer, intent(inout) :: field_len
+  character (len=*), intent(in) :: parent
 
 * integer function fget_error (dirfile_unit)
   integer, intent(in) :: dirfile_unit
@@ -185,6 +274,9 @@ Other procedures in the Fortran 95 bindings are:
     MULTIPLY  infield[0]  infield[1]   --
     PHASE     infield[0]   --          --
 
+  Furthermore, data_type does double duty as the data_type parameter for RAW
+  fields, and the const_type parameter for CONST fields.
+
 * subroutine fdirfile_add (dirfile_unit, field_code, ent)
   integer, intent(in) :: dirfile_unit
   character (len=*), intent(in) :: field_code
@@ -192,3 +284,10 @@ Other procedures in the Fortran 95 bindings are:
 
   This subroutine adds the field indicated by field_code and described by ent
   into specified dirfile.
+
+  Analagously, for adding meta fields:
+
+* subroutine fdirfile_add_meta (dirfile_unit, parent, field_code, ent)
+  integer, intent(in) :: dirfile_unit
+  character (len=*), intent(in) :: parent, field_code
+  type(gd_entry), intent(in) :: ent
