@@ -20,7 +20,7 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH get_constant_values 3 "8 October 2008" "Version 0.4.0" "GETDATA"
+.TH get_constant_values 3 "15 October 2008" "Version 0.4.0" "GETDATA"
 .SH NAME
 get_constant_values \(em retrieve a list of constant values from a dirfile
 .SH SYNOPSIS
@@ -53,8 +53,10 @@ The array returned will be de-allocated by a call to
 .BR dirfile_close (3)
 and should not be de-allocated by the caller.  The list returned should not be
 assumed to be in any particular order, although it is guaranteed to be in the
-same order as the list returned by
-.BR get_constant_list (3).
+same order as the list of
+.B CONST
+fields returned by
+.BR get_field_list_by_type (3).
 The array is unterminated.  The number of values in the array can be obtained
 from a call to
 .BR get_nfields_by_type (3).
@@ -68,14 +70,15 @@ a call to
 .BR dirfile_close (3).
 
 A corresponding list of names for these fields may be obtained by calling
-.BR get_constant_list (3).
+.BR get_field_list_by_type (3).
 
 .SH RETURN VALUE
 Upon successful completion,
 .BR get_constant_values ()
 returns a pointer to an array of values containing the values of all the
-constants defined in the dirfile database.  On error it returns NULL and sets
-the dirfile error to a non-zero error value.  Possible error values are:
+constants defined in the dirfile database.  If no constants are defined in the
+database, NULL is returned.  On error it returns NULL and sets the dirfile error
+to a non-zero error value.  Possible error values are:
 .TP 8
 .B GD_E_ALLOC
 The library was unable to allocate memory.
@@ -97,7 +100,7 @@ a call to
 .BR dirfile (5),
 .BR dirfile_open (3),
 .BR getdata (3),
-.BR get_constant_list (3),
 .BR get_error (3),
 .BR get_error_string (3),
+.BR get_field_list_by_type (3),
 .BR get_nfields_by_type (3)
