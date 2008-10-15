@@ -49,8 +49,6 @@ const void* get_metaconstant_values(DIRFILE* D, const char* parent,
     return NULL;
   }
 
-  _GD_ClearError(D);
-
   struct _gd_private_entry* e = P->e;
 
   if (e->n_meta_const == 0) {
@@ -101,8 +99,6 @@ const char** get_metastring_values(DIRFILE* D, const char* parent)
     dreturn("%p", NULL);
     return NULL;
   }
-
-  _GD_ClearError(D);
 
   struct _gd_private_entry* e = P->e;
 
@@ -229,8 +225,6 @@ const char** get_metavector_list(DIRFILE* D, const char* parent)
     return NULL;
   }
 
-  _GD_ClearError(D);
-
   struct _gd_private_entry* e = P->e;
 
   size_t offs = strlen(P->field) + 1;
@@ -283,8 +277,6 @@ const char** get_metafield_list(DIRFILE* D, const char* parent)
     dreturn("%p", NULL);
     return NULL;
   }
-
-  _GD_ClearError(D);
 
   struct _gd_private_entry* e = P->e;
 
