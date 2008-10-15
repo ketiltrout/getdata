@@ -36,7 +36,7 @@
 /* Include a format file fragment -- returns the include index, or 
  * -1 on error */
 int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,
-    int linenum, int me, int encoding, int* standards, int flags)
+    int linenum, int me, int* standards, int flags)
 {
   int i;
   int found = 0;
@@ -44,8 +44,8 @@ int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,
   char temp_buf2[FILENAME_MAX];
   FILE* new_fp = NULL;
 
-  dtrace("%p, \"%s\", \"%s\", %i, %i, %x, %p, %x\n", D, ename, format_file,
-      linenum, me, encoding, standards, flags);
+  dtrace("%p, \"%s\", \"%s\", %i, %i, %p, %x\n", D, ename, format_file, linenum,
+      me, standards, flags);
 
   /* create the format filename */
   snprintf(temp_buf1, FILENAME_MAX, "%s/%s/%s", D->name,
@@ -107,7 +107,8 @@ int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,
   D->include_list[D->n_include - 1].modified = 0;
   D->include_list[D->n_include - 1].parent = me;
   D->include_list[D->n_include - 1].first = 0;
-  D->include_list[D->n_include - 1].encoding = encoding;
+  D->include_list[D->n_include - 1].flags = flags & (GD_ENCODING |
+      GD_LITTLE_ENDIAN | GD_BIG_ENDIAN);
 
   /* extract the subdirectory name - dirname both returns a volatile string
    * and modifies its argument, ergo strcpy */
@@ -129,7 +130,7 @@ int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,
     return -1;
   }
 
-  if (_GD_ParseFormatFile(new_fp, D, D->n_include - 1, standards))
+  if (_GD_ParseFormatFile(new_fp, D, D->n_include - 1, standards, flags))
     D->include_list[me].first = 1;
 
   fclose(new_fp);
@@ -157,8 +158,8 @@ int dirfile_include(DIRFILE* D, const char* file, int format_file,
     return -1;
  }
 
-  int i = _GD_Include(D, file, "dirfile_include()", 0, format_file,
-      flags & GD_ENCODING, &standards, flags);
+  int i = _GD_Include(D, file, "dirfile_include()", 0, format_file, &standards,
+      flags);
 
   dreturn("%i", i);
   return i;

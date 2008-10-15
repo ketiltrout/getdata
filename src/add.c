@@ -163,13 +163,17 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
       }
 
       /* If the encoding scheme is unknown, we can't add the field */
-      if (D->include_list[E->format_file].encoding == GD_AUTO_ENCODED) {
+      if ((D->include_list[E->format_file].flags & GD_ENCODING) ==
+          GD_AUTO_ENCODED)
+      {
         _GD_SetError(D, GD_E_UNKNOWN_ENCODING, 0, NULL, 0, NULL);
         break;
       }
 
       /* If the encoding scheme is unsupported, we can't add the field */
-      if (D->include_list[E->format_file].encoding == GD_ENC_UNSUPPORTED) {
+      if ((D->include_list[E->format_file].flags & GD_ENCODING) ==
+          GD_ENC_UNSUPPORTED)
+      {
         _GD_SetError(D, GD_E_UNSUPPORTED, 0, NULL, 0, NULL);
         break;
       }
@@ -187,7 +191,7 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
           D->include_list[E->format_file].sname, E->field);
 
       /* Set the subencoding subscheme */
-      _GD_ResolveEncoding(E->e->file, D->include_list[E->format_file].encoding,
+      _GD_ResolveEncoding(E->e->file, D->include_list[E->format_file].flags,
           E->e);
 
       if ((E->spf = entry->spf) <= 0)
@@ -356,7 +360,7 @@ int dirfile_add_metaspec(DIRFILE* D, const char* parent, const char* line)
 
   /* Directive parsing is skipped -- The Field Spec parser will add the field */
   E = _GD_ParseFieldSpec(D, n_cols, in_cols, NULL, "dirfile_add_metaspec()",
-      0, &have_first, E->format_file, DIRFILE_STANDARDS_VERSION, 1);
+      0, &have_first, E->format_file, DIRFILE_STANDARDS_VERSION, 1, 1);
 
   if (D->error) {
     dreturn("%i", -1); /* field spec parser threw an error */
@@ -402,7 +406,7 @@ int dirfile_add_spec(DIRFILE* D, int format_file, const char* line)
 
   /* Directive parsing is skipped -- The Field Spec parser will add the field */
   E = _GD_ParseFieldSpec(D, n_cols, in_cols, NULL, "dirfile_add_spec()",
-      0, &have_first, format_file, DIRFILE_STANDARDS_VERSION, 1);
+      0, &have_first, format_file, DIRFILE_STANDARDS_VERSION, 1, 1);
 
   if (D->error) {
     dreturn("%i", -1); /* field spec parser threw an error */

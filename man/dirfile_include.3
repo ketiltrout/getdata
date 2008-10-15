@@ -1,4 +1,4 @@
-.\" dirfile_open.3.  The dirfile_open man page.
+.\" dirfile_include.3.  The dirfile_include man page.
 .\"
 .\" (C) 2008 D. V. Wiebe
 .\"
@@ -20,35 +20,36 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH dirfile_open 3 "15 October 2008" "Version 0.4.0" "GETDATA"
+.TH dirfile_include 3 "15 October 2008" "Version 0.4.0" "GETDATA"
 .SH NAME
-dirfile_open \(em open or create a dirfile
+dirfile_include \(em add a format file fragment to a dirfile
 .SH SYNOPSIS
 .B #include <getdata.h>
 .HP
 .nh
 .ad l
-.BI "DIRFILE* dirfile_open(const char *" dirfilename ", unsigned int " flags );
+.BI "DIRFILE* dirfile_include(DIRFILE *" dirfile ", const char *" include_file ,
+.BI "int " format_file ", unsigned int " flags );
 .hy
 .ad n
 .SH DESCRIPTION
 The
-.BR dirfile_open ()
-function opens or creates the dirfile specified by
-.IR dirfilename ,
-returning a DIRFILE object associated with it.  Opening a dirfile will cause the
-library to read and parse the dirfile's format file (see
+.BR dirfile_include ()
+adds the format file fragment specified by the path
+.I include_file
+to the specified dirfile.  This occurs as if, in the existing fragment indexed
+by
+.IR format_file ,
+the following directive were present:
+.IP
+.BI "/INCLUDE " <include_file>
+.P
+(see
 .BR dirfile-format (5)).
-
 The 
 .I flags
-parameter should include one of the
-.IR "access modes" :
-.B GD_RDONLY
-(read-only) or 
-.BR GD_RDWR
-(read-write), and may also contain zero or more of the following flags
-bitwise-or'd together:
+parameter should be a bitwise-or'd collection of the following flags, or zero
+if no flags are desired:
 .TP
 .B GD_BIG_ENDIAN
 Specifies that raw data on disk is stored as big-endian data (most significant
@@ -59,24 +60,16 @@ that of the native architecture.
 
 This flag is ignored completely if an
 .B ENDIAN
-directive occurs in the dirfile format file, unless
+directive occurs in the fragment, unless
 .B GD_FORCE_ENDIAN
 is also specified.
 .TP
 .B GD_CREAT
-An empty dirfile will be created, if one does not already exist.  This will
-create both the dirfile directory and an empty format file.  The directory will
-have have mode
-.BR S_IRWXU " | " S_IRWXG " | "  S_IRWXO 
-(0777), modified by the caller's umask value (see
-.BR umask (2)).
-The format file will have mode
+An empty fragment will be created, if one does not already exist.  The fragment
+will have mode
 .BR S_IRUSR " | " S_IWUSR " | "  S_IRGRP " | "  S_IWGRP " | " S_IROTH " | " S_IWOTH
-(0666), also modified by the caller's umask.
-
-The owner of the dirfile directory and format file will be the effective user ID
-of the caller.  Group ownership follows the rules outlined in
-.BR mkdir (2).
+(0666), modified by the caller's umask value (see
+.BR umask (2)).
 .TP
 .B GD_EXCL
 Ensure that this call creates a dirfile: when specified along with
@@ -95,7 +88,7 @@ Specifies that
 .B ENCODING
 directives (see
 .BR dirfile-format (5))
-found in the dirfile format file should be ignored.  The encoding scheme
+found in the fragment should be ignored.  The encoding scheme
 specified in
 .I flags
 will be used instead (see below).
@@ -105,7 +98,7 @@ Specifies that
 .B ENDIAN
 directives (see
 .BR dirfile-format (5))
-found in the dirfile format file should be ignored.  When specified with one of
+found in the fragment should be ignored.  When specified with one of
 .BR GD_BIG_ENDIAN " or " GD_LITTLE_ENDIAN ,
 the endianness specified will be assumed.  If this flag is specified with
 neither of those flags, the dirfile will be assumed to have the endianness of the
@@ -120,12 +113,12 @@ that of the native architecture.
 
 This flag is ignored completely if an
 .B ENDIAN
-directive occurs in the dirfile format file, unless
+directive occurs in the fragment, unless
 .B GD_FORCE_ENDIAN
 is also specified.
 .TP
 .B GD_PEDANTIC
-Specifies that unrecognised lines found during the parsing of the format file
+Specifies that unrecognised lines found during the parsing of the fragment
 should always cause a fatal error.  Without this flag, if a
 .B VERSION
 directive (see
@@ -136,26 +129,9 @@ ignored.
 .TP
 .B GD_TRUNC
 If
-.I dirfilename
-specifies an already existing dirfile, it will be truncated before opening.
-Since
-.BR dirfile_open ()
-decides whether
-.I dirfilename
-specifies an existing dirfile before attempting to parse the dirfile,
-.I dirfilename
-is considered to specify an existing dirfile if it refers to a directory
-containing a regular file called
-.BR format ,
-regardless of the content or form of that file.
-
-Truncation occurs by deleting every regular file in the specified directory,
-whether the files were referred to by the dirfile before truncation or not.
-Accordingly, this flag should be used with caution.  Subdirectories are
-left untouched.  Notably, this operation does not consider the presence of
-subdirfiles declared by
-.B INCLUDE
-directives.  If the dirfile does not exist, this flag is ignored.
+.I include_file
+already exists , it will be truncated before opening.  If the file does not
+exist, this flag is ignored.
 
 .P
 The
@@ -168,7 +144,7 @@ itself, unless
 is also specified.  If none of these symbols is present,
 .B GD_AUTO_ENCODED
 is assumed, unless the
-.BR dirfile_open ()
+.BR dirfile_include ()
 call results in creation or truncation of the dirfile.  In that case,
 .B GD_UNENCODED
 is assumed.  See
@@ -196,56 +172,33 @@ sample per line.
 Specifies that raw data files are not encoded, but written verbatim to disk.
 
 .SH RETURN VALUE
-A call to
-.BR dirfile_open ()
-always returns a pointer to a newly allocated DIRFILE object.  The DIRFILE
-object is an opaque structure which is guaranteed to have at least a member
-called
-.I error
-which is of type
-.IR int .
-If an error occurred, the dirfile error will be set to a non-zero error value.
-The DIRFILE object will also be internally flagged as invalid.  Possible error
+On success,
+.BR dirfile_include ()
+returns the format file index of the newly added fragment.  On error, -1 is
+returned and the dirfile error is set to a non-zero error value.  Possible error
 values are:
 .TP 8
 .B GD_E_ACCMODE
-The library was asked to create or truncate a dirfile opened read-only (i.e.
+The supplied dirfile was opened in read-only mode, but
 .B GD_CREAT
 or
 .B GD_TRUNC
 was specified in
-.I flags
-along with
-.BR GD_RDONLY ).
+.IR flags .
 .TP
 .B GD_E_ALLOC
 The library was unable to allocate memory.
 .TP
-.B GD_E_CREAT
-The library was unable to create the dirfile, or the dirfile exists and both
-.BR GD_CREAT " and " GD_EXCL
-were specified.
-.TP
 .B GD_E_FORMAT
-A syntax error occurred in the format file.
+A syntax error occurred in the fragment.
 .TP
 .B GD_E_INTERNAL_ERROR
 An internal error occurred in the library while trying to perform the task.
 This indicates a bug in the library.  Please report the incident to the
 maintainer.
 .TP
-.B GD_E_OPEN
-The dirfile format file could not be opened, or
-.I dirfilename
-does not specify a valid dirfile.
-.TP
 .B GD_E_OPEN_INCLUDE
-A file specified in an
-.B INCLUDE
-directive could not be opened.
-.TP
-.B GD_E_TRUNC
-The library was unable to truncate the dirfile.
+The fragment could not be opened or created.
 .P
 The dirfile error may be retrieved by calling
 .BR get_error (3).
@@ -259,8 +212,6 @@ even if the open failed.
 .BR dirfile (5),
 .BR dirfile-encoding (5),
 .BR dirfile-format (5),
-.BR dirfile_close (3),
-.BR dirfile_include (3),
-.BR getdata (3),
+.BR dirfile_open (3),
 .BR get_error (3),
 .BR get_error_string (3)

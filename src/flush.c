@@ -279,26 +279,32 @@ void _GD_FlushMeta(DIRFILE* D)
 
       /* Global metadata */
       if (i == 0) {
-        fprintf(stream, "/ENDIAN %s\n",
-#ifdef WORDS_BIGENDIAN
-            (D->flags & GD_LITTLE_ENDIAN) ? "little" : "big"
-#else
-            (D->flags & GD_BIG_ENDIAN) ? "big" : "little"
-#endif
-            );
-
         if (D->frame_offset != 0)
           fprintf(stream, "/FRAMEOFFSET %llu\n",
               (unsigned long long)D->frame_offset);
       }
 
+      /* Byte Sex */
+      fprintf(stream, "/ENDIAN %s\n",
+#ifdef WORDS_BIGENDIAN
+          (D->include_list[i].flags & GD_LITTLE_ENDIAN) ? "little" : "big"
+#else
+          (D->include_list[i].flags & GD_BIG_ENDIAN) ? "big" : "little"
+#endif
+          );
+
       /* The encoding -- we only write encodings we know about. */
-      if (D->include_list[i].encoding == GD_UNENCODED)
-        fputs("/ENCODING none\n", stream);
-      else if (D->include_list[i].encoding == GD_SLIM_ENCODED)
-        fputs("/ENCODING slim\n", stream);
-      else if (D->include_list[i].encoding == GD_TEXT_ENCODED)
-        fputs("/ENCODING text\n", stream);
+      switch(D->include_list[i].flags & GD_ENCODING) {
+        case GD_UNENCODED:
+          fputs("/ENCODING none\n", stream);
+          break;
+        case GD_SLIM_ENCODED:
+          fputs("/ENCODING slim\n", stream);
+          break;
+        case GD_TEXT_ENCODED:
+          fputs("/ENCODING text\n", stream);
+          break;
+      }
 
       /* The first field */
       if (D->first_field != NULL) {

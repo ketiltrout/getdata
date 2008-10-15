@@ -169,7 +169,7 @@ dependent.  Syntax is:
 .BI /ENCODING\~ <scheme>
 .PP
 A dirfile may have more than one encoding scheme.  The ENCODING directive
-indicates the encoding only of the binary files associated with RAW fields
+indicates the encoding of only the binary files associated with RAW fields
 defined in the same format file fragment as the ENCODING directive itself.  As a
 result, RAW field specified in different fragments of a dirfile, may use
 different encodings.  If two ENCODING directives appear in a single fragment,
@@ -186,6 +186,13 @@ is:
 .IP
 .B /ENDIAN
 .IR "( " big " | " little " )"
+.PP
+A dirfile may have more than one endianness.  The ENDIAN directive indicates the
+byte sex of only the binary files associated with RAW fields defined in the same
+format file fragment as the ENDIAN directive itself.  As a result, RAW field
+specified in different fragments of a dirfile, may have different endiannesses.
+If two ENDIAN directives appear in a single fragment, only the last such
+directive will be honoured.
 .RE
 .TP
 .B /FRAMEOFFSET

@@ -245,7 +245,7 @@ struct gd_include_t {
   char* ename;
   int modified;
   int parent;
-  unsigned int encoding;
+  unsigned int flags;
   int first;
 };
 
@@ -331,7 +331,7 @@ void _GD_FreeE(gd_entry_t* E, int priv);
 int _GD_GetLine(FILE *fp, char *line, int* linenum);
 unsigned int _GD_GetSPF(DIRFILE* D, gd_entry_t* E);
 int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,
-    int linenum, int me, int encoding, int* standards, int flags);
+    int linenum, int me, int* standards, int flags);
 void _GD_InsertSort(DIRFILE* D, gd_entry_t* E, int u) __THROW;
 
 #define _GD_InternalError(D) \
@@ -342,8 +342,9 @@ void _GD_LinterpData(DIRFILE* D, const void *data, gd_type_t type, size_t npts,
       double *lx, double *ly, size_t n_ln);
 gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, const char** in_cols,
     const gd_entry_t* parent, const char* format_file, int linenum,
-    int* have_first, unsigned int me, int standards, int creat);
-int _GD_ParseFormatFile(FILE* fp, DIRFILE *D, int me, int* standards);
+    int* have_first, unsigned int me, int standards, int creat, int pedantic);
+int _GD_ParseFormatFile(FILE* fp, DIRFILE *D, int me, int* standards,
+    unsigned int flags);
 void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E);
 unsigned int _GD_ResolveEncoding(const char* name, unsigned int scheme,
     struct _gd_private_entry *e);

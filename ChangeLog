@@ -1,3 +1,10 @@
+2008-10-15   D. V. Wiebe <getdata@ketiltrout.net>  svn:151
+	* src/add.c src/flush.c src/getdata.c src/include.c src/internal.h
+	src/nframes.c src/open.c src/putdata.c man/dirfile-format.5: Made endianness
+	fragment-local.
+
+	* man/dirfile_include.3: Added.
+
 2008-10-15   D. V. Wiebe <getdata@ketiltrout.net>  svn:148
 	* src/include.c (dirfile_include): Throw GD_E_ACCMODE if GD_CREAT or
 	GD_TRUNC are passed to a read-only dirfile.

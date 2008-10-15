@@ -45,14 +45,17 @@ off64_t get_nframes64(DIRFILE* D)
   }
 
   /* Figure out encoding scheme, if necessary */
-  if (D->include_list[D->first_field->format_file].encoding == GD_AUTO_ENCODED)
-      D->include_list[D->first_field->format_file].encoding =
+  if ((D->include_list[D->first_field->format_file].flags & GD_ENCODING)
+      == GD_AUTO_ENCODED) 
+  {
+      D->include_list[D->first_field->format_file].flags =
+      (D->include_list[D->first_field->format_file].flags & ~GD_ENCODING) |
         _GD_ResolveEncoding(D->first_field->e->file,
-            D->include_list[D->first_field->format_file].encoding,
+            D->include_list[D->first_field->format_file].flags & GD_ENCODING,
             D->first_field->e);
-  else if (D->first_field->e->encoding == GD_ENC_UNKNOWN)
+  } else if (D->first_field->e->encoding == GD_ENC_UNKNOWN)
       _GD_ResolveEncoding(D->first_field->e->file,
-          D->include_list[D->first_field->format_file].encoding,
+          D->include_list[D->first_field->format_file].flags & GD_ENCODING,
           D->first_field->e);
 
   if (encode[D->first_field->e->encoding].size == NULL) {

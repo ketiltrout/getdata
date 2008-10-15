@@ -757,12 +757,12 @@ static int utf8encode(DIRFILE* D, const char* format_file, int linenum,
  * specification */
 gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, const char** in_cols,
     const gd_entry_t* parent, const char* format_file, int linenum,
-    int* have_first, unsigned int me, int standards, int creat)
+    int* have_first, unsigned int me, int standards, int creat, int pedantic)
 {
   gd_entry_t* E = NULL;
 
-  dtrace("%p, %i, %p, %p, \"%s\", %i, %p, %u, %i, %i", D, n_cols, in_cols,
-      parent, format_file, linenum, have_first, me, standards, creat);
+  dtrace("%p, %i, %p, %p, \"%s\", %i, %p, %u, %i, %i, %i", D, n_cols, in_cols,
+      parent, format_file, linenum, have_first, me, standards, creat, pedantic);
 
   D->entry = realloc(D->entry, (D->n_entries + 1) * sizeof(gd_entry_t*));
 
@@ -789,15 +789,18 @@ gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, const char** in_cols,
     /* Create the binary file, if requested */
     if (!D->error && creat) {
       /* If the encoding scheme is unknown, we can't add the field */
-      if (D->include_list[E->format_file].encoding == GD_AUTO_ENCODED)
+      if ((D->include_list[E->format_file].flags & GD_ENCODING) ==
+          GD_AUTO_ENCODED) {
         _GD_SetError(D, GD_E_UNKNOWN_ENCODING, 0, NULL, 0, NULL);
-      else if (D->include_list[E->format_file].encoding == GD_ENC_UNSUPPORTED) {
+      } else if ((D->include_list[E->format_file].flags & GD_ENCODING) ==
+          GD_ENC_UNSUPPORTED)
+      {
         /* If the encoding scheme is unsupported, we can't add the field */
         _GD_SetError(D, GD_E_UNSUPPORTED, 0, NULL, 0, NULL);
       } else {
         /* Set the subencoding subscheme */
-        _GD_ResolveEncoding(E->e->file,
-            D->include_list[E->format_file].encoding, E->e);
+        _GD_ResolveEncoding(E->e->file, D->include_list[E->format_file].flags,
+            E->e);
 
         if (encode[E->e->encoding].touch == NULL) 
           _GD_SetError(D, GD_E_UNSUPPORTED, 0, NULL, 0, NULL);
@@ -823,8 +826,7 @@ gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, const char** in_cols,
     E = _GD_ParseString(D, in_cols, n_cols, parent, format_file, linenum);
     if (D->error == GD_E_OK && parent == NULL)
       D->n_string++;
-  } else if (standards <= DIRFILE_STANDARDS_VERSION ||
-      (D->flags & GD_PEDANTIC))
+  } else if (standards <= DIRFILE_STANDARDS_VERSION || pedantic)
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_LINE, format_file, linenum,
         NULL);
 
@@ -1045,7 +1047,7 @@ int _GD_Tokenise(DIRFILE *D, const char* instring, char* outstring,
  *       Returns 1 if a match was made.
  */
 static int _GD_ParseDirective(DIRFILE *D, const char** in_cols, int n_cols,
-    int me, int* standards, int linenum, int* have_first)
+    int me, int* standards, int linenum, int* have_first, unsigned int flags)
 {
   const char* ptr;
 
@@ -1062,26 +1064,30 @@ static int _GD_ParseDirective(DIRFILE *D, const char** in_cols, int n_cols,
     D->frame_offset = atoll(in_cols[1]);
   } else if (strcmp(ptr, "INCLUDE") == 0)
     _GD_Include(D, in_cols[1], D->include_list[me].cname, linenum, me,
-        D->include_list[me].encoding, standards, 0);
+        standards, D->include_list[me].flags);
   else if (strcmp(ptr, "ENCODING") == 0) {
-    if (!(D->flags & GD_FORCE_ENCODING)) {
+    if (!(flags & GD_FORCE_ENCODING)) {
       if (strcmp(in_cols[1], "none") == 0)
-        D->include_list[me].encoding = GD_UNENCODED;
+        D->include_list[me].flags = (D->include_list[me].flags & ~GD_ENCODING) |
+          GD_UNENCODED;
       else if (strcmp(in_cols[1], "slim") == 0)
-        D->include_list[me].encoding = GD_SLIM_ENCODED;
+        D->include_list[me].flags = (D->include_list[me].flags & ~GD_ENCODING) |
+          GD_SLIM_ENCODED;
       else if (strcmp(in_cols[1], "text") == 0)
-        D->include_list[me].encoding = GD_TEXT_ENCODED;
+        D->include_list[me].flags = (D->include_list[me].flags & ~GD_ENCODING) |
+          GD_TEXT_ENCODED;
       else
-        D->include_list[me].encoding = GD_ENC_UNSUPPORTED;
+        D->include_list[me].flags = (D->include_list[me].flags & ~GD_ENCODING) |
+          GD_ENC_UNSUPPORTED;
     }
   } else if (strcmp(ptr, "ENDIAN") == 0) {
-    if (!(D->flags & GD_FORCE_ENDIAN)) {
+    if (!(flags & GD_FORCE_ENDIAN)) {
       if (strcmp(in_cols[1], "big") == 0) {
-        D->flags |= GD_BIG_ENDIAN;
-        D->flags &= ~GD_LITTLE_ENDIAN;
+        D->include_list[me].flags |= GD_BIG_ENDIAN;
+        D->include_list[me].flags &= ~GD_LITTLE_ENDIAN;
       } else if (strcmp(in_cols[1], "little") == 0) {
-        D->flags |= GD_LITTLE_ENDIAN;
-        D->flags &= ~GD_BIG_ENDIAN;
+        D->include_list[me].flags |= GD_LITTLE_ENDIAN;
+        D->include_list[me].flags &= ~GD_BIG_ENDIAN;
       } else 
         _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_ENDIAN,
             D->include_list[me].cname, linenum, NULL);
@@ -1099,7 +1105,8 @@ static int _GD_ParseDirective(DIRFILE *D, const char** in_cols, int n_cols,
           D->include_list[me].cname, linenum, NULL);
     else {
       gd_entry_t* E = _GD_ParseFieldSpec(D, n_cols - 2, in_cols + 2, P,
-          D->include_list[me].cname, linenum, have_first, me, *standards, 0);
+          D->include_list[me].cname, linenum, have_first, me, *standards, 0,
+          flags & GD_PEDANTIC);
       if (!D->error) {
         /* there is no need to sort this list */
         P->e->meta_entry = realloc(P->e->meta_entry, (P->e->n_meta + 1) *
@@ -1130,7 +1137,8 @@ static int _GD_ParseDirective(DIRFILE *D, const char** in_cols, int n_cols,
  *
  *       Returns 0 unless this format file contains the first raw field.
  */
-int _GD_ParseFormatFile(FILE* fp, DIRFILE *D, int me, int* standards)
+int _GD_ParseFormatFile(FILE* fp, DIRFILE *D, int me, int* standards,
+    unsigned int flags)
 {
   char instring[MAX_LINE_LENGTH];
   char outstring[MAX_LINE_LENGTH];
@@ -1151,14 +1159,14 @@ int _GD_ParseFormatFile(FILE* fp, DIRFILE *D, int me, int* standards)
       break; /* tokeniser threw an error */
 
     match = _GD_ParseDirective(D, in_cols, n_cols, me, standards, linenum,
-        &have_first);
+        &have_first, flags);
 
     if (D->error)
       break; /* directive parser threw an error */
 
     if (!match)
       _GD_ParseFieldSpec(D, n_cols, in_cols, NULL, D->include_list[me].cname,
-          linenum, &have_first, me, *standards, 0);
+          linenum, &have_first, me, *standards, 0, flags & GD_PEDANTIC);
 
     if (D->error)
       break; /* field spec parser threw an error */
@@ -1389,9 +1397,10 @@ DIRFILE* dirfile_open(const char* filedir, unsigned int flags)
   D->include_list[0].ename = NULL;
   D->include_list[0].modified = 0;
   D->include_list[0].parent = -1;
-  D->include_list[0].encoding = D->flags & GD_ENCODING;
+  D->include_list[0].flags = D->flags & (GD_ENCODING | GD_LITTLE_ENDIAN |
+      GD_BIG_ENDIAN);
 
-  _GD_ParseFormatFile(fp, D, 0, &standards);
+  _GD_ParseFormatFile(fp, D, 0, &standards, D->flags);
   fclose(fp);
 
   if (D->error != GD_E_OK) {
