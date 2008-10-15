@@ -16,12 +16,30 @@ New in version 0.4.0:
   * Binary files in dirfiles may now be "encoded".  In addition to raw
     (unencoded) files, two encodings are currently supported:
 
-      - ASCII encoding (which is a simple proof-of-functionality encoding), and
-      - Slimlib encoding (a compression library used by ACT)
+      - ASCII encoding (a simple proof-of-functionality encoding), and
+      - Slimlib encoding (a compression library used by ACT).
 
+    Encoding schemes are fragment-local, although they are inherited from parent
+    fragments.
+  * Endianness is now also fragment-local, meaning different endiannesses can
+    co-exist in the same dirfile (so long as the fields are defined in different
+    format file fragments), and GetData will do the Right Thing.
   * "FILEFRAM" is no-longer supported as an alias for "INDEX".  This affects
     GetData's implementation of all Standards Versions.  Code that made use of
     FILEFRAM will have to be updated to use INDEX instead.
+
+  Library Changes
+
+  * INDEX is now a normal field.  It appears in the count/list functions.
+    Attempts to write to INDEX will fail.
+  * The GD_E_EMPTY error code has been removed: it is no longer an error to
+    query a dirfile containing no RAW fields.
+  * The presence of two fields in the dirfile with the same name is now
+    detected, and will cause a syntax error when parsing the format file.
+    Previously, such things were allowed, but only one of the synonym fields
+    could ever be queried. (Which field was returned was arbitrary.)
+  * Field code look-ups for input fields are now cached, which should result
+    in slightly better performance from the library.
 
   API Changes
 
@@ -50,29 +68,16 @@ New in version 0.4.0:
     META fields, as well.
   * Extra flags have been added to dirfile_open() to permit indicating the
     encoding type, if not specified in the dirfile itself.
-  * DIRFILE struct members, and get_entry private members, are now completely
+  * DIRFILE struct members and gd_entry_t private members are now completely
     hidden from the public interface.  Where previously callers could query
     dirfile->error to check for an error, they must now call get_error(dirfile).
     This change was made to reduce unintentional ABI breakage when modifying
     internal library properties.
 
-  Library Changes
-
-  * INDEX is now a normal field.  It appears in the count/list functions.
-    Attempts to write to INDEX will fail.
-  * The GD_E_EMPTY error code has been removed: it is no longer an error to
-    query a dirfile containing no RAW fields.
-  * The presence of two fields in the dirfile with the same name is now detected
-    and will cause a syntax error when parsing the format file.  Previously,
-    such things were allowed, but only one of the synonym fields could ever
-    be queried. (Which field was returned was arbitrary.)
-  * Field code look-ups for input fields are now cached, which should result
-    in slightly better performance from the library.
-
   Legacy API Changes
 
   * Error codes which cannot be returned by the legacy API might not have a
-    corresponding string in GD_ERROR_CODES[].  Instead these entries would
+    corresponding string in GD_ERROR_CODES[].  Instead, these entries will
     simply be the NULL pointer.
   * No facilities exist in the legacy API to set or query CONST or STRING
     fields.  However, META fields of vector type can be queried/set using
