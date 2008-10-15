@@ -28,8 +28,8 @@ endif
 
 dist_man_MANS = dirfile_add.3 dirfile_add_raw.3 dirfile_close.3 \
 								dirfile_flush.3 dirfile_flush_metadata.3 \
-								dirfile_free_entry_strings.3 dirfile_open.3 get_constant.3 \
-								get_constant_values.3 get_entry.3 get_error.3 \
+								dirfile_free_entry_strings.3 dirfile_include.3 dirfile_open.3 \
+								get_constant.3 get_constant_values.3 get_entry.3 get_error.3 \
 								get_error_string.3 get_field_list.3 get_field_list_by_type.3 \
 								get_format_filename.3 get_nfields.3 get_nfields_by_type.3 \
 								get_nformats.3 get_nframes.3 get_nvectors.3 get_spf.3 \
