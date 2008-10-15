@@ -113,9 +113,9 @@ int main(void)
     parameter(stream, "GD_BIT_ENTRY",        "GD_BTE", GD_BIT_ENTRY,        i);
     parameter(stream, "GD_MULTIPLY_ENTRY",   "GD_MTE", GD_MULTIPLY_ENTRY,   i);
     parameter(stream, "GD_PHASE_ENTRY",      "GD_PHE", GD_PHASE_ENTRY,      i);
-    parameter(stream, "GD_INDEX_ENTRY",      "GD_IND", GD_INDEX_ENTRY,      i);
-    parameter(stream, "GD_CONST_ENTRY",      "GD_CON", GD_CONST_ENTRY,      i);
-    parameter(stream, "GD_STRING_ENTRY",     "GD_STR", GD_STRING_ENTRY,     i);
+    parameter(stream, "GD_INDEX_ENTRY",      "GD_IXE", GD_INDEX_ENTRY,      i);
+    parameter(stream, "GD_CONST_ENTRY",      "GD_COE", GD_CONST_ENTRY,      i);
+    parameter(stream, "GD_STRING_ENTRY",     "GD_STE", GD_STRING_ENTRY,     i);
 
     if (i == 0)
       fprintf(stream,

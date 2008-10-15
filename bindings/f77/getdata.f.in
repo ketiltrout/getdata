@@ -27,6 +27,8 @@ C     constants useful to Fortran programs
 C Externals
 C     Corresponding to dirfile_add_bit(3)
       EXTERNAL GDFABT
+C     Corresponding to dirfile_add_const(3)
+      EXTERNAL GDFACO
 C     Corresponding to dirfile_add_lincom(3)
       EXTERNAL GDFALC
 C     Corresponding to dirfile_add_linterp(3)
@@ -37,6 +39,10 @@ C     Corresponding to dirfile_add_phase(3)
       EXTERNAL GDFAPH
 C     Corresponding to dirfile_add_raw(3)
       EXTERNAL GDFARW
+C     Corresponding to dirfile_add_spec(3)
+      EXTERNAL GDFASP
+C     Corresponding to dirfile_add_string(3)
+      EXTERNAL GDFAST
 C     Corresponding to dirfile_close(3)
       EXTERNAL GDFCLS
 C     Corresponding to get_entry(3) for BIT fields
@@ -57,25 +63,67 @@ C     Corresponding to get_field_list(3) (sort of)
       EXTERNAL GDFFDN
 C     Returns the field type
       EXTERNAL GDFFDT
+C     Get the format file index for a field
+      EXTERNAL GDFFFI
 C     Corresponding to get_format_filename(3)
       EXTERNAL GDFFFN
 C     Corresponding to dirfile_flush(3)
       EXTERNAL GDFFLS
+C     Corresponding to get_field_list_by_type(3) (sort of)
+      EXTERNAL GDFFNT
 C     Returns the maximum field name length
       EXTERNAL GDFFNX
+C     Corresponding to get_constant(3)
+      EXTERNAL GDFGCO
 C     Corresponding to getdata(3)
       EXTERNAL GDFGET
+C     Corresponding to get_string(3)
+      EXTERNAL GDFGST
+C     Corresponding to dirfile_include(3)
+      EXTERNAL GDFINC
+C     Corresponding to dirfile_add_metabit(3)
+      EXTERNAL GDFMBT
+C     Corresponding to dirfile_add_metaconst(3)
+      EXTERNAL GDFMCO
+C     Corresponding to dirfile_add_metalincom(3)
+      EXTERNAL GDFMLC
+C     Corresponding to dirfile_add_metalinterp(3)
+      EXTERNAL GDFMLT
+C     Corresponding to dirfile_add_metamultiply(3)
+      EXTERNAL GDFMMT
+C     Corresponding to dirfile_add_metaphase(3)
+      EXTERNAL GDFMPH
+C     Corresponding to dirfile_add_metaspec(3)
+      EXTERNAL GDFMSP
+C     Corresponding to dirfile_add_metastring(3)
+      EXTERNAL GDFMST
 C     Corresponding to get_nfields(3)
       EXTERNAL GDFNFD
+C     Corresponding to get_nformats(3)
+      EXTERNAL GDFNFO
 C     Corresponding to get_nframes(3)
       EXTERNAL GDFNFR
-C     Corresponding to get_nformats(3)
+C     Corresponding to get_nfields_by_type(3)
       EXTERNAL GDFNFT
+C     Corresponding to get_nmetafields(3)
+      EXTERNAL GDFNMF
+C     Corresponding to get_nmetafields_by_type(3)
+      EXTERNAL GDFNMT
+C     Corresponding to get_nmetavectors(3)
+      EXTERNAL GDFNMV
+C     Corresponding to get_nvectors(3)
+      EXTERNAL GDFNVE
 C     Corresponding to dirfile_open(3)
       EXTERNAL GDFOPN
+C     Corresponding to put_constant(3)
+      EXTERNAL GDFPCO
+C     Corresponding to put_string(3)
+      EXTERNAL GDFPST
 C     Corresponding to putdata(3)
       EXTERNAL GDFPUT
 C     Corresponding to get_spf(3)
       EXTERNAL GDFSPF
 C     Corresponding to get_error_string(3)
       EXTERNAL GDFSTR
+C     Corresponding to get_vector_list(3) (sort of)
+      EXTERNAL GDFVEN

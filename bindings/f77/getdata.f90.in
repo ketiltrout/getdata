@@ -438,7 +438,7 @@ function fget_nformats (dirfile)
   integer :: fget_nformats
   integer, intent(in) :: dirfile
 
-  call gdfnft(fget_nformats, dirfile)
+  call gdfnfo(fget_nformats, dirfile)
 end function
 
 subroutine fdirfile_flush_metadata (dirfile)

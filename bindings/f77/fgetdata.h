@@ -132,6 +132,97 @@ void F77_FUNC(gdfaph, GDFAPH) (const int* dirfile, const char* field_code,
 void F77_FUNC(gdfffn, GDFFFN) (char* filename, int* filename_l,
     const int* dirfile, const int* index);
 
-void F77_FUNC(gdfnft, GDFNFT) (int* nformats, const int* dirfile);
+void F77_FUNC(gdfnfo, GDFNFO) (int* nformats, const int* dirfile);
 
 void F77_FUNC(gdfflm, GDFFLM) (const int* dirfile);
+
+void F77_FUNC(gdfinc, GDFINC) (const int* dirfile, const char* file,
+    const int* file_l, const int* format_file, const int* flags);
+
+void F77_FUNC(gdfnft, GDFNFT) (int* nfields, const int* dirfile,
+    const int* type);
+
+void F77_FUNC(gdfnve, GDFNVE) (int* nvectors, const int* dirfile);
+
+void F77_FUNC(gdffnt, GDFFNT) (char* name, int* name_l, const int* dirfile,
+    const int* type, const int* field_num);
+
+void F77_FUNC(gdfven, GDFVEN) (char* name, int* name_l, const int* dirfile,
+    const int* field_num);
+
+void F77_FUNC(gdfmlc, GDFMLC) (const int* dirfile, const char* parent,
+    const int* parent_l, const char* field_code, const int* field_code_l,
+    const int* n_fields, const char* in_field1, const int* in_field1_l,
+    const double* m1, const double* b1, const char* in_field2,
+    const int* in_field2_l, const double* m2, const double* b2,
+    const char* in_field3, const int* in_field3_l, const double* m3,
+    const double* b3);
+
+void F77_FUNC(gdfmlt, GDFMLT) (const int* dirfile, const char* parent,
+    const int* parent_l, const char* field_code, const int* field_code_l,
+    const char* in_field, const int* in_field_l, const char* table,
+    const int* table_l);
+
+void F77_FUNC(gdfmbt, GDFMBT) (const int* dirfile, const char* parent,
+    const int* parent_l, const char* field_code, const int* field_code_l,
+    const char* in_field, const int* in_field_l, const int* bitnum,
+    const int* numbits);
+
+void F77_FUNC(gdfmmt, GDFMMT) (const int* dirfile, const char* parent,
+    const int* parent_l, const char* field_code, const int* field_code_l,
+    const char* in_field1, const int* in_field1_l, const char* in_field2,
+    const int* in_field2_l);
+
+void F77_FUNC(gdfmph, GDFMPH) (const int* dirfile, const char* parent,
+    const int* parent_l, const char* field_code, const int* field_code_l,
+    const char* in_field, const int* in_field_l, const int* shift);
+
+void F77_FUNC(gdfaco, GDFACO) (const int* dirfile, const char* field_code,
+    const int* field_code_l, const int* const_type, const int* data_type,
+    const void* value, const int* format_file);
+
+void F77_FUNC(gdfmco, GDFMCO) (const int* dirfile, const char* parent,
+    const int* parent_l, const char* field_code, const int* field_code_l,
+    const int* const_type, const int* data_type, const void* value);
+
+void F77_FUNC(gdfast, GDFAST) (const int* dirfile, const char* field_code,
+    const int* field_code_l, const char* value, const int* value_l,
+    const int* format_file);
+
+void F77_FUNC(gdfmst, GDFMST) (const int* dirfile, const char* parent,
+    const int* parent_l, const char* field_code, const int* field_code_l,
+    const char* value, const int* value_l);
+
+void F77_FUNC(gdfasp, GDFASP) (const int* dirfile, const int* format_file,
+    const char* spec, const int* spec_l);
+
+void F77_FUNC(gdfmsp, GDFMSP) (const int* dirfile, const char *parent,
+    const int* parent_l, const char* spec, const int* spec_l);
+
+void F77_FUNC(gdfffi, GDFFFI) (int* format_file, const int* dirfile,
+    const char* field_code, const int* field_code_l);
+
+void F77_FUNC(gdfgco, GDFGCO) (int* n_read, const int* dirfile,
+    const char* field_code, const int* field_code_l, const int* return_type,
+    void* data_out);
+
+void F77_FUNC(gdfgst, GDFGST) (int* n_read, const int* dirfile,
+    const char* field_code, const int* field_code_l, const int* len,
+    char* data_out);
+
+void F77_FUNC(gdfpco, GDFPCO) (int* n_read, const int* dirfile,
+    const char* field_code, const int* field_code_l, const int* return_type,
+    const void* data_out);
+
+void F77_FUNC(gdfpst, GDFPST) (int* n_read, const int* dirfile,
+    const char* field_code, const int* field_code_l, const int* len,
+    const char* data_out);
+
+void F77_FUNC(gdfnmf, GDFNMF) (int* nfields, const int* dirfile,
+    const char* parent, const int* parent_l);
+
+void F77_FUNC(gdfnmt, GDFNMT) (int* nfields, const int* dirfile,
+    const char* parent, const int* parent_l, const int* type);
+
+void F77_FUNC(gdfnmv, GDFNMV) (int* nvectors, const int* dirfile,
+    const char* parent, const int* parent_l);

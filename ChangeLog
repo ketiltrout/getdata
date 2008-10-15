@@ -1,3 +1,11 @@
+2008-10-14   D. V. Wiebe <getdata@ketiltrout.net>  svn:146
+	* bindings/f77/fgetdata.c bindings/f77/fgetdata.h
+	bindings/f77/getdata.f90.in: Renamed GDFNFT to GDFNFO.
+
+	* README.f77 bindings/f77/fgetdata.c bindings/f77/fgetdata.h
+	bindings/f77/getdata.f.in bindings/f77/make_parameters.c: Added Fortran-77
+	bindings for the new public functions.
+
 2008-10-14   D. V. Wiebe <getdata@ketiltrout.net>  svn:143
 	* test/nframes_empty.c: Correct for removal of GD_E_EMPTY.
 
