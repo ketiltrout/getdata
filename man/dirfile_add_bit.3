@@ -1,4 +1,4 @@
-.\" dirfile_add_raw.3.  The dirfile_add_raw man page.
+.\" dirfile_add_bit.3.  The dirfile_add_bit man page.
 .\"
 .\" (C) 2008 D. V. Wiebe
 .\"
@@ -20,20 +20,22 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH dirfile_add_raw 3 "6 October 2008" "Version 0.4.0" "GETDATA"
+.TH dirfile_add_bit 3 "16 October 2008" "Version 0.4.0" "GETDATA"
 .SH NAME
-dirfile_add_raw, dirfile_add_bit, dirfile_add_lincom, dirfile_add_linterp,
-dirfile_add_multiply, dirfile_add_phase \(em add a field to a dirfile
+dirfile_add_bit, dirfile_add_const, dirfile_add_lincom, dirfile_add_linterp,
+dirfile_add_multiply, dirfile_add_phase, dirfile_add_raw, dirfile_add_string
+\(em add a field to a dirfile
 .SH SYNOPSIS
 .B #include <getdata.h>
 .HP
 .nh
 .ad l
-.BI "int dirfile_add_raw(DIRFILE *" dirfile ", const char *" field_name ,
-.BI "unsigned int " spf ", gd_type_t " data_type ", int " format_file );
-.HP
 .BI "int dirfile_add_bit(DIRFILE *" dirfile ", const char *" field_name ,
 .BI "const char *" in_field ", int " bitnum ", int " numbits ,
+.BI "int " format_file );
+.HP
+.BI "int dirfile_add_const(DIRFILE *" dirfile ", const char *" field_name ,
+.BI "gd_type_t " const_type ", gd_type_t " data_type ", void *" value ,
 .BI "int " format_file );
 .HP
 .BI "int dirfile_add_lincom(DIRFILE *" dirfile ", const char *" field_name ,
@@ -49,9 +51,8 @@ dirfile_add_multiply, dirfile_add_phase \(em add a field to a dirfile
 .BI "int dirfile_add_phase(DIRFILE *" dirfile ", const char *" field_name ,
 .BI "const char *" in_field ", int " phase ", int " format_file );
 .HP
-.BI "int dirfile_add_const(DIRFILE *" dirfile ", const char *" field_name ,
-.BI "gd_type_t " const_type ", gd_type_t " data_type ", void *" value ,
-.BI "int " format_file );
+.BI "int dirfile_add_raw(DIRFILE *" dirfile ", const char *" field_name ,
+.BI "unsigned int " spf ", gd_type_t " data_type ", int " format_file );
 .HP
 .BI "int dirfile_add_string(DIRFILE *" dirfile ", const char *" field_name ,
 .BI "const char *" value ", int " format_file );

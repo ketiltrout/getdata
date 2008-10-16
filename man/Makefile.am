@@ -26,10 +26,11 @@ else
 LFS_transitional_mans =
 endif
 
-dist_man_MANS = dirfile_add.3 dirfile_add_raw.3 dirfile_add_spec.3 \
-								dirfile_close.3 dirfile_flush.3 dirfile_flush_metadata.3 \
-								dirfile_free_entry_strings.3 dirfile_include.3 dirfile_open.3 \
-								get_constant.3 get_constant_values.3 get_entry.3 get_error.3 \
+dist_man_MANS = dirfile_add.3 dirfile_add_bit.3 dirfile_add_metabit.3 \
+								dirfile_add_spec.3 dirfile_close.3 dirfile_flush.3 \
+								dirfile_flush_metadata.3 dirfile_free_entry_strings.3 \
+								dirfile_include.3 dirfile_open.3 get_constant.3 \
+								get_constant_values.3 get_entry.3 get_error.3 \
 								get_error_string.3 get_field_list.3 get_field_list_by_type.3 \
 								get_format_filename.3 get_nfields.3 get_nfields_by_type.3 \
 								get_nformats.3 get_nframes.3 get_nvectors.3 get_spf.3 \
@@ -39,13 +40,20 @@ dist_man_MANS = dirfile_add.3 dirfile_add_raw.3 dirfile_add_spec.3 \
 
 install-data-hook:
 	cd $(DESTDIR)$(mandir)/man3 && \
-		$(LN_S) -f dirfile_add_raw.3 dirfile_add_bit.3 && \
-		$(LN_S) -f dirfile_add_raw.3 dirfile_add_const.3 && \
-		$(LN_S) -f dirfile_add_raw.3 dirfile_add_lincom.3 && \
-		$(LN_S) -f dirfile_add_raw.3 dirfile_add_linterp.3 && \
-		$(LN_S) -f dirfile_add_raw.3 dirfile_add_multiply.3 && \
-		$(LN_S) -f dirfile_add_raw.3 dirfile_add_phase.3 && \
+		$(LN_S) -f dirfile_add_bit.3 dirfile_add_const.3 && \
+		$(LN_S) -f dirfile_add_bit.3 dirfile_add_lincom.3 && \
+		$(LN_S) -f dirfile_add_bit.3 dirfile_add_linterp.3 && \
+		$(LN_S) -f dirfile_add_bit.3 dirfile_add_multiply.3 && \
+		$(LN_S) -f dirfile_add_bit.3 dirfile_add_phase.3 && \
+		$(LN_S) -f dirfile_add_bit.3 dirfile_add_raw.3 && \
 		$(LN_S) -f dirfile_add_raw.3 dirfile_add_string.3
+	cd $(DESTDIR)$(mandir)/man3 && \
+		$(LN_S) -f dirfile_add_metabit dirfile_add_const.3 && \
+		$(LN_S) -f dirfile_add_metabit dirfile_add_lincom.3 && \
+		$(LN_S) -f dirfile_add_metabit dirfile_add_linterp.3 && \
+		$(LN_S) -f dirfile_add_metabit dirfile_add_multiply.3 && \
+		$(LN_S) -f dirfile_add_metabit dirfile_add_phase.3 && \
+		$(LN_S) -f dirfile_add_metabit dirfile_add_string.3
 	cd $(DESTDIR)$(mandir)/man3 && \
 		$(LN_S) -f dirfile_add.3 dirfile_add_meta.3
 	cd $(DESTDIR)$(mandir)/man3 && \

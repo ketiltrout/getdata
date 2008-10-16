@@ -1,0 +1,164 @@
+.\" dirfile_add_metabit.3.  The dirfile_add_metabit man page.
+.\"
+.\" (C) 2008 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" This program is free software; you can redistribute it and/or modify
+.\" it under the terms of the GNU General Public License as published by
+.\" the Free Software Foundation; either version 2 of the License, or
+.\" (at your option) any later version.
+.\"
+.\" GetData is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+.\" General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public License along
+.\" with GetData; if not, write to the Free Software Foundation, Inc.,
+.\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+.\"
+.TH dirfile_add_metabit 3 "16 October 2008" "Version 0.4.0" "GETDATA"
+.SH NAME
+dirfile_add_metabit, dirfile_add_metaconst, dirfile_add_metalincom,
+dirfile_add_metalinterp, dirfile_add_metamultiply, dirfile_add_metaphase,
+dirfile_add_metastring \(em add a field to a dirfile
+.SH SYNOPSIS
+.B #include <getdata.h>
+.HP
+.nh
+.ad l
+.BI "int dirfile_add_metabit(DIRFILE *" dirfile ", const char *" field_name ,
+.BI "const char *" in_field ", int " bitnum ", int " numbits ,
+.BI "const char *" parent );
+.HP
+.BI "int dirfile_add_metaconst(DIRFILE *" dirfile ", const char *" field_name ,
+.BI "gd_type_t " const_type ", gd_type_t " data_type ", void *" value ,
+.BI "const char *" parent );
+.HP
+.BI "int dirfile_add_metalincom(DIRFILE *" dirfile ", const char *" field_name ,
+.BI "int " n_fields ", const char **" in_fields ", const double *" m ,
+.BI "const double *" b ", const char *" parent );
+.HP
+.BI "int dirfile_add_metalinterp(DIRFILE *" dirfile ", const char
+.BI * field_name ", const char *" in_field ", const char *" table ", const char"
+.BI * parent );
+.HP
+.BI "int dirfile_add_metamultiply(DIRFILE *" dirfile ", const char"
+.BI * field_name ", const char *" in_field1 ", const char *" in_field2 ,
+.BI "const char *" parent );
+.HP
+.BI "int dirfile_add_metaphase(DIRFILE *" dirfile ", const char *" field_name ,
+.BI "const char *" in_field ", int " phase ", const char *" parent );
+.HP
+.BI "int dirfile_add_metastring(DIRFILE *" dirfile ", const char *" field_name ,
+.BI "const char *" value ", const char *" parent );
+.hy
+.ad n
+.SH DESCRIPTION
+These functions provide alternatives to using the
+.BR dirfile_add_meta ()
+function to add a new metafield of the indicated type under the parent field
+given by
+.I parent
+in the dirfile specified by
+.IR dirfile .
+.P
+In all of these calls,
+.I field_name
+indicates the name of the field to be added.  It should not be the full
+.IB <parent-field> / <meta-field>
+field code.  The meaning and valid types of other arguments may be obtained from
+the
+.BR get_entry (3)
+and
+.BR dirfile-format (5)
+manual pages.
+.P
+The
+.BR dirfile_add_metalincom ()
+function takes pointers to three arrays of length
+.I n_fields
+containing the input field names
+.RI ( in_fields ),
+the gain factors
+.RI ( m ),
+and the offset terms
+.RI ( b ).
+.P
+The
+.BR dirfile_add_metastring ()
+and
+.BR dirfile_add_metaconst ()
+functions both add the field and set the value of the field to
+.IR value .
+For
+.BR dirfile_add_metaconst (),
+the
+.I const_type
+parameter specifies the storage type for the const, while
+.I data_type
+specifies the data type of the value pointed to by
+.IR value .
+
+All fields added with this interface must contain numerical parameters.  Fields
+with
+.B CONST
+fields as parameters cannot be added with these functions.  Those fields must
+be added with
+.BR dirfile_add_metaspec (3).
+.SH RETURN VALUE
+On success, any of these functions returns zero.   On error, -1 is returned and 
+the dirfile error is set to a non-zero error value.  Possible error values are:
+.TP 8
+.B GD_E_ACCMODE
+The specified dirfile was opened read-only.
+.TP
+.B GD_E_ALLOC
+The library was unable to allocate memory.
+.TP
+.B GD_E_BAD_CODE
+The
+.IR field_name
+parameter contained invalid characters. Alternately, the
+.I parent
+field code was not found, or was already a metafield.
+.TP
+.B GD_E_BAD_DIRFILE
+The supplied dirfile was invalid.
+.TP
+.B GD_E_BAD_ENTRY
+One or more of the field parameters specified was invalid.
+.TP
+.B GD_E_BAD_TYPE
+The
+.IR data_type " or " const_type
+parameter provided to
+.BR dirfile_add_const (),
+was invalid.
+.TP
+.B GD_E_DUPLICATE
+The
+.IR field_name
+provided duplicated that of an already existing field.
+.P
+The dirfile error may be retrieved by calling
+.BR get_error (3).
+A descriptive error string for the last error encountered can be obtained from
+a call to
+.BR get_error_string (3).
+.SH SEE ALSO
+.BR dirfile_add_meta (3),
+.BR dirfile_add_bit (3),
+.BR dirfile_add_lincom (3),
+.BR dirfile_add_linterp (3),
+.BR dirfile_add_multiply (3),
+.BR dirfile_add_phase (3),
+.BR dirfile_add_metaspec (3),
+.BR dirfile_open (3),
+.BR durfile_flush_metadata (3),
+.BR get_error (3),
+.BR get_error_string (3),
+.BR dirfile-format (5)

@@ -219,17 +219,17 @@ absolute path, or else a relative path from the current file.  Syntax is:
 .RE
 .TP
 .B /META
-The META directive specifies a metadata field attached to a particular parent
-field.  This directive is used to attach field metadata to the parent.  The
-field metadata may be of any allowed type.  Metadata field data are retrieved in
-exactly the same way as regular field data, but the field code specified will
-consist of the parent and metadata field names joined with a forward slash:
+The META directive specifies a metafield attached to a particular parent
+field.  The field metadata may be of any allowed type except
+.BR RAW .
+Metafields are retrieved in exactly the same way as regular field data, but the
+field code specified consists of the parent and metafield names joined with
+a forward slash:
 .RS
 .IP
 .IB <parent-field> / <meta-field>
 .PP
-META fields of type RAW are prohibited.  Furthermore, META fields may not be
-specified before their parent field has been.  Syntax is:
+META fields may not be specified before their parent field has been.  Syntax is:
 .IP
 .B /META
 .I <parent-field>
@@ -246,10 +246,10 @@ provides a scalar metadatum called
 .I meta
 with value 3.291882 attached to the field
 .IR pfield .
-This particular metadata field may be referred to by the field code
-"pfield/meta".  Note that multiple parent fields may have metadata fields with
-the same name, since all references to metadata fields must include the parent
-field name.  Metadata fields may not themselves have further sub-metadata.
+This particular metafield may be referred to by the field code
+"pfield/meta".  Note that different parent fields may have metafields with
+the same name, since all references to metafields must include the parent
+field name.  Metafields may not themselves have further sub-metafields.
 .RE
 .TP
 .B /VERSION
@@ -276,7 +276,7 @@ is assumed to be a field specification line.  The first token in a field
 specification line is the field name.  The field name consists of one or more
 characters, excluding both ASCII control characters, and the characters
 .IP
-.B &\t/\t;\t<\t>\t\\\\\t|\t.
+.B &\t/\t;\t<\t>\t|\t.
 .PP
 which are reserved.  The field name may not be
 .I INDEX
@@ -285,20 +285,20 @@ Field names are case sensitive.  The second token in the field specification
 line is the field type.  The meaning of subsequent tokens depends on the field
 type.
 
-Some of the parameters in a field specification line, may be either literal
+Some of the parameters in a field specification line may be either literal
 numbers or else the field code of a
 .B CONST
 field containing the number.  Such parameters are indicated below.  Since it is
-possible to create a field name which is identical to a literal number, a
-parameter is assumed to be the name of a 
+possible to create a field code which is identical to a literal number, a
+parameter is assumed to be the field code of a 
 .B CONST
 field only if the entire token cannot be parsed as a literal number using the
 rules outlined in
 .BR strtod (3).
 (So, for example, a
 .B CONST
-field whose code consists solely of digits can never be used as a parameter in a
-field specification line.)
+field whose field code consists solely of digits can never be used as a
+parameter in a field specification line.)
 
 There are eight field types.  Of these, six are of vector type
 .RB ( BIT ", " LINCOM ", " LINTERP ", " MULTIPLY ", " PHASE ", and " RAW )
@@ -576,13 +576,13 @@ and the
 and
 .B STRING
 field types.  It permitted whitespace in tokens and introduced the character
-escape sequences, and allowed
+escape sequences. It allowed
 .B CONST
 fields to be used as parameters in field specification lines.  It also removed
 .I FILEFRAM
 as an alias for
 .IR INDEX ,
-and allowed '#' in field codes, but prohibited '.'.
+and allowed '#' and '\e' in field codes, but prohibited '.'.
 
 Version 5 of the Standards (August 2008) added
 .B VERSION
