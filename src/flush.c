@@ -358,47 +358,43 @@ void _GD_FlushMeta(DIRFILE* D)
   dreturnvoid();
 }
 
-void dirfile_flush_metadata(DIRFILE* D)
+int dirfile_flush_metadata(DIRFILE* D)
 {
   dtrace("%p", D);
 
-  if (D->flags & GD_INVALID) { /* don't crash */
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturnvoid();
-    return;
-  }
-
   _GD_ClearError(D);
 
-  _GD_FlushMeta(D);
+  if (D->flags & GD_INVALID) /* don't crash */
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+  else
+    _GD_FlushMeta(D);
 
-  dreturnvoid();
+  dreturn("%i", (D->error == GD_E_OK) ? 0 : -1);
+  return (D->error == GD_E_OK) ? 0 : -1;
 }
 
-void dirfile_flush(DIRFILE* D, const char* field_code)
+int dirfile_flush(DIRFILE* D, const char* field_code)
 {
   unsigned int i;
 
   dtrace("%p, \"%s\"", D, field_code);
 
-  if (D->flags & GD_INVALID) {/* don't crash */
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturnvoid();
-    return;
-  }
-
   _GD_ClearError(D);
 
-  if (field_code == NULL) {
+  if (D->flags & GD_INVALID) /* don't crash */
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+  else if (field_code == NULL) {
     _GD_FlushMeta(D);
     if (!D->error)
       for (i = 0; i < D->n_entries; ++i)
         if (D->entry[i]->field_type == GD_RAW_ENTRY)
           _GD_Flush(D, D->entry[i], NULL);
-  } else
+  } else {
     _GD_Flush(D, _GD_FindField(D, field_code, NULL), field_code);
+  }
 
-    dreturnvoid();
+  dreturn("%i", (D->error == GD_E_OK) ? 0 : -1);
+  return (D->error == GD_E_OK) ? 0 : -1;
 }
 /* vim: ts=2 sw=2 et tw=80
 */

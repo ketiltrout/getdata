@@ -57,9 +57,9 @@ namespace GetData {
 
       const char **FieldListByType(EntryType type);
 
-      void Flush(const char *field_code = NULL);
+      int Flush(const char *field_code = NULL);
 
-      void FlushMetaData();
+      int FlushMetaData();
 
       const char *FormatFileName(int index);
 

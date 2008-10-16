@@ -60,14 +60,14 @@ Entry *Dirfile::Entry(const char* field_code)
   return new GetData::Entry(D, field_code);
 }
 
-void Dirfile::Flush(const char* field_code)
+int Dirfile::Flush(const char* field_code)
 {
-  dirfile_flush(D, field_code);
+  return dirfile_flush(D, field_code);
 }
 
-void Dirfile::FlushMetaData()
+int Dirfile::FlushMetaData()
 {
-  dirfile_flush_metadata(D);
+  return dirfile_flush_metadata(D);
 }
 
 int Dirfile::Error()
