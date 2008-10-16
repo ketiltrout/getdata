@@ -26,8 +26,8 @@ else
 LFS_transitional_mans =
 endif
 
-dist_man_MANS = dirfile_add.3 dirfile_add_raw.3 dirfile_close.3 \
-								dirfile_flush.3 dirfile_flush_metadata.3 \
+dist_man_MANS = dirfile_add.3 dirfile_add_raw.3 dirfile_add_spec.3 \
+								dirfile_close.3 dirfile_flush.3 dirfile_flush_metadata.3 \
 								dirfile_free_entry_strings.3 dirfile_include.3 dirfile_open.3 \
 								get_constant.3 get_constant_values.3 get_entry.3 get_error.3 \
 								get_error_string.3 get_field_list.3 get_field_list_by_type.3 \
