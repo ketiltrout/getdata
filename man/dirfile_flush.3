@@ -47,9 +47,8 @@ also be flushed to disk as if
 .BR dirfile_flush_metadata (3)
 has been called.
 .SH RETURN VALUE
-.BR dirfile_flush ()
-returns no value.  On error, it will set the dirfile error to a non-zero value.
-Possible error values are:
+On success, zero is returned.  On error, -1 is returned and the dirfile error is
+set to a non-zero error value.  Possible error values are:
 .TP 8
 .B GD_E_BAD_CODE
 The field specified by

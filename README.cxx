@@ -49,8 +49,8 @@ are available:
 * const void *Dirfile::ConstantValues(GetData::DataType type = Float64)
 * const char **Dirfile::FieldList()
 * const char **Dirfile::FieldListByType(GetData::EntryType type)
-* void Dirfile::Flush(const char *field_code = NULL)
-* void Dirfile::FlushMetaData()
+* int Dirfile::Flush(const char *field_code = NULL)
+* int Dirfile::FlushMetaData()
 * const char *Dirfile::FormatFilename(int index)
 * size_t Dirfile::GetConstant(const char *field_code, GetData::DataType type,
     void *data_out)

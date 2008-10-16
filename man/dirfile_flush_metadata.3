@@ -28,7 +28,7 @@ dirfile_flush_metadata \(em close a dirfile and free associated memory.
 .HP
 .nh
 .ad l
-.BI "void dirfile_flush_metadata(DIRFILE *" dirfile );
+.BI "int dirfile_flush_metadata(DIRFILE *" dirfile );
 .hy
 .ad n
 .SH DESCRIPTION
@@ -44,9 +44,8 @@ This function fushes only metadata.  To flush the field data as well, call
 .BR dirfile_flush (3)
 instead.
 .SH RETURN VALUE
-.BR dirfile_flush_metadata ()
-returns no value.  On error, it will set the dirfile error to a non-zero error
-value.  Possible error values are:
+On success, zero is returned.  On error, -1 is returned and the dirfile error is
+set to a non-zero error value.  Possible error values are:
 .TP 8
 .B GD_E_BAD_DIRFILE
 The supplied dirfile was invalid.
