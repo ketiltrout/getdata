@@ -90,7 +90,7 @@ char* _GD_ValidateField(const gd_entry_t* parent, const char* field_code)
   }
 
   for (i = 0; i < len; ++i)
-    if (strchr("/\\<>;|&.", field_code[i]) != NULL) {
+    if (strchr("/<>;|&.", field_code[i]) != NULL) {
       dreturn("%p", field_code);
       return (char*)field_code;
     }
