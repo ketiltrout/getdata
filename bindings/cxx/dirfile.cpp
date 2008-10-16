@@ -42,7 +42,7 @@ int Dirfile::Add(const GetData::Entry &entry)
 
 int Dirfile::AddSpec(const char *spec, int format_file)
 {
-  return dirfile_add_spec(D, format_file, spec);
+  return dirfile_add_spec(D, spec, format_file);
 }
 
 int Dirfile::AddMeta(const GetData::Entry &entry, const char *parent)
@@ -50,9 +50,9 @@ int Dirfile::AddMeta(const GetData::Entry &entry, const char *parent)
   return dirfile_add_meta(D, &entry.E, parent);
 }
 
-int Dirfile::AddMetaSpec(const char *parent, const char *spec)
+int Dirfile::AddMetaSpec(const char *spec, const char *parent)
 {
-  return dirfile_add_metaspec(D, parent, spec);
+  return dirfile_add_metaspec(D, spec, parent);
 }
 
 Entry *Dirfile::Entry(const char* field_code)

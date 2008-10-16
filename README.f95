@@ -102,11 +102,11 @@ unit numbers in place of C's DIRFILE pointers are:
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: field_code, data_in
 
-* subroutine fdirfile_add_spec (dirfile, format_file, spec)
+* subroutine fdirfile_add_spec (dirfile, spec, format_file)
   integer, intent(in) :: dirfile, format_file
   character (len=*), intent(in) :: spec
 
-* subroutine fdirfile_add_meta_spec (dirfile, parent, spec)
+* subroutine fdirfile_add_metaspec (dirfile, spec, parent)
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: parent, spec
 

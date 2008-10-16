@@ -13,23 +13,24 @@ int main(void)
 {
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
-  const char* data = __TEST__ "dirfile/data";
 
   DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_CREAT);
-  dirfile_add_spec(D, "data RAW UINT8 2", 0);
+  dirfile_add_metaspec(D, "meta CONST UINT8 2", "INDEX");
   int error = get_error(D);
 
   /* check */
   int n = get_nfields(D);
+  int m = get_nmetafields(D, "INDEX");
 
   dirfile_close(D);
 
-  if (unlink(data))
-    return 1;
   unlink(format);
   rmdir(filedir);
 
-  if (n != 2)
+  if (n != 1)
+    return 1;
+
+  if (m != 1)
     return 1;
 
   return (error != GD_E_OK);

@@ -16,7 +16,7 @@ int main(void)
   const char* data = __TEST__ "dirfile/data";
 
   DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_CREAT);
-  dirfile_add_spec(D, 0, "INCLUDE RAW UINT8 2");
+  dirfile_add_spec(D, "INCLUDE RAW UINT8 2", 0);
   int error = get_error(D);
 
   /* check */

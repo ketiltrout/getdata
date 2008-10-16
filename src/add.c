@@ -319,7 +319,7 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
 }
 
 /* add a META field by parsing a field spec */
-int dirfile_add_metaspec(DIRFILE* D, const char* parent, const char* line)
+int dirfile_add_metaspec(DIRFILE* D, const char* line, const char* parent)
 {
   char instring[MAX_LINE_LENGTH];
   char outstring[MAX_LINE_LENGTH];
@@ -328,10 +328,17 @@ int dirfile_add_metaspec(DIRFILE* D, const char* parent, const char* line)
   int have_first; /* unused */
   gd_entry_t* E = NULL;
 
-  dtrace("%p, \"%s\", \"%s\"", D, parent, line);
+  dtrace("%p, \"%s\", \"%s\"", D, line, parent);
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  /* check access mode */
+  if ((D->flags & GD_ACCMODE) == GD_RDONLY) {
+    _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
     dreturn("%i", -1);
     return -1;
   }
@@ -359,8 +366,8 @@ int dirfile_add_metaspec(DIRFILE* D, const char* parent, const char* line)
   }
 
   /* Directive parsing is skipped -- The Field Spec parser will add the field */
-  E = _GD_ParseFieldSpec(D, n_cols, in_cols, NULL, "dirfile_add_metaspec()",
-      0, &have_first, E->format_file, DIRFILE_STANDARDS_VERSION, 1, 1);
+  _GD_ParseFieldSpec(D, n_cols, in_cols, E, "dirfile_add_metaspec()", 0,
+      &have_first, E->format_file, DIRFILE_STANDARDS_VERSION, 1, 1);
 
   if (D->error) {
     dreturn("%i", -1); /* field spec parser threw an error */
@@ -372,19 +379,32 @@ int dirfile_add_metaspec(DIRFILE* D, const char* parent, const char* line)
 }
 
 /* add a field by parsing a field spec */
-int dirfile_add_spec(DIRFILE* D, int format_file, const char* line)
+int dirfile_add_spec(DIRFILE* D, const char* line, int format_file)
 {
   char instring[MAX_LINE_LENGTH];
   char outstring[MAX_LINE_LENGTH];
   const char *in_cols[MAX_IN_COLS];
   int n_cols;
   int have_first; /* unused */
-  gd_entry_t* E = NULL;
 
-  dtrace("%p, %i, \"%s\"", D, format_file, line);
+  dtrace("%p, \"%s\", %i", D, line, format_file);
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  /* check access mode */
+  if ((D->flags & GD_ACCMODE) == GD_RDONLY) {
+    _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  /* check for include index out of range */
+  if (format_file < 0 || format_file >= D->n_include) {
+    _GD_SetError(D, GD_E_BAD_INDEX, 0, NULL, format_file, NULL);
     dreturn("%i", -1);
     return -1;
   }
@@ -405,8 +425,8 @@ int dirfile_add_spec(DIRFILE* D, int format_file, const char* line)
   }
 
   /* Directive parsing is skipped -- The Field Spec parser will add the field */
-  E = _GD_ParseFieldSpec(D, n_cols, in_cols, NULL, "dirfile_add_spec()",
-      0, &have_first, format_file, DIRFILE_STANDARDS_VERSION, 1, 1);
+  _GD_ParseFieldSpec(D, n_cols, in_cols, NULL, "dirfile_add_spec()", 0,
+      &have_first, format_file, DIRFILE_STANDARDS_VERSION, 1, 1);
 
   if (D->error) {
     dreturn("%i", -1); /* field spec parser threw an error */

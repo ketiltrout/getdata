@@ -773,14 +773,14 @@ subroutine fdirfile_add_meta (dirfile, parent, field_code, ent)
   end if
 end subroutine
 
-subroutine fdirfile_add_spec (dirfile, format_file, spec)
+subroutine fdirfile_add_spec (dirfile, spec, format_file)
   integer, intent(in) :: dirfile, format_file
   character (len=*), intent(in) :: spec
 
   call gdfasp(dirfile, format_file, TRIM(spec), LEN_TRIM(spec))
 end subroutine
 
-subroutine fdirfile_add_meta_spec (dirfile, parent, spec)
+subroutine fdirfile_add_metaspec (dirfile, spec, parent)
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: parent, spec
 

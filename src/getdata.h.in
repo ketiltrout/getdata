@@ -316,8 +316,8 @@ extern const char** get_metavector_list(DIRFILE* D, const char* parent)
 extern const char** get_metafield_list(DIRFILE* D, const char* parent)
   __THROW __gd_nonnull((1,2));
 
-extern int dirfile_add_metaspec(DIRFILE* D, const char* parent,
-    const char* line) __THROW __gd_nonnull ((1,2,3));
+extern int dirfile_add_metaspec(DIRFILE* D, const char* line,
+    const char* parent) __THROW __gd_nonnull ((1,2,3));
 
 /* The following functions contain calls to I/O functions, making them
  * cancellation points.  As a result we cannot mark them with __THROW.
@@ -340,8 +340,8 @@ extern int dirfile_add_raw(DIRFILE* D, const char* field_code,
 
 extern int dirfile_add(DIRFILE* D, const gd_entry_t* entry) __gd_nonnull((1,2));
 
-extern int dirfile_add_spec(DIRFILE* D, int format_file, const char* line)
-  __gd_nonnull ((1,3));
+extern int dirfile_add_spec(DIRFILE* D, const char* line, int format_file)
+  __gd_nonnull ((1,2));
 
 /* the following functions are _FILE_OFFSET_BITS sensitive */
 #ifndef __USE_FILE_OFFSET64

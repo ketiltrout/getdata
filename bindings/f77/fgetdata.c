@@ -933,26 +933,26 @@ void F77_FUNC(gdfmst, GDFMST) (const int* dirfile, const char* parent,
 }
 
 /* dirfile_add_spec wrapper */
-void F77_FUNC(gdfasp, GDFASP) (const int* dirfile, const int* format_file,
-    const char* spec, const int* spec_l)
+void F77_FUNC(gdfasp, GDFASP) (const int* dirfile, const char* spec,
+    const int* spec_l, const int* format_file)
 {
   char* sp = malloc(*spec_l + 1);
 
-  dirfile_add_spec(_GDF_GetDirfile(*dirfile), *format_file, _GDF_CString(sp,
-        spec, *spec_l));
+  dirfile_add_spec(_GDF_GetDirfile(*dirfile), _GDF_CString(sp, spec, *spec_l),
+      *format_file);
 
   free(sp);
 }
 
 /* dirfile_add_metaspec wrapper */
-void F77_FUNC(gdfmsp, GDFMSP) (const int* dirfile, const char *parent,
-    const int* parent_l, const char* spec, const int* spec_l)
+void F77_FUNC(gdfmsp, GDFMSP) (const int* dirfile, const char* spec,
+    const int* spec_l, const char *parent, const int* parent_l)
 {
   char* pa = malloc(*parent_l + 1);
   char* sp = malloc(*spec_l + 1);
 
-  dirfile_add_metaspec(_GDF_GetDirfile(*dirfile), _GDF_CString(pa, parent,
-        *parent_l), _GDF_CString(sp, spec, *spec_l));
+  dirfile_add_metaspec(_GDF_GetDirfile(*dirfile), _GDF_CString(sp, spec,
+        *spec_l), _GDF_CString(pa, parent, *parent_l));
 
   free(pa);
   free(sp);

@@ -340,7 +340,7 @@ void _GD_InsertSort(DIRFILE* D, gd_entry_t* E, int u) __THROW;
 gd_type_t _GD_LegacyType(char c);
 void _GD_LinterpData(DIRFILE* D, const void *data, gd_type_t type, size_t npts,
       double *lx, double *ly, size_t n_ln);
-gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, const char** in_cols,
+void _GD_ParseFieldSpec(DIRFILE* D, int n_cols, const char** in_cols,
     const gd_entry_t* parent, const char* format_file, int linenum,
     int* have_first, unsigned int me, int standards, int creat, int pedantic);
 int _GD_ParseFormatFile(FILE* fp, DIRFILE *D, int me, int* standards,

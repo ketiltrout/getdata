@@ -41,7 +41,7 @@ namespace GetData {
 
       int AddMeta(const GetData::Entry &entry, const char *parent);
 
-      int AddMetaSpec(const char *parent, const char *spec);
+      int AddMetaSpec(const char *spec, const char *parent);
 
       int AddSpec(const char *spec, int format_file = 0);
 

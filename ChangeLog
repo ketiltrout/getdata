@@ -1,3 +1,22 @@
+2008-10-16   D. V. Wiebe <getdata@ketiltrout.net>  svn:155
+	* src/open.c: Moved meta field enumeration to _GD_ParseFieldSpec from
+	_GD_ParseDirective to allow dirfile_add_metaspec to benefit seamlessly.
+
+	* src/add.c (dirfile_add_metaspec dirfile_add_spec): Reversed parameters.
+	It's better to keep the order consistent with the other dirfile_add
+	functions rather than having it consistant with the format file.
+	* bindings/cxx/dirfile.cpp bindings/cxx/dirfile.h bindings/f77/fgetdata.c
+	bindings/f77/fgetdata.h bindings/f77/getdata.f90.in README.cxx README.f95
+	README.f77: Ditto for bindings.
+
+	* src/add.c (dirfile_add_metaspec dirfile_add_spec): Fail on a read-only
+	dirfile or format_file out of range.
+
+	* src/add.c (dirfile_add_metaspec): Pass parent to _GD_ParseFieldSpec.
+
+	* test/add_meta_spec_invalid.c test/add_meta_spec.c
+	test/add_meta_spec_directive.c: Added.
+
 2008-10-15   D. V. Wiebe <getdata@ketiltrout.net>  svn:151
 	* src/add.c src/flush.c src/getdata.c src/include.c src/internal.h
 	src/nframes.c src/open.c src/putdata.c man/dirfile-format.5: Made endianness

@@ -29,32 +29,32 @@ dirfile_add_multiply, dirfile_add_phase \(em add a field to a dirfile
 .HP
 .nh
 .ad l
-.BI "int dirfile_add_raw(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "int dirfile_add_raw(DIRFILE *" dirfile ", const char *" field_name ,
 .BI "unsigned int " spf ", gd_type_t " data_type ", int " format_file );
 .HP
-.BI "int dirfile_add_bit(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "int dirfile_add_bit(DIRFILE *" dirfile ", const char *" field_name ,
 .BI "const char *" in_field ", int " bitnum ", int " numbits ,
 .BI "int " format_file );
 .HP
-.BI "int dirfile_add_lincom(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "int dirfile_add_lincom(DIRFILE *" dirfile ", const char *" field_name ,
 .BI "int " n_fields ", const char **" in_fields ", const double *" m ,
 .BI "const double *" b ", int " format_file );
 .HP
-.BI "int dirfile_add_linterp(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "int dirfile_add_linterp(DIRFILE *" dirfile ", const char *" field_name ,
 .BI "const char *" in_field ", const char *" table ", int " format_file );
 .HP
-.BI "int dirfile_add_multiply(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "int dirfile_add_multiply(DIRFILE *" dirfile ", const char *" field_name ,
 .BI "const char *" in_field1 ", const char *" in_field2 ", int " format_file );
 .HP
-.BI "int dirfile_add_phase(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "int dirfile_add_phase(DIRFILE *" dirfile ", const char *" field_name ,
 .BI "const char *" in_field ", int " phase ", int " format_file );
 .HP
-.BI "int dirfile_add_string(DIRFILE *" dirfile ", const char *" field_code ,
-.BI "const char *" value ", int " format_file );
-.HP
-.BI "int dirfile_add_const(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "int dirfile_add_const(DIRFILE *" dirfile ", const char *" field_name ,
 .BI "gd_type_t " const_type ", gd_type_t " data_type ", void *" value ,
 .BI "int " format_file );
+.HP
+.BI "int dirfile_add_string(DIRFILE *" dirfile ", const char *" field_name ,
+.BI "const char *" value ", int " format_file );
 .hy
 .ad n
 .SH DESCRIPTION
@@ -64,7 +64,7 @@ function to add a new field of the indicated type to the dirfile specified by
 .IR dirfile .
 .P
 In all of these calls,
-.I field_code
+.I field_name
 indicates the name of the field to be added.  Further,
 .I format_file
 is the index of the format file fragment into which the field should be added.
@@ -101,6 +101,13 @@ parameter specifies the storage type for the const, while
 .I data_type
 specifies the data type of the value pointed to by
 .IR value .
+
+All fields added with this interface must contain numerical parameters.  Fields
+with
+.B CONST
+fields as parameters cannot be added with these functions.  Those fields must
+be added with
+.BR dirfile_add_spec (3).
 .SH RETURN VALUE
 On success, any of these functions returns zero.   On error, -1 is returned and 
 the dirfile error is set to a non-zero error value.  Possible error values are:
@@ -113,27 +120,50 @@ The library was unable to allocate memory.
 .TP
 .B GD_E_BAD_CODE
 The
-.IR field_code
+.IR field_name
 parameter contained invalid characters.
 .TP
 .B GD_E_BAD_DIRFILE
 The supplied dirfile was invalid.
 .TP
-.B GD_E_DUPLICATE
-The
-.IR field_code
-parameter referred to a field already existing in
-.IR dirfile .
-.TP
 .B GD_E_BAD_ENTRY
 One or more of the field parameters specified was invalid.
 .TP
+.B GD_E_BAD_INDEX
+The
+.IR format_file
+parameter was out of range.
+.TP
 .B GD_E_BAD_TYPE
 The
-.IR data_type
+.IR data_type " or " const_type
 parameter provided to
-.BR dirfile_add_raw ()
+.BR dirfile_add_raw "()  or " dirfile_add_const (),
 was invalid.
+.TP
+.B GD_E_DUPLICATE
+The
+.IR field_name
+provided duplicated that of an already existing field.
+.TP
+.B GD_E_RAW_IO
+An I/O error occurred while creating an empty binary file to be associated with
+a newly added
+.B RAW
+field.
+.TP
+.B GD_E_UNKNOWN_ENCODING
+The encoding scheme of the specified format file fragment is not known to the
+library.  As a result, the library was unable to create an empty binary file to
+be associated with a newly added
+.B RAW
+field.
+.TP
+.B GD_E_UNSUPPORTED
+The encoding scheme of the specified format file fragment does not support
+creating an empty binary file to be associated with a newly added
+.B RAW
+field.
 .P
 The dirfile error may be retrieved by calling
 .BR get_error (3).
@@ -142,6 +172,12 @@ a call to
 .BR get_error_string (3).
 .SH SEE ALSO
 .BR dirfile_add (3),
+.BR dirfile_add_metabit (3),
+.BR dirfile_add_metalincom (3),
+.BR dirfile_add_metalinterp (3),
+.BR dirfile_add_metamultiply (3),
+.BR dirfile_add_metaphase (3),
+.BR dirfile_add_spec (3),
 .BR dirfile_open (3),
 .BR durfile_flush_metadata (3),
 .BR get_error (3),

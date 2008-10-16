@@ -1,4 +1,4 @@
-.\" dirfile_add.3.  The dirfile_add man page.
+.\" dirfile_add_spec.3.  The dirfile_add_spec man page.
 .\"
 .\" (C) 2008 D. V. Wiebe
 .\"
@@ -20,66 +20,50 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH dirfile_add 3 "15 October 2008" "Version 0.4.0" "GETDATA"
+.TH dirfile_add_spec 3 "16 October 2008" "Version 0.4.0" "GETDATA"
 .SH NAME
-dirfile_add, dirfile_add_meta \(em add a field to a dirfile
+dirfile_add_spec, dirfile_add_metaspec \(em add a field to a dirfile
 .SH SYNOPSIS
 .B #include <getdata.h>
 .HP
 .nh
 .ad l
-.BI "int dirfile_add(DIRFILE *" dirfile ", const gd_entry_t *" entry );
+.BI "int dirfile_add_spec(DIRFILE *" dirfile ", const char *" line ,
+.BI "int " format_file );
 .HP
-.BI "int dirfile_add_meta(DIRFILE *" dirfile ", const gd_entry_t *" entry ,
+.BI "int dirfile_add_metaspec(DIRFILE *" dirfile ", const char *" line ,
 .BI "const char *" parent );
 .hy
 .ad n
 .SH DESCRIPTION
 The
-.BR dirfile_add ()
-function adds the field described by 
-.I entry
+.BR dirfile_add_spec ()
+function adds the field described by the field specification line in
+.I line
 to the dirfile specified by
 .IR dirfile .
 The
-.BR dirfile_add_meta ()
+.BR dirfile_add_metaspec ()
 function behaves similarly, but adds the field as a metafield under the
 field indicated by the field code
 .IR parent .
+Field specification lines are described in detail in
+.BR dirfile-format (5).
 
-The form of
-.I entry
-is described in detail in the
-.BR get_entry (3)
-man page.  All relevant members of
-.I entry
-for the field type specified must be properly initialised.
+When adding a metafield, 
+.I line
+should only contain a field specification, and not a
+.B /META
+directive.
 
-When adding a metafield, the
-.IR entry -> field
-member should contain just the metafield's name, not the fully formed
-.IB <parent-field> / <meta-field>
-field code.  Also,
-.BR dirfile_add_meta ()
-ignores the value of
-.IR entry -> format_file ,
-and instead adds the new meta field to the same format file fragment in which
-the parent field is defined.
-
-All fields added with this interface must contain numerical parameters.  Fields
-with
-.B CONST
-fields as parameters cannot be added with these functions.  Those fields must
-be added with
-.BR dirfile_add_spec (3)
-or
-.BR dirfile_add_metaspec (3).
+Passing these functions a directive line instead of a field specification line
+will result in a syntax error.
 
 .SH RETURN VALUE
 On success,
-.BR dirfile_add ()
+.BR dirfile_add_spec ()
 and
-.BR dirfile_add_meta ()
+.BR dirfile_add_metaspec ()
 return zero.   On error, -1 is returned and the dirfile error is set to a
 non-zero error value.  Possible error values are:
 .TP 8
@@ -90,42 +74,21 @@ The specified dirfile was opened read-only.
 The library was unable to allocate memory.
 .TP
 .B GD_E_BAD_CODE
-The field name provided in
-.IR entry -> field
-contained invalid characters. Alternately, the
+The
 .I parent
 field code was not found, or was already a metafield.
 .TP
 .B GD_E_BAD_DIRFILE
 The supplied dirfile was invalid.
 .TP
-.B GD_E_BAD_ENTRY
-There was an error in the specification of the field described by
-.IR entry ,
-or the caller attempted to add a field of type
-.B RAW
-as a metafield.
-.TP
 .B GD_E_BAD_INDEX
 The
-.IR entry -> format_file
+.IR format_file
 parameter was out of range.
 .TP
-.B GD_E_BAD_TYPE
-The
-.IR entry -> data_type
-parameter provided with a
-.BR RAW
-entry, or the
-.IR entry -> const_type
-parameter provided with a
-.BR CONST
-entry, was invalid.
-.TP
-.B GD_E_DUPLICATE
-The field name provided in 
-.IR entry -> field
-duplicated that of an already existing field.
+.B GD_E_FORMAT
+A syntax error was encountered in
+.IR line .
 .TP
 .B GD_E_RAW_IO
 An I/O error occurred while creating an empty binary file to be associated with
@@ -152,19 +115,19 @@ A descriptive error string for the last error encountered can be obtained from
 a call to
 .BR get_error_string (3).
 .SH SEE ALSO
+.BR dirfile_add (3),
 .BR dirfile_add_bit (3),
 .BR dirfile_add_lincom (3),
 .BR dirfile_add_linterp (3),
+.BR dirfile_add_meta (3),
 .BR dirfile_add_metabit (3),
 .BR dirfile_add_metalincom (3),
 .BR dirfile_add_metalinterp (3),
 .BR dirfile_add_metamultiply (3),
 .BR dirfile_add_metaphase (3),
-.BR dirfile_add_metaspec (3),
 .BR dirfile_add_multiply (3),
 .BR dirfile_add_phase (3),
 .BR dirfile_add_raw (3),
-.BR dirfile_add_spec (3),
 .BR dirfile_open (3),
 .BR durfile_flush_metadata (3),
 .BR get_error (3),

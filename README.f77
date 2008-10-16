@@ -597,7 +597,7 @@ Available Subroutines
   This subroutine adds a STRING field with the supplied parameters to the
   specified format file fragment of the dirfile
 
-* GDFASP(dirfile_unit, format_file, spec, spec_len)
+* GDFASP(dirfile_unit, spec, spec_len, format_file)
 
   Input:
     INTEGER dirfile_unit, format_file, spec_len
@@ -605,6 +605,16 @@ Available Subroutines
 
   This subroutine wraps dirfile_add_spec(3), and allows adding a field to
   a dirfile given a field specification line.
+
+* GDFMSP(dirfile_unit, spec, spec_len, parent, parent_len)
+
+  Input:
+    INTEGER dirfile_unit, spec_len, parent_len
+    CHARACTER*<spec_len> spec
+    CHARACTER*<parent_len> parent
+
+  This subroutine wraps dirfile_add_metaspec(3), and allows adding a metafield
+  to a dirfile given a field specification line.
 
 * GDFMBT(dirfile_unit, parent, parent_len, field_code, field_code_len, in_field,
   in_field_len, bitnum, numbits)

@@ -193,11 +193,11 @@ void F77_FUNC(gdfmst, GDFMST) (const int* dirfile, const char* parent,
     const int* parent_l, const char* field_code, const int* field_code_l,
     const char* value, const int* value_l);
 
-void F77_FUNC(gdfasp, GDFASP) (const int* dirfile, const int* format_file,
-    const char* spec, const int* spec_l);
+void F77_FUNC(gdfasp, GDFASP) (const int* dirfile, const char* spec,
+    const int* spec_l, const int* format_file);
 
-void F77_FUNC(gdfmsp, GDFMSP) (const int* dirfile, const char *parent,
-    const int* parent_l, const char* spec, const int* spec_l);
+void F77_FUNC(gdfmsp, GDFMSP) (const int* dirfile, const char* spec,
+    const int* spec_l, const char *parent, const int* parent_l);
 
 void F77_FUNC(gdfffi, GDFFFI) (int* format_file, const int* dirfile,
     const char* field_code, const int* field_code_l);

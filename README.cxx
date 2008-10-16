@@ -44,7 +44,7 @@ are available:
 
 * int Dirfile::Add(const Entry &entry)
 * int Dirfile::AddMeta(const Entry &entry, const char *parent)
-* int Dirfile::AddMetaSpec(const char *parent, const char *spec)
+* int Dirfile::AddMetaSpec(const char *spec, const char *parent)
 * int Dirfile::AddSpec(const char *spec, int format_file = 0)
 * const void *Dirfile::ConstantValues(GetData::DataType type = Float64)
 * const char **Dirfile::FieldList()

@@ -46,6 +46,10 @@ install-data-hook:
 		$(LN_S) -f dirfile_add_raw.3 dirfile_add_multiply.3 && \
 		$(LN_S) -f dirfile_add_raw.3 dirfile_add_phase.3 && \
 		$(LN_S) -f dirfile_add_raw.3 dirfile_add_string.3
+	cd $(DESTDIR)$(mandir)/man3 && \
+		$(LN_S) -f dirfile_add.3 dirfile_add_meta.3
+	cd $(DESTDIR)$(mandir)/man3 && \
+		$(LN_S) -f dirfile_add_spec.3 dirfile_add_meta_spec.3
 
 clean-local:
 	rm -rf *~ 

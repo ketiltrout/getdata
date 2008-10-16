@@ -45,6 +45,7 @@ ADD_TESTS=add add_bit add_bit_bitnum add_bit_bitsize add_bit_invalid \
 					add_meta_bit_invalid add_meta_lincom add_meta_lincom_invalid \
 					add_meta_linterp add_meta_linterp_invalid add_meta_multiply \
 					add_meta_multiply_invalid add_meta_phase add_meta_phase_invalid \
+					add_meta_spec add_meta_spec_directive add_meta_spec_invalid \
 					add_multiply add_multiply_invalid add_phase add_phase_invalid \
 					add_raw add_raw_invalid add_raw_spf add_raw_type add_rdonly add_sort \
 					add_spec add_spec_directive add_spec_invalid add_string add_type
