@@ -36,7 +36,7 @@ int main(void)
   close(fd);
 
   DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
-  unsigned int nfields = get_nmetavectors(D, "raw1");
+  unsigned int nfields = get_nmvectors(D, "raw1");
   int error = get_error(D);
   dirfile_close(D);
 

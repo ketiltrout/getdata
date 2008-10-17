@@ -16,11 +16,11 @@ int main(void)
 
   DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_CREAT);
   dirfile_add_phase(D, "new", "in", 3, 0);
-  dirfile_add_metalinterp(D, "new", "meta", "in", "table");
+  dirfile_madd_linterp(D, "new", "meta", "in", "table");
   int error = get_error(D);
 
   /* check */
-  int n = get_nmetafields(D, "new");
+  int n = get_nmfields(D, "new");
 
   dirfile_close(D);
 

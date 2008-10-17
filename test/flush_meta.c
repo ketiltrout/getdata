@@ -19,7 +19,7 @@ int main(void)
 
   DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_CREAT | GD_TRUNC);
   dirfile_add_raw(D, "new", GD_UINT8, 2, 0);
-  dirfile_flush_metadata(D);
+  dirfile_metaflush(D);
   int error = get_error(D);
 
   dirfile_close(D);

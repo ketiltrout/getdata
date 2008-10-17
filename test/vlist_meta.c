@@ -29,7 +29,7 @@ int main(void)
   close(fd);
 
   DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
-  const char** field_list = get_metavector_list(D, "parent");
+  const char** field_list = get_mvector_list(D, "parent");
 
   if (get_error(D))
     r = 1;

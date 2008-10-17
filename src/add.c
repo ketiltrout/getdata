@@ -319,7 +319,7 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
 }
 
 /* add a META field by parsing a field spec */
-int dirfile_add_metaspec(DIRFILE* D, const char* line, const char* parent)
+int dirfile_madd_spec(DIRFILE* D, const char* line, const char* parent)
 {
   char instring[MAX_LINE_LENGTH];
   char outstring[MAX_LINE_LENGTH];
@@ -357,8 +357,8 @@ int dirfile_add_metaspec(DIRFILE* D, const char* line, const char* parent)
   instring[MAX_LINE_LENGTH - 2] = '\0';
 
   /* start parsing */
-  n_cols = _GD_Tokenise(D, instring, outstring, in_cols,
-      "dirfile_add_metaspec()", 0);
+  n_cols = _GD_Tokenise(D, instring, outstring, in_cols, "dirfile_madd_spec()",
+      0);
 
   if (D->error) {
     dreturn("%i", -1); /* tokeniser threw an error */
@@ -366,7 +366,7 @@ int dirfile_add_metaspec(DIRFILE* D, const char* line, const char* parent)
   }
 
   /* Directive parsing is skipped -- The Field Spec parser will add the field */
-  _GD_ParseFieldSpec(D, n_cols, in_cols, E, "dirfile_add_metaspec()", 0,
+  _GD_ParseFieldSpec(D, n_cols, in_cols, E, "dirfile_madd_spec()", 0,
       &have_first, E->fragment_index, DIRFILE_STANDARDS_VERSION, 1, 1);
 
   if (D->error) {
@@ -686,7 +686,7 @@ int dirfile_add_const(DIRFILE* D, const char* field_code, gd_type_t const_type,
   return error;
 }
 
-int dirfile_add_meta(DIRFILE* D, const gd_entry_t* entry, const char* parent)
+int dirfile_madd(DIRFILE* D, const gd_entry_t* entry, const char* parent)
 {
   int ret;
 
@@ -705,9 +705,8 @@ int dirfile_add_meta(DIRFILE* D, const gd_entry_t* entry, const char* parent)
 }
 
 /* add a META LINCOM entry */
-int dirfile_add_metalincom(DIRFILE* D, const char* parent,
-    const char* field_code, int n_fields, const char** in_fields,
-    const double* m, const double* b)
+int dirfile_madd_lincom(DIRFILE* D, const char* parent, const char* field_code,
+    int n_fields, const char** in_fields, const double* m, const double* b)
 {
   dtrace("%p, \"%s\", \"%s\", %i, %p, %p, %p", D, field_code, parent,
       n_fields, in_fields, m, b);
@@ -738,8 +737,8 @@ int dirfile_add_metalincom(DIRFILE* D, const char* parent,
 }
 
 /* add a META LINTERP entry */
-int dirfile_add_metalinterp(DIRFILE* D, const char* parent,
-    const char* field_code, const char* in_field, const char* table)
+int dirfile_madd_linterp(DIRFILE* D, const char* parent, const char* field_code,
+    const char* in_field, const char* table)
 {
   dtrace("%p, \"%s\", \"%s\", \"%s\", \"%s\"", D, field_code, parent, in_field,
       table);
@@ -763,7 +762,7 @@ int dirfile_add_metalinterp(DIRFILE* D, const char* parent,
 }
 
 /* add a META BIT entry */
-int dirfile_add_metabit(DIRFILE* D, const char* parent, const char* field_code,
+int dirfile_madd_bit(DIRFILE* D, const char* parent, const char* field_code,
     const char* in_field, int bitnum, int numbits)
 {
   dtrace("%p, \"%s\", \"%s\", \"%s\", %i, %in", D, field_code, parent, in_field,
@@ -789,7 +788,7 @@ int dirfile_add_metabit(DIRFILE* D, const char* parent, const char* field_code,
 }
 
 /* add a META MULTIPLY entry */
-int dirfile_add_metamultiply(DIRFILE* D, const char* parent,
+int dirfile_madd_multiply(DIRFILE* D, const char* parent,
     const char* field_code, const char* in_field1, const char* in_field2)
 {
   dtrace("%p, \"%s\", \"%s\", \"%s\", \"%s\"", D, field_code, parent,
@@ -814,8 +813,8 @@ int dirfile_add_metamultiply(DIRFILE* D, const char* parent,
 }
 
 /* add a META PHASE entry */
-int dirfile_add_metaphase(DIRFILE* D, const char* parent,
-    const char* field_code, const char* in_field, int shift)
+int dirfile_madd_phase(DIRFILE* D, const char* parent, const char* field_code,
+    const char* in_field, int shift)
 {
   dtrace("%p, \"%s\", \"%s\", \"%s\", %i", D, field_code, parent, in_field,
       shift);
@@ -839,8 +838,8 @@ int dirfile_add_metaphase(DIRFILE* D, const char* parent,
 }
 
 /* add a META STRING entry */
-int dirfile_add_metastring(DIRFILE* D, const char* parent,
-    const char* field_code, const char* value)
+int dirfile_madd_string(DIRFILE* D, const char* parent, const char* field_code,
+    const char* value)
 {
   dtrace("%p, \"%s\", \"%s\", \"%s\"", D, field_code, parent, value);
 
@@ -875,9 +874,8 @@ int dirfile_add_metastring(DIRFILE* D, const char* parent,
 }
 
 /* add a META CONST entry */
-int dirfile_add_metaconst(DIRFILE* D, const char* parent,
-    const char* field_code, gd_type_t const_type, gd_type_t data_type,
-    const void* value)
+int dirfile_madd_const(DIRFILE* D, const char* parent, const char* field_code,
+    gd_type_t const_type, gd_type_t data_type, const void* value)
 {
   dtrace("%p, \"%s\", \"%s\", 0x%x, 0x%x, %p", D, field_code, parent,
       const_type, data_type, value);

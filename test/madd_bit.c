@@ -1,4 +1,4 @@
-/* Add a RAW field */
+/* Add a BIT field */
 #include "../src/getdata.h"
 
 #include <stdlib.h>
@@ -15,12 +15,12 @@ int main(void)
   const char* format = __TEST__ "dirfile/format";
 
   DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_CREAT);
-  dirfile_add_metaspec(D, "meta CONST UINT8 2", "INDEX");
+  dirfile_add_phase(D, "new", "in", 3, 0);
+  dirfile_madd_bit(D, "new", "meta", "input", 1, 1);
   int error = get_error(D);
 
   /* check */
-  int n = get_nfields(D);
-  int m = get_nmetafields(D, "INDEX");
+  int n = get_nmfields(D, "new");
 
   dirfile_close(D);
 
@@ -28,9 +28,6 @@ int main(void)
   rmdir(filedir);
 
   if (n != 1)
-    return 1;
-
-  if (m != 1)
     return 1;
 
   return (error != GD_E_OK);

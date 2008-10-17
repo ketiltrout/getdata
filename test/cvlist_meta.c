@@ -29,7 +29,7 @@ int main(void)
   close(fd);
 
   DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
-  const uint8_t* field_list = get_metaconstant_values(D, "parent", GD_UINT8);
+  const uint8_t* field_list = get_mconstants(D, "parent", GD_UINT8);
 
   if (get_error(D))
     r = 1;

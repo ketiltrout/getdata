@@ -159,8 +159,8 @@ Available Subroutines
 * GDFNMT(nfields, dirfile, parent, parent_l, type)
 * GDFNMV(nvectors, dirfile, parent, parent_l)
 
-  These subroutine wrap get_nmetafields(3), get_nmetafields_by_type(3), and
-  get_nmetavectors(3).  They behave analogously to GDFNFD, GDFNFT, and GDFNVE.
+  These subroutine wrap get_nmfields(3), get_nmfields_by_type(3), and
+  get_nmvectors(3).  They behave analogously to GDFNFD, GDFNFT, and GDFNVE.
 
 * GDFFDX(field_max, dirfile_unit)
 
@@ -239,7 +239,7 @@ Available Subroutines
     INTEGER dirfile_unit, field_num, parent_len
     CHARACTER*<parent_len> parent
 
-  This subroutine is the replacement for get_metafield_list(3) and behaves in
+  This subroutine is the replacement for get_mfield_list(3) and behaves in
   the same manner as GDFFDN.
 
 * GDFMFT(name, name_len, dirfile_unit, parent, parent_len, type, field_num)
@@ -252,7 +252,7 @@ Available Subroutines
     INTEGER dirfile_unit, field_num, parent_len, type
     CHARACTER*<parent_len> parent
 
-  This subroutine is the replacement for get_metafield_list_by_type(3) and
+  This subroutine is the replacement for get_mfield_list_by_type(3) and
   behaves in the same manner as GDFFNT.
     
 * GDFMVN(name, name_len, dirfile_unit, parent, parent_len, field_num)
@@ -265,7 +265,7 @@ Available Subroutines
     INTEGER dirfile_unit, field_num, parent_len
     CHARACTER*<parent_len> parent
 
-  This subroutine is the replacement for get_metavector_list(3) and behaves in
+  This subroutine is the replacement for get_mvector_list(3) and behaves in
   the same manner as GDFVEN.
 
 * GDFNFR(nframes, dirfile_unit)
@@ -613,7 +613,7 @@ Available Subroutines
     CHARACTER*<spec_len> spec
     CHARACTER*<parent_len> parent
 
-  This subroutine wraps dirfile_add_metaspec(3), and allows adding a metafield
+  This subroutine wraps dirfile_madd_spec(3), and allows adding a metafield
   to a dirfile given a field specification line.
 
 * GDFMBT(dirfile_unit, parent, parent_len, field_code, field_code_len, in_field,
@@ -661,13 +661,13 @@ Available Subroutines
   This subroutine returns the number of format file fragments in the specified
   dirfile.
 
-* GDFFLM(dirfile_unit)
+* GDFMFL(dirfile_unit)
 
   Input:
     INTEGER dirfile_unit
 
-  This subroutine wraps dirfile_flush_metadata(3), and will cause metadata
-  changes to be written to disk.
+  This subroutine wraps dirfile_metaflush(3), and will cause metadata changes to
+  be written to disk.
 
 * GDFINC(dirfile_unit, file, file_l, format_file, flags)
 

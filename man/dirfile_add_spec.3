@@ -22,7 +22,7 @@
 .\"
 .TH dirfile_add_spec 3 "17 October 2008" "Version 0.4.0" "GETDATA"
 .SH NAME
-dirfile_add_spec, dirfile_add_metaspec \(em add a field to a dirfile
+dirfile_add_spec, dirfile_madd_spec \(em add a field to a dirfile
 .SH SYNOPSIS
 .B #include <getdata.h>
 .HP
@@ -31,7 +31,7 @@ dirfile_add_spec, dirfile_add_metaspec \(em add a field to a dirfile
 .BI "int dirfile_add_spec(DIRFILE *" dirfile ", const char *" line ,
 .BI "int " fragment_index );
 .HP
-.BI "int dirfile_add_metaspec(DIRFILE *" dirfile ", const char *" line ,
+.BI "int dirfile_madd_spec(DIRFILE *" dirfile ", const char *" line ,
 .BI "const char *" parent );
 .hy
 .ad n
@@ -43,7 +43,7 @@ function adds the field described by the field specification line in
 to the dirfile specified by
 .IR dirfile .
 The
-.BR dirfile_add_metaspec ()
+.BR dirfile_madd_spec ()
 function behaves similarly, but adds the field as a metafield under the
 field indicated by the field code
 .IR parent .
@@ -63,7 +63,7 @@ will result in a syntax error.
 On success,
 .BR dirfile_add_spec ()
 and
-.BR dirfile_add_metaspec ()
+.BR dirfile_madd_spec ()
 return zero.   On error, -1 is returned and the dirfile error is set to a
 non-zero error value.  Possible error values are:
 .TP 8
@@ -119,15 +119,15 @@ a call to
 .BR dirfile_add_bit (3),
 .BR dirfile_add_lincom (3),
 .BR dirfile_add_linterp (3),
-.BR dirfile_add_meta (3),
-.BR dirfile_add_metabit (3),
-.BR dirfile_add_metalincom (3),
-.BR dirfile_add_metalinterp (3),
-.BR dirfile_add_metamultiply (3),
-.BR dirfile_add_metaphase (3),
 .BR dirfile_add_multiply (3),
 .BR dirfile_add_phase (3),
 .BR dirfile_add_raw (3),
+.BR dirfile_madd (3),
+.BR dirfile_madd_bit (3),
+.BR dirfile_madd_lincom (3),
+.BR dirfile_madd_linterp (3),
+.BR dirfile_madd_multiply (3),
+.BR dirfile_madd_phase (3),
 .BR dirfile_open (3),
 .BR durfile_flush_metadata (3),
 .BR get_error (3),

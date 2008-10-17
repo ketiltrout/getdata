@@ -135,7 +135,7 @@ void F77_FUNC(gdffgn, GDFFGN) (char* filename, int* filename_l,
 
 void F77_FUNC(gdfnfg, GDFNFG) (int* nformats, const int* dirfile);
 
-void F77_FUNC(gdfflm, GDFFLM) (const int* dirfile);
+void F77_FUNC(gdfmfl, GDFMFL) (const int* dirfile);
 
 void F77_FUNC(gdfinc, GDFINC) (const int* dirfile, const char* file,
     const int* file_l, const int* fragment_index, const int* flags);

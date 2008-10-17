@@ -25,7 +25,7 @@
 #include <string.h>
 #endif
 
-const void* get_metaconstant_values(DIRFILE* D, const char* parent,
+const void* get_mconstants(DIRFILE* D, const char* parent,
     gd_type_t return_type)
 {
   dtrace("%p, \"%s\", 0x%x", D, parent, return_type);
@@ -77,7 +77,7 @@ const void* get_metaconstant_values(DIRFILE* D, const char* parent,
   return e->const_value_list;
 }
 
-const char** get_metastring_values(DIRFILE* D, const char* parent)
+const char** get_mstrings(DIRFILE* D, const char* parent)
 {
   dtrace("%p, \"%s\"", D, parent);
 
@@ -128,7 +128,7 @@ const char** get_metastring_values(DIRFILE* D, const char* parent)
   return e->string_value_list;
 }
 
-const char** get_metafield_list_by_type(DIRFILE* D, const char* parent,
+const char** get_mfield_list_by_type(DIRFILE* D, const char* parent,
     gd_entype_t type)
 {
   dtrace("%p, \"%s\", %x", D, parent, type);
@@ -156,7 +156,7 @@ const char** get_metafield_list_by_type(DIRFILE* D, const char* parent,
   struct _gd_private_entry* e = P->e;
   size_t offs = strlen(P->field) + 1;
 
-  n = get_nmetafields_by_type(D, parent, type);
+  n = get_nmfields_by_type(D, parent, type);
 
   if (n == 0 || D->error) {
     dreturn("%p", NULL);
@@ -202,7 +202,7 @@ const char** get_metafield_list_by_type(DIRFILE* D, const char* parent,
   return (const char**)e->type_list[index];
 }
 
-const char** get_metavector_list(DIRFILE* D, const char* parent)
+const char** get_mvector_list(DIRFILE* D, const char* parent)
 {
   dtrace("%p, \"%s\"", D, parent);
 
@@ -255,7 +255,7 @@ const char** get_metavector_list(DIRFILE* D, const char* parent)
   return e->vector_list;
 }
 
-const char** get_metafield_list(DIRFILE* D, const char* parent)
+const char** get_mfield_list(DIRFILE* D, const char* parent)
 {
   dtrace("%p, \"%s\"", D, parent);
 

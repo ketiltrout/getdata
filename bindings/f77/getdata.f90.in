@@ -273,30 +273,30 @@ function fget_nvectors (dirfile)
   call gdfnve(fget_nvectors, dirfile)
 end function
 
-function fget_nmetafields (dirfile, parent)
-  integer :: fget_nmetafields
+function fget_nmfields (dirfile, parent)
+  integer :: fget_nmfields
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: parent
 
   ! call f77 library
-  call gdfnfd(fget_nmetafields, dirfile, TRIM(parent), LEN_TRIM(parent))
+  call gdfnfd(fget_nmfields, dirfile, TRIM(parent), LEN_TRIM(parent))
 end function
 
-function fget_nmetafields_by_type (dirfile, parent, entype)
-  integer :: fget_nmetafields_by_type
+function fget_nmfields_by_type (dirfile, parent, entype)
+  integer :: fget_nmfields_by_type
   integer, intent(in) :: dirfile, entype
   character (len=*), intent(in) :: parent
 
-  call gdfnmt(fget_nmetafields_by_type, dirfile, TRIM(parent), &
-  LEN_TRIM(parent), entype)
+  call gdfnmt(fget_nmfields_by_type, dirfile, TRIM(parent), LEN_TRIM(parent), &
+  entype)
 end function
 
-function fget_nmetavectors (dirfile, parent)
-  integer :: fget_nmetavectors
+function fget_nmvectors (dirfile, parent)
+  integer :: fget_nmvectors
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: parent
 
-  call gdfnmv(fget_nmetavectors, dirfile, TRIM(parent), LEN_TRIM(parent))
+  call gdfnmv(fget_nmvectors, dirfile, TRIM(parent), LEN_TRIM(parent))
 end function
 
 function fget_field_name_max (dirfile)
@@ -307,13 +307,13 @@ function fget_field_name_max (dirfile)
   call gdffnx(fget_field_name_max, dirfile)
 end function
 
-function fget_metafield_name_max (dirfile, parent)
-  integer :: fget_metafield_name_max
+function fget_mfield_name_max (dirfile, parent)
+  integer :: fget_mfield_name_max
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: parent
 
   ! call f77 library
-  call gdfmfx(fget_metafield_name_max, dirfile, TRIM(parent), LEN_TRIM(parent))
+  call gdfmfx(fget_mfield_name_max, dirfile, TRIM(parent), LEN_TRIM(parent))
 end function
 
 subroutine fget_field_list (field_list, dirfile, field_len)
@@ -376,7 +376,7 @@ subroutine fget_vector_list (field_list, dirfile, field_len)
   end if
 end subroutine
 
-subroutine fget_metafield_list (field_list, dirfile, parent, field_len)
+subroutine fget_mfield_list (field_list, dirfile, parent, field_len)
   character(len=*), dimension(:), intent(out) :: field_list
   integer, intent(in) :: dirfile
   integer, intent(inout) :: field_len
@@ -384,12 +384,12 @@ subroutine fget_metafield_list (field_list, dirfile, parent, field_len)
   character (len=*), intent(in) :: parent
 
   ! make sure the field list is large enough
-  max_len = fget_metafield_name_max(dirfile, parent)
+  max_len = fget_mfield_name_max(dirfile, parent)
 
   if (field_len .lt. max_len) then
     field_len = max_len
   else
-    nfields = fget_nmetafields(dirfile, parent)
+    nfields = fget_nmfields(dirfile, parent)
     do i=1,nfields
       ! call f77 library
       call gdfmfn(field_list(i), field_len, dirfile, TRIM(parent), &
@@ -398,7 +398,7 @@ subroutine fget_metafield_list (field_list, dirfile, parent, field_len)
   end if
 end subroutine
 
-subroutine fget_metafield_list_by_type (field_list, dirfile, parent, entype, &
+subroutine fget_mfield_list_by_type (field_list, dirfile, parent, entype, &
 field_len)
   character(len=*), dimension(:), intent(out) :: field_list
   integer, intent(in) :: dirfile, entype
@@ -407,12 +407,12 @@ field_len)
   character (len=*), intent(in) :: parent
 
   ! make sure the field list is large enough
-  max_len = fget_metafield_name_max(dirfile, parent)
+  max_len = fget_mfield_name_max(dirfile, parent)
 
   if (field_len .lt. max_len) then
     field_len = max_len
   else
-    nfields = fget_nmetafields_by_type(dirfile, parent, entype)
+    nfields = fget_nmfields_by_type(dirfile, parent, entype)
     do i=1,nfields
       ! call f77 library
       call gdfmft(field_list(i), field_len, dirfile, TRIM(parent), &
@@ -421,7 +421,7 @@ field_len)
   end if
 end subroutine
 
-subroutine fget_metavector_list (field_list, dirfile, parent, field_len)
+subroutine fget_mvector_list (field_list, dirfile, parent, field_len)
   character(len=*), dimension(:), intent(out) :: field_list
   integer, intent(in) :: dirfile
   integer, intent(inout) :: field_len
@@ -429,12 +429,12 @@ subroutine fget_metavector_list (field_list, dirfile, parent, field_len)
   character (len=*), intent(in) :: parent
 
   ! make sure the field list is large enough
-  max_len = fget_metafield_name_max(dirfile, parent)
+  max_len = fget_mfield_name_max(dirfile, parent)
 
   if (field_len .lt. max_len) then
     field_len = max_len
   else
-    nfields = fget_nmetavectors(dirfile, parent)
+    nfields = fget_nmvectors(dirfile, parent)
     do i=1,nfields
       ! call f77 library
       call gdfmvn(field_list(i), field_len, TRIM(parent), LEN_TRIM(parent), &
@@ -737,7 +737,7 @@ subroutine fdirfile_add (dirfile, field_code, ent)
   end if
 end subroutine
 
-subroutine fdirfile_add_meta (dirfile, parent, field_code, ent)
+subroutine fdirfile_madd (dirfile, parent, field_code, ent)
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: field_code, parent
   type(gd_entry), intent(in) :: ent
@@ -781,7 +781,7 @@ subroutine fdirfile_add_spec (dirfile, spec, fragment_index)
   call gdfasp(dirfile, fragment_index, TRIM(spec), LEN_TRIM(spec))
 end subroutine
 
-subroutine fdirfile_add_metaspec (dirfile, spec, parent)
+subroutine fdirfile_madd_spec (dirfile, spec, parent)
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: parent, spec
 
@@ -804,10 +804,10 @@ function fget_nfragments (dirfile)
   call gdfnfg(fget_nfragments, dirfile)
 end function
 
-subroutine fdirfile_flush_metadata (dirfile)
+subroutine fdirfile_metaflush (dirfile)
   integer, intent(in) :: dirfile
 
-  call gdfflm(dirfile)
+  call gdfmfl(dirfile)
 end subroutine
 
 subroutine fdirfile_include (dirfile, fragmentname, fragment_index, flags)

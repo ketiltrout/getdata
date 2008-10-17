@@ -358,7 +358,7 @@ void _GD_FlushMeta(DIRFILE* D)
   dreturnvoid();
 }
 
-int dirfile_flush_metadata(DIRFILE* D)
+int dirfile_metaflush(DIRFILE* D)
 {
   dtrace("%p", D);
 

@@ -39,13 +39,9 @@ namespace GetData {
 
       int Add(const GetData::Entry &entry);
 
-      int AddMeta(const GetData::Entry &entry, const char *parent);
-
-      int AddMetaSpec(const char *spec, const char *parent);
-
       int AddSpec(const char *spec, int format_file = 0);
 
-      const void *ConstantValues(DataType type = Float64);
+      const void *Constants(DataType type = Float64);
 
       GetData::Entry* Entry(const char *field_code);
 
@@ -58,8 +54,6 @@ namespace GetData {
       const char **FieldListByType(EntryType type);
 
       int Flush(const char *field_code = NULL);
-
-      int FlushMetaData();
 
       const char *FragmentName(int index);
 
@@ -74,24 +68,31 @@ namespace GetData {
       int Include(const char *file, int format_file = 0,
           unsigned int flags = 0);
 
-      const void *MetaConstantValues(const char *parent,
-          DataType type = Float64);
+      int MAdd(const GetData::Entry &entry, const char *parent);
 
-      const char **MetaFieldList(const char *parent);
+      int MAddSpec(const char *spec, const char *parent);
 
-      const char **MetaFieldListByType(const char *parent, EntryType type);
+      const void *MConstants(const char *parent, DataType type = Float64);
 
-      const char **MetaStringValues(const char *parent);
+      int MetaFlush();
 
-      const char **MetaVectorList(const char *parent);
+      const char **MFieldList(const char *parent);
+
+      const char **MFieldListByType(const char *parent, EntryType type);
+
+      const char **MStrings(const char *parent);
+
+      const char **MVectorList(const char *parent);
 
       unsigned int NFields();
 
       unsigned int NFieldsByType(EntryType type);
 
-      unsigned int NMetaFieldsByType(const char *parent, EntryType type);
+      unsigned int NMFields(const char *parent);
 
-      unsigned int NMetaVectors(const char *parent);
+      unsigned int NMFieldsByType(const char *parent, EntryType type);
+
+      unsigned int NMVectors(const char *parent);
 
       unsigned int NVectors();
 
@@ -110,7 +111,7 @@ namespace GetData {
 
       unsigned int SamplesPerFrame(const char *field_code);
 
-      const char **StringValues();
+      const char **Strings();
 
       const char **VectorList();
 

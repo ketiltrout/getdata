@@ -1,4 +1,4 @@
-.\" get_metavector_list.3.  The get_metavector_list man page.
+.\" get_strings.3.  The get_strings man page.
 .\"
 .\" (C) 2008 D. V. Wiebe
 .\"
@@ -20,28 +20,26 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH get_metavector_list 3 "17 October 2008" "Version 0.4.0" "GETDATA"
+.TH get_strings 3 "17 October 2008" "Version 0.4.0" "GETDATA"
 .SH NAME
-get_metavector_list \(em retrieve a list of vector fields in a dirfile
+get_strings \(em retrieve a list of string values from a dirfile
 .SH SYNOPSIS
 .B #include <getdata.h>
 .HP
 .nh
 .ad l
-.BI "const char **get_metavector_list(DIRFILE *" dirfile ,
-.BI "const char *" parent );
+.BI "const char **get_strings(DIRFILE *" dirfile );
 .hy
 .ad n
 .SH DESCRIPTION
 The
-.BR get_metavector_list ()
+.BR get_strings ()
 function queries a dirfile(5) database specified by
 .I dirfile
-and returns a read-only list of names of the all vector type metafields for
-the specified parent field defined in the database
-.RI ( ie.
-fields of types
-.BR BIT ", " LINCOM ", " LINTERP ", " MULTIPLY ", " PHASE ", and " RAW ).
+and returns a read-only list of values of the all
+.B STRING
+type fields defined in the database.  Notably, this list does not include
+/META subfields.
 
 The 
 .I dirfile
@@ -51,31 +49,38 @@ parameter must point to a valid DIRFILE object previously created by a call to
 The array returned will be de-allocated by a call to
 .BR dirfile_close (3)
 and should not be de-allocated by the caller.  The list returned should not be
-assumed to be in any particular order.  The array is terminated by a NULL
-pointer.  The number of strings in the array can be obtained from a call to
-.BR get_nmetavectors (3).
+assumed to be in any particular order, although it is guaranteed to be in the
+same order as the list of
+.B STRING
+fields returned by
+.BR get_field_list_by_type (3).
+The array is terminated by a NULL pointer.  The number of strings in the array
+can be obtained from a call to
+.BR get_nfields_by_type (3).
 
 The caller may not modify any strings in the array, or the array itself.  Doing
 so may cause database corruption.  The pointer returned is guaranteed to be
 valid until
-.BR get_metavector_list ()
+.BR get_strings ()
 is called again with the same arguments, or until the array is deallocated by
 a call to
 .BR dirfile_close (3).
 
+A corresponding list of names for these fields may be obtained by
+calling
+.BR get_field_list_by_type (3).
+
 .SH RETURN VALUE
 Upon successful completion,
-.BR get_metavector_list ()
-returns a pointer to an array of strings containing the names of all the vector
-metafields for the given parent field.  If no vector metafields are available,
-it returns NULL.  On error it returns NULL and sets the dirfile error to a
-non-zero error value.  Possible error values are:
+.BR get_strings ()
+returns a pointer to an array of strings containing the values of all the
+.B STRING
+fields defined in the dirfile database.  If no strings are defined in the
+database, NULL is returned.  On error it returns NULL and sets the dirfile error
+to a non-zero error value.  Possible error values are:
 .TP 8
 .B GD_E_ALLOC
 The library was unable to allocate memory.
-.TP
-.B GD_E_BAD_CODE
-The supplied parent field code was not found, or referred to a metafield itself.
 .TP
 .B GD_E_BAD_DIRFILE
 The supplied dirfile was invalid.
@@ -88,9 +93,8 @@ a call to
 .SH SEE ALSO
 .BR dirfile (5),
 .BR dirfile_open (3),
-.BR getdata (3),
 .BR get_error (3),
 .BR get_error_string (3),
-.BR get_metafield_list (3),
-.BR get_nmetavectors (3,)
-.BR get_vector_list (3)
+.BR get_field_list_by_type (3),
+.BR get_mstrings (3),
+.BR get_nfields_by_type (3)

@@ -13,7 +13,7 @@ int main(void)
   const char* filedir = __TEST__ "dirfile";
 
   DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
-  dirfile_add_metalinterp(D, "new", "meta", "in", "table");
+  dirfile_madd_spec(D, "data RAW UINT8 2", "INDEX");
   int error = get_error(D);
   dirfile_close(D);
 

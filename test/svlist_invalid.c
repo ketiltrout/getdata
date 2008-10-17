@@ -13,7 +13,7 @@ int main(void)
   const char* filedir = __TEST__ "dirfile";
 
   DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
-  const char** fl = get_string_values(D);
+  const char** fl = get_strings(D);
   int error = get_error(D);
   dirfile_close(D);
 

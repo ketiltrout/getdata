@@ -41,13 +41,9 @@ INCLUDES=-Wall -Wextra -I$(top_srcdir)/src -D__TEST__=\"$@\"
 ADD_TESTS=add add_bit add_bit_bitnum add_bit_bitsize add_bit_invalid \
 					add_bit_numbits add_code add_const add_duplicate add_format \
 					add_invalid add_lincom add_lincom_invalid add_lincom_nfields \
-					add_linterp add_linterp_invalid add_many add_meta add_meta_bit \
-					add_meta_bit_invalid add_meta_lincom add_meta_lincom_invalid \
-					add_meta_linterp add_meta_linterp_invalid add_meta_multiply \
-					add_meta_multiply_invalid add_meta_phase add_meta_phase_invalid \
-					add_meta_spec add_meta_spec_directive add_meta_spec_invalid \
-					add_multiply add_multiply_invalid add_phase add_phase_invalid \
-					add_raw add_raw_invalid add_raw_spf add_raw_type add_rdonly add_sort \
+					add_linterp add_linterp_invalid add_many add_multiply \
+					add_multiply_invalid add_phase add_phase_invalid add_raw \
+					add_raw_invalid add_raw_spf add_raw_type add_rdonly add_sort \
 					add_spec add_spec_directive add_spec_invalid add_string add_type
 
 ASCII_TESTS=ascii_get ascii_nframes ascii_put
@@ -122,6 +118,11 @@ GET_TESTS=get64 get_bad_code get_bit get_char get_endian8 get_endian16 \
 INCLUDE_TESTS=include include_accmode include_creat include_index \
 							include_invalid include_nonexistent
 
+MADD_TESTS=madd madd_bit madd_bit_invalid madd_lincom madd_lincom_invalid \
+					 madd_linterp madd_linterp_invalid madd_multiply \
+					 madd_multiply_invalid madd_phase madd_phase_invalid madd_spec \
+					 madd_spec_directive madd_spec_invalid
+
 NFIELDS_TESTS=nfields nfields_invalid nfields_type nfields_type_invalid
 
 NFRAGMENTS_TESTS=nfragments
@@ -171,16 +172,16 @@ TRUNC_TESTS=trunc trunc_rdonly trunc_rofs
 
 VLIST_TESTS=vlist vlist_invalid vlist_meta vlist_meta_invalid
 
-TESTS=$(ADD_TESTS)      $(ASCII_TESTS)      $(CVLIST_TESTS)   \
-			$(CLOSE_TESTS)    $(CONVERT_TESTS)    $(CREAT_TESTS)    \
-			$(DFES_TESTS)     $(ENTRY_TESTS)      $(ERROR_TESTS)    \
-			$(FLIST_TESTS)    $(FLUSH_TESTS)      $(FRAGMENT_TESTS) \
-			$(GET_TESTS)      $(INCLUDE_TESTS)    $(LEGACY_TESTS)   \
-			$(NFIELDS_TESTS)  $(NFRAGMENTS_TESTS) $(NFRAMES_TESTS)  \
-			$(NMETA_TESTS)    $(NVECTORS_TESTS)   $(OPEN_TESTS)     \
-			$(PARSE_TESTS)    $(PUT_TESTS)        $(SLIM_TESTS)     \
-			$(SPF_TESTS)      $(SVLIST_TESTS)     $(TRUNC_TESTS)    \
-			$(VLIST_TESTS)
+TESTS=$(ADD_TESTS)      $(ASCII_TESTS)      $(CVLIST_TESTS)     \
+			$(CLOSE_TESTS)    $(CONVERT_TESTS)    $(CREAT_TESTS)      \
+			$(DFES_TESTS)     $(ENTRY_TESTS)      $(ERROR_TESTS)      \
+			$(FLIST_TESTS)    $(FLUSH_TESTS)      $(FRAGMENT_TESTS)   \
+			$(GET_TESTS)      $(INCLUDE_TESTS)    $(LEGACY_TESTS)     \
+			$(MADD_TESTS)     $(NFIELDS_TESTS)    $(NFRAGMENTS_TESTS) \
+			$(NFRAMES_TESTS)  $(NMETA_TESTS)      $(NVECTORS_TESTS)   \
+			$(OPEN_TESTS)     $(PARSE_TESTS)      $(PUT_TESTS)        \
+			$(SLIM_TESTS)     $(SPF_TESTS)        $(SVLIST_TESTS)     \
+			$(TRUNC_TESTS)    $(VLIST_TESTS)
 
 check_PROGRAMS=$(TESTS)
 

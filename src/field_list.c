@@ -32,7 +32,7 @@ const gd_entype_t _gd_entype_index[GD_N_ENTYPES] =
   GD_STRING_ENTRY
 };
 
-const void* get_constant_values(DIRFILE* D, gd_type_t return_type)
+const void* get_constants(DIRFILE* D, gd_type_t return_type)
 {
   dtrace("%p, 0x%x", D, return_type);
 
@@ -74,7 +74,7 @@ const void* get_constant_values(DIRFILE* D, gd_type_t return_type)
   return D->const_value_list;
 }
 
-const char** get_string_values(DIRFILE* D)
+const char** get_strings(DIRFILE* D)
 {
   dtrace("%p", D);
 

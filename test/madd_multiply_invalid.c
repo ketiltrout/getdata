@@ -13,7 +13,7 @@ int main(void)
   const char* filedir = __TEST__ "dirfile";
 
   DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
-  dirfile_add_metaphase(D, "new", "meta", "in", 3);
+  dirfile_madd_multiply(D, "new", "meta", "in1", "in2");
   int error = get_error(D);
   dirfile_close(D);
 

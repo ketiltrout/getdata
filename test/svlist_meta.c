@@ -29,7 +29,7 @@ int main(void)
   close(fd);
 
   DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
-  const char** field_list = get_metastring_values(D, "parent");
+  const char** field_list = get_mstrings(D, "parent");
 
   if (get_error(D))
     r = 1;

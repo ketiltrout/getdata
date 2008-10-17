@@ -195,7 +195,7 @@ extern unsigned int get_nfields(DIRFILE* dirfile) __THROW __gd_nonnull ((1));
 extern unsigned int get_nfields_by_type(DIRFILE* D, gd_entype_t type)
   __THROW __gd_nonnull ((1));
 
-extern const void* get_constant_values(DIRFILE* dirfile, gd_type_t return_type)
+extern const void* get_constants(DIRFILE* dirfile, gd_type_t return_type)
   __THROW __gd_nonnull ((1));
 
 extern const char** get_field_list(DIRFILE* dirfile) __THROW __gd_nonnull ((1));
@@ -203,8 +203,7 @@ extern const char** get_field_list(DIRFILE* dirfile) __THROW __gd_nonnull ((1));
 extern const char** get_field_list_by_type(DIRFILE* D, gd_entype_t type)
   __THROW __gd_nonnull((1));
 
-extern const char** get_string_values(DIRFILE* dirfile)
-  __THROW __gd_nonnull ((1));
+extern const char** get_strings(DIRFILE* dirfile) __THROW __gd_nonnull ((1));
 
 extern const char** get_vector_list(DIRFILE* dirfile) __THROW __gd_nonnull((1));
 
@@ -213,8 +212,8 @@ extern int get_entry(DIRFILE* D, const char* field_code, gd_entry_t* entry)
 
 extern gd_entry_t *dirfile_free_entry_strings(gd_entry_t *entry) __THROW;
 
-extern int dirfile_add_meta(DIRFILE* D, const gd_entry_t* entry,
-    const char* parent) __THROW __gd_nonnull ((1,2,3));
+extern int dirfile_madd(DIRFILE* D, const gd_entry_t* entry, const char* parent)
+  __THROW __gd_nonnull ((1,2,3));
 
 extern int dirfile_add_lincom(DIRFILE* D, const char* field_code, int n_fields,
     const char** in_fields, const double* m, const double* b,
@@ -243,30 +242,30 @@ extern int dirfile_add_const(DIRFILE* D, const char* field_code,
     gd_type_t const_type, gd_type_t data_type, const void* value,
     int fragment_index);
 
-extern int dirfile_add_metalincom(DIRFILE* D, const char* parent,
+extern int dirfile_madd_lincom(DIRFILE* D, const char* parent,
     const char* field_code, int n_fields, const char** in_fields,
     const double* m, const double* b) __THROW __gd_nonnull((1,2,3,5,6,7));
 
-extern int dirfile_add_metalinterp(DIRFILE* D, const char* parent,
+extern int dirfile_madd_linterp(DIRFILE* D, const char* parent,
     const char* field_code, const char* in_field, const char* table)
 __THROW __gd_nonnull ((1,2,3,4,5));
 
-extern int dirfile_add_metabit(DIRFILE* D, const char* parent,
+extern int dirfile_madd_bit(DIRFILE* D, const char* parent,
     const char* field_code, const char* in_field, int bitnum, int numbits)
 __THROW __gd_nonnull ((1,2,3,4));
 
-extern int dirfile_add_metamultiply(DIRFILE* D, const char* parent,
+extern int dirfile_madd_multiply(DIRFILE* D, const char* parent,
     const char* field_code, const char* in_field1, const char* in_field2)
 __THROW __gd_nonnull ((1,2,3,4,5));
 
-extern int dirfile_add_metaphase(DIRFILE* D, const char* parent,
+extern int dirfile_madd_phase(DIRFILE* D, const char* parent,
     const char* field_code, const char* in_field, int shift)
 __THROW __gd_nonnull ((1,2,3,4));
 
-extern int dirfile_add_metastring(DIRFILE* D, const char* parent,
+extern int dirfile_madd_string(DIRFILE* D, const char* parent,
     const char* field_code, const char* value) __THROW __gd_nonnull ((1,2,3,4));
 
-extern int dirfile_add_metaconst(DIRFILE* D, const char* parent,
+extern int dirfile_madd_const(DIRFILE* D, const char* parent,
     const char* field_code, gd_type_t const_type, gd_type_t data_type,
     const void* value) __THROW __gd_nonnull ((1,2,3,6));
 
@@ -289,32 +288,32 @@ extern size_t get_string(DIRFILE* D, const char *field_code, size_t len,
 extern size_t put_string(DIRFILE* D, const char *field_code,
     const char *data_in) __THROW __gd_nonnull ((1, 2, 3));
 
-extern unsigned int get_nmetafields(DIRFILE* D, const char* parent)
+extern unsigned int get_nmfields(DIRFILE* D, const char* parent)
   __THROW __gd_nonnull((1,2));
 
-extern unsigned int get_nmetavectors(DIRFILE* D, const char* parent)
+extern unsigned int get_nmvectors(DIRFILE* D, const char* parent)
   __THROW __gd_nonnull((1,2));
 
-extern unsigned int get_nmetafields_by_type(DIRFILE* D, const char* parent,
+extern unsigned int get_nmfields_by_type(DIRFILE* D, const char* parent,
     gd_entype_t type) __THROW __gd_nonnull((1,2));
 
-extern const void* get_metaconstant_values(DIRFILE* D, const char* parent,
+extern const void* get_mconstants(DIRFILE* D, const char* parent,
     gd_type_t return_type) __THROW __gd_nonnull((1,2));
 
-extern const char** get_metastring_values(DIRFILE* D, const char* parent)
+extern const char** get_mstrings(DIRFILE* D, const char* parent)
   __THROW __gd_nonnull((1,2));
 
-extern const char** get_metafield_list_by_type(DIRFILE* D, const char* parent,
+extern const char** get_mfield_list_by_type(DIRFILE* D, const char* parent,
     gd_entype_t type) __THROW __gd_nonnull((1,2));
 
-extern const char** get_metavector_list(DIRFILE* D, const char* parent)
+extern const char** get_mvector_list(DIRFILE* D, const char* parent)
   __THROW __gd_nonnull((1,2));
 
-extern const char** get_metafield_list(DIRFILE* D, const char* parent)
+extern const char** get_mfield_list(DIRFILE* D, const char* parent)
   __THROW __gd_nonnull((1,2));
 
-extern int dirfile_add_metaspec(DIRFILE* D, const char* line,
-    const char* parent) __THROW __gd_nonnull ((1,2,3));
+extern int dirfile_madd_spec(DIRFILE* D, const char* line, const char* parent)
+  __THROW __gd_nonnull ((1,2,3));
 
 /* The following functions contain calls to I/O functions, making them
  * cancellation points.  As a result we cannot mark them with __THROW.
@@ -330,7 +329,7 @@ extern int dirfile_close(DIRFILE* dirfile);
 extern int dirfile_flush(DIRFILE* dirfile, const char* field_code)
   __gd_nonnull ((1));
 
-extern int dirfile_flush_metadata(DIRFILE* dirfile) __gd_nonnull ((1));
+extern int dirfile_metaflush(DIRFILE* dirfile) __gd_nonnull ((1));
 
 extern int dirfile_add_raw(DIRFILE* D, const char* field_code,
     gd_type_t data_type, unsigned int spf, int fragment_index)

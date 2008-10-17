@@ -83,27 +83,29 @@ C     Corresponding to get_string(3)
       EXTERNAL GDFGST
 C     Corresponding to dirfile_include(3)
       EXTERNAL GDFINC
-C     Corresponding to dirfile_add_metabit(3)
+C     Corresponding to dirfile_madd_bit(3)
       EXTERNAL GDFMBT
-C     Corresponding to dirfile_add_metaconst(3)
+C     Corresponding to dirfile_madd_const(3)
       EXTERNAL GDFMCO
+C     Corresponding to dirfile_metaflush(3)
+      EXTERNAL GDFMFL
 C     Corresponding to get_metafield_list(3) (sort of)
       EXTERNAL GDFMFN
 C     Corresponding to get_metafield_list_by_type(3) (sort of)
       EXTERNAL GDFMFT
 C     Returns the maximum field name length for a meta field list
       EXTERNAL GDFMFX
-C     Corresponding to dirfile_add_metalincom(3)
+C     Corresponding to dirfile_madd_lincom(3)
       EXTERNAL GDFMLC
-C     Corresponding to dirfile_add_metalinterp(3)
+C     Corresponding to dirfile_madd_linterp(3)
       EXTERNAL GDFMLT
-C     Corresponding to dirfile_add_metamultiply(3)
+C     Corresponding to dirfile_madd_multiply(3)
       EXTERNAL GDFMMT
-C     Corresponding to dirfile_add_metaphase(3)
+C     Corresponding to dirfile_madd_phase(3)
       EXTERNAL GDFMPH
-C     Corresponding to dirfile_add_metaspec(3)
+C     Corresponding to dirfile_madd_spec(3)
       EXTERNAL GDFMSP
-C     Corresponding to dirfile_add_metastring(3)
+C     Corresponding to dirfile_madd_string(3)
       EXTERNAL GDFMST
 C     Corresponding to get_metavector_list(3) (sort of)
       EXTERNAL GDFMVN

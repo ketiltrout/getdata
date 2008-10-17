@@ -29,7 +29,7 @@ int main(void)
   close(fd);
 
   DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
-  const char** field_list = get_metafield_list_by_type(D, "parent",
+  const char** field_list = get_mfield_list_by_type(D, "parent",
       GD_STRING_ENTRY);
 
   if (get_error(D))

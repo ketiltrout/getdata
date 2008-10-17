@@ -1,4 +1,4 @@
-.\" dirfile_add_metabit.3.  The dirfile_add_metabit man page.
+.\" dirfile_madd_bit.3.  The dirfile_madd_bit man page.
 .\"
 .\" (C) 2008 D. V. Wiebe
 .\"
@@ -20,46 +20,46 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH dirfile_add_metabit 3 "16 October 2008" "Version 0.4.0" "GETDATA"
+.TH dirfile_madd_bit 3 "16 October 2008" "Version 0.4.0" "GETDATA"
 .SH NAME
-dirfile_add_metabit, dirfile_add_metaconst, dirfile_add_metalincom,
-dirfile_add_metalinterp, dirfile_add_metamultiply, dirfile_add_metaphase,
-dirfile_add_metastring \(em add a field to a dirfile
+dirfile_madd_bit, dirfile_madd_const, dirfile_madd_lincom, dirfile_madd_linterp,
+dirfile_madd_multiply, dirfile_madd_phase, dirfile_madd_string \(em add a field
+to a dirfile
 .SH SYNOPSIS
 .B #include <getdata.h>
 .HP
 .nh
 .ad l
-.BI "int dirfile_add_metabit(DIRFILE *" dirfile ", const char *" field_name ,
+.BI "int dirfile_madd_bit(DIRFILE *" dirfile ", const char *" field_name ,
 .BI "const char *" in_field ", int " bitnum ", int " numbits ,
 .BI "const char *" parent );
 .HP
-.BI "int dirfile_add_metaconst(DIRFILE *" dirfile ", const char *" field_name ,
+.BI "int dirfile_madd_const(DIRFILE *" dirfile ", const char *" field_name ,
 .BI "gd_type_t " const_type ", gd_type_t " data_type ", void *" value ,
 .BI "const char *" parent );
 .HP
-.BI "int dirfile_add_metalincom(DIRFILE *" dirfile ", const char *" field_name ,
+.BI "int dirfile_madd_lincom(DIRFILE *" dirfile ", const char *" field_name ,
 .BI "int " n_fields ", const char **" in_fields ", const double *" m ,
 .BI "const double *" b ", const char *" parent );
 .HP
-.BI "int dirfile_add_metalinterp(DIRFILE *" dirfile ", const char
+.BI "int dirfile_madd_linterp(DIRFILE *" dirfile ", const char
 .BI * field_name ", const char *" in_field ", const char *" table ", const char"
 .BI * parent );
 .HP
-.BI "int dirfile_add_metamultiply(DIRFILE *" dirfile ", const char"
+.BI "int dirfile_madd_multiply(DIRFILE *" dirfile ", const char"
 .BI * field_name ", const char *" in_field1 ", const char *" in_field2 ,
 .BI "const char *" parent );
 .HP
-.BI "int dirfile_add_metaphase(DIRFILE *" dirfile ", const char *" field_name ,
+.BI "int dirfile_madd_phase(DIRFILE *" dirfile ", const char *" field_name ,
 .BI "const char *" in_field ", int " phase ", const char *" parent );
 .HP
-.BI "int dirfile_add_metastring(DIRFILE *" dirfile ", const char *" field_name ,
+.BI "int dirfile_madd_string(DIRFILE *" dirfile ", const char *" field_name ,
 .BI "const char *" value ", const char *" parent );
 .hy
 .ad n
 .SH DESCRIPTION
 These functions provide alternatives to using the
-.BR dirfile_add_meta ()
+.BR dirfile_madd ()
 function to add a new metafield of the indicated type under the parent field
 given by
 .I parent
@@ -78,7 +78,7 @@ and
 manual pages.
 .P
 The
-.BR dirfile_add_metalincom ()
+.BR dirfile_madd_lincom ()
 function takes pointers to three arrays of length
 .I n_fields
 containing the input field names
@@ -89,13 +89,13 @@ and the offset terms
 .RI ( b ).
 .P
 The
-.BR dirfile_add_metastring ()
+.BR dirfile_madd_string ()
 and
-.BR dirfile_add_metaconst ()
+.BR dirfile_madd_const ()
 functions both add the field and set the value of the field to
 .IR value .
 For
-.BR dirfile_add_metaconst (),
+.BR dirfile_madd_const (),
 the
 .I const_type
 parameter specifies the storage type for the const, while
@@ -108,7 +108,7 @@ with
 .B CONST
 fields as parameters cannot be added with these functions.  Those fields must
 be added with
-.BR dirfile_add_metaspec (3).
+.BR dirfile_madd_spec (3).
 .SH RETURN VALUE
 On success, any of these functions returns zero.   On error, -1 is returned and 
 the dirfile error is set to a non-zero error value.  Possible error values are:
@@ -150,13 +150,13 @@ A descriptive error string for the last error encountered can be obtained from
 a call to
 .BR get_error_string (3).
 .SH SEE ALSO
-.BR dirfile_add_meta (3),
 .BR dirfile_add_bit (3),
 .BR dirfile_add_lincom (3),
 .BR dirfile_add_linterp (3),
 .BR dirfile_add_multiply (3),
 .BR dirfile_add_phase (3),
-.BR dirfile_add_metaspec (3),
+.BR dirfile_madd (3),
+.BR dirfile_madd_spec (3),
 .BR dirfile_open (3),
 .BR durfile_flush_metadata (3),
 .BR get_error (3),

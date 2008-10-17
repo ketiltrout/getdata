@@ -1,3 +1,46 @@
+2008-10-17   D. V. Wiebe <getdata@ketiltrout.net>  svn:165
+	* src/nmeta.c: Renamed get_nmetafields, get_nmetavectors, and
+	get_nmetafields_by_type to get_nmfields, get_nmvectors, and
+	get_nmfields_by_type.
+	* src/field_list.c: Renamed get_constant_values and get_string_values to
+	get_constants and get_strings.
+	* src/flush.c: Renamed dirfile_flush_metadata to dirfile_metaflush
+	* src/meta_list.c: Renamed get_metaconstant_values, get_metastring_values,
+	get_metafield_list_by_type, get_metavector_list, and get_metafield_list to
+	get_mconstants, get_mstrings, get_mfield_list_by_type, get_mvector_list, and
+	get_mfield_list.
+	* src/add.c: Renamed dirfile_add_metaspec, dirfile_add_meta,
+	dirfile_add_metalincom, dirfile_add_metalinterp, dirfile_add_metabit,
+	dirfile_add_metamultiply, dirfile_add_metaphase, dirfile_add_metastring, and
+	dirfile_add_metaconst to dirfile_madd_spec, dirfile_madd,
+	dirfile_madd_lincom, dirfile_madd_linterp, dirfile_madd_bit,
+	dirfile_madd_multiply, dirfile_madd_phase, dirfile_madd_string, and
+	dirfile_madd_const.
+	* bindings/cxx/dirfle.cpp bindings/cxx/dirfile.h: Updated C++ bindings
+	accordingly.
+	* bindings/f77/fgetdata.c bindings/f77/getdata.f.in bindings/f77/fgetdata.h
+	bindings/f77/getdata.f90.in: Updated Fortran 77 and 95 bindings accordingly.
+	* test/add_meta_linterp_invalid.c test/add_meta_lincom_invalid.c
+	test/add_meta_phase_invalid.c test/add_meta_phase.c test/add_meta_multiply.c
+	test/add_meta_spec_invalid.c test/add_meta_spec.c test/add_meta_linterp.c
+	test/add_meta_lincom.c test/add_meta_spec_directive.c
+	test/add_meta_bit_invalid.c test/add_meta_bit.c test/add_meta.c
+	test/add_meta_multiply_invalid.c: Removed.
+	* test/madd_bit.c test/madd_lincom_invalid.c test/madd_lincom.c
+	test/madd_spec.c test/madd_phase.c test/madd.c test/madd_linterp_invalid.c
+	test/madd_bit_invalid.c test/madd_linterp.c test/madd_spec_invalid.c
+	test/madd_spec_directive.c test/madd_multiply_invalid.c test/madd_multiply.c
+	test/madd_phase_invalid.c: Added.
+	* test/nmeta_type.c test/vlist_meta.c test/cvlist_invalid.c
+	test/nmeta_vectors_parent.c test/svlist_invalid.c test/cvlist.c
+	test/svlist.c test/nmeta_parent.c test/nmeta_vectors.c
+	test/cvlist_meta_invalid.c test/flist_meta_invalid.c
+	test/svlist_meta_invalid.c test/cvlist_meta.c test/nmeta_type_invalid.c
+	test/vlist_meta_invalid.c test/flush_meta.c test/svlist_meta.c
+	test/nmeta_invalid.c test/nmeta.c test/flist_type_meta_invalid.c
+	test/flist_type_meta.c test/nmeta_vectors_invalid.c test/nmeta_type_parent.c
+	test/flist_meta.c: Updated.
+
 2008-10-17   D. V. Wiebe <getdata@ketiltrout.net>  svn:164
 	* src/open.c src/putdata.c src/getdata.c src/flush.c src/getdata.h.in
 	src/add.c src/nframes.c: Rename format_file in gd_entry_t to fragment_index,

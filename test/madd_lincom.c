@@ -1,4 +1,4 @@
-/* Add a MULTIPLY field */
+/* Add a LINCOM field */
 #include "../src/getdata.h"
 
 #include <stdlib.h>
@@ -16,11 +16,14 @@ int main(void)
 
   DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_CREAT);
   dirfile_add_phase(D, "new", "in", 3, 0);
-  dirfile_add_metamultiply(D, "new", "meta", "in1", "in2");
+  const char* in_fields[2] = {"in1", "in2"};
+  const double m[2] = {1, 0.3};
+  const double b[2] = {0, 0.9};
+  dirfile_madd_lincom(D, "new", "meta", 2, in_fields, m, b);
   int error = get_error(D);
 
   /* check */
-  int n = get_nmetafields(D, "new");
+  int n = get_nmfields(D, "new");
 
   dirfile_close(D);
 

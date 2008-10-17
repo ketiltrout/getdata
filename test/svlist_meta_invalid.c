@@ -13,7 +13,7 @@ int main(void)
   const char* filedir = __TEST__ "dirfile";
 
   DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
-  const char** fl = get_metastring_values(D, "parent");
+  const char** fl = get_mstrings(D, "parent");
   int error = get_error(D);
   dirfile_close(D);
 

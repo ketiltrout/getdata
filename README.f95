@@ -50,7 +50,7 @@ unit numbers in place of C's DIRFILE pointers are:
 
   (If field_code is the empty string, the entire dirfile will be flushed.)
 
-* subroutine fdirfile_flush_meta (dirfile_unit)
+* subroutine fdirfile_metaflush (dirfile_unit)
   integer, intent(in) :: dirfile
 
 * character (len=GD_FIELD_LEN) function fget_format_filename(dirfile_unit, ind)
@@ -106,7 +106,7 @@ unit numbers in place of C's DIRFILE pointers are:
   integer, intent(in) :: dirfile, format_file
   character (len=*), intent(in) :: spec
 
-* subroutine fdirfile_add_metaspec (dirfile, spec, parent)
+* subroutine fdirfile_madd_spec (dirfile, spec, parent)
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: parent, spec
 
@@ -190,7 +190,7 @@ Other procedures in the Fortran 95 bindings are:
   This function returns the length of the longest field name defined in the
   dirfile.
 
-* integer fget_metafield_name_max (dirfile_unit, parent)
+* integer fget_mfield_name_max (dirfile_unit, parent)
   integer, intent(in) :: dirfile_unit
   character (len=*), intent(in) :: parent
 
@@ -221,20 +221,20 @@ Other procedures in the Fortran 95 bindings are:
   integer, intent(inout) :: field_len
 
   Also analogously, except that field_len will be equivalent to the return
-  value of fget_metafield_name_max, if too small:
+  value of fget_mfield_name_max, if too small:
 
-* subroutine fget_metafield_list (field_list, dirfile, field_len)
+* subroutine fget_mfield_list (field_list, dirfile, field_len)
   character (len=<field_len>) dimension(:), intent(out) :: field_list
   integer, intent(in) :: dirfile_unit
   integer, intent(inout) :: field_len
   character (len=*), intent(in) :: parent
-* subroutine fget_metafield_list_by_type (field_list, dirfile, entype,
+* subroutine fget_mfield_list_by_type (field_list, dirfile, entype,
   field_len)
   character (len=<field_len>) dimension(:), intent(out) :: field_list
   integer, intent(in) :: dirfile_unit, entype
   integer, intent(inout) :: field_len
   character (len=*), intent(in) :: parent
-* subroutine fget_metavector_list (field_list, dirfile, field_len)
+* subroutine fget_mvector_list (field_list, dirfile, field_len)
   character (len=<field_len>) dimension(:), intent(out) :: field_list
   integer, intent(in) :: dirfile_unit
   integer, intent(inout) :: field_len
@@ -287,7 +287,7 @@ Other procedures in the Fortran 95 bindings are:
 
   Analagously, for adding meta fields:
 
-* subroutine fdirfile_add_meta (dirfile_unit, parent, field_code, ent)
+* subroutine fdirfile_madd (dirfile_unit, parent, field_code, ent)
   integer, intent(in) :: dirfile_unit
   character (len=*), intent(in) :: parent, field_code
   type(gd_entry), intent(in) :: ent

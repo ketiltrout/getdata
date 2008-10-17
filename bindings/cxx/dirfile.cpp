@@ -45,14 +45,14 @@ int Dirfile::AddSpec(const char *spec, int format_file)
   return dirfile_add_spec(D, spec, format_file);
 }
 
-int Dirfile::AddMeta(const GetData::Entry &entry, const char *parent)
+int Dirfile::MAdd(const GetData::Entry &entry, const char *parent)
 {
-  return dirfile_add_meta(D, &entry.E, parent);
+  return dirfile_madd(D, &entry.E, parent);
 }
 
-int Dirfile::AddMetaSpec(const char *spec, const char *parent)
+int Dirfile::MAddSpec(const char *spec, const char *parent)
 {
-  return dirfile_add_metaspec(D, spec, parent);
+  return dirfile_madd_spec(D, spec, parent);
 }
 
 Entry *Dirfile::Entry(const char* field_code)
@@ -65,9 +65,9 @@ int Dirfile::Flush(const char* field_code)
   return dirfile_flush(D, field_code);
 }
 
-int Dirfile::FlushMetaData()
+int Dirfile::MetaFlush()
 {
-  return dirfile_flush_metadata(D);
+  return dirfile_metaflush(D);
 }
 
 int Dirfile::Error()
@@ -111,34 +111,39 @@ const char** Dirfile::FieldListByType(EntryType type)
   return get_field_list_by_type(D, (gd_entype_t)type);
 }
 
-unsigned int Dirfile::NMetaFieldsByType(const char *parent, EntryType type)
+unsigned int Dirfile::NMFields(const char *parent)
 {
-  return get_nmetafields_by_type(D, parent, (gd_entype_t)type);
+  return get_nmfields(D, parent);
 }
 
-const char** Dirfile::MetaFieldListByType(const char *parent, EntryType type)
+unsigned int Dirfile::NMFieldsByType(const char *parent, EntryType type)
 {
-  return get_metafield_list_by_type(D, parent, (gd_entype_t)type);
+  return get_nmfields_by_type(D, parent, (gd_entype_t)type);
 }
 
-const void *Dirfile::ConstantValues(DataType type)
+const char** Dirfile::MFieldListByType(const char *parent, EntryType type)
 {
-  return get_constant_values(D, (gd_type_t)type);
+  return get_mfield_list_by_type(D, parent, (gd_entype_t)type);
 }
 
-const char **Dirfile::StringValues()
+const void *Dirfile::Constants(DataType type)
 {
-  return get_string_values(D);
+  return get_constants(D, (gd_type_t)type);
 }
 
-const void *Dirfile::MetaConstantValues(const char *parent, DataType type)
+const char **Dirfile::Strings()
 {
-  return get_metaconstant_values(D, parent, (gd_type_t)type);
+  return get_strings(D);
 }
 
-const char **Dirfile::MetaStringValues(const char *parent)
+const void *Dirfile::MConstants(const char *parent, DataType type)
 {
-  return get_metastring_values(D, parent);
+  return get_mconstants(D, parent, (gd_type_t)type);
+}
+
+const char **Dirfile::MStrings(const char *parent)
+{
+  return get_mstrings(D, parent);
 }
 
 const char** Dirfile::FieldList()
@@ -146,9 +151,9 @@ const char** Dirfile::FieldList()
   return get_field_list(D);
 }
 
-const char** Dirfile::MetaFieldList(const char *parent)
+const char** Dirfile::MFieldList(const char *parent)
 {
-  return get_metafield_list(D, parent);
+  return get_mfield_list(D, parent);
 }
 
 unsigned int Dirfile::NVectors()
@@ -161,14 +166,14 @@ const char** Dirfile::VectorList()
   return get_vector_list(D);
 }
 
-unsigned int Dirfile::NMetaVectors(const char *parent)
+unsigned int Dirfile::NMVectors(const char *parent)
 {
-  return get_nmetavectors(D, parent);
+  return get_nmvectors(D, parent);
 }
 
-const char** Dirfile::MetaVectorList(const char *parent)
+const char** Dirfile::MVectorList(const char *parent)
 {
-  return get_metavector_list(D, parent);
+  return get_mvector_list(D, parent);
 }
 
 off_t Dirfile::NFrames()

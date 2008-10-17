@@ -190,14 +190,14 @@ void F77_FUNC(gdfmfx, GDFMFX) (int* max, const int* dirfile, const char* parent,
   char* pa = malloc(*parent_l + 1);
   _GDF_CString(pa, parent, *parent_l);
 
-  unsigned int i, nfields = get_nmetafields(D, pa);
+  unsigned int i, nfields = get_nmfields(D, pa);
 
   if (D->error) {
     free(pa);
     return;
   }
 
-  const char** fl = get_metafield_list(D, pa);
+  const char** fl = get_mfield_list(D, pa);
 
   for (i = 0; i < nfields; ++i)
     if (strlen(fl[i]) > len)
@@ -225,7 +225,7 @@ void F77_FUNC(gdffdn, GDFFDN) (char* name, int* name_l, const int* dirfile,
     *name_l = 0;
 }
 
-/* get_metafield_list wrapper -- this only returns one field name */
+/* get_mfield_list wrapper -- this only returns one field name */
 void F77_FUNC(gdfmfn, GDFMFN) (char* name, int* name_l, const int* dirfile,
     const char* parent, const int* parent_l, const int* field_num)
 {
@@ -235,14 +235,14 @@ void F77_FUNC(gdfmfn, GDFMFN) (char* name, int* name_l, const int* dirfile,
   char* pa = malloc(*parent_l + 1);
   _GDF_CString(pa, parent, *parent_l);
 
-  unsigned int nfields = get_nmetafields(D, pa);
+  unsigned int nfields = get_nmfields(D, pa);
   if (D->error) {
     free(pa);
     return;
   }
 
   if (*field_num <= (int)nfields) {
-    fl = get_metafield_list(D, pa);
+    fl = get_mfield_list(D, pa);
     _GDF_FString(name, name_l, fl[*field_num - 1]);
   } else
     *name_l = 0;
@@ -628,10 +628,10 @@ void F77_FUNC(gdfnfg, GDFNFG) (int* nformats, const int* dirfile)
   *nformats = get_nfragments(_GDF_GetDirfile(*dirfile));
 }
 
-/* dirfile_flush_metadata wrapper */
-void F77_FUNC(gdfflm, GDFFLM) (const int* dirfile)
+/* dirfile_metaflush wrapper */
+void F77_FUNC(gdfmfl, GDFMFL) (const int* dirfile)
 {
-  dirfile_flush_metadata(_GDF_GetDirfile(*dirfile));
+  dirfile_metaflush(_GDF_GetDirfile(*dirfile));
 }
 
 /* dirfile_include wrapper */
@@ -693,7 +693,7 @@ void F77_FUNC(gdfven, GDFVEN) (char* name, int* name_l, const int* dirfile,
     *name_l = 0;
 }
 
-/* get_metafield_list_by_type wrapper -- this only returns one field name */
+/* get_mfield_list_by_type wrapper -- this only returns one field name */
 void F77_FUNC(gdfmft, GDFMFT) (char* name, int* name_l, const int* dirfile,
     const char* parent, const int* parent_l, const int* type,
     const int* field_num)
@@ -704,14 +704,14 @@ void F77_FUNC(gdfmft, GDFMFT) (char* name, int* name_l, const int* dirfile,
   char* pa = malloc(*parent_l + 1);
   _GDF_CString(pa, parent, *parent_l);
 
-  unsigned int nfields = get_nmetafields_by_type(D, pa, (gd_type_t)*type);
+  unsigned int nfields = get_nmfields_by_type(D, pa, (gd_type_t)*type);
   if (D->error) {
     free(pa);
     return;
   }
 
   if (*field_num <= (int)nfields) {
-    fl = get_metafield_list_by_type(D, pa, (gd_type_t)*type);
+    fl = get_mfield_list_by_type(D, pa, (gd_type_t)*type);
     _GDF_FString(name, name_l, fl[*field_num - 1]);
   } else
     *name_l = 0;
@@ -719,7 +719,7 @@ void F77_FUNC(gdfmft, GDFMFT) (char* name, int* name_l, const int* dirfile,
   free(pa);
 }
 
-/* get_metavector_list wrapper -- this only returns one field name */
+/* get_mvector_list wrapper -- this only returns one field name */
 void F77_FUNC(gdfmvn, GDFMVN) (char* name, int* name_l, const int* dirfile,
     const char* parent, const int* parent_l, const int* field_num)
 {
@@ -729,14 +729,14 @@ void F77_FUNC(gdfmvn, GDFMVN) (char* name, int* name_l, const int* dirfile,
   char* pa = malloc(*parent_l + 1);
   _GDF_CString(pa, parent, *parent_l);
 
-  unsigned int nfields = get_nmetavectors(D, pa);
+  unsigned int nfields = get_nmvectors(D, pa);
   if (D->error) {
     free(pa);
     return;
   }
 
   if (*field_num <= (int)nfields) {
-    fl = get_metavector_list(D, pa);
+    fl = get_mvector_list(D, pa);
     _GDF_FString(name, name_l, fl[*field_num - 1]);
   } else
     *name_l = 0;
@@ -744,7 +744,7 @@ void F77_FUNC(gdfmvn, GDFMVN) (char* name, int* name_l, const int* dirfile,
   free(pa);
 }
 
-/* dirfile_add_metalincom wrapper */
+/* dirfile_madd_lincom wrapper */
 void F77_FUNC(gdfmlc, GDFMLC) (const int* dirfile, const char* parent,
     const int* parent_l, const char* field_code, const int* field_code_l,
     const int* n_fields, const char* in_field1, const int* in_field1_l,
@@ -781,7 +781,7 @@ void F77_FUNC(gdfmlc, GDFMLC) (const int* dirfile, const char* parent,
     b[2] = *b3;
   }
 
-  dirfile_add_metalincom(_GDF_GetDirfile(*dirfile), _GDF_CString(pa, parent,
+  dirfile_madd_lincom(_GDF_GetDirfile(*dirfile), _GDF_CString(pa, parent,
         *parent_l), _GDF_CString(fc, field_code, *field_code_l), nf,
       (const char**)in_fields, m, b);
   free(pa);
@@ -791,7 +791,7 @@ void F77_FUNC(gdfmlc, GDFMLC) (const int* dirfile, const char* parent,
   free(in_fields[2]);
 }
 
-/* dirfile_add_metalinterp wrapper */
+/* dirfile_madd_linterp wrapper */
 void F77_FUNC(gdfmlt, GDFMLT) (const int* dirfile, const char* parent,
     const int* parent_l, const char* field_code, const int* field_code_l,
     const char* in_field, const int* in_field_l, const char* table,
@@ -802,7 +802,7 @@ void F77_FUNC(gdfmlt, GDFMLT) (const int* dirfile, const char* parent,
   char* in = malloc(*in_field_l + 1);
   char* tab = malloc(*table_l + 1);
 
-  dirfile_add_metalinterp(_GDF_GetDirfile(*dirfile), _GDF_CString(pa, parent,
+  dirfile_madd_linterp(_GDF_GetDirfile(*dirfile), _GDF_CString(pa, parent,
         *parent_l), _GDF_CString(fc, field_code, *field_code_l),
       _GDF_CString(in, in_field, *in_field_l), _GDF_CString(tab, table,
         *table_l));
@@ -822,7 +822,7 @@ void F77_FUNC(gdfmbt, GDFMBT) (const int* dirfile, const char* parent,
   char* fc = malloc(*field_code_l + 1);
   char* in = malloc(*in_field_l + 1);
 
-  dirfile_add_metabit(_GDF_GetDirfile(*dirfile), _GDF_CString(pa, parent,
+  dirfile_madd_bit(_GDF_GetDirfile(*dirfile), _GDF_CString(pa, parent,
         *parent_l), _GDF_CString(fc, field_code, *field_code_l),
       _GDF_CString(in, in_field, *in_field_l), *bitnum, *numbits);
   free(pa);
@@ -830,7 +830,7 @@ void F77_FUNC(gdfmbt, GDFMBT) (const int* dirfile, const char* parent,
   free(in);
 }
 
-/* dirfile_add_metamultiply wrapper */
+/* dirfile_madd_multiply wrapper */
 void F77_FUNC(gdfmmt, GDFMMT) (const int* dirfile, const char* parent,
     const int* parent_l, const char* field_code, const int* field_code_l,
     const char* in_field1, const int* in_field1_l, const char* in_field2,
@@ -841,7 +841,7 @@ void F77_FUNC(gdfmmt, GDFMMT) (const int* dirfile, const char* parent,
   char* in1 = malloc(*in_field1_l + 1);
   char* in2 = malloc(*in_field2_l + 1);
 
-  dirfile_add_metamultiply(_GDF_GetDirfile(*dirfile), _GDF_CString(pa, parent,
+  dirfile_madd_multiply(_GDF_GetDirfile(*dirfile), _GDF_CString(pa, parent,
         *parent_l), _GDF_CString(fc, field_code, *field_code_l),
       _GDF_CString(in1, in_field1, *in_field1_l), _GDF_CString(in2, in_field2,
         *in_field2_l));
@@ -852,7 +852,7 @@ void F77_FUNC(gdfmmt, GDFMMT) (const int* dirfile, const char* parent,
   free(in2);
 }
 
-/* dirfile_add_metaphase wrapper */
+/* dirfile_madd_phase wrapper */
 void F77_FUNC(gdfmph, GDFMPH) (const int* dirfile, const char* parent,
     const int* parent_l, const char* field_code, const int* field_code_l,
     const char* in_field, const int* in_field_l, const int* shift)
@@ -861,7 +861,7 @@ void F77_FUNC(gdfmph, GDFMPH) (const int* dirfile, const char* parent,
   char* fc = malloc(*field_code_l + 1);
   char* in = malloc(*in_field_l + 1);
 
-  dirfile_add_metaphase(_GDF_GetDirfile(*dirfile), _GDF_CString(pa, parent,
+  dirfile_madd_phase(_GDF_GetDirfile(*dirfile), _GDF_CString(pa, parent,
         *parent_l), _GDF_CString(fc, field_code, *field_code_l),
       _GDF_CString(in, in_field, *in_field_l), *shift);
 
@@ -884,7 +884,7 @@ void F77_FUNC(gdfaco, GDFACO) (const int* dirfile, const char* field_code,
   free(fc);
 }
 
-/* dirfile_add_metaconst wrapper */
+/* dirfile_madd_const wrapper */
 void F77_FUNC(gdfmco, GDFMCO) (const int* dirfile, const char* parent,
     const int* parent_l, const char* field_code, const int* field_code_l,
     const int* const_type, const int* data_type, const void* value)
@@ -892,7 +892,7 @@ void F77_FUNC(gdfmco, GDFMCO) (const int* dirfile, const char* parent,
   char* pa = malloc(*parent_l + 1);
   char* fc = malloc(*field_code_l + 1);
 
-  dirfile_add_metaconst(_GDF_GetDirfile(*dirfile), _GDF_CString(pa, parent,
+  dirfile_madd_const(_GDF_GetDirfile(*dirfile), _GDF_CString(pa, parent,
         *parent_l), _GDF_CString(fc, field_code, *field_code_l),
       (gd_type_t)*const_type, (gd_type_t)*data_type, value);
 
@@ -915,7 +915,7 @@ void F77_FUNC(gdfast, GDFAST) (const int* dirfile, const char* field_code,
   free(va);
 }
 
-/* dirfile_add_metastring wrapper */
+/* dirfile_madd_string wrapper */
 void F77_FUNC(gdfmst, GDFMST) (const int* dirfile, const char* parent,
     const int* parent_l, const char* field_code, const int* field_code_l,
     const char* value, const int* value_l)
@@ -924,7 +924,7 @@ void F77_FUNC(gdfmst, GDFMST) (const int* dirfile, const char* parent,
   char* fc = malloc(*field_code_l + 1);
   char* va = malloc(*value_l + 1);
 
-  dirfile_add_metastring(_GDF_GetDirfile(*dirfile), _GDF_CString(pa, parent,
+  dirfile_madd_string(_GDF_GetDirfile(*dirfile), _GDF_CString(pa, parent,
         *parent_l), _GDF_CString(fc, field_code, *field_code_l),
       _GDF_CString(va, value, *value_l));
 
@@ -945,14 +945,14 @@ void F77_FUNC(gdfasp, GDFASP) (const int* dirfile, const char* spec,
   free(sp);
 }
 
-/* dirfile_add_metaspec wrapper */
+/* dirfile_madd_spec wrapper */
 void F77_FUNC(gdfmsp, GDFMSP) (const int* dirfile, const char* spec,
     const int* spec_l, const char *parent, const int* parent_l)
 {
   char* pa = malloc(*parent_l + 1);
   char* sp = malloc(*spec_l + 1);
 
-  dirfile_add_metaspec(_GDF_GetDirfile(*dirfile), _GDF_CString(sp, spec,
+  dirfile_madd_spec(_GDF_GetDirfile(*dirfile), _GDF_CString(sp, spec,
         *spec_l), _GDF_CString(pa, parent, *parent_l));
 
   free(pa);
@@ -1011,32 +1011,32 @@ void F77_FUNC(gdfpst, GDFPST) (int* n_wrote, const int* dirfile,
   free(in);
 }
 
-/* get_nmetafields wrapper */
+/* get_nmfields wrapper */
 void F77_FUNC(gdfnmf, GDFNMF) (int* nfields, const int* dirfile,
     const char* parent, const int* parent_l)
 {
   char* pa = malloc(*parent_l + 1);
-  *nfields = get_nmetafields(_GDF_GetDirfile(*dirfile), _GDF_CString(pa, parent,
+  *nfields = get_nmfields(_GDF_GetDirfile(*dirfile), _GDF_CString(pa, parent,
         *parent_l));
   free(pa);
 }
 
-/* get_nmetafields_by_type wrapper */
+/* get_nmfields_by_type wrapper */
 void F77_FUNC(gdfnmt, GDFNMT) (int* nfields, const int* dirfile,
     const char* parent, const int* parent_l, const int* type)
 {
   char* pa = malloc(*parent_l + 1);
-  *nfields = get_nmetafields_by_type(_GDF_GetDirfile(*dirfile),
-      _GDF_CString(pa, parent, *parent_l), (gd_entype_t)*type);
+  *nfields = get_nmfields_by_type(_GDF_GetDirfile(*dirfile), _GDF_CString(pa,
+        parent, *parent_l), (gd_entype_t)*type);
   free(pa);
 }
 
-/* get_nmetavectors wrapper */
+/* get_nmvectors wrapper */
 void F77_FUNC(gdfnmv, GDFNMV) (int* nvectors, const int* dirfile,
     const char* parent, const int* parent_l)
 {
   char* pa = malloc(*parent_l + 1);
-  *nvectors = get_nmetavectors(_GDF_GetDirfile(*dirfile), _GDF_CString(pa,
-        parent, *parent_l));
+  *nvectors = get_nmvectors(_GDF_GetDirfile(*dirfile), _GDF_CString(pa, parent,
+        *parent_l));
   free(pa);
 }

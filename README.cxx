@@ -43,14 +43,11 @@ are available:
   description of the Entry class.
 
 * int Dirfile::Add(const Entry &entry)
-* int Dirfile::AddMeta(const Entry &entry, const char *parent)
-* int Dirfile::AddMetaSpec(const char *spec, const char *parent)
 * int Dirfile::AddSpec(const char *spec, int format_file = 0)
-* const void *Dirfile::ConstantValues(GetData::DataType type = Float64)
+* const void *Dirfile::Constants(GetData::DataType type = Float64)
 * const char **Dirfile::FieldList()
 * const char **Dirfile::FieldListByType(GetData::EntryType type)
 * int Dirfile::Flush(const char *field_code = NULL)
-* int Dirfile::FlushMetaData()
 * const char *Dirfile::FormatFilename(int index)
 * size_t Dirfile::GetConstant(const char *field_code, GetData::DataType type,
     void *data_out)
@@ -59,20 +56,23 @@ are available:
     GetData::DataType type, void *data_out)
 * size_t Dirfile::GetString(const char *field_code, size_t len, char *data_out)
 * int Include(const char *file, int format_file, unsigned int flags)
-* const void *Dirfile::MetaConstantValues(const char *parent,
-    GetData::DataType type)
-* const char **Dirfile::MetaFieldList(const char *parent)
-* const char **Dirfile::MetaFieldListByType(const char *parent,
-    GetData::EntryType type)
-* const char **Dirfile::MetaStringValues(const char *parent)
-* const char **Dirfile::MetaVectorList(const char *parent)
+* int Dirfile::MAdd(const Entry &entry, const char *parent)
+* int Dirfile::MAddSpec(const char *spec, const char *parent)
+* const void *Dirfile::MConstants(const char *parent, GetData::DataType type)
+* const char **Dirfile::MFieldList(const char *parent)
+* const char **Dirfile::MFieldListByType(const char *parent,
+    * GetData::EntryType type)
+* int Dirfile::MetaFlush()
+* const char **Dirfile::MStrings(const char *parent)
+* const char **Dirfile::MVectorList(const char *parent)
 * unsigned int Dirfile::NFields()
 * unsigned int Dirfile::NFieldsByType(GetData::EntryType type)
 * off_t Dirfile::NFrames()
 * int Dirfile::NFormats()
-* unsigned int Dirfile::NMetaFieldsByType(const char *parent,
+* unsigned int Dirfile::NMFields(const char *parent)
+* unsigned int Dirfile::NMFieldsByType(const char *parent,
     GetData::EntryType type)
-* unsigned int Dirfile::NMetaVectors(const char *parent)
+* unsigned int Dirfile::NMVectors(const char *parent)
 * int Dirfile::NVectors()
 * size_t Dirfile::PutConstant(const char *field_code, GetData::DataType type,
     const void *data_in)
@@ -81,7 +81,7 @@ are available:
     GetData::DataType type, const void *data_in)
 * size_t Dirfile::PutString(const char *field_code, const char *data_in)
 * unsigned int Dirfile::SamplesPerFrame(const char *field_code)
-* const char **Dirfile::StringValues()
+* const char **Dirfile::Strings()
 * const char **Dirfile::VectorList()
 
   These methods call the corresponding function from the C API on the C DIRFILE

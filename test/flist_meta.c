@@ -28,7 +28,7 @@ int main(void)
   close(fd);
 
   DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
-  const char** field_list = get_metafield_list(D, "parent");
+  const char** field_list = get_mfield_list(D, "parent");
 
   if (get_error(D))
     r = 1;

@@ -1,4 +1,4 @@
-.\" get_nmetavectors.3.  The get_nmetavectors man page.
+.\" get_nmfields.3.  The get_nmfields man page.
 .\"
 .\" (C) 2008 D. V. Wiebe
 .\"
@@ -20,27 +20,25 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH get_nmetavectors 3 "17 October 2008" "Version 0.4.0" "GETDATA"
+.TH get_nmfields 3 "17 October 2008" "Version 0.4.0" "GETDATA"
 .SH NAME
-get_nmetavectors \(em report the number of vector fields in a dirfile
+get_nmfields \(em report the number of metafields in a dirfile
 .SH SYNOPSIS
 .B #include <getdata.h>
 .HP
 .nh
 .ad l
-.BI "unsigned int get_nmetavectors(DIRFILE *" dirfile );
+.BI "unsigned int get_nmfields(DIRFILE *" dirfile ", const char *" parent );
 .hy
 .ad n
 .SH DESCRIPTION
 The
-.BR get_nmetavectors ()
+.BR get_nmfields ()
 function queries a dirfile(5) database specified by
 .I dirfile
-and returns the number of vector metafields defined in the database
-.RI ( ie.
-fields of types
-.BR BIT ", " LINCOM ", " LINTERP ", " MULTIPLY ", " PHASE ", and " RAW ) for
-the supplied parent field.
+and returns the number of metafields defined in the database for the parent
+field specified by
+.IR parent .
 
 The 
 .I dirfile
@@ -49,10 +47,10 @@ parameter must point to a valid DIRFILE object previously created by a call to
 
 .SH RETURN VALUE
 Upon successful completion,
-.BR get_nmetavectors ()
-returns the number of vector metafields in the dirfile for the given parent.  On
-error, it returns zero and sets the dirfile error to a non-zero error value.
-Possible error values are:
+.BR get_nmfields ()
+returns the number of defined metafields for the given parent.  On error, it
+returns zero and sets the dirfile error
+to a non-zero error value.  Possible error values are:
 .TP 8
 .B GD_E_BAD_CODE
 The supplied parent field code was not found, or referred to a metafield itself.
@@ -68,9 +66,9 @@ a call to
 .SH SEE ALSO
 .BR dirfile (5),
 .BR dirfile_open (3),
-.BR getdata (3),
 .BR get_error (3),
 .BR get_error_string (3),
-.BR get_metavector_list (3),
-.BR get_nmetafields (3),
-.BR get_nvectors (3)
+.BR get_mfield_list (3),
+.BR get_nfields (3),
+.BR get_nmfields_by_type (3),
+.BR get_nmvectors (3)
