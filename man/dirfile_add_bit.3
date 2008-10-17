@@ -32,30 +32,31 @@ dirfile_add_multiply, dirfile_add_phase, dirfile_add_raw, dirfile_add_string
 .ad l
 .BI "int dirfile_add_bit(DIRFILE *" dirfile ", const char *" field_name ,
 .BI "const char *" in_field ", int " bitnum ", int " numbits ,
-.BI "int " format_file );
+.BI "int " fragment_index );
 .HP
 .BI "int dirfile_add_const(DIRFILE *" dirfile ", const char *" field_name ,
 .BI "gd_type_t " const_type ", gd_type_t " data_type ", void *" value ,
-.BI "int " format_file );
+.BI "int " fragment_index );
 .HP
 .BI "int dirfile_add_lincom(DIRFILE *" dirfile ", const char *" field_name ,
 .BI "int " n_fields ", const char **" in_fields ", const double *" m ,
-.BI "const double *" b ", int " format_file );
+.BI "const double *" b ", int " fragment_index );
 .HP
 .BI "int dirfile_add_linterp(DIRFILE *" dirfile ", const char *" field_name ,
-.BI "const char *" in_field ", const char *" table ", int " format_file );
+.BI "const char *" in_field ", const char *" table ", int " fragment_index );
 .HP
 .BI "int dirfile_add_multiply(DIRFILE *" dirfile ", const char *" field_name ,
-.BI "const char *" in_field1 ", const char *" in_field2 ", int " format_file );
+.BI "const char *" in_field1 ", const char *" in_field2 ,
+.BI "int " fragment_index );
 .HP
 .BI "int dirfile_add_phase(DIRFILE *" dirfile ", const char *" field_name ,
-.BI "const char *" in_field ", int " phase ", int " format_file );
+.BI "const char *" in_field ", int " phase ", int " fragment_index );
 .HP
 .BI "int dirfile_add_raw(DIRFILE *" dirfile ", const char *" field_name ,
-.BI "gd_type_t " data_type ", unsigned int " spf ", int " format_file );
+.BI "gd_type_t " data_type ", unsigned int " spf ", int " fragment_index );
 .HP
 .BI "int dirfile_add_string(DIRFILE *" dirfile ", const char *" field_name ,
-.BI "const char *" value ", int " format_file );
+.BI "const char *" value ", int " fragment_index );
 .hy
 .ad n
 .SH DESCRIPTION
@@ -67,7 +68,7 @@ function to add a new field of the indicated type to the dirfile specified by
 In all of these calls,
 .I field_name
 indicates the name of the field to be added.  Further,
-.I format_file
+.I fragment_index
 is the index of the format file fragment into which the field should be added.
 (To convert a fragment index to its file name, see
 .BR get_fragmentname (3).)
@@ -132,7 +133,7 @@ One or more of the field parameters specified was invalid.
 .TP
 .B GD_E_BAD_INDEX
 The
-.IR format_file
+.IR fragment_index
 parameter was out of range.
 .TP
 .B GD_E_BAD_TYPE

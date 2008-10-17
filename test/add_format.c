@@ -1,4 +1,4 @@
-/* Add a dirfile field with to a bad format_file */
+/* Add a dirfile field with to a bad fragment_index */
 #include "../src/getdata.h"
 
 #include <stdlib.h>
@@ -17,7 +17,7 @@ int main(void)
   gd_entry_t E;
   E.field =  "new";
   E.field_type = GD_RAW_ENTRY;
-  E.format_file = 21;
+  E.fragment_index = 21;
   E.spf = 2;
   E.data_type = GD_UINT8;
 

@@ -1,3 +1,21 @@
+2008-10-17   D. V. Wiebe <getdata@ketiltrout.net>  svn:164
+	* src/open.c src/putdata.c src/getdata.c src/flush.c src/getdata.h.in
+	src/add.c src/nframes.c: Rename format_file in gd_entry_t to fragment_index,
+	also similar function parameters.
+	* bindings/cxx/entry.cpp bindings/cxx/entry.h bindings/f77/fgetdata.c
+	bindings/f77/getdata.f.in bindings/f77/fgetdata.h
+	bindings/f77/getdata.f90.in: Update bindings to match.
+	* test/add_rdonly.c test/add_invalid.ca test/add.c test/add_code.c
+	test/add_duplicate.c test/add_type.c test/add_meta.c test/add_format.c:
+	Updated.
+
+	* src/open.c (_GD_ParseRaw): Use me instead of E->fragment_index, since the
+	latter hasn't been initialised yet.
+
+	* test/format_filename.c test/nformats.c test/format_filename_oor.c:
+	Removed.
+	* test/fragmentname.c test/nfragments.c test/fragmentname_oor.c: Added.
+
 2008-10-17   D. V. Wiebe <getdata@ketiltrout.net>  svn:163
 	* src/getdata.c (_GD_DoString) src/string.c (get_string): Add one to string
 	length to account for terminating NUL.

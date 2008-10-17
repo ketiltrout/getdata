@@ -108,7 +108,7 @@ FLIST_TESTS=flist flist_invalid flist_meta flist_meta_invalid flist_type \
 
 FLUSH_TESTS=flush flush_all flush_bad_code flush_invalid flush_meta
 
-FORMAT_TESTS=format_filename format_filename_oor
+FRAGMENT_TESTS=fragmentname fragmentname_oor
 
 GET_TESTS=get64 get_bad_code get_bit get_char get_endian8 get_endian16 \
 					get_endian32 get_endian64 get_endian_float32 get_endian_float64 \
@@ -124,7 +124,7 @@ INCLUDE_TESTS=include include_accmode include_creat include_index \
 
 NFIELDS_TESTS=nfields nfields_invalid nfields_type nfields_type_invalid
 
-NFORMATS_TESTS=nformats
+NFRAGMENTS_TESTS=nfragments
 
 NFRAMES_TESTS=nframes nframes64 nframes_empty nframes_invalid $(NF_OFF64) \
 							nframes_spf
@@ -171,13 +171,16 @@ TRUNC_TESTS=trunc trunc_rdonly trunc_rofs
 
 VLIST_TESTS=vlist vlist_invalid vlist_meta vlist_meta_invalid
 
-TESTS=$(ADD_TESTS)      $(ASCII_TESTS)    $(CVLIST_TESTS)   $(CLOSE_TESTS)    \
-			$(CONVERT_TESTS)  $(CREAT_TESTS)    $(DFES_TESTS)     $(ENTRY_TESTS)    \
-			$(ERROR_TESTS)    $(FLIST_TESTS)    $(FLUSH_TESTS)    $(FORMAT_TESTS)   \
-			$(GET_TESTS)      $(INCLUDE_TESTS)  $(LEGACY_TESTS)   $(NFIELDS_TESTS)  \
-			$(NFORMATS_TESTS) $(NFRAMES_TESTS)  $(NMETA_TESTS)    $(NVECTORS_TESTS) \
-			$(OPEN_TESTS)     $(PARSE_TESTS)    $(PUT_TESTS)      $(SLIM_TESTS)     \
-			$(SPF_TESTS)      $(SVLIST_TESTS)   $(TRUNC_TESTS)    $(VLIST_TESTS)
+TESTS=$(ADD_TESTS)      $(ASCII_TESTS)      $(CVLIST_TESTS)   \
+			$(CLOSE_TESTS)    $(CONVERT_TESTS)    $(CREAT_TESTS)    \
+			$(DFES_TESTS)     $(ENTRY_TESTS)      $(ERROR_TESTS)    \
+			$(FLIST_TESTS)    $(FLUSH_TESTS)      $(FRAGMENT_TESTS) \
+			$(GET_TESTS)      $(INCLUDE_TESTS)    $(LEGACY_TESTS)   \
+			$(NFIELDS_TESTS)  $(NFRAGMENTS_TESTS) $(NFRAMES_TESTS)  \
+			$(NMETA_TESTS)    $(NVECTORS_TESTS)   $(OPEN_TESTS)     \
+			$(PARSE_TESTS)    $(PUT_TESTS)        $(SLIM_TESTS)     \
+			$(SPF_TESTS)      $(SVLIST_TESTS)     $(TRUNC_TESTS)    \
+			$(VLIST_TESTS)
 
 check_PROGRAMS=$(TESTS)
 

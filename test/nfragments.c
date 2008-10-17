@@ -1,4 +1,4 @@
-/* Test get_format_filename */
+/* Test get_nfragments */
 #include "../src/getdata.h"
 
 #include <stdlib.h>
@@ -7,7 +7,6 @@
 #include <fcntl.h>
 #include <string.h>
 #include <errno.h>
-#include <stdio.h>
 #include <unistd.h>
 
 int main(void)
@@ -17,8 +16,6 @@ int main(void)
   const char* format1 = __TEST__ "dirfile/format1";
   const char* format_data = "INCLUDE format1\n";
   const char* format1_data = "data RAW UINT8 11\n";
-  char* form0 = NULL;
-  char* form1 = NULL;
   int fd;
 
   mkdir(filedir, 0777);
@@ -32,19 +29,12 @@ int main(void)
   close(fd);
 
   DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
-  form0 = strdup(get_format_filename(D, 0));
-  form1 = strdup(get_format_filename(D, 1));
+  int nfragments = get_nfragments(D);
   dirfile_close(D);
 
   unlink(format1);
   unlink(format);
   rmdir(filedir);
 
-  if (form0 == NULL || form1 == NULL)
-    return 1;
-
-  if (form0[0] == 0 || form1[0] == 0)
-    return 1;
-
-  return 0;
+  return (nfragments != 2);
 }

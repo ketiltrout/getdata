@@ -15,7 +15,7 @@ int main(void)
   gd_entry_t E;
   E.field =  "data";
   E.field_type = GD_RAW_ENTRY;
-  E.format_file = 0;
+  E.fragment_index = 0;
   E.spf = 2;
   E.data_type = GD_UINT8;
 

@@ -65,8 +65,8 @@ C     Corresponding to get_field_list(3) (sort of)
       EXTERNAL GDFFDN
 C     Returns the field type
       EXTERNAL GDFFDT
-C     Get the format file index for a field
-      EXTERNAL GDFFFI
+C     Get the fragment index for a field
+      EXTERNAL GDFFGI
 C     Corresponding to get_fragmentname(3)
       EXTERNAL GDFFGN
 C     Corresponding to dirfile_flush(3)

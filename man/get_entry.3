@@ -20,7 +20,7 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH get_entry 3 "7 October 2008" "Version 0.4.0" "GETDATA"
+.TH get_entry 3 "17 October 2008" "Version 0.4.0" "GETDATA"
 .SH NAME
 get_entry \(em retrieve a dirfile field's metadata
 .SH SYNOPSIS
@@ -96,9 +96,9 @@ described.  All gd_entry_t objects are guaranteed to have at least:
 typedef struct {
   ...
 
-  const char  *field;       /* field code */
-  gd_entype_t  field_type;  /* field type */
-  int          format_file; /* format file index */
+  const char  *field;          /* field code */
+  gd_entype_t  field_type;     /* field type */
+  int          fragment_index; /* format file fragment index */
 
   ...
 } gd_entry_t;
@@ -132,11 +132,11 @@ is a special field type used only for the implicit
 field.  The meaning of the other symbols should be self-explanitory.
 .P
 The 
-.I format_file
+.I fragment_index
 member indicates the format file fragment in which this field is defined.  This
 is an integer index to the Dirfile's list of parsed format file fragments.  The
 name of the file corresponding to
-.I format_file
+.I fragment_index
 may be obtained by calling
 .BR get_fragmentname (3).
 A value of zero for this field indicates that the field is defined in the

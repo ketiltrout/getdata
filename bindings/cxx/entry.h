@@ -67,7 +67,7 @@ namespace GetData {
 
       EntryType Type() { return (EntryType)E.field_type; };
       
-      int FormatFile() { return E.format_file; };
+      int FragmentIndex() { return E.fragment_index; };
 
       /* Specific data */
       virtual const char *Input(int index = 0) {
@@ -129,7 +129,7 @@ namespace GetData {
   class RawEntry : public Entry {
     public:
       RawEntry(const char* field_code, DataType data_type, unsigned int spf,
-          int format_file = 0);
+          int fragment_index = 0);
 
       virtual unsigned int SamplesPerFrame() {
         return E.spf;
@@ -143,7 +143,7 @@ namespace GetData {
   class LincomEntry : public Entry {
     public:
       LincomEntry(const char* field_code, int n_fields, const char** in_fields,
-          double* m, double* b, int format_file = 0);
+          double* m, double* b, int fragment_index = 0);
 
       virtual const char *Input(int index = 0) {
         return (CheckIndex(E.field_type, E.n_fields, index)) ? 
@@ -166,7 +166,7 @@ namespace GetData {
   class LinterpEntry : public Entry {
     public:
       LinterpEntry(const char* field_code, const char* in_field,
-          const char* table, int format_file = 0);
+          const char* table, int fragment_index = 0);
 
       virtual const char *Input(int __gd_unused index = 0) {
         return E.in_fields[0];
@@ -180,7 +180,7 @@ namespace GetData {
   class BitEntry : public Entry {
     public:
       BitEntry(const char* field_code, const char* in_field, int bitnum,
-          int numbits = 1, int format_file = 0);
+          int numbits = 1, int fragment_index = 0);
 
       virtual const char *Input(int __gd_unused index = 0) {
         return E.in_fields[0];
@@ -198,7 +198,7 @@ namespace GetData {
   class MultiplyEntry : public Entry {
     public:
       MultiplyEntry(const char* field_code, const char* in_field1,
-          const char* in_field2, int format_file = 0);
+          const char* in_field2, int fragment_index = 0);
 
       virtual const char *Input(int index = 0) {
         return E.in_fields[(index == 0) ? 0 : 1];
@@ -208,7 +208,7 @@ namespace GetData {
   class PhaseEntry : public Entry {
     public:
       PhaseEntry(const char* field_code, const char* in_field, int shift,
-          int format_file = 0);
+          int fragment_index = 0);
 
       virtual const char *Input(int __gd_unused index = 0) {
         return E.in_fields[0];

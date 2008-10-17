@@ -1,4 +1,4 @@
-/* Test get_nformats */
+/* Test get_fragmentname out-of-range handling */
 #include "../src/getdata.h"
 
 #include <stdlib.h>
@@ -7,6 +7,7 @@
 #include <fcntl.h>
 #include <string.h>
 #include <errno.h>
+#include <stdio.h>
 #include <unistd.h>
 
 int main(void)
@@ -16,6 +17,8 @@ int main(void)
   const char* format1 = __TEST__ "dirfile/format1";
   const char* format_data = "INCLUDE format1\n";
   const char* format1_data = "data RAW UINT8 11\n";
+  const char* form0 = NULL;
+  const char* form1 = NULL;
   int fd;
 
   mkdir(filedir, 0777);
@@ -29,12 +32,20 @@ int main(void)
   close(fd);
 
   DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
-  int nform = get_nformats(D);
+  form0 = get_fragmentname(D, -3000);
+  form1 = get_fragmentname(D, 1000);
+  int error = get_error(D);
   dirfile_close(D);
 
   unlink(format1);
   unlink(format);
   rmdir(filedir);
 
-  return (nform != 2);
+  if (form0 != NULL || form1 != NULL)
+    return 1;
+
+  if (error != GD_E_BAD_INDEX)
+    return 1;
+
+  return 0;
 }

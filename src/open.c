@@ -789,18 +789,17 @@ void _GD_ParseFieldSpec(DIRFILE* D, int n_cols, const char** in_cols,
     /* Create the binary file, if requested */
     if (!D->error && creat) {
       /* If the encoding scheme is unknown, we can't add the field */
-      if ((D->include_list[E->format_file].flags & GD_ENCODING) ==
-          GD_AUTO_ENCODED) {
+      if ((D->include_list[me].flags & GD_ENCODING) == GD_AUTO_ENCODED) {
         _GD_SetError(D, GD_E_UNKNOWN_ENCODING, 0, NULL, 0, NULL);
-      } else if ((D->include_list[E->format_file].flags & GD_ENCODING) ==
+      } else if ((D->include_list[me].flags & GD_ENCODING) ==
           GD_ENC_UNSUPPORTED)
       {
         /* If the encoding scheme is unsupported, we can't add the field */
         _GD_SetError(D, GD_E_UNSUPPORTED, 0, NULL, 0, NULL);
       } else {
         /* Set the subencoding subscheme */
-        _GD_ResolveEncoding(E->e->file, D->include_list[E->format_file].flags,
-            E->e);
+        _GD_ResolveEncoding(E->e->file,
+            D->include_list[me].flags, E->e);
 
         if (encode[E->e->encoding].touch == NULL) 
           _GD_SetError(D, GD_E_UNSUPPORTED, 0, NULL, 0, NULL);
@@ -832,7 +831,7 @@ void _GD_ParseFieldSpec(DIRFILE* D, int n_cols, const char** in_cols,
 
   if (D->error == GD_E_OK && E != NULL) {
     /* the Format file fragment index */
-    E->format_file = me;
+    E->fragment_index = me;
 
     /* Check for duplicate */
     int u;
@@ -840,7 +839,7 @@ void _GD_ParseFieldSpec(DIRFILE* D, int n_cols, const char** in_cols,
 
     if (Q) {
       _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_DUPLICATE, format_file, linenum,
-          D->include_list[Q->format_file].cname);
+          D->include_list[Q->fragment_index].cname);
       dreturnvoid();
       return;
     } 
@@ -1107,7 +1106,7 @@ static int _GD_ParseDirective(DIRFILE *D, const char** in_cols, int n_cols,
     if (P == NULL)
       _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_NO_PARENT,
           D->include_list[me].cname, linenum, in_cols[1]);
-    else if (P->format_file != me)
+    else if (P->fragment_index != me)
       _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_LOCATION,
           D->include_list[me].cname, linenum, in_cols[1]);
     else if (n_cols < 4)

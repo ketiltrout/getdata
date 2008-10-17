@@ -20,7 +20,7 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH dirfile_include 3 "15 October 2008" "Version 0.4.0" "GETDATA"
+.TH dirfile_include 3 "17 October 2008" "Version 0.4.0" "GETDATA"
 .SH NAME
 dirfile_include \(em add a format file fragment to a dirfile
 .SH SYNOPSIS
@@ -29,7 +29,7 @@ dirfile_include \(em add a format file fragment to a dirfile
 .nh
 .ad l
 .BI "DIRFILE* dirfile_include(DIRFILE *" dirfile ", const char *" include_file ,
-.BI "int " format_file ", unsigned int " flags );
+.BI "int " fragment_index ", unsigned int " flags );
 .hy
 .ad n
 .SH DESCRIPTION
@@ -39,7 +39,7 @@ adds the format file fragment specified by the path
 .I include_file
 to the specified dirfile.  This occurs as if, in the existing fragment indexed
 by
-.IR format_file ,
+.IR fragment_index ,
 the following directive were present:
 .IP
 .BI "/INCLUDE " <include_file>
@@ -188,6 +188,9 @@ was specified in
 .TP
 .B GD_E_ALLOC
 The library was unable to allocate memory.
+.TP
+.B GD_E_BAD_INDEX
+The supplied fragment index was out of range.
 .TP
 .B GD_E_FORMAT
 A syntax error occurred in the fragment.

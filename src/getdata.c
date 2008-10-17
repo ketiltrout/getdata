@@ -241,17 +241,17 @@ static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *E,
     if (E->e->fp < 0) {
 
       /* Figure out the dirfile encoding type, if required */
-      if ((D->include_list[E->format_file].flags & GD_ENCODING) ==
+      if ((D->include_list[E->fragment_index].flags & GD_ENCODING) ==
           GD_AUTO_ENCODED)
       {
-          D->include_list[E->format_file].flags =
-            (D->include_list[E->format_file].flags & ~GD_ENCODING) |
+          D->include_list[E->fragment_index].flags =
+            (D->include_list[E->fragment_index].flags & ~GD_ENCODING) |
             _GD_ResolveEncoding(E->e->file, GD_AUTO_ENCODED, E->e);
       }
 
       /* If the encoding is still unknown, none of the candidate files exist;
        * complain and return */
-      if ((D->include_list[E->format_file].flags & GD_ENCODING)
+      if ((D->include_list[E->fragment_index].flags & GD_ENCODING)
           == GD_AUTO_ENCODED)
       {
         _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file, ENOENT, NULL);
@@ -261,8 +261,8 @@ static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *E,
 
       /* Figure out the encoding subtype, if required */
       if (E->e->encoding == GD_ENC_UNKNOWN)
-        _GD_ResolveEncoding(E->e->file, D->include_list[E->format_file].flags,
-            E->e);
+        _GD_ResolveEncoding(E->e->file,
+            D->include_list[E->fragment_index].flags, E->e);
 
       if (encode[E->e->encoding].open == NULL) {
         _GD_SetError(D, GD_E_UNSUPPORTED, 0, NULL, 0, NULL);
@@ -303,7 +303,7 @@ static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *E,
 
     samples_read /= E->size;
 
-    if (D->include_list[E->format_file].flags &
+    if (D->include_list[E->fragment_index].flags &
 #ifdef WORDS_BIGENDIAN
         GD_LITTLE_ENDIAN
 #else

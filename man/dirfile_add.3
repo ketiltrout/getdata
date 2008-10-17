@@ -20,7 +20,7 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH dirfile_add 3 "15 October 2008" "Version 0.4.0" "GETDATA"
+.TH dirfile_add 3 "17 October 2008" "Version 0.4.0" "GETDATA"
 .SH NAME
 dirfile_add, dirfile_add_meta \(em add a field to a dirfile
 .SH SYNOPSIS
@@ -62,7 +62,7 @@ member should contain just the metafield's name, not the fully formed
 field code.  Also,
 .BR dirfile_add_meta ()
 ignores the value of
-.IR entry -> format_file ,
+.IR entry -> fragment_index ,
 and instead adds the new meta field to the same format file fragment in which
 the parent field is defined.
 
@@ -108,7 +108,7 @@ as a metafield.
 .TP
 .B GD_E_BAD_INDEX
 The
-.IR entry -> format_file
+.IR entry -> fragment_index
 parameter was out of range.
 .TP
 .B GD_E_BAD_TYPE

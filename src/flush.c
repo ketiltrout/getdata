@@ -308,7 +308,7 @@ void _GD_FlushMeta(DIRFILE* D)
 
       /* The first field */
       if (D->first_field != NULL) {
-        if (D->first_field->format_file == i) {
+        if (D->first_field->fragment_index == i) {
           _GD_FieldSpec(D, stream, D->first_field, 0);
           for (j = 0; j < D->first_field->e->n_meta; ++j)
             _GD_FieldSpec(D, stream, D->first_field->e->meta_entry[j], 1);
@@ -327,7 +327,7 @@ void _GD_FlushMeta(DIRFILE* D)
 
       /* The fields */
       for (u = 0; u < D->n_entries; ++u)
-        if (D->entry[u]->format_file == i && D->entry[u]->e->n_meta != -1 &&
+        if (D->entry[u]->fragment_index == i && D->entry[u]->e->n_meta != -1 &&
             !D->entry[u]->e->first)
         {
           _GD_FieldSpec(D, stream, D->entry[u], 0);

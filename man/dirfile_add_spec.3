@@ -20,7 +20,7 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH dirfile_add_spec 3 "16 October 2008" "Version 0.4.0" "GETDATA"
+.TH dirfile_add_spec 3 "17 October 2008" "Version 0.4.0" "GETDATA"
 .SH NAME
 dirfile_add_spec, dirfile_add_metaspec \(em add a field to a dirfile
 .SH SYNOPSIS
@@ -29,7 +29,7 @@ dirfile_add_spec, dirfile_add_metaspec \(em add a field to a dirfile
 .nh
 .ad l
 .BI "int dirfile_add_spec(DIRFILE *" dirfile ", const char *" line ,
-.BI "int " format_file );
+.BI "int " fragment_index );
 .HP
 .BI "int dirfile_add_metaspec(DIRFILE *" dirfile ", const char *" line ,
 .BI "const char *" parent );
@@ -83,7 +83,7 @@ The supplied dirfile was invalid.
 .TP
 .B GD_E_BAD_INDEX
 The
-.IR format_file
+.IR fragment_index
 parameter was out of range.
 .TP
 .B GD_E_FORMAT
