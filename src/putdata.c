@@ -60,13 +60,14 @@ static size_t _GD_DoRawOut(DIRFILE *D, gd_entry_t *E,
     return 0;
   }
 
-  if (D->include_list[E->fragment_index].flags &
+  if (encode[E->e->encoding].ecor &&
+      (D->include_list[E->fragment_index].flags &
 #ifdef WORDS_BIGENDIAN
-      GD_LITTLE_ENDIAN
+       GD_LITTLE_ENDIAN
 #else
-      GD_BIG_ENDIAN
+       GD_BIG_ENDIAN
 #endif
-     )
+      ))
     _GD_FixEndianness(databuffer, E->size, ns);
 
   /* write data to file.  Note that if the first sample is beyond     */
@@ -284,7 +285,7 @@ static size_t _GD_DoBitOut(DIRFILE* D, gd_entry_t *E,
 
   if (E->e->entry[0] == NULL) {
     E->e->entry[0] = _GD_FindField(D, E->in_fields[0], NULL);
-    
+
     if (E->e->entry[0] == NULL) {
       _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, E->in_fields[0]);
       dreturn("%zi", 0);

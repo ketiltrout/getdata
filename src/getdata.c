@@ -59,18 +59,22 @@ static __attribute__ ((__const__)) double __NAN()
 
 /* encoding schemas */
 const struct encoding_t encode[] = {
-  { GD_UNENCODED, "", &_GD_RawOpen, &_GD_RawSeek, &_GD_RawRead,
-    &_GD_RawSize, &_GD_RawWrite, &_GD_RawSync, &_GD_RawTouch, &_GD_RawClose },
-  { GD_TEXT_ENCODED, ".txt", &_GD_AsciiOpen, &_GD_AsciiSeek, &_GD_AsciiRead,
-    &_GD_AsciiSize, &_GD_AsciiWrite, &_GD_AsciiSync, &_GD_RawTouch,
-    &_GD_AsciiClose },
+  { GD_UNENCODED, "", 1,
+    &_GD_RawOpen, &_GD_RawClose, &_GD_RawTouch, &_GD_RawSeek,
+    &_GD_RawRead, &_GD_RawSize,  &_GD_RawWrite, &_GD_RawSync },
+  { GD_TEXT_ENCODED, ".txt", 0,
+    &_GD_AsciiOpen, &_GD_AsciiClose, &_GD_RawTouch, &_GD_AsciiSeek,
+    &_GD_AsciiRead, &_GD_AsciiSize, &_GD_AsciiWrite, &_GD_AsciiSync },
+  { GD_SLIM_ENCODED, ".slm", 1,
 #ifdef USE_SLIMLIB
-  { GD_SLIM_ENCODED, ".slm", &_GD_SlimOpen, &_GD_SlimSeek, &_GD_SlimRead,
-    &_GD_SlimSize, NULL, NULL, NULL, &_GD_SlimClose },
+    &_GD_SlimOpen, &_GD_SlimClose, NULL /* TOUCH */,
+    &_GD_SlimSeek, &_GD_SlimRead,  &_GD_SlimSize,
 #else
-  { GD_SLIM_ENCODED, ".slm", NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL },
+    NULL /* OPEN */, NULL /* CLOSE */, NULL /* TOUCH */,
+    NULL /* SEEK */, NULL /* READ  */, NULL /* SIZE  */,
 #endif
-  { GD_ENC_UNSUPPORTED, "",  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL },
+    NULL /* WRITE */, NULL /* SYNC */ },
+  { GD_ENC_UNSUPPORTED, "", 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL },
 };
 
 /* _GD_FillFileFrame: fill dataout with frame indices
@@ -244,9 +248,9 @@ static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *E,
       if ((D->include_list[E->fragment_index].flags & GD_ENCODING) ==
           GD_AUTO_ENCODED)
       {
-          D->include_list[E->fragment_index].flags =
-            (D->include_list[E->fragment_index].flags & ~GD_ENCODING) |
-            _GD_ResolveEncoding(E->e->file, GD_AUTO_ENCODED, E->e);
+        D->include_list[E->fragment_index].flags =
+          (D->include_list[E->fragment_index].flags & ~GD_ENCODING) |
+          _GD_ResolveEncoding(E->e->file, GD_AUTO_ENCODED, E->e);
       }
 
       /* If the encoding is still unknown, none of the candidate files exist;
@@ -303,13 +307,14 @@ static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *E,
 
     samples_read /= E->size;
 
-    if (D->include_list[E->fragment_index].flags &
+    if (encode[E->e->encoding].ecor &&
+        (D->include_list[E->fragment_index].flags &
 #ifdef WORDS_BIGENDIAN
-        GD_LITTLE_ENDIAN
+         GD_LITTLE_ENDIAN
 #else
-        GD_BIG_ENDIAN
+         GD_BIG_ENDIAN
 #endif
-       )
+        ))
       _GD_FixEndianness(databuffer + n_read * E->size, E->size, samples_read);
 
     n_read += samples_read;

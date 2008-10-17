@@ -224,15 +224,16 @@ struct _gd_private_entry {
 extern const struct encoding_t {
   unsigned int scheme;
   const char* ext;
+  int ecor; /* encoding requires byte-sex correction */
   int (*open)(struct _gd_private_entry*, const char*, int, int);
+  int (*close)(struct _gd_private_entry*);
+  int (*touch)(const char*);
   off64_t (*seek)(struct _gd_private_entry*, off64_t, gd_type_t, int);
   ssize_t (*read)(struct _gd_private_entry*, void*, gd_type_t, size_t);
   off64_t (*size)(const char*, gd_type_t);
   ssize_t (*write)(struct _gd_private_entry*, const void*, gd_type_t,
       size_t);
   int (*sync)(struct _gd_private_entry*);
-  int (*touch)(const char*);
-  int (*close)(struct _gd_private_entry*);
 } encode[];
 
 /* Format file fragment metadata */

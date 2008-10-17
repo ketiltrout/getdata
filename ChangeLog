@@ -1,3 +1,7 @@
+2008-10-17   D. V. Wiebe <getdata@ketiltrout.net>  svn:169
+	* src/getdata.c (_GD_DorRaw) src/putdata.c (_GD_DoRawOut): Some encodings
+	need no endianness correction.
+
 2008-10-17   D. V. Wiebe <getdata@ketiltrout.net>  svn:165
 	* src/nmeta.c: Renamed get_nmetafields, get_nmetavectors, and
 	get_nmetafields_by_type to get_nmfields, get_nmvectors, and
