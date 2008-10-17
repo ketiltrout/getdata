@@ -2,7 +2,7 @@ FORTRAN 77 BINDINGS FOR GETDATA
 ===============================
 
 This README describes the Fortran 77 bindings for the GetData library.  These
-bindings consist of a Fortran compatibility library `libfgetdata' (writen in
+bindings consist of a Fortran compatibility library `libfgetdata' (written in
 C) and a Fortran 77 source file `getdata.f' which defines useful Fortran
 parameters and declares the external subroutines.
 
@@ -12,7 +12,7 @@ take care of converting Fortran CHARACTER stings to C strings.  However, as a
 result, when strings are passed to the compatibility library as arguments, the
 length of the string must also be passed.
 
-Because Fortran 77 handles neither pointers nor abstract datatypes, DIRFILE
+Because Fortran 77 handles neither pointers nor abstract data types, DIRFILE
 pointers are not used to refer to dirfile instances.  Instead, an integer
 dirfile unit number is used.  Space is available in the compatibility library
 for only 1023 dirfile units.  If an application attempts to open more than 1023
@@ -30,7 +30,7 @@ Fortran 77 compiler supports the MIL STD 1753 (DoD Extension) INCLUDE statement
 Fortran program to define these constants.
 
 All integer type parameters passed to the compatibility library are of type
-INTEGER (ie. the native size of the platform).  As a result, largefile support
+INTEGER (i.e. the native size of the platform).  As a result, largefile support
 will not be available in the Fortran 77 bindings on a 32-bit system.
 
 All character string arguments require also an integer indicating the size of
@@ -47,7 +47,7 @@ Available Subroutines
 * GDFOPN(dirfile_unit, dirfilename, dirfilename_len, flags)
   
   Output:
-    INTEGER dirfileunit
+    INTEGER dirfile_unit
   Input:
     INTEGER dirfilename_len, flags
     CHARACTER*<dirfilename_len> dirfilename
@@ -61,7 +61,7 @@ Available Subroutines
 * GDFCLS(dirfile_unit)
 
   Input:
-    INTEGER dirfileu_nit
+    INTEGER dirfile_unit
 
   This wraps dirfile_close(3).  The argument is the dirfile unit to close.
   In addition to closing the dirfile itself, this will also disassociate the
@@ -646,7 +646,7 @@ Available Subroutines
   Input:
     INTEGER ind
 
-  This subroutine returns the name of the format file frament indexed by ind.
+  This subroutine returns the name of the format file fragment indexed by ind.
   If the name of the file is longer than filename_len, it will return the
   actual length of the filename in filename_len and not modify the filename
   argument.

@@ -44,7 +44,7 @@ is NULL, all fields in
 .I dirfile
 will be flushed and closed.  In this special case, modified metadata will
 also be flushed to disk as if
-.BR dirfile_flush_metadata (3)
+.BR dirfile_metaflush (3)
 has been called.
 .SH RETURN VALUE
 On success, zero is returned.  On error, -1 is returned and the dirfile error is

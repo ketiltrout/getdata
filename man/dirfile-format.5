@@ -55,7 +55,7 @@ separated by whitespace.  The first token of a directive line is always a
 The first token of a field specification line is never a reserved word.
 
 Since tokens are separated by whitespace, to include a whitespace character in
-a token, it must either be escaped by preceeding it by a backslash character
+a token, it must either be escaped by preceding it by a backslash character
 .RB ( \e )
 or else by enclosing the token in quotation marks
 .RB ( """" ).
@@ -70,7 +70,7 @@ otherwise the hash mark will be understood as the comment delimiter.
 It is a syntax error to have a line which contains unmatched quotation marks, or
 in which the last character is the backslash character.
 
-Several characters when escaped by a preceeding backslash character are
+Several characters when escaped by a preceding backslash character are
 interpreted as special characters in tokens.  Some of these have already been
 mentioned.  They are:
 .RS
@@ -97,10 +97,10 @@ a form-feed character (ASCII 0x0C / U+000C)
 a line-feed character (ASCII 0x0A / U+000A)
 .TP
 .B \er
-a carraige return character (ASCII 0x0D / U+000D)
+a carriage return character (ASCII 0x0D / U+000D)
 .TP
 .B \et
-a horitontal tab character (ASCII 0x09 / U+0009)
+a horizontal tab character (ASCII 0x09 / U+0009)
 .TP
 .B \ev
 a vertical tab character (ASCII 0x0B / U+000B)
@@ -113,11 +113,11 @@ the single byte given by the octal number
 .IR ooo .
 .TP
 .BI \ex hh
-the single byte given by the hexidecimal number
+the single byte given by the hexadecimal number
 .IR hh .
 .TP
 .BI \eu hhhhhhh
-the UTF-8 byte sequence encoding the Unicode code point given by the hexidecimal
+the UTF-8 byte sequence encoding the Unicode code point given by the hexadecimal
 number
 .IR hhhhhhh .
 .RE
@@ -147,10 +147,10 @@ slash to distinguish a reserved word from a field name.
 .TP
 .B /ENCODING
 The ENCODING directive specifies the encoding scheme used to encode binary
-files in the dirfile.  The encoding scheme may be one of the pre-defined names
+files in the dirfile.  The encoding scheme may be one of the predefined names
 listed below, which are described in more detail in
 .BR dirfile-encoding (5),
-or any other site-specific encoding scheme.  The pre-defined scheme names are:
+or any other site-specific encoding scheme.  The predefined scheme names are:
 .RS
 .TP
 .I none
@@ -163,7 +163,7 @@ The dirfile is compressed using the slimlib library.
 The dirfile is text encoded.
 .PP
 Implementations should fail gracefully when encountering an unknown encoding
-scheme.  If no encoding scheme is specified, behaviour is implementaiton
+scheme.  If no encoding scheme is specified, behaviour is implementation
 dependent.  Syntax is:
 .IP
 .BI /ENCODING\~ <scheme>
@@ -383,7 +383,7 @@ input fields.  The resultant field will have the same sample rate as
 .IR field1 .
 Each supplied co-efficient
 .RI ( a1 ,\~ b1 ,\~ a2 ,
-&c.) may be either a litteral number, or else the field code of a
+&c.) may be either a literal number, or else the field code of a
 .B CONST
 field type containing its value.
 .RE

@@ -20,7 +20,7 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH dirfile_free_entry_strings 3 "2 September 2008" "Version 0.3.0" "GETDATA"
+.TH dirfile_free_entry_strings 3 "17 October 2008" "Version 0.4.0" "GETDATA"
 .SH NAME
 dirfile_free_entry_strings \(em free strings in a GetData gd_entry_t object
 .SH SYNOPSIS
@@ -28,7 +28,7 @@ dirfile_free_entry_strings \(em free strings in a GetData gd_entry_t object
 .HP
 .nh
 .ad l
-.BI "gd_enrty_t *dirfile_free_entry_strings(gd_entry_t *" entry );
+.BI "gd_entry_t *dirfile_free_entry_strings(gd_entry_t *" entry );
 .hy
 .ad n
 .SH DESCRIPTION
@@ -49,7 +49,7 @@ returned by
 .BR get_entry (3).
 As well, the caller may construct a properly initialised gd_entry_t object by
 first setting all bits to zero, then setting the field_type parameter to the
-desired gd_enntype_t symbol, and finally initialising only the members defined
+desired gd_entype_t symbol, and finally initialising only the members defined
 for that type.  The results of calling this function are undefined if the
 character strings pointed to by the string members of
 .I entry

@@ -51,7 +51,7 @@ parameter must point to a valid DIRFILE object previously created by a call to
 Because string values are stored in the dirfile metadata, the new value of
 .I field_code
 won't be written to disk until the dirfile metadata is flushed with
-.BR dirfile_flush_metadata (3),
+.BR dirfile_metaflush (3),
 or until the dirfile is closed.
 .SH RETURN VALUE
 On success,
@@ -98,7 +98,7 @@ a call to
 .BR get_error_string (3).
 .SH SEE ALSO
 .BR dirfile (5),
-.BR dirfile_flush_metadata (3),
+.BR dirfile_metaflush (3),
 .BR dirfile_open (3),
 .BR getdata (3),
 .BR get_string (3),

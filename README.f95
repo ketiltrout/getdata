@@ -4,7 +4,7 @@ FORTRAN 95 BINDINGS FOR GETDATA
 This README describes the Fortran 95 bindings for the GetData library.  These
 bindings consist of a Fortran 95 compatibility library `libf95getdata' (written
 in Fortran 95) and a Fortran 95 module file `getdata.mod' which defines the
-interface.  The Fortran 95 bindings require the Fortran 77 comatibility
+interface.  The Fortran 95 bindings require the Fortran 77 compatibility
 library `libfgetdata' for operation.
 
 For programs which can use Fortran 95 modules, these bindings should be
@@ -29,7 +29,7 @@ open flags (GD_RDONLY, GD_CREAT, &c.) and the same data type specifiers
 Available Procedures
 ====================
 
-Notably, unlinke the Fortran 77 bindings, the Fortran 95 bindings do not
+Notably, unlike the Fortran 77 bindings, the Fortran 95 bindings do not
 require passing character string lengths along with the string itself to
 procedures.
 
@@ -37,7 +37,7 @@ Procedures which are essentially equivalent to their C API counterparts, with
 the exception of including an initial `f' in their names, and using dirfile
 unit numbers in place of C's DIRFILE pointers are:
 
-* integer function fdrifile_open(dirfilename, flags)
+* integer function fdirfile_open(dirfilename, flags)
   character (len=*), intent(in) :: dirfilename
   integer, intent(in) :: flags
 
@@ -45,8 +45,8 @@ unit numbers in place of C's DIRFILE pointers are:
   integer, intent(in) :: dirfile
 
 * subroutine fdirfile_flush (dirfile_unit, field_code)
-  integer, intent(in) :: dirifle
-  character (len=*), intent(in) :: field_cde
+  integer, intent(in) :: dirfile
+  character (len=*), intent(in) :: field_code
 
   (If field_code is the empty string, the entire dirfile will be flushed.)
 
@@ -114,7 +114,7 @@ unit numbers in place of C's DIRFILE pointers are:
   integer, intent(in) :: dirfile, format_file, flags
   character (len=*), intent(in) :: inc_file
 
-In order to respect type safety, the getdata and putdata analogues endcode
+In order to respect type safety, the getdata and putdata analogues encode
 the datatype of their array in their function name, rather than as a parameter.
 Otherwise, they behave the same as their C counterparts.
 
@@ -124,7 +124,7 @@ Otherwise, they behave the same as their C counterparts.
   integer, intent(in) :: first_frame, first_sample, num_frames, num_samples
   character (len=*), intent(in) :: field_code
 
-  This calls getdata(3) with return_type = GD_NULL (ie. return no data).  As a
+  This calls getdata(3) with return_type = GD_NULL (i.e. return no data).  As a
   result, no data_out parameter is required.
 
 * integer function fgetdata_i1 (dirfile_unit, field_code, first_frame,
@@ -148,7 +148,7 @@ Otherwise, they behave the same as their C counterparts.
   GD_INT64, GD_FLOAT32, and GD_FLOAT64, respectively.  Here <datatype> is an
   integer or real type of the appropriate width.
 
-  Analagously, for putdata:
+  Analogously, for putdata:
 
 * integer function fputdata_i1 (dirfile_unit, field_code, first_frame,
   first_sample, num_frames, num_samples, data_in)
@@ -170,7 +170,7 @@ Otherwise, they behave the same as their C counterparts.
   No corresponding fputdata_n function exists, since GD_NULL is not an
   acceptable input data_type for putdata(3).
 
-  Analagously for get_constant and put_constant, for which only the _i1
+  Analogously for get_constant and put_constant, for which only the _i1
   versions are shown here:
 
 * integer function fget_constant_i1 (dirfile, field_code, data_out)
@@ -202,7 +202,7 @@ Other procedures in the Fortran 95 bindings are:
   integer, intent(in) :: dirfile_unit
   integer, intent(inout) :: field_len
 
-  This subroutine behaves analagously to get_field_list(3), except that it
+  This subroutine behaves analogously to get_field_list(3), except that it
   requires a third argument, field_len, which is the longest field name which
   will fit in the supplied field_list array.  If the longest field name in the
   dirfile is longer than field_len, field_len will be set to this value (which
@@ -252,7 +252,7 @@ Other procedures in the Fortran 95 bindings are:
 
   This fills ent with the metadata for field_code obtained by calling
   get_entry(3).  It returns the field type, or GD_NO_ENTRY if an error occurred
-  in the get_entry() call.  The gd_enty type is defined in the getdata module
+  in the get_entry() call.  The gd_entry type is defined in the getdata module
   to be:
 
   type gd_entry
@@ -285,7 +285,7 @@ Other procedures in the Fortran 95 bindings are:
   This subroutine adds the field indicated by field_code and described by ent
   into specified dirfile.
 
-  Analagously, for adding meta fields:
+  Analogously, for adding meta fields:
 
 * subroutine fdirfile_madd (dirfile_unit, parent, field_code, ent)
   integer, intent(in) :: dirfile_unit

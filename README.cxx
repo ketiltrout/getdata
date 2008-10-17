@@ -114,7 +114,7 @@ object.  The following methods are available:
 
 * Entry::~Entry()
 
-  This will take care of de-allcoating the gd_entry_t object and its allocated
+  This will take care of de-allocating the gd_entry_t object and its allocated
   strings.
 
 * EntryType Type()

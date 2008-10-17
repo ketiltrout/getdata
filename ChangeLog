@@ -1,5 +1,5 @@
 2008-10-17   D. V. Wiebe <getdata@ketiltrout.net>  svn:169
-	* src/getdata.c (_GD_DorRaw) src/putdata.c (_GD_DoRawOut): Some encodings
+	* src/getdata.c (_GD_DoRaw) src/putdata.c (_GD_DoRawOut): Some encodings
 	need no endianness correction.
 
 2008-10-17   D. V. Wiebe <getdata@ketiltrout.net>  svn:165
@@ -20,7 +20,7 @@
 	dirfile_madd_lincom, dirfile_madd_linterp, dirfile_madd_bit,
 	dirfile_madd_multiply, dirfile_madd_phase, dirfile_madd_string, and
 	dirfile_madd_const.
-	* bindings/cxx/dirfle.cpp bindings/cxx/dirfile.h: Updated C++ bindings
+	* bindings/cxx/dirfile.cpp bindings/cxx/dirfile.h: Updated C++ bindings
 	accordingly.
 	* bindings/f77/fgetdata.c bindings/f77/getdata.f.in bindings/f77/fgetdata.h
 	bindings/f77/getdata.f90.in: Updated Fortran 77 and 95 bindings accordingly.
@@ -84,7 +84,7 @@
 
 	* src/add.c (dirfile_add_metaspec dirfile_add_spec): Reversed parameters.
 	It's better to keep the order consistent with the other dirfile_add
-	functions rather than having it consistant with the format file.
+	functions rather than having it consistent with the format file.
 	* bindings/cxx/dirfile.cpp bindings/cxx/dirfile.h bindings/f77/fgetdata.c
 	bindings/f77/fgetdata.h bindings/f77/getdata.f90.in README.cxx README.f95
 	README.f77: Ditto for bindings.
@@ -112,7 +112,7 @@
 	test/include_creat.c test/include_nonexistent.c: Added.
 
 2008-10-15   D. V. Wiebe <getdata@ketiltrout.net>  svn:147
-	* README.f77 bindings/f77/fgetdata.c bindings/ff7/fgetdata.h
+	* README.f77 bindings/f77/fgetdata.c bindings/f77/fgetdata.h
 	bindings/f77/getdata.f.in: Add more Fortran 77 bindings.
 
 	* README.f95 bindings/f77/fgetdata.f90.in: Added Fortran 95 bindings for the
@@ -314,7 +314,7 @@
 
 2008-10-10   D. V. Wiebe <getdata@ketiltrout.net>  svn:130
 	* src/getdata.h.in: Incorporate a GD_SCALAR_ENTRY flag in gd_entype_t.
-	* src/field_list.c (get_nvectors) src/neta_list.c (get_nmeta_vectors):
+	* src/field_list.c (get_nvectors) src/meta_list.c (get_nmeta_vectors):
 	Use GD_SCALAR_ENTRY.
 
 	* src/add.c (_GD_Add): Properly initialise the meta field lists in the private
@@ -327,7 +327,7 @@
 	* src/getdata.c src/putdata.c src/spf.c: Detect and fail if a vector type
 	contains an input field that's a scalar.
 
-	* src/spf.c (_GD_GetSPF): Removed redunant field_code parameter.
+	* src/spf.c (_GD_GetSPF): Removed redundant field_code parameter.
 
 	* src/common.c (_GD_GetEntry): Removed FILEFRAM as an alias for INDEX per
 	discussion with Barth.
@@ -397,7 +397,7 @@
 2008-10-08   D. V. Wiebe <getdata@ketiltrout.net>  svn:124
 	* src/open.c (_GD_ValidateField): Malloc one more byte for the terminating
 	NULL.  Crash report from Matthew Truch.
-	* test/add_many.c: Add testcase for same (from Matthew Truch).
+	* test/add_many.c: Add test-case for same (from Matthew Truch).
 
 	* src/internal.h: Removed all instances of ierror and user_error in the
 	DIRFILE struct.
@@ -488,7 +488,7 @@
 	* src/getdata.c (getdata64): Prevent calling getdata() with CONST or STRING
 	fields.
 
-	* src/errors.c: Got rid of the positional parameter C99 desicration which
+	* src/errors.c: Got rid of the positional parameter C99 desecration which
 	GCC 4.3 complains about.  get_error_string() now builds the string itself.
 
 	* src/format_list.c (get_format_filename): make the index parameter unsigned.
@@ -502,7 +502,7 @@
 	* src/flush.c src/getdata.c src/putdata.c src/spf.c: Functions that check
 	recurse_level now also take care of incrementing and decrementing it.
 
-	* man/dirifle-format.5: Update for standards version six.
+	* man/dirfile-format.5: Update for standards version six.
 
 2008-10-02   D. V. Wiebe <getdata@ketiltrout.net>  svn:112
 	* configure.ac: Locate `slim' and `unslim' binaries needed for slimlib
@@ -525,7 +525,7 @@
 2008-10-01   D. V. Wiebe <getdata@ketiltrout.net>  svn:110
 	* src/internal.h: Moved config.h inclusion to internal.h
 
-	* src/open.c: Added "." to the list of prohibited field code characcters.
+	* src/open.c: Added "." to the list of prohibited field code characters.
 
 	* src/getdata.h.in, src/internal.h: Hide dirfile implementation from the
 	public.
@@ -564,8 +564,8 @@
 	Initialise internal data.  Initialise the first RAW field, if necessary.
 
 	* src/close.c src/flush.c src/open.c: Distinguish between "canonical"
-	format file names (ie.  the full path used to open the file) and
-	"external" names (ie. the relative path written to the parent format file).
+	format file names (i.e.  the full path used to open the file) and
+	"external" names (i.e. the relative path written to the parent format file).
 
 	* src/errors.c: Add strings for dirfile_add().
 
@@ -601,7 +601,7 @@
 	* src/internal.h: Minimum format file line length is 4096 characters.
 
 	* src/flish.c (_GD_FlushMeta dirfile_flush_metadata): flush metadata changes
-	to disk (ie. write format files).  Includes public function.
+	to disk (i.e. write format files).  Includes public function.
 
 	* src/add.c (dirfile_add): prevent adding to read-only dirfiles
 
@@ -627,7 +627,7 @@
 	* configure.ac bindings/cxx/Makefile.am bindings/cxx/test/Makefile.am: Call
 	the C++ bindings libgetdata++ instead of libdirfile to be a little more
 	explicit about what it is.  This also allows installation alongside TK's
-	libdrifile.
+	libdirfile.
 
 2008-09-22   D. V. Wiebe <getdata@ketiltrout.net>  svn:94
 	* bindings/cxx/entry.cpp: Use <cstring> instead of <string>.  Patch from
@@ -699,7 +699,7 @@
 	test/put_off64.c test/put_phase.c test/put_phase_noin.c test/put_sf.c
 	test/put_ss.c test/put_uint16.c: Fix compiler warnings
 
-2008-09-05   D. V. WIebe <getdata@ketiltrout.net>  svn:75
+2008-09-05   D. V. Wiebe <getdata@ketiltrout.net>  svn:75
 	* man/get_field_list.3 src/field_list.c: NULL terminate the list.
 
 	* src/field_list.c (get_field_list): Return GD_E_ALLOC on malloc error.
@@ -721,7 +721,7 @@
 	* src/close.c (_GD_FreeD): Handle GD_NO_ENTRY in switch
 
 	* configure.ac: Use modern AM_INIT_AUTOMAKE invocation so as not to have
-	to repreat package name and package version.
+	to repeat package name and package version.
 	* Makefile.am: Require automake 1.6
 
 	* NEWS: added
@@ -765,7 +765,7 @@
 
 	* bindings/f77/fgetdata.c bindings/f77/getdata.f.in
 	bindings/f77/getdata.f90.in bindings/f77/make_parameters.c
-	bindings/f77/test/fget_entry.f90: Add Fotran bindings for get_entry()
+	bindings/f77/test/fget_entry.f90: Add Fortran bindings for get_entry()
 
 2008-09-03   D. V. Wiebe <getdata@ketiltrout.net>  svn:63
 	* src/getdata.h.in: add a GD_NO_ENTRY entry type
@@ -774,7 +774,7 @@
 	add dirfile_free_entry_strings()
 
 2008-09-02   D. V. Wiebe <getdata@ketiltrout.net>  svn:62
-	*	bindings/f77/test/Makefila.am: fix include directory
+	*	bindings/f77/test/Makefile.am: fix include directory
 
 	* src/getdata.h.in src/close.c src/common.c src/getdata.c src/nframes.c
 	src/open.c src/putdata.c src/spf.c: re-organised gd_entry_t again
@@ -807,7 +807,7 @@
 	callers to not include the legacy API.
 
 2009-09-02  D. V. Wiebe <getdata@ketiltrout.net>  svn:59
-	* configure.ac: disable all fortran bindings with one option.  Rename
+	* configure.ac: disable all Fortran bindings with one option.  Rename
 	the bindings options.
 
 2008-09-01  D. V. Wiebe <getdata@ketiltrout.net>  svn:58
@@ -864,7 +864,7 @@
 	* bindings/f77/Makefile.am bindings/f77/getdata.f90.in
 	bindings/f77/test/Makefile.am bindings/f77/test/fget_field_list.f90
 	bindings/f77/test/fgetdata.f90: Use .f90 instead of .f95 for free-form
-	Fortran souce code
+	Fortran source code
 
 2008-08-29  D. V. Wiebe <getdata@ketiltrout.net>  svn:51
 	* man/README.cxx man/README.f77 bindings/cxx/dirfile.cpp
@@ -930,7 +930,7 @@
 
 2008-08-21  D. V. Wiebe <getdata@ketiltrout.net>  svn:34
 	* bindings/f77/fgetdata.c configure.ac src/dirfile_open.c src/getdata.c
-	src/getdata.h.in src/getdata_internal.hsrc/getdata_legacy.h src/putdata.c:
+	src/getdata.h.in src/getdata_internal.h src/getdata_legacy.h src/putdata.c:
 	Fixes for compilation with icc, mostly concerning type casting.
 
 	* configure.ac:  AC_PREREQ([2.60])

@@ -8,7 +8,7 @@ described in detail in two Unix manual pages distributed with this package:
 dirfile(5) and dirfile-format(5), which may be read before installation by
 running:
 
-  $ man man/dirfie.5
+  $ man man/dirfile.5
   $ man man/dirfile-format.5
 
 from the top GetData Project directory (the directory containing this README
@@ -146,9 +146,9 @@ USING THE LIBRARY
 =================
 
 To use the library in C programs, the header file getdata.h should be included.
-This file declares both the new and legacy APIs.  Programs using the getdata
-library need to be linked against the C Standard Math Library, in addition to
-GetData itself, eg. using `-lgetdata -lm'.
+This file declares both the new and legacy APIs.  Programs linking to static
+versions of the GetData library need to be linked against the C Standard Math
+Library, in addition to GetData itself, e.g. using `-lgetdata -lm'.
 
 The `checkdirfile' program is provided as an example of library use in the `bin'
 subdirectory of the package.  This program will be installed to ${prefix}/bin,
@@ -351,7 +351,7 @@ the new API:
     if (dirfile->error) {
       /* dirfile_open() returns a pointer to a newly allocated DIRFILE
         object even if the open failed. This DIRFILE object should still
-        be free'd by calling dirfile_close() after checking the error state */
+        be freed by calling dirfile_close() after checking the error state */
 
       printf("GetData error: %s\n",
           get_error_string(dirfile, error_buffer, 1024));

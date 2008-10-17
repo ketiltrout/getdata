@@ -45,7 +45,7 @@ such situations.
 Additionally, how a particular encoding is implemented is not specified by the
 Dirfile Standards, but, for purposes of interoperability, all dirfile
 implementations are encouraged to support the encoding implementation used by
-the GetData dirfile reference implmentation.
+the GetData dirfile reference implementation.
 
 An encoding scheme is local to the particular
 .I format file fragment
@@ -83,7 +83,7 @@ other encodings are noted below.  Encoding discovery proceeds by searching for
 files with the known list of file extensions (in an unspecified order) and
 stopping when the first successful match is made.  Because of this, when the a
 field has multiple data files with different, supported file extensions which
-could legitamilty be associated with it, the encoding scheme discovered by
+could legitimately be associated with it, the encoding scheme discovered by
 GetData is not well defined.
 
 In addition to raw (unencoded) data, GetData supports two other encoding
@@ -96,13 +96,13 @@ encoding, both discussed below.
 .SS Text Encoding
 
 The Text Encoding is unique among GetData encoding schemes in that it requires
-no exteral library.  As a result, all builds of the library contain full support
+no external library.  As a result, all builds of the library contain full support
 for this encoding.  It is meant to serve as a reference encoding and example
 of the encoding framework for work on other encoding schemes.
 
 The Text Encoding replaces the binary data files with 7-bit ASCII files
 containing a decimal text encoding of the data, one sample per line.  All
-operations are supported by the Text Excoding.  The file extension of the
+operations are supported by the Text Encoding.  The file extension of the
 Text Encoding is
 .BR .txt .
 

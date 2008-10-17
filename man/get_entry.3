@@ -45,7 +45,7 @@ The
 parameter must point to a valid DIRFILE object previously created by a call to
 .BR dirfile_open (3).
 
-The entry will be stored in the gd_entry_t struction indicated by the
+The entry will be stored in the gd_entry_t structure indicated by the
 .I entry
 parameter, which must be allocated by the caller.  Members available in this
 structure depend on the field type of the field queried.  See below for a
@@ -107,7 +107,7 @@ typedef struct {
 .P
 The
 .I field
-member is the field code of the entry (ie. its string name).  If the call to
+member is the field code of the entry (i.e. its string name).  If the call to
 .BR get_entry (3)
 is successful, this will be identical to the supplied
 .I field_code
@@ -129,7 +129,7 @@ to one of the following symbols:
 .B GD_INDEX_ENTRY
 is a special field type used only for the implicit
 .B INDEX
-field.  The meaning of the other symbols should be self-explanitory.
+field.  The meaning of the other symbols should be self-explanatory.
 .P
 The 
 .I fragment_index
