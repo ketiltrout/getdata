@@ -25,18 +25,17 @@
 #endif
 
 /* this function is little more than a public boilerplate for _GD_DoField */
-size_t get_constant(DIRFILE* D, const char *field_code, gd_type_t return_type,
+int get_constant(DIRFILE* D, const char *field_code, gd_type_t return_type,
     void *data_out)
 {
-  size_t n_read = 0;
   gd_entry_t *entry;
 
   dtrace("%p, \"%s\", 0x%x, %p", D, field_code, return_type, data_out);
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%zi", 0);
-    return 0;
+    dreturn("%i", -1);
+    return -1;
   }
 
   _GD_ClearError(D);
@@ -48,23 +47,21 @@ size_t get_constant(DIRFILE* D, const char *field_code, gd_type_t return_type,
   else if (entry->field_type != GD_CONST_ENTRY)
     _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
   else
-    n_read = _GD_DoField(D, entry, field_code, 0, 0, 0, 0, return_type,
-        data_out);
+    _GD_DoField(D, entry, field_code, 0, 0, 0, 0, return_type, data_out);
 
   if (D->error) {
-    dreturn("%i", 0);
-    return 0;
+    dreturn("%i", -1);
+    return -1;
   }
 
-  dreturn("%zi", n_read);
-  return n_read;
+  dreturn("%i", 0);
+  return 0;
 }
 
 /* this function is little more than a public boilerplate for _GD_DoFieldOut */
-size_t put_constant(DIRFILE* D, const char *field_code, gd_type_t data_type,
+int put_constant(DIRFILE* D, const char *field_code, gd_type_t data_type,
     const void *data_in)
 {
-  size_t n_wrote = 0;
   int i;
   gd_entry_t *entry;
 
@@ -72,14 +69,14 @@ size_t put_constant(DIRFILE* D, const char *field_code, gd_type_t data_type,
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%zi", 0);
-    return 0;
+    dreturn("%i", -1);
+    return -1;
   }
 
   if ((D->flags & GD_ACCMODE) != GD_RDWR) {
     _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
-    dreturn("%zi", 0);
-    return 0;
+    dreturn("%i", -1);
+    return -1;
   }
 
   _GD_ClearError(D);
@@ -91,8 +88,7 @@ size_t put_constant(DIRFILE* D, const char *field_code, gd_type_t data_type,
   else if (entry->field_type != GD_CONST_ENTRY)
     _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
   else 
-    n_wrote = _GD_DoFieldOut(D, entry, field_code, 0, 0, 0, 0, data_type,
-        data_in);
+    _GD_DoFieldOut(D, entry, field_code, 0, 0, 0, 0, data_type, data_in);
 
   /* Flag all clients as needing recalculation */
   for (i = 0; i < entry->e->n_client; ++i)
@@ -103,8 +99,8 @@ size_t put_constant(DIRFILE* D, const char *field_code, gd_type_t data_type,
   entry->e->client = NULL;
   entry->e->n_client = 0;
 
-  dreturn("%zi", n_wrote);
-  return n_wrote;
+  dreturn("%i", 0);
+  return 0;
 }
 
 /* vim: ts=2 sw=2 et tw=80

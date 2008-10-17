@@ -613,18 +613,18 @@ void F77_FUNC(gdfaph, GDFAPH) (const int* dirfile, const char* field_code,
   free(in);
 }
 
-/* get_format_filename wrapper */
-void F77_FUNC(gdfffn, GDFFFN) (char* filename, int* filename_l,
+/* get_fragmentname wrapper */
+void F77_FUNC(gdffgn, GDFFGN) (char* filename, int* filename_l,
     const int* dirfile, const int* index)
 {
-  _GDF_FString(filename, filename_l,
-      get_format_filename(_GDF_GetDirfile(*dirfile), *index));
+  _GDF_FString(filename, filename_l, get_fragmentname(_GDF_GetDirfile(*dirfile),
+        *index));
 }
 
-/* get_nformats wrapper */
-void F77_FUNC(gdfnfo, GDFNFO) (int* nformats, const int* dirfile)
+/* get_nfragments wrapper */
+void F77_FUNC(gdfnfg, GDFNFG) (int* nformats, const int* dirfile)
 {
-  *nformats = get_nformats(_GDF_GetDirfile(*dirfile));
+  *nformats = get_nfragments(_GDF_GetDirfile(*dirfile));
 }
 
 /* dirfile_flush_metadata wrapper */

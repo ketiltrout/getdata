@@ -459,7 +459,7 @@ int dirfile_add(DIRFILE* D, const gd_entry_t* entry)
 int dirfile_add_raw(DIRFILE* D, const char* field_code, gd_type_t data_type,
     unsigned int spf, int format_file)
 {
-  dtrace("%p, \"%s\", %i, %x %i", D, field_code, spf, data_type, format_file);
+  dtrace("%p, \"%s\", %x, %i %i", D, field_code, data_type, spf, format_file);
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);

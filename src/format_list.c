@@ -24,7 +24,7 @@
 #include <stdlib.h>
 #endif
 
-const char* get_format_filename(DIRFILE* D, int index)
+const char* get_fragmentname(DIRFILE* D, int index)
 {
   dtrace("%p, %i", D, index);
 
@@ -44,7 +44,7 @@ const char* get_format_filename(DIRFILE* D, int index)
   return D->include_list[index].cname;
 }
 
-int get_nformats(DIRFILE* D)
+int get_nfragments(DIRFILE* D)
 {
   dtrace("%p", D);
 

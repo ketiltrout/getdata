@@ -788,19 +788,19 @@ subroutine fdirfile_add_metaspec (dirfile, spec, parent)
   LEN_TRIM(spec))
 end subroutine
 
-function fget_format_filename (dirfile, ind)
-  character (len=GD_FIELD_LEN) :: fget_format_filename
+function fget_fragmentname (dirfile, ind)
+  character (len=GD_FIELD_LEN) :: fget_fragmentname
   integer, intent(in) :: dirfile, ind
   integer :: l = 4096
 
-  call gdfffn(fget_format_filename, l, dirfile, ind)
+  call gdffgn(fget_fragmentname, l, dirfile, ind)
 end function
 
-function fget_nformats (dirfile)
-  integer :: fget_nformats
+function fget_nfragments (dirfile)
+  integer :: fget_nfragments
   integer, intent(in) :: dirfile
 
-  call gdfnfo(fget_nformats, dirfile)
+  call gdfnfg(fget_nfragments, dirfile)
 end function
 
 subroutine fdirfile_flush_metadata (dirfile)

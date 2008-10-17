@@ -416,8 +416,8 @@ static size_t _GD_DoStringOut(DIRFILE* D, gd_entry_t *E, const void *data_in)
   E->e->string = strdup(data_in);
   D->include_list[E->format_file].modified = 1;
 
-  dreturn("%i", 1);
-  return 1;
+  dreturn("%i", strlen(E->e->string) + 1);
+  return strlen(E->e->string) + 1;
 }
 
 size_t _GD_DoFieldOut(DIRFILE *D, gd_entry_t* E, const char *field_code,

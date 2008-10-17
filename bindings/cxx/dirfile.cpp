@@ -214,12 +214,12 @@ size_t Dirfile::PutString(const char *field_code, const char* data_in)
   return put_string(D, field_code, data_in);
 }
 
-const char* Dirfile::FormatFileName(int index)
+const char* Dirfile::FragmentName(int index)
 {
-  return get_format_filename(D, index);
+  return get_fragmentname(D, index);
 }
 
-int Dirfile::NFormats()
+int Dirfile::NFragments()
 {
-  return get_nformats(D);
+  return get_nfragments(D);
 }

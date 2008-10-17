@@ -67,8 +67,8 @@ C     Returns the field type
       EXTERNAL GDFFDT
 C     Get the format file index for a field
       EXTERNAL GDFFFI
-C     Corresponding to get_format_filename(3)
-      EXTERNAL GDFFFN
+C     Corresponding to get_fragmentname(3)
+      EXTERNAL GDFFGN
 C     Corresponding to dirfile_flush(3)
       EXTERNAL GDFFLS
 C     Corresponding to get_field_list_by_type(3) (sort of)
@@ -109,8 +109,8 @@ C     Corresponding to get_metavector_list(3) (sort of)
       EXTERNAL GDFMVN
 C     Corresponding to get_nfields(3)
       EXTERNAL GDFNFD
-C     Corresponding to get_nformats(3)
-      EXTERNAL GDFNFO
+C     Corresponding to get_nfragments(3)
+      EXTERNAL GDFNFG
 C     Corresponding to get_nframes(3)
       EXTERNAL GDFNFR
 C     Corresponding to get_nfields_by_type(3)

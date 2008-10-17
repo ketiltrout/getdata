@@ -1,4 +1,4 @@
-.\" get_constant.3.  The get_constant man page.
+.\" put_string.3.  The put_string man page.
 .\"
 .\" (C) 2008 D. V. Wiebe
 .\"
@@ -20,91 +20,45 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH get_constant 3 "17 October 2008" "Version 0.4.0" "GETDATA"
+.TH put_string 3 "17 October 2008" "Version 0.4.0" "GETDATA"
 .SH NAME
-get_constant \(em retrieve a scalar constant from a dirfile database
+put_string \(em retrieve a scalar constant from a dirfile database
 .SH SYNOPSIS
 .B #include <getdata.h>
 .HP
 .nh
 .ad l
-.BI "int get_constant(DIRFILE *" dirfile ", const char *" field_code ,
-.BI "gd_type_t " return_type ", void *" data_out );
+.BI "int put_string(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "const char *" data_in );
 .hy
 .ad n
 .SH DESCRIPTION
 The
-.BR get_constant ()
+.BR put_string ()
 function queries a dirfile(5) database specified by
 .I dirfile
-for the
-.B CONST
-scalar
-.IR field_code .
-The constant is converted to the data type specified by
-.IR return_type ,
-and stored in the user-supplied buffer
-.IR data_out .
+and sets the
+.B STRING
+.I field_code 
+to the value specified in
+.IR data_in .
 
 The 
 .I dirfile
 parameter must point to a valid DIRFILE object previously created by a call to
 .BR dirfile_open (3).
 
-The 
-.I return_type
-parameter should be one of the following symbols, which indicates the desired
-return type of the data:
-.RS
-.TP 11
-.I GD_UINT8
-unsigned 8-bit integer
-.TP
-.I GD_INT8
-signed 8-bit integer
-.TP
-.I GD_UINT16
-unsigned 16-bit integer
-.TP
-.I GD_INT16
-signed 16-bit integer
-.TP
-.I GD_UINT32
-unsigned 32-bit integer
-.TP
-.I GD_INT32
-signed 32-bit integer
-.TP
-.I GD_UINT64
-unsigned 64-bit integer
-.TP
-.I GD_INT64
-signed 64-bit integer
-.TP
-.IR GD_FLOAT32 \~or\~ GD_FLOAT
-IEEE-754 standard 32-bit single precision floating point number
-.TP
-.IR GD_FLOAT64 \~or\~ GD_DOUBLE
-IEEE-754 standard 64-bit double precision floating point number
-.TP
-.I GD_NULL
-the null type: the database is queried as usual, but no data is returned.
-In this case,
-.I data_out
-is ignored and may be NULL.
-.RE
-
-The return type of the constant need not be the same as the type of the data
-stored in the database.  Type conversion will be performed as necessary to
-return the requested type.  The parameter
-.I data_out
-must point to a valid memory location of sufficient size to hold a value of the
-return type specified.
+Because string values are stored in the dirfile metadata, the new value of
+.I field_code
+won't be written to disk until the dirfile metadata is flushed with
+.BR dirfile_flush_metadata (3),
+or until the dirfile is closed.
 .SH RETURN VALUE
 On success,
-.BR get_constant ()
-returns zero.  On error, it returns -1 and sets the dirfile error to a non-zero
-value.  Possible error values are:
+.BR put_string ()
+returns the length of the string stored, including the trailing NULL character.
+On error, it returns 0 and sets the dirfile error to a non-zero value.  Possible
+error values are:
 .TP 8
 .B GD_E_BAD_CODE
 The field specified by
@@ -119,17 +73,17 @@ was supplied.
 .B GD_E_BAD_FIELD_TYPE
 The supplied
 .I field_code
-referred to a field of a type other than 
-.BR CONST .
+referred to a field of type other than
+.BR STRING .
 The caller should use
-.BR getdata (3),
+.BR putdata (3),
 or
-.BR get_string (3)
+.BR put_constant (3)
 instead.
 .TP
 .B GD_E_BAD_TYPE
 An invalid
-.I return_type
+.I data_type
 was specified.
 .TP
 .B GD_E_INTERNAL_ERROR
@@ -144,9 +98,10 @@ a call to
 .BR get_error_string (3).
 .SH SEE ALSO
 .BR dirfile (5),
+.BR dirfile_flush_metadata (3),
 .BR dirfile_open (3),
 .BR getdata (3),
-.BR get_constant_values (3),
+.BR get_string (3),
 .BR get_error (3),
 .BR get_error_string (3),
-.BR put_constant (3)
+.BR putdata (3)

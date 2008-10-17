@@ -20,15 +20,15 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH get_string 3 "7 October 2008" "Version 0.4.0" "GETDATA"
+.TH get_string 3 "17 October 2008" "Version 0.4.0" "GETDATA"
 .SH NAME
-get_string \(em retrieve a scalar constant from a dirfile database
+get_string \(em retrieve a string from a dirfile database
 .SH SYNOPSIS
-.B #include <get_string.h>
+.B #include <getdata.h>
 .HP
 .nh
 .ad l
-.BI "ssize_t get_string(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "size_t get_string(DIRFILE *" dirfile ", const char *" field_code ,
 .BI "size_t " len ", char *" data_out );
 .hy
 .ad n
@@ -63,16 +63,16 @@ must point to a valid memory location of sufficient size to hold at least
 .I len
 characters.  If the length of the string scalar is greater than
 .IR len ", " data_out
-will not be null-terminated.
+will not be NULL-terminated.
 .SH RETURN VALUE
 On success,
 .BR get_string ()
-returns the actual length of the specified string scalar.  A return return
-value greater than or equal to
+returns the actual length of the specified string scalar, including the trailing
+NULL character.  A return return value greater than
 .I len
 indicates that the output string is not null terminated.
 
-On error, it returns -1 and sets the dirfile error to a non-zero
+On error, it returns 0 and sets the dirfile error to a non-zero
 value.  Possible error values are:
 .TP 8
 .B GD_E_BAD_CODE
@@ -88,14 +88,12 @@ was supplied.
 .B GD_E_BAD_FIELD_TYPE
 The supplied
 .I field_code
-referred to a 
-.B CONST
-or 
-.B STRING
-field.  The caller should use
-.BR get_string (3),
+referred to a field of type other than
+.BR STRING .
+The caller should use
+.BR getdata (3),
 or
-.BR get_string (3)
+.BR get_constant (3)
 instead.
 .TP
 .B GD_E_BAD_TYPE
@@ -115,13 +113,9 @@ a call to
 .BR get_error_string (3).
 .SH SEE ALSO
 .BR dirfile (5),
-.BR dirfile-encoding (5),
 .BR dirfile_open (3),
 .BR getdata (3),
 .BR get_error (3),
 .BR get_error_string (3),
-.BR get_nframes (3),
-.BR get_spf (3),
-.BR get_string (3),
 .BR get_string_values (3),
-.BR putdata (3)
+.BR put_string (3)

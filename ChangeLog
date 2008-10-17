@@ -1,3 +1,14 @@
+2008-10-17   D. V. Wiebe <getdata@ketiltrout.net>  svn:163
+	* src/getdata.c (_GD_DoString) src/string.c (get_string): Add one to string
+	length to account for terminating NUL.
+	* src/putdata.c (_GD_DoStringOut) src/string.c (put_string): Return string
+	length.
+
+	* src/format_list.c: Renamed get_format_filename to get_fragmentname and
+	get_nformats to get_nfragments.  Bindings changed.
+	
+	* src/constant.c (get_constant put_constant): Reutrn -1 on error.
+
 2008-10-16   D. V. Wiebe <getdata@ketiltrout.net>  svn:161
 	* src/meta_list.c src/nmeta.c: Fail if the specified parent is itself a
 	metafield.

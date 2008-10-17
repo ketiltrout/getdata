@@ -883,8 +883,8 @@ static size_t _GD_DoString(gd_entry_t *E, size_t num_samp, void *data_out)
   if (num_samp > 0 && data_out != NULL)
     strncpy(data_out, E->e->string, num_samp); 
 
-  dreturn("%i", strlen(E->e->string));
-  return strlen(E->e->string);
+  dreturn("%i", strlen(E->e->string) + 1);
+  return strlen(E->e->string) + 1;
 }
 
 /* _GD_DoField: Locate the field in the database and read it.

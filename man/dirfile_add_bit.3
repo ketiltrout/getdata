@@ -52,7 +52,7 @@ dirfile_add_multiply, dirfile_add_phase, dirfile_add_raw, dirfile_add_string
 .BI "const char *" in_field ", int " phase ", int " format_file );
 .HP
 .BI "int dirfile_add_raw(DIRFILE *" dirfile ", const char *" field_name ,
-.BI "unsigned int " spf ", gd_type_t " data_type ", int " format_file );
+.BI "gd_type_t " data_type ", unsigned int " spf ", int " format_file );
 .HP
 .BI "int dirfile_add_string(DIRFILE *" dirfile ", const char *" field_name ,
 .BI "const char *" value ", int " format_file );
@@ -69,8 +69,8 @@ In all of these calls,
 indicates the name of the field to be added.  Further,
 .I format_file
 is the index of the format file fragment into which the field should be added.
-(To convert a format file index to its file name, see
-.BR get_format_filename (3).)
+(To convert a fragment index to its file name, see
+.BR get_fragmentname (3).)
 The meaning and valid types of other arguments may be obtained from the
 .BR get_entry (3)
 and

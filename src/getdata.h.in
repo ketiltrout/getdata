@@ -270,17 +270,17 @@ extern int dirfile_add_metaconst(DIRFILE* D, const char* parent,
     const char* field_code, gd_type_t const_type, gd_type_t data_type,
     const void* value) __THROW __gd_nonnull ((1,2,3,6));
 
-extern const char* get_format_filename(DIRFILE* D, int index)
+extern const char* get_fragmentname(DIRFILE* D, int index)
   __THROW __gd_nonnull((1));
 
 extern int get_error(const DIRFILE* D) __THROW __gd_nonnull ((1));
 
-extern int get_nformats(DIRFILE* D) __THROW __gd_nonnull((1));
+extern int get_nfragments(DIRFILE* D) __THROW __gd_nonnull((1));
 
-extern size_t get_constant(DIRFILE* D, const char *field_code,
+extern int get_constant(DIRFILE* D, const char *field_code,
     gd_type_t return_type, void *data_out) __THROW __gd_nonnull ((1, 2));
 
-extern size_t put_constant(DIRFILE* D, const char *field_code,
+extern int put_constant(DIRFILE* D, const char *field_code,
     gd_type_t data_type, const void *data_in) __THROW __gd_nonnull ((1, 2, 4));
 
 extern size_t get_string(DIRFILE* D, const char *field_code, size_t len,
@@ -288,9 +288,6 @@ extern size_t get_string(DIRFILE* D, const char *field_code, size_t len,
 
 extern size_t put_string(DIRFILE* D, const char *field_code,
     const char *data_in) __THROW __gd_nonnull ((1, 2, 3));
-
-extern size_t put_constant(DIRFILE* D, const char *field_code,
-    gd_type_t data_type, const void *data_in) __THROW __gd_nonnull ((1, 2, 4));
 
 extern unsigned int get_nmetafields(DIRFILE* D, const char* parent)
   __THROW __gd_nonnull((1,2));

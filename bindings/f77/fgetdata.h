@@ -129,10 +129,10 @@ void F77_FUNC(gdfaph, GDFAPH) (const int* dirfile, const char* field_code,
     const int* field_code_l, const char* in_field, const int* in_field_l,
     const int* shift, const int* format_file);
 
-void F77_FUNC(gdfffn, GDFFFN) (char* filename, int* filename_l,
+void F77_FUNC(gdffgn, GDFFGN) (char* filename, int* filename_l,
     const int* dirfile, const int* index);
 
-void F77_FUNC(gdfnfo, GDFNFO) (int* nformats, const int* dirfile);
+void F77_FUNC(gdfnfg, GDFNFG) (int* nformats, const int* dirfile);
 
 void F77_FUNC(gdfflm, GDFFLM) (const int* dirfile);
 

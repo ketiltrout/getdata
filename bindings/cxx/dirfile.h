@@ -61,7 +61,7 @@ namespace GetData {
 
       int FlushMetaData();
 
-      const char *FormatFileName(int index);
+      const char *FragmentName(int index);
 
       size_t GetConstant(const char *field_code, DataType type, void *data_out);
 
@@ -95,9 +95,9 @@ namespace GetData {
 
       unsigned int NVectors();
 
-      off_t NFrames();
+      int NFragments();
 
-      int NFormats();
+      off_t NFrames();
 
       size_t PutConstant(const char *field_code, DataType type,
           const void *data_in);
