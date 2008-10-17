@@ -1,3 +1,7 @@
+2008-10-16   D. V. Wiebe <getdata@ketiltrout.net>  svn:161
+	* src/meta_list.c src/nmeta.c: Fail if the specified parent is itself a
+	metafield.
+
 2008-10-16   D. V. Wiebe <getdata@ketiltrout.net>  svn:155
 	* src/open.c: Moved meta field enumeration to _GD_ParseFieldSpec from
 	_GD_ParseDirective to allow dirfile_add_metaspec to benefit seamlessly.

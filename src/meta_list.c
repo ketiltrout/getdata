@@ -43,7 +43,7 @@ const void* get_metaconstant_values(DIRFILE* D, const char* parent,
 
   const gd_entry_t* P = _GD_FindField(D, parent, NULL);
 
-  if (P == NULL) {
+  if (P == NULL || P->e->n_meta == -1) {
     _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, parent);
     dreturn("%p", NULL);
     return NULL;
@@ -94,7 +94,7 @@ const char** get_metastring_values(DIRFILE* D, const char* parent)
 
   const gd_entry_t* P = _GD_FindField(D, parent, NULL);
 
-  if (P == NULL) {
+  if (P == NULL || P->e->n_meta == -1) {
     _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, parent);
     dreturn("%p", NULL);
     return NULL;
@@ -147,7 +147,7 @@ const char** get_metafield_list_by_type(DIRFILE* D, const char* parent,
 
   const gd_entry_t* P = _GD_FindField(D, parent, NULL);
 
-  if (P == NULL) {
+  if (P == NULL || P->e->n_meta == -1) {
     _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, parent);
     dreturn("%p", NULL);
     return NULL;

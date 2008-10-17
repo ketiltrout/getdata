@@ -34,7 +34,7 @@ unsigned int get_nmetafields(DIRFILE* D, const char* parent)
 
   const gd_entry_t* P = _GD_FindField(D, parent, NULL);
 
-  if (P == NULL) {
+  if (P == NULL || P->e->n_meta == -1) {
     _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, parent);
     dreturn("%u", 0);
     return 0;
@@ -60,7 +60,7 @@ unsigned int get_nmetavectors(DIRFILE* D, const char* parent)
 
   const gd_entry_t* P = _GD_FindField(D, parent, NULL);
 
-  if (P == NULL) {
+  if (P == NULL || P->e->n_meta == -1) {
     _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, parent);
     dreturn("%u", 0);
     return 0;
@@ -90,7 +90,7 @@ unsigned int get_nmetafields_by_type(DIRFILE* D, const char* parent,
 
   const gd_entry_t* P = _GD_FindField(D, parent, NULL);
 
-  if (P == NULL) {
+  if (P == NULL || P->e->n_meta == -1) {
     _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, parent);
     dreturn("%u", 0);
     return 0;

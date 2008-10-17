@@ -32,11 +32,13 @@ dist_man_MANS = dirfile_add.3 dirfile_add_bit.3 dirfile_add_metabit.3 \
 								dirfile_include.3 dirfile_open.3 get_constant.3 \
 								get_constant_values.3 get_entry.3 get_error.3 \
 								get_error_string.3 get_field_list.3 get_field_list_by_type.3 \
-								get_format_filename.3 get_nfields.3 get_nfields_by_type.3 \
-								get_nformats.3 get_nframes.3 get_nvectors.3 get_spf.3 \
-								get_string_values.3 get_vector_list.3 getdata.3 putdata.3 \
-								dirfile.5 dirfile-encoding.5 dirfile-format.5 \
-								$(LFS_transitional_mans)
+								get_format_filename.3 get_metafield_list.3 \
+								get_metafield_list_by_type.3 get_metavector_list_by_type.3 \
+								get_nfields.3 get_nfields_by_type.3 get_nformats.3 \
+								get_nframes.3 get_nmetafields.3 get_nmeta_fields_by_type.3 \
+								getnmetavectors.3 get_nvectors.3 get_spf.3 get_string_values.3 \
+								get_vector_list.3 getdata.3 putdata.3 dirfile.5 \
+								dirfile-encoding.5 dirfile-format.5 $(LFS_transitional_mans)
 
 install-data-hook:
 	cd $(DESTDIR)$(mandir)/man3 && \

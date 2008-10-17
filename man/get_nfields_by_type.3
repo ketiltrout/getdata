@@ -20,7 +20,7 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH get_nfields_by_type 3 "7 October 2008" "Version 0.4.0" "GETDATA"
+.TH get_nfields_by_type 3 "17 October 2008" "Version 0.4.0" "GETDATA"
 .SH NAME
 get_nfields_by_type \(em report the number of fields of a given type in a dirfile
 .SH SYNOPSIS
@@ -28,7 +28,7 @@ get_nfields_by_type \(em report the number of fields of a given type in a dirfil
 .HP
 .nh
 .ad l
-.BI "unsigned int get_nfields_by_type(DIRFILE *" dirfile ", gd_entype_t type );
+.BI "unsigned int get_nfields_by_type(DIRFILE *" dirfile ", gd_entype_t " type );
 .hy
 .ad n
 .SH DESCRIPTION
@@ -77,4 +77,6 @@ a call to
 .BR getdata (3),
 .BR get_error (3),
 .BR get_error_string (3),
-.BR get_nfields (3)
+.BR get_field_list_by_type (3),
+.BR get_nfields (3),
+.BR get_nmetafields_by_type (3)
