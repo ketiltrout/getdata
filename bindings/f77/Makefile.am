@@ -53,6 +53,10 @@ LTFCCOMPILE = $(LIBTOOL) --tag=F77 $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 							--mode=compile $(FC) $(AM_FCFLAGS) $(FCFLAGS)
 FCLINK = $(LIBTOOL) --tag=F77 --mode=link $(FCLD) $(AM_FCFLAGS) $(FCFLAGS) \
 				 $(AM_LDFLAGS) $(LDFLAGS) -o $@
+libf95getdata_la_LINK = $(LIBTOOL) --tag=F77 $(AM_LIBTOOLFLAGS) \
+												$(LIBTOOLFLAGS) --mode=link $(FCLD) $(AM_FCFLAGS) \
+												$(FCFLAGS) $(libf95getdata_la_LDFLAGS) $(LDFLAGS) \
+												-o $@
 
 getdata.mod: getdata.o
 
