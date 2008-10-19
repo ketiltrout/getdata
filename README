@@ -47,16 +47,34 @@ Documentation for the various bindings, if present, can be found in files
 named `README.<language>'.  The C interface is described in this document.
 
 
-DIRFILE STANDARDS VERSION 5
+DIRFILE STANDARDS VERSION 6
 ===========================
 
 A full list of features new to this release of GetData may be found in the
-file called `NEWS'.  The 0.3.0 release of the GetData Library (August 2008),
-the first release on Sourceforge, was released in conjunction with a new
-version of the Dirfile Standards, known as Standards Version 5.  This was the
-first update to the Standards since October of 2006.
+file called `NEWS'.  The 0.4.0 release of the GetData Library (October 2008),
+was released in conjunction with a new version of the Dirfile Standards, known
+as Standards Version 6.
 
-Standards Version 5 introduces the following:
+Standards Version 6 introduces the following:
+  * Support for two scalar types: CONST (numerical) and STRING (a character
+    string)
+  * The ability to attach subdata to fields using the META directive.
+  * Support for different "encodings", which change how binary data is stored
+    on disk.
+  * Significantly more permissive and explicit rules on allowed characters in
+    format file tokens.
+  * Removal of "FILEFRAM" as an alias for the implicit "INDEX" field.  It is
+    encouraged that made use of FILEFRAM be updated to use INDEX instead.
+    However, a work-around is to add:
+    
+      FILEFRAM LINCOM 1 INDEX 1 0
+      
+    to the dirfile's format file to recreate the old behaviour.
+
+Standards Version 6 follows closely on the heels of Standards Version 5,
+released in August of 2006 with GetData 0.3.0.
+
+Standards Version 5 introduced the following:
   * Three new supported data type: 8-bit signed integers, and 64-bit signed
     and unsigned integers
   * A new, uniform way of referring to data types.  Previous versions of the
@@ -115,7 +133,7 @@ BUILDING THE LIBRARY
 
 This package may be configured and built using the GNU autotools.  Generic
 installation instructions are provided in the file called `INSTALL'.  A
-brief summary follows.
+brief summary follows.  A C99-compliant compiler is recommended.
 
 Most users should be able to build the package by simply executing:
 

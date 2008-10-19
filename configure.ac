@@ -198,7 +198,6 @@ AM_INIT_AUTOMAKE
 AC_PROG_LN_S
 AC_PROG_CC
 AC_PROG_CC_C_O
-dnl C99 isn't required, but it does define NAN, if we have it
 GD_PROG_CC_C99
 AC_PROG_CXX
 AC_PROG_CXX_C_O
