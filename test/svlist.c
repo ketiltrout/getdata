@@ -27,7 +27,7 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
+  DIRFILE* D = dirfile_open(filedir, GD_RDONLY | GD_VERBOSE);
   const char** field_list = get_strings(D);
 
   if (get_error(D))

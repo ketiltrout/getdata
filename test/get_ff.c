@@ -34,7 +34,7 @@ int main(void)
   write(fd, data_data, 256);
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
+  DIRFILE* D = dirfile_open(filedir, GD_RDONLY | GD_VERBOSE);
   int n = getdata(D, "data", 5, 0, 1, 0, GD_UINT8, c);
   int error = get_error(D);
 

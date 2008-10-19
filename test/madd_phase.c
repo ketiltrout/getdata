@@ -14,7 +14,7 @@ int main(void)
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_CREAT);
+  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
   dirfile_add_phase(D, "new", "in", 3, 0);
   dirfile_madd_phase(D, "new", "meta", "in", 3);
   int error = get_error(D);

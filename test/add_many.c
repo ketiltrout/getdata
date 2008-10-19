@@ -20,19 +20,19 @@ int main (void)
   const char* i = __TEST__ "dirfile/i";
   const char* j = __TEST__ "dirfile/jjjjjjjjjjjj";
 
-  DIRFILE *df;
+  DIRFILE *D;
 
-  df = dirfile_open(filedir, GD_RDWR|GD_CREAT|GD_EXCL);
-  dirfile_add_raw(df, "a", GD_FLOAT64, 1, 0);
-  dirfile_add_raw(df, "b", GD_FLOAT64, 1, 0);
-  dirfile_add_raw(df, "c", GD_FLOAT64, 1, 0);
-  dirfile_add_raw(df, "d", GD_FLOAT64, 1, 0);
-  dirfile_add_raw(df, "e", GD_FLOAT64, 1, 0);
-  dirfile_add_raw(df, "f", GD_FLOAT64, 1, 0);
-  dirfile_add_raw(df, "g", GD_FLOAT64, 1, 0);
-  dirfile_add_raw(df, "h", GD_FLOAT64, 1, 0);
-  dirfile_add_raw(df, "i", GD_FLOAT64, 1, 0);
-  dirfile_add_raw(df, "jjjjjjjjjjjj", GD_FLOAT64, 1, 0);
+  D = dirfile_open(filedir, GD_RDWR | GD_CREAT | GD_EXCL | GD_VERBOSE);
+  dirfile_add_raw(D, "a", GD_FLOAT64, 1, 0);
+  dirfile_add_raw(D, "b", GD_FLOAT64, 1, 0);
+  dirfile_add_raw(D, "c", GD_FLOAT64, 1, 0);
+  dirfile_add_raw(D, "d", GD_FLOAT64, 1, 0);
+  dirfile_add_raw(D, "e", GD_FLOAT64, 1, 0);
+  dirfile_add_raw(D, "f", GD_FLOAT64, 1, 0);
+  dirfile_add_raw(D, "g", GD_FLOAT64, 1, 0);
+  dirfile_add_raw(D, "h", GD_FLOAT64, 1, 0);
+  dirfile_add_raw(D, "i", GD_FLOAT64, 1, 0);
+  dirfile_add_raw(D, "jjjjjjjjjjjj", GD_FLOAT64, 1, 0);
 
   unlink(j);
   unlink(i);

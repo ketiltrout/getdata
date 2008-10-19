@@ -73,6 +73,9 @@ New in version 0.4.0:
     dirfile->error to check for an error, they must now call get_error(dirfile).
     This change was made to reduce unintentional ABI breakage when modifying
     internal library properties.
+  * GD_VERBOSE has been added to the list of available dirfile_open() flags.
+    If this flag is specified, GetData will write errors to stderr as
+    encountered.
 
   Legacy API Changes
 

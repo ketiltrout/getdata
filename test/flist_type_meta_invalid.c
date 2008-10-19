@@ -13,8 +13,7 @@ int main(void)
   const char* filedir = __TEST__ "dirfile";
 
   DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
-  const char** fl = get_mfield_list_by_type(D, "parent",
-      GD_STRING_ENTRY);
+  const char** fl = get_mfield_list_by_type(D, "parent", GD_STRING_ENTRY);
   int error = get_error(D);
   dirfile_close(D);
 

@@ -25,7 +25,7 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
+  DIRFILE* D = dirfile_open(filedir, GD_RDONLY | GD_VERBOSE);
   unsigned int spf = get_spf(D, "lincom");
   dirfile_close(D);
 

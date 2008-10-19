@@ -28,7 +28,7 @@ int main(void)
   write(fd, format1_data, strlen(format1_data));
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
+  DIRFILE* D = dirfile_open(filedir, GD_RDONLY | GD_VERBOSE);
   dirfile_include(D, "format1", 0, 0);
   int error = get_error(D);
   unsigned int spf = get_spf(D, "data");

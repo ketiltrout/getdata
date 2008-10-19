@@ -22,7 +22,7 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
+  DIRFILE* D = dirfile_open(filedir, GD_RDONLY | GD_VERBOSE);
   unsigned int spf = get_spf(D, "data");
   int error = get_error(D);
   dirfile_close(D);

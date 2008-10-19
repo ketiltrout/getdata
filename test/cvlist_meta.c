@@ -28,7 +28,7 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
+  DIRFILE* D = dirfile_open(filedir, GD_RDONLY | GD_VERBOSE);
   const uint8_t* field_list = get_mconstants(D, "parent", GD_UINT8);
 
   if (get_error(D))

@@ -32,7 +32,7 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_UNENCODED);
+  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_UNENCODED | GD_VERBOSE);
   int n = putdata64(D, "data", 5, 0, 1, 0, GD_UINT8, c);
   int error = get_error(D);
 

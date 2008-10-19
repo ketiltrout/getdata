@@ -31,7 +31,7 @@ int main(void)
   write(fd, format1_data, strlen(format1_data));
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
+  DIRFILE* D = dirfile_open(filedir, GD_RDONLY | GD_VERBOSE);
   form0 = strdup(get_fragmentname(D, 0));
   form1 = strdup(get_fragmentname(D, 1));
   dirfile_close(D);

@@ -262,7 +262,7 @@ int _GD_AsciiSync(struct _gd_private_entry *entry)
   if (!ret)
     ret = fsync(fileno(entry->stream));
 
-  dtrace("%i", ret);
+  dreturn("%i", ret);
   return ret;
 }
 

@@ -30,7 +30,7 @@ int main(void)
   fclose(stream);
 
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
+  DIRFILE* D = dirfile_open(filedir, GD_RDONLY | GD_VERBOSE);
   size_t n = get_nframes(D);
   dirfile_close(D);
 

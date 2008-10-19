@@ -41,7 +41,7 @@ int main(void)
   snprintf(command, 4096, "%s %s > /dev/null", SLIM, data);
   system(command);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
+  DIRFILE* D = dirfile_open(filedir, GD_RDONLY | GD_VERBOSE);
   int n = getdata(D, "data", 5, 0, 1, 0, GD_UINT8, c);
   int error = get_error(D);
 

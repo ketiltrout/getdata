@@ -1,3 +1,13 @@
+2008-10-19   D. V. Wiebe <getdata@ketiltrout.net>  svn:173
+	* src/errors.c (_GD_SetError) src/getdata.h.in: Added GD_VERBOSE flag.
+
+	* src/flush.c (_GD_Flush): Use encoding framework to flush and close raw
+	files.
+
+	* src/open.c (_GD_Tokenise): Properly handle trailing backslash.
+
+	* test/parse_eol.c test/parse_quote_mismatch.c: Added.
+
 2008-10-17   D. V. Wiebe <getdata@ketiltrout.net>  svn:169
 	* src/getdata.c (_GD_DoRaw) src/putdata.c (_GD_DoRawOut): Some encodings
 	need no endianness correction.

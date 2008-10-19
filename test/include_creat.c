@@ -21,7 +21,7 @@ int main(void)
   fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDWR);
+  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_VERBOSE);
   dirfile_include(D, "format1", 0, GD_CREAT);
   int error = get_error(D);
   dirfile_close(D);

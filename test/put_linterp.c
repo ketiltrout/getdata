@@ -37,7 +37,7 @@ int main(void)
     fprintf(t, "%i %i\n", i * 6, i * 3);
   fclose(t);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_UNENCODED);
+  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_UNENCODED | GD_VERBOSE);
   int n = putdata(D, "linterp", 5, 0, 1, 0, GD_INT8, c);
   int error = get_error(D);
 

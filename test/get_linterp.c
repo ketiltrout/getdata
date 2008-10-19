@@ -40,7 +40,7 @@ int main(void)
     fprintf(t, "%i %i\n", i * 6, i * 12);
   fclose(t);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
+  DIRFILE* D = dirfile_open(filedir, GD_RDONLY | GD_VERBOSE);
   int n = getdata(D, "linterp", 5, 0, 1, 0, GD_UINT8, &c);
   int error = get_error(D);
 

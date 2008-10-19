@@ -151,6 +151,12 @@ void _GD_SetError(DIRFILE* D, int error, int suberror,
   if (token != NULL)
     strncpy(D->error_string, token, FILENAME_MAX);
 
+  if (D->flags & GD_VERBOSE) {
+    char buffer[MAX_LINE_LENGTH];
+    fprintf(stderr, PACKAGE_NAME ": %s\n", get_error_string(D, buffer,
+          MAX_LINE_LENGTH));
+  }
+
   dreturnvoid();
 }
 

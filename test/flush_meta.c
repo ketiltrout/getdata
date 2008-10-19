@@ -16,8 +16,10 @@ int main(void)
   const char* format = __TEST__ "dirfile/format";
   const char* data = __TEST__ "dirfile/new";
   struct stat buf;
+  int r = 0;
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_CREAT | GD_TRUNC);
+  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_CREAT | GD_TRUNC |
+      GD_VERBOSE);
   dirfile_add_raw(D, "new", GD_UINT8, 2, 0);
   dirfile_metaflush(D);
   int error = get_error(D);
@@ -25,13 +27,13 @@ int main(void)
   dirfile_close(D);
 
   if (stat(format, &buf))
-    return 1;
+    r =  1;
 
   unlink(data);
   unlink(format);
   rmdir(filedir);
 
-  if (error)
+  if (error || r)
     return 1;
 
   return 0;

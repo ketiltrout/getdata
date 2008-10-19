@@ -20,7 +20,7 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH dirfile\-format 5 "12 October 2008" "Standards Version 6" "DATA FORMATS"
+.TH dirfile\-format 5 "18 October 2008" "Standards Version 6" "DATA FORMATS"
 .SH NAME
 dirfile\-format \(em the dirfile database format specification file
 .SH DESCRIPTION
@@ -33,9 +33,9 @@ database.
 
 The format file is a case sensitive text file called
 .B format
-located in the dirfile directory.  The explicit text encoding is not specified
-by these standards, but must be 7-bit ASCII compatible. Examples of acceptable
-character encodings include all the ISO\~8859 character sets
+located in the dirfile directory.  The explicit text encoding of the file is not
+specified by these standards, but must be 7-bit ASCII compatible. Examples of
+acceptable character encodings include all the ISO\~8859 character sets
 .RI ( i.e.
 Latin-1 through Latin-10, among others), as well as the UTF-8 encoding of
 Unicode and UCS.
@@ -43,25 +43,35 @@ Unicode and UCS.
 .SH SYNTAX
 The format file is composed of field specification lines and directive lines,
 optionally separated by blank lines or lines containing only whitespace.
-Unless escaped (see below), the hash mark
+Lines are separated by the line-feed character (0x0A).  Unless escaped (see
+below), the hash mark
 .RB ( # )
 is the comment delimiter; the comment delimiter, and any text following it to
 the end of the line, is ignored.
 
 .SS Tokens
 Both field specification lines and directive lines consist of several tokens
-separated by whitespace.  The first token of a directive line is always a
+separated by whitespace.  Whitespace consists of one or more whitespace
+characters.  These are: space (0x20), horizontal tab (0x09), vertical tab
+(0x0B), form-feed (0x0C), and carriage return (0x0D).  The first token of a
+directive line is always a
 .IR "reserved word" .
 The first token of a field specification line is never a reserved word.
 
 Since tokens are separated by whitespace, to include a whitespace character in
-a token, it must either be escaped by preceding it by a backslash character
-.RB ( \e )
-or else by enclosing the token in quotation marks
+a token, it must either escaped by preceding it by a backslash character
+.RB ( \e ),
+or be replaced by a
+.I character escape sequence
+(see below), or else the token must be enclosed in quotation marks
 .RB ( """" ).
-The quotation marks themselves will be stripped from the token.  To include a
-literal quotation mark or backslash character in a token, it must be escaped
-.RB ( \e" " or " \e\e ).
+The quotation marks themselves will be stripped from the token. The
+.I null-token
+(that is, the token consisting of zero characters) may be specified by a pair
+of quotation marks with nothing between them
+.RB ( """""" ).
+To include a literal quotation mark in a token, it must be escaped
+.RB ( \e" ).
 Similarly, a hash mark may be included in a token by including it in a quoted
 token or else by escaping it
 .RB ( \e# ),
@@ -72,8 +82,11 @@ in which the last character is the backslash character.
 
 Several characters when escaped by a preceding backslash character are
 interpreted as special characters in tokens.  Some of these have already been
-mentioned.  They are:
+mentioned.  The character escape sequences are:
 .RS
+.TP
+.BR \e\~\~ (i.e.\~backslash-space)
+a space character (ASCII 0x20 / U+0020)
 .TP
 .B \e"
 a quotation mark character (ASCII 0x22 / U+0022)

@@ -16,7 +16,7 @@ int main(void)
   const char* format = __TEST__ "dirfile/format";
   uint8_t val = 0;
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_CREAT);
+  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
   dirfile_add_const(D, "data", GD_UINT8, GD_UINT8, &val, 0);
   int error = get_error(D);
 

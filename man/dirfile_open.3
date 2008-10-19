@@ -156,6 +156,15 @@ left untouched.  Notably, this operation does not consider the presence of
 subdirfiles declared by
 .B INCLUDE
 directives.  If the dirfile does not exist, this flag is ignored.
+.TP
+.B GD_VERBOSE
+Specifies that whenever an error is triggered by the library when working
+on this dirfile, the corresponding error string, which can be retrieved by
+calling 
+.BR get_error_string (3),
+should be written on standard error by the library.  Without this flag,
+GetData writes nothing to standard error.  (GetData never writes to standard
+output.)
 
 .P
 The
@@ -255,6 +264,9 @@ a call to
 When finished with it, the DIRFILE object may be deallocated with a call to
 .BR dirfile_close (3),
 even if the open failed.
+.SH BUGS
+GetData assumes it is running on an ASCII-compatible platform.  Format file
+parsing will fail gloriously on an EBCDIC platform.
 .SH SEE ALSO
 .BR dirfile (5),
 .BR dirfile-encoding (5),

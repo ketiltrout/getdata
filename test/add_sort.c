@@ -23,7 +23,7 @@ int main (void)
 
   DIRFILE *D;
 
-  D = dirfile_open(filedir, GD_RDWR|GD_CREAT|GD_EXCL);
+  D = dirfile_open(filedir, GD_RDWR | GD_CREAT | GD_EXCL | GD_VERBOSE);
   dirfile_add_raw(D, "d", GD_FLOAT64, 1, 0);
   dirfile_add_raw(D, "b", GD_FLOAT64, 1, 0);
   dirfile_add_raw(D, "h", GD_FLOAT64, 1, 0);

@@ -22,7 +22,7 @@ int main(void)
   E.spf = 2;
   E.data_type = GD_UINT8;
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_CREAT);
+  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
   dirfile_add(D, &E);
   int error = get_error(D);
 

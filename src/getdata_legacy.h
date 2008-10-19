@@ -92,12 +92,8 @@ struct FormatType {
   int n_phase;
 };
 
-/* comments about cancellation points and __THROW found in getdata.h apply
- * here too...
- */
-
 extern const struct FormatType *GetFormat(const char *filedir, int *error_code)
-  __THROW __gd_nonnull ((1, 2)) __attribute_deprecated__;
+  __THROW __gd_nonnull ((1,2)) __attribute_deprecated__;
 
 /* legacy API for get_error_string() */
 extern char* GetDataErrorString(char* buffer, size_t buflen) __THROW
@@ -106,21 +102,21 @@ extern char* GetDataErrorString(char* buffer, size_t buflen) __THROW
 /* legacy API for getdata() */
 extern int GetData(const char *dirfilename, const char *field_code,
     int first_frame, int first_samp, int num_frames, int num_samp,
-    char return_type, void *data_out, int *error_code) __gd_nonnull ((1, 2, 9))
+    char return_type, void *data_out, int *error_code) __gd_nonnull ((1,2,9))
   __attribute_deprecated__;
 
 /* legacy API for get_nframes() */
 extern int GetNFrames(const char *dirfilename, int *error_code,
-    const void *unused) __gd_nonnull ((1, 2)) __attribute_deprecated__;
+    const void *unused) __gd_nonnull ((1,2)) __attribute_deprecated__;
 
 /* legacy API for get_spf() */
 extern int GetSamplesPerFrame(const char *dirfilename, const char *field_code,
-    int *error_code) __THROW __gd_nonnull ((1, 2, 3)) __attribute_deprecated__;
+    int *error_code) __THROW __gd_nonnull ((1,2,3)) __attribute_deprecated__;
 
 /* legacy API for putdata() */
 extern int PutData(const char *filename_in, const char *field_code,
     int first_frame, int first_samp, int num_frames, int num_samp,
-    char data_type, const void *data_in, int *error_code) __gd_nonnull ((1, 2, 9))
-  __attribute_deprecated__;
+    char data_type, const void *data_in, int *error_code)
+__gd_nonnull ((1,2,9)) __attribute_deprecated__;
 
 #endif

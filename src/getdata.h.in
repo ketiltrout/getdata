@@ -175,6 +175,7 @@ typedef struct _GD_DIRFILE DIRFILE;
 #define GD_TRUNC          0x0040 /* truncate dirfile (scary!) */
 #define GD_PEDANTIC       0x0080 /* be pedantic */
 #define GD_FORCE_ENCODING 0x0100 /* override encoding scheme */
+#define GD_VERBOSE        0x0200 /* be verbose */
 
 #define GD_ENCODING       0xF000 /* mask */
 #define GD_AUTO_ENCODED   0x0000 /* Encoding scheme unknown */

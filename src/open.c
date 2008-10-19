@@ -953,6 +953,9 @@ int _GD_Tokenise(DIRFILE *D, const char* instring, char* outstring,
         }
       } else {
         switch(*ip) {
+          case '\n': /* this is a backslach at the end of a line -- we don't
+                        support line splicing in this manner */
+            break;
           case 'a':
             *(op++) = '\a';
             escaped_char = 0;
@@ -1024,7 +1027,7 @@ int _GD_Tokenise(DIRFILE *D, const char* instring, char* outstring,
             ws = 0;
           }
         }
-      } else if (!quotated && isspace(*ip)) {
+      } else if (!quotated && strchr(" \t\r\f\v\n", *ip) != NULL) {
         if (!ws) {
           *(op++) = '\0';
           ws = 1;

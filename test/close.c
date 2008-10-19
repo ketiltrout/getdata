@@ -16,7 +16,7 @@ int main(void)
   mkdir(filedir, 0777);
   close(open(format, O_CREAT | O_EXCL | O_WRONLY, 0666));
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
+  DIRFILE* D = dirfile_open(filedir, GD_RDONLY | GD_VERBOSE);
   int error = dirfile_close(D);
 
   unlink(format);

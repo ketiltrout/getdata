@@ -14,7 +14,7 @@ int main(void)
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_CREAT);
+  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
   const char* in_fields[2] = {"in1", "in2"};
   const double m[2] = {1, 0.3};
   const double b[2] = {0, 0.9};
