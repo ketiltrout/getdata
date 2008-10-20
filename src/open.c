@@ -776,14 +776,9 @@ void _GD_ParseFieldSpec(DIRFILE* D, int n_cols, const char** in_cols,
     E = _GD_ParseRaw(D, in_cols, n_cols, P, me, format_file, linenum);
     if (!D->error && D->first_field == NULL) {
       /* set the first field */
-      D->first_field = malloc(sizeof(gd_entry_t));
-      if (D->first_field == NULL)
-        _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-      else {
-        memcpy(D->first_field, E, sizeof(gd_entry_t));
-        *have_first = 1;
-        D->include_list[me].first = 1;
-      }
+      D->first_field = E;
+      *have_first = 1;
+      D->include_list[me].first = 1;
     }
 
     /* Create the binary file, if requested */

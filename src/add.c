@@ -206,13 +206,7 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
       else if (D->first_field == NULL) {
         /* This is the first raw field */
         E->e->first = 1;
-        D->first_field = malloc(sizeof(gd_entry_t));
-        if (D->first_field == NULL) {
-          _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-          break;
-        }
-
-        memcpy(D->first_field, E, sizeof(gd_entry_t));
+        D->first_field = E;
         /* Tag the include list */
         for (i = E->fragment_index; i != -1; i = D->include_list[i].parent)
           D->include_list[i].first = D->include_list[i].modified = 1;
