@@ -19,8 +19,10 @@
 # 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 AUTOMAKE_OPTIONS = foreign
-AM_CFLAGS = -Wall -Wextra @SLIMLIB_CPPFLAGS@
-pkgconfigdir = @libdir@/pkgconfig
+
+if GNU_C_COMPILER
+WEXTRA=-Wextra
+endif
 
 if USE_SLIMLIB
 SLIM_C=slim.c
@@ -34,6 +36,9 @@ endif
 if GETDATA_DEBUG
 DEBUG_C = debug.c
 endif
+
+pkgconfigdir = @libdir@/pkgconfig
+AM_CFLAGS = -Wall ${WEXTRA} @SLIMLIB_CPPFLAGS@
 
 BUILT_SOURCES = getdata.h
 

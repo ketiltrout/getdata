@@ -19,16 +19,26 @@
 # 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 AUTOMAKE_OPTIONS = foreign
-INCLUDES = -Wall -Wextra -I$(top_srcdir)/src
 
 SED = @SED@
 DIFF = @DIFF@
+
+if GNU_FC_COMPILER
+FC_WEXTRA=-Wextra
+FC_WALL=-Wall
+endif
+
+if GNU_C_COMPILER
+C_WEXTRA=-Wextra
+endif
 
 if MAKE_F95BINDINGS
 F95_INC=getdata.mod
 F95_LIB=libf95getdata.la
 endif
 
+AM_FCFLAGS = $(FC_WALL) $(FC_WEXTRA)
+INCLUDES = -I$(top_srcdir)/src
 EXTRA_DIST=getdata.f.in getdata.f90.in
 
 SUBDIRS = test
@@ -40,6 +50,7 @@ noinst_PROGRAMS=make_parameters
 nodist_include_HEADERS=getdata.f $(F95_INC)
 
 lib_LTLIBRARIES=libfgetdata.la $(F95_LIB)
+libfgetdata_la_CPPFLAGS = -Wall $(C_WEXTRA)
 libfgetdata_la_SOURCES = fgetdata.c fgetdata.h
 libfgetdata_la_LIBADD=../../src/libgetdata.la
 libfgetdata_la_LDFLAGS = -version-info @FGETDATA_VERSION@

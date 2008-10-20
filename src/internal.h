@@ -64,6 +64,11 @@ typedef off_t off64_t
 #define assert(...)
 #endif
 
+/* disable the "unspecified order" remark in ICC */
+#ifdef __INTEL_COMPILER
+#  pragma warning (disable : 981)
+#endif
+
 /* debugging macros */
 #ifdef GETDATA_DEBUG
 const char* _gd_colnil(void);
@@ -88,18 +93,6 @@ const char* _gd_colsub(void);
 # else
 #  define atoll atol
 # endif
-#endif
-
-#if defined HAVE_DECL_FSYNC && !HAVE_DECL_FSYNC
-int fsync(int fd);
-#endif
-
-#if defined HAVE_DECL_STRDUP && !HAVE_DECL_STRDUP
-extern char* strdup(const char* s);
-#endif
-
-#if defined HAVE_DECL_STRERROR_R && !HAVE_DECL_STRERROR_R
-char *strerror_r(int errnum, char *buf, size_t buflen);
 #endif
 
 /* maximum number of recursions */

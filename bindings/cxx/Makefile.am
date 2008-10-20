@@ -21,7 +21,11 @@
 AUTOMAKE_OPTIONS = foreign
 getdata_includedir = ${includedir}/getdata
 
-INCLUDES = -Wall -Wextra -I$(top_srcdir)/src
+if GNU_CXX_COMPILER
+WEXTRA=-Wextra
+endif
+
+INCLUDES = -Wall $(WEXTRA) -I$(top_srcdir)/src
 
 SUBDIRS=test
 

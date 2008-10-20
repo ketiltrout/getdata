@@ -60,7 +60,7 @@ namespace GetData {
     public:
       Entry();
 
-      ~Entry();
+      virtual ~Entry();
 
       /* Generic data */
       const char *Code() { return E.field; };

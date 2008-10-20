@@ -1,4 +1,5 @@
 /* Test get_fragmentname */
+#define _SVID_SOURCE
 #include "../src/getdata.h"
 
 #include <stdlib.h>

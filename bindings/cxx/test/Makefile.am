@@ -19,7 +19,12 @@
 # 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 AUTOMAKE_OPTIONS = foreign
-INCLUDES = -Wall -Wextra -I$(srcdir)/.. -I$(top_srcdir)/src -D__TEST__=\"$@\"
+
+if GNU_CXX_COMPILER
+WEXTRA=-Wextra
+endif
+
+INCLUDES = -Wall $(WEXTRA) -I$(srcdir)/.. -I$(top_srcdir)/src -D__TEST__=\"$@\"
 LDADD=../libgetdata++.la
 TESTS=addentry entry getdata nframes putdata spf
 

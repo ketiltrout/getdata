@@ -20,6 +20,10 @@
 #
 AUTOMAKE_OPTIONS = foreign
 
+if GNU_C_COMPILER
+WEXTRA=-Wextra
+endif
+
 if HAVE_OFF64_T
 GET_OFF64=get_off64
 NF_OFF64=nframes_off64
@@ -36,7 +40,7 @@ SLIM_TESTS=slim_get slim_nframes slim_put
 endif
 
 LDADD=../src/libgetdata.la
-INCLUDES=-Wall -Wextra -I$(top_srcdir)/src -D__TEST__=\"$@\"
+INCLUDES=-Wall $(WEXTRA) -I$(top_srcdir)/src -D__TEST__=\"$@\"
 
 ADD_TESTS=add add_bit add_bit_bitnum add_bit_bitsize add_bit_invalid \
 					add_bit_numbits add_code add_const add_duplicate add_format \

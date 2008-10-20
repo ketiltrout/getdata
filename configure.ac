@@ -28,8 +28,6 @@ AC_SUBST(GETDATA_IFACE_VERSION, [1])
 dnl libgetdata current interface implementation revision
 AC_SUBST(GETDATA_IMPL_REVISION, [0])
 dnl libgetdata interface age (current interface - oldest supported interface)
-dnl   this must be 0 and not 1 because, although we still support the old
-dnl   interface, the error codes have changed.
 AC_SUBST(GETDATA_IFACE_AGE, [0])
 
 dnl libgetdata++ interface version info
@@ -211,6 +209,20 @@ AC_ENABLE_STATIC
 AC_ENABLE_SHARED
 AC_PROG_LIBTOOL
 
+dnl ICC checks
+GD_LANG_COMPILER_INTEL
+AM_CONDITIONAL(GNU_C_COMPILER, test "x$gd_cv_c_compiler_intel" == "xno" -a "x$ac_cv_c_compiler_gnu" == "xyes")
+AC_LANG_PUSH([C++])
+GD_LANG_COMPILER_INTEL
+AM_CONDITIONAL(GNU_CXX_COMPILER, test "x$gd_cv_cxx_compiler_intel" == "xno" -a "x$ac_cv_cxx_compiler_gnu" == "xyes")
+AC_LANG([Fortran 77])
+GD_LANG_COMPILER_INTEL
+AM_CONDITIONAL(GNU_F77_COMPILER, test "x$gd_cv_f77_compiler_intel" == "xno" -a "x$ac_cv_f77_compiler_gnu" == "xyes")
+AC_LANG([Fortran])
+GD_LANG_COMPILER_INTEL
+AM_CONDITIONAL(GNU_FC_COMPILER, test "x$gd_cv_fc_compiler_intel" == "xno" -a "x$ac_cv_fc_compiler_gnu" == "xyes")
+AC_LANG_POP([Fortran])
+
 dnl F77 stuff
 if test "x$make_f77bindings" != "xno"; then
   AC_F77_WRAPPERS
@@ -282,8 +294,12 @@ fi
 AM_CONDITIONAL(USE_SLIMLIB, [test "x$use_slimlib" = "xyes"])
 AM_CONDITIONAL(TEST_SLIMLIB, [test "x$use_slimlib" = "xyes" -a "x$SLIM" != "xnot found" -a "x$UNSLIM" != "xnot found"])
 
-dnl declarations
-AC_CHECK_DECLS([fsync, strdup, strerror_r])
+dnl Declare a few feature test macros
+AC_DEFINE([_BSD_SOURCE], [], [ Expose BSD-derived definitions ])
+AC_DEFINE([_SVID_SOURCE], [], [ Expose System V-derived definitions ])
+AC_DEFINE([_POSIX_SOURCE], [], [ Expose POSIX.1-1990 conforming definitions ])
+AC_DEFINE([_POSIX_C_SOURCE], [200112L],
+          [ Expose POSIX.1-2001 conforming definitions ])
 
 dnl types
 AC_C_CONST
@@ -331,8 +347,8 @@ AC_CONFIG_FILES([src/getdata.pc])
 AC_CONFIG_FILES([test/Makefile])
 
 AC_OUTPUT
-dnl Handy summary
 
+dnl Handy summary
 echo
 echo "Configuration summary: "
 echo "  checkdirfile utility: ${make_checkdirfile}"

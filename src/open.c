@@ -734,19 +734,19 @@ static int utf8encode(DIRFILE* D, const char* format_file, int linenum,
   }
 
   if (value <= 0x7F)
-    *((*op)++) = value;
+    *((*op)++) = (char)value;
   else if (value <= 0x7FF) {
-    *((*op)++) = 0xC0 + (value >> 6);
-    *((*op)++) = 0x80 + (value & 0x3F);
+    *((*op)++) = (char)(0xC0 + (value >> 6));
+    *((*op)++) = (char)(0x80 + (value & 0x3F));
   } else if (value <= 0xFFFF) {
-    *((*op)++) = 0xE0 + (value >> 12);
-    *((*op)++) = 0x80 + ((value >> 6) & 0x3F);
-    *((*op)++) = 0x80 + (value & 0x3F);
+    *((*op)++) = (char)(0xE0 + (value >> 12));
+    *((*op)++) = (char)(0x80 + ((value >> 6) & 0x3F));
+    *((*op)++) = (char)(0x80 + (value & 0x3F));
   } else {
-    *((*op)++) = 0xF0 + (value >> 18);
-    *((*op)++) = 0x80 + ((value >> 12) & 0x3F);
-    *((*op)++) = 0x80 + ((value >> 6) & 0x3F);
-    *((*op)++) = 0x80 + (value & 0x3F);
+    *((*op)++) = (char)(0xF0 + (value >> 18));
+    *((*op)++) = (char)(0x80 + ((value >> 12) & 0x3F));
+    *((*op)++) = (char)(0x80 + ((value >> 6) & 0x3F));
+    *((*op)++) = (char)(0x80 + (value & 0x3F));
   }
 
   dreturn("%i", 0);
@@ -912,7 +912,7 @@ int _GD_Tokenise(DIRFILE *D, const char* instring, char* outstring,
             break;
           }
 
-          *(op++) = accumulator;
+          *(op++) = (char)accumulator;
 
           if (*ip < '0' || *ip > '7')
             ip--; /* rewind */
@@ -936,7 +936,7 @@ int _GD_Tokenise(DIRFILE *D, const char* instring, char* outstring,
             break;
           }
 
-          *(op++) = accumulator;
+          *(op++) = (char)accumulator;
 
           if (!isxdigit(*ip))
             ip--; /* rewind */

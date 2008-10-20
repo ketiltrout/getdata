@@ -33,6 +33,11 @@
 # error The F77_FUNC macro must be defined to build the F77 bindings
 #endif
 
+/* disable the "unspecified order" remark in ICC */
+#ifdef __INTEL_COMPILER
+#  pragma warning (disable : 981)
+#endif
+
 #define GDF_N_DIRFILES 1024
 
 #endif

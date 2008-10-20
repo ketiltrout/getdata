@@ -37,7 +37,7 @@ const void* get_constants(DIRFILE* D, gd_type_t return_type)
   dtrace("%p, 0x%x", D, return_type);
 
   unsigned int i, n;
-  void* fl;
+  char* fl;
 
   if (D->flags & GD_INVALID) {
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);

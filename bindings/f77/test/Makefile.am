@@ -19,14 +19,25 @@
 # 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 AUTOMAKE_OPTIONS = foreign
-FFLAGS += -I.. -Wall -Wextra
-FCFLAGS += -I.. -Wall -Wextra
-F95LDADD=../libf95getdata.la $(F77LDADD)
-F77LDADD=../libfgetdata.la
+
+if GNU_FC_COMPILER
+FC_WEXTRA=-Wextra
+FC_WALL=-Wextra
+endif
+
+if GNU_F77_COMPILER
+F77_WEXTRA=-Wextra
+F77_WALL=-Wextra
+endif
 
 if MAKE_F95BINDINGS
 F95TESTS=fgetdata fget_field_list fget_entry
 endif
+
+FFLAGS += -I.. $(F77_WALL) $(F77_WEXTRA)
+FCFLAGS += -I.. $(F77_WALL) $(FC_WEXTRA)
+F95LDADD=../libf95getdata.la $(F77LDADD)
+F77LDADD=../libfgetdata.la
 
 TESTS=gdfget $(F95TESTS)
 

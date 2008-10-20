@@ -665,12 +665,12 @@ void F77_FUNC(gdffnt, GDFFNT) (char* name, int* name_l, const int* dirfile,
 {
   const char** fl;
   DIRFILE* D = _GDF_GetDirfile(*dirfile);
-  unsigned int nfields = get_nfields_by_type(D, (gd_type_t)*type);
+  unsigned int nfields = get_nfields_by_type(D, (gd_entype_t)*type);
   if (D->error)
     return;
 
   if (*field_num <= (int)nfields) {
-    fl = get_field_list_by_type(D, (gd_type_t)*type);
+    fl = get_field_list_by_type(D, (gd_entype_t)*type);
     _GDF_FString(name, name_l, fl[*field_num - 1]);
   } else
     *name_l = 0;
@@ -704,14 +704,14 @@ void F77_FUNC(gdfmft, GDFMFT) (char* name, int* name_l, const int* dirfile,
   char* pa = malloc(*parent_l + 1);
   _GDF_CString(pa, parent, *parent_l);
 
-  unsigned int nfields = get_nmfields_by_type(D, pa, (gd_type_t)*type);
+  unsigned int nfields = get_nmfields_by_type(D, pa, (gd_entype_t)*type);
   if (D->error) {
     free(pa);
     return;
   }
 
   if (*field_num <= (int)nfields) {
-    fl = get_mfield_list_by_type(D, pa, (gd_type_t)*type);
+    fl = get_mfield_list_by_type(D, pa, (gd_entype_t)*type);
     _GDF_FString(name, name_l, fl[*field_num - 1]);
   } else
     *name_l = 0;
