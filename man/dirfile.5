@@ -20,7 +20,7 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH dirfile 5 "20 October 2008" "Standards Version 6" "DATA FORMATS"
+.TH dirfile 5 "21 October 2008" "Standards Version 6" "DATA FORMATS"
 .SH NAME
 dirfile \(em a filesystem based database format for time-ordered binary data
 .SH DESCRIPTION
@@ -86,7 +86,7 @@ also further outlined in
 
 Dirfiles are designed to be written to and read simultaneously. The dirfile
 specification dictates that one particular raw field (specified either
-explicitly or implicitly by the format file is to be used as the
+explicitly or implicitly by the format file) is to be used as the
 .IR "reference field" :
 all other vector fields are assumed to have at least as many frames as the
 reference field has, and the size (in frames) of the reference field is used as

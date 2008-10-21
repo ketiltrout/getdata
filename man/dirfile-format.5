@@ -20,7 +20,7 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH dirfile\-format 5 "20 October 2008" "Standards Version 6" "DATA FORMATS"
+.TH dirfile\-format 5 "21 October 2008" "Standards Version 6" "DATA FORMATS"
 .SH NAME
 dirfile\-format \(em the dirfile database format specification file
 .SH DESCRIPTION
@@ -162,7 +162,7 @@ format file, directives are case sensitive.
 A number of the directives have
 .IR "fragment scope" .
 A directive with fragment scope only applies to the fragment in which it is
-presents, plus any sub-fragments indicated by the
+present, plus any sub-fragments indicated by the
 .B /INCLUDE
 directive, but only if those sub-fragments don't have their own corresponding
 directive.  Directives which have fragment scope are:
@@ -186,7 +186,7 @@ or any other site-specific encoding scheme.  The predefined scheme names are:
 .RS
 .TP
 .I none
-The dirfile is unencoded.  This is the default.
+The dirfile is unencoded.
 .TP
 .I slim
 The dirfile is compressed using the slimlib library.
@@ -287,7 +287,7 @@ long-term effect.
 .TP
 .B /PROTECT
 The PROTECT directive specifies the advisory protection level of the current
-fragment and the
+fragment and of the
 .B RAW
 fields defined therein.  The protection level indicates whether writing to the
 format file fragment, or the binary data on disk is permitted.  Syntax is:
@@ -324,7 +324,10 @@ reference field (see
 .BR dirfile (5)).
 If no REFERENCE directive is specified, the first
 .B RAW
-field encountered is used as the reference field.  Syntax is:
+field encountered is used as the reference field.  The REFERENCE directive must
+specify a
+.B RAW
+field.  Syntax is:
 .RS
 .IP
 .BI /REFERENCE\~ <field-code>
