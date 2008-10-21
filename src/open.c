@@ -1069,8 +1069,8 @@ static int _GD_ParseDirective(DIRFILE *D, const char** in_cols, int n_cols,
 {
   const char* ptr;
 
-  dtrace("%p, %p, %i, %u, %p, %i, %p, %p, %x", D, in_cols, n_cols, me, standards,
-      linenum, ref_name, flags);
+  dtrace("%p, %p, %i, %u, %p, %i, %p, %p, %x", D, in_cols, n_cols, me,
+      standards, linenum, ref_name, first_fragment, flags);
 
   /* set up for possibly slashed reserved words */
   ptr = in_cols[0] + ((in_cols[0][0] == '/') ? 1 : 0);
@@ -1126,13 +1126,13 @@ static int _GD_ParseDirective(DIRFILE *D, const char** in_cols, int n_cols,
           D->fragment[me].cname, linenum, me, *standards, 0,
           flags & GD_PEDANTIC);
   } else if (strcmp(ptr, "PROTECT") == 0) {
-    if (strcmp(in_cols[1], "none"))
+    if (strcmp(in_cols[1], "none") == 0)
       D->fragment[me].protection = GD_PROTECT_NONE;
-    else if (strcmp(in_cols[1], "format"))
+    else if (strcmp(in_cols[1], "format") == 0)
       D->fragment[me].protection = GD_PROTECT_FORMAT;
-    else if (strcmp(in_cols[1], "data"))
+    else if (strcmp(in_cols[1], "data") == 0)
       D->fragment[me].protection = GD_PROTECT_DATA;
-    else if (strcmp(in_cols[1], "all"))
+    else if (strcmp(in_cols[1], "all") == 0)
       D->fragment[me].protection = GD_PROTECT_ALL;
     else
       _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_PROTECT, D->fragment[me].cname,

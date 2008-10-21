@@ -64,11 +64,8 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
   }
 
   /* check protection */
-  if (D->fragment[entry->fragment_index].protection & GD_PROTECT_FORMAT ||
-      (entry->field_type == GD_RAW_ENTRY &&
-       D->fragment[entry->fragment_index].protection & GD_PROTECT_DATA))
-  {
-    _GD_SetError(D, GD_E_PROTECTED, 0, NULL, 0,
+  if (D->fragment[entry->fragment_index].protection & GD_PROTECT_FORMAT) {
+    _GD_SetError(D, GD_E_PROTECTED, GD_E_PROTECTED_FORMAT, NULL, 0,
         D->fragment[entry->fragment_index].cname);
     dreturn("%i", -1);
     return -1;
@@ -98,7 +95,7 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
   E = _GD_FindField(D, temp_buffer, &u);
 
   if (E != NULL) { /* matched */
-    _GD_SetError(D, GD_E_DUPLICATE, 0, NULL, 0, NULL);
+    _GD_SetError(D, GD_E_DUPLICATE, 0, NULL, 0, temp_buffer);
     dreturn("%i", -1);
     return -1;
   }
@@ -140,6 +137,7 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
     return -1;
   }
   memset(E->e, 0, sizeof(struct _gd_private_entry));
+  E->e->calculated = 1; /* this interface cannot produce CONST'd field specs */
 
   /* Validate field code */
   E->field_type = entry->field_type;
@@ -171,6 +169,14 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
         _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_METARAW, NULL,
             entry->field_type, NULL);
         break;
+      }
+
+      /* check protection */
+      if (D->fragment[entry->fragment_index].protection & GD_PROTECT_DATA) {
+        _GD_SetError(D, GD_E_PROTECTED, GD_E_PROTECTED_DATA, NULL, 0,
+            D->fragment[entry->fragment_index].cname);
+        dreturn("%i", -1);
+        return -1;
       }
 
       /* If the encoding scheme is unknown, we can't add the field */
@@ -222,9 +228,9 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
             D->fragment[i].modified = 1;
           } else
             break;
-        /* Is this the first raw field ever defined? */
-        if (D->reference_field == NULL)
-          D->reference_field = E;
+          /* Is this the first raw field ever defined? */
+          if (D->reference_field == NULL)
+            D->reference_field = E;
       }
       break;
     case GD_LINCOM_ENTRY:
@@ -365,7 +371,8 @@ int dirfile_madd_spec(DIRFILE* D, const char* line, const char* parent)
 
   /* check protection */
   if (D->fragment[me].protection & GD_PROTECT_FORMAT) {
-    _GD_SetError(D, GD_E_PROTECTED, 0, NULL, 0, D->fragment[me].cname);
+    _GD_SetError(D, GD_E_PROTECTED, GD_E_PROTECTED_FORMAT, NULL, 0,
+        D->fragment[me].cname);
     dreturn("%i", -1);
     return -1;
   }
@@ -385,7 +392,7 @@ int dirfile_madd_spec(DIRFILE* D, const char* line, const char* parent)
 
   /* Directive parsing is skipped -- The Field Spec parser will add the field */
   _GD_ParseFieldSpec(D, n_cols, in_cols, E, "dirfile_madd_spec()", 0, me,
-    DIRFILE_STANDARDS_VERSION, 1, 1);
+      DIRFILE_STANDARDS_VERSION, 1, 1);
 
   if (D->error) {
     dreturn("%i", -1); /* field spec parser threw an error */
@@ -428,7 +435,7 @@ int dirfile_add_spec(DIRFILE* D, const char* line, int fragment_index)
 
   /* check protection */
   if (D->fragment[fragment_index].protection & GD_PROTECT_FORMAT) {
-    _GD_SetError(D, GD_E_PROTECTED, 0, NULL, 0,
+    _GD_SetError(D, GD_E_PROTECTED, GD_E_PROTECTED_FORMAT, NULL, 0,
         D->fragment[fragment_index].cname);
     dreturn("%i", -1);
     return -1;

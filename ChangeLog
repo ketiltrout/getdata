@@ -1,3 +1,17 @@
+2008-10-21   D. V. Wiebe <getdata@ketiltrout.net>  svn:184
+	* src/open.c: Fix PROTECT parsing.
+	
+	* src/putdata.c: Check protection for STRING, not PHASE.
+
+	* src/putdata.c (_GD_DoStringOut): Don't de-allocate old string until
+	new string is successful.
+
+	* src/internal.h: Don't mix CONST data and client list.
+
+	* src/flush.c (_GD_FlushMeta): Don't write INDEX.
+
+	* src/add.c (_GD_Add): Split format and data protection checks.
+
 2008-10-21   D. V. Wiebe <getdata@ketiltrout.net>  svn:180
 	* src/internal.h: Add protection, ref_name, and frame_offset to
 	gd_fragment_t.  Remove first_field, first_fragment from same.  Remove

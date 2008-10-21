@@ -168,7 +168,7 @@ int dirfile_include(DIRFILE* D, const char* file, int fragment_index,
 
   /* check protection */
   if (D->fragment[fragment_index].protection & GD_PROTECT_FORMAT) {
-    _GD_SetError(D, GD_E_PROTECTED, 0, NULL, 0,
+    _GD_SetError(D, GD_E_PROTECTED, GD_E_PROTECTED_FORMAT, NULL, 0,
         D->fragment[fragment_index].cname);
     dreturn("%i", -1);
     return -1;

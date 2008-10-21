@@ -40,10 +40,10 @@ static size_t _GD_DoRawOut(DIRFILE *D, gd_entry_t *E,
 
   /* check protection */
   if (D->fragment[E->fragment_index].protection & GD_PROTECT_DATA) {
-    _GD_SetError(D, GD_E_PROTECTED, 0, NULL, 0,
+    _GD_SetError(D, GD_E_PROTECTED, GD_E_PROTECTED_DATA, NULL, 0,
         D->fragment[E->fragment_index].cname);
-    dreturn("%i", -1);
-    return -1;
+    dreturn("%i", 0);
+    return 0;
   }
 
   dtrace("%p, %p, %lli, %lli, %zi, %zi, 0x%x, %p", D, E, first_frame,
@@ -373,14 +373,6 @@ static size_t _GD_DoPhaseOut(DIRFILE* D, gd_entry_t *E,
   dtrace("%p, %p, %lli, %lli, %zi, %zi, 0x%x, %p", D, E, first_frame,
       first_samp, num_frames, num_samp, data_type, data_in);
 
-  /* check protection */
-  if (D->fragment[E->fragment_index].protection & GD_PROTECT_FORMAT) {
-    _GD_SetError(D, GD_E_PROTECTED, 0, NULL, 0,
-        D->fragment[E->fragment_index].cname);
-    dreturn("%i", 0);
-    return 0;
-  }
-
   if (E->e->entry[0] == NULL) {
     E->e->entry[0] = _GD_FindField(D, E->in_fields[0], NULL);
 
@@ -413,7 +405,7 @@ static size_t _GD_DoConstOut(DIRFILE* D, gd_entry_t *E, gd_type_t data_type,
 
   /* check protection */
   if (D->fragment[E->fragment_index].protection & GD_PROTECT_FORMAT)
-    _GD_SetError(D, GD_E_PROTECTED, 0, NULL, 0,
+    _GD_SetError(D, GD_E_PROTECTED, GD_E_PROTECTED_FORMAT, NULL, 0,
         D->fragment[E->fragment_index].cname);
   else if (E->const_type & GD_SIGNED)
     _GD_ConvertType(D, data_in, data_type, &E->e->iconst, GD_INT64, 1);
@@ -433,17 +425,27 @@ static size_t _GD_DoConstOut(DIRFILE* D, gd_entry_t *E, gd_type_t data_type,
   return 1;
 }
 
-static size_t _GD_DoStringOut(DIRFILE* D, gd_entry_t *E, const void *data_in)
+static size_t _GD_DoStringOut(DIRFILE* D, gd_entry_t *E, const char *data_in)
 {
   dtrace("%p, %p, %p", D, E, data_in);
+  char* ptr = E->e->string;
 
-  free(E->e->string);
+  /* check protection */
+  if (D->fragment[E->fragment_index].protection & GD_PROTECT_FORMAT) {
+    _GD_SetError(D, GD_E_PROTECTED, GD_E_PROTECTED_FORMAT, NULL, 0,
+        D->fragment[E->fragment_index].cname);
+    dreturn("%i", 0);
+    return 0;
+  }
+
   E->e->string = strdup(data_in);
   if (E->e->string == NULL) {
+    E->e->string = ptr;
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     dreturn("%i", 0);
     return 0;
   }
+  free(ptr);
   D->fragment[E->fragment_index].modified = 1;
 
   dreturn("%i", strlen(E->e->string) + 1);

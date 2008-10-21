@@ -171,7 +171,8 @@ static void _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
   }
 
   /* field name */
-  fprintf(stream, "%s", _GD_StringEscapeise(buffer, ptr));
+  if (E->field_type != GD_INDEX_ENTRY)
+    fprintf(stream, "%s", _GD_StringEscapeise(buffer, ptr));
 
   switch(E->field_type) {
     case GD_RAW_ENTRY:

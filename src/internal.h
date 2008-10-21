@@ -165,6 +165,9 @@ const char* _gd_colsub(void);
 #define GD_E_REFERENCE_CODE     1
 #define GD_E_REFERENCE_TYPE     2
 
+#define GD_E_PROTECTED_FORMAT   1
+#define GD_E_PROTECTED_DATA     2
+
 /* Unified entry struct */
 struct _gd_private_entry {
   gd_entry_t* entry[GD_MAX_LINCOM];
@@ -196,10 +199,12 @@ struct _gd_private_entry {
       double* x; /* internal */
       double* y; /* internal */
     };
-    union { /* CONST */
-      double dconst;
-      uint64_t uconst;
-      int64_t iconst;
+    struct { /* CONST */
+      union {
+        double dconst;
+        uint64_t uconst;
+        int64_t iconst;
+      };
       int n_client;
       gd_entry_t** client;
     };
@@ -343,7 +348,7 @@ void _GD_InsertSort(DIRFILE* D, gd_entry_t* E, int u) __THROW;
 
 gd_type_t _GD_LegacyType(char c);
 void _GD_LinterpData(DIRFILE* D, const void *data, gd_type_t type, size_t npts,
-      double *lx, double *ly, size_t n_ln);
+    double *lx, double *ly, size_t n_ln);
 gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, const char** in_cols,
     const gd_entry_t* parent, const char* format_file, int linenum,
     unsigned int me, int standards, int creat, int pedantic);
