@@ -81,6 +81,7 @@ int main(void)
     parameter(stream, "GD_E_BAD_INDEX",      "GD_EBI", GD_E_BAD_INDEX,      i);
     parameter(stream, "GD_E_BAD_SCALAR",     "GD_EBS", GD_E_BAD_SCALAR,     i);
     parameter(stream, "GD_E_BAD_REFERENCE",  "GD_EBR", GD_E_BAD_REFERENCE,  i);
+    parameter(stream, "GD_E_PROTECTED",      "GD_EPT", GD_E_PROTECTED,      i);
 
     if (i == 0)
       fprintf(stream, "\\\nC Open flags\\\n");
