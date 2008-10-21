@@ -148,15 +148,34 @@ character forms a valid token.  However, there may be further restrictions on
 allowed characters for a token in a particular situation, (for example, when
 used as a field name).
 
-.SS Reserved Words
+.SS Directives
 
-There are seven 
+There are eight 
 .IR "reserved words" ,
 which cannot be used as field names in the dirfile.  Instead, these specify
 directives.  Any reserved word may omit its initial forward slash
 .RB ( / ),
 without change in meaning.  Future versions of the Standards may require the
-slash to distinguish a reserved word from a field name.
+slash to distinguish a reserved word from a field name.  Like the rest of the
+format file, directives are case sensitive.
+
+A number of the directives have
+.IR "fragment scope" .
+A directive with fragment scope only applies to the fragment in which it is
+presents, plus any sub-fragments indicated by the
+.B /INCLUDE
+directive, but only if those sub-fragments don't have their own corresponding
+directive.  Directives which have fragment scope are:
+.BR /ENCODING ,\~ /ENDIAN ,\~ /FRAMEOFFSET ", and " /PROTECT .
+Becase of these scoping rules, different portions of the dirfile may have
+different encodings, endiannesses, frame offsets, or protection levels.
+
+If a directive with fragment scope appears more than once in a fragment, only
+the last such directive will be honoured, with the exception that the effect of
+a directive will not be propagated to sub-fragments if the directive line
+appears after the sub-fragment is included.  The scoping rules of the remaining
+directives are discussed below.
+
 .TP
 .B /ENCODING
 The ENCODING directive specifies the encoding scheme used to encode binary
@@ -167,7 +186,7 @@ or any other site-specific encoding scheme.  The predefined scheme names are:
 .RS
 .TP
 .I none
-The dirfile is unencoded.
+The dirfile is unencoded.  This is the default.
 .TP
 .I slim
 The dirfile is compressed using the slimlib library.
@@ -181,12 +200,8 @@ dependent.  Syntax is:
 .IP
 .BI /ENCODING\~ <scheme>
 .PP
-A dirfile may have more than one encoding scheme.  The ENCODING directive
-indicates the encoding of only the binary files associated with RAW fields
-defined in the same format file fragment as the ENCODING directive itself.  As a
-result, RAW field specified in different fragments of a dirfile, may use
-different encodings.  If two ENCODING directives appear in a single fragment,
-only the last such directive will be honoured.
+The ENCODING directive has
+.IR "fragment scope" .
 .RE
 .TP
 .B /ENDIAN
@@ -200,12 +215,8 @@ is:
 .B /ENDIAN
 .IR "( " big " | " little " )"
 .PP
-A dirfile may have more than one endianness.  The ENDIAN directive indicates the
-byte sex of only the binary files associated with RAW fields defined in the same
-format file fragment as the ENDIAN directive itself.  As a result, RAW field
-specified in different fragments of a dirfile, may have different endiannesses.
-If two ENDIAN directives appear in a single fragment, only the last such
-directive will be honoured.
+The ENDIAN directive has
+.IR "fragment scope" .
 .RE
 .TP
 .B /FRAMEOFFSET
@@ -214,6 +225,9 @@ database.  Syntax is:
 .RS
 .IP
 .BI /FRAMEOFFSET\~ <integer>
+.PP
+The FRAMEOFFSET directive has
+.IR "fragment scope" .
 .RE
 .TP
 .B /INCLUDE
@@ -229,6 +243,9 @@ absolute path, or else a relative path from the current file.  Syntax is:
 .RS
 .IP
 .BI /INCLUDE\~ <file>
+.PP
+The INCLUDE directive has no scope: it is processed immediately and has no
+long-term effect.
 .RE
 .TP
 .B /META
@@ -263,6 +280,42 @@ This particular metafield may be referred to by the field code
 "pfield/meta".  Note that different parent fields may have metafields with
 the same name, since all references to metafields must include the parent
 field name.  Metafields may not themselves have further sub-metafields.
+.PP
+The META directive has no scope: it is processed immediately and has no
+long-term effect.
+.RE
+.TP
+.B /PROTECT
+The PROTECT directive specifies the advisory protection level of the current
+fragment and the
+.B RAW
+fields defined therein.  The protection level indicates whether writing to the
+format file fragment, or the binary data on disk is permitted.  Syntax is:
+.RS
+.IP
+.BI /PROTECT\~ <level>
+.PP
+Four advisory protection levels are defined:
+.TP
+.I none
+No protection at all: data and metadata may be freely changed.  This is the
+default, if no PROTECT directive is present.
+.TP
+.I format
+The dirfile metadata is protected from change, but
+.B RAW
+data on disk may be modified.
+.TP
+.I data
+The
+.B RAW
+data on disk is protected from change, but metadata may be modified.
+.TP
+.I all
+Both metadata and data on disk are protected from change.
+.PP
+The PROTECT directive has
+.IR "fragment scope" .
 .RE
 .TP
 .B /REFERENCE
@@ -271,21 +324,34 @@ reference field (see
 .BR dirfile (5)).
 If no REFERENCE directive is specified, the first
 .B RAW
-field encountered is used as the reference field.  If multiple REFERENCE
-directives are present, only the last encountered will be honoured.
+field encountered is used as the reference field.  Syntax is:
+.RS
+.IP
+.BI /REFERENCE\~ <field-code>
+.PP
+The REFERENCE directive has
+.IR "global scope" :
+if multiple REFERENCE directives appear in the dirfile metadata, only the last
+such will be honoured.
+.RE
 .TP
 .B /VERSION
 The VERSION directive specifies the particular version of the Dirfile Standards
 to which the dirfile format file conforms.  This directive should occur before
 any version dependent syntax is encountered.  As of Standards Version 6, no such
 syntax exists, and this directive is provided primarily to ease forward
-compatibility.  A /VERSION directive takes effect immediately.  Syntax is:
+compatibility.  Syntax is:
 .RS
 .IP
 .BI /VERSION\~ <integer>
-.RE
 .PP
-Like the rest of the format file, these reserved words are case sensitive.
+The VERSION directive has
+.IR "immediate scope" :
+its effect is immediate, and it applies only to metadata below it, including
+and propagating downwards to sub-fragments after the directive.  Its effect
+will also propagate upwards back to the parent fragment, and affect subsequent
+metadata.
+.RE
 
 .SS Field Specification Lines
 
@@ -586,11 +652,9 @@ or else escape the whitespace with the backslash character
 
 This document describes Version 6 of the Dirfile Standards.
 
-Version 6 of the Standards (October 2008) added
-.B /ENCODING
-and
-.BR /META ,
-and the
+Version 6 of the Standards (October 2008) added the
+.BR /ENCODING ,\~ /META ,\~ /PROTECT ", and " /REFERENCE
+directives, and the
 .B CONST
 and
 .B STRING
@@ -601,12 +665,12 @@ fields to be used as parameters in field specification lines.  It also removed
 .I FILEFRAM
 as an alias for
 .IR INDEX ,
-and allowed '#' and '\e' in field codes, but prohibited '.'.
+and allowed '#' and '\e' in field codes.
 
 Version 5 of the Standards (August 2008) added
-.B VERSION
+.B /VERSION
 and
-.BR ENDIAN ,
+.BR /ENDIAN ,
 slash demarcation of reserved words, and removed the restriction on field
 name length.  It introduced the data types
 .IR INT8 ,\~ INT64 ,
@@ -615,7 +679,7 @@ and
 the new-style type specifiers, and increased the range of the
 .B BIT
 field type from 32 to 64 bits.  It also prohibited the characters
-.B #&/;<>\e|
+.B #&/;<>\e.|
 in field codes.
 
 Version 4 of the Standards (October 2006) added the
