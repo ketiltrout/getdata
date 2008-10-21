@@ -46,7 +46,7 @@ ADD_TESTS=add add_bit add_bit_bitnum add_bit_bitsize add_bit_invalid \
 					add_bit_numbits add_code add_const add_duplicate add_format \
 					add_invalid add_lincom add_lincom_invalid add_lincom_nfields \
 					add_linterp add_linterp_invalid add_many add_multiply \
-					add_multiply_invalid add_phase add_phase_invalid add_raw \
+					add_multiply_invalid add_phase add_phase_invalid add_protect add_raw \
 					add_raw_invalid add_raw_spf add_raw_type add_rdonly add_sort \
 					add_spec add_spec_directive add_spec_invalid add_string add_type
 
@@ -154,21 +154,26 @@ PARSE_TESTS=parse_badline parse_bit parse_bit4 parse_bit_bitnum \
 						parse_linterp parse_linterp_ncols parse_meta parse_meta_index \
 						parse_meta_parent parse_meta_raw parse_multiply \
 						parse_multiply_ncols parse_name parse_ncols parse_phase \
-						parse_phase_ncols parse_phase_scalar parse_quote \
-						parse_quote_mismatch parse_raw parse_raw_char parse_raw_ncols \
-						parse_raw_scalar parse_raw_spf parse_raw_type parse_sort \
+						parse_phase_ncols parse_phase_scalar parse_protect_all \
+						parse_protect_bad parse_protect_data parse_protect_format \
+						parse_protect_none parse_quote parse_quote_mismatch parse_raw \
+						parse_raw_char parse_raw_ncols parse_raw_scalar parse_raw_spf \
+						parse_raw_type parse_ref parse_ref_nonexistent parse_sort \
 						parse_string parse_string_ncols parse_string_null parse_version \
 						parse_version_include parse_version_pedantic parse_version_slash \
 						parse_whitespace
 
-PUT_TESTS=put64 put_bad_code put_bit put_bof put_char put_endian8 put_endian16 \
-					put_endian32 put_endian64 put_endian_float32 put_endian_float64 \
-					put_ff put_float32 put_float64 put_foffs put_fs put_int8 put_int16 \
-					put_int32 put_int64 put_invalid put_lincom1 put_lincom2 \
-					put_lincom_noin put_linterp put_linterp_noin put_linterp_notab \
-					put_multiply put_null $(PUT_OFF64) put_phase put_phase_noin \
-					put_rdonly put_recurse put_rofs put_sf put_ss put_type put_uint16 \
-					put_uint32 put_uint64
+PUT_TESTS=put64 put_bad_code put_bit put_bof put_char put_const \
+					put_const_protect put_endian8 put_endian16 put_endian32 put_endian64 \
+					put_endian_float32 put_endian_float64 put_ff put_float32 put_float64 \
+					put_foffs put_fs put_int8 put_int16 put_int32 put_int64 put_invalid \
+					put_lincom1 put_lincom2 put_lincom_noin put_linterp put_linterp_noin \
+					put_linterp_notab put_multiply put_null $(PUT_OFF64) put_phase \
+					put_phase_noin put_protect put_rdonly put_recurse put_rofs put_sf \
+					put_ss put_string put_string_protect put_type put_uint16 put_uint32 \
+					put_uint64
+
+REF_TESTS=ref ref_none ref_two
 
 SVLIST_TESTS=svlist svlist_invalid svlist_meta svlist_meta_invalid
 
@@ -186,8 +191,8 @@ TESTS=$(ADD_TESTS)      $(ASCII_TESTS)      $(CVLIST_TESTS)     \
 			$(MADD_TESTS)     $(NFIELDS_TESTS)    $(NFRAGMENTS_TESTS) \
 			$(NFRAMES_TESTS)  $(NMETA_TESTS)      $(NVECTORS_TESTS)   \
 			$(OPEN_TESTS)     $(PARSE_TESTS)      $(PUT_TESTS)        \
-			$(SLIM_TESTS)     $(SPF_TESTS)        $(SVLIST_TESTS)     \
-			$(TRUNC_TESTS)    $(VLIST_TESTS)
+			$(REF_TESTS)      $(SLIM_TESTS)       $(SPF_TESTS)        \
+			$(SVLIST_TESTS)   $(TRUNC_TESTS)      $(VLIST_TESTS)
 
 check_PROGRAMS=$(TESTS)
 
