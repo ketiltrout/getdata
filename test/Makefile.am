@@ -120,7 +120,7 @@ GET_TESTS=get64 get_bad_code get_bit get_char get_endian8 get_endian16 \
 					get_uint64
 
 INCLUDE_TESTS=include include_accmode include_creat include_index \
-							include_invalid include_nonexistent include_rdonly
+							include_invalid include_nonexistent
 
 MADD_TESTS=madd madd_bit madd_bit_invalid madd_lincom madd_lincom_invalid \
 					 madd_linterp madd_linterp_invalid madd_multiply \
