@@ -48,27 +48,28 @@ const char *GD_ERROR_CODES[GD_N_ERROR_CODES] = {
   "Success",
   "Error opening dirfile",
   "Error in Format file",
-  "Error truncating dirfile",
-  "Error creating dirfile",
+  NULL, /* GD_E_TRUNC */
+  NULL, /* GD_E_CREAT */
   "Bad field code",
   "Unrecognized data type",
   "I/O error accessing field file",
   "Could not open included Format file",
   "Internal error",
   "Memory allocation failed",
-  "Could not open interpolation file",
+  "Could not open interpolation table",
   "Too many levels of recursion",
-  "Bad DIRFILE",
+  "Bad dirfile",
   "Cannot write to specified field",
   "Read-only dirfile",
   "Request out-of-range",
   "Operation not supported by current encoding scheme",
-  "Unable to discover encoding",
+  "Unknown encoding scheme",
   NULL, /* GD_E_BAD_ENTRY */
   NULL, /* GD_E_DUPLICATE */
   "Scalar field found where vector field expected",
   NULL, /* GD_E_BAD_INDEX */
   "Scalar field code not found",
+  "Bad REFERENCE field",
 };
 
 static struct FormatType Format = {
@@ -263,7 +264,7 @@ const struct FormatType *GetFormat(const char *filedir, int *error_code) {
    * not thread-safe */
   Format.FileDirName = filedir; 
   Format.frame_offset = (int)D->frame_offset;
-  CopyRawEntry(&Format.first_field, D->first_field);
+  CopyRawEntry(&Format.first_field, D->reference_field);
 
   /* Pass one: run through the entry list and count the number of different
    * types */

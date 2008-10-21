@@ -161,6 +161,9 @@ const char* _gd_colsub(void);
 #define GD_E_SCALAR_CODE        1
 #define GD_E_SCALAR_TYPE        2
 
+#define GD_E_REFERENCE_CODE     1
+#define GD_E_REFERENCE_TYPE     2
+
 /* Unified entry struct */
 struct _gd_private_entry {
   gd_entry_t* entry[GD_MAX_LINCOM];
@@ -185,7 +188,6 @@ struct _gd_private_entry {
       char* file;
       int fp;
       void* stream;
-      int first;
       int encoding;
     };
     struct { /* LINTERP */
@@ -230,7 +232,7 @@ extern const struct encoding_t {
 } encode[];
 
 /* Format file fragment metadata */
-struct gd_include_t {
+struct gd_fragment_t {
   /* Canonical name (full path) */
   char* cname;
   /* Subdirectory name */
@@ -240,7 +242,8 @@ struct gd_include_t {
   int modified;
   int parent;
   unsigned int flags;
-  int first;
+  const gd_entry_t* first_field;
+  int first_fragment;
 };
 
 /* internal flags */
@@ -265,8 +268,8 @@ struct _GD_DIRFILE {
   /* field array */
   gd_entry_t** entry;
 
-  /* The first field */
-  gd_entry_t* first_field;
+  /* The reference field */
+  gd_entry_t* reference_field;
 
   /* directory name */
   const char* name;
@@ -274,9 +277,9 @@ struct _GD_DIRFILE {
   /* recursion counter */
   int recurse_level;
 
-  /* include list */
-  struct gd_include_t* include_list;
-  int n_include;
+  /* fragment list */
+  struct gd_fragment_t* fragment;
+  int n_fragment;
 
   /* field lists */
   const char** field_list;
@@ -325,7 +328,7 @@ void _GD_FreeE(gd_entry_t* E, int priv);
 int _GD_GetLine(FILE *fp, char *line, int* linenum);
 unsigned int _GD_GetSPF(DIRFILE* D, gd_entry_t* E);
 int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,
-    int linenum, int me, int* standards, int flags);
+    int linenum, char** ref_name, int me, int* standards, int flags);
 void _GD_InsertSort(DIRFILE* D, gd_entry_t* E, int u) __THROW;
 
 #define _GD_InternalError(D) \
@@ -334,10 +337,10 @@ void _GD_InsertSort(DIRFILE* D, gd_entry_t* E, int u) __THROW;
 gd_type_t _GD_LegacyType(char c);
 void _GD_LinterpData(DIRFILE* D, const void *data, gd_type_t type, size_t npts,
       double *lx, double *ly, size_t n_ln);
-void _GD_ParseFieldSpec(DIRFILE* D, int n_cols, const char** in_cols,
+gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, const char** in_cols,
     const gd_entry_t* parent, const char* format_file, int linenum,
-    int* have_first, unsigned int me, int standards, int creat, int pedantic);
-int _GD_ParseFormatFile(FILE* fp, DIRFILE *D, int me, int* standards,
+    unsigned int me, int standards, int creat, int pedantic);
+char* _GD_ParseFragment(FILE* fp, DIRFILE *D, int me, int* standards,
     unsigned int flags);
 void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E);
 unsigned int _GD_ResolveEncoding(const char* name, unsigned int scheme,

@@ -496,7 +496,6 @@ function fputdata_i4 (dirfile, field_code, first_frame, first_sample, &
   character (len=*), intent(in) :: field_code
   integer, intent(in) :: num_samples
   integer*4, dimension(:), intent(in) :: data_in
-  integer :: nread
 
   ! call f77 library
   call gdfput(fputdata_i4, dirfile, TRIM(field_code), LEN_TRIM(field_code), &

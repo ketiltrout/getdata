@@ -34,14 +34,14 @@ const char* get_fragmentname(DIRFILE* D, int index)
     return NULL;
   }
 
- if (index < 0 || index >= D->n_include) {
+ if (index < 0 || index >= D->n_fragment) {
     _GD_SetError(D, GD_E_BAD_INDEX, 0, NULL, 0, NULL);
     dreturn("%p", NULL);
     return NULL;
  }
 
-  dreturn("\"%s\"", D->include_list[index].cname);
-  return D->include_list[index].cname;
+  dreturn("\"%s\"", D->fragment[index].cname);
+  return D->fragment[index].cname;
 }
 
 int get_nfragments(DIRFILE* D)
@@ -54,6 +54,6 @@ int get_nfragments(DIRFILE* D)
     return 0;
   }
 
-  dreturn("%i", D->n_include);
-  return D->n_include;
+  dreturn("%i", D->n_fragment);
+  return D->n_fragment;
 }

@@ -36,7 +36,7 @@
 /* Include a format file fragment -- returns the include index, or 
  * -1 on error */
 int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,
-    int linenum, int me, int* standards, int flags)
+    int linenum, char** ref_name, int me, int* standards, int flags)
 {
   int i;
   int found = 0;
@@ -44,17 +44,17 @@ int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,
   char temp_buf2[FILENAME_MAX];
   FILE* new_fp = NULL;
 
-  dtrace("%p, \"%s\", \"%s\", %i, %i, %p, %x\n", D, ename, format_file, linenum,
-      me, standards, flags);
+  dtrace("%p, \"%s\", \"%s\", %p, %i, %i, %p, %x\n", D, ename, format_file,
+      ref_name, linenum, me, standards, flags);
 
   /* create the format filename */
-  snprintf(temp_buf1, FILENAME_MAX, "%s/%s/%s", D->name,
-      D->include_list[me].sname, ename);
+  snprintf(temp_buf1, FILENAME_MAX, "%s/%s/%s", D->name, D->fragment[me].sname,
+      ename);
 
   /* Run through the include list to see if we've already included this
    * file */
-  for (i = 0; i < D->n_include; ++i)
-    if (strcmp(temp_buf1, D->include_list[i].cname) == 0) {
+  for (i = 0; i < D->n_fragment; ++i)
+    if (strcmp(temp_buf1, D->fragment[i].cname) == 0) {
       found = 1;
       break;
     }
@@ -94,55 +94,56 @@ int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,
   }
 
   /* If we got here, we managed to open the included file; parse it */
-  D->include_list = realloc(D->include_list, (++D->n_include) *
-      sizeof(struct gd_include_t));
-  if (D->include_list == NULL) {
+  D->fragment = realloc(D->fragment, (++D->n_fragment) *
+      sizeof(struct gd_fragment_t));
+  if (D->fragment == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     dreturn("%i", -1);
     return -1;
   }
 
-  D->include_list[D->n_include - 1].cname = strdup(temp_buf1);
-  D->include_list[D->n_include - 1].ename = strdup(ename);
-  D->include_list[D->n_include - 1].modified = 0;
-  D->include_list[D->n_include - 1].parent = me;
-  D->include_list[D->n_include - 1].first = 0;
-  D->include_list[D->n_include - 1].flags = flags & (GD_ENCODING |
+  D->fragment[D->n_fragment - 1].cname = strdup(temp_buf1);
+  D->fragment[D->n_fragment - 1].ename = strdup(ename);
+  D->fragment[D->n_fragment - 1].modified = 0;
+  D->fragment[D->n_fragment - 1].parent = me;
+  D->fragment[D->n_fragment - 1].flags = flags & (GD_ENCODING |
       GD_LITTLE_ENDIAN | GD_BIG_ENDIAN);
+  D->fragment[D->n_fragment - 1].first_fragment = -1;
+  D->fragment[D->n_fragment - 1].first_field = NULL;
 
   /* extract the subdirectory name - dirname both returns a volatile string
    * and modifies its argument, ergo strcpy */
   strncpy(temp_buf1, ename, FILENAME_MAX);
-  if (strcmp(D->include_list[me].sname, ".") == 0)
+  if (strcmp(D->fragment[me].sname, ".") == 0)
     strcpy(temp_buf2, dirname(temp_buf1));
   else
-    snprintf(temp_buf2, FILENAME_MAX, "%s/%s", D->include_list[me].sname,
+    snprintf(temp_buf2, FILENAME_MAX, "%s/%s", D->fragment[me].sname,
         dirname(temp_buf1));
 
-  D->include_list[D->n_include - 1].sname = strdup(temp_buf2);
+  D->fragment[D->n_fragment - 1].sname = strdup(temp_buf2);
 
-  if (D->include_list[D->n_include - 1].cname == NULL ||
-      D->include_list[D->n_include - 1].sname == NULL ||
-      D->include_list[D->n_include - 1].ename == NULL)
+  if (D->fragment[D->n_fragment - 1].cname == NULL ||
+      D->fragment[D->n_fragment - 1].sname == NULL ||
+      D->fragment[D->n_fragment - 1].ename == NULL)
   {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     dreturn("%i", -1);
     return -1;
   }
 
-  if (_GD_ParseFormatFile(new_fp, D, D->n_include - 1, standards, flags))
-    D->include_list[me].first = 1;
+  *ref_name = _GD_ParseFragment(new_fp, D, D->n_fragment - 1, standards, flags);
 
   fclose(new_fp);
 
-  dreturn("%i", D->n_include - 1);
-  return D->n_include - 1;
+  dreturn("%i", D->n_fragment - 1);
+  return D->n_fragment - 1;
 }
 
 int dirfile_include(DIRFILE* D, const char* file, int format_file,
     unsigned int flags)
 {
   int standards = DIRFILE_STANDARDS_VERSION;
+  char* ref_name = NULL; 
 
   dtrace("%p, \"%s\"", D, file);
 
@@ -152,14 +153,28 @@ int dirfile_include(DIRFILE* D, const char* file, int format_file,
     return -1;
   }
 
- if (format_file < 0 || format_file >= D->n_include) {
+ if (format_file < 0 || format_file >= D->n_fragment) {
     _GD_SetError(D, GD_E_BAD_INDEX, 0, NULL, 0, NULL);
     dreturn("%i", -1);
     return -1;
  }
 
-  int i = _GD_Include(D, file, "dirfile_include()", 0, format_file, &standards,
-      flags);
+  int i = _GD_Include(D, file, "dirfile_include()", 0, &ref_name, format_file,
+      &standards, flags);
+
+  /* Find the reference field */
+  if (ref_name != NULL) {
+    gd_entry_t *E = _GD_FindField(D, ref_name, NULL);
+    if (E == NULL)
+      _GD_SetError(D, GD_E_BAD_REFERENCE, GD_E_REFERENCE_CODE, NULL, 0,
+          ref_name);
+    else if (E->field_type != GD_RAW_ENTRY)
+      _GD_SetError(D, GD_E_BAD_REFERENCE, GD_E_REFERENCE_TYPE, NULL, 0,
+          ref_name);
+    else
+      D->reference_field = E; 
+    free(ref_name);
+  }
 
   dreturn("%i", i);
   return i;

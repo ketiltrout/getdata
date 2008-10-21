@@ -131,6 +131,11 @@ static const struct {
     "Scalar field {4} not found in definition of {2}", 0 },
   { GD_E_BAD_SCALAR, GD_E_SCALAR_TYPE,
     "Scalar field {4} has wrong type in definition of {2}", 0 },
+  /* GD_E_BAD_REFERENCE: 4 = field name */
+  { GD_E_BAD_REFERENCE, GD_E_REFERENCE_CODE,
+    "REFERENCE field code not found: {4}", 0},
+  { GD_E_BAD_REFERENCE, GD_E_REFERENCE_TYPE,
+    "Bad field type for REFERENCE field: {4}", 0},
   /* GD_E_OK: (nothing) */
   { 0, 0, "Success", 0} /* this must be the last error string defined */
 };

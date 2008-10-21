@@ -75,8 +75,9 @@
 #define GD_E_DIMENSION        21
 #define GD_E_BAD_INDEX        22
 #define GD_E_BAD_SCALAR       23
+#define GD_E_BAD_REFERENCE    24
 
-#define GD_N_ERROR_CODES      24
+#define GD_N_ERROR_CODES      25
 
 #define GD_MAX_LINCOM 3
 

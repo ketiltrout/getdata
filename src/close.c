@@ -70,10 +70,10 @@ static void _GD_FreeD(DIRFILE* D)
       }
     }
 
-  for (j = 0; j < D->n_include; ++j) {
-    free(D->include_list[j].cname);
-    free(D->include_list[j].sname);
-    free(D->include_list[j].ename);
+  for (j = 0; j < D->n_fragment; ++j) {
+    free(D->fragment[j].cname);
+    free(D->fragment[j].sname);
+    free(D->fragment[j].ename);
   }
 
   free(D->entry);
@@ -85,7 +85,7 @@ static void _GD_FreeD(DIRFILE* D)
     free(D->type_list[j]);
   free(D->string_value_list);
   free(D->const_value_list);
-  free(D->include_list);
+  free(D->fragment);
 
   dreturnvoid();
 }

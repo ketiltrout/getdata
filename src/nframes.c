@@ -39,40 +39,41 @@ off64_t get_nframes64(DIRFILE* D)
     return 0;
   }
 
-  if (D->first_field == NULL) {
+  if (D->reference_field == NULL) {
     dreturn("%lli", 0LL);
     return 0;
   }
 
   /* Figure out encoding scheme, if necessary */
-  if ((D->include_list[D->first_field->fragment_index].flags & GD_ENCODING)
+  if ((D->fragment[D->reference_field->fragment_index].flags & GD_ENCODING)
       == GD_AUTO_ENCODED) 
   {
-      D->include_list[D->first_field->fragment_index].flags =
-      (D->include_list[D->first_field->fragment_index].flags & ~GD_ENCODING) |
-        _GD_ResolveEncoding(D->first_field->e->file,
-            D->include_list[D->first_field->fragment_index].flags & GD_ENCODING,
-            D->first_field->e);
-  } else if (D->first_field->e->encoding == GD_ENC_UNKNOWN)
-      _GD_ResolveEncoding(D->first_field->e->file,
-          D->include_list[D->first_field->fragment_index].flags & GD_ENCODING,
-          D->first_field->e);
+      D->fragment[D->reference_field->fragment_index].flags =
+      (D->fragment[D->reference_field->fragment_index].flags & ~GD_ENCODING) |
+        _GD_ResolveEncoding(D->reference_field->e->file,
+            D->fragment[D->reference_field->fragment_index].flags & GD_ENCODING,
+            D->reference_field->e);
+  } else if (D->reference_field->e->encoding == GD_ENC_UNKNOWN)
+      _GD_ResolveEncoding(D->reference_field->e->file,
+          D->fragment[D->reference_field->fragment_index].flags & GD_ENCODING,
+          D->reference_field->e);
 
-  if (encode[D->first_field->e->encoding].size == NULL) {
+  if (encode[D->reference_field->e->encoding].size == NULL) {
       _GD_SetError(D, GD_E_UNSUPPORTED, 0, NULL, 0, NULL);
       dreturn("%lli", 0LL);
       return 0;
   }
 
-  nf = (*encode[D->first_field->e->encoding].size)(D->first_field->e->file,
-      D->first_field->data_type);
+  nf = (*encode[D->reference_field->e->encoding].size)(
+      D->reference_field->e->file, D->reference_field->data_type
+      );
   if (nf < 0) {
-    _GD_SetError(D, GD_E_RAW_IO, 0, D->first_field->e->file, errno, NULL);
+    _GD_SetError(D, GD_E_RAW_IO, 0, D->reference_field->e->file, errno, NULL);
     dreturn("%lli", 0LL);
     return 0;
   }
 
-  nf /= D->first_field->size * D->first_field->spf;
+  nf /= D->reference_field->size * D->reference_field->spf;
   nf += D->frame_offset;
 
   dreturn("%lli", (unsigned long long)nf);

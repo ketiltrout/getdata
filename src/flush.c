@@ -153,7 +153,8 @@ static char* _GD_StringEscapeise(char* out, const char* in)
 }
 
 /* Write a field specification line */
-static void _GD_FieldSpec(DIRFILE* D, FILE* stream, gd_entry_t* E, int meta)
+static void _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
+    int meta)
 {
   int i;
   char buffer[MAX_LINE_LENGTH];
@@ -169,45 +170,45 @@ static void _GD_FieldSpec(DIRFILE* D, FILE* stream, gd_entry_t* E, int meta)
     fprintf(stream, "META %s ", buffer);
   }
 
+  /* field name */
+  fprintf(stream, "%s", _GD_StringEscapeise(buffer, ptr));
+
   switch(E->field_type) {
     case GD_RAW_ENTRY:
-      fprintf(stream, "%s RAW %s %u\n", ptr, _GD_TypeName(D, E->data_type),
-          E->spf);
+      fprintf(stream, " RAW %s %u\n", _GD_TypeName(D, E->data_type), E->spf);
       break;
     case GD_LINCOM_ENTRY:
-      fprintf(stream, "%s LINCOM %i", ptr, E->n_fields);
+      fprintf(stream, " LINCOM %i", E->n_fields);
       for (i = 0; i < E->n_fields; ++i)
         fprintf(stream, " %s %.15g %.15g", E->in_fields[i], E->m[i], E->b[i]);
       fputs("\n", stream);
       break;
     case GD_LINTERP_ENTRY:
-      fprintf(stream, "%s LINTERP %s %s\n", ptr, E->in_fields[0],
-          E->table);
+      fprintf(stream, " LINTERP %s %s\n", E->in_fields[0], E->table);
       break;
     case GD_BIT_ENTRY:
-      fprintf(stream, "%s BIT %s %i %i\n", ptr, E->in_fields[0], E->bitnum,
+      fprintf(stream, " BIT %s %i %i\n", E->in_fields[0], E->bitnum,
           E->numbits);
       break;
     case GD_MULTIPLY_ENTRY:
-      fprintf(stream, "%s MULTIPLY %s %s\n", ptr, E->in_fields[0],
-          E->in_fields[1]);
+      fprintf(stream, " MULTIPLY %s %s\n", E->in_fields[0], E->in_fields[1]);
       break;
     case GD_PHASE_ENTRY:
-      fprintf(stream, "%s PHASE %s %i\n", ptr, E->in_fields[0], E->shift);
+      fprintf(stream, " PHASE %s %i\n", E->in_fields[0], E->shift);
       break;
     case GD_CONST_ENTRY:
       if (E->const_type & GD_SIGNED)
-        fprintf(stream, "%s CONST %s %" PRIi64, ptr, _GD_TypeName(D,
-              E->const_type), E->e->iconst);
+        fprintf(stream, " CONST %s %" PRIi64, _GD_TypeName(D, E->const_type),
+            E->e->iconst);
       else if (E->const_type & GD_IEEE754)
-        fprintf(stream, "%s CONST %s %.16g", ptr, _GD_TypeName(D,
-              E->const_type), E->e->dconst);
+        fprintf(stream, " CONST %s %.16g", _GD_TypeName(D, E->const_type),
+            E->e->dconst);
       else
-        fprintf(stream, "%s CONST %s %" PRIu64, ptr, _GD_TypeName(D,
-              E->const_type), E->e->uconst);
+        fprintf(stream, " CONST %s %" PRIu64, _GD_TypeName(D, E->const_type),
+            E->e->uconst);
       break;
     case GD_STRING_ENTRY:
-      fprintf(stream, "%s STRING \"%s\"", ptr, _GD_StringEscapeise(buffer,
+      fprintf(stream, " STRING \"%s\"", _GD_StringEscapeise(buffer,
             E->e->string));
     case GD_INDEX_ENTRY:
       /* INDEX is implicit, and it is an error to define it in the format
@@ -241,8 +242,8 @@ void _GD_FlushMeta(DIRFILE* D)
     return;
   }
 
-  for (i = 0; i < D->n_include; ++i)
-    if (D->include_list[i].modified) {
+  for (i = 0; i < D->n_fragment; ++i)
+    if (D->fragment[i].modified) {
       /* open a temporary file */
       snprintf(temp_file, MAX_LINE_LENGTH, "%s/format_XXXXXX", D->name);
       fd = mkstemp(temp_file);
@@ -276,24 +277,17 @@ void _GD_FlushMeta(DIRFILE* D)
        * fragment as the first non-comment line for sanity's sake. */
       fprintf(stream, "/VERSION %i\n", DIRFILE_STANDARDS_VERSION);
 
-      /* Global metadata */
-      if (i == 0) {
-        if (D->frame_offset != 0)
-          fprintf(stream, "/FRAMEOFFSET %llu\n",
-              (unsigned long long)D->frame_offset);
-      }
-
       /* Byte Sex */
       fprintf(stream, "/ENDIAN %s\n",
 #ifdef WORDS_BIGENDIAN
-          (D->include_list[i].flags & GD_LITTLE_ENDIAN) ? "little" : "big"
+          (D->fragment[i].flags & GD_LITTLE_ENDIAN) ? "little" : "big"
 #else
-          (D->include_list[i].flags & GD_BIG_ENDIAN) ? "big" : "little"
+          (D->fragment[i].flags & GD_BIG_ENDIAN) ? "big" : "little"
 #endif
           );
 
       /* The encoding -- we only write encodings we know about. */
-      switch(D->include_list[i].flags & GD_ENCODING) {
+      switch(D->fragment[i].flags & GD_ENCODING) {
         case GD_UNENCODED:
           fputs("/ENCODING none\n", stream);
           break;
@@ -305,34 +299,41 @@ void _GD_FlushMeta(DIRFILE* D)
           break;
       }
 
-      /* The first field */
-      if (D->first_field != NULL) {
-        if (D->first_field->fragment_index == i) {
-          _GD_FieldSpec(D, stream, D->first_field, 0);
-          for (j = 0; j < D->first_field->e->n_meta; ++j)
-            _GD_FieldSpec(D, stream, D->first_field->e->meta_entry[j], 1);
-        } else
-          for (j = 0; j < D->n_include; ++j)
-            if (D->include_list[j].first && D->include_list[j].parent == i) {
-              fprintf(stream, "/INCLUDE %s\n", D->include_list[j].ename);
-              break; /* There can be only one */
-            }
-      }
+      /* The first field/fragment */
+      if (D->fragment[i].first_field != NULL) {
+        _GD_FieldSpec(D, stream, D->fragment[i].first_field, 0);
+        for (j = 0; j < D->fragment[i].first_field->e->n_meta; ++j)
+          _GD_FieldSpec(D, stream,
+              D->fragment[i].first_field->e->meta_entry[j], 1);
+      } else if (D->fragment[i].first_fragment != -1)
+        fprintf(stream, "/INCLUDE %s\n",
+            D->fragment[D->fragment[i].first_fragment].ename);
 
       /* The remaining includes */
-      for (j = 0; j < D->n_include; ++j)
-        if (D->include_list[j].parent == i && !D->include_list[j].first)
-          fprintf(stream, "/INCLUDE %s\n", D->include_list[j].ename);
+      for (j = 0; j < D->n_fragment; ++j)
+        if (D->fragment[j].parent == i && D->fragment[i].first_fragment != j)
+          fprintf(stream, "/INCLUDE %s\n", D->fragment[j].ename);
 
-      /* The fields */
+      /* The remaining fields */
       for (u = 0; u < D->n_entries; ++u)
         if (D->entry[u]->fragment_index == i && D->entry[u]->e->n_meta != -1 &&
-            !D->entry[u]->e->first)
+            D->entry[u] != D->fragment[i].first_field)
         {
           _GD_FieldSpec(D, stream, D->entry[u], 0);
           for (j = 0; j < D->entry[u]->e->n_meta; ++j)
             _GD_FieldSpec(D, stream, D->entry[u]->e->meta_entry[j], 1);
         }
+
+      /* Global metadata -- we write it at the end to ensure it overrides
+       * and metatdata found in any other fragments */
+      if (i == 0) {
+        if (D->frame_offset != 0)
+          fprintf(stream, "/FRAMEOFFSET %llu\n",
+              (unsigned long long)D->frame_offset);
+        if (D->reference_field != NULL)
+          fprintf(stream, "/REFERENCE %s\n", _GD_StringEscapeise(buffer,
+                D->reference_field->field));
+      }
 
       /* That's all, flush, sync, and close */
       fflush(stream);
@@ -345,13 +346,13 @@ void _GD_FlushMeta(DIRFILE* D)
         unlink(temp_file);
         break;
         /* Only assume we've synced the file if the rename succeeds */
-      } else if (rename(temp_file, D->include_list[i].cname)) {
+      } else if (rename(temp_file, D->fragment[i].cname)) {
         _GD_SetError(D, GD_E_OPEN_INCLUDE, errno, NULL, 0,
-            D->include_list[i].cname);
+            D->fragment[i].cname);
         unlink(temp_file);
         break;
       } else
-        D->include_list[i].modified = 0;
+        D->fragment[i].modified = 0;
     }
 
   dreturnvoid();

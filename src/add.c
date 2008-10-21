@@ -101,7 +101,7 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
 
   /* check for include index out of range */
   if (P == NULL && (entry->fragment_index < 0 ||
-        entry->fragment_index >= D->n_include))
+        entry->fragment_index >= D->n_fragment))
   {
     _GD_SetError(D, GD_E_BAD_INDEX, 0, NULL, entry->fragment_index, NULL);
     dreturn("%i", -1);
@@ -163,7 +163,7 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
       }
 
       /* If the encoding scheme is unknown, we can't add the field */
-      if ((D->include_list[E->fragment_index].flags & GD_ENCODING) ==
+      if ((D->fragment[E->fragment_index].flags & GD_ENCODING) ==
           GD_AUTO_ENCODED)
       {
         _GD_SetError(D, GD_E_UNKNOWN_ENCODING, 0, NULL, 0, NULL);
@@ -171,7 +171,7 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
       }
 
       /* If the encoding scheme is unsupported, we can't add the field */
-      if ((D->include_list[E->fragment_index].flags & GD_ENCODING) ==
+      if ((D->fragment[E->fragment_index].flags & GD_ENCODING) ==
           GD_ENC_UNSUPPORTED)
       {
         _GD_SetError(D, GD_E_UNSUPPORTED, 0, NULL, 0, NULL);
@@ -188,10 +188,10 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
       }
 
       snprintf(E->e->file, FILENAME_MAX, "%s/%s/%s", D->name,
-          D->include_list[E->fragment_index].sname, E->field);
+          D->fragment[E->fragment_index].sname, E->field);
 
       /* Set the subencoding subscheme */
-      _GD_ResolveEncoding(E->e->file, D->include_list[E->fragment_index].flags,
+      _GD_ResolveEncoding(E->e->file, D->fragment[E->fragment_index].flags,
           E->e);
 
       if ((E->spf = entry->spf) <= 0)
@@ -203,13 +203,14 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
         _GD_SetError(D, GD_E_UNSUPPORTED, 0, NULL, 0, NULL);
       else if ((*encode[E->e->encoding].touch)(E->e->file))
         _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file, errno, NULL);
-      else if (D->first_field == NULL) {
+      else if (D->reference_field == NULL) {
         /* This is the first raw field */
-        E->e->first = 1;
-        D->first_field = E;
+        D->fragment[E->fragment_index].first_field = E;
+        D->fragment[E->fragment_index].first_fragment = -1;
+        D->reference_field = E;
         /* Tag the include list */
-        for (i = E->fragment_index; i != -1; i = D->include_list[i].parent)
-          D->include_list[i].first = D->include_list[i].modified = 1;
+        for (i = E->fragment_index; i != -1; i = D->fragment[i].parent)
+          D->fragment[i].modified = 1;
       }
       break;
     case GD_LINCOM_ENTRY:
@@ -302,7 +303,7 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
   D->entry = realloc(D->entry, (D->n_entries + 1) * sizeof(gd_entry_t*));
   _GD_InsertSort(D, E, u);
   D->n_entries++;
-  D->include_list[E->fragment_index].modified = 1;
+  D->fragment[E->fragment_index].modified = 1;
 
   /* Invalidate the field lists */
   D->list_validity = 0;
@@ -319,7 +320,6 @@ int dirfile_madd_spec(DIRFILE* D, const char* line, const char* parent)
   char outstring[MAX_LINE_LENGTH];
   const char *in_cols[MAX_IN_COLS];
   int n_cols;
-  int have_first; /* unused */
   gd_entry_t* E = NULL;
 
   dtrace("%p, \"%s\", \"%s\"", D, line, parent);
@@ -361,7 +361,7 @@ int dirfile_madd_spec(DIRFILE* D, const char* line, const char* parent)
 
   /* Directive parsing is skipped -- The Field Spec parser will add the field */
   _GD_ParseFieldSpec(D, n_cols, in_cols, E, "dirfile_madd_spec()", 0,
-      &have_first, E->fragment_index, DIRFILE_STANDARDS_VERSION, 1, 1);
+      E->fragment_index, DIRFILE_STANDARDS_VERSION, 1, 1);
 
   if (D->error) {
     dreturn("%i", -1); /* field spec parser threw an error */
@@ -379,7 +379,6 @@ int dirfile_add_spec(DIRFILE* D, const char* line, int fragment_index)
   char outstring[MAX_LINE_LENGTH];
   const char *in_cols[MAX_IN_COLS];
   int n_cols;
-  int have_first; /* unused */
 
   dtrace("%p, \"%s\", %i", D, line, fragment_index);
 
@@ -397,7 +396,7 @@ int dirfile_add_spec(DIRFILE* D, const char* line, int fragment_index)
   }
 
   /* check for include index out of range */
-  if (fragment_index < 0 || fragment_index >= D->n_include) {
+  if (fragment_index < 0 || fragment_index >= D->n_fragment) {
     _GD_SetError(D, GD_E_BAD_INDEX, 0, NULL, fragment_index, NULL);
     dreturn("%i", -1);
     return -1;
@@ -419,8 +418,8 @@ int dirfile_add_spec(DIRFILE* D, const char* line, int fragment_index)
   }
 
   /* Directive parsing is skipped -- The Field Spec parser will add the field */
-  _GD_ParseFieldSpec(D, n_cols, in_cols, NULL, "dirfile_add_spec()", 0,
-      &have_first, fragment_index, DIRFILE_STANDARDS_VERSION, 1, 1);
+  _GD_ParseFieldSpec(D, n_cols, in_cols, NULL, "dirfile_add_spec()", 0, 
+      fragment_index, DIRFILE_STANDARDS_VERSION, 1, 1);
 
   if (D->error) {
     dreturn("%i", -1); /* field spec parser threw an error */

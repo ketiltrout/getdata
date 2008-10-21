@@ -80,6 +80,7 @@ int main(void)
     parameter(stream, "GD_E_DIMENSION",      "GD_EDM", GD_E_DIMENSION,      i);
     parameter(stream, "GD_E_BAD_INDEX",      "GD_EBI", GD_E_BAD_INDEX,      i);
     parameter(stream, "GD_E_BAD_SCALAR",     "GD_EBS", GD_E_BAD_SCALAR,     i);
+    parameter(stream, "GD_E_BAD_REFERENCE",  "GD_EBR", GD_E_BAD_REFERENCE,  i);
 
     if (i == 0)
       fprintf(stream, "\\\nC Open flags\\\n");

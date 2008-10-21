@@ -209,7 +209,7 @@ static gd_entry_t* _GD_ParseRaw(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
   }
 
   snprintf((char*)E->e->file, FILENAME_MAX, "%s/%s/%s", D->name,
-      D->include_list[me].sname, in_cols[0]);
+      D->fragment[me].sname, in_cols[0]);
   E->data_type = _GD_RawType(in_cols[2]);
   E->size = GD_SIZE(E->data_type);
 
@@ -755,14 +755,14 @@ static int utf8encode(DIRFILE* D, const char* format_file, int linenum,
 
 /* _GD_ParseFieldSpec: Parse a format file line fragment containing a field
  * specification */
-void _GD_ParseFieldSpec(DIRFILE* D, int n_cols, const char** in_cols,
-    const gd_entry_t* P, const char* format_file, int linenum, int* have_first,
-    unsigned int me, int standards, int creat, int pedantic)
+gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, const char** in_cols,
+    const gd_entry_t* P, const char* format_file, int linenum, unsigned int me,
+    int standards, int creat, int pedantic)
 {
   gd_entry_t* E = NULL;
 
-  dtrace("%p, %i, %p, %p, \"%s\", %i, %p, %u, %i, %i, %i", D, n_cols, in_cols,
-      P, format_file, linenum, have_first, me, standards, creat, pedantic);
+  dtrace("%p, %i, %p, %p, \"%s\", %i, %u, %i, %i, %i", D, n_cols, in_cols, P,
+      format_file, linenum, me, standards, creat, pedantic);
 
   D->entry = realloc(D->entry, (D->n_entries + 1) * sizeof(gd_entry_t*));
 
@@ -774,27 +774,22 @@ void _GD_ParseFieldSpec(DIRFILE* D, int n_cols, const char** in_cols,
         NULL);
   else if (strcmp(in_cols[1], "RAW") == 0) {
     E = _GD_ParseRaw(D, in_cols, n_cols, P, me, format_file, linenum);
-    if (!D->error && D->first_field == NULL) {
-      /* set the first field */
-      D->first_field = E;
-      *have_first = 1;
-      D->include_list[me].first = 1;
-    }
+
+    /* set the first field */
+    if (!D->error && D->reference_field == NULL)
+      D->reference_field = E;
 
     /* Create the binary file, if requested */
     if (!D->error && creat) {
       /* If the encoding scheme is unknown, we can't add the field */
-      if ((D->include_list[me].flags & GD_ENCODING) == GD_AUTO_ENCODED) {
+      if ((D->fragment[me].flags & GD_ENCODING) == GD_AUTO_ENCODED)
         _GD_SetError(D, GD_E_UNKNOWN_ENCODING, 0, NULL, 0, NULL);
-      } else if ((D->include_list[me].flags & GD_ENCODING) ==
-          GD_ENC_UNSUPPORTED)
-      {
+      else if ((D->fragment[me].flags & GD_ENCODING) == GD_ENC_UNSUPPORTED)
         /* If the encoding scheme is unsupported, we can't add the field */
         _GD_SetError(D, GD_E_UNSUPPORTED, 0, NULL, 0, NULL);
-      } else {
+      else {
         /* Set the subencoding subscheme */
-        _GD_ResolveEncoding(E->e->file,
-            D->include_list[me].flags, E->e);
+        _GD_ResolveEncoding(E->e->file, D->fragment[me].flags, E->e);
 
         if (encode[E->e->encoding].touch == NULL) 
           _GD_SetError(D, GD_E_UNSUPPORTED, 0, NULL, 0, NULL);
@@ -834,9 +829,9 @@ void _GD_ParseFieldSpec(DIRFILE* D, int n_cols, const char** in_cols,
 
     if (Q) {
       _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_DUPLICATE, format_file, linenum,
-          D->include_list[Q->fragment_index].cname);
-      dreturnvoid();
-      return;
+          D->fragment[Q->fragment_index].cname);
+      dreturn("%p", NULL);
+      return NULL;
     } 
 
     /* sort */
@@ -859,7 +854,8 @@ void _GD_ParseFieldSpec(DIRFILE* D, int n_cols, const char** in_cols,
     }
   }
 
-  dreturnvoid();
+  dreturn("%p", (E && E->field_type == GD_RAW_ENTRY) ? E : NULL);
+  return (E && E->field_type == GD_RAW_ENTRY) ? E : NULL;
 }
 
 /* _GD_Tokenise: Tokenise a line.  Returns n_cols. */
@@ -1054,66 +1050,70 @@ int _GD_Tokenise(DIRFILE *D, const char* instring, char* outstring,
  *       Returns 1 if a match was made.
  */
 static int _GD_ParseDirective(DIRFILE *D, const char** in_cols, int n_cols,
-    int me, int* standards, int linenum, int* have_first, unsigned int flags)
+    int me, int* standards, int linenum, char** ref_name, int* first_fragment,
+    unsigned int flags)
 {
   const char* ptr;
 
-  dtrace("%p, %p, %i, %u, %p, %i, %p", D, in_cols, n_cols, me, standards,
-      linenum, have_first);
+  dtrace("%p, %p, %i, %u, %p, %i, %p, %x", D, in_cols, n_cols, me, standards,
+      linenum, ref_name, flags);
 
   /* set up for possibly slashed reserved words */
-  ptr = (char*)in_cols[0] + ((in_cols[0][0] == '/') ? 1 : 0);
+  ptr = in_cols[0] + ((in_cols[0][0] == '/') ? 1 : 0);
 
-  if (n_cols < 2) {
-    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_COLS, D->include_list[me].cname,
+  if (n_cols < 2)
+    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_COLS, D->fragment[me].cname,
         linenum, NULL);
-  } else if (strcmp(ptr, "FRAMEOFFSET") == 0) {
-    D->frame_offset = atoll(in_cols[1]);
-  } else if (strcmp(ptr, "INCLUDE") == 0)
-    _GD_Include(D, in_cols[1], D->include_list[me].cname, linenum, me,
-        standards, D->include_list[me].flags);
   else if (strcmp(ptr, "ENCODING") == 0) {
     if (!(flags & GD_FORCE_ENCODING)) {
       if (strcmp(in_cols[1], "none") == 0)
-        D->include_list[me].flags = (D->include_list[me].flags & ~GD_ENCODING) |
+        D->fragment[me].flags = (D->fragment[me].flags & ~GD_ENCODING) |
           GD_UNENCODED;
       else if (strcmp(in_cols[1], "slim") == 0)
-        D->include_list[me].flags = (D->include_list[me].flags & ~GD_ENCODING) |
+        D->fragment[me].flags = (D->fragment[me].flags & ~GD_ENCODING) |
           GD_SLIM_ENCODED;
       else if (strcmp(in_cols[1], "text") == 0)
-        D->include_list[me].flags = (D->include_list[me].flags & ~GD_ENCODING) |
+        D->fragment[me].flags = (D->fragment[me].flags & ~GD_ENCODING) |
           GD_TEXT_ENCODED;
       else
-        D->include_list[me].flags = (D->include_list[me].flags & ~GD_ENCODING) |
+        D->fragment[me].flags = (D->fragment[me].flags & ~GD_ENCODING) |
           GD_ENC_UNSUPPORTED;
     }
   } else if (strcmp(ptr, "ENDIAN") == 0) {
     if (!(flags & GD_FORCE_ENDIAN)) {
       if (strcmp(in_cols[1], "big") == 0) {
-        D->include_list[me].flags |= GD_BIG_ENDIAN;
-        D->include_list[me].flags &= ~GD_LITTLE_ENDIAN;
+        D->fragment[me].flags |= GD_BIG_ENDIAN;
+        D->fragment[me].flags &= ~GD_LITTLE_ENDIAN;
       } else if (strcmp(in_cols[1], "little") == 0) {
-        D->include_list[me].flags |= GD_LITTLE_ENDIAN;
-        D->include_list[me].flags &= ~GD_BIG_ENDIAN;
+        D->fragment[me].flags |= GD_LITTLE_ENDIAN;
+        D->fragment[me].flags &= ~GD_BIG_ENDIAN;
       } else 
         _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_ENDIAN,
-            D->include_list[me].cname, linenum, NULL);
+            D->fragment[me].cname, linenum, NULL);
     }
+  } else if (strcmp(ptr, "FRAMEOFFSET") == 0)
+    D->frame_offset = atoll(in_cols[1]);
+  else if (strcmp(ptr, "INCLUDE") == 0) {
+    *first_fragment = _GD_Include(D, in_cols[1], D->fragment[me].cname, linenum,
+        ref_name, me, standards, D->fragment[me].flags);
   } else if (strcmp(ptr, "META") == 0) {
     const gd_entry_t* P =  _GD_FindField(D, in_cols[1], NULL);
     if (P == NULL)
       _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_NO_PARENT,
-          D->include_list[me].cname, linenum, in_cols[1]);
+          D->fragment[me].cname, linenum, in_cols[1]);
     else if (P->fragment_index != me)
       _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_LOCATION,
-          D->include_list[me].cname, linenum, in_cols[1]);
+          D->fragment[me].cname, linenum, in_cols[1]);
     else if (n_cols < 4)
       _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_COLS,
-          D->include_list[me].cname, linenum, NULL);
+          D->fragment[me].cname, linenum, NULL);
     else
       _GD_ParseFieldSpec(D, n_cols - 2, in_cols + 2, P,
-          D->include_list[me].cname, linenum, have_first, me, *standards, 0,
+          D->fragment[me].cname, linenum, me, *standards, 0,
           flags & GD_PEDANTIC);
+  } else if (strcmp(ptr, "REFERENCE") == 0) {
+    free(*ref_name);
+    *ref_name = strdup(in_cols[1]);
   } else if (strcmp(ptr, "VERSION") == 0)
     *standards = atoi(in_cols[1]);
   else {
@@ -1125,49 +1125,58 @@ static int _GD_ParseDirective(DIRFILE *D, const char** in_cols, int n_cols,
   return 1;
 }
 
-/* _GD_ParseFormatFile: Parse each line of the format file.  This
- *       function is called from GetFormat once for the main format file and
- *       once for each included file.
+/* _GD_ParseFragment: Parse each line of the fragment.
  *
- *       Returns 0 unless this format file contains the first raw field.
+ *       Returns NULL unless this fragment contains a REFERENCE directive.
  */
-int _GD_ParseFormatFile(FILE* fp, DIRFILE *D, int me, int* standards,
+char* _GD_ParseFragment(FILE* fp, DIRFILE *D, int me, int* standards,
     unsigned int flags)
 {
   char instring[MAX_LINE_LENGTH];
   char outstring[MAX_LINE_LENGTH];
   const char *in_cols[MAX_IN_COLS];
   int linenum = 0;
-  int have_first = 0;
+  char* ref_name = NULL;
   int n_cols;
   int match;
+  int first_fragment = -1;
+  gd_entry_t* first_raw = NULL;
 
   dtrace("%p, %p, %i, %p", fp, D, me, standards);
 
   /* start parsing */
   while (_GD_GetLine(fp, instring, &linenum)) {
     n_cols = _GD_Tokenise(D, instring, outstring, in_cols,
-        D->include_list[me].cname, linenum);
+        D->fragment[me].cname, linenum);
 
     if (D->error)
       break; /* tokeniser threw an error */
 
     match = _GD_ParseDirective(D, in_cols, n_cols, me, standards, linenum,
-        &have_first, flags);
+        &ref_name, &first_fragment, flags);
 
     if (D->error)
       break; /* directive parser threw an error */
 
     if (!match)
-      _GD_ParseFieldSpec(D, n_cols, in_cols, NULL, D->include_list[me].cname,
-          linenum, &have_first, me, *standards, 0, flags & GD_PEDANTIC);
+      first_raw = _GD_ParseFieldSpec(D, n_cols, in_cols, NULL,
+          D->fragment[me].cname, linenum, me, *standards, 0,
+          flags & GD_PEDANTIC);
 
     if (D->error)
       break; /* field spec parser threw an error */
+
+    /* Set firsts */
+    if (D->fragment[me].first_fragment == -1 &&
+        D->fragment[me].first_field == NULL)
+    {
+      D->fragment[me].first_fragment = first_fragment;
+      D->fragment[me].first_field = first_raw;
+    }
   }
 
-  dreturn("%i", have_first);
-  return have_first;
+  dreturn("%p", ref_name);
+  return ref_name;
 }
 
 /* attempt to open or create a new dirfile - set error appropriately */
@@ -1324,7 +1333,9 @@ static FILE* _GD_CreateDirfile(DIRFILE* D, const char* format_file,
 DIRFILE* dirfile_open(const char* filedir, unsigned int flags)
 {
   FILE *fp;
+  char* ref_name;
   DIRFILE* D;
+  gd_entry_t* E;
   char format_file[FILENAME_MAX];
   int standards = DIRFILE_STANDARDS_VERSION;
 
@@ -1377,29 +1388,45 @@ DIRFILE* dirfile_open(const char* filedir, unsigned int flags)
   }
 
   /* Parse the file.  This will take care of any necessary inclusions */
-  D->n_include = 1;
+  D->n_fragment = 1;
 
-  D->include_list = malloc(sizeof(struct gd_include_t));
-  if (D->include_list == NULL) {
+  D->fragment = malloc(sizeof(struct gd_fragment_t));
+  if (D->fragment == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     dreturn("%p", D);
     return D;
   }
-  D->include_list[0].cname = strdup(format_file);
-  D->include_list[0].sname = strdup(".");
+  D->fragment[0].cname = strdup(format_file);
+  D->fragment[0].sname = strdup(".");
   /* The root format file needs no external name */
-  D->include_list[0].ename = NULL;
-  D->include_list[0].modified = 0;
-  D->include_list[0].parent = -1;
-  D->include_list[0].flags = D->flags & (GD_ENCODING | GD_LITTLE_ENDIAN |
+  D->fragment[0].ename = NULL;
+  D->fragment[0].modified = 0;
+  D->fragment[0].parent = -1;
+  D->fragment[0].flags = D->flags & (GD_ENCODING | GD_LITTLE_ENDIAN |
       GD_BIG_ENDIAN);
+  D->fragment[0].first_field = NULL;
+  D->fragment[0].first_fragment = -1;
 
-  _GD_ParseFormatFile(fp, D, 0, &standards, D->flags);
+  ref_name = _GD_ParseFragment(fp, D, 0, &standards, D->flags);
   fclose(fp);
 
   if (D->error != GD_E_OK) {
     dreturn("%p", D);
     return D;
+  }
+
+  /* Find the reference field */
+  if (ref_name != NULL) {
+    E = _GD_FindField(D, ref_name, NULL);
+    if (E == NULL)
+      _GD_SetError(D, GD_E_BAD_REFERENCE, GD_E_REFERENCE_CODE, NULL, 0,
+          ref_name);
+    else if (E->field_type != GD_RAW_ENTRY)
+      _GD_SetError(D, GD_E_BAD_REFERENCE, GD_E_REFERENCE_TYPE, NULL, 0,
+          ref_name);
+    else
+      D->reference_field = E; 
+    free(ref_name);
   }
 
   /* Success! Clear invalid bit */

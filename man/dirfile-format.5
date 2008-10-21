@@ -20,7 +20,7 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH dirfile\-format 5 "18 October 2008" "Standards Version 6" "DATA FORMATS"
+.TH dirfile\-format 5 "20 October 2008" "Standards Version 6" "DATA FORMATS"
 .SH NAME
 dirfile\-format \(em the dirfile database format specification file
 .SH DESCRIPTION
@@ -150,7 +150,7 @@ used as a field name).
 
 .SS Reserved Words
 
-There are six 
+There are seven 
 .IR "reserved words" ,
 which cannot be used as field names in the dirfile.  Instead, these specify
 directives.  Any reserved word may omit its initial forward slash
@@ -265,21 +265,27 @@ the same name, since all references to metafields must include the parent
 field name.  Metafields may not themselves have further sub-metafields.
 .RE
 .TP
+.B /REFERENCE
+The REFERENCE directive specifies the name of the field to use as the dirfile's
+reference field (see
+.BR dirfile (5)).
+If no REFERENCE directive is specified, the first
+.B RAW
+field encountered is used as the reference field.  If multiple REFERENCE
+directives are present, only the last encountered will be honoured.
+.TP
 .B /VERSION
 The VERSION directive specifies the particular version of the Dirfile Standards
 to which the dirfile format file conforms.  This directive should occur before
-any version dependent syntax is encountered.  As of Standards Version 5, no such
+any version dependent syntax is encountered.  As of Standards Version 6, no such
 syntax exists, and this directive is provided primarily to ease forward
-compatibility.  Syntax is:
+compatibility.  A /VERSION directive takes effect immediately.  Syntax is:
 .RS
 .IP
 .BI /VERSION\~ <integer>
 .RE
 .PP
 Like the rest of the format file, these reserved words are case sensitive.
-Except for the INCLUDE and META directives, each instance of which must be
-processed independently, if multiple instances of a directive are present in a
-dirfile format file, only the last such instance will be honoured.
 
 .SS Field Specification Lines
 

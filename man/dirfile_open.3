@@ -230,6 +230,15 @@ along with
 .B GD_E_ALLOC
 The library was unable to allocate memory.
 .TP
+.B GD_E_BAD_REFERENCE
+The reference field specified by a
+.B /REFERENCE
+directive in the format file (see
+.BR dirfile-format (5))
+was not found, or was not a
+.B RAW
+field.
+.TP
 .B GD_E_CREAT
 The library was unable to create the dirfile, or the dirfile exists and both
 .BR GD_CREAT " and " GD_EXCL

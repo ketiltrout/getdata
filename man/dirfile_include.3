@@ -29,7 +29,7 @@ dirfile_include \(em add a format file fragment to a dirfile
 .nh
 .ad l
 .BI "DIRFILE* dirfile_include(DIRFILE *" dirfile ", const char *" include_file ,
-.BI "int " fragment_index ", unsigned int " flags );
+.BI "int " parent_fragment ", unsigned int " flags );
 .hy
 .ad n
 .SH DESCRIPTION
@@ -39,7 +39,7 @@ adds the format file fragment specified by the path
 .I include_file
 to the specified dirfile.  This occurs as if, in the existing fragment indexed
 by
-.IR fragment_index ,
+.IR parent_fragment ,
 the following directive were present:
 .IP
 .BI "/INCLUDE " <include_file>
@@ -190,7 +190,16 @@ was specified in
 The library was unable to allocate memory.
 .TP
 .B GD_E_BAD_INDEX
-The supplied fragment index was out of range.
+The supplied parent fragment index was out of range.
+.TP
+.B GD_E_BAD_REFERENCE
+The reference field specified by a
+.B /REFERENCE
+directive in the fragment (see
+.BR dirfile-format (5))
+was not found, or was not a
+.B RAW
+field.
 .TP
 .B GD_E_FORMAT
 A syntax error occurred in the fragment.

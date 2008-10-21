@@ -61,7 +61,7 @@ static size_t _GD_DoRawOut(DIRFILE *D, gd_entry_t *E,
   }
 
   if (encode[E->e->encoding].ecor &&
-      (D->include_list[E->fragment_index].flags &
+      (D->fragment[E->fragment_index].flags &
 #ifdef WORDS_BIGENDIAN
        GD_LITTLE_ENDIAN
 #else
@@ -74,16 +74,16 @@ static size_t _GD_DoRawOut(DIRFILE *D, gd_entry_t *E,
   /* the current end of file, a gap will result (see lseek(2)) */
 
   /* Figure out the dirfile encoding type, if required */
-  if ((D->include_list[E->fragment_index].flags & GD_ENCODING) ==
+  if ((D->fragment[E->fragment_index].flags & GD_ENCODING) ==
       GD_AUTO_ENCODED)
-    D->include_list[E->fragment_index].flags =
-      (D->include_list[E->fragment_index].flags & ~GD_ENCODING) |
-      _GD_ResolveEncoding(E->e->file, D->include_list[E->fragment_index].flags,
+    D->fragment[E->fragment_index].flags =
+      (D->fragment[E->fragment_index].flags & ~GD_ENCODING) |
+      _GD_ResolveEncoding(E->e->file, D->fragment[E->fragment_index].flags,
           E->e);
 
   /* If the encoding is still unknown, none of the candidate files exist;
    * as a result, we don't know the intended encoding type */
-  if ((D->include_list[E->fragment_index].flags & GD_ENCODING) ==
+  if ((D->fragment[E->fragment_index].flags & GD_ENCODING) ==
       GD_AUTO_ENCODED)
   {
     _GD_SetError(D, GD_E_UNKNOWN_ENCODING, 0, NULL, 0, NULL);
@@ -93,7 +93,7 @@ static size_t _GD_DoRawOut(DIRFILE *D, gd_entry_t *E,
 
   /* Figure out the encoding subtype, if required */
   if (E->e->encoding == GD_ENC_UNKNOWN)
-    _GD_ResolveEncoding(E->e->file, D->include_list[E->fragment_index].flags,
+    _GD_ResolveEncoding(E->e->file, D->fragment[E->fragment_index].flags,
         E->e);
 
   if (E->e->fp < 0) {
@@ -405,7 +405,7 @@ static size_t _GD_DoConstOut(DIRFILE* D, gd_entry_t *E, gd_type_t data_type,
     return 0;
   }
 
-  D->include_list[E->fragment_index].modified = 1;
+  D->fragment[E->fragment_index].modified = 1;
 
   dreturn("%i", 1);
   return 1;
@@ -422,7 +422,7 @@ static size_t _GD_DoStringOut(DIRFILE* D, gd_entry_t *E, const void *data_in)
     dreturn("%i", 0);
     return 0;
   }
-  D->include_list[E->fragment_index].modified = 1;
+  D->fragment[E->fragment_index].modified = 1;
 
   dreturn("%i", strlen(E->e->string) + 1);
   return strlen(E->e->string) + 1;

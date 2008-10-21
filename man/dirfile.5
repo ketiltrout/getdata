@@ -20,7 +20,7 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH dirfile 5 "7 October 2008" "Standards Version 6" "DATA FORMATS"
+.TH dirfile 5 "20 October 2008" "Standards Version 6" "DATA FORMATS"
 .SH NAME
 dirfile \(em a filesystem based database format for time-ordered binary data
 .SH DESCRIPTION
@@ -48,35 +48,20 @@ synchronicity.
 
 The binary files are all located in a central directory, known as the
 .IR "dirfile directory" .
-The dirfile as a whole may be referred to by its dirfile directory.
+The dirfile as a whole may be referred to by its dirfile directory path.
 
 Included in the dirfile along with the time streams is the
 .IR "dirfile format specification" ,
 which is an ASCII text file called
 .B format
-located in the dirfile directory.  For information of the format of this file,
-see
+located in the dirfile directory.  This file fully specifies the dirfile's
+metadata.  For the syntax of this file, see
 .BR dirfile\-format (5).
-
-In addition to the raw fields on disk, the dirfile format specification may
-also specify
-.I derived fields
-which are calculated from one or more raw or derived time streams.  Derived
-fields behave identically to raw fields when read via GetData.  See
-.BR dirfile\-format (5)
-for a complete list of derived field types.
-
-Dirfiles are designed to be written to and read simultaneously. The dirfile
-specification dictates that the first raw field specified in the
-.B format
-file is the prototypical time stream: all other time streams are assumed to have
-at least as many frames as the prototypical time stream has, and the size of the
-prototypical time stream is used as the size of the dirfile as a whole.
 
 Version 3 of the Dirfile Standards introduced the
 .I "large dirfile"
-extension.  This extension added the ability to distribute the dirfile format
-specification among multiple files (called
+extension.  This extension added the ability to distribute the dirfile metadata
+among multiple files (called
 .IR fragments )
 in addition to the 
 .B format
@@ -86,6 +71,26 @@ These subdirfiles may be fully fledged dirfiles in their own right, but may also
 be contained within a larger, parent dirfile.  See
 .BR dirfile\-format (5)
 for information on specifying these subdirfiles.
+
+In addition to the raw fields on disk, the dirfile format specification may
+also specify
+.I derived fields
+which are calculated from one or more raw or derived time streams.  Derived
+fields behave identically to raw fields when read via GetData.  See
+.BR dirfile\-format (5)
+for a complete list of derived field types.  Dirfiles may also contain both
+numerical and character string constant
+.IR "scalar fields" ,
+also further outlined in
+.BR dirfile\-format (5).
+
+Dirfiles are designed to be written to and read simultaneously. The dirfile
+specification dictates that one particular raw field (specified either
+explicitly or implicitly by the format file is to be used as the
+.IR "reference field" :
+all other vector fields are assumed to have at least as many frames as the
+reference field has, and the size (in frames) of the reference field is used as
+the size of the dirfile as a whole.
 
 Version 6 of the Dirfile Standards added the ability to encode the binary files
 on disk.  Each

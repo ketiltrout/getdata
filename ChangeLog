@@ -1,3 +1,30 @@
+2008-10-21   D. V. Wiebe <getdata@ketiltrout.net>  svn:179
+	* src/internal.h: Renamed D->include_list, D->n_include, and D->first_field to
+	D->fragment, D->n_fragment, and D->reference_field.  Also removed
+	E->e->first and D->fragment[].first and added D->fragment[].first_field and
+	D->fragment[].first_fragment.
+	* src/getdata.h.in bindings/f77/make_parameters.c: Added GD_E_BAD_REFERENCE.
+
+	* src/open.c (_GD_ParseFieldSpec): Return a pointer to the gd_entry_t just
+	created if it's a RAW field (or else NULL).  Also, it no longer gets
+	passed &have_first.
+	* src/open.c (_GD_ParseDirective): Update ref_name instead of have_first.
+	Parse REFERENCE directive.
+	* src/open.c (_GD_ParseFragment): Renamed from _GD_ParseFormatFile.  Returns
+	the ref_name.  Sets fragment->first_fragment and fragment->first_raw.
+	* src/flush.c (_GD_FlushMeta): Updated for new first field stuff.
+	* src/include.c (_GD_Include): Accept and return ref_name to caller.
+	* src/include.c (dirfile_include) open.c (dirfile_open): Resolve REFERENCE
+	after parsing completes.
+
+	* man/dirfile_include.3 man/dirfile_open.3 dirfile-format.5: Update for
+	REFERENCE.
+
+	* src/flush.c (_GD_FlushMeta): Write global metadata at the end so it will
+	take precedence.
+
+	* src/flush.c (_GD_FieldSpec): String escapeise the field name.
+
 2008-10-19   D. V. Wiebe <getdata@ketiltrout.net>  svn:173
 	* src/errors.c (_GD_SetError) src/getdata.h.in: Added GD_VERBOSE flag.
 
