@@ -22,7 +22,7 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
+  DIRFILE* D = dirfile_open(filedir, GD_RDWR);
   dirfile_include(D, "format1", 1, 0);
   int error = get_error(D);
   dirfile_close(D);

@@ -70,6 +70,7 @@ const char *GD_ERROR_CODES[GD_N_ERROR_CODES] = {
   NULL, /* GD_E_BAD_INDEX */
   "Scalar field code not found",
   "Bad REFERENCE field",
+  "Operation prohibited by protection level",
 };
 
 static struct FormatType Format = {
@@ -263,7 +264,7 @@ const struct FormatType *GetFormat(const char *filedir, int *error_code) {
   /* fill the structure -- like everything about the legacy API, this is
    * not thread-safe */
   Format.FileDirName = filedir; 
-  Format.frame_offset = (int)D->frame_offset;
+  Format.frame_offset = (int)D->fragment[0].frame_offset;
   CopyRawEntry(&Format.first_field, D->reference_field);
 
   /* Pass one: run through the entry list and count the number of different

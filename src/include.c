@@ -108,8 +108,8 @@ int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,
   D->fragment[D->n_fragment - 1].parent = me;
   D->fragment[D->n_fragment - 1].flags = flags & (GD_ENCODING |
       GD_LITTLE_ENDIAN | GD_BIG_ENDIAN);
-  D->fragment[D->n_fragment - 1].first_fragment = -1;
-  D->fragment[D->n_fragment - 1].first_field = NULL;
+  D->fragment[D->n_fragment - 1].ref_name = NULL;
+  D->fragment[D->n_fragment - 1].frame_offset = D->fragment[me].frame_offset;
 
   /* extract the subdirectory name - dirname both returns a volatile string
    * and modifies its argument, ergo strcpy */
@@ -139,7 +139,7 @@ int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,
   return D->n_fragment - 1;
 }
 
-int dirfile_include(DIRFILE* D, const char* file, int format_file,
+int dirfile_include(DIRFILE* D, const char* file, int fragment_index,
     unsigned int flags)
 {
   int standards = DIRFILE_STANDARDS_VERSION;
@@ -152,15 +152,30 @@ int dirfile_include(DIRFILE* D, const char* file, int format_file,
     dreturn("%zi", -1);
     return -1;
   }
-
- if (format_file < 0 || format_file >= D->n_fragment) {
-    _GD_SetError(D, GD_E_BAD_INDEX, 0, NULL, 0, NULL);
+  /* check access mode */
+  if ((D->flags & GD_ACCMODE) == GD_RDONLY) {
+    _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
     dreturn("%i", -1);
     return -1;
- }
+  }
 
-  int i = _GD_Include(D, file, "dirfile_include()", 0, &ref_name, format_file,
-      &standards, flags);
+  /* check for include index out of range */
+  if (fragment_index < 0 || fragment_index >= D->n_fragment) {
+    _GD_SetError(D, GD_E_BAD_INDEX, 0, NULL, fragment_index, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  /* check protection */
+  if (D->fragment[fragment_index].protection & GD_PROTECT_FORMAT) {
+    _GD_SetError(D, GD_E_PROTECTED, 0, NULL, 0,
+        D->fragment[fragment_index].cname);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+ int i = _GD_Include(D, file, "dirfile_include()", 0, &ref_name, fragment_index,
+     &standards, flags);
 
   /* Find the reference field */
   if (ref_name != NULL) {

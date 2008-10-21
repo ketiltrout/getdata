@@ -224,6 +224,8 @@ static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *E,
   dtrace("%p, %p, %lli, %lli, %zi, %zi, 0x%x, %p)", D, E, first_frame,
       first_samp, num_frames, num_samp, return_type, data_out);
 
+  first_frame -= D->fragment[E->fragment_index].frame_offset;
+
   s0 = first_samp + first_frame * E->spf;
   ns = num_samp + num_frames * E->spf;
 
@@ -946,10 +948,9 @@ size_t _GD_DoField(DIRFILE *D, gd_entry_t *E, const char* field_code,
     case GD_INDEX_ENTRY:
       /* if Asking for "INDEX", just return it */
       n_read = num_frames + num_samp;
-      if (data_out != NULL) {
-        _GD_FillFileFrame(data_out, return_type, first_frame + first_samp +
-            D->frame_offset, n_read);
-      }
+      if (data_out != NULL)
+        _GD_FillFileFrame(data_out, return_type, first_frame + first_samp,
+            n_read);
       break;
     case GD_CONST_ENTRY:
       n_read = _GD_DoConst(D, E, return_type, data_out);
@@ -986,8 +987,6 @@ size_t getdata64(DIRFILE* D, const char *field_code, off64_t first_frame,
   }
 
   _GD_ClearError(D);
-
-  first_frame -= D->frame_offset;
 
   entry = _GD_FindField(D, field_code, NULL);
 

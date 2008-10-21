@@ -54,6 +54,26 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
     return -1;
   }
 
+  /* check for include index out of range */
+  if (P == NULL && (entry->fragment_index < 0 ||
+        entry->fragment_index >= D->n_fragment))
+  {
+    _GD_SetError(D, GD_E_BAD_INDEX, 0, NULL, entry->fragment_index, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  /* check protection */
+  if (D->fragment[entry->fragment_index].protection & GD_PROTECT_FORMAT ||
+      (entry->field_type == GD_RAW_ENTRY &&
+       D->fragment[entry->fragment_index].protection & GD_PROTECT_DATA))
+  {
+    _GD_SetError(D, GD_E_PROTECTED, 0, NULL, 0,
+        D->fragment[entry->fragment_index].cname);
+    dreturn("%i", -1);
+    return -1;
+  }
+
   /* check parent */
   if (parent != NULL) {
     /* make sure it's not a meta field already */
@@ -95,15 +115,6 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
   {
     _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_TYPE, NULL,
         entry->field_type, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  /* check for include index out of range */
-  if (P == NULL && (entry->fragment_index < 0 ||
-        entry->fragment_index >= D->n_fragment))
-  {
-    _GD_SetError(D, GD_E_BAD_INDEX, 0, NULL, entry->fragment_index, NULL);
     dreturn("%i", -1);
     return -1;
   }
@@ -203,14 +214,17 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
         _GD_SetError(D, GD_E_UNSUPPORTED, 0, NULL, 0, NULL);
       else if ((*encode[E->e->encoding].touch)(E->e->file))
         _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file, errno, NULL);
-      else if (D->reference_field == NULL) {
-        /* This is the first raw field */
-        D->fragment[E->fragment_index].first_field = E;
-        D->fragment[E->fragment_index].first_fragment = -1;
-        D->reference_field = E;
-        /* Tag the include list */
+      else if (D->fragment[E->fragment_index].ref_name == NULL) {
+        /* This is the first raw field in this fragment; propagate it upwards */
         for (i = E->fragment_index; i != -1; i = D->fragment[i].parent)
-          D->fragment[i].modified = 1;
+          if (D->fragment[i].ref_name == NULL) {
+            D->fragment[E->fragment_index].ref_name = strdup(E->field);
+            D->fragment[i].modified = 1;
+          } else
+            break;
+        /* Is this the first raw field ever defined? */
+        if (D->reference_field == NULL)
+          D->reference_field = E;
       }
       break;
     case GD_LINCOM_ENTRY:
@@ -320,6 +334,7 @@ int dirfile_madd_spec(DIRFILE* D, const char* line, const char* parent)
   char outstring[MAX_LINE_LENGTH];
   const char *in_cols[MAX_IN_COLS];
   int n_cols;
+  int me;
   gd_entry_t* E = NULL;
 
   dtrace("%p, \"%s\", \"%s\"", D, line, parent);
@@ -346,6 +361,15 @@ int dirfile_madd_spec(DIRFILE* D, const char* line, const char* parent)
     return -1;
   }
 
+  me = E->fragment_index;
+
+  /* check protection */
+  if (D->fragment[me].protection & GD_PROTECT_FORMAT) {
+    _GD_SetError(D, GD_E_PROTECTED, 0, NULL, 0, D->fragment[me].cname);
+    dreturn("%i", -1);
+    return -1;
+  }
+
   /* we do this to ensure line is not too long */
   strncpy(instring, line, MAX_LINE_LENGTH - 1);
   instring[MAX_LINE_LENGTH - 2] = '\0';
@@ -360,8 +384,8 @@ int dirfile_madd_spec(DIRFILE* D, const char* line, const char* parent)
   }
 
   /* Directive parsing is skipped -- The Field Spec parser will add the field */
-  _GD_ParseFieldSpec(D, n_cols, in_cols, E, "dirfile_madd_spec()", 0,
-      E->fragment_index, DIRFILE_STANDARDS_VERSION, 1, 1);
+  _GD_ParseFieldSpec(D, n_cols, in_cols, E, "dirfile_madd_spec()", 0, me,
+    DIRFILE_STANDARDS_VERSION, 1, 1);
 
   if (D->error) {
     dreturn("%i", -1); /* field spec parser threw an error */
@@ -398,6 +422,14 @@ int dirfile_add_spec(DIRFILE* D, const char* line, int fragment_index)
   /* check for include index out of range */
   if (fragment_index < 0 || fragment_index >= D->n_fragment) {
     _GD_SetError(D, GD_E_BAD_INDEX, 0, NULL, fragment_index, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  /* check protection */
+  if (D->fragment[fragment_index].protection & GD_PROTECT_FORMAT) {
+    _GD_SetError(D, GD_E_PROTECTED, 0, NULL, 0,
+        D->fragment[fragment_index].cname);
     dreturn("%i", -1);
     return -1;
   }

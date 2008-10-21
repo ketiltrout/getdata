@@ -13,9 +13,7 @@ int main(void)
 {
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
-  const char* format1 = __TEST__ "dirfile/format1";
   const char* format_data = "\n";
-  const char* format1_data = "data RAW UINT8 11\n";
   int fd;
 
   mkdir(filedir, 0777);
@@ -24,22 +22,13 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  fd = open(format1, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format1_data, strlen(format1_data));
-  close(fd);
-
-  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_VERBOSE);
+  DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
   dirfile_include(D, "format1", 0, 0);
   int error = get_error(D);
-  unsigned int spf = get_spf(D, "data");
   dirfile_close(D);
 
-  unlink(format1);
   unlink(format);
   rmdir(filedir);
 
-  if (error)
-    return 1;
-
-  return (spf != 11);
+  return (error != GD_E_ACCMODE);
 }

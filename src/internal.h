@@ -143,6 +143,7 @@ const char* _gd_colsub(void);
 #define GD_E_FORMAT_NO_PARENT 17
 #define GD_E_FORMAT_DUPLICATE 18
 #define GD_E_FORMAT_LOCATION  19
+#define GD_E_FORMAT_PROTECT   20
 
 #define GD_E_LINFILE_LENGTH    1
 #define GD_E_LINFILE_OPEN      2
@@ -231,6 +232,11 @@ extern const struct encoding_t {
   int (*sync)(struct _gd_private_entry*);
 } encode[];
 
+#define GD_PROTECT_NONE   00
+#define GD_PROTECT_FORMAT 01
+#define GD_PROTECT_DATA   02
+#define GD_PROTECT_ALL    ( GD_PROTECT_DATA | GD_PROTECT_FORMAT )
+
 /* Format file fragment metadata */
 struct gd_fragment_t {
   /* Canonical name (full path) */
@@ -242,8 +248,15 @@ struct gd_fragment_t {
   int modified;
   int parent;
   unsigned int flags;
-  const gd_entry_t* first_field;
-  int first_fragment;
+  int protection;
+  char* ref_name;
+
+#ifndef __USE_FILE_OFFSET64
+  off_t
+#else
+    __off64_t
+#endif
+    frame_offset;
 };
 
 /* internal flags */
@@ -290,12 +303,6 @@ struct _GD_DIRFILE {
   int list_validity;
   int type_list_validity;
 
-#ifndef __USE_FILE_OFFSET64
-  off_t
-#else
-    __off64_t
-#endif
-    frame_offset;
   int suberror;
   char* error_string;
   char* error_file;

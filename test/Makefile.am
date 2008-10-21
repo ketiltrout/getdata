@@ -120,7 +120,7 @@ GET_TESTS=get64 get_bad_code get_bit get_char get_endian8 get_endian16 \
 					get_uint64
 
 INCLUDE_TESTS=include include_accmode include_creat include_index \
-							include_invalid include_nonexistent
+							include_invalid include_nonexistent include_rdonly
 
 MADD_TESTS=madd madd_bit madd_bit_invalid madd_lincom madd_lincom_invalid \
 					 madd_linterp madd_linterp_invalid madd_multiply \
@@ -147,11 +147,12 @@ PARSE_TESTS=parse_badline parse_bit parse_bit4 parse_bit_bitnum \
 						parse_bit_scalar parse_const parse_const_ncols parse_duplicate \
 						parse_endian_bad parse_endian_big parse_endian_force \
 						parse_endian_little parse_endian_slash parse_eol parse_foffs \
-						parse_foffs_slash parse_include parse_include_nonexistent \
-						parse_include_slash parse_index parse_lincom parse_lincom_ncols1 \
-						parse_lincom_ncols2 parse_lincom_nfields parse_lincom_nofields \
-						parse_lincom_scalar parse_linterp parse_linterp_ncols parse_meta \
-						parse_meta_index parse_meta_parent parse_meta_raw parse_multiply \
+						parse_foffs_include parse_foffs_slash parse_include \
+						parse_include_nonexistent parse_include_slash parse_index \
+						parse_lincom parse_lincom_ncols1 parse_lincom_ncols2 \
+						parse_lincom_nfields parse_lincom_nofields parse_lincom_scalar \
+						parse_linterp parse_linterp_ncols parse_meta parse_meta_index \
+						parse_meta_parent parse_meta_raw parse_multiply \
 						parse_multiply_ncols parse_name parse_ncols parse_phase \
 						parse_phase_ncols parse_phase_scalar parse_quote \
 						parse_quote_mismatch parse_raw parse_raw_char parse_raw_ncols \

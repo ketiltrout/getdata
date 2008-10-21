@@ -1,3 +1,20 @@
+2008-10-21   D. V. Wiebe <getdata@ketiltrout.net>  svn:180
+	* src/internal.h: Add protection, ref_name, and frame_offset to
+	gd_fragment_t.  Remove first_field, first_fragment from same.  Remove
+	frame_offset from DIRFILE.
+	* src/open.c (_GD_DoRaw): Set the first field stuff after attempting to
+	create the new file.
+	* src/open.c (_GD_ParseDirective): FRAMEOFFSET is fragment local.  Parse
+	PROTECT.
+	* src/open.c (_GD_ParseFragment): Set reference name.
+	* src/flush.c (_GD_FlushMeta): Write PROTECT, REFERENCE, FRAMEOFFSET.  Don't
+	worry about first fields any more.
+
+	* src/add.c (_GD_Add dirfile_add_spec dirfile_madd_spec) src/putdata.c
+	(_GD_DoRawOut _GD_DoConstOut _GD_DoStringOut): Check protection.
+	* src/getdata.c (_GD_DoRaw _GD_DoRawOut): frame_offset is fragment local.
+	* src/include.c (dirfile_include): check access mode and protection.
+
 2008-10-21   D. V. Wiebe <getdata@ketiltrout.net>  svn:179
 	* src/internal.h: Renamed D->include_list, D->n_include, and D->first_field to
 	D->fragment, D->n_fragment, and D->reference_field.  Also removed

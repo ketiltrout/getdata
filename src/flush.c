@@ -286,6 +286,19 @@ void _GD_FlushMeta(DIRFILE* D)
 #endif
           );
 
+      if (D->fragment[i].protection == GD_PROTECT_NONE)
+        fputs("/PROTECT none\n", stream);
+      else if (D->fragment[i].protection == GD_PROTECT_FORMAT)
+        fputs("/PROTECT format\n", stream);
+      else if (D->fragment[i].protection == GD_PROTECT_FORMAT)
+        fputs("/PROTECT data\n", stream);
+      else
+        fputs("/PROTECT all\n", stream);
+
+      if (D->fragment[i].frame_offset != 0)
+        fprintf(stream, "/FRAMEOFFSET %llu\n",
+            (unsigned long long)D->fragment[i].frame_offset);
+
       /* The encoding -- we only write encodings we know about. */
       switch(D->fragment[i].flags & GD_ENCODING) {
         case GD_UNENCODED:
@@ -299,41 +312,24 @@ void _GD_FlushMeta(DIRFILE* D)
           break;
       }
 
-      /* The first field/fragment */
-      if (D->fragment[i].first_field != NULL) {
-        _GD_FieldSpec(D, stream, D->fragment[i].first_field, 0);
-        for (j = 0; j < D->fragment[i].first_field->e->n_meta; ++j)
-          _GD_FieldSpec(D, stream,
-              D->fragment[i].first_field->e->meta_entry[j], 1);
-      } else if (D->fragment[i].first_fragment != -1)
-        fprintf(stream, "/INCLUDE %s\n",
-            D->fragment[D->fragment[i].first_fragment].ename);
-
-      /* The remaining includes */
+      /* The includes */
       for (j = 0; j < D->n_fragment; ++j)
-        if (D->fragment[j].parent == i && D->fragment[i].first_fragment != j)
+        if (D->fragment[j].parent == i)
           fprintf(stream, "/INCLUDE %s\n", D->fragment[j].ename);
 
-      /* The remaining fields */
+      /* The fields */
       for (u = 0; u < D->n_entries; ++u)
-        if (D->entry[u]->fragment_index == i && D->entry[u]->e->n_meta != -1 &&
-            D->entry[u] != D->fragment[i].first_field)
-        {
+        if (D->entry[u]->fragment_index == i && D->entry[u]->e->n_meta != -1) {
           _GD_FieldSpec(D, stream, D->entry[u], 0);
           for (j = 0; j < D->entry[u]->e->n_meta; ++j)
             _GD_FieldSpec(D, stream, D->entry[u]->e->meta_entry[j], 1);
         }
 
-      /* Global metadata -- we write it at the end to ensure it overrides
-       * and metatdata found in any other fragments */
-      if (i == 0) {
-        if (D->frame_offset != 0)
-          fprintf(stream, "/FRAMEOFFSET %llu\n",
-              (unsigned long long)D->frame_offset);
-        if (D->reference_field != NULL)
-          fprintf(stream, "/REFERENCE %s\n", _GD_StringEscapeise(buffer,
-                D->reference_field->field));
-      }
+      /* REFERENCE is written at the end, because its effect can propagate
+       * upwards */
+      if (D->reference_field != NULL)
+        fprintf(stream, "/REFERENCE %s\n", _GD_StringEscapeise(buffer,
+              D->fragment[i].ref_name));
 
       /* That's all, flush, sync, and close */
       fflush(stream);

@@ -760,6 +760,7 @@ gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, const char** in_cols,
     int standards, int creat, int pedantic)
 {
   gd_entry_t* E = NULL;
+  int i;
 
   dtrace("%p, %i, %p, %p, \"%s\", %i, %u, %i, %i, %i", D, n_cols, in_cols, P,
       format_file, linenum, me, standards, creat, pedantic);
@@ -775,12 +776,11 @@ gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, const char** in_cols,
   else if (strcmp(in_cols[1], "RAW") == 0) {
     E = _GD_ParseRaw(D, in_cols, n_cols, P, me, format_file, linenum);
 
-    /* set the first field */
-    if (!D->error && D->reference_field == NULL)
-      D->reference_field = E;
-
     /* Create the binary file, if requested */
     if (!D->error && creat) {
+      /* If this fragment is protected, we can't do anything */
+      if (D->fragment[me].protection != GD_PROTECT_NONE)
+        _GD_SetError(D, GD_E_PROTECTED, 0, NULL, 0, D->fragment[me].cname);
       /* If the encoding scheme is unknown, we can't add the field */
       if ((D->fragment[me].flags & GD_ENCODING) == GD_AUTO_ENCODED)
         _GD_SetError(D, GD_E_UNKNOWN_ENCODING, 0, NULL, 0, NULL);
@@ -796,6 +796,20 @@ gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, const char** in_cols,
         else if ((*encode[E->e->encoding].touch)(E->e->file))
           _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file, errno, NULL);
       }
+    }
+
+    /* set the first field */
+    if (!D->error && D->fragment[E->fragment_index].ref_name == NULL) {
+      /* This is the first raw field in this fragment; propagate it upwards */
+      for (i = E->fragment_index; i != -1; i = D->fragment[i].parent)
+        if (D->fragment[i].ref_name == NULL) {
+          D->fragment[E->fragment_index].ref_name = strdup(E->field);
+          D->fragment[i].modified = 1;
+        } else
+          break;
+        /* Is this the first raw field ever defined? */
+        if (D->reference_field == NULL)
+          D->reference_field = E;
     }
   } else if (strcmp(in_cols[1], "LINCOM") == 0)
     E = _GD_ParseLincom(D, in_cols, n_cols, P, format_file, linenum);
@@ -1055,7 +1069,7 @@ static int _GD_ParseDirective(DIRFILE *D, const char** in_cols, int n_cols,
 {
   const char* ptr;
 
-  dtrace("%p, %p, %i, %u, %p, %i, %p, %x", D, in_cols, n_cols, me, standards,
+  dtrace("%p, %p, %i, %u, %p, %i, %p, %p, %x", D, in_cols, n_cols, me, standards,
       linenum, ref_name, flags);
 
   /* set up for possibly slashed reserved words */
@@ -1092,7 +1106,7 @@ static int _GD_ParseDirective(DIRFILE *D, const char** in_cols, int n_cols,
             D->fragment[me].cname, linenum, NULL);
     }
   } else if (strcmp(ptr, "FRAMEOFFSET") == 0)
-    D->frame_offset = atoll(in_cols[1]);
+    D->fragment[me].frame_offset = atoll(in_cols[1]);
   else if (strcmp(ptr, "INCLUDE") == 0) {
     *first_fragment = _GD_Include(D, in_cols[1], D->fragment[me].cname, linenum,
         ref_name, me, standards, D->fragment[me].flags);
@@ -1111,6 +1125,18 @@ static int _GD_ParseDirective(DIRFILE *D, const char** in_cols, int n_cols,
       _GD_ParseFieldSpec(D, n_cols - 2, in_cols + 2, P,
           D->fragment[me].cname, linenum, me, *standards, 0,
           flags & GD_PEDANTIC);
+  } else if (strcmp(ptr, "PROTECT") == 0) {
+    if (strcmp(in_cols[1], "none"))
+      D->fragment[me].protection = GD_PROTECT_NONE;
+    else if (strcmp(in_cols[1], "format"))
+      D->fragment[me].protection = GD_PROTECT_FORMAT;
+    else if (strcmp(in_cols[1], "data"))
+      D->fragment[me].protection = GD_PROTECT_DATA;
+    else if (strcmp(in_cols[1], "all"))
+      D->fragment[me].protection = GD_PROTECT_ALL;
+    else
+      _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_PROTECT, D->fragment[me].cname,
+          linenum, in_cols[1]);
   } else if (strcmp(ptr, "REFERENCE") == 0) {
     free(*ref_name);
     *ref_name = strdup(in_cols[1]);
@@ -1165,14 +1191,14 @@ char* _GD_ParseFragment(FILE* fp, DIRFILE *D, int me, int* standards,
 
     if (D->error)
       break; /* field spec parser threw an error */
+  }
 
-    /* Set firsts */
-    if (D->fragment[me].first_fragment == -1 &&
-        D->fragment[me].first_field == NULL)
-    {
-      D->fragment[me].first_fragment = first_fragment;
-      D->fragment[me].first_field = first_raw;
-    }
+  /* Set reference */
+  if (!D->error) {
+    if (ref_name != NULL)
+      D->fragment[me].ref_name = strdup(ref_name);
+    else if (first_raw != NULL)
+      D->fragment[me].ref_name = strdup(first_raw->field);
   }
 
   dreturn("%p", ref_name);
@@ -1404,8 +1430,8 @@ DIRFILE* dirfile_open(const char* filedir, unsigned int flags)
   D->fragment[0].parent = -1;
   D->fragment[0].flags = D->flags & (GD_ENCODING | GD_LITTLE_ENDIAN |
       GD_BIG_ENDIAN);
-  D->fragment[0].first_field = NULL;
-  D->fragment[0].first_fragment = -1;
+  D->fragment[0].ref_name = NULL;
+  D->fragment[0].frame_offset = 0;
 
   ref_name = _GD_ParseFragment(fp, D, 0, &standards, D->flags);
   fclose(fp);

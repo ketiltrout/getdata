@@ -67,9 +67,11 @@ static const struct {
   { GD_E_FORMAT, GD_E_FORMAT_NO_PARENT,
     "Meta field defined before parent ({4}) on line {3} of {2}", 0 },
   { GD_E_FORMAT, GD_E_FORMAT_DUPLICATE,
-    "Field code {4} on line {3} of {2} already defined", 0 },
+    "Field code on line {3} of {2} already defined: {4}", 0 },
   { GD_E_FORMAT, GD_E_FORMAT_LOCATION,
     "META in a different file than parent ({4}) on line {3} of {2}", 0 },
+  { GD_E_FORMAT, GD_E_FORMAT_PROTECT,
+    "Bad protection level on line {3} of {2}: {4}", 0 },
   /* GD_E_CREAT: 1 = suberror, 2 = filename. 3 = errno */
   { GD_E_TRUNC, 0, "Error truncating {2}: ", 1 },
   /* GD_E_CREAT: 1 = suberror, 2 = filename, 3 = errno */

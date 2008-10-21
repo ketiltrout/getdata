@@ -38,8 +38,18 @@ static size_t _GD_DoRawOut(DIRFILE *D, gd_entry_t *E,
   size_t ns, n_wrote;
   void *databuffer;
 
+  /* check protection */
+  if (D->fragment[E->fragment_index].protection & GD_PROTECT_DATA) {
+    _GD_SetError(D, GD_E_PROTECTED, 0, NULL, 0,
+        D->fragment[E->fragment_index].cname);
+    dreturn("%i", -1);
+    return -1;
+  }
+
   dtrace("%p, %p, %lli, %lli, %zi, %zi, 0x%x, %p", D, E, first_frame,
       first_samp, num_frames, num_samp, data_type, data_in);
+
+  first_frame -= D->fragment[E->fragment_index].frame_offset;
 
   s0 = first_samp + first_frame * E->spf;
   ns = num_samp + num_frames * E->spf;
@@ -363,19 +373,27 @@ static size_t _GD_DoPhaseOut(DIRFILE* D, gd_entry_t *E,
   dtrace("%p, %p, %lli, %lli, %zi, %zi, 0x%x, %p", D, E, first_frame,
       first_samp, num_frames, num_samp, data_type, data_in);
 
+  /* check protection */
+  if (D->fragment[E->fragment_index].protection & GD_PROTECT_FORMAT) {
+    _GD_SetError(D, GD_E_PROTECTED, 0, NULL, 0,
+        D->fragment[E->fragment_index].cname);
+    dreturn("%i", 0);
+    return 0;
+  }
+
   if (E->e->entry[0] == NULL) {
     E->e->entry[0] = _GD_FindField(D, E->in_fields[0], NULL);
 
     if (E->e->entry[0] == NULL) {
       _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, E->in_fields[0]);
-      dreturn("%zi", 0);
+      dreturn("%i", 0);
       return 0;
     }
 
     /* scalar entries not allowed */
     if (E->e->entry[0]->field_type & GD_SCALAR_ENTRY) {
       _GD_SetError(D, GD_E_DIMENSION, 0, E->field, 0, E->e->entry[0]->field);
-      dreturn("%zi", 0);
+      dreturn("%i", 0);
       return 0;
     }
   }
@@ -393,7 +411,11 @@ static size_t _GD_DoConstOut(DIRFILE* D, gd_entry_t *E, gd_type_t data_type,
 {
   dtrace("%p, %p, 0x%x, %p", D, E, data_type, data_in);
 
-  if (E->const_type & GD_SIGNED)
+  /* check protection */
+  if (D->fragment[E->fragment_index].protection & GD_PROTECT_FORMAT)
+    _GD_SetError(D, GD_E_PROTECTED, 0, NULL, 0,
+        D->fragment[E->fragment_index].cname);
+  else if (E->const_type & GD_SIGNED)
     _GD_ConvertType(D, data_in, data_type, &E->e->iconst, GD_INT64, 1);
   else if (E->const_type & GD_IEEE754)
     _GD_ConvertType(D, data_in, data_type, &E->e->dconst, GD_FLOAT64, 1);
@@ -517,8 +539,6 @@ size_t putdata64(DIRFILE* D, const char *field_code, off64_t first_frame,
   }
 
   _GD_ClearError(D);
-
-  first_frame -= D->frame_offset;
 
   entry = _GD_FindField(D, field_code, NULL);
 
