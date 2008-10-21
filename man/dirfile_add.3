@@ -20,7 +20,7 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH dirfile_add 3 "17 October 2008" "Version 0.4.0" "GETDATA"
+.TH dirfile_add 3 "21 October 2008" "Version 0.4.0" "GETDATA"
 .SH NAME
 dirfile_add, dirfile_madd \(em add a field to a dirfile
 .SH SYNOPSIS
@@ -126,6 +126,11 @@ entry, was invalid.
 The field name provided in 
 .IR entry -> field
 duplicated that of an already existing field.
+.TP
+.B GD_E_PROTECTED
+The metadata of the fragment was protected from change.  Or, the creation of a
+.B RAW
+field was attempted and the data of the fragment was protected.
 .TP
 .B GD_E_RAW_IO
 An I/O error occurred while creating an empty binary file to be associated with

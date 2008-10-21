@@ -20,7 +20,7 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH dirfile_add_spec 3 "17 October 2008" "Version 0.4.0" "GETDATA"
+.TH dirfile_add_spec 3 "21 October 2008" "Version 0.4.0" "GETDATA"
 .SH NAME
 dirfile_add_spec, dirfile_madd_spec \(em add a field to a dirfile
 .SH SYNOPSIS
@@ -89,6 +89,11 @@ parameter was out of range.
 .B GD_E_FORMAT
 A syntax error was encountered in
 .IR line .
+.TP
+.B GD_E_PROTECTED
+The metadata of the fragment was protected from change.  Or, the creation of a
+.B RAW
+field was attempted and the data of the fragment was protected.
 .TP
 .B GD_E_RAW_IO
 An I/O error occurred while creating an empty binary file to be associated with

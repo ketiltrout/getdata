@@ -20,7 +20,7 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH dirfile_madd_bit 3 "16 October 2008" "Version 0.4.0" "GETDATA"
+.TH dirfile_madd_bit 3 "21 October 2008" "Version 0.4.0" "GETDATA"
 .SH NAME
 dirfile_madd_bit, dirfile_madd_const, dirfile_madd_lincom, dirfile_madd_linterp,
 dirfile_madd_multiply, dirfile_madd_phase, dirfile_madd_string \(em add a field
@@ -143,6 +143,9 @@ was invalid.
 The
 .IR field_name
 provided duplicated that of an already existing field.
+.TP
+.B GD_E_PROTECTED
+The metadata of the fragment was protected from change.
 .P
 The dirfile error may be retrieved by calling
 .BR get_error (3).

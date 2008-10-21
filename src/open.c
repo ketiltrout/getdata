@@ -780,7 +780,8 @@ gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, const char** in_cols,
     if (!D->error && creat) {
       /* If this fragment is protected, we can't do anything */
       if (D->fragment[me].protection != GD_PROTECT_NONE)
-        _GD_SetError(D, GD_E_PROTECTED, 0, NULL, 0, D->fragment[me].cname);
+        _GD_SetError(D, GD_E_PROTECTED, GD_E_PROTECTED_DATA, NULL, 0,
+            D->fragment[me].cname);
       /* If the encoding scheme is unknown, we can't add the field */
       if ((D->fragment[me].flags & GD_ENCODING) == GD_AUTO_ENCODED)
         _GD_SetError(D, GD_E_UNKNOWN_ENCODING, 0, NULL, 0, NULL);

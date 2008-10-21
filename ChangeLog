@@ -1,3 +1,6 @@
+2008-10-21   D. V. Wiebe <getdata@ketiltrout.net>  svn:185
+	* src/include.c: Remove duplicate accessmode check.
+
 2008-10-21   D. V. Wiebe <getdata@ketiltrout.net>  svn:184
 	* src/open.c: Fix PROTECT parsing.
 	

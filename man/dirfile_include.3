@@ -20,7 +20,7 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH dirfile_include 3 "17 October 2008" "Version 0.4.0" "GETDATA"
+.TH dirfile_include 3 "21 October 2008" "Version 0.4.0" "GETDATA"
 .SH NAME
 dirfile_include \(em add a format file fragment to a dirfile
 .SH SYNOPSIS
@@ -179,12 +179,7 @@ returned and the dirfile error is set to a non-zero error value.  Possible error
 values are:
 .TP 8
 .B GD_E_ACCMODE
-The supplied dirfile was opened in read-only mode, but
-.B GD_CREAT
-or
-.B GD_TRUNC
-was specified in
-.IR flags .
+The supplied dirfile was opened in read-only mode.
 .TP
 .B GD_E_ALLOC
 The library was unable to allocate memory.
@@ -211,6 +206,9 @@ maintainer.
 .TP
 .B GD_E_OPEN_INCLUDE
 The fragment could not be opened or created.
+.TP
+.B GD_E_PROTECTED
+The metadata of the parent fragment was protected from change.
 .P
 The dirfile error may be retrieved by calling
 .BR get_error (3).

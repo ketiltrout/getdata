@@ -20,7 +20,7 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH putdata 3 "6 October 2008" "Version 0.4.0" "GETDATA"
+.TH putdata 3 "21 October 2008" "Version 0.4.0" "GETDATA"
 .SH NAME
 putdata \(em write data to a dirfile database
 .SH SYNOPSIS
@@ -174,6 +174,13 @@ maintainer.
 .TP
 .B GD_E_OPEN_LINFILE
 An error occurred while trying to read a LINTERP table from disk.
+.TP
+.B GD_E_PROTECTED
+The data of the
+.B RAW
+field backing
+.I field_code
+was protected from change by a PROTECT directive.
 .TP
 .B GD_E_RANGE
 An attempt was made to write data before the beginning-of-frame marker for

@@ -20,7 +20,7 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH put_string 3 "17 October 2008" "Version 0.4.0" "GETDATA"
+.TH put_string 3 "21 October 2008" "Version 0.4.0" "GETDATA"
 .SH NAME
 put_string \(em retrieve a scalar constant from a dirfile database
 .SH SYNOPSIS
@@ -90,6 +90,9 @@ was specified.
 An internal error occurred in the library while trying to perform the task.
 This indicates a bug in the library.  Please report the incident to the
 maintainer.
+.TP
+.B GD_E_PROTECTED
+The fragment containing the string was protected from change.
 .P
 The dirfile error may be retrieved by calling
 .BR get_error (3).

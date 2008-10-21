@@ -77,14 +77,8 @@ int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,
       return -1;
     }
     new_fp = fdopen(i, "r+");
-  } else {
-    if (flags & (GD_CREAT | GD_TRUNC)) {
-      _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
-      dreturn("%i", -1);
-      return -1;
-    } else
-      new_fp = fopen(temp_buf1, "r");
-  }
+  } else
+    new_fp = fopen(temp_buf1, "r");
 
   /* If opening the file failed, set the error code and abort parsing. */
   if (new_fp == NULL) {
@@ -174,8 +168,8 @@ int dirfile_include(DIRFILE* D, const char* file, int fragment_index,
     return -1;
   }
 
- int i = _GD_Include(D, file, "dirfile_include()", 0, &ref_name, fragment_index,
-     &standards, flags);
+  int i = _GD_Include(D, file, "dirfile_include()", 0, &ref_name, fragment_index,
+      &standards, flags);
 
   /* Find the reference field */
   if (ref_name != NULL) {
