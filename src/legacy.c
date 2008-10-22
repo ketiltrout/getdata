@@ -45,32 +45,32 @@ static DIRFILE _GD_GlobalErrors = {
 
 /* old error strings */
 const char *GD_ERROR_CODES[GD_N_ERROR_CODES] = {
-  "Success",
-  "Error opening dirfile",
-  "Error in Format file",
+  "Success", /* GD_E_OK */
+  "Error opening dirfile", /* GD_E_OPEN */
+  "Error in Format file", /* GD_E_FORMAT */
   NULL, /* GD_E_TRUNC */
   NULL, /* GD_E_CREAT */
-  "Bad field code",
-  "Unrecognized data type",
-  "I/O error accessing field file",
-  "Could not open included Format file",
-  "Internal error",
-  "Memory allocation failed",
-  "Could not open interpolation table",
-  "Too many levels of recursion",
-  "Bad dirfile",
-  "Cannot write to specified field",
-  "Read-only dirfile",
-  "Request out-of-range",
-  "Operation not supported by current encoding scheme",
-  "Unknown encoding scheme",
+  "Bad field code", /* GD_E_BAD_CODE */
+  "Unrecognized data type", /* GD_E_BAD_TYPE */
+  "I/O error accessing field file", /* GD_E_RAW_IO */
+  "Could not open included fragment", /* GD_E_OPEN_INCLUDE */
+  "Internal error", /* GD_E_INTERNAL_ERROR */
+  "Memory allocation failed", /* GD_E_ALLOC */
+  "Request out-of-range", /* GD_E_RANGE */
+  "Could not open interpolation table", /* GD_E_OPEN_LINFILE */
+  "Too many levels of recursion", /* GD_E_RECURSE_LEVEL */
+  "Bad dirfile", /* GD_E_BAD_DIRFILE */
+  "Cannot write to specified field", /* GD_E_BAD_FIELD_TYPE */
+  "Read-only dirfile", /* GD_E_ACC_MODE */
+  "Operation not supported by current encoding scheme", /* GD_E_UNSUPPORTED */
+  "Unknown encoding scheme", /* GD_E_UNKNOWN_ENCODING */
   NULL, /* GD_E_BAD_ENTRY */
   NULL, /* GD_E_DUPLICATE */
-  "Scalar field found where vector field expected",
+  "Scalar field found where vector field expected", /* GD_E_DIMENSION */
   NULL, /* GD_E_BAD_INDEX */
-  "Scalar field code not found",
-  "Bad REFERENCE field",
-  "Operation prohibited by protection level",
+  "Scalar field code not found", /* GD_E_BAD_SCALAR */
+  "Bad REFERENCE field", /* GD_E_BAD_REFERENCE */
+  "Operation prohibited by protection level", /* GD_E_PROTECTED */
 };
 
 static struct FormatType Format = {
