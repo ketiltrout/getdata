@@ -4,15 +4,20 @@ THE GETDATA PROJECT
 The GetData Project is the reference implementation of the Dirfile Standards.
 The Dirfile database format is designed to provide a fast, simple format for
 storing and reading binary time-ordered data.  The Dirfile Standards are
-described in detail in two Unix manual pages distributed with this package:
-dirfile(5) and dirfile-format(5), which may be read before installation by
-running:
+described in detail in three Unix manual pages distributed with this package:
+dirfile(5), dirfile-format(5) and dirfile-encoding(5), which may be read before
+installation by running:
 
   $ man man/dirfile.5
   $ man man/dirfile-format.5
+  $ man man/dirfile-encoding.5
 
 from the top GetData Project directory (the directory containing this README
-file).
+file).  After installation, they can be read with the standard man command:
+
+  $ man dirfile
+  $ man dirfile-format
+  $ man dirfile-encoding
 
 
 WARRANTY AND REDISTRIBUTION
@@ -36,12 +41,13 @@ CONTENTS
 ========
 
 This package provides:
-  * the Dirfile Standards documents (two Unix manual pages)
+  * the Dirfile Standards documents (three Unix manual pages)
   * the C GetData library (libgetdata) including Unix manual pages
   * The handy checkdirfile utility, included also as an example
   * several bindings to the library from other languages:
     - C++ (libgetdata++)
     - Fortran 77 (libfgetdata)
+    - Fortran 96 (libf95getdata)
 
 Documentation for the various bindings, if present, can be found in files
 named `README.<language>'.  The C interface is described in this document.
