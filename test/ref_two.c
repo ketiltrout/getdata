@@ -53,7 +53,7 @@ int main(void)
   if (get_error(D))
     r = 1;
   else if (nf != 3) {
-    fprintf(stderr, "1=%i\n", nf);
+    fprintf(stderr, "1=%llu\n", (unsigned long long)nf);
     r = 1;
   }
 

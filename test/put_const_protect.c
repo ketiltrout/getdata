@@ -16,8 +16,7 @@ int main(void)
   const char* format = __TEST__ "dirfile/format";
   const char* format_data = "data CONST UINT8 8\nPROTECT all\n";
   uint8_t d = 3;
-  int fd, i;
-  struct stat buf;
+  int fd;
 
   mkdir(filedir, 0777);
 

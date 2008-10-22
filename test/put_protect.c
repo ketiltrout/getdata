@@ -14,11 +14,9 @@ int main(void)
 {
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
-  const char* data = __TEST__ "dirfile/data";
   const char* format_data = "data RAW UINT8 8\nPROTECT all\n";
-  uint8_t c[8], d;
+  uint8_t c[8];
   int fd, i;
-  struct stat buf;
 
   memset(c, 0, 8);
   mkdir(filedir, 0777);
