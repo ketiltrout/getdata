@@ -707,6 +707,8 @@ Error codes (returned by GDFERR):
   GD_EDM          GD_E_DIMENSION
   GD_EBI          GD_E_BAD_INDEX
   GD_EBS          GD_E_BAD_SCALAR
+  GD_EBR          GD_E_BAD_REFERENCE
+  GD_EPT          GD_E_PROTECTED
 
 Dirfile flags (required by GDFOPN):
 
