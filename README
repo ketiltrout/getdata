@@ -76,6 +76,7 @@ Standards Version 6 introduces the following:
       FILEFRAM LINCOM 1 INDEX 1 0
       
     to the dirfile's format file to recreate the old behaviour.
+  * The ability to flag portions of the dirfile as protected.
 
 Standards Version 6 follows closely on the heels of Standards Version 5,
 released in August of 2006 with GetData 0.3.0.
