@@ -3,7 +3,8 @@ New in version 0.4.0:
   Dirfile Changes
 
   * GetData now supports Dirfile Standards Version 6.  Standards Version 6 adds
-    numerical (CONST) and string (STRING) scalar fields to the dirfile.
+    numerical (CONST) and string (STRING) scalar fields to the dirfile, as well
+    as other features outlined below.
   * CONST names can now appear as parameters in field specifications in certain
     places in lieu of a literal number.
   * The tokeniser has been re-written.  Any sequence of non-null bytes can now
@@ -27,6 +28,14 @@ New in version 0.4.0:
   * "FILEFRAM" is no-longer supported as an alias for "INDEX".  This affects
     GetData's implementation of all Standards Versions.  Code that made use of
     FILEFRAM will have to be updated to use INDEX instead.
+  * The reference field, previously the first RAW field in the format file,
+    may now be specified using the REFERENCE directive.  The reference field
+    is the field that is looked at when get_nframes() is called.  This is
+    important to programs like kst which support streaming dirfiles.
+  * Portions (or all) of a dirfile's data and metadata can be protected from
+    change by specifying the PROTECT directive.  This protection is "advisory",
+    ie. while GetData will respect it in all cases, don't count on the PROTECT
+    directive to ensure data integrity.
 
   Library Changes
 
