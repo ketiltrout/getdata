@@ -177,7 +177,7 @@ Library, in addition to GetData itself, e.g. using `-lgetdata -lm'.
 
 The `checkdirfile' program is provided as an example of library use in the `bin'
 subdirectory of the package.  This program will be installed to ${prefix}/bin,
-unless disabled by passing `--disable-checkdirfile'.
+unless disabled by passing `--disable-checkdirfile' to ./configure.
 
 This utility was designed to report syntax error in the format file(s) of the
 large, complex dirfiles used in the analysis of the BLAST experiment data.
