@@ -66,8 +66,10 @@ int main(void)
     return 1;
   
   for (i = 0; i < 4; ++i)
-    if (x[(big_endian) ? 3 - i : i] != u.b[i])
+    if (x[(big_endian) ? 3 - i : i] != u.b[i]) {
+      printf("%i=%x (%x)\n", i, x[(big_endian) ? 3 - i : i], u.b[i]);
       return 1;
+    }
 
   return 0;
 }

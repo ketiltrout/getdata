@@ -55,8 +55,10 @@ int main(void)
   unlink(format);
   rmdir(filedir);
 
-  if (d != 0x0100040000000302LLU)
+  if (d != 0x0100040000000302LLU) {
+    printf("1=%" PRIx64 "\n", d);
     return 1;
+  }
   if (n != 1)
     return 1;
   if (error)

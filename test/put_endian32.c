@@ -55,8 +55,10 @@ int main(void)
   unlink(format);
   rmdir(filedir);
 
-  if (d != 0x1000002)
+  if (d != 0x1000002) {
+    printf("1=%x\n", d);
     return 1;
+  }
   if (n != 1)
     return 1;
   if (error)

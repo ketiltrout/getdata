@@ -66,8 +66,12 @@ int main(void)
     return 1;
   
   for (i = 0; i < 8; ++i)
-    if (x[(big_endian) ? 7 - i : i] != u.b[i])
+    if (x[(big_endian) ? 7 - i : i] != u.b[i]) {
+      printf("%02x %02x %02x %02x %02x %02x %02x %02x %.15g %i\n", 
+          u.b[0], u.b[1], u.b[2], u.b[3], u.b[4], u.b[5], u.b[6], u.b[7], u.f,
+          big_endian);
       return 1;
+    }
 
   return 0;
 }

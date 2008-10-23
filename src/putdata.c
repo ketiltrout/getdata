@@ -70,19 +70,6 @@ static size_t _GD_DoRawOut(DIRFILE *D, gd_entry_t *E,
     return 0;
   }
 
-  if (encode[E->e->encoding].ecor &&
-      (D->fragment[E->fragment_index].flags &
-#ifdef WORDS_BIGENDIAN
-       GD_LITTLE_ENDIAN
-#else
-       GD_BIG_ENDIAN
-#endif
-      ))
-    _GD_FixEndianness(databuffer, E->size, ns);
-
-  /* write data to file.  Note that if the first sample is beyond     */
-  /* the current end of file, a gap will result (see lseek(2)) */
-
   /* Figure out the dirfile encoding type, if required */
   if ((D->fragment[E->fragment_index].flags & GD_ENCODING) ==
       GD_AUTO_ENCODED)
@@ -105,6 +92,19 @@ static size_t _GD_DoRawOut(DIRFILE *D, gd_entry_t *E,
   if (E->e->encoding == GD_ENC_UNKNOWN)
     _GD_ResolveEncoding(E->e->file, D->fragment[E->fragment_index].flags,
         E->e);
+
+  if (encode[E->e->encoding].ecor &&
+      (D->fragment[E->fragment_index].flags &
+#ifdef WORDS_BIGENDIAN
+       GD_LITTLE_ENDIAN
+#else
+       GD_BIG_ENDIAN
+#endif
+      ))
+    _GD_FixEndianness(databuffer, E->size, ns);
+
+  /* write data to file.  Note that if the first sample is beyond     */
+  /* the current end of file, a gap will result (see lseek(2)) */
 
   if (E->e->fp < 0) {
     /* open file for reading / writing if not already opened */
