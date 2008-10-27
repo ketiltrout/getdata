@@ -29,6 +29,10 @@ SUBDIRS = src bin man . test bindings
 clean-local:
 	rm -rf *~ 
 
-dist-post: $(distdir).tar.gz $(distdir).tar.bz2
-	gpg -abo $(distdir).tar.gz.sig $(distdir).tar.gz
-	gpg -abo $(distdir).tar.bz2.sig $(distdir).tar.bz2
+%.sig: %
+	gpg -abo $@ $<
+
+dist-post: $(distdir).tar.gz.sig $(distdir).tar.bz2.sig
+
+dist-push:  $(distdir).tar.gz.sig $(distdir).tar.bz2.sig $(distdir).tar.gz $(distdir).tar.bz2
+	rsync -avP -e ssh $^ $(SFUSER)@frs.sourceforge.net:uploads/
