@@ -25,6 +25,9 @@
 #include <string.h>
 #endif
 
+/* a zero length list */
+static const char* zero_list[1] = { NULL };
+
 const void* get_mconstants(DIRFILE* D, const char* parent,
     gd_type_t return_type)
 {
@@ -103,8 +106,8 @@ const char** get_mstrings(DIRFILE* D, const char* parent)
   struct _gd_private_entry* e = P->e;
 
   if (e->n_meta_string == 0) {
-    dreturn("%p", NULL);
-    return NULL;
+    dreturn("%p", zero_list);
+    return zero_list;
   }
 
   fl = realloc((char**)e->string_value_list, sizeof(const char*) *
@@ -158,9 +161,14 @@ const char** get_mfield_list_by_type(DIRFILE* D, const char* parent,
 
   n = get_nmfields_by_type(D, parent, type);
 
-  if (n == 0 || D->error) {
+  if (D->error) {
     dreturn("%p", NULL);
     return NULL;
+  }
+
+  if (n == 0) {
+    dreturn("%p", zero_list);
+    return zero_list;
   }
 
   /* find the index -- get_nfields_by_type should have already tripped up
@@ -177,11 +185,6 @@ const char** get_mfield_list_by_type(DIRFILE* D, const char* parent,
     return NULL;
   }
 
-  if (e->n_meta_string == 0) {
-    dreturn("%p", NULL);
-    return NULL;
-  }
-
   fl = realloc(e->type_list[index], sizeof(const char*) * (n + 1));
 
   if (fl == NULL) {
@@ -191,7 +194,7 @@ const char** get_mfield_list_by_type(DIRFILE* D, const char* parent,
   }
 
   for (i = n = 0; i < e->n_meta; ++i) {
-    if (e->meta_entry[i]->field_type == GD_STRING_ENTRY)
+    if (e->meta_entry[i]->field_type == type)
       fl[n++] = e->meta_entry[i]->field + offs;
   }
   fl[n] = NULL;
@@ -229,13 +232,14 @@ const char** get_mvector_list(DIRFILE* D, const char* parent)
 
   size_t offs = strlen(P->field) + 1;
 
-  if (e->n_meta == 0) {
-    dreturn("%p", NULL);
-    return NULL;
+  n = e->n_meta - e->n_meta_string - e->n_meta_const;
+
+  if (n == 0) {
+    dreturn("%p", zero_list);
+    return zero_list;
   }
 
-  fl = realloc((char**)e->vector_list, sizeof(const char*) *
-      (e->n_meta + 1 - e->n_meta_string - e->n_meta_const));
+  fl = realloc((char**)e->vector_list, sizeof(const char*) * (n + 1));
 
   if (fl == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
@@ -283,8 +287,8 @@ const char** get_mfield_list(DIRFILE* D, const char* parent)
   size_t offs = strlen(P->field) + 1;
 
   if (e->n_meta == 0) {
-    dreturn("%p", NULL);
-    return NULL;
+    dreturn("%p", zero_list);
+    return zero_list;
   }
 
   fl = realloc((char**)e->field_list, sizeof(const char*) *

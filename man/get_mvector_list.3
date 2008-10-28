@@ -20,7 +20,7 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH get_mvector_list 3 "17 October 2008" "Version 0.4.0" "GETDATA"
+.TH get_mvector_list 3 "28 October 2008" "Version 0.4.0" "GETDATA"
 .SH NAME
 get_mvector_list \(em retrieve a list of vector fields in a dirfile
 .SH SYNOPSIS
@@ -67,9 +67,8 @@ a call to
 Upon successful completion,
 .BR get_mvector_list ()
 returns a pointer to an array of strings containing the names of all the vector
-metafields for the given parent field.  If no vector metafields are available,
-it returns NULL.  On error it returns NULL and sets the dirfile error to a
-non-zero error value.  Possible error values are:
+metafields for the given parent field.  On error it returns NULL and sets the
+dirfile error to a non-zero error value.  Possible error values are:
 .TP 8
 .B GD_E_ALLOC
 The library was unable to allocate memory.

@@ -20,7 +20,7 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH get_mstrings 3 "17 October 2008" "Version 0.4.0" "GETDATA"
+.TH get_mstrings 3 "28 October 2008" "Version 0.4.0" "GETDATA"
 .SH NAME
 get_mstrings \(em retrieve a list of string values from a dirfile
 .SH SYNOPSIS
@@ -75,9 +75,8 @@ Upon successful completion,
 .BR get_mstrings ()
 returns a pointer to an array of strings containing the values of all the
 .B STRING
-metafields for the specified parent field.  If the parent has no string
-metafields, NULL is returned.  On error it returns NULL and sets the dirfile
-error to a non-zero error value.  Possible error values are:
+metafields for the specified parent field.  On error it returns NULL and sets
+the dirfile error to a non-zero error value.  Possible error values are:
 .TP 8
 .B GD_E_ALLOC
 The library was unable to allocate memory.

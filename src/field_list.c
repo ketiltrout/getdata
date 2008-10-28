@@ -24,6 +24,9 @@
 #include <stdlib.h>
 #endif
 
+/* a zero length list */
+static const char* zero_list[1] = { NULL };
+
 /* correspondence between type_list index and gd_enttype_t */
 const gd_entype_t _gd_entype_index[GD_N_ENTYPES] =
 {
@@ -90,8 +93,8 @@ const char** get_strings(DIRFILE* D)
   _GD_ClearError(D);
 
   if (D->n_string == 0) {
-    dreturn("%p", NULL);
-    return NULL;
+    dreturn("%p", zero_list);
+    return zero_list;
   }
 
   if (D->list_validity & LIST_VALID_STRING_VALUE) {
@@ -141,9 +144,14 @@ const char** get_field_list_by_type(DIRFILE* D, gd_entype_t type)
 
   n = get_nfields_by_type(D, type);
 
-  if (n == 0 || D->error) {
+  if (D->error) {
     dreturn("%p", NULL);
     return NULL;
+  }
+
+  if (n == 0) {
+    dreturn("%p", zero_list);
+    return zero_list;
   }
 
   /* find the index -- get_nfields_by_type should have already tripped up
@@ -162,8 +170,8 @@ const char** get_field_list_by_type(DIRFILE* D, gd_entype_t type)
 
   if (D->type_list_validity & (1 << index)) {
     /* list already made */
-    dreturn("%p", D->string_value_list);
-    return D->string_value_list;
+    dreturn("%p", D->type_list[index]);
+    return D->type_list[index];
   }
 
   fl = realloc((char**)D->type_list[index], sizeof(const char*) * (n + 1));
@@ -175,8 +183,7 @@ const char** get_field_list_by_type(DIRFILE* D, gd_entype_t type)
   }
 
   for (i = n = 0; i < D->n_entries; ++i) {
-    if (D->entry[i]->field_type == GD_STRING_ENTRY &&
-        D->entry[i]->e->n_meta != -1)
+    if (D->entry[i]->field_type == type && D->entry[i]->e->n_meta != -1)
       fl[n++] = D->entry[i]->field;
   }
   fl[n] = NULL;
@@ -203,9 +210,11 @@ const char** get_vector_list(DIRFILE* D)
 
   _GD_ClearError(D);
 
-  if (D->n_entries == 0) {
-    dreturn("%p", NULL);
-    return NULL;
+  n = D->n_entries - D->n_meta - D->n_string - D->n_const;
+
+  if (n == 0) {
+    dreturn("%p", zero_list);
+    return zero_list;
   }
 
   if (D->list_validity & LIST_VALID_VECTOR) {
@@ -214,8 +223,7 @@ const char** get_vector_list(DIRFILE* D)
     return D->vector_list;
   }
 
-  fl = realloc((char**)D->vector_list, sizeof(const char*) *
-      (D->n_entries + 1 - D->n_string - D->n_const - D->n_meta));
+  fl = realloc((char**)D->vector_list, sizeof(const char*) * (n + 1));
 
   if (fl == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
@@ -253,8 +261,8 @@ const char** get_field_list(DIRFILE* D)
   _GD_ClearError(D);
 
   if (D->n_entries == 0) {
-    dreturn("%p", NULL);
-    return NULL;
+    dreturn("%p", zero_list);
+    return zero_list;
   }
 
   if (D->list_validity & LIST_VALID_FIELD) {
