@@ -29,7 +29,7 @@ INCLUDES = -Wall $(WEXTRA) -I$(top_srcdir)/src
 
 SUBDIRS=test
 
-getdata_include_HEADERS = dirfile.h entry.h
+getdata_include_HEADERS = getdata/dirfile.h getdata/entry.h
 
 lib_LTLIBRARIES=libgetdata++.la
 libgetdata___la_SOURCES = dirfile.cpp entry.cpp \
@@ -38,4 +38,4 @@ libgetdata___la_LIBADD=../../src/libgetdata.la
 libgetdata___la_LDFLAGS = -version-info @GETDATAXX_VERSION@
 
 clean-local:
-	rm -rvf *~
+	rm -rvf *~ getdata/*~
