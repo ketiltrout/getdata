@@ -107,12 +107,6 @@ AC_MSG_CHECKING([whether to include the C++ bindings])
 AC_MSG_RESULT([$make_cxxbindings])
 AM_CONDITIONAL(MAKE_CXXBINDINGS, test "x$make_cxxbindings" = "xyes")
 
-if test "x$make_cxxbindings" != "xno"; then
-  BINDINGS_BUILT="${BINDINGS_BUILT} C++"
-else
-  BINDINGS_LEFT="${BINDINGS_LEFT} C++"
-fi
-
 dnl Fortran 77 bindings
 AC_ARG_ENABLE(fortran, AS_HELP_STRING([--disable-fortran],
               [Don't build the Fortran 77 bindings (libfgetdata) nor the
@@ -146,18 +140,6 @@ AC_MSG_CHECKING([whether to include the Fortran 77 bindings])
 AC_MSG_RESULT([$make_f77bindings])
 AM_CONDITIONAL(MAKE_F77BINDINGS, test "x$make_f77bindings" != "xno")
 
-if test "x$make_f77bindings" != "xno"; then
-  BINDINGS_BUILT="${BINDINGS_BUILT} Fortran-77"
-else
-  BINDINGS_LEFT="${BINDINGS_LEFT} Fortran-77"
-fi
-
-if test "x$make_f95bindings" != "xno"; then
-  BINDINGS_BUILT="${BINDINGS_BUILT} Fortran-95"
-else
-  BINDINGS_LEFT="${BINDINGS_LEFT} Fortran-95"
-fi
-
 dnl pkg-config
 AC_ARG_ENABLE(pkg-config, AS_HELP_STRING([--disable-pkg-config],
               [Don't install the pkg-config metadata (getdata.pc)]),
@@ -182,14 +164,6 @@ AC_ARG_WITH(slimlib, AS_HELP_STRING([--with-slimlib=PREFIX],
                *) use_slimlib="yes"; slimlib_prefix="${withval}" ;;
              esac
              ], [ use_slimlib="yes"; slimlib_prefix=; ])
-
-if test "x$BINDINGS_BUILT" = "x"; then
-  BINDINGS_BUILT=" none"
-fi
-
-if test "x$BINDINGS_LEFT" = "x"; then
-  BINDINGS_LEFT=" none"
-fi
 
 dnl Programs
 AM_INIT_AUTOMAKE
@@ -222,6 +196,22 @@ AC_LANG([Fortran])
 GD_LANG_COMPILER_INTEL
 AM_CONDITIONAL(GNU_FC_COMPILER, test "x$gd_cv_fc_compiler_intel" == "xno" -a "x$ac_cv_fc_compiler_gnu" == "xyes")
 AC_LANG_POP([Fortran])
+
+dnl check if we found a C++ compiler
+if test "x$CXX" == "x"; then
+  make_cxxbindings=no
+fi
+
+dnl check if we found a Fortran 77 compiler
+if test "x$F77" == "x"; then
+  make_f77bindings=no
+  make_f95bindings=no
+fi
+
+dnl check if we found a free-form Fortran compiler
+if test "x$FC" == "x"; then
+  make_f95bindings=no
+fi
 
 dnl F77 stuff
 if test "x$make_f77bindings" != "xno"; then
@@ -349,6 +339,32 @@ AC_CONFIG_FILES([test/Makefile])
 AC_OUTPUT
 
 dnl Handy summary
+if test "x$make_cxxbindings" != "xno"; then
+  BINDINGS_BUILT="${BINDINGS_BUILT} C++"
+else
+  BINDINGS_LEFT="${BINDINGS_LEFT} C++"
+fi
+
+if test "x$make_f77bindings" != "xno"; then
+  BINDINGS_BUILT="${BINDINGS_BUILT} Fortran-77"
+else
+  BINDINGS_LEFT="${BINDINGS_LEFT} Fortran-77"
+fi
+
+if test "x$make_f95bindings" != "xno"; then
+  BINDINGS_BUILT="${BINDINGS_BUILT} Fortran-95"
+else
+  BINDINGS_LEFT="${BINDINGS_LEFT} Fortran-95"
+fi
+
+if test "x$BINDINGS_BUILT" = "x"; then
+  BINDINGS_BUILT=" none"
+fi
+
+if test "x$BINDINGS_LEFT" = "x"; then
+  BINDINGS_LEFT=" none"
+fi
+
 echo
 echo "Configuration summary: "
 echo "  checkdirfile utility: ${make_checkdirfile}"
