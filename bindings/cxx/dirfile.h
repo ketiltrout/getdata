@@ -28,7 +28,7 @@
 extern "C" {
 #include <getdata.h>
 }
-#include <entry.h>
+#include <getdata/entry.h>
 
 namespace GetData {
   class Dirfile {
