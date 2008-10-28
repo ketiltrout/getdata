@@ -73,7 +73,7 @@ off64_t get_nframes64(DIRFILE* D)
     return 0;
   }
 
-  nf /= D->reference_field->size * D->reference_field->spf;
+  nf /= D->reference_field->spf;
   nf += D->fragment[D->reference_field->fragment_index].frame_offset;
 
   dreturn("%lli", (unsigned long long)nf);

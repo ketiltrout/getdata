@@ -1,5 +1,5 @@
-#include "dirfile.h"
-#include "entry.h"
+#include "getdata/dirfile.h"
+#include "getdata/entry.h"
 
 #include <fcntl.h>
 #include <string.h>

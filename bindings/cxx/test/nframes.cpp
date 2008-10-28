@@ -1,5 +1,5 @@
 /* Retreiving the number of frames should succeed cleanly */
-#include "dirfile.h"
+#include "getdata/dirfile.h"
 
 #include <stdlib.h>
 #include <sys/types.h>

@@ -1,3 +1,11 @@
+2008-10-28   D. V. Wiebe <getdata@ketiltrout.net>  svn:204
+	* src/nframes.c (get_nframes): Don't divide by the datatype size twice.
+
+	* bindings/cxx/test/entry.cpp bindings/cxx/test/putdata.cpp
+	bindings/cxx/test/spf.cpp bindings/cxx/test/getdata.cpp
+	bindings/cxx/test/addentry.cp bindings/cxx/test/nframes.cpp: Update for new
+	header locations.
+
 2008-10-28   D. V. Wiebe <getdata@ketiltrout.net>  svn:200
 	* src/field_list.c (get_field_list get_vector_list get_field_list_by_type
 	get_strings) src/meta_list.c (get_mfield_list get_mvector_list
