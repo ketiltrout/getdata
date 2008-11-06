@@ -7,8 +7,8 @@ New in version 0.4.0:
     as other features outlined below.
   * CONST names can now appear as parameters in field specifications in certain
     places in lieu of a literal number.
-  * The tokeniser has been re-written.  Any sequence of non-null bytes can now
-    form a valid token.  Field codes are may not have ASCII control characters
+  * The tokeniser has been re-written.  Any sequence of non-NUL bytes can now
+    form a valid token.  Field codes may not have ASCII control characters
     or the "reserved characters" &, /, ;, <, >, |, . but may contain any other
     characters (including whitespace).
   * Subordinate fields may now be attached to fields.  These subfields are
