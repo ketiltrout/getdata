@@ -1,0 +1,6 @@
+* Parser callback
+* Locking
+* Zlib
+* Field modification/deletion
+* Field moving
+* Frameoffset/Encoding/Endianness modification
