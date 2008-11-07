@@ -63,6 +63,9 @@ void _GD_FreeE(gd_entry_t* entry, int priv)
         free(entry->e->client);
       break;
     case GD_RAW_ENTRY:
+      if (priv)
+        free(entry->e->file);
+      break;
     case GD_INDEX_ENTRY:
     case GD_NO_ENTRY:
       break;

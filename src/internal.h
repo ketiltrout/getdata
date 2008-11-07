@@ -364,7 +364,8 @@ void _GD_SetError(DIRFILE* D, int error, int suberror, const char* format_file,
     int line, const char* token);
 int _GD_Tokenise(DIRFILE *D, const char* instring, char* outstring,
     const char** in_cols, const char* format_file, int linenum);
-char* _GD_ValidateField(const gd_entry_t* parent, const char* field_code);
+char* _GD_ValidateField(const gd_entry_t* parent, const char* field_code,
+    int strict);
 
 /* unencoded I/O methods */
 int _GD_RawOpen(struct _gd_private_entry* entry, const char* name, int mode,
@@ -391,6 +392,7 @@ ssize_t _GD_AsciiWrite(struct _gd_private_entry *entry, const void *ptr,
     gd_type_t data_type, size_t nmemb);
 int _GD_AsciiSync(struct _gd_private_entry *entry);
 int _GD_AsciiClose(struct _gd_private_entry *entry);
+int _GD_AsciiTouch(const char *name);
 off64_t _GD_AsciiSize(const char *name, gd_type_t data_type);
 
 #ifdef USE_SLIMLIB

@@ -34,46 +34,13 @@ static void _GD_FreeD(DIRFILE* D)
   dtrace("%p", D);
 
   for (i = 0; i < D->n_entries; ++i) 
-    if (D->entry[i] != NULL) {
-      free((char*)D->entry[i]->field); /* cast away bogus constness */
-      switch(D->entry[i]->field_type) {
-        case GD_RAW_ENTRY:
-          free(D->entry[i]->e->file);
-          break;
-        case GD_LINTERP_ENTRY:
-          free(D->entry[i]->in_fields[0]);
-          free(D->entry[i]->table);
-          if (D->entry[i]->e->table_len > 0) {
-            free(D->entry[i]->e->x);
-            free(D->entry[i]->e->y);
-          }
-          break;
-        case GD_LINCOM_ENTRY:
-          for (j = 2; j < D->entry[i]->n_fields; ++j)
-            free(D->entry[i]->in_fields[j]);
-          /* fall through */
-        case GD_MULTIPLY_ENTRY:
-          free(D->entry[i]->in_fields[1]);
-          /* fall through */
-        case GD_BIT_ENTRY:
-        case GD_PHASE_ENTRY:
-          free(D->entry[i]->in_fields[0]);
-          break;
-        case GD_STRING_ENTRY:
-          if (D->entry[i]->e != NULL)
-            free(D->entry[i]->e->string);
-          break;
-        case GD_CONST_ENTRY:
-        case GD_INDEX_ENTRY:
-        case GD_NO_ENTRY:
-          break;
-      }
-    }
+    _GD_FreeE(D->entry[i], 1);
 
   for (j = 0; j < D->n_fragment; ++j) {
     free(D->fragment[j].cname);
     free(D->fragment[j].sname);
     free(D->fragment[j].ename);
+    free(D->fragment[j].ref_name);
   }
 
   free(D->entry);
@@ -86,6 +53,8 @@ static void _GD_FreeD(DIRFILE* D)
   free(D->string_value_list);
   free(D->const_value_list);
   free(D->fragment);
+  free(D->name);
+  free(D);
 
   dreturnvoid();
 }

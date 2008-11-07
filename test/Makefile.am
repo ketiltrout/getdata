@@ -153,13 +153,14 @@ PARSE_TESTS=parse_badline parse_bit parse_bit4 parse_bit_bitnum \
 						parse_lincom_nfields parse_lincom_nofields parse_lincom_scalar \
 						parse_linterp parse_linterp_ncols parse_meta parse_meta_index \
 						parse_meta_parent parse_meta_raw parse_multiply \
-						parse_multiply_ncols parse_name parse_ncols parse_phase \
-						parse_phase_ncols parse_phase_scalar parse_protect_all \
-						parse_protect_bad parse_protect_data parse_protect_format \
-						parse_protect_none parse_quote parse_quote_mismatch parse_raw \
-						parse_raw_char parse_raw_ncols parse_raw_scalar parse_raw_spf \
-						parse_raw_type parse_ref parse_ref_nonexistent parse_sort \
-						parse_string parse_string_ncols parse_string_null parse_version \
+						parse_multiply_ncols parse_name parse_name_dot parse_name_ext \
+						parse_name_pedantic parse_ncols parse_phase parse_phase_ncols \
+						parse_phase_scalar parse_protect_all parse_protect_bad \
+						parse_protect_data parse_protect_format parse_protect_none \
+						parse_quote parse_quote_mismatch parse_raw parse_raw_char \
+						parse_raw_ncols parse_raw_scalar parse_raw_spf parse_raw_type \
+						parse_ref parse_ref_nonexistent parse_sort parse_string \
+						parse_string_ncols parse_string_null parse_version \
 						parse_version_include parse_version_pedantic parse_version_slash \
 						parse_whitespace
 

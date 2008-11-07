@@ -33,8 +33,6 @@
 #include <libgen.h>
 #endif
 
-#include "internal.h"
-
 /* add an entry */
 static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
 {
@@ -141,7 +139,7 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
 
   /* Validate field code */
   E->field_type = entry->field_type;
-  E->field = _GD_ValidateField(P, entry->field);
+  E->field = _GD_ValidateField(P, entry->field, 1);
 
   if (E->field == entry->field) {
     _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, entry->field);

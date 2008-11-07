@@ -289,3 +289,19 @@ off64_t _GD_AsciiSize(const char *name, gd_type_t data_type __gd_unused)
   dreturn("%lli", n);
   return n;
 }
+
+int _GD_AsciiTouch(const char* name)
+{
+  char asciiname[FILENAME_MAX];
+
+  dtrace("\"%s\"", name);
+
+  snprintf(asciiname, FILENAME_MAX, "%s.txt", name);
+  int fd = open(asciiname, O_RDWR | O_CREAT | O_TRUNC, 0666);
+
+  if (fd != -1)
+    fd = close(fd);
+
+  dreturn("%i", fd);
+  return fd;
+}

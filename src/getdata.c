@@ -63,7 +63,7 @@ const struct encoding_t encode[] = {
     &_GD_RawOpen, &_GD_RawClose, &_GD_RawTouch, &_GD_RawSeek,
     &_GD_RawRead, &_GD_RawSize,  &_GD_RawWrite, &_GD_RawSync },
   { GD_TEXT_ENCODED, ".txt", 0,
-    &_GD_AsciiOpen, &_GD_AsciiClose, &_GD_RawTouch, &_GD_AsciiSeek,
+    &_GD_AsciiOpen, &_GD_AsciiClose, &_GD_AsciiTouch, &_GD_AsciiSeek,
     &_GD_AsciiRead, &_GD_AsciiSize, &_GD_AsciiWrite, &_GD_AsciiSync },
   { GD_SLIM_ENCODED, ".slm", 1,
 #ifdef USE_SLIMLIB

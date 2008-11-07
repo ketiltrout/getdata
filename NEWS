@@ -1,3 +1,20 @@
+New in version 0.4.1:
+  
+  Library Changes
+
+  * BUG FIX: Adding an ASCII encoded RAW field no longer creates an empty,
+    unencoded binary file.
+  * BUG FIX: A few minor memory leaks have been patched.  Most of these
+    were the result of insufficient clean up in dirfile_close().
+  * As an exception to the Standards, the full stop character '.' is once
+    again permitted in field names.  This is required by BLAST.  Instead,
+    field names are prohibited from ending with the known encoding extensions.
+    The Standards still prohibit the full stop character in field names, and the
+    GD_PEDANTIC flag will disable this exception.  Furthermore, fields may not
+    be added via GetData which contain a full stop character.
+  * Some minor speed improvements have been made to the format file parser
+    resulting in a ~30% decrease in parsing time.
+
 New in version 0.4.0:
   
   Dirfile Changes
@@ -101,7 +118,7 @@ New in version 0.3.1:
 
   Legacy API Changes
 
-  * Dirfiles are now opened in read-only mode, unless instantiated via
+  * BUG FIX: Dirfiles are now opened in read-only mode, unless instantiated via
     PutData(), allowing GetData() calls on read-only dirfiles.  If
     PutData() is called on a dirfile previously opened read-only, it will be
     re-opened in read-write mode.

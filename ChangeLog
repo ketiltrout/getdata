@@ -1,3 +1,21 @@
+2008-11-07   D. V. Wiebe <getdata@ketiltrout.net>  svn:211
+	* src/open.c (_GD_ValidateField _GD_Tokeniser): Replace slow strchr calls
+	with explicit tests.
+
+	* src/open.c (_GD_ValidateField): Conditionally allow "." in field names,
+	but prohibit encoding extensions in this case.
+	* test/parse_name_dot.c test/parse_name_ext.c test/parse_name_pedantic.c:
+	Added.
+
+	* src/open.c (_GD_ParseRaw): Don't set fragment->ref_name: it will be done
+	later.
+
+	* src/entry.c (_GD_FreeE): Free the file string for RAW fields.
+	* src/close.c (_GD_FreeD): Call _GD_FreeE instead of de-allocating entries
+	explicitly.  A few other missing free calls added.
+
+	* src/getdata.c src/internal.h src/ascii.c: Add _GD_AsciiTouch.
+
 2008-10-28   D. V. Wiebe <getdata@ketiltrout.net>  svn:204
 	* src/nframes.c (get_nframes): Don't divide by the datatype size twice.
 
