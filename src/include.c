@@ -104,6 +104,7 @@ int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,
       GD_LITTLE_ENDIAN | GD_BIG_ENDIAN);
   D->fragment[D->n_fragment - 1].ref_name = NULL;
   D->fragment[D->n_fragment - 1].frame_offset = D->fragment[me].frame_offset;
+  D->fragment[D->n_fragment - 1].protection = GD_PROTECT_NONE;
 
   /* extract the subdirectory name - dirname both returns a volatile string
    * and modifies its argument, ergo strcpy */
