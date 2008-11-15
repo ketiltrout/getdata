@@ -5,6 +5,16 @@ New in version 0.4.2:
   * BUG FIX: The default protection level of format file fragments is now
     properly set to "none".  Reported by Brendan Crill.
 
+  Legacy API Changes
+
+  * Several fixes to better re-create the legacy API:
+
+      - the return value of GetFormat is no longer marked const (although
+        it should be considered so.)
+      - a symbolic link getdata_struct.h -> getdata.h is created when the
+        headers are installed.
+      - the legacy function prototypes are wrapped in an extern "C" block.
+
 New in version 0.4.1:
   
   Library Changes

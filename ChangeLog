@@ -1,3 +1,16 @@
+2008-11-15   D. V. Wiebe <getdata@ketiltrout.net>  svn:219
+	* src/legacy.c (GetFormat): Remove const from return
+	* src/getdata_legacy.h: wrap all function declarations in extern "C"
+
+	* src/legacy.c: Trace function calls.
+
+	* src/Makefile.am: add symbolic link getdata_struct.h -> getdata.h for
+	better legacy API support.
+
+2008-11-14   D. V. Wiebe <getdata@ketiltrout.net>  svn:217
+	* src/include.c (_GD_Include) src/open.c (dirfile_open): Initialise
+	protection level for fragments.
+
 2008-11-07   D. V. Wiebe <getdata@ketiltrout.net>  svn:211
 	* src/open.c (_GD_ValidateField _GD_Tokeniser): Replace slow strchr calls
 	with explicit tests.

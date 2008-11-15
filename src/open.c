@@ -254,7 +254,7 @@ static gd_entry_t* _GD_ParseLincom(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
 {
   int i;
 
-  dtrace("%p, %p, %i, %p, \"%s\", %i, %i, %i", D, in_cols, n_cols, parent,
+  dtrace("%p, %p, %i, %p, \"%s\", %i, %i", D, in_cols, n_cols, parent,
       format_file, line, pedantic);
 
   if (n_cols < 3) {
