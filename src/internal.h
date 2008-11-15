@@ -290,7 +290,7 @@ struct _GD_DIRFILE {
   gd_entry_t* reference_field;
 
   /* directory name */
-  const char* name;
+  char* name;
 
   /* recursion counter */
   int recurse_level;
