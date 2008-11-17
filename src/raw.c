@@ -48,7 +48,12 @@ off64_t _GD_RawSeek(struct _gd_private_entry* entry, off64_t count,
 ssize_t _GD_RawRead(struct _gd_private_entry *entry, void *ptr,
     gd_type_t data_type, size_t nmemb)
 {
-  return read(entry->fp, ptr, nmemb * GD_SIZE(data_type));
+  int nread = read(entry->fp, ptr, nmemb * GD_SIZE(data_type));
+
+  if (nread >= 0)
+    nread /= GD_SIZE(data_type);
+
+  return nread;
 }
 
 ssize_t _GD_RawWrite(struct _gd_private_entry *entry, const void *ptr,

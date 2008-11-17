@@ -2,6 +2,7 @@
 #include "../src/config.h"
 #include "../src/getdata.h"
 
+#include <inttypes.h>
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -17,10 +18,10 @@ int main(void)
   const char* format = __TEST__ "dirfile/format";
   const char* data = __TEST__ "dirfile/data";
   const char* slimdata = __TEST__ "dirfile/data.slm";
-  const char* format_data = "data RAW UINT8 8\n";
-  unsigned char c[8];
+  const char* format_data = "data RAW UINT16 8\n";
+  uint16_t c[8];
   char command[4096];
-  unsigned char data_data[256];
+  uint16_t data_data[256];
   int fd, i;
 
   memset(c, 0, 8);
@@ -34,15 +35,15 @@ int main(void)
   close(fd);
 
   fd = open(data, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, data_data, 256);
+  write(fd, data_data, 256 * sizeof(uint16_t));
   close(fd);
 
   /* compress */
-  snprintf(command, 4096, "%s %s > /dev/null", SLIM, data);
+  snprintf(command, 4096, "%s -k %s > /dev/null", SLIM, data);
   system(command);
 
   DIRFILE* D = dirfile_open(filedir, GD_RDONLY | GD_VERBOSE);
-  int n = getdata(D, "data", 5, 0, 1, 0, GD_UINT8, c);
+  int n = getdata(D, "data", 5, 0, 1, 0, GD_UINT16, c);
   int error = get_error(D);
 
   dirfile_close(D);
@@ -53,8 +54,10 @@ int main(void)
 
   if (error)
     return 1;
-  if (n != 8)
+  if (n != 8) {
+    printf("n = %i\n", n);
     return 1;
+  }
   for (i = 0; i < 8; ++i)
     if (c[i] != 40 + i)
       return 1;
