@@ -192,6 +192,10 @@ Too many levels of recursion were encountered while trying to resolve
 This usually indicates a circular dependency in field specification in the
 dirfile.
 .TP
+.B GD_E_UNKNOWN_ENCODING
+The encoding scheme of a RAW field could not be determined.  This may also
+indicate that the binary file associated with the RAW field could not be found.
+.TP
 .B GD_E_UNSUPPORTED
 Reading from dirfiles with the encoding scheme of the specified dirfile is not
 supported by the library.  See
