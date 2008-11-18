@@ -197,7 +197,7 @@ static void CopyRawEntry(struct RawEntryType* R, gd_entry_t* E)
       break;
   }
 
-  R->size = (int)E->size;
+  R->size = (int)E->e->size;
   R->samples_per_frame = (int)E->spf;
 
   dreturnvoid();

@@ -48,15 +48,13 @@ void _GD_Flush(DIRFILE* D, gd_entry_t *E, const char* field_code)
 
   switch(E->field_type) {
     case GD_RAW_ENTRY:
-      if (E->e->fp >= 0) {
+      if (E->e->file[0].fp >= 0) {
         if ((D->flags & GD_ACCMODE) == GD_RDWR &&
-            encode[E->e->encoding].sync != NULL &&
-            (*encode[E->e->encoding].sync)(E->e))
-          _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file, errno, NULL);
-        else if ((*encode[E->e->encoding].close)(E->e))
-          _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file, errno, NULL);
-        else 
-          E->e->fp = -1;
+            encode[E->e->file[0].encoding].sync != NULL &&
+            (*encode[E->e->file[0].encoding].sync)(E->e->file))
+          _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[0].name, errno, NULL);
+        else if ((*encode[E->e->file[0].encoding].close)(E->e->file))
+          _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[0].name, errno, NULL);
       }
       break;
     case GD_LINCOM_ENTRY:

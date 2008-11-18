@@ -28,52 +28,61 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <string.h>
+#include <errno.h>
 #endif
 
-int _GD_AsciiOpen(struct _gd_private_entry* entry, const char* name, int mode,
+/* The ASCII encoding uses file->fp as to indicate the current line and
+ * file->edata for the stream pointer */
+
+int _GD_AsciiOpen(struct _gd_raw_file* file, const char* base, int mode,
     int creat)
 {
-  char asciiname[FILENAME_MAX];
+  dtrace("%p, \"%s\", %i, %i", file, base, mode, creat);
 
-  dtrace("%p, \"%s\", %i, %i", entry, name, mode, creat);
+  if (_GD_SetEncodedName(file, base, 0)) {
+    dreturn("%i", -1);
+    return -1;
+  }
 
-  snprintf(asciiname, FILENAME_MAX, "%s.txt", name);
-  int fp = open(asciiname,
-      ((mode == GD_RDWR) ? O_RDWR : O_RDONLY) | (creat ? O_CREAT : 0), 0666);
+  int fp = open(file->name, ((mode == GD_RDWR) ? O_RDWR : O_RDONLY) |
+      (creat ? O_CREAT : 0), 0666);
 
-  entry->edata = fdopen(fp, (mode == GD_RDWR) ? "r+" : "r");
+  file->edata = fdopen(fp, (mode == GD_RDWR) ? "r+" : "r");
 
-  if (entry->edata != NULL)
-    entry->fp = 0;
+  if (file->edata != NULL) {
+    file->fp = 0;
+    dreturn("%i", 0);
+    return 0;
+  }
 
-  dreturn("%i", entry->edata == NULL);
-  return (entry->edata == NULL);
+  dreturn("%i", -1);
+  return -1;
 }
 
-off64_t _GD_AsciiSeek(struct _gd_private_entry* entry, off64_t count,
+off64_t _GD_AsciiSeek(struct _gd_raw_file* file, off64_t count,
     gd_type_t data_type __gd_unused, int pad)
 {
   char line[64];
 
-  dtrace("%p, %lli, %x, %i", entry, count, data_type, pad);
+  dtrace("%p, %lli, <unused>, %i", file, count, pad);
 
-  if (count < entry->fp) {
-    rewind(entry->edata);
-    entry->fp = 0;
+  if (count < file->fp) {
+    rewind(file->edata);
+    file->fp = 0;
   }
 
-  for (; count > entry->fp; ++entry->fp)
-    if (fgets(line, 64, entry->edata) == NULL)
+  for (; count > file->fp; ++file->fp)
+    if (fgets(line, 64, file->edata) == NULL)
       break;
 
-  if (pad && count > entry->fp) {
+  if (pad && count > file->fp) {
     strcpy(line, "0\n");
-    for (; count > entry->fp; ++entry->fp)
-      fputs(line, entry->edata);
+    for (; count > file->fp; ++file->fp)
+      fputs(line, file->edata);
   }
 
-  dreturn("%i", entry->fp);
-  return entry->fp;
+  dreturn("%i", file->fp);
+  return file->fp;
 }
 
 void _GD_ScanFormat(char* fmt, gd_type_t data_type)
@@ -119,21 +128,21 @@ void _GD_ScanFormat(char* fmt, gd_type_t data_type)
   dreturn("[\"%s\"]", fmt);
 }
 
-ssize_t _GD_AsciiRead(struct _gd_private_entry *entry, void *ptr,
-    gd_type_t data_type, size_t nmemb)
+ssize_t _GD_AsciiRead(struct _gd_raw_file *file, void *ptr, gd_type_t data_type,
+    size_t nmemb)
 {
   char fmt[50];
   size_t n = 0;
   ssize_t ret = 0;
 
-  dtrace("%p, %p, 0x%x, %zi", entry, ptr, data_type, nmemb);
+  dtrace("%p, %p, 0x%x, %zi", file, ptr, data_type, nmemb);
 
   _GD_ScanFormat(fmt, data_type);
   for (n = 0; n < nmemb; ++n) {
-    if (feof(entry->edata))
+    if (feof(file->edata))
       break;
 
-    if (fscanf(entry->edata, fmt, (char*)ptr + GD_SIZE(data_type) * n) < 1) {
+    if (fscanf(file->edata, fmt, (char*)ptr + GD_SIZE(data_type) * n) < 1) {
       ret = -1;
       break;
     }
@@ -143,81 +152,81 @@ ssize_t _GD_AsciiRead(struct _gd_private_entry *entry, void *ptr,
   return (ret) ? ret : (ssize_t)n;
 }
 
-ssize_t _GD_AsciiWrite(struct _gd_private_entry *entry, const void *ptr,
+ssize_t _GD_AsciiWrite(struct _gd_raw_file *file, const void *ptr,
     gd_type_t data_type, size_t nmemb)
 {
   ssize_t ret = 0;
   size_t n;
 
-  dtrace("%p, %p, 0x%x, %zi", entry, ptr, data_type, nmemb);
+  dtrace("%p, %p, 0x%x, %zi", file, ptr, data_type, nmemb);
 
   switch(data_type) {
     case GD_UINT8:
       for (n = 0; n < nmemb; ++n)
-        if (fprintf(entry->edata, "%" PRIu8 "\n", ((uint8_t*)ptr)[n]) < 0) {
+        if (fprintf(file->edata, "%" PRIu8 "\n", ((uint8_t*)ptr)[n]) < 0) {
           ret = -1;
           break;
         }
       break;
     case GD_INT8:
       for (n = 0; n < nmemb; ++n)
-        if (fprintf(entry->edata, "%" PRIi8 "\n", ((int8_t*)ptr)[n]) < 0) {
+        if (fprintf(file->edata, "%" PRIi8 "\n", ((int8_t*)ptr)[n]) < 0) {
           ret = -1;
           break;
         }
       break;
     case GD_UINT16:
       for (n = 0; n < nmemb; ++n)
-        if (fprintf(entry->edata, "%" PRIu16 "\n", ((uint16_t*)ptr)[n]) < 0) {
+        if (fprintf(file->edata, "%" PRIu16 "\n", ((uint16_t*)ptr)[n]) < 0) {
           ret = -1;
           break;
         }
       break;
     case GD_INT16:
       for (n = 0; n < nmemb; ++n)
-        if (fprintf(entry->edata, "%" PRIi16 "\n", ((int16_t*)ptr)[n]) < 0) {
+        if (fprintf(file->edata, "%" PRIi16 "\n", ((int16_t*)ptr)[n]) < 0) {
           ret = -1;
           break;
         }
       break;
     case GD_UINT32:
       for (n = 0; n < nmemb; ++n)
-        if (fprintf(entry->edata, "%" PRIu32 "\n", ((uint32_t*)ptr)[n]) < 0) {
+        if (fprintf(file->edata, "%" PRIu32 "\n", ((uint32_t*)ptr)[n]) < 0) {
           ret = -1;
           break;
         }
       break;
     case GD_INT32:
       for (n = 0; n < nmemb; ++n)
-        if (fprintf(entry->edata, "%" PRIi32 "\n", ((int32_t*)ptr)[n]) < 0) {
+        if (fprintf(file->edata, "%" PRIi32 "\n", ((int32_t*)ptr)[n]) < 0) {
           ret = -1;
           break;
         }
       break;
     case GD_UINT64:
       for (n = 0; n < nmemb; ++n)
-        if (fprintf(entry->edata, "%" PRIu64 "\n", ((uint64_t*)ptr)[n]) < 0) {
+        if (fprintf(file->edata, "%" PRIu64 "\n", ((uint64_t*)ptr)[n]) < 0) {
           ret = -1;
           break;
         }
       break;
     case GD_INT64:
       for (n = 0; n < nmemb; ++n)
-        if (fprintf(entry->edata, "%" PRIi64 "\n", ((int64_t*)ptr)[n]) < 0) {
+        if (fprintf(file->edata, "%" PRIi64 "\n", ((int64_t*)ptr)[n]) < 0) {
           ret = -1;
           break;
         }
       break;
     case GD_FLOAT32:
       for (n = 0; n < nmemb; ++n)
-        if (fprintf(entry->edata, "%.7g\n", ((float*)ptr)[n]) < 0) {
+        if (fprintf(file->edata, "%.7g\n", ((float*)ptr)[n]) < 0) {
           ret = -1;
           break;
         }
       break;
     case GD_FLOAT64:
       for (n = 0; n < nmemb; ++n)
-        if (fprintf(entry->edata, "%.16lg\n", ((double*)ptr)[n]) < 0) {
+        if (fprintf(file->edata, "%.16lg\n", ((double*)ptr)[n]) < 0) {
           ret = -1;
           break;
         }
@@ -231,30 +240,30 @@ ssize_t _GD_AsciiWrite(struct _gd_private_entry *entry, const void *ptr,
   return (ret) ? ret : (ssize_t)n;
 }
 
-int _GD_AsciiSync(struct _gd_private_entry *entry)
+int _GD_AsciiSync(struct _gd_raw_file *file)
 {
   int ret;
 
-  dtrace("%p", entry);
+  dtrace("%p", file);
   
-  ret = fflush(entry->edata);
+  ret = fflush(file->edata);
 
   if (!ret)
-    ret = fsync(fileno(entry->edata));
+    ret = fsync(fileno(file->edata));
 
   dreturn("%i", ret);
   return ret;
 }
 
-int _GD_AsciiClose(struct _gd_private_entry *entry)
+int _GD_AsciiClose(struct _gd_raw_file* file)
 {
   int ret;
   
   dtrace("%p", entry);
 
-  ret = fclose(entry->edata);
+  ret = fclose(file->edata);
   if (ret != EOF) {
-    entry->fp = -1;
+    file->fp = -1;
     dreturn("%i", 0);
     return 0;
   }
@@ -263,17 +272,21 @@ int _GD_AsciiClose(struct _gd_private_entry *entry)
   return 1;
 }
 
-off64_t _GD_AsciiSize(const char *name, gd_type_t data_type __gd_unused)
+off64_t _GD_AsciiSize(struct _gd_raw_file* file, const char *base,
+    gd_type_t data_type __gd_unused)
 {
   FILE* stream;
-  char asciiname[FILENAME_MAX];
 
-  dtrace("\"%s\", 0x%x", name, data_type);
+  dtrace("%p, \"%s\", <unused>", file, base);
 
-  snprintf(asciiname, FILENAME_MAX, "%s.txt", name);
+  if (_GD_SetEncodedName(file, base, 0)) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
   off64_t n = 0;
 
-  stream = fopen(asciiname, "r");
+  stream = fopen(file->name, "r");
 
   if (stream == NULL) {
     dreturn("%i", -1);
@@ -281,7 +294,7 @@ off64_t _GD_AsciiSize(const char *name, gd_type_t data_type __gd_unused)
   }
 
   while (!feof(stream))
-    if (fgets(asciiname, FILENAME_MAX, stream) != NULL)
+    if (fgets(file->name, FILENAME_MAX, stream) != NULL)
       n++;
 
   fclose(stream);
@@ -290,12 +303,62 @@ off64_t _GD_AsciiSize(const char *name, gd_type_t data_type __gd_unused)
   return n;
 }
 
-int _GD_AsciiTouch(const char* name)
+int _GD_AsciiTemp(struct _gd_raw_file *file, int mode)
 {
-  return _GD_GenericTouch(name, ".txt");
-}
+  dtrace("%p, %i", file, mode);
 
-int _GD_AsciiUnlink(const char* name)
-{
-  return _GD_GenericUnlink(name, ".txt");
+  int move_error = 0;
+
+  switch(mode) {
+    case GD_TEMP_OPEN:
+      if (_GD_SetEncodedName(file + 1, file->name, 1)) {
+        dreturn("%i", -1);
+        return -1;
+      }
+
+      int fp = mkstemp(file[1].name);
+
+      file->edata = fdopen(fp, "r+");
+
+      if (file->edata != NULL) {
+        file->fp = 0;
+        dreturn("%i", -1);
+        return -1;
+      }
+      break;
+    case GD_TEMP_MOVE:
+      if (!rename(file[1].name, file[0].name)) {
+        free(file[1].name);
+        file[1].name = NULL;
+        dreturn("%i", 0);
+        return 0;
+      }
+      move_error = errno;
+      /* fallthrough on error */
+    case GD_TEMP_DESTROY:
+      if (file[1].name != NULL) {
+        if (file[1].fp >= 0)
+          if (_GD_AsciiClose(file + 1)) {
+            dreturn("%i", -1);
+            return -1;
+          }
+
+        if (unlink(file[1].name)) {
+          dreturn("%i", -1);
+          return -1;
+        }
+
+        if (mode == GD_TEMP_MOVE) {
+          errno = move_error;
+          dreturn("%i", -1);
+          return -1;
+        }
+        free(file[1].name);
+        file[1].name = NULL;
+      }
+      break;
+  }
+
+  dreturn("%i", 0);
+  return 0;
 }

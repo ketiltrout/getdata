@@ -166,7 +166,7 @@ static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *E,
   s0 = first_samp + first_frame * E->spf;
   ns = num_samp + num_frames * E->spf;
 
-  databuffer = malloc(ns * E->size);
+  databuffer = malloc(ns * E->e->size);
   if (databuffer == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     dreturn("%zi", 0);
@@ -181,32 +181,32 @@ static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *E,
 
   if (ns > 0) {
     /** open the file (and cache the fp) if it hasn't been opened yet. */
-    if (E->e->fp < 0) {
+    if (E->e->file[0].fp < 0) {
       if (!_GD_Supports(D, E, GD_EF_OPEN | GD_EF_SEEK | GD_EF_READ)) {
         dreturn("%i", 0);
         return 0;
-      } else if ((*encode[E->e->encoding].open)(E->e, E->e->file,
-            D->flags & GD_ACCMODE, 0))
+      } else if ((*encode[E->e->file[0].encoding].open)(E->e->file,
+            E->e->filebase, D->flags & GD_ACCMODE, 0))
       {
-        _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file, errno, NULL);
+        _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[0].name, errno, NULL);
         dreturn("%zi", 0);
         return 0;
       }
     }
 
-    (*encode[E->e->encoding].seek)(E->e, s0, E->data_type, 0);
+    (*encode[E->e->file[0].encoding].seek)(E->e->file, s0, E->data_type, 0);
 
-    samples_read = (*encode[E->e->encoding].read)(E->e,
-        databuffer + n_read * E->size, E->data_type, ns);
+    samples_read = (*encode[E->e->file[0].encoding].read)(E->e->file,
+        databuffer + n_read * E->e->size, E->data_type, ns);
 
     if (samples_read == -1) {
-      _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file, errno, NULL);
+      _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[0].name, errno, NULL);
       free(databuffer);
       dreturn("%zi", 0);
       return 0;
     }
 
-    if (encode[E->e->encoding].ecor &&
+    if (encode[E->e->file[0].encoding].ecor &&
         (D->fragment[E->fragment_index].flags &
 #ifdef WORDS_BIGENDIAN
          GD_LITTLE_ENDIAN
@@ -214,7 +214,8 @@ static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *E,
          GD_BIG_ENDIAN
 #endif
         ))
-      _GD_FixEndianness(databuffer + n_read * E->size, E->size, samples_read);
+      _GD_FixEndianness(databuffer + n_read * E->e->size, E->e->size,
+          samples_read);
 
     n_read += samples_read;
   }

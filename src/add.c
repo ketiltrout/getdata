@@ -175,26 +175,27 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
       }
 
       E->data_type = entry->data_type;
-      E->e->fp = -1;
-      E->e->encoding = GD_ENC_UNKNOWN;
+      E->e->file[0].fp = E->e->file[1].fp = -1;
+      E->e->file[0].encoding = GD_ENC_UNKNOWN;
 
-      if ((E->e->file = malloc(FILENAME_MAX)) == NULL) {
+      if ((E->e->filebase = malloc(FILENAME_MAX)) == NULL) {
         _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
         break;
       }
 
-      snprintf(E->e->file, FILENAME_MAX, "%s/%s/%s", D->name,
+      snprintf(E->e->filebase, FILENAME_MAX, "%s/%s/%s", D->name,
           D->fragment[E->fragment_index].sname, E->field);
 
       if ((E->spf = entry->spf) <= 0)
         _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_SPF, NULL, entry->spf,
             NULL);
-      else if (E->data_type & 0x40 || (E->size = GD_SIZE(E->data_type)) == 0)
+      else if (E->data_type & 0x40 || (E->e->size = GD_SIZE(E->data_type)) == 0)
         _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, entry->data_type, NULL);
       else if (!_GD_Supports(D, E, GD_EF_TOUCH))
         ; /* error already set */
-      else if ((*encode[E->e->encoding].touch)(E->e->file))
-        _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file, errno, NULL);
+      else if ((*encode[E->e->file[0].encoding].touch)(E->e->file,
+            E->e->filebase))
+        _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[0].name, errno, NULL);
       else if (D->fragment[E->fragment_index].ref_name == NULL) {
         /* This is the first raw field in this fragment; propagate it upwards */
         for (i = E->fragment_index; i != -1; i = D->fragment[i].parent)
@@ -466,7 +467,8 @@ int dirfile_add(DIRFILE* D, const gd_entry_t* entry)
 int dirfile_add_raw(DIRFILE* D, const char* field_code, gd_type_t data_type,
     unsigned int spf, int fragment_index)
 {
-  dtrace("%p, \"%s\", %x, %i %i", D, field_code, data_type, spf, fragment_index);
+  dtrace("%p, \"%s\", %x, %i %i", D, field_code, data_type, spf,
+      fragment_index);
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -488,7 +490,8 @@ int dirfile_add_raw(DIRFILE* D, const char* field_code, gd_type_t data_type,
 
 /* add a LINCOM entry */
 int dirfile_add_lincom(DIRFILE* D, const char* field_code, int n_fields,
-    const char** in_fields, const double* m, const double* b, int fragment_index)
+    const char** in_fields, const double* m, const double* b,
+    int fragment_index)
 {
   dtrace("%p, \"%s\", %i, %p, %p, %p, %i", D, field_code, n_fields, in_fields,
       m, b, fragment_index);

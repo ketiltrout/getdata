@@ -198,8 +198,9 @@ static gd_entry_t* _GD_ParseRaw(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
   memset(E->e, 0, sizeof(struct _gd_private_entry));
 
   E->field_type = GD_RAW_ENTRY;
-  E->e->fp = -1; /* file not opened yet */
-  E->e->encoding = GD_ENC_UNKNOWN; /* don't know the encoding subscheme yet */
+  E->e->file[0].fp = E->e->file[1].fp = -1; /* file not opened yet */
+  E->e->file[0].encoding = GD_ENC_UNKNOWN; /* don't know the encoding
+                                              subscheme yet */
 
   E->field = _GD_ValidateField(NULL, in_cols[0], pedantic);
   if (E->field == in_cols[0]) {
@@ -211,8 +212,8 @@ static gd_entry_t* _GD_ParseRaw(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
     return NULL;
   }
 
-  E->e->file = malloc(FILENAME_MAX);
-  if (E->e->file == NULL) {
+  E->e->filebase = malloc(FILENAME_MAX);
+  if (E->e->filebase == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     E->field = NULL;
     _GD_FreeE(E, 1);
@@ -220,12 +221,12 @@ static gd_entry_t* _GD_ParseRaw(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
     return NULL;
   }
 
-  snprintf((char*)E->e->file, FILENAME_MAX, "%s/%s/%s", D->name,
+  snprintf((char*)E->e->filebase, FILENAME_MAX, "%s/%s/%s", D->name,
       D->fragment[me].sname, in_cols[0]);
   E->data_type = _GD_RawType(in_cols[2]);
-  E->size = GD_SIZE(E->data_type);
+  E->e->size = GD_SIZE(E->data_type);
 
-  if (E->size == 0 || E->data_type & 0x40)
+  if (E->e->size == 0 || E->data_type & 0x40)
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_TYPE, format_file, line,
         in_cols[2]);
   else if ((E->e->scalar[0] = _GD_SetScalar(in_cols[3], &E->spf, 0)) == NULL) {
@@ -805,8 +806,8 @@ gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, const char** in_cols,
         /* If the encoding scheme is unsupported, we can't add the field */
         _GD_SetError(D, GD_E_UNSUPPORTED, 0, NULL, 0, NULL);
       else if (_GD_Supports(D, E, GD_EF_TOUCH) &&
-          (*encode[E->e->encoding].touch)(E->e->file))
-          _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file, errno, NULL);
+          (*encode[E->e->file[0].encoding].touch)(E->e->file, E->e->filebase))
+          _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[0].name, errno, NULL);
     }
 
     /* Is this the first raw field ever defined? */
@@ -1196,7 +1197,10 @@ char* _GD_ParseFragment(FILE* fp, DIRFILE *D, int me, int* standards,
           D->fragment[me].cname, linenum, me, *standards, 0,
           flags & GD_PEDANTIC);
 
-    if (D->error == GD_E_FORMAT) {
+    if (D->flags & GD_IGNORE_DUPS && D->error == GD_E_FORMAT &&
+        D->suberror == GD_E_FORMAT_DUPLICATE)
+      _GD_ClearError(D); /* ignore this line, continue parsing */
+    else if (D->error == GD_E_FORMAT) {
       rescan = 0;
       /* call the callback for this error */
       if (D->sehandler != NULL)

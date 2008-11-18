@@ -75,7 +75,7 @@ static size_t _GD_DoRawOut(DIRFILE *D, gd_entry_t *E,
     return 0;
   }
 
-  if (encode[E->e->encoding].ecor &&
+  if (encode[E->e->file[0].encoding].ecor &&
       (D->fragment[E->fragment_index].flags &
 #ifdef WORDS_BIGENDIAN
        GD_LITTLE_ENDIAN
@@ -83,27 +83,27 @@ static size_t _GD_DoRawOut(DIRFILE *D, gd_entry_t *E,
        GD_BIG_ENDIAN
 #endif
       ))
-    _GD_FixEndianness(databuffer, E->size, ns);
+    _GD_FixEndianness(databuffer, E->e->size, ns);
 
-  /* write data to file.  Note that if the first sample is beyond     */
-  /* the current end of file, a gap will result (see lseek(2)) */
+  /* write data to file. */
 
-  if (E->e->fp < 0) {
+  if (E->e->file[0].fp < 0) {
     /* open file for reading / writing if not already opened */
 
-    if ((*encode[E->e->encoding].open)(E->e, E->e->file, D->flags & GD_ACCMODE,
-          1))
+    if ((*encode[E->e->file[0].encoding].open)(E->e->file, E->e->filebase,
+          D->flags & GD_ACCMODE, 1))
     {
-      _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file, errno, NULL);
+      _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[0].name, errno, NULL);
       dreturn("%zi", 0);
       return 0;
     }
   }
 
-  (*encode[E->e->encoding].seek)(E->e, s0, E->data_type, 1);
+  (*encode[E->e->file[0].encoding].seek)(E->e->file, s0, E->data_type, 1);
 
-  n_wrote = (*encode[E->e->encoding].write)(E->e, databuffer, E->data_type, ns);
-  n_wrote /= E->size;
+  n_wrote = (*encode[E->e->file[0].encoding].write)(E->e->file, databuffer,
+      E->data_type, ns);
+  n_wrote /= E->e->size;
 
   free(databuffer);
 

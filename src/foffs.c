@@ -26,11 +26,12 @@
 #include <errno.h>
 #endif
 
+#define BUFFER_SIZE 9000000
+
 static void _GD_ShiftFragment(DIRFILE* D, off64_t offset, int fragment,
     int move)
 {
   unsigned int i, n_raw = 0;
-
 
   dtrace("%p, %lli, %i, %i\n", D, (long long)offset, fragment, move);
 
@@ -42,14 +43,20 @@ static void _GD_ShiftFragment(DIRFILE* D, off64_t offset, int fragment,
     return;
   }
 
-  if (move) {
+  if (move && offset != D->fragment[fragment].frame_offset) {
     gd_entry_t **raw_entry = malloc(sizeof(gd_entry_t*) * D->n_entries);
+    const struct encoding_t* enc;
+    void *buffer = malloc(BUFFER_SIZE);
+    size_t ns;
+    ssize_t nread, nwrote;
 
-    if (raw_entry == NULL) {
+    if (raw_entry == NULL || buffer == NULL) {
       _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
       dreturnvoid();
       return;
     }
+
+    offset -= D->fragment[fragment].frame_offset;
 
     /* Because it may fail, the move must occur out-of-place and then be copied
      * back over the affected files once success is assured */
@@ -66,29 +73,96 @@ static void _GD_ShiftFragment(DIRFILE* D, off64_t offset, int fragment,
 
         if (!_GD_Supports(D, D->entry[i], GD_EF_OPEN | GD_EF_CLOSE |
               GD_EF_READ | GD_EF_WRITE | GD_EF_SYNC | GD_EF_UNLINK |
-              GD_EF_MKTEMP))
+              GD_EF_TEMP))
           break;
+
+        enc = encode + raw_entry[i]->e->file[0].encoding;
+        ns = BUFFER_SIZE / raw_entry[i]->e->size;
 
         /* add this raw field to the list */
         raw_entry[n_raw++] = D->entry[i];
 
         /* Create a temporary file and open it */
-        if ((*encode[raw_entry[i]->e->encoding].mktemp)(raw_entry[i]->e, 0)) {
-          _GD_SetError(D, GD_E_RAW_IO, 0, raw_entry[i]->e->temp_file, errno,
+        if ((*enc->temp)(raw_entry[i]->e->file, GD_TEMP_OPEN)) {
+          _GD_SetError(D, GD_E_RAW_IO, 0, raw_entry[i]->e->file[1].name, errno,
               NULL);
           break;
         }
+
+        /* Open the input file */
+        if ((*enc->open)(raw_entry[i]->e->file, raw_entry[i]->e->filebase,
+              0, 0))
+        {
+          _GD_SetError(D, GD_E_RAW_IO, 0, raw_entry[i]->e->file[0].name, errno,
+              NULL);
+          break;
+        }
+
+        /* Adjust for the change in offset */
+        if (offset < 0) { /* new offset is less, pad new file */
+          if ((*enc->seek)(raw_entry[i]->e->file + 1,
+                -offset * raw_entry[i]->spf, raw_entry[i]->data_type, 1)) {
+            _GD_SetError(D, GD_E_RAW_IO, 0, raw_entry[i]->e->file[1].name,
+                errno, NULL);
+            break;
+          }
+        } else { /* new offset is more, truncate new file */
+          if ((*enc->seek)(raw_entry[i]->e->file, offset * raw_entry[i]->spf,
+              raw_entry[i]->data_type, 0))
+            _GD_SetError(D, GD_E_RAW_IO, 0, raw_entry[i]->e->file[1].name,
+                errno, NULL);
+            break;
+        }
+
+        /* Now copy the old file to the new file */
+        for (;;) {
+          nread = (*enc->read)(raw_entry[i]->e->file, buffer,
+              raw_entry[i]->data_type, ns);
+
+          if (nread < 0) {
+            _GD_SetError(D, GD_E_RAW_IO, 0, raw_entry[i]->e->file[1].name,
+                errno, NULL);
+            break;
+          }
+
+          if (nread == 0)
+            break;
+
+          nwrote = (*enc->write)(raw_entry[i]->e->file, buffer,
+              raw_entry[i]->data_type, nread);
+
+          if (nwrote < nread) {
+            _GD_SetError(D, GD_E_RAW_IO, 0, raw_entry[i]->e->file[1].name,
+                errno, NULL);
+            break;
+          }
+        }
+
+        /* Well, I suppose the copy worked.  Close both files */
+        if ((*enc->close)(raw_entry[i]->e->file) ||
+            (*enc->sync)(raw_entry[i]->e->file + 1) ||
+            (*enc->close)(raw_entry[i]->e->file + 1))
+        {
+            _GD_SetError(D, GD_E_RAW_IO, 0, raw_entry[i]->e->file[1].name,
+                errno, NULL);
+            break;
+        }
       }
 
+    /* If successful, move the temporary file over the old file, otherwise
+     * remove the temporary files */
+    for (i = 0; i < n_raw; ++i)
+      if ((*encode[raw_entry[i]->e->file[0].encoding].temp)
+          (raw_entry[i]->e->file, (D->error) ? GD_TEMP_DESTROY : GD_TEMP_MOVE))
+        _GD_SetError(D, GD_E_RAW_IO, 0, raw_entry[i]->e->file[0].name,
+            errno, NULL);
+
+    free(raw_entry);
+    free(buffer);
+
     if (D->error) {
-      /* an error occurred, clean-up the temporary files */
-      for (i = 0; i < n_raw; ++i)
-        (*encode[raw_entry[i]->e->encoding].mktemp)(raw_entry[i]->e, 1);
-      free(raw_entry);
       dreturnvoid();
       return;
-    } else {
-      /* no error occurred, overwrite the data with the temporary files */
     }
   }
 
@@ -118,6 +192,12 @@ int put_frameoffset64(DIRFILE* D, off64_t offset, int fragment, int move)
 
   if (fragment < GD_ALL_FRAGMENTS || fragment >= D->n_fragment) {
     _GD_SetError(D, GD_E_BAD_INDEX, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  if (offset < 0) {
+    _GD_SetError(D, GD_E_RANGE, 0, NULL, 0, NULL);
     dreturn("%i", -1);
     return -1;
   }

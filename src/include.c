@@ -169,8 +169,8 @@ int dirfile_include(DIRFILE* D, const char* file, int fragment_index,
     return -1;
   }
 
-  int i = _GD_Include(D, file, "dirfile_include()", 0, &ref_name, fragment_index,
-      &standards, flags);
+  int i = _GD_Include(D, file, "dirfile_include()", 0, &ref_name,
+      fragment_index, &standards, flags);
 
   /* Find the reference field */
   if (ref_name != NULL) {

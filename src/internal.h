@@ -150,6 +150,13 @@ const char* _gd_colsub(void);
 #define GD_E_DEL_CONST          2
 #define GD_E_DEL_DERIVED        3
 
+struct _gd_raw_file {
+  char* name;
+  int fp;
+  void* edata;
+  int encoding;
+};
+
 /* Unified entry struct */
 struct _gd_private_entry {
   gd_entry_t* entry[GD_MAX_LINCOM];
@@ -171,11 +178,9 @@ struct _gd_private_entry {
 
   union {
     struct { /* RAW */
-      char* file;
-      char* temp_file;
-      int fp;
-      void* edata;
-      int encoding;
+      char* filebase;
+      size_t size;
+      struct _gd_raw_file file[2];
     };
     struct { /* LINTERP */
       int table_len; /* internal */
@@ -213,24 +218,28 @@ struct _gd_private_entry {
 #define GD_EF_WRITE  0x040
 #define GD_EF_SYNC   0x080
 #define GD_EF_UNLINK 0x100
-#define GD_EF_MKTEMP 0x200
+#define GD_EF_TEMP   0x200
+
+#define GD_TEMP_OPEN    0
+#define GD_TEMP_MOVE    1
+#define GD_TEMP_DESTROY 2
 
 /* Encoding schemes */
 extern const struct encoding_t {
   unsigned int scheme;
   const char* ext;
   int ecor; /* encoding requires byte-sex correction */
-  int (*open)(struct _gd_private_entry*, const char*, int, int);
-  int (*close)(struct _gd_private_entry*);
-  int (*touch)(const char*);
-  off64_t (*seek)(struct _gd_private_entry*, off64_t, gd_type_t, int);
-  ssize_t (*read)(struct _gd_private_entry*, void*, gd_type_t, size_t);
-  off64_t (*size)(const char*, gd_type_t);
-  ssize_t (*write)(struct _gd_private_entry*, const void*, gd_type_t,
+  int (*open)(struct _gd_raw_file*, const char*, int, int);
+  int (*close)(struct _gd_raw_file*);
+  int (*touch)(struct _gd_raw_file*, const char*);
+  off64_t (*seek)(struct _gd_raw_file*, off64_t, gd_type_t, int);
+  ssize_t (*read)(struct _gd_raw_file*, void*, gd_type_t, size_t);
+  off64_t (*size)(struct _gd_raw_file*, const char*, gd_type_t);
+  ssize_t (*write)(struct _gd_raw_file*, const void*, gd_type_t,
       size_t);
-  int (*sync)(struct _gd_private_entry*);
-  int (*unlink)(const char*);
-  int (*mktemp)(struct _gd_private_entry*, int);
+  int (*sync)(struct _gd_raw_file*);
+  int (*unlink)(struct _gd_raw_file*, const char*);
+  int (*temp)(struct _gd_raw_file*, int);
 } encode[];
 
 #define GD_PROTECT_NONE   00
@@ -363,6 +372,7 @@ void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E);
 void _GD_ScaleData(DIRFILE* D, void *data, gd_type_t type, size_t npts,
     double m, double b);
 void _GD_ScanFormat(char* fmt, gd_type_t data_type);
+int _GD_SetEncodedName(struct _gd_raw_file* file, const char* base, int temp);
 void _GD_SetError(DIRFILE* D, int error, int suberror, const char* format_file,
     int line, const char* token);
 int _GD_Supports(DIRFILE* D, gd_entry_t* E, unsigned int funcs);
@@ -372,49 +382,50 @@ char* _GD_ValidateField(const gd_entry_t* parent, const char* field_code,
     int strict);
 
 /* generic I/O methods */
-int _GD_GenericTouch(const char* name, const char* ext);
-int _GD_GenericUnlink(const char* name, const char* ext);
+int _GD_GenericTouch(struct _gd_raw_file* file, const char* base);
+int _GD_GenericUnlink(struct _gd_raw_file* file, const char* base);
 
 /* unencoded I/O methods */
-int _GD_RawOpen(struct _gd_private_entry* entry, const char* name, int mode,
+int _GD_RawOpen(struct _gd_raw_file* file, const char* base, int mode,
     int creat);
-off64_t _GD_RawSeek(struct _gd_private_entry* entry, off64_t count,
+off64_t _GD_RawSeek(struct _gd_raw_file* file, off64_t count,
     gd_type_t data_type, int pad);
-ssize_t _GD_RawRead(struct _gd_private_entry *entry, void *ptr,
+ssize_t _GD_RawRead(struct _gd_raw_file* file, void *ptr, gd_type_t data_type,
+    size_t nmemb);
+ssize_t _GD_RawWrite(struct _gd_raw_file* file, const void *ptr,
     gd_type_t data_type, size_t nmemb);
-ssize_t _GD_RawWrite(struct _gd_private_entry *entry, const void *ptr,
-    gd_type_t data_type, size_t nmemb);
-int _GD_RawSync(struct _gd_private_entry *entry);
-int _GD_RawClose(struct _gd_private_entry *entry);
-int _GD_RawTouch(const char *name);
-off64_t _GD_RawSize(const char *name, gd_type_t data_type);
-int _GD_RawUnlink(const char *name);
+int _GD_RawSync(struct _gd_raw_file* file);
+int _GD_RawClose(struct _gd_raw_file* file);
+off64_t _GD_RawSize(struct _gd_raw_file* file, const char* base,
+    gd_type_t data_type);
+int _GD_RawTemp(struct _gd_raw_file *file, int mode);
 
 /* text I/O methods */
-int _GD_AsciiOpen(struct _gd_private_entry* entry, const char* name, int mode,
+int _GD_AsciiOpen(struct _gd_raw_file* file, const char* base, int mode,
     int creat);
-off64_t _GD_AsciiSeek(struct _gd_private_entry* entry, off64_t count,
+off64_t _GD_AsciiSeek(struct _gd_raw_file* file, off64_t count,
     gd_type_t data_type, int pad);
-ssize_t _GD_AsciiRead(struct _gd_private_entry *entry, void *ptr,
-    gd_type_t data_type, size_t nmemb);
-ssize_t _GD_AsciiWrite(struct _gd_private_entry *entry, const void *ptr,
-    gd_type_t data_type, size_t nmemb);
-int _GD_AsciiSync(struct _gd_private_entry *entry);
-int _GD_AsciiClose(struct _gd_private_entry *entry);
-int _GD_AsciiTouch(const char *name);
-off64_t _GD_AsciiSize(const char *name, gd_type_t data_type);
-int _GD_AsciiUnlink(const char *name);
+ssize_t _GD_AsciiRead(struct _gd_raw_file* file, void *ptr, gd_type_t data_type,
+    size_t nmemb);
+ssize_t _GD_AsciiWrite(struct _gd_raw_file* file, const void *ptr,
+    gd_type_t data_type,
+    size_t nmemb);
+int _GD_AsciiSync(struct _gd_raw_file* file);
+int _GD_AsciiClose(struct _gd_raw_file* file);
+off64_t _GD_AsciiSize(struct _gd_raw_file* file, const char* base,
+    gd_type_t data_type);
+int _GD_AsciiTemp(struct _gd_raw_file *file, int mode);
 
 #ifdef USE_SLIMLIB
 /* slimlib I/O methods */
-int _GD_SlimOpen(struct _gd_private_entry* entry, const char* name, int mode,
+int _GD_SlimOpen(struct _gd_raw_file* file, const char* base, int mode,
     int creat);
-off64_t _GD_SlimSeek(struct _gd_private_entry* entry, off64_t count,
+off64_t _GD_SlimSeek(struct _gd_raw_file* file, off64_t count,
     gd_type_t data_type, int pad);
-ssize_t _GD_SlimRead(struct _gd_private_entry *entry, void *ptr,
-    gd_type_t data_type, size_t nmemb);
-int _GD_SlimClose(struct _gd_private_entry *entry);
-off64_t _GD_SlimSize(const char *name, gd_type_t data_type);
-int _GD_SlimUnlink(const char *name);
+ssize_t _GD_SlimRead(struct _gd_raw_file* file, void *ptr, gd_type_t data_type,
+    size_t nmemb);
+int _GD_SlimClose(struct _gd_raw_file* file);
+off64_t _GD_SlimSize(struct _gd_raw_file* file, const char* base,
+    gd_type_t data_type);
 #endif
 #endif

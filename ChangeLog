@@ -1,5 +1,31 @@
+2008-11-18   D. V. Wiebe <getdata@ketiltrout.net>  svn:232
+	* src/open.c (_GD_ParseFragment): Added GD_IGNORE_DUPS flags.
+	* test/parse_duplicate_ignore.c: Added.
+
+	* src/internal.h src/getdata.h.in: Moved gd_entry_t->size to
+	_gd_private_entry.
+
+	* src/foffs.c (_GD_ShiftFragment): Do the move and cleanup.
+	* src/ascii.c (_GD_AsciiTemp) src/raw.c (_GD_RawTemp): Added.
+
+	* src/foffs.c (put_frameoffset64): Check offset parameter for range.
+
+	* src/encoding.c (_GD_SetEncodedName): Added.
+
+	* src/slim.c (_GD_SlimUnlink) src/ascii.c (_GD_AsciiUnlink) src/raw.c
+	(_GD_RawUnlink): Removed and replaced by _GD_GenericUnlink.
+	* src/ascii.c (_GD_AsciiTouch) src/raw.c (_GD_RawTouch): Removed and replaced
+	by _GD_GenericTouch.
+
+	* src/internal.h: Created the _gd_raw_file object. Renamed
+	_gd_private_entry->file to _gd_private_entry->filebase.
+	* src/encoding.c: Encoding framework updated to work on _gd_raw_file
+	objects.
+
+	* src/entry.c (get_raw_filename): Use cached filename.
+
 2008-11-18   D. V. Wiebe <getdata@ketiltrout.net>  svn:228
-  Merged in changes from the 0.4.x branch, revision 223:
+	 Merged in changes from the 0.4.x branch, revision 223:
 
 	* src/flush.c (_GD_Flush): Fix SEGV.
 

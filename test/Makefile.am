@@ -145,11 +145,11 @@ OPEN_TESTS=open open_eaccess open_nonexistent open_notdirfile
 PARSE_TESTS=parse_badline parse_bit parse_bit4 parse_bit_bitnum \
 						parse_bit_bitsize parse_bit_ncols parse_bit_numbits \
 						parse_bit_scalar parse_const parse_const_ncols parse_duplicate \
-						parse_endian_bad parse_endian_big parse_endian_force \
-						parse_endian_little parse_endian_slash parse_eol parse_foffs \
-						parse_foffs_include parse_foffs_slash parse_include \
-						parse_include_nonexistent parse_include_slash parse_index \
-						parse_lincom parse_lincom_ncols1 parse_lincom_ncols2 \
+						parse_duplicate_ignore parse_endian_bad parse_endian_big \
+						parse_endian_force parse_endian_little parse_endian_slash \
+						parse_eol parse_foffs parse_foffs_include parse_foffs_slash \
+						parse_include parse_include_nonexistent parse_include_slash \
+						parse_index parse_lincom parse_lincom_ncols1 parse_lincom_ncols2 \
 						parse_lincom_nfields parse_lincom_nofields parse_lincom_scalar \
 						parse_linterp parse_linterp_ncols parse_meta parse_meta_index \
 						parse_meta_parent parse_meta_raw parse_multiply \

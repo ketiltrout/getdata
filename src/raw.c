@@ -28,63 +28,79 @@
 #include <errno.h>
 #endif
 
-int _GD_RawOpen(struct _gd_private_entry* entry, const char* name, int mode,
+int _GD_RawOpen(struct _gd_raw_file* file, const char* base, int mode,
     int creat)
 {
-  dtrace("%p, \"%s\", %i, %i", entry, name, mode, creat);
-  entry->fp = open(name,
-      ((mode == GD_RDWR) ? O_RDWR : O_RDONLY) | (creat ? O_CREAT : 0), 0666);
+  dtrace("%p, \"%s\", %i, %i", file, base, mode, creat);
 
-  dreturn("%i", entry->fp < 0);
-  return (entry->fp < 0);
+  if (_GD_SetEncodedName(file, base, 0)) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  file->fp = open(file->name, ((mode == GD_RDWR) ? O_RDWR : O_RDONLY) |
+      (creat ? O_CREAT : 0), 0666);
+
+  dreturn("%i", file->fp < 0);
+  return (file->fp < 0);
 }
 
-off64_t _GD_RawSeek(struct _gd_private_entry* entry, off64_t count,
+off64_t _GD_RawSeek(struct _gd_raw_file* file, off64_t count,
     gd_type_t data_type, int pad __gd_unused)
 {
-  return lseek64(entry->fp, count * GD_SIZE(data_type), SEEK_SET);
+  return lseek64(file->fp, count * GD_SIZE(data_type), SEEK_SET);
 }
 
-ssize_t _GD_RawRead(struct _gd_private_entry *entry, void *ptr,
-    gd_type_t data_type, size_t nmemb)
+ssize_t _GD_RawRead(struct _gd_raw_file *file, void *ptr, gd_type_t data_type,
+    size_t nmemb)
 {
-  int nread = read(entry->fp, ptr, nmemb * GD_SIZE(data_type));
+  dtrace("%p, %p, %x, %zi", file, ptr, data_type, nemb);
+
+  int nread = read(file->fp, ptr, nmemb * GD_SIZE(data_type));
 
   if (nread >= 0)
     nread /= GD_SIZE(data_type);
 
+  dreturn("%zi", nread);
+
   return nread;
 }
 
-ssize_t _GD_RawWrite(struct _gd_private_entry *entry, const void *ptr,
+ssize_t _GD_RawWrite(struct _gd_raw_file *file, const void *ptr,
     gd_type_t data_type, size_t nmemb)
 {
-  return write(entry->fp, ptr, nmemb * GD_SIZE(data_type));
+  return write(file->fp, ptr, nmemb * GD_SIZE(data_type));
 }
 
-int _GD_RawSync(struct _gd_private_entry *entry)
+int _GD_RawSync(struct _gd_raw_file *file)
 {
-  return fsync(entry->fp);
+  return fsync(file->fp);
 }
 
-int _GD_RawClose(struct _gd_private_entry *entry)
+int _GD_RawClose(struct _gd_raw_file *file)
 {
-  dtrace("%p", entry);
+  dtrace("%p", file);
 
-  int ret = close(entry->fp);
+  int ret = close(file->fp);
   if (!ret)
-    entry->fp = -1;
+    file->fp = -1;
 
   dreturn("%i", ret);
   return ret;
 }
 
-off64_t _GD_RawSize(const char *name, gd_type_t data_type)
+off64_t _GD_RawSize(struct _gd_raw_file *file, const char *base,
+    gd_type_t data_type)
 {
   struct stat64 statbuf;
-  dtrace("\"%s\"", name);
+  dtrace("%p, \"%s\", %x", file, base, data_type);
 
-  if (stat64(name, &statbuf) < 0)  {
+  if (_GD_SetEncodedName(file, base, 0)) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  if (stat64(file->name, &statbuf) < 0)  {
     dreturn("%lli", -1LL);
     return -1;
   }
@@ -93,12 +109,58 @@ off64_t _GD_RawSize(const char *name, gd_type_t data_type)
   return statbuf.st_size / GD_SIZE(data_type);
 }
 
-int _GD_RawTouch(const char* name)
+int _GD_RawTemp(struct _gd_raw_file *file, int mode)
 {
-  return _GD_GenericTouch(name, "");
-}
+  dtrace("%p, %i", file, mode);
 
-int _GD_RawUnlink(const char* name)
-{
-  return _GD_GenericUnlink(name, "");
+  int move_error;
+
+  switch(mode) {
+    case GD_TEMP_OPEN:
+      if (_GD_SetEncodedName(file + 1, file->name, 1)) {
+        dreturn("%i", -1);
+        return -1;
+      }
+
+      file[1].fp = mkstemp(file[1].name);
+
+      if (file[1].fp == -1) {
+        dreturn("%i", -1);
+        return -1;
+      }
+      break;
+    case GD_TEMP_MOVE:
+      if (!rename(file[1].name, file[0].name)) {
+        free(file[1].name);
+        file[1].name = NULL;
+        dreturn("%i", 0);
+        return 0;
+      }
+      /* fallthrough on error */
+    case GD_TEMP_DESTROY:
+      if (file[1].name != NULL) {
+        if (file[1].fp >= 0)
+          if (_GD_AsciiClose(file + 1)) {
+            dreturn("%i", -1);
+            return -1;
+          }
+
+        if (unlink(file[1].name)) {
+          dreturn("%i", -1);
+          return -1;
+        }
+
+        if (mode == GD_TEMP_MOVE) {
+          errno = move_error;
+          dreturn("%i", -1);
+          return -1;
+        }
+        free(file[1].name);
+        file[1].name = NULL;
+      }
+      break;
+  }
+
+  dreturn("%i", 0);
+  return 0;
 }

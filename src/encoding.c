@@ -33,17 +33,18 @@
 /* encoding schemas */
 const struct encoding_t encode[] = {
   { GD_UNENCODED, "", 1,
-    &_GD_RawOpen, &_GD_RawClose, &_GD_RawTouch, &_GD_RawSeek, &_GD_RawRead,
-    &_GD_RawSize,  &_GD_RawWrite, &_GD_RawSync, &_GD_RawUnlink, NULL },
+    &_GD_RawOpen, &_GD_RawClose, &_GD_GenericTouch, &_GD_RawSeek, &_GD_RawRead,
+    &_GD_RawSize, &_GD_RawWrite, &_GD_RawSync, &_GD_GenericUnlink, &_GD_RawTemp
+  },
   { GD_TEXT_ENCODED, ".txt", 0,
-    &_GD_AsciiOpen, &_GD_AsciiClose, &_GD_AsciiTouch, &_GD_AsciiSeek,
+    &_GD_AsciiOpen, &_GD_AsciiClose, &_GD_GenericTouch, &_GD_AsciiSeek,
     &_GD_AsciiRead, &_GD_AsciiSize, &_GD_AsciiWrite, &_GD_AsciiSync,
-    &_GD_AsciiUnlink, NULL },
+    &_GD_GenericUnlink, &_GD_AsciiTemp },
   { GD_SLIM_ENCODED, ".slm", 1,
 #ifdef USE_SLIMLIB
     &_GD_SlimOpen, &_GD_SlimClose, NULL /* TOUCH */, &_GD_SlimSeek,
     &_GD_SlimRead, &_GD_SlimSize, NULL /* WRITE */, NULL /* SYNC */,
-    &_GD_SlimUnlink, NULL /* MKTEMP */
+    &_GD_GenericUnlink, NULL /* TEMP */
 #else
     NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
 #endif
@@ -54,7 +55,7 @@ const struct encoding_t encode[] = {
 
 /* Figure out the encoding scheme */
 static unsigned int _GD_ResolveEncoding(const char* name, unsigned int scheme,
-    struct _gd_private_entry *e)
+    struct _gd_raw_file *file)
 {
   char candidate[FILENAME_MAX];
   char* ptr;
@@ -74,18 +75,18 @@ static unsigned int _GD_ResolveEncoding(const char* name, unsigned int scheme,
 
       if (stat64(candidate, &statbuf) == 0) 
         if (S_ISREG(statbuf.st_mode)) {
-          if (e != NULL)
-            e->encoding = i;
+          if (file != NULL)
+            file->encoding = i;
           dreturn("%08x", encode[i].scheme);
           return encode[i].scheme;
         }
     }
   }
 
-  if (scheme != 0 && e != NULL) {
+  if (scheme != 0 && file != NULL) {
     for (i = 0; encode[i].scheme != GD_ENC_UNSUPPORTED; i++)
       if (scheme == encode[i].scheme) {
-        e->encoding = i;
+        file->encoding = i;
         dreturn("0x%08x", encode[i].scheme);
         return encode[i].scheme;;
       }
@@ -103,10 +104,10 @@ int _GD_Supports(DIRFILE* D, gd_entry_t* E, unsigned int funcs)
   if ((D->fragment[E->fragment_index].flags & GD_ENCODING) == GD_AUTO_ENCODED) {
     D->fragment[E->fragment_index].flags =
       (D->fragment[E->fragment_index].flags & ~GD_ENCODING) |
-      _GD_ResolveEncoding(E->e->file, GD_AUTO_ENCODED, E->e);
+      _GD_ResolveEncoding(E->e->filebase, GD_AUTO_ENCODED, E->e->file);
   }
 
-  /* If the encoding scheme is unknown, we can't delete the field */
+  /* If the encoding scheme is unknown, complain */
   if ((D->fragment[E->fragment_index].flags & GD_ENCODING) == GD_AUTO_ENCODED) {
     _GD_SetError(D, GD_E_UNKNOWN_ENCODING, 0, NULL, 0, NULL);
     dreturn("%i", 0);
@@ -114,20 +115,21 @@ int _GD_Supports(DIRFILE* D, gd_entry_t* E, unsigned int funcs)
   }
 
   /* Figure out the encoding subtype, if required */
-  if (E->e->encoding == GD_ENC_UNKNOWN)
-    _GD_ResolveEncoding(E->e->file, D->fragment[E->fragment_index].flags, E->e);
+  if (E->e->file[0].encoding == GD_ENC_UNKNOWN)
+    _GD_ResolveEncoding(E->e->filebase, D->fragment[E->fragment_index].flags,
+        E->e->file);
 
   /* check for our function(s) */
-  if ((funcs & GD_EF_OPEN   && encode[E->e->encoding].open   == NULL) ||
-      (funcs & GD_EF_CLOSE  && encode[E->e->encoding].close  == NULL) ||
-      (funcs & GD_EF_TOUCH  && encode[E->e->encoding].touch  == NULL) ||
-      (funcs & GD_EF_SEEK   && encode[E->e->encoding].seek   == NULL) ||
-      (funcs & GD_EF_READ   && encode[E->e->encoding].read   == NULL) ||
-      (funcs & GD_EF_SIZE   && encode[E->e->encoding].size   == NULL) ||
-      (funcs & GD_EF_WRITE  && encode[E->e->encoding].write  == NULL) ||
-      (funcs & GD_EF_SYNC   && encode[E->e->encoding].sync   == NULL) ||
-      (funcs & GD_EF_UNLINK && encode[E->e->encoding].unlink == NULL) ||
-      (funcs & GD_EF_MKTEMP && encode[E->e->encoding].mktemp == NULL))
+  if ((funcs & GD_EF_OPEN   && encode[E->e->file[0].encoding].open   == NULL) ||
+      (funcs & GD_EF_CLOSE  && encode[E->e->file[0].encoding].close  == NULL) ||
+      (funcs & GD_EF_TOUCH  && encode[E->e->file[0].encoding].touch  == NULL) ||
+      (funcs & GD_EF_SEEK   && encode[E->e->file[0].encoding].seek   == NULL) ||
+      (funcs & GD_EF_READ   && encode[E->e->file[0].encoding].read   == NULL) ||
+      (funcs & GD_EF_SIZE   && encode[E->e->file[0].encoding].size   == NULL) ||
+      (funcs & GD_EF_WRITE  && encode[E->e->file[0].encoding].write  == NULL) ||
+      (funcs & GD_EF_SYNC   && encode[E->e->file[0].encoding].sync   == NULL) ||
+      (funcs & GD_EF_UNLINK && encode[E->e->file[0].encoding].unlink == NULL) ||
+      (funcs & GD_EF_TEMP   && encode[E->e->file[0].encoding].temp   == NULL))
   {
     _GD_SetError(D, GD_E_UNSUPPORTED, 0, NULL, 0, NULL);
     dreturn("%i", 0);
@@ -138,14 +140,35 @@ int _GD_Supports(DIRFILE* D, gd_entry_t* E, unsigned int funcs)
   return 1;
 }
 
-int _GD_GenericTouch(const char* name, const char* ext)
+int _GD_SetEncodedName(struct _gd_raw_file* file, const char* base, int temp)
 {
-  char encodedname[FILENAME_MAX];
+  dtrace("%p, \"%s\", %i", file, base, temp);
 
-  dtrace("\"%s\", \"%s\"", name, ext);
-  snprintf(encodedname, FILENAME_MAX, "%s%s", name, ext);
+  if (file->name == NULL) {
+    file->name = malloc(FILENAME_MAX);
+    if (file->name == NULL) {
+      dreturn("%i", -1);
+      return -1;
+    }
 
-  int fd = open(encodedname, O_RDWR | O_CREAT | O_TRUNC, 0666);
+    snprintf(file->name, FILENAME_MAX, "%s%s", base, temp ? "_XXXXXX" :
+        encode[file->encoding].ext);
+  }
+
+  dreturn("%i", 0);
+  return 0;
+}
+
+int _GD_GenericTouch(struct _gd_raw_file* file, const char* base)
+{
+  dtrace("%p, \"%s\"", file, base);
+
+  if (_GD_SetEncodedName(file, base, 0)) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  int fd = open(file->name, O_RDWR | O_CREAT | O_TRUNC, 0666);
 
   if (fd != -1)
     fd = close(fd);
@@ -154,14 +177,16 @@ int _GD_GenericTouch(const char* name, const char* ext)
   return fd;
 }
 
-int _GD_GenericUnlink(const char* name, const char* ext)
+int _GD_GenericUnlink(struct _gd_raw_file* file, const char* base)
 {
-  char encodedname[FILENAME_MAX];
+  dtrace("%p, \"%s\"", file, base);
 
-  dtrace("\"%s\", \"%s\"", name, ext);
-  snprintf(encodedname, FILENAME_MAX, "%s%s", name, ext);
+  if (_GD_SetEncodedName(file, base, 0)) {
+    dreturn("%i", -1);
+    return -1;
+  }
 
-  int r = unlink(encodedname);
+  int r = unlink(file->name);
 
   dreturn("%i", r);
   return r;
