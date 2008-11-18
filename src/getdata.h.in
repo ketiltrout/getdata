@@ -77,10 +77,37 @@
 #define GD_E_BAD_SCALAR       23
 #define GD_E_BAD_REFERENCE    24
 #define GD_E_PROTECTED        25
+#define GD_E_DELETE           26
 
-#define GD_N_ERROR_CODES      26
+#define GD_N_ERROR_CODES      27
+
+/* maximum length of a format file line */
+#define GD_MAX_LINE_LENGTH 4096
 
 #define GD_MAX_LINCOM 3
+
+/* syntax suberrors */
+#define GD_E_FORMAT_BAD_SPF    1
+#define GD_E_FORMAT_N_FIELDS   2
+#define GD_E_FORMAT_N_TOK      3
+#define GD_E_FORMAT_NUMBITS    4
+#define GD_E_FORMAT_BITNUM     5
+#define GD_E_FORMAT_BITSIZE    6
+#define GD_E_FORMAT_CHARACTER  7
+#define GD_E_FORMAT_BAD_LINE   8
+#define GD_E_FORMAT_RES_NAME   9
+#define GD_E_FORMAT_ENDIAN    10
+#define GD_E_FORMAT_BAD_TYPE  11
+#define GD_E_FORMAT_BAD_NAME  12
+#define GD_E_FORMAT_UNTERM    13
+#define GD_E_FORMAT_METARAW   14
+#define GD_E_FORMAT_NO_PARENT 15
+#define GD_E_FORMAT_DUPLICATE 16
+#define GD_E_FORMAT_LOCATION  17
+#define GD_E_FORMAT_PROTECT   18
+
+/* this must be one less than the lowest allowed fragment index */
+#define GD_ALL_FRAGMENTS -1
 
 #define GD_SCALAR_ENTRY 0x100
 /* field types */
@@ -343,9 +370,30 @@ extern int dirfile_add(DIRFILE* D, const gd_entry_t* entry) __gd_nonnull((1,2));
 extern int dirfile_add_spec(DIRFILE* D, const char* line, int fragment_index)
   __gd_nonnull ((1,2));
 
+/* delete flags */
+#define GD_DEL_NONE  0x0
+#define GD_DEL_META  0x1
+#define GD_DEL_DATA  0x2
+#define GD_DEL_DEREF 0x4
+#define GD_DEL_FORCE 0x8
+extern int dirfile_delete(DIRFILE* D, const char* field_code, int flags)
+  __gd_nonnull ((1,2));
+
+extern const char* dirfilename(DIRFILE* D) __gd_nonnull ((1));
+
+extern const char* get_reference(DIRFILE* D) __gd_nonnull ((1));
+
+extern int put_reference(DIRFILE* D, const char* field_code)
+  __gd_nonnull ((1, 2));
+
+extern const char* get_raw_filename(DIRFILE* D, const char* field_code)
+  __gd_nonnull ((1, 2));
+
 /* the following functions are _FILE_OFFSET_BITS sensitive */
 #ifndef __USE_FILE_OFFSET64
-extern off_t get_nframes(DIRFILE* dirfile) __THROW __gd_nonnull ((1));
+extern off_t get_frameoffset(DIRFILE* dirfile, int fragment) __gd_nonnull ((1));
+
+extern off_t get_nframes(DIRFILE* dirfile) __gd_nonnull ((1));
 
 extern size_t getdata(DIRFILE* dirfile, const char *field_code,
     off_t first_frame, off_t first_sample, size_t num_frames,
@@ -356,14 +404,17 @@ extern size_t putdata(DIRFILE* dirfile, const char *field_code,
     off_t first_frame, off_t first_sample, size_t num_frames,
     size_t num_samples, gd_type_t data_type,
     const void *data_in) __gd_nonnull ((1, 2));
-#else
-# ifdef __REDIRECT_NTH
-extern off_t __REDIRECT_NTH (get_nframes, (DIRFILE* dirfile), get_nframes64);
-# else
-#  define get_nframes get_nframes64
-# endif
 
+extern int put_frameoffset(DIRFILE* D, off_t field_code, int fragment,
+    int move) __gd_nonnull ((1));
+#else
 # ifdef __REDIRECT
+extern off_t __REDIRECT (get_frameoffset, (DIRFILE* dirfile, int fragment),
+    get_frameoffset64) __gd_nonnull ((1));
+
+extern off_t __REDIRECT (get_nframes, (DIRFILE* dirfile), get_nframes64)
+  __gd_nonnull ((1));
+
 extern size_t __REDIRECT (getdata, (DIRFILE* dirfile, const char *field_code,
       __off64_t first_frame, __off64_t first_samp, size_t num_frames,
       size_t num_samp, gd_type_t return_type, void *data_out),
@@ -373,15 +424,27 @@ extern size_t __REDIRECT (putdata, (DIRFILE* dirfile, const char *field_code,
       __off64_t first_frame, __off64_t first_sample, size_t num_frames,
       size_t num_samples, gd_type_t data_type, const void *data_in),
     putdata64) __gd_nonnull ((1, 2));
+
+extern int __REDIRECT (put_frameoffset, (DIRFILE* D, __off64_t offset,
+      int fragment, int move), put_frameoffset64) __gd_nonnull ((1));
 # else
+#  define get_frameoffset get_frameoffset64
+#  define get_nframes get_nframes64
 #  define getdata getdata64
 #  define putdata putdata64
+#  define put_frameoffset put_frameoffset64
 # endif
 #endif
 
 /* if requested, declare the LFS transitional extension */
 #ifdef __USE_LARGEFILE64
-extern __off64_t get_nframes64(DIRFILE* dirfile) __THROW __gd_nonnull ((1));
+extern __off64_t get_frameoffset64(DIRFILE* dirfile, int fragment)
+  __gd_nonnull ((1));
+
+extern __off64_t get_nframes64(DIRFILE* dirfile) __gd_nonnull ((1));
+
+extern int put_frameoffset64(DIRFILE* D, __off64_t field_code, int fragment,
+    int move) __gd_nonnull ((1));
 
 extern size_t getdata64(DIRFILE* dirfile, const char *field_code,
     __off64_t first_frame, __off64_t first_samp, size_t num_frames,

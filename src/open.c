@@ -83,9 +83,9 @@ char* _GD_ValidateField(const gd_entry_t* parent, const char* field_code,
   size_t i;
   char* ptr;
 
-  dtrace("%p, \"%s\"", parent, field_code);
+  dtrace("%p, \"%s\", %i", parent, field_code, strict);
 
-  if (field_code[0] == '\0' || len >= MAX_LINE_LENGTH) {
+  if (field_code[0] == '\0' || len >= GD_MAX_LINE_LENGTH) {
     dreturn("%p", field_code);
     return (char*)field_code;
   }
@@ -168,7 +168,7 @@ static gd_entry_t* _GD_ParseRaw(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
       format_file, line, pedantic);
 
   if (n_cols < 4) {
-    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_COLS, format_file, line, NULL);
+    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_TOK, format_file, line, NULL);
     dreturn("%p", NULL);
     return NULL;
   }
@@ -198,9 +198,7 @@ static gd_entry_t* _GD_ParseRaw(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
   memset(E->e, 0, sizeof(struct _gd_private_entry));
 
   E->field_type = GD_RAW_ENTRY;
-  E->e->file = NULL;
   E->e->fp = -1; /* file not opened yet */
-  E->e->stream = NULL; /* file not opened yet */
   E->e->encoding = GD_ENC_UNKNOWN; /* don't know the encoding subscheme yet */
 
   E->field = _GD_ValidateField(NULL, in_cols[0], pedantic);
@@ -258,7 +256,7 @@ static gd_entry_t* _GD_ParseLincom(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
       format_file, line, pedantic);
 
   if (n_cols < 3) {
-    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_COLS, format_file, line, NULL);
+    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_TOK, format_file, line, NULL);
     dreturn("%p", NULL);
     return NULL;
   }
@@ -305,7 +303,7 @@ static gd_entry_t* _GD_ParseLincom(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_FIELDS, format_file, line,
         in_cols[2]);
   else if (n_cols < E->n_fields * 3 + 3)
-    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_COLS, format_file, line, NULL);
+    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_TOK, format_file, line, NULL);
   else
     for (i = 0; i < E->n_fields; i++) {
       E->in_fields[i] = strdup(in_cols[i * 3 + 3]);
@@ -342,7 +340,7 @@ static gd_entry_t* _GD_ParseLinterp(DIRFILE* D,
       format_file, line, pedantic);
 
   if (n_cols < 4) {
-    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_COLS, format_file, line, NULL);
+    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_TOK, format_file, line, NULL);
     dreturn("%p", NULL);
     return NULL;
   }
@@ -417,7 +415,7 @@ static gd_entry_t* _GD_ParseMultiply(DIRFILE* D,
       format_file, line, pedantic);
 
   if (n_cols < 4) {
-    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_COLS, format_file, line, NULL);
+    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_TOK, format_file, line, NULL);
     dreturn("%p", NULL);
     return NULL;
   }
@@ -477,7 +475,7 @@ static gd_entry_t* _GD_ParseBit(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
       format_file, line, pedantic);
 
   if (n_cols < 4) {
-    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_COLS, format_file, line, NULL);
+    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_TOK, format_file, line, NULL);
     dreturn("%p", NULL);
     return NULL;
   }
@@ -555,7 +553,7 @@ static gd_entry_t* _GD_ParsePhase(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
       format_file, line, pedantic);
 
   if (n_cols < 4) {
-    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_COLS, format_file, line, NULL);
+    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_TOK, format_file, line, NULL);
     dreturn("%p", NULL);
     return NULL;
   }
@@ -617,7 +615,7 @@ static gd_entry_t* _GD_ParseConst(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
       format_file, line, pedantic);
 
   if (n_cols < 4) {
-    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_COLS, format_file, line, NULL);
+    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_TOK, format_file, line, NULL);
     dreturn("%p", NULL);
     return NULL;
   }
@@ -692,7 +690,7 @@ static gd_entry_t* _GD_ParseString(DIRFILE* D, const char *in_cols[MAX_IN_COLS],
       format_file, line, pedantic);
 
   if (n_cols < 3) {
-    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_COLS, format_file, line, NULL);
+    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_TOK, format_file, line, NULL);
     dreturn("%p", NULL);
     return NULL;
   }
@@ -786,7 +784,7 @@ gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, const char** in_cols,
   D->entry = realloc(D->entry, (D->n_entries + 1) * sizeof(gd_entry_t*));
 
   if (n_cols < 2)
-    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_COLS, format_file, linenum,
+    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_TOK, format_file, linenum,
         NULL);
   else if (strcmp(in_cols[0], "INDEX") == 0) /* reserved field name */
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_RES_NAME, format_file, linenum,
@@ -806,15 +804,9 @@ gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, const char** in_cols,
       else if ((D->fragment[me].flags & GD_ENCODING) == GD_ENC_UNSUPPORTED)
         /* If the encoding scheme is unsupported, we can't add the field */
         _GD_SetError(D, GD_E_UNSUPPORTED, 0, NULL, 0, NULL);
-      else {
-        /* Set the subencoding subscheme */
-        _GD_ResolveEncoding(E->e->file, D->fragment[me].flags, E->e);
-
-        if (encode[E->e->encoding].touch == NULL) 
-          _GD_SetError(D, GD_E_UNSUPPORTED, 0, NULL, 0, NULL);
-        else if ((*encode[E->e->encoding].touch)(E->e->file))
+      else if (_GD_Supports(D, E, GD_EF_TOUCH) &&
+          (*encode[E->e->encoding].touch)(E->e->file))
           _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file, errno, NULL);
-      }
     }
 
     /* Is this the first raw field ever defined? */
@@ -1089,7 +1081,7 @@ static int _GD_ParseDirective(DIRFILE *D, const char** in_cols, int n_cols,
   ptr = in_cols[0] + ((in_cols[0][0] == '/') ? 1 : 0);
 
   if (n_cols < 2)
-    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_COLS, D->fragment[me].cname,
+    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_TOK, D->fragment[me].cname,
         linenum, NULL);
   else if (strcmp(ptr, "ENCODING") == 0) {
     if (!(flags & GD_FORCE_ENCODING)) {
@@ -1132,7 +1124,7 @@ static int _GD_ParseDirective(DIRFILE *D, const char** in_cols, int n_cols,
       _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_LOCATION,
           D->fragment[me].cname, linenum, in_cols[1]);
     else if (n_cols < 4)
-      _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_COLS,
+      _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_TOK,
           D->fragment[me].cname, linenum, NULL);
     else
       _GD_ParseFieldSpec(D, n_cols - 2, in_cols + 2, P,
@@ -1171,39 +1163,69 @@ static int _GD_ParseDirective(DIRFILE *D, const char** in_cols, int n_cols,
 char* _GD_ParseFragment(FILE* fp, DIRFILE *D, int me, int* standards,
     unsigned int flags)
 {
-  char instring[MAX_LINE_LENGTH];
-  char outstring[MAX_LINE_LENGTH];
+  char instring[GD_MAX_LINE_LENGTH];
+  char outstring[GD_MAX_LINE_LENGTH];
   const char *in_cols[MAX_IN_COLS];
   int linenum = 0;
   char* ref_name = NULL;
   int n_cols;
   int match;
+  int rescan = 0;
+  int se_action = GD_SYNTAX_ABORT;
   int first_fragment = -1;
   gd_entry_t* first_raw = NULL;
+
+  int saved_error = 0;
+  int saved_suberror = 0;
+  int saved_line = 0;
+  char* saved_token = NULL;
 
   dtrace("%p, %p, %i, %p", fp, D, me, standards);
 
   /* start parsing */
-  while (_GD_GetLine(fp, instring, &linenum)) {
+  while (rescan || _GD_GetLine(fp, instring, &linenum)) {
     n_cols = _GD_Tokenise(D, instring, outstring, in_cols,
         D->fragment[me].cname, linenum);
 
-    if (D->error)
-      break; /* tokeniser threw an error */
+    if (D->error == GD_E_OK)
+      match = _GD_ParseDirective(D, in_cols, n_cols, me, standards, linenum,
+          &ref_name, &first_fragment, flags);
 
-    match = _GD_ParseDirective(D, in_cols, n_cols, me, standards, linenum,
-        &ref_name, &first_fragment, flags);
-
-    if (D->error)
-      break; /* directive parser threw an error */
-
-    if (!match)
+    if (D->error == GD_E_OK && !match)
       first_raw = _GD_ParseFieldSpec(D, n_cols, in_cols, NULL,
           D->fragment[me].cname, linenum, me, *standards, 0,
           flags & GD_PEDANTIC);
 
-    if (D->error)
-      break; /* field spec parser threw an error */
+    if (D->error == GD_E_FORMAT) {
+      rescan = 0;
+      /* call the callback for this error */
+      if (D->sehandler != NULL)
+        se_action = (*D->sehandler)(D, D->suberror, instring);
+
+      if (se_action == GD_SYNTAX_ABORT)
+        break; /* abort parsing */
+      else if (se_action == GD_SYNTAX_CONTINUE) {
+        if (!saved_error) { /* remember this error ... */
+          saved_suberror = D->suberror;
+          saved_line = D->error_line;
+          if (D->error_string != NULL)
+            saved_token = strdup(D->error_string);
+          saved_error = 1;
+        }
+        _GD_ClearError(D); /* ... and continue parsing */
+      } else if (se_action == GD_SYNTAX_IGNORE)
+        _GD_ClearError(D); /* ignore this line, continue parsing */
+      else if (se_action == GD_SYNTAX_RESCAN)
+        rescan = 1; /* rescan the modified instring */
+    } else if (D->error)
+      break; /* abort in the event of a non-syntax error */
+  }
+
+  /* restore a saved error, if we have one */
+  if (!D->error && saved_error) {
+    _GD_SetError(D, GD_E_FORMAT, saved_suberror, D->fragment[me].cname,
+        saved_line, saved_token);
+    free(saved_token);
   }
 
   /* Set reference */
@@ -1367,9 +1389,10 @@ static FILE* _GD_CreateDirfile(DIRFILE* D, const char* format_file,
   return fp;
 }
 
-/* dirfile_open: open (or, perhaps, create) and parse the specified dirfile
+/* dirfile_cbopen: open (or, perhaps, create) and parse the specified dirfile
 */
-DIRFILE* dirfile_open(const char* filedir, unsigned int flags)
+DIRFILE* dirfile_cbopen(const char* filedir, unsigned int flags,
+    int (*sehandler)(const DIRFILE*, int, char*))
 {
   FILE *fp;
   char* ref_name;
@@ -1378,7 +1401,7 @@ DIRFILE* dirfile_open(const char* filedir, unsigned int flags)
   char format_file[FILENAME_MAX];
   int standards = DIRFILE_STANDARDS_VERSION;
 
-  dtrace("\"%s\", 0x%x", filedir, flags);
+  dtrace("\"%s\", 0x%x, %p", filedir, flags, sehandler);
 
   D = malloc(sizeof(DIRFILE));
   memset(D, 0, sizeof(DIRFILE));
@@ -1387,6 +1410,7 @@ DIRFILE* dirfile_open(const char* filedir, unsigned int flags)
   D->error_file = malloc(FILENAME_MAX);
   D->name = strdup(filedir);
   D->flags = flags | GD_INVALID;
+  D->sehandler = sehandler;
 
   /* Add the INDEX entry */
   D->n_entries = 1;
@@ -1471,6 +1495,16 @@ DIRFILE* dirfile_open(const char* filedir, unsigned int flags)
   /* Success! Clear invalid bit */
   if (D->error == GD_E_OK)
     D->flags &= ~GD_INVALID;
+
+  dreturn("%p", D);
+  return D;
+}
+
+DIRFILE* dirfile_open(const char* filedir, unsigned int flags)
+{
+  dtrace("\"%s\", 0x%x", filedir, flags);
+
+  DIRFILE* D = dirfile_cbopen(filedir, flags, NULL);
 
   dreturn("%p", D);
   return D;

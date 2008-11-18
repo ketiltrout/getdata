@@ -70,28 +70,10 @@ static size_t _GD_DoRawOut(DIRFILE *D, gd_entry_t *E,
     return 0;
   }
 
-  /* Figure out the dirfile encoding type, if required */
-  if ((D->fragment[E->fragment_index].flags & GD_ENCODING) ==
-      GD_AUTO_ENCODED)
-    D->fragment[E->fragment_index].flags =
-      (D->fragment[E->fragment_index].flags & ~GD_ENCODING) |
-      _GD_ResolveEncoding(E->e->file, D->fragment[E->fragment_index].flags,
-          E->e);
-
-  /* If the encoding is still unknown, none of the candidate files exist;
-   * as a result, we don't know the intended encoding type */
-  if ((D->fragment[E->fragment_index].flags & GD_ENCODING) ==
-      GD_AUTO_ENCODED)
-  {
-    _GD_SetError(D, GD_E_UNKNOWN_ENCODING, 0, NULL, 0, NULL);
-    dreturn("%zi", 0);
+  if (!_GD_Supports(D, E, GD_EF_OPEN | GD_EF_SEEK | GD_EF_WRITE)) {
+    dreturn("%i", 0);
     return 0;
   }
-
-  /* Figure out the encoding subtype, if required */
-  if (E->e->encoding == GD_ENC_UNKNOWN)
-    _GD_ResolveEncoding(E->e->file, D->fragment[E->fragment_index].flags,
-        E->e);
 
   if (encode[E->e->encoding].ecor &&
       (D->fragment[E->fragment_index].flags &
@@ -109,12 +91,8 @@ static size_t _GD_DoRawOut(DIRFILE *D, gd_entry_t *E,
   if (E->e->fp < 0) {
     /* open file for reading / writing if not already opened */
 
-    if (encode[E->e->encoding].open == NULL) {
-      _GD_SetError(D, GD_E_UNSUPPORTED, 0, NULL, 0, NULL);
-      dreturn("%zi", 0);
-      return 0;
-    } else if ((*encode[E->e->encoding].open)(E->e, E->e->file,
-          D->flags & GD_ACCMODE, 1))
+    if ((*encode[E->e->encoding].open)(E->e, E->e->file, D->flags & GD_ACCMODE,
+          1))
     {
       _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file, errno, NULL);
       dreturn("%zi", 0);
@@ -122,19 +100,7 @@ static size_t _GD_DoRawOut(DIRFILE *D, gd_entry_t *E,
     }
   }
 
-  if (encode[E->e->encoding].seek == NULL) {
-    _GD_SetError(D, GD_E_UNSUPPORTED, 0, NULL, 0, NULL);
-    dreturn("%zi", 0);
-    return 0;
-  }
-
   (*encode[E->e->encoding].seek)(E->e, s0, E->data_type, 1);
-
-  if (encode[E->e->encoding].write == NULL) {
-    _GD_SetError(D, GD_E_UNSUPPORTED, 0, NULL, 0, NULL);
-    dreturn("%zi", 0);
-    return 0;
-  }
 
   n_wrote = (*encode[E->e->encoding].write)(E->e, databuffer, E->data_type, ns);
   n_wrote /= E->size;

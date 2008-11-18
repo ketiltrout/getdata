@@ -24,9 +24,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
 #endif
 
 #ifdef HAVE_LIBGEN_H
@@ -177,22 +174,6 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
         return -1;
       }
 
-      /* If the encoding scheme is unknown, we can't add the field */
-      if ((D->fragment[E->fragment_index].flags & GD_ENCODING) ==
-          GD_AUTO_ENCODED)
-      {
-        _GD_SetError(D, GD_E_UNKNOWN_ENCODING, 0, NULL, 0, NULL);
-        break;
-      }
-
-      /* If the encoding scheme is unsupported, we can't add the field */
-      if ((D->fragment[E->fragment_index].flags & GD_ENCODING) ==
-          GD_ENC_UNSUPPORTED)
-      {
-        _GD_SetError(D, GD_E_UNSUPPORTED, 0, NULL, 0, NULL);
-        break;
-      }
-
       E->data_type = entry->data_type;
       E->e->fp = -1;
       E->e->encoding = GD_ENC_UNKNOWN;
@@ -205,17 +186,13 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
       snprintf(E->e->file, FILENAME_MAX, "%s/%s/%s", D->name,
           D->fragment[E->fragment_index].sname, E->field);
 
-      /* Set the subencoding subscheme */
-      _GD_ResolveEncoding(E->e->file, D->fragment[E->fragment_index].flags,
-          E->e);
-
       if ((E->spf = entry->spf) <= 0)
         _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_SPF, NULL, entry->spf,
             NULL);
       else if (E->data_type & 0x40 || (E->size = GD_SIZE(E->data_type)) == 0)
         _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, entry->data_type, NULL);
-      else if (encode[E->e->encoding].touch == NULL) 
-        _GD_SetError(D, GD_E_UNSUPPORTED, 0, NULL, 0, NULL);
+      else if (!_GD_Supports(D, E, GD_EF_TOUCH))
+        ; /* error already set */
       else if ((*encode[E->e->encoding].touch)(E->e->file))
         _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file, errno, NULL);
       else if (D->fragment[E->fragment_index].ref_name == NULL) {
@@ -334,8 +311,8 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
 /* add a META field by parsing a field spec */
 int dirfile_madd_spec(DIRFILE* D, const char* line, const char* parent)
 {
-  char instring[MAX_LINE_LENGTH];
-  char outstring[MAX_LINE_LENGTH];
+  char instring[GD_MAX_LINE_LENGTH];
+  char outstring[GD_MAX_LINE_LENGTH];
   const char *in_cols[MAX_IN_COLS];
   int n_cols;
   int me;
@@ -376,8 +353,8 @@ int dirfile_madd_spec(DIRFILE* D, const char* line, const char* parent)
   }
 
   /* we do this to ensure line is not too long */
-  strncpy(instring, line, MAX_LINE_LENGTH - 1);
-  instring[MAX_LINE_LENGTH - 2] = '\0';
+  strncpy(instring, line, GD_MAX_LINE_LENGTH - 1);
+  instring[GD_MAX_LINE_LENGTH - 2] = '\0';
 
   /* start parsing */
   n_cols = _GD_Tokenise(D, instring, outstring, in_cols, "dirfile_madd_spec()",
@@ -404,8 +381,8 @@ int dirfile_madd_spec(DIRFILE* D, const char* line, const char* parent)
 /* add a field by parsing a field spec */
 int dirfile_add_spec(DIRFILE* D, const char* line, int fragment_index)
 {
-  char instring[MAX_LINE_LENGTH];
-  char outstring[MAX_LINE_LENGTH];
+  char instring[GD_MAX_LINE_LENGTH];
+  char outstring[GD_MAX_LINE_LENGTH];
   const char *in_cols[MAX_IN_COLS];
   int n_cols;
 
@@ -442,8 +419,8 @@ int dirfile_add_spec(DIRFILE* D, const char* line, int fragment_index)
   _GD_ClearError(D);
 
   /* we do this to ensure line is not too long */
-  strncpy(instring, line, MAX_LINE_LENGTH - 1);
-  instring[MAX_LINE_LENGTH - 2] = '\0';
+  strncpy(instring, line, GD_MAX_LINE_LENGTH - 1);
+  instring[GD_MAX_LINE_LENGTH - 2] = '\0';
 
   /* start parsing */
   n_cols = _GD_Tokenise(D, instring, outstring, in_cols, "dirfile_add_spec()",

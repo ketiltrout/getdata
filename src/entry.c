@@ -116,12 +116,12 @@ static void _GD_GetScalar(DIRFILE* D, gd_entry_t* E, const char* scalar,
           E->e->scalar[0]);
     else {
       if (type == GD_IEEE754)
-        _GD_DoField(D, C, C->field, 0, 0, 0, 0, GD_FLOAT64, data);
+        _GD_DoConst(D, C, GD_FLOAT64, data);
       else if (type == GD_SIGNED) {
-        _GD_DoField(D, C, C->field, 0, 0, 0, 0, GD_INT32, &i32);
+        _GD_DoConst(D, C, GD_INT32, &i32);
         *(int*)data = (unsigned int)i32;
       } else {
-        _GD_DoField(D, C, C->field, 0, 0, 0, 0, GD_UINT32, &u32);
+        _GD_DoConst(D, C, GD_UINT32, &u32);
         *(unsigned int*)data = (unsigned int)u32;
       }
 
@@ -176,6 +176,57 @@ int _GD_CalculateEntry(DIRFILE* D, gd_entry_t* E)
 
   dreturn("%i", E->e->calculated);
   return E->e->calculated;
+}
+
+const char* get_raw_filename(DIRFILE* D, const char* field_code)
+{
+  dtrace("%p, \"%s\"", D, field_code);
+
+  if (D->flags & GD_INVALID) {/* don't crash */
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  /* Check field */
+  gd_entry_t *E = _GD_FindField(D, field_code, NULL);
+
+  if (E == NULL) {
+    _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, field_code);
+    dreturn("%p" NULL);
+    return NULL;
+  }
+
+  if (E->field_type != GD_RAW_ENTRY) {
+    _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
+    dreturn("%p" NULL);
+    return NULL;
+  }
+
+  /* ensure encoding sybtype is known */
+  if (!_GD_Supports(D, E, 0)) {
+    dreturn("%p" NULL);
+    return NULL;
+  }
+
+  if (E->e->encoding == GD_ENC_UNKNOWN) {
+    _GD_SetError(D, GD_E_UNKNOWN_ENCODING, 0, NULL, 0, NULL);
+    dreturn("%p" NULL);
+    return NULL;
+  }
+
+  char* name = malloc(FILENAME_MAX);
+
+  if (name == NULL) {
+    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    dreturn("%p" NULL);
+    return NULL;
+  }
+
+  snprintf(name, FILENAME_MAX, "%s%s", E->e->file, encode[E->e->encoding].ext);
+
+  dreturn("%p", name);
+  return name;
 }
 
 int get_entry(DIRFILE* D, const char* field_code, gd_entry_t* entry)

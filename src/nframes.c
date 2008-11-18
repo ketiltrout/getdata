@@ -44,24 +44,9 @@ off64_t get_nframes64(DIRFILE* D)
     return 0;
   }
 
-  /* Figure out encoding scheme, if necessary */
-  if ((D->fragment[D->reference_field->fragment_index].flags & GD_ENCODING)
-      == GD_AUTO_ENCODED) 
-  {
-      D->fragment[D->reference_field->fragment_index].flags =
-      (D->fragment[D->reference_field->fragment_index].flags & ~GD_ENCODING) |
-        _GD_ResolveEncoding(D->reference_field->e->file,
-            D->fragment[D->reference_field->fragment_index].flags & GD_ENCODING,
-            D->reference_field->e);
-  } else if (D->reference_field->e->encoding == GD_ENC_UNKNOWN)
-      _GD_ResolveEncoding(D->reference_field->e->file,
-          D->fragment[D->reference_field->fragment_index].flags & GD_ENCODING,
-          D->reference_field->e);
-
-  if (encode[D->reference_field->e->encoding].size == NULL) {
-      _GD_SetError(D, GD_E_UNSUPPORTED, 0, NULL, 0, NULL);
-      dreturn("%lli", 0LL);
-      return 0;
+  if (!_GD_Supports(D, D->reference_field, GD_EF_SIZE)) {
+    dreturn("%i", 0);
+    return 0;
   }
 
   nf = (*encode[D->reference_field->e->encoding].size)(

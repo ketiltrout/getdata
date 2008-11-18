@@ -44,7 +44,7 @@ static const struct {
     "Samples per frame out of range on line {3} of {2}: {4}", 0 },
   { GD_E_FORMAT, GD_E_FORMAT_N_FIELDS,
     "LINCOM field count out of range on line {3} of {2}: {4}", 0 },
-  { GD_E_FORMAT, GD_E_FORMAT_N_COLS, "Missing column on line {3} of {2}", 0 },
+  { GD_E_FORMAT, GD_E_FORMAT_N_TOK, "Missing token on line {3} of {2}", 0 },
   { GD_E_FORMAT, GD_E_FORMAT_NUMBITS,
     "Numbits out of range on line {3} of {2}", 0 },
   { GD_E_FORMAT, GD_E_FORMAT_BITNUM,
@@ -52,7 +52,7 @@ static const struct {
   { GD_E_FORMAT, GD_E_FORMAT_BITSIZE,
     "End of bitfield out of bounds on line {3} of {2}", 0 },
   { GD_E_FORMAT, GD_E_FORMAT_CHARACTER,
-    "Invalid character on line {3} or {2}", 0 },
+    "Invalid character on line {3} of {2}", 0 },
   { GD_E_FORMAT, GD_E_FORMAT_BAD_LINE, "Line {3} of {2} indecipherable", 0 },
   { GD_E_FORMAT, GD_E_FORMAT_RES_NAME,
     "Field name is reserved on line {3} of {2}", 0 },
@@ -163,9 +163,9 @@ void _GD_SetError(DIRFILE* D, int error, int suberror,
     strncpy(D->error_string, token, FILENAME_MAX);
 
   if (D->flags & GD_VERBOSE) {
-    char buffer[MAX_LINE_LENGTH];
+    char buffer[GD_MAX_LINE_LENGTH];
     fprintf(stderr, PACKAGE_NAME ": %s\n", get_error_string(D, buffer,
-          MAX_LINE_LENGTH));
+          GD_MAX_LINE_LENGTH));
   }
 
   dreturnvoid();

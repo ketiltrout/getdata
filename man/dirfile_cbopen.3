@@ -1,4 +1,4 @@
-.\" dirfile_open.3.  The dirfile_open man page.
+.\" dirfile_cbopen.3.  The dirfile_cbopen man page.
 .\"
 .\" (C) 2008 D. V. Wiebe
 .\"
@@ -20,25 +20,44 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH dirfile_open 3 "15 October 2008" "Version 0.4.0" "GETDATA"
+.TH dirfile_cbopen 3 "15 November 2008" "Version 0.5.0" "GETDATA"
 .SH NAME
-dirfile_open \(em open or create a dirfile
+dirfile_cbopen dirfile_open \(em open or create a dirfile
 .SH SYNOPSIS
 .B #include <getdata.h>
 .HP
 .nh
 .ad l
+.BI "DIRFILE* dirfile_cbopen(const char *" dirfilename ", unsigned int " flags ,
+.BI "int (*" sehandler ")(const DIRFILE*, int, char*));
+.HP
 .BI "DIRFILE* dirfile_open(const char *" dirfilename ", unsigned int " flags );
 .hy
 .ad n
 .SH DESCRIPTION
 The
-.BR dirfile_open ()
+.BR dirfile_cbopen ()
 function opens or creates the dirfile specified by
 .IR dirfilename ,
 returning a DIRFILE object associated with it.  Opening a dirfile will cause the
 library to read and parse the dirfile's format file (see
 .BR dirfile-format (5)).
+If the
+.I sehandler
+callback is not NULL, this function will be called whenever a syntax error is
+encountered during parsing the format file.  The caller may use this function
+to correct the error or modify the error handling of the format file parser.
+See
+.B The Callback Function
+section below for details on this function.
+
+The
+.BR dirfile_open ()
+function is equivalent to
+.BR dirfile_cbopen (),
+with
+.I sehandler
+set to NULL.
 
 The 
 .I flags
@@ -108,8 +127,8 @@ directives (see
 found in the dirfile format file should be ignored.  When specified with one of
 .BR GD_BIG_ENDIAN " or " GD_LITTLE_ENDIAN ,
 the endianness specified will be assumed.  If this flag is specified with
-neither of those flags, the dirfile will be assumed to have the endianness of the
-native architecture.
+neither of those flags, the dirfile will be assumed to have the endianness of
+the native architecture.
 .TP
 .B GD_LITTLE_ENDIAN
 Specifies that raw data on disk is stored as little-endian data (least
@@ -139,7 +158,7 @@ If
 .I dirfilename
 specifies an already existing dirfile, it will be truncated before opening.
 Since
-.BR dirfile_open ()
+.BR dirfile_cbopen ()
 decides whether
 .I dirfilename
 specifies an existing dirfile before attempting to parse the dirfile,
@@ -177,7 +196,7 @@ itself, unless
 is also specified.  If none of these symbols is present,
 .B GD_AUTO_ENCODED
 is assumed, unless the
-.BR dirfile_open ()
+.BR dirfile_cbopen ()
 call results in creation or truncation of the dirfile.  In that case,
 .B GD_UNENCODED
 is assumed.  See
@@ -204,9 +223,152 @@ sample per line.
 .B GD_UNENCODED
 Specifies that raw data files are not encoded, but written verbatim to disk.
 
+.SS The Callback Function
+The caller-supplied
+.I sehandler
+function is called whenever the format file parser encounters a syntax error
+.RI ( i.e.
+whenever it would return the
+.B GD_E_FORMAT
+error).  This callback may be used to correct the error, or to tell the parser
+how to recover from it.
+
+This function should have the prototype:
+.RS
+.HP
+.nh
+.ad l
+.BI "int sehandler(const DIRFILE *" dirfile ", int " suberror ,
+.BI "char *" line ));
+.hy
+.ad n
+.RE
+.P
+The
+.I dirfile
+parameter will be a pointer to a DIRFILE object suitable only for passing to
+.BR get_error_string ().
+Notably, the caller should not assume this pointer will be the same as the
+pointer eventually returned by
+.BR dirfile_cbopen (),
+nor that it will be valid after the callback function returns.
+
+The
+.I suberror
+parameter will be one of the following symbols indicating the type of syntax
+error encountered:
+.TP
+.B GD_E_FORMAT_BAD_LINE
+The line was indecypherable.  Typically this means that the line contained
+neither a reserved word, nor a field type.
+.TP
+.B GD_E_FORMAT_BAD_NAME
+The specified field name was invalid.
+.TP
+.B GD_E_FORMAT_BAD_SPF
+The samples-per-frame of a RAW field was out-of-range.
+.TP
+.B GD_E_FORMAT_BAD_TYPE
+The data type of a RAW field was unrecognised.
+.TP
+.B GD_E_FORMAT_BITNUM
+The first bit of a BIT field was out-of-range.
+.TP
+.B GD_E_FORMAT_BITSIZE
+The last bit of a BIT field was out-of-range.
+.TP
+.B GD_E_FORMAT_CHARACTER
+An invalid character was found in the line.
+.TP
+.B GD_E_FORMAT_DUPLICATE
+The specified field name already exists.
+.TP
+.B GD_E_FORMAT_ENDIAN
+The byte sex specified by an
+.B ENDIAN
+directive was unrecognised.
+.TP
+.B GD_E_FORMAT_LOCATION
+The parent of a metafield was defined in another fragment.
+.TP
+.B GD_E_FORMAT_METARAW
+An attempt was made to add a RAW metafield.
+.TP
+.B GD_E_FORMAT_N_FIELDS
+The number of fields of a LINCOM field was out-of-range.
+.TP
+.B GD_E_FORMAT_N_TOK
+An insufficient number of tokens was found on the line.
+.TP
+.B GD_E_FORMAT_NO_PARENT
+The parent of a metafield was not found.
+.TP
+.B GD_E_FORMAT_NUMBITS
+The number of bits of a BIT field was out-of-range.
+.TP
+.B GD_E_FORMAT_PROTECT
+The protection level specified by a
+.B PROTECT
+directive wasw unrecognised.
+.TP
+.B GD_E_FORMAT_RES_NAME
+A field was specified with the reserved name
+.IR INDEX .
+.TP
+.B GD_E_FORMAT_UNTERM
+The last token of the line was unterminated.
+.P
+The
+.I line
+parameter contains a copy of the line containing the syntax error.  This
+line may be freely modified by the callback function.  It may then be reparsed,
+if the callback function returns the symbol
+.B GD_SYNTAX_RESCAN
+(see below).  Space is available for at least GD_MAX_LINE_LENGTH characters,
+including the terminating NUL.
+
+The callback function should return one of the following symbols, which
+tells the parser how to subsequently handle the error:
+.TP
+.B GD_SYNTAX_ABORT
+The parser should immediately abort parsing the format file and fail with
+the error
+.BR GD_E_FORMAT .
+This is the default behaviour, if no callback function is provided (or if
+the parser is invoked by calling
+.BR dirfile_open ()).
+.TP
+.B GD_SYNTAX_CONTINUE
+The parser should continue parsing the format file.  However, once parsing has
+finished, the parser will fail with the error
+.BR GD_E_FORMAT ,
+even if no further syntax errors are encountered.  This behaviour may be used by
+the caller to identify all lines containing syntax errors in the format file,
+instead of just the first one.
+.TP
+.B GD_SYNTAX_IGNORE
+The parser should ignore the line containing the syntax error completely, and
+carry on parsing the format file.  If no further errors are encountered, the
+dirfile will be successfully opened.
+.TP
+.B GD_SYNTAX_RESCAN
+The parser should rescan the
+.I line
+parameter, which replaces the line which originally contained the syntax error.
+The line is assumed to have been corrected by the callback function.  If the
+line still contains a syntax error, the callback function will be called again.
+.P
+The callback function handles only syntax errors.  The parser may still abort
+early, if a different kind of library error is encountered.  Furthermore,
+although a line may contain more than one syntax error, the parser will only
+ever report one syntax error per line, even if the callback function returns
+.BR GD_SYNTAX_CONTINUE .
+
 .SH RETURN VALUE
 A call to
-.BR dirfile_open ()
+.BR dirfile_cbopen ()
+or
+.BR dirfile_open()
 always returns a pointer to a newly allocated DIRFILE object.  The DIRFILE
 object is an opaque structure which is guaranteed to have at least a member
 called
@@ -245,7 +407,9 @@ The library was unable to create the dirfile, or the dirfile exists and both
 were specified.
 .TP
 .B GD_E_FORMAT
-A syntax error occurred in the format file.
+A syntax error occurred in the format file.  See also the
+.B The Callback Function
+section above.
 .TP
 .B GD_E_INTERNAL_ERROR
 An internal error occurred in the library while trying to perform the task.
@@ -274,8 +438,8 @@ When finished with it, the DIRFILE object may be deallocated with a call to
 .BR dirfile_close (3),
 even if the open failed.
 .SH BUGS
-GetData assumes it is running on an ASCII-compatible platform.  Format file
-parsing will fail gloriously on an EBCDIC platform.
+GetData's parser assumes it is running on an ASCII-compatible platform.  Format
+file parsing will fail gloriously on an EBCDIC platform.
 .SH SEE ALSO
 .BR dirfile (5),
 .BR dirfile-encoding (5),

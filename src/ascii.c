@@ -41,13 +41,13 @@ int _GD_AsciiOpen(struct _gd_private_entry* entry, const char* name, int mode,
   int fp = open(asciiname,
       ((mode == GD_RDWR) ? O_RDWR : O_RDONLY) | (creat ? O_CREAT : 0), 0666);
 
-  entry->stream = fdopen(fp, (mode == GD_RDWR) ? "r+" : "r");
+  entry->edata = fdopen(fp, (mode == GD_RDWR) ? "r+" : "r");
 
-  if (entry->stream != NULL)
+  if (entry->edata != NULL)
     entry->fp = 0;
 
-  dreturn("%i", entry->stream == NULL);
-  return (entry->stream == NULL);
+  dreturn("%i", entry->edata == NULL);
+  return (entry->edata == NULL);
 }
 
 off64_t _GD_AsciiSeek(struct _gd_private_entry* entry, off64_t count,
@@ -58,18 +58,18 @@ off64_t _GD_AsciiSeek(struct _gd_private_entry* entry, off64_t count,
   dtrace("%p, %lli, %x, %i", entry, count, data_type, pad);
 
   if (count < entry->fp) {
-    rewind(entry->stream);
+    rewind(entry->edata);
     entry->fp = 0;
   }
 
   for (; count > entry->fp; ++entry->fp)
-    if (fgets(line, 64, entry->stream) == NULL)
+    if (fgets(line, 64, entry->edata) == NULL)
       break;
 
   if (pad && count > entry->fp) {
     strcpy(line, "0\n");
     for (; count > entry->fp; ++entry->fp)
-      fputs(line, entry->stream);
+      fputs(line, entry->edata);
   }
 
   dreturn("%i", entry->fp);
@@ -130,10 +130,10 @@ ssize_t _GD_AsciiRead(struct _gd_private_entry *entry, void *ptr,
 
   _GD_ScanFormat(fmt, data_type);
   for (n = 0; n < nmemb; ++n) {
-    if (feof(entry->stream))
+    if (feof(entry->edata))
       break;
 
-    if (fscanf(entry->stream, fmt, (char*)ptr + GD_SIZE(data_type) * n) < 1) {
+    if (fscanf(entry->edata, fmt, (char*)ptr + GD_SIZE(data_type) * n) < 1) {
       ret = -1;
       break;
     }
@@ -154,70 +154,70 @@ ssize_t _GD_AsciiWrite(struct _gd_private_entry *entry, const void *ptr,
   switch(data_type) {
     case GD_UINT8:
       for (n = 0; n < nmemb; ++n)
-        if (fprintf(entry->stream, "%" PRIu8 "\n", ((uint8_t*)ptr)[n]) < 0) {
+        if (fprintf(entry->edata, "%" PRIu8 "\n", ((uint8_t*)ptr)[n]) < 0) {
           ret = -1;
           break;
         }
       break;
     case GD_INT8:
       for (n = 0; n < nmemb; ++n)
-        if (fprintf(entry->stream, "%" PRIi8 "\n", ((int8_t*)ptr)[n]) < 0) {
+        if (fprintf(entry->edata, "%" PRIi8 "\n", ((int8_t*)ptr)[n]) < 0) {
           ret = -1;
           break;
         }
       break;
     case GD_UINT16:
       for (n = 0; n < nmemb; ++n)
-        if (fprintf(entry->stream, "%" PRIu16 "\n", ((uint16_t*)ptr)[n]) < 0) {
+        if (fprintf(entry->edata, "%" PRIu16 "\n", ((uint16_t*)ptr)[n]) < 0) {
           ret = -1;
           break;
         }
       break;
     case GD_INT16:
       for (n = 0; n < nmemb; ++n)
-        if (fprintf(entry->stream, "%" PRIi16 "\n", ((int16_t*)ptr)[n]) < 0) {
+        if (fprintf(entry->edata, "%" PRIi16 "\n", ((int16_t*)ptr)[n]) < 0) {
           ret = -1;
           break;
         }
       break;
     case GD_UINT32:
       for (n = 0; n < nmemb; ++n)
-        if (fprintf(entry->stream, "%" PRIu32 "\n", ((uint32_t*)ptr)[n]) < 0) {
+        if (fprintf(entry->edata, "%" PRIu32 "\n", ((uint32_t*)ptr)[n]) < 0) {
           ret = -1;
           break;
         }
       break;
     case GD_INT32:
       for (n = 0; n < nmemb; ++n)
-        if (fprintf(entry->stream, "%" PRIi32 "\n", ((int32_t*)ptr)[n]) < 0) {
+        if (fprintf(entry->edata, "%" PRIi32 "\n", ((int32_t*)ptr)[n]) < 0) {
           ret = -1;
           break;
         }
       break;
     case GD_UINT64:
       for (n = 0; n < nmemb; ++n)
-        if (fprintf(entry->stream, "%" PRIu64 "\n", ((uint64_t*)ptr)[n]) < 0) {
+        if (fprintf(entry->edata, "%" PRIu64 "\n", ((uint64_t*)ptr)[n]) < 0) {
           ret = -1;
           break;
         }
       break;
     case GD_INT64:
       for (n = 0; n < nmemb; ++n)
-        if (fprintf(entry->stream, "%" PRIi64 "\n", ((int64_t*)ptr)[n]) < 0) {
+        if (fprintf(entry->edata, "%" PRIi64 "\n", ((int64_t*)ptr)[n]) < 0) {
           ret = -1;
           break;
         }
       break;
     case GD_FLOAT32:
       for (n = 0; n < nmemb; ++n)
-        if (fprintf(entry->stream, "%.7g\n", ((float*)ptr)[n]) < 0) {
+        if (fprintf(entry->edata, "%.7g\n", ((float*)ptr)[n]) < 0) {
           ret = -1;
           break;
         }
       break;
     case GD_FLOAT64:
       for (n = 0; n < nmemb; ++n)
-        if (fprintf(entry->stream, "%.16lg\n", ((double*)ptr)[n]) < 0) {
+        if (fprintf(entry->edata, "%.16lg\n", ((double*)ptr)[n]) < 0) {
           ret = -1;
           break;
         }
@@ -237,10 +237,10 @@ int _GD_AsciiSync(struct _gd_private_entry *entry)
 
   dtrace("%p", entry);
   
-  ret = fflush(entry->stream);
+  ret = fflush(entry->edata);
 
   if (!ret)
-    ret = fsync(fileno(entry->stream));
+    ret = fsync(fileno(entry->edata));
 
   dreturn("%i", ret);
   return ret;
@@ -252,7 +252,7 @@ int _GD_AsciiClose(struct _gd_private_entry *entry)
   
   dtrace("%p", entry);
 
-  ret = fclose(entry->stream);
+  ret = fclose(entry->edata);
   if (ret != EOF) {
     entry->fp = -1;
     dreturn("%i", 0);
@@ -292,16 +292,10 @@ off64_t _GD_AsciiSize(const char *name, gd_type_t data_type __gd_unused)
 
 int _GD_AsciiTouch(const char* name)
 {
-  char asciiname[FILENAME_MAX];
+  return _GD_GenericTouch(name, ".txt");
+}
 
-  dtrace("\"%s\"", name);
-
-  snprintf(asciiname, FILENAME_MAX, "%s.txt", name);
-  int fd = open(asciiname, O_RDWR | O_CREAT | O_TRUNC, 0666);
-
-  if (fd != -1)
-    fd = close(fd);
-
-  dreturn("%i", fd);
-  return fd;
+int _GD_AsciiUnlink(const char* name)
+{
+  return _GD_GenericUnlink(name, ".txt");
 }

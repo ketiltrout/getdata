@@ -1,3 +1,47 @@
+2008-11-17   D. V. Wiebe <getdata@ketiltrout.net>  svn:224
+	* src/getdata.h.in src/internal.h: Rename MAX_LINE_LENGTH to
+	GD_MAX_LINE_LENGTH and move to public header.
+
+	* src/getdata.h.in src/internal.h: Clean up GD_E_FORMAT_* suberrors and move
+	to public header.  GD_E_FORMAT_N_COLS renamed to GD_E_FORMAT_N_TOK.
+	GD_E_FORMAT_MAX_I, GD_E_FORMAT_N_RAW, removed.  All codes renumbered.
+
+	* src/internal.h: _gd_private_entry->stream renamed to edata.
+
+	* src/entry.c (_GD_GetScalar): Call _GD_DoConst() directly instead of
+	_GD_DoField().
+	* src/getdata.c (_GD_DoConst): No longer static.
+
+	* src/errors.c: Correct typo in GD_E_FORMAT:GD_E_FORMAT_CHARACTER string.
+
+	* src/entry.c (get_raw_filename): Added.
+
+	* src/encoding.c (_GD_Supports): Added.
+	* src/encoding.c (_GD_ResolveEncoding): Make static.
+	* src/open.c (_GD_ParseFieldSpec) src/putdata.c (_GD_DoRawOut) src/getdata.c
+	(_GD_DoRaw) src/add.c (_GD_Add) src/nframes.c (get_nframes64): Replace
+	encoding checks with _GD_Supports call.
+
+	* src/common.c (_GD_FindField): Rename argument next to index.
+
+	* src/encoding.c (_GD_GenericUnlink _GD_GenericTouch): Added.
+	* src/slim.c (_GD_SlimUnlink) src/ascii.c (_GD_AsciiUnlink) src/raw.c
+	(_GD_RawUnlink): Added.
+	* src/ascii.c (_GD_AsciiTouch) src/raw.c (_GD_RawTouch): Call
+	_GD_GenericTouch().
+
+	* src/open.c (dirfile_cbopen): Renamed from dirfile_open
+	* src/open.c (dirfile_open): Added.
+	* src/open.c (_GD_ParseFragment): Call sehandler.
+
+	* src/slim.c: Trace.
+
+	* src/foffs.c: Added.
+	* src/del.c: Added.
+	* src/globals.c: Added.
+	
+	* src/encoding.c: Split from getdata.c.
+
 2008-11-07   D. V. Wiebe <getdata@ketiltrout.net>  svn:211
 	* src/open.c (_GD_ValidateField _GD_Tokeniser): Replace slow strchr calls
 	with explicit tests.

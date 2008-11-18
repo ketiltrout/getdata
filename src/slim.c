@@ -34,43 +34,74 @@ int _GD_SlimOpen(struct _gd_private_entry* entry, const char* name,
     int mode __gd_unused, int creat __gd_unused)
 {
   char slimname[FILENAME_MAX];
-  snprintf(slimname, FILENAME_MAX, "%s.slm", name);
-  entry->stream = slimopen(slimname, "r" /* writing not supported */);
 
-  if (entry->stream != NULL) {
+  dtrace("%p, \"%s\"", entry, name);
+
+  snprintf(slimname, FILENAME_MAX, "%s.slm", name);
+  entry->edata = slimopen(slimname, "r" /* writing not supported */);
+
+  if (entry->edata != NULL) {
     entry->fp = 0;
+    dreturn("%i", 0);
     return 0;
   }
 
+  dreturn("%i", 1);
   return 1;
 }
 
 off64_t _GD_SlimSeek(struct _gd_private_entry* entry, off64_t count,
     gd_type_t data_type, int pad __gd_unused)
 {
-  return (off64_t)slimseek(entry->stream, (off_t)count * GD_SIZE(data_type),
-      SEEK_SET);
+  dtrace("%p, %lli, %x", entry, (long long)count, data_type);
+
+  off64_t n = (off64_t)slimseek(entry->edata, (off_t)count *
+      GD_SIZE(data_type), SEEK_SET);
+
+  dreturn("%lli", (long long)n);
+  return n;
 }
 
 ssize_t _GD_SlimRead(struct _gd_private_entry *entry, void *ptr,
     gd_type_t data_type, size_t nmemb)
 {
-  return slimread(ptr, GD_SIZE(data_type), nmemb, entry->stream);
+  dtrace("%p, %p, %x, %zi", entry, ptr, data_type, nemb);
+
+  ssize_t n = slimread(ptr, GD_SIZE(data_type), nmemb, entry->edata);
+
+  dreturn("%zi", n);
+  return n;
 }
 
 int _GD_SlimClose(struct _gd_private_entry *entry)
 {
-  int ret = slimclose(entry->stream);
+  dtrace("%p", entry);
+
+  int ret = slimclose(entry->edata);
   if (!ret) {
     entry->fp = -1;
-    entry->stream = NULL;
+    entry->edata = NULL;
   }
+
+  dreturn("%i", ret);
   return ret;
 }
 
 off64_t _GD_SlimSize(const char *name, gd_type_t data_type)
 {
   char slimname[FILENAME_MAX];
+  off64_t size;
+
+  dtrace("\"%s\", %x", name, data_type);
+
   snprintf(slimname, FILENAME_MAX, "%s.slm", name);
-  return slimrawsize(slimname) / GD_SIZE(data_type);
+  size = slimrawsize(slimname) / GD_SIZE(data_type);
+
+  dreturn("%lli", (long long)size);
+  return size;
+}
+
+int _GD_SlimUnlink(const char* name)
+{
+  return _GD_GenericUnlink(name, ".slm");
 }

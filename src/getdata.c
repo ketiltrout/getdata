@@ -57,26 +57,6 @@ static __attribute__ ((__const__)) double __NAN()
 #define NAN __NAN()
 #endif /* !defined(NAN) */
 
-/* encoding schemas */
-const struct encoding_t encode[] = {
-  { GD_UNENCODED, "", 1,
-    &_GD_RawOpen, &_GD_RawClose, &_GD_RawTouch, &_GD_RawSeek,
-    &_GD_RawRead, &_GD_RawSize,  &_GD_RawWrite, &_GD_RawSync },
-  { GD_TEXT_ENCODED, ".txt", 0,
-    &_GD_AsciiOpen, &_GD_AsciiClose, &_GD_AsciiTouch, &_GD_AsciiSeek,
-    &_GD_AsciiRead, &_GD_AsciiSize, &_GD_AsciiWrite, &_GD_AsciiSync },
-  { GD_SLIM_ENCODED, ".slm", 1,
-#ifdef USE_SLIMLIB
-    &_GD_SlimOpen, &_GD_SlimClose, NULL /* TOUCH */,
-    &_GD_SlimSeek, &_GD_SlimRead,  &_GD_SlimSize,
-#else
-    NULL /* OPEN */, NULL /* CLOSE */, NULL /* TOUCH */,
-    NULL /* SEEK */, NULL /* READ  */, NULL /* SIZE  */,
-#endif
-    NULL /* WRITE */, NULL /* SYNC */ },
-  { GD_ENC_UNSUPPORTED, "", 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL },
-};
-
 /* _GD_FillFileFrame: fill dataout with frame indices
 */
 static void _GD_FillFileFrame(void *dataout, gd_type_t rtype, off64_t s0,
@@ -167,49 +147,6 @@ static int _GD_FillZero(void *databuffer, gd_type_t type, off64_t s0, size_t ns)
   return (nz);
 }
 
-/* Figure out the encoding scheme */
-unsigned int _GD_ResolveEncoding(const char* name, unsigned int scheme,
-    struct _gd_private_entry *e)
-{
-  char candidate[FILENAME_MAX];
-  char* ptr;
-  int i, len = strlen(name);
-  struct stat64 statbuf;
-
-  dtrace("\"%s\", 0x%08x, %p", name, scheme, e);
-
-  scheme &= GD_ENCODING;
-  strcpy(candidate, name);
-  ptr = candidate + len;
-  len = FILENAME_MAX - len;
-
-  for (i = 0; encode[i].scheme != GD_ENC_UNSUPPORTED; i++) {
-    if (scheme == GD_AUTO_ENCODED || scheme == encode[i].scheme) {
-      strcpy(ptr, encode[i].ext);
-
-      if (stat64(candidate, &statbuf) == 0) 
-        if (S_ISREG(statbuf.st_mode)) {
-          if (e != NULL)
-            e->encoding = i;
-          dreturn("%08x", encode[i].scheme);
-          return encode[i].scheme;
-        }
-    }
-  }
-
-  if (scheme != 0 && e != NULL) {
-    for (i = 0; encode[i].scheme != GD_ENC_UNSUPPORTED; i++)
-      if (scheme == encode[i].scheme) {
-        e->encoding = i;
-        dreturn("0x%08x", encode[i].scheme);
-        return encode[i].scheme;;
-      }
-  }
-
-  dreturn("%08x", GD_AUTO_ENCODED);
-  return GD_AUTO_ENCODED;
-}
-
 /* _GD_DoRaw:  Read from a raw.  Returns number of samples read.
 */
 static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *E,
@@ -245,34 +182,8 @@ static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *E,
   if (ns > 0) {
     /** open the file (and cache the fp) if it hasn't been opened yet. */
     if (E->e->fp < 0) {
-
-      /* Figure out the dirfile encoding type, if required */
-      if ((D->fragment[E->fragment_index].flags & GD_ENCODING) ==
-          GD_AUTO_ENCODED)
-      {
-        D->fragment[E->fragment_index].flags =
-          (D->fragment[E->fragment_index].flags & ~GD_ENCODING) |
-          _GD_ResolveEncoding(E->e->file, GD_AUTO_ENCODED, E->e);
-      }
-
-      /* If the encoding is still unknown, none of the candidate files exist;
-       * complain and return */
-      if ((D->fragment[E->fragment_index].flags & GD_ENCODING)
-          == GD_AUTO_ENCODED)
-      {
-        _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file, ENOENT, NULL);
-        dreturn("%zi", 0);
-        return 0;
-      }
-
-      /* Figure out the encoding subtype, if required */
-      if (E->e->encoding == GD_ENC_UNKNOWN)
-        _GD_ResolveEncoding(E->e->file,
-            D->fragment[E->fragment_index].flags, E->e);
-
-      if (encode[E->e->encoding].open == NULL) {
-        _GD_SetError(D, GD_E_UNSUPPORTED, 0, NULL, 0, NULL);
-        dreturn("%zi", 0);
+      if (!_GD_Supports(D, E, GD_EF_OPEN | GD_EF_SEEK | GD_EF_READ)) {
+        dreturn("%i", 0);
         return 0;
       } else if ((*encode[E->e->encoding].open)(E->e, E->e->file,
             D->flags & GD_ACCMODE, 0))
@@ -283,19 +194,7 @@ static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *E,
       }
     }
 
-    if (encode[E->e->encoding].seek == NULL) {
-      _GD_SetError(D, GD_E_UNSUPPORTED, 0, NULL, 0, NULL);
-      dreturn("%zi", 0);
-      return 0;
-    }
-
     (*encode[E->e->encoding].seek)(E->e, s0, E->data_type, 0);
-
-    if (encode[E->e->encoding].read == NULL) {
-      _GD_SetError(D, GD_E_UNSUPPORTED, 0, NULL, 0, NULL);
-      dreturn("%zi", 0);
-      return 0;
-    }
 
     samples_read = (*encode[E->e->encoding].read)(E->e,
         databuffer + n_read * E->size, E->data_type, ns);
@@ -860,7 +759,7 @@ static size_t _GD_DoLinterp(DIRFILE *D, gd_entry_t* E,
 
 /* _GD_DoConst:  Read from a const.  Returns number of samples read (ie. 1).
 */
-static size_t _GD_DoConst(DIRFILE *D, gd_entry_t *E, gd_type_t return_type,
+size_t _GD_DoConst(DIRFILE *D, const gd_entry_t *E, gd_type_t return_type,
     void *data_out)
 {
   dtrace("%p, %p, 0x%x, %p", D, E, return_type, data_out);

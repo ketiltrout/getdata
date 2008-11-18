@@ -90,12 +90,10 @@ off64_t _GD_RawSize(const char *name, gd_type_t data_type)
 
 int _GD_RawTouch(const char* name)
 {
-  dtrace("\"%s\"", name);
-  int fd = open(name, O_RDWR | O_CREAT | O_TRUNC, 0666);
+  return _GD_GenericTouch(name, "");
+}
 
-  if (fd != -1)
-    fd = close(fd);
-
-  dreturn("%i", fd);
-  return fd;
+int _GD_RawUnlink(const char* name)
+{
+  return _GD_GenericUnlink(name, "");
 }

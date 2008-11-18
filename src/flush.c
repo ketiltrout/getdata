@@ -157,7 +157,7 @@ static void _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
     int meta)
 {
   int i;
-  char buffer[MAX_LINE_LENGTH];
+  char buffer[GD_MAX_LINE_LENGTH];
   char* ptr;
 
   dtrace("%p, %p, %p, %i", D, stream, E, meta);
@@ -227,7 +227,7 @@ void _GD_FlushMeta(DIRFILE* D)
 {
   int i, j;
   FILE* stream;
-  char buffer[MAX_LINE_LENGTH];
+  char buffer[GD_MAX_LINE_LENGTH];
   char temp_file[FILENAME_MAX];
   char* ptr;
   struct tm now;
@@ -246,7 +246,7 @@ void _GD_FlushMeta(DIRFILE* D)
   for (i = 0; i < D->n_fragment; ++i)
     if (D->fragment[i].modified) {
       /* open a temporary file */
-      snprintf(temp_file, MAX_LINE_LENGTH, "%s/format_XXXXXX", D->name);
+      snprintf(temp_file, GD_MAX_LINE_LENGTH, "%s/format_XXXXXX", D->name);
       fd = mkstemp(temp_file);
       if (fd == -1) {
         _GD_SetError(D, GD_E_OPEN_INCLUDE, errno, NULL, 0, temp_file);
@@ -260,7 +260,7 @@ void _GD_FlushMeta(DIRFILE* D)
 
       /* Introit */
       t = time(NULL);
-      strftime(buffer, MAX_LINE_LENGTH, "%c", gmtime_r(&t, &now));
+      strftime(buffer, GD_MAX_LINE_LENGTH, "%c", gmtime_r(&t, &now));
 
       fprintf(stream, "# This is a dirfile format file.\n"
           "# It was written using version %s of the GetData Library.\n"

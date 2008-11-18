@@ -41,7 +41,7 @@ int _GD_GetLine(FILE *fp, char *line, int* linenum)
   dtrace("%p, %p, %p", fp, line, linenum);
 
   do {
-    ret_val = fgets(line, MAX_LINE_LENGTH, fp);
+    ret_val = fgets(line, GD_MAX_LINE_LENGTH, fp);
     (*linenum)++;
     first_char = 0;
     while (line[first_char] == ' ' || line[first_char] == '\t')
@@ -88,13 +88,13 @@ gd_type_t _GD_LegacyType(char c)
 }
 
 /* Binary search to find the field */
-gd_entry_t* _GD_FindField(DIRFILE* D, const char* field_code, int *next)
+gd_entry_t* _GD_FindField(DIRFILE* D, const char* field_code, int *index)
 {
   int i, c;
   int l = 0;
   int u = D->n_entries;
 
-  dtrace("%p, \"%s\", %p", D, field_code, next);
+  dtrace("%p, \"%s\", %p", D, field_code, index);
 
   while (l < u) {
     i = (l + u) / 2;
@@ -104,13 +104,16 @@ gd_entry_t* _GD_FindField(DIRFILE* D, const char* field_code, int *next)
     else if (c > 0)
       l = i + 1;
     else {
+      if (index != NULL) 
+        *index = i;
+
       dreturn("%p", D->entry[i]);
       return D->entry[i];
     }
   }
 
-  if (next != NULL) 
-    *next = u;
+  if (index != NULL) 
+    *index = u;
 
   dreturn("%p", NULL);
   return NULL;
@@ -242,7 +245,7 @@ void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E)
 {
   FILE *fp;
   int i;
-  char line[MAX_LINE_LENGTH];
+  char line[GD_MAX_LINE_LENGTH];
   int linenum = 0;
 
   dtrace("%p, %p", D, E);

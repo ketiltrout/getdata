@@ -33,8 +33,8 @@ static struct {
 } _GD_Dirfiles = {0, NULL};
 
 /* Error-reporting kludge for deprecated API */
-static char _GD_GlobalErrorString[MAX_LINE_LENGTH + 6];
-static char _GD_GlobalErrorFile[MAX_LINE_LENGTH + 6];
+static char _GD_GlobalErrorString[GD_MAX_LINE_LENGTH + 6];
+static char _GD_GlobalErrorFile[GD_MAX_LINE_LENGTH + 6];
 static DIRFILE _GD_GlobalErrors = {
   .error = 0,
   .suberror = 0,
@@ -60,7 +60,7 @@ const char *GD_ERROR_CODES[GD_N_ERROR_CODES] = {
   "Could not open interpolation table", /* GD_E_OPEN_LINFILE */
   "Too many levels of recursion", /* GD_E_RECURSE_LEVEL */
   "Bad dirfile", /* GD_E_BAD_DIRFILE */
-  "Cannot write to specified field", /* GD_E_BAD_FIELD_TYPE */
+  "Bad field type", /* GD_E_BAD_FIELD_TYPE */
   "Read-only dirfile", /* GD_E_ACC_MODE */
   "Operation not supported by current encoding scheme", /* GD_E_UNSUPPORTED */
   "Unknown encoding scheme", /* GD_E_UNKNOWN_ENCODING */
@@ -71,6 +71,7 @@ const char *GD_ERROR_CODES[GD_N_ERROR_CODES] = {
   "Scalar field code not found", /* GD_E_BAD_SCALAR */
   "Bad REFERENCE field", /* GD_E_BAD_REFERENCE */
   "Operation prohibited by protection level", /* GD_E_PROTECTED */
+  NULL, /* GD_E_DELETE */
 };
 
 static struct FormatType Format = {
