@@ -1,3 +1,11 @@
+2008-11-18   D. V. Wiebe <getdata@ketiltrout.net>  svn:229
+	Merge in a few undocumented 0.5 additions required by kst 2.x from r228.
+	These features are unsupported and may change before 0.5 is released.
+
+	* src/globals.c: Added.
+
+	* src/entry.c (get_raw_filename): Added.
+
 2008-11-17   D. V. Wiebe <getdata@ketiltrout.net>  svn:220
 	* src/flush.c (_GD_Flush): Fix SEGV.
 

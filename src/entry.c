@@ -178,6 +178,69 @@ int _GD_CalculateEntry(DIRFILE* D, gd_entry_t* E)
   return E->e->calculated;
 }
 
+const char* get_raw_filename(DIRFILE* D, const char* field_code)
+{
+  dtrace("%p, \"%s\"", D, field_code);
+
+  if (D->flags & GD_INVALID) {/* don't crash */
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  /* Check field */
+  gd_entry_t *E = _GD_FindField(D, field_code, NULL);
+
+  if (E == NULL) {
+    _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, field_code);
+    dreturn("%p" NULL);
+    return NULL;
+  }
+
+  if (E->field_type != GD_RAW_ENTRY) {
+    _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
+    dreturn("%p" NULL);
+    return NULL;
+  }
+
+  /* Figure out the dirfile encoding type, if required */
+  if ((D->fragment[E->fragment_index].flags & GD_ENCODING) == GD_AUTO_ENCODED) {
+    D->fragment[E->fragment_index].flags =
+      (D->fragment[E->fragment_index].flags & ~GD_ENCODING) |
+      _GD_ResolveEncoding(E->e->file, GD_AUTO_ENCODED, E->e);
+  }
+
+  /* If the encoding scheme is unknown, we can't delete the field */
+  if ((D->fragment[E->fragment_index].flags & GD_ENCODING) == GD_AUTO_ENCODED) {
+    _GD_SetError(D, GD_E_UNKNOWN_ENCODING, 0, NULL, 0, NULL);
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  /* Figure out the encoding subtype, if required */
+  if (E->e->encoding == GD_ENC_UNKNOWN)
+    _GD_ResolveEncoding(E->e->file, D->fragment[E->fragment_index].flags, E->e);
+
+  if (E->e->encoding == GD_ENC_UNKNOWN) {
+    _GD_SetError(D, GD_E_UNKNOWN_ENCODING, 0, NULL, 0, NULL);
+    dreturn("%p" NULL);
+    return NULL;
+  }
+
+  char* name = malloc(FILENAME_MAX);
+
+  if (name == NULL) {
+    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    dreturn("%p" NULL);
+    return NULL;
+  }
+
+  snprintf(name, FILENAME_MAX, "%s%s", E->e->file, encode[E->e->encoding].ext);
+
+  dreturn("%p", name);
+  return name;
+}
+
 int get_entry(DIRFILE* D, const char* field_code, gd_entry_t* entry)
 {
   int i;
