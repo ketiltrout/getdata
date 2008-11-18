@@ -1,6 +1,8 @@
-2008-11-18   D. V. Wiebe <getdata@ketiltrout.net>  svn:229
+2008-11-18   D. V. Wiebe <getdata@ketiltrout.net>  svn:229 svn:230
 	Merge in a few undocumented 0.5 additions required by kst 2.x from r228.
 	These features are unsupported and may change before 0.5 is released.
+
+	* bindings/cxx/dirfile.cpp (Dirfile::ReferenceFilename): Added.
 
 	* src/globals.c: Added.
 
