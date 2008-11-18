@@ -228,3 +228,13 @@ int Dirfile::NFragments()
 {
   return get_nfragments(D);
 }
+
+const char* Dirfile::ReferenceFilename()
+{
+  const char* ref = get_reference(D);
+
+  if (ref == NULL)
+    return NULL;
+
+  return get_raw_filename(D, ref);
+}

@@ -109,6 +109,8 @@ namespace GetData {
 
       size_t PutString(const char *field_code, const char *data_in);
 
+      const char *ReferenceFilename();
+
       unsigned int SamplesPerFrame(const char *field_code);
 
       const char **Strings();

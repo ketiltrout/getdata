@@ -343,6 +343,10 @@ extern int dirfile_add(DIRFILE* D, const gd_entry_t* entry) __gd_nonnull((1,2));
 extern int dirfile_add_spec(DIRFILE* D, const char* line, int fragment_index)
   __gd_nonnull ((1,2));
 
+extern const char* get_reference(DIRFILE* D) __gd_nonnull ((1));
+
+extern const char* get_raw_filename(DIRFILE* D, const char* field_code);
+
 /* the following functions are _FILE_OFFSET_BITS sensitive */
 #ifndef __USE_FILE_OFFSET64
 extern off_t get_nframes(DIRFILE* dirfile) __THROW __gd_nonnull ((1));
