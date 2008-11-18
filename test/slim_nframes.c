@@ -1,6 +1,6 @@
 /* Retreiving the number of frames should succeed cleanly */
-#include "../src/getdata.h"
 #include "../src/config.h"
+#include "../src/getdata.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -42,7 +42,7 @@ int main(void)
   size_t n = get_nframes(D);
   dirfile_close(D);
 
-  unlink(data);
+  unlink(slimdata);
   unlink(format);
   rmdir(filedir);
 

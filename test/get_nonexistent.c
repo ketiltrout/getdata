@@ -37,5 +37,5 @@ int main(void)
   if (n != 0)
     return 1;
 
-  return (error != GD_E_RAW_IO);
+  return (error != GD_E_UNKNOWN_ENCODING);
 }
