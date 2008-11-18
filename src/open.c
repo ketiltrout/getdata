@@ -252,7 +252,7 @@ static gd_entry_t* _GD_ParseLincom(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
 {
   int i;
 
-  dtrace("%p, %p, %i, %p, \"%s\", %i, %i, %i", D, in_cols, n_cols, parent,
+  dtrace("%p, %p, %i, %p, \"%s\", %i, %i", D, in_cols, n_cols, parent,
       format_file, line, pedantic);
 
   if (n_cols < 3) {
@@ -1469,6 +1469,7 @@ DIRFILE* dirfile_cbopen(const char* filedir, unsigned int flags,
       GD_BIG_ENDIAN);
   D->fragment[0].ref_name = NULL;
   D->fragment[0].frame_offset = 0;
+  D->fragment[0].protection = GD_PROTECT_NONE;
 
   ref_name = _GD_ParseFragment(fp, D, 0, &standards, D->flags);
   fclose(fp);

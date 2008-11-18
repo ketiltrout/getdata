@@ -87,11 +87,14 @@ static struct FormatType Format = {
  */
 static int _GD_CopyGlobalError(DIRFILE* D)
 {
+  dtrace("%p", D);
+
   _GD_GlobalErrors.suberror = D->suberror;
   _GD_GlobalErrors.error_line = D->error_line;
   strncpy(_GD_GlobalErrors.error_file, D->error_file, FILENAME_MAX);
   strncpy(_GD_GlobalErrors.error_string, D->error_string, FILENAME_MAX);
 
+  dreturn("%i", D->error);
   return _GD_GlobalErrors.error = D->error;
 }
 
@@ -108,6 +111,8 @@ char* GetDataErrorString(char* buffer, size_t buflen)
 static DIRFILE* _GD_GetDirfile(const char *filename_in, int mode)
 {
   unsigned int i_dirfile;
+
+  dtrace("\"%s\", %x", filename_in, mode);
 
   char filedir[FILENAME_MAX];
   strncpy(filedir, filename_in, FILENAME_MAX);
@@ -129,6 +134,7 @@ static DIRFILE* _GD_GetDirfile(const char *filename_in, int mode)
         _GD_Dirfiles.D[i_dirfile] = _GD_Dirfiles.D[--_GD_Dirfiles.n];
       } else {
         _GD_ClearError(_GD_Dirfiles.D[i_dirfile]);
+        dreturn("%p", _GD_Dirfiles.D[i_dirfile]);
         return _GD_Dirfiles.D[i_dirfile];
       }
     }
@@ -144,16 +150,23 @@ static DIRFILE* _GD_GetDirfile(const char *filename_in, int mode)
   _GD_Dirfiles.D[_GD_Dirfiles.n - 1] = dirfile_open(filedir, mode);
 
   /* Error encountered -- the dirfile will shortly be deleted */
-  if (_GD_Dirfiles.D[_GD_Dirfiles.n - 1]->error != GD_E_OK)
+  if (_GD_Dirfiles.D[_GD_Dirfiles.n - 1]->error != GD_E_OK) {
+    dreturn("%p", _GD_Dirfiles.D[--_GD_Dirfiles.n]);
     return _GD_Dirfiles.D[--_GD_Dirfiles.n];
+  }
 
+  dreturn("%p", _GD_Dirfiles.D[_GD_Dirfiles.n - 1]);
   return _GD_Dirfiles.D[_GD_Dirfiles.n - 1];
 }
 
 static void CopyRawEntry(struct RawEntryType* R, gd_entry_t* E)
 {
-  if (E == NULL)
+  dtrace("%p, %p", R, E);
+
+  if (E == NULL) {
+    dreturnvoid();
     return;
+  }
 
   R->field = E->field;
   
@@ -186,14 +199,20 @@ static void CopyRawEntry(struct RawEntryType* R, gd_entry_t* E)
 
   R->size = (int)E->size;
   R->samples_per_frame = (int)E->spf;
+
+  dreturnvoid();
 }
 
 static void CopyLincomEntry(struct LincomEntryType* L, gd_entry_t* E)
 {
   int i;
 
-  if (E == NULL)
+  dtrace("%p, %p", L, E);
+
+  if (E == NULL) {
+    dreturnvoid();
     return;
+  }
 
   L->field = E->field;
   L->n_fields = E->n_fields;
@@ -202,52 +221,81 @@ static void CopyLincomEntry(struct LincomEntryType* L, gd_entry_t* E)
     L->m[i] = E->m[i];
     L->b[i] = E->b[i];
   }
+
+  dreturnvoid();
 }
 
 static void CopyLinterpEntry(struct LinterpEntryType* L, gd_entry_t* E)
 {
-  if (E == NULL)
+  dtrace("%p, %p", L, E);
+
+  if (E == NULL) {
+    dreturnvoid();
     return;
+  }
 
   L->field = E->field;
   L->raw_field = E->in_fields[0];
   L->linterp_file = E->table;
+
+  dreturnvoid();
 }
 
 static void CopyBitEntry(struct BitEntryType* B, gd_entry_t* E)
 {
-  if (E == NULL)
+  dtrace("%p, %p", B, E);
+
+  if (E == NULL) {
+    dreturnvoid();
     return;
+  }
 
   B->field = E->field;
   B->raw_field = E->in_fields[0];
   B->bitnum = E->bitnum;
   B->numbits = E->numbits;
+
+  dreturnvoid();
 }
 
 static void CopyMultiplyEntry(struct MultiplyEntryType* M, gd_entry_t* E)
 {
-  if (E == NULL)
+  dtrace("%p, %p", M, E);
+
+  if (E == NULL) {
+    dreturnvoid();
     return;
+  }
 
   M->field = E->field;
   M->in_fields[0] = E->in_fields[0];
   M->in_fields[1] = E->in_fields[1];
+
+  dreturnvoid();
 }
 
 static void CopyPhaseEntry(struct PhaseEntryType* P, gd_entry_t* E)
 {
-  if (E == NULL)
+  dtrace("%p, %p", P, E);
+
+  if (E == NULL) {
+    dreturnvoid();
     return;
+  }
 
   P->field = E->field;
   P->raw_field = E->in_fields[0];
   P->shift = E->shift;
+
+  dreturnvoid();
 }
 
 /* Okay, reconstruct the old FormatType.  This is painful. */
-const struct FormatType *GetFormat(const char *filedir, int *error_code) {
+struct FormatType *GetFormat(const char *filedir, int *error_code) {
+  dtrace("\"%s\", %p", filedir, error_code);
+
   DIRFILE *D = _GD_GetDirfile(filedir, GD_RDONLY);
+
   unsigned int i;
 
   int nraw = 0;
@@ -259,6 +307,7 @@ const struct FormatType *GetFormat(const char *filedir, int *error_code) {
 
   if (D->error) {
     *error_code = _GD_CopyGlobalError(D);
+    dreturn("%p", NULL);
     return NULL;
   }
   
@@ -277,6 +326,7 @@ const struct FormatType *GetFormat(const char *filedir, int *error_code) {
   Format.n_mplex = 0; /* Erm... yeah... */
   Format.n_bit = 0; 
   Format.n_phase = 0; 
+
   for (i = 0; i < D->n_entries; ++i) 
     switch(D->entry[i]->field_type) {
       case GD_RAW_ENTRY:
@@ -340,6 +390,7 @@ const struct FormatType *GetFormat(const char *filedir, int *error_code) {
         break;
     }
 
+  dreturn("%p", &Format);
   return &Format;
 }
 
@@ -351,10 +402,15 @@ int GetData(const char *filename, const char *field_code,
   DIRFILE* D;
   int nread;
 
+  dtrace("\"%s\", \"%s\", %i, %i, %i, %i, '%c', %p, %p", filename, field_code,
+      first_frame, first_samp, num_frames, num_samp, return_type, data_out,
+      error_code);
+
   D = _GD_GetDirfile(filename, GD_RDONLY);
 
   if (D->error) {
     *error_code = _GD_CopyGlobalError(D);
+    dreturn("%i", 0);
     return 0;
   }
 
@@ -363,6 +419,7 @@ int GetData(const char *filename, const char *field_code,
       _GD_LegacyType(return_type), data_out);
   *error_code = _GD_CopyGlobalError(D);
 
+  dreturn("%i", nread);
   return nread;
 }
 
@@ -376,16 +433,20 @@ int GetNFrames(const char *filename, int *error_code,
   DIRFILE* D;
   int nf;
 
+  dtrace("\"%s\", %p, <unused>", filename, error_code);
+
   D = _GD_GetDirfile(filename, GD_RDONLY);
 
   if (D->error) {
     *error_code = _GD_CopyGlobalError(D);
+    dreturn("%i", 0);
     return 0;
   }
 
   nf = (int)get_nframes(D);
   *error_code = _GD_CopyGlobalError(D);
 
+  dreturn("%i", nf);
   return nf;
 }
 
@@ -396,16 +457,20 @@ int GetSamplesPerFrame(const char *filename, const char *field_code,
 {
   DIRFILE* D;
 
+  dtrace("\"%s\", \"%s\", %p", filename, field_code, error_code);
+
   D = _GD_GetDirfile(filename, GD_RDONLY);
 
   if (D->error) {
     *error_code = _GD_CopyGlobalError(D);
+    dreturn("%i", 0);
     return 0;
   }
 
   int spf = (int)get_spf(D, field_code);
   *error_code = _GD_CopyGlobalError(D);
 
+  dreturn("%i", spf);
   return spf;
 }
 
@@ -418,10 +483,15 @@ int PutData(const char *filename, const char *field_code,
   DIRFILE* D;
   int n_write = 0;
 
+  dtrace("\"%s\", \"%s\", %i, %i, %i, %i, '%c', %p, %p", filename, field_code,
+      first_frame, first_samp, num_frames, num_samp, data_type, data_in,
+      error_code);
+
   D = _GD_GetDirfile(filename, GD_RDWR | GD_UNENCODED);
 
   if (D->error) {
     *error_code = _GD_CopyGlobalError(D);
+    dreturn("%i", 0);
     return 0;
   }
 
@@ -430,6 +500,7 @@ int PutData(const char *filename, const char *field_code,
       _GD_LegacyType(data_type), data_in);
   *error_code = _GD_CopyGlobalError(D);
 
+  dreturn("%i", n_write);
   return n_write;
 }
 /* vim: ts=2 sw=2 et

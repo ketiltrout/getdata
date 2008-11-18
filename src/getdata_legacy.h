@@ -92,7 +92,11 @@ struct FormatType {
   int n_phase;
 };
 
-extern const struct FormatType *GetFormat(const char *filedir, int *error_code)
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+extern struct FormatType *GetFormat(const char *filedir, int *error_code)
   __THROW __gd_nonnull ((1,2)) __attribute_deprecated__;
 
 /* legacy API for get_error_string() */
@@ -118,5 +122,9 @@ extern int PutData(const char *filename_in, const char *field_code,
     int first_frame, int first_samp, int num_frames, int num_samp,
     char data_type, const void *data_in, int *error_code)
 __gd_nonnull ((1,2,9)) __attribute_deprecated__;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

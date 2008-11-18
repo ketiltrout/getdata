@@ -1,3 +1,26 @@
+New in version 0.4.2:
+
+  Library Changes
+
+  * BUG FIX: The default protection level of format file fragments is now
+    properly set to "none".  Reported by Brendan Crill.
+  * BUG FIX: getdata() now reports the correct number of samples read for slim
+    and ASCII encoded files.  Reported by Adam Hincks.
+  * BUG FIX: A segmentation fault only encountered when reading slim encoded
+    data has been fixed in dirfile_flush().
+
+  Legacy API Changes
+
+  * Several fixes have been made to better re-create the legacy API:
+
+      - the return value of GetFormat is no longer marked const (although
+        it should be considered so).
+      - a symbolic link getdata_struct.h -> getdata.h is created when the
+        headers are installed, but only if the legacy API is present in the
+        library.
+      - when included with a C++ compiler, the legacy function prototypes
+        are wrapped in an extern "C" block. (The new API functions are not.)
+
 New in version 0.4.1:
   
   Library Changes

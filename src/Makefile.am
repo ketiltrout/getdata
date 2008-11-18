@@ -31,6 +31,10 @@ endif
 if INCLUDE_LEGACY_API
 LEGACY_C = legacy.c
 GETDATA_LEGACY_H = getdata_legacy.h
+
+install-data-hook:
+	cd $(DESTDIR)$(includedir) && \
+		$(LN_S) -f getdata.h getdata_struct.h
 endif
 
 if GETDATA_DEBUG

@@ -1,3 +1,24 @@
+2008-11-18   D. V. Wiebe <getdata@ketiltrout.net>  svn:228
+  Merged in changes from the 0.4.x branch, revision 223:
+
+	* src/flush.c (_GD_Flush): Fix SEGV.
+
+	* src/getdata.c (_GD_DoRaw): don't divide samples_read by data size.
+	* src/raw.c (_GD_RawRead): divide nread by data size.
+	* test/slim_get.c test/slim_nframes.c: Test with uint16_t to check for
+		above bug.  Invoke slim binary with -k (force).
+
+	* src/legacy.c (GetFormat): Remove const from return
+	* src/getdata_legacy.h: wrap all function declarations in extern "C"
+
+	* src/legacy.c: Trace function calls.
+
+	* src/Makefile.am: add symbolic link getdata_struct.h -> getdata.h for
+	better legacy API support.
+
+	* src/include.c (_GD_Include) src/open.c (dirfile_open): Initialise
+	protection level for fragments.
+
 2008-11-17   D. V. Wiebe <getdata@ketiltrout.net>  svn:224
 	* src/getdata.h.in src/internal.h: Rename MAX_LINE_LENGTH to
 	GD_MAX_LINE_LENGTH and move to public header.

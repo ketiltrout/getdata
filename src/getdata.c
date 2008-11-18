@@ -206,8 +206,6 @@ static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *E,
       return 0;
     }
 
-    samples_read /= E->size;
-
     if (encode[E->e->encoding].ecor &&
         (D->fragment[E->fragment_index].flags &
 #ifdef WORDS_BIGENDIAN
