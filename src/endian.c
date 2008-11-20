@@ -26,12 +26,12 @@
 #include <errno.h>
 #endif
 
-static void _GD_ShiftFragment(DIRFILE* D, off64_t offset, int fragment,
-    int move)
+static void _GD_ByteSwapFragment(DIRFILE* D, unsigned int byte_sex,
+    int fragment, int move)
 {
   unsigned int i, n_raw = 0;
 
-  dtrace("%p, %lli, %i, %i\n", D, (long long)offset, fragment, move);
+  dtrace("%p, %u, %i, %i\n", D, byte_sex, fragment, move);
 
   /* check protection */
   if (D->fragment[fragment].protection & GD_PROTECT_FORMAT) {
@@ -41,7 +41,7 @@ static void _GD_ShiftFragment(DIRFILE* D, off64_t offset, int fragment,
     return;
   }
 
-  if (move && offset != D->fragment[fragment].frame_offset) {
+  if (move && byte_sex != D->fragment[fragment].byte_sex) {
     gd_entry_t **raw_entry = malloc(sizeof(gd_entry_t*) * D->n_entries);
     const struct encoding_t* enc;
     void *buffer = malloc(BUFFER_SIZE);
@@ -54,17 +54,28 @@ static void _GD_ShiftFragment(DIRFILE* D, off64_t offset, int fragment,
       return;
     }
 
-    offset -= D->fragment[fragment].frame_offset;
-
     /* Because it may fail, the move must occur out-of-place and then be copied
      * back over the affected files once success is assured */
     for (i = 0; i < D->n_entries; ++i)
       if (D->entry[i]->fragment_index == fragment &&
           D->entry[i]->field_type == GD_RAW_ENTRY)
       {
+        /* check subencoding support */
         if (!_GD_Supports(D, D->entry[i], GD_EF_OPEN | GD_EF_CLOSE |
               GD_EF_SEEK | GD_EF_READ | GD_EF_WRITE | GD_EF_SYNC |
               GD_EF_UNLINK | GD_EF_TEMP))
+          continue;
+
+        enc = encode + raw_entry[i]->e->file[0].encoding;
+        ns = BUFFER_SIZE / raw_entry[i]->e->size;
+
+        /* if the field's subencoding requires no endianness correction,
+         * do nothing */
+        if (!enc->ecor)
+          continue;
+
+        /* if the field's data type is one byte long, do nothing */
+        if (D->entry[i]->e->size == 1)
           continue;
 
         /* check data protection */
@@ -73,9 +84,6 @@ static void _GD_ShiftFragment(DIRFILE* D, off64_t offset, int fragment,
               D->fragment[fragment].cname);
           break;
         }
-
-        enc = encode + raw_entry[i]->e->file[0].encoding;
-        ns = BUFFER_SIZE / raw_entry[i]->e->size;
 
         /* add this raw field to the list */
         raw_entry[n_raw++] = D->entry[i];
@@ -97,34 +105,20 @@ static void _GD_ShiftFragment(DIRFILE* D, off64_t offset, int fragment,
           break;
         }
 
-        /* Adjust for the change in offset */
-        if (offset < 0) { /* new offset is less, pad new file */
-          if ((*enc->seek)(raw_entry[i]->e->file, 0,
-                raw_entry[i]->data_type, 1) == -1) {
-            _GD_SetError(D, GD_E_RAW_IO, 0, raw_entry[i]->e->file[0].name,
-                errno, NULL);
-            break;
-          }
-          if ((*enc->seek)(raw_entry[i]->e->file + 1,
-                -offset * raw_entry[i]->spf, raw_entry[i]->data_type, 1) == -1)
-          {
-            _GD_SetError(D, GD_E_RAW_IO, 0, raw_entry[i]->e->file[1].name,
-                errno, NULL);
-            break;
-          }
-        } else { /* new offset is more, truncate old file */
-          if ((*enc->seek)(raw_entry[i]->e->file, offset * raw_entry[i]->spf,
-                raw_entry[i]->data_type, 0) == -1) {
-            _GD_SetError(D, GD_E_RAW_IO, 0, raw_entry[i]->e->file[0].name,
-                errno, NULL);
-            break;
-          }
-          if ((*enc->seek)(raw_entry[i]->e->file + 1, 0,
-                raw_entry[i]->data_type, 1) == -1) {
-            _GD_SetError(D, GD_E_RAW_IO, 0, raw_entry[i]->e->file[1].name,
-                errno, NULL);
-            break;
-          }
+        /* Seek to start */
+        if ((*enc->seek)(raw_entry[i]->e->file, 0, raw_entry[i]->data_type, 1)
+            == -1)
+        {
+          _GD_SetError(D, GD_E_RAW_IO, 0, raw_entry[i]->e->file[0].name,
+              errno, NULL);
+          break;
+        }
+        if ((*enc->seek)(raw_entry[i]->e->file + 1, 0, raw_entry[i]->data_type,
+              1) == -1)
+        {
+          _GD_SetError(D, GD_E_RAW_IO, 0, raw_entry[i]->e->file[1].name,
+              errno, NULL);
+          break;
         }
 
         /* Now copy the old file to the new file */
@@ -140,6 +134,9 @@ static void _GD_ShiftFragment(DIRFILE* D, off64_t offset, int fragment,
 
           if (nread == 0)
             break;
+
+          /* swap endianness */
+          _GD_FixEndianness(buffer, raw_entry[i]->e->size, ns);
 
           nwrote = (*enc->write)(raw_entry[i]->e->file + 1, buffer,
               raw_entry[i]->data_type, nread);
@@ -179,17 +176,17 @@ static void _GD_ShiftFragment(DIRFILE* D, off64_t offset, int fragment,
     }
   }
 
-  D->fragment[fragment].frame_offset = offset;
+  D->fragment[fragment].byte_sex = byte_sex;
   D->fragment[fragment].modified = 1;
 
   dreturnvoid();
 }
 
-int put_frameoffset64(DIRFILE* D, off64_t offset, int fragment, int move)
+int put_endianness(DIRFILE* D, unsigned int byte_sex, int fragment, int move)
 {
   int i;
 
-  dtrace("%p, %lli, %i, %i\n", D, (long long)offset, fragment, move);
+  dtrace("%p, %i, %i, %i\n", D, byte_sex, fragment, move);
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -209,8 +206,8 @@ int put_frameoffset64(DIRFILE* D, off64_t offset, int fragment, int move)
     return -1;
   }
 
-  if (offset < 0) {
-    _GD_SetError(D, GD_E_RANGE, 0, NULL, 0, NULL);
+  if (byte_sex != GD_BIG_ENDIAN && byte_sex != GD_LITTLE_ENDIAN) {
+    _GD_SetError(D, GD_E_BAD_ENDIANNESS, 0, NULL, 0, NULL);
     dreturn("%i", -1);
     return -1;
   }
@@ -219,19 +216,19 @@ int put_frameoffset64(DIRFILE* D, off64_t offset, int fragment, int move)
 
   if (fragment == GD_ALL_FRAGMENTS) {
     for (i = 0; i < D->n_fragment; ++i) {
-      _GD_ShiftFragment(D, offset, i, move);
+      _GD_ByteSwapFragment(D, byte_sex, i, move);
 
       if (D->error)
         break;
     }
   } else
-    _GD_ShiftFragment(D, offset, fragment, move);
+    _GD_ByteSwapFragment(D, byte_sex, fragment, move);
 
   dreturn("%i", (D->error) ? -1 : 0);
   return (D->error) ? -1 : 0;
 }
 
-off64_t get_frameoffset64(DIRFILE* D, int fragment)
+int get_endianness(DIRFILE* D, int fragment)
 {
   dtrace("%p, %i\n", D, fragment);
 
@@ -249,17 +246,28 @@ off64_t get_frameoffset64(DIRFILE* D, int fragment)
 
   _GD_ClearError(D);
 
-  dreturn("%lli", (long long)D->fragment[fragment].frame_offset);
-  return D->fragment[fragment].frame_offset;
+  dreturn("%i", D->fragment[fragment].byte_sex);
+  return D->fragment[fragment].byte_sex;
 }
 
-/* 32(ish)-bit wrappers for the 64-bit versions, when needed */
-int put_frameoffset(DIRFILE* D, off_t offset, int fragment, int move)
+void _GD_FixEndianness(char* databuffer, size_t size, size_t ns)
 {
-  return put_frameoffset64(D, offset, fragment, move);
-}
+  size_t i, j;
+  char b;
 
-off_t get_frameoffset(DIRFILE* D, int fragment)
-{
-  return get_frameoffset64(D, fragment);
+  dtrace("%p, %zi, %zi", databuffer, size, ns);
+
+  if (size == 1) {
+    dreturnvoid();
+    return;
+  }
+
+  for (i = 0; i < ns; ++i)
+    for (j = 0; j < size / 2; ++j) {
+      b = databuffer[size * (i + 1) - j - 1];
+      databuffer[size * (i + 1) - j - 1] = databuffer[size * i + j];
+      databuffer[size * i + j] = b;
+    }
+
+  dreturnvoid();
 }

@@ -48,7 +48,17 @@ int _GD_RawOpen(struct _gd_raw_file* file, const char* base, int mode,
 off64_t _GD_RawSeek(struct _gd_raw_file* file, off64_t count,
     gd_type_t data_type, int pad __gd_unused)
 {
-  return lseek64(file->fp, count * GD_SIZE(data_type), SEEK_SET);
+  dtrace("%p, %lli, %x, <unused>", file, (long long)count, data_type);
+
+  off64_t pos =  lseek64(file->fp, count * GD_SIZE(data_type), SEEK_SET);
+
+  if (pos == -1) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  dreturn("%lli", (long long)count);
+  return count;
 }
 
 ssize_t _GD_RawRead(struct _gd_raw_file *file, void *ptr, gd_type_t data_type,

@@ -72,6 +72,7 @@ const char *GD_ERROR_CODES[GD_N_ERROR_CODES] = {
   "Bad REFERENCE field", /* GD_E_BAD_REFERENCE */
   "Operation prohibited by protection level", /* GD_E_PROTECTED */
   NULL, /* GD_E_DELETE */
+  NULL, /* GD_E_BAD_ENDIANNESS */
 };
 
 static struct FormatType Format = {

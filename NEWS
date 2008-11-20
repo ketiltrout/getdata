@@ -1,3 +1,12 @@
+New in version 0.5.0a1:
+
+  Library Changes
+
+  * BUG FIX: putdata() now reports the correct number of samples written for
+    ASCII encoded files.
+
+|==============================================================================|
+
 New in version 0.4.2:
 
   Library Changes
@@ -21,6 +30,8 @@ New in version 0.4.2:
       - when included with a C++ compiler, the legacy function prototypes
         are wrapped in an extern "C" block. (The new API functions are not.)
 
+|==============================================================================|
+
 New in version 0.4.1:
   
   Library Changes
@@ -37,6 +48,8 @@ New in version 0.4.1:
     be added via GetData which contain a full stop character.
   * Some minor speed improvements have been made to the format file parser
     resulting in a ~30% decrease in parsing time.
+
+|==============================================================================|
 
 New in version 0.4.0:
   

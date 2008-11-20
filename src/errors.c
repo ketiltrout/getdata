@@ -142,6 +142,15 @@ static const struct {
   { GD_E_PROTECTED, GD_E_PROTECTED_FORMAT, "Fragment is protected: {4}", 0 },
   { GD_E_PROTECTED, GD_E_PROTECTED_DATA, "Data for fragment is protected: {4}",
     0 },
+  /* GD_E_DELETE: 2 = deleted field, 4 = client field */
+  { GD_E_DELETE, GD_E_DEL_META, "Cannot delete field {2} with metafield {4}",
+    0 },
+  { GD_E_DELETE, GD_E_DEL_CONST,
+    "Cannot delete field {2} used in definiton of field {4}", 0 },
+  { GD_E_DELETE, GD_E_DEL_DERIVED,
+    "Cannot delete field {2} used as input to field {4}", 0 },
+  /* GD_E_BAD_ENDIANNESS: (nothing) */
+  { GD_E_BAD_ENDIANNESS, 0, "Invalid endianness specified", 0 },
   /* GD_E_OK: (nothing) */
   { 0, 0, "Success", 0} /* this must be the last error string defined */
 };

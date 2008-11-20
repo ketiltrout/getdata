@@ -100,8 +100,9 @@ int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,
   D->fragment[D->n_fragment - 1].ename = strdup(ename);
   D->fragment[D->n_fragment - 1].modified = 0;
   D->fragment[D->n_fragment - 1].parent = me;
-  D->fragment[D->n_fragment - 1].flags = flags & (GD_ENCODING |
-      GD_LITTLE_ENDIAN | GD_BIG_ENDIAN);
+  D->fragment[D->n_fragment - 1].encoding = flags & GD_ENCODING;
+  D->fragment[D->n_fragment - 1].byte_sex = flags &
+    (GD_LITTLE_ENDIAN | GD_BIG_ENDIAN);
   D->fragment[D->n_fragment - 1].ref_name = NULL;
   D->fragment[D->n_fragment - 1].frame_offset = D->fragment[me].frame_offset;
   D->fragment[D->n_fragment - 1].protection = GD_PROTECT_NONE;

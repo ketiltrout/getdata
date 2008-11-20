@@ -224,6 +224,8 @@ struct _gd_private_entry {
 #define GD_TEMP_MOVE    1
 #define GD_TEMP_DESTROY 2
 
+#define BUFFER_SIZE 9000000
+
 /* Encoding schemes */
 extern const struct encoding_t {
   unsigned int scheme;
@@ -262,7 +264,8 @@ struct gd_fragment_t {
   char* ename;
   int modified;
   int parent;
-  unsigned int flags;
+  unsigned int encoding;
+  unsigned int byte_sex;
   int protection;
   char* ref_name;
 

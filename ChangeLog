@@ -1,3 +1,27 @@
+2008-11-20   D. V. Wiebe <getdata@ketiltrout.net>  svn:236
+
+	* src/endian.c (_GD_FixEndianness): Moved from types.c.
+
+	* src/endian.c: Added.
+
+	* src/encoding.c (_GD_RecodeFragment put_encoding get_encoding): Added.
+
+	* src/foffs.c (_GD_ShiftFragment): Check for GD_EF_SEEK.  Only open the
+	input file if not already open.  Check seek success.  Seek on both files.
+
+	* src/getdata.h.in legacy.c: Add GD_E_BAD_ENDIANNESS.
+	
+	* src/putdata.c (_GD_DoRawOut): Don't divide n_wrote by size.
+
+	* src/slim.c (_GD_SlimSeek) src/raw.c (_GD_RawSeek): Return samples, not
+	bytes.
+
+	* src/getdata.c (_GD_DoRaw) src/putdata.c (_GD_DoRawOut): Check seek
+	success.
+
+	* src/internal.h: Split the unnecessarily difficult fragment->flags into
+	fragment->encoding and fragment->byte_sex.
+
 2008-11-18   D. V. Wiebe <getdata@ketiltrout.net>  svn:232
 	* src/open.c (_GD_ParseFragment): Added GD_IGNORE_DUPS flags.
 	* test/parse_duplicate_ignore.c: Added.

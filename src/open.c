@@ -800,9 +800,9 @@ gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, const char** in_cols,
         _GD_SetError(D, GD_E_PROTECTED, GD_E_PROTECTED_DATA, NULL, 0,
             D->fragment[me].cname);
       /* If the encoding scheme is unknown, we can't add the field */
-      if ((D->fragment[me].flags & GD_ENCODING) == GD_AUTO_ENCODED)
+      if (D->fragment[me].encoding == GD_AUTO_ENCODED)
         _GD_SetError(D, GD_E_UNKNOWN_ENCODING, 0, NULL, 0, NULL);
-      else if ((D->fragment[me].flags & GD_ENCODING) == GD_ENC_UNSUPPORTED)
+      else if (D->fragment[me].encoding == GD_ENC_UNSUPPORTED)
         /* If the encoding scheme is unsupported, we can't add the field */
         _GD_SetError(D, GD_E_UNSUPPORTED, 0, NULL, 0, NULL);
       else if (_GD_Supports(D, E, GD_EF_TOUCH) &&
@@ -1087,27 +1087,21 @@ static int _GD_ParseDirective(DIRFILE *D, const char** in_cols, int n_cols,
   else if (strcmp(ptr, "ENCODING") == 0) {
     if (!(flags & GD_FORCE_ENCODING)) {
       if (strcmp(in_cols[1], "none") == 0)
-        D->fragment[me].flags = (D->fragment[me].flags & ~GD_ENCODING) |
-          GD_UNENCODED;
+        D->fragment[me].encoding = GD_UNENCODED;
       else if (strcmp(in_cols[1], "slim") == 0)
-        D->fragment[me].flags = (D->fragment[me].flags & ~GD_ENCODING) |
-          GD_SLIM_ENCODED;
+        D->fragment[me].encoding = GD_SLIM_ENCODED;
       else if (strcmp(in_cols[1], "text") == 0)
-        D->fragment[me].flags = (D->fragment[me].flags & ~GD_ENCODING) |
-          GD_TEXT_ENCODED;
+        D->fragment[me].encoding = GD_TEXT_ENCODED;
       else
-        D->fragment[me].flags = (D->fragment[me].flags & ~GD_ENCODING) |
-          GD_ENC_UNSUPPORTED;
+        D->fragment[me].encoding = GD_ENC_UNSUPPORTED;
     }
   } else if (strcmp(ptr, "ENDIAN") == 0) {
     if (!(flags & GD_FORCE_ENDIAN)) {
-      if (strcmp(in_cols[1], "big") == 0) {
-        D->fragment[me].flags |= GD_BIG_ENDIAN;
-        D->fragment[me].flags &= ~GD_LITTLE_ENDIAN;
-      } else if (strcmp(in_cols[1], "little") == 0) {
-        D->fragment[me].flags |= GD_LITTLE_ENDIAN;
-        D->fragment[me].flags &= ~GD_BIG_ENDIAN;
-      } else 
+      if (strcmp(in_cols[1], "big") == 0)
+        D->fragment[me].byte_sex = GD_BIG_ENDIAN;
+      else if (strcmp(in_cols[1], "little") == 0)
+        D->fragment[me].byte_sex = GD_LITTLE_ENDIAN;
+      else 
         _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_ENDIAN,
             D->fragment[me].cname, linenum, NULL);
     }
@@ -1115,7 +1109,8 @@ static int _GD_ParseDirective(DIRFILE *D, const char** in_cols, int n_cols,
     D->fragment[me].frame_offset = atoll(in_cols[1]);
   else if (strcmp(ptr, "INCLUDE") == 0) {
     *first_fragment = _GD_Include(D, in_cols[1], D->fragment[me].cname, linenum,
-        ref_name, me, standards, D->fragment[me].flags);
+        ref_name, me, standards, D->fragment[me].encoding |
+        D->fragment[me].byte_sex);
   } else if (strcmp(ptr, "META") == 0) {
     const gd_entry_t* P =  _GD_FindField(D, in_cols[1], NULL);
     if (P == NULL)
@@ -1469,8 +1464,8 @@ DIRFILE* dirfile_cbopen(const char* filedir, unsigned int flags,
   D->fragment[0].ename = NULL;
   D->fragment[0].modified = 0;
   D->fragment[0].parent = -1;
-  D->fragment[0].flags = D->flags & (GD_ENCODING | GD_LITTLE_ENDIAN |
-      GD_BIG_ENDIAN);
+  D->fragment[0].encoding = D->flags & GD_ENCODING;
+  D->fragment[0].byte_sex = D->flags & (GD_LITTLE_ENDIAN | GD_BIG_ENDIAN);
   D->fragment[0].ref_name = NULL;
   D->fragment[0].frame_offset = 0;
   D->fragment[0].protection = GD_PROTECT_NONE;

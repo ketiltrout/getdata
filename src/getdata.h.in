@@ -78,11 +78,12 @@
 #define GD_E_BAD_REFERENCE    24
 #define GD_E_PROTECTED        25
 #define GD_E_DELETE           26
+#define GD_E_BAD_ENDIANNESS   27
 
-#define GD_N_ERROR_CODES      27
+#define GD_N_ERROR_CODES      28
 
 /* maximum length of a format file line */
-#define GD_MAX_LINE_LENGTH 4096
+#define GD_MAX_LINE_LENGTH  4096
 
 #define GD_MAX_LINCOM 3
 
@@ -345,6 +346,16 @@ extern const char** get_mfield_list(DIRFILE* D, const char* parent)
 extern int dirfile_madd_spec(DIRFILE* D, const char* line, const char* parent)
   __THROW __gd_nonnull ((1,2,3));
 
+extern const char* get_raw_filename(DIRFILE* D, const char* field_code)
+  __THROW __gd_nonnull ((1, 2));
+
+extern int put_reference(DIRFILE* D, const char* field_code) __THROW
+  __gd_nonnull ((1, 2));
+
+extern const char* dirfilename(DIRFILE* D) __THROW __gd_nonnull ((1));
+
+extern const char* get_reference(DIRFILE* D) __THROW __gd_nonnull ((1));
+
 /* The following functions contain calls to I/O functions, making them
  * cancellation points.  As a result we cannot mark them with __THROW.
  */
@@ -370,6 +381,9 @@ extern int dirfile_add(DIRFILE* D, const gd_entry_t* entry) __gd_nonnull((1,2));
 extern int dirfile_add_spec(DIRFILE* D, const char* line, int fragment_index)
   __gd_nonnull ((1,2));
 
+extern int put_encoding(DIRFILE* D, unsigned int encoding, int fragment,
+    int move) __gd_nonnull ((1));
+
 /* delete flags */
 #define GD_DEL_NONE  0x0
 #define GD_DEL_META  0x1
@@ -379,19 +393,10 @@ extern int dirfile_add_spec(DIRFILE* D, const char* line, int fragment_index)
 extern int dirfile_delete(DIRFILE* D, const char* field_code, int flags)
   __gd_nonnull ((1,2));
 
-extern const char* dirfilename(DIRFILE* D) __gd_nonnull ((1));
-
-extern const char* get_reference(DIRFILE* D) __gd_nonnull ((1));
-
-extern int put_reference(DIRFILE* D, const char* field_code)
-  __gd_nonnull ((1, 2));
-
-extern const char* get_raw_filename(DIRFILE* D, const char* field_code)
-  __gd_nonnull ((1, 2));
-
 /* the following functions are _FILE_OFFSET_BITS sensitive */
 #ifndef __USE_FILE_OFFSET64
-extern off_t get_frameoffset(DIRFILE* dirfile, int fragment) __gd_nonnull ((1));
+extern off_t get_frameoffset(DIRFILE* dirfile, int fragment)
+  __THROW __gd_nonnull ((1));
 
 extern off_t get_nframes(DIRFILE* dirfile) __gd_nonnull ((1));
 
@@ -408,10 +413,14 @@ extern size_t putdata(DIRFILE* dirfile, const char *field_code,
 extern int put_frameoffset(DIRFILE* D, off_t field_code, int fragment,
     int move) __gd_nonnull ((1));
 #else
-# ifdef __REDIRECT
-extern off_t __REDIRECT (get_frameoffset, (DIRFILE* dirfile, int fragment),
+# ifdef __REDIRECT_NTH
+extern off_t __REDIRECT_NTH (get_frameoffset, (DIRFILE* dirfile, int fragment),
     get_frameoffset64) __gd_nonnull ((1));
+# else
+#  define get_frameoffset get_frameoffset64
+# endif
 
+# ifdef __REDIRECT
 extern off_t __REDIRECT (get_nframes, (DIRFILE* dirfile), get_nframes64)
   __gd_nonnull ((1));
 
@@ -428,7 +437,6 @@ extern size_t __REDIRECT (putdata, (DIRFILE* dirfile, const char *field_code,
 extern int __REDIRECT (put_frameoffset, (DIRFILE* D, __off64_t offset,
       int fragment, int move), put_frameoffset64) __gd_nonnull ((1));
 # else
-#  define get_frameoffset get_frameoffset64
 #  define get_nframes get_nframes64
 #  define getdata getdata64
 #  define putdata putdata64

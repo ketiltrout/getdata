@@ -502,27 +502,5 @@ void _GD_ConvertType(DIRFILE* D, const void *data_in, gd_type_t in_type,
   _GD_SetError(D, GD_E_BAD_TYPE, in_type, NULL, 0, NULL);
 }
 
-void _GD_FixEndianness(char* databuffer, size_t size, size_t ns)
-{
-  size_t i, j;
-  char b;
-
-  dtrace("%p, %zi, %zi", databuffer, size, ns);
-
-  if (size == 1) {
-    dreturnvoid();
-    return;
-  }
-
-  for (i = 0; i < ns; ++i)
-    for (j = 0; j < size / 2; ++j) {
-      b = databuffer[size * (i + 1) - j - 1];
-      databuffer[size * (i + 1) - j - 1] = databuffer[size * i + j];
-      databuffer[size * i + j] = b;
-    }
-
-  dreturnvoid();
-}
-
 /* vim: ts=2 sw=2 et tw=80
  */

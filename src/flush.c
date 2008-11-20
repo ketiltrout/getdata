@@ -281,9 +281,9 @@ void _GD_FlushMeta(DIRFILE* D)
       /* Byte Sex */
       fprintf(stream, "/ENDIAN %s\n",
 #ifdef WORDS_BIGENDIAN
-          (D->fragment[i].flags & GD_LITTLE_ENDIAN) ? "little" : "big"
+          (D->fragment[i].byte_sex == GD_LITTLE_ENDIAN) ? "little" : "big"
 #else
-          (D->fragment[i].flags & GD_BIG_ENDIAN) ? "big" : "little"
+          (D->fragment[i].byte_sex == GD_BIG_ENDIAN) ? "big" : "little"
 #endif
           );
 
@@ -301,7 +301,7 @@ void _GD_FlushMeta(DIRFILE* D)
             (unsigned long long)D->fragment[i].frame_offset);
 
       /* The encoding -- we only write encodings we know about. */
-      switch(D->fragment[i].flags & GD_ENCODING) {
+      switch(D->fragment[i].encoding) {
         case GD_UNENCODED:
           fputs("/ENCODING none\n", stream);
           break;

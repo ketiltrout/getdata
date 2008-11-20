@@ -63,7 +63,12 @@ off64_t _GD_SlimSeek(struct _gd_raw_file* file, off64_t count,
   off64_t n = (off64_t)slimseek(file->edata, (off_t)count * GD_SIZE(data_type),
       SEEK_SET);
 
-  dreturn("%lli", (long long)n);
+  if (n == -1) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  dreturn("%lli", (long long)(n / GD_SIZE(data_type)));
   return n;
 }
 
