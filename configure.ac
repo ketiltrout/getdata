@@ -21,7 +21,7 @@ dnl
 AC_INIT([GetData], [0.5.0a1], [getdata-devel@lists.sourceforge.net])
 
 dnl autoconf 2.60 or later is required to build configure
-AC_PREREQ([2.60])
+AC_PREREQ([2.63])
 
 dnl libgetdata current interface version
 AC_SUBST(GETDATA_IFACE_VERSION, [1])
@@ -170,7 +170,7 @@ AM_INIT_AUTOMAKE
 AC_PROG_LN_S
 AC_PROG_CC
 AC_PROG_CC_C_O
-GD_PROG_CC_C99
+AC_PROG_CC_C99
 AC_PROG_CXX
 AC_PROG_CXX_C_O
 AC_PROG_F77

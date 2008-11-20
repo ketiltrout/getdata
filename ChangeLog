@@ -1,5 +1,8 @@
-2008-11-20   D. V. Wiebe <getdata@ketiltrout.net>  svn:236
+2008-11-20   D. V. Wiebe <getdata@ketiltrout.net>  svn:237
+	* configure.ac: Use AC_PROG_CC_C99 again, bump AC_PREREQ to 2.63.
+	* m4/c99.m4: Removed.
 
+2008-11-20   D. V. Wiebe <getdata@ketiltrout.net>  svn:236
 	* src/endian.c (_GD_FixEndianness): Moved from types.c.
 
 	* src/endian.c: Added.
