@@ -1,3 +1,12 @@
+2008-11-21   D. V. Wiebe <getdata@ketiltrout.net>  svn:239
+	* src/mod.c (dirfile_change_spec dirfile_mchange_spec): Added.
+
+	* src/open.c (_GD_ParseFieldSpec): Add insert parameter to indicate whether
+	the parsed entry should be inserted into the dirfile.
+
+	* sr/mod.c (_GD_Change): Remove unnecessary intermediate variables.
+	Properly handle scalars.
+
 2008-11-21   D. V. Wiebe <getdata@ketiltrout.net>  svn:238
 	* src/common.c (_GD_AddData): Moved from getdata.c and made non-static.
 

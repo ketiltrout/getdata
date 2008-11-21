@@ -368,7 +368,7 @@ int dirfile_madd_spec(DIRFILE* D, const char* line, const char* parent)
 
   /* Directive parsing is skipped -- The Field Spec parser will add the field */
   _GD_ParseFieldSpec(D, n_cols, in_cols, E, "dirfile_madd_spec()", 0, me,
-      DIRFILE_STANDARDS_VERSION, 1, 1);
+      DIRFILE_STANDARDS_VERSION, 1, 1, 1);
 
   if (D->error) {
     dreturn("%i", -1); /* field spec parser threw an error */
@@ -434,7 +434,7 @@ int dirfile_add_spec(DIRFILE* D, const char* line, int fragment_index)
 
   /* Directive parsing is skipped -- The Field Spec parser will add the field */
   _GD_ParseFieldSpec(D, n_cols, in_cols, NULL, "dirfile_add_spec()", 0, 
-      fragment_index, DIRFILE_STANDARDS_VERSION, 1, 1);
+      fragment_index, DIRFILE_STANDARDS_VERSION, 1, 1, 1);
 
   if (D->error) {
     dreturn("%i", -1); /* field spec parser threw an error */

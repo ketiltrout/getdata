@@ -775,7 +775,7 @@ static int utf8encode(DIRFILE* D, const char* format_file, int linenum,
  * specification */
 gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, const char** in_cols,
     const gd_entry_t* P, const char* format_file, int linenum, unsigned int me,
-    int standards, int creat, int pedantic)
+    int standards, int creat, int pedantic, int insert)
 {
   gd_entry_t* E = NULL;
 
@@ -837,7 +837,7 @@ gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, const char** in_cols,
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_LINE, format_file, linenum,
         NULL);
 
-  if (D->error == GD_E_OK && E != NULL) {
+  if (insert && D->error == GD_E_OK && E != NULL) {
     /* the Format file fragment index */
     E->fragment_index = me;
 
@@ -872,8 +872,8 @@ gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, const char** in_cols,
     }
   }
 
-  dreturn("%p", (E && E->field_type == GD_RAW_ENTRY) ? E : NULL);
-  return (E && E->field_type == GD_RAW_ENTRY) ? E : NULL;
+  dreturn("%p", (!insert || (E && E->field_type == GD_RAW_ENTRY)) ? E : NULL);
+  return (!insert || (E && E->field_type == GD_RAW_ENTRY)) ? E : NULL;
 }
 
 /* _GD_Tokenise: Tokenise a line.  Returns n_cols. */
@@ -1125,7 +1125,7 @@ static int _GD_ParseDirective(DIRFILE *D, const char** in_cols, int n_cols,
     else
       _GD_ParseFieldSpec(D, n_cols - 2, in_cols + 2, P,
           D->fragment[me].cname, linenum, me, *standards, 0,
-          flags & GD_PEDANTIC);
+          flags & GD_PEDANTIC, 1);
   } else if (strcmp(ptr, "PROTECT") == 0) {
     if (strcmp(in_cols[1], "none") == 0)
       D->fragment[me].protection = GD_PROTECT_NONE;
@@ -1190,7 +1190,7 @@ char* _GD_ParseFragment(FILE* fp, DIRFILE *D, int me, int* standards,
     if (D->error == GD_E_OK && !match)
       first_raw = _GD_ParseFieldSpec(D, n_cols, in_cols, NULL,
           D->fragment[me].cname, linenum, me, *standards, 0,
-          flags & GD_PEDANTIC);
+          flags & GD_PEDANTIC, 1);
 
     if (D->flags & GD_IGNORE_DUPS && D->error == GD_E_FORMAT &&
         D->suberror == GD_E_FORMAT_DUPLICATE)

@@ -371,7 +371,7 @@ void _GD_LinterpData(DIRFILE* D, const void *data, gd_type_t type, size_t npts,
     double *lx, double *ly, size_t n_ln);
 gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, const char** in_cols,
     const gd_entry_t* parent, const char* format_file, int linenum,
-    unsigned int me, int standards, int creat, int pedantic);
+    unsigned int me, int standards, int creat, int pedantic, int insert);
 char* _GD_ParseFragment(FILE* fp, DIRFILE *D, int me, int* standards,
     unsigned int flags);
 void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E);
