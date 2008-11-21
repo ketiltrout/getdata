@@ -356,6 +356,22 @@ extern const char* dirfilename(DIRFILE* D) __THROW __gd_nonnull ((1));
 
 extern const char* get_reference(DIRFILE* D) __THROW __gd_nonnull ((1));
 
+extern int dirfile_change_lincom(DIRFILE* D, const char* field_code,
+    int n_fields, const char** in_fields, const double* m, const double* b)
+__THROW __gd_nonnull((1,2));
+
+extern int dirfile_change_bit(DIRFILE* D, const char* field_code,
+    const char* in_field, int bitnum, int numbits) __THROW __gd_nonnull((1,2));
+
+extern int dirfile_change_multiply(DIRFILE* D, const char* field_code,
+    const char* in_field1, const char* in_field2) __THROW __gd_nonnull((1,2));
+
+extern int dirfile_change_phase(DIRFILE* D, const char* field_code,
+    const char* in_field, int shift) __THROW __gd_nonnull((1,2));
+
+extern int dirfile_change_const(DIRFILE* D, const char* field_code,
+    gd_type_t const_type) __THROW __gd_nonnull((1,2));
+
 /* The following functions contain calls to I/O functions, making them
  * cancellation points.  As a result we cannot mark them with __THROW.
  */
@@ -390,8 +406,17 @@ extern int put_encoding(DIRFILE* D, unsigned int encoding, int fragment,
 #define GD_DEL_DATA  0x2
 #define GD_DEL_DEREF 0x4
 #define GD_DEL_FORCE 0x8
-extern int dirfile_delete(DIRFILE* D, const char* field_code, int flags)
-  __gd_nonnull ((1,2));
+extern int dirfile_delete(DIRFILE* D, const char* field_code,
+    int flags) __gd_nonnull ((1,2));
+
+extern int dirfile_change(DIRFILE* D, const char* field_code,
+    const gd_entry_t *entry, int move) __gd_nonnull ((1,2));
+
+extern int dirfile_change_raw(DIRFILE *D, const char *field_code,
+    unsigned int spf, gd_type_t data_type, int move) __gd_nonnull ((1,2));
+
+extern int dirfile_change_linterp(DIRFILE* D, const char* field_code,
+    const char* in_field, const char* table, int move) __gd_nonnull ((1,2));
 
 /* the following functions are _FILE_OFFSET_BITS sensitive */
 #ifndef __USE_FILE_OFFSET64

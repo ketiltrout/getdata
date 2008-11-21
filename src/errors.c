@@ -105,6 +105,7 @@ static const struct {
   /* GD_E_BAD_FIELD_TYPE: 4 = fieldcode */
   { GD_E_BAD_FIELD_TYPE, GD_E_FIELD_PUT, "No method to write field {4}", 0 },
   { GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, "Invalid field type for {4}", 0 },
+  { GD_E_BAD_FIELD_TYPE, GD_E_FIELD_MATCH, "Field type mismatch for {4}", 0 },
   /* GD_E_ACCMODE: (nothing) */
   { GD_E_ACCMODE, 0, "Dirfile has been opened read-only", 0 },
   /* GD_E_UNSUPPORTED: (nothing) */

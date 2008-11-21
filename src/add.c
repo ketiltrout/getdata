@@ -186,7 +186,7 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
       snprintf(E->e->filebase, FILENAME_MAX, "%s/%s/%s", D->name,
           D->fragment[E->fragment_index].sname, E->field);
 
-      if ((E->spf = entry->spf) <= 0)
+      if ((E->spf = entry->spf) == 0)
         _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_SPF, NULL, entry->spf,
             NULL);
       else if (E->data_type & 0x40 || (E->e->size = GD_SIZE(E->data_type)) == 0)

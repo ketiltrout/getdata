@@ -2,3 +2,4 @@
 * Zlib
 * Field modification
 * Field moving
+* Fix non-moving foffs/&c.

@@ -128,6 +128,7 @@ const char* _gd_colsub(void);
 
 #define GD_E_FIELD_PUT         1
 #define GD_E_FIELD_BAD         2
+#define GD_E_FIELD_MATCH       3
 
 #define GD_E_BAD_ENTRY_TYPE     1
 #define GD_E_BAD_ENTRY_METARAW  2
@@ -332,6 +333,8 @@ struct _GD_DIRFILE {
 
 extern const gd_entype_t _gd_entype_index[GD_N_ENTYPES];
 
+void _GD_AddData(DIRFILE* D, void *A, unsigned int spfA, void *B,
+    unsigned int spfB, gd_type_t type, size_t n);
 void* _GD_Alloc(DIRFILE* D, gd_type_t type, size_t n);
 int _GD_CalculateEntry(DIRFILE* D, gd_entry_t* E);
 
