@@ -43,12 +43,8 @@ static void _GD_ByteSwapFragment(DIRFILE* D, unsigned int byte_sex,
 
   if (move && byte_sex != D->fragment[fragment].byte_sex) {
     gd_entry_t **raw_entry = malloc(sizeof(gd_entry_t*) * D->n_entries);
-    const struct encoding_t* enc;
-    void *buffer = malloc(BUFFER_SIZE);
-    size_t ns;
-    ssize_t nread, nwrote;
 
-    if (raw_entry == NULL || buffer == NULL) {
+    if (raw_entry == NULL) {
       _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
       dreturnvoid();
       return;
@@ -60,103 +56,26 @@ static void _GD_ByteSwapFragment(DIRFILE* D, unsigned int byte_sex,
       if (D->entry[i]->fragment_index == fragment &&
           D->entry[i]->field_type == GD_RAW_ENTRY)
       {
-        /* check subencoding support */
-        if (!_GD_Supports(D, D->entry[i], GD_EF_OPEN | GD_EF_CLOSE |
-              GD_EF_SEEK | GD_EF_READ | GD_EF_WRITE | GD_EF_SYNC |
-              GD_EF_UNLINK | GD_EF_TEMP))
-          continue;
-
-        enc = encode + raw_entry[i]->e->file[0].encoding;
-        ns = BUFFER_SIZE / raw_entry[i]->e->size;
-
         /* if the field's subencoding requires no endianness correction,
          * do nothing */
-        if (!enc->ecor)
+        if (!encode[D->entry[i]->e->file[0].encoding].ecor)
           continue;
 
         /* if the field's data type is one byte long, do nothing */
         if (D->entry[i]->e->size == 1)
           continue;
 
-        /* check data protection */
-        if (D->fragment[fragment].protection & GD_PROTECT_DATA) {
-          _GD_SetError(D, GD_E_PROTECTED, GD_E_PROTECTED_FORMAT, NULL, 0,
-              D->fragment[fragment].cname);
+        /* check subencoding support */
+        if (!_GD_Supports(D, D->entry[i], GD_EF_TEMP))
           break;
-        }
 
         /* add this raw field to the list */
         raw_entry[n_raw++] = D->entry[i];
 
-        /* Create a temporary file and open it */
-        if ((*enc->temp)(raw_entry[i]->e->file, GD_TEMP_OPEN)) {
-          _GD_SetError(D, GD_E_RAW_IO, 0, raw_entry[i]->e->file[1].name, errno,
-              NULL);
+        if (_GD_MogrifyFile(D, D->entry[i],
+            D->fragment[D->entry[i]->fragment_index].encoding, byte_sex,
+            D->fragment[D->entry[i]->fragment_index].frame_offset, 0))
           break;
-        }
-
-        /* Open the input file, if necessary */
-        if (raw_entry[i]->e->file[0].fp == -1 &&
-            (*enc->open)(raw_entry[i]->e->file, raw_entry[i]->e->filebase, 0,
-              0))
-        {
-          _GD_SetError(D, GD_E_RAW_IO, 0, raw_entry[i]->e->file[0].name, errno,
-              NULL);
-          break;
-        }
-
-        /* Seek to start */
-        if ((*enc->seek)(raw_entry[i]->e->file, 0, raw_entry[i]->data_type, 1)
-            == -1)
-        {
-          _GD_SetError(D, GD_E_RAW_IO, 0, raw_entry[i]->e->file[0].name,
-              errno, NULL);
-          break;
-        }
-        if ((*enc->seek)(raw_entry[i]->e->file + 1, 0, raw_entry[i]->data_type,
-              1) == -1)
-        {
-          _GD_SetError(D, GD_E_RAW_IO, 0, raw_entry[i]->e->file[1].name,
-              errno, NULL);
-          break;
-        }
-
-        /* Now copy the old file to the new file */
-        for (;;) {
-          nread = (*enc->read)(raw_entry[i]->e->file, buffer,
-              raw_entry[i]->data_type, ns);
-
-          if (nread < 0) {
-            _GD_SetError(D, GD_E_RAW_IO, 0, raw_entry[i]->e->file[1].name,
-                errno, NULL);
-            break;
-          }
-
-          if (nread == 0)
-            break;
-
-          /* swap endianness */
-          _GD_FixEndianness(buffer, raw_entry[i]->e->size, ns);
-
-          nwrote = (*enc->write)(raw_entry[i]->e->file + 1, buffer,
-              raw_entry[i]->data_type, nread);
-
-          if (nwrote < nread) {
-            _GD_SetError(D, GD_E_RAW_IO, 0, raw_entry[i]->e->file[1].name,
-                errno, NULL);
-            break;
-          }
-        }
-
-        /* Well, I suppose the copy worked.  Close both files */
-        if ((*enc->close)(raw_entry[i]->e->file) ||
-            (*enc->sync)(raw_entry[i]->e->file + 1) ||
-            (*enc->close)(raw_entry[i]->e->file + 1))
-        {
-          _GD_SetError(D, GD_E_RAW_IO, 0, raw_entry[i]->e->file[1].name,
-              errno, NULL);
-          break;
-        }
       }
 
     /* If successful, move the temporary file over the old file, otherwise
@@ -168,7 +87,6 @@ static void _GD_ByteSwapFragment(DIRFILE* D, unsigned int byte_sex,
             errno, NULL);
 
     free(raw_entry);
-    free(buffer);
 
     if (D->error) {
       dreturnvoid();

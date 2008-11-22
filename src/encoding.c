@@ -324,6 +324,23 @@ static void _GD_RecodeFragment(DIRFILE* D, unsigned int encoding, int fragment,
       dreturnvoid();
       return;
     }
+  } else {
+    for (i = 0; i < D->n_entries; ++i)
+      if (D->entry[i]->fragment_index == fragment &&
+          D->entry[i]->field_type == GD_RAW_ENTRY)
+      {
+        /* close the old file */
+        if (D->entry[i]->e->file[0].fp != -1 &&
+            (*encode[D->entry[i]->e->file[0].encoding].close)
+            (D->entry[i]->e->file))
+        {
+          _GD_SetError(D, GD_E_RAW_IO, 0, D->entry[i]->e->file[1].name,
+              errno, NULL);
+          break;
+        }
+        /* reset encoding subscheme. */
+        D->entry[i]->e->file[0].encoding = GD_ENC_UNKNOWN;
+      }
   }
 
   D->fragment[fragment].encoding = encoding;

@@ -369,6 +369,8 @@ void _GD_InsertSort(DIRFILE* D, gd_entry_t* E, int u) __THROW;
 gd_type_t _GD_LegacyType(char c);
 void _GD_LinterpData(DIRFILE* D, const void *data, gd_type_t type, size_t npts,
     double *lx, double *ly, size_t n_ln);
+int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, int encoding, int byte_sex,
+    off64_t offset, int finalise);
 gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, const char** in_cols,
     const gd_entry_t* parent, const char* format_file, int linenum,
     unsigned int me, int standards, int creat, int pedantic, int insert);

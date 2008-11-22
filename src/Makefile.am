@@ -58,9 +58,9 @@ libgetdata_la_SOURCES = add.c ascii.c close.c common.c constant.c ${DEBUG_C} \
 												del.c encoding.c endian.c entry.c errors.c \
 												field_list.c flush.c foffs.c format_list.c getdata.c \
 												globals.c include.c ${LEGACY_C} meta_list.c mod.c \
-												nfields.c nframes.c nmeta.c open.c putdata.c raw.c \
-												${SLIM_C} spf.c string.c types.c ${GETDATA_LEGACY_H} \
-												internal.h
+												move.c nfields.c nframes.c nmeta.c open.c putdata.c \
+												raw.c ${SLIM_C} spf.c string.c types.c \
+												${GETDATA_LEGACY_H} internal.h
 libgetdata_la_LDFLAGS = $(SLIMLIB_LDFLAGS) -export-symbols-regex '^[^_]' \
 												-version-info @GETDATA_IFACE_VERSION@:@GETDATA_IMPL_REVISION@:@GETDATA_IFACE_AGE@
 
