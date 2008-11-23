@@ -1,4 +1,4 @@
-/* Attempt to write UINT16 */
+/* Attempt to write UINT8 */
 #include "../src/getdata.h"
 
 #include <inttypes.h>
@@ -7,17 +7,19 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <string.h>
-#include <stdio.h>
 #include <errno.h>
+#include <stdio.h>
 #include <unistd.h>
 
 int main(void)
 {
+  return 77; /* writing not supported */
+#if 0
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
-  const char* data = __TEST__ "dirfile/data";
-  const char* format_data = "data RAW UINT16 8\n";
-  uint16_t c[8], d;
+  const char* data = __TEST__ "dirfile/data.txt";
+  const char* format_data = "data RAW UINT8 8\n";
+  uint8_t c[8], d;
   int fd, i;
   struct stat buf;
 
@@ -25,26 +27,24 @@ int main(void)
   mkdir(filedir, 0777);
 
   for (i = 0; i < 8; ++i)
-    c[i] = (uint16_t)(40 + i);
+    c[i] = (uint8_t)(40 + i);
 
   fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_UNENCODED | GD_VERBOSE);
-  int n = putdata(D, "data", 5, 0, 1, 0, GD_UINT16, c);
+  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_TEXT_ENCODED | GD_VERBOSE);
+  int n = putdata(D, "data", 5, 0, 1, 0, GD_UINT8, c);
   int error = get_error(D);
 
   dirfile_close(D);
 
   if (stat(data, &buf))
     return 1;
-  if (buf.st_size != 48 * sizeof(uint16_t))
-    return 1;
 
   fd = open(data, O_RDONLY);
   i = 0;
-  while (read(fd, &d, sizeof(uint16_t))) {
+  while (read(fd, &d, sizeof(uint8_t))) {
     if (i < 40 || i > 48) {
       if (d != 0)
         return 1;
@@ -52,7 +52,7 @@ int main(void)
       return 1;
     i++;
   }
-  close(fd);
+  fclose(stream);
 
   unlink(data);
   unlink(format);
@@ -60,10 +60,9 @@ int main(void)
 
   if (error)
     return 1;
-  if (n != 8) {
-    printf("n = %i\n", n);
+  if (n != 8)
     return 1;
-  }
 
   return 0;
+#endif
 }

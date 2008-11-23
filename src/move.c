@@ -26,47 +26,66 @@
 #include <errno.h>
 #endif
 
-int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, int encoding, int byte_sex,
-    off64_t offset, int finalise)
+int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned int encoding,
+    unsigned int byte_sex, off64_t offset, int finalise)
 {
-  const struct encoding_t* enc = encode + E->e->file[0].encoding;
+  const struct encoding_t* enc_in = encode + E->e->file[0].encoding;
+  const struct encoding_t* enc_out;
   const size_t ns = BUFFER_SIZE / E->e->size;
   ssize_t nread, nwrote;
-  int old_sex;
+  int subencoding = GD_ENC_UNSUPPORTED;
+  int i;
   void *buffer;
 
-  dtrace("%p, %p, %i, %i, %lli, %i", D, E, encoding, byte_sex,
+  dtrace("%p, %p, %u, %u, %lli, %i", D, E, encoding, byte_sex,
       (long long)offset, finalise);
 
   offset -= D->fragment[E->fragment_index].frame_offset;
 
+  /* Figure out the new subencoding scheme */
+  if (encoding == D->fragment[E->fragment_index].encoding)
+    subencoding = E->e->file[0].encoding;
+  else
+    for (i = 0; encode[i].scheme != GD_ENC_UNSUPPORTED; i++)
+      if (encode[i].scheme == encoding) {
+        subencoding = i;
+        break;
+      }
+
+  enc_out = encode + subencoding;
+
   /* Normalise endiannesses */
 #if WORDS_BIGENDIAN
-  byte_sex = (byte_sex & GD_LITTLE_ENDIAN) ^
-    (D->fragment[E->fragment_index].byte_sex & GD_LITTLE_ENDIAN);
+  byte_sex = ((byte_sex & GD_LITTLE_ENDIAN) && enc_out->ecor) ^
+    ((D->fragment[E->fragment_index].byte_sex & GD_LITTLE_ENDIAN) &&
+     enc_in->ecor);
 #else
-  byte_sex = (byte_sex & GD_BIG_ENDIAN) ^
-    (D->fragment[E->fragment_index].byte_sex & GD_BIG_ENDIAN);
+  byte_sex = ((byte_sex & GD_BIG_ENDIAN) && enc_out->ecor) ^
+    ((D->fragment[E->fragment_index].byte_sex & GD_BIG_ENDIAN) && enc_in->ecor);
 #endif
   /* Now byte_sex is true if endianness conversion is required. */
 
-  /* If all we're doing is byte swapping, but the encoding or data type doesn't
-   * require it, don't do anything */
-  if (offset == 0 && encoding == E->e->file[0].encoding && (!byte_sex ||
-        enc->ecor == 0 || E->e->size == 1))
+  /* If all that's changing is the byte sex, but we don't need to do
+   * endianness conversion, don't do anything */
+  if (offset == 0 && encoding == D->fragment[E->fragment_index].encoding &&
+      !byte_sex)
   {
     dreturn("%i", 0);
     return 0;
   }
 
-  if ((buffer = malloc(BUFFER_SIZE)) == NULL) {
-    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+  /* Check output encoding */
+  if (_GD_MissingFramework(subencoding, GD_EF_OPEN | GD_EF_CLOSE |
+        GD_EF_SEEK | GD_EF_WRITE | GD_EF_SYNC | GD_EF_UNLINK))
+  {
+    _GD_SetError(D, GD_E_UNSUPPORTED, 0, NULL, 0, NULL);
     dreturn("%i", -1);
     return -1;
   }
 
+  /* input encoding check */
   if (!_GD_Supports(D, E, GD_EF_OPEN | GD_EF_CLOSE | GD_EF_SEEK | GD_EF_READ |
-        GD_EF_WRITE | GD_EF_SYNC | GD_EF_UNLINK | GD_EF_TEMP)) {
+        GD_EF_UNLINK | GD_EF_TEMP)) {
     dreturn("%i", -1);
     return -1;
   }
@@ -78,16 +97,24 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, int encoding, int byte_sex,
     dreturn("%i", -1);
     return -1;
   }
-  
-  /* Create a temporary file and open it */
-  if ((*enc->temp)(E->e->file, GD_TEMP_OPEN)) {
+
+  /* Create the output file and open it */
+  E->e->file[1].encoding = subencoding;
+  if (subencoding != E->e->file[0].encoding) {
+    if ((*enc_out->open)(E->e->file + 1, E->e->filebase, GD_RDWR, 1)) {
+      _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[1].name, errno, NULL);
+      dreturn("%i", -1);
+      return -1;
+    }
+  } else if ((*enc_in->temp)(E->e->file, GD_TEMP_OPEN)) {
     _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[1].name, errno, NULL);
     dreturn("%i", -1);
     return -1;
   }
 
   /* Open the input file, if necessary */
-  if (E->e->file[0].fp == -1 && (*enc->open)(E->e->file, E->e->filebase, 0, 0))
+  if (E->e->file[0].fp == -1 && (*enc_in->open)(E->e->file, E->e->filebase, 0,
+        0))
   {
     _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[0].name, errno, NULL);
     dreturn("%i", -1);
@@ -96,32 +123,40 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, int encoding, int byte_sex,
 
   /* Adjust for the change in offset */
   if (offset < 0) { /* new offset is less, pad new file */
-    if ((*enc->seek)(E->e->file, 0, E->data_type, 1) == -1) {
+    if ((*enc_in->seek)(E->e->file, 0, E->data_type, 1) == -1) {
       _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[0].name, errno, NULL);
       dreturn("%i", -1);
       return -1;
     }
-    if ((*enc->seek)(E->e->file + 1, -offset * E->spf, E->data_type, 1) == -1) {
+    if ((*enc_out->seek)(E->e->file + 1, -offset * E->spf, E->data_type, 1) ==
+        -1)
+    {
       _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[1].name, errno, NULL);
       dreturn("%i", -1);
       return -1;
     }
   } else { /* new offset is more, truncate old file */
-    if ((*enc->seek)(E->e->file, offset * E->spf, E->data_type, 0) == -1) {
+    if ((*enc_in->seek)(E->e->file, offset * E->spf, E->data_type, 0) == -1) {
       _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[0].name, errno, NULL);
       dreturn("%i", -1);
       return -1;
     }
-    if ((*enc->seek)(E->e->file + 1, 0, E->data_type, 1) == -1) {
+    if ((*enc_out->seek)(E->e->file + 1, 0, E->data_type, 1) == -1) {
       _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[1].name, errno, NULL);
       dreturn("%i", -1);
       return -1;
     }
   }
 
+  if ((buffer = malloc(BUFFER_SIZE)) == NULL) {
+    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
   /* Now copy the old file to the new file */
   for (;;) {
-    nread = (*enc->read)(E->e->file, buffer, E->data_type, ns);
+    nread = (*enc_in->read)(E->e->file, buffer, E->data_type, ns);
 
     if (nread < 0) {
       _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[0].name, errno, NULL);
@@ -132,10 +167,10 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, int encoding, int byte_sex,
       break;
 
     /* swap endianness, if required */
-    if (byte_sex && enc->ecor)
+    if (byte_sex)
       _GD_FixEndianness(buffer, E->e->size, ns);
 
-    nwrote = (*enc->write)(E->e->file + 1, buffer, E->data_type, nread);
+    nwrote = (*enc_out->write)(E->e->file + 1, buffer, E->data_type, nread);
 
     if (nwrote < nread) {
       _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[1].name, errno, NULL);
@@ -143,9 +178,11 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, int encoding, int byte_sex,
     }
   }
 
+  free(buffer);
+
   /* Close both files */
-  if ((*enc->close)(E->e->file) || (*enc->sync)(E->e->file + 1) ||
-      (*enc->close)(E->e->file + 1))
+  if ((*enc_in->close)(E->e->file) || (*enc_out->sync)(E->e->file + 1) ||
+      (*enc_out->close)(E->e->file + 1))
   {
     _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[1].name, errno, NULL);
     dreturn("%i", -1);
@@ -155,7 +192,8 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, int encoding, int byte_sex,
   /* Finalise the conversion: on error delete the temporary file, otherwise
    * copy it over top of the new one. */
   if (finalise)
-    if ((*enc->temp)(E->e->file, (D->error) ? GD_TEMP_DESTROY : GD_TEMP_MOVE))
+    if ((*enc_out->temp)(E->e->file, (D->error) ? GD_TEMP_DESTROY :
+          GD_TEMP_MOVE))
       _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[0].name, errno, NULL);
 
   dreturn("%i", (D->error) ? -1 : 0);

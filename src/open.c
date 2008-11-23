@@ -221,8 +221,12 @@ static gd_entry_t* _GD_ParseRaw(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
     return NULL;
   }
 
-  snprintf((char*)E->e->filebase, FILENAME_MAX, "%s/%s/%s", D->name,
-      D->fragment[me].sname, in_cols[0]);
+  if (D->fragment[me].sname)
+    snprintf((char*)E->e->filebase, FILENAME_MAX, "%s/%s/%s", D->name,
+        D->fragment[me].sname, in_cols[0]);
+  else
+    snprintf((char*)E->e->filebase, FILENAME_MAX, "%s/%s", D->name,
+        in_cols[0]);
   E->data_type = _GD_RawType(in_cols[2]);
   E->e->size = GD_SIZE(E->data_type);
 
@@ -1459,7 +1463,7 @@ DIRFILE* dirfile_cbopen(const char* filedir, unsigned int flags,
     return D;
   }
   D->fragment[0].cname = strdup(format_file);
-  D->fragment[0].sname = strdup(".");
+  D->fragment[0].sname = NULL;
   /* The root format file needs no external name */
   D->fragment[0].ename = NULL;
   D->fragment[0].modified = 0;

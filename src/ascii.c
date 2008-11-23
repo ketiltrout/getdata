@@ -39,7 +39,7 @@ int _GD_AsciiOpen(struct _gd_raw_file* file, const char* base, int mode,
 {
   dtrace("%p, \"%s\", %i, %i", file, base, mode, creat);
 
-  if (_GD_SetEncodedName(file, base, 0)) {
+  if (GD_SetEncodedName(file, base, 0)) {
     dreturn("%i", -1);
     return -1;
   }
@@ -259,7 +259,7 @@ int _GD_AsciiClose(struct _gd_raw_file* file)
 {
   int ret;
   
-  dtrace("%p", entry);
+  dtrace("%p", file);
 
   ret = fclose(file->edata);
   if (ret != EOF) {
@@ -279,7 +279,7 @@ off64_t _GD_AsciiSize(struct _gd_raw_file* file, const char *base,
 
   dtrace("%p, \"%s\", <unused>", file, base);
 
-  if (_GD_SetEncodedName(file, base, 0)) {
+  if (GD_SetEncodedName(file, base, 0)) {
     dreturn("%i", -1);
     return -1;
   }
@@ -311,7 +311,7 @@ int _GD_AsciiTemp(struct _gd_raw_file *file, int mode)
 
   switch(mode) {
     case GD_TEMP_OPEN:
-      if (_GD_SetEncodedName(file + 1, file->name, 1)) {
+      if (GD_SetEncodedName(file + 1, file->name, 1)) {
         dreturn("%i", -1);
         return -1;
       }

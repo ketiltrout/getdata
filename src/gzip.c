@@ -24,16 +24,19 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <time.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #endif
 
-#ifdef HAVE_SLIMLIB_H
-#include <slimlib.h>
+#ifdef HAVE_ZLIB_H
+#include <zlib.h>
 #endif
 
-/* The slim encoding scheme uses edata as a slimfile pointer.  If a file is
+/* The zlib encoding scheme uses edata as a gzFile object.  If a file is
  * open, fp = 0 otherwise fp = -1. */
 
-int _GD_SlimOpen(struct _gd_raw_file* file, const char* base,
+int _GD_GzipOpen(struct _gd_raw_file* file, const char* base,
     int mode __gd_unused, int creat __gd_unused)
 {
   dtrace("%p, \"%s\", <unused>, <unused>", file, base);
@@ -43,7 +46,7 @@ int _GD_SlimOpen(struct _gd_raw_file* file, const char* base,
     return -1;
   }
 
-  file->edata = slimopen(file->name, "r" /* writing not supported */);
+  file->edata = gzopen(file->name, "rb" /* writing not supported */);
 
   if (file->edata != NULL) {
     file->fp = 0;
@@ -55,12 +58,12 @@ int _GD_SlimOpen(struct _gd_raw_file* file, const char* base,
   return 1;
 }
 
-off64_t _GD_SlimSeek(struct _gd_raw_file* file, off64_t count,
+off64_t _GD_GzipSeek(struct _gd_raw_file* file, off64_t count,
     gd_type_t data_type, int pad __gd_unused)
 {
   dtrace("%p, %lli, %x, <unused>", file, (long long)count, data_type);
 
-  off64_t n = (off64_t)slimseek(file->edata, (off_t)count * GD_SIZE(data_type),
+  off64_t n = (off64_t)gzseek(file->edata, (off_t)count * GD_SIZE(data_type),
       SEEK_SET);
 
   if (n == -1) {
@@ -72,22 +75,25 @@ off64_t _GD_SlimSeek(struct _gd_raw_file* file, off64_t count,
   return n;
 }
 
-ssize_t _GD_SlimRead(struct _gd_raw_file *file, void *ptr, gd_type_t data_type,
+ssize_t _GD_GzipRead(struct _gd_raw_file *file, void *ptr, gd_type_t data_type,
     size_t nmemb)
 {
   dtrace("%p, %p, %x, %zi", file, ptr, data_type, nmemb);
 
-  ssize_t n = slimread(ptr, GD_SIZE(data_type), nmemb, file->edata);
+  ssize_t n = gzread(file->edata, ptr, GD_SIZE(data_type) * nmemb);
+
+  if (n >= 0)
+    n /= GD_SIZE(data_type);
 
   dreturn("%zi", n);
   return n;
 }
 
-int _GD_SlimClose(struct _gd_raw_file *file)
+int _GD_GzipClose(struct _gd_raw_file *file)
 {
   dtrace("%p", file);
 
-  int ret = slimclose(file->edata);
+  int ret = gzclose(file->edata);
   if (!ret) {
     file->fp = -1;
     file->edata = NULL;
@@ -97,10 +103,10 @@ int _GD_SlimClose(struct _gd_raw_file *file)
   return ret;
 }
 
-off64_t _GD_SlimSize(struct _gd_raw_file *file, const char *base,
+off64_t _GD_GzipSize(struct _gd_raw_file *file, const char *base,
     gd_type_t data_type)
 {
-  off64_t size;
+  uint32_t size = 0;
 
   dtrace("%p, \"%s\", %x", file, base, data_type);
 
@@ -109,13 +115,24 @@ off64_t _GD_SlimSize(struct _gd_raw_file *file, const char *base,
     return -1;
   }
 
-  size = slimrawsize(file->name);
-
-  if (size < 0) {
+  int fd = open(file->name, O_RDONLY);
+  if (fd < 0) {
     dreturn("%i", -1);
     return -1;
   }
-  
+
+  /* seek to the end */
+  if (lseek64(fd, -4, SEEK_END) == -1) {
+    dreturn("%i", -1);
+    return -1;
+  }
+  if (read(fd, &size, 4) < 4) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  close(fd);
+
   size /= GD_SIZE(data_type);
 
   dreturn("%lli", (long long)size);

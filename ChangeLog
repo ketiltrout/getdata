@@ -1,3 +1,31 @@
+2008-11-23   D. V. Wiebe <getdata@ketiltrout.net>  svn:241
+	* src/add.c (_GD_Add) src/include.c (_GD_Include) open.c (_GD_ParseRaw):
+	Don't unnecessarily add "/./" to paths.
+
+	* src/gzip.c: Added.
+	* src/encoding.c src/getdata.h.in: Add GD_GZIP_ENCODING.
+	* test/gzip_get.c test/gzip_nframes.c test/gzip_put.c: Added.
+	* conigure.ac Makefile.am src/Makefile.am: Add gzip support.
+
+	* src/entry.c (_GD_FreeE): fix de-allocation of gd_raw_file objects.
+
+	* configure.ac: Check for -ldl.
+	* src/encoding.c (_GD_ResolveSymbol): Added.
+	* src/encoding.c (_GD_MissingFramework): dlopen an encoding sublibrary if
+	required.  Made non-static.
+	* src/encoding.c (GD_SetEncodedName): Remove initial underscore to enable
+	exporting because sublibraries may need it.
+
+	* src/Makefile.am: Compile slim.c into a stand-alone "sublibrary"
+	libgetdataslim.la.
+
+	* src/raw.c (__GD_RawWrite): Return samples, not bytes.
+
+	* src/move.c (_GD_MogrifyFile): Add encoding recoding.  Fix endianness
+	conversion calculation.
+	* src/encoding.c (_GD_RecodeFragment): Replaced the heavy lifting with a
+	call to _GD_MogrifyFile.
+
 2008-11-21   D. V. Wiebe <getdata@ketiltrout.net>  svn:240
 	* src/move.c: Added.
 	* src/foffs.c (_GD_ShiftFragment) src/endian.c (_GD_ByteSwapFragment): Call

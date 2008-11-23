@@ -182,9 +182,12 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
         _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
         break;
       }
-
-      snprintf(E->e->filebase, FILENAME_MAX, "%s/%s/%s", D->name,
-          D->fragment[E->fragment_index].sname, E->field);
+ 
+      if (D->fragment[E->fragment_index].sname)
+        snprintf(E->e->filebase, FILENAME_MAX, "%s/%s/%s", D->name,
+            D->fragment[E->fragment_index].sname, E->field);
+      else
+        snprintf(E->e->filebase, FILENAME_MAX, "%s/%s", D->name, E->field);
 
       if ((E->spf = entry->spf) == 0)
         _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_SPF, NULL, entry->spf,

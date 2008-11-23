@@ -48,8 +48,11 @@ int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,
       ref_name, linenum, me, standards, flags);
 
   /* create the format filename */
-  snprintf(temp_buf1, FILENAME_MAX, "%s/%s/%s", D->name, D->fragment[me].sname,
-      ename);
+  if (D->fragment[me].sname)
+    snprintf(temp_buf1, FILENAME_MAX, "%s/%s/%s", D->name,
+        D->fragment[me].sname, ename);
+  else
+    snprintf(temp_buf1, FILENAME_MAX, "%s/%s", D->name, ename);
 
   /* Run through the include list to see if we've already included this
    * file */
@@ -107,24 +110,33 @@ int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,
   D->fragment[D->n_fragment - 1].frame_offset = D->fragment[me].frame_offset;
   D->fragment[D->n_fragment - 1].protection = GD_PROTECT_NONE;
 
-  /* extract the subdirectory name - dirname both returns a volatile string
-   * and modifies its argument, ergo strcpy */
-  strncpy(temp_buf1, ename, FILENAME_MAX);
-  if (strcmp(D->fragment[me].sname, ".") == 0)
-    strcpy(temp_buf2, dirname(temp_buf1));
-  else
-    snprintf(temp_buf2, FILENAME_MAX, "%s/%s", D->fragment[me].sname,
-        dirname(temp_buf1));
-
-  D->fragment[D->n_fragment - 1].sname = strdup(temp_buf2);
-
   if (D->fragment[D->n_fragment - 1].cname == NULL ||
-      D->fragment[D->n_fragment - 1].sname == NULL ||
       D->fragment[D->n_fragment - 1].ename == NULL)
   {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     dreturn("%i", -1);
     return -1;
+  }
+
+  /* extract the subdirectory name - dirname both returns a volatile string
+   * and modifies its argument, ergo strcpy */
+  strncpy(temp_buf1, ename, FILENAME_MAX);
+  if (D->fragment[me].sname)
+    snprintf(temp_buf2, FILENAME_MAX, "%s/%s", D->fragment[me].sname,
+        dirname(temp_buf1));
+  else
+    strcpy(temp_buf2, dirname(temp_buf1));
+
+  if (temp_buf2[0] == '.' && temp_buf2[1] == '\0')
+    D->fragment[D->n_fragment - 1].sname = NULL;
+  else {
+    D->fragment[D->n_fragment - 1].sname = strdup(temp_buf2);
+
+    if (D->fragment[D->n_fragment - 1].sname == NULL) {
+      _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+      dreturn("%i", -1);
+      return -1;
+    }
   }
 
   *ref_name = _GD_ParseFragment(new_fp, D, D->n_fragment - 1, standards, flags);

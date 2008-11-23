@@ -25,7 +25,11 @@ WEXTRA=-Wextra
 endif
 
 if USE_SLIMLIB
-SLIM_C=slim.c
+LIBGETDATASLIM_LA=libgetdataslim.la
+endif
+
+if USE_ZLIB
+LIBGETDATAZLIB_LA=libgetdatagzip.la
 endif
 
 if INCLUDE_LEGACY_API
@@ -42,7 +46,7 @@ DEBUG_C = debug.c
 endif
 
 pkgconfigdir = @libdir@/pkgconfig
-AM_CFLAGS = -Wall ${WEXTRA} @SLIMLIB_CPPFLAGS@
+AM_CFLAGS = -Wall ${WEXTRA}
 
 BUILT_SOURCES = getdata.h
 
@@ -53,17 +57,24 @@ if INSTALL_PKG_CONFIG
 pkgconfig_DATA = getdata.pc
 endif
 
-lib_LTLIBRARIES = libgetdata.la
+lib_LTLIBRARIES = libgetdata.la ${LIBGETDATASLIM_LA} ${LIBGETDATAZLIB_LA}
 libgetdata_la_SOURCES = add.c ascii.c close.c common.c constant.c ${DEBUG_C} \
 												del.c encoding.c endian.c entry.c errors.c \
 												field_list.c flush.c foffs.c format_list.c getdata.c \
 												globals.c include.c ${LEGACY_C} meta_list.c mod.c \
 												move.c nfields.c nframes.c nmeta.c open.c putdata.c \
-												raw.c ${SLIM_C} spf.c string.c types.c \
-												${GETDATA_LEGACY_H} internal.h
-libgetdata_la_LDFLAGS = $(SLIMLIB_LDFLAGS) -export-symbols-regex '^[^_]' \
+												raw.c spf.c string.c types.c ${GETDATA_LEGACY_H} \
+												internal.h
+libgetdata_la_LDFLAGS = -export-symbols-regex '^[^_]' \
 												-version-info @GETDATA_IFACE_VERSION@:@GETDATA_IMPL_REVISION@:@GETDATA_IFACE_AGE@
 
+libgetdataslim_la_SOURCES = slim.c ${DEBUG_C}
+libgetdataslim_la_LDFLAGS = $(SLIMLIB_LDFLAGS) -release $(PACKAGE_VERSION)
+libgetdataslim_la_CPPFLAGS = $(AM_CPPFLAGS) $(SLIMLIB_CPPFLAGS)
+
+libgetdatagzip_la_SOURCES = gzip.c ${DEBUG_C}
+libgetdatagzip_la_LDFLAGS = $(ZLIB_LDFLAGS) -release $(PACKAGE_VERSION)
+libgetdatagzip_la_CPPFLAGS = $(AM_CPPFLAGS) $(ZLIB_CPPFLAGS)
 
 clean-local:
 	rm -rf *~ 

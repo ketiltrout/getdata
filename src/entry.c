@@ -63,8 +63,10 @@ void _GD_FreeE(gd_entry_t* entry, int priv)
         free(entry->e->client);
       break;
     case GD_RAW_ENTRY:
-      if (priv)
-        free(entry->e->file);
+      if (priv) {
+        free(entry->e->file[0].name);
+        free(entry->e->file[1].name);
+      }
       break;
     case GD_INDEX_ENTRY:
     case GD_NO_ENTRY:
@@ -193,26 +195,26 @@ const char* get_raw_filename(DIRFILE* D, const char* field_code)
 
   if (E == NULL) {
     _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, field_code);
-    dreturn("%p" NULL);
+    dreturn("%p", NULL);
     return NULL;
   }
 
   if (E->field_type != GD_RAW_ENTRY) {
     _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
-    dreturn("%p" NULL);
+    dreturn("%p", NULL);
     return NULL;
   }
 
   if (E->e->file[0].name == NULL) {
     /* ensure encoding sybtype is known */
     if (!_GD_Supports(D, E, 0)) {
-      dreturn("%p" NULL);
+      dreturn("%p", NULL);
       return NULL;
     }
 
     if (E->e->file[0].encoding == GD_ENC_UNKNOWN) {
       _GD_SetError(D, GD_E_UNKNOWN_ENCODING, 0, NULL, 0, NULL);
-      dreturn("%p" NULL);
+      dreturn("%p", NULL);
       return NULL;
     }
 
@@ -220,7 +222,7 @@ const char* get_raw_filename(DIRFILE* D, const char* field_code)
 
     if (E->e->file[0].name == NULL) {
       _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-      dreturn("%p" NULL);
+      dreturn("%p", NULL);
       return NULL;
     }
 

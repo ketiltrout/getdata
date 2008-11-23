@@ -45,6 +45,8 @@ AC_CONFIG_HEADER([src/config.h])
 dnl Features
 BUINDINGS_BUILT=
 BINDINGS_LEFT=
+ENCODINGS_BUILT=" raw ascii"
+ENCODINGS_LEFT=
 
 dnl Legacy API
 AC_ARG_ENABLE(legacy-api, AS_HELP_STRING([--disable-legacy-api],
@@ -165,6 +167,17 @@ AC_ARG_WITH(slimlib, AS_HELP_STRING([--with-slimlib=PREFIX],
              esac
              ], [ use_slimlib="yes"; slimlib_prefix=; ])
 
+dnl Zlib
+AC_ARG_WITH(zlib, AS_HELP_STRING([--with-zlib=PREFIX],
+            [Use zlib installed in PREFIX [[autodetect]]]),
+            [
+             case "${withval}" in
+               no) use_zlib="no" ;;
+               yes) use_zlib="yes"; zlib_prefix= ;;
+               *) use_zlib="yes"; zlib_prefix="${withval}" ;;
+             esac
+             ], [ use_zlib="yes"; zlib_prefix=; ])
+
 dnl Programs
 AM_INIT_AUTOMAKE
 AC_PROG_LN_S
@@ -236,6 +249,19 @@ if test "x$use_slimlib" = "xyes"; then
   LIBS=$saved_libs
 fi
 
+if test "x$use_zlib" = "xyes"; then
+  saved_ldflags=$LDFLAGS
+  saved_libs=$LIBS
+  if test "x$zlib_prefix" != "x"; then
+    LDFLAGS="$LDFLAGS -L$zlib_prefix/lib"
+  fi
+  AC_CHECK_LIB(z,gzopen)
+  LDFLAGS=$saved_ldflags
+  LIBS=$saved_libs
+fi
+
+AC_CHECK_LIB(dl,dlopen)
+
 dnl functions
 AC_CHECK_FUNCS([atoll atoq])
 
@@ -247,6 +273,14 @@ if test "x$use_slimlib" = "xyes"; then
     CPPFLAGS="$CPPFLAGS -I$slimlib_prefix/include"
   fi
   AC_CHECK_HEADERS([slimlib.h])
+  CPPFLAGS=$saved_cppflags
+fi
+if test "x$use_zlib" = "xyes"; then
+  saved_cppflags=$CPPFLAGS
+  if test "x$zlib_prefix" != "x"; then
+    CPPFLAGS="$CPPFLAGS -I$zlib_prefix/include"
+  fi
+  AC_CHECK_HEADERS([zlib.h])
   CPPFLAGS=$saved_cppflags
 fi
 AC_HEADER_ASSERT
@@ -283,6 +317,38 @@ else
 fi
 AM_CONDITIONAL(USE_SLIMLIB, [test "x$use_slimlib" = "xyes"])
 AM_CONDITIONAL(TEST_SLIMLIB, [test "x$use_slimlib" = "xyes" -a "x$SLIM" != "xnot found" -a "x$UNSLIM" != "xnot found"])
+
+dnl zlib cleanup
+if test "x$ac_cv_header_zlib_h" = "xyes" -a "x$ac_cv_lib_z_gzopen" = "xyes"; then
+  ZLIB_CPPFLAGS="-I$zlib_prefix/include"
+  if test "x$zlib_prefix" = "x"; then
+    ZLIB_LDFLAGS="-lz"
+    ZLIB_SEARCHPATH="$PATH"
+  else 
+    ZLIB_LDFLAGS="-L$zlib_prefix/lib -lz"
+    ZLIB_SEARCHPATH="$zlib_prefix/bin:$PATH"
+  fi
+  AC_SUBST(ZLIB_CPPFLAGS)
+  AC_SUBST(ZLIB_LDFLAGS)
+  AC_DEFINE([USE_ZLIB], [], [ Define to enable zlib support ])
+
+  AC_PATH_PROGS(GZIP, [gzip], [not found], [$ZLIB_SEARCHPATH])
+  AC_PATH_PROGS(GUNZIP, [gunzip], [not found], [$ZLIB_SEARCHPATH])
+
+  if test "x$GZIP" != "xnot found"; then
+    AC_DEFINE_UNQUOTED([GZIP], ["$GZIP"],
+                       [ Define to the full path to the `gzip' binary ])
+  fi
+
+  if test "x$GUNZIP" != "xnot found"; then
+    AC_DEFINE_UNQUOTED([GUNZIP], ["$GUNZIP"],
+                       [ Define to the full path to the `gunzup' binary ])
+  fi
+else
+  use_slimlib="no";
+fi
+AM_CONDITIONAL(USE_ZLIB, [test "x$use_zlib" = "xyes"])
+AM_CONDITIONAL(TEST_ZLIB, [test "x$use_zlib" = "xyes" -a "x$GZIP" != "xnot found" -a "x$GUNZIP" != "xnot found"])
 
 dnl Declare a few feature test macros
 AC_DEFINE([_BSD_SOURCE], [], [ Expose BSD-derived definitions ])
@@ -357,6 +423,18 @@ else
   BINDINGS_LEFT="${BINDINGS_LEFT} Fortran-95"
 fi
 
+if test "x$use_slimlib" != "xno"; then
+  ENCODINGS_BUILT="${ENCODINGS_BUILT} slim";
+else
+  ENCODINGS_LEFT="${ENCODINGS_LEFT} slim";
+fi
+
+if test "x$use_zlib" != "xno"; then
+  ENCODINGS_BUILT="${ENCODINGS_BUILT} gzip";
+else
+  ENCODINGS_LEFT="${ENCODINGS_LEFT} gzip";
+fi
+
 if test "x$BINDINGS_BUILT" = "x"; then
   BINDINGS_BUILT=" none"
 fi
@@ -365,19 +443,25 @@ if test "x$BINDINGS_LEFT" = "x"; then
   BINDINGS_LEFT=" none"
 fi
 
+if test "x$ENCODINGS_LEFT" = "x"; then
+  ENCODINGS_LEFT=" none"
+fi
+
 echo
 echo "Configuration summary: "
-echo "  checkdirfile utility: ${make_checkdirfile}"
-echo "  Include legacy API:   ${include_legacy_api}"
-echo "  Verbose debugging:    ${enable_debug}"
+echo "  checkdirfile utility:  ${make_checkdirfile}"
+echo "  Include legacy API:    ${include_legacy_api}"
+echo "  Verbose debugging:     ${enable_debug}"
 if test "${enable_assert+set}" = set; then
-  echo "  Enable assertions:    no"
+  echo "  Enable assertions:     no"
 else
-  echo "  Enable assertions:    yes"
+  echo "  Enable assertions:     yes"
 fi
-echo "  Install getdata.pc:   ${install_pkg_config}"
-echo "  Slimlib support:      ${use_slimlib}"
+echo "  Install getdata.pc:    ${install_pkg_config}"
 echo
-echo "  Bindings built:      ${BINDINGS_BUILT}"
-echo "  Bindings not built:  ${BINDINGS_LEFT}"
+echo "  Supported encodings:  ${ENCODINGS_BUILT}"
+echo "  Unsupported encodings:${ENCODINGS_LEFT}"
+echo
+echo "  Bindings built:       ${BINDINGS_BUILT}"
+echo "  Bindings not built:   ${BINDINGS_LEFT}"
 echo

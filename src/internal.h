@@ -204,11 +204,8 @@ struct _gd_private_entry {
 #define GD_ENC_NONE       0
 #define GD_ENC_ASCII      1
 #define GD_ENC_SLIM       2
-#define GD_ENC_GZ_HASHED  3
-#define GD_ENC_GZ_RAW     4
-#define GD_ENC_BZ2_HASHED 5
-#define GD_ENC_BZ2_RAW    6
-#define GD_ENC_UNKNOWN    7
+#define GD_ENC_GZ_RAW     3
+#define GD_ENC_UNKNOWN    4
 
 #define GD_EF_OPEN   0x001
 #define GD_EF_CLOSE  0x002
@@ -228,10 +225,12 @@ struct _gd_private_entry {
 #define BUFFER_SIZE 9000000
 
 /* Encoding schemes */
-extern const struct encoding_t {
+extern struct encoding_t {
   unsigned int scheme;
   const char* ext;
   int ecor; /* encoding requires byte-sex correction */
+  const char* affix;
+  unsigned int provides;
   int (*open)(struct _gd_raw_file*, const char*, int, int);
   int (*close)(struct _gd_raw_file*);
   int (*touch)(struct _gd_raw_file*, const char*);
@@ -369,8 +368,9 @@ void _GD_InsertSort(DIRFILE* D, gd_entry_t* E, int u) __THROW;
 gd_type_t _GD_LegacyType(char c);
 void _GD_LinterpData(DIRFILE* D, const void *data, gd_type_t type, size_t npts,
     double *lx, double *ly, size_t n_ln);
-int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, int encoding, int byte_sex,
-    off64_t offset, int finalise);
+int _GD_MissingFramework(int encoding, unsigned int funcs);
+int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned int encoding,
+    unsigned int byte_sex, off64_t offset, int finalise);
 gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, const char** in_cols,
     const gd_entry_t* parent, const char* format_file, int linenum,
     unsigned int me, int standards, int creat, int pedantic, int insert);
@@ -380,7 +380,7 @@ void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E);
 void _GD_ScaleData(DIRFILE* D, void *data, gd_type_t type, size_t npts,
     double m, double b);
 void _GD_ScanFormat(char* fmt, gd_type_t data_type);
-int _GD_SetEncodedName(struct _gd_raw_file* file, const char* base, int temp);
+int GD_SetEncodedName(struct _gd_raw_file* file, const char* base, int temp);
 void _GD_SetError(DIRFILE* D, int error, int suberror, const char* format_file,
     int line, const char* token);
 int _GD_Supports(DIRFILE* D, gd_entry_t* E, unsigned int funcs);
@@ -424,16 +424,4 @@ off64_t _GD_AsciiSize(struct _gd_raw_file* file, const char* base,
     gd_type_t data_type);
 int _GD_AsciiTemp(struct _gd_raw_file *file, int mode);
 
-#ifdef USE_SLIMLIB
-/* slimlib I/O methods */
-int _GD_SlimOpen(struct _gd_raw_file* file, const char* base, int mode,
-    int creat);
-off64_t _GD_SlimSeek(struct _gd_raw_file* file, off64_t count,
-    gd_type_t data_type, int pad);
-ssize_t _GD_SlimRead(struct _gd_raw_file* file, void *ptr, gd_type_t data_type,
-    size_t nmemb);
-int _GD_SlimClose(struct _gd_raw_file* file);
-off64_t _GD_SlimSize(struct _gd_raw_file* file, const char* base,
-    gd_type_t data_type);
-#endif
 #endif

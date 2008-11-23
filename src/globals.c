@@ -75,13 +75,13 @@ int put_reference(DIRFILE* D, const char* field_code)
 
   if (E == NULL) {
     _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, field_code);
-    dreturn("%i" -1);
+    dreturn("%i", -1);
     return -1;
   }
 
   if (E->field_type != GD_RAW_ENTRY) {
     _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
-    dreturn("%i" -1);
+    dreturn("%i", -1);
     return -1;
   }
 

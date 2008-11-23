@@ -569,7 +569,7 @@ int dirfile_change_const(DIRFILE* D, const char* field_code,
 {
   gd_entry_t N;
 
-  dtrace("%p, \"%s\", %i", D, field_code, in_field, const_type);
+  dtrace("%p, \"%s\", %x", D, field_code, const_type);
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -671,7 +671,7 @@ int dirfile_mchange_spec(DIRFILE* D, const char* parent, const char* line,
   int n_cols;
   gd_entry_t *N = NULL;
 
-  dtrace("%p, \"%s\", \"%s\", %i", D, line, move);
+  dtrace("%p, \"%s\", \"%s\", %i", D, parent, line, move);
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
