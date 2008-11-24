@@ -30,6 +30,12 @@
 #include <slimlib.h>
 #endif
 
+#define _GD_SlimOpen libgetdatagzip_LTX_GD_SlimOpen
+#define _GD_SlimSeek libgetdatagzip_LTX_GD_SlimSeek
+#define _GD_SlimRead libgetdatagzip_LTX_GD_SlimRead
+#define _GD_SlimClose libgetdatagzip_LTX_GD_SlimClose
+#define _GD_SlimSize libgetdatagzip_LTX_GD_SlimSize
+
 /* The slim encoding scheme uses edata as a slimfile pointer.  If a file is
  * open, fp = 0 otherwise fp = -1. */
 

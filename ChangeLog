@@ -1,3 +1,26 @@
+2008-11-24   D. V. Wiebe <getdata@ketiltrout.net>  svn:242
+	* src/encoding.c (_GD_ValidateField): Moved from open.c because it needs the
+	global encoding framework array.
+	* src/internal.h: Add local encoding framework array to DIRFILE struct.
+	Most functions now use this. (GD_SetEncodedName is a notable exception.)
+	* src/encoding.c (_GD_InitialiseFramework): Added.
+	* test/gzip_get_get: Added.
+
+	* src/encoding.c (_GD_ResolveSymbol _GD_MissingFramework): Use ltdl to
+	dynamically load libraries instead of calling dlopen directly.
+	* src/gzip.c src/slim.c: Export ltdl symbols.
+	* src/open.c (dirfile_cbopen): Call lt_dlinit().
+	* src/close.c (dirfile_close): Call lt_dlexit().
+	* configure.ac: ltdl checks.
+	* Makefile.am: conditionally descend into libltdl.
+	* src/Makefile.am: Pass -export-dynamic -module and -dlopen to libtool as
+	appropriate.
+
+	* configure.ac: remove --disable-pkg-config.
+	* src/Makefile.am: always install getdata.pc.
+
+	* man/Makefile.am: Properly link to dirfile_madd_bit.3
+
 2008-11-23   D. V. Wiebe <getdata@ketiltrout.net>  svn:241
 	* src/add.c (_GD_Add) src/include.c (_GD_Include) open.c (_GD_ParseRaw):
 	Don't unnecessarily add "/./" to paths.

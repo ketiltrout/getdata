@@ -26,10 +26,12 @@ endif
 
 if USE_SLIMLIB
 LIBGETDATASLIM_LA=libgetdataslim.la
+DLOPEN_LIBGETDATASLIM_LA=-dlopen libgetdataslim.la
 endif
 
 if USE_ZLIB
 LIBGETDATAZLIB_LA=libgetdatagzip.la
+DLOPEN_LIBGETDATAGZIP_LA=-dlopen libgetdatagzip.la
 endif
 
 if INCLUDE_LEGACY_API
@@ -46,16 +48,14 @@ DEBUG_C = debug.c
 endif
 
 pkgconfigdir = @libdir@/pkgconfig
-AM_CFLAGS = -Wall ${WEXTRA}
+AM_CFLAGS = -Wall ${WEXTRA} 
+AM_CPPFLAGS = $(LTDLINCL)
 
 BUILT_SOURCES = getdata.h
 
 nodist_include_HEADERS = getdata.h
 include_HEADERS = ${GETDATA_LEGACY_H}
-
-if INSTALL_PKG_CONFIG
 pkgconfig_DATA = getdata.pc
-endif
 
 lib_LTLIBRARIES = libgetdata.la ${LIBGETDATASLIM_LA} ${LIBGETDATAZLIB_LA}
 libgetdata_la_SOURCES = add.c ascii.c close.c common.c constant.c ${DEBUG_C} \
@@ -65,15 +65,16 @@ libgetdata_la_SOURCES = add.c ascii.c close.c common.c constant.c ${DEBUG_C} \
 												move.c nfields.c nframes.c nmeta.c open.c putdata.c \
 												raw.c spf.c string.c types.c ${GETDATA_LEGACY_H} \
 												internal.h
-libgetdata_la_LDFLAGS = -export-symbols-regex '^[^_]' \
+libgetdata_la_LDFLAGS = -export-dynamic -export-symbols-regex '^[^_]' \
 												-version-info @GETDATA_IFACE_VERSION@:@GETDATA_IMPL_REVISION@:@GETDATA_IFACE_AGE@
+libgetdata_la_LIBADD = $(LIBLTDL) $(DLOPEN_LIBGETDATASLIM_LA) $(DLOPEN_LIBGETDATAZLIB_LA)
 
 libgetdataslim_la_SOURCES = slim.c ${DEBUG_C}
-libgetdataslim_la_LDFLAGS = $(SLIMLIB_LDFLAGS) -release $(PACKAGE_VERSION)
+libgetdataslim_la_LDFLAGS = $(SLIMLIB_LDFLAGS) -release $(PACKAGE_VERSION) -module
 libgetdataslim_la_CPPFLAGS = $(AM_CPPFLAGS) $(SLIMLIB_CPPFLAGS)
 
 libgetdatagzip_la_SOURCES = gzip.c ${DEBUG_C}
-libgetdatagzip_la_LDFLAGS = $(ZLIB_LDFLAGS) -release $(PACKAGE_VERSION)
+libgetdatagzip_la_LDFLAGS = $(ZLIB_LDFLAGS) -release $(PACKAGE_VERSION) -module 
 libgetdatagzip_la_CPPFLAGS = $(AM_CPPFLAGS) $(ZLIB_CPPFLAGS)
 
 clean-local:

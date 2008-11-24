@@ -20,6 +20,7 @@
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "internal.h"
+#include <ltdl.h>
 
 #ifdef STDC_HEADERS
 #include <ctype.h>
@@ -73,61 +74,6 @@ static gd_type_t _GD_RawType(const char* type)
     return GD_FLOAT64;
 
   return GD_UNKNOWN;
-}
-
-/* Check for a valid field name -- returns input on error */
-char* _GD_ValidateField(const gd_entry_t* parent, const char* field_code,
-    int strict)
-{
-  size_t len = strlen(field_code);
-  size_t i;
-  char* ptr;
-
-  dtrace("%p, \"%s\", %i", parent, field_code, strict);
-
-  if (field_code[0] == '\0' || len >= GD_MAX_LINE_LENGTH) {
-    dreturn("%p", field_code);
-    return (char*)field_code;
-  }
-
-  for (i = 0; i < len; ++i)
-    if (field_code[i] == '/' || field_code[i] == '<' || field_code[i] == '>' ||
-        field_code[i] == ';' || field_code[i] == '|' || field_code[i] == '&' ||
-        (strict && field_code[i] == '.'))
-    {
-      dreturn("%p", field_code);
-      return (char*)field_code;
-    }
-
-  if (strcmp("FRAMEOFFSET", field_code) == 0 ||
-      strcmp("ENCODING", field_code) == 0 ||
-      strcmp("ENDIAN", field_code) == 0 ||
-      strcmp("INCLUDE", field_code) == 0 ||
-      strcmp("META", field_code) == 0 ||
-      strcmp("VERSION", field_code) == 0)
-  {
-    dreturn("%p", field_code);
-    return (char*)field_code;
-  }
-
-  if (!strict && len > 3 && ((len > 4 && field_code[len - 4] == '.') ||
-        field_code[len - 3] == '.'))
-    for (i = 0; encode[i].scheme != GD_ENC_UNSUPPORTED; ++i)
-      if (encode[i].ext[0] != '\0' && strcmp(field_code + len -
-            strlen(encode[i].ext), encode[i].ext) == 0)
-        {
-          dreturn("%p", field_code);
-          return (char*)field_code;
-        }
-
-  if (parent != NULL) {
-    ptr = malloc(strlen(parent->field) + strlen(field_code) + 2);
-    sprintf(ptr, "%s/%s", parent->field, field_code);
-  } else
-    ptr = strdup(field_code);
-
-  dreturn("\"%s\"", ptr);
-  return ptr;
 }
 
 static char* _GD_SetScalar(const char* token, void* data, int type)
@@ -810,7 +756,7 @@ gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, const char** in_cols,
         /* If the encoding scheme is unsupported, we can't add the field */
         _GD_SetError(D, GD_E_UNSUPPORTED, 0, NULL, 0, NULL);
       else if (_GD_Supports(D, E, GD_EF_TOUCH) &&
-          (*encode[E->e->file[0].encoding].touch)(E->e->file, E->e->filebase))
+          (*D->ef[E->e->file[0].encoding].touch)(E->e->file, E->e->filebase))
           _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[0].name, errno, NULL);
     }
 
@@ -1406,6 +1352,8 @@ DIRFILE* dirfile_cbopen(const char* filedir, unsigned int flags,
 
   dtrace("\"%s\", 0x%x, %p", filedir, flags, sehandler);
 
+  lt_dlinit();
+
   D = malloc(sizeof(DIRFILE));
   memset(D, 0, sizeof(DIRFILE));
 
@@ -1414,6 +1362,7 @@ DIRFILE* dirfile_cbopen(const char* filedir, unsigned int flags,
   D->name = strdup(filedir);
   D->flags = flags | GD_INVALID;
   D->sehandler = sehandler;
+  _GD_InitialiseFramework(D);
 
   /* Add the INDEX entry */
   D->n_entries = 1;

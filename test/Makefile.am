@@ -36,7 +36,7 @@ LEGACY_TESTS=legacy_get legacy_get_put legacy_get_rofs legacy_nframes \
 endif
 
 if TEST_ZLIB
-GZIP_TESTS=gzip_get gzip_nframes gzip_put
+GZIP_TESTS=gzip_get gzip_get_get gzip_nframes gzip_put
 endif
 
 if TEST_SLIMLIB

@@ -49,7 +49,7 @@ off64_t get_nframes64(DIRFILE* D)
     return 0;
   }
 
-  nf = (*encode[D->reference_field->e->file[0].encoding].size)
+  nf = (*D->ef[D->reference_field->e->file[0].encoding].size)
     (D->reference_field->e->file, D->reference_field->e->filebase,
      D->reference_field->data_type);
 

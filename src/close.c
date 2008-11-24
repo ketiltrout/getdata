@@ -19,6 +19,7 @@
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "internal.h"
+#include <ltdl.h>
 
 #ifdef STDC_HEADERS
 #include <stdlib.h>
@@ -88,6 +89,8 @@ int dirfile_close(DIRFILE* D)
   }
 
   _GD_FreeD(D);
+
+  lt_dlexit();
 
   dreturn("%i", 0);
   return 0;

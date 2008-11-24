@@ -24,7 +24,11 @@ EXTRA_DIST = ChangeLog README.cxx README.f77 README.f95
 
 ACLOCAL_AMFLAGS = -I m4
 
-SUBDIRS = src bin man . test bindings
+if BUILD_LTDL
+LIBLTDL_SUBDIR=libltdl
+endif
+
+SUBDIRS = $(LIBLTDL_SUBDIR) src bin man . test bindings
 
 clean-local:
 	rm -rf *~ 

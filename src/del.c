@@ -289,7 +289,7 @@ int dirfile_delete(DIRFILE* D, const char* field_code, int flags)
       return -1;
     }
 
-    if ((*encode[E->e->file[0].encoding].unlink)(E->e->file, E->e->filebase)) {
+    if ((*D->ef[E->e->file[0].encoding].unlink)(E->e->file, E->e->filebase)) {
       _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[0].name, errno, NULL);
       dreturn("%zi", -1);
       return -1;

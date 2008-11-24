@@ -196,7 +196,7 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
         _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, entry->data_type, NULL);
       else if (!_GD_Supports(D, E, GD_EF_TOUCH))
         ; /* error already set */
-      else if ((*encode[E->e->file[0].encoding].touch)(E->e->file,
+      else if ((*D->ef[E->e->file[0].encoding].touch)(E->e->file,
             E->e->filebase))
         _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[0].name, errno, NULL);
       else if (D->fragment[E->fragment_index].ref_name == NULL) {

@@ -33,6 +33,12 @@
 #include <zlib.h>
 #endif
 
+#define _GD_GzipOpen libgetdatagzip_LTX_GD_GzipOpen
+#define _GD_GzipSeek libgetdatagzip_LTX_GD_GzipSeek
+#define _GD_GzipRead libgetdatagzip_LTX_GD_GzipRead
+#define _GD_GzipClose libgetdatagzip_LTX_GD_GzipClose
+#define _GD_GzipSize libgetdatagzip_LTX_GD_GzipSize
+
 /* The zlib encoding scheme uses edata as a gzFile object.  If a file is
  * open, fp = 0 otherwise fp = -1. */
 

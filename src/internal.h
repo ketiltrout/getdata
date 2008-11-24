@@ -207,6 +207,8 @@ struct _gd_private_entry {
 #define GD_ENC_GZ_RAW     3
 #define GD_ENC_UNKNOWN    4
 
+#define GD_N_SUBENCODINGS (GD_ENC_UNKNOWN + 1)
+
 #define GD_EF_OPEN   0x001
 #define GD_EF_CLOSE  0x002
 #define GD_EF_TOUCH  0x004
@@ -225,7 +227,7 @@ struct _gd_private_entry {
 #define BUFFER_SIZE 9000000
 
 /* Encoding schemes */
-extern struct encoding_t {
+struct encoding_t {
   unsigned int scheme;
   const char* ext;
   int ecor; /* encoding requires byte-sex correction */
@@ -242,7 +244,7 @@ extern struct encoding_t {
   int (*sync)(struct _gd_raw_file*);
   int (*unlink)(struct _gd_raw_file*, const char*);
   int (*temp)(struct _gd_raw_file*, int);
-} encode[];
+};
 
 #define GD_PROTECT_NONE   00
 #define GD_PROTECT_FORMAT 01
@@ -321,6 +323,9 @@ struct _GD_DIRFILE {
   /* syntax error callback */
   int (*sehandler)(const DIRFILE*, int, char*);
 
+  /* encoding framework */
+  struct encoding_t ef[GD_N_SUBENCODINGS];
+
   /* library error data */
   int error;
   int suberror;
@@ -360,6 +365,7 @@ int _GD_GetLine(FILE *fp, char *line, int* linenum);
 unsigned int _GD_GetSPF(DIRFILE* D, gd_entry_t* E);
 int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,
     int linenum, char** ref_name, int me, int* standards, int flags);
+void _GD_InitialiseFramework(DIRFILE* D);
 void _GD_InsertSort(DIRFILE* D, gd_entry_t* E, int u) __THROW;
 
 #define _GD_InternalError(D) \
@@ -368,7 +374,7 @@ void _GD_InsertSort(DIRFILE* D, gd_entry_t* E, int u) __THROW;
 gd_type_t _GD_LegacyType(char c);
 void _GD_LinterpData(DIRFILE* D, const void *data, gd_type_t type, size_t npts,
     double *lx, double *ly, size_t n_ln);
-int _GD_MissingFramework(int encoding, unsigned int funcs);
+int _GD_MissingFramework(DIRFILE* D, int encoding, unsigned int funcs);
 int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned int encoding,
     unsigned int byte_sex, off64_t offset, int finalise);
 gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, const char** in_cols,

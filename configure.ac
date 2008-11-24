@@ -142,20 +142,6 @@ AC_MSG_CHECKING([whether to include the Fortran 77 bindings])
 AC_MSG_RESULT([$make_f77bindings])
 AM_CONDITIONAL(MAKE_F77BINDINGS, test "x$make_f77bindings" != "xno")
 
-dnl pkg-config
-AC_ARG_ENABLE(pkg-config, AS_HELP_STRING([--disable-pkg-config],
-              [Don't install the pkg-config metadata (getdata.pc)]),
-              [
-               case "${enableval}" in
-                 no) install_pkg_config="no" ;;
-                 *) install_pkg_config="yes" ;;
-               esac
-              ], [ install_pkg_config="yes" ])
-
-AC_MSG_CHECKING([whether to install pkg-config metadata])
-AC_MSG_RESULT([$install_pkg_config])
-AM_CONDITIONAL(INSTALL_PKG_CONFIG, test "x$install_pkg_config" = "xyes")
-
 dnl Slimlib
 AC_ARG_WITH(slimlib, AS_HELP_STRING([--with-slimlib=PREFIX],
             [Use slimlib installed in PREFIX [[autodetect]]]),
@@ -178,6 +164,16 @@ AC_ARG_WITH(zlib, AS_HELP_STRING([--with-zlib=PREFIX],
              esac
              ], [ use_zlib="yes"; zlib_prefix=; ])
 
+dnl LTDL
+AC_ARG_ENABLE(ltdl-install, AS_HELP_STRING([--enable-ltdl-install],
+              [Use and install the GNU ltdl library included in this package, even if one is already present in the system (not recommended)]),
+              [
+               case "${enableval}" in
+                 no) enable_ltdl_install="no" ;;
+                 *) enable_ltdl_install="yes" ;;
+               esac
+              ], [ enable_ltdl_install="no" ])
+
 dnl Programs
 AM_INIT_AUTOMAKE
 AC_PROG_LN_S
@@ -194,7 +190,20 @@ AC_HEADER_STDC
 AC_PROG_INSTALL
 AC_ENABLE_STATIC
 AC_ENABLE_SHARED
+AC_LIBTOOL_DLOPEN
+AC_LIBLTDL_INSTALLABLE
 AC_PROG_LIBTOOL
+
+dnl libltdl stuff
+AC_SUBST([LIBLTDL])
+AC_SUBST([LTDLINCL])
+if test "x${enable_ltdl_install}" = xyes; then
+  AC_CONFIG_SUBDIRS([libltdl])
+  use_system_ltdl=no
+else
+  use_system_ltdl=yes
+fi
+AM_CONDITIONAL(BUILD_LTDL, test "x${enable_ltdl_install}" = xyes)
 
 dnl ICC checks
 GD_LANG_COMPILER_INTEL
@@ -237,7 +246,8 @@ if test "x$make_f77bindings" != "xno"; then
 fi
 
 dnl libraries
-AC_CHECK_LIB(m,ceil)
+AC_SEARCH_LIBS(ceil,m)
+AC_SEARCH_LIBS(pthread_mutex_lock,pthread)
 if test "x$use_slimlib" = "xyes"; then
   saved_ldflags=$LDFLAGS
   saved_libs=$LIBS
@@ -260,13 +270,11 @@ if test "x$use_zlib" = "xyes"; then
   LIBS=$saved_libs
 fi
 
-AC_CHECK_LIB(dl,dlopen)
-
 dnl functions
 AC_CHECK_FUNCS([atoll atoq])
 
 dnl headers
-AC_CHECK_HEADERS(fcntl.h libgen.h)
+AC_CHECK_HEADERS(fcntl.h libgen.h pthread.h)
 if test "x$use_slimlib" = "xyes"; then
   saved_cppflags=$CPPFLAGS
   if test "x$slimlib_prefix" != "x"; then
@@ -285,6 +293,12 @@ if test "x$use_zlib" = "xyes"; then
 fi
 AC_HEADER_ASSERT
 AC_HEADER_DIRENT
+
+dnl pthread clean-up
+if test "x$ac_cv_header_pthread_h" = "xyes" -a "x$ac_cv_lib_pthread_pthread_mutex_lock" = "xyes"; then
+  use_pthread=yes
+  AC_DEFINE([USE_PTHREAD], [], [ Define if you have a POSIX compliant thread library ])
+fi
 
 dnl slimlib cleanup
 if test "x$ac_cv_header_slimlib_h" = "xyes" -a "x$ac_cv_lib_slim_slimopen" = "xyes"; then
@@ -449,19 +463,20 @@ fi
 
 echo
 echo "Configuration summary: "
-echo "  checkdirfile utility:  ${make_checkdirfile}"
-echo "  Include legacy API:    ${include_legacy_api}"
-echo "  Verbose debugging:     ${enable_debug}"
+echo "  checkdirfile utility:        ${make_checkdirfile}"
+echo "  Include legacy API:          ${include_legacy_api}"
+echo "  Verbose debugging:           ${enable_debug}"
 if test "${enable_assert+set}" = set; then
-  echo "  Enable assertions:     no"
+  echo "  Enable assertions:           no"
 else
-  echo "  Enable assertions:     yes"
+  echo "  Enable assertions:           yes"
 fi
-echo "  Install getdata.pc:    ${install_pkg_config}"
+echo "  Use system libltdl:          ${use_system_ltdl}"
+echo "  Thread-safe dynamic loading: ${use_pthread}"
 echo
-echo "  Supported encodings:  ${ENCODINGS_BUILT}"
-echo "  Unsupported encodings:${ENCODINGS_LEFT}"
+echo "  Supported encodings:        ${ENCODINGS_BUILT}"
+echo "  Unsupported encodings:      ${ENCODINGS_LEFT}"
 echo
-echo "  Bindings built:       ${BINDINGS_BUILT}"
-echo "  Bindings not built:   ${BINDINGS_LEFT}"
+echo "  Bindings built:             ${BINDINGS_BUILT}"
+echo "  Bindings not built:         ${BINDINGS_LEFT}"
 echo

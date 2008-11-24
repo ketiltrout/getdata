@@ -58,7 +58,7 @@ static void _GD_ByteSwapFragment(DIRFILE* D, unsigned int byte_sex,
       {
         /* if the field's subencoding requires no endianness correction,
          * do nothing */
-        if (!encode[D->entry[i]->e->file[0].encoding].ecor)
+        if (!D->ef[D->entry[i]->e->file[0].encoding].ecor)
           continue;
 
         /* if the field's data type is one byte long, do nothing */
@@ -81,7 +81,7 @@ static void _GD_ByteSwapFragment(DIRFILE* D, unsigned int byte_sex,
     /* If successful, move the temporary file over the old file, otherwise
      * remove the temporary files */
     for (i = 0; i < n_raw; ++i)
-      if ((*encode[raw_entry[i]->e->file[0].encoding].temp)
+      if ((*D->ef[raw_entry[i]->e->file[0].encoding].temp)
           (raw_entry[i]->e->file, (D->error) ? GD_TEMP_DESTROY : GD_TEMP_MOVE))
         _GD_SetError(D, GD_E_RAW_IO, 0, raw_entry[i]->e->file[0].name,
             errno, NULL);

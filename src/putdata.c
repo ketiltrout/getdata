@@ -75,7 +75,7 @@ static size_t _GD_DoRawOut(DIRFILE *D, gd_entry_t *E,
     return 0;
   }
 
-  if (encode[E->e->file[0].encoding].ecor &&
+  if (D->ef[E->e->file[0].encoding].ecor &&
       (D->fragment[E->fragment_index].byte_sex ==
 #ifdef WORDS_BIGENDIAN
        GD_LITTLE_ENDIAN
@@ -90,7 +90,7 @@ static size_t _GD_DoRawOut(DIRFILE *D, gd_entry_t *E,
   if (E->e->file[0].fp < 0) {
     /* open file for reading / writing if not already opened */
 
-    if ((*encode[E->e->file[0].encoding].open)(E->e->file, E->e->filebase,
+    if ((*D->ef[E->e->file[0].encoding].open)(E->e->file, E->e->filebase,
           D->flags & GD_ACCMODE, 1))
     {
       _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[0].name, errno, NULL);
@@ -99,7 +99,7 @@ static size_t _GD_DoRawOut(DIRFILE *D, gd_entry_t *E,
     }
   }
 
-  if ((*encode[E->e->file[0].encoding].seek)(E->e->file, s0, E->data_type, 1)
+  if ((*D->ef[E->e->file[0].encoding].seek)(E->e->file, s0, E->data_type, 1)
       == -1)
   {
       _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[0].name, errno, NULL);
@@ -107,7 +107,7 @@ static size_t _GD_DoRawOut(DIRFILE *D, gd_entry_t *E,
       return 0;
   }
 
-  n_wrote = (*encode[E->e->file[0].encoding].write)(E->e->file, databuffer,
+  n_wrote = (*D->ef[E->e->file[0].encoding].write)(E->e->file, databuffer,
       E->data_type, ns);
 
   free(databuffer);

@@ -227,7 +227,7 @@ const char* get_raw_filename(DIRFILE* D, const char* field_code)
     }
 
     snprintf(E->e->file[0].name, FILENAME_MAX, "%s%s", E->e->filebase,
-        encode[E->e->file[0].encoding].ext);
+        D->ef[E->e->file[0].encoding].ext);
   }
 
   dreturn("%p", E->e->file[0].name);

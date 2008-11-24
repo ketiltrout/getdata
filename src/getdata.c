@@ -185,7 +185,7 @@ static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *E,
       if (!_GD_Supports(D, E, GD_EF_OPEN | GD_EF_SEEK | GD_EF_READ)) {
         dreturn("%i", 0);
         return 0;
-      } else if ((*encode[E->e->file[0].encoding].open)(E->e->file,
+      } else if ((*D->ef[E->e->file[0].encoding].open)(E->e->file,
             E->e->filebase, D->flags & GD_ACCMODE, 0))
       {
         _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[0].name, errno, NULL);
@@ -194,7 +194,7 @@ static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *E,
       }
     }
 
-    if ((*encode[E->e->file[0].encoding].seek)(E->e->file, s0, E->data_type, 0)
+    if ((*D->ef[E->e->file[0].encoding].seek)(E->e->file, s0, E->data_type, 0)
         == -1)
     {
       _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[0].name, errno, NULL);
@@ -202,7 +202,7 @@ static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *E,
       return 0;
     }
 
-    samples_read = (*encode[E->e->file[0].encoding].read)(E->e->file,
+    samples_read = (*D->ef[E->e->file[0].encoding].read)(E->e->file,
         databuffer + n_read * E->e->size, E->data_type, ns);
 
     if (samples_read == -1) {
@@ -212,7 +212,7 @@ static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *E,
       return 0;
     }
 
-    if (encode[E->e->file[0].encoding].ecor &&
+    if (D->ef[E->e->file[0].encoding].ecor &&
         (D->fragment[E->fragment_index].byte_sex ==
 #ifdef WORDS_BIGENDIAN
          GD_LITTLE_ENDIAN

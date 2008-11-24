@@ -29,7 +29,7 @@
 int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned int encoding,
     unsigned int byte_sex, off64_t offset, int finalise)
 {
-  const struct encoding_t* enc_in = encode + E->e->file[0].encoding;
+  const struct encoding_t* enc_in = D->ef + E->e->file[0].encoding;
   const struct encoding_t* enc_out;
   const size_t ns = BUFFER_SIZE / E->e->size;
   ssize_t nread, nwrote;
@@ -46,13 +46,13 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned int encoding,
   if (encoding == D->fragment[E->fragment_index].encoding)
     subencoding = E->e->file[0].encoding;
   else
-    for (i = 0; encode[i].scheme != GD_ENC_UNSUPPORTED; i++)
-      if (encode[i].scheme == encoding) {
+    for (i = 0; D->ef[i].scheme != GD_ENC_UNSUPPORTED; i++)
+      if (D->ef[i].scheme == encoding) {
         subencoding = i;
         break;
       }
 
-  enc_out = encode + subencoding;
+  enc_out = D->ef + subencoding;
 
   /* Normalise endiannesses */
 #if WORDS_BIGENDIAN
@@ -75,7 +75,7 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned int encoding,
   }
 
   /* Check output encoding */
-  if (_GD_MissingFramework(subencoding, GD_EF_OPEN | GD_EF_CLOSE |
+  if (_GD_MissingFramework(D, subencoding, GD_EF_OPEN | GD_EF_CLOSE |
         GD_EF_SEEK | GD_EF_WRITE | GD_EF_SYNC | GD_EF_UNLINK))
   {
     _GD_SetError(D, GD_E_UNSUPPORTED, 0, NULL, 0, NULL);

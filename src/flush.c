@@ -50,10 +50,10 @@ void _GD_Flush(DIRFILE* D, gd_entry_t *E, const char* field_code)
     case GD_RAW_ENTRY:
       if (E->e->file[0].fp >= 0) {
         if ((D->flags & GD_ACCMODE) == GD_RDWR &&
-            encode[E->e->file[0].encoding].sync != NULL &&
-            (*encode[E->e->file[0].encoding].sync)(E->e->file))
+            D->ef[E->e->file[0].encoding].sync != NULL &&
+            (*D->ef[E->e->file[0].encoding].sync)(E->e->file))
           _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[0].name, errno, NULL);
-        else if ((*encode[E->e->file[0].encoding].close)(E->e->file))
+        else if ((*D->ef[E->e->file[0].encoding].close)(E->e->file))
           _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[0].name, errno, NULL);
       }
       break;
