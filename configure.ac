@@ -246,8 +246,13 @@ if test "x$make_f77bindings" != "xno"; then
 fi
 
 dnl libraries
-AC_SEARCH_LIBS(ceil,m)
-AC_SEARCH_LIBS(pthread_mutex_lock,pthread)
+AC_SEARCH_LIBS([ceil],[m])
+AC_SEARCH_LIBS([pthread_mutex_lock],[pthread],
+               [use_pthread=yes
+                AC_DEFINE([USE_PTHREAD], [],
+                          [Define if you have a POSIX compliant thread library])
+                ],
+               [use_pthread=no])
 if test "x$use_slimlib" = "xyes"; then
   saved_ldflags=$LDFLAGS
   saved_libs=$LIBS
@@ -293,12 +298,6 @@ if test "x$use_zlib" = "xyes"; then
 fi
 AC_HEADER_ASSERT
 AC_HEADER_DIRENT
-
-dnl pthread clean-up
-if test "x$ac_cv_header_pthread_h" = "xyes" -a "x$ac_cv_lib_pthread_pthread_mutex_lock" = "xyes"; then
-  use_pthread=yes
-  AC_DEFINE([USE_PTHREAD], [], [ Define if you have a POSIX compliant thread library ])
-fi
 
 dnl slimlib cleanup
 if test "x$ac_cv_header_slimlib_h" = "xyes" -a "x$ac_cv_lib_slim_slimopen" = "xyes"; then

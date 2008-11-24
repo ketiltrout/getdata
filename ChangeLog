@@ -1,3 +1,6 @@
+2008-11-24   D. V. Wiebe <getdata@ketiltrout.net>  svn:243
+	* configure.ac: Fix pthread check.
+
 2008-11-24   D. V. Wiebe <getdata@ketiltrout.net>  svn:242
 	* src/encoding.c (_GD_ValidateField): Moved from open.c because it needs the
 	global encoding framework array.
