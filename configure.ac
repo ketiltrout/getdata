@@ -240,6 +240,7 @@ AC_CHECK_HEADERS(fcntl.h libgen.h pthread.h)
 AC_HEADER_DIRENT
 
 dnl external encodings
+GD_CHECK_ENCODING([bzip2],[bz2],[BZ2_bzReadOpen],[bzlib.h],[bzip2],[bunzip2])
 GD_CHECK_ENCODING([slim],[slim],[slimopen],[slimlib.h],[slim],[unslim])
 GD_CHECK_ENCODING([gzip],[z],[gzopen],[zlib.h],[gzip],[gunzip])
 
@@ -333,11 +334,6 @@ echo "Configuration summary: "
 echo "  checkdirfile utility:        ${make_checkdirfile}"
 echo "  Include legacy API:          ${include_legacy_api}"
 echo "  Verbose debugging:           ${enable_debug}"
-if test "${enable_assert+set}" = set; then
-  echo "  Enable assertions:           no"
-else
-  echo "  Enable assertions:           yes"
-fi
 echo "  Use system libltdl:          ${use_system_ltdl}"
 echo "  Thread-safe dynamic loading: ${use_pthread}"
 echo
