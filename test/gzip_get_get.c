@@ -14,6 +14,9 @@
 
 int main(void)
 {
+#ifndef USE_GZIP
+  return 77; /* skip test */
+#else
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
   const char* data = __TEST__ "dirfile/data";
@@ -77,4 +80,5 @@ int main(void)
   }
 
   return 0;
+#endif
 }

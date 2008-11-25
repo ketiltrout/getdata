@@ -22,7 +22,7 @@ int main(void)
   uint16_t c[8];
   char command[4096];
   uint16_t data_data[256];
-  int fd, i;
+  int fd;
 
   memset(c, 0, 8);
   mkdir(filedir, 0777);
@@ -42,7 +42,11 @@ int main(void)
   snprintf(command, 4096, "%s -k %s > /dev/null", SLIM, data);
   system(command);
 
+#ifdef USE_SLIM
   DIRFILE* D = dirfile_open(filedir, GD_RDONLY | GD_VERBOSE);
+#else
+  DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
+#endif
   int n = getdata(D, "data", 5, 0, 1, 0, GD_UINT16, c);
   int error = get_error(D);
 
@@ -51,6 +55,9 @@ int main(void)
   unlink(slimdata);
   unlink(format);
   rmdir(filedir);
+
+#ifdef USE_SLIM
+  int i;
 
   if (error)
     return 1;
@@ -61,6 +68,12 @@ int main(void)
   for (i = 0; i < 8; ++i)
     if (c[i] != 40 + i)
       return 1;
+#else
+  if (error != GD_E_UNSUPPORTED)
+    return 1;
+  if (n != 0)
+    return 1;
+#endif
 
   return 0;
 }

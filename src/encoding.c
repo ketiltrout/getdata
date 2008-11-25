@@ -50,7 +50,7 @@ static const struct encoding_t encoding_framework[GD_N_SUBENCODINGS] = {
     &_GD_AsciiSeek, &_GD_AsciiRead, &_GD_AsciiSize, &_GD_AsciiWrite,
     &_GD_AsciiSync, &_GD_GenericUnlink, &_GD_AsciiTemp },
   { GD_GZIP_ENCODED, ".gz", 1, "Gzip",
-#ifdef USE_ZLIB
+#ifdef USE_GZIP
     GD_EF_OPEN | GD_EF_CLOSE | GD_EF_SEEK | GD_EF_READ | GD_EF_SIZE,
 #else
     0,
@@ -296,7 +296,7 @@ int _GD_Supports(DIRFILE* D, gd_entry_t* E, unsigned int funcs)
  * array to retrieve the encoding extension. */
 int GD_SetEncodedName(struct _gd_raw_file* file, const char* base, int temp)
 {
-  dtrace("%p, %p, \"%s\", %i", D, file, base, temp);
+  dtrace("%p, \"%s\", %i", file, base, temp);
 
   if (file->name == NULL) {
     file->name = malloc(FILENAME_MAX);

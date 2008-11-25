@@ -130,7 +130,7 @@ int _GD_RawTemp(struct _gd_raw_file *file, int mode)
 {
   dtrace("%p, %i", file, mode);
 
-  int move_error;
+  int move_error = 0;
 
   switch(mode) {
     case GD_TEMP_OPEN:

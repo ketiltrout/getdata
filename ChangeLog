@@ -1,3 +1,10 @@
+2008-11-25   D. V. Wiebe <getdata@ketiltrout.net>  svn:246
+	* m4/encoding.m4: Check for executables needed for tests even if the
+	library isn't found.
+	* test/slim_nframes.c test/slim_get.c test/gzip_get_get.c test/gzip_get.c
+	test/gzip_nframes.c: Allow proper execution in the absence of the
+	corresponding encoding support.
+
 2008-11-25   D. V. Wiebe <getdata@ketiltrout.net>  svn:244
 	* configure.ac: Reduce code duplication with the introduction of the
 	GD_CHECK_ENCODING macro.

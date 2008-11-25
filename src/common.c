@@ -139,7 +139,7 @@ void* _GD_Alloc(DIRFILE* D, gd_type_t type, size_t n)
   void* ptr = NULL;
 
   dtrace("%p, 0x%x, %zi", D, type, n);
-  if (n < 0)
+  if (n == 0)
     _GD_InternalError(D);
 
   if (type == GD_NULL) {

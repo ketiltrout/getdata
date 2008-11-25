@@ -27,7 +27,7 @@ AC_DEFUN([GD_CHECK_ENCODING],
 have_this_header=
 have_this_lib=
 AC_ARG_WITH([lib$2], AS_HELP_STRING([--with-lib$2=PREFIX],
-            [use lib$2 installed in PREFIX [[autodetect]]]),
+            [use the lib$2 installed in PREFIX [[autodetect]]]),
             [
              case "${withval}" in
                no) use_$1="no" ;;
@@ -35,6 +35,8 @@ AC_ARG_WITH([lib$2], AS_HELP_STRING([--with-lib$2=PREFIX],
                *) use_$1="yes"; $1_prefix="${withval}" ;;
              esac
              ], [ use_$1="yes"; $1_prefix=; ])
+m4_divert_once([HELP_WITH], AS_HELP_STRING([--without-lib$2],
+            [disable encodings supported by lib$2, even if the library is present]))
 
 if test "x$use_$1" = "xyes"; then
 dnl search for library
@@ -71,24 +73,27 @@ if test "x$have_this_header" = "xyes" -a "x$have_this_lib" = "xyes"; then
   AC_SUBST(AS_TR_CPP([$1_CPPFLAGS]))
   AC_SUBST(AS_TR_CPP([$1_LDFLAGS]))
   AC_DEFINE(AS_TR_CPP([USE_$1]), [], [ Define to enable $1 support ])
-
-  AC_PATH_PROGS([path_$5], [$5], [not found], [$AS_TR_CPP([$1_SEARCHPATH])])
-  AC_PATH_PROGS([path_$6], [$6], [not found], [$AS_TR_CPP([$1_SEARCHPATH])])
-
-  if test "x$path_$5" != "xnot found"; then
-    AC_DEFINE_UNQUOTED(AS_TR_CPP([$5]), ["$path_$5"],
-                       [ Define to the full path to the `$5' binary ])
-  fi
-
-  if test "x$path_$6)" != "xnot found"; then
-    AC_DEFINE_UNQUOTED(AS_TR_CPP([$6]), ["$path_$6"],
-                       [ Define to the full path to the `$6' binary ])
-  fi
 else
   use_$1="no";
+  AS_TR_CPP([$1_SEARCHPATH])="$PATH"
+fi
+
+dnl executables needed for tests
+AC_PATH_PROGS([path_$5], [$5], [not found], [$AS_TR_CPP([$1_SEARCHPATH])])
+AC_PATH_PROGS([path_$6], [$6], [not found], [$AS_TR_CPP([$1_SEARCHPATH])])
+
+if test "x$path_$5" != "xnot found"; then
+  AC_DEFINE_UNQUOTED(AS_TR_CPP([$5]), ["$path_$5"],
+                     [ Define to the full path to the `$5' binary ])
+fi
+
+if test "x$path_$6)" != "xnot found"; then
+  AC_DEFINE_UNQUOTED(AS_TR_CPP([$6]), ["$path_$6"],
+                     [ Define to the full path to the `$6' binary ])
 fi
 AM_CONDITIONAL(AS_TR_CPP([USE_$1]), [test "x$use_$1" = "xyes"])
-AM_CONDITIONAL(AS_TR_CPP([TEST_$1]), [test "x$use_$1" = "xyes" -a "x$path_$5" != "xnot found" -a "x$path_$6" != "xnot found"])
+AM_CONDITIONAL(AS_TR_CPP([TEST_$1]),
+              [test "x$path_$5" != "xnot found" -a "x$path_$6" != "xnot found"])
 
 dnl add to summary
 if test "x$use_$1" != "xno"; then

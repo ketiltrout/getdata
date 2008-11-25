@@ -39,13 +39,30 @@ int main(void)
   snprintf(command, 4096, "%s -f %s > /dev/null", GZIP, data);
   system(command);
 
+#ifdef USE_GZIP
   DIRFILE* D = dirfile_open(filedir, GD_RDONLY | GD_VERBOSE);
+#else
+  DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
+#endif
   size_t n = get_nframes(D);
+  int error = get_error(D);
   dirfile_close(D);
 
   unlink(gzipdata);
   unlink(format);
   rmdir(filedir);
 
-  return !(n == 256);
+#ifdef USE_GZIP
+  if (error)
+    return 1;
+  if (n != 256)
+    return 1;
+#else
+  if (error != GD_E_UNSUPPORTED)
+    return 1;
+  if (n != 0)
+    return 1;
+#endif
+
+  return 0;
 }
