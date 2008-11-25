@@ -18,7 +18,7 @@ dnl You should have received a copy of the GNU General Public License
 dnl along with GetData; if not, write to the Free SoftwareFoundation, Inc.,
 dnl 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 dnl
-AC_INIT([GetData], [0.5.0a1], [getdata-devel@lists.sourceforge.net])
+AC_INIT([GetData], [0.5.0a2], [getdata-devel@lists.sourceforge.net])
 
 dnl autoconf 2.60 or later is required to build configure
 AC_PREREQ([2.63])
@@ -50,7 +50,7 @@ ENCODINGS_LEFT=
 
 dnl Legacy API
 AC_ARG_ENABLE(legacy-api, AS_HELP_STRING([--disable-legacy-api],
-              [Don't include the legacy API wrapper in the library]),
+              [don't include the legacy API wrapper in the library]),
               [
                case "${enableval}" in
                  no) include_legacy_api="no" ;;
@@ -67,7 +67,7 @@ fi
 
 dnl debugging
 AC_ARG_ENABLE(debug, AS_HELP_STRING([--enable-debug],
-              [Enable debugging messages]),
+              [enable debugging messages]),
               [
                case "${enableval}" in
                  yes) enable_debug="yes" ;;
@@ -85,7 +85,7 @@ AM_CONDITIONAL(GETDATA_DEBUG, test "x$enable_debug" == "xyes")
 
 dnl checkdirfile
 AC_ARG_ENABLE(checkdirfile, AS_HELP_STRING([--disable-checkdirfile],
-              [Don't build or install the checkdirfile utility]),
+              [don't build or install the checkdirfile utility]),
               [
                case "${enableval}" in
                  no) make_checkdirfile="don't build" ;;
@@ -98,7 +98,7 @@ AM_CONDITIONAL(MAKE_CHECKDIRFILE, test "x$make_checkdirfile" = "xbuild")
 
 dnl C++ bindings
 AC_ARG_ENABLE(cplusplus, AS_HELP_STRING([--disable-cplusplus],
-              [Don't build the C++ bindings (libgetdata++)]),
+              [don't build the C++ bindings (libgetdata++)]),
               [
                case "${enableval}" in
                  no) make_cxxbindings="no" ;;
@@ -111,7 +111,7 @@ AM_CONDITIONAL(MAKE_CXXBINDINGS, test "x$make_cxxbindings" = "xyes")
 
 dnl Fortran 77 bindings
 AC_ARG_ENABLE(fortran, AS_HELP_STRING([--disable-fortran],
-              [Don't build the Fortran 77 bindings (libfgetdata) nor the
+              [don't build the Fortran 77 bindings (libfgetdata) nor the
                Fortran 95 bindings (libf95getdata)]),
               [
                case "${enableval}" in
@@ -122,7 +122,7 @@ AC_ARG_ENABLE(fortran, AS_HELP_STRING([--disable-fortran],
 
 dnl Fortran 95 bindings
 AC_ARG_ENABLE(fortran95, AS_HELP_STRING([--disable-fortran95],
-              [Don't build the Fortran 95 bindings (libfgetdata)]),
+              [don't build the Fortran 95 bindings (libfgetdata)]),
               [
                case "${enableval}" in
                  no) make_f95bindings="no" ;;
@@ -142,31 +142,9 @@ AC_MSG_CHECKING([whether to include the Fortran 77 bindings])
 AC_MSG_RESULT([$make_f77bindings])
 AM_CONDITIONAL(MAKE_F77BINDINGS, test "x$make_f77bindings" != "xno")
 
-dnl Slimlib
-AC_ARG_WITH(slimlib, AS_HELP_STRING([--with-slimlib=PREFIX],
-            [Use slimlib installed in PREFIX [[autodetect]]]),
-            [
-             case "${withval}" in
-               no) use_slimlib="no" ;;
-               yes) use_slimlib="yes"; slimlib_prefix= ;;
-               *) use_slimlib="yes"; slimlib_prefix="${withval}" ;;
-             esac
-             ], [ use_slimlib="yes"; slimlib_prefix=; ])
-
-dnl Zlib
-AC_ARG_WITH(zlib, AS_HELP_STRING([--with-zlib=PREFIX],
-            [Use zlib installed in PREFIX [[autodetect]]]),
-            [
-             case "${withval}" in
-               no) use_zlib="no" ;;
-               yes) use_zlib="yes"; zlib_prefix= ;;
-               *) use_zlib="yes"; zlib_prefix="${withval}" ;;
-             esac
-             ], [ use_zlib="yes"; zlib_prefix=; ])
-
 dnl LTDL
 AC_ARG_ENABLE(ltdl-install, AS_HELP_STRING([--enable-ltdl-install],
-              [Use and install the GNU ltdl library included in this package, even if one is already present in the system (not recommended)]),
+              [use and install the GNU ltdl library included in this package, even if one is already present in the system (not recommended)]),
               [
                case "${enableval}" in
                  no) enable_ltdl_install="no" ;;
@@ -253,115 +231,17 @@ AC_SEARCH_LIBS([pthread_mutex_lock],[pthread],
                           [Define if you have a POSIX compliant thread library])
                 ],
                [use_pthread=no])
-if test "x$use_slimlib" = "xyes"; then
-  saved_ldflags=$LDFLAGS
-  saved_libs=$LIBS
-  if test "x$slimlib_prefix" != "x"; then
-    LDFLAGS="$LDFLAGS -L$slimlib_prefix/lib"
-  fi
-  AC_CHECK_LIB(slim,slimopen)
-  LDFLAGS=$saved_ldflags
-  LIBS=$saved_libs
-fi
-
-if test "x$use_zlib" = "xyes"; then
-  saved_ldflags=$LDFLAGS
-  saved_libs=$LIBS
-  if test "x$zlib_prefix" != "x"; then
-    LDFLAGS="$LDFLAGS -L$zlib_prefix/lib"
-  fi
-  AC_CHECK_LIB(z,gzopen)
-  LDFLAGS=$saved_ldflags
-  LIBS=$saved_libs
-fi
 
 dnl functions
 AC_CHECK_FUNCS([atoll atoq])
 
 dnl headers
 AC_CHECK_HEADERS(fcntl.h libgen.h pthread.h)
-if test "x$use_slimlib" = "xyes"; then
-  saved_cppflags=$CPPFLAGS
-  if test "x$slimlib_prefix" != "x"; then
-    CPPFLAGS="$CPPFLAGS -I$slimlib_prefix/include"
-  fi
-  AC_CHECK_HEADERS([slimlib.h])
-  CPPFLAGS=$saved_cppflags
-fi
-if test "x$use_zlib" = "xyes"; then
-  saved_cppflags=$CPPFLAGS
-  if test "x$zlib_prefix" != "x"; then
-    CPPFLAGS="$CPPFLAGS -I$zlib_prefix/include"
-  fi
-  AC_CHECK_HEADERS([zlib.h])
-  CPPFLAGS=$saved_cppflags
-fi
-AC_HEADER_ASSERT
 AC_HEADER_DIRENT
 
-dnl slimlib cleanup
-if test "x$ac_cv_header_slimlib_h" = "xyes" -a "x$ac_cv_lib_slim_slimopen" = "xyes"; then
-  SLIMLIB_CPPFLAGS="-I$slimlib_prefix/include"
-  if test "x$slimlib_prefix" = "x"; then
-    SLIMLIB_LDFLAGS="-lslim"
-    SLIMLIB_SEARCHPATH="$PATH"
-  else 
-    SLIMLIB_LDFLAGS="-L$slimlib_prefix/lib -lslim"
-    SLIMLIB_SEARCHPATH="$slimlib_prefix/bin:$PATH"
-  fi
-  AC_SUBST(SLIMLIB_CPPFLAGS)
-  AC_SUBST(SLIMLIB_LDFLAGS)
-  AC_DEFINE([USE_SLIMLIB], [], [ Define to enable slimlib support ])
-
-  AC_PATH_PROGS(SLIM, [slim], [not found], [$SLIMLIB_SEARCHPATH])
-  AC_PATH_PROGS(UNSLIM, [unslim], [not found], [$SLIMLIB_SEARCHPATH])
-
-  if test "x$SLIM" != "xnot found"; then
-    AC_DEFINE_UNQUOTED([SLIM], ["$SLIM"],
-                       [ Define to the full path to the `slim' binary ])
-  fi
-
-  if test "x$UNSLIM" != "xnot found"; then
-    AC_DEFINE_UNQUOTED([UNSLIM], ["$UNSLIM"],
-                       [ Define to the full path to the `unslim' binary ])
-  fi
-else
-  use_slimlib="no";
-fi
-AM_CONDITIONAL(USE_SLIMLIB, [test "x$use_slimlib" = "xyes"])
-AM_CONDITIONAL(TEST_SLIMLIB, [test "x$use_slimlib" = "xyes" -a "x$SLIM" != "xnot found" -a "x$UNSLIM" != "xnot found"])
-
-dnl zlib cleanup
-if test "x$ac_cv_header_zlib_h" = "xyes" -a "x$ac_cv_lib_z_gzopen" = "xyes"; then
-  ZLIB_CPPFLAGS="-I$zlib_prefix/include"
-  if test "x$zlib_prefix" = "x"; then
-    ZLIB_LDFLAGS="-lz"
-    ZLIB_SEARCHPATH="$PATH"
-  else 
-    ZLIB_LDFLAGS="-L$zlib_prefix/lib -lz"
-    ZLIB_SEARCHPATH="$zlib_prefix/bin:$PATH"
-  fi
-  AC_SUBST(ZLIB_CPPFLAGS)
-  AC_SUBST(ZLIB_LDFLAGS)
-  AC_DEFINE([USE_ZLIB], [], [ Define to enable zlib support ])
-
-  AC_PATH_PROGS(GZIP, [gzip], [not found], [$ZLIB_SEARCHPATH])
-  AC_PATH_PROGS(GUNZIP, [gunzip], [not found], [$ZLIB_SEARCHPATH])
-
-  if test "x$GZIP" != "xnot found"; then
-    AC_DEFINE_UNQUOTED([GZIP], ["$GZIP"],
-                       [ Define to the full path to the `gzip' binary ])
-  fi
-
-  if test "x$GUNZIP" != "xnot found"; then
-    AC_DEFINE_UNQUOTED([GUNZIP], ["$GUNZIP"],
-                       [ Define to the full path to the `gunzup' binary ])
-  fi
-else
-  use_slimlib="no";
-fi
-AM_CONDITIONAL(USE_ZLIB, [test "x$use_zlib" = "xyes"])
-AM_CONDITIONAL(TEST_ZLIB, [test "x$use_zlib" = "xyes" -a "x$GZIP" != "xnot found" -a "x$GUNZIP" != "xnot found"])
+dnl external encodings
+GD_CHECK_ENCODING([slim],[slim],[slimopen],[slimlib.h],[slim],[unslim])
+GD_CHECK_ENCODING([gzip],[z],[gzopen],[zlib.h],[gzip],[gunzip])
 
 dnl Declare a few feature test macros
 AC_DEFINE([_BSD_SOURCE], [], [ Expose BSD-derived definitions ])
@@ -434,18 +314,6 @@ if test "x$make_f95bindings" != "xno"; then
   BINDINGS_BUILT="${BINDINGS_BUILT} Fortran-95"
 else
   BINDINGS_LEFT="${BINDINGS_LEFT} Fortran-95"
-fi
-
-if test "x$use_slimlib" != "xno"; then
-  ENCODINGS_BUILT="${ENCODINGS_BUILT} slim";
-else
-  ENCODINGS_LEFT="${ENCODINGS_LEFT} slim";
-fi
-
-if test "x$use_zlib" != "xno"; then
-  ENCODINGS_BUILT="${ENCODINGS_BUILT} gzip";
-else
-  ENCODINGS_LEFT="${ENCODINGS_LEFT} gzip";
 fi
 
 if test "x$BINDINGS_BUILT" = "x"; then

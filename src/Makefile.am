@@ -24,13 +24,13 @@ if GNU_C_COMPILER
 WEXTRA=-Wextra
 endif
 
-if USE_SLIMLIB
+if USE_SLIM
 LIBGETDATASLIM_LA=libgetdataslim.la
 DLOPEN_LIBGETDATASLIM_LA=-dlopen libgetdataslim.la
 endif
 
-if USE_ZLIB
-LIBGETDATAZLIB_LA=libgetdatagzip.la
+if USE_GZIP
+LIBGETDATAGZIP_LA=libgetdatagzip.la
 DLOPEN_LIBGETDATAGZIP_LA=-dlopen libgetdatagzip.la
 endif
 
@@ -57,7 +57,7 @@ nodist_include_HEADERS = getdata.h
 include_HEADERS = ${GETDATA_LEGACY_H}
 pkgconfig_DATA = getdata.pc
 
-lib_LTLIBRARIES = libgetdata.la ${LIBGETDATASLIM_LA} ${LIBGETDATAZLIB_LA}
+lib_LTLIBRARIES = libgetdata.la ${LIBGETDATASLIM_LA} ${LIBGETDATAGZIP_LA}
 libgetdata_la_SOURCES = add.c ascii.c close.c common.c constant.c ${DEBUG_C} \
 												del.c encoding.c endian.c entry.c errors.c \
 												field_list.c flush.c foffs.c format_list.c getdata.c \
@@ -67,15 +67,15 @@ libgetdata_la_SOURCES = add.c ascii.c close.c common.c constant.c ${DEBUG_C} \
 												internal.h
 libgetdata_la_LDFLAGS = -export-dynamic -export-symbols-regex '^[^_]' \
 												-version-info @GETDATA_IFACE_VERSION@:@GETDATA_IMPL_REVISION@:@GETDATA_IFACE_AGE@
-libgetdata_la_LIBADD = $(LIBLTDL) $(DLOPEN_LIBGETDATASLIM_LA) $(DLOPEN_LIBGETDATAZLIB_LA)
+libgetdata_la_LIBADD = $(LIBLTDL) $(DLOPEN_LIBGETDATASLIM_LA) $(DLOPEN_LIBGETDATAGZIP_LA)
 
 libgetdataslim_la_SOURCES = slim.c ${DEBUG_C}
 libgetdataslim_la_LDFLAGS = $(SLIMLIB_LDFLAGS) -release $(PACKAGE_VERSION) -module
 libgetdataslim_la_CPPFLAGS = $(AM_CPPFLAGS) $(SLIMLIB_CPPFLAGS)
 
 libgetdatagzip_la_SOURCES = gzip.c ${DEBUG_C}
-libgetdatagzip_la_LDFLAGS = $(ZLIB_LDFLAGS) -release $(PACKAGE_VERSION) -module 
-libgetdatagzip_la_CPPFLAGS = $(AM_CPPFLAGS) $(ZLIB_CPPFLAGS)
+libgetdatagzip_la_LDFLAGS = $(GZIP_LDFLAGS) -release $(PACKAGE_VERSION) -module 
+libgetdatagzip_la_CPPFLAGS = $(AM_CPPFLAGS) $(GZIP_CPPFLAGS)
 
 clean-local:
 	rm -rf *~ 

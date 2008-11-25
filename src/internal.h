@@ -58,12 +58,6 @@ typedef off_t off64_t
 
 #define __gd_unused __attribute__ (( unused ))
 
-#ifndef NDEBUG
-#include <assert.h>
-#else
-#define assert(...)
-#endif
-
 /* disable the "unspecified order" remark in ICC */
 #ifdef __INTEL_COMPILER
 #  pragma warning (disable : 981)

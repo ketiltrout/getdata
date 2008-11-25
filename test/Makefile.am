@@ -35,11 +35,11 @@ LEGACY_TESTS=legacy_get legacy_get_put legacy_get_rofs legacy_nframes \
 			legacy_nonexistent legacy_put legacy_spf
 endif
 
-if TEST_ZLIB
+if TEST_GZIP
 GZIP_TESTS=gzip_get gzip_get_get gzip_nframes gzip_put
 endif
 
-if TEST_SLIMLIB
+if TEST_SLIM
 SLIM_TESTS=slim_get slim_nframes slim_put
 endif
 

@@ -1,3 +1,12 @@
+2008-11-25   D. V. Wiebe <getdata@ketiltrout.net>  svn:244
+	* configure.ac: Reduce code duplication with the introduction of the
+	GD_CHECK_ENCODING macro.
+	* m4/encoding.m4: Added.
+
+	* src/common.c: Replaced the only assert() in the library with an internal
+	library error.
+	* configure.ac src/internal.h: Removed assert-related checks.
+
 2008-11-24   D. V. Wiebe <getdata@ketiltrout.net>  svn:243
 	* configure.ac: Fix pthread check.
 
