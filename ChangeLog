@@ -1,5 +1,15 @@
-2008-11-27   D. V. Wiebe <getdata@ketiltrout.net>  svn:248
-	* test/global_name: Added.
+2008-11-27   D. V. Wiebe <getdata@ketiltrout.net>  svn:250
+	* test/open_cb_ignore.c test/open_cb_cont.c test/open_cb_abort.c
+	test/open_cb_rescan.c: Added.
+	
+	* src/open.c (_GD_ParseFragment): Properly ABORT or RESCAN.
+
+	* src/internal.h src/getdata.h.in: GD_SYNTAX_* macros should be public.
+
+	* src/getdata.h.in: dirfile_cbopen() forward declaration.
+
+2008-11-27   D. V. Wiebe <getdata@ketiltrout.net>  svn:248 svn:249
+	* test/global_name.c: Added.
 
 	* src/open.c (_GD_ParseFragment): Fail with GD_E_CALLBACK on invalid
 	callback response.
@@ -20,7 +30,7 @@
 
 	* src/gzip.c (_GD_GzipSeek): Return samples not bytes.
 
-	* src/configure.ac: Add --enable-modules w/ checks.
+	* src/configure.ac: Add --enable-modules with checks.
 	* src/Makefile.am: Add rules for USE_MODULES
 	* src/encoding.c: Initialise encoding framework for USE_MODULES
 	* src/open.c (dirfile_cbopen) src/close.c (dirfile_close) src/slim.c

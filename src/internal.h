@@ -246,11 +246,6 @@ struct encoding_t {
 #define GD_PROTECT_DATA   02
 #define GD_PROTECT_ALL    ( GD_PROTECT_DATA | GD_PROTECT_FORMAT )
 
-#define GD_SYNTAX_ABORT    0
-#define GD_SYNTAX_RESCAN   1
-#define GD_SYNTAX_IGNORE   2
-#define GD_SYNTAX_CONTINUE 3
-
 /* Format file fragment metadata */
 struct gd_fragment_t {
   /* Canonical name (full path) */

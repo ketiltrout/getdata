@@ -1130,6 +1130,7 @@ char* _GD_ParseFragment(FILE* fp, DIRFILE *D, int me, int* standards,
 
   /* start parsing */
   while (rescan || _GD_GetLine(fp, instring, &linenum)) {
+    rescan = 0;
     n_cols = _GD_Tokenise(D, instring, outstring, in_cols,
         D->fragment[me].cname, linenum);
 
@@ -1146,7 +1147,6 @@ char* _GD_ParseFragment(FILE* fp, DIRFILE *D, int me, int* standards,
         D->suberror == GD_E_FORMAT_DUPLICATE)
       _GD_ClearError(D); /* ignore this line, continue parsing */
     else if (D->error == GD_E_FORMAT) {
-      rescan = 0;
       /* call the callback for this error */
       if (D->sehandler != NULL)
         se_action = (*D->sehandler)(D, D->suberror, instring);
@@ -1167,6 +1167,7 @@ char* _GD_ParseFragment(FILE* fp, DIRFILE *D, int me, int* standards,
           _GD_ClearError(D); /* ignore this line, continue parsing */
           break;
         case GD_SYNTAX_RESCAN:
+          _GD_ClearError(D);
           rescan = 1; /* rescan the modified instring */
           break;
         default:
@@ -1174,7 +1175,9 @@ char* _GD_ParseFragment(FILE* fp, DIRFILE *D, int me, int* standards,
           _GD_SetError(D, GD_E_CALLBACK, 0, NULL, se_action, NULL);
           break;
       }
-    } else if (D->error)
+    }
+
+    if (D->error)
       break; /* abort in the event of a non-syntax error */
   }
 

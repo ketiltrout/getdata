@@ -108,6 +108,12 @@
 #define GD_E_FORMAT_LOCATION  17
 #define GD_E_FORMAT_PROTECT   18
 
+/* parser callback return values */
+#define GD_SYNTAX_ABORT    0
+#define GD_SYNTAX_RESCAN   1
+#define GD_SYNTAX_IGNORE   2
+#define GD_SYNTAX_CONTINUE 3
+
 /* this must be one less than the lowest allowed fragment index */
 #define GD_ALL_FRAGMENTS -1
 
@@ -378,6 +384,9 @@ extern int dirfile_change_const(DIRFILE* D, const char* field_code,
 /* The following functions contain calls to I/O functions, making them
  * cancellation points.  As a result we cannot mark them with __THROW.
  */
+extern DIRFILE* dirfile_cbopen(const char* dirfilename, unsigned int flags,
+    int (*sehandler)(const DIRFILE*, int, char*)) __gd_nonnull ((1));
+
 extern DIRFILE* dirfile_open(const char* dirfilename,
     unsigned int flags) __gd_nonnull ((1));
 

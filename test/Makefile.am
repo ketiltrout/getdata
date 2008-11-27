@@ -150,7 +150,8 @@ NMETA_TESTS=nmeta nmeta_invalid nmeta_parent nmeta_type nmeta_type_invalid \
 
 NVECTORS_TESTS=nvectors nvectors_invalid
 
-OPEN_TESTS=open open_eaccess open_nonexistent open_notdirfile
+OPEN_TESTS=open open_cb_abort open_cb_cont open_cb_ignore open_cb_rescan \
+					 open_eaccess open_nonexistent open_notdirfile
 
 PARSE_TESTS=parse_badline parse_bit parse_bit4 parse_bit_bitnum \
 						parse_bit_bitsize parse_bit_ncols parse_bit_numbits \
