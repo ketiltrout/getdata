@@ -1,3 +1,13 @@
+2008-11-27   D. V. Wiebe <getdata@ketiltrout.net>  svn:248
+	* test/global_name: Added.
+
+	* src/open.c (_GD_ParseFragment): Fail with GD_E_CALLBACK on invalid
+	callback response.
+
+	* src/open.c (dirfile_cbopen): Check malloc.
+
+	* man/dirfilename.3: Added.
+
 2008-11-27   D. V. Wiebe <getdata@ketiltrout.net>  svn:247
 	* test/bzip_put.c test/bzip_get_get.c test/bzip_nframes.c test/bzip_get.c:
 	Added.

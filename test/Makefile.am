@@ -127,6 +127,8 @@ GET_TESTS=get64 get_bad_code get_bit get_char get_endian8 get_endian16 \
 					get_phase get_recurse get_sf get_ss get_type get_uint16 get_uint32 \
 					get_uint64
 
+GLOBAL_TESTS=global_name
+
 INCLUDE_TESTS=include include_accmode include_creat include_index \
 							include_invalid include_nonexistent
 
@@ -196,13 +198,13 @@ TESTS=$(ADD_TESTS)        $(ASCII_TESTS)      $(BZIP_TESTS)       \
 			$(CVLIST_TESTS)     $(CLOSE_TESTS)      $(CONVERT_TESTS)    \
 			$(CREAT_TESTS)      $(DFES_TESTS)       $(ENTRY_TESTS)      \
 			$(ERROR_TESTS)      $(FLIST_TESTS)      $(FLUSH_TESTS)      \
-			$(FRAGMENT_TESTS)   $(GET_TESTS)        $(GZIP_TESTS)       \
-			$(INCLUDE_TESTS)    $(LEGACY_TESTS)     $(MADD_TESTS)       \
-			$(NFIELDS_TESTS)    $(NFRAGMENTS_TESTS) $(NFRAMES_TESTS)    \
-			$(NMETA_TESTS)      $(NVECTORS_TESTS)   $(OPEN_TESTS)       \
-			$(PARSE_TESTS)      $(PUT_TESTS)        $(REF_TESTS)        \
-			$(SLIM_TESTS)       $(SPF_TESTS)        $(SVLIST_TESTS)     \
-			$(TRUNC_TESTS)      $(VLIST_TESTS)
+			$(FRAGMENT_TESTS)   $(GET_TESTS)        $(GLOBAL_TESTS)     \
+			$(GZIP_TESTS)       $(INCLUDE_TESTS)    $(LEGACY_TESTS)     \
+			$(MADD_TESTS)       $(NFIELDS_TESTS)    $(NFRAGMENTS_TESTS) \
+			$(NFRAMES_TESTS)    $(NMETA_TESTS)      $(NVECTORS_TESTS)   \
+			$(OPEN_TESTS)       $(PARSE_TESTS)      $(PUT_TESTS)        \
+			$(REF_TESTS)        $(SLIM_TESTS)       $(SPF_TESTS)        \
+			$(SVLIST_TESTS)     $(TRUNC_TESTS)      $(VLIST_TESTS)
 
 check_PROGRAMS=$(TESTS)
 

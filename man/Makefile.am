@@ -25,17 +25,18 @@ LFS_transitional_mans = getdata64.3 get_nframes64.3 putdata64.3
 endif
 
 dist_man_MANS = dirfile_add.3 dirfile_add_bit.3 dirfile_add_spec.3 \
-								dirfile_cbopen.3 dirfile_close.3 dirfile_flush.3 \
-								dirfile_free_entry_strings.3 dirfile_include.3 get_constant.3 \
-								get_constants.3 get_entry.3 get_error.3 get_error_string.3 \
-								get_field_list.3 get_field_list_by_type.3 get_fragmentname.3 \
+								dirfile_cbopen.3 dirfile_close.3 get_constant.3 put_constant.3 \
+								get_constants.3 getdata.3 putdata.3 get_entry.3 get_error.3 \
+								get_error_string.3 get_field_list.3 get_field_list_by_type.3 \
+								dirfile_flush.3 get_fragmentname.3 \
+								dirfile_free_entry_strings.3 dirfile_include.3 \
 								dirfile_madd_bit.3 dirfile_metaflush.3 get_mfield_list.3 \
-								get_mfield_list_by_type.3 get_mvector_list.3 get_nfields.3 \
-								get_nfields_by_type.3 get_nfragments.3 get_nframes.3 \
-								get_nmfields.3 get_nmfields_by_type.3 get_nmvectors.3 \
-								get_nvectors.3 get_spf.3 get_string.3 get_strings.3 \
-								get_vector_list.3 getdata.3 put_constant.3 put_string.3 \
-								putdata.3 dirfile.5 dirfile-encoding.5 dirfile-format.5 \
+								get_mfield_list_by_type.3 get_mvector_list.3 dirfilename.3 \
+								get_nfields.3 get_nfields_by_type.3 get_nfragments.3 
+								get_nframes.3 get_nmfields.3 get_nmfields_by_type.3 \
+								get_nmvectors.3 get_nvectors.3 get_spf.3 get_string.3 \
+								put_string.3 get_strings.3 get_vector_list.3 \
+								dirfile.5 dirfile-encoding.5 dirfile-format.5 \
 								$(LFS_transitional_mans)
 
 install-data-hook:

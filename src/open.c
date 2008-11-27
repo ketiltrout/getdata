@@ -1151,21 +1151,29 @@ char* _GD_ParseFragment(FILE* fp, DIRFILE *D, int me, int* standards,
       if (D->sehandler != NULL)
         se_action = (*D->sehandler)(D, D->suberror, instring);
 
-      if (se_action == GD_SYNTAX_ABORT)
-        break; /* abort parsing */
-      else if (se_action == GD_SYNTAX_CONTINUE) {
-        if (!saved_error) { /* remember this error ... */
-          saved_suberror = D->suberror;
-          saved_line = D->error_line;
-          if (D->error_string != NULL)
-            saved_token = strdup(D->error_string);
-          saved_error = 1;
-        }
-        _GD_ClearError(D); /* ... and continue parsing */
-      } else if (se_action == GD_SYNTAX_IGNORE)
-        _GD_ClearError(D); /* ignore this line, continue parsing */
-      else if (se_action == GD_SYNTAX_RESCAN)
-        rescan = 1; /* rescan the modified instring */
+      switch(se_action) {
+        case GD_SYNTAX_ABORT:
+          break; /* abort parsing */
+        case GD_SYNTAX_CONTINUE:
+          if (!saved_error) { /* remember this error ... */
+            saved_suberror = D->suberror;
+            saved_line = D->error_line;
+            if (D->error_string != NULL)
+              saved_token = strdup(D->error_string);
+            saved_error = 1;
+          }
+          /* ... and continue parsing (fallthrough) */
+        case GD_SYNTAX_IGNORE:
+          _GD_ClearError(D); /* ignore this line, continue parsing */
+          break;
+        case GD_SYNTAX_RESCAN:
+          rescan = 1; /* rescan the modified instring */
+          break;
+        default:
+          /* improper callback response */
+          _GD_SetError(D, GD_E_CALLBACK, 0, NULL, se_action, NULL);
+          break;
+      }
     } else if (D->error)
       break; /* abort in the event of a non-syntax error */
   }
@@ -1365,6 +1373,12 @@ DIRFILE* dirfile_cbopen(const char* filedir, unsigned int flags,
   D->flags = flags | GD_INVALID;
   D->sehandler = sehandler;
   _GD_InitialiseFramework(D);
+
+  if (D->error_string == NULL || D->error_file == NULL || D->name == NULL) {
+    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    dreturn("%p", D);
+    return D;
+  }
 
   /* Add the INDEX entry */
   D->n_entries = 1;

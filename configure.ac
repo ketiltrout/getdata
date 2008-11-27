@@ -18,7 +18,7 @@ dnl You should have received a copy of the GNU General Public License
 dnl along with GetData; if not, write to the Free SoftwareFoundation, Inc.,
 dnl 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 dnl
-AC_INIT([GetData], [0.5.0a2], [getdata-devel@lists.sourceforge.net])
+AC_INIT([GetData], [0.5.0a3], [getdata-devel@lists.sourceforge.net])
 
 dnl autoconf 2.60 or later is required to build configure
 AC_PREREQ([2.63])

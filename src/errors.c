@@ -152,6 +152,8 @@ static const struct {
     "Cannot delete field {2} used as input to field {4}", 0 },
   /* GD_E_BAD_ENDIANNESS: (nothing) */
   { GD_E_BAD_ENDIANNESS, 0, "Invalid endianness specified", 0 },
+  /* GD_E_CALLBACK: 3 = response */
+  { GD_E_CALLBACK, 0, "Unrecognised response from callback function: {3}", 0 },
   /* GD_E_OK: (nothing) */
   { 0, 0, "Success", 0} /* this must be the last error string defined */
 };

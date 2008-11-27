@@ -20,7 +20,7 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH dirfile_cbopen 3 "15 November 2008" "Version 0.5.0" "GETDATA"
+.TH dirfile_cbopen 3 "27 November 2008" "Version 0.5.0" "GETDATA"
 .SH NAME
 dirfile_cbopen dirfile_open \(em open or create a dirfile
 .SH SYNOPSIS
@@ -129,6 +129,21 @@ found in the dirfile format file should be ignored.  When specified with one of
 the endianness specified will be assumed.  If this flag is specified with
 neither of those flags, the dirfile will be assumed to have the endianness of
 the native architecture.
+.TP
+.B GD_IGNORE_DUPS
+If the dirfile format metadata specifies more than one field with the same name,
+all but one of them will be ignored by the parser.  Without this flag, parsing
+would fail with the
+.B GD_E_FORMAT 
+error, possibly resulting in invocation of the registered callback function.
+Which of the duplicate fields is kept is not specified.  As a result,
+this flag is typically only useful in the case where identical copies of a
+field specification line are present.
+
+No indication is provided to indicate whether a duplicate field has been
+discarded.  If finer grained control is required, the caller should handle
+.B GD_E_FORMAT_DUPLICATE
+suberrors itself with an appropriate callback function.
 .TP
 .B GD_LITTLE_ENDIAN
 Specifies that raw data on disk is stored as little-endian data (least
@@ -370,11 +385,7 @@ A call to
 or
 .BR dirfile_open()
 always returns a pointer to a newly allocated DIRFILE object.  The DIRFILE
-object is an opaque structure which is guaranteed to have at least a member
-called
-.I error
-which is of type
-.IR int .
+object is an opaque structure containing the parsed dirfile metadata.
 If an error occurred, the dirfile error will be set to a non-zero error value.
 The DIRFILE object will also be internally flagged as invalid.  Possible error
 values are:
@@ -401,20 +412,25 @@ was not found, or was not a
 .B RAW
 field.
 .TP
+.B GD_E_CALLBACK
+The registered callback function,
+.IR sehandler ,
+returned an unrecognised response.
+.TP
 .B GD_E_CREAT
 The library was unable to create the dirfile, or the dirfile exists and both
 .BR GD_CREAT " and " GD_EXCL
 were specified.
 .TP
 .B GD_E_FORMAT
-A syntax error occurred in the format file.  See also the
+A syntax error occurred in the format file.  See also
 .B The Callback Function
 section above.
 .TP
 .B GD_E_INTERNAL_ERROR
 An internal error occurred in the library while trying to perform the task.
 This indicates a bug in the library.  Please report the incident to the
-maintainer.
+GetData developers.
 .TP
 .B GD_E_OPEN
 The dirfile format file could not be opened, or
@@ -423,7 +439,7 @@ does not specify a valid dirfile.
 .TP
 .B GD_E_OPEN_INCLUDE
 A file specified in an
-.B INCLUDE
+.B /INCLUDE
 directive could not be opened.
 .TP
 .B GD_E_TRUNC

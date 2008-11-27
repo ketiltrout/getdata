@@ -79,8 +79,9 @@
 #define GD_E_PROTECTED        25
 #define GD_E_DELETE           26
 #define GD_E_BAD_ENDIANNESS   27
+#define GD_E_CALLBACK         28
 
-#define GD_N_ERROR_CODES      28
+#define GD_N_ERROR_CODES      29
 
 /* maximum length of a format file line */
 #define GD_MAX_LINE_LENGTH  4096

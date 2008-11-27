@@ -73,6 +73,7 @@ const char *GD_ERROR_CODES[GD_N_ERROR_CODES] = {
   "Operation prohibited by protection level", /* GD_E_PROTECTED */
   NULL, /* GD_E_DELETE */
   NULL, /* GD_E_BAD_ENDIANNESS */
+  NULL, /* GD_E_CALLBACK */
 };
 
 static struct FormatType Format = {
