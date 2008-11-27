@@ -213,6 +213,7 @@ typedef struct _GD_DIRFILE DIRFILE;
 #define GD_TEXT_ENCODED   0x2000 /* Dirfile is text encoded */
 #define GD_SLIM_ENCODED   0x3000 /* Dirfile is slimlib encoded */
 #define GD_GZIP_ENCODED   0x4000 /* Dirfile is gzip encoded */
+#define GD_BZIP2_ENCODED  0x5000 /* Dirfile is bzip2 encoded */
 
 extern char* get_error_string(const DIRFILE* dirfile, char* buffer,
     size_t buflen) __THROW __gd_nonnull ((1, 2));

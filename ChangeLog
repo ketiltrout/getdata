@@ -1,3 +1,21 @@
+2008-11-27   D. V. Wiebe <getdata@ketiltrout.net>  svn:247
+	* test/bzip_put.c test/bzip_get_get.c test/bzip_nframes.c test/bzip_get.c:
+	Added.
+
+	* m4/encodings.m4: Always AC_SUBST the Makefile variables.  Differentiate
+	between internal and external encodings.
+
+	* src/bzip.c: Added.
+	* src/encoding.c: Add bzip2 framework.
+
+	* src/gzip.c (_GD_GzipSeek): Return samples not bytes.
+
+	* src/configure.ac: Add --enable-modules w/ checks.
+	* src/Makefile.am: Add rules for USE_MODULES
+	* src/encoding.c: Initialise encoding framework for USE_MODULES
+	* src/open.c (dirfile_cbopen) src/close.c (dirfile_close) src/slim.c
+	src/gzip.c src/encoding.c: Wrap ltdl stuff in USE_MODULES
+
 2008-11-25   D. V. Wiebe <getdata@ketiltrout.net>  svn:246
 	* m4/encoding.m4: Check for executables needed for tests even if the
 	library isn't found.

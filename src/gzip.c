@@ -33,11 +33,13 @@
 #include <zlib.h>
 #endif
 
+#ifdef USE_MODULES
 #define _GD_GzipOpen libgetdatagzip_LTX_GD_GzipOpen
 #define _GD_GzipSeek libgetdatagzip_LTX_GD_GzipSeek
 #define _GD_GzipRead libgetdatagzip_LTX_GD_GzipRead
 #define _GD_GzipClose libgetdatagzip_LTX_GD_GzipClose
 #define _GD_GzipSize libgetdatagzip_LTX_GD_GzipSize
+#endif
 
 /* The zlib encoding scheme uses edata as a gzFile object.  If a file is
  * open, fp = 0 otherwise fp = -1. */
@@ -78,7 +80,7 @@ off64_t _GD_GzipSeek(struct _gd_raw_file* file, off64_t count,
   }
 
   dreturn("%lli", (long long)(n / GD_SIZE(data_type)));
-  return n;
+  return n / GD_SIZE(data_type);
 }
 
 ssize_t _GD_GzipRead(struct _gd_raw_file *file, void *ptr, gd_type_t data_type,

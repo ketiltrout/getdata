@@ -35,6 +35,10 @@ LEGACY_TESTS=legacy_get legacy_get_put legacy_get_rofs legacy_nframes \
 			legacy_nonexistent legacy_put legacy_spf
 endif
 
+if TEST_BZIP2
+BZIP_TESTS=bzip_get bzip_get_get bzip_nframes bzip_put
+endif
+
 if TEST_GZIP
 GZIP_TESTS=gzip_get gzip_get_get gzip_nframes gzip_put
 endif
@@ -188,17 +192,17 @@ TRUNC_TESTS=trunc trunc_rdonly trunc_rofs
 
 VLIST_TESTS=vlist vlist_invalid vlist_meta vlist_meta_invalid
 
-TESTS=$(ADD_TESTS)        $(ASCII_TESTS)      $(CVLIST_TESTS)     \
-			$(CLOSE_TESTS)      $(CONVERT_TESTS)    $(CREAT_TESTS)      \
-			$(DFES_TESTS)       $(ENTRY_TESTS)      $(ERROR_TESTS)      \
-			$(FLIST_TESTS)      $(FLUSH_TESTS)      $(FRAGMENT_TESTS)   \
-			$(GET_TESTS)        $(GZIP_TESTS)       $(INCLUDE_TESTS)    \
-			$(LEGACY_TESTS)     $(MADD_TESTS)       $(NFIELDS_TESTS)    \
-			$(NFRAGMENTS_TESTS) $(NFRAMES_TESTS)    $(NMETA_TESTS)      \
-			$(NVECTORS_TESTS)   $(OPEN_TESTS)       $(PARSE_TESTS)      \
-			$(PUT_TESTS)        $(REF_TESTS)        $(SLIM_TESTS)       \
-			$(SPF_TESTS)        $(SVLIST_TESTS)     $(TRUNC_TESTS)      \
-			$(VLIST_TESTS)
+TESTS=$(ADD_TESTS)        $(ASCII_TESTS)      $(BZIP_TESTS)       \
+			$(CVLIST_TESTS)     $(CLOSE_TESTS)      $(CONVERT_TESTS)    \
+			$(CREAT_TESTS)      $(DFES_TESTS)       $(ENTRY_TESTS)      \
+			$(ERROR_TESTS)      $(FLIST_TESTS)      $(FLUSH_TESTS)      \
+			$(FRAGMENT_TESTS)   $(GET_TESTS)        $(GZIP_TESTS)       \
+			$(INCLUDE_TESTS)    $(LEGACY_TESTS)     $(MADD_TESTS)       \
+			$(NFIELDS_TESTS)    $(NFRAGMENTS_TESTS) $(NFRAMES_TESTS)    \
+			$(NMETA_TESTS)      $(NVECTORS_TESTS)   $(OPEN_TESTS)       \
+			$(PARSE_TESTS)      $(PUT_TESTS)        $(REF_TESTS)        \
+			$(SLIM_TESTS)       $(SPF_TESTS)        $(SVLIST_TESTS)     \
+			$(TRUNC_TESTS)      $(VLIST_TESTS)
 
 check_PROGRAMS=$(TESTS)
 

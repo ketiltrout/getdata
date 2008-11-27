@@ -61,22 +61,24 @@ dnl search for header
 fi
 
 dnl cleanup
+AS_TR_CPP([$1_CPPFLAGS])=
+AS_TR_CPP([$1_LDFLAGS])=
 if test "x$have_this_header" = "xyes" -a "x$have_this_lib" = "xyes"; then
-  AS_TR_CPP([$1_CPPFLAGS])="-I$[]$1_prefix/include"
   if test "x$[]$1_prefix" = "x"; then
     AS_TR_CPP([$1_LDFLAGS])="-l$2"
     AS_TR_CPP([$1_SEARCHPATH])="$PATH"
   else 
+    AS_TR_CPP([$1_CPPFLAGS])="-I$[]$1_prefix/include"
     AS_TR_CPP([$1_LDFLAGS])="-L$[]$1_prefix/lib -l$2"
     AS_TR_CPP([$1_SEARCHPATH])="$[]$1_prefix/bin:$PATH"
   fi
-  AC_SUBST(AS_TR_CPP([$1_CPPFLAGS]))
-  AC_SUBST(AS_TR_CPP([$1_LDFLAGS]))
   AC_DEFINE(AS_TR_CPP([USE_$1]), [], [ Define to enable $1 support ])
 else
   use_$1="no";
   AS_TR_CPP([$1_SEARCHPATH])="$PATH"
 fi
+AC_SUBST(AS_TR_CPP([$1_CPPFLAGS]))
+AC_SUBST(AS_TR_CPP([$1_LDFLAGS]))
 
 dnl executables needed for tests
 AC_PATH_PROGS([path_$5], [$5], [not found], [$AS_TR_CPP([$1_SEARCHPATH])])
@@ -97,7 +99,11 @@ AM_CONDITIONAL(AS_TR_CPP([TEST_$1]),
 
 dnl add to summary
 if test "x$use_$1" != "xno"; then
-  ENCODINGS_BUILT="${ENCODINGS_BUILT} $1";
+  if test "x$use_modules" != "xno"; then
+    ENCODINGS_MODS="${ENCODINGS_MODS} $1";
+  else
+    ENCODINGS_BUILT="${ENCODINGS_BUILT} $1";
+  fi
 else
   ENCODINGS_LEFT="${ENCODINGS_LEFT} $1";
 fi

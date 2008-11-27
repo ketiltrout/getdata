@@ -45,24 +45,63 @@ static const struct encoding_t encoding_framework[GD_N_SUBENCODINGS] = {
     &_GD_RawRead, &_GD_RawSize, &_GD_RawWrite, &_GD_RawSync,
     &_GD_GenericUnlink, &_GD_RawTemp
   },
+#ifdef USE_MODULES
+  /* Modules are external */
+  { GD_GZIP_ENCODED, ".gz", 1, "Gzip",
+# ifdef USE_GZIP
+    GD_EF_OPEN | GD_EF_CLOSE | GD_EF_SEEK | GD_EF_READ | GD_EF_SIZE,
+# else
+    0,
+# endif
+    NULL, NULL, NULL, NULL, NULL, NULL, NULL , NULL, &_GD_GenericUnlink, NULL },
+  { GD_BZIP2_ENCODED, ".bz2", 1, "Bzip2",
+# ifdef USE_GZIP
+    GD_EF_OPEN | GD_EF_CLOSE | GD_EF_SEEK | GD_EF_READ | GD_EF_SIZE,
+# else
+    0,
+# endif
+    NULL, NULL, NULL, NULL, NULL, NULL, NULL , NULL, &_GD_GenericUnlink, NULL },
+  { GD_SLIM_ENCODED, ".slm", 1, "Slim",
+# ifdef USE_SLIMLIB
+    GD_EF_OPEN | GD_EF_CLOSE | GD_EF_SEEK | GD_EF_READ | GD_EF_SIZE,
+# else
+    0,
+# endif
+    NULL, NULL, NULL, NULL, NULL, NULL, NULL , NULL, &_GD_GenericUnlink, NULL },
+#else
+  /* Modules are internal */
+  { GD_GZIP_ENCODED, ".gz", 1, NULL, 0,
+# ifdef USE_GZIP
+    &_GD_GzipOpen, &_GD_GzipClose, NULL /* TOUCH */,
+    &_GD_GzipSeek, &_GD_GzipRead, &_GD_GzipSize, NULL /* WRITE */,
+    NULL /* SYNC */, &_GD_GenericUnlink, NULL /* TEMP */
+# else
+    NULL, NULL, NULL, NULL, NULL, NULL, NULL , NULL, &_GD_GenericUnlink, NULL
+# endif
+  },
+  { GD_BZIP2_ENCODED, ".bz2", 1, NULL, 0,
+# ifdef USE_GZIP
+    &_GD_Bzip2Open, &_GD_Bzip2Close, NULL /* TOUCH */,
+    &_GD_Bzip2Seek, &_GD_Bzip2Read, &_GD_Bzip2Size, NULL /* WRITE */,
+    NULL /* SYNC */, &_GD_GenericUnlink, NULL /* TEMP */
+# else
+    NULL, NULL, NULL, NULL, NULL, NULL, NULL , NULL, &_GD_GenericUnlink, NULL
+# endif
+  },
+  { GD_SLIM_ENCODED, ".slm", 1, NULL, 0,
+# ifdef USE_SLIMLIB
+    &_GD_SlimOpen, &_GD_SlimClose, NULL /* TOUCH */,
+    &_GD_SlimSeek, &_GD_SlimRead, &_GD_SlimSize, NULL /* WRITE */,
+    NULL /* SYNC */, &_GD_GenericUnlink, NULL /* TEMP */
+# else
+    NULL, NULL, NULL, NULL, NULL, NULL, NULL , NULL, &_GD_GenericUnlink, NULL
+# endif
+  },
+#endif
   { GD_TEXT_ENCODED, ".txt", 0, NULL, 0,
     &_GD_AsciiOpen, &_GD_AsciiClose, &_GD_GenericTouch,
     &_GD_AsciiSeek, &_GD_AsciiRead, &_GD_AsciiSize, &_GD_AsciiWrite,
     &_GD_AsciiSync, &_GD_GenericUnlink, &_GD_AsciiTemp },
-  { GD_GZIP_ENCODED, ".gz", 1, "Gzip",
-#ifdef USE_GZIP
-    GD_EF_OPEN | GD_EF_CLOSE | GD_EF_SEEK | GD_EF_READ | GD_EF_SIZE,
-#else
-    0,
-#endif
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL , NULL, &_GD_GenericUnlink, NULL },
-  { GD_SLIM_ENCODED, ".slm", 1, "Slim",
-#ifdef USE_SLIMLIB
-    GD_EF_OPEN | GD_EF_CLOSE | GD_EF_SEEK | GD_EF_READ | GD_EF_SIZE,
-#else
-    0,
-#endif
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL , NULL, &_GD_GenericUnlink, NULL },
   { GD_ENC_UNSUPPORTED, "", 0, "", 0,
     NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL },
 };
@@ -127,6 +166,7 @@ char* _GD_ValidateField(const gd_entry_t* parent, const char* field_code,
   return ptr;
 }
 
+#ifdef USE_MODULES
 static void* _GD_ResolveSymbol(void* lib, struct encoding_t* enc,
     const char* name)
 {
@@ -142,12 +182,18 @@ static void* _GD_ResolveSymbol(void* lib, struct encoding_t* enc,
   dreturn("%p", func);
   return func;
 }
+#endif
 
 int _GD_MissingFramework(DIRFILE* D, int encoding, unsigned int funcs)
 {
   dtrace("%p, %x, %x", D, encoding, funcs);
  
-  /* dlopen the encoding library if required */
+#ifdef USE_MODULES
+#ifdef USE_PTHREAD
+    pthread_mutex_lock(&_gd_mutex);
+#endif
+
+  /* set up the encoding library if required */
   if (D->ef[encoding].provides) {
     char library[FILENAME_MAX];
     lt_dlhandle lib;
@@ -156,9 +202,6 @@ int _GD_MissingFramework(DIRFILE* D, int encoding, unsigned int funcs)
     sprintf(library, "libgetdata%s-%s", D->ef[encoding].affix, PACKAGE_VERSION);
     library[10] -= 'A' - 'a';
 
-#ifdef USE_PTHREAD
-    pthread_mutex_lock(&_gd_mutex);
-#endif
     /* open */
     if ((lib = lt_dlopenext(library)) == NULL) {
       /* if that didn't work, try opening an unversioned version */
@@ -198,6 +241,7 @@ int _GD_MissingFramework(DIRFILE* D, int encoding, unsigned int funcs)
   }
 #ifdef USE_PTHREAD
     pthread_mutex_unlock(&_gd_mutex);
+#endif
 #endif
 
   int ret =

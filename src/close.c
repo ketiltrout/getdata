@@ -90,7 +90,9 @@ int dirfile_close(DIRFILE* D)
 
   _GD_FreeD(D);
 
+#ifdef USE_MODULES
   lt_dlexit();
+#endif
 
   dreturn("%i", 0);
   return 0;

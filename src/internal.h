@@ -196,10 +196,11 @@ struct _gd_private_entry {
 };
 
 #define GD_ENC_NONE       0
-#define GD_ENC_ASCII      1
-#define GD_ENC_SLIM       2
-#define GD_ENC_GZ_RAW     3
-#define GD_ENC_UNKNOWN    4
+#define GD_ENC_SLIM       1
+#define GD_ENC_GZ_RAW     2
+#define GD_ENC_BZ2_RAW    3
+#define GD_ENC_ASCII      4
+#define GD_ENC_UNKNOWN    5
 
 #define GD_N_SUBENCODINGS (GD_ENC_UNKNOWN + 1)
 
@@ -423,5 +424,38 @@ int _GD_AsciiClose(struct _gd_raw_file* file);
 off64_t _GD_AsciiSize(struct _gd_raw_file* file, const char* base,
     gd_type_t data_type);
 int _GD_AsciiTemp(struct _gd_raw_file *file, int mode);
+
+/* bzip I/O methods */
+int _GD_Bzip2Open(struct _gd_raw_file* file, const char* base, int mode,
+    int creat);
+off64_t _GD_Bzip2Seek(struct _gd_raw_file* file, off64_t count,
+    gd_type_t data_type, int pad);
+ssize_t _GD_Bzip2Read(struct _gd_raw_file* file, void *ptr, gd_type_t data_type,
+    size_t nmemb);
+int _GD_Bzip2Close(struct _gd_raw_file* file);
+off64_t _GD_Bzip2Size(struct _gd_raw_file* file, const char* base,
+    gd_type_t data_type);
+
+/* gzip I/O methods */
+int _GD_GzipOpen(struct _gd_raw_file* file, const char* base, int mode,
+    int creat);
+off64_t _GD_GzipSeek(struct _gd_raw_file* file, off64_t count,
+    gd_type_t data_type, int pad);
+ssize_t _GD_GzipRead(struct _gd_raw_file* file, void *ptr, gd_type_t data_type,
+    size_t nmemb);
+int _GD_GzipClose(struct _gd_raw_file* file);
+off64_t _GD_GzipSize(struct _gd_raw_file* file, const char* base,
+    gd_type_t data_type);
+
+/* slim I/O methods */
+int _GD_SlimOpen(struct _gd_raw_file* file, const char* base, int mode,
+    int creat);
+off64_t _GD_SlimSeek(struct _gd_raw_file* file, off64_t count,
+    gd_type_t data_type, int pad);
+ssize_t _GD_SlimRead(struct _gd_raw_file* file, void *ptr, gd_type_t data_type,
+    size_t nmemb);
+int _GD_SlimClose(struct _gd_raw_file* file);
+off64_t _GD_SlimSize(struct _gd_raw_file* file, const char* base,
+    gd_type_t data_type);
 
 #endif

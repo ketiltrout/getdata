@@ -1352,7 +1352,9 @@ DIRFILE* dirfile_cbopen(const char* filedir, unsigned int flags,
 
   dtrace("\"%s\", 0x%x, %p", filedir, flags, sehandler);
 
+#ifdef USE_MODULES
   lt_dlinit();
+#endif
 
   D = malloc(sizeof(DIRFILE));
   memset(D, 0, sizeof(DIRFILE));

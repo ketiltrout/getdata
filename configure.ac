@@ -142,6 +142,23 @@ AC_MSG_CHECKING([whether to include the Fortran 77 bindings])
 AC_MSG_RESULT([$make_f77bindings])
 AM_CONDITIONAL(MAKE_F77BINDINGS, test "x$make_f77bindings" != "xno")
 
+dnl Modules
+AC_ARG_ENABLE(modules, AS_HELP_STRING([--enable-modules],
+              [build external encodings in dynamically loaded modules instead
+               of directly into the main getdata library]),
+               [
+                case "${enableval}" in
+                  no) use_modules="no" ;;
+                  *) use_modules="yes" ;;
+                esac
+                ], [ use_modules="no" ])
+AC_MSG_CHECKING([whether to enable getdata modules])
+AC_MSG_RESULT([$use_modules])
+AM_CONDITIONAL(USE_MODULES, test "x$use_modules" != "xno")
+if test "x$use_modules" != "xno"; then
+AC_DEFINE([USE_MODULES], [], [ Define if building with modules ])
+fi
+
 dnl LTDL
 AC_ARG_ENABLE(ltdl-install, AS_HELP_STRING([--enable-ltdl-install],
               [use and install the GNU ltdl library included in this package, even if one is already present in the system (not recommended)]),
@@ -168,19 +185,27 @@ AC_HEADER_STDC
 AC_PROG_INSTALL
 AC_ENABLE_STATIC
 AC_ENABLE_SHARED
-AC_LIBTOOL_DLOPEN
-AC_LIBLTDL_INSTALLABLE
+if test "x${use_modules}" != "xno"; then
+  AC_LIBTOOL_DLOPEN
+  AC_LIBLTDL_INSTALLABLE
+fi
 AC_PROG_LIBTOOL
 
 dnl libltdl stuff
+if test "x${use_modules}" != "xno"; then
+  if test "x${enable_ltdl_install}" = xyes; then
+    AC_CONFIG_SUBDIRS([libltdl])
+    use_system_ltdl=no
+  else
+    use_system_ltdl=yes
+  fi
+else
+  LIBLTDL=
+  LTDLINCL=
+  enable_ltdl_install=no
+fi
 AC_SUBST([LIBLTDL])
 AC_SUBST([LTDLINCL])
-if test "x${enable_ltdl_install}" = xyes; then
-  AC_CONFIG_SUBDIRS([libltdl])
-  use_system_ltdl=no
-else
-  use_system_ltdl=yes
-fi
 AM_CONDITIONAL(BUILD_LTDL, test "x${enable_ltdl_install}" = xyes)
 
 dnl ICC checks
@@ -225,18 +250,23 @@ fi
 
 dnl libraries
 AC_SEARCH_LIBS([ceil],[m])
-AC_SEARCH_LIBS([pthread_mutex_lock],[pthread],
-               [use_pthread=yes
-                AC_DEFINE([USE_PTHREAD], [],
+
+dnl pthread
+if test "x${use_modules}" != "xno"; then
+  AC_SEARCH_LIBS([pthread_mutex_lock],[pthread],
+                 [use_pthread=yes
+                  AC_DEFINE([USE_PTHREAD], [],
                           [Define if you have a POSIX compliant thread library])
-                ],
-               [use_pthread=no])
+                  ],
+                  [use_pthread=no])
+  AC_CHECK_HEADERS(pthread.h)
+fi
 
 dnl functions
 AC_CHECK_FUNCS([atoll atoq])
 
 dnl headers
-AC_CHECK_HEADERS(fcntl.h libgen.h pthread.h)
+AC_CHECK_HEADERS(fcntl.h libgen.h)
 AC_HEADER_DIRENT
 
 dnl external encodings
@@ -274,8 +304,11 @@ AM_CONDITIONAL(HAVE_OFF64_T, test "x$have_off64_t" = "xyes")
 
 if test "x$have_off64_t" = "xyes"; then
   dnl Assume we have the entire LFS defined transitional API
-  AC_DEFINE([HAVE_OFF64_T], [1], [ Define to 1 if the system has the type `off64_t'. ]) dnl `
+  AC_DEFINE([HAVE_OFF64_T], [1],
+            [ Define to 1 if the system has the type `off64_t'. ]) dnl `
 fi
+
+AC_CHECK_SIZEOF([int])
 
 dnl output
 AC_CONFIG_FILES([Makefile])
@@ -325,21 +358,31 @@ if test "x$BINDINGS_LEFT" = "x"; then
   BINDINGS_LEFT=" none"
 fi
 
+if test "x$ENCODINGS_MODS" = "x"; then
+  ENCODINGS_MODS=" none"
+fi
+
 if test "x$ENCODINGS_LEFT" = "x"; then
   ENCODINGS_LEFT=" none"
 fi
 
 echo
 echo "Configuration summary: "
-echo "  checkdirfile utility:        ${make_checkdirfile}"
-echo "  Include legacy API:          ${include_legacy_api}"
-echo "  Verbose debugging:           ${enable_debug}"
-echo "  Use system libltdl:          ${use_system_ltdl}"
-echo "  Thread-safe dynamic loading: ${use_pthread}"
+echo "  checkdirfile utility:         ${make_checkdirfile}"
+echo "  Include legacy API:           ${include_legacy_api}"
+echo "  Verbose debugging:            ${enable_debug}"
+echo "  Use modules:                  ${use_modules}"
+if test "x${use_modules}" != "xno"; then
+  echo "  Use system libltdl:           ${use_system_ltdl}"
+  echo "  Thread-safe dynamic loading:  ${use_pthread}"
+fi
 echo
-echo "  Supported encodings:        ${ENCODINGS_BUILT}"
-echo "  Unsupported encodings:      ${ENCODINGS_LEFT}"
+echo "  Supported internal encodings:${ENCODINGS_BUILT}"
+if test "x${use_modules}" != "xno"; then
+echo "  Supported external encodings:${ENCODINGS_MODS}"
+fi
+echo "  Unsupported encodings:       ${ENCODINGS_LEFT}"
 echo
-echo "  Bindings built:             ${BINDINGS_BUILT}"
-echo "  Bindings not built:         ${BINDINGS_LEFT}"
+echo "  Bindings built:              ${BINDINGS_BUILT}"
+echo "  Bindings not built:          ${BINDINGS_LEFT}"
 echo
