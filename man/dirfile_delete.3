@@ -1,0 +1,155 @@
+.\" dirfile_delete.3.  The dirfile_delete man page.
+.\"
+.\" (C) 2008 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" This program is free software; you can redistribute it and/or modify
+.\" it under the terms of the GNU General Public License as published by
+.\" the Free Software Foundation; either version 2 of the License, or
+.\" (at your option) any later version.
+.\"
+.\" GetData is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+.\" General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public License along
+.\" with GetData; if not, write to the Free Software Foundation, Inc.,
+.\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+.\"
+.TH dirfile_delete 3 "28 November 2008" "Version 0.5.0" "GETDATA"
+.SH NAME
+dirfile_delete \(em remove a field from a dirfile
+.SH SYNOPSIS
+.B #include <getdata.h>
+.HP
+.nh
+.ad l
+.BI "int dirfile_delete(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "int " flags );
+.hy
+.ad n
+.SH DESCRIPTION
+The
+.BR dirfile_delete ()
+function attempts to delete the field specified by
+.I field_code
+in the dirfile specified by
+.IR dirfile .
+
+The
+.I flags
+parameter influences how the deletion attempt occurrs.  It may be zero, for the
+default behaviour, or else one or more of the following flags, bitwise or'd
+together:
+.TP 8
+.B GD_DEL_DATA
+If the field to be deleted is a
+.B RAW
+field, also delete the binary data file associated with it.  If
+.I field_code
+specified a
+.B RAW
+field and this flag is not specified, the field will still be deleted but the
+binary file will be left untouched.
+.TP
+.B GD_DEL_DEREF
+If the field to be deleted is a
+.B CONST
+field which is used as a parameter in the specification of other fields, resolve
+these other fields dependence on
+.I field_code
+by replacing instances of
+.I field_code
+in their field specifications with the value of the
+.B CONST
+field.
+.TP
+.B GD_DEL_FORCE
+Delete the specified field even if it is used in the specification of other
+fields, either as a input for a derived vector field or as a
+.B CONST
+parameter in a field specification.
+.TP
+.B GD_DEL_META
+If the field to be deleted has metafields attached to it, attempt to delete
+those, too.  If the field has metafields and this flag is not specified, the
+call will fail with the
+.B GD_E_DELETE
+error.
+.SH RETURN VALUE
+On successful deletion, zero is returned.  On error, -1 is returned and the
+dirfile error is set to a non-zero error value.  Possible error values are:
+.TP 8
+.B GD_E_ACCMODE
+The specified dirfile was opened read-only.
+.TP
+.B GD_E_ALLOC
+The library was unable to allocate memory.
+.TP
+.B GD_E_BAD_CODE
+The field specified by
+.I field_code
+was not found in the database.
+.TP
+.B GD_E_BAD_DIRFILE
+The supplied dirfile was invalid.
+.TP
+.B GD_E_DELETE
+The attempt to delete the field failed.  Either the specified field is used in
+the specification of other fields and
+.B GD_DEL_FORCE
+or
+.B GD_DEL_DEREF
+was not specified, or it has metafields and
+.B GD_DEL_META
+was not specified.
+.TP
+.B GD_E_INTERNAL_ERROR
+An internal error occurred in the library while trying to perform the task.
+This indicates a bug in the library.  Please report the incident to the
+GetData developers.
+.TP
+.B GD_E_PROTECTED
+The metadata of the fragment containing the feild was protected from change.
+Or, the deletion of the binary data file associated with a
+.B RAW
+field was attempted and the data of the fragment was protected.
+.TP
+.B GD_E_RAW_IO
+An error occurred while trying to close or delete the binary file associated
+with a
+.B RAW
+field.
+.TP
+.B GD_E_UNKNOWN_ENCODING
+The
+.B GD_DEL_DATA
+flag was specified but the encoding scheme of the specified format file fragment
+is not known to the library.  As a result, the library was unable to delete the
+binary file associated with a
+.B RAW
+field.
+.TP
+.B GD_E_UNSUPPORTED
+The
+.B GD_DEL_DATA
+flag was specified but the encoding scheme of the specified format file fragment
+does not support deleting the binary file associated with a
+.B RAW
+field.
+.P
+The dirfile error may be retrieved by calling
+.BR get_error (3).
+A descriptive error string for the last error encountered can be obtained from
+a call to
+.BR get_error_string (3).
+.SH SEE ALSO
+.BR dirfile_open (3),
+.BR dirfile_close (3),
+.BR dirfile_metaflush (3),
+.BR get_error (3),
+.BR get_error_string (3)

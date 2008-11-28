@@ -26,9 +26,9 @@ endif
 
 dist_man_MANS = dirfile_add.3 dirfile_add_bit.3 dirfile_add_spec.3 \
 								dirfile_cbopen.3 dirfile_close.3 get_constant.3 put_constant.3 \
-								get_constants.3 getdata.3 putdata.3 get_entry.3 get_error.3 \
-								get_error_string.3 get_field_list.3 get_field_list_by_type.3 \
-								dirfile_flush.3 get_fragmentname.3 \
+								get_constants.3 getdata.3 putdata.3 dirfile_delete.3 \
+								get_entry.3 get_error.3 get_error_string.3 get_field_list.3 \
+								get_field_list_by_type.3 dirfile_flush.3 get_fragmentname.3 \
 								dirfile_free_entry_strings.3 dirfile_include.3 \
 								dirfile_madd_bit.3 dirfile_metaflush.3 get_mfield_list.3 \
 								get_mfield_list_by_type.3 get_mvector_list.3 dirfilename.3 \

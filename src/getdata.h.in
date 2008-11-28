@@ -413,7 +413,6 @@ extern int put_encoding(DIRFILE* D, unsigned int encoding, int fragment,
     int move) __gd_nonnull ((1));
 
 /* delete flags */
-#define GD_DEL_NONE  0x0
 #define GD_DEL_META  0x1
 #define GD_DEL_DATA  0x2
 #define GD_DEL_DEREF 0x4

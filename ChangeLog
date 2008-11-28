@@ -1,3 +1,15 @@
+2008-11-28   D. V. Wiebe <getdata@ketiltrout.net>  svn:251
+	* test/del.c test/del_meta.c test/del_meta_force.c test/del_const.c
+	test/del_const_deref.c test/del_const_force.c test/del_data.c
+	test/del_derived.c test/del_derived_force.c test/open_cb_invalid.c: Added.
+	* man/dirfile_delete.3: Added.
+
+	* src/spf.c (_GD_GetSPF): Calculate RAW fields, if requried.
+
+	* src/del.c (dirfile_delete): Multiple bug fixes.
+
+	* src/getdata.h.in: Remove GD_DEL_NONE
+
 2008-11-27   D. V. Wiebe <getdata@ketiltrout.net>  svn:250
 	* test/open_cb_ignore.c test/open_cb_cont.c test/open_cb_abort.c
 	test/open_cb_rescan.c: Added.

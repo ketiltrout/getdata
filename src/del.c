@@ -172,7 +172,7 @@ static void _GD_DeReference(DIRFILE* D, gd_entry_t* E, const gd_entry_t* C,
 int dirfile_delete(DIRFILE* D, const char* field_code, int flags)
 {
   int index;
-  int first, last;
+  int first, last = 0;
   const int len = strlen(field_code);
   int n_del, i;
   unsigned int j;
@@ -215,7 +215,8 @@ int dirfile_delete(DIRFILE* D, const char* field_code, int flags)
     _GD_SetError(D, GD_E_DELETE, GD_E_DEL_META, NULL, 0, field_code);
     dreturn("%i", -1);
     return -1;
-  } else {
+  } else if (E->e->n_meta > 0) {
+    for (i = 0; (unsigned int)i < D->n_entries; ++i)
     /* find one of the meta fields -- it's not true that metafields are
      * necessarily sorted directly after their parent */
     if (_GD_FindField(D, E->e->meta_entry[0]->field, &first) == NULL) {
@@ -229,15 +230,15 @@ int dirfile_delete(DIRFILE* D, const char* field_code, int flags)
      * search linearly in both directions until we find something that isn't a
      * meta field of our parent */
     while (first > 0)
-      if (E->e->meta_entry[first - 1]->field[len] == '/' &&
-          strncmp(E->e->meta_entry[first - 1]->field, field_code, len) == 0)
+      if (D->entry[first - 1]->field[len] == '/' &&
+          strncmp(D->entry[first - 1]->field, field_code, len) == 0)
         first--;
       else
         break;
 
-    while (last < (int)D->n_entries - 2)
-      if (E->e->meta_entry[last + 1]->field[len] == '/' &&
-          strncmp(E->e->meta_entry[last + 1]->field, field_code, len) == 0)
+    while (last < (int)D->n_entries - 1)
+      if (D->entry[last + 1]->field[len] == '/' &&
+          strncmp(D->entry[last + 1]->field, field_code, len) == 0)
         last++;
       else
         break;
@@ -248,8 +249,8 @@ int dirfile_delete(DIRFILE* D, const char* field_code, int flags)
 
   if (del_list == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-    dreturn("%zi", 1);
-    return 1;
+    dreturn("%zi", -1);
+    return -1;
   }
 
   del_list[0] = E;
@@ -269,8 +270,8 @@ int dirfile_delete(DIRFILE* D, const char* field_code, int flags)
 
         if (D->error) {
           free(del_list);
-          dreturn("%zi", 1);
-          return 1;
+          dreturn("%zi", -1);
+          return -1;
         }
       }
 
@@ -280,17 +281,27 @@ int dirfile_delete(DIRFILE* D, const char* field_code, int flags)
     if (D->fragment[E->fragment_index].protection & GD_PROTECT_DATA) {
       _GD_SetError(D, GD_E_PROTECTED, GD_E_PROTECTED_DATA, NULL, 0,
           D->fragment[E->fragment_index].cname);
+      free(del_list);
       dreturn("%i", -1);
       return -1;
     }
 
     if (!_GD_Supports(D, E, GD_EF_UNLINK)) {
+      free(del_list);
       dreturn("%zi", -1);
       return -1;
     }
 
     if ((*D->ef[E->e->file[0].encoding].unlink)(E->e->file, E->e->filebase)) {
       _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[0].name, errno, NULL);
+      free(del_list);
+      dreturn("%zi", -1);
+      return -1;
+    }
+  } else if (E->field_type == GD_RAW_ENTRY && E->e->file->fp != -1) {
+    if ((*D->ef[E->e->file[0].encoding].close)(E->e->file)) {
+      _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[0].name, errno, NULL);
+      free(del_list);
       dreturn("%zi", -1);
       return -1;
     }
@@ -311,16 +322,27 @@ int dirfile_delete(DIRFILE* D, const char* field_code, int flags)
   /* Remove meta fields, if present */
   if (E->e->n_meta > 0) {
     /* Remove all meta fields -- there are no RAW fields here */
+    for (i = first; i <= last; ++i)
+      _GD_FreeE(D->entry[i], 1);
+
     memmove(D->entry + first, D->entry + last + 1,
-        sizeof(gd_entry_t*) * D->n_entries - last - 1);
+        sizeof(gd_entry_t*) * (D->n_entries - last - 1));
+    D->n_meta -= last - first + 1;
     D->n_entries -= last - first + 1;
   }
 
   /* Remove the entry from the list -- we need not worry about the way we've
    * already modified D->entry, since E is guaranteed to be before the stuff
    * we've already removed */
+  if (D->entry[index]->field_type == GD_CONST_ENTRY)
+    D->n_const--;
+  else if (D->entry[index]->field_type == GD_STRING_ENTRY)
+    D->n_string--;
+
+  _GD_FreeE(D->entry[index], 1);
+
   memmove(D->entry + index, D->entry + index + 1,
-      sizeof(gd_entry_t*) * D->n_entries - index - 1);
+      sizeof(gd_entry_t*) * (D->n_entries - index - 1));
   D->n_entries--;
 
   dreturn("%i", 0);

@@ -42,6 +42,8 @@ unsigned int _GD_GetSPF(DIRFILE* D, gd_entry_t* E)
 
   switch(E->field_type) {
     case GD_RAW_ENTRY:
+      if (!E->e->calculated)
+        _GD_CalculateEntry(D, E);
       spf = E->spf;
       break;
     case GD_LINCOM_ENTRY:
