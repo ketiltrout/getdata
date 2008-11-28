@@ -1,3 +1,29 @@
+2008-11-28   D. V. Wiebe <getdata@ketiltrout.net>  svn:252
+	* man/dirfile_include.3: Updated for calback.
+	* man/dirfile_close.3: Updated for dirfile_discard.
+
+	* src/getdata.h.in: Sorted.
+
+	* src/Makefile.am: Correct flags for bzip2 module.
+
+	* src/globals.c (dirfile_reference): Renamed from put_reference and merged
+	with get_reference.
+
+	* test/close_discard.c: Added.
+
+	* src/encoding.c src/internal.h: Removed the per-dirfile encoding
+	frameworks.  Renamed encoding_framework ef and made non static and non
+	const.
+	* src/encoding.c (_GD_InitialiseFramework): Reimplemented to initialise
+	global framework.
+	* src/open.c (dirfile_cbopen): Call _GD_InitialiseFramework to initialise
+	global framework.
+	* src/close.c (_GD_ShutdownDirfile): Don't call lt_dlexit();
+
+	* src/close.c (_GD_ShutdownDirfile): Renamed from dirfile_close and
+	added the flush_meta parameter.
+	* src/close.c (dirfile_close dirfile_discard): Added.
+
 2008-11-28   D. V. Wiebe <getdata@ketiltrout.net>  svn:251
 	* test/del.c test/del_meta.c test/del_meta_force.c test/del_const.c
 	test/del_const_deref.c test/del_const_force.c test/del_data.c

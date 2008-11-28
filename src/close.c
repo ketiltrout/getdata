@@ -60,15 +60,11 @@ static void _GD_FreeD(DIRFILE* D)
   dreturnvoid();
 }
 
-/* dirfile_close: Close the specified dirfile and free memory.  This must
- * return an error indicator, since checking D->error after this call won't
- * work if the function was a success.
-*/
-int dirfile_close(DIRFILE* D)
+static int _GD_ShutdownDirfile(DIRFILE* D, int flush_meta)
 {
   unsigned int i;
 
-  dtrace("%p", D);
+  dtrace("%p, %i", D, flush_meta);
 
   if (D == NULL) {
     dreturn("%i", 0);
@@ -78,7 +74,9 @@ int dirfile_close(DIRFILE* D)
   _GD_ClearError(D);
 
   /* Flush */
-  _GD_FlushMeta(D);
+  if (flush_meta)
+    _GD_FlushMeta(D);
+
   for(i = 0; i < D->n_entries; ++i)
     if (D->entry[i]->field_type == GD_RAW_ENTRY)
       _GD_Flush(D, D->entry[i], D->entry[i]->field);
@@ -90,12 +88,28 @@ int dirfile_close(DIRFILE* D)
 
   _GD_FreeD(D);
 
-#ifdef USE_MODULES
-  lt_dlexit();
-#endif
-
   dreturn("%i", 0);
   return 0;
+}
+
+int dirfile_close(DIRFILE *D)
+{
+  dtrace("%p", D);
+
+  int ret = _GD_ShutdownDirfile(D, 1);
+
+  dreturn("%i", ret);
+  return ret;
+}
+
+int dirfile_discard(DIRFILE* D)
+{
+  dtrace("%p", D);
+
+  int ret = _GD_ShutdownDirfile(D, 0);
+
+  dreturn("%i", ret);
+  return ret;
 }
 /* vim: ts=2 sw=2 et tw=80
 */

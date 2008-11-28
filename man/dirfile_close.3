@@ -20,15 +20,17 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH dirfile_close 3 "6 October 2008" "Version 0.4.0" "GETDATA"
+.TH dirfile_close 3 "28 November 2008" "Version 0.5.0" "GETDATA"
 .SH NAME
-dirfile_close \(em close a dirfile and free associated memory.
+dirfile_close dirfile_discard \(em close a dirfile and free associated memory.
 .SH SYNOPSIS
 .B #include <getdata.h>
 .HP
 .nh
 .ad l
 .BI "int dirfile_close(DIRFILE *" dirfile );
+.HP
+.BI "int dirfile_discard(DIRFILE *" dirfile );
 .hy
 .ad n
 .SH DESCRIPTION
@@ -36,34 +38,53 @@ The
 .BR dirfile_close ()
 function first calls
 .BR dirfile_flush (3)
-to flush and close all file handles associated with 
+to flush all metadata changes to disk and to close all file handles associated
+with 
 .IR dirfile .
 It then frees memory associated with the DIRFILE object.  If
 .I dirfile
 is NULL, nothing happens, and the call succeeds.
 
 The
-.BR dirfile_close ()
-function should be called on all pointers returned by
+.BR dirfile_discard ()
+function behaves similarly, except modified metadata is not written to disk,
+but simply discarded.  In order to ensure that modified data files associated
+with
+.B RAW
+fields are properly terminated, changes to
+.B RAW
+data files are still flushed to disk by this function.  If
+.I dirfile
+was opened in read-only mode,
+.BR dirfile_discard()
+and
+.BR dirfile_close()
+behave identically.
+
+One of these functions should be called on all pointers returned by
 .BR dirfile_open (3),
 even if the call to that function failed.  After
 .BR dirfile_close ()
-returns, the pointer
+or
+.BR dirfile_discard()
+returns successfully, the pointer
 .I dirfile
 should be considered invalid.
 .SH RETURN VALUE
 .BR dirfile_close ()
-returns zero on success.  On error, it does not free
+and
+.BR dirfile_discrd ()
+return zero on success.  On error, they do not deallocate
 .I dirfile
-and sets the dirfile error to a non-zero error value.  Possible error values
+and set the dirfile error to a non-zero error value.  Possible error values
 are:
 .TP 8
 .B GD_E_RAW_IO
 An error occurred while trying to flush or close one or more open raw files.
-In this case,
-.I dirfile
-will not be deallocated, and another call to
+In this case, another call to
 .BR dirfile_close ()
+or
+.BR dirfile_discard ()
 may be attempted.
 .P
 The dirfile error may be retrieved by calling

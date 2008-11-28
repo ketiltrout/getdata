@@ -61,6 +61,8 @@ install-data-hook:
 		$(LN_S) -f dirfile_add_spec.3 dirfile_madd_spec.3
 	cd $(DESTDIR)$(mandir)/man3 && \
 		$(LN_S) -f dirfile_cbopen.3 dirfile_open.3
+	cd $(DESTDIR)$(mandir)/man3 && \
+		$(LN_S) -f dirfile_close.3 dirfile_discard.3
 
 clean-local:
 	rm -rf *~ 

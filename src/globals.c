@@ -34,26 +34,7 @@ const char* dirfilename(DIRFILE* D)
   return D->name;
 }
 
-const char* get_reference(DIRFILE* D)
-{
-  dtrace("%p", D);
-
-  if (D->flags & GD_INVALID) {/* don't crash */
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%p", NULL);
-    return NULL;
-  }
-
-  if (D->reference_field == NULL) {
-    dreturn("%p", NULL);
-    return NULL;
-  }
-
-  dreturn("\"%s\"", D->reference_field->field);
-  return D->reference_field->field;
-}
-
-int put_reference(DIRFILE* D, const char* field_code)
+const char* dirfile_reference(DIRFILE* D, const char* field_code)
 {
   dtrace("%p, \"%s\"", D, field_code);
 
@@ -62,12 +43,23 @@ int put_reference(DIRFILE* D, const char* field_code)
     dreturn("%i", -1);
     return -1;
   }
+  
+  /* if no field specified, return only the field name */
+  if (field_code == NULL) {
+    if (D->reference_field == NULL) {
+      dreturn("%p", NULL);
+      return NULL;
+    }
+
+    dreturn("\"%s\"", D->reference_field->field);
+    return D->reference_field->field;
+  }
 
   /* check access mode */
   if ((D->flags & GD_ACCMODE) == GD_RDONLY) {
     _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
+    dreturn("%i", NULL);
+    return NULL;
   }
 
   /* Check field */
@@ -75,22 +67,22 @@ int put_reference(DIRFILE* D, const char* field_code)
 
   if (E == NULL) {
     _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, field_code);
-    dreturn("%i", -1);
-    return -1;
+    dreturn("%i", NULL);
+    return NULL;
   }
 
   if (E->field_type != GD_RAW_ENTRY) {
     _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
-    dreturn("%i", -1);
-    return -1;
+    dreturn("%i", NULL);
+    return NULL;
   }
 
   /* Check protection */
   if (D->fragment[0].protection & GD_PROTECT_FORMAT) {
     _GD_SetError(D, GD_E_PROTECTED, GD_E_PROTECTED_FORMAT, NULL, 0,
         D->fragment[0].cname);
-    dreturn("%i", -1);
-    return -1;
+    dreturn("%i", NULL);
+    return NULL;
   }
 
   /* set the new reference field */
@@ -98,6 +90,7 @@ int put_reference(DIRFILE* D, const char* field_code)
   D->fragment[0].ref_name = E->field;
   D->fragment[0].modified = 1;
 
-  dreturn("%i", 0);
-  return 0;
+
+  dreturn("\"%s\"", D->reference_field->field);
+  return D->reference_field->field;
 }

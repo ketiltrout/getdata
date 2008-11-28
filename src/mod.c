@@ -91,7 +91,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
         off64_t ns_out;
         void *buffer1;
         void *buffer2;
-        const struct encoding_t* enc = D->ef + E->e->file[0].encoding;
+        const struct encoding_t* enc = ef + E->e->file[0].encoding;
         const off64_t nf = BUFFER_SIZE / max(E->e->size, GD_SIZE(Q.data_type)) /
           max(E->spf, Q.spf);
 

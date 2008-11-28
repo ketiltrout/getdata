@@ -107,8 +107,9 @@ libgetdatagzip_la_LDFLAGS = $(GZIP_LDFLAGS) -release $(PACKAGE_VERSION) -module
 libgetdatagzip_la_CPPFLAGS = $(AM_CPPFLAGS) $(GZIP_CPPFLAGS)
 
 libgetdatabzip2_la_SOURCES = bzip.c ${DEBUG_C}
-libgetdatabzip2_la_LDFLAGS = $(BZIP_LDFLAGS) -release $(PACKAGE_VERSION) -module
-libgetdatabzip2_la_CPPFLAGS = $(AM_CPPFLAGS) $(BZIP_CPPFLAGS)
+libgetdatabzip2_la_LDFLAGS = $(BZIP2_LDFLAGS) -release $(PACKAGE_VERSION) \
+														 -module
+libgetdatabzip2_la_CPPFLAGS = $(AM_CPPFLAGS) $(BZIP2_CPPFLAGS)
 
 clean-local:
 	rm -rf *~ 

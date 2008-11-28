@@ -756,7 +756,7 @@ gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, const char** in_cols,
         /* If the encoding scheme is unsupported, we can't add the field */
         _GD_SetError(D, GD_E_UNSUPPORTED, 0, NULL, 0, NULL);
       else if (_GD_Supports(D, E, GD_EF_TOUCH) &&
-          (*D->ef[E->e->file[0].encoding].touch)(E->e->file, E->e->filebase))
+          (*ef[E->e->file[0].encoding].touch)(E->e->file, E->e->filebase))
           _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[0].name, errno, NULL);
     }
 
@@ -1363,9 +1363,7 @@ DIRFILE* dirfile_cbopen(const char* filedir, unsigned int flags,
 
   dtrace("\"%s\", 0x%x, %p", filedir, flags, sehandler);
 
-#ifdef USE_MODULES
-  lt_dlinit();
-#endif
+  _GD_InitialiseFramework();
 
   D = malloc(sizeof(DIRFILE));
   memset(D, 0, sizeof(DIRFILE));
@@ -1375,7 +1373,6 @@ DIRFILE* dirfile_cbopen(const char* filedir, unsigned int flags,
   D->name = strdup(filedir);
   D->flags = flags | GD_INVALID;
   D->sehandler = sehandler;
-  _GD_InitialiseFramework(D);
 
   if (D->error_string == NULL || D->error_file == NULL || D->name == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);

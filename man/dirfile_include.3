@@ -20,7 +20,7 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH dirfile_include 3 "21 October 2008" "Version 0.4.0" "GETDATA"
+.TH dirfile_include 3 "28 November 2008" "Version 0.5.0" "GETDATA"
 .SH NAME
 dirfile_include \(em add a format file fragment to a dirfile
 .SH SYNOPSIS
@@ -37,7 +37,8 @@ The
 .BR dirfile_include ()
 adds the format file fragment specified by the path
 .I include_file
-to the specified dirfile.  This occurs as if, in the existing fragment indexed
+to the specified dirfile, possibly creating the fragment.  This occurs as if,
+in the existing fragment indexed
 by
 .IR parent_fragment ,
 the following directive were present:
@@ -46,6 +47,12 @@ the following directive were present:
 .P
 (see
 .BR dirfile-format (5)).
+If a parser callback function had been specified when the dirfile was opened
+using
+.BR dirfile_cbopen (3),
+this callback function will be called if a syntax error is encountered while
+parsing the included fragment.
+
 The 
 .I flags
 parameter should be a bitwise-or'd collection of the following flags, or zero
@@ -72,7 +79,7 @@ will have mode
 .BR umask (2)).
 .TP
 .B GD_EXCL
-Ensure that this call creates a dirfile: when specified along with
+Ensure that this call creates a new fragment: when specified along with
 .BR GD_CREAT ,
 the call will fail if the dirfile specified by
 .I dirfilename
@@ -195,6 +202,9 @@ directive in the fragment (see
 was not found, or was not a
 .B RAW
 field.
+.TP
+.B GD_E_CALLBACK
+The registered callback function returned an unrecognised response.
 .TP
 .B GD_E_FORMAT
 A syntax error occurred in the fragment.

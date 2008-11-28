@@ -62,7 +62,7 @@ ASCII_TESTS=ascii_get ascii_nframes ascii_put
 
 CVLIST_TESTS=cvlist cvlist_invalid cvlist_meta cvlist_meta_invalid
 
-CLOSE_TESTS=close close_bad close_null
+CLOSE_TESTS=close close_bad close_discard close_null
 
 CONVERT_TESTS=convert_uint8_int8 convert_uint8_uint16 convert_uint8_int16 \
 							convert_uint8_uint32 convert_uint8_int32 convert_uint8_float32 \

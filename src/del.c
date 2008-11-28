@@ -291,14 +291,14 @@ int dirfile_delete(DIRFILE* D, const char* field_code, int flags)
       return -1;
     }
 
-    if ((*D->ef[E->e->file[0].encoding].unlink)(E->e->file, E->e->filebase)) {
+    if ((*ef[E->e->file[0].encoding].unlink)(E->e->file, E->e->filebase)) {
       _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[0].name, errno, NULL);
       free(del_list);
       dreturn("%zi", -1);
       return -1;
     }
   } else if (E->field_type == GD_RAW_ENTRY && E->e->file->fp != -1) {
-    if ((*D->ef[E->e->file[0].encoding].close)(E->e->file)) {
+    if ((*ef[E->e->file[0].encoding].close)(E->e->file)) {
       _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[0].name, errno, NULL);
       free(del_list);
       dreturn("%zi", -1);
