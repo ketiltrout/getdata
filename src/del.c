@@ -216,7 +216,6 @@ int dirfile_delete(DIRFILE* D, const char* field_code, int flags)
     dreturn("%i", -1);
     return -1;
   } else if (E->e->n_meta > 0) {
-    for (i = 0; (unsigned int)i < D->n_entries; ++i)
     /* find one of the meta fields -- it's not true that metafields are
      * necessarily sorted directly after their parent */
     if (_GD_FindField(D, E->e->meta_entry[0]->field, &first) == NULL) {
