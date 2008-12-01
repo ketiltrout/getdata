@@ -328,7 +328,7 @@ void _GD_FlushMeta(DIRFILE* D)
 
       /* REFERENCE is written at the end, because its effect can propagate
        * upwards */
-      if (D->reference_field != NULL)
+      if (D->fragment[i].ref_name != NULL)
         fprintf(stream, "/REFERENCE %s\n", _GD_StringEscapeise(buffer,
               D->fragment[i].ref_name));
 

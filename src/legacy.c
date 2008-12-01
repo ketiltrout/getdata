@@ -113,6 +113,7 @@ char* GetDataErrorString(char* buffer, size_t buflen)
 static DIRFILE* _GD_GetDirfile(const char *filename_in, int mode)
 {
   unsigned int i_dirfile;
+  void *ptr;
 
   dtrace("\"%s\", %x", filename_in, mode);
 
@@ -146,14 +147,23 @@ static DIRFILE* _GD_GetDirfile(const char *filename_in, int mode)
   /* Allocate the memory, then fill.  If we have an error, */
   /*  we will have to free the memory... */
   _GD_Dirfiles.n++;
-  _GD_Dirfiles.D = realloc(_GD_Dirfiles.D, _GD_Dirfiles.n * sizeof(DIRFILE*));
+  ptr = realloc(_GD_Dirfiles.D, _GD_Dirfiles.n * sizeof(DIRFILE*));
+  if (ptr == NULL) {
+    /* There's been a problem trying to create a new dirfile object, even an
+     * invalid one.  So, return the only one we're guaranteed to have... */
+    _GD_GlobalErrors.error = GD_E_ALLOC;
+    dreturn("%p", &_GD_GlobalErrors);
+    return &_GD_GlobalErrors;
+  }
+
+  _GD_Dirfiles.D = ptr;
 
   /* Open a dirfile */
   _GD_Dirfiles.D[_GD_Dirfiles.n - 1] = dirfile_open(filedir, mode);
 
   /* Error encountered -- the dirfile will shortly be deleted */
   if (_GD_Dirfiles.D[_GD_Dirfiles.n - 1]->error != GD_E_OK) {
-    dreturn("%p", _GD_Dirfiles.D[--_GD_Dirfiles.n]);
+    dreturn("%p", _GD_Dirfiles.D[_GD_Dirfiles.n - 1]);
     return _GD_Dirfiles.D[--_GD_Dirfiles.n];
   }
 
@@ -354,18 +364,32 @@ struct FormatType *GetFormat(const char *filedir, int *error_code) {
     }
 
   /* Now reallocate the Entry arrays */
-  Format.rawEntries = realloc(Format.rawEntries,
-      Format.n_raw * sizeof(struct RawEntryType));
-  Format.lincomEntries = realloc(Format.lincomEntries,
-      Format.n_lincom * sizeof(struct LincomEntryType));
-  Format.linterpEntries = realloc(Format.linterpEntries,
-      Format.n_linterp * sizeof(struct LinterpEntryType));
-  Format.multiplyEntries = realloc(Format.multiplyEntries,
-      Format.n_multiply * sizeof(struct MultiplyEntryType));
-  Format.bitEntries = realloc(Format.bitEntries,
-      Format.n_bit * sizeof(struct BitEntryType));
-  Format.phaseEntries = realloc(Format.phaseEntries,
-      Format.n_phase * sizeof(struct PhaseEntryType));
+  free(Format.rawEntries);
+  free(Format.lincomEntries);
+  free(Format.linterpEntries);
+  free(Format.multiplyEntries);
+  free(Format.bitEntries);
+  free(Format.phaseEntries);
+
+  Format.rawEntries = malloc(Format.n_raw * sizeof(struct RawEntryType));
+  Format.lincomEntries = malloc(Format.n_lincom *
+      sizeof(struct LincomEntryType));
+  Format.linterpEntries = malloc(Format.n_linterp *
+      sizeof(struct LinterpEntryType));
+  Format.multiplyEntries = malloc(Format.n_multiply *
+      sizeof(struct MultiplyEntryType));
+  Format.bitEntries = malloc(Format.n_bit * sizeof(struct BitEntryType));
+  Format.phaseEntries = malloc(Format.n_phase * sizeof(struct PhaseEntryType));
+
+  if (Format.rawEntries == NULL || Format.lincomEntries == NULL ||
+      Format.linterpEntries == NULL || Format.multiplyEntries == NULL || 
+      Format.bitEntries == NULL || Format.phaseEntries == NULL)
+  {
+    D->error = GD_E_ALLOC;
+    *error_code = _GD_CopyGlobalError(D);
+    dreturn("%p", NULL);
+    return NULL;
+  }
 
   /* Pass 2: Fill the Entry structs */
   for (i = 0; i < D->n_entries; ++i)

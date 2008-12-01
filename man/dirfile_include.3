@@ -20,7 +20,7 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH dirfile_include 3 "28 November 2008" "Version 0.5.0" "GETDATA"
+.TH dirfile_include 3 "1 December 2008" "Version 0.5.0" "GETDATA"
 .SH NAME
 dirfile_include \(em add a format file fragment to a dirfile
 .SH SYNOPSIS
@@ -110,6 +110,33 @@ found in the fragment should be ignored.  When specified with one of
 the endianness specified will be assumed.  If this flag is specified with
 neither of those flags, the dirfile will be assumed to have the endianness of the
 native architecture.
+.TP
+.B GD_IGNORE_DUPS
+If the fragment specifies more than one field with the same name, or a field 
+with the same name as an existing field, all but one of them will be ignored by
+the parser.  Without this flag, parsing would fail with the
+.B GD_E_FORMAT 
+error, possibly resulting in invocation of the registered callback function.
+Which of the duplicate fields is kept is not specified, nor whether an existing
+field takes precedence over a new one or not.  As a result, this flag is
+typically only useful in the case where identical copies of a field
+specification line are present.
+
+No indication is provided to indicate whether a duplicate field has been
+discarded.  If finer grained control is required, the caller should handle
+.B GD_E_FORMAT_DUPLICATE
+suberrors itself with an appropriate callback function.
+.TP
+.B GD_IGNORE_REFS
+If the dirfile currently has a reference field (either because one was specified
+explicitly, or else because the first
+.B RAW
+field was used),
+.B /REFERENCE
+directives in the included fragment will be ignored.  Otherwise, a
+.B /REFERENCE
+directive in the included fragment will replace the current reference field in
+the dirfile.
 .TP
 .B GD_LITTLE_ENDIAN
 Specifies that raw data on disk is stored as little-endian data (least
@@ -219,6 +246,19 @@ The fragment could not be opened or created.
 .TP
 .B GD_E_PROTECTED
 The metadata of the parent fragment was protected from change.
+.TP
+.B GD_E_REFERENCE
+The included fragment contained a
+.B /REFERENCE
+directive which referred to a non-existent field, or a field that was not of
+type
+.BR RAW .
+In this case, the included fragment will still be added to the dirfile, but
+the
+.B /REFERENCE
+directive will be ignored.  See also the
+.B BUGS
+section below.
 .P
 The dirfile error may be retrieved by calling
 .BR get_error (3).
@@ -228,12 +268,25 @@ a call to
 When finished with it, the DIRFILE object may be deallocated with a call to
 .BR dirfile_close (3),
 even if the open failed.
+.SH BUGS
+If this function fails with the error
+.BR GD_E_REFERENCE ,
+it typically results in no reference field being defined for the dirfile, even
+if the dirfile contains
+.B RAW
+fields.  As a result, functions which rely on the reference field, such as
+.BR get_nframes (3),
+will operate incorrectly.  Callers should explicitly set the reference field
+with
+.BR dirfile_reference (3)
+in this case.
 .SH SEE ALSO
-.BR dirfile (5),
-.BR dirfile-encoding (5),
-.BR dirfile-format (5),
 .BR dirfile_open (3),
+.BR dirfile_reference (3),
 .BR get_error (3),
 .BR get_error_string (3),
 .BR get_fragmentname (3),
-.BR get_nfragments (3)
+.BR get_nfragments (3),
+.BR dirfile (5),
+.BR dirfile-encoding (5),
+.BR dirfile-format (5)

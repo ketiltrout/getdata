@@ -28,15 +28,9 @@
 #include <errno.h>
 #endif
 
-int _GD_RawOpen(struct _gd_raw_file* file, const char* base, int mode,
-    int creat)
+int _GD_RawOpen(struct _gd_raw_file* file, int mode, int creat)
 {
-  dtrace("%p, \"%s\", %i, %i", file, base, mode, creat);
-
-  if (GD_SetEncodedName(file, base, 0)) {
-    dreturn("%i", -1);
-    return -1;
-  }
+  dtrace("%p, %i, %i", file, base, mode, creat);
 
   file->fp = open(file->name, ((mode == GD_RDWR) ? O_RDWR : O_RDONLY) |
       (creat ? O_CREAT : 0), 0666);
@@ -106,16 +100,10 @@ int _GD_RawClose(struct _gd_raw_file *file)
   return ret;
 }
 
-off64_t _GD_RawSize(struct _gd_raw_file *file, const char *base,
-    gd_type_t data_type)
+off64_t _GD_RawSize(struct _gd_raw_file *file, gd_type_t data_type)
 {
   struct stat64 statbuf;
-  dtrace("%p, \"%s\", %x", file, base, data_type);
-
-  if (GD_SetEncodedName(file, base, 0)) {
-    dreturn("%i", -1);
-    return -1;
-  }
+  dtrace("%p, %x", file, base, data_type);
 
   if (stat64(file->name, &statbuf) < 0)  {
     dreturn("%lli", -1LL);
@@ -134,11 +122,6 @@ int _GD_RawTemp(struct _gd_raw_file *file, int mode)
 
   switch(mode) {
     case GD_TEMP_OPEN:
-      if (GD_SetEncodedName(file + 1, file->name, 1)) {
-        dreturn("%i", -1);
-        return -1;
-      }
-
       file[1].fp = mkstemp(file[1].name);
 
       if (file[1].fp == -1) {

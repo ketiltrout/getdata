@@ -42,6 +42,7 @@ int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,
   int found = 0;
   char temp_buf1[FILENAME_MAX];
   char temp_buf2[FILENAME_MAX];
+  void* ptr;
   FILE* new_fp = NULL;
 
   dtrace("%p, \"%s\", \"%s\", %p, %i, %i, %p, %x\n", D, ename, format_file,
@@ -91,13 +92,13 @@ int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,
   }
 
   /* If we got here, we managed to open the included file; parse it */
-  D->fragment = realloc(D->fragment, (++D->n_fragment) *
-      sizeof(struct gd_fragment_t));
-  if (D->fragment == NULL) {
+  ptr = realloc(D->fragment, (++D->n_fragment) * sizeof(struct gd_fragment_t));
+  if (ptr == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     dreturn("%i", -1);
     return -1;
   }
+  D->fragment = ptr;
 
   D->fragment[D->n_fragment - 1].cname = strdup(temp_buf1);
   D->fragment[D->n_fragment - 1].ename = strdup(ename);
@@ -148,12 +149,13 @@ int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,
 }
 
 int dirfile_include(DIRFILE* D, const char* file, int fragment_index,
-    unsigned int flags)
+    unsigned long flags)
 {
   int standards = DIRFILE_STANDARDS_VERSION;
   char* ref_name = NULL; 
+  int i;
 
-  dtrace("%p, \"%s\"", D, file);
+  dtrace("%p, \"%s\", %i, %lx", D, file, fragment_index, flags);
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -182,12 +184,35 @@ int dirfile_include(DIRFILE* D, const char* file, int fragment_index,
     return -1;
   }
 
-  int i = _GD_Include(D, file, "dirfile_include()", 0, &ref_name,
+  int new_fragment = _GD_Include(D, file, "dirfile_include()", 0, &ref_name,
       fragment_index, &standards, flags);
 
-  /* Find the reference field */
-  if (ref_name != NULL) {
+  if (!D->error)
+    D->fragment[fragment_index].modified = 1;
+
+  /* If ref_name is non-NULL, the included fragment contained a REFERENCE
+   * directive.  If ref_name is NULL but D->fragment[new_fragment].ref_name is
+   * non-NULL, no REFERENCE directive was present, but the parser found a RAW
+   * field to serve as a reference field.
+   */
+  if (new_fragment >= 0 && D->fragment[new_fragment].ref_name != NULL)
+    /* If the parser chose a reference field, propagate it upward if requried */
+    for (i = fragment_index; i != -1; i = D->fragment[i].parent) {
+      if (D->fragment[i].ref_name == NULL) {
+        D->fragment[i].ref_name = strdup(D->fragment[new_fragment].ref_name);
+        D->fragment[i].modified = 1;
+      } else
+        break;
+    }
+
+  /* Honour the reference directive, if not prohibited by the caller */
+  if (ref_name != NULL && ~flags & GD_IGNORE_REFS) {
     gd_entry_t *E = _GD_FindField(D, ref_name, NULL);
+
+    /* FIXME: These errors are problematic, since they'll cause the call to
+     * fail, even though the new fragment has been integrated into the DIRFILE.
+     */
+
     if (E == NULL)
       _GD_SetError(D, GD_E_BAD_REFERENCE, GD_E_REFERENCE_CODE, NULL, 0,
           ref_name);
@@ -199,6 +224,6 @@ int dirfile_include(DIRFILE* D, const char* file, int fragment_index,
     free(ref_name);
   }
 
-  dreturn("%i", i);
-  return i;
+  dreturn("%i", new_fragment);
+  return new_fragment;
 }

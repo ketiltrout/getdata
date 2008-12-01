@@ -13,6 +13,7 @@ int main(void)
 {
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
+  const char* data = __TEST__ "dirfile/data";
 
   mkdir(filedir, 0777);
   close(open(format, O_CREAT | O_EXCL | O_WRONLY, 0666));
@@ -24,6 +25,7 @@ int main(void)
   int n = get_nfields(D);
   dirfile_close(D);
 
+  unlink(data);
   unlink(format);
   rmdir(filedir);
 

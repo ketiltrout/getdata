@@ -41,7 +41,7 @@
 #endif
 
 #if SIZEOF_INT < 4
-#define GD_BZIP_BUFFER_SIZE 65536
+#define GD_BZIP_BUFFER_SIZE 65535
 #else
 #define GD_BZIP_BUFFER_SIZE 1000000
 #endif
@@ -58,17 +58,11 @@ struct gd_bzdata {
 /* The bzip encoding scheme uses edata as a gd_bzdata pointer.  If a file is
  * open, fp = 0 otherwise fp = -1. */
 
-static struct gd_bzdata *_GD_Bzip2DoOpen(struct _gd_raw_file* file,
-    const char* base)
+static struct gd_bzdata *_GD_Bzip2DoOpen(struct _gd_raw_file* file)
 {
   struct gd_bzdata *ptr;
 
-  dtrace("%p, \"%s\"", file, base);
-
-  if (GD_SetEncodedName(file, base, 0)) {
-    dreturn("%p", NULL);
-    return NULL;
-  }
+  dtrace("%p", file);
 
   if ((ptr = malloc(sizeof(struct gd_bzdata))) == NULL) {
     dreturn("%p", NULL);
@@ -98,14 +92,14 @@ static struct gd_bzdata *_GD_Bzip2DoOpen(struct _gd_raw_file* file,
   return ptr;
 }
 
-int _GD_Bzip2Open(struct _gd_raw_file* file, const char* base,
-    int mode __gd_unused, int creat __gd_unused)
+int _GD_Bzip2Open(struct _gd_raw_file* file, int mode __gd_unused,
+    int creat __gd_unused)
 {
   struct gd_bzdata *ptr;
 
-  dtrace("%p, \"%s\", <unused>, <unused>", file, base);
+  dtrace("%p, <unused>, <unused>", file);
 
-  file->edata = ptr = _GD_Bzip2DoOpen(file, base);
+  file->edata = ptr = _GD_Bzip2DoOpen(file);
 
   if (file->edata == NULL) {
     dreturn("%i", 1);
@@ -235,12 +229,11 @@ int _GD_Bzip2Close(struct _gd_raw_file *file)
   return 1;
 }
 
-off64_t _GD_Bzip2Size(struct _gd_raw_file *file, const char *base,
-    gd_type_t data_type)
+off64_t _GD_Bzip2Size(struct _gd_raw_file *file, gd_type_t data_type)
 {
-  dtrace("%p, \"%s\", %x", file, base, data_type);
+  dtrace("%p, %x", file, data_type);
 
-  struct gd_bzdata *ptr = _GD_Bzip2DoOpen(file, base);
+  struct gd_bzdata *ptr = _GD_Bzip2DoOpen(file);
 
   if (ptr == NULL) {
     dreturn("%i", -1);

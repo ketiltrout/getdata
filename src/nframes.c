@@ -49,9 +49,15 @@ off64_t get_nframes64(DIRFILE* D)
     return 0;
   }
 
+  if (_GD_SetEncodedName(D, D->reference_field->e->file,
+        D->reference_field->e->filebase, 0))
+  {
+    dreturn("%i", 0);
+    return 0;
+  }
+
   nf = (*ef[D->reference_field->e->file[0].encoding].size)
-    (D->reference_field->e->file, D->reference_field->e->filebase,
-     D->reference_field->data_type);
+    (D->reference_field->e->file, D->reference_field->data_type);
 
   if (nf < 0) {
     _GD_SetError(D, GD_E_RAW_IO, 0, D->reference_field->e->file[0].name, errno,

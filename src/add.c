@@ -33,12 +33,15 @@
 /* add an entry */
 static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
 {
-  dtrace("%p, %p, \"%s\"", D, entry, parent);
-
   char temp_buffer[FILENAME_MAX];
-  int i, u;
+  int i;
+  void* new_list;
+  void* new_ref = NULL;
+  unsigned int u;
   gd_entry_t* E;
   gd_entry_t* P = NULL;
+
+  dtrace("%p, %p, \"%s\"", D, entry, parent);
 
   _GD_ClearError(D);
 
@@ -196,19 +199,15 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
         _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, entry->data_type, NULL);
       else if (!_GD_Supports(D, E, GD_EF_TOUCH))
         ; /* error already set */
-      else if ((*ef[E->e->file[0].encoding].touch)(E->e->file, E->e->filebase))
+      else if (_GD_SetEncodedName(D, E->e->file, E->e->filebase, 0))
+        ; /* error already set */
+      else if ((*ef[E->e->file[0].encoding].touch)(E->e->file))
         _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[0].name, errno, NULL);
       else if (D->fragment[E->fragment_index].ref_name == NULL) {
-        /* This is the first raw field in this fragment; propagate it upwards */
-        for (i = E->fragment_index; i != -1; i = D->fragment[i].parent)
-          if (D->fragment[i].ref_name == NULL) {
-            D->fragment[E->fragment_index].ref_name = strdup(E->field);
-            D->fragment[i].modified = 1;
-          } else
-            break;
-          /* Is this the first raw field ever defined? */
-          if (D->reference_field == NULL)
-            D->reference_field = E;
+        /* This is the first raw field in this fragment */
+        new_ref = strdup(E->field);
+        if (new_ref == NULL)
+          _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
       }
       break;
     case GD_LINCOM_ENTRY:
@@ -265,17 +264,11 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
 
       if (E->const_type & 0x40 || GD_SIZE(E->const_type) == 0)
         _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, E->const_type, NULL);
-      else if (P == NULL)
-        D->n_const++;
-      else
-        P->e->n_meta_const++;
       break;
     case GD_STRING_ENTRY:
       E->e->string = strdup("");
-      if (P == NULL)
-        D->n_string++;
-      else
-        P->e->n_meta_string++;
+      if (E->e->string == NULL)
+        _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
       break;
     case GD_INDEX_ENTRY:
     case GD_NO_ENTRY:
@@ -284,21 +277,68 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
   }
 
   if (D->error != GD_E_OK) {
+    free(new_ref);
+    _GD_FreeE(E, 1);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  new_list = realloc(D->entry, (D->n_entries + 1) * sizeof(gd_entry_t*));
+  if (new_list == NULL) {
+    free(new_ref);
     _GD_FreeE(E, 1);
     dreturn("%i", -1);
     return -1;
   }
 
   if (P) {
-    P->e->meta_entry = realloc(P->e->meta_entry, (P->e->n_meta + 1) *
+    void *ptr = realloc(P->e->meta_entry, (P->e->n_meta + 1) *
         sizeof(gd_entry_t*));
+    if (ptr == NULL) {
+      free(new_list);
+      free(new_ref);
+      _GD_FreeE(E, 1);
+      dreturn("%i", -1);
+      return -1;
+    }
+
+    /* From here on, nothing may fail */
+
+    P->e->meta_entry = ptr;
     P->e->meta_entry[P->e->n_meta] = E;
     P->e->n_meta++;
     D->n_meta++;
+
+  }
+
+  if (E->field_type == GD_STRING_ENTRY) {
+    if (P)
+      P->e->n_meta_string++;
+    else
+      D->n_string++;
+  } else if (E->field_type == GD_CONST_ENTRY) {
+    if (P)
+      P->e->n_meta_const++;
+    else
+      D->n_const++;
+  } else if (E->field_type == GD_RAW_ENTRY) {
+    if (new_ref != NULL) {
+      /* This is the first raw field in this fragment; propagate it upwards */
+      for (i = E->fragment_index; i != -1; i = D->fragment[i].parent) {
+        if (D->fragment[i].ref_name == NULL) {
+          D->fragment[i].ref_name = new_ref;
+          D->fragment[i].modified = 1;
+        } else
+          break;
+      }
+
+      if (D->reference_field == NULL)
+        D->reference_field = E;
+    }
   }
 
   /* add the entry and resort the entry list */
-  D->entry = realloc(D->entry, (D->n_entries + 1) * sizeof(gd_entry_t*));
+  D->entry = new_list;
   _GD_InsertSort(D, E, u);
   D->n_entries++;
   D->fragment[E->fragment_index].modified = 1;

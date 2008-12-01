@@ -1,0 +1,100 @@
+.\" dirfile_reference.3.  The dirfile_reference man page.
+.\"
+.\" (C) 2008 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" This program is free software; you can redistribute it and/or modify
+.\" it under the terms of the GNU General Public License as published by
+.\" the Free Software Foundation; either version 2 of the License, or
+.\" (at your option) any later version.
+.\"
+.\" GetData is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+.\" General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public License along
+.\" with GetData; if not, write to the Free Software Foundation, Inc.,
+.\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+.\"
+.TH dirfile_reference 3 "29 November 2008" "Version 0.5.0" "GETDATA"
+.SH NAME
+dirfile_reference \(em retrieve or set the reference field for a dirfile
+.SH SYNOPSIS
+.B #include <getdata.h>
+.HP
+.nh
+.ad l
+.BI "const char *dirfile_reference(DIRFILE *" dirfile ", const char"
+.BI * field_code );
+.hy
+.ad n
+.SH DESCRIPTION
+The
+.BR dirfile_reference ()
+function sets or retrieves the reference field (see 
+.BR dirfile (5))
+associated with the dirfile specified by
+.IR dirfile .
+If the
+.I field_code
+parameter is non-NULL, the reference field for the dirfile will be set to the
+field specified.  If
+.I field_code
+is NULL, the reference field is not modified.
+
+.SH RETURN VALUE
+On success,
+.BR dirfile_reference ()
+returns the field code of the dirfile's reference field, which will be
+.IR field_code ,
+if
+.I field_code
+is non-NULL.   If no
+.B RAW
+fields are defined in the dirfile,
+.BR dirfile_reference ()
+will return NULL, without raising an error.  On error, NULL is returned and the
+dirfile error is set to a non-zero error value.  Possible error values are:
+.TP 8
+.B GD_E_ACCMODE
+The specified dirfile was opened read-only.
+.TP
+.B GD_E_ALLOC
+The library was unable to allocate memory.
+.TP
+.B GD_E_BAD_CODE
+The field specified by
+.I field_code
+was not found.
+.TP
+.B GD_E_BAD_DIRFILE
+The supplied dirfile was invalid.
+.TP
+.B GD_E_BAD_FIELD_TYPE
+The field specified by
+.I field_code
+was not a
+.B RAW
+field.
+.TP
+.B GD_E_PROTECTED
+The metadata of the primary format file fragment (the file named
+.I format
+in the root dirfile directory) was protected from change.
+.P
+The dirfile error may be retrieved by calling
+.BR get_error (3).
+A descriptive error string for the last error encountered can be obtained from
+a call to
+.BR get_error_string (3).
+.SH SEE ALSO
+.BR dirfile_metaflush (3),
+.BR dirfile_open (3),
+.BR get_error (3),
+.BR get_error_string (3),
+.BR dirfile (5),
+.BR dirfile-format (5)

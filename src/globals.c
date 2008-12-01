@@ -20,6 +20,14 @@
  */
 #include "internal.h"
 
+#ifdef STDC_HEADERS
+#include <string.h>
+#include <stdlib.h>
+#endif
+
+/* This is nothing other than what the caller gave us.  Presumably it should
+ * be better at keeping track of such things than us, but this is present in
+ * the event that it is not. */
 const char* dirfilename(DIRFILE* D)
 {
   dtrace("%p", D);
@@ -40,8 +48,8 @@ const char* dirfile_reference(DIRFILE* D, const char* field_code)
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
+    dreturn("%p", NULL);
+    return NULL;
   }
   
   /* if no field specified, return only the field name */
@@ -58,7 +66,7 @@ const char* dirfile_reference(DIRFILE* D, const char* field_code)
   /* check access mode */
   if ((D->flags & GD_ACCMODE) == GD_RDONLY) {
     _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
-    dreturn("%i", NULL);
+    dreturn("%p", NULL);
     return NULL;
   }
 
@@ -67,13 +75,13 @@ const char* dirfile_reference(DIRFILE* D, const char* field_code)
 
   if (E == NULL) {
     _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, field_code);
-    dreturn("%i", NULL);
+    dreturn("%p", NULL);
     return NULL;
   }
 
   if (E->field_type != GD_RAW_ENTRY) {
     _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
-    dreturn("%i", NULL);
+    dreturn("%p", NULL);
     return NULL;
   }
 
@@ -81,15 +89,23 @@ const char* dirfile_reference(DIRFILE* D, const char* field_code)
   if (D->fragment[0].protection & GD_PROTECT_FORMAT) {
     _GD_SetError(D, GD_E_PROTECTED, GD_E_PROTECTED_FORMAT, NULL, 0,
         D->fragment[0].cname);
-    dreturn("%i", NULL);
+    dreturn("%p", NULL);
+    return NULL;
+  }
+  
+  char* ptr = strdup(E->field);
+
+  if (ptr == NULL) {
+    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    dreturn("%p", NULL);
     return NULL;
   }
 
   /* set the new reference field */
   D->reference_field = E;
-  D->fragment[0].ref_name = E->field;
+  free(D->fragment[0].ref_name);
+  D->fragment[0].ref_name = ptr;
   D->fragment[0].modified = 1;
-
 
   dreturn("\"%s\"", D->reference_field->field);
   return D->reference_field->field;

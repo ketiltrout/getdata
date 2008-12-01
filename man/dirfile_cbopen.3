@@ -20,7 +20,7 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH dirfile_cbopen 3 "27 November 2008" "Version 0.5.0" "GETDATA"
+.TH dirfile_cbopen 3 "30 November 2008" "Version 0.5.0" "GETDATA"
 .SH NAME
 dirfile_cbopen dirfile_open \(em open or create a dirfile
 .SH SYNOPSIS
@@ -293,7 +293,8 @@ The first bit of a BIT field was out-of-range.
 The last bit of a BIT field was out-of-range.
 .TP
 .B GD_E_FORMAT_CHARACTER
-An invalid character was found in the line.
+An invalid character was found in the line, or a character escape sequence was
+malformed.
 .TP
 .B GD_E_FORMAT_DUPLICATE
 The specified field name already exists.

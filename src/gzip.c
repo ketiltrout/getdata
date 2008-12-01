@@ -44,15 +44,10 @@
 /* The zlib encoding scheme uses edata as a gzFile object.  If a file is
  * open, fp = 0 otherwise fp = -1. */
 
-int _GD_GzipOpen(struct _gd_raw_file* file, const char* base,
-    int mode __gd_unused, int creat __gd_unused)
+int _GD_GzipOpen(struct _gd_raw_file* file, int mode __gd_unused,
+    int creat __gd_unused)
 {
-  dtrace("%p, \"%s\", <unused>, <unused>", file, base);
-
-  if (GD_SetEncodedName(file, base, 0)) {
-    dreturn("%i", -1);
-    return -1;
-  }
+  dtrace("%p, <unused>, <unused>", file);
 
   file->edata = gzopen(file->name, "rb" /* writing not supported */);
 
@@ -111,17 +106,11 @@ int _GD_GzipClose(struct _gd_raw_file *file)
   return ret;
 }
 
-off64_t _GD_GzipSize(struct _gd_raw_file *file, const char *base,
-    gd_type_t data_type)
+off64_t _GD_GzipSize(struct _gd_raw_file *file, gd_type_t data_type)
 {
   uint32_t size = 0;
 
-  dtrace("%p, \"%s\", %x", file, base, data_type);
-
-  if (GD_SetEncodedName(file, base, 0)) {
-    dreturn("%i", -1);
-    return -1;
-  }
+  dtrace("%p, %x", file, data_type);
 
   int fd = open(file->name, O_RDONLY);
   if (fd < 0) {

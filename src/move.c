@@ -27,7 +27,8 @@
 #endif
 
 int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned int encoding,
-    unsigned int byte_sex, off64_t offset, int finalise)
+    unsigned int byte_sex, off64_t offset, int finalise, int new_fragment,
+    char* new_filebase)
 {
   const struct encoding_t* enc_in = ef + E->e->file[0].encoding;
   const struct encoding_t* enc_out;
@@ -37,8 +38,11 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned int encoding,
   int i;
   void *buffer;
 
-  dtrace("%p, %p, %u, %u, %lli, %i", D, E, encoding, byte_sex,
-      (long long)offset, finalise);
+  dtrace("%p, %p, %u, %u, %lli, %i, %i", D, E, encoding, byte_sex,
+      (long long)offset, finalise, new_fragment);
+
+  if (new_fragment == -1)
+    new_fragment = E->fragment_index;
 
   offset -= D->fragment[E->fragment_index].frame_offset;
 
@@ -91,8 +95,10 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned int encoding,
   }
 
   /* check data protection */
-  if (D->fragment[E->fragment_index].protection & GD_PROTECT_DATA) {
-    _GD_SetError(D, GD_E_PROTECTED, GD_E_PROTECTED_FORMAT, NULL, 0,
+  if (D->fragment[E->fragment_index].protection & GD_PROTECT_DATA ||
+      D->fragment[new_fragment].protection & GD_PROTECT_DATA)
+  {
+    _GD_SetError(D, GD_E_PROTECTED, GD_E_PROTECTED_DATA, NULL, 0,
         D->fragment[E->fragment_index].cname);
     dreturn("%i", -1);
     return -1;
@@ -101,21 +107,36 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned int encoding,
   /* Create the output file and open it */
   E->e->file[1].encoding = subencoding;
   if (subencoding != E->e->file[0].encoding) {
-    if ((*enc_out->open)(E->e->file + 1, E->e->filebase, GD_RDWR, 1)) {
+    if (_GD_SetEncodedName(D, E->e->file + 1, new_filebase, 0)) {
+      dreturn("%i", -1);
+      return -1;
+    }
+
+    if ((*enc_out->open)(E->e->file + 1, GD_RDWR, 1)) {
       _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[1].name, errno, NULL);
       dreturn("%i", -1);
       return -1;
     }
-  } else if ((*enc_in->temp)(E->e->file, GD_TEMP_OPEN)) {
-    _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[1].name, errno, NULL);
+  } else {
+    if (_GD_SetEncodedName(D, E->e->file + 1, new_filebase, 1)) {
+      dreturn("%i", -1);
+      return -1;
+    }
+
+    if ((*enc_in->temp)(E->e->file, GD_TEMP_OPEN)) {
+      _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[1].name, errno, NULL);
+      dreturn("%i", -1);
+      return -1;
+    }
+  }
+
+  /* Open the input file, if necessary */
+  if (_GD_SetEncodedName(D, E->e->file, E->e->filebase, 0)) {
     dreturn("%i", -1);
     return -1;
   }
 
-  /* Open the input file, if necessary */
-  if (E->e->file[0].fp == -1 && (*enc_in->open)(E->e->file, E->e->filebase, 0,
-        0))
-  {
+  if (E->e->file[0].fp == -1 && (*enc_in->open)(E->e->file, 0, 0)) {
     _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[0].name, errno, NULL);
     dreturn("%i", -1);
     return -1;
@@ -192,9 +213,11 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned int encoding,
   /* Finalise the conversion: on error delete the temporary file, otherwise
    * copy it over top of the new one. */
   if (finalise)
-    if ((*enc_out->temp)(E->e->file, (D->error) ? GD_TEMP_DESTROY :
-          GD_TEMP_MOVE))
+    if ((*enc_out->temp)(E->e->file,
+          (D->error) ? GD_TEMP_DESTROY : GD_TEMP_MOVE))
+    {
       _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[0].name, errno, NULL);
+    }
 
   dreturn("%i", (D->error) ? -1 : 0);
   return (D->error) ? -1 : 0;
@@ -204,6 +227,7 @@ int dirfile_move(DIRFILE* D, const char* field_code, int new_fragment,
     int move_data)
 {
   gd_entry_t *E;
+  char *new_filebase;
 
   dtrace("%p, \"%s\", %i, %i", D, field_code, new_fragment, move_data);
 
@@ -226,10 +250,7 @@ int dirfile_move(DIRFILE* D, const char* field_code, int new_fragment,
     return -1;
   }
 
-  if (D->fragment[new_fragment].encoding != GD_UNENCODED &&
-      D->fragment[new_fragment].encoding != GD_TEXT_ENCODED &&
-      D->fragment[new_fragment].encoding != GD_SLIM_ENCODED)
-  {
+  if (!_GD_EncodingUnderstood(D->fragment[new_fragment].encoding)) {
     _GD_SetError(D, GD_E_UNKNOWN_ENCODING, 0, NULL, 0, NULL);
     dreturn("%i", -1);
     return -1;
@@ -250,6 +271,16 @@ int dirfile_move(DIRFILE* D, const char* field_code, int new_fragment,
     return 0;
   }
 
+  /* check metadata protection */
+  if (D->fragment[E->fragment_index].protection & GD_PROTECT_FORMAT ||
+      D->fragment[new_fragment].protection & GD_PROTECT_FORMAT)
+  {
+    _GD_SetError(D, GD_E_PROTECTED, GD_E_PROTECTED_FORMAT, NULL, 0,
+        D->fragment[E->fragment_index].cname);
+    dreturn("%i", -1);
+    return -1;
+  }
+
   if (move_data && E->field_type == GD_RAW_ENTRY &&
       (D->fragment[E->fragment_index].encoding !=
        D->fragment[new_fragment].encoding ||
@@ -258,9 +289,23 @@ int dirfile_move(DIRFILE* D, const char* field_code, int new_fragment,
        D->fragment[E->fragment_index].frame_offset !=
        D->fragment[new_fragment].frame_offset))
   {
+    new_filebase = malloc(FILENAME_MAX);
+    if (new_filebase == NULL) {
+      _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+      dreturn("%i", -1);
+      return -1;
+    }
+
+    if (D->fragment[new_fragment].sname)
+      snprintf(new_filebase, FILENAME_MAX, "%s/%s/%s", D->name,
+          D->fragment[new_fragment].sname, E->field);
+    else
+      snprintf(new_filebase, FILENAME_MAX, "%s/%s", D->name, E->field);
+
     if (_GD_MogrifyFile(D, E, D->fragment[new_fragment].encoding,
           D->fragment[new_fragment].byte_sex,
-          D->fragment[new_fragment].frame_offset, 1))
+          D->fragment[new_fragment].frame_offset, 1, new_fragment,
+          new_filebase))
     {
       dreturn("%i", -1);
       return -1;

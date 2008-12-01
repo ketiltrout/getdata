@@ -31,11 +31,11 @@
 #endif
 
 #ifdef USE_MODULES
-#define _GD_SlimOpen libgetdatagzip_LTX_GD_SlimOpen
-#define _GD_SlimSeek libgetdatagzip_LTX_GD_SlimSeek
-#define _GD_SlimRead libgetdatagzip_LTX_GD_SlimRead
-#define _GD_SlimClose libgetdatagzip_LTX_GD_SlimClose
-#define _GD_SlimSize libgetdatagzip_LTX_GD_SlimSize
+#define _GD_SlimOpen libgetdataslim_LTX_GD_SlimOpen
+#define _GD_SlimSeek libgetdataslim_LTX_GD_SlimSeek
+#define _GD_SlimRead libgetdataslim_LTX_GD_SlimRead
+#define _GD_SlimClose libgetdataslim_LTX_GD_SlimClose
+#define _GD_SlimSize libgetdataslim_LTX_GD_SlimSize
 #endif
 
 /* The slim encoding scheme uses edata as a slimfile pointer.  If a file is

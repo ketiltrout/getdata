@@ -17,7 +17,7 @@ int main(void)
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
   const char* data = __TEST__ "dirfile/data";
-  const char* gzipdata = __TEST__ "dirfile/data.bz2";
+  const char* bzip2data = __TEST__ "dirfile/data.bz2";
   const char* format_data = "data RAW UINT16 8\n";
   uint16_t c[8];
   char command[4096];
@@ -40,7 +40,8 @@ int main(void)
 
   /* compress */
   snprintf(command, 4096, "%s -f %s > /dev/null", BZIP2, data);
-  system(command);
+  if (system(command))
+    return 1;
 
 #ifdef USE_BZIP2
   DIRFILE* D = dirfile_open(filedir, GD_RDONLY | GD_VERBOSE);
@@ -52,7 +53,7 @@ int main(void)
 
   dirfile_close(D);
 
-  unlink(gzipdata);
+  unlink(bzip2data);
   unlink(format);
   rmdir(filedir);
 

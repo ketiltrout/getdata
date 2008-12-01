@@ -117,20 +117,25 @@ static void _GD_GetScalar(DIRFILE* D, gd_entry_t* E, const char* scalar,
       _GD_SetError(D, GD_E_BAD_SCALAR, GD_E_SCALAR_TYPE, E->field, 0,
           E->e->scalar[0]);
     else {
-      if (type == GD_IEEE754)
-        _GD_DoConst(D, C, GD_FLOAT64, data);
-      else if (type == GD_SIGNED) {
-        _GD_DoConst(D, C, GD_INT32, &i32);
-        *(int*)data = (unsigned int)i32;
-      } else {
-        _GD_DoConst(D, C, GD_UINT32, &u32);
-        *(unsigned int*)data = (unsigned int)u32;
-      }
+      void *ptr = realloc(C->e->client, (C->e->n_client + 1) *
+          sizeof(gd_entry_t*));
+      if (ptr == NULL)
+        _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+      else {
+        if (type == GD_IEEE754)
+          _GD_DoConst(D, C, GD_FLOAT64, data);
+        else if (type == GD_SIGNED) {
+          _GD_DoConst(D, C, GD_INT32, &i32);
+          *(int*)data = (unsigned int)i32;
+        } else {
+          _GD_DoConst(D, C, GD_UINT32, &u32);
+          *(unsigned int*)data = (unsigned int)u32;
+        }
 
-      if ((D->flags & GD_ACCMODE) == GD_RDWR) {
-        C->e->client = realloc(C->e->client, (C->e->n_client + 1) *
-            sizeof(gd_entry_t*));
-        C->e->client[C->e->n_client++] = E;
+        if ((D->flags & GD_ACCMODE) == GD_RDWR) {
+          C->e->client = ptr;
+          C->e->client[C->e->n_client++] = E;
+        }
       }
     }
   }

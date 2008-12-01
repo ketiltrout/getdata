@@ -103,8 +103,9 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
               GD_EF_READ | GD_EF_WRITE | GD_EF_SYNC | GD_EF_UNLINK |
               GD_EF_TEMP))
           ; /* error already set */
-        else if (E->e->file[0].fp == -1 && (*enc->open)(E->e->file,
-              E->e->filebase, 0, 0))
+        else if (_GD_SetEncodedName(D, E->e->file, E->e->filebase, 0))
+          ; /* error already set */
+        else if (E->e->file[0].fp == -1 && (*enc->open)(E->e->file, 0, 0))
           _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[0].name, errno, NULL);
         else if ((*enc->seek)(E->e->file, 0, E->data_type, 1) == -1)
           _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[0].name, errno, NULL);
@@ -113,7 +114,9 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
           break;
 
         /* Create a temporary file and open it */
-        if ((*enc->temp)(E->e->file, GD_TEMP_OPEN))
+        if (_GD_SetEncodedName(D, E->e->file + 1, E->e->filebase, 1))
+          ; /* error already set */
+        else if ((*enc->temp)(E->e->file, GD_TEMP_OPEN))
           _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[1].name, errno, NULL);
         else if ((*enc->seek)(E->e->file + 1, 0, E->data_type, 1) == -1)
           _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[1].name, errno, NULL);

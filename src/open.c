@@ -161,18 +161,17 @@ static gd_entry_t* _GD_ParseRaw(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
   E->e->filebase = malloc(FILENAME_MAX);
   if (E->e->filebase == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-    E->field = NULL;
     _GD_FreeE(E, 1);
     dreturn("%p", NULL);
     return NULL;
   }
 
   if (D->fragment[me].sname)
-    snprintf((char*)E->e->filebase, FILENAME_MAX, "%s/%s/%s", D->name,
+    snprintf(E->e->filebase, FILENAME_MAX, "%s/%s/%s", D->name,
         D->fragment[me].sname, in_cols[0]);
   else
-    snprintf((char*)E->e->filebase, FILENAME_MAX, "%s/%s", D->name,
-        in_cols[0]);
+    snprintf(E->e->filebase, FILENAME_MAX, "%s/%s", D->name, in_cols[0]);
+
   E->data_type = _GD_RawType(in_cols[2]);
   E->e->size = GD_SIZE(E->data_type);
 
@@ -728,11 +727,18 @@ gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, const char** in_cols,
     int standards, int creat, int pedantic, int insert)
 {
   gd_entry_t* E = NULL;
+  void *ptr;
 
   dtrace("%p, %i, %p, %p, \"%s\", %i, %u, %i, %i, %i", D, n_cols, in_cols, P,
       format_file, linenum, me, standards, creat, pedantic);
 
-  D->entry = realloc(D->entry, (D->n_entries + 1) * sizeof(gd_entry_t*));
+  ptr = realloc(D->entry, (D->n_entries + 1) * sizeof(gd_entry_t*));
+  if (ptr == NULL) {
+    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    dreturn ("%p", NULL);
+    return NULL;
+  }
+  D->entry = ptr;
 
   if (n_cols < 2)
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_TOK, format_file, linenum,
@@ -755,9 +761,12 @@ gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, const char** in_cols,
       else if (D->fragment[me].encoding == GD_ENC_UNSUPPORTED)
         /* If the encoding scheme is unsupported, we can't add the field */
         _GD_SetError(D, GD_E_UNSUPPORTED, 0, NULL, 0, NULL);
-      else if (_GD_Supports(D, E, GD_EF_TOUCH) &&
-          (*ef[E->e->file[0].encoding].touch)(E->e->file, E->e->filebase))
-          _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[0].name, errno, NULL);
+      else if (!_GD_Supports(D, E, GD_EF_TOUCH))
+        ; /* error already set */
+      else if (_GD_SetEncodedName(D, E->e->file, E->e->filebase, 0))
+        ; /* error already set */
+      else if ((*ef[E->e->file[0].encoding].touch)(E->e->file))
+        _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[0].name, errno, NULL);
     }
 
     /* Is this the first raw field ever defined? */
@@ -792,7 +801,7 @@ gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, const char** in_cols,
     E->fragment_index = me;
 
     /* Check for duplicate */
-    int u;
+    unsigned int u;
     const gd_entry_t* Q = _GD_FindField(D, E->field, &u);
 
     if (Q) {
@@ -802,16 +811,17 @@ gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, const char** in_cols,
       return NULL;
     } 
 
-    /* sort */
-    _GD_InsertSort(D, E, u);
-    D->n_entries++;
-
     /* Initialse the meta counts */
     if (P != NULL) {
       E->e->n_meta = -1;
       /* there is no need to sort this list */
-      P->e->meta_entry = realloc(P->e->meta_entry, (P->e->n_meta + 1) *
-          sizeof(gd_entry_t*));
+      ptr = realloc(P->e->meta_entry, (P->e->n_meta + 1) * sizeof(gd_entry_t*));
+      if (ptr == NULL) {
+        _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+        dreturn ("%p", NULL);
+        return NULL;
+      }
+      P->e->meta_entry = ptr;
       P->e->meta_entry[P->e->n_meta++] = E;
 
       D->n_meta++;
@@ -820,13 +830,18 @@ gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, const char** in_cols,
       else if (E->field_type == GD_STRING_ENTRY)
         P->e->n_meta_string++;
     }
+
+    /* sort */
+    _GD_InsertSort(D, E, u);
+    D->n_entries++;
   }
 
   dreturn("%p", (!insert || (E && E->field_type == GD_RAW_ENTRY)) ? E : NULL);
   return (!insert || (E && E->field_type == GD_RAW_ENTRY)) ? E : NULL;
 }
 
-/* _GD_Tokenise: Tokenise a line.  Returns n_cols. */
+/* _GD_Tokenise: Tokenise a line.  Returns n_cols.  This is a simple state
+ * machine. */
 #define ACC_MODE_NONE  0
 #define ACC_MODE_OCTAL 1
 #define ACC_MODE_HEX   2
@@ -1351,7 +1366,7 @@ static FILE* _GD_CreateDirfile(DIRFILE* D, const char* format_file,
 
 /* dirfile_cbopen: open (or, perhaps, create) and parse the specified dirfile
 */
-DIRFILE* dirfile_cbopen(const char* filedir, unsigned int flags,
+DIRFILE* dirfile_cbopen(const char* filedir, unsigned long flags,
     int (*sehandler)(const DIRFILE*, int, char*))
 {
   FILE *fp;
@@ -1361,7 +1376,7 @@ DIRFILE* dirfile_cbopen(const char* filedir, unsigned int flags,
   char format_file[FILENAME_MAX];
   int standards = DIRFILE_STANDARDS_VERSION;
 
-  dtrace("\"%s\", 0x%x, %p", filedir, flags, sehandler);
+  dtrace("\"%s\", 0x%lx, %p", filedir, flags, sehandler);
 
   _GD_InitialiseFramework();
 
@@ -1469,9 +1484,9 @@ DIRFILE* dirfile_cbopen(const char* filedir, unsigned int flags,
   return D;
 }
 
-DIRFILE* dirfile_open(const char* filedir, unsigned int flags)
+DIRFILE* dirfile_open(const char* filedir, unsigned long flags)
 {
-  dtrace("\"%s\", 0x%x", filedir, flags);
+  dtrace("\"%s\", 0x%lx", filedir, flags);
 
   DIRFILE* D = dirfile_cbopen(filedir, flags, NULL);
 

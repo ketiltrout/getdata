@@ -34,15 +34,9 @@
 /* The ASCII encoding uses file->fp as to indicate the current line and
  * file->edata for the stream pointer */
 
-int _GD_AsciiOpen(struct _gd_raw_file* file, const char* base, int mode,
-    int creat)
+int _GD_AsciiOpen(struct _gd_raw_file* file, int mode, int creat)
 {
-  dtrace("%p, \"%s\", %i, %i", file, base, mode, creat);
-
-  if (GD_SetEncodedName(file, base, 0)) {
-    dreturn("%i", -1);
-    return -1;
-  }
+  dtrace("%p, %i, %i", file, mode, creat);
 
   int fp = open(file->name, ((mode == GD_RDWR) ? O_RDWR : O_RDONLY) |
       (creat ? O_CREAT : 0), 0666);
@@ -272,17 +266,12 @@ int _GD_AsciiClose(struct _gd_raw_file* file)
   return 1;
 }
 
-off64_t _GD_AsciiSize(struct _gd_raw_file* file, const char *base,
+off64_t _GD_AsciiSize(struct _gd_raw_file* file,
     gd_type_t data_type __gd_unused)
 {
   FILE* stream;
 
-  dtrace("%p, \"%s\", <unused>", file, base);
-
-  if (GD_SetEncodedName(file, base, 0)) {
-    dreturn("%i", -1);
-    return -1;
-  }
+  dtrace("%p, <unused>", file);
 
   off64_t n = 0;
 
@@ -308,15 +297,11 @@ int _GD_AsciiTemp(struct _gd_raw_file *file, int mode)
   dtrace("%p, %i", file, mode);
 
   int move_error = 0;
+  int fp;
 
   switch(mode) {
     case GD_TEMP_OPEN:
-      if (GD_SetEncodedName(file + 1, file->name, 1)) {
-        dreturn("%i", -1);
-        return -1;
-      }
-
-      int fp = mkstemp(file[1].name);
+      fp = mkstemp(file[1].name);
 
       file->edata = fdopen(fp, "r+");
 

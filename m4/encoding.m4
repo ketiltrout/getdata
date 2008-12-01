@@ -43,7 +43,7 @@ dnl search for library
   saved_ldflags=$LDFLAGS
   saved_libs=$LIBS
   if test "x$[]$1_prefix" != "x"; then
-    LDFLAGS="$LDFLAGS -L$1_prefix/lib"
+    LDFLAGS="$LDFLAGS -L$[]$1_prefix/lib"
   fi
   AC_CHECK_LIB([$2],[$3],[have_this_lib=yes]
   AC_DEFINE(AS_TR_CPP([HAVE_LIB$2]), 1,

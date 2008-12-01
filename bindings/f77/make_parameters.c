@@ -44,6 +44,7 @@ int main(void)
 {
   FILE* stream;
   int i;
+  char c;
 
   stream = fopen("make_parameters.sed.in", "w");
   if (stream == NULL) {
@@ -52,6 +53,7 @@ int main(void)
   }
 
   for (i = 0; i < 2; ++i) {
+    c = (i == 0) ? 'C' : '!';
     if (i == 0)
       fprintf(stream, "s/@PARAMETERS@/\\\nC     Error codes\\\n");
     else
@@ -82,31 +84,34 @@ int main(void)
     parameter(stream, "GD_E_BAD_SCALAR",     "GD_EBS", GD_E_BAD_SCALAR,     i);
     parameter(stream, "GD_E_BAD_REFERENCE",  "GD_EBR", GD_E_BAD_REFERENCE,  i);
     parameter(stream, "GD_E_PROTECTED",      "GD_EPT", GD_E_PROTECTED,      i);
+    parameter(stream, "GD_E_DELETE",         "GD_EDL", GD_E_DELETE,         i);
+    parameter(stream, "GD_E_BAD_ENDIANNESS", "GD_EEN", GD_E_BAD_ENDIANNESS, i);
+    parameter(stream, "GD_E_CALLBACK",       "GD_ECB", GD_E_CALLBACK,       i);
 
-    if (i == 0)
-      fprintf(stream, "\\\nC Open flags\\\n");
-    else
-      fprintf(stream, "\\\n! Open flags\\\n");
+    fprintf(stream, "\\\n%c Open flags\\\n", c);
 
     parameter(stream, "GD_RDONLY",           "GD_RO",  GD_RDONLY,           i);
     parameter(stream, "GD_RDWR",             "GD_RW",  GD_RDWR,             i);
+    parameter(stream, "GD_FORCE_ENDIAN",     "GD_FE",  GD_FORCE_ENDIAN,     i);
+    parameter(stream, "GD_BIG_ENDIAN",       "GD_BE",  GD_BIG_ENDIAN,       i);
+    parameter(stream, "GD_LITTLE_ENDIAN",    "GD_LE",  GD_LITTLE_ENDIAN,    i);
     parameter(stream, "GD_CREAT",            "GD_CR",  GD_CREAT,            i);
     parameter(stream, "GD_EXCL",             "GD_EX",  GD_EXCL,             i);
     parameter(stream, "GD_TRUNC",            "GD_TR",  GD_TRUNC,            i);
-    parameter(stream, "GD_BIG_ENDIAN",       "GD_BE",  GD_BIG_ENDIAN,       i);
-    parameter(stream, "GD_LITTLE_ENDIAN",    "GD_LE",  GD_LITTLE_ENDIAN,    i);
-    parameter(stream, "GD_FORCE_ENCODDED",   "GD_FC",  GD_FORCE_ENDIAN,     i);
-    parameter(stream, "GD_FORCE_ENDIAN",     "GD_FE",  GD_FORCE_ENCODING,   i);
     parameter(stream, "GD_PEDANTIC",         "GD_PE",  GD_PEDANTIC,         i);
+    parameter(stream, "GD_FORCE_ENCODING",   "GD_FC",  GD_FORCE_ENCODING,   i);
+    parameter(stream, "GD_VERBOSE",          "GD_VB",  GD_VERBOSE,          i);
+    parameter(stream, "GD_IGNORE_DUPS",      "GD_ID",  GD_IGNORE_DUPS,      i);
+    parameter(stream, "GD_IGNORE_REFS",      "GD_IR",  GD_IGNORE_REFS,      i);
+
     parameter(stream, "GD_AUTO_ENCODED",     "GD_EA",  GD_AUTO_ENCODED,     i);
     parameter(stream, "GD_UNENCODED",        "GD_EN",  GD_UNENCODED,        i);
     parameter(stream, "GD_TEXT_ENCODED",     "GD_ET",  GD_TEXT_ENCODED,     i);
     parameter(stream, "GD_SLIM_ENCODED",     "GD_ES",  GD_SLIM_ENCODED,     i);
+    parameter(stream, "GD_GZIP_ENCODED",     "GD_EG",  GD_GZIP_ENCODED,     i);
+    parameter(stream, "GD_BZIP2_ENCODED",    "GD_EB",  GD_BZIP2_ENCODED,    i);
 
-    if (i == 0)
-      fprintf(stream, "\\\nC Field types\\\n");
-    else
-      fprintf(stream, "\\\n! Field types\\\n");
+    fprintf(stream, "\\\n%c Field types\\\n", c);
 
     parameter(stream, "GD_NO_ENTRY",         "GD_NOE", GD_NO_ENTRY,         i);
     parameter(stream, "GD_RAW_ENTRY",        "GD_RWE", GD_RAW_ENTRY,        i);
@@ -119,18 +124,11 @@ int main(void)
     parameter(stream, "GD_CONST_ENTRY",      "GD_COE", GD_CONST_ENTRY,      i);
     parameter(stream, "GD_STRING_ENTRY",     "GD_STE", GD_STRING_ENTRY,     i);
 
-    if (i == 0)
-      fprintf(stream,
-          "\\\nC Data types -- the unsigned types won't work when passed as\\\n"
-          "C               a return type, but we keep them anyways, since\\\n"
-          "C               they might appear as a result of calling "
-          "GDFERW\\\n");
-    else
-      fprintf(stream,
-          "\\\n! Data types -- the unsigned types won't work when passed as\\\n"
-          "!               a return type, but we keep them anyways, since\\\n"
-          "!               they might appear as a result of calling "
-          "fget_entry\\\n");
+    fprintf(stream,
+        "\\\n%c Data types -- the unsigned types won't work when passed as\\\n"
+        "%c               a return type, but we keep them anyways, since\\\n"
+        "%c               they might appear as a result of calling %s\\\n",
+        c, c, c, (i == 0) ? "GDFERW" : "fget_entry");
 
     parameter(stream, "GD_NULL",             "GD_NUL", GD_NULL,             i);
     parameter(stream, "GD_UINT8",            "GD_U8",  GD_UINT8,            i);

@@ -1,3 +1,39 @@
+2008-12-01   D. V. Wiebe <getdata@ketiltrout.net>  svn:253
+	* src/ascii.c src/bzip.c src/encoding.c src/gzip.c src/raw.c: Initialise
+	filename in the library directly instead of passing that off on the encoding
+	framework.
+
+	* man/dirfile_move.3: Added.
+
+	* src/getdata.h.in: Add GD_IGNORE_REFS.
+	* src/include.c (dirfile_include): Handle both explicit and implicit
+	reference field declarations, along with GD_IGNORE_REFS.
+	* test/include_ignore.c test/include_ref.c test/include_auto.c: Added.
+	* man/dirfile_include.3: Update.
+
+	* test/global_ref_empty.c test/global_ref_set.c test/global_ref.c: Added.
+	* man/dirfile_reference.3: Added.
+
+	* add.c (_GD_Add): Don't modify the dirfile until we're sure to succeed.
+
+	* src/add.c (_GD_Add) src/entry.c (_GD_GetScalar) src/legacy.c
+	(_GD_GetDirfile GetFormat) src/open.c (_GD_ParseFieldSpec) src/globals.c
+	(dirfile_reference): Properly check realloc for error before use.
+
+	* src/slim.c src/encoding.c: Fix symbols for slim module.
+
+	* src/del.c (dirfile_delete): If the reference field is deleted, do
+	something sensible.
+
+	* src/open.c (dirfile_cbopen dirfile_open) src/include.c (dirfile_include):
+	Flags are long.
+
+	* m4/encoding.m4: Fix library check for extra prefix.
+
+	* src/common.c (_GD_FindField): index should be unsigned.
+
+	* bindings/f77/make_parameters.c README.f77: Update for new symbols.
+
 2008-11-28   D. V. Wiebe <getdata@ketiltrout.net>  svn:252
 	* man/dirfile_include.3: Updated for calback.
 	* man/dirfile_close.3: Updated for dirfile_discard.

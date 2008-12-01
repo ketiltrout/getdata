@@ -74,17 +74,20 @@ static void _GD_ByteSwapFragment(DIRFILE* D, unsigned int byte_sex,
 
         if (_GD_MogrifyFile(D, D->entry[i],
             D->fragment[D->entry[i]->fragment_index].encoding, byte_sex,
-            D->fragment[D->entry[i]->fragment_index].frame_offset, 0))
+            D->fragment[D->entry[i]->fragment_index].frame_offset, 0, -1,
+            D->entry[i]->e->filebase))
           break;
       }
 
     /* If successful, move the temporary file over the old file, otherwise
      * remove the temporary files */
     for (i = 0; i < n_raw; ++i)
-      if ((*ef[raw_entry[i]->e->file[0].encoding].temp)
-          (raw_entry[i]->e->file, (D->error) ? GD_TEMP_DESTROY : GD_TEMP_MOVE))
+      if ((*ef[raw_entry[i]->e->file[0].encoding].temp)(raw_entry[i]->e->file,
+            (D->error) ? GD_TEMP_DESTROY : GD_TEMP_MOVE))
+      {
         _GD_SetError(D, GD_E_RAW_IO, 0, raw_entry[i]->e->file[0].name,
             errno, NULL);
+      }
 
     free(raw_entry);
 

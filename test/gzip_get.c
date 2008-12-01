@@ -40,7 +40,8 @@ int main(void)
 
   /* compress */
   snprintf(command, 4096, "%s -f %s > /dev/null", GZIP, data);
-  system(command);
+  if (system(command))
+    return 1;
 
 #ifdef USE_GZIP
   DIRFILE* D = dirfile_open(filedir, GD_RDONLY | GD_VERBOSE);

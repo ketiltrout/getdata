@@ -90,7 +90,10 @@ static size_t _GD_DoRawOut(DIRFILE *D, gd_entry_t *E,
   if (E->e->file[0].fp < 0) {
     /* open file for reading / writing if not already opened */
 
-    if ((*ef[E->e->file[0].encoding].open)(E->e->file, E->e->filebase,
+    if (_GD_SetEncodedName(D, E->e->file, E->e->filebase, 0)) {
+      dreturn("%i", 0);
+      return 0;
+    } else if ((*ef[E->e->file[0].encoding].open)(E->e->file,
           D->flags & GD_ACCMODE, 1))
     {
       _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[0].name, errno, NULL);

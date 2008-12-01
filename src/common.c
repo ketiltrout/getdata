@@ -88,11 +88,11 @@ gd_type_t _GD_LegacyType(char c)
 }
 
 /* Binary search to find the field */
-gd_entry_t* _GD_FindField(DIRFILE* D, const char* field_code, int *index)
+gd_entry_t* _GD_FindField(DIRFILE* D, const char* field_code,
+    unsigned int *index)
 {
-  int i, c;
-  int l = 0;
-  int u = D->n_entries;
+  int c;
+  unsigned int i, l = 0, u = D->n_entries;
 
   dtrace("%p, \"%s\", %p", D, field_code, index);
 

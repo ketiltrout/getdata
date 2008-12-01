@@ -185,7 +185,10 @@ static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *E,
       if (!_GD_Supports(D, E, GD_EF_OPEN | GD_EF_SEEK | GD_EF_READ)) {
         dreturn("%i", 0);
         return 0;
-      } else if ((*ef[E->e->file[0].encoding].open)(E->e->file, E->e->filebase,
+      } else if (_GD_SetEncodedName(D, E->e->file, E->e->filebase, 0)) {
+        dreturn("%i", 0);
+        return 0;
+      } else if ((*ef[E->e->file[0].encoding].open)(E->e->file,
             D->flags & GD_ACCMODE, 0))
       {
         _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[0].name, errno, NULL);

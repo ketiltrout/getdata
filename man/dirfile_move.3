@@ -1,0 +1,122 @@
+.\" dirfile_move.3.  The dirfile_move man page.
+.\"
+.\" (C) 2008 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" This program is free software; you can redistribute it and/or modify
+.\" it under the terms of the GNU General Public License as published by
+.\" the Free Software Foundation; either version 2 of the License, or
+.\" (at your option) any later version.
+.\"
+.\" GetData is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+.\" General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public License along
+.\" with GetData; if not, write to the Free Software Foundation, Inc.,
+.\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+.\"
+.TH dirfile_move 3 "1 December 2008" "Version 0.5.0" "GETDATA"
+.SH NAME
+dirfile_move \(em move a dirfile field between format file fragments
+.SH SYNOPSIS
+.B #include <getdata.h>
+.HP
+.nh
+.ad l
+.BI "const char *dirfile_move(DIRFILE *" dirfile ", const char"
+.BI * field_code ", int " new_fragment ", int " move_data );
+.hy
+.ad n
+.SH DESCRIPTION
+The
+.BR dirfile_move ()
+function transfers the field
+.I field_code
+defined in the dirfile specified by
+.IR dirfile
+from it's current format file fragment to the fragment index by
+.IR new_fragment .
+If the field is already defined in the fragment index by
+.IR new_fragment ,
+this function does nothing.
+
+If the flag
+.I move_data
+is non-zero, and
+.I field_code
+specifies a
+.B RAW
+field, the binary file associated with the field will be translated to account
+for the possibly different encoding, endianness, and frame offset of the
+new format file fragment.  It will also be moved to a new directory, if
+necessary.  If
+.I move_data
+is zero, no changes will be made to the binary file.  If
+.I field_code
+specifies a field of type other than
+.BR RAW ,
+the
+.I move_data
+flag is ignored.
+
+.SH RETURN VALUE
+On success,
+.BR dirfile_move ()
+returns zero.  On error, -1 is returned and the dirfile error is set to a
+non-zero error value.  Possible error values are:
+.TP 8
+.B GD_E_ACCMODE
+The specified dirfile was opened read-only.
+.TP
+.B GD_E_ALLOC
+The library was unable to allocate memory.
+.TP
+.B GD_E_BAD_CODE
+The field specified by
+.I field_code
+was not found.
+.TP
+.B GD_E_BAD_DIRFILE
+The supplied dirfile was invalid.
+.TP
+.B GD_E_BAD_INDEX
+The
+.I new_fragment
+parameter did not index a valid format file fragment.
+.TP
+.B GD_E_PROTECTED
+The metadata of the source or destination format file fragments was protected
+from change, or the binary data of the source or destination fragments was
+protected from change, and binary file translation was requested.
+.TP
+.B GD_E_RAW_IO
+An I/O error occurred while attempting to translate a binary file.
+.TP
+.B GD_E_UNKNOWN_ENCODING
+The encoding scheme of the source or destination fragment is unknown.
+.TP
+.B GD_E_UNSUPPORTED
+The encoding scheme of the source or destination fragment does not suport
+binary file translation.
+.P
+The dirfile error may be retrieved by calling
+.BR get_error (3).
+A descriptive error string for the last error encountered can be obtained from
+a call to
+.BR get_error_string (3).
+.SH NOTES
+A binary file tranlsation occurs out-of-place.  As a result, sufficient space
+must be present on the filesystem for both the binary file before translation
+and the binary file after translation.
+.SH SEE ALSO
+.BR dirfile_metaflush (3),
+.BR dirfile_open (3),
+.BR get_error (3),
+.BR get_error_string (3),
+.BR dirfile (5),
+.BR dirfile-format (5)

@@ -130,10 +130,11 @@ GET_TESTS=get64 get_bad_code get_bit get_char get_endian8 get_endian16 \
 					get_phase get_recurse get_sf get_ss get_type get_uint16 get_uint32 \
 					get_uint64
 
-GLOBAL_TESTS=global_name
+GLOBAL_TESTS=global_name global_ref global_ref_empty global_ref_set
 
-INCLUDE_TESTS=include include_accmode include_creat include_index \
-							include_invalid include_nonexistent
+INCLUDE_TESTS=include include_accmode include_auto include_creat \
+							include_ignore include_index include_invalid include_nonexistent \
+							include_ref
 
 MADD_TESTS=madd madd_bit madd_bit_invalid madd_lincom madd_lincom_invalid \
 					 madd_linterp madd_linterp_invalid madd_multiply \

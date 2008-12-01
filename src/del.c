@@ -171,8 +171,8 @@ static void _GD_DeReference(DIRFILE* D, gd_entry_t* E, const gd_entry_t* C,
 
 int dirfile_delete(DIRFILE* D, const char* field_code, int flags)
 {
-  int index;
-  int first, last = 0;
+  unsigned int index;
+  unsigned int first, last = 0;
   const int len = strlen(field_code);
   int n_del, i;
   unsigned int j;
@@ -235,7 +235,7 @@ int dirfile_delete(DIRFILE* D, const char* field_code, int flags)
       else
         break;
 
-    while (last < (int)D->n_entries - 1)
+    while (last < D->n_entries - 1)
       if (D->entry[last + 1]->field[len] == '/' &&
           strncmp(D->entry[last + 1]->field, field_code, len) == 0)
         last++;
@@ -291,7 +291,13 @@ int dirfile_delete(DIRFILE* D, const char* field_code, int flags)
       return -1;
     }
 
-    if ((*ef[E->e->file[0].encoding].unlink)(E->e->file, E->e->filebase)) {
+    if (_GD_SetEncodedName(D, E->e->file, E->e->filebase, 0)) {
+      free(del_list);
+      dreturn("%zi", -1);
+      return -1;
+    }
+
+    if ((*ef[E->e->file[0].encoding].unlink)(E->e->file)) {
       _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[0].name, errno, NULL);
       free(del_list);
       dreturn("%zi", -1);
@@ -306,7 +312,74 @@ int dirfile_delete(DIRFILE* D, const char* field_code, int flags)
     }
   }
 
-  /* Everything from now on must not fail */
+  /* Fix up reference fields */
+  char** new_ref = NULL;
+  gd_entry_t* reference = NULL;
+
+  if (E->field_type == GD_RAW_ENTRY) {
+    new_ref = malloc(sizeof(char*) * D->n_fragment);
+    if (new_ref == NULL) {
+      free(del_list);
+      _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+      dreturn("%zi", -1);
+      return -1;
+    }
+    memset(new_ref, 0, sizeof(char*) * D->n_fragment);
+
+    for (i = 0; i < D->n_fragment; ++i)
+      if (D->fragment[i].ref_name != NULL &&
+          strcmp(D->fragment[i].ref_name, E->field) == 0)
+      {
+        /* Flag for replacement */
+        new_ref[i] = (char*)E;
+        /* Search for a replacement */
+        for (j = 0; j < D->n_entries; ++j)
+          if (j != index && D->entry[j]->field_type == GD_RAW_ENTRY) {
+            /* Is this field in scope? */
+            int in_scope = 0;
+            int f;
+            for (f = D->entry[j]->fragment_index; f != -1;
+                f = D->fragment[f].parent)
+              if (f == i) {
+                in_scope = 1;
+                break;
+              }
+
+            if (in_scope) {
+              new_ref[i] = strdup(D->entry[j]->field);
+              if (new_ref == NULL) {
+                for (f = 0; f < i; ++f)
+                  free(new_ref[f]);
+                free(new_ref);
+                free(del_list);
+                _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+                dreturn("%zi", -1);
+                return -1;
+              }
+
+              if (i == 0)
+                reference = D->entry[j];
+
+              break;
+            }
+          }
+      }
+  }
+
+  /* Nothing from now on may fail */
+
+  /* Fix up reference fields */
+  if (reference != NULL)
+    D->reference_field = reference;
+
+  if (new_ref != NULL) {
+    for (i = 0; i < D->n_fragment; ++i)
+      if (new_ref[i] != NULL) {
+        free(D->fragment[i].ref_name);
+        D->fragment[i].ref_name = (new_ref[i] == (char*)E) ? NULL : new_ref[i];
+      }
+    free(new_ref);
+  }
 
   /* Clear clients and derived fields */
   for (j = 0; j < D->n_entries; ++j)
@@ -321,8 +394,8 @@ int dirfile_delete(DIRFILE* D, const char* field_code, int flags)
   /* Remove meta fields, if present */
   if (E->e->n_meta > 0) {
     /* Remove all meta fields -- there are no RAW fields here */
-    for (i = first; i <= last; ++i)
-      _GD_FreeE(D->entry[i], 1);
+    for (j = first; j <= last; ++j)
+      _GD_FreeE(D->entry[j], 1);
 
     memmove(D->entry + first, D->entry + last + 1,
         sizeof(gd_entry_t*) * (D->n_entries - last - 1));
@@ -333,12 +406,12 @@ int dirfile_delete(DIRFILE* D, const char* field_code, int flags)
   /* Remove the entry from the list -- we need not worry about the way we've
    * already modified D->entry, since E is guaranteed to be before the stuff
    * we've already removed */
-  if (D->entry[index]->field_type == GD_CONST_ENTRY)
+  if (E->field_type == GD_CONST_ENTRY)
     D->n_const--;
-  else if (D->entry[index]->field_type == GD_STRING_ENTRY)
+  else if (E->field_type == GD_STRING_ENTRY)
     D->n_string--;
 
-  _GD_FreeE(D->entry[index], 1);
+  _GD_FreeE(E, 1);
 
   memmove(D->entry + index, D->entry + index + 1,
       sizeof(gd_entry_t*) * (D->n_entries - index - 1));

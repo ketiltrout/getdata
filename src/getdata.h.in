@@ -198,28 +198,30 @@ typedef struct _gd_unified_entry gd_entry_t;
 typedef struct _GD_DIRFILE DIRFILE;
 
 /* dirfile_flags */
-#define GD_ACCMODE        0x0001 /* mask */
-#define GD_RDONLY         0x0000 /* open read only */
-#define GD_RDWR           0x0001 /* open read/write */
+#define GD_ACCMODE        0x00001 /* mask */
+#define GD_RDONLY         0x00000 /* open read only */
+#define GD_RDWR           0x00001 /* open read/write */
 
-#define GD_FORCE_ENDIAN   0x0002 /* override endianness */
-#define GD_BIG_ENDIAN     0x0004 /* assume big-endian raw data */
-#define GD_LITTLE_ENDIAN  0x0008 /* assume litte-endian raw data */
-#define GD_CREAT          0x0010 /* create the dirfile if it doesn't exist */
-#define GD_EXCL           0x0020 /* force creation: fail on existence */
-#define GD_TRUNC          0x0040 /* truncate dirfile (scary!) */
-#define GD_PEDANTIC       0x0080 /* be pedantic */
-#define GD_FORCE_ENCODING 0x0100 /* override encoding scheme */
-#define GD_VERBOSE        0x0200 /* be verbose */
-#define GD_IGNORE_DUPS    0x0400 /* ignore duplicate fields */
+#define GD_FORCE_ENDIAN   0x00002 /* override endianness */
+#define GD_BIG_ENDIAN     0x00004 /* assume big-endian raw data */
+#define GD_LITTLE_ENDIAN  0x00008 /* assume litte-endian raw data */
+#define GD_CREAT          0x00010 /* create the dirfile if it doesn't exist */
+#define GD_EXCL           0x00020 /* force creation: fail on existence */
+#define GD_TRUNC          0x00040 /* truncate dirfile (scary!) */
+#define GD_PEDANTIC       0x00080 /* be pedantic */
+#define GD_FORCE_ENCODING 0x00100 /* override encoding scheme */
+#define GD_VERBOSE        0x00200 /* be verbose */
+#define GD_IGNORE_DUPS    0x00400 /* ignore duplicate fields */
+#define GD_IGNORE_REFS    0x00800 /* ignore REFERENCE directives --
+                                     dirfile_include only */
 
-#define GD_ENCODING       0xF000 /* mask */
-#define GD_AUTO_ENCODED   0x0000 /* Encoding scheme unknown */
-#define GD_UNENCODED      0x1000 /* Dirfile is not encoded */
-#define GD_TEXT_ENCODED   0x2000 /* Dirfile is text encoded */
-#define GD_SLIM_ENCODED   0x3000 /* Dirfile is slimlib encoded */
-#define GD_GZIP_ENCODED   0x4000 /* Dirfile is gzip encoded */
-#define GD_BZIP2_ENCODED  0x5000 /* Dirfile is bzip2 encoded */
+#define GD_ENCODING       0x0F000 /* mask */
+#define GD_AUTO_ENCODED   0x00000 /* Encoding scheme unknown */
+#define GD_UNENCODED      0x01000 /* Dirfile is not encoded */
+#define GD_TEXT_ENCODED   0x02000 /* Dirfile is text encoded */
+#define GD_SLIM_ENCODED   0x03000 /* Dirfile is slimlib encoded */
+#define GD_GZIP_ENCODED   0x04000 /* Dirfile is gzip encoded */
+#define GD_BZIP2_ENCODED  0x05000 /* Dirfile is bzip2 encoded */
 
 /* delete flags */
 #define GD_DEL_META  0x1
@@ -399,7 +401,7 @@ __gd_nonnull((1,2));
 extern int dirfile_add_spec(DIRFILE* D, const char* line,
     int fragment_index) __gd_nonnull ((1,2));
 
-extern DIRFILE* dirfile_cbopen(const char* dirfilename, unsigned int flags,
+extern DIRFILE* dirfile_cbopen(const char* dirfilename, unsigned long flags,
     int (*sehandler)(const DIRFILE*, int, char*)) __gd_nonnull ((1));
 
 extern int dirfile_change(DIRFILE* D, const char* field_code,
@@ -428,7 +430,7 @@ extern int dirfile_flush(DIRFILE* dirfile,
     const char* field_code) __gd_nonnull ((1));
 
 extern int dirfile_include(DIRFILE* D, const char* file, int fragment_index,
-    unsigned int flags) __gd_nonnull ((1,2));
+    unsigned long flags) __gd_nonnull ((1,2));
 
 extern int dirfile_mchange_spec(DIRFILE* D, const char* parent,
     const char* line, int move) __gd_nonnull ((1,2,3));
@@ -436,7 +438,7 @@ extern int dirfile_mchange_spec(DIRFILE* D, const char* parent,
 extern int dirfile_metaflush(DIRFILE* dirfile) __gd_nonnull ((1));
 
 extern DIRFILE* dirfile_open(const char* dirfilename,
-    unsigned int flags) __gd_nonnull ((1));
+    unsigned long flags) __gd_nonnull ((1));
 
 /* the following functions are _FILE_OFFSET_BITS sensitive */
 #ifndef __USE_FILE_OFFSET64

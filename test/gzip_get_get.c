@@ -44,7 +44,8 @@ int main(void)
 
   /* compress */
   snprintf(command, 4096, "%s -f %s > /dev/null", GZIP, data);
-  system(command);
+  if (system(command))
+    return 1;
 
   DIRFILE* D = dirfile_open(filedir, GD_RDONLY | GD_VERBOSE);
   int n1 = getdata(D, "data", 5, 0, 1, 0, GD_UINT16, c1);

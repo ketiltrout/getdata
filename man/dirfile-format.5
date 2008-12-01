@@ -20,7 +20,7 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH dirfile\-format 5 "21 October 2008" "Standards Version 6" "DATA FORMATS"
+.TH dirfile\-format 5 "28 November 2008" "Standards Version 6" "DATA FORMATS"
 .SH NAME
 dirfile\-format \(em the dirfile database format specification file
 .SH DESCRIPTION
@@ -81,18 +81,9 @@ It is a syntax error to have a line which contains unmatched quotation marks, or
 in which the last character is the backslash character.
 
 Several characters when escaped by a preceding backslash character are
-interpreted as special characters in tokens.  Some of these have already been
-mentioned.  The character escape sequences are:
+interpreted as special characters in tokens.  The character escape sequences
+are:
 .RS
-.TP
-.BR \e\~\~ (i.e.\~backslash-space)
-a space character (ASCII 0x20 / U+0020)
-.TP
-.B \e"
-a quotation mark character (ASCII 0x22 / U+0022)
-.TP
-.B \e#
-a hash mark character (ASCII 0x23 / U+0023)
 .TP
 .B \ea
 an alert (bell) character (ASCII 0x07 / U+0007)
@@ -362,12 +353,13 @@ Any line which does not start with a
 .I reserved word
 is assumed to be a field specification line.  The first token in a field
 specification line is the field name.  The field name consists of one or more
-characters, excluding both ASCII control characters, and the characters
+characters, excluding both ASCII control characters (the bytes 0x01 through
+0x1F), and the characters
 .IP
 .B &\t/\t;\t<\t>\t|\t.
 .PP
 which are reserved.  The field name may not be
-.I INDEX
+.IR INDEX ,
 which is a special, implicit field which contains the integer frame index.
 Field names are case sensitive.  The second token in the field specification
 line is the field type.  The meaning of subsequent tokens depends on the field
@@ -487,10 +479,12 @@ field.  Syntax is:
 .PP
 where
 .I input
-is the input vector field for the table lookup and
+is the input vector field for the table lookup, and
 .I table
-is the complete path to the lookup table file for the field.  The lookup table
-file is an ASCII text file with two whitespace separated columns of
+is the path to the lookup table file for the field.  If this path is relative,
+it is assumed to be relative to the directory containing the format file
+fragment defining this field.  The lookup table file is an ASCII text file with
+two whitespace separated columns of
 .I x
 and
 .I y

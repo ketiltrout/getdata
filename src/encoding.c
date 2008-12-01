@@ -66,7 +66,7 @@ struct encoding_t ef[GD_N_SUBENCODINGS] = {
 # endif
     NULL, NULL, NULL, NULL, NULL, NULL, NULL , NULL, &_GD_GenericUnlink, NULL },
   { GD_SLIM_ENCODED, ".slm", 1, "Slim",
-# ifdef USE_SLIMLIB
+# ifdef USE_SLIM
     GD_EF_OPEN | GD_EF_CLOSE | GD_EF_SEEK | GD_EF_READ | GD_EF_SIZE,
 # else
     0,
@@ -93,7 +93,7 @@ struct encoding_t ef[GD_N_SUBENCODINGS] = {
 # endif
   },
   { GD_SLIM_ENCODED, ".slm", 1, NULL, 0,
-# ifdef USE_SLIMLIB
+# ifdef USE_SLIM
     &_GD_SlimOpen, &_GD_SlimClose, NULL /* TOUCH */,
     &_GD_SlimSeek, &_GD_SlimRead, &_GD_SlimSize, NULL /* WRITE */,
     NULL /* SYNC */, &_GD_GenericUnlink, NULL /* TEMP */
@@ -183,6 +183,12 @@ char* _GD_ValidateField(const gd_entry_t* parent, const char* field_code,
   return ptr;
 }
 
+int _GD_EncodingUnderstood(unsigned int encoding)
+{
+  return (encoding == GD_UNENCODED || encoding == GD_SLIM_ENCODED ||
+      encoding == GD_GZIP_ENCODED || encoding == GD_BZIP2_ENCODED);
+}
+
 #ifdef USE_MODULES
 static void* _GD_ResolveSymbol(void* lib, struct encoding_t* enc,
     const char* name)
@@ -207,7 +213,7 @@ int _GD_MissingFramework(int encoding, unsigned int funcs)
  
 #ifdef USE_MODULES
 #ifdef USE_PTHREAD
-    pthread_mutex_lock(&_gd_mutex);
+  pthread_mutex_lock(&_gd_mutex);
 #endif
 
   /* set up the encoding library if required */
@@ -353,15 +359,16 @@ int _GD_Supports(DIRFILE* D, gd_entry_t* E, unsigned int funcs)
 }
 
 /* this function is needed by the encoding libraries and is not makred with
- * an initial underscore.  Furthermore, it uses the global encoding framework
- * array to retrieve the encoding extension. */
-int GD_SetEncodedName(struct _gd_raw_file* file, const char* base, int temp)
+ * an initial underscore. */
+int _GD_SetEncodedName(DIRFILE* D, struct _gd_raw_file* file, const char* base,
+    int temp)
 {
-  dtrace("%p, \"%s\", %i", file, base, temp);
+  dtrace("%p, %p, \"%s\", %i", D, file, base, temp);
 
   if (file->name == NULL) {
     file->name = malloc(FILENAME_MAX);
     if (file->name == NULL) {
+      _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
       dreturn("%i", -1);
       return -1;
     }
@@ -412,17 +419,20 @@ static void _GD_RecodeFragment(DIRFILE* D, unsigned int encoding, int fragment,
 
         if (_GD_MogrifyFile(D, D->entry[i], encoding,
               D->fragment[D->entry[i]->fragment_index].byte_sex,
-              D->fragment[D->entry[i]->fragment_index].frame_offset, 0))
+              D->fragment[D->entry[i]->fragment_index].frame_offset, 0, -1,
+              D->entry[i]->e->filebase))
           break;
       }
 
     /* If successful, move the temporary file over the old file, otherwise
      * remove the temporary files */
     for (i = 0; i < n_raw; ++i)
-      if ((*ef[raw_entry[i]->e->file[0].encoding].temp)
-          (raw_entry[i]->e->file, (D->error) ? GD_TEMP_DESTROY : GD_TEMP_MOVE))
+      if ((*ef[raw_entry[i]->e->file[0].encoding].temp)(raw_entry[i]->e->file,
+            (D->error) ? GD_TEMP_DESTROY : GD_TEMP_MOVE))
+      {
         _GD_SetError(D, GD_E_RAW_IO, 0, raw_entry[i]->e->file[0].name,
             errno, NULL);
+      }
 
     free(raw_entry);
 
@@ -478,9 +488,7 @@ int put_encoding(DIRFILE* D, unsigned int encoding, int fragment, int move)
     return -1;
   }
 
-  if (encoding != GD_UNENCODED && encoding != GD_TEXT_ENCODED &&
-      encoding != GD_SLIM_ENCODED)
-  {
+  if (!_GD_EncodingUnderstood(encoding)) {
     _GD_SetError(D, GD_E_UNKNOWN_ENCODING, 0, NULL, 0, NULL);
     dreturn("%i", -1);
     return -1;
@@ -524,14 +532,9 @@ unsigned int get_encoding(DIRFILE* D, int fragment)
   return D->fragment[fragment].encoding;
 }
 
-int _GD_GenericTouch(struct _gd_raw_file* file, const char* base)
+int _GD_GenericTouch(struct _gd_raw_file* file)
 {
-  dtrace("%p, \"%s\"", file, base);
-
-  if (GD_SetEncodedName(file, base, 0)) {
-    dreturn("%i", -1);
-    return -1;
-  }
+  dtrace("%p", file);
 
   int fd = open(file->name, O_RDWR | O_CREAT | O_TRUNC, 0666);
 
@@ -542,14 +545,9 @@ int _GD_GenericTouch(struct _gd_raw_file* file, const char* base)
   return fd;
 }
 
-int _GD_GenericUnlink(struct _gd_raw_file* file, const char* base)
+int _GD_GenericUnlink(struct _gd_raw_file* file)
 {
-  dtrace("%p, \"%s\"", file, base);
-
-  if (GD_SetEncodedName(file, base, 0)) {
-    dreturn("%i", -1);
-    return -1;
-  }
+  dtrace("%p", file);
 
   int r = unlink(file->name);
 

@@ -709,6 +709,9 @@ Error codes (returned by GDFERR):
   GD_EBS          GD_E_BAD_SCALAR
   GD_EBR          GD_E_BAD_REFERENCE
   GD_EPT          GD_E_PROTECTED
+  GD_EDL          GD_E_DELETE
+  GD_EEN          GD_E_BAD_ENDIANNESS
+  GD_ECB          GD_E_CALLBACK
 
 Dirfile flags (required by GDFOPN):
 
@@ -728,6 +731,8 @@ Dirfile flags (required by GDFOPN):
   GD_EN           GD_UNENCODED
   GD_ET           GD_TEXT_ENCODED
   GD_ES           GD_SLIM_ENCODED
+  GD_EG           GD_GZIP_ENCODED
+  GD_EB           GD_BZIP2_ENCODED
 
 Entry types (required by GDFFDT):
 
