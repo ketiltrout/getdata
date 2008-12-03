@@ -437,6 +437,9 @@ extern int dirfile_mchange_spec(DIRFILE* D, const char* parent,
 
 extern int dirfile_metaflush(DIRFILE* dirfile) __gd_nonnull ((1));
 
+extern int dirfile_move(DIRFILE* D, const char* field_code, int new_fragment,
+    int move_data) __gd_nonnull ((1,2));
+
 extern DIRFILE* dirfile_open(const char* dirfilename,
     unsigned long flags) __gd_nonnull ((1));
 

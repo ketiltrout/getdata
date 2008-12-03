@@ -30,7 +30,7 @@
 
 int _GD_RawOpen(struct _gd_raw_file* file, int mode, int creat)
 {
-  dtrace("%p, %i, %i", file, base, mode, creat);
+  dtrace("%p, %i, %i", file, mode, creat);
 
   file->fp = open(file->name, ((mode == GD_RDWR) ? O_RDWR : O_RDONLY) |
       (creat ? O_CREAT : 0), 0666);
@@ -103,7 +103,8 @@ int _GD_RawClose(struct _gd_raw_file *file)
 off64_t _GD_RawSize(struct _gd_raw_file *file, gd_type_t data_type)
 {
   struct stat64 statbuf;
-  dtrace("%p, %x", file, base, data_type);
+
+  dtrace("%p, %x", file, data_type);
 
   if (stat64(file->name, &statbuf) < 0)  {
     dreturn("%lli", -1LL);

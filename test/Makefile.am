@@ -141,6 +141,8 @@ MADD_TESTS=madd madd_bit madd_bit_invalid madd_lincom madd_lincom_invalid \
 					 madd_multiply_invalid madd_phase madd_phase_invalid madd_spec \
 					 madd_spec_directive madd_spec_invalid
 
+MOVE_TESTS=move move_index move_protect
+
 NFIELDS_TESTS=nfields nfields_invalid nfields_type nfields_type_invalid
 
 NFRAGMENTS_TESTS=nfragments
@@ -205,12 +207,12 @@ TESTS=$(ADD_TESTS)        $(ASCII_TESTS)      $(BZIP_TESTS)       \
 			$(ENTRY_TESTS)      $(ERROR_TESTS)      $(FLIST_TESTS)      \
 			$(FLUSH_TESTS)      $(FRAGMENT_TESTS)   $(GET_TESTS)        \
 			$(GLOBAL_TESTS)     $(GZIP_TESTS)       $(INCLUDE_TESTS)    \
-			$(LEGACY_TESTS)     $(MADD_TESTS)       $(NFIELDS_TESTS)    \
-			$(NFRAGMENTS_TESTS) $(NFRAMES_TESTS)    $(NMETA_TESTS)      \
-			$(NVECTORS_TESTS)   $(OPEN_TESTS)       $(PARSE_TESTS)      \
-			$(PUT_TESTS)        $(REF_TESTS)        $(SLIM_TESTS)       \
-			$(SPF_TESTS)        $(SVLIST_TESTS)     $(TRUNC_TESTS)      \
-			$(VLIST_TESTS)
+			$(LEGACY_TESTS)     $(MADD_TESTS)       $(MOVE_TESTS)       \
+			$(NFIELDS_TESTS)    $(NFRAGMENTS_TESTS) $(NFRAMES_TESTS)    \
+			$(NMETA_TESTS)      $(NVECTORS_TESTS)   $(OPEN_TESTS)       \
+			$(PARSE_TESTS)      $(PUT_TESTS)        $(REF_TESTS)        \
+			$(SLIM_TESTS)       $(SPF_TESTS)        $(SVLIST_TESTS)     \
+			$(TRUNC_TESTS)      $(VLIST_TESTS)
 
 check_PROGRAMS=$(TESTS)
 

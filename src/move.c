@@ -250,12 +250,6 @@ int dirfile_move(DIRFILE* D, const char* field_code, int new_fragment,
     return -1;
   }
 
-  if (!_GD_EncodingUnderstood(D->fragment[new_fragment].encoding)) {
-    _GD_SetError(D, GD_E_UNKNOWN_ENCODING, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
-
   _GD_ClearError(D);
 
   E = _GD_FindField(D, field_code, NULL);
@@ -307,10 +301,17 @@ int dirfile_move(DIRFILE* D, const char* field_code, int new_fragment,
           D->fragment[new_fragment].frame_offset, 1, new_fragment,
           new_filebase))
     {
+      free(new_filebase);
       dreturn("%i", -1);
       return -1;
     }
+    free(new_filebase);
   }
+
+  /* nothing from now on may fail */
+  D->fragment[E->fragment_index].modified = 1;
+  D->fragment[new_fragment].modified = 1;
+  E->fragment_index = new_fragment;
 
   dreturn("%i", 0);
   return 0;

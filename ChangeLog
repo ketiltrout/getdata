@@ -1,3 +1,10 @@
+2008-12-03   D. V. Wiebe <getdata@ketiltrout.net>  svn:254
+	* src/move.c (dirfile_move): Don't bother checking whether the encoding is
+	understood if we're not moving the data.  Also, update the fragment index
+	for the field and mark both the old and new fragments as dirty.
+
+	* test/move.c test/move_protect.c test/move_index.c: Added.
+
 2008-12-01   D. V. Wiebe <getdata@ketiltrout.net>  svn:253
 	* src/ascii.c src/bzip.c src/encoding.c src/gzip.c src/raw.c: Initialise
 	filename in the library directly instead of passing that off on the encoding
