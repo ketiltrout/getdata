@@ -30,23 +30,6 @@ NF_OFF64=nframes_off64
 PUT_OFF64=put_off64
 endif
 
-if INCLUDE_LEGACY_API
-LEGACY_TESTS=legacy_get legacy_get_put legacy_get_rofs legacy_nframes \
-			legacy_nonexistent legacy_put legacy_spf
-endif
-
-if TEST_BZIP2
-BZIP_TESTS=bzip_get bzip_get_get bzip_nframes bzip_put
-endif
-
-if TEST_GZIP
-GZIP_TESTS=gzip_get gzip_get_get gzip_nframes gzip_put
-endif
-
-if TEST_SLIM
-SLIM_TESTS=slim_get slim_nframes slim_put
-endif
-
 LDADD=../src/libgetdata.la
 INCLUDES=-Wall $(WEXTRA) -I$(top_srcdir)/src -D__TEST__=\"$@\"
 
@@ -59,6 +42,10 @@ ADD_TESTS=add add_bit add_bit_bitnum add_bit_bitsize add_bit_invalid \
 					add_spec add_spec_directive add_spec_invalid add_string add_type
 
 ASCII_TESTS=ascii_get ascii_nframes ascii_put
+
+if TEST_BZIP2
+BZIP_TESTS=bzip_get bzip_get_get bzip_move_from bzip_nframes bzip_put
+endif
 
 CVLIST_TESTS=cvlist cvlist_invalid cvlist_meta cvlist_meta_invalid
 
@@ -132,16 +119,26 @@ GET_TESTS=get64 get_bad_code get_bit get_char get_endian8 get_endian16 \
 
 GLOBAL_TESTS=global_name global_ref global_ref_empty global_ref_set
 
+if TEST_GZIP
+GZIP_TESTS=gzip_get gzip_get_get gzip_move_from gzip_nframes gzip_put
+endif
+
 INCLUDE_TESTS=include include_accmode include_auto include_creat \
 							include_ignore include_index include_invalid include_nonexistent \
 							include_ref
+
+if INCLUDE_LEGACY_API
+LEGACY_TESTS=legacy_get legacy_get_put legacy_get_rofs legacy_nframes \
+			legacy_nonexistent legacy_put legacy_spf
+endif
 
 MADD_TESTS=madd madd_bit madd_bit_invalid madd_lincom madd_lincom_invalid \
 					 madd_linterp madd_linterp_invalid madd_multiply \
 					 madd_multiply_invalid madd_phase madd_phase_invalid madd_spec \
 					 madd_spec_directive madd_spec_invalid
 
-MOVE_TESTS=move move_index move_protect
+MOVE_TESTS=move move_data_enc_ar move_data_enc_ra move_data_endian \
+					 move_data_foffs move_data_nop move_index move_protect
 
 NFIELDS_TESTS=nfields nfields_invalid nfields_type nfields_type_invalid
 
@@ -192,6 +189,10 @@ PUT_TESTS=put64 put_bad_code put_bit put_bof put_char put_const \
 					put_uint64
 
 REF_TESTS=ref ref_none ref_two
+
+if TEST_SLIM
+SLIM_TESTS=slim_get slim_nframes slim_put
+endif
 
 SVLIST_TESTS=svlist svlist_invalid svlist_meta svlist_meta_invalid
 

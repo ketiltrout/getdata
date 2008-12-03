@@ -50,6 +50,7 @@ struct gd_bzdata {
   BZFILE* bzfile;
   FILE* stream;
   int bzerror;
+  int stream_end;
   int pos, end;
   off64_t base;
   char data[GD_BZIP_BUFFER_SIZE];
@@ -75,7 +76,7 @@ static struct gd_bzdata *_GD_Bzip2DoOpen(struct _gd_raw_file* file)
     return NULL;
   }
 
-  ptr->bzerror = 0;
+  ptr->bzerror = ptr->stream_end = 0;
   ptr->bzfile = BZ2_bzReadOpen(&ptr->bzerror, ptr->stream, 0, 0, NULL, 0);
 
   if (ptr->bzfile == NULL || ptr->bzerror != BZ_OK) {
@@ -132,11 +133,11 @@ off64_t _GD_Bzip2Seek(struct _gd_raw_file* file, off64_t count,
       return 1;
     }
     ptr->pos = ptr->end = 0;
-    ptr->base = 0;
+    ptr->base = ptr->stream_end = 0;
   }
 
   /* seek forward the slow way */
-  while (ptr->base + ptr->end <= count) {
+  while (ptr->base + ptr->end < count) {
     ptr->bzerror = 0;
     int n = BZ2_bzRead(&ptr->bzerror, ptr->bzfile, ptr->data,
         GD_BZIP_BUFFER_SIZE);
@@ -150,8 +151,10 @@ off64_t _GD_Bzip2Seek(struct _gd_raw_file* file, off64_t count,
     }
 
     /* eof */
-    if (ptr->bzerror != BZ_OK)
+    if (ptr->bzerror != BZ_OK) {
+      ptr->stream_end = 1;
       break;
+    }
   }
 
   ptr->pos = (ptr->bzerror == BZ_STREAM_END && count >= ptr->base + ptr->end) ?
@@ -174,6 +177,12 @@ ssize_t _GD_Bzip2Read(struct _gd_raw_file *file, void *data,
   while (nbytes > (unsigned long long)(ptr->end - ptr->pos)) {
     memcpy(output, ptr->data + ptr->pos, ptr->end - ptr->pos);
     output += ptr->end - ptr->pos;
+    ptr->pos = ptr->end;
+
+    if (ptr->stream_end) {
+      dreturn("%zi", ptr->end - ptr->pos);
+      return ptr->end - ptr->pos;
+    }
 
     ptr->bzerror = 0;
     int n = BZ2_bzRead(&ptr->bzerror, ptr->bzfile, ptr->data,
@@ -189,8 +198,10 @@ ssize_t _GD_Bzip2Read(struct _gd_raw_file *file, void *data,
     }
 
     /* eof */
-    if (ptr->bzerror != BZ_OK)
+    if (ptr->bzerror != BZ_OK) {
+      ptr->stream_end = 1;
       break;
+    }
 
     memcpy(output, ptr->data, ptr->end);
     nbytes -= ptr->end;

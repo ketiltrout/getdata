@@ -137,7 +137,8 @@ ssize_t _GD_AsciiRead(struct _gd_raw_file *file, void *ptr, gd_type_t data_type,
       break;
 
     if (fscanf(file->edata, fmt, (char*)ptr + GD_SIZE(data_type) * n) < 1) {
-      ret = -1;
+      if (!feof(file->edata))
+        ret = -1;
       break;
     }
   }
@@ -303,13 +304,14 @@ int _GD_AsciiTemp(struct _gd_raw_file *file, int mode)
     case GD_TEMP_OPEN:
       fp = mkstemp(file[1].name);
 
-      file->edata = fdopen(fp, "r+");
+      file[1].edata = fdopen(fp, "r+");
 
-      if (file->edata != NULL) {
-        file->fp = 0;
+      if (file[1].edata == NULL) {
         dreturn("%i", -1);
         return -1;
       }
+
+      file[1].fp = 0;
       break;
     case GD_TEMP_MOVE:
       if (!rename(file[1].name, file[0].name)) {

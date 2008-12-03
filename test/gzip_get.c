@@ -1,5 +1,7 @@
 /* Attempt to read UINT8 */
-#include "../src/config.h"
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 #include "../src/getdata.h"
 
 #include <inttypes.h>

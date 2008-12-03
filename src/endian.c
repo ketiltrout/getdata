@@ -75,7 +75,7 @@ static void _GD_ByteSwapFragment(DIRFILE* D, unsigned int byte_sex,
         if (_GD_MogrifyFile(D, D->entry[i],
             D->fragment[D->entry[i]->fragment_index].encoding, byte_sex,
             D->fragment[D->entry[i]->fragment_index].frame_offset, 0, -1,
-            D->entry[i]->e->filebase))
+            NULL))
           break;
       }
 

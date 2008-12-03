@@ -1,3 +1,23 @@
+2008-12-03   D. V. Wiebe <getdata@ketiltrout.net>  svn:258
+	* src/open.c (_GD_ParseDirective): Handle bzip and gzip ENCODING directives.
+
+	* src/encoding.c: Fix bzip2 non-module framework.
+
+	* src/ascii.c (_GD_AsciiRead): Don't throw an error on EOF.
+
+	* src/ascii.c (_GD_AsciiTemp) src/raw.c (_GD_RawTemp): Don't overwrite the
+	main file.
+
+	* src/bzip.c (_GD_Bzip2Seek _GD_Bzip2Read): Intelligently handle EOF.
+
+	* src/move.c (_GD_MogrifyData): Handle new_filebase internally.  Don't check
+	the input encoding before determining it.  Always use temp files, even when
+	changing encodings.  Error handling fixes.
+
+	* test/move_data_enc_ar.c test/gzip_move_from.c test/move_data_enc_ra.c
+	test/move_data_foffs.c test/move_data_endian.c test/bzip_move_from.c
+	test/move_data_nop.c: Added.
+
 2008-12-03   D. V. Wiebe <getdata@ketiltrout.net>  svn:254
 	* src/move.c (dirfile_move): Don't bother checking whether the encoding is
 	understood if we're not moving the data.  Also, update the fragment index

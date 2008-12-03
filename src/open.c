@@ -1053,6 +1053,10 @@ static int _GD_ParseDirective(DIRFILE *D, const char** in_cols, int n_cols,
     if (!(flags & GD_FORCE_ENCODING)) {
       if (strcmp(in_cols[1], "none") == 0)
         D->fragment[me].encoding = GD_UNENCODED;
+      else if (strcmp(in_cols[1], "bzip2") == 0)
+        D->fragment[me].encoding = GD_BZIP2_ENCODED;
+      else if (strcmp(in_cols[1], "gzip") == 0)
+        D->fragment[me].encoding = GD_GZIP_ENCODED;
       else if (strcmp(in_cols[1], "slim") == 0)
         D->fragment[me].encoding = GD_SLIM_ENCODED;
       else if (strcmp(in_cols[1], "text") == 0)

@@ -84,7 +84,7 @@ struct encoding_t ef[GD_N_SUBENCODINGS] = {
 # endif
   },
   { GD_BZIP2_ENCODED, ".bz2", 1, NULL, 0,
-# ifdef USE_GZIP
+# ifdef USE_BZIP2
     &_GD_Bzip2Open, &_GD_Bzip2Close, NULL /* TOUCH */,
     &_GD_Bzip2Seek, &_GD_Bzip2Read, &_GD_Bzip2Size, NULL /* WRITE */,
     NULL /* SYNC */, &_GD_GenericUnlink, NULL /* TEMP */
@@ -420,7 +420,7 @@ static void _GD_RecodeFragment(DIRFILE* D, unsigned int encoding, int fragment,
         if (_GD_MogrifyFile(D, D->entry[i], encoding,
               D->fragment[D->entry[i]->fragment_index].byte_sex,
               D->fragment[D->entry[i]->fragment_index].frame_offset, 0, -1,
-              D->entry[i]->e->filebase))
+              NULL))
           break;
       }
 

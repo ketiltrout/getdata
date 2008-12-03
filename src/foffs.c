@@ -65,7 +65,7 @@ static void _GD_ShiftFragment(DIRFILE* D, off64_t offset, int fragment,
         if (_GD_MogrifyFile(D, D->entry[i],
             D->fragment[D->entry[i]->fragment_index].encoding,
             D->fragment[D->entry[i]->fragment_index].byte_sex, offset, 0, -1,
-            D->entry[i]->e->filebase))
+            NULL))
           break;
       }
 

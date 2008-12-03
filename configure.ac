@@ -20,7 +20,6 @@ dnl 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 dnl
 AC_INIT([GetData], [0.5.0a4], [getdata-devel@lists.sourceforge.net])
 
-dnl autoconf 2.60 or later is required to build configure
 AC_PREREQ([2.63])
 
 dnl libgetdata current interface version
