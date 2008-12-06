@@ -1,3 +1,14 @@
+2008-12-06   D. V. Wiebe <getdata@ketiltrout.net>  svn:259
+	* src/endian.c (dirfile_alter_endianness): Renamed from put_endianness.
+	* src/foffs.c (dirfile_alter_frameoffset64 dirfile_alter_frameoffset):
+	Renamed from put_frameoffset64 and put_frameoffset.
+	* src/encoding.c (dirfile_alter_encoding): Renamed from put_encoding.
+	* src/mod.c (dirfile_alter_raw dirfile_alter_lincom dirfile_alter_linterp
+	dirfile_alter_bit dirfile_alter_multiply dirfile_alter_phase
+	dirfile_alter_const dirfile_alter_spec dirfile_malter_spec): Renamed from
+	*_change_*.
+	* src/mod.c (dirfile_alter_entry): Renamed from dirfile_change.
+
 2008-12-03   D. V. Wiebe <getdata@ketiltrout.net>  svn:258
 	* src/open.c (_GD_ParseDirective): Handle bzip and gzip ENCODING directives.
 

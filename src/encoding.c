@@ -464,7 +464,8 @@ static void _GD_RecodeFragment(DIRFILE* D, unsigned int encoding, int fragment,
   dreturnvoid();
 }
 
-int put_encoding(DIRFILE* D, unsigned int encoding, int fragment, int move)
+int dirfile_alter_encoding(DIRFILE* D, unsigned int encoding, int fragment,
+    int move)
 {
   int i;
 

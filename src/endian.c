@@ -103,7 +103,8 @@ static void _GD_ByteSwapFragment(DIRFILE* D, unsigned int byte_sex,
   dreturnvoid();
 }
 
-int put_endianness(DIRFILE* D, unsigned int byte_sex, int fragment, int move)
+int dirfile_alter_endianness(DIRFILE* D, unsigned int byte_sex, int fragment,
+    int move)
 {
   int i;
 

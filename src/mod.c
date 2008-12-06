@@ -371,8 +371,8 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
   return 0;
 }
 
-int dirfile_change(DIRFILE* D, const char* field_code, const gd_entry_t *entry,
-    int move)
+int dirfile_alter_entry(DIRFILE* D, const char* field_code,
+    const gd_entry_t *entry, int move)
 {
   dtrace("%p, \"%s\", %p, %i", D, field_code, entry, move);
 
@@ -397,7 +397,7 @@ int dirfile_change(DIRFILE* D, const char* field_code, const gd_entry_t *entry,
   return ret;
 }
 
-int dirfile_change_raw(DIRFILE *D, const char *field_code, unsigned int spf,
+int dirfile_alter_raw(DIRFILE *D, const char *field_code, unsigned int spf,
     gd_type_t data_type, int move)
 {
   gd_entry_t N;
@@ -423,7 +423,7 @@ int dirfile_change_raw(DIRFILE *D, const char *field_code, unsigned int spf,
   return ret;
 }
 
-int dirfile_change_lincom(DIRFILE* D, const char* field_code, int n_fields,
+int dirfile_alter_lincom(DIRFILE* D, const char* field_code, int n_fields,
     const char** in_fields, const double* m, const double* b)
 {
   gd_entry_t N;
@@ -468,7 +468,7 @@ int dirfile_change_lincom(DIRFILE* D, const char* field_code, int n_fields,
   return ret;
 }
 
-int dirfile_change_linterp(DIRFILE* D, const char* field_code,
+int dirfile_alter_linterp(DIRFILE* D, const char* field_code,
     const char* in_field, const char* table, int move)
 {
   gd_entry_t N;
@@ -493,7 +493,7 @@ int dirfile_change_linterp(DIRFILE* D, const char* field_code,
   return ret;
 }
 
-int dirfile_change_bit(DIRFILE* D, const char* field_code, const char* in_field,
+int dirfile_alter_bit(DIRFILE* D, const char* field_code, const char* in_field,
     int bitnum, int numbits)
 {
   gd_entry_t N;
@@ -519,7 +519,7 @@ int dirfile_change_bit(DIRFILE* D, const char* field_code, const char* in_field,
   return ret;
 }
 
-int dirfile_change_multiply(DIRFILE* D, const char* field_code,
+int dirfile_alter_multiply(DIRFILE* D, const char* field_code,
     const char* in_field1, const char* in_field2)
 {
   gd_entry_t N;
@@ -543,7 +543,7 @@ int dirfile_change_multiply(DIRFILE* D, const char* field_code,
   return ret;
 }
 
-int dirfile_change_phase(DIRFILE* D, const char* field_code,
+int dirfile_alter_phase(DIRFILE* D, const char* field_code,
     const char* in_field, int shift)
 {
   gd_entry_t N;
@@ -567,7 +567,7 @@ int dirfile_change_phase(DIRFILE* D, const char* field_code,
   return ret;
 }
 
-int dirfile_change_const(DIRFILE* D, const char* field_code,
+int dirfile_alter_const(DIRFILE* D, const char* field_code,
     gd_type_t const_type)
 {
   gd_entry_t N;
@@ -590,7 +590,7 @@ int dirfile_change_const(DIRFILE* D, const char* field_code,
   return ret;
 }
 
-int dirfile_change_spec(DIRFILE* D, const char* line, int move)
+int dirfile_alter_spec(DIRFILE* D, const char* line, int move)
 {
   char instring[GD_MAX_LINE_LENGTH];
   char outstring[GD_MAX_LINE_LENGTH];
@@ -621,7 +621,7 @@ int dirfile_change_spec(DIRFILE* D, const char* line, int move)
 
   /* start parsing */
   n_cols = _GD_Tokenise(D, instring, outstring, in_cols,
-      "dirfile_change_spec()", 0);
+      "dirfile_alter_spec()", 0);
 
   if (D->error) {
     dreturn("%i", -1); /* tokeniser threw an error */
@@ -630,7 +630,7 @@ int dirfile_change_spec(DIRFILE* D, const char* line, int move)
 
   /* Sanity check */
   if (n_cols == 0) {
-    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_TOK, "dirfile_change_spec()", 0,
+    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_TOK, "dirfile_alter_spec()", 0,
         NULL);
     dreturn("%i", -1);
     return -1;
@@ -645,7 +645,7 @@ int dirfile_change_spec(DIRFILE* D, const char* line, int move)
   }
 
   /* Let the parser compose the entry */
-  N = _GD_ParseFieldSpec(D, n_cols, in_cols, NULL, "dirfile_change_spec()", 0, 
+  N = _GD_ParseFieldSpec(D, n_cols, in_cols, NULL, "dirfile_alter_spec()", 0, 
       N->fragment_index, DIRFILE_STANDARDS_VERSION, 1, 1, 0);
 
   if (D->error) {
@@ -665,7 +665,7 @@ int dirfile_change_spec(DIRFILE* D, const char* line, int move)
   return ret;
 }
 
-int dirfile_mchange_spec(DIRFILE* D, const char* parent, const char* line,
+int dirfile_malter_spec(DIRFILE* D, const char* parent, const char* line,
     int move)
 {
   char instring[GD_MAX_LINE_LENGTH];
@@ -704,7 +704,7 @@ int dirfile_mchange_spec(DIRFILE* D, const char* parent, const char* line,
 
   /* start parsing */
   n_cols = _GD_Tokenise(D, instring, outstring, in_cols,
-      "dirfile_change_spec()", 0);
+      "dirfile_alter_spec()", 0);
 
   if (D->error) {
     dreturn("%i", -1); /* tokeniser threw an error */
@@ -712,7 +712,7 @@ int dirfile_mchange_spec(DIRFILE* D, const char* parent, const char* line,
   }
 
   /* Let the parser compose the entry */
-  N = _GD_ParseFieldSpec(D, n_cols, in_cols, N, "dirfile_mchange_spec()", 0,
+  N = _GD_ParseFieldSpec(D, n_cols, in_cols, N, "dirfile_malter_spec()", 0,
       N->fragment_index, DIRFILE_STANDARDS_VERSION, 1, 1, 0);
 
   if (D->error) {

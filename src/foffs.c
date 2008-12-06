@@ -93,7 +93,8 @@ static void _GD_ShiftFragment(DIRFILE* D, off64_t offset, int fragment,
   dreturnvoid();
 }
 
-int put_frameoffset64(DIRFILE* D, off64_t offset, int fragment, int move)
+int dirfile_alter_frameoffset64(DIRFILE* D, off64_t offset, int fragment,
+    int move)
 {
   int i;
 
@@ -162,9 +163,9 @@ off64_t get_frameoffset64(DIRFILE* D, int fragment)
 }
 
 /* 32(ish)-bit wrappers for the 64-bit versions, when needed */
-int put_frameoffset(DIRFILE* D, off_t offset, int fragment, int move)
+int dirfile_alter_frameoffset(DIRFILE* D, off_t offset, int fragment, int move)
 {
-  return put_frameoffset64(D, offset, fragment, move);
+  return dirfile_alter_frameoffset64(D, offset, fragment, move);
 }
 
 off_t get_frameoffset(DIRFILE* D, int fragment)
