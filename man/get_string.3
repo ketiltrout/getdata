@@ -20,7 +20,7 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH get_string 3 "17 October 2008" "Version 0.4.0" "GETDATA"
+.TH get_string 3 "8 December 2008" "Version 0.5.0" "GETDATA"
 .SH NAME
 get_string \(em retrieve a string from a dirfile database
 .SH SYNOPSIS
@@ -46,7 +46,7 @@ characters of the string scalar are stored in the user-supplied buffer
 
 The 
 .I dirfile
-parameter must point to a valid DIRFILE object previously created by a call to
+argument must point to a valid DIRFILE object previously created by a call to
 .BR dirfile_open (3).
 
 If
@@ -57,7 +57,7 @@ equals NULL, no data will be copied to
 .IR data_out ,
 but the length of the string scalar will still be returned by
 .BR get_string ().
-Otherwise, the parameter
+Otherwise, the argument
 .I data_out
 must point to a valid memory location of sufficient size to hold at least
 .I len

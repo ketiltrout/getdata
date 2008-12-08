@@ -20,7 +20,7 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH dirfile_include 3 "1 December 2008" "Version 0.5.0" "GETDATA"
+.TH dirfile_include 3 "8 December 2008" "Version 0.5.0" "GETDATA"
 .SH NAME
 dirfile_include \(em add a format file fragment to a dirfile
 .SH SYNOPSIS
@@ -55,7 +55,7 @@ parsing the included fragment.
 
 The 
 .I flags
-parameter should be a bitwise-or'd collection of the following flags, or zero
+argument should be a bitwise-or'd collection of the following flags, or zero
 if no flags are desired:
 .TP
 .B GD_BIG_ENDIAN
@@ -170,7 +170,7 @@ exist, this flag is ignored.
 .P
 The
 .I flags
-parameter may also be bitwise or'd with one of the following symbols indicating
+argument may also be bitwise or'd with one of the following symbols indicating
 the default encoding scheme of the dirfile.  Like the endianness flags, the
 choice of encoding here is ignored if the encoding is specified in the dirfile
 itself, unless

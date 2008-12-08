@@ -20,7 +20,7 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH put_constant 3 "21 October 2008" "Version 0.4.0" "GETDATA"
+.TH put_constant 3 "8 December 2008" "Version 0.5.0" "GETDATA"
 .SH NAME
 put_constant \(em retrieve a scalar constant from a dirfile database
 .SH SYNOPSIS
@@ -48,12 +48,12 @@ which should be of the type indicated by
 
 The 
 .I dirfile
-parameter must point to a valid DIRFILE object previously created by a call to
+argument must point to a valid DIRFILE object previously created by a call to
 .BR dirfile_open (3).
 
 The 
 .I data_type
-parameter should be one of the following symbols, which indicates the desired
+argument should be one of the following symbols, which indicates the desired
 return type of the data:
 .RS
 .TP 11
@@ -90,7 +90,7 @@ IEEE-754 standard 64-bit double precision floating point number
 
 The data type of the supplied value need not be the same as the type of the 
 storage type of the constant in the database.  Type conversion will be performed
-as necessary to return the requested type.  The parameter
+as necessary to return the requested type.  The argument
 .I data_out
 must point to valid data type of the specified type.
 

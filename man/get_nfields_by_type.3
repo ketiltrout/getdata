@@ -20,7 +20,7 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH get_nfields_by_type 3 "17 October 2008" "Version 0.4.0" "GETDATA"
+.TH get_nfields_by_type 3 "8 December 2008" "Version 0.5.0" "GETDATA"
 .SH NAME
 get_nfields_by_type \(em report the number of fields of a given type in a dirfile
 .SH SYNOPSIS
@@ -41,11 +41,11 @@ does not include /META fields.
 
 The 
 .I dirfile
-parameter must point to a valid DIRFILE object previously created by a call to
+argument must point to a valid DIRFILE object previously created by a call to
 .BR dirfile_open (3).
 The
 .I type
-parameter should be one of the following symbols indicating the type of field to
+argument should be one of the following symbols indicating the type of field to
 count:
 .IP
 .nh

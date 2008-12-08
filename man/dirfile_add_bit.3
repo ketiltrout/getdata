@@ -20,7 +20,7 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH dirfile_add_bit 3 "7 December 2008" "Version 0.5.0" "GETDATA"
+.TH dirfile_add_bit 3 "8 December 2008" "Version 0.5.0" "GETDATA"
 .SH NAME
 dirfile_add_bit, dirfile_add_const, dirfile_add_lincom, dirfile_add_linterp,
 dirfile_add_multiply, dirfile_add_phase, dirfile_add_raw, dirfile_add_string
@@ -99,7 +99,7 @@ For
 .BR dirfile_add_const (),
 the
 .I const_type
-parameter specifies the storage type for the const, while
+argument specifies the storage type for the const, while
 .I data_type
 specifies the data type of the value pointed to by
 .IR value .
@@ -123,7 +123,7 @@ The library was unable to allocate memory.
 .B GD_E_BAD_CODE
 The
 .IR field_name
-parameter contained invalid characters.
+argument contained invalid characters.
 .TP
 .B GD_E_BAD_DIRFILE
 The supplied dirfile was invalid.
@@ -134,12 +134,12 @@ One or more of the field parameters specified was invalid.
 .B GD_E_BAD_INDEX
 The
 .IR fragment_index
-parameter was out of range.
+argument was out of range.
 .TP
 .B GD_E_BAD_TYPE
 The
 .IR data_type " or " const_type
-parameter provided to
+argument provided to
 .BR dirfile_add_raw "()  or " dirfile_add_const (),
 was invalid.
 .TP

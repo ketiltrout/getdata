@@ -20,7 +20,7 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH get_nframes 3 "6 October 2008" "Version 0.4.0" "GETDATA"
+.TH get_nframes 3 "8 December 2008" "Version 0.5.0" "GETDATA"
 .SH NAME
 get_nframes \(em report the size of a dirfile
 .SH SYNOPSIS
@@ -42,24 +42,23 @@ have differing number of frames, the Dirfile Standards (see
 dictate that the number of frames in the database is defined to be equal to the
 number of frames in the first raw field specified in the format file.
 
+If no vector fields are defined in the database,
+.BR get_nframes ()
+returns zero and succeeds.
+
 The 
 .I dirfile
-parameter must point to a valid DIRFILE object previously created by a call to
+argument must point to a valid DIRFILE object previously created by a call to
 .BR dirfile_open (3).
 
 .SH RETURN VALUE
 Upon successful completion,
 .BR get_nframes ()
-returns the number of frames in the dirfile.  On error, it
-returns zero and sets the dirfile error
-to a non-zero error value.  Possible error values are:
+returns the number of frames in the dirfile.  On error, it returns zero and sets
+the dirfile error to a non-zero error value.  Possible error values are:
 .TP 8
 .B GD_E_BAD_DIRFILE
 The supplied dirfile was invalid.
-.TP
-.B GD_E_EMPTY
-The dirfile format file defines no raw fields, or else none of the raw fields
-defined could be accessed.  As a result, the database is effectively empty.
 .TP
 .B GD_E_RAW_IO
 An attempt to

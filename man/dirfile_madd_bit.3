@@ -20,7 +20,7 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH dirfile_madd_bit 3 "7 December 2008" "Version 0.5.0" "GETDATA"
+.TH dirfile_madd_bit 3 "8 December 2008" "Version 0.5.0" "GETDATA"
 .SH NAME
 dirfile_madd_bit, dirfile_madd_const, dirfile_madd_lincom, dirfile_madd_linterp,
 dirfile_madd_multiply, dirfile_madd_phase, dirfile_madd_string \(em add a field
@@ -98,7 +98,7 @@ For
 .BR dirfile_madd_const (),
 the
 .I const_type
-parameter specifies the storage type for the const, while
+argument specifies the storage type for the const, while
 .I data_type
 specifies the data type of the value pointed to by
 .IR value .
@@ -122,7 +122,7 @@ The library was unable to allocate memory.
 .B GD_E_BAD_CODE
 The
 .IR field_name
-parameter contained invalid characters. Alternately, the
+argument contained invalid characters. Alternately, the
 .I parent
 field code was not found, or was already a metafield.
 .TP
@@ -135,7 +135,7 @@ One or more of the field parameters specified was invalid.
 .B GD_E_BAD_TYPE
 The
 .IR data_type " or " const_type
-parameter provided to
+argument provided to
 .BR dirfile_add_const (),
 was invalid.
 .TP

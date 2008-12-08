@@ -20,7 +20,7 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH dirfile\-format 5 "28 November 2008" "Standards Version 6" "DATA FORMATS"
+.TH dirfile\-format 5 "8 December 2008" "Standards Version 6" "DATA FORMATS"
 .SH NAME
 dirfile\-format \(em the dirfile database format specification file
 .SH DESCRIPTION
@@ -211,8 +211,10 @@ The ENDIAN directive has
 .RE
 .TP
 .B /FRAMEOFFSET
-The FRAMEOFFSET directive specifies the frame number of the first frame in the
-database.  Syntax is:
+The FRAMEOFFSET directive specifies the frame number of the first frame for
+which data exists in binary files associated with
+.B RAW
+fields.  Syntax is:
 .RS
 .IP
 .BI /FRAMEOFFSET\~ <integer>

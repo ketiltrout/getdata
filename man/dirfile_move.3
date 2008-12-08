@@ -20,7 +20,7 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH dirfile_move 3 "1 December 2008" "Version 0.5.0" "GETDATA"
+.TH dirfile_move 3 "8 December 2008" "Version 0.5.0" "GETDATA"
 .SH NAME
 dirfile_move \(em move a dirfile field between format file fragments
 .SH SYNOPSIS
@@ -64,6 +64,12 @@ the
 .I move_data
 flag is ignored.
 
+If the binary file is translated, and the frame offset of the destination
+fragment is larger than that of the source fragment, this will result in
+permanent deletion of data from the database.  If the new frame offset is
+smaller than the old frame offset, the binary file will be padded at the front
+with zeroes.
+
 .SH RETURN VALUE
 On success,
 .BR dirfile_move ()
@@ -87,12 +93,12 @@ The supplied dirfile was invalid.
 .B GD_E_BAD_INDEX
 The
 .I new_fragment
-parameter did not index a valid format file fragment.
+argument did not index a valid format file fragment.
 .TP
 .B GD_E_PROTECTED
 The metadata of the source or destination format file fragments was protected
 from change, or the binary data of the source or destination fragments was
-protected from change, and binary file translation was requested.
+protected from change and binary file translation was requested.
 .TP
 .B GD_E_RAW_IO
 An I/O error occurred while attempting to translate a binary file.
@@ -110,7 +116,7 @@ A descriptive error string for the last error encountered can be obtained from
 a call to
 .BR get_error_string (3).
 .SH NOTES
-A binary file tranlsation occurs out-of-place.  As a result, sufficient space
+A binary file translation occurs out-of-place.  As a result, sufficient space
 must be present on the filesystem for both the binary file before translation
 and the binary file after translation.
 .SH SEE ALSO

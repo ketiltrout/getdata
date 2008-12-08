@@ -20,7 +20,7 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH putdata 3 "21 October 2008" "Version 0.4.0" "GETDATA"
+.TH putdata 3 "8 December 2008" "Version 0.5.0" "GETDATA"
 .SH NAME
 putdata \(em write data to a dirfile database
 .SH SYNOPSIS
@@ -55,7 +55,7 @@ which is has a data type specified by
 
 The 
 .I dirfile
-parameter must point to a valid DIRFILE object previously created by a call to
+argument must point to a valid DIRFILE object previously created by a call to
 .BR dirfile_open (3).
 
 The first sample written will be
@@ -83,7 +83,7 @@ equal to zero.
 
 The 
 .I data_type
-parameter should be one of the following symbols, which indicates the type of
+argument should be one of the following symbols, which indicates the type of
 the input data:
 .RS
 .TP 11
@@ -120,7 +120,7 @@ IEEE-754 standard 64-bit double precision floating point number
 
 The type of the input data need not be the same as the type of the data stored
 in the database.  Type conversion will be performed as necessary to write the
-appropriate type.  The parameter
+appropriate type.  The argument
 .I data_in
 must point to a valid memory location of containing all the data to be written.
 .SH RETURN VALUE

@@ -20,7 +20,7 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH dirfile_cbopen 3 "30 November 2008" "Version 0.5.0" "GETDATA"
+.TH dirfile_cbopen 3 "8 December 2008" "Version 0.5.0" "GETDATA"
 .SH NAME
 dirfile_cbopen dirfile_open \(em open or create a dirfile
 .SH SYNOPSIS
@@ -61,7 +61,7 @@ set to NULL.
 
 The 
 .I flags
-parameter should include one of the
+argument should include one of the
 .IR "access modes" :
 .B GD_RDONLY
 (read-only) or 
@@ -203,7 +203,7 @@ output.)
 .P
 The
 .I flags
-parameter may also be bitwise or'd with one of the following symbols indicating
+argument may also be bitwise or'd with one of the following symbols indicating
 the default encoding scheme of the dirfile.  Like the endianness flags, the
 choice of encoding here is ignored if the encoding is specified in the dirfile
 itself, unless
@@ -370,7 +370,7 @@ dirfile will be successfully opened.
 .B GD_SYNTAX_RESCAN
 The parser should rescan the
 .I line
-parameter, which replaces the line which originally contained the syntax error.
+argument, which replaces the line which originally contained the syntax error.
 The line is assumed to have been corrected by the callback function.  If the
 line still contains a syntax error, the callback function will be called again.
 .P
