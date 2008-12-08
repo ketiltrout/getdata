@@ -111,6 +111,8 @@ FLIST_TESTS=flist flist_invalid flist_meta flist_meta_invalid flist_type \
 
 FLUSH_TESTS=flush flush_all flush_bad_code flush_invalid flush_meta
 
+FOFFS_TESTS=foffs_alter foffs_get foffs_move
+
 FRAGMENT_TESTS=fragmentname fragmentname_oor
 
 GET_TESTS=get64 get_bad_code get_bit get_char get_endian8 get_endian16 \
@@ -207,19 +209,19 @@ TRUNC_TESTS=trunc trunc_rdonly trunc_rofs
 
 VLIST_TESTS=vlist vlist_invalid vlist_meta vlist_meta_invalid
 
-TESTS=$(ALTER_TESTS)
-QTESTS=$(ADD_TESTS)        $(ALTER_TESTS)      $(ASCII_TESTS)      \
+TESTS=$(ADD_TESTS)        $(ALTER_TESTS)      $(ASCII_TESTS)      \
 			$(BZIP_TESTS)       $(CVLIST_TESTS)     $(CLOSE_TESTS)      \
 			$(CONVERT_TESTS)    $(CREAT_TESTS)      $(DEL_TESTS)        \
 			$(DFES_TESTS)       $(ENTRY_TESTS)      $(ERROR_TESTS)      \
-			$(FLIST_TESTS)      $(FLUSH_TESTS)      $(FRAGMENT_TESTS)   \
-			$(GET_TESTS)        $(GLOBAL_TESTS)     $(GZIP_TESTS)       \
-			$(INCLUDE_TESTS)    $(LEGACY_TESTS)     $(MADD_TESTS)       \
-			$(MOVE_TESTS)       $(NFIELDS_TESTS)    $(NFRAGMENTS_TESTS) \
-			$(NFRAMES_TESTS)    $(NMETA_TESTS)      $(NVECTORS_TESTS)   \
-			$(OPEN_TESTS)       $(PARSE_TESTS)      $(PUT_TESTS)        \
-			$(REF_TESTS)        $(SLIM_TESTS)       $(SPF_TESTS)        \
-			$(SVLIST_TESTS)     $(TRUNC_TESTS)      $(VLIST_TESTS)
+			$(FLIST_TESTS)      $(FLUSH_TESTS)      $(FOFFS_TESTS)      \
+			$(FRAGMENT_TESTS)   $(GET_TESTS)        $(GLOBAL_TESTS)     \
+			$(GZIP_TESTS)       $(INCLUDE_TESTS)    $(LEGACY_TESTS)     \
+			$(MADD_TESTS)       $(MOVE_TESTS)       $(NFIELDS_TESTS)    \
+			$(NFRAGMENTS_TESTS) $(NFRAMES_TESTS)    $(NMETA_TESTS)      \
+			$(NVECTORS_TESTS)   $(OPEN_TESTS)       $(PARSE_TESTS)      \
+			$(PUT_TESTS)        $(REF_TESTS)        $(SLIM_TESTS)       \
+			$(SPF_TESTS)        $(SVLIST_TESTS)     $(TRUNC_TESTS)      \
+			$(VLIST_TESTS)
 
 check_PROGRAMS=$(TESTS)
 
