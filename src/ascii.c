@@ -25,6 +25,7 @@
 #include <inttypes.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <unistd.h>
 #include <fcntl.h>
 #include <stdio.h>
 #include <string.h>
@@ -293,14 +294,16 @@ off64_t _GD_AsciiSize(struct _gd_raw_file* file,
   return n;
 }
 
-int _GD_AsciiTemp(struct _gd_raw_file *file, int mode)
+int _GD_AsciiTemp(struct _gd_raw_file *file, int method)
 {
-  dtrace("%p, %i", file, mode);
-
   int move_error = 0;
+  struct stat stat_buf;
+  mode_t mode;
   int fp;
 
-  switch(mode) {
+  dtrace("%p, %i", file, method);
+
+  switch(method) {
     case GD_TEMP_OPEN:
       fp = mkstemp(file[1].name);
 
@@ -314,7 +317,13 @@ int _GD_AsciiTemp(struct _gd_raw_file *file, int mode)
       file[1].fp = 0;
       break;
     case GD_TEMP_MOVE:
+      if (stat(file[0].name, &stat_buf))
+        mode = 0644;
+      else
+        mode = stat_buf.st_mode;
+
       if (!rename(file[1].name, file[0].name)) {
+        chmod(file[0].name, mode);
         free(file[1].name);
         file[1].name = NULL;
         dreturn("%i", 0);
@@ -335,7 +344,7 @@ int _GD_AsciiTemp(struct _gd_raw_file *file, int mode)
           return -1;
         }
 
-        if (mode == GD_TEMP_MOVE) {
+        if (method == GD_TEMP_MOVE) {
           errno = move_error;
           dreturn("%i", -1);
           return -1;

@@ -20,7 +20,7 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH dirfile_add_bit 3 "21 October 2008" "Version 0.4.0" "GETDATA"
+.TH dirfile_add_bit 3 "7 December 2008" "Version 0.5.0" "GETDATA"
 .SH NAME
 dirfile_add_bit, dirfile_add_const, dirfile_add_lincom, dirfile_add_linterp,
 dirfile_add_multiply, dirfile_add_phase, dirfile_add_raw, dirfile_add_string
@@ -61,7 +61,7 @@ dirfile_add_multiply, dirfile_add_phase, dirfile_add_raw, dirfile_add_string
 .ad n
 .SH DESCRIPTION
 These functions provide alternatives to using the
-.BR dirfile_add ()
+.BR dirfile_add (3)
 function to add a new field of the indicated type to the dirfile specified by
 .IR dirfile .
 .P
@@ -181,10 +181,12 @@ a call to
 .BR dirfile_add (3),
 .BR dirfile_add_spec (3),
 .BR dirfile_madd_bit (3),
+.BR dirfile_madd_const (3),
 .BR dirfile_madd_lincom (3),
 .BR dirfile_madd_linterp (3),
 .BR dirfile_madd_multiply (3),
 .BR dirfile_madd_phase (3),
+.BR dirfile_madd_string (3),
 .BR dirfile_metaflush (3),
 .BR dirfile_open (3),
 .BR get_error (3),

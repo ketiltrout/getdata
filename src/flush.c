@@ -24,6 +24,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 #include <time.h>
 #endif
 
@@ -234,6 +237,8 @@ void _GD_FlushMeta(DIRFILE* D)
   time_t t;
   int fd;
   unsigned int u;
+  mode_t mode;
+  struct stat stat_buf;
 
   dtrace("%p", D);
 
@@ -245,6 +250,12 @@ void _GD_FlushMeta(DIRFILE* D)
 
   for (i = 0; i < D->n_fragment; ++i)
     if (D->fragment[i].modified) {
+      /* get the permissions of the old file */
+      if (stat(D->fragment[i].cname, &stat_buf))
+        mode = 0644;
+      else
+        mode = stat_buf.st_mode;
+
       /* open a temporary file */
       snprintf(temp_file, GD_MAX_LINE_LENGTH, "%s/format_XXXXXX", D->name);
       fd = mkstemp(temp_file);
@@ -335,6 +346,7 @@ void _GD_FlushMeta(DIRFILE* D)
       /* That's all, flush, sync, and close */
       fflush(stream);
       fsync(fd);
+      fchmod(fd, mode);
       fclose(stream);
 
       /* If no error was encountered, move the temporary file over the

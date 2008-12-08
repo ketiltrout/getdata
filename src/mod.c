@@ -26,6 +26,10 @@
 #include <errno.h>
 #endif
 
+#ifdef HAVE_LIBGEN_H
+#include <libgen.h>
+#endif
+
 static unsigned int max(unsigned int A, unsigned int B)
 {
   return (A > B) ? A : B;
@@ -91,7 +95,6 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
         off64_t ns_out;
         void *buffer1;
         void *buffer2;
-        const struct encoding_t* enc = ef + E->e->file[0].encoding;
         const off64_t nf = BUFFER_SIZE / max(E->e->size, GD_SIZE(Q.data_type)) /
           max(E->spf, Q.spf);
 
@@ -99,11 +102,17 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
         if (D->fragment[E->fragment_index].protection & GD_PROTECT_DATA)
           _GD_SetError(D, GD_E_PROTECTED, GD_E_PROTECTED_DATA, NULL, 0,
               D->fragment[E->fragment_index].cname);
-        else if (!_GD_Supports(D, E, GD_EF_OPEN | GD_EF_CLOSE | GD_EF_SEEK |
+        else
+          _GD_Supports(D, E, GD_EF_OPEN | GD_EF_CLOSE | GD_EF_SEEK |
               GD_EF_READ | GD_EF_WRITE | GD_EF_SYNC | GD_EF_UNLINK |
-              GD_EF_TEMP))
-          ; /* error already set */
-        else if (_GD_SetEncodedName(D, E->e->file, E->e->filebase, 0))
+              GD_EF_TEMP);
+
+        if (D->error)
+          break;
+
+        const struct encoding_t* enc = ef + E->e->file[0].encoding;
+
+        if (_GD_SetEncodedName(D, E->e->file, E->e->filebase, 0))
           ; /* error already set */
         else if (E->e->file[0].fp == -1 && (*enc->open)(E->e->file, 0, 0))
           _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[0].name, errno, NULL);
@@ -146,7 +155,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
 
           /* spf convert -- this is done via AddData */
           if (Q.spf != E->spf)
-            _GD_AddData(D, buffer2, E->spf, buffer1, Q.spf, E->data_type,
+            _GD_AddData(D, buffer2, Q.spf, buffer1, E->spf, E->data_type,
                 ns_out);
           else {
             ptr = buffer1;
@@ -241,16 +250,30 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
       }
 
       if (N->table != NULL && strcmp(E->table, N->table)) {
-        if ((Q.table = strdup(N->table)) == NULL) {
+        if (N->table[0] == '/')
+          Q.table = strdup(N->table);
+        else {
+          Q.table = malloc(FILENAME_MAX);
+          if (Q.table != NULL) {
+            char temp_buffer[FILENAME_MAX];
+            strcpy(temp_buffer, D->fragment[E->fragment_index].cname);
+            strcpy(Q.table, dirname(temp_buffer));
+            strcat(Q.table, "/");
+            strcat(Q.table, N->table);
+          }
+        }
+
+        if (Q.table == NULL) {
           _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
           break;
         }
 
-        if (flags)
-          if (rename(E->table, N->table)) {
+        if (flags) {
+          if (rename(E->table, Q.table)) {
             _GD_SetError(D, GD_E_RAW_IO, 0, E->table, errno, 0);
             break;
           }
+        }
 
         modified = 1;
         free(E->table);
@@ -332,10 +355,29 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
 
       break;
     case GD_CONST_ENTRY:
-      if (E->const_type != N->const_type) {
-        modified = 1;
-        Q.const_type = N->const_type;
+      Q.const_type = (N->const_type == GD_NULL) ? E->const_type : N->const_type;
+
+      if (Q.const_type & 0x40 || GD_SIZE(Q.const_type) == 0) {
+        _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, Q.const_type, NULL);
+        dreturn("%i", -1);
+        return -1;
       }
+
+      if (Q.const_type != E->const_type) {
+        modified = 1; 
+        /* type convert */
+        if (Q.const_type & GD_IEEE754)
+          Qe.dconst = (E->const_type & GD_IEEE754) ? E->e->dconst :
+            (E->const_type & GD_SIGNED) ? (double)E->e->iconst :
+            (double)E->e->uconst;
+        else if (Q.const_type & GD_SIGNED)
+          Qe.iconst = (E->const_type & GD_IEEE754) ? (int64_t)E->e->dconst :
+            (E->const_type & GD_SIGNED) ? E->e->iconst : (int64_t)E->e->uconst;
+        else
+          Qe.uconst = (E->const_type & GD_IEEE754) ? (uint64_t)E->e->dconst :
+            (E->const_type & GD_SIGNED) ? (uint64_t)E->e->iconst : E->e->uconst;
+      }
+
       break;
     case GD_INDEX_ENTRY:
       /* INDEX may not be modified */
@@ -352,8 +394,10 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
 
   if (modified) {
     for (i = 0; i < GD_MAX_LINCOM; ++i) {
-      if (field_free & (2 << i))
+      if (field_free & (1 << i)) {
+        Qe.entry[i] = NULL;
         free(E->in_fields[i]);
+      }
     }
 
     for (i = 0; i < 2 * GD_MAX_LINCOM; ++i) {
@@ -397,8 +441,8 @@ int dirfile_alter_entry(DIRFILE* D, const char* field_code,
   return ret;
 }
 
-int dirfile_alter_raw(DIRFILE *D, const char *field_code, unsigned int spf,
-    gd_type_t data_type, int move)
+int dirfile_alter_raw(DIRFILE *D, const char *field_code, gd_type_t data_type,
+    unsigned int spf, int move)
 {
   gd_entry_t N;
 
@@ -430,8 +474,8 @@ int dirfile_alter_lincom(DIRFILE* D, const char* field_code, int n_fields,
   int i;
   int move = 0;
 
-  dtrace("%p, \"%s\", %i, %p, %p, %p", D, field_code, n_fields, in_fields,
-      m, b);
+  dtrace("%p, \"%s\", %i, %p, %p, %p", D, field_code, n_fields, in_fields, m,
+      b);
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -442,11 +486,23 @@ int dirfile_alter_lincom(DIRFILE* D, const char* field_code, int n_fields,
   _GD_ClearError(D);
 
   N.field_type = GD_LINCOM_ENTRY;
-  N.n_fields = n_fields;
+  if (n_fields != 0)
+    N.n_fields = n_fields;
+  else {
+    gd_entry_t *E = _GD_FindField(D, field_code, NULL);
+
+    if (E == NULL) {
+      _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, field_code);
+      dreturn("%i", -1);
+      return -1;
+    }
+
+    N.n_fields = E->n_fields;
+  }
   N.e = NULL;
 
-  for (i = 0; i < n_fields; ++i) {
-    if (in_fields == NULL) {
+  for (i = 0; i < N.n_fields; ++i) {
+    if (in_fields != NULL) {
       move |= 1;
       N.in_fields[i] = (char*)in_fields[i];
     }
@@ -456,7 +512,7 @@ int dirfile_alter_lincom(DIRFILE* D, const char* field_code, int n_fields,
       N.m[i] = m[i];
     }
 
-    if (b == NULL) {
+    if (b != NULL) {
       move |= 4;
       N.b[i] = b[i];
     }
@@ -532,7 +588,7 @@ int dirfile_alter_multiply(DIRFILE* D, const char* field_code,
     return -1;
   }
 
-  N.field_type = GD_PHASE_ENTRY;
+  N.field_type = GD_MULTIPLY_ENTRY;
   N.in_fields[0] = (char*)in_field1;
   N.in_fields[1] = (char*)in_field2;
   N.e = NULL;
@@ -572,7 +628,7 @@ int dirfile_alter_const(DIRFILE* D, const char* field_code,
 {
   gd_entry_t N;
 
-  dtrace("%p, \"%s\", %x", D, field_code, const_type);
+  dtrace("%p, \"%s\", %2x", D, field_code, const_type);
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -665,7 +721,7 @@ int dirfile_alter_spec(DIRFILE* D, const char* line, int move)
   return ret;
 }
 
-int dirfile_malter_spec(DIRFILE* D, const char* parent, const char* line,
+int dirfile_malter_spec(DIRFILE* D, const char* line, const char* parent,
     int move)
 {
   char instring[GD_MAX_LINE_LENGTH];
@@ -674,7 +730,7 @@ int dirfile_malter_spec(DIRFILE* D, const char* parent, const char* line,
   int n_cols;
   gd_entry_t *N = NULL;
 
-  dtrace("%p, \"%s\", \"%s\", %i", D, parent, line, move);
+  dtrace("%p, \"%s\", \"%s\", %i", D, line, parent, move);
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);

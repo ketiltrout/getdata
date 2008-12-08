@@ -402,22 +402,22 @@ extern int dirfile_add_spec(DIRFILE* D, const char* line,
     int fragment_index) __gd_nonnull ((1,2));
 
 extern int dirifle_alter_encoding(DIRFILE* D, unsigned int encoding,
-    int fragment, int move) __gd_nonnull ((1));
+    int fragment, int recode) __gd_nonnull ((1));
 
 extern int dirfile_alter_endianness(DIRFILE* D, unsigned int byte_sex,
-    int fragment, int move) __gd_nonnull ((1));
+    int fragment, int recode) __gd_nonnull ((1));
 
 extern int dirfile_alter_entry(DIRFILE* D, const char* field_code,
-    const gd_entry_t *entry, int move) __gd_nonnull ((1,2));
+    const gd_entry_t *entry, int recode) __gd_nonnull ((1,2));
 
 extern int dirfile_alter_linterp(DIRFILE* D, const char* field_code,
-    const char* in_field, const char* table, int move) __gd_nonnull ((1,2));
+    const char* in_field, const char* table, int recode) __gd_nonnull ((1,2));
 
 extern int dirfile_alter_raw(DIRFILE *D, const char *field_code,
-    unsigned int spf, gd_type_t data_type, int move) __gd_nonnull ((1,2));
+    gd_type_t data_type, unsigned int spf, int recode) __gd_nonnull ((1,2));
 
 extern int dirfile_alter_spec(DIRFILE* D, const char* line,
-    int move) __gd_nonnull ((1,2));
+    int recode) __gd_nonnull ((1,2));
 
 extern DIRFILE* dirfile_cbopen(const char* dirfilename, unsigned long flags,
     int (*sehandler)(const DIRFILE*, int, char*)) __gd_nonnull ((1));
@@ -439,8 +439,8 @@ extern int dirfile_flush(DIRFILE* dirfile,
 extern int dirfile_include(DIRFILE* D, const char* file, int fragment_index,
     unsigned long flags) __gd_nonnull ((1,2));
 
-extern int dirfile_malter_spec(DIRFILE* D, const char* parent, const char* line,
-    int move) __gd_nonnull ((1,2,3));
+extern int dirfile_malter_spec(DIRFILE* D, const char* line, const char* parent,
+    int recode) __gd_nonnull ((1,2,3));
 
 extern int dirfile_metaflush(DIRFILE* dirfile) __gd_nonnull ((1));
 
@@ -453,7 +453,7 @@ extern DIRFILE* dirfile_open(const char* dirfilename,
 /* the following functions are _FILE_OFFSET_BITS sensitive */
 #ifndef __USE_FILE_OFFSET64
 extern int dirfile_alter_frameoffset(DIRFILE* D, off_t field_code, int fragment,
-    int move) __gd_nonnull ((1));
+    int recode) __gd_nonnull ((1));
 
 extern size_t getdata(DIRFILE* dirfile, const char *field_code,
     off_t first_frame, off_t first_sample, size_t num_frames,
@@ -479,7 +479,8 @@ extern off_t __REDIRECT_NTH (get_frameoffset, (DIRFILE* dirfile, int fragment),
 
 # ifdef __REDIRECT
 extern int __REDIRECT (dirfile_alter_frameoffset, (DIRFILE* D, __off64_t offset,
-      int fragment, int move), dirfile_alter_frameoffset64) __gd_nonnull ((1));
+      int fragment, int recode), dirfile_alter_frameoffset64)
+__gd_nonnull ((1));
 
 extern size_t __REDIRECT (getdata, (DIRFILE* dirfile, const char *field_code,
       __off64_t first_frame, __off64_t first_samp, size_t num_frames,
@@ -504,7 +505,7 @@ extern off_t __REDIRECT (get_nframes, (DIRFILE* dirfile),
 /* if requested, declare the LFS transitional extension */
 #ifdef __USE_LARGEFILE64
 extern int dirfile_alter_frameoffset64(DIRFILE* D, __off64_t field_code,
-    int fragment, int move) __gd_nonnull ((1));
+    int fragment, int recode) __gd_nonnull ((1));
 
 extern size_t getdata64(DIRFILE* dirfile, const char *field_code,
     __off64_t first_frame, __off64_t first_samp, size_t num_frames,

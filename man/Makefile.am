@@ -25,6 +25,7 @@ LFS_transitional_mans = getdata64.3 get_nframes64.3 putdata64.3
 endif
 
 dist_man_MANS = dirfile_add.3 dirfile_add_bit.3 dirfile_add_spec.3 \
+								dirfile_alter_bit.3 dirfile_alter_entry.3 dirfile_alter_spec.3 \
 								dirfile_cbopen.3 dirfile_close.3 get_constant.3 put_constant.3 \
 								get_constants.3 getdata.3 putdata.3 dirfile_delete.3 \
 								get_entry.3 get_error.3 get_error_string.3 get_field_list.3 \
@@ -47,7 +48,7 @@ install-data-hook:
 		$(LN_S) -f dirfile_add_bit.3 dirfile_add_multiply.3 && \
 		$(LN_S) -f dirfile_add_bit.3 dirfile_add_phase.3 && \
 		$(LN_S) -f dirfile_add_bit.3 dirfile_add_raw.3 && \
-		$(LN_S) -f dirfile_add_raw.3 dirfile_add_string.3
+		$(LN_S) -f dirfile_add_bit.3 dirfile_add_string.3
 	cd $(DESTDIR)$(mandir)/man3 && \
 		$(LN_S) -f dirfile_madd_bit.3 dirfile_add_const.3 && \
 		$(LN_S) -f dirfile_madd_bit.3 dirfile_add_lincom.3 && \
@@ -63,6 +64,15 @@ install-data-hook:
 		$(LN_S) -f dirfile_cbopen.3 dirfile_open.3
 	cd $(DESTDIR)$(mandir)/man3 && \
 		$(LN_S) -f dirfile_close.3 dirfile_discard.3
+	cd $(DESTDIR)$(mandir)/man3 && \
+		$(LN_S) -f dirfile_alter_bit.3 dirfile_alter_const.3 && \
+		$(LN_S) -f dirfile_alter_bit.3 dirfile_alter_lincom.3 && \
+		$(LN_S) -f dirfile_alter_bit.3 dirfile_alter_linterp.3 && \
+		$(LN_S) -f dirfile_alter_bit.3 dirfile_alter_multiply.3 && \
+		$(LN_S) -f dirfile_alter_bit.3 dirfile_alter_phase.3 && \
+		$(LN_S) -f dirfile_alter_bit.3 dirfile_alter_raw.3
+	cd $(DESTDIR)$(mandir)/man3 && \
+		$(LN_S) -f dirfile_alter_spec.3 dirfile_malter_spec.3
 
 clean-local:
 	rm -rf *~ 

@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
 #endif
@@ -115,13 +116,15 @@ off64_t _GD_RawSize(struct _gd_raw_file *file, gd_type_t data_type)
   return statbuf.st_size / GD_SIZE(data_type);
 }
 
-int _GD_RawTemp(struct _gd_raw_file *file, int mode)
+int _GD_RawTemp(struct _gd_raw_file *file, int method)
 {
-  dtrace("%p, %i", file, mode);
-
+  struct stat stat_buf;
   int move_error = 0;
+  mode_t mode;
 
-  switch(mode) {
+  dtrace("%p, %i", file, method);
+
+  switch(method) {
     case GD_TEMP_OPEN:
       file[1].fp = mkstemp(file[1].name);
 
@@ -131,7 +134,13 @@ int _GD_RawTemp(struct _gd_raw_file *file, int mode)
       }
       break;
     case GD_TEMP_MOVE:
+      if (stat(file[0].name, &stat_buf))
+        mode = 0644;
+      else
+        mode = stat_buf.st_mode;
+
       if (!rename(file[1].name, file[0].name)) {
+        chmod(file[0].name, mode);
         free(file[1].name);
         file[1].name = NULL;
         dreturn("%i", 0);
@@ -151,7 +160,7 @@ int _GD_RawTemp(struct _gd_raw_file *file, int mode)
           return -1;
         }
 
-        if (mode == GD_TEMP_MOVE) {
+        if (method == GD_TEMP_MOVE) {
           errno = move_error;
           dreturn("%i", -1);
           return -1;

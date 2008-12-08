@@ -1,4 +1,30 @@
-2008-12-06   D. V. Wiebe <getdata@ketiltrout.net>  svn:259
+2008-12-08   D. V. Wiebe <getdata@ketiltrout.net>  svn:261
+	* test/alter_multiply.c test/alter_entry.c test/alter_phase.c
+	test/alter_linterp_move.c test/alter_lincom_input.c
+	test/alter_lincom_slope.c test/alter_linterp.c test/alter_const.c
+	test/alter_raw_type.c test/alter_entry_recode.c test/alter_bit_bitnum.c
+	test/alter_raw_spf.c test/alter_bit_numbits.c test/alter_lincom_offset.c:
+	Added.
+
+	* src/flush.c (_GD_FlushMeta): Preserve access mode for fragments.
+	* src/ascii.c (_GD_AsciiTemp) src/raw.c (_GD_RawTemp): Preserve access mode.
+
+	* src/mod.c (_GD_Change): Don't initialise enc until subencoding is
+	determined.  Fully determine LUT table paths.  Type convert CONST data as
+	needed.  Fix lincom argument handling.
+
+	* src/mod.c (dirfile_alter_raw): Swap order of spf and data type arguments
+	to correspond to dirfile_add_raw().
+
+	* src/mod.c (dirfile_alter_lincom): Set n_fields properly, potentially by
+	finding the field to be changed first.  Fix checks for NULL arguments.
+
+	* src/mod.c (dirfile_alter_multiply): Set correct field type.
+
+	* src/mod.c (dirfile_malter_spec): Swap order of line and parent arguments
+	to correspond to dirfile_madd_spec().
+
+2008-12-06   D. V. Wiebe <getdata@ketiltrout.net>  svn:260
 	* src/endian.c (dirfile_alter_endianness): Renamed from put_endianness.
 	* src/foffs.c (dirfile_alter_frameoffset64 dirfile_alter_frameoffset):
 	Renamed from put_frameoffset64 and put_frameoffset.

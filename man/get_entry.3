@@ -20,7 +20,7 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH get_entry 3 "17 October 2008" "Version 0.4.0" "GETDATA"
+.TH get_entry 3 "7 December 2008" "Version 0.5.0" "GETDATA"
 .SH NAME
 get_entry \(em retrieve a dirfile field's metadata
 .SH SYNOPSIS
@@ -120,15 +120,15 @@ to one of the following symbols:
 .IP
 .nh
 .ad l
-.BR GD_RAW_ENTRY ,\~ GD_LINCOM_ENTRY ,\~ GD_LINTERP_ENTRY ,\~
-.BR GD_BIT_ENTRY ,\~ GD_MULTIPLY_ENTRY ,\~ GD_PHASE_ENTRY ,\~
-.BR GD_CONST_ENTRY ,\~ GD_STRING_ENTRY ,\~ GD_INDEX_ENTRY .
+.BR GD_BIT_ENTRY ,\~ GD_CONST_ENTRY ,\~ GD_INDEX_ENTRY ,\~
+.BR GD_LINCOM_ENTRY ,\~ GD_LINTERP_ENTRY ,\~ GD_MULTIPLY_ENTRY ,\~
+.BR GD_PHASE_ENTRY ,\~ GD_RAW_ENTRY ,\~ GD_STRING_ENTRY .
 .ad n
 .hy
 .P
 .B GD_INDEX_ENTRY
 is a special field type used only for the implicit
-.B INDEX
+.I INDEX
 field.  The meaning of the other symbols should be self-explanatory.
 .P
 The 
@@ -153,9 +153,9 @@ before attempting to access the remaining members.  Members for different
 field types may be stored in the same physical location in core.  Accordingly,
 attempting to access a member not declared for the appropriate field type will
 have unspecified results.
-.SS RAW Members
+.SS BIT Members
 A gd_entry_t describing a
-.B RAW
+.B BIT
 entry, will also provide:
 .PP
 .in +4n
@@ -163,8 +163,9 @@ entry, will also provide:
 typedef struct {
   ...
 
-  unsigned int  spf;          /* samples per frame on disk */
-  gd_type_t     data_type;    /* data type on disk */
+  const char *in_fields[1];     /* input field code */
+  int         bitnum;           /* first bit */
+  int         numbits;          /* bit length */
 
   ...
 } gd_entry_t;
@@ -172,16 +173,48 @@ typedef struct {
 .in
 .P
 The
-.I samples_per_frame
-member contains the samples per frame of the binary data on disk.
+.I in_fields
+member is an array of length 1 containing the input field code.
 .P
 The
-.I data_type
-member indicates the data type of the binary data on disk.  See
+.I bitnum
+member indicates the number of the first bit (counted from zero) extracted from
+the input.
+.P
+The
+.I numbits
+member indicates the number of bits which are extracted from the input.
+.SS CONST Members
+A gd_entry_t describing a
+.B CONST
+entry, will also provide:
+.PP
+.in +4n
+.nf
+typedef struct {
+  ...
+
+  gd_type_t   const_type;       /* data type in format file */
+
+  ...
+} gd_entry_t;
+.fi
+.in
+.P
+The
+.I const_type
+member indicates the data type of the constant value stored in the format
+file metadata.  See
 .BR getdata (3)
 for a list of valid values that a variable of type
 .B gd_type_t
 may take.
+.SS INDEX Members
+A gd_entry_t describing an
+.B INDEX
+entry, which is used only for the implicit
+.I INDEX
+field, provides no additional data.
 .SS LINCOM Members
 A gd_entry_t describing a
 .B LINCOM
@@ -253,37 +286,6 @@ member is the pathname to the look up table on disk.
 The
 .I in_fields
 member is an array of length 1 containing the input field code.
-.SS BIT Members
-A gd_entry_t describing a
-.B BIT
-entry, will also provide:
-.PP
-.in +4n
-.nf
-typedef struct {
-  ...
-
-  const char *in_fields[1];     /* input field code */
-  int         bitnum;           /* first bit */
-  int         numbits;          /* bit length */
-
-  ...
-} gd_entry_t;
-.fi
-.in
-.P
-The
-.I in_fields
-member is an array of length 1 containing the input field code.
-.P
-The
-.I bitnum
-member indicates the number of the first bit (counted from zero) extracted from
-the input.
-.P
-The
-.I numbits
-member indicates the number of bits which are extracted from the input.
 .SS MULTIPLY Members
 A gd_entry_t describing a
 .B MULTIPLY
@@ -330,6 +332,39 @@ The
 .I shift
 member indicates the shift in samples.  A positive value indicates a shift
 forward in time (towards larger frame numbers).
+.SS RAW Members
+A gd_entry_t describing a
+.B RAW
+entry, will also provide:
+.PP
+.in +4n
+.nf
+typedef struct {
+  ...
+
+  unsigned int  spf;          /* samples per frame on disk */
+  gd_type_t     data_type;    /* data type on disk */
+
+  ...
+} gd_entry_t;
+.fi
+.in
+.P
+The
+.I samples_per_frame
+member contains the samples per frame of the binary data on disk.
+.P
+The
+.I data_type
+member indicates the data type of the binary data on disk.  See
+.BR getdata (3)
+for a list of valid values that a variable of type
+.B gd_type_t
+may take.
+.SS STRING Members
+A gd_entry_t describing a
+.B STRING
+entry provides no additional data.
 .SH SEE ALSO
 .BR dirfile (5),
 .BR dirfile_free_entry_strings (3),

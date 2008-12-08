@@ -1,0 +1,174 @@
+.\" dirfile_alter_bit.3.  The dirfile_alter_bit man page.
+.\"
+.\" (C) 2008 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" This program is free software; you can redistribute it and/or modify
+.\" it under the terms of the GNU General Public License as published by
+.\" the Free Software Foundation; either version 2 of the License, or
+.\" (at your option) any later version.
+.\"
+.\" GetData is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+.\" General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public License along
+.\" with GetData; if not, write to the Free Software Foundation, Inc.,
+.\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+.\"
+.TH dirfile_alter_bit 3 "7 December 2008" "Version 0.5.0" "GETDATA"
+.SH NAME
+dirfile_alter_bit, dirfile_alter_const, dirfile_alter_lincom,
+dirfile_alter_linterp, dirfile_alter_multiply, dirfile_alter_phase,
+dirfile_alter_raw
+\(em modify a field in a dirfile
+.SH SYNOPSIS
+.B #include <getdata.h>
+.HP
+.nh
+.ad l
+.BI "int dirfile_alter_bit(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "const char *" in_field ", int " bitnum ", int " numbits );
+.HP
+.BI "int dirfile_alter_const(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "gd_type_t " const_type );
+.HP
+.BI "int dirfile_alter_lincom(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "int " n_fields ", const char **" in_fields ", const double *" m ,
+.BI "const double *" b );
+.HP
+.BI "int dirfile_alter_linterp(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "const char *" in_field ", const char *" table ", int " recode );
+.HP
+.BI "int dirfile_alter_multiply(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "const char *" in_field1 ", const char *" in_field2 );
+.HP
+.BI "int dirfile_alter_phase(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "const char *" in_field ", int " phase );
+.HP
+.BI "int dirfile_alter_raw(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "gd_type_t " data_type ", unsigned int " spf ", int " recode );
+.hy
+.ad n
+.SH DESCRIPTION
+These functions provide alternatives to using the
+.BR dirfile_alter_entry (3)
+function to modify a field of the indicated type in the dirfile specified by
+.IR dirfile .
+.P
+In all of these calls,
+.I field_code
+indicates the the field to be modified, which may be a regular field, or a
+metafield specified by its full (slashed) field code.  The meaning and valid
+types of other arguments may be obtained from the
+.BR get_entry (3)
+and
+.BR dirfile-format (5)
+manual pages.
+.P
+The
+.BR dirfile_alter_lincom ()
+function takes pointers to three arrays of length
+.I n_fields
+containing the input field names
+.RI ( in_fields ),
+the gain factors
+.RI ( m ),
+and the offset terms
+.RI ( b ).
+
+Some field parameters have special values which indicate no change should be
+made to the parameter.  Specifically, if any of the string parameters or 
+.IR m " or " b
+are NULL, the old values will be retained.  Similarly, if
+.IR spf ", " n_fields ", or " numbits
+is zero, or if
+.IR bitnum
+is -1, or if
+.IR data_type ", or " const_type
+are equal to
+.BR GD_NULL , 
+these parameters will not be modified.
+
+All fields added with this interface must contain numerical parameters.  Fields
+with
+.B CONST
+fields as parameters cannot be added with these functions.  Those fields must
+be added with
+.BR dirfile_alter_spec (3).
+.SH RETURN VALUE
+On success, any of these functions returns zero.   On error, -1 is returned and 
+the dirfile error is set to a non-zero error value.  Possible error values are:
+.TP 8
+.B GD_E_ACCMODE
+The specified dirfile was opened read-only.
+.TP
+.B GD_E_ALLOC
+The library was unable to allocate memory.
+.TP
+.B GD_E_BAD_CODE
+The field specified by
+.I field_code
+was not found.
+.TP
+.B GD_E_BAD_DIRFILE
+The supplied dirfile was invalid.
+.TP
+.B GD_E_BAD_ENTRY
+One or more of the field parameters specified was invalid.
+.TP
+.B GD_E_BAD_FIELD_TYPE
+The field specified by
+.I field_code
+was of the wrong type for the function called.
+.TP
+.B GD_E_BAD_TYPE
+The
+.IR data_type " or " const_type
+parameter was invalid.
+.TP
+.B GD_E_PROTECTED
+The metadata of the fragment was protected from change.  Or, a request to
+translate the binary file associated with a
+.B RAW
+field was attempted, but the data of the fragment was protected.
+.TP
+.B GD_E_RAW_IO
+An I/O error occurred while translating the binary file associated with a
+modified
+.B RAW
+field, or an I/O error occurred while attempting to rename a
+.B LINTERP
+table file.
+.TP
+.B GD_E_UNKNOWN_ENCODING
+The encoding scheme of the specified format file fragment is not known to the
+library.  As a result, the library was unable to translate the binary file 
+be associated with a modified
+.B RAW
+field.
+.TP
+.B GD_E_UNSUPPORTED
+The encoding scheme of the specified format file fragment does not support
+translating the empty binary file associated with a modified
+.B RAW
+field.
+.P
+The dirfile error may be retrieved by calling
+.BR get_error (3).
+A descriptive error string for the last error encountered can be obtained from
+a call to
+.BR get_error_string (3).
+.SH SEE ALSO
+.BR dirfile_alter_entry (3),
+.BR dirfile_alter_spec (3),
+.BR dirfile_malter_spec (3),
+.BR dirfile_metaflush (3),
+.BR dirfile_open (3),
+.BR get_error (3),
+.BR get_error_string (3),
+.BR dirfile-format (5)
