@@ -1,0 +1,80 @@
+.\" get_endianness.3.  The get_endianness man page.
+.\"
+.\" (C) 2008 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" This program is free software; you can redistribute it and/or modify
+.\" it under the terms of the GNU General Public License as published by
+.\" the Free Software Foundation; either version 2 of the License, or
+.\" (at your option) any later version.
+.\"
+.\" GetData is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+.\" General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public License along
+.\" with GetData; if not, write to the Free Software Foundation, Inc.,
+.\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+.\"
+.TH get_endianness 3 "9 December 2008" "Version 0.5.0" "GETDATA"
+.SH NAME
+get_endianness \(em report the byte sex of fields in a dirfile
+.SH SYNOPSIS
+.B #include <getdata.h>
+.HP
+.nh
+.ad l
+.BI "unsigned long get_endianness(DIRFILE *" dirfile ", int " fragment_index );
+.hy
+.ad n
+.SH DESCRIPTION
+The
+.BR get_endianness ()
+function queries a dirfile(5) database specified by
+.I dirfile
+and returns the byte sex for the fragment indexed by
+.IR fragment_index .
+The byte sex of a fragment indicate the endianness of data stored in binary
+files associated with
+.B RAW
+fields defined in the specified fragment.  The endianness of a fragment
+containing no
+.B RAW
+fields is ignored.
+
+The
+.I dirfile
+argument must point to a valid DIRFILE object previously created by a call to
+.BR dirfile_open (3).
+
+.SH RETURN VALUE
+Upon successful completion,
+.BR get_endianness ()
+returns the byte sex of the specified fragment, which will be either
+.BR GD_BIG_ENDIAN " or " GD_LITTLE_ENDIAN .
+On error, it returns zero and sets the dirfile error to a non-zero error value. 
+Possible error values are:
+.TP 8
+.B GD_E_BAD_DIRFILE
+The supplied dirfile was invalid.
+.TP
+.B GD_E_BAD_INDEX
+The supplied index was out of range.
+.P
+The dirfile error may be retrieved by calling
+.BR get_error (3).
+A descriptive error string for the last error encountered can be obtained from
+a call to
+.BR get_error_string (3).
+.SH SEE ALSO
+.BR dirfile_alter_endianness (3),
+.BR dirfile_open (3),
+.BR getdata (3),
+.BR get_error (3),
+.BR get_error_string (3),
+.BR dirfile (5),
+.BR dirfile-format (5)

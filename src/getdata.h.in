@@ -404,7 +404,7 @@ extern int dirfile_add_spec(DIRFILE* D, const char* line,
 extern int dirifle_alter_encoding(DIRFILE* D, unsigned int encoding,
     int fragment, int recode) __gd_nonnull ((1));
 
-extern int dirfile_alter_endianness(DIRFILE* D, unsigned int byte_sex,
+extern int dirfile_alter_endianness(DIRFILE* D, unsigned long byte_sex,
     int fragment, int recode) __gd_nonnull ((1));
 
 extern int dirfile_alter_entry(DIRFILE* D, const char* field_code,
@@ -431,7 +431,7 @@ extern int dirfile_discard(DIRFILE* dirfile);
 
 extern unsigned int get_encoding(DIRFILE* D, int fragment) __gd_nonnull ((1));
 
-extern int get_endianness(DIRFILE* D, int fragment) __gd_nonnull ((1));
+extern unsigned long get_endianness(DIRFILE* D, int fragment) __gd_nonnull((1));
 
 extern int dirfile_flush(DIRFILE* dirfile,
     const char* field_code) __gd_nonnull ((1));

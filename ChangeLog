@@ -1,3 +1,22 @@
+2008-12-09   D. V. Wiebe <getdata@ketiltrout.net>  svn:264
+	* test/endian_move.c test/endian_get.c test/endian_alter.c: Added.
+
+	* src/endian.c: Use unsigned long for byte_sex parameters.
+
+	* src/endian.c (_GD_ByteSwapFragment) src/open.c (dirfile_cbopen)
+	src/include.c (_GD_Include): Canonicalise byte sex as soon as possible.
+
+	* src/ascii.c (_GD_AsciiTemp) src/raw.c (_GD_RawTemp): Check for valid
+	field name before trying move.
+
+	* src/endian.c (_GD_ByteSwapFragment): Don't bother checking encoding ecor
+	before calling _GD_Mogrify.
+
+	* src/endian.c (get_endianness): Return unsigned long and 0 on error.
+
+2008-12-08   D. V. Wiebe <getdata@ketiltrout.net>  svn:263
+	* test/foffs_move.c test/foffs_get.c test/foffs_alter.c: Added.
+
 2008-12-08   D. V. Wiebe <getdata@ketiltrout.net>  svn:261
 	* test/alter_multiply.c test/alter_entry.c test/alter_phase.c
 	test/alter_linterp_move.c test/alter_lincom_input.c

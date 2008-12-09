@@ -99,6 +99,8 @@ DEL_TESTS=del del_const del_const_deref del_const_force del_data del_derived \
 DFES_TESTS=dfes_bit dfes_lincom dfes_linterp dfes_multiply dfes_null \
 					 dfes_phase dfes_raw dfes_zero
 
+ENDIAN_TESTS=endian_alter endian_get endian_move
+
 ENTRY_TESTS=entry_bad_code entry_bit entry_bit_scalar entry_invalid \
 						entry_lincom entry_lincom_scalar entry_linterp entry_multiply \
 						entry_phase entry_phase_scalar entry_raw entry_raw_scalar \
@@ -212,16 +214,16 @@ VLIST_TESTS=vlist vlist_invalid vlist_meta vlist_meta_invalid
 TESTS=$(ADD_TESTS)        $(ALTER_TESTS)      $(ASCII_TESTS)      \
 			$(BZIP_TESTS)       $(CVLIST_TESTS)     $(CLOSE_TESTS)      \
 			$(CONVERT_TESTS)    $(CREAT_TESTS)      $(DEL_TESTS)        \
-			$(DFES_TESTS)       $(ENTRY_TESTS)      $(ERROR_TESTS)      \
-			$(FLIST_TESTS)      $(FLUSH_TESTS)      $(FOFFS_TESTS)      \
-			$(FRAGMENT_TESTS)   $(GET_TESTS)        $(GLOBAL_TESTS)     \
-			$(GZIP_TESTS)       $(INCLUDE_TESTS)    $(LEGACY_TESTS)     \
-			$(MADD_TESTS)       $(MOVE_TESTS)       $(NFIELDS_TESTS)    \
-			$(NFRAGMENTS_TESTS) $(NFRAMES_TESTS)    $(NMETA_TESTS)      \
-			$(NVECTORS_TESTS)   $(OPEN_TESTS)       $(PARSE_TESTS)      \
-			$(PUT_TESTS)        $(REF_TESTS)        $(SLIM_TESTS)       \
-			$(SPF_TESTS)        $(SVLIST_TESTS)     $(TRUNC_TESTS)      \
-			$(VLIST_TESTS)
+			$(DFES_TESTS)       $(ENDIAN_TESTS)     $(ENTRY_TESTS)      \
+			$(ERROR_TESTS)      $(FLIST_TESTS)      $(FLUSH_TESTS)      \
+			$(FOFFS_TESTS)      $(FRAGMENT_TESTS)   $(GET_TESTS)        \
+			$(GLOBAL_TESTS)     $(GZIP_TESTS)       $(INCLUDE_TESTS)    \
+			$(LEGACY_TESTS)     $(MADD_TESTS)       $(MOVE_TESTS)       \
+			$(NFIELDS_TESTS)    $(NFRAGMENTS_TESTS) $(NFRAMES_TESTS)    \
+			$(NMETA_TESTS)      $(NVECTORS_TESTS)   $(OPEN_TESTS)       \
+			$(PARSE_TESTS)      $(PUT_TESTS)        $(REF_TESTS)        \
+			$(SLIM_TESTS)       $(SPF_TESTS)        $(SVLIST_TESTS)     \
+			$(TRUNC_TESTS)      $(VLIST_TESTS)
 
 check_PROGRAMS=$(TESTS)
 

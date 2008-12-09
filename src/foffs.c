@@ -63,9 +63,9 @@ static void _GD_ShiftFragment(DIRFILE* D, off64_t offset, int fragment,
         raw_entry[n_raw++] = D->entry[i];
 
         if (_GD_MogrifyFile(D, D->entry[i],
-            D->fragment[D->entry[i]->fragment_index].encoding,
-            D->fragment[D->entry[i]->fragment_index].byte_sex, offset, 0, -1,
-            NULL))
+              D->fragment[D->entry[i]->fragment_index].encoding,
+              D->fragment[D->entry[i]->fragment_index].byte_sex, offset, 0, -1,
+              NULL))
           break;
       }
 
@@ -73,7 +73,7 @@ static void _GD_ShiftFragment(DIRFILE* D, off64_t offset, int fragment,
      * remove the temporary files */
     for (i = 0; i < n_raw; ++i)
       if ((*ef[raw_entry[i]->e->file[0].encoding].temp)(raw_entry[i]->e->file,
-           (D->error) ? GD_TEMP_DESTROY : GD_TEMP_MOVE))
+            (D->error) ? GD_TEMP_DESTROY : GD_TEMP_MOVE))
       {
         _GD_SetError(D, GD_E_RAW_IO, 0, raw_entry[i]->e->file[0].name,
             errno, NULL);

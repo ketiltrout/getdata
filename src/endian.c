@@ -26,12 +26,20 @@
 #include <errno.h>
 #endif
 
-static void _GD_ByteSwapFragment(DIRFILE* D, unsigned int byte_sex,
+static void _GD_ByteSwapFragment(DIRFILE* D, unsigned long byte_sex,
     int fragment, int move)
 {
   unsigned int i, n_raw = 0;
 
-  dtrace("%p, %u, %i, %i\n", D, byte_sex, fragment, move);
+  dtrace("%p, %lx, %i, %i", D, byte_sex, fragment, move);
+
+  byte_sex = 
+#ifdef WORDS_BIGENDIAN
+    (byte_sex & GD_LITTLE_ENDIAN) ? GD_LITTLE_ENDIAN : GD_BIG_ENDIAN
+#else
+    (byte_sex & GD_BIG_ENDIAN) ? GD_BIG_ENDIAN : GD_LITTLE_ENDIAN
+#endif
+    ;
 
   /* check protection */
   if (D->fragment[fragment].protection & GD_PROTECT_FORMAT) {
@@ -56,11 +64,6 @@ static void _GD_ByteSwapFragment(DIRFILE* D, unsigned int byte_sex,
       if (D->entry[i]->fragment_index == fragment &&
           D->entry[i]->field_type == GD_RAW_ENTRY)
       {
-        /* if the field's subencoding requires no endianness correction,
-         * do nothing */
-        if (!ef[D->entry[i]->e->file[0].encoding].ecor)
-          continue;
-
         /* if the field's data type is one byte long, do nothing */
         if (D->entry[i]->e->size == 1)
           continue;
@@ -73,9 +76,9 @@ static void _GD_ByteSwapFragment(DIRFILE* D, unsigned int byte_sex,
         raw_entry[n_raw++] = D->entry[i];
 
         if (_GD_MogrifyFile(D, D->entry[i],
-            D->fragment[D->entry[i]->fragment_index].encoding, byte_sex,
-            D->fragment[D->entry[i]->fragment_index].frame_offset, 0, -1,
-            NULL))
+              D->fragment[D->entry[i]->fragment_index].encoding, byte_sex,
+              D->fragment[D->entry[i]->fragment_index].frame_offset, 0, -1,
+              NULL))
           break;
       }
 
@@ -103,12 +106,12 @@ static void _GD_ByteSwapFragment(DIRFILE* D, unsigned int byte_sex,
   dreturnvoid();
 }
 
-int dirfile_alter_endianness(DIRFILE* D, unsigned int byte_sex, int fragment,
+int dirfile_alter_endianness(DIRFILE* D, unsigned long byte_sex, int fragment,
     int move)
 {
   int i;
 
-  dtrace("%p, %i, %i, %i\n", D, byte_sex, fragment, move);
+  dtrace("%p, %lx, %i, %i", D, byte_sex, fragment, move);
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -150,25 +153,25 @@ int dirfile_alter_endianness(DIRFILE* D, unsigned int byte_sex, int fragment,
   return (D->error) ? -1 : 0;
 }
 
-int get_endianness(DIRFILE* D, int fragment)
+unsigned long get_endianness(DIRFILE* D, int fragment)
 {
-  dtrace("%p, %i\n", D, fragment);
+  dtrace("%p, %i", D, fragment);
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
+    dreturn("%i", 0);
+    return 0;
   }
 
   if (fragment < 0 || fragment >= D->n_fragment) {
     _GD_SetError(D, GD_E_BAD_INDEX, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
+    dreturn("%i", 0);
+    return 0;
   }
 
   _GD_ClearError(D);
 
-  dreturn("%i", D->fragment[fragment].byte_sex);
+  dreturn("0x%x", D->fragment[fragment].byte_sex);
   return D->fragment[fragment].byte_sex;
 }
 

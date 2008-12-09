@@ -1453,7 +1453,13 @@ DIRFILE* dirfile_cbopen(const char* filedir, unsigned long flags,
   D->fragment[0].modified = 0;
   D->fragment[0].parent = -1;
   D->fragment[0].encoding = D->flags & GD_ENCODING;
-  D->fragment[0].byte_sex = D->flags & (GD_LITTLE_ENDIAN | GD_BIG_ENDIAN);
+  D->fragment[0].byte_sex =
+#ifdef WORDS_BIGENDIAN
+    (D->flags & GD_LITTLE_ENDIAN) ? GD_LITTLE_ENDIAN : GD_BIG_ENDIAN
+#else
+    (D->flags & GD_BIG_ENDIAN) ? GD_BIG_ENDIAN : GD_LITTLE_ENDIAN
+#endif
+    ;
   D->fragment[0].ref_name = NULL;
   D->fragment[0].frame_offset = 0;
   D->fragment[0].protection = GD_PROTECT_NONE;

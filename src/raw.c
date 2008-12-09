@@ -134,6 +134,9 @@ int _GD_RawTemp(struct _gd_raw_file *file, int method)
       }
       break;
     case GD_TEMP_MOVE:
+      if (file[1].name == NULL)
+        break;
+
       if (stat(file[0].name, &stat_buf))
         mode = 0644;
       else

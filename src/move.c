@@ -139,8 +139,14 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned int encoding,
   else if ((*enc_out->temp)(E->e->file, GD_TEMP_OPEN))
     _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[1].name, errno, NULL);
 
+  if (D->error) {
+    free(new_filebase);
+    dreturn("%i", -1);
+    return -1;
+  }
+
   /* Open the input file, if necessary */
-  else if (_GD_SetEncodedName(D, E->e->file, E->e->filebase, 0))
+  if (_GD_SetEncodedName(D, E->e->file, E->e->filebase, 0))
     ; /* error already set */
   else if (E->e->file[0].fp == -1 && (*enc_in->open)(E->e->file, 0, 0))
     _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[0].name, errno, NULL);
