@@ -20,7 +20,7 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH dirfile_alter_frameoffset 3 "8 December 2008" "Version 0.5.0" "GETDATA"
+.TH dirfile_alter_frameoffset 3 "9 December 2008" "Version 0.5.0" "GETDATA"
 .SH NAME
 dirfile_alter_frameoffset \(em modify the starting frame of fields in a dirfile
 .SH SYNOPSIS
@@ -29,7 +29,7 @@ dirfile_alter_frameoffset \(em modify the starting frame of fields in a dirfile
 .nh
 .ad l
 .BI "int dirfile_alter_frameoffset(DIRFILE *" dirfile ", off_t " offset ,
-.BI "int " fragment_index ", int " move );
+.BI "int " fragment_index ", int " recode );
 .hy
 .ad n
 .SH DESCRIPTION
@@ -62,14 +62,14 @@ which indicates that the frame offset of all fragments in the database should
 be changed.
 
 If the
-.I move
+.I recode
 argument is non-zero, this call will shift the binary data of affected
 .B RAW
 fields to account for the change in frame offset.  If the new frame offset
 is larger than the old frame offset, this will result in permanent deletion of
 data from the database.  If the new frame offset is smaller than the old frame
 offset, the binary file will be padded at the front with zeroes.  If
-.I move
+.I recode
 is zero, affected binary files are left untouched.
 
 .SH RETURN VALUE

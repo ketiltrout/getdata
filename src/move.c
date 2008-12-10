@@ -233,7 +233,7 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned int encoding,
         E->e->file[0].name = temp.name;
         E->e->file[0].encoding = temp.encoding;
       } else if ((*enc_out->temp)(E->e->file, GD_TEMP_MOVE)) {
-        _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[0].name, errno, NULL);
+        _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[1].name, errno, NULL);
         E->e->file[0].name = temp.name;
         E->e->file[0].encoding = temp.encoding;
       } else if (subencoding != temp.encoding && (*enc_in->unlink)(&temp)) {

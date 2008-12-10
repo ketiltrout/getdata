@@ -171,7 +171,7 @@ unsigned long get_endianness(DIRFILE* D, int fragment)
 
   _GD_ClearError(D);
 
-  dreturn("0x%x", D->fragment[fragment].byte_sex);
+  dreturn("0x%lx", D->fragment[fragment].byte_sex);
   return D->fragment[fragment].byte_sex;
 }
 

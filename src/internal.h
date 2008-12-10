@@ -256,8 +256,8 @@ struct gd_fragment_t {
   char* ename;
   int modified;
   int parent;
-  unsigned int encoding;
-  unsigned int byte_sex;
+  unsigned long encoding;
+  unsigned long byte_sex;
   int protection;
   char* ref_name;
 
@@ -270,7 +270,6 @@ struct gd_fragment_t {
 };
 
 /* internal flags */
-#define GD_ENC_UNSUPPORTED GD_ENCODING /* Dirfile encoding unsupported */
 #define GD_INVALID         0x80000000 /* the dirfile is invalid */
 
 #define LIST_VALID_FIELD        0x01
@@ -343,7 +342,7 @@ size_t _GD_DoFieldOut(DIRFILE* D, gd_entry_t *E, const char *field_code,
     off64_t first_frame, off64_t first_samp, size_t num_frames,
     size_t num_samp, gd_type_t data_type, const void *data_in);
 int _GD_EntryCmp(const void *A, const void *B);
-int _GD_EncodingUnderstood(unsigned int encoding); 
+int _GD_EncodingUnderstood(unsigned long encoding); 
 gd_entry_t* _GD_FindField(DIRFILE* D, const char* field_code,
     unsigned int *next);
 void _GD_FixEndianness(char* databuffer, size_t size, size_t ns);

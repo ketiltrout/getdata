@@ -1,3 +1,12 @@
+2008-12-10   D. V. Wiebe <getdata@ketiltrout.net>  svn:265
+	* src/encoding.c (_GD_EncodingUnderstood): Understand GD_TEXT_ENCODED.
+
+	* src/encoding.c (_GD_RecodeFragment): Properly handle moving the temporary
+	file and deleting the old file.
+
+	* src/encoding.c (get_encoding): Determine encoding if needed.  Report
+	GD_ENC_UNSUPPORTED if encoding is not understood.
+
 2008-12-09   D. V. Wiebe <getdata@ketiltrout.net>  svn:264
 	* test/endian_move.c test/endian_get.c test/endian_alter.c: Added.
 
