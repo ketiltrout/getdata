@@ -1,3 +1,6 @@
+2008-12-10   D. V. Wiebe <getdata@ketiltrout.net>  svn:266
+	* bindings/cxx/dirfile.cpp (Dirfile::ReferenceFilename): Added.
+
 2008-12-10   D. V. Wiebe <getdata@ketiltrout.net>  svn:265
 	* src/encoding.c (_GD_EncodingUnderstood): Understand GD_TEXT_ENCODED.
 

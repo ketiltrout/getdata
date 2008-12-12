@@ -23,7 +23,7 @@ AUTOMAKE_OPTIONS = foreign
 if HAVE_OFF64_T
 LFS_transitional_mans = getdata64.3 get_frameoffset64.3 get_nframes64.3 \
 												putdata64.3
-INSTALL_DATA_HOOK64 = install_data_hook64
+INSTALL_DATA_HOOK64 = install-data-hook64
 endif
 
 dist_man_MANS = dirfile_add.3 dirfile_add_bit.3 dirfile_add_spec.3 \
