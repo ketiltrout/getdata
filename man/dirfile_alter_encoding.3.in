@@ -1,4 +1,6 @@
-.\" dirfile_alter_encoding.3.  The dirfile_alter_encoding man page.
+.\" dirfile_alter_encoding.3.in.  The dirfile_alter_encoding man page.
+.\"
+.\" man/dirfile_alter_encoding.3.  Generated from dirfile_alter_encoding.3.in by configure.
 .\"
 .\" (C) 2008 D. V. Wiebe
 .\"
@@ -19,8 +21,7 @@
 .\" You should have received a copy of the GNU General Public License along
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-.\"
-.TH dirfile_alter_encoding 3 "8 December 2008" "Version 0.5.0" "GETDATA"
+.TH dirfile_alter_encoding 3 "17 December 2008" "Version 0.5.0" "GETDATA"
 .SH NAME
 dirfile_alter_encoding \(em modify the binary encoding of data in a dirfile
 .SH SYNOPSIS
@@ -69,7 +70,7 @@ In addition to being simply a valid fragment index,
 .I fragment_index
 may also be the special value
 .BR GD_ALL_FRAGMENTS ,
-which indicates that the frame offset of all fragments in the database should
+which indicates that the encoding of all fragments in the database should
 be changed.
 
 If the
@@ -108,11 +109,19 @@ recoding was requested.
 .B GD_E_RAW_IO
 An I/O error occurred while attempting to recode a binary file.
 .TP
+.B GD_E_UNCLEAN_DB
+An error occurred while moving the recoded file into place.  As a result, the
+database may be in an unclean state.  See the
+.B NOTES
+section below for recovery instructions.  In this case, the dirfile will be
+flagged as invalid, to prevent further database corruption.  It should be
+immediately closed.
+.TP
 .B GD_E_UNKNOWN_ENCODING
 The encoding scheme of the fragment is unknown.
 .TP
 .B GD_E_UNSUPPORTED
-The encoding scheme of the fragment does not suport binary file recoding.
+The encoding scheme of the fragment does not support binary file recoding.
 .P
 The dirfile error may be retrieved by calling
 .BR get_error (3).
@@ -127,6 +136,15 @@ fields in the fragment both before and after translation.  If all fragments
 are updated by specifying
 .BR GD_ALL_FRAGMENTS ,
 the recoding occurs one fragment at a time.
+
+An error code of
+.B GD_E_UNCLEAN_DB
+indicates a system error occurred while moving the re-encoded binary data into
+place or when deleting the old data.  If this happens, the database may be left
+in an unclean state.  The caller should check the filesystem directly to
+ascertain the state of the dirfile data before continuing.  For recovery
+instructions, see the file
+@absolute_docdir@/unclean_database_recovery.txt.
 .SH SEE ALSO
 .BR dirfile_cbopen (3),
 .BR getdata (3),

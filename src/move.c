@@ -111,7 +111,7 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned int encoding,
   /* If all that's changing is the byte sex, but we don't need to do
    * endianness conversion, don't do anything */
   if (offset == 0 && encoding == D->fragment[E->fragment_index].encoding &&
-      !byte_sex)
+      !byte_sex && strcmp(new_filebase, E->e->filebase) == 0)
   {
     free(new_filebase);
     dreturn("%i", 0);
@@ -229,14 +229,16 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned int encoding,
       E->e->file[0].name = NULL;
       E->e->file[0].encoding = subencoding;
 
-      if (_GD_SetEncodedName(D, E->e->file, E->e->filebase, 0)) {
+      if (_GD_SetEncodedName(D, E->e->file, new_filebase, 0)) {
         E->e->file[0].name = temp.name;
         E->e->file[0].encoding = temp.encoding;
       } else if ((*enc_out->temp)(E->e->file, GD_TEMP_MOVE)) {
         _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[1].name, errno, NULL);
         E->e->file[0].name = temp.name;
         E->e->file[0].encoding = temp.encoding;
-      } else if (subencoding != temp.encoding && (*enc_in->unlink)(&temp)) {
+      } else if ((subencoding != temp.encoding || strcmp(E->e->filebase,
+              new_filebase)) && (*enc_in->unlink)(&temp))
+      {
         _GD_SetError(D, GD_E_RAW_IO, 0, temp.name, errno, NULL);
         E->e->file[0].name = temp.name;
         E->e->file[0].encoding = temp.encoding;
@@ -256,6 +258,33 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned int encoding,
 
   dreturn("%i", 0);
   return 0;
+}
+
+static int strcmpnull(const char *s1, const char *s2)
+{
+  int r;
+
+  dtrace("%p, %p", s1, s2);
+
+  if (s1 == NULL && s2 == NULL) {
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  if (s1 == NULL) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  if (s2 == NULL) {
+    dreturn("%i", 1);
+    return 1;
+  }
+
+  r = strcmp(s1, s2);
+
+  dreturn("%i", r);
+  return r;
 }
 
 int dirfile_move(DIRFILE* D, const char* field_code, int new_fragment,
@@ -316,7 +345,9 @@ int dirfile_move(DIRFILE* D, const char* field_code, int new_fragment,
        D->fragment[E->fragment_index].byte_sex !=
        D->fragment[new_fragment].byte_sex ||
        D->fragment[E->fragment_index].frame_offset !=
-       D->fragment[new_fragment].frame_offset))
+       D->fragment[new_fragment].frame_offset ||
+       strcmpnull(D->fragment[E->fragment_index].sname,
+         D->fragment[new_fragment].sname)))
   {
     new_filebase = malloc(FILENAME_MAX);
     if (new_filebase == NULL) {

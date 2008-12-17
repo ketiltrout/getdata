@@ -110,6 +110,8 @@ ENTRY_TESTS=entry_bad_code entry_bit entry_bit_scalar entry_invalid \
 
 ERROR_TESTS=error error_error error_short
 
+FILE_TESTS=file file_code file_type
+
 FLIST_TESTS=flist flist_invalid flist_meta flist_meta_invalid flist_type \
 						flist_type_invalid flist_type_meta flist_type_meta_invalid
 
@@ -149,7 +151,9 @@ MADD_TESTS=madd madd_bit madd_bit_invalid madd_lincom madd_lincom_invalid \
 					 madd_spec_directive madd_spec_invalid
 
 MOVE_TESTS=move move_data_enc_ar move_data_enc_ra move_data_endian \
-					 move_data_foffs move_data_nop move_index move_protect
+					 move_data_foffs move_data_nop move_index move_protect move_subdir
+
+NAME_TESTS=name name_move
 
 NFIELDS_TESTS=nfields nfields_invalid nfields_type nfields_type_invalid
 
@@ -166,6 +170,8 @@ NVECTORS_TESTS=nvectors nvectors_invalid
 
 OPEN_TESTS=open open_cb_abort open_cb_cont open_cb_ignore open_cb_invalid \
 					 open_cb_rescan open_eaccess open_nonexistent open_notdirfile
+
+PARENT_TESTS=parent
 
 PARSE_TESTS=parse_badline parse_bit parse_bit4 parse_bit_bitnum \
 						parse_bit_bitsize parse_bit_ncols parse_bit_numbits \
@@ -189,6 +195,8 @@ PARSE_TESTS=parse_badline parse_bit parse_bit4 parse_bit_bitnum \
 						parse_version_include parse_version_pedantic parse_version_slash \
 						parse_whitespace
 
+PROTECT_TESTS=protect_alter protect_get
+
 PUT_TESTS=put64 put_bad_code put_bit put_bof put_char put_const \
 					put_const_protect put_endian8 put_endian16 put_endian32 put_endian64 \
 					put_endian_float32 put_endian_float64 put_ff put_float32 put_float64 \
@@ -211,21 +219,25 @@ SPF_TESTS=spf spf_lincom spf_multiply spf_recurse
 
 TRUNC_TESTS=trunc trunc_rdonly trunc_rofs
 
+UNCLUDE_TESTS=unclude unclude_del unclude_move
+
 VLIST_TESTS=vlist vlist_invalid vlist_meta vlist_meta_invalid
 
 TESTS=$(ADD_TESTS)        $(ALTER_TESTS)      $(ASCII_TESTS)      \
 			$(BZIP_TESTS)       $(CVLIST_TESTS)     $(CLOSE_TESTS)      \
 			$(CONVERT_TESTS)    $(CREAT_TESTS)      $(DEL_TESTS)        \
 			$(DFES_TESTS)       $(ENCODE_TESTS)     $(ENDIAN_TESTS)     \
-			$(ENTRY_TESTS)      $(ERROR_TESTS)      $(FLIST_TESTS)      \
-			$(FLUSH_TESTS)      $(FOFFS_TESTS)      $(FRAGMENT_TESTS)   \
-			$(GET_TESTS)        $(GLOBAL_TESTS)     $(GZIP_TESTS)       \
-			$(INCLUDE_TESTS)    $(LEGACY_TESTS)     $(MADD_TESTS)       \
-			$(MOVE_TESTS)       $(NFIELDS_TESTS)    $(NFRAGMENTS_TESTS) \
-			$(NFRAMES_TESTS)    $(NMETA_TESTS)      $(NVECTORS_TESTS)   \
-			$(OPEN_TESTS)       $(PARSE_TESTS)      $(PUT_TESTS)        \
-			$(REF_TESTS)        $(SLIM_TESTS)       $(SPF_TESTS)        \
-			$(SVLIST_TESTS)     $(TRUNC_TESTS)      $(VLIST_TESTS)
+			$(ENTRY_TESTS)      $(ERROR_TESTS)      $(FILE_TESTS)       \
+			$(FLIST_TESTS)      $(FLUSH_TESTS)      $(FOFFS_TESTS)      \
+			$(FRAGMENT_TESTS)   $(GET_TESTS)        $(GLOBAL_TESTS)     \
+			$(GZIP_TESTS)       $(INCLUDE_TESTS)    $(LEGACY_TESTS)     \
+			$(MADD_TESTS)       $(MOVE_TESTS)       $(NAME_TESTS)       \
+			$(NFIELDS_TESTS)    $(NFRAGMENTS_TESTS) $(NFRAMES_TESTS)    \
+			$(NMETA_TESTS)      $(NVECTORS_TESTS)   $(OPEN_TESTS)       \
+			$(PARENT_TESTS)     $(PARSE_TESTS)      $(PROTECT_TESTS)    \
+			$(PUT_TESTS)        $(REF_TESTS)        $(SLIM_TESTS)       \
+			$(SPF_TESTS)        $(SVLIST_TESTS)     $(TRUNC_TESTS)      \
+			$(UNCLUDE_TESTS)    $(VLIST_TESTS)
 
 check_PROGRAMS=$(TESTS)
 

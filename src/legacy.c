@@ -74,6 +74,8 @@ const char *GD_ERROR_CODES[GD_N_ERROR_CODES] = {
   NULL, /* GD_E_DELETE */
   NULL, /* GD_E_BAD_ENDIANNESS */
   NULL, /* GD_E_CALLBACK */
+  NULL, /* GD_E_BAD_PROTECTION */
+  NULL, /* GD_E_UNCLEAN_DB */
 };
 
 static struct FormatType Format = {

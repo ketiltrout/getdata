@@ -309,6 +309,19 @@ fi
 
 AC_CHECK_SIZEOF([int])
 
+dnl Calculate absolute docdir
+cat <<EOF > conftest.sh
+prefix=$prefix
+test "x$prefix" = xNONE && prefix=$ac_default_prefix
+test "x$exec_prefix" = xNONE && exec_prefix=\$prefix
+exec_prefix=$exec_prefix
+datarootdir=$datarootdir
+PACKAGE_TARNAME=$PACKAGE_TARNAME
+echo $docdir
+EOF
+absolute_docdir=`$SHELL conftest.sh`
+AC_SUBST([absolute_docdir])
+
 dnl output
 AC_CONFIG_FILES([Makefile])
 AC_CONFIG_FILES([bin/Makefile])
@@ -321,9 +334,12 @@ if test "x$make_f77bindings" = "xyes"; then
   AC_CONFIG_FILES([bindings/f77/Makefile])
   AC_CONFIG_FILES([bindings/f77/test/Makefile])
 fi
+AC_CONFIG_FILES([doc/Makefile])
 AC_CONFIG_FILES([man/Makefile])
+AC_CONFIG_FILES([man/dirfile_alter_encoding.3])
+AC_CONFIG_FILES([man/dirfile_alter_endianness.3])
+AC_CONFIG_FILES([man/dirfile_alter_frameoffset.3])
 AC_CONFIG_FILES([src/Makefile])
-dnl (because I keep modifying getdata.h instead of getdata.h.in)
 AC_CONFIG_HEADERS([src/getdata.h], [chmod a-w src/getdata.h])
 AC_CONFIG_FILES([src/getdata.pc])
 AC_CONFIG_FILES([test/Makefile])

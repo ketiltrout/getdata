@@ -226,9 +226,9 @@ static void _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
   dreturnvoid();
 }
 
-void _GD_FlushMeta(DIRFILE* D)
+void _GD_FlushFragment(DIRFILE* D, int i)
 {
-  int i, j;
+  int j;
   FILE* stream;
   char buffer[GD_MAX_LINE_LENGTH];
   char temp_file[FILENAME_MAX];
@@ -240,7 +240,132 @@ void _GD_FlushMeta(DIRFILE* D)
   mode_t mode;
   struct stat stat_buf;
 
-  dtrace("%p", D);
+  dtrace("%p, %i", D, i);
+
+  /* get the permissions of the old file */
+  if (stat(D->fragment[i].cname, &stat_buf))
+    mode = 0644;
+  else
+    mode = stat_buf.st_mode;
+
+  /* open a temporary file */
+  snprintf(temp_file, GD_MAX_LINE_LENGTH, "%s/format_XXXXXX", D->name);
+  fd = mkstemp(temp_file);
+  if (fd == -1) {
+    _GD_SetError(D, GD_E_OPEN_INCLUDE, errno, NULL, 0, temp_file);
+    dreturnvoid();
+    return;
+  }
+  stream = fdopen(fd, "w");
+  if (stream == NULL) {
+    _GD_SetError(D, GD_E_OPEN_INCLUDE, errno, NULL, 0, temp_file);
+    dreturnvoid();
+    return;
+  }
+
+  /* Introit */
+  t = time(NULL);
+  strftime(buffer, GD_MAX_LINE_LENGTH, "%c", gmtime_r(&t, &now));
+
+  fprintf(stream, "# This is a dirfile format file.\n"
+      "# It was written using version %s of the GetData Library.\n"
+      "# Written on %s UTC", PACKAGE_VERSION, buffer);
+
+  if ((ptr = getenv("LOGNAME")) != NULL) {
+    fprintf(stream, " by %s", ptr);
+    if ((ptr = getenv("HOSTNAME")) != NULL)
+      fprintf(stream, "@%s", ptr);
+  }
+  fputs(".\n", stream);
+
+  /* Regardless of the version of the input dirfile, we always write
+   * the latest version to disk -- this is present in every format file
+   * fragment as the first non-comment line for sanity's sake. */
+  fprintf(stream, "/VERSION %i\n", DIRFILE_STANDARDS_VERSION);
+
+  /* Byte Sex */
+  fprintf(stream, "/ENDIAN %s\n",
+#ifdef WORDS_BIGENDIAN
+      (D->fragment[i].byte_sex == GD_LITTLE_ENDIAN) ? "little" : "big"
+#else
+      (D->fragment[i].byte_sex == GD_BIG_ENDIAN) ? "big" : "little"
+#endif
+      );
+
+  if (D->fragment[i].protection == GD_PROTECT_NONE)
+    fputs("/PROTECT none\n", stream);
+  else if (D->fragment[i].protection == GD_PROTECT_FORMAT)
+    fputs("/PROTECT format\n", stream);
+  else if (D->fragment[i].protection == GD_PROTECT_FORMAT)
+    fputs("/PROTECT data\n", stream);
+  else
+    fputs("/PROTECT all\n", stream);
+
+  if (D->fragment[i].frame_offset != 0)
+    fprintf(stream, "/FRAMEOFFSET %llu\n",
+        (unsigned long long)D->fragment[i].frame_offset);
+
+  /* The encoding -- we only write encodings we know about. */
+  switch(D->fragment[i].encoding) {
+    case GD_UNENCODED:
+      fputs("/ENCODING none\n", stream);
+      break;
+    case GD_SLIM_ENCODED:
+      fputs("/ENCODING slim\n", stream);
+      break;
+    case GD_TEXT_ENCODED:
+      fputs("/ENCODING text\n", stream);
+      break;
+  }
+
+  /* The includes */
+  for (j = 0; j < D->n_fragment; ++j)
+    if (D->fragment[j].parent == i)
+      fprintf(stream, "/INCLUDE %s\n", D->fragment[j].ename);
+
+  /* The fields */
+  for (u = 0; u < D->n_entries; ++u)
+    if (D->entry[u]->fragment_index == i && D->entry[u]->e->n_meta != -1) {
+      _GD_FieldSpec(D, stream, D->entry[u], 0);
+      for (j = 0; j < D->entry[u]->e->n_meta; ++j)
+        _GD_FieldSpec(D, stream, D->entry[u]->e->meta_entry[j], 1);
+    }
+
+  /* REFERENCE is written at the end, because its effect can propagate
+   * upwards */
+  if (D->fragment[i].ref_name != NULL)
+    fprintf(stream, "/REFERENCE %s\n", _GD_StringEscapeise(buffer,
+          D->fragment[i].ref_name));
+
+  /* That's all, flush, sync, and close */
+  fflush(stream);
+  fsync(fd);
+  fchmod(fd, mode);
+  fclose(stream);
+
+  /* If no error was encountered, move the temporary file over the
+   * old format file, otherwise abort */
+  if (D->error != GD_E_OK) {
+    unlink(temp_file);
+    dreturnvoid();
+    return;
+    /* Only assume we've synced the file if the rename succeeds */
+  } else if (rename(temp_file, D->fragment[i].cname)) {
+    _GD_SetError(D, GD_E_OPEN_INCLUDE, errno, NULL, 0, D->fragment[i].cname);
+    unlink(temp_file);
+    dreturnvoid();
+    return;
+  } else
+    D->fragment[i].modified = 0;
+
+  dreturnvoid();
+}
+
+void _GD_FlushMeta(DIRFILE* D, int fragment)
+{
+  int i;
+
+  dtrace("%p, %i", D, fragment);
 
   if ((D->flags & GD_ACCMODE) == GD_RDONLY) {
     /* nothing to do */
@@ -248,121 +373,12 @@ void _GD_FlushMeta(DIRFILE* D)
     return;
   }
 
-  for (i = 0; i < D->n_fragment; ++i)
-    if (D->fragment[i].modified) {
-      /* get the permissions of the old file */
-      if (stat(D->fragment[i].cname, &stat_buf))
-        mode = 0644;
-      else
-        mode = stat_buf.st_mode;
-
-      /* open a temporary file */
-      snprintf(temp_file, GD_MAX_LINE_LENGTH, "%s/format_XXXXXX", D->name);
-      fd = mkstemp(temp_file);
-      if (fd == -1) {
-        _GD_SetError(D, GD_E_OPEN_INCLUDE, errno, NULL, 0, temp_file);
-        break;
-      }
-      stream = fdopen(fd, "w");
-      if (stream == NULL) {
-        _GD_SetError(D, GD_E_OPEN_INCLUDE, errno, NULL, 0, temp_file);
-        break;
-      }
-
-      /* Introit */
-      t = time(NULL);
-      strftime(buffer, GD_MAX_LINE_LENGTH, "%c", gmtime_r(&t, &now));
-
-      fprintf(stream, "# This is a dirfile format file.\n"
-          "# It was written using version %s of the GetData Library.\n"
-          "# Written on %s UTC", PACKAGE_VERSION, buffer);
-
-      if ((ptr = getenv("LOGNAME")) != NULL) {
-        fprintf(stream, " by %s", ptr);
-        if ((ptr = getenv("HOSTNAME")) != NULL)
-          fprintf(stream, "@%s", ptr);
-      }
-      fputs(".\n", stream);
-
-      /* Regardless of the version of the input dirfile, we always write
-       * the latest version to disk -- this is present in every format file
-       * fragment as the first non-comment line for sanity's sake. */
-      fprintf(stream, "/VERSION %i\n", DIRFILE_STANDARDS_VERSION);
-
-      /* Byte Sex */
-      fprintf(stream, "/ENDIAN %s\n",
-#ifdef WORDS_BIGENDIAN
-          (D->fragment[i].byte_sex == GD_LITTLE_ENDIAN) ? "little" : "big"
-#else
-          (D->fragment[i].byte_sex == GD_BIG_ENDIAN) ? "big" : "little"
-#endif
-          );
-
-      if (D->fragment[i].protection == GD_PROTECT_NONE)
-        fputs("/PROTECT none\n", stream);
-      else if (D->fragment[i].protection == GD_PROTECT_FORMAT)
-        fputs("/PROTECT format\n", stream);
-      else if (D->fragment[i].protection == GD_PROTECT_FORMAT)
-        fputs("/PROTECT data\n", stream);
-      else
-        fputs("/PROTECT all\n", stream);
-
-      if (D->fragment[i].frame_offset != 0)
-        fprintf(stream, "/FRAMEOFFSET %llu\n",
-            (unsigned long long)D->fragment[i].frame_offset);
-
-      /* The encoding -- we only write encodings we know about. */
-      switch(D->fragment[i].encoding) {
-        case GD_UNENCODED:
-          fputs("/ENCODING none\n", stream);
-          break;
-        case GD_SLIM_ENCODED:
-          fputs("/ENCODING slim\n", stream);
-          break;
-        case GD_TEXT_ENCODED:
-          fputs("/ENCODING text\n", stream);
-          break;
-      }
-
-      /* The includes */
-      for (j = 0; j < D->n_fragment; ++j)
-        if (D->fragment[j].parent == i)
-          fprintf(stream, "/INCLUDE %s\n", D->fragment[j].ename);
-
-      /* The fields */
-      for (u = 0; u < D->n_entries; ++u)
-        if (D->entry[u]->fragment_index == i && D->entry[u]->e->n_meta != -1) {
-          _GD_FieldSpec(D, stream, D->entry[u], 0);
-          for (j = 0; j < D->entry[u]->e->n_meta; ++j)
-            _GD_FieldSpec(D, stream, D->entry[u]->e->meta_entry[j], 1);
-        }
-
-      /* REFERENCE is written at the end, because its effect can propagate
-       * upwards */
-      if (D->fragment[i].ref_name != NULL)
-        fprintf(stream, "/REFERENCE %s\n", _GD_StringEscapeise(buffer,
-              D->fragment[i].ref_name));
-
-      /* That's all, flush, sync, and close */
-      fflush(stream);
-      fsync(fd);
-      fchmod(fd, mode);
-      fclose(stream);
-
-      /* If no error was encountered, move the temporary file over the
-       * old format file, otherwise abort */
-      if (D->error != GD_E_OK) {
-        unlink(temp_file);
-        break;
-        /* Only assume we've synced the file if the rename succeeds */
-      } else if (rename(temp_file, D->fragment[i].cname)) {
-        _GD_SetError(D, GD_E_OPEN_INCLUDE, errno, NULL, 0,
-            D->fragment[i].cname);
-        unlink(temp_file);
-        break;
-      } else
-        D->fragment[i].modified = 0;
-    }
+  if (fragment == GD_ALL_FRAGMENTS) {
+    for (i = 0; i < D->n_fragment; ++i)
+      if (D->fragment[i].modified)
+        _GD_FlushFragment(D, i);
+  } else if (D->fragment[fragment].modified)
+    _GD_FlushFragment(D, fragment);
 
   dreturnvoid();
 }
@@ -376,7 +392,7 @@ int dirfile_metaflush(DIRFILE* D)
   if (D->flags & GD_INVALID) /* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
   else
-    _GD_FlushMeta(D);
+    _GD_FlushMeta(D, GD_ALL_FRAGMENTS);
 
   dreturn("%i", (D->error == GD_E_OK) ? 0 : -1);
   return (D->error == GD_E_OK) ? 0 : -1;
@@ -393,7 +409,7 @@ int dirfile_flush(DIRFILE* D, const char* field_code)
   if (D->flags & GD_INVALID) /* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
   else if (field_code == NULL) {
-    _GD_FlushMeta(D);
+    _GD_FlushMeta(D, GD_ALL_FRAGMENTS);
     if (!D->error)
       for (i = 0; i < D->n_entries; ++i)
         if (D->entry[i]->field_type == GD_RAW_ENTRY)

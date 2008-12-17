@@ -1,4 +1,4 @@
-.\" dirfile_move.3.  The dirfile_move man page.
+.\" dirfile_rename.3.  The dirfile_rename man page.
 .\"
 .\" (C) 2008 D. V. Wiebe
 .\"
@@ -20,41 +20,43 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH dirfile_move 3 "14 December 2008" "Version 0.5.0" "GETDATA"
+.TH dirfile_rename 3 "14 December 2008" "Version 0.5.0" "GETDATA"
 .SH NAME
-dirfile_move \(em move a dirfile field between format file fragments
+dirfile_rename \(em change the name of a dirfile field
 .SH SYNOPSIS
 .B #include <getdata.h>
 .HP
 .nh
 .ad l
-.BI "const char *dirfile_move(DIRFILE *" dirfile ", const char"
-.BI * field_code ", int " new_fragment ", int " move_data );
+.BI "int dirfile_rename(DIRFILE *" dirfile ", const char"
+.BI * old_code ", cons char *" new_name ", int " move_data );
 .hy
 .ad n
 .SH DESCRIPTION
 The
-.BR dirfile_move ()
-function transfers the field
-.I field_code
+.BR dirfile_rename ()
+function changes the name of the field specified by
+.I old_code
 defined in the dirfile specified by
 .IR dirfile
-from it's current format file fragment to the fragment index by
-.IR new_fragment .
-If the field is already defined in the fragment index by
-.IR new_fragment ,
-this function does nothing.
+to
+.IR new_name .
+If the new name is the same as the old name, this function does nothing.
+
+When renaming a metafield, the metafield should be specified in
+.I old_code
+by its full (slashed) field code, while
+.I new_name
+should only contain the new name (without slash).
 
 If the flag
 .I move_data
 is non-zero, and
-.I field_code
+.I old_code
 specifies a
 .B RAW
-field, the binary file associated with the field will be translated to account
-for the possibly different encoding, endianness, and frame offset of the
-new format file fragment.  It will also be moved to a new directory, if
-necessary.  If
+field, the binary file associated with the field will be renamed as well.
+If
 .I move_data
 is zero, no changes will be made to the binary file.  If
 .I field_code
@@ -64,15 +66,9 @@ the
 .I move_data
 flag is ignored.
 
-If the binary file is translated, and the frame offset of the destination
-fragment is larger than that of the source fragment, this will result in
-permanent deletion of data from the database.  If the new frame offset is
-smaller than the old frame offset, the binary file will be padded at the front
-with zeroes.
-
 .SH RETURN VALUE
 On success,
-.BR dirfile_move ()
+.BR dirfile_rename ()
 returns zero.  On error, -1 is returned and the dirfile error is set to a
 non-zero error value.  Possible error values are:
 .TP 8
@@ -84,31 +80,29 @@ The library was unable to allocate memory.
 .TP
 .B GD_E_BAD_CODE
 The field specified by
-.I field_code
+.I old_code
 was not found.
 .TP
 .B GD_E_BAD_DIRFILE
 The supplied dirfile was invalid.
 .TP
-.B GD_E_BAD_INDEX
-The
-.I new_fragment
-argument did not index a valid format file fragment.
+.B GD_E_DUPLICATE
+The new name specified is already in use by another field.
 .TP
 .B GD_E_PROTECTED
-The metadata of the source or destination format file fragments was protected
-from change, or the binary data of the source or destination fragments was
-protected from change and binary file translation was requested.
+The metadata of the format file fragment containing the field was protected
+from change, or the binary data of the fragments was protected from change and
+binary file translation was requested.
 .TP
 .B GD_E_RAW_IO
-An I/O error occurred while attempting to translate a binary file.
+An I/O error occurred while attempting to rename the binary file.
 .TP
 .B GD_E_UNKNOWN_ENCODING
-The encoding scheme of the source or destination fragment is unknown.
+The encoding scheme of the specified field could not be determined or was not
+understood by GetData.
 .TP
 .B GD_E_UNSUPPORTED
-The encoding scheme of the source or destination fragment does not support
-binary file translation.
+The encoding scheme of the field does not support binary file renaming.
 .P
 The dirfile error may be retrieved by calling
 .BR get_error (3).

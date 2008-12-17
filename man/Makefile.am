@@ -41,9 +41,11 @@ dist_man_MANS = dirfile_add.3 dirfile_add_bit.3 dirfile_add_spec.3 \
 								get_mstrings.3 get_mvector_list.3 dirfilename.3 get_nfields.3 \
 								get_nfields_by_type.3 get_nfragments.3 get_nframes.3 \
 								get_nmfields.3 get_nmfields_by_type.3 get_nmvectors.3 \
-								get_nvectors.3 dirfile_reference.3 get_spf.3 get_string.3 \
-								put_string.3 get_strings.3 get_vector_list.3 dirfile.5 \
-								dirfile-encoding.5 dirfile-format.5 $(LFS_transitional_mans)
+								get_nvectors.3 get_parent_fragment.3 get_raw_filename.3 \
+								dirfile_reference.3 dirfile_rename.3 get_spf.3 get_string.3 \
+								put_string.3 get_strings.3 dirfile_uninclude.3 \
+								get_vector_list.3 dirfile.5 dirfile-encoding.5 \
+								dirfile-format.5 $(LFS_transitional_mans)
 
 install-data-hook: ${INSTALL_DATA_HOOK64}
 	cd $(DESTDIR)$(mandir)/man3 && \
@@ -85,3 +87,5 @@ install-data-hook64:
 
 clean-local:
 	rm -rf *~ 
+	rm -rf dirfile_alter_encoding.3 dirfile_alter_endianness.3 \
+		dirfile_alter_frameoffset.3

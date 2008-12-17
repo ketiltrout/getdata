@@ -71,13 +71,22 @@ static void _GD_ShiftFragment(DIRFILE* D, off64_t offset, int fragment,
 
     /* If successful, move the temporary file over the old file, otherwise
      * remove the temporary files */
-    for (i = 0; i < n_raw; ++i)
-      if ((*ef[raw_entry[i]->e->file[0].encoding].temp)(raw_entry[i]->e->file,
-            (D->error) ? GD_TEMP_DESTROY : GD_TEMP_MOVE))
-      {
-        _GD_SetError(D, GD_E_RAW_IO, 0, raw_entry[i]->e->file[0].name,
-            errno, NULL);
-      }
+    if (D->error) {
+      for (i = 0; i < n_raw; ++i)
+        if ((*ef[raw_entry[i]->e->file[0].encoding].temp)(raw_entry[i]->e->file,
+              GD_TEMP_DESTROY))
+          _GD_SetError(D, GD_E_RAW_IO, 0, raw_entry[i]->e->file[0].name,
+              errno, NULL);
+    } else {
+      for (i = 0; i < n_raw; ++i)
+        if ((*ef[raw_entry[i]->e->file[0].encoding].temp)(raw_entry[i]->e->file,
+              GD_TEMP_MOVE))
+        {
+          _GD_SetError(D, GD_E_UNCLEAN_DB, 0,
+              D->fragment[D->entry[i]->fragment_index].cname, 0, NULL);
+          D->flags |= GD_INVALID;
+        }
+    }
 
     free(raw_entry);
 

@@ -85,11 +85,11 @@ lib_LTLIBRARIES = libgetdata.la ${LIBGETDATASLIM_LA} ${LIBGETDATAGZIP_LA} \
 									${LIBGETDATABZIP2_LA}
 libgetdata_la_SOURCES = add.c ascii.c ${BZIP2_C} close.c common.c constant.c \
 												${DEBUG_C} del.c encoding.c endian.c entry.c errors.c \
-												field_list.c flush.c foffs.c format_list.c getdata.c \
+												field_list.c flush.c foffs.c fragment.c getdata.c \
 												globals.c ${GZIP_C} include.c ${LEGACY_C} meta_list.c \
-												mod.c move.c nfields.c nframes.c nmeta.c open.c \
-												putdata.c raw.c ${SLIM_C} spf.c string.c types.c \
-												${GETDATA_LEGACY_H} internal.h
+												mod.c move.c name.c nfields.c nframes.c nmeta.c open.c \
+												parse.c protect.c putdata.c raw.c ${SLIM_C} spf.c \
+												string.c types.c ${GETDATA_LEGACY_H} internal.h
 libgetdata_la_LDFLAGS = $(EXPORT_DYNAMIC) -export-symbols-regex '^[^_]' \
 												-version-info @GETDATA_IFACE_VERSION@:\
 												@GETDATA_IMPL_REVISION@:@GETDATA_IFACE_AGE@ \

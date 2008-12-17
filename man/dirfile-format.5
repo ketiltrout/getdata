@@ -20,7 +20,7 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH dirfile\-format 5 "8 December 2008" "Standards Version 6" "DATA FORMATS"
+.TH dirfile\-format 5 "14 December 2008" "Standards Version 6" "DATA FORMATS"
 .SH NAME
 dirfile\-format \(em the dirfile database format specification file
 .SH DESCRIPTION
@@ -158,7 +158,7 @@ present, plus any sub-fragments indicated by the
 directive, but only if those sub-fragments don't have their own corresponding
 directive.  Directives which have fragment scope are:
 .BR /ENCODING ,\~ /ENDIAN ,\~ /FRAMEOFFSET ", and " /PROTECT .
-Becase of these scoping rules, different portions of the dirfile may have
+Because of these scoping rules, different portions of the dirfile may have
 different encodings, endiannesses, frame offsets, or protection levels.
 
 If a directive with fragment scope appears more than once in a fragment, only

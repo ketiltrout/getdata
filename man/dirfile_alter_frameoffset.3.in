@@ -20,7 +20,7 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH dirfile_alter_frameoffset 3 "9 December 2008" "Version 0.5.0" "GETDATA"
+.TH dirfile_alter_frameoffset 3 "17 December 2008" "Version 0.5.0" "GETDATA"
 .SH NAME
 dirfile_alter_frameoffset \(em modify the starting frame of fields in a dirfile
 .SH SYNOPSIS
@@ -101,11 +101,19 @@ The supplied offset was less than zero.
 .B GD_E_RAW_IO
 An I/O error occurred while attempting to shift a binary file.
 .TP
+.B GD_E_UNCLEAN_DB
+An error occurred while moving the shifted file into place.  As a result, the
+database may be in an unclean state.  See the
+.B NOTES
+section below for recovery instructions.  In this case, the dirfile will be
+flagged as invalid, to prevent further database corruption.  It should be
+immediately closed.
+.TP
 .B GD_E_UNKNOWN_ENCODING
 The encoding scheme of the fragment is unknown.
 .TP
 .B GD_E_UNSUPPORTED
-The encoding scheme of the fragment does not suport binary file shifting.
+The encoding scheme of the fragment does not support binary file shifting.
 .P
 The dirfile error may be retrieved by calling
 .BR get_error (3).
@@ -120,6 +128,15 @@ fields in the fragment both before and after translation.  If all fragments
 are updated by specifying
 .BR GD_ALL_FRAGMENTS ,
 the shifting occurs one fragment at a time.
+
+An error code of
+.B GD_E_UNCLEAN_DB
+indicates a system error occurred while moving the shifted binary data into
+place or when deleting the old data.  If this happens, the database may be left
+in an unclean state.  The caller should check the filesystem directly to
+ascertain the state of the dirfile data before continuing.  For recovery
+instructions, see the file
+@absolute_docdir@/unclean_database_recovery.txt.
 .SH SEE ALSO
 .BR dirfile_open (3),
 .BR getdata (3),

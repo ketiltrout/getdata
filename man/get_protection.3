@@ -1,4 +1,4 @@
-.\" get_nfragments.3.  The get_nfragments man page.
+.\" get_protection.3.  The get_protection man page.
 .\"
 .\" (C) 2008 D. V. Wiebe
 .\"
@@ -20,40 +20,48 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH get_nfragments 3 "14 December 2008" "Version 0.5.0" "GETDATA"
+.TH get_protection 3 "14 December 2008" "Version 0.5.0" "GETDATA"
 .SH NAME
-get_nfragments \(em retrieve the number of format file fragments in a dirfile
+get_protection \(em report the protection level of a dirfile fragment
 .SH SYNOPSIS
 .B #include <getdata.h>
 .HP
 .nh
 .ad l
-.BI "int get_nfragments(const DIRFILE *" dirfile );
+.BI "int get_protection(DIRFILE *" dirfile ", int " fragment_index );
 .hy
 .ad n
 .SH DESCRIPTION
 The
-.BR get_nfragments ()
+.BR get_protection ()
 function queries a dirfile(5) database specified by
 .I dirfile
-and returns the total number of parsed format file fragments in the database.
-
-The 
-.I dirfile
-argument must point to a valid DIRFILE object previously created by a call to
-.BR dirfile_open (3).
+and returns the advisory protection level for the fragment indexed by
+.IR fragment_index .
 
 .SH RETURN VALUE
 Upon successful completion,
-.BR get_nfragments ()
-returns the total number of format file fragments which are present in the
-dirfile.  On error, 
-.BR get_nfragments ()
-returns zero and sets the dirfile error to a non-zero value.  Possible error
-values are:
+.BR get_protection ()
+returns the advisory protection level of the specified fragment, which will be
+one of the following symbols.
+.IP
+.nh
+.ad l
+.BR GD_PROTECT_NONE ,\~ GD_PROTECT_FORMAT ,\~ GD_PROTECT_DATA ,\~
+.BR GD_PROTECT_ALL .
+.ad n
+.hy
+.P
+The meaning of these symbols are explained in the
+.BR dirfile_protect (3)
+man page.  On error, it returns -1 and sets the dirfile error to a non-zero
+error value.  Possible error values are:
 .TP 8
 .B GD_E_BAD_DIRFILE
 The supplied dirfile was invalid.
+.TP
+.B GD_E_BAD_INDEX
+The supplied index was out of range.
 .P
 The dirfile error may be retrieved by calling
 .BR get_error (3).
@@ -61,8 +69,10 @@ A descriptive error string for the last error encountered can be obtained from
 a call to
 .BR get_error_string (3).
 .SH SEE ALSO
-.BR dirfile (5),
-.BR dirfile_include (3),
 .BR dirfile_open (3),
-.BR get_fragmentname (3),
-.BR get_parent_fragment (3)
+.BR dirfile_protect (3),
+.BR getdata (3),
+.BR get_error (3),
+.BR get_error_string (3),
+.BR dirfile (5),
+.BR dirfile-format (5)

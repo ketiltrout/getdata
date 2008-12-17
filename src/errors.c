@@ -154,6 +154,11 @@ static const struct {
   { GD_E_BAD_ENDIANNESS, 0, "Invalid endianness specified", 0 },
   /* GD_E_CALLBACK: 3 = response */
   { GD_E_CALLBACK, 0, "Unrecognised response from callback function: {3}", 0 },
+  /* GD_E_BAD_PROTECTION: (nothing) */
+  { GD_E_BAD_PROTECTION, 0, "Invalid protection level specified", 0 },
+  /* GD_E_UNCLEAN_DB: 3 = fragment */
+  { GD_E_UNCLEAN_DB, 0,
+    "Unexpected system error processing {3}; database unclean", 0 },
   /* GD_E_OK: (nothing) */
   { 0, 0, "Success", 0} /* this must be the last error string defined */
 };

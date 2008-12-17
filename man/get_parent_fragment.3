@@ -1,4 +1,4 @@
-.\" get_nfragments.3.  The get_nfragments man page.
+.\" get_parent_fragment.3.  The get_parent_fragment man page.
 .\"
 .\" (C) 2008 D. V. Wiebe
 .\"
@@ -20,40 +20,45 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH get_nfragments 3 "14 December 2008" "Version 0.5.0" "GETDATA"
+.TH get_parent_fragment 3 "14 December 2008" "Version 0.5.0" "GETDATA"
 .SH NAME
-get_nfragments \(em retrieve the number of format file fragments in a dirfile
+get_parent_fragment \(em retrieve the parent fragment of a fragment in a dirfile
 .SH SYNOPSIS
 .B #include <getdata.h>
 .HP
 .nh
 .ad l
-.BI "int get_nfragments(const DIRFILE *" dirfile );
+.BI "int get_parent_fragment(const DIRFILE *" dirfile ", int " fragment_index );
 .hy
 .ad n
 .SH DESCRIPTION
 The
-.BR get_nfragments ()
+.BR get_parent_fragment ()
 function queries a dirfile(5) database specified by
 .I dirfile
-and returns the total number of parsed format file fragments in the database.
+and returns the index of the fragment which contains the
+.B INCLUDE
+directive for the fragment indexed by
+.IR fragment_index .
 
-The 
-.I dirfile
-argument must point to a valid DIRFILE object previously created by a call to
-.BR dirfile_open (3).
+Since the primary format file fragment is not included in any other fragment,
+passing zero for
+.I fragment_index
+will result in an error.
 
 .SH RETURN VALUE
-Upon successful completion,
-.BR get_nfragments ()
-returns the total number of format file fragments which are present in the
-dirfile.  On error, 
-.BR get_nfragments ()
-returns zero and sets the dirfile error to a non-zero value.  Possible error
+On success,
+.BR get_parent_fragment ()
+returns the index of the specified fragment's parent.  On error,
+.BR get_parent_fragment ()
+returns -1 and sets the dirfile error to a non-zero value.  Possible error
 values are:
 .TP 8
 .B GD_E_BAD_DIRFILE
 The supplied dirfile was invalid.
+.TP
+.B GD_E_BAD_INDEX
+The supplied index was out of range, or was equal to zero.
 .P
 The dirfile error may be retrieved by calling
 .BR get_error (3).
@@ -65,4 +70,4 @@ a call to
 .BR dirfile_include (3),
 .BR dirfile_open (3),
 .BR get_fragmentname (3),
-.BR get_parent_fragment (3)
+.BR get_nfragments (3)

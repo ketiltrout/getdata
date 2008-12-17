@@ -18,25 +18,9 @@
 # with GetData; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-AUTOMAKE_OPTIONS = foreign dist-bzip2 check-news 1.10
+AUTOMAKE_OPTIONS = foreign
 
-EXTRA_DIST = ChangeLog README.cxx README.f77 README.f95
-
-ACLOCAL_AMFLAGS = -I m4
-
-if BUILD_LTDL
-LIBLTDL_SUBDIR=libltdl
-endif
-
-SUBDIRS = $(LIBLTDL_SUBDIR) src bin man . doc test bindings
+dist_doc_DATA = unclean_database_recovery.txt
 
 clean-local:
-	rm -rf *~ 
-
-%.sig: %
-	gpg -abo $@ $<
-
-dist-post: $(distdir).tar.gz.sig $(distdir).tar.bz2.sig
-
-dist-push:  $(distdir).tar.gz.sig $(distdir).tar.bz2.sig $(distdir).tar.gz $(distdir).tar.bz2
-	rsync -avP -e ssh $^ $(SFUSER)@frs.sourceforge.net:uploads/
+	rm -rf *~

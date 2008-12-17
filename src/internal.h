@@ -162,7 +162,10 @@ struct _gd_private_entry {
   int n_meta;
   int n_meta_string;
   int n_meta_const;
-  gd_entry_t** meta_entry;
+  union {
+    gd_entry_t** meta_entry;
+    const gd_entry_t* parent;
+  };
 
   /* field lists */
   const char** field_list;
@@ -212,8 +215,9 @@ struct _gd_private_entry {
 #define GD_EF_SIZE   0x020
 #define GD_EF_WRITE  0x040
 #define GD_EF_SYNC   0x080
-#define GD_EF_UNLINK 0x100
-#define GD_EF_TEMP   0x200
+#define GD_EF_MOVE   0x100
+#define GD_EF_UNLINK 0x200
+#define GD_EF_TEMP   0x400
 
 #define GD_TEMP_OPEN    0
 #define GD_TEMP_MOVE    1
@@ -237,14 +241,10 @@ extern struct encoding_t {
   ssize_t (*write)(struct _gd_raw_file*, const void*, gd_type_t,
       size_t);
   int (*sync)(struct _gd_raw_file*);
+  int (*move)(struct _gd_raw_file*, char*);
   int (*unlink)(struct _gd_raw_file*);
   int (*temp)(struct _gd_raw_file*, int);
 } ef[GD_N_SUBENCODINGS];
-
-#define GD_PROTECT_NONE   00
-#define GD_PROTECT_FORMAT 01
-#define GD_PROTECT_DATA   02
-#define GD_PROTECT_ALL    ( GD_PROTECT_DATA | GD_PROTECT_FORMAT )
 
 /* Format file fragment metadata */
 struct gd_fragment_t {
@@ -347,7 +347,7 @@ gd_entry_t* _GD_FindField(DIRFILE* D, const char* field_code,
     unsigned int *next);
 void _GD_FixEndianness(char* databuffer, size_t size, size_t ns);
 void _GD_Flush(DIRFILE* D, gd_entry_t *E, const char* field_code);
-void _GD_FlushMeta(DIRFILE* D);
+void _GD_FlushMeta(DIRFILE* D, int fragment);
 void _GD_FreeE(gd_entry_t* E, int priv);
 int _GD_GetLine(FILE *fp, char *line, int* linenum);
 unsigned int _GD_GetSPF(DIRFILE* D, gd_entry_t* E);
@@ -387,6 +387,7 @@ char* _GD_ValidateField(const gd_entry_t* parent, const char* field_code,
 
 /* generic I/O methods */
 int _GD_GenericTouch(struct _gd_raw_file* file);
+int _GD_GenericMove(struct _gd_raw_file* file, char* new_path);
 int _GD_GenericUnlink(struct _gd_raw_file* file);
 
 /* unencoded I/O methods */

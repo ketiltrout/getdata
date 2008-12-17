@@ -20,7 +20,7 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH dirfile_alter_entry 3 "7 December 2008" "Version 0.5.0" "GETDATA"
+.TH dirfile_alter_entry 3 "14 December 2008" "Version 0.5.0" "GETDATA"
 .SH NAME
 dirfile_alter_entry \(em modify the metadata of a dirfile field
 .SH SYNOPSIS
@@ -87,7 +87,10 @@ and
 members are ignored by this function and need not be initialised.  All other
 members appropriate to the field type of 
 .I field_code
-should be initialised.
+should be initialised.  To change the fragment index of a field, use
+.BR dirfile_move (3).
+To change the name of a field, use
+.BR dirfile_rename (3).
 
 The
 .IR entry -> field_type
@@ -203,14 +206,16 @@ a call to
 .BR dirfile_alter_const (3),
 .BR dirfile_alter_lincom (3),
 .BR dirfile_alter_linterp (3),
-.BR dirfile_alter_mulitply (3),
+.BR dirfile_alter_multiply (3),
 .BR dirfile_alter_phase (3),
 .BR dirfile_alter_raw (3),
 .BR dirfile_alter_spec (3),
 .BR dirfile_delete (3),
 .BR dirfile_malter_spec (3),
 .BR dirfile_metaflush (3),
+.BR dirfile_move (3),
 .BR dirfile_open (3),
+.BR dirfile_rename (3),
 .BR get_error (3),
 .BR get_error_string (3),
 .BR dirfile-format (5)

@@ -1,4 +1,4 @@
-.\" get_nfragments.3.  The get_nfragments man page.
+.\" get_raw_filename.3.  The get_raw_filename man page.
 .\"
 .\" (C) 2008 D. V. Wiebe
 .\"
@@ -20,40 +20,56 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH get_nfragments 3 "14 December 2008" "Version 0.5.0" "GETDATA"
+.TH get_raw_filename 3 "14 December 2008" "Version 0.5.0" "GETDATA"
 .SH NAME
-get_nfragments \(em retrieve the number of format file fragments in a dirfile
+get_raw_filename \(em retrieve the pathname of a binary file in a dirfile
 .SH SYNOPSIS
 .B #include <getdata.h>
 .HP
 .nh
 .ad l
-.BI "int get_nfragments(const DIRFILE *" dirfile );
+.BI "const char *get_raw_filename(DIRFILE *" dirfile ", const char"
+.BI * field_code );
 .hy
 .ad n
 .SH DESCRIPTION
 The
-.BR get_nfragments ()
-function queries a dirfile(5) database specified by
-.I dirfile
-and returns the total number of parsed format file fragments in the database.
-
-The 
-.I dirfile
-argument must point to a valid DIRFILE object previously created by a call to
-.BR dirfile_open (3).
+.BR get_raw_filename ()
+function retrieves the pathname of the file backing the
+.B RAW
+field specified by
+.I field_code
+in the dirfile specified by
+.IR dirfile .
 
 .SH RETURN VALUE
-Upon successful completion,
-.BR get_nfragments ()
-returns the total number of format file fragments which are present in the
-dirfile.  On error, 
-.BR get_nfragments ()
-returns zero and sets the dirfile error to a non-zero value.  Possible error
-values are:
+On success,
+.BR get_raw_filename ()
+returns the full pathname of the binary file associated with the specified
+field.  On error, NULL is returned and the dirfile error is set to a non-zero
+error value.  Possible error values are:
 .TP 8
+.B GD_E_ALLOC
+The library was unable to allocate memory.
+.TP
+.B GD_E_BAD_CODE
+The field specified by
+.I field_code
+was not found.
+.TP
 .B GD_E_BAD_DIRFILE
 The supplied dirfile was invalid.
+.TP
+.B GD_E_BAD_FIELD_TYPE
+The field specified by
+.I field_code
+was not a
+.B RAW
+field.
+.TP
+.B GD_E_UNKNOWN_ENCODING
+The encoding scheme of the specified field could not be determined or was not
+understood by GetData.
 .P
 The dirfile error may be retrieved by calling
 .BR get_error (3).
@@ -61,8 +77,9 @@ A descriptive error string for the last error encountered can be obtained from
 a call to
 .BR get_error_string (3).
 .SH SEE ALSO
+.BR get_entry (3),
+.BR get_error (3),
+.BR get_error_string (3),
 .BR dirfile (5),
-.BR dirfile_include (3),
-.BR dirfile_open (3),
-.BR get_fragmentname (3),
-.BR get_parent_fragment (3)
+.BR dirfile-encoding (5),
+.BR dirfile-format (5)

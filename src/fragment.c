@@ -28,17 +28,19 @@ const char* get_fragmentname(DIRFILE* D, int index)
 {
   dtrace("%p, %i", D, index);
 
+  _GD_ClearError(D);
+
   if (D->flags & GD_INVALID) {
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
     dreturn("%p", NULL);
     return NULL;
   }
 
- if (index < 0 || index >= D->n_fragment) {
+  if (index < 0 || index >= D->n_fragment) {
     _GD_SetError(D, GD_E_BAD_INDEX, 0, NULL, 0, NULL);
     dreturn("%p", NULL);
     return NULL;
- }
+  }
 
   dreturn("\"%s\"", D->fragment[index].cname);
   return D->fragment[index].cname;
@@ -48,6 +50,8 @@ int get_nfragments(DIRFILE* D)
 {
   dtrace("%p", D);
 
+  _GD_ClearError(D);
+
   if (D->flags & GD_INVALID) {
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
     dreturn("%i", 0);
@@ -56,4 +60,26 @@ int get_nfragments(DIRFILE* D)
 
   dreturn("%i", D->n_fragment);
   return D->n_fragment;
+}
+
+int get_parent_fragment(DIRFILE* D, int fragment_index)
+{
+  dtrace("%p, %i", D, fragment_index);
+
+  _GD_ClearError(D);
+
+  if (D->flags & GD_INVALID) {
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  if (fragment_index <= 0 || fragment_index >= D->n_fragment) {
+    _GD_SetError(D, GD_E_BAD_INDEX, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  dreturn("%i", D->fragment[fragment_index].parent);
+  return D->fragment[fragment_index].parent;
 }

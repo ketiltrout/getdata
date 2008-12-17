@@ -221,18 +221,10 @@ const char* get_raw_filename(DIRFILE* D, const char* field_code)
       _GD_SetError(D, GD_E_UNKNOWN_ENCODING, 0, NULL, 0, NULL);
       dreturn("%p", NULL);
       return NULL;
-    }
-
-    E->e->file[0].name = malloc(FILENAME_MAX);
-
-    if (E->e->file[0].name == NULL) {
-      _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    } else if (_GD_SetEncodedName(D, E->e->file, E->e->filebase, 0)) {
       dreturn("%p", NULL);
       return NULL;
     }
-
-    snprintf(E->e->file[0].name, FILENAME_MAX, "%s%s", E->e->filebase,
-        ef[E->e->file[0].encoding].ext);
   }
 
   dreturn("%p", E->e->file[0].name);

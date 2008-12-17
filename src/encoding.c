@@ -47,7 +47,7 @@ struct encoding_t ef[GD_N_SUBENCODINGS] = {
   { GD_UNENCODED, "", 1, NULL, 0,
     &_GD_RawOpen, &_GD_RawClose, &_GD_GenericTouch, &_GD_RawSeek,
     &_GD_RawRead, &_GD_RawSize, &_GD_RawWrite, &_GD_RawSync,
-    &_GD_GenericUnlink, &_GD_RawTemp
+    &_GD_GenericMove, &_GD_GenericUnlink, &_GD_RawTemp
   },
 #ifdef USE_MODULES
   /* Modules are external */
@@ -57,57 +57,63 @@ struct encoding_t ef[GD_N_SUBENCODINGS] = {
 # else
     0,
 # endif
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL , NULL, &_GD_GenericUnlink, NULL },
+    NULL, NULL, NULL, NULL, NULL, NULL, NULL , NULL, &_GD_GenericMove,
+    &_GD_GenericUnlink, NULL },
   { GD_BZIP2_ENCODED, ".bz2", 1, "Bzip2",
 # ifdef USE_GZIP
     GD_EF_OPEN | GD_EF_CLOSE | GD_EF_SEEK | GD_EF_READ | GD_EF_SIZE,
 # else
     0,
 # endif
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL , NULL, &_GD_GenericUnlink, NULL },
+    NULL, NULL, NULL, NULL, NULL, NULL, NULL , NULL, &_GD_GenericMove,
+    &_GD_GenericUnlink, NULL },
   { GD_SLIM_ENCODED, ".slm", 1, "Slim",
 # ifdef USE_SLIM
     GD_EF_OPEN | GD_EF_CLOSE | GD_EF_SEEK | GD_EF_READ | GD_EF_SIZE,
 # else
     0,
 # endif
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL , NULL, &_GD_GenericUnlink, NULL },
+    NULL, NULL, NULL, NULL, NULL, NULL, NULL , NULL, &_GD_GenericMove,
+    &_GD_GenericUnlink, NULL },
 #else
   /* Modules are internal */
   { GD_GZIP_ENCODED, ".gz", 1, NULL, 0,
 # ifdef USE_GZIP
     &_GD_GzipOpen, &_GD_GzipClose, NULL /* TOUCH */,
     &_GD_GzipSeek, &_GD_GzipRead, &_GD_GzipSize, NULL /* WRITE */,
-    NULL /* SYNC */, &_GD_GenericUnlink, NULL /* TEMP */
+    NULL /* SYNC */, &_GD_GenericMove, &_GD_GenericUnlink, NULL /* TEMP */
 # else
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL , NULL, &_GD_GenericUnlink, NULL
+    NULL, NULL, NULL, NULL, NULL, NULL, NULL , NULL, &_GD_GenericMove,
+    &_GD_GenericUnlink, NULL
 # endif
   },
   { GD_BZIP2_ENCODED, ".bz2", 1, NULL, 0,
 # ifdef USE_BZIP2
     &_GD_Bzip2Open, &_GD_Bzip2Close, NULL /* TOUCH */,
     &_GD_Bzip2Seek, &_GD_Bzip2Read, &_GD_Bzip2Size, NULL /* WRITE */,
-    NULL /* SYNC */, &_GD_GenericUnlink, NULL /* TEMP */
+    NULL /* SYNC */, &_GD_GenericMove, &_GD_GenericUnlink, NULL /* TEMP */
 # else
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL , NULL, &_GD_GenericUnlink, NULL
+    NULL, NULL, NULL, NULL, NULL, NULL, NULL , NULL, &_GD_GenericMove,
+    &_GD_GenericUnlink, NULL
 # endif
   },
   { GD_SLIM_ENCODED, ".slm", 1, NULL, 0,
 # ifdef USE_SLIM
     &_GD_SlimOpen, &_GD_SlimClose, NULL /* TOUCH */,
     &_GD_SlimSeek, &_GD_SlimRead, &_GD_SlimSize, NULL /* WRITE */,
-    NULL /* SYNC */, &_GD_GenericUnlink, NULL /* TEMP */
+    NULL /* SYNC */, &_GD_GenericMove, &_GD_GenericUnlink, NULL /* TEMP */
 # else
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL , NULL, &_GD_GenericUnlink, NULL
+    NULL, NULL, NULL, NULL, NULL, NULL, NULL , NULL, &_GD_GenericMove,
+    &_GD_GenericUnlink, NULL
 # endif
   },
 #endif
   { GD_TEXT_ENCODED, ".txt", 0, NULL, 0,
     &_GD_AsciiOpen, &_GD_AsciiClose, &_GD_GenericTouch,
     &_GD_AsciiSeek, &_GD_AsciiRead, &_GD_AsciiSize, &_GD_AsciiWrite,
-    &_GD_AsciiSync, &_GD_GenericUnlink, &_GD_AsciiTemp },
+    &_GD_AsciiSync, &_GD_GenericMove, &_GD_GenericUnlink, &_GD_AsciiTemp },
   { GD_ENC_UNSUPPORTED, "", 0, "", 0,
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL },
+    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL },
 };
 
 void _GD_InitialiseFramework(void)
@@ -126,61 +132,6 @@ void _GD_InitialiseFramework(void)
 #endif
 #endif
   dreturnvoid();
-}
-
-/* Check for a valid field name -- returns input on error */
-char* _GD_ValidateField(const gd_entry_t* parent, const char* field_code,
-    int strict)
-{
-  size_t len = strlen(field_code);
-  size_t i;
-  char* ptr;
-
-  dtrace("%p, \"%s\", %i", parent, field_code, strict);
-
-  if (field_code[0] == '\0' || len >= GD_MAX_LINE_LENGTH) {
-    dreturn("%p", field_code);
-    return (char*)field_code;
-  }
-
-  for (i = 0; i < len; ++i)
-    if (field_code[i] == '/' || field_code[i] == '<' || field_code[i] == '>' ||
-        field_code[i] == ';' || field_code[i] == '|' || field_code[i] == '&' ||
-        (strict && field_code[i] == '.'))
-    {
-      dreturn("%p", field_code);
-      return (char*)field_code;
-    }
-
-  if (strcmp("FRAMEOFFSET", field_code) == 0 ||
-      strcmp("ENCODING", field_code) == 0 ||
-      strcmp("ENDIAN", field_code) == 0 ||
-      strcmp("INCLUDE", field_code) == 0 ||
-      strcmp("META", field_code) == 0 ||
-      strcmp("VERSION", field_code) == 0)
-  {
-    dreturn("%p", field_code);
-    return (char*)field_code;
-  }
-
-  if (!strict && len > 3 && ((len > 4 && field_code[len - 4] == '.') ||
-        field_code[len - 3] == '.'))
-    for (i = 0; i < GD_N_SUBENCODINGS; ++i)
-      if (ef[i].ext[0] != '\0' && strcmp(field_code + len - strlen(ef[i].ext),
-            ef[i].ext) == 0)
-        {
-          dreturn("%p", field_code);
-          return (char*)field_code;
-        }
-
-  if (parent != NULL) {
-    ptr = malloc(strlen(parent->field) + strlen(field_code) + 2);
-    sprintf(ptr, "%s/%s", parent->field, field_code);
-  } else
-    ptr = strdup(field_code);
-
-  dreturn("\"%s\"", ptr);
-  return ptr;
 }
 
 int _GD_EncodingUnderstood(unsigned long encoding)
@@ -453,12 +404,15 @@ static void _GD_RecodeFragment(DIRFILE* D, unsigned long encoding, int fragment,
             (*ef[raw_entry[i]->e->file[1].encoding].temp)(raw_entry[i]->e->file,
               GD_TEMP_MOVE))
         {
-          _GD_SetError(D, GD_E_RAW_IO, 0, raw_entry[i]->e->file[0].name,
-              errno, NULL);
+          _GD_SetError(D, GD_E_UNCLEAN_DB, 0,
+              D->fragment[D->entry[i]->fragment_index].cname, 0, NULL);
+          D->flags |= GD_INVALID;
           raw_entry[i]->e->file[0].name = temp.name;
           raw_entry[i]->e->file[0].encoding = temp.encoding;
         } else if ((*ef[temp.encoding].unlink)(&temp)) {
-          _GD_SetError(D, GD_E_RAW_IO, 0, temp.name, errno, NULL);
+          _GD_SetError(D, GD_E_UNCLEAN_DB, 0,
+              D->fragment[D->entry[i]->fragment_index].cname, 0, NULL);
+          D->flags |= GD_INVALID;
           raw_entry[i]->e->file[0].name = temp.name;
           raw_entry[i]->e->file[0].encoding = temp.encoding;
         } else
@@ -604,6 +558,26 @@ int _GD_GenericUnlink(struct _gd_raw_file* file)
   dtrace("%p", file);
 
   int r = unlink(file->name);
+
+  dreturn("%i", r);
+  return r;
+}
+
+int _GD_GenericMove(struct _gd_raw_file* file, char* new_path)
+{
+  dtrace("%p, \"%s\"", file, new_path);
+
+  int r = rename(file->name, new_path);
+
+  int rename_errno = errno;
+
+  if (!r) {
+    free(file->name);
+    file->name = new_path;
+  } else
+    free(new_path);
+
+  errno = rename_errno;
 
   dreturn("%i", r);
   return r;

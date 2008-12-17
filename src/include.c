@@ -162,6 +162,8 @@ int dirfile_include(DIRFILE* D, const char* file, int fragment_index,
 
   dtrace("%p, \"%s\", %i, %lx", D, file, fragment_index, flags);
 
+  _GD_ClearError(D);
+
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
     dreturn("%zi", -1);
@@ -231,4 +233,171 @@ int dirfile_include(DIRFILE* D, const char* file, int fragment_index,
 
   dreturn("%i", new_fragment);
   return new_fragment;
+}
+
+static int _GD_CollectFragments(DIRFILE* D, int** f, int fragment, int nf)
+{
+  int i;
+
+  dtrace("%p, %p, %i, %i", D, f, fragment, nf);
+
+  int* new_f = realloc(*f, sizeof(int) * ++nf);
+  if (new_f == NULL) {
+    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+  new_f[nf - 1] = fragment;
+
+  for (i = 0; i < D->n_fragment; ++i)
+    if (D->fragment[i].parent == fragment) {
+      nf = _GD_CollectFragments(D, &new_f, i, nf);
+      if (nf == -1)
+        break;
+    }
+
+  *f = new_f; 
+
+  dreturn("%i", nf);
+  return nf;
+}
+
+static int _GD_ContainsFragment(int* f, int nf, int fragment)
+{
+  int i;
+
+  dtrace("%p, %i, %i", f, nf, fragment);
+
+  for (i = 0; i < nf; ++i)
+    if (f[i] == fragment) {
+      dreturn("%i", 1);
+      return 1;
+    }
+
+  dreturn("%i", 0);
+  return 0;
+}
+
+int dirfile_uninclude(DIRFILE* D, int fragment_index, int del)
+{
+  int parent, j;
+  unsigned int i, o;
+  int *f = NULL;
+
+  dtrace("%p, %i, %i", D, fragment_index, del);
+
+  _GD_ClearError(D);
+
+  if (D->flags & GD_INVALID) {/* don't crash */
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%zi", -1);
+    return -1;
+  }
+
+  if ((D->flags & GD_ACCMODE) == GD_RDONLY) {
+    _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  if (fragment_index <= 0 || fragment_index >= D->n_fragment) {
+    _GD_SetError(D, GD_E_BAD_INDEX, 0, NULL, fragment_index, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  parent = D->fragment[fragment_index].parent;
+
+  if (D->fragment[parent].protection & GD_PROTECT_FORMAT) {
+    _GD_SetError(D, GD_E_PROTECTED, GD_E_PROTECTED_FORMAT, NULL, 0,
+        D->fragment[parent].cname);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  /* find all affected fragments */
+  int nf = _GD_CollectFragments(D, &f, fragment_index, 0);
+
+  if (D->error) {
+    free(f);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  /* close affected raw fields */
+  for (i = 0; i < D->n_entries; ++i)
+    if (D->entry[i]->field_type == GD_RAW_ENTRY &&
+        _GD_ContainsFragment(f, nf, D->entry[i]->fragment_index))
+    {
+      _GD_Flush(D, D->entry[i], NULL);
+    }
+
+  /* flush the fragment's metadata, if requested */
+  if (!del)
+    for (j = 0; j < nf; ++j)
+      _GD_FlushMeta(D, f[j]);
+
+  if (D->error) {
+    free(f);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  /* Nothing from now on may fail */
+
+  /* delete the fragments, if requested */
+  if (del)
+    for (j = 0; j < nf; ++j)
+      unlink(D->fragment[f[j]].cname);
+
+  /* delete fields from the fragment -- memory use is not sufficient to warrant
+   * resizing D->entry */
+  unsigned int old_count = D->n_entries;
+  for (i = o = 0; i < old_count; ++i)
+    if (_GD_ContainsFragment(f, nf, D->entry[i]->fragment_index)) {
+      if (D->entry[i]->e->n_meta >= 0) {
+        D->n_entries--;
+        if (D->entry[i]->field_type == GD_CONST_ENTRY)
+          D->n_const--;
+        else if (D->entry[i]->field_type == GD_STRING_ENTRY)
+          D->n_string--;
+      } else
+        D->n_meta--;
+
+      _GD_FreeE(D->entry[i], 1);
+    } else
+      D->entry[o++] = D->entry[i];
+
+  /* Flag the parent as modified */
+  D->fragment[parent].modified = 1;
+
+  /* delete the fragments -- again, don't bother resizing D->fragment */
+  for (j = 0; j < nf; ++j) {
+    free(D->fragment[f[j]].cname);
+    free(D->fragment[f[j]].sname);
+    free(D->fragment[f[j]].ename);
+    free(D->fragment[f[j]].ref_name);
+
+    memcpy(D->fragment + f[j], D->fragment + D->n_fragment - 1,
+        sizeof(struct gd_fragment_t));
+    D->n_fragment--;
+
+    /* Relocate all fields of the fragment we just moved */
+    for (i = 0; i < D->n_entries; ++i)
+      if (D->entry[i]->fragment_index == D->n_fragment)
+        D->entry[i]->fragment_index = f[j];
+  }
+
+  /* Clear the cache of all fields */
+  /* FIXME: Should probably just clear affected fields */
+  for (i = 0; i < D->n_entries; ++i) {
+    D->entry[i]->e->calculated = 0;
+    for (j = 0; j < GD_MAX_LINCOM; ++j)
+      D->entry[i]->e->entry[j] = NULL;
+  }
+
+  free(f);
+
+  dreturn("%i", 0);
+  return 0;
 }

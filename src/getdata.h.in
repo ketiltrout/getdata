@@ -80,8 +80,10 @@
 #define GD_E_DELETE           26
 #define GD_E_BAD_ENDIANNESS   27
 #define GD_E_CALLBACK         28
+#define GD_E_BAD_PROTECTION   29
+#define GD_E_UNCLEAN_DB       30
 
-#define GD_N_ERROR_CODES      29
+#define GD_N_ERROR_CODES      31
 
 /* maximum length of a format file line */
 #define GD_MAX_LINE_LENGTH  4096
@@ -113,6 +115,12 @@
 #define GD_SYNTAX_RESCAN   1
 #define GD_SYNTAX_IGNORE   2
 #define GD_SYNTAX_CONTINUE 3
+
+/* Protection levels */
+#define GD_PROTECT_NONE   00
+#define GD_PROTECT_FORMAT 01
+#define GD_PROTECT_DATA   02
+#define GD_PROTECT_ALL    ( GD_PROTECT_DATA | GD_PROTECT_FORMAT )
 
 /* this must be one less than the lowest allowed fragment index */
 #define GD_ALL_FRAGMENTS -1
@@ -287,6 +295,9 @@ extern gd_entry_t *dirfile_free_entry_strings(gd_entry_t *entry) __THROW;
 extern unsigned long get_encoding(DIRFILE *D, int fragment)
   __THROW __gd_nonnull ((1));
 
+extern unsigned long get_endianness(DIRFILE* D, int fragment)
+  __THROW __gd_nonnull((1));
+
 extern int get_entry(DIRFILE* D, const char* field_code, gd_entry_t* entry)
   __THROW __gd_nonnull ((1, 2));
 
@@ -371,6 +382,12 @@ extern unsigned int get_nmvectors(DIRFILE* D, const char* parent)
 
 extern unsigned int get_nvectors(DIRFILE* dirfile) __THROW __gd_nonnull ((1));
 
+extern int dirfile_protect(DIRFILE *D, int fragment_index, int protection_level)
+  __THROW __gd_nonnull ((1));
+
+extern int get_protection(DIRFILE* D, int fragment_index)
+  __THROW __gd_nonnull ((1));
+
 extern const char* get_raw_filename(DIRFILE* D, const char* field_code)
   __THROW __gd_nonnull ((1, 2));
 
@@ -430,8 +447,6 @@ extern int dirfile_delete(DIRFILE* D, const char* field_code,
 
 extern int dirfile_discard(DIRFILE* dirfile);
 
-extern unsigned long get_endianness(DIRFILE* D, int fragment) __gd_nonnull((1));
-
 extern int dirfile_flush(DIRFILE* dirfile,
     const char* field_code) __gd_nonnull ((1));
 
@@ -448,6 +463,12 @@ extern int dirfile_move(DIRFILE* D, const char* field_code, int new_fragment,
 
 extern DIRFILE* dirfile_open(const char* dirfilename,
     unsigned long flags) __gd_nonnull ((1));
+
+extern int dirfile_rename(DIRFILE *D, const char *old_code,
+    const char *new_name, int move_data) __gd_nonnull ((1,2,3));
+
+extern int dirfile_uninclude(DIRFILE* D, int fragment_index, int del)
+  __gd_nonnull ((1));
 
 /* the following functions are _FILE_OFFSET_BITS sensitive */
 #ifndef __USE_FILE_OFFSET64

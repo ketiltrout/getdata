@@ -20,7 +20,7 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH dirfile_delete 3 "8 December 2008" "Version 0.5.0" "GETDATA"
+.TH dirfile_delete 3 "14 December 2008" "Version 0.5.0" "GETDATA"
 .SH NAME
 dirfile_delete \(em remove a field from a dirfile
 .SH SYNOPSIS
@@ -42,7 +42,7 @@ in the dirfile specified by
 
 The
 .I flags
-argument influences how the deletion attempt occurrs.  It may be zero, for the
+argument influences how the deletion attempt occurs.  It may be zero, for the
 default behaviour, or else one or more of the following flags, bitwise or'd
 together:
 .TP 8
@@ -114,7 +114,7 @@ This indicates a bug in the library.  Please report the incident to the
 GetData developers.
 .TP
 .B GD_E_PROTECTED
-The metadata of the fragment containing the feild was protected from change.
+The metadata of the fragment containing the field was protected from change.
 Or, the deletion of the binary data file associated with a
 .B RAW
 field was attempted and the data of the fragment was protected.

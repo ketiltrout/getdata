@@ -1,3 +1,52 @@
+2008-12-17   D. V. Wiebe <getdata@ketiltrout.net>  svn:267
+	* test/name_move.c test/protect_alter.c test/move_subdir.c test/file_code.c
+	test/protect_get.c test/name.c test/unclude_del.c test/unclude.c
+	test/file_type.c test/parent.c test/file.c test/unclude_move.c: Added.
+
+	* doc/unclean_database_recovery.txt: Added.
+	* COPYING.DOC: Added.
+	* man/dirfile_alter_encoding.3.in man/dirfile_alter_endianness.3.in
+	man/dirfile_alter_frameoffset.3in configure.ac: Build mans with paths.
+
+	* src/getdata.h.in src/error.c: Added GD_E_UNCLEAN_DB.
+	* src/endian.c (_GD_ByteSwapFragment) src/foffs.c (_GD_ShiftFragment)
+	src/encoding.c (_GD_RecodeFragment): Return the dreaded GD_E_UNCLEAN_DB if
+	finalisation fails.
+
+	* src/entry.c (get_raw_filename): Call _GD_SetEncodedName.
+
+	* src/flush.c (_GD_FlushFragment): Added.
+	* src/flush.c (_GD_FlushMeta): Call _GD_FlushFragment.
+
+	* src/internal.h: Add parent field to private entry.
+	* src/parse.c (_GD_ParseFieldSpec): Record parent.
+
+	* src/parse.c (_GD_Tokenise): Gracefully handle lines without terminating
+	newlines.
+
+	* src/include.c (dirfile_uninclude _GD_CollectFragments
+	_GD_ContainsFragment): Added.
+
+	* src/parse.c src/open.c: Split open.c
+
+	* src/move.c (_GD_MogrifyFile dirfile_move): Perform mogrification if filebase
+	has changed.
+	* src/move.c (strcmpnull): Added.
+
+	* src/fragment.c (get_parent_fragment): Added.
+	* src/fragment.c: Prperly clear error in public functions.
+
+	* src/fragment.c: Renamed from format_list.c
+
+	* src/name.c (_GD_ValidateField): Moved from encoding.c.
+
+	* src/name.c src/protect.c: Added.
+	* src/getdata.h.in src/error.c: Added GD_E_BAD_PROTECTION.
+	* src/getdata.h.in src/internal.h: Move GD_PROTECT macros to public header.
+
+	* src/encoding.c src/internal.h: Add move method to encoding framework.
+	* src/encoding.c (_GD_GenericMove): Added.
+
 2008-12-10   D. V. Wiebe <getdata@ketiltrout.net>  svn:266
 	* bindings/cxx/dirfile.cpp (Dirfile::ReferenceFilename): Added.
 
