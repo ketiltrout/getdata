@@ -1,2 +1,3 @@
 * Locking
+* Test dirfile_[m]alter_spec()
 * Hashed compressed files
