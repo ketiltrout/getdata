@@ -394,6 +394,8 @@ extern const char* get_raw_filename(DIRFILE* D, const char* field_code)
 extern const char* dirfile_reference(DIRFILE* D, const char* field_code)
   __THROW __gd_nonnull ((1));
 
+extern const char* get_reference(DIRFILE* D) __THROW __gd_nonnull ((1));
+
 extern unsigned int get_spf(DIRFILE* dirfile, const char *field_code) __THROW
 __gd_nonnull ((1, 2));
 

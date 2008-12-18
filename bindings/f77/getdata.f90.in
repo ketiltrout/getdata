@@ -448,7 +448,7 @@ function fget_nframes (dirfile)
   integer, intent(in) :: dirfile
 
   ! call f77 library
-  call gdfnfr(fget_nframes, dirfile)
+  call gdnfrm(fget_nframes, dirfile)
 end function
 
 function fget_spf (dirfile, field_code)
@@ -653,7 +653,7 @@ function fget_entry (dirfile, field_code, ent)
   integer :: len3 = GD_FIELD_LEN
 
   ! get field type from f77 library
-  call gdffdt (fget_entry, dirfile, TRIM(field_code), LEN_TRIM(field_code))
+  call gdfldt (fget_entry, dirfile, TRIM(field_code), LEN_TRIM(field_code))
 
   if (fget_entry .EQ. GD_RAW_ENTRY) then
     ! raw

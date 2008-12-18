@@ -45,6 +45,10 @@ C     Corresponding to dirfile_add_string(3)
       EXTERNAL GDADST
 C     Corresponding to dirfile_close(3)
       EXTERNAL GDCLOS
+C     Corresponding to dirfile_copen(3)
+      EXTERNAL GDCOPN
+C     Corresponding to dirfile_discard(3)
+      EXTERNAL GDDSCD
 C     Returns the dirfile->error member
       EXTERNAL GDEROR
 C     Corresponding to get_error_string(3)

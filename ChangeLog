@@ -1,3 +1,21 @@
+2008-12-18   D. V. Wiebe <getdata@ketiltrout.net>  svn:270
+	* test/global_ref_get.c: Added.
+	* src/globals.c (get_reference): Added.
+
+	* bindings/f77/test/gdcopn.f: Added.
+
+	* bindings/f77/fgetdata.c (_GDF_ClearDirfile): Let caller close dirfile.
+
+	* bindings/f77/fgetdata.c (_GDF_FString): Fix off-by-one error.
+
+	* bindings/f77/fgetdata.c (_GDF_Callback): Added.
+	* bindings/f77/fgetdata.c: Add bindings for dirfile_cbopen and
+	dirfile_discard.
+
+	* bindings/f77/make_parameters.c: Add delete flags, protect levels,
+	callback actions, syntax suberrors, GD_MAX_LINE_LENGTH, GD_ALL_FRAGMENTS,
+	DIRFILE_STANDARDS_VERSION.
+
 2008-12-18   D. V. Wiebe <getdata@ketiltrout.net>  svn:269
 	* bindings/f77/make_parameters.c: Update for GD_E_BAD_PROTECTION and
 	GD_E_UNCLEAN_DB.

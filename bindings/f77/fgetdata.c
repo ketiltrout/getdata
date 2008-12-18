@@ -89,15 +89,8 @@ static int _GDF_SetDirfile(DIRFILE* D)
 /* delete the supplied dirfile */
 static void _GDF_ClearDirfile(int d)
 {
-  if (d == 0)
-    return;
-
-  DIRFILE* D = f77dirfiles[d];
-
-  if (D) {
-    dirfile_close(D);
+  if (d != 0)
     f77dirfiles[d] = NULL;
-  }
 }
 
 /* create a Fortran space padded string */
@@ -105,7 +98,7 @@ static int _GDF_FString(char* dest, int *dlen, const char* src)
 {
   int slen = strlen(src);
   if (slen < *dlen) {
-    sprintf(dest, "%-*s", *dlen, src);
+    sprintf(dest, "%-*s", *dlen - 1, src);
     dest[*dlen - 1] = ' ';
     return 0;
   }
@@ -114,11 +107,35 @@ static int _GDF_FString(char* dest, int *dlen, const char* src)
   return -1;
 }
 
+static void *_gdf_f77_callback = NULL;
+
+/* callback wrapper */
+int _GDF_Callback(const DIRFILE* D, int suberror, char *line)
+{
+  int unit;
+  int r = GD_SYNTAX_ABORT;
+
+  if (_gdf_f77_callback != NULL) {
+    unit = _GDF_SetDirfile((DIRFILE*)D);
+
+    (*(void(*)(int*, const int*, const int*, char*))_gdf_f77_callback)(&r,
+        &unit, &suberror, line);
+
+    line[GD_MAX_LINE_LENGTH - 1] = '\0';
+
+    _GDF_ClearDirfile(unit);
+  }
+
+  return r;
+}
+
 /* dirfile_open wrapper */
 void F77_FUNC(gdopen, GDOPEN) (int* dirfile, const char* dirfilename,
     const int* dirfilename_l, const int* flags)
 {
   char* out = malloc(*dirfilename_l + 1);
+
+  _gdf_f77_callback = NULL;
 
   *dirfile = _GDF_SetDirfile(dirfile_open(_GDF_CString(out, dirfilename,
           *dirfilename_l), *flags));
@@ -129,6 +146,8 @@ void F77_FUNC(gdopen, GDOPEN) (int* dirfile, const char* dirfilename,
 /* dirfile_close wrapper */
 void F77_FUNC(gdclos, GDCLOS) (const int* dirfile)
 {
+  dirfile_close(_GDF_GetDirfile(*dirfile));
+
   _GDF_ClearDirfile(*dirfile);
 }
 
@@ -1039,4 +1058,26 @@ void F77_FUNC(gdnmve, GDNMVE) (int* nvectors, const int* dirfile,
   *nvectors = get_nmvectors(_GDF_GetDirfile(*dirfile), _GDF_CString(pa, parent,
         *parent_l));
   free(pa);
+}
+
+/* dirfile_discard wrapper */
+void F77_FUNC(gddscd, GDDSCD) (const int* dirfile)
+{
+  dirfile_discard(_GDF_GetDirfile(*dirfile));
+
+  _GDF_ClearDirfile(*dirfile);
+}
+
+/* dirfile_cbopen wrapper */
+void F77_FUNC(gdcopn, GDCOPN) (int* dirfile, const char* dirfilename,
+    const int* dirfilename_l, const int* flags, void* callback)
+{
+  char* out = malloc(*dirfilename_l + 1);
+
+  _gdf_f77_callback = callback;
+
+  *dirfile = _GDF_SetDirfile(dirfile_cbopen(_GDF_CString(out, dirfilename,
+          *dirfilename_l), *flags, _GDF_Callback));
+
+  free(out);
 }

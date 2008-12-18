@@ -143,6 +143,55 @@ int main(void)
     parameter(stream, "GD_INT64",            "GD_I64", GD_INT64,            i);
     parameter(stream, "GD_FLOAT32",          "GD_F32", GD_FLOAT32,          i);
     parameter(stream, "GD_FLOAT64",          "GD_F64", GD_FLOAT64,          i);
+
+    fprintf(stream, "\\\n%c Delete flags\\\n", c);
+    parameter(stream, "GD_DEL_META",         "GDD_MT", GD_DEL_META,         i);
+    parameter(stream, "GD_DEL_DATA",         "GDD_DT", GD_DEL_DATA,         i);
+    parameter(stream, "GD_DEL_DEREF",        "GDD_DR", GD_DEL_DEREF,        i);
+    parameter(stream, "GD_DEL_FORCE",        "GDD_FO", GD_DEL_FORCE,        i);
+
+    fprintf(stream, "\\\n%c Protection levels\\\n", c);
+
+    parameter(stream, "GD_PROTECT_NONE",     "GDPR_N", GD_PROTECT_NONE,     i);
+    parameter(stream, "GD_PROTECT_FORMAT",   "GDPR_F", GD_PROTECT_FORMAT,   i);
+    parameter(stream, "GD_PROTECT_DATA",     "GDPR_D", GD_PROTECT_DATA,     i);
+    parameter(stream, "GD_PROTECT_ALL",      "GDPR_A", GD_PROTECT_ALL,      i);
+
+    fprintf(stream, "\\\n%c Callback actions\\\n", c);
+
+    parameter(stream, "GD_SYNTAX_ABORT",     "GDSX_A", GD_SYNTAX_ABORT,     i);
+    parameter(stream, "GD_SYNTAX_RESCAN",    "GDSX_S", GD_SYNTAX_RESCAN,    i);
+    parameter(stream, "GD_SYNTAX_IGNORE",    "GDSX_I", GD_SYNTAX_IGNORE,    i);
+    parameter(stream, "GD_SYNTAX_CONTINUE",  "GDSX_C", GD_SYNTAX_CONTINUE,  i);
+
+    fprintf(stream, "\\\n%c Syntax suberrors\\\n", c);
+
+    parameter(stream, "GD_E_FORMAT_BITNUM",  "GDF_BN", GD_E_FORMAT_BITNUM,  i);
+    parameter(stream,"GD_E_FORMAT_CHARACTER","GDF_CH",GD_E_FORMAT_CHARACTER,i);
+    parameter(stream,"GD_E_FORMAT_DUPLICATE","GDF_DU",GD_E_FORMAT_DUPLICATE,i);
+    parameter(stream, "GD_E_FORMAT_ENDIAN",  "GDF_EN", GD_E_FORMAT_ENDIAN,  i);
+    parameter(stream, "GD_E_FORMAT_BAD_LINE","GDF_LI", GD_E_FORMAT_BAD_LINE,i);
+    parameter(stream, "GD_E_FORMAT_LOCATION","GDF_LO", GD_E_FORMAT_LOCATION,i);
+    parameter(stream, "GD_E_FORMAT_METARAW", "GDF_MR", GD_E_FORMAT_METARAW, i);
+    parameter(stream, "GD_E_FORMAT_BAD_NAME","GDF_NA", GD_E_FORMAT_BAD_NAME,i);
+    parameter(stream, "GD_E_FORMAT_NUMBITS", "GDF_NB", GD_E_FORMAT_NUMBITS, i);
+    parameter(stream, "GD_E_FORMAT_N_FIELDS","GDF_NF", GD_E_FORMAT_N_FIELDS,i);
+    parameter(stream, "GD_E_FORMAT_N_TOK",   "GDF_NT", GD_E_FORMAT_N_TOK,   i);
+    parameter(stream,"GD_E_FORMAT_NO_PARENT","GDF_PA",GD_E_FORMAT_NO_PARENT,i);
+    parameter(stream, "GD_E_FORMAT_PROTECT", "GDF_PR", GD_E_FORMAT_PROTECT, i);
+    parameter(stream, "GD_E_FORMAT_RES_NAME","GDF_RN", GD_E_FORMAT_RES_NAME,i);
+    parameter(stream, "GD_E_FORMAT_BAD_SPF", "GDF_SF", GD_E_FORMAT_BAD_SPF, i);
+    parameter(stream, "GD_E_FORMAT_BITSIZE", "GDF_SZ", GD_E_FORMAT_BITSIZE, i);
+    parameter(stream, "GD_E_FORMAT_BAD_TYPE","GDF_TY", GD_E_FORMAT_BAD_TYPE,i);
+    parameter(stream, "GD_E_FORMAT_UNTERM",  "GDF_UM", GD_E_FORMAT_UNTERM,  i);
+
+    fprintf(stream, "\\\n%c Miscellaneous parameters\\\n", c);
+
+    parameter(stream, "GD_MAX_LINE_LENGTH",  "GD_MLL", GD_MAX_LINE_LENGTH,  i);
+    parameter(stream, "GD_ALL_FRAGMENTS",    "GD_ALL", GD_ALL_FRAGMENTS,    i);
+    parameter(stream, "DIRFILE_STANDARDS_VERSION", "GD_DSV",
+        DIRFILE_STANDARDS_VERSION, i);
+
     fprintf(stream, "/\n");
   }
 

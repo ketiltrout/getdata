@@ -248,3 +248,8 @@ void F77_FUNC(gdmfdt, GDMFDT) (char* name, int* name_l, const int* dirfile,
 
 void F77_FUNC(gdmven, GDMVEN) (char* name, int* name_l, const int* dirfile,
     const char* parent, const int* parent_l, const int* field_num);
+
+void F77_FUNC(gddscd, GDDSCD) (const int* dirfile);
+
+void F77_FUNC(gdcopn, GDCOPN) (int* dirfile, const char* dirfilename,
+    const int* dirfilename_l, const int* flags, void* callback);

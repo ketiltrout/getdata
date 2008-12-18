@@ -130,7 +130,8 @@ GET_TESTS=get64 get_bad_code get_bit get_char get_endian8 get_endian16 \
 					get_phase get_recurse get_sf get_ss get_type get_uint16 get_uint32 \
 					get_uint64
 
-GLOBAL_TESTS=global_name global_ref global_ref_empty global_ref_set
+GLOBAL_TESTS=global_name global_ref global_ref_empty global_ref_get \
+						 global_ref_set
 
 if TEST_GZIP
 GZIP_TESTS=gzip_get gzip_get_get gzip_move_from gzip_nframes gzip_put

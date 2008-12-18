@@ -110,3 +110,13 @@ const char* dirfile_reference(DIRFILE* D, const char* field_code)
   dreturn("\"%s\"", D->reference_field->field);
   return D->reference_field->field;
 }
+
+const char* get_reference(DIRFILE* D)
+{
+  dtrace("%p", D);
+
+  const char *r = dirfile_reference(D, NULL);
+
+  dreturn("\"%s\"", r);
+  return r;
+}
