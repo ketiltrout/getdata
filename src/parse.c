@@ -729,8 +729,8 @@ gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, const char** in_cols,
   gd_entry_t* E = NULL;
   void *ptr;
 
-  dtrace("%p, %i, %p, %p, \"%s\", %i, %u, %i, %i, %i", D, n_cols, in_cols, P,
-      format_file, linenum, me, standards, creat, pedantic);
+  dtrace("%p, %i, %p, %p, \"%s\", %i, %u, %i, %i, %i, %i", D, n_cols, in_cols,
+      P, format_file, linenum, me, standards, creat, pedantic, insert);
 
   ptr = realloc(D->entry, (D->n_entries + 1) * sizeof(gd_entry_t*));
   if (ptr == NULL) {

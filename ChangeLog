@@ -1,3 +1,16 @@
+2008-12-18   D. V. Wiebe <getdata@ketiltrout.net>  svn:269
+	* bindings/f77/make_parameters.c: Update for GD_E_BAD_PROTECTION and
+	GD_E_UNCLEAN_DB.
+
+	* bindings/f77/fgetdata.c bindings/f77/getdata.f.in bindings/f77/fgetdata.h
+	bindings/f77/getdata.f90.in README.f77 bindings/f77/test/gdfget.f: Convert
+	all Fortran-77 function names from GDFxxx to GDxxxx.
+	
+	* test/alter_mspec.c test/alter_spec.c: Added.
+
+	* src/mod.c (dirfile_alter_spec dirfile_malter_spec): Call
+	_GD_ParseFieldSpec with creat = 0
+
 2008-12-17   D. V. Wiebe <getdata@ketiltrout.net>  svn:267
 	* test/name_move.c test/protect_alter.c test/move_subdir.c test/file_code.c
 	test/protect_get.c test/name.c test/unclude_del.c test/unclude.c

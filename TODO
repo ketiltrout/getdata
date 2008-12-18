@@ -1,3 +1,8 @@
 * Locking
-* Test dirfile_[m]alter_spec()
+* Think about our linterp look-up optimisation
 * Hashed compressed files
+
+Proposed additions to the Standards:
+* POLYCOM field type (from MDT & JK for BLAST & ACT)
+  <field-name> POLYCOM <field> <a0> <a1> [<a2> [<a3> [<a4>]]]
+  field-name = a4*field^4 + a3*field^3 + a2*field^2 + a1*field +a0

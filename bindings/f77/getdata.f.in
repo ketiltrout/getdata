@@ -26,116 +26,116 @@ C     constants useful to Fortran programs
 
 C Externals
 C     Corresponding to dirfile_add_bit(3)
-      EXTERNAL GDFABT
+      EXTERNAL GDADBT
 C     Corresponding to dirfile_add_const(3)
-      EXTERNAL GDFACO
+      EXTERNAL GDADCO
 C     Corresponding to dirfile_add_lincom(3)
-      EXTERNAL GDFALC
+      EXTERNAL GDADLC
 C     Corresponding to dirfile_add_linterp(3)
-      EXTERNAL GDFALT
+      EXTERNAL GDADLT
 C     Corresponding to dirfile_add_multiply(3)
-      EXTERNAL GDFAMT
+      EXTERNAL GDADMT
 C     Corresponding to dirfile_add_phase(3)
-      EXTERNAL GDFAPH
+      EXTERNAL GDADPH
 C     Corresponding to dirfile_add_raw(3)
-      EXTERNAL GDFARW
+      EXTERNAL GDADRW
 C     Corresponding to dirfile_add_spec(3)
-      EXTERNAL GDFASP
+      EXTERNAL GDADSP
 C     Corresponding to dirfile_add_string(3)
-      EXTERNAL GDFAST
+      EXTERNAL GDADST
 C     Corresponding to dirfile_close(3)
-      EXTERNAL GDFCLS
-C     Corresponding to get_entry(3) for BIT fields
-      EXTERNAL GDFEBT
-C     Corresponding to get_entry(3) for CONST fields
-      EXTERNAL GDFECO
-C     Corresponding to get_entry(3) for LINCOM fields
-      EXTERNAL GDFELC
-C     Corresponding to get_entry(3) for LINTERP fields
-      EXTERNAL GDFELT
-C     Corresponding to get_entry(3) for MULTIPLY fields
-      EXTERNAL GDFEMT
-C     Corresponding to get_entry(3) for PHASE fields
-      EXTERNAL GDFEPH
+      EXTERNAL GDCLOS
 C     Returns the dirfile->error member
-      EXTERNAL GDFERR
-C     Corresponding to get_entry(3) for RAW fields
-      EXTERNAL GDFERW
-C     Corresponding to get_field_list(3) (sort of)
-      EXTERNAL GDFFDN
-C     Returns the field type
-      EXTERNAL GDFFDT
-C     Get the fragment index for a field
-      EXTERNAL GDFFGI
-C     Corresponding to get_fragmentname(3)
-      EXTERNAL GDFFGN
-C     Corresponding to dirfile_flush(3)
-      EXTERNAL GDFFLS
-C     Corresponding to get_field_list_by_type(3) (sort of)
-      EXTERNAL GDFFNT
-C     Returns the maximum field name length
-      EXTERNAL GDFFNX
-C     Corresponding to get_constant(3)
-      EXTERNAL GDFGCO
-C     Corresponding to getdata(3)
-      EXTERNAL GDFGET
-C     Corresponding to get_string(3)
-      EXTERNAL GDFGST
-C     Corresponding to dirfile_include(3)
-      EXTERNAL GDFINC
-C     Corresponding to dirfile_madd_bit(3)
-      EXTERNAL GDFMBT
-C     Corresponding to dirfile_madd_const(3)
-      EXTERNAL GDFMCO
-C     Corresponding to dirfile_metaflush(3)
-      EXTERNAL GDFMFL
-C     Corresponding to get_metafield_list(3) (sort of)
-      EXTERNAL GDFMFN
-C     Corresponding to get_metafield_list_by_type(3) (sort of)
-      EXTERNAL GDFMFT
-C     Returns the maximum field name length for a meta field list
-      EXTERNAL GDFMFX
-C     Corresponding to dirfile_madd_lincom(3)
-      EXTERNAL GDFMLC
-C     Corresponding to dirfile_madd_linterp(3)
-      EXTERNAL GDFMLT
-C     Corresponding to dirfile_madd_multiply(3)
-      EXTERNAL GDFMMT
-C     Corresponding to dirfile_madd_phase(3)
-      EXTERNAL GDFMPH
-C     Corresponding to dirfile_madd_spec(3)
-      EXTERNAL GDFMSP
-C     Corresponding to dirfile_madd_string(3)
-      EXTERNAL GDFMST
-C     Corresponding to get_metavector_list(3) (sort of)
-      EXTERNAL GDFMVN
-C     Corresponding to get_nfields(3)
-      EXTERNAL GDFNFD
-C     Corresponding to get_nfragments(3)
-      EXTERNAL GDFNFG
-C     Corresponding to get_nframes(3)
-      EXTERNAL GDFNFR
-C     Corresponding to get_nfields_by_type(3)
-      EXTERNAL GDFNFT
-C     Corresponding to get_nmetafields(3)
-      EXTERNAL GDFNMF
-C     Corresponding to get_nmetafields_by_type(3)
-      EXTERNAL GDFNMT
-C     Corresponding to get_nmetavectors(3)
-      EXTERNAL GDFNMV
-C     Corresponding to get_nvectors(3)
-      EXTERNAL GDFNVE
-C     Corresponding to dirfile_open(3)
-      EXTERNAL GDFOPN
-C     Corresponding to put_constant(3)
-      EXTERNAL GDFPCO
-C     Corresponding to put_string(3)
-      EXTERNAL GDFPST
-C     Corresponding to putdata(3)
-      EXTERNAL GDFPUT
-C     Corresponding to get_spf(3)
-      EXTERNAL GDFSPF
+      EXTERNAL GDEROR
 C     Corresponding to get_error_string(3)
-      EXTERNAL GDFSTR
+      EXTERNAL GDESTR
+C     Corresponding to get_field_list_by_type(3) (sort of)
+      EXTERNAL GDFDNT
+C     Returns the maximum field name length
+      EXTERNAL GDFDNX
+C     Corresponding to get_field_list(3) (sort of)
+      EXTERNAL GDFLDN
+C     Returns the field type
+      EXTERNAL GDFLDT
+C     Corresponding to dirfile_flush(3)
+      EXTERNAL GDFLSH
+C     Get the fragment index for a field
+      EXTERNAL GDFRGI
+C     Corresponding to get_fragmentname(3)
+      EXTERNAL GDFRGN
+C     Corresponding to get_entry(3) for BIT fields
+      EXTERNAL GDGEBT
+C     Corresponding to get_entry(3) for CONST fields
+      EXTERNAL GDGECO
+C     Corresponding to get_entry(3) for LINCOM fields
+      EXTERNAL GDGELC
+C     Corresponding to get_entry(3) for LINTERP fields
+      EXTERNAL GDGELT
+C     Corresponding to get_entry(3) for MULTIPLY fields
+      EXTERNAL GDGEMT
+C     Corresponding to get_entry(3) for PHASE fields
+      EXTERNAL GDGEPH
+C     Corresponding to get_entry(3) for RAW fields
+      EXTERNAL GDGERW
+C     Corresponding to getdata(3)
+      EXTERNAL GDGETD
+C     Corresponding to get_spf(3)
+      EXTERNAL GDGSPF
+C     Corresponding to get_constant(3)
+      EXTERNAL GDGTCO
+C     Corresponding to get_string(3)
+      EXTERNAL GDGTST
+C     Corresponding to dirfile_include(3)
+      EXTERNAL GDINCL
+C     Corresponding to dirfile_madd_bit(3)
+      EXTERNAL GDMDBT
+C     Corresponding to dirfile_madd_const(3)
+      EXTERNAL GDMDCO
+C     Corresponding to dirfile_madd_lincom(3)
+      EXTERNAL GDMDLC
+C     Corresponding to dirfile_madd_linterp(3)
+      EXTERNAL GDMDLT
+C     Corresponding to dirfile_madd_multiply(3)
+      EXTERNAL GDMDMT
+C     Corresponding to dirfile_madd_phase(3)
+      EXTERNAL GDMDPH
+C     Corresponding to dirfile_madd_spec(3)
+      EXTERNAL GDMDSP
+C     Corresponding to dirfile_madd_string(3)
+      EXTERNAL GDMDST
+C     Corresponding to get_mfield_list(3) (sort of)
+      EXTERNAL GDMFDN
+C     Corresponding to get_mfield_list_by_type(3) (sort of)
+      EXTERNAL GDMFDT
+C     Corresponding to dirfile_metaflush(3)
+      EXTERNAL GDMFLS
+C     Returns the maximum field name length for a meta field list
+      EXTERNAL GDMFNX
+C     Corresponding to get_mvector_list(3) (sort of)
+      EXTERNAL GDMVEN
+C     Corresponding to get_nfields_by_type(3)
+      EXTERNAL GDNFDT
+C     Corresponding to get_nfields(3)
+      EXTERNAL GDNFLD
+C     Corresponding to get_nfragments(3)
+      EXTERNAL GDNFRG
+C     Corresponding to get_nframes(3)
+      EXTERNAL GDNFRM
+C     Corresponding to get_nmfields(3)
+      EXTERNAL GDNMFD
+C     Corresponding to get_nmfields_by_type(3)
+      EXTERNAL GDNMFT
+C     Corresponding to get_nmvectors(3)
+      EXTERNAL GDNMVE
+C     Corresponding to get_nvectors(3)
+      EXTERNAL GDNVEC
+C     Corresponding to dirfile_open(3)
+      EXTERNAL GDOPEN
+C     Corresponding to put_constant(3)
+      EXTERNAL GDPTCO
+C     Corresponding to put_string(3)
+      EXTERNAL GDPTST
+C     Corresponding to putdata(3)
+      EXTERNAL GDPUTD
 C     Corresponding to get_vector_list(3) (sort of)
-      EXTERNAL GDFVEN
+      EXTERNAL GDVECN

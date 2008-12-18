@@ -43,8 +43,8 @@ ADD_TESTS=add add_bit add_bit_bitnum add_bit_bitsize add_bit_invalid \
 
 ALTER_TESTS=alter_bit_bitnum alter_bit_numbits alter_const alter_entry \
 						alter_entry_recode alter_lincom_input alter_lincom_offset \
-						alter_lincom_slope alter_linterp alter_linterp_move alter_multiply \
-						alter_phase alter_raw_spf alter_raw_type
+						alter_lincom_slope alter_linterp alter_linterp_move alter_mspec \
+						alter_multiply alter_phase alter_raw_spf alter_raw_type alter_spec
 
 ASCII_TESTS=ascii_get ascii_nframes ascii_put
 

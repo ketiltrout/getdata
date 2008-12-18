@@ -65,12 +65,20 @@ if test "x$include_legacy_api" != "xno"; then
 fi
 
 dnl debugging
+AC_ARG_ENABLE(assert, AS_HELP_STRING([--enable-assert],
+              [enable assertions]),
+              [
+               case "${enableval}" in
+                 yes) enable_assert="yes" ;;
+                 *) enable_assert="no" ;;
+               esac
+              ], [ enable_assert="no" ])
 AC_ARG_ENABLE(debug, AS_HELP_STRING([--enable-debug],
               [enable debugging messages]),
               [
                case "${enableval}" in
                  yes) enable_debug="yes" ;;
-                 *) enable_debug="no";
+                 *) enable_debug="no" ;;
                esac
               ], [ enable_debug="no" ])
 
@@ -79,8 +87,15 @@ AC_MSG_RESULT([$enable_debug])
 if test "x$enable_debug" = "xyes"; then
   AC_DEFINE([GETDATA_DEBUG], [],
             [ Define to enable debugging messages ])
+  enable_assert="yes"
 fi
-AM_CONDITIONAL(GETDATA_DEBUG, test "x$enable_debug" == "xyes")
+AM_CONDITIONAL(GETDATA_DEBUG, [test "x$enable_debug" == "xyes"])
+
+AC_MSG_CHECKING([whether to enable assertions])
+AC_MSG_RESULT([$enable_assert])
+if test "x$enable_assert" = "xno"; then
+  AC_DEFINE(NDEBUG, 1, [ Define to disable assertions ])
+fi
 
 dnl checkdirfile
 AC_ARG_ENABLE(checkdirfile, AS_HELP_STRING([--disable-checkdirfile],
@@ -379,6 +394,10 @@ fi
 
 if test "x$ENCODINGS_LEFT" = "x"; then
   ENCODINGS_LEFT=" none"
+fi
+
+if test "x$enable_debug$enable_assert" = "xnoyes"; then
+  enable_debug = "assert only"
 fi
 
 echo

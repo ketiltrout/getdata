@@ -18,7 +18,7 @@ dirfile unit number is used.  Space is available in the compatibility library
 for only 1023 dirfile units.  If an application attempts to open more than 1023
 dirfiles simultaneously, the compatibility library will emit an error message
 on standard error and raise SIGABRT.  Passing an invalid dirfile unit number to
-a subroutines which requires one as input (other than GDFCLS, which will simply
+a subroutines which requires one as input (other than GDCLOS, which will simply
 ignore it) will result in the call failing with error code GD_EBD
 (= GD_E_BAD_DIRFILE, see below).
 
@@ -38,13 +38,13 @@ the character buffer.  In cases where the bindings return string value, the
 value will not be returned if the string length supplied is too short.  In
 these cases, the character string will be left untouched, but the integer
 indicating the string length will be updated to indicate the required string
-length.  The exception to this is GDFSTR, which simply truncates the string
+length.  The exception to this is GDESTR, which simply truncates the string
 it outputs, as the C API does.
 
 Available Subroutines
 =====================
 
-* GDFOPN(dirfile_unit, dirfilename, dirfilename_len, flags)
+* GDOPEN(dirfile_unit, dirfilename, dirfilename_len, flags)
   
   Output:
     INTEGER dirfile_unit
@@ -58,7 +58,7 @@ Available Subroutines
   parameters (see below).  This behaves analogously to dirfile_open() itself:
   it returns a valid dirfile unit even in case of error.
 
-* GDFCLS(dirfile_unit)
+* GDCLOS(dirfile_unit)
 
   Input:
     INTEGER dirfile_unit
@@ -66,9 +66,9 @@ Available Subroutines
   This wraps dirfile_close(3).  The argument is the dirfile unit to close.
   In addition to closing the dirfile itself, this will also disassociate the
   supplied dirfile unit number, which may be subsequently returned by a
-  subsequent call to GDFOPN.
+  subsequent call to GDOPEN.
 
-* GDFFLS(dirfile_unit, field_code, field_code_len)
+* GDFLSH(dirfile_unit, field_code, field_code_len)
 
   Input:
     INTEGER dirfile_unit, field_code_len
@@ -78,7 +78,7 @@ Available Subroutines
   will be flushed, and field_code will be ignored.  Otherwise the field named
   by field_code will be flushed.
 
-* GDFGET(n_read, dirfile_unit, field_code, field_code_len, first_frame,
+* GDGETD(n_read, dirfile_unit, field_code, field_code_len, first_frame,
   first_sample, num_frames, num_samples, return_type, data_out)
 
   Output:
@@ -95,7 +95,7 @@ Available Subroutines
   parameters defined in getdata.f (see below).  data_out must be of sufficient
   length and of appropriate data type width for the data returned.
 
-* GDFGCO(n_read, dirfile_unit, field_code, field_code_len, return_type,
+* GDGTCO(n_read, dirfile_unit, field_code, field_code_len, return_type,
   data_out)
 
   Output:
@@ -111,7 +111,7 @@ Available Subroutines
   of the parameters defined in getdata.f.  data_out must be of appropriate data
   type width for the data returned.
 
-* GDFGST(n_read, dirfile_unit, field_code, field_code_len, len, data_out)
+* GDGTST(n_read, dirfile_unit, field_code, field_code_len, len, data_out)
 
   Output:
     INTEGER n_read
@@ -124,7 +124,7 @@ Available Subroutines
   contain the string length of the field_code).  The number of characters
   actually read is returned in n_read.  At most len characters will be returned.
 
-* GDFNFD(nfields, dirfile_unit)
+* GDNFLD(nfields, dirfile_unit)
 
   Output:
     INTEGER nframes
@@ -134,7 +134,7 @@ Available Subroutines
   This wraps get_nfields(3).  It takes the dirfile unit number as input and
   returns the number of fields in the dirfile in nfields.
 
-* GDFNFT(nfields, dirfile_unit, type)
+* GDNFDT(nfields, dirfile_unit, type)
 
   Output:
     INTEGER nframes
@@ -145,7 +145,7 @@ Available Subroutines
   specifier as input and returns the number of fields of the specified type in
   the dirfile in nfields.
 
-* GDFNVE(nvectors, dirfile_unit)
+* GDNVEC(nvectors, dirfile_unit)
 
   Output:
     INTEGER nvectors
@@ -155,14 +155,14 @@ Available Subroutines
   This wraps get_nvectors(3).  It takes the dirfile unit number as input and
   returns the number of vector fields in the dirfile in nfields.
 
-* GDFNMF(nfields, dirfile, parent, parent_l)
-* GDFNMT(nfields, dirfile, parent, parent_l, type)
-* GDFNMV(nvectors, dirfile, parent, parent_l)
+* GDNMFD(nfields, dirfile, parent, parent_l)
+* GDNMFT(nfields, dirfile, parent, parent_l, type)
+* GDNMVE(nvectors, dirfile, parent, parent_l)
 
   These subroutine wrap get_nmfields(3), get_nmfields_by_type(3), and
-  get_nmvectors(3).  They behave analogously to GDFNFD, GDFNFT, and GDFNVE.
+  get_nmvectors(3).  They behave analogously to GDNFLD, GDNFDT, and GDNVEC.
 
-* GDFFDX(field_max, dirfile_unit)
+* GDFDNX(field_max, dirfile_unit)
 
   Output:
     INTEGER field_max
@@ -174,7 +174,7 @@ Available Subroutines
   dirfile unit number as input and returns the length (in characters) of
   the longest field name in the dirfile in field_max.
  
-* GDFMFX(field_max, dirfile_unit, parent, parent_len)
+* GDMFNX(field_max, dirfile_unit, parent, parent_len)
 
   Output:
     INTEGER field_max
@@ -187,7 +187,7 @@ Available Subroutines
   supplied parent field.  It returns the length (in characters) of the longest
   META field name for the supplied parent in field_max.
  
-* GDFFDN(name, name_len, dirfile_unit, field_num)
+* GDFLDN(name, name_len, dirfile_unit, field_num)
 
   Output:
     CHARACTER*<name_len> name
@@ -198,13 +198,13 @@ Available Subroutines
 
   This subroutine is the replacement for get_field_list(3).  It returns in
   name a Fortran 77 string containing the field name of the field indexed by
-  field_num (which is should be a number between 1 and the output of GDFNFD).
+  field_num (which is should be a number between 1 and the output of GDNFLD).
   If the name of the field is longer than name_len, it will return the actual
   length of the field in name_len and not modify the name argument.  If
   field_num is out of range, name_len will be set to zero, and name will not be
   modified.
 
-* GDFFNT(name, name_len, dirfile_unit, type, field_num)
+* GDFDNT(name, name_len, dirfile_unit, type, field_num)
   
   Output:
     CHARACTER*<name_len> name
@@ -214,10 +214,10 @@ Available Subroutines
     INTEGER dirfile_unit, field_num, type
 
   This subroutine is the replacement for get_field_list_by_type(3) and behaves
-  in the same manner as GDFFDN.  Type should be one of the parameters defined
+  in the same manner as GDFLDN.  Type should be one of the parameters defined
   in getdata.f (see below).
     
-* GDFVEN(name, name_len, dirfile_unit, field_num)
+* GDVECN(name, name_len, dirfile_unit, field_num)
 
   Output:
     CHARACTER*<name_len> name
@@ -227,9 +227,9 @@ Available Subroutines
     INTEGER dirfile_unit, field_num
 
   This subroutine is the replacement for get_vector_list(3) and behaves in the
-  same manner as GDFFDN.
+  same manner as GDFLDN.
 
-* GDFMFN(name, name_len, dirfile_unit, parent, parent_len, field_num)
+* GDMFDN(name, name_len, dirfile_unit, parent, parent_len, field_num)
 
   Output:
     CHARACTER*<name_len> name
@@ -240,9 +240,9 @@ Available Subroutines
     CHARACTER*<parent_len> parent
 
   This subroutine is the replacement for get_mfield_list(3) and behaves in
-  the same manner as GDFFDN.
+  the same manner as GDFLDN.
 
-* GDFMFT(name, name_len, dirfile_unit, parent, parent_len, type, field_num)
+* GDMFDT(name, name_len, dirfile_unit, parent, parent_len, type, field_num)
   
   Output:
     CHARACTER*<name_len> name
@@ -253,9 +253,9 @@ Available Subroutines
     CHARACTER*<parent_len> parent
 
   This subroutine is the replacement for get_mfield_list_by_type(3) and
-  behaves in the same manner as GDFFNT.
+  behaves in the same manner as GDFDNT.
     
-* GDFMVN(name, name_len, dirfile_unit, parent, parent_len, field_num)
+* GDMVEN(name, name_len, dirfile_unit, parent, parent_len, field_num)
 
   Output:
     CHARACTER*<name_len> name
@@ -266,9 +266,9 @@ Available Subroutines
     CHARACTER*<parent_len> parent
 
   This subroutine is the replacement for get_mvector_list(3) and behaves in
-  the same manner as GDFVEN.
+  the same manner as GDVECN.
 
-* GDFNFR(nframes, dirfile_unit)
+* GDNFRM(nframes, dirfile_unit)
 
   Output:
     INTEGER nframes
@@ -278,7 +278,7 @@ Available Subroutines
   This wraps get_nframes(3).  It takes the dirfile unit number as input and
   returns the number of frames in the dirfile in nframes.
 
-* GDFSPF(spf, dirfile_unit, field_code, field_code_len)
+* GDGSPF(spf, dirfile_unit, field_code, field_code_len)
 
   Output:
     INTEGER spf
@@ -290,7 +290,7 @@ Available Subroutines
   string length of field_code.  The number of samples per frame in field_code
   will be returned in spf.
 
-* GDFPUT(n_wrote, dirfile_unit, field_code, field_code_len, first_frame,
+* GDPUTD(n_wrote, dirfile_unit, field_code, field_code_len, first_frame,
   first_sample, num_frames, num_samples, data_type, data_in)
 
   Output:
@@ -307,7 +307,7 @@ Available Subroutines
   parameters defined in getdata.f.  data_in must be of sufficient length and
   of appropriate data type width for the data input.
 
-* GDFPCO(n_read, dirfile_unit, field_code, field_code_len, data_type,
+* GDPTCO(n_read, dirfile_unit, field_code, field_code_len, data_type,
   data_in)
 
   Output:
@@ -322,7 +322,7 @@ Available Subroutines
   successful, n_wrote will be non-zero.  The data_type parameter should be one
   of the parameters defined in getdata.f.
 
-* GDFPST(n_read, dirfile_unit, field_code, field_code_len, len, data_out)
+* GDPTST(n_read, dirfile_unit, field_code, field_code_len, len, data_out)
 
   Output:
     INTEGER n_wrote
@@ -336,7 +336,7 @@ Available Subroutines
   length of data_in).  The number of characters actually wrote is returned in
   n_wrote.
 
-* GDFERR(error, dirfile_unit)
+* GDEROR(error, dirfile_unit)
 
   Output:
     INTEGER error
@@ -347,7 +347,7 @@ Available Subroutines
   value associated with it in error.  The value of error will equal one of the
   error codes defined in getdata.f.
 
-* GDFSTR(dirfile_unit, buffer, buffer_len)
+* GDESTR(dirfile_unit, buffer, buffer_len)
 
   Output:
     CHARACTER*<buffer_len> buffer
@@ -358,7 +358,7 @@ Available Subroutines
   string returned by get_error_string(3) in buffer, which is of length
   buffer_len.
 
-* GDFFDT(entry_type, dirfile_unit, field_code, field_code_len)
+* GDFLDT(entry_type, dirfile_unit, field_code, field_code_len)
 
   Output:
     INTEGER type
@@ -370,7 +370,7 @@ Available Subroutines
   entry_type.  The entry_type will be one of the entry type parameters listed
   below.
 
-* GDFERW(spf, data_type, format_file, dirfile_unit, field_code, field_code_len)
+* GDGERW(spf, data_type, format_file, dirfile_unit, field_code, field_code_len)
 
   Output: 
     INTEGER spf, data_type, format_file
@@ -385,7 +385,7 @@ Available Subroutines
   spf will be set to zero.  In this case the value of the other output
   parameters is unspecified.
 
-* GDFELC(nfields, infield1, infield1_len, m1, b1, infield2, infield2_len, m2,
+* GDGELC(nfields, infield1, infield1_len, m1, b1, infield2, infield2_len, m2,
   b2, infield3, infield3_len, m3, b3, format_file, dirfile_unit, field_code,
   field_code_len)
 
@@ -407,7 +407,7 @@ Available Subroutines
   will be set to zero.  In this case the value of the remaining data is
   unspecified.
 
-* GDFELT(infield, infield_len, table, table_len, format_file, dirfile_unit,
+* GDGELT(infield, infield_len, table, table_len, format_file, dirfile_unit,
   field_code, field_code_len)
 
   Output: 
@@ -424,7 +424,7 @@ Available Subroutines
   is not found, or the field specified is not of LINTERP type, infield_len will
   be set to zero.  In this case the value of the remaining data is unspecified.
 
-* GDFEBT(infield, infield_len, bitnum, numbits, format_file, dirfile_unit,
+* GDGEBT(infield, infield_len, bitnum, numbits, format_file, dirfile_unit,
   field_code, field_code_len)
 
   Output: 
@@ -440,7 +440,7 @@ Available Subroutines
   is not found, or the field specified is not of BIT type, infield_len will
   be set to zero.  In this case the value of the remaining data is unspecified.
 
-* GDFEMT(infield1, infield1_len, infield2, infield2_len, format_file,
+* GDGEMT(infield1, infield1_len, infield2, infield2_len, format_file,
   dirfile_unit, field_code, field_code_len)
 
   Output: 
@@ -458,7 +458,7 @@ Available Subroutines
   will be set to zero.  In this case the value of the remaining data is
   unspecified.
 
-* GDFEPH(infield, infield_len, shift, format_file, dirfile_unit, field_code,
+* GDGEPH(infield, infield_len, shift, format_file, dirfile_unit, field_code,
   field_code_len)
 
   Output: 
@@ -474,7 +474,7 @@ Available Subroutines
   is not found, or the field specified is not of PHASE type, shift will
   be set to zero.  In this case the value of the remaining data is unspecified.
 
-* GDFECO(const_type, format_file, dirfile_unit, field_code, field_code_len)
+* GDGECO(const_type, format_file, dirfile_unit, field_code, field_code_len)
 
   Output: 
     INTEGER const_type, format_file
@@ -486,7 +486,7 @@ Available Subroutines
   is not found, or the field specified is not of CONST type, const_type will
   be set to zero.  In this case the value of the remaining data is unspecified.
 
-* GDFFFI(format_file, dirfile_unit, field_code, field_code_len
+* GDFRGI(format_file, dirfile_unit, field_code, field_code_len
 
   Output: 
     INTEGER format_file
@@ -497,7 +497,7 @@ Available Subroutines
   This subroutine returns the format file fragment index for the supplied field.
   If the field does not exist, or an error occurred, -1 is returned.
 
-* GDFARW(dirfile_unit, field_code, field_code_len, data_type, spf, format_file)
+* GDADRW(dirfile_unit, field_code, field_code_len, data_type, spf, format_file)
 
   Input:
     INTEGER dirfile_unit, field_code_len, data_type, spf, format_file
@@ -506,7 +506,7 @@ Available Subroutines
   This subroutine adds a RAW field with the supplied parameters to the
   specified format file fragment of the dirfile.
 
-* GDFALC(dirfile_unit, field_code, field_code_len, nfields, in_field1,
+* GDADLC(dirfile_unit, field_code, field_code_len, nfields, in_field1,
   in_field1_len, m1, b1, in_field2, in_field2_len, m2, b2, in_field3,
   in_field3_len, m3, b3, format_file)
 
@@ -524,7 +524,7 @@ Available Subroutines
   parameters are required to be passed to the call, but only the first
   nfield sets will be examined.
 
-* GDFALT(dirfile_unit, field_code, field_code_len, in_field, in_field_len,
+* GDADLT(dirfile_unit, field_code, field_code_len, in_field, in_field_len,
   table, table_len, format_file)
 
   Input:
@@ -536,7 +536,7 @@ Available Subroutines
   This subroutine adds a LINTERP field with the supplied parameters to the
   specified format file fragment of the dirfile.
 
-* GDFABT(dirfile_unit, field_code, field_code_len, in_field, in_field_len,
+* GDADBT(dirfile_unit, field_code, field_code_len, in_field, in_field_len,
   bitnum, numbits, format_file)
 
   Input:
@@ -548,7 +548,7 @@ Available Subroutines
   This subroutine adds a BIT field with the supplied parameters to the
   specified format file fragment of the dirfile.
 
-* GDFAMT(dirfile_unit, field_code, field_code_len, in_field1, in_field1_len,
+* GDADMT(dirfile_unit, field_code, field_code_len, in_field1, in_field1_len,
   in_field2, in_field2_len, format_file)
 
   Input:
@@ -562,7 +562,7 @@ Available Subroutines
   specified format file fragment of the dirfile.
 
 
-* GDFAPH(dirfile_unit, field_code, field_code_len, in_field1, in_field1_len,
+* GDADPH(dirfile_unit, field_code, field_code_len, in_field1, in_field1_len,
   shift, format_file)
 
   Input:
@@ -573,7 +573,7 @@ Available Subroutines
   This subroutine adds a PHASE field with the supplied parameters to the
   specified format file fragment of the dirfile.
 
-* GDFACO(dirfile_unit, field_code, field_code_len, const_type, data_type,
+* GDADCO(dirfile_unit, field_code, field_code_len, const_type, data_type,
   value, format_file)
 
   Input:
@@ -586,7 +586,7 @@ Available Subroutines
   of the field when stored in the dirfile.  data_type is the data type of the
   supplied value.  These need not be the same.
 
-* GDFAST(dirfile_unit, field_code, field_code_len, value, value_len,
+* GDADST(dirfile_unit, field_code, field_code_len, value, value_len,
   format_file)
 
   Input:
@@ -597,7 +597,7 @@ Available Subroutines
   This subroutine adds a STRING field with the supplied parameters to the
   specified format file fragment of the dirfile
 
-* GDFASP(dirfile_unit, spec, spec_len, format_file)
+* GDADSP(dirfile_unit, spec, spec_len, format_file)
 
   Input:
     INTEGER dirfile_unit, format_file, spec_len
@@ -606,7 +606,7 @@ Available Subroutines
   This subroutine wraps dirfile_add_spec(3), and allows adding a field to
   a dirfile given a field specification line.
 
-* GDFMSP(dirfile_unit, spec, spec_len, parent, parent_len)
+* GDMDSP(dirfile_unit, spec, spec_len, parent, parent_len)
 
   Input:
     INTEGER dirfile_unit, spec_len, parent_len
@@ -616,28 +616,28 @@ Available Subroutines
   This subroutine wraps dirfile_madd_spec(3), and allows adding a metafield
   to a dirfile given a field specification line.
 
-* GDFMBT(dirfile_unit, parent, parent_len, field_code, field_code_len, in_field,
+* GDMDBT(dirfile_unit, parent, parent_len, field_code, field_code_len, in_field,
   in_field_len, bitnum, numbits)
 * GDFACO(dirfile_unit, parent, parent_len, field_code, field_code_len,
   const_type, data_type, value)
-* GDFMLC(dirfile_unit, parent, parent_len, field_code, field_code_len, nfields,
+* GDMDLC(dirfile_unit, parent, parent_len, field_code, field_code_len, nfields,
   in_field1, in_field1_len, m1, b1, in_field2, in_field2_len, m2, b2, in_field3,
   in_field3_len, m3, b3)
-* GDFMLT(dirfile_unit, parent, parent_len, field_code, field_code_len, in_field,
+* GDMDLT(dirfile_unit, parent, parent_len, field_code, field_code_len, in_field,
   in_field_len, table, table_len)
-* GDFMMT(dirfile_unit, parent, parent_len, field_code, field_code_len,
+* GDMDMT(dirfile_unit, parent, parent_len, field_code, field_code_len,
   in_field1, in_field1_len, in_field2, in_field2_len)
-* GDFMPH(dirfile_unit, parent, parent_len, field_code, field_code_len,
+* GDMDPH(dirfile_unit, parent, parent_len, field_code, field_code_len,
   in_field1, in_field1_len, shift)
-* GDFMCO(dirfile_unit, parent, parent_len, field_code, field_code_len,
+* GDMDCO(dirfile_unit, parent, parent_len, field_code, field_code_len,
   const_type, data_type, value)
-* GDFMST(dirfile_unit, parent, parent_len, field_code, field_code_len, value,
+* GDMDST(dirfile_unit, parent, parent_len, field_code, field_code_len, value,
   value_len)
 
   These functions are the corresponding META field functions for the GDFAxx
   functions above. They add META fields to the parent field indicated.
 
-* GDFFFN(filename, filename_len, dirfile_unit, ind)
+* GDFRGN(filename, filename_len, dirfile_unit, ind)
 
   Output:
     CHARACTER*<infield_len> infield
@@ -651,7 +651,7 @@ Available Subroutines
   actual length of the filename in filename_len and not modify the filename
   argument.
 
-* GDFNFO(nformats, dirfile_unit)
+* GDNFRG(nformats, dirfile_unit)
 
   Output:
     INTEGER nformats
@@ -661,7 +661,7 @@ Available Subroutines
   This subroutine returns the number of format file fragments in the specified
   dirfile.
 
-* GDFMFL(dirfile_unit)
+* GDMFLS(dirfile_unit)
 
   Input:
     INTEGER dirfile_unit
@@ -669,7 +669,7 @@ Available Subroutines
   This subroutine wraps dirfile_metaflush(3), and will cause metadata changes to
   be written to disk.
 
-* GDFINC(dirfile_unit, file, file_l, format_file, flags)
+* GDINCL(dirfile_unit, file, file_l, format_file, flags)
 
   This subroutine wraps dirfile_include(3), and allows the inclusion of another
   format file fragment into the current dirfile.
@@ -681,7 +681,7 @@ The following parameters, listed here with their C library analogues, are
 defined in getdata.f which may be included in any Fortran program using the
 Fortran 77 bindings.
 
-Error codes (returned by GDFERR):
+Error codes (returned by GDEROR):
 
   F77 symbol      C symbol          Notes
   ----------      ----------------- --------------------------------------
@@ -712,12 +712,14 @@ Error codes (returned by GDFERR):
   GD_EDL          GD_E_DELETE
   GD_EEN          GD_E_BAD_ENDIANNESS
   GD_ECB          GD_E_CALLBACK
+  GD_EBP          GD_E_BAD_PROTECTION
+  GD_UCL          GD_E_UNCLEAN_DB
 
-Dirfile flags (required by GDFOPN):
+Dirfile flags (required by GDOPEN):
 
   F77 symbol      C symbol          Notes
   ----------      ----------------- --------------------------------------
-  GD_RO           GD_RDONLY         The flags argument passed to GDFOPN
+  GD_RO           GD_RDONLY         The flags argument passed to GDOPEN
   GD_RW           GD_RDWR           must contain at least GD_RO or GD_RW
   GD_CR           GD_CREAT
   GD_EX           GD_EXCL
@@ -734,7 +736,7 @@ Dirfile flags (required by GDFOPN):
   GD_EG           GD_GZIP_ENCODED
   GD_EB           GD_BZIP2_ENCODED
 
-Entry types (required by GDFFDT):
+Entry types (required by GDFLDT):
 
   F77 symbol      C symbol          Notes
   ----------      ----------------- --------------------------------------
@@ -749,14 +751,14 @@ Entry types (required by GDFFDT):
   GD_COE          GD_CONST_ENTRY
   GD_STE          GD_STRING_ENTRY
 
-Data types.  Note, Fortran does not support unsigned data types, but GDFERW may
+Data types.  Note, Fortran does not support unsigned data types, but GDGERW may
 still return an unsigned type, so all types are defined here.  The unsigned data
 type specifiers will be accepted by the other subroutines, but the data returned
 may not be properly interpretable by Fortran 77.
 
   F77 symbol      C symbol          Notes
   ----------      ----------------- --------------------------------------
-  GD_NUL          GD_NULL           Not suitable to be passed to GDFPUT
+  GD_NUL          GD_NULL           Not suitable to be passed to GDPUTD
   GD_U8           GD_UINT8
   GD_I8           GD_INT8
   GD_U16          GD_UINT16

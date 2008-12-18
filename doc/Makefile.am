@@ -20,7 +20,7 @@
 #
 AUTOMAKE_OPTIONS = foreign
 
-dist_doc_DATA = unclean_database_recovery.txt
+dist_doc_DATA = README.cxx README.f77 README.f95 unclean_database_recovery.txt
 
 clean-local:
 	rm -rf *~

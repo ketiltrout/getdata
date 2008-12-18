@@ -702,7 +702,7 @@ int dirfile_alter_spec(DIRFILE* D, const char* line, int move)
 
   /* Let the parser compose the entry */
   N = _GD_ParseFieldSpec(D, n_cols, in_cols, NULL, "dirfile_alter_spec()", 0, 
-      N->fragment_index, DIRFILE_STANDARDS_VERSION, 1, 1, 0);
+      N->fragment_index, DIRFILE_STANDARDS_VERSION, 0, 1, 0);
 
   if (D->error) {
     dreturn("%i", -1); /* field spec parser threw an error */
@@ -769,7 +769,7 @@ int dirfile_malter_spec(DIRFILE* D, const char* line, const char* parent,
 
   /* Let the parser compose the entry */
   N = _GD_ParseFieldSpec(D, n_cols, in_cols, N, "dirfile_malter_spec()", 0,
-      N->fragment_index, DIRFILE_STANDARDS_VERSION, 1, 1, 0);
+      N->fragment_index, DIRFILE_STANDARDS_VERSION, 0, 1, 0);
 
   if (D->error) {
     dreturn("%i", -1); /* field spec parser threw an error */

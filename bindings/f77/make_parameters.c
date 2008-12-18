@@ -87,6 +87,8 @@ int main(void)
     parameter(stream, "GD_E_DELETE",         "GD_EDL", GD_E_DELETE,         i);
     parameter(stream, "GD_E_BAD_ENDIANNESS", "GD_EEN", GD_E_BAD_ENDIANNESS, i);
     parameter(stream, "GD_E_CALLBACK",       "GD_ECB", GD_E_CALLBACK,       i);
+    parameter(stream, "GD_E_BAD_PROTECTION", "GD_EBP", GD_E_BAD_PROTECTION, i);
+    parameter(stream, "GD_E_UNCLEAN_DB",     "GD_UCL", GD_E_UNCLEAN_DB,     i);
 
     fprintf(stream, "\\\n%c Open flags\\\n", c);
 
@@ -128,7 +130,7 @@ int main(void)
         "\\\n%c Data types -- the unsigned types won't work when passed as\\\n"
         "%c               a return type, but we keep them anyways, since\\\n"
         "%c               they might appear as a result of calling %s\\\n",
-        c, c, c, (i == 0) ? "GDFERW" : "fget_entry");
+        c, c, c, (i == 0) ? "GDGERW" : "fget_entry");
 
     parameter(stream, "GD_NULL",             "GD_NUL", GD_NULL,             i);
     parameter(stream, "GD_UINT8",            "GD_U8",  GD_UINT8,            i);

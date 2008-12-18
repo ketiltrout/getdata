@@ -85,6 +85,17 @@ install-data-hook64:
 	cd $(DESTDIR)$(mandir)/man3 && \
 		$(LN_S) -f get_frameoffset64.3 dirfile_alter_frameoffset64.3
 
+uninstall-hook:
+	cd $(DESTDIR)$(mandir)/man3 && \
+		rm -rf dirfile_add_const.3 dirfile_add_lincom.3 dirfile_add_linterp.3 \
+		dirfile_add_multiply.3 dirfile_add_phase.3 dirfile_add_raw.3 \
+		dirfile_add_string.3 dirfile_add_const.3 dirfile_add_lincom.3 \
+		dirfile_add_linterp.3 dirfile_add_multiply.3 dirfile_add_phase.3 \
+		dirfile_add_string.3 dirfile_madd.3 dirfile_madd_spec.3 dirfile_open.3 \
+		dirfile_discard.3 dirfile_alter_const.3 dirfile_alter_lincom.3 \
+		dirfile_alter_linterp.3 dirfile_alter_multiply.3 dirfile_alter_phase.3 \
+		dirfile_alter_raw.3 dirfile_malter_spec.3 dirfile_alter_frameoffset64.3
+
 clean-local:
 	rm -rf *~ 
 	rm -rf dirfile_alter_encoding.3 dirfile_alter_endianness.3 \

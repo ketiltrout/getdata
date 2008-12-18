@@ -20,7 +20,7 @@
 #
 AUTOMAKE_OPTIONS = foreign dist-bzip2 check-news 1.10
 
-EXTRA_DIST = ChangeLog README.cxx README.f77 README.f95
+EXTRA_DIST = ChangeLog
 
 ACLOCAL_AMFLAGS = -I m4
 
@@ -29,6 +29,8 @@ LIBLTDL_SUBDIR=libltdl
 endif
 
 SUBDIRS = $(LIBLTDL_SUBDIR) src bin man . doc test bindings
+
+dist_doc_DATA = COPYING.DOC
 
 clean-local:
 	rm -rf *~ 

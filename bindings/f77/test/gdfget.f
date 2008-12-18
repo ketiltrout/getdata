@@ -36,10 +36,10 @@ C     Attempt to read INT8 via the F77 bindings
       WRITE (1,REC=1) datdat
       CLOSE(1, STATUS='KEEP')
 
-      CALL GDFOPN(d, fildir, 12, GD_RO)
-      CALL GDFGET(n, d, 'data', 4, 5, 0, 1, 0, GD_I8, c);
-      CALL GDFERR(e, d)
-      CALL GDFCLS(d)
+      CALL GDOPEN(d, fildir, 12, GD_RO)
+      CALL GDGETD(n, d, 'data', 4, 5, 0, 1, 0, GD_I8, c);
+      CALL GDEROR(e, d)
+      CALL GDCLOS(d)
 
       CALL SYSTEM ( 'rm -rf ' // fildir )
 
