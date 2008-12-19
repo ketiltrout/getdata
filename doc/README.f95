@@ -41,7 +41,23 @@ unit numbers in place of C's DIRFILE pointers are:
   character (len=*), intent(in) :: dirfilename
   integer, intent(in) :: flags
 
+* integer function fdirfile_cbopen (dirfilename, flags, sehandler)
+  character (len=*), intent (in) :: dirfilename
+  integer, intent (in) :: flags
+  interface
+    subroutine sehandler(act, dirfile_unit, suberror, line)
+      integer, intent (out) :: act
+      integer, intent (in) :: dirfile_unit, suberror
+      character (len=GD_MAX_LINE_LENGTH), intent (inout) :: line
+    end subroutine
+  end interface
+
+  (GD_FIELD_LEN is a constant parameter defined in the module)
+
 * subroutine fdirfile_close (dirfile_unit)
+  integer, intent(in) :: dirfile
+
+* subroutine fdirfile_discard (dirfile_unit)
   integer, intent(in) :: dirfile
 
 * subroutine fdirfile_flush (dirfile_unit, field_code)
@@ -56,7 +72,7 @@ unit numbers in place of C's DIRFILE pointers are:
 * character (len=GD_FIELD_LEN) function fget_format_filename(dirfile_unit, ind)
   integer, intent(in) :: dirfile_unit, ind
 
-  (GD_FIELD_LEN is a constant parameter equal to 4096.)
+  (GD_FIELD_LEN is a constant parameter defined in the module)
 
 * integer function fget_nfields (dirfile_unit)
   integer, intent(in) :: dirfile_unit
@@ -113,6 +129,199 @@ unit numbers in place of C's DIRFILE pointers are:
 * subroutine fdirfile_include (dirfile, inc_file, flags)
   integer, intent(in) :: dirfile, format_file, flags
   character (len=*), intent(in) :: inc_file
+
+* subroutine fdirfile_add_bit (dirfile, field_name, in_field, bitnum, numbits,
+  fragment_index)
+  integer, intent(in) :: dirfile, bitnum, numbits, fragment_index
+  character (len=*), intent(in) :: field_name, in_field
+
+* subroutine fdirfile_add_const (dirfile, field_name, const_type,
+  fragment_index)
+  integer, intent(in) :: dirfile, const_type, fragment_index
+  character (len=*), intent(in) :: field_name
+
+  (Unlike the C counterpart, this version cannot be used to simultaneously
+  set the value of the constant.  Use one of the put_constant procedures after
+  creating the field).
+
+* subroutine fdirfile_add_lincom (dirfile, field_name, n_fields, in_field1, m1,
+  b1, in_field2, m2, b2, in_field3, m3, b3, fragment_index)
+  integer, intent(in) :: dirfile, n_fields, fragment_index
+  character (len=*), intent(in) :: field_name, in_field1, in_field2, in_field3
+  real*8, intent(in) :: m1, b1, m2, b2, m3, b3
+
+* subroutine fdirfile_add_linterp (dirfile, field_name, in_field, table,
+  fragment_index)
+  integer, intent(in) :: dirfile, fragment_index
+  character (len=*), intent(in) :: field_name, in_field, table
+
+* subroutine fdrifile_add_multiply (dirfile, field_name, in_field1, in_field2,
+  fragment_index)
+  integer, intent(in) :: dirfile, fragment_index
+  character (len=*), intent(in) :: field_name, in_field1, in_field2
+
+* subroutine fdrifile_add_phase (dirfile, field_name, in_field, phase,
+  fragment_index)
+  integer, intent(in) :: dirfile, phase, fragment_index
+  character (len=*), intent(in) :: field_name, in_field
+
+* subroutine fdirfile_add_raw (dirfile, field_code, data_type, spf,
+  fragment_index)
+  integer, intent(in) :: dirfile, data_type, spf, fragment_index
+  character (len=*), intent(in) :: field_code
+
+* subroutine fdirfile_add_string (dirfile, field_code, fragment_index)
+  integer, intent(in) :: dirfile, fragment_index
+  character (len=*), intent(in) :: field_code
+
+  (Unlike the C counterpart, this version cannot be used to simultaneously
+  set the value of the string.  Use the put_string procedures after creating
+  the field).
+
+* subroutine fdirfile_madd_bit (dirfile, parent, field_name, in_field, bitnum,
+  numbits)
+  integer, intent(in) :: dirfile, bitnum, numbits
+  character (len=*), intent(in) :: field_name, in_field, parent
+
+* subroutine fdirfile_madd_const (dirfile, parent, field_name, const_type)
+  integer, intent(in) :: dirfile, const_type
+  character (len=*), intent(in) :: field_name, parent
+
+  (Unlike the C counterpart, this version cannot be used to simultaneously
+  set the value of the constant.  Use one of the put_constant procedures after
+  creating the field).
+
+* subroutine fdirfile_madd_lincom (dirfile, parent, field_name, n_fields,
+  in_field1, m1, b1, in_field2, m2, b2, in_field3, m3, b3)
+  integer, intent(in) :: dirfile, n_fields
+  character (len=*), intent(in) :: field_name, in_field1, in_field2, in_field3
+  character (len=*), intent(in) :: parent
+  real*8, intent(in) :: m1, b1, m2, b2, m3, b3
+
+* subroutine fdirfile_madd_linterp (dirfile, parent, field_name, in_field,
+  table)
+  integer, intent(in) :: dirfile
+  character (len=*), intent(in) :: field_name, in_field, table, parent
+
+* subroutine fdrifile_madd_multiply (dirfile, parent, field_name, in_field1,
+  in_field2)
+  integer, intent(in) :: dirfile
+  character (len=*), intent(in) :: field_name, in_field1, in_field2, parent
+
+* subroutine fdrifile_madd_phase (dirfile, parent, field_name, in_field, phase)
+  integer, intent(in) :: dirfile, phase
+  character (len=*), intent(in) :: field_name, in_field, parent
+
+* subroutine fdirfile_madd_string (dirfile, parent, field_code)
+  integer, intent(in) :: dirfile
+  character (len=*), intent(in) :: field_code, parent
+
+  (Unlike the C counterpart, this version cannot be used to simultaneously
+  set the value of the string.  Use the put_string procedures after creating
+  the field).
+
+* character (len=GD_FIELD_LEN) function fget_reference (dirfile)
+  integer, intent(in) :: dirfile
+
+* character (len=GD_FIELD_LEN)  function fdirfile_reference (dirfile, &
+  field_code)
+  integer, intent(in) :: dirfile
+  character (len=*), intent(in) :: field_code
+
+* subroutine fdirfile_parser_callback (dirfile, sehandler)
+  integer, intent(in) :: dirfile
+  interface
+    subroutine sehandler(act, dirfile_unit, suberror, line)
+      integer, intent (out) :: act
+      integer, intent (in) :: dirfile_unit, suberror
+      character (len=@GD_MAX_LINE_LENGTH@), intent (inout) :: line
+    end subroutine
+  end interface
+
+* integer function fget_encoding (dirfile, fragment)
+  integer, intent(in) :: dirfile, fragment
+
+* subroutine fdirfile_alter_encoding (dirfile, encoding, fragment, recode)
+  integer, intent(in) :: dirfile, encoding, fragment, recode
+
+* integer function fget_endianness (dirfile, fragment)
+  integer, intent(in) :: dirfile, fragment
+
+* subroutine fdirfile_alter_endianness (dirfile, endianness, fragment, recode)
+  integer, intent(in) :: dirfile, endianness, fragment, recode
+
+* integer function fget_frameoffset (dirfile, fragment)
+  integer, intent(in) :: dirfile, fragment
+
+* subroutine fdirfile_alter_frameoffset (dirfile, frameoffset, fragment, recode)
+  integer, intent(in) :: dirfile, frameoffset, fragment, recode
+
+* integer function fget_protection (dirfile, fragment)
+  integer, intent(in) :: dirfile, fragment
+
+* subroutine fdirfile_protect (dirfile, protection_level, fragment)
+  integer, intent(in) :: dirfile, protection_level, fragment
+
+* integer function fget_parent_fragment (dirfile, fragment)
+  integer, intent(in) :: dirfile, fragment
+
+* subroutine fdirfile_uninclude (dirfile, fragment, del)
+  integer, intent(in) :: dirfile, fragment, del
+
+* character (len=GD_MAX_LINE_LENGTH) function fget_raw_filename (dirfile,
+  field_code)
+  integer, intent(in) :: dirfile
+  character (len=*), intent(in) :: field_code
+
+* subroutine fdirfile_move (dirfile, field_code, new_fragment, move_data)
+  integer, intent(in) :: dirfile, new_fragment, move_data
+  character (len=*), intent(in) :: field_code
+
+* subroutine fdirfile_alter_bit (dirfile, field_name, in_field, bitnum, numbits)
+  integer, intent(in) :: dirfile, bitnum, numbits
+  character (len=*), intent(in) :: field_name, in_field
+
+* subroutine fdirfile_alter_const (dirfile, field_name, const_type)
+  integer, intent(in) :: dirfile, const_type
+  character (len=*), intent(in) :: field_name
+
+* subroutine fdirfile_alter_lincom (dirfile, field_name, n_fields, in_field1,
+  m1, b1, in_field2, m2, b2, in_field3, m3, b3)
+  integer, intent(in) :: dirfile, n_fields
+  character (len=*), intent(in) :: field_name, in_field1, in_field2, in_field3
+  real*8, intent(in) :: m1, b1, m2, b2, m3, b3
+
+* subroutine fdirfile_alter_linterp (dirfile, field_name, in_field, table, move)
+  integer, intent(in) :: dirfile, move
+  character (len=*), intent(in) :: field_name, in_field, table
+
+* subroutine fdrifile_alter_multiply (dirfile, field_name, in_field1, in_field2)
+  integer, intent(in) :: dirfile
+  character (len=*), intent(in) :: field_name, in_field1, in_field2
+
+* subroutine fdrifile_alter_phase (dirfile, field_name, in_field, phase)
+  integer, intent(in) :: dirfile, phase
+  character (len=*), intent(in) :: field_name, in_field
+
+* subroutine fdirfile_alter_raw (dirfile, field_code, data_type, spf, move)
+  integer, intent(in) :: dirfile, data_type, spf, move
+  character (len=*), intent(in) :: field_code
+
+* subroutine fdirfile_alter_spec (dirfile, spec, recode)
+  integer, intent(in) :: dirfile, recode
+  character (len=*), intent(in) :: spec
+
+* subroutine fdirfile_malter_spec (dirfile, spec, parent, recode)
+  integer, intent(in) :: dirfile, recode
+  character (len=*), intent(in) :: parent, spec
+
+* subroutine fdirfile_rename (dirfile, field_code, new_name, move_data)
+  integer, intent(in) :: dirfile, move_data
+  character (len=*), intent(in) :: field_code, new_name
+
+* subroutine fdirfile_delete (dirfile, field_code, flags)
+  integer, intent(in) :: dirfile, flags
+  character (len=*), intent(in) :: field_code
 
 In order to respect type safety, the getdata and putdata analogues encode
 the datatype of their array in their function name, rather than as a parameter.
@@ -291,3 +500,10 @@ Other procedures in the Fortran 95 bindings are:
   integer, intent(in) :: dirfile_unit
   character (len=*), intent(in) :: parent, field_code
   type(gd_entry), intent(in) :: ent
+
+* subroutine fdirfile_alter_entry (dirfile, field_code, ent, recode)
+  integer, intent(in) :: dirfile, recode
+  character (len=*), intent(in) :: field_code
+  type(gd_entry), intent(in) :: ent
+
+  This subroutine alters the field or metafield specified.

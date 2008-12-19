@@ -1,4 +1,10 @@
 2008-12-19   D. V. Wiebe <getdata@ketiltrout.net>  svn:273
+	* bindings/f77/getdata.f90.in doc/README.F95: Add Fortran 95 bindings for new
+	functions, and for the dirfile_[m]add_<field_type> functions.
+
+	* bindings/f77/getdata.f90.in: Fix call to gdadsp and gdmdsp
+
+2008-12-19   D. V. Wiebe <getdata@ketiltrout.net>  svn:273
 	* src/protect.c (dirfile_protect): Swap order of arguments for consistency
 	with the dirfile_alter_<metadata> functions.
 

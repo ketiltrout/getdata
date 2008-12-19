@@ -5,6 +5,12 @@ New in version 0.5.0a4:
   * BUG FIX: putdata() now reports the correct number of samples written for
     ASCII encoded files.
 
+  Miscellaneous:
+
+  * BUG FIX: The dirifle_madd_bit(3) manual page has been corrected to show
+    the correct order or parameters for all the dirfile_madd_<field_type>
+    functions.
+
 |==============================================================================|
 
 New in version 0.4.2:

@@ -20,7 +20,7 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH dirfile_madd_bit 3 "8 December 2008" "Version 0.5.0" "GETDATA"
+.TH dirfile_madd_bit 3 "19 December 2008" "Version 0.5.0" "GETDATA"
 .SH NAME
 dirfile_madd_bit, dirfile_madd_const, dirfile_madd_lincom, dirfile_madd_linterp,
 dirfile_madd_multiply, dirfile_madd_phase, dirfile_madd_string \(em add a field
@@ -30,31 +30,32 @@ to a dirfile
 .HP
 .nh
 .ad l
-.BI "int dirfile_madd_bit(DIRFILE *" dirfile ", const char *" field_name ,
-.BI "const char *" in_field ", int " bitnum ", int " numbits ,
-.BI "const char *" parent );
+.BI "int dirfile_madd_bit(DIRFILE *" dirfile ,
+.BI "const char *" parent ", const char *" field_name ,
+.BI "const char *" in_field ", int " bitnum ", int " numbits );
 .HP
-.BI "int dirfile_madd_const(DIRFILE *" dirfile ", const char *" field_name ,
-.BI "gd_type_t " const_type ", gd_type_t " data_type ", void *" value ,
-.BI "const char *" parent );
+.BI "int dirfile_madd_const(DIRFILE *" dirfile ,
+.BI "const char *" parent ", const char *" field_name ,
+.BI "gd_type_t " const_type ", gd_type_t " data_type ", void *" value );
 .HP
-.BI "int dirfile_madd_lincom(DIRFILE *" dirfile ", const char *" field_name ,
-.BI "int " n_fields ", const char **" in_fields ", const double *" m ,
-.BI "const double *" b ", const char *" parent );
+.BI "int dirfile_madd_lincom(DIRFILE *" dirfile ", const char *" parent ,
+.BI "const char *" field_name ", int " n_fields ", const char **" in_fields ,
+.BI "const double *" m ", const double *" b );
 .HP
-.BI "int dirfile_madd_linterp(DIRFILE *" dirfile ", const char
-.BI * field_name ", const char *" in_field ", const char *" table ", const char"
-.BI * parent );
+.BI "int dirfile_madd_linterp(DIRFILE *" dirfile ,
+.BI "const char *" parent ", const char *" field_name ,
+.BI "const char *" in_field ", const char *" table );
 .HP
-.BI "int dirfile_madd_multiply(DIRFILE *" dirfile ", const char"
-.BI * field_name ", const char *" in_field1 ", const char *" in_field2 ,
-.BI "const char *" parent );
+.BI "int dirfile_madd_multiply(DIRFILE *" dirfile ,
+.BI "const char *" parent ", const char *" field_name ,
+.BI " const char *" in_field1 ", const char *" in_field2 );
 .HP
-.BI "int dirfile_madd_phase(DIRFILE *" dirfile ", const char *" field_name ,
-.BI "const char *" in_field ", int " phase ", const char *" parent );
+.BI "int dirfile_madd_phase(DIRFILE *" dirfile ,
+.BI "const char *" parent ", const char *" field_name ,
+.BI "const char *" in_field ", int " phase );
 .HP
-.BI "int dirfile_madd_string(DIRFILE *" dirfile ", const char *" field_name ,
-.BI "const char *" value ", const char *" parent );
+.BI "int dirfile_madd_string(DIRFILE *" dirfile ", const char *" parent ,
+.BI "const char *" field_name ", const char *" value );
 .hy
 .ad n
 .SH DESCRIPTION

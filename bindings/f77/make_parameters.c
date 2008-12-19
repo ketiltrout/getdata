@@ -194,6 +194,7 @@ int main(void)
 
     fprintf(stream, "/\n");
   }
+  fprintf(stream, "s/@GD_MAX_LINE_LENGTH@/%i/\n", GD_MAX_LINE_LENGTH);
 
   fclose(stream);
 }

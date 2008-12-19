@@ -25,12 +25,12 @@ implicit none
 
 @PARAMETERS95@
 
-integer, parameter :: GD_FIELD_LEN=4096
+integer, parameter :: GD_FIELD_LEN=@GD_MAX_LINE_LENGTH@
 
 type gd_entry
   integer :: field_type, n_fields, spf, data_type, bitnum, numbits, shift
   integer :: fragment_index
-  character(len=GD_FIELD_LEN), dimension(3) :: field
+  character (len=GD_FIELD_LEN), dimension(3) :: field
   real*8, dimension(3) :: m, b
 end type
 
@@ -43,6 +43,30 @@ function fdirfile_open (dirfilename, flags)
   ! call f77 library
   call gdopen(fdirfile_open, TRIM(dirfilename), LEN_TRIM(dirfilename), flags)
 end function
+
+function fdirfile_cbopen (dirfilename, flags, sehandler)
+  integer :: fdirfile_cbopen
+  character (len=*), intent (in) :: dirfilename
+  integer, intent (in) :: flags
+  interface
+    subroutine sehandler(act, dirfile_unit, suberror, line)
+      integer, intent (out) :: act
+      integer, intent (in) :: dirfile_unit, suberror
+      character (len=@GD_MAX_LINE_LENGTH@), intent (inout) :: line
+    end subroutine
+  end interface
+
+  ! call f77 library
+  call gdcopn(fdirfile_cbopen, TRIM(dirfilename), LEN_TRIM(dirfilename), &
+  flags, sehandler)
+end function
+
+subroutine fdirfile_discard (dirfile)
+  integer, intent(in) :: dirfile
+
+  ! call f77 library
+  call gddscd(dirfile)
+end subroutine
 
 subroutine fdirfile_close (dirfile)
   integer, intent(in) :: dirfile
@@ -736,6 +760,83 @@ subroutine fdirfile_add (dirfile, field_code, ent)
   end if
 end subroutine
 
+subroutine fdirfile_add_bit (dirfile, field_name, in_field, bitnum, numbits, &
+  fragment_index)
+  integer, intent(in) :: dirfile, bitnum, numbits, fragment_index
+  character (len=*), intent(in) :: field_name, in_field
+
+  call gdadbt(dirfile, TRIM(field_name), LEN_TRIM(field_name), TRIM(in_field), &
+  LEN_TRIM(in_field), bitnum, numbits, fragment_index)
+end subroutine
+
+subroutine fdirfile_add_const (dirfile, field_name, const_type, fragment_index)
+  integer, intent(in) :: dirfile, const_type, fragment_index
+  character (len=*), intent(in) :: field_name
+  integer*4 :: zero = 0
+
+  call gdadco(dirfile, TRIM(field_name), LEN_TRIM(field_name), const_type, &
+  GD_INT32, zero, fragment_index)
+end subroutine
+
+subroutine fdirfile_add_lincom (dirfile, field_name, n_fields, in_field1, m1, &
+  b1, in_field2, m2, b2, in_field3, m3, b3, fragment_index)
+  integer, intent(in) :: dirfile, n_fields, fragment_index
+  character (len=*), intent(in) :: field_name, in_field1, in_field2, in_field3
+  real*8, intent(in) :: m1, b1, m2, b2, m3, b3
+
+  call gdadlc(dirfile, TRIM(field_name), LEN_TRIM(field_name), n_fields, &
+  TRIM(in_field1), LEN_TRIM(in_field1), m1, b1, TRIM(in_field2), &
+  LEN_TRIM(in_field2), m2, b2, TRIM(in_field3), LEN_TRIM(in_field3), m3, b3, &
+  fragment_index)
+end subroutine
+
+subroutine fdirfile_add_linterp (dirfile, field_name, in_field, table, &
+  fragment_index)
+  integer, intent(in) :: dirfile, fragment_index
+  character (len=*), intent(in) :: field_name, in_field, table
+
+  call gdadlt(dirfile, TRIM(field_name), LEN_TRIM(field_name), TRIM(in_field), &
+  LEN_TRIM(in_field), TRIM(table), LEN_TRIM(table), fragment_index)
+end subroutine
+
+subroutine fdrifile_add_multiply (dirfile, field_name, in_field1, in_field2, &
+  fragment_index)
+  integer, intent(in) :: dirfile, fragment_index
+  character (len=*), intent(in) :: field_name, in_field1, in_field2
+
+  call gdadmt(dirfile, TRIM(field_name), LEN_TRIM(field_name), &
+  TRIM(in_field1), LEN_TRIM(in_field1), TRIM(in_field2), LEN_TRIM(in_field2), &
+  fragment_index)
+end subroutine
+
+subroutine fdrifile_add_phase (dirfile, field_name, in_field, phase, &
+  fragment_index)
+  integer, intent(in) :: dirfile, phase, fragment_index
+  character (len=*), intent(in) :: field_name, in_field
+
+  call gdadph(dirfile, TRIM(field_name), LEN_TRIM(field_name), &
+  TRIM(in_field), LEN_TRIM(in_field), phase, fragment_index)
+end subroutine
+
+subroutine fdirfile_add_raw (dirfile, field_code, data_type, spf, &
+  fragment_index)
+  integer, intent(in) :: dirfile, data_type, spf, fragment_index
+  character (len=*), intent(in) :: field_code
+
+  call gdadrw(dirfile, TRIM(field_code), LEN_TRIM(field_code), data_type, spf, &
+  fragment_index)
+end subroutine
+
+subroutine fdirfile_add_string (dirfile, field_code, fragment_index)
+  integer, intent(in) :: dirfile, fragment_index
+  character (len=*), intent(in) :: field_code
+  
+  character (len=1) :: nil = ""
+
+  call gdadst(dirfile, TRIM(field_code), LEN_TRIM(field_code), nil, 0, &
+  fragment_index)
+end subroutine
+
 subroutine fdirfile_madd (dirfile, parent, field_code, ent)
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: field_code, parent
@@ -773,25 +874,93 @@ subroutine fdirfile_madd (dirfile, parent, field_code, ent)
   end if
 end subroutine
 
+subroutine fdirfile_madd_bit (dirfile, parent, field_name, in_field, bitnum, &
+  numbits)
+  integer, intent(in) :: dirfile, bitnum, numbits
+  character (len=*), intent(in) :: field_name, in_field, parent
+
+  call gdmdbt(dirfile, TRIM(parent), LEN_TRIM(parent), TRIM(field_name), &
+  LEN_TRIM(field_name), TRIM(in_field), LEN_TRIM(in_field), bitnum, numbits)
+end subroutine
+
+subroutine fdirfile_madd_const (dirfile, parent, field_name, const_type)
+  integer, intent(in) :: dirfile, const_type
+  character (len=*), intent(in) :: field_name, parent
+  integer*4 :: zero = 0
+
+  call gdmdco(dirfile, TRIM(parent), LEN_TRIM(parent), TRIM(field_name), &
+  LEN_TRIM(field_name), const_type, GD_INT32, zero)
+end subroutine
+
+subroutine fdirfile_madd_lincom (dirfile, parent, field_name, n_fields, &
+  in_field1, m1, b1, in_field2, m2, b2, in_field3, m3, b3)
+  integer, intent(in) :: dirfile, n_fields
+  character (len=*), intent(in) :: field_name, in_field1, in_field2, in_field3
+  character (len=*), intent(in) :: parent
+  real*8, intent(in) :: m1, b1, m2, b2, m3, b3
+
+  call gdmdlc(dirfile, TRIM(parent), LEN_TRIM(parent), TRIM(field_name), &
+  LEN_TRIM(field_name), n_fields, TRIM(in_field1), LEN_TRIM(in_field1), m1, &
+  b1, TRIM(in_field2), LEN_TRIM(in_field2), m2, b2, TRIM(in_field3), &
+  LEN_TRIM(in_field3), m3, b3)
+end subroutine
+
+subroutine fdirfile_madd_linterp (dirfile, parent, field_name, in_field, table)
+  integer, intent(in) :: dirfile
+  character (len=*), intent(in) :: field_name, in_field, table, parent
+
+  call gdmdlt(dirfile, TRIM(parent), LEN_TRIM(parent), TRIM(field_name), &
+  LEN_TRIM(field_name), TRIM(in_field), LEN_TRIM(in_field), TRIM(table), &
+  LEN_TRIM(table))
+end subroutine
+
+subroutine fdrifile_madd_multiply (dirfile, parent, field_name, in_field1, &
+  in_field2)
+  integer, intent(in) :: dirfile
+  character (len=*), intent(in) :: field_name, in_field1, in_field2, parent
+
+  call gdmdmt(dirfile, TRIM(parent), LEN_TRIM(parent), TRIM(field_name), &
+  LEN_TRIM(field_name), TRIM(in_field1), LEN_TRIM(in_field1), TRIM(in_field2), &
+  LEN_TRIM(in_field2))
+end subroutine
+
+subroutine fdrifile_madd_phase (dirfile, parent, field_name, in_field, phase)
+  integer, intent(in) :: dirfile, phase
+  character (len=*), intent(in) :: field_name, in_field, parent
+
+  call gdmdph(dirfile, TRIM(parent), LEN_TRIM(parent), TRIM(field_name), &
+  LEN_TRIM(field_name), TRIM(in_field), LEN_TRIM(in_field), phase)
+end subroutine
+
+subroutine fdirfile_madd_string (dirfile, parent, field_code)
+  integer, intent(in) :: dirfile
+  character (len=*), intent(in) :: field_code, parent
+  
+  character (len=1) :: nil = ""
+
+  call gdmdst(dirfile, TRIM(parent), LEN_TRIM(parent), TRIM(field_code), &
+  LEN_TRIM(field_code), nil, 0)
+end subroutine
+
 subroutine fdirfile_add_spec (dirfile, spec, fragment_index)
   integer, intent(in) :: dirfile, fragment_index
   character (len=*), intent(in) :: spec
 
-  call gdadsp(dirfile, fragment_index, TRIM(spec), LEN_TRIM(spec))
+  call gdadsp(dirfile, TRIM(spec), LEN_TRIM(spec), fragment_index)
 end subroutine
 
 subroutine fdirfile_madd_spec (dirfile, spec, parent)
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: parent, spec
 
-  call gdmdsp(dirfile, TRIM(parent), LEN_TRIM(parent), TRIM(spec), &
-  LEN_TRIM(spec))
+  call gdmdsp(dirfile, TRIM(spec), LEN_TRIM(spec), TRIM(parent), &
+  LEN_TRIM(parent))
 end subroutine
 
 function fget_fragmentname (dirfile, ind)
   character (len=GD_FIELD_LEN) :: fget_fragmentname
   integer, intent(in) :: dirfile, ind
-  integer :: l = 4096
+  integer :: l = GD_FIELD_LEN
 
   call gdfrgn(fget_fragmentname, l, dirfile, ind)
 end function
@@ -816,4 +985,242 @@ subroutine fdirfile_include (dirfile, fragmentname, fragment_index, flags)
   call gdincl(dirfile, TRIM(fragmentname), LEN_TRIM(fragmentname), &
   fragment_index, flags)
 end subroutine
+
+function fget_reference (dirfile)
+  character (len=GD_FIELD_LEN) :: fget_reference
+  integer, intent(in) :: dirfile
+
+  integer :: l = GD_FIELD_LEN
+
+  call gdgref(fget_reference, l, dirfile)
+end function
+
+function fdirfile_reference (dirfile, field_code)
+  character (len=GD_FIELD_LEN) :: fdirfile_reference
+  integer, intent(in) :: dirfile
+  character (len=*), intent(in) :: field_code
+
+  integer :: l = GD_FIELD_LEN
+
+  call gdrefe(fdirfile_reference, l, dirfile, TRIM(field_code), &
+  LEN_TRIM(field_code))
+end function 
+
+subroutine fdirfile_parser_callback (dirfile, sehandler)
+  integer, intent(in) :: dirfile
+  interface
+    subroutine sehandler(act, dirfile_unit, suberror, line)
+      integer, intent (out) :: act
+      integer, intent (in) :: dirfile_unit, suberror
+      character (len=@GD_MAX_LINE_LENGTH@), intent (inout) :: line
+    end subroutine
+  end interface
+
+  call gdclbk(dirfile, sehandler)
+end subroutine
+
+function fget_encoding (dirfile, fragment)
+  integer :: fget_encoding
+  integer, intent(in) :: dirfile, fragment
+
+  call gdgenc(fget_encoding, dirfile, fragment)
+end function
+
+subroutine fdirfile_alter_encoding (dirfile, encoding, fragment, recode)
+  integer, intent(in) :: dirfile, encoding, fragment, recode
+
+  call gdaenc(dirfile, encoding, fragment, recode)
+end subroutine
+
+function fget_endianness (dirfile, fragment)
+  integer :: fget_endianness
+  integer, intent(in) :: dirfile, fragment
+
+  call gdgend(fget_endianness, dirfile, fragment)
+end function
+
+subroutine fdirfile_alter_endianness (dirfile, endianness, fragment, recode)
+  integer, intent(in) :: dirfile, endianness, fragment, recode
+
+  call gdaend(dirfile, endianness, fragment, recode)
+end subroutine
+
+function fget_frameoffset (dirfile, fragment)
+  integer :: fget_frameoffset
+  integer, intent(in) :: dirfile, fragment
+
+  call gdgfof(fget_frameoffset, dirfile, fragment)
+end function
+
+subroutine fdirfile_alter_frameoffset (dirfile, frameoffset, fragment, recode)
+  integer, intent(in) :: dirfile, frameoffset, fragment, recode
+
+  call gdafof(dirfile, frameoffset, fragment, recode)
+end subroutine
+
+function fget_protection (dirfile, fragment)
+  integer :: fget_protection
+  integer, intent(in) :: dirfile, fragment
+
+  call gdgprt(fget_protection, dirfile, fragment)
+end function
+
+subroutine fdirfile_protect (dirfile, protection_level, fragment)
+  integer, intent(in) :: dirfile, protection_level, fragment
+
+  call gdprot(dirfile, protection_level, fragment)
+end subroutine
+
+function fget_parent_fragment (dirfile, fragment)
+  integer :: fget_parent_fragment
+  integer, intent(in) :: dirfile, fragment
+
+  call gdpfrg(fget_parent_fragment, dirfile, fragment)
+end function
+
+subroutine fdirfile_uninclude (dirfile, fragment, del)
+  integer, intent(in) :: dirfile, fragment, del
+
+  call gduinc(dirfile, fragment, del)
+end subroutine
+
+function fget_raw_filename (dirfile, field_code)
+  character (len=GD_MAX_LINE_LENGTH) :: fget_raw_filename
+  integer, intent(in) :: dirfile
+  character (len=*), intent(in) :: field_code
+
+  integer :: l = GD_MAX_LINE_LENGTH
+
+  call gdrwfn (fget_raw_filename, l, dirfile, TRIM(field_code), &
+  LEN_TRIM(field_code))
+end function
+
+subroutine fdirfile_move (dirfile, field_code, new_fragment, move_data)
+  integer, intent(in) :: dirfile, new_fragment, move_data
+  character (len=*), intent(in) :: field_code
+
+  call gdmove (dirfile, TRIM(field_code), LEN_TRIM(field_code), new_fragment, &
+  move_data)
+end subroutine
+
+subroutine fdirfile_alter_entry (dirfile, field_code, ent, recode)
+  integer, intent(in) :: dirfile, recode
+  character (len=*), intent(in) :: field_code
+  type(gd_entry), intent(in) :: ent
+
+  if (ent%field_type .EQ. GD_RAW_ENTRY) then
+    call gdalrw(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+    ent%data_type, ent%spf, recode)
+  else if (ent%field_type .EQ. GD_LINCOM_ENTRY) then
+    call gdallc(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+    ent%n_fields, TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), ent%m(1), &
+    ent%b(1), TRIM(ent%field(2)), LEN_TRIM(ent%field(2)), ent%m(2), ent%b(2), &
+    TRIM(ent%field(3)), LEN_TRIM(ent%field(3)), ent%m(3), ent%b(3))
+  else if (ent%field_type .EQ. GD_LINTERP_ENTRY) then
+    call gdallt(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+    TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), TRIM(ent%field(2)), &
+    LEN_TRIM(ent%field(2)), recode)
+  else if (ent%field_type .EQ. GD_BIT_ENTRY) then
+    call gdalbt(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+    TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), ent%bitnum, ent%numbits)
+  else if (ent%field_type .EQ. GD_MULTIPLY_ENTRY) then
+    call gdalmt(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+    TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), TRIM(ent%field(2)), &
+    LEN_TRIM(ent%field(2)))
+  else if (ent%field_type .EQ. GD_PHASE_ENTRY) then
+    call gdalph(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+    TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), ent%shift)
+  else if (ent%field_type .EQ. GD_CONST_ENTRY) then
+    call gdalco(dirfile, TRIM(field_code), LEN_TRIM(field_code), ent%data_type)
+  end if
+end subroutine
+
+subroutine fdirfile_alter_bit (dirfile, field_name, in_field, bitnum, numbits)
+  integer, intent(in) :: dirfile, bitnum, numbits
+  character (len=*), intent(in) :: field_name, in_field
+
+  call gdalbt(dirfile, TRIM(field_name), LEN_TRIM(field_name), TRIM(in_field), &
+  LEN_TRIM(in_field), bitnum, numbits)
+end subroutine
+
+subroutine fdirfile_alter_const (dirfile, field_name, const_type)
+  integer, intent(in) :: dirfile, const_type
+  character (len=*), intent(in) :: field_name
+
+  call gdalco(dirfile, TRIM(field_name), LEN_TRIM(field_name), const_type)
+end subroutine
+
+subroutine fdirfile_alter_lincom (dirfile, field_name, n_fields, in_field1, &
+  m1, b1, in_field2, m2, b2, in_field3, m3, b3)
+  integer, intent(in) :: dirfile, n_fields
+  character (len=*), intent(in) :: field_name, in_field1, in_field2, in_field3
+  real*8, intent(in) :: m1, b1, m2, b2, m3, b3
+
+  call gdallc(dirfile, TRIM(field_name), LEN_TRIM(field_name), n_fields, &
+  TRIM(in_field1), LEN_TRIM(in_field1), m1, b1, TRIM(in_field2), &
+  LEN_TRIM(in_field2), m2, b2, TRIM(in_field3), LEN_TRIM(in_field3), m3, b3)
+end subroutine
+
+subroutine fdirfile_alter_linterp (dirfile, field_name, in_field, table, move)
+  integer, intent(in) :: dirfile, move
+  character (len=*), intent(in) :: field_name, in_field, table
+
+  call gdallt(dirfile, TRIM(field_name), LEN_TRIM(field_name), TRIM(in_field), &
+  LEN_TRIM(in_field), TRIM(table), LEN_TRIM(table), move)
+end subroutine
+
+subroutine fdrifile_alter_multiply (dirfile, field_name, in_field1, in_field2)
+  integer, intent(in) :: dirfile
+  character (len=*), intent(in) :: field_name, in_field1, in_field2
+
+  call gdalmt(dirfile, TRIM(field_name), LEN_TRIM(field_name), &
+  TRIM(in_field1), LEN_TRIM(in_field1), TRIM(in_field2), LEN_TRIM(in_field2))
+end subroutine
+
+subroutine fdrifile_alter_phase (dirfile, field_name, in_field, phase)
+  integer, intent(in) :: dirfile, phase
+  character (len=*), intent(in) :: field_name, in_field
+
+  call gdalph(dirfile, TRIM(field_name), LEN_TRIM(field_name), &
+  TRIM(in_field), LEN_TRIM(in_field), phase)
+end subroutine
+
+subroutine fdirfile_alter_raw (dirfile, field_code, data_type, spf, move)
+  integer, intent(in) :: dirfile, data_type, spf, move
+  character (len=*), intent(in) :: field_code
+
+  call gdalrw(dirfile, TRIM(field_code), LEN_TRIM(field_code), data_type, spf, &
+  move)
+end subroutine
+
+subroutine fdirfile_alter_spec (dirfile, spec, recode)
+  integer, intent(in) :: dirfile, recode
+  character (len=*), intent(in) :: spec
+
+  call gdalsp(dirfile, TRIM(spec), LEN_TRIM(spec), recode)
+end subroutine
+
+subroutine fdirfile_malter_spec (dirfile, spec, parent, recode)
+  integer, intent(in) :: dirfile, recode
+  character (len=*), intent(in) :: parent, spec
+
+  call gdmlsp(dirfile, TRIM(spec), LEN_TRIM(spec), TRIM(parent), &
+  LEN_TRIM(parent), recode)
+end subroutine
+
+subroutine fdirfile_rename (dirfile, field_code, new_name, move_data)
+  integer, intent(in) :: dirfile, move_data
+  character (len=*), intent(in) :: field_code, new_name
+
+  call gdrenm(dirfile, TRIM(field_code), LEN_TRIM(field_code), TRIM(new_name), &
+  LEN_TRIM(new_name), move_data)
+end subroutine
+
+subroutine fdirfile_delete (dirfile, field_code, flags)
+  integer, intent(in) :: dirfile, flags
+  character (len=*), intent(in) :: field_code
+
+  call gddele(dirfile, TRIM(field_code), LEN_TRIM(field_code), flags)
+end subroutine
+
 end module
