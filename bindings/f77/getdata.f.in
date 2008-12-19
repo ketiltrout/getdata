@@ -43,10 +43,36 @@ C     Corresponding to dirfile_add_spec(3)
       EXTERNAL GDADSP
 C     Corresponding to dirfile_add_string(3)
       EXTERNAL GDADST
+C     Correpsonding to dirfile_alter_encoding(3)
+      EXTERNAL GDAENC
+C     Correpsonding to dirfile_alter_endianness(3)
+      EXTERNAL GDAEND
+C     Correpsonding to dirfile_alter_frameoffset(3)
+      EXTERNAL GDAFOF
+C     Correpsonding to dirfile_alter_bit(3)
+      EXTERNAL GDALBT
+C     Correpsonding to dirfile_alter_const(3)
+      EXTERNAL GDALCO
+C     Correpsonding to dirfile_alter_lincom(3)
+      EXTERNAL GDALLC
+C     Correpsonding to dirfile_alter_linterp(3)
+      EXTERNAL GDALLT
+C     Correpsonding to dirfile_alter_multiply(3)
+      EXTERNAL GDALMT
+C     Correpsonding to dirfile_alter_phase(3)
+      EXTERNAL GDALPH
+C     Correpsonding to dirfile_alter_raw(3)
+      EXTERNAL GDALRW
+C     Correpsonding to dirfile_alter_spec(3)
+      EXTERNAL GDALSP
+C     Corresponding to dirfile_parser_callback(3)
+      EXTERNAL GDCLBK
 C     Corresponding to dirfile_close(3)
       EXTERNAL GDCLOS
 C     Corresponding to dirfile_copen(3)
       EXTERNAL GDCOPN
+C     Correpsonding to dirfile_delete(3)
+      EXTERNAL GDDELE
 C     Corresponding to dirfile_discard(3)
       EXTERNAL GDDSCD
 C     Returns the dirfile->error member
@@ -77,12 +103,22 @@ C     Corresponding to get_entry(3) for LINTERP fields
       EXTERNAL GDGELT
 C     Corresponding to get_entry(3) for MULTIPLY fields
       EXTERNAL GDGEMT
+C     Corresponding to get_encoding(3)
+      EXTERNAL GDGENC
+C     Corresponding to get_endianness(3)
+      EXTERNAL GDGEND
 C     Corresponding to get_entry(3) for PHASE fields
       EXTERNAL GDGEPH
 C     Corresponding to get_entry(3) for RAW fields
       EXTERNAL GDGERW
 C     Corresponding to getdata(3)
       EXTERNAL GDGETD
+C     Correpsonding to get_frameoffset(3)
+      EXTERNAL GDGFOF
+C     Corresponding to get_protection(3)
+      EXTERNAL GDGPRT
+C     Corresponding to get_reference(3)
+      EXTERNAL GDGREF
 C     Corresponding to get_spf(3)
       EXTERNAL GDGSPF
 C     Corresponding to get_constant(3)
@@ -115,8 +151,14 @@ C     Corresponding to dirfile_metaflush(3)
       EXTERNAL GDMFLS
 C     Returns the maximum field name length for a meta field list
       EXTERNAL GDMFNX
+C     Correpsonding to dirfile_malter_spec(3)
+      EXTERNAL GDMLSP
+C     Correpsonding to dirfile_move(3)
+      EXTERNAL GDMOVE
 C     Corresponding to get_mvector_list(3) (sort of)
       EXTERNAL GDMVEN
+C     Corresponding to dirfilename(3)
+      EXTERNAL GDNAME
 C     Corresponding to get_nfields_by_type(3)
       EXTERNAL GDNFDT
 C     Corresponding to get_nfields(3)
@@ -135,11 +177,23 @@ C     Corresponding to get_nvectors(3)
       EXTERNAL GDNVEC
 C     Corresponding to dirfile_open(3)
       EXTERNAL GDOPEN
+C     Corresponding to get_parent_fragment(3)
+      EXTERNAL GDPFRG
+C     Corresponding to dirfile_protect(3)
+      EXTERNAL GDPROT
 C     Corresponding to put_constant(3)
       EXTERNAL GDPTCO
 C     Corresponding to put_string(3)
       EXTERNAL GDPTST
 C     Corresponding to putdata(3)
       EXTERNAL GDPUTD
+C     Corresponding to dirfile_reference(3)
+      EXTERNAL GDREFE
+C     Correpsonding to dirfile_rename(3)
+      EXTERNAL GDRENM
+C     Corresponding to get_raw_filename(3)
+      EXTERNAL GDRWFN
+C     Corresponding to dirfile_uninclude(3)
+      EXTERNAL GDUINC
 C     Corresponding to get_vector_list(3) (sort of)
       EXTERNAL GDVECN

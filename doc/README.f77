@@ -44,6 +44,9 @@ it outputs, as the C API does.
 Available Subroutines
 =====================
 
+Subroutines interacting with the database
+-----------------------------------------
+
 * GDOPEN(dirfile_unit, dirfilename, dirfilename_len, flags)
   
   Output:
@@ -80,14 +83,16 @@ Available Subroutines
   line, and should set act to one of the syntax handler action parameters (see
   below).  If the callback subroutine fails to set act, the default action
   (GDSX_A = GD_SYNTAX_ABORT) will be assumed.  The possible values of suberror
-  are also listed below.
+  are also listed below.  If GDCOPN is passed zero as sehandler, no callback is
+  set.
 
   The callback subroutine is wrapped by the Fortran 77 library to properly
   interface with GetData.  Only one such callback subroutine may be registered
   by the Fortan 77 bindings at any given time, and the last registered callback
-  subroutine will be used if needed, regarless of dirfile_unit number (The only
-  subroutine which potentially could cause the callback subroutine to be called
-  is GDINCL).
+  subroutine will be used if needed, regarless of dirfile_unit number. Other
+  than GDCOPN, the only other subroutine which potentially could cause the
+  callback subroutine to be called is GDINCL.  Use GDCLBK to change the callback
+  function before calling GDINCL, if required.
 
 * GDCLOS(dirfile_unit)
 
@@ -115,6 +120,18 @@ Available Subroutines
   This wraps dirfile_flush(3).  If field_code_len is zero, the entire dirfile
   will be flushed, and field_code will be ignored.  Otherwise the field named
   by field_code will be flushed.
+
+* GDMFLS(dirfile_unit)
+
+  Input:
+    INTEGER dirfile_unit
+
+  This subroutine wraps dirfile_metaflush(3), and will cause metadata changes to
+  be written to disk.
+
+
+Subroutines interacting with data
+---------------------------------
 
 * GDGETD(n_read, dirfile_unit, field_code, field_code_len, first_frame,
   first_sample, num_frames, num_samples, return_type, data_out)
@@ -161,6 +178,56 @@ Available Subroutines
   This wraps get_string(3), with the same input arguments (field_code_len should
   contain the string length of the field_code).  The number of characters
   actually read is returned in n_read.  At most len characters will be returned.
+
+* GDPUTD(n_wrote, dirfile_unit, field_code, field_code_len, first_frame,
+  first_sample, num_frames, num_samples, data_type, data_in)
+
+  Output:
+    INTEGER n_wrote
+  Input:
+    INTEGER dirfile_unit, field_code_len, first_frame, first_sample
+    INTEGER num_frames, num_samples, data_type
+    CHARACTER*<field_code_len> field_code
+    <datatype>*<n> data_out
+
+  This wraps putdata(3), with the same input arguments (field_code_len should
+  contain the string length of the field_code).  The number of samples actually
+  written is returned in n_wrote.  The data_type parameter should be one of the
+  parameters defined in getdata.f.  data_in must be of sufficient length and
+  of appropriate data type width for the data input.
+
+* GDPTCO(n_read, dirfile_unit, field_code, field_code_len, data_type,
+  data_in)
+
+  Output:
+    INTEGER n_wrote
+  Input:
+    INTEGER dirfile_unit, field_code_len, data_type
+    CHARACTER*<field_code_len> field_code
+    <datatype> data_in
+
+  This wraps put_constant(3), with the same input arguments (field_code_len
+  should contain the string length of the field_code).  If the call is
+  successful, n_wrote will be non-zero.  The data_type parameter should be one
+  of the parameters defined in getdata.f.
+
+* GDPTST(n_read, dirfile_unit, field_code, field_code_len, len, data_out)
+
+  Output:
+    INTEGER n_wrote
+  Input:
+    INTEGER dirfile_unit, field_code_len, len
+    CHARACTER*<field_code_len> field_code
+    CHARACTER*<len> data_in
+
+  This wraps put_string(3), with the same input arguments (field_code_len should
+  contain the string length of the field_code, and len should contain the string
+  length of data_in).  The number of characters actually wrote is returned in
+  n_wrote.
+
+
+Subroutines interacting with global metadata
+--------------------------------------------
 
 * GDNFLD(nfields, dirfile_unit)
 
@@ -316,64 +383,6 @@ Available Subroutines
   This wraps get_nframes(3).  It takes the dirfile unit number as input and
   returns the number of frames in the dirfile in nframes.
 
-* GDGSPF(spf, dirfile_unit, field_code, field_code_len)
-
-  Output:
-    INTEGER spf
-  Input:
-    INTEGER dirfile_unit, field_code_len
-    CHARACTER*<field_code_len> field_code
-
-  This wraps get_spf(3).  The field_code_len parameter should contain the
-  string length of field_code.  The number of samples per frame in field_code
-  will be returned in spf.
-
-* GDPUTD(n_wrote, dirfile_unit, field_code, field_code_len, first_frame,
-  first_sample, num_frames, num_samples, data_type, data_in)
-
-  Output:
-    INTEGER n_wrote
-  Input:
-    INTEGER dirfile_unit, field_code_len, first_frame, first_sample
-    INTEGER num_frames, num_samples, data_type
-    CHARACTER*<field_code_len> field_code
-    <datatype>*<n> data_out
-
-  This wraps putdata(3), with the same input arguments (field_code_len should
-  contain the string length of the field_code).  The number of samples actually
-  written is returned in n_wrote.  The data_type parameter should be one of the
-  parameters defined in getdata.f.  data_in must be of sufficient length and
-  of appropriate data type width for the data input.
-
-* GDPTCO(n_read, dirfile_unit, field_code, field_code_len, data_type,
-  data_in)
-
-  Output:
-    INTEGER n_wrote
-  Input:
-    INTEGER dirfile_unit, field_code_len, data_type
-    CHARACTER*<field_code_len> field_code
-    <datatype> data_in
-
-  This wraps put_constant(3), with the same input arguments (field_code_len
-  should contain the string length of the field_code).  If the call is
-  successful, n_wrote will be non-zero.  The data_type parameter should be one
-  of the parameters defined in getdata.f.
-
-* GDPTST(n_read, dirfile_unit, field_code, field_code_len, len, data_out)
-
-  Output:
-    INTEGER n_wrote
-  Input:
-    INTEGER dirfile_unit, field_code_len, len
-    CHARACTER*<field_code_len> field_code
-    CHARACTER*<len> data_in
-
-  This wraps put_string(3), with the same input arguments (field_code_len should
-  contain the string length of the field_code, and len should contain the string
-  length of data_in).  The number of characters actually wrote is returned in
-  n_wrote.
-
 * GDEROR(error, dirfile_unit)
 
   Output:
@@ -396,17 +405,190 @@ Available Subroutines
   string returned by get_error_string(3) in buffer, which is of length
   buffer_len.
 
-* GDFLDT(entry_type, dirfile_unit, field_code, field_code_len)
+* GDNFRG(nformats, dirfile_unit)
 
   Output:
-    INTEGER type
+    INTEGER nformats
+  Input:
+    INTEGER dirfile_unit
+
+  This subroutine returns the number of format file fragments in the specified
+  dirfile.
+
+* GDNAME(name, name_len, dirfile_unit)
+
+  Output:
+    CHARACTER*<name_len> name
+  Input/Output:
+    INTEGER name_len
+  Input:
+    INTEGER dirfile_unit
+
+  This wraps diriflename(3).  The name of the dirfile will be returned in name.
+  If the name of the dirfile is longer than name_len, it will return the actual
+  length of the name in name_len and not modify the name argument.
+
+* GDREFE(name, name_len, dirfile_unit, field_code, field_code_len)
+
+  Output:
+    CHARACTER*<name_len> name
+  Input/Output:
+    INTEGER name_len
   Input:
     INTEGER dirfile_unit, field_code_len
     CHARACTER*<field_code_len> field_code
 
-  This subroutine returns the field type of the specified field_code in
-  entry_type.  The entry_type will be one of the entry type parameters listed
+  This wraps dirfile_reference(3).  The reference field will be set to
+  field_code, unless field_code_len is zero, in which case the reference field
+  will not be changed, and field_code will be ignored.  The name of the
+  reference field will be returned in name.  If the name of the reference field
+  is longer than name_len it will return the actual length of the field in
+  name_len and not modify the name argument.
+
+* GDGREF(name, name_len, dirfile_unit)
+
+  Output:
+    CHARACTER*<name_len> name
+  Input/Output:
+    INTEGER name_len
+  Input:
+    INTEGER dirfile_unit
+
+  This wraps get_reference(3).  It behaves as if GDREFE was called with
+  field_code_len equal to zero.
+
+
+Subroutines interacting with fragment metadata
+----------------------------------------------
+
+* GDFRGN(filename, filename_len, dirfile_unit, ind)
+
+  Output:
+    CHARACTER*<infield_len> infield
+  Input/Output:
+    INTEGER infield_len
+  Input:
+    INTEGER ind
+
+  This subroutine returns the name of the format file fragment indexed by ind.
+  If the name of the file is longer than filename_len, it will return the
+  actual length of the filename in filename_len and not modify the filename
+  argument.
+
+* GDINCL(dirfile_unit, file, file_len, format_file, flags)
+
+  Input:
+    INTEGER dirfile_unit, field_code_len, format_file, flags
+    CHARACTER*<file_len> file
+
+  This subroutine wraps dirfile_include(3), and allows the inclusion of another
+  format file fragment into the current dirfile.  This may call the registered
+  callback subroutine, if any.  See the caveat in the description of GDCOPN
+  above.
+
+* GDUINC(dirfile_unit, fragment, del)
+
+  Input:
+    INTEGER dirifle_unit, fragment, del
+
+  This subroutine wraps dirfile_uninclude(3).  It removes the specified fragment
+  from the dirfile.  If del is non-zero, the fragment file will be deleted.
+
+* GDGENC(encoding, dirfile_unit, fragment_index)
+
+  Output:
+    INTEGER encoding
+  Input:
+    INTEGER dirfile_unit, fragment_index
+
+  This subroutine wraps get_encoding(3).  It returns the current encoding scheme
+  of the specified fragment, which will be one of the symbols listed below.
+
+* GDAENC(dirfile_unit, encoding, fragment, recode)
+
+  Input:
+    INTEGER dirfile_unit, encoding, fragment, recode
+
+  This subroutine wraps dirfile_alter_encoding(3).  It sets the encoding scheme
+  of the specified fragment to the value of the encoding parameter, which should
+  be one of the encoding flags listed below.  If recode is non-zero, binary
+  files associated with this fragment will be modified to compensate for the
+  change.
+
+* GDGEND(endianness, dirfile_unit, fragment_index)
+
+  Output:
+    INTEGER endianness
+  Input:
+    INTEGER dirfile_unit, fragment_index
+
+  This subroutine wraps get_endianness(3).  It returns the current byte sex of
+  the specified fragment, which will be one of the symbols listed below.
+
+* GDAEND(dirfile_unit, endianness, fragment, recode)
+
+  Input:
+    INTEGER dirfile_unit, endianness, fragment, recode
+
+  This subroutine wraps dirfile_alter_endianness(3).  It sets the byte sex of
+  the specified fragment to the value of the endianness parameter, which should
+  be zero or a combination of GD_BE and GD_LE as described on the
+  dirfile_alter_endianness manual page.  If recode is non-zero, binary files
+  associated with this fragment will be modified to compensate for the change.
+
+* GDGFOF(frame_offset, dirfile_unit, fragment_index)
+
+  Output:
+    INTEGER frame_offset
+  Input:
+    INTEGER dirfile_unit, fragment_index
+
+  This subroutine wraps get_frameoffset(3).  It returns the current frame offset
+  of the specified fragment.
+
+* GDAFOF(dirfile_unit, frame_offset, fragment, recode)
+
+  Input:
+    INTEGER dirfile_unit, frame_offset, fragment, recode
+
+  This subroutine wraps dirfile_alter_frameoffset(3).  It sets the frame offset
+  of the specified fragment to the value of the frame_offset parameter.  If
+  recode is non-zero, binary files associated with this fragment will be
+  modified to compensate for the change.
+
+* GDGPRT(protection_level, dirfile_unit, fragment_index)
+
+  Output:
+    INTEGER protection_level
+  Input:
+    INTEGER dirfile_unit, fragment_index
+
+  This subroutine wraps get_protection(3).  It returns the current protection
+  level of the specified fragment, which will be one of the symbols listed
   below.
+
+* GDPROT(dirfile_unit, protection_level, fragment)
+
+  Input:
+    INTEGER dirfile_unit, protection_level, fragment
+
+  This subroutine wraps dirfile_protect(3).  It sets the protection level of
+  the specified fragment to the value of the protection_level parameter, which
+  should one of the protection level listed below.
+
+* GDPFRG(parent, dirfile_unit, fragment)
+
+  Output:
+    INTEGER parent
+  Input:
+    INTEGER dirfile_unit, fragment
+
+  This subroutine wraps get_parent_fragment(3).  It returns the parent fragment
+  of the specified fragment, or -1 on error.
+
+
+Subroutines interacting with field metadata
+-------------------------------------------
 
 * GDGERW(spf, data_type, format_file, dirfile_unit, field_code, field_code_len)
 
@@ -524,6 +706,30 @@ Available Subroutines
   is not found, or the field specified is not of CONST type, const_type will
   be set to zero.  In this case the value of the remaining data is unspecified.
 
+* GDGSPF(spf, dirfile_unit, field_code, field_code_len)
+
+  Output:
+    INTEGER spf
+  Input:
+    INTEGER dirfile_unit, field_code_len
+    CHARACTER*<field_code_len> field_code
+
+  This wraps get_spf(3).  The field_code_len parameter should contain the
+  string length of field_code.  The number of samples per frame in field_code
+  will be returned in spf.
+
+* GDFLDT(entry_type, dirfile_unit, field_code, field_code_len)
+
+  Output:
+    INTEGER type
+  Input:
+    INTEGER dirfile_unit, field_code_len
+    CHARACTER*<field_code_len> field_code
+
+  This subroutine returns the field type of the specified field_code in
+  entry_type.  The entry_type will be one of the entry type parameters listed
+  below.
+
 * GDFRGI(format_file, dirfile_unit, field_code, field_code_len
 
   Output: 
@@ -534,6 +740,162 @@ Available Subroutines
 
   This subroutine returns the format file fragment index for the supplied field.
   If the field does not exist, or an error occurred, -1 is returned.
+
+* GDALRW(dirfile_unit, field_code, field_code_len, data_type, spf, recode)
+
+  Input:
+    INTEGER dirfile_unit, field_code_len, data_type, spf, recode
+    CHARACTER*<field_code_len> field_code
+
+  This subroutine wraps dirfile_alter_raw(3), and modifies the specified field
+  metadata.  If recode is non-zero, the binary file associated with this field
+  will be modified to account for the changes.
+
+* GDALLC(dirfile_unit, field_code, field_code_len, nfields, in_field1,
+  in_field1_len, m1, b1, in_field2, in_field2_len, m2, b2, in_field3,
+  in_field3_len, m3, b3)
+
+  Input:
+    INTEGER dirfile_unit, field_code_len, nfields, in_field1_len, in_field2_len
+    INTEGER in_field3_len
+    REAL*8 m1, b1, m2, b2, m3, b3
+    CHARACTER*<field_code_len> field_code
+    CHARACTER*<in_field1_len> in_field1
+    CHARACTER*<in_field2_len> in_field2
+    CHARACTER*<in_field3_len> in_field3
+
+  This subroutine wraps dirfile_alter_lincom(3), and modifies the specified
+  field metadata.
+
+* GDALLT(dirfile_unit, field_code, field_code_len, in_field, in_field_len,
+  table, table_len, move)
+
+  Input:
+    INTEGER dirfile_unit, field_code_len, in_field_len, table_len, move
+    CHARACTER*<field_code_len> field_code
+    CHARACTER*<in_field_len> in_field
+    CHARACTER*<table_len> table
+
+  This subroutine wraps dirfile_alter_linterp(3), and modifies the specified
+  field metadata.  If move is non-zero, the lookup table will be moved to
+  the path specified by table.
+
+* GDALBT(dirfile_unit, field_code, field_code_len, in_field, in_field_len,
+  bitnum, numbits)
+
+  Input:
+    INTEGER dirfile_unit, field_code_len, in_field_len, bitnum, numbits
+    CHARACTER*<field_code_len> field_code
+    CHARACTER*<in_field_len> in_field
+
+  This subroutine wraps dirfile_alter_bit(3), and modifies the specified
+  field metadata.
+
+* GDALMT(dirfile_unit, field_code, field_code_len, in_field1, in_field1_len,
+  in_field2, in_field2_len)
+
+  Input:
+    INTEGER dirfile_unit, field_code_len, in_field1_len, in_field2_len
+    CHARACTER*<field_code_len> field_code
+    CHARACTER*<in_field1_len> in_field1
+    CHARACTER*<in_field2_len> in_field2
+
+  This subroutine wraps dirfile_alter_multiply(3), and modifies the specified
+  field metadata.
+
+* GDALPH(dirfile_unit, field_code, field_code_len, in_field1, in_field1_len,
+  shift)
+
+  Input:
+    INTEGER dirfile_unit, field_code_len, in_field1_len, shift, format_file
+    CHARACTER*<field_code_len> field_code
+    CHARACTER*<in_field_len> in_field
+
+  This subroutine wraps dirfile_alter_phase(3), and modifies the specified
+  field metadata.
+
+* GDALCO(dirfile_unit, field_code, field_code_len, const_type)
+
+  Input:
+    INTEGER dirfile_unit, field_code_len, const_type
+    CHARACTER*<field_code_len> field_code
+    <data_type> value
+
+  This subroutine wraps dirfile_alter_const(3), and modifies the specified
+  field metadata.
+
+* GDALSP(dirfile_unit, spec, spec_len, move)
+
+  Input:
+    INTEGER dirfile_unit, move, spec_len
+    CHARACTER*<spec_len> spec
+
+  This subroutine wraps dirfile_alter_spec(3), and modifies the specified field
+  metadata.  If move is non-zero, and the field is a RAW field, the binary
+  file will be modified.  If move is non-zero, and the field is a LINTERP,
+  the lookup table will be moved.  Otherwise, move is ignored.
+
+* GDMLSP(dirfile_unit, spec, spec_len, parent, parent_len, move)
+
+  Input:
+    INTEGER dirfile_unit, spec_len, parent_len, move
+    CHARACTER*<spec_len> spec
+    CHARACTER*<parent_len> parent
+
+  This subroutine wraps dirfile_malter_spec(3), and behaves similarly to
+  GDALSP, but also requires the name of the metafield's parent.  The spec should
+  contain only the name of the metafield, and not the metafield's full field
+  code.
+
+* GDRWFN(name, name_len, dirfile_unit, field_code, field_code_len)
+
+  Output:
+    CHARACTER*<name_len> name
+  Input/Output:
+    INTEGER name_len
+  Input:
+    INTEGER dirfile_unit, field_code_len
+    CHARACTER*<field_code_len> field_code
+
+  This subroutine wraps get_raw_filename(3).  It returns in name the name of
+  the binary file associated with the raw field indicated by field_code.  On
+  error, it sets name_len to zero.
+
+* GDMOVE(dirfile_unit, field_code, field_code_len, new_fragment, move_data)
+
+  Input:
+    INTEGER dirfile_unit, field_code_len, new_fragment, move_data
+    CHARACTER*<field_code_len> field_code
+
+  This subroutine wraps dirfile_move(3), and moves the specified field to the
+  new fragment given.  If move_data is non-zero, the binary file, for RAW
+  fields, is also moved, if necessary.
+
+* GDRENM(dirfile_unit, field_code, field_code_len, new_name, new_name_len,
+  move_data)
+
+  Input:
+    INTEGER dirfile_unit, field_code_len, new_name_len, move_data
+    CHARACTER*<field_code_len> field_code
+    CHARACTER*<new_name_len> new_name
+
+  This subroutine wraps dirfile_rename(3), and changes the name of a field.
+  If move_data is non-zero, and the field is a RAW field, the binary file
+  associated with the field will also be renamed.
+
+
+Subroutines which add or delete fields
+--------------------------------------
+
+* GDDELE(dirfile_unit, field_code, field_code_len, flags)
+
+  Input:
+    INTEGER dirfile_unit, field_code_len, flags
+    CHARACTER*<field_code_len> field_code
+
+  This subroutine wraps dirfile_delete(3).  It deletes the indicated field.
+  The flags parameter should be either zero, or one or more of the delete flags
+  listed below combined with a bitwise or.
 
 * GDADRW(dirfile_unit, field_code, field_code_len, data_type, spf, format_file)
 
@@ -672,47 +1034,8 @@ Available Subroutines
 * GDMDST(dirfile_unit, parent, parent_len, field_code, field_code_len, value,
   value_len)
 
-  These functions are the corresponding META field functions for the GDFAxx
+  These functions are the corresponding META field functions for the GDADxx
   functions above. They add META fields to the parent field indicated.
-
-* GDFRGN(filename, filename_len, dirfile_unit, ind)
-
-  Output:
-    CHARACTER*<infield_len> infield
-  Input/Output:
-    INTEGER infield_len
-  Input:
-    INTEGER ind
-
-  This subroutine returns the name of the format file fragment indexed by ind.
-  If the name of the file is longer than filename_len, it will return the
-  actual length of the filename in filename_len and not modify the filename
-  argument.
-
-* GDNFRG(nformats, dirfile_unit)
-
-  Output:
-    INTEGER nformats
-  Input:
-    INTEGER dirfile_unit
-
-  This subroutine returns the number of format file fragments in the specified
-  dirfile.
-
-* GDMFLS(dirfile_unit)
-
-  Input:
-    INTEGER dirfile_unit
-
-  This subroutine wraps dirfile_metaflush(3), and will cause metadata changes to
-  be written to disk.
-
-* GDINCL(dirfile_unit, file, file_l, format_file, flags)
-
-  This subroutine wraps dirfile_include(3), and allows the inclusion of another
-  format file fragment into the current dirfile.  This may call the registered
-  callback subroutine, if any.  See the caveat in the description of GDCOPN
-  above.
 
 Defined Parameters
 ==================
@@ -827,6 +1150,16 @@ Protection levels (returned by GDGPRT and required by GDPROT):
   GDPR_F          GD_PROTECT_FORMAT
   GDPR_D          GD_PROTECT_DATA
   GDPR_A          GD_PROTECT_ALL    This is the bitwise or of GDPR_D and GDPR_A
+
+Sytax error handler actions (returned by the registered callback function, see
+GDCOPN)
+
+  F77 symbol      C symbol
+  ----------      -------------------
+  GDSX_A          GD_PROTECT_ABORT
+  GDSX_S          GD_PROTECT_RESCAN
+  GDSX_I          GD_PROTECT_IGNORE
+  GDSX_C          GD_PROTECT_CONTINUE
 
 Callback actions (returned by the registered callback function, see GDCOPN):
 

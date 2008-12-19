@@ -46,11 +46,11 @@ int get_protection(DIRFILE* D, int fragment_index)
   return D->fragment[fragment_index].protection;
 }
 
-int dirfile_protect(DIRFILE *D, int fragment_index, int protection_level)
+int dirfile_protect(DIRFILE *D, int protection_level, int fragment_index)
 {
   int i;
 
-  dtrace("%p, %i, %o", D, fragment_index, protection_level);
+  dtrace("%p, %i, %i", D, protection_level, fragment_index);
 
   _GD_ClearError(D);
 

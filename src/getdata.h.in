@@ -388,7 +388,7 @@ extern int get_parent_fragment(DIRFILE* D, int fragment_index)
 extern void dirfile_parser_callback(DIRFILE* D, int (*sehandler)(const DIRFILE*,
       int, char*)) __THROW __gd_nonnull ((1));
 
-extern int dirfile_protect(DIRFILE *D, int fragment_index, int protection_level)
+extern int dirfile_protect(DIRFILE *D, int protection_level, int fragment_index)
   __THROW __gd_nonnull ((1));
 
 extern int get_protection(DIRFILE* D, int fragment_index)
@@ -480,7 +480,7 @@ extern int dirfile_uninclude(DIRFILE* D, int fragment_index, int del)
 
 /* the following functions are _FILE_OFFSET_BITS sensitive */
 #ifndef __USE_FILE_OFFSET64
-extern int dirfile_alter_frameoffset(DIRFILE* D, off_t field_code, int fragment,
+extern int dirfile_alter_frameoffset(DIRFILE* D, off_t offset, int fragment,
     int recode) __gd_nonnull ((1));
 
 extern size_t getdata(DIRFILE* dirfile, const char *field_code,

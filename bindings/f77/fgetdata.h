@@ -252,4 +252,93 @@ void F77_FUNC(gdmven, GDMVEN) (char* name, int* name_l, const int* dirfile,
 void F77_FUNC(gddscd, GDDSCD) (const int* dirfile);
 
 void F77_FUNC(gdcopn, GDCOPN) (int* dirfile, const char* dirfilename,
-    const int* dirfilename_l, const int* flags, void* callback);
+    const int* dirfilename_l, const int* flags, const void* callback);
+
+void F77_FUNC(gdclbk, GDCLBK) (const int* dirfile, const void* callback);
+
+void F77_FUNC(gdalbt, GDALBT) (const int* dirfile, const char* field_code,
+    const int* field_code_l, const char* in_field, const int* in_field_l,
+    int* bitnum, int* numbits);
+
+void F77_FUNC(gdalco, GDALCO) (const int* dirfile, const char* field_code,
+    const int* field_code_l, const int* const_type);
+
+void F77_FUNC(gdallc, GDALLC) (const int* dirfile, const char* field_code,
+    const int* field_code_l, const int* n_fields, const char* in_field1,
+    const int* in_field1_l, const double* m1, const double* b1,
+    const char* in_field2, const int* in_field2_l, const double* m2,
+    const double* b2, const char* in_field3, const int* in_field3_l,
+    const double* m3, const double* b3);
+
+void F77_FUNC(gdalmt, GDALMT) (const int* dirfile, const char* field_code,
+    const int* field_code_l, const char* in_field1, const int* in_field1_l,
+    const char* in_field2, const int* in_field2_l);
+
+void F77_FUNC(gdalph, GDALPH) (const int* dirfile, const char* field_code,
+    const int* field_code_l, const char* in_field, const int* in_field_l,
+    const int* shift);
+
+void F77_FUNC(gdgenc, GDGENC) (int* encoding, const int* dirfile,
+    const int* fragment);
+
+void F77_FUNC(gdgend, GDGEND) (int* endianness, const int* dirfile,
+    const int* fragment);
+
+void F77_FUNC(gdname, GDNAME) (char* name, int* name_l, const int* dirfile);
+
+void F77_FUNC(gdpfrg, GDPFRG) (int* parent, const int* dirfile,
+    const int* fragment);
+
+void F77_FUNC(gdprot, GDPROT) (const int* dirfile, const int* fragment, 
+    const int* protection_level);
+
+void F77_FUNC(gdgprt, GDGPRT) (int* protection_level, const int* dirfile,
+    const int* fragment);
+
+void F77_FUNC(gdrwfn, GDRWFN) (char* name, int* name_l, const int* dirfile,
+    const char* field_code, const int* field_code_l);
+
+void F77_FUNC(gdrefe, GDREFE) (char* name, int* name_l, const int* dirfile,
+    const char* field_code, const int *field_code_l);
+
+void F77_FUNC(gdgref, GDGREF) (char *name, int* name_l, const int* dirfile);
+
+void F77_FUNC(gdaenc, GDAENC) (const int* dirfile, const int* encoding,
+    const int* fragment, const int* recode);
+
+void F77_FUNC(gdaend, GDAEND) (const int* dirfile, const int* endianness,
+    const int* fragment, const int* recode);
+
+void F77_FUNC(gdallt, GDALLT) (const int* dirfile, const char* field_code,
+    const int* field_code_l, const char* in_field, const int* in_field_l,
+    const char* table, const int* table_l, const int* recode);
+
+void F77_FUNC(gdalrw, GDALRW) (const int* dirfile, const char* field_code,
+    const int* field_code_l, const int* data_type, const int* spf,
+    const int* recode);
+
+void F77_FUNC(gdalsp, GDALSP) (const int* dirfile, const char* spec,
+    const int* spec_l, const int* fragment_index);
+
+void F77_FUNC(gddele, GDDELE) (const int* dirfile, const char* field_code,
+    const int* field_code_l, const int* flags);
+
+void F77_FUNC(gdmlsp, GDMLSP) (const int* dirfile, const char* spec,
+    const int* spec_l, const char* parent, const int* parent_l,
+    const int* recode);
+
+void F77_FUNC(gdmove, GDMOVE) (const int* dirfile, const char* field_code,
+    const int* field_code_l, const int* new_fragment, const int* move_data);
+
+void F77_FUNC(gdrenm, GDRENM) (const int* dirfile, const char* field_code,
+    const int* field_code_l, const char* new_name, const int* new_name_l,
+    const int* move_data);
+
+void F77_FUNC(gduinc, GDUINC) (const int* dirfile, const int* fragment,
+    const int* del);
+
+void F77_FUNC(gdafof, GDAFOF) (const int* dirfile, const int* offset,
+    const int* fragment, const int* recode);
+
+void F77_FUNC(gdgfof, GDGFOF) (int* offset, const int* dirfile,
+    const int* fragment);
