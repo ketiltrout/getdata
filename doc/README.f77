@@ -58,6 +58,37 @@ Available Subroutines
   parameters (see below).  This behaves analogously to dirfile_open() itself:
   it returns a valid dirfile unit even in case of error.
 
+* GDCOPN(dirfile_unit, dirfilename, dirfilename_len, flags, sehandler)
+
+  Output:
+    INTEGER dirfile_unit
+  Input:
+    INTEGER dirfilename_len, flags
+    CHARACTER*<dirfilename_len> dirfilename
+    EXTERNAL sehandler
+
+  This wraps dirfile_cbopen(3), and behaves identically to GDOPEN, except for
+  requiring the name of the callback subroutine as sehandler.  The callback
+  subroutine should accept the following arguments:
+
+    SUBROUTINE CALBCK(act, dirfile_unit, suberror, line)
+    INTEGER act, dirfile_unit, suberror
+    CHARACTER*(GD_MLL) line
+
+  where GD_MLL is a integer parameter, defined in getdata.f, equal to the
+  value of the C macro GD_MAX_LINE_LENGTH.  The callback subroutine may modify
+  line, and should set act to one of the syntax handler action parameters (see
+  below).  If the callback subroutine fails to set act, the default action
+  (GDSX_A = GD_SYNTAX_ABORT) will be assumed.  The possible values of suberror
+  are also listed below.
+
+  The callback subroutine is wrapped by the Fortran 77 library to properly
+  interface with GetData.  Only one such callback subroutine may be registered
+  by the Fortan 77 bindings at any given time, and the last registered callback
+  subroutine will be used if needed, regarless of dirfile_unit number (The only
+  subroutine which potentially could cause the callback subroutine to be called
+  is GDINCL).
+
 * GDCLOS(dirfile_unit)
 
   Input:
@@ -67,6 +98,13 @@ Available Subroutines
   In addition to closing the dirfile itself, this will also disassociate the
   supplied dirfile unit number, which may be subsequently returned by a
   subsequent call to GDOPEN.
+
+* GDDSCD(dirfile_unit)
+
+  Input:
+    INTEGER dirfile_unit
+
+  This wraps dirfile_discard(3), but otherwise behaves identically to GDCLOS.
 
 * GDFLSH(dirfile_unit, field_code, field_code_len)
 
@@ -672,7 +710,9 @@ Available Subroutines
 * GDINCL(dirfile_unit, file, file_l, format_file, flags)
 
   This subroutine wraps dirfile_include(3), and allows the inclusion of another
-  format file fragment into the current dirfile.
+  format file fragment into the current dirfile.  This may call the registered
+  callback subroutine, if any.  See the caveat in the description of GDCOPN
+  above.
 
 Defined Parameters
 ==================
@@ -715,7 +755,7 @@ Error codes (returned by GDEROR):
   GD_EBP          GD_E_BAD_PROTECTION
   GD_UCL          GD_E_UNCLEAN_DB
 
-Dirfile flags (required by GDOPEN):
+Dirfile flags (required by GDOPEN, GDCOPN, and GDINCL):
 
   F77 symbol      C symbol          Notes
   ----------      ----------------- --------------------------------------
@@ -769,3 +809,52 @@ may not be properly interpretable by Fortran 77.
   GD_I64          GD_INT64
   GD_F32          GD_FLOAT32
   GD_F64          GD_FLOAT64
+
+Delete flags (required by GDDELE):
+
+  F77 symbol      C symbol
+  ----------      -----------------
+  GDD_MT          GD_DEL_META
+  GDD_DT          GD_DEL_DATA
+  GDD_DR          GD_DEL_DEREF
+  GDD_FO          GD_DEL_FORCE
+
+Protection levels (returned by GDGPRT and required by GDPROT):
+
+  F77 symbol      C symbol          Notes
+  ----------      ----------------- --------------------------------------
+  GDPR_N          GD_PROTECT_NONE
+  GDPR_F          GD_PROTECT_FORMAT
+  GDPR_D          GD_PROTECT_DATA
+  GDPR_A          GD_PROTECT_ALL    This is the bitwise or of GDPR_D and GDPR_A
+
+Callback actions (returned by the registered callback function, see GDCOPN):
+
+  F77 symbol      C symbol
+  ----------      ---------------------
+  GDF_BN          GD_E_FORMAT_BITNUM
+  GDF_CH          GD_E_FORMAT_CHARACTER
+  GDF_DU          GD_E_FORMAT_DUPLICATE
+  GDF_EN          GD_E_FORMAT_ENDIAN
+  GDF_LI          GD_E_FORMAT_BAD_LINE
+  GDF_LO          GD_E_FORMAT_LOCATION
+  GDF_MR          GD_E_FORMAT_METARAW
+  GDF_NA          GD_E_FORMAT_BAD_NAME
+  GDF_NB          GD_E_FORMAT_NUMBITS
+  GDF_NF          GD_E_FORMAT_N_FIELDS
+  GDF_NT          GD_E_FORMAT_N_TOK
+  GDF_PA          GD_E_FORMAT_NO_PARENT
+  GDF_PR          GD_E_FORMAT_PROTECT
+  GDF_RN          GD_E_FORMAT_RES_NAME
+  GDF_SF          GD_E_FORMAT_BAD_SPF
+  GDF_SZ          GD_E_FORMAT_BITSIZE
+  GDF_TY          GD_E_FORMAT_BAD_TYPE
+  GDF_UM          GD_E_FORMAT_UNTERM
+
+Miscellaneous parameters:
+
+  F77 symbol      C symbol
+  ----------      -------------------------
+  GD_ALL          GD_ALL_FRAGMENTS
+  GD_DSV          DIRFILE_STANDARDS_VERSION
+  GD_MLL          GD_MAX_LINE_LENGTH

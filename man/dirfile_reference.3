@@ -20,9 +20,9 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH dirfile_reference 3 "8 December 2008" "Version 0.5.0" "GETDATA"
+.TH dirfile_reference 3 "18 December 2008" "Version 0.5.0" "GETDATA"
 .SH NAME
-dirfile_reference \(em retrieve or set the reference field for a dirfile
+dirfile_reference get_reference \(em retrieve or set the reference field for a dirfile
 .SH SYNOPSIS
 .B #include <getdata.h>
 .HP
@@ -30,6 +30,8 @@ dirfile_reference \(em retrieve or set the reference field for a dirfile
 .ad l
 .BI "const char *dirfile_reference(DIRFILE *" dirfile ", const char"
 .BI * field_code );
+.HP
+.BI "const char *get_reference(DIRFILE *" dirfile );
 .hy
 .ad n
 .SH DESCRIPTION
@@ -46,19 +48,27 @@ field specified.  If
 .I field_code
 is NULL, the reference field is not modified.
 
+.BR get_reference ()
+is equivalent to calling
+.BR dirfile_reference ()
+with
+.I field_code
+set to NULL.
+
 .SH RETURN VALUE
 On success,
 .BR dirfile_reference ()
-returns the field code of the dirfile's reference field, which will be
+and
+.BR get_reference ()
+return the field code of the dirfile's reference field, which will be
 .IR field_code ,
 if
 .I field_code
 is non-NULL.   If no
 .B RAW
-fields are defined in the dirfile,
-.BR dirfile_reference ()
-will return NULL, without raising an error.  On error, NULL is returned and the
-dirfile error is set to a non-zero error value.  Possible error values are:
+fields are defined in the dirfile, these functions will return NULL, without
+raising an error.  On error, NULL is returned and the dirfile error is set to a
+non-zero error value.  Possible error values are:
 .TP 8
 .B GD_E_ACCMODE
 The specified dirfile was opened read-only.
