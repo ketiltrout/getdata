@@ -22,7 +22,7 @@ int main(void)
   const char* format1_data = "ENCODING text\n";
   uint16_t data_data[128];
   int we = 0;
-  unsigned long d;
+  uint16_t d;
   char line[100];
   int fd, i;
   FILE* stream;
@@ -58,14 +58,14 @@ int main(void)
 
     while (fgets(line, 100, stream)) {
       d = strtoul(line, NULL, 10);
-      if (d != i * 0x201) {
+      if (d != (unsigned)i * 0x201) {
         printf("%i = %4x %s", i, d, line);
         we++;
       }
 
       i++;
     }
-    close(stream);
+    fclose(stream);
   } else 
     we = -1;
 

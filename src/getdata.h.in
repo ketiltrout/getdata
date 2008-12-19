@@ -382,6 +382,12 @@ extern unsigned int get_nmvectors(DIRFILE* D, const char* parent)
 
 extern unsigned int get_nvectors(DIRFILE* dirfile) __THROW __gd_nonnull ((1));
 
+extern int get_parent_fragment(DIRFILE* D, int fragment_index)
+  __THROW __gd_nonnull ((1));
+
+extern void dirfile_parser_callback(DIRFILE* D, int (*sehandler)(const DIRFILE*,
+      int, char*)) __THROW __gd_nonnull ((1));
+
 extern int dirfile_protect(DIRFILE *D, int fragment_index, int protection_level)
   __THROW __gd_nonnull ((1));
 

@@ -17,7 +17,7 @@ int main(void)
   const char* data = __TEST__ "dirfile/data";
   const char* format_data = "data CONST UINT8 8\n";
   unsigned char data_data[256];
-  int fd, i;
+  int fd;
 
   mkdir(filedir, 0777);
 

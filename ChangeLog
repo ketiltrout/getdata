@@ -1,3 +1,8 @@
+2008-12-18   D. V. Wiebe <getdata@ketiltrout.net>  svn:272
+	* test/include_pc.c test/include_cb.c test/include_syntax.c: Added.
+
+	* src/open.c (dirfile_parser_callback): Added.
+
 2008-12-18   D. V. Wiebe <getdata@ketiltrout.net>  svn:270
 	* test/global_ref_get.c: Added.
 	* src/globals.c (get_reference): Added.

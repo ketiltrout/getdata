@@ -189,6 +189,16 @@ static FILE* _GD_CreateDirfile(DIRFILE* D, const char* format_file,
   return fp;
 }
 
+void dirfile_parser_callback(DIRFILE* D, int (*sehandler)(const DIRFILE*, int,
+      char*))
+{
+  dtrace("%p, %p", D, sehandler);
+
+  D->sehandler = sehandler;
+
+  dreturnvoid();
+}
+
 /* dirfile_cbopen: open (or, perhaps, create) and parse the specified dirfile
 */
 DIRFILE* dirfile_cbopen(const char* filedir, unsigned long flags,

@@ -20,7 +20,7 @@
 .\" with GetData; if not, write to the Free Software Foundation, Inc.,
 .\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 .\"
-.TH dirfile_include 3 "8 December 2008" "Version 0.5.0" "GETDATA"
+.TH dirfile_include 3 "19 December 2008" "Version 0.5.0" "GETDATA"
 .SH NAME
 dirfile_include \(em add a format file fragment to a dirfile
 .SH SYNOPSIS
@@ -50,6 +50,8 @@ the following directive were present:
 If a parser callback function had been specified when the dirfile was opened
 using
 .BR dirfile_cbopen (3),
+or added later with
+.BR dirfile_parser_callback (3),
 this callback function will be called if a syntax error is encountered while
 parsing the included fragment.
 
@@ -285,6 +287,7 @@ with
 in this case.
 .SH SEE ALSO
 .BR dirfile_open (3),
+.BR dirfile_parser_callback (3),
 .BR dirfile_reference (3),
 .BR dirfile_uninclude (3),
 .BR get_error (3),

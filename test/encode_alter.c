@@ -22,7 +22,7 @@ int main(void)
   const char* txt_data =
     "0\n1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12\n13\n14\n15\n";
   uint16_t data_data[128];
-  uint16_t c[8], d;
+  uint16_t c[8];
   int fd;
 
   memset(c, 0, 8);

@@ -41,11 +41,11 @@ dist_man_MANS = dirfile_add.3 dirfile_add_bit.3 dirfile_add_spec.3 \
 								get_mstrings.3 get_mvector_list.3 dirfilename.3 get_nfields.3 \
 								get_nfields_by_type.3 get_nfragments.3 get_nframes.3 \
 								get_nmfields.3 get_nmfields_by_type.3 get_nmvectors.3 \
-								get_nvectors.3 get_parent_fragment.3 get_raw_filename.3 \
-								dirfile_reference.3 dirfile_rename.3 get_spf.3 get_string.3 \
-								put_string.3 get_strings.3 dirfile_uninclude.3 \
-								get_vector_list.3 dirfile.5 dirfile-encoding.5 \
-								dirfile-format.5 $(LFS_transitional_mans)
+								get_nvectors.3 get_parent_fragment.3 dirfile_parser_callback.3 \
+								get_raw_filename.3 dirfile_reference.3 dirfile_rename.3 \
+								get_spf.3 get_string.3 put_string.3 get_strings.3 \
+								dirfile_uninclude.3 get_vector_list.3 dirfile.5 \
+								dirfile-encoding.5 dirfile-format.5 $(LFS_transitional_mans)
 
 install-data-hook: ${INSTALL_DATA_HOOK64}
 	cd $(DESTDIR)$(mandir)/man3 && \
@@ -80,6 +80,8 @@ install-data-hook: ${INSTALL_DATA_HOOK64}
 		$(LN_S) -f dirfile_alter_bit.3 dirfile_alter_raw.3
 	cd $(DESTDIR)$(mandir)/man3 && \
 		$(LN_S) -f dirfile_alter_spec.3 dirfile_malter_spec.3
+	cd $(DESTDIR)$(mandir)/man3 && \
+		$(LN_S) -f dirfile_reference.3 get_reference.3
 
 install-data-hook64:
 	cd $(DESTDIR)$(mandir)/man3 && \
@@ -94,7 +96,8 @@ uninstall-hook:
 		dirfile_add_string.3 dirfile_madd.3 dirfile_madd_spec.3 dirfile_open.3 \
 		dirfile_discard.3 dirfile_alter_const.3 dirfile_alter_lincom.3 \
 		dirfile_alter_linterp.3 dirfile_alter_multiply.3 dirfile_alter_phase.3 \
-		dirfile_alter_raw.3 dirfile_malter_spec.3 dirfile_alter_frameoffset64.3
+		dirfile_alter_raw.3 dirfile_malter_spec.3 dirfile_alter_frameoffset64.3 \
+		get_reference.3
 
 clean-local:
 	rm -rf *~ 

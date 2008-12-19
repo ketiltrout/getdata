@@ -137,9 +137,9 @@ if TEST_GZIP
 GZIP_TESTS=gzip_get gzip_get_get gzip_move_from gzip_nframes gzip_put
 endif
 
-INCLUDE_TESTS=include include_accmode include_auto include_creat \
+INCLUDE_TESTS=include include_accmode include_auto include_cb include_creat \
 							include_ignore include_index include_invalid include_nonexistent \
-							include_ref
+							include_pc include_ref include_syntax
 
 if INCLUDE_LEGACY_API
 LEGACY_TESTS=legacy_get legacy_get_put legacy_get_rofs legacy_nframes \

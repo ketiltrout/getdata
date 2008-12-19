@@ -1,0 +1,62 @@
+.\" dirfile_parser_callback.3.  The dirfile_parser_callback man page.
+.\"
+.\" (C) 2008 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" This program is free software; you can redistribute it and/or modify
+.\" it under the terms of the GNU General Public License as published by
+.\" the Free Software Foundation; either version 2 of the License, or
+.\" (at your option) any later version.
+.\"
+.\" GetData is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+.\" General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public License along
+.\" with GetData; if not, write to the Free Software Foundation, Inc.,
+.\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+.\"
+.TH dirfile_parser_callback 3 "19 December 2008" "Version 0.5.0" "GETDATA"
+.SH NAME
+dirfile_parser_callback \(em set the syntax error callback handler for a dirfile
+.SH SYNOPSIS
+.B #include <getdata.h>
+.HP
+.nh
+.ad l
+.BI "void dirfile_parser_callback(DIRFILE *" dirfile ,
+.BI "int (*" sehandler ")(const DIRFILE*, int, char*));
+.hy
+.ad n
+.SH DESCRIPTION
+The
+.BR dirfile_parser_callback ()
+sets the syntax error callback function of the DIRFILE object
+.I dirfile
+to
+.IR sehandler ,
+discarding any signal handler which was previously registered for this DIRFILE.
+If
+.I sehandler
+is NULL, the existing handler will be removed and the default behaviour (abort
+on error) restored.  See
+.BR dirfile_cbopen (3)
+for a discussion on the requirements for the syntax handler.
+
+Since parsing of an existing format file occurs when the DIRFILE object is
+created, before this function can be called, this function is only useful to
+modify set or modify a callback function before calling
+.BR dirfile_include (3),
+which will invoke the callback function if syntax errors are found in the
+included fragment.
+
+This function always succeeds, and has no return value.
+
+.SH SEE ALSO
+.BR dirfile_cbopen (3),
+.BR dirfile_include (3),
+.BR dirfile (5)

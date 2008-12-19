@@ -19,17 +19,17 @@ int main(void)
   const char* table = __TEST__ "dirfile/table";
   const char* table1 = __TEST__ "dirfile/table1";
   const char* data = __TEST__ "dirfile/data";
-  const char* format_data = "data RAW UINT32 8\nlut LINTERP data table\n";
+  const char* format_data = "data RAW INT32 8\nlut LINTERP data table\n";
   const char* tabledata = "0 0\n1000 5000\n";
   const char* table1data = "0 0\n1000 10000\n";
-  uint32_t data_data[256];
-  uint32_t c[8];
+  int32_t data_data[256];
+  int32_t c[8];
   int fd, i, we = 0;
 
   mkdir(filedir, 0777);
 
   for (fd = 0; fd < 256; ++fd)
-    data_data[fd] = (uint32_t)fd;
+    data_data[fd] = (int32_t)fd;
 
   fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
   write(fd, format_data, strlen(format_data));
@@ -44,13 +44,13 @@ int main(void)
   close(fd);
 
   fd = open(data, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, data_data, 256 * sizeof(uint32_t));
+  write(fd, data_data, 256 * sizeof(int32_t));
   close(fd);
 
   DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_VERBOSE);
   int ret = dirfile_alter_linterp(D, "lut", NULL, "table1", 1);
   int error = get_error(D);
-  int n = getdata(D, "lut", 5, 0, 1, 0, GD_UINT32, c);
+  int n = getdata(D, "lut", 5, 0, 1, 0, GD_INT32, c);
 
   dirfile_close(D);
 
