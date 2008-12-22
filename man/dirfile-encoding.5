@@ -6,21 +6,14 @@
 .\"
 .\" This file is part of the GetData project.
 .\"
-.\" This program is free software; you can redistribute it and/or modify
-.\" it under the terms of the GNU General Public License as published by
-.\" the Free Software Foundation; either version 2 of the License, or
-.\" (at your option) any later version.
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
 .\"
-.\" GetData is distributed in the hope that it will be useful,
-.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
-.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-.\" General Public License for more details.
-.\"
-.\" You should have received a copy of the GNU General Public License along
-.\" with GetData; if not, write to the Free Software Foundation, Inc.,
-.\" 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-.\"
-.TH dirfile-encoding 5 "2 October 2008" "Standards Version 6" "DATA FORMATS"
+.TH dirfile-encoding 5 "22 December 2008" "Standards Version 6" "DATA FORMATS"
 .SH NAME
 dirfile-encoding \(em dirfile database encoding schemes
 .SH DESCRIPTION
@@ -33,8 +26,8 @@ field data in the specified simple data type.  In certain situations, it may be
 advantageous to convert the binary files in the database into a more convenient
 form.  This is accomplished by
 .I encoding
-the dirfile into the alternate form.  A common use-case for encoding a dirfile
-is to compress the binary files to save disk space.  Only data is modified by an
+the binary file into the alternate form.  A common use-case for encoding a
+binary file is to compress it to save disk space.  Only data is modified by an
 encoding scheme.  Database metadata is unaffected.
 
 Support for encoding schemes is optional.  An implementation need not support
@@ -58,18 +51,21 @@ implemented in the GetData library.
 
 .SH THE GETDATA ENCODING FRAMEWORK
 
-The GetData library provides an encoding framework which abstracts data file
+The GetData library provides an encoding framework which abstracts binary file
 I/O, allowing for generic support for a wide variety of encoding schemes.
-The only functions which make use of the encoding framework are
-.BR dirfile_add (3)
-(and its dirfile_add_... cousins),
-.BR getdata "(3), " get_nframes (3),
+Functions which may make use of the encoding framework are:
+.IP
+.BR dirfile_add (3),\~ dirfile_add_raw (3),\~ dirfile_add_spec (3),
+.BR dirfile_alter_encoding (3),\~ dirfile_alter_endianness (3),
+.BR dirfile_alter_frameoffset (3),\~ dirfile_alter_entry (3),
+.BR dirfile_alter_raw (3),\~ dirfile_alter_spec (3),\~ dirfile_move (3),
+.BR dirfile_rename (3),\~ getdata (3),\~ get_nframes (3),
 and
 .BR putdata (3).
-
+.P
 Most of the encodings supported by GetData are implemented through external
 libraries which handle the actual file I/O and data translation.  All such
-libraries are optional: a build of the library which omits an external library
+libraries are optional; a build of the library which omits an external library
 will lack support for the associated encoding scheme.  In this case, GetData
 will still properly identify the encoding scheme, but attempts to use GetData
 for file I/O via the encoding will fail with the
@@ -86,19 +82,23 @@ field has multiple data files with different, supported file extensions which
 could legitimately be associated with it, the encoding scheme discovered by
 GetData is not well defined.
 
-In addition to raw (unencoded) data, GetData supports two other encoding
+In addition to raw (unencoded) data, GetData supports four other encoding
 schemes:
 .I text
+encoding,
+.I bzip2
+encoding,
+.I gzip
 encoding, and
 .I slim
-encoding, both discussed below.
+encoding, all discussed below.
 
 .SS Text Encoding
 
 The Text Encoding is unique among GetData encoding schemes in that it requires
-no external library.  As a result, all builds of the library contain full support
-for this encoding.  It is meant to serve as a reference encoding and example
-of the encoding framework for work on other encoding schemes.
+no external library.  As a result, all builds of the library contain full
+support for this encoding.  It is meant to serve as a reference encoding and
+example of the encoding framework for work on other encoding schemes.
 
 The Text Encoding replaces the binary data files with 7-bit ASCII files
 containing a decimal text encoding of the data, one sample per line.  All
@@ -106,22 +106,48 @@ operations are supported by the Text Encoding.  The file extension of the
 Text Encoding is
 .BR .txt .
 
+.SS Bzip2 Encoding
+
+The Bzip2 Encoding compresses raw binary files using the Burrows-Wheeler block
+sorting text compression algorithm and Huffman coding, as implemented in the
+bzip2 format.  GetData's Bzip2 Encoding scheme is implemented through the the
+.I bzip2 compression library
+written by Julian Seward.  GetData's Bzip2 Encoding framework currently lacks
+write capabilities; as a result the Bzip2 Encoding does not support functions
+which modify binary data.
+
+GetData caches an uncompressed megabyte of data at a time to speed access times.
+A call to
+.BR get_nframes (3)
+requires decompression of the entire binary file to determine its uncompressed
+size, and may take some time to complete.
+
+.SS Gzip Encoding
+
+The Gzip Encoding compresses raw binary files using Lempel-Ziv coding (LZ77) as
+implemented in the gzip format.  GetData's Gzip Encoding scheme is implemented
+through the the
+.I zlib compression library
+written by Jean-loup Gailly and Mark Adler.  GetData's Gzip Encoding framework
+currently lacks write capabilities; as a result the Gzip Encoding does not
+support functions which modify binary data.
+
+To speed the operation of
+.BR get_nframes (3),
+the Gzip Encoding takes the uncompressed size of the file the gzip footer, which
+contains the file's uncompressed size in bytes, modulo 2^32.  As a result, using
+a field with an (uncompressed) binary file size larger than 4\~Gib as the
+reference field will result in the wrong number of frames being reported.
+
 .SS Slim Encoding
 
 The Slim Encoding compresses raw binary files using the slimlib compression
-library.  The slimlib library was developed at Princeton University to compress
-dirfile-like data.  It permits reasonably fast random-access reads.  The slimlib
-library currently lacks write capabilities; as a result, the Slim Encoding does
-not support
-.BR dirfile_add (3),
-nor
-.BR putdata (3).
-The file extension of the Slim Encoding is
+library written by Joseph Fowler.  The slimlib library was developed at
+Princeton University to compress dirfile-like data.  GetData's Slim Encoding
+framework currently lacks write capabilities; as a result, the Slim Encoding
+does not support function which modify binary files.  The file extension of the
+Slim Encoding is
 .BR .slm .
-
-Slimlib has been released under the GPL but, as of the writing of this manual
-page, slimlib is not distributed via the Internet.  Slimlib was written by
-Joseph Fowler.  Interested parties should write to the slimlib author directly.
 
 .SH AUTHOR
 
@@ -132,4 +158,7 @@ This manual page was by D. V. Wiebe
 
 .SH SEE ALSO
 .BR dirfile (5),
-.BR dirfile\-format (5)
+.BR dirfile\-format (5),
+.BR bzip2 (1),
+.BR gzip (1),
+.BR zlib (3).

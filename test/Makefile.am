@@ -106,7 +106,7 @@ ENDIAN_TESTS=endian_alter endian_get endian_move
 ENTRY_TESTS=entry_bad_code entry_bit entry_bit_scalar entry_invalid \
 						entry_lincom entry_lincom_scalar entry_linterp entry_multiply \
 						entry_phase entry_phase_scalar entry_raw entry_raw_scalar \
-						entry_raw_scalar_code entry_raw_scalar_type
+						entry_raw_scalar_code entry_raw_scalar_type entry_type
 
 ERROR_TESTS=error error_error error_short
 
@@ -119,7 +119,7 @@ FLUSH_TESTS=flush flush_all flush_bad_code flush_invalid flush_meta
 
 FOFFS_TESTS=foffs_alter foffs_get foffs_move
 
-FRAGMENT_TESTS=fragmentname fragmentname_oor
+FRAGMENT_TESTS=fragment_index fragment_name fragment_name_oor
 
 GET_TESTS=get64 get_bad_code get_bit get_char get_endian8 get_endian16 \
 					get_endian32 get_endian64 get_endian_float32 get_endian_float64 \

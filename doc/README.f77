@@ -718,7 +718,7 @@ Subroutines interacting with field metadata
   string length of field_code.  The number of samples per frame in field_code
   will be returned in spf.
 
-* GDFLDT(entry_type, dirfile_unit, field_code, field_code_len)
+* GDENTY(entry_type, dirfile_unit, field_code, field_code_len)
 
   Output:
     INTEGER type
@@ -726,9 +726,9 @@ Subroutines interacting with field metadata
     INTEGER dirfile_unit, field_code_len
     CHARACTER*<field_code_len> field_code
 
-  This subroutine returns the field type of the specified field_code in
-  entry_type.  The entry_type will be one of the entry type parameters listed
-  below.
+  This subroutine wraps get_entry_type(3), and returns the field type of the
+  specified field_code in entry_type.  The entry_type will be one of the entry
+  type parameters listed below.
 
 * GDFRGI(format_file, dirfile_unit, field_code, field_code_len
 
@@ -738,8 +738,9 @@ Subroutines interacting with field metadata
     INTEGER dirfile_unit, field_code_len
     CHARACTER*<field_code_len> field_code
 
-  This subroutine returns the format file fragment index for the supplied field.
-  If the field does not exist, or an error occurred, -1 is returned.
+  This subroutine wraps get_fragment_index(3), and returns the format file
+  fragment index for the supplied field.  If the field does not exist, or an
+  error occurred, -1 is returned.
 
 * GDALRW(dirfile_unit, field_code, field_code_len, data_type, spf, recode)
 

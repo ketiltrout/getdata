@@ -287,19 +287,22 @@ extern int get_constant(DIRFILE* D, const char *field_code,
 extern int put_constant(DIRFILE* D, const char *field_code,
     gd_type_t data_type, const void *data_in) __THROW __gd_nonnull ((1, 2, 4));
 
-extern const void* get_constants(DIRFILE* dirfile, gd_type_t return_type)
-  __THROW __gd_nonnull ((1));
+extern const void* get_constants(DIRFILE* dirfile,
+    gd_type_t return_type) __THROW __gd_nonnull ((1));
 
 extern gd_entry_t *dirfile_free_entry_strings(gd_entry_t *entry) __THROW;
 
-extern unsigned long get_encoding(DIRFILE *D, int fragment)
-  __THROW __gd_nonnull ((1));
+extern unsigned long get_encoding(DIRFILE *D,
+    int fragment) __THROW __gd_nonnull ((1));
 
-extern unsigned long get_endianness(DIRFILE* D, int fragment)
-  __THROW __gd_nonnull((1));
+extern unsigned long get_endianness(DIRFILE* D,
+    int fragment) __THROW __gd_nonnull((1));
 
-extern int get_entry(DIRFILE* D, const char* field_code, gd_entry_t* entry)
-  __THROW __gd_nonnull ((1, 2));
+extern int get_entry(DIRFILE* D, const char* field_code,
+    gd_entry_t* entry) __THROW __gd_nonnull ((1, 2));
+
+extern gd_entype_t get_entry_type(DIRFILE *D,
+    const char *field_code) __THROW __gd_nonnull ((1));
 
 extern int get_error(const DIRFILE* D) __THROW __gd_nonnull ((1));
 
@@ -309,10 +312,13 @@ extern char* get_error_string(const DIRFILE* dirfile, char* buffer,
 extern const char** get_field_list(DIRFILE* dirfile) __THROW __gd_nonnull ((1));
 
 extern const char** get_field_list_by_type(DIRFILE* D, gd_entype_t type)
-  __THROW __gd_nonnull((1));
+  __THROW __gd_nonnull ((1));
+
+extern int get_fragment_index(DIRFILE* D, const char *field_code)
+  __THROW __gd_nonnull ((1));
 
 extern const char* get_fragmentname(DIRFILE* D, int index)
-  __THROW __gd_nonnull((1));
+  __THROW __gd_nonnull ((1));
 
 extern int dirfile_madd(DIRFILE* D, const gd_entry_t* entry, const char* parent)
   __THROW __gd_nonnull ((1,2,3));
@@ -341,8 +347,8 @@ extern int dirfile_madd_phase(DIRFILE* D, const char* parent,
     const char* field_code, const char* in_field, int shift)
 __THROW __gd_nonnull ((1,2,3,4));
 
-extern int dirfile_madd_spec(DIRFILE* D, const char* line, const char* parent)
-  __THROW __gd_nonnull ((1,2,3));
+extern int dirfile_madd_spec(DIRFILE* D, const char* line,
+    const char* parent) __THROW __gd_nonnull ((1,2,3));
 
 extern int dirfile_madd_string(DIRFILE* D, const char* parent,
     const char* field_code, const char* value) __THROW __gd_nonnull ((1,2,3,4));
@@ -350,55 +356,55 @@ extern int dirfile_madd_string(DIRFILE* D, const char* parent,
 extern const void* get_mconstants(DIRFILE* D, const char* parent,
     gd_type_t return_type) __THROW __gd_nonnull((1,2));
 
-extern const char** get_mfield_list(DIRFILE* D, const char* parent)
-  __THROW __gd_nonnull((1,2));
+extern const char** get_mfield_list(DIRFILE* D,
+    const char* parent) __THROW __gd_nonnull((1,2));
 
 extern const char** get_mfield_list_by_type(DIRFILE* D, const char* parent,
     gd_entype_t type) __THROW __gd_nonnull((1,2));
 
-extern const char** get_mstrings(DIRFILE* D, const char* parent)
-  __THROW __gd_nonnull((1,2));
+extern const char** get_mstrings(DIRFILE* D,
+    const char* parent) __THROW __gd_nonnull((1,2));
 
-extern const char** get_mvector_list(DIRFILE* D, const char* parent)
-  __THROW __gd_nonnull((1,2));
+extern const char** get_mvector_list(DIRFILE* D,
+    const char* parent) __THROW __gd_nonnull((1,2));
 
 extern const char* dirfilename(DIRFILE* D) __THROW __gd_nonnull ((1));
 
 extern unsigned int get_nfields(DIRFILE* dirfile) __THROW __gd_nonnull ((1));
 
-extern unsigned int get_nfields_by_type(DIRFILE* D, gd_entype_t type)
-  __THROW __gd_nonnull ((1));
+extern unsigned int get_nfields_by_type(DIRFILE* D,
+    gd_entype_t type) __THROW __gd_nonnull ((1));
 
 extern int get_nfragments(DIRFILE* D) __THROW __gd_nonnull((1));
 
-extern unsigned int get_nmfields(DIRFILE* D, const char* parent)
-  __THROW __gd_nonnull((1,2));
+extern unsigned int get_nmfields(DIRFILE* D,
+    const char* parent) __THROW __gd_nonnull((1,2));
 
 extern unsigned int get_nmfields_by_type(DIRFILE* D, const char* parent,
     gd_entype_t type) __THROW __gd_nonnull((1,2));
 
-extern unsigned int get_nmvectors(DIRFILE* D, const char* parent)
-  __THROW __gd_nonnull((1,2));
+extern unsigned int get_nmvectors(DIRFILE* D,
+    const char* parent) __THROW __gd_nonnull((1,2));
 
 extern unsigned int get_nvectors(DIRFILE* dirfile) __THROW __gd_nonnull ((1));
 
-extern int get_parent_fragment(DIRFILE* D, int fragment_index)
-  __THROW __gd_nonnull ((1));
+extern int get_parent_fragment(DIRFILE* D,
+    int fragment_index) __THROW __gd_nonnull ((1));
 
 extern void dirfile_parser_callback(DIRFILE* D, int (*sehandler)(const DIRFILE*,
       int, char*)) __THROW __gd_nonnull ((1));
 
-extern int dirfile_protect(DIRFILE *D, int protection_level, int fragment_index)
-  __THROW __gd_nonnull ((1));
+extern int dirfile_protect(DIRFILE *D, int protection_level,
+    int fragment_index) __THROW __gd_nonnull ((1));
 
-extern int get_protection(DIRFILE* D, int fragment_index)
-  __THROW __gd_nonnull ((1));
+extern int get_protection(DIRFILE* D,
+    int fragment_index) __THROW __gd_nonnull ((1));
 
-extern const char* get_raw_filename(DIRFILE* D, const char* field_code)
-  __THROW __gd_nonnull ((1, 2));
+extern const char* get_raw_filename(DIRFILE* D,
+    const char* field_code) __THROW __gd_nonnull ((1, 2));
 
-extern const char* dirfile_reference(DIRFILE* D, const char* field_code)
-  __THROW __gd_nonnull ((1));
+extern const char* dirfile_reference(DIRFILE* D,
+    const char* field_code) __THROW __gd_nonnull ((1));
 
 extern const char* get_reference(DIRFILE* D) __THROW __gd_nonnull ((1));
 
@@ -475,8 +481,8 @@ extern DIRFILE* dirfile_open(const char* dirfilename,
 extern int dirfile_rename(DIRFILE *D, const char *old_code,
     const char *new_name, int move_data) __gd_nonnull ((1,2,3));
 
-extern int dirfile_uninclude(DIRFILE* D, int fragment_index, int del)
-  __gd_nonnull ((1));
+extern int dirfile_uninclude(DIRFILE* D, int fragment_index,
+    int del) __gd_nonnull ((1));
 
 /* the following functions are _FILE_OFFSET_BITS sensitive */
 #ifndef __USE_FILE_OFFSET64
@@ -493,8 +499,8 @@ extern size_t putdata(DIRFILE* dirfile, const char *field_code,
     size_t num_samples, gd_type_t data_type,
     const void *data_in) __gd_nonnull ((1, 2));
 
-extern off_t get_frameoffset(DIRFILE* dirfile, int fragment)
-  __THROW __gd_nonnull ((1));
+extern off_t get_frameoffset(DIRFILE* dirfile,
+    int fragment) __THROW __gd_nonnull ((1));
 
 extern off_t get_nframes(DIRFILE* dirfile) __gd_nonnull ((1));
 #else
@@ -532,7 +538,7 @@ extern off_t __REDIRECT (get_nframes, (DIRFILE* dirfile),
 
 /* if requested, declare the LFS transitional extension */
 #ifdef __USE_LARGEFILE64
-extern int dirfile_alter_frameoffset64(DIRFILE* D, __off64_t field_code,
+extern int dirfile_alter_frameoffset64(DIRFILE* D, __off64_t offset,
     int fragment, int recode) __gd_nonnull ((1));
 
 extern size_t getdata64(DIRFILE* dirfile, const char *field_code,

@@ -325,21 +325,16 @@ void F77_FUNC(gdestr, GDESTR) (const int* dirfile, char* buffer, const int* len)
   get_error_string(_GDF_GetDirfile(*dirfile), buffer, *len);
 }
 
-/* returns the field type */
-void F77_FUNC(gdfldt, GDFLDT) (int* type, const int* dirfile,
+/* get_entry_type wrapper */
+void F77_FUNC(gdenty, GDENTY) (int* type, const int* dirfile,
     const char* field_code, const int* field_code_l)
 {
-  char* out = malloc(*field_code_l + 1);
-  gd_entry_t E;
+  char* fc = malloc(*field_code_l + 1);
 
-  if (get_entry(_GDF_GetDirfile(*dirfile), _GDF_CString(out, field_code,
-          *field_code_l), &E))
-    *type = GD_NO_ENTRY;
-  else
-    *type = E.field_type;
+  *type = (int)get_entry_type(_GDF_GetDirfile(*dirfile), _GDF_CString(fc,
+        field_code, *field_code_l));
 
-  dirfile_free_entry_strings(&E);
-  free(out);
+  free(fc);
 }
 
 /* get_entry wrapper for RAW */
@@ -505,21 +500,16 @@ void F77_FUNC(gdgeco, GDGECO) (int* data_type, int* fragment_index,
   free(out);
 }
 
-/* get fragment index for field */
+/* get_fragment_index wrapper */
 void F77_FUNC(gdfrgi, GDFRGI) (int* fragment_index, const int* dirfile,
     const char* field_code, const int* field_code_l)
 {
-  char* out = malloc(*field_code_l + 1);
-  gd_entry_t E;
+  char* fc = malloc(*field_code_l + 1);
 
-  if (get_entry(_GDF_GetDirfile(*dirfile), _GDF_CString(out, field_code,
-          *field_code_l), &E))
-    *fragment_index = -1;
-  else
-    *fragment_index = E.fragment_index;
+  *fragment_index = get_fragment_index(_GDF_GetDirfile(*dirfile),
+      _GDF_CString(fc, field_code, *field_code_l));
 
-  dirfile_free_entry_strings(&E);
-  free(out);
+  free(fc);
 }
 
 /* dirfile_add_raw wrapper */

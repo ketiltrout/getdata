@@ -323,6 +323,14 @@ unit numbers in place of C's DIRFILE pointers are:
   integer, intent(in) :: dirfile, flags
   character (len=*), intent(in) :: field_code
 
+* integer function fget_entry_type (dirfile, field_code)
+  integer, intent(in) :: dirfile
+  character (len=*), intent(in) :: field_code
+
+* integer function fget_fragment_index (dirfile, field_code)
+  integer, intent(in) :: dirfile
+  character (len=*), intent(in) :: field_code
+
 In order to respect type safety, the getdata and putdata analogues encode
 the datatype of their array in their function name, rather than as a parameter.
 Otherwise, they behave the same as their C counterparts.

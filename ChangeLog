@@ -1,4 +1,29 @@
-2008-12-19   D. V. Wiebe <getdata@ketiltrout.net>  svn:273
+2008-12-21   D. V. Wiebe <getdata@ketiltrout.net>  svn:276
+	* bindings/cxx/linterpentry.cpp bindings/cxx/bitentry.cpp
+	bindings/cxx/multiplyentry.cpp bindings/cxx/lincomentry.cpp
+	bindings/cxx/fragment.cpp bindings/cxx/constentry.cpp
+	bindings/cxx/rawentry.cpp bindings/cxx/phaseentry.cpp
+	bindings/cxx/getdata/indexentry.h bindings/cxx/getdata/getdata/rawentry.h
+	bindigns/cxx/getdata/linterpentry.h bindings/cxx/getdata/bitentry.h
+	bindings/cxx/getdata/multiplyentry.h bindings/cxx/getdata/phaseentry.h
+	bindings/cxx/getdata/lincomentry.h bindings/cxx/getdata/fragment.h
+	bindings/cxx/getdata/constentry.h bindings/cxx/getdata/stringentry.h
+	bindings/cxx/stringentry.cpp bindings/cxx/indexentry.cpp: Added.
+
+	* bindings/cxx/dirfile.cpp bindings/cxx/getdata/dirfile.h
+	bindings/cxx/entry.cpp bindings/cxx/getdata/entry.h: Updated C++ bindings
+	for the new functions.
+
+	* bindings/f77/fgetdata.c bindings/f77/getdata.f.in
+	bindings/f77/getdata.f90.in: Update for get_entry_type and get_fragment_index.
+
+	* test/fragment_index.c test/entry_type.c: Added.
+	* src/entry.c (get_entry_type get_fragment_index): Added.
+
+	* src/name.c (dirfile_rename): Prohibit renaming INDEX.
+	* src/move.c (dirfile_move): Prohibit moving INDEX.
+
+2008-12-19   D. V. Wiebe <getdata@ketiltrout.net>  svn:274
 	* bindings/f77/getdata.f90.in doc/README.F95: Add Fortran 95 bindings for new
 	functions, and for the dirfile_[m]add_<field_type> functions.
 
@@ -48,7 +73,7 @@
 	* test/alter_mspec.c test/alter_spec.c: Added.
 
 	* src/mod.c (dirfile_alter_spec dirfile_malter_spec): Call
-	_GD_ParseFieldSpec with creat = 0
+	_GD_ParseFieldSpec with creat = 0.
 
 2008-12-17   D. V. Wiebe <getdata@ketiltrout.net>  svn:267
 	* test/name_move.c test/protect_alter.c test/move_subdir.c test/file_code.c

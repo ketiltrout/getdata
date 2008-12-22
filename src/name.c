@@ -115,6 +115,12 @@ int dirfile_rename(DIRFILE *D, const char *old_code, const char *new_name,
     return -1;
   }
 
+  if (E->field_type == GD_INDEX_ENTRY) {
+    _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, "INDEX");
+    dreturn("%i", -1);
+    return -1;
+  }
+
   /* check metadata protection */
   if (D->fragment[E->fragment_index].protection & GD_PROTECT_FORMAT) {
     _GD_SetError(D, GD_E_PROTECTED, GD_E_PROTECTED_FORMAT, NULL, 0,

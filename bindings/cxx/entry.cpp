@@ -1,6 +1,6 @@
 // (C) 2008 D. V. Wiebe
 //
-//#########################################################################
+///////////////////////////////////////////////////////////////////////////
 //
 // This file is part of the GetData project.
 //
@@ -19,7 +19,18 @@
 // Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 //
 #include "getdata/entry.h"
+#include "getdata/dirfile.h"
+#include "getdata/rawentry.h"
+#include "getdata/lincomentry.h"
+#include "getdata/linterpentry.h"
+#include "getdata/bitentry.h"
+#include "getdata/multiplyentry.h"
+#include "getdata/phaseentry.h"
+#include "getdata/constentry.h"
+#include "getdata/stringentry.h"
+#include "getdata/indexentry.h"
 
+#include <stdlib.h>
 #include <cstring>
 
 using namespace GetData;
@@ -27,11 +38,13 @@ using namespace GetData;
 Entry::Entry()
 {
   memset(&E, 0, sizeof(E));
+  D = NULL;
 }
 
-Entry::Entry(DIRFILE *dirfile, const char* field_code)
+Entry::Entry(GetData::Dirfile *dirfile, const char* field_code)
 {
-  get_entry(dirfile, field_code, &E);
+  D = dirfile;
+  get_entry(D->D, field_code, &E);
 }
 
 Entry::~Entry()
@@ -62,70 +75,47 @@ int Entry::CheckIndex(gd_entype_t field_type, int n_fields, int index)
   return 1;
 }
 
-RawEntry::RawEntry(const char* field_code, DataType data_type, unsigned int spf,
-      int fragment_index) : Entry::Entry()
+int Entry::Move(int new_fragment, int move_data)
 {
-  E.field = strdup(field_code);
-  E.field_type = GD_RAW_ENTRY;
-  E.spf = spf;
-  E.data_type = (gd_type_t)data_type;
-  E.fragment_index = fragment_index;
+  int ret = -1;
+
+  if (D != NULL)
+    ret = dirfile_move(D->D, E.field, new_fragment, move_data);
+
+  if (!ret)
+    E.fragment_index = new_fragment;
+
+  return ret;
 }
 
-LincomEntry::LincomEntry(const char* field_code, int n_fields,
-    const char** in_fields, double* m, double* b, int fragment_index) :
-  Entry::Entry()
+int Entry::Rename(const char* new_name, int move_data)
 {
-  int i;
+  char* ptr;
+  int ret = -1;
 
-  E.field = strdup(field_code);
-  E.field_type = GD_LINCOM_ENTRY;
-  E.n_fields = n_fields;
-  E.fragment_index = fragment_index;
-  for (i = 0; i < n_fields; ++i) {
-    E.in_fields[i] = strdup(in_fields[i]);
-    E.m[i] = m[i];
-    E.b[i] = b[i];
+  if (D != NULL)
+    ret = dirfile_rename(D->D, E.field, new_name, move_data);
+
+  if (ret) {
+    char* nn = (char*)malloc(strlen(E.field) + strlen(new_name));
+    strcpy(nn, E.field);
+    ptr = strchr(nn, '/');
+
+    if (ptr) { /* metafield */
+      strcpy(ptr + 1, new_name);
+    } else {
+      free(nn);
+      nn = strdup(new_name);
+    }
+
+    free(E.field);
+    E.field = nn;
   }
+
+  return ret;
 }
 
-LinterpEntry::LinterpEntry(const char* field_code, const char* in_field,
-    const char* table, int fragment_index) : Entry::Entry()
+void Entry::SetDirfile(GetData::Dirfile* dirfile)
 {
-  E.field = strdup(field_code);
-  E.field_type = GD_LINTERP_ENTRY;
-  E.in_fields[0] = strdup(in_field);
-  E.table = strdup(table);
-  E.fragment_index = fragment_index;
-}
-
-BitEntry::BitEntry(const char* field_code, const char* in_field, int bitnum,
-    int numbits, int fragment_index) : Entry::Entry()
-{
-  E.field = strdup(field_code);
-  E.field_type = GD_BIT_ENTRY;
-  E.in_fields[0] = strdup(in_field);
-  E.bitnum = bitnum;
-  E.numbits = numbits;
-  E.fragment_index = fragment_index;
-}
-
-MultiplyEntry::MultiplyEntry(const char* field_code, const char* in_field1,
-    const char* in_field2, int fragment_index) : Entry::Entry()
-{
-  E.field = strdup(field_code);
-  E.field_type = GD_MULTIPLY_ENTRY;
-  E.in_fields[0] = strdup(in_field1);
-  E.in_fields[1] = strdup(in_field2);
-  E.fragment_index = fragment_index;
-}
-
-PhaseEntry::PhaseEntry(const char* field_code, const char* in_field, int shift,
-    int fragment_index) : Entry::Entry()
-{
-  E.field = strdup(field_code);
-  E.field_type = GD_PHASE_ENTRY;
-  E.in_fields[0] = strdup(in_field);
-  E.shift = shift;
-  E.fragment_index = fragment_index;
+  D = dirfile;
 }

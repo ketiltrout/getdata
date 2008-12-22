@@ -329,6 +329,12 @@ int dirfile_move(DIRFILE* D, const char* field_code, int new_fragment,
     return 0;
   }
 
+  if (E->field_type == GD_INDEX_ENTRY) {
+    _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, "INDEX");
+    dreturn("%i", -1);
+    return -1;
+  }
+
   /* check metadata protection */
   if (D->fragment[E->fragment_index].protection & GD_PROTECT_FORMAT ||
       D->fragment[new_fragment].protection & GD_PROTECT_FORMAT)

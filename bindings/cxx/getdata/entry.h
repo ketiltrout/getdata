@@ -1,6 +1,6 @@
 // (C) 2008 D. V. Wiebe
 //
-//#########################################################################
+///////////////////////////////////////////////////////////////////////////
 //
 // This file is part of the GetData project.
 //
@@ -31,6 +31,8 @@ extern "C" {
 #define __gd_unused __attribute__ (( unused ))
 
 namespace GetData {
+
+  class Dirfile;
 
   enum DataType {
     Null    = GD_NULL,    Unknown = GD_UNKNOWN,
@@ -68,6 +70,10 @@ namespace GetData {
       EntryType Type() { return (EntryType)E.field_type; };
       
       int FragmentIndex() { return E.fragment_index; };
+
+      int Move(int new_fragment, int move_data = 0);
+
+      int Rename(const char* new_name, int move_data = 0);
 
       /* Specific data */
       virtual const char *Input(int index = 0) {
@@ -119,106 +125,15 @@ namespace GetData {
       };
 
     protected:
+      Entry(Dirfile *dirfile, const char* field_code);
+
       static int CheckIndex(gd_entype_t field_type, int n_fields, int index);
+
+      void SetDirfile(GetData::Dirfile* dirfile);
+
       gd_entry_t E;
-
-    private:
-      Entry(DIRFILE *dirfile, const char* field_code);
+      Dirfile* D;
   };
-
-  class RawEntry : public Entry {
-    public:
-      RawEntry(const char* field_code, DataType data_type, unsigned int spf,
-          int fragment_index = 0);
-
-      virtual unsigned int SamplesPerFrame() {
-        return E.spf;
-      };
-
-      virtual DataType RawType() {
-        return (DataType)E.data_type;
-      };
-  };
-
-  class LincomEntry : public Entry {
-    public:
-      LincomEntry(const char* field_code, int n_fields, const char** in_fields,
-          double* m, double* b, int fragment_index = 0);
-
-      virtual const char *Input(int index = 0) {
-        return (CheckIndex(E.field_type, E.n_fields, index)) ? 
-            E.in_fields[index] : NULL;
-      };
-
-      virtual int NFields() {
-        return E.n_fields;
-      };
-
-      virtual double Scale(int index = 0) {
-        return (CheckIndex(E.field_type, E.n_fields, index)) ? E.m[index] : 0;
-      };
-
-      virtual double Offset(int index = 0) {
-        return (CheckIndex(E.field_type, E.n_fields, index)) ? E.b[index] : 0;
-      };
-  };
-
-  class LinterpEntry : public Entry {
-    public:
-      LinterpEntry(const char* field_code, const char* in_field,
-          const char* table, int fragment_index = 0);
-
-      virtual const char *Input(int __gd_unused index = 0) {
-        return E.in_fields[0];
-      };
-
-      virtual const char *Table() {
-        return E.table;
-      };
-  };
-
-  class BitEntry : public Entry {
-    public:
-      BitEntry(const char* field_code, const char* in_field, int bitnum,
-          int numbits = 1, int fragment_index = 0);
-
-      virtual const char *Input(int __gd_unused index = 0) {
-        return E.in_fields[0];
-      };
-
-      virtual int FirstBit() {
-        return E.bitnum;
-      };
-
-      virtual int NumBits() {
-        return E.numbits;
-      };
-  };
-
-  class MultiplyEntry : public Entry {
-    public:
-      MultiplyEntry(const char* field_code, const char* in_field1,
-          const char* in_field2, int fragment_index = 0);
-
-      virtual const char *Input(int index = 0) {
-        return E.in_fields[(index == 0) ? 0 : 1];
-      };
-  };
-
-  class PhaseEntry : public Entry {
-    public:
-      PhaseEntry(const char* field_code, const char* in_field, int shift,
-          int fragment_index = 0);
-
-      virtual const char *Input(int __gd_unused index = 0) {
-        return E.in_fields[0];
-      };
-
-      virtual int Shift() {
-        return E.shift;
-      };
-  };
-
 }
 
 #endif

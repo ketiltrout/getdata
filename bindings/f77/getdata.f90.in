@@ -677,7 +677,7 @@ function fget_entry (dirfile, field_code, ent)
   integer :: len3 = GD_FIELD_LEN
 
   ! get field type from f77 library
-  call gdfldt (fget_entry, dirfile, TRIM(field_code), LEN_TRIM(field_code))
+  call gdenty(fget_entry, dirfile, TRIM(field_code), LEN_TRIM(field_code))
 
   if (fget_entry .EQ. GD_RAW_ENTRY) then
     ! raw
@@ -718,6 +718,23 @@ function fget_entry (dirfile, field_code, ent)
     fget_entry = GD_NO_ENTRY
   end if
   ent%field_type = fget_entry
+end function
+
+function fget_entry_type (dirfile, field_code)
+  integer :: fget_entry_type
+  integer, intent(in) :: dirfile
+  character (len=*), intent(in) :: field_code
+
+  call gdenty(fget_entry_type, dirfile, TRIM(field_code), LEN_TRIM(field_code))
+end function
+
+function fget_fragment_index (dirfile, field_code)
+  integer :: fget_fragment_index
+  integer, intent(in) :: dirfile
+  character (len=*), intent(in) :: field_code
+
+  call gdfrgi(fget_fragment_index, dirfile, TRIM(field_code), &
+  LEN_TRIM(field_code))
 end function
 
 subroutine fdirfile_add (dirfile, field_code, ent)

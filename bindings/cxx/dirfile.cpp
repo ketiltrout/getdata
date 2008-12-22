@@ -1,6 +1,6 @@
 // (C) 2008 D. V. Wiebe
 //
-//#########################################################################
+///////////////////////////////////////////////////////////////////////////
 //
 // This file is part of the GetData project.
 //
@@ -19,12 +19,30 @@
 // Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 //
 #include "getdata/dirfile.h"
+#include "getdata/entry.h"
+#include "getdata/fragment.h"
+#include "getdata/rawentry.h"
+#include "getdata/lincomentry.h"
+#include "getdata/linterpentry.h"
+#include "getdata/bitentry.h"
+#include "getdata/multiplyentry.h"
+#include "getdata/phaseentry.h"
+#include "getdata/constentry.h"
+#include "getdata/stringentry.h"
+#include "getdata/indexentry.h"
 
 using namespace GetData;
 
-Dirfile::Dirfile(const char* filedir, unsigned int flags)
+Dirfile::Dirfile(const char* filedir, unsigned int flags,
+          int (*sehandler)(const DIRFILE*, int, char*))
 {
-  D = dirfile_open(filedir, flags);
+  D = dirfile_cbopen(filedir, flags, sehandler);
+  error_string = NULL;
+}
+
+Dirfile::Dirfile(DIRFILE* dirfile)
+{
+  D = dirfile;
   error_string = NULL;
 }
 
@@ -32,12 +50,15 @@ Dirfile::~Dirfile()
 {
   if (error_string != NULL)
     delete error_string;
-  dirfile_close(D);
+
+  if (D == NULL)
+    dirfile_close(D);
 }
 
-int Dirfile::Add(const GetData::Entry &entry)
+int Dirfile::Add(GetData::Entry &entry)
 {
   return dirfile_add(D, &entry.E);
+  entry.SetDirfile(this);
 }
 
 int Dirfile::AddSpec(const char *spec, int format_file)
@@ -45,9 +66,10 @@ int Dirfile::AddSpec(const char *spec, int format_file)
   return dirfile_add_spec(D, spec, format_file);
 }
 
-int Dirfile::MAdd(const GetData::Entry &entry, const char *parent)
+int Dirfile::MAdd(GetData::Entry &entry, const char *parent)
 {
   return dirfile_madd(D, &entry.E, parent);
+  entry.SetDirfile(this);
 }
 
 int Dirfile::MAddSpec(const char *spec, const char *parent)
@@ -57,7 +79,32 @@ int Dirfile::MAddSpec(const char *spec, const char *parent)
 
 Entry *Dirfile::Entry(const char* field_code)
 {
-  return new GetData::Entry(D, field_code);
+  GetData::EntryType type = (GetData::EntryType)get_entry_type(D, field_code);
+
+  switch(type) {
+    case RawEntryType:
+      return new GetData::RawEntry(this, field_code);
+    case LincomEntryType:
+      return new GetData::LincomEntry(this, field_code);
+    case LinterpEntryType:
+      return new GetData::LinterpEntry(this, field_code);
+    case BitEntryType:
+      return new GetData::BitEntry(this, field_code);
+    case MultiplyEntryType:
+      return new GetData::MultiplyEntry(this, field_code);
+    case PhaseEntryType:
+      return new GetData::PhaseEntry(this, field_code);
+    case ConstEntryType:
+      return new GetData::ConstEntry(this, field_code);
+    case StringEntryType:
+      return new GetData::StringEntry(this, field_code);
+    case IndexEntryType:
+      return new GetData::IndexEntry(this, field_code);
+    case NoEntryType:
+      break;
+  }
+
+  return NULL;
 }
 
 int Dirfile::Flush(const char* field_code)
@@ -219,9 +266,12 @@ size_t Dirfile::PutString(const char *field_code, const char* data_in)
   return put_string(D, field_code, data_in);
 }
 
-const char* Dirfile::FragmentName(int index)
+GetData::Fragment* Dirfile::Fragment(int index)
 {
-  return get_fragmentname(D, index);
+  if (index < 0 || index >= get_nfragments(D))
+    return NULL;
+
+  return new GetData::Fragment(this, index);
 }
 
 int Dirfile::NFragments()
@@ -237,4 +287,59 @@ const char* Dirfile::ReferenceFilename()
     return NULL;
 
   return get_raw_filename(D, ref);
+}
+
+int Dirfile::Discard()
+{
+  int ret = dirfile_discard(D);
+
+  if (!ret)
+    D = NULL;
+
+  return ret;
+}
+
+int Dirfile::Close()
+{
+  int ret = dirfile_close(D);
+
+  if (!ret)
+    D = NULL;
+
+  return ret;
+}
+
+void Dirfile::SetCallback(int (*sehandler)(const DIRFILE*, int, char*))
+{
+  dirfile_parser_callback(D, sehandler);
+}
+
+RawEntry* Dirfile::Reference(const char* field_code)
+{
+  const char* ref = dirfile_reference(D, field_code);
+
+  if (ref == NULL)
+    return NULL;
+
+  return new RawEntry(this, ref);
+}
+
+int Dirfile::AlterSpec(const char *line, int recode)
+{
+  return dirfile_alter_spec(D, line, recode);
+}
+
+int Dirfile::MAlterSpec(const char* line, const char *parent, int recode)
+{
+  return dirfile_malter_spec(D, line, parent, recode);
+}
+
+int Dirfile::Delete(const char* field_code, int flags)
+{
+  return dirfile_delete(D, field_code, flags);
+}
+
+int Dirfile::UnInclude(int fragment_index, int del)
+{
+  return dirfile_uninclude(D, fragment_index, del);
 }

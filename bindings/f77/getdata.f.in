@@ -75,6 +75,8 @@ C     Correpsonding to dirfile_delete(3)
       EXTERNAL GDDELE
 C     Corresponding to dirfile_discard(3)
       EXTERNAL GDDSCD
+C     Corresponding to get_entry_type(3)
+      EXTERNAL GDENTY
 C     Returns the dirfile->error member
       EXTERNAL GDEROR
 C     Corresponding to get_error_string(3)
@@ -85,11 +87,9 @@ C     Returns the maximum field name length
       EXTERNAL GDFDNX
 C     Corresponding to get_field_list(3) (sort of)
       EXTERNAL GDFLDN
-C     Returns the field type
-      EXTERNAL GDFLDT
 C     Corresponding to dirfile_flush(3)
       EXTERNAL GDFLSH
-C     Get the fragment index for a field
+C     Corresponding to get_fragment_index(3)
       EXTERNAL GDFRGI
 C     Corresponding to get_fragmentname(3)
       EXTERNAL GDFRGN

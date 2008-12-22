@@ -1,6 +1,6 @@
 // (C) 2008 D. V. Wiebe
 //
-//#########################################################################
+///////////////////////////////////////////////////////////////////////////
 //
 // This file is part of the GetData project.
 //
@@ -28,20 +28,48 @@
 extern "C" {
 #include <getdata.h>
 }
+#include <getdata/fragment.h>
 #include <getdata/entry.h>
 
 namespace GetData {
+  
+  class Entry;
+  class RawEntry;
+
   class Dirfile {
+    friend class Entry;
+    friend class RawEntry;
+    friend class LincomEntry;
+    friend class LinterpEntry;
+    friend class BitEntry;
+    friend class MultiplyEntry;
+    friend class PhaseEntry;
+    friend class ConstEntry;
+    friend class StringEntry;
+    friend class IndexEntry;
+    friend class Fragment;
+
     public:
-      Dirfile(const char *dirfilename, unsigned int flags = GD_RDWR);
+      Dirfile(const char *dirfilename, unsigned int flags = GD_RDWR,
+          int (*sehandler)(const DIRFILE*, int, char*) = NULL);
+
+      Dirfile(DIRFILE *D);
 
       ~Dirfile();
 
-      int Add(const GetData::Entry &entry);
+      int Add(GetData::Entry &entry);
 
       int AddSpec(const char *spec, int format_file = 0);
 
+      int AlterSpec(const char* line, int recode = 0);
+
+      int Close();
+
       const void *Constants(DataType type = Float64);
+
+      int Delete(const char* field_code, int flags = 0);
+
+      int Discard();
 
       GetData::Entry* Entry(const char *field_code);
 
@@ -55,7 +83,7 @@ namespace GetData {
 
       int Flush(const char *field_code = NULL);
 
-      const char *FragmentName(int index);
+      GetData::Fragment *Fragment(int index);
 
       size_t GetConstant(const char *field_code, DataType type, void *data_out);
 
@@ -68,9 +96,11 @@ namespace GetData {
       int Include(const char *file, int format_file = 0,
           unsigned int flags = 0);
 
-      int MAdd(const GetData::Entry &entry, const char *parent);
+      int MAdd(GetData::Entry &entry, const char *parent);
 
       int MAddSpec(const char *spec, const char *parent);
+
+      int MAlterSpec(const char *line, const char *parent, int recode = 0);
 
       const void *MConstants(const char *parent, DataType type = Float64);
 
@@ -109,11 +139,17 @@ namespace GetData {
 
       size_t PutString(const char *field_code, const char *data_in);
 
+      GetData::RawEntry *Reference(const char* field_code = NULL);
+
       const char *ReferenceFilename();
 
       unsigned int SamplesPerFrame(const char *field_code);
 
+      void SetCallback(int (*sehandler)(const DIRFILE*, int, char*));
+
       const char **Strings();
+
+      int UnInclude(int fragment_index, int del = 0);
 
       const char **VectorList();
 

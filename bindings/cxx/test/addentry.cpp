@@ -1,5 +1,5 @@
 #include "getdata/dirfile.h"
-#include "getdata/entry.h"
+#include "getdata/rawentry.h"
 
 #include <fcntl.h>
 #include <string.h>
