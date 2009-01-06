@@ -54,16 +54,19 @@ This package provides:
     - Fortran 96 (libf95getdata)
 
 Documentation for the various bindings, if present, can be found in files
-named `README.<language>'.  The C interface is described in this document.
+named `README.<language>' in the doc/ directory.  The C interface is described
+in this document and the associated man pages.
+
+A full list of features new to this release of GetData may be found in the
+file called `NEWS'.
 
 
 DIRFILE STANDARDS VERSION 6
 ===========================
 
-A full list of features new to this release of GetData may be found in the
-file called `NEWS'.  The 0.4.0 release of the GetData Library (October 2008),
-was released in conjunction with a new version of the Dirfile Standards, known
-as Standards Version 6.
+The 0.4.0 release of the GetData Library (October 2008), was released in
+conjunction with a new version of the Dirfile Standards, known as Standards
+Version 6.
 
 Standards Version 6 introduces the following:
   * Support for two scalar types: CONST (numerical) and STRING (a character
@@ -198,6 +201,33 @@ terms as the GetData Project, we encourage you to submit them for inclusion in
 the package.
 
 
+USING MODULES
+=============
+
+Starting with GetData 0.5.0, encoding schemes which rely on optional external
+libraries (slim, gzip, bzip2) may be built as stand-alone library modules which
+will be dynamically loaded, as needed, at runtime by the core GetData library.
+This architecture is provided to permit packaging the core GetData library
+separately from the part of the library requiring the optional external
+libraries without having to give up the functionality these extra libraries
+provide.  To enable this behaviour, pass `--enable-modules' to ./configure.
+
+The modules are dynamically loaded via GNU libtool's portable dlopen wrapper
+library, libltdl.  Version 1.2 of the libltdl library is distributed with
+GetData, but a libltdl library installed in the system will be preferred over
+the local copy, if found.  The libltdl library permits dynamic loading of
+modules on at least Solaris, Linux, BSD, HP-UX, Win16, Win32, BeOS, Darwin,
+Mac OS X.
+
+GetData will fail gracefully if a library module is not found at runtime.  In
+this case, the call which triggered the attempt to load the module will fail
+with the GD_E_UNSUPPORTED error.
+
+The dlopen library (and by extension libltdl) is notoriously not thread safe.
+As a result, if a POSIX thread implementation can be found, calls to the dynamic
+loader will be wrapped in a mutex.
+
+
 THE API CHANGE
 ==============
 
@@ -264,7 +294,7 @@ Defining the preprocessor symbol `NO_GETDATA_LEGACY_API' before including
 getdata.h will prevent the legacy API from being declared.  In cases when the
 legacy API is declared, getdata.h will define the symbol GETDATA_LEGACY_API,
 which can be used by callers to determine whether the legacy API is present at
-compile time.
+compile time or runtime.
 
 If the legacy API is not built (as a result of passing `--disable-legacy-api'
 to ./configure), getdata_legacy.h will not be installed, and the legacy API will

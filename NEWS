@@ -1,9 +1,74 @@
-New in version 0.5.0a4:
+New in version 0.5.0rc1:
+
+  Dirfile Changes
+
+  * Support for two new encoding schemes has been added which support bzip2 and
+    gzip compression.  Like the slim encoding, the bzip and gzip encoding
+    schemes currently do not support writing, but do allow reading dirfile data
+    compressed with the standard gzip and bzip2 utilities.  Reading compressed
+    data is unsurprisingly slow.
 
   Library Changes
 
+  * Encoding schemes relying on external libraries (slim, gzip, bzip2) may now
+    be built into stand-alone library modules which will be loaded, as needed,
+    at runtime.  GetData will fail gracefully if modules are missing.  See the
+    README for full details.
+  * BUG FIX: Writing metadata to disc now preserves the permissions of the
+    format file fragments which are changed.
+  * BUG FIX: Format files without a line feed character at the end of the file
+    no longer cause the parser to segfault.
   * BUG FIX: putdata() now reports the correct number of samples written for
     ASCII encoded files.
+  * BUG FIX: GetData no longer inserts unnecessary "/./" elements into the paths
+    it reports.
+
+  API Changes
+
+  * The caller can now register a callback function with a DIRFILE by opening
+    the dirfile with dirfile_cbopen instead of dirfile_open.  This callback
+    function will be called by GetData whenever the format file parser
+    encounters a syntax error.  The callback function can be used by the caller
+    to either correct the syntax error, or else tell GetData whether to ignore
+    the line or not.  The callback function may be later modified by calling
+    dirfile_parser_callback.
+  * A fragment may be removed from a dirfile by calling dirfile_uninclude.
+  * The pathname of the drifile may be retrieved by calling dirfilename.
+  * The reference field for the dirfile may be set or retrieved by calling
+    dirfile_reference.
+  * Fragment metadata may be queried or modified by calling:
+
+      - get_encoding, dirfile_alter_encoding
+      - get_endianness, dirfile_alter_endianness
+      - get_frameoffset, dirfile_alter_frameoffset
+      - get_protection, dirfile_protect
+      - get_parent_fragment
+
+  * Various functions now exist to modify field metadata:
+
+      - dirfile_alter_entry, dirfile_alter_<field-type>, dirfile_alter_spec,
+        dirfile_malter_spec
+  
+  * A field may be moved to a different format file fragment using dirfile_move.
+  * A field may be renamed by using dirfile_rename.
+  * A field may be removed from the dirfile by calling dirfile_delete.
+  * The type or fragment index of a field may be retrieved by calling
+    get_entry_type or get_fragment_index, respectively.
+  * The pathname of a raw field may be obtained from a call to get_raw_filename.
+  * A DIRFILE may be deallocated without saving modified metadata by calling
+    dirfile_discard.
+  * A new flags, GD_IGNORE_DUPS, may be passed to dirfile_open to tell the
+    parser to ignore duplicate field specifications in the format files.  This
+    is really only useful identically duplicate specifications, since there is
+    no indication of which of the duplicates is honoured.  Explicit control can
+    be obtained by handling this inside a caller supplied callback function.
+  
+  Bindings:
+
+  * All functions in the Fortran 77 bindings have been completely renamed from
+    GDFxxx to GDxxxx to provide a larger namespace for our use.
+  * BUG FIX: Fortran 77 functions which return character strings no longer
+    corrupt memory as a side-effect of operation.
 
   Miscellaneous:
 

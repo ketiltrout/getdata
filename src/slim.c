@@ -41,15 +41,10 @@
 /* The slim encoding scheme uses edata as a slimfile pointer.  If a file is
  * open, fp = 0 otherwise fp = -1. */
 
-int _GD_SlimOpen(struct _gd_raw_file* file, const char* base,
-    int mode __gd_unused, int creat __gd_unused)
+int _GD_SlimOpen(struct _gd_raw_file* file, int mode __gd_unused,
+    int creat __gd_unused)
 {
-  dtrace("%p, \"%s\", <unused>, <unused>", file, base);
-
-  if (GD_SetEncodedName(file, base, 0)) {
-    dreturn("%i", -1);
-    return -1;
-  }
+  dtrace("%p, <unused>, <unused>", file);
 
   file->edata = slimopen(file->name, "r" /* writing not supported */);
 
@@ -105,17 +100,11 @@ int _GD_SlimClose(struct _gd_raw_file *file)
   return ret;
 }
 
-off64_t _GD_SlimSize(struct _gd_raw_file *file, const char *base,
-    gd_type_t data_type)
+off64_t _GD_SlimSize(struct _gd_raw_file *file, gd_type_t data_type)
 {
   off64_t size;
 
-  dtrace("%p, \"%s\", %x", file, base, data_type);
-
-  if (GD_SetEncodedName(file, base, 0)) {
-    dreturn("%i", -1);
-    return -1;
-  }
+  dtrace("%p, %x", file, data_type);
 
   size = slimrawsize(file->name);
 

@@ -89,7 +89,7 @@ if test "x$path_$5" != "xnot found"; then
                      [ Define to the full path to the `$5' binary ])
 fi
 
-if test "x$path_$6)" != "xnot found"; then
+if test "x$path_$6" != "xnot found"; then
   AC_DEFINE_UNQUOTED(AS_TR_CPP([$6]), ["$path_$6"],
                      [ Define to the full path to the `$6' binary ])
 fi

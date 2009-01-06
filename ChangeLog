@@ -1,3 +1,8 @@
+2008-12-23   D. V. Wiebe <getdata@ketiltrout.net>  svn:277
+	* NEWS README: Updated.
+
+	* src/slim.c (_GD_SlimOpen _GD_SlimSize): Remove filebase stuff.
+
 2008-12-21   D. V. Wiebe <getdata@ketiltrout.net>  svn:276
 	* bindings/cxx/linterpentry.cpp bindings/cxx/bitentry.cpp
 	bindings/cxx/multiplyentry.cpp bindings/cxx/lincomentry.cpp
@@ -189,7 +194,7 @@
 	* src/mod.c (dirfile_alter_raw dirfile_alter_lincom dirfile_alter_linterp
 	dirfile_alter_bit dirfile_alter_multiply dirfile_alter_phase
 	dirfile_alter_const dirfile_alter_spec dirfile_malter_spec): Renamed from
-	*_change_*.
+	dirfile_change_*.
 	* src/mod.c (dirfile_alter_entry): Renamed from dirfile_change.
 
 2008-12-03   D. V. Wiebe <getdata@ketiltrout.net>  svn:258
@@ -394,7 +399,7 @@
 	* src/Makefile.am: Compile slim.c into a stand-alone "sublibrary"
 	libgetdataslim.la.
 
-	* src/raw.c (__GD_RawWrite): Return samples, not bytes.
+	* src/raw.c (_GD_RawWrite): Return samples, not bytes.
 
 	* src/move.c (_GD_MogrifyFile): Add encoding recoding.  Fix endianness
 	conversion calculation.

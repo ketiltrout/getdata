@@ -18,7 +18,7 @@ dnl You should have received a copy of the GNU General Public License
 dnl along with GetData; if not, write to the Free SoftwareFoundation, Inc.,
 dnl 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 dnl
-AC_INIT([GetData], [0.5.0a4], [getdata-devel@lists.sourceforge.net])
+AC_INIT([GetData], [0.5.0rc1], [getdata-devel@lists.sourceforge.net])
 
 AC_PREREQ([2.63])
 
@@ -136,7 +136,7 @@ AC_ARG_ENABLE(fortran, AS_HELP_STRING([--disable-fortran],
 
 dnl Fortran 95 bindings
 AC_ARG_ENABLE(fortran95, AS_HELP_STRING([--disable-fortran95],
-              [don't build the Fortran 95 bindings (libfgetdata)]),
+              [don't build the Fortran 95 bindings (libf95getdata)]),
               [
                case "${enableval}" in
                  no) make_f95bindings="no" ;;
@@ -159,7 +159,7 @@ AM_CONDITIONAL(MAKE_F77BINDINGS, test "x$make_f77bindings" != "xno")
 dnl Modules
 AC_ARG_ENABLE(modules, AS_HELP_STRING([--enable-modules],
               [build external encodings in dynamically loaded modules instead
-               of directly into the main getdata library]),
+               of directly into the core GetData library]),
                [
                 case "${enableval}" in
                   no) use_modules="no" ;;
@@ -208,7 +208,6 @@ AC_PROG_LIBTOOL
 dnl libltdl stuff
 if test "x${use_modules}" != "xno"; then
   if test "x${enable_ltdl_install}" = xyes; then
-    AC_CONFIG_SUBDIRS([libltdl])
     use_system_ltdl=no
   else
     use_system_ltdl=yes
@@ -358,6 +357,7 @@ AC_CONFIG_FILES([src/Makefile])
 AC_CONFIG_HEADERS([src/getdata.h], [chmod a-w src/getdata.h])
 AC_CONFIG_FILES([src/getdata.pc])
 AC_CONFIG_FILES([test/Makefile])
+AC_CONFIG_SUBDIRS([libltdl])
 
 AC_OUTPUT
 
