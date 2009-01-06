@@ -2,7 +2,7 @@ New in version 0.5.0rc1:
 
   Dirfile Changes
 
-  * Support for two new encoding schemes has been added which support bzip2 and
+  * Support for two new encoding schemes has been added which handle bzip2 and
     gzip compression.  Like the slim encoding, the bzip and gzip encoding
     schemes currently do not support writing, but do allow reading dirfile data
     compressed with the standard gzip and bzip2 utilities.  Reading compressed
@@ -57,7 +57,7 @@ New in version 0.5.0rc1:
   * The pathname of a raw field may be obtained from a call to get_raw_filename.
   * A DIRFILE may be deallocated without saving modified metadata by calling
     dirfile_discard.
-  * A new flags, GD_IGNORE_DUPS, may be passed to dirfile_open to tell the
+  * A new flag, GD_IGNORE_DUPS, may be passed to dirfile_open to tell the
     parser to ignore duplicate field specifications in the format files.  This
     is really only useful identically duplicate specifications, since there is
     no indication of which of the duplicates is honoured.  Explicit control can
@@ -67,8 +67,11 @@ New in version 0.5.0rc1:
 
   * All functions in the Fortran 77 bindings have been completely renamed from
     GDFxxx to GDxxxx to provide a larger namespace for our use.
+  * Fortran 77, Fortran 95, and C++ bindings have been updated for the latest
+    API changes.
   * BUG FIX: Fortran 77 functions which return character strings no longer
-    corrupt memory as a side-effect of operation.
+    corrupt memory as a side-effect of operation.  This also affected the
+    Fortran 95 bindings.
 
   Miscellaneous:
 
