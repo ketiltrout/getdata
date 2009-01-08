@@ -126,7 +126,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 #  define assert(arg)	((void) 0)
 #endif
 
-#include "ltdl.h"
+#include "gd_ltdl.h"
 
 #if WITH_DMALLOC
 #  include <dmalloc.h>
