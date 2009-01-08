@@ -24,11 +24,7 @@ EXTRA_DIST = ChangeLog
 
 ACLOCAL_AMFLAGS = -I m4
 
-if BUILD_LTDL
-LIBLTDL_SUBDIR=libltdl
-endif
-
-SUBDIRS = $(LIBLTDL_SUBDIR) src bin man . doc test bindings
+SUBDIRS = src bin man . doc test bindings
 
 dist_doc_DATA = COPYING.DOC
 

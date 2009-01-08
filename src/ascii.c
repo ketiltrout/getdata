@@ -1,4 +1,4 @@
-/* (C) 2008 D. V. Wiebe
+/* (C) 2008-2009 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -152,7 +152,7 @@ ssize_t _GD_AsciiWrite(struct _gd_raw_file *file, const void *ptr,
     gd_type_t data_type, size_t nmemb)
 {
   ssize_t ret = 0;
-  size_t n;
+  size_t n = 0;
 
   dtrace("%p, %p, 0x%x, %zi", file, ptr, data_type, nmemb);
 

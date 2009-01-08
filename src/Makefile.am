@@ -1,4 +1,4 @@
-# (C) 2008 D. V. Wiebe
+# (C) 2008-2009 D. V. Wiebe
 #
 ##########################################################################
 #
@@ -53,6 +53,9 @@ endif
 
 if USE_MODULES
 EXPORT_DYNAMIC=-export-dynamic
+if INTERNAL_LTDL
+GD_LTDL=gd_ltdl.c gd_ltdl.h
+endif
 else
 EXTERNAL_CPPFLAGS=$(SLIM_CPPFLAGS) $(GZIP_CPPFLAGS) $(BZIP2_CPPFLAGS)
 EXTERNAL_LDFLAGS=$(SLIM_LDFLAGS) $(GZIP_LDFLAGS) $(BZIP2_LDFLAGS)
@@ -92,7 +95,8 @@ libgetdata_la_SOURCES = add.c ascii.c ${BZIP2_C} close.c common.c constant.c \
 												globals.c ${GZIP_C} include.c ${LEGACY_C} meta_list.c \
 												mod.c move.c name.c nfields.c nframes.c nmeta.c open.c \
 												parse.c protect.c putdata.c raw.c ${SLIM_C} spf.c \
-												string.c types.c ${GETDATA_LEGACY_H} internal.h
+												string.c types.c ${GD_LTDL} ${GETDATA_LEGACY_H} \
+												internal.h
 libgetdata_la_LDFLAGS = $(EXPORT_DYNAMIC) -export-symbols-regex '^[^_]' \
 												-version-info @GETDATA_IFACE_VERSION@:\
 												@GETDATA_IMPL_REVISION@:@GETDATA_IFACE_AGE@ \

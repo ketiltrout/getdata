@@ -1,5 +1,5 @@
 /* (C) 2002-2005 C. Barth Netterfield
- * (C) 2005-2008 D. V. Wiebe
+ * (C) 2005-2009 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -20,7 +20,6 @@
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "internal.h"
-#include <ltdl.h>
 
 #ifdef STDC_HEADERS
 #include <ctype.h>
@@ -765,7 +764,7 @@ gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, const char** in_cols,
         ; /* error already set */
       else if (_GD_SetEncodedName(D, E->e->file, E->e->filebase, 0))
         ; /* error already set */
-      else if ((*ef[E->e->file[0].encoding].touch)(E->e->file))
+      else if ((*_gd_ef[E->e->file[0].encoding].touch)(E->e->file))
         _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[0].name, errno, NULL);
     }
 
@@ -1136,7 +1135,7 @@ char* _GD_ParseFragment(FILE* fp, DIRFILE *D, int me, int* standards,
   int linenum = 0;
   char* ref_name = NULL;
   int n_cols;
-  int match;
+  int match = 0;
   int rescan = 0;
   int se_action = GD_SYNTAX_ABORT;
   int first_fragment = -1;

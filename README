@@ -213,11 +213,13 @@ libraries without having to give up the functionality these extra libraries
 provide.  To enable this behaviour, pass `--enable-modules' to ./configure.
 
 The modules are dynamically loaded via GNU libtool's portable dlopen wrapper
-library, libltdl.  Version 1.2 of the libltdl library is distributed with
-GetData, but a libltdl library installed in the system will be preferred over
-the local copy, if found.  The libltdl library permits dynamic loading of
-modules on at least Solaris, Linux, BSD, HP-UX, Win16, Win32, BeOS, Darwin,
-Mac OS X.
+library, libltdl.  Version 1.2 of libltdl is distributed with GetData, but a
+libltdl installed in the system will be preferred over the local copy, if found.
+The libltdl library permits dynamic loading of modules on at least Solaris,
+Linux, BSD, HP-UX, Win16, Win32, BeOS, Darwin, Mac OS X.  GetData does not
+export the symbols from its internal version of libltdl.  As a result, if the
+internal version is used, GetData can still be linked to another object using
+the system libltdl.
 
 GetData will fail gracefully if a library module is not found at runtime.  In
 this case, the call which triggered the attempt to load the module will fail
@@ -453,7 +455,8 @@ the new API:
     /* Clean up */
     free(data_buffer);
 
-    /* not strictly necessary at the end of the program */
+    /* not strictly necessary at the end of the program for a dirfile opened
+    read-only */
     dirfile_close(dirfile);
 
     return 0;

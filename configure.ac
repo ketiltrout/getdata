@@ -1,4 +1,4 @@
-dnl (C) 2008 D. V. Wiebe
+dnl (C) 2008-2009 D. V. Wiebe
 dnl
 dnllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll
 dnl
@@ -174,14 +174,16 @@ AC_DEFINE([USE_MODULES], [], [ Define if building with modules ])
 fi
 
 dnl LTDL
-AC_ARG_ENABLE(ltdl-install, AS_HELP_STRING([--enable-ltdl-install],
-              [use and install the GNU ltdl library included in this package, even if one is already present in the system (not recommended)]),
+AC_ARG_WITH([system-ltdl], AS_HELP_STRING([--with-system-ltdl=PREFIX],
+              [if building modules, use the GNU ltdl library located in PREFIX [[autodetect]]]),
               [
-               case "${enableval}" in
-                 no) enable_ltdl_install="no" ;;
-                 *) enable_ltdl_install="yes" ;;
+               case "${withval}" in
+                 no) use_system_ltdl="no" ;; 
+                 *) use_system_ltdl="yes" ; ltdl_prefix="${withval}" ;;
                esac
-              ], [ enable_ltdl_install="no" ])
+              ], [ use_system_ltdl="yes" ; ltdl_prefix= ])
+m4_divert_once([HELP_WITH], AS_HELP_STRING([--without-system-ltdl],
+               [if building modules, always use the internal ltdl library, even if an external one is present]))
 
 dnl Programs
 AM_INIT_AUTOMAKE
@@ -201,25 +203,97 @@ AC_ENABLE_STATIC
 AC_ENABLE_SHARED
 if test "x${use_modules}" != "xno"; then
   AC_LIBTOOL_DLOPEN
-  AC_LIBLTDL_INSTALLABLE
+  true
 fi
 AC_PROG_LIBTOOL
 
 dnl libltdl stuff
+
 if test "x${use_modules}" != "xno"; then
-  if test "x${enable_ltdl_install}" = xyes; then
-    use_system_ltdl=no
+  if test "x${use_system_ltdl}" = "xyes"; then
+    saved_ldflags=$LDFLAGS
+    saved_libs=$LIBS
+    if test "x$ltdl_prefix" != "x"; then
+      LDFLAGS="$LDFLAGS -L$ltdl_prefix/lib"
+    fi
+    AC_CHECK_LIB([ltdl],[lt_dlinit], [internal_ltdl=no], [internal_ltdl=yes])
+    LDFLAGS=$saved_ldflags
+    LIBS=$saved_libs
   else
-    use_system_ltdl=yes
+    internal_ltdl=yes
+  fi
+
+  if test "x$internal_ltdl" == "xyes"; then
+    AC_DEFINE([INTERNAL_LTDL], 1,
+              [Define to 1 if using the internal ltdl library])
+    use_system_ltdl=no
+    AC_LTDL_SHLIBEXT
+    AC_LTDL_SHLIBPATH
+    AC_LTDL_SYSSEARCHPATH
+    AC_LTDL_OBJDIR
+    AC_LTDL_DLPREOPEN
+    AC_LTDL_DLLIB
+    AC_LTDL_SYMBOL_USCORE
+    AC_LTDL_DLSYM_USCORE
+    AC_LTDL_SYS_DLOPEN_DEPLIBS
+    AC_LTDL_FUNC_ARGZ
+    AC_CHECK_HEADERS([assert.h ctype.h errno.h malloc.h memory.h stdlib.h \
+                            stdio.h unistd.h])
+    AC_CHECK_HEADERS([dl.h sys/dl.h dld.h mach-o/dyld.h])
+    AC_CHECK_HEADERS([string.h strings.h], [break])
+    AC_CHECK_FUNCS([strchr index], [break])
+    AC_CHECK_FUNCS([strrchr rindex], [break])
+    AC_CHECK_FUNCS([memcpy bcopy], [break])
+    AC_CHECK_FUNCS([memmove strcmp])
+    AC_CHECK_FUNCS([closedir opendir readdir])
+
+    GD_HIDE_LTDL_SYM(lt_dladderror)
+    GD_HIDE_LTDL_SYM(lt_dladdsearchdir)
+    GD_HIDE_LTDL_SYM(lt_dlcaller_get_data)
+    GD_HIDE_LTDL_SYM(lt_dlcaller_register)
+    GD_HIDE_LTDL_SYM(lt_dlcaller_set_data)
+    GD_HIDE_LTDL_SYM(lt_dlclose)
+    GD_HIDE_LTDL_SYM(lt_dlerror)
+    GD_HIDE_LTDL_SYM(lt_dlexit)
+    GD_HIDE_LTDL_SYM(lt_dlforeach)
+    GD_HIDE_LTDL_SYM(lt_dlforeachfile)
+    GD_HIDE_LTDL_SYM(lt_dlfree)
+    GD_HIDE_LTDL_SYM(lt_dlgetinfo)
+    GD_HIDE_LTDL_SYM(lt_dlgetsearchpath)
+    GD_HIDE_LTDL_SYM(lt_dlhandle_next)
+    GD_HIDE_LTDL_SYM(lt_dlinit)
+    GD_HIDE_LTDL_SYM(lt_dlinsertsearchdir)
+    GD_HIDE_LTDL_SYM(lt_dlisresident)
+    GD_HIDE_LTDL_SYM(lt_dlloader_add)
+    GD_HIDE_LTDL_SYM(lt_dlloader_data)
+    GD_HIDE_LTDL_SYM(lt_dlloader_find)
+    GD_HIDE_LTDL_SYM(lt_dlloader_name)
+    GD_HIDE_LTDL_SYM(lt_dlloader_next)
+    GD_HIDE_LTDL_SYM(lt_dlloader_remove)
+    GD_HIDE_LTDL_SYM(lt_dlmakeresident)
+    GD_HIDE_LTDL_SYM(lt_dlmalloc)
+    GD_HIDE_LTDL_SYM(lt_dlmutex_register)
+    GD_HIDE_LTDL_SYM(lt_dlopen)
+    GD_HIDE_LTDL_SYM(lt_dlopenext)
+    GD_HIDE_LTDL_SYM(lt_dlpreload)
+    GD_HIDE_LTDL_SYM(lt_dlpreload_default)
+    GD_HIDE_LTDL_SYM(lt_dlrealloc)
+    GD_HIDE_LTDL_SYM(lt_dlseterror)
+    GD_HIDE_LTDL_SYM(lt_dlsetsearchpath)
+    GD_HIDE_LTDL_SYM(lt_dlsym)
+    LIBLTDL="$LIBADD_DL"
+  elif test "x$ltdl_prefix" != "x"; then
+    LIBLTDL="-L${ltdl_prefix}/lib -lltdl"
+    LTDLINC="-I${ltdl_prefix}/include"
+  else
+    LIBLTDL="-lltdl"
   fi
 else
-  LIBLTDL=
-  LTDLINCL=
-  enable_ltdl_install=no
+  internal_ltdl=no
 fi
 AC_SUBST([LIBLTDL])
 AC_SUBST([LTDLINCL])
-AM_CONDITIONAL(BUILD_LTDL, test "x${enable_ltdl_install}" = xyes)
+AM_CONDITIONAL(INTERNAL_LTDL, test "x${internal_ltdl}" = xyes)
 
 dnl ICC checks
 GD_LANG_COMPILER_INTEL
@@ -357,7 +431,6 @@ AC_CONFIG_FILES([src/Makefile])
 AC_CONFIG_HEADERS([src/getdata.h], [chmod a-w src/getdata.h])
 AC_CONFIG_FILES([src/getdata.pc])
 AC_CONFIG_FILES([test/Makefile])
-AC_CONFIG_SUBDIRS([libltdl])
 
 AC_OUTPUT
 

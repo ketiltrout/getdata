@@ -1,5 +1,5 @@
 /* (C) 2002-2005 C. Barth Netterfield
- * (C) 2005-2008 D. V. Wiebe
+ * (C) 2005-2009 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -56,7 +56,7 @@ off64_t get_nframes64(DIRFILE* D)
     return 0;
   }
 
-  nf = (*ef[D->reference_field->e->file[0].encoding].size)
+  nf = (*_gd_ef[D->reference_field->e->file[0].encoding].size)
     (D->reference_field->e->file, D->reference_field->data_type);
 
   if (nf < 0) {

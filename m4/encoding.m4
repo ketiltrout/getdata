@@ -1,4 +1,4 @@
-dnl (C) 2008 D. V. Wiebe
+dnl (C) 2008-2009 D. V. Wiebe
 dnl
 dnl llllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll
 dnl
@@ -107,4 +107,12 @@ if test "x$use_$1" != "xno"; then
 else
   ENCODINGS_LEFT="${ENCODINGS_LEFT} $1";
 fi
+])
+
+dnl GD_HIDE_LTDL_SYM
+dnl -------------------------------------------------------------
+dnl Rename a ltdl external symbol using the C preprocessor
+AC_DEFUN([GD_HIDE_LTDL_SYM],
+[
+AC_DEFINE([$1], [_gd_$1], [ The following is used to hide the ltdl symbol `$1' ])
 ])

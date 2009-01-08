@@ -1,3 +1,15 @@
+2009-01-08   D. V. Wiebe <getdata@ketiltrout.net>  svn:279
+	* src/encoding.c src/endian.c src/foffs.c src/getdata.c src/name.c
+	src/flush.c src/encoding.c src/putdata.c src/del.c src/move.c src/parse.c
+	src/mod.c src/internal.h src/nframes.c: Hide internal symbols.
+
+	* src/internal.h src/Makefile.am Makefile.am configure.ac: Use an embeded ltdl
+	if no system ltdl is found.
+	* m4/encdoing.m4: Hide ltdl symbols.
+	* m4/ltdl.m4 src/gd_ltdl.c src/gd_ltdl.h: Added.  These are taken unmodified
+	from the libtool distribution.
+
+
 2008-12-23   D. V. Wiebe <getdata@ketiltrout.net>  svn:277
 	* NEWS README: Updated.
 

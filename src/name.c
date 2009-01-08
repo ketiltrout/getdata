@@ -1,4 +1,4 @@
-/* (C) 2008 D. V. Wiebe
+/* (C) 2008-2009 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -69,8 +69,8 @@ char* _GD_ValidateField(const gd_entry_t* parent, const char* field_code,
   if (!strict && len > 3 && ((len > 4 && field_code[len - 4] == '.') ||
         field_code[len - 3] == '.'))
     for (i = 0; i < GD_N_SUBENCODINGS; ++i)
-      if (ef[i].ext[0] != '\0' && strcmp(field_code + len - strlen(ef[i].ext),
-            ef[i].ext) == 0)
+      if (_gd_ef[i].ext[0] != '\0' && strcmp(field_code + len -
+            strlen(_gd_ef[i].ext), _gd_ef[i].ext) == 0)
         {
           dreturn("%p", field_code);
           return (char*)field_code;
@@ -173,7 +173,8 @@ int dirfile_rename(DIRFILE *D, const char *old_code, const char *new_name,
       snprintf(filebase, FILENAME_MAX, "%s/%s", D->name, new_name);
 
     /* Close the old file */
-    if (E->e->file->fp != -1 && (*ef[E->e->file[0].encoding].close)(E->e->file))
+    if (E->e->file->fp != -1 && (*_gd_ef[E->e->file[0].encoding].close)(
+          E->e->file))
     {
       _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[0].name, errno, NULL);
       free(name);
@@ -218,7 +219,7 @@ int dirfile_rename(DIRFILE *D, const char *old_code, const char *new_name,
         return -1;
       }
 
-      if ((*ef[E->e->file[0].encoding].move)(E->e->file, temp.name)) {
+      if ((*_gd_ef[E->e->file[0].encoding].move)(E->e->file, temp.name)) {
         _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[0].name, errno, NULL);
         free(filebase);
         dreturn("%i", -1);

@@ -1,4 +1,4 @@
-/* (C) 2008 D. V. Wiebe
+/* (C) 2008-2009 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -110,7 +110,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
         if (D->error)
           break;
 
-        const struct encoding_t* enc = ef + E->e->file[0].encoding;
+        const struct encoding_t* enc = _gd_ef + E->e->file[0].encoding;
 
         if (_GD_SetEncodedName(D, E->e->file, E->e->filebase, 0))
           ; /* error already set */

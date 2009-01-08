@@ -1,4 +1,4 @@
-/* (C) 2008 D. V. Wiebe
+/* (C) 2008-2009 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -86,14 +86,14 @@ static void _GD_ByteSwapFragment(DIRFILE* D, unsigned long byte_sex,
      * remove the temporary files */
     if (D->error) {
       for (i = 0; i < n_raw; ++i)
-        if ((*ef[raw_entry[i]->e->file[0].encoding].temp)(raw_entry[i]->e->file,
-              GD_TEMP_DESTROY))
+        if ((*_gd_ef[raw_entry[i]->e->file[0].encoding].temp)(
+              raw_entry[i]->e->file, GD_TEMP_DESTROY))
           _GD_SetError(D, GD_E_RAW_IO, 0, raw_entry[i]->e->file[0].name,
               errno, NULL);
     } else {
       for (i = 0; i < n_raw; ++i)
-        if ((*ef[raw_entry[i]->e->file[0].encoding].temp)(raw_entry[i]->e->file,
-              GD_TEMP_MOVE))
+        if ((*_gd_ef[raw_entry[i]->e->file[0].encoding].temp)(
+              raw_entry[i]->e->file, GD_TEMP_MOVE))
         {
           _GD_SetError(D, GD_E_UNCLEAN_DB, 0,
               D->fragment[D->entry[i]->fragment_index].cname, 0, NULL);

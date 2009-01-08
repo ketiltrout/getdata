@@ -1,5 +1,5 @@
 /* (C) 2002-2005 C. Barth Netterfield
- * (C) 2005-2008 D. V. Wiebe
+ * (C) 2005-2009 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -61,6 +61,14 @@ typedef off_t off64_t
 /* disable the "unspecified order" remark in ICC */
 #ifdef __INTEL_COMPILER
 #  pragma warning (disable : 981)
+#endif
+
+#ifdef USE_MODULES
+# ifdef INTERNAL_LTDL
+#  include "gd_ltdl.h"
+# else
+#  include <ltdl.h>
+# endif
 #endif
 
 /* debugging macros */
@@ -244,7 +252,7 @@ extern struct encoding_t {
   int (*move)(struct _gd_raw_file*, char*);
   int (*unlink)(struct _gd_raw_file*);
   int (*temp)(struct _gd_raw_file*, int);
-} ef[GD_N_SUBENCODINGS];
+} _gd_ef[GD_N_SUBENCODINGS];
 
 /* Format file fragment metadata */
 struct gd_fragment_t {

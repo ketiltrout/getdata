@@ -1,5 +1,5 @@
 /* (C) 2002-2005 C. Barth Netterfield
- * (C) 2005-2008 D. V. Wiebe
+ * (C) 2005-2009 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -188,7 +188,7 @@ static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *E,
       } else if (_GD_SetEncodedName(D, E->e->file, E->e->filebase, 0)) {
         dreturn("%i", 0);
         return 0;
-      } else if ((*ef[E->e->file[0].encoding].open)(E->e->file,
+      } else if ((*_gd_ef[E->e->file[0].encoding].open)(E->e->file,
             D->flags & GD_ACCMODE, 0))
       {
         _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[0].name, errno, NULL);
@@ -197,7 +197,7 @@ static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *E,
       }
     }
 
-    if ((*ef[E->e->file[0].encoding].seek)(E->e->file, s0, E->data_type, 0)
+    if ((*_gd_ef[E->e->file[0].encoding].seek)(E->e->file, s0, E->data_type, 0)
         == -1)
     {
       _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[0].name, errno, NULL);
@@ -205,7 +205,7 @@ static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *E,
       return 0;
     }
 
-    samples_read = (*ef[E->e->file[0].encoding].read)(E->e->file,
+    samples_read = (*_gd_ef[E->e->file[0].encoding].read)(E->e->file,
         databuffer + n_read * E->e->size, E->data_type, ns);
 
     if (samples_read == -1) {
@@ -215,7 +215,7 @@ static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *E,
       return 0;
     }
 
-    if (ef[E->e->file[0].encoding].ecor &&
+    if (_gd_ef[E->e->file[0].encoding].ecor &&
         (D->fragment[E->fragment_index].byte_sex ==
 #ifdef WORDS_BIGENDIAN
          GD_LITTLE_ENDIAN

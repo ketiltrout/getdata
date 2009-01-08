@@ -1,4 +1,4 @@
-/* (C) 2008 D. V. Wiebe
+/* (C) 2008-2009 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -60,8 +60,8 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned int encoding,
       E->e->file[0].encoding != GD_ENC_UNKNOWN) {
     subencoding = E->e->file[0].encoding;
   } else
-    for (i = 0; ef[i].scheme != GD_ENC_UNSUPPORTED; i++) {
-      if (ef[i].scheme == encoding) {
+    for (i = 0; _gd_ef[i].scheme != GD_ENC_UNSUPPORTED; i++) {
+      if (_gd_ef[i].scheme == encoding) {
         subencoding = i;
         break;
       }
@@ -74,7 +74,7 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned int encoding,
     return -1;
   }
 
-  enc_out = ef + subencoding;
+  enc_out = _gd_ef + subencoding;
 
   /* Check output encoding */
   if (_GD_MissingFramework(subencoding, GD_EF_CLOSE | GD_EF_SEEK | GD_EF_WRITE |
@@ -95,7 +95,7 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned int encoding,
     return -1;
   }
 
-  enc_in = ef + E->e->file[0].encoding;
+  enc_in = _gd_ef + E->e->file[0].encoding;
 
   /* Normalise endiannesses */
 #if WORDS_BIGENDIAN

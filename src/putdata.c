@@ -1,6 +1,6 @@
 /* (C) 2003-2005 C. Barth Netterfield
  * (C) 2003-2005 Theodore Kisner
- * (C) 2005-2008 D. V. Wiebe
+ * (C) 2005-2009 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -75,7 +75,7 @@ static size_t _GD_DoRawOut(DIRFILE *D, gd_entry_t *E,
     return 0;
   }
 
-  if (ef[E->e->file[0].encoding].ecor &&
+  if (_gd_ef[E->e->file[0].encoding].ecor &&
       (D->fragment[E->fragment_index].byte_sex ==
 #ifdef WORDS_BIGENDIAN
        GD_LITTLE_ENDIAN
@@ -93,7 +93,7 @@ static size_t _GD_DoRawOut(DIRFILE *D, gd_entry_t *E,
     if (_GD_SetEncodedName(D, E->e->file, E->e->filebase, 0)) {
       dreturn("%i", 0);
       return 0;
-    } else if ((*ef[E->e->file[0].encoding].open)(E->e->file,
+    } else if ((*_gd_ef[E->e->file[0].encoding].open)(E->e->file,
           D->flags & GD_ACCMODE, 1))
     {
       _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[0].name, errno, NULL);
@@ -102,7 +102,7 @@ static size_t _GD_DoRawOut(DIRFILE *D, gd_entry_t *E,
     }
   }
 
-  if ((*ef[E->e->file[0].encoding].seek)(E->e->file, s0, E->data_type, 1)
+  if ((*_gd_ef[E->e->file[0].encoding].seek)(E->e->file, s0, E->data_type, 1)
       == -1)
   {
       _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[0].name, errno, NULL);
@@ -110,7 +110,7 @@ static size_t _GD_DoRawOut(DIRFILE *D, gd_entry_t *E,
       return 0;
   }
 
-  n_wrote = (*ef[E->e->file[0].encoding].write)(E->e->file, databuffer,
+  n_wrote = (*_gd_ef[E->e->file[0].encoding].write)(E->e->file, databuffer,
       E->data_type, ns);
 
   free(databuffer);

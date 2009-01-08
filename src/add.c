@@ -1,4 +1,4 @@
-/* (C) 2008 D. V. Wiebe
+/* (C) 2008-2009 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -201,7 +201,7 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
         ; /* error already set */
       else if (_GD_SetEncodedName(D, E->e->file, E->e->filebase, 0))
         ; /* error already set */
-      else if ((*ef[E->e->file[0].encoding].touch)(E->e->file))
+      else if ((*_gd_ef[E->e->file[0].encoding].touch)(E->e->file))
         _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[0].name, errno, NULL);
       else if (D->fragment[E->fragment_index].ref_name == NULL) {
         /* This is the first raw field in this fragment */

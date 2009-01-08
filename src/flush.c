@@ -1,4 +1,4 @@
-/* (C) 2008 D. V. Wiebe
+/* (C) 2008-2009 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -53,10 +53,10 @@ void _GD_Flush(DIRFILE* D, gd_entry_t *E, const char* field_code)
     case GD_RAW_ENTRY:
       if (E->e->file[0].fp >= 0) {
         if ((D->flags & GD_ACCMODE) == GD_RDWR &&
-            ef[E->e->file[0].encoding].sync != NULL &&
-            (*ef[E->e->file[0].encoding].sync)(E->e->file))
+            _gd_ef[E->e->file[0].encoding].sync != NULL &&
+            (*_gd_ef[E->e->file[0].encoding].sync)(E->e->file))
           _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[0].name, errno, NULL);
-        else if ((*ef[E->e->file[0].encoding].close)(E->e->file))
+        else if ((*_gd_ef[E->e->file[0].encoding].close)(E->e->file))
           _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[0].name, errno, NULL);
       }
       break;

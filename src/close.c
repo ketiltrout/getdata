@@ -19,7 +19,6 @@
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "internal.h"
-#include <ltdl.h>
 
 #ifdef STDC_HEADERS
 #include <stdlib.h>
