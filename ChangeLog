@@ -1,4 +1,6 @@
 2009-01-09   D. V. Wiebe <getdata@ketiltrout.net>  svn:281
+	GetData-0.5.0rc3:
+
 	* test/encode_move.c test/move_data_endian.c test/endian_get.c
 	test/endian_alter.c: Fix for correct operation on big endian architectures.
 
@@ -14,6 +16,8 @@
 	* bindings/f77/fgetdata.h: Fix function names.
 
 2009-01-08   D. V. Wiebe <getdata@ketiltrout.net>  svn:279
+	GetData-0.5.0rc2:
+
 	* src/encoding.c src/endian.c src/foffs.c src/getdata.c src/name.c
 	src/flush.c src/encoding.c src/putdata.c src/del.c src/move.c src/parse.c
 	src/mod.c src/internal.h src/nframes.c: Hide internal symbols.
@@ -26,6 +30,8 @@
 
 
 2008-12-23   D. V. Wiebe <getdata@ketiltrout.net>  svn:277
+	GetData-0.5.0rc1:
+
 	* NEWS README: Updated.
 
 	* src/slim.c (_GD_SlimOpen _GD_SlimSize): Remove filebase stuff.
@@ -574,6 +580,9 @@
 	
 	* src/encoding.c: Split from getdata.c.
 
+2008-11-14   D. V. Wiebe <getdata@ketiltrout.net>  svn:216
+	Fork GetData-0.4.
+
 2008-11-07   D. V. Wiebe <getdata@ketiltrout.net>  svn:211
 	* src/open.c (_GD_ValidateField _GD_Tokeniser): Replace slow strchr calls
 	with explicit tests.
@@ -592,7 +601,12 @@
 
 	* src/getdata.c src/internal.h src/ascii.c: Add _GD_AsciiTouch.
 
+2008-10-31   D. V. Wiebe <getdata@ketiltrout.net>  svn:206
+	GetData-0.4.0 released.
+
 2008-10-28   D. V. Wiebe <getdata@ketiltrout.net>  svn:204
+	GetData-0.4.0rc4:
+
 	* src/nframes.c (get_nframes): Don't divide by the datatype size twice.
 
 	* bindings/cxx/test/entry.cpp bindings/cxx/test/putdata.cpp
@@ -601,6 +615,8 @@
 	header locations.
 
 2008-10-28   D. V. Wiebe <getdata@ketiltrout.net>  svn:200
+	GetData-0.4.0rc3:
+
 	* src/field_list.c (get_field_list get_vector_list get_field_list_by_type
 	get_strings) src/meta_list.c (get_mfield_list get_mvector_list
 	get_mfield_list_by_type get_mstrings): Return a valid list even if there
@@ -610,11 +626,15 @@
 	cases.
 
 2008-10-22   D. V. Wiebe <getdata@ketiltrout.net>  svn:197
+	GetData-0.4.0rc2:
+
 	* src/putdata.c (_GD_DoRawOut): Figure out the encoding scheme before
 	attempting to check whether idem needs byte-swapping.  Bug report from
 	Matthew Truch.
 
 2008-10-21   D. V. Wiebe <getdata@ketiltrout.net>  svn:185
+	GetData-0.4.0rc1:
+
 	* src/include.c: Remove duplicate accessmode check.
 
 2008-10-21   D. V. Wiebe <getdata@ketiltrout.net>  svn:184
@@ -1310,6 +1330,9 @@
 	* src/add.c src/getdata.h.in: First part of dirfile_add(): input validation
 	and add to DIRFILE list.
 
+2008-09-22   D. V. Wiebe <getdata@ketiltrout.net>  svn:99
+	GetData-0.3.1 released.
+
 2008-09-22   D. V. Wiebe <getdata@ketiltrout.net>  svn:97
 	* configure.ac bindings/cxx/Makefile.am bindings/cxx/test/Makefile.am: Call
 	the C++ bindings libgetdata++ instead of libdirfile to be a little more
@@ -1330,8 +1353,8 @@
 2008-09-15   D. V. Wiebe <getdata@ketiltrout.net>  svn:86
 	* src/errors.c: Fix GD_E_RAW_IO error string.
 
-2008-09-15   D. V. Wiebe <getdata@ketiltrout.net>
-	Getdata-0.3.0 released.
+2008-09-15   D. V. Wiebe <getdata@ketiltrout.net>  svn:84
+	GetData-0.3.0 released.
 
 2008-09-05   D. V. Wiebe <getdata@ketiltrout.net>  svn:77
 	* m4/c99.m4 configure.ac Makefile.am: Re-implement AC_PROG_CC_C99 as
