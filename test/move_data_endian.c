@@ -1,4 +1,5 @@
 /* Test move */
+#include "../src/config.h"
 #include "../src/getdata.h"
 
 #include <stdlib.h>

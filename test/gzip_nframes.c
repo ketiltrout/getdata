@@ -54,15 +54,23 @@ int main(void)
   rmdir(filedir);
 
 #ifdef USE_GZIP
-  if (error)
+  if (error) {
+    fprintf(stderr, "1a=%i\n", error);
     return 1;
-  if (n != 256)
+  }
+  if (n != 256) {
+    fprintf(stderr, "2a=%i\n", n);
     return 1;
+  }
 #else
-  if (error != GD_E_UNSUPPORTED)
+  if (error != GD_E_UNSUPPORTED) {
+    fprintf(stderr, "1b=%i\n", error);
     return 1;
-  if (n != 0)
+  }
+  if (n != 0) {
+    fprintf(stderr, "2b=%i\n", n);
     return 1;
+  }
 #endif
 
   return 0;

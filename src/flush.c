@@ -226,7 +226,7 @@ static void _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
   dreturnvoid();
 }
 
-void _GD_FlushFragment(DIRFILE* D, int i)
+static void _GD_FlushFragment(DIRFILE* D, int i)
 {
   int j;
   FILE* stream;

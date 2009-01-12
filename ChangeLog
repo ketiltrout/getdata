@@ -1,3 +1,18 @@
+2009-01-09   D. V. Wiebe <getdata@ketiltrout.net>  svn:281
+	* test/encode_move.c test/move_data_endian.c test/endian_get.c
+	test/endian_alter.c: Fix for correct operation on big endian architectures.
+
+	* src/gzip.c (_GD_GzipSize): Byte swap size on big endian machines.
+
+	* src/flush.c (_GD_FlushFragment): Static.
+	
+	* bindings/cxx/dirfile.cpp (Dirfile::Add Dirfile::MAdd): Don't return before
+	setting the dirfile for the entry.
+
+	* bindings/f77/fgetdata.c (_GDF_Callback): Static.
+
+	* bindings/f77/fgetdata.h: Fix function names.
+
 2009-01-08   D. V. Wiebe <getdata@ketiltrout.net>  svn:279
 	* src/encoding.c src/endian.c src/foffs.c src/getdata.c src/name.c
 	src/flush.c src/encoding.c src/putdata.c src/del.c src/move.c src/parse.c

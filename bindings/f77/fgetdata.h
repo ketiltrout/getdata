@@ -57,7 +57,7 @@ void F77_FUNC(gdgetd, GDGETD) (int* n_read, const int* dirfile,
     const int* num_frames, const int* num_samples, const int* return_type,
     void* data_out);
 
-void F77_FUNC(gdmdnx, GDFDNX) (int* max, const int* dirfile);
+void F77_FUNC(gdfdnx, GDFDNX) (int* max, const int* dirfile);
 
 void F77_FUNC(gdfldn, GDFLDN) (char* name, int* name_l, const int* dirfile,
     const int* field_num);
@@ -79,7 +79,7 @@ void F77_FUNC(gderor, GDEROR) (int* error, const int* dirfile);
 void F77_FUNC(gdestr, GDESTR) (const int* dirfile, char* buffer,
     const int* len);
 
-void F77_FUNC(gdfldt, GDFLDT) (int* type, const int* dirfile,
+void F77_FUNC(gdenty, GDENTY) (int* type, const int* dirfile,
     const char* field_code, const int* field_code_l);
 
 void F77_FUNC(gdgerw, GDGERW) (int* spf, int* dtype, int* fragment_index,

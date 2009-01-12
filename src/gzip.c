@@ -128,6 +128,12 @@ off64_t _GD_GzipSize(struct _gd_raw_file *file, gd_type_t data_type)
     return -1;
   }
 
+  /* the checksum size is stored little endian */
+#ifdef WORDS_BIGENDIAN
+  size = (size << 24) | ((size << 8) & 0x00ff0000)
+       | (size >> 24) | ((size >> 8) & 0x0000ff00);
+#endif
+
   close(fd);
 
   size /= GD_SIZE(data_type);

@@ -119,7 +119,7 @@ static int _GDF_FString(char* dest, int *dlen, const char* src)
 static const void *_gdf_f77_callback = NULL;
 
 /* callback wrapper */
-int _GDF_Callback(const DIRFILE* D, int suberror, char *line)
+static int _GDF_Callback(const DIRFILE* D, int suberror, char *line)
 {
   int unit;
   int r = GD_SYNTAX_ABORT;

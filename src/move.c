@@ -98,7 +98,7 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned int encoding,
   enc_in = _gd_ef + E->e->file[0].encoding;
 
   /* Normalise endiannesses */
-#if WORDS_BIGENDIAN
+#ifdef WORDS_BIGENDIAN
   byte_sex = ((byte_sex & GD_LITTLE_ENDIAN) && enc_out->ecor) ^
     ((D->fragment[E->fragment_index].byte_sex & GD_LITTLE_ENDIAN) &&
      enc_in->ecor);

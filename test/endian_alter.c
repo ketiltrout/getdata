@@ -1,6 +1,6 @@
 /* Test endianness */
+#include "../src/config.h"
 #include "../src/getdata.h"
-
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -28,7 +28,11 @@ int main(void)
   mkdir(filedir, 0777);
 
   for (fd = 0; fd < 128; ++fd)
+#ifdef WORDS_BIGENDIAN
+    data_data[fd] = 0x102 * fd;
+#else
     data_data[fd] = 0x201 * fd;
+#endif
 
   fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
   write(fd, format_data, strlen(format_data));

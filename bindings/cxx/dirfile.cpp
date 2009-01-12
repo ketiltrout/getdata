@@ -57,8 +57,9 @@ Dirfile::~Dirfile()
 
 int Dirfile::Add(GetData::Entry &entry)
 {
-  return dirfile_add(D, &entry.E);
+  int ret = dirfile_add(D, &entry.E);
   entry.SetDirfile(this);
+  return ret;
 }
 
 int Dirfile::AddSpec(const char *spec, int format_file)
@@ -68,8 +69,9 @@ int Dirfile::AddSpec(const char *spec, int format_file)
 
 int Dirfile::MAdd(GetData::Entry &entry, const char *parent)
 {
-  return dirfile_madd(D, &entry.E, parent);
+  int ret = dirfile_madd(D, &entry.E, parent);
   entry.SetDirfile(this);
+  return ret;
 }
 
 int Dirfile::MAddSpec(const char *spec, const char *parent)
