@@ -1,3 +1,14 @@
+2009-01-13   D. V. Wiebe <getdata@ketiltrout.net>  svn:283
+	GetData-0.5.0rc4:
+
+	* test/endian_move.c test/encode_move.c test/endian_alter.c: Fix more
+	big-endian errors reported by Matthew Truch.
+
+	* bindings/f77/fgetdata.c (gdcopn gdclbk): Properly check the callback
+	parameter for NULL.  Reported by Matthew Truch.
+
+	* bindings/f77/fgetdata.c bindings/f77/Makefile.am: Add debugging tracing.
+
 2009-01-09   D. V. Wiebe <getdata@ketiltrout.net>  svn:281
 	GetData-0.5.0rc3:
 

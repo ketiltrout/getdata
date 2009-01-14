@@ -37,6 +37,10 @@ F95_INC=getdata.mod
 F95_LIB=libf95getdata.la
 endif
 
+if GETDATA_DEBUG
+DEBUG_C = ../../src/debug.c
+endif
+
 AM_FCFLAGS = $(FC_WALL) $(FC_WEXTRA)
 INCLUDES = -I$(top_srcdir)/src
 EXTRA_DIST=getdata.f.in getdata.f90.in
@@ -51,7 +55,7 @@ nodist_include_HEADERS=getdata.f $(F95_INC)
 
 lib_LTLIBRARIES=libfgetdata.la $(F95_LIB)
 libfgetdata_la_CPPFLAGS = -Wall $(C_WEXTRA)
-libfgetdata_la_SOURCES = fgetdata.c fgetdata.h
+libfgetdata_la_SOURCES = fgetdata.c fgetdata.h $(DEBUG_C)
 libfgetdata_la_LIBADD=../../src/libgetdata.la
 libfgetdata_la_LDFLAGS = -version-info @FGETDATA_VERSION@
 

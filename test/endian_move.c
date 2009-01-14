@@ -1,6 +1,6 @@
 /* Test endianness */
+#include "../src/config.h"
 #include "../src/getdata.h"
-
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -65,9 +65,15 @@ int main(void)
   unlink(format);
   rmdir(filedir);
 
+#ifdef WORDS_BIGENDIAN
+# define FACTOR 0x102
+#else
+# define FACTOR 0x201
+#endif
+
   for (i = 0; i < 8; ++i)
-    if (c[i] != (40 + i) * 0x201) {
-      fprintf(stderr, "%x - %x\n", c[i], (40 + i) * 0x201);
+    if (c[i] != (40 + i) * FACTOR) {
+      fprintf(stderr, "%x - %x\n", c[i], (40 + i) * FACTOR);
       we++;
     }
 

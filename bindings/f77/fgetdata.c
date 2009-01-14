@@ -34,6 +34,7 @@ static int f77dirfiles_initialised = 0;
 /* initialise the f77dirfiles array */
 static void _GDF_InitDirfiles(void)
 {
+  dtracevoid();
   int i;
 
   for (i = 1; i < GDF_N_DIRFILES; ++i)
@@ -45,28 +46,38 @@ static void _GDF_InitDirfiles(void)
   f77dirfiles[0]->flags = GD_INVALID;
 
   f77dirfiles_initialised = 1;
+  dreturnvoid();
 }
 
 /* make a C string */
 static char* _GDF_CString(char* out, const char* in, int l)
 {
+  dtrace("%p, \"%s\", %i", out, in, l);
   int i;
-  if (l == 0)
+  if (l == 0) {
+    dreturn("%p", NULL);
     return NULL;
+  }
 
   for (i = 0; i < l; ++i)
     out[i] = in[i];
   out[l] = '\0';
 
+  dreturn("%p", out);
   return out;
 }
 
 /* convert an int to a DIRFILE* */
 static DIRFILE* _GDF_GetDirfile(int d)
 {
-  if (f77dirfiles[d] == NULL)
-    return f77dirfiles[0];
+  dtrace("%i", d);
 
+  if (f77dirfiles[d] == NULL) {
+    dreturn("%p [0]", f77dirfiles[0]);
+    return f77dirfiles[0];
+  }
+
+  dreturn("%p", f77dirfiles[d]);
   return f77dirfiles[d];
 }
 
@@ -75,12 +86,15 @@ static int _GDF_SetDirfile(DIRFILE* D)
 {
   int i;
 
+  dtrace("%p", D);
+
   if (!f77dirfiles_initialised)
     _GDF_InitDirfiles();
 
   for (i = 1; i < GDF_N_DIRFILES; ++i)
     if (f77dirfiles[i] == NULL) {
       f77dirfiles[i] = D;
+      dreturn("%i", i);
       return i;
     }
 
@@ -92,27 +106,35 @@ static int _GDF_SetDirfile(DIRFILE* D)
 /* delete the supplied dirfile */
 static void _GDF_ClearDirfile(int d)
 {
+  dtrace("%i", d);
+
   if (d != 0)
     f77dirfiles[d] = NULL;
+
+  dreturnvoid();
 }
 
 /* create a Fortran space padded string */
 static int _GDF_FString(char* dest, int *dlen, const char* src)
 {
+  dtrace("%p, %i, \"%s\"", dest, *dlen, src);
   int slen = strlen(src);
 
   if (src == NULL) {
     *dlen = 0;
+    dreturn("%i", -1);
     return -1;
   }
 
   if (slen < *dlen) {
     sprintf(dest, "%-*s", *dlen - 1, src);
     dest[*dlen - 1] = ' ';
+    dreturn("%i", 0);
     return 0;
   }
 
   *dlen = slen + 1;
+  dreturn("%i", -1);
   return -1;
 }
 
@@ -123,6 +145,8 @@ static int _GDF_Callback(const DIRFILE* D, int suberror, char *line)
 {
   int unit;
   int r = GD_SYNTAX_ABORT;
+
+  dtrace("%p, %i, \"%s\"", D, suberror, line);
 
   if (_gdf_f77_callback != NULL) {
     unit = _GDF_SetDirfile((DIRFILE*)D);
@@ -135,6 +159,7 @@ static int _GDF_Callback(const DIRFILE* D, int suberror, char *line)
     _GDF_ClearDirfile(unit);
   }
 
+  dreturn("%i", r);
   return r;
 }
 
@@ -1071,24 +1096,27 @@ void F77_FUNC(gddscd, GDDSCD) (const int* dirfile)
 void F77_FUNC(gdcopn, GDCOPN) (int* dirfile, const char* dirfilename,
     const int* dirfilename_l, const int* flags, const void* callback)
 {
+  dtrace("%p, \"%s\", %i, %x, %p", dirfile, dirfilename, *dirfilename_l, *flags,
+      callback);
+
   char* out = malloc(*dirfilename_l + 1);
 
-  _gdf_f77_callback = (*(int*)callback == 0) ? NULL : callback;
+  _gdf_f77_callback = (callback == 0) ? NULL : callback;
 
   *dirfile = _GDF_SetDirfile(dirfile_cbopen(_GDF_CString(out, dirfilename,
-          *dirfilename_l), *flags, (*(int*)callback == 0) ? NULL :
-        _GDF_Callback));
+          *dirfilename_l), *flags, (callback == 0) ? NULL : _GDF_Callback));
 
   free(out);
+  dreturn("%i", *dirfile);
 }
 
 /* dirfile_parser_callback wrapper */
 void F77_FUNC(gdclbk, GDCLBK) (const int* dirfile, const void* callback)
 {
-  _gdf_f77_callback = (*(int*)callback == 0) ? NULL : callback;
+  _gdf_f77_callback = (callback == 0) ? NULL : callback;
 
-  dirfile_parser_callback(_GDF_GetDirfile(*dirfile), (*(int*)callback == 0) ?
-      NULL : _GDF_Callback);
+  dirfile_parser_callback(_GDF_GetDirfile(*dirfile), (callback == 0) ?  NULL
+      : _GDF_Callback);
 }
 
 /* dirfile_alter_bit wrapper */

@@ -28,11 +28,7 @@ int main(void)
   mkdir(filedir, 0777);
 
   for (fd = 0; fd < 128; ++fd)
-#ifdef WORDS_BIGENDIAN
-    data_data[fd] = 0x102 * fd;
-#else
     data_data[fd] = 0x201 * fd;
-#endif
 
   fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
   write(fd, format_data, strlen(format_data));
@@ -69,9 +65,15 @@ int main(void)
   unlink(format);
   rmdir(filedir);
 
+#ifdef WORDS_BIGENDIAN
+# define FACTOR 0x201
+#else
+# define FACTOR 0x102
+#endif
+
   for (i = 0; i < 8; ++i)
-    if (c[i] != (40 + i) * 0x102) {
-      fprintf(stderr, "%x - %x\n", c[i], (40 + i) * 0x102);
+    if (c[i] != (40 + i) * FACTOR) {
+      fprintf(stderr, "%x - %x\n", c[i], (40 + i) * FACTOR);
       we++;
     }
 

@@ -21,13 +21,11 @@
 AUTOMAKE_OPTIONS = foreign
 
 if GNU_FC_COMPILER
-FC_WEXTRA=-Wextra
-FC_WALL=-Wextra
+FC_WALL=-Wall
 endif
 
 if GNU_F77_COMPILER
-F77_WEXTRA=-Wextra
-F77_WALL=-Wextra
+F77_WALL=-Wall
 endif
 
 if MAKE_F95BINDINGS
