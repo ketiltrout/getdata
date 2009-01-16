@@ -64,10 +64,10 @@ typedef off_t off64_t
 #endif
 
 #ifdef USE_MODULES
-# ifdef INTERNAL_LTDL
-#  include "gd_ltdl.h"
-# else
+# ifdef HAVE_LTDL_H
 #  include <ltdl.h>
+# else
+#  include "gd_ltdl.h"
 # endif
 #endif
 

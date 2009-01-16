@@ -47,6 +47,8 @@ BINDINGS_LEFT=
 ENCODINGS_BUILT=" raw ascii"
 ENCODINGS_LEFT=
 
+echo "*** Checking GetData configuration"
+echo
 dnl Legacy API
 AC_ARG_ENABLE(legacy-api, AS_HELP_STRING([--disable-legacy-api],
               [don't include the legacy API wrapper in the library]),
@@ -186,30 +188,47 @@ m4_divert_once([HELP_WITH], AS_HELP_STRING([--without-system-ltdl],
                [if building modules, always use the internal ltdl library, even if an external one is present]))
 
 dnl Programs
+echo
+echo "*** Initialising build system"
+echo
 AM_INIT_AUTOMAKE
 AC_PROG_LN_S
+echo
+echo "*** Checking C compiler characteristics"
+echo
 AC_PROG_CC
 AC_PROG_CC_C_O
 AC_PROG_CC_C99
+AC_HEADER_STDC
+echo
+echo "*** Checking C++ compiler characteristics"
+echo
 AC_PROG_CXX
 AC_PROG_CXX_C_O
+echo
+echo "*** Checking Fortran 77 compiler characteristics"
+echo
 AC_PROG_F77
 AC_PROG_F77_C_O
+echo
+echo "*** Checking Fortran 90 compiler characteristics"
+echo
 AC_PROG_FC
 AC_PROG_FC_C_O
-AC_HEADER_STDC
-AC_PROG_INSTALL
+echo
+echo "*** Building libtool"
+echo
 AC_ENABLE_STATIC
 AC_ENABLE_SHARED
-if test "x${use_modules}" != "xno"; then
-  AC_LIBTOOL_DLOPEN
-  true
-fi
+AC_LIBTOOL_DLOPEN
 AC_PROG_LIBTOOL
 
 dnl libltdl stuff
 
 if test "x${use_modules}" != "xno"; then
+  echo
+  echo "*** Configuring the dynamic loader"
+  echo
   if test "x${use_system_ltdl}" = "xyes"; then
     saved_ldflags=$LDFLAGS
     saved_libs=$LIBS
@@ -283,9 +302,11 @@ if test "x${use_modules}" != "xno"; then
     GD_HIDE_LTDL_SYM(lt_dlsym)
     LIBLTDL="$LIBADD_DL"
   elif test "x$ltdl_prefix" != "x"; then
+    AC_CHECK_HEADERS(ltdl.h)
     LIBLTDL="-L${ltdl_prefix}/lib -lltdl"
     LTDLINC="-I${ltdl_prefix}/include"
   else
+    AC_CHECK_HEADERS(ltdl.h)
     LIBLTDL="-lltdl"
   fi
 else
@@ -296,6 +317,9 @@ AC_SUBST([LTDLINCL])
 AM_CONDITIONAL(INTERNAL_LTDL, test "x${internal_ltdl}" = xyes)
 
 dnl ICC checks
+echo
+echo "*** Checking additional compiler characteristics"
+echo
 GD_LANG_COMPILER_INTEL
 AM_CONDITIONAL(GNU_C_COMPILER, test "x$gd_cv_c_compiler_intel" == "xno" -a "x$ac_cv_c_compiler_gnu" == "xyes")
 AC_LANG_PUSH([C++])
@@ -327,15 +351,18 @@ fi
 
 dnl F77 stuff
 if test "x$make_f77bindings" != "xno"; then
-  AC_F77_WRAPPERS
   AC_PROG_SED
   AC_CHECK_PROGS([DIFF], [diff], [not found])
   if test "x$DIFF" == "xnot found"; then
     AC_MSG_ERROR([`diff' is needed to build the Fortran bindings]) dnl`
   fi
+  AC_F77_WRAPPERS
 fi
 
 dnl libraries
+echo
+echo "*** Looking for library functions"
+echo
 AC_SEARCH_LIBS([ceil],[m])
 
 dnl pthread
@@ -353,13 +380,11 @@ dnl functions
 AC_CHECK_FUNCS([atoll atoq])
 
 dnl headers
+echo
+echo "*** Looking for additional header files"
+echo
 AC_CHECK_HEADERS(fcntl.h libgen.h)
 AC_HEADER_DIRENT
-
-dnl external encodings
-GD_CHECK_ENCODING([bzip2],[bz2],[BZ2_bzReadOpen],[bzlib.h],[bzip2],[bunzip2])
-GD_CHECK_ENCODING([slim],[slim],[slimopen],[slimlib.h],[slim],[unslim])
-GD_CHECK_ENCODING([gzip],[z],[gzopen],[zlib.h],[gzip],[gunzip])
 
 dnl Declare a few feature test macros
 AC_DEFINE([_BSD_SOURCE], [], [ Expose BSD-derived definitions ])
@@ -369,6 +394,9 @@ AC_DEFINE([_POSIX_C_SOURCE], [200112L],
           [ Expose POSIX.1-2001 conforming definitions ])
 
 dnl types
+echo
+echo "*** Checking data types"
+echo
 AC_C_CONST
 AC_C_BIGENDIAN
 AC_TYPE_SIZE_T
@@ -397,6 +425,11 @@ fi
 
 AC_CHECK_SIZEOF([int])
 
+dnl external encodings
+GD_CHECK_ENCODING([bzip2],[bz2],[BZ2_bzReadOpen],[bzlib.h],[bzip2],[bunzip2])
+GD_CHECK_ENCODING([slim],[slim],[slimopen],[slimlib.h],[slim],[unslim])
+GD_CHECK_ENCODING([gzip],[z],[gzopen],[zlib.h],[gzip],[gunzip])
+
 dnl Calculate absolute docdir
 cat <<EOF > conftest.sh
 prefix=$prefix
@@ -411,6 +444,9 @@ absolute_docdir=`$SHELL conftest.sh`
 AC_SUBST([absolute_docdir])
 
 dnl output
+echo
+echo "*** Writing configure output"
+echo
 AC_CONFIG_FILES([Makefile])
 AC_CONFIG_FILES([bin/Makefile])
 AC_CONFIG_FILES([bindings/Makefile])
