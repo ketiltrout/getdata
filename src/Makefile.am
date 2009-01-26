@@ -98,8 +98,8 @@ libgetdata_la_SOURCES = add.c ascii.c ${BZIP2_C} close.c common.c constant.c \
 												string.c types.c ${GD_LTDL} ${GETDATA_LEGACY_H} \
 												internal.h
 libgetdata_la_LDFLAGS = $(EXPORT_DYNAMIC) -export-symbols-regex '^[^_]' \
-												-version-info @GETDATA_IFACE_VERSION@:\
-												@GETDATA_IMPL_REVISION@:@GETDATA_IFACE_AGE@ \
+												-version-info \
+												@GETDATA_IFACE_VERSION@:@GETDATA_IMPL_REVISION@:@GETDATA_IFACE_AGE@ \
 												$(EXTERNAL_LDFLAGS)
 libgetdata_la_LIBADD = $(LIBLTDL) $(DLOPEN_LIBGETDATASLIM_LA) \
 											 $(DLOPEN_LIBGETDATAGZIP_LA) $(DLOPEN_LIBGETDATABZIP2_LA)
