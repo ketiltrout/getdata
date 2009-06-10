@@ -52,6 +52,7 @@ void _GD_FreeE(gd_entry_t* entry, int priv)
       /* fall through */
     case GD_BIT_ENTRY:
     case GD_PHASE_ENTRY:
+    case GD_POLYNOM_ENTRY:
       free(entry->in_fields[0]);
       break;
     case GD_STRING_ENTRY:
@@ -74,7 +75,7 @@ void _GD_FreeE(gd_entry_t* entry, int priv)
   }
 
   if (priv) {
-    for (i = 0; i < GD_MAX_LINCOM * 2; ++i)
+    for (i = 0; i <= GD_MAX_POLYNOM; ++i)
       free(entry->e->scalar[i]);
     free(entry->e->field_list);
     free(entry->e->vector_list);
@@ -152,6 +153,14 @@ int _GD_CalculateEntry(DIRFILE* D, gd_entry_t* E)
   switch(E->field_type) {
     case GD_RAW_ENTRY:
       _GD_GetScalar(D, E, E->e->scalar[0], 0, &E->spf);
+      break;
+    case GD_POLYNOM_ENTRY:
+      for (i = 0; i <= E->poly_ord; ++i) {
+        _GD_GetScalar(D, E, E->e->scalar[i], GD_IEEE754, &E->a[i]);
+
+        if (D->error)
+          break;
+      }
       break;
     case GD_LINCOM_ENTRY:
       for (i = 0; i < E->n_fields; ++i) {
@@ -284,6 +293,7 @@ int get_entry(DIRFILE* D, const char* field_code, gd_entry_t* entry)
       /* fall through */
     case GD_BIT_ENTRY:
     case GD_PHASE_ENTRY:
+    case GD_POLYNOM_ENTRY:
       entry->in_fields[0] = strdup(E->in_fields[0]);
       /* fall through */
     case GD_RAW_ENTRY:

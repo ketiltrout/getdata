@@ -125,6 +125,8 @@ static const struct {
   { GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_BITSIZE,
     "End of bitfield out of range: {3}", 0 },
   { GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_METARAW, "Invalid metafield type: {3}", 0 },
+  { GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_POLYORD, "POLYNOM order out of range: {3}",
+    0 },
   /* GD_E_DUPLICATE: 4 = name */
   { GD_E_DUPLICATE, 0, "Field code already present: {4}", 0 },
   /* GD_E_BAD_INDEX: 3 = index */

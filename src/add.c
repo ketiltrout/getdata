@@ -106,6 +106,7 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
       entry->field_type != GD_MULTIPLY_ENTRY &&
       entry->field_type != GD_PHASE_ENTRY &&
       entry->field_type != GD_CONST_ENTRY &&
+      entry->field_type != GD_POLYNOM_ENTRY &&
       entry->field_type != GD_STRING_ENTRY)
   {
     _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_TYPE, NULL,
@@ -212,16 +213,18 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
       break;
     case GD_LINCOM_ENTRY:
       E->n_fields = entry->n_fields;
-      memcpy(E->m, entry->m, sizeof(double) * E->n_fields);
-      memcpy(E->b, entry->b, sizeof(double) * E->n_fields);
 
       if (E->n_fields < 1 || E->n_fields > GD_MAX_LINCOM)
         _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_NFIELDS, NULL,
             E->n_fields, NULL);
-      else
+      else {
+        memcpy(E->m, entry->m, sizeof(double) * E->n_fields);
+        memcpy(E->b, entry->b, sizeof(double) * E->n_fields);
+
         for (i = 0; i < E->n_fields; ++i)
           if ((E->in_fields[i] = strdup(entry->in_fields[i])) == NULL)
             _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+      }
       break;
     case GD_LINTERP_ENTRY:
       E->e->table_len = -1;
@@ -269,6 +272,19 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
       E->e->string = strdup("");
       if (E->e->string == NULL)
         _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+      break;
+    case GD_POLYNOM_ENTRY:
+      E->poly_ord = entry->poly_ord;
+
+      if (E->poly_ord < 1 || E->poly_ord > GD_MAX_POLYNOM)
+        _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_NFIELDS, NULL,
+            E->poly_ord, NULL);
+      else {
+        memcpy(E->a, entry->a, sizeof(double) * E->poly_ord);
+        for (i = 0; i <= E->poly_ord; ++i)
+          if ((E->in_fields[i] = strdup(entry->in_fields[i])) == NULL)
+            _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+      }
       break;
     case GD_INDEX_ENTRY:
     case GD_NO_ENTRY:
@@ -546,6 +562,13 @@ int dirfile_add_lincom(DIRFILE* D, const char* field_code, int n_fields,
     return -1;
   }
 
+  if (n_fields < 1 || n_fields > GD_MAX_LINCOM) {
+    _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_NFIELDS, NULL, n_fields,
+        NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
   gd_entry_t L;
   L.field = (char*)field_code;
   L.field_type = GD_LINCOM_ENTRY;
@@ -634,6 +657,44 @@ int dirfile_add_multiply(DIRFILE* D, const char* field_code,
   M.in_fields[1] = (char*)in_field2;
   M.fragment_index = fragment_index;
   int error = _GD_Add(D, &M, NULL);
+
+  dreturn("%i", error);
+  return error;
+}
+
+/* add a POLYNOM entry */
+int dirfile_add_polynom(DIRFILE* D, const char* field_code, int poly_ord,
+    const char* in_field, const double* a, int fragment_index)
+{
+  dtrace("%p, \"%s\", %i, \"%s\", %p, %i", D, field_code, poly_ord, in_field,
+      a, fragment_index);
+
+  int i;
+
+  if (D->flags & GD_INVALID) {/* don't crash */
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  if (poly_ord < 1 || poly_ord > GD_MAX_LINCOM) {
+    _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_POLYORD, NULL, poly_ord,
+        NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  gd_entry_t E;
+  E.field = (char*)field_code;
+  E.field_type = GD_POLYNOM_ENTRY;
+  E.poly_ord = poly_ord;
+  E.fragment_index = fragment_index;
+  E.in_fields[0] = (char*)in_field;
+
+  for (i = 0; i <= poly_ord; ++i)
+    E.a[i] = a[i];
+
+  int error = _GD_Add(D, &E, NULL);
 
   dreturn("%i", error);
   return error;
@@ -771,6 +832,13 @@ int dirfile_madd_lincom(DIRFILE* D, const char* parent, const char* field_code,
     return -1;
   }
 
+  if (n_fields < 1 || n_fields > GD_MAX_LINCOM) {
+    _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_NFIELDS, NULL, n_fields,
+        NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
   gd_entry_t L;
   L.field = (char*)field_code;
   L.field_type = GD_LINCOM_ENTRY;
@@ -884,6 +952,44 @@ int dirfile_madd_phase(DIRFILE* D, const char* parent, const char* field_code,
   P.shift = shift;
   P.fragment_index = 0;
   int error = _GD_Add(D, &P, parent);
+
+  dreturn("%i", error);
+  return error;
+}
+
+/* add a META POLYNOM entry */
+int dirfile_madd_polynom(DIRFILE* D, const char* parent, const char* field_code,
+    int poly_ord, const char* in_field, const double* a)
+{
+  dtrace("%p, \"%s\", \"%s\", %i, \"%s\", %p", D, field_code, parent, poly_ord,
+      in_field, a);
+
+  int i;
+
+  if (D->flags & GD_INVALID) {/* don't crash */
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  if (poly_ord < 1 || poly_ord > GD_MAX_POLYNOM) {
+    _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_POLYORD, NULL, poly_ord,
+        NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  gd_entry_t E;
+  E.field = (char*)field_code;
+  E.field_type = GD_POLYNOM_ENTRY;
+  E.poly_ord = poly_ord;
+  E.fragment_index = 0;
+  E.in_fields[0] = (char*)in_field;
+
+  for (i = 0; i <= poly_ord; ++i)
+    E.a[i] = a[i];
+
+  int error = _GD_Add(D, &E, parent);
 
   dreturn("%i", error);
   return error;

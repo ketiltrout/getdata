@@ -372,6 +372,77 @@ static size_t _GD_DoPhaseOut(DIRFILE* D, gd_entry_t *E,
   return n_wrote;
 }
 
+static size_t _GD_DoPolynomOut(DIRFILE* D, gd_entry_t *E,
+    off64_t first_frame, off64_t first_samp, size_t num_frames, size_t num_samp,
+    gd_type_t data_type, const void *data_in)
+{
+  int spf;
+  size_t ns, n_wrote;
+  void* tmpbuf;
+
+  dtrace("%p, %p, %lli, %lli, %zi, %zi, 0x%x, %p", D, E, first_frame,
+      first_samp, num_frames, num_samp, data_type, data_in);
+
+  /* we cannot write to POLYNOM fields that are quadradic or higher order */
+
+  if (E->poly_ord > 1) {
+    _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_PUT, NULL, 0, E->field);
+    dreturn("%zi", 0);
+    return 0;
+  }
+
+  if (E->e->entry[0] == NULL) {
+    E->e->entry[0] = _GD_FindField(D, E->in_fields[0], NULL);
+
+    if (E->e->entry[0] == NULL) {
+      _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, E->in_fields[0]);
+      dreturn("%zi", 0);
+      return 0;
+    }
+
+    /* scalar entries not allowed */
+    if (E->e->entry[0]->field_type & GD_SCALAR_ENTRY) {
+      _GD_SetError(D, GD_E_DIMENSION, 0, E->field, 0, E->e->entry[0]->field);
+      dreturn("%zi", 0);
+      return 0;
+    }
+  }
+
+  /* do the inverse scaling */
+  spf = _GD_GetSPF(D, E->e->entry[0]);
+  ns = num_samp + num_frames * (int)spf;
+
+  if (D->error != GD_E_OK) {
+    dreturn("%zi", 0);
+    return 0;
+  }
+
+  /* writeable copy */
+  tmpbuf = _GD_Alloc(D, data_type, ns);
+
+  if (tmpbuf == NULL) {
+    dreturn("%zi", 0);
+    return 0;
+  }
+
+  memcpy(tmpbuf, data_in, ns * GD_SIZE(data_type));
+
+  _GD_ScaleData(D, tmpbuf, data_type, ns, 1 / E->a[1], -E->a[0] / E->a[1]);
+
+  if (D->error != GD_E_OK) {
+    free(tmpbuf);
+    dreturn("%zi", 0);
+    return 0;
+  }
+
+  n_wrote = _GD_DoFieldOut(D, E->e->entry[0], E->in_fields[0], first_frame,
+      first_samp, num_frames, num_samp, data_type, tmpbuf);
+  free(tmpbuf);
+
+  dreturn("%zi", n_wrote);
+  return n_wrote;
+}
+
 static size_t _GD_DoConstOut(DIRFILE* D, gd_entry_t *E, gd_type_t data_type,
     const void *data_in)
 {
@@ -473,6 +544,10 @@ size_t _GD_DoFieldOut(DIRFILE *D, gd_entry_t* E, const char *field_code,
       break;
     case GD_PHASE_ENTRY:
       n_wrote = _GD_DoPhaseOut(D, E, first_frame, first_samp, num_frames,
+          num_samp, data_type, data_in);
+      break;
+    case GD_POLYNOM_ENTRY:
+      n_wrote = _GD_DoPolynomOut(D, E, first_frame, first_samp, num_frames,
           num_samp, data_type, data_in);
       break;
     case GD_CONST_ENTRY:

@@ -139,6 +139,7 @@ const char* _gd_colsub(void);
 #define GD_E_BAD_ENTRY_NUMBITS  5
 #define GD_E_BAD_ENTRY_BITNUM   6
 #define GD_E_BAD_ENTRY_BITSIZE  7
+#define GD_E_BAD_ENTRY_POLYORD  8
 
 #define GD_E_SCALAR_CODE        1
 #define GD_E_SCALAR_TYPE        2
@@ -165,7 +166,7 @@ struct _gd_private_entry {
   gd_entry_t* entry[GD_MAX_LINCOM];
 
   int calculated;
-  char *scalar[GD_MAX_LINCOM * 2];
+  char *scalar[GD_MAX_POLYNOM + 1];
 
   int n_meta;
   int n_meta_string;

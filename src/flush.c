@@ -70,6 +70,7 @@ void _GD_Flush(DIRFILE* D, gd_entry_t *E, const char* field_code)
     case GD_LINTERP_ENTRY:
     case GD_BIT_ENTRY:
     case GD_PHASE_ENTRY:
+    case GD_POLYNOM_ENTRY:
       _GD_Flush(D, E->e->entry[0], field_code);
     case GD_CONST_ENTRY:
     case GD_STRING_ENTRY:
@@ -200,12 +201,18 @@ static void _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
     case GD_PHASE_ENTRY:
       fprintf(stream, " PHASE %s %i\n", E->in_fields[0], E->shift);
       break;
+    case GD_POLYNOM_ENTRY:
+      fprintf(stream, " POLYNOM %s", E->in_fields[0]);
+      for (i = 0; i <= E->poly_ord; ++i)
+        fprintf(stream, " %.15g", E->a[i]);
+      fputs("\n", stream);
+      break;
     case GD_CONST_ENTRY:
       if (E->const_type & GD_SIGNED)
         fprintf(stream, " CONST %s %" PRIi64, _GD_TypeName(D, E->const_type),
             E->e->iconst);
       else if (E->const_type & GD_IEEE754)
-        fprintf(stream, " CONST %s %.16g", _GD_TypeName(D, E->const_type),
+        fprintf(stream, " CONST %s %.15g", _GD_TypeName(D, E->const_type),
             E->e->dconst);
       else
         fprintf(stream, " CONST %s %" PRIu64, _GD_TypeName(D, E->const_type),

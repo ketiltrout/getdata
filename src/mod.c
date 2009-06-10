@@ -225,7 +225,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
           Q.m[i] = N->m[i];
           if (N->e != NULL && N->e->scalar[i * 2] != NULL) {
             Qe.scalar[i * 2] = strdup(N->e->scalar[i * 2]);
-            scalar_free |= 2 << (i * 2);
+            scalar_free |= 1 << (i * 2);
           }
         }
 
@@ -234,7 +234,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
           Q.b[i] = N->b[i];
           if (N->e != NULL && N->e->scalar[i * 2 + 1] != NULL) {
             Qe.scalar[i * 2 + 1] = strdup(N->e->scalar[i * 2 + 1]);
-            scalar_free |= 2 << (i * 2 + 1);
+            scalar_free |= 1 << (i * 2 + 1);
           }
         }
       }
@@ -354,6 +354,32 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
       }
 
       break;
+    case GD_POLYNOM_ENTRY: 
+      if (N->in_fields[0] != NULL && strcmp(E->in_fields[0], N->in_fields[0])) {
+        if ((Q.in_fields[0] = strdup(N->in_fields[0])) == NULL) {
+          _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+          break;
+        }
+        modified = 1;
+        field_free = 1;
+      }
+
+      if (N->poly_ord != E->poly_ord) {
+        modified = 1;
+        Q.poly_ord = N->poly_ord;
+      }
+
+      for (i = 0; i <= GD_MAX_POLYNOM; ++i)
+        if (flags & 0x1 && N->a[i] != E->a[i]) {
+          modified = 1;
+          Q.a[i] = N->a[i];
+          if (N->e != NULL && N->e->scalar[i] != NULL) {
+            Qe.scalar[i] = strdup(N->e->scalar[i]);
+            scalar_free |= 1 << i;
+          }
+        }
+
+      break;
     case GD_CONST_ENTRY:
       Q.const_type = (N->const_type == GD_NULL) ? E->const_type : N->const_type;
 
@@ -400,8 +426,8 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
       }
     }
 
-    for (i = 0; i < 2 * GD_MAX_LINCOM; ++i) {
-      if (scalar_free & (2 << i))
+    for (i = 0; i < GD_MAX_POLYNOM; ++i) {
+      if (scalar_free & (1 << i))
         free(E->e->scalar[i]);
     }
 
@@ -432,7 +458,8 @@ int dirfile_alter_entry(DIRFILE* D, const char* field_code,
   memcpy(&N, entry, sizeof(gd_entry_t));
   N.e = NULL;
 
-  if (N.field_type == GD_LINCOM_ENTRY)
+  /* for these field types, move is a set of bitflags; we set them all */
+  if (N.field_type == GD_LINCOM_ENTRY || N.field_type == GD_POLYNOM_ENTRY)
     move = 7;
 
   int ret = _GD_Change(D, field_code, &N, move);
@@ -472,7 +499,7 @@ int dirfile_alter_lincom(DIRFILE* D, const char* field_code, int n_fields,
 {
   gd_entry_t N;
   int i;
-  int move = 0;
+  int flags = 0;
 
   dtrace("%p, \"%s\", %i, %p, %p, %p", D, field_code, n_fields, in_fields, m,
       b);
@@ -486,7 +513,12 @@ int dirfile_alter_lincom(DIRFILE* D, const char* field_code, int n_fields,
   _GD_ClearError(D);
 
   N.field_type = GD_LINCOM_ENTRY;
-  if (n_fields != 0)
+  if (n_fields > GD_MAX_LINCOM || n_fields < 0) {
+    _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_NFIELDS, NULL, n_fields,
+        NULL);
+    dreturn("%i", -1);
+    return -1;
+  } else if (n_fields != 0)
     N.n_fields = n_fields;
   else {
     gd_entry_t *E = _GD_FindField(D, field_code, NULL);
@@ -503,22 +535,22 @@ int dirfile_alter_lincom(DIRFILE* D, const char* field_code, int n_fields,
 
   for (i = 0; i < N.n_fields; ++i) {
     if (in_fields != NULL) {
-      move |= 1;
+      flags |= 1;
       N.in_fields[i] = (char*)in_fields[i];
     }
 
     if (m != NULL) {
-      move |= 2;
+      flags |= 2;
       N.m[i] = m[i];
     }
 
     if (b != NULL) {
-      move |= 4;
+      flags |= 4;
       N.b[i] = b[i];
     }
   }
 
-  int ret = _GD_Change(D, field_code, &N, move);
+  int ret = _GD_Change(D, field_code, &N, flags);
 
   dreturn("%i", ret);
   return ret;
@@ -641,6 +673,57 @@ int dirfile_alter_const(DIRFILE* D, const char* field_code,
   N.e = NULL;
 
   int ret = _GD_Change(D, field_code, &N, 0);
+
+  dreturn("%i", ret);
+  return ret;
+}
+
+int dirfile_alter_polynom(DIRFILE* D, const char* field_code, int poly_ord,
+    const char* in_field, const double* a)
+{
+  gd_entry_t N;
+  int i;
+  int flags = 0;
+
+  dtrace("%p, \"%s\", %i, \"%s\", %p", D, field_code, poly_ord, in_fields, a);
+
+  if (D->flags & GD_INVALID) {/* don't crash */
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  _GD_ClearError(D);
+
+  N.field_type = GD_POLYNOM_ENTRY;
+  if (poly_ord > GD_MAX_POLYNOM || poly_ord < 0) {
+    _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_POLYORD, NULL, poly_ord,
+        NULL);
+    dreturn("%i", -1);
+    return -1;
+  } else if (poly_ord != 0)
+    N.poly_ord = poly_ord;
+  else {
+    gd_entry_t *E = _GD_FindField(D, field_code, NULL);
+
+    if (E == NULL) {
+      _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, field_code);
+      dreturn("%i", -1);
+      return -1;
+    }
+
+    N.poly_ord = E->poly_ord;
+  }
+  N.in_fields[0] = (char*)in_field;
+  N.e = NULL;
+
+  for (i = 0; i < N.poly_ord; ++i)
+    if (a != NULL) {
+      flags |= 1;
+      N.a[i] = a[i];
+    }
+
+  int ret = _GD_Change(D, field_code, &N, flags);
 
   dreturn("%i", ret);
   return ret;

@@ -554,6 +554,83 @@ static gd_entry_t* _GD_ParsePhase(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
   return E;
 }
 
+/* _GD_ParsePolynom: parse a POLYNOM data type in the format file.
+*/
+static gd_entry_t* _GD_ParsePolynom(DIRFILE* D,
+    const char* in_cols[MAX_IN_COLS], int n_cols, const gd_entry_t* parent,
+    const char* format_file, int line, int pedantic)
+{
+  int i;
+
+  dtrace("%p, %p, %i, %p, \"%s\", %i, %i", D, in_cols, n_cols, parent,
+      format_file, line, pedantic);
+
+  if (n_cols < 5) {
+    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_TOK, format_file, line, NULL);
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  gd_entry_t* E = malloc(sizeof(gd_entry_t));
+  if (E == NULL) {
+    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    dreturn("%p", NULL);
+    return NULL;
+  }
+  memset(E, 0, sizeof(gd_entry_t));
+
+  E->e = malloc(sizeof(struct _gd_private_entry));
+  if (E->e == NULL) {
+    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    free(E);
+    dreturn("%p", NULL);
+    return NULL;
+  }
+  memset(E->e, 0, sizeof(struct _gd_private_entry));
+
+  E->field_type = GD_POLYNOM_ENTRY;
+  E->field = _GD_ValidateField(parent, in_cols[0], pedantic);
+  if (E->field == in_cols[0]) {
+    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_NAME, format_file, line,
+        in_cols[0]);
+    E->field = NULL;
+    _GD_FreeE(E, 1);
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  E->poly_ord = n_cols - 4;
+
+  /* the legacy ignore-trailing-tokens "feature" */
+  if (E->poly_ord > GD_MAX_POLYNOM)
+    E->poly_ord = GD_MAX_POLYNOM;
+
+  E->e->calculated = 1;
+
+  if (E->field == NULL)
+    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+  else {
+    E->in_fields[0] = strdup(in_cols[2]);
+    if (E->in_fields[0] == NULL)
+      _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    else
+      for (i = 0; i <= E->poly_ord; i++) {
+        E->e->scalar[i] = _GD_SetScalar(in_cols[i + 4], &E->a[i], GD_IEEE754);
+
+        if (E->e->scalar[i] != NULL)
+          E->e->calculated = 0;
+      }
+  }
+
+  if (D->error != GD_E_OK) {
+    _GD_FreeE(E, 1);
+    E = NULL;
+  }
+
+  dreturn("%p", E);
+  return E;
+}
+
 /* _GD_ParseConst: parse CONST data type entry in formats file.
 */
 static gd_entry_t* _GD_ParseConst(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
@@ -783,6 +860,8 @@ gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, const char** in_cols,
     E = _GD_ParseBit(D, in_cols, n_cols, P, format_file, linenum, pedantic);
   else if (strcmp(in_cols[1], "PHASE") == 0)
     E = _GD_ParsePhase(D, in_cols, n_cols, P, format_file, linenum, pedantic);
+  else if (strcmp(in_cols[1], "POLYNOM") == 0)
+    E = _GD_ParsePolynom(D, in_cols, n_cols, P, format_file, linenum, pedantic);
   else if (strcmp(in_cols[1], "CONST") == 0) {
     E = _GD_ParseConst(D, in_cols, n_cols, P, format_file, linenum, pedantic);
     if (D->error == GD_E_OK && P == NULL)

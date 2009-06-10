@@ -51,7 +51,7 @@
 #endif
 
 /* error codes */
-#define GD_E_OK                0 /* this must be zero */
+#define GD_E_OK                0 /* this MUST be zero */
 #define GD_E_OPEN              1
 #define GD_E_FORMAT            2
 #define GD_E_TRUNC             3
@@ -90,6 +90,9 @@
 
 #define GD_MAX_LINCOM 3
 
+/* the following MUST be at least one less than twice GD_MAX_LINCOM */
+#define GD_MAX_POLYNOM (GD_MAX_LINCOM * 2 - 1)
+
 /* syntax suberrors */
 #define GD_E_FORMAT_BAD_SPF    1
 #define GD_E_FORMAT_N_FIELDS   2
@@ -122,7 +125,7 @@
 #define GD_PROTECT_DATA   02
 #define GD_PROTECT_ALL    ( GD_PROTECT_DATA | GD_PROTECT_FORMAT )
 
-/* this must be one less than the lowest allowed fragment index */
+/* this MUST be one less than the lowest allowed fragment index */
 #define GD_ALL_FRAGMENTS -1
 
 #define GD_SCALAR_ENTRY 0x100
@@ -136,12 +139,13 @@ typedef enum {
   GD_MULTIPLY_ENTRY = 0x05,
   GD_PHASE_ENTRY    = 0x06,
   GD_INDEX_ENTRY    = 0x07,
+  GD_POLYNOM_ENTRY  = 0x09,
   GD_CONST_ENTRY    = GD_SCALAR_ENTRY + 0x01,
   GD_STRING_ENTRY   = GD_SCALAR_ENTRY + 0x02,
 } gd_entype_t;
 
 /* GD_NO_ENTRY is not part of this count */
-#define GD_N_ENTYPES 9
+#define GD_N_ENTYPES 10
 
 /* Data types -- No valid type may set 0x40 */
 #define GD_SIZE8     0x01
@@ -155,7 +159,7 @@ typedef enum {
 
 typedef enum {
   GD_NULL    = 0,
-  GD_UNKNOWN = 0xb0,  /* GD_SIZE(GD_UNKNOWN) must evaluate to zero */
+  GD_UNKNOWN = 0xb0,  /* GD_SIZE(GD_UNKNOWN) MUST evaluate to zero */
   GD_UINT8   = GD_SIZE8,
   GD_INT8    = GD_SIZE8  | GD_SIGNED,
   GD_UINT16  = GD_SIZE16,
@@ -195,6 +199,10 @@ struct _gd_unified_entry {
     };
     int shift; /* PHASE */
     gd_type_t const_type; /* CONST */
+    struct { /* POLYNOM */
+      int poly_ord;
+      double a[GD_MAX_POLYNOM + 1];
+    };
   };
 
   struct _gd_private_entry *e;

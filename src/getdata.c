@@ -236,6 +236,252 @@ static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *E,
   return (D->error == GD_E_OK) ? n_read : 0;
 }
 
+/* Macros to reduce tangly code */
+#define POLYNOM5(t) \
+  ((t*)data)[i] = (t)( \
+    ((t*)data)[i] * ((t*)data)[i] * ((t*)data)[i] \
+      * ((t*)data)[i] * ((t*)data)[i] * a[5] \
+    + ((t*)data)[i] * ((t*)data)[i] * ((t*)data)[i] * ((t*)data)[i] * a[4] \
+    + ((t*)data)[i] * ((t*)data)[i] * ((t*)data)[i] * a[3] \
+    + ((t*)data)[i] * ((t*)data)[i] * a[2] \
+    + ((t*)data)[i] * a[1] + a[0] \
+    )
+
+#define POLYNOM4(t) \
+  ((t*)data)[i] = (t)( \
+    ((t*)data)[i] * ((t*)data)[i] * ((t*)data)[i] * ((t*)data)[i] * a[4] \
+    + ((t*)data)[i] * ((t*)data)[i] * ((t*)data)[i] * a[3] \
+    + ((t*)data)[i] * ((t*)data)[i] * a[2] \
+    + ((t*)data)[i] * a[1] + a[0] \
+    )
+
+#define POLYNOM3(t) \
+  ((t*)data)[i] = (t)( \
+    ((t*)data)[i] * ((t*)data)[i] * ((t*)data)[i] * a[3] \
+    + ((t*)data)[i] * ((t*)data)[i] * a[2] \
+    + ((t*)data)[i] * a[1] + a[0] \
+    )
+
+#define POLYNOM2(t) \
+  ((t*)data)[i] = (t)( \
+    ((t*)data)[i] * ((t*)data)[i] * a[2] \
+    + ((t*)data)[i] * a[1] + a[0] \
+    )
+
+/* _GD_PolynomData: Compute data = Sum(i=0..n; data**i * a[i]), for scalar a,
+ * and integer 2 <= n < GD_MAX_POLYNOM
+ */
+static void _GD_PolynomData(DIRFILE* D, void *data, gd_type_t type, size_t npts,
+    int n, double* a)
+{
+  size_t i;
+
+  dtrace("%p, %p, 0x%x, %zi, %i, %p", D, data, type, npts, n, a);
+
+  if (n == 1) {
+    /* no need to duplicate this case */
+    _GD_ScaleData(D, data, type, npts, a[1], a[0]);
+  } else if (n == 2) {
+    switch (type) {
+      case GD_NULL:
+        break;
+      case GD_INT8:
+        for (i = 0; i < npts; i++)
+          POLYNOM2(int8_t);
+        break;
+      case GD_UINT8:
+        for (i = 0; i < npts; i++)
+          POLYNOM2(uint8_t);
+        break;
+      case GD_INT16:
+        for (i = 0; i < npts; i++)
+          POLYNOM2(int16_t);
+        break;
+      case GD_UINT16:
+        for (i = 0; i < npts; i++)
+          POLYNOM2(uint16_t);
+        break;
+      case GD_INT32:
+        for (i = 0; i < npts; i++)
+          POLYNOM2(int32_t);
+        break;
+      case GD_UINT32:
+        for (i = 0; i < npts; i++)
+          POLYNOM2(uint32_t);
+        break;
+      case GD_INT64:
+        for (i = 0; i < npts; i++)
+          POLYNOM2(int64_t);
+        break;
+      case GD_UINT64:
+        for (i = 0; i < npts; i++)
+          POLYNOM2(uint64_t);
+        break;
+      case GD_FLOAT:
+        for (i = 0; i < npts; i++)
+          POLYNOM2(float);
+        break;
+      case GD_DOUBLE:
+        for (i = 0; i < npts; i++)
+          POLYNOM2(double);
+        break;
+      default:
+        _GD_SetError(D, GD_E_BAD_TYPE, type, NULL, 0, NULL);
+        break;
+    }
+  } else if (n == 3) {
+    switch (type) {
+      case GD_NULL:
+        break;
+      case GD_INT8:
+        for (i = 0; i < npts; i++)
+          POLYNOM3(int8_t);
+        break;
+      case GD_UINT8:
+        for (i = 0; i < npts; i++)
+          POLYNOM3(uint8_t);
+        break;
+      case GD_INT16:
+        for (i = 0; i < npts; i++)
+          POLYNOM3(int16_t);
+        break;
+      case GD_UINT16:
+        for (i = 0; i < npts; i++)
+          POLYNOM3(uint16_t);
+        break;
+      case GD_INT32:
+        for (i = 0; i < npts; i++)
+          POLYNOM3(int32_t);
+        break;
+      case GD_UINT32:
+        for (i = 0; i < npts; i++)
+          POLYNOM3(uint32_t);
+        break;
+      case GD_INT64:
+        for (i = 0; i < npts; i++)
+          POLYNOM3(int64_t);
+        break;
+      case GD_UINT64:
+        for (i = 0; i < npts; i++)
+          POLYNOM3(uint64_t);
+        break;
+      case GD_FLOAT:
+        for (i = 0; i < npts; i++)
+          POLYNOM3(float);
+        break;
+      case GD_DOUBLE:
+        for (i = 0; i < npts; i++)
+          POLYNOM3(double);
+        break;
+      default:
+        _GD_SetError(D, GD_E_BAD_TYPE, type, NULL, 0, NULL);
+        break;
+    }
+  } else if (n == 4) {
+    switch (type) {
+      case GD_NULL:
+        break;
+      case GD_INT8:
+        for (i = 0; i < npts; i++)
+          POLYNOM4(int8_t);
+        break;
+      case GD_UINT8:
+        for (i = 0; i < npts; i++)
+          POLYNOM4(uint8_t);
+        break;
+      case GD_INT16:
+        for (i = 0; i < npts; i++)
+          POLYNOM4(int16_t);
+        break;
+      case GD_UINT16:
+        for (i = 0; i < npts; i++)
+          POLYNOM4(uint16_t);
+        break;
+      case GD_INT32:
+        for (i = 0; i < npts; i++)
+          POLYNOM4(int32_t);
+        break;
+      case GD_UINT32:
+        for (i = 0; i < npts; i++)
+          POLYNOM4(uint32_t);
+        break;
+      case GD_INT64:
+        for (i = 0; i < npts; i++)
+          POLYNOM4(int64_t);
+        break;
+      case GD_UINT64:
+        for (i = 0; i < npts; i++)
+          POLYNOM4(uint64_t);
+        break;
+      case GD_FLOAT:
+        for (i = 0; i < npts; i++)
+          POLYNOM4(float);
+        break;
+      case GD_DOUBLE:
+        for (i = 0; i < npts; i++)
+          POLYNOM4(double);
+        break;
+      default:
+        _GD_SetError(D, GD_E_BAD_TYPE, type, NULL, 0, NULL);
+        break;
+    }
+  } else if (n == 5) {
+    switch (type) {
+      case GD_NULL:
+        break;
+      case GD_INT8:
+        for (i = 0; i < npts; i++)
+          POLYNOM5(int8_t);
+        break;
+      case GD_UINT8:
+        for (i = 0; i < npts; i++)
+          POLYNOM5(uint8_t);
+        break;
+      case GD_INT16:
+        for (i = 0; i < npts; i++)
+          POLYNOM5(int16_t);
+        break;
+      case GD_UINT16:
+        for (i = 0; i < npts; i++)
+          POLYNOM5(uint16_t);
+        break;
+      case GD_INT32:
+        for (i = 0; i < npts; i++)
+          POLYNOM5(int32_t);
+        break;
+      case GD_UINT32:
+        for (i = 0; i < npts; i++)
+          POLYNOM5(uint32_t);
+        break;
+      case GD_INT64:
+        for (i = 0; i < npts; i++)
+          POLYNOM5(int64_t);
+        break;
+      case GD_UINT64:
+        for (i = 0; i < npts; i++)
+          POLYNOM5(uint64_t);
+        break;
+      case GD_FLOAT:
+        for (i = 0; i < npts; i++)
+          POLYNOM5(float);
+        break;
+      case GD_DOUBLE:
+        for (i = 0; i < npts; i++)
+          POLYNOM5(double);
+        break;
+      default:
+        _GD_SetError(D, GD_E_BAD_TYPE, type, NULL, 0, NULL);
+        break;
+    }
+  } else {
+    /* In this case, someone increased GD_MAX_POLYNOM without adding
+     * to this if statement */
+    _GD_InternalError(D);
+  }
+
+  dreturnvoid();
+}
+
 /* MultiplyData: Multiply A by B.  B is unchanged.
 */
 static void _GD_MultiplyData(DIRFILE* D, void *A, unsigned int spfA, void *B,
@@ -697,6 +943,62 @@ static size_t _GD_DoLinterp(DIRFILE *D, gd_entry_t* E,
   return n_read;
 }
 
+/* _GD_DoPolynom:  Read from a polynom.  Returns number of samples read.
+*/
+static size_t _GD_DoPolynom(DIRFILE *D, gd_entry_t *E,
+    off64_t first_frame, off64_t first_samp, size_t num_frames, size_t num_samp,
+    gd_type_t return_type, void *data_out)
+{
+  int spf;
+  size_t n_read;
+
+  dtrace("%p, %p, %lli, %lli, %zi, %zi, 0x%x, %p", D, E, first_frame,
+      first_samp, num_frames, num_samp, return_type, data_out);
+
+  if (E->e->entry[0] == NULL) {
+    E->e->entry[0] = _GD_FindField(D, E->in_fields[0], NULL);
+
+    if (E->e->entry[0] == NULL) {
+      _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, E->in_fields[0]);
+      dreturn("%zi", 0);
+      return 0;
+    }
+
+    /* scalar entries not allowed */
+    if (E->e->entry[0]->field_type & GD_SCALAR_ENTRY) {
+      _GD_SetError(D, GD_E_DIMENSION, 0, E->field, 0, E->e->entry[0]->field);
+      dreturn("%zi", 0);
+      return 0;
+    }
+  }
+
+  spf = _GD_GetSPF(D, E->e->entry[0]);
+  if (D->error != GD_E_OK) {
+    dreturn("%zi", 0);
+    return 0;
+  }
+
+  /* read the input field */
+  n_read = _GD_DoField(D, E->e->entry[0], E->in_fields[0], first_frame,
+      first_samp, num_frames, num_samp, return_type, data_out);
+
+  if (D->error != GD_E_OK) {
+    dreturn("%zi", 0);
+    return 0;
+  }
+
+  /* Nothing to polynomise */
+  if (n_read == 0) {
+    dreturn("%zi", 0);
+    return 0;
+  }
+
+  _GD_PolynomData(D, data_out, return_type, n_read, E->poly_ord, E->a);
+
+  dreturn("%zi", n_read);
+  return n_read;
+}
+
 /* _GD_DoConst:  Read from a const.  Returns number of samples read (ie. 1).
 */
 size_t _GD_DoConst(DIRFILE *D, const gd_entry_t *E, gd_type_t return_type,
@@ -791,6 +1093,9 @@ size_t _GD_DoField(DIRFILE *D, gd_entry_t *E, const char* field_code,
         _GD_FillFileFrame(data_out, return_type, first_frame + first_samp,
             n_read);
       break;
+    case GD_POLYNOM_ENTRY:
+      n_read = _GD_DoPolynom(D, E, return_type, first_frame, first_samp,
+          num_frames, num_samp, data_out);
     case GD_CONST_ENTRY:
       n_read = _GD_DoConst(D, E, return_type, data_out);
       break;

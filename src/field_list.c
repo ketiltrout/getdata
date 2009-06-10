@@ -31,8 +31,8 @@ static const char* zero_list[1] = { NULL };
 const gd_entype_t _gd_entype_index[GD_N_ENTYPES] =
 {
   GD_RAW_ENTRY, GD_LINCOM_ENTRY, GD_LINTERP_ENTRY, GD_BIT_ENTRY,
-  GD_MULTIPLY_ENTRY, GD_PHASE_ENTRY, GD_INDEX_ENTRY, GD_CONST_ENTRY,
-  GD_STRING_ENTRY
+  GD_MULTIPLY_ENTRY, GD_PHASE_ENTRY, GD_INDEX_ENTRY, GD_POLYNOM_ENTRY,
+  GD_CONST_ENTRY, GD_STRING_ENTRY
 };
 
 const void* get_constants(DIRFILE* D, gd_type_t return_type)

@@ -56,6 +56,7 @@ static void _GD_ClearDerived(DIRFILE* D, gd_entry_t* E, const gd_entry_t* C,
     case GD_LINTERP_ENTRY:
     case GD_BIT_ENTRY:
     case GD_PHASE_ENTRY:
+    case GD_POLYNOM_ENTRY:
       if (strcmp(E->in_fields[0], C->field) == 0) {
         if (check)
           _GD_SetError(D, GD_E_DELETE, GD_E_DEL_DERIVED, E->field, 0,
@@ -92,6 +93,20 @@ static void _GD_DeReference(DIRFILE* D, gd_entry_t* E, const gd_entry_t* C,
           _GD_DoConst(D, C, GD_UINT32, &E->spf);
           free(E->e->scalar[0]);
           E->e->scalar[0] = NULL;
+        }
+      }
+      break;
+    case GD_POLYNOM_ENTRY:
+      for (i = 0; i <= E->poly_ord; ++i) {
+        if (E->e->scalar[i] != NULL && strcmp(C->field, E->e->scalar[i]) == 0) {
+          if (check) {
+            _GD_SetError(D, GD_E_DELETE, GD_E_DEL_CONST, E->field, 0, C->field);
+            break;
+          } else {
+            _GD_DoConst(D, C, GD_FLOAT64, &E->a[i]);
+            free(E->e->scalar[i]);
+            E->e->scalar[i] = NULL;
+          }
         }
       }
       break;

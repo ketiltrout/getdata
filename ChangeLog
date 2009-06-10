@@ -1,3 +1,42 @@
+2009-06-09   D. V. Wiebe <getdata@ketiltrout.net>  svn:285
+	* src/internal.h: Add GD_E_BAD_ENTRY_POLYORD.
+	* src/getdata.h.in: Define GD_MAX_POLYNOM and GD_POLYNOM_ENTRY.  Increment
+	GD_N_ENTYPES.  Add POLYNOM struct to the entry struct.
+
+	* src/entry.c (_GD_FreeE _GD_CalculateEntry get_entry): Add case for
+	GD_POLYNOM_ENTRY.
+	* src/getdata.c (_GD_DoField): Add case for GD_POLYNOM_ENTRY.
+	* src/flush.c (_GD_Flush _GD_FieldSpec): Add case for GD_POLYNOM_ENTRY.
+	* src/nfields.c (get_nfields_by_type): Add case for GD_POLYNOM_ENTRY.
+	* src/spf.c (_GD_GetSPF): Add case for GD_POLYNOM_ENTRY.
+	* src/putdata.c (_GD_DoFieldOut): Add case for GD_POLYNOM_ENTRY.
+	* src/del.c (_GD_ClearDerived _GD_DeReference): Add case for GD_POLYNOM_ENTRY.
+	* src/mod.c (_GD_Change): Add case for GD_POLYNOM_ENTRY.
+	* src/add.c (_GD_Add): Add case for GD_POLYNOM_ENTRY.
+
+	* src/getdata.c (_GD_PolynomData _GD_DoPolynom): Added.
+	* src/putdata.c (_GD_DoPolynomOut): Added.
+	* src/parse.c (_GD_ParsePolynom): Added.
+	* src/mod.c (dirfile_alter_polynom): Added.
+	* src/add.c (dirfile_add_polynom dirfile_madd_polynom): Added.
+
+	* src/entry.c (_GD_FreeE): GD_MAX_LINCOM -> GD_MAX_POLYNOM in limits.
+	* src/mod.c (_GD_Change): GD_MAX_LINCOM -> GD_MAX_POLYNOM in limits.
+	* src/internal.h: GD_MAX_LINCOM -> GD_MAX_POLYNOM in limits.
+
+	* src/parse.c (_GD_ParseFieldSpec): Handle POLYNOM field type.
+	* src/errors.c: Add GD_E_BAD_ENTRY_POLYORD suberror under GD_E_BAD_ENTRY.
+	* src/field_list.c: Add GD_POLYNOM_ENTRY to _gd_entype_index.
+	* src/mod.c (dirfile_alter_entry): For POLYNOM, also set move.
+
+	* src/mod.c (_GD_Change): Fix scalar_free flags for LINCOM.
+	* src/mod.c (dirfile_alter_lincom): Rename "move" to "flags" to avoid
+	obfuscating the purpose of this variable.
+
+	* src/mod.c (dirfile_alter_lincom): Check validity of n_fields before use.
+	* src/add.c (_GD_Add dirfile_add_lincom dirfile_madd_lincom): Check validity
+	of n_fields before use.
+
 2009-01-16   D. V. Wiebe <getdata@ketiltrout.net>  svn:285
 	GetData 0.5.0 released.	
 
