@@ -615,7 +615,7 @@ static gd_entry_t* _GD_ParsePolynom(DIRFILE* D,
       _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     else
       for (i = 0; i <= E->poly_ord; i++) {
-        E->e->scalar[i] = _GD_SetScalar(in_cols[i + 4], &E->a[i], GD_IEEE754);
+        E->e->scalar[i] = _GD_SetScalar(in_cols[i + 3], &E->a[i], GD_IEEE754);
 
         if (E->e->scalar[i] != NULL)
           E->e->calculated = 0;

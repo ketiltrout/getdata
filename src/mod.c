@@ -364,12 +364,11 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
         field_free = 1;
       }
 
-      if (N->poly_ord != E->poly_ord) {
+      Q.poly_ord = (N->poly_ord == 0) ? E->poly_ord : N->poly_ord;
+      if (Q.poly_ord != E->poly_ord)
         modified = 1;
-        Q.poly_ord = N->poly_ord;
-      }
 
-      for (i = 0; i <= GD_MAX_POLYNOM; ++i)
+      for (i = 0; i <= Q.poly_ord; ++i)
         if (flags & 0x1 && N->a[i] != E->a[i]) {
           modified = 1;
           Q.a[i] = N->a[i];
@@ -685,7 +684,7 @@ int dirfile_alter_polynom(DIRFILE* D, const char* field_code, int poly_ord,
   int i;
   int flags = 0;
 
-  dtrace("%p, \"%s\", %i, \"%s\", %p", D, field_code, poly_ord, in_fields, a);
+  dtrace("%p, \"%s\", %i, \"%s\", %p", D, field_code, poly_ord, in_field, a);
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -717,7 +716,7 @@ int dirfile_alter_polynom(DIRFILE* D, const char* field_code, int poly_ord,
   N.in_fields[0] = (char*)in_field;
   N.e = NULL;
 
-  for (i = 0; i < N.poly_ord; ++i)
+  for (i = 0; i <= N.poly_ord; ++i)
     if (a != NULL) {
       flags |= 1;
       N.a[i] = a[i];

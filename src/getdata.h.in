@@ -270,6 +270,10 @@ extern int dirfile_add_phase(DIRFILE* D, const char* field_code,
     const char* in_field, int shift, int fragment_index)
 __THROW __gd_nonnull ((1,2,3));
 
+extern int dirfile_add_polynom(DIRFILE* D, const char* field_code, int poly_ord,
+    const char* in_field, const double* a, int fragment_index)
+__THROW __gd_nonnull ((1,2,4));
+
 extern int dirfile_add_string(DIRFILE* D, const char* field_code,
     const char* value, int fragment_index) __THROW __gd_nonnull((1,2,3));
 
@@ -288,6 +292,10 @@ extern int dirfile_alter_multiply(DIRFILE* D, const char* field_code,
 
 extern int dirfile_alter_phase(DIRFILE* D, const char* field_code,
     const char* in_field, int shift) __THROW __gd_nonnull((1,2));
+
+extern int dirfile_alter_polynom(DIRFILE* D, const char* field_code,
+    int poly_ord, const char* in_field, const double* a)
+__THROW __gd_nonnull((1,2));
 
 extern int get_constant(DIRFILE* D, const char *field_code,
     gd_type_t return_type, void *data_out) __THROW __gd_nonnull ((1, 2));
@@ -354,6 +362,10 @@ __THROW __gd_nonnull ((1,2,3,4,5));
 extern int dirfile_madd_phase(DIRFILE* D, const char* parent,
     const char* field_code, const char* in_field, int shift)
 __THROW __gd_nonnull ((1,2,3,4));
+
+extern int dirfile_madd_polynom(DIRFILE* D, const char* parent,
+    const char* field_code, int poly_ord, const char* in_field, const double* a)
+__THROW __gd_nonnull ((1,2,3,5));
 
 extern int dirfile_madd_spec(DIRFILE* D, const char* line,
     const char* parent) __THROW __gd_nonnull ((1,2,3));

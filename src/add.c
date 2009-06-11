@@ -281,8 +281,7 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
             E->poly_ord, NULL);
       else {
         memcpy(E->a, entry->a, sizeof(double) * E->poly_ord);
-        for (i = 0; i <= E->poly_ord; ++i)
-          if ((E->in_fields[i] = strdup(entry->in_fields[i])) == NULL)
+        if ((E->in_fields[0] = strdup(entry->in_fields[0])) == NULL)
             _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
       }
       break;

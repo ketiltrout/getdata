@@ -1094,8 +1094,9 @@ size_t _GD_DoField(DIRFILE *D, gd_entry_t *E, const char* field_code,
             n_read);
       break;
     case GD_POLYNOM_ENTRY:
-      n_read = _GD_DoPolynom(D, E, return_type, first_frame, first_samp,
-          num_frames, num_samp, data_out);
+      n_read = _GD_DoPolynom(D, E, first_frame, first_samp, num_frames,
+          num_samp, return_type, data_out);
+      break;
     case GD_CONST_ENTRY:
       n_read = _GD_DoConst(D, E, return_type, data_out);
       break;

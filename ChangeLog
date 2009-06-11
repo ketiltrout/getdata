@@ -1,4 +1,23 @@
-2009-06-09   D. V. Wiebe <getdata@ketiltrout.net>  svn:285
+2009-06-11   D. V. Wiebe <getdata@ketiltrout.net>  svn:291
+	* test/alter_polynom_coeff.c test/get_polynom_noin.c
+	test/parse_polynom_scalar.c test/put_polynom1.c test/alter_polynom_input.c
+	test/put_polynom2.c test/madd_polynom.c test/entry_polynom_scalar.c
+	test/parse_polynom_ncols1.c test/parse_polynom.c test/add_polynom.c
+	test/spf_polynom.c test/parse_polynom_ncols2.c test/put_polynom_noin.c
+	test/alter_polynom_ord.c test/get_polynom.c test/entry_polynom.c: Added.
+
+	* src/getdata.c (_GD_DoField): Fix call to _GD_DoPolynom.
+
+	* src/parse.c (_GD_ParsePolynom): Fix off-by-one error.
+
+	* src/mod.c (_GD_Change): Handle poly_ord = 0 properly.
+	* src/mod.c (dirfile_alter_polynom): Fix off-by-one error.
+
+	* src/getdata.h.in: Declare polynom API.
+
+	* src/add.c (_GD_Add): Only copy the first polynom in_field.
+
+2009-06-09   D. V. Wiebe <getdata@ketiltrout.net>  svn:290
 	* src/internal.h: Add GD_E_BAD_ENTRY_POLYORD.
 	* src/getdata.h.in: Define GD_MAX_POLYNOM and GD_POLYNOM_ENTRY.  Increment
 	GD_N_ENTYPES.  Add POLYNOM struct to the entry struct.
