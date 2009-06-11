@@ -1,3 +1,9 @@
+2009-06-11   D. V. Wiebe <getdata@ketiltrout.net>  svn:292
+	* test/get_lincom_non.c test/parse_lincom_non_ncols.c
+	test/parse_lincom_non.c: Added.
+
+	* src/parse.c (_GD_ParseLincom): Make <n> optional.
+
 2009-06-11   D. V. Wiebe <getdata@ketiltrout.net>  svn:291
 	* test/alter_polynom_coeff.c test/get_polynom_noin.c
 	test/parse_polynom_scalar.c test/put_polynom1.c test/alter_polynom_input.c

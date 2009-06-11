@@ -128,10 +128,10 @@ GET_TESTS=get64 get_bad_code get_bit get_char get_endian8 get_endian16 \
 					get_endian32 get_endian64 get_endian_float32 get_endian_float64 \
 					get_ff get_float32 get_float64 get_foffs get_fs get_int8 get_int16 \
 					get_int32 get_int64 get_invalid get_lincom1 get_lincom2 get_lincom3 \
-					get_lincom_noin get_linterp get_linterp_noin get_linterp_notab \
-					get_multiply get_multiply_noin get_nonexistent get_null $(GET_OFF64) \
-					get_phase get_polynom get_polynom_noin get_recurse get_sf get_ss \
-					get_type get_uint16 get_uint32 get_uint64
+					get_lincom_noin get_lincom_non get_linterp get_linterp_noin \
+					get_linterp_notab get_multiply get_multiply_noin get_nonexistent \
+					get_null $(GET_OFF64) get_phase get_polynom get_polynom_noin \
+					get_recurse get_sf get_ss get_type get_uint16 get_uint32 get_uint64
 
 GLOBAL_TESTS=global_name global_ref global_ref_empty global_ref_get \
 						 global_ref_set
@@ -185,20 +185,20 @@ PARSE_TESTS=parse_badline parse_bit parse_bit4 parse_bit_bitnum \
 						parse_eol parse_foffs parse_foffs_include parse_foffs_slash \
 						parse_include parse_include_nonexistent parse_include_slash \
 						parse_index parse_lincom parse_lincom_ncols1 parse_lincom_ncols2 \
-						parse_lincom_nfields parse_lincom_nofields parse_lincom_scalar \
-						parse_linterp parse_linterp_ncols parse_meta parse_meta_index \
-						parse_meta_parent parse_meta_raw parse_multiply \
-						parse_multiply_ncols parse_name parse_name_dot parse_name_ext \
-						parse_name_pedantic parse_ncols parse_phase parse_phase_ncols \
-						parse_phase_scalar parse_polynom parse_polynom_ncols1 \
-						parse_polynom_ncols2 parse_polynom_scalar parse_protect_all \
-						parse_protect_bad parse_protect_data parse_protect_format \
-						parse_protect_none parse_quote parse_quote_mismatch parse_raw \
-						parse_raw_char parse_raw_ncols parse_raw_scalar parse_raw_spf \
-						parse_raw_type parse_ref parse_ref_nonexistent parse_sort \
-						parse_string parse_string_ncols parse_string_null parse_version \
-						parse_version_include parse_version_pedantic parse_version_slash \
-						parse_whitespace
+						parse_lincom_nfields parse_lincom_nofields parse_lincom_non \
+						parse_lincom_non_ncols parse_lincom_scalar parse_linterp \
+						parse_linterp_ncols parse_meta parse_meta_index parse_meta_parent \
+						parse_meta_raw parse_multiply parse_multiply_ncols parse_name \
+						parse_name_dot parse_name_ext parse_name_pedantic parse_ncols \
+						parse_phase parse_phase_ncols parse_phase_scalar parse_polynom \
+						parse_polynom_ncols1 parse_polynom_ncols2 parse_polynom_scalar \
+						parse_protect_all parse_protect_bad parse_protect_data \
+						parse_protect_format parse_protect_none parse_quote \
+						parse_quote_mismatch parse_raw parse_raw_char parse_raw_ncols \
+						parse_raw_scalar parse_raw_spf parse_raw_type parse_ref \
+						parse_ref_nonexistent parse_sort parse_string parse_string_ncols \
+						parse_string_null parse_version parse_version_include \
+						parse_version_pedantic parse_version_slash parse_whitespace
 
 PROTECT_TESTS=protect_alter protect_get
 

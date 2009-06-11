@@ -200,6 +200,7 @@ static gd_entry_t* _GD_ParseLincom(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
     int pedantic)
 {
   int i;
+  char* ptr = NULL;
 
   dtrace("%p, %p, %i, %p, \"%s\", %i, %i", D, in_cols, n_cols, parent,
       format_file, line, pedantic);
@@ -243,8 +244,21 @@ static gd_entry_t* _GD_ParseLincom(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
     return NULL;
   }
 
-  E->n_fields = atoi(in_cols[2]);
   E->e->calculated = 1;
+  E->n_fields = (int)(strtol(in_cols[2], &ptr, 10));
+  if (*ptr != '\0') {
+    E->n_fields = (n_cols - 2) / 3;
+    /* assume <n> has been omitted */
+    if (n_cols % 3 != 2 || E->n_fields < 1 || E->n_fields > GD_MAX_LINCOM) {
+      _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_TOK, format_file, line, NULL);
+      _GD_FreeE(E, 1);
+      dreturn("%p", NULL);
+      return NULL;
+    }
+    /* the following two statements are somewhat hacky.... */
+    n_cols++;
+    in_cols--;
+  }
 
   if (E->field == NULL)
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
