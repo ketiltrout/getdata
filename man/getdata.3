@@ -162,10 +162,17 @@ or
 .BR get_string (3)
 instead.
 .TP
+.B GD_E_BAD_SCALAR
+A scalar field used in the definition of the field was not found, or was not of
+scalar type.
+.TP
 .B GD_E_BAD_TYPE
 An invalid
 .I return_type
 was specified.
+.TP
+.B GD_E_DIMENSION
+A scalar field was found where a vector field was expected.
 .TP
 .B GD_E_INTERNAL_ERROR
 An internal error occurred in the library while trying to perform the task.
