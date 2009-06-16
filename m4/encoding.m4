@@ -85,17 +85,20 @@ AC_SUBST(AS_TR_CPP([$1_LDFLAGS]))
 
 dnl executables needed for tests
 AC_PATH_PROGS([path_$5], [$5], [not found], [$AS_TR_CPP([$1_SEARCHPATH])])
-AC_PATH_PROGS([path_$6], [$6], [not found], [$AS_TR_CPP([$1_SEARCHPATH])])
 
 if test "x$path_$5" != "xnot found"; then
   AC_DEFINE_UNQUOTED(AS_TR_CPP([$5]), ["$path_$5"],
                      [ Define to the full path to the `$5' binary ])
 fi
 
+ifelse(`x$6', `x',,[
+AC_PATH_PROGS([path_$6], [$6], [not found], [$AS_TR_CPP([$1_SEARCHPATH])])
+
 if test "x$path_$6" != "xnot found"; then
   AC_DEFINE_UNQUOTED(AS_TR_CPP([$6]), ["$path_$6"],
                      [ Define to the full path to the `$6' binary ])
 fi
+])
 AM_CONDITIONAL(AS_TR_CPP([USE_$1]), [test "x$use_$1" = "xyes"])
 AM_CONDITIONAL(AS_TR_CPP([TEST_$1]),
               [test "x$path_$5" != "xnot found" -a "x$path_$6" != "xnot found"])

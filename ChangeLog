@@ -1,3 +1,17 @@
+2009-06-16   D. V. Wiebe <getdata@ketiltrout.net>  svn:295
+	* test/xz_nframes.c test/lzma_nframes.c test/lzma_get.c test/xz_get.c:
+	Added.
+
+	* m4/encoding.m4 (GD_CHECK_ENCODING): Fix to allow an empty 6th parameter.
+	* configure.ac: Add LZMA/xz encoding framework check.
+
+	* src/lzma.c: Added.
+	* src/encoding.c: Add entries to _gd_ef for the LZMA schemes.
+	* src/internal.h: Add GD_ENC_LZMA_RAW and GD_ENC_XZ_RAW.
+	* src/getdata.h.in: Add GD_LZMA_ENCODED.
+
+	* src/bzip.c (_GD_Bzip2Read): Fix length count.
+
 2009-06-11   D. V. Wiebe <getdata@ketiltrout.net>  svn:292
 	* test/get_lincom_non.c test/parse_lincom_non_ncols.c
 	test/parse_lincom_non.c: Added.

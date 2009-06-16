@@ -79,12 +79,15 @@ const char* _gd_colsub(void);
 #define dtracevoid() printf("%s %s()\n", _gd_coladd(), __FUNCTION__)
 #define dtrace(fmt, ...) printf("%s %s(" fmt ")\n", _gd_coladd(), \
     __FUNCTION__, __VA_ARGS__)
+#define dprintf(fmt, ...) printf("%s %s:%i " fmt "\n", _gd_colnil(), \
+    __FUNCTION__, __LINE__, __VA_ARGS__)
 #define dreturnvoid() printf("%s %s = (nil)\n", _gd_colsub(), __FUNCTION__)
 #define dreturn(fmt, ...) printf("%s %s = " fmt "\n", _gd_colsub(), \
     __FUNCTION__, __VA_ARGS__)
 #else
 #define dtracevoid()
 #define dtrace(...)
+#define dprintf(...)
 #define dreturnvoid()
 #define dreturn(...)
 #endif
@@ -212,7 +215,9 @@ struct _gd_private_entry {
 #define GD_ENC_GZ_RAW     2
 #define GD_ENC_BZ2_RAW    3
 #define GD_ENC_ASCII      4
-#define GD_ENC_UNKNOWN    5
+#define GD_ENC_LZMA_RAW   5
+#define GD_ENC_XZ_RAW     6
+#define GD_ENC_UNKNOWN    7
 
 #define GD_N_SUBENCODINGS (GD_ENC_UNKNOWN + 1)
 
@@ -443,6 +448,15 @@ ssize_t _GD_GzipRead(struct _gd_raw_file* file, void *ptr, gd_type_t data_type,
     size_t nmemb);
 int _GD_GzipClose(struct _gd_raw_file* file);
 off64_t _GD_GzipSize(struct _gd_raw_file* file, gd_type_t data_type);
+
+/* lzma I/O methods */
+int _GD_LzmaOpen(struct _gd_raw_file* file, int mode, int creat);
+off64_t _GD_LzmaSeek(struct _gd_raw_file* file, off64_t count,
+    gd_type_t data_type, int pad);
+ssize_t _GD_LzmaRead(struct _gd_raw_file* file, void *ptr, gd_type_t data_type,
+    size_t nmemb);
+int _GD_LzmaClose(struct _gd_raw_file* file);
+off64_t _GD_LzmaSize(struct _gd_raw_file* file, gd_type_t data_type);
 
 /* slim I/O methods */
 int _GD_SlimOpen(struct _gd_raw_file* file, int mode, int creat);

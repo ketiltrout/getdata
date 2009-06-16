@@ -59,7 +59,7 @@ struct encoding_t _gd_ef[GD_N_SUBENCODINGS] = {
     NULL, NULL, NULL, NULL, NULL, NULL, NULL , NULL, &_GD_GenericMove,
     &_GD_GenericUnlink, NULL },
   { GD_BZIP2_ENCODED, ".bz2", 1, "Bzip2",
-# ifdef USE_GZIP
+# ifdef USE_BZIP2
     GD_EF_OPEN | GD_EF_CLOSE | GD_EF_SEEK | GD_EF_READ | GD_EF_SIZE,
 # else
     0,
@@ -68,6 +68,22 @@ struct encoding_t _gd_ef[GD_N_SUBENCODINGS] = {
     &_GD_GenericUnlink, NULL },
   { GD_SLIM_ENCODED, ".slm", 1, "Slim",
 # ifdef USE_SLIM
+    GD_EF_OPEN | GD_EF_CLOSE | GD_EF_SEEK | GD_EF_READ | GD_EF_SIZE,
+# else
+    0,
+# endif
+    NULL, NULL, NULL, NULL, NULL, NULL, NULL , NULL, &_GD_GenericMove,
+    &_GD_GenericUnlink, NULL },
+  { GD_LZMA_ENCODED, ".xz", 1, "Lzma",
+# ifdef USE_LZMA
+    GD_EF_OPEN | GD_EF_CLOSE | GD_EF_SEEK | GD_EF_READ | GD_EF_SIZE,
+# else
+    0,
+# endif
+    NULL, NULL, NULL, NULL, NULL, NULL, NULL , NULL, &_GD_GenericMove,
+    &_GD_GenericUnlink, NULL },
+  { GD_LZMA_ENCODED, ".lzma", 1, "Lzma",
+# ifdef USE_LZMA
     GD_EF_OPEN | GD_EF_CLOSE | GD_EF_SEEK | GD_EF_READ | GD_EF_SIZE,
 # else
     0,
@@ -100,6 +116,26 @@ struct encoding_t _gd_ef[GD_N_SUBENCODINGS] = {
 # ifdef USE_SLIM
     &_GD_SlimOpen, &_GD_SlimClose, NULL /* TOUCH */,
     &_GD_SlimSeek, &_GD_SlimRead, &_GD_SlimSize, NULL /* WRITE */,
+    NULL /* SYNC */, &_GD_GenericMove, &_GD_GenericUnlink, NULL /* TEMP */
+# else
+    NULL, NULL, NULL, NULL, NULL, NULL, NULL , NULL, &_GD_GenericMove,
+    &_GD_GenericUnlink, NULL
+# endif
+  },
+  { GD_LZMA_ENCODED, ".xz", 1, NULL, 0,
+# ifdef USE_LZMA
+    &_GD_LzmaOpen, &_GD_LzmaClose, NULL /* TOUCH */,
+    &_GD_LzmaSeek, &_GD_LzmaRead, &_GD_LzmaSize, NULL /* WRITE */,
+    NULL /* SYNC */, &_GD_GenericMove, &_GD_GenericUnlink, NULL /* TEMP */
+# else
+    NULL, NULL, NULL, NULL, NULL, NULL, NULL , NULL, &_GD_GenericMove,
+    &_GD_GenericUnlink, NULL
+#endif
+  },
+  { GD_LZMA_ENCODED, ".lzma", 1, NULL, 0,
+# ifdef USE_LZMA
+    &_GD_LzmaOpen, &_GD_LzmaClose, NULL /* TOUCH */,
+    &_GD_LzmaSeek, &_GD_LzmaRead, &_GD_LzmaSize, NULL /* WRITE */,
     NULL /* SYNC */, &_GD_GenericMove, &_GD_GenericUnlink, NULL /* TEMP */
 # else
     NULL, NULL, NULL, NULL, NULL, NULL, NULL , NULL, &_GD_GenericMove,
@@ -313,8 +349,6 @@ int _GD_Supports(DIRFILE* D, gd_entry_t* E, unsigned int funcs)
   return 1;
 }
 
-/* this function is needed by the encoding libraries and is not makred with
- * an initial underscore. */
 int _GD_SetEncodedName(DIRFILE* D, struct _gd_raw_file* file, const char* base,
     int temp)
 {
@@ -332,7 +366,7 @@ int _GD_SetEncodedName(DIRFILE* D, struct _gd_raw_file* file, const char* base,
         _gd_ef[file->encoding].ext);
   }
 
-  dreturn("%i", 0);
+  dreturn("%i (%s)", 0, file->name);
   return 0;
 }
 

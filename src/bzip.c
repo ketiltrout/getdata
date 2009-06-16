@@ -1,4 +1,4 @@
-/* (C) 2008 D. V. Wiebe
+/* (C) 2008-2009 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -41,7 +41,7 @@
 #endif
 
 #if SIZEOF_INT < 4
-#define GD_BZIP_BUFFER_SIZE 65535
+#define GD_BZIP_BUFFER_SIZE 32767
 #else
 #define GD_BZIP_BUFFER_SIZE 1000000
 #endif
@@ -177,11 +177,12 @@ ssize_t _GD_Bzip2Read(struct _gd_raw_file *file, void *data,
   while (nbytes > (unsigned long long)(ptr->end - ptr->pos)) {
     memcpy(output, ptr->data + ptr->pos, ptr->end - ptr->pos);
     output += ptr->end - ptr->pos;
+    nbytes -= ptr->end - ptr->pos;
     ptr->pos = ptr->end;
 
     if (ptr->stream_end) {
-      dreturn("%zi", ptr->end - ptr->pos);
-      return ptr->end - ptr->pos;
+      dreturn("%li", (long)(nmemb - nbytes / GD_SIZE(data_type)));
+      return nmemb - nbytes / GD_SIZE(data_type);
     }
 
     ptr->bzerror = 0;
@@ -202,9 +203,6 @@ ssize_t _GD_Bzip2Read(struct _gd_raw_file *file, void *data,
       ptr->stream_end = 1;
       break;
     }
-
-    memcpy(output, ptr->data, ptr->end);
-    nbytes -= ptr->end;
   }
 
   if (nbytes > (unsigned long long)(ptr->end - ptr->pos)) {

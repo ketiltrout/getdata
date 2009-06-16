@@ -149,6 +149,10 @@ LEGACY_TESTS=legacy_get legacy_get_put legacy_get_rofs legacy_nframes \
 			legacy_nonexistent legacy_put legacy_spf
 endif
 
+if TEST_LZMA
+LZMA_TESTS=lzma_get lzma_nframes
+endif
+
 MADD_TESTS=madd madd_bit madd_bit_invalid madd_lincom madd_lincom_invalid \
 					 madd_linterp madd_linterp_invalid madd_multiply \
 					 madd_multiply_invalid madd_phase madd_phase_invalid madd_polynom \
@@ -228,6 +232,10 @@ UNCLUDE_TESTS=unclude unclude_del unclude_move
 
 VLIST_TESTS=vlist vlist_invalid vlist_meta vlist_meta_invalid
 
+if TEST_LZMA
+XZ_TESTS=xz_get xz_nframes
+endif
+
 TESTS=$(ADD_TESTS)        $(ALTER_TESTS)      $(ASCII_TESTS)      \
 			$(BZIP_TESTS)       $(CVLIST_TESTS)     $(CLOSE_TESTS)      \
 			$(CONVERT_TESTS)    $(CREAT_TESTS)      $(DEL_TESTS)        \
@@ -236,13 +244,14 @@ TESTS=$(ADD_TESTS)        $(ALTER_TESTS)      $(ASCII_TESTS)      \
 			$(FLIST_TESTS)      $(FLUSH_TESTS)      $(FOFFS_TESTS)      \
 			$(FRAGMENT_TESTS)   $(GET_TESTS)        $(GLOBAL_TESTS)     \
 			$(GZIP_TESTS)       $(INCLUDE_TESTS)    $(LEGACY_TESTS)     \
-			$(MADD_TESTS)       $(MOVE_TESTS)       $(NAME_TESTS)       \
-			$(NFIELDS_TESTS)    $(NFRAGMENTS_TESTS) $(NFRAMES_TESTS)    \
-			$(NMETA_TESTS)      $(NVECTORS_TESTS)   $(OPEN_TESTS)       \
-			$(PARENT_TESTS)     $(PARSE_TESTS)      $(PROTECT_TESTS)    \
-			$(PUT_TESTS)        $(REF_TESTS)        $(SLIM_TESTS)       \
-			$(SPF_TESTS)        $(SVLIST_TESTS)     $(TRUNC_TESTS)      \
-			$(UNCLUDE_TESTS)    $(VLIST_TESTS)
+			$(LZMA_TESTS)       $(MADD_TESTS)       $(MOVE_TESTS)       \
+			$(NAME_TESTS)       $(NFIELDS_TESTS)    $(NFRAGMENTS_TESTS) \
+			$(NFRAMES_TESTS)    $(NMETA_TESTS)      $(NVECTORS_TESTS)   \
+			$(OPEN_TESTS)       $(PARENT_TESTS)     $(PARSE_TESTS)      \
+			$(PROTECT_TESTS)    $(PUT_TESTS)        $(REF_TESTS)        \
+			$(SLIM_TESTS)       $(SPF_TESTS)        $(SVLIST_TESTS)     \
+			$(TRUNC_TESTS)      $(UNCLUDE_TESTS)    $(VLIST_TESTS)      \
+			$(XZ_TESTS)
 
 check_PROGRAMS=$(TESTS)
 
