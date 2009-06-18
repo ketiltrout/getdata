@@ -60,7 +60,6 @@ AC_ARG_ENABLE(legacy-api, AS_HELP_STRING([--disable-legacy-api],
               ], [ include_legacy_api="yes" ])
 AC_MSG_CHECKING([whether to include the legacy API])
 AC_MSG_RESULT([$include_legacy_api])
-AM_CONDITIONAL(INCLUDE_LEGACY_API, test "x$include_legacy_api" != "xno")
 
 if test "x$include_legacy_api" != "xno"; then
   AC_DEFINE([GETDATA_LEGACY_API], [], [ This symbol is defined whenever the library contains the legacy API ])
@@ -91,7 +90,6 @@ if test "x$enable_debug" = "xyes"; then
             [ Define to enable debugging messages ])
   enable_assert="yes"
 fi
-AM_CONDITIONAL(GETDATA_DEBUG, [test "x$enable_debug" == "xyes"])
 
 AC_MSG_CHECKING([whether to enable assertions])
 AC_MSG_RESULT([$enable_assert])
@@ -110,7 +108,6 @@ AC_ARG_ENABLE(checkdirfile, AS_HELP_STRING([--disable-checkdirfile],
               ], [ make_checkdirfile="build" ])
 AC_MSG_CHECKING([whether to compile and install checkdirfile])
 AC_MSG_RESULT([$make_checkdirfile])
-AM_CONDITIONAL(MAKE_CHECKDIRFILE, test "x$make_checkdirfile" = "xbuild")
 
 dnl C++ bindings
 AC_ARG_ENABLE(cplusplus, AS_HELP_STRING([--disable-cplusplus],
@@ -123,7 +120,6 @@ AC_ARG_ENABLE(cplusplus, AS_HELP_STRING([--disable-cplusplus],
               ], [ make_cxxbindings="yes" ])
 AC_MSG_CHECKING([whether to include the C++ bindings])
 AC_MSG_RESULT([$make_cxxbindings])
-AM_CONDITIONAL(MAKE_CXXBINDINGS, test "x$make_cxxbindings" = "xyes")
 
 dnl Fortran 77 bindings
 AC_ARG_ENABLE(fortran, AS_HELP_STRING([--disable-fortran],
@@ -148,7 +144,6 @@ AC_ARG_ENABLE(fortran95, AS_HELP_STRING([--disable-fortran95],
 
 AC_MSG_CHECKING([whether to include the Fortran 95 bindings])
 AC_MSG_RESULT([$make_f95bindings])
-AM_CONDITIONAL(MAKE_F95BINDINGS, test "x$make_f95bindings" = "xyes")
 
 if test "x$make_f77bindings$make_f95bindings" = "xnoyes"; then
   make_f77bindings="yes (required by Fortran 95 bindings)"
@@ -156,7 +151,6 @@ fi
 
 AC_MSG_CHECKING([whether to include the Fortran 77 bindings])
 AC_MSG_RESULT([$make_f77bindings])
-AM_CONDITIONAL(MAKE_F77BINDINGS, test "x$make_f77bindings" != "xno")
 
 dnl Modules
 AC_ARG_ENABLE(modules, AS_HELP_STRING([--enable-modules],
@@ -170,7 +164,6 @@ AC_ARG_ENABLE(modules, AS_HELP_STRING([--enable-modules],
                 ], [ use_modules="no" ])
 AC_MSG_CHECKING([whether to enable getdata modules])
 AC_MSG_RESULT([$use_modules])
-AM_CONDITIONAL(USE_MODULES, test "x$use_modules" != "xno")
 if test "x$use_modules" != "xno"; then
 AC_DEFINE([USE_MODULES], [], [ Define if building with modules ])
 fi
@@ -314,23 +307,18 @@ else
 fi
 AC_SUBST([LIBLTDL])
 AC_SUBST([LTDLINCL])
-AM_CONDITIONAL(INTERNAL_LTDL, test "x${internal_ltdl}" = xyes)
 
 dnl ICC checks
 echo
 echo "*** Checking additional compiler characteristics"
 echo
 GD_LANG_COMPILER_INTEL
-AM_CONDITIONAL(GNU_C_COMPILER, test "x$gd_cv_c_compiler_intel" == "xno" -a "x$ac_cv_c_compiler_gnu" == "xyes")
 AC_LANG_PUSH([C++])
 GD_LANG_COMPILER_INTEL
-AM_CONDITIONAL(GNU_CXX_COMPILER, test "x$gd_cv_cxx_compiler_intel" == "xno" -a "x$ac_cv_cxx_compiler_gnu" == "xyes")
 AC_LANG([Fortran 77])
 GD_LANG_COMPILER_INTEL
-AM_CONDITIONAL(GNU_F77_COMPILER, test "x$gd_cv_f77_compiler_intel" == "xno" -a "x$ac_cv_f77_compiler_gnu" == "xyes")
 AC_LANG([Fortran])
 GD_LANG_COMPILER_INTEL
-AM_CONDITIONAL(GNU_FC_COMPILER, test "x$gd_cv_fc_compiler_intel" == "xno" -a "x$ac_cv_fc_compiler_gnu" == "xyes")
 AC_LANG_POP([Fortran])
 
 dnl check if we found a C++ compiler
@@ -415,7 +403,6 @@ AC_DEFINE([_LARGEFILE64_SOURCE], [1],
           [ Additional functionality from LFS for large files. ])
 dnl We use off64_t to probe whether to include the LFS transitional API.
 AC_CHECK_TYPES([off64_t], [have_off64_t="yes"], [have_off64_t="no"])
-AM_CONDITIONAL(HAVE_OFF64_T, test "x$have_off64_t" = "xyes")
 
 if test "x$have_off64_t" = "xyes"; then
   dnl Assume we have the entire LFS defined transitional API
@@ -468,6 +455,21 @@ AC_CONFIG_FILES([src/Makefile])
 AC_CONFIG_HEADERS([src/getdata.h], [chmod a-w src/getdata.h])
 AC_CONFIG_FILES([src/getdata.pc])
 AC_CONFIG_FILES([test/Makefile])
+
+# Automake conditionals
+AM_CONDITIONAL(GETDATA_DEBUG, [test "x$enable_debug" == "xyes"])
+AM_CONDITIONAL(GNU_C_COMPILER, test "x$gd_cv_c_compiler_intel" == "xno" -a "x$ac_cv_c_compiler_gnu" == "xyes")
+AM_CONDITIONAL(GNU_CXX_COMPILER, test "x$gd_cv_cxx_compiler_intel" == "xno" -a "x$ac_cv_cxx_compiler_gnu" == "xyes")
+AM_CONDITIONAL(GNU_F77_COMPILER, test "x$gd_cv_f77_compiler_intel" == "xno" -a "x$ac_cv_f77_compiler_gnu" == "xyes")
+AM_CONDITIONAL(GNU_FC_COMPILER, test "x$gd_cv_fc_compiler_intel" == "xno" -a "x$ac_cv_fc_compiler_gnu" == "xyes")
+AM_CONDITIONAL(HAVE_OFF64_T, test "x$have_off64_t" = "xyes")
+AM_CONDITIONAL(INCLUDE_LEGACY_API, test "x$include_legacy_api" != "xno")
+AM_CONDITIONAL(INTERNAL_LTDL, test "x${internal_ltdl}" = xyes)
+AM_CONDITIONAL(MAKE_CHECKDIRFILE, test "x$make_checkdirfile" = "xbuild")
+AM_CONDITIONAL(MAKE_CXXBINDINGS, test "x$make_cxxbindings" = "xyes")
+AM_CONDITIONAL(MAKE_F77BINDINGS, test "x$make_f77bindings" != "xno")
+AM_CONDITIONAL(MAKE_F95BINDINGS, test "x$make_f95bindings" = "xyes")
+AM_CONDITIONAL(USE_MODULES, test "x$use_modules" != "xno")
 
 AC_OUTPUT
 
