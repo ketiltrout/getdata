@@ -107,6 +107,7 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
       entry->field_type != GD_PHASE_ENTRY &&
       entry->field_type != GD_CONST_ENTRY &&
       entry->field_type != GD_POLYNOM_ENTRY &&
+      entry->field_type != GD_SBIT_ENTRY &&
       entry->field_type != GD_STRING_ENTRY)
   {
     _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_TYPE, NULL,
@@ -241,6 +242,7 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
         _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
       break;
     case GD_BIT_ENTRY:
+    case GD_SBIT_ENTRY:
       E->numbits = entry->numbits;
       E->bitnum = entry->bitnum;
 
@@ -636,6 +638,32 @@ int dirfile_add_bit(DIRFILE* D, const char* field_code, const char* in_field,
   return error;
 }
 
+/* add a SBIT entry */
+int dirfile_add_sbit(DIRFILE* D, const char* field_code, const char* in_field,
+    int bitnum, int numbits, int fragment_index)
+{
+  dtrace("%p, \"%s\", \"%s\", %i, %i, %i\n", D, field_code, in_field, bitnum,
+      numbits, fragment_index);
+
+  if (D->flags & GD_INVALID) {/* don't crash */
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  gd_entry_t B;
+  B.field = (char*)field_code;
+  B.field_type = GD_SBIT_ENTRY;
+  B.in_fields[0] = (char*)in_field;
+  B.bitnum = bitnum;
+  B.numbits = numbits;
+  B.fragment_index = fragment_index;
+  int error = _GD_Add(D, &B, NULL);
+
+  dreturn("%i", error);
+  return error;
+}
+
 /* add a MULTIPLY entry */
 int dirfile_add_multiply(DIRFILE* D, const char* field_code,
     const char* in_field1, const char* in_field2, int fragment_index)
@@ -896,6 +924,32 @@ int dirfile_madd_bit(DIRFILE* D, const char* parent, const char* field_code,
   gd_entry_t B;
   B.field = (char*)field_code;
   B.field_type = GD_BIT_ENTRY;
+  B.in_fields[0] = (char*)in_field;
+  B.bitnum = bitnum;
+  B.numbits = numbits;
+  B.fragment_index = 0;
+  int error = _GD_Add(D, &B, parent);
+
+  dreturn("%i", error);
+  return error;
+}
+
+/* add a META SBIT entry */
+int dirfile_madd_sbit(DIRFILE* D, const char* parent, const char* field_code,
+    const char* in_field, int bitnum, int numbits)
+{
+  dtrace("%p, \"%s\", \"%s\", \"%s\", %i, %in", D, field_code, parent, in_field,
+      bitnum, numbits);
+
+  if (D->flags & GD_INVALID) {/* don't crash */
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  gd_entry_t B;
+  B.field = (char*)field_code;
+  B.field_type = GD_SBIT_ENTRY;
   B.in_fields[0] = (char*)in_field;
   B.bitnum = bitnum;
   B.numbits = numbits;

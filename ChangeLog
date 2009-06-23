@@ -1,3 +1,25 @@
+2009-06-23   D. V. Wiebe <getdata@ketiltrout.net>  svn:298
+	* test/get_sbit.c test/parse_sbit.c test/add_sbit.c test/put_sbit.c
+	test/madd_sbit.c: Added.
+
+	* src/getdata.h.in: define GD_SBIT_ENTRY.
+
+	* src/entry.c (_GD_FreeE _GD_CalculateEntry get_entry): Update for SBIT.
+	* src/getdata.c (_GD_DoBit): Add is_signed parameter and calculates signed
+	bitfields when needed.
+	* src/getdata.c (_GD_DoField): Update for SBIT.
+	* src/flush.c (_GD_FieldSpec _GD_Flush): Update for SBIT.
+	* src/nfields.c (get_nfields_by_type): Update for SBIT.
+	* src/putdata.c (_GD_DoFieldOut): Update for SBIT.
+	* src/del.c (_GD_ClearDerived _GD_DeReference): Update for SBIT.
+	* src/parse.c (_GD_ParseBit): Add is_signed parameter and parse SBIT.
+	* src/parse.c (_GD_ParseFieldSpec): Update for SBIT.
+	* src/field_list.c: Add GD_SBIT_ENTRY to _gd_entype_index.
+	* src/mod.c (dirfile_alter_sbit): Added.
+	* src/mod.c (_GD_Change): Update for SBIT.
+	* src/add.c (_GD_Add): Update for SBIT.
+	* src/add.c (dirfile_add_sbit dirfile_madd_sbit): Added.
+
 2009-06-18   D. V. Wiebe <getdata@ketiltrout.net>  svn:297
 	* configure.ac: Move AM_CONDITIONALS to a block near the end to avoid
 	testing them too soon.

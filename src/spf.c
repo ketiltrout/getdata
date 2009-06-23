@@ -52,6 +52,7 @@ unsigned int _GD_GetSPF(DIRFILE* D, gd_entry_t* E)
     case GD_PHASE_ENTRY:
     case GD_LINTERP_ENTRY:
     case GD_POLYNOM_ENTRY:
+    case GD_SBIT_ENTRY:
       if (E->e->entry[0] == NULL) {
         E->e->entry[0] = _GD_FindField(D, E->in_fields[0], NULL);
 

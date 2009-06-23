@@ -281,6 +281,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
 
       break;
     case GD_BIT_ENTRY:
+    case GD_SBIT_ENTRY:
       if (N->numbits >= 1 && E->numbits != N->numbits) {
         modified = 1;
         Q.numbits = N->numbits;
@@ -595,6 +596,32 @@ int dirfile_alter_bit(DIRFILE* D, const char* field_code, const char* in_field,
   }
 
   N.field_type = GD_BIT_ENTRY;
+  N.in_fields[0] = (char*)in_field;
+  N.bitnum = bitnum;
+  N.numbits = numbits;
+  N.e = NULL;
+
+  int ret = _GD_Change(D, field_code, &N, 0);
+
+  dreturn("%i", ret);
+  return ret;
+}
+
+int dirfile_alter_sbit(DIRFILE* D, const char* field_code, const char* in_field,
+    int bitnum, int numbits)
+{
+  gd_entry_t N;
+
+  dtrace("%p, \"%s\", \"%s\", %i, %i", D, field_code, in_field, bitnum,
+      numbits);
+
+  if (D->flags & GD_INVALID) {/* don't crash */
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  N.field_type = GD_SBIT_ENTRY;
   N.in_fields[0] = (char*)in_field;
   N.bitnum = bitnum;
   N.numbits = numbits;

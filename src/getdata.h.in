@@ -139,13 +139,14 @@ typedef enum {
   GD_MULTIPLY_ENTRY = 0x05,
   GD_PHASE_ENTRY    = 0x06,
   GD_INDEX_ENTRY    = 0x07,
-  GD_POLYNOM_ENTRY  = 0x09,
+  GD_POLYNOM_ENTRY  = 0x08,
+  GD_SBIT_ENTRY     = 0x09,
   GD_CONST_ENTRY    = GD_SCALAR_ENTRY + 0x01,
   GD_STRING_ENTRY   = GD_SCALAR_ENTRY + 0x02,
 } gd_entype_t;
 
 /* GD_NO_ENTRY is not part of this count */
-#define GD_N_ENTYPES 10
+#define GD_N_ENTYPES 11
 
 /* Data types -- No valid type may set 0x40 */
 #define GD_SIZE8     0x01
@@ -193,7 +194,7 @@ struct _gd_unified_entry {
       double b[GD_MAX_LINCOM];
     };
     char *table; /* LINTERP */
-    struct { /* BIT */
+    struct { /* BIT and SBIT */
       int bitnum;
       int numbits;
     };
@@ -275,6 +276,10 @@ extern int dirfile_add_polynom(DIRFILE* D, const char* field_code, int poly_ord,
     const char* in_field, const double* a, int fragment_index)
 __THROW __gd_nonnull ((1,2,4));
 
+extern int dirfile_add_sbit(DIRFILE* D, const char* field_code,
+    const char* in_field, int bitnum, int numbits, int fragment_index)
+__THROW __gd_nonnull ((1,2,3));
+
 extern int dirfile_add_string(DIRFILE* D, const char* field_code,
     const char* value, int fragment_index) __THROW __gd_nonnull((1,2,3));
 
@@ -297,6 +302,9 @@ extern int dirfile_alter_phase(DIRFILE* D, const char* field_code,
 extern int dirfile_alter_polynom(DIRFILE* D, const char* field_code,
     int poly_ord, const char* in_field, const double* a)
 __THROW __gd_nonnull((1,2));
+
+extern int dirfile_alter_sbit(DIRFILE* D, const char* field_code,
+    const char* in_field, int bitnum, int numbits) __THROW __gd_nonnull((1,2));
 
 extern int get_constant(DIRFILE* D, const char *field_code,
     gd_type_t return_type, void *data_out) __THROW __gd_nonnull ((1, 2));
@@ -367,6 +375,10 @@ __THROW __gd_nonnull ((1,2,3,4));
 extern int dirfile_madd_polynom(DIRFILE* D, const char* parent,
     const char* field_code, int poly_ord, const char* in_field, const double* a)
 __THROW __gd_nonnull ((1,2,3,5));
+
+extern int dirfile_madd_sbit(DIRFILE* D, const char* parent,
+    const char* field_code, const char* in_field, int bitnum, int numbits)
+__THROW __gd_nonnull ((1,2,3,4));
 
 extern int dirfile_madd_spec(DIRFILE* D, const char* line,
     const char* parent) __THROW __gd_nonnull ((1,2,3));

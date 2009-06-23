@@ -53,6 +53,7 @@ void _GD_FreeE(gd_entry_t* entry, int priv)
     case GD_BIT_ENTRY:
     case GD_PHASE_ENTRY:
     case GD_POLYNOM_ENTRY:
+    case GD_SBIT_ENTRY:
       free(entry->in_fields[0]);
       break;
     case GD_STRING_ENTRY:
@@ -172,6 +173,7 @@ int _GD_CalculateEntry(DIRFILE* D, gd_entry_t* E)
       }
       break;
     case GD_BIT_ENTRY:
+    case GD_SBIT_ENTRY:
       _GD_GetScalar(D, E, E->e->scalar[0], GD_SIGNED, &E->bitnum);
       _GD_GetScalar(D, E, E->e->scalar[1], GD_SIGNED, &E->numbits);
       break;
@@ -294,6 +296,7 @@ int get_entry(DIRFILE* D, const char* field_code, gd_entry_t* entry)
     case GD_BIT_ENTRY:
     case GD_PHASE_ENTRY:
     case GD_POLYNOM_ENTRY:
+    case GD_SBIT_ENTRY:
       entry->in_fields[0] = strdup(E->in_fields[0]);
       /* fall through */
     case GD_RAW_ENTRY:

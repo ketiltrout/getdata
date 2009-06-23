@@ -790,18 +790,18 @@ static size_t _GD_DoMultiply(DIRFILE *D, gd_entry_t* E,
 
 /* _GD_DoBit:  Read from a bitfield.  Returns number of samples read.
 */
-static size_t _GD_DoBit(DIRFILE *D, gd_entry_t *E,
+static size_t _GD_DoBit(DIRFILE *D, gd_entry_t *E, int is_signed,
     off64_t first_frame, off64_t first_samp, size_t num_frames, size_t num_samp,
     gd_type_t return_type, void *data_out)
 {
-  uint64_t *tmpbuf;
+  void *tmpbuf;
   size_t i;
   int spf;
   size_t ns;
   size_t n_read;
 
-  dtrace("%p, %p, %lli, %lli, %zi, %zi, 0x%x, %p", D, E, first_frame,
-      first_samp, num_frames, num_samp, return_type, data_out);
+  dtrace("%p, %p, %i, %lli, %lli, %zi, %zi, 0x%x, %p", D, E, is_signed,
+      first_frame, first_samp, num_frames, num_samp, return_type, data_out);
 
   const uint64_t mask = (E->numbits == 64) ? 0xffffffffffffffffULL :
     ((uint64_t)1 << E->numbits) - 1;
@@ -831,7 +831,10 @@ static size_t _GD_DoBit(DIRFILE *D, gd_entry_t *E,
   }
 
   ns = num_samp + num_frames * spf;
-  tmpbuf = (uint64_t *)malloc(ns * sizeof(uint64_t));
+  if (is_signed)
+    tmpbuf = (int64_t *)malloc(ns * sizeof(int64_t));
+  else
+    tmpbuf = (uint64_t *)malloc(ns * sizeof(uint64_t));
   if (tmpbuf == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     dreturn("%zi", 0);
@@ -847,10 +850,18 @@ static size_t _GD_DoBit(DIRFILE *D, gd_entry_t *E,
     return 0;
   }
 
-  for (i = 0; i < n_read; i++)
-    tmpbuf[i] = (tmpbuf[i] >> E->bitnum) & mask;
+  /* extract bits */
+  if (is_signed) {
+    uint64_t sign = -1 << (E->numbits + - 1);
+    for (i = 0; i < n_read; i++)
+      ((int64_t*)tmpbuf)[i] = (((((uint64_t*)tmpbuf)[i] >> E->bitnum) & mask)
+        + sign) ^ sign;
+  } else
+    for (i = 0; i < n_read; i++)
+      ((uint64_t*)tmpbuf)[i] = (((uint64_t*)tmpbuf)[i] >> E->bitnum) & mask;
 
-  _GD_ConvertType(D, tmpbuf, GD_UINT64, data_out, return_type, n_read);
+  _GD_ConvertType(D, tmpbuf, (is_signed) ? GD_INT64 : GD_UINT64, data_out,
+      return_type, n_read);
   free(tmpbuf);
 
   dreturn("%zi", n_read);
@@ -1075,7 +1086,7 @@ size_t _GD_DoField(DIRFILE *D, gd_entry_t *E, const char* field_code,
           num_samp, return_type, data_out);
       break;
     case GD_BIT_ENTRY:
-      n_read = _GD_DoBit(D, E, first_frame, first_samp, num_frames,
+      n_read = _GD_DoBit(D, E, 0, first_frame, first_samp, num_frames,
           num_samp, return_type, data_out);
       break;
     case GD_MULTIPLY_ENTRY:
@@ -1095,6 +1106,10 @@ size_t _GD_DoField(DIRFILE *D, gd_entry_t *E, const char* field_code,
       break;
     case GD_POLYNOM_ENTRY:
       n_read = _GD_DoPolynom(D, E, first_frame, first_samp, num_frames,
+          num_samp, return_type, data_out);
+      break;
+    case GD_SBIT_ENTRY:
+      n_read = _GD_DoBit(D, E, 1, first_frame, first_samp, num_frames,
           num_samp, return_type, data_out);
       break;
     case GD_CONST_ENTRY:

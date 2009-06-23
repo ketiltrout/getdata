@@ -39,8 +39,8 @@ ADD_TESTS=add add_bit add_bit_bitnum add_bit_bitsize add_bit_invalid \
 					add_linterp add_linterp_invalid add_many add_multiply \
 					add_multiply_invalid add_phase add_phase_invalid add_polynom \
 					add_protect add_raw add_raw_invalid add_raw_spf add_raw_type \
-					add_rdonly add_sort add_spec add_spec_directive add_spec_invalid \
-					add_string add_type
+					add_rdonly add_sbit add_sort add_spec add_spec_directive \
+					add_spec_invalid add_string add_type
 
 ALTER_TESTS=alter_bit_bitnum alter_bit_numbits alter_const alter_entry \
 						alter_entry_recode alter_lincom_input alter_lincom_offset \
@@ -131,7 +131,8 @@ GET_TESTS=get64 get_bad_code get_bit get_char get_endian8 get_endian16 \
 					get_lincom_noin get_lincom_non get_linterp get_linterp_noin \
 					get_linterp_notab get_multiply get_multiply_noin get_nonexistent \
 					get_null $(GET_OFF64) get_phase get_polynom get_polynom_noin \
-					get_recurse get_sf get_ss get_type get_uint16 get_uint32 get_uint64
+					get_recurse get_sbit get_sf get_ss get_type get_uint16 get_uint32 \
+					get_uint64
 
 GLOBAL_TESTS=global_name global_ref global_ref_empty global_ref_get \
 						 global_ref_set
@@ -156,7 +157,7 @@ endif
 MADD_TESTS=madd madd_bit madd_bit_invalid madd_lincom madd_lincom_invalid \
 					 madd_linterp madd_linterp_invalid madd_multiply \
 					 madd_multiply_invalid madd_phase madd_phase_invalid madd_polynom \
-					 madd_spec madd_spec_directive madd_spec_invalid
+					 madd_sbit madd_spec madd_spec_directive madd_spec_invalid
 
 MOVE_TESTS=move move_data_enc_ar move_data_enc_ra move_data_endian \
 					 move_data_foffs move_data_nop move_index move_protect move_subdir
@@ -200,9 +201,10 @@ PARSE_TESTS=parse_badline parse_bit parse_bit4 parse_bit_bitnum \
 						parse_protect_format parse_protect_none parse_quote \
 						parse_quote_mismatch parse_raw parse_raw_char parse_raw_ncols \
 						parse_raw_scalar parse_raw_spf parse_raw_type parse_ref \
-						parse_ref_nonexistent parse_sort parse_string parse_string_ncols \
-						parse_string_null parse_version parse_version_include \
-						parse_version_pedantic parse_version_slash parse_whitespace
+						parse_ref_nonexistent parse_sbit parse_sort parse_string \
+						parse_string_ncols parse_string_null parse_version \
+						parse_version_include parse_version_pedantic parse_version_slash \
+						parse_whitespace
 
 PROTECT_TESTS=protect_alter protect_get
 
@@ -213,8 +215,9 @@ PUT_TESTS=put64 put_bad_code put_bit put_bof put_char put_const \
 					put_lincom1 put_lincom2 put_lincom_noin put_linterp put_linterp_noin \
 					put_linterp_notab put_multiply put_null $(PUT_OFF64) put_phase \
 					put_phase_noin put_polynom1 put_polynom2 put_polynom_noin \
-					put_protect put_rdonly put_recurse put_rofs put_sf put_ss put_string \
-					put_string_protect put_type put_uint16 put_uint32 put_uint64
+					put_protect put_rdonly put_recurse put_rofs put_sbit put_sf put_ss \
+					put_string put_string_protect put_type put_uint16 put_uint32 \
+					put_uint64
 
 REF_TESTS=ref ref_none ref_two
 

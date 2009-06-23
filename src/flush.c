@@ -71,6 +71,7 @@ void _GD_Flush(DIRFILE* D, gd_entry_t *E, const char* field_code)
     case GD_BIT_ENTRY:
     case GD_PHASE_ENTRY:
     case GD_POLYNOM_ENTRY:
+    case GD_SBIT_ENTRY:
       _GD_Flush(D, E->e->entry[0], field_code);
     case GD_CONST_ENTRY:
     case GD_STRING_ENTRY:
@@ -206,6 +207,10 @@ static void _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
       for (i = 0; i <= E->poly_ord; ++i)
         fprintf(stream, " %.15g", E->a[i]);
       fputs("\n", stream);
+      break;
+    case GD_SBIT_ENTRY:
+      fprintf(stream, " SBIT %s %i %i\n", E->in_fields[0], E->bitnum,
+          E->numbits);
       break;
     case GD_CONST_ENTRY:
       if (E->const_type & GD_SIGNED)

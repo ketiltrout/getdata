@@ -57,6 +57,7 @@ static void _GD_ClearDerived(DIRFILE* D, gd_entry_t* E, const gd_entry_t* C,
     case GD_BIT_ENTRY:
     case GD_PHASE_ENTRY:
     case GD_POLYNOM_ENTRY:
+    case GD_SBIT_ENTRY:
       if (strcmp(E->in_fields[0], C->field) == 0) {
         if (check)
           _GD_SetError(D, GD_E_DELETE, GD_E_DEL_DERIVED, E->field, 0,
@@ -139,6 +140,7 @@ static void _GD_DeReference(DIRFILE* D, gd_entry_t* E, const gd_entry_t* C,
       }
       break;
     case GD_BIT_ENTRY:
+    case GD_SBIT_ENTRY:
       if (E->e->scalar[0] != NULL && strcmp(C->field, E->e->scalar[0]) == 0) {
         if (check) {
           _GD_SetError(D, GD_E_DELETE, GD_E_DEL_CONST, E->field, 0, C->field);

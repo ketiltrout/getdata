@@ -307,7 +307,6 @@ static size_t _GD_DoBitOut(DIRFILE* D, gd_entry_t *E,
   _GD_ConvertType(D, data_in, data_type, (void*)tmpbuf, GD_UINT64, ns);
 
   /* first, READ the field in so that we can change the bits    */
-  /* do not check error code, since the field may not exist yet */
 
 #ifdef GETDATA_DEBUG
   fprintf(stdout,"DoBitOut:  reading in bitfield %s\n",E->in_fields[0]);
@@ -535,6 +534,7 @@ size_t _GD_DoFieldOut(DIRFILE *D, gd_entry_t* E, const char *field_code,
           num_samp, data_type, data_in);
       break;
     case GD_BIT_ENTRY:
+    case GD_SBIT_ENTRY:
       n_wrote = _GD_DoBitOut(D, E, first_frame, first_samp, num_frames,
           num_samp, data_type, data_in);
       break;

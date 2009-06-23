@@ -83,6 +83,7 @@ unsigned int get_nfields_by_type(DIRFILE* D, gd_entype_t type)
     case GD_BIT_ENTRY:
     case GD_PHASE_ENTRY:
     case GD_POLYNOM_ENTRY:
+    case GD_SBIT_ENTRY:
       for (i = 0; i < D->n_entries; ++i)
         if (D->entry[i]->field_type == type && D->entry[i]->e->n_meta != -1)
           r++;

@@ -430,12 +430,12 @@ static gd_entry_t* _GD_ParseMultiply(DIRFILE* D,
 
 /* _GD_ParseBit: parse BIT data type entry in format file.
 */
-static gd_entry_t* _GD_ParseBit(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
-    int n_cols, const gd_entry_t* parent, const char* format_file, int line,
-    int pedantic)
+static gd_entry_t* _GD_ParseBit(DIRFILE* D, int is_signed,
+    const char* in_cols[MAX_IN_COLS], int n_cols, const gd_entry_t* parent,
+    const char* format_file, int line, int pedantic)
 {
-  dtrace("%p, %p, %i, %p, \"%s\", %i, %i", D, in_cols, n_cols, parent,
-      format_file, line, pedantic);
+  dtrace("%p, %i, %p, %i, %p, \"%s\", %i, %i", D, is_signed, in_cols, n_cols,
+      parent, format_file, line, pedantic);
 
   if (n_cols < 4) {
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_TOK, format_file, line, NULL);
@@ -460,7 +460,7 @@ static gd_entry_t* _GD_ParseBit(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
   }
   memset(E->e, 0, sizeof(struct _gd_private_entry));
 
-  E->field_type = GD_BIT_ENTRY;
+  E->field_type = (is_signed) ? GD_SBIT_ENTRY : GD_BIT_ENTRY;
   E->in_fields[0] = NULL;
   E->e->entry[0] = NULL;
   E->e->calculated = 1;
@@ -871,11 +871,13 @@ gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, const char** in_cols,
     E = _GD_ParseMultiply(D, in_cols, n_cols, P, format_file, linenum,
         pedantic);
   else if (strcmp(in_cols[1], "BIT") == 0)
-    E = _GD_ParseBit(D, in_cols, n_cols, P, format_file, linenum, pedantic);
+    E = _GD_ParseBit(D, 0, in_cols, n_cols, P, format_file, linenum, pedantic);
   else if (strcmp(in_cols[1], "PHASE") == 0)
     E = _GD_ParsePhase(D, in_cols, n_cols, P, format_file, linenum, pedantic);
   else if (strcmp(in_cols[1], "POLYNOM") == 0)
     E = _GD_ParsePolynom(D, in_cols, n_cols, P, format_file, linenum, pedantic);
+  else if (strcmp(in_cols[1], "SBIT") == 0)
+    E = _GD_ParseBit(D, 1, in_cols, n_cols, P, format_file, linenum, pedantic);
   else if (strcmp(in_cols[1], "CONST") == 0) {
     E = _GD_ParseConst(D, in_cols, n_cols, P, format_file, linenum, pedantic);
     if (D->error == GD_E_OK && P == NULL)
