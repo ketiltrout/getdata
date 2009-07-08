@@ -126,7 +126,7 @@ In all cases,
 .BR getdata ()
 returns the number of samples (not bytes) successfully read from the database.
 If the end-of-field is encountered before the requested number of samples have
-been read, a short count will result.  The library does not considered this an
+been read, a short count will result.  The library does not consider this an
 error.  Requests for data before the beginning-of-field marker, which may have
 been shifted from frame zero by the presence of a
 .B FRAMEOFFSET
