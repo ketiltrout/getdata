@@ -1,4 +1,4 @@
-# (C) 2008 D. V. Wiebe
+# (C) 2009 D. V. Wiebe
 #
 ##########################################################################
 #
@@ -20,19 +20,21 @@
 #
 AUTOMAKE_OPTIONS = foreign
 
-if MAKE_CXXBINDINGS
-CXX_SUBDIR=cxx
+if GETDATA_DEBUG
+DEBUG_C = ../../src/debug.c
 endif
 
-if MAKE_F77BINDINGS
-F77_SUBDIR=f77
-endif
+SUBDIRS=test
 
-if MAKE_PYBINDINGS
-PY_SUBDIR=python
-endif
+python_LTLIBRARIES = getdata.la
 
-SUBDIRS = ${CXX_SUBDIR} ${F77_SUBDIR} ${PY_SUBDIR}
+AM_CFLAGS = -Wall
+AM_CPPFLAGS = $(CPPFLAGS) $(PYTHON_CPPFLAGS)
+getdata_la_LDFLAGS = -module -avoid-version -export-symbols-regex initgetdata
+getdata_la_LIBADD = $(PYTHON_LIBS) -lgetdata
+getdata_la_SOURCES = pygetdata.c pyconstants.c pydirfile.c pyentry.c \
+										 pyfragment.c ${DEBUG_C} pygetdata.h
 
 clean-local:
 	rm -rf *~ 
+

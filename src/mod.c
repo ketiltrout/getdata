@@ -85,7 +85,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
       modified = 1;
 
       if (Q.data_type & 0x40 || (Qe.size = GD_SIZE(Q.data_type)) == 0) {
-        _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, Q.data_type, NULL);
+        _GD_SetError(D, GD_E_BAD_TYPE, Q.data_type, NULL, 0, NULL);
         dreturn("%i", -1);
         return -1;
       }
@@ -384,7 +384,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
       Q.const_type = (N->const_type == GD_NULL) ? E->const_type : N->const_type;
 
       if (Q.const_type & 0x40 || GD_SIZE(Q.const_type) == 0) {
-        _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, Q.const_type, NULL);
+        _GD_SetError(D, GD_E_BAD_TYPE, Q.const_type, NULL, 0, NULL);
         dreturn("%i", -1);
         return -1;
       }

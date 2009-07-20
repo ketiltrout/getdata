@@ -1,4 +1,4 @@
-# (C) 2008 D. V. Wiebe
+# (C) 2009 D. V. Wiebe
 #
 ##########################################################################
 #
@@ -20,19 +20,17 @@
 #
 AUTOMAKE_OPTIONS = foreign
 
-if MAKE_CXXBINDINGS
-CXX_SUBDIR=cxx
-endif
+TESTS=
 
-if MAKE_F77BINDINGS
-F77_SUBDIR=f77
-endif
+check_PROGRAMS=${TESTS}
 
-if MAKE_PYBINDINGS
-PY_SUBDIR=python
-endif
+# clean up after the tests
+check-local: check-TESTS
+	$(MAKE) getdata-clean-dirs
 
-SUBDIRS = ${CXX_SUBDIR} ${F77_SUBDIR} ${PY_SUBDIR}
+getdata-clean-dirs:
+	rm -rvf *odirfile
 
 clean-local:
-	rm -rf *~ 
+	$(MAKE) getdata-clean-dirs
+	rm -rf *~

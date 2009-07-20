@@ -189,11 +189,12 @@ static FILE* _GD_CreateDirfile(DIRFILE* D, const char* format_file,
 }
 
 void dirfile_parser_callback(DIRFILE* D, int (*sehandler)(const DIRFILE*, int,
-      char*))
+      char*, void*), void* extra)
 {
-  dtrace("%p, %p", D, sehandler);
+  dtrace("%p, %p, %p", D, sehandler, extra);
 
   D->sehandler = sehandler;
+  D->sehandler_extra = extra;
 
   dreturnvoid();
 }
@@ -201,7 +202,7 @@ void dirfile_parser_callback(DIRFILE* D, int (*sehandler)(const DIRFILE*, int,
 /* dirfile_cbopen: open (or, perhaps, create) and parse the specified dirfile
 */
 DIRFILE* dirfile_cbopen(const char* filedir, unsigned long flags,
-    int (*sehandler)(const DIRFILE*, int, char*))
+    int (*sehandler)(const DIRFILE*, int, char*, void*), void* extra)
 {
   FILE *fp;
   char* ref_name;
@@ -210,7 +211,7 @@ DIRFILE* dirfile_cbopen(const char* filedir, unsigned long flags,
   char format_file[FILENAME_MAX];
   int standards = DIRFILE_STANDARDS_VERSION;
 
-  dtrace("\"%s\", 0x%lx, %p", filedir, flags, sehandler);
+  dtrace("\"%s\", 0x%lx, %p, %p", filedir, flags, sehandler, extra);
 
   _GD_InitialiseFramework();
 
@@ -222,6 +223,7 @@ DIRFILE* dirfile_cbopen(const char* filedir, unsigned long flags,
   D->name = strdup(filedir);
   D->flags = flags | GD_INVALID;
   D->sehandler = sehandler;
+  D->sehandler_extra = extra;
 
   if (D->error_string == NULL || D->error_file == NULL || D->name == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
@@ -328,7 +330,7 @@ DIRFILE* dirfile_open(const char* filedir, unsigned long flags)
 {
   dtrace("\"%s\", 0x%lx", filedir, flags);
 
-  DIRFILE* D = dirfile_cbopen(filedir, flags, NULL);
+  DIRFILE* D = dirfile_cbopen(filedir, flags, NULL, NULL);
 
   dreturn("%p", D);
   return D;

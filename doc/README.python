@@ -1,0 +1,14 @@
+PYTHON BINDINGS FOR GETDATA
+============================
+
+Full documentation for the Python bindings to the GetData library is contained
+within the PyGetData module itself.  To read this documentation, execute
+
+$ pydoc getdata
+
+from the system shell, or
+
+>>> import getdata
+>>> help(getdata)
+
+from within the Python interpereter.

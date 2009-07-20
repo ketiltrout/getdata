@@ -27,6 +27,8 @@
 #include "getdata/bitentry.h"
 #include "getdata/multiplyentry.h"
 #include "getdata/phaseentry.h"
+#include "getdata/sbitentry.h"
+#include "getdata/polynomentry.h"
 #include "getdata/constentry.h"
 #include "getdata/stringentry.h"
 #include "getdata/indexentry.h"
@@ -34,9 +36,9 @@
 using namespace GetData;
 
 Dirfile::Dirfile(const char* filedir, unsigned int flags,
-          int (*sehandler)(const DIRFILE*, int, char*))
+          int (*sehandler)(const DIRFILE*, int, char*, void*), void* extra)
 {
-  D = dirfile_cbopen(filedir, flags, sehandler);
+  D = dirfile_cbopen(filedir, flags, sehandler, extra);
   error_string = NULL;
 }
 
@@ -92,10 +94,14 @@ Entry *Dirfile::Entry(const char* field_code)
       return new GetData::LinterpEntry(this, field_code);
     case BitEntryType:
       return new GetData::BitEntry(this, field_code);
+    case SBitEntryType:
+      return new GetData::SBitEntry(this, field_code);
     case MultiplyEntryType:
       return new GetData::MultiplyEntry(this, field_code);
     case PhaseEntryType:
       return new GetData::PhaseEntry(this, field_code);
+    case PolynomEntryType:
+      return new GetData::PolynomEntry(this, field_code);
     case ConstEntryType:
       return new GetData::ConstEntry(this, field_code);
     case StringEntryType:
@@ -311,9 +317,10 @@ int Dirfile::Close()
   return ret;
 }
 
-void Dirfile::SetCallback(int (*sehandler)(const DIRFILE*, int, char*))
+void Dirfile::SetCallback(int (*sehandler)(const DIRFILE*, int, char*, void*),
+    void* extra)
 {
-  dirfile_parser_callback(D, sehandler);
+  dirfile_parser_callback(D, sehandler, extra);
 }
 
 RawEntry* Dirfile::Reference(const char* field_code)

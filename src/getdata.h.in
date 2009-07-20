@@ -128,7 +128,7 @@
 /* this MUST be one less than the lowest allowed fragment index */
 #define GD_ALL_FRAGMENTS -1
 
-#define GD_SCALAR_ENTRY 0x100
+#define GD_SCALAR_ENTRY 0x10
 /* field types */
 typedef enum {
   GD_NO_ENTRY       = 0x00,
@@ -141,8 +141,8 @@ typedef enum {
   GD_INDEX_ENTRY    = 0x07,
   GD_POLYNOM_ENTRY  = 0x08,
   GD_SBIT_ENTRY     = 0x09,
-  GD_CONST_ENTRY    = GD_SCALAR_ENTRY + 0x01,
-  GD_STRING_ENTRY   = GD_SCALAR_ENTRY + 0x02,
+  GD_CONST_ENTRY    = GD_SCALAR_ENTRY | 0x00,
+  GD_STRING_ENTRY   = GD_SCALAR_ENTRY | 0x01,
 } gd_entype_t;
 
 /* GD_NO_ENTRY is not part of this count */
@@ -425,7 +425,7 @@ extern int get_parent_fragment(DIRFILE* D,
     int fragment_index) __THROW __gd_nonnull ((1));
 
 extern void dirfile_parser_callback(DIRFILE* D, int (*sehandler)(const DIRFILE*,
-      int, char*)) __THROW __gd_nonnull ((1));
+      int, char*, void*), void*) __THROW __gd_nonnull ((1));
 
 extern int dirfile_protect(DIRFILE *D, int protection_level,
     int fragment_index) __THROW __gd_nonnull ((1));
@@ -485,7 +485,8 @@ extern int dirfile_alter_spec(DIRFILE* D, const char* line,
     int recode) __gd_nonnull ((1,2));
 
 extern DIRFILE* dirfile_cbopen(const char* dirfilename, unsigned long flags,
-    int (*sehandler)(const DIRFILE*, int, char*)) __gd_nonnull ((1));
+    int (*sehandler)(const DIRFILE*, int, char*, void*),
+    void* extra) __gd_nonnull ((1));
 
 extern int dirfile_close(DIRFILE* dirfile);
 

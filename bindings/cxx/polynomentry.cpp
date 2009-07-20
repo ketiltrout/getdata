@@ -1,4 +1,4 @@
-// (C) 2008 D. V. Wiebe
+// (C) 2009 D. V. Wiebe
 //
 ///////////////////////////////////////////////////////////////////////////
 //
@@ -18,7 +18,7 @@
 // along with GetData; if not, write to the Free Software Foundation,
 // Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 //
-#include "getdata/lincomentry.h"
+#include "getdata/polynomentry.h"
 #include "getdata/entry.h"
 #include "getdata/dirfile.h"
 
@@ -27,7 +27,7 @@
 
 using namespace GetData;
 
-LincomEntry::LincomEntry(const char* field_code, int n_fields,
+PolynomEntry::PolynomEntry(const char* field_code, int n_fields,
     const char** in_fields, double* m, double* b, int fragment_index) :
   Entry::Entry()
 {
@@ -44,18 +44,15 @@ LincomEntry::LincomEntry(const char* field_code, int n_fields,
   }
 }
 
-int LincomEntry::SetInput(const char* field, int index)
+int PolynomEntry::SetInput(const char* field)
 {
-  if (index < 0 || index > 2)
-    return -1;
-
   char* ptr = strdup(field);
 
   if (ptr == NULL)
     return -1;
 
-  free(E.in_fields[index]);
-  E.in_fields[index] = ptr;
+  free(E.in_fields[0]);
+  E.in_fields[0] = ptr;
 
   if (D != NULL)
     return dirfile_alter_entry(D->D, E.field, &E, 0);
@@ -63,12 +60,12 @@ int LincomEntry::SetInput(const char* field, int index)
   return 0;
 }
 
-int LincomEntry::SetScale(double scale, int index)
+int PolynomEntry::SetCoefficient(double coeff, int index)
 {
-  if (index < 0 || index > 2)
+  if (index < 0 || index > 5)
     return -1;
 
-  E.m[index] = scale;
+  E.a[index] = coeff;
 
   if (D != NULL)
     return dirfile_alter_entry(D->D, E.field, &E, 0);
@@ -76,37 +73,21 @@ int LincomEntry::SetScale(double scale, int index)
   return 0;
 }
 
-int LincomEntry::SetOffset(double offset, int index)
+int PolynomEntry::SetPolyOrd(int poly_ord)
 {
-  if (index < 0 || index > 2)
+  int old_n = E.poly_ord;
+
+  if (poly_ord < 2 || poly_ord > 5)
     return -1;
 
-  E.b[index] = offset;
-
-  if (D != NULL)
-    return dirfile_alter_entry(D->D, E.field, &E, 0);
-  
-  return 0;
-}
-
-int LincomEntry::SetNFields(int nfields)
-{
-  int old_n = E.n_fields;
-
-  if (nfields < 1 || nfields > 2)
-    return -1;
-
-  if (nfields > old_n) {
+  if (poly_ord > old_n) {
     int i;
 
-    for (i = old_n; i < nfields; ++i) {
-      free(E.in_fields[i]);
-      E.in_fields[i] = strdup("INDEX");
-      E.m[i] = E.b[i] = 0;
-    }
+    for (i = old_n + 1; i <= poly_ord; ++i)
+      E.a[i] = 0;
   }
 
-  E.n_fields = nfields;
+  E.poly_ord = poly_ord;
 
   if (D != NULL)
     return dirfile_alter_entry(D->D, E.field, &E, 0);

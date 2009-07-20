@@ -92,11 +92,20 @@ void F77_FUNC(gdgelc, GDGELC) (int* nfields,
     int* fragment_index, const int* dirfile, const char* field_code,
     const int* field_code_l);
 
+void F77_FUNC(gdgepn, GDGEPN) (int* nfields, char* infield, int* infield_l,
+    double* a0, double* a1, double* a2, double* a3, double* a4, double* a5,
+    int* fragment_index, const int* dirfile, const char* field_code,
+    const int* field_code_l);
+
 void F77_FUNC(gdgelt, GDGELT) (char* in_field, int* in_field_l, char* table,
     int* table_l, int* fragment_index, const int* dirfile,
     const char* field_code, const int* field_code_l);
 
 void F77_FUNC(gdgebt, GDGEBT) (char* in_field, int* in_field_l, int* bitnum,
+    int* numbits, int* fragment_index, const int* dirfile,
+    const char* field_code, const int* field_code_l);
+
+void F77_FUNC(gdgesb, GDGESB) (char* in_field, int* in_field_l, int* bitnum,
     int* numbits, int* fragment_index, const int* dirfile,
     const char* field_code, const int* field_code_l);
 
@@ -118,6 +127,12 @@ void F77_FUNC(gdadlc, GDADLC) (const int* dirfile, const char* field_code,
     const char* in_field2, const int* in_field2_l, const double* m2,
     const double* b2, const char* in_field3, const int* in_field3_l,
     const double* m3, const double* b3, const int* fragment_index);
+
+void F77_FUNC(gdadpn, GDADPN) (const int* dirfile, const char* field_code,
+    const int* field_code_l, const int* poly_ord, const char* in_field,
+    const int* in_field_l, const double* a0, const double* a1, const double* a2,
+    const double* a3, const double* a4, const double* a5,
+    const int* fragment_index);
 
 void F77_FUNC(gdadlt, GDADLT) (const int* dirfile, const char* field_code,
     const int* field_code_l, const char* in_field, const int* in_field_l,
@@ -164,12 +179,23 @@ void F77_FUNC(gdmdlc, GDMDLC) (const int* dirfile, const char* parent,
     const char* in_field3, const int* in_field3_l, const double* m3,
     const double* b3);
 
+void F77_FUNC(gdmdpn, GDMDPN) (const int* dirfile, const char* parent,
+    const int* parent_l, const char* field_code, const int* field_code_l,
+    const int* poly_ord, const char* in_field, const int* in_field_l,
+    const double* a0, const double* a1, const double* a2, const double* a3,
+    const double* a4, const double* a5);
+
 void F77_FUNC(gdmdlt, GDMDLT) (const int* dirfile, const char* parent,
     const int* parent_l, const char* field_code, const int* field_code_l,
     const char* in_field, const int* in_field_l, const char* table,
     const int* table_l);
 
 void F77_FUNC(gdmdbt, GDMDBT) (const int* dirfile, const char* parent,
+    const int* parent_l, const char* field_code, const int* field_code_l,
+    const char* in_field, const int* in_field_l, const int* bitnum,
+    const int* numbits);
+
+void F77_FUNC(gdmdsb, GDMDSB) (const int* dirfile, const char* parent,
     const int* parent_l, const char* field_code, const int* field_code_l,
     const char* in_field, const int* in_field_l, const int* bitnum,
     const int* numbits);
@@ -269,6 +295,11 @@ void F77_FUNC(gdallc, GDALLC) (const int* dirfile, const char* field_code,
     const char* in_field2, const int* in_field2_l, const double* m2,
     const double* b2, const char* in_field3, const int* in_field3_l,
     const double* m3, const double* b3);
+
+void F77_FUNC(gdalpn, GDALPN) (const int* dirfile, const char* field_code,
+    const int* field_code_l, const int* poly_ord, const char* in_field,
+    const int* in_field_l, const double* a0, const double* a1, const double* a2,
+    const double* a3, const double* a4, const double* a5);
 
 void F77_FUNC(gdalmt, GDALMT) (const int* dirfile, const char* field_code,
     const int* field_code_l, const char* in_field1, const int* in_field1_l,

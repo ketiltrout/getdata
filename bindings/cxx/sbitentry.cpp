@@ -18,57 +18,35 @@
 // along with GetData; if not, write to the Free Software Foundation,
 // Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 //
-#include "getdata/lincomentry.h"
+#include "getdata/sbitentry.h"
 #include "getdata/entry.h"
 #include "getdata/dirfile.h"
 
-#include <stdlib.h>
 #include <cstring>
+#include <stdlib.h>
 
 using namespace GetData;
 
-LincomEntry::LincomEntry(const char* field_code, int n_fields,
-    const char** in_fields, double* m, double* b, int fragment_index) :
-  Entry::Entry()
+SBitEntry::SBitEntry(const char* field_code, const char* in_field, int bitnum,
+    int numbits, int fragment_index) : Entry::Entry()
 {
-  int i;
-
   E.field = strdup(field_code);
-  E.field_type = GD_LINCOM_ENTRY;
-  E.n_fields = n_fields;
+  E.field_type = GD_BIT_ENTRY;
+  E.in_fields[0] = strdup(in_field);
+  E.bitnum = bitnum;
+  E.numbits = numbits;
   E.fragment_index = fragment_index;
-  for (i = 0; i < n_fields; ++i) {
-    E.in_fields[i] = strdup(in_fields[i]);
-    E.m[i] = m[i];
-    E.b[i] = b[i];
-  }
 }
 
-int LincomEntry::SetInput(const char* field, int index)
+int SBitEntry::SetInput(const char* field)
 {
-  if (index < 0 || index > 2)
-    return -1;
-
   char* ptr = strdup(field);
 
   if (ptr == NULL)
-    return -1;
+    return 0;
 
-  free(E.in_fields[index]);
-  E.in_fields[index] = ptr;
-
-  if (D != NULL)
-    return dirfile_alter_entry(D->D, E.field, &E, 0);
-  
-  return 0;
-}
-
-int LincomEntry::SetScale(double scale, int index)
-{
-  if (index < 0 || index > 2)
-    return -1;
-
-  E.m[index] = scale;
+  free(E.in_fields[0]);
+  E.in_fields[0] = ptr;
 
   if (D != NULL)
     return dirfile_alter_entry(D->D, E.field, &E, 0);
@@ -76,12 +54,9 @@ int LincomEntry::SetScale(double scale, int index)
   return 0;
 }
 
-int LincomEntry::SetOffset(double offset, int index)
+int SBitEntry::SetFirstBit(int first_bit)
 {
-  if (index < 0 || index > 2)
-    return -1;
-
-  E.b[index] = offset;
+  E.bitnum = first_bit;
 
   if (D != NULL)
     return dirfile_alter_entry(D->D, E.field, &E, 0);
@@ -89,27 +64,12 @@ int LincomEntry::SetOffset(double offset, int index)
   return 0;
 }
 
-int LincomEntry::SetNFields(int nfields)
+int SBitEntry::SetNumBits(int num_bits)
 {
-  int old_n = E.n_fields;
-
-  if (nfields < 1 || nfields > 2)
-    return -1;
-
-  if (nfields > old_n) {
-    int i;
-
-    for (i = old_n; i < nfields; ++i) {
-      free(E.in_fields[i]);
-      E.in_fields[i] = strdup("INDEX");
-      E.m[i] = E.b[i] = 0;
-    }
-  }
-
-  E.n_fields = nfields;
+  E.numbits = num_bits;
 
   if (D != NULL)
     return dirfile_alter_entry(D->D, E.field, &E, 0);
-
+  
   return 0;
 }

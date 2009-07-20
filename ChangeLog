@@ -1,3 +1,60 @@
+2009-07-20   D. V. Wiebe <getdata@ketiltrout.net>  svn:301
+	* util/: moved from bin/
+
+	* test/flush_spec.c: Added.
+	* src/flush.c (_GD_StringEscapeise): Properly handle bytex 0x80-0xFF.
+	* src/flush.c (_GD_WriteConst): Added.
+	* src/flush.c (_GD_FieldSpec): Write CONST field parameters, where
+	appropriate.
+
+	* src/parse.c (_GD_ParseBit): Fix check for CONST field in error checks for
+	numbits and bitnum.
+
+	* m4/python.m4: Added.
+	* bindings/python/: Added.
+	* configure.ac: Python tests.
+
+	* src/open.c (dirfile_parser_callback dirfile_cbopen): Pass an opaque
+	pointer as a fourth argument to the parser callback handler.
+	* src/parse.c (_GD_ParseFragment): Pass the fourth, opaque pointer to the
+	callback.
+	* bindings/cxx/dirfile.cpp: Update for fourth argument to callback.
+	* bindings/f77/fgetdata.c: Use fourth argument to callback to support
+	per-dirfile callback functions.  Removed _gdf_f77_callback global.
+
+	* src/mod.c (_GD_Change): Fix _GD_SetError calls for GD_E_BAD_TYPE errors.
+	* src/add.c (_GD_Add): Ditto.
+
+	* src/add.c (dirfile_add_spec dirfile_madd_spec): Flag fragment as modified
+	on parser success.
+
+	* src/foffs.c: Remove spurious newlines from debugging trace messages.
+
+	* src/types.c (_GD_ConvertType): return propper error on bad out_type
+
+	* src/getdata.h.in: Changed the value of GD_SCALAR_ENTRY
+
+	* bindings/cxx/entry.cpp bindings/cxx/dirfile.cpp
+	bindings/cxx/getdata/dirfile.h bindings/cxx/getdata/entry.h: Update for SBIT
+	and POLYNOM.
+	* bindings/cxx/polynomentry.cpp bindings/cxx/sbitentry.cpp
+	bindings/cxx/getdata/polynomentry.h bindings/cxx/getdata/sbitentry.h: Added.
+	* bindings/f77/fgetdata.c (GDGEPN GDGESB GDADPN GDADSB GDMDPN GDMDSB GDALSB
+	GDALPN): Added.
+	* bindings/f77/make_parameters.c: Added GD_LZMA_ENCODED GD_POLYNOM_ENTRY
+	GD_SBIT_ENTRY.
+	* bindings/f77/getdata.f90.in (fget_entry fdirfile_add fdirfile_madd
+	fdirfile_alter_entry): Update for SBIT and POLYNOM.
+	* bindings/f77/getdata.f90.in (fdirfile_add_sbit fdirfile_add_polynom
+	fdirfile_madd_polynom fdirfile_alter_sbit fdirfile_alter_polynom): Added.
+
+	* bindings/cxx/test/fragment.h: Add the Index() method.
+
+	* bindings/cxx/lincomentry.cpp (LincomEntry::SetNFields): Fix initialisation
+	of new terms.
+
+	* man/dirfile_uninclude.3 man/dirfile_include.3 man/get_entry.3: Typoes.
+
 2009-06-23   D. V. Wiebe <getdata@ketiltrout.net>  svn:298
 	* test/get_sbit.c test/parse_sbit.c test/add_sbit.c test/put_sbit.c
 	test/madd_sbit.c: Added.

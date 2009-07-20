@@ -324,7 +324,8 @@ struct _GD_DIRFILE {
   int type_list_validity;
 
   /* syntax error callback */
-  int (*sehandler)(const DIRFILE*, int, char*);
+  int (*sehandler)(const DIRFILE*, int, char*, void*);
+  void* sehandler_extra;
 
   /* library error data */
   int error;

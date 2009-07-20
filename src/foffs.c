@@ -31,7 +31,7 @@ static void _GD_ShiftFragment(DIRFILE* D, off64_t offset, int fragment,
 {
   unsigned int i, n_raw = 0;
 
-  dtrace("%p, %lli, %i, %i\n", D, (long long)offset, fragment, move);
+  dtrace("%p, %lli, %i, %i", D, (long long)offset, fragment, move);
 
   /* check protection */
   if (D->fragment[fragment].protection & GD_PROTECT_FORMAT) {
@@ -107,7 +107,7 @@ int dirfile_alter_frameoffset64(DIRFILE* D, off64_t offset, int fragment,
 {
   int i;
 
-  dtrace("%p, %lli, %i, %i\n", D, (long long)offset, fragment, move);
+  dtrace("%p, %lli, %i, %i", D, (long long)offset, fragment, move);
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -151,7 +151,7 @@ int dirfile_alter_frameoffset64(DIRFILE* D, off64_t offset, int fragment,
 
 off64_t get_frameoffset64(DIRFILE* D, int fragment)
 {
-  dtrace("%p, %i\n", D, fragment);
+  dtrace("%p, %i", D, fragment);
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);

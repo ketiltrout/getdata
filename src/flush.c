@@ -137,24 +137,43 @@ static char* _GD_StringEscapeise(char* out, const char* in)
 
   dtrace("%p, \"%s\"", out, in);
 
-  for (; *in != '\0'; ++in)
+  for (; *in != '\0'; ++in) {
     if (*in == '"') {
       *(ptr++) = '\\';
       *(ptr++) = '"';
     } else if (*in == '\\') {
       *(ptr++) = '\\';
       *(ptr++) = '\\';
-    } else if (*in < 0x20) {
+    } else if (*in < 0x20 && *in >= 0x00) {
       *(ptr++) = '\\';
       *(ptr++) = 'x';
       *(ptr++) = HexDigit[*in >> 8];
       *(ptr++) = HexDigit[*in & 0xF];
     } else
       *(ptr++) = *in;
+  }
   *ptr = '\0';
 
   dreturn("\"%s\"", out);
   return out;
+}
+
+/* Write a litteral parameter or CONST name */
+static void _GD_WriteConst(FILE* stream, int type, const void* value,
+    const char* scalar, const char* postamble)
+{
+  dtrace("%p, %i, %p, \"%s\", \"%s\"", stream, type, value, scalar, postamble);
+
+  if (scalar != NULL)
+    fprintf(stream, "%s%s", scalar, postamble);
+  else if (type == 0)
+    fprintf(stream, "%u%s", *(unsigned int*)value, postamble);
+  else if (type == GD_SIGNED)
+    fprintf(stream, "%i%s", *(int*)value, postamble);
+  else if (type == GD_IEEE754)
+    fprintf(stream, "%.15g%s", *(double*)value, postamble);
+
+  dreturnvoid();
 }
 
 /* Write a field specification line */
@@ -166,7 +185,7 @@ static void _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
   char* ptr;
 
   dtrace("%p, %p, %p, %i", D, stream, E, meta);
-  
+
   ptr = (meta) ? strchr(E->field, '/') + 1 : E->field;
 
   if (meta) {
@@ -181,50 +200,58 @@ static void _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
 
   switch(E->field_type) {
     case GD_RAW_ENTRY:
-      fprintf(stream, " RAW %s %u\n", _GD_TypeName(D, E->data_type), E->spf);
+      fprintf(stream, " RAW %s ", _GD_TypeName(D, E->data_type));
+      _GD_WriteConst(stream, 0, &E->spf, E->e->scalar[0], "\n");
       break;
     case GD_LINCOM_ENTRY:
       fprintf(stream, " LINCOM %i", E->n_fields);
-      for (i = 0; i < E->n_fields; ++i)
-        fprintf(stream, " %s %.15g %.15g", E->in_fields[i], E->m[i], E->b[i]);
+      for (i = 0; i < E->n_fields; ++i) {
+        fprintf(stream, " %s ", E->in_fields[i]);
+        _GD_WriteConst(stream, GD_IEEE754, &E->m[i], E->e->scalar[i * 2], " ");
+        _GD_WriteConst(stream, GD_IEEE754, &E->b[i], E->e->scalar[i * 2 + 1],
+            "");
+      }
       fputs("\n", stream);
       break;
     case GD_LINTERP_ENTRY:
       fprintf(stream, " LINTERP %s %s\n", E->in_fields[0], E->table);
       break;
     case GD_BIT_ENTRY:
-      fprintf(stream, " BIT %s %i %i\n", E->in_fields[0], E->bitnum,
-          E->numbits);
+      fprintf(stream, " BIT %s ", E->in_fields[0]);
+      _GD_WriteConst(stream, GD_SIGNED, &E->bitnum, E->e->scalar[0], " ");
+      _GD_WriteConst(stream, GD_SIGNED, &E->numbits, E->e->scalar[1], "\n");
       break;
     case GD_MULTIPLY_ENTRY:
       fprintf(stream, " MULTIPLY %s %s\n", E->in_fields[0], E->in_fields[1]);
       break;
     case GD_PHASE_ENTRY:
-      fprintf(stream, " PHASE %s %i\n", E->in_fields[0], E->shift);
+      fprintf(stream, " PHASE %s ", E->in_fields[0]);
+      _GD_WriteConst(stream, GD_SIGNED, &E->shift, E->e->scalar[0], "\n");
       break;
     case GD_POLYNOM_ENTRY:
-      fprintf(stream, " POLYNOM %s", E->in_fields[0]);
+      fprintf(stream, " POLYNOM %s ", E->in_fields[0]);
       for (i = 0; i <= E->poly_ord; ++i)
-        fprintf(stream, " %.15g", E->a[i]);
-      fputs("\n", stream);
+        _GD_WriteConst(stream, GD_IEEE754, &E->a[i], E->e->scalar[i],
+            (i == E->poly_ord) ? "\n" : " ");
       break;
     case GD_SBIT_ENTRY:
-      fprintf(stream, " SBIT %s %i %i\n", E->in_fields[0], E->bitnum,
-          E->numbits);
+      fprintf(stream, " SBIT %s ", E->in_fields[0]);
+      _GD_WriteConst(stream, GD_SIGNED, &E->bitnum, E->e->scalar[0], " ");
+      _GD_WriteConst(stream, GD_SIGNED, &E->numbits, E->e->scalar[1], "\n");
       break;
     case GD_CONST_ENTRY:
       if (E->const_type & GD_SIGNED)
-        fprintf(stream, " CONST %s %" PRIi64, _GD_TypeName(D, E->const_type),
-            E->e->iconst);
+        fprintf(stream, " CONST %s %" PRIi64 "\n", _GD_TypeName(D,
+              E->const_type), E->e->iconst);
       else if (E->const_type & GD_IEEE754)
-        fprintf(stream, " CONST %s %.15g", _GD_TypeName(D, E->const_type),
+        fprintf(stream, " CONST %s %.15g\n", _GD_TypeName(D, E->const_type),
             E->e->dconst);
       else
-        fprintf(stream, " CONST %s %" PRIu64, _GD_TypeName(D, E->const_type),
-            E->e->uconst);
+        fprintf(stream, " CONST %s %" PRIu64 "\n", _GD_TypeName(D,
+              E->const_type), E->e->uconst);
       break;
     case GD_STRING_ENTRY:
-      fprintf(stream, " STRING \"%s\"", _GD_StringEscapeise(buffer,
+      fprintf(stream, " STRING \"%s\"\n", _GD_StringEscapeise(buffer,
             E->e->string));
     case GD_INDEX_ENTRY:
       /* INDEX is implicit, and it is an error to define it in the format

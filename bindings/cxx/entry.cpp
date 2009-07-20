@@ -67,6 +67,9 @@ int Entry::CheckIndex(gd_entype_t field_type, int n_fields, int index)
     case GD_MULTIPLY_ENTRY:
       if (index > 2)
         return 0;
+    case GD_POLYNOM_ENTRY:
+      if (index > n_fields + 1)
+        return 0;
     default:
       if (index > 1)
         return 0;

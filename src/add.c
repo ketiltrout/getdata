@@ -198,7 +198,7 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
         _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_SPF, NULL, entry->spf,
             NULL);
       else if (E->data_type & 0x40 || (E->e->size = GD_SIZE(E->data_type)) == 0)
-        _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, entry->data_type, NULL);
+        _GD_SetError(D, GD_E_BAD_TYPE, entry->data_type, NULL, 0, NULL);
       else if (!_GD_Supports(D, E, GD_EF_TOUCH))
         ; /* error already set */
       else if (_GD_SetEncodedName(D, E->e->file, E->e->filebase, 0))
@@ -268,7 +268,7 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
       E->const_type = entry->const_type;
 
       if (E->const_type & 0x40 || GD_SIZE(E->const_type) == 0)
-        _GD_SetError(D, GD_E_BAD_TYPE, 0, NULL, E->const_type, NULL);
+        _GD_SetError(D, GD_E_BAD_TYPE, E->const_type, NULL, 0, NULL);
       break;
     case GD_STRING_ENTRY:
       E->e->string = strdup("");
@@ -434,6 +434,7 @@ int dirfile_madd_spec(DIRFILE* D, const char* line, const char* parent)
     return -1;
   }
 
+  D->fragment[me].modified = 1;
   dreturn("%i", 0);
   return 0;
 }
@@ -500,6 +501,7 @@ int dirfile_add_spec(DIRFILE* D, const char* line, int fragment_index)
     return -1;
   }
 
+  D->fragment[fragment_index].modified = 1;
   dreturn("%i", 0);
   return 0;
 }

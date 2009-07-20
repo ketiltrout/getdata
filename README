@@ -19,7 +19,8 @@ file).  After installation, they can be read with the standard man command:
   $ man dirfile-format
   $ man dirfile-encoding
 
-More information on the GetData Project may be found on the World Wide Web:
+More information on the GetData Project and the Dirfile database format may be
+found on the World Wide Web:
 
   http://getdata.sourceforge.net/
 
@@ -52,6 +53,7 @@ This package provides:
     - C++ (libgetdata++)
     - Fortran 77 (libfgetdata)
     - Fortran 96 (libf95getdata)
+    - Python (PyGetData)
 
 Documentation for the various bindings, if present, can be found in files
 named `README.<language>' in the doc/ directory.  The C interface is described
@@ -180,11 +182,14 @@ USING THE LIBRARY
 To use the library in C programs, the header file getdata.h should be included.
 This file declares both the new and legacy APIs.  Programs linking to static
 versions of the GetData library need to be linked against the C Standard Math
-Library, in addition to GetData itself, e.g. using `-lgetdata -lm'.
+Library, in addition to GetData itself, plus any other libraries required for
+encodings supported by the library, e.g. using `-lgetdata -lm
+<other-libraries>'.
 
-The `checkdirfile' program is provided as an example of library use in the `bin'
-subdirectory of the package.  This program will be installed to ${prefix}/bin,
-unless disabled by passing `--disable-checkdirfile' to ./configure.
+The `checkdirfile' program is provided as an example of library use in the
+`util' subdirectory of the package.  This program will be installed in
+${prefix}/bin, unless disabled by passing `--disable-checkdirfile' to
+./configure.
 
 This utility was designed to report syntax error in the format file(s) of the
 large, complex dirfiles used in the analysis of the BLAST experiment data.
@@ -193,7 +198,7 @@ or the size of the dirfile, if no syntax errors are found.
 
 Bindings exist for using the GetData library in languages other than C.  If
 language bindings exist for your particular library, a README.<language> file
-explaining its use should be present in the same directory as this file.
+explaining its use should be present in the `doc' subdirectory.
 
 If no bindings exist for your language of choice, you will have to write your
 own.  If you are willing to have these bindings redistributed under identical
@@ -208,7 +213,7 @@ Starting with GetData 0.5.0, encoding schemes which rely on optional external
 libraries (slim, gzip, bzip2) may be built as stand-alone library modules which
 will be dynamically loaded, as needed, at runtime by the core GetData library.
 This architecture is provided to permit packaging the core GetData library
-separately from the part of the library requiring the optional external
+separately from the parts of the library requiring the optional external
 libraries without having to give up the functionality these extra libraries
 provide.  To enable this behaviour, pass `--enable-modules' to ./configure.
 
@@ -221,11 +226,11 @@ export the symbols from its internal version of libltdl.  As a result, if the
 internal version is used, GetData can still be linked to another object using
 the system libltdl.
 
-GetData will fail gracefully if a library module is not found at runtime.  In
-this case, the call which triggered the attempt to load the module will fail
-with the GD_E_UNSUPPORTED error.
+GetData will fail gracefully if a library module is not found or cannot be
+opened at runtime.  In this case, the call which triggered the attempt to load
+the module will fail with the GD_E_UNSUPPORTED error.
 
-The dlopen library (and by extension libltdl) is notoriously not thread safe.
+The dlopen library (and, by extension, libltdl) is notoriously not thread safe.
 As a result, if a POSIX thread implementation can be found, calls to the dynamic
 loader will be wrapped in a mutex.
 
@@ -296,7 +301,7 @@ Defining the preprocessor symbol `NO_GETDATA_LEGACY_API' before including
 getdata.h will prevent the legacy API from being declared.  In cases when the
 legacy API is declared, getdata.h will define the symbol GETDATA_LEGACY_API,
 which can be used by callers to determine whether the legacy API is present at
-compile time or runtime.
+compile time.
 
 If the legacy API is not built (as a result of passing `--disable-legacy-api'
 to ./configure), getdata_legacy.h will not be installed, and the legacy API will
@@ -314,9 +319,9 @@ before including getdata.h or any Standard C Library header file.
 
 The first of these, _LARGEFILE64_SOURCE, if defined before including getdata.h,
 will enable the obsolete, transitional largefile extensions defined by the LFS.
-This will enable explicit support for large files by defining the 64-bit
-explicit type `off64_t', and result in getdata defining the explicitly 64-bit
-interfaces `getdata64', `putdata64', and `get_nframes64'.  This macro is
+This will enable explicit support for large files through the definition of the
+64-bit explicit type `off64_t', and result in getdata defining the explicitly
+64-bit interfaces `getdata64', `putdata64', `get_nframes64', &c.  This macro is
 largely obsolete, and using _FILE_OFFSET_BITS is preferred, if supported.
 
 The second macro, _FILE_OFFSET_BITS, determines the size of `off_t'.  If not

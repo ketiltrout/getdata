@@ -18,7 +18,18 @@ dnl You should have received a copy of the GNU General Public License
 dnl along with GetData; if not, write to the Free SoftwareFoundation, Inc.,
 dnl 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 dnl
-AC_INIT([GetData], [0.5.0], [getdata-devel@lists.sourceforge.net])
+
+m4_define(getdata_major,    0)
+m4_define(getdata_minor,    5)
+m4_define(getdata_revision, 0)
+m4_define(getdata_version, getdata_major.getdata_minor.getdata_revision)
+
+
+AC_INIT([GetData], [getdata_version], [getdata-devel@lists.sourceforge.net])
+
+AC_DEFINE([GETDATA_MAJOR], [getdata_major], [ The major version number ])
+AC_DEFINE([GETDATA_MINOR], [getdata_minor], [ The minor version number ])
+AC_DEFINE([GETDATA_REVISION], [getdata_revision], [ The revision number ])
 
 AC_PREREQ([2.63])
 
@@ -151,6 +162,19 @@ fi
 
 AC_MSG_CHECKING([whether to include the Fortran 77 bindings])
 AC_MSG_RESULT([$make_f77bindings])
+
+dnl Python bindings
+AC_ARG_ENABLE(python, AS_HELP_STRING([--disable-python],
+              [don't build the Python bindings (PyGetData)]),
+              [
+               case "${enableval}" in
+                 no) make_pybindings="no" ;;
+                 *) make_pybindings="yes" ;;
+               esac
+              ], [ make_pybindings="yes" ])
+
+AC_MSG_CHECKING([whether to include the Python bindings])
+AC_MSG_RESULT([$make_pybindings])
 
 dnl Modules
 AC_ARG_ENABLE(modules, AS_HELP_STRING([--enable-modules],
@@ -412,6 +436,17 @@ fi
 
 AC_CHECK_SIZEOF([int])
 
+dnl python
+if test "x$make_pybindings" = "xyes"; then
+  echo
+  echo "*** Configuring python bindings"
+  echo
+  GD_PYTHON([2.3])
+  if test "x$have_python" = "xno"; then
+    make_pybindings="no"
+  fi
+fi
+
 dnl external encodings
 GD_CHECK_ENCODING([bzip2],[bz2],[BZ2_bzReadOpen],[bzlib.h],[bzip2],[bunzip2])
 GD_CHECK_ENCODING([slim],[slim],[slimopen],[slimlib.h],[slim],[unslim])
@@ -436,7 +471,6 @@ echo
 echo "*** Writing configure output"
 echo
 AC_CONFIG_FILES([Makefile])
-AC_CONFIG_FILES([bin/Makefile])
 AC_CONFIG_FILES([bindings/Makefile])
 if test "x$make_cxxbindings" = "xyes"; then
   AC_CONFIG_FILES([bindings/cxx/Makefile])
@@ -445,6 +479,10 @@ fi
 if test "x$make_f77bindings" = "xyes"; then
   AC_CONFIG_FILES([bindings/f77/Makefile])
   AC_CONFIG_FILES([bindings/f77/test/Makefile])
+fi
+if test "x$make_pybindings" = "xyes"; then
+  AC_CONFIG_FILES([bindings/python/Makefile])
+  AC_CONFIG_FILES([bindings/python/test/Makefile])
 fi
 AC_CONFIG_FILES([doc/Makefile])
 AC_CONFIG_FILES([man/Makefile])
@@ -455,6 +493,7 @@ AC_CONFIG_FILES([src/Makefile])
 AC_CONFIG_HEADERS([src/getdata.h], [chmod a-w src/getdata.h])
 AC_CONFIG_FILES([src/getdata.pc])
 AC_CONFIG_FILES([test/Makefile])
+AC_CONFIG_FILES([util/Makefile])
 
 # Automake conditionals
 AM_CONDITIONAL(GETDATA_DEBUG, [test "x$enable_debug" == "xyes"])
@@ -469,6 +508,7 @@ AM_CONDITIONAL(MAKE_CHECKDIRFILE, test "x$make_checkdirfile" = "xbuild")
 AM_CONDITIONAL(MAKE_CXXBINDINGS, test "x$make_cxxbindings" = "xyes")
 AM_CONDITIONAL(MAKE_F77BINDINGS, test "x$make_f77bindings" != "xno")
 AM_CONDITIONAL(MAKE_F95BINDINGS, test "x$make_f95bindings" = "xyes")
+AM_CONDITIONAL(MAKE_PYBINDINGS, test "x$make_pybindings" = "xyes")
 AM_CONDITIONAL(USE_MODULES, test "x$use_modules" != "xno")
 
 AC_OUTPUT
@@ -490,6 +530,12 @@ if test "x$make_f95bindings" != "xno"; then
   BINDINGS_BUILT="${BINDINGS_BUILT} Fortran-95"
 else
   BINDINGS_LEFT="${BINDINGS_LEFT} Fortran-95"
+fi
+
+if test "x$make_pybindings" != "xno"; then
+  BINDINGS_BUILT="${BINDINGS_BUILT} Python"
+else
+  BINDINGS_LEFT="${BINDINGS_LEFT} Python"
 fi
 
 if test "x$BINDINGS_BUILT" = "x"; then

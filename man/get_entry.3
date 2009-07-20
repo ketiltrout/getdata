@@ -229,7 +229,7 @@ typedef struct {
 .in
 .P
 The
-.I count
+.I n_fields
 member indicates the number of input fields.  It will be between one and
 .BR GD_MAX_LINCOM ,
 which is defined in getdata.h to the maximum number of input fields permitted
@@ -241,7 +241,7 @@ The
 member is an array of length
 .B GD_MAX_LINCOM
 containing the input field code(s).  Only the first
-.I count
+.I n_fields
 records from this array are initialised.  The remaining records will contain
 invalid data.
 .P
@@ -252,7 +252,7 @@ and
 members are arrays of the scale factor(s) and offset term(s) for the
 .BR LINCOM .
 Attempting to access more than the first
-.I count
+.I n_fields
 records from these array may result in undefined behaviour.
 .SS LINTERP Members
 A gd_entry_t describing a
@@ -344,7 +344,7 @@ typedef struct {
 .in
 .P
 The
-.I samples_per_frame
+.I spf
 member contains the samples per frame of the binary data on disk.
 .P
 The

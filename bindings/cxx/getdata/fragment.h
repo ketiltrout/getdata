@@ -53,6 +53,8 @@ namespace GetData {
 
       off_t FrameOffset() { return (off_t)off; };
 
+      int Index() { return ind; }
+
       const char* Name() { return name; }
 
       int Parent() { return parent; }

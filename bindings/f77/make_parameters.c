@@ -112,6 +112,7 @@ int main(void)
     parameter(stream, "GD_SLIM_ENCODED",     "GD_ES",  GD_SLIM_ENCODED,     i);
     parameter(stream, "GD_GZIP_ENCODED",     "GD_EG",  GD_GZIP_ENCODED,     i);
     parameter(stream, "GD_BZIP2_ENCODED",    "GD_EB",  GD_BZIP2_ENCODED,    i);
+    parameter(stream, "GD_LZMA_ENCODED",     "GD_EL",  GD_LZMA_ENCODED,     i);
 
     fprintf(stream, "\\\n%c Field types\\\n", c);
 
@@ -123,6 +124,8 @@ int main(void)
     parameter(stream, "GD_MULTIPLY_ENTRY",   "GD_MTE", GD_MULTIPLY_ENTRY,   i);
     parameter(stream, "GD_PHASE_ENTRY",      "GD_PHE", GD_PHASE_ENTRY,      i);
     parameter(stream, "GD_INDEX_ENTRY",      "GD_IXE", GD_INDEX_ENTRY,      i);
+    parameter(stream, "GD_POLYNOM_ENTRY",    "GD_PNE", GD_POLYNOM_ENTRY,    i);
+    parameter(stream, "GD_SBIT_ENTRY",       "GD_SBE", GD_SBIT_ENTRY,       i);
     parameter(stream, "GD_CONST_ENTRY",      "GD_COE", GD_CONST_ENTRY,      i);
     parameter(stream, "GD_STRING_ENTRY",     "GD_STE", GD_STRING_ENTRY,     i);
 

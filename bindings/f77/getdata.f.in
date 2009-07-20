@@ -1,4 +1,4 @@
-C     (C) 2008 D. V. Wiebe
+C     (C) 2008-2009 D. V. Wiebe
 C
 C     CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 C
@@ -37,8 +37,12 @@ C     Corresponding to dirfile_add_multiply(3)
       EXTERNAL GDADMT
 C     Corresponding to dirfile_add_phase(3)
       EXTERNAL GDADPH
+C     Corresponding to dirfile_add_polynom(3)
+      EXTERNAL GDADPN
 C     Corresponding to dirfile_add_raw(3)
       EXTERNAL GDADRW
+C     Corresponding to dirfile_add_sbit(3)
+      EXTERNAL GDADSB
 C     Corresponding to dirfile_add_spec(3)
       EXTERNAL GDADSP
 C     Corresponding to dirfile_add_string(3)
@@ -61,8 +65,12 @@ C     Correpsonding to dirfile_alter_multiply(3)
       EXTERNAL GDALMT
 C     Correpsonding to dirfile_alter_phase(3)
       EXTERNAL GDALPH
+C     Correpsonding to dirfile_alter_polynom(3)
+      EXTERNAL GDALPN
 C     Correpsonding to dirfile_alter_raw(3)
       EXTERNAL GDALRW
+C     Correpsonding to dirfile_alter_sbit(3)
+      EXTERNAL GDALSB
 C     Correpsonding to dirfile_alter_spec(3)
       EXTERNAL GDALSP
 C     Corresponding to dirfile_parser_callback(3)
@@ -109,8 +117,12 @@ C     Corresponding to get_endianness(3)
       EXTERNAL GDGEND
 C     Corresponding to get_entry(3) for PHASE fields
       EXTERNAL GDGEPH
+C     Corresponding to get_entry(3) for POLYNOM fields
+      EXTERNAL GDGEPN
 C     Corresponding to get_entry(3) for RAW fields
       EXTERNAL GDGERW
+C     Corresponding to get_entry(3) for SBIT fields
+      EXTERNAL GDGESB
 C     Corresponding to getdata(3)
       EXTERNAL GDGETD
 C     Correpsonding to get_frameoffset(3)
@@ -139,6 +151,10 @@ C     Corresponding to dirfile_madd_multiply(3)
       EXTERNAL GDMDMT
 C     Corresponding to dirfile_madd_phase(3)
       EXTERNAL GDMDPH
+C     Corresponding to dirfile_madd_polynom(3)
+      EXTERNAL GDMDPN
+C     Corresponding to dirfile_madd_sbit(3)
+      EXTERNAL GDMDSB
 C     Corresponding to dirfile_madd_spec(3)
       EXTERNAL GDMDSP
 C     Corresponding to dirfile_madd_string(3)

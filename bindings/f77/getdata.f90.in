@@ -1,4 +1,4 @@
-! (C) 2008 D. V. Wiebe
+! (C) 2008-2009 D. V. Wiebe
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
@@ -697,6 +697,10 @@ function fget_entry (dirfile, field_code, ent)
     ! bit
     call gdgebt(ent%field(1), len1, ent%bitnum, ent%numbits, &
     ent%fragment_index, dirfile, TRIM(field_code), LEN_TRIM(field_code))
+  else if (fget_entry .EQ. GD_SBIT_ENTRY) then
+    ! sbit
+    call gdgesb(ent%field(1), len1, ent%bitnum, ent%numbits, &
+    ent%fragment_index, dirfile, TRIM(field_code), LEN_TRIM(field_code))
   else if (fget_entry .EQ. GD_MULTIPLY_ENTRY) then
     ! multiply
     call gdgemt(ent%field(1), len1, ent%field(2), len2, ent%fragment_index, &
@@ -704,6 +708,11 @@ function fget_entry (dirfile, field_code, ent)
   else if (fget_entry .EQ. GD_PHASE_ENTRY) then
     !phase
     call gdgemt(ent%field(1), len1, ent%shift, ent%fragment_index, dirfile, &
+    TRIM(field_code), LEN_TRIM(field_code))
+  else if (fget_entry .EQ. GD_POLYNOM_ENTRY) then
+    ! polynom
+    call gdgepn(ent%n_fields, ent%field(1), len1, ent%m(1), ent%m(2), &
+    ent%m(3), ent%b(1), ent%b(2), ent%b(3), ent%fragment_index, dirfile, &
     TRIM(field_code), LEN_TRIM(field_code))
   else if (fget_entry .EQ. GD_CONST_ENTRY) then
     !const
@@ -761,6 +770,10 @@ subroutine fdirfile_add (dirfile, field_code, ent)
     call gdadbt(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
     TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), ent%bitnum, ent%numbits, &
     ent%fragment_index)
+  else if (ent%field_type .EQ. GD_SBIT_ENTRY) then
+    call gdadsb(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+    TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), ent%bitnum, ent%numbits, &
+    ent%fragment_index)
   else if (ent%field_type .EQ. GD_MULTIPLY_ENTRY) then
     call gdadmt(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
     TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), TRIM(ent%field(2)), &
@@ -768,6 +781,10 @@ subroutine fdirfile_add (dirfile, field_code, ent)
   else if (ent%field_type .EQ. GD_PHASE_ENTRY) then
     call gdadph(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
     TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), ent%shift, ent%fragment_index)
+  else if (ent%field_type .EQ. GD_POLYNOM_ENTRY) then
+    call gdadpn(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+    ent%n_fields, TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), ent%m(1), &
+    ent%m(2), ent%m(3), ent%b(1), ent%b(2), ent%b(3), ent%fragment_index)
   else if (ent%field_type .EQ. GD_CONST_ENTRY) then
     call gdadco(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
     ent%data_type, GD_INT32, zero, ent%fragment_index)
@@ -783,6 +800,15 @@ subroutine fdirfile_add_bit (dirfile, field_name, in_field, bitnum, numbits, &
   character (len=*), intent(in) :: field_name, in_field
 
   call gdadbt(dirfile, TRIM(field_name), LEN_TRIM(field_name), TRIM(in_field), &
+  LEN_TRIM(in_field), bitnum, numbits, fragment_index)
+end subroutine
+
+subroutine fdirfile_add_sbit (dirfile, field_name, in_field, bitnum, numbits, &
+  fragment_index)
+  integer, intent(in) :: dirfile, bitnum, numbits, fragment_index
+  character (len=*), intent(in) :: field_name, in_field
+
+  call gdadsb(dirfile, TRIM(field_name), LEN_TRIM(field_name), TRIM(in_field), &
   LEN_TRIM(in_field), bitnum, numbits, fragment_index)
 end subroutine
 
@@ -804,6 +830,17 @@ subroutine fdirfile_add_lincom (dirfile, field_name, n_fields, in_field1, m1, &
   call gdadlc(dirfile, TRIM(field_name), LEN_TRIM(field_name), n_fields, &
   TRIM(in_field1), LEN_TRIM(in_field1), m1, b1, TRIM(in_field2), &
   LEN_TRIM(in_field2), m2, b2, TRIM(in_field3), LEN_TRIM(in_field3), m3, b3, &
+  fragment_index)
+end subroutine
+
+subroutine fdirfile_add_polynom (dirfile, field_name, poly_ord, in_field, a0, &
+  a1, a2, a3, a4, a5, fragment_index)
+  integer, intent(in) :: dirfile, poly_ord, fragment_index
+  character (len=*), intent(in) :: field_name, in_field
+  real*8, intent(in) :: a0, a1, a2, a3, a4, a5
+
+  call gdadpn(dirfile, TRIM(field_name), LEN_TRIM(field_name), poly_ord, &
+  TRIM(in_field), LEN_TRIM(in_field), a0, a1, a2, a3, a4, a5, &
   fragment_index)
 end subroutine
 
@@ -875,10 +912,19 @@ subroutine fdirfile_madd (dirfile, parent, field_code, ent)
     call gdmdbt(dirfile, TRIM(parent), LEN_TRIM(parent), TRIM(field_code), &
     LEN_TRIM(field_code), TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), &
     ent%bitnum, ent%numbits)
+  else if (ent%field_type .EQ. GD_SBIT_ENTRY) then
+    call gdmdsb(dirfile, TRIM(parent), LEN_TRIM(parent), TRIM(field_code), &
+    LEN_TRIM(field_code), TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), &
+    ent%bitnum, ent%numbits)
   else if (ent%field_type .EQ. GD_MULTIPLY_ENTRY) then
     call gdmdmt(dirfile, TRIM(parent), LEN_TRIM(parent), TRIM(field_code), &
     LEN_TRIM(field_code), TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), &
     TRIM(ent%field(2)), LEN_TRIM(ent%field(2)))
+  else if (ent%field_type .EQ. GD_POLYNOM_ENTRY) then
+    call gdmdpn(dirfile, TRIM(parent), LEN_TRIM(parent), TRIM(field_code), &
+    LEN_TRIM(field_code), ent%n_fields, TRIM(ent%field(1)), &
+    LEN_TRIM(ent%field(1)), ent%m(1), ent%m(2), ent%m(3), ent%b(1), ent%b(2), &
+    ent%b(3))
   else if (ent%field_type .EQ. GD_PHASE_ENTRY) then
     call gdmdph(dirfile, TRIM(parent), LEN_TRIM(parent), TRIM(field_code), &
     LEN_TRIM(field_code), TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), ent%shift)
@@ -920,6 +966,18 @@ subroutine fdirfile_madd_lincom (dirfile, parent, field_name, n_fields, &
   LEN_TRIM(field_name), n_fields, TRIM(in_field1), LEN_TRIM(in_field1), m1, &
   b1, TRIM(in_field2), LEN_TRIM(in_field2), m2, b2, TRIM(in_field3), &
   LEN_TRIM(in_field3), m3, b3)
+end subroutine
+
+subroutine fdirfile_madd_polynom (dirfile, parent, field_name, poly_ord, &
+  in_field, a0, a1, a2, a3, a4, a5)
+  integer, intent(in) :: dirfile, poly_ord
+  character (len=*), intent(in) :: field_name, in_field
+  character (len=*), intent(in) :: parent
+  real*8, intent(in) :: a0, a1, a2, a3, a4, a5
+
+  call gdmdpn(dirfile, TRIM(parent), LEN_TRIM(parent), TRIM(field_name), &
+  LEN_TRIM(field_name), poly_ord, TRIM(in_field), LEN_TRIM(in_field), a0, &
+  a1, a2, a3, a4, a5)
 end subroutine
 
 subroutine fdirfile_madd_linterp (dirfile, parent, field_name, in_field, table)
@@ -1140,6 +1198,9 @@ subroutine fdirfile_alter_entry (dirfile, field_code, ent, recode)
   else if (ent%field_type .EQ. GD_BIT_ENTRY) then
     call gdalbt(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
     TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), ent%bitnum, ent%numbits)
+  else if (ent%field_type .EQ. GD_SBIT_ENTRY) then
+    call gdalsb(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+    TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), ent%bitnum, ent%numbits)
   else if (ent%field_type .EQ. GD_MULTIPLY_ENTRY) then
     call gdalmt(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
     TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), TRIM(ent%field(2)), &
@@ -1147,6 +1208,10 @@ subroutine fdirfile_alter_entry (dirfile, field_code, ent, recode)
   else if (ent%field_type .EQ. GD_PHASE_ENTRY) then
     call gdalph(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
     TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), ent%shift)
+  else if (ent%field_type .EQ. GD_POLYNOM_ENTRY) then
+    call gdalpn(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+    ent%n_fields, TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), ent%m(1), &
+    ent%m(2), ent%m(3), ent%b(1), ent%b(2), ent%b(3))
   else if (ent%field_type .EQ. GD_CONST_ENTRY) then
     call gdalco(dirfile, TRIM(field_code), LEN_TRIM(field_code), ent%data_type)
   end if
@@ -1157,6 +1222,14 @@ subroutine fdirfile_alter_bit (dirfile, field_name, in_field, bitnum, numbits)
   character (len=*), intent(in) :: field_name, in_field
 
   call gdalbt(dirfile, TRIM(field_name), LEN_TRIM(field_name), TRIM(in_field), &
+  LEN_TRIM(in_field), bitnum, numbits)
+end subroutine
+
+subroutine fdirfile_alter_sbit (dirfile, field_name, in_field, bitnum, numbits)
+  integer, intent(in) :: dirfile, bitnum, numbits
+  character (len=*), intent(in) :: field_name, in_field
+
+  call gdalsb(dirfile, TRIM(field_name), LEN_TRIM(field_name), TRIM(in_field), &
   LEN_TRIM(in_field), bitnum, numbits)
 end subroutine
 
@@ -1176,6 +1249,16 @@ subroutine fdirfile_alter_lincom (dirfile, field_name, n_fields, in_field1, &
   call gdallc(dirfile, TRIM(field_name), LEN_TRIM(field_name), n_fields, &
   TRIM(in_field1), LEN_TRIM(in_field1), m1, b1, TRIM(in_field2), &
   LEN_TRIM(in_field2), m2, b2, TRIM(in_field3), LEN_TRIM(in_field3), m3, b3)
+end subroutine
+
+subroutine fdirfile_alter_polynom (dirfile, field_name, poly_ord, in_field, &
+  a0, a1, a2, a3, a4, a5)
+  integer, intent(in) :: dirfile, poly_ord
+  character (len=*), intent(in) :: field_name, in_field
+  real*8, intent(in) :: a0, a1, a2, a3, a4, a5
+
+  call gdalpn(dirfile, TRIM(field_name), LEN_TRIM(field_name), poly_ord, &
+  TRIM(in_field), LEN_TRIM(in_field), a0, a1, a2, a3, a4, a5)
 end subroutine
 
 subroutine fdirfile_alter_linterp (dirfile, field_name, in_field, table, move)

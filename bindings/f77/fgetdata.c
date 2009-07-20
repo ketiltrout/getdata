@@ -138,21 +138,20 @@ static int _GDF_FString(char* dest, int *dlen, const char* src)
   return -1;
 }
 
-static const void *_gdf_f77_callback = NULL;
-
 /* callback wrapper */
-static int _GDF_Callback(const DIRFILE* D, int suberror, char *line)
+static int _GDF_Callback(const DIRFILE* D, int suberror, char *line,
+    void* f77_callback)
 {
   int unit;
   int r = GD_SYNTAX_ABORT;
 
   dtrace("%p, %i, \"%s\"", D, suberror, line);
 
-  if (_gdf_f77_callback != NULL) {
+  if (f77_callback != NULL) {
     unit = _GDF_SetDirfile((DIRFILE*)D);
 
-    (*(void(*)(int*, const int*, const int*, char*))_gdf_f77_callback)(&r,
-        &unit, &suberror, line);
+    (*(void(*)(int*, const int*, const int*, char*))f77_callback)(&r, &unit,
+        &suberror, line);
 
     line[GD_MAX_LINE_LENGTH - 1] = '\0';
 
@@ -168,8 +167,6 @@ void F77_FUNC(gdopen, GDOPEN) (int* dirfile, const char* dirfilename,
     const int* dirfilename_l, const int* flags)
 {
   char* out = malloc(*dirfilename_l + 1);
-
-  _gdf_f77_callback = NULL;
 
   *dirfile = _GDF_SetDirfile(dirfile_open(_GDF_CString(out, dirfilename,
           *dirfilename_l), *flags));
@@ -421,6 +418,44 @@ void F77_FUNC(gdgelc, GDGELC) (int* nfields,
   free(out);
 }
 
+/* get_entry wrapper for POLYNOM */
+void F77_FUNC(gdgepn, GDGEPN) (int* poly_ord,
+    char* infield, int* infield_l, double* a0, double* a1,
+    double* a2, double* a3, double* a4, double* a5,
+    int* fragment_index, const int* dirfile, const char* field_code,
+    const int* field_code_l)
+{
+  char* out = malloc(*field_code_l + 1);
+  gd_entry_t E;
+
+  if (get_entry(_GDF_GetDirfile(*dirfile), _GDF_CString(out, field_code,
+          *field_code_l), &E) || E.field_type != GD_LINCOM_ENTRY)
+    *poly_ord = 0;
+  else {
+    *poly_ord = E.poly_ord;
+    *fragment_index = E.fragment_index;
+
+    _GDF_FString(infield, infield_l, E.in_fields[0]);
+
+    switch (E.poly_ord) {
+      case 5:
+        *a5 = E.a[5];
+      case 4:
+        *a4 = E.a[4];
+      case 3:
+        *a3 = E.a[3];
+      case 2:
+        *a2 = E.a[2];
+      case 1:
+        *a1 = E.a[1];
+        *a0 = E.a[0];
+    }
+  }
+
+  dirfile_free_entry_strings(&E);
+  free(out);
+}
+
 /* get_entry wrapper for LINTERP */
 void F77_FUNC(gdgelt, GDGELT) (char* in_field, int* in_field_l, char* table,
     int* table_l, int* fragment_index, const int* dirfile,
@@ -452,6 +487,28 @@ void F77_FUNC(gdgebt, GDGEBT) (char* in_field, int* in_field_l, int* bitnum,
 
   if (get_entry(_GDF_GetDirfile(*dirfile), _GDF_CString(out, field_code,
           *field_code_l), &E) || E.field_type != GD_BIT_ENTRY)
+    *in_field_l = 0;
+  else {
+    _GDF_FString(in_field, in_field_l, E.in_fields[0]);
+    *bitnum = E.bitnum;
+    *numbits = E.numbits;
+    *fragment_index = E.fragment_index;
+  }
+
+  dirfile_free_entry_strings(&E);
+  free(out);
+}
+
+/* get_entry wrapper for SBIT */
+void F77_FUNC(gdgesb, GDGESB) (char* in_field, int* in_field_l, int* bitnum,
+    int* numbits, int* fragment_index, const int* dirfile,
+    const char* field_code, const int* field_code_l)
+{
+  char* out = malloc(*field_code_l + 1);
+  gd_entry_t E;
+
+  if (get_entry(_GDF_GetDirfile(*dirfile), _GDF_CString(out, field_code,
+          *field_code_l), &E) || E.field_type != GD_SBIT_ENTRY)
     *in_field_l = 0;
   else {
     _GDF_FString(in_field, in_field_l, E.in_fields[0]);
@@ -591,6 +648,43 @@ void F77_FUNC(gdadlc, GDADLC) (const int* dirfile, const char* field_code,
   free(in_fields[2]);
 }
 
+/* dirfile_add_polynom wrapper */
+void F77_FUNC(gdadpn, GDADPN) (const int* dirfile, const char* field_code,
+    const int* field_code_l, const int* poly_ord, const char* in_field,
+    const int* in_field_l, const double* a0, const double* a1, const double* a2,
+    const double* a3, const double* a4, const double* a5,
+    const int* fragment_index)
+{
+  char* fc = malloc(*field_code_l + 1);
+  char* inf = NULL;
+  double a[6] = {0, 0, 0, 0, 0, 0};
+  int po = *poly_ord;
+  if (po > 5)
+    po = 5;
+
+  inf = malloc(*in_field_l + 1);
+  _GDF_CString(inf, in_field, *in_field_l);
+
+  switch (po) {
+    case 5:
+      a[5] = *a5;
+    case 4:
+      a[4] = *a4;
+    case 3:
+      a[3] = *a3;
+    case 2:
+      a[2] = *a2;
+    case 1:
+      a[1] = *a1;
+      a[0] = *a0;
+  }
+
+  dirfile_add_polynom(_GDF_GetDirfile(*dirfile), _GDF_CString(fc, field_code,
+        *field_code_l), po, inf, a, *fragment_index);
+  free(fc);
+  free(inf);
+}
+
 /* dirfile_add_linterp wrapper */
 void F77_FUNC(gdadlt, GDADLT) (const int* dirfile, const char* field_code,
     const int* field_code_l, const char* in_field, const int* in_field_l,
@@ -617,6 +711,21 @@ void F77_FUNC(gdadbt, GDADBT) (const int* dirfile, const char* field_code,
   char* in = malloc(*in_field_l + 1);
 
   dirfile_add_bit(_GDF_GetDirfile(*dirfile), _GDF_CString(fc, field_code,
+        *field_code_l), _GDF_CString(in, in_field, *in_field_l), *bitnum,
+      *numbits, *fragment_index);
+  free(fc);
+  free(in);
+}
+
+/* dirfile_add_sbit wrapper */
+void F77_FUNC(gdadsb, GDADSB) (const int* dirfile, const char* field_code,
+    const int* field_code_l, const char* in_field, const int* in_field_l,
+    const int* bitnum, const int* numbits, const int* fragment_index)
+{
+  char* fc = malloc(*field_code_l + 1);
+  char* in = malloc(*in_field_l + 1);
+
+  dirfile_add_sbit(_GDF_GetDirfile(*dirfile), _GDF_CString(fc, field_code,
         *field_code_l), _GDF_CString(in, in_field, *in_field_l), *bitnum,
       *numbits, *fragment_index);
   free(fc);
@@ -834,6 +943,45 @@ void F77_FUNC(gdmdlc, GDMDLC) (const int* dirfile, const char* parent,
   free(in_fields[2]);
 }
 
+/* dirfile_madd_polynom wrapper */
+void F77_FUNC(gdmdpn, GDMDPN) (const int* dirfile, const char* parent,
+    const int* parent_l, const char* field_code, const int* field_code_l,
+    const int* poly_ord, const char* in_field, const int* in_field_l,
+    const double* a0, const double* a1, const double* a2, const double* a3,
+    const double* a4, const double* a5)
+{
+  char* pa = malloc(*parent_l + 1);
+  char* fc = malloc(*field_code_l + 1);
+  char* inf = NULL;
+  double a[6] = {0, 0, 0, 0, 0, 0};
+  int po = *poly_ord;
+  if (po > 5)
+    po = 5;
+
+  inf = malloc(*in_field_l + 1);
+  _GDF_CString(inf, in_field, *in_field_l);
+
+  switch (po) {
+    case 5:
+      a[5] = *a5;
+    case 4:
+      a[4] = *a4;
+    case 3:
+      a[3] = *a3;
+    case 2:
+      a[2] = *a2;
+    case 1:
+      a[1] = *a1;
+      a[0] = *a0;
+  }
+
+  dirfile_madd_polynom(_GDF_GetDirfile(*dirfile), _GDF_CString(pa, parent,
+        *parent_l), _GDF_CString(fc, field_code, *field_code_l), po, inf, a);
+  free(pa);
+  free(fc);
+  free(inf);
+}
+
 /* dirfile_madd_linterp wrapper */
 void F77_FUNC(gdmdlt, GDMDLT) (const int* dirfile, const char* parent,
     const int* parent_l, const char* field_code, const int* field_code_l,
@@ -866,6 +1014,24 @@ void F77_FUNC(gdmdbt, GDMDBT) (const int* dirfile, const char* parent,
   char* in = malloc(*in_field_l + 1);
 
   dirfile_madd_bit(_GDF_GetDirfile(*dirfile), _GDF_CString(pa, parent,
+        *parent_l), _GDF_CString(fc, field_code, *field_code_l),
+      _GDF_CString(in, in_field, *in_field_l), *bitnum, *numbits);
+  free(pa);
+  free(fc);
+  free(in);
+}
+
+/* dirfile_madd_sbit wrapper */
+void F77_FUNC(gdmdsb, GDMDSB) (const int* dirfile, const char* parent,
+    const int* parent_l, const char* field_code, const int* field_code_l,
+    const char* in_field, const int* in_field_l, const int* bitnum,
+    const int* numbits)
+{
+  char* pa = malloc(*parent_l + 1);
+  char* fc = malloc(*field_code_l + 1);
+  char* in = malloc(*in_field_l + 1);
+
+  dirfile_madd_sbit(_GDF_GetDirfile(*dirfile), _GDF_CString(pa, parent,
         *parent_l), _GDF_CString(fc, field_code, *field_code_l),
       _GDF_CString(in, in_field, *in_field_l), *bitnum, *numbits);
   free(pa);
@@ -1101,10 +1267,9 @@ void F77_FUNC(gdcopn, GDCOPN) (int* dirfile, const char* dirfilename,
 
   char* out = malloc(*dirfilename_l + 1);
 
-  _gdf_f77_callback = (callback == 0) ? NULL : callback;
-
   *dirfile = _GDF_SetDirfile(dirfile_cbopen(_GDF_CString(out, dirfilename,
-          *dirfilename_l), *flags, (callback == 0) ? NULL : _GDF_Callback));
+          *dirfilename_l), *flags, (callback == 0) ? NULL : _GDF_Callback,
+        (callback == 0) ? NULL : (void*)callback));
 
   free(out);
   dreturn("%i", *dirfile);
@@ -1113,10 +1278,8 @@ void F77_FUNC(gdcopn, GDCOPN) (int* dirfile, const char* dirfilename,
 /* dirfile_parser_callback wrapper */
 void F77_FUNC(gdclbk, GDCLBK) (const int* dirfile, const void* callback)
 {
-  _gdf_f77_callback = (callback == 0) ? NULL : callback;
-
-  dirfile_parser_callback(_GDF_GetDirfile(*dirfile), (callback == 0) ?  NULL
-      : _GDF_Callback);
+  dirfile_parser_callback(_GDF_GetDirfile(*dirfile), (callback == 0) ? NULL
+      : _GDF_Callback, (callback == 0) ?  NULL : (void*)callback);
 }
 
 /* dirfile_alter_bit wrapper */
@@ -1128,6 +1291,22 @@ void F77_FUNC(gdalbt, GDALBT) (const int* dirfile, const char* field_code,
   char* in = malloc(*in_field_l + 1);
 
   dirfile_alter_bit(_GDF_GetDirfile(*dirfile), _GDF_CString(fc, field_code,
+        *field_code_l), _GDF_CString(in, in_field, *in_field_l), *bitnum,
+      *numbits);
+
+  free(fc);
+  free(in);
+}
+
+/* dirfile_alter_sbit wrapper */
+void F77_FUNC(gdalsb, GDALSB) (const int* dirfile, const char* field_code,
+    const int* field_code_l, const char* in_field, const int* in_field_l,
+    int* bitnum, int* numbits)
+{
+  char* fc = malloc(*field_code_l + 1);
+  char* in = malloc(*in_field_l + 1);
+
+  dirfile_alter_sbit(_GDF_GetDirfile(*dirfile), _GDF_CString(fc, field_code,
         *field_code_l), _GDF_CString(in, in_field, *in_field_l), *bitnum,
       *numbits);
 
@@ -1188,6 +1367,42 @@ void F77_FUNC(gdallc, GDALLC) (const int* dirfile, const char* field_code,
   free(in_fields[0]);
   free(in_fields[1]);
   free(in_fields[2]);
+}
+
+/* dirfile_alter_polynom wrapper */
+void F77_FUNC(gdalpn, GDALPN) (const int* dirfile, const char* field_code,
+    const int* field_code_l, const int* poly_ord, const char* in_field,
+    const int* in_field_l, const double* a0, const double* a1, const double* a2,
+    const double* a3, const double* a4, const double* a5)
+{
+  char* fc = malloc(*field_code_l + 1);
+  char* inf = NULL;
+  double a[6] = {0, 0, 0, 0, 0, 0};
+  int po = *poly_ord;
+  if (po > 5)
+    po = 5;
+
+  inf = malloc(*in_field_l + 1);
+  _GDF_CString(inf, in_field, *in_field_l);
+
+  switch (po) {
+    case 5:
+      a[5] = *a5;
+    case 4:
+      a[4] = *a4;
+    case 3:
+      a[3] = *a3;
+    case 2:
+      a[2] = *a2;
+    case 1:
+      a[1] = *a1;
+      a[0] = *a0;
+  }
+
+  dirfile_alter_polynom(_GDF_GetDirfile(*dirfile), _GDF_CString(fc, field_code,
+        *field_code_l), po, inf, a);
+  free(fc);
+  free(inf);
 }
 
 /* dirfile_alter_multiply wrapper */

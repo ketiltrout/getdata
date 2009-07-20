@@ -1,5 +1,20 @@
+TODO for 0.6.0:            impl    bind      docs      test
+- Python bindings          done     --       TODO      TODO
+- IDL bindings             TODO     --       TODO      TODO
+- SBIT field type          done    done      TODO      done
+- POLYNOM field type       done    done      TODO      done
+- LZMA encoding            done    done      TODO      done
+- [BUG] Metaparameters
+  in _GD_FieldSpec         done     --        --       done
+
+
+Maybe TODO for 0.6.0
+- COMPLEX data types
+- Perl bindings
+
+Future TODOs:
 * Locking
 * Think about our linterp look-up optimisation
+* LUT sorting
 * Hashed compressed files
-* Write metaparameters in _GD_FieldSpec
-* check adds and mods for LINCOM/POLYNOM
+* streaming

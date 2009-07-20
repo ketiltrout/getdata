@@ -51,6 +51,8 @@ namespace GetData {
     BitEntryType      = GD_BIT_ENTRY,
     MultiplyEntryType = GD_MULTIPLY_ENTRY,
     PhaseEntryType    = GD_PHASE_ENTRY,
+    SBitEntryType     = GD_SBIT_ENTRY,
+    PolynomEntryType  = GD_POLYNOM_ENTRY,
     ConstEntryType    = GD_CONST_ENTRY,
     StringEntryType   = GD_STRING_ENTRY,
     IndexEntryType    = GD_INDEX_ENTRY
@@ -77,8 +79,8 @@ namespace GetData {
 
       /* Specific data */
       virtual const char *Input(int index = 0) {
-        return (CheckIndex(E.field_type, E.n_fields, index)) ? 
-            E.in_fields[index] : NULL;
+        return (CheckIndex(E.field_type, (E.field_type == GD_POLYNOM_ENTRY) ?
+              0 : E.n_fields, index)) ?  E.in_fields[index] : NULL;
       };
 
       /* RAW methods */
@@ -110,7 +112,7 @@ namespace GetData {
         return (E.field_type == GD_LINTERP_ENTRY) ? E.table : NULL;
       };
 
-      /* BIT methods */
+      /* (S)BIT methods */
       virtual int FirstBit() {
         return (E.field_type == GD_BIT_ENTRY) ? E.bitnum : -1;
       };
@@ -123,6 +125,16 @@ namespace GetData {
       virtual int Shift() {
         return (E.field_type == GD_PHASE_ENTRY) ? E.shift : 0;
       };
+
+      /* POLYNOM methods */
+      virtual int PolyOrd() {
+        return (E.field_type == GD_POLYNOM_ENTRY) ? E.poly_ord : 0;
+      };
+
+      virtual double Coefficient(int index = 0) {
+        return (E.field_type == GD_POLYNOM_ENTRY &&
+            CheckIndex(E.field_type, E.poly_ord, index)) ? E.a[index] : 0;
+      }
 
     protected:
       Entry(Dirfile *dirfile, const char* field_code);

@@ -42,8 +42,10 @@ namespace GetData {
     friend class LincomEntry;
     friend class LinterpEntry;
     friend class BitEntry;
+    friend class SBitEntry;
     friend class MultiplyEntry;
     friend class PhaseEntry;
+    friend class PolynomEntry;
     friend class ConstEntry;
     friend class StringEntry;
     friend class IndexEntry;
@@ -51,7 +53,8 @@ namespace GetData {
 
     public:
       Dirfile(const char *dirfilename, unsigned int flags = GD_RDWR,
-          int (*sehandler)(const DIRFILE*, int, char*) = NULL);
+          int (*sehandler)(const DIRFILE*, int, char*, void*) = NULL,
+          void* extra = NULL);
 
       Dirfile(DIRFILE *D);
 
@@ -59,9 +62,9 @@ namespace GetData {
 
       int Add(GetData::Entry &entry);
 
-      int AddSpec(const char *spec, int format_file = 0);
+      int AddSpec(const char *spec, int fragment_index = 0);
 
-      int AlterSpec(const char* line, int recode = 0);
+      int AlterSpec(const char* spec, int recode = 0);
 
       int Close();
 
@@ -93,7 +96,7 @@ namespace GetData {
 
       size_t GetString(const char *field_code, size_t len, char *data_out);
 
-      int Include(const char *file, int format_file = 0,
+      int Include(const char *file, int fragment_index = 0,
           unsigned int flags = 0);
 
       int MAdd(GetData::Entry &entry, const char *parent);
@@ -145,7 +148,8 @@ namespace GetData {
 
       unsigned int SamplesPerFrame(const char *field_code);
 
-      void SetCallback(int (*sehandler)(const DIRFILE*, int, char*));
+      void SetCallback(int (*sehandler)(const DIRFILE*, int, char*, void*),
+          void* extra = NULL);
 
       const char **Strings();
 

@@ -490,9 +490,9 @@ static gd_entry_t* _GD_ParseBit(DIRFILE* D, int is_signed,
   if (E->e->scalar[0] != NULL || E->e->scalar[1] != NULL)
     E->e->calculated = 0;
 
-  if (E->e->scalar[0] == NULL && E->numbits < 1)
+  if (E->e->scalar[1] == NULL && E->numbits < 1)
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_NUMBITS, format_file, line, NULL);
-  else if (E->e->scalar[1] == NULL && E->bitnum < 0)
+  else if (E->e->scalar[0] == NULL && E->bitnum < 0)
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BITNUM, format_file, line, NULL);
   else if (E->e->calculated && E->bitnum + E->numbits - 1 > 63)
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BITSIZE, format_file, line, NULL);
@@ -1264,7 +1264,8 @@ char* _GD_ParseFragment(FILE* fp, DIRFILE *D, int me, int* standards,
     else if (D->error == GD_E_FORMAT) {
       /* call the callback for this error */
       if (D->sehandler != NULL)
-        se_action = (*D->sehandler)(D, D->suberror, instring);
+        se_action = (*D->sehandler)(D, D->suberror, instring,
+            D->sehandler_extra);
 
       switch(se_action) {
         case GD_SYNTAX_ABORT:

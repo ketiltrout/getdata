@@ -87,6 +87,7 @@ void _GD_ConvertType(DIRFILE* D, const void *data_in, gd_type_t in_type,
             ((double*)data_out)[i] = (double)((int8_t*)data_in)[i];
           return;
         default:
+          _GD_SetError(D, GD_E_BAD_TYPE, out_type, NULL, 0, NULL);
           break;
       }
       break;
@@ -132,6 +133,7 @@ void _GD_ConvertType(DIRFILE* D, const void *data_in, gd_type_t in_type,
             ((double*)data_out)[i] = (double)((uint8_t*)data_in)[i];
           return;
         default:
+          _GD_SetError(D, GD_E_BAD_TYPE, out_type, NULL, 0, NULL);
           break;
       }
       break;
@@ -177,6 +179,7 @@ void _GD_ConvertType(DIRFILE* D, const void *data_in, gd_type_t in_type,
             ((double*)data_out)[i] = (double)((uint16_t*)data_in)[i];
           return;
         default:
+          _GD_SetError(D, GD_E_BAD_TYPE, out_type, NULL, 0, NULL);
           break;
       }
       break;
@@ -222,6 +225,7 @@ void _GD_ConvertType(DIRFILE* D, const void *data_in, gd_type_t in_type,
             ((double*)data_out)[i] = (double)((uint16_t*)data_in)[i];
           return;
         default:
+          _GD_SetError(D, GD_E_BAD_TYPE, out_type, NULL, 0, NULL);
           break;
       }
       break;
@@ -267,6 +271,7 @@ void _GD_ConvertType(DIRFILE* D, const void *data_in, gd_type_t in_type,
             ((double*)data_out)[i] = (double)((int32_t*)data_in)[i];
           return;
         default:
+          _GD_SetError(D, GD_E_BAD_TYPE, out_type, NULL, 0, NULL);
           break;
       }
       break;
@@ -357,6 +362,7 @@ void _GD_ConvertType(DIRFILE* D, const void *data_in, gd_type_t in_type,
             ((double*)data_out)[i] = (double)((int64_t*)data_in)[i];
           return;
         default:
+          _GD_SetError(D, GD_E_BAD_TYPE, out_type, NULL, 0, NULL);
           break;
       }
       break;
@@ -402,6 +408,7 @@ void _GD_ConvertType(DIRFILE* D, const void *data_in, gd_type_t in_type,
             ((double*)data_out)[i] = (double)((uint64_t*)data_in)[i];
           return;
         default:
+          _GD_SetError(D, GD_E_BAD_TYPE, out_type, NULL, 0, NULL);
           break;
       }
       break;
@@ -447,6 +454,7 @@ void _GD_ConvertType(DIRFILE* D, const void *data_in, gd_type_t in_type,
             ((double*)data_out)[i] = (double)((float*)data_in)[i];
           return;
         default:
+          _GD_SetError(D, GD_E_BAD_TYPE, out_type, NULL, 0, NULL);
           break;
       }
       break;
@@ -492,14 +500,14 @@ void _GD_ConvertType(DIRFILE* D, const void *data_in, gd_type_t in_type,
           memcpy(data_out, data_in, n * sizeof(double));
           return;
         default:
+          _GD_SetError(D, GD_E_BAD_TYPE, out_type, NULL, 0, NULL);
           break;
       }
       break;
     default:
+      _GD_SetError(D, GD_E_BAD_TYPE, in_type, NULL, 0, NULL);
       break;
   }
-
-  _GD_SetError(D, GD_E_BAD_TYPE, in_type, NULL, 0, NULL);
 }
 
 /* vim: ts=2 sw=2 et tw=80
