@@ -17,7 +17,6 @@ int main(void)
   const char* format = __TEST__ "dirfile/format";
   const char* apath = __TEST__ "dirfile/a";
   const char* jpath = __TEST__ "dirfile/j";
-  struct stat buf;
   const char* spec[] = {
     "a RAW UINT8 1\n",
     "c CONST UINT64 1\n",
@@ -48,7 +47,7 @@ int main(void)
   FILE* stream = fopen(format, "rt");
   i = 0;
   while (!feof(stream)) {
-    const char line[GD_MAX_LINE_LENGTH];
+    char line[GD_MAX_LINE_LENGTH];
     if (fgets(line, GD_MAX_LINE_LENGTH, stream) == NULL)
       break;
 
@@ -63,10 +62,10 @@ int main(void)
   }
   fclose(stream);
 
-//  unlink(apath);
-//  unlink(jpath);
-//  unlink(format);
-//  rmdir(filedir);
+  unlink(apath);
+  unlink(jpath);
+  unlink(format);
+  rmdir(filedir);
 
   if (error)
     return 1;

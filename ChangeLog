@@ -1,3 +1,10 @@
+2009-07-20   D. V. Wiebe <getdata@ketiltrout.net>  svn:302
+	* test/open_cb_invalid.c test/include_cb.c test/open_cb_rescan.c
+	test/open_cb_ignore.c test/include_pc.c test/open_cb_cont.c
+	test/open_cb_abort.c: Update for new sehandler.
+
+	* test/flush_spec.c: Fix compiler warinings.
+
 2009-07-20   D. V. Wiebe <getdata@ketiltrout.net>  svn:301
 	* util/: moved from bin/
 

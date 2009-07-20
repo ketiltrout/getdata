@@ -13,14 +13,15 @@
 static int saw_callback = 0;
 
 int callback(const DIRFILE *dirfile __attribute (( unused )),
-    int suberror __attribute__ (( unused )), char *line)
+    int suberror __attribute__ (( unused )), char *line,
+    void *extra __attribute__ (( unused )))
 {
   if (saw_callback)
     return GD_SYNTAX_ABORT;
 
   saw_callback = 1;
 
-  sprintf(line, "/REFERENCE data\n");
+  strcpy(line, "/REFERENCE data\n");
 
   return GD_SYNTAX_RESCAN;
 }
@@ -38,7 +39,7 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = dirfile_cbopen(filedir, GD_RDONLY, callback);
+  DIRFILE* D = dirfile_cbopen(filedir, GD_RDONLY, callback, NULL);
   int error = get_error(D);
   dirfile_close(D);
 

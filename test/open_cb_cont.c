@@ -13,7 +13,8 @@ static int saw_callback = 0;
 
 int callback(const DIRFILE *dirfile __attribute (( unused )),
     int suberror __attribute__ (( unused )),
-    char *line __attribute__ (( unused )))
+    char *line __attribute__ (( unused )),
+    void* extra __attribute__ (( unused )))
 {
   saw_callback++;
 
@@ -36,7 +37,7 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = dirfile_cbopen(filedir, GD_RDONLY, callback);
+  DIRFILE* D = dirfile_cbopen(filedir, GD_RDONLY, callback, NULL);
   int error = get_error(D);
   dirfile_close(D);
 
