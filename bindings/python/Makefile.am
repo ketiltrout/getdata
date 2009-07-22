@@ -28,7 +28,7 @@ SUBDIRS=test
 
 python_LTLIBRARIES = getdata.la
 
-AM_CFLAGS = -Wall
+AM_CFLAGS = -Wall -fno-strict-aliasing
 AM_CPPFLAGS = $(CPPFLAGS) $(PYTHON_CPPFLAGS)
 getdata_la_LDFLAGS = -module -avoid-version -export-symbols-regex initgetdata
 getdata_la_LIBADD = $(PYTHON_LIBS) -lgetdata
