@@ -67,13 +67,14 @@ else
     fi
   done])
   done
-  AC_SUBST([PYTHON])
   AC_MSG_RESULT([$PYTHON])
 fi
 
 if test "x$PYTHON" = "xnot found"; then
   have_python="no"
+  $PYTHON=
 fi
+AC_SUBST([PYTHON])
 
 fi
 

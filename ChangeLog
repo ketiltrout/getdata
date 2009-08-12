@@ -1,3 +1,15 @@
+2009-08-04   D. V. Wiebe <getdata@ketiltrout.net>  svn:304
+	* m4/ax_compare_version.m4 m4/idl.m4: Added.
+	* m4/idl.m4: Added.
+	* bindings/idl: Added.
+	
+	* src/getdata.h.in: Renamed GD_MAX_POLYNOM to GD_MAX_POLYORD to remove
+	confusion as to what this actually is.
+
+	* bindings/f77/fgetdata.c: Ensure the f77dirfiles array is initialised
+	before we try to read from it, even if the caller hasn't opened a dirfile
+	yet.
+
 2009-07-20   D. V. Wiebe <getdata@ketiltrout.net>  svn:302
 	* test/open_cb_invalid.c test/include_cb.c test/open_cb_rescan.c
 	test/open_cb_ignore.c test/include_pc.c test/open_cb_cont.c

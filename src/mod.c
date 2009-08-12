@@ -426,7 +426,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
       }
     }
 
-    for (i = 0; i < GD_MAX_POLYNOM; ++i) {
+    for (i = 0; i < GD_MAX_POLYORD; ++i) {
       if (scalar_free & (1 << i))
         free(E->e->scalar[i]);
     }
@@ -722,7 +722,7 @@ int dirfile_alter_polynom(DIRFILE* D, const char* field_code, int poly_ord,
   _GD_ClearError(D);
 
   N.field_type = GD_POLYNOM_ENTRY;
-  if (poly_ord > GD_MAX_POLYNOM || poly_ord < 0) {
+  if (poly_ord > GD_MAX_POLYORD || poly_ord < 0) {
     _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_POLYORD, NULL, poly_ord,
         NULL);
     dreturn("%i", -1);

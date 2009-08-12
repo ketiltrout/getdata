@@ -120,6 +120,22 @@ AC_ARG_ENABLE(checkdirfile, AS_HELP_STRING([--disable-checkdirfile],
 AC_MSG_CHECKING([whether to compile and install checkdirfile])
 AC_MSG_RESULT([$make_checkdirfile])
 
+dnl bindings, globally
+make_cxxbindings="yes"
+make_f77bindings="yes"
+make_pybindings="yes"
+make_idlbindings="yes"
+AC_ARG_ENABLE(bindings, AS_HELP_STRING([--disable-bindings],
+              [don't build any bindings, just build the C library]),
+              [
+               if test "x${enableval}" = "xno"; then
+                 make_cxxbindings="no"
+                 make_f77bindings="no"
+                 make_pybindings="no"
+                 make_idlbindings="no"
+               fi
+              ])
+
 dnl C++ bindings
 AC_ARG_ENABLE(cplusplus, AS_HELP_STRING([--disable-cplusplus],
               [don't build the C++ bindings (libgetdata++)]),
@@ -128,7 +144,7 @@ AC_ARG_ENABLE(cplusplus, AS_HELP_STRING([--disable-cplusplus],
                  no) make_cxxbindings="no" ;;
                  *) make_cxxbindings="yes" ;;
                esac
-              ], [ make_cxxbindings="yes" ])
+              ])
 AC_MSG_CHECKING([whether to include the C++ bindings])
 AC_MSG_RESULT([$make_cxxbindings])
 
@@ -141,7 +157,7 @@ AC_ARG_ENABLE(fortran, AS_HELP_STRING([--disable-fortran],
                  no) make_f77bindings="no" ;;
                  *) make_f77bindings="yes" ;;
                esac
-              ], [ make_f77bindings="yes" ])
+              ])
 
 dnl Fortran 95 bindings
 AC_ARG_ENABLE(fortran95, AS_HELP_STRING([--disable-fortran95],
@@ -171,10 +187,23 @@ AC_ARG_ENABLE(python, AS_HELP_STRING([--disable-python],
                  no) make_pybindings="no" ;;
                  *) make_pybindings="yes" ;;
                esac
-              ], [ make_pybindings="yes" ])
+              ])
 
 AC_MSG_CHECKING([whether to include the Python bindings])
 AC_MSG_RESULT([$make_pybindings])
+
+dnl IDL bindings
+AC_ARG_ENABLE(idl, AS_HELP_STRING([--disable-idl],
+       [don't build the Interactive Data Language (IDL) bindings (IDLGetData)]),
+              [
+               case "${enableval}" in
+                 no) make_idlbindings="no" ;;
+                 *) make_idlbindings="yes" ;;
+               esac
+              ])
+
+AC_MSG_CHECKING([whether to include the IDL bindings])
+AC_MSG_RESULT([$make_idlbindings])
 
 dnl Modules
 AC_ARG_ENABLE(modules, AS_HELP_STRING([--enable-modules],
@@ -447,6 +476,26 @@ if test "x$make_pybindings" = "xyes"; then
   fi
 fi
 
+dnl idl
+if test "x$make_idlbindings" = "xyes"; then
+  echo
+  echo "*** Configuring interactive data language (IDL) bindings"
+  echo
+  GD_IDL([5.5])
+  if test "x$have_idl" = "xno"; then
+    make_idlbindings="no"
+  fi
+
+  dnl build date
+  AC_CHECK_PROGS([DATE], [date], [not found])
+  if test "x$DATE" == "xnot found"; then
+    BUILD_DATE="Build date unspecified"
+  else
+    BUILD_DATE=`date`
+  fi
+  AC_SUBST([BUILD_DATE])
+fi
+
 dnl external encodings
 GD_CHECK_ENCODING([bzip2],[bz2],[BZ2_bzReadOpen],[bzlib.h],[bzip2],[bunzip2])
 GD_CHECK_ENCODING([slim],[slim],[slimopen],[slimlib.h],[slim],[unslim])
@@ -480,6 +529,11 @@ if test "x$make_f77bindings" = "xyes"; then
   AC_CONFIG_FILES([bindings/f77/Makefile])
   AC_CONFIG_FILES([bindings/f77/test/Makefile])
 fi
+if test "x$make_idlbindings" = "xyes"; then
+  AC_CONFIG_FILES([bindings/idl/Makefile])
+  AC_CONFIG_FILES([bindings/idl/makedlm.sh])
+dnl  AC_CONFIG_FILES([bindings/idl/test/Makefile])
+fi
 if test "x$make_pybindings" = "xyes"; then
   AC_CONFIG_FILES([bindings/python/Makefile])
   AC_CONFIG_FILES([bindings/python/test/Makefile])
@@ -509,6 +563,7 @@ AM_CONDITIONAL(MAKE_CXXBINDINGS, test "x$make_cxxbindings" = "xyes")
 AM_CONDITIONAL(MAKE_F77BINDINGS, test "x$make_f77bindings" != "xno")
 AM_CONDITIONAL(MAKE_F95BINDINGS, test "x$make_f95bindings" = "xyes")
 AM_CONDITIONAL(MAKE_PYBINDINGS, test "x$make_pybindings" = "xyes")
+AM_CONDITIONAL(MAKE_IDLBINDINGS, test "x$make_idlbindings" = "xyes")
 AM_CONDITIONAL(USE_MODULES, test "x$use_modules" != "xno")
 
 AC_OUTPUT
@@ -536,6 +591,12 @@ if test "x$make_pybindings" != "xno"; then
   BINDINGS_BUILT="${BINDINGS_BUILT} Python"
 else
   BINDINGS_LEFT="${BINDINGS_LEFT} Python"
+fi
+
+if test "x$make_idlbindings" != "xno"; then
+  BINDINGS_BUILT="${BINDINGS_BUILT} IDL"
+else
+  BINDINGS_LEFT="${BINDINGS_LEFT} IDL"
 fi
 
 if test "x$BINDINGS_BUILT" = "x"; then

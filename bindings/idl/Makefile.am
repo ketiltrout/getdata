@@ -1,4 +1,4 @@
-# (C) 2008 D. V. Wiebe
+# (C) 2009 D. V. Wiebe
 #
 ##########################################################################
 #
@@ -20,23 +20,28 @@
 #
 AUTOMAKE_OPTIONS = foreign
 
-if MAKE_CXXBINDINGS
-CXX_SUBDIR=cxx
+if GETDATA_DEBUG
+DEBUG_C = ../../src/debug.c
 endif
 
-if MAKE_F77BINDINGS
-F77_SUBDIR=f77
-endif
+#SUBDIRS=test
 
-if MAKE_IDLBINDINGS
-IDL_SUBDIR=idl
-endif
+idl_LTLIBRARIES = idl_getdata.la
+idl_HEADERS = idl_getdata.dlm
 
-if MAKE_PYBINDINGS
-PY_SUBDIR=python
-endif
+# idl makes heavy use of type punning, ergo -fno-strict-aliasing
+AM_CFLAGS = -Wall $(IDL_CFLAGS) -fno-strict-aliasing
+BUILT_SOURCES=sublist.c
+idl_getdata_la_LDFLAGS = -module -avoid-version -export-symbols-regex IDL_Load
+idl_getdata_la_LIBADD = $(IDL_LIBS) -lgetdata
+idl_getdata_la_SOURCES = getdata.c sublist.c ${DEBUG_C}
 
-SUBDIRS = ${CXX_SUBDIR} ${F77_SUBDIR} ${IDL_SUBDIR} ${PY_SUBDIR}
+sublist.c: getdata.c makedlm.sh
+	${SHELL} ./makedlm.sh -c $< > $@
+
+idl_getdata.dlm: getdata.c makedlm.sh
+	${SHELL} ./makedlm.sh -d $< > $@
 
 clean-local:
-	rm -rf *~ 
+	rm -rf *~ idl_getdata.dlm
+

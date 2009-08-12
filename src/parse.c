@@ -616,8 +616,8 @@ static gd_entry_t* _GD_ParsePolynom(DIRFILE* D,
   E->poly_ord = n_cols - 4;
 
   /* the legacy ignore-trailing-tokens "feature" */
-  if (E->poly_ord > GD_MAX_POLYNOM)
-    E->poly_ord = GD_MAX_POLYNOM;
+  if (E->poly_ord > GD_MAX_POLYORD)
+    E->poly_ord = GD_MAX_POLYORD;
 
   E->e->calculated = 1;
 

@@ -43,6 +43,7 @@ static void _GDF_InitDirfiles(void)
   /* we keep entry zero as a generic, invalid dirfile to return if
    * dirfile lookup fails */
   f77dirfiles[0] = (DIRFILE*)malloc(sizeof(DIRFILE));
+  memset(f77dirfiles[0], 0, sizeof(DIRFILE));
   f77dirfiles[0]->flags = GD_INVALID;
 
   f77dirfiles_initialised = 1;
@@ -71,6 +72,9 @@ static char* _GDF_CString(char* out, const char* in, int l)
 static DIRFILE* _GDF_GetDirfile(int d)
 {
   dtrace("%i", d);
+
+  if (!f77dirfiles_initialised)
+    _GDF_InitDirfiles();
 
   if (f77dirfiles[d] == NULL) {
     dreturn("%p [0]", f77dirfiles[0]);

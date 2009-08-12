@@ -91,7 +91,7 @@
 #define GD_MAX_LINCOM 3
 
 /* the following MUST be at least one less than twice GD_MAX_LINCOM */
-#define GD_MAX_POLYNOM (GD_MAX_LINCOM * 2 - 1)
+#define GD_MAX_POLYORD (GD_MAX_LINCOM * 2 - 1)
 
 /* syntax suberrors */
 #define GD_E_FORMAT_BAD_SPF    1
@@ -202,7 +202,7 @@ struct _gd_unified_entry {
     gd_type_t const_type; /* CONST */
     struct { /* POLYNOM */
       int poly_ord;
-      double a[GD_MAX_POLYNOM + 1];
+      double a[GD_MAX_POLYORD + 1];
     };
   };
 

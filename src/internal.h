@@ -169,7 +169,7 @@ struct _gd_private_entry {
   gd_entry_t* entry[GD_MAX_LINCOM];
 
   int calculated;
-  char *scalar[GD_MAX_POLYNOM + 1];
+  char *scalar[GD_MAX_POLYORD + 1];
 
   int n_meta;
   int n_meta_string;

@@ -278,7 +278,7 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
     case GD_POLYNOM_ENTRY:
       E->poly_ord = entry->poly_ord;
 
-      if (E->poly_ord < 1 || E->poly_ord > GD_MAX_POLYNOM)
+      if (E->poly_ord < 1 || E->poly_ord > GD_MAX_POLYORD)
         _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_NFIELDS, NULL,
             E->poly_ord, NULL);
       else {
@@ -1027,7 +1027,7 @@ int dirfile_madd_polynom(DIRFILE* D, const char* parent, const char* field_code,
     return -1;
   }
 
-  if (poly_ord < 1 || poly_ord > GD_MAX_POLYNOM) {
+  if (poly_ord < 1 || poly_ord > GD_MAX_POLYORD) {
     _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_POLYORD, NULL, poly_ord,
         NULL);
     dreturn("%i", -1);

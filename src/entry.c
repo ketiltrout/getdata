@@ -76,7 +76,7 @@ void _GD_FreeE(gd_entry_t* entry, int priv)
   }
 
   if (priv) {
-    for (i = 0; i <= GD_MAX_POLYNOM; ++i)
+    for (i = 0; i <= GD_MAX_POLYORD; ++i)
       free(entry->e->scalar[i]);
     free(entry->e->field_list);
     free(entry->e->vector_list);

@@ -252,8 +252,8 @@ static void gdpy_set_entry_from_tuple(gd_entry_t *E, PyObject* tuple,
       }
 
       E->poly_ord = count = PyTuple_Size(parm2) - 1;
-      if (count > GD_MAX_POLYNOM)
-        count = GD_MAX_POLYNOM;
+      if (count > GD_MAX_POLYORD)
+        count = GD_MAX_POLYORD;
 
       E->in_fields[0] = gdpy_dup_pystring(PyTuple_GetItem(tuple, 0));
 
@@ -1187,7 +1187,7 @@ static int gdpy_entry_seta(struct gdpy_entry_t* self, PyObject *value,
     void *closure)
 {
   int i;
-  double a[GD_MAX_POLYNOM + 1];
+  double a[GD_MAX_POLYORD + 1];
 
   dtrace("%p, %p, %p", self, value, closure);
 
@@ -1263,7 +1263,7 @@ static int gdpy_entry_setpolyord(struct gdpy_entry_t* self, PyObject *value,
   if (PyErr_Occurred()) {
     dreturn("%i", -1);
     return -1;
-  } else if (n < 1 || n > GD_MAX_POLYNOM) {
+  } else if (n < 1 || n > GD_MAX_POLYORD) {
     PyErr_SetString(PyExc_ValueError, "'getdata.entry' "
         "attribute 'poly_ord' out of range");
     dreturn("%i", -1);
