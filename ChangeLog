@@ -1,3 +1,6 @@
+2009-08-13   D. V. Wiebe <getdata@ketiltrout.net>  svn:305
+	GetData license changed to GNU LGPLv2.1+.  All documentation updated.
+
 2009-08-04   D. V. Wiebe <getdata@ketiltrout.net>  svn:304
 	* m4/ax_compare_version.m4 m4/idl.m4: Added.
 	* m4/idl.m4: Added.
