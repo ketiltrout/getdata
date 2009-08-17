@@ -484,7 +484,7 @@ static void _GD_PolynomData(DIRFILE* D, void *data, gd_type_t type, size_t npts,
 
 /* MultiplyData: Multiply A by B.  B is unchanged.
 */
-static void _GD_MultiplyData(DIRFILE* D, void *A, unsigned int spfA, void *B,
+static void _GD_MultiplyData(DIRFILE* D, void *A, unsigned int spfA, double *B,
     unsigned int spfB, gd_type_t type, size_t n)
 {
   size_t i;
@@ -496,51 +496,43 @@ static void _GD_MultiplyData(DIRFILE* D, void *A, unsigned int spfA, void *B,
       break;
     case GD_INT8:
       for (i = 0; i < n; i++)
-        ((int8_t*)A)[i] = (int8_t)(((int8_t*)A)[i] * (((int8_t*)B)[i * spfB /
-            spfA]));
+        ((int8_t*)A)[i] = (int8_t)(((int8_t*)A)[i] * B[i * spfB / spfA]);
       break;
     case GD_UINT8:
       for (i = 0; i < n; i++)
-        ((uint8_t*)A)[i] = (uint8_t)(((uint8_t*)A)[i] * (((uint8_t*)B)[i * spfB
-            / spfA]));
+        ((uint8_t*)A)[i] *= B[i * spfB / spfA];
       break;
     case GD_INT16:
       for (i = 0; i < n; i++)
-        ((int16_t*)A)[i] = (int16_t)(((int16_t*)A)[i] * (((int16_t*)B)[i * spfB
-            / spfA]));
+        ((int16_t*)A)[i] *= B[i * spfB / spfA];
       break;
     case GD_UINT16:
       for (i = 0; i < n; i++)
-        ((uint16_t*)A)[i] = (uint16_t)(((uint16_t*)A)[i] * (((uint16_t*)B)[i *
-            spfB / spfA]));
+        ((uint16_t*)A)[i] *= B[i * spfB / spfA];
       break;
     case GD_INT32:
       for (i = 0; i < n; i++)
-        ((int32_t*)A)[i] = (int32_t)(((int32_t*)A)[i] * (((int32_t*)B)[i *
-            spfB / spfA]));
+        ((int32_t*)A)[i] *= B[i * spfB / spfA];
       break;
     case GD_UINT32:
       for (i = 0; i < n; i++)
-        ((uint32_t*)A)[i] = (uint32_t)(((uint32_t*)A)[i] * (((uint32_t*)B)[i *
-            spfB / spfA]));
+        ((uint32_t*)A)[i] *= B[i * spfB / spfA];
       break;
     case GD_INT64:
       for (i = 0; i < n; i++)
-        ((int64_t*)A)[i] = (int64_t)(((int64_t*)A)[i] * (((int64_t*)B)[i *
-            spfB / spfA]));
+        ((int64_t*)A)[i] *= B[i * spfB / spfA];
       break;
     case GD_UINT64:
       for (i = 0; i < n; i++)
-        ((uint64_t*)A)[i] = (uint64_t)(((uint64_t*)A)[i] * (((uint64_t*)B)[i *
-            spfB / spfA]));
+        ((uint64_t*)A)[i] *= B[i * spfB / spfA];
       break;
     case GD_FLOAT:
       for (i = 0; i < n; i++)
-        ((float*)A)[i] *= ((float*)B)[i * spfB / spfA];
+        ((float*)A)[i] *= B[i * spfB / spfA];
       break;
     case GD_DOUBLE:
       for (i = 0; i < n; i++)
-        ((double*)A)[i] *= ((double*)B)[i * spfB / spfA];
+        ((double*)A)[i] *= B[i * spfB / spfA];
       break;
     default:
       _GD_SetError(D, GD_E_BAD_TYPE, type, NULL, 0, NULL);
@@ -761,7 +753,7 @@ static size_t _GD_DoMultiply(DIRFILE *D, gd_entry_t* E,
   first_samp2 = (first_frame * spf2 + first_samp * spf2 / spf1);
 
   /* Allocate a temporary buffer for the second field */
-  tmpbuf = _GD_Alloc(D, return_type, num_samp2);
+  tmpbuf = _GD_Alloc(D, GD_FLOAT64, num_samp2);
 
   if (D->error != GD_E_OK) {
     dreturn("%zi", 0);
@@ -770,7 +762,7 @@ static size_t _GD_DoMultiply(DIRFILE *D, gd_entry_t* E,
 
   /* read the second field */
   n_read2 = _GD_DoField(D, E->e->entry[1], E->in_fields[1], 0, first_samp2, 0,
-      num_samp2, return_type, tmpbuf);
+      num_samp2, GD_FLOAT64, tmpbuf);
   if (D->error != GD_E_OK) {
     free(tmpbuf);
     dreturn("%zi", 0);
