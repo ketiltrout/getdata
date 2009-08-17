@@ -496,7 +496,7 @@ static void _GD_MultiplyData(DIRFILE* D, void *A, unsigned int spfA, double *B,
       break;
     case GD_INT8:
       for (i = 0; i < n; i++)
-        ((int8_t*)A)[i] = (int8_t)(((int8_t*)A)[i] * B[i * spfB / spfA]);
+        ((int8_t*)A)[i] *= B[i * spfB / spfA];
       break;
     case GD_UINT8:
       for (i = 0; i < n; i++)
