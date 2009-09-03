@@ -52,10 +52,14 @@ int main(void)
   i = 0;
   while (read(fd, &d, sizeof(int8_t))) {
     if (i < 40 || i > 48) {
-      if (d != 0)
+      if (d != 0) {
+        fprintf(stderr, "%i=%i\n", i, d);
         return 1;
-    } else if (d != i * 2)
+      }
+    } else if (d != i * 2) {
+      fprintf(stderr, "%i=%i\n", i, d);
       return 1;
+    }
     i++;
   }
   close(fd);

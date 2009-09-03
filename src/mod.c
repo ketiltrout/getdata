@@ -220,18 +220,31 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
           field_free |= 2 << i;
         }
 
-        if (flags & 0x2 && E->m[i] != N->m[i]) {
-          modified = 1;
-          Q.m[i] = N->m[i];
+        if (flags & 0x2) {
+          if (E->complex_scalars && E->cm[i] != N->cm[i]) {
+            modified = 1;
+            Q.cm[i] = N->cm[i];
+            Q.m[i] = creal(Q.cm[i]);
+          } else if ( E->m[i] != N->m[i]) {
+            modified = 1;
+            Q.cm[i] = Q.m[i] = N->m[i];
+          }
+
           if (N->e != NULL && N->e->scalar[i * 2] != NULL) {
             Qe.scalar[i * 2] = strdup(N->e->scalar[i * 2]);
             scalar_free |= 1 << (i * 2);
           }
         }
 
-        if (flags & 0x4 && E->b[i] != N->b[i]) {
-          modified = 1;
-          Q.b[i] = N->b[i];
+        if (flags & 0x4) {
+          if (E->complex_scalars && E->cb[i] != N->cb[i]) {
+            modified = 1;
+            Q.cb[i] = N->cb[i];
+            Q.b[i] = creal(Q.cb[i]);
+          } else if ( E->m[i] != N->m[i]) {
+            modified = 1;
+            Q.cb[i] = Q.b[i] = N->b[i];
+          }
           if (N->e != NULL && N->e->scalar[i * 2 + 1] != NULL) {
             Qe.scalar[i * 2 + 1] = strdup(N->e->scalar[i * 2 + 1]);
             scalar_free |= 1 << (i * 2 + 1);
@@ -369,10 +382,16 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
       if (Q.poly_ord != E->poly_ord)
         modified = 1;
 
-      for (i = 0; i <= Q.poly_ord; ++i)
-        if (flags & 0x1 && N->a[i] != E->a[i]) {
-          modified = 1;
-          Q.a[i] = N->a[i];
+      if (flags & 0x1)
+        for (i = 0; i <= Q.poly_ord; ++i) {
+          if (E->complex_scalars && N->ca[i] != E->ca[i]) {
+            modified = 1;
+            Q.ca[i] = N->ca[i];
+            Q.a[i] = creal(Q.ca[i]);
+          } else if (N->a[i] != E->a[i]) {
+            modified = 1;
+            Q.ca[i] = Q.a[i] = N->a[i];
+          }
           if (N->e != NULL && N->e->scalar[i] != NULL) {
             Qe.scalar[i] = strdup(N->e->scalar[i]);
             scalar_free |= 1 << i;
@@ -392,15 +411,23 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
       if (Q.const_type != E->const_type) {
         modified = 1; 
         /* type convert */
+        if (Q.const_type & GD_COMPLEX)
+          Qe.cconst = (E->const_type & GD_COMPLEX) ? E->e->cconst :
+            (E->const_type & GD_IEEE754) ? (double complex)E->e->dconst :
+            (E->const_type & GD_SIGNED) ? (double complex)E->e->iconst :
+            (double complex)E->e->uconst;
         if (Q.const_type & GD_IEEE754)
           Qe.dconst = (E->const_type & GD_IEEE754) ? E->e->dconst :
+            (E->const_type & GD_COMPLEX) ? (double)E->e->cconst :
             (E->const_type & GD_SIGNED) ? (double)E->e->iconst :
             (double)E->e->uconst;
         else if (Q.const_type & GD_SIGNED)
           Qe.iconst = (E->const_type & GD_IEEE754) ? (int64_t)E->e->dconst :
+            (E->const_type & GD_COMPLEX) ? (int64_t)E->e->cconst :
             (E->const_type & GD_SIGNED) ? E->e->iconst : (int64_t)E->e->uconst;
         else
           Qe.uconst = (E->const_type & GD_IEEE754) ? (uint64_t)E->e->dconst :
+            (E->const_type & GD_COMPLEX) ? (uint64_t)E->e->cconst :
             (E->const_type & GD_SIGNED) ? (uint64_t)E->e->iconst : E->e->uconst;
       }
 
@@ -513,6 +540,7 @@ int dirfile_alter_lincom(DIRFILE* D, const char* field_code, int n_fields,
   _GD_ClearError(D);
 
   N.field_type = GD_LINCOM_ENTRY;
+  N.complex_scalars = 0;
   if (n_fields > GD_MAX_LINCOM || n_fields < 0) {
     _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_NFIELDS, NULL, n_fields,
         NULL);
@@ -547,6 +575,69 @@ int dirfile_alter_lincom(DIRFILE* D, const char* field_code, int n_fields,
     if (b != NULL) {
       flags |= 4;
       N.b[i] = b[i];
+    }
+  }
+
+  int ret = _GD_Change(D, field_code, &N, flags);
+
+  dreturn("%i", ret);
+  return ret;
+}
+
+int dirfile_alter_clincom(DIRFILE* D, const char* field_code, int n_fields,
+    const char** in_fields, const double complex* cm, const double complex* cb)
+{
+  gd_entry_t N;
+  int i;
+  int flags = 0;
+
+  dtrace("%p, \"%s\", %i, %p, %p, %p", D, field_code, n_fields, in_fields, cm,
+      cb);
+
+  if (D->flags & GD_INVALID) {/* don't crash */
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  _GD_ClearError(D);
+
+  N.field_type = GD_LINCOM_ENTRY;
+  N.complex_scalars = 1;
+  if (n_fields > GD_MAX_LINCOM || n_fields < 0) {
+    _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_NFIELDS, NULL, n_fields,
+        NULL);
+    dreturn("%i", -1);
+    return -1;
+  } else if (n_fields != 0)
+    N.n_fields = n_fields;
+  else {
+    gd_entry_t *E = _GD_FindField(D, field_code, NULL);
+
+    if (E == NULL) {
+      _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, field_code);
+      dreturn("%i", -1);
+      return -1;
+    }
+
+    N.n_fields = E->n_fields;
+  }
+  N.e = NULL;
+
+  for (i = 0; i < N.n_fields; ++i) {
+    if (in_fields != NULL) {
+      flags |= 1;
+      N.in_fields[i] = (char*)in_fields[i];
+    }
+
+    if (cm != NULL) {
+      flags |= 2;
+      N.cm[i] = cm[i];
+    }
+
+    if (cb != NULL) {
+      flags |= 4;
+      N.cb[i] = cb[i];
     }
   }
 
@@ -686,7 +777,7 @@ int dirfile_alter_const(DIRFILE* D, const char* field_code,
 {
   gd_entry_t N;
 
-  dtrace("%p, \"%s\", %2x", D, field_code, const_type);
+  dtrace("%p, \"%s\", 0x%x", D, field_code, const_type);
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -722,6 +813,7 @@ int dirfile_alter_polynom(DIRFILE* D, const char* field_code, int poly_ord,
   _GD_ClearError(D);
 
   N.field_type = GD_POLYNOM_ENTRY;
+  N.complex_scalars = 0;
   if (poly_ord > GD_MAX_POLYORD || poly_ord < 0) {
     _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_POLYORD, NULL, poly_ord,
         NULL);
@@ -747,6 +839,58 @@ int dirfile_alter_polynom(DIRFILE* D, const char* field_code, int poly_ord,
     if (a != NULL) {
       flags |= 1;
       N.a[i] = a[i];
+    }
+
+  int ret = _GD_Change(D, field_code, &N, flags);
+
+  dreturn("%i", ret);
+  return ret;
+}
+
+int dirfile_alter_cpolynom(DIRFILE* D, const char* field_code, int poly_ord,
+    const char* in_field, const double complex* ca)
+{
+  gd_entry_t N;
+  int i;
+  int flags = 0;
+
+  dtrace("%p, \"%s\", %i, \"%s\", %p", D, field_code, poly_ord, in_field, ca);
+
+  if (D->flags & GD_INVALID) {/* don't crash */
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  _GD_ClearError(D);
+
+  N.field_type = GD_POLYNOM_ENTRY;
+  N.complex_scalars = 1;
+  if (poly_ord > GD_MAX_POLYORD || poly_ord < 0) {
+    _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_POLYORD, NULL, poly_ord,
+        NULL);
+    dreturn("%i", -1);
+    return -1;
+  } else if (poly_ord != 0)
+    N.poly_ord = poly_ord;
+  else {
+    gd_entry_t *E = _GD_FindField(D, field_code, NULL);
+
+    if (E == NULL) {
+      _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, field_code);
+      dreturn("%i", -1);
+      return -1;
+    }
+
+    N.poly_ord = E->poly_ord;
+  }
+  N.in_fields[0] = (char*)in_field;
+  N.e = NULL;
+
+  for (i = 0; i <= N.poly_ord; ++i)
+    if (ca != NULL) {
+      flags |= 1;
+      N.a[i] = ca[i];
     }
 
   int ret = _GD_Change(D, field_code, &N, flags);

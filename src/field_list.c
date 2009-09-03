@@ -66,8 +66,8 @@ const void* get_constants(DIRFILE* D, gd_type_t return_type)
   for (i = n = 0; i < D->n_entries; ++i) {
     if (D->entry[i]->field_type == GD_CONST_ENTRY &&
         D->entry[i]->e->n_meta != -1)
-      if (_GD_DoField(D, D->entry[i], D->entry[i]->field, 0, 0, 0, 0,
-            return_type, fl + n++ * GD_SIZE(return_type)) != 1)
+      if (_GD_DoField(D, D->entry[i], D->entry[i]->field, 0, 0, 0, return_type,
+            fl + n++ * GD_SIZE(return_type)) != 1)
         break;
   }
 

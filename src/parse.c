@@ -71,28 +71,65 @@ static gd_type_t _GD_RawType(const char* type)
     return GD_FLOAT64;
   if (strcmp(type, "DOUBLE") == 0)
     return GD_FLOAT64;
+  if (strcmp(type, "COMPLEX64") == 0)
+    return GD_COMPLEX64;
+  if (strcmp(type, "COMPLEX128") == 0)
+    return GD_COMPLEX128;
 
   return GD_UNKNOWN;
 }
 
-static char* _GD_SetScalar(const char* token, void* data, int type)
+static char* _GD_SetScalar(DIRFILE* D, const char* token, void* data, int type,
+    const char* format_file, int line, int *complex_scalars)
 {
-  char* ptr;
+  char *ptr;
+  const char *semicolon;
   double d;
+  double i = 0;
 
-  dtrace("\"%s\", %p, %i", token, data, type);
+  dtrace("%p, \"%s\", %p, %i, \"%s\", %i, %p", D, token, data, type,
+      format_file, line, complex_scalars);
 
-  /* try to parse token as a double */
+  /* try to convert to double */
   d = strtod(token, &ptr); 
 
-  /* there were trailing characters */
-  if (*ptr != '\0') {
+  /* check for a complex value -- look for the semicolon */
+  for (semicolon = token; *semicolon; ++semicolon)
+    if (*semicolon == ';')
+      break;
+
+  /* there were trailing characters in the double or real part of complex */
+  if (ptr != semicolon) {
     ptr = strdup(token);
     dreturn("\"%s\"", ptr);
     return ptr;
   }
 
-  if (type == GD_IEEE754)
+  /* If there was a semicolon, try to extract the imaginary part */
+  if (*semicolon == ';') {
+    i = strtod(semicolon + 1, &ptr);
+
+    /* there were trailing characters in the imaginary part of complex */
+    if (*ptr != '\0') {
+      ptr = strdup(token);
+      dreturn("\"%s\"", ptr);
+      return ptr;
+    }
+
+    /* if a complex value is not permitted, complain */
+    if (type != GD_COMPLEX) {
+      _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_LITTERAL, format_file, line,
+          token);
+      dreturn("%p", NULL);
+      return NULL;
+    }
+
+    *complex_scalars = 1;
+  }
+
+  if (type == GD_COMPLEX)
+    *(double complex*)data = d + _Complex_I * i;
+  else if (type == GD_IEEE754)
     *(double*)data = d;
   else if (type == GD_SIGNED)
     *(int*)data = (int)round(d);
@@ -177,7 +214,9 @@ static gd_entry_t* _GD_ParseRaw(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
   if (E->e->size == 0 || E->data_type & 0x40)
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_TYPE, format_file, line,
         in_cols[2]);
-  else if ((E->e->scalar[0] = _GD_SetScalar(in_cols[3], &E->spf, 0)) == NULL) {
+  else if ((E->e->scalar[0] = _GD_SetScalar(D, in_cols[3], &E->spf, 0,
+          format_file, line, NULL)) == NULL)
+  {
     E->e->calculated = 1;
     if (E->spf <= 0)
       _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_SPF, format_file, line,
@@ -273,10 +312,12 @@ static gd_entry_t* _GD_ParseLincom(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
       if (E->in_fields[i] == NULL)
         _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
 
-      E->e->scalar[i * 2] = _GD_SetScalar(in_cols[i * 3 + 4], &E->m[i],
-          GD_IEEE754);
-      E->e->scalar[i * 2 + 1] = _GD_SetScalar(in_cols[i * 3 + 5], &E->b[i],
-          GD_IEEE754);
+      E->e->scalar[i * 2] = _GD_SetScalar(D, in_cols[i * 3 + 4], &E->cm[i],
+          GD_COMPLEX, format_file, line, &E->complex_scalars);
+      E->m[i] = creal(E->cm[i]);
+      E->e->scalar[i * 2 + 1] = _GD_SetScalar(D, in_cols[i * 3 + 5], &E->cb[i],
+          GD_COMPLEX, format_file, line, &E->complex_scalars);
+      E->b[i] = creal(E->cb[i]);
 
       if (E->e->scalar[i * 2] != NULL || E->e->scalar[i * 2 + 1] != NULL)
         E->e->calculated = 0;
@@ -481,9 +522,11 @@ static gd_entry_t* _GD_ParseBit(DIRFILE* D, int is_signed,
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
 
 
-  E->e->scalar[0] = _GD_SetScalar(in_cols[3], &E->bitnum, GD_SIGNED);
+  E->e->scalar[0] = _GD_SetScalar(D, in_cols[3], &E->bitnum, GD_SIGNED,
+      format_file, line, NULL);
   if (n_cols > 4)
-    E->e->scalar[1] = _GD_SetScalar(in_cols[4], &E->numbits, GD_SIGNED);
+    E->e->scalar[1] = _GD_SetScalar(D, in_cols[4], &E->numbits, GD_SIGNED,
+        format_file, line, NULL);
   else
     E->numbits = 1;
 
@@ -560,8 +603,8 @@ static gd_entry_t* _GD_ParsePhase(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
     E = NULL;
   }
 
-  if ((E->e->scalar[0] = _GD_SetScalar(in_cols[3], &E->shift, GD_SIGNED)) ==
-      NULL)
+  if ((E->e->scalar[0] = _GD_SetScalar(D, in_cols[3], &E->shift, GD_SIGNED,
+          format_file, line, NULL)) == NULL)
     E->e->calculated = 1;
 
   dreturn("%p", E);
@@ -629,7 +672,9 @@ static gd_entry_t* _GD_ParsePolynom(DIRFILE* D,
       _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     else
       for (i = 0; i <= E->poly_ord; i++) {
-        E->e->scalar[i] = _GD_SetScalar(in_cols[i + 3], &E->a[i], GD_IEEE754);
+        E->e->scalar[i] = _GD_SetScalar(D, in_cols[i + 3], &E->ca[i],
+            GD_COMPLEX, format_file, line, &E->complex_scalars);
+        E->a[i] = creal(E->ca[i]);
 
         if (E->e->scalar[i] != NULL)
           E->e->calculated = 0;
@@ -651,6 +696,9 @@ static gd_entry_t* _GD_ParseConst(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
     int n_cols, const gd_entry_t* parent, const char* format_file, int line,
     int pedantic)
 {
+  int dummy;
+  char* ptr;
+
   dtrace("%p, %p, %i, %p, \"%s\", %i, %i", D, in_cols, n_cols, parent,
       format_file, line, pedantic);
 
@@ -709,12 +757,27 @@ static gd_entry_t* _GD_ParseConst(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
     return NULL;
   }
 
-  if (E->const_type & GD_SIGNED)
-    sscanf(in_cols[3], "%" SCNi64, &E->e->iconst);
+  if (E->const_type & GD_COMPLEX)
+    ptr = _GD_SetScalar(D, in_cols[3], &E->e->cconst, GD_COMPLEX, format_file,
+        line, &dummy);
   else if (E->const_type & GD_IEEE754)
-    sscanf(in_cols[3], "%lg", &E->e->dconst);
+    ptr = _GD_SetScalar(D, in_cols[3], &E->e->dconst, GD_IEEE754, format_file,
+        line, NULL);
+  else if (E->const_type & GD_SIGNED)
+    ptr = _GD_SetScalar(D, in_cols[3], &E->e->iconst, GD_SIGNED, format_file,
+        line, NULL);
   else
-    sscanf(in_cols[3], "%" SCNu64, &E->e->uconst);
+    ptr = _GD_SetScalar(D, in_cols[3], &E->e->uconst, 0, format_file, line,
+        NULL);
+
+  if (ptr)
+    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_LITTERAL, format_file, line,
+        in_cols[3]);
+
+  if (D->error) {
+    _GD_FreeE(E, 1);
+    E = NULL;
+  }
 
   dreturn("%p", E);
   return E;

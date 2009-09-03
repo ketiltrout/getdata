@@ -1,5 +1,5 @@
 /* (C) 2002-2005 C. Barth Netterfield
- * (C) 2005-2008 D. V. Wiebe
+ * (C) 2005-2009 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -154,68 +154,12 @@ void* _GD_Alloc(DIRFILE* D, gd_type_t type, size_t n)
   }
 
   ptr = malloc(n * GD_SIZE(type));
+
+  if (ptr == NULL)
+    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+
   dreturn("%p", ptr);
   return ptr;
-}
-
-/* _GD_ScaleData: Compute data = data * m + b, for scalar m and b.
-*/
-void _GD_ScaleData(DIRFILE* D, void *data, gd_type_t type, size_t npts,
-    double m, double b)
-{
-  size_t i;
-
-  dtrace("%p, %p, 0x%x, %zi, %g, %g", D, data, type, npts, m, b);
-
-  switch (type) {
-    case GD_NULL:
-      break;
-    case GD_INT8:
-      for (i = 0; i < npts; i++)
-        ((int8_t*)data)[i] = (int8_t)(((int8_t*)data)[i] * m + b);
-      break;
-    case GD_UINT8:
-      for (i = 0; i < npts; i++)
-        ((uint8_t*)data)[i] = (uint8_t)(((uint8_t*)data)[i] * m + b);
-      break;
-    case GD_INT16:
-      for (i = 0; i < npts; i++)
-        ((int16_t*)data)[i] = (int16_t)(((int16_t*)data)[i] * m + b);
-      break;
-    case GD_UINT16:
-      for (i = 0; i < npts; i++)
-        ((uint16_t*)data)[i] = (uint16_t)(((uint16_t*)data)[i] * m + b);
-      break;
-    case GD_INT32:
-      for (i = 0; i < npts; i++)
-        ((int32_t*)data)[i] = (int32_t)(((int32_t*)data)[i] * m + b);
-      break;
-    case GD_UINT32:
-      for (i = 0; i < npts; i++)
-        ((uint32_t*)data)[i] = (uint32_t)(((uint32_t*)data)[i] * m + b);
-      break;
-    case GD_INT64:
-      for (i = 0; i < npts; i++)
-        ((int64_t*)data)[i] = (int64_t)(((int64_t*)data)[i] * m + b);
-      break;
-    case GD_UINT64:
-      for (i = 0; i < npts; i++)
-        ((uint64_t*)data)[i] = (uint64_t)(((uint64_t*)data)[i] * m + b);
-      break;
-    case GD_FLOAT:
-      for (i = 0; i < npts; i++)
-        ((float*)data)[i] = (float)(((float*)data)[i] * m + b);
-      break;
-    case GD_DOUBLE:
-      for (i = 0; i < npts; i++)
-        ((double*)data)[i] = ((double*)data)[i] * m + b;
-      break;
-    default:
-      _GD_SetError(D, GD_E_BAD_TYPE, type, NULL, 0, NULL);
-      break;
-  }
-
-  dreturnvoid();
 }
 
 /* _GD_MakeDummyLinterp: Make an empty linterp
@@ -225,6 +169,7 @@ static void _GD_MakeDummyLinterp(DIRFILE* D, struct _gd_private_entry *e)
   dtrace("%p, %p", D, e);
 
   e->table_len = 2;
+  e->complex_table = 0;
   e->x = (double *)malloc(2*sizeof(double));
   e->y = (double *)malloc(2*sizeof(double));
 
@@ -248,8 +193,11 @@ void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E)
   int i;
   char line[GD_MAX_LINE_LENGTH];
   int linenum = 0;
+  double yr, yi;
 
   dtrace("%p, %p", D, E);
+
+  E->e->complex_table = 0;
 
   fp = fopen(E->table, "r");
   if (fp == NULL) {
@@ -259,12 +207,17 @@ void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E)
     return;
   }
 
-  dtrace("[%p]1", E->e->entry[0]);
-
-  /* first read the file to see how big it is */
+  /* first read the file to see how big it is, also figure out whether the
+   * table is complex valued */
   i = 0;
-  while (_GD_GetLine(fp, line, &linenum))
+  while (_GD_GetLine(fp, line, &linenum)) {
+    if (i == 0) { /* complex check */
+      char ystr[50];
+      if (sscanf(line, "%lg %49s", &yr, ystr) == 2)
+        E->e->complex_table = (strchr(ystr, ';') == NULL) ? 0 : 1;
+    }
     i++;
+  }
 
   if (i < 2) {
     _GD_MakeDummyLinterp(D, E->e);
@@ -273,25 +226,31 @@ void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E)
     return;
   }
 
-  dtrace("[%p]2", E->e->entry[0]);
-
   E->e->table_len = i;
+
   E->e->x = (double *)malloc(i * sizeof(double));
-  E->e->y = (double *)malloc(i * sizeof(double));
+
+  if (E->e->complex_table)
+    E->e->cy = (double complex*)malloc(i * sizeof(double complex));
+  else
+    E->e->y = (double *)malloc(i * sizeof(double));
+
   if (E->e->x == NULL || E->e->y == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     dreturnvoid();
     return;
   }
 
-  dtrace("[%p]3", E->e->entry[0]);
-
   /* now read in the data */
   rewind(fp);
   linenum = 0;
   for (i = 0; i < E->e->table_len; i++) {
     _GD_GetLine(fp, line, &linenum);
-    sscanf(line, "%lg %lg", &(E->e->x[i]), &(E->e->y[i]));
+    if (E->e->complex_table) {
+      sscanf(line, "%lg %lg;%lg", &(E->e->x[i]), &yr, &yi);
+      E->e->cy[i] = yr + _Complex_I * yi;
+    } else
+      sscanf(line, "%lg %lg", &(E->e->x[i]), &(E->e->y[i]));
   }
 
   dreturnvoid();
@@ -299,7 +258,7 @@ void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E)
 
 /* _GD_GetIndex: get LUT index.
 */
-static size_t _GD_GetIndex(double x, double lx[], size_t idx, size_t n)
+static size_t _GD_GetIndex(double x, const double *lx, size_t idx, size_t n)
 {
   dtrace("%g, %p, %zi, %zi", x, lx, idx, n);
 
@@ -368,13 +327,21 @@ void _GD_AddData(DIRFILE* D, void *A, unsigned int spfA, void *B,
         ((uint64_t*)A)[i] = (uint64_t)(((uint64_t*)A)[i] + (((uint64_t*)B)[i *
             spfB / spfA]));
       break;
-    case GD_FLOAT:
+    case GD_FLOAT32:
       for (i = 0; i < n; i++)
         ((float*)A)[i] += ((float*)B)[i * spfB / spfA];
       break;
-    case GD_DOUBLE:
+    case GD_FLOAT64:
       for (i = 0; i < n; i++)
         ((double*)A)[i] += ((double*)B)[i * spfB / spfA];
+      break;
+    case GD_COMPLEX64:
+      for (i = 0; i < n; i++)
+        ((float complex*)A)[i] += ((float complex*)B)[i * spfB / spfA];
+      break;
+    case GD_COMPLEX128:
+      for (i = 0; i < n; i++)
+        ((double complex*)A)[i] += ((double complex*)B)[i * spfB / spfA];
       break;
     default:
       _GD_SetError(D, GD_E_BAD_TYPE, type, NULL, 0, NULL);
@@ -386,8 +353,129 @@ void _GD_AddData(DIRFILE* D, void *A, unsigned int spfA, void *B,
 
 /* _GD_LinterpData: calibrate data using lookup table lx and ly
 */
-void _GD_LinterpData(DIRFILE* D, const void *data, gd_type_t type, size_t npts,
-    double *lx, double *ly, size_t n_ln)
+void _GD_LinterpData(DIRFILE* D, void *data, gd_type_t type,
+    const double *data_in, size_t npts, const double *lx, const double *ly,
+    size_t n_ln)
+{
+  int idx = 0;
+  size_t i;
+  double x;
+
+  dtrace("%p, %p, 0x%x, %p, %zi, %p, %p, %zi", D, data, type, data_in, npts,
+      lx, ly, n_ln);
+
+  switch (type) {
+    case GD_NULL:
+      break;
+    case GD_INT8:
+      for (i = 0; i < npts; i++) {
+        x = data_in[i];
+        idx = _GD_GetIndex(x, lx, idx, n_ln);
+        ((int8_t *)data)[i] = (int8_t)(ly[idx] + (ly[idx + 1] - ly[idx]) /
+          (lx[idx + 1] - lx[idx]) * (x - lx[idx]));
+      }
+      break;
+    case GD_UINT8:
+      for (i = 0; i < npts; i++) {
+        x = data_in[i];
+        idx = _GD_GetIndex(x, lx, idx, n_ln);
+        ((uint8_t *)data)[i] = (uint8_t)(ly[idx] + (ly[idx + 1] - ly[idx]) /
+          (lx[idx + 1] - lx[idx]) * (x - lx[idx]));
+      }
+      break;
+    case GD_INT16:
+      for (i = 0; i < npts; i++) {
+        x = data_in[i];
+        idx = _GD_GetIndex(x, lx, idx, n_ln);
+        ((int16_t *)data)[i] = (int16_t)(ly[idx] + (ly[idx + 1] - ly[idx]) /
+          (lx[idx + 1] - lx[idx]) * (x - lx[idx]));
+      }
+      break;
+    case GD_UINT16:
+      for (i = 0; i < npts; i++) {
+        x = data_in[i];
+        idx = _GD_GetIndex(x, lx, idx,n_ln);
+        ((uint16_t *)data)[i] = (uint16_t)(ly[idx] + (ly[idx + 1] - ly[idx]) /
+          (lx[idx + 1] - lx[idx]) * (x - lx[idx]));
+      }
+      break;
+    case GD_INT32:
+      for (i = 0; i < npts; i++) {
+        x = data_in[i];
+        idx = _GD_GetIndex(x, lx, idx, n_ln);
+        ((int32_t *)data)[i] = (int32_t)(ly[idx] + (ly[idx + 1] - ly[idx]) /
+          (lx[idx + 1] - lx[idx]) * (x - lx[idx]));
+      }
+      break;
+    case GD_UINT32:
+      for (i = 0; i < npts; i++) {
+        x = data_in[i];
+        idx = _GD_GetIndex(x, lx, idx, n_ln);
+        ((uint32_t *)data)[i] = (uint32_t)(ly[idx] + (ly[idx + 1] - ly[idx]) /
+          (lx[idx + 1] - lx[idx]) * (x - lx[idx]));
+      }
+      break;
+    case GD_INT64:
+      for (i = 0; i < npts; i++) {
+        x = data_in[i];
+        idx = _GD_GetIndex(x, lx, idx, n_ln);
+        ((int64_t *)data)[i] = (int64_t)(ly[idx] + (ly[idx + 1] - ly[idx]) /
+          (lx[idx + 1] - lx[idx]) * (x - lx[idx]));
+      }
+      break;
+    case GD_UINT64:
+      for (i = 0; i < npts; i++) {
+        x = data_in[i];
+        idx = _GD_GetIndex(x, lx, idx, n_ln);
+        ((uint64_t *)data)[i] = (uint64_t)(ly[idx] + (ly[idx + 1] - ly[idx]) /
+          (lx[idx + 1] - lx[idx]) * (x - lx[idx]));
+      }
+      break;
+    case GD_FLOAT32:
+      for (i = 0; i < npts; i++) {
+        x = data_in[i];
+        idx = _GD_GetIndex(x, lx, idx, n_ln);
+        ((float *)data)[i] = (float)(ly[idx] + (ly[idx + 1] - ly[idx]) /
+          (lx[idx + 1] - lx[idx]) * (x - lx[idx]));
+      }
+      break;
+    case GD_FLOAT64:
+      for (i = 0; i < npts; i++) {
+        x = data_in[i];
+        idx = _GD_GetIndex(x, lx, idx, n_ln);
+        ((double *)data)[i] = (double)(ly[idx] + (ly[idx + 1] - ly[idx]) /
+          (lx[idx + 1] - lx[idx]) * (x - lx[idx]));
+      }
+      break;
+    case GD_COMPLEX64:
+      for (i = 0; i < npts; i++) {
+        x = data_in[i];
+        idx = _GD_GetIndex(x, lx, idx, n_ln);
+        ((float complex *)data)[i] = (float complex)(ly[idx] + (ly[idx + 1] -
+            ly[idx]) / (lx[idx + 1] - lx[idx]) * (x - lx[idx]));
+      }
+      break;
+    case GD_COMPLEX128:
+      for (i = 0; i < npts; i++) {
+        x = data_in[i];
+        idx = _GD_GetIndex(x, lx, idx, n_ln);
+        ((double complex *)data)[i] = (double complex)(ly[idx] + (ly[idx + 1] -
+            ly[idx]) / (lx[idx + 1] - lx[idx]) * (x - lx[idx]));
+      }
+      break;
+    default:
+      _GD_SetError(D, GD_E_BAD_TYPE, type, NULL, 0, NULL);
+      break;
+  }
+
+  dreturnvoid();
+}
+
+/* _GD_CLinterpData: calibrate data using lookup table lx and complex ly
+*/
+void _GD_CLinterpData(DIRFILE* D, void *data, gd_type_t type,
+    const double *data_in, size_t npts, const double *lx,
+    const double complex *ly, size_t n_ln)
 {
   int idx = 0;
   size_t i;
@@ -400,7 +488,7 @@ void _GD_LinterpData(DIRFILE* D, const void *data, gd_type_t type, size_t npts,
       break;
     case GD_INT8:
       for (i = 0; i < npts; i++) {
-        x = ((int8_t *)data)[i];
+        x = data_in[i];
         idx = _GD_GetIndex(x, lx, idx, n_ln);
         ((int8_t *)data)[i] = (int8_t)(ly[idx] + (ly[idx + 1] - ly[idx]) /
           (lx[idx + 1] - lx[idx]) * (x - lx[idx]));
@@ -408,7 +496,7 @@ void _GD_LinterpData(DIRFILE* D, const void *data, gd_type_t type, size_t npts,
       break;
     case GD_UINT8:
       for (i = 0; i < npts; i++) {
-        x = ((uint8_t *)data)[i];
+        x = data_in[i];
         idx = _GD_GetIndex(x, lx, idx, n_ln);
         ((uint8_t *)data)[i] = (uint8_t)(ly[idx] + (ly[idx + 1] - ly[idx]) /
           (lx[idx + 1] - lx[idx]) * (x - lx[idx]));
@@ -416,7 +504,7 @@ void _GD_LinterpData(DIRFILE* D, const void *data, gd_type_t type, size_t npts,
       break;
     case GD_INT16:
       for (i = 0; i < npts; i++) {
-        x = ((int16_t *)data)[i];
+        x = data_in[i];
         idx = _GD_GetIndex(x, lx, idx, n_ln);
         ((int16_t *)data)[i] = (int16_t)(ly[idx] + (ly[idx + 1] - ly[idx]) /
           (lx[idx + 1] - lx[idx]) * (x - lx[idx]));
@@ -424,7 +512,7 @@ void _GD_LinterpData(DIRFILE* D, const void *data, gd_type_t type, size_t npts,
       break;
     case GD_UINT16:
       for (i = 0; i < npts; i++) {
-        x = ((uint16_t *)data)[i];
+        x = data_in[i];
         idx = _GD_GetIndex(x, lx, idx,n_ln);
         ((uint16_t *)data)[i] = (uint16_t)(ly[idx] + (ly[idx + 1] - ly[idx]) /
           (lx[idx + 1] - lx[idx]) * (x - lx[idx]));
@@ -432,7 +520,7 @@ void _GD_LinterpData(DIRFILE* D, const void *data, gd_type_t type, size_t npts,
       break;
     case GD_INT32:
       for (i = 0; i < npts; i++) {
-        x = ((int32_t *)data)[i];
+        x = data_in[i];
         idx = _GD_GetIndex(x, lx, idx, n_ln);
         ((int32_t *)data)[i] = (int32_t)(ly[idx] + (ly[idx + 1] - ly[idx]) /
           (lx[idx + 1] - lx[idx]) * (x - lx[idx]));
@@ -440,7 +528,7 @@ void _GD_LinterpData(DIRFILE* D, const void *data, gd_type_t type, size_t npts,
       break;
     case GD_UINT32:
       for (i = 0; i < npts; i++) {
-        x = ((uint32_t *)data)[i];
+        x = data_in[i];
         idx = _GD_GetIndex(x, lx, idx, n_ln);
         ((uint32_t *)data)[i] = (uint32_t)(ly[idx] + (ly[idx + 1] - ly[idx]) /
           (lx[idx + 1] - lx[idx]) * (x - lx[idx]));
@@ -448,7 +536,7 @@ void _GD_LinterpData(DIRFILE* D, const void *data, gd_type_t type, size_t npts,
       break;
     case GD_INT64:
       for (i = 0; i < npts; i++) {
-        x = (double)((int64_t *)data)[i];
+        x = data_in[i];
         idx = _GD_GetIndex(x, lx, idx, n_ln);
         ((int64_t *)data)[i] = (int64_t)(ly[idx] + (ly[idx + 1] - ly[idx]) /
           (lx[idx + 1] - lx[idx]) * (x - lx[idx]));
@@ -456,26 +544,42 @@ void _GD_LinterpData(DIRFILE* D, const void *data, gd_type_t type, size_t npts,
       break;
     case GD_UINT64:
       for (i = 0; i < npts; i++) {
-        x = (double)((uint64_t *)data)[i];
+        x = data_in[i];
         idx = _GD_GetIndex(x, lx, idx, n_ln);
         ((uint64_t *)data)[i] = (uint64_t)(ly[idx] + (ly[idx + 1] - ly[idx]) /
           (lx[idx + 1] - lx[idx]) * (x - lx[idx]));
       }
       break;
-    case GD_FLOAT:
+    case GD_FLOAT32:
       for (i = 0; i < npts; i++) {
-        x = ((float *)data)[i];
+        x = data_in[i];
         idx = _GD_GetIndex(x, lx, idx, n_ln);
         ((float *)data)[i] = (float)(ly[idx] + (ly[idx + 1] - ly[idx]) /
           (lx[idx + 1] - lx[idx]) * (x - lx[idx]));
       }
       break;
-    case GD_DOUBLE:
+    case GD_FLOAT64:
       for (i = 0; i < npts; i++) {
-        x = ((double *)data)[i];
+        x = data_in[i];
         idx = _GD_GetIndex(x, lx, idx, n_ln);
         ((double *)data)[i] = (double)(ly[idx] + (ly[idx + 1] - ly[idx]) /
           (lx[idx + 1] - lx[idx]) * (x - lx[idx]));
+      }
+      break;
+    case GD_COMPLEX64:
+      for (i = 0; i < npts; i++) {
+        x = data_in[i];
+        idx = _GD_GetIndex(x, lx, idx, n_ln);
+        ((float complex *)data)[i] = (float complex)(ly[idx] + (ly[idx + 1] -
+            ly[idx]) / (lx[idx + 1] - lx[idx]) * (x - lx[idx]));
+      }
+      break;
+    case GD_COMPLEX128:
+      for (i = 0; i < npts; i++) {
+        x = data_in[i];
+        idx = _GD_GetIndex(x, lx, idx, n_ln);
+        ((double complex *)data)[i] = (double complex)(ly[idx] + (ly[idx + 1] -
+            ly[idx]) / (lx[idx + 1] - lx[idx]) * (x - lx[idx]));
       }
       break;
     default:
@@ -484,6 +588,223 @@ void _GD_LinterpData(DIRFILE* D, const void *data, gd_type_t type, size_t npts,
   }
 
   dreturnvoid();
+}
+
+/* macros to reduce tangly code */
+#define LINCOM1(t) for (i = 0; i < n_read; i++) \
+                            ((t*)data1)[i] = (t)(((t*)data1)[i] * m[0] + b[0])
+
+#define LINCOM2(t) for (i = 0; i < n_read; i++) \
+                            ((t*)data1)[i] = (t)(((t*)data1)[i] * m[0] + \
+                              (data2[i * spf[1] / spf[0]] * m[1] + b[0] + b[1]))
+
+#define LINCOM3(t) for (i = 0; i < n_read; i++) \
+                            ((t*)data1)[i] = (t)(((t*)data1)[i] * m[0] + \
+                              (data2[i * spf[1] / spf[0]] * m[1] + \
+                               data3[i * spf[2] / spf[0]] * m[2] + \
+                               b[0] + b[1] + b[2]))
+
+#define LINCOM(t) \
+  switch (n) { \
+    case 1: LINCOM1(t); break; \
+    case 2: LINCOM2(t); break; \
+    case 3: LINCOM3(t); break; \
+    default: _GD_InternalError(D); \
+  }
+
+/* Compute a lincom, all at once */
+void _GD_LincomData(DIRFILE* D, int n, void* data1, gd_type_t return_type,
+    double *data2, double *data3, double* m, double *b, unsigned int *spf,
+    size_t n_read)
+{
+  size_t i;
+
+  dtrace("%p, %i, %p, 0x%x, %p, %p, %p, %p, %p, %zi", D, n, data1, return_type,
+      data2, data3, m, b, spf, n_read);
+
+  switch(return_type) {
+    case GD_NULL:
+      break;
+    case GD_UINT8:
+      LINCOM(uint8_t);
+      break;
+    case GD_INT8:
+      LINCOM(int8_t);
+      break;
+    case GD_UINT16:
+      LINCOM(uint16_t);
+      break;
+    case GD_INT16:
+      LINCOM(int16_t);
+      break;
+    case GD_UINT32:
+      LINCOM(uint32_t);
+      break;
+    case GD_INT32:
+      LINCOM(int32_t);
+      break;
+    case GD_UINT64:
+      LINCOM(uint64_t);
+      break;
+    case GD_INT64:
+      LINCOM(int64_t);
+      break;
+    case GD_FLOAT32:
+      LINCOM(float);
+      break;
+    case GD_FLOAT64:
+      LINCOM(double);
+      break;
+    case GD_COMPLEX64:
+      LINCOM(float complex);
+      break;
+    case GD_COMPLEX128:
+      LINCOM(double complex);
+      break;
+    default:
+      _GD_InternalError(D);
+  }
+
+  dreturnvoid();
+}
+
+/* Compute a complex valued lincom, all at once */
+void _GD_CLincomData(DIRFILE* D, int n, void* data1, gd_type_t return_type,
+    double complex *data2, double complex *data3, double complex* m,
+    double complex *b, unsigned int *spf, size_t n_read)
+{
+  size_t i;
+
+  dtrace("%p, %i, %p, 0x%x, %p, %p, %p, %p, %p, %zi", D, n, data1, return_type,
+      data2, data3, m, b, spf, n_read);
+
+  switch(return_type) {
+    case GD_NULL:
+      break;
+    case GD_UINT8:
+      LINCOM(uint8_t);
+      break;
+    case GD_INT8:
+      LINCOM(int8_t);
+      break;
+    case GD_UINT16:
+      LINCOM(uint16_t);
+      break;
+    case GD_INT16:
+      LINCOM(int16_t);
+      break;
+    case GD_UINT32:
+      LINCOM(uint32_t);
+      break;
+    case GD_INT32:
+      LINCOM(int32_t);
+      break;
+    case GD_UINT64:
+      LINCOM(uint64_t);
+      break;
+    case GD_INT64:
+      LINCOM(int64_t);
+      break;
+    case GD_FLOAT32:
+      LINCOM(float);
+      break;
+    case GD_FLOAT64:
+      LINCOM(double);
+      break;
+    case GD_COMPLEX64:
+      LINCOM(float complex);
+      break;
+    case GD_COMPLEX128:
+      LINCOM(double complex);
+      break;
+    default:
+      _GD_InternalError(D);
+  }
+
+  dreturnvoid();
+}
+
+int _GD_GetRepr(DIRFILE* D, const char* field_code_in, char** field_code)
+{
+  int repr = GD_REPR_NONE;
+
+  dtrace("%p, \"%s\", %p", D, field_code_in, field_code);
+
+  const int field_code_len = strlen(field_code_in);
+
+  *field_code = (char*)field_code_in;
+  /* find the representation, if any */
+  if (field_code_in[field_code_len - 2] == '.') {
+    switch (field_code_in[field_code_len - 1]) {
+      case 'r':
+        repr = GD_REPR_REAL;
+        break;
+      case 'i':
+        repr = GD_REPR_IMAG;
+        break;
+      case 'm':
+        repr = GD_REPR_MOD;
+        break;
+      case 'a':
+        repr = GD_REPR_ARG;
+        break;
+      default:
+        _GD_SetError(D, GD_E_BAD_REPR, GD_E_REPR_UNKNOWN, NULL, 0,
+            field_code_in + field_code_len - 1);
+        dreturn("%i", 0);
+        return 0;
+    }
+
+    /* make a copy of the field code without the representation */
+    *field_code = strdup(field_code_in);
+    if (*field_code == NULL) 
+      _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    else
+      (*field_code)[field_code_len - 2] = '\0';
+  }
+
+  dreturn("%i", repr);
+  return repr;
+}
+
+/* Ensure that an input field has been identified (with error checking) */
+int _GD_BadInput(DIRFILE* D, gd_entry_t* E, int i)
+{
+  char* code;
+
+  dtrace("%p, %p, %i", D, E, i);
+
+  if (E->e->entry[i] == NULL) {
+    E->e->repr[i] = _GD_GetRepr(D, E->in_fields[i], &code);
+
+    if (D->error) {
+      dreturn("%i", 1);
+      return 1;
+    }
+
+    E->e->entry[i] = _GD_FindField(D, code, NULL);
+
+    if (E->e->entry[i] == NULL) {
+      _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, code);
+      if (code != E->in_fields[i])
+        free(code);
+      dreturn("%i", 1);
+      return 1;
+    }
+
+    if (code != E->in_fields[i])
+      free(code);
+  }
+
+  /* scalar entries not allowed */
+  if (E->e->entry[0]->field_type & GD_SCALAR_ENTRY) {
+    _GD_SetError(D, GD_E_DIMENSION, 0, E->field, 0, E->e->entry[0]->field);
+    dreturn("%zi", 1);
+    return 1;
+  }
+
+  dreturn("%i", 0);
+  return 0;
 }
 /* vim: ts=2 sw=2 et tw=80
 */

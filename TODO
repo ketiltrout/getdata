@@ -6,15 +6,13 @@ TODO for 0.6.0:            impl    bind      docs      test
 - LZMA encoding            done    done      TODO      done
 - [BUG] Metaparameters
   in _GD_FieldSpec         done     --        --       done
-
-
-Maybe TODO for 0.6.0
-- COMPLEX data types
-- Perl bindings
+- COMPLEX data types       done    TODO      TODO      TODO
+- Fix LFS stuff            TODO     --        --       TODO
+- ValidateField            TODO    TODO      TODO      TODO
 
 Future TODOs:
+* Perl bindings
 * Locking
-* Think about our linterp look-up optimisation
 * LUT sorting
 * Hashed compressed files
 * streaming

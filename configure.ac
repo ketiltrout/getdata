@@ -424,7 +424,7 @@ dnl headers
 echo
 echo "*** Looking for additional header files"
 echo
-AC_CHECK_HEADERS(fcntl.h libgen.h)
+AC_CHECK_HEADERS([complex.h fcntl.h libgen.h])
 AC_HEADER_DIRENT
 
 dnl Declare a few feature test macros
@@ -464,6 +464,14 @@ if test "x$have_off64_t" = "xyes"; then
 fi
 
 AC_CHECK_SIZEOF([int])
+
+dnl Check for complex data types
+AC_CHECK_TYPES([complex float, complex double],,,
+[
+#ifdef HAVE_COMPLEX_H
+#include <complex.h>
+#endif
+])
 
 dnl python
 if test "x$make_pybindings" = "xyes"; then

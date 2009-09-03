@@ -72,13 +72,15 @@ static const struct {
     "META in a different file than parent ({4}) on line {3} of {2}", 0 },
   { GD_E_FORMAT, GD_E_FORMAT_PROTECT,
     "Bad protection level on line {3} of {2}: {4}", 0 },
-  /* GD_E_CREAT: 1 = suberror, 2 = filename. 3 = errno */
+  { GD_E_FORMAT, GD_E_FORMAT_LITTERAL,
+    "Unexpected characters in scalar litteral ({4}) on line {3} of {2}", 0 },
+  /* GD_E_TRUNC: 1 = suberror, 2 = filename. 3 = errno */
   { GD_E_TRUNC, 0, "Error truncating {2}: ", 1 },
   /* GD_E_CREAT: 1 = suberror, 2 = filename, 3 = errno */
   { GD_E_CREAT, GD_E_CREAT_DIR, "Unable to create directory {2}: ", 1 },
   { GD_E_CREAT, GD_E_CREAT_FORMAT, "Unable to create format file {2}: ", 1 },
-  { GD_E_CREAT, GD_E_CREAT_EXCL,
-    "Unable to create dirfile {2}: already exists", 1 },
+  { GD_E_CREAT, GD_E_CREAT_EXCL, "Unable to create dirfile {2}: already exists",
+    1 },
   /* GD_E_BAD_CODE: 4 = field code */
   { GD_E_BAD_CODE, 0, "Field not found: {4}", 0 },
   /* GD_E_BAD_TYPE: 1 = data type */
@@ -161,6 +163,10 @@ static const struct {
   /* GD_E_UNCLEAN_DB: 3 = fragment */
   { GD_E_UNCLEAN_DB, 0,
     "Unexpected system error processing {3}; database unclean", 0 },
+  /* GD_E_UNCLEAN_DB: 4 = repr */
+  { GD_E_BAD_REPR, GD_E_REPR_UNKNOWN, "Unknown field representation: .{4}", 0 },
+  { GD_E_BAD_REPR, GD_E_REPR_PUT, "Unable to write to field reprentation: .{4}",
+    0 },
   /* GD_E_OK: (nothing) */
   { 0, 0, "Success", 0} /* this must be the last error string defined */
 };
@@ -220,13 +226,12 @@ char* get_error_string(const DIRFILE* D, char* buffer, size_t buflen)
   }
 
   /* Find the error message */
-  for (i = 0; s == -1; ++i) {
+  for (i = 0; error_string[i].error; ++i)
     if ((error_string[i].error == D->error) && ((error_string[i].suberror == 0)
-          || (error_string[i].suberror == D->suberror)))
+          || (error_string[i].suberror == D->suberror))) {
       s = i;
-    else if (error_string[i].error == 0)
       break;
-  }
+    }
 
   if (s == -1) /* Unhandled error */
     snprintf(buffer, buflen, "Unknown error %i:%i. Please report to "

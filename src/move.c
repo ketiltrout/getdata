@@ -197,8 +197,12 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned int encoding,
       break;
 
     /* swap endianness, if required */
-    if (byte_sex)
-      _GD_FixEndianness(buffer, E->e->size, ns);
+    if (byte_sex) {
+      if (E->data_type & GD_COMPLEX)
+        _GD_FixEndianness(buffer, E->e->size / 2, ns * 2);
+      else
+        _GD_FixEndianness(buffer, E->e->size, ns);
+    }
 
     nwrote = (*enc_out->write)(E->e->file + 1, buffer, E->data_type, nread);
 

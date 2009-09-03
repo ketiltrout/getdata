@@ -157,6 +157,9 @@ const char* _gd_colsub(void);
 #define GD_E_DEL_CONST          2
 #define GD_E_DEL_DERIVED        3
 
+#define GD_E_REPR_UNKNOWN       1
+#define GD_E_REPR_PUT           2
+
 struct _gd_raw_file {
   char* name;
   int fp;
@@ -167,6 +170,7 @@ struct _gd_raw_file {
 /* Unified entry struct */
 struct _gd_private_entry {
   gd_entry_t* entry[GD_MAX_LINCOM];
+  int repr[GD_MAX_LINCOM];
 
   int calculated;
   char *scalar[GD_MAX_POLYORD + 1];
@@ -190,15 +194,20 @@ struct _gd_private_entry {
     struct { /* RAW */
       char* filebase;
       size_t size;
-      struct _gd_raw_file file[2];
+      struct _gd_raw_file file[2]; /* encoding framework data */
     };
     struct { /* LINTERP */
       int table_len; /* internal */
-      double* x; /* internal */
-      double* y; /* internal */
+      int complex_table;
+      double* x;
+      union {
+        double* y;
+        double complex *cy;
+      };
     };
     struct { /* CONST */
       union {
+        double complex cconst;
         double dconst;
         uint64_t uconst;
         int64_t iconst;
@@ -290,6 +299,14 @@ struct gd_fragment_t {
 #define LIST_VALID_VECTOR       0x02
 #define LIST_VALID_STRING_VALUE 0x04
 
+#define GD_REPR_NONE 0
+#define GD_REPR_REAL 'r'
+#define GD_REPR_IMAG 'i'
+#define GD_REPR_MOD  'm'
+#define GD_REPR_ARG  'a'
+
+#define GD_REPR_AUTO GD_REPR_REAL
+
 /* The DIRFILE struct.  */
 struct _GD_DIRFILE {
   /* field counts */
@@ -341,23 +358,29 @@ extern const gd_entype_t _gd_entype_index[GD_N_ENTYPES];
 void _GD_AddData(DIRFILE* D, void *A, unsigned int spfA, void *B,
     unsigned int spfB, gd_type_t type, size_t n);
 void* _GD_Alloc(DIRFILE* D, gd_type_t type, size_t n);
+int _GD_BadInput(DIRFILE* D, gd_entry_t* E, int i);
 int _GD_CalculateEntry(DIRFILE* D, gd_entry_t* E);
 
 /* _GD_ClearError: Everything's A-OK; clear the last error. */
 #define _GD_ClearError(D) (D)->error = 0
 
+void _GD_CLincomData(DIRFILE* D, int n, void* data1, gd_type_t return_type,
+    double complex *data2, double complex *data3, double complex* m,
+    double complex *b, unsigned int *spf, size_t n_read);
+void _GD_CLinterpData(DIRFILE* D, void *data, gd_type_t type,
+    const double *data_in, size_t npts, const double *lx,
+    const double complex *ly, size_t n_ln);
 void _GD_ConvertType(DIRFILE* D, const void *data_in, gd_type_t in_type,
     void *data_out, gd_type_t out_type, size_t n) __THROW;
 size_t _GD_DoConst(DIRFILE *D, const gd_entry_t *E, gd_type_t return_type,
     void *data_out);
-size_t  _GD_DoField(DIRFILE *D, gd_entry_t *E, const char* field_code,
-    off64_t first_frame, off64_t first_samp, size_t num_frames, size_t num_samp,
-    gd_type_t return_type, void *data_out);
-size_t _GD_DoFieldOut(DIRFILE* D, gd_entry_t *E, const char *field_code,
-    off64_t first_frame, off64_t first_samp, size_t num_frames,
-    size_t num_samp, gd_type_t data_type, const void *data_in);
+size_t _GD_DoField(DIRFILE*, gd_entry_t*, const char*, int, off64_t, size_t,
+    gd_type_t, void*);
+size_t _GD_DoFieldOut(DIRFILE*, gd_entry_t*, const char*, int, off64_t, size_t,
+    gd_type_t, const void*);
 int _GD_EntryCmp(const void *A, const void *B);
 int _GD_EncodingUnderstood(unsigned long encoding); 
+int _GD_FillZero(void *databuffer, gd_type_t type, size_t nz);
 gd_entry_t* _GD_FindField(DIRFILE* D, const char* field_code,
     unsigned int *next);
 void _GD_FixEndianness(char* databuffer, size_t size, size_t ns);
@@ -365,6 +388,7 @@ void _GD_Flush(DIRFILE* D, gd_entry_t *E, const char* field_code);
 void _GD_FlushMeta(DIRFILE* D, int fragment);
 void _GD_FreeE(gd_entry_t* E, int priv);
 int _GD_GetLine(FILE *fp, char *line, int* linenum);
+int _GD_GetRepr(DIRFILE*, const char*, char**);
 unsigned int _GD_GetSPF(DIRFILE* D, gd_entry_t* E);
 int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,
     int linenum, char** ref_name, int me, int* standards, int flags);
@@ -375,20 +399,23 @@ void _GD_InsertSort(DIRFILE* D, gd_entry_t* E, int u) __THROW;
   _GD_SetError(D, GD_E_INTERNAL_ERROR, 0, __FILE__, __LINE__, NULL)
 
 gd_type_t _GD_LegacyType(char c);
-void _GD_LinterpData(DIRFILE* D, const void *data, gd_type_t type, size_t npts,
-    double *lx, double *ly, size_t n_ln);
+void _GD_LincomData(DIRFILE* D, int n, void* data1, gd_type_t return_type,
+    double *data2, double *data3, double* m, double *b, unsigned int *spf,
+    size_t n_read);
+void _GD_LinterpData(DIRFILE* D, void *data, gd_type_t type,
+    const double *data_in, size_t npts, const double *lx, const double *ly,
+    size_t n_ln);
 int _GD_MissingFramework(int encoding, unsigned int funcs);
 int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned int encoding,
     unsigned int byte_sex, off64_t offset, int finalise, int new_fragment,
     char* new_filebase);
+gd_type_t _GD_NativeType(DIRFILE* D, gd_entry_t* E, int repr);
 gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, const char** in_cols,
     const gd_entry_t* parent, const char* format_file, int linenum,
     unsigned int me, int standards, int creat, int pedantic, int insert);
 char* _GD_ParseFragment(FILE* fp, DIRFILE *D, int me, int* standards,
     unsigned int flags);
 void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E);
-void _GD_ScaleData(DIRFILE* D, void *data, gd_type_t type, size_t npts,
-    double m, double b);
 void _GD_ScanFormat(char* fmt, gd_type_t data_type);
 int _GD_SetEncodedName(DIRFILE* D, struct _gd_raw_file* file, const char* base,
     int temp);

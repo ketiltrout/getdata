@@ -3,6 +3,7 @@
 
 #include <inttypes.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -15,9 +16,9 @@ int main(void)
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
   const char* data = __TEST__ "dirfile/data";
-  const char* format_data = "bit SBIT data 2 3\ndata RAW UINT8 8\n";
+  const char* format_data = "bit SBIT data 2 3\ndata RAW INT8 8\n";
   int8_t c[8];
-  uint8_t d = 0xA5;
+  int8_t d = 0xA5;
   int fd, i;
 
   mkdir(filedir, 0777);
@@ -31,7 +32,7 @@ int main(void)
 
   fd = open(data, O_CREAT | O_EXCL | O_WRONLY, 0666);
   for (i = 0; i < 50; ++i)
-    write(fd, &d, sizeof(uint8_t));
+    write(fd, &d, sizeof(int8_t));
   close(fd);
 
   DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_UNENCODED | GD_VERBOSE);
@@ -42,12 +43,17 @@ int main(void)
 
   fd = open(data, O_RDONLY);
   i = 0;
-  while (read(fd, &d, sizeof(uint8_t))) {
+  int ne = 0;
+  while (read(fd, &d, sizeof(int8_t))) {
     if (i < 40 || i >= 48) {
-      if (d != 0xA5)
-        return 1;
-    } else if (d != (0xA1 | (i - 40) << 2))
-      return 1;
+      if (d != -91) {
+        ne++;
+        fprintf(stderr, "%i=%i -91\n", i, d);
+      }
+    } else if (d != (-95 | (i - 40) << 2)) {
+      ne++;
+      fprintf(stderr, "%i=%i %i\n", i, d, (-95 | (i - 40) << 2));
+    }
     i++;
   }
   close(fd);
@@ -56,9 +62,15 @@ int main(void)
   unlink(format);
   rmdir(filedir);
 
-  if (error)
+  if (error) {
+    fprintf(stderr, "n=%i\n", error);
     return 1;
-  if (n != 8)
+  }
+  if (n != 8) {
+    fprintf(stderr, "n=%i\n", n);
+    return 1;
+  }
+  if (ne)
     return 1;
 
   return 0;

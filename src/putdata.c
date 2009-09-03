@@ -30,12 +30,10 @@
 #include <stdlib.h>
 #endif
 
-static size_t _GD_DoRawOut(DIRFILE *D, gd_entry_t *E,
-    off64_t first_frame, off64_t first_samp, size_t num_frames, size_t num_samp,
-    gd_type_t data_type, const void *data_in)
+static size_t _GD_DoRawOut(DIRFILE *D, gd_entry_t *E, off64_t s0,
+    size_t ns, gd_type_t data_type, const void *data_in)
 {
-  off64_t s0;
-  size_t ns, n_wrote;
+  size_t n_wrote;
   void *databuffer;
 
   /* check protection */
@@ -46,13 +44,9 @@ static size_t _GD_DoRawOut(DIRFILE *D, gd_entry_t *E,
     return 0;
   }
 
-  dtrace("%p, %p, %lli, %lli, %zi, %zi, 0x%x, %p", D, E, first_frame,
-      first_samp, num_frames, num_samp, data_type, data_in);
+  dtrace("%p, %p, %lli, %zi, 0x%x, %p", D, E, s0, ns, data_type, data_in);
 
-  first_frame -= D->fragment[E->fragment_index].frame_offset;
-
-  s0 = first_samp + first_frame * E->spf;
-  ns = num_samp + num_frames * E->spf;
+  s0 -= D->fragment[E->fragment_index].frame_offset * E->spf;
 
   if (s0 < 0) {
     _GD_SetError(D, GD_E_RANGE, 0, NULL, 0, NULL);
@@ -61,6 +55,11 @@ static size_t _GD_DoRawOut(DIRFILE *D, gd_entry_t *E,
   }
 
   databuffer = _GD_Alloc(D, E->data_type, ns);
+
+  if (databuffer == NULL) {
+    dreturn("%zi", 0);
+    return 0;
+  }
 
   _GD_ConvertType(D, data_in, data_type, databuffer, E->data_type, ns);
 
@@ -119,16 +118,20 @@ static size_t _GD_DoRawOut(DIRFILE *D, gd_entry_t *E,
   return n_wrote;
 }
 
-static size_t _GD_DoLinterpOut(DIRFILE* D, gd_entry_t *E,
-    off64_t first_frame, off64_t first_samp, size_t num_frames, size_t num_samp,
-    gd_type_t data_type, const void *data_in)
+static size_t _GD_DoLinterpOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
+    size_t num_samp, gd_type_t data_type, const void *data_in)
 {
-  int spf;
-  size_t ns;
   size_t n_wrote;
 
-  dtrace("%p, %p, %lli, %lli, %zi, %zi, 0x%x, %p", D, E, first_frame,
-      first_samp, num_frames, num_samp, data_type, data_in);
+  dtrace("%p, %p, %lli, %zi, 0x%x, %p", D, E, first_samp, num_samp, data_type,
+      data_in);
+
+  /* if the table is complex valued, we can't invert it */
+  if (E->e->complex_table) {
+    _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_PUT, NULL, 0, E->field);
+    dreturn("%zi", 0);
+    return 0;
+  }
 
   if (E->e->table_len < 0) {
     _GD_ReadLinterpFile(D, E);
@@ -139,51 +142,52 @@ static size_t _GD_DoLinterpOut(DIRFILE* D, gd_entry_t *E,
   }
 
   /* Interpolate X(y) instead of Y(x) */
-
-  if (E->e->entry[0] == NULL) {
-    E->e->entry[0] = _GD_FindField(D, E->in_fields[0], NULL);
-
-    if (E->e->entry[0] == NULL) {
-      _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, E->in_fields[0]);
-      dreturn("%zi", 0);
-      return 0;
-    }
-
-    /* scalar entries not allowed */
-    if (E->e->entry[0]->field_type & GD_SCALAR_ENTRY) {
-      _GD_SetError(D, GD_E_DIMENSION, 0, E->field, 0, E->e->entry[0]->field);
-      dreturn("%zi", 0);
-      return 0;
-    }
-  }
-
-  spf = _GD_GetSPF(D, E->e->entry[0]);
-  ns = num_samp + num_frames * (int)spf;
-
-  _GD_LinterpData(D, data_in, data_type, ns, E->e->y, E->e->x, E->e->table_len);
-
-  if (D->error != GD_E_OK) {
+  if (_GD_BadInput(D, E, 0)) {
     dreturn("%zi", 0);
     return 0;
   }
 
-  n_wrote = _GD_DoFieldOut(D, E->e->entry[0], E->in_fields[0], first_frame,
-      first_samp, num_frames, num_samp, data_type, data_in);
+  double *tmpbuf = _GD_Alloc(D, GD_FLOAT64, num_samp);
+  if (tmpbuf == NULL) {
+    free(tmpbuf);
+    dreturn("%zi", 0);
+    return 0;
+  }
+
+  _GD_ConvertType(D, data_in, data_type, tmpbuf, GD_FLOAT64, num_samp);
+
+  if (D->error) {
+    free(tmpbuf);
+    dreturn("%zi", 0);
+    return 0;
+  }
+
+  _GD_LinterpData(D, tmpbuf, GD_FLOAT64, tmpbuf, num_samp, E->e->y, E->e->x,
+      E->e->table_len);
+
+  if (D->error != GD_E_OK) {
+    free(tmpbuf);
+    dreturn("%zi", 0);
+    return 0;
+  }
+
+  n_wrote = _GD_DoFieldOut(D, E->e->entry[0], E->in_fields[0], E->e->repr[0],
+      first_samp, num_samp, GD_FLOAT64, tmpbuf);
+
+  free(tmpbuf);
 
   dreturn("%zi", n_wrote);
   return n_wrote;
 }
 
-static size_t _GD_DoLincomOut(DIRFILE* D, gd_entry_t *E,
-    off64_t first_frame, off64_t first_samp, size_t num_frames, size_t num_samp,
-    gd_type_t data_type, const void *data_in)
+static size_t _GD_DoLincomOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
+    size_t num_samp, gd_type_t data_type, const void *data_in)
 {
-  int spf;
-  size_t ns, n_wrote;
+  size_t n_wrote;
   void* tmpbuf;
 
-  dtrace("%p, %p, %lli, %lli, %zi, %zi, 0x%x, %p", D, E, first_frame,
-      first_samp, num_frames, num_samp, data_type, data_in);
+  dtrace("%p, %p, %lli, %zi, 0x%x, %p", D, E, first_samp, num_samp, data_type,
+      data_in);
 
   /* we cannot write to LINCOM fields that are a linear combination */
   /* of more than one raw field (no way to know how to split data). */
@@ -194,43 +198,37 @@ static size_t _GD_DoLincomOut(DIRFILE* D, gd_entry_t *E,
     return 0;
   }
 
-  if (E->e->entry[0] == NULL) {
-    E->e->entry[0] = _GD_FindField(D, E->in_fields[0], NULL);
-
-    if (E->e->entry[0] == NULL) {
-      _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, E->in_fields[0]);
-      dreturn("%zi", 0);
-      return 0;
-    }
-
-    /* scalar entries not allowed */
-    if (E->e->entry[0]->field_type & GD_SCALAR_ENTRY) {
-      _GD_SetError(D, GD_E_DIMENSION, 0, E->field, 0, E->e->entry[0]->field);
-      dreturn("%zi", 0);
-      return 0;
-    }
+  if (_GD_BadInput(D, E, 0)) {
+    dreturn("%zi", 0);
+    return 0;
   }
 
   /* do the inverse scaling */
-  spf = _GD_GetSPF(D, E->e->entry[0]);
-  ns = num_samp + num_frames * (int)spf;
-
   if (D->error != GD_E_OK) {
     dreturn("%zi", 0);
     return 0;
   }
 
   /* writeable copy */
-  tmpbuf = _GD_Alloc(D, data_type, ns);
+  tmpbuf = _GD_Alloc(D, data_type, num_samp);
 
   if (tmpbuf == NULL) {
     dreturn("%zi", 0);
     return 0;
   }
 
-  memcpy(tmpbuf, data_in, ns * GD_SIZE(data_type));
+  memcpy(tmpbuf, data_in, num_samp * GD_SIZE(data_type));
 
-  _GD_ScaleData(D, tmpbuf, data_type, ns, 1 / E->m[0], -E->b[0] / E->m[0]);
+  if (E->complex_scalars) {
+    double complex cm = 1 / E->cm[0];
+    double complex cb = -E->cb[0] / E->cm[0];
+    _GD_CLincomData(D, 1, tmpbuf, data_type, NULL, NULL, &cm, &cb, NULL,
+        num_samp);
+  } else {
+    double m = 1 / E->m[0];
+    double b = -E->b[0] / E->m[0];
+    _GD_LincomData(D, 1, tmpbuf, data_type, NULL, NULL, &m, &b, NULL, num_samp);
+  }
 
   if (D->error != GD_E_OK) {
     free(tmpbuf);
@@ -238,82 +236,50 @@ static size_t _GD_DoLincomOut(DIRFILE* D, gd_entry_t *E,
     return 0;
   }
 
-  n_wrote = _GD_DoFieldOut(D, E->e->entry[0], E->in_fields[0], first_frame,
-      first_samp, num_frames, num_samp, data_type, tmpbuf);
+  n_wrote = _GD_DoFieldOut(D, E->e->entry[0], E->in_fields[0], E->e->repr[0],
+      first_samp, num_samp, data_type, tmpbuf);
   free(tmpbuf);
 
   dreturn("%zi", n_wrote);
   return n_wrote;
 }
 
-static size_t _GD_DoBitOut(DIRFILE* D, gd_entry_t *E,
-    off64_t first_frame, off64_t first_samp, size_t num_frames, size_t num_samp,
-    gd_type_t data_type, const void *data_in)
+static size_t _GD_DoBitOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
+    size_t num_samp, gd_type_t data_type, const void *data_in)
 {
   uint64_t *tmpbuf;
   uint64_t *readbuf;
   size_t i, n_wrote;
-  int spf;
-  size_t ns;
 
-  dtrace("%p, %p, %lli, %lli, %zi, %zi, 0x%x, %p", D, E, first_frame,
-      first_samp, num_frames, num_samp, data_type, data_in);
+  dtrace("%p, %p, %lli, %zi, 0x%x, %p", D, E, first_samp, num_samp, data_type,
+      data_in);
 
   const uint64_t mask = (E->numbits == 64) ? 0xffffffffffffffffULL :
     ((uint64_t)1 << E->numbits) - 1;
 
-#ifdef GETDATA_DEBUG
-  fprintf(stdout,"DoBitOut:  bitnum = %d numbits = %d mask = %llx\n",
-      E->bitnum, E->numbits, mask);
-#endif
-
-  if (E->e->entry[0] == NULL) {
-    E->e->entry[0] = _GD_FindField(D, E->in_fields[0], NULL);
-
-    if (E->e->entry[0] == NULL) {
-      _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, E->in_fields[0]);
-      dreturn("%zi", 0);
-      return 0;
-    }
-
-    /* scalar entries not allowed */
-    if (E->e->entry[0]->field_type & GD_SCALAR_ENTRY) {
-      _GD_SetError(D, GD_E_DIMENSION, 0, E->field, 0, E->e->entry[0]->field);
-      dreturn("%zi", 0);
-      return 0;
-    }
-  }
-
-  spf = _GD_GetSPF(D, E->e->entry[0]);
-
-  if (D->error != GD_E_OK) {
+  if (_GD_BadInput(D, E, 0)) {
     dreturn("%zi", 0);
     return 0;
   }
 
-  ns = num_samp + num_frames * (int)spf;
-
-  tmpbuf = _GD_Alloc(D, GD_UINT64, ns);
-  readbuf = _GD_Alloc(D, GD_UINT64, ns);
+  tmpbuf = _GD_Alloc(D, GD_UINT64, num_samp);
+  readbuf = _GD_Alloc(D, GD_UINT64, num_samp);
 
   if (tmpbuf == NULL || readbuf == NULL) {
+    free(tmpbuf);
+    free(readbuf);
     dreturn("%zi", 0);
     return 0;
   }
 
-  memset(tmpbuf, 0, sizeof(uint64_t) * ns);
-  memset(readbuf, 0, sizeof(uint64_t) * ns);
+  memset(tmpbuf, 0, sizeof(uint64_t) * num_samp);
+  memset(readbuf, 0, sizeof(uint64_t) * num_samp);
 
-  _GD_ConvertType(D, data_in, data_type, (void*)tmpbuf, GD_UINT64, ns);
+  _GD_ConvertType(D, data_in, data_type, (void*)tmpbuf, GD_UINT64, num_samp);
 
   /* first, READ the field in so that we can change the bits    */
-
-#ifdef GETDATA_DEBUG
-  fprintf(stdout,"DoBitOut:  reading in bitfield %s\n",E->in_fields[0]);
-#endif
-
-  _GD_DoField(D, E->e->entry[0], E->in_fields[0], first_frame, first_samp, 0,
-      ns, GD_UINT64, readbuf);
+  _GD_DoField(D, E->e->entry[0], E->in_fields[0], E->e->repr[0], first_samp,
+      num_samp, GD_UINT64, readbuf);
 
   /* error encountered, abort */
   if (D->error != GD_E_OK) {
@@ -322,13 +288,13 @@ static size_t _GD_DoBitOut(DIRFILE* D, gd_entry_t *E,
   }
 
   /* now go through and set the correct bits in each field value */
-  for (i = 0; i < ns; i++)
+  for (i = 0; i < num_samp; i++)
     readbuf[i] = (readbuf[i] & ~(mask << E->bitnum)) |
       (tmpbuf[i] & mask) << E->bitnum;
 
   /* write the modified data out */
-  n_wrote = _GD_DoFieldOut(D, E->e->entry[0], E->in_fields[0], first_frame,
-      first_samp, num_frames, num_samp, GD_UINT64, (void*)readbuf);
+  n_wrote = _GD_DoFieldOut(D, E->e->entry[0], E->in_fields[0], E->e->repr[0],
+      first_samp, num_samp, GD_UINT64, (void*)readbuf);
 
   free(readbuf);
   free(tmpbuf);
@@ -337,50 +303,35 @@ static size_t _GD_DoBitOut(DIRFILE* D, gd_entry_t *E,
   return n_wrote;
 }
 
-static size_t _GD_DoPhaseOut(DIRFILE* D, gd_entry_t *E,
-    off64_t first_frame, off64_t first_samp, size_t num_frames, size_t num_samp,
-    gd_type_t data_type, const void *data_in)
+static size_t _GD_DoPhaseOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
+    size_t num_samp, gd_type_t data_type, const void *data_in)
 {
   size_t n_wrote;
 
-  dtrace("%p, %p, %lli, %lli, %zi, %zi, 0x%x, %p", D, E, first_frame,
-      first_samp, num_frames, num_samp, data_type, data_in);
+  dtrace("%p, %p, %lli, %zi, 0x%x, %p", D, E, first_samp, num_samp, data_type,
+      data_in);
 
-  if (E->e->entry[0] == NULL) {
-    E->e->entry[0] = _GD_FindField(D, E->in_fields[0], NULL);
-
-    if (E->e->entry[0] == NULL) {
-      _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, E->in_fields[0]);
-      dreturn("%i", 0);
-      return 0;
-    }
-
-    /* scalar entries not allowed */
-    if (E->e->entry[0]->field_type & GD_SCALAR_ENTRY) {
-      _GD_SetError(D, GD_E_DIMENSION, 0, E->field, 0, E->e->entry[0]->field);
-      dreturn("%i", 0);
-      return 0;
-    }
+  if (_GD_BadInput(D, E, 0)) {
+    dreturn("%i", 0);
+    return 0;
   }
 
-  n_wrote = _GD_DoFieldOut(D, E->e->entry[0], E->in_fields[0], first_frame,
-      first_samp + E->shift, num_frames, num_samp, data_type, data_in);
+  n_wrote = _GD_DoFieldOut(D, E->e->entry[0], E->in_fields[0], E->e->repr[0],
+      first_samp + E->shift, num_samp, data_type, data_in);
 
   dreturn("%zi", n_wrote);
 
   return n_wrote;
 }
 
-static size_t _GD_DoPolynomOut(DIRFILE* D, gd_entry_t *E,
-    off64_t first_frame, off64_t first_samp, size_t num_frames, size_t num_samp,
-    gd_type_t data_type, const void *data_in)
+static size_t _GD_DoPolynomOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
+    size_t num_samp, gd_type_t data_type, const void *data_in)
 {
-  int spf;
-  size_t ns, n_wrote;
+  size_t n_wrote;
   void* tmpbuf;
 
-  dtrace("%p, %p, %lli, %lli, %zi, %zi, 0x%x, %p", D, E, first_frame,
-      first_samp, num_frames, num_samp, data_type, data_in);
+  dtrace("%p, %p, %lli, %zi, 0x%x, %p", D, E, first_samp, num_samp, data_type,
+      data_in);
 
   /* we cannot write to POLYNOM fields that are quadradic or higher order */
 
@@ -390,43 +341,37 @@ static size_t _GD_DoPolynomOut(DIRFILE* D, gd_entry_t *E,
     return 0;
   }
 
-  if (E->e->entry[0] == NULL) {
-    E->e->entry[0] = _GD_FindField(D, E->in_fields[0], NULL);
-
-    if (E->e->entry[0] == NULL) {
-      _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, E->in_fields[0]);
-      dreturn("%zi", 0);
-      return 0;
-    }
-
-    /* scalar entries not allowed */
-    if (E->e->entry[0]->field_type & GD_SCALAR_ENTRY) {
-      _GD_SetError(D, GD_E_DIMENSION, 0, E->field, 0, E->e->entry[0]->field);
-      dreturn("%zi", 0);
-      return 0;
-    }
+  if (_GD_BadInput(D, E, 0)) {
+    dreturn("%zi", 0);
+    return 0;
   }
 
   /* do the inverse scaling */
-  spf = _GD_GetSPF(D, E->e->entry[0]);
-  ns = num_samp + num_frames * (int)spf;
-
   if (D->error != GD_E_OK) {
     dreturn("%zi", 0);
     return 0;
   }
 
   /* writeable copy */
-  tmpbuf = _GD_Alloc(D, data_type, ns);
+  tmpbuf = _GD_Alloc(D, data_type, num_samp);
 
   if (tmpbuf == NULL) {
     dreturn("%zi", 0);
     return 0;
   }
 
-  memcpy(tmpbuf, data_in, ns * GD_SIZE(data_type));
+  memcpy(tmpbuf, data_in, num_samp * GD_SIZE(data_type));
 
-  _GD_ScaleData(D, tmpbuf, data_type, ns, 1 / E->a[1], -E->a[0] / E->a[1]);
+  if (E->complex_scalars) {
+    double complex cm = 1 / E->ca[1];
+    double complex cb = -E->ca[0] / E->ca[1];
+    _GD_CLincomData(D, 1, tmpbuf, data_type, NULL, NULL, &cm, &cb, NULL,
+        num_samp);
+  } else {
+    double m = 1 / E->a[1];
+    double b = -E->a[0] / E->a[1];
+    _GD_LincomData(D, 1, tmpbuf, data_type, NULL, NULL, &m, &b, NULL, num_samp);
+  }
 
   if (D->error != GD_E_OK) {
     free(tmpbuf);
@@ -434,8 +379,8 @@ static size_t _GD_DoPolynomOut(DIRFILE* D, gd_entry_t *E,
     return 0;
   }
 
-  n_wrote = _GD_DoFieldOut(D, E->e->entry[0], E->in_fields[0], first_frame,
-      first_samp, num_frames, num_samp, data_type, tmpbuf);
+  n_wrote = _GD_DoFieldOut(D, E->e->entry[0], E->in_fields[0], E->e->repr[0],
+      first_samp, num_samp, data_type, tmpbuf);
   free(tmpbuf);
 
   dreturn("%zi", n_wrote);
@@ -453,6 +398,8 @@ static size_t _GD_DoConstOut(DIRFILE* D, gd_entry_t *E, gd_type_t data_type,
         D->fragment[E->fragment_index].cname);
   else if (E->const_type & GD_SIGNED)
     _GD_ConvertType(D, data_in, data_type, &E->e->iconst, GD_INT64, 1);
+  else if (E->const_type & GD_COMPLEX)
+    _GD_ConvertType(D, data_in, data_type, &E->e->cconst, GD_COMPLEX128, 1);
   else if (E->const_type & GD_IEEE754)
     _GD_ConvertType(D, data_in, data_type, &E->e->dconst, GD_FLOAT64, 1);
   else
@@ -497,13 +444,13 @@ static size_t _GD_DoStringOut(DIRFILE* D, gd_entry_t *E, const char *data_in)
 }
 
 size_t _GD_DoFieldOut(DIRFILE *D, gd_entry_t* E, const char *field_code,
-    off64_t first_frame, off64_t first_samp, size_t num_frames, size_t num_samp,
-    gd_type_t data_type, const void *data_in)
+    int repr, off64_t first_samp, size_t num_samp, gd_type_t data_type,
+    const void *data_in)
 {
   size_t n_wrote = 0;
 
-  dtrace("%p, %p, \"%s\", %lli, %lli, %zi, %zi, 0x%x, %p", D, E, field_code,
-      first_frame, first_samp, num_frames, num_samp, data_type, data_in);
+  dtrace("%p, %p, \"%s\", %i, %lli, %zi, 0x%x, %p", D, E, field_code, repr,
+      first_samp, num_samp, data_type, data_in);
 
   if (++D->recurse_level >= GD_MAX_RECURSE_LEVEL) {
     _GD_SetError(D, GD_E_RECURSE_LEVEL, 0, NULL, 0, field_code);
@@ -520,35 +467,39 @@ size_t _GD_DoFieldOut(DIRFILE *D, gd_entry_t* E, const char *field_code,
     return 0;
   }
 
+  /* writing to representations is prohibited */
+  if (repr != GD_REPR_NONE) {
+    const char r[2] = {repr, 0};
+    _GD_SetError(D, GD_E_BAD_REPR, GD_E_REPR_PUT, NULL, 0, r);
+    dreturn("%zi", 0);
+    return 0;
+  }
+
   switch (E->field_type) {
     case GD_RAW_ENTRY:
-      n_wrote = _GD_DoRawOut(D, E, first_frame, first_samp, num_frames,
-          num_samp, data_type, data_in);
+      n_wrote = _GD_DoRawOut(D, E, first_samp, num_samp, data_type, data_in);
       break;
     case GD_LINTERP_ENTRY:
-      n_wrote = _GD_DoLinterpOut(D, E, first_frame, first_samp, num_frames,
-          num_samp, data_type, data_in);
+      n_wrote = _GD_DoLinterpOut(D, E, first_samp, num_samp, data_type,
+          data_in);
       break;
     case GD_LINCOM_ENTRY:
-      n_wrote = _GD_DoLincomOut(D, E, first_frame, first_samp, num_frames,
-          num_samp, data_type, data_in);
+      n_wrote = _GD_DoLincomOut(D, E, first_samp, num_samp, data_type, data_in);
       break;
     case GD_BIT_ENTRY:
     case GD_SBIT_ENTRY:
-      n_wrote = _GD_DoBitOut(D, E, first_frame, first_samp, num_frames,
-          num_samp, data_type, data_in);
+      n_wrote = _GD_DoBitOut(D, E, first_samp, num_samp, data_type, data_in);
       break;
     case GD_MULTIPLY_ENTRY:
     case GD_INDEX_ENTRY:
       _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_PUT, NULL, 0, field_code);
       break;
     case GD_PHASE_ENTRY:
-      n_wrote = _GD_DoPhaseOut(D, E, first_frame, first_samp, num_frames,
-          num_samp, data_type, data_in);
+      n_wrote = _GD_DoPhaseOut(D, E, first_samp, num_samp, data_type, data_in);
       break;
     case GD_POLYNOM_ENTRY:
-      n_wrote = _GD_DoPolynomOut(D, E, first_frame, first_samp, num_frames,
-          num_samp, data_type, data_in);
+      n_wrote = _GD_DoPolynomOut(D, E, first_samp, num_samp, data_type,
+          data_in);
       break;
     case GD_CONST_ENTRY:
       n_wrote = _GD_DoConstOut(D, E, data_type, data_in);
@@ -567,14 +518,16 @@ size_t _GD_DoFieldOut(DIRFILE *D, gd_entry_t* E, const char *field_code,
 }
 
 /* this function is little more than a public boilerplate for _GD_DoFieldOut */
-size_t putdata64(DIRFILE* D, const char *field_code, off64_t first_frame,
+size_t putdata64(DIRFILE* D, const char *field_code_in, off64_t first_frame,
     off64_t first_samp, size_t num_frames, size_t num_samp, gd_type_t data_type,
     const void *data_in)
 {
   size_t n_wrote = 0;
   gd_entry_t *entry;
+  char* field_code;
+  int repr;
 
-  dtrace("%p, \"%s\", %lli, %lli, %zi, %zi, 0x%x, %p", D, field_code,
+  dtrace("%p, \"%s\", %lli, %lli, %zi, %zi, 0x%x, %p", D, field_code_in,
       first_frame, first_samp, num_frames, num_samp, data_type, data_in);
 
   if (D->flags & GD_INVALID) {/* don't crash */
@@ -591,15 +544,33 @@ size_t putdata64(DIRFILE* D, const char *field_code, off64_t first_frame,
 
   _GD_ClearError(D);
 
+  repr = _GD_GetRepr(D, field_code_in, &field_code);
+
+  if (D->error) {
+    dreturn("%i", 0);
+    return 0;
+  }
   entry = _GD_FindField(D, field_code, NULL);
 
   if (entry == NULL)
     _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, field_code);
   else if (entry->field_type & GD_SCALAR_ENTRY)
     _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
-  else 
-    n_wrote = _GD_DoFieldOut(D, entry, field_code, first_frame, first_samp,
-        num_frames, num_samp, data_type, data_in);
+  else {
+    /* get the samples per frame */
+    unsigned int spf = _GD_GetSPF(D, entry);
+
+    if (D->error) {
+      dreturn("%i", 0);
+      return 0;
+    }
+
+    first_samp += spf * first_frame;
+    num_samp += spf * num_frames;
+
+    n_wrote = _GD_DoFieldOut(D, entry, field_code, repr, first_samp, num_samp,
+        data_type, data_in);
+  }
 
   dreturn("%zi", n_wrote);
   return n_wrote;

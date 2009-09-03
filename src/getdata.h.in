@@ -24,13 +24,13 @@
 #ifndef GETDATA_H
 #define GETDATA_H
 
+#define DIRFILE_STANDARDS_VERSION 6
+
 /* one or more of these should give us:
  *    size_t, off_t, __REDIRECT, &c. 
  */
 #include <sys/types.h>
 #include <unistd.h>
-
-#define DIRFILE_STANDARDS_VERSION 6
 
 /* ICC ignores the __nonnull__ attribute */
 #ifdef __INTEL_COMPILER
@@ -82,8 +82,9 @@
 #define GD_E_CALLBACK         28
 #define GD_E_BAD_PROTECTION   29
 #define GD_E_UNCLEAN_DB       30
+#define GD_E_BAD_REPR         31
 
-#define GD_N_ERROR_CODES      31
+#define GD_N_ERROR_CODES      32
 
 /* maximum length of a format file line */
 #define GD_MAX_LINE_LENGTH  4096
@@ -112,6 +113,7 @@
 #define GD_E_FORMAT_DUPLICATE 16
 #define GD_E_FORMAT_LOCATION  17
 #define GD_E_FORMAT_PROTECT   18
+#define GD_E_FORMAT_LITTERAL  19
 
 /* parser callback return values */
 #define GD_SYNTAX_ABORT    0
@@ -148,29 +150,35 @@ typedef enum {
 /* GD_NO_ENTRY is not part of this count */
 #define GD_N_ENTYPES 11
 
-/* Data types -- No valid type may set 0x40 */
-#define GD_SIZE8     0x01
-#define GD_SIZE16    0x02
-#define GD_SIZE32    0x04
-#define GD_SIZE64    0x08
-#define GD_SIZE(x)   (x & 0x0f)
+#include <complex.h>
 
-#define GD_SIGNED    0x10
-#define GD_IEEE754   0x20
+/* Data types -- No valid type may set 0x40 */
+#define GD_SIZE8     0x001
+#define GD_SIZE16    0x002
+#define GD_SIZE32    0x004
+#define GD_SIZE64    0x008
+#define GD_SIZE128   0x010
+#define GD_SIZE(x)   (x & 0x01f)
+
+#define GD_SIGNED    0x020
+#define GD_IEEE754   0x080
+#define GD_COMPLEX   0x100
 
 typedef enum {
-  GD_NULL    = 0,
-  GD_UNKNOWN = 0xb0,  /* GD_SIZE(GD_UNKNOWN) MUST evaluate to zero */
-  GD_UINT8   = GD_SIZE8,
-  GD_INT8    = GD_SIZE8  | GD_SIGNED,
-  GD_UINT16  = GD_SIZE16,
-  GD_INT16   = GD_SIZE16 | GD_SIGNED,
-  GD_UINT32  = GD_SIZE32,
-  GD_INT32   = GD_SIZE32 | GD_SIGNED,
-  GD_UINT64  = GD_SIZE64,
-  GD_INT64   = GD_SIZE64 | GD_SIGNED,
-  GD_FLOAT32 = GD_SIZE32 | GD_IEEE754,
-  GD_FLOAT64 = GD_SIZE64 | GD_IEEE754
+  GD_NULL       = 0,
+  GD_UNKNOWN    = 0xfa0,  /* GD_SIZE(GD_UNKNOWN) MUST evaluate to zero */
+  GD_UINT8      = GD_SIZE8,
+  GD_INT8       = GD_SIZE8   | GD_SIGNED,
+  GD_UINT16     = GD_SIZE16,
+  GD_INT16      = GD_SIZE16  | GD_SIGNED,
+  GD_UINT32     = GD_SIZE32,
+  GD_INT32      = GD_SIZE32  | GD_SIGNED,
+  GD_UINT64     = GD_SIZE64,
+  GD_INT64      = GD_SIZE64  | GD_SIGNED,
+  GD_FLOAT32    = GD_SIZE32  | GD_IEEE754,
+  GD_FLOAT64    = GD_SIZE64  | GD_IEEE754,
+  GD_COMPLEX64  = GD_SIZE64  | GD_COMPLEX,
+  GD_COMPLEX128 = GD_SIZE128 | GD_COMPLEX
 } gd_type_t;
 #define GD_FLOAT     GD_FLOAT32
 #define GD_DOUBLE    GD_FLOAT64
@@ -183,6 +191,7 @@ struct _gd_unified_entry {
   gd_entype_t field_type;
   char *in_fields[GD_MAX_LINCOM];
   int fragment_index;
+  int complex_scalars;
   union {
     struct { /* RAW */
       unsigned int spf;
@@ -191,7 +200,9 @@ struct _gd_unified_entry {
     struct { /* LINCOM */
       int n_fields;
       double m[GD_MAX_LINCOM];
+      double complex cm[GD_MAX_LINCOM];
       double b[GD_MAX_LINCOM];
+      double complex cb[GD_MAX_LINCOM];
     };
     char *table; /* LINTERP */
     struct { /* BIT and SBIT */
@@ -203,6 +214,7 @@ struct _gd_unified_entry {
     struct { /* POLYNOM */
       int poly_ord;
       double a[GD_MAX_POLYORD + 1];
+      double complex ca[GD_MAX_POLYORD + 1];
     };
   };
 
@@ -252,9 +264,17 @@ extern int dirfile_add_bit(DIRFILE* D, const char* field_code,
     const char* in_field, int bitnum, int numbits, int fragment_index)
 __THROW __gd_nonnull ((1,2,3));
 
+extern int dirfile_add_clincom(DIRFILE* D, const char* field_code, int n_fields,
+    const char** in_fields, const double complex* cm, const double complex* cb,
+    int fragment_index) __THROW __gd_nonnull ((1,2,4,5,6));
+
 extern int dirfile_add_const(DIRFILE* D, const char* field_code,
     gd_type_t const_type, gd_type_t data_type, const void* value,
     int fragment_index) __THROW __gd_nonnull ((1,2,5));
+
+extern int dirfile_add_cpolynom(DIRFILE* D, const char* field_code,
+    int poly_ord, const char* in_field, const double complex* a,
+    int fragment_index) __THROW __gd_nonnull ((1,2,4));
 
 extern int dirfile_add_lincom(DIRFILE* D, const char* field_code, int n_fields,
     const char** in_fields, const double* m, const double* b,
@@ -286,8 +306,16 @@ extern int dirfile_add_string(DIRFILE* D, const char* field_code,
 extern int dirfile_alter_bit(DIRFILE* D, const char* field_code,
     const char* in_field, int bitnum, int numbits) __THROW __gd_nonnull((1,2));
 
+extern int dirfile_alter_clincom(DIRFILE* D, const char* field_code,
+    int n_fields, const char** in_fields, const double complex* m,
+    const double complex* b) __THROW __gd_nonnull((1,2));
+
 extern int dirfile_alter_const(DIRFILE* D, const char* field_code,
     gd_type_t const_type) __THROW __gd_nonnull((1,2));
+
+extern int dirfile_alter_cpolynom(DIRFILE* D, const char* field_code,
+    int poly_ord, const char* in_field, const double complex* a)
+__THROW __gd_nonnull((1,2));
 
 extern int dirfile_alter_lincom(DIRFILE* D, const char* field_code,
     int n_fields, const char** in_fields, const double* m, const double* b)
@@ -352,9 +380,18 @@ extern int dirfile_madd_bit(DIRFILE* D, const char* parent,
     const char* field_code, const char* in_field, int bitnum, int numbits)
 __THROW __gd_nonnull ((1,2,3,4));
 
+extern int dirfile_madd_clincom(DIRFILE* D, const char* parent,
+    const char* field_code, int n_fields, const char** in_fields,
+    const double complex* cm,
+    const double complex* cb) __THROW __gd_nonnull((1,2,3,5,6,7));
+
 extern int dirfile_madd_const(DIRFILE* D, const char* parent,
     const char* field_code, gd_type_t const_type, gd_type_t data_type,
     const void* value) __THROW __gd_nonnull ((1,2,3,6));
+
+extern int dirfile_madd_cpolynom(DIRFILE* D, const char* parent,
+    const char* field_code, int poly_ord, const char* in_field,
+    const double complex* a) __THROW __gd_nonnull ((1,2,3,5));
 
 extern int dirfile_madd_lincom(DIRFILE* D, const char* parent,
     const char* field_code, int n_fields, const char** in_fields,

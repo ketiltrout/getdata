@@ -1,5 +1,5 @@
 /* (C) 2002-2005 C. Barth Netterfield
- * (C) 2005-2008 D. V. Wiebe
+ * (C) 2005-2009 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -78,13 +78,23 @@ void _GD_ConvertType(DIRFILE* D, const void *data_in, gd_type_t in_type,
           for (i = 0; i < n; i++)
             ((uint64_t*)data_out)[i] = (uint64_t)((int8_t*)data_in)[i];
           return;
-        case GD_FLOAT:
+        case GD_FLOAT32:
           for (i = 0; i < n; i++)
             ((float*)data_out)[i] = (float)((int8_t*)data_in)[i];
           return;
-        case GD_DOUBLE:
+        case GD_FLOAT64:
           for (i = 0; i < n; i++)
             ((double*)data_out)[i] = (double)((int8_t*)data_in)[i];
+          return;
+        case GD_COMPLEX64:
+          for (i = 0; i < n; i++)
+            ((float complex*)data_out)[i] =
+              (float complex)((int8_t*)data_in)[i];
+          return;
+        case GD_COMPLEX128:
+          for (i = 0; i < n; i++)
+            ((double complex*)data_out)[i] =
+              (double complex)((int8_t*)data_in)[i];
           return;
         default:
           _GD_SetError(D, GD_E_BAD_TYPE, out_type, NULL, 0, NULL);
@@ -124,13 +134,23 @@ void _GD_ConvertType(DIRFILE* D, const void *data_in, gd_type_t in_type,
           for (i = 0; i < n; i++)
             ((uint64_t*)data_out)[i] = (uint64_t)((uint8_t*)data_in)[i];
           return;
-        case GD_FLOAT:
+        case GD_FLOAT32:
           for (i = 0; i < n; i++)
             ((float*)data_out)[i] = (float)((uint8_t*)data_in)[i];
           return;
-        case GD_DOUBLE:
+        case GD_FLOAT64:
           for (i = 0; i < n; i++)
             ((double*)data_out)[i] = (double)((uint8_t*)data_in)[i];
+          return;
+        case GD_COMPLEX64:
+          for (i = 0; i < n; i++)
+            ((float complex*)data_out)[i] =
+              (float complex)((uint8_t*)data_in)[i];
+          return;
+        case GD_COMPLEX128:
+          for (i = 0; i < n; i++)
+            ((double complex*)data_out)[i] =
+              (double complex)((uint8_t*)data_in)[i];
           return;
         default:
           _GD_SetError(D, GD_E_BAD_TYPE, out_type, NULL, 0, NULL);
@@ -168,15 +188,25 @@ void _GD_ConvertType(DIRFILE* D, const void *data_in, gd_type_t in_type,
           return;
         case GD_UINT64:
           for (i = 0; i < n; i++)
-            ((uint64_t*)data_out)[i] = (uint64_t)((uint16_t*)data_in)[i];
+            ((int64_t*)data_out)[i] = (uint64_t)((int16_t*)data_in)[i];
           return;
-        case GD_FLOAT:
+        case GD_FLOAT32:
           for (i = 0; i < n; i++)
-            ((float*)data_out)[i] = (float)((uint16_t*)data_in)[i];
+            ((float*)data_out)[i] = (float)((int16_t*)data_in)[i];
           return;
-        case GD_DOUBLE:
+        case GD_FLOAT64:
           for (i = 0; i < n; i++)
-            ((double*)data_out)[i] = (double)((uint16_t*)data_in)[i];
+            ((double*)data_out)[i] = (double)((int16_t*)data_in)[i];
+          return;
+        case GD_COMPLEX64:
+          for (i = 0; i < n; i++)
+            ((float complex*)data_out)[i] =
+              (float complex)((int16_t*)data_in)[i];
+          return;
+        case GD_COMPLEX128:
+          for (i = 0; i < n; i++)
+            ((double complex*)data_out)[i] =
+              (double complex)((int16_t*)data_in)[i];
           return;
         default:
           _GD_SetError(D, GD_E_BAD_TYPE, out_type, NULL, 0, NULL);
@@ -216,13 +246,23 @@ void _GD_ConvertType(DIRFILE* D, const void *data_in, gd_type_t in_type,
           for (i = 0; i < n; i++)
             ((uint64_t*)data_out)[i] = (uint64_t)((uint16_t*)data_in)[i];
           return;
-        case GD_FLOAT:
+        case GD_FLOAT32:
           for (i = 0; i < n; i++)
             ((float*)data_out)[i] = (float)((uint16_t*)data_in)[i];
           return;
-        case GD_DOUBLE:
+        case GD_FLOAT64:
           for (i = 0; i < n; i++)
             ((double*)data_out)[i] = (double)((uint16_t*)data_in)[i];
+          return;
+        case GD_COMPLEX64:
+          for (i = 0; i < n; i++)
+            ((float complex*)data_out)[i] =
+              (float complex)((uint16_t*)data_in)[i];
+          return;
+        case GD_COMPLEX128:
+          for (i = 0; i < n; i++)
+            ((double complex*)data_out)[i] =
+              (double complex)((uint16_t*)data_in)[i];
           return;
         default:
           _GD_SetError(D, GD_E_BAD_TYPE, out_type, NULL, 0, NULL);
@@ -262,13 +302,23 @@ void _GD_ConvertType(DIRFILE* D, const void *data_in, gd_type_t in_type,
           for (i = 0; i < n; i++)
             ((uint64_t*)data_out)[i] = (uint64_t)((int32_t*)data_in)[i];
           return;
-        case GD_FLOAT:
+        case GD_FLOAT32:
           for (i = 0; i < n; i++)
             ((float*)data_out)[i] = (float)((int32_t*)data_in)[i];
           return;
-        case GD_DOUBLE:
+        case GD_FLOAT64:
           for (i = 0; i < n; i++)
             ((double*)data_out)[i] = (double)((int32_t*)data_in)[i];
+          return;
+        case GD_COMPLEX64:
+          for (i = 0; i < n; i++)
+            ((float complex*)data_out)[i] =
+              (float complex)((int32_t*)data_in)[i];
+          return;
+        case GD_COMPLEX128:
+          for (i = 0; i < n; i++)
+            ((double complex*)data_out)[i] =
+              (double complex)((int32_t*)data_in)[i];
           return;
         default:
           _GD_SetError(D, GD_E_BAD_TYPE, out_type, NULL, 0, NULL);
@@ -308,13 +358,23 @@ void _GD_ConvertType(DIRFILE* D, const void *data_in, gd_type_t in_type,
           for (i = 0; i < n; i++)
             ((uint64_t*)data_out)[i] = (uint64_t)((uint32_t*)data_in)[i];
           return;
-        case GD_FLOAT:
+        case GD_FLOAT32:
           for (i = 0; i < n; i++)
             ((float*)data_out)[i] = (float)((uint32_t*)data_in)[i];
           return;
-        case GD_DOUBLE:
+        case GD_FLOAT64:
           for (i = 0; i < n; i++)
             ((double*)data_out)[i] = (double)((uint32_t*)data_in)[i];
+          return;
+        case GD_COMPLEX64:
+          for (i = 0; i < n; i++)
+            ((float complex*)data_out)[i] =
+              (float complex)((uint32_t*)data_in)[i];
+          return;
+        case GD_COMPLEX128:
+          for (i = 0; i < n; i++)
+            ((double complex*)data_out)[i] =
+              (double complex)((uint32_t*)data_in)[i];
           return;
         default:
           break;
@@ -353,13 +413,23 @@ void _GD_ConvertType(DIRFILE* D, const void *data_in, gd_type_t in_type,
           for (i = 0; i < n; i++)
             ((uint64_t*)data_out)[i] = (uint64_t)((int64_t*)data_in)[i];
           return;
-        case GD_FLOAT:
+        case GD_FLOAT32:
           for (i = 0; i < n; i++)
             ((float*)data_out)[i] = (float)((int64_t*)data_in)[i];
           return;
-        case GD_DOUBLE:
+        case GD_FLOAT64:
           for (i = 0; i < n; i++)
             ((double*)data_out)[i] = (double)((int64_t*)data_in)[i];
+          return;
+        case GD_COMPLEX64:
+          for (i = 0; i < n; i++)
+            ((float complex*)data_out)[i] =
+              (float complex)((int64_t*)data_in)[i];
+          return;
+        case GD_COMPLEX128:
+          for (i = 0; i < n; i++)
+            ((double complex*)data_out)[i] =
+              (double complex)((int64_t*)data_in)[i];
           return;
         default:
           _GD_SetError(D, GD_E_BAD_TYPE, out_type, NULL, 0, NULL);
@@ -399,20 +469,30 @@ void _GD_ConvertType(DIRFILE* D, const void *data_in, gd_type_t in_type,
         case GD_UINT64:
           memcpy(data_out, data_in, n * sizeof(uint64_t));
           return;
-        case GD_FLOAT:
+        case GD_FLOAT32:
           for (i = 0; i < n; i++)
             ((float*)data_out)[i] = (float)((uint64_t*)data_in)[i];
           return;
-        case GD_DOUBLE:
+        case GD_FLOAT64:
           for (i = 0; i < n; i++)
             ((double*)data_out)[i] = (double)((uint64_t*)data_in)[i];
+          return;
+        case GD_COMPLEX64:
+          for (i = 0; i < n; i++)
+            ((float complex*)data_out)[i] =
+              (float complex)((uint64_t*)data_in)[i];
+          return;
+        case GD_COMPLEX128:
+          for (i = 0; i < n; i++)
+            ((double complex*)data_out)[i] =
+              (double complex)((uint64_t*)data_in)[i];
           return;
         default:
           _GD_SetError(D, GD_E_BAD_TYPE, out_type, NULL, 0, NULL);
           break;
       }
       break;
-    case GD_FLOAT:
+    case GD_FLOAT32:
       switch (out_type) {
         case GD_INT8:
           for (i = 0; i < n; i++)
@@ -446,19 +526,28 @@ void _GD_ConvertType(DIRFILE* D, const void *data_in, gd_type_t in_type,
           for (i = 0; i < n; i++)
             ((uint64_t*)data_out)[i] = (uint64_t)((float*)data_in)[i];
           return;
-        case GD_FLOAT:
+        case GD_FLOAT32:
           memcpy(data_out, data_in, n * sizeof(float));
           return;
-        case GD_DOUBLE:
+        case GD_FLOAT64:
           for (i = 0; i < n; i++)
             ((double*)data_out)[i] = (double)((float*)data_in)[i];
+          return;
+        case GD_COMPLEX64:
+          for (i = 0; i < n; i++)
+            ((float complex*)data_out)[i] = (float complex)((float*)data_in)[i];
+          return;
+        case GD_COMPLEX128:
+          for (i = 0; i < n; i++)
+            ((double complex*)data_out)[i] =
+              (double complex)((float*)data_in)[i];
           return;
         default:
           _GD_SetError(D, GD_E_BAD_TYPE, out_type, NULL, 0, NULL);
           break;
       }
       break;
-    case GD_DOUBLE:
+    case GD_FLOAT64:
       switch (out_type) {
         case GD_INT8:
           for (i = 0; i < n; i++)
@@ -492,12 +581,131 @@ void _GD_ConvertType(DIRFILE* D, const void *data_in, gd_type_t in_type,
           for (i = 0; i < n; i++)
             ((uint64_t*)data_out)[i] = (uint64_t)((double*)data_in)[i];
           return;
-        case GD_FLOAT:
+        case GD_FLOAT32:
           for (i = 0; i < n; i++)
             ((float*)data_out)[i] = (float)((double*)data_in)[i];
           return;
-        case GD_DOUBLE:
+        case GD_FLOAT64:
           memcpy(data_out, data_in, n * sizeof(double));
+          return;
+        case GD_COMPLEX64:
+          for (i = 0; i < n; i++)
+            ((float complex*)data_out)[i] =
+              (float complex)((double*)data_in)[i];
+          return;
+        case GD_COMPLEX128:
+          for (i = 0; i < n; i++)
+            ((double complex*)data_out)[i] =
+              (double complex)((double*)data_in)[i];
+          return;
+        default:
+          _GD_SetError(D, GD_E_BAD_TYPE, out_type, NULL, 0, NULL);
+          break;
+      }
+      break;
+    case GD_COMPLEX64:
+      switch (out_type) {
+        case GD_INT8:
+          for (i = 0; i < n; i++)
+            ((int8_t*) data_out)[i] = (int8_t)((float complex*)data_in)[i];
+          return;
+        case GD_UINT8:
+          for (i = 0; i < n; i++)
+            ((uint8_t*) data_out)[i] = (uint8_t)((float complex*)data_in)[i];
+          return;
+        case GD_INT16:
+          for (i = 0; i < n; i++)
+            ((int16_t*)data_out)[i] = (int16_t)((float complex*)data_in)[i];
+          return;
+        case GD_UINT16:
+          for (i = 0; i < n; i++)
+            ((uint16_t*)data_out)[i] = (uint16_t)((float complex*)data_in)[i];
+          return;
+        case GD_INT32:
+          for (i = 0; i < n; i++)
+            ((int32_t*)data_out)[i] = (int32_t)((float complex*)data_in)[i];
+          return;
+        case GD_UINT32:
+          for (i = 0; i < n; i++)
+            ((uint32_t*)data_out)[i] = (int32_t)((float complex*)data_in)[i];
+          return;
+        case GD_INT64:
+          for (i = 0; i < n; i++)
+            ((int64_t*)data_out)[i] = (int64_t)((float complex*)data_in)[i];
+          return;
+        case GD_UINT64:
+          for (i = 0; i < n; i++)
+            ((uint64_t*)data_out)[i] = (uint64_t)((float complex*)data_in)[i];
+          return;
+        case GD_FLOAT32:
+          for (i = 0; i < n; i++)
+            ((float*)data_out)[i] = (float)((float complex*)data_in)[i];
+          return;
+        case GD_FLOAT64:
+          for (i = 0; i < n; i++)
+            ((double*)data_out)[i] = (double)((float complex*)data_in)[i];
+          return;
+        case GD_COMPLEX64:
+          memcpy(data_out, data_in, n * sizeof(float complex));
+          return;
+        case GD_COMPLEX128:
+          for (i = 0; i < n; i++)
+            ((double complex*)data_out)[i] =
+              (double complex)((float complex*)data_in)[i];
+          return;
+        default:
+          _GD_SetError(D, GD_E_BAD_TYPE, out_type, NULL, 0, NULL);
+          break;
+      }
+    case GD_COMPLEX128:
+      switch (out_type) {
+        case GD_INT8:
+          for (i = 0; i < n; i++)
+            ((int8_t*) data_out)[i] = (int8_t)((double complex*)data_in)[i];
+          return;
+        case GD_UINT8:
+          for (i = 0; i < n; i++)
+            ((uint8_t*) data_out)[i] = (uint8_t)((double complex*)data_in)[i];
+          return;
+        case GD_INT16:
+          for (i = 0; i < n; i++)
+            ((int16_t*)data_out)[i] = (int16_t)((double complex*)data_in)[i];
+          return;
+        case GD_UINT16:
+          for (i = 0; i < n; i++)
+            ((uint16_t*)data_out)[i] = (uint16_t)((double complex*)data_in)[i];
+          return;
+        case GD_INT32:
+          for (i = 0; i < n; i++)
+            ((int32_t*)data_out)[i] = (int32_t)((double complex*)data_in)[i];
+          return;
+        case GD_UINT32:
+          for (i = 0; i < n; i++)
+            ((uint32_t*)data_out)[i] = (int32_t)((double complex*)data_in)[i];
+          return;
+        case GD_INT64:
+          for (i = 0; i < n; i++)
+            ((int64_t*)data_out)[i] = (int64_t)((double complex*)data_in)[i];
+          return;
+        case GD_UINT64:
+          for (i = 0; i < n; i++)
+            ((uint64_t*)data_out)[i] = (uint64_t)((double complex*)data_in)[i];
+          return;
+        case GD_FLOAT32:
+          for (i = 0; i < n; i++)
+            ((float*)data_out)[i] = (float)((double complex*)data_in)[i];
+          return;
+        case GD_FLOAT64:
+          for (i = 0; i < n; i++)
+            ((float*)data_out)[i] = (float)((double complex*)data_in)[i];
+          return;
+        case GD_COMPLEX64:
+          for (i = 0; i < n; i++)
+            ((float complex*)data_out)[i] =
+              (float complex)((double complex*)data_in)[i];
+          return;
+        case GD_COMPLEX128:
+          memcpy(data_out, data_in, n * sizeof(double complex));
           return;
         default:
           _GD_SetError(D, GD_E_BAD_TYPE, out_type, NULL, 0, NULL);

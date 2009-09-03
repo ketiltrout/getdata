@@ -46,6 +46,12 @@ char* _GD_ValidateField(const gd_entry_t* parent, const char* field_code,
     return (char*)field_code;
   }
 
+  /* don't allow representations in field names */
+  if (field_code[len - 2] == '.') {
+    dreturn("%p", field_code);
+    return (char*)field_code;
+  }
+
   for (i = 0; i < len; ++i)
     if (field_code[i] == '/' || field_code[i] == '<' || field_code[i] == '>' ||
         field_code[i] == ';' || field_code[i] == '|' || field_code[i] == '&' ||
@@ -71,10 +77,10 @@ char* _GD_ValidateField(const gd_entry_t* parent, const char* field_code,
     for (i = 0; i < GD_N_SUBENCODINGS; ++i)
       if (_gd_ef[i].ext[0] != '\0' && strcmp(field_code + len -
             strlen(_gd_ef[i].ext), _gd_ef[i].ext) == 0)
-        {
-          dreturn("%p", field_code);
-          return (char*)field_code;
-        }
+      {
+        dreturn("%p", field_code);
+        return (char*)field_code;
+      }
 
   if (parent != NULL) {
     ptr = malloc(strlen(parent->field) + strlen(field_code) + 2);

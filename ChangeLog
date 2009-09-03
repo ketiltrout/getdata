@@ -1,3 +1,99 @@
+2009-09-03   D. V. Wiebe <getdata@ketiltrout.net>  svn:308
+	* test/put_sbit.c: Ensure data is signed.
+
+	* src/internal.h: Add repr, complex_table, cy, cconst to _gd_private_entry;
+	added representation stuff.
+	* src/getdata.h.in: Add GD_E_BAD_REPR, GD_E_FORMAT_LITTERAL, GD_COMPLEX64,
+	GD_COMPLEX128.  Add complex_scalars, cm, cb, ca to _gd_unified_entry.
+
+	* src/entry.c (_GD_GetScalar): Set complex_scalars.
+	* src/entry.c (_GD_CalculateEntry): Retrieve all scalars as GD_COMPLEX, and
+	then realify back down.
+	* src/types.c (_GD_ConvertType): Handle complex types.
+	* src/getdata.c (_GD_FillFileFrame _GD_PolynomData _GD_MultiplyData): Handle
+	complex types.
+	* src/getdata.c (_GD_DoRaw): Handle complex data endianness correction
+	properly.
+	* src/getdata.c (_GD_CPolynomData _GD_CMultiplyData): Added.
+	* src/getdata.c (_GD_DoMultiply _GD_DoPolynom): Handle complex input fields.
+	* src/getdata.c (_GD_DoLinterp): Permit complex y-valued LUTs.
+	* src/getdata.c (_GD_DoConst): Handle complex valued scalars.
+	* src/flush.c (_GD_TypeName): Add GD_COMPLEX64 and GD_COMPLEX128.
+	* src/flush.c (_GD_WriteConst): Write a complex literal.
+	* src/flush.c (_GD_FieldSpec): Handle complex valued literals.
+	* src/ascii.c (_GD_ScanFormat _GD_AsciiRead _GD_AsciiWrite): Handle complex
+	data.
+	* src/putdata.c (_GD_DoLinterpOut _GD_DoLincomOut _GD_DoPolynomOut
+	_GD_DoConstOut): Handle complex writes.
+	* src/del.c (_GD_DeReference): Handle complex scalars.
+	* src/parse.c (_GD_RawType): Add GD_COMPLEX64 and GD_COMPLEX128.
+	* src/parse.c (_GD_SetScalar): Handle complex literals.  This may now
+	through the FORMAT suberror GD_E_FORMAT_LITTERAL.  Callers updated.
+	* src/parse.c (_GD_ParseLincom _GD_ParsePolynom _GD_ParseConst): Handle
+	complex literals.
+	* src/mod.c (_GD_Change): Handle complex scalars.
+	* src/mod.c (dirfile_alter_clincom dirfile_alter_cpolynom): Added.
+	* src/add.c (_GD_Add): Handle complex scalars.
+	* src/add.c (dirfile_add_clincom dirfile_add_cpolynom dirfile_madd_clincom
+	dirfile_madd_cpolynom): Added.
+	* src/common.c (_GD_ReadLinterpFile): Allow complex y-values.
+	* src/common.c (_GD_LinterpData): Handle complex return types.
+	* src/common.c (_GD_CLinterpData): Added.
+
+	* src/native.c: Added.
+
+	* src/entry.c (get_entry get_entry_type get_fragment_index): Discard any
+	represenation in the input field code.
+	* src/getdata.c (_GD_ExtractRepr): Added.
+	* src/getdata.c (_GD_DoField): Handle represenations for both complex and
+	real types.
+	* src/getdata.c (getdata64): Decode the input representation.
+	* src/name.c (_GD_ValidateField): Don't allow representation suffixes in
+	field names.
+	* src/spf.c (get_spf): Discard any represenation in the input field code.
+	* src/constant.c (get_constant put_constant): Handle representations.
+	* src/putdata.c (_GD_DoFieldOut): Complain on getting a representation.
+	* src/putdata.c (putdata64): Decode the input representation.
+	* src/common.c (_GD_GetRepr): Added.
+
+	* src/errors.c: Add errors for GD_E_FORMAT_LITTERAL and GD_E_BAD_REPRs.
+
+	* src/legacy.c: Add GD_E_BAD_REPR to GD_ERROR_CODES.
+
+	* src/getdata.c (_GD_FillZero): Let the caller deal with s0.
+
+	* src/getdata.c (_GD_DoLincom _GD_DoMultiply _GD_DoBit _GD_DoPhase
+	_GD_DoLinterp _GD_DoPolynom): Use _GD_BadInput.
+	* src/spf.c (_GD_GetSPF): Use _GD_BadInput.
+	* src/common.c (_GD_BadInput): Added.
+
+	* src/constant.c (put_constant): Return -1 on error.
+
+	* src/getdata.c (_GD_DoLincom): Rewrote for better optimisation.  Includes
+	MDT's m=1 b=0 short circuit.
+	* src/common.c (_GD_ScaleData): Deleted.
+	* src/commonc. (_GD_LincomData _GD_CLincomData): Added.
+
+	* src/common.c (_GD_Alloc): Throw GD_E_ALLOC on malloc error.
+
+	* src/flush.c (_GD_FlushFragment): Add the missing encoding types, and write
+	something to the file on an unhandled type.
+
+	* src/putdata.c (_GD_DoRawOut): Check malloc return.
+
+	* src/getdata.c (_GD_DoRaw _GD_DoLincom _GD_DoMultiply _GD_DoBit _GD_DoPhase
+	_GD_DoLinterp _GD_DoPolynom _GD_DoField getdata64): Only the user cares about
+	first_frame, and num_frames.  Convert to pure samples early in getdata64().
+	* src/putdata.c (_GD_DoRawOut _GD_DoLincomOut _GD_DoBitOut _GD_DoPhaseOut
+	_GD_DoLinterpOut _GD_DoPolynomOut _GD_DoFieldOut putdata64): Ditto in
+	putdata64().
+
+
+2009-08-17   D. V. Wiebe <getdata@ketiltrout.net>  svn:306
+	* src/getdata.c (_GD_DoMultiply): Load the second field as GD_DOUBLE.
+	* src/getdata.c (_GD_MultiplyData): Compute MULTIPLYs in double precision,
+	rather than the return_type.
+
 2009-08-13   D. V. Wiebe <getdata@ketiltrout.net>  svn:305
 	GetData license changed to GNU LGPLv2.1+.  All documentation updated.
 

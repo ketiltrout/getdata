@@ -120,6 +120,12 @@ static const char* _GD_TypeName(DIRFILE* D, gd_type_t data_type)
     case GD_FLOAT64:
       ptr = "FLOAT64";
       break;
+    case GD_COMPLEX64:
+      ptr = "COMPLEX64";
+      break;
+    case GD_COMPLEX128:
+      ptr = "COMPLEX128";
+      break;
     default:
       _GD_InternalError(D);
       ptr = "";
@@ -172,6 +178,9 @@ static void _GD_WriteConst(FILE* stream, int type, const void* value,
     fprintf(stream, "%i%s", *(int*)value, postamble);
   else if (type == GD_IEEE754)
     fprintf(stream, "%.15g%s", *(double*)value, postamble);
+  else if (type == GD_COMPLEX)
+    fprintf(stream, "%.15g;%.15g%s", creal(*(double complex*)value),
+        cimag(*(double complex*)value), postamble);
 
   dreturnvoid();
 }
@@ -207,9 +216,17 @@ static void _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
       fprintf(stream, " LINCOM %i", E->n_fields);
       for (i = 0; i < E->n_fields; ++i) {
         fprintf(stream, " %s ", E->in_fields[i]);
-        _GD_WriteConst(stream, GD_IEEE754, &E->m[i], E->e->scalar[i * 2], " ");
-        _GD_WriteConst(stream, GD_IEEE754, &E->b[i], E->e->scalar[i * 2 + 1],
-            "");
+        if (E->complex_scalars) {
+          _GD_WriteConst(stream, GD_COMPLEX, &E->cm[i], E->e->scalar[i * 2],
+              " ");
+          _GD_WriteConst(stream, GD_COMPLEX, &E->cb[i], E->e->scalar[i * 2 + 1],
+              "");
+        } else {
+          _GD_WriteConst(stream, GD_IEEE754, &E->m[i], E->e->scalar[i * 2],
+              " ");
+          _GD_WriteConst(stream, GD_IEEE754, &E->b[i], E->e->scalar[i * 2 + 1],
+              "");
+        }
       }
       fputs("\n", stream);
       break;
@@ -231,7 +248,11 @@ static void _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
     case GD_POLYNOM_ENTRY:
       fprintf(stream, " POLYNOM %s ", E->in_fields[0]);
       for (i = 0; i <= E->poly_ord; ++i)
-        _GD_WriteConst(stream, GD_IEEE754, &E->a[i], E->e->scalar[i],
+        if (E->complex_scalars)
+          _GD_WriteConst(stream, GD_COMPLEX, &E->ca[i], E->e->scalar[i],
+            (i == E->poly_ord) ? "\n" : " ");
+        else
+          _GD_WriteConst(stream, GD_IEEE754, &E->a[i], E->e->scalar[i],
             (i == E->poly_ord) ? "\n" : " ");
       break;
     case GD_SBIT_ENTRY:
@@ -246,6 +267,9 @@ static void _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
       else if (E->const_type & GD_IEEE754)
         fprintf(stream, " CONST %s %.15g\n", _GD_TypeName(D, E->const_type),
             E->e->dconst);
+      else if (E->const_type & GD_COMPLEX)
+        fprintf(stream, " CONST %s %.15g;%.15g\n", _GD_TypeName(D,
+              E->const_type), creal(E->e->cconst), cimag(E->e->cconst));
       else
         fprintf(stream, " CONST %s %" PRIu64 "\n", _GD_TypeName(D,
               E->const_type), E->e->uconst);
@@ -344,16 +368,27 @@ static void _GD_FlushFragment(DIRFILE* D, int i)
     fprintf(stream, "/FRAMEOFFSET %llu\n",
         (unsigned long long)D->fragment[i].frame_offset);
 
-  /* The encoding -- we only write encodings we know about. */
   switch(D->fragment[i].encoding) {
     case GD_UNENCODED:
       fputs("/ENCODING none\n", stream);
+      break;
+    case GD_BZIP2_ENCODED:
+      fputs("/ENCODING bzip2\n", stream);
+      break;
+    case GD_GZIP_ENCODED:
+      fputs("/ENCODING gzip\n", stream);
+      break;
+    case GD_LZMA_ENCODED:
+      fputs("/ENCODING lzma\n", stream);
       break;
     case GD_SLIM_ENCODED:
       fputs("/ENCODING slim\n", stream);
       break;
     case GD_TEXT_ENCODED:
       fputs("/ENCODING text\n", stream);
+      break;
+    default:
+      fprintf(stream, "/ENCODING unknown # (%x)\n", D->fragment[i].encoding);
       break;
   }
 

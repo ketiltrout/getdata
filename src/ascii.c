@@ -115,6 +115,12 @@ void _GD_ScanFormat(char* fmt, gd_type_t data_type)
     case GD_FLOAT64:
       strcpy(fmt, "%lf");
       break;
+    case GD_COMPLEX64:
+      strcpy(fmt, "%f;%f");
+      break;
+    case GD_COMPLEX128:
+      strcpy(fmt, "%lf;%lf");
+      break;
     default:
       fmt[0] = 0;
       break;
@@ -133,14 +139,28 @@ ssize_t _GD_AsciiRead(struct _gd_raw_file *file, void *ptr, gd_type_t data_type,
   dtrace("%p, %p, 0x%x, %zi", file, ptr, data_type, nmemb);
 
   _GD_ScanFormat(fmt, data_type);
-  for (n = 0; n < nmemb; ++n) {
-    if (feof(file->edata))
-      break;
+  if (data_type & GD_COMPLEX) {
+    for (n = 0; n < nmemb; ++n) {
+      if (feof(file->edata))
+        break;
 
-    if (fscanf(file->edata, fmt, (char*)ptr + GD_SIZE(data_type) * n) < 1) {
-      if (!feof(file->edata))
-        ret = -1;
-      break;
+      if (fscanf(file->edata, fmt, (char*)ptr + GD_SIZE(data_type) * n,
+            (char*)ptr + GD_SIZE(data_type) * n + GD_SIZE(data_type) / 2) < 2) {
+        if (!feof(file->edata))
+          ret = -1;
+        break;
+      }
+    }
+  } else {
+    for (n = 0; n < nmemb; ++n) {
+      if (feof(file->edata))
+        break;
+
+      if (fscanf(file->edata, fmt, (char*)ptr + GD_SIZE(data_type) * n) < 1) {
+        if (!feof(file->edata))
+          ret = -1;
+        break;
+      }
     }
   }
 
@@ -227,6 +247,24 @@ ssize_t _GD_AsciiWrite(struct _gd_raw_file *file, const void *ptr,
           break;
         }
       break;
+    case GD_COMPLEX64:
+      for (n = 0; n < nmemb; ++n)
+        if (fprintf(file->edata, "%.16g;%.16g\n", ((float*)ptr)[n * 2],
+              (((float*)ptr)[n * 2 + 1])) < 0)
+        {
+          ret = -1;
+          break;
+        }
+      break;
+    case GD_COMPLEX128:
+      for (n = 0; n < nmemb; ++n)
+        if (fprintf(file->edata, "%.16lg;%.16lg\n", ((double*)ptr)[n * 2],
+              (((double*)ptr)[n * 2 + 1])) < 0)
+        {
+          ret = -1;
+          break;
+        }
+      break;
     default:
       ret = -1;
       break;
@@ -241,7 +279,7 @@ int _GD_AsciiSync(struct _gd_raw_file *file)
   int ret;
 
   dtrace("%p", file);
-  
+
   ret = fflush(file->edata);
 
   if (!ret)
@@ -254,7 +292,7 @@ int _GD_AsciiSync(struct _gd_raw_file *file)
 int _GD_AsciiClose(struct _gd_raw_file* file)
 {
   int ret;
-  
+
   dtrace("%p", file);
 
   ret = fclose(file->edata);

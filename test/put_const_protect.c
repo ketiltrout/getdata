@@ -8,6 +8,7 @@
 #include <fcntl.h>
 #include <string.h>
 #include <errno.h>
+#include <stdio.h>
 #include <unistd.h>
 
 int main(void)
@@ -33,10 +34,14 @@ int main(void)
   unlink(format);
   rmdir(filedir);
 
-  if (error != GD_E_PROTECTED)
+  if (error != GD_E_PROTECTED) {
+    fprintf(stderr, "error=%i\n", error);
     return 1;
-  if (n != 0)
+  }
+  if (n != -1) {
+    fprintf(stderr, "n=%i\n", n);
     return 1;
+  }
 
   return 0;
 }
