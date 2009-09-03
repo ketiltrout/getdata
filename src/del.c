@@ -126,7 +126,7 @@ static void _GD_DeReference(DIRFILE* D, gd_entry_t* E, const gd_entry_t* C,
             if (E->complex_scalars)
               _GD_DoConst(D, C, GD_COMPLEX128, &E->cb[i]);
             else 
-              _GD_DoConst(D, C, GD_FLOAT64, &E->cm[i]);
+              _GD_DoConst(D, C, GD_FLOAT64, &E->b[i]);
             free(E->e->scalar[i * 2]);
             E->e->scalar[i * 2] = NULL;
           }
