@@ -1,4 +1,4 @@
-/* Retreiving the number of fields of a field should succeed cleanly */
+/* Retreive a list of string metafields */
 #include "../src/getdata.h"
 
 #include <stdlib.h>
@@ -29,13 +29,20 @@ int main(void)
   close(fd);
 
   DIRFILE* D = dirfile_open(filedir, GD_RDONLY | GD_VERBOSE);
+  get_nfields(D);
+  get_nmfields(D, "parent");
+  get_nmfields_by_type(D, "parent", GD_STRING_ENTRY);
   const char** field_list = get_mstrings(D, "parent");
 
-  if (get_error(D))
+  if (get_error(D)) {
+    fprintf(stderr, "error = %i\n", get_error(D));
     r = 1;
+  }
 
-  if (field_list == NULL)
+  if (field_list == NULL) {
+    fprintf(stderr, "field_list = %p\n", field_list);
     r = 1;
+  }
 
   fd = 0;
   if (!r)
@@ -43,27 +50,42 @@ int main(void)
       if (field_list[fd] == NULL)
         break;
 
-      if (strlen(field_list[fd]) != 5)
+      if (strlen(field_list[fd]) != 5) {
+        fprintf(stderr, "strlen(field_list[%i]) = %i\n", fd,
+            strlen(field_list[fd]));
         r = 1;
+      }
 
-      if (field_list[fd][0] != 'v')
+      if (field_list[fd][0] != 'v') {
+        fprintf(stderr, "field_list[%i][0] = %i\n", fd, field_list[fd][0]);
         r = 1;
+      }
 
-      if (field_list[fd][1] != 'a')
+      if (field_list[fd][1] != 'a') {
+        fprintf(stderr, "field_list[%i][0] = %i\n", fd, field_list[fd][0]);
         r = 1;
+      }
 
-      if (field_list[fd][2] != 'l')
+      if (field_list[fd][2] != 'l') {
+        fprintf(stderr, "field_list[%i][0] = %i\n", fd, field_list[fd][0]);
         r = 1;
+      }
 
-      if (field_list[fd][3] != 'u')
+      if (field_list[fd][3] != 'u') {
+        fprintf(stderr, "field_list[%i][0] = %i\n", fd, field_list[fd][0]);
         r = 1;
+      }
 
-      if (field_list[fd][4] < '1' || field_list[fd][4] > '3')
+      if (field_list[fd][4] < '1' || field_list[fd][4] > '3') {
+        fprintf(stderr, "field_list[%i][0] = %i\n", fd, field_list[fd][0]);
         r = 1;
+      }
     }
 
-  if (fd != 3)
+  if (fd != 3) {
+    fprintf(stderr, "fd = %i\n", fd);
     r = 1;
+  }
 
   dirfile_close(D);
   unlink(format);

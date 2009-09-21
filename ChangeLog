@@ -1,3 +1,9 @@
+2009-09-21   D. V. Wiebe <getdata@ketiltrout.net>  svn:309 
+	* src/meta_list.c (get_mstrings): Properly terminate the list.  Bug
+	report from MDT.
+
+	* test/svlist_meta.c: Be more verbose.
+
 2009-09-03   D. V. Wiebe <getdata@ketiltrout.net>  svn:308
 	* test/put_sbit.c: Ensure data is signed.
 

@@ -125,7 +125,7 @@ const char** get_mstrings(DIRFILE* D, const char* parent)
     if (e->meta_entry[i]->field_type == GD_STRING_ENTRY)
       fl[n++] = e->meta_entry[i]->e->string;
   }
-  fl[i] = NULL;
+  fl[n] = NULL;
 
   e->string_value_list = (const char**)fl;
 
