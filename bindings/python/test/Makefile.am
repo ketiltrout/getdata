@@ -20,17 +20,16 @@
 #
 AUTOMAKE_OPTIONS = foreign
 
-TESTS=
-
-check_PROGRAMS=${TESTS}
+TESTS_ENVIRONMENT=LD_LIBRARY_PATH=../../../src/.libs PYTHONPATH=../.libs/ ${PYTHON}
+TESTS=callback.py tst_getdata.py
 
 # clean up after the tests
 check-local: check-TESTS
 	$(MAKE) getdata-clean-dirs
 
 getdata-clean-dirs:
-	rm -rvf *odirfile
+	rm -rf dirfile
 
 clean-local:
 	$(MAKE) getdata-clean-dirs
-	rm -rf *~
+	rm -rf *~ 

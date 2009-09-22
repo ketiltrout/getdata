@@ -26,6 +26,31 @@
 #undef _SVID_SOURCE
 #include "../../src/internal.h"
 
+#define GDPY_UNSIGNED        0x00
+#define GDPY_SIGNED          0x01
+#define GDPY_IEEE754         0x02
+#define GDPY_COMPLEX         0x03
+
+#define GDPY_INT             0x00
+#define GDPY_LONG            0x10
+#define GDPY_FLOAT           0x20
+#define GDPY_PYCOMPLEX       0x40
+
+#define GDPY_INT_AS_LONG        (GDPY_INT       | GDPY_SIGNED)
+#define GDPY_LONG_AS_ULL        (GDPY_LONG      | GDPY_UNSIGNED)
+#define GDPY_LONG_AS_SLL        (GDPY_LONG      | GDPY_SIGNED)
+#define GDPY_LONG_AS_DOUBLE     (GDPY_LONG      | GDPY_IEEE754)
+#define GDPY_FLOAT_AS_DOUBLE    (GDPY_FLOAT     | GDPY_IEEE754)
+#define GDPY_COMPLEX_AS_COMPLEX (GDPY_PYCOMPLEX | GDPY_COMPLEX)
+
+#define GDPY_INVALID_TYPE(t) ( \
+    t != GD_UINT8     && t != GD_INT8    && \
+    t != GD_UINT16    && t != GD_INT16   && \
+    t != GD_UINT32    && t != GD_INT32   && \
+    t != GD_UINT64    && t != GD_INT64   && \
+    t != GD_FLOAT32   && t != GD_FLOAT64 && \
+    t != GD_COMPLEX64 && t != GD_COMPLEX128 )
+
 #define PYGD_CHECK_ERROR(D,R) PYGD_CHECK_ERROR2(D,R,)
 
 #define PYGD_CHECK_ERROR2(D,R,E) \
@@ -70,13 +95,22 @@ struct gdpy_fragment_t {
   struct gdpy_dirfile_t* dirfile;
 };
 
-union gdpy_triple_value {
+union gdpy_quadruple_value {
   uint64_t u;
   int64_t s;
   double f;
+  double complex c;
 };
 
-extern int gdpy_convert_from_pyobj(PyObject*, union gdpy_triple_value*,
+static inline double complex gdpy_as_complex(PyObject* o)
+{
+  Py_complex c = PyComplex_AsCComplex(o);
+  return c.real + _Complex_I * c.imag;
+}
+
+#define gdpy_from_complex(c) PyComplex_FromDoubles(creal(c), cimag(c))
+
+extern int gdpy_convert_from_pyobj(PyObject*, union gdpy_quadruple_value*,
     gd_type_t);
 extern gd_type_t gdpy_convert_from_pylist(PyObject*, void*, gd_type_t, size_t);
 extern PyObject* gdpy_convert_to_pyobj(const void*, gd_type_t);

@@ -104,7 +104,7 @@ static void _GD_DeReference(DIRFILE* D, gd_entry_t* E, const gd_entry_t* C,
             _GD_SetError(D, GD_E_DELETE, GD_E_DEL_CONST, E->field, 0, C->field);
             break;
           } else {
-            if (E->complex_scalars)
+            if (E->comp_scal)
               _GD_DoConst(D, C, GD_COMPLEX128, &E->ca[i]);
             else
               _GD_DoConst(D, C, GD_FLOAT64, &E->a[i]);
@@ -123,7 +123,7 @@ static void _GD_DeReference(DIRFILE* D, gd_entry_t* E, const gd_entry_t* C,
             _GD_SetError(D, GD_E_DELETE, GD_E_DEL_CONST, E->field, 0, C->field);
             break;
           } else {
-            if (E->complex_scalars)
+            if (E->comp_scal)
               _GD_DoConst(D, C, GD_COMPLEX128, &E->cb[i]);
             else 
               _GD_DoConst(D, C, GD_FLOAT64, &E->b[i]);
@@ -138,7 +138,7 @@ static void _GD_DeReference(DIRFILE* D, gd_entry_t* E, const gd_entry_t* C,
             _GD_SetError(D, GD_E_DELETE, GD_E_DEL_CONST, E->field, 0, C->field);
             break;
           } else {
-            if (E->complex_scalars)
+            if (E->comp_scal)
               _GD_DoConst(D, C, GD_COMPLEX128, &E->cb[i]);
             else 
               _GD_DoConst(D, C, GD_FLOAT64, &E->b[i]);

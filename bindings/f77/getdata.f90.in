@@ -29,9 +29,12 @@ integer, parameter :: GD_FIELD_LEN=@GD_MAX_LINE_LENGTH@
 
 type gd_entry
   integer :: field_type, n_fields, spf, data_type, bitnum, numbits, shift
-  integer :: fragment_index
+  integer :: fragment_index, complex_scalars
   character (len=GD_FIELD_LEN), dimension(3) :: field
   real*8, dimension(3) :: m, b
+  real*8, dimension(6) :: a
+  double complex, dimension(3) :: cm, cb
+  double complex, dimension(6) :: ca
 end type
 
 contains
@@ -181,6 +184,34 @@ function fgetdata_r8 (dirfile, field_code, first_frame, first_sample, &
   first_frame, first_sample, num_frames, num_samples, GD_FLOAT64, data_out)
 end function
 
+! getdata with return_type=GD_COMPLEX64
+function fgetdata_c8 (dirfile, field_code, first_frame, first_sample, &
+  num_frames, num_samples, data_out)
+  integer :: fgetdata_c8
+  integer, intent(in) :: dirfile, first_frame, first_sample, num_frames
+  character (len=*), intent(in) :: field_code
+  integer, intent(in) :: num_samples
+  complex, dimension(:), intent(out) :: data_out
+
+  ! call f77 library
+  call gdgetd(fgetdata_c8, dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+  first_frame, first_sample, num_frames, num_samples, GD_COMPLEX64, data_out)
+end function
+
+! getdata with return_type=GD_COMPLEX128
+function fgetdata_c16 (dirfile, field_code, first_frame, first_sample, &
+  num_frames, num_samples, data_out)
+  integer :: fgetdata_c16
+  integer, intent(in) :: dirfile, first_frame, first_sample, num_frames
+  character (len=*), intent(in) :: field_code
+  integer, intent(in) :: num_samples
+  double complex, dimension(:), intent(out) :: data_out
+
+  ! call f77 library
+  call gdgetd(fgetdata_c16, dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+  first_frame, first_sample, num_frames, num_samples, GD_COMPLEX128, data_out)
+end function
+
 !get_constant with return_type=GD_NULL
 function fget_constant_n (dirfile, field_code)
   integer :: fget_constant_n
@@ -262,6 +293,30 @@ function fget_constant_r8 (dirfile, field_code, data_out)
   ! call f77 library
   call gdgtco(fget_constant_r8, dirfile, TRIM(field_code), &
   LEN_TRIM(field_code), GD_FLOAT64, data_out)
+end function
+
+!get_constant with return_type=GD_COMPLEX64
+function fget_constant_c8 (dirfile, field_code, data_out)
+  integer :: fget_constant_c8
+  integer, intent(in) :: dirfile
+  character (len=*), intent(in) :: field_code
+  complex, intent(out)  :: data_out
+  
+  ! call f77 library
+  call gdgtco(fget_constant_c8, dirfile, TRIM(field_code), &
+  LEN_TRIM(field_code), GD_COMPLEX64, data_out)
+end function
+
+!get_constant with return_type=GD_COMPLEX128
+function fget_constant_c16 (dirfile, field_code, data_out)
+  integer :: fget_constant_c16
+  integer, intent(in) :: dirfile
+  character (len=*), intent(in) :: field_code
+  complex, intent(out)  :: data_out
+  
+  ! call f77 library
+  call gdgtco(fget_constant_c16, dirfile, TRIM(field_code), &
+  LEN_TRIM(field_code), GD_COMPLEX128, data_out)
 end function
 
 function fget_string (dirfile, field_code, length, data_out)
@@ -568,6 +623,34 @@ function fputdata_r8 (dirfile, field_code, first_frame, first_sample, &
   first_frame, first_sample, num_frames, num_samples, GD_FLOAT64, data_in)
 end function
 
+! putdata with data_type=GD_COMPLEX64
+function fputdata_c8 (dirfile, field_code, first_frame, first_sample, &
+  num_frames, num_samples, data_in)
+  integer :: fputdata_c8
+  integer, intent(in) :: dirfile, first_frame, first_sample, num_frames
+  character (len=*), intent(in) :: field_code
+  integer, intent(in) :: num_samples
+  complex, dimension(:), intent(in) :: data_in
+
+  ! call f77 library
+  call gdputd(fputdata_c8, dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+  first_frame, first_sample, num_frames, num_samples, GD_COMPLEX64, data_in)
+end function
+
+! putdata with data_type=GD_COMPLEX128
+function fputdata_c16 (dirfile, field_code, first_frame, first_sample, &
+  num_frames, num_samples, data_in)
+  integer :: fputdata_c16
+  integer, intent(in) :: dirfile, first_frame, first_sample, num_frames
+  character (len=*), intent(in) :: field_code
+  integer, intent(in) :: num_samples
+  complex, dimension(:), intent(in) :: data_in
+
+  ! call f77 library
+  call gdputd(fputdata_c16, dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+  first_frame, first_sample, num_frames, num_samples, GD_COMPLEX128, data_in)
+end function
+
 ! put_constant with data_type=GD_INT8
 function fput_constant_i1 (dirfile, field_code, data_in)
   integer :: fput_constant_i1
@@ -640,6 +723,30 @@ function fput_constant_r8 (dirfile, field_code, data_in)
   LEN_TRIM(field_code), GD_FLOAT64, data_in)
 end function
 
+! put_constant with data_type=GD_COMPLEX64
+function fput_constant_c8 (dirfile, field_code, data_in)
+  integer :: fput_constant_c8
+  integer, intent(in) :: dirfile
+  character (len=*), intent(in) :: field_code
+  complex, intent(in) :: data_in
+
+  ! call f77 library
+  call gdptco(fput_constant_c8, dirfile, TRIM(field_code), &
+  LEN_TRIM(field_code), GD_COMPLEX64, data_in)
+end function
+
+! put_constant with data_type=GD_COMPLEX128
+function fput_constant_c16 (dirfile, field_code, data_in)
+  integer :: fput_constant_c16
+  integer, intent(in) :: dirfile
+  character (len=*), intent(in) :: field_code
+  double complex, intent(in) :: data_in
+
+  ! call f77 library
+  call gdptco(fput_constant_c16, dirfile, TRIM(field_code), &
+  LEN_TRIM(field_code), GD_COMPLEX128, data_in)
+end function
+
 function fput_string (dirfile, field_code, data_in)
   integer :: fput_string
   integer, intent(in) :: dirfile
@@ -685,10 +792,19 @@ function fget_entry (dirfile, field_code, ent)
     TRIM(field_code), LEN_TRIM(field_code))
   else if (fget_entry .EQ. GD_LINCOM_ENTRY) then
     ! lincom
-    call gdgelc(ent%n_fields, ent%field(1), len1, ent%m(1), ent%b(1), &
-    ent%field(2), len2, ent%m(2), ent%b(2), ent%field(3), len3, ent%m(3), &
-    ent%b(3), ent%fragment_index, dirfile, TRIM(field_code), &
-    LEN_TRIM(field_code))
+    call gdcscl(ent%complex_scalars, dirfile, TRIM(field_code), &
+      LEN_TRIM(field_code))
+    if (ent%complex_scalars .NE. 0) then
+      call gdgecl(ent%n_fields, ent%field(1), len1, ent%cm(1), ent%cb(1), &
+      ent%field(2), len2, ent%cm(2), ent%cb(2), ent%field(3), len3, ent%cm(3), &
+      ent%cb(3), ent%fragment_index, dirfile, TRIM(field_code), &
+      LEN_TRIM(field_code))
+    else
+      call gdgelc(ent%n_fields, ent%field(1), len1, ent%m(1), ent%b(1), &
+      ent%field(2), len2, ent%m(2), ent%b(2), ent%field(3), len3, ent%m(3), &
+      ent%b(3), ent%fragment_index, dirfile, TRIM(field_code), &
+      LEN_TRIM(field_code))
+    end if
   else if (fget_entry .EQ. GD_LINTERP_ENTRY) then
     ! linterp
     call gdgelt(ent%field(1), len1, ent%field(2), len2, ent%fragment_index, &
@@ -711,9 +827,17 @@ function fget_entry (dirfile, field_code, ent)
     TRIM(field_code), LEN_TRIM(field_code))
   else if (fget_entry .EQ. GD_POLYNOM_ENTRY) then
     ! polynom
-    call gdgepn(ent%n_fields, ent%field(1), len1, ent%m(1), ent%m(2), &
-    ent%m(3), ent%b(1), ent%b(2), ent%b(3), ent%fragment_index, dirfile, &
-    TRIM(field_code), LEN_TRIM(field_code))
+    call gdcscl(ent%complex_scalars, dirfile, TRIM(field_code), &
+      LEN_TRIM(field_code))
+    if (ent%complex_scalars .NE. 0) then
+      call gdgecp(ent%n_fields, ent%field(1), len1, ent%ca(1), ent%ca(2), &
+      ent%ca(3), ent%ca(4), ent%ca(5), ent%ca(6), ent%fragment_index, dirfile, &
+      TRIM(field_code), LEN_TRIM(field_code))
+    else
+      call gdgepn(ent%n_fields, ent%field(1), len1, ent%a(1), ent%a(2), &
+      ent%a(3), ent%a(4), ent%a(5), ent%a(6), ent%fragment_index, dirfile, &
+      TRIM(field_code), LEN_TRIM(field_code))
+    end if
   else if (fget_entry .EQ. GD_CONST_ENTRY) then
     !const
     call gdgeco(ent%data_type, ent%fragment_index, dirfile, TRIM(field_code), &
@@ -757,11 +881,19 @@ subroutine fdirfile_add (dirfile, field_code, ent)
     call gdadrw(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
     ent%data_type, ent%spf, ent%fragment_index)
   else if (ent%field_type .EQ. GD_LINCOM_ENTRY) then
-    call gdadlc(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
-    ent%n_fields, TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), ent%m(1), &
-    ent%b(1), TRIM(ent%field(2)), LEN_TRIM(ent%field(2)), ent%m(2), ent%b(2), &
-    TRIM(ent%field(3)), LEN_TRIM(ent%field(3)), ent%m(3), ent%b(3), &
-    ent%fragment_index)
+    if (ent%complex_scalars .NE. 0) then
+      call gdadlc(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+      ent%n_fields, TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), ent%m(1), &
+      ent%b(1), TRIM(ent%field(2)), LEN_TRIM(ent%field(2)), ent%m(2), &
+      ent%b(2), TRIM(ent%field(3)), LEN_TRIM(ent%field(3)), ent%m(3), &
+      ent%b(3), ent%fragment_index)
+    else
+      call gdadcl(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+      ent%n_fields, TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), ent%cm(1), &
+      ent%cb(1), TRIM(ent%field(2)), LEN_TRIM(ent%field(2)), ent%cm(2), &
+      ent%cb(2), TRIM(ent%field(3)), LEN_TRIM(ent%field(3)), ent%cm(3), &
+      ent%cb(3), ent%fragment_index)
+    end if
   else if (ent%field_type .EQ. GD_LINTERP_ENTRY) then
     call gdadlt(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
     TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), TRIM(ent%field(2)), &
@@ -782,9 +914,15 @@ subroutine fdirfile_add (dirfile, field_code, ent)
     call gdadph(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
     TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), ent%shift, ent%fragment_index)
   else if (ent%field_type .EQ. GD_POLYNOM_ENTRY) then
-    call gdadpn(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
-    ent%n_fields, TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), ent%m(1), &
-    ent%m(2), ent%m(3), ent%b(1), ent%b(2), ent%b(3), ent%fragment_index)
+    if (ent%complex_scalars .NE. 0) then
+      call gdadpn(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+      ent%n_fields, TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), ent%a(1), &
+      ent%a(2), ent%a(3), ent%a(4), ent%a(5), ent%a(6), ent%fragment_index)
+    else
+      call gdadpn(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+      ent%n_fields, TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), ent%ca(1), &
+      ent%ca(2), ent%ca(3), ent%ca(4), ent%ca(5), ent%ca(6), ent%fragment_index)
+    end if
   else if (ent%field_type .EQ. GD_CONST_ENTRY) then
     call gdadco(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
     ent%data_type, GD_INT32, zero, ent%fragment_index)
@@ -833,6 +971,18 @@ subroutine fdirfile_add_lincom (dirfile, field_name, n_fields, in_field1, m1, &
   fragment_index)
 end subroutine
 
+subroutine fdirfile_add_clincom (dirfile, field_name, n_fields, in_field1, m1, &
+  b1, in_field2, m2, b2, in_field3, m3, b3, fragment_index)
+  integer, intent(in) :: dirfile, n_fields, fragment_index
+  character (len=*), intent(in) :: field_name, in_field1, in_field2, in_field3
+  double complex, intent(in) :: m1, b1, m2, b2, m3, b3
+
+  call gdadcl(dirfile, TRIM(field_name), LEN_TRIM(field_name), n_fields, &
+  TRIM(in_field1), LEN_TRIM(in_field1), m1, b1, TRIM(in_field2), &
+  LEN_TRIM(in_field2), m2, b2, TRIM(in_field3), LEN_TRIM(in_field3), m3, b3, &
+  fragment_index)
+end subroutine
+
 subroutine fdirfile_add_polynom (dirfile, field_name, poly_ord, in_field, a0, &
   a1, a2, a3, a4, a5, fragment_index)
   integer, intent(in) :: dirfile, poly_ord, fragment_index
@@ -840,6 +990,17 @@ subroutine fdirfile_add_polynom (dirfile, field_name, poly_ord, in_field, a0, &
   real*8, intent(in) :: a0, a1, a2, a3, a4, a5
 
   call gdadpn(dirfile, TRIM(field_name), LEN_TRIM(field_name), poly_ord, &
+  TRIM(in_field), LEN_TRIM(in_field), a0, a1, a2, a3, a4, a5, &
+  fragment_index)
+end subroutine
+
+subroutine fdirfile_add_cpolynom (dirfile, field_name, poly_ord, in_field, a0, &
+  a1, a2, a3, a4, a5, fragment_index)
+  integer, intent(in) :: dirfile, poly_ord, fragment_index
+  character (len=*), intent(in) :: field_name, in_field
+  double complex, intent(in) :: a0, a1, a2, a3, a4, a5
+
+  call gdadcp(dirfile, TRIM(field_name), LEN_TRIM(field_name), poly_ord, &
   TRIM(in_field), LEN_TRIM(in_field), a0, a1, a2, a3, a4, a5, &
   fragment_index)
 end subroutine
@@ -899,11 +1060,19 @@ subroutine fdirfile_madd (dirfile, parent, field_code, ent)
   character (len=1) :: nil = ""
 
   if (ent%field_type .EQ. GD_LINCOM_ENTRY) then
-    call gdmdlc(dirfile, TRIM(parent), LEN_TRIM(parent), TRIM(field_code), &
-    LEN_TRIM(field_code), ent%n_fields, TRIM(ent%field(1)), &
-    LEN_TRIM(ent%field(1)), ent%m(1), ent%b(1), TRIM(ent%field(2)), &
-    LEN_TRIM(ent%field(2)), ent%m(2), ent%b(2), TRIM(ent%field(3)), &
-    LEN_TRIM(ent%field(3)), ent%m(3), ent%b(3))
+    if (ent%complex_scalars .NE. 0) then
+      call gdmdcl(dirfile, TRIM(parent), LEN_TRIM(parent), TRIM(field_code), &
+      LEN_TRIM(field_code), ent%n_fields, TRIM(ent%field(1)), &
+      LEN_TRIM(ent%field(1)), ent%cm(1), ent%cb(1), TRIM(ent%field(2)), &
+      LEN_TRIM(ent%field(2)), ent%cm(2), ent%cb(2), TRIM(ent%field(3)), &
+      LEN_TRIM(ent%field(3)), ent%cm(3), ent%cb(3))
+    else
+      call gdmdlc(dirfile, TRIM(parent), LEN_TRIM(parent), TRIM(field_code), &
+      LEN_TRIM(field_code), ent%n_fields, TRIM(ent%field(1)), &
+      LEN_TRIM(ent%field(1)), ent%m(1), ent%b(1), TRIM(ent%field(2)), &
+      LEN_TRIM(ent%field(2)), ent%m(2), ent%b(2), TRIM(ent%field(3)), &
+      LEN_TRIM(ent%field(3)), ent%m(3), ent%b(3))
+    end if
   else if (ent%field_type .EQ. GD_LINTERP_ENTRY) then
     call gdmdlt(dirfile, TRIM(parent), LEN_TRIM(parent), TRIM(field_code), &
     LEN_TRIM(field_code), TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), &
@@ -921,10 +1090,17 @@ subroutine fdirfile_madd (dirfile, parent, field_code, ent)
     LEN_TRIM(field_code), TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), &
     TRIM(ent%field(2)), LEN_TRIM(ent%field(2)))
   else if (ent%field_type .EQ. GD_POLYNOM_ENTRY) then
-    call gdmdpn(dirfile, TRIM(parent), LEN_TRIM(parent), TRIM(field_code), &
-    LEN_TRIM(field_code), ent%n_fields, TRIM(ent%field(1)), &
-    LEN_TRIM(ent%field(1)), ent%m(1), ent%m(2), ent%m(3), ent%b(1), ent%b(2), &
-    ent%b(3))
+    if (ent%complex_scalars .NE. 0) then
+      call gdmdcp(dirfile, TRIM(parent), LEN_TRIM(parent), TRIM(field_code), &
+      LEN_TRIM(field_code), ent%n_fields, TRIM(ent%field(1)), &
+      LEN_TRIM(ent%field(1)), ent%ca(1), ent%ca(2), ent%ca(3), ent%ca(4), &
+      ent%ca(5), ent%ca(6))
+    else
+      call gdmdpn(dirfile, TRIM(parent), LEN_TRIM(parent), TRIM(field_code), &
+      LEN_TRIM(field_code), ent%n_fields, TRIM(ent%field(1)), &
+      LEN_TRIM(ent%field(1)), ent%a(1), ent%a(2), ent%a(3), ent%a(4), &
+      ent%a(5), ent%a(6))
+    endif
   else if (ent%field_type .EQ. GD_PHASE_ENTRY) then
     call gdmdph(dirfile, TRIM(parent), LEN_TRIM(parent), TRIM(field_code), &
     LEN_TRIM(field_code), TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), ent%shift)
@@ -968,6 +1144,19 @@ subroutine fdirfile_madd_lincom (dirfile, parent, field_name, n_fields, &
   LEN_TRIM(in_field3), m3, b3)
 end subroutine
 
+subroutine fdirfile_madd_clincom (dirfile, parent, field_name, n_fields, &
+  in_field1, m1, b1, in_field2, m2, b2, in_field3, m3, b3)
+  integer, intent(in) :: dirfile, n_fields
+  character (len=*), intent(in) :: field_name, in_field1, in_field2, in_field3
+  character (len=*), intent(in) :: parent
+  double complex, intent(in) :: m1, b1, m2, b2, m3, b3
+
+  call gdmdcl(dirfile, TRIM(parent), LEN_TRIM(parent), TRIM(field_name), &
+  LEN_TRIM(field_name), n_fields, TRIM(in_field1), LEN_TRIM(in_field1), m1, &
+  b1, TRIM(in_field2), LEN_TRIM(in_field2), m2, b2, TRIM(in_field3), &
+  LEN_TRIM(in_field3), m3, b3)
+end subroutine
+
 subroutine fdirfile_madd_polynom (dirfile, parent, field_name, poly_ord, &
   in_field, a0, a1, a2, a3, a4, a5)
   integer, intent(in) :: dirfile, poly_ord
@@ -976,6 +1165,18 @@ subroutine fdirfile_madd_polynom (dirfile, parent, field_name, poly_ord, &
   real*8, intent(in) :: a0, a1, a2, a3, a4, a5
 
   call gdmdpn(dirfile, TRIM(parent), LEN_TRIM(parent), TRIM(field_name), &
+  LEN_TRIM(field_name), poly_ord, TRIM(in_field), LEN_TRIM(in_field), a0, &
+  a1, a2, a3, a4, a5)
+end subroutine
+
+subroutine fdirfile_madd_cpolynom (dirfile, parent, field_name, poly_ord, &
+  in_field, a0, a1, a2, a3, a4, a5)
+  integer, intent(in) :: dirfile, poly_ord
+  character (len=*), intent(in) :: field_name, in_field
+  character (len=*), intent(in) :: parent
+  double complex, intent(in) :: a0, a1, a2, a3, a4, a5
+
+  call gdmdcp(dirfile, TRIM(parent), LEN_TRIM(parent), TRIM(field_name), &
   LEN_TRIM(field_name), poly_ord, TRIM(in_field), LEN_TRIM(in_field), a0, &
   a1, a2, a3, a4, a5)
 end subroutine
@@ -1187,10 +1388,18 @@ subroutine fdirfile_alter_entry (dirfile, field_code, ent, recode)
     call gdalrw(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
     ent%data_type, ent%spf, recode)
   else if (ent%field_type .EQ. GD_LINCOM_ENTRY) then
-    call gdallc(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
-    ent%n_fields, TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), ent%m(1), &
-    ent%b(1), TRIM(ent%field(2)), LEN_TRIM(ent%field(2)), ent%m(2), ent%b(2), &
-    TRIM(ent%field(3)), LEN_TRIM(ent%field(3)), ent%m(3), ent%b(3))
+    if (ent%complex_scalars .NE. 0) then
+      call gdalcl(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+      ent%n_fields, TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), ent%cm(1), &
+      ent%cb(1), TRIM(ent%field(2)), LEN_TRIM(ent%field(2)), ent%cm(2), &
+      ent%cb(2), TRIM(ent%field(3)), LEN_TRIM(ent%field(3)), ent%cm(3), &
+      ent%cb(3))
+    else
+      call gdallc(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+      ent%n_fields, TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), ent%m(1), &
+      ent%b(1), TRIM(ent%field(2)), LEN_TRIM(ent%field(2)), ent%m(2), &
+      ent%b(2), TRIM(ent%field(3)), LEN_TRIM(ent%field(3)), ent%m(3), ent%b(3))
+    end if
   else if (ent%field_type .EQ. GD_LINTERP_ENTRY) then
     call gdallt(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
     TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), TRIM(ent%field(2)), &
@@ -1209,9 +1418,15 @@ subroutine fdirfile_alter_entry (dirfile, field_code, ent, recode)
     call gdalph(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
     TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), ent%shift)
   else if (ent%field_type .EQ. GD_POLYNOM_ENTRY) then
-    call gdalpn(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
-    ent%n_fields, TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), ent%m(1), &
-    ent%m(2), ent%m(3), ent%b(1), ent%b(2), ent%b(3))
+    if (ent%complex_scalars .NE. 0) then
+      call gdalcp(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+      ent%n_fields, TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), ent%ca(1), &
+      ent%ca(2), ent%ca(3), ent%ca(4), ent%ca(5), ent%ca(6))
+    else
+      call gdalpn(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+      ent%n_fields, TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), ent%a(1), &
+      ent%a(2), ent%a(3), ent%a(4), ent%a(5), ent%a(6))
+    endif
   else if (ent%field_type .EQ. GD_CONST_ENTRY) then
     call gdalco(dirfile, TRIM(field_code), LEN_TRIM(field_code), ent%data_type)
   end if
@@ -1251,6 +1466,17 @@ subroutine fdirfile_alter_lincom (dirfile, field_name, n_fields, in_field1, &
   LEN_TRIM(in_field2), m2, b2, TRIM(in_field3), LEN_TRIM(in_field3), m3, b3)
 end subroutine
 
+subroutine fdirfile_alter_clincom (dirfile, field_name, n_fields, in_field1, &
+  m1, b1, in_field2, m2, b2, in_field3, m3, b3)
+  integer, intent(in) :: dirfile, n_fields
+  character (len=*), intent(in) :: field_name, in_field1, in_field2, in_field3
+  double complex, intent(in) :: m1, b1, m2, b2, m3, b3
+
+  call gdalcl(dirfile, TRIM(field_name), LEN_TRIM(field_name), n_fields, &
+  TRIM(in_field1), LEN_TRIM(in_field1), m1, b1, TRIM(in_field2), &
+  LEN_TRIM(in_field2), m2, b2, TRIM(in_field3), LEN_TRIM(in_field3), m3, b3)
+end subroutine
+
 subroutine fdirfile_alter_polynom (dirfile, field_name, poly_ord, in_field, &
   a0, a1, a2, a3, a4, a5)
   integer, intent(in) :: dirfile, poly_ord
@@ -1258,6 +1484,16 @@ subroutine fdirfile_alter_polynom (dirfile, field_name, poly_ord, in_field, &
   real*8, intent(in) :: a0, a1, a2, a3, a4, a5
 
   call gdalpn(dirfile, TRIM(field_name), LEN_TRIM(field_name), poly_ord, &
+  TRIM(in_field), LEN_TRIM(in_field), a0, a1, a2, a3, a4, a5)
+end subroutine
+
+subroutine fdirfile_alter_cpolynom (dirfile, field_name, poly_ord, in_field, &
+  a0, a1, a2, a3, a4, a5)
+  integer, intent(in) :: dirfile, poly_ord
+  character (len=*), intent(in) :: field_name, in_field
+  double complex, intent(in) :: a0, a1, a2, a3, a4, a5
+
+  call gdalcp(dirfile, TRIM(field_name), LEN_TRIM(field_name), poly_ord, &
   TRIM(in_field), LEN_TRIM(in_field), a0, a1, a2, a3, a4, a5)
 end subroutine
 
@@ -1322,5 +1558,43 @@ subroutine fdirfile_delete (dirfile, field_code, flags)
 
   call gddele(dirfile, TRIM(field_code), LEN_TRIM(field_code), flags)
 end subroutine
+
+function fget_native_type (dirfile, field_code)
+  integer :: fget_native_type
+  integer, intent(in) :: dirfile
+  character (len=*), intent(in) :: field_code
+
+  call gdntyp(fget_native_type, dirfile, TRIM(field_code), LEN_TRIM(field_code))
+end function
+
+function fdirfile_validate (dirfile, field_code)
+  integer :: fdirfile_validate
+  integer, intent(in) :: dirfile
+  character (len=*), intent(in) :: field_code
+
+  call gdvldt(fdirfile_validate, dirfile, TRIM(field_code), &
+  LEN_TRIM(field_code))
+end function
+
+function fget_framenum (dirfile, field_code, value)
+  real*8 :: fget_framenum
+  integer, intent(in) :: dirfile
+  character (len=*), intent(in) :: field_code
+  real*8, intent(in) :: value
+
+  call gdfnum(fget_framenum, dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+  value)
+end function
+
+function fget_framenum_subset (dirfile, field_code, value, frame_start, &
+frame_end)
+  real*8 :: fget_framenum_subset
+  integer, intent(in) :: dirfile, frame_start, frame_end
+  character (len=*), intent(in) :: field_code
+  real*8, intent(in) :: value
+
+  call gdfnss(fget_framenum_subset, dirfile, TRIM(field_code), &
+  LEN_TRIM(field_code), value, frame_start, frame_end)
+end function
 
 end module

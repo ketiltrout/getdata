@@ -214,12 +214,13 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
       break;
     case GD_LINCOM_ENTRY:
       E->n_fields = entry->n_fields;
+      E->comp_scal = entry->comp_scal;
 
       if (E->n_fields < 1 || E->n_fields > GD_MAX_LINCOM)
         _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_NFIELDS, NULL,
             E->n_fields, NULL);
       else {
-        if (E->complex_scalars) {
+        if (E->comp_scal) {
           memcpy(E->cm, entry->cm, sizeof(double complex) * E->n_fields);
           memcpy(E->cb, entry->cb, sizeof(double complex) * E->n_fields);
           for (i = 0; i < E->n_fields; ++i) {
@@ -290,18 +291,19 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
       break;
     case GD_POLYNOM_ENTRY:
       E->poly_ord = entry->poly_ord;
+      E->comp_scal = entry->comp_scal;
 
       if (E->poly_ord < 1 || E->poly_ord > GD_MAX_POLYORD)
         _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_NFIELDS, NULL,
             E->poly_ord, NULL);
       else {
-        if (E->complex_scalars) {
-          memcpy(E->ca, entry->ca, sizeof(double complex) * E->n_fields);
-          for (i = 0; i < E->n_fields; ++i)
+        if (E->comp_scal) {
+          memcpy(E->ca, entry->ca, sizeof(double complex) * (E->poly_ord + 1));
+          for (i = 0; i <= E->poly_ord; ++i)
             E->a[i] = creal(E->ca[i]);
         } else {
-          memcpy(E->b, entry->b, sizeof(double) * E->n_fields);
-          for (i = 0; i < E->n_fields; ++i)
+          memcpy(E->a, entry->a, sizeof(double) * (E->poly_ord + 1));
+          for (i = 0; i <= E->poly_ord; ++i)
             E->ca[i] = E->a[i];
         }
 
@@ -598,7 +600,7 @@ int dirfile_add_lincom(DIRFILE* D, const char* field_code, int n_fields,
   L.field = (char*)field_code;
   L.field_type = GD_LINCOM_ENTRY;
   L.n_fields = n_fields;
-  L.complex_scalars = 0;
+  L.comp_scal = 0;
   L.fragment_index = fragment_index;
 
   for (i = 0; i < n_fields; ++i) {
@@ -639,7 +641,7 @@ int dirfile_add_clincom(DIRFILE* D, const char* field_code, int n_fields,
   L.field = (char*)field_code;
   L.field_type = GD_LINCOM_ENTRY;
   L.n_fields = n_fields;
-  L.complex_scalars = 1;
+  L.comp_scal = 1;
   L.fragment_index = fragment_index;
 
   for (i = 0; i < n_fields; ++i) {
@@ -782,7 +784,7 @@ int dirfile_add_polynom(DIRFILE* D, const char* field_code, int poly_ord,
   E.field_type = GD_POLYNOM_ENTRY;
   E.poly_ord = poly_ord;
   E.fragment_index = fragment_index;
-  E.complex_scalars = 0;
+  E.comp_scal = 0;
   E.in_fields[0] = (char*)in_field;
 
   for (i = 0; i <= poly_ord; ++i)
@@ -821,7 +823,7 @@ int dirfile_add_cpolynom(DIRFILE* D, const char* field_code, int poly_ord,
   E.field_type = GD_POLYNOM_ENTRY;
   E.poly_ord = poly_ord;
   E.fragment_index = fragment_index;
-  E.complex_scalars = 1;
+  E.comp_scal = 1;
   E.in_fields[0] = (char*)in_field;
 
   for (i = 0; i <= poly_ord; ++i)
@@ -884,7 +886,7 @@ int dirfile_add_string(DIRFILE* D, const char* field_code, const char* value,
     if (entry == NULL)
       _GD_InternalError(D); /* We should be able to find it: we just added it */
     else
-      _GD_DoFieldOut(D, entry, field_code, 0, 0, 0, GD_NULL, value);
+      _GD_DoFieldOut(D, entry, 0, 0, 0, GD_NULL, value);
 
     if (D->error)
       error = -1;
@@ -922,7 +924,7 @@ int dirfile_add_const(DIRFILE* D, const char* field_code, gd_type_t const_type,
     if (entry == NULL)
       _GD_InternalError(D); /* We should be able to find it: we just added it */
     else
-      _GD_DoFieldOut(D, entry, field_code, 0, 0, 0, data_type, value);
+      _GD_DoFieldOut(D, entry, 0, 0, 0, data_type, value);
 
     if (D->error)
       error = -1;
@@ -976,7 +978,7 @@ int dirfile_madd_lincom(DIRFILE* D, const char* parent, const char* field_code,
   L.field = (char*)field_code;
   L.field_type = GD_LINCOM_ENTRY;
   L.n_fields = n_fields;
-  L.complex_scalars = 0;
+  L.comp_scal = 0;
   L.fragment_index = 0;
 
   for (i = 0; i < n_fields; ++i) {
@@ -1017,7 +1019,7 @@ int dirfile_madd_clincom(DIRFILE* D, const char* parent, const char* field_code,
   L.field = (char*)field_code;
   L.field_type = GD_LINCOM_ENTRY;
   L.n_fields = n_fields;
-  L.complex_scalars = 0;
+  L.comp_scal = 1;
   L.fragment_index = 0;
 
   for (i = 0; i < n_fields; ++i) {
@@ -1185,7 +1187,7 @@ int dirfile_madd_polynom(DIRFILE* D, const char* parent, const char* field_code,
   E.field_type = GD_POLYNOM_ENTRY;
   E.poly_ord = poly_ord;
   E.fragment_index = 0;
-  E.complex_scalars = 0;
+  E.comp_scal = 0;
   E.in_fields[0] = (char*)in_field;
 
   for (i = 0; i <= poly_ord; ++i)
@@ -1225,7 +1227,7 @@ int dirfile_madd_cpolynom(DIRFILE* D, const char* parent,
   E.field_type = GD_POLYNOM_ENTRY;
   E.poly_ord = poly_ord;
   E.fragment_index = 0;
-  E.complex_scalars = 1;
+  E.comp_scal = 1;
   E.in_fields[0] = (char*)in_field;
 
   for (i = 0; i <= poly_ord; ++i)
@@ -1263,7 +1265,7 @@ int dirfile_madd_string(DIRFILE* D, const char* parent, const char* field_code,
     if (entry == NULL)
       _GD_InternalError(D); /* We should be able to find it: we just added it */
     else
-      _GD_DoFieldOut(D, entry, field_code, 0, 0, 0, GD_NULL, value);
+      _GD_DoFieldOut(D, entry, 0, 0, 0, GD_NULL, value);
 
     if (D->error)
       error = -1;
@@ -1277,6 +1279,7 @@ int dirfile_madd_string(DIRFILE* D, const char* parent, const char* field_code,
 int dirfile_madd_const(DIRFILE* D, const char* parent, const char* field_code,
     gd_type_t const_type, gd_type_t data_type, const void* value)
 {
+  char buffer[GD_MAX_LINE_LENGTH];
   dtrace("%p, \"%s\", \"%s\", 0x%x, 0x%x, %p", D, field_code, parent,
       const_type, data_type, value);
 
@@ -1295,13 +1298,14 @@ int dirfile_madd_const(DIRFILE* D, const char* parent, const char* field_code,
   int error = _GD_Add(D, &C, parent);
 
   /* Actually store the constant, now */
+  snprintf(buffer, GD_MAX_LINE_LENGTH, "%s/%s", parent, field_code);
   if (!error) {
-    entry = _GD_FindField(D, field_code, NULL);
+    entry = _GD_FindField(D, buffer, NULL);
 
     if (entry == NULL)
       _GD_InternalError(D); /* We should be able to find it: we just added it */
     else
-      _GD_DoFieldOut(D, entry, field_code, 0, 0, 0, data_type, value);
+      _GD_DoFieldOut(D, entry, 0, 0, 0, data_type, value);
 
     if (D->error)
       error = -1;

@@ -44,7 +44,7 @@ size_t get_string(DIRFILE* D, const char *field_code, size_t len,
   else if (entry && entry->field_type != GD_STRING_ENTRY)
     _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
   else
-    n_read = _GD_DoField(D, entry, field_code, 0, 0, len, GD_NULL, data_out);
+    n_read = _GD_DoField(D, entry, 0, 0, len, GD_NULL, data_out);
 
   dreturn("%zi", n_read);
   return n_read;
@@ -79,7 +79,7 @@ size_t put_string(DIRFILE* D, const char *field_code, const char *data_in)
   else if (entry->field_type != GD_STRING_ENTRY)
     _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
   else 
-    n_wrote = _GD_DoFieldOut(D, entry, field_code, 0, 0, 0, GD_NULL, data_in);
+    n_wrote = _GD_DoFieldOut(D, entry, 0, 0, 0, GD_NULL, data_in);
 
   dreturn("%zi", n_wrote);
   return n_wrote;

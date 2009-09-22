@@ -35,12 +35,13 @@ namespace GetData {
   class Dirfile;
 
   enum DataType {
-    Null    = GD_NULL,    Unknown = GD_UNKNOWN,
-    UInt8   = GD_UINT8,   Int8    = GD_INT8,
-    UInt16  = GD_UINT16,  Int16   = GD_INT16,
-    UInt32  = GD_UINT32,  Int32   = GD_INT32,
-    UInt64  = GD_UINT64,  Int64   = GD_INT64,
-    Float32 = GD_FLOAT32, Float64 = GD_FLOAT64
+    Null      = GD_NULL,      Unknown    = GD_UNKNOWN,
+    UInt8     = GD_UINT8,     Int8       = GD_INT8,
+    UInt16    = GD_UINT16,    Int16      = GD_INT16,
+    UInt32    = GD_UINT32,    Int32      = GD_INT32,
+    UInt64    = GD_UINT64,    Int64      = GD_INT64,
+    Float32   = GD_FLOAT32,   Float64    = GD_FLOAT64,
+    Complex64 = GD_COMPLEX64, Complex128 = GD_COMPLEX128
   };
 
   enum EntryType {
@@ -102,9 +103,19 @@ namespace GetData {
             CheckIndex(E.field_type, E.n_fields, index)) ? E.m[index] : 0;
       }
 
+      virtual double complex CScale(int index = 0) {
+        return (E.field_type == GD_LINCOM_ENTRY &&
+            CheckIndex(E.field_type, E.n_fields, index)) ? E.cm[index] : 0;
+      }
+
       virtual double Offset(int index = 0) {
         return (E.field_type == GD_LINCOM_ENTRY &&
             CheckIndex(E.field_type, E.n_fields, index)) ? E.b[index] : 0;
+      }
+
+      virtual double complex COffset(int index = 0) {
+        return (E.field_type == GD_LINCOM_ENTRY &&
+            CheckIndex(E.field_type, E.n_fields, index)) ? E.cb[index] : 0;
       }
 
       /* LINTERP methods */
@@ -134,6 +145,11 @@ namespace GetData {
       virtual double Coefficient(int index = 0) {
         return (E.field_type == GD_POLYNOM_ENTRY &&
             CheckIndex(E.field_type, E.poly_ord, index)) ? E.a[index] : 0;
+      }
+
+      virtual double complex CCoefficient(int index = 0) {
+        return (E.field_type == GD_POLYNOM_ENTRY &&
+            CheckIndex(E.field_type, E.poly_ord, index)) ? E.ca[index] : 0;
       }
 
     protected:

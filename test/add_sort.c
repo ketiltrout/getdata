@@ -38,6 +38,8 @@ int main (void)
 
   const char** field_list = get_field_list(D);
 
+  /* FIXME: the public API function get_field_list() is not required to
+   * return the field_list in the internally sorted order */
   if (get_error(D))
     r = 1;
   else if (field_list == NULL)

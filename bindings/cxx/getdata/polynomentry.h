@@ -37,8 +37,11 @@ namespace GetData {
     friend class Dirfile;
 
     public:
-      PolynomEntry(const char* field_code, int n_fields, const char** in_fields,
-          double* m, double* b, int fragment_index = 0);
+      PolynomEntry(const char* field_code, int poly_ord, const char* in_field,
+          double* a, int fragment_index = 0);
+
+      PolynomEntry(const char* field_code, int poly_ord, const char* in_field,
+          double complex* ca, int fragment_index = 0);
 
       virtual const char *Input() {
         return E.in_fields[0];
@@ -49,6 +52,10 @@ namespace GetData {
       };
 
       virtual double Coefficient(int index = 0) {
+        return (CheckIndex(E.field_type, E.poly_ord, index)) ? E.a[index] : 0;
+      };
+
+      virtual double complex CCoefficient(int index = 0) {
         return (CheckIndex(E.field_type, E.poly_ord, index)) ? E.a[index] : 0;
       };
 

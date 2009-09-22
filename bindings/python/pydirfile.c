@@ -926,6 +926,59 @@ static PyObject* gdpy_dirfile_getmvectorlist(struct gdpy_dirfile_t* self,
   return pylist;
 }
 
+static PyObject* gdpy_dirfile_getnativetype(struct gdpy_dirfile_t* self,
+    PyObject* args, PyObject* keys)
+{
+  dtrace("%p, %p, %p", self, args, keys);
+
+  char* keywords[] = { "field_code", NULL };
+  const char* field_code;
+
+  if (!PyArg_ParseTupleAndKeywords(args, keys,
+        "s:getdata.dirfile.get_native_type", keywords, &field_code))
+  {
+    dreturn ("%p", NULL);
+    return NULL;
+  }
+
+  gd_type_t ntype = get_native_type(self->D, field_code);
+
+  PYGD_CHECK_ERROR(self->D, NULL);
+
+  PyObject* pyobj = PyInt_FromLong((long)ntype);
+  dreturn("%p", pyobj);
+  return pyobj;
+}
+
+static PyObject* gdpy_dirfile_getnativetypename(struct gdpy_dirfile_t* self,
+    PyObject* args, PyObject* keys)
+{
+  dtrace("%p, %p, %p", self, args, keys);
+
+  char* keywords[] = { "field_code", NULL };
+  const char* field_code;
+  char buffer[11];
+
+  if (!PyArg_ParseTupleAndKeywords(args, keys,
+        "s:getdata.dirfile.get_native_type_name", keywords, &field_code))
+  {
+    dreturn ("%p", NULL);
+    return NULL;
+  }
+
+  gd_type_t t = get_native_type(self->D, field_code);
+
+  PYGD_CHECK_ERROR(self->D, NULL);
+
+  sprintf(buffer, "%s%i", (t & GD_COMPLEX) ? "COMPLEX" :
+        (t & GD_IEEE754) ? "FLOAT" : (t & GD_SIGNED) ?  "INT" : "UINT",
+        8 * GD_SIZE(t));
+
+  PyObject* pyobj = PyString_FromString(buffer);
+  dreturn("%p", pyobj);
+  return pyobj;
+}
+
 static PyObject* gdpy_dirfile_getnfields(struct gdpy_dirfile_t* self)
 {
   dtrace("%p", self);
@@ -1192,7 +1245,7 @@ static PyObject* gdpy_dirfile_putconstant(struct gdpy_dirfile_t* self,
     return NULL;
   }
 
-  union gdpy_triple_value data;
+  union gdpy_quadruple_value data;
   int data_type = gdpy_convert_from_pyobj(value, &data, type);
 
   if (data_type == -1) {
@@ -1200,12 +1253,14 @@ static PyObject* gdpy_dirfile_putconstant(struct gdpy_dirfile_t* self,
     return NULL;
   }
 
-  if ((data_type & 0xf) == 0)
-    put_constant(self->D, field_code, GD_UINT64, &data.u);
-  else if ((data_type & 0xf) == 1)
-    put_constant(self->D, field_code, GD_UINT32, &data.s);
-  else
+  if ((data_type & 0xf) == GDPY_SIGNED)
+    put_constant(self->D, field_code, GD_INT64, &data.s);
+  else if ((data_type & 0xf) == GDPY_IEEE754)
     put_constant(self->D, field_code, GD_FLOAT64, &data.f);
+  else if ((data_type & 0xf) == GDPY_COMPLEX)
+    put_constant(self->D, field_code, GD_COMPLEX128, &data.c);
+  else
+    put_constant(self->D, field_code, GD_UINT64, &data.u);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -1310,6 +1365,58 @@ static PyObject* gdpy_dirfile_getspf(struct gdpy_dirfile_t* self,
   PYGD_CHECK_ERROR(self->D, NULL);
 
   PyObject* pyobj = PyInt_FromLong((long)spf);
+  dreturn("%p", pyobj);
+  return pyobj;
+}
+
+static PyObject* gdpy_dirfile_validate(struct gdpy_dirfile_t* self,
+    PyObject* args, PyObject* keys)
+{
+  dtrace("%p, %p, %p", self, args, keys);
+
+  char* keywords[] = { "field_code", NULL };
+  const char* field_code;
+
+  if (!PyArg_ParseTupleAndKeywords(args, keys, "s:getdata.dirfile.validate",
+        keywords, &field_code)) {
+    dreturn ("%p", NULL);
+    return NULL;
+  }
+
+  int r = dirfile_validate(self->D, field_code);
+
+  PYGD_CHECK_ERROR(self->D, NULL);
+
+  PyObject* pyobj = PyInt_FromLong((long)r);
+  dreturn("%p", pyobj);
+  return pyobj;
+}
+
+static PyObject* gdpy_dirfile_getframenum(struct gdpy_dirfile_t* self,
+    PyObject* args, PyObject* keys)
+{
+  dtrace("%p, %p, %p", self, args, keys);
+
+  char* keywords[] = { "field_code", "value", "start", "end", NULL };
+  const char* field_code;
+  double value;
+  off64_t frame_start;
+  off64_t frame_end;
+
+  if (!PyArg_ParseTupleAndKeywords(args, keys,
+        "sdKK:getdata.dirfile.get_framenum", keywords, &field_code, &value,
+        &frame_start, &frame_end))
+  {
+    dreturn ("%p", NULL);
+    return NULL;
+  }
+
+  double frame = get_framenum_subset64(self->D, field_code, value, frame_start,
+      frame_end);
+
+  PYGD_CHECK_ERROR(self->D, NULL);
+
+  PyObject* pyobj = PyFloat_FromDouble(frame);
   dreturn("%p", pyobj);
   return pyobj;
 }
@@ -1428,6 +1535,9 @@ static PyMethodDef gdpy_dirfile_methods[] = {
     "Retrieve a list of the Dirfile field names of the given type."},
   { "get_fragment", (PyCFunction)gdpy_dirfile_getfragment, METH_VARARGS |
     METH_KEYWORDS, "Retrieve the metatdata of one fragment in the Dirfile."},
+  {"get_framenum", (PyCFunction)gdpy_dirfile_getframenum,
+    METH_VARARGS | METH_KEYWORDS, "Given a data value, returns the fraction "
+      "frame number associated with the value, based on a monotonic field."},
   {"get_mconstants", (PyCFunction)gdpy_dirfile_getmconstants, METH_VARARGS |
     METH_KEYWORDS, "Retrieve the name and value of all CONST subfields for a "
       "given field from the Dirfile."},
@@ -1443,8 +1553,14 @@ static PyMethodDef gdpy_dirfile_methods[] = {
   { "get_mvector_list", (PyCFunction)gdpy_dirfile_getmvectorlist,
     METH_VARARGS | METH_KEYWORDS, "Retrieve a list of the vector subfield "
       "names for a field from the Dirfile."},
+  {"get_native_type", (PyCFunction)gdpy_dirfile_getnativetype,
+    METH_VARARGS | METH_KEYWORDS,
+    "Retrieve the native type of a field from the Dirfile."},
+  {"get_native_type_name", (PyCFunction)gdpy_dirfile_getnativetypename,
+    METH_VARARGS | METH_KEYWORDS, "Retrieve a string representation of the "
+      "native type of a field from the Dirfile."},
   {"get_nfields", (PyCFunction)gdpy_dirfile_getnfields, METH_NOARGS,
-    "Retrieve the number of fields from the Dirfile."},
+    "Retrieve the number of fields in the Dirfile."},
   {"get_nfields_by_type", (PyCFunction)gdpy_dirfile_getnfieldsbytype,
     METH_VARARGS | METH_KEYWORDS,
     "Retrieve the number of fields of a given type from the Dirfile."},
@@ -1460,7 +1576,7 @@ static PyMethodDef gdpy_dirfile_methods[] = {
   {"get_nvectors", (PyCFunction)gdpy_dirfile_getnvectors, METH_NOARGS,
     "Retrieve the number of vector fields from the Dirfile."},
   {"get_spf", (PyCFunction)gdpy_dirfile_getspf, METH_VARARGS | METH_KEYWORDS,
-    "Retrieve the samples-per-frame a field from the Dirfile."},
+    "Retrieve the samples-per-frame of a field from the Dirfile."},
   {"get_string", (PyCFunction)gdpy_dirfile_getstring, METH_VARARGS |
     METH_KEYWORDS, "Retrieve the value of a STRING field from the Dirfile."},
   { "get_strings", (PyCFunction)gdpy_dirfile_getstrings, METH_NOARGS,
@@ -1488,6 +1604,8 @@ static PyMethodDef gdpy_dirfile_methods[] = {
     METH_KEYWORDS, "Change or remove the parser callback function."},
   {"uninclude", (PyCFunction)gdpy_dirfile_uninclude, METH_VARARGS |
     METH_KEYWORDS, "Remove a format file fragment from the Dirfile."},
+  {"validate", (PyCFunction)gdpy_dirfile_validate, METH_VARARGS | METH_KEYWORDS,
+    "Returns non-zero if the specified field is invalid."},
   { NULL, NULL, 0, NULL }
 };
 

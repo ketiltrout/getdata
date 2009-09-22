@@ -427,6 +427,8 @@ echo
 AC_CHECK_HEADERS([complex.h fcntl.h libgen.h])
 AC_HEADER_DIRENT
 
+AC_SUBST([INCLUDE_COMPLEX_H])
+
 dnl Declare a few feature test macros
 AC_DEFINE([_BSD_SOURCE], [], [ Expose BSD-derived definitions ])
 AC_DEFINE([_SVID_SOURCE], [], [ Expose System V-derived definitions ])
@@ -450,6 +452,12 @@ AC_TYPE_UINT32_T
 AC_TYPE_INT32_T
 AC_TYPE_UINT64_T
 AC_TYPE_INT64_T
+AC_CHECK_TYPES([complex float, complex double],,,
+[
+#ifdef HAVE_COMPLEX_H
+#include <complex.h>
+#endif
+])
 
 dnl We define this to allow us to use off64_t in addition to the usual off_t
 AC_DEFINE([_LARGEFILE64_SOURCE], [1],
@@ -464,14 +472,6 @@ if test "x$have_off64_t" = "xyes"; then
 fi
 
 AC_CHECK_SIZEOF([int])
-
-dnl Check for complex data types
-AC_CHECK_TYPES([complex float, complex double],,,
-[
-#ifdef HAVE_COMPLEX_H
-#include <complex.h>
-#endif
-])
 
 dnl python
 if test "x$make_pybindings" = "xyes"; then

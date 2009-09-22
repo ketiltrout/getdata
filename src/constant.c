@@ -56,7 +56,10 @@ int get_constant(DIRFILE* D, const char *field_code_in, gd_type_t return_type,
   else if (entry->field_type != GD_CONST_ENTRY)
     _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
   else
-    _GD_DoField(D, entry, field_code, repr, 0, 0, return_type, data_out);
+    _GD_DoField(D, entry, repr, 0, 0, return_type, data_out);
+
+  if (field_code != field_code_in)
+    free(field_code);
 
   if (D->error) {
     dreturn("%i", -1);
@@ -106,7 +109,10 @@ int put_constant(DIRFILE* D, const char *field_code_in, gd_type_t data_type,
   else if (entry->field_type != GD_CONST_ENTRY)
     _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
   else 
-    _GD_DoFieldOut(D, entry, field_code, repr, 0, 0, data_type, data_in);
+    _GD_DoFieldOut(D, entry, repr, 0, 0, data_type, data_in);
+
+  if (field_code != field_code_in)
+    free(field_code);
 
   if (D->error) {
     dreturn("%i", -1);

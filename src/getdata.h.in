@@ -82,9 +82,10 @@
 #define GD_E_CALLBACK         28
 #define GD_E_BAD_PROTECTION   29
 #define GD_E_UNCLEAN_DB       30
-#define GD_E_BAD_REPR         31
+#define GD_E_DOMAIN           31
+#define GD_E_BAD_REPR         32
 
-#define GD_N_ERROR_CODES      32
+#define GD_N_ERROR_CODES      33
 
 /* maximum length of a format file line */
 #define GD_MAX_LINE_LENGTH  4096
@@ -191,7 +192,7 @@ struct _gd_unified_entry {
   gd_entype_t field_type;
   char *in_fields[GD_MAX_LINCOM];
   int fragment_index;
-  int complex_scalars;
+  int comp_scal;
   union {
     struct { /* RAW */
       unsigned int spf;
@@ -260,372 +261,395 @@ typedef struct _GD_DIRFILE DIRFILE;
 #define GD_DEL_DEREF 0x4
 #define GD_DEL_FORCE 0x8
 
-extern int dirfile_add_bit(DIRFILE* D, const char* field_code,
-    const char* in_field, int bitnum, int numbits, int fragment_index)
+extern int dirfile_add_bit(DIRFILE *dirfile, const char *field_code,
+    const char *in_field, int bitnum, int numbits, int fragment_index)
 __THROW __gd_nonnull ((1,2,3));
 
-extern int dirfile_add_clincom(DIRFILE* D, const char* field_code, int n_fields,
-    const char** in_fields, const double complex* cm, const double complex* cb,
-    int fragment_index) __THROW __gd_nonnull ((1,2,4,5,6));
+extern int dirfile_add_clincom(DIRFILE *dirfile, const char *field_code,
+    int n_fields, const char **in_fields, const double complex *cm,
+    const double complex *cb, int fragment_index)
+__THROW __gd_nonnull ((1,2,4,5,6));
 
-extern int dirfile_add_const(DIRFILE* D, const char* field_code,
+extern int dirfile_add_const(DIRFILE *dirfile, const char *field_code,
     gd_type_t const_type, gd_type_t data_type, const void* value,
     int fragment_index) __THROW __gd_nonnull ((1,2,5));
 
-extern int dirfile_add_cpolynom(DIRFILE* D, const char* field_code,
-    int poly_ord, const char* in_field, const double complex* a,
+extern int dirfile_add_cpolynom(DIRFILE *dirfile, const char *field_code,
+    int poly_ord, const char *in_field, const double complex *a,
     int fragment_index) __THROW __gd_nonnull ((1,2,4));
 
-extern int dirfile_add_lincom(DIRFILE* D, const char* field_code, int n_fields,
-    const char** in_fields, const double* m, const double* b,
+extern int dirfile_add_lincom(DIRFILE *dirfile, const char *field_code,
+    int n_fields, const char **in_fields, const double *m, const double *b,
     int fragment_index) __THROW __gd_nonnull ((1,2,4,5,6));
 
-extern int dirfile_add_linterp(DIRFILE* D, const char* field_code,
-    const char* in_field, const char* table, int fragment_index)
+extern int dirfile_add_linterp(DIRFILE *dirfile, const char *field_code,
+    const char *in_field, const char *table, int fragment_index)
 __THROW __gd_nonnull ((1,2,3,4));
 
-extern int dirfile_add_multiply(DIRFILE* D, const char* field_code,
-    const char* in_field1, const char* in_field2, int fragment_index)
+extern int dirfile_add_multiply(DIRFILE *dirfile, const char *field_code,
+    const char *in_field1, const char *in_field2, int fragment_index)
 __THROW __gd_nonnull ((1,2,3,4));
 
-extern int dirfile_add_phase(DIRFILE* D, const char* field_code,
-    const char* in_field, int shift, int fragment_index)
+extern int dirfile_add_phase(DIRFILE *dirfile, const char *field_code,
+    const char *in_field, int shift, int fragment_index)
 __THROW __gd_nonnull ((1,2,3));
 
-extern int dirfile_add_polynom(DIRFILE* D, const char* field_code, int poly_ord,
-    const char* in_field, const double* a, int fragment_index)
+extern int dirfile_add_polynom(DIRFILE *dirfile, const char *field_code,
+    int poly_ord, const char *in_field, const double *a, int fragment_index)
 __THROW __gd_nonnull ((1,2,4));
 
-extern int dirfile_add_sbit(DIRFILE* D, const char* field_code,
-    const char* in_field, int bitnum, int numbits, int fragment_index)
+extern int dirfile_add_sbit(DIRFILE *dirfile, const char *field_code,
+    const char *in_field, int bitnum, int numbits, int fragment_index)
 __THROW __gd_nonnull ((1,2,3));
 
-extern int dirfile_add_string(DIRFILE* D, const char* field_code,
-    const char* value, int fragment_index) __THROW __gd_nonnull((1,2,3));
+extern int dirfile_add_string(DIRFILE *dirfile, const char *field_code,
+    const char *value, int fragment_index) __THROW __gd_nonnull((1,2,3));
 
-extern int dirfile_alter_bit(DIRFILE* D, const char* field_code,
-    const char* in_field, int bitnum, int numbits) __THROW __gd_nonnull((1,2));
+extern int dirfile_alter_bit(DIRFILE *dirfile, const char *field_code,
+    const char *in_field, int bitnum, int numbits) __THROW __gd_nonnull((1,2));
 
-extern int dirfile_alter_clincom(DIRFILE* D, const char* field_code,
-    int n_fields, const char** in_fields, const double complex* m,
-    const double complex* b) __THROW __gd_nonnull((1,2));
+extern int dirfile_alter_clincom(DIRFILE *dirfile, const char *field_code,
+    int n_fields, const char **in_fields, const double complex *m,
+    const double complex *b) __THROW __gd_nonnull((1,2));
 
-extern int dirfile_alter_const(DIRFILE* D, const char* field_code,
+extern int dirfile_alter_const(DIRFILE *dirfile, const char *field_code,
     gd_type_t const_type) __THROW __gd_nonnull((1,2));
 
-extern int dirfile_alter_cpolynom(DIRFILE* D, const char* field_code,
-    int poly_ord, const char* in_field, const double complex* a)
+extern int dirfile_alter_cpolynom(DIRFILE *dirfile, const char *field_code,
+    int poly_ord, const char *in_field, const double complex *a)
 __THROW __gd_nonnull((1,2));
 
-extern int dirfile_alter_lincom(DIRFILE* D, const char* field_code,
-    int n_fields, const char** in_fields, const double* m, const double* b)
+extern int dirfile_alter_lincom(DIRFILE *dirfile, const char *field_code,
+    int n_fields, const char **in_fields, const double *m, const double *b)
 __THROW __gd_nonnull((1,2));
 
-extern int dirfile_alter_multiply(DIRFILE* D, const char* field_code,
-    const char* in_field1, const char* in_field2) __THROW __gd_nonnull((1,2));
+extern int dirfile_alter_multiply(DIRFILE *dirfile, const char *field_code,
+    const char *in_field1, const char *in_field2) __THROW __gd_nonnull((1,2));
 
-extern int dirfile_alter_phase(DIRFILE* D, const char* field_code,
-    const char* in_field, int shift) __THROW __gd_nonnull((1,2));
+extern int dirfile_alter_phase(DIRFILE *dirfile, const char *field_code,
+    const char *in_field, int shift) __THROW __gd_nonnull((1,2));
 
-extern int dirfile_alter_polynom(DIRFILE* D, const char* field_code,
-    int poly_ord, const char* in_field, const double* a)
+extern int dirfile_alter_polynom(DIRFILE *dirfile, const char *field_code,
+    int poly_ord, const char *in_field, const double *a)
 __THROW __gd_nonnull((1,2));
 
-extern int dirfile_alter_sbit(DIRFILE* D, const char* field_code,
-    const char* in_field, int bitnum, int numbits) __THROW __gd_nonnull((1,2));
+extern int dirfile_alter_sbit(DIRFILE *dirfile, const char *field_code,
+    const char *in_field, int bitnum, int numbits) __THROW __gd_nonnull((1,2));
 
-extern int get_constant(DIRFILE* D, const char *field_code,
-    gd_type_t return_type, void *data_out) __THROW __gd_nonnull ((1, 2));
+extern int get_constant(DIRFILE *dirfile, const char *field_code,
+    gd_type_t return_type, void *data) __THROW __gd_nonnull ((1, 2));
 
-extern int put_constant(DIRFILE* D, const char *field_code,
-    gd_type_t data_type, const void *data_in) __THROW __gd_nonnull ((1, 2, 4));
+extern int put_constant(DIRFILE *dirfile, const char *field_code,
+    gd_type_t data_type, const void *data) __THROW __gd_nonnull ((1, 2, 4));
 
-extern const void* get_constants(DIRFILE* dirfile,
+extern const void *get_constants(DIRFILE *dirfile,
     gd_type_t return_type) __THROW __gd_nonnull ((1));
 
 extern gd_entry_t *dirfile_free_entry_strings(gd_entry_t *entry) __THROW;
 
-extern unsigned long get_encoding(DIRFILE *D,
+extern unsigned long get_encoding(DIRFILE *dirfile,
     int fragment) __THROW __gd_nonnull ((1));
 
-extern unsigned long get_endianness(DIRFILE* D,
+extern unsigned long get_endianness(DIRFILE *dirfile,
     int fragment) __THROW __gd_nonnull((1));
 
-extern int get_entry(DIRFILE* D, const char* field_code,
-    gd_entry_t* entry) __THROW __gd_nonnull ((1, 2));
+extern int get_entry(DIRFILE *dirfile, const char *field_code,
+    gd_entry_t *entry) __THROW __gd_nonnull ((1, 2));
 
-extern gd_entype_t get_entry_type(DIRFILE *D,
+extern gd_entype_t get_entry_type(DIRFILE *dirfile,
     const char *field_code) __THROW __gd_nonnull ((1));
 
-extern int get_error(const DIRFILE* D) __THROW __gd_nonnull ((1));
+extern int get_error(const DIRFILE *dirfile) __THROW __gd_nonnull ((1));
 
-extern char* get_error_string(const DIRFILE* dirfile, char* buffer,
+extern char *get_error_string(const DIRFILE *dirfile, char *buffer,
     size_t buflen) __THROW __gd_nonnull ((1, 2));
 
-extern const char** get_field_list(DIRFILE* dirfile) __THROW __gd_nonnull ((1));
+extern const char **get_field_list(DIRFILE *dirfile) __THROW __gd_nonnull ((1));
 
-extern const char** get_field_list_by_type(DIRFILE* D, gd_entype_t type)
+extern const char **get_field_list_by_type(DIRFILE *dirfile, gd_entype_t type)
   __THROW __gd_nonnull ((1));
 
-extern int get_fragment_index(DIRFILE* D, const char *field_code)
+extern int get_fragment_index(DIRFILE *dirfile, const char *field_code)
   __THROW __gd_nonnull ((1));
 
-extern const char* get_fragmentname(DIRFILE* D, int index)
+extern const char *get_fragmentname(DIRFILE *dirfile, int index)
   __THROW __gd_nonnull ((1));
 
-extern int dirfile_madd(DIRFILE* D, const gd_entry_t* entry, const char* parent)
-  __THROW __gd_nonnull ((1,2,3));
+extern int dirfile_madd(DIRFILE *dirfile, const gd_entry_t *entry,
+    const char *parent) __THROW __gd_nonnull ((1,2,3));
 
-extern int dirfile_madd_bit(DIRFILE* D, const char* parent,
-    const char* field_code, const char* in_field, int bitnum, int numbits)
+extern int dirfile_madd_bit(DIRFILE *dirfile, const char *parent,
+    const char *field_code, const char *in_field, int bitnum, int numbits)
 __THROW __gd_nonnull ((1,2,3,4));
 
-extern int dirfile_madd_clincom(DIRFILE* D, const char* parent,
-    const char* field_code, int n_fields, const char** in_fields,
-    const double complex* cm,
-    const double complex* cb) __THROW __gd_nonnull((1,2,3,5,6,7));
+extern int dirfile_madd_clincom(DIRFILE *dirfile, const char *parent,
+    const char *field_code, int n_fields, const char **in_fields,
+    const double complex *cm,
+    const double complex *cb) __THROW __gd_nonnull((1,2,3,5,6,7));
 
-extern int dirfile_madd_const(DIRFILE* D, const char* parent,
-    const char* field_code, gd_type_t const_type, gd_type_t data_type,
-    const void* value) __THROW __gd_nonnull ((1,2,3,6));
+extern int dirfile_madd_const(DIRFILE *dirfile, const char *parent,
+    const char *field_code, gd_type_t const_type, gd_type_t data_type,
+    const void *value) __THROW __gd_nonnull ((1,2,3,6));
 
-extern int dirfile_madd_cpolynom(DIRFILE* D, const char* parent,
-    const char* field_code, int poly_ord, const char* in_field,
-    const double complex* a) __THROW __gd_nonnull ((1,2,3,5));
+extern int dirfile_madd_cpolynom(DIRFILE *dirfile, const char *parent,
+    const char *field_code, int poly_ord, const char *in_field,
+    const double complex *a) __THROW __gd_nonnull ((1,2,3,5));
 
-extern int dirfile_madd_lincom(DIRFILE* D, const char* parent,
-    const char* field_code, int n_fields, const char** in_fields,
-    const double* m, const double* b) __THROW __gd_nonnull((1,2,3,5,6,7));
+extern int dirfile_madd_lincom(DIRFILE *dirfile, const char *parent,
+    const char *field_code, int n_fields, const char **in_fields,
+    const double *m, const double *b) __THROW __gd_nonnull((1,2,3,5,6,7));
 
-extern int dirfile_madd_linterp(DIRFILE* D, const char* parent,
-    const char* field_code, const char* in_field, const char* table)
+extern int dirfile_madd_linterp(DIRFILE *dirfile, const char *parent,
+    const char *field_code, const char *in_field, const char *table)
 __THROW __gd_nonnull ((1,2,3,4,5));
 
-extern int dirfile_madd_multiply(DIRFILE* D, const char* parent,
-    const char* field_code, const char* in_field1, const char* in_field2)
+extern int dirfile_madd_multiply(DIRFILE *dirfile, const char *parent,
+    const char *field_code, const char *in_field1, const char *in_field2)
 __THROW __gd_nonnull ((1,2,3,4,5));
 
-extern int dirfile_madd_phase(DIRFILE* D, const char* parent,
-    const char* field_code, const char* in_field, int shift)
+extern int dirfile_madd_phase(DIRFILE *dirfile, const char *parent,
+    const char *field_code, const char *in_field, int shift)
 __THROW __gd_nonnull ((1,2,3,4));
 
-extern int dirfile_madd_polynom(DIRFILE* D, const char* parent,
-    const char* field_code, int poly_ord, const char* in_field, const double* a)
+extern int dirfile_madd_polynom(DIRFILE *dirfile, const char *parent,
+    const char *field_code, int poly_ord, const char *in_field, const double *a)
 __THROW __gd_nonnull ((1,2,3,5));
 
-extern int dirfile_madd_sbit(DIRFILE* D, const char* parent,
-    const char* field_code, const char* in_field, int bitnum, int numbits)
+extern int dirfile_madd_sbit(DIRFILE *dirfile, const char *parent,
+    const char *field_code, const char *in_field, int bitnum, int numbits)
 __THROW __gd_nonnull ((1,2,3,4));
 
-extern int dirfile_madd_spec(DIRFILE* D, const char* line,
-    const char* parent) __THROW __gd_nonnull ((1,2,3));
+extern int dirfile_madd_spec(DIRFILE *dirfile, const char *line,
+    const char *parent) __THROW __gd_nonnull ((1,2,3));
 
-extern int dirfile_madd_string(DIRFILE* D, const char* parent,
-    const char* field_code, const char* value) __THROW __gd_nonnull ((1,2,3,4));
+extern int dirfile_madd_string(DIRFILE *dirfile, const char *parent,
+    const char *field_code, const char *value) __THROW __gd_nonnull ((1,2,3,4));
 
-extern const void* get_mconstants(DIRFILE* D, const char* parent,
+extern const void *get_mconstants(DIRFILE *dirfile, const char *parent,
     gd_type_t return_type) __THROW __gd_nonnull((1,2));
 
-extern const char** get_mfield_list(DIRFILE* D,
-    const char* parent) __THROW __gd_nonnull((1,2));
+extern const char **get_mfield_list(DIRFILE *dirfile,
+    const char *parent) __THROW __gd_nonnull((1,2));
 
-extern const char** get_mfield_list_by_type(DIRFILE* D, const char* parent,
-    gd_entype_t type) __THROW __gd_nonnull((1,2));
+extern const char **get_mfield_list_by_type(DIRFILE *dirfile,
+    const char *parent, gd_entype_t type) __THROW __gd_nonnull((1,2));
 
-extern const char** get_mstrings(DIRFILE* D,
-    const char* parent) __THROW __gd_nonnull((1,2));
+extern const char **get_mstrings(DIRFILE *dirfile,
+    const char *parent) __THROW __gd_nonnull((1,2));
 
-extern const char** get_mvector_list(DIRFILE* D,
-    const char* parent) __THROW __gd_nonnull((1,2));
+extern const char **get_mvector_list(DIRFILE *dirfile,
+    const char *parent) __THROW __gd_nonnull((1,2));
 
-extern const char* dirfilename(DIRFILE* D) __THROW __gd_nonnull ((1));
+extern const char *dirfilename(DIRFILE *dirfile) __THROW __gd_nonnull ((1));
 
-extern unsigned int get_nfields(DIRFILE* dirfile) __THROW __gd_nonnull ((1));
+extern gd_type_t get_native_type(DIRFILE* D, const char* field_code_in) __THROW
+__gd_nonnull ((1));
 
-extern unsigned int get_nfields_by_type(DIRFILE* D,
+extern unsigned int get_nfields(DIRFILE *dirfile) __THROW __gd_nonnull ((1));
+
+extern unsigned int get_nfields_by_type(DIRFILE *dirfile,
     gd_entype_t type) __THROW __gd_nonnull ((1));
 
-extern int get_nfragments(DIRFILE* D) __THROW __gd_nonnull((1));
+extern int get_nfragments(DIRFILE *dirfile) __THROW __gd_nonnull((1));
 
-extern unsigned int get_nmfields(DIRFILE* D,
-    const char* parent) __THROW __gd_nonnull((1,2));
+extern unsigned int get_nmfields(DIRFILE *dirfile,
+    const char *parent) __THROW __gd_nonnull((1,2));
 
-extern unsigned int get_nmfields_by_type(DIRFILE* D, const char* parent,
+extern unsigned int get_nmfields_by_type(DIRFILE *dirfile, const char *parent,
     gd_entype_t type) __THROW __gd_nonnull((1,2));
 
-extern unsigned int get_nmvectors(DIRFILE* D,
-    const char* parent) __THROW __gd_nonnull((1,2));
+extern unsigned int get_nmvectors(DIRFILE *dirfile,
+    const char *parent) __THROW __gd_nonnull((1,2));
 
-extern unsigned int get_nvectors(DIRFILE* dirfile) __THROW __gd_nonnull ((1));
+extern unsigned int get_nvectors(DIRFILE *dirfile) __THROW __gd_nonnull ((1));
 
-extern int get_parent_fragment(DIRFILE* D,
+extern int get_parent_fragment(DIRFILE *dirfile,
     int fragment_index) __THROW __gd_nonnull ((1));
 
-extern void dirfile_parser_callback(DIRFILE* D, int (*sehandler)(const DIRFILE*,
-      int, char*, void*), void*) __THROW __gd_nonnull ((1));
+extern void dirfile_parser_callback(DIRFILE *dirfile,
+    int (*sehandler)(const DIRFILE*, int, char*, void*),
+    void*) __THROW __gd_nonnull ((1));
 
-extern int dirfile_protect(DIRFILE *D, int protection_level,
+extern int dirfile_protect(DIRFILE *dirfile, int protection_level,
     int fragment_index) __THROW __gd_nonnull ((1));
 
-extern int get_protection(DIRFILE* D,
+extern int get_protection(DIRFILE *dirfile,
     int fragment_index) __THROW __gd_nonnull ((1));
 
-extern const char* get_raw_filename(DIRFILE* D,
-    const char* field_code) __THROW __gd_nonnull ((1, 2));
+extern const char *get_raw_filename(DIRFILE *dirfile,
+    const char *field_code) __THROW __gd_nonnull ((1, 2));
 
-extern const char* dirfile_reference(DIRFILE* D,
-    const char* field_code) __THROW __gd_nonnull ((1));
+extern const char *dirfile_reference(DIRFILE *dirfile,
+    const char *field_code) __THROW __gd_nonnull ((1));
 
-extern const char* get_reference(DIRFILE* D) __THROW __gd_nonnull ((1));
+extern const char *get_reference(DIRFILE *dirfile) __THROW __gd_nonnull ((1));
 
-extern unsigned int get_spf(DIRFILE* dirfile, const char *field_code) __THROW
+extern unsigned int get_spf(DIRFILE *dirfile, const char *field_code) __THROW
 __gd_nonnull ((1, 2));
 
-extern size_t get_string(DIRFILE* D, const char *field_code, size_t len,
-    char *data_in) __THROW __gd_nonnull ((1, 2, 4));
+extern size_t get_string(DIRFILE *dirfile, const char *field_code, size_t len,
+    char *data) __THROW __gd_nonnull ((1, 2, 4));
 
-extern size_t put_string(DIRFILE* D, const char *field_code,
-    const char *data_in) __THROW __gd_nonnull ((1, 2, 3));
+extern size_t put_string(DIRFILE *dirfile, const char *field_code,
+    const char *data) __THROW __gd_nonnull ((1, 2, 3));
 
-extern const char** get_strings(DIRFILE* dirfile) __THROW __gd_nonnull ((1));
+extern const char **get_strings(DIRFILE *dirfile) __THROW __gd_nonnull ((1));
 
-extern const char** get_vector_list(DIRFILE* dirfile) __THROW __gd_nonnull((1));
+extern int dirfile_validate(DIRFILE *dirfile, const char *field_code_in)
+  __THROW __gd_nonnull((1,2));
+
+extern const char **get_vector_list(DIRFILE *dirfile) __THROW __gd_nonnull((1));
 
 /* The following functions contain calls to I/O functions, making them
  * cancellation points.  As a result we cannot mark them with __THROW.
  */
-extern int dirfile_add(DIRFILE* D, const gd_entry_t* entry) __gd_nonnull((1,2));
+extern int dirfile_add(DIRFILE *dirfile, const gd_entry_t *entry)
+  __gd_nonnull((1,2));
 
-extern int dirfile_add_raw(DIRFILE* D, const char* field_code,
+extern int dirfile_add_raw(DIRFILE *dirfile, const char *field_code,
     gd_type_t data_type, unsigned int spf, int fragment_index)
 __gd_nonnull((1,2));
 
-extern int dirfile_add_spec(DIRFILE* D, const char* line,
+extern int dirfile_add_spec(DIRFILE *dirfile, const char *line,
     int fragment_index) __gd_nonnull ((1,2));
 
-extern int dirfile_alter_encoding(DIRFILE* D, unsigned long encoding,
+extern int dirfile_alter_encoding(DIRFILE *dirfile, unsigned long encoding,
     int fragment, int recode) __gd_nonnull ((1));
 
-extern int dirfile_alter_endianness(DIRFILE* D, unsigned long byte_sex,
+extern int dirfile_alter_endianness(DIRFILE *dirfile, unsigned long byte_sex,
     int fragment, int recode) __gd_nonnull ((1));
 
-extern int dirfile_alter_entry(DIRFILE* D, const char* field_code,
+extern int dirfile_alter_entry(DIRFILE *dirfile, const char *field_code,
     const gd_entry_t *entry, int recode) __gd_nonnull ((1,2));
 
-extern int dirfile_alter_linterp(DIRFILE* D, const char* field_code,
-    const char* in_field, const char* table, int recode) __gd_nonnull ((1,2));
+extern int dirfile_alter_linterp(DIRFILE *dirfile, const char *field_code,
+    const char *in_field, const char *table, int recode) __gd_nonnull ((1,2));
 
-extern int dirfile_alter_raw(DIRFILE *D, const char *field_code,
+extern int dirfile_alter_raw(DIRFILE *dirfile, const char *field_code,
     gd_type_t data_type, unsigned int spf, int recode) __gd_nonnull ((1,2));
 
-extern int dirfile_alter_spec(DIRFILE* D, const char* line,
+extern int dirfile_alter_spec(DIRFILE *dirfile, const char *line,
     int recode) __gd_nonnull ((1,2));
 
-extern DIRFILE* dirfile_cbopen(const char* dirfilename, unsigned long flags,
+extern DIRFILE *dirfile_cbopen(const char *dirfilename, unsigned long flags,
     int (*sehandler)(const DIRFILE*, int, char*, void*),
-    void* extra) __gd_nonnull ((1));
+    void *extra) __gd_nonnull ((1));
 
-extern int dirfile_close(DIRFILE* dirfile);
+extern int dirfile_close(DIRFILE *dirfile);
 
-extern int dirfile_delete(DIRFILE* D, const char* field_code,
+extern int dirfile_delete(DIRFILE *dirfile, const char *field_code,
     int flags) __gd_nonnull ((1,2));
 
-extern int dirfile_discard(DIRFILE* dirfile);
+extern int dirfile_discard(DIRFILE *dirfile);
 
-extern int dirfile_flush(DIRFILE* dirfile,
-    const char* field_code) __gd_nonnull ((1));
+extern int dirfile_flush(DIRFILE *dirfile,
+    const char *field_code) __gd_nonnull ((1));
 
-extern int dirfile_include(DIRFILE* D, const char* file, int fragment_index,
-    unsigned long flags) __gd_nonnull ((1,2));
+extern int dirfile_include(DIRFILE *dirfile, const char *file,
+    int fragment_index, unsigned long flags) __gd_nonnull ((1,2));
 
-extern int dirfile_malter_spec(DIRFILE* D, const char* line, const char* parent,
-    int recode) __gd_nonnull ((1,2,3));
+double get_framenum(DIRFILE* D, const char* field_code_in,
+    double value) __gd_nonnull ((1,2));
 
-extern int dirfile_metaflush(DIRFILE* dirfile) __gd_nonnull ((1));
+extern int dirfile_malter_spec(DIRFILE *dirfile, const char *line,
+    const char *parent, int recode) __gd_nonnull ((1,2,3));
 
-extern int dirfile_move(DIRFILE* D, const char* field_code, int new_fragment,
-    int move_data) __gd_nonnull ((1,2));
+extern int dirfile_metaflush(DIRFILE *dirfile) __gd_nonnull ((1));
 
-extern DIRFILE* dirfile_open(const char* dirfilename,
+extern int dirfile_move(DIRFILE *dirfile, const char *field_code,
+    int new_fragment, int move_data) __gd_nonnull ((1,2));
+
+extern DIRFILE *dirfile_open(const char *dirfilename,
     unsigned long flags) __gd_nonnull ((1));
 
-extern int dirfile_rename(DIRFILE *D, const char *old_code,
+extern int dirfile_rename(DIRFILE *dirfile, const char *old_code,
     const char *new_name, int move_data) __gd_nonnull ((1,2,3));
 
-extern int dirfile_uninclude(DIRFILE* D, int fragment_index,
+extern int dirfile_uninclude(DIRFILE *dirfile, int fragment_index,
     int del) __gd_nonnull ((1));
 
 /* the following functions are _FILE_OFFSET_BITS sensitive */
-#ifndef __USE_FILE_OFFSET64
-extern int dirfile_alter_frameoffset(DIRFILE* D, off_t offset, int fragment,
-    int recode) __gd_nonnull ((1));
+#if !defined _FILE_OFFSET_BITS || _FILE_OFFSET_BITS != 64
+extern int dirfile_alter_frameoffset(DIRFILE *dirfile, off_t offset,
+    int fragment, int recode) __gd_nonnull ((1));
 
-extern size_t getdata(DIRFILE* dirfile, const char *field_code,
+extern size_t getdata(DIRFILE *dirfile, const char *field_code,
     off_t first_frame, off_t first_sample, size_t num_frames,
     size_t num_samples, gd_type_t return_type,
-    void *data_out) __gd_nonnull ((1, 2));
+    void *data) __gd_nonnull ((1, 2));
 
-extern size_t putdata(DIRFILE* dirfile, const char *field_code,
+extern size_t putdata(DIRFILE *dirfile, const char *field_code,
     off_t first_frame, off_t first_sample, size_t num_frames,
     size_t num_samples, gd_type_t data_type,
-    const void *data_in) __gd_nonnull ((1, 2));
+    const void *data) __gd_nonnull ((1, 2));
 
-extern off_t get_frameoffset(DIRFILE* dirfile,
+extern double get_framenum_subset(DIRFILE* D, const char* field_code,
+    double value, off_t field_start, off_t field_end) __gd_nonnull ((1,2));
+
+extern off_t get_frameoffset(DIRFILE *dirfile,
     int fragment) __THROW __gd_nonnull ((1));
 
-extern off_t get_nframes(DIRFILE* dirfile) __gd_nonnull ((1));
+extern off_t get_nframes(DIRFILE *dirfile) __gd_nonnull ((1));
 #else
 # ifdef __REDIRECT_NTH
-extern off_t __REDIRECT_NTH (get_frameoffset, (DIRFILE* dirfile, int fragment),
+extern off_t __REDIRECT_NTH (get_frameoffset, (DIRFILE *dirfile, int fragment),
     get_frameoffset64) __gd_nonnull ((1));
 # else
 #  define get_frameoffset get_frameoffset64
 # endif
 
 # ifdef __REDIRECT
-extern int __REDIRECT (dirfile_alter_frameoffset, (DIRFILE* D, __off64_t offset,
-      int fragment, int recode), dirfile_alter_frameoffset64)
+extern int __REDIRECT (dirfile_alter_frameoffset, (DIRFILE *dirfile,
+      off_t offset, int fragment, int recode), dirfile_alter_frameoffset64)
 __gd_nonnull ((1));
 
-extern size_t __REDIRECT (getdata, (DIRFILE* dirfile, const char *field_code,
-      __off64_t first_frame, __off64_t first_samp, size_t num_frames,
-      size_t num_samp, gd_type_t return_type, void *data_out),
+extern size_t __REDIRECT (getdata, (DIRFILE *dirfile, const char *field_code,
+      off_t first_frame, off_t first_samp, size_t num_frames,
+      size_t num_samp, gd_type_t return_type, void *data),
     getdata64) __gd_nonnull ((1, 2));
 
-extern size_t __REDIRECT (putdata, (DIRFILE* dirfile, const char *field_code,
-      __off64_t first_frame, __off64_t first_sample, size_t num_frames,
-      size_t num_samples, gd_type_t data_type, const void *data_in),
+extern size_t __REDIRECT (putdata, (DIRFILE *dirfile, const char *field_code,
+      off_t first_frame, off_t first_sample, size_t num_frames,
+      size_t num_samples, gd_type_t data_type, const void *data),
     putdata64) __gd_nonnull ((1, 2));
 
-extern off_t __REDIRECT (get_nframes, (DIRFILE* dirfile),
+extern off_t __REDIRECT (get_nframes, (DIRFILE *dirfile),
     get_nframes64) __gd_nonnull ((1));
+
+extern double __REDIRECT (get_framenum_subset, (DIRFILE* D,
+      const char* field_code, double value, off_t field_start,
+      off_t field_end), get_framenum_subset64) __gd_nonnull ((1,2));
 # else
 #  define dirfile_alter_frameoffset dirfile_alter_frameoffset64
 #  define getdata getdata64
 #  define putdata putdata64
 #  define get_nframes get_nframes64
+#  define get_framenum_subset get_framenum_subset64
 # endif
 #endif
 
 /* if requested, declare the LFS transitional extension */
-#ifdef __USE_LARGEFILE64
-extern int dirfile_alter_frameoffset64(DIRFILE* D, __off64_t offset,
+#ifdef _LARGEFILE64_SOURCE
+extern int dirfile_alter_frameoffset64(DIRFILE *dirfile, off64_t offset,
     int fragment, int recode) __gd_nonnull ((1));
 
-extern size_t getdata64(DIRFILE* dirfile, const char *field_code,
-    __off64_t first_frame, __off64_t first_samp, size_t num_frames,
-    size_t num_samp, gd_type_t return_type, void *data_out)
+extern size_t getdata64(DIRFILE *dirfile, const char *field_code,
+    off64_t first_frame, off64_t first_samp, size_t num_frames,
+    size_t num_samp, gd_type_t return_type, void *data)
 __gd_nonnull ((1, 2));
 
-extern size_t putdata64(DIRFILE* dirfile, const char *field_code,
-    __off64_t first_frame, __off64_t first_sample, size_t num_frames,
+extern size_t putdata64(DIRFILE *dirfile, const char *field_code,
+    off64_t first_frame, off64_t first_sample, size_t num_frames,
     size_t num_samples, gd_type_t data_type,
-    const void *data_in) __gd_nonnull ((1, 2));
+    const void *data) __gd_nonnull ((1, 2));
 
-extern __off64_t get_frameoffset64(DIRFILE* dirfile,
+extern off64_t get_frameoffset64(DIRFILE *dirfile,
     int fragment) __gd_nonnull ((1));
 
-extern __off64_t get_nframes64(DIRFILE* dirfile) __gd_nonnull ((1));
+extern double get_framenum_subset64(DIRFILE* D, const char* field_code_in,
+    double value, off64_t field_start, off64_t field_end) __gd_nonnull ((1,2));
+
+extern off64_t get_nframes64(DIRFILE *dirfile) __gd_nonnull ((1));
 #endif
 
 /* The caller can disable the legacy API by defining NO_GETDATA_LEGACY_API

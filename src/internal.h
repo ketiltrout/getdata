@@ -160,6 +160,12 @@ const char* _gd_colsub(void);
 #define GD_E_REPR_UNKNOWN       1
 #define GD_E_REPR_PUT           2
 
+#define GD_E_DOMAIN_COMPLEX     1
+#define GD_E_DOMAIN_EMPTY       2
+
+#define GD_E_OUT_OF_RANGE       1
+#define GD_E_SINGULAR_RANGE     2
+
 struct _gd_raw_file {
   char* name;
   int fp;
@@ -283,13 +289,7 @@ struct gd_fragment_t {
   unsigned long byte_sex;
   int protection;
   char* ref_name;
-
-#ifndef __USE_FILE_OFFSET64
-  off_t
-#else
-    __off64_t
-#endif
-    frame_offset;
+  off64_t frame_offset;
 };
 
 /* internal flags */
@@ -374,10 +374,10 @@ void _GD_ConvertType(DIRFILE* D, const void *data_in, gd_type_t in_type,
     void *data_out, gd_type_t out_type, size_t n) __THROW;
 size_t _GD_DoConst(DIRFILE *D, const gd_entry_t *E, gd_type_t return_type,
     void *data_out);
-size_t _GD_DoField(DIRFILE*, gd_entry_t*, const char*, int, off64_t, size_t,
-    gd_type_t, void*);
-size_t _GD_DoFieldOut(DIRFILE*, gd_entry_t*, const char*, int, off64_t, size_t,
-    gd_type_t, const void*);
+size_t _GD_DoField(DIRFILE*, gd_entry_t*, int, off64_t, size_t, gd_type_t,
+    void*);
+size_t _GD_DoFieldOut(DIRFILE*, gd_entry_t*, int, off64_t, size_t, gd_type_t,
+    const void*);
 int _GD_EntryCmp(const void *A, const void *B);
 int _GD_EncodingUnderstood(unsigned long encoding); 
 int _GD_FillZero(void *databuffer, gd_type_t type, size_t nz);
@@ -494,5 +494,31 @@ ssize_t _GD_SlimRead(struct _gd_raw_file* file, void *ptr, gd_type_t data_type,
     size_t nmemb);
 int _GD_SlimClose(struct _gd_raw_file* file);
 off64_t _GD_SlimSize(struct _gd_raw_file* file, gd_type_t data_type);
+
+/* The following has been extracted from internal.cpp from kjs */
+
+/*
+ * For systems without NAN, this is a NAN in IEEE double format.
+ */
+
+#if !defined(NAN)
+static inline __attribute__ ((__const__)) double __NAN()
+{
+  /* work around some strict alignment requirements
+     for double variables on some architectures (e.g. PA-RISC) */
+  typedef union { unsigned char b[8]; double d; } nan_t;
+#ifdef WORDS_BIGENDIAN
+  static const nan_t NaN_Bytes = { { 0x7f, 0xf8, 0, 0, 0, 0, 0, 0 } };
+#elif defined(arm)
+  static const nan_t NaN_Bytes = { { 0, 0, 0xf8, 0x7f, 0, 0, 0, 0 } };
+#else
+  static const nan_t NaN_Bytes = { { 0, 0, 0, 0, 0, 0, 0xf8, 0x7f } };
+#endif
+
+  const double NaN = NaN_Bytes.d;
+  return NaN;
+}
+#define NAN __NAN()
+#endif /* !defined(NAN) */
 
 #endif

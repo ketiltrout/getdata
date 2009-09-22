@@ -1,60 +1,65 @@
-/* Add a dirfile field */
+/* Add a complex POLYNOM field */
 #include "../src/getdata.h"
 
 #include <stdlib.h>
-#include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <string.h>
 #include <errno.h>
 #include <unistd.h>
+#include <stdio.h>
+#include <math.h>
 
 int main(void)
 {
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
-  const char* data = __TEST__ "dirfile/data";
   int r = 0;
-
-  gd_entry_t E, e;
-  E.field = "data";
-  E.field_type = GD_RAW_ENTRY;
-  E.fragment_index = 0;
-  E.spf = 2;
-  E.data_type = GD_UINT8;
+  int j;
+  gd_entry_t e;
 
   DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
-  dirfile_add(D, &E);
+  const double complex a[4] = {1 + _Complex_I * 29.03, 0.3 + _Complex_I * 12.34,
+    0.5 + _Complex_I * 99.55, 1.8 + _Complex_I * 45.32};
+  dirfile_add_cpolynom(D, "new", 3, "in", a, 0);
   int error = get_error(D);
 
   /* check */
-  get_entry(D, "data", &e);
+  get_entry(D, "new", &e);
   if (get_error(D))
     r = 1;
   else {
-    if (e.field_type != GD_RAW_ENTRY) {
+    if (e.field_type != GD_POLYNOM_ENTRY) {
       fprintf(stderr, "field_type = %i\n", e.field_type);
+      r = 1;
+    }
+    if (strcmp(e.in_fields[0], "in")) {
+      fprintf(stderr, "in_field = %s\n", e.in_fields[0]);
       r = 1;
     }
     if (e.fragment_index != 0) {
       fprintf(stderr, "fragment_index = %i\n", e.fragment_index);
       r = 1;
     }
-    if (e.spf != 2) {
-      fprintf(stderr, "spf = %i\n", e.spf);
+    if (e.poly_ord != 3) {
+      fprintf(stderr, "poly_ord = %i\n", e.poly_ord);
       r = 1;
     }
-    if (e.data_type != GD_UINT8) {
-      fprintf(stderr, "data_type = %i\n", e.data_type);
+    if (e.comp_scal != 1) {
+      fprintf(stderr, "poly_ord = %i\n", e.poly_ord);
       r = 1;
     }
+    for (j = 0; j < 4; ++j)
+      if (cabs(e.ca[j] - a[j]) > 1e-6) {
+        fprintf(stderr, "a[%i] = %g\n", j, e.a[j]);
+        r = 1;
+      }
     dirfile_free_entry_strings(&e);
   }
 
   dirfile_close(D);
 
-  unlink(data);
   unlink(format);
   rmdir(filedir);
 

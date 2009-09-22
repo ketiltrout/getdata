@@ -352,3 +352,19 @@ int Dirfile::UnInclude(int fragment_index, int del)
 {
   return dirfile_uninclude(D, fragment_index, del);
 }
+
+DataType Dirfile::NativeType(const char* field_code)
+{
+  return (DataType)get_native_type(D, field_code);
+}
+
+int Dirfile::Validate(const char* field_code)
+{
+  return dirfile_validate(D, field_code);
+}
+
+double Dirfile::FrameNum(const char* field_code, double value,
+    off_t frame_start, off_t frame_end)
+{
+  return get_framenum_subset(D, field_code, value, frame_start, frame_end);
+}

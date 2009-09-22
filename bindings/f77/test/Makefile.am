@@ -37,10 +37,14 @@ FCFLAGS += -I.. $(F77_WALL) $(FC_WEXTRA)
 F95LDADD=../libf95getdata.la $(F77LDADD)
 F77LDADD=../libfgetdata.la
 
-TESTS=gdfget gdcopn $(F95TESTS)
+#TESTS=gdfget gdcopn big_test $(F95TESTS)
+TESTS=big_test
 
 gdcopn_SOURCES=gdcopn.f
 gdcopn_LDADD=$(F77LDADD)
+
+big_test_SOURCES=big_test.f
+big_test_LDADD=$(F77LDADD)
 
 gdfget_SOURCES=gdfget.f
 gdfget_LDADD=$(F77LDADD)

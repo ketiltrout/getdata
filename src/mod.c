@@ -221,7 +221,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
         }
 
         if (flags & 0x2) {
-          if (E->complex_scalars && E->cm[i] != N->cm[i]) {
+          if (E->comp_scal && E->cm[i] != N->cm[i]) {
             modified = 1;
             Q.cm[i] = N->cm[i];
             Q.m[i] = creal(Q.cm[i]);
@@ -237,7 +237,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
         }
 
         if (flags & 0x4) {
-          if (E->complex_scalars && E->cb[i] != N->cb[i]) {
+          if (E->comp_scal && E->cb[i] != N->cb[i]) {
             modified = 1;
             Q.cb[i] = N->cb[i];
             Q.b[i] = creal(Q.cb[i]);
@@ -384,7 +384,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
 
       if (flags & 0x1)
         for (i = 0; i <= Q.poly_ord; ++i) {
-          if (E->complex_scalars && N->ca[i] != E->ca[i]) {
+          if (E->comp_scal && N->ca[i] != E->ca[i]) {
             modified = 1;
             Q.ca[i] = N->ca[i];
             Q.a[i] = creal(Q.ca[i]);
@@ -540,7 +540,7 @@ int dirfile_alter_lincom(DIRFILE* D, const char* field_code, int n_fields,
   _GD_ClearError(D);
 
   N.field_type = GD_LINCOM_ENTRY;
-  N.complex_scalars = 0;
+  N.comp_scal = 0;
   if (n_fields > GD_MAX_LINCOM || n_fields < 0) {
     _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_NFIELDS, NULL, n_fields,
         NULL);
@@ -603,7 +603,7 @@ int dirfile_alter_clincom(DIRFILE* D, const char* field_code, int n_fields,
   _GD_ClearError(D);
 
   N.field_type = GD_LINCOM_ENTRY;
-  N.complex_scalars = 1;
+  N.comp_scal = 1;
   if (n_fields > GD_MAX_LINCOM || n_fields < 0) {
     _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_NFIELDS, NULL, n_fields,
         NULL);
@@ -813,7 +813,7 @@ int dirfile_alter_polynom(DIRFILE* D, const char* field_code, int poly_ord,
   _GD_ClearError(D);
 
   N.field_type = GD_POLYNOM_ENTRY;
-  N.complex_scalars = 0;
+  N.comp_scal = 0;
   if (poly_ord > GD_MAX_POLYORD || poly_ord < 0) {
     _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_POLYORD, NULL, poly_ord,
         NULL);
@@ -865,7 +865,7 @@ int dirfile_alter_cpolynom(DIRFILE* D, const char* field_code, int poly_ord,
   _GD_ClearError(D);
 
   N.field_type = GD_POLYNOM_ENTRY;
-  N.complex_scalars = 1;
+  N.comp_scal = 1;
   if (poly_ord > GD_MAX_POLYORD || poly_ord < 0) {
     _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_POLYORD, NULL, poly_ord,
         NULL);

@@ -37,10 +37,29 @@ LincomEntry::LincomEntry(const char* field_code, int n_fields,
   E.field_type = GD_LINCOM_ENTRY;
   E.n_fields = n_fields;
   E.fragment_index = fragment_index;
+  E.comp_scal = 0;
   for (i = 0; i < n_fields; ++i) {
     E.in_fields[i] = strdup(in_fields[i]);
     E.m[i] = m[i];
     E.b[i] = b[i];
+  }
+}
+
+LincomEntry::LincomEntry(const char* field_code, int n_fields,
+    const char** in_fields, double complex* cm, double complex* cb,
+    int fragment_index) : Entry::Entry()
+{
+  int i;
+
+  E.field = strdup(field_code);
+  E.field_type = GD_LINCOM_ENTRY;
+  E.n_fields = n_fields;
+  E.fragment_index = fragment_index;
+  E.comp_scal = 1;
+  for (i = 0; i < n_fields; ++i) {
+    E.in_fields[i] = strdup(in_fields[i]);
+    E.cm[i] = cm[i];
+    E.cb[i] = cb[i];
   }
 }
 

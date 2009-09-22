@@ -1,39 +1,35 @@
-/* Add a dirfile field */
+/* Add a CONST field */
 #include "../src/getdata.h"
 
+#include <inttypes.h>
 #include <stdlib.h>
-#include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <string.h>
 #include <errno.h>
 #include <unistd.h>
+#include <stdio.h>
 
 int main(void)
 {
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
-  const char* data = __TEST__ "dirfile/data";
+  uint8_t val = 3;
   int r = 0;
-
-  gd_entry_t E, e;
-  E.field = "data";
-  E.field_type = GD_RAW_ENTRY;
-  E.fragment_index = 0;
-  E.spf = 2;
-  E.data_type = GD_UINT8;
+  gd_entry_t e;
 
   DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
-  dirfile_add(D, &E);
+  dirfile_add_phase(D, "new", "in", 3, 0);
+  dirfile_madd_const(D, "new", "data", GD_UINT8, GD_UINT8, &val);
   int error = get_error(D);
 
   /* check */
-  get_entry(D, "data", &e);
+  get_entry(D, "new/data", &e);
   if (get_error(D))
     r = 1;
   else {
-    if (e.field_type != GD_RAW_ENTRY) {
+    if (e.field_type != GD_CONST_ENTRY) {
       fprintf(stderr, "field_type = %i\n", e.field_type);
       r = 1;
     }
@@ -41,12 +37,13 @@ int main(void)
       fprintf(stderr, "fragment_index = %i\n", e.fragment_index);
       r = 1;
     }
-    if (e.spf != 2) {
-      fprintf(stderr, "spf = %i\n", e.spf);
+    if (e.const_type != GD_UINT8) {
+      fprintf(stderr, "const_type = %i\n", e.const_type);
       r = 1;
     }
-    if (e.data_type != GD_UINT8) {
-      fprintf(stderr, "data_type = %i\n", e.data_type);
+    get_constant(D, "new/data", GD_UINT8, &val);
+    if (val != 3) {
+      fprintf(stderr, "val = %i\n", val);
       r = 1;
     }
     dirfile_free_entry_strings(&e);
@@ -54,7 +51,6 @@ int main(void)
 
   dirfile_close(D);
 
-  unlink(data);
   unlink(format);
   rmdir(filedir);
 

@@ -31,35 +31,8 @@
 #include <string.h>
 #endif
 
-/* The following has been extracted from internal.cpp from kjs */
-
-/*
- * For systems without NAN, this is a NAN in IEEE double format.
- */
-
-#if !defined(NAN)
-static __attribute__ ((__const__)) double __NAN()
-{
-  /* work around some strict alignment requirements
-     for double variables on some architectures (e.g. PA-RISC) */
-  typedef union { unsigned char b[8]; double d; } nan_t;
-#ifdef WORDS_BIGENDIAN
-  static const nan_t NaN_Bytes = { { 0x7f, 0xf8, 0, 0, 0, 0, 0, 0 } };
-#elif defined(arm)
-  static const nan_t NaN_Bytes = { { 0, 0, 0xf8, 0x7f, 0, 0, 0, 0 } };
-#else
-  static const nan_t NaN_Bytes = { { 0, 0, 0, 0, 0, 0, 0xf8, 0x7f } };
-#endif
-
-  const double NaN = NaN_Bytes.d;
-  return NaN;
-}
-#define NAN __NAN()
-#endif /* !defined(NAN) */
-
 #define EXTRACT_REPR(t,f) \
   for (i = 0; i < n; ++i) ((t*)rdata)[i] = f(cdata[i])
-
 
 #define EXTRACT_REPRS(t) \
   switch (repr) { \
@@ -501,8 +474,8 @@ static size_t _GD_DoLincom(DIRFILE *D, gd_entry_t *E, off64_t first_samp,
   /* read the first field and record the number of samples returned -- we can
    * safely store this in the output buffer, with the correct return type as
    * it will not aversely affect our later math */
-  n_read = _GD_DoField(D, E->e->entry[0], E->in_fields[0], E->e->repr[0],
-      first_samp, num_samp, return_type, data_out);
+  n_read = _GD_DoField(D, E->e->entry[0], E->e->repr[0], first_samp, num_samp,
+      return_type, data_out);
 
   if (D->error) {
     dreturn("%i", 0);
@@ -539,8 +512,8 @@ static size_t _GD_DoLincom(DIRFILE *D, gd_entry_t *E, off64_t first_samp,
     }
 
     /* read the second field */
-    size_t n_read2 = _GD_DoField(D, E->e->entry[1], E->in_fields[1],
-        E->e->repr[1], first_samp2, num_samp2, ntype, tmpbuf2);
+    size_t n_read2 = _GD_DoField(D, E->e->entry[1], E->e->repr[1], first_samp2,
+        num_samp2, ntype, tmpbuf2);
     if (D->error || n_read2 == 0) {
       free(tmpbuf2);
       dreturn("%i", 0);
@@ -564,8 +537,8 @@ static size_t _GD_DoLincom(DIRFILE *D, gd_entry_t *E, off64_t first_samp,
         return 0;
       }
 
-      size_t n_read3 = _GD_DoField(D, E->e->entry[2], E->in_fields[2],
-          E->e->repr[2], first_samp3, num_samp3, ntype, tmpbuf3);
+      size_t n_read3 = _GD_DoField(D, E->e->entry[2], E->e->repr[2],
+          first_samp3, num_samp3, ntype, tmpbuf3);
       if (D->error || n_read3 == 0) {
         free(tmpbuf2);
         free(tmpbuf3);
@@ -579,7 +552,7 @@ static size_t _GD_DoLincom(DIRFILE *D, gd_entry_t *E, off64_t first_samp,
   }
 
   /* Compute everything at once */
-  if (ntype == GD_COMPLEX128)
+  if (E->comp_scal)
     _GD_CLincomData(D, E->n_fields, data_out, return_type, tmpbuf2, tmpbuf3,
         E->cm, E->cb, spf, n_read);
   else
@@ -629,8 +602,8 @@ static size_t _GD_DoMultiply(DIRFILE *D, gd_entry_t* E, off64_t first_samp,
   }
 
   /* read the first field and record the number of samples returned */
-  n_read = _GD_DoField(D, E->e->entry[0], E->in_fields[0], E->e->repr[0],
-      first_samp, num_samp, return_type, data_out);
+  n_read = _GD_DoField(D, E->e->entry[0], E->e->repr[0], first_samp, num_samp,
+      return_type, data_out);
 
   if (D->error != GD_E_OK) {
     dreturn("%zi", 0);
@@ -669,8 +642,8 @@ static size_t _GD_DoMultiply(DIRFILE *D, gd_entry_t* E, off64_t first_samp,
   }
 
   /* read the second field */
-  n_read2 = _GD_DoField(D, E->e->entry[1], E->in_fields[1], E->e->repr[1],
-      first_samp2, num_samp2, type2, tmpbuf);
+  n_read2 = _GD_DoField(D, E->e->entry[1], E->e->repr[1], first_samp2,
+      num_samp2, type2, tmpbuf);
 
   if (D->error != GD_E_OK) {
     free(tmpbuf);
@@ -731,8 +704,8 @@ static size_t _GD_DoBit(DIRFILE *D, gd_entry_t *E, int is_signed,
     return 0;
   }
 
-  n_read = _GD_DoField(D, E->e->entry[0], E->in_fields[0], E->e->repr[0],
-      first_samp, num_samp, (is_signed) ? GD_INT64 : GD_UINT64, tmpbuf);
+  n_read = _GD_DoField(D, E->e->entry[0], E->e->repr[0], first_samp, num_samp,
+      (is_signed) ? GD_INT64 : GD_UINT64, tmpbuf);
 
   if (D->error != GD_E_OK) {
     free(tmpbuf);
@@ -773,8 +746,8 @@ static size_t _GD_DoPhase(DIRFILE *D, gd_entry_t *E, off64_t first_samp,
     return 0;
   }
 
-  n_read = _GD_DoField(D, E->e->entry[0], E->in_fields[0], E->e->repr[0],
-      first_samp + E->shift, num_samp, return_type, data_out);
+  n_read = _GD_DoField(D, E->e->entry[0], E->e->repr[0], first_samp + E->shift,
+      num_samp, return_type, data_out);
 
   dreturn("%zi", n_read);
   return n_read;
@@ -813,8 +786,8 @@ static size_t _GD_DoLinterp(DIRFILE *D, gd_entry_t* E, off64_t first_samp,
     return 0;
   }
 
-  n_read = _GD_DoField(D, E->e->entry[0], E->in_fields[0], E->e->repr[0],
-      first_samp, num_samp, GD_FLOAT64, data_in);
+  n_read = _GD_DoField(D, E->e->entry[0], E->e->repr[0], first_samp, num_samp,
+      GD_FLOAT64, data_in);
 
   if (D->error != GD_E_OK) {
     free(data_in);
@@ -850,8 +823,8 @@ static size_t _GD_DoPolynom(DIRFILE *D, gd_entry_t *E, off64_t first_samp,
   }
 
   /* read the input field */
-  n_read = _GD_DoField(D, E->e->entry[0], E->in_fields[0], E->e->repr[0],
-      first_samp, num_samp, return_type, data_out);
+  n_read = _GD_DoField(D, E->e->entry[0], E->e->repr[0], first_samp, num_samp,
+      return_type, data_out);
 
   if (D->error != GD_E_OK) {
     dreturn("%zi", 0);
@@ -864,7 +837,7 @@ static size_t _GD_DoPolynom(DIRFILE *D, gd_entry_t *E, off64_t first_samp,
     return 0;
   }
 
-  if (E->complex_scalars)
+  if (E->comp_scal)
     _GD_CPolynomData(D, data_out, return_type, n_read, E->poly_ord, E->ca);
   else
     _GD_PolynomData(D, data_out, return_type, n_read, E->poly_ord, E->a);
@@ -913,9 +886,8 @@ static size_t _GD_DoString(gd_entry_t *E, size_t num_samp, void *data_out)
 
 /* _GD_DoField: Locate the field in the database and read it.
 */
-size_t _GD_DoField(DIRFILE *D, gd_entry_t *E, const char* field_code,
-    int repr, off64_t first_samp, size_t num_samp, gd_type_t return_type,
-    void *data_out)
+size_t _GD_DoField(DIRFILE *D, gd_entry_t *E, int repr, off64_t first_samp,
+    size_t num_samp, gd_type_t return_type, void *data_out)
 {
   size_t n_read = 0;
   gd_type_t ntype;
@@ -923,11 +895,11 @@ size_t _GD_DoField(DIRFILE *D, gd_entry_t *E, const char* field_code,
   const gd_type_t true_return_type = return_type; 
   int out_of_place = 0;
 
-  dtrace("%p, %p, \"%s\", %i, %lli, %zi, 0x%x, %p", D, E, field_code, repr,
-      first_samp, num_samp, return_type, data_out);
+  dtrace("%p, %p, %i, %lli, %zi, 0x%x, %p", D, E, repr, first_samp, num_samp,
+      return_type, data_out);
 
   if (++D->recurse_level >= GD_MAX_RECURSE_LEVEL) {
-    _GD_SetError(D, GD_E_RECURSE_LEVEL, 0, NULL, 0, field_code);
+    _GD_SetError(D, GD_E_RECURSE_LEVEL, 0, NULL, 0, E->field);
     D->recurse_level--;
     dreturn("%zi", 0);
     return 0;
@@ -1060,26 +1032,28 @@ size_t getdata64(DIRFILE* D, const char *field_code_in, off64_t first_frame,
     _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, field_code);
   else if (entry->field_type & GD_SCALAR_ENTRY)
     _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
-  else {
-    /* get the samples per frame */
-    unsigned int spf = _GD_GetSPF(D, entry);
-
-    if (D->error) {
-      if (field_code != field_code_in)
-        free(field_code);
-      dreturn("%i", 0);
-      return 0;
-    }
-
-    first_samp += spf * first_frame;
-    num_samp += spf * num_frames;
-
-    n_read = _GD_DoField(D, entry, field_code, repr, first_samp, num_samp,
-        return_type, data_out);
-  }
 
   if (field_code != field_code_in)
     free(field_code);
+
+  if (D->error) {
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  /* get the samples per frame */
+  unsigned int spf = _GD_GetSPF(D, entry);
+
+  if (D->error) {
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  first_samp += spf * first_frame;
+  num_samp += spf * num_frames;
+
+  n_read = _GD_DoField(D, entry, repr, first_samp, num_samp, return_type,
+      data_out);
 
   dreturn("%zi", n_read);
   return n_read;

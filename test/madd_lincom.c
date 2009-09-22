@@ -8,11 +8,14 @@
 #include <string.h>
 #include <errno.h>
 #include <unistd.h>
+#include <stdio.h>
 
 int main(void)
 {
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
+  int r = 0;
+  gd_entry_t e;
 
   DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
   dirfile_add_phase(D, "new", "in", 3, 0);
@@ -23,14 +26,59 @@ int main(void)
   int error = get_error(D);
 
   /* check */
-  int n = get_nmfields(D, "new");
+  get_entry(D, "new/meta", &e);
+  if (get_error(D))
+    r = 1;
+  else {
+    if (e.field_type != GD_LINCOM_ENTRY) {
+      fprintf(stderr, "field_type = %i\n", e.field_type);
+      r = 1;
+    }
+    if (e.fragment_index != 0) {
+      fprintf(stderr, "fragment_index = %i\n", e.fragment_index);
+      r = 1;
+    }
+    if (e.n_fields != 2) {
+      fprintf(stderr, "n_fields = %i\n", e.n_fields);
+      r = 1;
+    }
+    if (strcmp(e.in_fields[0], "in1")) {
+      fprintf(stderr, "in_fields[0] = %s\n", e.in_fields[0]);
+      r = 1;
+    }
+    if (strcmp(e.in_fields[1], "in2")) {
+      fprintf(stderr, "in_fields[1] = %s\n", e.in_fields[1]);
+      r = 1;
+    }
+    if (fabs(e.m[0] - m[0]) > 1e-6) {
+      fprintf(stderr, "m[0] = %g\n", e.m[0]);
+      r = 1;
+    }
+    if (fabs(e.m[1] - m[1]) > 1e-6) {
+      fprintf(stderr, "m[1] = %g\n", e.m[1]);
+      r = 1;
+    }
+    if (fabs(e.b[0] - b[0]) > 1e-6) {
+      fprintf(stderr, "b[0] = %g\n", e.b[0]);
+      r = 1;
+    }
+    if (fabs(e.b[1] - b[1]) > 1e-6) {
+      fprintf(stderr, "b[1] = %g\n", e.b[1]);
+      r = 1;
+    }
+    if (e.comp_scal != 0) {
+      fprintf(stderr, "comp_scal = %i\n", e.comp_scal);
+      r = 1;
+    }
+    dirfile_free_entry_strings(&e);
+  }
 
   dirfile_close(D);
 
   unlink(format);
   rmdir(filedir);
 
-  if (n != 1)
+  if (r)
     return 1;
 
   return (error != GD_E_OK);

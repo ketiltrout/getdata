@@ -49,7 +49,7 @@ static size_t _GD_DoRawOut(DIRFILE *D, gd_entry_t *E, off64_t s0,
   s0 -= D->fragment[E->fragment_index].frame_offset * E->spf;
 
   if (s0 < 0) {
-    _GD_SetError(D, GD_E_RANGE, 0, NULL, 0, NULL);
+    _GD_SetError(D, GD_E_RANGE, GD_E_OUT_OF_RANGE, NULL, 0, NULL);
     dreturn("%zi", 0);
     return 0;
   }
@@ -128,7 +128,7 @@ static size_t _GD_DoLinterpOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
 
   /* if the table is complex valued, we can't invert it */
   if (E->e->complex_table) {
-    _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_PUT, NULL, 0, E->field);
+    _GD_SetError(D, GD_E_DOMAIN, GD_E_DOMAIN_COMPLEX, NULL, 0, NULL);
     dreturn("%zi", 0);
     return 0;
   }
@@ -171,8 +171,8 @@ static size_t _GD_DoLinterpOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
     return 0;
   }
 
-  n_wrote = _GD_DoFieldOut(D, E->e->entry[0], E->in_fields[0], E->e->repr[0],
-      first_samp, num_samp, GD_FLOAT64, tmpbuf);
+  n_wrote = _GD_DoFieldOut(D, E->e->entry[0], E->e->repr[0], first_samp,
+      num_samp, GD_FLOAT64, tmpbuf);
 
   free(tmpbuf);
 
@@ -219,7 +219,7 @@ static size_t _GD_DoLincomOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
 
   memcpy(tmpbuf, data_in, num_samp * GD_SIZE(data_type));
 
-  if (E->complex_scalars) {
+  if (E->comp_scal) {
     double complex cm = 1 / E->cm[0];
     double complex cb = -E->cb[0] / E->cm[0];
     _GD_CLincomData(D, 1, tmpbuf, data_type, NULL, NULL, &cm, &cb, NULL,
@@ -236,8 +236,8 @@ static size_t _GD_DoLincomOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
     return 0;
   }
 
-  n_wrote = _GD_DoFieldOut(D, E->e->entry[0], E->in_fields[0], E->e->repr[0],
-      first_samp, num_samp, data_type, tmpbuf);
+  n_wrote = _GD_DoFieldOut(D, E->e->entry[0], E->e->repr[0], first_samp,
+      num_samp, data_type, tmpbuf);
   free(tmpbuf);
 
   dreturn("%zi", n_wrote);
@@ -278,8 +278,8 @@ static size_t _GD_DoBitOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
   _GD_ConvertType(D, data_in, data_type, (void*)tmpbuf, GD_UINT64, num_samp);
 
   /* first, READ the field in so that we can change the bits    */
-  _GD_DoField(D, E->e->entry[0], E->in_fields[0], E->e->repr[0], first_samp,
-      num_samp, GD_UINT64, readbuf);
+  _GD_DoField(D, E->e->entry[0], E->e->repr[0], first_samp, num_samp, GD_UINT64,
+      readbuf);
 
   /* error encountered, abort */
   if (D->error != GD_E_OK) {
@@ -293,8 +293,8 @@ static size_t _GD_DoBitOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
       (tmpbuf[i] & mask) << E->bitnum;
 
   /* write the modified data out */
-  n_wrote = _GD_DoFieldOut(D, E->e->entry[0], E->in_fields[0], E->e->repr[0],
-      first_samp, num_samp, GD_UINT64, (void*)readbuf);
+  n_wrote = _GD_DoFieldOut(D, E->e->entry[0], E->e->repr[0], first_samp,
+      num_samp, GD_UINT64, (void*)readbuf);
 
   free(readbuf);
   free(tmpbuf);
@@ -316,8 +316,8 @@ static size_t _GD_DoPhaseOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
     return 0;
   }
 
-  n_wrote = _GD_DoFieldOut(D, E->e->entry[0], E->in_fields[0], E->e->repr[0],
-      first_samp + E->shift, num_samp, data_type, data_in);
+  n_wrote = _GD_DoFieldOut(D, E->e->entry[0], E->e->repr[0], first_samp +
+      E->shift, num_samp, data_type, data_in);
 
   dreturn("%zi", n_wrote);
 
@@ -362,7 +362,7 @@ static size_t _GD_DoPolynomOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
 
   memcpy(tmpbuf, data_in, num_samp * GD_SIZE(data_type));
 
-  if (E->complex_scalars) {
+  if (E->comp_scal) {
     double complex cm = 1 / E->ca[1];
     double complex cb = -E->ca[0] / E->ca[1];
     _GD_CLincomData(D, 1, tmpbuf, data_type, NULL, NULL, &cm, &cb, NULL,
@@ -379,8 +379,8 @@ static size_t _GD_DoPolynomOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
     return 0;
   }
 
-  n_wrote = _GD_DoFieldOut(D, E->e->entry[0], E->in_fields[0], E->e->repr[0],
-      first_samp, num_samp, data_type, tmpbuf);
+  n_wrote = _GD_DoFieldOut(D, E->e->entry[0], E->e->repr[0], first_samp,
+      num_samp, data_type, tmpbuf);
   free(tmpbuf);
 
   dreturn("%zi", n_wrote);
@@ -443,17 +443,16 @@ static size_t _GD_DoStringOut(DIRFILE* D, gd_entry_t *E, const char *data_in)
   return strlen(E->e->string) + 1;
 }
 
-size_t _GD_DoFieldOut(DIRFILE *D, gd_entry_t* E, const char *field_code,
-    int repr, off64_t first_samp, size_t num_samp, gd_type_t data_type,
-    const void *data_in)
+size_t _GD_DoFieldOut(DIRFILE *D, gd_entry_t* E, int repr, off64_t first_samp,
+    size_t num_samp, gd_type_t data_type, const void *data_in)
 {
   size_t n_wrote = 0;
 
-  dtrace("%p, %p, \"%s\", %i, %lli, %zi, 0x%x, %p", D, E, field_code, repr,
-      first_samp, num_samp, data_type, data_in);
+  dtrace("%p, %p, %i, %lli, %zi, 0x%x, %p", D, E, repr, first_samp, num_samp,
+      data_type, data_in);
 
   if (++D->recurse_level >= GD_MAX_RECURSE_LEVEL) {
-    _GD_SetError(D, GD_E_RECURSE_LEVEL, 0, NULL, 0, field_code);
+    _GD_SetError(D, GD_E_RECURSE_LEVEL, 0, NULL, 0, E->field);
     D->recurse_level--;
     dreturn("%zi", 0);
     return 0;
@@ -492,7 +491,7 @@ size_t _GD_DoFieldOut(DIRFILE *D, gd_entry_t* E, const char *field_code,
       break;
     case GD_MULTIPLY_ENTRY:
     case GD_INDEX_ENTRY:
-      _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_PUT, NULL, 0, field_code);
+      _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_PUT, NULL, 0, E->field);
       break;
     case GD_PHASE_ENTRY:
       n_wrote = _GD_DoPhaseOut(D, E, first_samp, num_samp, data_type, data_in);
@@ -552,25 +551,35 @@ size_t putdata64(DIRFILE* D, const char *field_code_in, off64_t first_frame,
   }
   entry = _GD_FindField(D, field_code, NULL);
 
+  if (field_code != field_code_in)
+    free(field_code);
+
   if (entry == NULL)
     _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, field_code);
   else if (entry->field_type & GD_SCALAR_ENTRY)
     _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
-  else {
-    /* get the samples per frame */
-    unsigned int spf = _GD_GetSPF(D, entry);
 
-    if (D->error) {
+  if (field_code != field_code_in)
+    free(field_code);
+
+  if (D->error) {
       dreturn("%i", 0);
       return 0;
-    }
-
-    first_samp += spf * first_frame;
-    num_samp += spf * num_frames;
-
-    n_wrote = _GD_DoFieldOut(D, entry, field_code, repr, first_samp, num_samp,
-        data_type, data_in);
   }
+
+  /* get the samples per frame */
+  unsigned int spf = _GD_GetSPF(D, entry);
+
+  if (D->error) {
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  first_samp += spf * first_frame;
+  num_samp += spf * num_frames;
+
+  n_wrote = _GD_DoFieldOut(D, entry, repr, first_samp, num_samp, data_type,
+      data_in);
 
   dreturn("%zi", n_wrote);
   return n_wrote;

@@ -159,6 +159,10 @@ static inline UCHAR gdidl_idl_type(gd_type_t t) {
       return IDL_TYP_FLOAT;
     case GD_FLOAT64:
       return IDL_TYP_DOUBLE;
+    case GD_COMPLEX64:
+      return IDL_TYP_COMPLEX;
+    case GD_COMPLEX128:
+      return IDL_TYP_DCOMPLEX;
     case GD_NULL:
     case GD_UNKNOWN:
       ;
@@ -167,7 +171,7 @@ static inline UCHAR gdidl_idl_type(gd_type_t t) {
   return IDL_TYP_UNDEF;
 }
 
-/* convert a getdata type code to an IDL type code */
+/* convert an IDL type code to a getdata type code */
 static inline gd_type_t gdidl_gd_type(int t) {
   switch (t) {
     case IDL_TYP_BYTE:
@@ -188,6 +192,10 @@ static inline gd_type_t gdidl_gd_type(int t) {
       return GD_FLOAT32;
     case IDL_TYP_DOUBLE:
       return GD_FLOAT64;
+    case IDL_TYP_COMPLEX:
+      return GD_COMPLEX64;
+    case IDL_TYP_DCOMPLEX:
+      return GD_COMPLEX128;
   }
 
   return GD_UNKNOWN;
@@ -198,6 +206,8 @@ static inline IDL_ALLTYPES gdidl_to_alltypes(gd_type_t t, void* d)
 {
   dtrace("%x, %p", t, d);
 
+  float complex fc;
+  double complex dc;
   IDL_ALLTYPES v;
 
   switch (t) {
@@ -232,6 +242,16 @@ static inline IDL_ALLTYPES gdidl_to_alltypes(gd_type_t t, void* d)
     case GD_FLOAT64:
       v.d = *(double*)d;
       break;
+    case GD_COMPLEX64:
+      fc = *(float complex*)d;
+      v.cmp.r = crealf(fc);
+      v.cmp.i = cimagf(fc);
+      break;
+    case GD_COMPLEX128:
+      dc = *(double complex*)d;
+      v.cmp.r = creal(dc);
+      v.cmp.i = cimag(dc);
+      break;
     case GD_NULL:
     case GD_UNKNOWN:
       ;
@@ -245,6 +265,9 @@ static inline IDL_ALLTYPES gdidl_to_alltypes(gd_type_t t, void* d)
  * reference the appropriate member */
 static inline const void* gdidl_from_alltypes(UCHAR t, IDL_ALLTYPES* v)
 {
+  static float complex fc;
+  static double complex dc;
+
   switch(t)
   {
     case IDL_TYP_BYTE:
@@ -265,9 +288,71 @@ static inline const void* gdidl_from_alltypes(UCHAR t, IDL_ALLTYPES* v)
       return &(v->f);
     case IDL_TYP_DOUBLE:
       return &(v->d);
+    case IDL_TYP_COMPLEX:
+      fc = v->cmp.r + _Complex_I * v->cmp.i;
+      return &fc;
+    case IDL_TYP_DCOMPLEX:
+      dc = v->dcmp.r + _Complex_I * v->dcmp.i;
+      return &dc;
   }
 
   return NULL;
+}
+
+/* copy (and convert) an array of complex values */
+static inline void gdidl_dcmp_to_c99(double complex* dest, IDL_DCOMPLEX* src,
+    size_t n)
+{
+  size_t i;
+
+  for (i = 0; i < n; ++i)
+    dest[i] = src[i].r + _Complex_I * src[i].i;
+}
+
+/* copy (and convert) an array of complex values */
+static inline void gdidl_c99_to_dcmp(IDL_DCOMPLEX* dest, double complex* src,
+    size_t n)
+{
+  size_t i;
+
+  for (i = 0; i < n; ++i) {
+    dest[i].r = creal(src[i]);
+    dest[i].i = cimag(src[i]);
+  }
+}
+
+static double complex gdidl_dcomplexScalar(IDL_VPTR obj)
+{
+  double r = 0, i = 0;
+
+  /* accept either a scalar or a single element array */
+  if (obj->flags & IDL_V_ARR) {
+    if (obj->value.arr->n_dim != 1 || obj->value.arr->dim[0] != 1)
+      idl_abort("Scalar or single element array expected where multiple "
+          "element array found");
+
+    if (obj->type == IDL_TYP_DCOMPLEX) {
+      r = ((IDL_DCOMPLEX *)obj->value.arr->data)[0].r;
+      i = ((IDL_DCOMPLEX *)obj->value.arr->data)[0].i;
+    } else if (obj->type == IDL_TYP_COMPLEX) {
+      r = ((IDL_COMPLEX *)obj->value.arr->data)[0].r;
+      i = ((IDL_COMPLEX *)obj->value.arr->data)[0].i;
+    } else
+      idl_abort("complex value expected");
+  } else {
+    IDL_ENSURE_SCALAR(obj);
+
+    if (obj->type == IDL_TYP_DCOMPLEX) {
+      r = obj->value.dcmp.r;
+      i = obj->value.dcmp.i;
+    } else if (obj->type == IDL_TYP_COMPLEX) {
+      r = obj->value.cmp.r;
+      i = obj->value.cmp.i;
+    } else
+      idl_abort("complex value expected");
+  }
+
+  return r + _Complex_I * i;
 }
 
 /* convert a gd_entry_t to an IDL GD_ENTRY struct in a temporary variable */
@@ -308,15 +393,26 @@ IDL_VPTR gdidl_make_idl_entry(const gd_entry_t* E)
             IDL_MSG_LONGJMP, NULL)) = E->data_type;
       break;
     case GD_LINCOM_ENTRY:
+      *(IDL_INT*)(data + IDL_StructTagInfoByName(gdidl_entry_def,
+            "COMP_SCAL", IDL_MSG_LONGJMP, NULL)) = E->comp_scal;
       for (i = 0; i < E->n_fields; ++i) {
         IDL_StrStore((IDL_STRING*)(data +
               IDL_StructTagInfoByName(gdidl_entry_def, "IN_FIELDS",
                 IDL_MSG_LONGJMP, NULL)) + i, E->in_fields[i]);
       }
-      memcpy(data + IDL_StructTagInfoByName(gdidl_entry_def, "M",
-            IDL_MSG_LONGJMP, NULL), E->m, E->n_fields * sizeof(double));
-      memcpy(data + IDL_StructTagInfoByName(gdidl_entry_def, "B",
-            IDL_MSG_LONGJMP, NULL), E->b, E->n_fields * sizeof(double));
+      if (E->comp_scal) {
+        gdidl_c99_to_dcmp((IDL_DCOMPLEX*)data +
+            IDL_StructTagInfoByName(gdidl_entry_def, "CM", IDL_MSG_LONGJMP,
+              NULL), (double complex*)E->cm, E->n_fields);
+        gdidl_c99_to_dcmp((IDL_DCOMPLEX*)data +
+            IDL_StructTagInfoByName(gdidl_entry_def, "CB", IDL_MSG_LONGJMP,
+              NULL), (double complex*)E->cb, E->n_fields);
+      } else {
+        memcpy(data + IDL_StructTagInfoByName(gdidl_entry_def, "M",
+              IDL_MSG_LONGJMP, NULL), E->m, E->n_fields * sizeof(double));
+        memcpy(data + IDL_StructTagInfoByName(gdidl_entry_def, "B",
+              IDL_MSG_LONGJMP, NULL), E->b, E->n_fields * sizeof(double));
+      }
       break;
     case GD_LINTERP_ENTRY:
       IDL_StrStore((IDL_STRING*)(data + IDL_StructTagInfoByName(gdidl_entry_def,
@@ -338,8 +434,15 @@ IDL_VPTR gdidl_make_idl_entry(const gd_entry_t* E)
             IDL_MSG_LONGJMP, NULL)) = E->shift;
       break;
     case GD_POLYNOM_ENTRY:
-      memcpy(data + IDL_StructTagInfoByName(gdidl_entry_def, "A",
-            IDL_MSG_LONGJMP, NULL), E->a, (E->poly_ord + 1) * sizeof(double));
+      *(IDL_INT*)(data + IDL_StructTagInfoByName(gdidl_entry_def,
+            "COMP_SCAL", IDL_MSG_LONGJMP, NULL)) = E->comp_scal;
+      if (E->comp_scal)
+        gdidl_c99_to_dcmp((IDL_DCOMPLEX*)data +
+            IDL_StructTagInfoByName(gdidl_entry_def, "CA", IDL_MSG_LONGJMP,
+              NULL), (double complex*)E->ca, E->poly_ord + 1);
+      else
+        memcpy(data + IDL_StructTagInfoByName(gdidl_entry_def, "A",
+              IDL_MSG_LONGJMP, NULL), E->a, (E->poly_ord + 1) * sizeof(double));
       break;
     case GD_CONST_ENTRY:
       *(IDL_INT*)(data + IDL_StructTagInfoByName(gdidl_entry_def, "DATA_TYPE",
@@ -420,6 +523,12 @@ void gdidl_read_idl_entry(gd_entry_t *E, IDL_VPTR v)
         idl_abort("GD_ENTRY element NFIELDS must be of type INT");
       E->n_fields = *(int16_t*)(data + o);
 
+      o = IDL_StructTagInfoByName(v->value.s.sdef, "COMP_SCAL",
+          IDL_MSG_LONGJMP, &d);
+      if (d->type != IDL_TYP_INT)
+        idl_abort("GD_ENTRY element COMP_SCAL must be of type INT");
+      E->comp_scal = *(int16_t*)(data + o);
+
       o = IDL_StructTagInfoByName(v->value.s.sdef, "IN_FIELDS", IDL_MSG_LONGJMP,
           &d);
       IDL_ENSURE_STRING(d);
@@ -427,17 +536,41 @@ void gdidl_read_idl_entry(gd_entry_t *E, IDL_VPTR v)
       for (i = 0; i < E->n_fields; ++i)
         E->in_fields[i] = IDL_STRING_STR((IDL_STRING*)(data + o) + i);
 
-      o = IDL_StructTagInfoByName(v->value.s.sdef, "M", IDL_MSG_LONGJMP, &d);
-      IDL_ENSURE_ARRAY(d);
-      if (d->type != IDL_TYP_DOUBLE)
-        idl_abort("GD_ENTRY element M must be of type DOUBLE");
-      memcpy(E->m, data + o, E->n_fields * sizeof(double));
+      if (E->comp_scal) {
+        o = IDL_StructTagInfoByName(v->value.s.sdef, "CM", IDL_MSG_LONGJMP, &d);
+        IDL_ENSURE_ARRAY(d);
+        if (d->type == IDL_TYP_DCOMPLEX)
+          gdidl_dcmp_to_c99(E->cm, (IDL_DCOMPLEX*)data + o, E->n_fields);
+        else
+          idl_abort("GD_ENTRY element CM must be of type DCOMPLEX");
+      } else {
+        o = IDL_StructTagInfoByName(v->value.s.sdef, "M", IDL_MSG_LONGJMP, &d);
+        IDL_ENSURE_ARRAY(d);
+        if (d->type == IDL_TYP_DOUBLE) {
+          memcpy(E->m, data + o, E->n_fields * sizeof(double));
+          for (i = 0; i < E->n_fields; ++i)
+            E->cm[i] = E->m[i];
+        } else
+          idl_abort("GD_ENTRY element M must be of type DOUBLE");
+      }
 
-      o = IDL_StructTagInfoByName(v->value.s.sdef, "B", IDL_MSG_LONGJMP, &d);
-      IDL_ENSURE_ARRAY(d);
-      if (d->type != IDL_TYP_DOUBLE)
-        idl_abort("GD_ENTRY element B must be of type DOUBLE");
-      memcpy(E->b, data + o, E->n_fields * sizeof(double));
+      if (E->comp_scal) {
+        o = IDL_StructTagInfoByName(v->value.s.sdef, "CB", IDL_MSG_LONGJMP, &d);
+        IDL_ENSURE_ARRAY(d);
+        if (d->type == IDL_TYP_DCOMPLEX)
+          gdidl_dcmp_to_c99(E->cb, (IDL_DCOMPLEX*)data + o, E->n_fields);
+        else
+          idl_abort("GD_ENTRY element CB must be of type DCOMPLEX");
+      } else {
+        o = IDL_StructTagInfoByName(v->value.s.sdef, "B", IDL_MSG_LONGJMP, &d);
+        IDL_ENSURE_ARRAY(d);
+        if (d->type == IDL_TYP_DOUBLE) {
+          memcpy(E->b, data + o, E->n_fields * sizeof(double));
+          for (i = 0; i < E->n_fields; ++i)
+            E->cb[i] = E->b[i];
+        } else
+          idl_abort("GD_ENTRY element B must be of type DOUBLE");
+      }
       break;
     case GD_LINTERP_ENTRY:
       o = IDL_StructTagInfoByName(v->value.s.sdef, "TABLE", IDL_MSG_LONGJMP,
@@ -479,11 +612,27 @@ void gdidl_read_idl_entry(gd_entry_t *E, IDL_VPTR v)
         idl_abort("GD_ENTRY element POLY_ORD must be of type INT");
       E->poly_ord = *(int16_t*)(data + o);
 
-      o = IDL_StructTagInfoByName(v->value.s.sdef, "A", IDL_MSG_LONGJMP, &d);
-      IDL_ENSURE_ARRAY(d);
-      if (d->type != IDL_TYP_DOUBLE)
-        idl_abort("GD_ENTRY element A must be of type DOUBLE");
-      memcpy(E->b, data + o, E->poly_ord * sizeof(double));
+      o = IDL_StructTagInfoByName(v->value.s.sdef, "COMP_SCAL",
+          IDL_MSG_LONGJMP, &d);
+      if (d->type != IDL_TYP_INT)
+        idl_abort("GD_ENTRY element COMP_SCAL must be of type INT");
+      E->comp_scal = *(int16_t*)(data + o);
+
+      if (E->comp_scal) {
+        o = IDL_StructTagInfoByName(v->value.s.sdef, "CA", IDL_MSG_LONGJMP, &d);
+        IDL_ENSURE_ARRAY(d);
+        if (d->type == IDL_TYP_DCOMPLEX)
+          gdidl_dcmp_to_c99(E->ca, (IDL_DCOMPLEX*)data + o, E->poly_ord + 1);
+        else
+          idl_abort("GD_ENTRY element CA must be of type DCOMPLEX");
+      } else {
+        o = IDL_StructTagInfoByName(v->value.s.sdef, "A", IDL_MSG_LONGJMP, &d);
+        IDL_ENSURE_ARRAY(d);
+        if (d->type == IDL_TYP_DOUBLE)
+          memcpy(E->a, data + o, (1 + E->poly_ord) * sizeof(double));
+        else
+          idl_abort("GD_ENTRY element A must be of type DOUBLE");
+      }
       break;
     case GD_CONST_ENTRY:
       o = IDL_StructTagInfoByName(v->value.s.sdef, "DATA_TYPE", IDL_MSG_LONGJMP,
@@ -675,6 +824,8 @@ void gdidl_dirfile_add_bit(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
+/* @@DLM: P gdidl_dirfile_add_lincom DIRFILE_ADD_CLINCOM 5 11 KEYWORDS */
+
 /* @@DLM: P gdidl_dirfile_add_const DIRFILE_ADD_CONST 2 2 KEYWORDS */
 void gdidl_dirfile_add_const(int argc, IDL_VPTR argv[], char *argk)
 {
@@ -751,6 +902,8 @@ void gdidl_dirfile_add_const(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
+/* @@DLM: P gdidl_dirfile_add_polynom DIRFILE_ADD_CPOLYNOM 4 8 KEYWORDS */
+
 /* @@DLM: P gdidl_dirfile_add_lincom DIRFILE_ADD_LINCOM 5 11 KEYWORDS */
 void gdidl_dirfile_add_lincom(int argc, IDL_VPTR argv[], char *argk)
 {
@@ -765,10 +918,12 @@ void gdidl_dirfile_add_lincom(int argc, IDL_VPTR argv[], char *argk)
   } KW_RESULT;
   KW_RESULT kw;
 
-  int i;
+  int i, comp_scal = 0;
   const char* in_field[3];
   double m[3];
   double b[3];
+  double complex cm[3];
+  double complex cb[3];
 
   GDIDL_KW_INIT_ERROR;
   kw.fragment_index = 0;
@@ -792,14 +947,33 @@ void gdidl_dirfile_add_lincom(int argc, IDL_VPTR argv[], char *argk)
 
   for (i = 0; i < n_fields; ++i) {
     in_field[i] = IDL_VarGetString(argv[2 + i * 3]);
-    m[i] = IDL_DoubleScalar(argv[3 + i * 3]);
-    b[i] = IDL_DoubleScalar(argv[4 + i * 3]);
+    if (argv[3 + i * 3]->type == IDL_TYP_DCOMPLEX ||
+        argv[3 + i * 3]->type == IDL_TYP_COMPLEX)
+    {
+      comp_scal = 1;
+      m[i] = cm[i] = gdidl_dcomplexScalar(argv[3 + i * 3]);
+    } else
+      cm[i] = m[i] = IDL_DoubleScalar(argv[3 + i * 3]);
+
+    if (argv[4 + i * 3]->type == IDL_TYP_DCOMPLEX ||
+        argv[4 + i * 3]->type == IDL_TYP_COMPLEX)
+    {
+      comp_scal = 1;
+      b[i] = cb[i] = gdidl_dcomplexScalar(argv[4 + i * 3]);
+    } else
+      cb[i] = b[i] = IDL_DoubleScalar(argv[4 + i * 3]);
   }
 
   if (kw.parent_x) {
     const char* parent = IDL_STRING_STR(&kw.parent);
-    dirfile_madd_lincom(D, field_code, parent, n_fields, in_field, m, b);
-  } else
+    if (comp_scal) 
+      dirfile_madd_clincom(D, field_code, parent, n_fields, in_field, cm, cb);
+    else
+      dirfile_madd_lincom(D, field_code, parent, n_fields, in_field, m, b);
+  } else if (comp_scal) 
+    dirfile_add_clincom(D, field_code, n_fields, in_field, cm, cb,
+        kw.fragment_index);
+  else
     dirfile_add_lincom(D, field_code, n_fields, in_field, m, b,
         kw.fragment_index);
 
@@ -966,8 +1140,9 @@ void gdidl_dirfile_add_polynom(int argc, IDL_VPTR argv[], char *argk)
   } KW_RESULT;
   KW_RESULT kw;
 
-  int i;
+  int i, comp_scal = 0;
   double a[3];
+  double complex ca[3];
 
   GDIDL_KW_INIT_ERROR;
   kw.fragment_index = 0;
@@ -1004,31 +1179,41 @@ void gdidl_dirfile_add_polynom(int argc, IDL_VPTR argv[], char *argk)
       switch(argv[3]->type)
       {
         case IDL_TYP_BYTE:
-          a[i] = ((UCHAR*)(argv[3]->value.arr->data))[i];
+          ca[i] = a[i] = ((UCHAR*)(argv[3]->value.arr->data))[i];
           break;
         case IDL_TYP_INT:
-          a[i] = ((IDL_INT*)(argv[3]->value.arr->data))[i];
+          ca[i] = a[i] = ((IDL_INT*)(argv[3]->value.arr->data))[i];
           break;
         case IDL_TYP_LONG:
-          a[i] = ((IDL_LONG*)(argv[3]->value.arr->data))[i];
+          ca[i] = a[i] = ((IDL_LONG*)(argv[3]->value.arr->data))[i];
           break;
         case IDL_TYP_FLOAT:
-          a[i] = ((float*)(argv[3]->value.arr->data))[i];
+          ca[i] = a[i] = ((float*)(argv[3]->value.arr->data))[i];
           break;
         case IDL_TYP_DOUBLE:
-          a[i] = ((double*)(argv[3]->value.arr->data))[i];
+          ca[i] = a[i] = ((double*)(argv[3]->value.arr->data))[i];
           break;
         case IDL_TYP_UINT:
-          a[i] = ((IDL_UINT*)(argv[3]->value.arr->data))[i];
+          ca[i] = a[i] = ((IDL_UINT*)(argv[3]->value.arr->data))[i];
           break;
         case IDL_TYP_ULONG:
-          a[i] = ((IDL_ULONG*)(argv[3]->value.arr->data))[i];
+          ca[i] = a[i] = ((IDL_ULONG*)(argv[3]->value.arr->data))[i];
           break;
         case IDL_TYP_LONG64:
-          a[i] = ((IDL_LONG64*)(argv[3]->value.arr->data))[i];
+          ca[i] = a[i] = ((IDL_LONG64*)(argv[3]->value.arr->data))[i];
           break;
         case IDL_TYP_ULONG64:
-          a[i] = ((IDL_ULONG64*)(argv[3]->value.arr->data))[i];
+          ca[i] = a[i] = ((IDL_ULONG64*)(argv[3]->value.arr->data))[i];
+          break;
+        case IDL_TYP_COMPLEX:
+          comp_scal = 1;
+          ca[i] = ((IDL_COMPLEX*)(argv[3]->value.arr->data))[i].r
+            + _Complex_I * ((IDL_COMPLEX*)(argv[3]->value.arr->data))[i].i;
+          break;
+        case IDL_TYP_DCOMPLEX:
+          comp_scal = 1;
+          ca[i] = ((IDL_DCOMPLEX*)(argv[3]->value.arr->data))[i].r
+            + _Complex_I * ((IDL_DCOMPLEX*)(argv[3]->value.arr->data))[i].i;
           break;
         default:
           idl_kw_abort("The coeffecients must be of SCALAR type");
@@ -1037,15 +1222,29 @@ void gdidl_dirfile_add_polynom(int argc, IDL_VPTR argv[], char *argk)
   } else {
     poly_ord = argc - 2;
 
-    for (i = 0; i <= poly_ord; ++i) {
-      a[i] = IDL_DoubleScalar(argv[i + 2]);
-    }
+    for (i = 0; i <= poly_ord; ++i)
+      if (argv[i + 2]->type == IDL_TYP_COMPLEX) {
+        comp_scal = 1;
+        ca[i] = argv[i + 2]->value.cmp.r +
+          _Complex_I * argv[i + 2]->value.cmp.i;
+      } else if (argv[i + 2]->type == IDL_TYP_DCOMPLEX) {
+        comp_scal = 1;
+        ca[i] = argv[i + 2]->value.dcmp.r +
+          _Complex_I * argv[i + 2]->value.dcmp.i;
+      } else
+        ca[i] = a[i] = IDL_DoubleScalar(argv[i + 2]);
   }
 
   if (kw.parent_x) {
     const char* parent = IDL_STRING_STR(&kw.parent);
-    dirfile_madd_polynom(D, field_code, parent, poly_ord, in_field, a);
-  } else
+    if (comp_scal)
+      dirfile_madd_cpolynom(D, field_code, parent, poly_ord, in_field, ca);
+    else
+      dirfile_madd_polynom(D, field_code, parent, poly_ord, in_field, a);
+  } else if (comp_scal)
+    dirfile_add_cpolynom(D, field_code, poly_ord, in_field, ca,
+        kw.fragment_index);
+  else
     dirfile_add_polynom(D, field_code, poly_ord, in_field, a,
         kw.fragment_index);
 
@@ -1296,6 +1495,8 @@ void gdidl_dirfile_alter_bit(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
+/* @@DLM: P gdidl_dirfile_alter_lincom DIRFILE_ALTER_CLINCOM 2 2 KEYWORDS */
+
 /* @@DLM: P gdidl_dirfile_alter_const DIRFILE_ALTER_CONST 2 2 KEYWORDS */
 void gdidl_dirfile_alter_const(int argc, IDL_VPTR argv[], char *argk)
 {
@@ -1332,6 +1533,8 @@ void gdidl_dirfile_alter_const(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
+/* @@DLM: P gdidl_dirfile_alter_polynom DIRFILE_ALTER_CPOLYNOM 2 2 KEYWORDS */
+
 /* @@DLM: P gdidl_dirfile_alter_encoding DIRFILE_ALTER_ENCODING 2 2 KEYWORDS */
 void gdidl_dirfile_alter_encoding(int argc, IDL_VPTR argv[], char *argk)
 {
@@ -1358,7 +1561,7 @@ void gdidl_dirfile_alter_encoding(int argc, IDL_VPTR argv[], char *argk)
   IDL_KWProcessByOffset(argc, argv, argk, kw_pars, NULL, 1, &kw);
 
   DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
-  
+
   dirfile_alter_encoding(D, gdidl_convert_encoding(argv[1]), kw.fragment_index,
       kw.recode);
 
@@ -1401,7 +1604,7 @@ void gdidl_dirfile_alter_endianness(int argc, IDL_VPTR argv[], char *argk)
   IDL_KWProcessByOffset(argc, argv, argk, kw_pars, NULL, 1, &kw);
 
   DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
-  
+
   dirfile_alter_endianness(D, (kw.big_end ? GD_BIG_ENDIAN : 0) | 
       (kw.little_end ? GD_LITTLE_ENDIAN : 0), kw.fragment_index, kw.recode);
 
@@ -1476,7 +1679,7 @@ void gdidl_dirfile_alter_frameoffset(int argc, IDL_VPTR argv[], char *argk)
   IDL_KWProcessByOffset(argc, argv, argk, kw_pars, NULL, 1, &kw);
 
   DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
-  
+
   dirfile_alter_frameoffset64(D, IDL_Long64Scalar(argv[1]), kw.fragment_index,
       kw.recode);
 
@@ -1509,9 +1712,12 @@ void gdidl_dirfile_alter_lincom(int argc, IDL_VPTR argv[], char *argk)
   const char* local_in_field[3];
   double* m = NULL;
   double* b = NULL;
+  double complex* cm = NULL;
+  double complex* cb = NULL;
   const char** in_field = NULL;
   IDL_VPTR tmp_m = NULL;
   IDL_VPTR tmp_b = NULL;
+  int comp_scal = 1;
 
   GDIDL_KW_INIT_ERROR;
   kw.in_field = kw.m = kw.b = NULL;
@@ -1551,17 +1757,34 @@ void gdidl_dirfile_alter_lincom(int argc, IDL_VPTR argv[], char *argk)
 
   if (kw.m_x) {
     IDL_ENSURE_ARRAY(kw.m);
-    tmp_m = IDL_CvtDbl(1, &kw.m);
-    m = (double*)tmp_m->value.arr->data;
+    if (kw.m->type == IDL_TYP_COMPLEX || kw.m->type == IDL_TYP_DCOMPLEX) {
+      comp_scal = 1;
+      tmp_m = IDL_CvtDbl(1, &kw.m); 
+      cm = malloc(sizeof(double complex) * tmp_m->value.arr->dim[0]);
+      gdidl_dcmp_to_c99(cm, (IDL_DCOMPLEX*)tmp_m->value.arr->data, kw.n_fields);
+    } else {
+      tmp_m = IDL_CvtDbl(1, &kw.m);
+      m = (double*)tmp_m->value.arr->data;
+    }
   }
 
   if (kw.b_x) {
     IDL_ENSURE_ARRAY(kw.b);
-    tmp_b = IDL_CvtDbl(1, &kw.b);
-    b = (double*)kw.b->value.arr->data;
+    if (kw.b->type == IDL_TYP_COMPLEX || kw.b->type == IDL_TYP_DCOMPLEX) {
+      comp_scal = 1;
+      tmp_b = IDL_CvtDbl(1, &kw.b); 
+      cb = malloc(sizeof(double complex) * tmp_b->value.arr->dim[0]);
+      gdidl_dcmp_to_c99(cb, (IDL_DCOMPLEX*)tmp_b->value.arr->data, kw.n_fields);
+    } else {
+      tmp_b = IDL_CvtDbl(1, &kw.b);
+      b = (double*)tmp_b->value.arr->data;
+    }
   }
 
-  dirfile_alter_lincom(D, field_code, kw.n_fields, in_field, m, b);
+  if (comp_scal)
+    dirfile_alter_clincom(D, field_code, kw.n_fields, in_field, cm, cb);
+  else
+    dirfile_alter_lincom(D, field_code, kw.n_fields, in_field, m, b);
 
   GDIDL_SET_ERROR(D);
 
@@ -1571,6 +1794,9 @@ void gdidl_dirfile_alter_lincom(int argc, IDL_VPTR argv[], char *argk)
     IDL_Deltmp(tmp_m);
   if (tmp_b != NULL && kw.b->type != IDL_TYP_DOUBLE)
     IDL_Deltmp(tmp_b);
+
+  free(cm);
+  free(cb);
 
   dreturnvoid();
 }
@@ -1741,7 +1967,9 @@ void gdidl_dirfile_alter_polynom(int argc, IDL_VPTR argv[], char *argk)
   } KW_RESULT;
   KW_RESULT kw;
 
+  int comp_scal = 1;
   double* a = NULL;
+  double complex* ca = NULL;
   const char* in_field = NULL;
   IDL_VPTR tmp_a = NULL;
 
@@ -1765,11 +1993,22 @@ void gdidl_dirfile_alter_polynom(int argc, IDL_VPTR argv[], char *argk)
 
   if (kw.a_x) {
     IDL_ENSURE_ARRAY(kw.a);
-    tmp_a = IDL_CvtDbl(1, &kw.a);
-    a = (double*)tmp_a->value.arr->data;
+    if (kw.a->type == IDL_TYP_COMPLEX || kw.a->type == IDL_TYP_DCOMPLEX) {
+      comp_scal = 1;
+      tmp_a = IDL_CvtDbl(1, &kw.a); 
+      ca = malloc(sizeof(double complex) * tmp_a->value.arr->dim[0]);
+      gdidl_dcmp_to_c99(ca, (IDL_DCOMPLEX*)tmp_a->value.arr->data,
+          kw.poly_ord + 1);
+    } else {
+      tmp_a = IDL_CvtDbl(1, &kw.a);
+      a = (double*)tmp_a->value.arr->data;
+    }
   }
 
-  dirfile_alter_polynom(D, field_code, kw.poly_ord, in_field, a);
+  if (comp_scal)
+    dirfile_alter_cpolynom(D, field_code, kw.poly_ord, in_field, ca);
+  else
+    dirfile_alter_polynom(D, field_code, kw.poly_ord, in_field, a);
 
   GDIDL_SET_ERROR(D);
 
@@ -1780,6 +2019,8 @@ void gdidl_dirfile_alter_polynom(int argc, IDL_VPTR argv[], char *argk)
    * the temporary variable */
   if (tmp_a != NULL && kw.a->type != IDL_TYP_DOUBLE)
     IDL_Deltmp(tmp_a);
+
+  free(ca);
 
   dreturnvoid();
 }
@@ -1965,7 +2206,7 @@ void gdidl_dirfile_delete(int argc, IDL_VPTR argv[], char *argk)
 
   kw.data = kw.deref = kw.force = 0;
   GDIDL_KW_INIT_ERROR;
-  
+
   static IDL_KW_PAR kw_pars[] = {
     { "DATA", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(data) },
     { "DEREF", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(deref) },
@@ -1975,7 +2216,7 @@ void gdidl_dirfile_delete(int argc, IDL_VPTR argv[], char *argk)
   };
 
   IDL_KWProcessByOffset(argc, argv, argk, kw_pars, NULL, 1, &kw);
-  
+
   DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
   const char* field_code = IDL_VarGetString(argv[1]);
 
@@ -2151,7 +2392,9 @@ void gdidl_dirfile_include(int argc, IDL_VPTR argv[], char *argk)
 
 /* @@DLM: P gdidl_dirfile_add DIRFILE_MADD 2 2 KEYWORDS */
 /* @@DLM: P gdidl_dirfile_add_bit DIRFILE_MADD_BIT 3 3 KEYWORDS */
+/* @@DLM: P gdidl_dirfile_add_lincom DIRFILE_MADD_CLINCOM 5 11 KEYWORDS */
 /* @@DLM: P gdidl_dirfile_add_const DIRFILE_MADD_CONST 2 2 KEYWORDS */
+/* @@DLM: P gdidl_dirfile_add_polynom DIRFILE_MADD_CPOLYNOM 4 8 KEYWORDS */
 /* @@DLM: P gdidl_dirfile_add_lincom DIRFILE_MADD_LINCOM 5 11 KEYWORDS */
 /* @@DLM: P gdidl_dirfile_add_linterp DIRFILE_MADD_LINTERP 4 4 KEYWORDS */
 /* @@DLM: P gdidl_dirfile_add_multiply DIRFILE_MADD_MULTIPLY 4 4 KEYWORDS */
@@ -2419,6 +2662,26 @@ void gdidl_dirfile_uninclude(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
+/* @@DLM: F gdidl_dirfile_validate DIRFILE_VALIDATE 2 2 KEYWORDS */
+IDL_VPTR gdidl_dirfile_validate(int argc, IDL_VPTR argv[], char *argk)
+{
+  dtraceidl();
+
+  GDIDL_KW_ONLY_ERROR;
+
+  DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
+  const char* field_code = IDL_VarGetString(argv[1]);
+
+  int v = dirfile_validate(D, field_code);
+
+  GDIDL_SET_ERROR(D);
+
+  IDL_KW_FREE;
+
+  IDL_VPTR r = IDL_GettmpInt(v);
+  dreturn("%p", r);
+  return r;
+}
 /* @@DLM: F gdidl_getdata GETDATA 2 2 KEYWORDS */
 IDL_VPTR gdidl_getdata(int argc, IDL_VPTR argv[], char *argk)
 {
@@ -2860,41 +3123,48 @@ IDL_VPTR gdidl_get_fragmentname(int argc, IDL_VPTR argv[], char *argk)
   return r;
 }
 
-/* @@DLM: F gdidl_get_frameoffset GET_FRAMEOFFSET 1 1 KEYWORDS */
-IDL_VPTR gdidl_get_frameoffset(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: F gdidl_get_framenum GET_FRAMENUM 3 3 KEYWORDS */
+/* @@DLM: F gdidl_get_framenum GET_FRAMENUM_SUBSET 3 3 KEYWORDS */
+IDL_VPTR gdidl_get_framenum(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
   typedef struct {
     IDL_KW_RESULT_FIRST_FIELD;
     GDIDL_KW_RESULT_ERROR;
-    int fragment_index;
+    IDL_LONG64 frame_start;
+    IDL_LONG64 frame_end;
   } KW_RESULT;
   KW_RESULT kw;
 
   GDIDL_KW_INIT_ERROR;
-  kw.fragment_index = 0;
+  kw.frame_start = 0;
+  kw.frame_end = 0;
 
   static IDL_KW_PAR kw_pars[] = {
+    { "END", IDL_TYP_LONG64, 1, 0, 0, IDL_KW_OFFSETOF(frame_end) },
     GDIDL_KW_PAR_ERROR,
     GDIDL_KW_PAR_ESTRING,
-    { "FRAGMENT", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(fragment_index) },
+    { "START", IDL_TYP_LONG64, 1, 0, 0, IDL_KW_OFFSETOF(frame_start) },
     { NULL }
   };
 
   IDL_KWProcessByOffset(argc, argv, argk, kw_pars, NULL, 1, &kw);
 
   DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
+  const char* field_code = IDL_VarGetString(argv[1]);
+  double value = IDL_DoubleScalar(argv[2]);
 
-  off64_t foffs = get_frameoffset64(D, kw.fragment_index);
+  double frame = get_framenum_subset64(D, field_code, value, kw.frame_start,
+      kw.frame_end);
 
   GDIDL_SET_ERROR(D);
 
   IDL_KW_FREE;
 
   IDL_VPTR r = IDL_Gettmp();
-  r->type = IDL_TYP_LONG64;
-  r->value.l64 = (IDL_LONG64)foffs;
+  r->type = IDL_TYP_DOUBLE;
+  r->value.d = frame;
   dreturn("%p", r);
   return r;
 }
@@ -2905,6 +3175,27 @@ IDL_VPTR gdidl_get_frameoffset(int argc, IDL_VPTR argv[], char *argk)
 /* @@DLM: F gdidl_get_field_list GET_MFIELD_LIST_BY_TYPE 1 1 KEYWORDS */
 /* @@DLM: F gdidl_get_strings GET_MSTRINGS 1 1 KEYWORDS */
 /* @@DLM: F gdidl_get_vector_list GET_MVECTOR_LIST 1 1 KEYWORDS */
+
+/* @@DLM: F gdidl_get_native_type GET_NATIVE_TYPE 2 2 KEYWORDS */
+IDL_VPTR gdidl_get_native_type(int argc, IDL_VPTR argv[], char *argk)
+{
+  dtraceidl();
+
+  GDIDL_KW_ONLY_ERROR;
+
+  DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
+  const char* field_code = IDL_VarGetString(argv[1]);
+
+  gd_type_t t = get_native_type(D, field_code);
+
+  GDIDL_SET_ERROR(D);
+
+  IDL_KW_FREE;
+
+  IDL_VPTR r = IDL_GettmpInt(t);
+  dreturn("%p", r);
+  return r;
+}
 
 /* @@DLM: F gdidl_get_nfields GET_NFIELDS 1 1 KEYWORDS */
 /* @@DLM: F gdidl_get_nfields GET_NFIELDS_BY_TYPE 1 1 KEYWORDS */
@@ -3393,10 +3684,14 @@ static IDL_STRUCT_TAG_DEF gdidl_entry[] = {
 
   { "IN_FIELDS",  lincom_dims, (void*)IDL_TYP_STRING },
   { "A",          polynom_dims, (void*)IDL_TYP_DOUBLE }, /* POLYNOM */
+  { "CA",         polynom_dims, (void*)IDL_TYP_DOUBLE }, /* POLYNOM */
   { "B",          lincom_dims, (void*)IDL_TYP_DOUBLE }, /* LINCOM */
+  { "CB",         lincom_dims, (void*)IDL_TYP_DOUBLE }, /* LINCOM */
   { "BITNUM",     0, (void*)IDL_TYP_INT }, /* (S)BIT */
+  { "COMP_SCAL",  0, (void*)IDL_TYP_INT }, /* LINCOM / POLYNOM */
   { "DATA_TYPE",  0, (void*)IDL_TYP_INT }, /* RAW / CONST */
   { "M",          lincom_dims, (void*)IDL_TYP_DOUBLE }, /* LINCOM */
+  { "CM",         lincom_dims, (void*)IDL_TYP_DOUBLE }, /* LINCOM */
   { "NFIELDS",    0, (void*)IDL_TYP_INT },  /* LINCOM */
   { "NUMBITS",    0, (void*)IDL_TYP_INT }, /* (S)BIT */
   { "POLY_ORD",   0, (void*)IDL_TYP_INT }, /* POLYNOM */

@@ -36,7 +36,7 @@ if MAKE_PYBINDINGS
 PY_SUBDIR=python
 endif
 
-SUBDIRS = ${CXX_SUBDIR} ${F77_SUBDIR} ${IDL_SUBDIR} ${PY_SUBDIR}
+SUBDIRS = ${CXX_SUBDIR} ${F77_SUBDIR} ${PY_SUBDIR} ${IDL_SUBDIR}
 
 clean-local:
 	rm -rf *~ 

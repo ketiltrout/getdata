@@ -27,21 +27,35 @@
 
 using namespace GetData;
 
-PolynomEntry::PolynomEntry(const char* field_code, int n_fields,
-    const char** in_fields, double* m, double* b, int fragment_index) :
+PolynomEntry::PolynomEntry(const char* field_code, int poly_ord,
+    const char* in_field, double* a, int fragment_index) : Entry::Entry()
+{
+  int i;
+
+  E.field = strdup(field_code);
+  E.field_type = GD_POLYNOM_ENTRY;
+  E.poly_ord = poly_ord;
+  E.fragment_index = fragment_index;
+  E.comp_scal = 0;
+  E.in_fields[0] = strdup(in_field);
+  for (i = 0; i <= poly_ord; ++i)
+    E.a[i] = a[i];
+}
+
+PolynomEntry::PolynomEntry(const char* field_code, int poly_ord,
+    const char* in_field, double complex* ca, int fragment_index) :
   Entry::Entry()
 {
   int i;
 
   E.field = strdup(field_code);
-  E.field_type = GD_LINCOM_ENTRY;
-  E.n_fields = n_fields;
+  E.field_type = GD_POLYNOM_ENTRY;
+  E.poly_ord = poly_ord;
   E.fragment_index = fragment_index;
-  for (i = 0; i < n_fields; ++i) {
-    E.in_fields[i] = strdup(in_fields[i]);
-    E.m[i] = m[i];
-    E.b[i] = b[i];
-  }
+  E.comp_scal = 1;
+  E.in_fields[0] = strdup(in_field);
+  for (i = 0; i <= poly_ord; ++i)
+    E.ca[i] = ca[i];
 }
 
 int PolynomEntry::SetInput(const char* field)

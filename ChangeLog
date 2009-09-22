@@ -1,3 +1,77 @@
+2009-09-21   D. V. Wiebe <getdata@ketiltrout.net>  svn:311 
+	* src/getdata.h.in: complex_scalars member shortened to comp_scal.
+
+	* test/add_cpolynom.c test/add_clincom.c test/index.c test/index_range.c
+	test/madd_clincom.c test/index_domain.c test/madd_const.c: Added.
+
+	* test/madd_bit.c test/madd_lincom.c test/add_lincom.c test/add_phase.c
+	test/add_multiply.c test/add_bit.c test/add_const.c test/add_linterp.c
+	test/add.c test/add_sbit.c test/madd.c test/add_raw.c test/add_polynom.c
+	test/add_spec.c: Make more rigourous tests for success.
+
+	* src/entry.c (dirfile_validate): Added.
+
+	* src/getdata.c (_GD_DoField): removed the largely unnecessary field_code
+	argument.  All callers changed.
+	* src/putdata.c (_GD_DoFieldOut): ditto.
+
+	* src/legacy.c (CopyPolynomEntry GetFormat): Report POLYNOMs and LINCOMs.
+	Similarly, report SBITs as BITs.
+
+	* src/index.c: Added.
+
+	* src/getdata.c (_GD_DoLincom _GD_DoPolynom): Select complex versions of the
+	calculation functions based on E->comp_scal, not the native type.
+
+	* src/errors.c (get_error_string): Properly report success.
+
+	* src/getdata.c src/internal.h: Moved the NAN() function to the header.
+
+	* src/getdata.h.in: Removed a number of GNUisms.
+
+	* src/add.c (_GD_Add): Set E->comp_scal for LINCOMs and POLYNOMs.  Fix
+	copying of POLYNOM parameters.
+	* src/add.c (dirfile_madd_clincom): Set comp_scal correctly.
+
+	* src/add.c (dirfile_madd_const): Search for the correct field code.
+	
+	* bindings/python/test/callback.py bindings/python/test/tst_getdata.py:
+	Added.
+
+	* bindings/python/pygetdata.c bindings/python/pyconstants.c
+	bindings/python/pydirfile.c bindings/python/pygetdata.h
+	bindings/python/pyentry.c: Update for get_framenum() and complex values.
+
+	* bindings/cxx/dirfile.cpp (Dirfile::NativeType Dirfile::Validate
+	Dirfile::FrameNum): Added.
+	* bindings/cxx/lincomentry.cpp bindings/cxx/polynomentry.cpp
+	bindings/cxx/getdata/polynomentry.h: Update for complex values.
+
+	* bindings/f77/test/big_test.f: Added.
+
+	* bindings/f77/fgetdata.c (_GDF_FString): Don't unnecessarily cut of the
+	last character of the string.  Also, don't corrupt memory.
+	* bindings/f77/fgetdata.c (GDFLDN GDMFDN): Check for field_num < 0.
+	* bindings/f77/fgetdata.c (GDESTR): Properly space-pad the string.
+	* bindings/f77/fgetdata.c (GDGERW GDGELC GDGEPN GDGECP GDGEBT GDGESB GDGEMT
+	GDGEPH GDGECO): Fix crash-on-error due to indiscriminate use of
+	dirfile_free_entry_strings().
+
+	* bindings/f77/fgetdata.c (GDGEPN): Fix multiple bugs resulting from
+	improper translationg from GDGELC.
+
+	* bindings/f77/fgetdata.c (GDGECL GDGECP GDADCL GDADCP GDMDCL GDMDCP GDALCL
+	GDALCP GDNTYP GDCSCL GDVLDT GDFNUM GDFNSS): Added.
+
+	* bindings/f77/getdata.f90.in (fgetdata_c8 fgetdata_c16 fget_constant_c8
+	fget_constant_c16 fputdata_c8 fputdata_c16 fput_constant_c8
+	fput_constant_c16 fdirfile_add_clincom fdirfile_add_cpolynom
+	fdirfile_madd_clincom fdirfile_madd_cpolynom fdirfile_alter_clincom
+	fdirfile_alter_cpolynom fget_native_type fdirfile_validate fget_framenum
+	fget_framenum_subset): Added.
+
+	* bindings/idl/getdata.c: Update.
+
 2009-09-21   D. V. Wiebe <getdata@ketiltrout.net>  svn:309 
 	* src/meta_list.c (get_mstrings): Properly terminate the list.  Bug
 	report from MDT.

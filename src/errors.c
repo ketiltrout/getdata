@@ -96,7 +96,8 @@ static const struct {
   /* GD_E_ALLOC: (nothing) */
   { GD_E_ALLOC, 0, "Memory allocation error", 0 },
   /* GD_E_RANGE: (nothing) */
-  { GD_E_RANGE, 0, "Request out of range", 0 },
+  { GD_E_RANGE, GD_E_OUT_OF_RANGE, "Request out of range", 0 },
+  { GD_E_RANGE, GD_E_SINGULAR_RANGE, "Singular range", 0 },
   /* GD_E_OPEN_LINFILE: 1 = suberror, 2 = errno, 4 = lutfile */
   { GD_E_OPEN_LINFILE, GD_E_LINFILE_LENGTH, "LINTERP table {4} too short", 0 },
   { GD_E_OPEN_LINFILE, 0, "Error opening LINTERP table {4}: ", 2 },
@@ -167,6 +168,9 @@ static const struct {
   { GD_E_BAD_REPR, GD_E_REPR_UNKNOWN, "Unknown field representation: .{4}", 0 },
   { GD_E_BAD_REPR, GD_E_REPR_PUT, "Unable to write to field reprentation: .{4}",
     0 },
+  /* GD_E_DOMAIN: (nothing) */
+  { GD_E_DOMAIN, GD_E_DOMAIN_COMPLEX, "Improper domain: complex valued", 0 },
+  { GD_E_DOMAIN, GD_E_DOMAIN_EMPTY, "Improper domain: empty set", 0 },
   /* GD_E_OK: (nothing) */
   { 0, 0, "Success", 0} /* this must be the last error string defined */
 };
@@ -232,6 +236,9 @@ char* get_error_string(const DIRFILE* D, char* buffer, size_t buflen)
       s = i;
       break;
     }
+
+  if (D->error == 0)
+    s = i;
 
   if (s == -1) /* Unhandled error */
     snprintf(buffer, buflen, "Unknown error %i:%i. Please report to "

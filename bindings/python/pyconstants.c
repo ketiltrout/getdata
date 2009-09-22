@@ -53,6 +53,8 @@ const struct gdpy_constant_t gdpy_constant_list[] = {
   GDPY_CONSTANT(E_CALLBACK),
   GDPY_CONSTANT(E_BAD_PROTECTION),
   GDPY_CONSTANT(E_UNCLEAN_DB),
+  GDPY_CONSTANT(E_DOMAIN),
+  GDPY_CONSTANT(E_BAD_REPR),
   GDPY_CONSTANT(RDONLY),
   GDPY_CONSTANT(RDWR),
   GDPY_CONSTANT(FORCE_ENDIAN),
@@ -95,6 +97,8 @@ const struct gdpy_constant_t gdpy_constant_list[] = {
   GDPY_CONSTANT(INT64),
   GDPY_CONSTANT(FLOAT32),
   GDPY_CONSTANT(FLOAT64),
+  GDPY_CONSTANT(COMPLEX64),
+  GDPY_CONSTANT(COMPLEX128),
   GDPY_CONSTANT(DEL_META),
   GDPY_CONSTANT(DEL_DATA),
   GDPY_CONSTANT(DEL_DEREF),
@@ -134,5 +138,6 @@ const struct gdpy_constant_t gdpy_constant_list[] = {
   { "LONG", GD_INT64 },
   { "ULONG", GD_UINT64 },
   { "FLOAT", GD_FLOAT64 },
+  { "COMPLEX", GD_COMPLEX128 },
   { NULL, 0 }
 };

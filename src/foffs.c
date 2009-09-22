@@ -128,7 +128,7 @@ int dirfile_alter_frameoffset64(DIRFILE* D, off64_t offset, int fragment,
   }
 
   if (offset < 0) {
-    _GD_SetError(D, GD_E_RANGE, 0, NULL, 0, NULL);
+    _GD_SetError(D, GD_E_RANGE, GD_E_OUT_OF_RANGE, NULL, 0, NULL);
     dreturn("%i", -1);
     return -1;
   }

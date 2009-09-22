@@ -34,13 +34,13 @@ LDADD=../src/libgetdata.la
 INCLUDES=-Wall $(WEXTRA) -I$(top_srcdir)/src -D__TEST__=\"$@\"
 
 ADD_TESTS=add add_bit add_bit_bitnum add_bit_bitsize add_bit_invalid \
-					add_bit_numbits add_code add_const add_duplicate add_format \
-					add_invalid add_lincom add_lincom_invalid add_lincom_nfields \
-					add_linterp add_linterp_invalid add_many add_multiply \
-					add_multiply_invalid add_phase add_phase_invalid add_polynom \
-					add_protect add_raw add_raw_invalid add_raw_spf add_raw_type \
-					add_rdonly add_sbit add_sort add_spec add_spec_directive \
-					add_spec_invalid add_string add_type
+					add_bit_numbits add_clincom add_code add_const add_cpolynom \
+					add_duplicate add_format add_invalid add_lincom add_lincom_invalid \
+					add_lincom_nfields add_linterp add_linterp_invalid add_many \
+					add_multiply add_multiply_invalid add_phase add_phase_invalid \
+					add_polynom add_protect add_raw add_raw_invalid add_raw_spf \
+					add_raw_type add_rdonly add_sbit add_sort add_spec \
+					add_spec_directive add_spec_invalid add_string add_type
 
 ALTER_TESTS=alter_bit_bitnum alter_bit_numbits alter_const alter_entry \
 						alter_entry_recode alter_lincom_input alter_lincom_offset \
@@ -145,6 +145,8 @@ INCLUDE_TESTS=include include_accmode include_auto include_cb include_creat \
 							include_ignore include_index include_invalid include_nonexistent \
 							include_pc include_ref include_syntax
 
+INDEX_TESTS=index index_domain index_range
+
 if INCLUDE_LEGACY_API
 LEGACY_TESTS=legacy_get legacy_get_put legacy_get_rofs legacy_nframes \
 			legacy_nonexistent legacy_put legacy_spf
@@ -154,7 +156,7 @@ if TEST_LZMA
 LZMA_TESTS=lzma_get lzma_nframes
 endif
 
-MADD_TESTS=madd madd_bit madd_bit_invalid madd_lincom madd_lincom_invalid \
+MADD_TESTS=madd madd_bit madd_bit_invalid madd_clincom madd_const madd_lincom madd_lincom_invalid \
 					 madd_linterp madd_linterp_invalid madd_multiply \
 					 madd_multiply_invalid madd_phase madd_phase_invalid madd_polynom \
 					 madd_sbit madd_spec madd_spec_directive madd_spec_invalid
@@ -239,22 +241,23 @@ if TEST_LZMA
 XZ_TESTS=xz_get xz_nframes
 endif
 
-TESTS=$(ADD_TESTS)        $(ALTER_TESTS)      $(ASCII_TESTS)      \
+TESTS=$(MADD_TESTS)
+rESTS=$(ADD_TESTS)        $(ALTER_TESTS)      $(ASCII_TESTS)      \
 			$(BZIP_TESTS)       $(CVLIST_TESTS)     $(CLOSE_TESTS)      \
 			$(CONVERT_TESTS)    $(CREAT_TESTS)      $(DEL_TESTS)        \
 			$(DFES_TESTS)       $(ENCODE_TESTS)     $(ENDIAN_TESTS)     \
 			$(ENTRY_TESTS)      $(ERROR_TESTS)      $(FILE_TESTS)       \
 			$(FLIST_TESTS)      $(FLUSH_TESTS)      $(FOFFS_TESTS)      \
 			$(FRAGMENT_TESTS)   $(GET_TESTS)        $(GLOBAL_TESTS)     \
-			$(GZIP_TESTS)       $(INCLUDE_TESTS)    $(LEGACY_TESTS)     \
-			$(LZMA_TESTS)       $(MADD_TESTS)       $(MOVE_TESTS)       \
-			$(NAME_TESTS)       $(NFIELDS_TESTS)    $(NFRAGMENTS_TESTS) \
-			$(NFRAMES_TESTS)    $(NMETA_TESTS)      $(NVECTORS_TESTS)   \
-			$(OPEN_TESTS)       $(PARENT_TESTS)     $(PARSE_TESTS)      \
-			$(PROTECT_TESTS)    $(PUT_TESTS)        $(REF_TESTS)        \
-			$(SLIM_TESTS)       $(SPF_TESTS)        $(SVLIST_TESTS)     \
-			$(TRUNC_TESTS)      $(UNCLUDE_TESTS)    $(VLIST_TESTS)      \
-			$(XZ_TESTS)
+			$(GZIP_TESTS)       $(INCLUDE_TESTS)    $(INDEX_TESTS)      \
+			$(LEGACY_TESTS)     $(LZMA_TESTS)       $(MADD_TESTS)       \
+			$(MOVE_TESTS)       $(NAME_TESTS)       $(NFIELDS_TESTS)    \
+			$(NFRAGMENTS_TESTS) $(NFRAMES_TESTS)    $(NMETA_TESTS)      \
+			$(NVECTORS_TESTS)   $(OPEN_TESTS)       $(PARENT_TESTS)     \
+			$(PARSE_TESTS)      $(PROTECT_TESTS)    $(PUT_TESTS)        \
+			$(REF_TESTS)        $(SLIM_TESTS)       $(SPF_TESTS)        \
+			$(SVLIST_TESTS)     $(TRUNC_TESTS)      $(UNCLUDE_TESTS)    \
+			$(VLIST_TESTS)      $(XZ_TESTS)
 
 check_PROGRAMS=$(TESTS)
 

@@ -27,8 +27,12 @@ C     constants useful to Fortran programs
 C Externals
 C     Corresponding to dirfile_add_bit(3)
       EXTERNAL GDADBT
+C     Corresponding to dirfile_add_clincom(3)
+      EXTERNAL GDADCL
 C     Corresponding to dirfile_add_const(3)
       EXTERNAL GDADCO
+C     Corresponding to dirfile_add_cpolynom(3)
+      EXTERNAL GDADCP
 C     Corresponding to dirfile_add_lincom(3)
       EXTERNAL GDADLC
 C     Corresponding to dirfile_add_linterp(3)
@@ -55,8 +59,12 @@ C     Correpsonding to dirfile_alter_frameoffset(3)
       EXTERNAL GDAFOF
 C     Correpsonding to dirfile_alter_bit(3)
       EXTERNAL GDALBT
+C     Correpsonding to dirfile_alter_clincom(3)
+      EXTERNAL GDALCL
 C     Correpsonding to dirfile_alter_const(3)
       EXTERNAL GDALCO
+C     Correpsonding to dirfile_alter_cpolynom(3)
+      EXTERNAL GDALCP
 C     Correpsonding to dirfile_alter_lincom(3)
       EXTERNAL GDALLC
 C     Correpsonding to dirfile_alter_linterp(3)
@@ -79,6 +87,8 @@ C     Corresponding to dirfile_close(3)
       EXTERNAL GDCLOS
 C     Corresponding to dirfile_copen(3)
       EXTERNAL GDCOPN
+C     Check whether an entry contains complex scalars
+      EXTERNAL GDCSCL
 C     Correpsonding to dirfile_delete(3)
       EXTERNAL GDDELE
 C     Corresponding to dirfile_discard(3)
@@ -97,14 +107,22 @@ C     Corresponding to get_field_list(3) (sort of)
       EXTERNAL GDFLDN
 C     Corresponding to dirfile_flush(3)
       EXTERNAL GDFLSH
+C     Corresponding to get_framenum_subset(3)
+      EXTERNAL GDFNSS
+C     Corresponding to get_framenum(3)
+      EXTERNAL GDFNUM
 C     Corresponding to get_fragment_index(3)
       EXTERNAL GDFRGI
 C     Corresponding to get_fragmentname(3)
       EXTERNAL GDFRGN
 C     Corresponding to get_entry(3) for BIT fields
       EXTERNAL GDGEBT
+C     Corresponding to get_entry(3) for complex valued LINCOM fields
+      EXTERNAL GDGECL
 C     Corresponding to get_entry(3) for CONST fields
       EXTERNAL GDGECO
+C     Corresponding to get_entry(3) for complex valued POLYNOM fields
+      EXTERNAL GDGECP
 C     Corresponding to get_entry(3) for LINCOM fields
       EXTERNAL GDGELC
 C     Corresponding to get_entry(3) for LINTERP fields
@@ -141,8 +159,12 @@ C     Corresponding to dirfile_include(3)
       EXTERNAL GDINCL
 C     Corresponding to dirfile_madd_bit(3)
       EXTERNAL GDMDBT
+C     Corresponding to complex valued dirfile_madd_clincom(3)
+      EXTERNAL GDMDCL
 C     Corresponding to dirfile_madd_const(3)
       EXTERNAL GDMDCO
+C     Corresponding to dirfile_madd_cpolynom(3)
+      EXTERNAL GDMDCP
 C     Corresponding to dirfile_madd_lincom(3)
       EXTERNAL GDMDLC
 C     Corresponding to dirfile_madd_linterp(3)
@@ -189,6 +211,8 @@ C     Corresponding to get_nmfields_by_type(3)
       EXTERNAL GDNMFT
 C     Corresponding to get_nmvectors(3)
       EXTERNAL GDNMVE
+C     Corresponding to get_native_type(3)
+      EXTERNAL GDNTYP
 C     Corresponding to get_nvectors(3)
       EXTERNAL GDNVEC
 C     Corresponding to dirfile_open(3)
@@ -213,3 +237,5 @@ C     Corresponding to dirfile_uninclude(3)
       EXTERNAL GDUINC
 C     Corresponding to get_vector_list(3) (sort of)
       EXTERNAL GDVECN
+C     Corresponding to dirfile_validate(3)
+      EXTERNAL GDVLDT

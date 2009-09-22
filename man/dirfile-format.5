@@ -1,6 +1,6 @@
 .\" dirfile-format.5.  The dirfile format file man page.
 .\"
-.\" (C) 2005, 2006, 2008 D. V. Wiebe
+.\" (C) 2005, 2006, 2008, 2009 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH dirfile\-format 5 "22 December 2008" "Standards Version 6" "DATA FORMATS"
+.TH dirfile\-format 5 "20 September 2009" "Standards Version 6" "DATA FORMATS"
 .SH NAME
 dirfile\-format \(em the dirfile database format specification file
 .SH DESCRIPTION
@@ -49,7 +49,8 @@ characters.  These are: space (0x20), horizontal tab (0x09), vertical tab
 (0x0B), form-feed (0x0C), and carriage return (0x0D).  The first token of a
 directive line is always a
 .IR "reserved word" .
-The first token of a field specification line is never a reserved word.
+The first token of a field specification line is never a reserved word.  Any
+amount of whitespace may precede the first token on a line.
 
 Since tokens are separated by whitespace, to include a whitespace character in
 a token, it must either escaped by preceding it by a backslash character

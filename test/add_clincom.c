@@ -1,4 +1,4 @@
-/* Add a LINCOM field */
+/* Add a complex LINCOM field */
 #include "../src/getdata.h"
 
 #include <stdlib.h>
@@ -18,12 +18,12 @@ int main(void)
 
   DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
   const char* in_fields[2] = {"in1", "in2"};
-  const double m[2] = {1, 0.3};
-  const double b[2] = {5, 0.9};
+  const double complex m[2] = {1 + _Complex_I * 3.3, 0.3 + _Complex_I * 18.3};
+  const double complex b[2] = {2 + _Complex_I * 3.8, 2.1 + _Complex_I * 9.8};
   int r = 0;
   gd_entry_t e;
 
-  dirfile_add_lincom(D, "new", 2, in_fields, m, b, 0);
+  dirfile_add_clincom(D, "new", 2, in_fields, m, b, 0);
   int error = get_error(D);
 
   /* check */
@@ -51,23 +51,23 @@ int main(void)
       fprintf(stderr, "in_fields[1] = %s\n", e.in_fields[1]);
       r = 1;
     }
-    if (fabs(e.m[0] - m[0]) > 1e-6) {
-      fprintf(stderr, "m[0] = %g\n", e.m[0]);
+    if (cabs(e.cm[0] - m[0]) > 1e-6) {
+      fprintf(stderr, "m[0] = %g;%g\n", creal(e.m[0]), cimag(e.m[0]));
       r = 1;
     }
-    if (fabs(e.m[1] - m[1]) > 1e-6) {
-      fprintf(stderr, "m[1] = %g\n", e.m[1]);
+    if (cabs(e.cm[1] - m[1]) > 1e-6) {
+      fprintf(stderr, "m[1] = %g;%g\n", creal(e.m[1]), cimag(e.m[1]));
       r = 1;
     }
-    if (fabs(e.b[0] - b[0]) > 1e-6) {
-      fprintf(stderr, "b[0] = %g\n", e.b[0]);
+    if (cabs(e.cb[0] - b[0]) > 1e-6) {
+      fprintf(stderr, "b[0] = %g;%g\n", creal(e.b[0]), cimag(e.b[0]));
       r = 1;
     }
-    if (fabs(e.b[1] - b[1]) > 1e-6) {
-      fprintf(stderr, "b[1] = %g\n", e.b[1]);
+    if (cabs(e.cb[1] - b[1]) > 1e-6) {
+      fprintf(stderr, "b[1] = %g;%g\n", creal(e.b[1]), cimag(e.b[1]));
       r = 1;
     }
-    if (e.comp_scal != 0) {
+    if (e.comp_scal != 1) {
       fprintf(stderr, "comp_scal = %i\n", e.comp_scal);
       r = 1;
     }

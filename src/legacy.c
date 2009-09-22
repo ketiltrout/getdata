@@ -76,6 +76,7 @@ const char *GD_ERROR_CODES[GD_N_ERROR_CODES] = {
   NULL, /* GD_E_CALLBACK */
   NULL, /* GD_E_BAD_PROTECTION */
   NULL, /* GD_E_UNCLEAN_DB */
+  "Improper domain", /* GD_E_DOMAIN */
   "Bad representation", /* GD_E_BAD_REPR */
 };
 
@@ -218,6 +219,26 @@ static void CopyRawEntry(struct RawEntryType* R, gd_entry_t* E)
   dreturnvoid();
 }
 
+/* We operate under the myth that POLYNOMs are actually LINCOMs.  We report them
+ * to have one input field, and discard non-linear terms */
+static void CopyPolynomEntry(struct LincomEntryType* L, gd_entry_t* E)
+{
+  dtrace("%p, %p", L, E);
+
+  if (E == NULL) {
+    dreturnvoid();
+    return;
+  }
+
+  L->field = E->field;
+  L->n_fields = 1;
+  L->in_fields[0] = E->in_fields[0];
+  L->m[0] = E->a[1];
+  L->b[0] = E->a[0];
+
+  dreturnvoid();
+}
+
 static void CopyLincomEntry(struct LincomEntryType* L, gd_entry_t* E)
 {
   int i;
@@ -351,9 +372,11 @@ struct FormatType *GetFormat(const char *filedir, int *error_code) {
         Format.n_lincom++;
         break;
       case GD_LINTERP_ENTRY:
+      case GD_POLYNOM_ENTRY:
         Format.n_linterp++;
         break;
       case GD_BIT_ENTRY:
+      case GD_SBIT_ENTRY:
         Format.n_bit++;
         break;
       case GD_MULTIPLY_ENTRY:
@@ -362,7 +385,10 @@ struct FormatType *GetFormat(const char *filedir, int *error_code) {
       case GD_PHASE_ENTRY:
         Format.n_phase++;
         break;
-      default:
+      case GD_NO_ENTRY:
+      case GD_CONST_ENTRY:
+      case GD_INDEX_ENTRY:
+      case GD_STRING_ENTRY:
         break;
     }
 
@@ -400,6 +426,9 @@ struct FormatType *GetFormat(const char *filedir, int *error_code) {
       case GD_RAW_ENTRY:
         CopyRawEntry(&Format.rawEntries[nraw++], D->entry[i]);
         break;
+      case GD_POLYNOM_ENTRY:
+        CopyPolynomEntry(&Format.lincomEntries[nlincom++], D->entry[i]);
+        break;
       case GD_LINCOM_ENTRY:
         CopyLincomEntry(&Format.lincomEntries[nlincom++], D->entry[i]);
         break;
@@ -407,6 +436,7 @@ struct FormatType *GetFormat(const char *filedir, int *error_code) {
         CopyLinterpEntry(&Format.linterpEntries[nlinterp++], D->entry[i]);
         break;
       case GD_BIT_ENTRY:
+      case GD_SBIT_ENTRY:
         CopyBitEntry(&Format.bitEntries[nbit++], D->entry[i]);
         break;
       case GD_MULTIPLY_ENTRY:
@@ -415,7 +445,10 @@ struct FormatType *GetFormat(const char *filedir, int *error_code) {
       case GD_PHASE_ENTRY:
         CopyPhaseEntry(&Format.phaseEntries[nphase++], D->entry[i]);
         break;
-      default:
+      case GD_STRING_ENTRY:
+      case GD_CONST_ENTRY:
+      case GD_INDEX_ENTRY:
+      case GD_NO_ENTRY:
         break;
     }
 

@@ -89,6 +89,8 @@ int main(void)
     parameter(stream, "GD_E_CALLBACK",       "GD_ECB", GD_E_CALLBACK,       i);
     parameter(stream, "GD_E_BAD_PROTECTION", "GD_EBP", GD_E_BAD_PROTECTION, i);
     parameter(stream, "GD_E_UNCLEAN_DB",     "GD_UCL", GD_E_UNCLEAN_DB,     i);
+    parameter(stream, "GD_E_DOMAIN",         "GD_EDO", GD_E_DOMAIN,         i);
+    parameter(stream, "GD_E_BAD_REPR",       "GD_ERP", GD_E_BAD_REPR,       i);
 
     fprintf(stream, "\\\n%c Open flags\\\n", c);
 
@@ -146,6 +148,8 @@ int main(void)
     parameter(stream, "GD_INT64",            "GD_I64", GD_INT64,            i);
     parameter(stream, "GD_FLOAT32",          "GD_F32", GD_FLOAT32,          i);
     parameter(stream, "GD_FLOAT64",          "GD_F64", GD_FLOAT64,          i);
+    parameter(stream, "GD_COMPLEX64",        "GD_C64", GD_COMPLEX64,        i);
+    parameter(stream, "GD_COMPLEX128",       "GDC128", GD_COMPLEX128,       i);
 
     fprintf(stream, "\\\n%c Delete flags\\\n", c);
     parameter(stream, "GD_DEL_META",         "GDD_MT", GD_DEL_META,         i);

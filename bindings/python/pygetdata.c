@@ -52,11 +52,13 @@ static const char *gdpy_exception_list[GD_N_ERROR_CODES] = {
   "BadEndianess",
   "Callback",
   "BadProtection",
-  "UncleanDatabase"
+  "UncleanDatabase",
+  "Domain",
+  "BadRepr"
 };
 PyObject *gdpy_exceptions[GD_N_ERROR_CODES];
 
-int gdpy_convert_from_pyobj(PyObject* value, union gdpy_triple_value *data,
+int gdpy_convert_from_pyobj(PyObject* value, union gdpy_quadruple_value *data,
     gd_type_t type)
 {
   dtrace("%p, %p, %02x", value, data, type);
@@ -65,7 +67,7 @@ int gdpy_convert_from_pyobj(PyObject* value, union gdpy_triple_value *data,
   /* check value type, and figure out autotype, if needed */
   if (PyInt_Check(value)) {
     data->s = PyInt_AsLong(value);
-    data_type = 0x01;
+    data_type = GDPY_INT_AS_LONG;
 
     if (PyErr_Occurred()) {
       dreturn("%i", -1);
@@ -75,12 +77,12 @@ int gdpy_convert_from_pyobj(PyObject* value, union gdpy_triple_value *data,
     if (type == GD_UNKNOWN) {
       /* try unsigned long long first */
       data->u = PyLong_AsUnsignedLongLong(value);
-      data_type = 0x10;
+      data_type = GDPY_LONG_AS_ULL;
 
       if (PyErr_Occurred()) {
         if (PyErr_ExceptionMatches(PyExc_OverflowError)) { /* too big */
           data->f = PyLong_AsDouble(value);
-          data_type = 0x12;
+          data_type = GDPY_LONG_AS_DOUBLE;
 
           if (PyErr_Occurred()) {
             dreturn("%i", -1);
@@ -88,12 +90,12 @@ int gdpy_convert_from_pyobj(PyObject* value, union gdpy_triple_value *data,
           }
         } else if (PyErr_ExceptionMatches(PyExc_TypeError)) { /* too small */
           data->f = PyLong_AsDouble(value);
-          data_type = 0x12;
+          data_type = GDPY_LONG_AS_DOUBLE;
 
           if (PyErr_Occurred()) {
             if (PyErr_ExceptionMatches(PyExc_TypeError)) { /* still too small */
               data->s = PyLong_AsLongLong(value);
-              data_type = 0x11;
+              data_type = GDPY_LONG_AS_SLL;
 
               if (PyErr_Occurred()) {
                 dreturn("%i", -1);
@@ -111,7 +113,7 @@ int gdpy_convert_from_pyobj(PyObject* value, union gdpy_triple_value *data,
       }
     } else if (type & GD_SIGNED) {
       data->s = PyLong_AsLongLong(value);
-      data_type = 0x11;
+      data_type = GDPY_LONG_AS_SLL;
 
       if (PyErr_Occurred()) {
         dreturn("%i", -1);
@@ -119,7 +121,7 @@ int gdpy_convert_from_pyobj(PyObject* value, union gdpy_triple_value *data,
       }
     } else if (type & GD_IEEE754) {
       data->f = PyLong_AsDouble(value);
-      data_type = 0x12;
+      data_type = GDPY_LONG_AS_DOUBLE;
 
       if (PyErr_Occurred()) {
         dreturn("%i", -1);
@@ -127,7 +129,7 @@ int gdpy_convert_from_pyobj(PyObject* value, union gdpy_triple_value *data,
       }
     } else {
       data->u = PyLong_AsLongLong(value);
-      data_type = 0x10;
+      data_type = GDPY_LONG_AS_ULL;
 
       if (PyErr_Occurred()) {
         dreturn("%i", -1);
@@ -136,7 +138,15 @@ int gdpy_convert_from_pyobj(PyObject* value, union gdpy_triple_value *data,
     }
   } else if (PyFloat_Check(value)) {
     data->f = PyFloat_AsDouble(value);
-    data_type = 0x22;
+    data_type = GDPY_FLOAT_AS_DOUBLE;
+
+    if (PyErr_Occurred()) {
+      dreturn("%i", -1);
+      return -1;
+    }
+  } else if (PyComplex_Check(value)) {
+    data->c = gdpy_as_complex(value);
+    data_type = GDPY_COMPLEX_AS_COMPLEX;
 
     if (PyErr_Occurred()) {
       dreturn("%i", -1);
@@ -161,7 +171,7 @@ gd_type_t gdpy_convert_from_pylist(PyObject* value, void *data, gd_type_t type,
 
   /* use the first element to determine the data type */
   int data_type = gdpy_convert_from_pyobj(PyList_GetItem(value, 0),
-      (union gdpy_triple_value*)data, type);
+      (union gdpy_quadruple_value*)data, type);
 
   if (data_type == -1) {
     dreturn("%02x", GD_UNKNOWN);
@@ -169,31 +179,36 @@ gd_type_t gdpy_convert_from_pylist(PyObject* value, void *data, gd_type_t type,
   }
 
   switch(data_type) {
-    case 0x01:
+    case GDPY_INT_AS_LONG:
       type = GD_INT64;
       for (i = 1; i < ns; ++i)
         ((int64_t*)data)[i] = PyInt_AsLong(PyList_GetItem(value, i));
       break;
-    case 0x10: 
+    case GDPY_LONG_AS_ULL: 
       type = GD_UINT64;
       for (i = 1; i < ns; ++i)
         ((uint64_t*)data)[i] = PyLong_AsUnsignedLongLong(PyList_GetItem(value,
             i));
       break;
-    case 0x11: 
+    case GDPY_LONG_AS_SLL: 
       type = GD_INT64;
       for (i = 1; i < ns; ++i)
         ((int64_t*)data)[i] = PyLong_AsLongLong(PyList_GetItem(value, i));
       break;
-    case 0x12: 
+    case GDPY_LONG_AS_DOUBLE: 
       type = GD_FLOAT64;
       for (i = 1; i < ns; ++i)
         ((double*)data)[i] = PyLong_AsDouble(PyList_GetItem(value, i));
       break;
-    case 0x22:
+    case GDPY_FLOAT_AS_DOUBLE:
       type = GD_FLOAT64;
       for (i = 1; i < ns; ++i)
         ((double*)data)[i] = PyFloat_AsDouble(PyList_GetItem(value, i));
+      break;
+    case GDPY_COMPLEX_AS_COMPLEX:
+      type = GD_COMPLEX128;
+      for (i = 1; i < ns; ++i)
+        ((double complex*)data)[i] = gdpy_as_complex(PyList_GetItem(value, i));
       break;
   }
 
@@ -220,55 +235,68 @@ PyObject* gdpy_convert_to_pylist(const void* data, gd_type_t type, size_t ns)
       return Py_None;
     case GD_UINT8:
       for (i = 0; i < ns; ++i)
-        if (PyList_Append(pylist, PyInt_FromLong((long)*(uint8_t*)data)))
+        if (PyList_Append(pylist, PyInt_FromLong((long)((uint8_t*)data)[i])))
           return NULL;
       break;
     case GD_INT8:
       for (i = 0; i < ns; ++i)
-        if (PyList_Append(pylist, PyInt_FromLong((long)*(int8_t*)data)))
+        if (PyList_Append(pylist, PyInt_FromLong((long)((int8_t*)data)[i])))
           return NULL;
       break;
     case GD_UINT16:
       for (i = 0; i < ns; ++i)
-        if (PyList_Append(pylist, PyInt_FromLong((long)*(uint16_t*)data)))
+        if (PyList_Append(pylist, PyInt_FromLong((long)((uint16_t*)data)[i])))
           return NULL;
       break;
     case GD_INT16:
       for (i = 0; i < ns; ++i)
-        if (PyList_Append(pylist, PyInt_FromLong((long)*(int16_t*)data)))
+        if (PyList_Append(pylist, PyInt_FromLong((long)((int16_t*)data)[i])))
           return NULL;
       break;
     case GD_UINT32:
       for (i = 0; i < ns; ++i)
         if (PyList_Append(pylist,
-              PyLong_FromUnsignedLong((unsigned long)*(uint32_t*)data)))
+              PyLong_FromUnsignedLong((unsigned long)((uint32_t*)data)[i])))
           return NULL;
       break;
     case GD_INT32:
       for (i = 0; i < ns; ++i)
-        if (PyList_Append(pylist, PyInt_FromLong((long)*(int32_t*)data)))
+        if (PyList_Append(pylist, PyInt_FromLong((long)((int32_t*)data)[i])))
           return NULL;
       break;
     case GD_UINT64:
       for (i = 0; i < ns; ++i)
         if (PyList_Append(pylist, PyLong_FromUnsignedLongLong(
-                (unsigned long long)*(uint64_t*)data)))
+                (unsigned long long)((uint64_t*)data)[i])))
           return NULL;
       break;
     case GD_INT64:
       for (i = 0; i < ns; ++i)
         if (PyList_Append(pylist,
-              PyLong_FromLongLong((long long)*(int64_t*)data)))
+              PyLong_FromLongLong((long long)((int64_t*)data)[i])))
           return NULL;
       break;
     case GD_FLOAT32:
       for (i = 0; i < ns; ++i)
-        if (PyList_Append(pylist, PyFloat_FromDouble((double)*(float*)data)))
+        if (PyList_Append(pylist,
+              PyFloat_FromDouble((double)((float*)data)[i])))
           return NULL;
       break;
     case GD_FLOAT64:
       for (i = 0; i < ns; ++i)
-        if (PyList_Append(pylist, PyFloat_FromDouble(*(double*)data)))
+        if (PyList_Append(pylist, PyFloat_FromDouble(((double*)data)[i])))
+          return NULL;
+      break;
+    case GD_COMPLEX64:
+      for (i = 0; i < ns; ++i)
+        if (PyList_Append(pylist,
+              gdpy_from_complex((double complex)((float complex*)data)[i])))
+          return NULL;
+      break;
+    case GD_COMPLEX128:
+      for (i = 0; i < ns; ++i)
+        if (PyList_Append(pylist,
+              gdpy_from_complex(((double complex*)data)[i])))
           return NULL;
       break;
     case GD_UNKNOWN: /* prevent compiler warning */
@@ -318,6 +346,12 @@ PyObject* gdpy_convert_to_pyobj(const void* data, gd_type_t type)
       break;
     case GD_FLOAT64:
       pyobj = PyFloat_FromDouble(*(double*)data);
+      break;
+    case GD_COMPLEX64:
+      pyobj = gdpy_from_complex((double complex)*(float complex*)data);
+      break;
+    case GD_COMPLEX128:
+      pyobj = gdpy_from_complex(*(double complex*)data);
       break;
     case GD_UNKNOWN: /* prevent compiler warning */
       break;

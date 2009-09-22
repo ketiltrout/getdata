@@ -125,9 +125,9 @@ static void _GD_GetScalar(DIRFILE* D, gd_entry_t* E, const char* scalar,
         _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
       else {
         if (type == GD_COMPLEX) {
-          /* if the constant is complex, set complex_scalars */
+          /* if the constant is complex, set comp_scal */
           if (C->const_type & GD_COMPLEX)
-            E->complex_scalars = 1;
+            E->comp_scal = 1;
 
           _GD_DoConst(D, C, GD_COMPLEX128, data);
         } else if (type == GD_SIGNED) {
@@ -392,4 +392,72 @@ int get_fragment_index(DIRFILE* D, const char* field_code_in)
 
   dreturn("%i", E->fragment_index);
   return E->fragment_index;
+}
+
+int dirfile_validate(DIRFILE *D, const char *field_code_in)
+{
+  int i;
+  gd_entry_t* E;
+  char *field_code;
+
+  dtrace("%p, \"%s\"", D, field_code_in);
+
+  if (D->flags & GD_INVALID) {
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  _GD_ClearError(D);
+
+  /* get rid of the representation, if any */
+  _GD_GetRepr(D, field_code_in, &field_code);
+
+  E = _GD_FindField(D, field_code, NULL);
+
+  if (E == NULL) {
+    _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, field_code);
+    if (field_code != field_code_in)
+      free(field_code);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  if (field_code != field_code_in)
+    free(field_code);
+
+  /* calculate scalars */
+  if (!E->e->calculated)
+    _GD_CalculateEntry(D, E);
+
+  /* check input fields */
+  switch (E->field_type) {
+    case GD_LINCOM_ENTRY:
+      for (i = 0; i < E->n_fields; ++i)
+        _GD_BadInput(D, E, i);
+      break;
+    case GD_MULTIPLY_ENTRY:
+      _GD_BadInput(D, E, 1);
+    case GD_LINTERP_ENTRY:
+    case GD_BIT_ENTRY:
+    case GD_PHASE_ENTRY:
+    case GD_POLYNOM_ENTRY:
+    case GD_SBIT_ENTRY:
+      _GD_BadInput(D, E, 0);
+      break;
+    case GD_RAW_ENTRY:
+    case GD_CONST_ENTRY:
+    case GD_STRING_ENTRY:
+    case GD_INDEX_ENTRY:
+    case GD_NO_ENTRY:
+      break;
+  }
+
+  if (D->error) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  dreturn("%i", 0);
+  return 0;
 }

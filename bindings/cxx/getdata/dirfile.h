@@ -88,6 +88,9 @@ namespace GetData {
 
       GetData::Fragment *Fragment(int index);
 
+      double FrameNum(const char* field_code, double value,
+          off_t frame_start = 0, off_t frame_end = 0);
+
       size_t GetConstant(const char *field_code, DataType type, void *data_out);
 
       size_t GetData(const char *field_code, off_t first_frame,
@@ -127,11 +130,13 @@ namespace GetData {
 
       unsigned int NMVectors(const char *parent);
 
-      unsigned int NVectors();
+      DataType NativeType(const char* field_code);
 
       int NFragments();
 
       off_t NFrames();
+
+      unsigned int NVectors();
 
       size_t PutConstant(const char *field_code, DataType type,
           const void *data_in);
@@ -154,6 +159,8 @@ namespace GetData {
       const char **Strings();
 
       int UnInclude(int fragment_index, int del = 0);
+
+      int Validate(const char* field_code);
 
       const char **VectorList();
 

@@ -80,7 +80,7 @@ static gd_type_t _GD_RawType(const char* type)
 }
 
 static char* _GD_SetScalar(DIRFILE* D, const char* token, void* data, int type,
-    const char* format_file, int line, int *complex_scalars)
+    const char* format_file, int line, int *comp_scal)
 {
   char *ptr;
   const char *semicolon;
@@ -88,7 +88,7 @@ static char* _GD_SetScalar(DIRFILE* D, const char* token, void* data, int type,
   double i = 0;
 
   dtrace("%p, \"%s\", %p, %i, \"%s\", %i, %p", D, token, data, type,
-      format_file, line, complex_scalars);
+      format_file, line, comp_scal);
 
   /* try to convert to double */
   d = strtod(token, &ptr); 
@@ -124,7 +124,7 @@ static char* _GD_SetScalar(DIRFILE* D, const char* token, void* data, int type,
       return NULL;
     }
 
-    *complex_scalars = 1;
+    *comp_scal = 1;
   }
 
   if (type == GD_COMPLEX)
@@ -313,10 +313,10 @@ static gd_entry_t* _GD_ParseLincom(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
         _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
 
       E->e->scalar[i * 2] = _GD_SetScalar(D, in_cols[i * 3 + 4], &E->cm[i],
-          GD_COMPLEX, format_file, line, &E->complex_scalars);
+          GD_COMPLEX, format_file, line, &E->comp_scal);
       E->m[i] = creal(E->cm[i]);
       E->e->scalar[i * 2 + 1] = _GD_SetScalar(D, in_cols[i * 3 + 5], &E->cb[i],
-          GD_COMPLEX, format_file, line, &E->complex_scalars);
+          GD_COMPLEX, format_file, line, &E->comp_scal);
       E->b[i] = creal(E->cb[i]);
 
       if (E->e->scalar[i * 2] != NULL || E->e->scalar[i * 2 + 1] != NULL)
@@ -673,7 +673,7 @@ static gd_entry_t* _GD_ParsePolynom(DIRFILE* D,
     else
       for (i = 0; i <= E->poly_ord; i++) {
         E->e->scalar[i] = _GD_SetScalar(D, in_cols[i + 3], &E->ca[i],
-            GD_COMPLEX, format_file, line, &E->complex_scalars);
+            GD_COMPLEX, format_file, line, &E->comp_scal);
         E->a[i] = creal(E->ca[i]);
 
         if (E->e->scalar[i] != NULL)

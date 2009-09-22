@@ -40,6 +40,9 @@ namespace GetData {
       LincomEntry(const char* field_code, int n_fields, const char** in_fields,
           double* m, double* b, int fragment_index = 0);
 
+      LincomEntry(const char* field_code, int n_fields, const char** in_fields,
+          double complex* cm, double complex* cb, int fragment_index = 0);
+
       virtual const char *Input(int index = 0) {
         return (CheckIndex(E.field_type, E.n_fields, index)) ? 
             E.in_fields[index] : NULL;
@@ -53,8 +56,16 @@ namespace GetData {
         return (CheckIndex(E.field_type, E.n_fields, index)) ? E.m[index] : 0;
       };
 
+      virtual double complex CScale(int index = 0) {
+        return (CheckIndex(E.field_type, E.n_fields, index)) ? E.cm[index] : 0;
+      };
+
       virtual double Offset(int index = 0) {
         return (CheckIndex(E.field_type, E.n_fields, index)) ? E.b[index] : 0;
+      };
+
+      virtual double complex COffset(int index = 0) {
+        return (CheckIndex(E.field_type, E.n_fields, index)) ? E.cb[index] : 0;
       };
 
       int SetNFields(int nfields);

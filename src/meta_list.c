@@ -71,8 +71,8 @@ const void* get_mconstants(DIRFILE* D, const char* parent,
    * as purely real */
   for (i = n = 0; i < e->n_meta; ++i) {
     if (e->meta_entry[i]->field_type == GD_CONST_ENTRY)
-      if (_GD_DoField(D, e->meta_entry[i], e->meta_entry[i]->field, 0, 0, 0,
-            return_type, fl + n++ * GD_SIZE(return_type)) != 1)
+      if (_GD_DoField(D, e->meta_entry[i], 0, 0, 0, return_type,
+            fl + n++ * GD_SIZE(return_type)) != 1)
         break;
   }
 

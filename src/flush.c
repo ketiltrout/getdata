@@ -216,7 +216,7 @@ static void _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
       fprintf(stream, " LINCOM %i", E->n_fields);
       for (i = 0; i < E->n_fields; ++i) {
         fprintf(stream, " %s ", E->in_fields[i]);
-        if (E->complex_scalars) {
+        if (E->comp_scal) {
           _GD_WriteConst(stream, GD_COMPLEX, &E->cm[i], E->e->scalar[i * 2],
               " ");
           _GD_WriteConst(stream, GD_COMPLEX, &E->cb[i], E->e->scalar[i * 2 + 1],
@@ -248,7 +248,7 @@ static void _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
     case GD_POLYNOM_ENTRY:
       fprintf(stream, " POLYNOM %s ", E->in_fields[0]);
       for (i = 0; i <= E->poly_ord; ++i)
-        if (E->complex_scalars)
+        if (E->comp_scal)
           _GD_WriteConst(stream, GD_COMPLEX, &E->ca[i], E->e->scalar[i],
             (i == E->poly_ord) ? "\n" : " ");
         else
@@ -388,7 +388,7 @@ static void _GD_FlushFragment(DIRFILE* D, int i)
       fputs("/ENCODING text\n", stream);
       break;
     default:
-      fprintf(stream, "/ENCODING unknown # (%x)\n", D->fragment[i].encoding);
+      fprintf(stream, "/ENCODING unknown # (%lx)\n", D->fragment[i].encoding);
       break;
   }
 
