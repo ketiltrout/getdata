@@ -1,3 +1,9 @@
+2009-09-26   D. V. Wiebe <getdata@ketiltrout.net>  svn:312
+	* bindings/idl/getdata.c: Fixed typo in DLM magic for
+	gdidl_get_raw_filename.
+
+	* configure.ac: Remove spurious AC_SUBST.
+
 2009-09-21   D. V. Wiebe <getdata@ketiltrout.net>  svn:311 
 	* src/getdata.h.in: complex_scalars member shortened to comp_scal.
 

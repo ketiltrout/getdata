@@ -3405,7 +3405,7 @@ IDL_VPTR gdidl_get_protection(int argc, IDL_VPTR argv[], char *argk)
   return r;
 }
 
-/* @@DLM: F gdidl_get_raw_filenmae GET_RAW_FILENAME 2 2 KEYWORDS */
+/* @@DLM: F gdidl_get_raw_filename GET_RAW_FILENAME 2 2 KEYWORDS */
 IDL_VPTR gdidl_get_raw_filename(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();

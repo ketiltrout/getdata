@@ -427,8 +427,6 @@ echo
 AC_CHECK_HEADERS([complex.h fcntl.h libgen.h])
 AC_HEADER_DIRENT
 
-AC_SUBST([INCLUDE_COMPLEX_H])
-
 dnl Declare a few feature test macros
 AC_DEFINE([_BSD_SOURCE], [], [ Expose BSD-derived definitions ])
 AC_DEFINE([_SVID_SOURCE], [], [ Expose System V-derived definitions ])
