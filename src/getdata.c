@@ -42,7 +42,7 @@
     case GD_REPR_ARG:  EXTRACT_REPR(t,carg); break; \
   }
 
-static void _GD_ExtractRepr(DIRFILE* D, const double complex* cdata,
+void _GD_ExtractRepr(DIRFILE* D, const double complex* cdata,
     void* rdata, gd_type_t type, size_t n, int repr)
 {
   size_t i;
@@ -871,8 +871,9 @@ size_t _GD_DoConst(DIRFILE *D, const gd_entry_t *E, gd_type_t return_type,
   return 1;
 }
 
-/* _GD_DoString:  Read from a string.  Returns number of samples read (ie. 1).
-*/
+/* _GD_DoString:  Read from a string.  Returns number of samples read (ie. the
+ * length of the string plus 1).
+ */
 static size_t _GD_DoString(gd_entry_t *E, size_t num_samp, void *data_out)
 {
   dtrace("%p, %zi, %p", E, num_samp, data_out);
@@ -895,8 +896,8 @@ size_t _GD_DoField(DIRFILE *D, gd_entry_t *E, int repr, off64_t first_samp,
   const gd_type_t true_return_type = return_type; 
   int out_of_place = 0;
 
-  dtrace("%p, %p, %i, %lli, %zi, 0x%x, %p", D, E, repr, first_samp, num_samp,
-      return_type, data_out);
+  dtrace("%p, %p(%s), '%c', %lli, %zi, 0x%x, %p", D, E, E->field, repr,
+      first_samp, num_samp, return_type, data_out);
 
   if (++D->recurse_level >= GD_MAX_RECURSE_LEVEL) {
     _GD_SetError(D, GD_E_RECURSE_LEVEL, 0, NULL, 0, E->field);
@@ -914,7 +915,7 @@ size_t _GD_DoField(DIRFILE *D, gd_entry_t *E, int repr, off64_t first_samp,
   }
 
   /* calculate the native type */
-  ntype = _GD_NativeType(D, E, repr); 
+  ntype = _GD_NativeType(D, E, GD_REPR_NONE); 
 
   if (D->error) {
     dreturn("%i", 0);

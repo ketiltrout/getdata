@@ -41,6 +41,8 @@ int main(void)
     return 1;
   if (E.field_type != GD_LINCOM_ENTRY)
     return 1;
+  if (E.comp_scal != 0)
+    return 1;
   if (E.n_fields != 3)
     return 1;
   if (strcmp(E.in_fields[0], "in1"))

@@ -13,7 +13,6 @@ int main(void)
 {
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
-  const char* table = __TEST__ "dirfile/../tablefile";
   const char* format_data = "data LINTERP in1 ../tablefile\n";
   int fd;
 
@@ -43,7 +42,7 @@ int main(void)
     return 1;
   if (strcmp(E.in_fields[0], "in1"))
     return 1;
-  if (strcmp(E.table, table))
+  if (strcmp(E.table, "../tablefile"))
     return 1;
 
   return 0;

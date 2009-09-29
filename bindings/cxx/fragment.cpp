@@ -49,7 +49,7 @@ Fragment::~Fragment()
 
 int Fragment::SetEncoding(GetData::EncodingScheme encoding, int recode)
 {
-  int ret = dirfile_alter_encoding(D->D, (unsigned long)enc, ind, recode);
+  int ret = dirfile_alter_encoding(D->D, (unsigned long)encoding, ind, recode);
 
   if (!ret)
     enc = encoding;

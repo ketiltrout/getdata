@@ -26,14 +26,15 @@ endif
 
 SUBDIRS=test
 
-python_LTLIBRARIES = getdata.la
+python_LTLIBRARIES = pygetdata.la
 
 AM_CFLAGS = -Wall -fno-strict-aliasing
 AM_CPPFLAGS = $(CPPFLAGS) $(PYTHON_CPPFLAGS)
-getdata_la_LDFLAGS = -module -avoid-version -export-symbols-regex initgetdata
-getdata_la_LIBADD = $(PYTHON_LIBS) -lgetdata
-getdata_la_SOURCES = pygetdata.c pyconstants.c pydirfile.c pyentry.c \
-										 pyfragment.c ${DEBUG_C} pygetdata.h
+pygetdata_la_LDFLAGS = -module -avoid-version \
+											 -export-symbols-regex initpygetdata
+pygetdata_la_LIBADD = $(PYTHON_LIBS) -lgetdata
+pygetdata_la_SOURCES = pygetdata.c pyconstants.c pydirfile.c pyentry.c \
+											 pyfragment.c ${DEBUG_C} pygetdata.h
 
 clean-local:
 	rm -rf *~ 

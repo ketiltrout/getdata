@@ -19,21 +19,14 @@
 // 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 //
 #include "getdata/dirfile.h"
-#include "getdata/entry.h"
-#include "getdata/fragment.h"
-#include "getdata/rawentry.h"
-#include "getdata/lincomentry.h"
-#include "getdata/linterpentry.h"
-#include "getdata/bitentry.h"
-#include "getdata/multiplyentry.h"
-#include "getdata/phaseentry.h"
-#include "getdata/sbitentry.h"
-#include "getdata/polynomentry.h"
-#include "getdata/constentry.h"
-#include "getdata/stringentry.h"
-#include "getdata/indexentry.h"
 
 using namespace GetData;
+
+Dirfile::Dirfile()
+{
+  D = dirfile_open("", 0);
+  error_string = NULL;
+}
 
 Dirfile::Dirfile(const char* filedir, unsigned int flags,
           int (*sehandler)(const DIRFILE*, int, char*, void*), void* extra)
@@ -367,4 +360,14 @@ double Dirfile::FrameNum(const char* field_code, double value,
     off_t frame_start, off_t frame_end)
 {
   return get_framenum_subset(D, field_code, value, frame_start, frame_end);
+}
+
+int Dirfile::FragmentIndex(const char* field_code)
+{
+  return get_fragment_index(D, field_code);
+}
+
+const char* Dirfile::Name()
+{
+  return dirfilename(D);
 }

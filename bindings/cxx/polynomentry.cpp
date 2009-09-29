@@ -79,7 +79,22 @@ int PolynomEntry::SetCoefficient(double coeff, int index)
   if (index < 0 || index > 5)
     return -1;
 
-  E.a[index] = coeff;
+  E.ca[index] = E.a[index] = coeff;
+
+  if (D != NULL)
+    return dirfile_alter_entry(D->D, E.field, &E, 0);
+  
+  return 0;
+}
+
+int PolynomEntry::SetCoefficient(double complex coeff, int index)
+{
+  if (index < 0 || index > 5)
+    return -1;
+
+  E.ca[index] = coeff;
+  E.a[index] = creal(E.ca[index]);
+  E.comp_scal = 1;
 
   if (D != NULL)
     return dirfile_alter_entry(D->D, E.field, &E, 0);

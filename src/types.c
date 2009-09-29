@@ -697,7 +697,7 @@ void _GD_ConvertType(DIRFILE* D, const void *data_in, gd_type_t in_type,
           return;
         case GD_FLOAT64:
           for (i = 0; i < n; i++)
-            ((float*)data_out)[i] = (float)((double complex*)data_in)[i];
+            ((double*)data_out)[i] = (double)((double complex*)data_in)[i];
           return;
         case GD_COMPLEX64:
           for (i = 0; i < n; i++)

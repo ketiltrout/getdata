@@ -78,6 +78,8 @@ void _GD_FreeE(gd_entry_t* entry, int priv)
   if (priv) {
     for (i = 0; i <= GD_MAX_POLYORD; ++i)
       free(entry->e->scalar[i]);
+    if (entry->field_type == GD_LINTERP_ENTRY)
+      free(entry->e->table_path);
     free(entry->e->field_list);
     free(entry->e->vector_list);
     free(entry->e->string_value_list);

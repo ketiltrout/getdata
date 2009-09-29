@@ -173,7 +173,7 @@ int _GD_EncodingUnderstood(unsigned long encoding)
 {
   return (encoding == GD_UNENCODED || encoding == GD_SLIM_ENCODED ||
       encoding == GD_GZIP_ENCODED || encoding == GD_BZIP2_ENCODED ||
-      encoding == GD_TEXT_ENCODED);
+      encoding == GD_TEXT_ENCODED || encoding == GD_LZMA_ENCODED);
 }
 
 #ifdef USE_MODULES

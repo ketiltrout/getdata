@@ -203,7 +203,8 @@ struct _gd_private_entry {
       struct _gd_raw_file file[2]; /* encoding framework data */
     };
     struct { /* LINTERP */
-      int table_len; /* internal */
+      char *table_path;
+      int table_len;
       int complex_table;
       double* x;
       union {
@@ -410,9 +411,9 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned int encoding,
     unsigned int byte_sex, off64_t offset, int finalise, int new_fragment,
     char* new_filebase);
 gd_type_t _GD_NativeType(DIRFILE* D, gd_entry_t* E, int repr);
-gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, const char** in_cols,
+gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, char** in_cols,
     const gd_entry_t* parent, const char* format_file, int linenum,
-    unsigned int me, int standards, int creat, int pedantic, int insert);
+    int me, int standards, int creat, int pedantic, int insert);
 char* _GD_ParseFragment(FILE* fp, DIRFILE *D, int me, int* standards,
     unsigned int flags);
 void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E);
@@ -421,9 +422,10 @@ int _GD_SetEncodedName(DIRFILE* D, struct _gd_raw_file* file, const char* base,
     int temp);
 void _GD_SetError(DIRFILE* D, int error, int suberror, const char* format_file,
     int line, const char* token);
+int _GD_SetTablePath(DIRFILE *D, gd_entry_t *E, struct _gd_private_entry *e);
 int _GD_Supports(DIRFILE* D, gd_entry_t* E, unsigned int funcs);
 int _GD_Tokenise(DIRFILE *D, const char* instring, char* outstring,
-    const char** in_cols, const char* format_file, int linenum);
+    char** in_cols, const char* format_file, int linenum);
 char* _GD_ValidateField(const gd_entry_t* parent, const char* field_code,
     int strict);
 

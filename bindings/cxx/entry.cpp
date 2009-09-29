@@ -67,9 +67,6 @@ int Entry::CheckIndex(gd_entype_t field_type, int n_fields, int index)
     case GD_MULTIPLY_ENTRY:
       if (index > 2)
         return 0;
-    case GD_POLYNOM_ENTRY:
-      if (index > n_fields + 1)
-        return 0;
     default:
       if (index > 1)
         return 0;
@@ -100,19 +97,23 @@ int Entry::Rename(const char* new_name, int move_data)
     ret = dirfile_rename(D->D, E.field, new_name, move_data);
 
   if (ret) {
-    char* nn = (char*)malloc(strlen(E.field) + strlen(new_name));
-    strcpy(nn, E.field);
-    ptr = strchr(nn, '/');
-
-    if (ptr) { /* metafield */
-      strcpy(ptr + 1, new_name);
+    if (E.field == NULL) {
+      E.field = strdup(new_name);
     } else {
-      free(nn);
-      nn = strdup(new_name);
-    }
+      char* nn = (char*)malloc(strlen(E.field) + strlen(new_name));
+      strcpy(nn, E.field);
+      ptr = strchr(nn, '/');
 
-    free(E.field);
-    E.field = nn;
+      if (ptr) { /* metafield */
+        strcpy(ptr + 1, new_name);
+      } else {
+        free(nn);
+        nn = strdup(new_name);
+      }
+
+      free(E.field);
+      E.field = nn;
+    }
   }
 
   return ret;
@@ -121,4 +122,14 @@ int Entry::Rename(const char* new_name, int move_data)
 void Entry::SetDirfile(GetData::Dirfile* dirfile)
 {
   D = dirfile;
+}
+
+void Entry::SetName(const char* name)
+{
+  this->Rename(name);
+}
+
+void Entry::SetFragmentIndex(int fragment_index)
+{
+  this->Move(fragment_index);
 }

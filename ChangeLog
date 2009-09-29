@@ -1,3 +1,165 @@
+2009-09-29   D. V. Wiebe <getdata@ketiltrout.net>  svn:313
+	* test/madd_spec.c test/madd_polynom.c test/get_polynom.c
+	test/entry_polynom.c test/entry_lincom.c test/add_string.c test/madd_phase.c
+	test/madd_sbit.c test/madd_linterp.c test/alter_linterp.c
+	test/madd_multiply.c: Make tests more rigorous.
+
+	* test/convert_complex128_float64.c test/parse_meta_implicit.c
+	test/convert_float32_complex128.c test/parse_meta_implicit2.c
+	test/get_const_complex.c test/get_complex128.c test/alter_spec_meta.c
+	test/convert_float64_complex128.c test/repr_uint64.c test/repr_real_m.c
+	test/convert_complex64_uint64.c test/repr_float32.c
+	test/convert_int16_complex64.c test/repr_i.c test/get_complex64.c
+	test/repr_int32.c test/put_complex128.c test/convert_uint8_complex64.c
+	test/alter_lincom_23.c test/get_cpolynom.c test/repr_int16.c
+	test/convert_float64_complex64.c test/put_repr.c
+	test/convert_complex64_complex128.c test/convert_float32_complex64.c
+	test/repr_real_a.c test/convert_complex128_int64.c
+	test/convert_complex64_int64.c test/put_endian_complex128.c
+	test/put_endian_complex64.c test/convert_uint16_complex128.c test/repr_m.c
+	test/convert_uint16_complex64.c test/repr_real_r.c
+	test/convert_int64_complex64.c test/get_const.c test/parse_meta_index2.c
+	test/get_endian_complex64.c test/repr_uint8.c test/convert_int32_complex64.c
+	test/convert_int8_complex128.c test/convert_int16_complex128.c
+	test/madd_string.c test/repr_float64.c test/convert_complex128_complex64.c
+	test/convert_int8_complex64.c test/repr_int64.c
+	test/convert_complex128_uint64.c test/convert_uint32_complex128.c
+	test/repr_a.c test/put_complex64.c test/repr_int8.c test/repr_uint32.c
+	test/get_endian_complex128.c test/madd_cpolynom.c
+	test/convert_uint64_complex64.c test/add_spec_meta.c test/repr_uint16.c
+	test/convert_int32_complex128.c test/get_clincom.c
+	test/convert_uint32_complex64.c test/convert_uint8_complex128.c test/repr_r.c
+	test/alter_cpolynom.c test/convert_uint64_complex128.c test/get_const_repr.c
+	test/convert_complex64_float64.c test/repr_real_i.c
+	test/convert_int64_complex128.c: Added.
+
+	* bindings/python/test/big_test.py: Added.
+	* bindings/python/test/tst_getdata.py: Deleted.
+
+	* bindings/cxx/test/big_test.cpp: Added.
+	* bindings/cxx/test/entry.cpp: Deleted.
+
+	* bindings/f77/test/big_test95.f90: Added.
+	* bindings/f77/test/big_test.f: Completed.
+	* bindings/f77/test/fget_field_list.f90 bindings/f77/test/fget_entry.f90
+	bindings/f77/test/gdfget.f bindings/f77/test/fgetdata.f90: Deleted.
+
+	* index.c (get_framenum_subset64): Multiply user-supplied frame limits by
+	spf.
+
+	* getdata.c (_GD_DoField): Don't pass the user-supplie represenation when
+	calculating the native type.
+
+	* errors.c: Fix error strings for GD_E_DELETE.
+
+	* encoding.c (_GD_EncodingUnderstood): Add GD_LZMA_ENCODED.
+
+	* constant.c (get_constant): specify num_samp=1 in _GD_DoField call to
+	ensure correct repr handling.
+
+	* putdata.c (_GD_DoRawOut): Properly handle byte swapping for complex data.
+
+	* putdata.c (putdata64): Remove spurious free().
+
+	* parse.c: Remove bogus const specifier from in_cols.
+
+	* internal.h: Add table_len to private entry struct.
+	* parse.c (_GD_ParseLinterp): Don't store the computed path in E->table.
+	* mod.c (_GD_Change): ditto.  Reset Qe.table_path instead.  Furthermore, if
+	moving the table, recompute table_path, first.
+	* common.c (_GD_SetTablePath): Added.
+	* common.c (_GD_ReadLinterpFile): Update for table_path.
+
+	* common.c (_GD_ReadLinterpFile): Close the file after reading it.
+
+	* mod.c (_GD_Change): Fix the limits on the scalar free.
+
+	* mod.c (dirfile_alter_cpolynom): Move invariant code out of the loop.
+
+	* parse.c (_GD_ParseFieldSpec): Parse a "Barth"-style meta field
+	specification.
+
+	* parse.c (_GD_ParseFieldSpec): Allow "INDEX" as a metafield name.
+
+	* mod.c (_GD_Change): Recompute comp_scal, instead of just using the input.
+	* add.c (_GD_Add): ditto.
+
+	* add.c (dirfile_madd_string): Search for the correct field code.
+
+	* common.c (_GD_Alloc): Return early on n=0.
+
+	* bindings/python: Renamed module to pygetdata.
+
+	* bindings/python/pydirfile.c (gdpy_dirfile_alter
+	gdpy_dirfile_getfragmentindex gdpy_dirfile_getrawfilename gdpy_dirfile_move
+	gdpy_dirfile_rename): Added.
+
+	* bindings/python/pyentry.c (gdpy_set_entry_from_tuple): Fix initialisation
+	of PHASE->shift.
+
+	* bindings/python/pyentry.c (gdpy_set_entry_from_dict): Fix RAW keys.
+
+	* bindings/python/pyentry.c (gdpy_entry_init): Make the parameter list
+	optional for STRING entries.
+
+	* bindings/python/pyentry.c (gdpy_entry_getbitnum gdpy_entry_setbitnum
+	gdpy_entry_getshift gdpy_entry_setshift): Fix field_type check.
+
+	* bindings/cxx/entry.cpp (Entry::Rename): Properly handle renaming
+	metafields.
+
+	* bindings/cxx/entry.cpp (Entry::SetName Entry::SetFragmentIndex): Added.
+	* bindings/cxx/getdata/entry.h (Entry::Associated Entry::Dissociate
+	Entry::Name Entry::ComplexScalars Entry::ConstType): Added.
+
+	* bindings/cxx/fragment.cpp (Fragment::SetEncoding): Fix
+	dirfile_alter_encoding call.
+
+	* bindings/cxx/lincomentry.cpp (LincomEntry::SetScale
+	LincomEntry::SetOffset): Add complex versions.
+	* bindings/cxx/polynomentry.cpp (PolynomEntry::SetCoefficient): ditto.
+
+	* bindings/cxx/dirfile.cpp (Dirfile::Dirfile): Add empty constructor.
+
+	* bindings/cxx/dirfile.cpp (Dirfile::FragmentIndex Dirfile::Name): Added.
+
+	* bindings/cxx/getdata/rawentry.h bindings/cxx/getdata/linterpentry.h
+	bindings/cxx/getdata/polynomentry.h bindings/cxx/getdata/bitentry.h
+	bindings/cxx/getdata/multiplyentry.h bindings/cxx/getdata/phaseentry.h
+	bindings/cxx/getdata/lincomentry.h bindings/cxx/getdata/sbitentry.h
+	bindings/cxx/getdata/constentry.h bindings/cxx/getdata/stringentry.h: Added
+	empty constructors.
+
+	* bindings/cxx/getdata/dirfile.h: Include all the other headers.
+
+	* bindings/cxx/getdata.entry.h (Entry::Coefficient Entry::CCoefficient
+	Entry::Input): Fix calls for POLYNOM entries.
+
+	* bindigns/f77/fgetdata.c (_GDF_CString): Return a empty string instead of
+	NULL on l=0.
+
+	* bindings/f77/fgetdata.c (_GDF_GetDirfile): Don't crash on index out of
+	range.
+
+	* bindings/f77/fgetdata.c (gdgtst gdptst): Report a length one less than the
+	C API.
+
+	* bindings/f77/getdata.f90.in: Don't overload gd_entry%n_fields: use
+	gd_entry%poly_ord when necessary.
+
+	* bindings/f77/getdata.f90.in (fget_nmfields): Call the right F77 function.
+
+	* bindings/f77/getdata.f90.in (fget_mvector_list): Fix gdmven call.
+
+	* bindings/f77/getdata.f90.in (fget_entry): Call the right F77 function for
+	PHASE entries.
+
+	* bindings/f77/getdata.f90.in (fdirfile_add_multiply fdirfile_add_phase
+	fdirfile_madd_multiply fdirfile_madd_phase fdirfile_alter_multiply
+	fdirfile_alter_phase): Fix name.
+
+	* bindings/f77/getdata.f90.in (fdirfile_madd_sbit fdirfilename): Added.
+
 2009-09-26   D. V. Wiebe <getdata@ketiltrout.net>  svn:312
 	* bindings/idl/getdata.c: Fixed typo in DLM magic for
 	gdidl_get_raw_filename.

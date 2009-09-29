@@ -142,7 +142,7 @@ static char* _GD_SetScalar(DIRFILE* D, const char* token, void* data, int type,
 
 /* _GD_ParseRaw: parse a RAW data type in the format file
 */
-static gd_entry_t* _GD_ParseRaw(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
+static gd_entry_t* _GD_ParseRaw(DIRFILE* D, char* in_cols[MAX_IN_COLS],
     int n_cols, const gd_entry_t* parent, int me, const char* format_file,
     int line, int pedantic)
 {
@@ -234,7 +234,7 @@ static gd_entry_t* _GD_ParseRaw(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
 
 /* _GD_ParseLincom: parse a LINCOM data type in the format file.
 */
-static gd_entry_t* _GD_ParseLincom(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
+static gd_entry_t* _GD_ParseLincom(DIRFILE* D, char* in_cols[MAX_IN_COLS],
     int n_cols, const gd_entry_t* parent, const char* format_file, int line,
     int pedantic)
 {
@@ -335,11 +335,9 @@ static gd_entry_t* _GD_ParseLincom(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
 /* _GD_ParseLinterp: parse a LINTERP data type in the format file.
 */
 static gd_entry_t* _GD_ParseLinterp(DIRFILE* D,
-    const char* in_cols[MAX_IN_COLS], int n_cols, const gd_entry_t* parent,
+    char* in_cols[MAX_IN_COLS], int n_cols, const gd_entry_t* parent,
     const char* format_file, int line, int pedantic)
 {
-  char temp_buffer[FILENAME_MAX];
-
   dtrace("%p, %p, %i, %p, \"%s\", %i, %i", D, in_cols, n_cols, parent,
       format_file, line, pedantic);
 
@@ -386,18 +384,7 @@ static gd_entry_t* _GD_ParseLinterp(DIRFILE* D,
   E->e->table_len = -1; /* linterp file not read yet */
 
 
-  if (in_cols[3][0] == '/')
-    E->table = strdup(in_cols[3]);
-  else {
-    /* non-absolute paths are relative to the format file's directory */
-    E->table = malloc(FILENAME_MAX);
-    if (E->table != NULL) {
-      strcpy(temp_buffer, format_file);
-      strcpy(E->table, dirname(temp_buffer));
-      strcat(E->table, "/");
-      strcat(E->table, in_cols[3]);
-    }
-  }
+  E->table = strdup(in_cols[3]);
 
   if (E->field == NULL || E->in_fields[0] == NULL || E->table == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
@@ -412,7 +399,7 @@ static gd_entry_t* _GD_ParseLinterp(DIRFILE* D,
 /* _GD_ParseMultiply: parse MULTIPLY data type entry in format file.
 */
 static gd_entry_t* _GD_ParseMultiply(DIRFILE* D,
-    const char* in_cols[MAX_IN_COLS], int n_cols, const gd_entry_t* parent,
+    char* in_cols[MAX_IN_COLS], int n_cols, const gd_entry_t* parent,
     const char* format_file, int line, int pedantic)
 {
   dtrace("%p, %p, %i, %p, \"%s\", %i, %i", D, in_cols, n_cols, parent,
@@ -472,7 +459,7 @@ static gd_entry_t* _GD_ParseMultiply(DIRFILE* D,
 /* _GD_ParseBit: parse BIT data type entry in format file.
 */
 static gd_entry_t* _GD_ParseBit(DIRFILE* D, int is_signed,
-    const char* in_cols[MAX_IN_COLS], int n_cols, const gd_entry_t* parent,
+    char* in_cols[MAX_IN_COLS], int n_cols, const gd_entry_t* parent,
     const char* format_file, int line, int pedantic)
 {
   dtrace("%p, %i, %p, %i, %p, \"%s\", %i, %i", D, is_signed, in_cols, n_cols,
@@ -551,7 +538,7 @@ static gd_entry_t* _GD_ParseBit(DIRFILE* D, int is_signed,
 
 /* _GD_ParsePhase: parse PHASE data type entry in formats file.
 */
-static gd_entry_t* _GD_ParsePhase(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
+static gd_entry_t* _GD_ParsePhase(DIRFILE* D, char* in_cols[MAX_IN_COLS],
     int n_cols, const gd_entry_t* parent, const char* format_file, int line,
     int pedantic)
 {
@@ -614,7 +601,7 @@ static gd_entry_t* _GD_ParsePhase(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
 /* _GD_ParsePolynom: parse a POLYNOM data type in the format file.
 */
 static gd_entry_t* _GD_ParsePolynom(DIRFILE* D,
-    const char* in_cols[MAX_IN_COLS], int n_cols, const gd_entry_t* parent,
+    char* in_cols[MAX_IN_COLS], int n_cols, const gd_entry_t* parent,
     const char* format_file, int line, int pedantic)
 {
   int i;
@@ -692,7 +679,7 @@ static gd_entry_t* _GD_ParsePolynom(DIRFILE* D,
 
 /* _GD_ParseConst: parse CONST data type entry in formats file.
 */
-static gd_entry_t* _GD_ParseConst(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
+static gd_entry_t* _GD_ParseConst(DIRFILE* D, char* in_cols[MAX_IN_COLS],
     int n_cols, const gd_entry_t* parent, const char* format_file, int line,
     int pedantic)
 {
@@ -785,7 +772,7 @@ static gd_entry_t* _GD_ParseConst(DIRFILE* D, const char* in_cols[MAX_IN_COLS],
 
 /* _GD_ParseString: parse STRING data type entry in formats file.
 */
-static gd_entry_t* _GD_ParseString(DIRFILE* D, const char *in_cols[MAX_IN_COLS],
+static gd_entry_t* _GD_ParseString(DIRFILE* D, char *in_cols[MAX_IN_COLS],
     int n_cols, const gd_entry_t* parent, const char* format_file, int line,
     int pedantic)
 {
@@ -875,15 +862,45 @@ static int utf8encode(DIRFILE* D, const char* format_file, int linenum,
 
 /* _GD_ParseFieldSpec: Parse a format file line fragment containing a field
  * specification */
-gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, const char** in_cols,
-    const gd_entry_t* P, const char* format_file, int linenum, unsigned int me,
+gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, char** in_cols,
+    const gd_entry_t* P, const char* format_file, int linenum, int me,
     int standards, int creat, int pedantic, int insert)
 {
   gd_entry_t* E = NULL;
   void *ptr;
+  char *cptr;
 
   dtrace("%p, %i, %p, %p, \"%s\", %i, %u, %i, %i, %i, %i", D, n_cols, in_cols,
       P, format_file, linenum, me, standards, creat, pedantic, insert);
+
+  /* Check for barth-style metafield definition */
+  if (P == NULL)
+    for (cptr = in_cols[0] + 1; *cptr != '\0'; ++cptr)
+      if (*cptr == '/') {
+        *cptr = '\0';
+        const gd_entry_t* P = _GD_FindField(D, in_cols[0], NULL);
+        if (P == NULL)
+          _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_NO_PARENT,
+              D->fragment[me].cname, linenum, in_cols[0]);
+        else if (P->fragment_index != me)
+          _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_LOCATION,
+              D->fragment[me].cname, linenum, in_cols[0]);
+        else if (n_cols < 2)
+          _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_TOK, D->fragment[me].cname,
+              linenum, NULL);
+        else {
+          /* temporarily point in_cols[0] to the metafield name */
+          ptr = in_cols[0];
+          in_cols[0] = cptr + 1;
+          E = _GD_ParseFieldSpec(D, n_cols, in_cols, P, D->fragment[me].cname,
+              linenum, me, standards, creat, pedantic, insert);
+          /* restore in_cols[0] */
+          in_cols[0] = ptr;
+        }
+        dreturn("%p", (!insert) ? E : NULL);
+        return (!insert) ? E : NULL;
+      }
+
 
   ptr = realloc(D->entry, (D->n_entries + 1) * sizeof(gd_entry_t*));
   if (ptr == NULL) {
@@ -896,7 +913,8 @@ gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, const char** in_cols,
   if (n_cols < 2)
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_TOK, format_file, linenum,
         NULL);
-  else if (strcmp(in_cols[0], "INDEX") == 0) /* reserved field name */
+  else if (P == NULL && strcmp(in_cols[0], "INDEX") == 0)
+    /* reserved field name */
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_RES_NAME, format_file, linenum,
         NULL);
   else if (strcmp(in_cols[1], "RAW") == 0) {
@@ -994,6 +1012,11 @@ gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, const char** in_cols,
     D->n_entries++;
   }
 
+  /* return the entry object if we either:
+   * - didn't insert the object into the list of fields (ie. we were called
+   *   by [m]alter_spec
+   * - found a RAW field (which might be the reference field)
+   */
   dreturn("%p", (!insert || (E && E->field_type == GD_RAW_ENTRY)) ? E : NULL);
   return (!insert || (E && E->field_type == GD_RAW_ENTRY)) ? E : NULL;
 }
@@ -1005,7 +1028,7 @@ gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, const char** in_cols,
 #define ACC_MODE_HEX   2
 #define ACC_MODE_UTF8  3
 int _GD_Tokenise(DIRFILE *D, const char* instring, char* outstring,
-    const char** in_cols, const char* format_file, int linenum)
+    char** in_cols, const char* format_file, int linenum)
 {
   const char* ip;
   char* op = outstring;
@@ -1193,7 +1216,7 @@ int _GD_Tokenise(DIRFILE *D, const char* instring, char* outstring,
 /* _GD_ParseDirective: Actually parse a single format file line.
  *       Returns 1 if a match was made.
  */
-static int _GD_ParseDirective(DIRFILE *D, const char** in_cols, int n_cols,
+static int _GD_ParseDirective(DIRFILE *D, char** in_cols, int n_cols,
     int me, int* standards, int linenum, char** ref_name, int* first_fragment,
     unsigned int flags)
 {
@@ -1289,7 +1312,7 @@ char* _GD_ParseFragment(FILE* fp, DIRFILE *D, int me, int* standards,
 {
   char instring[GD_MAX_LINE_LENGTH];
   char outstring[GD_MAX_LINE_LENGTH];
-  const char *in_cols[MAX_IN_COLS];
+  char *in_cols[MAX_IN_COLS];
   int linenum = 0;
   char* ref_name = NULL;
   int n_cols;

@@ -214,19 +214,22 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
       break;
     case GD_LINCOM_ENTRY:
       E->n_fields = entry->n_fields;
-      E->comp_scal = entry->comp_scal;
 
       if (E->n_fields < 1 || E->n_fields > GD_MAX_LINCOM)
         _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_NFIELDS, NULL,
             E->n_fields, NULL);
       else {
-        if (E->comp_scal) {
+        if (entry->comp_scal) {
+          int cs = 0;
           memcpy(E->cm, entry->cm, sizeof(double complex) * E->n_fields);
           memcpy(E->cb, entry->cb, sizeof(double complex) * E->n_fields);
           for (i = 0; i < E->n_fields; ++i) {
             E->m[i] = creal(E->cm[i]);
             E->b[i] = creal(E->cb[i]);
+            if (cimag(E->cm[i]) || cimag(E->cb[i]))
+              cs = 1;
           }
+          E->comp_scal = cs;
         } else {
           memcpy(E->m, entry->m, sizeof(double) * E->n_fields);
           memcpy(E->b, entry->b, sizeof(double) * E->n_fields);
@@ -234,6 +237,7 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
             E->cm[i] = E->m[i];
             E->cb[i] = E->b[i];
           }
+          E->comp_scal = 0;
         }
 
         for (i = 0; i < E->n_fields; ++i)
@@ -291,20 +295,25 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
       break;
     case GD_POLYNOM_ENTRY:
       E->poly_ord = entry->poly_ord;
-      E->comp_scal = entry->comp_scal;
 
       if (E->poly_ord < 1 || E->poly_ord > GD_MAX_POLYORD)
         _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_NFIELDS, NULL,
             E->poly_ord, NULL);
       else {
-        if (E->comp_scal) {
+        if (entry->comp_scal) {
+          int cs = 0;
           memcpy(E->ca, entry->ca, sizeof(double complex) * (E->poly_ord + 1));
-          for (i = 0; i <= E->poly_ord; ++i)
+          for (i = 0; i <= E->poly_ord; ++i) {
             E->a[i] = creal(E->ca[i]);
+            if (cimag(E->ca[i]))
+              cs = 1;
+          }
+          E->comp_scal = 1;
         } else {
           memcpy(E->a, entry->a, sizeof(double) * (E->poly_ord + 1));
           for (i = 0; i <= E->poly_ord; ++i)
             E->ca[i] = E->a[i];
+          E->comp_scal = 0;
         }
 
         if ((E->in_fields[0] = strdup(entry->in_fields[0])) == NULL)
@@ -397,7 +406,7 @@ int dirfile_madd_spec(DIRFILE* D, const char* line, const char* parent)
 {
   char instring[GD_MAX_LINE_LENGTH];
   char outstring[GD_MAX_LINE_LENGTH];
-  const char *in_cols[MAX_IN_COLS];
+  char *in_cols[MAX_IN_COLS];
   int n_cols;
   int me;
   gd_entry_t* E = NULL;
@@ -468,7 +477,7 @@ int dirfile_add_spec(DIRFILE* D, const char* line, int fragment_index)
 {
   char instring[GD_MAX_LINE_LENGTH];
   char outstring[GD_MAX_LINE_LENGTH];
-  const char *in_cols[MAX_IN_COLS];
+  char *in_cols[MAX_IN_COLS];
   int n_cols;
 
   dtrace("%p, \"%s\", %i", D, line, fragment_index);
@@ -1243,6 +1252,7 @@ int dirfile_madd_cpolynom(DIRFILE* D, const char* parent,
 int dirfile_madd_string(DIRFILE* D, const char* parent, const char* field_code,
     const char* value)
 {
+  char buffer[GD_MAX_LINE_LENGTH];
   dtrace("%p, \"%s\", \"%s\", \"%s\"", D, field_code, parent, value);
 
   if (D->flags & GD_INVALID) {/* don't crash */
@@ -1260,7 +1270,8 @@ int dirfile_madd_string(DIRFILE* D, const char* parent, const char* field_code,
 
   /* Actually store the string, now */
   if (!error) {
-    entry = _GD_FindField(D, field_code, NULL);
+    snprintf(buffer, GD_MAX_LINE_LENGTH, "%s/%s", parent, field_code);
+    entry = _GD_FindField(D, buffer, NULL);
 
     if (entry == NULL)
       _GD_InternalError(D); /* We should be able to find it: we just added it */
@@ -1298,8 +1309,8 @@ int dirfile_madd_const(DIRFILE* D, const char* parent, const char* field_code,
   int error = _GD_Add(D, &C, parent);
 
   /* Actually store the constant, now */
-  snprintf(buffer, GD_MAX_LINE_LENGTH, "%s/%s", parent, field_code);
   if (!error) {
+    snprintf(buffer, GD_MAX_LINE_LENGTH, "%s/%s", parent, field_code);
     entry = _GD_FindField(D, buffer, NULL);
 
     if (entry == NULL)

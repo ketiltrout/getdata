@@ -24,7 +24,8 @@ int main(void)
   const char* table1data = "0 0\n1000 10000\n";
   int32_t data_data[256];
   int32_t c[8];
-  int fd, i, we = 0;
+  gd_entry_t e;
+  int fd, i, r = 0;
 
   mkdir(filedir, 0777);
 
@@ -50,42 +51,52 @@ int main(void)
   DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_VERBOSE);
   int ret = dirfile_alter_linterp(D, "lut", NULL, "table1", 0);
   int error = get_error(D);
+  get_entry(D, "lut", &e);
+  int error2 = get_error(D);
   int n = getdata(D, "lut", 5, 0, 1, 0, GD_INT32, c);
 
   dirfile_close(D);
 
-  for (i = 0; i < 8; ++i)
-    if (c[i] != (i + 40) * 10) {
-        printf("%i = %i\n", (i + 40) * 10, c[i]);
-        we++;
-      }
-
   unlink(data);
   int unlink_table = unlink(table);
   unlink(table1);
-  unlink(format);
+  //unlink(format);
   rmdir(filedir);
+
+  for (i = 0; i < 8; ++i)
+    if (c[i] != (i + 40) * 10) {
+        fprintf(stderr, "%i = %i\n", (i + 40) * 10, c[i]);
+        r = 1;
+      }
 
   if (error) {
     fprintf(stderr, "1=%i\n", error);
-    return 1;
+    r = 1;
   }
   if (n != 8) {
     fprintf(stderr, "2=%lli\n", (long long)n);
-    return 1;
+    r = 1;
   }
   if (ret != 0) {
     fprintf(stderr, "3=%i\n", ret);
-    return 1;
-  }
-  if (we != 0) {
-    fprintf(stderr, "4=%i\n", we);
-    return 1;
+    r = 1;
   }
   if (unlink_table != 0) {
     fprintf(stderr, "5=%i\n", unlink_table);
-    return 1;
+    r = 1;
+  }
+  if (error2) {
+    fprintf(stderr, "6=%i\n", error2);
+    r = 1;
+  }
+  if (strcmp(e.in_fields[0], "data")) {
+    fprintf(stderr, "7=%s\n", e.in_fields[0]);
+    r = 1;
+  }
+  if (strcmp(e.table, "table1")) {
+    fprintf(stderr, "7=%s\n", e.table);
+    r = 1;
   }
 
-  return 0;
+  return r;
 }

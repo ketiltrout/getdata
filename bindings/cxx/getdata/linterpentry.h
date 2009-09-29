@@ -37,6 +37,8 @@ namespace GetData {
     friend class Dirfile;
 
     public:
+      LinterpEntry() : Entry::Entry() { E.field_type = GD_LINTERP_ENTRY; };
+
       LinterpEntry(const char* field_code, const char* in_field,
           const char* table, int fragment_index = 0);
 
@@ -49,7 +51,7 @@ namespace GetData {
       };
 
       int SetInput(const char* field);
-      int SetTable(const char* table, int move_table);
+      int SetTable(const char* table, int move_table = 0);
 
     private:
       LinterpEntry(GetData::Dirfile *dirfile, const char* field_code) :

@@ -39,9 +39,11 @@ int main(void)
     return 1;
   } else if (strcmp(E.field, "data")) {
     return 1;
-  } else if (E.field_type != GD_POLYNOM_ENTRY) {
+  } else if (E.field_type != GD_POLYNOM_ENTRY)
     return 1;
-  } else if (E.poly_ord != 4) {
+  if (E.comp_scal != 0)
+    return 1;
+  if (E.poly_ord != 4) {
     return 1;
   } else if (strcmp(E.in_fields[0], "in")) {
     return 1;

@@ -235,6 +235,31 @@ static PyObject* gdpy_dirfile_addspec(struct gdpy_dirfile_t* self,
   return Py_None;
 }
 
+static PyObject* gdpy_dirfile_alter(struct gdpy_dirfile_t* self,
+    PyObject* args, PyObject* keys)
+{
+  dtrace("%p, %p, %p", self, args, keys);
+
+  char* keywords[] = { "entry", "recode", NULL };
+  struct gdpy_entry_t* entry = NULL;
+  int recode = 0;
+
+  if (!PyArg_ParseTupleAndKeywords(args, keys, "O!|i:getdata.dirfile.alter",
+        keywords, &gdpy_entry, &entry, &recode))
+  {
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  dirfile_alter_entry(self->D, entry->E->field, entry->E, recode);
+
+  PYGD_CHECK_ERROR(self->D, NULL);
+
+  Py_INCREF(Py_None);
+  dreturn("%p", Py_None);
+  return Py_None;
+}
+
 static PyObject* gdpy_dirfile_alterspec(struct gdpy_dirfile_t* self,
     PyObject* args, PyObject* keys)
 {
@@ -343,7 +368,7 @@ static PyObject* gdpy_dirfile_getconstant(struct gdpy_dirfile_t* self,
     return NULL;
   }
 
-  char data[8];
+  char data[16];
 
   get_constant(self->D, field_code, return_type, data);
 
@@ -481,6 +506,17 @@ static PyObject* gdpy_dirfile_getentry(struct gdpy_dirfile_t* self,
   return (PyObject*)obj;
 }
 
+static PyObject* gdpy_dirfile_geterror(struct gdpy_dirfile_t* self,
+    void* closure)
+{
+  dtrace("%p, %p", self, closure);
+
+  PyObject* error = PyInt_FromLong(get_error(self->D));
+
+  dreturn("%p", error);
+  return error;
+}
+
 static PyObject* gdpy_dirfile_getfragment(struct gdpy_dirfile_t* self,
     void* args, void* keys)
 {
@@ -513,15 +549,29 @@ static PyObject* gdpy_dirfile_getfragment(struct gdpy_dirfile_t* self,
   return (PyObject*)obj;
 }
 
-static PyObject* gdpy_dirfile_geterror(struct gdpy_dirfile_t* self,
-    void* closure)
+static PyObject* gdpy_dirfile_getfragmentindex(struct gdpy_dirfile_t* self,
+    void* args, void* keys)
 {
-  dtrace("%p, %p", self, closure);
+  dtrace("%p, %p, %p", self, args, keys);
 
-  PyObject* error = PyInt_FromLong(get_error(self->D));
+  char* keywords[] = {"field_code", NULL};
+  const char* field_code;
 
-  dreturn("%p", error);
-  return error;
+  if (!PyArg_ParseTupleAndKeywords(args, keys,
+        "s:getdata.dirfile.get_fragment_index", keywords, &field_code))
+  {
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  int index = get_fragment_index(self->D, field_code);
+
+  PYGD_CHECK_ERROR(self->D, NULL);
+
+  PyObject* pyobj = PyInt_FromLong(index);
+
+  dreturn("%p", pyobj);
+  return pyobj;
 }
 
 static PyObject* gdpy_dirfile_geterrorstring(struct gdpy_dirfile_t* self,
@@ -926,6 +976,31 @@ static PyObject* gdpy_dirfile_getmvectorlist(struct gdpy_dirfile_t* self,
   return pylist;
 }
 
+static PyObject* gdpy_dirfile_getrawfilename(struct gdpy_dirfile_t* self,
+    PyObject* args, PyObject* keys)
+{
+  dtrace("%p, %p, %p", self, args, keys);
+
+  char* keywords[] = { "field_code", NULL };
+  const char* field_code;
+  const char* filename;
+
+  if (!PyArg_ParseTupleAndKeywords(args, keys,
+        "s:getdata.dirfile.get_raw_filename", keywords, &field_code))
+  {
+    dreturn ("%p", NULL);
+    return NULL;
+  }
+  
+  filename = get_raw_filename(self->D, field_code);
+
+  PYGD_CHECK_ERROR(self->D, NULL);
+
+  PyObject* pyobj = PyString_FromString(filename);
+  dreturn("%p", pyobj);
+  return pyobj;
+}
+
 static PyObject* gdpy_dirfile_getnativetype(struct gdpy_dirfile_t* self,
     PyObject* args, PyObject* keys)
 {
@@ -1078,7 +1153,7 @@ static PyObject* gdpy_dirfile_getnmfieldsbytype(struct gdpy_dirfile_t* self,
 {
   dtrace("%p, %p, %p", self, args, keys);
 
-  char* keywords[] = { "parent", NULL };
+  char* keywords[] = { "parent", "type", NULL };
   const char* parent = NULL;
   int type;
 
@@ -1299,7 +1374,7 @@ static PyObject* gdpy_dirfile_putdata(struct gdpy_dirfile_t* self,
   size_t ns = PyList_Size(pyobj);
 
   if (ns > 0) {
-    void* data = malloc(ns * 8);
+    void* data = malloc(ns * 16);
 
     type = gdpy_convert_from_pylist(pyobj, data, type, ns);
 
@@ -1383,13 +1458,13 @@ static PyObject* gdpy_dirfile_validate(struct gdpy_dirfile_t* self,
     return NULL;
   }
 
-  int r = dirfile_validate(self->D, field_code);
+  dirfile_validate(self->D, field_code);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
-  PyObject* pyobj = PyInt_FromLong((long)r);
-  dreturn("%p", pyobj);
-  return pyobj;
+  Py_INCREF(Py_None);
+  dreturn("%p", Py_None);
+  return Py_None;
 }
 
 static PyObject* gdpy_dirfile_getframenum(struct gdpy_dirfile_t* self,
@@ -1400,11 +1475,11 @@ static PyObject* gdpy_dirfile_getframenum(struct gdpy_dirfile_t* self,
   char* keywords[] = { "field_code", "value", "start", "end", NULL };
   const char* field_code;
   double value;
-  off64_t frame_start;
-  off64_t frame_end;
+  off64_t frame_start = 0;
+  off64_t frame_end = 0;
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
-        "sdKK:getdata.dirfile.get_framenum", keywords, &field_code, &value,
+        "sd|KK:getdata.dirfile.get_framenum", keywords, &field_code, &value,
         &frame_start, &frame_end))
   {
     dreturn ("%p", NULL);
@@ -1461,7 +1536,6 @@ static PyObject* gdpy_dirfile_callback(struct gdpy_dirfile_t* self,
   return Py_None;
 }
 
-
 static PyObject* gdpy_dirfile_uninclude(struct gdpy_dirfile_t* self,
     PyObject *args, PyObject *keys)
 {
@@ -1479,6 +1553,56 @@ static PyObject* gdpy_dirfile_uninclude(struct gdpy_dirfile_t* self,
   }
 
   dirfile_uninclude(self->D, fragment_index, del);
+
+  PYGD_CHECK_ERROR(self->D, NULL);
+
+  Py_INCREF(Py_None);
+  dreturn("%p", Py_None);
+  return Py_None;
+}
+
+static PyObject* gdpy_dirfile_move(struct gdpy_dirfile_t* self, PyObject* args,
+    PyObject* keys)
+{
+  dtrace("%p, %p, %p", self, args, keys);
+
+  char* keywords[] = { "field_code", "new_fragment", "move_data", NULL };
+  const char* field_code;
+  int new_fragment;
+  int move_data = 0;
+
+  if (!PyArg_ParseTupleAndKeywords(args, keys, "si|i:getdata.dirfile.move",
+        keywords, &field_code, &new_fragment, &move_data)) {
+    dreturn ("%p", NULL);
+    return NULL;
+  }
+
+  dirfile_move(self->D, field_code, new_fragment, move_data);
+
+  PYGD_CHECK_ERROR(self->D, NULL);
+
+  Py_INCREF(Py_None);
+  dreturn("%p", Py_None);
+  return Py_None;
+}
+
+static PyObject* gdpy_dirfile_rename(struct gdpy_dirfile_t* self,
+    PyObject* args, PyObject* keys)
+{
+  dtrace("%p, %p, %p", self, args, keys);
+
+  char* keywords[] = { "old_code", "new_name", "move_data", NULL };
+  const char* old_code;
+  const char* new_name;
+  int move_data = 0;
+
+  if (!PyArg_ParseTupleAndKeywords(args, keys, "ss|i:getdata.dirfile.move",
+        keywords, &old_code, &new_name, &move_data)) {
+    dreturn ("%p", NULL);
+    return NULL;
+  }
+
+  dirfile_rename(self->D, old_code, new_name, move_data);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -1508,6 +1632,8 @@ static PyMethodDef gdpy_dirfile_methods[] = {
     "Add a new field to a Dirfile."},
   {"add_spec", (PyCFunction)gdpy_dirfile_addspec, METH_VARARGS | METH_KEYWORDS,
     "Add a new field to a Dirfile."},
+  {"alter", (PyCFunction)gdpy_dirfile_alter, METH_VARARGS | METH_KEYWORDS,
+    "Alter the metadata of an existing field in the Dirfile."},
   {"alter_spec", (PyCFunction)gdpy_dirfile_alterspec, METH_VARARGS |
     METH_KEYWORDS, "Modify the metadata of an existing field in the Dirfile."},
   {"close", (PyCFunction)gdpy_dirfile_close, METH_NOARGS,
@@ -1535,6 +1661,9 @@ static PyMethodDef gdpy_dirfile_methods[] = {
     "Retrieve a list of the Dirfile field names of the given type."},
   { "get_fragment", (PyCFunction)gdpy_dirfile_getfragment, METH_VARARGS |
     METH_KEYWORDS, "Retrieve the metatdata of one fragment in the Dirfile."},
+  {"get_fragment_index", (PyCFunction)gdpy_dirfile_getfragmentindex,
+    METH_VARARGS | METH_KEYWORDS, "Returns the index number of the fragment"
+      "defining the supplied field."},
   {"get_framenum", (PyCFunction)gdpy_dirfile_getframenum,
     METH_VARARGS | METH_KEYWORDS, "Given a data value, returns the fraction "
       "frame number associated with the value, based on a monotonic field."},
@@ -1567,7 +1696,7 @@ static PyMethodDef gdpy_dirfile_methods[] = {
   {"get_nmfields", (PyCFunction)gdpy_dirfile_getnmfields, METH_VARARGS |
     METH_KEYWORDS, "Retrieve the number of subfields for a given field from "
       "the Dirfile."},
-  {"get_nmfieldsbytype", (PyCFunction)gdpy_dirfile_getnmfieldsbytype,
+  {"get_nmfields_by_type", (PyCFunction)gdpy_dirfile_getnmfieldsbytype,
     METH_VARARGS | METH_KEYWORDS, "Retrieve the number of subfields of a given "
       "type for a field from the Dirfile."},
   {"get_nmvectors", (PyCFunction)gdpy_dirfile_getnmvectors, METH_VARARGS |
@@ -1575,6 +1704,9 @@ static PyMethodDef gdpy_dirfile_methods[] = {
       "from the Dirfile."},
   {"get_nvectors", (PyCFunction)gdpy_dirfile_getnvectors, METH_NOARGS,
     "Retrieve the number of vector fields from the Dirfile."},
+  {"get_raw_filename", (PyCFunction)gdpy_dirfile_getrawfilename, METH_VARARGS |
+    METH_KEYWORDS, "Retrieve the name of the file on disk containing the raw "
+      "data backing a RAW field."},
   {"get_spf", (PyCFunction)gdpy_dirfile_getspf, METH_VARARGS | METH_KEYWORDS,
     "Retrieve the samples-per-frame of a field from the Dirfile."},
   {"get_string", (PyCFunction)gdpy_dirfile_getstring, METH_VARARGS |
@@ -1594,12 +1726,16 @@ static PyMethodDef gdpy_dirfile_methods[] = {
     "Modify the metadata of an existing subfield in the Dirfile."},
   {"metaflush", (PyCFunction)gdpy_dirfile_metaflush, METH_NOARGS,
     "Flush pending metadata changes to the Dirfile to disc."},
+  {"move", (PyCFunction)gdpy_dirfile_move, METH_VARARGS | METH_KEYWORDS,
+    "Move a field specification to a differend format file fragment."},
   {"put_constant", (PyCFunction)gdpy_dirfile_putconstant, METH_VARARGS |
     METH_KEYWORDS, "Store the value of a CONST field to the Dirfile."},
   {"putdata", (PyCFunction)gdpy_dirfile_putdata, METH_VARARGS | METH_KEYWORDS,
     "Store a data to the Dirfile."},
   {"put_string", (PyCFunction)gdpy_dirfile_putstring, METH_VARARGS |
     METH_KEYWORDS, "Store the value of a STRING field to the Dirfile."},
+  {"rename", (PyCFunction)gdpy_dirfile_rename, METH_VARARGS | METH_KEYWORDS,
+    "Rename a field in the dirfile."},
   {"set_callback", (PyCFunction)gdpy_dirfile_callback, METH_VARARGS |
     METH_KEYWORDS, "Change or remove the parser callback function."},
   {"uninclude", (PyCFunction)gdpy_dirfile_uninclude, METH_VARARGS |

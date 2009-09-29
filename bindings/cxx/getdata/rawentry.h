@@ -37,6 +37,8 @@ namespace GetData {
     friend class Dirfile;
 
     public:
+      RawEntry() : Entry::Entry() { E.field_type = GD_RAW_ENTRY; };
+
       RawEntry(const char* field_code, DataType data_type, unsigned int spf,
           int fragment_index = 0);
 
@@ -49,8 +51,8 @@ namespace GetData {
       };
 
       const char* FileName();
-      int SetSamplesPerFrame(unsigned int spf, int recode);
-      int SetType(DataType type, int recode);
+      int SetSamplesPerFrame(unsigned int spf, int recode = 0);
+      int SetType(DataType type, int recode = 0);
 
     private:
       RawEntry(GetData::Dirfile *dirfile, const char* field_code) :

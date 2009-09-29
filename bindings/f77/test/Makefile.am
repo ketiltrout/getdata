@@ -29,7 +29,7 @@ F77_WALL=-Wall
 endif
 
 if MAKE_F95BINDINGS
-F95TESTS=fgetdata fget_field_list fget_entry
+F95TESTS=big_test95
 endif
 
 FFLAGS += -I.. $(F77_WALL) $(F77_WEXTRA)
@@ -37,8 +37,7 @@ FCFLAGS += -I.. $(F77_WALL) $(FC_WEXTRA)
 F95LDADD=../libf95getdata.la $(F77LDADD)
 F77LDADD=../libfgetdata.la
 
-#TESTS=gdfget gdcopn big_test $(F95TESTS)
-TESTS=big_test
+TESTS=gdcopn big_test $(F95TESTS)
 
 gdcopn_SOURCES=gdcopn.f
 gdcopn_LDADD=$(F77LDADD)
@@ -46,17 +45,8 @@ gdcopn_LDADD=$(F77LDADD)
 big_test_SOURCES=big_test.f
 big_test_LDADD=$(F77LDADD)
 
-gdfget_SOURCES=gdfget.f
-gdfget_LDADD=$(F77LDADD)
-
-fgetdata_SOURCES=fgetdata.f90
-fgetdata_LDADD=$(F95LDADD)
-
-fget_field_list_SOURCES=fget_field_list.f90
-fget_field_list_LDADD=$(F95LDADD)
-
-fget_entry_SOURCES=fget_entry.f90
-fget_entry_LDADD=$(F95LDADD)
+big_test95_SOURCES=big_test95.f90
+big_test95_LDADD=$(F95LDADD)
 
 check_PROGRAMS=$(TESTS)
 

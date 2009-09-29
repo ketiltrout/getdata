@@ -253,9 +253,13 @@ double get_framenum_subset64(DIRFILE* D, const char* field_code_in,
   spf = _GD_GetSPF(D, entry);
   if (field_start == 0)
     field_start = D->fragment[entry->fragment_index].frame_offset * spf;
+  else
+    field_start *= spf;
 
   if (field_end == 0)
     field_end = (get_nframes64(D) + 1) * spf - 1;
+  else
+    field_end = field_end * spf - 1;
 
   if (field_end - field_start < 2)
     _GD_SetError(D, GD_E_DOMAIN, GD_E_DOMAIN_EMPTY, NULL, 0, NULL);

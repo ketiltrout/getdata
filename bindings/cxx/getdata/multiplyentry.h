@@ -37,6 +37,8 @@ namespace GetData {
     friend class Dirfile;
 
     public:
+      MultiplyEntry() : Entry::Entry() { E.field_type = GD_MULTIPLY_ENTRY; };
+
       MultiplyEntry(const char* field_code, const char* in_field1,
           const char* in_field2, int fragment_index = 0);
 

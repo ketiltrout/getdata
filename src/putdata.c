@@ -82,7 +82,12 @@ static size_t _GD_DoRawOut(DIRFILE *D, gd_entry_t *E, off64_t s0,
        GD_BIG_ENDIAN
 #endif
       ))
-    _GD_FixEndianness(databuffer, E->e->size, ns);
+  {
+    if (E->data_type & GD_COMPLEX)
+      _GD_FixEndianness(databuffer, E->e->size / 2, ns * 2);
+    else
+      _GD_FixEndianness(databuffer, E->e->size, ns);
+  }
 
   /* write data to file. */
 
@@ -550,9 +555,6 @@ size_t putdata64(DIRFILE* D, const char *field_code_in, off64_t first_frame,
     return 0;
   }
   entry = _GD_FindField(D, field_code, NULL);
-
-  if (field_code != field_code_in)
-    free(field_code);
 
   if (entry == NULL)
     _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, field_code);

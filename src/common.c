@@ -30,6 +30,10 @@
 #include <string.h>
 #endif
 
+#ifdef HAVE_LIBGEN_H
+#include <libgen.h>
+#endif
+
 /* _GD_GetLine: read non-comment line from format file.  The line is placed in
  *       *line.  Returns 1 if successful, 0 if unsuccessful.
  */
@@ -139,8 +143,11 @@ void* _GD_Alloc(DIRFILE* D, gd_type_t type, size_t n)
   void* ptr = NULL;
 
   dtrace("%p, 0x%x, %zi", D, type, n);
-  if (n == 0)
+  if (n == 0) {
     _GD_InternalError(D);
+    dreturn("%p", NULL);
+    return NULL;
+  }
 
   if (type == GD_NULL) {
     dreturn("%p", NULL);
@@ -185,6 +192,36 @@ static void _GD_MakeDummyLinterp(DIRFILE* D, struct _gd_private_entry *e)
   dreturnvoid();
 }
 
+/* compute LUT table path -- this is used by _GD_Change, so e may not be E->e */
+int _GD_SetTablePath(DIRFILE *D, gd_entry_t *E, struct _gd_private_entry *e)
+{
+  dtrace("%p, %p, %p", D, E, e);
+
+  if (E->table[0] == '/') {
+    e->table_path = strdup(E->table);
+    if (e->table_path == NULL) {
+      _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+      dreturn("%i", 1);
+      return 1;
+    }
+  } else {
+    e->table_path = malloc(FILENAME_MAX);
+    if (e->table_path == NULL) {
+      _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+      dreturn("%i", 1);
+      return 1;
+    }
+    char temp_buffer[FILENAME_MAX];
+    strcpy(temp_buffer, D->fragment[E->fragment_index].cname);
+    strcpy(e->table_path, dirname(temp_buffer));
+    strcat(e->table_path, "/");
+    strcat(e->table_path, E->table);
+  }
+
+  dreturn("%i", 0);
+  return 0;
+}
+
 /* _GD_ReadLinterpFile: Read in the linterp data for this field
 */
 void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E)
@@ -197,12 +234,19 @@ void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E)
 
   dtrace("%p, %p", D, E);
 
+  if (E->e->table_path == NULL)
+    if (_GD_SetTablePath(D, E, E->e)) {
+      dreturnvoid();
+      return;
+    }
+
   E->e->complex_table = 0;
 
-  fp = fopen(E->table, "r");
+  fp = fopen(E->e->table_path, "r");
   if (fp == NULL) {
     _GD_MakeDummyLinterp(D, E->e);
-    _GD_SetError(D, GD_E_OPEN_LINFILE, GD_E_LINFILE_OPEN, NULL, 0, E->table);
+    _GD_SetError(D, GD_E_OPEN_LINFILE, GD_E_LINFILE_OPEN, NULL, 0,
+        E->e->table_path);
     dreturnvoid();
     return;
   }
@@ -221,7 +265,9 @@ void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E)
 
   if (i < 2) {
     _GD_MakeDummyLinterp(D, E->e);
-    _GD_SetError(D, GD_E_OPEN_LINFILE, GD_E_LINFILE_LENGTH, NULL, 0, E->table);
+    _GD_SetError(D, GD_E_OPEN_LINFILE, GD_E_LINFILE_LENGTH, NULL, 0,
+        E->e->table_path);
+    fclose(fp);
     dreturnvoid();
     return;
   }
@@ -237,6 +283,7 @@ void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E)
 
   if (E->e->x == NULL || E->e->y == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    fclose(fp);
     dreturnvoid();
     return;
   }
@@ -253,6 +300,7 @@ void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E)
       sscanf(line, "%lg %lg", &(E->e->x[i]), &(E->e->y[i]));
   }
 
+  fclose(fp);
   dreturnvoid();
 }
 

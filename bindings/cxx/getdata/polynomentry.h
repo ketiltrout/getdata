@@ -37,6 +37,8 @@ namespace GetData {
     friend class Dirfile;
 
     public:
+      PolynomEntry() : Entry::Entry() { E.field_type = GD_POLYNOM_ENTRY; };
+
       PolynomEntry(const char* field_code, int poly_ord, const char* in_field,
           double* a, int fragment_index = 0);
 
@@ -47,21 +49,26 @@ namespace GetData {
         return E.in_fields[0];
       };
 
-      virtual int NFields() {
-        return E.n_fields;
+      virtual int ComplexScalars() {
+        return E.comp_scal;
+      }
+
+      virtual int PolyOrd() {
+        return E.poly_ord;
       };
 
       virtual double Coefficient(int index = 0) {
-        return (CheckIndex(E.field_type, E.poly_ord, index)) ? E.a[index] : 0;
+        return (index <= E.poly_ord) ? E.a[index] : 0;
       };
 
       virtual double complex CCoefficient(int index = 0) {
-        return (CheckIndex(E.field_type, E.poly_ord, index)) ? E.a[index] : 0;
+        return (index <= E.poly_ord) ? E.ca[index] : 0;
       };
 
       int SetPolyOrd(int poly_ord);
       int SetInput(const char* field);
       int SetCoefficient(double coeff, int index = 0);
+      int SetCoefficient(double complex coeff, int index = 0);
 
     private:
       PolynomEntry(GetData::Dirfile *dirfile, const char* field_code) :

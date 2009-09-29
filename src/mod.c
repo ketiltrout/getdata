@@ -208,20 +208,23 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
       if (Q.n_fields != E->n_fields)
         modified = 1;
 
+      Q.comp_scal = 0;
+
       for (i = 0; i < Q.n_fields; ++i) {
-        if (flags & 0x1 && N->in_fields[i] != NULL &&
-            strcmp(E->in_fields[i], N->in_fields[i]))
-        {
-          if ((Q.in_fields[i] = strdup(N->in_fields[i])) == NULL) {
-            _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-            break;
+        if (flags & 0x1)
+          if (E->n_fields <= i || (N->in_fields[i] != NULL && 
+              strcmp(E->in_fields[i], N->in_fields[i])))
+          {
+            if ((Q.in_fields[i] = strdup(N->in_fields[i])) == NULL) {
+              _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+              break;
+            }
+            modified = 1;
+            field_free |= 2 << i;
           }
-          modified = 1;
-          field_free |= 2 << i;
-        }
 
         if (flags & 0x2) {
-          if (E->comp_scal && E->cm[i] != N->cm[i]) {
+          if (N->comp_scal && E->cm[i] != N->cm[i]) {
             modified = 1;
             Q.cm[i] = N->cm[i];
             Q.m[i] = creal(Q.cm[i]);
@@ -237,11 +240,11 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
         }
 
         if (flags & 0x4) {
-          if (E->comp_scal && E->cb[i] != N->cb[i]) {
+          if (N->comp_scal && E->cb[i] != N->cb[i]) {
             modified = 1;
             Q.cb[i] = N->cb[i];
             Q.b[i] = creal(Q.cb[i]);
-          } else if ( E->m[i] != N->m[i]) {
+          } else if ( E->b[i] != N->b[i]) {
             modified = 1;
             Q.cb[i] = Q.b[i] = N->b[i];
           }
@@ -250,7 +253,13 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
             scalar_free |= 1 << (i * 2 + 1);
           }
         }
+
+        if (cimag(Q.cm[i]) || cimag(Q.cb[i]))
+          Q.comp_scal = 1;
       }
+
+      if ((Q.comp_scal && !E->comp_scal) || (!Q.comp_scal && E->comp_scal))
+        modified = 1;
       break;
     case GD_LINTERP_ENTRY:
       if (N->in_fields[0] != NULL && strcmp(E->in_fields[0], N->in_fields[0])) {
@@ -263,18 +272,8 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
       }
 
       if (N->table != NULL && strcmp(E->table, N->table)) {
-        if (N->table[0] == '/')
-          Q.table = strdup(N->table);
-        else {
-          Q.table = malloc(FILENAME_MAX);
-          if (Q.table != NULL) {
-            char temp_buffer[FILENAME_MAX];
-            strcpy(temp_buffer, D->fragment[E->fragment_index].cname);
-            strcpy(Q.table, dirname(temp_buffer));
-            strcat(Q.table, "/");
-            strcat(Q.table, N->table);
-          }
-        }
+        Q.table = strdup(N->table);
+        Qe.table_path = NULL;
 
         if (Q.table == NULL) {
           _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
@@ -282,14 +281,23 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
         }
 
         if (flags) {
-          if (rename(E->table, Q.table)) {
-            _GD_SetError(D, GD_E_RAW_IO, 0, E->table, errno, 0);
+          if (E->e->table_path == NULL)
+            if (_GD_SetTablePath(D, E, E->e))
+              break;
+
+          if (Qe.table_path == NULL)
+            if (_GD_SetTablePath(D, &Q, &Qe))
+              break;
+
+          if (rename(E->e->table_path, Qe.table_path)) {
+            _GD_SetError(D, GD_E_RAW_IO, 0, E->e->table_path, errno, 0);
             break;
           }
         }
 
         modified = 1;
         free(E->table);
+        free(E->e->table_path);
       }
 
       break;
@@ -382,9 +390,11 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
       if (Q.poly_ord != E->poly_ord)
         modified = 1;
 
+      Q.comp_scal = 0;
+
       if (flags & 0x1)
         for (i = 0; i <= Q.poly_ord; ++i) {
-          if (E->comp_scal && N->ca[i] != E->ca[i]) {
+          if (N->comp_scal && N->ca[i] != E->ca[i]) {
             modified = 1;
             Q.ca[i] = N->ca[i];
             Q.a[i] = creal(Q.ca[i]);
@@ -396,7 +406,12 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
             Qe.scalar[i] = strdup(N->e->scalar[i]);
             scalar_free |= 1 << i;
           }
+          if (cimag(Q.ca[i]))
+            Q.comp_scal = 1;
         }
+
+      if ((Q.comp_scal && !E->comp_scal) || (!Q.comp_scal && E->comp_scal))
+        modified = 1;
 
       break;
     case GD_CONST_ENTRY:
@@ -453,7 +468,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
       }
     }
 
-    for (i = 0; i < GD_MAX_POLYORD; ++i) {
+    for (i = 0; i <= GD_MAX_POLYORD; ++i) {
       if (scalar_free & (1 << i))
         free(E->e->scalar[i]);
     }
@@ -887,11 +902,11 @@ int dirfile_alter_cpolynom(DIRFILE* D, const char* field_code, int poly_ord,
   N.in_fields[0] = (char*)in_field;
   N.e = NULL;
 
-  for (i = 0; i <= N.poly_ord; ++i)
-    if (ca != NULL) {
-      flags |= 1;
-      N.a[i] = ca[i];
-    }
+  if (ca != NULL)  {
+    flags |= 1;
+    for (i = 0; i <= N.poly_ord; ++i) 
+      N.ca[i] = ca[i];
+  }
 
   int ret = _GD_Change(D, field_code, &N, flags);
 
@@ -903,7 +918,7 @@ int dirfile_alter_spec(DIRFILE* D, const char* line, int move)
 {
   char instring[GD_MAX_LINE_LENGTH];
   char outstring[GD_MAX_LINE_LENGTH];
-  const char *in_cols[MAX_IN_COLS];
+  char *in_cols[MAX_IN_COLS];
   int n_cols;
   gd_entry_t *N = NULL;
 
@@ -979,7 +994,7 @@ int dirfile_malter_spec(DIRFILE* D, const char* line, const char* parent,
 {
   char instring[GD_MAX_LINE_LENGTH];
   char outstring[GD_MAX_LINE_LENGTH];
-  const char *in_cols[MAX_IN_COLS];
+  char *in_cols[MAX_IN_COLS];
   int n_cols;
   gd_entry_t *N = NULL;
 

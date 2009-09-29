@@ -55,10 +55,6 @@ static char* _GDF_CString(char* out, const char* in, int l)
 {
   dtrace("%p, \"%s\", %i", out, in, l);
   int i;
-  if (l == 0) {
-    dreturn("%p", NULL);
-    return NULL;
-  }
 
   for (i = 0; i < l; ++i)
     out[i] = in[i];
@@ -76,7 +72,7 @@ static DIRFILE* _GDF_GetDirfile(int d)
   if (!f77dirfiles_initialised)
     _GDF_InitDirfiles();
 
-  if (f77dirfiles[d] == NULL) {
+  if (d < 0 || d >= GDF_N_DIRFILES || f77dirfiles[d] == NULL) {
     dreturn("%p [0]", f77dirfiles[0]);
     return f77dirfiles[0];
   }
@@ -1445,7 +1441,7 @@ void F77_FUNC(gdgtst, GDGTST) (int* n_read, const int* dirfile,
   int l = *len;
 
   *n_read = get_string(_GDF_GetDirfile(*dirfile), _GDF_CString(fc, field_code,
-        *field_code_l), (size_t)len, out);
+        *field_code_l), (size_t)*len, out) - 1;
 
   _GDF_FString(data_out, &l, out);
   free(fc);
@@ -1471,7 +1467,7 @@ void F77_FUNC(gdptst, GDPTST) (int* n_wrote, const int* dirfile,
   char* fc = malloc(*field_code_l + 1);
   char* in = malloc(*len + 1);
   *n_wrote = put_string(_GDF_GetDirfile(*dirfile), _GDF_CString(fc, field_code,
-        *field_code_l), _GDF_CString(in, data_in, *len));
+        *field_code_l), _GDF_CString(in, data_in, *len)) - 1;
   free(fc);
   free(in);
 }

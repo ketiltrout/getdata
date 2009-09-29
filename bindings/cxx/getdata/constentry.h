@@ -37,7 +37,11 @@ namespace GetData {
     friend class Dirfile;
 
     public:
+      ConstEntry() : Entry::Entry() { E.field_type = GD_CONST_ENTRY; };
+
       ConstEntry(const char* field_code, DataType type, int fragment_index = 0);
+
+      virtual DataType ConstType() { return (DataType)E.const_type; }
 
       int SetType(DataType type);
 

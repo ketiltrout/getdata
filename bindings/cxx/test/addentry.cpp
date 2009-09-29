@@ -28,7 +28,7 @@ int main(void)
   unlink(format);
   rmdir(filedir);
 
-  if (strcmp(entry.Code(), "data") != 0)
+  if (strcmp(entry.Name(), "data") != 0)
     return 1;
 
   if (entry.Type() != RawEntryType)

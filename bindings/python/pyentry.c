@@ -246,7 +246,7 @@ static void gdpy_set_entry_from_tuple(gd_entry_t *E, PyObject* tuple,
         return;
       }
 
-      E->shift = (int)PyInt_AsLong(PyTuple_GetItem(tuple, 0));
+      E->shift = (int)PyInt_AsLong(PyTuple_GetItem(tuple, 1));
       break;
     case GD_POLYNOM_ENTRY:
       parm2 = PyTuple_GetItem(tuple, 1);
@@ -318,7 +318,7 @@ static void gdpy_set_entry_from_dict(gd_entry_t *E, PyObject* parms,
   {
     case GD_RAW_ENTRY:
       key[0] = "type";
-      key[1] = "a";
+      key[1] = "spf";
       size = 2;
       break;
     case GD_LINCOM_ENTRY:
@@ -397,12 +397,12 @@ static int gdpy_entry_init(struct gdpy_entry_t* self, PyObject *args,
 
   gd_entry_t E;
   char *keywords[] = {"type", "name", "fragment_index", "parameters", NULL};
-  PyObject* parms;
+  PyObject* parms = NULL;
   const char* field_name;
 
   memset(&E, 0, sizeof(gd_entry_t));
 
-  if (!PyArg_ParseTupleAndKeywords(args, keys, "isiO:getdata.entry.__init__",
+  if (!PyArg_ParseTupleAndKeywords(args, keys, "isi|O:getdata.entry.__init__",
         keywords, &E.field_type, &field_name, &E.fragment_index, &parms))
   {
     dreturn("%i", -1);
@@ -416,7 +416,22 @@ static int gdpy_entry_init(struct gdpy_entry_t* self, PyObject *args,
     return -1;
   }
 
-  if (PyDict_Check(parms))
+  /* check for valid field type */
+  if (E.field_type > 0x11 || E.field_type <= 0 ||
+      gdpy_entry_type_names[E.field_type] == NULL) {
+    PyErr_SetString(PyExc_ValueError,
+        "'getdata.entry.__init__' invalid entry type");
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  if (E.field_type == GD_STRING_ENTRY) 
+    ; /* no parameters required */
+  else if (parms == NULL)
+    PyErr_Format(PyExc_TypeError, "getdata.entry.__init__() initialisation of "
+        "%s require parameter tuple or dictionary",
+        gdpy_entry_type_names[E.field_type]);
+  else if (PyDict_Check(parms))
     gdpy_set_entry_from_dict(&E, parms, "getdata.entry.__init__");
   else if (PyTuple_Check(parms))
     gdpy_set_entry_from_tuple(&E, parms, "getdata.entry.__init__");
@@ -1069,8 +1084,8 @@ static PyObject* gdpy_entry_getbitnum(struct gdpy_entry_t* self, void* closure)
 
   dtrace("%p, %p", self, closure);
 
-  if (self->E->field_type != GD_BIT_ENTRY &&
-      self->E->field_type != GD_SBIT_ENTRY)
+  if (self->E->field_type == GD_BIT_ENTRY ||
+      self->E->field_type == GD_SBIT_ENTRY)
   {
     obj = PyInt_FromLong(self->E->bitnum);
   } else
@@ -1115,8 +1130,8 @@ static PyObject* gdpy_entry_getnumbits(struct gdpy_entry_t* self, void* closure)
 
   dtrace("%p, %p", self, closure);
 
-  if (self->E->field_type != GD_BIT_ENTRY &&
-      self->E->field_type != GD_SBIT_ENTRY)
+  if (self->E->field_type == GD_BIT_ENTRY ||
+      self->E->field_type == GD_SBIT_ENTRY)
   {
     obj = PyInt_FromLong(self->E->numbits);
   } else
@@ -1161,7 +1176,7 @@ static PyObject* gdpy_entry_getshift(struct gdpy_entry_t* self, void* closure)
 
   dtrace("%p, %p", self, closure);
 
-  if (self->E->field_type == GD_RAW_ENTRY)
+  if (self->E->field_type == GD_PHASE_ENTRY)
     obj = PyInt_FromLong(self->E->shift);
   else
     PyErr_Format(PyExc_AttributeError, "'getdata.entry' "
@@ -1177,7 +1192,7 @@ static int gdpy_entry_setshift(struct gdpy_entry_t* self, PyObject *value,
 {
   dtrace("%p, %p, %p", self, value, closure);
 
-  if (self->E->field_type != GD_RAW_ENTRY) {
+  if (self->E->field_type != GD_PHASE_ENTRY) {
     PyErr_Format(PyExc_AttributeError, "'getdata.entry' "
         "attribute 'shift' not available for entry type %s",
         gdpy_entry_type_names[self->E->field_type]); 

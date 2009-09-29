@@ -30,6 +30,17 @@ extern "C" {
 }
 #include <getdata/fragment.h>
 #include <getdata/entry.h>
+#include <getdata/rawentry.h>
+#include <getdata/lincomentry.h>
+#include <getdata/linterpentry.h>
+#include <getdata/bitentry.h>
+#include <getdata/sbitentry.h>
+#include <getdata/phaseentry.h>
+#include <getdata/indexentry.h>
+#include <getdata/polynomentry.h>
+#include <getdata/constentry.h>
+#include <getdata/stringentry.h>
+#include <getdata/multiplyentry.h>
 
 namespace GetData {
   
@@ -52,6 +63,8 @@ namespace GetData {
     friend class Fragment;
 
     public:
+      Dirfile();
+
       Dirfile(const char *dirfilename, unsigned int flags = GD_RDWR,
           int (*sehandler)(const DIRFILE*, int, char*, void*) = NULL,
           void* extra = NULL);
@@ -87,6 +100,8 @@ namespace GetData {
       int Flush(const char *field_code = NULL);
 
       GetData::Fragment *Fragment(int index);
+
+      int FragmentIndex(const char* field_cde);
 
       double FrameNum(const char* field_code, double value,
           off_t frame_start = 0, off_t frame_end = 0);
@@ -129,6 +144,8 @@ namespace GetData {
       unsigned int NMFieldsByType(const char *parent, EntryType type);
 
       unsigned int NMVectors(const char *parent);
+
+      const char* Name();
 
       DataType NativeType(const char* field_code);
 

@@ -37,6 +37,8 @@ namespace GetData {
     friend class Dirfile;
 
     public:
+      PhaseEntry() : Entry::Entry() { E.field_type = GD_PHASE_ENTRY; };
+
       PhaseEntry(const char* field_code, const char* in_field, int shift,
           int fragment_index = 0);
 

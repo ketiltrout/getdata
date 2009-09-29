@@ -26,7 +26,7 @@ gd_type_t _GD_NativeType(DIRFILE* D, gd_entry_t* E, int repr)
   gd_type_t type = GD_UNKNOWN;
   int i;
 
-  dtrace("%p, %p, %i", D, E, repr);
+  dtrace("%p, %p, %c", D, E, repr);
 
   if (++D->recurse_level >= GD_MAX_RECURSE_LEVEL) {
     _GD_SetError(D, GD_E_RECURSE_LEVEL, 0, NULL, 0, E->field);

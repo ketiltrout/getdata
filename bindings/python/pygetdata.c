@@ -366,7 +366,7 @@ static PyMethodDef GetDataMethods[] = {
   { NULL, NULL, 0, NULL }
 };
 
-PyMODINIT_FUNC initgetdata(void)
+PyMODINIT_FUNC initpygetdata(void)
 {
   int i;
   PyObject* mod;
@@ -380,7 +380,7 @@ PyMODINIT_FUNC initgetdata(void)
   if (PyType_Ready(&gdpy_fragment) < 0)
     return;
 
-  mod = Py_InitModule3("getdata", GetDataMethods,
+  mod = Py_InitModule3("pygetdata", GetDataMethods,
       "Bindings to the GetData library for Dirfile access\n\n"
       "This module provides interfaces to the C GetData library.");
   if (mod == NULL)

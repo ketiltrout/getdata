@@ -15,7 +15,7 @@ int main(void)
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
   const char* data = __TEST__ "dirfile/data";
-  const char* format_data = "polynom POLYNOM data 3 2\ndata RAW UINT8 1\n";
+  const char* format_data = "polynom POLYNOM data 3 2 1\ndata RAW UINT8 1\n";
   unsigned char c = 0;
   unsigned char data_data[256];
   int fd;
@@ -51,7 +51,7 @@ int main(void)
     printf("2=%i\n", n);
     return 1;
   }
-  if (c != 13) {
+  if (c != 3 + 2 * 5 + 1 * 5 * 5) {
     printf("3=%i\n", c);
     return 1;
   }

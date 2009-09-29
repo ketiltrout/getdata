@@ -37,6 +37,8 @@ namespace GetData {
     friend class Dirfile;
 
     public:
+      LincomEntry() : Entry::Entry() { E.field_type = GD_LINCOM_ENTRY; };
+
       LincomEntry(const char* field_code, int n_fields, const char** in_fields,
           double* m, double* b, int fragment_index = 0);
 
@@ -47,6 +49,10 @@ namespace GetData {
         return (CheckIndex(E.field_type, E.n_fields, index)) ? 
             E.in_fields[index] : NULL;
       };
+
+      virtual int ComplexScalars() {
+        return E.comp_scal;
+      }
 
       virtual int NFields() {
         return E.n_fields;
@@ -71,7 +77,9 @@ namespace GetData {
       int SetNFields(int nfields);
       int SetInput(const char* field, int index = 0);
       int SetScale(double scale, int index = 0);
+      int SetScale(double complex scale, int index = 0);
       int SetOffset(double offset, int index = 0);
+      int SetOffset(double complex offset, int index = 0);
 
     private:
       LincomEntry(GetData::Dirfile *dirfile, const char* field_code) :

@@ -87,7 +87,22 @@ int LincomEntry::SetScale(double scale, int index)
   if (index < 0 || index > 2)
     return -1;
 
-  E.m[index] = scale;
+  E.cm[index] = E.m[index] = scale;
+
+  if (D != NULL)
+    return dirfile_alter_entry(D->D, E.field, &E, 0);
+  
+  return 0;
+}
+
+int LincomEntry::SetScale(double complex scale, int index)
+{
+  if (index < 0 || index > 2)
+    return -1;
+
+  E.cm[index] = scale;
+  E.m[index] = creal(E.cm[index]);
+  E.comp_scal = 1;
 
   if (D != NULL)
     return dirfile_alter_entry(D->D, E.field, &E, 0);
@@ -100,7 +115,22 @@ int LincomEntry::SetOffset(double offset, int index)
   if (index < 0 || index > 2)
     return -1;
 
-  E.b[index] = offset;
+  E.cb[index] = E.b[index] = offset;
+
+  if (D != NULL)
+    return dirfile_alter_entry(D->D, E.field, &E, 0);
+  
+  return 0;
+}
+
+int LincomEntry::SetOffset(double complex offset, int index)
+{
+  if (index < 0 || index > 2)
+    return -1;
+
+  E.cb[index] = offset;
+  E.b[index] = creal(E.cb[index]);
+  E.comp_scal = 1;
 
   if (D != NULL)
     return dirfile_alter_entry(D->D, E.field, &E, 0);
@@ -112,7 +142,7 @@ int LincomEntry::SetNFields(int nfields)
 {
   int old_n = E.n_fields;
 
-  if (nfields < 1 || nfields > 2)
+  if (nfields < 1 || nfields > GD_MAX_LINCOM)
     return -1;
 
   if (nfields > old_n) {

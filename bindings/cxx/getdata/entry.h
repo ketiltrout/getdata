@@ -68,10 +68,14 @@ namespace GetData {
       virtual ~Entry();
 
       /* Generic data */
-      const char *Code() { return E.field; };
+      int Associated() { return (D != NULL); };
+
+      const char *Name() { return E.field; };
 
       EntryType Type() { return (EntryType)E.field_type; };
       
+      void Dissociate() { D = NULL; };
+
       int FragmentIndex() { return E.fragment_index; };
 
       int Move(int new_fragment, int move_data = 0);
@@ -80,9 +84,14 @@ namespace GetData {
 
       /* Specific data */
       virtual const char *Input(int index = 0) {
-        return (CheckIndex(E.field_type, (E.field_type == GD_POLYNOM_ENTRY) ?
-              0 : E.n_fields, index)) ?  E.in_fields[index] : NULL;
+        return (CheckIndex(E.field_type, E.n_fields, index)) ?
+          E.in_fields[index] : NULL;
       };
+
+      virtual int ComplexScalars() {
+        return (E.field_type == GD_LINCOM_ENTRY ||
+            E.field_type == GD_POLYNOM_ENTRY) ? E.comp_scal : 0;
+      }
 
       /* RAW methods */
       virtual unsigned int SamplesPerFrame() {
@@ -137,20 +146,30 @@ namespace GetData {
         return (E.field_type == GD_PHASE_ENTRY) ? E.shift : 0;
       };
 
+      /* CONST methods */
+      virtual DataType ConstType() {
+        return (E.field_type == GD_CONST_ENTRY) ? (DataType)E.const_type :
+          Unknown;
+      };
+
       /* POLYNOM methods */
       virtual int PolyOrd() {
         return (E.field_type == GD_POLYNOM_ENTRY) ? E.poly_ord : 0;
       };
 
       virtual double Coefficient(int index = 0) {
-        return (E.field_type == GD_POLYNOM_ENTRY &&
-            CheckIndex(E.field_type, E.poly_ord, index)) ? E.a[index] : 0;
+        return (E.field_type == GD_POLYNOM_ENTRY && index <= E.poly_ord)
+          ? E.a[index] : 0;
       }
 
       virtual double complex CCoefficient(int index = 0) {
-        return (E.field_type == GD_POLYNOM_ENTRY &&
-            CheckIndex(E.field_type, E.poly_ord, index)) ? E.ca[index] : 0;
+        return (E.field_type == GD_POLYNOM_ENTRY && index <= E.poly_ord)
+          ? E.ca[index] : 0;
       }
+
+      void SetName(const char* name);
+
+      void SetFragmentIndex(int fragment_index);
 
     protected:
       Entry(Dirfile *dirfile, const char* field_code);
