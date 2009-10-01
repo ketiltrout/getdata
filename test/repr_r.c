@@ -1,7 +1,6 @@
 /* Attempt to read real representation */
 #include "../src/getdata.h"
 
-
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -10,6 +9,7 @@
 #include <errno.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <math.h>
 
 int main(void)
 {

@@ -342,7 +342,7 @@ struct _GD_DIRFILE {
   int type_list_validity;
 
   /* syntax error callback */
-  int (*sehandler)(const DIRFILE*, int, char*, void*);
+  gd_parser_callback_t sehandler;
   void* sehandler_extra;
 
   /* library error data */

@@ -227,6 +227,20 @@ typedef struct _gd_unified_entry gd_entry_t;
 /* The dirifle object */
 typedef struct _GD_DIRFILE DIRFILE;
 
+/* Parser callback objects */
+struct _gd_callback_data {
+  const DIRFILE* dirfile;
+  int suberror;
+  int linenum;
+  const char* filename;
+  char* line;
+};
+
+typedef struct _gd_callback_data gd_parser_data_t;
+
+typedef int (*gd_parser_callback_t)(gd_parser_data_t*, void*);
+
+
 /* dirfile_flags */
 #define GD_ACCMODE        0x00001 /* mask */
 #define GD_RDONLY         0x00000 /* open read only */
@@ -467,8 +481,7 @@ extern int get_parent_fragment(DIRFILE *dirfile,
     int fragment_index) __THROW __gd_nonnull ((1));
 
 extern void dirfile_parser_callback(DIRFILE *dirfile,
-    int (*sehandler)(const DIRFILE*, int, char*, void*),
-    void*) __THROW __gd_nonnull ((1));
+    gd_parser_callback_t sehandler, void*) __THROW __gd_nonnull ((1));
 
 extern int dirfile_protect(DIRFILE *dirfile, int protection_level,
     int fragment_index) __THROW __gd_nonnull ((1));
@@ -532,8 +545,7 @@ extern int dirfile_alter_spec(DIRFILE *dirfile, const char *line,
     int recode) __gd_nonnull ((1,2));
 
 extern DIRFILE *dirfile_cbopen(const char *dirfilename, unsigned long flags,
-    int (*sehandler)(const DIRFILE*, int, char*, void*),
-    void *extra) __gd_nonnull ((1));
+    gd_parser_callback_t sehandler, void* extra) __gd_nonnull ((1));
 
 extern int dirfile_close(DIRFILE *dirfile);
 

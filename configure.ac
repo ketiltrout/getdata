@@ -261,6 +261,14 @@ echo "*** Checking Fortran 90 compiler characteristics"
 echo
 AC_PROG_FC
 AC_PROG_FC_C_O
+# does $FC accept fortran code with .f90 extension?
+AC_MSG_CHECKING([whether the Fortran 90 compiler works])
+AC_LANG_PUSH([Fortran])
+ac_ext="f90"
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM()],
+[AC_MSG_RESULT([yes])],
+[AC_MSG_RESULT([no]); FC=;])
+AC_LANG_POP
 echo
 echo "*** Building libtool"
 echo

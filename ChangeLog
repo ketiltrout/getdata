@@ -1,3 +1,33 @@
+2009-09-30   D. V. Wiebe <getdata@ketiltrout.net>  svn:314
+	* test/convert_complex128_float64.c test/get_const_complex.c
+	test/madd_lincom.c test/madd_polynom.c test/repr_real_m.c test/repr_i.c
+	test/put_repr.c test/repr_real_a.c test/repr_m.c test/repr_real_r.c
+	test/get_const.c test/madd_string.c test/add_string.c test/repr_a.c
+	test/convert_complex128_complex64.c test/repr_r.c test/get_const_repr.c
+	test/convert_complex64_float64.c test/repr_real_i.c: Clean compiler
+	warnings.
+	
+	* src/open.c (dirfile_parser_callback): Changed the parser callback protoype
+	again.  This is hopefully less likely to break things in the future.
+	* src/getdata.h.in: Define two new types: gd_parser_data_t, a structure
+	of getdata data passed to the callback function, and gd_parser_callback_t,
+	the callback function itself.
+	* src/parse.c (_GD_ParseFragment): Call the new parser callback.
+	* test/open_cb_invalid.c test/include_cb.c test/open_cb_rescan.c
+	test/open_cb_ignore.c test/include_pc.c test/open_cb_cont.c
+	test/open_cb_abort.c bindings/python/test/callback.py
+	bindings/python/pydirfile.c bindings/cxx/dirfile.cpp
+	bindings/cxx/getdata/dirfile.h bindings/f77/fgetdata.c: Update for new
+	callback prototype.
+
+	* configure.ac: Attempt to compile a minimal F90 program with a .f90
+	extension.  This should tip us off to any old G77s which are pretending to
+	be "Fortran" compilers.
+
+	* util/checkdirfile.c: A significant overhaul to add more functionality:
+	reports all the lines with syntax errors, calls dirfile_validate() on all
+	fields.
+
 2009-09-29   D. V. Wiebe <getdata@ketiltrout.net>  svn:313
 	* test/madd_spec.c test/madd_polynom.c test/get_polynom.c
 	test/entry_polynom.c test/entry_lincom.c test/add_string.c test/madd_phase.c

@@ -18,9 +18,8 @@ int main(void)
   const char* format = __TEST__ "dirfile/format";
   const char* data = __TEST__ "dirfile/data";
   const char* format_data = "data RAW COMPLEX64 8\n";
-  float c[8], d;
+  float c[8];
   int fd, i, r = 0;
-  struct stat buf;
 
   memset(c, 0, 8);
   mkdir(filedir, 0777);

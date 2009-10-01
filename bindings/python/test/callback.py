@@ -4,16 +4,25 @@ import array
 import pygetdata
 
 #callback
-def parser_callback(estring, suberror, line, extra):
+def parser_callback(pdata, extra):
   if (extra != "extra stuff"):
+    print "extra =", extra;
     sys.exit(1)
 
-  if (suberror != 8):
-    print "suberror = ", suberror
+  if (pdata["suberror"] != 8):
+    print "suberror =", pdata["suberror"]
     sys.exit(1);
 
-  if (line != "bad line\n"):
-    print "line = ", line
+  if (pdata["line"] != "bad line\n"):
+    print "line =", pdata["line"]
+    sys.exit(1);
+
+  if (pdata["linenum"] != 2):
+    print "linenum =", pdata["linenum"]
+    sys.exit(1);
+
+  if (pdata["filename"] != "dirfile/format"):
+    print "filename =", pdata["filename"]
     sys.exit(1);
 
   return pygetdata.SYNTAX_IGNORE;

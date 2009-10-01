@@ -21,20 +21,20 @@
 #include "pygetdata.h"
 
 /* Dirfile */
-static int gdpy_callback_func(const DIRFILE* D, int suberror, char* line,
-    void* extra)
+static int gdpy_callback_func(gd_parser_data_t* pdata, void* extra)
 {
-  dtrace("%p, %i, \"%s\", %p", D, suberror, line, extra);
+  dtrace("%p, %p", pdata, extra);
 
   int r = GD_SYNTAX_ABORT;
   struct gdpy_dirfile_t* self = extra;
 
   if (self->callback != NULL) {
     char buffer[GD_MAX_LINE_LENGTH];
-    get_error_string(D, buffer, GD_MAX_LINE_LENGTH);
+    get_error_string(pdata->dirfile, buffer, GD_MAX_LINE_LENGTH);
 
-    PyObject* arglist = Py_BuildValue("(sisO)", buffer, suberror, line,
-        self->callback_data);
+    PyObject* arglist = Py_BuildValue("({sssisssiss}O)", "error_string", buffer,
+        "suberror", pdata->suberror, "line", pdata->line, "linenum",
+        pdata->linenum, "filename", pdata->filename, self->callback_data);
 
     /* an exception results in an abort */
     if (arglist == NULL) {
@@ -84,8 +84,8 @@ static int gdpy_callback_func(const DIRFILE* D, int suberror, char* line,
             r = GD_SYNTAX_ABORT;
           }
           
-          strncpy(line, new_string, GD_MAX_LINE_LENGTH - 1);
-          line[GD_MAX_LINE_LENGTH - 1] = '\0';
+          strncpy(pdata->line, new_string, GD_MAX_LINE_LENGTH - 1);
+          pdata->line[GD_MAX_LINE_LENGTH - 1] = '\0';
       }
 
       if (PyTuple_Size(result) == 1) {
@@ -99,8 +99,8 @@ static int gdpy_callback_func(const DIRFILE* D, int suberror, char* line,
       }
           
       r = GD_SYNTAX_RESCAN;
-      strncpy(line, new_string, GD_MAX_LINE_LENGTH - 1);
-      line[GD_MAX_LINE_LENGTH - 1] = '\0';
+      strncpy(pdata->line, new_string, GD_MAX_LINE_LENGTH - 1);
+      pdata->line[GD_MAX_LINE_LENGTH - 1] = '\0';
     } else if (PyInt_Check(result))
       r = (int)PyInt_AsLong(result);
     else {

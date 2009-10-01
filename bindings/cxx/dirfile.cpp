@@ -29,7 +29,7 @@ Dirfile::Dirfile()
 }
 
 Dirfile::Dirfile(const char* filedir, unsigned int flags,
-          int (*sehandler)(const DIRFILE*, int, char*, void*), void* extra)
+    gd_parser_callback_t sehandler, void* extra)
 {
   D = dirfile_cbopen(filedir, flags, sehandler, extra);
   error_string = NULL;
@@ -310,8 +310,7 @@ int Dirfile::Close()
   return ret;
 }
 
-void Dirfile::SetCallback(int (*sehandler)(const DIRFILE*, int, char*, void*),
-    void* extra)
+void Dirfile::SetCallback(gd_parser_callback_t sehandler, void* extra)
 {
   dirfile_parser_callback(D, sehandler, extra);
 }

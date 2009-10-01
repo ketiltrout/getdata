@@ -12,16 +12,14 @@
 
 static int saw_callback = 0;
 
-int callback(const DIRFILE *dirfile __attribute (( unused )),
-    int suberror __attribute__ (( unused )), char *line,
-    void *extra __attribute__ (( unused )))
+int callback(gd_parser_data_t *pdata, void *extra __attribute__ (( unused )))
 {
   if (saw_callback)
     return GD_SYNTAX_ABORT;
 
   saw_callback = 1;
 
-  strcpy(line, "/REFERENCE data\n");
+  strcpy(pdata->line, "/REFERENCE data\n");
 
   return GD_SYNTAX_RESCAN;
 }

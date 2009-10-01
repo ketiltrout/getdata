@@ -11,9 +11,7 @@
 
 static int saw_callback = 0;
 
-int callback(const DIRFILE *dirfile __attribute (( unused )),
-    int suberror __attribute__ (( unused )),
-    char *line __attribute__ (( unused )),
+int callback(gd_parser_data_t *pdata __attribute__ (( unused )),
     void* extra __attribute__ (( unused )))
 {
   saw_callback = 1;

@@ -17,7 +17,7 @@ int main(void)
   const char* format = __TEST__ "dirfile/format";
   int r = 0;
   gd_entry_t e;
-  const char val[1000];
+  char val[1000];
 
   DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
   dirfile_add_phase(D, "new", "in", 3, 0);
@@ -37,7 +37,7 @@ int main(void)
       fprintf(stderr, "fragment_index = %i\n", e.fragment_index);
       r = 1;
     }
-    get_string(D, "new/meta", 1000, &val);
+    get_string(D, "new/meta", 1000, val);
     if (strcmp(val, "A string.")) {
       fprintf(stderr, "val = %s\n", val);
       r = 1;

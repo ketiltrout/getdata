@@ -66,8 +66,7 @@ namespace GetData {
       Dirfile();
 
       Dirfile(const char *dirfilename, unsigned int flags = GD_RDWR,
-          int (*sehandler)(const DIRFILE*, int, char*, void*) = NULL,
-          void* extra = NULL);
+          gd_parser_callback_t sehandler = NULL, void* extra = NULL);
 
       Dirfile(DIRFILE *D);
 
@@ -170,8 +169,7 @@ namespace GetData {
 
       unsigned int SamplesPerFrame(const char *field_code);
 
-      void SetCallback(int (*sehandler)(const DIRFILE*, int, char*, void*),
-          void* extra = NULL);
+      void SetCallback(gd_parser_callback_t sehandler, void* extra = NULL);
 
       const char **Strings();
 

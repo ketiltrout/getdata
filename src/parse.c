@@ -1321,6 +1321,7 @@ char* _GD_ParseFragment(FILE* fp, DIRFILE *D, int me, int* standards,
   int se_action = GD_SYNTAX_ABORT;
   int first_fragment = -1;
   gd_entry_t* first_raw = NULL;
+  gd_parser_data_t pdata;
 
   int saved_error = 0;
   int saved_suberror = 0;
@@ -1349,9 +1350,14 @@ char* _GD_ParseFragment(FILE* fp, DIRFILE *D, int me, int* standards,
       _GD_ClearError(D); /* ignore this line, continue parsing */
     else if (D->error == GD_E_FORMAT) {
       /* call the callback for this error */
-      if (D->sehandler != NULL)
-        se_action = (*D->sehandler)(D, D->suberror, instring,
-            D->sehandler_extra);
+      if (D->sehandler != NULL) {
+        pdata.dirfile = D;
+        pdata.suberror = D->suberror;
+        pdata.linenum = linenum;
+        pdata.filename = D->fragment[me].cname;
+        pdata.line = instring;
+        se_action = (*D->sehandler)(&pdata, D->sehandler_extra);
+      }
 
       switch(se_action) {
         case GD_SYNTAX_ABORT:

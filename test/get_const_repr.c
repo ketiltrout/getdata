@@ -1,4 +1,4 @@
-/* Attempt to read UINT8 */
+/* Attempt to read constant with repr */
 #include "../src/getdata.h"
 
 
@@ -17,7 +17,7 @@ int main(void)
   const char* format = __TEST__ "dirfile/format";
   const char* format_data = "const CONST COMPLEX128 8.3;9.2\n";
   double c;
-  int fd, i;
+  int fd;
 
   mkdir(filedir, 0777);
 

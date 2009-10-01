@@ -143,8 +143,7 @@ static int _GDF_FString(char* dest, int *dlen, const char* src)
 }
 
 /* callback wrapper */
-static int _GDF_Callback(const DIRFILE* D, int suberror, char *line,
-    void* f77_callback)
+static int _GDF_Callback(gd_parser_data_t* pdata, void* f77_callback)
 {
   int unit;
   int r = GD_SYNTAX_ABORT;
@@ -152,12 +151,13 @@ static int _GDF_Callback(const DIRFILE* D, int suberror, char *line,
   dtrace("%p, %i, \"%s\"", D, suberror, line);
 
   if (f77_callback != NULL) {
-    unit = _GDF_SetDirfile((DIRFILE*)D);
+    unit = _GDF_SetDirfile((DIRFILE*)pdata->dirfile);
 
-    (*(void(*)(int*, const int*, const int*, char*))f77_callback)(&r, &unit,
-        &suberror, line);
+    (*(void(*)(int*, const int*, const int*, char*, const int*,
+               const char*))f77_callback)(&r, &unit, &pdata->suberror,
+             pdata->line, &pdata->linenum, pdata->filename);
 
-    line[GD_MAX_LINE_LENGTH - 1] = '\0';
+    pdata->line[GD_MAX_LINE_LENGTH - 1] = '\0';
 
     _GDF_ClearDirfile(unit);
   }
