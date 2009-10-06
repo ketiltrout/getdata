@@ -148,7 +148,7 @@ static int _GDF_Callback(gd_parser_data_t* pdata, void* f77_callback)
   int unit;
   int r = GD_SYNTAX_ABORT;
 
-  dtrace("%p, %i, \"%s\"", D, suberror, line);
+  dtrace("%p, %p", pdata, f77_callback);
 
   if (f77_callback != NULL) {
     unit = _GDF_SetDirfile((DIRFILE*)pdata->dirfile);

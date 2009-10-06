@@ -180,7 +180,8 @@ MADD_TESTS=madd madd_bit madd_bit_invalid madd_clincom madd_const \
 					 madd_spec_directive madd_spec_invalid madd_string
 
 MOVE_TESTS=move move_data_enc_ar move_data_enc_ra move_data_endian \
-					 move_data_foffs move_data_nop move_index move_protect move_subdir
+					 move_data_foffs move_data_nop move_index move_meta move_protect \
+					 move_subdir
 
 NAME_TESTS=name name_move
 

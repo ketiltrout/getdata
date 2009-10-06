@@ -396,8 +396,8 @@ PyMODINIT_FUNC initpygetdata(void)
   PyModule_AddObject(mod, "fragment", (PyObject *)&gdpy_fragment);
 
   /* version */
-  PyModule_AddObject(mod, "__version__", Py_BuildValue("(iii)", GETDATA_MAJOR,
-        GETDATA_MINOR, GETDATA_REVISION));
+  PyModule_AddObject(mod, "__version__", Py_BuildValue("(iiis)", GETDATA_MAJOR,
+        GETDATA_MINOR, GETDATA_REVISION, GETDATA_VERSION_SUFFIX));
 
   /* author */
   PyModule_AddStringConstant(mod, "__author__",

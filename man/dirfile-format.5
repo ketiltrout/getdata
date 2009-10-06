@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH dirfile\-format 5 "20 September 2009" "Standards Version 6" "DATA FORMATS"
+.TH dirfile\-format 5 "4 October 2009" "Standards Version 7" "DATA FORMATS"
 .SH NAME
 dirfile\-format \(em the dirfile database format specification file
 .SH DESCRIPTION
@@ -166,7 +166,7 @@ directives are discussed below.
 The ENCODING directive specifies the encoding scheme used to encode binary
 files in the dirfile.  The encoding scheme may be one of the predefined names
 listed below, which are described in more detail in
-.BR dirfile-encoding (5),
+.BR dirfile\-encoding (5),
 or any other site-specific encoding scheme.  The predefined scheme names are:
 .RS
 .TP
@@ -246,8 +246,9 @@ The META directive specifies a metafield attached to a particular parent
 field.  The field metadata may be of any allowed type except
 .BR RAW .
 Metafields are retrieved in exactly the same way as regular field data, but the
-field code specified consists of the parent and metafield names joined with
-a forward slash:
+.I field code
+specified consists of the parent and metafield names joined with a forward
+slash:
 .RS
 .IP
 .IB <parent-field> / <meta-field>
@@ -269,10 +270,23 @@ provides a scalar metadatum called
 .I meta
 with value 3.291882 attached to the field
 .IR pfield .
-This particular metafield may be referred to by the field code
+This particular metafield may be referred to by the
+.I field code
 "pfield/meta".  Note that different parent fields may have metafields with
 the same name, since all references to metafields must include the parent
 field name.  Metafields may not themselves have further sub-metafields.
+.PP
+As an alternative to the META directive, a metafield may be specified by a
+standard field specification line, using
+.IP
+.IB <parent-field> / <meta-field>
+.PP
+as the field name.  That is, the above example metafield could have also been
+specified as:
+.IP
+pfield/meta
+.B CONST FLOAT64
+3.291882
 .PP
 The META directive has no scope: it is processed immediately and has no
 long-term effect.
@@ -367,8 +381,16 @@ Field names are case sensitive.  The second token in the field specification
 line is the field type.  The meaning of subsequent tokens depends on the field
 type.
 
+If the field name beginning a field specifiction line does contain a
+.B /
+character, the line is assumed to specify a metafield.  See the
+.B META
+directive above for further details.
+
 Some of the parameters in a field specification line may be either literal
-numbers or else the field code of a
+numbers or else the
+.I field code
+(see below) of a
 .B CONST
 field containing the number.  Such parameters are indicated below.  Since it is
 possible to create a field code which is identical to a literal number, a
@@ -380,17 +402,62 @@ rules outlined in
 (So, for example, a
 .B CONST
 field whose field code consists solely of digits can never be used as a
-parameter in a field specification line.)
+parameter in a field specification line.)  A literal complex number is specified
+as two real (floating point) numbers separated by a semicolon
+.RB ( ; )
+with no intervening whitespace.  So, for example, the tokens
+.IP
+1;0 0;1 4;0 0;5 9.313e2;74.1
+.PP
+represent, respectively, the real unit, the imaginary unit, the real number
+four, the imaginary number
+.RI 5 i ,
+and the complex number
+.RI "931.3 + 74.1" i .
 
-There are eight field types.  Of these, six are of vector type
-.RB ( BIT ", " LINCOM ", " LINTERP ", " MULTIPLY ", " PHASE ", and " RAW )
+When specifying the input to a field, either as a
+.B CONST
+scalar parameter, or as an input vector field to a
+.RB non- RAW
+vector field,
+.I field codes
+are used.  A
+.I field code
+is one of:
+.IP \(bu 4
+a simple field name, indicating to a vector or scalar field
+.IP \(bu 4
+a parent field name, followed by a forward slash, followed by a metafield name,
+indicating a metafield.  See the description of the
+.B META
+directive above for further details. 
+.IP \(bu 4
+either of the above, followed by a period, followed by a
+.I "representation suffix" ,
+but only if the field or metafield specified is not a
+.B STRING
+type field.
+.PP
+The 
+.IR "representation suffixes"
+are:
+.B .a .i .m .r
+and specify a norm which is applied to complex valued data to convert them to
+real valued data (respecively: complex argument, imaginary part, modulus, and
+real part.  See dirfile\-complex(5) for full details on complex numbers and
+.I representations
+in dirfiles.
+
+There are ten field types.  Of these, eight are of vector type
+.RB ( BIT ", " LINCOM ", " LINTERP ", " MULTIPLY ", " PHASE ,
+.BR POLYNOM ", " RAW ", and " SBIT )
 and two are of scalar type
 .RB ( CONST " and " STRING ).
 The possible fields types are:
 .TP
 .B BIT
 The BIT vector field type extracts one or more bits out of an input vector
-field.  Syntax is:
+field as an unsigned number.  Syntax is:
 .RS
 .IP
 .I <field-name>
@@ -414,7 +481,9 @@ is omitted, it is assumed to be 1.  Both
 .IR first-bit " and " bits
 may be either literal numbers, or else the field code of a
 .B CONST
-field type containing their values.
+field type containing their values.  The
+.B SBIT
+field type is a signed version of this field type.
 .RE
 .TP
 .B CONST
@@ -443,12 +512,13 @@ input vector fields.  Syntax is:
 .IP
 .I <field-name>
 .B LINCOM
-.IR "<n> <field1> <a1> <b1>"\~ [ "<field2> <a2> <b2>"\~ [ "<field3> <a3> <b3>" ]]
+.RI [ <n> "] " "<field1> <a1> <b1>"\~ [ "<field2> <a2> <b2>"\~ [ "<field3> <a3>"
+.IR <b3> ]]
 .PP
 where
-.I n
-indicates the number of input vector fields (1, 2, or 3).  The derived field
-will be computed as:
+.IR n ,
+if present, indicates the number of input vector fields (1, 2, or 3).  The
+derived field will be computed as:
 .IP
 field-name[n] = (a1 * field1[n] + b1) + (a2 * field2[n2] + b2) + (a3 * field3[n3] + b3)
 .PP
@@ -468,6 +538,21 @@ Each supplied co-efficient
 &c.) may be either a literal number, or else the field code of a
 .B CONST
 field type containing its value.
+
+If
+.I n
+is not specified, the number of fields is determined by looking at the supplied
+parameters.  Since it is possible to create a field code which is identical to
+a literal number, the third token on the line is assumed to be
+.I n
+if it the entire token can be parsed as a literal number using the rules
+outlined in
+.BR strtod (3).
+That is, if the field code specifying
+.I field1
+could be mistaken for a literal number,
+.I n
+must be specified to prevent ambiguity.
 .RE
 .TP
 .B LINTERP
@@ -538,6 +623,35 @@ parameter may be either a literal number, or else the field code of a
 field type containing its values.
 .RE
 .TP
+.B POLYNOM
+The POLYNOM vector field type specifies a polynomial function of a single input
+vector field.  Synax is:
+.RS
+.IP
+.I <field_name>
+.B POLYNOM
+.I <input> <a0> <a1> [<a2> [<a3> [<a4> [<a5]]]]
+where
+.I <input>
+.PP
+is the input field code, and the order of the computed polynomial is determined
+by how many co-efficients are present in the specification.  The derived field
+is computed as:
+.IP
+field-name[n] = a0 + a1 * input[n] + a2 * input[n]**2 + a3 * input[n]**3 +
+a4 * input[n]**4 + a5 * input[n]**5
+.PP
+where
+.I **
+is the exponentiation operator, and the higher order terms are computed only
+if the corresponding co-efficients
+.RI a i
+are specified.  The coefficients, if specified, may be either literal numbers,
+or else the field code of a
+.B CONST
+field type containing the value.
+.RE
+.TP
 .B RAW
 The RAW vector field type specifies raw time streams on disk.  In this case, the
 field name should correspond to the name of the file containing the time stream.
@@ -584,7 +698,24 @@ IEEE-754 standard 32-bit single precision floating point number
 .TP
 .IR FLOAT64 \~or\~ DOUBLE
 IEEE-754 standard 64-bit double precision floating point number
+.TP
+.I COMPLEX64
+a 64-bit complex number stored in "Fortran order" (that is, as a IEEE-754
+standard 32-bit single precision floating point number representing the real
+part of the complex number followed by a IEEE-754 standard 32-bit single
+precision floating point number representing the imaginary part of the complex
+number).  This format also conforms to the C99 standard.
+.TP
+.I COMPLEX128
+a 128-bit complex number stored in "Fortran order" (that is, as a IEEE-754
+standard 64-bit double precision floating point number representing the real
+part of the complex number followed by a IEEE-754 standard 64-bit double
+precision floating point number representing the imaginary part of the complex
+number).  This format also conforms to the C99 standard.
 .RE
+
+For more information on the storage and retrieval of complex valued data, see
+dirfile\-complex(5).
 
 For backwards compatibility, implementations should also recognise the following
 single character type aliases in use prior to Standards Version 5:
@@ -613,9 +744,9 @@ FLOAT64
 .RE
 
 Types
-.IR INT8 ,\~ UINT64 ,
+.IR INT8 ,\~ UINT64 ,\~ INT64 ,\~ COMPLEX64 ,
 and
-.I INT64
+.I COMPLEX128
 are not supported before Standards Version 5, so no single character type
 aliases exist for these types.
 
@@ -624,6 +755,37 @@ The
 parameter may be either a literal number, or else the name of a
 .B CONST
 field type containing its values.
+.RE
+.TP
+.B SBIT
+The SBIT vector field type extracts one or more bits out of an input vector
+field as a signed number.  Syntax is:
+.RS
+.IP
+.I <field-name>
+.B SBIT
+.I <input> <first-bit> [<bits>]
+.PP
+which specifies
+.I field-name
+to be the value of bits
+.I first-bit
+through
+.IR first-bit + bits -1
+of the input vector field
+.IR input ,
+when
+.I input
+is converted from its native type to a (endianness corrected) signed 64-bit
+integer.  If
+.I bits
+is omitted, it is assumed to be 1.  Both
+.IR first-bit " and " bits
+may be either literal numbers, or else the field code of a
+.B CONST
+field type containing their values.  The
+.B BIT
+field type is an unsigned version of this field type.
 .RE
 .TP
 .B STRING
@@ -649,7 +811,19 @@ or else escape the whitespace with the backslash character
 
 .SH STANDARDS VERSIONS
 
-This document describes Version 6 of the Dirfile Standards.
+This document describes Version 7 of the Dirfile Standards.
+
+Version 7 of the Standards (October 2009) added the
+.B SBIT
+and
+.B POLYNOM
+field types, and the directive-less method of specifying metafields.  It also
+introduced the data types
+.I COMPLEX128
+and
+.IR COMPLEX64 ,
+along with the notion of
+.IR representations .
 
 Version 6 of the Standards (October 2008) added the
 .BR /ENCODING ,\~ /META ,\~ /PROTECT ", and " /REFERENCE
@@ -664,7 +838,11 @@ fields to be used as parameters in field specification lines.  It also removed
 .I FILEFRAM
 as an alias for
 .IR INDEX ,
-and allowed '#' and '\e' in field codes.
+and allowed
+.B #
+and
+.B \e
+in field names.
 
 Version 5 of the Standards (August 2008) added
 .B /VERSION
@@ -679,7 +857,7 @@ the new-style type specifiers, and increased the range of the
 .B BIT
 field type from 32 to 64 bits.  It also prohibited the characters
 .B #&/;<>\e.|
-in field codes.
+in field names.
 
 Version 4 of the Standards (October 2006) added the
 .B PHASE
@@ -722,4 +900,5 @@ D. V. Wiebe
 
 .SH SEE ALSO
 .BR dirfile (5),
-.BR dirfile-encoding (5)
+.BR dirfile\-complex (5),
+.BR dirfile\-encoding (5)

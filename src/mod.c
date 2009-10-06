@@ -1028,7 +1028,7 @@ int dirfile_malter_spec(DIRFILE* D, const char* line, const char* parent,
 
   /* start parsing */
   n_cols = _GD_Tokenise(D, instring, outstring, in_cols,
-      "dirfile_alter_spec()", 0);
+      "dirfile_malter_spec()", 0);
 
   if (D->error) {
     dreturn("%i", -1); /* tokeniser threw an error */

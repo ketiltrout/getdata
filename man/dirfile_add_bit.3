@@ -1,6 +1,6 @@
 .\" dirfile_add_bit.3.  The dirfile_add_bit man page.
 .\"
-.\" (C) 2008 D. V. Wiebe
+.\" (C) 2008, 2009 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,10 +13,12 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH dirfile_add_bit 3 "8 December 2008" "Version 0.5.0" "GETDATA"
+.TH dirfile_add_bit 3 "4 October 2009" "Version 0.6.0" "GETDATA"
 .SH NAME
-dirfile_add_bit, dirfile_add_const, dirfile_add_lincom, dirfile_add_linterp,
-dirfile_add_multiply, dirfile_add_phase, dirfile_add_raw, dirfile_add_string
+dirfile_add_bit, dirfile_add_clincom, dirfile_add_const, dirfile_add_cpolynom,
+dirfile_add_lincom, dirfile_add_linterp, dirfile_add_multiply,
+dirfile_add_phase, dirfile_add_polynom, dirfile_add_raw, dirfile_add_sbit,
+dirfile_add_string
 \(em add a field to a dirfile
 .SH SYNOPSIS
 .B #include <getdata.h>
@@ -27,9 +29,17 @@ dirfile_add_multiply, dirfile_add_phase, dirfile_add_raw, dirfile_add_string
 .BI "const char *" in_field ", int " bitnum ", int " numbits ,
 .BI "int " fragment_index );
 .HP
+.BI "int dirfile_add_clincom(DIRFILE *" dirfile ", const char *" field_name ,
+.BI "int " n_fields ", const char **" in_fields ", const double complex *" cm ,
+.BI "const double complex *" cb ", int " fragment_index );
+.HP
 .BI "int dirfile_add_const(DIRFILE *" dirfile ", const char *" field_name ,
 .BI "gd_type_t " const_type ", gd_type_t " data_type ", void *" value ,
 .BI "int " fragment_index );
+.HP
+.BI "int dirfile_add_cpolynom(DIRFILE *" dirfile ", const char *" field_name ,
+.BI "int " poly_ord ", const char *" in_fields ", const double complex *" ca ,
+.BI int " fragment_index );
 .HP
 .BI "int dirfile_add_lincom(DIRFILE *" dirfile ", const char *" field_name ,
 .BI "int " n_fields ", const char **" in_fields ", const double *" m ,
@@ -45,8 +55,16 @@ dirfile_add_multiply, dirfile_add_phase, dirfile_add_raw, dirfile_add_string
 .BI "int dirfile_add_phase(DIRFILE *" dirfile ", const char *" field_name ,
 .BI "const char *" in_field ", int " phase ", int " fragment_index );
 .HP
+.BI "int dirfile_add_polynom(DIRFILE *" dirfile ", const char *" field_name ,
+.BI "int " poly_ord ", const char *" in_fields ", const double *" a ,
+.BI int " fragment_index );
+.HP
 .BI "int dirfile_add_raw(DIRFILE *" dirfile ", const char *" field_name ,
 .BI "gd_type_t " data_type ", unsigned int " spf ", int " fragment_index );
+.HP
+.BI "int dirfile_add_sbit(DIRFILE *" dirfile ", const char *" field_name ,
+.BI "const char *" in_field ", int " bitnum ", int " numbits ,
+.BI "int " fragment_index );
 .HP
 .BI "int dirfile_add_string(DIRFILE *" dirfile ", const char *" field_name ,
 .BI "const char *" value ", int " fragment_index );
@@ -70,18 +88,39 @@ The meaning and valid types of other arguments may be obtained from the
 and
 .BR dirfile-format (5)
 manual pages.
-.P
+
+The
+.BR dirfile_add_clincom ()
+and
+.BR dirfile_add_cpolynom ()
+functions are identical to
+.BR dirfile_add_lincom ()
+and
+.BR dirfile_add_polynom (),
+except they take complex scalar parameters, instead of purely real values.
+
 The
 .BR dirfile_add_lincom ()
-function takes pointers to three arrays of length
+and
+.BR dirfile_add_clincom ()
+functions takes pointers to three arrays of length
 .I n_fields
 containing the input field names
 .RI ( in_fields ),
 the gain factors
-.RI ( m ),
+.RI ( m " or " cm ),
 and the offset terms
-.RI ( b ).
-.P
+.RI ( b " or " cb ).
+Similarly,
+.BR dirfile_add_polynom ()
+and
+.BR dirfile_add_cpolynom ()
+take an array of length
+.I poly_ord
++ 1
+containing the polynomial co-efficients
+.RI ( a " or " ca ).
+
 The
 .BR dirfile_add_string ()
 and
@@ -174,11 +213,15 @@ a call to
 .BR dirfile_add (3),
 .BR dirfile_add_spec (3),
 .BR dirfile_madd_bit (3),
+.BR dirfile_madd_clincom (3),
 .BR dirfile_madd_const (3),
+.BR dirfile_madd_cpolynom (3),
 .BR dirfile_madd_lincom (3),
 .BR dirfile_madd_linterp (3),
 .BR dirfile_madd_multiply (3),
 .BR dirfile_madd_phase (3),
+.BR dirfile_madd_polynom (3),
+.BR dirfile_madd_sbit (3),
 .BR dirfile_madd_string (3),
 .BR dirfile_metaflush (3),
 .BR dirfile_open (3),

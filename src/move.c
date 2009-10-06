@@ -296,6 +296,7 @@ int dirfile_move(DIRFILE* D, const char* field_code, int new_fragment,
 {
   gd_entry_t *E;
   char *new_filebase;
+  int i;
 
   dtrace("%p, \"%s\", %i, %i", D, field_code, new_fragment, move_data);
 
@@ -386,6 +387,10 @@ int dirfile_move(DIRFILE* D, const char* field_code, int new_fragment,
   D->fragment[E->fragment_index].modified = 1;
   D->fragment[new_fragment].modified = 1;
   E->fragment_index = new_fragment;
+
+  /* update meta fields */
+  for (i = 0; i < E->e->n_meta; ++i)
+    E->e->meta_entry[i]->fragment_index = new_fragment;
 
   dreturn("%i", 0);
   return 0;

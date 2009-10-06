@@ -55,6 +55,16 @@ AC_ARG_WITH([idl], AS_HELP_STRING([--with-idl=PATH],
               esac
             ], [ user_idl=; have_idl= ])
 
+
+AC_ARG_WITH([idl-dlm-dir], AS_HELP_STRING([--with-idl-dlm-dir=PATH],
+      [install the IDL bindings in PATH [[autodetect]]]),
+      [
+        case "${withval}" in
+          no) local_idl_dlm_path= ;;
+          *) local_idl_dlm_path="${withval}"
+        esac
+      ], [ local_idl_dlm_path= ])
+
 if test "x${have_idl}" != "xno"; then
 
 dnl try to find a sufficiently new IDL.
@@ -95,7 +105,11 @@ AC_MSG_RESULT([$IDL_VERSION])
 
 dnl calculate idl CPPFLAGS and LIBS
 AC_MSG_CHECKING([for $IDL DLM directory])
-idldir=`(echo 'print,"@@@"+!DLM_PATH' | $IDL 2>&1) | $GREP '@@@' | sed -e 's/@@@\(@<:@^:@:>@*\)/\1/'`
+if test "x${local_idl_dlm_path}" = "x"; then
+  idldir=`(echo 'print,"@@@"+!DLM_PATH' | $IDL 2>&1) | $GREP '@@@' | sed -e 's/@@@\(@<:@^:@:>@*\)/\1/'`
+else
+  idldir="$local_idl_dlm_path"
+fi
 AC_MSG_RESULT([$idldir])
 AC_SUBST([idldir])
 

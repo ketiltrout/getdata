@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH get_constant 3 "8 December 2008" "Version 0.5.0" "GETDATA"
+.TH get_constant 3 "4 October 2009" "Version 0.6.0" "GETDATA"
 .SH NAME
 get_constant \(em retrieve a scalar constant from a dirfile database
 .SH SYNOPSIS
@@ -43,6 +43,10 @@ The
 .I dirfile
 argument must point to a valid DIRFILE object previously created by a call to
 .BR dirfile_open (3).
+The argument
+.I data_out
+must point to a valid memory location of sufficient size to hold a value of the
+return type specified.
 
 The 
 .I return_type
@@ -74,11 +78,17 @@ unsigned 64-bit integer
 .I GD_INT64
 signed (two's complement) 64-bit integer
 .TP
-.IR GD_FLOAT32 \~or\~ GD_FLOAT
+.IR GD_FLOAT32
 IEEE-754 standard 32-bit single precision floating point number
 .TP
-.IR GD_FLOAT64 \~or\~ GD_DOUBLE
+.IR GD_FLOAT64
 IEEE-754 standard 64-bit double precision floating point number
+.TP
+.IR GD_COMPLEX64
+C99-conformant 64-bit single precision complex number
+.TP
+.IR GD_COMPLEX128
+C99-conformant 128-bit double precision complex number
 .TP
 .I GD_NULL
 the null type: the database is queried as usual, but no data is returned.
@@ -89,10 +99,11 @@ is ignored and may be NULL.
 
 The return type of the constant need not be the same as the type of the data
 stored in the database.  Type conversion will be performed as necessary to
-return the requested type.  The argument
-.I data_out
-must point to a valid memory location of sufficient size to hold a value of the
-return type specified.
+return the requested type.  If the
+.I field_code
+does not indicate a representation, but conversion from a complex value to a
+purely real one is required, only the real portion of the requested vector will
+be returned.
 .SH RETURN VALUE
 On success,
 .BR get_constant ()
@@ -119,6 +130,11 @@ The caller should use
 or
 .BR get_string (3)
 instead.
+.TP
+.B GD_E_BAD_REPR
+The representation suffix specified in
+.IR field code ,
+or in one of the field codes it uses for input, was invalid.
 .TP
 .B GD_E_BAD_TYPE
 An invalid

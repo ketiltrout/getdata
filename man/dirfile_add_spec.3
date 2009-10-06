@@ -1,6 +1,6 @@
 .\" dirfile_add_spec.3.  The dirfile_add_spec man page.
 .\"
-.\" (C) 2008 D. V. Wiebe
+.\" (C) 2008, 2009 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH dirfile_add_spec 3 "8 December 2008" "Version 0.5.0" "GETDATA"
+.TH dirfile_add_spec 3 "4 October 2009" "Version 0.6.0" "GETDATA"
 .SH NAME
 dirfile_add_spec, dirfile_madd_spec \(em add a field to a dirfile
 .SH SYNOPSIS
@@ -38,12 +38,20 @@ to the dirfile specified by
 The
 .BR dirfile_madd_spec ()
 function behaves similarly, but adds the field as a metafield under the
-field indicated by the field code
+field indicated by the field
 .IR parent .
 Field specification lines are described in detail in
 .BR dirfile-format (5).
+Since Standards Version 7 (see dirfile(5)) permits specifying metafield without
+the use of the
+.B /META
+directive,
+.BR dirfile_add_spec ()
+may also be used to add metafields, by specifying the metafield's full field
+code.  See dirfile-format(5) for full details.
 
-When adding a metafield, 
+When using
+.BR dirfile_madd_spec (),
 .I line
 should only contain a field specification, and not a
 .B /META

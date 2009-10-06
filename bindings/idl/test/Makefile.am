@@ -1,4 +1,4 @@
-# (C) 2008 D. V. Wiebe
+# (C) 2009 D. V. Wiebe
 #
 ##########################################################################
 #
@@ -20,25 +20,19 @@
 #
 AUTOMAKE_OPTIONS = foreign
 
-if MAKE_CXXBINDINGS
-CXX_SUBDIR=cxx
-endif
+TESTS_ENVIRONMENT=IDL_PATH="${srcdir}" IDL_DLM_PATH=../.libs LD_PRELOAD=../../../src/.libs/libgetdata.so ${IDL}
+idlTESTS=big_test.pro
+TESTS=$(addprefix ${srcdir}/,$(idlTESTS))
 
-if MAKE_F77BINDINGS
-F77_SUBDIR=f77
-endif
+EXTRA_DIST=getdata_idl_test_routines.pro ${idlTESTS}
 
-if MAKE_IDLBINDINGS
-IDL_SUBDIR=idl
-endif
+# clean up after the tests
+check-local: check-TESTS
+	$(MAKE) getdata-clean-dirs
 
-if MAKE_PYBINDINGS
-PY_SUBDIR=python
-endif
-
-noinst_PROGRAMS=make_parameters
-
-SUBDIRS = . ${CXX_SUBDIR} ${F77_SUBDIR} ${PY_SUBDIR} ${IDL_SUBDIR}
+getdata-clean-dirs:
+	rm -rf dirfile
 
 clean-local:
+	$(MAKE) getdata-clean-dirs
 	rm -rf *~ 

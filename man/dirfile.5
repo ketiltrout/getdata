@@ -1,6 +1,6 @@
 .\" dirfile.5.  The dirfile man page.
 .\"
-.\" (C) 2005, 2006, 2008 D. V. Wiebe
+.\" (C) 2005, 2006, 2008, 2009 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH dirfile 5 "21 October 2008" "Standards Version 6" "DATA FORMATS"
+.TH dirfile 5 "4 October 2009" "Standards Version 7" "DATA FORMATS"
 .SH NAME
 dirfile \(em a filesystem based database format for time-ordered binary data
 .SH DESCRIPTION
@@ -93,6 +93,16 @@ files.  See
 .BR dirfile\-encoding (5)
 for information on encoding schemes.
 
+Version 7 of the Dirfile Standards added support for complex valued data.  As
+part of this, dirfile field codes may contain a
+.I representation suffix
+which specifies a norm to apply to the complex valued data to convert it into
+purely real data.  See
+.BR dirfile\-complex (5)
+for information on complex number support and
+.I representations
+in dirfiles.
+
 .SH AUTHORS
 
 The dirfile specification was developed by C. B. Netterfield
@@ -106,5 +116,6 @@ The dirfile specification is now maintained by D. V. Wiebe
 .hy 1
 
 .SH SEE ALSO
-.BR dirfile\-encoding (5)
+.BR dirfile\-complex (5),
+.BR dirfile\-encoding (5),
 .BR dirfile\-format (5)

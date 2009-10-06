@@ -29,10 +29,12 @@ SUBDIRS = src util man . doc test bindings
 dist_doc_DATA = COPYING.DOC
 
 clean-local:
-	rm -rf *~ 
+	rm -rf *~  m4/*~
 
 %.sig: %
 	gpg -abo $@ $<
+
+DISTCHECK_CONFIGURE_FLAGS = --with-idl-dlm-dir="$$dc_install_base/idl"
 
 dist-post: $(distdir).tar.gz.sig $(distdir).tar.bz2.sig
 

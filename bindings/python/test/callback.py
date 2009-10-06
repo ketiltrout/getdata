@@ -43,6 +43,8 @@ d=pygetdata.dirfile("dirfile", pygetdata.RDONLY, callback=parser_callback,
     extra="extra stuff");
 error=d.error;
 
+os.system("rm -rf dirfile")
+
 if (error != pygetdata.E_OK):
   print "error = ", error
   sys.exit(1)

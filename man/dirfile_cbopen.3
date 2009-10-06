@@ -1,6 +1,6 @@
 .\" dirfile_cbopen.3.  The dirfile_cbopen man page.
 .\"
-.\" (C) 2008 D. V. Wiebe
+.\" (C) 2008, 2009 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH dirfile_cbopen 3 "22 December 2008" "Version 0.5.0" "GETDATA"
+.TH dirfile_cbopen 3 "5 October 2009" "Version 0.6.0" "GETDATA"
 .SH NAME
 dirfile_cbopen, dirfile_open \(em open or create a dirfile
 .SH SYNOPSIS
@@ -22,7 +22,7 @@ dirfile_cbopen, dirfile_open \(em open or create a dirfile
 .nh
 .ad l
 .BI "DIRFILE* dirfile_cbopen(const char *" dirfilename ", unsigned int " flags ,
-.BI "int (*" sehandler ")(const DIRFILE*, int, char*));
+.BI "gd_parser_callback_t " sehandler ", void *" extra );
 .HP
 .BI "DIRFILE* dirfile_open(const char *" dirfilename ", unsigned int " flags );
 .hy
@@ -35,14 +35,19 @@ function opens or creates the dirfile specified by
 returning a DIRFILE object associated with it.  Opening a dirfile will cause the
 library to read and parse the dirfile's format file (see
 .BR dirfile-format (5)).
-If the
+
+If not NULL,
 .I sehandler
-callback is not NULL, this function will be called whenever a syntax error is
-encountered during parsing the format file.  The caller may use this function
+should be a pointer to a function which will be called whenever a syntax error
+is encountered during parsing the format file.  Specify NULL for this parameter
+if no callback function is to be used.  The caller may use this function
 to correct the error or modify the error handling of the format file parser.
 See
 .B The Callback Function
-section below for details on this function.
+section below for details on this function.  The
+.I extra
+argument allows the caller to pass data to the callback function.  The pointer
+will be passed to the callback function verbatim.
 
 The
 .BR dirfile_open ()
@@ -50,6 +55,8 @@ function is equivalent to
 .BR dirfile_cbopen (),
 with
 .I sehandler
+and
+.I extra
 set to NULL.
 
 The 
@@ -59,7 +66,7 @@ argument should include one of the
 .B GD_RDONLY
 (read-only) or 
 .BR GD_RDWR
-(read-write), and may also contain zero or more of the following flags
+(read-write), and may also contain zero or more of the following flags,
 bitwise-or'd together:
 .TP
 .B GD_BIG_ENDIAN
@@ -250,20 +257,45 @@ whenever it would return the
 error).  This callback may be used to correct the error, or to tell the parser
 how to recover from it.
 
-This function should have the prototype:
+This function should take two pointers as arguments, and return an int:
 .RS
 .HP
 .nh
 .ad l
-.BI "int sehandler(const DIRFILE *" dirfile ", int " suberror ,
-.BI "char *" line );
+.BI "int " sehandler "(gd_parser_data_t *" pdata ", void *" extra );
 .hy
 .ad n
 .RE
 .P
 The
-.I dirfile
-parameter will be a pointer to a DIRFILE object suitable only for passing to
+.I extra
+parameter is the pointer supplied to
+.BR dirfile_cbopen (),
+passed verbatim to this function.  It can be used to pass caller data to the
+callback.  GetData does not inspect this pointer, not even to check its
+validity.  If the caller needs to pass no data to the callback, it may be NULL.
+
+The
+.B gd_parser_data_t
+type is a structure with at least the following members:
+
+.in +4n
+.nf
+typedef struct {
+  const DIRFILE* dirfile;
+  int suberror;
+  int linenum;
+  const char* filename;
+  char* line;
+
+  ...
+} gd_parser_data_t;
+.fi
+.in
+.P
+The
+.IR pdata -> dirfile
+member will be a pointer to a DIRFILE object suitable only for passing to
 .BR get_error_string ().
 Notably, the caller should not assume this pointer will be the same as the
 pointer eventually returned by
@@ -271,7 +303,7 @@ pointer eventually returned by
 nor that it will be valid after the callback function returns.
 
 The
-.I suberror
+.IR pdata -> suberror
 parameter will be one of the following symbols indicating the type of syntax
 error encountered:
 .TP
@@ -306,6 +338,9 @@ The byte sex specified by an
 .B ENDIAN
 directive was unrecognised.
 .TP
+.B GD_E_FORMAT_LITTERAL
+An unexpected character was encountered in a complex litteral. 
+.TP
 .B GD_E_FORMAT_LOCATION
 The parent of a metafield was defined in another fragment.
 .TP
@@ -335,12 +370,18 @@ A field was specified with the reserved name
 .TP
 .B GD_E_FORMAT_UNTERM
 The last token of the line was unterminated.
-.P
+.PP
+.IR pdata -> filename
+and
+.IR pdata -> linenum
+members contains the name of the fragment and line number where the syntax error
+was encountered.  The first line in a fragment is line one.
+
 The
-.I line
-parameter contains a copy of the line containing the syntax error.  This
-line may be freely modified by the callback function.  It may then be reparsed,
-if the callback function returns the symbol
+.IR pdata -> line
+member contains a copy of the line containing the syntax error.  This line may
+be freely modified by the callback function.  It will then be reparsed if the
+callback function returns the symbol
 .B GD_SYNTAX_RESCAN
 (see below).  Space is available for at least GD_MAX_LINE_LENGTH characters,
 including the terminating NUL.
@@ -386,7 +427,7 @@ ever report one syntax error per line, even if the callback function returns
 A call to
 .BR dirfile_cbopen ()
 or
-.BR dirfile_open()
+.BR dirfile_open ()
 always returns a pointer to a newly allocated DIRFILE object.  The DIRFILE
 object is an opaque structure containing the parsed dirfile metadata.
 If an error occurred, the dirfile error will be set to a non-zero error value.
@@ -453,7 +494,7 @@ The dirfile error may be retrieved by calling
 A descriptive error string for the last error encountered can be obtained from
 a call to
 .BR get_error_string (3).
-When finished with it, the DIRFILE object may be deallocated with a call to
+When finished with it, the DIRFILE object should be deallocated with a call to
 .BR dirfile_close (3),
 even if the open failed.
 .SH BUGS

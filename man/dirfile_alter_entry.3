@@ -1,6 +1,6 @@
 .\" dirfile_alter_entry.3.  The dirfile_alter_entry man page.
 .\"
-.\" (C) 2008 D. V. Wiebe
+.\" (C) 2008, 2009 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH dirfile_alter_entry 3 "14 December 2008" "Version 0.5.0" "GETDATA"
+.TH dirfile_alter_entry 3 "4 October 2009" "Version 0.6.0" "GETDATA"
 .SH NAME
 dirfile_alter_entry \(em modify the metadata of a dirfile field
 .SH SYNOPSIS
@@ -39,6 +39,23 @@ In addition to specifying a regular field,
 may also refer to a metafield by specifying it using its full (slashed) field
 code.
 
+The form of
+.I entry
+is described in detail in the
+.BR get_entry (3)
+man page.  The
+.IR entry -> field
+and
+.IR entry -> fragment_index
+members are ignored by this function and need not be initialised.  All other
+members appropriate to the field type of 
+.I field_code
+should be initialised, except as noted below.  To change the fragment index of a
+field, use
+.BR dirfile_move (3).
+To change the name of a field, use
+.BR dirfile_rename (3).
+
 If
 .I field_code
 specifies a
@@ -58,8 +75,8 @@ field and the
 .I recode
 argument is non-zero, the look-up table file will be moved if
 .IR entry -> table
-specifies a different path, overwriting an existing file with the new
-pathname, if present.  If the field specified by
+specifies a different path.  If a file with the new pathname already exists, it
+will be overwritten.  If the field specified by
 .I field_code
 is of type other than
 .B RAW
@@ -69,21 +86,19 @@ the
 .I recode
 argument is ignored.
 
-The form of
-.I entry
-is described in detail in the
-.BR get_entry (3)
-man page.  The
-.IR entry -> field
-and
-.IR entry -> fragment_index
-members are ignored by this function and need not be initialised.  All other
-members appropriate to the field type of 
+If
 .I field_code
-should be initialised.  To change the fragment index of a field, use
-.BR dirfile_move (3).
-To change the name of a field, use
-.BR dirfile_rename (3).
+specified a
+.B LINCOM
+or
+.B POLYNOM
+field, the value of
+.IR entry -> comp_scal
+indicates whether the purely real scalar lists
+.RI ( entry -> a ", or " entry -> b " and " entry -> m )
+or the complex valued lists
+.RI ( entry -> ca ", or " entry -> cb " and " entry -> cm )
+will be used.  The unused counterparts need not be initialised.
 
 The
 .IR entry -> field_type
@@ -96,8 +111,11 @@ and then create a new field of the desired type with
 .BR dirfile_add (3).
 
 Some field parameters have special values which indicate no change should be
-made to the parameter.  Specifically, if any of the string parameters are NULL,
-the old value will be retained.  Similarly, if
+made to the parameter.  Specifically, if any of the string parameters, or
+the parameters
+.RI ( entry -> a ,\~ entry -> b ,\~ entry -> m ,\~ entry -> ca ,\~ entry -> cb ,
+.RI "or " entry -> cm )
+are NULL, the old values will be retained.  Similarly, if
 .IR entry -> spf ", " entry -> n_fields ", or " entry -> numbits
 is zero, or if
 .IR entry -> bitnum
@@ -196,11 +214,14 @@ a call to
 .BR get_error_string (3).
 .SH SEE ALSO
 .BR dirfile_alter_bit (3),
+.BR dirfile_alter_clincom (3),
 .BR dirfile_alter_const (3),
+.BR dirfile_alter_cpolynom (3),
 .BR dirfile_alter_lincom (3),
 .BR dirfile_alter_linterp (3),
 .BR dirfile_alter_multiply (3),
 .BR dirfile_alter_phase (3),
+.BR dirfile_alter_polynom (3),
 .BR dirfile_alter_raw (3),
 .BR dirfile_alter_spec (3),
 .BR dirfile_delete (3),

@@ -49,8 +49,6 @@ SUBDIRS = test
 
 BUILT_SOURCES=getdata.f $(F95_INC)
 
-noinst_PROGRAMS=make_parameters
-
 nodist_include_HEADERS=getdata.f $(F95_INC)
 
 lib_LTLIBRARIES=libfgetdata.la $(F95_LIB)
@@ -78,8 +76,11 @@ clean-local:
 		make_parameters.sed getdata.f getdata.f90
 	rm -rf *~
 
-make_parameters.sed.in: make_parameters ../../src/getdata.h
-	./make_parameters
+make_parameters.sed.in: ../make_parameters ../../src/getdata.h
+	../make_parameters f > $@
+
+../make_parameters: ../make_parameters.c
+	cd .. && ${MAKE} make_parameters
 
 make_parameters.sed: make_parameters.stamp
 	@if test ! -f $@; then \

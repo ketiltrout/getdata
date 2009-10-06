@@ -1,6 +1,6 @@
 .\" dirfile-encoding.5.  The dirfile-encoding man page.
 .\"
-.\" (C) 2008 D. V. Wiebe
+.\" (C) 2008, 2009 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH dirfile-encoding 5 "22 December 2008" "Standards Version 6" "DATA FORMATS"
+.TH dirfile-encoding 5 "4 October 2009" "Standards Version 7" "DATA FORMATS"
 .SH NAME
 dirfile-encoding \(em dirfile database encoding schemes
 .SH DESCRIPTION
@@ -38,7 +38,7 @@ such situations.
 Additionally, how a particular encoding is implemented is not specified by the
 Dirfile Standards, but, for purposes of interoperability, all dirfile
 implementations are encouraged to support the encoding implementation used by
-the GetData dirfile reference implementation.
+the GetData dirfile reference implementation, elaborated below.
 
 An encoding scheme is local to the particular
 .I format file fragment
@@ -47,7 +47,8 @@ which are stored using multiple encodings, by having them defined in multiple
 fragments.
 
 The rest of this manual page discusses specifics of the encoding framework
-implemented in the GetData library.
+implemented in the GetData library, and does not constitute part of the
+Dirfile Standards.
 
 .SH THE GETDATA ENCODING FRAMEWORK
 
@@ -82,13 +83,15 @@ field has multiple data files with different, supported file extensions which
 could legitimately be associated with it, the encoding scheme discovered by
 GetData is not well defined.
 
-In addition to raw (unencoded) data, GetData supports four other encoding
+In addition to raw (unencoded) data, GetData supports five other encoding
 schemes:
 .I text
 encoding,
 .I bzip2
 encoding,
 .I gzip
+encoding,
+.I lzma
 encoding, and
 .I slim
 encoding, all discussed below.

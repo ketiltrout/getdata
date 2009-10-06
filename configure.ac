@@ -20,16 +20,19 @@ dnl 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 dnl
 
 m4_define(getdata_major,    0)
-m4_define(getdata_minor,    5)
+m4_define(getdata_minor,    6)
 m4_define(getdata_revision, 0)
-m4_define(getdata_version, getdata_major.getdata_minor.getdata_revision)
-
+m4_define(getdata_extra,    rc1)
+m4_define(getdata_version,
+          getdata_major.getdata_minor.getdata_revision[]getdata_extra)
 
 AC_INIT([GetData], [getdata_version], [getdata-devel@lists.sourceforge.net])
 
 AC_DEFINE([GETDATA_MAJOR], [getdata_major], [ The major version number ])
 AC_DEFINE([GETDATA_MINOR], [getdata_minor], [ The minor version number ])
 AC_DEFINE([GETDATA_REVISION], [getdata_revision], [ The revision number ])
+AC_DEFINE([GETDATA_VERSION_SUFFIX], ["getdata_extra"],
+          [ Other qualifiers on the version number triplet (if any) ])
 
 AC_PREREQ([2.63])
 
@@ -546,7 +549,7 @@ fi
 if test "x$make_idlbindings" = "xyes"; then
   AC_CONFIG_FILES([bindings/idl/Makefile])
   AC_CONFIG_FILES([bindings/idl/makedlm.sh])
-dnl  AC_CONFIG_FILES([bindings/idl/test/Makefile])
+  AC_CONFIG_FILES([bindings/idl/test/Makefile])
 fi
 if test "x$make_pybindings" = "xyes"; then
   AC_CONFIG_FILES([bindings/python/Makefile])

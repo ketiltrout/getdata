@@ -1,0 +1,147 @@
+.\" dirfile-complex.5.  The dirfile complex number man page
+.\"
+.\" (C) 2008, 2009 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH dirfile-encoding 5 "4 October 2009" "Standards Version 7" "DATA FORMATS"
+.SH NAME
+dirfile-complex \(em complex number support in dirfiles
+.SH DESCRIPTION
+Starting with Version 7, the
+.I Dirfile Standards
+support the storage and manipulation of complex numbers.  This manual page
+discusses the store format of complex valued data and the manipulation of these
+data within the dirfile database format.
+
+.SS Complex Number Storage Format
+Two types of complex valued data are supported by the Dirfile Standards:
+.IP \(bu 4
+A 64-bit complex number consisting of a IEEE-754 standard 32-bit single
+precision floating point real part and a IEEE-754 standard 32-bit single
+precision floating point imaginary part, and a
+.IP \(bu 4
+A 128-bit complex number consisting of a IEEE-754 standard 64-bit double
+precision floating point real part and a IEEE-754 standard 64-bit double
+precision floating point imaginary part, and a
+.PP
+No integer type complex numbers are supported.
+
+Unencoded complex numbers are stored on disk in "Fortran order", that is
+with the IEEE-754 real part followed by the IEEE-754 imaginary part.  The
+specified endianness of the two components follows that of purely real floating
+point numbers.  Endianness does not affect the ordering of the real and
+imaginary parts.  This format also conforms to the C99 standard.  The latest
+C++ standard (C++90) does not specify a standard storage format for native
+complex numbers, but the upcoming standard, (C++0x) does specify the above
+format for compatibility with C99.
+
+.SS Complex Literals in Format Files
+A literal complex number is specified in the format file (see dirfile-format(5))
+as two real (floating point) numbers separated by a semicolon
+.RB ( ; )
+with no intervening whitespace.  So, for example, the tokens
+.IP
+1;0 0;1 4;0 0;5 9.313e2;74.1
+.PP
+represent, respectively, the real unit, the imaginary unit, the real number
+four, the imaginary number
+.RI 5 i ,
+and the complex number
+.RI "931.3 + 74.1" i .
+Because the semicolon character cannot be used in field names, a complex valued
+literal can never be mistaken for a field code.  This allows, among other
+things, the composition of complex valued fields from purely real input fields.
+For example, a complex valued field,
+.IR z ,
+may be created from a real valued field
+.IR re ,
+representing the real part of the complex number, and the real valued field
+.IR im ,
+representing the imaginary part of the complex number, with the following
+.B LINCOM
+specification:
+.IP
+.I z
+.B LINCOM
+.I re
+1 0
+.I im
+0;1 0
+
+.SS Field Representations and Complex Norms
+It is often necessary to represent a complex number as a purely real number,
+that is to compute the norm of the complex number.
+Fields other than
+.B STRING
+type fields may be specified with a
+.IR representation suffix ,
+regardless of whether the field is complex valued or purely real.  Each
+representation corresponds to a particular complex norm.  The suffixes and their
+meanings in the complex plane are:
+.TP
+.B .a
+This representation indicates the angle (in radians) between the positive real
+axis and the value (ie. the complex argument).  The argument is in the range
+[-pi, pi], and a branch cut exists along the negative real axis.  At the branch
+cut, -pi is returned if the imaginary part is -0, and pi is returned if the
+branch cut is +0.  If z=0, zero is returned.
+.TP
+.B .i
+This representation indicates the projection of the value onto the imaginary
+axis (ie. the imaginary part of the number).
+.TP
+.B .m
+This representation indicates the modulus of the value (ie. its absolute
+value).
+.TP 
+.B .r
+This representation indicates the projection of the value onto the real axis
+(ie.  the real part of the number).
+.PP
+If the specified field is purely real, the representations
+.B .r
+and 
+.B .m
+return the field unchanged, while the representations
+.B .a
+and
+.B .i
+return uniformly zero.  Representations can be used in field specifications.
+So, for example, given a complex valued vector,
+.IR z ,
+a vector containing the real part of
+.IR z ,\~  re_z ,
+can be produced with:
+.IP
+.I re_z
+.B PHASE
+.I z.r
+0
+.PP
+and similarly for the complex field's imaginary part, argument, and absolute
+value.  (Although it should be pointed out this simplistic an example isn't
+strictly necessary, since
+.I z.r
+could be used wherever
+.I re_z
+would be.)
+.SH AUTHOR
+
+This manual page was by D. V. Wiebe
+.nh
+<dvw@ketiltrout.net>.
+.hy 1
+
+.SH SEE ALSO
+.BR dirfile (5),
+.BR dirfile\-format (5)

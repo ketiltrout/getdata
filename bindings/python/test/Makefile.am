@@ -21,7 +21,10 @@
 AUTOMAKE_OPTIONS = foreign
 
 TESTS_ENVIRONMENT=LD_LIBRARY_PATH=../../../src/.libs PYTHONPATH=../.libs/ ${PYTHON}
-TESTS=big_test.py callback.py
+pyTESTS=big_test.py callback.py
+TESTS=$(addprefix ${srcdir}/,$(pyTESTS))
+
+EXTRA_DIST=${pyTESTS}
 
 # clean up after the tests
 check-local: check-TESTS

@@ -2,7 +2,7 @@
 .\"
 .\" @configure_input@
 .\"
-.\" (C) 2008 D. V. Wiebe
+.\" (C) 2008, 2009 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -15,7 +15,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH dirfile_alter_encoding 3 "17 December 2008" "Version 0.5.0" "GETDATA"
+.TH dirfile_alter_encoding 3 "4 October 2009" "Version 0.6.0" "GETDATA"
 .SH NAME
 dirfile_alter_encoding \(em modify the binary encoding of data in a dirfile
 .SH SYNOPSIS
@@ -50,8 +50,8 @@ argument should be one of the following:
 .IP
 .nh
 .ad l
-.BR GD_UNENCODED ,\~ GD_TEXT_ENCODED ,\~ GD_SLIM_ENCODED ,\~
-.BR GD_GZIP_ENCODED ,\~ GD_BZIP2_ENCODED .
+.BR GD_UNENCODED ,\~ GD_BZIP2_ENCODED ,\~ GD_GZIP_ENCODED ,\~
+.BR GD_LZMA_ENCODED ,\~ GD_SLIM_ENCODED  ,\~ GD_TEXT_ENCODED .
 .ad n
 .hy
 .P

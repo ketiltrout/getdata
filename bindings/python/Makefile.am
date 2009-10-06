@@ -28,6 +28,7 @@ SUBDIRS=test
 
 python_LTLIBRARIES = pygetdata.la
 
+BUILT_SOURCES = pyconstants.c
 AM_CFLAGS = -Wall -fno-strict-aliasing
 AM_CPPFLAGS = $(CPPFLAGS) $(PYTHON_CPPFLAGS)
 pygetdata_la_LDFLAGS = -module -avoid-version \
@@ -36,6 +37,12 @@ pygetdata_la_LIBADD = $(PYTHON_LIBS) -lgetdata
 pygetdata_la_SOURCES = pygetdata.c pyconstants.c pydirfile.c pyentry.c \
 											 pyfragment.c ${DEBUG_C} pygetdata.h
 
+pyconstants.c: ../make_parameters
+	../make_parameters p > $@
+
+../make_parameters: ../make_parameters.c
+	cd .. && ${MAKE} make_parameters
+
 clean-local:
-	rm -rf *~ 
+	rm -rf ${BUILT_SOURCES} *~ 
 

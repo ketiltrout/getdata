@@ -24,24 +24,33 @@ if GETDATA_DEBUG
 DEBUG_C = ../../src/debug.c
 endif
 
-#SUBDIRS=test
+SUBDIRS=test
 
 idl_LTLIBRARIES = idl_getdata.la
 idl_HEADERS = idl_getdata.dlm
 
 # idl makes heavy use of type punning, ergo -fno-strict-aliasing
 AM_CFLAGS = -Wall $(IDL_CFLAGS) -fno-strict-aliasing
-BUILT_SOURCES=sublist.c
+BUILT_SOURCES=sublist.c constants.c
 idl_getdata_la_LDFLAGS = -module -avoid-version -export-symbols-regex IDL_Load
 idl_getdata_la_LIBADD = $(IDL_LIBS) -lgetdata
-idl_getdata_la_SOURCES = getdata.c sublist.c ${DEBUG_C}
+idl_getdata_la_SOURCES = getdata.c constants.c sublist.c ${DEBUG_C}
 
 sublist.c: getdata.c makedlm.sh
 	${SHELL} ./makedlm.sh -c $< > $@
 
+constants.c: ../make_parameters
+	../make_parameters i > $@
+
+../make_parameters: ../make_parameters.c
+	cd .. && ${MAKE} make_parameters
+
 idl_getdata.dlm: getdata.c makedlm.sh
 	${SHELL} ./makedlm.sh -d $< > $@
 
+all-local: idl_getdata.dlm
+	cp $< .libs
+
 clean-local:
-	rm -rf *~ idl_getdata.dlm
+	rm -rf ${BUILT_SOURCES} *~ idl_getdata.dlm
 

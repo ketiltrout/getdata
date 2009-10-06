@@ -1,6 +1,6 @@
 .\" dirfile_alter_bit.3.  The dirfile_alter_bit man page.
 .\"
-.\" (C) 2008 D. V. Wiebe
+.\" (C) 2008, 2009 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,11 +13,12 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH dirfile_alter_bit 3 "8 December 2008" "Version 0.5.0" "GETDATA"
+.TH dirfile_alter_bit 3 "4 October 2009" "Version 0.6.0" "GETDATA"
 .SH NAME
-dirfile_alter_bit, dirfile_alter_const, dirfile_alter_lincom,
-dirfile_alter_linterp, dirfile_alter_multiply, dirfile_alter_phase,
-dirfile_alter_raw
+dirfile_alter_bit, dirfile_alter_clincom, dirfile_alter_const,
+dirfile_alter_cpolynom, dirfile_alter_lincom, dirfile_alter_linterp,
+dirfile_alter_multiply, dirfile_alter_phase, dirfile_alter_polynom,
+dirfile_alter_raw, dirfile_alter_sbit
 \(em modify a field in a dirfile
 .SH SYNOPSIS
 .B #include <getdata.h>
@@ -27,8 +28,15 @@ dirfile_alter_raw
 .BI "int dirfile_alter_bit(DIRFILE *" dirfile ", const char *" field_code ,
 .BI "const char *" in_field ", int " bitnum ", int " numbits );
 .HP
+.BI "int dirfile_alter_clincom(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "int " n_fields ", const char **" in_fields ", const double complex *" cm ,
+.BI "const double complex *" cb );
+.HP
 .BI "int dirfile_alter_const(DIRFILE *" dirfile ", const char *" field_code ,
 .BI "gd_type_t " const_type );
+.HP
+.BI "int dirfile_alter_cpolynom(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "int " poly_ord ", const char *" in_field ", const double complex *" ca );
 .HP
 .BI "int dirfile_alter_lincom(DIRFILE *" dirfile ", const char *" field_code ,
 .BI "int " n_fields ", const char **" in_fields ", const double *" m ,
@@ -43,8 +51,14 @@ dirfile_alter_raw
 .BI "int dirfile_alter_phase(DIRFILE *" dirfile ", const char *" field_code ,
 .BI "const char *" in_field ", int " phase );
 .HP
+.BI "int dirfile_alter_polynom(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "int " poly_ord ", const char *" in_field ", const double *" ca );
+.HP
 .BI "int dirfile_alter_raw(DIRFILE *" dirfile ", const char *" field_code ,
 .BI "gd_type_t " data_type ", unsigned int " spf ", int " recode );
+.HP
+.BI "int dirfile_alter_sbit(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "const char *" in_field ", int " bitnum ", int " numbits );
 .hy
 .ad n
 .SH DESCRIPTION
@@ -62,21 +76,49 @@ types of other arguments may be obtained from the
 and
 .BR dirfile-format (5)
 manual pages.
-.P
+
 The
+.BR dirfile_alter_clincom ()
+and
+.BR dirfile_alter_cpolynom ()
+functions are identical to
 .BR dirfile_alter_lincom ()
-function takes pointers to three arrays of length
+and
+.BR dirfile_alter_polynom (),
+except they take complex scalar parameters, instead of purely real values.  This
+only matters for the input of
+.I new
+parameters; if the scalar parameters are not
+changed (by passing NULL instead of a list of scalars), the functions can be
+used interchangeably, regardless of whether the altered field has complex scalar
+parameters or not.
+
+If the corresponding parameters are to be changed, the
+.BR dirfile_alter_lincom ()
+and
+.BR dirfile_alter_clincom ()
+functions take pointers to three arrays of length
 .I n_fields
 containing the input field names
 .RI ( in_fields ),
 the gain factors
-.RI ( m ),
+.RI ( m " or " cm ),
 and the offset terms
-.RI ( b ).
+.RI ( b " or " cb ).
+Similarly,
+.BR dirfile_add_polynom ()
+and
+.BR dirfile_add_cpolynom ()
+take an array of length
+.I poly_ord
++ 1
+containing the polynomial co-efficients
+.RI ( a " or " ca ).
 
 Some field parameters have special values which indicate no change should be
 made to the parameter.  Specifically, if any of the string parameters or 
-.IR m " or " b
+.IR m ,\~ b ", or " a
+.RI ( cm ,\~ cb ", or " ca )
 are NULL, the old values will be retained.  Similarly, if
 .IR spf ", " n_fields ", or " numbits
 is zero, or if
@@ -87,12 +129,14 @@ are equal to
 .BR GD_NULL , 
 these parameters will not be modified.
 
-All fields added with this interface must contain numerical parameters.  Fields
-with
+All field parameters introduced with this interface must contain numerical
+parameters.  Field parameters which are
 .B CONST
-fields as parameters cannot be added with these functions.  Those fields must
-be added with
-.BR dirfile_alter_spec (3).
+cannot be introduced with these functions.  To do that, use
+.BR dirfile_alter_spec (3)
+or
+.BR dirfile_malter_spec (3),
+as appropriate.
 
 If
 .I rename_table
