@@ -45,9 +45,10 @@ C     GDCLOS (although this last one is used)
       datdat(i) = i
    10 CONTINUE
 
-      fields = (/ 'INDEX', 'bit', 'const', 'data', 'lincom', 'linterp',
-     +'mult', 'phase', 'polynom', 'sbit', 'string', '', '', '', '', '',
-     +'', '', '', '' /)
+      fields = (/ 'INDEX  ', 'bit    ', 'const  ', 'data   ', 'lincom ',
+     +'linterp', 'mult   ', 'phase  ', 'polynom', 'sbit   ', 'string ',
+     +'       ', '       ', '       ', '       ', '       ', +'       ',
+     +'       ', '       ', '       ' /)
 
 C     Write the test dirfile
       OPEN(1, FILE=frmat, STATUS='NEW')
@@ -1331,9 +1332,10 @@ C     44: GDNVEC check
       ENDIF
 
 C     45: GDVECN check
-      fields = (/ 'INDEX', 'bit', 'data', 'lincom', 'linterp', 'mult',
-     +'new1', 'new10', 'new2', 'new3', 'new4', 'new5', 'new6', 'new7',
-     +'new8', 'new9', 'phase', 'polynom', 'sbit', 'string' /)
+      fields = (/ 'INDEX  ', 'bit    ', 'data   ', 'lincom ', 'linterp',
+     +'mult   ', 'new1   ', 'new10  ', 'new2   ', 'new3   ', 'new4   ',
+     +'new5   ', 'new6   ', 'new7   ', 'new8   ', 'new9   ', 'phase  ',
+     +'polynom', 'sbit   ', 'string ' /)
       DO 450 i = 1, n
       l = flen
       CALL GDVECN(fn, l, d, i)
@@ -2030,9 +2032,10 @@ C     65: GDNMVE check
       ENDIF
 
 C     66: GDMVEN check
-      fields = (/ 'mlut', 'mnew1', 'mnew2', 'mnew3', 'mnew5', 'mnew6',
-     +'mnew7', 'mnew8', 'mnew9', 'mnew10', '', '', '', '', '', '', '',
-     +'', '', '' /)
+      fields = (/ 'mlut  ', 'mnew1 ', 'mnew2 ', 'mnew3 ', 'mnew5 ',
+     +'mnew6 ', 'mnew7 ', 'mnew8 ', 'mnew9 ', 'mnew10', '      ',
+     +'      ', '      ', '      ', '      ', '      ', '      ',
+     +'      ', '      ', '      ' /)
       DO 660 i = 1, n
       l = flen
       CALL GDMVEN(fn, l, d, "data", 4, i)

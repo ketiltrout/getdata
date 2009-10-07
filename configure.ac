@@ -37,20 +37,20 @@ AC_DEFINE([GETDATA_VERSION_SUFFIX], ["getdata_extra"],
 AC_PREREQ([2.63])
 
 dnl libgetdata current interface version
-AC_SUBST(GETDATA_IFACE_VERSION, [1])
+AC_SUBST(GETDATA_IFACE_VERSION, [2])
 dnl libgetdata current interface implementation revision
 AC_SUBST(GETDATA_IMPL_REVISION, [0])
 dnl libgetdata interface age (current interface - oldest supported interface)
 AC_SUBST(GETDATA_IFACE_AGE, [0])
 
 dnl libgetdata++ interface version info
-AC_SUBST(GETDATAXX_VERSION, [0:0:0])
+AC_SUBST(GETDATAXX_VERSION, [1:0:0])
 
 dnl libfgetdata interface version info
-AC_SUBST(FGETDATA_VERSION, [0:0:0])
+AC_SUBST(FGETDATA_VERSION, [1:0:1])
 
 dnl libf95getdata interface version info
-AC_SUBST(F95GETDATA_VERSION, [0:0:0])
+AC_SUBST(F95GETDATA_VERSION, [1:0:0])
 
 AC_CONFIG_SRCDIR([src/getdata.c])
 AC_CONFIG_HEADER([src/config.h])
@@ -501,16 +501,16 @@ if test "x$make_idlbindings" = "xyes"; then
   GD_IDL([5.5])
   if test "x$have_idl" = "xno"; then
     make_idlbindings="no"
-  fi
-
-  dnl build date
-  AC_CHECK_PROGS([DATE], [date], [not found])
-  if test "x$DATE" == "xnot found"; then
-    BUILD_DATE="Build date unspecified"
   else
-    BUILD_DATE=`date`
+    dnl build date
+    AC_CHECK_PROGS([DATE], [date], [not found])
+    if test "x$DATE" == "xnot found"; then
+      BUILD_DATE="Build date unspecified"
+    else
+      BUILD_DATE=`date`
+    fi
+    AC_SUBST([BUILD_DATE])
   fi
-  AC_SUBST([BUILD_DATE])
 fi
 
 dnl external encodings

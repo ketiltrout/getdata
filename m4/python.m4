@@ -72,7 +72,7 @@ fi
 
 if test "x$PYTHON" = "xnot found"; then
   have_python="no"
-  $PYTHON=
+  PYTHON=
 fi
 AC_SUBST([PYTHON])
 
