@@ -24,6 +24,7 @@
 #undef _BSD_SOURCE
 #undef _POSIX_SOURCE
 #undef _SVID_SOURCE
+#undef _POSIX_C_SOURCE
 #include "../../src/internal.h"
 
 #define GDPY_UNSIGNED        0x00
