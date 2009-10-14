@@ -1,6 +1,6 @@
 .\" get_entry.3.  The get_entry man page.
 .\"
-.\" (C) 2008 D. V. Wiebe
+.\" (C) 2008, 2009 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH get_entry 3 "14 December 2008" "Version 0.5.0" "GETDATA"
+.TH get_entry 3 "6 October 2009" "Version 0.6.0" "GETDATA"
 .SH NAME
 get_entry \(em retrieve a dirfile field's metadata
 .SH SYNOPSIS
@@ -45,7 +45,7 @@ structure depend on the field type of the field queried.  See below for a
 complete description of this data type.
 
 Strings members in 
-.BI * entry
+.I entry
 filled by this function (variously, depending on field type:
 .IR field ", the elements of the " in_fields "[] array, " table ;
 see below) will by dynamically allocated by
@@ -58,11 +58,16 @@ by the caller once they are no longer needed.  The
 .BR dirfile_free_entry_strings (3)
 function is provided as a convenience to do this.
 
+The returned
+.I entry
+structure, including strings and their pointers may be freely modified by the
+caller.
+
 .SH RETURN VALUE
 Upon successful completion,
 .BR get_entry ()
 returns zero, and writes the field metadata in the supplied gd_entry_t buffer.
-On error,
+On error, the supplied gd_entry_t buffer is not modified.  In this case,
 .BR get_entry ()
 returns -1 and sets the dirfile error to a non-zero error value.  Possible
 error values are:
@@ -74,6 +79,9 @@ was not found in the database.
 .TP
 .B GD_E_BAD_DIRFILE
 The supplied dirfile was invalid.
+.TP
+.B GD_E_BAD_SCALAR
+A scalar parameter used in the definition of the field was invalid.
 .P
 The dirfile error may be retrieved by calling
 .BR get_error (3).

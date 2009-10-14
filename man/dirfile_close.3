@@ -1,6 +1,6 @@
 .\" dirfile_close.3.  The dirfile_close man page.
 .\"
-.\" (C) 2008 D. V. Wiebe
+.\" (C) 2008, 2009 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH dirfile_close 3 "22 December 2008" "Version 0.5.0" "GETDATA"
+.TH dirfile_close 3 "6 October 2009" "Version 0.6.0" "GETDATA"
 .SH NAME
 dirfile_close, dirfile_discard \(em close a dirfile and free associated memory.
 .SH SYNOPSIS
@@ -55,8 +55,10 @@ and
 behave identically.
 
 One of these functions should be called on all pointers returned by
+.BR dirfile_cbopen (3)
+and
 .BR dirfile_open (3),
-even if the call to that function failed.  After
+even if the call to those function failed.  After
 .BR dirfile_close ()
 or
 .BR dirfile_discard()

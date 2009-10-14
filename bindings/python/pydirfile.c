@@ -1236,13 +1236,16 @@ static int gdpy_dirfile_setreference(struct gdpy_dirfile_t* self,
   const char* ref = PyString_AsString(value);
 
   /* TypeError already raised on error */
-  if (ref == NULL)
+  if (ref == NULL) {
+    dreturn("%i", -1);
     return -1;
+  }
 
   dirfile_reference(self->D, ref);
 
   PYGD_CHECK_ERROR(self->D, -1);
 
+  dreturn("%i", 0);
   return 0;
 }
 

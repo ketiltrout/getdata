@@ -39,7 +39,7 @@ int main(void)
       r = 1;
     }
     if (e.shift != 3) {
-      fprintf(stderr, "shift = %i\n", e.shift);
+      fprintf(stderr, "shift = %lli\n", (long long)e.shift);
       r = 1;
     }
     dirfile_free_entry_strings(&e);

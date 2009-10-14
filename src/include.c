@@ -160,7 +160,7 @@ int dirfile_include(DIRFILE* D, const char* file, int fragment_index,
   char* ref_name = NULL; 
   int i;
 
-  dtrace("%p, \"%s\", %i, %lx", D, file, fragment_index, flags);
+  dtrace("%p, \"%s\", %i, %lx", D, file, fragment_index, (unsigned long)flags);
 
   _GD_ClearError(D);
 

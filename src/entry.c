@@ -40,21 +40,34 @@ void _GD_FreeE(gd_entry_t* entry, int priv)
 
   switch(entry->field_type) {
     case GD_LINCOM_ENTRY:
-      for (i = 0; i < entry->n_fields; ++i)
+      for (i = 0; i < entry->n_fields; ++i) {
         free(entry->in_fields[i]);
+        free(entry->scalar[i]);
+        free(entry->scalar[i + GD_MAX_LINCOM]);
+      }
       break;
     case GD_LINTERP_ENTRY:
       free(entry->in_fields[0]);
       free(entry->table);
+      if (priv)
+        free(entry->e->table_path);
       break;
     case GD_MULTIPLY_ENTRY:
       free(entry->in_fields[1]);
-      /* fall through */
-    case GD_BIT_ENTRY:
-    case GD_PHASE_ENTRY:
-    case GD_POLYNOM_ENTRY:
-    case GD_SBIT_ENTRY:
       free(entry->in_fields[0]);
+      break;
+    case GD_BIT_ENTRY:
+    case GD_SBIT_ENTRY:
+      free(entry->scalar[1]);
+      /* fallthrough */
+    case GD_PHASE_ENTRY:
+      free(entry->scalar[0]);
+      free(entry->in_fields[0]);
+      break;
+    case GD_POLYNOM_ENTRY:
+      free(entry->in_fields[0]);
+      for (i = 0; i <= entry->poly_ord; ++i)
+        free(entry->scalar[i]);
       break;
     case GD_STRING_ENTRY:
       if (priv)
@@ -65,6 +78,7 @@ void _GD_FreeE(gd_entry_t* entry, int priv)
         free(entry->e->client);
       break;
     case GD_RAW_ENTRY:
+      free(entry->scalar[0]);
       if (priv) {
         free(entry->e->file[0].name);
         free(entry->e->file[1].name);
@@ -76,10 +90,6 @@ void _GD_FreeE(gd_entry_t* entry, int priv)
   }
 
   if (priv) {
-    for (i = 0; i <= GD_MAX_POLYORD; ++i)
-      free(entry->e->scalar[i]);
-    if (entry->field_type == GD_LINTERP_ENTRY)
-      free(entry->e->table_path);
     free(entry->e->field_list);
     free(entry->e->vector_list);
     free(entry->e->string_value_list);
@@ -107,38 +117,36 @@ gd_entry_t* dirfile_free_entry_strings(gd_entry_t* entry)
 static void _GD_GetScalar(DIRFILE* D, gd_entry_t* E, const char* scalar,
     int type, void* data)
 {
-  int32_t i32;
-  uint32_t u32;
+  uint16_t u16;
+  int16_t i16;
+  int64_t i64;
   gd_entry_t* C;
 
   dtrace("%p, %p, \"%s\", %i, %p", D, E, scalar, type, data);
 
   if (scalar != NULL) {
     if ((C = _GD_FindField(D, scalar, NULL)) == NULL)
-      _GD_SetError(D, GD_E_BAD_SCALAR, GD_E_SCALAR_CODE, E->field, 0,
-          E->e->scalar[0]);
+      _GD_SetError(D, GD_E_BAD_SCALAR, GD_E_SCALAR_CODE, E->field, 0, scalar);
     else if (C->field_type != GD_CONST_ENTRY)
-      _GD_SetError(D, GD_E_BAD_SCALAR, GD_E_SCALAR_TYPE, E->field, 0,
-          E->e->scalar[0]);
+      _GD_SetError(D, GD_E_BAD_SCALAR, GD_E_SCALAR_TYPE, E->field, 0, scalar);
     else {
       void *ptr = realloc(C->e->client, (C->e->n_client + 1) *
           sizeof(gd_entry_t*));
       if (ptr == NULL)
         _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
       else {
-        if (type == GD_COMPLEX) {
-          /* if the constant is complex, set comp_scal */
-          if (C->const_type & GD_COMPLEX)
-            E->comp_scal = 1;
-
+        if (type == GD_INT64) {
+          _GD_DoConst(D, C, GD_INT64, &i64);
+          *(long int*)data = (long int)i64;
+        } else if (type == GD_COMPLEX)
           _GD_DoConst(D, C, GD_COMPLEX128, data);
-        } else if (type == GD_SIGNED) {
-          _GD_DoConst(D, C, GD_INT32, &i32);
-          *(int*)data = (int)i32; /* this periphrasis is in case `int32_t'
+        else if (type == GD_SIGNED) {
+          _GD_DoConst(D, C, GD_INT16, &i16);
+          *(int*)data = (int)i16; /* this periphrasis is in case `int16'
                                      is different than `int' */
         } else {
-          _GD_DoConst(D, C, GD_UINT32, &u32);
-          *(unsigned int*)data = (unsigned int)u32; /* ditto */
+          _GD_DoConst(D, C, GD_UINT16, &u16);
+          *(unsigned int*)data = (unsigned int)u16; /* ditto */
         }
 
         if ((D->flags & GD_ACCMODE) == GD_RDWR) {
@@ -161,24 +169,36 @@ int _GD_CalculateEntry(DIRFILE* D, gd_entry_t* E)
 
   switch(E->field_type) {
     case GD_RAW_ENTRY:
-      _GD_GetScalar(D, E, E->e->scalar[0], 0, &E->spf);
+      _GD_GetScalar(D, E, E->scalar[0], 0, &E->spf);
       break;
     case GD_POLYNOM_ENTRY:
+      E->comp_scal = 0;
       for (i = 0; i <= E->poly_ord; ++i) {
-        _GD_GetScalar(D, E, E->e->scalar[i], GD_COMPLEX, &E->ca[i]);
+        _GD_GetScalar(D, E, E->scalar[i], GD_COMPLEX, &E->ca[i]);
         E->a[i] = creal(E->ca[i]);
+
+        if (cimag(E->ca[i]))
+          E->comp_scal = 1;
 
         if (D->error)
           break;
       }
       break;
     case GD_LINCOM_ENTRY:
+      E->comp_scal = 0;
       for (i = 0; i < E->n_fields; ++i) {
-        _GD_GetScalar(D, E, E->e->scalar[i * 2], GD_COMPLEX, &E->cm[i]);
+        _GD_GetScalar(D, E, E->scalar[i], GD_COMPLEX, &E->cm[i]);
         E->m[i] = creal(E->cm[i]);
 
-        _GD_GetScalar(D, E, E->e->scalar[i * 2 + 1], GD_COMPLEX, &E->cb[i]);
+        if (cimag(E->cm[i]))
+          E->comp_scal = 1;
+
+        _GD_GetScalar(D, E, E->scalar[i + GD_MAX_LINCOM], GD_COMPLEX,
+            &E->cb[i]);
         E->b[i] = creal(E->cb[i]);
+
+        if (cimag(E->cb[i]))
+          E->comp_scal = 1;
 
         if (D->error)
           break;
@@ -186,11 +206,11 @@ int _GD_CalculateEntry(DIRFILE* D, gd_entry_t* E)
       break;
     case GD_BIT_ENTRY:
     case GD_SBIT_ENTRY:
-      _GD_GetScalar(D, E, E->e->scalar[0], GD_SIGNED, &E->bitnum);
-      _GD_GetScalar(D, E, E->e->scalar[1], GD_SIGNED, &E->numbits);
+      _GD_GetScalar(D, E, E->scalar[0], GD_SIGNED, &E->bitnum);
+      _GD_GetScalar(D, E, E->scalar[1], GD_SIGNED, &E->numbits);
       break;
     case GD_PHASE_ENTRY:
-      _GD_GetScalar(D, E, E->e->scalar[0], GD_SIGNED, &E->shift);
+      _GD_GetScalar(D, E, E->scalar[0], GD_INT64, &E->shift);
       break;
     case GD_NO_ENTRY:
     case GD_LINTERP_ENTRY:
@@ -299,23 +319,46 @@ int get_entry(DIRFILE* D, const char* field_code_in, gd_entry_t* entry)
 
   switch(E->field_type) {
     case GD_LINCOM_ENTRY:
-      for (i = 0; i < E->n_fields; ++i)
+      for (i = 0; i < E->n_fields; ++i) {
         entry->in_fields[i] = strdup(E->in_fields[i]);
+        if (E->scalar[i])
+          entry->scalar[i] = strdup(E->scalar[i]);
+        if (E->scalar[i + GD_MAX_LINCOM])
+          entry->scalar[i + GD_MAX_LINCOM] = strdup(E->scalar[i +
+              GD_MAX_LINCOM]);
+      }
       break;
     case GD_LINTERP_ENTRY:
       entry->in_fields[0] = strdup(E->in_fields[0]);
       entry->table = strdup(E->table);
       break;
-    case GD_MULTIPLY_ENTRY:
-      entry->in_fields[1] = strdup(E->in_fields[1]);
-      /* fall through */
-    case GD_BIT_ENTRY:
-    case GD_PHASE_ENTRY:
     case GD_POLYNOM_ENTRY:
+      entry->in_fields[0] = strdup(E->in_fields[0]);
+      for (i = 0; i <= E->poly_ord; ++i)
+        if (E->scalar[i])
+          entry->scalar[i] = strdup(E->scalar[i]);
+      break;
+    case GD_MULTIPLY_ENTRY:
+      entry->in_fields[0] = strdup(E->in_fields[0]);
+      entry->in_fields[1] = strdup(E->in_fields[1]);
+      break;
+    case GD_PHASE_ENTRY:
+      entry->in_fields[0] = strdup(E->in_fields[0]);
+      if (E->scalar[0])
+        entry->scalar[0] = strdup(E->scalar[0]);
+      break;
+    case GD_BIT_ENTRY:
     case GD_SBIT_ENTRY:
       entry->in_fields[0] = strdup(E->in_fields[0]);
-      /* fall through */
+      if (E->scalar[0])
+        entry->scalar[0] = strdup(E->scalar[0]);
+      if (E->scalar[1])
+        entry->scalar[1] = strdup(E->scalar[1]);
+      break;
     case GD_RAW_ENTRY:
+      if (E->scalar[0])
+        entry->scalar[0] = strdup(E->scalar[0]);
+      break;
     case GD_INDEX_ENTRY:
     case GD_CONST_ENTRY:
     case GD_STRING_ENTRY:

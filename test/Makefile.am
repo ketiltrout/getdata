@@ -39,15 +39,17 @@ ADD_TESTS=add add_bit add_bit_bitnum add_bit_bitsize add_bit_invalid \
 					add_lincom_nfields add_linterp add_linterp_invalid add_many \
 					add_multiply add_multiply_invalid add_phase add_phase_invalid \
 					add_polynom add_protect add_raw add_raw_invalid add_raw_spf \
-					add_raw_type add_rdonly add_sbit add_sort add_spec \
+					add_raw_type add_rdonly add_sbit add_scalar add_sort add_spec \
 					add_spec_directive add_spec_invalid add_spec_meta add_string add_type
 
 ALTER_TESTS=alter_bit_bitnum alter_bit_numbits alter_cpolynom alter_const \
-						alter_entry alter_entry_recode alter_lincom_23 alter_lincom_input \
-						alter_lincom_offset alter_lincom_slope alter_linterp \
-						alter_linterp_move alter_mspec alter_multiply alter_phase \
-						alter_polynom_coeff alter_polynom_input alter_polynom_ord \
-						alter_raw_spf alter_raw_type alter_spec alter_spec_meta
+						alter_entry alter_entry_recode alter_entry_scalar2a \
+						alter_entry_scalar2n alter_entry_scalar3 alter_entry_scalar4 \
+						alter_lincom_23 alter_lincom_input alter_lincom_offset \
+						alter_lincom_slope alter_linterp alter_linterp_move alter_mspec \
+						alter_multiply alter_phase alter_polynom_coeff alter_polynom_input \
+						alter_polynom_ord alter_raw_spf alter_raw_type alter_spec \
+						alter_spec_meta
 
 ASCII_TESTS=ascii_get ascii_nframes ascii_put
 

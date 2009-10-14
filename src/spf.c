@@ -28,9 +28,9 @@
 
 /* _GD_GetSPF: Get samples per frame for field
 */
-unsigned int _GD_GetSPF(DIRFILE* D, gd_entry_t* E)
+_gd_spf_t _GD_GetSPF(DIRFILE* D, gd_entry_t* E)
 {
-  unsigned int spf = 0;
+  _gd_spf_t spf = 0;
 
   dtrace("%p, %p", D, E);
 
@@ -77,7 +77,7 @@ unsigned int _GD_GetSPF(DIRFILE* D, gd_entry_t* E)
 */
 unsigned int get_spf(DIRFILE* D, const char *field_code_in)
 {
-  unsigned int spf = 0;
+  _gd_spf_t spf = 0;
   gd_entry_t* entry;
   char* field_code;
 
@@ -114,7 +114,7 @@ unsigned int get_spf(DIRFILE* D, const char *field_code_in)
     free(field_code);
 
   dreturn("%u", spf);
-  return spf;
+  return (unsigned int)spf;
 }
 /* vim: ts=2 sw=2 et tw=80
 */

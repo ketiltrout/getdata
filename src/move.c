@@ -26,8 +26,8 @@
 #include <errno.h>
 #endif
 
-int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned int encoding,
-    unsigned int byte_sex, off64_t offset, int finalise, int new_fragment,
+int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned long encoding,
+    unsigned long byte_sex, off64_t offset, int finalise, int new_fragment,
     char* new_filebase)
 {
   const struct encoding_t* enc_in;
@@ -38,7 +38,7 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned int encoding,
   int i;
   void *buffer;
 
-  dtrace("%p, %p, %u, %u, %lli, %i, %i, %p", D, E, encoding, byte_sex,
+  dtrace("%p, %p, %lu, %lu, %lli, %i, %i, %p", D, E, encoding, byte_sex,
       (long long)offset, finalise, new_fragment, new_filebase);
 
   if (new_fragment == -1)

@@ -481,6 +481,7 @@ if test "x$have_off64_t" = "xyes"; then
 fi
 
 AC_CHECK_SIZEOF([int])
+AC_CHECK_SIZEOF([unsigned int])
 
 dnl python
 if test "x$make_pybindings" = "xyes"; then

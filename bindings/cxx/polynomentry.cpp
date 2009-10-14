@@ -76,7 +76,7 @@ int PolynomEntry::SetInput(const char* field)
 
 int PolynomEntry::SetCoefficient(double coeff, int index)
 {
-  if (index < 0 || index > 5)
+  if (index < 0 || index > GD_MAX_POLYORD)
     return -1;
 
   E.ca[index] = E.a[index] = coeff;
@@ -87,9 +87,37 @@ int PolynomEntry::SetCoefficient(double coeff, int index)
   return 0;
 }
 
+int PolynomEntry::SetCoefficient(const char *scale, int index)
+{
+  int r = 0;
+  double complex c128;
+
+  if (index < 0 || index > GD_MAX_POLYORD)
+    return -1;
+
+  free(E.scalar[index]);
+
+  if (scale == NULL)
+    E.scalar[index] = NULL;
+  else
+    E.scalar[index] = strdup(scale);
+
+  if (D != NULL) {
+    r = dirfile_alter_entry(D->D, E.field, &E, 0);
+
+    if (!r) {
+      r = get_constant(D->D, scale, GD_COMPLEX128, &c128);
+      E.cm[index] = c128;
+      E.m[index] = creal(c128);
+    }
+  }
+  
+  return r;
+}
+
 int PolynomEntry::SetCoefficient(double complex coeff, int index)
 {
-  if (index < 0 || index > 5)
+  if (index < 0 || index > GD_MAX_POLYORD)
     return -1;
 
   E.ca[index] = coeff;
@@ -106,7 +134,7 @@ int PolynomEntry::SetPolyOrd(int poly_ord)
 {
   int old_n = E.poly_ord;
 
-  if (poly_ord < 2 || poly_ord > 5)
+  if (poly_ord < 2 || poly_ord > GD_MAX_POLYORD)
     return -1;
 
   if (poly_ord > old_n) {
@@ -122,4 +150,12 @@ int PolynomEntry::SetPolyOrd(int poly_ord)
     return dirfile_alter_entry(D->D, E.field, &E, 0);
 
   return 0;
+}
+
+const char *PolynomEntry::Scalar(int index)
+{
+  if (index < 0 || index > E.poly_ord)
+    return NULL;
+
+  return E.scalar[index];
 }

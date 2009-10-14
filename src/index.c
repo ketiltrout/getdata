@@ -215,7 +215,7 @@ double get_framenum_subset64(DIRFILE* D, const char* field_code_in,
   gd_entry_t* entry;
   char* field_code;
   int repr = GD_REPR_NONE;
-  unsigned int spf;
+  _gd_spf_t spf;
 
   dtrace("%p, \"%s\", %g, %lli, %lli", D, field_code_in, value, field_start,
       field_end);

@@ -1,3 +1,115 @@
+2009-10-13   D. V. Wiebe <getdata@ketiltrout.net>  svn:318
+	* test/alter_polynom_coeff.c test/entry_raw_scalar.c
+	test/entry_polynom_scalar.c test/entry_bit_scalar.c test/add.c
+	test/entry_lincom_scalar.c test/entry_phase_scalar.c test/entry_bit.c:
+	Update for scalar[] in gd_entry_t.
+
+	* test/add_phase.c test/madd_phase.c test/get_phase.c: Update for long
+	shift.
+
+	* test/add_scalar.c alter_entry_scalar3.c alter_entry_scalar4.c
+	alter_entry_scalar2n.c alter_entry_scalar2a.c: Added.
+
+	* src/getdata.h.in: Use long int for phase shift in gd_entry_t.
+	* src/parse.c (_GD_SetScalar): Use INT64 for shift internally.
+
+	* src/internal.h src/getdata.h.in: Make scalar[] array public: moved from
+	_gd_private_entry to gd_entry_t.
+	* src/entry.c (_GD_FreeE _GD_CalculateEntry): Update for above.
+	* src/del.c (_GD_DeReference): Ditto.
+	* src/parse.c (_GD_SetScalar _GD_ParseLincom _GD_ParseBit _GD_ParsePhase
+	_GD_ParsePolynom _GD_ParseRaw): Ditto.
+	* src/mod.c (dirfile_alter_raw dirfile_alter_lincom dirfile_alter_clincom
+	dirfile_alter_linterp dirfile_alter_bit dirfile_alter_sbit
+	dirfile_alter_phase dirfile_alter_polynom dirfile_alter_cpolynom):
+	Initialise E.scalar[].
+	* src/add.c (_GD_Add): Allow adding of non-literal scalars via dirfile_add.
+	
+	* src/mod.c (_GD_AlterScalar): Added.
+	* src/mod.c (_GD_Change): Call _GD_AlterScalar to allow scalar
+	modifications.
+
+	* src/entry.c (_GD_GetScalar): Assume 16 bit integers for int types.
+
+	* src/internal.h: Encodings and byte_sex are unsigned longs.
+	* src/getdata.h.in: Renumber some open flags.
+	* src/encoding.c (_GD_ResolveEncoding): Return unsigned long.
+	* src/move.c (_GD_MogrifyFile): Parameters encoding and bye_sex are unsigned
+	longs.
+	* src/parse.c (_GD_ParseDirective _GD_ParseFragment): Parameter flags is
+	unsigned long.
+
+	* src/internal.h: typedef unsigned int as _gd_spf_t for use as internal
+	representation for SPFs.  In the external API, unsigned int is still
+	explicitly used.
+	* src/index.c (get_framenum_subset64): Use _gd_spf_t.
+	* src/getdata.c (_GD_MultiplyData _GD_CMultiplyData _GD_DoLincom
+	_GD_DoMultiply getdata64): Use _gd_spf_t internally.
+	* src/spf.c (_GD_GetSPF get_spf): Use _gd_spf_t internally.
+	* src/putdata.c (putdata64): Use _gd_spf_t internally.
+	* src/common.c (_GD_AddData _GD_LincomData _GD_CLincomData): Use _gd_spf_t.
+
+	* src/getdata.h.in: Added GD_PRETTY_PRINT.
+	* src/flush.c (_GD_PadField): Added.
+	* src/flush.c (_GD_FieldSpec): Pad field specs if requested.
+	* src/flush.c (_GD_FlushFragment): Compute max and mean field lengths if
+	pretty printing.
+	* bindings/make_parameters.c: Add GD_PRETTY_PRINT.
+
+	* src/getdata.h.in: Bump standards version.
+
+	* src/globals.c (dirfilename dirfile_reference): Clear error on success.
+
+	* bindings/python/test/big_test.py: Test adding/modifying scalars.
+	* bindings/python/pyentry.c (gdpy_set_scalar_from_pyobj
+	gdpy_entry_getscalars): Added.
+	* bindings/python/pyentry.c (gdpy_set_entry_from_tuple): Update for
+	scalar[].
+	* bindings/python/pyentry.c (gdpy_entry_setspf gdpy_entry_setm
+	gdpy_entry_setb gdpy_entry_setbitnum gdpy_entry_setnumbits
+	gdpy_entry_setshift gdpy_entry_seta): Allow non-literal CONST names.
+	* bindings/python/pyentry.c (gdpy_entry_getspf gdpy_entry_getm
+	gdpy_entry_getb gdpy_entry_getbitnum gdpy_entry_getnumbits
+	gdpy_entry_getshift gdpy_entry_geta): Return non-literal CONST names.
+
+	* bindings/cxx/bitentry.cpp (BitEntry::Scalar): Added.
+	* bindings/cxx/bitentry.cpp (BitEntry::SetFirstBit BitEntry::SetNumBits):
+	Add CONST name versions.
+	* bindings/cxx/sbitentry.cpp (SBitEntry::Scalar): Added.
+	* bindings/cxx/sbitentry.cpp (SBitEntry::SetFirstBit BitEntry::SetNumBits):
+	Add CONST name versions.
+	* bindings/cxx/entry.cpp (Entry::Scalar): Added.
+	* bindings/cxx/lincomentry.cpp (LincomEntry::SetScale
+	LincomEntry::SetOffset): Add CONST name versions.
+	* bindings/cxx/lincomentry.cpp (LincomEntry::Scalar): Added.
+	* bindings/cxx/rawentry.cpp (RawEntry::SetSamplesPerFrame): Add CONST name
+	version.
+	* bindings/cxx/polynomentry.cpp (PolynomEntry::SetCoefficient): Add CONST
+	name version.
+	* bindings/cxx/phaseentry.cpp (PhaseEntry::SetShift): Add CONST name version.
+	* bindings/cxx/getdata/rawentry.h (Scalar): Added.
+	* bindings/cxx/getdata/phaseentry.h (Scalar): Added.
+
+	* bindings/cxx/phaseentry.cpp (PhaseEntry::SetShift): shift is long int.
+	* bindings/cxx/getdata/entry.h (PhaseEntry::Shift): shift is long int.
+	* bindings/cxx/getdata/phaseentry.h (PhaseEntry::Shift): shift is long int.
+
+	* bindings/cxx/dirfile.cpp (Dirfile::Dirfile Dirfile::Include): Flags is
+	unsigned long.
+
+	* bindings/f77/fgetdata.c (GDCLOS GDDSCD): Don't close dirfile unit #0.
+	* bindings/f77/fgetdata.c (GDGSCA GDASCA): Added.
+	* bindings/f77/test/big_test.f: Test GDGSCA and GDASCA.
+
+	* bindings/f77/getdata.f90.in: Add scalar member. to gd_entry.
+	* bindings/f77/getdata.f90.in (fget_entry): Call GDGSCA to fill scalar
+	members.
+
+	* bindings/idl/getdata.c: Add SCALAR to GD_ENTRY structure.
+	* bindings/idl/getdata.c (gdidl_make_idl_entry gdidl_read_idl_entry): Copy
+	SCALAR members.
+	* bindings/idl/getdata.c (gdidl_dirfile_close): Don't close dirfile unit #0.
+
 2009-10-07   D. V. Wiebe <getdata@ketiltrout.net>  svn:316
 	* configure.ac: Update interface version info.
 

@@ -211,7 +211,7 @@ DIRFILE* dirfile_cbopen(const char* filedir, unsigned long flags,
   char format_file[FILENAME_MAX];
   int standards = DIRFILE_STANDARDS_VERSION;
 
-  dtrace("\"%s\", 0x%lx, %p, %p", filedir, flags, sehandler, extra);
+  dtrace("\"%s\", 0x%lx, %p, %p", filedir, (unsigned long)flags, sehandler, extra);
 
   _GD_InitialiseFramework();
 
@@ -328,7 +328,7 @@ DIRFILE* dirfile_cbopen(const char* filedir, unsigned long flags,
 
 DIRFILE* dirfile_open(const char* filedir, unsigned long flags)
 {
-  dtrace("\"%s\", 0x%lx", filedir, flags);
+  dtrace("\"%s\", 0x%lx", filedir, (unsigned long)flags);
 
   DIRFILE* D = dirfile_cbopen(filedir, flags, NULL, NULL);
 

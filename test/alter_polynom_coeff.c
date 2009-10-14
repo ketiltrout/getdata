@@ -11,6 +11,7 @@
 #include <errno.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <math.h>
 
 int main(void)
 {
@@ -20,9 +21,9 @@ int main(void)
   const char* format_data = "data RAW INT32 8\n"
     "polynom POLYNOM data 1 2 1\n";
   int32_t data_data[256];
-  int32_t c[8];
   const double a[] = {2, 1, 3};
-  int fd, i, we = 0;
+  int fd, i, r = 0;
+  gd_entry_t E;
 
   mkdir(filedir, 0777);
 
@@ -40,17 +41,47 @@ int main(void)
   DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_VERBOSE);
   int ret = dirfile_alter_polynom(D, "polynom", 0, NULL, a);
   int error = get_error(D);
-  int n = getdata(D, "polynom", 5, 0, 1, 0, GD_INT32, c);
+
+  if (error) {
+    fprintf(stderr, "error=%i\n", error);
+    r = 1;
+  }
+
+  int n = get_entry(D, "polynom", &E);
+  error = get_error(D);
 
   dirfile_close(D);
 
-  for (i = 0; i < 8; ++i) {
-    int x = i + 40;
-    if (c[i] != 3 * x * x + x + 2) {
-        printf("%i = %i\n", 3 * x * x + x + 2, c[i]);
-        we++;
-      }
+  if (strcmp(E.field, "polynom")) {
+    fprintf(stderr, "E.field = %s\n", E.field);
+    r = 1;
   }
+
+  if (E.field_type != GD_POLYNOM_ENTRY) {
+    fprintf(stderr, "E.field_type = %i\n", E.field_type);
+    r = 1;
+  }
+
+  if (E.poly_ord != 2) {
+    fprintf(stderr, "E.poly_ord = %i\n", E.poly_ord);
+    r = 1;
+  }
+
+  if (E.comp_scal != 0) {
+    fprintf(stderr, "E.comp_scal = %i\n", E.comp_scal);
+    r = 1;
+  }
+  
+  if (strcmp(E.in_fields[0], "data")) {
+    fprintf(stderr, "E.in_fields[0] = %s\n", E.in_fields[0]);
+    r = 1;
+  }
+
+  for (i = 0; i < 3; ++i) 
+    if (fabs(E.a[i] - a[i]) > 1e-6) {
+      fprintf(stderr, "E.a[%i] = %g\n", i, E.a[i]);
+      r = 1;
+    }
 
   unlink(data);
   unlink(format);
@@ -58,20 +89,16 @@ int main(void)
 
   if (error) {
     fprintf(stderr, "1=%i\n", error);
-    return 1;
+    r = 1;
   }
-  if (n != 8) {
+  if (n != 0) {
     fprintf(stderr, "2=%lli\n", (long long)n);
-    return 1;
+    r = 1;
   }
   if (ret != 0) {
     fprintf(stderr, "3=%i\n", ret);
-    return 1;
-  }
-  if (we != 0) {
-    fprintf(stderr, "4=%i\n", we);
-    return 1;
+    r = 1;
   }
 
-  return 0;
+  return r;
 }

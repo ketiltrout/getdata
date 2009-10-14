@@ -1,4 +1,4 @@
-// (C) 2008 D. V. Wiebe
+// (C) 2008, 2009 D. V. Wiebe
 //
 ///////////////////////////////////////////////////////////////////////////
 //
@@ -52,7 +52,12 @@ namespace GetData {
 
       const char* FileName();
       int SetSamplesPerFrame(unsigned int spf, int recode = 0);
+      int SetSamplesPerFrame(const char *spf, int recode = 0);
       int SetType(DataType type, int recode = 0);
+
+      const char *Scalar() {
+        return E.scalar[0];
+      };
 
     private:
       RawEntry(GetData::Dirfile *dirfile, const char* field_code) :

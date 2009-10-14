@@ -86,20 +86,20 @@ static void _GD_DeReference(DIRFILE* D, gd_entry_t* E, const gd_entry_t* C,
 
   switch(E->field_type) {
     case GD_RAW_ENTRY:
-      if (E->e->scalar[0] != NULL && strcmp(C->field, E->e->scalar[0]) == 0) {
+      if (E->scalar[0] != NULL && strcmp(C->field, E->scalar[0]) == 0) {
         if (check) {
           _GD_SetError(D, GD_E_DELETE, GD_E_DEL_CONST, E->field, 0, C->field);
           break;
         } else {
           _GD_DoConst(D, C, GD_UINT32, &E->spf);
-          free(E->e->scalar[0]);
-          E->e->scalar[0] = NULL;
+          free(E->scalar[0]);
+          E->scalar[0] = NULL;
         }
       }
       break;
     case GD_POLYNOM_ENTRY:
       for (i = 0; i <= E->poly_ord; ++i) {
-        if (E->e->scalar[i] != NULL && strcmp(C->field, E->e->scalar[i]) == 0) {
+        if (E->scalar[i] != NULL && strcmp(C->field, E->scalar[i]) == 0) {
           if (check) {
             _GD_SetError(D, GD_E_DELETE, GD_E_DEL_CONST, E->field, 0, C->field);
             break;
@@ -108,16 +108,16 @@ static void _GD_DeReference(DIRFILE* D, gd_entry_t* E, const gd_entry_t* C,
               _GD_DoConst(D, C, GD_COMPLEX128, &E->ca[i]);
             else
               _GD_DoConst(D, C, GD_FLOAT64, &E->a[i]);
-            free(E->e->scalar[i]);
-            E->e->scalar[i] = NULL;
+            free(E->scalar[i]);
+            E->scalar[i] = NULL;
           }
         }
       }
       break;
     case GD_LINCOM_ENTRY:
       for (i = 0; i < E->n_fields; ++i) {
-        if (E->e->scalar[i * 2] != NULL &&
-            strcmp(C->field, E->e->scalar[i * 2]) == 0)
+        if (E->scalar[i] != NULL &&
+            strcmp(C->field, E->scalar[i]) == 0)
         {
           if (check) {
             _GD_SetError(D, GD_E_DELETE, GD_E_DEL_CONST, E->field, 0, C->field);
@@ -127,12 +127,12 @@ static void _GD_DeReference(DIRFILE* D, gd_entry_t* E, const gd_entry_t* C,
               _GD_DoConst(D, C, GD_COMPLEX128, &E->cb[i]);
             else 
               _GD_DoConst(D, C, GD_FLOAT64, &E->b[i]);
-            free(E->e->scalar[i * 2]);
-            E->e->scalar[i * 2] = NULL;
+            free(E->scalar[i]);
+            E->scalar[i] = NULL;
           }
         }
-        if (E->e->scalar[i * 2 + 1] != NULL &&
-            strcmp(C->field, E->e->scalar[i * 2 + 1]) == 0)
+        if (E->scalar[i + GD_MAX_LINCOM] != NULL &&
+            strcmp(C->field, E->scalar[i + GD_MAX_LINCOM]) == 0)
         {
           if (check) {
             _GD_SetError(D, GD_E_DELETE, GD_E_DEL_CONST, E->field, 0, C->field);
@@ -142,44 +142,44 @@ static void _GD_DeReference(DIRFILE* D, gd_entry_t* E, const gd_entry_t* C,
               _GD_DoConst(D, C, GD_COMPLEX128, &E->cb[i]);
             else 
               _GD_DoConst(D, C, GD_FLOAT64, &E->b[i]);
-            free(E->e->scalar[i * 2 + 1]);
-            E->e->scalar[i * 2 + 1] = NULL;
+            free(E->scalar[i + GD_MAX_LINCOM]);
+            E->scalar[i + GD_MAX_LINCOM] = NULL;
           }
         }
       }
       break;
     case GD_BIT_ENTRY:
     case GD_SBIT_ENTRY:
-      if (E->e->scalar[0] != NULL && strcmp(C->field, E->e->scalar[0]) == 0) {
+      if (E->scalar[0] != NULL && strcmp(C->field, E->scalar[0]) == 0) {
         if (check) {
           _GD_SetError(D, GD_E_DELETE, GD_E_DEL_CONST, E->field, 0, C->field);
           break;
         } else {
           _GD_DoConst(D, C, GD_UINT32, &E->bitnum);
-          free(E->e->scalar[0]);
-          E->e->scalar[0] = NULL;
+          free(E->scalar[0]);
+          E->scalar[0] = NULL;
         }
       }
-      if (E->e->scalar[1] != NULL && strcmp(C->field, E->e->scalar[1]) == 0) {
+      if (E->scalar[1] != NULL && strcmp(C->field, E->scalar[1]) == 0) {
         if (check) {
           _GD_SetError(D, GD_E_DELETE, GD_E_DEL_CONST, E->field, 0, C->field);
           break;
         } else {
           _GD_DoConst(D, C, GD_UINT32, &E->numbits);
-          free(E->e->scalar[0]);
-          E->e->scalar[1] = NULL;
+          free(E->scalar[0]);
+          E->scalar[1] = NULL;
         }
       }
       break;
     case GD_PHASE_ENTRY:
-      if (E->e->scalar[0] != NULL && strcmp(C->field, E->e->scalar[0]) == 0) {
+      if (E->scalar[0] != NULL && strcmp(C->field, E->scalar[0]) == 0) {
         if (check) {
           _GD_SetError(D, GD_E_DELETE, GD_E_DEL_CONST, E->field, 0, C->field);
           break;
         } else {
           _GD_DoConst(D, C, GD_UINT32, &E->shift);
-          free(E->e->scalar[0]);
-          E->e->scalar[0] = NULL;
+          free(E->scalar[0]);
+          E->scalar[0] = NULL;
         }
       }
       break;

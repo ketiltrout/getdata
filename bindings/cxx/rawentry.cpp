@@ -1,4 +1,4 @@
-// (C) 2008 D. V. Wiebe
+// (C) 2008, 2009 D. V. Wiebe
 //
 ///////////////////////////////////////////////////////////////////////////
 //
@@ -23,6 +23,8 @@
 #include "getdata/dirfile.h"
 
 #include <cstring>
+#include <stdlib.h>
+#include <stdint.h>
 
 using namespace GetData;
 
@@ -44,6 +46,29 @@ int RawEntry::SetSamplesPerFrame(unsigned int spf, int recode)
     return dirfile_alter_entry(D->D, E.field, &E, recode);
   
   return 0;
+}
+
+int RawEntry::SetSamplesPerFrame(const char *spf, int recode)
+{
+  int r = 0;
+  uint16_t u16;
+
+  free(E.scalar[0]);
+  if (spf == NULL)
+    E.scalar[0] = NULL;
+  else
+    E.scalar[0] = strdup(spf);
+
+  if (D != NULL) {
+    r = dirfile_alter_entry(D->D, E.field, &E, recode);
+
+    if (!r) {
+      r = get_constant(D->D, spf, GD_UINT16, &u16);
+      E.spf = (unsigned int)u16;
+    }
+  }
+  
+  return r;
 }
 
 int RawEntry::SetType(DataType type, int recode)

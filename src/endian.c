@@ -31,7 +31,7 @@ static void _GD_ByteSwapFragment(DIRFILE* D, unsigned long byte_sex,
 {
   unsigned int i, n_raw = 0;
 
-  dtrace("%p, %lx, %i, %i", D, byte_sex, fragment, move);
+  dtrace("%p, %lx, %i, %i", D, (unsigned long)byte_sex, fragment, move);
 
   byte_sex = 
 #ifdef WORDS_BIGENDIAN
@@ -120,7 +120,7 @@ int dirfile_alter_endianness(DIRFILE* D, unsigned long byte_sex, int fragment,
 {
   int i;
 
-  dtrace("%p, %lx, %i, %i", D, byte_sex, fragment, move);
+  dtrace("%p, %lx, %i, %i", D, (unsigned long)byte_sex, fragment, move);
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -180,7 +180,7 @@ unsigned long get_endianness(DIRFILE* D, int fragment)
 
   _GD_ClearError(D);
 
-  dreturn("0x%lx", D->fragment[fragment].byte_sex);
+  dreturn("0x%lx", (unsigned long)D->fragment[fragment].byte_sex);
   return D->fragment[fragment].byte_sex;
 }
 

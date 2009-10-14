@@ -82,6 +82,7 @@ static struct {
   CONSTANT(VERBOSE,          "GD_VB",  1),
   CONSTANT(IGNORE_DUPS,      "GD_ID",  1),
   CONSTANT(IGNORE_REFS,      "GD_IR",  1),
+  CONSTANT(PRETTY_PRINT,     "GD_PP",  1),
 
   CONSTANT(AUTO_ENCODED,     "GD_EA",  1),
   CONSTANT(UNENCODED,        "GD_EN",  2),

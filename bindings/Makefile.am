@@ -38,6 +38,8 @@ endif
 
 noinst_PROGRAMS=make_parameters
 
+make_parameters_SOURCES = make_parameters.c ../src/getdata.h
+
 SUBDIRS = . ${CXX_SUBDIR} ${F77_SUBDIR} ${PY_SUBDIR} ${IDL_SUBDIR}
 
 clean-local:

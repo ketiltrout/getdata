@@ -1,4 +1,4 @@
-// (C) 2008 D. V. Wiebe
+// (C) 2008, 2009 D. V. Wiebe
 //
 ///////////////////////////////////////////////////////////////////////////
 //
@@ -28,7 +28,7 @@ Dirfile::Dirfile()
   error_string = NULL;
 }
 
-Dirfile::Dirfile(const char* filedir, unsigned int flags,
+Dirfile::Dirfile(const char* filedir, unsigned long flags,
     gd_parser_callback_t sehandler, void* extra)
 {
   D = dirfile_cbopen(filedir, flags, sehandler, extra);
@@ -134,7 +134,7 @@ const char* Dirfile::ErrorString(size_t len)
   return get_error_string(D, error_string, len);
 }
 
-int Dirfile::Include(const char* file, int format_file, unsigned int flags)
+int Dirfile::Include(const char* file, int format_file, unsigned long flags)
 {
   return dirfile_include(D, file, format_file, flags);
 }

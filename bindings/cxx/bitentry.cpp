@@ -1,4 +1,4 @@
-// (C) 2008 D. V. Wiebe
+// (C) 2008, 2009 D. V. Wiebe
 //
 ///////////////////////////////////////////////////////////////////////////
 //
@@ -72,4 +72,58 @@ int BitEntry::SetNumBits(int num_bits)
     return dirfile_alter_entry(D->D, E.field, &E, 0);
   
   return 0;
+}
+
+const char *BitEntry::Scalar(int index)
+{
+  if (index != 0 && index != 1)
+    return NULL;
+
+  return E.scalar[index];
+}
+
+int BitEntry::SetFirstBit(const char *first_bit)
+{
+  int r = 0;
+  int16_t i16;
+
+  free(E.scalar[0]);
+  if (first_bit == NULL)
+    E.scalar[0] = NULL;
+  else
+    E.scalar[0] = strdup(first_bit);
+
+  if (D != NULL) {
+    r = dirfile_alter_entry(D->D, E.field, &E, 0);
+
+    if (!r) {
+      r = get_constant(D->D, first_bit, GD_INT16, &i16);
+      E.bitnum = (int)i16;
+    }
+  }
+  
+  return r;
+}
+
+int BitEntry::SetNumBits(const char *num_bits)
+{
+  int r = 0;
+  int16_t i16;
+
+  free(E.scalar[1]);
+  if (num_bits == NULL)
+    E.scalar[1] = NULL;
+  else
+    E.scalar[1] = strdup(num_bits);
+
+  if (D != NULL) {
+    r = dirfile_alter_entry(D->D, E.field, &E, 0);
+
+    if (!r) {
+      r = get_constant(D->D, num_bits, GD_INT16, &i16);
+      E.numbits = (int)i16;
+    }
+  }
+  
+  return r;
 }

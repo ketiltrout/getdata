@@ -1,6 +1,5 @@
-/* Attempt to read PHASE */
+/* Test field modifying */
 #include "../src/getdata.h"
-
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -8,18 +7,18 @@
 #include <fcntl.h>
 #include <string.h>
 #include <errno.h>
-#include <unistd.h>
 #include <stdio.h>
+#include <unistd.h>
 
 int main(void)
 {
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
   const char* data = __TEST__ "dirfile/data";
-  const char* format_data = "phase PHASE data -2\ndata RAW UINT8 1\n";
-  unsigned char c = 0;
+  const char* format_data = "data RAW UINT8 8\nconst CONST INT64 11\n";
   unsigned char data_data[256];
   int fd, r = 0;
+  gd_entry_t E;
 
   mkdir(filedir, 0777);
 
@@ -34,9 +33,15 @@ int main(void)
   write(fd, data_data, 256);
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY | GD_VERBOSE);
-  int n = getdata(D, "phase", 5, 0, 1, 0, GD_UINT8, &c);
+  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_VERBOSE);
+  get_entry(D, "data", &E);
+  E.scalar[0] = "const";
+  int ret = dirfile_alter_entry(D, "data", &E, 0);
   int error = get_error(D);
+
+  E.scalar[0] = NULL;
+  dirfile_free_entry_strings(&E);
+  int n = get_entry(D, "data", &E);
 
   dirfile_close(D);
 
@@ -45,15 +50,19 @@ int main(void)
   rmdir(filedir);
 
   if (error) {
-    fprintf(stderr, "error=%i\n", error);
+    fprintf(stderr, "1=%i\n", error);
     r = 1;
   }
-  if (n != 1) {
+  if (n != 0) {
     fprintf(stderr, "n=%i\n", n);
     r = 1;
   }
-  if (c != 3) {
-    fprintf(stderr, "c=%i\n", c);
+  if (ret != 0) {
+    fprintf(stderr, "ret=%i\n", ret);
+    r = 1;
+  }
+  if (E.spf != 11) {
+    fprintf(stderr, "E.spf=%i\n", E.spf);
     r = 1;
   }
 

@@ -35,6 +35,7 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
 {
   char temp_buffer[FILENAME_MAX];
   int i;
+  int copy_scalar[GD_MAX_POLYORD + 1];
   void* new_list;
   void* new_ref = NULL;
   unsigned int u;
@@ -42,6 +43,8 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
   gd_entry_t* P = NULL;
 
   dtrace("%p, %p, \"%s\"", D, entry, parent);
+
+  memset(copy_scalar, 0, sizeof(int) * (GD_MAX_POLYORD + 1));
 
   _GD_ClearError(D);
 
@@ -137,7 +140,7 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
     return -1;
   }
   memset(E->e, 0, sizeof(struct _gd_private_entry));
-  E->e->calculated = 1; /* this interface cannot produce CONST'd field specs */
+  E->e->calculated = 0;
 
   /* Validate field code */
   E->field_type = entry->field_type;
@@ -211,6 +214,7 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
         if (new_ref == NULL)
           _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
       }
+      copy_scalar[0] = 1;
       break;
     case GD_LINCOM_ENTRY:
       E->n_fields = entry->n_fields;
@@ -240,9 +244,11 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
           E->comp_scal = 0;
         }
 
-        for (i = 0; i < E->n_fields; ++i)
+        for (i = 0; i < E->n_fields; ++i) {
           if ((E->in_fields[i] = strdup(entry->in_fields[i])) == NULL)
             _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+          copy_scalar[i] = copy_scalar[i + GD_MAX_LINCOM] = 1;
+        }
       }
       break;
     case GD_LINTERP_ENTRY:
@@ -275,12 +281,14 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
       else if (E->bitnum + E->numbits - 1 > 63)
         _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_BITSIZE, NULL, 
             E->bitnum + E->numbits - 1, NULL);
+      copy_scalar[0] = copy_scalar[1] = 1;
       break;
     case GD_PHASE_ENTRY:
       E->shift = entry->shift;
 
       if ((E->in_fields[0] = strdup(entry->in_fields[0])) == NULL)
         _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+      copy_scalar[0] = 1;
       break;
     case GD_CONST_ENTRY:
       E->const_type = entry->const_type;
@@ -319,11 +327,25 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
         if ((E->in_fields[0] = strdup(entry->in_fields[0])) == NULL)
           _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
       }
+
+      for (i = 0; i < E->poly_ord; ++i)
+        copy_scalar[i] = 1;
       break;
     case GD_INDEX_ENTRY:
     case GD_NO_ENTRY:
       _GD_InternalError(D); /* We've already verrified field_type is valid */
       break;
+  }
+
+  /* copy scalars */
+  for (i = 0; i <= GD_MAX_POLYORD; ++i) {
+    if (!copy_scalar[i] || entry->scalar[i] == NULL)
+      E->scalar[i] = NULL;
+    else {
+      E->scalar[i] = strdup(entry->scalar[i]);
+      if (E->scalar[i] == NULL)
+        _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    }
   }
 
   if (D->error != GD_E_OK) {
@@ -571,6 +593,7 @@ int dirfile_add_raw(DIRFILE* D, const char* field_code, gd_type_t data_type,
   }
 
   gd_entry_t R;
+  memset(&R, 0, sizeof(gd_entry_t));
   R.field = (char*)field_code;
   R.field_type = GD_RAW_ENTRY;
   R.spf = spf;
@@ -606,6 +629,7 @@ int dirfile_add_lincom(DIRFILE* D, const char* field_code, int n_fields,
   }
 
   gd_entry_t L;
+  memset(&L, 0, sizeof(gd_entry_t));
   L.field = (char*)field_code;
   L.field_type = GD_LINCOM_ENTRY;
   L.n_fields = n_fields;
@@ -647,6 +671,7 @@ int dirfile_add_clincom(DIRFILE* D, const char* field_code, int n_fields,
   }
 
   gd_entry_t L;
+  memset(&L, 0, sizeof(gd_entry_t));
   L.field = (char*)field_code;
   L.field_type = GD_LINCOM_ENTRY;
   L.n_fields = n_fields;
@@ -678,6 +703,7 @@ int dirfile_add_linterp(DIRFILE* D, const char* field_code,
   }
 
   gd_entry_t L;
+  memset(&L, 0, sizeof(gd_entry_t));
   L.field = (char*)field_code;
   L.field_type = GD_LINTERP_ENTRY;
   L.in_fields[0] = (char*)in_field;
@@ -703,6 +729,7 @@ int dirfile_add_bit(DIRFILE* D, const char* field_code, const char* in_field,
   }
 
   gd_entry_t B;
+  memset(&B, 0, sizeof(gd_entry_t));
   B.field = (char*)field_code;
   B.field_type = GD_BIT_ENTRY;
   B.in_fields[0] = (char*)in_field;
@@ -729,6 +756,7 @@ int dirfile_add_sbit(DIRFILE* D, const char* field_code, const char* in_field,
   }
 
   gd_entry_t B;
+  memset(&B, 0, sizeof(gd_entry_t));
   B.field = (char*)field_code;
   B.field_type = GD_SBIT_ENTRY;
   B.in_fields[0] = (char*)in_field;
@@ -755,6 +783,7 @@ int dirfile_add_multiply(DIRFILE* D, const char* field_code,
   }
 
   gd_entry_t M;
+  memset(&M, 0, sizeof(gd_entry_t));
   M.field = (char*)field_code;
   M.field_type = GD_MULTIPLY_ENTRY;
   M.in_fields[0] = (char*)in_field1;
@@ -789,6 +818,7 @@ int dirfile_add_polynom(DIRFILE* D, const char* field_code, int poly_ord,
   }
 
   gd_entry_t E;
+  memset(&E, 0, sizeof(gd_entry_t));
   E.field = (char*)field_code;
   E.field_type = GD_POLYNOM_ENTRY;
   E.poly_ord = poly_ord;
@@ -828,6 +858,7 @@ int dirfile_add_cpolynom(DIRFILE* D, const char* field_code, int poly_ord,
   }
 
   gd_entry_t E;
+  memset(&E, 0, sizeof(gd_entry_t));
   E.field = (char*)field_code;
   E.field_type = GD_POLYNOM_ENTRY;
   E.poly_ord = poly_ord;
@@ -858,6 +889,7 @@ int dirfile_add_phase(DIRFILE* D, const char* field_code, const char* in_field,
   }
 
   gd_entry_t P;
+  memset(&P, 0, sizeof(gd_entry_t));
   P.field = (char*)field_code;
   P.field_type = GD_PHASE_ENTRY;
   P.in_fields[0] = (char*)in_field;
@@ -883,6 +915,7 @@ int dirfile_add_string(DIRFILE* D, const char* field_code, const char* value,
 
   gd_entry_t *entry;
   gd_entry_t S;
+  memset(&S, 0, sizeof(gd_entry_t));
   S.field = (char*)field_code;
   S.field_type = GD_STRING_ENTRY;
   S.fragment_index = fragment_index;
@@ -920,6 +953,7 @@ int dirfile_add_const(DIRFILE* D, const char* field_code, gd_type_t const_type,
 
   gd_entry_t *entry;
   gd_entry_t C;
+  memset(&C, 0, sizeof(gd_entry_t));
   C.field = (char*)field_code;
   C.field_type = GD_CONST_ENTRY;
   C.const_type = const_type;
@@ -994,6 +1028,8 @@ int dirfile_madd_lincom(DIRFILE* D, const char* parent, const char* field_code,
     L.in_fields[i] = (char*)in_fields[i];
     L.m[i] = m[i];
     L.b[i] = b[i];
+    L.scalar[i] = NULL;
+    L.scalar[i + GD_MAX_LINCOM] = NULL;
   }
   int error = _GD_Add(D, &L, parent);
 
@@ -1035,6 +1071,8 @@ int dirfile_madd_clincom(DIRFILE* D, const char* parent, const char* field_code,
     L.in_fields[i] = (char*)in_fields[i];
     L.cm[i] = cm[i];
     L.cb[i] = cb[i];
+    L.scalar[i] = NULL;
+    L.scalar[i + GD_MAX_LINCOM] = NULL;
   }
   int error = _GD_Add(D, &L, parent);
 
@@ -1087,6 +1125,7 @@ int dirfile_madd_bit(DIRFILE* D, const char* parent, const char* field_code,
   B.bitnum = bitnum;
   B.numbits = numbits;
   B.fragment_index = 0;
+  B.scalar[0] = B.scalar[1] = NULL;
   int error = _GD_Add(D, &B, parent);
 
   dreturn("%i", error);
@@ -1113,6 +1152,7 @@ int dirfile_madd_sbit(DIRFILE* D, const char* parent, const char* field_code,
   B.bitnum = bitnum;
   B.numbits = numbits;
   B.fragment_index = 0;
+  B.scalar[0] = B.scalar[1] = NULL;
   int error = _GD_Add(D, &B, parent);
 
   dreturn("%i", error);
@@ -1163,6 +1203,7 @@ int dirfile_madd_phase(DIRFILE* D, const char* parent, const char* field_code,
   P.in_fields[0] = (char*)in_field;
   P.shift = shift;
   P.fragment_index = 0;
+  P.scalar[0] = NULL;
   int error = _GD_Add(D, &P, parent);
 
   dreturn("%i", error);
@@ -1199,8 +1240,10 @@ int dirfile_madd_polynom(DIRFILE* D, const char* parent, const char* field_code,
   E.comp_scal = 0;
   E.in_fields[0] = (char*)in_field;
 
-  for (i = 0; i <= poly_ord; ++i)
+  for (i = 0; i <= poly_ord; ++i) {
     E.a[i] = a[i];
+    E.scalar[i] = NULL;
+  }
 
   int error = _GD_Add(D, &E, parent);
 
@@ -1239,8 +1282,10 @@ int dirfile_madd_cpolynom(DIRFILE* D, const char* parent,
   E.comp_scal = 1;
   E.in_fields[0] = (char*)in_field;
 
-  for (i = 0; i <= poly_ord; ++i)
+  for (i = 0; i <= poly_ord; ++i) {
     E.ca[i] = ca[i];
+    E.scalar[i] = NULL;
+  }
 
   int error = _GD_Add(D, &E, parent);
 

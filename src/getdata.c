@@ -378,8 +378,8 @@ static void _GD_CPolynomData(DIRFILE* D, void *data, gd_type_t type,
 
 /* MultiplyData: Multiply A by B.  B is unchanged.
 */
-static void _GD_MultiplyData(DIRFILE* D, void *A, unsigned int spfA, double *B,
-    unsigned int spfB, gd_type_t type, size_t n)
+static void _GD_MultiplyData(DIRFILE* D, void *A, _gd_spf_t spfA, double *B,
+    _gd_spf_t spfB, gd_type_t type, size_t n)
 {
   size_t i;
 
@@ -410,8 +410,8 @@ static void _GD_MultiplyData(DIRFILE* D, void *A, unsigned int spfA, double *B,
 
 /* MultiplyData: Multiply A by B.  B is complex.
 */
-static void _GD_CMultiplyData(DIRFILE* D, void *A, unsigned int spfA,
-    double complex *B, unsigned int spfB, gd_type_t type, size_t n)
+static void _GD_CMultiplyData(DIRFILE* D, void *A, _gd_spf_t spfA,
+    double complex *B, _gd_spf_t spfB, gd_type_t type, size_t n)
 {
   size_t i;
 
@@ -445,7 +445,7 @@ static void _GD_CMultiplyData(DIRFILE* D, void *A, unsigned int spfA,
 static size_t _GD_DoLincom(DIRFILE *D, gd_entry_t *E, off64_t first_samp,
     size_t num_samp, gd_type_t return_type, void *data_out)
 {
-  unsigned int spf[GD_MAX_LINCOM];
+  _gd_spf_t spf[GD_MAX_LINCOM];
   size_t n_read;
   int i;
   void *tmpbuf2 = NULL;
@@ -576,7 +576,7 @@ static size_t _GD_DoMultiply(DIRFILE *D, gd_entry_t* E, off64_t first_samp,
     size_t num_samp, gd_type_t return_type, void *data_out)
 {
   void *tmpbuf = NULL;
-  unsigned int spf1, spf2;
+  _gd_spf_t spf1, spf2;
   size_t n_read, n_read2, num_samp2;
   off64_t first_samp2;
 
@@ -896,7 +896,7 @@ size_t _GD_DoField(DIRFILE *D, gd_entry_t *E, int repr, off64_t first_samp,
   const gd_type_t true_return_type = return_type; 
   int out_of_place = 0;
 
-  dtrace("%p, %p(%s), '%c', %lli, %zi, 0x%x, %p", D, E, E->field, repr,
+  dtrace("%p, %p(%s), %i, %lli, %zi, 0x%x, %p", D, E, E->field, repr,
       first_samp, num_samp, return_type, data_out);
 
   if (++D->recurse_level >= GD_MAX_RECURSE_LEVEL) {
@@ -1043,7 +1043,7 @@ size_t getdata64(DIRFILE* D, const char *field_code_in, off64_t first_frame,
   }
 
   /* get the samples per frame */
-  unsigned int spf = _GD_GetSPF(D, entry);
+  _gd_spf_t spf = _GD_GetSPF(D, entry);
 
   if (D->error) {
     dreturn("%i", 0);

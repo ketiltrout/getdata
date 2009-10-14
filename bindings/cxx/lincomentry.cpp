@@ -1,4 +1,4 @@
-// (C) 2008 D. V. Wiebe
+// (C) 2008, 2009 D. V. Wiebe
 //
 ///////////////////////////////////////////////////////////////////////////
 //
@@ -65,7 +65,7 @@ LincomEntry::LincomEntry(const char* field_code, int n_fields,
 
 int LincomEntry::SetInput(const char* field, int index)
 {
-  if (index < 0 || index > 2)
+  if (index < 0 || index >= GD_MAX_LINCOM)
     return -1;
 
   char* ptr = strdup(field);
@@ -84,7 +84,7 @@ int LincomEntry::SetInput(const char* field, int index)
 
 int LincomEntry::SetScale(double scale, int index)
 {
-  if (index < 0 || index > 2)
+  if (index < 0 || index >= GD_MAX_LINCOM)
     return -1;
 
   E.cm[index] = E.m[index] = scale;
@@ -95,9 +95,37 @@ int LincomEntry::SetScale(double scale, int index)
   return 0;
 }
 
+int LincomEntry::SetScale(const char *scale, int index)
+{
+  int r = 0;
+  double complex c128;
+
+  if (index < 0 || index >= GD_MAX_LINCOM)
+    return -1;
+
+  free(E.scalar[index]);
+
+  if (scale == NULL)
+    E.scalar[index] = NULL;
+  else
+    E.scalar[index] = strdup(scale);
+
+  if (D != NULL) {
+    r = dirfile_alter_entry(D->D, E.field, &E, 0);
+
+    if (!r) {
+      r = get_constant(D->D, scale, GD_COMPLEX128, &c128);
+      E.cm[index] = c128;
+      E.m[index] = creal(c128);
+    }
+  }
+  
+  return r;
+}
+
 int LincomEntry::SetScale(double complex scale, int index)
 {
-  if (index < 0 || index > 2)
+  if (index < 0 || index >= GD_MAX_LINCOM)
     return -1;
 
   E.cm[index] = scale;
@@ -112,7 +140,7 @@ int LincomEntry::SetScale(double complex scale, int index)
 
 int LincomEntry::SetOffset(double offset, int index)
 {
-  if (index < 0 || index > 2)
+  if (index < 0 || index >= GD_MAX_LINCOM)
     return -1;
 
   E.cb[index] = E.b[index] = offset;
@@ -123,9 +151,37 @@ int LincomEntry::SetOffset(double offset, int index)
   return 0;
 }
 
+int LincomEntry::SetOffset(const char *scale, int index)
+{
+  int r = 0;
+  double complex c128;
+
+  if (index < 0 || index >= GD_MAX_LINCOM)
+    return -1;
+
+  free(E.scalar[index + GD_MAX_LINCOM]);
+
+  if (scale == NULL)
+    E.scalar[index + GD_MAX_LINCOM] = NULL;
+  else
+    E.scalar[index + GD_MAX_LINCOM] = strdup(scale);
+
+  if (D != NULL) {
+    r = dirfile_alter_entry(D->D, E.field, &E, 0);
+
+    if (!r) {
+      r = get_constant(D->D, scale, GD_COMPLEX128, &c128);
+      E.cm[index + GD_MAX_LINCOM] = c128;
+      E.m[index + GD_MAX_LINCOM] = creal(c128);
+    }
+  }
+  
+  return r;
+}
+
 int LincomEntry::SetOffset(double complex offset, int index)
 {
-  if (index < 0 || index > 2)
+  if (index < 0 || index >= GD_MAX_LINCOM)
     return -1;
 
   E.cb[index] = offset;
@@ -161,4 +217,12 @@ int LincomEntry::SetNFields(int nfields)
     return dirfile_alter_entry(D->D, E.field, &E, 0);
 
   return 0;
+}
+
+const char *LincomEntry::Scalar(int index)
+{
+  if (index < 0 || index >= E.n_fields)
+    return NULL;
+
+  return E.scalar[index];
 }

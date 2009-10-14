@@ -31,6 +31,7 @@ type gd_entry
   integer :: field_type, n_fields, spf, data_type, bitnum, numbits, shift
   integer :: fragment_index, comp_scal, poly_ord
   character (len=GD_FIELD_LEN), dimension(3) :: field
+  character (len=GD_FIELD_LEN), dimension(6) :: scalar
   double precision, dimension(3) :: m, b
   double precision, dimension(6) :: a
   double complex, dimension(3) :: cm, cb
@@ -777,6 +778,7 @@ function fget_entry (dirfile, field_code, ent)
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: field_code
   type(gd_entry), intent(out) :: ent
+  integer :: i
 
   ! the call may modify the lengths, so don't use parameters
   integer :: len1 = GD_FIELD_LEN
@@ -790,10 +792,12 @@ function fget_entry (dirfile, field_code, ent)
     ! raw
     call gdgerw(ent%spf, ent%data_type, ent%fragment_index, dirfile, &
     TRIM(field_code), LEN_TRIM(field_code))
+    call gdgsca(ent%scalar(1), len1, dirfile, TRIM(field_code), &
+    LEN_TRIM(field_code), 1)
   else if (fget_entry .EQ. GD_LINCOM_ENTRY) then
     ! lincom
     call gdcscl(ent%comp_scal, dirfile, TRIM(field_code), &
-      LEN_TRIM(field_code))
+    LEN_TRIM(field_code))
     if (ent%comp_scal .NE. 0) then
       call gdgecl(ent%n_fields, ent%field(1), len1, ent%cm(1), ent%cb(1), &
       ent%field(2), len2, ent%cm(2), ent%cb(2), ent%field(3), len3, ent%cm(3), &
@@ -805,6 +809,11 @@ function fget_entry (dirfile, field_code, ent)
       ent%b(3), ent%fragment_index, dirfile, TRIM(field_code), &
       LEN_TRIM(field_code))
     end if
+    do i=1,6
+      len1 = GD_FIELD_LEN
+      call gdgsca(ent%scalar(i), len1, dirfile, TRIM(field_code), &
+      LEN_TRIM(field_code), i)
+    end do
   else if (fget_entry .EQ. GD_LINTERP_ENTRY) then
     ! linterp
     call gdgelt(ent%field(1), len1, ent%field(2), len2, ent%fragment_index, &
@@ -813,10 +822,18 @@ function fget_entry (dirfile, field_code, ent)
     ! bit
     call gdgebt(ent%field(1), len1, ent%bitnum, ent%numbits, &
     ent%fragment_index, dirfile, TRIM(field_code), LEN_TRIM(field_code))
+    call gdgsca(ent%scalar(1), len1, dirfile, TRIM(field_code), &
+    LEN_TRIM(field_code), 1)
+    call gdgsca(ent%scalar(2), len1, dirfile, TRIM(field_code), &
+    LEN_TRIM(field_code), 2)
   else if (fget_entry .EQ. GD_SBIT_ENTRY) then
     ! sbit
     call gdgesb(ent%field(1), len1, ent%bitnum, ent%numbits, &
     ent%fragment_index, dirfile, TRIM(field_code), LEN_TRIM(field_code))
+    call gdgsca(ent%scalar(1), len1, dirfile, TRIM(field_code), &
+    LEN_TRIM(field_code), 1)
+    call gdgsca(ent%scalar(2), len1, dirfile, TRIM(field_code), &
+    LEN_TRIM(field_code), 2)
   else if (fget_entry .EQ. GD_MULTIPLY_ENTRY) then
     ! multiply
     call gdgemt(ent%field(1), len1, ent%field(2), len2, ent%fragment_index, &
@@ -825,6 +842,8 @@ function fget_entry (dirfile, field_code, ent)
     !phase
     call gdgeph(ent%field(1), len1, ent%shift, ent%fragment_index, dirfile, &
     TRIM(field_code), LEN_TRIM(field_code))
+    call gdgsca(ent%scalar(1), len1, dirfile, TRIM(field_code), &
+    LEN_TRIM(field_code), 1)
   else if (fget_entry .EQ. GD_POLYNOM_ENTRY) then
     ! polynom
     call gdcscl(ent%comp_scal, dirfile, TRIM(field_code), &
@@ -838,6 +857,11 @@ function fget_entry (dirfile, field_code, ent)
       ent%a(3), ent%a(4), ent%a(5), ent%a(6), ent%fragment_index, dirfile, &
       TRIM(field_code), LEN_TRIM(field_code))
     end if
+    do i=1,6
+      len1 = GD_FIELD_LEN
+      call gdgsca(ent%scalar(i), len1, dirfile, TRIM(field_code), &
+      LEN_TRIM(field_code), i)
+    end do
   else if (fget_entry .EQ. GD_CONST_ENTRY) then
     !const
     call gdgeco(ent%data_type, ent%fragment_index, dirfile, TRIM(field_code), &

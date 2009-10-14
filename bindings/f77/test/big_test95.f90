@@ -866,6 +866,16 @@ program big_test
     write(*, 2007) 18, 7, ent%comp_scal
   end if
 
+  if (ent%scalar(3) .ne. 'const') then
+    ne = ne + 1
+    write(*, 2008) 18, 8, ent%scalar(3)
+  end if
+
+  if (ent%scalar(6) .ne. 'const') then
+    ne = ne + 1
+    write(*, 2008) 18, 9, ent%scalar(6)
+  end if
+
   cq(1) = dcmplx(1.1, 0.0)
   cq(2) = dcmplx(2.2, 0.0)
   cq(3) = dcmplx(2.2, 0.0)

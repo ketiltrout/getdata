@@ -38,6 +38,8 @@ const char* dirfilename(DIRFILE* D)
     return NULL;
   }
 
+  _GD_ClearError(D);
+
   dreturn("\"%s\"", D->name);
   return D->name;
 }
@@ -51,6 +53,8 @@ const char* dirfile_reference(DIRFILE* D, const char* field_code)
     dreturn("%p", NULL);
     return NULL;
   }
+
+  _GD_ClearError(D);
   
   /* if no field specified, return only the field name */
   if (field_code == NULL) {

@@ -9,23 +9,27 @@
 #include <string.h>
 #include <errno.h>
 #include <unistd.h>
+#include <math.h>
 
 int main(void)
 {
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
-  const char* data = __TEST__ "dirfile/data";
   int r = 0;
 
   gd_entry_t E, e;
   E.field = "data";
-  E.field_type = GD_RAW_ENTRY;
+  E.field_type = GD_LINCOM_ENTRY;
   E.fragment_index = 0;
-  E.spf = 2;
-  E.data_type = GD_UINT8;
+  E.n_fields = 1;
+  E.comp_scal = 0;
+  E.in_fields[0] = "INDEX";
+  E.m[0] = 1.;
   E.scalar[0] = NULL;
+  E.scalar[0 + GD_MAX_LINCOM] = "c";
 
   DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
+  dirfile_add_spec(D, "c CONST INT64 4", 0);
   dirfile_add(D, &E);
   int error = get_error(D);
 
@@ -34,7 +38,7 @@ int main(void)
   if (get_error(D))
     r = 1;
   else {
-    if (e.field_type != GD_RAW_ENTRY) {
+    if (e.field_type != GD_LINCOM_ENTRY) {
       fprintf(stderr, "field_type = %i\n", e.field_type);
       r = 1;
     }
@@ -42,16 +46,25 @@ int main(void)
       fprintf(stderr, "fragment_index = %i\n", e.fragment_index);
       r = 1;
     }
-    if (e.spf != 2) {
-      fprintf(stderr, "spf = %i\n", e.spf);
+    if (e.n_fields != 1) {
+      fprintf(stderr, "n_fields = %i\n", e.n_fields);
       r = 1;
     }
-    if (e.data_type != GD_UINT8) {
-      fprintf(stderr, "data_type = %i\n", e.data_type);
+    if (fabs(e.m[0] - 1) > 1e-6) {
+      fprintf(stderr, "m[0] = %g\n", e.m[0]);
+      r = 1;
+    }
+    if (fabs(e.b[0] - 4) > 1e-6) {
+      fprintf(stderr, "b[0] = %g\n", e.b[0]);
       r = 1;
     }
     if (e.scalar[0] != NULL) {
-      fprintf(stderr, "scalar = %p\n", e.scalar[0]);
+      fprintf(stderr, "scalar[0] = %p\n", e.scalar[0]);
+      r = 1;
+    }
+    if (strcmp(e.scalar[0 + GD_MAX_LINCOM], "c")) {
+      fprintf(stderr, "scalar[0 + GD_MAX_LINCOM] = %s\n",
+          e.scalar[0 + GD_MAX_LINCOM]);
       r = 1;
     }
     dirfile_free_entry_strings(&e);
@@ -59,7 +72,6 @@ int main(void)
 
   dirfile_close(D);
 
-  unlink(data);
   unlink(format);
   rmdir(filedir);
 

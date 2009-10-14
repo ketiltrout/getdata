@@ -445,3 +445,10 @@ void F77_FUNC(gdfnum, GDFNUM) (double *framenum, const int *dirfile,
 void F77_FUNC(gdfnss, GDFNSS) (double *framenum, const int *dirfile,
     const char *field_code, const int *field_code_l, const double *value,
     const int *start, const int *end);
+
+void F77_FUNC(gdgsca, GDGSCA) (char* scalar, int* scalar_l, const int* dirfile,
+    const char* field_code, const int *field_code_l, const int* index);
+
+void F77_FUNC(gdasca, GDASCA) (const int* dirfile, const char* field_code,
+    const int *field_code_l, const int *index, const char *scalar,
+    const char *scalar_l, int* recode);

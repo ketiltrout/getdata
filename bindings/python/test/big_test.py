@@ -287,8 +287,8 @@ CheckSimple2(18,2,ent.field_type_name,"LINCOM_ENTRY")
 CheckSimple2(18,3,ent.fragment,0)
 CheckSimple2(18,4,ent.n_fields,3)
 CheckSimple2(18,5,ent.in_fields,( "data", "INDEX", "linterp" ))
-CheckSimple2(18,6,ent.m,(1.1, 2.2, 5.5))
-CheckSimple2(18,7,ent.b,(2.2, 3.3 + 4.4j, 5.5))
+CheckSimple2(18,6,ent.m,(1.1, 2.2, "const"))
+CheckSimple2(18,7,ent.b,(2.2, 3.3 + 4.4j, "const"))
 
 # 20: entry (polynom) check
 try:
@@ -300,7 +300,7 @@ CheckSimple2(20,2,ent.field_type_name,"POLYNOM_ENTRY")
 CheckSimple2(20,3,ent.fragment,0)
 CheckSimple2(20,4,ent.poly_ord,5)
 CheckSimple2(20,5,ent.in_fields,( "data", ))
-CheckSimple2(20,6,ent.a,(1.1, 2.2, 2.2, 3.3 + 4.4j, 5.5, 5.5))
+CheckSimple2(20,6,ent.a,(1.1, 2.2, 2.2, 3.3 + 4.4j, "const", "const"))
 
 # 21: entry (linterp) check
 try:
@@ -1098,7 +1098,7 @@ except:
   CheckOK(97)
 CheckSimple(97,n,pygetdata.INT8)
 
-# 137: get_native_type check
+# 137: get_native_type_name check
 try:
   n = d.get_native_type_name("data")
 except:

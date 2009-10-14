@@ -570,7 +570,7 @@ size_t putdata64(DIRFILE* D, const char *field_code_in, off64_t first_frame,
   }
 
   /* get the samples per frame */
-  unsigned int spf = _GD_GetSPF(D, entry);
+  _gd_spf_t spf = _GD_GetSPF(D, entry);
 
   if (D->error) {
     dreturn("%i", 0);

@@ -45,7 +45,7 @@ gdcopn_LDADD=$(F77LDADD)
 big_test_SOURCES=big_test.f
 big_test_LDADD=$(F77LDADD)
 
-big_test95_SOURCES=big_test95.f90
+big_test95_SOURCES=big_test95.f90 ../getdata.mod
 big_test95_LDADD=$(F95LDADD)
 
 check_PROGRAMS=$(TESTS)

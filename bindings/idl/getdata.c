@@ -423,6 +423,8 @@ IDL_VPTR gdidl_make_idl_entry(const gd_entry_t* E)
             IDL_MSG_LONGJMP, NULL)) = E->spf;
       *(IDL_INT*)(data + IDL_StructTagInfoByName(gdidl_entry_def, "DATA_TYPE",
             IDL_MSG_LONGJMP, NULL)) = E->data_type;
+      IDL_StrStore((IDL_STRING*)(data + IDL_StructTagInfoByName(gdidl_entry_def,
+              "SCALAR", IDL_MSG_LONGJMP, NULL)), E->scalar[0]);
       break;
     case GD_LINCOM_ENTRY:
       *(IDL_INT*)(data + IDL_StructTagInfoByName(gdidl_entry_def,
@@ -433,6 +435,13 @@ IDL_VPTR gdidl_make_idl_entry(const gd_entry_t* E)
         IDL_StrStore((IDL_STRING*)(data +
               IDL_StructTagInfoByName(gdidl_entry_def, "IN_FIELDS",
                 IDL_MSG_LONGJMP, NULL)) + i, E->in_fields[i]);
+        IDL_StrStore((IDL_STRING*)(data +
+              IDL_StructTagInfoByName(gdidl_entry_def, "SCALAR",
+                IDL_MSG_LONGJMP, NULL)) + i, E->scalar[i]);
+        IDL_StrStore((IDL_STRING*)(data +
+              IDL_StructTagInfoByName(gdidl_entry_def, "SCALAR",
+                IDL_MSG_LONGJMP, NULL)) + i + GD_MAX_LINCOM,
+            E->scalar[i + GD_MAX_LINCOM]);
       }
       if (E->comp_scal) {
         gdidl_c99_to_dcmp((IDL_DCOMPLEX*)(data +
@@ -458,6 +467,10 @@ IDL_VPTR gdidl_make_idl_entry(const gd_entry_t* E)
             IDL_MSG_LONGJMP, NULL)) = E->bitnum;
       *(IDL_INT*)(data + IDL_StructTagInfoByName(gdidl_entry_def, "NUMBITS",
             IDL_MSG_LONGJMP, NULL)) = E->numbits;
+      IDL_StrStore((IDL_STRING*)(data + IDL_StructTagInfoByName(gdidl_entry_def,
+              "SCALAR", IDL_MSG_LONGJMP, NULL)), E->scalar[0]);
+      IDL_StrStore((IDL_STRING*)(data + IDL_StructTagInfoByName(gdidl_entry_def,
+              "SCALAR", IDL_MSG_LONGJMP, NULL)) + 1, E->scalar[1]);
       break;
     case GD_MULTIPLY_ENTRY:
       IDL_StrStore((IDL_STRING*)(data + IDL_StructTagInfoByName(gdidl_entry_def,
@@ -466,12 +479,20 @@ IDL_VPTR gdidl_make_idl_entry(const gd_entry_t* E)
     case GD_PHASE_ENTRY:
       *(IDL_INT*)(data + IDL_StructTagInfoByName(gdidl_entry_def, "SHIFT",
             IDL_MSG_LONGJMP, NULL)) = E->shift;
+      IDL_StrStore((IDL_STRING*)(data + IDL_StructTagInfoByName(gdidl_entry_def,
+              "SCALAR", IDL_MSG_LONGJMP, NULL)), E->scalar[0]);
       break;
     case GD_POLYNOM_ENTRY:
       *(IDL_INT*)(data + IDL_StructTagInfoByName(gdidl_entry_def,
             "COMP_SCAL", IDL_MSG_LONGJMP, NULL)) = E->comp_scal;
       *(IDL_INT*)(data + IDL_StructTagInfoByName(gdidl_entry_def,
             "POLY_ORD", IDL_MSG_LONGJMP, NULL)) = E->poly_ord;
+
+      for (i = 0; i <= E->poly_ord; ++i)
+        IDL_StrStore((IDL_STRING*)(data +
+              IDL_StructTagInfoByName(gdidl_entry_def, "SCALAR",
+                IDL_MSG_LONGJMP, NULL)) + i, E->scalar[i]);
+
       if (E->comp_scal)
         gdidl_c99_to_dcmp((IDL_DCOMPLEX*)(data +
             IDL_StructTagInfoByName(gdidl_entry_def, "CA", IDL_MSG_LONGJMP,
@@ -506,8 +527,10 @@ void gdidl_read_idl_entry(gd_entry_t *E, IDL_VPTR v, int alter)
   IDL_VPTR d;
   IDL_MEMINT o;
   int i, n = 0;
+  int copy_scalar[GD_MAX_POLYORD + 1];
   int action = (alter) ? IDL_MSG_RET | IDL_MSG_ATTR_NOPRINT : IDL_MSG_LONGJMP;
 
+  memset(copy_scalar, 0, sizeof(int) * (GD_MAX_POLYORD + 1));
   memset(E, 0, sizeof(gd_entry_t));
 
   unsigned char* data = v->value.s.arr->data;
@@ -522,7 +545,7 @@ void gdidl_read_idl_entry(gd_entry_t *E, IDL_VPTR v, int alter)
     o = IDL_StructTagInfoByName(v->value.s.sdef, "FRAGMENT", IDL_MSG_LONGJMP,
         &d);
     if (d->type != IDL_TYP_INT)
-      idl_abort("GD_ENTRY element INDEX must be of type INT");
+      idl_abort("GD_ENTRY element FRAGMENT must be of type INT");
     E->fragment_index = *(int16_t*)(data + o);
   }
 
@@ -563,6 +586,8 @@ void gdidl_read_idl_entry(gd_entry_t *E, IDL_VPTR v, int alter)
       } else
         E->data_type = GD_NULL;
 
+      copy_scalar[0] = 1;
+
       break;
     case GD_LINCOM_ENTRY:
       o = IDL_StructTagInfoByName(v->value.s.sdef, "N_FIELDS", action, &d);
@@ -590,6 +615,11 @@ void gdidl_read_idl_entry(gd_entry_t *E, IDL_VPTR v, int alter)
         }
         for (i = 0; i < n; ++i)
           E->in_fields[i] = IDL_STRING_STR((IDL_STRING*)(data + o) + i);
+      }
+
+      for (i = 0 ; i < n; ++i) {
+        copy_scalar[i] = 1;
+        copy_scalar[i + GD_MAX_LINCOM] = 1;
       }
 
       if (E->comp_scal) {
@@ -679,6 +709,8 @@ void gdidl_read_idl_entry(gd_entry_t *E, IDL_VPTR v, int alter)
           idl_abort("GD_ENTRY element NUMBITS must be of type INT");
         E->numbits = *(int16_t*)(data + o);
       }
+
+      copy_scalar[0] = copy_scalar[1] = 1;
       break;
     case GD_MULTIPLY_ENTRY:
       o = IDL_StructTagInfoByName(v->value.s.sdef, "IN_FIELDS", action, &d);
@@ -693,6 +725,7 @@ void gdidl_read_idl_entry(gd_entry_t *E, IDL_VPTR v, int alter)
       if (d->type != IDL_TYP_INT)
         idl_abort("GD_ENTRY element SHIFT must be of type INT");
       E->shift = *(int16_t*)(data + o);
+      copy_scalar[0] = 1;
       break;
     case GD_POLYNOM_ENTRY:
       o = IDL_StructTagInfoByName(v->value.s.sdef, "POLY_ORD", action, &d);
@@ -702,6 +735,9 @@ void gdidl_read_idl_entry(gd_entry_t *E, IDL_VPTR v, int alter)
         E->poly_ord = *(int16_t*)(data + o);
         n = E->poly_ord + 1;
       }
+
+      for (i = 0 ; i < n; ++i)
+        copy_scalar[i] = 1;
 
       o = IDL_StructTagInfoByName(v->value.s.sdef, "COMP_SCAL", action, &d);
       if (o != -1) {
@@ -754,6 +790,19 @@ void gdidl_read_idl_entry(gd_entry_t *E, IDL_VPTR v, int alter)
     case GD_STRING_ENTRY:
       break;
   }
+
+  /* scalars */
+  o = IDL_StructTagInfoByName(v->value.s.sdef, "SCALAR", action, &d);
+  if (o != -1)
+    for (i = 0; i < GD_MAX_POLYORD + 1; ++i)
+      if (copy_scalar[i]) {
+        E->scalar[i] = IDL_STRING_STR((IDL_STRING*)(data + o) + i);
+        if (E->scalar[i][0] == '\0')
+          E->scalar[i] = NULL;
+      }
+  else 
+    for (i = 0; i < GD_MAX_POLYORD + 1; ++i)
+      E->scalar[i] = NULL;
 
   dreturnvoid();
 }
@@ -1305,7 +1354,7 @@ void gdidl_dirfile_add_polynom(int argc, IDL_VPTR argv[], char *argk)
             + _Complex_I * ((IDL_DCOMPLEX*)(argv[3]->value.arr->data))[i].i;
           break;
         default:
-          idl_kw_abort("The coeffecients must be of SCALAR type");
+          idl_kw_abort("The coeffecients must be of scalar type");
       }
     }
   } else {
@@ -2301,7 +2350,8 @@ void gdidl_dirfile_alter_spec(int argc, IDL_VPTR argv[], char *argk)
 /* @@DLM: P gdidl_dirfile_close DIRFILE_CLOSE 1 1 KEYWORDS */
 void gdidl_dirfile_close(int argc, IDL_VPTR argv[], char *argk)
 {
-  int ret;
+  int ret = 0;
+  DIRFILE* D = NULL;
 
   dtraceidl();
 
@@ -2325,12 +2375,14 @@ void gdidl_dirfile_close(int argc, IDL_VPTR argv[], char *argk)
 
   IDL_LONG d = IDL_LongScalar(argv[0]);
 
-  DIRFILE* D = gdidl_get_dirfile(d);
+  if (d != 0) {
+    D = gdidl_get_dirfile(d);
 
-  if (kw.discard)
-    ret = dirfile_discard(D);
-  else
-    ret = dirfile_close(D);
+    if (kw.discard)
+      ret = dirfile_discard(D);
+    else
+      ret = dirfile_close(D);
+  }
 
   if (ret)
     GDIDL_SET_ERROR(D);
@@ -2343,9 +2395,9 @@ void gdidl_dirfile_close(int argc, IDL_VPTR argv[], char *argk)
       IDL_StrStore((IDL_STRING*)&kw.estr->value.s, "Success");
     }
 
-    gdidl_clear_dirfile(d);
+    if (d != 0)
+      gdidl_clear_dirfile(d);
   }
-
 
   IDL_KW_FREE;
 
@@ -3921,6 +3973,7 @@ static IDL_STRUCT_TAG_DEF gdidl_entry[] = {
   { "N_FIELDS",   0, (void*)IDL_TYP_INT },  /* LINCOM */
   { "NUMBITS",    0, (void*)IDL_TYP_INT }, /* (S)BIT */
   { "POLY_ORD",   0, (void*)IDL_TYP_INT }, /* POLYNOM */
+  { "SCALAR",     polynom_dims, (void*)IDL_TYP_STRING },
   { "SHIFT",      0, (void*)IDL_TYP_INT }, /* PHASE */
   { "SPF",        0, (void*)IDL_TYP_UINT }, /* RAW */
   { "TABLE",      0, (void*)IDL_TYP_STRING }, /* LINTERP */

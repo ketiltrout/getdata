@@ -48,7 +48,10 @@ constants.c: ../make_parameters
 idl_getdata.dlm: getdata.c makedlm.sh
 	${SHELL} ./makedlm.sh -d $< > $@
 
-all-local: idl_getdata.dlm
+all-local: .libs/idl_getdata.dlm
+
+# This is required to properly run the test suite
+.libs/idl_getdata.dlm: idl_getdata.dlm
 	cp $< .libs
 
 clean-local:

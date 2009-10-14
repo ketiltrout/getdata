@@ -1,4 +1,4 @@
-// (C) 2008 D. V. Wiebe
+// (C) 2008, 2009 D. V. Wiebe
 //
 ///////////////////////////////////////////////////////////////////////////
 //
@@ -93,6 +93,8 @@ namespace GetData {
             E.field_type == GD_POLYNOM_ENTRY) ? E.comp_scal : 0;
       }
 
+      virtual const char *Scalar(int index = 0);
+
       /* RAW methods */
       virtual unsigned int SamplesPerFrame() {
         return (E.field_type == GD_RAW_ENTRY) ? E.spf : 0;
@@ -142,7 +144,7 @@ namespace GetData {
       };
 
       /* PHASE methods */
-      virtual int Shift() {
+      virtual long int Shift() {
         return (E.field_type == GD_PHASE_ENTRY) ? E.shift : 0;
       };
 

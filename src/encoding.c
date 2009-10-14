@@ -275,7 +275,7 @@ int _GD_MissingFramework(int encoding, unsigned int funcs)
 }
 
 /* Figure out the encoding scheme */
-static unsigned int _GD_ResolveEncoding(const char* name, unsigned int scheme,
+static unsigned long _GD_ResolveEncoding(const char* name, unsigned long scheme,
     struct _gd_raw_file *file)
 {
   char candidate[FILENAME_MAX];
@@ -283,7 +283,7 @@ static unsigned int _GD_ResolveEncoding(const char* name, unsigned int scheme,
   int i, len = strlen(name);
   struct stat64 statbuf;
 
-  dtrace("\"%s\", 0x%08x, %p", name, scheme, file);
+  dtrace("\"%s\", 0x%08lx, %p", name, scheme, file);
 
   strcpy(candidate, name);
   ptr = candidate + len;
@@ -297,7 +297,7 @@ static unsigned int _GD_ResolveEncoding(const char* name, unsigned int scheme,
         if (S_ISREG(statbuf.st_mode)) {
           if (file != NULL)
             file->encoding = i;
-          dreturn("%08x", _gd_ef[i].scheme);
+          dreturn("%08lx", _gd_ef[i].scheme);
           return _gd_ef[i].scheme;
         }
     }
@@ -307,12 +307,12 @@ static unsigned int _GD_ResolveEncoding(const char* name, unsigned int scheme,
     for (i = 0; _gd_ef[i].scheme != GD_ENC_UNSUPPORTED; i++)
       if (scheme == _gd_ef[i].scheme) {
         file->encoding = i;
-        dreturn("0x%08x", _gd_ef[i].scheme);
+        dreturn("0x%08lx", _gd_ef[i].scheme);
         return _gd_ef[i].scheme;;
       }
   }
 
-  dreturn("%08x", GD_AUTO_ENCODED);
+  dreturn("%08lx", (unsigned long)GD_AUTO_ENCODED);
   return GD_AUTO_ENCODED;
 }
 
@@ -492,7 +492,7 @@ int dirfile_alter_encoding(DIRFILE* D, unsigned long encoding, int fragment,
 {
   int i;
 
-  dtrace("%p, %lu, %i, %i", D, encoding, fragment, move);
+  dtrace("%p, %lu, %i, %i", D, (unsigned long)encoding, fragment, move);
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -574,7 +574,7 @@ unsigned long get_encoding(DIRFILE* D, int fragment)
   if (D->fragment[fragment].encoding != GD_AUTO_ENCODED)
     reported_encoding = D->fragment[fragment].encoding;
 
-  dreturn("%lx", reported_encoding);
+  dreturn("%lx", (unsigned long)reported_encoding);
   return reported_encoding;
 }
 

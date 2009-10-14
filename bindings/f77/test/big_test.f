@@ -6,7 +6,7 @@ C     GDDSCD GDCLBK
 C     GDCLOS (although this last one is used)
 
       PROGRAM GETTST
-      INCLUDE "getdata.f"
+      INCLUDE "../getdata.f"
 
       CHARACTER*12 fildir
       PARAMETER (fildir = 'test_dirfile')
@@ -3018,6 +3018,7 @@ C     99: GDVLDT check
       ENDIF
 
 C     100: GDFNUM check
+      l = 20
       CALL GDREFE(str, l, d, "data", 4)
       CALL GDFNUM(dp, d, 'INDEX', 5, 33.3d0)
       CALL GDEROR(e, d)
@@ -3046,6 +3047,45 @@ C     101: GDFNSS check
         WRITE(*, 2012) 101, dp
       ENDIF
 
+C     138: GDGSCA check
+      l = 20
+      CALL GDGSCA(str, l, d, 'lincom', 6, 6)
+      CALL GDEROR(e, d)
+
+      IF (e .NE. GD_EOK) THEN
+        ne = ne + 1
+        WRITE(*, 2001) 138, e
+      ENDIF
+
+      IF (str .NE. "const") THEN
+        ne = ne + 1
+        WRITE(*, 2009) 138, str
+      ENDIF
+
+C     139: GDASCA check
+      CALL GDASCA(d, 'lincom', 6, 6, 'new11', 5, 0)
+      CALL GDEROR(e, d)
+
+      IF (e .NE. GD_EOK) THEN
+        ne = ne + 1
+        WRITE(*, 2006) 139, 1, e
+      ENDIF
+
+      l = 20
+      CALL GDGSCA(str, l, d, 'lincom', 6, 6)
+      CALL GDEROR(e, d)
+
+      IF (e .NE. GD_EOK) THEN
+        ne = ne + 1
+        WRITE(*, 2006) 139, 2, e
+      ENDIF
+
+      IF (str .NE. "new11") THEN
+        ne = ne + 1
+        WRITE(*, 2009) 139, str
+      ENDIF
+
+C     Cleanup
       CALL GDCLOS(d)
 
       CALL SYSTEM ( 'rm -rf ' // fildir )

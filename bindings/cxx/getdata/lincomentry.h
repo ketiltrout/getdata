@@ -1,4 +1,4 @@
-// (C) 2008 D. V. Wiebe
+// (C) 2008, 2009 D. V. Wiebe
 //
 ///////////////////////////////////////////////////////////////////////////
 //
@@ -74,11 +74,15 @@ namespace GetData {
         return (CheckIndex(E.field_type, E.n_fields, index)) ? E.cb[index] : 0;
       };
 
+      virtual const char *Scalar(int index = 0);
+
       int SetNFields(int nfields);
       int SetInput(const char* field, int index = 0);
       int SetScale(double scale, int index = 0);
+      int SetScale(const char* scale, int index = 0);
       int SetScale(double complex scale, int index = 0);
       int SetOffset(double offset, int index = 0);
+      int SetOffset(const char* scale, int index = 0);
       int SetOffset(double complex offset, int index = 0);
 
     private:

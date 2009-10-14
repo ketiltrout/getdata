@@ -181,9 +181,11 @@ void F77_FUNC(gdopen, GDOPEN) (int* dirfile, const char* dirfilename,
 /* dirfile_close wrapper */
 void F77_FUNC(gdclos, GDCLOS) (const int* dirfile)
 {
-  dirfile_close(_GDF_GetDirfile(*dirfile));
+  if (*dirfile != 0) {
+    dirfile_close(_GDF_GetDirfile(*dirfile));
 
-  _GDF_ClearDirfile(*dirfile);
+    _GDF_ClearDirfile(*dirfile);
+  }
 }
 
 /* dirfile_flush wrapper */
@@ -399,6 +401,10 @@ void F77_FUNC(gdgelc, GDGELC) (int* nfields,
     int* fragment_index, const int* dirfile, const char* field_code,
     const int* field_code_l)
 {
+  dtrace("%p, %p, %p, %p, %p, %p, %p, %p, %p, %p, %p, %p, %p, %p, %i, %s, %i",
+      nfields, infield1, infield1_l, m1, b1, infield2, infield2_l, m2, b2,
+      infield3, infield3_l, m3, b3, fragment_index, *dirfile, field_code,
+      *field_code_l);
   char* out = malloc(*field_code_l + 1);
   gd_entry_t E;
 
@@ -428,6 +434,8 @@ void F77_FUNC(gdgelc, GDGELC) (int* nfields,
     dirfile_free_entry_strings(&E);
   }
   free(out);
+
+  dreturnvoid();
 }
 
 void F77_FUNC(gdgecl, GDGECL) (int* nfields,
@@ -437,13 +445,20 @@ void F77_FUNC(gdgecl, GDGECL) (int* nfields,
     int* fragment_index, const int* dirfile, const char* field_code,
     const int* field_code_l)
 {
-  char* out = malloc(*field_code_l + 1);
+  dtrace("%p, %p, %p, %p, %p, %p, %p, %p, %p, %p, %p, %p, %p, %p, %i, \"%s\", "
+      "%i", nfields, infield1, infield1_l, m1, b1, infield2, infield2_l, m2, b2,
+      infield3, infield3_l, m3, b3, fragment_index, *dirfile, field_code,
+      *field_code_l);
+  char* fc = malloc(*field_code_l + 1);
   gd_entry_t E;
 
-  if (get_entry(_GDF_GetDirfile(*dirfile), _GDF_CString(out, field_code,
-          *field_code_l), &E) || E.field_type != GD_LINCOM_ENTRY)
+  if (get_entry(_GDF_GetDirfile(*dirfile), _GDF_CString(fc, field_code,
+          *field_code_l), &E))
     *nfields = 0;
-  else {
+  else if (E.field_type != GD_LINCOM_ENTRY) {
+    *nfields = 0;
+    dirfile_free_entry_strings(&E);
+  } else {
     *nfields = E.n_fields;
     *fragment_index = E.fragment_index;
 
@@ -465,7 +480,9 @@ void F77_FUNC(gdgecl, GDGECL) (int* nfields,
     dirfile_free_entry_strings(&E);
   }
 
-  free(out);
+  free(fc);
+
+  dreturnvoid();
 }
 
 /* get_entry wrapper for POLYNOM */
@@ -1505,9 +1522,11 @@ void F77_FUNC(gdnmve, GDNMVE) (int* nvectors, const int* dirfile,
 /* dirfile_discard wrapper */
 void F77_FUNC(gddscd, GDDSCD) (const int* dirfile)
 {
-  dirfile_discard(_GDF_GetDirfile(*dirfile));
+  if (*dirfile != 0) {
+    dirfile_discard(_GDF_GetDirfile(*dirfile));
 
-  _GDF_ClearDirfile(*dirfile);
+    _GDF_ClearDirfile(*dirfile);
+  }
 }
 
 /* dirfile_cbopen wrapper */
@@ -2008,6 +2027,7 @@ void F77_FUNC(gdcscl, GDCSCL) (int *comp_scal, const int *dirfile,
         E.field_type == GD_POLYNOM_ENTRY))
     *comp_scal = E.comp_scal;
 
+  dirfile_free_entry_strings(&E);
   free(fc);
 }
 
@@ -2046,4 +2066,131 @@ void F77_FUNC(gdfnss, GDFNSS) (double *framenum, const int *dirfile,
       _GDF_CString(fc, field_code, *field_code_l), *value, *start, *end);
 
   free(fc);
+}
+
+/* retrieve a scalar parameter */
+void F77_FUNC(gdgsca, GDGSCA) (char* scalar, int* scalar_l, const int* dirfile,
+    const char* field_code, const int *field_code_l, const int* index)
+{
+  dtrace("%p, %p, %i, \"%s\", %i, %i", scalar, scalar_l, *dirfile, field_code,
+      *field_code_l, *index);
+
+  char *fc = malloc(*field_code_l + 1);
+  gd_entry_t E;
+  DIRFILE *D = _GDF_GetDirfile(*dirfile);
+  int ok = 0;
+
+  get_entry(D, _GDF_CString(fc, field_code, *field_code_l), &E);
+
+  free(fc);
+
+  if (!get_error(D) && *index > 0) {
+    ok = 1;
+    switch (E.field_type) {
+      case GD_NO_ENTRY:
+      case GD_LINTERP_ENTRY:
+      case GD_MULTIPLY_ENTRY:
+      case GD_INDEX_ENTRY:
+      case GD_CONST_ENTRY:
+      case GD_STRING_ENTRY:
+        ok = 0;
+        break;
+      case GD_LINCOM_ENTRY:
+        if (*index > GD_MAX_LINCOM + E.n_fields ||
+            (*index > E.n_fields && *index <= GD_MAX_LINCOM))
+        {
+          ok = 0;
+        }
+        break;
+      case GD_POLYNOM_ENTRY:
+        if (*index > E.poly_ord + 1)
+          ok = 0;
+        break;
+      case GD_BIT_ENTRY:
+      case GD_SBIT_ENTRY:
+        if (*index > 2)
+          ok = 0;
+        break;
+      case GD_RAW_ENTRY:
+      case GD_PHASE_ENTRY:
+        if (*index > 1)
+          ok = 0;
+        break;
+    }
+  }
+
+  if (ok && E.scalar[*index - 1] == NULL)
+    ok = 0;
+
+  _GDF_FString(scalar, scalar_l, (ok) ? E.scalar[*index - 1] : "");
+
+  dirfile_free_entry_strings(&E);
+
+  dreturnvoid();
+}
+
+/* set a scalar parameter */
+void F77_FUNC(gdasca, GDASCA) (const int* dirfile, const char* field_code,
+    const int *field_code_l, const int *index, const char *scalar,
+    const char *scalar_l, int* recode)
+{
+  dtrace("%i, %p, %i, %i, %p, %i, %i", *dirfile, field_code, *field_code_l,
+      *index, scalar, *scalar_l, *recode);
+
+  char *fc = malloc(*field_code_l + 1);
+  gd_entry_t E;
+  DIRFILE *D = _GDF_GetDirfile(*dirfile);
+
+  if (*index < 0) {
+    dreturnvoid();
+    return;
+  }
+
+  get_entry(D, _GDF_CString(fc, field_code, *field_code_l), &E);
+
+  int ok = 1;
+  switch (E.field_type) {
+    case GD_NO_ENTRY:
+    case GD_LINTERP_ENTRY:
+    case GD_MULTIPLY_ENTRY:
+    case GD_INDEX_ENTRY:
+    case GD_CONST_ENTRY:
+    case GD_STRING_ENTRY:
+      ok = 0;
+      break;
+    case GD_LINCOM_ENTRY:
+      if (*index > GD_MAX_LINCOM + E.n_fields ||
+          (*index > E.n_fields && *index <= GD_MAX_LINCOM))
+      {
+        ok = 0;
+      }
+      break;
+    case GD_POLYNOM_ENTRY:
+      if (*index > E.poly_ord + 1)
+        ok = 0;
+      break;
+    case GD_BIT_ENTRY:
+    case GD_SBIT_ENTRY:
+      if (*index > 2)
+        ok = 0;
+      break;
+    case GD_RAW_ENTRY:
+    case GD_PHASE_ENTRY:
+      if (*index > 1)
+        ok = 0;
+      break;
+  }
+
+  if (!ok || get_error(D)) {
+    dreturnvoid();
+    return;
+  }
+
+  free(E.scalar[*index - 1]);
+  E.scalar[*index - 1] = malloc(*scalar_l + 1);
+  _GDF_CString(E.scalar[*index - 1], scalar, *scalar_l);
+
+  dirfile_alter_entry(D, fc, &E, *recode);
+
+  dreturnvoid();
 }

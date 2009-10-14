@@ -1,4 +1,4 @@
-// (C) 2008 D. V. Wiebe
+// (C) 2008, 2009 D. V. Wiebe
 //
 ///////////////////////////////////////////////////////////////////////////
 //
@@ -53,7 +53,7 @@ int PhaseEntry::SetInput(const char* field)
   return 0;
 }
 
-int PhaseEntry::SetShift(int shift)
+int PhaseEntry::SetShift(long int shift)
 {
   E.shift = shift;
 
@@ -61,4 +61,27 @@ int PhaseEntry::SetShift(int shift)
     return dirfile_alter_entry(D->D, E.field, &E, 0);
   
   return 0;
+}
+
+int PhaseEntry::SetShift(const char *shift)
+{
+  int r = 0;
+  int32_t i32;
+
+  free(E.scalar[0]);
+  if (shift == NULL)
+    E.scalar[0] = NULL;
+  else
+    E.scalar[0] = strdup(shift);
+
+  if (D != NULL) {
+    r = dirfile_alter_entry(D->D, E.field, &E, 0);
+
+    if (!r) {
+      r = get_constant(D->D, shift, GD_UINT16, &i32);
+      E.shift = (long int)i32;
+    }
+  }
+  
+  return r;
 }

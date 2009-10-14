@@ -1,4 +1,4 @@
-// (C) 2008 D. V. Wiebe
+// (C) 2008, 2009 D. V. Wiebe
 //
 ///////////////////////////////////////////////////////////////////////////
 //
@@ -132,4 +132,39 @@ void Entry::SetName(const char* name)
 void Entry::SetFragmentIndex(int fragment_index)
 {
   this->Move(fragment_index);
+}
+
+const char *Entry::Scalar(int index)
+{
+  if (index < 0)
+    return NULL;
+
+  switch (E.field_type) {
+    case GD_LINCOM_ENTRY:
+      if (index >= GD_MAX_LINCOM + E.n_fields ||
+          (index >= E.n_fields && index < GD_MAX_LINCOM))
+      {
+        return NULL;
+      }
+    case GD_POLYNOM_ENTRY:
+      if (index > E.poly_ord)
+        return NULL;
+    case GD_BIT_ENTRY:
+    case GD_SBIT_ENTRY:
+      if (index >= 2)
+        return NULL;
+    case GD_RAW_ENTRY:
+    case GD_PHASE_ENTRY:
+      if (index >= 1)
+        return NULL;
+    case GD_LINTERP_ENTRY:
+    case GD_MULTIPLY_ENTRY:
+    case GD_INDEX_ENTRY:
+    case GD_CONST_ENTRY:
+    case GD_STRING_ENTRY:
+    case GD_NO_ENTRY:
+      return NULL;
+  }
+
+  return E.scalar[index];
 }

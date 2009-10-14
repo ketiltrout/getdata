@@ -1,6 +1,6 @@
 .\" get_constants.3.  The get_constants man page.
 .\"
-.\" (C) 2008 D. V. Wiebe
+.\" (C) 2008, 2009 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH get_constants 3 "8 December 2008" "Version 0.5.0" "GETDATA"
+.TH get_constants 3 "6 October 2009" "Version 0.6.0" "GETDATA"
 .SH NAME
 get_constants \(em retrieve a list of constant values from a dirfile
 .SH SYNOPSIS
@@ -35,7 +35,12 @@ and returns a read-only list of values of the all
 type fields defined in the database after type conversion to the data type
 specified by
 .IR return_type .
-Notably, this list does not include /META subfields.
+Notably, this list does not include /META subfields.  For a list of valid
+symbols to use for
+.IR return_type ,
+see the
+.BR getdata (3)
+man page.
 
 The 
 .I dirfile
@@ -56,10 +61,11 @@ from a call to
 
 The caller may not modify any values in the array, or the array itself.  Doing
 so may cause database corruption.  The pointer returned is guaranteed to be
-valid until
+valid only until
 .BR get_constants ()
-is called again with the same arguments, or until the array is deallocated by
-a call to
+is called again with the same arguments, or until the dirfile's metadata is
+modified (by adding, modifying or deleting an entry), or until the array is
+deallocated by a call to
 .BR dirfile_close (3).
 
 A corresponding list of names for these fields may be obtained by calling
@@ -92,6 +98,7 @@ a call to
 .SH SEE ALSO
 .BR dirfile (5),
 .BR dirfile_open (3),
+.BR get_constant (3),
 .BR get_error (3),
 .BR get_error_string (3),
 .BR get_field_list_by_type (3),

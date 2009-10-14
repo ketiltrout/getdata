@@ -127,7 +127,9 @@ static char* _GD_SetScalar(DIRFILE* D, const char* token, void* data, int type,
     *comp_scal = 1;
   }
 
-  if (type == GD_COMPLEX)
+  if (type == GD_INT64)
+    *(int64_t*)data = (int64_t)round(d);
+  else if (type == GD_COMPLEX)
     *(double complex*)data = d + _Complex_I * i;
   else if (type == GD_IEEE754)
     *(double*)data = d;
@@ -214,8 +216,8 @@ static gd_entry_t* _GD_ParseRaw(DIRFILE* D, char* in_cols[MAX_IN_COLS],
   if (E->e->size == 0 || E->data_type & 0x40)
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_TYPE, format_file, line,
         in_cols[2]);
-  else if ((E->e->scalar[0] = _GD_SetScalar(D, in_cols[3], &E->spf, 0,
-          format_file, line, NULL)) == NULL)
+  else if ((E->scalar[0] = _GD_SetScalar(D, in_cols[3], &E->spf, 0, format_file,
+          line, NULL)) == NULL)
   {
     E->e->calculated = 1;
     if (E->spf <= 0)
@@ -312,14 +314,14 @@ static gd_entry_t* _GD_ParseLincom(DIRFILE* D, char* in_cols[MAX_IN_COLS],
       if (E->in_fields[i] == NULL)
         _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
 
-      E->e->scalar[i * 2] = _GD_SetScalar(D, in_cols[i * 3 + 4], &E->cm[i],
+      E->scalar[i] = _GD_SetScalar(D, in_cols[i * 3 + 4], &E->cm[i],
           GD_COMPLEX, format_file, line, &E->comp_scal);
       E->m[i] = creal(E->cm[i]);
-      E->e->scalar[i * 2 + 1] = _GD_SetScalar(D, in_cols[i * 3 + 5], &E->cb[i],
-          GD_COMPLEX, format_file, line, &E->comp_scal);
+      E->scalar[i + GD_MAX_LINCOM] = _GD_SetScalar(D, in_cols[i * 3 + 5],
+          &E->cb[i], GD_COMPLEX, format_file, line, &E->comp_scal);
       E->b[i] = creal(E->cb[i]);
 
-      if (E->e->scalar[i * 2] != NULL || E->e->scalar[i * 2 + 1] != NULL)
+      if (E->scalar[i] != NULL || E->scalar[i + GD_MAX_LINCOM] != NULL)
         E->e->calculated = 0;
     }
 
@@ -509,20 +511,20 @@ static gd_entry_t* _GD_ParseBit(DIRFILE* D, int is_signed,
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
 
 
-  E->e->scalar[0] = _GD_SetScalar(D, in_cols[3], &E->bitnum, GD_SIGNED,
+  E->scalar[0] = _GD_SetScalar(D, in_cols[3], &E->bitnum, GD_SIGNED,
       format_file, line, NULL);
   if (n_cols > 4)
-    E->e->scalar[1] = _GD_SetScalar(D, in_cols[4], &E->numbits, GD_SIGNED,
+    E->scalar[1] = _GD_SetScalar(D, in_cols[4], &E->numbits, GD_SIGNED,
         format_file, line, NULL);
   else
     E->numbits = 1;
 
-  if (E->e->scalar[0] != NULL || E->e->scalar[1] != NULL)
+  if (E->scalar[0] != NULL || E->scalar[1] != NULL)
     E->e->calculated = 0;
 
-  if (E->e->scalar[1] == NULL && E->numbits < 1)
+  if (E->scalar[1] == NULL && E->numbits < 1)
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_NUMBITS, format_file, line, NULL);
-  else if (E->e->scalar[0] == NULL && E->bitnum < 0)
+  else if (E->scalar[0] == NULL && E->bitnum < 0)
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BITNUM, format_file, line, NULL);
   else if (E->e->calculated && E->bitnum + E->numbits - 1 > 63)
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BITSIZE, format_file, line, NULL);
@@ -590,7 +592,7 @@ static gd_entry_t* _GD_ParsePhase(DIRFILE* D, char* in_cols[MAX_IN_COLS],
     E = NULL;
   }
 
-  if ((E->e->scalar[0] = _GD_SetScalar(D, in_cols[3], &E->shift, GD_SIGNED,
+  if ((E->scalar[0] = _GD_SetScalar(D, in_cols[3], &E->shift, GD_INT64,
           format_file, line, NULL)) == NULL)
     E->e->calculated = 1;
 
@@ -659,11 +661,11 @@ static gd_entry_t* _GD_ParsePolynom(DIRFILE* D,
       _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     else
       for (i = 0; i <= E->poly_ord; i++) {
-        E->e->scalar[i] = _GD_SetScalar(D, in_cols[i + 3], &E->ca[i],
+        E->scalar[i] = _GD_SetScalar(D, in_cols[i + 3], &E->ca[i],
             GD_COMPLEX, format_file, line, &E->comp_scal);
         E->a[i] = creal(E->ca[i]);
 
-        if (E->e->scalar[i] != NULL)
+        if (E->scalar[i] != NULL)
           E->e->calculated = 0;
       }
   }
@@ -1218,11 +1220,11 @@ int _GD_Tokenise(DIRFILE *D, const char* instring, char* outstring,
  */
 static int _GD_ParseDirective(DIRFILE *D, char** in_cols, int n_cols,
     int me, int* standards, int linenum, char** ref_name, int* first_fragment,
-    unsigned int flags)
+    unsigned long flags)
 {
   const char* ptr;
 
-  dtrace("%p, %p, %i, %u, %p, %i, %p, %p, %x", D, in_cols, n_cols, me,
+  dtrace("%p, %p, %i, %u, %p, %i, %p, %p, %lx", D, in_cols, n_cols, me,
       standards, linenum, ref_name, first_fragment, flags);
 
   /* set up for possibly slashed reserved words */
@@ -1308,7 +1310,7 @@ static int _GD_ParseDirective(DIRFILE *D, char** in_cols, int n_cols,
  *       Returns NULL unless this fragment contains a REFERENCE directive.
  */
 char* _GD_ParseFragment(FILE* fp, DIRFILE *D, int me, int* standards,
-    unsigned int flags)
+    unsigned long flags)
 {
   char instring[GD_MAX_LINE_LENGTH];
   char outstring[GD_MAX_LINE_LENGTH];

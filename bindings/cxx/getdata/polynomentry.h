@@ -65,9 +65,12 @@ namespace GetData {
         return (index <= E.poly_ord) ? E.ca[index] : 0;
       };
 
+      virtual const char *Scalar(int index = 0);
+
       int SetPolyOrd(int poly_ord);
       int SetInput(const char* field);
       int SetCoefficient(double coeff, int index = 0);
+      int SetCoefficient(const char* coeff, int index = 0);
       int SetCoefficient(double complex coeff, int index = 0);
 
     private:

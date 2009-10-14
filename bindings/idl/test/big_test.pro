@@ -163,6 +163,7 @@ nume += check_simple2(18, 7, n.cm, [ DCOMPLEX(1.1D,0), DCOMPLEX(2.2D,0), $
   DCOMPLEX(5.5D,0) ])
 nume += check_simple2(18, 8, n.cb, [ DCOMPLEX(2.2D,0), DCOMPLEX(3.3D,4.4D), $
   DCOMPLEX(5.5D,0) ])
+nume += check_simple2(18, 9, n.scalar, [ "", "", "const", "", "", "const" ])
 
 ;  20: get_entry (polynom)
 n = get_entry(d, "polynom")
@@ -175,6 +176,7 @@ nume += check_simple2(20, 5, n.in_fields, [ "data" ])
 nume += check_simple2(20, 6, n.comp_scal, 1)
 nume += check_simple2(20, 7, n.ca, [ DCOMPLEX(1.1D,0), DCOMPLEX(2.2D,0), $
   DCOMPLEX(2.2D,0), DCOMPLEX(3.3D,4.4D), DCOMPLEX(5.5D,0), DCOMPLEX(5.5D,0) ])
+nume += check_simple2(20, 8, n.scalar, [ "", "", "", "", "const", "const" ])
 
 ;  21: get_entry (linterp)
 n = get_entry(d, "linterp")

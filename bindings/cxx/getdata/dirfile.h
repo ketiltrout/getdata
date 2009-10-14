@@ -1,4 +1,4 @@
-// (C) 2008 D. V. Wiebe
+// (C) 2008, 2009 D. V. Wiebe
 //
 ///////////////////////////////////////////////////////////////////////////
 //
@@ -65,7 +65,7 @@ namespace GetData {
     public:
       Dirfile();
 
-      Dirfile(const char *dirfilename, unsigned int flags = GD_RDWR,
+      Dirfile(const char *dirfilename, unsigned long flags = GD_RDWR,
           gd_parser_callback_t sehandler = NULL, void* extra = NULL);
 
       Dirfile(DIRFILE *D);
@@ -114,7 +114,7 @@ namespace GetData {
       size_t GetString(const char *field_code, size_t len, char *data_out);
 
       int Include(const char *file, int fragment_index = 0,
-          unsigned int flags = 0);
+          unsigned long flags = 0);
 
       int MAdd(GetData::Entry &entry, const char *parent);
 

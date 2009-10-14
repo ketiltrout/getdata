@@ -1,4 +1,4 @@
-// (C) 2008 D. V. Wiebe
+// (C) 2008, 2009 D. V. Wiebe
 //
 ///////////////////////////////////////////////////////////////////////////
 //
@@ -46,12 +46,17 @@ namespace GetData {
         return E.in_fields[0];
       };
 
-      virtual int Shift() {
+      virtual long int Shift() {
         return E.shift;
       };
 
       int SetInput(const char* field);
-      int SetShift(int shift);
+      int SetShift(long int shift);
+      int SetShift(const char* shift);
+
+      const char *Scalar() {
+        return E.scalar[0];
+      };
 
     private:
       PhaseEntry(GetData::Dirfile *dirfile, const char* field_code) :

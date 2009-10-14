@@ -1,4 +1,4 @@
-// (C) 2008 D. V. Wiebe
+// (C) 2008, 2009 D. V. Wiebe
 //
 ///////////////////////////////////////////////////////////////////////////
 //
@@ -56,7 +56,11 @@ namespace GetData {
 
       int SetInput(const char* field);
       int SetFirstBit(int first_bit);
+      int SetFirstBit(const char* first_bit);
       int SetNumBits(int num_bits);
+      int SetNumBits(const char* num_bits);
+
+      virtual const char *Scalar(int index = 0);
 
     private:
       SBitEntry(GetData::Dirfile *dirfile, const char* field_code) :

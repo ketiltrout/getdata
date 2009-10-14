@@ -24,7 +24,7 @@
 #ifndef GETDATA_H
 #define GETDATA_H
 
-#define DIRFILE_STANDARDS_VERSION 6
+#define DIRFILE_STANDARDS_VERSION 7
 
 /* one or more of these should give us:
  *    size_t, off_t, __REDIRECT, &c. 
@@ -145,7 +145,7 @@ typedef enum {
   GD_POLYNOM_ENTRY  = 0x08,
   GD_SBIT_ENTRY     = 0x09,
   GD_CONST_ENTRY    = GD_SCALAR_ENTRY | 0x00,
-  GD_STRING_ENTRY   = GD_SCALAR_ENTRY | 0x01,
+  GD_STRING_ENTRY   = GD_SCALAR_ENTRY | 0x01
 } gd_entype_t;
 
 /* GD_NO_ENTRY is not part of this count */
@@ -191,6 +191,7 @@ struct _gd_unified_entry {
   char *field;
   gd_entype_t field_type;
   char *in_fields[GD_MAX_LINCOM];
+  char *scalar[GD_MAX_POLYORD + 1];
   int fragment_index;
   int comp_scal;
   union {
@@ -210,7 +211,7 @@ struct _gd_unified_entry {
       int bitnum;
       int numbits;
     };
-    int shift; /* PHASE */
+    long int shift; /* PHASE */
     gd_type_t const_type; /* CONST */
     struct { /* POLYNOM */
       int poly_ord;
@@ -242,31 +243,32 @@ typedef int (*gd_parser_callback_t)(gd_parser_data_t*, void*);
 
 
 /* dirfile_flags */
-#define GD_ACCMODE        0x00001 /* mask */
-#define GD_RDONLY         0x00000 /* open read only */
-#define GD_RDWR           0x00001 /* open read/write */
+#define GD_ACCMODE        0x00000001 /* mask */
+#define GD_RDONLY         0x00000000 /* open read only */
+#define GD_RDWR           0x00000001 /* open read/write */
 
-#define GD_FORCE_ENDIAN   0x00002 /* override endianness */
-#define GD_BIG_ENDIAN     0x00004 /* assume big-endian raw data */
-#define GD_LITTLE_ENDIAN  0x00008 /* assume litte-endian raw data */
-#define GD_CREAT          0x00010 /* create the dirfile if it doesn't exist */
-#define GD_EXCL           0x00020 /* force creation: fail on existence */
-#define GD_TRUNC          0x00040 /* truncate dirfile (scary!) */
-#define GD_PEDANTIC       0x00080 /* be pedantic */
-#define GD_FORCE_ENCODING 0x00100 /* override encoding scheme */
-#define GD_VERBOSE        0x00200 /* be verbose */
-#define GD_IGNORE_DUPS    0x00400 /* ignore duplicate fields */
-#define GD_IGNORE_REFS    0x00800 /* ignore REFERENCE directives --
+#define GD_FORCE_ENDIAN   0x00000002 /* override endianness */
+#define GD_BIG_ENDIAN     0x00000004 /* assume big-endian raw data */
+#define GD_LITTLE_ENDIAN  0x00000008 /* assume litte-endian raw data */
+#define GD_CREAT          0x00000010 /* create dirfile if it doesn't exist */
+#define GD_EXCL           0x00000020 /* force creation: fail on existence */
+#define GD_TRUNC          0x00000040 /* truncate dirfile (scary!) */
+#define GD_PEDANTIC       0x00000080 /* be pedantic */
+#define GD_FORCE_ENCODING 0x00000100 /* override encoding scheme */
+#define GD_VERBOSE        0x00000200 /* be verbose */
+#define GD_IGNORE_DUPS    0x00000400 /* ignore duplicate fields */
+#define GD_IGNORE_REFS    0x00000800 /* ignore REFERENCE directives --
                                      dirfile_include only */
+#define GD_PRETTY_PRINT   0x00001000 /* make a nicer looking format file */
 
-#define GD_ENCODING       0x0F000 /* mask */
-#define GD_AUTO_ENCODED   0x00000 /* Encoding scheme unknown */
-#define GD_UNENCODED      0x01000 /* Dirfile is not encoded */
-#define GD_TEXT_ENCODED   0x02000 /* Dirfile is text encoded */
-#define GD_SLIM_ENCODED   0x03000 /* Dirfile is slimlib encoded */
-#define GD_GZIP_ENCODED   0x04000 /* Dirfile is gzip encoded */
-#define GD_BZIP2_ENCODED  0x05000 /* Dirfile is bzip2 encoded */
-#define GD_LZMA_ENCODED   0x06000 /* Dirfile is xz encoded */
+#define GD_ENCODING       0x0F000000 /* mask */
+#define GD_AUTO_ENCODED   0x00000000 /* Encoding scheme unknown */
+#define GD_UNENCODED      0x01000000 /* Dirfile is not encoded */
+#define GD_TEXT_ENCODED   0x02000000 /* Dirfile is text encoded */
+#define GD_SLIM_ENCODED   0x03000000 /* Dirfile is slimlib encoded */
+#define GD_GZIP_ENCODED   0x04000000 /* Dirfile is gzip encoded */
+#define GD_BZIP2_ENCODED  0x05000000 /* Dirfile is bzip2 encoded */
+#define GD_LZMA_ENCODED   0x06000000 /* Dirfile is xz encoded */
 #define GD_ENC_UNSUPPORTED GD_ENCODING /* Dirfile encoding unsupported */
 
 /* delete flags */
@@ -361,11 +363,11 @@ extern const void *get_constants(DIRFILE *dirfile,
 
 extern gd_entry_t *dirfile_free_entry_strings(gd_entry_t *entry) __THROW;
 
-extern unsigned long get_encoding(DIRFILE *dirfile,
-    int fragment) __THROW __gd_nonnull ((1));
+extern unsigned long int get_encoding(DIRFILE *dirfile, int fragment) __THROW
+__gd_nonnull ((1));
 
-extern unsigned long get_endianness(DIRFILE *dirfile,
-    int fragment) __THROW __gd_nonnull((1));
+extern unsigned long int get_endianness(DIRFILE *dirfile, int fragment) __THROW
+__gd_nonnull((1));
 
 extern int get_entry(DIRFILE *dirfile, const char *field_code,
     gd_entry_t *entry) __THROW __gd_nonnull ((1, 2));
@@ -526,11 +528,11 @@ __gd_nonnull((1,2));
 extern int dirfile_add_spec(DIRFILE *dirfile, const char *line,
     int fragment_index) __gd_nonnull ((1,2));
 
-extern int dirfile_alter_encoding(DIRFILE *dirfile, unsigned long encoding,
+extern int dirfile_alter_encoding(DIRFILE *dirfile, unsigned long int encoding,
     int fragment, int recode) __gd_nonnull ((1));
 
-extern int dirfile_alter_endianness(DIRFILE *dirfile, unsigned long byte_sex,
-    int fragment, int recode) __gd_nonnull ((1));
+extern int dirfile_alter_endianness(DIRFILE *dirfile,
+    unsigned long int byte_sex, int fragment, int recode) __gd_nonnull ((1));
 
 extern int dirfile_alter_entry(DIRFILE *dirfile, const char *field_code,
     const gd_entry_t *entry, int recode) __gd_nonnull ((1,2));
@@ -544,7 +546,7 @@ extern int dirfile_alter_raw(DIRFILE *dirfile, const char *field_code,
 extern int dirfile_alter_spec(DIRFILE *dirfile, const char *line,
     int recode) __gd_nonnull ((1,2));
 
-extern DIRFILE *dirfile_cbopen(const char *dirfilename, unsigned long flags,
+extern DIRFILE *dirfile_cbopen(const char *dirfilename, unsigned long int flags,
     gd_parser_callback_t sehandler, void* extra) __gd_nonnull ((1));
 
 extern int dirfile_close(DIRFILE *dirfile);
@@ -558,7 +560,7 @@ extern int dirfile_flush(DIRFILE *dirfile,
     const char *field_code) __gd_nonnull ((1));
 
 extern int dirfile_include(DIRFILE *dirfile, const char *file,
-    int fragment_index, unsigned long flags) __gd_nonnull ((1,2));
+    int fragment_index, unsigned long int flags) __gd_nonnull ((1,2));
 
 double get_framenum(DIRFILE* D, const char* field_code_in,
     double value) __gd_nonnull ((1,2));
@@ -572,7 +574,7 @@ extern int dirfile_move(DIRFILE *dirfile, const char *field_code,
     int new_fragment, int move_data) __gd_nonnull ((1,2));
 
 extern DIRFILE *dirfile_open(const char *dirfilename,
-    unsigned long flags) __gd_nonnull ((1));
+    unsigned long int flags) __gd_nonnull ((1));
 
 extern int dirfile_rename(DIRFILE *dirfile, const char *old_code,
     const char *new_name, int move_data) __gd_nonnull ((1,2,3));
