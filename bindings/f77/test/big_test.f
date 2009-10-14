@@ -6,7 +6,7 @@ C     GDDSCD GDCLBK
 C     GDCLOS (although this last one is used)
 
       PROGRAM GETTST
-      INCLUDE "../getdata.f"
+      INCLUDE "getdata.f"
 
       CHARACTER*12 fildir
       PARAMETER (fildir = 'test_dirfile')
@@ -47,7 +47,7 @@ C     GDCLOS (although this last one is used)
 
       fields = (/ 'INDEX  ', 'bit    ', 'const  ', 'data   ', 'lincom ',
      +'linterp', 'mult   ', 'phase  ', 'polynom', 'sbit   ', 'string ',
-     +'       ', '       ', '       ', '       ', '       ', +'       ',
+     +'       ', '       ', '       ', '       ', '       ', '       ',
      +'       ', '       ', '       ' /)
 
 C     Write the test dirfile

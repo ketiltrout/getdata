@@ -1,3 +1,13 @@
+2009-10-14   D. V. Wiebe <getdata@ketiltrout.net>  svn:319
+	GetData-0.6.0rc2:
+
+	* bindings/f77/test/big_test.f: Fix typos.
+
+	* bindings/idl/test/big_test.pro: Add scalar members to structure
+	initialisations in tests 125 and 126.
+
+	* bindings/idl/Makefile.am: Make sure .libs exists.
+
 2009-10-13   D. V. Wiebe <getdata@ketiltrout.net>  svn:318
 	* test/alter_polynom_coeff.c test/entry_raw_scalar.c
 	test/entry_polynom_scalar.c test/entry_bit_scalar.c test/add.c

@@ -52,6 +52,7 @@ all-local: .libs/idl_getdata.dlm
 
 # This is required to properly run the test suite
 .libs/idl_getdata.dlm: idl_getdata.dlm
+	if [ ! -e .libs ]; then mkdir -p .libs; fi
 	cp $< .libs
 
 clean-local:
