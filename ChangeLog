@@ -1,3 +1,8 @@
+2009-10-14   D. V. Wiebe <getdata@ketiltrout.net>  svn:321
+	* internal.h: Add .ffname member to encoding_t.
+	* parse.c (_GD_ParseDirective): Run through _gd_ef instead of hard-coding
+	encoding names.
+
 2009-10-14   D. V. Wiebe <getdata@ketiltrout.net>  svn:319
 	GetData-0.6.0rc2:
 

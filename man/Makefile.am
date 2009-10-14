@@ -46,8 +46,8 @@ dist_man_MANS = dirfile_add.3 dirfile_add_bit.3 dirfile_add_spec.3 \
 								dirfile_protect.3 get_protection.3 get_raw_filename.3 \
 								dirfile_reference.3 dirfile_rename.3 get_spf.3 get_string.3 \
 								put_string.3 get_strings.3 dirfile_uninclude.3 \
-								get_vector_list.3 dirfile.5 dirfile-complex.5 \
-								dirfile-encoding.5 dirfile-format.5 $(LFS_transitional_mans)
+								get_vector_list.3 dirfile.5 dirfile-encoding.5 \
+								dirfile-format.5 $(LFS_transitional_mans)
 
 install-data-hook: ${INSTALL_DATA_HOOK64}
 	cd $(DESTDIR)$(mandir)/man3 && \

@@ -43,14 +43,14 @@ static int framework_initialised = 0;
 
 /* encoding schemas */
 struct encoding_t _gd_ef[GD_N_SUBENCODINGS] = {
-  { GD_UNENCODED, "", 1, NULL, 0,
+  { GD_UNENCODED, "", 1, NULL, "none", 0,
     &_GD_RawOpen, &_GD_RawClose, &_GD_GenericTouch, &_GD_RawSeek,
     &_GD_RawRead, &_GD_RawSize, &_GD_RawWrite, &_GD_RawSync,
     &_GD_GenericMove, &_GD_GenericUnlink, &_GD_RawTemp
   },
 #ifdef USE_MODULES
   /* Modules are external */
-  { GD_GZIP_ENCODED, ".gz", 1, "Gzip",
+  { GD_GZIP_ENCODED, ".gz", 1, "Gzip", "gzip",
 # ifdef USE_GZIP
     GD_EF_OPEN | GD_EF_CLOSE | GD_EF_SEEK | GD_EF_READ | GD_EF_SIZE,
 # else
@@ -58,7 +58,7 @@ struct encoding_t _gd_ef[GD_N_SUBENCODINGS] = {
 # endif
     NULL, NULL, NULL, NULL, NULL, NULL, NULL , NULL, &_GD_GenericMove,
     &_GD_GenericUnlink, NULL },
-  { GD_BZIP2_ENCODED, ".bz2", 1, "Bzip2",
+  { GD_BZIP2_ENCODED, ".bz2", 1, "Bzip2", "bzip2",
 # ifdef USE_BZIP2
     GD_EF_OPEN | GD_EF_CLOSE | GD_EF_SEEK | GD_EF_READ | GD_EF_SIZE,
 # else
@@ -66,7 +66,7 @@ struct encoding_t _gd_ef[GD_N_SUBENCODINGS] = {
 # endif
     NULL, NULL, NULL, NULL, NULL, NULL, NULL , NULL, &_GD_GenericMove,
     &_GD_GenericUnlink, NULL },
-  { GD_SLIM_ENCODED, ".slm", 1, "Slim",
+  { GD_SLIM_ENCODED, ".slm", 1, "Slim", "slim",
 # ifdef USE_SLIM
     GD_EF_OPEN | GD_EF_CLOSE | GD_EF_SEEK | GD_EF_READ | GD_EF_SIZE,
 # else
@@ -74,7 +74,7 @@ struct encoding_t _gd_ef[GD_N_SUBENCODINGS] = {
 # endif
     NULL, NULL, NULL, NULL, NULL, NULL, NULL , NULL, &_GD_GenericMove,
     &_GD_GenericUnlink, NULL },
-  { GD_LZMA_ENCODED, ".xz", 1, "Lzma",
+  { GD_LZMA_ENCODED, ".xz", 1, "Lzma", "lzma
 # ifdef USE_LZMA
     GD_EF_OPEN | GD_EF_CLOSE | GD_EF_SEEK | GD_EF_READ | GD_EF_SIZE,
 # else
@@ -82,7 +82,7 @@ struct encoding_t _gd_ef[GD_N_SUBENCODINGS] = {
 # endif
     NULL, NULL, NULL, NULL, NULL, NULL, NULL , NULL, &_GD_GenericMove,
     &_GD_GenericUnlink, NULL },
-  { GD_LZMA_ENCODED, ".lzma", 1, "Lzma",
+  { GD_LZMA_ENCODED, ".lzma", 1, "Lzma", "lzma",
 # ifdef USE_LZMA
     GD_EF_OPEN | GD_EF_CLOSE | GD_EF_SEEK | GD_EF_READ | GD_EF_SIZE,
 # else
@@ -92,7 +92,7 @@ struct encoding_t _gd_ef[GD_N_SUBENCODINGS] = {
     &_GD_GenericUnlink, NULL },
 #else
   /* Modules are internal */
-  { GD_GZIP_ENCODED, ".gz", 1, NULL, 0,
+  { GD_GZIP_ENCODED, ".gz", 1, NULL, "gzip", 0,
 # ifdef USE_GZIP
     &_GD_GzipOpen, &_GD_GzipClose, NULL /* TOUCH */,
     &_GD_GzipSeek, &_GD_GzipRead, &_GD_GzipSize, NULL /* WRITE */,
@@ -102,7 +102,7 @@ struct encoding_t _gd_ef[GD_N_SUBENCODINGS] = {
     &_GD_GenericUnlink, NULL
 # endif
   },
-  { GD_BZIP2_ENCODED, ".bz2", 1, NULL, 0,
+  { GD_BZIP2_ENCODED, ".bz2", 1, NULL, "bzip2", 0,
 # ifdef USE_BZIP2
     &_GD_Bzip2Open, &_GD_Bzip2Close, NULL /* TOUCH */,
     &_GD_Bzip2Seek, &_GD_Bzip2Read, &_GD_Bzip2Size, NULL /* WRITE */,
@@ -112,7 +112,7 @@ struct encoding_t _gd_ef[GD_N_SUBENCODINGS] = {
     &_GD_GenericUnlink, NULL
 # endif
   },
-  { GD_SLIM_ENCODED, ".slm", 1, NULL, 0,
+  { GD_SLIM_ENCODED, ".slm", 1, NULL, "slim", 0,
 # ifdef USE_SLIM
     &_GD_SlimOpen, &_GD_SlimClose, NULL /* TOUCH */,
     &_GD_SlimSeek, &_GD_SlimRead, &_GD_SlimSize, NULL /* WRITE */,
@@ -122,7 +122,7 @@ struct encoding_t _gd_ef[GD_N_SUBENCODINGS] = {
     &_GD_GenericUnlink, NULL
 # endif
   },
-  { GD_LZMA_ENCODED, ".xz", 1, NULL, 0,
+  { GD_LZMA_ENCODED, ".xz", 1, NULL, "lzma", 0,
 # ifdef USE_LZMA
     &_GD_LzmaOpen, &_GD_LzmaClose, NULL /* TOUCH */,
     &_GD_LzmaSeek, &_GD_LzmaRead, &_GD_LzmaSize, NULL /* WRITE */,
@@ -132,7 +132,7 @@ struct encoding_t _gd_ef[GD_N_SUBENCODINGS] = {
     &_GD_GenericUnlink, NULL
 #endif
   },
-  { GD_LZMA_ENCODED, ".lzma", 1, NULL, 0,
+  { GD_LZMA_ENCODED, ".lzma", 1, NULL, "lzma", 0,
 # ifdef USE_LZMA
     &_GD_LzmaOpen, &_GD_LzmaClose, NULL /* TOUCH */,
     &_GD_LzmaSeek, &_GD_LzmaRead, &_GD_LzmaSize, NULL /* WRITE */,
@@ -143,11 +143,11 @@ struct encoding_t _gd_ef[GD_N_SUBENCODINGS] = {
 # endif
   },
 #endif
-  { GD_TEXT_ENCODED, ".txt", 0, NULL, 0,
+  { GD_TEXT_ENCODED, ".txt", 0, NULL, "text", 0,
     &_GD_AsciiOpen, &_GD_AsciiClose, &_GD_GenericTouch,
     &_GD_AsciiSeek, &_GD_AsciiRead, &_GD_AsciiSize, &_GD_AsciiWrite,
     &_GD_AsciiSync, &_GD_GenericMove, &_GD_GenericUnlink, &_GD_AsciiTemp },
-  { GD_ENC_UNSUPPORTED, "", 0, "", 0,
+  { GD_ENC_UNSUPPORTED, "", 0, "", "", 0,
     NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL },
 };
 

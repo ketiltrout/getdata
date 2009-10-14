@@ -133,7 +133,7 @@ character forms a valid token.  However, there may be further restrictions on
 allowed characters for a token in a particular situation, (for example, when
 used as a field name).
 
-.SS Directives
+.SH DIRECTIVES
 
 There are eight 
 .IR "reserved words" ,
@@ -363,23 +363,32 @@ will also propagate upwards back to the parent fragment, and affect subsequent
 metadata.
 .RE
 
-.SS Field Specification Lines
+.SH FIELD SPECIFICATION LINES
 
 Any line which does not start with a
 .I reserved word
-is assumed to be a field specification line.  The first token in a field
+is assumed to be a field specification line.  A field specification line
+consists of at least two tokens.  The first token is the
+.IR "field name" .
+The second token is the
+.IR "field type" .
+Subsequent tokens are field parameters.  The meaning and number these parameters
+depends on the field type specified.
+
+.SS Field Names
+The first token in a field
 specification line is the field name.  The field name consists of one or more
 characters, excluding both ASCII control characters (the bytes 0x01 through
 0x1F), and the characters
 .IP
 .B &\t/\t;\t<\t>\t|\t.
 .PP
-which are reserved.  The field name may not be
+which are reserved (but see below for the use of
+.B /
+to specify metafields).  The field name may not be
 .IR INDEX ,
 which is a special, implicit field which contains the integer frame index.
-Field names are case sensitive.  The second token in the field specification
-line is the field type.  The meaning of subsequent tokens depends on the field
-type.
+Field names are case sensitive.
 
 If the field name beginning a field specifiction line does contain a
 .B /
@@ -387,67 +396,7 @@ character, the line is assumed to specify a metafield.  See the
 .B META
 directive above for further details.
 
-Some of the parameters in a field specification line may be either literal
-numbers or else the
-.I field code
-(see below) of a
-.B CONST
-field containing the number.  Such parameters are indicated below.  Since it is
-possible to create a field code which is identical to a literal number, a
-parameter is assumed to be the field code of a 
-.B CONST
-field only if the entire token cannot be parsed as a literal number using the
-rules outlined in
-.BR strtod (3).
-(So, for example, a
-.B CONST
-field whose field code consists solely of digits can never be used as a
-parameter in a field specification line.)  A literal complex number is specified
-as two real (floating point) numbers separated by a semicolon
-.RB ( ; )
-with no intervening whitespace.  So, for example, the tokens
-.IP
-1;0 0;1 4;0 0;5 9.313e2;74.1
-.PP
-represent, respectively, the real unit, the imaginary unit, the real number
-four, the imaginary number
-.RI 5 i ,
-and the complex number
-.RI "931.3 + 74.1" i .
-
-When specifying the input to a field, either as a
-.B CONST
-scalar parameter, or as an input vector field to a
-.RB non- RAW
-vector field,
-.I field codes
-are used.  A
-.I field code
-is one of:
-.IP \(bu 4
-a simple field name, indicating to a vector or scalar field
-.IP \(bu 4
-a parent field name, followed by a forward slash, followed by a metafield name,
-indicating a metafield.  See the description of the
-.B META
-directive above for further details. 
-.IP \(bu 4
-either of the above, followed by a period, followed by a
-.I "representation suffix" ,
-but only if the field or metafield specified is not a
-.B STRING
-type field.
-.PP
-The 
-.IR "representation suffixes"
-are:
-.B .a .i .m .r
-and specify a norm which is applied to complex valued data to convert them to
-real valued data (respecively: complex argument, imaginary part, modulus, and
-real part.  See dirfile\-complex(5) for full details on complex numbers and
-.I representations
-in dirfiles.
-
+.SS Field Types
 There are ten field types.  Of these, eight are of vector type
 .RB ( BIT ", " LINCOM ", " LINTERP ", " MULTIPLY ", " PHASE ,
 .BR POLYNOM ", " RAW ", and " SBIT )
@@ -700,22 +649,17 @@ IEEE-754 standard 32-bit single precision floating point number
 IEEE-754 standard 64-bit double precision floating point number
 .TP
 .I COMPLEX64
-a 64-bit complex number stored in "Fortran order" (that is, as a IEEE-754
-standard 32-bit single precision floating point number representing the real
-part of the complex number followed by a IEEE-754 standard 32-bit single
-precision floating point number representing the imaginary part of the complex
-number).  This format also conforms to the C99 standard.
+a 64-bit complex number consisting of two IEEE-754 standard 32-bit single
+precision floating point numbers representing the real and imaginary parts of
+the complex number.
 .TP
 .I COMPLEX128
-a 128-bit complex number stored in "Fortran order" (that is, as a IEEE-754
-standard 64-bit double precision floating point number representing the real
-part of the complex number followed by a IEEE-754 standard 64-bit double
-precision floating point number representing the imaginary part of the complex
-number).  This format also conforms to the C99 standard.
+a 128-bit complex number consisting of two IEEE-754 standard 64-bit double
+precision floating point numbers representing the real and imaginary parts of
+the complex number.
 .RE
 
-For more information on the storage and retrieval of complex valued data, see
-dirfile\-complex(5).
+For more information on the storage of complex valued data, see dirfile(5).
 
 For backwards compatibility, implementations should also recognise the following
 single character type aliases in use prior to Standards Version 5:
@@ -809,6 +753,134 @@ or else escape the whitespace with the backslash character
 .RB ( \e ).
 .RE
 
+.SS Field Parameters
+All input vector field parameters should be a
+.I field codes
+(see below).  Additionally, some of the numerical field parameters may be either
+literal numbers or else the
+.I field code
+of a
+.B CONST
+field containing the value.  Parameters for which this is possible are indicated
+above.  Since it is possible to create a field code which is identical to a
+literal number, a parameter is assumed to be the field code of a 
+.B CONST
+field only if the entire token cannot be parsed as a literal number using the
+rules outlined in
+.BR strtod (3).
+(So, for example, a
+.B CONST
+field whose field code consists solely of digits can never be used as a
+parameter in a field specification line.)
+
+A literal complex number is specified as two real (floating point) numbers
+separated by a semicolon
+.RB ( ; )
+with no intervening whitespace.  So, for example, the tokens
+.IP
+1;0 0;1 4;0 0;5 9.313e2;74.1
+.PP
+represent, respectively, the real unit, the imaginary unit, the real number
+four, the imaginary number
+.RI 5 i ,
+and the complex number
+.RI "931.3 + 74.1" i .
+Because the semicolon character cannot be used in field names, a complex valued
+literal can never be mistaken for a field code.  This allows, among other
+things, the composition of complex valued fields from purely real input fields.
+For example, a complex valued field,
+.IR z ,
+may be created from a real valued field
+.IR re ,
+representing the real part of the complex number, and the real valued field
+.IR im ,
+representing the imaginary part of the complex number, with the following
+.B LINCOM
+specification:
+.IP
+.I z
+.B LINCOM
+.I re
+1 0
+.I im
+0;1 0
+
+.SS Field Codes
+When specifying the input to a field, either as a
+.B CONST
+scalar parameter, or as an input vector field to a
+.RB non- RAW
+vector field,
+.I field codes
+are used.  A
+.I field code
+is one of:
+.IP \(bu 4
+a simple field name, indicating to a vector or scalar field
+.IP \(bu 4
+a parent field name, followed by a forward slash, followed by a metafield name,
+indicating a metafield.  See the description of the
+.B META
+directive above for further details. 
+.IP \(bu 4
+either of the above, followed by a period, followed by a
+.IR "representation suffix" ,
+but only if the field or metafield specified is not a
+.B STRING
+type field.
+.PP
+A 
+.IR "representation suffix"
+may be used used to extract a real number from a complex value.  The available
+suffixes and their meanings are:
+.TP
+.B .a
+This representation indicates the angle (in radians) between the positive real
+axis and the value (ie. the complex argument).  The argument is in the range
+[-pi, pi], and a branch cut exists along the negative real axis.  At the branch
+cut, -pi is returned if the imaginary part is -0, and pi is returned if the
+branch cut is +0.  If z=0, zero is returned.
+.TP
+.B .i
+This representation indicates the projection of the value onto the imaginary
+axis (ie. the imaginary part of the number).
+.TP
+.B .m
+This representation indicates the modulus of the value (ie. its absolute
+value).
+.TP 
+.B .r
+This representation indicates the projection of the value onto the real axis
+(ie.  the real part of the number).
+.PP
+If the specified field is purely real, the representations
+.B .r
+and 
+.B .m
+return the field unchanged, while the representations
+.B .a
+and
+.B .i
+return uniformly zero.  Representations can be used in field specifications.
+So, for example, given a complex valued vector,
+.IR z ,
+a vector containing the real part of
+.IR z ,\~  re_z ,
+can be produced with:
+.IP
+.I re_z
+.B PHASE
+.I z.r
+0
+.PP
+and similarly for the complex field's imaginary part, argument, and absolute
+value.  (Although it should be pointed out this simplistic an example isn't
+strictly necessary, since
+.I z.r
+could be used wherever
+.I re_z
+would be.)
+
 .SH STANDARDS VERSIONS
 
 This document describes Version 7 of the Dirfile Standards.
@@ -900,5 +972,4 @@ D. V. Wiebe
 
 .SH SEE ALSO
 .BR dirfile (5),
-.BR dirfile\-complex (5),
 .BR dirfile\-encoding (5)

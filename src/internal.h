@@ -265,6 +265,7 @@ extern struct encoding_t {
   const char* ext;
   int ecor; /* encoding requires byte-sex correction */
   const char* affix;
+  const char* ffname;
   unsigned int provides;
   int (*open)(struct _gd_raw_file*, int, int);
   int (*close)(struct _gd_raw_file*);

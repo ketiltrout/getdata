@@ -1223,6 +1223,7 @@ static int _GD_ParseDirective(DIRFILE *D, char** in_cols, int n_cols,
     unsigned long flags)
 {
   const char* ptr;
+  int i;
 
   dtrace("%p, %p, %i, %u, %p, %i, %p, %p, %lx", D, in_cols, n_cols, me,
       standards, linenum, ref_name, first_fragment, flags);
@@ -1235,18 +1236,12 @@ static int _GD_ParseDirective(DIRFILE *D, char** in_cols, int n_cols,
         linenum, NULL);
   else if (strcmp(ptr, "ENCODING") == 0) {
     if (!(flags & GD_FORCE_ENCODING)) {
-      if (strcmp(in_cols[1], "none") == 0)
-        D->fragment[me].encoding = GD_UNENCODED;
-      else if (strcmp(in_cols[1], "bzip2") == 0)
-        D->fragment[me].encoding = GD_BZIP2_ENCODED;
-      else if (strcmp(in_cols[1], "gzip") == 0)
-        D->fragment[me].encoding = GD_GZIP_ENCODED;
-      else if (strcmp(in_cols[1], "slim") == 0)
-        D->fragment[me].encoding = GD_SLIM_ENCODED;
-      else if (strcmp(in_cols[1], "text") == 0)
-        D->fragment[me].encoding = GD_TEXT_ENCODED;
-      else
-        D->fragment[me].encoding = GD_ENC_UNSUPPORTED;
+      D->fragment[me].encoding = GD_ENC_UNSUPPORTED;
+      for (i = 0; i < GD_N_SUBENCODINGS - 1; ++i)
+        if (strcmp(in_cols[1], _gd_ef[i].ffname) == 0) {
+          D->fragment[me].encoding = _gd_ef[i].scheme;
+          break;
+        }
     }
   } else if (strcmp(ptr, "ENDIAN") == 0) {
     if (!(flags & GD_FORCE_ENDIAN)) {

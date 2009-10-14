@@ -109,14 +109,14 @@ operations are supported by the Text Encoding.  The file extension of the
 Text Encoding is
 .BR .txt .
 
-.SS Bzip2 Encoding
+.SS BZip2 Encoding
 
-The Bzip2 Encoding compresses raw binary files using the Burrows-Wheeler block
+The BZip2 Encoding compresses raw binary files using the Burrows-Wheeler block
 sorting text compression algorithm and Huffman coding, as implemented in the
-bzip2 format.  GetData's Bzip2 Encoding scheme is implemented through the the
+bzip2 format.  GetData's BZip2 Encoding scheme is implemented through the the
 .I bzip2 compression library
-written by Julian Seward.  GetData's Bzip2 Encoding framework currently lacks
-write capabilities; as a result the Bzip2 Encoding does not support functions
+written by Julian Seward.  GetData's BZip2 Encoding framework currently lacks
+write capabilities; as a result the BZip2 Encoding does not support functions
 which modify binary data.
 
 GetData caches an uncompressed megabyte of data at a time to speed access times.
@@ -124,23 +124,49 @@ A call to
 .BR get_nframes (3)
 requires decompression of the entire binary file to determine its uncompressed
 size, and may take some time to complete.
+The file extension of the BZip2 Encoding is
+.BR .bz2 .
 
-.SS Gzip Encoding
+.SS GZip Encoding
 
-The Gzip Encoding compresses raw binary files using Lempel-Ziv coding (LZ77) as
-implemented in the gzip format.  GetData's Gzip Encoding scheme is implemented
+The GZip Encoding compresses raw binary files using Lempel-Ziv coding (LZ77) as
+implemented in the gzip format.  GetData's GZip Encoding scheme is implemented
 through the the
 .I zlib compression library
-written by Jean-loup Gailly and Mark Adler.  GetData's Gzip Encoding framework
-currently lacks write capabilities; as a result the Gzip Encoding does not
+written by Jean-loup Gailly and Mark Adler.  GetData's GZip Encoding framework
+currently lacks write capabilities; as a result the GZip Encoding does not
 support functions which modify binary data.
 
 To speed the operation of
 .BR get_nframes (3),
-the Gzip Encoding takes the uncompressed size of the file the gzip footer, which
+the GZip Encoding takes the uncompressed size of the file the gzip footer, which
 contains the file's uncompressed size in bytes, modulo 2^32.  As a result, using
-a field with an (uncompressed) binary file size larger than 4\~Gib as the
+a field with an (uncompressed) binary file size larger than 4\~GiB as the
 reference field will result in the wrong number of frames being reported.
+The file extension of the GZip Encoding is
+.BR .gz .
+
+.SS LZMA Encoding
+
+The LZMA Encoding compresses raw binary files using the Lempel-Ziv Markov Chain
+Algorithm (LZMA) as implemented in the xz container format.  GetData's LZMA
+Encoding scheme is implemented through the
+.IR "lzma library" ,
+part of the
+.I XZ Utils
+suite written by Lasse Collin, Ville Koskinen, and Igor Pavlov.  GetData's LZMA
+Encoding framework currently lacks write capabilities; as a result the LZMA
+Encoding does not support functions which modify binary data.
+
+As with the BZip2 Encoding, GetData caches an uncompressed megabyte of data at a
+time to speed access times.  A call to
+.BR get_nframes (3)
+requires decompression of the entire binary file to determine its uncompressed
+size, and may take some time to complete.
+The file extension of the LZMA Encoding is
+.BR .xz ,
+or
+.B .lzma .
 
 .SS Slim Encoding
 
