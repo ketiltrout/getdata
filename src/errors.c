@@ -72,8 +72,8 @@ static const struct {
     "META in a different file than parent ({4}) on line {3} of {2}", 0 },
   { GD_E_FORMAT, GD_E_FORMAT_PROTECT,
     "Bad protection level on line {3} of {2}: {4}", 0 },
-  { GD_E_FORMAT, GD_E_FORMAT_LITTERAL,
-    "Unexpected characters in scalar litteral ({4}) on line {3} of {2}", 0 },
+  { GD_E_FORMAT, GD_E_FORMAT_LITERAL,
+    "Unexpected characters in scalar literal ({4}) on line {3} of {2}", 0 },
   /* GD_E_TRUNC: 1 = suberror, 2 = filename. 3 = errno */
   { GD_E_TRUNC, 0, "Error truncating {2}: ", 1 },
   /* GD_E_CREAT: 1 = suberror, 2 = filename, 3 = errno */

@@ -114,7 +114,7 @@
 #define GD_E_FORMAT_DUPLICATE 16
 #define GD_E_FORMAT_LOCATION  17
 #define GD_E_FORMAT_PROTECT   18
-#define GD_E_FORMAT_LITTERAL  19
+#define GD_E_FORMAT_LITERAL   19
 
 /* parser callback return values */
 #define GD_SYNTAX_ABORT    0
@@ -458,8 +458,8 @@ extern const char **get_mvector_list(DIRFILE *dirfile,
 
 extern const char *dirfilename(DIRFILE *dirfile) __THROW __gd_nonnull ((1));
 
-extern gd_type_t get_native_type(DIRFILE* D, const char* field_code_in) __THROW
-__gd_nonnull ((1));
+extern gd_type_t get_native_type(DIRFILE *dirfile,
+    const char *field_code_in) __THROW __gd_nonnull ((1,2));
 
 extern unsigned int get_nfields(DIRFILE *dirfile) __THROW __gd_nonnull ((1));
 

@@ -46,13 +46,13 @@ static size_t _GD_DoRawOut(DIRFILE *D, gd_entry_t *E, off64_t s0,
 
   dtrace("%p, %p, %lli, %zi, 0x%x, %p", D, E, s0, ns, data_type, data_in);
 
-  s0 -= D->fragment[E->fragment_index].frame_offset * E->spf;
-
-  if (s0 < 0) {
+  if (s0 < D->fragment[E->fragment_index].frame_offset * E->spf) {
     _GD_SetError(D, GD_E_RANGE, GD_E_OUT_OF_RANGE, NULL, 0, NULL);
     dreturn("%zi", 0);
     return 0;
   }
+
+  s0 -= D->fragment[E->fragment_index].frame_offset * E->spf;
 
   databuffer = _GD_Alloc(D, E->data_type, ns);
 

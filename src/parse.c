@@ -118,7 +118,7 @@ static char* _GD_SetScalar(DIRFILE* D, const char* token, void* data, int type,
 
     /* if a complex value is not permitted, complain */
     if (type != GD_COMPLEX) {
-      _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_LITTERAL, format_file, line,
+      _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_LITERAL, format_file, line,
           token);
       dreturn("%p", NULL);
       return NULL;
@@ -760,7 +760,7 @@ static gd_entry_t* _GD_ParseConst(DIRFILE* D, char* in_cols[MAX_IN_COLS],
         NULL);
 
   if (ptr)
-    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_LITTERAL, format_file, line,
+    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_LITERAL, format_file, line,
         in_cols[3]);
 
   if (D->error) {

@@ -1,16 +1,9 @@
 TODO for 0.6.0:            impl    bind      docs      test
-- Python bindings          done     --       TODO      TODO
-- IDL bindings             done     --       TODO      TODO
-- SBIT field type          done    done      TODO      done
-- POLYNOM field type       done    done      TODO      done
-- LZMA encoding            done    done      TODO      done
-- [BUG] Metaparameters
-  in _GD_FieldSpec         done     --        --       done
-- COMPLEX data types       done    done      TODO      TODO
-- Fix LFS stuff            done     --        --       done
-- ValidateField            done    done      TODO      TODO
+- Python bindings          done     --       TODO      done
+- IDL bindings             done     --       TODO      done
+- ValidateField            done    done      TODO      done
 - get_frame                done    done      TODO      done
-- get_native_type          done    done      TODO      TODO
+- get_native_type          done    done      TODO      done
 
 Future TODOs:
 * Perl bindings
