@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH dirfile_add 3 "4 October 2009" "Version 0.6.0" "GETDATA"
+.TH dirfile_add 3 "16 October 2009" "Version 0.6.0" "GETDATA"
 .SH NAME
 dirfile_add, dirfile_madd \(em add a field to a dirfile
 .SH SYNOPSIS
@@ -42,7 +42,7 @@ field indicated by the field code
 
 The form of
 .I entry
-is described in detail in the
+is described in detail on the
 .BR get_entry (3)
 man page.  All relevant members of
 .I entry
@@ -59,14 +59,19 @@ ignores the value of
 and instead adds the new meta field to the same format file fragment in which
 the parent field is defined.
 
-All fields added with this interface must contain numerical parameters.  Fields
-with
+Fields added with this interface may contain either numerical parameters or 
+parameters based on
 .B CONST
-fields as parameters cannot be added with these functions.  Those fields must
-be added with
-.BR dirfile_add_spec (3)
-or
-.BR dirfile_madd_spec (3).
+fields.  If an element of the
+.IR entry -> scalar
+array defined for the specified field type is non-NULL, this element will be
+used as the
+.B CONST
+field code, and the corresponding numerical member will be ignored, and need
+not be initialised.  Conversely, if numerical parameters are intended, the
+corresponding
+.IR entry -> scalar
+elements should be set to NULL.
 
 .SH RETURN VALUE
 On success,
@@ -177,6 +182,7 @@ a call to
 .BR dirfile_madd_string (3),
 .BR dirfile_metaflush (3),
 .BR dirfile_open (3),
+.BR get_entry (3),
 .BR get_error (3),
 .BR get_error_string (3),
 .BR dirfile-format (5)

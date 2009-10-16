@@ -1,3 +1,22 @@
+2009-10-14   D. V. Wiebe <getdata@ketiltrout.net>  svn:322
+	* test/madd.c: Properly initialise E.
+	
+	* src/getdata.c (_GD_DoRaw): Don't assume size_t is signed.
+
+	* src/flush.c (_GD_FlushFragment): Don't justify field names if they're very
+	long.
+
+	* bindings/f77/test/big_test95.f90: Use fixed width strings in array
+	initialisations.
+
+	* man/dirfile_alter_entry.3 man/dirfile_add_bit.3
+	man/get_mfield_list_by_type.3 man/get_entry_type.3 man/get_nvectors.3
+	man/dirfile_alter_bit.3 man/dirfile_cbopen.3 man/dirfile_rename.3
+	man/dirfile_include.3 man/dirfile_add.3 man/dirfile-format.5
+	man/get_field_list_by_type.3 man/get_mvector_list.3 man/dirfile_flush.3
+	man/get_vector_list.3 man/get_entry.3 man/dirfile_madd_bit.3
+	man/dirfile-encoding.5: Update.
+
 2009-10-14   D. V. Wiebe <getdata@ketiltrout.net>  svn:321
 	* internal.h: Add .ffname member to encoding_t.
 	* parse.c (_GD_ParseDirective): Run through _gd_ef instead of hard-coding

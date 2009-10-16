@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH dirfile_alter_bit 3 "4 October 2009" "Version 0.6.0" "GETDATA"
+.TH dirfile_alter_bit 3 "16 October 2009" "Version 0.6.0" "GETDATA"
 .SH NAME
 dirfile_alter_bit, dirfile_alter_clincom, dirfile_alter_const,
 dirfile_alter_cpolynom, dirfile_alter_lincom, dirfile_alter_linterp,
@@ -133,6 +133,7 @@ All field parameters introduced with this interface must contain numerical
 parameters.  Field parameters which are
 .B CONST
 cannot be introduced with these functions.  To do that, use
+.BR dirfile_alter_entry (3),
 .BR dirfile_alter_spec (3)
 or
 .BR dirfile_malter_spec (3),

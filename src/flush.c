@@ -30,6 +30,8 @@
 #include <time.h>
 #endif
 
+#define GD_MAX_PRETTY_FIELD_WIDTH 80
+
 void _GD_Flush(DIRFILE* D, gd_entry_t *E, const char* field_code)
 {
   int i;
@@ -357,6 +359,8 @@ static void _GD_FlushFragment(DIRFILE* D, int i)
     max_len = 2 * t / n;
     if (max_len > m)
       max_len = m;
+    if (max_len > GD_MAX_PRETTY_FIELD_WIDTH)
+      max_len = GD_MAX_PRETTY_FIELD_WIDTH;
   }
 
   /* Introit */

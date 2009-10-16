@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH dirfile_cbopen 3 "5 October 2009" "Version 0.6.0" "GETDATA"
+.TH dirfile_cbopen 3 "16 October 2009" "Version 0.6.0" "GETDATA"
 .SH NAME
 dirfile_cbopen, dirfile_open \(em open or create a dirfile
 .SH SYNOPSIS
@@ -21,10 +21,10 @@ dirfile_cbopen, dirfile_open \(em open or create a dirfile
 .HP
 .nh
 .ad l
-.BI "DIRFILE* dirfile_cbopen(const char *" dirfilename ", unsigned int " flags ,
-.BI "gd_parser_callback_t " sehandler ", void *" extra );
+.BI "DIRFILE* dirfile_cbopen(const char *" dirfilename ", unsigned long"
+.IB flags ", gd_parser_callback_t " sehandler ", void *" extra );
 .HP
-.BI "DIRFILE* dirfile_open(const char *" dirfilename ", unsigned int " flags );
+.BI "DIRFILE* dirfile_open(const char *" dirfilename ", unsigned long " flags );
 .hy
 .ad n
 .SH DESCRIPTION
@@ -168,6 +168,16 @@ indicates that the dirfile being opened conforms Standards Version newer than
 the version understood by the library, unrecognised lines will be silently
 ignored.
 .TP
+.B GD_PRETTY_PRINT
+When dirfile metadata is flushed to disc (either explicitly via
+.BR dirfile_metaflush()
+or 
+.BR dirfile_flush()
+or implicitly by closing the dirfile), an attempt will be made to create a
+nicer looking format file (from a human-readable standpoint).  What this
+explicitly means is not part of the API, and any particular behaviour should not
+be relied on.  If the dirfile is opened read-only, this flag is ignored.
+.TP
 .B GD_TRUNC
 If
 .I dirfilename
@@ -236,6 +246,10 @@ bzip2 format.
 .B GD_GZIP_ENDODED
 Specifies that raw data files are compressed using Lempel-Ziv coding (LZ77)
 as implemented in the gzip format.
+.TP
+.B GD_LZMA_ENDODED
+Specifies that raw data files are compressed using the Lempel-Ziv Markov Chain
+Algorithm (LZMA) as implemented in the xz container format.
 .TP
 .B GD_SLIM_ENCODED
 Specifies that raw data files are compressed using the slimlib library.

@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH dirfile_add_bit 3 "4 October 2009" "Version 0.6.0" "GETDATA"
+.TH dirfile_add_bit 3 "16 October 2009" "Version 0.6.0" "GETDATA"
 .SH NAME
 dirfile_add_bit, dirfile_add_clincom, dirfile_add_const, dirfile_add_cpolynom,
 dirfile_add_lincom, dirfile_add_linterp, dirfile_add_multiply,
@@ -141,7 +141,10 @@ with
 .B CONST
 fields as parameters cannot be added with these functions.  Those fields must
 be added with
+.BR dirfile_add (3)
+or
 .BR dirfile_add_spec (3).
+
 .SH RETURN VALUE
 On success, any of these functions returns zero.   On error, -1 is returned and 
 the dirfile error is set to a non-zero error value.  Possible error values are:

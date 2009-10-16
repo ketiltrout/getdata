@@ -151,7 +151,7 @@ GET_TESTS=get64 get_bad_code get_bit get_char get_clincom get_complex128 \
 					get_linterp_noin get_linterp_notab get_multiply get_multiply_noin \
 					get_nonexistent get_null $(GET_OFF64) get_phase get_polynom \
 					get_polynom_noin get_recurse get_sbit get_sf get_ss get_type \
-					get_uint16 get_uint32 get_uint64
+					get_uint16 get_uint32 get_uint64 get_zero
 
 GLOBAL_TESTS=global_name global_ref global_ref_empty global_ref_get \
 						 global_ref_set

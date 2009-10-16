@@ -1,6 +1,6 @@
 .\" dirfile_include.3.  The dirfile_include man page.
 .\"
-.\" (C) 2008 D. V. Wiebe
+.\" (C) 2008, 2009 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH dirfile_include 3 "19 December 2008" "Version 0.5.0" "GETDATA"
+.TH dirfile_include 3 "16 October 2009" "Version 0.6.0" "GETDATA"
 .SH NAME
 dirfile_include \(em add a format file fragment to a dirfile
 .SH SYNOPSIS
@@ -22,7 +22,7 @@ dirfile_include \(em add a format file fragment to a dirfile
 .nh
 .ad l
 .BI "int dirfile_include(DIRFILE *" dirfile ", const char *" include_file ,
-.BI "int " parent_fragment ", unsigned int " flags );
+.BI "int " parent_fragment ", unsigned long " flags );
 .hy
 .ad n
 .SH DESCRIPTION
@@ -76,8 +76,8 @@ will have mode
 .B GD_EXCL
 Ensure that this call creates a new fragment: when specified along with
 .BR GD_CREAT ,
-the call will fail if the dirfile specified by
-.I dirfilename
+the call will fail if the file specified by
+.I include_file
 already exists.  Behaviour of this flag is undefined if
 .B GD_CREAT
 is not specified.  This flag suffers from all the limitations of the
@@ -103,8 +103,8 @@ directives (see
 found in the fragment should be ignored.  When specified with one of
 .BR GD_BIG_ENDIAN " or " GD_LITTLE_ENDIAN ,
 the endianness specified will be assumed.  If this flag is specified with
-neither of those flags, the dirfile will be assumed to have the endianness of the
-native architecture.
+neither of those flags, the fragment will be assumed to have the endianness of
+the native architecture.
 .TP
 .B GD_IGNORE_DUPS
 If the fragment specifies more than one field with the same name, or a field 
@@ -152,29 +152,29 @@ should always cause a fatal error.  Without this flag, if a
 .B VERSION
 directive (see
 .BR dirfile-format (5))
-indicates that the dirfile being opened conforms Standards Version newer than
+indicates that the fragment being opened conforms Standards Version newer than
 the version understood by the library, unrecognised lines will be silently
 ignored.
 .TP
 .B GD_TRUNC
 If
 .I include_file
-already exists , it will be truncated before opening.  If the file does not
+already exists, it will be truncated before opening.  If the file does not
 exist, this flag is ignored.
 
 .P
 The
 .I flags
 argument may also be bitwise or'd with one of the following symbols indicating
-the default encoding scheme of the dirfile.  Like the endianness flags, the
-choice of encoding here is ignored if the encoding is specified in the dirfile
+the default encoding scheme of the fragment.  Like the endianness flags, the
+choice of encoding here is ignored if the encoding is specified in the fragment
 itself, unless
 .B GD_FORCE_ENCODED
 is also specified.  If none of these symbols is present,
 .B GD_AUTO_ENCODED
 is assumed, unless the
 .BR dirfile_include ()
-call results in creation or truncation of the dirfile.  In that case,
+call results in creation or truncation of the fragment.  In that case,
 .B GD_UNENCODED
 is assumed.  See
 .BR dirfile-encoding (5)
@@ -189,6 +189,19 @@ notably fail if the the library is called via
 to create a previously non-existent raw field unless a read is first
 successfully performed on the dirfile.  Once the library has determined the
 encoding scheme for the first time, it remembers it for subsequent calls.
+.TP
+.B GD_BZIP2_ENDODED
+Specifies that raw data files are compressed using the Burrows-Wheeler block
+sorting text compression algorithm and Huffman coding, as implemented in the
+bzip2 format.
+.TP
+.B GD_GZIP_ENDODED
+Specifies that raw data files are compressed using Lempel-Ziv coding (LZ77)
+as implemented in the gzip format.
+.TP
+.B GD_LZMA_ENDODED
+Specifies that raw data files are compressed using the Lempel-Ziv Markov Chain
+Algorithm (LZMA) as implemented in the xz container format.
 .TP
 .B GD_SLIM_ENCODED
 Specifies that raw data files are compressed using the slimlib library.

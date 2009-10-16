@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH get_vector_list 3 "8 December 2008" "Version 0.5.0" "GETDATA"
+.TH get_vector_list 3 "16 October 2009" "Version 0.6.0" "GETDATA"
 .SH NAME
 get_vector_list \(em retrieve a list of vector fields in a dirfile
 .SH SYNOPSIS
@@ -33,7 +33,8 @@ and returns a read-only list of names of the all vector type fields defined in
 the database
 .RI ( i.e.
 fields of types
-.BR BIT ", " LINCOM ", " LINTERP ", " MULTIPLY ", " PHASE ", and " RAW ).
+.BR BIT ,\~ LINCOM ,\~ LINTERP ,\~ MULTIPLY ,\~ PHASE ,\~ POLYNOM ,\~ RAW ,
+.BR SBIT ).
 Notably, this list does not include /META subfields.
 
 The 

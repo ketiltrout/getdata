@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH get_entry 3 "6 October 2009" "Version 0.6.0" "GETDATA"
+.TH get_entry 3 "16 October 2009" "Version 0.6.0" "GETDATA"
 .SH NAME
 get_entry \(em retrieve a dirfile field's metadata
 .SH SYNOPSIS
@@ -94,6 +94,7 @@ described.  All gd_entry_t objects are guaranteed to have at least:
 .PP
 .in +4n
 .nf
+.fam C
 typedef struct {
   ...
 
@@ -103,6 +104,7 @@ typedef struct {
 
   ...
 } gd_entry_t;
+.fam
 .fi
 .in
 .P
@@ -123,7 +125,8 @@ to one of the following symbols:
 .ad l
 .BR GD_BIT_ENTRY ,\~ GD_CONST_ENTRY ,\~ GD_INDEX_ENTRY ,\~
 .BR GD_LINCOM_ENTRY ,\~ GD_LINTERP_ENTRY ,\~ GD_MULTIPLY_ENTRY ,\~
-.BR GD_PHASE_ENTRY ,\~ GD_RAW_ENTRY ,\~ GD_STRING_ENTRY .
+.BR GD_PHASE_ENTRY ,\~ GD_POLYNOM_ENTRY ,\~ GD_RAW_ENTRY ,\~ GD_SBIT_ENTRY ,\~
+.BR GD_STRING_ENTRY .
 .ad n
 .hy
 .P
@@ -154,37 +157,66 @@ before attempting to access the remaining members.  Members for different
 field types may be stored in the same physical location in core.  Accordingly,
 attempting to access a member not declared for the appropriate field type will
 have unspecified results.
-.SS BIT Members
+
+.SS BIT and SBIT Members
 A gd_entry_t describing a
 .B BIT
+or
+.B SBIT
 entry, will also provide:
 .PP
 .in +4n
 .nf
+.fam C
 typedef struct {
   ...
 
   const char *in_fields[1];     /* input field code */
+  const char *scalar[2];        /* parameter field codes */
   int         bitnum;           /* first bit */
   int         numbits;          /* bit length */
 
   ...
 } gd_entry_t;
+.fam
 .fi
 .in
 .P
 The
 .I in_fields
-member is an array of length 1 containing the input field code.
+member is an array of length one containing the input field code.
+.P
+The
+.I scalar
+member is an array of length two containing the field codes specifying
+.I bitnum
+and
+.IR numbits ,
+or NULLs if numeric literal parameters were used.
 .P
 The
 .I bitnum
 member indicates the number of the first bit (counted from zero) extracted from
 the input.
+If this value was specified as a
+.B CONST
+field code, this will be the numerical value of that field, and
+.IR scalar [0]
+will contain the field code itself, otherwise
+.IR scalar [0]
+will be NULL.
 .P
 The
 .I numbits
 member indicates the number of bits which are extracted from the input.
+If this value was specified as a
+.B CONST
+field code, this will be the numerical value of that field, and
+.IR scalar [1]
+will contain the field code itself, otherwise
+.IR scalar [1]
+will be NULL.
+
 .SS CONST Members
 A gd_entry_t describing a
 .B CONST
@@ -192,6 +224,7 @@ entry, will also provide:
 .PP
 .in +4n
 .nf
+.fam C
 typedef struct {
   ...
 
@@ -199,6 +232,7 @@ typedef struct {
 
   ...
 } gd_entry_t;
+.fam
 .fi
 .in
 .P
@@ -210,12 +244,14 @@ file metadata.  See
 for a list of valid values that a variable of type
 .B gd_type_t
 may take.
+
 .SS INDEX Members
 A gd_entry_t describing an
 .B INDEX
 entry, which is used only for the implicit
 .I INDEX
 field, provides no additional data.
+
 .SS LINCOM Members
 A gd_entry_t describing a
 .B LINCOM
@@ -223,26 +259,41 @@ entry, will also provide:
 .PP
 .in +4n
 .nf
+.fam C
 typedef struct {
   ...
 
-  int         n_fields;                 /* number of input fields */
-  const char *in_fields[GD_MAX_LINCOM]; /* input field code(s) */
-  double      m[GD_MAX_LINCOM];         /* scale factor(s) */
-  double      b[GD_MAX_LINCOM];         /* offset terms(s) */
+  int            n_fields;                  /* # of input fields */
+  int            comp_scal;                 /* complex scalar flag */
+  const char    *in_fields[GD_MAX_LINCOM];  /* input field code(s) */
+  const char    *scalar[2 * GD_MAX_LINCOM]; /* param. field codes */
+  double complex cm[GD_MAX_LINCOM];         /* scale factor(s) */
+  double         m[GD_MAX_LINCOM];          /* scale factor(s) */
+  double complex cb[GD_MAX_LINCOM];         /* offset terms(s) */
+  double         b[GD_MAX_LINCOM];          /* offset terms(s) */
 
   ...
 } gd_entry_t;
+.fam
 .fi
 .in
 .P
 The
 .I n_fields
 member indicates the number of input fields.  It will be between one and
-.BR GD_MAX_LINCOM ,
-which is defined in getdata.h to the maximum number of input fields permitted
-by a
+.B GD_MAX_LINCOM
+inclusive, which is defined in getdata.h to the maximum number of input fields
+permitted by a
 .BR LINCOM .
+.P
+The
+.I comp_scal
+member is non-zero if any of the scale factors or offset terms have a non-zero
+imaginary part.  (That is, if comp_scal is zero, the elements of
+.IR cm \~and\~ cb
+equal the corresponding elements of
+.IR m \~and\~ b .)
+members.)
 .P
 The
 .I in_fields
@@ -250,18 +301,64 @@ member is an array of length
 .B GD_MAX_LINCOM
 containing the input field code(s).  Only the first
 .I n_fields
-records from this array are initialised.  The remaining records will contain
-invalid data.
+elements of this array are initialised.  The remaining elements contain
+uninitialised data.
 .P
 The
+.I scalar
+member is an array of length twice
+.B GD_MAX_LINCOM
+containing the field codes specifying the slope factors and offset terms for the
+field, or NULLs if numberical literal parameters were used.
+The first
+.B GD_MAX_LINCOM
+array elements contain the scale factors.  The remaining
+.B GD_MAX_LINCOM
+array elements contain the offset terms.  Array elements
+.IR scalar [ i ]
+and
+.IR scalar [ i
++
+.BR GD_MAX_LINCOM ],
+for
+.IR i \~>=\~ n_fields ,
+contain uninitialised data.
+.P
+The
+.I cm
+and
+.I cb
+members are arrays of the scale factor(s) and offset term(s) for the
+.BR LINCOM .
+Only the first
+.I n_fields
+elements of these array contain meaningful data.
+If any of these values were specified as a
+.B CONST
+field code, this will be the numerical value of that field.  The field code
+corresponding to
+.IR cm [ i ]
+will be stored in
+.IR scalar [ i ]
+and the field code associated with
+.IR cb [ i ]
+will be stored in
+.IR scalar [ i
++
+.BR GD_MAX_LINCOM ].
+Otherwise the corresponding
+.I scalar
+member will be NULL.
+.P
+The elements of
 .I m
 and
 .I b
-members are arrays of the scale factor(s) and offset term(s) for the
-.BR LINCOM .
-Attempting to access more than the first
-.I n_fields
-records from these array may result in undefined behaviour.
+are the real parts of the corresponding elements of
+.I cm
+and
+.IR cb .
+
 .SS LINTERP Members
 A gd_entry_t describing a
 .B LINTERP
@@ -269,6 +366,7 @@ entry, will also provide:
 .PP
 .in +4n
 .nf
+.fam C
 typedef struct {
   ...
 
@@ -277,6 +375,7 @@ typedef struct {
 
   ...
 } gd_entry_t;
+.fam
 .fi
 .in
 .P
@@ -286,7 +385,8 @@ member is the pathname to the look up table on disk.
 .P
 The
 .I in_fields
-member is an array of length 1 containing the input field code.
+member is an array of length one containing the input field code.
+
 .SS MULTIPLY Members
 A gd_entry_t describing a
 .B MULTIPLY
@@ -294,6 +394,7 @@ entry, will also provide:
 .PP
 .in +4n
 .nf
+.fam C
 typedef struct {
   ...
 
@@ -301,12 +402,14 @@ typedef struct {
 
   ...
 } gd_entry_t;
+.fam
 .fi
 .in
 .P
 The
 .I in_fields
-member is an array of length 2 containing the input field codes.
+member is an array of length two containing the input field codes.
+
 .SS PHASE Members
 A gd_entry_t describing a
 .B PHASE
@@ -314,25 +417,121 @@ entry, will also provide:
 .PP
 .in +4n
 .nf
+.fam C
 typedef struct {
   ...
 
   const char *in_fields[1];     /* input field code */
-  int         shift;            /* phase shift */
+  const char *scalar[1];        /* parameter field codes */
+  long int    shift;            /* phase shift */
 
   ...
 } gd_entry_t;
+.fam
 .fi
 .in
 .P
 The
 .I in_fields
-member is an array of length 1 containing the input field code.
+member is an array of length one containing the input field code.
+.P
+The
+.I scalar
+member is an array of length one containing the field code specifying
+.IR shift ,
+or NULL if a numeric literal parameter was used.
 .P
 The
 .I shift
 member indicates the shift in samples.  A positive value indicates a shift
 forward in time (towards larger frame numbers).
+If this value was specified as a
+.B CONST
+field code, this will be the numerical value of that field, and
+.IR scalar [0]
+will contain the field code itself, otherwise
+.IR scalar [0]
+will be NULL.
+
+.SS POLYNOM Members
+A gd_entry_t describing a
+.B POLYNOM
+entry, will also provide:
+.PP
+.in +4n
+.nf
+.fam C
+typedef struct {
+  ...
+
+  int            poly_ord;                  /* polynomial order */
+  int            comp_scal;                 /* complex scalar flag */
+  const char    *in_fields[1];              /* input field code(s) */
+  const char    *scalar[GD_MAX_POLY_ORD + 1];
+                                            /* co-eff. field codes */
+  double complex ca[GD_MAX_POLY_ORD + 1];   /* co-efficients(s) */
+  double         a[GD_MAX_POLY_ORD + 1];    /* co-efficients(s) */
+
+  ...
+} gd_entry_t;
+.fam
+.fi
+.in
+.P
+The
+.I poly_ord
+member indicates the order of the polynomial.  It will be between one and
+.B GD_MAX_POLY_ORD
+inclusive, which is defined in getdata.h to the maximum order of polynomial
+permitted by a
+.BR POLYNOM .
+.P
+The
+.I comp_scal
+member is non-zero if any of the co-efficients have a non-zero imaginary part.
+(That is, if comp_scal is zero, the elements of
+.I ca
+equal the corresponding elements of
+.IR a .)
+.P
+The
+.I in_fields
+member is an array of length one containing the input field code.
+.P
+The
+.I scalar
+member is an array of length one more than
+.B GD_MAX_POLYORD
+containing the field codes specifying the co-efficients for the field, or NULLs
+if numberical literal parameters were used.
+Only the first
+.I poly_ord
++ 1
+elements are initialised.  The remaining elements contain uninitialised data.
+.P
+The
+.I ca
+members are arrays of the co-efficient(s) for the
+.BR POLYNOM .
+Only the first
+.I poly_ord
++ 1 elements of this array contains meaningful data.
+If any of these values were specified as a
+.B CONST
+field code, this will be the numerical value of that field.  The field code
+corresponding to
+.IR ca [ i ]
+will be stored in
+.IR scalar [ i ].
+Otherwise the corresponding
+.I scalar
+member will be NULL.
+.P
+The elements of
+.I a
+are the real parts of the corresponding elements of
+.IR ca .
+
 .SS RAW Members
 A gd_entry_t describing a
 .B RAW
@@ -340,20 +539,36 @@ entry, will also provide:
 .PP
 .in +4n
 .nf
+.fam C
 typedef struct {
   ...
 
+  const char   *scalar[1];    /* parameter field codes */
   unsigned int  spf;          /* samples per frame on disk */
   gd_type_t     data_type;    /* data type on disk */
 
   ...
 } gd_entry_t;
+.fam
 .fi
 .in
 .P
 The
+.I scalar
+member is an array of length one containing the field code specifying
+.IR spf ,
+or NULL if a numeric literal parameter was used.
+.P
+The
 .I spf
 member contains the samples per frame of the binary data on disk.
+If this value was specified as a
+.B CONST
+field code, this will be the numerical value of that field, and
+.IR scalar [0]
+will contain the field code itself, otherwise
+.IR scalar [0]
+will be NULL.
 .P
 The
 .I data_type
@@ -362,6 +577,7 @@ member indicates the data type of the binary data on disk.  See
 for a list of valid values that a variable of type
 .B gd_type_t
 may take.
+
 .SS STRING Members
 A gd_entry_t describing a
 .B STRING

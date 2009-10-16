@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH dirfile\-format 5 "4 October 2009" "Standards Version 7" "DATA FORMATS"
+.TH dirfile\-format 5 "16 October 2009" "Standards Version 7" "DATA FORMATS"
 .SH NAME
 dirfile\-format \(em the dirfile database format specification file
 .SH DESCRIPTION
@@ -174,10 +174,13 @@ or any other site-specific encoding scheme.  The predefined scheme names are:
 The dirfile is unencoded.
 .TP
 .I bzip2
-The dirfile is compressed using the bzip compression scheme.
+The dirfile is compressed using the bzip2 compression scheme.
 .TP
 .I gzip
 The dirfile is compressed using the gzip compression scheme.
+.TP
+.I lzma
+The dirfile is compressed using the LZMA compression scheme.
 .TP
 .I slim
 The dirfile is compressed using the slim compression scheme.
@@ -579,10 +582,11 @@ vector field.  Synax is:
 .IP
 .I <field_name>
 .B POLYNOM
-.I <input> <a0> <a1> [<a2> [<a3> [<a4> [<a5]]]]
+.I <input> <a0> <a1>
+.RI [ <a2> \~[ <a3> \~[ <a4> \~[ <a5> ]]]]
+.PP
 where
 .I <input>
-.PP
 is the input field code, and the order of the computed polynomial is determined
 by how many co-efficients are present in the specification.  The derived field
 is computed as:

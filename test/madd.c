@@ -20,6 +20,7 @@ int main(void)
   gd_entry_t e;
 
   gd_entry_t E;
+  memset(&E, 0, sizeof(E));
   E.field = "data";
   E.field_type = GD_RAW_ENTRY;
   E.fragment_index = 0;

@@ -175,10 +175,14 @@ static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *E, off64_t s0, size_t ns,
   size_t n_read = 0;
   ssize_t samples_read;
   char *databuffer;
+  size_t zero_pad = 0;
 
   dtrace("%p, %p, %lli, %zi, 0x%x, %p)", D, E, s0, ns, return_type, data_out);
 
-  s0 -= E->spf * D->fragment[E->fragment_index].frame_offset;
+  if (s0 < E->spf * D->fragment[E->fragment_index].frame_offset)
+    zero_pad = E->spf * D->fragment[E->fragment_index].frame_offset - s0;
+  else
+    s0 -= E->spf * D->fragment[E->fragment_index].frame_offset;
 
   databuffer = malloc(ns * E->e->size);
   if (databuffer == NULL) {
@@ -187,8 +191,9 @@ static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *E, off64_t s0, size_t ns,
     return 0;
   }
 
-  if (s0 < 0) {
-    n_read = _GD_FillZero(databuffer, E->data_type, (s0 + ns > 0) ? -s0 : ns);
+  if (zero_pad > 0) {
+    n_read = _GD_FillZero(databuffer, E->data_type, (zero_pad > ns) ? ns :
+        zero_pad);
     ns -= n_read;
     s0 = 0;
   }

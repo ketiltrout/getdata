@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH dirfile_madd_bit 3 "4 October 2009" "Version 0.6.0" "GETDATA"
+.TH dirfile_madd_bit 3 "16 October 2009" "Version 0.6.0" "GETDATA"
 .SH NAME
 dirfile_madd_bit, dirfile_madd_clincom, dirfile_madd_const,
 dirfile_madd_cpolynom, dirfile_madd_lincom, dirfile_madd_linterp,
@@ -141,6 +141,8 @@ with
 .B CONST
 fields as parameters cannot be added with these functions.  Those fields must
 be added with
+.BR dirfile_madd (3)
+or
 .BR dirfile_madd_spec (3).
 .SH RETURN VALUE
 On success, any of these functions returns zero.   On error, -1 is returned and 

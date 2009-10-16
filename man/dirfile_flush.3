@@ -1,6 +1,6 @@
 .\" dirfile_flush.3.  The dirfile_flush man page.
 .\"
-.\" (C) 2008 D. V. Wiebe
+.\" (C) 2008, 2009 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,9 +13,9 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH dirfile_flush 3 "28 November 2008" "Version 0.5.0" "GETDATA"
+.TH dirfile_flush 3 "16 October 2009" "Version 0.6.0" "GETDATA"
 .SH NAME
-dirfile_flush \(em close a dirfile and free associated memory.
+dirfile_flush \(em write all pending dirfile changes to disk.
 .SH SYNOPSIS
 .B #include <getdata.h>
 .HP
@@ -38,7 +38,7 @@ is NULL, all fields in
 will be flushed and closed.  In this special case, modified metadata will
 also be flushed to disk as if
 .BR dirfile_metaflush (3)
-has been called.
+had been called.
 .SH RETURN VALUE
 On success, zero is returned.  On error, -1 is returned and the dirfile error is
 set to a non-zero error value.  Possible error values are:

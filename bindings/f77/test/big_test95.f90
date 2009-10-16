@@ -41,9 +41,10 @@ program big_test
   call system ( 'rm -rf ' // fildir )
   call system ( 'mkdir ' // fildir )
 
-  fields = (/ 'INDEX', 'bit', 'const', 'data', 'lincom', 'linterp', 'mult', &
-  'phase', 'polynom', 'sbit', 'string', '', '', '', '', '', '', '', '', '', &
-  '' /)
+  fields = (/ 'INDEX  ', 'bit    ', 'const  ', 'data   ', 'lincom ', &
+  'linterp', 'mult   ', 'phase  ', 'polynom', 'sbit   ', 'string ', '       ', &
+  '       ', '       ', '       ', '       ', '       ', '       ', '       ', &
+  '       ', '       ' /)
 
   open(1, file=frmat, status='new')
   write(1, *) '/ENDIAN little'
@@ -1786,9 +1787,10 @@ program big_test
   end if
 
 ! 45: fget_vector_list check
-  fields = (/ 'INDEX', 'bit', 'data', 'lincom', 'linterp', 'mult', 'new1', &
-  'new10', 'new13', 'new2', 'new3', 'new4', 'new5', 'new6', 'new7', 'new8', &
-  'new9', 'phase', 'polynom', 'sbit', 'string' /)
+  fields = (/ 'INDEX  ', 'bit    ', 'data   ', 'lincom ', 'linterp', &
+  'mult   ', 'new1   ', 'new10  ', 'new13  ', 'new2   ', 'new3   ', 'new4   ', &
+  'new5   ', 'new6   ', 'new7   ', 'new8   ', 'new9   ', 'phase  ', 'polynom', &
+  'sbit   ', 'string ' /)
   l = flen
   call fget_vector_list(flist, d, l)
   e = fget_error(d)
@@ -2728,9 +2730,10 @@ program big_test
   end if
 
 ! 66: fget_mvector_list check
-  fields = (/ 'mlut', 'mnew1', 'mnew2', 'mnew3', 'mnew5', 'mnew6', 'mnew7', &
-  'mnew8', 'mnew9', 'mnew10', 'mnew4', '', '', '', '', '', '', '', '', '', &
-  '' /)
+  fields = (/ 'mlut  ', 'mnew1 ', 'mnew2 ', 'mnew3 ', 'mnew5 ', 'mnew6 ', &
+  'mnew7 ', 'mnew8 ', 'mnew9 ', 'mnew10', 'mnew4 ', '      ', '      ', &
+  '      ', '      ', '      ', '      ', '      ', '      ', '      ', &
+  '      ' /)
   l = flen
   call fget_mvector_list(flist, d, "data", l)
   e = fget_error(d)
