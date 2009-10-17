@@ -1,9 +1,6 @@
 TODO for 0.6.0:            impl    bind      docs      test
 - Python bindings          done     --       TODO      done
 - IDL bindings             done     --       TODO      done
-- ValidateField            done    done      TODO      done
-- get_frame                done    done      TODO      done
-- get_native_type          done    done      TODO      done
 
 Future TODOs:
 * Perl bindings

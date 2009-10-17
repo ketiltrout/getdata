@@ -35,14 +35,14 @@ gd_type_t _GD_NativeType(DIRFILE* D, gd_entry_t* E, int repr)
     return 0;
   }
 
-  if (!E->e->calculated)
-    _GD_CalculateEntry(D, E);
-
   switch(E->field_type) {
     case GD_RAW_ENTRY:
       type = E->data_type;
       break;
     case GD_LINCOM_ENTRY:
+      if (!E->e->calculated)
+        _GD_CalculateEntry(D, E);
+
       if (E->comp_scal) {
         type = GD_COMPLEX128;
         break;
@@ -60,10 +60,22 @@ gd_type_t _GD_NativeType(DIRFILE* D, gd_entry_t* E, int repr)
       type = GD_FLOAT64;
       break;
     case GD_LINTERP_ENTRY:
-      type = GD_FLOAT64;
+      /* initialise the table, if necessary */
+      if (E->e->table_len < 0) {
+        _GD_ReadLinterpFile(D, E);
+        if (D->error != GD_E_OK)
+          break;
+      }
+
+      type = E->e->complex_table ? GD_COMPLEX128 : GD_FLOAT64;
       break;
     case GD_MULTIPLY_ENTRY:
-      type = GD_FLOAT64;
+      if (_GD_BadInput(D, E, 0) || _GD_BadInput(D, E, 1))
+        break;
+
+      type = (_GD_NativeType(D, E->e->entry[0], E->e->repr[0]) & GD_COMPLEX
+          || _GD_NativeType(D, E->e->entry[0], E->e->repr[0]) & GD_COMPLEX)
+        ? GD_COMPLEX128 : GD_FLOAT64;
       break;
     case GD_BIT_ENTRY:
     case GD_INDEX_ENTRY:
@@ -76,6 +88,9 @@ gd_type_t _GD_NativeType(DIRFILE* D, gd_entry_t* E, int repr)
       type = _GD_NativeType(D, E->e->entry[0], E->e->repr[0]);
       break;
     case GD_POLYNOM_ENTRY:
+      if (!E->e->calculated)
+        _GD_CalculateEntry(D, E);
+
       if (E->comp_scal) {
         type = GD_COMPLEX128;
         break;

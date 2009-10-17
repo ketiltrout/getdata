@@ -35,17 +35,19 @@ dist_man_MANS = dirfile_add.3 dirfile_add_bit.3 dirfile_add_spec.3 \
 								get_encoding.3 get_endianness.3 get_entry.3 get_entry_type.3 \
 								get_error.3 get_error_string.3 get_field_list.3 \
 								get_field_list_by_type.3 dirfile_flush.3 get_fragment_index.3 \
-								get_fragmentname.3 get_frameoffset.3 \
+								get_fragmentname.3 get_framenum_subset.3 get_frameoffset.3 \
 								dirfile_free_entry_strings.3 dirfile_include.3 \
 								dirfile_madd_bit.3 get_mconstants.3 dirfile_metaflush.3 \
 								get_mfield_list.3 get_mfield_list_by_type.3 dirfile_move.3 \
-								get_mstrings.3 get_mvector_list.3 dirfilename.3 get_nfields.3 \
+								get_mstrings.3 get_mvector_list.3 dirfilename.3 \
+								get_native_type.3 get_nfields.3 \
 								get_nfields_by_type.3 get_nfragments.3 get_nframes.3 \
 								get_nmfields.3 get_nmfields_by_type.3 get_nmvectors.3 \
 								get_nvectors.3 get_parent_fragment.3 dirfile_parser_callback.3 \
 								dirfile_protect.3 get_protection.3 get_raw_filename.3 \
 								dirfile_reference.3 dirfile_rename.3 get_spf.3 get_string.3 \
 								put_string.3 get_strings.3 dirfile_uninclude.3 \
+								dirfile_validate.3 \
 								get_vector_list.3 dirfile.5 dirfile-encoding.5 \
 								dirfile-format.5 $(LFS_transitional_mans)
 
@@ -95,6 +97,8 @@ install-data-hook: ${INSTALL_DATA_HOOK64}
 		$(LN_S) -f dirfile_alter_spec.3 dirfile_malter_spec.3
 	cd $(DESTDIR)$(mandir)/man3 && \
 		$(LN_S) -f dirfile_reference.3 get_reference.3
+	cd $(DESTDIR)$(mandir)/man3 && \
+		$(LN_S) -f dirfile_framenum_subset.3 dirfile_framenum.3
 
 install-data-hook64:
 	cd $(DESTDIR)$(mandir)/man3 && \
@@ -114,7 +118,7 @@ uninstall-hook:
 		dirfile_add_polynom.3 dirfile_add_sbit.3 dirfile_madd_clincom.3 \
 		dirfile_madd_cpolynom.3 dirfile_madd_polynom.3 dirfile_madd_sbit.3 \
 		dirfile_alter_clincom.3 dirfile_alter_cpolynom.3 dirfile_alter_polynom.3 \
-		dirfile_alter_sbit.3
+		dirfile_alter_sbit.3 dirfile_framenum.3
 
 clean-local:
 	rm -rf *~ 

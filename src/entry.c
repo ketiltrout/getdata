@@ -120,6 +120,7 @@ static void _GD_GetScalar(DIRFILE* D, gd_entry_t* E, const char* scalar,
   uint16_t u16;
   int16_t i16;
   int64_t i64;
+  void *ptr = NULL;
   gd_entry_t* C;
 
   dtrace("%p, %p, \"%s\", %i, %p", D, E, scalar, type, data);
@@ -130,29 +131,30 @@ static void _GD_GetScalar(DIRFILE* D, gd_entry_t* E, const char* scalar,
     else if (C->field_type != GD_CONST_ENTRY)
       _GD_SetError(D, GD_E_BAD_SCALAR, GD_E_SCALAR_TYPE, E->field, 0, scalar);
     else {
-      void *ptr = realloc(C->e->client, (C->e->n_client + 1) *
-          sizeof(gd_entry_t*));
-      if (ptr == NULL)
-        _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-      else {
-        if (type == GD_INT64) {
-          _GD_DoConst(D, C, GD_INT64, &i64);
-          *(long int*)data = (long int)i64;
-        } else if (type == GD_COMPLEX)
-          _GD_DoConst(D, C, GD_COMPLEX128, data);
-        else if (type == GD_SIGNED) {
-          _GD_DoConst(D, C, GD_INT16, &i16);
-          *(int*)data = (int)i16; /* this periphrasis is in case `int16'
-                                     is different than `int' */
-        } else {
-          _GD_DoConst(D, C, GD_UINT16, &u16);
-          *(unsigned int*)data = (unsigned int)u16; /* ditto */
-        }
+      if ((D->flags & GD_ACCMODE) == GD_RDWR) {
+        ptr = realloc(C->e->client, (C->e->n_client + 1) *
+            sizeof(gd_entry_t*));
+        if (ptr == NULL)
+          _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+      }
 
-        if ((D->flags & GD_ACCMODE) == GD_RDWR) {
-          C->e->client = ptr;
-          C->e->client[C->e->n_client++] = E;
-        }
+      if (type == GD_INT64) {
+        _GD_DoConst(D, C, GD_INT64, &i64);
+        *(long int*)data = (long int)i64;
+      } else if (type == GD_COMPLEX)
+        _GD_DoConst(D, C, GD_COMPLEX128, data);
+      else if (type == GD_SIGNED) {
+        _GD_DoConst(D, C, GD_INT16, &i16);
+        *(int*)data = (int)i16; /* this periphrasis is in case `int16'
+                                   is different than `int' */
+      } else {
+        _GD_DoConst(D, C, GD_UINT16, &u16);
+        *(unsigned int*)data = (unsigned int)u16; /* ditto */
+      }
+
+      if (ptr) {
+        C->e->client = ptr;
+        C->e->client[C->e->n_client++] = E;
       }
     }
   }
@@ -293,6 +295,11 @@ int get_entry(DIRFILE* D, const char* field_code_in, gd_entry_t* entry)
   /* get rid of the represenation, if any */
   _GD_GetRepr(D, field_code_in, &field_code);
 
+  if (D->error) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
   E = _GD_FindField(D, field_code, NULL);
 
   if (E == NULL) {
@@ -388,6 +395,11 @@ gd_entype_t get_entry_type(DIRFILE* D, const char* field_code_in)
   /* get rid of the represenation, if any */
   _GD_GetRepr(D, field_code_in, &field_code);
 
+  if (D->error) {
+    dreturn("%i", GD_NO_ENTRY);
+    return GD_NO_ENTRY;
+  }
+
   E = _GD_FindField(D, field_code, NULL);
 
   if (E == NULL) {
@@ -421,6 +433,11 @@ int get_fragment_index(DIRFILE* D, const char* field_code_in)
 
   /* get rid of the represenation, if any */
   _GD_GetRepr(D, field_code_in, &field_code);
+
+  if (D->error) {
+    dreturn("%i", -1);
+    return -1;
+  }
 
   E = _GD_FindField(D, field_code, NULL);
 
@@ -457,6 +474,11 @@ int dirfile_validate(DIRFILE *D, const char *field_code_in)
 
   /* get rid of the representation, if any */
   _GD_GetRepr(D, field_code_in, &field_code);
+
+  if (D->error) {
+    dreturn("%i", -1);
+    return -1;
+  }
 
   E = _GD_FindField(D, field_code, NULL);
 

@@ -1,6 +1,18 @@
+2009-10-17   D. V. Wiebe <getdata@ketiltrout.net>  svn:324
+	* src/entry.c (_GD_Calculate): Memory leak.
+
+	* src/entry.c (get_entry get_entry_type get_fragment_index
+	dirfile_validate): Throw GD_E_BAD_REPR when necessary.
+	
+	* src/native.c (_GD_NativeType): Only calculate the entry if needed.
+	Properly calculate LINTERP and MULTIPLY native types.
+
+	* man/get_native_type.3 man/get_framenum_subset.3 man/dirfile_validate.3:
+	Added.
+
 2009-10-16   D. V. Wiebe <getdata@ketiltrout.net>  svn:323
-	* internal.h: Fix spelling of GD_E_FORMAT_LITERAL.
-	* errors.c parse.c: Ditto.
+	* src/internal.h: Fix spelling of GD_E_FORMAT_LITERAL.
+	* src/errors.c src/parse.c: Ditto.
 
 	* src/putdata.c: Don't assume size_t is signed.
 
