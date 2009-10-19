@@ -119,7 +119,7 @@ static void _GD_FillFileFrame(void *dataout, gd_type_t rtype, off64_t s0,
       break;
     case GD_INT32:
       for (i = 0; i < n; i++)
-        ((uint32_t*)dataout)[i] = (int32_t)(i + s0);
+        ((int32_t*)dataout)[i] = (int32_t)(i + s0);
       break;
     case GD_UINT32:
       for (i = 0; i < n; i++)

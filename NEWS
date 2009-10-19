@@ -35,7 +35,8 @@ New in version 0.6.0rc3:
     desired.
   * Computation of derived fields can now handle complex valued inputs, and
     computation will occur in the complex plane when required.
-  * The computation of LINCOM fields has been re-written and is now faster.
+  * The computation of LINCOM fields has been re-written and is now ~20% faster
+    for LINCOMs with 2 or 3 input fields.  (No change for LINCOMs of 1 field.)
   * A new open flag, GD_PRETTY_PRINT, tells the library to attempt to write a
     nicer looking format file.  What this specifically means, isn't part of the
     public API and shouldn't be relied on in portable code.
