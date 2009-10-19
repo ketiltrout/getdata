@@ -382,7 +382,44 @@ PyMODINIT_FUNC initpygetdata(void)
 
   mod = Py_InitModule3("pygetdata", GetDataMethods,
       "Bindings to the GetData library for Dirfile access\n\n"
-      "This module provides interfaces to the C GetData library.");
+      "This module provides interfaces to the C GetData library.  It defines "
+      "three\nmain classes:\n\n"
+      "  o dirfile, encapsulating the C API's DIRFILE object,\n"
+      "  o entry, encapsulating the C API's gd_entry_t object, and\n"
+      "  o fragment, containing fragment metadata.\n\n"
+      "Second, it defines various symbolic constants defined by the C API.  "
+      "These\nsymbols are identical to the C API's symbols, except lacking the "
+      "GD_ prefix.\nSo, for example, the C API's GD_INT8 is available in these "
+      "bindings as\npygetdata.INT8.\n\n"
+      "Finally, it defines a number of exceptions corresponding to C API "
+      "dirfile\nerror codes.  These exceptions have similar names to the C "
+      "API's error\nnames, so, for example, pygetdata.BadCodeError corresponds "
+      "to the C API's\nGD_E_BAD_CODE error code.  All these exceptions are "
+      "derived from a common\npygetdata.DirfileError exception class, itself "
+      "derived from RuntimeError.\nExceptions are thrown by the bindings in "
+      "lieu of returning a dirfile error\nvalue.\n\n"
+      "The input data type argument to bindings for functions such as "
+      "putdata(3),\nwhich is required in the C API, are typically optional, as "
+      "pygetdata can\ndetermine the input data type by itself, and convert it "
+      "to an appropriate\ntype for the C API.  If the data type is supplied, "
+      "pygetdata will coerce the\ninput data to the specified C type as best "
+      "it can.  For getdata(3) and\nsimilar, the C API types are converted to "
+      "python types as follows:\n\n"
+      "  o int     -- UINT8, INT8, UINT16, INT16, INT32\n"
+      "  o long    -- UINT32, UINT64, INT64\n"
+      "  o float   -- FLOAT32, FLOAT64\n"
+      "  o complex -- COMPLEX64, COMPLEX128\n\n"
+      "For convenience, the following type code aliases are defined:\n\n"
+      "  o pygetdata.INT     = pygetdata.INT32\n"
+      "  o pygetdata.LONG    = pygetdata.INT64\n"
+      "  o pygetdata.ULONG   = pygetdata.UINT64\n"
+      "  o pygetdata.FLOAT   = pygetdata.FLOAT64\n"
+      "  o pygetdata.COMPLEX = pygetdata.COMPLEX128\n\n"
+      "Note that pygetdata.FLOAT is different than the C API's GD_FLOAT "
+      "alias.\n\n"
+      "All pygetdata functions may be given positional or keyword parameters."
+      );
+
   if (mod == NULL)
     return;
 
@@ -409,14 +446,14 @@ PyMODINIT_FUNC initpygetdata(void)
         gdpy_constant_list[i].value);
 
   /* add exceptions */
-  GdPy_DirfileError = PyErr_NewException("getdata.DirfileError",
+  GdPy_DirfileError = PyErr_NewException("pygetdata.DirfileError",
       PyExc_RuntimeError, NULL);
   Py_INCREF(GdPy_DirfileError);
   PyModule_AddObject(mod, "DirfileError", GdPy_DirfileError);
 
   for (i = 1; i < GD_N_ERROR_CODES; ++i) {
     char name[40];
-    sprintf(name, "getdata.%sError", gdpy_exception_list[i]);
+    sprintf(name, "pygetdata.%sError", gdpy_exception_list[i]);
     gdpy_exceptions[i] = PyErr_NewException(name, GdPy_DirfileError, NULL);
     Py_INCREF(gdpy_exceptions[i]);
     sprintf(name, "%sError", gdpy_exception_list[i]);

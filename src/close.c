@@ -78,7 +78,7 @@ static int _GD_ShutdownDirfile(DIRFILE* D, int flush_meta)
 
   for(i = 0; i < D->n_entries; ++i)
     if (D->entry[i]->field_type == GD_RAW_ENTRY)
-      _GD_Flush(D, D->entry[i], D->entry[i]->field);
+      _GD_Flush(D, D->entry[i]);
 
   if (D->error) {
     dreturn("%i", 1);

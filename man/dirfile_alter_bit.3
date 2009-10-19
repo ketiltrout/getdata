@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH dirfile_alter_bit 3 "16 October 2009" "Version 0.6.0" "GETDATA"
+.TH dirfile_alter_bit 3 "19 October 2009" "Version 0.6.0" "GETDATA"
 .SH NAME
 dirfile_alter_bit, dirfile_alter_clincom, dirfile_alter_const,
 dirfile_alter_cpolynom, dirfile_alter_lincom, dirfile_alter_linterp,
@@ -70,7 +70,8 @@ function to modify a field of the indicated type in the dirfile specified by
 In all of these calls,
 .I field_code
 indicates the the field to be modified, which may be a regular field, or a
-metafield specified by its full (slashed) field code.  The meaning and valid
+metafield specified by its full (slashed) field code, but should not contain a
+representtion suffix.  The meaning and valid
 types of other arguments may be obtained from the
 .BR get_entry (3)
 and

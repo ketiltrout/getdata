@@ -52,8 +52,9 @@ static int gdpy_fragment_init(struct gdpy_fragment_t* self, PyObject *args,
 
   char *keywords[] = {"dirifle", "index", NULL};
 
-  if (!PyArg_ParseTupleAndKeywords(args, keys, "O!i:getdata.fragment.__init__",
-        keywords, &gdpy_dirfile, &self->dirfile, self->n))
+  if (!PyArg_ParseTupleAndKeywords(args, keys,
+        "O!i:pygetdata.fragment.__init__", keywords, &gdpy_dirfile,
+        &self->dirfile, self->n))
   {
     dreturn("%i", -1);
     return -1;
@@ -116,7 +117,7 @@ static PyObject* gdpy_fragment_setencoding(struct gdpy_fragment_t* self,
   int recode = 0;
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
-        "k|i:getdata.fragment.alter_encoding", keywords, &enc, &recode))
+        "k|i:pygetdata.fragment.alter_encoding", keywords, &enc, &recode))
   {
     dreturn("%p", NULL);
     return NULL;
@@ -156,7 +157,7 @@ static PyObject* gdpy_fragment_setendianness(struct gdpy_fragment_t* self,
   int recode = 0;
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
-        "k|i:getdata.fragment.alter_endianness", keywords, &end, &recode))
+        "k|i:pygetdata.fragment.alter_endianness", keywords, &end, &recode))
   {
     dreturn("%p", NULL);
     return NULL;
@@ -191,12 +192,12 @@ static PyObject* gdpy_fragment_setoffset(struct gdpy_fragment_t* self,
 {
   dtrace("%p, %p, %p", self, args, keys);
 
-  char* keywords[] = { "encoding", "recode", NULL };
+  char* keywords[] = { "frameoffset", "recode", NULL };
   long long offset;
   int recode = 0;
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
-        "L|i:getdata.fragment.alter_frameoffset", keywords, &offset, &recode))
+        "L|i:pygetdata.fragment.alter_frameoffset", keywords, &offset, &recode))
   {
     dreturn("%p", NULL);
     return NULL;
@@ -264,37 +265,96 @@ static int gdpy_fragment_setprotection(struct gdpy_fragment_t* self,
 
 static PyGetSetDef gdpy_fragment_getset[] = {
   { "encoding", (getter)gdpy_fragment_getencoding, NULL,
-    "The encoding scheme of this fragment.", NULL },
+    "The encoding scheme of this fragment.  This will be one of the\n"
+      "pygetdata.*_ENCODED symbols.  To change this value, use the\n"
+      "alter_encoding method.",
+    NULL },
   { "endianness", (getter)gdpy_fragment_getendianness, NULL,
-    "The byte sex of this fragment.", NULL },
+    "The byte sex of this fragment.  This will be either\n"
+      "pygetdata.BIG_ENDIAN or pygetdata.LITTLE_ENDIAN.  To change this\n"
+      "value, use the alter_endianness method.",
+    NULL },
   { "frameoffset", (getter)gdpy_fragment_getoffset, NULL,
-    "The frame offset of this fragment.", NULL },
+    "The frame offset of this fragment.  To change this value, use the\n"
+      "alter_frameoffset method.",
+    NULL },
   { "index", (getter)gdpy_fragment_getindex, NULL,
-    "The index number of this fragment.", NULL },
+    "The index number of this fragment.  This is simply the index value\n"
+      "passed to the constructor.",
+    NULL },
   { "name", (getter)gdpy_fragment_getname, NULL,
-    "The pathname of this fragment.", NULL },
+    "The pathname of this fragment.  This attribute cannot be changed.\n"
+      /* -----------------------------------------------------------------| */
+      "See get_fragmentname(3).",
+    NULL },
   { "parent", (getter)gdpy_fragment_getparent, NULL,
-    "The pathname of this fragment.", NULL },
+    "The fragment index of this fragment's parent.  Since the primary\n"
+      "format file has no parent, an error will occur if an attempt is made\n"
+      "to read this attribute for the primary format file.  This value\n"
+      "cannot be changed.  To move a format file fragment to a different\n"
+      "parent fragment, use dirfile.uninclude() and dirfile.include().",
+    NULL },
   { "protection", (getter)gdpy_fragment_getprotection,
     (setter)gdpy_fragment_setprotection,
-    "The protection level of this fragment.", NULL },
+    "The (advisory) protection level of this fragment.  This will be one\n"
+      "the pygetdata.PROTECT_* symbols.  The protection level of this\n"
+      "fragment can be changed by assigning to this attribute.  See\n"
+      "get_protection(3) and dirfile_protect(3).",
+    NULL },
   { NULL }
 };
 
 static PyMethodDef gdpy_fragment_methods[] = {
-  {"alter_encoding", (PyCFunction)gdpy_fragment_setencoding, METH_VARARGS |
-    METH_KEYWORDS, "Alter the encoding scheme of this fragment."},
-  {"alter_endianness", (PyCFunction)gdpy_fragment_setendianness, METH_VARARGS |
-    METH_KEYWORDS, "Alter the byte sex of this fragment."},
-  {"alter_frameoffset", (PyCFunction)gdpy_fragment_setoffset, METH_VARARGS |
-    METH_KEYWORDS, "Alter the frame offset of this fragment."},
+  {"alter_encoding", (PyCFunction)gdpy_fragment_setencoding,
+    METH_VARARGS | METH_KEYWORDS,
+    "alter_encoding(encoding [, recode])\n\n"
+      "Change the encoding scheme of this fragment.  The 'encoding'\n"
+      "parameter should be one of the pygetdata.*_ENCODED symbols\n"
+      "(excluding pygetdata.AUTO_ENCODED).  If 'recode' is given, and is\n"
+      "non-zero, the RAW files affected by this change will be converted\n"
+      "to the new encoding.  See dirfile_alter_encoding(3)."
+  },
+  {"alter_endianness", (PyCFunction)gdpy_fragment_setendianness,
+    METH_VARARGS | METH_KEYWORDS,
+    "alter_endianness(endianness [, recode)\n\n"
+      "Change the byte sex of this fragment.  The 'endianness' parameter\n"
+      "should be pygetdata.LITTLE_ENDIAN, pygetdata.BIG_ENDIAN, or some\n"
+      "combination of these two as described in the\n"
+      "dirfile_alter_endianness manual page.  If 'recode' is given, and is\n"
+      "non-zero, the RAW files affected by this change will be converted\n"
+      "to the byte sex.  See dirfile_alter_endianness(3)."
+  },
+  {"alter_frameoffset", (PyCFunction)gdpy_fragment_setoffset,
+    METH_VARARGS | METH_KEYWORDS,
+    "alter_frameoffset(frameoffset [, recode])\n\n"
+      "Change the frame offset of this fragment.  The 'frameoffset'\n"
+      "parameter should specify the new frame offset.  If 'recode' is\n"
+      "given, and is non-zero, the RAW files affected bt this change will\n"
+      "be shifted appropriately for the new frame offset.  See\n"
+      "dirfile_alter_frameoffset(3)."
+  },
   { NULL, NULL, 0, NULL }
 };
+
+#define FRAGMENT_DOC \
+"fragment(dirfile, index)\n\n"\
+"Returns a fragment object which describes the fragment-specific metadata\n"\
+"of one format file fragment in a dirfile.  The 'dirfile' parameter\n"\
+"should be a dirfile object.  Index is the fragment index of the desired\n"\
+"format file fragment.  This constructor is equivalent to calling\n\n"\
+"  dirfile.fragment(index)\n\n"\
+"The fragment object remains connected to its dirfile, and changes made\n"\
+"to the fragment object are propagated back to the dirfile.  This object\n"\
+/* ---------------------------------------------------------------------| */\
+"creates a new reference to the supplied dirfile.  Calling\n"\
+"close() or discard() on the dirfile and then attempting to access a\n"\
+"fragment object previously derived from that dirfile will result in an\n"\
+"error."
 
 PyTypeObject gdpy_fragment = {
   PyObject_HEAD_INIT(NULL)
     0,                           /* ob_size */
-  "getdata.fragment",            /* tp_name */
+  "pygetdata.fragment",          /* tp_name */
   sizeof(struct gdpy_fragment_t),/* tp_basicsize */
   0,                             /* tp_itemsize */
   (destructor)gdpy_fragment_delete, /* tp_dealloc */
@@ -313,7 +373,7 @@ PyTypeObject gdpy_fragment = {
   0,                             /* tp_setattro */
   0,                             /* tp_as_buffer */
   Py_TPFLAGS_DEFAULT,            /* tp_flags */
-  "The Dirfile fragment object", /* tp_doc */
+  FRAGMENT_DOC,                  /* tp_doc */
   0,                             /* tp_traverse */
   0,                             /* tp_clear */
   0,                             /* tp_richcompare */

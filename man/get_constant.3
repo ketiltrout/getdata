@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH get_constant 3 "4 October 2009" "Version 0.6.0" "GETDATA"
+.TH get_constant 3 "19 October 2009" "Version 0.6.0" "GETDATA"
 .SH NAME
 get_constant \(em retrieve a scalar constant from a dirfile database
 .SH SYNOPSIS
@@ -33,7 +33,8 @@ function queries a dirfile(5) database specified by
 for the
 .B CONST
 scalar
-.IR field_code .
+.IR field_code ,
+which may contain a representation suffix.
 The constant is converted to the data type specified by
 .IR return_type ,
 and stored in the user-supplied buffer

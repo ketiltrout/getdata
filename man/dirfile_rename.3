@@ -1,6 +1,6 @@
 .\" dirfile_rename.3.  The dirfile_rename man page.
 .\"
-.\" (C) 2008 D. V. Wiebe
+.\" (C) 2008, 2009 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH dirfile_rename 3 "14 December 2008" "Version 0.5.0" "GETDATA"
+.TH dirfile_rename 3 "19 October 2009" "Version 0.6.0" "GETDATA"
 .SH NAME
 dirfile_rename \(em change the name of a dirfile field
 .SH SYNOPSIS
@@ -29,8 +29,9 @@ dirfile_rename \(em change the name of a dirfile field
 The
 .BR dirfile_rename ()
 function changes the name of the field specified by
-.I old_code
-defined in the dirfile specified by
+.IR old_code ,
+which should not contain a representation suffix, defined in the dirfile
+specified by
 .IR dirfile
 to
 .IR new_name .
@@ -83,6 +84,11 @@ The supplied dirfile was invalid.
 An attempt was made to rename the immutable
 .I INDEX
 field.
+.TP
+.B GD_E_BAD_REPR
+The representation suffix specified in
+.I field_code
+was not recognised.
 .TP
 .B GD_E_DUPLICATE
 The new name specified is already in use by another field.

@@ -329,7 +329,7 @@ int dirfile_uninclude(DIRFILE* D, int fragment_index, int del)
     if (D->entry[i]->field_type == GD_RAW_ENTRY &&
         _GD_ContainsFragment(f, nf, D->entry[i]->fragment_index))
     {
-      _GD_Flush(D, D->entry[i], NULL);
+      _GD_Flush(D, D->entry[i]);
     }
 
   /* flush the fragment's metadata, if requested */

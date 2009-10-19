@@ -55,7 +55,7 @@ namespace GetData {
       int SetSamplesPerFrame(const char *spf, int recode = 0);
       int SetType(DataType type, int recode = 0);
 
-      const char *Scalar() {
+      virtual const char *Scalar() {
         return E.scalar[0];
       };
 

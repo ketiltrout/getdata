@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH get_native_type 3 "17 October 2009" "Version 0.6.0" "GETDATA"
+.TH get_native_type 3 "19 October 2009" "Version 0.6.0" "GETDATA"
 .SH NAME
 get_native_type \(em returns the native data type of a field in a dirfile
 .SH SYNOPSIS
@@ -30,7 +30,8 @@ The
 function queries a dirfile(5) database specified by
 .I dirfile
 and returns the native data type of the field
-.IR field_code .
+.IR field_code ,
+which may contain a representation suffix.
 
 The 
 .I dirfile

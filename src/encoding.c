@@ -74,7 +74,7 @@ struct encoding_t _gd_ef[GD_N_SUBENCODINGS] = {
 # endif
     NULL, NULL, NULL, NULL, NULL, NULL, NULL , NULL, &_GD_GenericMove,
     &_GD_GenericUnlink, NULL },
-  { GD_LZMA_ENCODED, ".xz", 1, "Lzma", "lzma
+  { GD_LZMA_ENCODED, ".xz", 1, "Lzma", "lzma",
 # ifdef USE_LZMA
     GD_EF_OPEN | GD_EF_CLOSE | GD_EF_SEEK | GD_EF_READ | GD_EF_SIZE,
 # else

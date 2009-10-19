@@ -390,7 +390,7 @@ int _GD_FillZero(void *databuffer, gd_type_t type, size_t nz);
 gd_entry_t* _GD_FindField(DIRFILE* D, const char* field_code,
     unsigned int *next);
 void _GD_FixEndianness(char* databuffer, size_t size, size_t ns);
-void _GD_Flush(DIRFILE* D, gd_entry_t *E, const char* field_code);
+void _GD_Flush(DIRFILE* D, gd_entry_t *E);
 void _GD_FlushMeta(DIRFILE* D, int fragment);
 void _GD_FreeE(gd_entry_t* E, int priv);
 int _GD_GetLine(FILE *fp, char *line, int* linenum);

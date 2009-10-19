@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH dirfile_alter_entry 3 "16 October 2009" "Version 0.6.0" "GETDATA"
+.TH dirfile_alter_entry 3 "19 October 2009" "Version 0.6.0" "GETDATA"
 .SH NAME
 dirfile_alter_entry \(em modify the metadata of a dirfile field
 .SH SYNOPSIS
@@ -28,7 +28,7 @@ dirfile_alter_entry \(em modify the metadata of a dirfile field
 .SH DESCRIPTION
 The
 .BR dirfile_alter_entry ()
-function modifies the field described by 
+function modifies the field specified by 
 .I field_code
 in the dirfile specified by
 .I dirfile
@@ -37,7 +37,9 @@ to correspond to the new parameters specified by
 In addition to specifying a regular field,
 .I field_code
 may also refer to a metafield by specifying it using its full (slashed) field
-code.
+code.  However,
+.I field_code
+should never contain a represenation suffix.
 
 The form of
 .I entry

@@ -100,7 +100,7 @@ namespace GetData {
 
       GetData::Fragment *Fragment(int index);
 
-      int FragmentIndex(const char* field_cde);
+      int FragmentIndex(const char* field_code);
 
       double FrameNum(const char* field_code, double value,
           off_t frame_start = 0, off_t frame_end = 0);

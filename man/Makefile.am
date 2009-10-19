@@ -21,8 +21,8 @@
 AUTOMAKE_OPTIONS = foreign
 
 if HAVE_OFF64_T
-LFS_transitional_mans = getdata64.3 get_frameoffset64.3 get_nframes64.3 \
-												putdata64.3
+LFS_transitional_mans = getdata64.3 get_framenum_subset64.3 \
+												get_frameoffset64.3 get_nframes64.3 putdata64.3
 INSTALL_DATA_HOOK64 = install-data-hook64
 endif
 
@@ -118,7 +118,7 @@ uninstall-hook:
 		dirfile_add_polynom.3 dirfile_add_sbit.3 dirfile_madd_clincom.3 \
 		dirfile_madd_cpolynom.3 dirfile_madd_polynom.3 dirfile_madd_sbit.3 \
 		dirfile_alter_clincom.3 dirfile_alter_cpolynom.3 dirfile_alter_polynom.3 \
-		dirfile_alter_sbit.3 dirfile_framenum.3
+		dirfile_alter_sbit.3 dirfile_framenum.3 dirfile_alter_frameoffset64.3
 
 clean-local:
 	rm -rf *~ 

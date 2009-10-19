@@ -24,14 +24,15 @@ The "getdata" module, which these bindings define, is described in
 `getdata.mod', which will be installed in the same directory as getdata.h.  The
 getdata module defines the same error codes (GD_E_OK, GD_E_OPEN, &c.), the same
 open flags (GD_RDONLY, GD_CREAT, &c.) and the same data type specifiers
-(GD_INT8, GD_FLOAT32, &c.) as the C API.
+(GD_INT8, GD_FLOAT32, &c.), and other symbolic parameters as the C API.
 
 Available Procedures
 ====================
 
 Notably, unlike the Fortran 77 bindings, the Fortran 95 bindings do not
 require passing character string lengths along with the string itself to
-procedures.
+procedures.  The downside to this convenience is that strings with trailing
+whitespace cannot be used.
 
 Procedures which are essentially equivalent to their C API counterparts, with
 the exception of including an initial `f' in their names, and using dirfile
@@ -144,11 +145,17 @@ unit numbers in place of C's DIRFILE pointers are:
   set the value of the constant.  Use one of the put_constant procedures after
   creating the field).
 
+* subroutine fdirfile_add_clincom (dirfile, field_name, n_fields, in_field1, m1,
+  b1, in_field2, m2, b2, in_field3, m3, b3, fragment_index)
+  integer, intent(in) :: dirfile, n_fields, fragment_index
+  character (len=*), intent(in) :: field_name, in_field1, in_field2, in_field3
+  double complex, intent(in) :: m1, b1, m2, b2, m3, b3
+
 * subroutine fdirfile_add_lincom (dirfile, field_name, n_fields, in_field1, m1,
   b1, in_field2, m2, b2, in_field3, m3, b3, fragment_index)
   integer, intent(in) :: dirfile, n_fields, fragment_index
   character (len=*), intent(in) :: field_name, in_field1, in_field2, in_field3
-  real*8, intent(in) :: m1, b1, m2, b2, m3, b3
+  double precision, intent(in) :: m1, b1, m2, b2, m3, b3
 
 * subroutine fdirfile_add_linterp (dirfile, field_name, in_field, table,
   fragment_index)
@@ -165,10 +172,27 @@ unit numbers in place of C's DIRFILE pointers are:
   integer, intent(in) :: dirfile, phase, fragment_index
   character (len=*), intent(in) :: field_name, in_field
 
+* subroutine fdirfile_add_polynom (dirfile, field_name, poly_ord, in_field, a0,
+  a1, a2, a3, a4, a5, fragment_index)
+  integer, intent(in) :: dirfile, poly_ord, fragment_index
+  character (len=*), intent(in) :: field_name, in_field
+  double precision, intent(in) :: a0, a1, a2, a3, a4, a5
+
+* subroutine fdirfile_add_cpolynom (dirfile, field_name, poly_ord, in_field, a0,
+  a1, a2, a3, a4, a5, fragment_index)
+  integer, intent(in) :: dirfile, poly_ord, fragment_index
+  character (len=*), intent(in) :: field_name, in_field
+  double complex, intent(in) :: a0, a1, a2, a3, a4, a5
+
 * subroutine fdirfile_add_raw (dirfile, field_code, data_type, spf,
   fragment_index)
   integer, intent(in) :: dirfile, data_type, spf, fragment_index
   character (len=*), intent(in) :: field_code
+
+* subroutine fdirfile_add_sbit (dirfile, field_name, in_field, bitnum, numbits,
+  fragment_index)
+  integer, intent(in) :: dirfile, bitnum, numbits, fragment_index
+  character (len=*), intent(in) :: field_name, in_field
 
 * subroutine fdirfile_add_string (dirfile, field_code, fragment_index)
   integer, intent(in) :: dirfile, fragment_index
@@ -196,7 +220,14 @@ unit numbers in place of C's DIRFILE pointers are:
   integer, intent(in) :: dirfile, n_fields
   character (len=*), intent(in) :: field_name, in_field1, in_field2, in_field3
   character (len=*), intent(in) :: parent
-  real*8, intent(in) :: m1, b1, m2, b2, m3, b3
+  double precision, intent(in) :: m1, b1, m2, b2, m3, b3
+
+* subroutine fdirfile_madd_clincom (dirfile, parent, field_name, n_fields,
+  in_field1, m1, b1, in_field2, m2, b2, in_field3, m3, b3)
+  integer, intent(in) :: dirfile, n_fields
+  character (len=*), intent(in) :: field_name, in_field1, in_field2, in_field3
+  character (len=*), intent(in) :: parent
+  double complex, intent(in) :: m1, b1, m2, b2, m3, b3
 
 * subroutine fdirfile_madd_linterp (dirfile, parent, field_name, in_field,
   table)
@@ -210,6 +241,23 @@ unit numbers in place of C's DIRFILE pointers are:
 
 * subroutine fdrifile_madd_phase (dirfile, parent, field_name, in_field, phase)
   integer, intent(in) :: dirfile, phase
+  character (len=*), intent(in) :: field_name, in_field, parent
+
+* subroutine fdirfile_madd_polynom (dirfile, parent, field_name, poly_ord,
+  in_field, a0, a1, a2, a3, a4, a5)
+  integer, intent(in) :: dirfile, poly_ord
+  character (len=*), intent(in) :: field_name, in_field, parent
+  double precision, intent(in) :: a0, a1, a2, a3, a4, a5
+
+* subroutine fdirfile_madd_cpolynom (dirfile, parent, field_name, poly_ord,
+  in_field, a0, a1, a2, a3, a4, a5)
+  integer, intent(in) :: dirfile, poly_ord
+  character (len=*), intent(in) :: field_name, in_field, parent
+  double precision, intent(in) :: a0, a1, a2, a3, a4, a5
+
+* subroutine fdirfile_madd_sbit (dirfile, parent, field_name, in_field, bitnum,
+  numbits)
+  integer, intent(in) :: dirfile, bitnum, numbits
   character (len=*), intent(in) :: field_name, in_field, parent
 
 * subroutine fdirfile_madd_string (dirfile, parent, field_code)
@@ -234,7 +282,7 @@ unit numbers in place of C's DIRFILE pointers are:
     subroutine sehandler(act, dirfile_unit, suberror, line)
       integer, intent (out) :: act
       integer, intent (in) :: dirfile_unit, suberror
-      character (len=@GD_MAX_LINE_LENGTH@), intent (inout) :: line
+      character (len=GD_MAX_LINE_LENGTH), intent (inout) :: line
     end subroutine
   end interface
 
@@ -261,6 +309,10 @@ unit numbers in place of C's DIRFILE pointers are:
 
 * subroutine fdirfile_protect (dirfile, protection_level, fragment)
   integer, intent(in) :: dirfile, protection_level, fragment
+
+* integer function fget_native_type (dirfile, field_code)
+  integer integer(in) :: dirfile
+  character (len=*), intent(in) :: field_code
 
 * integer function fget_parent_fragment (dirfile, fragment)
   integer, intent(in) :: dirfile, fragment
@@ -289,7 +341,7 @@ unit numbers in place of C's DIRFILE pointers are:
   m1, b1, in_field2, m2, b2, in_field3, m3, b3)
   integer, intent(in) :: dirfile, n_fields
   character (len=*), intent(in) :: field_name, in_field1, in_field2, in_field3
-  real*8, intent(in) :: m1, b1, m2, b2, m3, b3
+  double precision, intent(in) :: m1, b1, m2, b2, m3, b3
 
 * subroutine fdirfile_alter_linterp (dirfile, field_name, in_field, table, move)
   integer, intent(in) :: dirfile, move
@@ -331,6 +383,26 @@ unit numbers in place of C's DIRFILE pointers are:
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: field_code
 
+* integer function fdirfile_validate (dirfile, field_code)
+  integer integer(in) :: dirfile
+  character (len=*), intent(in) :: field_code
+
+* double precision function fget_framenum (dirfile, field_code, value)
+  integer, intent(in) :: dirfile
+  character (len=*), intent(in) :: field_code
+  double precision, intent(in) :: value
+
+* double precision function fget_framenum_subset (dirfile, field_code, value,
+  frame_start, frame_end)
+  integer, intent(in) :: dirfile, frame_start, frame_end
+  character (len=*), intent(in) :: field_code
+  double precision, intent(in) :: value 
+
+* subroutine fdirfilename (dirfilename, diriflename_l, dirfile, fragment_index)
+  character (len=*), intent(out) :: dirfilename
+  integer, intent(in) :: dirfile, fragment_index
+  integer, intent(inout) :: diriflename_l
+
 In order to respect type safety, the getdata and putdata analogues encode
 the datatype of their array in their function name, rather than as a parameter.
 Otherwise, they behave the same as their C counterparts.
@@ -356,14 +428,19 @@ Otherwise, they behave the same as their C counterparts.
   first_sample, num_frames, num_samples, data_out)
 * integer function fgetdata_r8 (dirfile_unit, field_code, first_frame,
   first_sample, num_frames, num_samples, data_out)
+* integer function fgetdata_c8 (dirfile_unit, field_code, first_frame,
+  first_sample, num_frames, num_samples, data_out)
+* integer function fgetdata_c16 (dirfile_unit, field_code, first_frame,
+  first_sample, num_frames, num_samples, data_out)
   integer, intent(in) :: dirfile_unit
   integer, intent(in) :: first_frame, first_sample, num_frames, num_samples
   character (len=*), intent(in) :: field_code
   <datatype>, dimension(:), intent(out) :: data_out
 
   These call getdata(3) with return_type = GD_INT8, GD_INT16, GD_INT32,
-  GD_INT64, GD_FLOAT32, and GD_FLOAT64, respectively.  Here <datatype> is an
-  integer or real type of the appropriate width.
+  GD_INT64, GD_FLOAT32, GD_FLOAT64, GD_COMPLEX64, and GD_COMPLEX128
+  respectively.  Here <datatype> is an integer or real type of the appropriate
+  width.
 
   Analogously, for putdata:
 
@@ -379,6 +456,10 @@ Otherwise, they behave the same as their C counterparts.
   first_sample, num_frames, num_samples, data_in)
 * integer function fputdata_r8 (dirfile_unit, field_code, first_frame,
   first_sample, num_frames, num_samples, data_in)
+* integer function fputdata_c8 (dirfile_unit, field_code, first_frame,
+  first_sample, num_frames, num_samples, data_out)
+* integer function fputdata_c16 (dirfile_unit, field_code, first_frame,
+  first_sample, num_frames, num_samples, data_out)
   integer, intent(in) :: dirfile_unit
   integer, intent(in) :: first_frame, first_sample, num_frames, num_samples
   character (len=*), intent(in) :: field_code
@@ -476,7 +557,7 @@ Other procedures in the Fortran 95 bindings are:
     integer :: field_type, n_fields, spf, data_type, bitnum, numbits, shift
     integer :: format_file
     character(len=GD_FIELD_LEN), dimension(3) :: field
-    real*8, dimension(3) :: m, b
+    double precision, dimension(3) :: m, b
   end type
 
   where GD_FIELD_LEN is a constant parameter equal to 4096.  Character strings

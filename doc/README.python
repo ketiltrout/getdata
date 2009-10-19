@@ -1,14 +1,16 @@
 PYTHON BINDINGS FOR GETDATA
 ============================
 
-Full documentation for the Python bindings to the GetData library is contained
-within the PyGetData module itself.  To read this documentation, execute
+The python bindings consist of a python extension module, `pygetdata.so'.  They
+should work with Python version 2.2, or any later 2.x version.  Full
+documentation for the Python bindings to the GetData library is contained
+within the pygetdata module itself.  To read this documentation, execute
 
-$ pydoc getdata
+$ pydoc pygetdata
 
 from the system shell, or
 
->>> import getdata
->>> help(getdata)
+>>> import pygetdata
+>>> help(pygetdata)
 
 from within the Python interpereter.

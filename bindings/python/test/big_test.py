@@ -575,14 +575,14 @@ CheckSimple2(41,2,n,-19)
 
 # 42: get_nfields_by_type check
 try:
-  n = d.get_nfields_by_type(pygetdata.LINCOM_ENTRY)
+  n = d.get_nfields(pygetdata.LINCOM_ENTRY)
 except:
   CheckOK(42)
 CheckSimple(42,n,2)
 
 # 43: get_field_list_by_type check
 try:
-  n = d.get_field_list_by_type(pygetdata.LINCOM_ENTRY)
+  n = d.get_field_list(pygetdata.LINCOM_ENTRY)
 except:
   CheckOK(43)
 CheckSimple(43,n,["lincom", "new2"])
@@ -871,14 +871,14 @@ CheckSimple(62,n,"Arthur Dent")
 
 # 63: get_nmfields_by_type check
 try:
-  n = d.get_nmfields_by_type("data",pygetdata.LINCOM_ENTRY)
+  n = d.get_nmfields("data",pygetdata.LINCOM_ENTRY)
 except:
   CheckOK(63)
 CheckSimple(63,n,1)
 
 # 64: get_mfield_list_by_type check
 try:
-  n = d.get_mfield_list_by_type("data",pygetdata.LINCOM_ENTRY)
+  n = d.get_mfield_list("data",pygetdata.LINCOM_ENTRY)
 except:
   CheckOK(64)
 CheckSimple(64,n,["mnew1"])
@@ -902,7 +902,7 @@ CheckSimple(66,n,['mlut', 'mnew1', 'mnew3', 'mnew6', 'mnew7', 'mnew8', 'mnew9',
 ent = pygetdata.entry(pygetdata.RAW_ENTRY, "new1", 0,
     {"type": pygetdata.FLOAT32, "spf": 4})
 try:
-  n = d.alter(ent)
+  n = d.alter("new1", ent)
 except:
   CheckOK2(67,1)
 

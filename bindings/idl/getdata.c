@@ -477,7 +477,7 @@ IDL_VPTR gdidl_make_idl_entry(const gd_entry_t* E)
               "IN_FIELDS", IDL_MSG_LONGJMP, NULL)) + 1, E->in_fields[1]);
       break;
     case GD_PHASE_ENTRY:
-      *(IDL_INT*)(data + IDL_StructTagInfoByName(gdidl_entry_def, "SHIFT",
+      *(IDL_LONG*)(data + IDL_StructTagInfoByName(gdidl_entry_def, "SHIFT",
             IDL_MSG_LONGJMP, NULL)) = E->shift;
       IDL_StrStore((IDL_STRING*)(data + IDL_StructTagInfoByName(gdidl_entry_def,
               "SCALAR", IDL_MSG_LONGJMP, NULL)), E->scalar[0]);
@@ -722,8 +722,8 @@ void gdidl_read_idl_entry(gd_entry_t *E, IDL_VPTR v, int alter)
     case GD_PHASE_ENTRY:
       o = IDL_StructTagInfoByName(v->value.s.sdef, "SHIFT", IDL_MSG_LONGJMP,
           &d);
-      if (d->type != IDL_TYP_INT)
-        idl_abort("GD_ENTRY element SHIFT must be of type INT");
+      if (d->type != IDL_TYP_LONG)
+        idl_abort("GD_ENTRY element SHIFT must be of type LONG");
       E->shift = *(int16_t*)(data + o);
       copy_scalar[0] = 1;
       break;
@@ -821,6 +821,8 @@ unsigned long gdidl_convert_encoding(IDL_VPTR idl_enc)
       encoding = GD_BZIP2_ENCODED;
     else if (strcasecmp(enc, "GZIP"))
       encoding = GD_GZIP_ENCODED;
+    else if (strcasecmp(enc, "LZMA"))
+      encoding = GD_LZMA_ENCODED;
     else if (strcasecmp(enc, "SLIM"))
       encoding = GD_SLIM_ENCODED;
     else if (strcasecmp(enc, "TEXT"))
@@ -1249,7 +1251,7 @@ void gdidl_dirfile_add_phase(int argc, IDL_VPTR argv[], char *argk)
   DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
   const char* field_code = IDL_VarGetString(argv[1]);
   const char* in_field = IDL_VarGetString(argv[2]);
-  int shift = (int)IDL_LongScalar(argv[3]);
+  long shift = IDL_LongScalar(argv[3]);
 
   if (kw.parent_x) {
     const char* parent = IDL_STRING_STR(&kw.parent);
@@ -1688,22 +1690,28 @@ void gdidl_dirfile_alter_encoding(int argc, IDL_VPTR argv[], char *argk)
     IDL_KW_RESULT_FIRST_FIELD;
     GDIDL_KW_RESULT_ERROR;
     int fragment_index;
+    int fragment_index_x;
     int recode;
   } KW_RESULT;
   KW_RESULT kw;
 
   kw.recode = 0;
   kw.fragment_index = 0;
+  kw.fragment_index_x = 0;
   GDIDL_KW_INIT_ERROR;
 
   static IDL_KW_PAR kw_pars[] = {
     GDIDL_KW_PAR_ERROR,
     GDIDL_KW_PAR_ESTRING,
-    { "FRAGMENT", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(fragment_index) },
+    { "FRAGMENT", IDL_TYP_INT, 1, 0, IDL_KW_OFFSETOF(fragment_index_x),
+      IDL_KW_OFFSETOF(fragment_index) },
     { "RECODE", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(recode) },
   };
 
   IDL_KWProcessByOffset(argc, argv, argk, kw_pars, NULL, 1, &kw);
+
+  if (!kw.fragment_index_x)
+    kw.fragment_index = GD_ALL_FRAGMENTS;
 
   DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
 
@@ -1727,6 +1735,7 @@ void gdidl_dirfile_alter_endianness(int argc, IDL_VPTR argv[], char *argk)
     GDIDL_KW_RESULT_ERROR;
     int big_end;
     int fragment_index;
+    int fragment_index_x;
     int little_end;
     int recode;
   } KW_RESULT;
@@ -1734,6 +1743,7 @@ void gdidl_dirfile_alter_endianness(int argc, IDL_VPTR argv[], char *argk)
 
   kw.recode = 0;
   kw.fragment_index = 0;
+  kw.fragment_index_x = 0;
   kw.big_end = kw.little_end = 0;
   GDIDL_KW_INIT_ERROR;
 
@@ -1741,12 +1751,16 @@ void gdidl_dirfile_alter_endianness(int argc, IDL_VPTR argv[], char *argk)
     { "BIG_ENDIAN", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(big_end) },
     GDIDL_KW_PAR_ERROR,
     GDIDL_KW_PAR_ESTRING,
-    { "FRAGMENT", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(fragment_index) },
+    { "FRAGMENT", IDL_TYP_INT, 1, 0, IDL_KW_OFFSETOF(fragment_index_x),
+      IDL_KW_OFFSETOF(fragment_index) },
     { "LITTLE_ENDIAN", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(little_end) },
     { "RECODE", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(recode) },
   };
 
   IDL_KWProcessByOffset(argc, argv, argk, kw_pars, NULL, 1, &kw);
+
+  if (!kw.fragment_index_x)
+    kw.fragment_index = GD_ALL_FRAGMENTS;
 
   DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
 
@@ -1807,22 +1821,28 @@ void gdidl_dirfile_alter_frameoffset(int argc, IDL_VPTR argv[], char *argk)
     IDL_KW_RESULT_FIRST_FIELD;
     GDIDL_KW_RESULT_ERROR;
     int fragment_index;
+    int fragment_index_x;
     int recode;
   } KW_RESULT;
   KW_RESULT kw;
 
   kw.recode = 0;
   kw.fragment_index = 0;
+  kw.fragment_index_x = 0;
   GDIDL_KW_INIT_ERROR;
 
   static IDL_KW_PAR kw_pars[] = {
     GDIDL_KW_PAR_ERROR,
     GDIDL_KW_PAR_ESTRING,
-    { "FRAGMENT", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(fragment_index) },
+    { "FRAGMENT", IDL_TYP_INT, 1, 0, IDL_KW_OFFSETOF(fragment_index_x),
+      IDL_KW_OFFSETOF(fragment_index) },
     { "RECODE", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(recode) },
   };
 
   IDL_KWProcessByOffset(argc, argv, argk, kw_pars, NULL, 1, &kw);
+
+  if (!kw.fragment_index_x)
+    kw.fragment_index = GD_ALL_FRAGMENTS;
 
   DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
 
@@ -2100,7 +2120,7 @@ void gdidl_dirfile_alter_phase(int argc, IDL_VPTR argv[], char *argk)
     GDIDL_KW_PAR_ESTRING,
     { "IN_FIELD", IDL_TYP_STRING, 1, 0, IDL_KW_OFFSETOF(in_field_x),
       IDL_KW_OFFSETOF(in_field) },
-    { "SHIFT", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(shift) },
+    { "SHIFT", IDL_TYP_LONG, 1, 0, 0, IDL_KW_OFFSETOF(shift) },
     { NULL }
   };
 
@@ -2422,7 +2442,7 @@ void gdidl_dirfile_delete(int argc, IDL_VPTR argv[], char *argk)
   GDIDL_KW_INIT_ERROR;
 
   static IDL_KW_PAR kw_pars[] = {
-    { "DATA", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(data) },
+    { "DEL_DATA", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(data) },
     { "DEREF", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(deref) },
     GDIDL_KW_PAR_ERROR,
     GDIDL_KW_PAR_ESTRING,
@@ -2525,8 +2545,8 @@ void gdidl_dirfile_include(int argc, IDL_VPTR argv[], char *argk)
     GDIDL_KW_PAR_ERROR,
     GDIDL_KW_PAR_ESTRING,
     { "EXCL", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(excl) },
-    { "FORCE_ENC", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(force_enc) },
-    { "FORCE_END", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(force_end) },
+    { "FORCE_ENCODING", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(force_enc) },
+    { "FORCE_ENDIANNESS", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(force_end) },
     { "FRAGMENT", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(fragment_index) },
     { "INDEX", 0, 1, IDL_KW_OUT, IDL_KW_OFFSETOF(index_x),
       IDL_KW_OFFSETOF(index) },
@@ -2682,8 +2702,8 @@ IDL_VPTR gdidl_dirfile_open(int argc, IDL_VPTR argv[], char *argk)
     GDIDL_KW_PAR_ERROR,
     GDIDL_KW_PAR_ESTRING,
     { "EXCL", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(excl) },
-    { "FORCE_ENC", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(force_enc) },
-    { "FORCE_END", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(force_end) },
+    { "FORCE_ENCODING", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(force_enc) },
+    { "FORCE_ENDIANNESS", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(force_end) },
     { "IGNORE_DUPS", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(ignore_dups) },
     { "LITTLE_ENDIAN", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(little_end) },
     { "PEDANTIC", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(pedantic) },
@@ -2728,26 +2748,26 @@ void gdidl_dirfile_protect(int argc, IDL_VPTR argv[], char *argk)
   typedef struct {
     IDL_KW_RESULT_FIRST_FIELD;
     GDIDL_KW_RESULT_ERROR;
-    int all_frags;
     int fragment_index;
+    int fragment_index_x;
   } KW_RESULT;
   KW_RESULT kw;
 
   GDIDL_KW_INIT_ERROR;
   kw.fragment_index = 0;
-  kw.all_frags = 0;
+  kw.fragment_index_x = 0;
 
   static IDL_KW_PAR kw_pars[] = {
-    { "ALL_FRAGMENTS", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(all_frags) },
     GDIDL_KW_PAR_ERROR,
     GDIDL_KW_PAR_ESTRING,
-    { "FRAGMENT", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(fragment_index) },
+    { "FRAGMENT", IDL_TYP_INT, 1, 0, IDL_KW_OFFSETOF(fragment_index_x),
+      IDL_KW_OFFSETOF(fragment_index) },
     { NULL }
   };
 
   IDL_KWProcessByOffset(argc, argv, argk, kw_pars, NULL, 1, &kw);
 
-  if (kw.all_frags)
+  if (!kw.fragment_index_x)
     kw.fragment_index = GD_ALL_FRAGMENTS;
 
   DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
@@ -2887,7 +2907,7 @@ IDL_VPTR gdidl_getdata(int argc, IDL_VPTR argv[], char *argk)
   IDL_VPTR r;
 
   kw.first_frame = kw.first_sample = kw.n_frames = kw.n_samples = 0;
-  kw.return_type = GD_DOUBLE;
+  kw.return_type = GD_FLOAT64;
   GDIDL_KW_INIT_ERROR;
 
   static IDL_KW_PAR kw_pars[] = {
@@ -3974,7 +3994,7 @@ static IDL_STRUCT_TAG_DEF gdidl_entry[] = {
   { "NUMBITS",    0, (void*)IDL_TYP_INT }, /* (S)BIT */
   { "POLY_ORD",   0, (void*)IDL_TYP_INT }, /* POLYNOM */
   { "SCALAR",     polynom_dims, (void*)IDL_TYP_STRING },
-  { "SHIFT",      0, (void*)IDL_TYP_INT }, /* PHASE */
+  { "SHIFT",      0, (void*)IDL_TYP_LONG }, /* PHASE */
   { "SPF",        0, (void*)IDL_TYP_UINT }, /* RAW */
   { "TABLE",      0, (void*)IDL_TYP_STRING }, /* LINTERP */
   { NULL }

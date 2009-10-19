@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH get_framenum 3 "17 October 2009" "Version 0.6.0" "GETDATA"
+.TH get_framenum 3 "19 October 2009" "Version 0.6.0" "GETDATA"
 .SH NAME
 get_framenum_subset, get_framenum \(em perform a reverse look-up on a monotonic
 dirfile field
@@ -35,8 +35,8 @@ The
 function queries a dirfile(5) database specified by
 .I dirfile
 and returns the fractional frame number at which the field specified by
-.I field_code
-equals
+.IR field_code ,
+which may contain a representation suffix, equals
 .IR value ,
 by considering the field between the frame limits
 .I field_start

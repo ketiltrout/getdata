@@ -32,20 +32,14 @@
 
 #define GD_MAX_PRETTY_FIELD_WIDTH 80
 
-void _GD_Flush(DIRFILE* D, gd_entry_t *E, const char* field_code)
+void _GD_Flush(DIRFILE* D, gd_entry_t *E)
 {
   int i;
 
   dtrace("%p, %p", D, E);
 
-  if (E == NULL) {
-    _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, field_code);
-    dreturnvoid();
-    return;
-  }
-
   if (++D->recurse_level >= GD_MAX_RECURSE_LEVEL) {
-    _GD_SetError(D, GD_E_RECURSE_LEVEL, 0, NULL, 0, field_code);
+    _GD_SetError(D, GD_E_RECURSE_LEVEL, 0, NULL, 0, E->field);
     D->recurse_level--;
     dreturnvoid();
     return;
@@ -64,17 +58,17 @@ void _GD_Flush(DIRFILE* D, gd_entry_t *E, const char* field_code)
       break;
     case GD_LINCOM_ENTRY:
       for (i = 2; i < GD_MAX_LINCOM; ++i)
-        _GD_Flush(D, E->e->entry[i], field_code);
+        _GD_Flush(D, E->e->entry[i]);
       /* fallthrough */
     case GD_MULTIPLY_ENTRY:
-      _GD_Flush(D, E->e->entry[1], field_code);
+      _GD_Flush(D, E->e->entry[1]);
       /* fallthrough */
     case GD_LINTERP_ENTRY:
     case GD_BIT_ENTRY:
     case GD_PHASE_ENTRY:
     case GD_POLYNOM_ENTRY:
     case GD_SBIT_ENTRY:
-      _GD_Flush(D, E->e->entry[0], field_code);
+      _GD_Flush(D, E->e->entry[0]);
     case GD_CONST_ENTRY:
     case GD_STRING_ENTRY:
     case GD_INDEX_ENTRY:
@@ -512,6 +506,8 @@ int dirfile_metaflush(DIRFILE* D)
 int dirfile_flush(DIRFILE* D, const char* field_code)
 {
   unsigned int i;
+  char *simple_field_code;
+  gd_entry_t *E;
 
   dtrace("%p, \"%s\"", D, field_code);
 
@@ -524,9 +520,20 @@ int dirfile_flush(DIRFILE* D, const char* field_code)
     if (!D->error)
       for (i = 0; i < D->n_entries; ++i)
         if (D->entry[i]->field_type == GD_RAW_ENTRY)
-          _GD_Flush(D, D->entry[i], NULL);
+          _GD_Flush(D, D->entry[i]);
   } else {
-    _GD_Flush(D, _GD_FindField(D, field_code, NULL), field_code);
+    /* discard representation */
+    _GD_GetRepr(D, field_code, &simple_field_code);
+
+    E = _GD_FindField(D, simple_field_code, NULL);
+
+    if (E == NULL)
+      _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, field_code);
+    else
+      _GD_Flush(D, E);
+
+    if (field_code != simple_field_code)
+      free(simple_field_code);
   }
 
   dreturn("%i", (D->error == GD_E_OK) ? 0 : -1);

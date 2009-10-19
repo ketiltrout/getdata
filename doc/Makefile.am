@@ -20,7 +20,28 @@
 #
 AUTOMAKE_OPTIONS = foreign
 
-dist_doc_DATA = README.cxx README.f77 README.f95 unclean_database_recovery.txt
+if MAKE_CXXBINDINGS
+READMECXX=README.cxx
+endif
+
+if MAKE_F77BINDINGS
+READMEF77=README.f77
+endif
+
+if MAKE_F95BINDINGS
+READMEF95=README.f77
+endif
+
+if MAKE_IDLBINDINGS
+READMEIDL=README.idl
+endif
+
+if MAKE_IDLBINDINGS
+READMEPYTHON=README.python
+endif
+
+dist_doc_DATA = ${READMECXX} ${READMEF77} ${READMEF95} ${READMEIDL} \
+								${READMEPYTHON} unclean_database_recovery.txt
 
 clean-local:
 	rm -rf *~

@@ -32,6 +32,9 @@ function queries a dirfile(5) database specified by
 .I dirfile
 and returns the field type of the field specified by
 .IR field_code .
+If
+.I field_code
+contains a valid representation suffix, it will be ignored.
 
 The
 .B gd_entype_t
@@ -62,6 +65,11 @@ The supplied dirfile was invalid.
 The field specified by
 .I field_code
 was not found in the database.
+.TP
+.B GD_E_BAD_REPR
+The representation suffix specified in
+.I field_code
+was not recognised.
 .P
 The dirfile error may be retrieved by calling
 .BR get_error (3).

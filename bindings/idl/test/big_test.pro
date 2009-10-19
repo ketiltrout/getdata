@@ -366,7 +366,7 @@ nume += check_simple2(38, 5, n, 4.3D)
 
 ;  125: dirfile_add
 n = {field: "new13", field_type: !GD.PHASE_ENTRY, fragment: 0, $
-  shift: -88, in_fields: [ "new9" ], scalar: [ "" ]}
+  shift: -88L, in_fields: [ "new9" ], scalar: [ "" ]}
 dirfile_add, d, n
 nume += check_ok2(125, 1, d)
 
@@ -523,7 +523,7 @@ nume += check_simple2(55, 4, n.data_type, !GD.UINT64)
 
 ;  126: dirfile_madd
 n = {field: "mnew13", field_type: !GD.PHASE_ENTRY, fragment: 0, $
-  shift: 2, in_fields: [ "in1" ], scalar: [ "" ]}
+  shift: 2L, in_fields: [ "in1" ], scalar: [ "" ]}
 dirfile_add, d, n, parent="data"
 nume += check_ok2(126, 1, d)
 
@@ -750,7 +750,7 @@ nume += check_simple2(77, 3, n.fragment, 0)
 nume += check_simple2(77, 4, n.data_type, !GD.FLOAT32)
 
 ;  141: dirfile_alter
-n = {field_type: !GD.PHASE_ENTRY, shift: -8}
+n = {field_type: !GD.PHASE_ENTRY, shift: -8L}
 dirfile_alter_entry, d, "new13", n
 nume += check_ok2(141, 1, d)
 

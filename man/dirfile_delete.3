@@ -1,6 +1,6 @@
 .\" dirfile_delete.3.  The dirfile_delete man page.
 .\"
-.\" (C) 2008 D. V. Wiebe
+.\" (C) 2008, 2009 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH dirfile_delete 3 "14 December 2008" "Version 0.5.0" "GETDATA"
+.TH dirfile_delete 3 "19 October 2009" "Version 0.6.0" "GETDATA"
 .SH NAME
 dirfile_delete \(em remove a field from a dirfile
 .SH SYNOPSIS
@@ -32,6 +32,9 @@ function attempts to delete the field specified by
 .I field_code
 in the dirfile specified by
 .IR dirfile .
+The
+.I field_code
+should not contain a representation suffix.
 
 The
 .I flags

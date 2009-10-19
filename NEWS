@@ -1,6 +1,151 @@
-New in version 0.6.0rc2:
+New in version 0.6.0rc3:
 
-  (No NEWS is good NEWS.)
+  License
+
+  * The GetData library and its bindings are now distributed under the GNU
+    Lesser Public License, version 2.1 or later.
+
+  Dirfile Changes
+
+  * GetData now support Dirfile Standards Version 7.  Standards Version 7 adds
+    complex data types, a signed bitfield (SBIT), a polynomial derived field
+    (POLYNOM), and other features detailed below.
+  * Field codes can now contain a "representation suffix", which allows
+    specifying a complex norm used to convert complex valued data into purely
+    real data.
+  * The n_fields parameter in a LINCOM specification is now optional.
+  * A new encoding scheme which supports LZMA compressed data using the .xz
+    container format has been added.
+  * Look-up tables may contain a complex y-value.  This prohibits writing to
+    the associated LINTERP field.
+
+  Library Changes
+
+  * The field parameters spf (RAW), bitnum and numbits (BIT and SBIT) are now
+    internally restricted to 16-bit signed numbers, which should be more than
+    enough.  The public API still calls these 'int', but callers should never
+    assume this means more than 16-bits.
+  * The shift field parameter is now a long int, which ensures at least 32-bits.
+  * The dirfile flags, including encoding and endianness symbols are now
+    explicitly long ints.  Previously these quantities mixed long int with int
+    arbitrarily.  This affects the public API.
+  * The parser callback has received a new, API breaking signature, which should
+    hopefully reduce the amount of API breakage in the future.  It is also now
+    possible for the caller to pass data through GetData to the callback, if
+    desired.
+  * Computation of derived fields can now handle complex valued inputs, and
+    computation will occur in the complex plane when required.
+  * The computation of LINCOM fields has been re-written and is now faster.
+  * A new open flag, GD_PRETTY_PRINT, tells the library to attempt to write a
+    nicer looking format file.  What this specifically means, isn't part of the
+    public API and shouldn't be relied on in portable code.
+  * BUG FIX: dirfile_madd_spec() and dirfile_add_spec() didn't properly flag
+    the fragments they modified as dirty, leading to possible loss of metadata.
+  * BUG FIX: calling get_nframes on a bzip2 encoded dirfile would report the
+    wrong dirfile length.
+  * BUG FIX: LINTERP tables are now closed after loading, resolving a file
+    descriptor leak of great age (ie. pre-0.3.0).
+  * BUG FIX: When re-writing a format file fragment containing fields with
+    CONST scalar field parameters, GetData no longer replaces the CONST field
+    codes in the field specification lines with the value of the CONST field.
+  * BUG FIX: when moving a field with dirfile_move(), the fragment index in
+    the entry objects of metafields defined for the field were not updated.
+    (The metafields were placed in the correct fragment when the metadata was
+    flushed to disk, despite this.)
+  * BUG FIX: Calling getdata() or putdata() on 64-bit architectures in certain
+    situations involving a non-zero frameoffset no longer results in bizarrity.
+
+  API Changes
+
+  * This release breaks ABI compatibility and, to a lesser extent, API
+    compatibility.  The SOVERSION of the library has been incremented
+    accordingly.
+  * An array containing the CONST scalar field codes used when non-literal
+    parameters are used in the specification of various different fields has
+    been added to the gd_entry_t object.  As a side-effect of this,
+    dirfile_add(), dirfile_alter_entry(), and dirfile_madd() can be used to
+    manipulate non-literal field parameters.
+  * A function, get_native_type(), now exists which returns the underlying data
+    type of a specified field code.
+  * A function, get_framenum(), is now available to perform a "reverse look-up"
+    on a field: given a data value, it reports the frame number where the field
+    has that value.  The field must be monotonic.
+  * A function, dirfile_validate(), now exists which can be used to check the
+    validity of a field code before use.
+  * Two new error codes have been added: GD_E_DOMAIN, potentially returned by
+    get_framenum(), and GD_E_BAD_REPR, indicating an unrecognised representation
+    suffix, or an attempt to write to a representation.
+  * A new syntax error suberror code has been added: GD_E_FORMAT_LITERAL, which
+    indicates a syntax error in a complex literal number.
+  * BUG FIX: On success, dirfilename(), dirfile_reference(), and get_reference()
+    didn't change the error code to GD_E_OK, resulting in spurious error codes
+    from these functions.
+  * BUG FIX: dirfile_madd_string() and dirfile_madd_const() now don't fail
+    erroneously by reporting GD_E_BAD_CODE.
+  * BUG FIX: error strings relating to GD_E_DELETE error codes now report the
+    proper error information.
+  * BUG FIX: the list returned by get_mstring() is now properly NULL terminated.
+  * BUG FIX: the entry->table member now reports the proper path to the LUT.
+    (That is, the path stored in the format file.)  Previously it incorrectly
+    reported a path relative to the base dirfile directory.
+
+  Legacy API Changes
+
+  * Because they would otherwise be unreported, in the structure returned by
+    GetFormat(), POLYNOM entries are reported as LINCOM entries, by discarding
+    higher order terms.  Similarly, SBIT entries are reported as BIT entries.
+
+  Bindings
+
+  * Bindings for Python and the Interactive Data Language (IDL) have been
+    added.
+  * Bindings for the functionality introduced into 0.6.0 have been added.
+  * C++: The missing bindings for dirfilename(), get_nvectors(), and
+    get_fragment_index() have been added.
+  * C++: Empty entry class constructors have been added which allow delayed
+    specification of field metadata.
+  * C++: The dirfile.h header now includes all other C++ headers, and is now
+    the only header required to be included in applications.  (The other headers
+    can still be included, with no ill effects.)
+  * All bindings have a much expanded test suite, which has resulted in the
+    discovery of many bugs (subsequently fixed).
+  * F77: The callback function is now dirfile-specific, as it is in the C API.
+  * C++ BUG FIX: Entry class constructors now properly set the field name for
+    metafields.
+  * C++ BUG FIX: Fragment::SetEncoding() now actually does what it advertises,
+    instead of doing nothing.
+  * C++ BUG FIX: The recode argument to various functions is now optional and
+    defaults to zero, as the documentation already indicated.
+  * F77 BUG FIX: a NULL C string returned from the C API now returns an empty
+    string, rather than causing a segfault.
+  * F77 BUG FIX: attempting to call another F77 function before calling GDCOPN
+    or GDOPEN no longer results in a segfault.
+  * F77 BUG FIX: passing an out-of-range dirfile unit no longer results in
+    undefined behaviour.
+  * F77 BUG FIX: the last character of a string returned by the bindings is no
+    longer deleted.
+  * F77 BUG FIX: string lengths now report the correct length.
+  * F77 BUG FIX: passing dirfile unit 0 to GDCLOS or GDDSCD no longer corrupts
+    the bindings.
+  * F77 BUG FIX: GDFLDN no longer accepts indices less than one.
+  * F77 BUG FIX: GDESTR now space pads its output string, rather than filling
+    the remainder of the string with garbage.
+  * F77 BUG FIX: The get_entry() bindings, GDGExx no longer segfault on dirfile
+    error.
+  * F77 BUG FIX: GDGTST and GDPTST now report the FORTRAN string length, which
+    is one less than the C API would report, due to the lack of a terminating
+    null.
+  * F95 BUG FIX: Attempting to retrieve a PHASE entry with fget_entry() now
+    works.
+  * F95 BUG FIX: Several routines which were named fdrifile_<foo> are now
+    properly spelled.
+
+  Miscellaneous
+
+  * All bindings can now be disabled by passing --disable-bindings to
+    ./configure.
+
+|==============================================================================|
 
 New in version 0.5.0:
 
@@ -37,7 +182,7 @@ New in version 0.5.0:
     the line or not.  The callback function may be later modified by calling
     dirfile_parser_callback.
   * A fragment may be removed from a dirfile by calling dirfile_uninclude.
-  * The pathname of the drifile may be retrieved by calling dirfilename.
+  * The pathname of the dirfile may be retrieved by calling dirfilename.
   * The reference field for the dirfile may be set or retrieved by calling
     dirfile_reference.
   * Fragment metadata may be queried or modified by calling:

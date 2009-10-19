@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH dirfile_reference 3 "22 December 2008" "Version 0.5.0" "GETDATA"
+.TH dirfile_reference 3 "19 October 2009" "Version 0.6.0" "GETDATA"
 .SH NAME
 dirfile_reference, get_reference \(em retrieve or set the reference field for a dirfile
 .SH SYNOPSIS
@@ -39,7 +39,8 @@ If the
 argument is non-NULL, the reference field for the dirfile will be set to the
 field specified.  If
 .I field_code
-is NULL, the reference field is not modified.
+is NULL, the reference field is not modified.  The field code should refer to
+a RAW field, and may not contain a representation suffix.
 
 .BR get_reference ()
 is equivalent to calling

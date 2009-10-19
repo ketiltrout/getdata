@@ -31,23 +31,45 @@
 #include <string.h>
 #endif
 
-#define EXTRACT_REPR(t,f) \
-  for (i = 0; i < n; ++i) ((t*)rdata)[i] = f(cdata[i])
+#define EXTRACT_REPR(it,ot,f) \
+  for (i = 0; i < n; ++i) ((ot*)rdata)[i] = f(((it*)cdata)[i])
 
-#define EXTRACT_REPRS(t) \
+#define EXTRACT_REPR2(it,ot) \
   switch (repr) { \
-    case GD_REPR_REAL: EXTRACT_REPR(t,creal); break; \
-    case GD_REPR_IMAG: EXTRACT_REPR(t,cimag); break; \
-    case GD_REPR_MOD:  EXTRACT_REPR(t,cabs); break; \
-    case GD_REPR_ARG:  EXTRACT_REPR(t,carg); break; \
+    case GD_REPR_REAL: EXTRACT_REPR(it,ot,creal); break; \
+    case GD_REPR_IMAG: EXTRACT_REPR(it,ot,cimag); break; \
+    case GD_REPR_MOD:  EXTRACT_REPR(it,ot,cabs); break; \
+    case GD_REPR_ARG:  EXTRACT_REPR(it,ot,carg); break; \
   }
 
-void _GD_ExtractRepr(DIRFILE* D, const double complex* cdata,
+#define EXTRACT_REPRS(ot) \
+  switch (in_type) { \
+    case GD_UINT8:      EXTRACT_REPR2(       uint8_t, ot); break; \
+    case GD_INT8:       EXTRACT_REPR2(        int8_t, ot); break; \
+    case GD_UINT16:     EXTRACT_REPR2(      uint16_t, ot); break; \
+    case GD_INT16:      EXTRACT_REPR2(       int16_t, ot); break; \
+    case GD_UINT32:     EXTRACT_REPR2(      uint32_t, ot); break; \
+    case GD_INT32:      EXTRACT_REPR2(       int32_t, ot); break; \
+    case GD_UINT64:     EXTRACT_REPR2(      uint64_t, ot); break; \
+    case GD_INT64:      EXTRACT_REPR2(       int64_t, ot); break; \
+    case GD_FLOAT32:    EXTRACT_REPR2(         float, ot); break; \
+    case GD_FLOAT64:    EXTRACT_REPR2(        double, ot); break; \
+    case GD_COMPLEX64:  EXTRACT_REPR2( float complex, ot); break; \
+    case GD_COMPLEX128: EXTRACT_REPR2(double complex, ot); break; \
+    default: \
+      _GD_SetError(D, GD_E_BAD_TYPE, in_type, NULL, 0, NULL); \
+    case GD_NULL: \
+      break; \
+  }
+
+
+static void _GD_ExtractRepr(DIRFILE* D, const void* cdata, gd_type_t in_type,
     void* rdata, gd_type_t type, size_t n, int repr)
 {
   size_t i;
 
-  dtrace("%p, %p, %p, %x, %zi, %i", D, cdata, rdata, type, n, repr);
+  dtrace("%p, %p, %x, %p, %x, %zi, %i", D, cdata, in_type, rdata, type, n,
+      repr);
 
   switch (type) {
     case GD_UINT8:      EXTRACT_REPRS(       uint8_t); break;
@@ -929,12 +951,12 @@ size_t _GD_DoField(DIRFILE *D, gd_entry_t *E, int repr, off64_t first_samp,
 
   /* short circuit for purely real native types */
   if (~ntype & GD_COMPLEX) {
-    if (repr == GD_REPR_IMAG || repr == GD_REPR_ARG) {
+    if (repr == GD_REPR_IMAG) {
       memset(data_out, 0, GD_SIZE(return_type) * num_samp);
       dreturn("%zi", num_samp);
       return num_samp;
-    }
-    repr = GD_REPR_NONE;
+    } else if (repr == GD_REPR_REAL)
+      repr = GD_REPR_NONE;
   }
 
   /* if the native type is complex valued, but our return type is purely real,
@@ -993,8 +1015,8 @@ size_t _GD_DoField(DIRFILE *D, gd_entry_t *E, int repr, off64_t first_samp,
 
   /* extract the requested representation */
   if (!D->error && repr != GD_REPR_NONE)
-    _GD_ExtractRepr(D, data_out, true_data_out, true_return_type, n_read,
-        repr);
+    _GD_ExtractRepr(D, data_out, return_type, true_data_out, true_return_type,
+        n_read, repr);
 
   if (out_of_place)
     free(data_out);

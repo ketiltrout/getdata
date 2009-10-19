@@ -1,6 +1,6 @@
 .\" dirfile_move.3.  The dirfile_move man page.
 .\"
-.\" (C) 2008 D. V. Wiebe
+.\" (C) 2008, 2009 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH dirfile_move 3 "14 December 2008" "Version 0.5.0" "GETDATA"
+.TH dirfile_move 3 "19 October 2009" "Version 0.6.0" "GETDATA"
 .SH NAME
 dirfile_move \(em move a dirfile field between format file fragments
 .SH SYNOPSIS
@@ -28,9 +28,10 @@ dirfile_move \(em move a dirfile field between format file fragments
 .SH DESCRIPTION
 The
 .BR dirfile_move ()
-function transfers the field
-.I field_code
-defined in the dirfile specified by
+function transfers the field specified by
+.IR field_code ,
+which should not have a representation suffix, defined in the dirfile
+specified by
 .IR dirfile
 from it's current format file fragment to the fragment index by
 .IR new_fragment .
