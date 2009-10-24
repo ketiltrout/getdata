@@ -136,4 +136,4 @@ libgetdatalzma_la_LDFLAGS = $(LZMA_LDFLAGS) -release $(PACKAGE_VERSION) \
 libgetdatalzma_la_CPPFLAGS = $(AM_CPPFLAGS) $(LZMA_CPPFLAGS)
 
 clean-local:
-	rm -rf *~ 
+	rm -rf *~ getdata.pc

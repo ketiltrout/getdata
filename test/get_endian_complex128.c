@@ -34,7 +34,7 @@ int main(void)
   char x[16];
   u.f = 0;
   double complex data_data[128];
-  int fd, i, r = 0;
+  int fd, i, j, r = 0;
   const int big_endian = BigEndian();
 
   mkdir(filedir, 0777); 
@@ -43,11 +43,12 @@ int main(void)
       ? "little" : "big");
 
   data_data[0] = 1.5;
-  for (fd = 1; fd < 128; ++fd) {
-    data_data[fd] =
-      (double complex)(data_data[fd - 1] * (0.5 + _Complex_I));
-    if (fd == 5) {
-      u.f = data_data[fd];
+  for (j = 1; j < 128; ++j) {
+    data_data[j] =
+      (double complex)(data_data[j - 1] * (0.2 + _Complex_I * 0.3));
+    if (j == 5) {
+      u.f = data_data[j];
+
       for (i = 0; i < 8; ++i)
         x[7 - i] = u.b[i];
       for (; i < 16; ++i)
@@ -83,10 +84,9 @@ int main(void)
   }
 
   for (i = 0; i < 16; ++i)
-    if (x[(big_endian) ? 15 - i : i] != u.b[i]) {
-      fprintf(stderr, "x[%i] = %2x, u.b[%i] = %2x (%g;%g)\n",
-          (big_endian) ? 15 - i : i, x[(big_endian) ? 15 - i : i], i, u.b[i],
-          creal(u.f), cimag(u.f));
+    if (x[i] != u.b[i]) {
+      fprintf(stderr, "x[%i] = %2x, u.b[%i] = %2x (%g;%g)\n", i, x[i], i,
+          u.b[i], creal(u.f), cimag(u.f));
       r = 1;
     }
 

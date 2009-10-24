@@ -875,8 +875,8 @@ static size_t _GD_DoPolynom(DIRFILE *D, gd_entry_t *E, off64_t first_samp,
 
 /* _GD_DoConst:  Read from a const.  Returns number of samples read (ie. 1).
 */
-size_t _GD_DoConst(DIRFILE *D, const gd_entry_t *E, gd_type_t return_type,
-    void *data_out)
+static size_t _GD_DoConst(DIRFILE *D, const gd_entry_t *E,
+    gd_type_t return_type, void *data_out)
 {
   dtrace("%p, %p, 0x%x, %p", D, E, return_type, data_out);
 

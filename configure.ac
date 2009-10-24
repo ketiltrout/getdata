@@ -429,7 +429,7 @@ if test "x${use_modules}" != "xno"; then
 fi
 
 dnl functions
-AC_CHECK_FUNCS([atoll atoq])
+AC_CHECK_FUNCS([strtoll strtoull])
 
 dnl headers
 echo

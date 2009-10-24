@@ -94,7 +94,7 @@ static void gdpy_set_scalar_from_pyobj(PyObject* pyobj, gd_type_t type,
   else {
     *scalar = NULL;
     if (type == GD_INT64)
-      *(int64_t*)data = (int64_t)PyLong_AsLongLong(pyobj);
+      *(long int*)data = (long int)PyLong_AsLongLong(pyobj);
     else if (type & GD_COMPLEX)
       *(double complex*)data = gdpy_as_complex(pyobj);
     else if (type & GD_IEEE754)

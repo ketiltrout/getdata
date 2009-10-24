@@ -1,3 +1,36 @@
+2009-10-23   D. V. Wiebe <getdata@keiltrout.net>   svn:327
+	* test/entry_scalar_repr.c: Added.
+
+	* test/put_endian_complex128.c test/put_endian_complex64.c
+	test/get_endian_complex64.c test/get_endian_complex128.c: Fix checks.o
+
+	* src/entry.c (_GD_GetScalar): Handle representations: call _GD_DoField
+	instead of _GD_DoConst
+	* src/del.c (_GD_DeReferenceOne): Added.
+	* src/del.c (_GD_DeReference): Handle representations: call _GD_DoField.
+	* src/getdata.c (_GD_DoConst): Make static.  Callers should use _GD_DoField
+	so that the representation is properly handled.
+
+	* src/flush.c (_GD_StringEscapeise): Preprocessor check for unsigned char.
+
+	* src/flush.c (_GD_WriteConst): Handle long int for PHASE shift.
+
+	* src/parse.c (_GD_SetScalar): Don't convert everything willy-nilly to
+	double first.  Properly handle types.
+	* src/parse.c (_GD_ParseRaw _GD_ParseBit _GD_ParsePhase): Call _GD_SetScalar
+	with an intermediary.
+	* src/parse.c (_GD_ParseConst): Call _GD_SetScalar with the right type code.
+
+	* bindings/python/pydirfile.c (gdpy_dirfile_getdata): Use correct integer
+	types and codes in PyArg_ParseTupleAndKeywords call.
+	* bindings/python/pyentry.c (gdpy_set_scalar_from_pyobj): Fix type for PHASE
+	shift.
+
+	* bindings/f77/fgetdata.c (GDASCA): Fix scalar_l type.  Reject index = 0.
+
+	* bindings/f77/test/Makefile.am bindings/python/Makefile.am
+	bindings/Makefile.am man/Makefile.am: noinst_ flag built files.
+
 2009-10-19   D. V. Wiebe <getdata@ketiltrout.net>  svn:325
 	GetData-0.6.0rc3:
 

@@ -92,12 +92,12 @@ const char* _gd_colsub(void);
 #define dreturn(...)
 #endif
 
-#ifndef HAVE_ATOLL
-# ifdef HAVE_ATOQ
-#  define atoll atoq
-# else
-#  define atoll atol
-# endif
+#ifndef HAVE_STRTOLL
+#  define strtoll strtol
+#endif
+
+#ifndef HAVE_STRTOULL
+#  define stroull strtoul
 #endif
 
 /* some type aliases */
@@ -378,8 +378,6 @@ void _GD_CLinterpData(DIRFILE* D, void *data, gd_type_t type,
     const double complex *ly, size_t n_ln);
 void _GD_ConvertType(DIRFILE* D, const void *data_in, gd_type_t in_type,
     void *data_out, gd_type_t out_type, size_t n) __THROW;
-size_t _GD_DoConst(DIRFILE *D, const gd_entry_t *E, gd_type_t return_type,
-    void *data_out);
 size_t _GD_DoField(DIRFILE*, gd_entry_t*, int, off64_t, size_t, gd_type_t,
     void*);
 size_t _GD_DoFieldOut(DIRFILE*, gd_entry_t*, int, off64_t, size_t, gd_type_t,

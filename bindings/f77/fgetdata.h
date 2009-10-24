@@ -451,4 +451,4 @@ void F77_FUNC(gdgsca, GDGSCA) (char* scalar, int* scalar_l, const int* dirfile,
 
 void F77_FUNC(gdasca, GDASCA) (const int* dirfile, const char* field_code,
     const int *field_code_l, const int *index, const char *scalar,
-    const char *scalar_l, int* recode);
+    const int *scalar_l, int* recode);

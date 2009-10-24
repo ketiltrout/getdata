@@ -428,13 +428,13 @@ static PyObject* gdpy_dirfile_getdata(struct gdpy_dirfile_t* self,
   char* keywords[] = { "field_code", "return_type", "first_frame",
     "first_sample", "num_frames", "num_samples", NULL };
   const char* field_code;
-  off64_t first_frame = 0, first_sample = 0;
-  size_t num_frames = 0, num_samples = 0;
+  PY_LONG_LONG first_frame = 0, first_sample = 0;
+  long int num_frames = 0, num_samples = 0;
   gd_type_t return_type;
   PyObject* pylist;
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
-        "si|LLii:pygetdata.dirfile.getdata", keywords, &field_code,
+        "si|LLll:pygetdata.dirfile.getdata", keywords, &field_code,
         &return_type, &first_frame, &first_sample, &num_frames, &num_samples))
   {
     dreturn("%p", NULL);
@@ -453,8 +453,9 @@ static PyObject* gdpy_dirfile_getdata(struct gdpy_dirfile_t* self,
   else {
     void* data = malloc(ns * GD_SIZE(return_type));
 
-    ns = getdata64(self->D, field_code, first_frame, first_sample, num_frames,
-        num_samples, return_type, data);
+    ns = getdata64(self->D, field_code, (off64_t)first_frame,
+        (off64_t)first_sample, (size_t)num_frames, (size_t)num_samples,
+        return_type, data);
 
     PYGD_CHECK_ERROR2(self->D, NULL, free(data));
 

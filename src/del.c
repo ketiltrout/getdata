@@ -77,111 +77,110 @@ static void _GD_ClearDerived(DIRFILE* D, gd_entry_t* E, const gd_entry_t* C,
   dreturnvoid();
 }
 
-static void _GD_DeReference(DIRFILE* D, gd_entry_t* E, const gd_entry_t* C,
+static int _GD_DeReferenceOne(DIRFILE* D, gd_entry_t* E, gd_entry_t* C,
+    int check, int i, gd_type_t type, void *data)
+{
+  int repr;
+  char *field_code;
+
+  dtrace("%p, %p, %p, %i, %i, 0x%03x, %p", D, E, C, check, i, type, data);
+
+  if (E->scalar[i] != NULL) {
+    repr = _GD_GetRepr(D, E->scalar[i], &field_code);
+
+    if (D->error) {
+      dreturn("%i", 1);
+      return 1;
+    }
+
+    if (strcmp(C->field, field_code) == 0) {
+      if (field_code != E->scalar[i])
+        free(field_code);
+
+      if (check) {
+        _GD_SetError(D, GD_E_DELETE, GD_E_DEL_CONST, E->field, 0, C->field);
+
+        dreturn("%i", 1);
+        return 1;
+      } else {
+        _GD_DoField(D, C, repr, 0, 1, type, data);
+        free(E->scalar[i]);
+        E->scalar[i] = NULL;
+      }
+    } else if (field_code != E->scalar[i])
+      free(field_code);
+
+  }
+
+  dreturn("%i", 0);
+  return 0;
+}
+
+static void _GD_DeReference(DIRFILE* D, gd_entry_t* E, gd_entry_t* C,
     int check)
 {
   int i;
+  uint16_t u16;
+  int16_t i16;
+  int64_t i64;
 
   dtrace("%p, %p, %p, %i", D, E, C, check);
 
   switch(E->field_type) {
     case GD_RAW_ENTRY:
-      if (E->scalar[0] != NULL && strcmp(C->field, E->scalar[0]) == 0) {
-        if (check) {
-          _GD_SetError(D, GD_E_DELETE, GD_E_DEL_CONST, E->field, 0, C->field);
-          break;
-        } else {
-          _GD_DoConst(D, C, GD_UINT32, &E->spf);
-          free(E->scalar[0]);
-          E->scalar[0] = NULL;
-        }
-      }
+      if (_GD_DeReferenceOne(D, E, C, check, 0, GD_UINT16, &u16))
+        break;
+
+      if (!check)
+        E->spf = (unsigned int)u16;
+
       break;
     case GD_POLYNOM_ENTRY:
       for (i = 0; i <= E->poly_ord; ++i) {
-        if (E->scalar[i] != NULL && strcmp(C->field, E->scalar[i]) == 0) {
-          if (check) {
-            _GD_SetError(D, GD_E_DELETE, GD_E_DEL_CONST, E->field, 0, C->field);
-            break;
-          } else {
-            if (E->comp_scal)
-              _GD_DoConst(D, C, GD_COMPLEX128, &E->ca[i]);
-            else
-              _GD_DoConst(D, C, GD_FLOAT64, &E->a[i]);
-            free(E->scalar[i]);
-            E->scalar[i] = NULL;
-          }
-        }
+        if (_GD_DeReferenceOne(D, E, C, check, i, GD_COMPLEX128, &E->ca[i]))
+          break;
+
+        if (!check)
+          E->a[i] = creal(E->ca[i]);
       }
       break;
     case GD_LINCOM_ENTRY:
       for (i = 0; i < E->n_fields; ++i) {
-        if (E->scalar[i] != NULL &&
-            strcmp(C->field, E->scalar[i]) == 0)
-        {
-          if (check) {
-            _GD_SetError(D, GD_E_DELETE, GD_E_DEL_CONST, E->field, 0, C->field);
-            break;
-          } else {
-            if (E->comp_scal)
-              _GD_DoConst(D, C, GD_COMPLEX128, &E->cb[i]);
-            else 
-              _GD_DoConst(D, C, GD_FLOAT64, &E->b[i]);
-            free(E->scalar[i]);
-            E->scalar[i] = NULL;
-          }
-        }
-        if (E->scalar[i + GD_MAX_LINCOM] != NULL &&
-            strcmp(C->field, E->scalar[i + GD_MAX_LINCOM]) == 0)
-        {
-          if (check) {
-            _GD_SetError(D, GD_E_DELETE, GD_E_DEL_CONST, E->field, 0, C->field);
-            break;
-          } else {
-            if (E->comp_scal)
-              _GD_DoConst(D, C, GD_COMPLEX128, &E->cb[i]);
-            else 
-              _GD_DoConst(D, C, GD_FLOAT64, &E->b[i]);
-            free(E->scalar[i + GD_MAX_LINCOM]);
-            E->scalar[i + GD_MAX_LINCOM] = NULL;
-          }
-        }
+        if (_GD_DeReferenceOne(D, E, C, check, i, GD_COMPLEX128, &E->cm[i]))
+          break;
+
+        if (!check)
+          E->m[i] = creal(E->cm[i]);
+
+        if (_GD_DeReferenceOne(D, E, C, check, i + GD_MAX_LINCOM, GD_COMPLEX128,
+              &E->cb[i]))
+          break;
+
+        if (!check)
+          E->b[i] = creal(E->cb[i]);
       }
       break;
     case GD_BIT_ENTRY:
     case GD_SBIT_ENTRY:
-      if (E->scalar[0] != NULL && strcmp(C->field, E->scalar[0]) == 0) {
-        if (check) {
-          _GD_SetError(D, GD_E_DELETE, GD_E_DEL_CONST, E->field, 0, C->field);
-          break;
-        } else {
-          _GD_DoConst(D, C, GD_UINT32, &E->bitnum);
-          free(E->scalar[0]);
-          E->scalar[0] = NULL;
-        }
-      }
-      if (E->scalar[1] != NULL && strcmp(C->field, E->scalar[1]) == 0) {
-        if (check) {
-          _GD_SetError(D, GD_E_DELETE, GD_E_DEL_CONST, E->field, 0, C->field);
-          break;
-        } else {
-          _GD_DoConst(D, C, GD_UINT32, &E->numbits);
-          free(E->scalar[0]);
-          E->scalar[1] = NULL;
-        }
-      }
+      if (_GD_DeReferenceOne(D, E, C, check, 0, GD_INT16, &i16))
+        break;
+
+      if (!check)
+        E->bitnum = (int)i16;
+
+      if (_GD_DeReferenceOne(D, E, C, check, 1, GD_INT16, &i16))
+        break;
+
+      if (!check)
+        E->numbits = (int)i16;
       break;
     case GD_PHASE_ENTRY:
-      if (E->scalar[0] != NULL && strcmp(C->field, E->scalar[0]) == 0) {
-        if (check) {
-          _GD_SetError(D, GD_E_DELETE, GD_E_DEL_CONST, E->field, 0, C->field);
-          break;
-        } else {
-          _GD_DoConst(D, C, GD_UINT32, &E->shift);
-          free(E->scalar[0]);
-          E->scalar[0] = NULL;
-        }
-      }
+      if (_GD_DeReferenceOne(D, E, C, check, 0, GD_INT64, &i64))
+        break;
+
+      if (!check)
+        E->shift = (long int)i64;
+
       break;
     case GD_NO_ENTRY:
     case GD_LINTERP_ENTRY:

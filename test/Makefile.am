@@ -126,7 +126,7 @@ ENTRY_TESTS=entry_bad_code entry_bit entry_bit_scalar entry_invalid \
 						entry_lincom entry_lincom_scalar entry_linterp entry_multiply \
 						entry_phase entry_phase_scalar entry_polynom entry_polynom_scalar \
 						entry_raw entry_raw_scalar entry_raw_scalar_code \
-						entry_raw_scalar_type entry_type
+						entry_raw_scalar_type entry_scalar_repr entry_type
 
 ERROR_TESTS=error error_error error_short
 

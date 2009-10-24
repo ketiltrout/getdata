@@ -83,10 +83,9 @@ int main(void)
   }
 
   for (i = 0; i < 8; ++i)
-    if (x[(big_endian) ? 7 - i : i] != u.b[i]) {
-      fprintf(stderr, "x[%i] = %2x, u.b[%i] = %2x (%g;%g)\n",
-          (big_endian) ? 7 - i : i, x[(big_endian) ? 7 - i : i], i, u.b[i],
-          creal(u.f), cimag(u.f));
+    if (x[i] != u.b[i]) {
+      fprintf(stderr, "x[%i] = %2x, u.b[%i] = %2x (%g;%g)\n", i, x[i], i,
+          u.b[i], creal(u.f), cimag(u.f));
       r = 1;
     }
 

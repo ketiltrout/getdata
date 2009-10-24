@@ -28,7 +28,7 @@ int main(void)
   const char* data = __TEST__ "dirfile/data";
   char format_data[1000];
   double complex c = 4. / (3. + _Complex_I);
-  int fd, i;
+  int fd, i, r = 0;
   const int big_endian = BigEndian();
   union {
     double complex f;
@@ -66,15 +66,21 @@ int main(void)
   unlink(format);
   rmdir(filedir);
 
-  if (n != 1)
-    return 1;
-  if (error)
-    return 1;
+  if (n != 1) {
+    fprintf(stderr, "n=%i\n", n);
+    r = 1;
+  }
+  if (error) {
+    fprintf(stderr, "error=%i\n", error);
+    r = 1;
+  }
   
   for (i = 0; i < 16; ++i)
-    if (x[(big_endian) ? 15 - i : i] != u.b[i]) {
-      return 1;
+    if (x[i] != u.b[i]) {
+      fprintf(stderr, "x[%i] = %2x, u.b[%i] = %2x (%g;%g)\n", i, x[i], i,
+          u.b[i], creal(u.f), cimag(u.f));
+      r = 1;
     }
 
-  return 0;
+  return r;
 }

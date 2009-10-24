@@ -122,14 +122,27 @@ static void _GD_GetScalar(DIRFILE* D, gd_entry_t* E, const char* scalar,
   int64_t i64;
   void *ptr = NULL;
   gd_entry_t* C;
+  int repr;
+  char* field_code;
 
   dtrace("%p, %p, \"%s\", %i, %p", D, E, scalar, type, data);
 
   if (scalar != NULL) {
-    if ((C = _GD_FindField(D, scalar, NULL)) == NULL)
-      _GD_SetError(D, GD_E_BAD_SCALAR, GD_E_SCALAR_CODE, E->field, 0, scalar);
+    repr = _GD_GetRepr(D, scalar, &field_code);
+
+    if (D->error) {
+      dreturnvoid();
+      return;
+    }
+
+    C = _GD_FindField(D, field_code, NULL);
+
+    if (C == NULL)
+      _GD_SetError(D, GD_E_BAD_SCALAR, GD_E_SCALAR_CODE, E->field, 0,
+          field_code);
     else if (C->field_type != GD_CONST_ENTRY)
-      _GD_SetError(D, GD_E_BAD_SCALAR, GD_E_SCALAR_TYPE, E->field, 0, scalar);
+      _GD_SetError(D, GD_E_BAD_SCALAR, GD_E_SCALAR_TYPE, E->field, 0,
+          field_code);
     else {
       if ((D->flags & GD_ACCMODE) == GD_RDWR) {
         ptr = realloc(C->e->client, (C->e->n_client + 1) *
@@ -139,16 +152,16 @@ static void _GD_GetScalar(DIRFILE* D, gd_entry_t* E, const char* scalar,
       }
 
       if (type == GD_INT64) {
-        _GD_DoConst(D, C, GD_INT64, &i64);
+        _GD_DoField(D, C, repr, 0, 1, GD_INT64, &i64);
         *(long int*)data = (long int)i64;
       } else if (type == GD_COMPLEX)
-        _GD_DoConst(D, C, GD_COMPLEX128, data);
+        _GD_DoField(D, C, repr, 0, 1, GD_COMPLEX128, data);
       else if (type == GD_SIGNED) {
-        _GD_DoConst(D, C, GD_INT16, &i16);
+        _GD_DoField(D, C, repr, 0, 1, GD_INT16, &i16);
         *(int*)data = (int)i16; /* this periphrasis is in case `int16'
                                    is different than `int' */
       } else {
-        _GD_DoConst(D, C, GD_UINT16, &u16);
+        _GD_DoField(D, C, repr, 0, 1, GD_UINT16, &u16);
         *(unsigned int*)data = (unsigned int)u16; /* ditto */
       }
 
@@ -157,6 +170,9 @@ static void _GD_GetScalar(DIRFILE* D, gd_entry_t* E, const char* scalar,
         C->e->client[C->e->n_client++] = E;
       }
     }
+
+    if (field_code != scalar)
+      free(field_code);
   }
 
   dreturnvoid();

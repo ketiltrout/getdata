@@ -28,6 +28,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <time.h>
+#include <limits.h>
 #endif
 
 #define GD_MAX_PRETTY_FIELD_WIDTH 80
@@ -146,7 +147,11 @@ static char* _GD_StringEscapeise(char* out, const char* in)
     } else if (*in == '\\') {
       *(ptr++) = '\\';
       *(ptr++) = '\\';
-    } else if (*in < 0x20 && *in >= 0x00) {
+    } else if (*in < 0x20
+#if CHAR_MIN != 0
+        && *in >= 0x00
+#endif
+        ) {
       *(ptr++) = '\\';
       *(ptr++) = 'x';
       *(ptr++) = HexDigit[*in >> 8];
@@ -184,6 +189,8 @@ static void _GD_WriteConst(FILE* stream, int type, const void* value,
     fprintf(stream, "%s%s", scalar, postamble);
   else if (type == 0)
     fprintf(stream, "%u%s", *(unsigned int*)value, postamble);
+  else if (type == GD_INT64)
+    fprintf(stream, "%li%s", *(long int*)value, postamble);
   else if (type == GD_SIGNED)
     fprintf(stream, "%i%s", *(int*)value, postamble);
   else if (type == GD_IEEE754)
@@ -253,7 +260,7 @@ static void _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
       break;
     case GD_PHASE_ENTRY:
       fprintf(stream, " PHASE%s %s ", pretty ? "   " : "", E->in_fields[0]);
-      _GD_WriteConst(stream, GD_SIGNED, &E->shift, E->scalar[0], "\n");
+      _GD_WriteConst(stream, GD_INT64, &E->shift, E->scalar[0], "\n");
       break;
     case GD_POLYNOM_ENTRY:
       fprintf(stream, " POLYNOM%s %s ", pretty ? " " : "", E->in_fields[0]);

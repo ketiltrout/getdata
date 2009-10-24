@@ -34,8 +34,9 @@ AM_CPPFLAGS = $(CPPFLAGS) $(PYTHON_CPPFLAGS)
 pygetdata_la_LDFLAGS = -module -avoid-version \
 											 -export-symbols-regex initpygetdata
 pygetdata_la_LIBADD = $(PYTHON_LIBS) ../../src/libgetdata.la
-pygetdata_la_SOURCES = pygetdata.c pyconstants.c pydirfile.c pyentry.c \
-											 pyfragment.c ${DEBUG_C} pygetdata.h
+pygetdata_la_SOURCES = pygetdata.c pydirfile.c pyentry.c pyfragment.c \
+											 ${DEBUG_C} pygetdata.h
+nodist_pygetdata_la_SOURCES = pyconstants.c
 
 pyconstants.c: ../make_parameters
 	../make_parameters p > $@

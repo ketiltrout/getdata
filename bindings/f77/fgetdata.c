@@ -2132,7 +2132,7 @@ void F77_FUNC(gdgsca, GDGSCA) (char* scalar, int* scalar_l, const int* dirfile,
 /* set a scalar parameter */
 void F77_FUNC(gdasca, GDASCA) (const int* dirfile, const char* field_code,
     const int *field_code_l, const int *index, const char *scalar,
-    const char *scalar_l, int* recode)
+    const int *scalar_l, int* recode)
 {
   dtrace("%i, %p, %i, %i, %p, %i, %i", *dirfile, field_code, *field_code_l,
       *index, scalar, *scalar_l, *recode);
@@ -2141,7 +2141,7 @@ void F77_FUNC(gdasca, GDASCA) (const int* dirfile, const char* field_code,
   gd_entry_t E;
   DIRFILE *D = _GDF_GetDirfile(*dirfile);
 
-  if (*index < 0) {
+  if (*index < 1) {
     dreturnvoid();
     return;
   }
