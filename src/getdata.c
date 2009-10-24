@@ -788,8 +788,8 @@ static size_t _GD_DoLinterp(DIRFILE *D, gd_entry_t* E, off64_t first_samp,
   size_t n_read = 0;
   double* data_in;
 
-  dtrace("%p, %p, %lli, %zi, 0x%x, %p [%p]", D, E, first_samp, num_samp,
-      return_type, data_out, E->e->entry[0]);
+  dtrace("%p, %p, %lli, %zi, 0x%x, %p", D, E, first_samp, num_samp, return_type,
+      data_out);
 
   if (E->e->table_len < 0) {
     _GD_ReadLinterpFile(D, E);
