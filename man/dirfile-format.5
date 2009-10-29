@@ -758,7 +758,7 @@ or else escape the whitespace with the backslash character
 .RE
 
 .SS Field Parameters
-All input vector field parameters should be a
+All input vector field parameters should be
 .I field codes
 (see below).  Additionally, some of the numerical field parameters may be either
 literal numbers or else the
@@ -820,7 +820,7 @@ are used.  A
 .I field code
 is one of:
 .IP \(bu 4
-a simple field name, indicating to a vector or scalar field
+a simple field name, indicating a vector or scalar field
 .IP \(bu 4
 a parent field name, followed by a forward slash, followed by a metafield name,
 indicating a metafield.  See the description of the
@@ -857,20 +857,13 @@ value).
 This representation indicates the projection of the value onto the real axis
 (ie.  the real part of the number).
 .PP
-If the specified field is purely real, the representations
-.B .r
-and 
-.B .m
-return the field unchanged, while the representations
-.B .a
-and
-.B .i
-return uniformly zero.  Representations can be used in field specifications.
-So, for example, given a complex valued vector,
+If the specified field is purely real, the representations are calculated as
+if the imaginary part was equal to +0.  For example, given a complex valued
+vector,
 .IR z ,
 a vector containing the real part of
 .IR z ,\~  re_z ,
-can be produced with:
+could be produced with:
 .IP
 .I re_z
 .B PHASE
