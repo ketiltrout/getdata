@@ -18,6 +18,7 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
+#define NO_IMPORT_ARRAY
 #include "pygetdata.h"
 
 /* Fragment */

@@ -1,9 +1,16 @@
 PYTHON BINDINGS FOR GETDATA
-============================
+===========================
 
 The python bindings consist of a python extension module, `pygetdata.so'.  They
-should work with Python version 2.2, or any later 2.x version.  Full
-documentation for the Python bindings to the GetData library is contained
+should work with Python version 2.2, or any later 2.x version.
+
+If found at configure time, the bindings will be built with NumPy support, which
+will result in requests for vector data returning NumPy arrays instead of Python
+lists.  If built with NumPy support, importing the module will later fail if
+the numpy module cannot be found.  NumPy support should be preferred: it is more
+efficient both in memory usage and speed of data retrieval.
+
+Full documentation for the Python bindings to the GetData library is contained
 within the pygetdata module itself.  To read this documentation, execute
 
 $ pydoc pygetdata
@@ -13,4 +20,4 @@ from the system shell, or
 >>> import pygetdata
 >>> help(pygetdata)
 
-from within the Python interpereter.
+from within the Python interpereter after the bindings have been installed.

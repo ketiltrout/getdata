@@ -1,3 +1,17 @@
+2009-10-29   D. V. Wiebe <getdata@keiltrout.net>   svn:329
+	* bindings/python/test/big_test.py: NumPy tests.
+
+	* configure.ac: Detect NumPy.
+
+	* bindings/python/pygetdata.h: #include <numpy/arrayobject.h>
+	* bindings/python/pygetdata.c (gdpy_type_from_npytype
+	gdpy_npytype_from_type): Added.
+	* bindings/python/pygetdata.c (initpygetdata): Call import_array().  Add
+	"__numpy_supported__" to Python module.
+	* bindings/python/pydirfile.c (gdpy_dirfile_getdata): Add "as_list"
+	parameter.  Return NumPy array.
+	* bindings/python/pydirfile.c (gdpy_dirfile_putdata): Handle NumPy arrays.
+
 2009-10-23   D. V. Wiebe <getdata@keiltrout.net>   svn:327
 	* test/entry_scalar_repr.c: Added.
 

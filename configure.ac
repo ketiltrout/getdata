@@ -489,8 +489,39 @@ if test "x$make_pybindings" = "xyes"; then
   echo "*** Configuring python bindings"
   echo
   GD_PYTHON([2.3])
+  have_numpy="no"
   if test "x$have_python" = "xno"; then
     make_pybindings="no"
+  else
+    AC_MSG_CHECKING([for NumPy])
+    cat > conftest.py << EOF
+try:
+  import numpy
+except ImportError:
+  exit(1)
+EOF
+    if $PYTHON conftest.py; then
+      have_numpy="yes"
+    fi
+    AC_MSG_RESULT([$have_numpy])
+  fi
+  if test "x$have_numpy" = "xyes"; then
+    AC_MSG_CHECKING([NumPy includes])
+    NUMPY_CPPFLAGS=-I`$PYTHON -c "import numpy; print numpy.get_include()"`
+    AC_MSG_RESULT([$NUMPY_CPPFLAGS])
+    AC_SUBST([NUMPY_CPPFLAGS])
+
+    saved_cppflags=$CPPFLAGS
+    CPPFLAGS="${CPPFLAGS} ${PYTHON_CPPFLAGS} ${NUMPY_CPPFLAGS}"
+    AC_CHECK_HEADERS([numpy/arrayobject.h],,[have_numpy="no"],[
+#include<Python.h>
+])
+    CPPFLAGS=$saved_cppflags
+  fi
+
+  if test "x$have_numpy" = "xyes"; then
+    AC_DEFINE([USE_NUMPY], [],
+              [ Define to to enable NumPy support in the Python bindings ])
   fi
 fi
 
@@ -656,4 +687,7 @@ echo "  Unsupported encodings:       ${ENCODINGS_LEFT}"
 echo
 echo "  Bindings built:              ${BINDINGS_BUILT}"
 echo "  Bindings not built:          ${BINDINGS_LEFT}"
+if test "x$make_pybindings" != "xno"; then
+echo "  NumPy support in Python:      ${have_numpy}"
+fi
 echo

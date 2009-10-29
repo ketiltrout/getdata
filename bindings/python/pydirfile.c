@@ -18,6 +18,7 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
+#define NO_IMPORT_ARRAY
 #include "pygetdata.h"
 
 /* Dirfile */
@@ -426,16 +427,19 @@ static PyObject* gdpy_dirfile_getdata(struct gdpy_dirfile_t* self,
   dtrace("%p, %p, %p", self, args, keys);
 
   char* keywords[] = { "field_code", "return_type", "first_frame",
-    "first_sample", "num_frames", "num_samples", NULL };
+    "first_sample", "num_frames", "num_samples", "as_list", NULL };
   const char* field_code;
   PY_LONG_LONG first_frame = 0, first_sample = 0;
   long int num_frames = 0, num_samples = 0;
+  int as_list = 0;
   gd_type_t return_type;
   PyObject* pylist;
+  npy_intp dims[] = { 0 };
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
-        "si|LLll:pygetdata.dirfile.getdata", keywords, &field_code,
-        &return_type, &first_frame, &first_sample, &num_frames, &num_samples))
+        "si|LLlli:pygetdata.dirfile.getdata", keywords, &field_code,
+        &return_type, &first_frame, &first_sample, &num_frames, &num_samples,
+        &as_list))
   {
     dreturn("%p", NULL);
     return NULL;
@@ -448,9 +452,14 @@ static PyObject* gdpy_dirfile_getdata(struct gdpy_dirfile_t* self,
 
   size_t ns = num_samples + num_frames * spf;
 
-  if (ns == 0)
-    pylist = Py_BuildValue("[]");
-  else {
+  if (ns == 0) {
+#ifdef USE_NUMPY
+    if (!as_list)
+      pylist = PyArray_ZEROS(1, dims, NPY_INT, 0);
+    else
+#endif
+      pylist = Py_BuildValue("[]");
+  } else {
     void* data = malloc(ns * GD_SIZE(return_type));
 
     ns = getdata64(self->D, field_code, (off64_t)first_frame,
@@ -459,9 +468,17 @@ static PyObject* gdpy_dirfile_getdata(struct gdpy_dirfile_t* self,
 
     PYGD_CHECK_ERROR2(self->D, NULL, free(data));
 
-    pylist = gdpy_convert_to_pylist(data, return_type, ns);
+#ifdef USE_NUMPY
+    if (!as_list) {
+      dims[0] = (npy_intp)ns;
+      pylist = PyArray_SimpleNewFromData(1, dims,
+          gdpy_npytype_from_type(return_type), data);
+    } else {
+#endif
+      pylist = gdpy_convert_to_pylist(data, return_type, ns);
 
-    free(data);
+      free(data);
+    }
   }
 
   dreturn("%p", pylist);
@@ -1292,6 +1309,8 @@ static PyObject* gdpy_dirfile_putdata(struct gdpy_dirfile_t* self,
   off64_t first_frame = 0, first_sample = 0;
   gd_type_t type = GD_UNKNOWN;
   PyObject* pyobj;
+  size_t ns;
+  int have_ndarray = 0;
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
         "sO|iLL:pygetdata.dirfile.putdata", keywords, &field_code, &pyobj,
@@ -1300,32 +1319,89 @@ static PyObject* gdpy_dirfile_putdata(struct gdpy_dirfile_t* self,
     return NULL;
   }
 
-  /* we only handle list data */
-  if (!PyList_Check(pyobj)) {
-    PyErr_SetString(PyExc_TypeError,
-        "pygetdata.dirfile.putdata() argument 2 must be list");
-    dreturn ("%p", NULL);
-    return NULL;
+  /* we only handle list or ndarray data */
+#ifdef USE_NUMPY
+  if (PyArray_Check(pyobj)) {
+    if (PyArray_NDIM(pyobj) != 1) {
+      PyErr_SetString(PyExc_ValueError,
+          "pygetdata.dirfile.putdata() argument 2 must be one dimensional");
+      dreturn("%p", NULL);
+      return NULL;
+    }
+    have_ndarray = 1;
+    ns = PyArray_DIM(pyobj, 0);
+  } else {
+#endif
+    if (!PyList_Check(pyobj)) {
+      PyErr_SetString(PyExc_TypeError,
+          "pygetdata.dirfile.putdata() argument 2 must be list"
+#ifdef USE_NUMPY
+          " or NumPy array"
+#endif
+          ".");
+      dreturn("%p", NULL);
+      return NULL;
+    }
+
+    ns = PyList_Size(pyobj);
   }
 
-  size_t ns = PyList_Size(pyobj);
-
   if (ns > 0) {
-    void* data = malloc(ns * 16);
+    void* data;
+    
+#ifdef USE_NUMPY
+    if (have_ndarray) {
+      type = gdpy_type_from_npytype(PyArray_TYPE(pyobj));
 
-    type = gdpy_convert_from_pylist(pyobj, data, type, ns);
+      if (type == GD_UNKNOWN) {
+        PyErr_SetString(PyExc_ValueError,
+            "pygetdata.dirfile.putdata() unknown data type for argument 2.");
+        dreturn ("%p", NULL);
+        return NULL;
+      }
 
-    if (type == GD_UNKNOWN) {
-      dreturn ("%p", NULL);
-      return NULL;
+      if (!(PyArray_FLAGS(pyobj) & NPY_ALIGNED)) {
+        PyErr_SetString(PyExc_ValueError,
+            "pygetdata.dirfile.putdata() argument 2 must be aligned.");
+        dreturn ("%p", NULL);
+        return NULL;
+      }
+
+      if (!(PyArray_FLAGS(pyobj) & NPY_C_CONTIGUOUS)) {
+        PyErr_SetString(PyExc_ValueError, "pygetdata.dirfile.putdata()"
+           " argument 2 must be C-style contiguous.");
+        dreturn ("%p", NULL);
+        return NULL;
+      }
+
+      data = PyArray_DATA(pyobj);
+    } else
+#endif
+    {
+      data = malloc(ns * 16);
+      type = gdpy_convert_from_pylist(pyobj, data, type, ns);
+
+      if (type == GD_UNKNOWN) {
+        PyErr_SetString(PyExc_ValueError,
+            "pygetdata.dirfile.putdata() unknown data type for argument 2.");
+        dreturn ("%p", NULL);
+        return NULL;
+      }
     }
 
     ns = putdata64(self->D, field_code, first_frame, first_sample, 0, ns, type,
         data);
 
-    PYGD_CHECK_ERROR2(self->D, NULL, free(data));
+#ifdef USE_NUMPY
+    if (have_ndarray)
+      PYGD_CHECK_ERROR(self->D, NULL);
+    else
+#endif
+    {
+      PYGD_CHECK_ERROR2(self->D, NULL, free(data));
 
-    free(data);
+      free(data);
+    }
   }
 
   pyobj = PyLong_FromLongLong(ns);
@@ -1594,7 +1670,6 @@ static PyMethodDef gdpy_dirfile_methods[] = {
   {"alter", (PyCFunction)gdpy_dirfile_alter, METH_VARARGS | METH_KEYWORDS,
     "alter(field_code, entry [, recode])\n\n"
       "Modify the field metadata of the field specified by 'field_code',\n"
-      /* -----------------------------------------------------------------| */
       "as described by 'entry', which should be a pygetdata.entry object.\n"
       "If recode is given and is non-zero, the data on disk will also be\n"
       "updated, if relevant, to reflect changes in the field metatdata.\n"
@@ -1666,10 +1741,16 @@ static PyMethodDef gdpy_dirfile_methods[] = {
   },
   {"getdata", (PyCFunction)gdpy_dirfile_getdata, METH_VARARGS | METH_KEYWORDS,
     "getdata(field_code, return_type [, first_frame, first_sample,\n"
-      "num_frames, num_samples])\n\n"
-      "Retrieve a data vector from the dirfile.  A list of data values will\n"
-      "be returned.  The 'return_type' parameter indicates the desired type\n"
-      "of the values returned, and should be (typically) one of:\n"
+      "num_frames, num_samples, as_list])\n\n"
+      "Retrieve a data vector from the dirfile.  If NumPy support is\n"
+      "present in pygetdata, and 'as_list' is not given or zero, a NumPy\n"
+      "array will be returned.  Otherwise a list of data values will\n"
+      "be returned.  NumPy arrays should be preferred for large datasets:\n"
+      "they are more efficient both in terms of memory usage and retrieval\n"
+      "time.\n\n"
+      "The 'return_type' parameter indicates the desired type of the values\n"
+      "returned.  For NumPy data, the NumPy array will have the dtype\n"
+      "indicated.  For list data it should be (typically) one of:\n"
       "pygetdata.INT, pygetdata.LONG, pygetdata.ULONG, pygetdata.FLOAT, or\n"
       "pygetdata.COMPLEX, although any GetData data type code is permitted.\n"
       "The 'first_frame' and 'first_samples' parameters indicate first\n"
@@ -1896,13 +1977,13 @@ static PyMethodDef gdpy_dirfile_methods[] = {
   },
   {"putdata", (PyCFunction)gdpy_dirfile_putdata, METH_VARARGS | METH_KEYWORDS,
     "putdata(field_code, data [, type, first_frame, first_sample])\n\n"
-      "Store the data in the list 'data' in the field given by\n"
-      "'field_code'.  The 'data' parameter should be a simple list of\n"
-      "numerical data.  All entries in the list must be of the same type.\n"
-      "The parameters 'first_frame' and 'first_sample' indicate where the\n"
-      "first sample in which the data will be stored.  If neither are\n"
-      "given, the data will be stored starting from the first sample in the\n"
-      "field.  The number of samples actually written is returned.\n\n"
+      /* -----------------------------------------------------------------| */
+      "Store the data in the list or NumPy array 'data' in the field given\n"
+      "by 'field_code'.  If a list is provided, all entries must be of the\n"
+      "same type.  The parameters 'first_frame' and 'first_sample' indicate\n"
+      "where the first sample in which the data will be stored.  If neither\n"
+      "are given, the data will be stored starting from the first sample in\n"
+      "the field.  The number of samples actually written is returned.\n\n"
       "This method will use the most appropriate data type when passing the\n"
       "data to the C API.  However, this behaviour can be overridden by\n"
       "explicitly specifying a C API type for the data using 'type'.  If\n"
@@ -1953,7 +2034,7 @@ static PyMethodDef gdpy_dirfile_methods[] = {
 };
 
 #define DIRFILE_DOC \
-"dirfile(dirfilename [, flags [, sehandler [, extra ]])\n\n" \
+  "dirfile(dirfilename [, flags [, sehandler [, extra ]])\n\n" \
 "Returns a dirfile object representing the dirfile specified by\n" \
 "'dirfilename'.  The dirfile is opened by a call to dirfile_cbopen(3).\n"\
 "See that manual page for full details on arguments.  If present 'flags'\n"\

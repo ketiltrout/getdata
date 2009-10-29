@@ -3,6 +3,9 @@ import os
 import array
 import pygetdata
 
+if (pygetdata.__numpy_supported__):
+  import numpy
+
 def CheckOK(t):
   global ne
   ne+=1
@@ -24,6 +27,18 @@ def CheckException2(t,m,g):
   if (sys.exc_type != g):
     ne+=1
     print "e[", t, ",", m, "] =", sys.exc_type
+
+def CheckNumpy(t,v,g):
+  global ne
+  if (numpy.any(v - g)):
+    ne+=1
+    print "a[", t, "] =", v
+
+def CheckNumpy2(t,m,v,g):
+  global ne
+  if (numpy.any(v - g)):
+    ne+=1
+    print "a[", t, ",", m, "] =", v
 
 def CheckSimple(t,v,g):
   global ne
@@ -92,7 +107,10 @@ try:
 except:
   CheckOK(2)
 CheckSimple(2,len(n),8)
-CheckSimple(2,n,range(41,49))
+if (pygetdata.__numpy_supported__):
+  CheckNumpy(2,n,numpy.arange(41,49))
+else:
+  CheckSimple(2,n,range(41,49))
 
 # 104: getdata (long) check
 try:
@@ -100,7 +118,10 @@ try:
 except:
   CheckOK(104)
 CheckSimple(104,len(n),8)
-CheckSimple(104,n,range(41L,49L))
+if (pygetdata.__numpy_supported__):
+  CheckNumpy(104,n,numpy.arange(41L,49L))
+else:
+  CheckSimple(104,n,range(41L,49L))
 
 # 106: getdata (float) check
 try:
@@ -108,7 +129,10 @@ try:
 except:
   CheckOK(106)
 CheckSimple(106,len(n),8)
-CheckSimple(106,n,[41.,42.,43.,44.,45.,46.,47.,48.])
+if (pygetdata.__numpy_supported__):
+  CheckNumpy(104,n,numpy.arange(41.,49.))
+else:
+  CheckSimple(106,n,[41.,42.,43.,44.,45.,46.,47.,48.])
 
 # 108: getdata (complex) check
 try:
@@ -116,7 +140,10 @@ try:
 except:
   CheckOK(108)
 CheckSimple(108,len(n),8)
-CheckSimple(108,n,[41.+0j,42.+0j,43.+0j,44.+0j,45.+0j,46.+0j,47.+0j,48.+0j])
+if (pygetdata.__numpy_supported__):
+  CheckNumpy(104,n,numpy.arange(41,49,dtype=numpy.complex128))
+else:
+  CheckSimple(108,n,[41.+0j,42.+0j,43.+0j,44.+0j,45.+0j,46.+0j,47.+0j,48.+0j])
 
 # 3: get_constant (int) check
 try:
@@ -197,10 +224,25 @@ except:
 CheckSimple2(13,1,n,4)
 
 try:
-  n = d.getdata("data", pygetdata.INT, first_frame=5, num_frames=1)
+  n = d.getdata("data", pygetdata.INT, first_frame=5, num_frames=1, as_list=1)
 except:
   CheckOK(13,2)
 CheckSimple2(13,2,n,[41, 13, 14, 15, 16, 46, 47, 48])
+
+# 119: putdata (numpy) check
+if (pygetdata.__numpy_supported__):
+  p = numpy.array([ 73, 74, 75, 76 ])
+  try:
+    n = d.putdata("data", p, first_frame=5, first_sample=1)
+  except:
+    CheckOK2(13,1)
+  CheckSimple2(13,1,n,4)
+
+  try:
+    n = d.getdata("data", pygetdata.INT, first_frame=5, num_frames=1)
+  except:
+    CheckOK(13,2)
+  CheckNumpy2(13,2,n,numpy.array([41, 73, 74, 75, 76, 46, 47, 48]))
 
 # 120: putdata (long) check
 p = [ 23L, 24L, 25L, 26L ]
@@ -211,7 +253,7 @@ except:
 CheckSimple2(120,1,n,4)
 
 try:
-  n = d.getdata("data", pygetdata.INT, first_frame=5, num_frames=1)
+  n = d.getdata("data", pygetdata.INT, first_frame=5, num_frames=1, as_list=1)
 except:
   CheckOK(120,2)
 CheckSimple2(120,2,n,[41, 23, 24, 25, 26, 46, 47, 48])
@@ -225,7 +267,7 @@ except:
 CheckSimple2(122,1,n,4)
 
 try:
-  n = d.getdata("data", pygetdata.INT, first_frame=5, num_frames=1)
+  n = d.getdata("data", pygetdata.INT, first_frame=5, num_frames=1, as_list=1)
 except:
   CheckOK(122,2)
 CheckSimple2(122,2,n,[41, 33, 34, 35, 36, 46, 47, 48])
@@ -239,7 +281,7 @@ except:
 CheckSimple2(124,1,n,4)
 
 try:
-  n = d.getdata("data", pygetdata.INT, first_frame=5, num_frames=1)
+  n = d.getdata("data", pygetdata.INT, first_frame=5, num_frames=1, as_list=1)
 except:
   CheckOK2(124,2)
 CheckSimple2(124,2,n,[41, 43, 44, 45, 46, 46, 47, 48])
@@ -253,7 +295,7 @@ except:
 CheckSimple2(136,1,n,4)
 
 try:
-  n = d.getdata("data", pygetdata.INT, first_frame=5, num_frames=1)
+  n = d.getdata("data", pygetdata.INT, first_frame=5, num_frames=1, as_list=1)
 except:
   CheckOK2(136,2)
 CheckSimple2(136,2,n,[41, 53, 54, 55, 56, 46, 47, 48])

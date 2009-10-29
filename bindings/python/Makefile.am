@@ -30,7 +30,7 @@ python_LTLIBRARIES = pygetdata.la
 
 BUILT_SOURCES = pyconstants.c
 AM_CFLAGS = -Wall -fno-strict-aliasing
-AM_CPPFLAGS = $(CPPFLAGS) $(PYTHON_CPPFLAGS)
+AM_CPPFLAGS = $(CPPFLAGS) $(PYTHON_CPPFLAGS) $(NUMPY_CPPFLAGS)
 pygetdata_la_LDFLAGS = -module -avoid-version \
 											 -export-symbols-regex initpygetdata
 pygetdata_la_LIBADD = $(PYTHON_LIBS) ../../src/libgetdata.la

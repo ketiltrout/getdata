@@ -27,6 +27,11 @@
 #undef _POSIX_C_SOURCE
 #include "../../src/internal.h"
 
+#ifdef HAVE_NUMPY_ARRAYOBJECT_H
+# define PY_ARRAY_UNIQUE_SYMBOL gdpy_array_api
+# include <numpy/arrayobject.h>
+#endif
+
 #define GDPY_UNSIGNED        0x00
 #define GDPY_SIGNED          0x01
 #define GDPY_IEEE754         0x02
@@ -116,3 +121,5 @@ extern int gdpy_convert_from_pyobj(PyObject*, union gdpy_quadruple_value*,
 extern gd_type_t gdpy_convert_from_pylist(PyObject*, void*, gd_type_t, size_t);
 extern PyObject* gdpy_convert_to_pyobj(const void*, gd_type_t);
 extern PyObject* gdpy_convert_to_pylist(const void*, gd_type_t, size_t);
+extern int gdpy_npytype_from_type(gd_type_t type);
+extern gd_type_t gdpy_type_from_npytype(int npytype);

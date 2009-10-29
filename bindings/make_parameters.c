@@ -261,7 +261,8 @@ void Python(void)
 
   printf(
       "/* This code is automatically generated.  "
-      "Changes made here will be lost. */\n#include \"pygetdata.h\"\n"
+      "Changes made here will be lost. */\n#define NO_IMPORT_ARRAY\n"
+      "#include \"pygetdata.h\"\n"
       "const struct gdpy_constant_t gdpy_constant_list[] = {\n");
   
   for (i = 0; constant_list[i].lname != NULL; ++i)

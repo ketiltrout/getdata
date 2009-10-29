@@ -217,6 +217,132 @@ gd_type_t gdpy_convert_from_pylist(PyObject* value, void *data, gd_type_t type,
 }
 
 /* generic utitily functions */
+#ifdef USE_NUMPY
+gd_type_t gdpy_type_from_npytype(int npytype)
+{
+  gd_type_t type;
+
+  dtrace("%i", type);
+
+  switch(npytype)
+  {
+    case NPY_UBYTE:
+      type = GD_UINT8;
+      break;
+    case NPY_BYTE:
+      type = GD_INT8;
+      break;
+#if NPY_SIZEOF_SHORT <= 8
+    case NPY_SHORT:
+      type = NPY_SIZEOF_SHORT | GD_SIGNED;
+      break;
+    case NPY_USHORT:
+      type = NPY_SIZEOF_SHORT;
+      break;
+#endif
+#if NPY_SIZEOF_INT <= 8
+    case NPY_INT:
+      type = NPY_SIZEOF_INT | GD_SIGNED;
+      break;
+    case NPY_UINT:
+      type = NPY_SIZEOF_INT;
+      break;
+#endif
+#if NPY_SIZEOF_LONG <= 8
+    case NPY_LONG:
+      type = NPY_SIZEOF_LONG | GD_SIGNED;
+      break;
+    case NPY_ULONG:
+      type = NPY_SIZEOF_LONG;
+      break;
+#endif
+#if NPY_SIZEOF_LONGLONG <= 8
+    case NPY_LONGLONG:
+      type = NPY_SIZEOF_LONGLONG | GD_SIGNED;
+      break;
+    case NPY_ULONGLONG:
+      type = NPY_SIZEOF_LONGLONG;
+      break;
+#endif
+#if NPY_SIZEOF_FLOAT <= 8
+    case NPY_FLOAT:
+      type = NPY_SIZEOF_FLOAT | GD_IEEE754;
+      break;
+    case NPY_CFLOAT:
+      type = (2 * NPY_SIZEOF_FLOAT) | GD_COMPLEX;
+      break;
+#endif
+#if NPY_SIZEOF_DOUBLE <= 8
+    case NPY_DOUBLE:
+      type = NPY_SIZEOF_DOUBLE | GD_IEEE754;
+      break;
+    case NPY_CDOUBLE:
+      type = (2 * NPY_SIZEOF_DOUBLE) | GD_COMPLEX;
+      break;
+#endif
+    default:
+      type = GD_UNKNOWN;
+      break;
+  }
+
+  dreturn("0x%03x\n", type);
+  return type;
+}
+
+int gdpy_npytype_from_type(gd_type_t type)
+{
+  int npytype;
+
+  dtrace("0x%03x", type);
+
+  switch(type)
+  {
+    case GD_UINT8:
+      npytype = PyArray_UINT8;
+      break;
+    case GD_INT8:
+      npytype = PyArray_INT8;
+      break;
+    case GD_UINT16:
+      npytype = PyArray_UINT16;
+      break;
+    case GD_INT16:
+      npytype = PyArray_INT16;
+      break;
+    case GD_UINT32:
+      npytype = PyArray_UINT32;
+      break;
+    case GD_INT32:
+      npytype = PyArray_INT32;
+      break;
+    case GD_UINT64:
+      npytype = PyArray_UINT64;
+      break;
+    case GD_INT64:
+      npytype = PyArray_INT64;
+      break;
+    case GD_FLOAT32:
+      npytype = PyArray_FLOAT32;
+      break;
+    case GD_FLOAT64:
+      npytype = PyArray_FLOAT64;
+      break;
+    case GD_COMPLEX64:
+      npytype = PyArray_COMPLEX64;
+      break;
+    case GD_COMPLEX128:
+      npytype = PyArray_COMPLEX128;
+      break;
+    default:
+      npytype = NPY_NOTYPE;
+      break;
+  }
+
+  dreturn("%i", npytype);
+  return npytype;
+}
+#endif
+
 PyObject* gdpy_convert_to_pylist(const void* data, gd_type_t type, size_t ns)
 {
   size_t i;
@@ -380,6 +506,12 @@ PyMODINIT_FUNC initpygetdata(void)
   if (PyType_Ready(&gdpy_fragment) < 0)
     return;
 
+#ifdef USE_NUMPY
+  /* The following macro will cause this function to return if importing numpy
+   * fails */
+  import_array()
+#endif
+
   mod = Py_InitModule3("pygetdata", GetDataMethods,
       "Bindings to the GetData library for Dirfile access\n\n"
       "This module provides interfaces to the C GetData library.  It defines "
@@ -398,18 +530,26 @@ PyMODINIT_FUNC initpygetdata(void)
       "derived from a common\npygetdata.DirfileError exception class, itself "
       "derived from RuntimeError.\nExceptions are thrown by the bindings in "
       "lieu of returning a dirfile error\nvalue.\n\n"
+      "Where possible, pygetdata will, by default, return vector data as "
+      "NumPy\narrays.  If "
+      "pygetdata has been built with NumPy support,\n"
+      "pygetdata.__numpy_supported__ will be non-zero.  If NumPy support is "
+      "not\npresent, vector data will be returned as Python lists.  Vector "
+      "data passed\nto pygetdata may either be a Python list or a NumPy array."
+      "\n\n"
       "The input data type argument to bindings for functions such as "
       "putdata(3),\nwhich is required in the C API, are typically optional, as "
       "pygetdata can\ndetermine the input data type by itself, and convert it "
       "to an appropriate\ntype for the C API.  If the data type is supplied, "
       "pygetdata will coerce the\ninput data to the specified C type as best "
       "it can.  For getdata(3) and\nsimilar, the C API types are converted to "
-      "python types as follows:\n\n"
+      "Python types as follows:\n\n"
       "  o int     -- UINT8, INT8, UINT16, INT16, INT32\n"
       "  o long    -- UINT32, UINT64, INT64\n"
       "  o float   -- FLOAT32, FLOAT64\n"
       "  o complex -- COMPLEX64, COMPLEX128\n\n"
-      "For convenience, the following type code aliases are defined:\n\n"
+      "or to NumPy data types, as appropriate.  "
+      "For convenience, the following type\ncode aliases are defined:\n\n"
       "  o pygetdata.INT     = pygetdata.INT32\n"
       "  o pygetdata.LONG    = pygetdata.INT64\n"
       "  o pygetdata.ULONG   = pygetdata.UINT64\n"
@@ -444,6 +584,14 @@ PyMODINIT_FUNC initpygetdata(void)
   for (i = 0; gdpy_constant_list[i].name != NULL; ++i)
     PyModule_AddIntConstant(mod, gdpy_constant_list[i].name,
         gdpy_constant_list[i].value);
+
+  PyModule_AddIntConstant(mod, "__numpy_supported__",
+#ifdef USE_NUMPY
+      1
+#else
+      0
+#endif
+      );
 
   /* add exceptions */
   GdPy_DirfileError = PyErr_NewException("pygetdata.DirfileError",
