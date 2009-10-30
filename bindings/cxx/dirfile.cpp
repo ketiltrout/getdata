@@ -46,8 +46,7 @@ Dirfile::~Dirfile()
   if (error_string != NULL)
     delete error_string;
 
-  if (D == NULL)
-    dirfile_close(D);
+  dirfile_close(D);
 }
 
 int Dirfile::Add(GetData::Entry &entry)

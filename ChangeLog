@@ -1,3 +1,10 @@
+2009-10-29   D. V. Wiebe <getdata@keiltrout.net>   svn:330
+	* src/entry.c (_GD_FreeE): Free E->e->filebase.  Reported by CBN.
+
+	* bindings/cxx/dirfile.cpp (Dirfile::~Dirfile):  Fix call to
+	dirfile_close().  Previously it only called dirfile_close() on NULL
+	pointers.  Reported by CBN.
+
 2009-10-29   D. V. Wiebe <getdata@keiltrout.net>   svn:329
 	* bindings/python/test/big_test.py: NumPy tests.
 

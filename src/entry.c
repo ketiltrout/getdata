@@ -80,6 +80,7 @@ void _GD_FreeE(gd_entry_t* entry, int priv)
     case GD_RAW_ENTRY:
       free(entry->scalar[0]);
       if (priv) {
+        free(entry->e->filebase);
         free(entry->e->file[0].name);
         free(entry->e->file[1].name);
       }
