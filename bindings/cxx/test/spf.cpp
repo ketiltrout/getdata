@@ -24,7 +24,7 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  Dirfile dirfile = Dirfile(filedir, GD_RDONLY);
+  Dirfile dirfile(filedir, GD_RDONLY);
   unsigned int spf = dirfile.SamplesPerFrame("data");
 
   unlink(format);

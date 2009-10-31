@@ -30,7 +30,7 @@ int main(void)
   write(fd, data_data, 256);
   close(fd);
 
-  Dirfile dirfile = Dirfile(filedir);
+  Dirfile dirfile(filedir);
   size_t n = dirfile.GetData("data", 5, 0, 1, 0, UInt8, c);
   int error = dirfile.Error();
 

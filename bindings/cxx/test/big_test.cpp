@@ -10,9 +10,9 @@ using namespace std;
 using namespace GetData;
 
 #define CHECK_ERROR(t,g) \
-  e = d.Error(); if (e != (g)) { ne++; cerr << "e[" << t << "] = " << e << endl; }
+  e = d->Error(); if (e != (g)) { ne++; cerr << "e[" << t << "] = " << e << endl; }
 #define CHECK_ERROR2(t,n,g) \
-  e = d.Error(); if (e != (g)) { \
+  e = d->Error(); if (e != (g)) { \
     ne++; cerr << "e[" << t << ", " << n << "] = " << e << endl; }
 #define CHECK_OK(t) CHECK_ERROR(t,GD_E_OK)
 #define CHECK_OK2(t,n) CHECK_ERROR2(t,n,GD_E_OK)
@@ -84,7 +84,7 @@ int main(void)
   const char **list;
   const char* str;
   char buf[GD_MAX_LINE_LENGTH];
-  Dirfile d;
+  Dirfile *d;
   Entry *ent;
   RawEntry rent, *rep;
   LincomEntry lent, *lep;
@@ -122,37 +122,38 @@ int main(void)
   close(n);
 
   // 0: Dirfile::Error check
-  d = Dirfile("x");
+  d = new Dirfile("x");
   CHECK_ERROR(0, GD_E_OPEN);
+  delete d;
 
   // 1: Dirfile::Dirfile check
-  d = Dirfile(filedir, GD_RDWR);
+  d = new Dirfile(filedir, GD_RDWR);
   CHECK_OK(1);
 
   // 2: Dirfile::GetData check
-  n = d.GetData("data", 5, 0, 1, 0, UInt8, c);
+  n = d->GetData("data", 5, 0, 1, 0, UInt8, c);
   CHECK_OK(2);
   CHECK_INT(2,n,8);
   CHECK_INT_ARRAY(2,8,c[i],41 + i);
 
   // 3: Dirfile::GetConstant check
-  n = d.GetConstant("const", Float64, &dp);
+  n = d->GetConstant("const", Float64, &dp);
   CHECK_OK(3);
   CHECK_INT(3,n,0);
   CHECK_DOUBLE(3,dp,5.5);
 
   // 6: Dirfile::NFields check
-  n = d.NFields();
+  n = d->NFields();
   CHECK_OK(6);
   CHECK_INT(6,n,nfields);
 
   // 8: Dirfile::FieldList check
-  list = d.FieldList();
+  list = d->FieldList();
   CHECK_OK(8);
   CHECK_STRING_ARRAY(8,n,list[i],fields[i]);
 
   // 9: Dirfile::NFields check
-  n = d.NMFields("data");
+  n = d->NMFields("data");
   CHECK_OK(9);
   CHECK_INT(9,n,3);
 
@@ -160,17 +161,17 @@ int main(void)
   fields[0] = (char*)"mstr";
   fields[1] = (char*)"mconst";
   fields[2] = (char*)"mlut";
-  list = d.MFieldList("data");
+  list = d->MFieldList("data");
   CHECK_OK(10);
   CHECK_STRING_ARRAY(10,n,list[i],fields[i]);
 
   // 11: Dirfile::NFrames check
-  n = d.NFrames();
+  n = d->NFrames();
   CHECK_OK(11);
   CHECK_INT(11,n,10);
 
   // 12: Dirfile::SamplesPerFrame check
-  n = d.SamplesPerFrame("data");
+  n = d->SamplesPerFrame("data");
   CHECK_OK(12);
   CHECK_INT(12,n,8);
 
@@ -179,22 +180,22 @@ int main(void)
   c[1] = 14;
   c[2] = 15;
   c[3] = 16;
-  n = d.PutData("data", 5, 1, 0, 4, UInt8, c);
+  n = d->PutData("data", 5, 1, 0, 4, UInt8, c);
   CHECK_OK2(13,1);
   CHECK_INT2(13,1,n,4);
 
-  n = d.GetData("data", 5, 0, 1, 0, UInt8, c);
+  n = d->GetData("data", 5, 0, 1, 0, UInt8, c);
   CHECK_OK2(13,2);
   CHECK_INT2(13,2,n,8);
   CHECK_INT_ARRAY(13,8,c[i],(i == 0 || i > 4) ? 41 + i : 12 + i);
 
   // 14: Dirfile::ErrorString check
-  d.GetData("x", 5, 0, 1, 0, Null, NULL);
-  str = d.ErrorString();
+  d->GetData("x", 5, 0, 1, 0, Null, NULL);
+  str = d->ErrorString();
   CHECK_STRING(14,str,"Field not found: x");
 
   // 16: Dirfile::Entry / RawEntry check
-  ent = d.Entry("data");
+  ent = d->Entry("data");
   CHECK_OK(16);
   CHECK_INT2(16,1,ent->Type(),RawEntryType);
   CHECK_INT2(16,2,ent->FragmentIndex(),0);
@@ -208,7 +209,7 @@ int main(void)
   cq[3] = 3.3 + _Complex_I * 4.4;
   cq[4] = 5.5;
   cq[5] = 5.5;
-  ent = d.Entry("lincom");
+  ent = d->Entry("lincom");
   CHECK_OK(18);
   CHECK_INT2(18,1,ent->Type(),LincomEntryType);
   CHECK_INT2(18,2,ent->NFields(),3);
@@ -221,7 +222,7 @@ int main(void)
   CHECK_COMPLEX_ARRAY(18,3,ent->COffset(i),cq[i * 2 + 1]);
 
   // 20: Dirfile::Entry / PolynomEntry check
-  ent = d.Entry("polynom");
+  ent = d->Entry("polynom");
   CHECK_OK(20);
   CHECK_INT2(20,1,ent->Type(),PolynomEntryType);
   CHECK_INT2(20,2,ent->PolyOrd(),5);
@@ -231,7 +232,7 @@ int main(void)
   CHECK_COMPLEX_ARRAY(20,6,ent->CCoefficient(i),cq[i]);
 
   // 21: Dirfile::Entry / LinterpEntry check
-  ent = d.Entry("linterp");
+  ent = d->Entry("linterp");
   CHECK_OK(21);
   CHECK_INT2(21,1,ent->Type(),LinterpEntryType);
   CHECK_INT2(21,2,ent->FragmentIndex(),0);
@@ -239,7 +240,7 @@ int main(void)
   CHECK_STRING2(21,4,ent->Table(),"/look/up/file");
 
   // 22: Dirfile::Entry / BitEntry check
-  ent = d.Entry("bit");
+  ent = d->Entry("bit");
   CHECK_OK(22);
   CHECK_INT2(22,1,ent->Type(),BitEntryType);
   CHECK_INT2(22,2,ent->FragmentIndex(),0);
@@ -248,7 +249,7 @@ int main(void)
   CHECK_INT2(22,5,ent->FirstBit(),3);
 
   // 23: Dirfile::Entry / SBitEntry check
-  ent = d.Entry("sbit");
+  ent = d->Entry("sbit");
   CHECK_OK(23);
   CHECK_INT2(23,1,ent->Type(),SBitEntryType);
   CHECK_INT2(23,2,ent->FragmentIndex(),0);
@@ -257,7 +258,7 @@ int main(void)
   CHECK_INT2(23,5,ent->FirstBit(),5);
 
   // 24: Dirfile::Entry / MultiplyEntry check
-  ent = d.Entry("mult");
+  ent = d->Entry("mult");
   CHECK_OK(24);
   CHECK_INT2(24,1,ent->Type(),MultiplyEntryType);
   CHECK_INT2(24,2,ent->FragmentIndex(),0);
@@ -265,7 +266,7 @@ int main(void)
   CHECK_STRING2(24,4,ent->Input(1),"sbit");
 
   // 25: Dirfile::Entry / PhaseEntry check
-  ent = d.Entry("phase");
+  ent = d->Entry("phase");
   CHECK_OK(25);
   CHECK_INT2(25,1,ent->Type(),PhaseEntryType);
   CHECK_INT2(25,2,ent->FragmentIndex(),0);
@@ -273,20 +274,20 @@ int main(void)
   CHECK_INT2(25,4,ent->Shift(),11);
 
   // 26: Dirfile::Entry / ConstEntry check
-  ent = d.Entry("const");
+  ent = d->Entry("const");
   CHECK_OK(26);
   CHECK_INT2(26,1,ent->Type(),ConstEntryType);
   CHECK_INT2(26,2,ent->FragmentIndex(),0);
   CHECK_INT2(26,3,ent->ConstType(),Float64);
 
   // 134: Dirfile::Entry / StringEntry check
-  ent = d.Entry("string");
+  ent = d->Entry("string");
   CHECK_OK(134);
   CHECK_INT2(134,1,ent->Type(),StringEntryType);
   CHECK_INT2(134,2,ent->FragmentIndex(),0);
 
   // 27: Dirfile::FragmentIndex check
-  n = d.FragmentIndex("data");
+  n = d->FragmentIndex("data");
   CHECK_OK(27);
   CHECK_INT(27,n,0);
 
@@ -295,10 +296,10 @@ int main(void)
   rent.SetFragmentIndex(0);
   rent.SetSamplesPerFrame(3);
   rent.SetType(Float64);
-  d.Add(rent);
+  d->Add(rent);
   CHECK_OK2(28,1);
 
-  ent = d.Entry("new1");
+  ent = d->Entry("new1");
   CHECK_OK2(28,2);
   CHECK_INT2(28,1,ent->Type(),RawEntryType);
   CHECK_INT2(28,2,ent->FragmentIndex(),0);
@@ -319,10 +320,10 @@ int main(void)
   lent.SetInput("in2", 1);
   lent.SetScale(q[2], 1);
   lent.SetOffset(q[3], 1);
-  d.Add(lent);
+  d->Add(lent);
   CHECK_OK2(29,1);
 
-  ent = d.Entry("new2");
+  ent = d->Entry("new2");
   CHECK_OK2(29,2);
   CHECK_INT2(29,1,ent->Type(),LincomEntryType);
   CHECK_INT2(29,2,ent->NFields(),2);
@@ -348,10 +349,10 @@ int main(void)
   lent.SetInput("in2", 1);
   lent.SetScale(cq[2], 1);
   lent.SetOffset(cq[3], 1);
-  d.Add(lent);
+  d->Add(lent);
   CHECK_OK2(30,1);
 
-  ent = d.Entry("new3");
+  ent = d->Entry("new3");
   CHECK_OK2(30,2);
   CHECK_INT2(30,1,ent->Type(),LincomEntryType);
   CHECK_INT2(30,2,ent->NFields(),2);
@@ -375,10 +376,10 @@ int main(void)
   yent.SetCoefficient(q[1], 1);
   yent.SetCoefficient(q[2], 2);
   yent.SetCoefficient(q[3], 3);
-  d.Add(yent);
+  d->Add(yent);
   CHECK_OK2(31,1);
 
-  ent = d.Entry("new4");
+  ent = d->Entry("new4");
   CHECK_OK2(31,2);
   CHECK_INT2(31,1,ent->Type(),PolynomEntryType);
   CHECK_INT2(31,2,ent->PolyOrd(),3);
@@ -401,10 +402,10 @@ int main(void)
   yent.SetCoefficient(cq[1], 1);
   yent.SetCoefficient(cq[2], 2);
   yent.SetCoefficient(cq[3], 3);
-  d.Add(yent);
+  d->Add(yent);
   CHECK_OK2(32,1);
 
-  ent = d.Entry("new5");
+  ent = d->Entry("new5");
   CHECK_OK2(32,2);
   CHECK_INT2(32,1,ent->Type(),PolynomEntryType);
   CHECK_INT2(32,2,ent->PolyOrd(),3);
@@ -418,10 +419,10 @@ int main(void)
   nent.SetFragmentIndex(0);
   nent.SetInput("in");
   nent.SetTable("./some/table");
-  d.Add(nent);
+  d->Add(nent);
   CHECK_OK2(33,1);
 
-  ent = d.Entry("new6");
+  ent = d->Entry("new6");
   CHECK_OK2(33,2);
   CHECK_INT2(33,1,ent->Type(),LinterpEntryType);
   CHECK_INT2(33,2,ent->FragmentIndex(),0);
@@ -434,10 +435,10 @@ int main(void)
   bent.SetInput("in1");
   bent.SetFirstBit(13);
   bent.SetNumBits(12);
-  d.Add(bent);
+  d->Add(bent);
   CHECK_OK2(34,1);
 
-  ent = d.Entry("new7");
+  ent = d->Entry("new7");
   CHECK_OK(34);
   CHECK_INT2(34,1,ent->Type(),BitEntryType);
   CHECK_INT2(34,2,ent->FragmentIndex(),0);
@@ -451,10 +452,10 @@ int main(void)
   sent.SetInput("in2");
   sent.SetFirstBit(14);
   sent.SetNumBits(15);
-  d.Add(sent);
+  d->Add(sent);
   CHECK_OK2(35,1);
 
-  ent = d.Entry("new8");
+  ent = d->Entry("new8");
   CHECK_OK(35);
   CHECK_INT2(35,1,ent->Type(),SBitEntryType);
   CHECK_INT2(35,2,ent->FragmentIndex(),0);
@@ -467,10 +468,10 @@ int main(void)
   ment.SetFragmentIndex(0);
   ment.SetInput("in1", 0);
   ment.SetInput("in2", 1);
-  d.Add(ment);
+  d->Add(ment);
   CHECK_OK2(36,1);
 
-  ent = d.Entry("new9");
+  ent = d->Entry("new9");
   CHECK_OK2(36,2);
   CHECK_INT2(36,1,ent->Type(),MultiplyEntryType);
   CHECK_INT2(36,2,ent->FragmentIndex(),0);
@@ -482,10 +483,10 @@ int main(void)
   pent.SetFragmentIndex(0);
   pent.SetInput("in1");
   pent.SetShift(22);
-  d.Add(pent);
+  d->Add(pent);
   CHECK_OK2(37,1);
 
-  ent = d.Entry("new10");
+  ent = d->Entry("new10");
   CHECK_OK(37);
   CHECK_INT2(37,1,ent->Type(),PhaseEntryType);
   CHECK_INT2(37,2,ent->FragmentIndex(),0);
@@ -496,35 +497,35 @@ int main(void)
   cent.SetName("new11");
   cent.SetFragmentIndex(0);
   cent.SetType(Float64);
-  d.Add(cent);
+  d->Add(cent);
   CHECK_OK2(38,1);
 
-  ent = d.Entry("new11");
+  ent = d->Entry("new11");
   CHECK_OK2(38,2);
   CHECK_INT2(38,1,ent->Type(),ConstEntryType);
   CHECK_INT2(38,2,ent->FragmentIndex(),0);
   CHECK_INT2(38,3,ent->ConstType(),Float64);
 
   // 39: Fragment check
-  frag = d.Fragment(0);
+  frag = d->Fragment(0);
   CHECK_OK(39);
   CHECK_STRING(39,frag->Name(),__TEST__ "dirfile/format");
 
   // 40: Dirfile::NFragments check
-  n = d.NFragments();
+  n = d->NFragments();
   CHECK_OK(40);
   CHECK_INT(40,n,1);
 
   // 41: Dirfile::Include check
-  n = d.Include("form2");
+  n = d->Include("form2");
   CHECK_OK2(41,1);
   CHECK_INT2(41,1,n,1);
-  n = d.GetConstant("const2", Int8, &sc);
+  n = d->GetConstant("const2", Int8, &sc);
   CHECK_OK2(41,2);
   CHECK_INT2(41,2,sc,-19);
 
   // 42: Dirfile::NFieldsByType check
-  n = d.NFieldsByType(LincomEntryType);
+  n = d->NFieldsByType(LincomEntryType);
   CHECK_OK(42);
   CHECK_INT(42,n,3);
 
@@ -532,12 +533,12 @@ int main(void)
   fields[0] = (char*)"lincom";
   fields[1] = (char*)"new2";
   fields[2] = (char*)"new3";
-  list = d.FieldListByType(LincomEntryType);
+  list = d->FieldListByType(LincomEntryType);
   CHECK_OK(43);
   CHECK_STRING_ARRAY(43,n,list[i],fields[i]);
 
   // 44: Dirfile::NVectors check
-  n = d.NVectors();
+  n = d->NVectors();
   CHECK_OK(44);
   CHECK_INT(44,n,19);
 
@@ -562,7 +563,7 @@ int main(void)
   fields[17] = (char*)"polynom";
   fields[18] = (char*)"sbit";
   fields[19] = (char*)"string";
-  list = d.VectorList();
+  list = d->VectorList();
   CHECK_OK(45);
   CHECK_STRING_ARRAY(45,n,list[i],fields[i]);
 
@@ -580,10 +581,10 @@ int main(void)
   lent.SetInput("in2", 1);
   lent.SetScale(q[2], 1);
   lent.SetOffset(q[3], 1);
-  d.MAdd(lent, "data");
+  d->MAdd(lent, "data");
   CHECK_OK2(126,1);
 
-  ent = d.Entry("data/mnew1");
+  ent = d->Entry("data/mnew1");
   CHECK_OK2(126,2);
   CHECK_INT2(126,1,ent->Type(),LincomEntryType);
   CHECK_INT2(126,2,ent->NFields(),2);
@@ -595,7 +596,7 @@ int main(void)
   CHECK_DOUBLE_ARRAY(126,2,ent->Offset(i),q[i * 2 + 1]);
 
   // 56: Dirfile::GetString check
-  n = d.GetString("string", GD_MAX_LINE_LENGTH, buf);
+  n = d->GetString("string", GD_MAX_LINE_LENGTH, buf);
   CHECK_OK(56);
   CHECK_INT(56,n,18);
   CHECK_STRING(56,buf,"Zaphod Beeblebrox");
@@ -603,90 +604,90 @@ int main(void)
   // 57: Dirfile::Add / StringEntry check
   gent.SetName("new12");
   gent.SetFragmentIndex(0);
-  d.Add(gent);
+  d->Add(gent);
   CHECK_OK2(57,1);
 
-  ent = d.Entry("new12");
+  ent = d->Entry("new12");
   CHECK_OK2(57,2);
   CHECK_INT2(57,1,ent->Type(),StringEntryType);
   CHECK_INT2(57,2,ent->FragmentIndex(),0);
 
-  n = d.GetString("new12", GD_MAX_LINE_LENGTH, buf);
+  n = d->GetString("new12", GD_MAX_LINE_LENGTH, buf);
   CHECK_OK2(57,3);
   CHECK_INT(57,n,1);
   CHECK_STRING(57,buf,"");
 
   // 59: Dirfile::AddSpec check
-  d.AddSpec("lorem STRING \"Lorem ipsum\"", 0);
+  d->AddSpec("lorem STRING \"Lorem ipsum\"", 0);
   CHECK_OK2(59,1);
 
-  n = d.GetString("lorem", GD_MAX_LINE_LENGTH, buf);
+  n = d->GetString("lorem", GD_MAX_LINE_LENGTH, buf);
   CHECK_OK2(59,2);
   CHECK_INT(59,n,12);
   CHECK_STRING(59,buf,"Lorem ipsum");
 
   // 60: Dirfile::MAddSpec check
-  d.MAddSpec("ipsum STRING \"dolor sit amet.\"", "lorem");
+  d->MAddSpec("ipsum STRING \"dolor sit amet.\"", "lorem");
   CHECK_OK2(60,1);
 
-  n = d.GetString("lorem/ipsum", GD_MAX_LINE_LENGTH, buf);
+  n = d->GetString("lorem/ipsum", GD_MAX_LINE_LENGTH, buf);
   CHECK_OK2(60,2);
   CHECK_INT(60,n,16);
   CHECK_STRING(60,buf,"dolor sit amet.");
 
   // 61: Dirfile::PutConstant check
   sc = 61;
-  n = d.PutConstant("const", Int8, &sc);
+  n = d->PutConstant("const", Int8, &sc);
   CHECK_OK2(61,1);
   CHECK_INT2(61,1,n,0);
 
-  n = d.GetConstant("const", Float32, &fl);
+  n = d->GetConstant("const", Float32, &fl);
   CHECK_OK2(61,2);
   CHECK_INT2(61,2,n,0);
   CHECK_DOUBLE2(61,3,fl,61);
 
   // 62: Dirfile::PutString check
-  n = d.PutString("string", "Arthur Dent");
+  n = d->PutString("string", "Arthur Dent");
   CHECK_OK2(62,1);
   CHECK_INT2(62,1,n,12);
 
-  n = d.GetString("string", GD_MAX_LINE_LENGTH, buf);
+  n = d->GetString("string", GD_MAX_LINE_LENGTH, buf);
   CHECK_OK2(62,2);
   CHECK_INT2(62,2,n,12);
   CHECK_STRING(62,buf,"Arthur Dent");
 
   // 63: Dirfile::NMFieldsByType check
-  n = d.NMFieldsByType("data", LincomEntryType);
+  n = d->NMFieldsByType("data", LincomEntryType);
   CHECK_OK(63);
   CHECK_INT(63,n,1);
 
   // 64: Dirfile::MFieldListByType check
   fields[0] = (char*)"mnew1";
-  list = d.MFieldListByType("data", LincomEntryType);
+  list = d->MFieldListByType("data", LincomEntryType);
   CHECK_OK(64);
   CHECK_STRING_ARRAY(64,n,list[i],fields[i]);
 
   // 65: Dirfile::NMVectors check
-  n = d.NMVectors("data");
+  n = d->NMVectors("data");
   CHECK_OK(65);
   CHECK_INT(65,n,2);
 
   // 66: Dirfile::MVectorList check
   fields[0] = (char*)"mlut";
   fields[1] = (char*)"mnew1";
-  list = d.MVectorList("data");
+  list = d->MVectorList("data");
   CHECK_OK(66);
   CHECK_STRING_ARRAY(66,n,list[i],fields[i]);
 
   // 67: RawEntry check
-  rep = reinterpret_cast<RawEntry*>(d.Entry("new1"));
+  rep = reinterpret_cast<RawEntry*>(d->Entry("new1"));
   CHECK_OK2(67,1);
   rep->SetType(Int32,0);
   CHECK_OK2(67,2);
   rep->SetSamplesPerFrame(4,0);
   CHECK_OK2(67,3);
 
-  ent = d.Entry("new1");
+  ent = d->Entry("new1");
   CHECK_OK2(67,4);
   CHECK_INT2(67,1,ent->Type(),RawEntryType);
   CHECK_INT2(67,2,ent->FragmentIndex(),0);
@@ -694,7 +695,7 @@ int main(void)
   CHECK_INT2(67,4,ent->RawType(),Int32);
 
   // 68: LincomEntry check
-  lep = reinterpret_cast<LincomEntry*>(d.Entry("new2"));
+  lep = reinterpret_cast<LincomEntry*>(d->Entry("new2"));
   CHECK_OK2(68,1);
   lep->SetNFields(3);
   CHECK_OK2(68,2);
@@ -711,7 +712,7 @@ int main(void)
   q[3] = 6.6;
   q[4] = 1.96;
   q[5] = 0.22;
-  ent = d.Entry("new2");
+  ent = d->Entry("new2");
   CHECK_OK2(68,6);
   CHECK_INT2(68,1,ent->Type(),LincomEntryType);
   CHECK_INT2(68,2,ent->NFields(),3);
@@ -724,7 +725,7 @@ int main(void)
   CHECK_DOUBLE_ARRAY(68,3,ent->Offset(i),q[i * 2 + 1]);
 
   // 70: PolynomEntry check
-  yep = reinterpret_cast<PolynomEntry*>(d.Entry("new4"));
+  yep = reinterpret_cast<PolynomEntry*>(d->Entry("new4"));
   CHECK_OK2(70,1);
   yep->SetInput("in4");
   CHECK_OK2(70,2);
@@ -738,7 +739,7 @@ int main(void)
   q[2] = 5.7;
   q[3] = 6.6;
   q[4] = 55.5;
-  ent = d.Entry("new4");
+  ent = d->Entry("new4");
   CHECK_OK2(70,5);
   CHECK_INT2(70,1,ent->Type(),PolynomEntryType);
   CHECK_INT2(70,2,ent->PolyOrd(),4);
@@ -748,14 +749,14 @@ int main(void)
   CHECK_DOUBLE_ARRAY(70,5,ent->Coefficient(i),q[i]);
 
   // 72: LinterpEntry check
-  nep = reinterpret_cast<LinterpEntry*>(d.Entry("new6"));
+  nep = reinterpret_cast<LinterpEntry*>(d->Entry("new6"));
   CHECK_OK2(72,1);
   nep->SetInput("in3");
   CHECK_OK2(72,2);
   nep->SetTable("./other/table");
   CHECK_OK2(72,3);
 
-  ent = d.Entry("new6");
+  ent = d->Entry("new6");
   CHECK_OK2(72,2);
   CHECK_INT2(72,1,ent->Type(),LinterpEntryType);
   CHECK_INT2(72,2,ent->FragmentIndex(),0);
@@ -763,7 +764,7 @@ int main(void)
   CHECK_STRING2(72,4,ent->Table(),"./other/table");
 
   // 73: BitEntry check
-  bep = reinterpret_cast<BitEntry*>(d.Entry("new7"));
+  bep = reinterpret_cast<BitEntry*>(d->Entry("new7"));
   CHECK_OK2(73,1);
   bep->SetInput("in3");
   CHECK_OK2(73,2);
@@ -772,7 +773,7 @@ int main(void)
   bep->SetNumBits(2);
   CHECK_OK2(73,4);
 
-  ent = d.Entry("new7");
+  ent = d->Entry("new7");
   CHECK_OK(73);
   CHECK_INT2(73,1,ent->Type(),BitEntryType);
   CHECK_INT2(73,2,ent->FragmentIndex(),0);
@@ -781,7 +782,7 @@ int main(void)
   CHECK_INT2(73,5,ent->FirstBit(),3);
 
   // 74: SBitEntry check
-  sep = reinterpret_cast<SBitEntry*>(d.Entry("new8"));
+  sep = reinterpret_cast<SBitEntry*>(d->Entry("new8"));
   CHECK_OK2(74,1);
   sep->SetInput("in4");
   CHECK_OK2(74,2);
@@ -790,7 +791,7 @@ int main(void)
   sep->SetNumBits(22);
   CHECK_OK2(74,4);
 
-  ent = d.Entry("new8");
+  ent = d->Entry("new8");
   CHECK_OK(74);
   CHECK_INT2(74,1,ent->Type(),SBitEntryType);
   CHECK_INT2(74,2,ent->FragmentIndex(),0);
@@ -799,14 +800,14 @@ int main(void)
   CHECK_INT2(74,5,ent->FirstBit(),1);
 
   // 75: MultiplyEntry check
-  mep = reinterpret_cast<MultiplyEntry*>(d.Entry("new9"));
+  mep = reinterpret_cast<MultiplyEntry*>(d->Entry("new9"));
   CHECK_OK2(75,1);
   mep->SetInput("in4",0);
   CHECK_OK2(75,2);
   mep->SetInput("in5",1);
   CHECK_OK2(75,3);
 
-  ent = d.Entry("new9");
+  ent = d->Entry("new9");
   CHECK_OK2(75,2);
   CHECK_INT2(75,1,ent->Type(),MultiplyEntryType);
   CHECK_INT2(75,2,ent->FragmentIndex(),0);
@@ -814,14 +815,14 @@ int main(void)
   CHECK_STRING2(75,4,ent->Input(1),"in5");
 
   // 76: PhsaeEntry check
-  pep = reinterpret_cast<PhaseEntry*>(d.Entry("new10"));
+  pep = reinterpret_cast<PhaseEntry*>(d->Entry("new10"));
   CHECK_OK2(76,1);
   pep->SetInput("in2");
   CHECK_OK2(76,2);
   pep->SetShift(8);
   CHECK_OK2(76,3);
 
-  ent = d.Entry("new10");
+  ent = d->Entry("new10");
   CHECK_OK(76);
   CHECK_INT2(76,1,ent->Type(),PhaseEntryType);
   CHECK_INT2(76,2,ent->FragmentIndex(),0);
@@ -829,19 +830,19 @@ int main(void)
   CHECK_INT2(76,4,ent->Shift(),8);
 
   // 77: ConstEntry check
-  cep = reinterpret_cast<ConstEntry*>(d.Entry("new11"));
+  cep = reinterpret_cast<ConstEntry*>(d->Entry("new11"));
   CHECK_OK2(76,1);
   cep->SetType(Float32);
   CHECK_OK2(76,2);
 
-  ent = d.Entry("new11");
+  ent = d->Entry("new11");
   CHECK_OK2(77,2);
   CHECK_INT2(77,1,ent->Type(),ConstEntryType);
   CHECK_INT2(77,2,ent->FragmentIndex(),0);
   CHECK_INT2(77,3,ent->ConstType(),Float32);
 
   // 78: Fragment::Encoding check
-  frag = d.Fragment(0);
+  frag = d->Fragment(0);
   CHECK_OK(78);
   CHECK_INT(78,frag->Encoding(),RawEncoding);
 
@@ -849,12 +850,12 @@ int main(void)
   CHECK_INT(79,frag->Endianness(),GD_LITTLE_ENDIAN);
 
   // 80: Dirfile::Name check
-  str = d.Name();
+  str = d->Name();
   CHECK_OK(80);
   CHECK_STRING(80,str,__TEST__ "dirfile");
 
   // 81: Fragment::Parent check
-  frag = d.Fragment(1);
+  frag = d->Fragment(1);
   CHECK_OK(81);
   CHECK_INT(81,frag->Parent(),0);
 
@@ -863,7 +864,7 @@ int main(void)
   CHECK_OK(82);
 
   // 83: Fragment::Protection check
-  frag = d.Fragment(1);
+  frag = d->Fragment(1);
   CHECK_OK(83);
   CHECK_INT(83,frag->Protection(),GD_PROTECT_DATA);
 
@@ -873,12 +874,12 @@ int main(void)
   CHECK_STRING(84,str,__TEST__ "dirfile/new1");
 
   // 85: Dirfile::Reference check
-  rep = d.Reference("new1");
+  rep = d->Reference("new1");
   CHECK_OK(85);
   CHECK_STRING(85,rep->Name(),"new1");
 
   // 135: Dirfile::ReferenceFilename check
-  str = d.ReferenceFilename();
+  str = d->ReferenceFilename();
   CHECK_OK(135);
   CHECK_STRING(135,str,__TEST__ "dirfile/new1");
   
@@ -893,10 +894,10 @@ int main(void)
   CHECK_INT(88,frag->Endianness(),GD_BIG_ENDIAN);
 
   // 89: Dirfile::AlterSpec check
-  d.AlterSpec("new10 PHASE in1 3");
+  d->AlterSpec("new10 PHASE in1 3");
   CHECK_OK2(89,1);
 
-  ent = d.Entry("new10");
+  ent = d->Entry("new10");
   CHECK_OK2(89,2);
   CHECK_INT2(89,1,ent->Type(),PhaseEntryType);
   CHECK_INT2(89,2,ent->FragmentIndex(),0);
@@ -904,17 +905,17 @@ int main(void)
   CHECK_INT2(89,4,ent->Shift(),3);
 
   //  90: Dirfile::Delete check
-  d.Delete("new10", 0);
+  d->Delete("new10", 0);
   CHECK_OK2(90,1);
 
-  ent = d.Entry("new10");
+  ent = d->Entry("new10");
   CHECK_ERROR2(90,2,GD_E_BAD_CODE);
 
   // 91: Dirfile::MAlterSpec check
-  d.MAlterSpec("mnew1 LINCOM 2 in4 1 2 in5 3 4", "data", 0);
+  d->MAlterSpec("mnew1 LINCOM 2 in4 1 2 in5 3 4", "data", 0);
   CHECK_OK2(91,1);
 
-  ent = d.Entry("data/mnew1");
+  ent = d->Entry("data/mnew1");
   CHECK_OK2(91,2);
   CHECK_INT2(91,1,ent->Type(),LincomEntryType);
   CHECK_INT2(91,2,ent->NFields(),2);
@@ -926,7 +927,7 @@ int main(void)
   CHECK_DOUBLE_ARRAY(91,2,ent->Offset(i),i * 2 + 2);
 
   // 92: Entry::Move check
-  ent = d.Entry("new9");
+  ent = d->Entry("new9");
   CHECK_OK2(92,1);
   ent->Move(1,0);
   CHECK_OK2(92,2);
@@ -936,10 +937,10 @@ int main(void)
   ent->Rename("newer",0);
   CHECK_OK2(93,1);
 
-  ent = d.Entry("new9");
+  ent = d->Entry("new9");
   CHECK_ERROR2(93,2,GD_E_BAD_CODE);
 
-  ent = d.Entry("newer");
+  ent = d->Entry("newer");
   CHECK_OK2(93,3);
   CHECK_INT2(93,1,ent->Type(),MultiplyEntryType);
   CHECK_INT2(93,2,ent->FragmentIndex(),1);
@@ -947,14 +948,14 @@ int main(void)
   CHECK_STRING2(93,4,ent->Input(1),"in5");
 
   // 94: Dirfile::UnInclude check
-  d.UnInclude(1,0);
+  d->UnInclude(1,0);
   CHECK_OK2(94,1);
 
-  ent = d.Entry("newer");
+  ent = d->Entry("newer");
   CHECK_ERROR2(94,2,GD_E_BAD_CODE);
 
   // 95: Fragment::FrameOffset check
-  frag = d.Fragment(0);
+  frag = d->Fragment(0);
   CHECK_OK(95);
   CHECK_INT(95,frag->FrameOffset(),0);
 
@@ -964,21 +965,22 @@ int main(void)
   CHECK_INT(96,frag->FrameOffset(),33);
 
   // 97: Dirfile::NativeType check
-  n = d.NativeType("data");
+  n = d->NativeType("data");
   CHECK_OK(97);
   CHECK_INT(97,n,Int8);
 
   // 99: Dirfile::Validate check
-  n = d.Validate("new7");
+  n = d->Validate("new7");
   CHECK_ERROR(99,GD_E_BAD_CODE);
   CHECK_INT(99,n,-1);
 
   // 101: Dirfile::FrameNum check
-  d.Reference("data");
-  dp = d.FrameNum("data", 33.3, 6);
+  d->Reference("data");
+  dp = d->FrameNum("data", 33.3, 6);
   CHECK_OK(101);
   CHECK_DOUBLE(101,dp,37.0375);
   
+  delete d;
   unlink(data);
   unlink(new1);
   unlink(format);

@@ -30,7 +30,7 @@ int main(void)
   write(fd, data, len);
   close(fd);
 
-  Dirfile dirfile = Dirfile(filedir, GD_RDONLY);
+  Dirfile dirfile(filedir, GD_RDONLY);
   size_t n = dirfile.NFrames();
 
   unlink(data);
