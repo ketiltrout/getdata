@@ -21,9 +21,26 @@
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+/* GETDATA.H -- GetData Library public API definition
+ * --------------------------------------------------
+ *
+ * Two preprocessor symbols may be defined before including this file to
+ * modify it's use:
+ *
+ * - defining NO_GETDATA_LEGACY_API will prevent the Legacy API declarations in
+ *   getdata_legacy.h from being declared.  If the Legacy API was omitted from
+ *   the library when it was built, this symbol does nothing.
+ * 
+ * - defining GETDATA_C89_API will prevent declarations herein from
+ *   using the C99 symbol `complex'.  Affected declarations will instead use a
+ *   two-element array of doubles in place of the complex types.  This symbol
+ *   permits including these declarations using a non-C99 conforming compiler.
+ */
+
 #ifndef GETDATA_H
 #define GETDATA_H
 
+/* The most recent standards version supported by this library */
 #define DIRFILE_STANDARDS_VERSION 7
 
 /* one or more of these should give us:
@@ -151,7 +168,26 @@ typedef enum {
 /* GD_NO_ENTRY is not part of this count */
 #define GD_N_ENTYPES 11
 
-#include <complex.h>
+#undef _gd_int16_t
+#undef _gd_uint16_t
+#undef _gd_int64_t
+#ifndef GETDATA_C89_API
+#  ifndef complex
+#    include <complex.h>
+#  endif
+#  include <inttypes.h>
+#  define GD_DCOMPLEXM(v) double complex v
+#  define GD_DCOMPLEXP(v) double complex *v
+typedef int16_t gd_bit_t;
+typedef uint16_t gd_spf_t;
+typedef int64_t gd_shift_t;
+#else
+#  define GD_DCOMPLEXM(v) double v[2]
+#  define GD_DCOMPLEXP(v) double *v
+typedef _gd_int16_t gd_bit_t;
+typedef _gd_uint16_t gd_spf_t;
+typedef _gd_int64_t gd_shift_t;
+#endif
 
 /* Data types -- No valid type may set 0x40 */
 #define GD_SIZE8     0x001
@@ -196,27 +232,27 @@ struct _gd_unified_entry {
   int comp_scal;
   union {
     struct { /* RAW */
-      unsigned int spf;
+      gd_spf_t spf;
       gd_type_t data_type;
     };
     struct { /* LINCOM */
       int n_fields;
       double m[GD_MAX_LINCOM];
-      double complex cm[GD_MAX_LINCOM];
+      GD_DCOMPLEXM(cm[GD_MAX_LINCOM]);
       double b[GD_MAX_LINCOM];
-      double complex cb[GD_MAX_LINCOM];
+      GD_DCOMPLEXM(cb[GD_MAX_LINCOM]);
     };
     char *table; /* LINTERP */
     struct { /* BIT and SBIT */
-      int bitnum;
-      int numbits;
+      gd_bit_t bitnum;
+      gd_bit_t numbits;
     };
-    long int shift; /* PHASE */
+    gd_shift_t shift; /* PHASE */
     gd_type_t const_type; /* CONST */
     struct { /* POLYNOM */
       int poly_ord;
       double a[GD_MAX_POLYORD + 1];
-      double complex ca[GD_MAX_POLYORD + 1];
+      GD_DCOMPLEXM(ca[GD_MAX_POLYORD + 1]);
     };
   };
 
@@ -278,20 +314,20 @@ typedef int (*gd_parser_callback_t)(gd_parser_data_t*, void*);
 #define GD_DEL_FORCE 0x8
 
 extern int dirfile_add_bit(DIRFILE *dirfile, const char *field_code,
-    const char *in_field, int bitnum, int numbits, int fragment_index)
+    const char *in_field, gd_bit_t bitnum, gd_bit_t numbits, int fragment_index)
 __THROW __gd_nonnull ((1,2,3));
 
 extern int dirfile_add_clincom(DIRFILE *dirfile, const char *field_code,
-    int n_fields, const char **in_fields, const double complex *cm,
-    const double complex *cb, int fragment_index)
-__THROW __gd_nonnull ((1,2,4,5,6));
+    int n_fields, const char **in_fields, const GD_DCOMPLEXP(cm),
+    const GD_DCOMPLEXP(cb), int fragment_index) __THROW
+__gd_nonnull ((1,2,4,5,6));
 
 extern int dirfile_add_const(DIRFILE *dirfile, const char *field_code,
     gd_type_t const_type, gd_type_t data_type, const void* value,
     int fragment_index) __THROW __gd_nonnull ((1,2,5));
 
 extern int dirfile_add_cpolynom(DIRFILE *dirfile, const char *field_code,
-    int poly_ord, const char *in_field, const double complex *a,
+    int poly_ord, const char *in_field, const GD_DCOMPLEXP(ca),
     int fragment_index) __THROW __gd_nonnull ((1,2,4));
 
 extern int dirfile_add_lincom(DIRFILE *dirfile, const char *field_code,
@@ -307,7 +343,7 @@ extern int dirfile_add_multiply(DIRFILE *dirfile, const char *field_code,
 __THROW __gd_nonnull ((1,2,3,4));
 
 extern int dirfile_add_phase(DIRFILE *dirfile, const char *field_code,
-    const char *in_field, int shift, int fragment_index)
+    const char *in_field, gd_shift_t shift, int fragment_index)
 __THROW __gd_nonnull ((1,2,3));
 
 extern int dirfile_add_polynom(DIRFILE *dirfile, const char *field_code,
@@ -315,24 +351,25 @@ extern int dirfile_add_polynom(DIRFILE *dirfile, const char *field_code,
 __THROW __gd_nonnull ((1,2,4));
 
 extern int dirfile_add_sbit(DIRFILE *dirfile, const char *field_code,
-    const char *in_field, int bitnum, int numbits, int fragment_index)
+    const char *in_field, gd_bit_t bitnum, gd_bit_t numbits, int fragment_index)
 __THROW __gd_nonnull ((1,2,3));
 
 extern int dirfile_add_string(DIRFILE *dirfile, const char *field_code,
     const char *value, int fragment_index) __THROW __gd_nonnull((1,2,3));
 
 extern int dirfile_alter_bit(DIRFILE *dirfile, const char *field_code,
-    const char *in_field, int bitnum, int numbits) __THROW __gd_nonnull((1,2));
+    const char *in_field, gd_bit_t bitnum, gd_bit_t numbits) __THROW
+__gd_nonnull((1,2));
 
 extern int dirfile_alter_clincom(DIRFILE *dirfile, const char *field_code,
-    int n_fields, const char **in_fields, const double complex *m,
-    const double complex *b) __THROW __gd_nonnull((1,2));
+    int n_fields, const char **in_fields, const GD_DCOMPLEXP(m),
+    const GD_DCOMPLEXP(b)) __THROW __gd_nonnull((1,2));
 
 extern int dirfile_alter_const(DIRFILE *dirfile, const char *field_code,
     gd_type_t const_type) __THROW __gd_nonnull((1,2));
 
 extern int dirfile_alter_cpolynom(DIRFILE *dirfile, const char *field_code,
-    int poly_ord, const char *in_field, const double complex *a)
+    int poly_ord, const char *in_field, const GD_DCOMPLEXP(a))
 __THROW __gd_nonnull((1,2));
 
 extern int dirfile_alter_lincom(DIRFILE *dirfile, const char *field_code,
@@ -343,14 +380,15 @@ extern int dirfile_alter_multiply(DIRFILE *dirfile, const char *field_code,
     const char *in_field1, const char *in_field2) __THROW __gd_nonnull((1,2));
 
 extern int dirfile_alter_phase(DIRFILE *dirfile, const char *field_code,
-    const char *in_field, int shift) __THROW __gd_nonnull((1,2));
+    const char *in_field, gd_shift_t shift) __THROW __gd_nonnull((1,2));
 
 extern int dirfile_alter_polynom(DIRFILE *dirfile, const char *field_code,
     int poly_ord, const char *in_field, const double *a)
 __THROW __gd_nonnull((1,2));
 
 extern int dirfile_alter_sbit(DIRFILE *dirfile, const char *field_code,
-    const char *in_field, int bitnum, int numbits) __THROW __gd_nonnull((1,2));
+    const char *in_field, gd_bit_t bitnum, gd_bit_t numbits) __THROW
+__gd_nonnull((1,2));
 
 extern int get_constant(DIRFILE *dirfile, const char *field_code,
     gd_type_t return_type, void *data) __THROW __gd_nonnull ((1, 2));
@@ -395,13 +433,13 @@ extern int dirfile_madd(DIRFILE *dirfile, const gd_entry_t *entry,
     const char *parent) __THROW __gd_nonnull ((1,2,3));
 
 extern int dirfile_madd_bit(DIRFILE *dirfile, const char *parent,
-    const char *field_code, const char *in_field, int bitnum, int numbits)
-__THROW __gd_nonnull ((1,2,3,4));
+    const char *field_code, const char *in_field, gd_bit_t bitnum,
+    gd_bit_t numbits) __THROW __gd_nonnull ((1,2,3,4));
 
 extern int dirfile_madd_clincom(DIRFILE *dirfile, const char *parent,
     const char *field_code, int n_fields, const char **in_fields,
-    const double complex *cm,
-    const double complex *cb) __THROW __gd_nonnull((1,2,3,5,6,7));
+    const GD_DCOMPLEXP(cm), const GD_DCOMPLEXP(cb)) __THROW
+__gd_nonnull((1,2,3,5,6,7));
 
 extern int dirfile_madd_const(DIRFILE *dirfile, const char *parent,
     const char *field_code, gd_type_t const_type, gd_type_t data_type,
@@ -409,7 +447,7 @@ extern int dirfile_madd_const(DIRFILE *dirfile, const char *parent,
 
 extern int dirfile_madd_cpolynom(DIRFILE *dirfile, const char *parent,
     const char *field_code, int poly_ord, const char *in_field,
-    const double complex *a) __THROW __gd_nonnull ((1,2,3,5));
+    const GD_DCOMPLEXP(ca)) __THROW __gd_nonnull ((1,2,3,5));
 
 extern int dirfile_madd_lincom(DIRFILE *dirfile, const char *parent,
     const char *field_code, int n_fields, const char **in_fields,
@@ -424,7 +462,7 @@ extern int dirfile_madd_multiply(DIRFILE *dirfile, const char *parent,
 __THROW __gd_nonnull ((1,2,3,4,5));
 
 extern int dirfile_madd_phase(DIRFILE *dirfile, const char *parent,
-    const char *field_code, const char *in_field, int shift)
+    const char *field_code, const char *in_field, gd_shift_t shift)
 __THROW __gd_nonnull ((1,2,3,4));
 
 extern int dirfile_madd_polynom(DIRFILE *dirfile, const char *parent,
@@ -432,8 +470,8 @@ extern int dirfile_madd_polynom(DIRFILE *dirfile, const char *parent,
 __THROW __gd_nonnull ((1,2,3,5));
 
 extern int dirfile_madd_sbit(DIRFILE *dirfile, const char *parent,
-    const char *field_code, const char *in_field, int bitnum, int numbits)
-__THROW __gd_nonnull ((1,2,3,4));
+    const char *field_code, const char *in_field, gd_bit_t bitnum,
+    gd_bit_t numbits) __THROW __gd_nonnull ((1,2,3,4));
 
 extern int dirfile_madd_spec(DIRFILE *dirfile, const char *line,
     const char *parent) __THROW __gd_nonnull ((1,2,3));
@@ -499,7 +537,7 @@ extern const char *dirfile_reference(DIRFILE *dirfile,
 
 extern const char *get_reference(DIRFILE *dirfile) __THROW __gd_nonnull ((1));
 
-extern unsigned int get_spf(DIRFILE *dirfile, const char *field_code) __THROW
+extern gd_spf_t get_spf(DIRFILE *dirfile, const char *field_code) __THROW
 __gd_nonnull ((1, 2));
 
 extern size_t get_string(DIRFILE *dirfile, const char *field_code, size_t len,
@@ -522,7 +560,7 @@ extern int dirfile_add(DIRFILE *dirfile, const gd_entry_t *entry)
   __gd_nonnull((1,2));
 
 extern int dirfile_add_raw(DIRFILE *dirfile, const char *field_code,
-    gd_type_t data_type, unsigned int spf, int fragment_index)
+    gd_type_t data_type, gd_spf_t spf, int fragment_index)
 __gd_nonnull((1,2));
 
 extern int dirfile_add_spec(DIRFILE *dirfile, const char *line,
@@ -541,7 +579,7 @@ extern int dirfile_alter_linterp(DIRFILE *dirfile, const char *field_code,
     const char *in_field, const char *table, int recode) __gd_nonnull ((1,2));
 
 extern int dirfile_alter_raw(DIRFILE *dirfile, const char *field_code,
-    gd_type_t data_type, unsigned int spf, int recode) __gd_nonnull ((1,2));
+    gd_type_t data_type, gd_spf_t spf, int recode) __gd_nonnull ((1,2));
 
 extern int dirfile_alter_spec(DIRFILE *dirfile, const char *line,
     int recode) __gd_nonnull ((1,2));
