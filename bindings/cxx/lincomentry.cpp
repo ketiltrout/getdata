@@ -18,8 +18,6 @@
 // along with GetData; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 //
-#include "getdata/lincomentry.h"
-#include "getdata/entry.h"
 #include "getdata/dirfile.h"
 
 #include <stdlib.h>
@@ -46,7 +44,7 @@ LincomEntry::LincomEntry(const char* field_code, int n_fields,
 }
 
 LincomEntry::LincomEntry(const char* field_code, int n_fields,
-    const char** in_fields, double complex* cm, double complex* cb,
+    const char** in_fields, std::complex<double>* cm, std::complex<double>* cb,
     int fragment_index) : Entry::Entry()
 {
   int i;
@@ -58,8 +56,10 @@ LincomEntry::LincomEntry(const char* field_code, int n_fields,
   E.comp_scal = 1;
   for (i = 0; i < n_fields; ++i) {
     E.in_fields[i] = strdup(in_fields[i]);
-    E.cm[i] = cm[i];
-    E.cb[i] = cb[i];
+    E.cm[i][0] = cm[i].real();
+    E.cm[i][1] = cm[i].imag();
+    E.cb[i][0] = cb[i].real();
+    E.cb[i][1] = cb[i].imag();
   }
 }
 
@@ -87,7 +87,8 @@ int LincomEntry::SetScale(double scale, int index)
   if (index < 0 || index >= GD_MAX_LINCOM)
     return -1;
 
-  E.cm[index] = E.m[index] = scale;
+  E.cm[index][0] = E.m[index] = scale;
+  E.cm[index][1] = 0;
 
   if (D != NULL)
     return dirfile_alter_entry(D->D, E.field, &E, 0);
@@ -98,7 +99,6 @@ int LincomEntry::SetScale(double scale, int index)
 int LincomEntry::SetScale(const char *scale, int index)
 {
   int r = 0;
-  double complex c128;
 
   if (index < 0 || index >= GD_MAX_LINCOM)
     return -1;
@@ -114,22 +114,21 @@ int LincomEntry::SetScale(const char *scale, int index)
     r = dirfile_alter_entry(D->D, E.field, &E, 0);
 
     if (!r) {
-      r = get_constant(D->D, scale, GD_COMPLEX128, &c128);
-      E.cm[index] = c128;
-      E.m[index] = creal(c128);
+      r = get_constant(D->D, scale, GD_COMPLEX128, E.cm + index);
+      E.m[index] = E.cm[index][0];
     }
   }
   
   return r;
 }
 
-int LincomEntry::SetScale(double complex scale, int index)
+int LincomEntry::SetScale(std::complex<double> scale, int index)
 {
   if (index < 0 || index >= GD_MAX_LINCOM)
     return -1;
 
-  E.cm[index] = scale;
-  E.m[index] = creal(E.cm[index]);
+  E.m[index] = E.cm[index][0] = scale.real();
+  E.cm[index][1] = scale.imag();
   E.comp_scal = 1;
 
   if (D != NULL)
@@ -143,7 +142,8 @@ int LincomEntry::SetOffset(double offset, int index)
   if (index < 0 || index >= GD_MAX_LINCOM)
     return -1;
 
-  E.cb[index] = E.b[index] = offset;
+  E.cb[index][0] = E.b[index] = offset;
+  E.cb[index][1] = 0;
 
   if (D != NULL)
     return dirfile_alter_entry(D->D, E.field, &E, 0);
@@ -154,7 +154,6 @@ int LincomEntry::SetOffset(double offset, int index)
 int LincomEntry::SetOffset(const char *scale, int index)
 {
   int r = 0;
-  double complex c128;
 
   if (index < 0 || index >= GD_MAX_LINCOM)
     return -1;
@@ -170,22 +169,21 @@ int LincomEntry::SetOffset(const char *scale, int index)
     r = dirfile_alter_entry(D->D, E.field, &E, 0);
 
     if (!r) {
-      r = get_constant(D->D, scale, GD_COMPLEX128, &c128);
-      E.cm[index + GD_MAX_LINCOM] = c128;
-      E.m[index + GD_MAX_LINCOM] = creal(c128);
+      r = get_constant(D->D, scale, GD_COMPLEX128, E.cb + index);
+      E.b[index] = E.cb[index][0];
     }
   }
   
   return r;
 }
 
-int LincomEntry::SetOffset(double complex offset, int index)
+int LincomEntry::SetOffset(std::complex<double> offset, int index)
 {
   if (index < 0 || index >= GD_MAX_LINCOM)
     return -1;
 
-  E.cb[index] = offset;
-  E.b[index] = creal(E.cb[index]);
+  E.b[index] = E.cb[index][0] = offset.real();
+  E.cb[index][1] = offset.imag();
   E.comp_scal = 1;
 
   if (D != NULL)

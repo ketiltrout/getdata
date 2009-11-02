@@ -120,20 +120,12 @@ static void _GD_DeReference(DIRFILE* D, gd_entry_t* E, gd_entry_t* C,
     int check)
 {
   int i;
-  uint16_t u16;
-  int16_t i16;
-  int64_t i64;
 
   dtrace("%p, %p, %p, %i", D, E, C, check);
 
   switch(E->field_type) {
     case GD_RAW_ENTRY:
-      if (_GD_DeReferenceOne(D, E, C, check, 0, GD_UINT16, &u16))
-        break;
-
-      if (!check)
-        E->spf = (unsigned int)u16;
-
+      _GD_DeReferenceOne(D, E, C, check, 0, GD_UINT16, &E->spf);
       break;
     case GD_POLYNOM_ENTRY:
       for (i = 0; i <= E->poly_ord; ++i) {
@@ -162,25 +154,13 @@ static void _GD_DeReference(DIRFILE* D, gd_entry_t* E, gd_entry_t* C,
       break;
     case GD_BIT_ENTRY:
     case GD_SBIT_ENTRY:
-      if (_GD_DeReferenceOne(D, E, C, check, 0, GD_INT16, &i16))
+      if (_GD_DeReferenceOne(D, E, C, check, 0, GD_INT16, &E->bitnum))
         break;
 
-      if (!check)
-        E->bitnum = (int)i16;
-
-      if (_GD_DeReferenceOne(D, E, C, check, 1, GD_INT16, &i16))
-        break;
-
-      if (!check)
-        E->numbits = (int)i16;
+      _GD_DeReferenceOne(D, E, C, check, 1, GD_INT16, &E->numbits);
       break;
     case GD_PHASE_ENTRY:
-      if (_GD_DeReferenceOne(D, E, C, check, 0, GD_INT64, &i64))
-        break;
-
-      if (!check)
-        E->shift = (long int)i64;
-
+      _GD_DeReferenceOne(D, E, C, check, 0, GD_INT64, &E->shift);
       break;
     case GD_NO_ENTRY:
     case GD_LINTERP_ENTRY:

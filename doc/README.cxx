@@ -163,7 +163,7 @@ are available:
   should be one of:
 
     Null, Unknown, UInt8, Int8, UInt16, Int16, UInt32, Int32, UInt64, Int64,
-    Float32, Float64
+    Float32, Float64, Complex64, Complex128
 
   which are aliases for the gd_type_t values GD_NULL, GD_UNKNOWN, GD_UINT8, &c.
   Arguments of type GetData::EntryType should be one of 
@@ -219,7 +219,7 @@ ENTRY CLASS
 
 Defined in getdata/entry.h, the GetData::Entry class encapsulates the gd_entry_t
 object.  An entry object may be "associated" with a dirfile.  An entry object
-returned by Dirfile::Entry will be associate with that dirfile.  Entry objects
+returned by Dirfile::Entry will be associated with that dirfile.  Entry objects
 created by using one of the constructors will not be associated.
 
 Changing the value of one of the data members of an associated entry object will

@@ -1,4 +1,4 @@
-dnl (C) 2008 D. V. Wiebe
+dnl (C) 2008, 2009 D. V. Wiebe
 dnl
 dnl llllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll
 dnl
@@ -33,4 +33,30 @@ AC_DEFUN([GD_LANG_COMPILER_INTEL],
 [gd_compiler_intel=yes],
 [gd_compiler_intel=no])
 gd_cv_[]_AC_LANG_ABBREV[]_compiler_intel=$gd_compiler_intel
+])])
+
+dnl GD_LANG_F77_COMPILER_INTEL
+dnl -------------------------------------------------------------
+dnl Check whether the compiler for Fortran is Intel.
+AC_DEFUN([GD_LANG_F77_COMPILER_INTEL],
+[AC_CACHE_CHECK([whether we are using the Intel Fortran-77 compiler],
+[gd_cv_f77_compiler_intel],
+[if $F77 -help 2>/dev/null | grep -q 'Intel.R. Fortran Compiler'; then
+gd_cv_f77_compiler_intel=yes
+else
+gd_cv_f77_compiler_intel=no
+fi
+])])
+
+dnl GD_LANG_FC_COMPILER_INTEL
+dnl -------------------------------------------------------------
+dnl Check whether the compiler for free-form Fortran is Intel.
+AC_DEFUN([GD_LANG_FC_COMPILER_INTEL],
+[AC_CACHE_CHECK([whether we are using the Intel Fortran compiler],
+[gd_cv_fc_compiler_intel],
+[if $FC -help 2>/dev/null | grep -q 'Intel.R. Fortran Compiler'; then
+gd_cv_fc_compiler_intel=yes
+else
+gd_cv_fc_compiler_intel=no
+fi
 ])])

@@ -118,9 +118,6 @@ gd_entry_t* dirfile_free_entry_strings(gd_entry_t* entry)
 static void _GD_GetScalar(DIRFILE* D, gd_entry_t* E, const char* scalar,
     int type, void* data)
 {
-  uint16_t u16;
-  int16_t i16;
-  int64_t i64;
   void *ptr = NULL;
   gd_entry_t* C;
   int repr;
@@ -152,19 +149,7 @@ static void _GD_GetScalar(DIRFILE* D, gd_entry_t* E, const char* scalar,
           _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
       }
 
-      if (type == GD_INT64) {
-        _GD_DoField(D, C, repr, 0, 1, GD_INT64, &i64);
-        *(long int*)data = (long int)i64;
-      } else if (type == GD_COMPLEX)
-        _GD_DoField(D, C, repr, 0, 1, GD_COMPLEX128, data);
-      else if (type == GD_SIGNED) {
-        _GD_DoField(D, C, repr, 0, 1, GD_INT16, &i16);
-        *(int*)data = (int)i16; /* this periphrasis is in case `int16'
-                                   is different than `int' */
-      } else {
-        _GD_DoField(D, C, repr, 0, 1, GD_UINT16, &u16);
-        *(unsigned int*)data = (unsigned int)u16; /* ditto */
-      }
+      _GD_DoField(D, C, repr, 0, 1, type, data);
 
       if (ptr) {
         C->e->client = ptr;
@@ -188,12 +173,12 @@ int _GD_CalculateEntry(DIRFILE* D, gd_entry_t* E)
 
   switch(E->field_type) {
     case GD_RAW_ENTRY:
-      _GD_GetScalar(D, E, E->scalar[0], 0, &E->spf);
+      _GD_GetScalar(D, E, E->scalar[0], GD_UINT16, &E->spf);
       break;
     case GD_POLYNOM_ENTRY:
       E->comp_scal = 0;
       for (i = 0; i <= E->poly_ord; ++i) {
-        _GD_GetScalar(D, E, E->scalar[i], GD_COMPLEX, &E->ca[i]);
+        _GD_GetScalar(D, E, E->scalar[i], GD_COMPLEX128, &E->ca[i]);
         E->a[i] = creal(E->ca[i]);
 
         if (cimag(E->ca[i]))
@@ -206,13 +191,13 @@ int _GD_CalculateEntry(DIRFILE* D, gd_entry_t* E)
     case GD_LINCOM_ENTRY:
       E->comp_scal = 0;
       for (i = 0; i < E->n_fields; ++i) {
-        _GD_GetScalar(D, E, E->scalar[i], GD_COMPLEX, &E->cm[i]);
+        _GD_GetScalar(D, E, E->scalar[i], GD_COMPLEX128, &E->cm[i]);
         E->m[i] = creal(E->cm[i]);
 
         if (cimag(E->cm[i]))
           E->comp_scal = 1;
 
-        _GD_GetScalar(D, E, E->scalar[i + GD_MAX_LINCOM], GD_COMPLEX,
+        _GD_GetScalar(D, E, E->scalar[i + GD_MAX_LINCOM], GD_COMPLEX128,
             &E->cb[i]);
         E->b[i] = creal(E->cb[i]);
 
@@ -225,8 +210,8 @@ int _GD_CalculateEntry(DIRFILE* D, gd_entry_t* E)
       break;
     case GD_BIT_ENTRY:
     case GD_SBIT_ENTRY:
-      _GD_GetScalar(D, E, E->scalar[0], GD_SIGNED, &E->bitnum);
-      _GD_GetScalar(D, E, E->scalar[1], GD_SIGNED, &E->numbits);
+      _GD_GetScalar(D, E, E->scalar[0], GD_INT16, &E->bitnum);
+      _GD_GetScalar(D, E, E->scalar[1], GD_INT16, &E->numbits);
       break;
     case GD_PHASE_ENTRY:
       _GD_GetScalar(D, E, E->scalar[0], GD_INT64, &E->shift);

@@ -22,7 +22,7 @@ dnl
 m4_define(getdata_major,    0)
 m4_define(getdata_minor,    6)
 m4_define(getdata_revision, 0)
-m4_define(getdata_extra,    rc3)
+m4_define(getdata_extra,    rc4)
 m4_define(getdata_version,
           getdata_major.getdata_minor.getdata_revision[]getdata_extra)
 
@@ -184,7 +184,7 @@ AC_MSG_RESULT([$make_f77bindings])
 
 dnl Python bindings
 AC_ARG_ENABLE(python, AS_HELP_STRING([--disable-python],
-              [don't build the Python bindings (PyGetData)]),
+              [don't build the Python bindings (pygetdata)]),
               [
                case "${enableval}" in
                  no) make_pybindings="no" ;;
@@ -197,7 +197,7 @@ AC_MSG_RESULT([$make_pybindings])
 
 dnl IDL bindings
 AC_ARG_ENABLE(idl, AS_HELP_STRING([--disable-idl],
-       [don't build the Interactive Data Language (IDL) bindings (IDLGetData)]),
+       [don't build the Interactive Data Language (IDL) bindings (IDL_GetData)]),
               [
                case "${enableval}" in
                  no) make_idlbindings="no" ;;
@@ -379,11 +379,9 @@ echo
 GD_LANG_COMPILER_INTEL
 AC_LANG_PUSH([C++])
 GD_LANG_COMPILER_INTEL
-AC_LANG([Fortran 77])
-GD_LANG_COMPILER_INTEL
-AC_LANG([Fortran])
-GD_LANG_COMPILER_INTEL
-AC_LANG_POP([Fortran])
+AC_LANG_POP([C++])
+GD_LANG_F77_COMPILER_INTEL
+GD_LANG_FC_COMPILER_INTEL
 
 dnl check if we found a C++ compiler
 if test "x$CXX" == "x"; then
@@ -480,8 +478,53 @@ if test "x$have_off64_t" = "xyes"; then
             [ Define to 1 if the system has the type `off64_t'. ]) dnl `
 fi
 
+dnl integer sizes
+AC_CHECK_SIZEOF([short int])
 AC_CHECK_SIZEOF([int])
+AC_CHECK_SIZEOF([long int])
+AC_CHECK_SIZEOF([long long int])
+AC_CHECK_SIZEOF([unsigned short int])
 AC_CHECK_SIZEOF([unsigned int])
+AC_CHECK_SIZEOF([unsigned long int])
+AC_CHECK_SIZEOF([unsigned long long int])
+
+dnl C89 API types
+if test $ac_cv_sizeof_int -eq 2; then
+  gd_int16_t="int"
+elif test $ac_cv_sizeof_short_int -eq 2; then
+  gd_int16_t="short int"
+elif test $ac_cv_sizeof_long_int -eq 2; then
+  gd_int16_t="long int"
+elif test $ac_cv_sizeof_long_long_int -eq 2; then
+  gd_int16_t="long long int"
+fi
+
+if test $ac_cv_sizeof_unsigned_int -eq 2; then
+  gd_uint16_t="unsigned int"
+elif test $ac_cv_sizeof_unsigned_short_int -eq 2; then
+  gd_uint16_t="unsigned short int"
+elif test $ac_cv_sizeof_unsigned_long_int -eq 2; then
+  gd_uint16_t="unsigned long int"
+elif test $ac_cv_sizeof_unsigned_long_long_int -eq 2; then
+  gd_uint16_t="unsigned long long int"
+fi
+
+if test $ac_cv_sizeof_int -eq 8; then
+  gd_int64_t="int"
+elif test $ac_cv_sizeof_short_int -eq 8; then
+  gd_int64_t="short int"
+elif test $ac_cv_sizeof_long_int -eq 8; then
+  gd_int64_t="long int"
+elif test $ac_cv_sizeof_long_long_int -eq 8; then
+  gd_int64_t="long long int"
+fi
+
+AC_DEFINE_UNQUOTED([_gd_int16_t], [$gd_int16_t],
+                   [ Define to a signed 16-bit integer type ])
+AC_DEFINE_UNQUOTED([_gd_uint16_t], [$gd_uint16_t],
+                   [ Define to an unsigned 16-bit integer type ])
+AC_DEFINE_UNQUOTED([_gd_int64_t], [$gd_int64_t],
+                   [ Define to a signed 64-bit integer type ])
 
 dnl python
 if test "x$make_pybindings" = "xyes"; then
@@ -495,12 +538,13 @@ if test "x$make_pybindings" = "xyes"; then
   else
     AC_MSG_CHECKING([for NumPy])
     cat > conftest.py << EOF
+import sys
 try:
   import numpy
 except ImportError:
-  exit(1)
+  sys.exit(1)
 EOF
-    if $PYTHON conftest.py; then
+    if $PYTHON conftest.py > /dev/null 2>&1; then
       have_numpy="yes"
     fi
     AC_MSG_RESULT([$have_numpy])
@@ -604,6 +648,8 @@ AM_CONDITIONAL(GNU_C_COMPILER, test "x$gd_cv_c_compiler_intel" == "xno" -a "x$ac
 AM_CONDITIONAL(GNU_CXX_COMPILER, test "x$gd_cv_cxx_compiler_intel" == "xno" -a "x$ac_cv_cxx_compiler_gnu" == "xyes")
 AM_CONDITIONAL(GNU_F77_COMPILER, test "x$gd_cv_f77_compiler_intel" == "xno" -a "x$ac_cv_f77_compiler_gnu" == "xyes")
 AM_CONDITIONAL(GNU_FC_COMPILER, test "x$gd_cv_fc_compiler_intel" == "xno" -a "x$ac_cv_fc_compiler_gnu" == "xyes")
+AM_CONDITIONAL(INTEL_F77_COMPILER, test "x$gd_cv_f77_compiler_intel" == "xyes")
+AM_CONDITIONAL(INTEL_FC_COMPILER, test "x$gd_cv_fc_compiler_intel" == "xyes")
 AM_CONDITIONAL(HAVE_OFF64_T, test "x$have_off64_t" = "xyes")
 AM_CONDITIONAL(INCLUDE_LEGACY_API, test "x$include_legacy_api" != "xno")
 AM_CONDITIONAL(INTERNAL_LTDL, test "x${internal_ltdl}" = xyes)

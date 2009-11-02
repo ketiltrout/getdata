@@ -24,7 +24,7 @@
 #include <stdio.h>
 #include "getdata.h"
 
-int callback(gd_parser_data_t *pdata, void* ne)
+static int callback(gd_parser_data_t *pdata, void* ne)
 {
   char getdata_error[2048];
   printf("  syntax error: %s\n", get_error_string(pdata->dirfile,
@@ -95,9 +95,9 @@ int main(int argc, char* argv[])
   nfields = get_nfields(dirfile);
 
   if (ne > 0)
-    printf("  Found %i problems in %i fields.\n", ne, nfields);
+    printf("  Found %i problems in %u fields.\n", ne, nfields);
   else
-    printf("  No problems found in %i fields.\n", nfields);
+    printf("  No problems found in %u fields.\n", nfields);
 
   /* try to retrieve the number of frames in the dirfile */
   puts("\nChecking frames...");

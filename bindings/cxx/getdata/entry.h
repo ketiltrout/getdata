@@ -23,10 +23,13 @@
 #define GETDATA_ENTRY_H
 
 #define NO_GETDATA_LEGACY_API
+#define GETDATA_C89_API
 
 extern "C" {
 #include <getdata.h>
 }
+
+#include <complex>
 
 #define __gd_unused __attribute__ (( unused ))
 
@@ -96,7 +99,7 @@ namespace GetData {
       virtual const char *Scalar(int index = 0);
 
       /* RAW methods */
-      virtual unsigned int SamplesPerFrame() {
+      virtual gd_spf_t SamplesPerFrame() {
         return (E.field_type == GD_RAW_ENTRY) ? E.spf : 0;
       };
 
@@ -114,9 +117,10 @@ namespace GetData {
             CheckIndex(E.field_type, E.n_fields, index)) ? E.m[index] : 0;
       }
 
-      virtual double complex CScale(int index = 0) {
+      virtual std::complex<double> CScale(int index = 0) {
         return (E.field_type == GD_LINCOM_ENTRY &&
-            CheckIndex(E.field_type, E.n_fields, index)) ? E.cm[index] : 0;
+            CheckIndex(E.field_type, E.n_fields, index))
+          ? std::complex<double>(E.cm[index][0], E.cm[index][1]) : 0;
       }
 
       virtual double Offset(int index = 0) {
@@ -124,9 +128,10 @@ namespace GetData {
             CheckIndex(E.field_type, E.n_fields, index)) ? E.b[index] : 0;
       }
 
-      virtual double complex COffset(int index = 0) {
+      virtual std::complex<double> COffset(int index = 0) {
         return (E.field_type == GD_LINCOM_ENTRY &&
-            CheckIndex(E.field_type, E.n_fields, index)) ? E.cb[index] : 0;
+            CheckIndex(E.field_type, E.n_fields, index))
+          ? std::complex<double>(E.cb[index][0], E.cb[index][1]) : 0;
       }
 
       /* LINTERP methods */
@@ -135,16 +140,16 @@ namespace GetData {
       };
 
       /* (S)BIT methods */
-      virtual int FirstBit() {
+      virtual gd_bit_t FirstBit() {
         return (E.field_type == GD_BIT_ENTRY) ? E.bitnum : -1;
       };
 
-      virtual int NumBits() {
+      virtual gd_bit_t NumBits() {
         return (E.field_type == GD_BIT_ENTRY) ? E.numbits : -1;
       };
 
       /* PHASE methods */
-      virtual long int Shift() {
+      virtual gd_shift_t Shift() {
         return (E.field_type == GD_PHASE_ENTRY) ? E.shift : 0;
       };
 
@@ -164,9 +169,9 @@ namespace GetData {
           ? E.a[index] : 0;
       }
 
-      virtual double complex CCoefficient(int index = 0) {
+      virtual std::complex<double> CCoefficient(int index = 0) {
         return (E.field_type == GD_POLYNOM_ENTRY && index <= E.poly_ord)
-          ? E.ca[index] : 0;
+          ? std::complex<double>(E.ca[index][0], E.ca[index][1]) : 0;
       }
 
       void SetName(const char* name);

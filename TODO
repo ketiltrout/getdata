@@ -3,3 +3,5 @@
 * LUT sorting
 * Hashed compressed files
 * streaming
+* linterp table path munging [MH]
+* get_nsamples() [MH]

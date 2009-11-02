@@ -30,7 +30,7 @@
 
 /* Type conventions:
  *
- *  - samples per frame is always _gd_spf_t (aka unsigned int)
+ *  - samples per frame is always gd_spf_t (aka uin16_t)
  *  - variables holding offsets or file sizes should be of type off64_t (which
  *    may be simply off_t, depending on local LFS support)
  *  - variables holding object sizes or counts of items read or written should
@@ -99,9 +99,6 @@ const char* _gd_colsub(void);
 #ifndef HAVE_STRTOULL
 #  define stroull strtoul
 #endif
-
-/* some type aliases */
-typedef unsigned int _gd_spf_t;
 
 /* maximum number of recursions */
 #define GD_MAX_RECURSE_LEVEL  32
@@ -361,7 +358,7 @@ struct _GD_DIRFILE {
 
 extern const gd_entype_t _gd_entype_index[GD_N_ENTYPES];
 
-void _GD_AddData(DIRFILE* D, void *A, _gd_spf_t spfA, void *B, _gd_spf_t spfB,
+void _GD_AddData(DIRFILE* D, void *A, gd_spf_t spfA, void *B, gd_spf_t spfB,
     gd_type_t type, size_t n);
 void* _GD_Alloc(DIRFILE* D, gd_type_t type, size_t n);
 int _GD_BadInput(DIRFILE* D, gd_entry_t* E, int i);
@@ -372,7 +369,7 @@ int _GD_CalculateEntry(DIRFILE* D, gd_entry_t* E);
 
 void _GD_CLincomData(DIRFILE* D, int n, void* data1, gd_type_t return_type,
     double complex *data2, double complex *data3, double complex* m,
-    double complex *b, _gd_spf_t *spf, size_t n_read);
+    double complex *b, gd_spf_t *spf, size_t n_read);
 void _GD_CLinterpData(DIRFILE* D, void *data, gd_type_t type,
     const double *data_in, size_t npts, const double *lx,
     const double complex *ly, size_t n_ln);
@@ -393,7 +390,7 @@ void _GD_FlushMeta(DIRFILE* D, int fragment);
 void _GD_FreeE(gd_entry_t* E, int priv);
 int _GD_GetLine(FILE *fp, char *line, int* linenum);
 int _GD_GetRepr(DIRFILE*, const char*, char**);
-_gd_spf_t _GD_GetSPF(DIRFILE* D, gd_entry_t* E);
+gd_spf_t _GD_GetSPF(DIRFILE* D, gd_entry_t* E);
 int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,
     int linenum, char** ref_name, int me, int* standards, int flags);
 void _GD_InitialiseFramework(void);
@@ -404,7 +401,7 @@ void _GD_InsertSort(DIRFILE* D, gd_entry_t* E, int u) __THROW;
 
 gd_type_t _GD_LegacyType(char c);
 void _GD_LincomData(DIRFILE* D, int n, void* data1, gd_type_t return_type,
-    double *data2, double *data3, double* m, double *b, _gd_spf_t *spf,
+    double *data2, double *data3, double* m, double *b, gd_spf_t *spf,
     size_t n_read);
 void _GD_LinterpData(DIRFILE* D, void *data, gd_type_t type,
     const double *data_in, size_t npts, const double *lx, const double *ly,

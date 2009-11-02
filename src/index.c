@@ -197,7 +197,7 @@ static double _GD_GetIndex(DIRFILE* D, gd_entry_t *E, int repr, double value,
       low = c;
     } else {
       /* our guess was unexpectedly correct */
-      sample = c;
+      sample = (double)c;
       dreturn("%g", sample);
       return sample;
     }
@@ -215,7 +215,7 @@ double get_framenum_subset64(DIRFILE* D, const char* field_code_in,
   gd_entry_t* entry;
   char* field_code;
   int repr = GD_REPR_NONE;
-  _gd_spf_t spf;
+  gd_spf_t spf;
 
   dtrace("%p, \"%s\", %g, %lli, %lli", D, field_code_in, value, field_start,
       field_end);

@@ -54,9 +54,6 @@ static int _GD_AlterScalar(DIRFILE* D, int alter_literal, gd_type_t type,
   int set_lout = 0;
   int error = 0;
 
-  int16_t i16;
-  uint16_t u16;
-
   dtrace("%p, %i, %x, %p, %p, %p, \"%s\", %i", D, alter_literal, type, lout,
       lin, sout, sin, calculated);
 
@@ -73,21 +70,8 @@ static int _GD_AlterScalar(DIRFILE* D, int alter_literal, gd_type_t type,
          *    this may throw GD_E_BAD_CODE or GD_E_BAD_FIELD_TYPE, via
          *    get_constant. */
         r = GD_AS_FREE_SCALAR | GD_AS_MODIFIED;
-        if (!calculated) {
-          if (type == GD_INT64)
-            error = get_constant(D, *sout, GD_INT64, lout);
-          else if (type & GD_COMPLEX)
-            error = get_constant(D, *sout, GD_COMPLEX128, lout);
-          else if (type & GD_IEEE754)
-            error = get_constant(D, *sout, GD_FLOAT64, lout);
-          else if (type & GD_SIGNED) {
-            if ((error = get_constant(D, *sout, GD_INT16, &i16)) == 0)
-              *(int*)lout = (int)i16;
-          } else {
-            if ((error = get_constant(D, *sout, GD_INT16, &u16)) == 0)
-              *(unsigned int*)lout = (unsigned int)u16;
-          }
-        }
+        if (!calculated)
+          error = get_constant(D, *sout, GD_INT64, lout);
         *sout = NULL;
       }
     } else if (alter_literal) {
@@ -115,14 +99,16 @@ static int _GD_AlterScalar(DIRFILE* D, int alter_literal, gd_type_t type,
     r |= GD_AS_MODIFIED;
     if (type == GD_INT64)
       *(int64_t*)lout = *(int64_t*)lin;
-    else if (type & GD_COMPLEX)
+    else if (type == GD_COMPLEX128)
       *(double complex*)lout = *(double complex*)lin;
-    else if (type & GD_IEEE754)
+    else if (type == GD_FLOAT64)
       *(double*)lout = *(double*)lin;
-    else if (type & GD_SIGNED)
-      *(int*)lout = *(int*)lin;
+    else if (type == GD_INT16)
+      *(int16_t*)lout = *(int16_t*)lin;
+    else if (type == GD_UINT16)
+      *(uint16_t*)lout = *(uint16_t*)lin;
     else
-      *(unsigned int*)lout = *(unsigned int*)lin;
+      _GD_InternalError(D);
   }
 
   if (error)
@@ -166,8 +152,8 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
 
   switch(E->field_type) {
     case GD_RAW_ENTRY:
-      j = _GD_AlterScalar(D, N->spf && N->spf != E->spf, 0, &Q.spf, &N->spf,
-          Q.scalar + 0, N->scalar[0], E->e->calculated);
+      j = _GD_AlterScalar(D, N->spf && N->spf != E->spf, GD_UINT16, &Q.spf,
+          &N->spf, Q.scalar + 0, N->scalar[0], E->e->calculated);
       
       if (j & GD_AS_ERROR)
         break;
@@ -196,13 +182,10 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
         off64_t ns_out;
         void *buffer1;
         void *buffer2;
-        uint16_t u16;
 
-        if (j & GD_AS_NEED_RECALC) {
-          if (get_constant(D, Q.scalar[0], GD_INT16, &u16))
+        if (j & GD_AS_NEED_RECALC)
+          if (get_constant(D, Q.scalar[0], GD_UINT16, &Q.spf))
             break;
-          Q.spf = (unsigned int)u16;
-        }
 
         const off64_t nf = BUFFER_SIZE / max(E->e->size, GD_SIZE(Q.data_type)) /
           max(E->spf, Q.spf);
@@ -647,7 +630,7 @@ int dirfile_alter_entry(DIRFILE* D, const char* field_code,
 }
 
 int dirfile_alter_raw(DIRFILE *D, const char *field_code, gd_type_t data_type,
-    unsigned int spf, int move)
+    gd_spf_t spf, int move)
 {
   gd_entry_t N;
 
@@ -833,7 +816,7 @@ int dirfile_alter_linterp(DIRFILE* D, const char* field_code,
 }
 
 int dirfile_alter_bit(DIRFILE* D, const char* field_code, const char* in_field,
-    int bitnum, int numbits)
+    gd_bit_t bitnum, gd_bit_t numbits)
 {
   gd_entry_t N;
 
@@ -861,7 +844,7 @@ int dirfile_alter_bit(DIRFILE* D, const char* field_code, const char* in_field,
 }
 
 int dirfile_alter_sbit(DIRFILE* D, const char* field_code, const char* in_field,
-    int bitnum, int numbits)
+    gd_bit_t bitnum, gd_bit_t numbits)
 {
   gd_entry_t N;
 
@@ -913,11 +896,11 @@ int dirfile_alter_multiply(DIRFILE* D, const char* field_code,
 }
 
 int dirfile_alter_phase(DIRFILE* D, const char* field_code,
-    const char* in_field, int shift)
+    const char* in_field, gd_shift_t shift)
 {
   gd_entry_t N;
 
-  dtrace("%p, \"%s\", \"%s\", %i", D, field_code, in_field, shift);
+  dtrace("%p, \"%s\", \"%s\", %lli", D, field_code, in_field, (long long)shift);
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);

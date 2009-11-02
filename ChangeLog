@@ -1,4 +1,76 @@
-2009-10-29   D. V. Wiebe <getdata@keiltrout.net>   svn:330
+2009-11-01   D. V. Wiebe <getdata@ketiltrout.net>   svn:334
+	GetData-0.6.0rc4:
+
+	* test/header_complex.c: Added.
+
+	* test/repr_real_m.c test/repr_i.c test/repr_real_a.c test/repr_m.c
+	test/repr_real_r.c test/repr_a.c test/repr_real_i.c: Replaced M_PI with a
+	literal.
+
+	* configure.ac: Determine types for gd_bit_t, gd_spf_t, and gd_shift_t.  Fix
+	NumPy test.
+	* m4/intel.m4: Better tests for Fortran compilers.
+
+	* src/getdata.h.in: Export a C-89 compliant API if GETDATA_C89_API is set.
+	Include <complex.h> only if needed.  typedef gd_bit_t, gd_spf_t, gd_shift_t,
+	and use them in the public API.
+
+	* src/entry.c (_GD_GetScalar): Use correct types in call to _GD_DoField.
+	* src/entry.c (_GD_CalculateEntry): Use correct types in call to
+	_GD_GetScalar.
+	* src/flush.c (_GD_WriteConst _GD_FieldSpec): Use correct types and C-99
+	printf codes.
+	* src/del.c (_GD_DeReference): Use correct types in call to
+	_GD_DeReferenceOne.
+	* src/parse.c (_GD_ParseRaw _GD_ParseBit _GD_ParsePhase): Remove unnecessary
+	periphrasis in calls to _GD_SetScalar.
+	* bindings/python/pyentry.c (gdpy_set_scalar_from_pyobj): Use proper types.
+	* bindings/cxx/bitentry.cpp (BitEntry::SetFirstBit BitEntry::SetNumBits):
+	Remove periphrasis in calls to get_constant.
+	* bindings/cxx/rawentry.cpp (RawEntry::SetSamplesPerFrame): Remove periphrasis
+	in call to get_constant.
+	* bindings/cxx/phaseentry.cpp (PhaseEntry::SetShift): Remove periphrasis in
+	call to get_constant.
+	* bindings/cxx/sbitentry.cpp (SBitEntry::SetFirstBit SBitEntry::SetNumBits):
+	Remove periphrasis in calls to get_constant.
+
+	* src/index.c (_GD_GetIndex): Explicit typecast.
+	* src/getdata.c (EXTRACT_REPR MULTIPLY): Explicit typecasts.
+	* src/getdata.c (CMULTIPLY): Added.
+
+	* src/native.c (_GD_NativeType): Return GD_UNKNOWN on recursion error.
+
+	* src/add.c (_GD_Add): Properly set comp_scal for POLYNOM.
+
+	* src/getdata.c (_GD_DoBit): Remove unnecessary call to _GD_GetSPF.
+
+	* bindings/python/pydirfile.c: Allow compilation without NumPy.
+
+	* bindings/cxx/lincomentry.cpp bindings/cxx/polynomentry.cpp: Use C++ complex
+	class.
+	* bindings/cxx/tests/big_test.cpp: Use C++ complex class.
+	* bindings/cxx/getdata/indexentry.h bindings/cxx/getdata/rawentry.h
+	bindings/cxx/getdata/dirfile.hbindings/cxx/getdata/linterpentry.h
+	bindings/cxx/getdata/polynomentry.h bindings/cxx/getdata/bitentry.h
+	bindings/cxx/getdata/entry.h bindings/cxx/getdata/multiplyentry.h
+	bindings/cxx/getdata/phaseentry.h bindings/cxx/getdata/fragment.h
+	bindings/cxx/getdata/lincomentry.h bindings/cxx/getdata/sbitentry.h
+	bindings/cxx/getdata/constentry.h bindings/cxx/getdata/stringentry.h: Use the
+	C-89 GetData API.
+
+	* bindings/f77/test/Makefile.am: If using ifort, pass -assume byterecl
+
+	* bindings/f77/test/big_test95.f90: replace realpart() and imagpart() with
+	real(real()) and real(aimag())
+
+2009-10-29   D. V. Wiebe <getdata@ketiltrout.net>   svn:332
+
+	* bindings/cxx/test/addentry.cpp bindings/cxx/test/big_test.cpp
+	bindings/cxx/test/getdata.cpp bindings/cxx/test/nframes.cpp
+	bindings/cxx/test/putdata.cpp bindings/cxx/test/spf.cpp: Fix dirfile
+	initialisation.
+
+2009-10-29   D. V. Wiebe <getdata@keiltrout.net>   svn:331
 	* src/entry.c (_GD_FreeE): Free E->e->filebase.  Reported by CBN.
 
 	* bindings/cxx/dirfile.cpp (Dirfile::~Dirfile):  Fix call to

@@ -18,8 +18,6 @@
 // along with GetData; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 //
-#include "getdata/rawentry.h"
-#include "getdata/entry.h"
 #include "getdata/dirfile.h"
 
 #include <cstring>
@@ -28,7 +26,7 @@
 
 using namespace GetData;
 
-RawEntry::RawEntry(const char* field_code, DataType data_type, unsigned int spf,
+RawEntry::RawEntry(const char* field_code, DataType data_type, gd_spf_t spf,
       int fragment_index) : Entry::Entry()
 {
   E.field = strdup(field_code);
@@ -38,7 +36,7 @@ RawEntry::RawEntry(const char* field_code, DataType data_type, unsigned int spf,
   E.fragment_index = fragment_index;
 }
 
-int RawEntry::SetSamplesPerFrame(unsigned int spf, int recode)
+int RawEntry::SetSamplesPerFrame(gd_spf_t spf, int recode)
 {
   E.spf = spf;
 
@@ -51,7 +49,6 @@ int RawEntry::SetSamplesPerFrame(unsigned int spf, int recode)
 int RawEntry::SetSamplesPerFrame(const char *spf, int recode)
 {
   int r = 0;
-  uint16_t u16;
 
   free(E.scalar[0]);
   if (spf == NULL)
@@ -62,10 +59,8 @@ int RawEntry::SetSamplesPerFrame(const char *spf, int recode)
   if (D != NULL) {
     r = dirfile_alter_entry(D->D, E.field, &E, recode);
 
-    if (!r) {
-      r = get_constant(D->D, spf, GD_UINT16, &u16);
-      E.spf = (unsigned int)u16;
-    }
+    if (!r)
+      r = get_constant(D->D, spf, GD_UINT16, &E.spf);
   }
   
   return r;

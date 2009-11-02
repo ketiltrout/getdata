@@ -325,8 +325,8 @@ static size_t _GD_GetIndex(double x, const double *lx, size_t idx, size_t n)
 
 /* _GD_AddData: add vector B to vector A.  B is unchanged
 */
-void _GD_AddData(DIRFILE* D, void *A, _gd_spf_t spfA, void *B,
-    _gd_spf_t spfB, gd_type_t type, size_t n)
+void _GD_AddData(DIRFILE* D, void *A, gd_spf_t spfA, void *B,
+    gd_spf_t spfB, gd_type_t type, size_t n)
 {
   size_t i;
 
@@ -662,7 +662,7 @@ void _GD_CLinterpData(DIRFILE* D, void *data, gd_type_t type,
 
 /* Compute a lincom, all at once */
 void _GD_LincomData(DIRFILE* D, int n, void* data1, gd_type_t return_type,
-    double *data2, double *data3, double* m, double *b, _gd_spf_t *spf,
+    double *data2, double *data3, double* m, double *b, gd_spf_t *spf,
     size_t n_read)
 {
   size_t i;
@@ -719,7 +719,7 @@ void _GD_LincomData(DIRFILE* D, int n, void* data1, gd_type_t return_type,
 /* Compute a complex valued lincom, all at once */
 void _GD_CLincomData(DIRFILE* D, int n, void* data1, gd_type_t return_type,
     double complex *data2, double complex *data3, double complex* m,
-    double complex *b, _gd_spf_t *spf, size_t n_read)
+    double complex *b, gd_spf_t *spf, size_t n_read)
 {
   size_t i;
 

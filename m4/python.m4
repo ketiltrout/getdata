@@ -122,7 +122,7 @@ test "x$pyexec_prefix" = xNONE && pyexec_prefix=$prefix
 test "x$pyexec_prefix" = xNONE && pyexec_prefix=$ac_default_prefix
 
 dnl calculate the extension module directory
-AC_MSG_CHECKING([for python extension module directory])
+AC_MSG_CHECKING([Python extension module directory])
 pythondir=`$PYTHON -c "from distutils import sysconfig; print sysconfig.get_python_lib(1,0,prefix='${pyexec_prefix}')" 2>/dev/null || echo "${pyexec_prefix}/lib/python${PYTHON_VERSION}/site-packages"`
 AC_SUBST([pythondir])
 AC_MSG_RESULT([$pythondir])

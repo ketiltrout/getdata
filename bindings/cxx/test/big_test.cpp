@@ -32,9 +32,9 @@ using namespace GetData;
 #define CHECK_DOUBLE2(t,m,v,g) \
   if (fabs((v) - (g)) > 1e-10) { \
     ne++; cerr << "d[" << t << ", " << m << "] = " << (v) << endl; }
-#define CHECK_DOUBLE_ARRAY(t,m,v,g) \
-  for (i = 0; i < m; ++i) if (fabs((v) - (g)) > 1e-10) { \
-    ne++; cerr << "d(" << i << ")[" << t << "] = " << (v) << endl; }
+#define CHECK_DOUBLE_ARRAY(t,m,n,v,g) \
+  for (i = 0; i < n; ++i) if (fabs((v) - (g)) > 1e-10) { \
+    ne++; cerr << "d(" << i << ")[" << t << ", " << m << "] = " << (v) << endl; }
 
 #define CHECK_STRING(t,v,g) \
   if (strcmp((v), (g))) { ne++; cerr << "s[" << t << "] = " << (v) << endl; }
@@ -46,9 +46,9 @@ using namespace GetData;
     ne++; cerr << "s(" << i << ")[" << t << "] = " << (v) << endl; }
 
 #define CHECK_COMPLEX_ARRAY(t,m,v,g) \
-  for (i = 0; i < m; ++i) if (cabs((v) - (g)) > 1e-10) { \
-    ne++; cerr << "c(" << i << ")[" << t << "] = " << creal(v) \
-    << ";" << cimag(v) << endl; }
+  for (i = 0; i < m; ++i) if (abs((v) - (g)) > 1e-10) { \
+    ne++; cerr << "c(" << i << ")[" << t << "] = " << v.real() \
+    << ";" << v.imag() << endl; }
 
 int main(void)
 {
@@ -80,7 +80,7 @@ int main(void)
   int n, i, e, ne = 0;
   float fl;
   double dp, q[6];
-  double complex cq[6];
+  complex<double> cq[6];
   const char **list;
   const char* str;
   char buf[GD_MAX_LINE_LENGTH];
@@ -206,7 +206,7 @@ int main(void)
   cq[0] = 1.1;
   cq[1] = 2.2;
   cq[2] = 2.2;
-  cq[3] = 3.3 + _Complex_I * 4.4;
+  cq[3] = complex<double>(3.3, 4.4);
   cq[4] = 5.5;
   cq[5] = 5.5;
   ent = d->Entry("lincom");
@@ -331,14 +331,14 @@ int main(void)
   CHECK_STRING2(29,4,ent->Input(0),"in1");
   CHECK_STRING2(29,5,ent->Input(1),"in2");
   CHECK_INT2(29,6,ent->ComplexScalars(),0);
-  CHECK_DOUBLE_ARRAY(29,2,ent->Scale(i),q[i * 2]);
-  CHECK_DOUBLE_ARRAY(29,2,ent->Offset(i),q[i * 2 + 1]);
+  CHECK_DOUBLE_ARRAY(29,7,2,ent->Scale(i),q[i * 2]);
+  CHECK_DOUBLE_ARRAY(29,8,2,ent->Offset(i),q[i * 2 + 1]);
 
   // 30: Dirfile::Add / LincomEntry check
-  cq[0] = 1.1 + _Complex_I * 1.2;
-  cq[1] = 1.3 + _Complex_I * 1.4;
-  cq[2] = 1.4 + _Complex_I * 1.5;
-  cq[3] = 1.6 + _Complex_I * 1.7;
+  cq[0] = complex<double>(1.1, 1.2);
+  cq[1] = complex<double>(1.3, 1.4);
+  cq[2] = complex<double>(1.4, 1.5);
+  cq[3] = complex<double>(1.6, 1.7);
   lent.Dissociate();
   lent.SetName("new3");
   lent.SetFragmentIndex(0);
@@ -385,14 +385,14 @@ int main(void)
   CHECK_INT2(31,2,ent->PolyOrd(),3);
   CHECK_INT2(31,3,ent->FragmentIndex(),0);
   CHECK_STRING2(31,4,ent->Input(),"in1");
-  CHECK_INT2(31,7,ent->ComplexScalars(),0);
-  CHECK_DOUBLE_ARRAY(31,4,ent->Coefficient(i),q[i]);
+  CHECK_INT2(31,5,ent->ComplexScalars(),0);
+  CHECK_DOUBLE_ARRAY(31,6,4,ent->Coefficient(i),q[i]);
 
   // 32: Dirfile::Add / PolynomEntry check
-  cq[0] = 3.1 + _Complex_I * 7;
-  cq[1] = 4.2 + _Complex_I * 8;
-  cq[2] = 5.2 + _Complex_I * 9;
-  cq[3] = 6.3 + _Complex_I * 4.4;
+  cq[0] = complex<double>(3.1, 7);
+  cq[1] = complex<double>(4.2, 8);
+  cq[2] = complex<double>(5.2, 9);
+  cq[3] = complex<double>(6.3, 4.4);
   yent.Dissociate();
   yent.SetName("new5");
   yent.SetFragmentIndex(0);
@@ -592,8 +592,8 @@ int main(void)
   CHECK_STRING2(126,4,ent->Input(0),"in1");
   CHECK_STRING2(126,5,ent->Input(1),"in2");
   CHECK_INT2(126,6,ent->ComplexScalars(),0);
-  CHECK_DOUBLE_ARRAY(126,2,ent->Scale(i),q[i * 2]);
-  CHECK_DOUBLE_ARRAY(126,2,ent->Offset(i),q[i * 2 + 1]);
+  CHECK_DOUBLE_ARRAY(126,7,2,ent->Scale(i),q[i * 2]);
+  CHECK_DOUBLE_ARRAY(126,8,2,ent->Offset(i),q[i * 2 + 1]);
 
   // 56: Dirfile::GetString check
   n = d->GetString("string", GD_MAX_LINE_LENGTH, buf);
@@ -721,8 +721,8 @@ int main(void)
   CHECK_STRING2(68,5,ent->Input(1),"in2");
   CHECK_STRING2(68,6,ent->Input(2),"in4");
   CHECK_INT2(68,7,ent->ComplexScalars(),0);
-  CHECK_DOUBLE_ARRAY(68,3,ent->Scale(i),q[i * 2]);
-  CHECK_DOUBLE_ARRAY(68,3,ent->Offset(i),q[i * 2 + 1]);
+  CHECK_DOUBLE_ARRAY(68,8,3,ent->Scale(i),q[i * 2]);
+  CHECK_DOUBLE_ARRAY(68,9,3,ent->Offset(i),q[i * 2 + 1]);
 
   // 70: PolynomEntry check
   yep = reinterpret_cast<PolynomEntry*>(d->Entry("new4"));
@@ -745,8 +745,8 @@ int main(void)
   CHECK_INT2(70,2,ent->PolyOrd(),4);
   CHECK_INT2(70,3,ent->FragmentIndex(),0);
   CHECK_STRING2(70,4,ent->Input(),"in4");
-  CHECK_INT2(70,7,ent->ComplexScalars(),0);
-  CHECK_DOUBLE_ARRAY(70,5,ent->Coefficient(i),q[i]);
+  CHECK_INT2(70,5,ent->ComplexScalars(),0);
+  CHECK_DOUBLE_ARRAY(70,6,5,ent->Coefficient(i),q[i]);
 
   // 72: LinterpEntry check
   nep = reinterpret_cast<LinterpEntry*>(d->Entry("new6"));
@@ -923,8 +923,8 @@ int main(void)
   CHECK_STRING2(91,4,ent->Input(0),"in4");
   CHECK_STRING2(91,5,ent->Input(1),"in5");
   CHECK_INT2(91,6,ent->ComplexScalars(),0);
-  CHECK_DOUBLE_ARRAY(91,2,ent->Scale(i),i * 2 + 1);
-  CHECK_DOUBLE_ARRAY(91,2,ent->Offset(i),i * 2 + 2);
+  CHECK_DOUBLE_ARRAY(91,7,2,ent->Scale(i),i * 2 + 1);
+  CHECK_DOUBLE_ARRAY(91,8,2,ent->Offset(i),i * 2 + 2);
 
   // 92: Entry::Move check
   ent = d->Entry("new9");

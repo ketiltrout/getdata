@@ -78,7 +78,7 @@ extern PyTypeObject gdpy_entry;
 extern PyTypeObject gdpy_fragment;
 
 extern const struct gdpy_constant_t {
-  const char* name;
+  char* name;
   long value;
 } gdpy_constant_list[];
 
@@ -123,3 +123,4 @@ extern PyObject* gdpy_convert_to_pyobj(const void*, gd_type_t);
 extern PyObject* gdpy_convert_to_pylist(const void*, gd_type_t, size_t);
 extern int gdpy_npytype_from_type(gd_type_t type);
 extern gd_type_t gdpy_type_from_npytype(int npytype);
+PyMODINIT_FUNC initpygetdata(void);

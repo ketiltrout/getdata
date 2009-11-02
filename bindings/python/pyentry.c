@@ -95,15 +95,15 @@ static void gdpy_set_scalar_from_pyobj(PyObject* pyobj, gd_type_t type,
   else {
     *scalar = NULL;
     if (type == GD_INT64)
-      *(long int*)data = (long int)PyLong_AsLongLong(pyobj);
-    else if (type & GD_COMPLEX)
+      *(int64_t*)data = (int64_t)PyLong_AsLongLong(pyobj);
+    else if (type & GD_COMPLEX128)
       *(double complex*)data = gdpy_as_complex(pyobj);
-    else if (type & GD_IEEE754)
+    else if (type & GD_FLOAT64)
       *(double*)data = PyFloat_AsDouble(pyobj);
-    else if (type & GD_SIGNED)
-      *(int*)data = PyLong_AsUnsignedLong(pyobj);
-    else
-      *(unsigned int*)data = PyLong_AsUnsignedLong(pyobj);
+    else if (type & GD_INT16)
+      *(int16_t*)data = PyLong_AsUnsignedLong(pyobj);
+    else if (type & GD_UINT16)
+      *(uint16_t*)data = PyLong_AsUnsignedLong(pyobj);
   }
 
   dreturnvoid();
@@ -165,13 +165,13 @@ static void gdpy_set_entry_from_tuple(gd_entry_t *E, PyObject* tuple,
   switch (E->field_type)
   {
     case GD_RAW_ENTRY:
-      E->data_type = (int)PyInt_AsLong(PyTuple_GetItem(tuple, 0));
+      E->data_type = (gd_type_t)PyInt_AsLong(PyTuple_GetItem(tuple, 0));
       if (GDPY_INVALID_TYPE(E->data_type))
         PyErr_SetString(PyExc_ValueError,
             "'pygetdata.entry' invalid data type");
 
-      gdpy_set_scalar_from_pyobj(PyTuple_GetItem(tuple, 1), 0, &E->scalar[0],
-          &E->spf);
+      gdpy_set_scalar_from_pyobj(PyTuple_GetItem(tuple, 1), GD_UINT16,
+          &E->scalar[0], &E->spf);
       break;
     case GD_LINCOM_ENTRY:
       parm1 = PyTuple_GetItem(tuple, 0);
@@ -210,9 +210,10 @@ static void gdpy_set_entry_from_tuple(gd_entry_t *E, PyObject* tuple,
           E->comp_scal = 1;
           E->cm[i] = gdpy_as_complex(obj);
         } else if (E->comp_scal)
-          gdpy_set_scalar_from_pyobj(obj, GD_COMPLEX, &E->scalar[i], &E->cm[i]);
+          gdpy_set_scalar_from_pyobj(obj, GD_COMPLEX128, &E->scalar[i],
+              &E->cm[i]);
         else {
-          gdpy_set_scalar_from_pyobj(obj, GD_IEEE754, &E->scalar[i], &E->m[i]);
+          gdpy_set_scalar_from_pyobj(obj, GD_FLOAT64, &E->scalar[i], &E->m[i]);
           E->cm[i] = E->m[i];
         }
 
@@ -226,10 +227,10 @@ static void gdpy_set_entry_from_tuple(gd_entry_t *E, PyObject* tuple,
           E->comp_scal = 1;
           E->cb[i] = gdpy_as_complex(obj);
         } else if (E->comp_scal)
-          gdpy_set_scalar_from_pyobj(obj, GD_COMPLEX,
+          gdpy_set_scalar_from_pyobj(obj, GD_COMPLEX128,
               &E->scalar[i + GD_MAX_LINCOM], &E->cb[i]);
         else {
-          gdpy_set_scalar_from_pyobj(obj, GD_IEEE754,
+          gdpy_set_scalar_from_pyobj(obj, GD_FLOAT64,
               &E->scalar[i + GD_MAX_LINCOM], &E->b[i]);
           E->cb[i] = E->b[i];
         }
@@ -264,10 +265,10 @@ static void gdpy_set_entry_from_tuple(gd_entry_t *E, PyObject* tuple,
         return;
       }
 
-      gdpy_set_scalar_from_pyobj(PyTuple_GetItem(tuple, 1), GD_SIGNED,
+      gdpy_set_scalar_from_pyobj(PyTuple_GetItem(tuple, 1), GD_INT16,
           &E->scalar[0], &E->bitnum);
       if (size > 2)
-        gdpy_set_scalar_from_pyobj(PyTuple_GetItem(tuple, 2), GD_SIGNED,
+        gdpy_set_scalar_from_pyobj(PyTuple_GetItem(tuple, 2), GD_INT16,
             &E->scalar[1], &E->numbits);
       else {
         E->numbits = 1;
@@ -327,9 +328,10 @@ static void gdpy_set_entry_from_tuple(gd_entry_t *E, PyObject* tuple,
           E->ca[i] = gdpy_as_complex(obj);
           E->scalar[i] = NULL;
         } else if (E->comp_scal)
-          gdpy_set_scalar_from_pyobj(obj, GD_COMPLEX, &E->scalar[i], &E->ca[i]);
+          gdpy_set_scalar_from_pyobj(obj, GD_COMPLEX128, &E->scalar[i],
+              &E->ca[i]);
         else {
-          gdpy_set_scalar_from_pyobj(obj, GD_DOUBLE, &E->scalar[i], &E->a[i]);
+          gdpy_set_scalar_from_pyobj(obj, GD_FLOAT64, &E->scalar[i], &E->a[i]);
           E->ca[i] = E->a[i];
         }
 
@@ -340,7 +342,7 @@ static void gdpy_set_entry_from_tuple(gd_entry_t *E, PyObject* tuple,
       }
       break;
     case GD_CONST_ENTRY:
-      E->const_type = (int)PyInt_AsLong(PyTuple_GetItem(tuple, 0));
+      E->const_type = (gd_type_t)PyInt_AsLong(PyTuple_GetItem(tuple, 0));
       if (GDPY_INVALID_TYPE(E->const_type))
         PyErr_SetString(PyExc_ValueError,
             "'pygetdata.entry' invalid data type");
@@ -830,9 +832,9 @@ static int gdpy_entry_setdatatype(struct gdpy_entry_t* self, PyObject *value,
   }
 
   if (self->E->field_type == GD_RAW_ENTRY)
-    self->E->data_type = t;
+    self->E->data_type = (gd_type_t)t;
   else
-    self->E->const_type = t;
+    self->E->const_type = (gd_type_t)t;
 
   dreturn("%i", 0);
   return 0;
@@ -861,7 +863,7 @@ static PyObject* gdpy_entry_getspf(struct gdpy_entry_t* self, void* closure)
 static int gdpy_entry_setspf(struct gdpy_entry_t* self, PyObject *value,
     void *closure)
 {
-  unsigned int spf;
+  gd_spf_t spf;
   char *scalar;
 
   dtrace("%p, %p, %p", self, value, closure);
@@ -874,7 +876,7 @@ static int gdpy_entry_setspf(struct gdpy_entry_t* self, PyObject *value,
     return -1;
   }
 
-  gdpy_set_scalar_from_pyobj(value, 0, &scalar, &spf);
+  gdpy_set_scalar_from_pyobj(value, GD_UINT16, &scalar, &spf);
 
   if (PyErr_Occurred()) {
     free(scalar);
@@ -1008,13 +1010,13 @@ static int gdpy_entry_setm(struct gdpy_entry_t* self, PyObject *value,
     PyObject *obj = PyTuple_GetItem(value, i);
     if (PyComplex_Check(obj)) {
       comp_scal = 1;
-      m[i] = cm[i] = gdpy_as_complex(obj);
+      m[i] = (double)(cm[i] = gdpy_as_complex(obj));
       scalar[i] = NULL;
     } else if (comp_scal) {
-      gdpy_set_scalar_from_pyobj(obj, GD_COMPLEX, scalar + i, cm + i);
+      gdpy_set_scalar_from_pyobj(obj, GD_COMPLEX128, scalar + i, cm + i);
       m[i] = creal(cm[i]);
     } else {
-      gdpy_set_scalar_from_pyobj(obj, GD_IEEE754, scalar + i, m + i);
+      gdpy_set_scalar_from_pyobj(obj, GD_FLOAT64, scalar + i, m + i);
       cm[i] = m[i];
     }
   }
@@ -1100,13 +1102,13 @@ static int gdpy_entry_setb(struct gdpy_entry_t* self, PyObject *value,
     PyObject *obj = PyTuple_GetItem(value, i);
     if (PyComplex_Check(obj)) {
       comp_scal = 1;
-      b[i] = cb[i] = gdpy_as_complex(obj);
+      b[i] = (double)(cb[i] = gdpy_as_complex(obj));
       scalar[i] = NULL;
     } else if (comp_scal) {
-      gdpy_set_scalar_from_pyobj(obj, GD_COMPLEX, scalar + i, cb + i);
+      gdpy_set_scalar_from_pyobj(obj, GD_COMPLEX128, scalar + i, cb + i);
       b[i] = creal(cb[i]);
     } else {
-      gdpy_set_scalar_from_pyobj(obj, GD_IEEE754, scalar + i, b + i);
+      gdpy_set_scalar_from_pyobj(obj, GD_FLOAT64, scalar + i, b + i);
       cb[i] = b[i];
     }
   }
@@ -1214,14 +1216,14 @@ static int gdpy_entry_setbitnum(struct gdpy_entry_t* self, PyObject *value,
     return -1;
   }
 
-  gdpy_set_scalar_from_pyobj(value, GD_SIGNED, &scalar, &bitnum);
+  gdpy_set_scalar_from_pyobj(value, GD_INT16, &scalar, &bitnum);
   if (PyErr_Occurred()) {
     free(scalar);
     dreturn("%i", -1);
     return -1;
   }
 
-  self->E->bitnum = bitnum;
+  self->E->bitnum = (gd_bit_t)bitnum;
   free(self->E->scalar[0]);
   self->E->scalar[0] = scalar;
 
@@ -1269,14 +1271,14 @@ static int gdpy_entry_setnumbits(struct gdpy_entry_t* self, PyObject *value,
     return -1;
   }
 
-  gdpy_set_scalar_from_pyobj(value, GD_SIGNED, &scalar, &numbits);
+  gdpy_set_scalar_from_pyobj(value, GD_INT16, &scalar, &numbits);
 
   if (PyErr_Occurred()) {
     dreturn("%i", -1);
     return -1;
   }
 
-  self->E->numbits = numbits;
+  self->E->numbits = (gd_bit_t)numbits;
   free(self->E->scalar[1]);
   self->E->scalar[1] = scalar;
 
@@ -1394,10 +1396,10 @@ static int gdpy_entry_seta(struct gdpy_entry_t* self, PyObject *value,
       comp_scal = 1;
       scalar[i] = NULL;
     } else if (comp_scal) {
-      gdpy_set_scalar_from_pyobj(obj, GD_COMPLEX, scalar + i, ca + i);
-      a[i] = ca[i];
+      gdpy_set_scalar_from_pyobj(obj, GD_COMPLEX128, scalar + i, ca + i);
+      a[i] = (double)ca[i];
     } else {
-      gdpy_set_scalar_from_pyobj(obj, GD_DOUBLE, scalar + i, a + i);
+      gdpy_set_scalar_from_pyobj(obj, GD_FLOAT64, scalar + i, a + i);
       ca[i] = a[i];
     }
   }

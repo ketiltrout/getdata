@@ -1,4 +1,4 @@
-New in version 0.6.0rc3:
+New in version 0.6.0rc4:
 
   License
 
@@ -22,10 +22,9 @@ New in version 0.6.0rc3:
   Library Changes
 
   * The field parameters spf (RAW), bitnum and numbits (BIT and SBIT) are now
-    internally restricted to 16-bit signed numbers, which should be more than
-    enough.  The public API still calls these 'int', but callers should never
-    assume this means more than 16-bits.
-  * The shift field parameter is now a long int, which ensures at least 32-bits.
+    restricted to 16-bit numbers, which should be more than enough.  The public
+    API uses gd_spf_t and gd_bit_t for these quantities.
+  * The shift field parameter is now a 64-bit integer type, called gd_shift_t.
   * The dirfile flags, including encoding and endianness symbols are now
     explicitly long ints.  Previously these quantities mixed long int with int
     arbitrarily.  This affects the public API.
@@ -55,12 +54,19 @@ New in version 0.6.0rc3:
     flushed to disk, despite this.)
   * BUG FIX: Calling getdata() or putdata() on 64-bit architectures in certain
     situations involving a non-zero frameoffset no longer results in bizarrity.
+  * BUG FIX: A memory leak associated with RAW field metadata has been fixed.
+  * BUG FIX: 64-bit integer literals in the format file are no longer truncated
+    to double precision when read.
 
   API Changes
 
   * This release breaks ABI compatibility and, to a lesser extent, API
     compatibility.  The SOVERSION of the library has been incremented
     accordingly.
+  * A C-89 API will be declared by getdata.h if GETDATA_C89_API is defined
+    before inclusion.  If this symbol is not defined, the C API defined will
+    include C-99 conforming complex types, and getdata.h will include complex.h
+    if `complex' has not been defined before inclusion.
   * An array containing the CONST scalar field codes used when non-literal
     parameters are used in the specification of various different fields has
     been added to the gd_entry_t object.  As a side-effect of this,
@@ -85,7 +91,8 @@ New in version 0.6.0rc3:
     erroneously by reporting GD_E_BAD_CODE.
   * BUG FIX: error strings relating to GD_E_DELETE error codes now report the
     proper error information.
-  * BUG FIX: the list returned by get_mstring() is now properly NULL terminated.
+  * BUG FIX: the list returned by get_mstrings() is now properly NULL
+    terminated.
   * BUG FIX: the entry->table member now reports the proper path to the LUT.
     (That is, the path stored in the format file.)  Previously it incorrectly
     reported a path relative to the base dirfile directory.
@@ -117,6 +124,7 @@ New in version 0.6.0rc3:
     instead of doing nothing.
   * C++ BUG FIX: The recode argument to various functions is now optional and
     defaults to zero, as the documentation already indicated.
+  * C++ BUG FIX: dirfile_close() was not being called by the Dirifle destructor.
   * F77 BUG FIX: a NULL C string returned from the C API now returns an empty
     string, rather than causing a segfault.
   * F77 BUG FIX: attempting to call another F77 function before calling GDCOPN

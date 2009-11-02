@@ -18,8 +18,6 @@
 // along with GetData; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 //
-#include "getdata/phaseentry.h"
-#include "getdata/entry.h"
 #include "getdata/dirfile.h"
 
 #include <stdlib.h>
@@ -27,8 +25,8 @@
 
 using namespace GetData;
 
-PhaseEntry::PhaseEntry(const char* field_code, const char* in_field, int shift,
-    int fragment_index) : Entry::Entry()
+PhaseEntry::PhaseEntry(const char* field_code, const char* in_field,
+    gd_shift_t shift, int fragment_index) : Entry::Entry()
 {
   E.field = strdup(field_code);
   E.field_type = GD_PHASE_ENTRY;
@@ -53,7 +51,7 @@ int PhaseEntry::SetInput(const char* field)
   return 0;
 }
 
-int PhaseEntry::SetShift(long int shift)
+int PhaseEntry::SetShift(gd_shift_t shift)
 {
   E.shift = shift;
 
@@ -66,7 +64,6 @@ int PhaseEntry::SetShift(long int shift)
 int PhaseEntry::SetShift(const char *shift)
 {
   int r = 0;
-  int32_t i32;
 
   free(E.scalar[0]);
   if (shift == NULL)
@@ -77,10 +74,8 @@ int PhaseEntry::SetShift(const char *shift)
   if (D != NULL) {
     r = dirfile_alter_entry(D->D, E.field, &E, 0);
 
-    if (!r) {
-      r = get_constant(D->D, shift, GD_UINT16, &i32);
-      E.shift = (long int)i32;
-    }
+    if (!r)
+      r = get_constant(D->D, shift, GD_INT64, &E.shift);
   }
   
   return r;

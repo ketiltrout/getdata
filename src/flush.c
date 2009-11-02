@@ -180,24 +180,27 @@ static char* _GD_PadField(char* out, const char* in, size_t len)
 }
 
 /* Write a litteral parameter or CONST name */
-static void _GD_WriteConst(FILE* stream, int type, const void* value,
-    const char* scalar, const char* postamble)
+static void _GD_WriteConst(DIRFILE *D, FILE* stream, int type,
+    const void* value, const char* scalar, const char* postamble)
 {
-  dtrace("%p, %i, %p, \"%s\", \"%s\"", stream, type, value, scalar, postamble);
+  dtrace("%p, %p, %i, %p, \"%s\", \"%s\"", D, stream, type, value, scalar,
+      postamble);
 
   if (scalar != NULL)
     fprintf(stream, "%s%s", scalar, postamble);
-  else if (type == 0)
-    fprintf(stream, "%u%s", *(unsigned int*)value, postamble);
+  else if (type == GD_UINT16)
+    fprintf(stream, "%" PRIu16 "%s", *(uint16_t*)value, postamble);
   else if (type == GD_INT64)
-    fprintf(stream, "%li%s", *(long int*)value, postamble);
-  else if (type == GD_SIGNED)
-    fprintf(stream, "%i%s", *(int*)value, postamble);
-  else if (type == GD_IEEE754)
+    fprintf(stream, "%" PRIi64 "%s", *(uint64_t*)value, postamble);
+  else if (type == GD_INT16)
+    fprintf(stream, "%" PRIi16 "%s", *(int16_t*)value, postamble);
+  else if (type == GD_FLOAT64)
     fprintf(stream, "%.15g%s", *(double*)value, postamble);
-  else if (type == GD_COMPLEX)
+  else if (type == GD_COMPLEX128)
     fprintf(stream, "%.15g;%.15g%s", creal(*(double complex*)value),
         cimag(*(double complex*)value), postamble);
+  else
+    _GD_InternalError(D);
 
   dreturnvoid();
 }
@@ -228,19 +231,20 @@ static void _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
     case GD_RAW_ENTRY:
       fprintf(stream, " RAW%s %s ", pretty ? "     " : "",
           _GD_TypeName(D, E->data_type));
-      _GD_WriteConst(stream, 0, &E->spf, E->scalar[0], "\n");
+      _GD_WriteConst(D, stream, GD_UINT16, &E->spf, E->scalar[0], "\n");
       break;
     case GD_LINCOM_ENTRY:
       fprintf(stream, " LINCOM%s %i", pretty ? "  " : "", E->n_fields);
       for (i = 0; i < E->n_fields; ++i) {
         fprintf(stream, " %s ", E->in_fields[i]);
         if (E->comp_scal) {
-          _GD_WriteConst(stream, GD_COMPLEX, &E->cm[i], E->scalar[i], " ");
-          _GD_WriteConst(stream, GD_COMPLEX, &E->cb[i],
+          _GD_WriteConst(D, stream, GD_COMPLEX128, &E->cm[i], E->scalar[i],
+              " ");
+          _GD_WriteConst(D, stream, GD_COMPLEX128, &E->cb[i],
               E->scalar[i + GD_MAX_LINCOM], "");
         } else {
-          _GD_WriteConst(stream, GD_IEEE754, &E->m[i], E->scalar[i], " ");
-          _GD_WriteConst(stream, GD_IEEE754, &E->b[i],
+          _GD_WriteConst(D, stream, GD_FLOAT64, &E->m[i], E->scalar[i], " ");
+          _GD_WriteConst(D, stream, GD_FLOAT64, &E->b[i],
               E->scalar[i + GD_MAX_LINCOM], "");
         }
       }
@@ -252,30 +256,30 @@ static void _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
       break;
     case GD_BIT_ENTRY:
       fprintf(stream, " BIT%s %s ", pretty ? "     " : "", E->in_fields[0]);
-      _GD_WriteConst(stream, GD_SIGNED, &E->bitnum, E->scalar[0], " ");
-      _GD_WriteConst(stream, GD_SIGNED, &E->numbits, E->scalar[1], "\n");
+      _GD_WriteConst(D, stream, GD_INT16, &E->bitnum, E->scalar[0], " ");
+      _GD_WriteConst(D, stream, GD_INT16, &E->numbits, E->scalar[1], "\n");
       break;
     case GD_MULTIPLY_ENTRY:
       fprintf(stream, " MULTIPLY %s %s\n", E->in_fields[0], E->in_fields[1]);
       break;
     case GD_PHASE_ENTRY:
       fprintf(stream, " PHASE%s %s ", pretty ? "   " : "", E->in_fields[0]);
-      _GD_WriteConst(stream, GD_INT64, &E->shift, E->scalar[0], "\n");
+      _GD_WriteConst(D, stream, GD_INT64, &E->shift, E->scalar[0], "\n");
       break;
     case GD_POLYNOM_ENTRY:
       fprintf(stream, " POLYNOM%s %s ", pretty ? " " : "", E->in_fields[0]);
       for (i = 0; i <= E->poly_ord; ++i)
         if (E->comp_scal)
-          _GD_WriteConst(stream, GD_COMPLEX, &E->ca[i], E->scalar[i],
+          _GD_WriteConst(D, stream, GD_COMPLEX128, &E->ca[i], E->scalar[i],
             (i == E->poly_ord) ? "\n" : " ");
         else
-          _GD_WriteConst(stream, GD_IEEE754, &E->a[i], E->scalar[i],
+          _GD_WriteConst(D, stream, GD_FLOAT64, &E->a[i], E->scalar[i],
             (i == E->poly_ord) ? "\n" : " ");
       break;
     case GD_SBIT_ENTRY:
       fprintf(stream, " SBIT%s %s ", pretty ? "    " : "", E->in_fields[0]);
-      _GD_WriteConst(stream, GD_SIGNED, &E->bitnum, E->scalar[0], " ");
-      _GD_WriteConst(stream, GD_SIGNED, &E->numbits, E->scalar[1], "\n");
+      _GD_WriteConst(D, stream, GD_INT16, &E->bitnum, E->scalar[0], " ");
+      _GD_WriteConst(D, stream, GD_INT16, &E->numbits, E->scalar[1], "\n");
       break;
     case GD_CONST_ENTRY:
       fprintf(stream, " CONST%s %s ", pretty ? "   " : "", _GD_TypeName(D,
@@ -313,7 +317,6 @@ static void _GD_FlushFragment(DIRFILE* D, int i)
   char temp_file[FILENAME_MAX];
   char* ptr;
   struct tm now;
-  time_t t;
   int fd;
   int pretty = 0;
   size_t max_len = 0;
@@ -365,7 +368,7 @@ static void _GD_FlushFragment(DIRFILE* D, int i)
   }
 
   /* Introit */
-  t = time(NULL);
+  time_t t = time(NULL);
   strftime(buffer, GD_MAX_LINE_LENGTH, "%c", gmtime_r(&t, &now));
 
   fprintf(stream, "# This is a dirfile format file.\n"

@@ -23,6 +23,7 @@
 #define GETDATA_POLYNOMENTRY_H
 
 #define NO_GETDATA_LEGACY_API
+#define GETDATA_C89_API
 
 extern "C" {
 #include <getdata.h>
@@ -43,7 +44,7 @@ namespace GetData {
           double* a, int fragment_index = 0);
 
       PolynomEntry(const char* field_code, int poly_ord, const char* in_field,
-          double complex* ca, int fragment_index = 0);
+          std::complex<double>* ca, int fragment_index = 0);
 
       virtual const char *Input() {
         return E.in_fields[0];
@@ -61,8 +62,9 @@ namespace GetData {
         return (index <= E.poly_ord) ? E.a[index] : 0;
       };
 
-      virtual double complex CCoefficient(int index = 0) {
-        return (index <= E.poly_ord) ? E.ca[index] : 0;
+      virtual std::complex<double> CCoefficient(int index = 0) {
+        return (index <= E.poly_ord)
+          ? std::complex<double>(E.ca[index][0], E.ca[index][1]) : 0;
       };
 
       virtual const char *Scalar(int index = 0);
@@ -71,7 +73,7 @@ namespace GetData {
       int SetInput(const char* field);
       int SetCoefficient(double coeff, int index = 0);
       int SetCoefficient(const char* coeff, int index = 0);
-      int SetCoefficient(double complex coeff, int index = 0);
+      int SetCoefficient(std::complex<double> coeff, int index = 0);
 
     private:
       PolynomEntry(GetData::Dirfile *dirfile, const char* field_code) :

@@ -434,7 +434,9 @@ static PyObject* gdpy_dirfile_getdata(struct gdpy_dirfile_t* self,
   int as_list = 0;
   gd_type_t return_type;
   PyObject* pylist;
+#ifdef USE_NUMPY
   npy_intp dims[] = { 0 };
+#endif
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
         "si|LLlli:pygetdata.dirfile.getdata", keywords, &field_code,
@@ -473,8 +475,9 @@ static PyObject* gdpy_dirfile_getdata(struct gdpy_dirfile_t* self,
       dims[0] = (npy_intp)ns;
       pylist = PyArray_SimpleNewFromData(1, dims,
           gdpy_npytype_from_type(return_type), data);
-    } else {
+    } else
 #endif
+    {
       pylist = gdpy_convert_to_pylist(data, return_type, ns);
 
       free(data);
@@ -507,7 +510,7 @@ static PyObject* gdpy_dirfile_getentry(struct gdpy_dirfile_t* self,
     dreturn("%p", NULL);
     return NULL;
   }
-  
+
   get_entry(self->D, field_code, E);
 
   PYGD_CHECK_ERROR(self->D, NULL);
@@ -635,7 +638,7 @@ static PyObject* gdpy_dirfile_getfieldlist(struct gdpy_dirfile_t* self,
 
   const char **fields;
   char* keywords[] = { "type", NULL };
-  int i, type = GD_NO_ENTRY;
+  int i, type = (int)GD_NO_ENTRY;
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
         "|i:pygetdata.dirfile.field_list", keywords, &type))
@@ -647,7 +650,7 @@ static PyObject* gdpy_dirfile_getfieldlist(struct gdpy_dirfile_t* self,
   if (type == GD_NO_ENTRY)
     fields = get_field_list(self->D);
   else
-    fields = get_field_list_by_type(self->D, type);
+    fields = get_field_list_by_type(self->D, (gd_type_t)type);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -853,7 +856,7 @@ static PyObject* gdpy_dirfile_getmfieldlist(struct gdpy_dirfile_t* self,
   const char** fields;
   char* keywords[] = { "parent", "type", NULL };
   const char* parent = NULL;
-  gd_type_t type = GD_NO_ENTRY;
+  gd_type_t type = (int)GD_NO_ENTRY;
   int i;
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
@@ -866,7 +869,7 @@ static PyObject* gdpy_dirfile_getmfieldlist(struct gdpy_dirfile_t* self,
   if (type == GD_NO_ENTRY)
     fields = get_mfield_list(self->D, parent);
   else
-    fields = get_mfield_list_by_type(self->D, parent, type);
+    fields = get_mfield_list_by_type(self->D, parent, (gd_type_t)type);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -930,7 +933,7 @@ static PyObject* gdpy_dirfile_getmstrings(struct gdpy_dirfile_t* self,
 }
 
 static PyObject* gdpy_dirfile_getmvectorlist(struct gdpy_dirfile_t* self,
-  void* args, void* keys)
+    void* args, void* keys)
 {
   dtrace("%p, %p, %p", self, args, keys);
 
@@ -973,7 +976,7 @@ static PyObject* gdpy_dirfile_getrawfilename(struct gdpy_dirfile_t* self,
     dreturn ("%p", NULL);
     return NULL;
   }
-  
+
   filename = get_raw_filename(self->D, field_code);
 
   PYGD_CHECK_ERROR(self->D, NULL);
@@ -1014,7 +1017,7 @@ static PyObject* gdpy_dirfile_getnativetypename(struct gdpy_dirfile_t* self,
 
   char* keywords[] = { "field_code", NULL };
   const char* field_code;
-  char buffer[11];
+  char tbuffer[11];
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
         "s:pygetdata.dirfile.get_native_type_name", keywords, &field_code))
@@ -1027,11 +1030,11 @@ static PyObject* gdpy_dirfile_getnativetypename(struct gdpy_dirfile_t* self,
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
-  sprintf(buffer, "%s%i", (t & GD_COMPLEX) ? "COMPLEX" :
-        (t & GD_IEEE754) ? "FLOAT" : (t & GD_SIGNED) ?  "INT" : "UINT",
-        8 * GD_SIZE(t));
+  sprintf(tbuffer, "%s%i", ((t & GD_COMPLEX) ? "COMPLEX" :
+        (t & GD_IEEE754) ? "FLOAT" : (t & GD_SIGNED) ?  "INT" : "UINT"),
+      (int)(8 * GD_SIZE(t)));
 
-  PyObject* pyobj = PyString_FromString(buffer);
+  PyObject* pyobj = PyString_FromString(tbuffer);
   dreturn("%p", pyobj);
   return pyobj;
 }
@@ -1115,7 +1118,7 @@ static PyObject* gdpy_dirfile_getnmfields(struct gdpy_dirfile_t* self,
   if (type == GD_NO_ENTRY)
     nmfields = get_nmfields(self->D, parent);
   else
-    nmfields = get_nmfields_by_type(self->D, parent, type);
+    nmfields = get_nmfields_by_type(self->D, parent, (gd_type_t)type);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -1310,7 +1313,6 @@ static PyObject* gdpy_dirfile_putdata(struct gdpy_dirfile_t* self,
   gd_type_t type = GD_UNKNOWN;
   PyObject* pyobj;
   size_t ns;
-  int have_ndarray = 0;
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
         "sO|iLL:pygetdata.dirfile.putdata", keywords, &field_code, &pyobj,
@@ -1321,6 +1323,7 @@ static PyObject* gdpy_dirfile_putdata(struct gdpy_dirfile_t* self,
 
   /* we only handle list or ndarray data */
 #ifdef USE_NUMPY
+  int have_ndarray = 0;
   if (PyArray_Check(pyobj)) {
     if (PyArray_NDIM(pyobj) != 1) {
       PyErr_SetString(PyExc_ValueError,
@@ -1330,8 +1333,9 @@ static PyObject* gdpy_dirfile_putdata(struct gdpy_dirfile_t* self,
     }
     have_ndarray = 1;
     ns = PyArray_DIM(pyobj, 0);
-  } else {
+  } else
 #endif
+  {
     if (!PyList_Check(pyobj)) {
       PyErr_SetString(PyExc_TypeError,
           "pygetdata.dirfile.putdata() argument 2 must be list"
@@ -1348,7 +1352,7 @@ static PyObject* gdpy_dirfile_putdata(struct gdpy_dirfile_t* self,
 
   if (ns > 0) {
     void* data;
-    
+
 #ifdef USE_NUMPY
     if (have_ndarray) {
       type = gdpy_type_from_npytype(PyArray_TYPE(pyobj));
@@ -1369,7 +1373,7 @@ static PyObject* gdpy_dirfile_putdata(struct gdpy_dirfile_t* self,
 
       if (!(PyArray_FLAGS(pyobj) & NPY_C_CONTIGUOUS)) {
         PyErr_SetString(PyExc_ValueError, "pygetdata.dirfile.putdata()"
-           " argument 2 must be C-style contiguous.");
+            " argument 2 must be C-style contiguous.");
         dreturn ("%p", NULL);
         return NULL;
       }
@@ -2055,7 +2059,8 @@ static PyMethodDef gdpy_dirfile_methods[] = {
 "the dirfile will be invalidated, prohibiting further use of it.\n"
 
 
-PyTypeObject gdpy_dirfile = {
+PyTypeObject gdpy_dirfile =
+{
   PyObject_HEAD_INIT(NULL)
     0,                             /* ob_size */
   "pygetdata.dirfile",             /* tp_name */

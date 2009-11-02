@@ -23,6 +23,7 @@
 #define GETDATA_PHASEENTRY_H
 
 #define NO_GETDATA_LEGACY_API
+#define GETDATA_C89_API
 
 extern "C" {
 #include <getdata.h>
@@ -39,19 +40,19 @@ namespace GetData {
     public:
       PhaseEntry() : Entry::Entry() { E.field_type = GD_PHASE_ENTRY; };
 
-      PhaseEntry(const char* field_code, const char* in_field, int shift,
+      PhaseEntry(const char* field_code, const char* in_field, gd_shift_t shift,
           int fragment_index = 0);
 
       virtual const char *Input(int __gd_unused index = 0) {
         return E.in_fields[0];
       };
 
-      virtual long int Shift() {
+      virtual gd_shift_t Shift() {
         return E.shift;
       };
 
       int SetInput(const char* field);
-      int SetShift(long int shift);
+      int SetShift(gd_shift_t shift);
       int SetShift(const char* shift);
 
       const char *Scalar() {

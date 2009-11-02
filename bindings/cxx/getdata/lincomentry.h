@@ -23,6 +23,7 @@
 #define GETDATA_LINCOMENTRY_H
 
 #define NO_GETDATA_LEGACY_API
+#define GETDATA_C89_API
 
 extern "C" {
 #include <getdata.h>
@@ -43,7 +44,8 @@ namespace GetData {
           double* m, double* b, int fragment_index = 0);
 
       LincomEntry(const char* field_code, int n_fields, const char** in_fields,
-          double complex* cm, double complex* cb, int fragment_index = 0);
+          std::complex<double>* cm, std::complex<double>* cb,
+          int fragment_index = 0);
 
       virtual const char *Input(int index = 0) {
         return (CheckIndex(E.field_type, E.n_fields, index)) ? 
@@ -62,16 +64,18 @@ namespace GetData {
         return (CheckIndex(E.field_type, E.n_fields, index)) ? E.m[index] : 0;
       };
 
-      virtual double complex CScale(int index = 0) {
-        return (CheckIndex(E.field_type, E.n_fields, index)) ? E.cm[index] : 0;
+      virtual std::complex<double> CScale(int index = 0) {
+        return (CheckIndex(E.field_type, E.n_fields, index))
+          ? std::complex<double>(E.cm[index][0], E.cm[index][1]) : 0;
       };
 
       virtual double Offset(int index = 0) {
         return (CheckIndex(E.field_type, E.n_fields, index)) ? E.b[index] : 0;
       };
 
-      virtual double complex COffset(int index = 0) {
-        return (CheckIndex(E.field_type, E.n_fields, index)) ? E.cb[index] : 0;
+      virtual std::complex<double> COffset(int index = 0) {
+        return (CheckIndex(E.field_type, E.n_fields, index))
+          ? std::complex<double>(E.cb[index][0], E.cb[index][1]) : 0;
       };
 
       virtual const char *Scalar(int index = 0);
@@ -80,10 +84,10 @@ namespace GetData {
       int SetInput(const char* field, int index = 0);
       int SetScale(double scale, int index = 0);
       int SetScale(const char* scale, int index = 0);
-      int SetScale(double complex scale, int index = 0);
+      int SetScale(std::complex<double> scale, int index = 0);
       int SetOffset(double offset, int index = 0);
       int SetOffset(const char* scale, int index = 0);
-      int SetOffset(double complex offset, int index = 0);
+      int SetOffset(std::complex<double> offset, int index = 0);
 
     private:
       LincomEntry(GetData::Dirfile *dirfile, const char* field_code) :

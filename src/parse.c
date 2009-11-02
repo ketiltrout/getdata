@@ -193,8 +193,6 @@ static gd_entry_t* _GD_ParseRaw(DIRFILE* D, char* in_cols[MAX_IN_COLS],
     int n_cols, const gd_entry_t* parent, int me, const char* format_file,
     int line, int pedantic)
 {
-  uint16_t u16;
-
   dtrace("%p, %p, %i, %p, %i, \"%s\", %i, %i", D, in_cols, n_cols, parent, me,
       format_file, line, pedantic);
 
@@ -263,10 +261,9 @@ static gd_entry_t* _GD_ParseRaw(DIRFILE* D, char* in_cols[MAX_IN_COLS],
   if (E->e->size == 0 || E->data_type & 0x40)
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_TYPE, format_file, line,
         in_cols[2]);
-  else if ((E->scalar[0] = _GD_SetScalar(D, in_cols[3], &u16, GD_UINT16,
+  else if ((E->scalar[0] = _GD_SetScalar(D, in_cols[3], &E->spf, GD_UINT16,
           format_file, line, NULL)) == NULL)
   {
-    E->spf = (unsigned int)u16;
     E->e->calculated = 1;
     if (E->spf <= 0)
       _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_SPF, format_file, line,
@@ -512,8 +509,6 @@ static gd_entry_t* _GD_ParseBit(DIRFILE* D, int is_signed,
     char* in_cols[MAX_IN_COLS], int n_cols, const gd_entry_t* parent,
     const char* format_file, int line, int pedantic)
 {
-  int16_t i16;
-
   dtrace("%p, %i, %p, %i, %p, \"%s\", %i, %i", D, is_signed, in_cols, n_cols,
       parent, format_file, line, pedantic);
 
@@ -561,15 +556,13 @@ static gd_entry_t* _GD_ParseBit(DIRFILE* D, int is_signed,
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
 
 
-  E->scalar[0] = _GD_SetScalar(D, in_cols[3], &i16, GD_INT16, format_file, line,
-      NULL);
-  E->bitnum = (int)i16;
+  E->scalar[0] = _GD_SetScalar(D, in_cols[3], &E->bitnum, GD_INT16, format_file,
+      line, NULL);
 
-  if (n_cols > 4) {
-    E->scalar[1] = _GD_SetScalar(D, in_cols[4], &i16, GD_INT16, format_file,
-        line, NULL);
-    E->numbits = (int)i16;
-  } else
+  if (n_cols > 4)
+    E->scalar[1] = _GD_SetScalar(D, in_cols[4], &E->numbits, GD_INT16,
+        format_file, line, NULL);
+  else
     E->numbits = 1;
 
   if (E->scalar[0] != NULL || E->scalar[1] != NULL)
@@ -597,8 +590,6 @@ static gd_entry_t* _GD_ParsePhase(DIRFILE* D, char* in_cols[MAX_IN_COLS],
     int n_cols, const gd_entry_t* parent, const char* format_file, int line,
     int pedantic)
 {
-  int64_t i64;
-
   dtrace("%p, %p, %i, %p, \"%s\", %i, %i", D, in_cols, n_cols, parent,
       format_file, line, pedantic);
 
@@ -647,10 +638,9 @@ static gd_entry_t* _GD_ParsePhase(DIRFILE* D, char* in_cols[MAX_IN_COLS],
     E = NULL;
   }
 
-  if ((E->scalar[0] = _GD_SetScalar(D, in_cols[3], &i64, GD_INT64, format_file,
-          line, NULL)) == NULL)
+  if ((E->scalar[0] = _GD_SetScalar(D, in_cols[3], &E->shift, GD_INT64,
+          format_file, line, NULL)) == NULL)
   {
-    E->shift = (long int)i64;
     E->e->calculated = 1;
   }
 
@@ -940,7 +930,7 @@ gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, char** in_cols,
     for (cptr = in_cols[0] + 1; *cptr != '\0'; ++cptr)
       if (*cptr == '/') {
         *cptr = '\0';
-        const gd_entry_t* P = _GD_FindField(D, in_cols[0], NULL);
+        P = _GD_FindField(D, in_cols[0], NULL);
         if (P == NULL)
           _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_NO_PARENT,
               D->fragment[me].cname, linenum, in_cols[0]);

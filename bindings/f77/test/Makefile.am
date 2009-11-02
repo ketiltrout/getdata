@@ -28,12 +28,20 @@ if GNU_F77_COMPILER
 F77_WALL=-Wall
 endif
 
+if INTEL_F77_COMPILER
+F77_ASSUME=-assume byterecl
+endif
+
+if INTEL_FC_COMPILER
+FC_ASSUME=-assume byterecl
+endif
+
 if MAKE_F95BINDINGS
 F95TESTS=big_test95
 endif
 
-FFLAGS += -I.. $(F77_WALL) $(F77_WEXTRA)
-FCFLAGS += -I.. $(F77_WALL) $(FC_WEXTRA)
+FFLAGS += -I.. $(F77_WALL) $(F77_WEXTRA) $(F77_ASSUME)
+FCFLAGS += -I.. $(F77_WALL) $(FC_WEXTRA) $(FC_ASSUME)
 F95LDADD=../libf95getdata.la $(F77LDADD)
 F77LDADD=../libfgetdata.la
 

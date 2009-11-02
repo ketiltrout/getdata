@@ -705,7 +705,8 @@ void F77_FUNC(gdadrw, GDADRW) (const int* dirfile, const char* field_code,
 {
   char* out = malloc(*field_code_l + 1);
   dirfile_add_raw(_GDF_GetDirfile(*dirfile), _GDF_CString(out, field_code,
-        *field_code_l), (gd_type_t)(*data_type), *spf, *fragment_index);
+        *field_code_l), (gd_type_t)(*data_type), (gd_spf_t)*spf,
+      *fragment_index);
   free(out);
 }
 
@@ -895,8 +896,8 @@ void F77_FUNC(gdadbt, GDADBT) (const int* dirfile, const char* field_code,
   char* in = malloc(*in_field_l + 1);
 
   dirfile_add_bit(_GDF_GetDirfile(*dirfile), _GDF_CString(fc, field_code,
-        *field_code_l), _GDF_CString(in, in_field, *in_field_l), *bitnum,
-      *numbits, *fragment_index);
+        *field_code_l), _GDF_CString(in, in_field, *in_field_l),
+      (gd_bit_t)*bitnum, (gd_bit_t)*numbits, *fragment_index);
   free(fc);
   free(in);
 }
@@ -910,8 +911,8 @@ void F77_FUNC(gdadsb, GDADSB) (const int* dirfile, const char* field_code,
   char* in = malloc(*in_field_l + 1);
 
   dirfile_add_sbit(_GDF_GetDirfile(*dirfile), _GDF_CString(fc, field_code,
-        *field_code_l), _GDF_CString(in, in_field, *in_field_l), *bitnum,
-      *numbits, *fragment_index);
+        *field_code_l), _GDF_CString(in, in_field, *in_field_l),
+      (gd_bit_t)*bitnum, (gd_bit_t)*numbits, *fragment_index);
   free(fc);
   free(in);
 }
@@ -1284,7 +1285,8 @@ void F77_FUNC(gdmdbt, GDMDBT) (const int* dirfile, const char* parent,
 
   dirfile_madd_bit(_GDF_GetDirfile(*dirfile), _GDF_CString(pa, parent,
         *parent_l), _GDF_CString(fc, field_code, *field_code_l),
-      _GDF_CString(in, in_field, *in_field_l), *bitnum, *numbits);
+      _GDF_CString(in, in_field, *in_field_l), (gd_bit_t)*bitnum,
+      (gd_bit_t)*numbits);
   free(pa);
   free(fc);
   free(in);
@@ -1302,7 +1304,8 @@ void F77_FUNC(gdmdsb, GDMDSB) (const int* dirfile, const char* parent,
 
   dirfile_madd_sbit(_GDF_GetDirfile(*dirfile), _GDF_CString(pa, parent,
         *parent_l), _GDF_CString(fc, field_code, *field_code_l),
-      _GDF_CString(in, in_field, *in_field_l), *bitnum, *numbits);
+      _GDF_CString(in, in_field, *in_field_l), (gd_bit_t)*bitnum,
+      (gd_bit_t)*numbits);
   free(pa);
   free(fc);
   free(in);
@@ -1562,8 +1565,8 @@ void F77_FUNC(gdalbt, GDALBT) (const int* dirfile, const char* field_code,
   char* in = malloc(*in_field_l + 1);
 
   dirfile_alter_bit(_GDF_GetDirfile(*dirfile), _GDF_CString(fc, field_code,
-        *field_code_l), _GDF_CString(in, in_field, *in_field_l), *bitnum,
-      *numbits);
+        *field_code_l), _GDF_CString(in, in_field, *in_field_l),
+      (gd_bit_t)*bitnum, (gd_bit_t)*numbits);
 
   free(fc);
   free(in);
@@ -1578,8 +1581,8 @@ void F77_FUNC(gdalsb, GDALSB) (const int* dirfile, const char* field_code,
   char* in = malloc(*in_field_l + 1);
 
   dirfile_alter_sbit(_GDF_GetDirfile(*dirfile), _GDF_CString(fc, field_code,
-        *field_code_l), _GDF_CString(in, in_field, *in_field_l), *bitnum,
-      *numbits);
+        *field_code_l), _GDF_CString(in, in_field, *in_field_l),
+      (gd_bit_t)*bitnum, (gd_bit_t)*numbits);
 
   free(fc);
   free(in);
@@ -1907,7 +1910,7 @@ void F77_FUNC(gdalrw, GDALRW) (const int* dirfile, const char* field_code,
 {
   char* out = malloc(*field_code_l + 1);
   dirfile_alter_raw(_GDF_GetDirfile(*dirfile), _GDF_CString(out, field_code,
-        *field_code_l), (gd_type_t)(*data_type), *spf, *recode);
+        *field_code_l), (gd_type_t)(*data_type), (gd_spf_t)*spf, *recode);
   free(out);
 }
 

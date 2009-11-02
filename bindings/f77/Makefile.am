@@ -41,7 +41,7 @@ if GETDATA_DEBUG
 DEBUG_C = ../../src/debug.c
 endif
 
-AM_FCFLAGS = $(FC_WALL) $(FC_WEXTRA)
+FCFLAGS += $(FC_WALL) $(FC_WEXTRA)
 INCLUDES = -I$(top_srcdir)/src
 EXTRA_DIST=getdata.f.in getdata.f90.in
 

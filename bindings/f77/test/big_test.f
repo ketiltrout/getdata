@@ -55,14 +55,14 @@ C     Write the test dirfile
       WRITE(1, *) '/ENDIAN little'
       WRITE(1, *) 'data RAW INT8 8'
       WRITE(1, *) 'lincom LINCOM data 1.1 2.2 INDEX 2.2 3.3;4.4 linterp
-     +const const'
+     + const const'
       WRITE(1, *) '/META data mstr STRING "This is a string constant."'
       WRITE(1, *) '/META data mconst CONST COMPLEX128 3.3;4.4'
       WRITE(1, *) '/META data mlut LINTERP DATA ./lut'
       WRITE(1, *) 'const CONST FLOAT64 5.5'
       WRITE(1, *) 'linterp LINTERP data /look/up/file'
       WRITE(1, *) 'polynom POLYNOM data 1.1 2.2 2.2 3.3;4.4
-     +const const'
+     + const const'
       WRITE(1, *) 'bit BIT data 3 4'
       WRITE(1, *) 'sbit SBIT data 5 6'
       WRITE(1, *) 'mult MULTIPLY data sbit'

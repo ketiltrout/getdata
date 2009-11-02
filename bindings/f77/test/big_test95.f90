@@ -234,7 +234,7 @@ program big_test
   do i=1,8
   if (abs(cc8(i) - 40 - i) .gt. 1e-5) then
     ne = ne + 1
-    write(*, 2011) i, 107, realpart(cc8(i)), imagpart(cc8(i))
+    write(*, 2011) i, 107, real(real(cc8(i))), real(aimag(cc8(i)))
   end if
   end do 
 
@@ -255,7 +255,7 @@ program big_test
   do i=1,8
   if (abs(cc16(i) - 40 - i) .gt. 1e-5) then
     ne = ne + 1
-    write(*, 2011) i, 107, realpart(cc16(i)), imagpart(cc16(i))
+    write(*, 2011) i, 107, real(real(cc16(i))), real(aimag(cc16(i)))
   end if
   end do 
 
@@ -403,7 +403,7 @@ program big_test
 
   if (abs(cc8(1) - 5.5) .gt. 1e-5) then
     ne = ne + 1
-    write(*, 2013) 115, realpart(cc8(i)), imagpart(cc8(i))
+    write(*, 2013) 115, real(real(cc8(i))), real(aimag(cc8(i)))
   end if
 
 ! 116: fget_constant_c16 check
@@ -422,7 +422,7 @@ program big_test
 
   if (abs(cc16(1) - 5.5) .gt. 1e-5) then
     ne = ne + 1
-    write(*, 2013) 116, realpart(cc16(i)), imagpart(cc16(i))
+    write(*, 2013) 116, real(real(cc16(i))), real(aimag(cc16(i)))
   end if
 
 ! 117: fget_constant_n check
@@ -742,7 +742,7 @@ program big_test
   if (((i .EQ. 1 .OR. i .GT. 5) .AND. abs(cc8(i) - 40 - i) .gt. 1e-5) .OR. &
   (i .GT. 1 .AND. i .LT. 6) .AND. abs(cc8(i) - 51 - i) .gt. 1e-5) then
     ne = ne + 1
-    write(*, 2011) i, 123, realpart(cc8(i)), imagpart(cc8(i))
+    write(*, 2011) i, 123, real(real(cc8(i))), real(aimag(cc8(i)))
   end if
   end do
 
@@ -767,7 +767,7 @@ program big_test
   if (((i .EQ. 1 .OR. i .GT. 5) .AND. abs(cc16(i) - 40 - i) .gt. 1e-5) .OR. &
   (i .GT. 1 .AND. i .LT. 6) .AND. abs(cc16(i) - 61 - i) .gt. 1e-5) then
     ne = ne + 1
-    write(*, 2011) i, 124, realpart(cc16(i)), imagpart(cc16(i))
+    write(*, 2011) i, 124, real(real(cc16(i))), real(aimag(cc16(i)))
   end if
   end do
 
@@ -932,7 +932,7 @@ program big_test
   DO i=1,6
   if (abs(ent%ca(i) - cq(i)) > 0.001) then
     ne = ne + 1
-    write(*, 2011) i, 30, realpart(ent%ca(i)), imagpart(ent%ca(i))
+    write(*, 2011) i, 30, real(real(ent%ca(i))), real(aimag(ent%ca(i)))
   end if
   end do
 
@@ -1285,11 +1285,11 @@ program big_test
   do i=1,2
   if (abs(ent%cm(i) - cq(i * 2 - 1)) > 0.001) then
     ne = ne + 1
-    write(*, 2011) i * 2 - 1, 30, realpart(ent%cm(i)), imagpart(ent%cm(i))
+    write(*, 2011) i * 2 - 1, 30, real(real(ent%cm(i))), real(aimag(ent%cm(i)))
   end if
   if (abs(ent%cb(i) - cq(i * 2)) > 0.001) then
     ne = ne + 1
-    write(*, 2011) i * 2, 30, realpart(ent%cb(i)), imagpart(ent%cb(i))
+    write(*, 2011) i * 2, 30, real(real(ent%cb(i))), real(aimag(ent%cb(i)))
   end if
   end do
 
@@ -1398,7 +1398,7 @@ program big_test
   DO i=1,4
   if (abs(ent%ca(i) - cq(i)) > 0.001) then
     ne = ne + 1
-    write(*, 2011) i, 32, realpart(ent%ca(i)), imagpart(ent%ca(i))
+    write(*, 2011) i, 32, real(real(ent%ca(i))), real(aimag(ent%ca(i)))
   end if
   end do
 
@@ -1931,11 +1931,11 @@ program big_test
   DO i=1,2
   if (abs(ent%cm(i) - cq(i * 2 - 1)) > 0.001) then
     ne = ne + 1
-    write(*, 2011) i * 2 - 1, 47, realpart(ent%cm(i)), imagpart(ent%cm(i))
+    write(*, 2011) i * 2 - 1, 47, real(real(ent%cm(i))), real(aimag(ent%cm(i)))
   end if
   if (abs(ent%cb(i) - cq(i * 2)) > 0.001) then
     ne = ne + 1
-    write(*, 2011) i * 2, 47, realpart(ent%cb(i)), imagpart(ent%cb(i))
+    write(*, 2011) i * 2, 47, real(real(ent%cb(i))), real(aimag(ent%cb(i)))
   end if
   end do
 
@@ -2034,7 +2034,7 @@ program big_test
   DO i=1,4
   if (abs(ent%ca(i) - cq(i)) > 0.001) then
     ne = ne + 1
-    write(*, 2011) i, 49, realpart(ent%ca(i)), imagpart(ent%ca(i))
+    write(*, 2011) i, 49, real(real(ent%ca(i))), real(aimag(ent%ca(i)))
   end if
   end do
 
@@ -2916,11 +2916,11 @@ program big_test
   DO i=1,2
   if (abs(ent%cm(i) - cq(i * 2 - 1)) > 0.001) then
     ne = ne + 1
-    write(*, 2011) i * 2 - 1, 69, realpart(ent%cm(i)), imagpart(ent%cm(i))
+    write(*, 2011) i * 2 - 1, 69, real(real(ent%cm(i))), real(aimag(ent%cm(i)))
   end if
   if (abs(ent%cb(i) - cq(i * 2)) > 0.001) then
     ne = ne + 1
-    write(*, 2011) i * 2, 69, realpart(ent%cb(i)), imagpart(ent%cb(i))
+    write(*, 2011) i * 2, 69, real(real(ent%cb(i))), real(aimag(ent%cb(i)))
   end if
   end do
 
@@ -3023,7 +3023,7 @@ program big_test
   DO 710 i=1,4
   if (abs(ent%ca(i) - cq(i)) > 0.001) then
     ne = ne + 1
-    write(*, 2011) i, 71, realpart(ent%ca(i)), imagpart(ent%ca(i))
+    write(*, 2011) i, 71, real(real(ent%ca(i))), real(aimag(ent%ca(i)))
   end if
   710 CONTINUE
 

@@ -473,7 +473,7 @@ size_t _GD_DoFieldOut(DIRFILE *D, gd_entry_t* E, int repr, off64_t first_samp,
 
   /* writing to representations is prohibited */
   if (repr != GD_REPR_NONE) {
-    const char r[2] = {repr, 0};
+    const char r[2] = {(char)repr, 0};
     _GD_SetError(D, GD_E_BAD_REPR, GD_E_REPR_PUT, NULL, 0, r);
     dreturn("%zi", 0);
     return 0;
@@ -570,7 +570,7 @@ size_t putdata64(DIRFILE* D, const char *field_code_in, off64_t first_frame,
   }
 
   /* get the samples per frame */
-  _gd_spf_t spf = _GD_GetSPF(D, entry);
+  gd_spf_t spf = _GD_GetSPF(D, entry);
 
   if (D->error) {
     dreturn("%i", 0);

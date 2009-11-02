@@ -18,8 +18,6 @@
 // along with GetData; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 //
-#include "getdata/bitentry.h"
-#include "getdata/entry.h"
 #include "getdata/dirfile.h"
 
 #include <cstring>
@@ -27,8 +25,8 @@
 
 using namespace GetData;
 
-BitEntry::BitEntry(const char* field_code, const char* in_field, int bitnum,
-    int numbits, int fragment_index) : Entry::Entry()
+BitEntry::BitEntry(const char* field_code, const char* in_field,
+    gd_bit_t bitnum, gd_bit_t numbits, int fragment_index) : Entry::Entry()
 {
   E.field = strdup(field_code);
   E.field_type = GD_BIT_ENTRY;
@@ -54,7 +52,7 @@ int BitEntry::SetInput(const char* field)
   return 0;
 }
 
-int BitEntry::SetFirstBit(int first_bit)
+int BitEntry::SetFirstBit(gd_bit_t first_bit)
 {
   E.bitnum = first_bit;
 
@@ -64,7 +62,7 @@ int BitEntry::SetFirstBit(int first_bit)
   return 0;
 }
 
-int BitEntry::SetNumBits(int num_bits)
+int BitEntry::SetNumBits(gd_bit_t num_bits)
 {
   E.numbits = num_bits;
 
@@ -85,7 +83,6 @@ const char *BitEntry::Scalar(int index)
 int BitEntry::SetFirstBit(const char *first_bit)
 {
   int r = 0;
-  int16_t i16;
 
   free(E.scalar[0]);
   if (first_bit == NULL)
@@ -96,10 +93,8 @@ int BitEntry::SetFirstBit(const char *first_bit)
   if (D != NULL) {
     r = dirfile_alter_entry(D->D, E.field, &E, 0);
 
-    if (!r) {
-      r = get_constant(D->D, first_bit, GD_INT16, &i16);
-      E.bitnum = (int)i16;
-    }
+    if (!r)
+      r = get_constant(D->D, first_bit, GD_INT16, &E.bitnum);
   }
   
   return r;
@@ -108,7 +103,6 @@ int BitEntry::SetFirstBit(const char *first_bit)
 int BitEntry::SetNumBits(const char *num_bits)
 {
   int r = 0;
-  int16_t i16;
 
   free(E.scalar[1]);
   if (num_bits == NULL)
@@ -119,10 +113,8 @@ int BitEntry::SetNumBits(const char *num_bits)
   if (D != NULL) {
     r = dirfile_alter_entry(D->D, E.field, &E, 0);
 
-    if (!r) {
-      r = get_constant(D->D, num_bits, GD_INT16, &i16);
-      E.numbits = (int)i16;
-    }
+    if (!r)
+      r = get_constant(D->D, num_bits, GD_INT16, &E.numbits);
   }
   
   return r;

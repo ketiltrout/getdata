@@ -32,7 +32,7 @@
 #endif
 
 #define EXTRACT_REPR(it,ot,f) \
-  for (i = 0; i < n; ++i) ((ot*)rdata)[i] = f(((it*)cdata)[i])
+  for (i = 0; i < n; ++i) ((ot*)rdata)[i] = (ot)f(((it*)cdata)[i])
 
 #define EXTRACT_REPR2(it,ot) \
   switch (repr) { \
@@ -401,12 +401,16 @@ static void _GD_CPolynomData(DIRFILE* D, void *data, gd_type_t type,
 }
 
 #define MULTIPLY(t) \
-  for (i = 0; i < n; i++) ((t*)A)[i] *= B[i * spfB / spfA]
+  for (i = 0; i < n; i++) ((t*)A)[i] = (t)((double)((t*)A)[i] * \
+      B[i * spfB / spfA])
+#define CMULTIPLY(t) \
+  for (i = 0; i < n; i++) ((t*)A)[i] = (t)((double complex)((t*)A)[i] * \
+      (t)B[i * spfB / spfA])
 
 /* MultiplyData: Multiply A by B.  B is unchanged.
 */
-static void _GD_MultiplyData(DIRFILE* D, void *A, _gd_spf_t spfA, double *B,
-    _gd_spf_t spfB, gd_type_t type, size_t n)
+static void _GD_MultiplyData(DIRFILE* D, void *A, gd_spf_t spfA, double *B,
+    gd_spf_t spfB, gd_type_t type, size_t n)
 {
   size_t i;
 
@@ -437,8 +441,8 @@ static void _GD_MultiplyData(DIRFILE* D, void *A, _gd_spf_t spfA, double *B,
 
 /* MultiplyData: Multiply A by B.  B is complex.
 */
-static void _GD_CMultiplyData(DIRFILE* D, void *A, _gd_spf_t spfA,
-    double complex *B, _gd_spf_t spfB, gd_type_t type, size_t n)
+static void _GD_CMultiplyData(DIRFILE* D, void *A, gd_spf_t spfA,
+    double complex *B, gd_spf_t spfB, gd_type_t type, size_t n)
 {
   size_t i;
 
@@ -447,18 +451,18 @@ static void _GD_CMultiplyData(DIRFILE* D, void *A, _gd_spf_t spfA,
   switch (type) {
     case GD_NULL:
       break;
-    case GD_UINT8:      MULTIPLY(       uint8_t); break;
-    case GD_INT8:       MULTIPLY(        int8_t); break;
-    case GD_UINT16:     MULTIPLY(      uint16_t); break;
-    case GD_INT16:      MULTIPLY(       int16_t); break;
-    case GD_UINT32:     MULTIPLY(      uint32_t); break;
-    case GD_INT32:      MULTIPLY(       int32_t); break;
-    case GD_UINT64:     MULTIPLY(      uint64_t); break;
-    case GD_INT64:      MULTIPLY(       int64_t); break;
-    case GD_FLOAT32:    MULTIPLY(         float); break;
-    case GD_FLOAT64:    MULTIPLY(        double); break;
-    case GD_COMPLEX64:  MULTIPLY( float complex); break;
-    case GD_COMPLEX128: MULTIPLY(double complex); break;
+    case GD_UINT8:      CMULTIPLY(       uint8_t); break;
+    case GD_INT8:       CMULTIPLY(        int8_t); break;
+    case GD_UINT16:     CMULTIPLY(      uint16_t); break;
+    case GD_INT16:      CMULTIPLY(       int16_t); break;
+    case GD_UINT32:     CMULTIPLY(      uint32_t); break;
+    case GD_INT32:      CMULTIPLY(       int32_t); break;
+    case GD_UINT64:     CMULTIPLY(      uint64_t); break;
+    case GD_INT64:      CMULTIPLY(       int64_t); break;
+    case GD_FLOAT32:    CMULTIPLY(         float); break;
+    case GD_FLOAT64:    CMULTIPLY(        double); break;
+    case GD_COMPLEX64:  CMULTIPLY( float complex); break;
+    case GD_COMPLEX128: CMULTIPLY(double complex); break;
     default:
       _GD_SetError(D, GD_E_BAD_TYPE, type, NULL, 0, NULL);
       break;
@@ -472,7 +476,7 @@ static void _GD_CMultiplyData(DIRFILE* D, void *A, _gd_spf_t spfA,
 static size_t _GD_DoLincom(DIRFILE *D, gd_entry_t *E, off64_t first_samp,
     size_t num_samp, gd_type_t return_type, void *data_out)
 {
-  _gd_spf_t spf[GD_MAX_LINCOM];
+  gd_spf_t spf[GD_MAX_LINCOM];
   size_t n_read;
   int i;
   void *tmpbuf2 = NULL;
@@ -603,7 +607,7 @@ static size_t _GD_DoMultiply(DIRFILE *D, gd_entry_t* E, off64_t first_samp,
     size_t num_samp, gd_type_t return_type, void *data_out)
 {
   void *tmpbuf = NULL;
-  _gd_spf_t spf1, spf2;
+  gd_spf_t spf1, spf2;
   size_t n_read, n_read2, num_samp2;
   off64_t first_samp2;
 
@@ -700,7 +704,6 @@ static size_t _GD_DoBit(DIRFILE *D, gd_entry_t *E, int is_signed,
 {
   void *tmpbuf;
   size_t i;
-  int spf;
   size_t n_read;
 
   dtrace("%p, %p, %i, %lli, %zi, 0x%x, %p", D, E, is_signed, first_samp,
@@ -710,13 +713,6 @@ static size_t _GD_DoBit(DIRFILE *D, gd_entry_t *E, int is_signed,
     ((uint64_t)1 << E->numbits) - 1;
 
   if (_GD_BadInput(D, E, 0)) {
-    dreturn("%zi", 0);
-    return 0;
-  }
-
-  spf = _GD_GetSPF(D, E->e->entry[0]);
-
-  if (D->error != GD_E_OK) {
     dreturn("%zi", 0);
     return 0;
   }
@@ -1070,7 +1066,7 @@ size_t getdata64(DIRFILE* D, const char *field_code_in, off64_t first_frame,
   }
 
   /* get the samples per frame */
-  _gd_spf_t spf = _GD_GetSPF(D, entry);
+  gd_spf_t spf = _GD_GetSPF(D, entry);
 
   if (D->error) {
     dreturn("%i", 0);

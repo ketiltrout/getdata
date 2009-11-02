@@ -316,7 +316,7 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
             if (cimag(E->ca[i]))
               cs = 1;
           }
-          E->comp_scal = 1;
+          E->comp_scal = cs;
         } else {
           memcpy(E->a, entry->a, sizeof(double) * (E->poly_ord + 1));
           for (i = 0; i <= E->poly_ord; ++i)
@@ -581,7 +581,7 @@ int dirfile_add(DIRFILE* D, const gd_entry_t* entry)
 
 /* add a RAW entry */
 int dirfile_add_raw(DIRFILE* D, const char* field_code, gd_type_t data_type,
-    unsigned int spf, int fragment_index)
+    gd_spf_t spf, int fragment_index)
 {
   dtrace("%p, \"%s\", %x, %i %i", D, field_code, data_type, spf,
       fragment_index);
@@ -717,7 +717,7 @@ int dirfile_add_linterp(DIRFILE* D, const char* field_code,
 
 /* add a BIT entry */
 int dirfile_add_bit(DIRFILE* D, const char* field_code, const char* in_field,
-    int bitnum, int numbits, int fragment_index)
+    gd_bit_t bitnum, gd_bit_t numbits, int fragment_index)
 {
   dtrace("%p, \"%s\", \"%s\", %i, %i, %i\n", D, field_code, in_field, bitnum,
       numbits, fragment_index);
@@ -744,7 +744,7 @@ int dirfile_add_bit(DIRFILE* D, const char* field_code, const char* in_field,
 
 /* add a SBIT entry */
 int dirfile_add_sbit(DIRFILE* D, const char* field_code, const char* in_field,
-    int bitnum, int numbits, int fragment_index)
+    gd_bit_t bitnum, gd_bit_t numbits, int fragment_index)
 {
   dtrace("%p, \"%s\", \"%s\", %i, %i, %i\n", D, field_code, in_field, bitnum,
       numbits, fragment_index);
@@ -877,10 +877,10 @@ int dirfile_add_cpolynom(DIRFILE* D, const char* field_code, int poly_ord,
 
 /* add a PHASE entry */
 int dirfile_add_phase(DIRFILE* D, const char* field_code, const char* in_field,
-    int shift, int fragment_index)
+    gd_shift_t shift, int fragment_index)
 {
-  dtrace("%p, \"%s\", \"%s\", %i, %i", D, field_code, in_field, shift,
-      fragment_index);
+  dtrace("%p, \"%s\", \"%s\", %lli, %i", D, field_code, in_field,
+      (long long)shift, fragment_index);
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -1107,7 +1107,7 @@ int dirfile_madd_linterp(DIRFILE* D, const char* parent, const char* field_code,
 
 /* add a META BIT entry */
 int dirfile_madd_bit(DIRFILE* D, const char* parent, const char* field_code,
-    const char* in_field, int bitnum, int numbits)
+    const char* in_field, gd_bit_t bitnum, gd_bit_t numbits)
 {
   dtrace("%p, \"%s\", \"%s\", \"%s\", %i, %in", D, field_code, parent, in_field,
       bitnum, numbits);
@@ -1134,7 +1134,7 @@ int dirfile_madd_bit(DIRFILE* D, const char* parent, const char* field_code,
 
 /* add a META SBIT entry */
 int dirfile_madd_sbit(DIRFILE* D, const char* parent, const char* field_code,
-    const char* in_field, int bitnum, int numbits)
+    const char* in_field, gd_bit_t bitnum, gd_bit_t numbits)
 {
   dtrace("%p, \"%s\", \"%s\", \"%s\", %i, %in", D, field_code, parent, in_field,
       bitnum, numbits);
@@ -1186,10 +1186,10 @@ int dirfile_madd_multiply(DIRFILE* D, const char* parent,
 
 /* add a META PHASE entry */
 int dirfile_madd_phase(DIRFILE* D, const char* parent, const char* field_code,
-    const char* in_field, int shift)
+    const char* in_field, gd_shift_t shift)
 {
-  dtrace("%p, \"%s\", \"%s\", \"%s\", %i", D, field_code, parent, in_field,
-      shift);
+  dtrace("%p, \"%s\", \"%s\", \"%s\", %lli", D, field_code, parent, in_field,
+      (long long)shift);
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);

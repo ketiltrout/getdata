@@ -25,9 +25,14 @@
 // We don't want the legacy API since its symbols clash with us.
 #define NO_GETDATA_LEGACY_API
 
+// We use the C89 API since not all C++ compilers support the C99 complex
+// keyword
+#define GETDATA_C89_API
+
 extern "C" {
 #include <getdata.h>
 }
+
 #include <getdata/fragment.h>
 #include <getdata/entry.h>
 #include <getdata/rawentry.h>

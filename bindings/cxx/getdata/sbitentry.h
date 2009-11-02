@@ -23,6 +23,7 @@
 #define GETDATA_SBITENTRY_H
 
 #define NO_GETDATA_LEGACY_API
+#define GETDATA_C89_API
 
 extern "C" {
 #include <getdata.h>
@@ -39,25 +40,25 @@ namespace GetData {
     public:
       SBitEntry() : Entry::Entry() { E.field_type = GD_SBIT_ENTRY; };
 
-      SBitEntry(const char* field_code, const char* in_field, int bitnum,
-          int numbits = 1, int fragment_index = 0);
+      SBitEntry(const char* field_code, const char* in_field, gd_bit_t bitnum,
+          gd_bit_t numbits = 1, int fragment_index = 0);
 
       virtual const char *Input(int __gd_unused index = 0) {
         return E.in_fields[0];
       };
 
-      virtual int FirstBit() {
+      virtual gd_bit_t FirstBit() {
         return E.bitnum;
       };
 
-      virtual int NumBits() {
+      virtual gd_bit_t NumBits() {
         return E.numbits;
       };
 
       int SetInput(const char* field);
-      int SetFirstBit(int first_bit);
+      int SetFirstBit(gd_bit_t first_bit);
       int SetFirstBit(const char* first_bit);
-      int SetNumBits(int num_bits);
+      int SetNumBits(gd_bit_t num_bits);
       int SetNumBits(const char* num_bits);
 
       virtual const char *Scalar(int index = 0);

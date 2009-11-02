@@ -34,7 +34,7 @@ INTEGER (i.e. the native size of the platform).  As a result, largefile support
 will not be available in the Fortran 77 bindings on a 32-bit system.
 
 All character string arguments require also an integer indicating the size of
-the character buffer.  In cases where the bindings return string value, the
+the character buffer.  In cases where the bindings return a string value, the
 value will not be returned if the string length supplied is too short.  In
 these cases, the character string will be left untouched, but the integer
 indicating the string length will be updated to indicate the required string

@@ -160,6 +160,8 @@ if TEST_GZIP
 GZIP_TESTS=gzip_get gzip_get_get gzip_move_from gzip_nframes
 endif
 
+HEADER_TESTS=header_complex
+
 INCLUDE_TESTS=include include_accmode include_auto include_cb include_creat \
 							include_ignore include_index include_invalid include_nonexistent \
 							include_pc include_ref include_syntax
@@ -276,15 +278,16 @@ TESTS=$(ADD_TESTS)        $(ALTER_TESTS)      $(ASCII_TESTS)      \
 			$(ENTRY_TESTS)      $(ERROR_TESTS)      $(FILE_TESTS)       \
 			$(FLIST_TESTS)      $(FLUSH_TESTS)      $(FOFFS_TESTS)      \
 			$(FRAGMENT_TESTS)   $(GET_TESTS)        $(GLOBAL_TESTS)     \
-			$(GZIP_TESTS)       $(INCLUDE_TESTS)    $(INDEX_TESTS)      \
-			$(LEGACY_TESTS)     $(LZMA_TESTS)       $(MADD_TESTS)       \
-			$(MOVE_TESTS)       $(NAME_TESTS)       $(NFIELDS_TESTS)    \
-			$(NFRAGMENTS_TESTS) $(NFRAMES_TESTS)    $(NMETA_TESTS)      \
-			$(NVECTORS_TESTS)   $(OPEN_TESTS)       $(PARENT_TESTS)     \
-			$(PARSE_TESTS)      $(PROTECT_TESTS)    $(PUT_TESTS)        \
-			$(REF_TESTS)        $(REPR_TESTS)       $(SLIM_TESTS)       \
-			$(SPF_TESTS)        $(SVLIST_TESTS)     $(TRUNC_TESTS)      \
-			$(UNCLUDE_TESTS)    $(VLIST_TESTS)      $(XZ_TESTS)
+			$(GZIP_TESTS)       $(HEADER_TESTS)     $(INCLUDE_TESTS)    \
+			$(INDEX_TESTS)      $(LEGACY_TESTS)     $(LZMA_TESTS)       \
+			$(MADD_TESTS)       $(MOVE_TESTS)       $(NAME_TESTS)       \
+			$(NFIELDS_TESTS)    $(NFRAGMENTS_TESTS) $(NFRAMES_TESTS)    \
+			$(NMETA_TESTS)      $(NVECTORS_TESTS)   $(OPEN_TESTS)       \
+			$(PARENT_TESTS)     $(PARSE_TESTS)      $(PROTECT_TESTS)    \
+			$(PUT_TESTS)        $(REF_TESTS)        $(REPR_TESTS)       \
+			$(SLIM_TESTS)       $(SPF_TESTS)        $(SVLIST_TESTS)     \
+			$(TRUNC_TESTS)      $(UNCLUDE_TESTS)    $(VLIST_TESTS)      \
+			$(XZ_TESTS)
 
 check_PROGRAMS=$(TESTS)
 

@@ -23,6 +23,7 @@
 #define GETDATA_RAWENTRY_H
 
 #define NO_GETDATA_LEGACY_API
+#define GETDATA_C89_API
 
 extern "C" {
 #include <getdata.h>
@@ -39,10 +40,10 @@ namespace GetData {
     public:
       RawEntry() : Entry::Entry() { E.field_type = GD_RAW_ENTRY; };
 
-      RawEntry(const char* field_code, DataType data_type, unsigned int spf,
+      RawEntry(const char* field_code, DataType data_type, gd_spf_t spf,
           int fragment_index = 0);
 
-      virtual unsigned int SamplesPerFrame() {
+      virtual gd_spf_t SamplesPerFrame() {
         return E.spf;
       };
 
@@ -51,7 +52,7 @@ namespace GetData {
       };
 
       const char* FileName();
-      int SetSamplesPerFrame(unsigned int spf, int recode = 0);
+      int SetSamplesPerFrame(gd_spf_t spf, int recode = 0);
       int SetSamplesPerFrame(const char *spf, int recode = 0);
       int SetType(DataType type, int recode = 0);
 

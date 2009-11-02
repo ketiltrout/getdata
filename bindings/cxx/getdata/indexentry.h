@@ -23,6 +23,7 @@
 #define GETDATA_INDEXENTRY_H
 
 #define NO_GETDATA_LEGACY_API
+#define GETDATA_C89_API
 
 extern "C" {
 #include <getdata.h>

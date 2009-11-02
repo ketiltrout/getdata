@@ -24,7 +24,7 @@ int main(void)
   mkdir(filedir, 0777);
 
   for (i = 0; i < 100; ++i)
-    data_data[i] = sin(i * M_PI / 5.);
+    data_data[i] = sin(i * 3.14159265358979323846 / 5.);
 
   i = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
   write(i, format_data, strlen(format_data));

@@ -18,17 +18,7 @@
 // along with GetData; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 //
-#include "getdata/entry.h"
 #include "getdata/dirfile.h"
-#include "getdata/rawentry.h"
-#include "getdata/lincomentry.h"
-#include "getdata/linterpentry.h"
-#include "getdata/bitentry.h"
-#include "getdata/multiplyentry.h"
-#include "getdata/phaseentry.h"
-#include "getdata/constentry.h"
-#include "getdata/stringentry.h"
-#include "getdata/indexentry.h"
 
 #include <stdlib.h>
 #include <cstring>
