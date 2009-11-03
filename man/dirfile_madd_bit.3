@@ -13,11 +13,11 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH dirfile_madd_bit 3 "16 October 2009" "Version 0.6.0" "GETDATA"
+.TH dirfile_madd_bit 3 "2 November 2009" "Version 0.6.0" "GETDATA"
 .SH NAME
 dirfile_madd_bit, dirfile_madd_clincom, dirfile_madd_const,
 dirfile_madd_cpolynom, dirfile_madd_lincom, dirfile_madd_linterp,
-dirfile_madd_multiply, dirfile_madd_phase, dirifle_madd_polynom,
+dirfile_madd_multiply, dirfile_madd_phase, dirfile_madd_polynom,
 dirfile_madd_bit, dirfile_madd_string \(em add a field
 to a dirfile
 .SH SYNOPSIS
@@ -27,7 +27,7 @@ to a dirfile
 .ad l
 .BI "int dirfile_madd_bit(DIRFILE *" dirfile ,
 .BI "const char *" parent ", const char *" field_name ,
-.BI "const char *" in_field ", int " bitnum ", int " numbits );
+.BI "const char *" in_field ", gd_bit_t " bitnum ", gd_bit_t " numbits );
 .HP
 .BI "int dirfile_madd_clincom(DIRFILE *" dirfile ", const char *" parent ,
 .BI "const char *" field_name ", int " n_fields ", const char **" in_fields ,
@@ -37,9 +37,9 @@ to a dirfile
 .BI "const char *" parent ", const char *" field_name ,
 .BI "gd_type_t " const_type ", gd_type_t " data_type ", void *" value );
 .HP
-.BI "int dirfile_madd_polynom(DIRFILE *" dirfile ", const char *" parent ,
+.BI "int dirfile_madd_cpolynom(DIRFILE *" dirfile ", const char *" parent ,
 .BI "const char *" field_name ", int " poly_ord ", const char *" in_field ,
-.BI "const double *" ca );
+.BI "const double complex *" ca );
 .HP
 .BI "int dirfile_madd_lincom(DIRFILE *" dirfile ", const char *" parent ,
 .BI "const char *" field_name ", int " n_fields ", const char **" in_fields ,
@@ -59,11 +59,11 @@ to a dirfile
 .HP
 .BI "int dirfile_madd_phase(DIRFILE *" dirfile ,
 .BI "const char *" parent ", const char *" field_name ,
-.BI "const char *" in_field ", int " phase );
+.BI "const char *" in_field ", gd_shift_t " shift );
 .HP
 .BI "int dirfile_madd_sbit(DIRFILE *" dirfile ,
 .BI "const char *" parent ", const char *" field_name ,
-.BI "const char *" in_field ", int " bitnum ", int " numbits );
+.BI "const char *" in_field ", gd_bit_t " bitnum ", gd_bit_t " numbits );
 .HP
 .BI "int dirfile_madd_string(DIRFILE *" dirfile ", const char *" parent ,
 .BI "const char *" field_name ", const char *" value );
@@ -136,6 +136,12 @@ argument specifies the storage type for the const, while
 specifies the data type of the value pointed to by
 .IR value .
 
+The
+.B gd_bit_t
+type is a signed 16-bit integer type.  The
+.B gd_shift_t
+type is a signed 64-bit integer type.
+
 All fields added with this interface must contain numerical parameters.  Fields
 with
 .B CONST
@@ -144,6 +150,15 @@ be added with
 .BR dirfile_madd (3)
 or
 .BR dirfile_madd_spec (3).
+
+See
+.B NOTES
+below for information on using
+.BR dirfile_madd_clincom ()
+and 
+.BR dirfile_madd_cpolynom ()
+in the C89 GetData API.
+
 .SH RETURN VALUE
 On success, any of these functions returns zero.   On error, -1 is returned and 
 the dirfile error is set to a non-zero error value.  Possible error values are:
@@ -171,7 +186,7 @@ One or more of the field parameters specified was invalid.
 The
 .IR data_type " or " const_type
 argument provided to
-.BR dirfile_add_const (),
+.BR dirfile_madd_const (),
 was invalid.
 .TP
 .B GD_E_DUPLICATE
@@ -187,6 +202,45 @@ The dirfile error may be retrieved by calling
 A descriptive error string for the last error encountered can be obtained from
 a call to
 .BR get_error_string (3).
+
+.SH NOTES
+The C89 GetData API provides different prototypes for
+.BR dirfile_madd_clincom ()
+and
+.BR dirfile_madd_cpolynom ():
+.P
+.nf
+.B #define GETDATA_C89_API
+.B #include <getdata.h>
+.HP
+.nh
+.ad l
+.BI "int dirfile_madd_clincom(DIRFILE *" dirfile ", const char *" parent ,
+.BI "const char *" field_name ", int " n_fields ", const char **" in_fields ,
+.BI "const double *" cm ", const double *" cb );
+.HP
+.BI "int dirfile_madd_cpolynom(DIRFILE *" dirfile ", const char *" parent ,
+.BI "const char *" field_name ", int " poly_ord ", const char *" in_field ,
+.BI "const double *" ca );
+.hy
+.ad n
+.fi
+.P
+In this case, the array pointers passed as
+.IR cm ,\~ cb
+or
+.IR ca
+should have twice as many (purely real) elements, consisting of alternating
+real and imaginary parts for the complex data.  For example,
+.IR ca [0]
+should be the real part of the first co-efficient,
+.IR ca [1]
+the imaginary part of the first co-efficient,
+.IR ca [2]
+the real part of the second co-efficient,
+.IR ca [3]
+the imaginary part of the second co-efficient, and so on.
+
 .SH SEE ALSO
 .BR dirfile_add_bit (3),
 .BR dirfile_add_const (3),

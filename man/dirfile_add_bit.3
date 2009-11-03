@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH dirfile_add_bit 3 "16 October 2009" "Version 0.6.0" "GETDATA"
+.TH dirfile_add_bit 3 "2 November 2009" "Version 0.6.0" "GETDATA"
 .SH NAME
 dirfile_add_bit, dirfile_add_clincom, dirfile_add_const, dirfile_add_cpolynom,
 dirfile_add_lincom, dirfile_add_linterp, dirfile_add_multiply,
@@ -26,7 +26,7 @@ dirfile_add_string
 .nh
 .ad l
 .BI "int dirfile_add_bit(DIRFILE *" dirfile ", const char *" field_name ,
-.BI "const char *" in_field ", int " bitnum ", int " numbits ,
+.BI "const char *" in_field ", gd_bit_t " bitnum ", gd_bit_t " numbits ,
 .BI "int " fragment_index );
 .HP
 .BI "int dirfile_add_clincom(DIRFILE *" dirfile ", const char *" field_name ,
@@ -53,17 +53,17 @@ dirfile_add_string
 .BI "int " fragment_index );
 .HP
 .BI "int dirfile_add_phase(DIRFILE *" dirfile ", const char *" field_name ,
-.BI "const char *" in_field ", int " phase ", int " fragment_index );
+.BI "const char *" in_field ", gd_shift_t " shift ", int " fragment_index );
 .HP
 .BI "int dirfile_add_polynom(DIRFILE *" dirfile ", const char *" field_name ,
 .BI "int " poly_ord ", const char *" in_fields ", const double *" a ,
 .BI int " fragment_index );
 .HP
 .BI "int dirfile_add_raw(DIRFILE *" dirfile ", const char *" field_name ,
-.BI "gd_type_t " data_type ", unsigned int " spf ", int " fragment_index );
+.BI "gd_type_t " data_type ", gd_spf_t " spf ", int " fragment_index );
 .HP
 .BI "int dirfile_add_sbit(DIRFILE *" dirfile ", const char *" field_name ,
-.BI "const char *" in_field ", int " bitnum ", int " numbits ,
+.BI "const char *" in_field ", gd_bit_t " bitnum ", gd_bit_t " numbits ,
 .BI "int " fragment_index );
 .HP
 .BI "int dirfile_add_string(DIRFILE *" dirfile ", const char *" field_name ,
@@ -136,6 +136,14 @@ argument specifies the storage type for the const, while
 specifies the data type of the value pointed to by
 .IR value .
 
+The
+.B gd_bit_t
+type is a signed 16-bit integer type.  The
+.B gd_shift_t
+type is a signed 64-bit integer type.  The
+.B gd_spf_t
+type is an unsigned 16-bit integer type.
+
 All fields added with this interface must contain numerical parameters.  Fields
 with
 .B CONST
@@ -144,6 +152,14 @@ be added with
 .BR dirfile_add (3)
 or
 .BR dirfile_add_spec (3).
+
+See
+.B NOTES
+below for information on using
+.BR dirfile_add_clincom ()
+and 
+.BR dirfile_add_cpolynom ()
+in the C89 GetData API.
 
 .SH RETURN VALUE
 On success, any of these functions returns zero.   On error, -1 is returned and 
@@ -212,6 +228,45 @@ The dirfile error may be retrieved by calling
 A descriptive error string for the last error encountered can be obtained from
 a call to
 .BR get_error_string (3).
+
+.SH NOTES
+The C89 GetData API provides different prototypes for
+.BR dirfile_add_clincom ()
+and
+.BR dirfile_add_cpolynom ():
+.P
+.nf
+.B #define GETDATA_C89_API
+.B #include <getdata.h>
+.HP
+.nh
+.ad l
+.BI "int dirfile_add_clincom(DIRFILE *" dirfile ", const char *" field_name ,
+.BI "int " n_fields ", const char **" in_fields ", const double *" cm ,
+.BI "const double *" cb ", int " fragment_index );
+.HP
+.BI "int dirfile_add_cpolynom(DIRFILE *" dirfile ", const char *" field_name ,
+.BI "int " poly_ord ", const char *" in_fields ", const double *" ca ,
+.BI int " fragment_index );
+.hy
+.ad n
+.fi
+.P
+In this case, the array pointers passed as
+.IR cm ,\~ cb
+or
+.IR ca
+should have twice as many (purely real) elements, consisting of alternating
+real and imaginary parts for the complex data.  For example,
+.IR ca [0]
+should be the real part of the first co-efficient,
+.IR ca [1]
+the imaginary part of the first co-efficient,
+.IR ca [2]
+the real part of the second co-efficient,
+.IR ca [3]
+the imaginary part of the second co-efficient, and so on.
+
 .SH SEE ALSO
 .BR dirfile_add (3),
 .BR dirfile_add_spec (3),

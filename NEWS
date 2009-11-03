@@ -10,6 +10,8 @@ New in version 0.6.0rc4:
   * GetData now support Dirfile Standards Version 7.  Standards Version 7 adds
     complex data types, a signed bitfield (SBIT), a polynomial derived field
     (POLYNOM), and other features detailed below.
+  * Metafields can now be specified using a normal format specification line and
+    their full (slashed) field code.
   * Field codes can now contain a "representation suffix", which allows
     specifying a complex norm used to convert complex valued data into purely
     real data.
@@ -67,6 +69,9 @@ New in version 0.6.0rc4:
     before inclusion.  If this symbol is not defined, the C API defined will
     include C-99 conforming complex types, and getdata.h will include complex.h
     if `complex' has not been defined before inclusion.
+  * Due to the new, simple way of specifying META fields in Standards Version 7,
+    dirfile_add_spec() and dirfile_alter_spec() can be used to modify
+    metafields. dirfile_madd_spec() and dirfile_malter_spec() remain as well.
   * An array containing the CONST scalar field codes used when non-literal
     parameters are used in the specification of various different fields has
     been added to the gd_entry_t object.  As a side-effect of this,

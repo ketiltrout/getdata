@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH dirfile_alter_bit 3 "19 October 2009" "Version 0.6.0" "GETDATA"
+.TH dirfile_alter_bit 3 "2 November 2009" "Version 0.6.0" "GETDATA"
 .SH NAME
 dirfile_alter_bit, dirfile_alter_clincom, dirfile_alter_const,
 dirfile_alter_cpolynom, dirfile_alter_lincom, dirfile_alter_linterp,
@@ -26,7 +26,7 @@ dirfile_alter_raw, dirfile_alter_sbit
 .nh
 .ad l
 .BI "int dirfile_alter_bit(DIRFILE *" dirfile ", const char *" field_code ,
-.BI "const char *" in_field ", int " bitnum ", int " numbits );
+.BI "const char *" in_field ", gd_bit_t " bitnum ", gd_bit_t " numbits );
 .HP
 .BI "int dirfile_alter_clincom(DIRFILE *" dirfile ", const char *" field_code ,
 .BI "int " n_fields ", const char **" in_fields ", const double complex *" cm ,
@@ -49,16 +49,16 @@ dirfile_alter_raw, dirfile_alter_sbit
 .BI "const char *" in_field1 ", const char *" in_field2 );
 .HP
 .BI "int dirfile_alter_phase(DIRFILE *" dirfile ", const char *" field_code ,
-.BI "const char *" in_field ", int " phase );
+.BI "const char *" in_field ", gd_shift_t " shift );
 .HP
 .BI "int dirfile_alter_polynom(DIRFILE *" dirfile ", const char *" field_code ,
 .BI "int " poly_ord ", const char *" in_field ", const double *" ca );
 .HP
 .BI "int dirfile_alter_raw(DIRFILE *" dirfile ", const char *" field_code ,
-.BI "gd_type_t " data_type ", unsigned int " spf ", int " recode );
+.BI "gd_type_t " data_type ", gd_spf_t " spf ", int " recode );
 .HP
 .BI "int dirfile_alter_sbit(DIRFILE *" dirfile ", const char *" field_code ,
-.BI "const char *" in_field ", int " bitnum ", int " numbits );
+.BI "const char *" in_field ", gd_bit_t " bitnum ", gd_bit_t " numbits );
 .hy
 .ad n
 .SH DESCRIPTION
@@ -107,9 +107,9 @@ the gain factors
 and the offset terms
 .RI ( b " or " cb ).
 Similarly,
-.BR dirfile_add_polynom ()
+.BR dirfile_alter_polynom ()
 and
-.BR dirfile_add_cpolynom ()
+.BR dirfile_alter_cpolynom ()
 take an array of length
 .I poly_ord
 + 1
@@ -151,9 +151,26 @@ If
 is non-zero, the binary file associated with the
 .B RAW
 field will be re-encoded to reflect the new field parameters.
+
+See
+.B NOTES
+below for information on using
+.BR dirfile_alter_clincom ()
+and 
+.BR dirfile_alter_cpolynom ()
+in the C89 GetData API.
+
 .SH RETURN VALUE
 On success, any of these functions returns zero.   On error, -1 is returned and 
 the dirfile error is set to a non-zero error value.  Possible error values are:
+
+The
+.B gd_bit_t
+type is a signed 16-bit integer type.  The
+.B gd_shift_t
+type is a signed 64-bit integer type.  The
+.B gd_spf_t
+type is an unsigned 16-bit integer type.
 .TP 8
 .B GD_E_ACCMODE
 The specified dirfile was opened read-only.
@@ -214,6 +231,44 @@ The dirfile error may be retrieved by calling
 A descriptive error string for the last error encountered can be obtained from
 a call to
 .BR get_error_string (3).
+
+.SH NOTES
+The C89 GetData API provides different prototypes for
+.BR dirfile_alter_clincom ()
+and
+.BR dirfile_alter_cpolynom ():
+.P
+.nf
+.B #define GETDATA_C89_API
+.B #include <getdata.h>
+.HP
+.nh
+.ad l
+.BI "int dirfile_alter_clincom(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "int " n_fields ", const char **" in_fields ", const double *" cm ,
+.BI "const double *" cb );
+.HP
+.BI "int dirfile_alter_cpolynom(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "int " poly_ord ", const char *" in_fields ", const double *" ca );
+.hy
+.ad n
+.fi
+.P
+In this case, the array pointers passed as
+.IR cm ,\~ cb
+or
+.IR ca
+should have twice as many (purely real) elements, consisting of alternating
+real and imaginary parts for the complex data.  For example,
+.IR ca [0]
+should be the real part of the first co-efficient,
+.IR ca [1]
+the imaginary part of the first co-efficient,
+.IR ca [2]
+the real part of the second co-efficient,
+.IR ca [3]
+the imaginary part of the second co-efficient, and so on.
+
 .SH SEE ALSO
 .BR dirfile_alter_entry (3),
 .BR dirfile_alter_spec (3),
