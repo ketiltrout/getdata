@@ -34,7 +34,7 @@ AM_CFLAGS = -Wall $(IDL_CFLAGS) -fno-strict-aliasing
 BUILT_SOURCES=sublist.c constants.c
 idl_getdata_la_LDFLAGS = -module -avoid-version -export-symbols-regex IDL_Load \
 												 -precious-files-regex 'idl_getdata\.dlm'
-idl_getdata_la_LIBADD = $(IDL_LIBS) -lgetdata
+idl_getdata_la_LIBADD = $(IDL_LIBS) ../../src/libgetdata.la
 idl_getdata_la_SOURCES = getdata.c ${DEBUG_C}
 nodist_idl_getdata_la_SOURCES = constants.c sublist.c
 
