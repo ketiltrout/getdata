@@ -32,7 +32,7 @@
  *   the library when it was built, this symbol does nothing.
  * 
  * - defining GETDATA_C89_API will prevent declarations herein from
- *   using the C99 symbol `complex'.  Affected declarations will instead use a
+ *   using the C99 keyword `_Complex'.  Affected declarations will instead use a
  *   two-element array of doubles in place of the complex types.  This symbol
  *   permits including these declarations using a non-C99 conforming compiler.
  */
@@ -172,12 +172,9 @@ typedef enum {
 #undef _gd_uint16_t
 #undef _gd_int64_t
 #ifndef GETDATA_C89_API
-#  ifndef complex
-#    include <complex.h>
-#  endif
 #  include <inttypes.h>
-#  define GD_DCOMPLEXM(v) double complex v
-#  define GD_DCOMPLEXP(v) double complex *v
+#  define GD_DCOMPLEXM(v) double _Complex v
+#  define GD_DCOMPLEXP(v) double _Complex *v
 typedef int16_t gd_bit_t;
 typedef uint16_t gd_spf_t;
 typedef int64_t gd_shift_t;

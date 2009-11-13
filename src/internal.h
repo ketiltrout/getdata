@@ -27,6 +27,7 @@
 #endif
 
 #include "getdata.h"
+#include <complex.h>
 
 /* Type conventions:
  *
