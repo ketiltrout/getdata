@@ -236,6 +236,57 @@ As a result, if a POSIX thread implementation can be found, calls to the dynamic
 loader will be wrapped in a mutex.
 
 
+THE GETDATA HEADER FILE
+=======================
+
+The GetData header file, `getdata.h', installed in ${prefix}/include, declares
+the new API.  It also includes `getdata_legacy.h' (also installed) which
+declares the legacy API.  The legacy header should never be included directly.
+Defining the preprocessor symbol `NO_GETDATA_LEGACY_API' before including
+getdata.h will prevent the legacy API from being declared.  In cases when the
+legacy API is declared, getdata.h will define the symbol GETDATA_LEGACY_API,
+which can be used by callers to determine whether the legacy API is present at
+compile time.
+
+If the legacy API is not built (as a result of passing `--disable-legacy-api'
+to ./configure), getdata_legacy.h will not be installed, and the legacy API will
+never be declared.
+
+
+LARGEFILE SUPPORT
+=================
+
+When built on a platform using the GNU C Library, or another compatible
+C Library, the new getdata API will respect the feature test macros
+_LARGEFILE64_SOURCE and _FILE_OFFSET_BITS affecting largefile (> 2 GB)
+support.  If one or the other of these are to be used, they must be defined
+before including getdata.h or any Standard C Library header file.
+
+The first of these, _LARGEFILE64_SOURCE, if defined before including getdata.h,
+will enable the obsolete, transitional largefile extensions defined by the LFS.
+This will enable explicit support for large files through the definition of the
+64-bit explicit type `off64_t', and result in getdata defining the explicitly
+64-bit interfaces `getdata64', `putdata64', `get_nframes64', &c.  This macro is
+largely obsolete, and using _FILE_OFFSET_BITS is preferred, if supported.
+
+The second macro, _FILE_OFFSET_BITS, determines the size of `off_t'.  If not
+defined, or defined to `32', `off_t' will be the old 32-bit type.  If, instead,
+this macro is defined to `64', `off_t' will be the largefile supporting 64-bit
+type, and calls to getdata, putdata, &c. will intrinsically have largefile
+support.  On 64-bit systems this macro has no effect, since a 64-bit `off_t'
+is used all the time.
+
+If your system uses the GNU C Library, the feature_test_macros(7) man page
+will provide further explanation.  On systems where these macros are
+unsupported, the getdata64, &c. interfaces will never be defined, and the size
+of `off_t' will be system dependent.  In this case, GetData will likely lack
+largefile support.
+
+If you build GetData against a C Library that lacks largefile support, the
+getdata library will not support large files either, no matter what you do with
+these macros.
+
+
 THE API CHANGE
 ==============
 
@@ -290,57 +341,6 @@ prevents it from supporting large files.
 The new API is fully documented in the included man pages.  A translation
 example from the legacy API to the new API is present as an Appendix at the end
 of this document.
-
-
-THE GETDATA HEADER FILE
-=======================
-
-The GetData header file, `getdata.h', installed in ${prefix}/include, declares
-the new API.  It also includes `getdata_legacy.h' (also installed) which
-declares the legacy API.  The legacy header should never be included directly.
-Defining the preprocessor symbol `NO_GETDATA_LEGACY_API' before including
-getdata.h will prevent the legacy API from being declared.  In cases when the
-legacy API is declared, getdata.h will define the symbol GETDATA_LEGACY_API,
-which can be used by callers to determine whether the legacy API is present at
-compile time.
-
-If the legacy API is not built (as a result of passing `--disable-legacy-api'
-to ./configure), getdata_legacy.h will not be installed, and the legacy API will
-never be declared.
-
-
-LARGEFILE SUPPORT
-=================
-
-When built on a platform using the GNU C Library, or another compatible
-C Library, the new getdata API will respect the feature test macros
-_LARGEFILE64_SOURCE and _FILE_OFFSET_BITS affecting largefile (> 2 GB)
-support.  If one or the other of these are to be used, they must be defined
-before including getdata.h or any Standard C Library header file.
-
-The first of these, _LARGEFILE64_SOURCE, if defined before including getdata.h,
-will enable the obsolete, transitional largefile extensions defined by the LFS.
-This will enable explicit support for large files through the definition of the
-64-bit explicit type `off64_t', and result in getdata defining the explicitly
-64-bit interfaces `getdata64', `putdata64', `get_nframes64', &c.  This macro is
-largely obsolete, and using _FILE_OFFSET_BITS is preferred, if supported.
-
-The second macro, _FILE_OFFSET_BITS, determines the size of `off_t'.  If not
-defined, or defined to `32', `off_t' will be the old 32-bit type.  If, instead,
-this macro is defined to `64', `off_t' will be the largefile supporting 64-bit
-type, and calls to getdata, putdata, &c. will intrinsically have largefile
-support.  On 64-bit systems this macro has no effect, since a 64-bit `off_t'
-is used all the time.
-
-If your system uses the GNU C Library, the feature_test_macros(7) man page
-will provide further explanation.  On systems where these macros are
-unsupported, the getdata64, &c. interfaces will never be defined, and the size
-of `off_t' will be system dependent.  In this case, GetData will likely lack
-largefile support.
-
-If you build GetData against a C Library that lacks largefile support, the
-getdata library will not support large files either, no matter what you do with
-these macros.
 
 
 AUTHOR

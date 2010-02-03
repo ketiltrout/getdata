@@ -59,12 +59,6 @@ big_test95_LDADD=$(F95LDADD)
 
 check_PROGRAMS=$(TESTS)
 
-# libtool 1.5.x hack: treat FC stuff like F77
-LTFCCOMPILE = $(LIBTOOL) --tag=F77 $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
-							--mode=compile $(FC) $(AM_FCFLAGS) $(FCFLAGS)
-FCLINK = $(LIBTOOL) --tag=F77 --mode=link $(FCLD) $(AM_FCFLAGS) $(FCFLAGS) \
-				 $(AM_LDFLAGS) $(LDFLAGS) -o $@
-
 clean-local:
 	rm -rf test_dirfile
 	rm -rf *~

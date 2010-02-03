@@ -1,3 +1,47 @@
+2010-02-03   D. V. Wiebe <getdata@ketiltrout.net>   svn:346
+	GetData-0.6.1rc1:
+	
+	* test/convert_complex128_float64.c test/add_cpolynom.c
+	test/convert_float32_complex128.c test/get_const_complex.c
+	test/get_complex128.c test/convert_float64_complex128.c test/repr_uint64.c
+	test/repr_real_m.c test/convert_complex64_uint64.c test/add_clincom.c
+	test/repr_float32.c test/convert_int16_complex64.c test/repr_i.c
+	test/get_complex64.c test/repr_int32.c test/put_complex128.c
+	test/convert_uint8_complex64.c test/get_cpolynom.c test/repr_int16.c
+	test/convert_float64_complex64.c test/convert_complex64_complex128.c
+	test/convert_float32_complex64.c test/repr_real_a.c test/repr_int64.c
+	test/convert_complex128_int64.c test/convert_complex64_int64.c
+	test/put_endian_complex128.c test/put_endian_complex64.c test/repr_a.c
+	test/convert_uint16_complex128.c test/repr_m.c test/put_complex64.c
+	test/convert_uint16_complex64.c test/repr_real_r.c test/repr_int8.c
+	test/convert_int64_complex64.c test/get_endian_complex64.c test/repr_uint8.c
+	test/convert_int32_complex64.c test/convert_int8_complex128.c
+	test/convert_int16_complex128.c test/madd_clincom.c test/repr_float64.c
+	test/convert_complex128_complex64.c test/convert_int8_complex64.c
+	test/convert_complex128_uint64.c test/convert_uint32_complex128.c
+	test/repr_uint32.c test/get_endian_complex128.c test/madd_cpolynom.c
+	test/convert_uint64_complex64.c test/repr_uint16.c
+	test/convert_int32_complex128.c test/get_clincom.c
+	test/convert_uint32_complex64.c test/convert_uint8_complex128.c
+	test/repr_r.c test/alter_cpolynom.c test/convert_uint64_complex128.c
+	test/get_const_repr.c test/convert_complex64_float64.c test/repr_real_i.c
+	test/convert_int64_complex128.c: Include complex.h.
+
+	* m4/encoding.m4 (GD_HIDE_LTDL_SYM): Removed.
+	* m4/ltdl.m4: Removed.
+	* src/gd_ltdl.c src/gd_ltdl.h: Removed.
+	* configure.ac: Update for libtool 2.x.  Remove support for the internal
+	ltdl.
+	* bindings/f77/test/Makefile.am bindings/f77/Makefile.am: Removed the
+	libtool 1.5.x hack.
+
+	* bindings/idl/getdata.c (gdidl_dirfile_alter_entry gdidl_dirfile_move
+	gdidl_dirfile_rename gdidl_dirfile_uninclude): Initialise kw.error and
+	kw.estr.
+
+	* bindings/cxx/test/big_test.cpp: Include headers to declare mkdir().  Bug
+	report from Matthew Truch.
+
 2009-11-13   D. V. Wiebe <getdata@ketiltrout.net>   svn:345
 	* src/getdata.h.in: Don't include <complex.h>; use _Complex directly.
 
@@ -708,7 +752,7 @@
 
 2009-09-21   D. V. Wiebe <getdata@ketiltrout.net>  svn:309 
 	* src/meta_list.c (get_mstrings): Properly terminate the list.  Bug
-	report from MDT.
+	report from Matthew Truch.
 
 	* test/svlist_meta.c: Be more verbose.
 
@@ -784,7 +828,7 @@
 	* src/constant.c (put_constant): Return -1 on error.
 
 	* src/getdata.c (_GD_DoLincom): Rewrote for better optimisation.  Includes
-	MDT's m=1 b=0 short circuit.
+	Matthew Truch's m=1 b=0 short circuit.
 	* src/common.c (_GD_ScaleData): Deleted.
 	* src/commonc. (_GD_LincomData _GD_CLincomData): Added.
 

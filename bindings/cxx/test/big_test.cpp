@@ -1,4 +1,6 @@
 #include "getdata/dirfile.h"
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <fcntl.h>
 #include <string.h>
 #include <errno.h>

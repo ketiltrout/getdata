@@ -46,7 +46,7 @@ This situation should be unlikely, since the DLM install directory is determined
 by ./configure by running the IDL interpreter to read the value of !DLM_PATH
 explicitly.
 
-NB: Third-part DLMs, such as these bindings, cannot be used in timed demo mode. 
+NB: Third-party DLMs, such as these bindings, cannot be used in timed demo mode.
 To use the IDL GetData bindings, a fully licensed version of IDL is required.
 An unlicensed version of IDL will never find these bindings.
 

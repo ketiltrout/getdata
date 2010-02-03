@@ -1,6 +1,7 @@
 /* Add a complex POLYNOM field */
 #include "../src/getdata.h"
 
+#include <complex.h>
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>

@@ -25,6 +25,7 @@
 #define NO_GETDATA_LEGACY_API
 #undef _BSD_SOURCE
 #undef _POSIX_SOURCE
+#undef _POSIX_C_SOURCE
 #undef _SVID_SOURCE
 #include "../../src/internal.h"
 
@@ -220,6 +221,7 @@ static inline IDL_ALLTYPES gdidl_to_alltypes(gd_type_t t, void* d)
   float complex fc;
   double complex dc;
   IDL_ALLTYPES v;
+  v.c = 0;
 
   switch (t) {
     case GD_UINT8:
@@ -1789,6 +1791,7 @@ void gdidl_dirfile_alter_entry(int argc, IDL_VPTR argv[], char *argk)
   gd_entry_t E;
 
   kw.recode = 0;
+  GDIDL_KW_INIT_ERROR;
 
   static IDL_KW_PAR kw_pars[] = {
     GDIDL_KW_PAR_ERROR,
@@ -2642,6 +2645,7 @@ void gdidl_dirfile_move(int argc, IDL_VPTR argv[], char *argk)
   KW_RESULT kw;
 
   kw.move_data = 0;
+  GDIDL_KW_INIT_ERROR;
 
   static IDL_KW_PAR kw_pars[] = {
     GDIDL_KW_PAR_ERROR,
@@ -2813,6 +2817,7 @@ void gdidl_dirfile_rename(int argc, IDL_VPTR argv[], char *argk)
   KW_RESULT kw;
 
   kw.move_data = 0;
+  GDIDL_KW_INIT_ERROR;
 
   static IDL_KW_PAR kw_pars[] = {
     GDIDL_KW_PAR_ERROR,
@@ -2848,6 +2853,7 @@ void gdidl_dirfile_uninclude(int argc, IDL_VPTR argv[], char *argk)
   KW_RESULT kw;
 
   kw.del = 0;
+  GDIDL_KW_INIT_ERROR;
 
   static IDL_KW_PAR kw_pars[] = {
     GDIDL_KW_PAR_ERROR,

@@ -1,6 +1,7 @@
 /* Attempt to read INT8 as COMPLEX64 */
 #include "../src/getdata.h"
 
+#include <complex.h>
 #include <math.h>
 #include <inttypes.h>
 #include <stdlib.h>

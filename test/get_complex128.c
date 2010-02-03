@@ -1,6 +1,7 @@
 /* Attempt to read COMPLEX128 */
 #include "../src/getdata.h"
 
+#include <complex.h>
 #include <math.h>
 #include <stdlib.h>
 #include <sys/types.h>

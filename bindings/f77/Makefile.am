@@ -61,14 +61,6 @@ nodist_libf95getdata_la_SOURCES=getdata.f90
 libf95getdata_la_LIBADD=libfgetdata.la ../../src/libgetdata.la
 libf95getdata_la_LDFLAGS = -version-info @F95GETDATA_VERSION@
 
-# libtool 1.5.x hack: treat FC stuff like F77
-LTFCCOMPILE = $(LIBTOOL) --tag=F77 $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
-							--mode=compile $(FC) $(AM_FCFLAGS) $(FCFLAGS)
-libf95getdata_la_LINK = $(LIBTOOL) --tag=F77 $(AM_LIBTOOLFLAGS) \
-												$(LIBTOOLFLAGS) --mode=link $(FCLD) $(AM_FCFLAGS) \
-												$(FCFLAGS) $(libf95getdata_la_LDFLAGS) $(LDFLAGS) \
-												-o $@
-
 getdata.mod: getdata.o
 
 clean-local:

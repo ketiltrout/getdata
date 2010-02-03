@@ -21,12 +21,12 @@ dnl
 
 m4_define(getdata_major,    0)
 m4_define(getdata_minor,    6)
-m4_define(getdata_revision, 0)
-m4_define(getdata_extra,    [])
+m4_define(getdata_revision, 1)
+m4_define(getdata_extra,    [rc1])
 m4_define(getdata_version,
           getdata_major.getdata_minor.getdata_revision[]getdata_extra)
 
-AC_INIT([GetData], [getdata_version], [getdata-devel@lists.sourceforge.net])
+AC_INIT([GetData],[getdata_version],[getdata-devel@lists.sourceforge.net])
 
 AC_DEFINE([GETDATA_MAJOR], [getdata_major], [ The major version number ])
 AC_DEFINE([GETDATA_MINOR], [getdata_minor], [ The minor version number ])
@@ -35,6 +35,9 @@ AC_DEFINE([GETDATA_VERSION_SUFFIX], ["getdata_extra"],
           [ Other qualifiers on the version number triplet (if any) ])
 
 AC_PREREQ([2.63])
+AC_CONFIG_MACRO_DIR([m4])
+
+LT_PREREQ([2.2.6b])
 
 dnl libgetdata current interface version
 AC_SUBST(GETDATA_IFACE_VERSION, [2])
@@ -225,16 +228,14 @@ AC_DEFINE([USE_MODULES], [], [ Define if building with modules ])
 fi
 
 dnl LTDL
-AC_ARG_WITH([system-ltdl], AS_HELP_STRING([--with-system-ltdl=PREFIX],
+AC_ARG_WITH([ltdl], AS_HELP_STRING([--with-ltdl=PREFIX],
               [if building modules, use the GNU ltdl library located in PREFIX [[autodetect]]]),
               [
                case "${withval}" in
-                 no) use_system_ltdl="no" ;; 
-                 *) use_system_ltdl="yes" ; ltdl_prefix="${withval}" ;;
+                 no) ltdl_prefix= ;;
+                 *) ltdl_prefix="${withval}" ;;
                esac
-              ], [ use_system_ltdl="yes" ; ltdl_prefix= ])
-m4_divert_once([HELP_WITH], AS_HELP_STRING([--without-system-ltdl],
-               [if building modules, always use the internal ltdl library, even if an external one is present]))
+              ], [ ltdl_prefix= ])
 
 dnl Programs
 echo
@@ -277,8 +278,9 @@ echo "*** Building libtool"
 echo
 AC_ENABLE_STATIC
 AC_ENABLE_SHARED
-AC_LIBTOOL_DLOPEN
-AC_PROG_LIBTOOL
+LT_INIT([dlopen])
+AC_SUBST([LIBTOOL_DEPS])
+LT_OUTPUT
 
 dnl libltdl stuff
 
@@ -286,79 +288,20 @@ if test "x${use_modules}" != "xno"; then
   echo
   echo "*** Configuring the dynamic loader"
   echo
-  if test "x${use_system_ltdl}" = "xyes"; then
-    saved_ldflags=$LDFLAGS
-    saved_libs=$LIBS
-    if test "x$ltdl_prefix" != "x"; then
-      LDFLAGS="$LDFLAGS -L$ltdl_prefix/lib"
-    fi
-    AC_CHECK_LIB([ltdl],[lt_dlinit], [internal_ltdl=no], [internal_ltdl=yes])
-    LDFLAGS=$saved_ldflags
-    LIBS=$saved_libs
-  else
-    internal_ltdl=yes
+  saved_ldflags=$LDFLAGS
+  saved_libs=$LIBS
+  if test "x$ltdl_prefix" != "x"; then
+    LDFLAGS="$LDFLAGS -L$ltdl_prefix/lib"
+  fi
+  AC_CHECK_LIB([ltdl],[lt_dlinit], [have_ltdl=yes], [have_ltdl=no])
+  LDFLAGS=$saved_ldflags
+  LIBS=$saved_libs
+
+  if test "x$have_ltdl" == "xno"; then
+    AC_MSG_ERROR([libltdl is required to build modules.  Please specify either the location of the libltdl library using --with-ldtl-prefix=PREFIX or else disable the building of modules by using --disable-modules.])
   fi
 
-  if test "x$internal_ltdl" == "xyes"; then
-    AC_DEFINE([INTERNAL_LTDL], 1,
-              [Define to 1 if using the internal ltdl library])
-    use_system_ltdl=no
-    AC_LTDL_SHLIBEXT
-    AC_LTDL_SHLIBPATH
-    AC_LTDL_SYSSEARCHPATH
-    AC_LTDL_OBJDIR
-    AC_LTDL_DLPREOPEN
-    AC_LTDL_DLLIB
-    AC_LTDL_SYMBOL_USCORE
-    AC_LTDL_DLSYM_USCORE
-    AC_LTDL_SYS_DLOPEN_DEPLIBS
-    AC_LTDL_FUNC_ARGZ
-    AC_CHECK_HEADERS([assert.h ctype.h errno.h malloc.h memory.h stdlib.h \
-                            stdio.h unistd.h])
-    AC_CHECK_HEADERS([dl.h sys/dl.h dld.h mach-o/dyld.h])
-    AC_CHECK_HEADERS([string.h strings.h], [break])
-    AC_CHECK_FUNCS([strchr index], [break])
-    AC_CHECK_FUNCS([strrchr rindex], [break])
-    AC_CHECK_FUNCS([memcpy bcopy], [break])
-    AC_CHECK_FUNCS([memmove strcmp])
-    AC_CHECK_FUNCS([closedir opendir readdir])
-
-    GD_HIDE_LTDL_SYM(lt_dladderror)
-    GD_HIDE_LTDL_SYM(lt_dladdsearchdir)
-    GD_HIDE_LTDL_SYM(lt_dlcaller_get_data)
-    GD_HIDE_LTDL_SYM(lt_dlcaller_register)
-    GD_HIDE_LTDL_SYM(lt_dlcaller_set_data)
-    GD_HIDE_LTDL_SYM(lt_dlclose)
-    GD_HIDE_LTDL_SYM(lt_dlerror)
-    GD_HIDE_LTDL_SYM(lt_dlexit)
-    GD_HIDE_LTDL_SYM(lt_dlforeach)
-    GD_HIDE_LTDL_SYM(lt_dlforeachfile)
-    GD_HIDE_LTDL_SYM(lt_dlfree)
-    GD_HIDE_LTDL_SYM(lt_dlgetinfo)
-    GD_HIDE_LTDL_SYM(lt_dlgetsearchpath)
-    GD_HIDE_LTDL_SYM(lt_dlhandle_next)
-    GD_HIDE_LTDL_SYM(lt_dlinit)
-    GD_HIDE_LTDL_SYM(lt_dlinsertsearchdir)
-    GD_HIDE_LTDL_SYM(lt_dlisresident)
-    GD_HIDE_LTDL_SYM(lt_dlloader_add)
-    GD_HIDE_LTDL_SYM(lt_dlloader_data)
-    GD_HIDE_LTDL_SYM(lt_dlloader_find)
-    GD_HIDE_LTDL_SYM(lt_dlloader_name)
-    GD_HIDE_LTDL_SYM(lt_dlloader_next)
-    GD_HIDE_LTDL_SYM(lt_dlloader_remove)
-    GD_HIDE_LTDL_SYM(lt_dlmakeresident)
-    GD_HIDE_LTDL_SYM(lt_dlmalloc)
-    GD_HIDE_LTDL_SYM(lt_dlmutex_register)
-    GD_HIDE_LTDL_SYM(lt_dlopen)
-    GD_HIDE_LTDL_SYM(lt_dlopenext)
-    GD_HIDE_LTDL_SYM(lt_dlpreload)
-    GD_HIDE_LTDL_SYM(lt_dlpreload_default)
-    GD_HIDE_LTDL_SYM(lt_dlrealloc)
-    GD_HIDE_LTDL_SYM(lt_dlseterror)
-    GD_HIDE_LTDL_SYM(lt_dlsetsearchpath)
-    GD_HIDE_LTDL_SYM(lt_dlsym)
-    LIBLTDL="$LIBADD_DL"
-  elif test "x$ltdl_prefix" != "x"; then
+  if test "x$ltdl_prefix" != "x"; then
     AC_CHECK_HEADERS(ltdl.h)
     LIBLTDL="-L${ltdl_prefix}/lib -lltdl"
     LTDLINC="-I${ltdl_prefix}/include"
@@ -366,8 +309,6 @@ if test "x${use_modules}" != "xno"; then
     AC_CHECK_HEADERS(ltdl.h)
     LIBLTDL="-lltdl"
   fi
-else
-  internal_ltdl=no
 fi
 AC_SUBST([LIBLTDL])
 AC_SUBST([LTDLINCL])
@@ -402,10 +343,8 @@ fi
 dnl F77 stuff
 if test "x$make_f77bindings" != "xno"; then
   AC_PROG_SED
-  AC_CHECK_PROGS([DIFF], [diff], [not found])
-  if test "x$DIFF" == "xnot found"; then
-    AC_MSG_ERROR([`diff' is needed to build the Fortran bindings]) dnl`
-  fi
+  AC_CHECK_PROGS([DIFF], [doff],
+                 [AC_MSG_ERROR([diff is needed to build the Fortran bindings])])
   AC_F77_WRAPPERS
 fi
 
@@ -652,7 +591,6 @@ AM_CONDITIONAL(INTEL_F77_COMPILER, test "x$gd_cv_f77_compiler_intel" == "xyes")
 AM_CONDITIONAL(INTEL_FC_COMPILER, test "x$gd_cv_fc_compiler_intel" == "xyes")
 AM_CONDITIONAL(HAVE_OFF64_T, test "x$have_off64_t" = "xyes")
 AM_CONDITIONAL(INCLUDE_LEGACY_API, test "x$include_legacy_api" != "xno")
-AM_CONDITIONAL(INTERNAL_LTDL, test "x${internal_ltdl}" = xyes)
 AM_CONDITIONAL(MAKE_CHECKDIRFILE, test "x$make_checkdirfile" = "xbuild")
 AM_CONDITIONAL(MAKE_CXXBINDINGS, test "x$make_cxxbindings" = "xyes")
 AM_CONDITIONAL(MAKE_F77BINDINGS, test "x$make_f77bindings" != "xno")
@@ -721,7 +659,6 @@ echo "  Include legacy API:           ${include_legacy_api}"
 echo "  Verbose debugging:            ${enable_debug}"
 echo "  Use modules:                  ${use_modules}"
 if test "x${use_modules}" != "xno"; then
-  echo "  Use system libltdl:           ${use_system_ltdl}"
   echo "  Thread-safe dynamic loading:  ${use_pthread}"
 fi
 echo

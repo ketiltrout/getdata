@@ -1,6 +1,7 @@
 /* Attempt to read COMPLEX128 as UINT16 */
 #include "../src/getdata.h"
 
+#include <complex.h>
 #include <inttypes.h>
 #include <stdlib.h>
 #include <sys/types.h>

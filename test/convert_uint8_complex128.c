@@ -1,6 +1,7 @@
 /* Attempt to read UINT8 as COMPLEX128 */
 #include "../src/getdata.h"
 
+#include <complex.h>
 #include <math.h>
 #include <stddef.h>
 #include <stdlib.h>
