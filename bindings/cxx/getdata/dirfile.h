@@ -25,8 +25,8 @@
 // We don't want the legacy API since its symbols clash with us.
 #define NO_GETDATA_LEGACY_API
 
-// We use the C89 API since not all C++ compilers support the C99 complex
-// keyword
+// We use the C89 API since C++ compilers aren't required to support the
+// C99 _Complex keyword
 #define GETDATA_C89_API
 
 extern "C" {

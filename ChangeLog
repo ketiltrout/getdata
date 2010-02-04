@@ -1,3 +1,6 @@
+2010-02-04   D. V. Wiebe <getdata@ketiltrout.net>   svn:349
+	* bindings/cxx/test/getdata.cpp: Also fix the mkdir() bug here.
+
 2010-02-03   D. V. Wiebe <getdata@ketiltrout.net>   svn:346
 	GetData-0.6.1rc1:
 	
