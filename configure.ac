@@ -276,8 +276,6 @@ AC_LANG_POP
 echo
 echo "*** Building libtool"
 echo
-AC_ENABLE_STATIC
-AC_ENABLE_SHARED
 LT_INIT([dlopen])
 AC_SUBST([LIBTOOL_DEPS])
 LT_OUTPUT

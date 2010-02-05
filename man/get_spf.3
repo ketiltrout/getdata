@@ -22,7 +22,7 @@ dirfile
 .HP
 .nh
 .ad l
-.BI "unsigned int get_spf(DIRFILE *" dirfile ", const char *" field_code );
+.BI "gd_spf_t get_spf(DIRFILE *" dirfile ", const char *" field_code );
 .hy
 .ad n
 .SH DESCRIPTION
@@ -34,7 +34,9 @@ and returns the number of samples per frame for the field
 .IR field_code .
 If
 .I field_code
-contains a valid representation suffix, it will be ignored.
+contains a valid representation suffix, it will be ignored.  The
+.IR gd_spf_t
+type is an unsigned 16-bit integer type.
 
 The 
 .I dirfile
