@@ -1,3 +1,21 @@
+New in version 0.6.1rc1:
+
+  API Changes
+
+  * The getdata.h header no longer includes complex.h explicitly.
+  
+  Bindings
+
+  * IDL BUG FIX: Several segfaults in the IDL bindings have been eradicated.
+
+  Miscellaneous
+
+  * Libtool has been upgraded to 2.2.6b, which provides proper support for
+  Fortran-9x.  The outdated, internal libltdl has been removed.  Building
+  modules now requires an installed libltdl.
+
+|==============================================================================|
+
 New in version 0.6.0:
 
   License
