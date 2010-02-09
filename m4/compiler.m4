@@ -1,4 +1,4 @@
-dnl (C) 2008, 2009 D. V. Wiebe
+dnl (C) 2008, 2009, 2010 D. V. Wiebe
 dnl
 dnl llllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll
 dnl
@@ -60,3 +60,56 @@ else
 gd_cv_fc_compiler_intel=no
 fi
 ])])
+
+dnl GD_PROG_CC_WEXTRA
+dnl -------------------------------------------------------------
+dnl Check whether the C compiler accepts -Wextra
+AC_DEFUN([GD_PROG_CC_WEXTRA],
+[gd_saved_CFLAGS=$CFLAGS
+AC_CACHE_CHECK([whether $CC accepts -Wextra], gd_cv_prog_cc_wextra,
+[CFLAGS="-Wextra"
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM()], [gd_cv_prog_cc_wextra=yes],
+[gd_cv_prog_cc_wextra=no])])
+CFLAGS=$gd_saved_CFLAGS])
+
+
+dnl GD_PROG_CXX_WEXTRA
+dnl -------------------------------------------------------------
+dnl Check whether the C++ compiler accepts -Wextra
+AC_DEFUN([GD_PROG_CXX_WEXTRA],
+[gd_saved_CXXFLAGS=$CXXFLAGS
+AC_CACHE_CHECK([whether $CXX accepts -Wextra], gd_cv_prog_cxx_wextra,
+[CXXFLAGS="-Wextra"
+AC_LANG_PUSH([C++])
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM()], [gd_cv_prog_cxx_wextra=yes],
+[gd_cv_prog_cxx_wextra=no])
+AC_LANG_POP([C++])])
+CXXFLAGS=$gd_saved_CXXFLAGS])
+
+
+dnl GD_PROG_F77_WEXTRA
+dnl -------------------------------------------------------------
+dnl Check whether the Fotran-77 compiler accepts -Wextra
+AC_DEFUN([GD_PROG_F77_WEXTRA],
+[gd_saved_FFLAGS=$FFLAGS
+AC_CACHE_CHECK([whether $F77 accepts -Wextra], gd_cv_prog_f77_wextra,
+[FFLAGS="-Wextra"
+AC_LANG_PUSH([Fortran 77])
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM()], [gd_cv_prog_f77_wextra=yes],
+[gd_cv_prog_f77_wextra=no])
+AC_LANG_POP([Fortran 77])])
+FFLAGS=$gd_saved_FFLAGS])
+
+
+dnl GD_PROG_FC_WEXTRA
+dnl -------------------------------------------------------------
+dnl Check whether the free-form Fotran compiler accepts -Wextra
+AC_DEFUN([GD_PROG_FC_WEXTRA],
+[gd_saved_FCFLAGS=$FCFLAGS
+AC_CACHE_CHECK([whether $FC accepts -Wextra], gd_cv_prog_fc_wextra,
+[FCFLAGS="-Wextra"
+AC_LANG_PUSH([Fortran 77])
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM()], [gd_cv_prog_fc_wextra=yes],
+[gd_cv_prog_fc_wextra=no])
+AC_LANG_POP([Fortran 77])])
+FCFLAGS=$gd_saved_FCFLAGS])

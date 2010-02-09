@@ -311,17 +311,6 @@ fi
 AC_SUBST([LIBLTDL])
 AC_SUBST([LTDLINCL])
 
-dnl ICC checks
-echo
-echo "*** Checking additional compiler characteristics"
-echo
-GD_LANG_COMPILER_INTEL
-AC_LANG_PUSH([C++])
-GD_LANG_COMPILER_INTEL
-AC_LANG_POP([C++])
-GD_LANG_F77_COMPILER_INTEL
-GD_LANG_FC_COMPILER_INTEL
-
 dnl check if we found a C++ compiler
 if test "x$CXX" == "x"; then
   make_cxxbindings=no
@@ -338,11 +327,33 @@ if test "x$FC" == "x"; then
   make_f95bindings=no
 fi
 
+dnl compiler checks
+echo
+echo "*** Checking additional compiler characteristics"
+echo
+GD_PROG_CC_WEXTRA
+
+if test "x$make_c++bindings" != "xno"; then
+  GD_PROG_CXX_WEXTRA
+fi
+
+if test "x$make_f77bindings" != "xno"; then
+  GD_PROG_F77_WEXTRA
+  GD_LANG_F77_COMPILER_INTEL
+fi
+
+if test "x$make_f95bindings" != "xno"; then
+  GD_PROG_FC_WEXTRA
+  GD_LANG_FC_COMPILER_INTEL
+fi
+
 dnl F77 stuff
 if test "x$make_f77bindings" != "xno"; then
   AC_PROG_SED
-  AC_CHECK_PROGS([DIFF], [doff],
-                 [AC_MSG_ERROR([diff is needed to build the Fortran bindings])])
+  AC_CHECK_PROGS([DIFF], [diff], [not found])
+  if test "x$DIFF" == "xnot found"; then
+    AC_MSG_ERROR([diff is needed to build the Fortran bindings])
+  fi
   AC_F77_WRAPPERS
 fi
 
@@ -581,10 +592,10 @@ AC_CONFIG_FILES([util/Makefile])
 
 # Automake conditionals
 AM_CONDITIONAL(GETDATA_DEBUG, [test "x$enable_debug" == "xyes"])
-AM_CONDITIONAL(GNU_C_COMPILER, test "x$gd_cv_c_compiler_intel" == "xno" -a "x$ac_cv_c_compiler_gnu" == "xyes")
-AM_CONDITIONAL(GNU_CXX_COMPILER, test "x$gd_cv_cxx_compiler_intel" == "xno" -a "x$ac_cv_cxx_compiler_gnu" == "xyes")
-AM_CONDITIONAL(GNU_F77_COMPILER, test "x$gd_cv_f77_compiler_intel" == "xno" -a "x$ac_cv_f77_compiler_gnu" == "xyes")
-AM_CONDITIONAL(GNU_FC_COMPILER, test "x$gd_cv_fc_compiler_intel" == "xno" -a "x$ac_cv_fc_compiler_gnu" == "xyes")
+AM_CONDITIONAL(CC_WEXTRA, test "x$gd_cv_prog_cc_wextra" == "xyes")
+AM_CONDITIONAL(CXX_WEXTRA, test "x$gd_cv_prog_cxx_wextra" == "xyes")
+AM_CONDITIONAL(F77_WEXTRA, test "x$gd_cv_prog_f77_wextra" == "xyes")
+AM_CONDITIONAL(FC_WEXTRA, test "x$gd_cv_prog_fc_wextra" == "xyes")
 AM_CONDITIONAL(INTEL_F77_COMPILER, test "x$gd_cv_f77_compiler_intel" == "xyes")
 AM_CONDITIONAL(INTEL_FC_COMPILER, test "x$gd_cv_fc_compiler_intel" == "xyes")
 AM_CONDITIONAL(HAVE_OFF64_T, test "x$have_off64_t" = "xyes")

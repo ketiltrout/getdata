@@ -23,12 +23,12 @@ AUTOMAKE_OPTIONS = foreign
 SED = @SED@
 DIFF = @DIFF@
 
-if GNU_FC_COMPILER
+if FC_WEXTRA
 FC_WEXTRA=-Wextra
 FC_WALL=-Wall
 endif
 
-if GNU_C_COMPILER
+if CC_WEXTRA
 C_WEXTRA=-Wextra
 endif
 
