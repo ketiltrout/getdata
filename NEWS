@@ -3,16 +3,23 @@ New in version 0.6.1rc1:
   API Changes
 
   * The getdata.h header no longer includes complex.h explicitly.
+
+  Legacy API Changes
+
+  * A potential segfault relating to error reporting in the legacy API has
+    been fixed.
   
   Bindings
 
+  * C++ BUG FIX: Several bugs preventing compilation of the C++ test-suite under
+    Fedora 13 have been fixed.
   * IDL BUG FIX: Several segfaults in the IDL bindings have been eradicated.
 
   Miscellaneous
 
   * Libtool has been upgraded to 2.2.6b, which provides proper support for
-  Fortran-9x.  The outdated, internal libltdl has been removed.  Building
-  modules now requires an installed libltdl.
+    Fortran-9x.  The outdated, internal libltdl has been removed.  Building
+    modules now requires an installed libltdl.
 
 |==============================================================================|
 

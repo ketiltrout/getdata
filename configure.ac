@@ -22,7 +22,7 @@ dnl
 m4_define(getdata_major,    0)
 m4_define(getdata_minor,    6)
 m4_define(getdata_revision, 1)
-m4_define(getdata_extra,    [rc1])
+m4_define(getdata_extra,    [rc2])
 m4_define(getdata_version,
           getdata_major.getdata_minor.getdata_revision[]getdata_extra)
 
@@ -42,7 +42,7 @@ LT_PREREQ([2.2.6b])
 dnl libgetdata current interface version
 AC_SUBST(GETDATA_IFACE_VERSION, [2])
 dnl libgetdata current interface implementation revision
-AC_SUBST(GETDATA_IMPL_REVISION, [0])
+AC_SUBST(GETDATA_IMPL_REVISION, [1])
 dnl libgetdata interface age (current interface - oldest supported interface)
 AC_SUBST(GETDATA_IFACE_AGE, [0])
 
@@ -341,8 +341,11 @@ fi
 dnl F77 stuff
 if test "x$make_f77bindings" != "xno"; then
   AC_PROG_SED
-  AC_CHECK_PROGS([DIFF], [diff],
-                 [AC_MSG_ERROR([diff is needed to build the Fortran bindings])])
+  AC_CHECK_PROGS([DIFF], [diff], [not found])
+
+  if test "x$DIFF" = "xnot found"; then
+    AC_MSG_ERROR([diff is needed to build the Fortran bindings])
+  fi
   AC_F77_WRAPPERS
 fi
 

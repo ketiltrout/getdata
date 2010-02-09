@@ -33,8 +33,8 @@ static struct {
 } _GD_Dirfiles = {0, NULL};
 
 /* Error-reporting kludge for deprecated API */
-static char _GD_GlobalErrorString[GD_MAX_LINE_LENGTH + 6];
-static char _GD_GlobalErrorFile[GD_MAX_LINE_LENGTH + 6];
+static char _GD_GlobalErrorString[FILENAME_MAX];
+static char _GD_GlobalErrorFile[FILENAME_MAX];
 static DIRFILE _GD_GlobalErrors = {
   .error = 0,
   .suberror = 0,
