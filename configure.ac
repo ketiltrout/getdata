@@ -341,7 +341,7 @@ fi
 dnl F77 stuff
 if test "x$make_f77bindings" != "xno"; then
   AC_PROG_SED
-  AC_CHECK_PROGS([DIFF], [doff],
+  AC_CHECK_PROGS([DIFF], [diff],
                  [AC_MSG_ERROR([diff is needed to build the Fortran bindings])])
   AC_F77_WRAPPERS
 fi
