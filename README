@@ -64,14 +64,25 @@ A full list of features new to this release of GetData may be found in the
 file called `NEWS'.
 
 
-DIRFILE STANDARDS VERSION 6
+DIRFILE STANDARDS VERSION 7
 ===========================
 
-The 0.4.0 release of the GetData Library (October 2008), was released in
+The 0.6.0 release of the GetData Library (October 2009), was released in
 conjunction with a new version of the Dirfile Standards, known as Standards
-Version 6.
+Version 7.
 
-Standards Version 6 introduces the following:
+Standards Version 7 introduces the following:
+  * Support for single and double precision floating-point complex data.
+    This includes the support for complex literals in the format file, as well
+    as operators ("representations") to compute norms of complex data.
+  * Two new field types: SBIT, a (two's complement) signed bitfield; and
+    POLYNOM, a polynomial function of a given input field.
+  * The number of fields parameter for LINCOM is now optional.
+
+This is the first update to the Dirfile Standards since Standards Version 6
+(October 2008).
+
+Standards Version 6 introduced the following:
   * Support for two scalar types: CONST (numerical) and STRING (a character
     string)
   * The ability to attach subdata to fields using the META directive.
@@ -82,9 +93,9 @@ Standards Version 6 introduces the following:
   * Removal of "FILEFRAM" as an alias for the implicit "INDEX" field.  It is
     encouraged that made use of FILEFRAM be updated to use INDEX instead.
     However, a work-around is to add:
-    
+
       FILEFRAM LINCOM 1 INDEX 1 0
-      
+
     to the dirfile's format file to recreate the old behaviour.
   * The ability to flag portions of the dirfile as protected.
 
@@ -150,7 +161,8 @@ BUILDING THE LIBRARY
 
 This package may be configured and built using the GNU autotools.  Generic
 installation instructions are provided in the file called `INSTALL'.  A
-brief summary follows.  A C99-compliant compiler is recommended.
+brief summary follows.  A C99-compliant compiler is required to build (but not
+to use) the package.
 
 Most users should be able to build the package by simply executing:
 
@@ -167,10 +179,10 @@ which will run a series of self-tests.  Finally,
 
   $ make install
 
-will install the utilities, libraries and documentation.
+will install the utilities, libraries, bindings, and documentation.
 
-The package can be configured, if the default configuration is insufficient,
-before building it by passing options to ./configure.  Running
+The package configuration can be changed, if the default configuration is
+insufficient, before building it by passing options to ./configure.  Running
 
   $ ./configure --help
 
@@ -194,8 +206,8 @@ ${prefix}/bin, unless disabled by passing `--disable-checkdirfile' to
 
 This utility was designed to report syntax error in the format file(s) of the
 large, complex dirfiles used in the analysis of the BLAST experiment data.
-This utility will report the first syntax error it find in the supplied dirfile,
-or the size of the dirfile, if no syntax errors are found.
+This utility will report all syntax errors it find in the supplied dirfile,
+plus any problems in the metadata itself.
 
 Bindings exist for using the GetData library in languages other than C.  If
 language bindings exist for your particular library, a README.<language> file
@@ -219,13 +231,10 @@ libraries without having to give up the functionality these extra libraries
 provide.  To enable this behaviour, pass `--enable-modules' to ./configure.
 
 The modules are dynamically loaded via GNU libtool's portable dlopen wrapper
-library, libltdl.  Version 1.2 of libltdl is distributed with GetData, but a
-libltdl installed in the system will be preferred over the local copy, if found.
-The libltdl library permits dynamic loading of modules on at least Solaris,
-Linux, BSD, HP-UX, Win16, Win32, BeOS, Darwin, Mac OS X.  GetData does not
-export the symbols from its internal version of libltdl.  As a result, if the
-internal version is used, GetData can still be linked to another object using
-the system libltdl.
+library, libltdl.  The libltdl library permits dynamic loading of modules on at
+least Solaris, Linux, BSD, HP-UX, Win16, Win32, BeOS, Darwin, Mac OS X.  The
+libltdl library is no longer distributed with GetData.  It can usually be found
+as part of the GNU libtool package, on any modern system.
 
 GetData will fail gracefully if a library module is not found or cannot be
 opened at runtime.  In this case, the call which triggered the attempt to load
@@ -363,12 +372,14 @@ the new API:
 
   /* Legacy API */
   #include <getdata.h>
+  #include <stdlib.h>
+  #include <stdio.h>
 
   int main(void)
   {
     const char* dirfile_name = "/var/dirfile"; /* dirfile name */
     const char* field_name = "datafield";      /* field code */
-    char* error_buffer[1024];
+    char error_buffer[1024];
     int first_frame = 1000;
     int error_code;
 
@@ -391,7 +402,7 @@ the new API:
 
     /* Retrieve all but the first 1000 frames */
     int n_read = GetData(dirfile_name, field_name, first_frame, 0,
-            nf - first_frame, 0, 'd', data_buffer, &error_code);
+        nf - first_frame, 0, 'd', data_buffer, &error_code);
     if (error_code) {
       printf("GetData error: %s\n", GetDataErrorString(error_buffer, 1024));
       exit(1);
@@ -405,65 +416,67 @@ the new API:
 
   /* New API -- same header file */
   #include <getdata.h>
+  #include <stdlib.h>
+  #include <stdio.h>
 
   int main(void)
   {
     const char* dirfile_name = "/var/dirfile"; /* dirfile name */
     const char* field_name = "datafield";      /* field code */
-    char* error_buffer[1024];
+    char error_buffer[1024];
     off_t first_frame = 1000; /* off_t is for dirfile offsets and lengths */
 
     /* Open the dirfile */
-    DIRFILE* dirfile = dirfile_open(dirfilen_name, GD_RDONLY);
-    if (dirfile->error) {
+    DIRFILE* dirfile = dirfile_open(dirfile_name, GD_RDONLY);
+    if (get_error(dirfile)) {
       /* dirfile_open() returns a pointer to a newly allocated DIRFILE
-        object even if the open failed. This DIRFILE object should still
-        be freed by calling dirfile_close() after checking the error state */
+         object even if the open failed. This DIRFILE object should still
+         be freed by calling dirfile_close() after checking the error state */
 
       printf("GetData error: %s\n",
           get_error_string(dirfile, error_buffer, 1024));
       dirfile_close(dirfile);
       exit(1);
-    }
+      }
 
-    /* Get size of the database */
-    off_t nf = get_nframes(dirfile); /* again off_t */
-    if (dirfile->error) {
-      printf("GetData error: %s\n",
-          get_error_string(dirfile, error_buffer, 1024));
+      /* Get size of the database */
+      off_t nf = get_nframes(dirfile); /* again off_t */
+      if (get_error(dirfile)) {
+        printf("GetData error: %s\n",
+            get_error_string(dirfile, error_buffer, 1024));
+        dirfile_close(dirfile);
+        exit(1);
+      }
+
+      /* Get samples-per-frame */
+      unsigned int spf = get_spf(dirfile, field_name);
+      if (get_error(dirfile)) {
+        printf("GetData error: %s\n",
+            get_error_string(dirfile, error_buffer, 1024));
+        dirfile_close(dirfile);
+        exit(1);
+      }
+
+      /* Allocate a buffer */
+      double* data_buffer = malloc(sizeof(double) * spf * (nf - first_frame));
+
+      /* Retrieve all but the first 1000 frames -- size_t is for counts of
+         objects read */
+      size_t n_read = getdata(dirfile, field_name, first_frame, 0,
+          nf - first_frame, 0, GD_FLOAT64, data_buffer);
+      if (get_error(dirfile)) {
+        printf("GetData error: %s\n",
+            get_error_string(dirfile, error_buffer, 1024));
+        dirfile_close(dirfile);
+        exit(1);
+      }
+
+      /* Clean up */
+      free(data_buffer);
+
+      /* not strictly necessary at the end of the program for a dirfile opened
+         read-only */
       dirfile_close(dirfile);
-      exit(1);
+
+      return 0;
     }
-
-    /* Get samples-per-frame */
-    unsigned int spf = get_spf(dirfile, field_name);
-    if (dirfile->error) {
-      printf("GetData error: %s\n",
-          get_error_string(dirfile, error_buffer, 1024));
-      dirfile_close(dirfile);
-      exit(1);
-    }
-
-    /* Allocate a buffer */
-    double* data_buffer = malloc(sizeof(double) * spf * (nf - first_frame));
-
-    /* Retrieve all but the first 1000 frames -- size_t is for count of
-       object read */
-    size_t n_read = getdata(dirfile, field_name, first_frame, 0,
-            nf - first_frame, 0, GD_FLOAT64, data_buffer);
-    if (dirfile->error) {
-      printf("GetData error: %s\n",
-          get_error_string(dirfile, error_buffer, 1024));
-      dirfile_close(dirfile);
-      exit(1);
-    }
-
-    /* Clean up */
-    free(data_buffer);
-
-    /* not strictly necessary at the end of the program for a dirfile opened
-    read-only */
-    dirfile_close(dirfile);
-
-    return 0;
-  }
