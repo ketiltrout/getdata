@@ -275,7 +275,7 @@ typedef struct _gd_callback_data gd_parser_data_t;
 typedef int (*gd_parser_callback_t)(gd_parser_data_t*, void*);
 
 
-/* dirfile_flags */
+/* dirfile_flags -- bit 0x80000000 is reserved */
 #define GD_ACCMODE        0x00000001 /* mask */
 #define GD_RDONLY         0x00000000 /* open read only */
 #define GD_RDWR           0x00000001 /* open read/write */
@@ -293,6 +293,7 @@ typedef int (*gd_parser_callback_t)(gd_parser_data_t*, void*);
 #define GD_IGNORE_REFS    0x00000800 /* ignore REFERENCE directives --
                                      dirfile_include only */
 #define GD_PRETTY_PRINT   0x00001000 /* make a nicer looking format file */
+#define GD_ARM_ENDIAN     0x00002000 /* ARM-endian doubles */
 
 #define GD_ENCODING       0x0F000000 /* mask */
 #define GD_AUTO_ENCODED   0x00000000 /* Encoding scheme unknown */

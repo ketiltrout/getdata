@@ -292,6 +292,7 @@ DIRFILE* dirfile_cbopen(const char* filedir, unsigned long flags,
     (D->flags & GD_BIG_ENDIAN) ? GD_BIG_ENDIAN : GD_LITTLE_ENDIAN
 #endif
     ;
+  D->fragment[0].float_sex = D->fragment[0].byte_sex;
   D->fragment[0].ref_name = NULL;
   D->fragment[0].frame_offset = 0;
   D->fragment[0].protection = GD_PROTECT_NONE;

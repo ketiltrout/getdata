@@ -80,6 +80,8 @@ make_parameters.sed: make_parameters.stamp
 		$(MAKE) $<; \
 		fi
 
+if HAVE_DIFF
+
 make_parameters.stamp: make_parameters.sed.in
 	@if $(DIFF) make_parameters.sed make_parameters.sed.in >/dev/null 2>&1; then \
 		echo "make_parameters.sed is unchanged"; \
@@ -88,6 +90,15 @@ make_parameters.stamp: make_parameters.sed.in
 		cp make_parameters.sed.in make_parameters.sed; \
 		fi; \
 		touch make_parameters.stamp
+
+else
+
+make_parameters.stamp: make_parameters.sed.in
+		@rm -f make_parameters.sed; \
+		cp make_parameters.sed.in make_parameters.sed; \
+		touch make_parameters.stamp
+
+endif
 
 getdata.f: $(srcdir)/getdata.f.in make_parameters.sed
 	rm -f $@

@@ -350,10 +350,7 @@ fi
 dnl F77 stuff
 if test "x$make_f77bindings" != "xno"; then
   AC_PROG_SED
-  AC_CHECK_PROGS([DIFF], [diff], [not found])
-  if test "x$DIFF" == "xnot found"; then
-    AC_MSG_ERROR([diff is needed to build the Fortran bindings])
-  fi
+  AC_CHECK_PROGS([DIFF], [diff], [])
   AC_F77_WRAPPERS
 fi
 
@@ -397,6 +394,7 @@ echo "*** Checking data types"
 echo
 AC_C_CONST
 AC_C_BIGENDIAN
+GD_C_FLOATORDERING
 AC_TYPE_SIZE_T
 AC_TYPE_OFF_T
 AC_TYPE_UINT8_T
@@ -607,6 +605,7 @@ AM_CONDITIONAL(MAKE_F95BINDINGS, test "x$make_f95bindings" = "xyes")
 AM_CONDITIONAL(MAKE_PYBINDINGS, test "x$make_pybindings" = "xyes")
 AM_CONDITIONAL(MAKE_IDLBINDINGS, test "x$make_idlbindings" = "xyes")
 AM_CONDITIONAL(USE_MODULES, test "x$use_modules" != "xno")
+AM_CONDITIONAL(HAVE_DIFF, test "x$DIFF" != "x")
 
 AC_OUTPUT
 

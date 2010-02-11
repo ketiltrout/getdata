@@ -1,3 +1,40 @@
+2010-02-08   D. V. Wiebe <getdata@ketiltrout.net>   svn:355
+	* configure.ac: Call GD_C_FLOATORDERING.
+	* m4/compiler.m4 (GD_C_FLOATORDERING): Added.
+
+	* src/internal.h (__NAN): Fix for ARM_ENDIAN_DOUBLES and FLOATS_BIGENDIAN.
+
+	* src/internal.h: Add unsigned long int float_sex to gd_fragment_t.
+	* src/open.c (dirfile_cbopen): Initialise float_sex.
+	* src/getdata.h.in: Add GD_ARM_ENDIAN.
+	
+	* src/flush.c (_GD_FlushFragment): Write optional second parameter to
+	/ENDIAN, but only if necessary.
+	* src/parse.c (_GD_ParseDirective): Handle optional second parameter to
+	/ENDIAN.
+
+	* src/getdata.c (_GD_DoRaw): Call _GD_ArmEndianise when appropriate.  Check
+	float_sex when appropriate.
+	* src/endian.c (_GD_ArmEndianise): Added.
+
+	* configure.ac bindings/f77/Makefile.am: Handle missing diff gracefully.
+
+2010-02-08   D. V. Wiebe <getdata@ketiltrout.net>   svn:355
+	* configure.ac: Call GD_PROG_CC_WEXTRA, GD_PROG_CXX_WEXTRA,
+	GD_PROG_F77_WEXTRA, GD_PROG_FC_WEXTRA; don't bother checking compilers we
+	aren't going to use.
+
+	* bindings/cxx/Makefile.am bindings/cxx/test/Makefile.am
+	bindings/f77/Makefile.am bindings/f77/test/Makefile.am src/Makefile.am
+	test/Makefile.am util/Makefile.am: use *_WEXTRA conditionals.
+
+	* compiler.m4: Renamed from intel.m4.
+	* compiler.m4 (GD_PROG_CC_WEXTRA GD_PROG_CXX_WEXTRA GD_PROG_F77_WEXTRA
+	GD_PROG_FC_WEXTRA): Added.
+
+2010-02-06   D. V. Wiebe <getdata@ketiltrout.net>   svn:354
+	Branch svn:351 for getdata-arm.	
+
 2010-02-04   D. V. Wiebe <getdata@ketiltrout.net>   svn:349
 	* bindings/cxx/test/getdata.cpp: Also fix the mkdir() bug here.
 

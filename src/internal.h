@@ -257,6 +257,12 @@ struct _gd_private_entry {
 
 #define BUFFER_SIZE 9000000
 
+/* helper macro */
+#if defined ARM_ENDIAN_FLOATS || \
+  ((defined WORDS_BIGENDIAN) ^ (defined FLOATS_BIGENDIAN))
+#  define SCREWY_FLOATS
+#endif
+
 /* Encoding schemes */
 extern struct encoding_t {
   unsigned long int scheme;
@@ -291,6 +297,7 @@ struct gd_fragment_t {
   int parent;
   unsigned long int encoding;
   unsigned long int byte_sex;
+  unsigned long int float_sex;
   int protection;
   char* ref_name;
   off64_t frame_offset;
@@ -362,6 +369,7 @@ extern const gd_entype_t _gd_entype_index[GD_N_ENTYPES];
 void _GD_AddData(DIRFILE* D, void *A, gd_spf_t spfA, void *B, gd_spf_t spfB,
     gd_type_t type, size_t n);
 void* _GD_Alloc(DIRFILE* D, gd_type_t type, size_t n);
+void _GD_ArmEndianise(uint64_t* databuffer, int is_complex, size_t ns);
 int _GD_BadInput(DIRFILE* D, gd_entry_t* E, int i);
 int _GD_CalculateEntry(DIRFILE* D, gd_entry_t* E);
 
@@ -498,22 +506,14 @@ ssize_t _GD_SlimRead(struct _gd_raw_file* file, void *ptr, gd_type_t data_type,
 int _GD_SlimClose(struct _gd_raw_file* file);
 off64_t _GD_SlimSize(struct _gd_raw_file* file, gd_type_t data_type);
 
-/* The following has been extracted from internal.cpp from kjs */
-
-/*
- * For systems without NAN, this is a NAN in IEEE double format.
- */
-
 #if !defined(NAN)
 static inline __attribute__ ((__const__)) double __NAN()
 {
-  /* work around some strict alignment requirements
-     for double variables on some architectures (e.g. PA-RISC) */
   typedef union { unsigned char b[8]; double d; } nan_t;
-#ifdef WORDS_BIGENDIAN
-  static const nan_t NaN_Bytes = { { 0x7f, 0xf8, 0, 0, 0, 0, 0, 0 } };
-#elif defined(arm)
+#ifdef ARM_ENDIAN_DOUBLES
   static const nan_t NaN_Bytes = { { 0, 0, 0xf8, 0x7f, 0, 0, 0, 0 } };
+#elif FLOATS_BIGENDIAN
+  static const nan_t NaN_Bytes = { { 0x7f, 0xf8, 0, 0, 0, 0, 0, 0 } };
 #else
   static const nan_t NaN_Bytes = { { 0, 0, 0, 0, 0, 0, 0xf8, 0x7f } };
 #endif
