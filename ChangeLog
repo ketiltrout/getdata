@@ -1,10 +1,13 @@
+2010-02-15   D. V. Wiebe <getdata@ketiltrout.net>   svn:362
+	* util/dirfile2ascii.c: Added Matthew Truch's ASCII conversion utility.
+
 2010-02-12   D. V. Wiebe <getdata@ketiltrout.net>   svn:361
 	GetData 0.6.1 released.
 
 2010-02-09   D. V. Wiebe <getdata@ketiltrout.net>   svn:358
 	GetData-0.6.1rc2:
 
-	* legacy.c: Fix length of global error string buffers.
+	* src/legacy.c: Fix length of global error string buffers.
 
 	* configure.ac: Bump GETDATA_IMPL_REVISION.
 	* configure.ac: Fix diff check.

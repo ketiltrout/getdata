@@ -28,11 +28,12 @@ LDADD=../src/libgetdata.la
 INCLUDES=-Wall $(WEXTRA) -I$(top_srcdir)/src
 
 if MAKE_CHECKDIRFILE
-CHECKDIRFILE=checkdirfile
+CHECKDIRFILE=checkdirfile dirfile2ascii
 endif
 
 bin_PROGRAMS=$(CHECKDIRFILE)
 checkdirfile_SOURCES=checkdirfile.c
+dirfile2ascii_SOURCES=dirfile2ascii.c
 
 clean-local:
 	rm -rf *~ 
