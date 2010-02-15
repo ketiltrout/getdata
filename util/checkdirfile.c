@@ -21,6 +21,7 @@
 #endif
 
 #include <stdlib.h>
+#include <string.h>
 #include <stdio.h>
 #include "getdata.h"
 
@@ -45,8 +46,28 @@ int main(int argc, char* argv[])
   unsigned int nfields;
   const char **flist, **mflist;
 
-  if (argc < 2) {
-    printf("No dirfile.\n");
+  if (argc < 2 || !strcmp(argv[1], "--version") || !strcmp(argv[1], "--help")) {
+    printf("Usage:\n"
+        "  checkdirfile DIRFILE                Check the DirFile database "
+        "DIRFILE for\n"
+        "                                        errors.\n"
+        "  checkdirfile [ --help | --version]  Print this message and exit.\n"
+        "\n\n"
+        "This program is part of %s.  (C) 2008-2010  D. V. Wiebe\n"
+        "Please send reports of bugs and other communication to:\n  %s\n\n"
+        "This program comes with NO WARRANTY, not even for MERCHANTABILITY "
+        "or FITNESS\n"
+        "FOR A PARTICULAR PURPOSE. You may redistribute it under the terms of "
+        "the GNU\n"
+        "Lesser General Public License, either version 2.1 of the License, or "
+        "(at your\n"
+        "option) any later version.\n\n"
+        "You should have received a copy of the GNU Lesser General Public "
+        "License along\n"
+        "with this program; if not, write to the Free Software Foundation,"
+        "Inc.,\n"
+        "51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA\n",
+        PACKAGE_STRING, PACKAGE_BUGREPORT);
     return 1;
   }
 
