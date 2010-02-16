@@ -1,4 +1,4 @@
-/* Attempt to write FLOAT32 with the opposite endianness */
+/* Attempt to write arm-endian FLOAT32 (which is just little endian) */
 #include "../src/getdata.h"
 
 #include <inttypes.h>
@@ -11,35 +11,18 @@
 #include <errno.h>
 #include <unistd.h>
 
-static int BigEndian(void)
-{
-  union {
-    long int li;
-    char ch[sizeof(long int)];
-  } un;
-  un.li = 1;
-  return (un.ch[sizeof(long int) - 1] == 1);
-}
-
 int main(void)
 {
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
   const char* data = __TEST__ "dirfile/data";
-  char format_data[1000];
-  float c = (float)(4. / 3.);
-  int fd, i;
-  const int big_endian = BigEndian();
-  union {
-    float f;
-    char b[4];
-  } u;
-  const char x[4] = { 0x3f, 0xaa, 0xaa, 0xab };
+  const char* format_data = "data RAW FLOAT32 1\nENDIAN little arm\n";
+  int fd, i, r = 0;
+  const float c = 1.5;
+  unsigned char x[sizeof(float)] = { 0x00, 0x00, 0xC0, 0x3F };
+  unsigned char u[sizeof(float)];
 
   mkdir(filedir, 0777); 
-
-  sprintf(format_data, "data RAW FLOAT32 1\nENDIAN %s\n", (big_endian)
-      ? "little" : "big");
 
   fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
   write(fd, format_data, strlen(format_data));
@@ -53,23 +36,27 @@ int main(void)
 
   fd = open(data, O_RDONLY);
   lseek(fd, 5 * sizeof(float), SEEK_SET);
-  read(fd, &u.f, sizeof(float));
+  read(fd, u, sizeof(float));
   close(fd);
 
   unlink(data);
   unlink(format);
   rmdir(filedir);
 
-  if (n != 1)
-    return 1;
-  if (error)
-    return 1;
+  if (n != 1) {
+    printf("n = %i\n", n);
+    r = 1;
+  }
+  if (error) {
+    printf("error = %i\n", error);
+    r = 1;
+  }
   
-  for (i = 0; i < 4; ++i)
-    if (x[(big_endian) ? 3 - i : i] != u.b[i]) {
-      printf("%i=%x (%x)\n", i, x[(big_endian) ? 3 - i : i], u.b[i]);
-      return 1;
+  for (i = 0; i < sizeof(float); ++i)
+    if (x[i] != u[i]) {
+      printf("%i=%x (%x)\n", i, x[i], u[i]);
+      r = 1;
     }
 
-  return 0;
+  return r;
 }

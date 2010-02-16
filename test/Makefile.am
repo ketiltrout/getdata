@@ -144,14 +144,18 @@ FRAGMENT_TESTS=fragment_index fragment_name fragment_name_oor
 GET_TESTS=get64 get_bad_code get_bit get_char get_clincom get_complex128 \
 					get_complex64 get_const get_const_complex get_const_repr \
 					get_cpolynom get_endian8 get_endian16 get_endian32 get_endian64 \
-					get_endian_complex128 get_endian_complex64 get_endian_float32 \
-					get_endian_float64 get_ff get_float32 get_float64 get_foffs get_fs \
-					get_int8 get_int16 get_int32 get_int64 get_invalid get_lincom1 \
-					get_lincom2 get_lincom3 get_lincom_noin get_lincom_non get_linterp \
-					get_linterp_noin get_linterp_notab get_multiply get_multiply_noin \
-					get_nonexistent get_null $(GET_OFF64) get_phase get_polynom \
-					get_polynom_noin get_recurse get_sbit get_sf get_ss get_type \
-					get_uint16 get_uint32 get_uint64 get_zero
+					get_endian_complex128_arm get_endian_complex128_big \
+					get_endian_complex128_little get_endian_complex64_arm \
+					get_endian_complex64_big get_endian_complex64_little \
+					get_endian_float32_arm get_endian_float32_big \
+					get_endian_float32_little get_endian_float64_arm \
+					get_endian_float64_big get_endian_float64_little get_ff get_float32 \
+					get_float64 get_foffs get_fs get_int8 get_int16 get_int32 get_int64 \
+					get_invalid get_lincom1 get_lincom2 get_lincom3 get_lincom_noin \
+					get_lincom_non get_linterp get_linterp_noin get_linterp_notab \
+					get_multiply get_multiply_noin get_nonexistent get_null $(GET_OFF64) \
+					get_phase get_polynom get_polynom_noin get_recurse get_sbit get_sf \
+					get_ss get_type get_uint16 get_uint32 get_uint64 get_zero
 
 GLOBAL_TESTS=global_name global_ref global_ref_empty global_ref_get \
 						 global_ref_set
@@ -236,8 +240,13 @@ PROTECT_TESTS=protect_alter protect_get
 
 PUT_TESTS=put64 put_bad_code put_bit put_bof put_char put_complex128 \
 					put_complex64 put_const put_const_protect put_endian8 put_endian16 \
-					put_endian32 put_endian64 put_endian_complex128 put_endian_complex64 \
-					put_endian_float32 put_endian_float64 put_ff put_float32 put_float64 \
+					put_endian32 put_endian64 put_endian_complex128_arm \
+					put_endian_complex128_big put_endian_complex128_little \
+					put_endian_complex64_arm put_endian_complex64_big \
+					put_endian_complex64_little put_endian_float32_arm \
+					put_endian_float32_big put_endian_float32_little \
+					put_endian_float64_arm put_endian_float64_big \
+					put_endian_float64_little put_ff put_float32 put_float64 \
 					put_foffs put_fs put_int8 put_int16 put_int32 put_int64 put_invalid \
 					put_lincom1 put_lincom2 put_lincom_noin put_linterp put_linterp_noin \
 					put_linterp_notab put_multiply put_null $(PUT_OFF64) put_phase \

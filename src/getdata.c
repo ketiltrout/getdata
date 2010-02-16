@@ -283,8 +283,7 @@ static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *E, off64_t s0, size_t ns,
 #else
              GD_BIG_ENDIAN
 #endif
-             )
-         )
+             ))
       {
         if (E->data_type & GD_COMPLEX)
           _GD_FixEndianness(databuffer + n_read * E->e->size, E->e->size / 2,

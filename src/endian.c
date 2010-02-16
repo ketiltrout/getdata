@@ -193,7 +193,7 @@ void _GD_ArmEndianise(uint64_t* databuffer, int is_complex, size_t ns)
     ns *= 2;
 
   for (p = databuffer; p < databuffer + ns; ++p)
-    *p = ((*p & 0xffffffff) << 32) | ((*p & 0xffffffff00000000ULL) >> 32)
+    *p = ((*p & 0xffffffff) << 32) | ((*p & 0xffffffff00000000ULL) >> 32);
 
   dreturnvoid();
 }
