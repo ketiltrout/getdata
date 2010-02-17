@@ -1,3 +1,6 @@
+2010-02-17   D. V. Wiebe <getdata@ketiltrout.net>   svn:371
+	* src/open.c (dirfile_cbopen): Fix default float_sex.
+
 2010-02-16   D. V. Wiebe <getdata@ketiltrout.net>   svn:366
 	* test/put_endian_float32_big.c test/put_endian_float64_big.c
 	test/put_endian_complex64_little.c test/put_endian_float32_arm.c
