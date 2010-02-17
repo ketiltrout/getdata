@@ -326,6 +326,7 @@ off64_t _GD_AsciiSize(struct _gd_raw_file* file,
     gd_type_t data_type __gd_unused)
 {
   FILE* stream;
+  char buffer[GD_MAX_LINE_LENGTH];
 
   dtrace("%p, <unused>", file);
 
@@ -339,7 +340,7 @@ off64_t _GD_AsciiSize(struct _gd_raw_file* file,
   }
 
   while (!feof(stream))
-    if (fgets(file->name, FILENAME_MAX, stream) != NULL)
+    if (fgets(buffer, FILENAME_MAX, stream) != NULL)
       n++;
 
   fclose(stream);
