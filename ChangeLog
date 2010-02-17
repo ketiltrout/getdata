@@ -1,3 +1,7 @@
+2010-02-17   D. V. Wiebe <getdata@ketiltrout.net>   svn:372
+	* src/parse.c (_GD_ParseDirective): Handle missing second parameter to
+	/ENDIAN.
+
 2010-02-17   D. V. Wiebe <getdata@ketiltrout.net>   svn:371
 	* src/open.c (dirfile_cbopen): Fix default float_sex.
 

@@ -1312,7 +1312,8 @@ static int _GD_ParseDirective(DIRFILE *D, char** in_cols, int n_cols,
         else 
           _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_ENDIAN,
               D->fragment[me].cname, linenum, NULL);
-      }
+      } else
+        D->fragment[me].float_sex = D->fragment[me].byte_sex;
     }
   } else if (strcmp(ptr, "FRAMEOFFSET") == 0)
     D->fragment[me].frame_offset = strtoll(in_cols[1], NULL, 10);
