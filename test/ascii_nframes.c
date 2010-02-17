@@ -15,7 +15,7 @@ int main(void)
   const char* format = __TEST__ "dirfile/format";
   const char* data = __TEST__ "dirfile/data.txt";
   const char* format_data = "data RAW UINT8 1\n";
-  int i;
+  int i, r = 0;
   FILE* stream;
 
   mkdir(filedir, 0777);
@@ -32,11 +32,21 @@ int main(void)
 
   DIRFILE* D = dirfile_open(filedir, GD_RDONLY | GD_VERBOSE);
   size_t n = get_nframes(D);
+  size_t m = get_nframes(D);
   dirfile_close(D);
 
   unlink(data);
   unlink(format);
   rmdir(filedir);
 
-  return !(n == 256);
+  if (n != 256) {
+    fprintf(stderr, "n = %i\n", n);
+    r = 1;
+  }
+  if (m != 256) {
+    fprintf(stderr, "m = %i\n", m);
+    r = 1;
+  }
+
+  return r;
 }

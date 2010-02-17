@@ -1,3 +1,7 @@
+2010-02-17   D. V. Wiebe <getdata@ketiltrout.net>   svn:369
+	* src/ascii.c (_GD_AsciiSize): Don't trample on the file name.
+	* test/ascii_nframes.c: Update to test for same.
+
 2010-02-12   D. V. Wiebe <getdata@ketiltrout.net>   svn:361
 	GetData 0.6.1 released.
 

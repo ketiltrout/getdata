@@ -1,3 +1,12 @@
+New in version 0.6.2:
+
+  Library Changes
+
+  * Attempting to get the number of frames from an ASCII file no longer fails
+    the second time.
+
+|==============================================================================|
+
 New in version 0.6.1:
 
   API Changes
