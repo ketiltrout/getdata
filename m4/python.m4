@@ -86,8 +86,9 @@ AC_MSG_RESULT([$PYTHON_VERSION])
 
 dnl calculate python CPPFLAGS and LIBS
 if test -x $PYTHON-config; then
+  python_exec_prefix=`$PYTHON-config --exec-prefix`
   PYTHON_CPPFLAGS=`$PYTHON-config --includes 2>/dev/null`
-  PYTHON_LIBS=`$PYTHON-config --ldflags 2>/dev/null`
+  PYTHON_LIBS="-L${python_exec_prefix}/lib `$PYTHON-config --ldflags 2>/dev/null`"
 else
   python_prefix=`$PYTHON -c "import sys; print sys.prefix"`
   python_exec_prefix=`$PYTHON -c "import sys; print sys.exec_prefix"`
