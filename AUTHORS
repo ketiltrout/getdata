@@ -8,11 +8,11 @@ standards.
 Ted Kisner <tskisner.public@gmail.com> wrote the PutData library
 (libdirfile).
 
+Matthew Truch <matt@truch.net> wrote the dirfile2ascii conversion utility.
+He also provides alpha-testing, bug fixes, and maintains the Fedora packages.
+
 Eli Fidler <eli@staikos.net> ported PutData to this version of the GetData
 library.
-
-Matthew Truch <matt@truch.net> provides alpha-testing, bug fixes, and maintains
-the Fedora packages.
 
 Joseph Fowler <jfowler@princeton.edu> provided code which was adapted to
 create the slimlib encoding support.

@@ -36,7 +36,7 @@ fi
 
 dnl --without-python basically does the same as --disable-python
 AC_ARG_WITH([python], AS_HELP_STRING([--with-python=PATH],
-            [use the Python interpreter PATH [[autodetect]]]),
+            [use the Python interpreter located in PATH [[autodetect]]]),
             [
               case "${withval}" in
                 no) have_python="no" ;;
