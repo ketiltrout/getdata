@@ -80,6 +80,7 @@ gd_spf_t get_spf(DIRFILE* D, const char *field_code_in)
   gd_spf_t spf = 0;
   gd_entry_t* entry;
   char* field_code;
+  int repr;
 
   dtrace("%p, \"%s\"", D, field_code_in);
 
@@ -94,18 +95,14 @@ gd_spf_t get_spf(DIRFILE* D, const char *field_code_in)
   /* the representation is unimportant: it doesn't change the SPF of the field,
    * yet we have to run the field code through here to potentially remove it
    */
-  _GD_GetRepr(D, field_code_in, &field_code);
+  entry = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1);
 
   if (D->error) {
     dreturn("%u", 0);
     return 0;
   }
 
-  entry = _GD_FindField(D, field_code, NULL);
-
-  if (entry == NULL)
-    _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, field_code);
-  else if (entry->field_type & GD_SCALAR_ENTRY)
+  if (entry->field_type & GD_SCALAR_ENTRY)
     _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
   else 
     spf = _GD_GetSPF(D, entry);

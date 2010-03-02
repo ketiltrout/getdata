@@ -229,7 +229,7 @@ PARSE_TESTS=parse_badline parse_bit parse_bit4 parse_bit_bitnum \
 						parse_raw_char parse_raw_ncols parse_raw_scalar parse_raw_spf \
 						parse_raw_type parse_ref parse_ref_nonexistent parse_sbit \
 						parse_sort parse_string parse_string_ncols parse_string_null \
-						parse_version parse_version_include parse_version_pedantic \
+						parse_version parse_version_include parse_version_permissive \
 						parse_version_slash parse_whitespace
 
 PROTECT_TESTS=protect_alter protect_get
@@ -265,6 +265,10 @@ TRUNC_TESTS=trunc trunc_rdonly trunc_rofs
 
 UNCLUDE_TESTS=unclude unclude_del unclude_move
 
+VERSION_TESTS=version_0 version_1 version_2 version_3 version_4 version_5 \
+							version_5_strict version_6 version_6_strict version_7 \
+							version_7_strict
+
 VLIST_TESTS=vlist vlist_invalid vlist_meta vlist_meta_invalid
 
 if TEST_LZMA
@@ -286,8 +290,8 @@ TESTS=$(ADD_TESTS)        $(ALTER_TESTS)      $(ASCII_TESTS)      \
 			$(PARENT_TESTS)     $(PARSE_TESTS)      $(PROTECT_TESTS)    \
 			$(PUT_TESTS)        $(REF_TESTS)        $(REPR_TESTS)       \
 			$(SLIM_TESTS)       $(SPF_TESTS)        $(SVLIST_TESTS)     \
-			$(TRUNC_TESTS)      $(UNCLUDE_TESTS)    $(VLIST_TESTS)      \
-			$(XZ_TESTS)
+			$(TRUNC_TESTS)      $(UNCLUDE_TESTS)    $(VERSION_TESTS)    \
+			$(VLIST_TESTS)      $(XZ_TESTS)
 
 check_PROGRAMS=$(TESTS)
 

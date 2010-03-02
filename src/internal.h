@@ -28,6 +28,7 @@
 
 #include "getdata.h"
 #include <complex.h>
+#include <string.h>
 
 /* Type conventions:
  *
@@ -318,9 +319,11 @@ struct _GD_DIRFILE {
   unsigned int n_string;
   unsigned int n_const;
   unsigned int n_meta;
+  unsigned int n_dot;
 
   /* field array */
   gd_entry_t** entry;
+  gd_entry_t** dot_list;
 
   /* the reference field */
   gd_entry_t* reference_field;
@@ -354,6 +357,9 @@ struct _GD_DIRFILE {
   char* error_string;
   char* error_file;
   int error_line;
+
+  /* global data */
+  int standards;
   unsigned long int flags;
 };
 
@@ -384,7 +390,9 @@ int _GD_EntryCmp(const void *A, const void *B);
 int _GD_EncodingUnderstood(unsigned long int encoding); 
 int _GD_FillZero(void *databuffer, gd_type_t type, size_t nz);
 gd_entry_t* _GD_FindField(DIRFILE* D, const char* field_code,
-    unsigned int *next);
+    gd_entry_t** list, unsigned int u, unsigned int *index);
+gd_entry_t* _GD_FindFieldAndRepr(DIRFILE* D, const char* field_code_in,
+    char** field_code, int* repr, unsigned int *index, int set);
 void _GD_FixEndianness(char* databuffer, size_t size, size_t ns);
 void _GD_Flush(DIRFILE* D, gd_entry_t *E);
 void _GD_FlushMeta(DIRFILE* D, int fragment);
@@ -426,9 +434,10 @@ void _GD_SetError(DIRFILE* D, int error, int suberror, const char* format_file,
 int _GD_SetTablePath(DIRFILE *D, gd_entry_t *E, struct _gd_private_entry *e);
 int _GD_Supports(DIRFILE* D, gd_entry_t* E, unsigned int funcs);
 int _GD_Tokenise(DIRFILE *D, const char* instring, char* outstring,
-    char** in_cols, const char* format_file, int linenum);
+    char** in_cols, const char* format_file, int linenum, int standards,
+    int pedantic);
 char* _GD_ValidateField(const gd_entry_t* parent, const char* field_code,
-    int strict);
+    int standards, int pedantic, int* is_dot);
 
 /* generic I/O methods */
 int _GD_GenericTouch(struct _gd_raw_file* file);
@@ -497,6 +506,11 @@ ssize_t _GD_SlimRead(struct _gd_raw_file* file, void *ptr, gd_type_t data_type,
     size_t nmemb);
 int _GD_SlimClose(struct _gd_raw_file* file);
 off64_t _GD_SlimSize(struct _gd_raw_file* file, gd_type_t data_type);
+
+static inline int entry_cmp(const void *a, const void *b)
+{
+  return strcmp((*(gd_entry_t**)a)->field, (*(gd_entry_t**)b)->field);
+}
 
 /* The following has been extracted from internal.cpp from kjs */
 

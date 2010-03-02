@@ -209,7 +209,6 @@ DIRFILE* dirfile_cbopen(const char* filedir, unsigned long flags,
   DIRFILE* D;
   gd_entry_t* E;
   char format_file[FILENAME_MAX];
-  int standards = DIRFILE_STANDARDS_VERSION;
 
   dtrace("\"%s\", 0x%lx, %p, %p", filedir, (unsigned long)flags, sehandler, extra);
 
@@ -224,6 +223,7 @@ DIRFILE* dirfile_cbopen(const char* filedir, unsigned long flags,
   D->flags = flags | GD_INVALID;
   D->sehandler = sehandler;
   D->sehandler_extra = extra;
+  D->standards = DIRFILE_STANDARDS_VERSION;
 
   if (D->error_string == NULL || D->error_file == NULL || D->name == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
@@ -296,7 +296,7 @@ DIRFILE* dirfile_cbopen(const char* filedir, unsigned long flags,
   D->fragment[0].frame_offset = 0;
   D->fragment[0].protection = GD_PROTECT_NONE;
 
-  ref_name = _GD_ParseFragment(fp, D, 0, &standards, D->flags);
+  ref_name = _GD_ParseFragment(fp, D, 0, &D->standards, D->flags);
   fclose(fp);
 
   if (D->error != GD_E_OK) {
@@ -306,7 +306,7 @@ DIRFILE* dirfile_cbopen(const char* filedir, unsigned long flags,
 
   /* Find the reference field */
   if (ref_name != NULL) {
-    E = _GD_FindField(D, ref_name, NULL);
+    E = _GD_FindField(D, ref_name, D->entry, D->n_entries, NULL);
     if (E == NULL)
       _GD_SetError(D, GD_E_BAD_REFERENCE, GD_E_REFERENCE_CODE, NULL, 0,
           ref_name);

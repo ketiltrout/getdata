@@ -126,14 +126,12 @@ static void _GD_GetScalar(DIRFILE* D, gd_entry_t* E, const char* scalar,
   dtrace("%p, %p, \"%s\", %i, %p", D, E, scalar, type, data);
 
   if (scalar != NULL) {
-    repr = _GD_GetRepr(D, scalar, &field_code);
+    C = _GD_FindFieldAndRepr(D, scalar, &field_code, &repr, NULL, 0);
 
     if (D->error) {
       dreturnvoid();
       return;
     }
-
-    C = _GD_FindField(D, field_code, NULL);
 
     if (C == NULL)
       _GD_SetError(D, GD_E_BAD_SCALAR, GD_E_SCALAR_CODE, E->field, 0,
@@ -232,9 +230,12 @@ int _GD_CalculateEntry(DIRFILE* D, gd_entry_t* E)
   return E->e->calculated;
 }
 
-const char* get_raw_filename(DIRFILE* D, const char* field_code)
+const char* get_raw_filename(DIRFILE* D, const char* field_code_in)
 {
-  dtrace("%p, \"%s\"", D, field_code);
+  int repr;
+  char* field_code;
+
+  dtrace("%p, \"%s\"", D, field_code_in);
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -243,10 +244,10 @@ const char* get_raw_filename(DIRFILE* D, const char* field_code)
   }
 
   /* Check field */
-  gd_entry_t *E = _GD_FindField(D, field_code, NULL);
+  gd_entry_t *E = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr,
+      NULL, 1);
 
-  if (E == NULL) {
-    _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, field_code);
+  if (D->error) {
     dreturn("%p", NULL);
     return NULL;
   }
@@ -256,6 +257,9 @@ const char* get_raw_filename(DIRFILE* D, const char* field_code)
     dreturn("%p", NULL);
     return NULL;
   }
+
+  if (field_code != field_code_in)
+    free(field_code);
 
   if (E->e->file[0].name == NULL) {
     /* ensure encoding sybtype is known */
@@ -280,7 +284,7 @@ const char* get_raw_filename(DIRFILE* D, const char* field_code)
 
 int get_entry(DIRFILE* D, const char* field_code_in, gd_entry_t* entry)
 {
-  int i;
+  int i, repr;
   gd_entry_t *E;
   char* field_code;
 
@@ -295,20 +299,15 @@ int get_entry(DIRFILE* D, const char* field_code_in, gd_entry_t* entry)
   _GD_ClearError(D);
 
   /* get rid of the represenation, if any */
-  _GD_GetRepr(D, field_code_in, &field_code);
+  E = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1);
 
   if (D->error) {
     dreturn("%i", -1);
     return -1;
   }
 
-  E = _GD_FindField(D, field_code, NULL);
-
-  if (E == NULL) {
-    _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, field_code);
-    dreturn("%i", -1);
-    return -1;
-  }
+  if (field_code != field_code_in)
+    free(field_code);
 
   /* Calculate the entry, if necessary */
   if (!E->e->calculated)
@@ -383,6 +382,7 @@ gd_entype_t get_entry_type(DIRFILE* D, const char* field_code_in)
 {
   gd_entry_t* E;
   char* field_code;
+  int repr;
 
   dtrace("%p, \"%s\"", D, field_code_in);
 
@@ -395,25 +395,16 @@ gd_entype_t get_entry_type(DIRFILE* D, const char* field_code_in)
   _GD_ClearError(D);
 
   /* get rid of the represenation, if any */
-  _GD_GetRepr(D, field_code_in, &field_code);
+  E = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1);
 
   if (D->error) {
     dreturn("%i", GD_NO_ENTRY);
     return GD_NO_ENTRY;
   }
 
-  E = _GD_FindField(D, field_code, NULL);
-
-  if (E == NULL) {
-    _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, field_code);
-    if (field_code != field_code_in)
-      free(field_code);
-    dreturn("%i", GD_NO_ENTRY);
-    return GD_NO_ENTRY;
-  }
-
   if (field_code != field_code_in)
     free(field_code);
+
   dreturn("%i", E->field_type);
   return E->field_type;
 }
@@ -422,6 +413,7 @@ int get_fragment_index(DIRFILE* D, const char* field_code_in)
 {
   gd_entry_t* E;
   char* field_code;
+  int repr;
 
   dtrace("%p, \"%s\"", D, field_code_in);
 
@@ -434,19 +426,9 @@ int get_fragment_index(DIRFILE* D, const char* field_code_in)
   _GD_ClearError(D);
 
   /* get rid of the represenation, if any */
-  _GD_GetRepr(D, field_code_in, &field_code);
+  E = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1);
 
   if (D->error) {
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  E = _GD_FindField(D, field_code, NULL);
-
-  if (E == NULL) {
-    _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, field_code);
-    if (field_code != field_code_in)
-      free(field_code);
     dreturn("%i", -1);
     return -1;
   }
@@ -460,7 +442,7 @@ int get_fragment_index(DIRFILE* D, const char* field_code_in)
 
 int dirfile_validate(DIRFILE *D, const char *field_code_in)
 {
-  int i;
+  int i, repr;
   gd_entry_t* E;
   char *field_code;
 
@@ -475,19 +457,9 @@ int dirfile_validate(DIRFILE *D, const char *field_code_in)
   _GD_ClearError(D);
 
   /* get rid of the representation, if any */
-  _GD_GetRepr(D, field_code_in, &field_code);
+  E = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1);
 
   if (D->error) {
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  E = _GD_FindField(D, field_code, NULL);
-
-  if (E == NULL) {
-    _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, field_code);
-    if (field_code != field_code_in)
-      free(field_code);
     dreturn("%i", -1);
     return -1;
   }

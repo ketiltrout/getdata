@@ -34,7 +34,7 @@
 static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
 {
   char temp_buffer[FILENAME_MAX];
-  int i;
+  int i, is_dot;
   int copy_scalar[GD_MAX_POLYORD + 1];
   void* new_list;
   void* new_ref = NULL;
@@ -81,7 +81,7 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
       return -1;
     }
 
-    P = _GD_FindField(D, parent, NULL);
+    P = _GD_FindField(D, parent, D->entry, D->n_entries, NULL);
     if (P == NULL) {
       _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, parent);
       dreturn("%i", -1);
@@ -93,7 +93,7 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
     snprintf(temp_buffer, FILENAME_MAX, "%s", entry->field);
 
   /* check for duplicate field */
-  E = _GD_FindField(D, temp_buffer, &u);
+  E = _GD_FindField(D, temp_buffer, D->entry, D->n_entries, &u);
 
   if (E != NULL) { /* matched */
     _GD_SetError(D, GD_E_DUPLICATE, 0, NULL, 0, temp_buffer);
@@ -144,7 +144,7 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
 
   /* Validate field code */
   E->field_type = entry->field_type;
-  E->field = _GD_ValidateField(P, entry->field, 1);
+  E->field = _GD_ValidateField(P, entry->field, D->standards, 1, &is_dot);
 
   if (E->field == entry->field) {
     _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, entry->field);
@@ -362,12 +362,23 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
     dreturn("%i", -1);
     return -1;
   }
+  D->entry = new_list;
+
+  if (is_dot) {
+    new_list = realloc(D->dot_list, (D->n_dot + 1) * sizeof(gd_entry_t*));
+    if (new_list == NULL) {
+      free(new_ref);
+      _GD_FreeE(E, 1);
+      dreturn("%i", -1);
+      return -1;
+    }
+    D->dot_list = new_list;
+  }
 
   if (P) {
     void *ptr = realloc(P->e->meta_entry, (P->e->n_meta + 1) *
         sizeof(gd_entry_t*));
     if (ptr == NULL) {
-      free(new_list);
       free(new_ref);
       _GD_FreeE(E, 1);
       dreturn("%i", -1);
@@ -409,8 +420,13 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
     }
   }
 
+  /* add the entry to the dot list, if needed */
+  if (is_dot) {
+    D->dot_list[D->n_dot++] = E;
+    qsort(D->dot_list, D->n_dot, sizeof(gd_entry_t*), entry_cmp);
+  }
+
   /* add the entry and resort the entry list */
-  D->entry = new_list;
   _GD_InsertSort(D, E, u);
   D->n_entries++;
   D->fragment[E->fragment_index].modified = 1;
@@ -450,7 +466,7 @@ int dirfile_madd_spec(DIRFILE* D, const char* line, const char* parent)
 
   _GD_ClearError(D);
 
-  E = _GD_FindField(D, parent, NULL);
+  E = _GD_FindField(D, parent, D->entry, D->n_entries, NULL);
   if (E == NULL) {
     _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, parent);
     dreturn("%i", -1);
@@ -473,7 +489,7 @@ int dirfile_madd_spec(DIRFILE* D, const char* line, const char* parent)
 
   /* start parsing */
   n_cols = _GD_Tokenise(D, instring, outstring, in_cols, "dirfile_madd_spec()",
-      0);
+      0, D->standards, D->flags & GD_PERMISSIVE);
 
   if (D->error) {
     dreturn("%i", -1); /* tokeniser threw an error */
@@ -540,7 +556,7 @@ int dirfile_add_spec(DIRFILE* D, const char* line, int fragment_index)
 
   /* start parsing */
   n_cols = _GD_Tokenise(D, instring, outstring, in_cols, "dirfile_add_spec()",
-      0);
+      0, D->standards, D->flags & GD_PERMISSIVE);
 
   if (D->error) {
     dreturn("%i", -1); /* tokeniser threw an error */
@@ -923,7 +939,7 @@ int dirfile_add_string(DIRFILE* D, const char* field_code, const char* value,
 
   /* Actually store the string, now */
   if (!error) {
-    entry = _GD_FindField(D, field_code, NULL);
+    entry = _GD_FindField(D, field_code, D->entry, D->n_entries, NULL);
 
     if (entry == NULL)
       _GD_InternalError(D); /* We should be able to find it: we just added it */
@@ -962,7 +978,7 @@ int dirfile_add_const(DIRFILE* D, const char* field_code, gd_type_t const_type,
 
   /* Actually store the constant, now */
   if (!error) {
-    entry = _GD_FindField(D, field_code, NULL);
+    entry = _GD_FindField(D, field_code, D->entry, D->n_entries, NULL);
 
     if (entry == NULL)
       _GD_InternalError(D); /* We should be able to find it: we just added it */
@@ -1316,7 +1332,7 @@ int dirfile_madd_string(DIRFILE* D, const char* parent, const char* field_code,
   /* Actually store the string, now */
   if (!error) {
     snprintf(buffer, GD_MAX_LINE_LENGTH, "%s/%s", parent, field_code);
-    entry = _GD_FindField(D, buffer, NULL);
+    entry = _GD_FindField(D, buffer, D->entry, D->n_entries, NULL);
 
     if (entry == NULL)
       _GD_InternalError(D); /* We should be able to find it: we just added it */
@@ -1356,7 +1372,7 @@ int dirfile_madd_const(DIRFILE* D, const char* parent, const char* field_code,
   /* Actually store the constant, now */
   if (!error) {
     snprintf(buffer, GD_MAX_LINE_LENGTH, "%s/%s", parent, field_code);
-    entry = _GD_FindField(D, buffer, NULL);
+    entry = _GD_FindField(D, buffer, D->entry, D->n_entries, NULL);
 
     if (entry == NULL)
       _GD_InternalError(D); /* We should be able to find it: we just added it */

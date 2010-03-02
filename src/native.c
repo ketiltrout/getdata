@@ -151,19 +151,14 @@ gd_type_t get_native_type(DIRFILE* D, const char* field_code_in)
 
   _GD_ClearError(D);
 
-  repr = _GD_GetRepr(D, field_code_in, &field_code);
+  entry = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1);
 
   if (D->error) {
     dreturn("0x%x", GD_UNKNOWN);
     return GD_UNKNOWN;
   }
 
-  entry = _GD_FindField(D, field_code, NULL);
-
-  if (entry == NULL)
-    _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, field_code);
-  else 
-    type = _GD_NativeType(D, entry, repr);
+  type = _GD_NativeType(D, entry, repr);
 
   if (field_code != field_code_in)
     free(field_code);

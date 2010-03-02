@@ -39,44 +39,53 @@
 #include <libgen.h>
 #endif
 
-static gd_type_t _GD_RawType(const char* type)
+static gd_type_t _GD_RawType(const char* type, int standards, int pedantic)
 {
+  gd_type_t t = GD_UNKNOWN;;
+  dtrace("\"%s\", %i, %i\n", type, standards, pedantic);
+
   /* for backwards compatibility */
   if (strlen(type) == 1) 
-    return _GD_LegacyType(type[0]);
+    t = _GD_LegacyType(type[0]);
+  else if (pedantic && standards < 5)
+    t = GD_UNKNOWN;
 
-  if (strcmp(type, "NULL") == 0)
-    return GD_NULL;
-  if (strcmp(type, "INT8") == 0)
-    return GD_INT8;
-  if (strcmp(type, "UINT8") == 0)
-    return GD_UINT8;
-  if (strcmp(type, "INT16") == 0)
-    return GD_INT16;
-  if (strcmp(type, "INT32") == 0)
-    return GD_INT32;
-  if (strcmp(type, "UINT32") == 0)
-    return GD_UINT32;
-  if (strcmp(type, "UINT64") == 0)
-    return GD_UINT64;
-  if (strcmp(type, "INT64") == 0)
-    return GD_INT64;
-  if (strcmp(type, "UINT16") == 0)
-    return GD_UINT16;
-  if (strcmp(type, "FLOAT32") == 0)
-    return GD_FLOAT32;
-  if (strcmp(type, "FLOAT") == 0)
-    return GD_FLOAT32;
-  if (strcmp(type, "FLOAT64") == 0)
-    return GD_FLOAT64;
-  if (strcmp(type, "DOUBLE") == 0)
-    return GD_FLOAT64;
-  if (strcmp(type, "COMPLEX64") == 0)
-    return GD_COMPLEX64;
-  if (strcmp(type, "COMPLEX128") == 0)
-    return GD_COMPLEX128;
+  else if (strcmp(type, "NULL") == 0)
+    t = GD_NULL;
+  else if (strcmp(type, "INT8") == 0)
+    t = GD_INT8;
+  else if (strcmp(type, "UINT8") == 0)
+    t = GD_UINT8;
+  else if (strcmp(type, "INT16") == 0)
+    t = GD_INT16;
+  else if (strcmp(type, "INT32") == 0)
+    t = GD_INT32;
+  else if (strcmp(type, "UINT32") == 0)
+    t = GD_UINT32;
+  else if (strcmp(type, "UINT64") == 0)
+    t = GD_UINT64;
+  else if (strcmp(type, "INT64") == 0)
+    t = GD_INT64;
+  else if (strcmp(type, "UINT16") == 0)
+    t = GD_UINT16;
+  else if (strcmp(type, "FLOAT32") == 0)
+    t = GD_FLOAT32;
+  else if (strcmp(type, "FLOAT") == 0)
+    t = GD_FLOAT32;
+  else if (strcmp(type, "FLOAT64") == 0)
+    t = GD_FLOAT64;
+  else if (strcmp(type, "DOUBLE") == 0)
+    t = GD_FLOAT64;
+  else if (pedantic && standards < 7)
+    t = GD_UNKNOWN;
 
-  return GD_UNKNOWN;
+  else if (strcmp(type, "COMPLEX64") == 0)
+    t = GD_COMPLEX64;
+  else if (strcmp(type, "COMPLEX128") == 0)
+    t = GD_COMPLEX128;
+
+  dreturn("%x", t);
+  return t;
 }
 
 static char* _GD_SetScalar(DIRFILE* D, const char* token, void* data, int type,
@@ -191,10 +200,10 @@ static char* _GD_SetScalar(DIRFILE* D, const char* token, void* data, int type,
 */
 static gd_entry_t* _GD_ParseRaw(DIRFILE* D, char* in_cols[MAX_IN_COLS],
     int n_cols, const gd_entry_t* parent, int me, const char* format_file,
-    int line, int pedantic)
+    int line, int standards, int pedantic, int *is_dot)
 {
-  dtrace("%p, %p, %i, %p, %i, \"%s\", %i, %i", D, in_cols, n_cols, parent, me,
-      format_file, line, pedantic);
+  dtrace("%p, %p, %i, %p, %i, \"%s\", %i, %i, %i, %p", D, in_cols, n_cols,
+      parent, me, format_file, line, standards, pedantic, is_dot);
 
   if (n_cols < 4) {
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_TOK, format_file, line, NULL);
@@ -231,7 +240,7 @@ static gd_entry_t* _GD_ParseRaw(DIRFILE* D, char* in_cols[MAX_IN_COLS],
   E->e->file[0].encoding = GD_ENC_UNKNOWN; /* don't know the encoding
                                               subscheme yet */
 
-  E->field = _GD_ValidateField(NULL, in_cols[0], pedantic);
+  E->field = _GD_ValidateField(NULL, in_cols[0], standards, pedantic, is_dot);
   if (E->field == in_cols[0]) {
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_NAME, format_file, line,
         in_cols[0]);
@@ -255,7 +264,7 @@ static gd_entry_t* _GD_ParseRaw(DIRFILE* D, char* in_cols[MAX_IN_COLS],
   else
     snprintf(E->e->filebase, FILENAME_MAX, "%s/%s", D->name, in_cols[0]);
 
-  E->data_type = _GD_RawType(in_cols[2]);
+  E->data_type = _GD_RawType(in_cols[2], standards, pedantic);
   E->e->size = GD_SIZE(E->data_type);
 
   if (E->e->size == 0 || E->data_type & 0x40)
@@ -283,13 +292,13 @@ static gd_entry_t* _GD_ParseRaw(DIRFILE* D, char* in_cols[MAX_IN_COLS],
 */
 static gd_entry_t* _GD_ParseLincom(DIRFILE* D, char* in_cols[MAX_IN_COLS],
     int n_cols, const gd_entry_t* parent, const char* format_file, int line,
-    int pedantic)
+    int standards, int pedantic, int* is_dot)
 {
   int i;
   char* ptr = NULL;
 
-  dtrace("%p, %p, %i, %p, \"%s\", %i, %i", D, in_cols, n_cols, parent,
-      format_file, line, pedantic);
+  dtrace("%p, %p, %i, %p, \"%s\", %i, %i, %i, %p", D, in_cols, n_cols, parent,
+      format_file, line, standards, pedantic, is_dot);
 
   if (n_cols < 3) {
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_TOK, format_file, line, NULL);
@@ -320,7 +329,7 @@ static gd_entry_t* _GD_ParseLincom(DIRFILE* D, char* in_cols[MAX_IN_COLS],
     E->e->entry[i] = NULL;
   }
 
-  E->field = _GD_ValidateField(parent, in_cols[0], pedantic);
+  E->field = _GD_ValidateField(parent, in_cols[0], standards, pedantic, is_dot);
   if (E->field == in_cols[0]) {
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_NAME, format_file, line,
         in_cols[0]);
@@ -383,10 +392,10 @@ static gd_entry_t* _GD_ParseLincom(DIRFILE* D, char* in_cols[MAX_IN_COLS],
 */
 static gd_entry_t* _GD_ParseLinterp(DIRFILE* D,
     char* in_cols[MAX_IN_COLS], int n_cols, const gd_entry_t* parent,
-    const char* format_file, int line, int pedantic)
+    const char* format_file, int line, int standards, int pedantic, int* is_dot)
 {
-  dtrace("%p, %p, %i, %p, \"%s\", %i, %i", D, in_cols, n_cols, parent,
-      format_file, line, pedantic);
+  dtrace("%p, %p, %i, %p, \"%s\", %i, %i, %i, %p", D, in_cols, n_cols, parent,
+      format_file, line, standards, pedantic, is_dot);
 
   if (n_cols < 4) {
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_TOK, format_file, line, NULL);
@@ -417,7 +426,7 @@ static gd_entry_t* _GD_ParseLinterp(DIRFILE* D,
   E->e->calculated = 1;
   E->table = NULL;
 
-  E->field = _GD_ValidateField(parent, in_cols[0], pedantic);
+  E->field = _GD_ValidateField(parent, in_cols[0], standards, pedantic, is_dot);
   if (E->field == in_cols[0]) {
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_NAME, format_file, line,
         in_cols[0]);
@@ -447,10 +456,10 @@ static gd_entry_t* _GD_ParseLinterp(DIRFILE* D,
 */
 static gd_entry_t* _GD_ParseMultiply(DIRFILE* D,
     char* in_cols[MAX_IN_COLS], int n_cols, const gd_entry_t* parent,
-    const char* format_file, int line, int pedantic)
+    const char* format_file, int line, int standards, int pedantic, int* is_dot)
 {
-  dtrace("%p, %p, %i, %p, \"%s\", %i, %i", D, in_cols, n_cols, parent,
-      format_file, line, pedantic);
+  dtrace("%p, %p, %i, %p, \"%s\", %i, %i, %i, %p", D, in_cols, n_cols, parent,
+      format_file, line, standards, pedantic, is_dot);
 
   if (n_cols < 4) {
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_TOK, format_file, line, NULL);
@@ -480,7 +489,7 @@ static gd_entry_t* _GD_ParseMultiply(DIRFILE* D,
   E->e->entry[0] = E->e->entry[1] = NULL;
   E->e->calculated = 1;
 
-  E->field = _GD_ValidateField(parent, in_cols[0], pedantic);
+  E->field = _GD_ValidateField(parent, in_cols[0], standards, pedantic, is_dot);
   if (E->field == in_cols[0]) {
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_NAME, format_file, line,
         in_cols[0]);
@@ -507,10 +516,10 @@ static gd_entry_t* _GD_ParseMultiply(DIRFILE* D,
 */
 static gd_entry_t* _GD_ParseBit(DIRFILE* D, int is_signed,
     char* in_cols[MAX_IN_COLS], int n_cols, const gd_entry_t* parent,
-    const char* format_file, int line, int pedantic)
+    const char* format_file, int line, int standards, int pedantic, int* is_dot)
 {
-  dtrace("%p, %i, %p, %i, %p, \"%s\", %i, %i", D, is_signed, in_cols, n_cols,
-      parent, format_file, line, pedantic);
+  dtrace("%p, %i, %p, %i, %p, \"%s\", %i, %i, %i, %p", D, is_signed, in_cols,
+      n_cols, parent, format_file, line, standards, pedantic, is_dot);
 
   if (n_cols < 4) {
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_TOK, format_file, line, NULL);
@@ -540,7 +549,7 @@ static gd_entry_t* _GD_ParseBit(DIRFILE* D, int is_signed,
   E->e->entry[0] = NULL;
   E->e->calculated = 1;
 
-  E->field = _GD_ValidateField(parent, in_cols[0], pedantic);
+  E->field = _GD_ValidateField(parent, in_cols[0], standards, pedantic, is_dot);
   if (E->field == in_cols[0]) {
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_NAME, format_file, line,
         in_cols[0]);
@@ -588,10 +597,10 @@ static gd_entry_t* _GD_ParseBit(DIRFILE* D, int is_signed,
 */
 static gd_entry_t* _GD_ParsePhase(DIRFILE* D, char* in_cols[MAX_IN_COLS],
     int n_cols, const gd_entry_t* parent, const char* format_file, int line,
-    int pedantic)
+    int standards, int pedantic, int* is_dot)
 {
-  dtrace("%p, %p, %i, %p, \"%s\", %i, %i", D, in_cols, n_cols, parent,
-      format_file, line, pedantic);
+  dtrace("%p, %p, %i, %p, \"%s\", %i, %i, %i, %p", D, in_cols, n_cols, parent,
+      format_file, line, standards, pedantic, is_dot);
 
   if (n_cols < 4) {
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_TOK, format_file, line, NULL);
@@ -620,7 +629,7 @@ static gd_entry_t* _GD_ParsePhase(DIRFILE* D, char* in_cols[MAX_IN_COLS],
   E->in_fields[0] = NULL;
   E->e->entry[0] = NULL;
 
-  E->field = _GD_ValidateField(parent, in_cols[0], pedantic);
+  E->field = _GD_ValidateField(parent, in_cols[0], standards, pedantic, is_dot);
   if (E->field == in_cols[0]) {
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_NAME, format_file, line,
         in_cols[0]);
@@ -652,12 +661,12 @@ static gd_entry_t* _GD_ParsePhase(DIRFILE* D, char* in_cols[MAX_IN_COLS],
 */
 static gd_entry_t* _GD_ParsePolynom(DIRFILE* D,
     char* in_cols[MAX_IN_COLS], int n_cols, const gd_entry_t* parent,
-    const char* format_file, int line, int pedantic)
+    const char* format_file, int line, int standards, int pedantic, int* is_dot)
 {
   int i;
 
-  dtrace("%p, %p, %i, %p, \"%s\", %i, %i", D, in_cols, n_cols, parent,
-      format_file, line, pedantic);
+  dtrace("%p, %p, %i, %p, \"%s\", %i, %i, %i, %p", D, in_cols, n_cols, parent,
+      format_file, line, standards, pedantic, is_dot);
 
   if (n_cols < 5) {
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_TOK, format_file, line, NULL);
@@ -683,7 +692,7 @@ static gd_entry_t* _GD_ParsePolynom(DIRFILE* D,
   memset(E->e, 0, sizeof(struct _gd_private_entry));
 
   E->field_type = GD_POLYNOM_ENTRY;
-  E->field = _GD_ValidateField(parent, in_cols[0], pedantic);
+  E->field = _GD_ValidateField(parent, in_cols[0], standards, pedantic, is_dot);
   if (E->field == in_cols[0]) {
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_NAME, format_file, line,
         in_cols[0]);
@@ -731,13 +740,13 @@ static gd_entry_t* _GD_ParsePolynom(DIRFILE* D,
 */
 static gd_entry_t* _GD_ParseConst(DIRFILE* D, char* in_cols[MAX_IN_COLS],
     int n_cols, const gd_entry_t* parent, const char* format_file, int line,
-    int pedantic)
+    int standards, int pedantic, int* is_dot)
 {
   int dummy;
   char* ptr;
 
-  dtrace("%p, %p, %i, %p, \"%s\", %i, %i", D, in_cols, n_cols, parent,
-      format_file, line, pedantic);
+  dtrace("%p, %p, %i, %p, \"%s\", %i, %i, %i, %p", D, in_cols, n_cols, parent,
+      format_file, line, standards, pedantic, is_dot);
 
   if (n_cols < 4) {
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_TOK, format_file, line, NULL);
@@ -765,7 +774,7 @@ static gd_entry_t* _GD_ParseConst(DIRFILE* D, char* in_cols[MAX_IN_COLS],
   E->field_type = GD_CONST_ENTRY;
   E->e->calculated = 1;
 
-  E->field = _GD_ValidateField(parent, in_cols[0], pedantic);
+  E->field = _GD_ValidateField(parent, in_cols[0], standards, pedantic, is_dot);
   if (E->field == in_cols[0]) {
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_NAME, format_file, line,
         in_cols[0]);
@@ -783,7 +792,7 @@ static gd_entry_t* _GD_ParseConst(DIRFILE* D, char* in_cols[MAX_IN_COLS],
     return NULL;
   }
 
-  E->const_type = _GD_RawType(in_cols[2]);
+  E->const_type = _GD_RawType(in_cols[2], standards, pedantic);
 
   if (GD_SIZE(E->const_type) == 0 || E->data_type & 0x40) {
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_TYPE, format_file, line,
@@ -826,10 +835,10 @@ static gd_entry_t* _GD_ParseConst(DIRFILE* D, char* in_cols[MAX_IN_COLS],
 */
 static gd_entry_t* _GD_ParseString(DIRFILE* D, char *in_cols[MAX_IN_COLS],
     int n_cols, const gd_entry_t* parent, const char* format_file, int line,
-    int pedantic)
+    int standards, int pedantic, int* is_dot)
 {
-  dtrace("%p, %p, %i, %p, \"%s\", %i, %i", D, in_cols, n_cols, parent,
-      format_file, line, pedantic);
+  dtrace("%p, %p, %i, %p, \"%s\", %i, %i, %i, %p", D, in_cols, n_cols, parent,
+      format_file, line, standards, pedantic, is_dot);
 
   if (n_cols < 3) {
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_TOK, format_file, line, NULL);
@@ -858,7 +867,7 @@ static gd_entry_t* _GD_ParseString(DIRFILE* D, char *in_cols[MAX_IN_COLS],
   E->e->string = strdup(in_cols[2]);
   E->e->calculated = 1;
 
-  E->field = _GD_ValidateField(parent, in_cols[0], pedantic);
+  E->field = _GD_ValidateField(parent, in_cols[0], standards, pedantic, is_dot);
   if (E->field == in_cols[0]) {
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_NAME, format_file, line,
         in_cols[0]);
@@ -921,16 +930,17 @@ gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, char** in_cols,
   gd_entry_t* E = NULL;
   void *ptr;
   char *cptr;
+  int is_dot = 0;
 
   dtrace("%p, %i, %p, %p, \"%s\", %i, %u, %i, %i, %i, %i", D, n_cols, in_cols,
       P, format_file, linenum, me, standards, creat, pedantic, insert);
 
   /* Check for barth-style metafield definition */
-  if (P == NULL)
+  if (P == NULL && (!pedantic || standards >= 7))
     for (cptr = in_cols[0] + 1; *cptr != '\0'; ++cptr)
       if (*cptr == '/') {
         *cptr = '\0';
-        P = _GD_FindField(D, in_cols[0], NULL);
+        P = _GD_FindField(D, in_cols[0], D->entry, D->n_entries, NULL);
         if (P == NULL)
           _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_NO_PARENT,
               D->fragment[me].cname, linenum, in_cols[0]);
@@ -953,7 +963,6 @@ gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, char** in_cols,
         return (!insert) ? E : NULL;
       }
 
-
   ptr = realloc(D->entry, (D->n_entries + 1) * sizeof(gd_entry_t*));
   if (ptr == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
@@ -965,12 +974,14 @@ gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, char** in_cols,
   if (n_cols < 2)
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_TOK, format_file, linenum,
         NULL);
-  else if (P == NULL && strcmp(in_cols[0], "INDEX") == 0)
+  else if (P == NULL && (strcmp(in_cols[0], "INDEX") == 0 || (pedantic &&
+          standards < 6 && strcmp(in_cols[0], "FILEFRAM") == 0)))
     /* reserved field name */
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_RES_NAME, format_file, linenum,
         NULL);
   else if (strcmp(in_cols[1], "RAW") == 0) {
-    E = _GD_ParseRaw(D, in_cols, n_cols, P, me, format_file, linenum, pedantic);
+    E = _GD_ParseRaw(D, in_cols, n_cols, P, me, format_file, linenum, standards,
+        pedantic, &is_dot);
 
     /* Create the binary file, if requested */
     if (!D->error && creat) {
@@ -997,31 +1008,52 @@ gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, char** in_cols,
       if (D->reference_field == NULL)
         D->reference_field = E;
   } else if (strcmp(in_cols[1], "LINCOM") == 0)
-    E = _GD_ParseLincom(D, in_cols, n_cols, P, format_file, linenum, pedantic);
+    E = _GD_ParseLincom(D, in_cols, n_cols, P, format_file, linenum, standards,
+        pedantic, &is_dot);
   else if (strcmp(in_cols[1], "LINTERP") == 0)
-    E = _GD_ParseLinterp(D, in_cols, n_cols, P, format_file, linenum, pedantic);
-  else if (strcmp(in_cols[1], "MULTIPLY") == 0)
+    E = _GD_ParseLinterp(D, in_cols, n_cols, P, format_file, linenum, standards,
+        pedantic, &is_dot);
+  else if (strcmp(in_cols[1], "MULTIPLY") == 0 && (!pedantic ||
+        standards >= 2))
     E = _GD_ParseMultiply(D, in_cols, n_cols, P, format_file, linenum,
-        pedantic);
+        standards, pedantic, &is_dot);
   else if (strcmp(in_cols[1], "BIT") == 0)
-    E = _GD_ParseBit(D, 0, in_cols, n_cols, P, format_file, linenum, pedantic);
-  else if (strcmp(in_cols[1], "PHASE") == 0)
-    E = _GD_ParsePhase(D, in_cols, n_cols, P, format_file, linenum, pedantic);
-  else if (strcmp(in_cols[1], "POLYNOM") == 0)
-    E = _GD_ParsePolynom(D, in_cols, n_cols, P, format_file, linenum, pedantic);
-  else if (strcmp(in_cols[1], "SBIT") == 0)
-    E = _GD_ParseBit(D, 1, in_cols, n_cols, P, format_file, linenum, pedantic);
-  else if (strcmp(in_cols[1], "CONST") == 0) {
-    E = _GD_ParseConst(D, in_cols, n_cols, P, format_file, linenum, pedantic);
+    E = _GD_ParseBit(D, 0, in_cols, n_cols, P, format_file, linenum, standards,
+        pedantic, &is_dot);
+  else if (strcmp(in_cols[1], "PHASE") == 0 && (!pedantic || standards >= 4))
+    E = _GD_ParsePhase(D, in_cols, n_cols, P, format_file, linenum, standards,
+        pedantic, &is_dot);
+  else if (strcmp(in_cols[1], "POLYNOM") == 0 && (!pedantic || standards >= 7))
+    E = _GD_ParsePolynom(D, in_cols, n_cols, P, format_file, linenum, standards,
+        pedantic, &is_dot);
+  else if (strcmp(in_cols[1], "SBIT") == 0 && (!pedantic || standards >= 7))
+    E = _GD_ParseBit(D, 1, in_cols, n_cols, P, format_file, linenum, standards,
+        pedantic, &is_dot);
+  else if (strcmp(in_cols[1], "CONST") == 0 && (!pedantic || standards >= 6)) {
+    E = _GD_ParseConst(D, in_cols, n_cols, P, format_file, linenum, standards,
+        pedantic, &is_dot);
     if (D->error == GD_E_OK && P == NULL)
       D->n_const++;
-  } else if (strcmp(in_cols[1], "STRING") == 0) {
-    E = _GD_ParseString(D, in_cols, n_cols, P, format_file, linenum, pedantic);
+  } else if (strcmp(in_cols[1], "STRING") == 0 && (!pedantic ||
+        standards >= 6))
+  {
+    E = _GD_ParseString(D, in_cols, n_cols, P, format_file, linenum, standards,
+        pedantic, &is_dot);
     if (D->error == GD_E_OK && P == NULL)
       D->n_string++;
   } else if (standards <= DIRFILE_STANDARDS_VERSION || pedantic)
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_LINE, format_file, linenum,
         NULL);
+
+  if (is_dot) {
+    ptr = realloc(D->dot_list, (D->n_dot + 1) * sizeof(gd_entry_t*));
+    if (ptr == NULL) {
+      _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+      dreturn ("%p", NULL);
+      return NULL;
+    }
+    D->dot_list = ptr;
+  }
 
   if (insert && D->error == GD_E_OK && E != NULL) {
     /* the Format file fragment index */
@@ -1029,7 +1061,8 @@ gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, char** in_cols,
 
     /* Check for duplicate */
     unsigned int u;
-    const gd_entry_t* Q = _GD_FindField(D, E->field, &u);
+    const gd_entry_t* Q = _GD_FindField(D, E->field, D->entry, D->n_entries,
+        &u);
 
     if (Q) {
       _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_DUPLICATE, format_file, linenum,
@@ -1059,6 +1092,12 @@ gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, char** in_cols,
         P->e->n_meta_string++;
     }
 
+    /* update the dot list if necessary */
+    if (is_dot) {
+      D->dot_list[D->n_dot++] = E;
+      qsort(D->dot_list, D->n_dot, sizeof(gd_entry_t*), entry_cmp);
+    }
+
     /* sort */
     _GD_InsertSort(D, E, u);
     D->n_entries++;
@@ -1080,7 +1119,8 @@ gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, char** in_cols,
 #define ACC_MODE_HEX   2
 #define ACC_MODE_UTF8  3
 int _GD_Tokenise(DIRFILE *D, const char* instring, char* outstring,
-    char** in_cols, const char* format_file, int linenum)
+    char** in_cols, const char* format_file, int linenum, int standards,
+    int pedantic)
 {
   const char* ip;
   char* op = outstring;
@@ -1092,8 +1132,8 @@ int _GD_Tokenise(DIRFILE *D, const char* instring, char* outstring,
   int n_acc = 0;
   int acc_mode = ACC_MODE_NONE;
 
-  dtrace("%p, \"%s\", %p, %p, \"%s\", %i", D, instring, outstring, in_cols,
-      format_file, linenum);
+  dtrace("%p, \"%s\", %p, %p, \"%s\", %i, %i, %i", D, instring, outstring,
+      in_cols, format_file, linenum, standards, pedantic);
 
   outstring[0] = '\0';
 
@@ -1223,9 +1263,9 @@ int _GD_Tokenise(DIRFILE *D, const char* instring, char* outstring,
         }
       }
     } else {
-      if (*ip == '\\')
+      if (*ip == '\\' && (!pedantic || standards >= 6))
         escaped_char = 1;
-      else if (*ip == '"') {
+      else if (*ip == '"' && (!pedantic || standards >= 6)) {
         if ((quotated = !quotated)) {
           if (ws) {
             if (n_cols >= MAX_IN_COLS)
@@ -1260,6 +1300,8 @@ int _GD_Tokenise(DIRFILE *D, const char* instring, char* outstring,
   if (quotated || escaped_char) /* Unterminated token */
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_UNTERM, format_file, linenum,
         NULL);
+  else if (n_cols < 2) /* any valid line has at least two tokens */
+    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_TOK, format_file, linenum, NULL);
 
   dreturn("%i", n_cols);
   return n_cols;
@@ -1270,22 +1312,40 @@ int _GD_Tokenise(DIRFILE *D, const char* instring, char* outstring,
  */
 static int _GD_ParseDirective(DIRFILE *D, char** in_cols, int n_cols,
     int me, int* standards, int linenum, char** ref_name, int* first_fragment,
-    unsigned long flags)
+    unsigned long *flags)
 {
   const char* ptr;
   int i;
+  int pedantic = *flags & GD_PEDANTIC;
 
-  dtrace("%p, %p, %i, %u, %p, %i, %p, %p, %lx", D, in_cols, n_cols, me,
+  dtrace("%p, %p, %i, %u, %p, %i, %p, %p, %p", D, in_cols, n_cols, me,
       standards, linenum, ref_name, first_fragment, flags);
 
   /* set up for possibly slashed reserved words */
-  ptr = in_cols[0] + ((in_cols[0][0] == '/') ? 1 : 0);
+  ptr = in_cols[0];
+  if (*standards >= 5 || !pedantic)
+    if (in_cols[0][0] == '/')
+      ptr++;
 
-  if (n_cols < 2)
-    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_TOK, D->fragment[me].cname,
-        linenum, NULL);
-  else if (strcmp(ptr, "ENCODING") == 0) {
-    if (!(flags & GD_FORCE_ENCODING)) {
+  if (!pedantic && in_cols[0][0] != '/' && n_cols > 2)
+    /* check for a field spec masquerading as a directive */
+    if ((strcmp(in_cols[1], "RAW") == 0) ||
+        (strcmp(in_cols[1], "LINCOM") == 0) ||
+        (strcmp(in_cols[1], "BIT") == 0) ||
+        (strcmp(in_cols[1], "LINTERP") == 0) ||
+        (strcmp(in_cols[1], "PHASE") == 0) ||
+        (strcmp(in_cols[1], "MULTIPLY") == 0) ||
+        (strcmp(in_cols[1], "SBIT") == 0) ||
+        (strcmp(in_cols[1], "POLYNOM") == 0) ||
+        (strcmp(in_cols[1], "STRING") == 0) ||
+        (strcmp(in_cols[1], "CONST") == 0))
+    {
+      dreturn("%i", 0);
+      return 0;
+    }
+
+  if (strcmp(ptr, "ENCODING") == 0 && (!pedantic || *standards >= 6)) {
+    if (!(*flags & GD_FORCE_ENCODING)) {
       D->fragment[me].encoding = GD_ENC_UNSUPPORTED;
       for (i = 0; i < GD_N_SUBENCODINGS - 1; ++i)
         if (strcmp(in_cols[1], _gd_ef[i].ffname) == 0) {
@@ -1293,8 +1353,8 @@ static int _GD_ParseDirective(DIRFILE *D, char** in_cols, int n_cols,
           break;
         }
     }
-  } else if (strcmp(ptr, "ENDIAN") == 0) {
-    if (!(flags & GD_FORCE_ENDIAN)) {
+  } else if (strcmp(ptr, "ENDIAN") == 0 && (!pedantic || *standards >= 5)) {
+    if (!(*flags & GD_FORCE_ENDIAN)) {
       if (strcmp(in_cols[1], "big") == 0)
         D->fragment[me].byte_sex = GD_BIG_ENDIAN;
       else if (strcmp(in_cols[1], "little") == 0)
@@ -1303,28 +1363,30 @@ static int _GD_ParseDirective(DIRFILE *D, char** in_cols, int n_cols,
         _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_ENDIAN,
             D->fragment[me].cname, linenum, NULL);
     }
-  } else if (strcmp(ptr, "FRAMEOFFSET") == 0)
+  } else if (strcmp(ptr, "FRAMEOFFSET") == 0 && (!pedantic || *standards >= 1))
     D->fragment[me].frame_offset = strtoll(in_cols[1], NULL, 10);
-  else if (strcmp(ptr, "INCLUDE") == 0) {
+  else if (strcmp(ptr, "INCLUDE") == 0 && (!pedantic || *standards >= 3)) {
+    int saved_standards = *standards;
     *first_fragment = _GD_Include(D, in_cols[1], D->fragment[me].cname, linenum,
         ref_name, me, standards, D->fragment[me].encoding |
         D->fragment[me].byte_sex);
-  } else if (strcmp(ptr, "META") == 0) {
-    const gd_entry_t* P =  _GD_FindField(D, in_cols[1], NULL);
+    *standards = saved_standards;
+  } else if (strcmp(ptr, "META") == 0 && (!pedantic || *standards >= 6)) {
+    const gd_entry_t* P =  _GD_FindField(D, in_cols[1], D->entry, D->n_entries,
+        NULL);
     if (P == NULL)
-      _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_NO_PARENT,
-          D->fragment[me].cname, linenum, in_cols[1]);
+      _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_NO_PARENT, D->fragment[me].cname,
+          linenum, in_cols[1]);
     else if (P->fragment_index != me)
-      _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_LOCATION,
-          D->fragment[me].cname, linenum, in_cols[1]);
+      _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_LOCATION, D->fragment[me].cname,
+          linenum, in_cols[1]);
     else if (n_cols < 4)
-      _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_TOK,
-          D->fragment[me].cname, linenum, NULL);
+      _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_TOK, D->fragment[me].cname,
+          linenum, NULL);
     else
-      _GD_ParseFieldSpec(D, n_cols - 2, in_cols + 2, P,
-          D->fragment[me].cname, linenum, me, *standards, 0,
-          flags & GD_PEDANTIC, 1);
-  } else if (strcmp(ptr, "PROTECT") == 0) {
+      _GD_ParseFieldSpec(D, n_cols - 2, in_cols + 2, P, D->fragment[me].cname,
+          linenum, me, *standards, 0, pedantic, 1);
+  } else if (strcmp(ptr, "PROTECT") == 0 && (!pedantic || *standards >= 6)) {
     if (strcmp(in_cols[1], "none") == 0)
       D->fragment[me].protection = GD_PROTECT_NONE;
     else if (strcmp(in_cols[1], "format") == 0)
@@ -1336,12 +1398,14 @@ static int _GD_ParseDirective(DIRFILE *D, char** in_cols, int n_cols,
     else
       _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_PROTECT, D->fragment[me].cname,
           linenum, in_cols[1]);
-  } else if (strcmp(ptr, "REFERENCE") == 0) {
+  } else if (strcmp(ptr, "REFERENCE") == 0 && (!pedantic || *standards >= 6)) {
     free(*ref_name);
     *ref_name = strdup(in_cols[1]);
-  } else if (strcmp(ptr, "VERSION") == 0)
+  } else if (strcmp(ptr, "VERSION") == 0 && (!pedantic || *standards >= 5)) {
     *standards = atoi(in_cols[1]);
-  else {
+    if (!pedantic && ~(*flags) & GD_PERMISSIVE)
+      *flags |= (pedantic = GD_PEDANTIC);
+  } else {
     dreturn("%i", 0);
     return 0;
   }
@@ -1375,17 +1439,17 @@ char* _GD_ParseFragment(FILE* fp, DIRFILE *D, int me, int* standards,
   int saved_line = 0;
   char* saved_token = NULL;
 
-  dtrace("%p, %p, %i, %p", fp, D, me, standards);
+  dtrace("%p, %p, %i, %p, %lx", fp, D, me, standards, flags);
 
   /* start parsing */
   while (rescan || _GD_GetLine(fp, instring, &linenum)) {
     rescan = 0;
     n_cols = _GD_Tokenise(D, instring, outstring, in_cols,
-        D->fragment[me].cname, linenum);
+        D->fragment[me].cname, linenum, *standards, flags & GD_PEDANTIC);
 
     if (D->error == GD_E_OK)
       match = _GD_ParseDirective(D, in_cols, n_cols, me, standards, linenum,
-          &ref_name, &first_fragment, flags);
+          &ref_name, &first_fragment, &flags);
 
     if (D->error == GD_E_OK && !match)
       first_raw = _GD_ParseFieldSpec(D, n_cols, in_cols, NULL,

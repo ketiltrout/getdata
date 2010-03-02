@@ -44,7 +44,7 @@ const void* get_mconstants(DIRFILE* D, const char* parent,
 
   _GD_ClearError(D);
 
-  const gd_entry_t* P = _GD_FindField(D, parent, NULL);
+  const gd_entry_t* P = _GD_FindField(D, parent, D->entry, D->n_entries, NULL);
 
   if (P == NULL || P->e->n_meta == -1) {
     _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, parent);
@@ -97,7 +97,7 @@ const char** get_mstrings(DIRFILE* D, const char* parent)
 
   _GD_ClearError(D);
 
-  const gd_entry_t* P = _GD_FindField(D, parent, NULL);
+  const gd_entry_t* P = _GD_FindField(D, parent, D->entry, D->n_entries, NULL);
 
   if (P == NULL || P->e->n_meta == -1) {
     _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, parent);
@@ -150,7 +150,7 @@ const char** get_mfield_list_by_type(DIRFILE* D, const char* parent,
 
   _GD_ClearError(D);
 
-  const gd_entry_t* P = _GD_FindField(D, parent, NULL);
+  const gd_entry_t* P = _GD_FindField(D, parent, D->entry, D->n_entries, NULL);
 
   if (P == NULL || P->e->n_meta == -1) {
     _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, parent);
@@ -222,7 +222,7 @@ const char** get_mvector_list(DIRFILE* D, const char* parent)
 
   _GD_ClearError(D);
 
-  const gd_entry_t* P = _GD_FindField(D, parent, NULL);
+  const gd_entry_t* P = _GD_FindField(D, parent, D->entry, D->n_entries, NULL);
 
   if (P == NULL) {
     _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, parent);
@@ -276,7 +276,7 @@ const char** get_mfield_list(DIRFILE* D, const char* parent)
 
   _GD_ClearError(D);
 
-  const gd_entry_t* P = _GD_FindField(D, parent, NULL);
+  const gd_entry_t* P = _GD_FindField(D, parent, D->entry, D->n_entries, NULL);
 
   if (P == NULL) {
     _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, parent);

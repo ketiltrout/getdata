@@ -75,7 +75,7 @@ const char* dirfile_reference(DIRFILE* D, const char* field_code)
   }
 
   /* Check field */
-  gd_entry_t *E = _GD_FindField(D, field_code, NULL);
+  gd_entry_t *E = _GD_FindField(D, field_code, D->entry, D->n_entries, NULL);
 
   if (E == NULL) {
     _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, field_code);

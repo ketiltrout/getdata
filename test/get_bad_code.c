@@ -1,7 +1,7 @@
 /* Attempt to read a non-existant field */
 #include "../src/getdata.h"
 
-
+#include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -16,7 +16,7 @@ int main(void)
   const char* format = __TEST__ "dirfile/format";
   const char* format_data = "\n";
   unsigned char c = 0;
-  int fd;
+  int fd, r = 0;
 
   mkdir(filedir, 0777);
 
@@ -33,8 +33,15 @@ int main(void)
   unlink(format);
   rmdir(filedir);
 
-  if (n != 0)
-    return 1;
+  if (n != 0) {
+    fprintf(stderr, "n = %i\n", n);
+    r = 1;
+  }
 
-  return (error != GD_E_BAD_CODE);
+  if (error != GD_E_BAD_CODE) {
+    fprintf(stderr, "error = %i\n", error);
+    r = 1;
+  }
+
+  return r;
 }

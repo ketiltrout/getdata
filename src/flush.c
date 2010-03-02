@@ -516,6 +516,7 @@ int dirfile_metaflush(DIRFILE* D)
 int dirfile_flush(DIRFILE* D, const char* field_code)
 {
   unsigned int i;
+  int repr;
   char *simple_field_code;
   gd_entry_t *E;
 
@@ -533,13 +534,9 @@ int dirfile_flush(DIRFILE* D, const char* field_code)
           _GD_Flush(D, D->entry[i]);
   } else {
     /* discard representation */
-    _GD_GetRepr(D, field_code, &simple_field_code);
+    E = _GD_FindFieldAndRepr(D, field_code, &simple_field_code, &repr, NULL, 1);
 
-    E = _GD_FindField(D, simple_field_code, NULL);
-
-    if (E == NULL)
-      _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, field_code);
-    else
+    if (!D->error)
       _GD_Flush(D, E);
 
     if (field_code != simple_field_code)

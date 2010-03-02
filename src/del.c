@@ -174,15 +174,15 @@ static void _GD_DeReference(DIRFILE* D, gd_entry_t* E, gd_entry_t* C,
   dreturnvoid();
 }
 
-int dirfile_delete(DIRFILE* D, const char* field_code, int flags)
+int dirfile_delete(DIRFILE* D, const char* field_code_in, int flags)
 {
   unsigned int index;
   unsigned int first, last = 0;
-  const int len = strlen(field_code);
-  int n_del, i;
+  int n_del, i, repr;
   unsigned int j;
+  char *field_code;
 
-  dtrace("%p, \"%s\", %x", D, field_code, flags);
+  dtrace("%p, \"%s\", %x", D, field_code_in, flags);
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -198,13 +198,15 @@ int dirfile_delete(DIRFILE* D, const char* field_code, int flags)
 
   _GD_ClearError(D);
 
-  gd_entry_t *E = _GD_FindField(D, field_code, &index);
+  gd_entry_t *E = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr,
+      &index, 1);
 
-  if (E == NULL) {
-    _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, field_code);
+  if (D->error) {
     dreturn("%i", -1);
     return -1;
   }
+
+  const int len = strlen(field_code);
 
   /* check protection */
   if (D->fragment[E->fragment_index].protection & GD_PROTECT_FORMAT) {
@@ -223,8 +225,12 @@ int dirfile_delete(DIRFILE* D, const char* field_code, int flags)
   } else if (E->e->n_meta > 0) {
     /* find one of the meta fields -- it's not true that metafields are
      * necessarily sorted directly after their parent */
-    if (_GD_FindField(D, E->e->meta_entry[0]->field, &first) == NULL) {
+    if (_GD_FindField(D, E->e->meta_entry[0]->field, D->entry, D->n_entries,
+          &first) == NULL)
+    {
       _GD_InternalError(D);
+      if (field_code != field_code_in)
+        free(field_code);
       dreturn("%i", -1);
       return -1;
     }
@@ -247,6 +253,9 @@ int dirfile_delete(DIRFILE* D, const char* field_code, int flags)
       else
         break;
   }
+
+  if (field_code != field_code_in)
+    free(field_code);
 
   /* gather a list of fields */
   gd_entry_t **del_list = malloc(sizeof(gd_entry_t*) * (1 + E->e->n_meta));

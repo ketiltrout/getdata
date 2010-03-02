@@ -42,20 +42,16 @@ int get_constant(DIRFILE* D, const char *field_code_in, gd_type_t return_type,
 
   _GD_ClearError(D);
 
-  repr = _GD_GetRepr(D, field_code_in, &field_code);
-
+  entry = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1);
+    
   if (D->error) {
     dreturn("%i", -1);
     return -1;
   }
 
-  entry = _GD_FindField(D, field_code, NULL);
-    
-  if (entry == NULL)
-    _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, field_code);
-  else if (entry->field_type != GD_CONST_ENTRY)
+  if (entry->field_type != GD_CONST_ENTRY)
     _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
-  else
+  else if (!D->error)
     _GD_DoField(D, entry, repr, 0, 1, return_type, data_out);
 
   if (field_code != field_code_in)
@@ -95,18 +91,14 @@ int put_constant(DIRFILE* D, const char *field_code_in, gd_type_t data_type,
 
   _GD_ClearError(D);
 
-  repr = _GD_GetRepr(D, field_code_in, &field_code);
+  entry = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1);
 
   if (D->error) {
     dreturn("%i", -1);
     return -1;
   }
 
-  entry = _GD_FindField(D, field_code, NULL);
-
-  if (entry == NULL)
-    _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, field_code);
-  else if (entry->field_type != GD_CONST_ENTRY)
+  if (entry->field_type != GD_CONST_ENTRY)
     _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
   else 
     _GD_DoFieldOut(D, entry, repr, 0, 0, data_type, data_in);

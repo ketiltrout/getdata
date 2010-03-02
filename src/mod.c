@@ -134,9 +134,11 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
 
   if ((D->flags & GD_ACCMODE) != GD_RDWR)
     _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
-  else if ((E = _GD_FindField(D, field_code, NULL)) == NULL)
+  else if ((E = _GD_FindField(D, field_code, D->entry, D->n_entries, NULL))
+      == NULL)
+  {
     _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, field_code);
-  else if (D->fragment[E->fragment_index].protection & GD_PROTECT_FORMAT)
+  } else if (D->fragment[E->fragment_index].protection & GD_PROTECT_FORMAT)
     _GD_SetError(D, GD_E_PROTECTED, GD_E_PROTECTED_FORMAT, NULL, 0,
         D->fragment[E->fragment_index].cname);
   else if (E->field_type != N->field_type)
@@ -684,7 +686,7 @@ int dirfile_alter_lincom(DIRFILE* D, const char* field_code, int n_fields,
   } else if (n_fields != 0)
     N.n_fields = n_fields;
   else {
-    gd_entry_t *E = _GD_FindField(D, field_code, NULL);
+    gd_entry_t *E = _GD_FindField(D, field_code, D->entry, D->n_entries, NULL);
 
     if (E == NULL) {
       _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, field_code);
@@ -751,7 +753,7 @@ int dirfile_alter_clincom(DIRFILE* D, const char* field_code, int n_fields,
   } else if (n_fields != 0)
     N.n_fields = n_fields;
   else {
-    gd_entry_t *E = _GD_FindField(D, field_code, NULL);
+    gd_entry_t *E = _GD_FindField(D, field_code, D->entry, D->n_entries, NULL);
 
     if (E == NULL) {
       _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, field_code);
@@ -970,7 +972,7 @@ int dirfile_alter_polynom(DIRFILE* D, const char* field_code, int poly_ord,
   } else if (poly_ord != 0)
     N.poly_ord = poly_ord;
   else {
-    gd_entry_t *E = _GD_FindField(D, field_code, NULL);
+    gd_entry_t *E = _GD_FindField(D, field_code, D->entry, D->n_entries, NULL);
 
     if (E == NULL) {
       _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, field_code);
@@ -1026,7 +1028,7 @@ int dirfile_alter_cpolynom(DIRFILE* D, const char* field_code, int poly_ord,
   } else if (poly_ord != 0)
     N.poly_ord = poly_ord;
   else {
-    gd_entry_t *E = _GD_FindField(D, field_code, NULL);
+    gd_entry_t *E = _GD_FindField(D, field_code, D->entry, D->n_entries, NULL);
 
     if (E == NULL) {
       _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, field_code);
@@ -1086,7 +1088,7 @@ int dirfile_alter_spec(DIRFILE* D, const char* line, int move)
 
   /* start parsing */
   n_cols = _GD_Tokenise(D, instring, outstring, in_cols,
-      "dirfile_alter_spec()", 0);
+      "dirfile_alter_spec()", 0, D->standards, D->flags & GD_PERMISSIVE);
 
   if (D->error) {
     dreturn("%i", -1); /* tokeniser threw an error */
@@ -1101,7 +1103,7 @@ int dirfile_alter_spec(DIRFILE* D, const char* line, int move)
     return -1;
   }
 
-  N = _GD_FindField(D, in_cols[0], NULL);
+  N = _GD_FindField(D, in_cols[0], D->entry, D->n_entries, NULL);
 
   if (N == NULL) {
     _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, in_cols[0]);
@@ -1156,7 +1158,7 @@ int dirfile_malter_spec(DIRFILE* D, const char* line, const char* parent,
 
   _GD_ClearError(D);
 
-  N = _GD_FindField(D, parent, NULL);
+  N = _GD_FindField(D, parent, D->entry, D->n_entries, NULL);
   if (N == NULL) {
     _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, parent);
     dreturn("%i", -1);
@@ -1169,7 +1171,7 @@ int dirfile_malter_spec(DIRFILE* D, const char* line, const char* parent,
 
   /* start parsing */
   n_cols = _GD_Tokenise(D, instring, outstring, in_cols,
-      "dirfile_malter_spec()", 0);
+      "dirfile_malter_spec()", 0, D->standards, D->flags & GD_PERMISSIVE);
 
   if (D->error) {
     dreturn("%i", -1); /* tokeniser threw an error */

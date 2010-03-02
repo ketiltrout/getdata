@@ -321,7 +321,7 @@ int dirfile_move(DIRFILE* D, const char* field_code, int new_fragment,
 
   _GD_ClearError(D);
 
-  E = _GD_FindField(D, field_code, NULL);
+  E = _GD_FindField(D, field_code, D->entry, D->n_entries, NULL);
 
   if (E == NULL) {
     _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, field_code);

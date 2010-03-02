@@ -7,6 +7,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <string.h>
+#include <stdio.h>
 #include <errno.h>
 #include <unistd.h>
 
@@ -17,7 +18,7 @@ int main(void)
   const char* data = __TEST__ "dirfile/data";
   const char* format_data = "data RAW UINT8 8\nFRAMEOFFSET 2\n";
   uint8_t c[8], d;
-  int fd, i;
+  int fd, i, r = 0;
   struct stat buf;
 
   mkdir(filedir, 0777);
@@ -44,10 +45,14 @@ int main(void)
   i = 0;
   while (read(fd, &d, sizeof(uint8_t))) {
     if (i < 24 || i >= 32) {
-      if (d != 0)
-        return 1;
-    } else if (d != i + 16)
-      return 1;
+      if (d != 0) {
+        fprintf(stderr, "d[%i] = %i\n", i, d);
+        r = 1;
+      }
+    } else if (d != i + 16) {
+      fprintf(stderr, "d[%i] = %i\n", i, d);
+      r = 1;
+    }
     i++;
   }
   close(fd);
@@ -56,10 +61,14 @@ int main(void)
   unlink(format);
   rmdir(filedir);
 
-  if (error)
-    return 1;
-  if (n != 8)
-    return 1;
+  if (error) {
+    fprintf(stderr, "error = %i\n", error);
+    r = 1;
+  }
+  if (n != 8) {
+    fprintf(stderr, "n = %i\n", n);
+    r = 1;
+  }
 
-  return 0;
+  return r;
 }

@@ -228,18 +228,14 @@ double get_framenum_subset64(DIRFILE* D, const char* field_code_in,
 
   _GD_ClearError(D);
 
-  repr = _GD_GetRepr(D, field_code_in, &field_code);
+  entry = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1);
 
   if (D->error) {
     dreturn("%g", frame);
     return frame;
   }
 
-  entry = _GD_FindField(D, field_code, NULL);
-
-  if (entry == NULL)
-    _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, field_code);
-  else if (_GD_NativeType(D, entry, repr) & GD_COMPLEX)
+  if (_GD_NativeType(D, entry, repr) & GD_COMPLEX)
     _GD_SetError(D, GD_E_DOMAIN, GD_E_DOMAIN_COMPLEX, NULL, 0, NULL);
 
   if (field_code != field_code_in)

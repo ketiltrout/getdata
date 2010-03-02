@@ -1,4 +1,60 @@
-2010-03-03   D. V. Wiebe <getdata@ketiltrout.net>   svn:379
+2010-03-02   D. V. Wiebe <getdata@ketiltrout.net>   svn:380
+	* test/version_0.c test/version_1.c test/version_2.c test/version_6_strict.c
+	test/version_3.c test/version_4.c test/version_5.c test/version_6.c
+	test/parse_version_permissive.c test/version_7_strict.c test/version_7.c
+	test/version_5_strict.c: Added.
+
+	* test/parse_version_pedantic.c: Removed.
+
+	* test/parse_name.c: Update.
+
+	* test/put_foffs.c test/parse_version.c test/parse_version_slash.c
+	test/get_bad_code.c test/parse_name_ext.c: Better error reporting.
+
+	* src/getdata.h.in: Add GD_PERMISSIVE.
+
+	* src/name.c src/internal.h: move entry_cmp() to header as a static inline.
+
+	* src/internal.h: Add n_dot, dot_list, standards to _GD_DIRFILE.
+
+	* src/common.c (_GD_FindField): Pass the list and count as parameters.  If
+	looking for FILEFRAM in early versions, look for INDEX instead.
+	* src/common.c (_GD_FindFieldAndRepr): Added.
+
+	* src/entry.c (_GD_GetScalar get_entry get_entry_type get_fragment_index
+	dirfile_validate): Call _GD_FindFieldAndRepr instead of _GD_GetRepr and
+	_GD_FindField.
+	* src/index.c (get_framenum_subset64): Ditto.
+	* src/getdata.c (getdata64): Ditto.
+	* src/flush.c (dirfile_flush): Ditto.
+	* src/native.c (get_native_type): Ditto.
+	* src/spf.c (get_spf): Ditto.
+	* src/constant.c (get_constant put_constant): Ditto.
+	* src/putdata.c (putdata64): Ditto.
+	* src/del.c (dirfile_delete): Ditto.
+
+	* src/entry.c (get_raw_filename): Remove the representation from the input by
+	calling _GD_FindFieldAndRepr.
+
+	* src/name.c (_GD_ValidateField): Behave differently with different
+	versions.  Also set *is_dot on permitted '.' in field name.
+	* src/parse.c (_GD_RawType _GD_ParseRaw _GD_ParseLincom _GD_ParseLinterp
+	_GD_ParseMultiply _GD_ParseBit _GD_ParsePhase _GD_ParsePolynom
+	_GD_ParseConst _GD_ParseString _GD_ParseFragment): Behave differently with
+	different versions.
+	* src/parse.c (_GD_ParseFieldSpec): Behave differently with different
+	versions.  Make FILEFRAM a reserved field name in early versions.
+	* src/parse.c (_GD_ParseDirective): Behave differently with different
+	versions.  Try to allow fields with directive names when it wouldn't confuse
+	us, and not in pedantic mode.  Set GD_PEDANTIC on encountering a VERSION
+	directive unless GD_PERMISSIVE was specified.
+
+	* src/name.c (dirfile_rename): Update the dot list when necessary.
+	* src/add.c (_GD_Add): Ditto.
+
+	* src/open.c (dirfile_cbopen): Initialise D->standards.
+
+2010-03-02   D. V. Wiebe <getdata@ketiltrout.net>   svn:379
 	* util/dirfile2ascii.c: Fix missing break statement per Matthew Truch.
 
 2010-02-19   D. V. Wiebe <getdata@ketiltrout.net>   svn:377

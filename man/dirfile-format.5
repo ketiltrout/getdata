@@ -910,7 +910,9 @@ fields to be used as parameters in field specification lines.  It also removed
 .I FILEFRAM
 as an alias for
 .IR INDEX ,
-and allowed
+and prohibited
+.BR .
+but allowed
 .B #
 and
 .B \e
@@ -928,7 +930,7 @@ and
 the new-style type specifiers, and increased the range of the
 .B BIT
 field type from 32 to 64 bits.  It also prohibited the characters
-.B #&/;<>\e.|
+.B #&/;<>\e|
 in field names.
 
 Version 4 of the Standards (October 2006) added the

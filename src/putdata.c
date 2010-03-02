@@ -548,17 +548,14 @@ size_t putdata64(DIRFILE* D, const char *field_code_in, off64_t first_frame,
 
   _GD_ClearError(D);
 
-  repr = _GD_GetRepr(D, field_code_in, &field_code);
+  entry = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1);
 
   if (D->error) {
     dreturn("%i", 0);
     return 0;
   }
-  entry = _GD_FindField(D, field_code, NULL);
 
-  if (entry == NULL)
-    _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, field_code);
-  else if (entry->field_type & GD_SCALAR_ENTRY)
+  if (entry->field_type & GD_SCALAR_ENTRY)
     _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
 
   if (field_code != field_code_in)

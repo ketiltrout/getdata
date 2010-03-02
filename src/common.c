@@ -93,16 +93,21 @@ gd_type_t _GD_LegacyType(char c)
 
 /* Binary search to find the field */
 gd_entry_t* _GD_FindField(DIRFILE* D, const char* field_code,
-    unsigned int *index)
+    gd_entry_t** list, unsigned int u, unsigned int *index)
 {
   int c;
-  unsigned int i, l = 0, u = D->n_entries;
+  unsigned int i, l = 0;
 
-  dtrace("%p, \"%s\", %p", D, field_code, index);
+  dtrace("%p, \"%s\", %p, %u, %p", D, field_code, list, u, index);
+
+  /* handle FILEFRAM */
+  if (D->standards < 6 && (D->flags & GD_PEDANTIC) &&
+      strcmp(field_code, "FILEFRAM") == 0)
+    field_code = "INDEX";
 
   while (l < u) {
     i = (l + u) / 2;
-    c = strcmp(field_code, D->entry[i]->field);
+    c = strcmp(field_code, list[i]->field);
     if (c < 0)
       u = i;
     else if (c > 0)
@@ -111,8 +116,8 @@ gd_entry_t* _GD_FindField(DIRFILE* D, const char* field_code,
       if (index != NULL) 
         *index = i;
 
-      dreturn("%p", D->entry[i]);
-      return D->entry[i];
+      dreturn("%p", list[i]);
+      return list[i];
     }
   }
 
@@ -823,19 +828,10 @@ int _GD_BadInput(DIRFILE* D, gd_entry_t* E, int i)
   dtrace("%p, %p, %i", D, E, i);
 
   if (E->e->entry[i] == NULL) {
-    E->e->repr[i] = _GD_GetRepr(D, E->in_fields[i], &code);
+    E->e->entry[i] = _GD_FindFieldAndRepr(D, E->in_fields[i], &code,
+        &E->e->repr[i], NULL, 1);
 
     if (D->error) {
-      dreturn("%i", 1);
-      return 1;
-    }
-
-    E->e->entry[i] = _GD_FindField(D, code, NULL);
-
-    if (E->e->entry[i] == NULL) {
-      _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, code);
-      if (code != E->in_fields[i])
-        free(code);
       dreturn("%i", 1);
       return 1;
     }
@@ -853,6 +849,42 @@ int _GD_BadInput(DIRFILE* D, gd_entry_t* E, int i)
 
   dreturn("%i", 0);
   return 0;
+}
+
+/* Find the entry and the representation */
+gd_entry_t* _GD_FindFieldAndRepr(DIRFILE* D, const char* field_code_in,
+    char** field_code, int* repr, unsigned int *index, int set)
+{
+  gd_entry_t* E = NULL;
+
+  dtrace("%p, \"%s\", %p, %p, %p, %i", D, field_code_in, field_code, repr,
+      index, set);
+
+  E = _GD_FindField(D, field_code_in, D->dot_list, D->n_dot, NULL);
+
+  if (E == NULL) {
+    *repr = _GD_GetRepr(D, field_code_in, field_code);
+
+    if (D->error) {
+      dreturn("%p", NULL);
+      return NULL;
+    }
+  } else {
+    *repr = GD_REPR_NONE;
+    *field_code = (char*)field_code_in;
+  }
+
+  if (E == NULL || index != NULL)
+    E = _GD_FindField(D, *field_code, D->entry, D->n_entries, index);
+
+  if (E == NULL && set) {
+    _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, field_code_in);
+    if (field_code_in != *field_code)
+      free(*field_code);
+  }
+
+  dreturn("%p", E);
+  return E;
 }
 /* vim: ts=2 sw=2 et tw=80
 */
