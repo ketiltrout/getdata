@@ -229,6 +229,7 @@ int main (int argc, char **argv)
         fields[numfields].type = c;
         fields[numfields].name = optarg;
         numfields++;
+        break;
       case 'f': /* firstframe */
         ff = (off64_t)strtoll(optarg, &tmp, 0);
         if (tmp[0] == ':' && tmp[1] != '\0')

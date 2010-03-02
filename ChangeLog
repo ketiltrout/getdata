@@ -1,3 +1,13 @@
+2010-03-03   D. V. Wiebe <getdata@ketiltrout.net>   svn:379
+	* util/dirfile2ascii.c: Fix missing break statement per Matthew Truch.
+
+2010-02-19   D. V. Wiebe <getdata@ketiltrout.net>   svn:377
+	* util/dirfile2ascii.c: Add -a, -A, -F, -u.  Read UINT64 when appropriate.
+	Add --version and other long options.  Increase BUF_LEN to
+	GD_MAX_LINE_LENGTH.  Turn off default verbose.  Make ff an off64_t.
+
+	* m4/python.m4 m4/idl.m4: Fix typos in help strings.
+
 2010-02-17   D. V. Wiebe <getdata@ketiltrout.net>   svn:375
 	Merged in changes from the 0.6 branch, revision 373:
 
