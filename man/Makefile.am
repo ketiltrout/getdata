@@ -1,4 +1,4 @@
-# (C) 2008 D. V. Wiebe
+# (C) 2008-2010 D. V. Wiebe
 #
 ##########################################################################
 #
@@ -26,7 +26,7 @@ LFS_transitional_mans = getdata64.3 get_framenum_subset64.3 \
 INSTALL_DATA_HOOK64 = install-data-hook64
 endif
 
-noinst_dist_man_MANS = dirfile_alter_encoding.3  dirfile_alter_endianness.3 \
+nodist_man_MANS = dirfile_alter_encoding.3  dirfile_alter_endianness.3 \
 											 dirfile_alter_frameoffset.3
 dist_man_MANS = dirfile_add.3 dirfile_add_bit.3 dirfile_add_spec.3 \
 								dirfile_alter_bit.3 dirfile_alter_entry.3 dirfile_alter_spec.3 \
