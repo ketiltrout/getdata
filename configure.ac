@@ -1,4 +1,4 @@
-dnl (C) 2008-2009 D. V. Wiebe
+dnl (C) 2008-2010 D. V. Wiebe
 dnl
 dnllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll
 dnl
@@ -38,6 +38,9 @@ AC_PREREQ([2.63])
 AC_CONFIG_MACRO_DIR([m4])
 
 LT_PREREQ([2.2.6b])
+
+AC_ARG_VAR([BUILDCC],
+           [C compiler command on the build system (only needed if cross-compiling)])
 
 dnl libgetdata current interface version
 AC_SUBST(GETDATA_IFACE_VERSION, [2])
@@ -250,29 +253,52 @@ AC_PROG_CC
 AC_PROG_CC_C_O
 AC_PROG_CC_C99
 AC_HEADER_STDC
-echo
-echo "*** Checking C++ compiler characteristics"
-echo
-AC_PROG_CXX
-AC_PROG_CXX_C_O
-echo
-echo "*** Checking Fortran 77 compiler characteristics"
-echo
-AC_PROG_F77
-AC_PROG_F77_C_O
-echo
-echo "*** Checking Fortran 90 compiler characteristics"
-echo
-AC_PROG_FC
-AC_PROG_FC_C_O
-# does $FC accept fortran code with .f90 extension?
-AC_MSG_CHECKING([whether the Fortran 90 compiler works])
-AC_LANG_PUSH([Fortran])
-ac_ext="f90"
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM()],
-[AC_MSG_RESULT([yes])],
-[AC_MSG_RESULT([no]); FC=;])
-AC_LANG_POP
+if test "x$make_cxxbindings" != "xno"; then
+  echo
+  echo "*** Checking C++ compiler characteristics"
+  echo
+  AC_PROG_CXX
+  AC_PROG_CXX_C_O
+fi
+if test "x$make_f77bindings" != "xno"; then
+  echo
+  echo "*** Checking Fortran 77 compiler characteristics"
+  echo
+  AC_PROG_F77
+  AC_PROG_F77_C_O
+fi
+if test "x$make_f95bindings" != "xno"; then
+  echo
+  echo "*** Checking Fortran 90 compiler characteristics"
+  echo
+  AC_PROG_FC
+  AC_PROG_FC_C_O
+  # does $FC accept fortran code with .f90 extension?
+  AC_MSG_CHECKING([whether the Fortran 90 compiler works])
+  AC_LANG_PUSH([Fortran])
+  ac_ext="f90"
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM()],
+  [AC_MSG_RESULT([yes])],
+  [AC_MSG_RESULT([no]); FC=;])
+  AC_LANG_POP
+fi
+if test "x${cross_compiling}" != "xno"; then
+  echo
+  echo "*** Checking the build environment"
+  echo
+  if test -z "$BUILDCC"; then
+    if test -n "$build_alias"; then
+      AC_CHECK_PROGS([BUILDCC],
+                     [${build_alias}-gcc ${build_alias}-cc ${build_alias}-cl])
+    fi
+  fi
+  if test -z "$BUILDCC"; then
+    AC_CHECK_PROGS([BUILDCC], [gcc cc cl])
+  fi
+else
+  BUILDCC=$CC
+  AC_SUBST([BUILDCC])
+fi
 echo
 echo "*** Building libtool"
 echo
@@ -296,7 +322,7 @@ if test "x${use_modules}" != "xno"; then
   LIBS=$saved_libs
 
   if test "x$have_ltdl" == "xno"; then
-    AC_MSG_ERROR([libltdl is required to build modules.  Please specify either the location of the libltdl library using --with-ldtl-prefix=PREFIX or else disable the building of modules by using --disable-modules.])
+    AC_MSG_ERROR([libltdl is required to build modules.  Please either specify the location of the libltdl library using --with-ldtl-prefix=PREFIX or else disable the building of modules by using --disable-modules.])
   fi
 
   if test "x$ltdl_prefix" != "x"; then

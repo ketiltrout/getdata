@@ -1,4 +1,4 @@
-dnl (C) 2009 D. V. Wiebe
+dnl (C) 2009-2010 D. V. Wiebe
 dnl
 dnl llllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll
 dnl
@@ -86,9 +86,14 @@ AC_MSG_RESULT([$PYTHON_VERSION])
 
 dnl calculate python CPPFLAGS and LIBS
 if test -x $PYTHON-config; then
-  python_exec_prefix=`$PYTHON-config --exec-prefix`
+  if test -n "$user_python"; then
+    python_exec_prefix=`$PYTHON-config --exec-prefix`
+    PYTHON_LIBS="-L${python_exec_prefix}/lib "
+  else
+    PYTHON_LIBS=""
+  fi
   PYTHON_CPPFLAGS=`$PYTHON-config --includes 2>/dev/null`
-  PYTHON_LIBS="-L${python_exec_prefix}/lib `$PYTHON-config --ldflags 2>/dev/null`"
+  PYTHON_LIBS="${PYTHON_LIBS}`$PYTHON-config --ldflags 2>/dev/null`"
 else
   python_prefix=`$PYTHON -c "import sys; print sys.prefix"`
   python_exec_prefix=`$PYTHON -c "import sys; print sys.exec_prefix"`
@@ -98,7 +103,12 @@ else
   python_modlibs=`$PYTHON -c "from distutils import sysconfig; print sysconfig.get_config_var('MODLIBS')"`
 
   PYTHON_CPPFLAGS="-I${python_prefix}/include/python${PYTHON_VERSION} -I${python_exec_prefix}/include/python${PYTHON_VERSION}"
-  PYTHON_LIBS="-L${python_libdir} $python_syslibs $python_shlibs $python_modlibs -lpython${PYTHON_VERSION}"
+  if test -n "$user_python"; then
+    PYTHON_LIBS="-L${python_libdir} "
+  else
+    PYTHON_LIBS=""
+  fi
+  PYTHON_LIBS="${PYTHON_LIBS}$python_syslibs $python_shlibs $python_modlibs -lpython${PYTHON_VERSION}"
 fi
 AC_MSG_CHECKING([Python includes])
 AC_MSG_RESULT([$PYTHON_CPPFLAGS])

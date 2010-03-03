@@ -1,3 +1,13 @@
+2010-03-02   D. V. Wiebe <getdata@ketiltrout.net>   svn:382
+	* m4/python.m4: Don't specify -L unless needed.o
+	
+	* bindings/idl/getdata.c (gdidl_read_idl_entry): Fix compiler warning.
+
+	* configure.ac: Calculate BUILDCC
+	* bindings/Makefile.am: use BUILDCC
+
+	* bindings/make_parameters.c (main): Return zero.
+
 2010-02-17   D. V. Wiebe <getdata@ketiltrout.net>   svn:372
 	* src/parse.c (_GD_ParseDirective): Handle missing second parameter to
 	/ENDIAN.

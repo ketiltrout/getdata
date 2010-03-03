@@ -1,4 +1,4 @@
-/* (C) 2009 D. V. Wiebe
+/* (C) 2009-2010 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -795,14 +795,14 @@ void gdidl_read_idl_entry(gd_entry_t *E, IDL_VPTR v, int alter)
 
   /* scalars */
   o = IDL_StructTagInfoByName(v->value.s.sdef, "SCALAR", action, &d);
-  if (o != -1)
+  if (o != -1) {
     for (i = 0; i < GD_MAX_POLYORD + 1; ++i)
       if (copy_scalar[i]) {
         E->scalar[i] = IDL_STRING_STR((IDL_STRING*)(data + o) + i);
         if (E->scalar[i][0] == '\0')
           E->scalar[i] = NULL;
       }
-  else 
+  } else 
     for (i = 0; i < GD_MAX_POLYORD + 1; ++i)
       E->scalar[i] = NULL;
 
