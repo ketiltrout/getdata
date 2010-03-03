@@ -46,7 +46,7 @@ nodist_make_parameters_SOURCES = ../src/getdata.h
 SUBDIRS = . ${CXX_SUBDIR} ${F77_SUBDIR} ${PY_SUBDIR} ${IDL_SUBDIR}
 
 make_parameters$(EXEEXT): $(make_parameters_SOURCES) $(nodist_make_parameters_SOURCES)
-	${BUILDCC} -o make_parameters$(EXEEXT) $(make_parameters_SOURCES)
+	${BUILDCC} -I../src -o make_parameters$(EXEEXT) $(make_parameters_SOURCES)
 
 clean-local:
 	rm -rf *~ 
