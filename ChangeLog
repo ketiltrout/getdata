@@ -1,3 +1,6 @@
+2010-03-05   D. V. Wiebe <getdata@ketiltrout.net>   svn:384
+	* bindings/make_parameters.c: Don't include the legacy API.
+
 2010-03-02   D. V. Wiebe <getdata@ketiltrout.net>   svn:382
 	* m4/python.m4: Don't specify -L unless needed.o
 	

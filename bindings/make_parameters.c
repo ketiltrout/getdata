@@ -26,6 +26,7 @@
 #include <stdio.h>
 #include <unistd.h>
 
+#define NO_GETDATA_LEGACY_API
 #include "getdata.h"
 
 #define CONSTANT(s,f,t) { "GD_" #s, #s, f, GD_ ## s, t }
