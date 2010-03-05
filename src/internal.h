@@ -1,5 +1,5 @@
 /* (C) 2002-2005 C. Barth Netterfield
- * (C) 2005-2009 D. V. Wiebe
+ * (C) 2005-2010 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -86,12 +86,14 @@ const char* _gd_colsub(void);
 #define dreturnvoid() printf("%s %s = (nil)\n", _gd_colsub(), __FUNCTION__)
 #define dreturn(fmt, ...) printf("%s %s = " fmt "\n", _gd_colsub(), \
     __FUNCTION__, __VA_ARGS__)
+#define dwatch(fmt, v) printf("%s %s = " fmt "\n", _gd_colnil(), #v, v)
 #else
 #define dtracevoid()
 #define dtrace(...)
 #define dprintf(...)
 #define dreturnvoid()
 #define dreturn(...)
+#define dwatch(...)
 #endif
 
 #ifndef HAVE_STRTOLL
@@ -295,9 +297,11 @@ struct gd_fragment_t {
   int protection;
   char* ref_name;
   off64_t frame_offset;
+  uint32_t vers;
 };
 
 /* internal flags */
+#define GD_HAVE_VERSION    0x40000000 /* have computed the version */
 #define GD_INVALID         0x80000000 /* the dirfile is invalid */
 
 #define LIST_VALID_FIELD        0x01
@@ -359,6 +363,7 @@ struct _GD_DIRFILE {
   int error_line;
 
   /* global data */
+  uint32_t av;
   int standards;
   unsigned long int flags;
 };
@@ -393,6 +398,7 @@ gd_entry_t* _GD_FindField(DIRFILE* D, const char* field_code,
     gd_entry_t** list, unsigned int u, unsigned int *index);
 gd_entry_t* _GD_FindFieldAndRepr(DIRFILE* D, const char* field_code_in,
     char** field_code, int* repr, unsigned int *index, int set);
+uint32_t _GD_FindVersion(DIRFILE *D);
 void _GD_FixEndianness(char* databuffer, size_t size, size_t ns);
 void _GD_Flush(DIRFILE* D, gd_entry_t *E);
 void _GD_FlushMeta(DIRFILE* D, int fragment);
@@ -401,7 +407,7 @@ int _GD_GetLine(FILE *fp, char *line, int* linenum);
 int _GD_GetRepr(DIRFILE*, const char*, char**);
 gd_spf_t _GD_GetSPF(DIRFILE* D, gd_entry_t* E);
 int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,
-    int linenum, char** ref_name, int me, int* standards, int flags);
+    int linenum, char** ref_name, int me, int* standards, unsigned long *flags);
 void _GD_InitialiseFramework(void);
 void _GD_InsertSort(DIRFILE* D, gd_entry_t* E, int u) __THROW;
 
@@ -424,7 +430,7 @@ gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, char** in_cols,
     const gd_entry_t* parent, const char* format_file, int linenum,
     int me, int standards, int creat, int pedantic, int insert);
 char* _GD_ParseFragment(FILE* fp, DIRFILE *D, int me, int* standards,
-    unsigned long int flags);
+    unsigned long int *flags);
 void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E);
 void _GD_ScanFormat(char* fmt, gd_type_t data_type);
 int _GD_SetEncodedName(DIRFILE* D, struct _gd_raw_file* file, const char* base,

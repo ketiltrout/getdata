@@ -1,4 +1,4 @@
-/* (C) 2008-2009 D. V. Wiebe
+/* (C) 2008-2010 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -48,6 +48,9 @@ char* _GD_ValidateField(const gd_entry_t* parent, const char* field_code,
   for (i = 0; i < len; ++i)
     if (field_code[i] == '/') {
       /* fields may never contain '/', regardless of version and strictness */
+      dreturn("%p", field_code);
+      return (char*)field_code;
+    } else if (field_code[i] < 0x20) {
       dreturn("%p", field_code);
       return (char*)field_code;
     } else if (strict && ((standards >= 5 && (field_code[i] == '<' ||

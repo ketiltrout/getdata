@@ -1,4 +1,4 @@
-/* (C) 2008 D. V. Wiebe
+/* (C) 2008-2010 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -36,7 +36,7 @@
 /* Include a format file fragment -- returns the include index, or 
  * -1 on error */
 int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,
-    int linenum, char** ref_name, int me, int* standards, int flags)
+    int linenum, char** ref_name, int me, int* standards, unsigned long *flags)
 {
   int i;
   int found = 0;
@@ -45,7 +45,7 @@ int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,
   void* ptr;
   FILE* new_fp = NULL;
 
-  dtrace("%p, \"%s\", \"%s\", %p, %i, %i, %p, %x\n", D, ename, format_file,
+  dtrace("%p, \"%s\", \"%s\", %p, %i, %i, %p, %p\n", D, ename, format_file,
       ref_name, linenum, me, standards, flags);
 
   /* create the format filename */
@@ -71,8 +71,8 @@ int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,
 
   /* Otherwise, try to open the file */
   if ((D->flags & GD_ACCMODE) == GD_RDWR) {
-    i = open(temp_buf1, O_RDWR | ((flags & GD_CREAT) ? O_CREAT : 0) |
-        ((flags & GD_TRUNC) ? O_TRUNC : 0) | ((flags & GD_EXCL) ? O_EXCL : 0),
+    i = open(temp_buf1, O_RDWR | ((*flags & GD_CREAT) ? O_CREAT : 0) |
+        ((*flags & GD_TRUNC) ? O_TRUNC : 0) | ((*flags & GD_EXCL) ? O_EXCL : 0),
         0666);
     if (i < 0) {
       _GD_SetError(D, GD_E_OPEN_INCLUDE, errno, format_file, linenum,
@@ -104,17 +104,19 @@ int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,
   D->fragment[D->n_fragment - 1].ename = strdup(ename);
   D->fragment[D->n_fragment - 1].modified = 0;
   D->fragment[D->n_fragment - 1].parent = me;
-  D->fragment[D->n_fragment - 1].encoding = flags & GD_ENCODING;
+  D->fragment[D->n_fragment - 1].encoding = *flags & GD_ENCODING;
   D->fragment[D->n_fragment - 1].byte_sex =
 #ifdef WORDS_BIGENDIAN
-    (flags & GD_LITTLE_ENDIAN) ? GD_LITTLE_ENDIAN : GD_BIG_ENDIAN
+    (*flags & GD_LITTLE_ENDIAN) ? GD_LITTLE_ENDIAN : GD_BIG_ENDIAN
 #else
-    (flags & GD_BIG_ENDIAN) ? GD_BIG_ENDIAN : GD_LITTLE_ENDIAN
+    (*flags & GD_BIG_ENDIAN) ? GD_BIG_ENDIAN : GD_LITTLE_ENDIAN
 #endif
     ;
   D->fragment[D->n_fragment - 1].ref_name = NULL;
   D->fragment[D->n_fragment - 1].frame_offset = D->fragment[me].frame_offset;
   D->fragment[D->n_fragment - 1].protection = GD_PROTECT_NONE;
+  D->fragment[D->n_fragment - 1].vers =
+    (*flags & GD_PEDANTIC) ? 1ULL << *standards : 0;
 
   if (D->fragment[D->n_fragment - 1].cname == NULL ||
       D->fragment[D->n_fragment - 1].ename == NULL)
@@ -192,7 +194,7 @@ int dirfile_include(DIRFILE* D, const char* file, int fragment_index,
   }
 
   int new_fragment = _GD_Include(D, file, "dirfile_include()", 0, &ref_name,
-      fragment_index, &standards, flags);
+      fragment_index, &standards, &flags);
 
   if (!D->error)
     D->fragment[fragment_index].modified = 1;

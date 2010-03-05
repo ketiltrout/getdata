@@ -38,6 +38,10 @@ int main(void)
   int n = getdata(D, "INCLUDE", 5, 0, 1, 0, GD_UINT8, c);
   int error = get_error(D);
 
+  int v = dirfile_standards(D, GD_VERSION_CURRENT);
+  int l = dirfile_standards(D, GD_VERSION_LATEST);
+  int e = dirfile_standards(D, GD_VERSION_EARLIEST);
+
   dirfile_close(D);
 
   unlink(data);
@@ -59,6 +63,22 @@ int main(void)
       fprintf(stderr, "c[%i] = %i\n", i, c[i]);
       r = 1;
     }
+
+  /* Version 1 is forwards compatible with version 2 */
+  if (v != 2) {
+    fprintf(stderr, "v = %i\n", v);
+    r = 1;
+  }
+
+  if (l != 2) {
+    fprintf(stderr, "l = %i\n", l);
+    r = 1;
+  }
+
+  if (e != 1) {
+    fprintf(stderr, "e = %i\n", e);
+    r = 1;
+  }
 
   return r;
 }

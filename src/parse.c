@@ -1,5 +1,5 @@
 /* (C) 2002-2005 C. Barth Netterfield
- * (C) 2005-2009 D. V. Wiebe
+ * (C) 2005-2010 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -1311,15 +1311,14 @@ int _GD_Tokenise(DIRFILE *D, const char* instring, char* outstring,
  *       Returns 1 if a match was made.
  */
 static int _GD_ParseDirective(DIRFILE *D, char** in_cols, int n_cols,
-    int me, int* standards, int linenum, char** ref_name, int* first_fragment,
-    unsigned long *flags)
+    int me, int* standards, int linenum, char** ref_name, unsigned long *flags)
 {
   const char* ptr;
   int i;
   int pedantic = *flags & GD_PEDANTIC;
 
   dtrace("%p, %p, %i, %u, %p, %i, %p, %p, %p", D, in_cols, n_cols, me,
-      standards, linenum, ref_name, first_fragment, flags);
+      standards, linenum, ref_name, flags);
 
   /* set up for possibly slashed reserved words */
   ptr = in_cols[0];
@@ -1366,11 +1365,14 @@ static int _GD_ParseDirective(DIRFILE *D, char** in_cols, int n_cols,
   } else if (strcmp(ptr, "FRAMEOFFSET") == 0 && (!pedantic || *standards >= 1))
     D->fragment[me].frame_offset = strtoll(in_cols[1], NULL, 10);
   else if (strcmp(ptr, "INCLUDE") == 0 && (!pedantic || *standards >= 3)) {
-    int saved_standards = *standards;
-    *first_fragment = _GD_Include(D, in_cols[1], D->fragment[me].cname, linenum,
-        ref_name, me, standards, D->fragment[me].encoding |
-        D->fragment[me].byte_sex);
-    *standards = saved_standards;
+    unsigned long flags = D->fragment[me].encoding | D->fragment[me].byte_sex |
+      (D->flags & (GD_PEDANTIC | GD_PERMISSIVE | GD_FORCE_ENDIAN |
+                   GD_FORCE_ENCODING | GD_IGNORE_DUPS | GD_IGNORE_REFS));
+    int frag = _GD_Include(D, in_cols[1], D->fragment[me].cname, linenum,
+        ref_name, me, standards, &flags);
+    if ((pedantic = flags & GD_PEDANTIC))
+      D->flags |= GD_PEDANTIC;
+    D->fragment[me].vers |= D->fragment[frag].vers;
   } else if (strcmp(ptr, "META") == 0 && (!pedantic || *standards >= 6)) {
     const gd_entry_t* P =  _GD_FindField(D, in_cols[1], D->entry, D->n_entries,
         NULL);
@@ -1405,6 +1407,8 @@ static int _GD_ParseDirective(DIRFILE *D, char** in_cols, int n_cols,
     *standards = atoi(in_cols[1]);
     if (!pedantic && ~(*flags) & GD_PERMISSIVE)
       *flags |= (pedantic = GD_PEDANTIC);
+    if (pedantic)
+      D->fragment[me].vers |= 1ULL << *standards;
   } else {
     dreturn("%i", 0);
     return 0;
@@ -1419,7 +1423,7 @@ static int _GD_ParseDirective(DIRFILE *D, char** in_cols, int n_cols,
  *       Returns NULL unless this fragment contains a REFERENCE directive.
  */
 char* _GD_ParseFragment(FILE* fp, DIRFILE *D, int me, int* standards,
-    unsigned long flags)
+    unsigned long *flags)
 {
   char instring[GD_MAX_LINE_LENGTH];
   char outstring[GD_MAX_LINE_LENGTH];
@@ -1430,7 +1434,6 @@ char* _GD_ParseFragment(FILE* fp, DIRFILE *D, int me, int* standards,
   int match = 0;
   int rescan = 0;
   int se_action = GD_SYNTAX_ABORT;
-  int first_fragment = -1;
   gd_entry_t* first_raw = NULL;
   gd_parser_data_t pdata;
 
@@ -1439,24 +1442,24 @@ char* _GD_ParseFragment(FILE* fp, DIRFILE *D, int me, int* standards,
   int saved_line = 0;
   char* saved_token = NULL;
 
-  dtrace("%p, %p, %i, %p, %lx", fp, D, me, standards, flags);
+  dtrace("%p, %p, %i, %p, %p", fp, D, me, standards, flags);
 
   /* start parsing */
   while (rescan || _GD_GetLine(fp, instring, &linenum)) {
     rescan = 0;
     n_cols = _GD_Tokenise(D, instring, outstring, in_cols,
-        D->fragment[me].cname, linenum, *standards, flags & GD_PEDANTIC);
+        D->fragment[me].cname, linenum, *standards, *flags & GD_PEDANTIC);
 
     if (D->error == GD_E_OK)
       match = _GD_ParseDirective(D, in_cols, n_cols, me, standards, linenum,
-          &ref_name, &first_fragment, &flags);
+          &ref_name, flags);
 
     if (D->error == GD_E_OK && !match)
       first_raw = _GD_ParseFieldSpec(D, n_cols, in_cols, NULL,
           D->fragment[me].cname, linenum, me, *standards, 0,
-          flags & GD_PEDANTIC, 1);
+          *flags & GD_PEDANTIC, 1);
 
-    if (D->flags & GD_IGNORE_DUPS && D->error == GD_E_FORMAT &&
+    if (*flags & GD_IGNORE_DUPS && D->error == GD_E_FORMAT &&
         D->suberror == GD_E_FORMAT_DUPLICATE)
       _GD_ClearError(D); /* ignore this line, continue parsing */
     else if (D->error == GD_E_FORMAT) {

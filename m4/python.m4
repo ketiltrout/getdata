@@ -1,4 +1,4 @@
-dnl (C) 2009 D. V. Wiebe
+dnl (C) 2009-2010 D. V. Wiebe
 dnl
 dnl llllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll
 dnl

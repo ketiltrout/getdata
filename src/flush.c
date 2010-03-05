@@ -1,4 +1,4 @@
-/* (C) 2008-2009 D. V. Wiebe
+/* (C) 2008-2010 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -545,6 +545,201 @@ int dirfile_flush(DIRFILE* D, const char* field_code)
 
   dreturn("%i", (D->error == GD_E_OK) ? 0 : -1);
   return (D->error == GD_E_OK) ? 0 : -1;
+}
+
+#define GD_VERS_GE_1  0xFFFFFFFFFFFFFFFE
+#define GD_VERS_GE_2  0xFFFFFFFFFFFFFFFC
+#define GD_VERS_GE_3  0xFFFFFFFFFFFFFFF8
+#define GD_VERS_GE_4  0xFFFFFFFFFFFFFFF0
+#define GD_VERS_GE_5  0xFFFFFFFFFFFFFFE0
+#define GD_VERS_GE_6  0xFFFFFFFFFFFFFFC0
+#define GD_VERS_GE_7  0xFFFFFFFFFFFFFF80
+
+#define GD_VERS_LE_0  0x0000000000000001
+#define GD_VERS_LE_1  0x0000000000000003
+#define GD_VERS_LE_2  0x0000000000000007
+#define GD_VERS_LE_3  0x000000000000000f
+#define GD_VERS_LE_4  0x000000000000001f
+#define GD_VERS_LE_5  0x000000000000003f
+#define GD_VERS_LE_6  0x000000000000007f
+#define GD_VERS_LE_7  0x00000000000000ff
+
+uint32_t _GD_FindVersion(DIRFILE *D)
+{
+  unsigned int i;
+  char* ptr;
+  dtrace("%p", D);
+
+  D->av = (1 << (1 + DIRFILE_STANDARDS_VERSION)) - 1;
+
+  if (D->n_fragment > 1)
+    D->av &= GD_VERS_GE_3;
+
+  for (i = 0; D->av && i < (unsigned int)D->n_fragment; ++i) {
+    if (D->fragment[i].frame_offset > 0)
+      D->av &= GD_VERS_GE_1;
+    else if (D->fragment[i].byte_sex != GD_LITTLE_ENDIAN)
+      D->av &= GD_VERS_GE_5;
+    else if ((D->fragment[i].encoding != GD_UNENCODED &&
+          D->fragment[i].encoding != GD_AUTO_ENCODED) ||
+        D->fragment[i].protection)
+      D->av &= GD_VERS_GE_6;
+  }
+
+  if (D->reference_field != NULL && D->reference_field->fragment_index != 0)
+    D->av &= GD_VERS_GE_6; /* indicating the use of a /REFERENCE directive */
+
+  for (i = 0; D->av && i < D->n_entries; ++i) {
+    switch (D->entry[i]->field_type) {
+      case GD_RAW_ENTRY:
+        switch (D->entry[i]->data_type) {
+          case GD_COMPLEX128:
+          case GD_COMPLEX64:
+            D->av &= GD_VERS_GE_7;
+            break;
+          case GD_INT8:
+          case GD_INT64:
+          case GD_UINT64:
+            D->av &= GD_VERS_GE_5;
+            break;
+          default:
+            break;
+        }
+        break;
+      case GD_MULTIPLY_ENTRY:
+        D->av &= GD_VERS_GE_2;
+        break;
+      case GD_PHASE_ENTRY:
+        D->av &= GD_VERS_GE_4;
+        break;
+      case GD_POLYNOM_ENTRY:
+      case GD_SBIT_ENTRY:
+        D->av &= GD_VERS_GE_7;
+        break;
+      case GD_CONST_ENTRY:
+        if (D->entry[i]->const_type & GD_COMPLEX128)
+          D->av &= GD_VERS_GE_7;
+        else
+          D->av &= GD_VERS_GE_6;
+        break;
+      case GD_STRING_ENTRY:
+        D->av &= GD_VERS_GE_6;
+        break;
+      case GD_BIT_ENTRY:
+        if (D->entry[i]->numbits > 1)
+          D->av &= GD_VERS_GE_1;
+        else if (D->entry[i]->bitnum + D->entry[i]->numbits - 1 > 32)
+          D->av &= GD_VERS_GE_5;
+        break;
+      default:
+        break;
+    }
+    if (D->av & GD_VERS_GE_1 && strcmp(D->entry[i]->field, "FRAMEOFFSET") == 0)
+      D->av &= GD_VERS_LE_0;
+    else if (D->av & GD_VERS_GE_3 && strcmp(D->entry[i]->field, "INCLUDE") == 0)
+      D->av &= GD_VERS_LE_2;
+    else if (D->av & GD_VERS_GE_5 && (strcmp(D->entry[i]->field, "VERSION") == 0
+          || strcmp(D->entry[i]->field, "ENDIAN") == 0))
+      D->av &= GD_VERS_LE_4;
+    else if (D->av & GD_VERS_GE_6 &&
+        (strcmp(D->entry[i]->field, "ENCODING") == 0
+          || strcmp(D->entry[i]->field, "META") == 0
+          || strcmp(D->entry[i]->field, "PROTECT") == 0
+          || strcmp(D->entry[i]->field, "REFERENCE") == 0))
+      D->av &= GD_VERS_LE_5;
+    else if (D->av & GD_VERS_LE_5 &&
+        strcmp(D->entry[i]->field, "FILEFRAM") == 0)
+      D->av &= GD_VERS_GE_6;
+    for (ptr = D->entry[i]->field; *ptr != 0 && D->av; ++ptr)
+      switch(*ptr) {
+        case '/': /* a metafield */
+        case '#':
+        case ' ':
+          D->av &= GD_VERS_GE_6;
+          break;
+        case '.':
+          D->av &= GD_VERS_LE_5;
+          break;
+        case '&':
+        case ';':
+        case '<':
+        case '>':
+        case '\\':
+        case '|':
+          D->av &= GD_VERS_LE_4;
+          break;
+      }
+  }
+
+  D->flags |= GD_HAVE_VERSION;
+  dreturn("%04x", D->av);
+  return D->av;
+}
+
+int dirfile_standards(DIRFILE *D, int vers)
+{
+  dtrace("%p, %i", D, vers);
+
+  /* log2(n) lut */
+  static const char ln2[] = { -1,
+    0,
+    1, 1,
+    2, 2, 2, 2,
+    3, 3, 3, 3, 3, 3, 3, 3,
+    4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
+    5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
+    5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
+    6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
+    6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
+    6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
+    6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
+    7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+    7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+    7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+    7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+    7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+    7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+    7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+    7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7
+  };
+
+  /* some magic numbers */
+  static const char earliest_magic[] = {64,  0,  1, 39,  2, 15, 40, 23,  3, 12,
+    16, 59, 41, 19, 24, 54,  4,  0, 13, 10, 17, 62, 60, 28, 42, 30, 20, 51, 25,
+    44, 55, 47,  5, 32,  0, 38, 14, 22, 11, 58, 18, 53, 63,  9, 61, 27, 29, 50,
+    43, 46, 31, 37, 21, 57, 52,  8, 26, 49, 45, 36, 56,  7, 48, 35,  6, 34, 33};
+
+  _GD_ClearError(D);
+
+  if (D->flags & GD_INVALID) {
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  if (~D->flags & GD_HAVE_VERSION)
+    _GD_FindVersion(D);
+
+  if (vers == GD_VERSION_CURRENT)
+    vers = D->standards;
+  else if (vers == GD_VERSION_LATEST) {
+    uint32_t a, b;
+    if ((b = D->av >> 16))
+      vers = (a = b >> 8) ? 24 + ln2[a] : 16 + ln2[b];
+    else
+      vers = (a = D->av >> 8) ? 8 + ln2[a] : ln2[D->av];
+  } else if (vers == GD_VERSION_EARLIEST)
+    vers = earliest_magic[(~(D->av - 1) & D->av) % 67];
+
+  if (vers < 0 || vers > DIRFILE_STANDARDS_VERSION || ~D->av & (1ULL << vers)) {
+    _GD_SetError(D, GD_E_BAD_VERSION, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  D->standards = vers;
+  dreturn("%i", vers);
+  return vers;
 }
 /* vim: ts=2 sw=2 et tw=80
 */

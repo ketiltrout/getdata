@@ -1,6 +1,6 @@
 /* (C) 2002-2005 C. Barth Netterfield
  * (C) 2003-2005 Theodore Kisner
- * (C) 2005-2009 D. V. Wiebe
+ * (C) 2005-2010 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -78,6 +78,7 @@ const char *GD_ERROR_CODES[GD_N_ERROR_CODES] = {
   NULL, /* GD_E_UNCLEAN_DB */
   "Improper domain", /* GD_E_DOMAIN */
   "Bad representation", /* GD_E_BAD_REPR */
+  NULL /* GD_E_BAD_VERSION */
 };
 
 static struct FormatType Format = {

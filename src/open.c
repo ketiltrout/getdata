@@ -1,5 +1,5 @@
 /* (C) 2002-2005 C. Barth Netterfield
- * (C) 2005-2009 D. V. Wiebe
+ * (C) 2005-2010 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -217,10 +217,14 @@ DIRFILE* dirfile_cbopen(const char* filedir, unsigned long flags,
   D = malloc(sizeof(DIRFILE));
   memset(D, 0, sizeof(DIRFILE));
 
+  /* clear GD_PERMISSIVE if it was specified along with GD_PEDANTIC */
+  if (flags & GD_PERMISSIVE && flags & GD_PEDANTIC)
+    flags &= ~GD_PERMISSIVE;
+
   D->error_string = malloc(FILENAME_MAX);
   D->error_file = malloc(FILENAME_MAX);
   D->name = strdup(filedir);
-  D->flags = flags | GD_INVALID;
+  D->flags = (flags | GD_INVALID) & ~GD_IGNORE_REFS;
   D->sehandler = sehandler;
   D->sehandler_extra = extra;
   D->standards = DIRFILE_STANDARDS_VERSION;
@@ -295,8 +299,9 @@ DIRFILE* dirfile_cbopen(const char* filedir, unsigned long flags,
   D->fragment[0].ref_name = NULL;
   D->fragment[0].frame_offset = 0;
   D->fragment[0].protection = GD_PROTECT_NONE;
+  D->fragment[0].vers = (flags & GD_PEDANTIC) ? DIRFILE_STANDARDS_VERSION : 0;
 
-  ref_name = _GD_ParseFragment(fp, D, 0, &D->standards, D->flags);
+  ref_name = _GD_ParseFragment(fp, D, 0, &D->standards, &D->flags);
   fclose(fp);
 
   if (D->error != GD_E_OK) {
@@ -321,6 +326,19 @@ DIRFILE* dirfile_cbopen(const char* filedir, unsigned long flags,
   /* Success! Clear invalid bit */
   if (D->error == GD_E_OK)
     D->flags &= ~GD_INVALID;
+
+  /* if GD_PEDANTIC is not set, we don't know which version this conforms to;
+   * try to figure it out. */
+  if (!D->error && !(D->flags & GD_PEDANTIC)) {
+    if (_GD_FindVersion(D)) {
+      /* conforms to some standard, use the latest */
+      dirfile_standards(D, GD_VERSION_LATEST); /* can't fail */
+      D->flags &= ~GD_PERMISSIVE;
+    } else
+      /* non-conformant dirfile, flag it */
+      D->flags |= GD_PERMISSIVE;
+  } else
+    D->flags &= ~GD_PERMISSIVE;
 
   dreturn("%p", D);
   return D;

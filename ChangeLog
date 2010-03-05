@@ -1,3 +1,31 @@
+2010-03-05   D. V. Wiebe <getdata@ketiltrout.net>   svn:386
+	* test/version_0.c test/version_1.c test/version_2.c test/version_3.c
+	test/version_4.c test/version_5.c test/version_6.c test/version_7.c: Call
+	dirfile_standards().
+
+	* test/parse_version_include.c: Use GD_PERMISSIVE.
+
+	* src/internal.h: Add GD_HAVE_VERSION.
+	* src/getdata.h.in: Add GD_E_BAD_VERSION, GD_VERSION_*
+	* src/flush.c (_GD_FindVersion dirfile_standards): Added.
+	* src/open.c (dirfile_cbopen): Clear GD_PERMISSIVE if GD_PEDANTIC is set.
+	Clear GD_IGNORE_REFS if set.  If necessary, determine the standards
+	conformance of the dirfile.
+	* src/parse.c (_GD_ParseDirective): Set proper flags when calling
+	_GD_Include.  Propagate pedantry back up.  Enumerate fragment versions.
+	* src/include.c (_GD_Include): Take a pointer to the flags, to permit
+	propagation of pedantry.  Enumerate fragment versions.
+
+	* src/parse.c (_GD_ParseFragment): Take a pointer to the flags, to permit
+	propagation of pedantry.
+
+	* src/name.c (_GD_ValidateField): Prohibit characters < 0x20 in field names.
+
+	* src/parse.c (_GD_ParseDirective): Remove unnecessary first_fragment
+	parameter.
+
+	* configure.ac: Bump interface version.
+
 2010-03-02   D. V. Wiebe <getdata@ketiltrout.net>   svn:380
 	* test/version_0.c test/version_1.c test/version_2.c test/version_6_strict.c
 	test/version_3.c test/version_4.c test/version_5.c test/version_6.c

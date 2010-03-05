@@ -15,9 +15,9 @@ int main(void)
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
   const char* format1 = __TEST__ "dirfile/RAW";
-  const char* data = __TEST__ "dirfile/i";
-  const char* format_data = "i RAW c 8\nINCLUDE RAW\n";
-  const char* format_data1 = "m MULTIPLY i i\n";
+  const char* data = __TEST__ "dirfile/ENDIAN";
+  const char* format_data = "ENDIAN RAW c 8\nINCLUDE RAW\n";
+  const char* format_data1 = "m MULTIPLY ENDIAN ENDIAN\n";
   uint16_t c[8];
   unsigned char data_data[256];
   int fd, i, r = 0;
@@ -44,6 +44,10 @@ int main(void)
   int n = getdata(D, "m", 5, 0, 1, 0, GD_UINT16, c);
   int error = get_error(D);
 
+  int v = dirfile_standards(D, GD_VERSION_CURRENT);
+  int l = dirfile_standards(D, GD_VERSION_LATEST);
+  int e = dirfile_standards(D, GD_VERSION_EARLIEST);
+
   dirfile_close(D);
 
   unlink(data);
@@ -66,6 +70,22 @@ int main(void)
       fprintf(stderr, "c[%i] = %i\n", i, c[i]);
       r = 1;
     }
+
+  /* Version 3 is forwards compatible with version 4 */
+  if (v != 4) {
+    fprintf(stderr, "v = %i\n", v);
+    r = 1;
+  }
+
+  if (l != 4) {
+    fprintf(stderr, "l = %i\n", l);
+    r = 1;
+  }
+
+  if (e != 3) {
+    fprintf(stderr, "e = %i\n", e);
+    r = 1;
+  }
 
   return r;
 }

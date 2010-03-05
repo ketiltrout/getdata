@@ -1,6 +1,6 @@
 /* (C) 2002-2005 C. Barth Netterfield
  * (C) 2003-2005 Theodore Kisner
- * (C) 2005-2009 D. V. Wiebe
+ * (C) 2005-2010 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -101,8 +101,9 @@
 #define GD_E_UNCLEAN_DB       30
 #define GD_E_DOMAIN           31
 #define GD_E_BAD_REPR         32
+#define GD_E_BAD_VERSION      33
 
-#define GD_N_ERROR_CODES      33
+#define GD_N_ERROR_CODES      34
 
 /* maximum length of a format file line */
 #define GD_MAX_LINE_LENGTH  4096
@@ -144,6 +145,11 @@
 #define GD_PROTECT_FORMAT 01
 #define GD_PROTECT_DATA   02
 #define GD_PROTECT_ALL    ( GD_PROTECT_DATA | GD_PROTECT_FORMAT )
+
+/* Standards specifiers */
+#define GD_VERSION_CURRENT  -1
+#define GD_VERSION_LATEST   -2
+#define GD_VERSION_EARLIEST -3
 
 /* this MUST be one less than the lowest allowed fragment index */
 #define GD_ALL_FRAGMENTS -1
@@ -275,7 +281,7 @@ typedef struct _gd_callback_data gd_parser_data_t;
 typedef int (*gd_parser_callback_t)(gd_parser_data_t*, void*);
 
 
-/* dirfile_flags */
+/* dirfile_flags --- 0xF0000000 are reserved */
 #define GD_ACCMODE        0x00000001 /* mask */
 #define GD_RDONLY         0x00000000 /* open read only */
 #define GD_RDWR           0x00000001 /* open read/write */
@@ -476,6 +482,8 @@ extern int dirfile_madd_spec(DIRFILE *dirfile, const char *line,
 
 extern int dirfile_madd_string(DIRFILE *dirfile, const char *parent,
     const char *field_code, const char *value) __THROW __gd_nonnull ((1,2,3,4));
+
+extern int dirfile_standards(DIRFILE *D, int vers) __THROW __gd_nonnull((1));
 
 extern const void *get_mconstants(DIRFILE *dirfile, const char *parent,
     gd_type_t return_type) __THROW __gd_nonnull((1,2));

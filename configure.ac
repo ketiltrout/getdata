@@ -1,4 +1,4 @@
-dnl (C) 2008-2009 D. V. Wiebe
+dnl (C) 2008-2010 D. V. Wiebe
 dnl
 dnllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll
 dnl
@@ -40,11 +40,11 @@ AC_CONFIG_MACRO_DIR([m4])
 LT_PREREQ([2.2.6b])
 
 dnl libgetdata current interface version
-AC_SUBST(GETDATA_IFACE_VERSION, [2])
+AC_SUBST(GETDATA_IFACE_VERSION, [3])
 dnl libgetdata current interface implementation revision
-AC_SUBST(GETDATA_IMPL_REVISION, [1])
+AC_SUBST(GETDATA_IMPL_REVISION, [0])
 dnl libgetdata interface age (current interface - oldest supported interface)
-AC_SUBST(GETDATA_IFACE_AGE, [0])
+AC_SUBST(GETDATA_IFACE_AGE, [1])
 
 dnl libgetdata++ interface version info
 AC_SUBST(GETDATAXX_VERSION, [1:0:0])
