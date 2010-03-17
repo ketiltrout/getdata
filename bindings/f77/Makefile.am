@@ -91,10 +91,10 @@ make_parameters.stamp: make_parameters.sed.in
 
 getdata.f: $(srcdir)/getdata.f.in make_parameters.sed
 	rm -f $@
-	$(SED) $< -f make_parameters.sed > $@
+	$(SED) -f make_parameters.sed $< > $@
 	chmod a-w $@
 
 getdata.f90: $(srcdir)/getdata.f90.in make_parameters.sed
 	rm -f $@
-	$(SED) $< -f make_parameters.sed > $@
+	$(SED) -f make_parameters.sed $< > $@
 	chmod a-w $@

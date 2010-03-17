@@ -686,8 +686,10 @@ extern double __REDIRECT (get_framenum_subset, (DIRFILE* D,
 # endif
 #endif
 
-/* if requested, declare the LFS transitional extension */
-#ifdef _LARGEFILE64_SOURCE
+/* if requested, declare the LFS transitional extension -- this is not
+ * needed on Darwin, which has no off64_t type, and whose off_t is always
+ * 64 bits */
+#if defined _LARGEFILE64_SOURCE  && !defined SYS_DARWIN
 extern int dirfile_alter_frameoffset64(DIRFILE *dirfile, off64_t offset,
     int fragment, int recode) __gd_nonnull ((1));
 

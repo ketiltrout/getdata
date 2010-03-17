@@ -1,3 +1,9 @@
+2010-03-17   D. V. Wiebe <getdata@ketiltrout.net>   svn:387
+	* configure.ac src/getdata.h.in: Disable LFS transitional API on Darwin.
+
+	* bindings/f77/Makefile.am: Change order of sed arguments to work with Darwin
+	sed.
+
 2010-03-05   D. V. Wiebe <getdata@ketiltrout.net>   svn:386
 	* test/version_0.c test/version_1.c test/version_2.c test/version_3.c
 	test/version_4.c test/version_5.c test/version_6.c test/version_7.c: Call

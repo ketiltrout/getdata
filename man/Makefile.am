@@ -20,7 +20,7 @@
 #
 AUTOMAKE_OPTIONS = foreign
 
-if HAVE_OFF64_T
+if LFS_TRANSITIONAL_API
 LFS_transitional_mans = getdata64.3 get_framenum_subset64.3 \
 												get_frameoffset64.3 get_nframes64.3 putdata64.3
 INSTALL_DATA_HOOK64 = install-data-hook64

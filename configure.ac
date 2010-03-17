@@ -349,6 +349,17 @@ if test "x$make_f77bindings" != "xno"; then
   AC_F77_WRAPPERS
 fi
 
+dnl Is this darwin?
+AC_CACHE_CHECK([whether the compiler defines SYS_DARWIN], [gd_cv_sys_darwin], [
+AC_COMPILE_IFELSE(
+[AC_LANG_SOURCE(
+[[#ifndef SYS_DARWIN
+  not darwin
+#endif
+]])],
+[gd_cv_sys_darwin="yes"],
+[gd_cv_sys_darwin="no"])])
+
 dnl libraries
 echo
 echo "*** Looking for library functions"
@@ -391,6 +402,7 @@ AC_C_CONST
 AC_C_BIGENDIAN
 AC_TYPE_SIZE_T
 AC_TYPE_OFF_T
+AC_CHECK_SIZEOF([off_t])
 AC_TYPE_UINT8_T
 AC_TYPE_INT8_T
 AC_TYPE_UINT16_T
@@ -584,21 +596,27 @@ AC_CONFIG_FILES([util/Makefile])
 
 # Automake conditionals
 AM_CONDITIONAL(GETDATA_DEBUG, [test "x$enable_debug" == "xyes"])
-AM_CONDITIONAL(GNU_C_COMPILER, test "x$gd_cv_c_compiler_intel" == "xno" -a "x$ac_cv_c_compiler_gnu" == "xyes")
-AM_CONDITIONAL(GNU_CXX_COMPILER, test "x$gd_cv_cxx_compiler_intel" == "xno" -a "x$ac_cv_cxx_compiler_gnu" == "xyes")
-AM_CONDITIONAL(GNU_F77_COMPILER, test "x$gd_cv_f77_compiler_intel" == "xno" -a "x$ac_cv_f77_compiler_gnu" == "xyes")
-AM_CONDITIONAL(GNU_FC_COMPILER, test "x$gd_cv_fc_compiler_intel" == "xno" -a "x$ac_cv_fc_compiler_gnu" == "xyes")
-AM_CONDITIONAL(INTEL_F77_COMPILER, test "x$gd_cv_f77_compiler_intel" == "xyes")
-AM_CONDITIONAL(INTEL_FC_COMPILER, test "x$gd_cv_fc_compiler_intel" == "xyes")
-AM_CONDITIONAL(HAVE_OFF64_T, test "x$have_off64_t" = "xyes")
-AM_CONDITIONAL(INCLUDE_LEGACY_API, test "x$include_legacy_api" != "xno")
-AM_CONDITIONAL(MAKE_CHECKDIRFILE, test "x$make_checkdirfile" = "xbuild")
-AM_CONDITIONAL(MAKE_CXXBINDINGS, test "x$make_cxxbindings" = "xyes")
-AM_CONDITIONAL(MAKE_F77BINDINGS, test "x$make_f77bindings" != "xno")
-AM_CONDITIONAL(MAKE_F95BINDINGS, test "x$make_f95bindings" = "xyes")
-AM_CONDITIONAL(MAKE_PYBINDINGS, test "x$make_pybindings" = "xyes")
-AM_CONDITIONAL(MAKE_IDLBINDINGS, test "x$make_idlbindings" = "xyes")
-AM_CONDITIONAL(USE_MODULES, test "x$use_modules" != "xno")
+AM_CONDITIONAL(GNU_C_COMPILER, [test "x$gd_cv_c_compiler_intel" == "xno"]dnl
+               [-a "x$ac_cv_c_compiler_gnu" == "xyes"])
+AM_CONDITIONAL(GNU_CXX_COMPILER, [test "x$gd_cv_cxx_compiler_intel" == "xno"]dnl
+               [-a "x$ac_cv_cxx_compiler_gnu" == "xyes"])
+AM_CONDITIONAL(GNU_F77_COMPILER, [test "x$gd_cv_f77_compiler_intel" == "xno"]dnl
+               [-a "x$ac_cv_f77_compiler_gnu" == "xyes"])
+AM_CONDITIONAL(GNU_FC_COMPILER, [test "x$gd_cv_fc_compiler_intel" == "xno"]dnl
+               [-a "x$ac_cv_fc_compiler_gnu" == "xyes"])
+AM_CONDITIONAL(INTEL_F77_COMPILER,
+               [test "x$gd_cv_f77_compiler_intel" == "xyes"])
+AM_CONDITIONAL(INTEL_FC_COMPILER, [test "x$gd_cv_fc_compiler_intel" == "xyes"])
+AM_CONDITIONAL(LFS_TRANSITIONAL_API,
+               [test "x$have_off64_t" = "xyes" -a "x$gd_cv_sys_darwin" = "xno"])
+AM_CONDITIONAL(INCLUDE_LEGACY_API, [test "x$include_legacy_api" != "xno"])
+AM_CONDITIONAL(MAKE_CHECKDIRFILE, [test "x$make_checkdirfile" = "xbuild"])
+AM_CONDITIONAL(MAKE_CXXBINDINGS, [test "x$make_cxxbindings" = "xyes"])
+AM_CONDITIONAL(MAKE_F77BINDINGS, [test "x$make_f77bindings" != "xno"])
+AM_CONDITIONAL(MAKE_F95BINDINGS, [test "x$make_f95bindings" = "xyes"])
+AM_CONDITIONAL(MAKE_PYBINDINGS, [test "x$make_pybindings" = "xyes"])
+AM_CONDITIONAL(MAKE_IDLBINDINGS, [test "x$make_idlbindings" = "xyes"])
+AM_CONDITIONAL(USE_MODULES, [test "x$use_modules" != "xno"])
 
 AC_OUTPUT
 
@@ -650,13 +668,20 @@ if test "x$ENCODINGS_LEFT" = "x"; then
 fi
 
 if test "x$enable_debug$enable_assert" = "xnoyes"; then
-  enable_debug = "assert only"
+  enable_debug="assert only"
+fi
+
+if test "x$have_off64_t" = "xyes" -a "x$gd_cv_sys_darwin" = "xno"; then
+  lfs_transitional_api="yes"
+else
+  lfs_transitional_api="no"
 fi
 
 echo
 echo "Configuration summary: "
 echo "  checkdirfile utility:         ${make_checkdirfile}"
-echo "  Include legacy API:           ${include_legacy_api}"
+echo "  LFS transitional API:         ${lfs_transitional_api}"
+echo "  Legacy API:                   ${include_legacy_api}"
 echo "  Verbose debugging:            ${enable_debug}"
 echo "  Use modules:                  ${use_modules}"
 if test "x${use_modules}" != "xno"; then

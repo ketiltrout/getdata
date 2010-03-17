@@ -24,7 +24,7 @@ if GNU_C_COMPILER
 WEXTRA=-Wextra
 endif
 
-if HAVE_OFF64_T
+if LFS_TRANSITIONAL_API
 GET_OFF64=get_off64
 NF_OFF64=nframes_off64
 PUT_OFF64=put_off64
