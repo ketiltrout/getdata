@@ -222,7 +222,7 @@ gd_type_t gdpy_type_from_npytype(int npytype)
 {
   gd_type_t type;
 
-  dtrace("%i", type);
+  dtrace("%i", npytype);
 
   switch(npytype)
   {

@@ -1,3 +1,14 @@
+2010-04-24   D. V. Wiebe <getdata@ketiltrout.net>   svn:390
+	* bindings/python/pydirfile.c (gdpy_dirfile_getdata): Use numpy to allocate
+	the data buffer, instead of doing it ourselves, to avoid memory hassles.
+	Also, only retrieve spf when needed.
+
+	* bindings/python/pygetdata.c (gdpy_type_from_npytype): Fix debug message.
+
+	* bindings/python/pygetdata.h: Undef Python's SIZEOF_OFF_T.
+
+	* bindings/make_parameters.c (main): Don't fall off the end.
+
 2010-03-17   D. V. Wiebe <getdata@ketiltrout.net>   svn:387
 	* configure.ac src/getdata.h.in: Disable LFS transitional API on Darwin.
 

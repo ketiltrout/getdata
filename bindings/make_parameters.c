@@ -325,4 +325,6 @@ int main(int argc, char* argv[])
     Python();
   else if (argv[1][0] == 'i')
     IDL();
+
+  return 0;
 }

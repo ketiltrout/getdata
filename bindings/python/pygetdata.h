@@ -25,6 +25,7 @@
 #undef _POSIX_SOURCE
 #undef _SVID_SOURCE
 #undef _POSIX_C_SOURCE
+#undef SIZEOF_OFF_T
 #include "../../src/internal.h"
 
 #ifdef HAVE_NUMPY_ARRAYOBJECT_H
