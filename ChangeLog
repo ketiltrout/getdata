@@ -1,4 +1,15 @@
+2010-04-26   D. V. Wiebe <getdata@ketiltrout.net>   svn:391
+	GetData-0.6.3 released.
+
+	Merged in changes from trunk, revision 390:
+
+	* bindings/python/pydirfile.c (gdpy_dirfile_getdata): Use numpy to allocate
+	the data buffer, instead of doing it ourselves, to avoid memory hassles.
+	Also, only retrieve spf when needed.
+
 2010-02-17   D. V. Wiebe <getdata@ketiltrout.net>   svn:369
+	GetData 0.6.2 released.
+
 	* src/ascii.c (_GD_AsciiSize): Don't trample on the file name.
 	* test/ascii_nframes.c: Update to test for same.
 

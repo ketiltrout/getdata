@@ -1,3 +1,13 @@
+New in version 0.6.3:
+
+  Bindings 
+
+  * A memory leak has been plugged in the Python bindings manifesting in calls
+    to dirfile.getdata() returning a NumPy array.  In previous versions, the
+    memory used by the returned array to hold the data was not reclaimed by GC.
+
+|==============================================================================|
+
 New in version 0.6.2:
 
   Library Changes

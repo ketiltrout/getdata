@@ -433,7 +433,8 @@ static PyObject* gdpy_dirfile_getdata(struct gdpy_dirfile_t* self,
   long int num_frames = 0, num_samples = 0;
   int as_list = 0;
   gd_type_t return_type;
-  PyObject* pylist;
+  gd_spf_t spf = 1;
+  PyObject* pylist = NULL;
 #ifdef USE_NUMPY
   npy_intp dims[] = { 0 };
 #endif
@@ -448,9 +449,11 @@ static PyObject* gdpy_dirfile_getdata(struct gdpy_dirfile_t* self,
   }
 
   /* we need the SPF to know how many samples we have to allocate */
-  unsigned int spf = get_spf(self->D, field_code);
+  if (num_frames) {
+    spf = get_spf(self->D, field_code);
 
-  PYGD_CHECK_ERROR(self->D, NULL);
+    PYGD_CHECK_ERROR(self->D, NULL);
+  }
 
   size_t ns = num_samples + num_frames * spf;
 
@@ -462,22 +465,28 @@ static PyObject* gdpy_dirfile_getdata(struct gdpy_dirfile_t* self,
 #endif
       pylist = Py_BuildValue("[]");
   } else {
-    void* data = malloc(ns * GD_SIZE(return_type));
+    void* data;
+#ifdef USE_NUMPY
+    if (!as_list) {
+      dims[0] = (npy_intp)ns;
+      pylist = PyArray_SimpleNew(1, dims, gdpy_npytype_from_type(return_type));
+      data = PyArray_DATA(pylist);
+    } else
+#endif
+      data = malloc(ns * GD_SIZE(return_type));
 
     ns = getdata64(self->D, field_code, (off64_t)first_frame,
         (off64_t)first_sample, (size_t)num_frames, (size_t)num_samples,
         return_type, data);
 
-    PYGD_CHECK_ERROR2(self->D, NULL, free(data));
 
 #ifdef USE_NUMPY
-    if (!as_list) {
-      dims[0] = (npy_intp)ns;
-      pylist = PyArray_SimpleNewFromData(1, dims,
-          gdpy_npytype_from_type(return_type), data);
-    } else
+    if (!as_list)
+      PYGD_CHECK_ERROR(self->D, NULL);
+    else
 #endif
     {
+      PYGD_CHECK_ERROR2(self->D, NULL, free(data));
       pylist = gdpy_convert_to_pylist(data, return_type, ns);
 
       free(data);
