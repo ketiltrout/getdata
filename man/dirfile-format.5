@@ -1,4 +1,4 @@
-.\" dirfile-format.5.  The dirfile format file man page.
+.\" dirfile-format.5.  The dirfile format specification man page.
 .\"
 .\" (C) 2005, 2006, 2008, 2009, 2010 D. V. Wiebe
 .\"
@@ -13,28 +13,37 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH dirfile\-format 5 "2 March 2010" "Standards Version 7" "DATA FORMATS"
+.TH dirfile\-format 5 "1 May 2010" "Standards Version 7" "DATA FORMATS"
 .SH NAME
 dirfile\-format \(em the dirfile database format specification file
 .SH DESCRIPTION
 The
-.I dirfile format
-file fully specifies the raw and derived time streams and auxiliary information
+.I dirfile format specification
+fully specifies the raw and derived time streams and auxiliary information
 for a
 .BR dirfile (5)
 database.
 
-The format file is a case sensitive text file called
+The format specification is contained in one or more case-sensitive text files
+located in the dirfile tree.  Each file is known as a
+.IR fragment .
+The primary fragment is the file called
 .B format
-located in the dirfile directory.  The explicit text encoding of the file is not
-specified by these standards, but must be 7-bit ASCII compatible. Examples of
-acceptable character encodings include all the ISO\~8859 character sets
+located in the base dirfile directory.  This file may contain only part of
+the format specification, and may reference other fragments (using the
+.B /INCLUDE
+directive) containing futher format specification.  This inclusion mechanism
+may be nested arbitrarily deep.
+
+The explicit text encoding of these files is not specified by these standards,
+but must be 7-bit ASCII compatible. Examples of acceptable character encodings
+include all the ISO\~8859 character sets
 .RI ( i.e.
 Latin-1 through Latin-10, among others), as well as the UTF-8 encoding of
 Unicode and UCS.
 
 .SH SYNTAX
-The format file is composed of field specification lines and directive lines,
+The format specification is composed of field specification lines and directive lines,
 optionally separated by blank lines or lines containing only whitespace.
 Lines are separated by the line-feed character (0x0A).  Unless escaped (see
 below), the hash mark
@@ -142,7 +151,7 @@ directives.  Any reserved word may omit its initial forward slash
 .RB ( / ),
 without change in meaning.  Future versions of the Standards may require the
 slash to distinguish a reserved word from a field name.  Like the rest of the
-format file, directives are case sensitive.
+format specification, directives are case sensitive.
 
 A number of the directives have
 .IR "fragment scope" .
@@ -228,12 +237,12 @@ The FRAMEOFFSET directive has
 .TP
 .B /INCLUDE
 The INCLUDE directive specifies another file (called a
-.IR "format file fragment" )
+.IR "fragment" )
 to parse for additional format specification for the dirfile.  The inclusion is
 treated as if the lines of the fragment were pasted verbatim in place of the
 INCLUDE directive line.  The exception to this is that RAW fields specified in
 the fragment are located in the directory containing the fragment and not in the
-directory containing the parent format file, and the binary file encoding may be
+directory containing the parent fragment, and the binary file encoding may be
 different for each fragment.  The fragment may be specified either with an
 absolute path, or else a relative path from the current file.  Syntax is:
 .RS
@@ -300,7 +309,7 @@ The PROTECT directive specifies the advisory protection level of the current
 fragment and of the
 .B RAW
 fields defined therein.  The protection level indicates whether writing to the
-format file fragment, or the binary data on disk is permitted.  Syntax is:
+fragment, or the binary data on disk is permitted.  Syntax is:
 .RS
 .IP
 .BI /PROTECT\~ <level>
@@ -350,10 +359,10 @@ such will be honoured.
 .TP
 .B /VERSION
 The VERSION directive specifies the particular version of the Dirfile Standards
-to which the dirfile format file conforms.  This directive should occur before
-any version dependent syntax is encountered.  As of Standards Version 6, no such
-syntax exists, and this directive is provided primarily to ease forward
-compatibility.  Syntax is:
+to which the dirfile format specification conforms.  This directive should
+occur before any version dependent syntax is encountered.  As of Standards
+Version 6, no such syntax exists, and this directive is provided primarily to
+ease forward compatibility.  Syntax is:
 .RS
 .IP
 .BI /VERSION\~ <integer>
@@ -439,8 +448,8 @@ field type is a signed version of this field type.
 .RE
 .TP
 .B CONST
-The CONST scalar field type is a constant fully specified in the format file
-metadata.  Syntax is:
+The CONST scalar field type is a constant fully specified in the format
+specification metadata.  Syntax is:
 .RS
 .IP
 .I <field-name>
@@ -521,9 +530,9 @@ where
 is the input vector field for the table lookup, and
 .I table
 is the path to the lookup table file for the field.  If this path is relative,
-it is assumed to be relative to the directory containing the format file
-fragment defining this field.  The lookup table file is an ASCII text file with
-two whitespace separated columns of
+it is assumed to be relative to the directory containing the fragment defining
+this field.  The lookup table file is an ASCII text file with two whitespace
+separated columns of
 .I x
 and
 .I y
