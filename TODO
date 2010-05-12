@@ -6,3 +6,4 @@
 * linterp table path munging [MH]
 * get_nsamples() [MH]
 * Fix ARM python bug
+* Make webpage suck less
