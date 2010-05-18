@@ -20,7 +20,7 @@
 #
 AUTOMAKE_OPTIONS = foreign
 
-TESTS_ENVIRONMENT=LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:../../../src/.libs PYTHONPATH=../.libs/ ${PYTHON}
+TESTS_ENVIRONMENT=${DL_LIBRARY_PATH}=${${DL_LIBRARY_PATH}}:../../../src/.libs PYTHONPATH=../.libs/ ${PYTHON}
 pyTESTS=big_test.py callback.py
 TESTS=$(addprefix ${srcdir}/,$(pyTESTS))
 

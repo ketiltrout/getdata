@@ -66,6 +66,10 @@ ENCODINGS_LEFT=
 
 echo "*** Checking GetData configuration"
 echo
+
+dnl Build/Host triplets
+AC_CANONICAL_HOST
+
 dnl Legacy API
 AC_ARG_ENABLE(legacy-api, AS_HELP_STRING([--disable-legacy-api],
               [don't include the legacy API wrapper in the library]),
@@ -184,6 +188,13 @@ fi
 
 AC_MSG_CHECKING([whether to include the Fortran 77 bindings])
 AC_MSG_RESULT([$make_f77bindings])
+
+dnl DL library path munging for test suite
+case "${host}" in
+  *-apple-darwin*) DL_LIBRARY_PATH="DYLD_LIBRARY_PATH" ;;
+  *) DL_LIBRARY_PATH="LD_LIBRARY_PATH" ;;
+esac
+AC_SUBST(DL_LIBRARY_PATH)
 
 dnl Python bindings
 AC_ARG_ENABLE(python, AS_HELP_STRING([--disable-python],

@@ -627,7 +627,7 @@ extern int dirfile_uninclude(DIRFILE *dirfile, int fragment_index,
     int del) __gd_nonnull ((1));
 
 /* the following functions are _FILE_OFFSET_BITS sensitive */
-#if !defined _FILE_OFFSET_BITS || _FILE_OFFSET_BITS != 64
+#if defined __APPLE__ || !defined _FILE_OFFSET_BITS || _FILE_OFFSET_BITS != 64
 extern int dirfile_alter_frameoffset(DIRFILE *dirfile, off_t offset,
     int fragment, int recode) __gd_nonnull ((1));
 
@@ -689,7 +689,7 @@ extern double __REDIRECT (get_framenum_subset, (DIRFILE* D,
 /* if requested, declare the LFS transitional extension -- this is not
  * needed on Darwin, which has no off64_t type, and whose off_t is always
  * 64 bits */
-#if defined _LARGEFILE64_SOURCE  && !defined SYS_DARWIN
+#if defined _LARGEFILE64_SOURCE  && !defined __APPLE__
 extern int dirfile_alter_frameoffset64(DIRFILE *dirfile, off64_t offset,
     int fragment, int recode) __gd_nonnull ((1));
 

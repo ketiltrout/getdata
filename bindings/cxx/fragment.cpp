@@ -35,7 +35,7 @@ Fragment::Fragment(GetData::Dirfile *dirfile, int index)
   ind = index;
   enc = (GetData::EncodingScheme)get_encoding(D->D, index);
   end = get_endianness(D->D, index);
-  off = get_frameoffset64(D->D, index);
+  off = get_frameoffset(D->D, index);
   prot = get_protection(D->D, index);
   name = strdup(get_fragmentname(D->D, index));
   parent = (index == 0) ? -1 : get_parent_fragment(D->D, index);
@@ -68,7 +68,7 @@ int Fragment::SetEndianness(unsigned long byte_sex, int recode)
 
 int Fragment::SetFrameOffset(off_t offset, int recode)
 {
-  int ret = dirfile_alter_frameoffset64(D->D, (off64_t)offset, ind, recode);
+  int ret = dirfile_alter_frameoffset(D->D, offset, ind, recode);
 
   if (!ret)
     off = offset;

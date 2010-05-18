@@ -31,6 +31,10 @@
 #include <math.h>
 #include "getdata.h"
 
+#ifndef HAVE_OFF64_T
+#define off64_t off_t
+#endif
+
 #define BUF_LEN GD_MAX_LINE_LENGTH
 #define F_LEN 16
 #define VALID_PRECISION_CHARS "#- +`I.0123456789"

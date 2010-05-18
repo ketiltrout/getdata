@@ -475,9 +475,8 @@ static PyObject* gdpy_dirfile_getdata(struct gdpy_dirfile_t* self,
 #endif
       data = malloc(ns * GD_SIZE(return_type));
 
-    ns = getdata64(self->D, field_code, (off64_t)first_frame,
-        (off64_t)first_sample, (size_t)num_frames, (size_t)num_samples,
-        return_type, data);
+    ns = getdata(self->D, field_code, first_frame, first_sample,
+        (size_t)num_frames, (size_t)num_samples, return_type, data);
 
 
 #ifdef USE_NUMPY
@@ -1097,7 +1096,7 @@ static PyObject* gdpy_dirfile_getnframes(struct gdpy_dirfile_t* self,
 {
   dtrace("%p, %p", self, closure);
 
-  off64_t nframes = get_nframes64(self->D);
+  off_t nframes = get_nframes(self->D);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -1318,7 +1317,7 @@ static PyObject* gdpy_dirfile_putdata(struct gdpy_dirfile_t* self,
   char* keywords[] = { "field_code", "data", "type", "first_frame",
     "first_sample", NULL };
   const char* field_code;
-  off64_t first_frame = 0, first_sample = 0;
+  off_t first_frame = 0, first_sample = 0;
   gd_type_t type = GD_UNKNOWN;
   PyObject* pyobj;
   size_t ns;
@@ -1402,7 +1401,7 @@ static PyObject* gdpy_dirfile_putdata(struct gdpy_dirfile_t* self,
       }
     }
 
-    ns = putdata64(self->D, field_code, first_frame, first_sample, 0, ns, type,
+    ns = putdata(self->D, field_code, first_frame, first_sample, 0, ns, type,
         data);
 
 #ifdef USE_NUMPY
@@ -1502,8 +1501,8 @@ static PyObject* gdpy_dirfile_getframenum(struct gdpy_dirfile_t* self,
   char* keywords[] = { "field_code", "value", "start", "end", NULL };
   const char* field_code;
   double value;
-  off64_t frame_start = 0;
-  off64_t frame_end = 0;
+  off_t frame_start = 0;
+  off_t frame_end = 0;
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
         "sd|KK:pygetdata.dirfile.get_framenum", keywords, &field_code, &value,
@@ -1513,7 +1512,7 @@ static PyObject* gdpy_dirfile_getframenum(struct gdpy_dirfile_t* self,
     return NULL;
   }
 
-  double frame = get_framenum_subset64(self->D, field_code, value, frame_start,
+  double frame = get_framenum_subset(self->D, field_code, value, frame_start,
       frame_end);
 
   PYGD_CHECK_ERROR(self->D, NULL);

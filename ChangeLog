@@ -1,3 +1,27 @@
+2010-05-17   D. V. Wiebe <getdata@ketiltrout.net>   svn:400
+	* src/flush.c (_GD_FlushFragment): malloc temp_file.
+
+	* src/internal.h: Fix handling of !defined(HAVE_OFF64_T).
+	* src/getdata.h.in: __APPLE__ specifics.
+
+	* configure.ac: Set DL_LIBRARY_PATH based on $host.
+	* bindings/python/test/Makefile.am: Use DL_LIBRARY_PATH
+
+	* bindings/python/pydirfile.c bindings/python/pyfragment.c: De-LFSise.
+	* bindings/python/pydirfile.h: Define _FILE_OFFSET_BITS.
+	
+	* bindings/cxx/fragment.cpp: De-LFSise.
+	* bindings/cxx/getdata/indexentry.h bindings/cxx/getdata/rawentry.h
+	bindings/cxx/getdata/dirfile.h bindings/cxx/getdata/linterpentry.h
+	bindings/cxx/getdata/polynomentry.h bindings/cxx/getdata/bitentry.h
+	bindings/cxx/getdata/entry.h bindings/cxx/getdata/multiplyentry.h
+	bindings/cxx/getdata/phaseentry.h bindings/cxx/getdata/fragment.h
+	bindings/cxx/getdata/lincomentry.h bindings/cxx/getdata/sbitentry.h
+	bindings/cxx/getdata/constentry.h bindings/cxx/getdata/stringentry.h: Define
+	_FILE_OFFSET_BITS.
+
+	* util/dirfile2ascii.c: Define off64_t if not present.
+
 2010-04-24   D. V. Wiebe <getdata@ketiltrout.net>   svn:390
 	* bindings/python/pydirfile.c (gdpy_dirfile_getdata): Use numpy to allocate
 	the data buffer, instead of doing it ourselves, to avoid memory hassles.

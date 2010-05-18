@@ -30,6 +30,12 @@
 #include <complex.h>
 #include <string.h>
 
+/* For FILENAME_MAX */
+#include <stdio.h>
+
+/* For the C99 integer types */
+#include <inttypes.h>
+
 /* Type conventions:
  *
  *  - samples per frame is always gd_spf_t (aka uin16_t)
@@ -40,15 +46,6 @@
  *  - public functions taking or returning types of off64_t should have both
  *    a off_t prototype and and off64_t type prototype.
  */
-
-/* if we don't have off64_t, we probably don't have the rest of the transitional
- * LFS API
- */
-#ifndef HAVE_OFF64_T
-typedef off_t off64_t
-# define lseek64 lseek
-# define stat64 stat
-#endif
 
 #ifndef __attribute_malloc__
 # define __attribute_malloc__
@@ -68,8 +65,6 @@ typedef off_t off64_t
 #ifdef USE_MODULES
 # ifdef HAVE_LTDL_H
 #  include <ltdl.h>
-# else
-#  include "gd_ltdl.h"
 # endif
 #endif
 
@@ -106,12 +101,6 @@ const char* _gd_colsub(void);
 
 /* maximum number of recursions */
 #define GD_MAX_RECURSE_LEVEL  32
-
-/* For FILENAME_MAX */
-#include <stdio.h>
-
-/* For the C99 integer types */
-#include <inttypes.h>
 
 #define MAX_IN_COLS (3 * GD_MAX_LINCOM + 5) /* for META lincom */
 
@@ -259,6 +248,15 @@ struct _gd_private_entry {
 #define GD_TEMP_DESTROY 2
 
 #define BUFFER_SIZE 9000000
+
+/* if we don't have off64_t, we probably don't have the rest of the transitional
+ * LFS API
+ */
+#ifndef HAVE_OFF64_T
+typedef off_t off64_t;
+# define lseek64 lseek
+# define stat64 stat
+#endif
 
 /* Encoding schemes */
 extern struct encoding_t {

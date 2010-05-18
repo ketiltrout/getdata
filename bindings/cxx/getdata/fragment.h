@@ -22,6 +22,10 @@
 #ifndef GETDATA_FRAGMENT_H
 #define GETDATA_FRAGMENT_H
 
+#ifndef _FILE_OFFSET_BITS
+# define _FILE_OFFSET_BITS 64
+#endif
+
 #define NO_GETDATA_LEGACY_API
 #define GETDATA_C89_API
 
@@ -78,7 +82,7 @@ namespace GetData {
       unsigned long end;
       int ind;
       int prot;
-      __off64_t off;
+      off_t off;
       char* name;
       int parent;
   };
