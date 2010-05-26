@@ -41,13 +41,13 @@ int main(void)
     return 1;
 
 #ifdef USE_LZMA
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY | GD_VERBOSE);
+  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
 #else
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
+  DIRFILE* D = gd_open(filedir, GD_RDONLY);
 #endif
-  size_t n = get_nframes(D);
-  int error = get_error(D);
-  dirfile_close(D);
+  size_t n = gd_get_nframes(D);
+  int error = gd_error(D);
+  gd_close(D);
 
   unlink(xzdata);
   unlink(format);

@@ -202,7 +202,7 @@ void _GD_SetError(DIRFILE* D, int error, int suberror,
 /* Return the error */
 int gd_error(const DIRFILE* D)
 {
-  dtrace("%p", get_error);
+  dtrace("%p", D);
 
   dreturn("%i", D->error);
 

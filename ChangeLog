@@ -1,4 +1,4 @@
-2010-05-22   D. V. Wiebe <getdata@ketiltrout.net>   svn:401
+2010-05-22   D. V. Wiebe <getdata@ketiltrout.net>   svn:401, 402
 	* test/: Update for new function names.  Modernise error reporting.
 	* test/test.h: Added.
 	* test/add_many.h test/global_ref_get.c: Deleted.

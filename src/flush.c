@@ -334,8 +334,8 @@ static void _GD_FlushFragment(DIRFILE* D, int i)
     mode = stat_buf.st_mode;
 
   /* open a temporary file */
-  temp_file = malloc(name_len + 14);
-  snprintf(temp_file, name_len + 14, "%s/format_XXXXXX", D->name);
+  temp_file = malloc(name_len + 15);
+  snprintf(temp_file, name_len + 15, "%s/format_XXXXXX", D->name);
   fd = mkstemp(temp_file);
   if (fd == -1) {
     _GD_SetError(D, GD_E_OPEN_INCLUDE, errno, NULL, 0, temp_file);

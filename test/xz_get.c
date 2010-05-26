@@ -44,14 +44,14 @@ int main(void)
     return 1;
 
 #ifdef USE_LZMA
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY | GD_VERBOSE);
+  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
 #else
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
+  DIRFILE* D = gd_open(filedir, GD_RDONLY);
 #endif
-  int n = getdata(D, "data", 5, 0, 1, 0, GD_UINT16, c);
-  int error = get_error(D);
+  int n = gd_getdata(D, "data", 5, 0, 1, 0, GD_UINT16, c);
+  int error = gd_error(D);
 
-  dirfile_close(D);
+  gd_close(D);
 
   unlink(xzdata);
   unlink(format);

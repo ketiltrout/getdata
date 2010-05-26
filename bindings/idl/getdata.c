@@ -3700,26 +3700,6 @@ IDL_VPTR gdidl_get_raw_filename(int argc, IDL_VPTR argv[], char *argk)
   return r;
 }
 
-/* @@DLM: F gdidl_get_reference GD_GET_REFERENCE 1 1 KEYWORDS */
-IDL_VPTR gdidl_get_reference(int argc, IDL_VPTR argv[], char *argk)
-{
-  dtraceidl();
-
-  GDIDL_KW_ONLY_ERROR;
-
-  DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
-
-  const char* name = gd_get_reference(D);
-
-  GDIDL_SET_ERROR(D);
-
-  IDL_KW_FREE;
-
-  IDL_VPTR r = IDL_StrToSTRING((char*)name);
-  dreturn("%p", r);
-  return r;
-}
-
 /* @@DLM: F gdidl_get_spf GD_GET_SPF 2 2 KEYWORDS */
 IDL_VPTR gdidl_get_spf(int argc, IDL_VPTR argv[], char *argk)
 {

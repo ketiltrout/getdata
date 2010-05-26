@@ -36,7 +36,7 @@ function check_simple, t, v, g
 end
 
 function check_error, t, d, ce
-  e = get_error(d)
+  e = gd_error(d)
   if (e ne ce) then begin
     print,"e[", t, "]=", e
     return,1
@@ -50,7 +50,7 @@ function check_ok, t, d
 end
 
 function check_error2, t, m, d, ce
-  e = get_error(d)
+  e = gd_error(d)
   if (e ne ce) then begin
     print,"e[", t, ",", m, "]=", e
     return,1
