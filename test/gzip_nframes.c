@@ -1,6 +1,6 @@
 /* Retreiving the number of frames should succeed cleanly */
 #include "../src/config.h"
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -20,7 +20,7 @@ int main(void)
   const char* format_data = "data RAW UINT16 1\n";
   char command[4096];
   uint16_t data_data[256];
-  int i;
+  int i, r = 0;
 
   mkdir(filedir, 0777);
 
@@ -41,37 +41,25 @@ int main(void)
     return 1;
 
 #ifdef USE_GZIP
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY | GD_VERBOSE);
+  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
 #else
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
+  DIRFILE* D = gd_open(filedir, GD_RDONLY);
 #endif
-  size_t n = get_nframes(D);
-  int error = get_error(D);
-  dirfile_close(D);
+  size_t n = gd_get_nframes(D);
+  int error = gd_error(D);
+  gd_close(D);
 
   unlink(gzipdata);
   unlink(format);
   rmdir(filedir);
 
 #ifdef USE_GZIP
-  if (error) {
-    fprintf(stderr, "1a=%i\n", error);
-    return 1;
-  }
-  if (n != 256) {
-    fprintf(stderr, "2a=%i\n", n);
-    return 1;
-  }
+  CHECKI(error, 0);
+  CHECKI(n, 256);
 #else
-  if (error != GD_E_UNSUPPORTED) {
-    fprintf(stderr, "1b=%i\n", error);
-    return 1;
-  }
-  if (n != 0) {
-    fprintf(stderr, "2b=%i\n", n);
-    return 1;
-  }
+  CHECKI(error, GD_E_UNSUPPORTED);
+  CHECKI(n, 0);
 #endif
 
-  return 0;
+  return r;
 }

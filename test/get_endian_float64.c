@@ -1,5 +1,5 @@
 /* Attempt to read FLOAT64 with the opposite endianness */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <inttypes.h>
 #include <stdlib.h>
@@ -34,7 +34,7 @@ int main(void)
   const char x[8] = {0x40, 0x26, 0xc8, 0x00, 0x00, 0x00, 0x00, 0x00};
   u.f = 0;
   double data_data[128];
-  int fd, i;
+  int fd, i, r = 0;
   const int big_endian = BigEndian();
 
   mkdir(filedir, 0777); 
@@ -54,24 +54,21 @@ int main(void)
   write(fd, data_data, 128 * sizeof(double));
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY | GD_VERBOSE);
-  int n = getdata(D, "data", 5, 0, 1, 0, GD_FLOAT64, &u.f);
-  int error = get_error(D);
+  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  int n = gd_getdata(D, "data", 5, 0, 1, 0, GD_FLOAT64, &u.f);
+  int error = gd_error(D);
 
-  dirfile_close(D);
+  gd_close(D);
 
   unlink(data);
   unlink(format);
   rmdir(filedir);
 
-  if (error)
-    return 1;
-  if (n != 1)
-    return 1;
+  CHECKI(error, 0);
+  CHECKI(n, 1);
 
   for (i = 0; i < 8; ++i)
-    if (x[(big_endian) ? 7 - i : i] != u.b[i])
-      return 1;
+    CHECKXi(i,u.b[i],x[(big_endian) ? 7 - i : i]);
 
-  return 0;
+  return r;
 }

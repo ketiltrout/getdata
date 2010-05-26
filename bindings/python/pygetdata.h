@@ -64,9 +64,9 @@
 #define PYGD_CHECK_ERROR2(D,R,E) \
   do { \
     int the_error; \
-    if ((the_error = get_error(D))) { \
+    if ((the_error = gd_error(D))) { \
       char buffer[GD_MAX_LINE_LENGTH]; \
-      PyErr_SetString(gdpy_exceptions[the_error], get_error_string((D), \
+      PyErr_SetString(gdpy_exceptions[the_error], gd_error_string((D), \
             buffer, GD_MAX_LINE_LENGTH)); \
       E; \
       dreturnvoid(); \

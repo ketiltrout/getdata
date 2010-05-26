@@ -1,5 +1,5 @@
 /* Test include */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -19,7 +19,7 @@ int main(void)
   const char* format_data = "/INCLUDE format1\na CONST UINT8 1\n";
   const char* format1_data = "b CONST UINT8 11\n/INCLUDE format2\n";
   const char* format2_data = "c CONST UINT8 11\n";
-  int fd;
+  int fd, r = 0;
 
   mkdir(filedir, 0777);
 
@@ -35,42 +35,24 @@ int main(void)
   write(fd, format2_data, strlen(format2_data));
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_VERBOSE);
-  int ret = dirfile_uninclude(D, 1, 0);
-  int error = get_error(D);
-  unsigned int nfields = get_nfields(D);
-  unsigned int nfragments = get_nfragments(D);
-  dirfile_close(D);
+  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
+  int ret = gd_uninclude(D, 1, 0);
+  int error = gd_error(D);
+  unsigned int nfields = gd_get_nfields(D);
+  unsigned int nfragments = gd_get_nfragments(D);
+  gd_close(D);
 
   int unlink_format2 = unlink(format2);
   int unlink_format1 = unlink(format1);
   unlink(format);
   rmdir(filedir);
 
-  if (error) {
-    fprintf(stderr, "1=%i\n", error);
-    return 1;
-  }
-  if (ret != 0) {
-    fprintf(stderr, "2=%i\n", ret);
-    return 1;
-  }
-  if (nfields != 2) {
-    fprintf(stderr, "3=%i\n", nfields);
-    return 1;
-  }
-  if (nfragments != 1) {
-    fprintf(stderr, "4=%i\n", nfragments);
-    return 1;
-  }
-  if (unlink_format2 != 0) {
-    fprintf(stderr, "5=%i\n", unlink_format2);
-    return 1;
-  }
-  if (unlink_format1 != 0) {
-    fprintf(stderr, "6=%i\n", unlink_format1);
-    return 1;
-  }
+  CHECKI(error,0);
+  CHECKI(ret,0);
+  CHECKI(nfields,2);
+  CHECKI(nfragments,1);
+  CHECKI(unlink_format2,0);
+  CHECKI(unlink_format1,0);
 
-  return 0;
+  return r;
 }

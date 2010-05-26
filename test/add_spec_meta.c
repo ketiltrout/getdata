@@ -1,5 +1,5 @@
 /* add a barth-style meta field with add_spec */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -17,48 +17,33 @@ int main(void)
   int r = 0;
   gd_entry_t e;
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
-  dirfile_add_spec(D, "INDEX/meta CONST UINT8 2", 0);
-  int error = get_error(D);
+  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
+  gd_add_spec(D, "INDEX/meta CONST UINT8 2", 0);
+  int error = gd_error(D);
   unsigned char val;
 
   /* check */
-  int n = get_nfields(D);
+  int n = gd_get_nfields(D);
 
-  if (n != 1)
-    r = 1;
+  CHECKI(n, 1);
 
-  get_entry(D, "INDEX/meta", &e);
-  if (get_error(D))
+  gd_get_entry(D, "INDEX/meta", &e);
+  if (gd_error(D))
     r = 1;
   else {
-    if (e.field_type != GD_CONST_ENTRY) {
-      fprintf(stderr, "field_type = %i\n", e.field_type);
-      r = 1;
-    }
-    if (e.fragment_index != 0) {
-      fprintf(stderr, "fragment_index = %i\n", e.fragment_index);
-      r = 1;
-    }
-    if (e.const_type != GD_UINT8) {
-      fprintf(stderr, "const_type = %i\n", e.const_type);
-      r = 1;
-    }
-    get_constant(D, "INDEX/meta", GD_UINT8, &val);
-    if (val != 2) {
-      fprintf(stderr, "val = %i\n", val);
-      r = 1;
-    }
-    dirfile_free_entry_strings(&e);
+    CHECKI(e.field_type, GD_CONST_ENTRY);
+    CHECKI(e.fragment_index, 0);
+    CHECKI(e.const_type, GD_UINT8);
+    gd_get_constant(D, "INDEX/meta", GD_UINT8, &val);
+    CHECKI(val, 2);
+    gd_free_entry_strings(&e);
   }
 
-  dirfile_close(D);
+  gd_close(D);
 
   unlink(format);
   rmdir(filedir);
 
-  if (r)
-    return 1;
-
-  return (error != GD_E_OK);
+  CHECKI(error, GD_E_OK);
+  return r;
 }

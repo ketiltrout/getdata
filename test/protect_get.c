@@ -1,6 +1,5 @@
 /* Test protection */
-#include "../src/getdata.h"
-
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -17,7 +16,7 @@ int main(void)
   const char* data = __TEST__ "dirfile/data";
   const char* format_data = "data RAW UINT8 8\nPROTECT format\n";
   unsigned char data_data[256];
-  int fd;
+  int fd, r = 0;
 
   mkdir(filedir, 0777);
 
@@ -32,20 +31,18 @@ int main(void)
   write(fd, data_data, 256);
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY | GD_VERBOSE);
-  int p = get_protection(D, 0);
-  int error = get_error(D);
+  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  int p = gd_get_protection(D, 0);
+  int error = gd_error(D);
 
-  dirfile_close(D);
+  gd_close(D);
 
   unlink(data);
   unlink(format);
   rmdir(filedir);
 
-  if (error)
-    return 1;
-  if (p != GD_PROTECT_FORMAT)
-    return 1;
+  CHECKI(p, GD_PROTECT_FORMAT);
+  CHECKI(error, 0);
 
-  return 0;
+  return r;
 }

@@ -1,6 +1,6 @@
 /* Retreiving the number of frames should succeed cleanly */
 #include "../src/config.h"
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -20,7 +20,7 @@ int main(void)
   const char* format_data = "data RAW UINT16 1\n";
   char command[4096];
   uint16_t data_data[256];
-  int i;
+  int i, r = 0;
 
   mkdir(filedir, 0777);
 
@@ -54,16 +54,12 @@ int main(void)
   rmdir(filedir);
 
 #ifdef USE_LZMA
-  if (error)
-    return 1;
-  if (n != 256)
-    return 1;
+  CHECKI(error,0);
+  CHECKI(n,256);
 #else
-  if (error != GD_E_UNSUPPORTED)
-    return 1;
-  if (n != 0)
-    return 1;
+  CHECKI(error,GD_E_UNSUPPORTED);
+  CHECKI(n,0);
 #endif
 
-  return 0;
+  return r;
 }

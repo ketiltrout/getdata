@@ -1,5 +1,5 @@
-/* Test get_fragmentname out-of-range handling */
-#include "../src/getdata.h"
+/* Test gd_get_fragmentname out-of-range handling */
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -19,7 +19,7 @@ int main(void)
   const char* format1_data = "data RAW UINT8 11\n";
   const char* form0 = NULL;
   const char* form1 = NULL;
-  int fd;
+  int fd, r = 0;
 
   mkdir(filedir, 0777);
 
@@ -31,21 +31,19 @@ int main(void)
   write(fd, format1_data, strlen(format1_data));
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
-  form0 = get_fragmentname(D, -3000);
-  form1 = get_fragmentname(D, 1000);
-  int error = get_error(D);
-  dirfile_close(D);
+  DIRFILE* D = gd_open(filedir, GD_RDONLY);
+  form0 = gd_get_fragmentname(D, -3000);
+  form1 = gd_get_fragmentname(D, 1000);
+  int error = gd_error(D);
+  gd_close(D);
 
   unlink(format1);
   unlink(format);
   rmdir(filedir);
 
-  if (form0 != NULL || form1 != NULL)
-    return 1;
+  CHECKP(form0);
+  CHECKP(form1);
+  CHECKI(error, GD_E_BAD_INDEX);
 
-  if (error != GD_E_BAD_INDEX)
-    return 1;
-
-  return 0;
+  return r;
 }

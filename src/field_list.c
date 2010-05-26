@@ -35,7 +35,7 @@ const gd_entype_t _gd_entype_index[GD_N_ENTYPES] =
   GD_SBIT_ENTRY, GD_CONST_ENTRY, GD_STRING_ENTRY
 };
 
-const void* get_constants(DIRFILE* D, gd_type_t return_type)
+const void* gd_get_constants(DIRFILE* D, gd_type_t return_type)
 {
   dtrace("%p, 0x%x", D, return_type);
 
@@ -77,7 +77,7 @@ const void* get_constants(DIRFILE* D, gd_type_t return_type)
   return D->const_value_list;
 }
 
-const char** get_strings(DIRFILE* D)
+const char** gd_get_strings(DIRFILE* D)
 {
   dtrace("%p", D);
 
@@ -126,7 +126,7 @@ const char** get_strings(DIRFILE* D)
   return D->string_value_list;
 }
 
-const char** get_field_list_by_type(DIRFILE* D, gd_entype_t type)
+const char** gd_get_field_list_by_type(DIRFILE* D, gd_entype_t type)
 {
   dtrace("%p, %x", D, type);
 
@@ -142,7 +142,7 @@ const char** get_field_list_by_type(DIRFILE* D, gd_entype_t type)
 
   _GD_ClearError(D);
 
-  n = get_nfields_by_type(D, type);
+  n = gd_get_nfields_by_type(D, type);
 
   if (D->error) {
     dreturn("%p", NULL);
@@ -195,7 +195,7 @@ const char** get_field_list_by_type(DIRFILE* D, gd_entype_t type)
   return D->type_list[index];
 }
 
-const char** get_vector_list(DIRFILE* D)
+const char** gd_get_vector_list(DIRFILE* D)
 {
   dtrace("%p", D);
 
@@ -245,7 +245,7 @@ const char** get_vector_list(DIRFILE* D)
   return D->vector_list;
 }
 
-const char** get_field_list(DIRFILE* D)
+const char** gd_get_field_list(DIRFILE* D)
 {
   dtrace("%p", D);
 

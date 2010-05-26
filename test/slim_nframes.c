@@ -1,6 +1,6 @@
 /* Retreiving the number of frames should succeed cleanly */
 #include "../src/config.h"
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -37,33 +37,31 @@ int main(void)
 
   /* compress */
   snprintf(command, 4096, "%s -k %s > /dev/null", SLIM, data);
-  if (system(command))
-    return 1;
+  if (system(command)) {
+    perror("command");
+    r = 1;
+  }
 
 #ifdef USE_SLIM
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY | GD_VERBOSE);
+  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
 #else
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
+  DIRFILE* D = gd_open(filedir, GD_RDONLY);
 #endif
-  size_t n = get_nframes(D);
-  int error = get_error(D);
-  dirfile_close(D);
+  size_t n = gd_get_nframes(D);
+  int error = gd_error(D);
+  gd_close(D);
 
   unlink(slimdata);
   unlink(format);
   rmdir(filedir);
 
 #ifdef USE_SLIM
-  if (error)
-    return 1;
-  if (n != 256)
-    return 1;
+  CHECKI(error, 0);
+  CHECKI(n,256);
 #else
-  if (error != GD_E_UNSUPPORTED)
-    return 1;
-  if (n != 0)
-    return 1;
+  CHECKI(error, GD_E_UNSUPPORTED);
+  CHECKI(n,0);
 #endif
 
-  return 0;
+  return r;
 }

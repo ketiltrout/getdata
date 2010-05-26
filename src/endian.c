@@ -115,8 +115,7 @@ static void _GD_ByteSwapFragment(DIRFILE* D, unsigned long byte_sex,
   dreturnvoid();
 }
 
-int dirfile_alter_endianness(DIRFILE* D, unsigned long byte_sex, int fragment,
-    int move)
+int gd_alter_endianness(DIRFILE* D, unsigned long byte_sex, int fragment, int move)
 {
   int i;
 
@@ -162,7 +161,7 @@ int dirfile_alter_endianness(DIRFILE* D, unsigned long byte_sex, int fragment,
   return (D->error) ? -1 : 0;
 }
 
-unsigned long get_endianness(DIRFILE* D, int fragment)
+unsigned long gd_get_endianness(DIRFILE* D, int fragment)
 {
   dtrace("%p, %i", D, fragment);
 

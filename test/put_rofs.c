@@ -1,6 +1,5 @@
 /* Attempt to write a non-existant field */
-#include "../src/getdata.h"
-
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -17,7 +16,7 @@ int main(void)
   const char* data = __TEST__ "dirfile/data";
   const char* format_data = "data RAW UINT8 1\n";
   unsigned char c = 0;
-  int fd;
+  int fd, r = 0;
 
   mkdir(filedir, 0777);
 
@@ -27,18 +26,17 @@ int main(void)
 
   close(open(data, O_CREAT | O_EXCL | O_WRONLY, 0444));
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_UNENCODED);
-  int n = putdata(D, "data", 5, 0, 1, 0, GD_UINT8, &c);
+  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_UNENCODED);
+  int n = gd_putdata(D, "data", 5, 0, 1, 0, GD_UINT8, &c);
 
-  int error = get_error(D);
-  dirfile_close(D);
+  int error = gd_error(D);
+  gd_close(D);
 
   unlink(data);
   unlink(format);
   rmdir(filedir);
 
-  if (n != 0)
-    return 1;
-
-  return (error != GD_E_RAW_IO);
+  CHECKI(n,0);
+  CHECKI(error,GD_E_RAW_IO);
+  return r;
 }

@@ -152,7 +152,7 @@ int gdpy_convert_from_pyobj(PyObject* value, union gdpy_quadruple_value *data,
       dreturn("%i", -1);
       return -1;
     }
-  } else { /* an non numeric type */
+  } else { /* a non-numeric type */
     PyErr_SetString(PyExc_TypeError, "a numeric type was expected");
     dreturn("%i", -1);
     return -1;
@@ -180,9 +180,9 @@ gd_type_t gdpy_convert_from_pylist(PyObject* value, void *data, gd_type_t type,
 
   switch(data_type) {
     case GDPY_INT_AS_LONG:
-      type = GD_INT64;
+      type = GD_INT32;
       for (i = 1; i < ns; ++i)
-        ((int64_t*)data)[i] = PyInt_AsLong(PyList_GetItem(value, i));
+        ((int32_t*)data)[i] = PyInt_AsLong(PyList_GetItem(value, i));
       break;
     case GDPY_LONG_AS_ULL: 
       type = GD_UINT64;
@@ -538,11 +538,11 @@ PyMODINIT_FUNC initpygetdata(void)
       "data passed\nto pygetdata may either be a Python list or a NumPy array."
       "\n\n"
       "The input data type argument to bindings for functions such as "
-      "putdata(3),\nwhich is required in the C API, are typically optional, as "
+      "gd_putdata(3),\nwhich is required in the C API, are typically optional, as "
       "pygetdata can\ndetermine the input data type by itself, and convert it "
       "to an appropriate\ntype for the C API.  If the data type is supplied, "
       "pygetdata will coerce the\ninput data to the specified C type as best "
-      "it can.  For getdata(3) and\nsimilar, the C API types are converted to "
+      "it can.  For gd_getdata(3) and\nsimilar, the C API types are converted to "
       "Python types as follows:\n\n"
       "  o int     -- UINT8, INT8, UINT16, INT16, INT32\n"
       "  o long    -- UINT32, UINT64, INT64\n"

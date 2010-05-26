@@ -1,6 +1,5 @@
 /* Test field modifying */
-#include "../src/getdata.h"
-
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -18,7 +17,7 @@ int main(void)
   const char* data = __TEST__ "dirfile/data";
   const char* format_data = "data RAW UINT8 8\n";
   unsigned char data_data[256];
-  int fd;
+  int fd, r = 0;
   gd_entry_t E;
 
   mkdir(filedir, 0777);
@@ -34,32 +33,23 @@ int main(void)
   write(fd, data_data, 256);
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_VERBOSE);
-  get_entry(D, "data", &E);
+  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
+  gd_get_entry(D, "data", &E);
   E.data_type = GD_UINT16;
   E.spf = 11;
-  int ret = dirfile_alter_entry(D, "data", &E, 0);
-  int error = get_error(D);
-  off_t n = get_nframes(D);
+  int ret = gd_alter_entry(D, "data", &E, 0);
+  int error = gd_error(D);
+  off_t n = gd_get_nframes(D);
 
-  dirfile_close(D);
+  gd_close(D);
 
   unlink(data);
   unlink(format);
   rmdir(filedir);
 
-  if (error) {
-    fprintf(stderr, "1=%i\n", error);
-    return 1;
-  }
-  if (n != 11) {
-    fprintf(stderr, "2=%lli\n", (long long)n);
-    return 1;
-  }
-  if (ret != 0) {
-    fprintf(stderr, "3=%i\n", ret);
-    return 1;
-  }
+  CHECKI(error, 0);
+  CHECKI(n, 11);
+  CHECKI(ret, 0);
 
-  return 0;
+  return r;
 }

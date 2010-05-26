@@ -1,5 +1,5 @@
 /* Retreiving the number of fields of a field should succeed cleanly */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -19,7 +19,7 @@ int main(void)
     "data2 STRING valu2\n"
     "data3 STRING valu3\n"
     "data4 CONST UINT8 1\n";
-  int fd, r = 0;
+  int fd, i, r = 0;
 
   mkdir(filedir, 0777);
 
@@ -27,44 +27,31 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY | GD_VERBOSE);
-  const char** field_list = get_strings(D);
+  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  const char** field_list = gd_get_strings(D);
 
-  if (get_error(D))
-    r = 1;
+  int error = gd_error(D);
+  CHECKI(error, 0);
+  CHECKPN(field_list);
 
-  if (field_list == NULL)
-    r = 1;
+  for (i = 0; field_list[i]; ++i) {
+    int len = strlen(field_list[i]);
+    CHECKIi(i,len,5);
 
-  fd = 0;
-  if (!r)
-    for (fd = 0; ; ++fd) {
-      if (field_list[fd] == NULL)
-        break;
+    CHECKIi(i,field_list[i][0], 'v');
+    CHECKIi(i,field_list[i][1], 'a');
+    CHECKIi(i,field_list[i][2], 'l');
+    CHECKIi(i,field_list[i][3], 'u');
 
-      if (strlen(field_list[fd]) != 5)
-        r = 1;
-
-      if (field_list[fd][0] != 'v')
-        r = 1;
-
-      if (field_list[fd][1] != 'a')
-        r = 1;
-
-      if (field_list[fd][2] != 'l')
-        r = 1;
-
-      if (field_list[fd][3] != 'u')
-        r = 1;
-
-      if (field_list[fd][4] < '1' || field_list[fd][4] > '3')
-        r = 1;
+    if (field_list[i][4] < '1' || field_list[i][4] > '3') {
+      fprintf(stderr, "field_list[%i] = \"%s\"\n", i, field_list[i]);
+      r = 1;
     }
+  }
 
-  if (fd != 3)
-    r = 1;
+  CHECKI(i,3);
 
-  dirfile_close(D);
+  gd_close(D);
   unlink(format);
   rmdir(filedir);
 

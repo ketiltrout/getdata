@@ -18,6 +18,10 @@
 // along with GetData; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 //
+#ifdef HAVE_CONFIG_H
+#include "../../src/config.h"
+#endif
+#undef GETDATA_LEGACY_API
 #include "getdata/dirfile.h"
 
 #include <cstring>
@@ -38,7 +42,7 @@ int ConstEntry::SetType(DataType type)
   E.const_type = (gd_type_t)type;
 
   if (D != NULL)
-    return dirfile_alter_entry(D->D, E.field, &E, 0);
+    return gd_alter_entry(D->D, E.field, &E, 0);
   
   return 0;
 }

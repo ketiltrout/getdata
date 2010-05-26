@@ -1,0 +1,122 @@
+.\" gd_uninclude.3.  The gd_uninclude man page.
+.\"
+.\" (C) 2008, 2010 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_uninclude 3 "25 May 2010" "Version 0.7.0" "GETDATA"
+.SH NAME
+gd_uninclude \(em remove a format file fragment from a dirfile
+.SH SYNOPSIS
+.B #include <getdata.h>
+.HP
+.nh
+.ad l
+.BI "int *gd_uninclude(DIRFILE *" dirfile ", int " fragment_index ,
+.BI "int " del );
+.hy
+.ad n
+.SH DESCRIPTION
+The
+.BR gd_uninclude ()
+removes the format file fragment indexed by
+.I fragment_index
+from the specified dirfile, as well as any fragments the specified fragment
+INCLUDEs.  Fields defined in the removed fragments will be removed from the
+dirfile.
+
+Before removing the specified fragment, all pending writes are flushed to
+.B RAW
+fields defined the the removed fragments.  If
+.I del
+is zero, metadata changes will also be written to the removed fragments.  If
+.I del
+is non-zero, the format file fragments will be deleted from disk, if possible.
+Regardless of the value of
+.IR del ,
+binary data files associated with
+.B RAW
+fields defined in the removed fragments will not be deleted.  To delete these
+binary files, use
+.BR gd_delete (3)
+before calling this function.
+
+The primary format file (the fragment indexed by zero) cannot be removed
+from the dirfile.
+.SH RETURN VALUE
+On success,
+.BR gd_uninclude ()
+returns zero.  On error, -1 is returned and the dirfile error is set to a
+non-zero error value.  Possible error values are:
+.TP 8
+.B GD_E_ACCMODE
+The supplied dirfile was opened in read-only mode.
+.TP
+.B GD_E_ALLOC
+The library was unable to allocate memory.
+.TP
+.B GD_E_BAD_DIRFILE
+The supplied dirfile was invalid.
+.TP
+.B GD_E_BAD_INDEX
+The supplied fragment index was out of range, or an attempt was made to remove
+the primary format file.
+.TP
+.B GD_E_OPEN_INCLUDE
+A temporary file could not be opened into which to write the metadata of a
+modified, removed fragment.
+.TP
+.B GD_E_PROTECTED
+The metadata of the fragment which included the removed fragment was protected
+from change.
+.TP
+.B GD_E_RAW_IO
+An error occurred while trying to flush or close a removed field.
+.P
+The dirfile error may be retrieved by calling
+.BR gd_error (3).
+A descriptive error string for the last error encountered can be obtained from
+a call to
+.BR gd_error_string (3).
+When finished with it, the DIRFILE object may be deallocated with a call to
+.BR gd_close (3),
+even if the open failed.
+.SH NOTES
+This function re-arranges the remaining format file fragments in some
+unspecified way, except for the primary fragment, which is guaranteed to remain
+at index zero.  Callers which cache format file fragment indices must
+re-initialise their cache after calling this function.
+
+Unlike
+.BR gd_delete (3),
+fields which depend on fields removed by this function are not automatically
+updated, nor is any check made to ensure that this function does not leave
+fields with missing input fields.  Because of this, a fragment inclusion may be
+easily moved from one fragment to another with a combination of
+.BR gd_uninclude ()
+and
+.BR gd_include (3).
+However, if such checks are required, use
+.BR gd_delete (3)
+to delete the fields defined in the removed fragments first.
+.SH SEE ALSO
+.BR gd_delete (3),
+.BR gd_include (3),
+.BR gd_open (3),
+.BR gd_reference (3),
+.BR gd_error (3),
+.BR gd_error_string (3),
+.BR gd_get_fragmentname (3),
+.BR gd_get_nfragments (3),
+.BR dirfile (5),
+.BR dirfile-encoding (5),
+.BR dirfile-format (5)

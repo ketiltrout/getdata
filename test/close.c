@@ -1,5 +1,5 @@
 /* Closing a dirfile should succeed cleanly */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -12,15 +12,18 @@ int main(void)
 {
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
+  int r = 0;
 
   mkdir(filedir, 0777);
   close(open(format, O_CREAT | O_EXCL | O_WRONLY, 0666));
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY | GD_VERBOSE);
-  int error = dirfile_close(D);
+  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  int error = gd_close(D);
 
   unlink(format);
   rmdir(filedir);
 
-  return error;
+  CHECKI(error, 0);
+
+  return r;
 }

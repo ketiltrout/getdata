@@ -1,0 +1,305 @@
+.\" gd_include.3.  The gd_include man page.
+.\"
+.\" (C) 2008, 2009, 2010 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_include 3 "25 May 2010" "Version 0.7.0" "GETDATA"
+.SH NAME
+gd_include \(em add a format file fragment to a dirfile
+.SH SYNOPSIS
+.B #include <getdata.h>
+.HP
+.nh
+.ad l
+.BI "int gd_include(DIRFILE *" dirfile ", const char *" include_file ,
+.BI "int " parent_fragment ", unsigned long " flags );
+.hy
+.ad n
+.SH DESCRIPTION
+The
+.BR gd_include ()
+adds the format file fragment specified by the path
+.I include_file
+to the specified dirfile, possibly creating the fragment.  This occurs as if,
+in the existing fragment indexed
+by
+.IR parent_fragment ,
+the following directive were present:
+.IP
+.BI "/INCLUDE " <include_file>
+.P
+(see
+.BR dirfile-format (5)).
+If a parser callback function had been specified when the dirfile was opened
+using
+.BR gd_cbopen (3),
+or added later with
+.BR gd_parser_callback (3),
+this callback function will be called if a syntax error is encountered while
+parsing the included fragment.
+
+The 
+.I flags
+argument should be a bitwise-or'd collection of the following flags, or zero
+if no flags are desired:
+.TP
+.B GD_BIG_ENDIAN
+Specifies that raw data on disk is stored as big-endian data (most significant
+byte first).  Specifying this flag along with the contradictory
+.BR GD_LITTLE_ENDIAN 
+will cause the library to assume that the endianness of the data is opposite to
+that of the native architecture.
+
+This flag is ignored completely if an
+.B ENDIAN
+directive occurs in the fragment, unless
+.B GD_FORCE_ENDIAN
+is also specified.
+.TP
+.B GD_CREAT
+An empty fragment will be created, if one does not already exist.  The fragment
+will have mode
+.BR S_IRUSR " | " S_IWUSR " | "  S_IRGRP " | "  S_IWGRP " | " S_IROTH " | " S_IWOTH
+(0666), modified by the caller's umask value (see
+.BR umask (2)).
+.TP
+.B GD_EXCL
+Ensure that this call creates a new fragment: when specified along with
+.BR GD_CREAT ,
+the call will fail if the file specified by
+.I include_file
+already exists.  Behaviour of this flag is undefined if
+.B GD_CREAT
+is not specified.  This flag suffers from all the limitations of the
+.B O_EXCL
+flag as indicated in
+.BR open (2).
+.TP
+.B GD_FORCE_ENCODING
+Specifies that
+.B ENCODING
+directives (see
+.BR dirfile-format (5))
+found in the fragment should be ignored.  The encoding scheme
+specified in
+.I flags
+will be used instead (see below).
+.TP
+.B GD_FORCE_ENDIAN
+Specifies that
+.B ENDIAN
+directives (see
+.BR dirfile-format (5))
+found in the fragment should be ignored.  When specified with one of
+.BR GD_BIG_ENDIAN " or " GD_LITTLE_ENDIAN ,
+the endianness specified will be assumed.  If this flag is specified with
+neither of those flags, the fragment will be assumed to have the endianness of
+the native architecture.
+.TP
+.B GD_IGNORE_DUPS
+If the fragment specifies more than one field with the same name, or a field 
+with the same name as an existing field, all but one of them will be ignored by
+the parser.  Without this flag, parsing would fail with the
+.B GD_E_FORMAT 
+error, possibly resulting in invocation of the registered callback function.
+Which of the duplicate fields is kept is not specified, nor whether an existing
+field takes precedence over a new one or not.  As a result, this flag is
+typically only useful in the case where identical copies of a field
+specification line are present.
+
+No indication is provided to indicate whether a duplicate field has been
+discarded.  If finer grained control is required, the caller should handle
+.B GD_E_FORMAT_DUPLICATE
+suberrors itself with an appropriate callback function.
+.TP
+.B GD_IGNORE_REFS
+If the dirfile currently has a reference field (either because one was specified
+explicitly, or else because the first
+.B RAW
+field was used),
+.B /REFERENCE
+directives in the included fragment will be ignored.  Otherwise, a
+.B /REFERENCE
+directive in the included fragment will replace the current reference field in
+the dirfile.
+.TP
+.B GD_LITTLE_ENDIAN
+Specifies that raw data on disk is stored as little-endian data (least
+significant byte first).  Specifying this flag along with the contradictory
+.BR GD_BIG_ENDIAN 
+will cause the library to assume that the endianness of the data is opposite to
+that of the native architecture.
+
+This flag is ignored completely if an
+.B ENDIAN
+directive occurs in the fragment, unless
+.B GD_FORCE_ENDIAN
+is also specified.
+.TP
+.B GD_PEDANTIC
+Specifies that unrecognised lines found during the parsing of the fragment
+should always cause a fatal error.  Without this flag, if a
+.B VERSION
+directive (see
+.BR dirfile-format (5))
+indicates that the fragment being opened conforms Standards Version newer than
+the version understood by the library, unrecognised lines will be silently
+ignored.
+.TP
+.B GD_TRUNC
+If
+.I include_file
+already exists, it will be truncated before opening.  If the file does not
+exist, this flag is ignored.
+
+.P
+The
+.I flags
+argument may also be bitwise or'd with one of the following symbols indicating
+the default encoding scheme of the fragment.  Like the endianness flags, the
+choice of encoding here is ignored if the encoding is specified in the fragment
+itself, unless
+.B GD_FORCE_ENCODED
+is also specified.  If none of these symbols is present,
+.B GD_AUTO_ENCODED
+is assumed, unless the
+.BR gd_include ()
+call results in creation or truncation of the fragment.  In that case,
+.B GD_UNENCODED
+is assumed.  See
+.BR dirfile-encoding (5)
+for details on dirfile encoding schemes.
+.TP
+.B GD_AUTO_ENCODED
+Specifies that the encoding type is not known in advance, but should be detected
+by the GetData library.  Detection is accomplished by searching for raw data
+files with extensions appropriate to the encoding scheme.  This method will
+notably fail if the the library is called via
+.BR putdata (3)
+to create a previously non-existent raw field unless a read is first
+successfully performed on the dirfile.  Once the library has determined the
+encoding scheme for the first time, it remembers it for subsequent calls.
+.TP
+.B GD_BZIP2_ENDODED
+Specifies that raw data files are compressed using the Burrows-Wheeler block
+sorting text compression algorithm and Huffman coding, as implemented in the
+bzip2 format.
+.TP
+.B GD_GZIP_ENDODED
+Specifies that raw data files are compressed using Lempel-Ziv coding (LZ77)
+as implemented in the gzip format.
+.TP
+.B GD_LZMA_ENDODED
+Specifies that raw data files are compressed using the Lempel-Ziv Markov Chain
+Algorithm (LZMA) as implemented in the xz container format.
+.TP
+.B GD_SLIM_ENCODED
+Specifies that raw data files are compressed using the slimlib library.
+.TP
+.B GD_TEXT_ENCODED
+Specifies that raw data files are encoded as text files containing one data
+sample per line.  
+.TP
+.B GD_UNENCODED
+Specifies that raw data files are not encoded, but written verbatim to disk.
+
+.SH RETURN VALUE
+On success,
+.BR gd_include ()
+returns the format file index of the newly added fragment.  On error, -1 is
+returned and the dirfile error is set to a non-zero error value.  Possible error
+values are:
+.TP 8
+.B GD_E_ACCMODE
+The supplied dirfile was opened in read-only mode.
+.TP
+.B GD_E_ALLOC
+The library was unable to allocate memory.
+.TP
+.B GD_E_BAD_DIRFILE
+The supplied dirfile was invalid.
+.TP
+.B GD_E_BAD_INDEX
+The supplied parent fragment index was out of range.
+.TP
+.B GD_E_BAD_REFERENCE
+The reference field specified by a
+.B /REFERENCE
+directive in the fragment (see
+.BR dirfile-format (5))
+was not found, or was not a
+.B RAW
+field.
+.TP
+.B GD_E_CALLBACK
+The registered callback function returned an unrecognised response.
+.TP
+.B GD_E_FORMAT
+A syntax error occurred in the fragment.
+.TP
+.B GD_E_INTERNAL_ERROR
+An internal error occurred in the library while trying to perform the task.
+This indicates a bug in the library.  Please report the incident to the
+maintainer.
+.TP
+.B GD_E_OPEN_INCLUDE
+The fragment could not be opened or created.
+.TP
+.B GD_E_PROTECTED
+The metadata of the parent fragment was protected from change.
+.TP
+.B GD_E_REFERENCE
+The included fragment contained a
+.B /REFERENCE
+directive which referred to a non-existent field, or a field that was not of
+type
+.BR RAW .
+In this case, the included fragment will still be added to the dirfile, but
+the
+.B /REFERENCE
+directive will be ignored.  See also the
+.B BUGS
+section below.
+.P
+The dirfile error may be retrieved by calling
+.BR gd_error (3).
+A descriptive error string for the last error encountered can be obtained from
+a call to
+.BR gd_error_string (3).
+When finished with it, the DIRFILE object may be deallocated with a call to
+.BR gd_close (3),
+even if the open failed.
+.SH BUGS
+If this function fails with the error
+.BR GD_E_REFERENCE ,
+it typically results in no reference field being defined for the dirfile, even
+if the dirfile contains
+.B RAW
+fields.  As a result, functions which rely on the reference field, such as
+.BR gd_get_nframes (3),
+will operate incorrectly.  Callers should explicitly set the reference field
+with
+.BR gd_reference (3)
+in this case.
+.SH SEE ALSO
+.BR gd_open (3),
+.BR gd_parser_callback (3),
+.BR gd_reference (3),
+.BR gd_uninclude (3),
+.BR gd_error (3),
+.BR gd_error_string (3),
+.BR gd_get_fragmentname (3),
+.BR gd_get_nfragments (3),
+.BR dirfile (5),
+.BR dirfile-encoding (5),
+.BR dirfile-format (5)

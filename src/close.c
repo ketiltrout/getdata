@@ -91,7 +91,7 @@ static int _GD_ShutdownDirfile(DIRFILE* D, int flush_meta)
   return 0;
 }
 
-int dirfile_close(DIRFILE *D)
+int gd_close(DIRFILE *D)
 {
   dtrace("%p", D);
 
@@ -101,7 +101,7 @@ int dirfile_close(DIRFILE *D)
   return ret;
 }
 
-int dirfile_discard(DIRFILE* D)
+int gd_discard(DIRFILE* D)
 {
   dtrace("%p", D);
 

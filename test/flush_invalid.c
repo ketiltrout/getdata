@@ -1,5 +1,5 @@
 /* Writing data to an invalid dirfile should fail cleanly */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -12,10 +12,10 @@ int main(void)
 {
   const char* filedir = __TEST__ "dirfile";
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDWR);
-  dirfile_flush(D, NULL);
-  int error = get_error(D);
-  dirfile_close(D);
+  DIRFILE* D = gd_open(filedir, GD_RDWR);
+  gd_flush(D, NULL);
+  int error = gd_error(D);
+  gd_close(D);
 
   return (error != GD_E_BAD_DIRFILE);
 }

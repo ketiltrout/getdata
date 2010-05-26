@@ -1,5 +1,5 @@
 /* Retreiving the number of frames via the legacy API should succeed cleanly */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -18,7 +18,7 @@ int main(void)
   const char* format = __TEST__ "dirfile/format";
   const char* data = __TEST__ "dirfile/data";
   const char* format_data = "data RAW UINT8 1\n";
-  int fd, error;
+  int fd, error, r = 0;
   const size_t len = strlen(data);
 
   mkdir(filedir, 0777);
@@ -37,6 +37,8 @@ int main(void)
   unlink(format);
   rmdir(filedir);
 
-  return !(n == len);
+  CHECKU(n,len);
+
+  return r;
 #endif
 }

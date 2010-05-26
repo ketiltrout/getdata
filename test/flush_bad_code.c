@@ -1,6 +1,5 @@
 /* Attempt to flush a non-existant field */
-#include "../src/getdata.h"
-
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -23,11 +22,11 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDWR);
-  dirfile_flush(D, "no-such-field");
+  DIRFILE* D = gd_open(filedir, GD_RDWR);
+  gd_flush(D, "no-such-field");
 
-  int error = get_error(D);
-  dirfile_close(D);
+  int error = gd_error(D);
+  gd_close(D);
 
   unlink(format);
   rmdir(filedir);

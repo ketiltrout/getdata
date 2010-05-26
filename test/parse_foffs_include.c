@@ -1,5 +1,5 @@
 /* Parser check */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <inttypes.h>
 #include <stdlib.h>
@@ -51,30 +51,24 @@ int main(void)
   write(fd, data_data, 4);
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY | GD_VERBOSE);
+  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
 
-  if (get_error(D))
-    r = 1;
+  int error = gd_error(D);
+  CHECKI(error, 0);
 
-  getdata(D, "data1", 3, 0, 1, 0, GD_UINT8, data_data);
+  gd_getdata(D, "data1", 3, 0, 1, 0, GD_UINT8, data_data);
 
-  if (get_error(D))
-    r = 1;
-  else if (data_data[0] != 2) {
-    fprintf(stderr, "1=%i\n", data_data[0]);
-    r = 1;
-  }
+  int error2 = gd_error(D);
+  CHECKI(error2, 0);
+  CHECKU(data_data[0], 2);
 
-  getdata(D, "data2", 3, 0, 1, 0, GD_UINT8, data_data);
+  gd_getdata(D, "data2", 3, 0, 1, 0, GD_UINT8, data_data);
 
-  if (get_error(D))
-    r = 1;
-  else if (data_data[0] != 1) {
-    fprintf(stderr, "2=%i\n", data_data[0]);
-    r = 1;
-  }
+  int error3 = gd_error(D);
+  CHECKI(error3, 0);
+  CHECKU(data_data[0], 1);
 
-  dirfile_close(D);
+  gd_close(D);
 
   unlink(format);
   unlink(format1);

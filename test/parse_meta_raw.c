@@ -1,5 +1,5 @@
 /* Parser check */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -16,7 +16,7 @@ int main(void)
   const char* format_data =
     "parent RAW UINT8 1\n"
     "META parent child RAW UINT8 1\n";
-  int fd;
+  int fd, r = 0;
 
   mkdir(filedir, 0777);
 
@@ -24,12 +24,13 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
-  int error = get_error(D);
-  dirfile_close(D);
+  DIRFILE* D = gd_open(filedir, GD_RDONLY);
+  int error = gd_error(D);
+  gd_close(D);
 
   unlink(format);
   rmdir(filedir);
 
-  return (error != GD_E_FORMAT);
+  CHECKI(error,GD_E_FORMAT);
+  return r;
 }

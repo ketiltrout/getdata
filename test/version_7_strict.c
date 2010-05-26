@@ -1,5 +1,5 @@
 /* Check Standards Version 6 strictness */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -31,7 +31,6 @@ int main(void)
     "ar/c CONST COMPLEX128 3;3\n";
   uint16_t c[8];
   int ll[7] = {0, 0, 0, 0, 0, 0, 0};
-  uint16_t d[8];
   unsigned char data_data[256];
   int fd, i, r = 0;
 
@@ -49,41 +48,30 @@ int main(void)
   write(fd, data_data, 256);
   close(fd);
 
-  DIRFILE* D = dirfile_cbopen(filedir, GD_RDONLY | GD_PEDANTIC, cb, ll);
-  int n = getdata(D, "ar", 5, 0, 1, 0, GD_UINT16, c);
-  int error = get_error(D);
+  DIRFILE* D = gd_cbopen(filedir, GD_RDONLY | GD_PEDANTIC, cb, ll);
+  int n = gd_getdata(D, "ar", 5, 0, 1, 0, GD_UINT16, c);
+  int error = gd_error(D);
 
-  dirfile_close(D);
+  gd_close(D);
 
   unlink(data);
   unlink(format);
   rmdir(filedir);
 
-  if (error) {
-    fprintf(stderr, "error = %i\n", error);
-    r = 1;
-  }
+  CHECKI(error,0);
 
   for (i = 0; i < 7; ++i) {
-    if ((i == 1 || i == 2) && !ll[i]) {
-      fprintf(stderr, "ll[%i] = %i\n", i, ll[i]);
-      r = 1;
-    } else if ((i < 1 || i > 2) && ll[i]) {
-      fprintf(stderr, "ll[%i] = %i\n", i, ll[i]);
-      r = 1;
+    if (i == 1 || i == 2) {
+      CHECKIi(i,!ll[i], 0);
+    } else if (i < 1 || i > 2) {
+      CHECKIi(i,ll[i],0);
     }
   }
 
-  if (n != 8) {
-    fprintf(stderr, "n = %i\n", n);
-    r = 1;
-  }
+  CHECKI(n,8);
 
   for (i = 0; i < 8; ++i)
-    if (c[i] != 40 + i) {
-      fprintf(stderr, "c[%i] = %i\n", i, c[i]);
-      r = 1;
-    }
+    CHECKUi(i,c[i],40 +i);
 
   return r;
 }

@@ -505,7 +505,7 @@ void _GD_FlushMeta(DIRFILE* D, int fragment)
   dreturnvoid();
 }
 
-int dirfile_metaflush(DIRFILE* D)
+int gd_metaflush(DIRFILE* D)
 {
   dtrace("%p", D);
 
@@ -520,7 +520,7 @@ int dirfile_metaflush(DIRFILE* D)
   return (D->error == GD_E_OK) ? 0 : -1;
 }
 
-int dirfile_flush(DIRFILE* D, const char* field_code)
+int gd_flush(DIRFILE* D, const char* field_code)
 {
   unsigned int i;
   int repr;
@@ -683,7 +683,7 @@ uint32_t _GD_FindVersion(DIRFILE *D)
   return D->av;
 }
 
-int dirfile_standards(DIRFILE *D, int vers)
+int gd_dirfile_standards(DIRFILE *D, int vers)
 {
   dtrace("%p, %i", D, vers);
 

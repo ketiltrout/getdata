@@ -1,7 +1,7 @@
 /* Retreiving the number of frames should succeed cleanly */
 #define _LARGEFILE64_SOURCE
 
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -30,9 +30,9 @@ int main(void)
   write(fd, data, len);
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY | GD_VERBOSE);
-  size_t n = get_nframes64(D);
-  dirfile_close(D);
+  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  size_t n = gd_get_nframes64(D);
+  gd_close(D);
 
   unlink(data);
   unlink(format);

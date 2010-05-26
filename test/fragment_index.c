@@ -1,5 +1,5 @@
 /* Try to read fragment index */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -16,7 +16,7 @@ int main(void)
   const char* format1 = __TEST__ "dirfile/format1";
   const char* format_data = "INCLUDE format1\n";
   const char* format1_data = "data RAW UINT8 8\n";
-  int fd;
+  int fd, r = 0;
 
   mkdir(filedir, 0777);
 
@@ -28,20 +28,18 @@ int main(void)
   write(fd, format1_data, strlen(format1_data));
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY | GD_VERBOSE);
+  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
 
-  gd_entype_t n = get_fragment_index(D, "data");
-  int error = get_error(D);
+  gd_entype_t n = gd_get_fragment_index(D, "data");
+  int error = gd_error(D);
 
-  dirfile_close(D);
+  gd_close(D);
   unlink(format1);
   unlink(format);
   rmdir(filedir);
 
-  if (error != GD_E_OK)
-    return 1;
-  if (n != 1)
-    return 1;
+  CHECKI(error, GD_E_OK);
+  CHECKI(n, 1);
 
-  return 0;
+  return r;
 }

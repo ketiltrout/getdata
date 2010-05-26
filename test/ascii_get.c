@@ -1,6 +1,5 @@
 /* Attempt to read UINT8 */
-#include "../src/getdata.h"
-
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -18,7 +17,7 @@ int main(void)
   const char* data = __TEST__ "dirfile/data.txt";
   const char* format_data = "data RAW UINT8 8\n";
   unsigned char c[8];
-  int fd, i;
+  int fd, i, r = 0;
   FILE* stream;
 
   memset(c, 0, 8);
@@ -33,23 +32,20 @@ int main(void)
     fprintf(stream, "%i\n", i);
   fclose(stream);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY | GD_VERBOSE);
-  int n = getdata(D, "data", 5, 0, 1, 0, GD_UINT8, c);
-  int error = get_error(D);
+  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  int n = gd_getdata(D, "data", 5, 0, 1, 0, GD_UINT8, c);
+  int error = gd_error(D);
 
-  dirfile_close(D);
+  gd_close(D);
 
   unlink(data);
   unlink(format);
   rmdir(filedir);
 
-  if (error)
-    return 1;
-  if (n != 8)
-    return 1;
+  CHECKI(error, 0);
+  CHECKI(n, 8);
   for (i = 0; i < 8; ++i)
-    if (c[i] != 40 + i)
-      return 1;
+    CHECKIi(i,c[i], 40 + i);
 
-  return 0;
+  return r;
 }

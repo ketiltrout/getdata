@@ -1,5 +1,5 @@
 /* Retreiving the number of frames should succeed cleanly */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -29,24 +29,17 @@ int main(void)
     fprintf(stream, "%i\n", i);
   fclose(stream);
 
-
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY | GD_VERBOSE);
-  size_t n = get_nframes(D);
-  size_t m = get_nframes(D);
-  dirfile_close(D);
+  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  size_t n = gd_get_nframes(D);
+  size_t m = gd_get_nframes(D);
+  gd_close(D);
 
   unlink(data);
   unlink(format);
   rmdir(filedir);
 
-  if (n != 256) {
-    fprintf(stderr, "n = %i\n", n);
-    r = 1;
-  }
-  if (m != 256) {
-    fprintf(stderr, "m = %i\n", m);
-    r = 1;
-  }
+  CHECKI(n, 256);
+  CHECKI(m, 256);
 
   return r;
 }

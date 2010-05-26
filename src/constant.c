@@ -25,8 +25,8 @@
 #endif
 
 /* this function is little more than a public boilerplate for _GD_DoField */
-int get_constant(DIRFILE* D, const char *field_code_in, gd_type_t return_type,
-    void *data_out)
+int gd_get_constant(DIRFILE* D, const char *field_code_in,
+    gd_type_t return_type, void *data_out)
 {
   gd_entry_t *entry;
   char* field_code;
@@ -67,7 +67,7 @@ int get_constant(DIRFILE* D, const char *field_code_in, gd_type_t return_type,
 }
 
 /* this function is little more than a public boilerplate for _GD_DoFieldOut */
-int put_constant(DIRFILE* D, const char *field_code_in, gd_type_t data_type,
+int gd_put_constant(DIRFILE* D, const char *field_code_in, gd_type_t data_type,
     const void *data_in)
 {
   int i;

@@ -1,5 +1,5 @@
 /* Retreiving the number of fields of a field should succeed cleanly */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -20,7 +20,7 @@ int main(void)
     "META parent data2 STRING UINT8 1\n"
     "META parent data3 STRING UINT8 1\n"
     "META parent data4 CONST UINT8 1\n";
-  int fd, r = 0;
+  int fd, i, r = 0;
 
   mkdir(filedir, 0777);
 
@@ -28,45 +28,32 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY | GD_VERBOSE);
-  const char** field_list = get_mfield_list_by_type(D, "parent",
+  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  const char** field_list = gd_get_mfield_list_by_type(D, "parent",
       GD_STRING_ENTRY);
 
-  if (get_error(D))
-    r = 1;
+  int error = gd_error(D);
+  CHECKI(error, 0);
 
-  if (field_list == NULL)
-    r = 1;
+  CHECKPN(field_list);
 
-  fd = 0;
-  if (!r)
-    for (fd = 0; ; ++fd) {
-      if (field_list[fd] == NULL)
-        break;
+  for (i = 0; field_list[i]; ++i) {
+    CHECKIi(i,strlen(field_list[i]), 5);
 
-      if (strlen(field_list[fd]) != 5)
-        r = 1;
+    CHECKIi(i,field_list[i][0], 'd');
+    CHECKIi(i,field_list[i][1], 'a');
+    CHECKIi(i,field_list[i][2], 't');
+    CHECKIi(i,field_list[i][3], 'a');
 
-      if (field_list[fd][0] != 'd')
-        r = 1;
-
-      if (field_list[fd][1] != 'a')
-        r = 1;
-
-      if (field_list[fd][2] != 't')
-        r = 1;
-
-      if (field_list[fd][3] != 'a')
-        r = 1;
-
-      if (field_list[fd][4] < '1' || field_list[fd][4] > '3')
-        r = 1;
+    if (field_list[i][4] < '1' || field_list[i][4] > '3') {
+      fprintf(stderr, "field_list[%i] = \"%s\"\n", i, field_list[i]);
+      r = 1;
     }
+  }
 
-  if (fd != 3)
-    r = 1;
+  CHECKI(i, 3);
 
-  dirfile_close(D);
+  gd_close(D);
   unlink(format);
   rmdir(filedir);
 

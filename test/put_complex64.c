@@ -1,5 +1,5 @@
 /* Attempt to write COMPLEX64 */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <complex.h>
 #include <inttypes.h>
@@ -33,33 +33,25 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_UNENCODED | GD_VERBOSE);
-  int n = putdata(D, "data", 5, 0, 1, 0, GD_COMPLEX64, c);
-  int error = get_error(D);
+  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_UNENCODED | GD_VERBOSE);
+  int n = gd_putdata(D, "data", 5, 0, 1, 0, GD_COMPLEX64, c);
+  int error = gd_error(D);
 
-  dirfile_close(D);
+  gd_close(D);
 
   if (stat(data, &buf)) {
-    fputs("stat failed.\n", stderr);
+    perror("stat");
     r = 1;
   }
-  if (buf.st_size != 48 * sizeof(float complex)) {
-    fprintf(stderr, "size=%lli", (long long)buf.st_size);
-    r = 1;
-  }
+  CHECKI(buf.st_size, 48 * sizeof(float complex));
 
   fd = open(data, O_RDONLY);
   i = 0;
   while (read(fd, &d, sizeof(float complex))) {
     if (i < 40 || i > 48) {
-      if (cabs(d) > 1e-10) {
-        fprintf(stderr, "d[%i] = %g;%g\n", i, creal(d), cimag(d));
-        r = 1;
-      }
-    } else if (cabs(d - i - _Complex_I * (i - 40)) > 1e-10) {
-      fprintf(stderr, "d[%i] = %g;%g\n", i, creal(d), cimag(d));
-      r = 1;
-    }
+      CHECKCi(i,d,0);
+    } else
+      CHECKCi(i,d,i + _Complex_I * (i - 40));
     i++;
   }
   close(fd);
@@ -68,14 +60,8 @@ int main(void)
   unlink(format);
   rmdir(filedir);
 
-  if (error) {
-    r = 1;
-    fprintf(stderr, "error=%i\n", error);
-  }
-  if (n != 8) {
-    r = 1;
-    fprintf(stderr, "n=%i\n", n);
-  }
+  CHECKI(error,0);
+  CHECKI(n,8);
 
   return r;
 }

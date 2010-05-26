@@ -23,7 +23,7 @@ are available:
 
   This constructor takes the name of the dirfile, the dirfile flags, and
   optional pointers to a syntax error callback handler, and a caller pointer
-  passed to that callback.  The constructor will call dirfile_cbopen(3) on the
+  passed to that callback.  The constructor will call gd_cbopen(3) on the
   provided path name.  If flags is omitted, the default GD_RDWR will be used.
 
 * Dirfile::Dirfile(DIRFILE *dirfile)
@@ -35,15 +35,15 @@ are available:
 * ~Dirfile::Dirfile()
 
   If not done explicitly (see below), the destructor will take care of calling
-  dirfile_close(3).
+  gd_close(3).
 
 * int Dirfile::Close()
 * int Dirfile::Discard()
   
-  These call dirfile_close(3) and dirfile_discard(3) respectively.  If they
-  return successfully (return value zero), the Dirfile should immediately be
-  destroyed, by calling its destructor.  Calling any member function after
-  these functions return successfully will result in a GD_E_BAD_DIRFILE error.
+  These call gd_close(3) and gd_discard(3) respectively.  If they return
+  successfully (return value zero), the Dirfile should immediately be destroyed,
+  by calling its destructor.  Calling any member function after these functions
+  return successfully will result in a GD_E_BAD_DIRFILE error.
 
 * int Dirfile::Error()
 
@@ -53,16 +53,16 @@ are available:
 * const char *Dirfile::ErrorString(size_t len = 4096)
 
   The ErrorString method will return a buffer containing a description of the
-  last GetData library error as obtained from get_error_string(3).  This
-  buffer is local to the object, and subsequent calls to ErrorString() will
-  overwrite the buffer.  The string written to the buffer will be at most
-  len characters long, up to a maximum of 4096 characters.
+  last GetData library error as obtained from gd_error_string(3).  This buffer
+  is local to the object, and subsequent calls to ErrorString() will overwrite
+  the buffer.  The string written to the buffer will be at most len characters
+  long, up to a maximum of 4096 characters.
 
 * GetData::Entry *Dirfile::Entry(const char *field_code)
 
   This method will return a pointer to a newly allocated object of the
   appropriate Entry Child class, cast as a plain GetData::Entry, created after
-  calling get_entry(3) with the supplied field_code.  See below for a
+  calling gd_get_entry(3) with the supplied field_code.  See below for a
   description of the Entry classes.
 
 * GetData::Fragment *Dirfile::Fragment(int index)
@@ -72,14 +72,14 @@ are available:
 
 * int Dirfile::FragmentIndex(const char *field_code)
 
-  This method will call get_fragment_index(3) and return the index number of the
-  fragment defining the specified field.
+  This method will call gd_get_fragment_index(3) and return the index number of
+  the fragment defining the specified field.
 
 * double Dirfile::FrameNum(const char *field_code, double value,
     off_t frame_start = 0, off_t frame_end = 0)
 
-  This method will call get_framenum_subset(3) to perform a reverse look-up on
-  the specified field.  If frame_start or frame_end are omitted, the start or
+  This method will call gd_get_framenum_subset(3) to perform a reverse look-up
+  on the specified field.  If frame_start or frame_end are omitted, the start or
   end of the field will be used as the limit.
 
 * const char *Dirfile::Name()
@@ -89,8 +89,8 @@ are available:
 
 * GetData::RawEntry *Dirfile::Reference(const char *field_code = NULL)
   
-  This method will call dirfile_reference(3) to set and/or retrieve the
-  reference field.  It returns a RawEntry object describing the reference field.
+  This method will call gd_reference(3) to set and/or retrieve the reference
+  field.  It returns a RawEntry object describing the reference field.
 
 * const char *Dirfile::ReferenceFilename()
 
@@ -101,15 +101,15 @@ are available:
 
 * void Dirfile::SetCallback(gd_parser_callback_t sehandler, void *extra = NULL)
   
-  This method will call dirfile_parser_callback(3) to change or remove the
-  parser callback function.
+  This method will call gd_parser_callback(3) to change or remove the parser
+  callback function.
 
 * int Dirfile::UnInclude(int fragment_index, int del = 0)
 
-  This method will call dirfile_uninclude(3) to remove the indicated fragment
-  from the dirfile.  Because dirfile_uninclude may re-arrange the order of
-  fragments in the dirfile, the caller should destroy any GetData::Fragment
-  objects it has retained.
+  This method will call gd_uninclude(3) to remove the indicated fragment from
+  the dirfile.  Because gd_uninclude may re-arrange the order of fragments in
+  the dirfile, the caller should destroy any GetData::Fragment objects it has
+  retained.
 
 * int Dirfile::Add(const Entry &entry)
 * int Dirfile::AddSpec(const char *spec, int format_file = 0)
@@ -210,8 +210,8 @@ be incorrect, and all pre-existing Fragment objects should be destroyed.
 * int SetProtection(int protection_level)
 
   These methods set the specified information on the associated fragment by
-  calling dirfile_alter_encoding(3), dirfile_alter_endianness(3),
-  dirfile_alter_frameoffset(3), or dirfile_protect(3) as appropriate.
+  calling gd_alter_encoding(3), gd_alter_endianness(3), gd_alter_frameoffset(3),
+  or gd_protect(3) as appropriate.
 
 
 ENTRY CLASS
@@ -233,11 +233,6 @@ The following methods are available:
 
   This will create an empty gd_entry_t object.
 
-* Entry::~Entry()
-
-  This will take care of de-allocating the gd_entry_t object and its allocated
-  strings.
-
 * int Entry::Associated()
   
   Returns non-zero if this entry object is associated with a dirfile.
@@ -258,10 +253,10 @@ The following methods are available:
 * int Entry::Move(int new_fragment, int move_data = 0)
 
   These will update the fragment index of the entry.  If the entry is
-  associated, these will call dirfile_move(3) to move the field to a different
+  associated, these will call gd_move(3) to move the field to a different
   fragment.  These two functions are equivalent, except Entry::Move allows
-  specifying the move_data flag.  Entry::SetFragmentIndex always calls
-  dirfile_move with move_data = 0.
+  specifying the move_data flag.  Entry::SetFragmentIndex always calls gd_move
+  with move_data = 0.
 
 * const char *Entry::Name()
 
@@ -271,10 +266,9 @@ The following methods are available:
 * int Entry::Rename(const char *new_name, int move_data = 0)
 
   These will change the name of the field of this entry.  If the entry object
-  is associated, these will also call calling dirfile_rename(3).  These two
-  functions are equivalent, except Entry::Rename allows specifying the move_data
-  flag explicitly.  Entry::SetName always calls dirfile_rename with
-  move_data = 0.
+  is associated, these will also call calling gd_rename(3).  These two functions
+  are equivalent, except Entry::Rename allows specifying the move_data flag
+  explicitly.  Entry::SetName always calls gd_rename with move_data = 0.
 
 * virtual int Entry::ComplexScalars()
 * virtual int Entry::FragmentIndex()
@@ -330,7 +324,7 @@ Defined in getdata/rawentry.h
 
 * const char *RawEntry::FileName()
 
-  This calls get_raw_filename(3) and returns the pathname of the binary file
+  This calls gd_get_raw_filename(3) and returns the pathname of the binary file
   associated with the RAW field.
 
 * virtual unsigned int RawEntry::SamplesPerFrame()
@@ -345,9 +339,9 @@ Defined in getdata/rawentry.h
 * int RawEntry::SetType(DataType type, int recode = 0)
 
   These methods will change the specified field parameter by calling
-  dirfile_alter_raw(3).  If recode is non-zero, the binary file will also
-  be translated.  To use a CONST field code as the sample per frame, pass a
-  string to SetSamplesPerFrame().
+  gd_alter_raw(3).  If recode is non-zero, the binary file will also be
+  translated.  To use a CONST field code as the sample per frame, pass a string
+  to SetSamplesPerFrame().
 
 
 LincomEntry Class
@@ -393,9 +387,9 @@ Defined in getdata/lincomentry.h
 
 * int LincomEntry::SetNFields(int nfields)
 
-  This will set the number of input fields for the LINCOM.  If this is
-  greater than its previous value, the Set methods above should be used
-  to initialise the data.
+  This will set the number of input fields for the LINCOM.  If this is greater
+  than its previous value, the Set methods above should be used to initialise
+  the data.
 
 
 LinterpEntry Class
@@ -420,8 +414,8 @@ Defined in getdata/linterpentry.h
 * int LinterpEntry::SetTable(const char *table, int move_table = 0)
 
   These methods will change the specified field parameter by calling
-  dirfile_alter_raw(3).  If move_table is non-zero, the existing look-up table
-  will be renamed to account for the change in name.
+  gd_alter_raw(3).  If move_table is non-zero, the existing look-up table will
+  be renamed to account for the change in name.
 
 
 BitEntry and SBitEntry Classes

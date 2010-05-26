@@ -1,6 +1,5 @@
 /* Attempt to read constant */
-#include "../src/getdata.h"
-
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -17,7 +16,7 @@ int main(void)
   const char* format = __TEST__ "dirfile/format";
   const char* format_data = "const CONST FLOAT64 8.3\n";
   double c;
-  int fd;
+  int fd, r = 0;
 
   mkdir(filedir, 0777);
 
@@ -25,21 +24,18 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY | GD_VERBOSE);
-  int n = get_constant(D, "const", GD_FLOAT64, &c);
-  int error = get_error(D);
+  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  int n = gd_get_constant(D, "const", GD_FLOAT64, &c);
+  int error = gd_error(D);
 
-  dirfile_close(D);
+  gd_close(D);
 
   unlink(format);
   rmdir(filedir);
 
-  if (error)
-    return 1;
-  if (n != 0)
-    return 1;
-  if (fabs(c - 8.3) > 1e-6)
-    return 1;
+  CHECKI(error, 0);
+  CHECKI(n, 0);
+  CHECKF(c, 8.3);
 
-  return 0;
+  return r;
 }

@@ -1,6 +1,5 @@
 /* Test field modifying */
-#include "../src/getdata.h"
-
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -17,7 +16,7 @@ int main(void)
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
   const char* format_data = "const CONST FLOAT32 8.3\n";
-  int fd;
+  int fd, r = 0;
   double d;
 
   mkdir(filedir, 0777);
@@ -26,32 +25,20 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_VERBOSE);
-  int ret = dirfile_alter_const(D, "const", GD_UINT8);
-  int error = get_error(D);
-  int n = get_constant(D, "const", GD_FLOAT64, &d);
+  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
+  int ret = gd_alter_const(D, "const", GD_UINT8);
+  int error = gd_error(D);
+  int n = gd_get_constant(D, "const", GD_FLOAT64, &d);
 
-  dirfile_close(D);
+  gd_close(D);
 
   unlink(format);
   rmdir(filedir);
 
-  if (error) {
-    fprintf(stderr, "1=%i\n", error);
-    return 1;
-  }
-  if (n != 0) {
-    fprintf(stderr, "2=%lli\n", (long long)n);
-    return 1;
-  }
-  if (ret != 0) {
-    fprintf(stderr, "3=%i\n", ret);
-    return 1;
-  }
-  if (d != 8) {
-    fprintf(stderr, "4=%g\n", d);
-    return 1;
-  }
+  CHECKI(error, 0);
+  CHECKI(n, 0);
+  CHECKI(ret, 0);
+  CHECKF(d, 8.);
 
-  return 0;
+  return r;
 }

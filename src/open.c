@@ -188,8 +188,7 @@ static FILE* _GD_CreateDirfile(DIRFILE* D, const char* format_file,
   return fp;
 }
 
-void dirfile_parser_callback(DIRFILE* D, gd_parser_callback_t sehandler,
-    void* extra)
+void gd_parser_callback(DIRFILE* D, gd_parser_callback_t sehandler, void* extra)
 {
   dtrace("%p, %p, %p", D, sehandler, extra);
 
@@ -201,7 +200,7 @@ void dirfile_parser_callback(DIRFILE* D, gd_parser_callback_t sehandler,
 
 /* dirfile_cbopen: open (or, perhaps, create) and parse the specified dirfile
 */
-DIRFILE* dirfile_cbopen(const char* filedir, unsigned long flags,
+DIRFILE* gd_cbopen(const char* filedir, unsigned long flags,
     gd_parser_callback_t sehandler, void* extra)
 {
   FILE *fp;
@@ -332,7 +331,7 @@ DIRFILE* dirfile_cbopen(const char* filedir, unsigned long flags,
   if (!D->error && !(D->flags & GD_PEDANTIC)) {
     if (_GD_FindVersion(D)) {
       /* conforms to some standard, use the latest */
-      dirfile_standards(D, GD_VERSION_LATEST); /* can't fail */
+      gd_dirfile_standards(D, GD_VERSION_LATEST); /* can't fail */
       D->flags &= ~GD_PERMISSIVE;
     } else
       /* non-conformant dirfile, flag it */
@@ -344,11 +343,11 @@ DIRFILE* dirfile_cbopen(const char* filedir, unsigned long flags,
   return D;
 }
 
-DIRFILE* dirfile_open(const char* filedir, unsigned long flags)
+DIRFILE* gd_open(const char* filedir, unsigned long flags)
 {
   dtrace("\"%s\", 0x%lx", filedir, (unsigned long)flags);
 
-  DIRFILE* D = dirfile_cbopen(filedir, flags, NULL, NULL);
+  DIRFILE* D = gd_cbopen(filedir, flags, NULL, NULL);
 
   dreturn("%p", D);
   return D;

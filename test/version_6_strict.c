@@ -1,5 +1,5 @@
 /* Check Standards Version 6 strictness */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -52,54 +52,36 @@ int main(void)
   write(fd, data_data, 256);
   close(fd);
 
-  DIRFILE* D = dirfile_cbopen(filedir, GD_RDONLY | GD_PEDANTIC, cb, ll);
-  int n = getdata(D, "ar", 5, 0, 1, 0, GD_UINT16, c);
-  int error = get_error(D);
+  DIRFILE* D = gd_cbopen(filedir, GD_RDONLY | GD_PEDANTIC, cb, ll);
+  int n = gd_getdata(D, "ar", 5, 0, 1, 0, GD_UINT16, c);
+  int error = gd_error(D);
 
-  int m = getdata(D, "FILEFRAM", 5, 0, 8, 0, GD_UINT16, d);
-  int error2 = get_error(D);
+  int m = gd_getdata(D, "FILEFRAM", 5, 0, 8, 0, GD_UINT16, d);
+  int error2 = gd_error(D);
 
-  dirfile_close(D);
+  gd_close(D);
 
   unlink(data);
   unlink(format);
   rmdir(filedir);
 
-  if (error) {
-    fprintf(stderr, "error = %i\n", error);
-    r = 1;
-  }
-
-  if (error2 != GD_E_BAD_CODE) {
-    fprintf(stderr, "error2 = %i\n", error2);
-    r = 1;
-  }
+  CHECKI(error,0);
+  CHECKI(error2, GD_E_BAD_CODE);
 
   for (i = 0; i < 10; ++i) {
-    if ((i == 1 || i == 2 || i == 3 || i == 4) && !ll[i]) {
-      fprintf(stderr, "ll[%i] = %i\n", i, ll[i]);
-      r = 1;
-    } else if ((i < 1 || i > 4) && ll[i]) {
-      fprintf(stderr, "ll[%i] = %i\n", i, ll[i]);
-      r = 1;
+    if (i == 1 || i == 2 || i == 3 || i == 4) {
+      CHECKIi(i,!ll[i],0);
+    } else if (i < 1 || i > 4) {
+      CHECKIi(i,ll[i],0);
     }
   }
 
-  if (n != 8) {
-    fprintf(stderr, "n = %i\n", n);
-    r = 1;
-  }
+  CHECKI(n,8);
 
   for (i = 0; i < 8; ++i)
-    if (c[i] != 40 + i) {
-      fprintf(stderr, "c[%i] = %i\n", i, c[i]);
-      r = 1;
-    }
+    CHECKIi(i,c[i],40 + i);
 
-  if (m != 0) {
-    fprintf(stderr, "m = %i\n", m);
-    r = 1;
-  }
+  CHECKI(m,0);
 
   return r;
 }

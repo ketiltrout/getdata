@@ -1,7 +1,12 @@
 /* Passing NULL to dirfile_close should succeed cleanly */
-#include "../src/getdata.h"
+#include "test.h"
 
 int main(void)
 {
-  return dirfile_close(NULL);
+  int r = 0;
+  int ret = gd_close(NULL);
+
+  CHECKI(ret, 0);
+
+  return r;
 }

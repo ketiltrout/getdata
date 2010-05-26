@@ -1,0 +1,49 @@
+.\" gd_error.3.  The gd_error man page.
+.\"
+.\" (C) 2008, 2010 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_error 3 "25 May 2010" "Version 0.7.0" "GETDATA"
+.SH NAME
+gd_error \(em report a GetData library error
+.SH SYNOPSIS
+.B #include <getdata.h>
+.HP
+.nh
+.ad l
+.BI "int gd_error(const DIRFILE *" dirfile );
+.hy
+.ad n
+.SH DESCRIPTION
+The
+.BR gd_error ()
+function returns the numeric dirfile error associated with the dirfile
+.I dirfile
+which is set by many GetData library functions.
+
+The 
+.I dirfile
+argument should point to a DIRFILE object previously created by a call to
+.BR gd_open (3).
+
+A textual description of the error may be obtained by calling
+.BR gd_error_string (3).
+
+.SH RETURN VALUE
+The
+.BR gd_error ()
+function always returns the dirfile error corresponding to the error state of
+the last library call on the supplied DIRFILE object.
+.SH SEE ALSO
+.BR gd_open (3),
+.BR gd_error_string (3)

@@ -1,5 +1,5 @@
 /* Attempt to read argument representation */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <complex.h>
 #include <stdlib.h>
@@ -35,31 +35,20 @@ int main(void)
   write(i, data_data, 100 * sizeof(double));
   close(i);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY | GD_VERBOSE);
-  int n = getdata(D, "data.a", 5, 0, 8, 0, GD_FLOAT64, &c);
-  int error = get_error(D);
+  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  int n = gd_getdata(D, "data.a", 5, 0, 8, 0, GD_FLOAT64, &c);
+  int error = gd_error(D);
 
-  dirfile_close(D);
+  gd_close(D);
 
   unlink(data);
   unlink(format);
   rmdir(filedir);
 
-  if (error) {
-    fprintf(stderr, "error=%i\n", error);
-    r = 1;
-  }
-  if (n != 8) {
-    fprintf(stderr, "n=%i\n", n);
-    r = 1;
-  }
+  CHECKI(error,0);
+  CHECKI(n,8);
   for (i = 0; i < 8; ++i)
-    if (fabs(c[i] - carg(data_data[5 + i])) > 1e-6) {
-      fprintf(stderr, "%g = %g;%g = %g;%g\n", c[i], creal(data_data[5 + i]),
-          cimag(data_data[5 + i]), cabs(data_data[5 + i]),
-          carg(data_data[5 + i]));
-      r = 1;
-    }
+    CHECKFi(i,c[i],carg(data_data[5 + i]));
 
   return r;
 }

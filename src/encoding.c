@@ -487,8 +487,7 @@ static void _GD_RecodeFragment(DIRFILE* D, unsigned long encoding, int fragment,
   dreturnvoid();
 }
 
-int dirfile_alter_encoding(DIRFILE* D, unsigned long encoding, int fragment,
-    int move)
+int gd_alter_encoding(DIRFILE* D, unsigned long encoding, int fragment, int move)
 {
   int i;
 
@@ -534,7 +533,7 @@ int dirfile_alter_encoding(DIRFILE* D, unsigned long encoding, int fragment,
   return (D->error) ? -1 : 0;
 }
 
-unsigned long get_encoding(DIRFILE* D, int fragment)
+unsigned long gd_get_encoding(DIRFILE* D, int fragment)
 {
   unsigned long reported_encoding = GD_ENC_UNSUPPORTED;
   unsigned int i;

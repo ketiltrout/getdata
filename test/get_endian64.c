@@ -1,5 +1,5 @@
 /* Attempt to read UINT64 with the opposite endianness */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <inttypes.h>
 #include <stdlib.h>
@@ -29,7 +29,7 @@ int main(void)
   char format_data[1000];
   uint64_t c = 0;
   uint64_t data_data[128];
-  int fd;
+  int fd, r = 0;
   const int big_endian = BigEndian();
 
   mkdir(filedir, 0777); 
@@ -48,23 +48,19 @@ int main(void)
   write(fd, data_data, 128 * sizeof(uint64_t));
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY | GD_VERBOSE);
-  int n = getdata(D, "data", 5, 0, 1, 0, GD_UINT64, &c);
-  int error = get_error(D);
+  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  int n = gd_getdata(D, "data", 5, 0, 1, 0, GD_UINT64, &c);
+  int error = gd_error(D);
 
-  dirfile_close(D);
+  gd_close(D);
 
   unlink(data);
   unlink(format);
   rmdir(filedir);
 
-  if (error)
-    return 1;
-  if (n != 1)
-    return 1;
+  CHECKI(error, 0);
+  CHECKI(n, 1);
+  CHECKX(c, 0x50a0000050a0000LLU);
 
-  if (c != 0x50a0000050a0000LLU)
-    return 1;
-
-  return 0;
+  return r;
 }

@@ -1,5 +1,5 @@
 /* Parser check */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -24,7 +24,7 @@ int main(void)
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
   const char* format_data = "BADDIRECTIVE BADTYPE\n";
-  int fd;
+  int fd, r = 0;
 
   mkdir(filedir, 0777);
 
@@ -32,15 +32,15 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = dirfile_cbopen(filedir, GD_RDONLY, callback, NULL);
-  int error = get_error(D);
-  dirfile_close(D);
+  DIRFILE* D = gd_cbopen(filedir, GD_RDONLY, callback, NULL);
+  int error = gd_error(D);
+  gd_close(D);
 
   unlink(format);
   rmdir(filedir);
 
-  if (!saw_callback)
-    return 1;
+  CHECKI(saw_callback, 1);
+  CHECKI(error, 0);
 
-  return (error != GD_E_OK);
+  return r;
 }

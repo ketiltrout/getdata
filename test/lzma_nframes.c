@@ -1,6 +1,6 @@
 /* Retreiving the number of frames should succeed cleanly */
 #include "../src/config.h"
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -54,16 +54,12 @@ int main(void)
   rmdir(filedir);
 
 #ifdef USE_LZMA
-  if (error)
-    return 1;
-  if (n != 256)
-    return 1;
+  CHECKI(error, 0);
+  CHECKI(n, 256);
 #else
-  if (error != GD_E_UNSUPPORTED)
-    return 1;
-  if (n != 0)
-    return 1;
+  CHECKI(error, GD_E_UNSUPPORTED);
+  CHECKI(n, 0);
 #endif
 
-  return 0;
+  return r;
 }

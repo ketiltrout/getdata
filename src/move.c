@@ -291,8 +291,7 @@ static int strcmpnull(const char *s1, const char *s2)
   return r;
 }
 
-int dirfile_move(DIRFILE* D, const char* field_code, int new_fragment,
-    int move_data)
+int gd_move(DIRFILE* D, const char* field_code, int new_fragment, int move_data)
 {
   gd_entry_t *E;
   char *new_filebase;

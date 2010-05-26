@@ -5,7 +5,7 @@
 #  define _FILE_OFFSET_BITS 64
 #endif
 
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -37,9 +37,9 @@ int main(void)
   write(fd, data, len);
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY | GD_VERBOSE);
-  size_t n = get_nframes(D);
-  dirfile_close(D);
+  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  size_t n = gd_get_nframes(D);
+  gd_close(D);
 
   unlink(data);
   unlink(format);

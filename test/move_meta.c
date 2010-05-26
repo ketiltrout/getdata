@@ -1,5 +1,5 @@
 /* Test move */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -31,32 +31,20 @@ int main(void)
   write(fd, format1_data, strlen(format1_data));
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_UNENCODED | GD_VERBOSE);
-  int ret = dirfile_move(D, "data", 1, 0);
-  int error = get_error(D);
-  int ge_ret =  get_entry(D, "data/meta", &E);
-  dirfile_close(D);
+  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_UNENCODED | GD_VERBOSE);
+  int ret = gd_move(D, "data", 1, 0);
+  int error = gd_error(D);
+  int ge_ret =  gd_get_entry(D, "data/meta", &E);
+  gd_close(D);
 
   unlink(format1);
   unlink(format);
   rmdir(filedir);
 
-  if (ret != 0) {
-    fprintf(stderr, "1=%i\n", ret);
-    r = 1;
-  }
-  if (error != GD_E_OK) {
-    fprintf(stderr, "2=%i\n", error);
-    r = 1;
-  }
-  if (ge_ret != 0) {
-    fprintf(stderr, "3=%i\n", ge_ret);
-    r = 1;
-  }
-  if (E.fragment_index != 1) {
-    fprintf(stderr, "4=%i\n", E.fragment_index);
-    r = 1;
-  }
+  CHECKI(ret, 0);
+  CHECKI(error, GD_E_OK);
+  CHECKI(ge_ret, 0);
+  CHECKI(E.fragment_index, 1);
 
   return r;
 }

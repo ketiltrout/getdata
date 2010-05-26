@@ -1,5 +1,5 @@
 /* Open a Standards Version 4 conformant dirfile */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -40,51 +40,30 @@ int main(void)
   write(fd, data_data, 256);
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY | GD_VERBOSE);
-  int n = getdata(D, "VERSION", 5, 0, 1, 0, GD_UINT16, c);
-  int error = get_error(D);
+  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  int n = gd_getdata(D, "VERSION", 5, 0, 1, 0, GD_UINT16, c);
+  int error = gd_error(D);
 
-  int v = dirfile_standards(D, GD_VERSION_CURRENT);
-  int l = dirfile_standards(D, GD_VERSION_LATEST);
-  int e = dirfile_standards(D, GD_VERSION_EARLIEST);
+  int v = gd_dirfile_standards(D, GD_VERSION_CURRENT);
+  int l = gd_dirfile_standards(D, GD_VERSION_LATEST);
+  int e = gd_dirfile_standards(D, GD_VERSION_EARLIEST);
 
-  dirfile_close(D);
+  gd_close(D);
 
   unlink(data);
   unlink(format);
   unlink(format1);
   rmdir(filedir);
 
-  if (error) {
-    fprintf(stderr, "error = %i\n", error);
-    r = 1;
-  }
-
-  if (n != 8) {
-    fprintf(stderr, "n = %i\n", n);
-    r = 1;
-  }
+  CHECKI(error,0);
+  CHECKI(n,8);
 
   for (i = 0; i < 8; ++i)
-    if (c[i] != 41 + i) {
-      fprintf(stderr, "c[%i] = %i\n", i, c[i]);
-      r = 1;
-    }
+    CHECKUi(i,c[i],41 + i);
 
-  if (v != 4) {
-    fprintf(stderr, "v = %i\n", v);
-    r = 1;
-  }
-
-  if (l != 4) {
-    fprintf(stderr, "l = %i\n", l);
-    r = 1;
-  }
-
-  if (e != 4) {
-    fprintf(stderr, "e = %i\n", e);
-    r = 1;
-  }
+  CHECKI(v,4);
+  CHECKI(l,4);
+  CHECKI(e,4);
 
   return r;
 }

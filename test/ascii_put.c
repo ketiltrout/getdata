@@ -1,5 +1,5 @@
 /* Attempt to write UINT8 */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <inttypes.h>
 #include <stdlib.h>
@@ -18,7 +18,7 @@ int main(void)
   const char* data = __TEST__ "dirfile/data.txt";
   const char* format_data = "data RAW UINT8 8\n";
   uint8_t c[8], d;
-  int fd, i;
+  int fd, i, r = 0;
   struct stat buf;
   FILE* stream;
 
@@ -32,11 +32,11 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_TEXT_ENCODED | GD_VERBOSE);
-  int n = putdata(D, "data", 5, 0, 1, 0, GD_UINT8, c);
-  int error = get_error(D);
+  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_TEXT_ENCODED | GD_VERBOSE);
+  int n = gd_putdata(D, "data", 5, 0, 1, 0, GD_UINT8, c);
+  int error = gd_error(D);
 
-  dirfile_close(D);
+  gd_close(D);
 
   if (stat(data, &buf))
     return 1;
@@ -48,10 +48,9 @@ int main(void)
     if (feof(stream))
       break;
     if (i < 40 || i > 48) {
-      if (d != 0)
-        return 1;
-    } else if (d != i)
-      return 1;
+      CHECKI(d, 0);
+    } else
+      CHECKI(d, i);
     i++;
   }
   fclose(stream);
@@ -60,10 +59,8 @@ int main(void)
   unlink(format);
   rmdir(filedir);
 
-  if (error)
-    return 1;
-  if (n != 8)
-    return 1;
+  CHECKI(error,0);
+  CHECKI(n,8);
 
-  return 0;
+  return r;
 }

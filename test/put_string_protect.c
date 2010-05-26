@@ -1,5 +1,5 @@
 /* Attempt to write UINT8 */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <inttypes.h>
 #include <stdlib.h>
@@ -15,7 +15,7 @@ int main(void)
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
   const char* format_data = "data STRING UINT8\nPROTECT all\n";
-  int fd;
+  int fd, r = 0;
 
   mkdir(filedir, 0777);
 
@@ -23,19 +23,17 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_UNENCODED);
-  int n = put_string(D, "data", "some string");
-  int error = get_error(D);
+  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_UNENCODED);
+  int n = gd_put_string(D, "data", "some string");
+  int error = gd_error(D);
 
-  dirfile_close(D);
+  gd_close(D);
 
   unlink(format);
   rmdir(filedir);
 
-  if (error != GD_E_PROTECTED)
-    return 1;
-  if (n != 0)
-    return 1;
+  CHECKI(n,0);
+  CHECKI(error, GD_E_PROTECTED);
 
-  return 0;
+  return r;
 }

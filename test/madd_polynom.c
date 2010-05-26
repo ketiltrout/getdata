@@ -1,5 +1,5 @@
 /* Add a POLYNOM field */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -18,53 +18,33 @@ int main(void)
   int j, r = 0;
   gd_entry_t e;
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
-  dirfile_add_phase(D, "new", "in", 3, 0);
+  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
+  gd_add_phase(D, "new", "in", 3, 0);
   const char* in_field = "in";
   const double a[4] = {1, 0.3, 0.5, 1.8};
-  dirfile_madd_polynom(D, "new", "meta", 3, in_field, a);
-  int error = get_error(D);
+  gd_madd_polynom(D, "new", "meta", 3, in_field, a);
+  int error = gd_error(D);
 
   /* check */
-  get_entry(D, "new/meta", &e);
-  if (get_error(D))
-    r = 1;
-  else {
-    if (e.field_type != GD_POLYNOM_ENTRY) {
-      fprintf(stderr, "field_type = %i\n", e.field_type);
-      r = 1;
-    }
-    if (strcmp(e.in_fields[0], "in")) {
-      fprintf(stderr, "in_field = %s\n", e.in_fields[0]);
-      r = 1;
-    }
-    if (e.fragment_index != 0) {
-      fprintf(stderr, "fragment_index = %i\n", e.fragment_index);
-      r = 1;
-    }
-    if (e.poly_ord != 3) {
-      fprintf(stderr, "poly_ord = %i\n", e.poly_ord);
-      r = 1;
-    }
-    if (e.comp_scal != 0) {
-      fprintf(stderr, "poly_ord = %i\n", e.poly_ord);
-      r = 1;
-    }
+  gd_get_entry(D, "new/meta", &e);
+  int ge_error = gd_error(D);
+  CHECKI(ge_error, 0);
+  if (!r) {
+    CHECKI(e.field_type, GD_POLYNOM_ENTRY);
+    CHECKS(e.in_fields[0], "in");
+    CHECKI(e.fragment_index, 0);
+    CHECKI(e.poly_ord, 3);
+    CHECKI(e.comp_scal, 0);
     for (j = 0; j < 4; ++j)
-      if (fabs(e.a[j] - a[j]) > 1e-6) {
-        fprintf(stderr, "a[%i] = %g\n", j, e.a[j]);
-        r = 1;
-      }
-    dirfile_free_entry_strings(&e);
+      CHECKFi(j, e.a[j], a[j]);
+    gd_free_entry_strings(&e);
   }
 
-  dirfile_close(D);
+  gd_close(D);
 
   unlink(format);
   rmdir(filedir);
 
-  if (r)
-    return 1;
-
-  return (error != GD_E_OK);
+  CHECKI(error, GD_E_OK);
+  return r;
 }

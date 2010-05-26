@@ -1,0 +1,289 @@
+.\" gd_getdata.3.  The gd_getdata man page.
+.\"
+.\" (C) 2008, 2009, 2010 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_getdata 3 "25 May 2010" "Version 0.7.0" "GETDATA"
+.SH NAME
+gd_getdata \(em retrieve data from a dirfile database
+.SH SYNOPSIS
+.B #include <getdata.h>
+.HP
+.nh
+.ad l
+.BI "size_t gd_getdata(DIRFILE *" dirfile ", const char *" field_code ", off_t"
+.IB first_frame ", off_t " first_sample ", size_t " num_frames ", size_t"
+.IB num_samples ", gd_type_t " return_type ", void *" data_out );
+.hy
+.ad n
+.SH DESCRIPTION
+The
+.BR gd_getdata ()
+function queries a dirfile(5) database specified by
+.I dirfile
+for the field
+.IR field_code .
+It fetches
+.I num_frames
+frames plus
+.I num_samples
+samples from this field, starting 
+.I first_sample
+samples past frame
+.IR first_frame . 
+The data is converted to the data type specified by
+.IR return_type ,
+and stored in the user-supplied buffer
+.IR data_out .
+
+The 
+.I field_code
+may contain one of the representation suffixes listed in dirfile-format(5).
+If it does,
+.BR gd_getdata ()
+will compute the appropriate complex norm before returning the data.
+
+The 
+.I dirfile
+argument must point to a valid DIRFILE object previously created by a call to
+.BR gd_open (3).
+The argument
+.I data_out
+must point to a valid memory location of sufficient size to hold all data
+requested.
+
+The first sample returned will be
+.RS
+.IR first_frame " * " samples_per_frame " + " first_sample
+.RE
+as measured from the start of the dirfile, where
+.I samples_per_frame
+is the number of samples per frame as returned by
+.BR gd_get_spf (3).
+The number of samples fetched is, similarly,
+.RS
+.IR num_frames " * " samples_per_frame " + " num_samples .
+.RE
+Although calling
+.BR gd_getdata ()
+using both samples and frames is possible, the function is typically called
+with either
+.IR num_samples " and " first_sample ,
+or
+.IR num_frames " and " first_frames ,
+equal to zero.
+
+The 
+.I return_type
+argument should be one of the following symbols, which indicates the desired
+return type of the data:
+.RS
+.TP 11
+.I GD_UINT8
+unsigned 8-bit integer
+.TP
+.I GD_INT8
+signed (two's complement) 8-bit integer
+.TP
+.I GD_UINT16
+unsigned 16-bit integer
+.TP
+.I GD_INT16
+signed (two's complement) 16-bit integer
+.TP
+.I GD_UINT32
+unsigned 32-bit integer
+.TP
+.I GD_INT32
+signed (two's complement) 32-bit integer
+.TP
+.I GD_UINT64
+unsigned 64-bit integer
+.TP
+.I GD_INT64
+signed (two's complement) 64-bit integer
+.TP
+.IR GD_FLOAT32
+IEEE-754 standard 32-bit single precision floating point number
+.TP
+.IR GD_FLOAT64
+IEEE-754 standard 64-bit double precision floating point number
+.TP
+.IR GD_COMPLEX64
+C99-conformant 64-bit single precision complex number
+.TP
+.IR GD_COMPLEX128
+C99-conformant 128-bit double precision complex number
+.TP
+.I GD_NULL
+the null type: the database is queried as usual, but no data is returned.
+In this case,
+.I data_out
+is ignored and may be NULL.
+.RE
+
+The return type of the data need not be the same as the type of the data stored
+in the database.  Type conversion will be performed as necessary to return the
+requested type.  If the
+.I field_code
+does not indicate a representation, but conversion from a complex value to a
+purely real one is required, only the real portion of the requested vector will
+be returned.
+
+.SH RETURN VALUE
+In all cases,
+.BR gd_getdata ()
+returns the number of samples (not bytes) successfully read from the database.
+If the end-of-field is encountered before the requested number of samples have
+been read, a short count will result.  The library does not consider this an
+error.  Requests for data before the beginning-of-field marker, which may have
+been shifted from frame zero by the presence of a
+.B FRAMEOFFSET
+directive, will result in the the data being padded at the front by NaN or zero
+depending on whether the return type is of floating point or integral type.
+
+If an error has occurred, zero is returned and the dirfile error
+will be set to a non-zero value.  Possible error values are:
+.TP 8
+.B GD_E_ALLOC
+The library was unable to allocate memory.
+.TP
+.B GD_E_BAD_CODE
+The field specified by
+.IR field_code ,
+or one of the fields it uses for input, was not found in the database.
+.TP
+.B GD_E_BAD_DIRFILE
+An invalid
+.I dirfile
+was supplied.
+.TP
+.B GD_E_BAD_FIELD_TYPE
+The supplied
+.I field_code
+referred to a 
+.B CONST
+or 
+.B STRING
+field.  The caller should use
+.BR gd_get_constant (3),
+or
+.BR gd_get_string (3)
+instead.
+.TP
+.B GD_E_BAD_REPR
+The representation suffix specified in
+.IR field_code ,
+or in one of the field codes it uses for input, was invalid.
+.TP
+.B GD_E_BAD_SCALAR
+A scalar field used in the definition of the field was not found, or was not of
+scalar type.
+.TP
+.B GD_E_BAD_TYPE
+An invalid
+.I return_type
+was specified.
+.TP
+.B GD_E_DIMENSION
+A scalar field was found where a vector field was expected.
+.TP
+.B GD_E_INTERNAL_ERROR
+An internal error occurred in the library while trying to perform the task.
+This indicates a bug in the library.  Please report the incident to the
+maintainer.
+.TP
+.B GD_E_OPEN_LINFILE
+An error occurred while trying to read a LINTERP table from disk.
+.TP
+.B GD_E_RAW_IO
+An error occurred while trying to open or read from a file on disk containing
+a raw field.
+.TP
+.B GD_E_RECURSE_LEVEL
+Too many levels of recursion were encountered while trying to resolve
+.IR field_code .
+This usually indicates a circular dependency in field specification in the
+dirfile.
+.TP
+.B GD_E_UNKNOWN_ENCODING
+The encoding scheme of a RAW field could not be determined.  This may also
+indicate that the binary file associated with the RAW field could not be found.
+.TP
+.B GD_E_UNSUPPORTED
+Reading from dirfiles with the encoding scheme of the specified dirfile is not
+supported by the library.  See
+.BR dirfile-encoding (5)
+for details on dirfile encoding schemes.
+.RE
+.P
+The dirfile error may be retrieved by calling
+.BR gd_error (3).
+A descriptive error string for the last error encountered can be obtained from
+a call to
+.BR gd_error_string (3).
+.SH LIMITATIONS
+The
+.B PHASE
+field type is poorly defined, since a forward-shifted
+.B PHASE
+field will always encounter the end-of-field marker before its input field does.
+This has ramifications when using
+.BR gd_getdata ()
+with streaming data.  The Dirfile
+Standards make tacit admission to this problem by indicating the results of
+reading a
+.B PHASE
+field beyond the beginning- or end-of-field is "implementation dependent" (see
+.BR dirfile-format (5)).
+As with any other field,
+.BR gd_getdata ()
+will return a short count whenever a read from a
+.B PHASE
+field encounters the end-of-field marker.
+
+Backward-shifted
+.B PHASE
+fields do not suffer from this problem, since
+.BR gd_getdata ()
+pads reads past the beginning-of-field marker with NaN or zero as appropriate.
+Database creators who wish to use the
+.B PHASE
+field type with streaming data are encouraged to work around this limitation
+by only using backward-shifted 
+.B PHASE
+fields, by writing
+.B RAW
+data at the maximal time lag, and then back-shifting all data which should have
+been written earlier.  Another possible work-around is to write
+systematically less data to the first
+.B RAW
+field in proportion to the maximal forward phase shift.  This method will work
+with applications which respect the database size reported by
+.BR gd_get_nframes (3)
+resulting in these applications effectively ignoring all frames past the frame
+containing the maximally forward-shifted
+.B PHASE
+field's end-of-field marker.
+
+.SH SEE ALSO
+.BR dirfile (5),
+.BR dirfile-encoding (5),
+.BR gd_open (3),
+.BR gd_get_constant (3),
+.BR gd_error (3),
+.BR gd_error_string (3),
+.BR gd_get_nframes (3),
+.BR gd_get_spf (3),
+.BR gd_get_string (3),
+.BR gd_putdata (3)

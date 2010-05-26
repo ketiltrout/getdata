@@ -1,9 +1,13 @@
 /* Opening a non-existent dirfile should fail cleanly */
-#include "../src/getdata.h"
+#include "test.h"
 
 int main(void)
 {
-  DIRFILE* D = dirfile_open("a non_existant dirfile", 0);
+  DIRFILE* D = gd_open("a non_existant dirfile", 0);
+  int r = 0;
 
-  return get_error(D) != GD_E_OPEN;
+  int error = gd_error(D);
+  CHECKI(error, GD_E_OPEN);
+
+  return r;
 }

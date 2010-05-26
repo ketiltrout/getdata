@@ -1,5 +1,5 @@
 /* Add a dirfile field */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -28,55 +28,32 @@ int main(void)
   E.scalar[0] = NULL;
   E.scalar[0 + GD_MAX_LINCOM] = "c";
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
-  dirfile_add_spec(D, "c CONST INT64 4", 0);
-  dirfile_add(D, &E);
-  int error = get_error(D);
+  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
+  gd_add_spec(D, "c CONST INT64 4", 0);
+  gd_add(D, &E);
+  int error = gd_error(D);
 
   /* check */
-  get_entry(D, "data", &e);
-  if (get_error(D))
+  gd_get_entry(D, "data", &e);
+  if (gd_error(D))
     r = 1;
   else {
-    if (e.field_type != GD_LINCOM_ENTRY) {
-      fprintf(stderr, "field_type = %i\n", e.field_type);
-      r = 1;
-    }
-    if (e.fragment_index != 0) {
-      fprintf(stderr, "fragment_index = %i\n", e.fragment_index);
-      r = 1;
-    }
-    if (e.n_fields != 1) {
-      fprintf(stderr, "n_fields = %i\n", e.n_fields);
-      r = 1;
-    }
-    if (fabs(e.m[0] - 1) > 1e-6) {
-      fprintf(stderr, "m[0] = %g\n", e.m[0]);
-      r = 1;
-    }
-    if (fabs(e.b[0] - 4) > 1e-6) {
-      fprintf(stderr, "b[0] = %g\n", e.b[0]);
-      r = 1;
-    }
-    if (e.scalar[0] != NULL) {
-      fprintf(stderr, "scalar[0] = %p\n", e.scalar[0]);
-      r = 1;
-    }
-    if (strcmp(e.scalar[0 + GD_MAX_LINCOM], "c")) {
-      fprintf(stderr, "scalar[0 + GD_MAX_LINCOM] = %s\n",
-          e.scalar[0 + GD_MAX_LINCOM]);
-      r = 1;
-    }
-    dirfile_free_entry_strings(&e);
+    CHECKI(e.field_type, GD_LINCOM_ENTRY);
+    CHECKI(e.fragment_index, 0);
+    CHECKI(e.n_fields, 1);
+    CHECKF(e.m[0], 1);
+    CHECKF(e.b[0], 4);
+    CHECKP(e.scalar[0]);
+    CHECKS(e.scalar[0 + GD_MAX_LINCOM], "c");
+    gd_free_entry_strings(&e);
   }
 
-  dirfile_close(D);
+  gd_close(D);
 
   unlink(format);
   rmdir(filedir);
 
-  if (r)
-    return 1;
+  CHECKI(error, GD_E_OK);
 
-  return (error != GD_E_OK);
+  return r;
 }

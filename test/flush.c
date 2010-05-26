@@ -1,5 +1,5 @@
 /* Attempt to flush */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <inttypes.h>
 #include <stdlib.h>
@@ -30,12 +30,12 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_UNENCODED | GD_VERBOSE);
-  int n = putdata(D, "data", 5, 0, 1, 0, GD_UINT8, c);
-  dirfile_flush(D, "data");
-  int error = get_error(D);
+  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_UNENCODED | GD_VERBOSE);
+  int n = gd_putdata(D, "data", 5, 0, 1, 0, GD_UINT8, c);
+  gd_flush(D, "data");
+  int error = gd_error(D);
 
-  dirfile_close(D);
+  gd_close(D);
 
   if (stat(data, &buf))
     return 1;

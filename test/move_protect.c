@@ -1,5 +1,5 @@
 /* Test move */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -17,7 +17,7 @@ int main(void)
   const char* format1 = __TEST__ "dirfile/format1";
   const char* format_data = "INCLUDE format1\ndata RAW UINT8 11";
   const char* format1_data = "/PROTECT all\n";
-  int fd;
+  int fd, r = 0;
   gd_entry_t E;
 
   mkdir(filedir, 0777);
@@ -30,32 +30,20 @@ int main(void)
   write(fd, format1_data, strlen(format1_data));
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_UNENCODED);
-  int ret = dirfile_move(D, "data", 1, 0);
-  int error = get_error(D);
-  int ge_ret =  get_entry(D, "data", &E);
-  dirfile_close(D);
+  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_UNENCODED);
+  int ret = gd_move(D, "data", 1, 0);
+  int error = gd_error(D);
+  int ge_ret =  gd_get_entry(D, "data", &E);
+  gd_close(D);
 
   unlink(format1);
   unlink(format);
   rmdir(filedir);
 
-  if (ret != -1) {
-    fprintf(stderr, "1=%i\n", ret);
-    return 1;
-  }
-  if (error != GD_E_PROTECTED) {
-    fprintf(stderr, "2=%i\n", error);
-    return 1;
-  }
-  if (ge_ret != 0) {
-    fprintf(stderr, "3=%i\n", ge_ret);
-    return 1;
-  }
-  if (E.fragment_index != 0) {
-    fprintf(stderr, "4=%i\n", E.fragment_index);
-    return 1;
-  }
+  CHECKI(ret, -1);
+  CHECKI(error, GD_E_PROTECTED);
+  CHECKI(ge_ret, 0);
+  CHECKI(E.fragment_index, 0);
 
-  return 0;
+  return r;
 }

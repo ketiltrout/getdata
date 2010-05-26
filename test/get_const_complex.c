@@ -1,5 +1,5 @@
 /* Attempt to read complex constant */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <complex.h>
 #include <stdlib.h>
@@ -17,7 +17,7 @@ int main(void)
   const char* format = __TEST__ "dirfile/format";
   const char* format_data = "const CONST COMPLEX128 8.3;9.2\n";
   double complex c;
-  int fd;
+  int fd, r = 0;
 
   mkdir(filedir, 0777);
 
@@ -25,21 +25,18 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY | GD_VERBOSE);
-  int n = get_constant(D, "const", GD_COMPLEX128, &c);
-  int error = get_error(D);
+  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  int n = gd_get_constant(D, "const", GD_COMPLEX128, &c);
+  int error = gd_error(D);
 
-  dirfile_close(D);
+  gd_close(D);
 
   unlink(format);
   rmdir(filedir);
 
-  if (error)
-    return 1;
-  if (n != 0)
-    return 1;
-  if (cabs(c - 8.3 - _Complex_I * 9.2) > 1e-6)
-    return 1;
+  CHECKI(error, 0);
+  CHECKI(n, 0);
+  CHECKC(c, 8.3 + _Complex_I * 9.2);
 
-  return 0;
+  return r;
 }

@@ -134,7 +134,7 @@ gd_type_t _GD_NativeType(DIRFILE* D, gd_entry_t* E, int repr)
   return type;
 }
 
-gd_type_t get_native_type(DIRFILE* D, const char* field_code_in)
+gd_type_t gd_get_native_type(DIRFILE* D, const char* field_code_in)
 {
   gd_type_t type = GD_UNKNOWN;
   gd_entry_t* entry;

@@ -1,6 +1,5 @@
 /* Attempt to read UINT8 via the legacy interface */
-#include "../src/getdata.h"
-
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -21,7 +20,7 @@ int main(void)
   const char* format_data = "data RAW UINT8 8\n";
   unsigned char c[8];
   unsigned char data_data[256];
-  int fd, i;
+  int fd, i, r = 0;
 
   memset(c, 0, 8);
   mkdir(filedir, 0777);
@@ -40,18 +39,15 @@ int main(void)
   int error;
   int n = GetData(filedir, "data", 5, 0, 1, 0, 'c', c, &error);
 
-  if (error)
-    return 1;
-  if (n != 8)
-    return 1;
+  CHECKI(error, 0);
+  CHECKI(n, 8);
   for (i = 0; i < 8; ++i)
-    if (c[i] != 40 + i)
-      return 1;
+    CHECKUi(i, c[i], 40 + i);
 
   unlink(data);
   unlink(format);
   rmdir(filedir);
 
-  return 0;
+  return r;
 #endif
 }

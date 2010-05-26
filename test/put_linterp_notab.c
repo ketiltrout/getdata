@@ -1,5 +1,5 @@
 /* Attempt to write LINCOM 1 */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <inttypes.h>
 #include <stdlib.h>
@@ -17,7 +17,7 @@ int main(void)
   const char* data = __TEST__ "dirfile/data";
   const char* format_data = "linterp LINTERP data ./table\ndata RAW INT8 8\n";
   int8_t c[8];
-  int fd, i;
+  int fd, i, r = 0;
 
   memset(c, 0, 8);
   mkdir(filedir, 0777);
@@ -29,18 +29,17 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_UNENCODED);
-  int n = putdata(D, "linterp", 5, 0, 1, 0, GD_INT8, c);
-  int error = get_error(D);
+  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_UNENCODED);
+  int n = gd_putdata(D, "linterp", 5, 0, 1, 0, GD_INT8, c);
+  int error = gd_error(D);
 
-  dirfile_close(D);
+  gd_close(D);
 
   unlink(data);
   unlink(format);
   rmdir(filedir);
 
-  if (n != 0)
-    return 1;
-
-  return (error != GD_E_OPEN_LINFILE);
+  CHECKI(n,0);
+  CHECKI(error,GD_E_OPEN_LINFILE);
+  return r;
 }

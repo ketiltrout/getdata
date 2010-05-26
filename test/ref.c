@@ -1,5 +1,5 @@
 /* Parser check */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <inttypes.h>
 #include <stdlib.h>
@@ -42,21 +42,18 @@ int main(void)
   write(fd, data_data, 3);
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY | GD_VERBOSE);
+  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
 
-  if (get_error(D))
-    r = 1;
+  int error = gd_error(D);
+  CHECKI(error,0);
 
-  off_t nf = get_nframes(D);
+  off_t nf = gd_get_nframes(D);
 
-  if (get_error(D))
-    r = 1;
-  else if (nf != 3) {
-    fprintf(stderr, "1=%llu\n", (unsigned long long)nf);
-    r = 1;
-  }
+  int error2 = gd_error(D);
+  CHECKI(error2,0);
+  CHECKI(nf,3);
 
-  dirfile_close(D);
+  gd_close(D);
 
   unlink(format);
   unlink(data1);

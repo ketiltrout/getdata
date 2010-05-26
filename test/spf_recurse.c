@@ -1,5 +1,5 @@
 /* Attempting to resove a recursively defined field should fail cleanly */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -16,7 +16,7 @@ int main(void)
   const char* format_data =
     "in1 RAW UINT8 11\n"
     "lincom LINCOM 2 lincom 1 0 in1 1 0\n";
-  int fd;
+  int fd, r = 0;
 
   mkdir(filedir, 0777);
 
@@ -24,16 +24,16 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
-  unsigned int spf = get_spf(D, "lincom");
-  int error = get_error(D);
-  dirfile_close(D);
+  DIRFILE* D = gd_open(filedir, GD_RDONLY);
+  unsigned int spf = gd_get_spf(D, "lincom");
+  int error = gd_error(D);
+  gd_close(D);
 
   unlink(format);
   rmdir(filedir);
 
-  if (spf != 0)
-    return 0;
+  CHECKI(spf,0);
 
-  return (error != GD_E_RECURSE_LEVEL);
+  CHECKI(error,GD_E_RECURSE_LEVEL);
+  return r;
 }

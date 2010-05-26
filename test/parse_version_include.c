@@ -1,5 +1,5 @@
 /* VERSION should cross INCLUDEs */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -16,7 +16,7 @@ int main(void)
   const char* format1 = __TEST__ "dirfile/format1";
   const char* format_data = "VERSION 999999\nINCLUDE format1\n";
   const char* format1_data = "BADDIRECTIVE BADTYPE\n";
-  int fd;
+  int fd, r = 0;
 
   mkdir(filedir, 0777);
 
@@ -28,13 +28,14 @@ int main(void)
   write(fd, format1_data, strlen(format1_data));
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY | GD_VERBOSE | GD_PERMISSIVE);
-  int error = get_error(D);
-  dirfile_close(D);
+  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE | GD_PERMISSIVE);
+  int error = gd_error(D);
+  gd_close(D);
 
   unlink(format1);
   unlink(format);
   rmdir(filedir);
 
-  return (error != GD_E_OK);
+  CHECKI(error,GD_E_OK);
+  return r;
 }

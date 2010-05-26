@@ -1,5 +1,5 @@
 /* Test move */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -21,7 +21,7 @@ int main(void)
   const char* format_data =
     "/INCLUDE format1\ndata RAW UINT16 11\nENCODING text\n";
   const char* format1_data = "ENCODING none\n";
-  int we = 0;
+  int r = 0;
   uint16_t d;
   int fd, i;
   FILE* stream;
@@ -42,27 +42,25 @@ int main(void)
     fprintf(stream, "%i\n", i * 0x201);
   fclose(stream);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_UNENCODED | GD_VERBOSE);
-  int ret = dirfile_move(D, "data", 1, 1);
-  int error = get_error(D);
-  int ge_ret =  get_entry(D, "data", &E);
-  dirfile_close(D);
+  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_UNENCODED | GD_VERBOSE);
+  int ret = gd_move(D, "data", 1, 1);
+  int error = gd_error(D);
+  int ge_ret =  gd_get_entry(D, "data", &E);
+  gd_close(D);
 
   fd = open(data, O_RDONLY);
   i = 0;
 
   if (fd >= 0) {
     while (read(fd, &d, sizeof(uint16_t))) {
-      if (d != i * 0x201) {
-        printf("%i = %4x\n", i, d);
-        we++;
-      }
-
+      CHECKXi(i,d,i * 0x201);
       i++;
     }
     close(fd);
-  } else
-    we = -1;
+  } else {
+    perror("open");
+    r = 1;
+  }
 
   unlink(format1);
   unlink(format);
@@ -70,34 +68,12 @@ int main(void)
   int unlink_txtdata = unlink(txtdata);
   rmdir(filedir);
 
-  if (ret != 0) {
-    fprintf(stderr, "1=%i\n", ret);
-    return 1;
-  }
-  if (error != GD_E_OK) {
-    fprintf(stderr, "2=%i\n", error);
-    return 1;
-  }
-  if (ge_ret != 0) {
-    fprintf(stderr, "3=%i\n", ge_ret);
-    return 1;
-  }
-  if (E.fragment_index != 1) {
-    fprintf(stderr, "4=%i\n", E.fragment_index);
-    return 1;
-  }
-  if (we != 0) {
-    fprintf(stderr, "5=%i\n", we);
-    return 1;
-  }
-  if (unlink_data != 0) {
-    fprintf(stderr, "6=%i\n", unlink_data);
-    return 1;
-  }
-  if (unlink_txtdata != -1) {
-    fprintf(stderr, "7=%i\n", unlink_txtdata);
-    return 1;
-  }
+  CHECKI(ret, 0);
+  CHECKI(error, GD_E_OK);
+  CHECKI(ge_ret, 0);
+  CHECKI(E.fragment_index, 1);
+  CHECKI(unlink_data, 0);
+  CHECKI(unlink_txtdata, -1);
 
   return 0;
 }

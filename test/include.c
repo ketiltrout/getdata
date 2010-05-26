@@ -1,5 +1,5 @@
 /* Test include */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -16,7 +16,7 @@ int main(void)
   const char* format1 = __TEST__ "dirfile/format1";
   const char* format_data = "\n";
   const char* format1_data = "data RAW UINT8 11\n";
-  int fd;
+  int fd, r = 0;
 
   mkdir(filedir, 0777);
 
@@ -28,18 +28,18 @@ int main(void)
   write(fd, format1_data, strlen(format1_data));
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_VERBOSE);
-  dirfile_include(D, "format1", 0, 0);
-  int error = get_error(D);
-  unsigned int spf = get_spf(D, "data");
-  dirfile_close(D);
+  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
+  gd_include(D, "format1", 0, 0);
+  int error = gd_error(D);
+  unsigned int spf = gd_get_spf(D, "data");
+  gd_close(D);
 
   unlink(format1);
   unlink(format);
   rmdir(filedir);
 
-  if (error)
-    return 1;
+  CHECKI(error, 0);
+  CHECKU(spf, 11);
 
-  return (spf != 11);
+  return r;
 }

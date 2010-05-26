@@ -1,3 +1,32 @@
+2010-05-22   D. V. Wiebe <getdata@ketiltrout.net>   svn:401
+	* test/: Update for new function names.  Modernise error reporting.
+	* test/test.h: Added.
+	* test/add_many.h test/global_ref_get.c: Deleted.
+
+	* util/dirfile2ascii.c util/checkdirfile.c: Update for new function names.
+
+	* util/checkdirifle.c: Report standards version compliance.
+
+	* bindings/python/*.c: Update for new function names.
+	* bindings/cxx/*.cxx: Ditto.
+	* bindigns/f77/fgetdata.c: Ditto.
+	* bindings/f77/getdata.f90.in: Ditto.
+	* bindings/idl/getdata.c: Ditto.
+
+	* src/: Use the gd_ namespace for all public functions.
+	* src/getdata.h.in: Add function aliases.
+
+	* src/legacy.c: Fix lengths of global error buffers.
+
+	* src/getdata_legacy.h src/getdata.h.in: Fix function attributes to work
+	with gcc but a non-gnu libc.
+
+	* bindings/cxx/fragment.cpp: Remove dependence on the LFS transitional API.
+
+	* src/configure.ac: Remove obsolete Darwin check.
+
+	* src/globals.c (get_reference): Deleted.
+
 2010-05-17   D. V. Wiebe <getdata@ketiltrout.net>   svn:400
 	* src/flush.c (_GD_FlushFragment): malloc temp_file.
 

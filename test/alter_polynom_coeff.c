@@ -1,6 +1,5 @@
 /* Test field modifying */
-#include "../src/getdata.h"
-
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -38,67 +37,33 @@ int main(void)
   write(fd, data_data, 256 * sizeof(int32_t));
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_VERBOSE);
-  int ret = dirfile_alter_polynom(D, "polynom", 0, NULL, a);
-  int error = get_error(D);
+  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
+  int ret = gd_alter_polynom(D, "polynom", 0, NULL, a);
+  int error = gd_error(D);
 
-  if (error) {
-    fprintf(stderr, "error=%i\n", error);
-    r = 1;
-  }
+  CHECKI(error,0);
 
-  int n = get_entry(D, "polynom", &E);
-  error = get_error(D);
+  int n = gd_get_entry(D, "polynom", &E);
+  int error2 = gd_error(D);
 
-  dirfile_close(D);
+  gd_close(D);
 
-  if (strcmp(E.field, "polynom")) {
-    fprintf(stderr, "E.field = %s\n", E.field);
-    r = 1;
-  }
-
-  if (E.field_type != GD_POLYNOM_ENTRY) {
-    fprintf(stderr, "E.field_type = %i\n", E.field_type);
-    r = 1;
-  }
-
-  if (E.poly_ord != 2) {
-    fprintf(stderr, "E.poly_ord = %i\n", E.poly_ord);
-    r = 1;
-  }
-
-  if (E.comp_scal != 0) {
-    fprintf(stderr, "E.comp_scal = %i\n", E.comp_scal);
-    r = 1;
-  }
-  
-  if (strcmp(E.in_fields[0], "data")) {
-    fprintf(stderr, "E.in_fields[0] = %s\n", E.in_fields[0]);
-    r = 1;
-  }
+  CHECKS(E.field, "polynom");
+  CHECKI(E.field_type, GD_POLYNOM_ENTRY);
+  CHECKI(E.poly_ord, 2);
+  CHECKI(E.comp_scal, 0);
+  CHECKS(E.in_fields[0], "data"); 
 
   for (i = 0; i < 3; ++i) 
-    if (fabs(E.a[i] - a[i]) > 1e-6) {
-      fprintf(stderr, "E.a[%i] = %g\n", i, E.a[i]);
-      r = 1;
-    }
+    CHECKFi(i,E.a[i], a[i]);
 
   unlink(data);
   unlink(format);
   rmdir(filedir);
 
-  if (error) {
-    fprintf(stderr, "1=%i\n", error);
-    r = 1;
-  }
-  if (n != 0) {
-    fprintf(stderr, "2=%lli\n", (long long)n);
-    r = 1;
-  }
-  if (ret != 0) {
-    fprintf(stderr, "3=%i\n", ret);
-    r = 1;
-  }
+  CHECKI(error2,0);
+  CHECKI(n,0);
+  CHECKI(ret,0);
 
   return r;
 }

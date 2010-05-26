@@ -1,5 +1,5 @@
 /* Attempt to read INT64 */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <inttypes.h>
 #include <stdlib.h>
@@ -18,7 +18,7 @@ int main(void)
   const char* format_data = "data RAW INT64 8\n";
   int64_t c[8];
   int64_t data_data[64];
-  int fd, i;
+  int fd, i, r = 0;
 
   memset(c, 0, 8);
   mkdir(filedir, 0777);
@@ -34,23 +34,22 @@ int main(void)
   write(fd, data_data, 64 * sizeof(int64_t));
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY | GD_VERBOSE);
-  int n = getdata(D, "data", 5, 0, 1, 0, GD_UINT64, c);
+  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  int n = gd_getdata(D, "data", 5, 0, 1, 0, GD_UINT64, c);
 
-  if (get_error(D))
-    return 1;
-  if (n != 8)
-    return 1;
+  int error = gd_error(D);
+  CHECKI(error, 0);
+  CHECKI(n, 8);
+
   for (i = 0; i < 8; ++i)
-    if (c[i] != (0x5000000000000028LL + i * 0x0200000000000001LL)
-        * (2 * (i % 2) - 1))
-      return 1;
+    CHECKIi(i,c[i], (0x5000000000000028LL + i * 0x0200000000000001LL)
+        * (2 * (i % 2) - 1));
 
-  dirfile_close(D);
+  gd_close(D);
 
   unlink(data);
   unlink(format);
   rmdir(filedir);
 
-  return 0;
+  return r;
 }

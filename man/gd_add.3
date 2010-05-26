@@ -1,0 +1,188 @@
+.\" gd_add.3.  The gd_add man page.
+.\"
+.\" (C) 2008, 2009, 2010 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_add 3 "25 May 2010" "Version 0.7.0" "GETDATA"
+.SH NAME
+gd_add, gd_madd \(em add a field to a dirfile
+.SH SYNOPSIS
+.B #include <getdata.h>
+.HP
+.nh
+.ad l
+.BI "int gd_add(DIRFILE *" dirfile ", const gd_entry_t *" entry );
+.HP
+.BI "int gd_madd(DIRFILE *" dirfile ", const gd_entry_t *" entry ,
+.BI "const char *" parent );
+.hy
+.ad n
+.SH DESCRIPTION
+The
+.BR gd_add ()
+function adds the field described by 
+.I entry
+to the dirfile specified by
+.IR dirfile .
+The
+.BR gd_madd ()
+function behaves similarly, but adds the field as a metafield under the
+field indicated by the field code
+.IR parent .
+
+The form of
+.I entry
+is described in detail on the
+.BR gd_get_entry (3)
+man page.  All relevant members of
+.I entry
+for the field type specified must be properly initialised.
+
+When adding a metafield, the
+.IR entry -> field
+member should contain just the metafield's name, not the fully formed
+.IB <parent-field> / <meta-field>
+field code.  Also,
+.BR gd_madd ()
+ignores the value of
+.IR entry -> fragment_index ,
+and instead adds the new meta field to the same format file fragment in which
+the parent field is defined.
+
+Fields added with this interface may contain either numerical parameters or 
+parameters based on
+.B CONST
+fields.  If an element of the
+.IR entry -> scalar
+array defined for the specified field type is non-NULL, this element will be
+used as the
+.B CONST
+field code, and the corresponding numerical member will be ignored, and need
+not be initialised.  Conversely, if numerical parameters are intended, the
+corresponding
+.IR entry -> scalar
+elements should be set to NULL.
+
+.SH RETURN VALUE
+On success,
+.BR gd_add ()
+and
+.BR gd_madd ()
+return zero.   On error, -1 is returned and the dirfile error is set to a
+non-zero error value.  Possible error values are:
+.TP 8
+.B GD_E_ACCMODE
+The specified dirfile was opened read-only.
+.TP
+.B GD_E_ALLOC
+The library was unable to allocate memory.
+.TP
+.B GD_E_BAD_CODE
+The field name provided in
+.IR entry -> field
+contained invalid characters. Alternately, the
+.I parent
+field code was not found, or was already a metafield.
+.TP
+.B GD_E_BAD_DIRFILE
+The supplied dirfile was invalid.
+.TP
+.B GD_E_BAD_ENTRY
+There was an error in the specification of the field described by
+.IR entry ,
+or the caller attempted to add a field of type
+.B RAW
+as a metafield.
+.TP
+.B GD_E_BAD_INDEX
+The
+.IR entry -> fragment_index
+parameter was out of range.
+.TP
+.B GD_E_BAD_TYPE
+The
+.IR entry -> data_type
+parameter provided with a
+.BR RAW
+entry, or the
+.IR entry -> const_type
+parameter provided with a
+.BR CONST
+entry, was invalid.
+.TP
+.B GD_E_DUPLICATE
+The field name provided in 
+.IR entry -> field
+duplicated that of an already existing field.
+.TP
+.B GD_E_PROTECTED
+The metadata of the fragment was protected from change.  Or, the creation of a
+.B RAW
+field was attempted and the data of the fragment was protected.
+.TP
+.B GD_E_RAW_IO
+An I/O error occurred while creating an empty binary file to be associated with
+a newly added
+.B RAW
+field.
+.TP
+.B GD_E_UNKNOWN_ENCODING
+The encoding scheme of the specified format file fragment is not known to the
+library.  As a result, the library was unable to create an empty binary file to
+be associated with a newly added
+.B RAW
+field.
+.TP
+.B GD_E_UNSUPPORTED
+The encoding scheme of the specified format file fragment does not support
+creating an empty binary file to be associated with a newly added
+.B RAW
+field.
+.P
+The dirfile error may be retrieved by calling
+.BR gd_error (3).
+A descriptive error string for the last error encountered can be obtained from
+a call to
+.BR gd_error_string (3).
+.SH SEE ALSO
+.BR gd_add_bit (3),
+.BR gd_add_clincom (3),
+.BR gd_add_const (3),
+.BR gd_add_cpolynom (3),
+.BR gd_add_lincom (3),
+.BR gd_add_linterp (3),
+.BR gd_add_multiply (3),
+.BR gd_add_phase (3),
+.BR gd_add_polynom (3),
+.BR gd_add_raw (3),
+.BR gd_add_sbit (3),
+.BR gd_add_spec (3),
+.BR gd_add_string (3),
+.BR gd_error (3),
+.BR gd_error_string (3),
+.BR gd_get_entry (3),
+.BR gd_madd_bit (3),
+.BR gd_madd_clincom (3),
+.BR gd_madd_const (3),
+.BR gd_madd_cpolynom (3),
+.BR gd_madd_lincom (3),
+.BR gd_madd_linterp (3),
+.BR gd_madd_multiply (3),
+.BR gd_madd_phase (3),
+.BR gd_madd_polynom (3),
+.BR gd_madd_sbit (3),
+.BR gd_madd_spec (3),
+.BR gd_madd_string (3),
+.BR gd_metaflush (3),
+.BR gd_open (3),
+.BR dirfile-format (5)

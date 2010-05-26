@@ -1,5 +1,5 @@
 /* Attempt to read from before the BOF */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -34,29 +34,20 @@ int main(void)
   write(fd, data_data, 256);
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY | GD_VERBOSE);
-  int n = getdata(D, "data", 5, 0, 1, 0, GD_UINT8, c);
-  int error = get_error(D);
+  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  int n = gd_getdata(D, "data", 5, 0, 1, 0, GD_UINT8, c);
+  int error = gd_error(D);
 
-  dirfile_close(D);
+  gd_close(D);
 
   unlink(data);
   unlink(format);
   rmdir(filedir);
 
-  if (error) {
-    fprintf(stderr, "error=%i\n", error);
-    r = 1;
-  }
-  if (n != 8) {
-    fprintf(stderr, "n=%i\n", n);
-    r = 1;
-  }
+  CHECKI(error, 0);
+  CHECKI(n, 8);
   for (i = 0; i < 8; ++i)
-    if (c[i] != 0) {
-      fprintf(stderr, "c[%i]=%i\n", i, c[i]);
-      r = 1;
-    }
+    CHECKUi(i, c[i], 0);
 
   return r;
 }

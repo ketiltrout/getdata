@@ -1,6 +1,5 @@
 /* Attempt to write to a read only dirfile */
-#include "../src/getdata.h"
-
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -17,7 +16,7 @@ int main(void)
   const char* data = __TEST__ "dirfile/data";
   const char* format_data = "data RAW UINT8 8\n";
   unsigned char c[8];
-  int fd;
+  int fd, r = 0;
 
   memset(c, 0, 8);
   mkdir(filedir, 0777);
@@ -26,18 +25,18 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY | GD_UNENCODED);
-  int n = putdata(D, "data", 5, 0, 1, 0, GD_UINT8, c);
-  int error = get_error(D);
+  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_UNENCODED);
+  int n = gd_putdata(D, "data", 5, 0, 1, 0, GD_UINT8, c);
+  int error = gd_error(D);
 
-  dirfile_close(D);
+  gd_close(D);
 
-  if (!unlink(data))
-    return 1;
+  int unlink_data = unlink(data);
   unlink(format);
   rmdir(filedir);
 
-  if (n != 0)
-    return 1;
-  return (error != GD_E_ACCMODE);
+  CHECKI(unlink_data, -1);
+  CHECKI(n,0);
+  CHECKI(error,GD_E_ACCMODE);
+  return r;
 }

@@ -1,6 +1,5 @@
 /* Attempt to read LINCOM */
-#include "../src/getdata.h"
-
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -18,7 +17,7 @@ int main(void)
   const char* format_data = "lincom LINCOM data 2 3 data 1 0\ndata RAW UINT8 1\n";
   unsigned char c = 0;
   unsigned char data_data[256];
-  int fd;
+  int fd, r = 0;
 
   mkdir(filedir, 0777);
 
@@ -33,22 +32,19 @@ int main(void)
   write(fd, data_data, 256);
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY | GD_VERBOSE);
-  int n = getdata(D, "lincom", 5, 0, 1, 0, GD_UINT8, &c);
-  int error = get_error(D);
+  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  int n = gd_getdata(D, "lincom", 5, 0, 1, 0, GD_UINT8, &c);
+  int error = gd_error(D);
 
-  dirfile_close(D);
+  gd_close(D);
 
   unlink(data);
   unlink(format);
   rmdir(filedir);
 
-  if (error)
-    return 1;
-  if (n != 1)
-    return 1;
-  if (c != 18)
-    return 1;
+  CHECKI(error, 0);
+  CHECKI(n, 1);
+  CHECKU(c, 18);
 
-  return 0;
+  return r;
 }

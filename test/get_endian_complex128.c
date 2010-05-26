@@ -1,5 +1,5 @@
 /* Attempt to read COMPLEX128 with the opposite endianness */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <complex.h>
 #include <inttypes.h>
@@ -65,31 +65,21 @@ int main(void)
   write(fd, data_data, 128 * sizeof(double complex));
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY | GD_VERBOSE);
-  int n = getdata(D, "data", 5, 0, 1, 0, GD_COMPLEX128, &u.f);
-  int error = get_error(D);
+  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  int n = gd_getdata(D, "data", 5, 0, 1, 0, GD_COMPLEX128, &u.f);
+  int error = gd_error(D);
 
-  dirfile_close(D);
+  gd_close(D);
 
   unlink(data);
   unlink(format);
   rmdir(filedir);
 
-  if (error) {
-    fprintf(stderr, "error = %i\n", error);
-    r = 1;
-  }
-  if (n != 1) {
-    fprintf(stderr, "n = %i\n", n);
-    r = 1;
-  }
+  CHECKI(error, 0);
+  CHECKI(n, 1);
 
   for (i = 0; i < 16; ++i)
-    if (x[i] != u.b[i]) {
-      fprintf(stderr, "x[%i] = %2x, u.b[%i] = %2x (%g;%g)\n", i, x[i], i,
-          u.b[i], creal(u.f), cimag(u.f));
-      r = 1;
-    }
+    CHECKXi(i,u.b[i], x[i]);
 
   return r;
 }

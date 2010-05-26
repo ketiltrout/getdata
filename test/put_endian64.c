@@ -1,5 +1,5 @@
 /* Attempt to write UINT64 with the opposite endianness */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <inttypes.h>
 #include <stdlib.h>
@@ -28,7 +28,7 @@ int main(void)
   const char* data = __TEST__ "dirfile/data";
   char format_data[1000];
   uint64_t c = 0x0203000000040001LLU, d = 0;
-  int fd;
+  int fd, r = 0;
   const int big_endian = BigEndian();
 
   mkdir(filedir, 0777); 
@@ -40,11 +40,11 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_UNENCODED | GD_VERBOSE);
-  int n = putdata(D, "data", 5, 0, 1, 0, GD_UINT64, &c);
-  int error = get_error(D);
+  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_UNENCODED | GD_VERBOSE);
+  int n = gd_putdata(D, "data", 5, 0, 1, 0, GD_UINT64, &c);
+  int error = gd_error(D);
 
-  dirfile_close(D);
+  gd_close(D);
 
   fd = open(data, O_RDONLY);
   lseek(fd, 5 * sizeof(uint64_t), SEEK_SET);
@@ -55,14 +55,9 @@ int main(void)
   unlink(format);
   rmdir(filedir);
 
-  if (d != 0x0100040000000302LLU) {
-    printf("1=%" PRIx64 "\n", d);
-    return 1;
-  }
-  if (n != 1)
-    return 1;
-  if (error)
-    return 1;
+  CHECKX(d,0x0100040000000302LLU);
+  CHECKI(n,1);
+  CHECKI(error,0);
 
-  return 0;
+  return r;
 }

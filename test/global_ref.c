@@ -1,5 +1,5 @@
 /* Global metadata check */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <inttypes.h>
 #include <stdlib.h>
@@ -16,6 +16,7 @@ int main(void)
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
   const char* format_data = "data RAW UINT8 1\n";
+  int r = 0;
 
   mkdir(filedir, 0777);
 
@@ -23,20 +24,16 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY | GD_VERBOSE);
-  const char* ref = strdup(dirfile_reference(D, NULL));
-  int error = get_error(D);
-  dirfile_close(D);
+  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  const char* ref = strdup(gd_reference(D, NULL));
+  int error = gd_error(D);
+  gd_close(D);
 
   unlink(format);
   rmdir(filedir);
 
-  if (error != GD_E_OK)
-    return 1;
-  else if (strcmp("data", ref)) {
-    fprintf(stderr, "1=%s\n", ref);
-    return 1;
-  }
+  CHECKI(error, 0);
+  CHECKS(ref, "data");
 
-  return 0;
+  return r;
 }

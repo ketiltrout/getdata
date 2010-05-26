@@ -1,5 +1,5 @@
 /* Truncating a dirfile should succeed cleanly */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -14,7 +14,7 @@ int main(void)
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
   const char* data = __TEST__ "dirfile/data";
-  int fd;
+  int fd, r = 0;
   struct stat buf;
 
   mkdir(filedir, 0777);
@@ -25,21 +25,20 @@ int main(void)
 
   close(open(data, O_CREAT | O_EXCL | O_WRONLY, 0666));
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_TRUNC | GD_VERBOSE);
-  int error = get_error(D);
-  dirfile_close(D);
+  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_TRUNC | GD_VERBOSE);
+  int error = gd_error(D);
+  gd_close(D);
 
-  if (!unlink(data))
-    return 1;
+  int unlink_data = unlink(data);
+  CHECKI(unlink_data, -1);
 
-  if (stat(format, &buf))
-    return 1;
-
-  if (buf.st_size > 0)
-    return 1;
+  int stat_format = stat(format, &buf);
+  CHECKI(stat_format, 0);
+  CHECK((buf.st_size > 0),buf.st_size,"%lli","%s",(long long)buf.st_size,"> 0");
 
   unlink(format);
   rmdir(filedir);
 
-  return (error != GD_E_OK);
+  CHECKI(error,GD_E_OK);
+  return r;
 }

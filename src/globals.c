@@ -28,7 +28,7 @@
 /* This is nothing other than what the caller gave us.  Presumably it should
  * be better at keeping track of such things than us, but this is present in
  * the event that it is not. */
-const char* dirfilename(DIRFILE* D)
+const char* gd_dirfilename(DIRFILE* D)
 {
   dtrace("%p", D);
 
@@ -44,7 +44,7 @@ const char* dirfilename(DIRFILE* D)
   return D->name;
 }
 
-const char* dirfile_reference(DIRFILE* D, const char* field_code)
+const char* gd_reference(DIRFILE* D, const char* field_code)
 {
   dtrace("%p, \"%s\"", D, field_code);
 
@@ -113,14 +113,4 @@ const char* dirfile_reference(DIRFILE* D, const char* field_code)
 
   dreturn("\"%s\"", D->reference_field->field);
   return D->reference_field->field;
-}
-
-const char* get_reference(DIRFILE* D)
-{
-  dtrace("%p", D);
-
-  const char *r = dirfile_reference(D, NULL);
-
-  dreturn("\"%s\"", r);
-  return r;
 }

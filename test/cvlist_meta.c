@@ -1,4 +1,4 @@
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <inttypes.h>
 #include <stdlib.h>
@@ -28,22 +28,17 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY | GD_VERBOSE);
-  const uint8_t* field_list = get_mconstants(D, "parent", GD_UINT8);
+  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  const uint8_t* field_list = gd_get_mconstants(D, "parent", GD_UINT8);
 
-  if (get_error(D))
-    r = 1;
+  int error = gd_error(D);
+  CHECKI(error, 0);
 
-  if (field_list == NULL)
-    r = 1;
-
-  fd = 0;
   if (!r)
     for (fd = 0; fd < 3; ++fd)
-      if (field_list[fd] != fd + 1)
-        r = 1;
+      CHECKUi(fd,field_list[fd], fd + 1);
 
-  dirfile_close(D);
+  gd_close(D);
   unlink(format);
   rmdir(filedir);
 

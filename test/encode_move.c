@@ -1,5 +1,5 @@
 /* Test endianness */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -20,7 +20,7 @@ int main(void)
   const char* format_data = "data RAW UINT16 8\nENCODING none\n";
   uint16_t data_data[128];
   uint16_t c[8];
-  int fd, i, we = 0;
+  int fd, i, r = 0;
 
   memset(c, 0, 8);
   mkdir(filedir, 0777);
@@ -36,12 +36,12 @@ int main(void)
   write(fd, data_data, 256);
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_VERBOSE);
-  int ret = dirfile_alter_encoding(D, GD_TEXT_ENCODED, 0, 1);
-  int error = get_error(D);
-  int n = getdata(D, "data", 5, 0, 1, 0, GD_UINT16, c);
+  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
+  int ret = gd_alter_encoding(D, GD_TEXT_ENCODED, 0, 1);
+  int error = gd_error(D);
+  int n = gd_getdata(D, "data", 5, 0, 1, 0, GD_UINT16, c);
 
-  dirfile_close(D);
+  gd_close(D);
 
   int unlink_txtdata = unlink(txtdata);
   int unlink_data = unlink(data);
@@ -49,35 +49,13 @@ int main(void)
   rmdir(filedir);
 
   for (i = 0; i < 8; ++i)
-    if (c[i] != (40 + i) * 0x201) {
-      fprintf(stderr, "%x - %x\n", c[i], (40 + i) * 0x201);
-      we++;
-    }
+    CHECKXi(i,c[i], (40 + i) * 0x201);
 
-  if (error) {
-    fprintf(stderr, "1=%i\n", error);
-    return 1;
-  }
-  if (ret != 0) {
-    fprintf(stderr, "2=%i\n", ret);
-    return 1;
-  }
-  if (n != 8) {
-    fprintf(stderr, "3=%i\n", n);
-    return 1;
-  }
-  if (we != 0) {
-    fprintf(stderr, "4=%i\n", we);
-    return 1;
-  }
-  if (unlink_txtdata != 0) {
-    fprintf(stderr, "5=%i\n", unlink_txtdata);
-    return 1;
-  }
-  if (unlink_data == 0) {
-    fprintf(stderr, "6=%i\n", unlink_data);
-    return 1;
-  }
+  CHECKI(error, 0);
+  CHECKI(ret, 0);
+  CHECKI(n, 8);
+  CHECKI(unlink_txtdata, 0);
+  CHECKI(unlink_data, -1);
 
-  return 0;
+  return r;
 }

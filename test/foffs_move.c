@@ -1,6 +1,5 @@
 /* Test frameoffset */
-#include "../src/getdata.h"
-
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -18,7 +17,7 @@ int main(void)
   const char* data = __TEST__ "dirfile/data";
   const char* format_data = "data RAW UINT8 8\nFRAMEOFFSET 13\n";
   unsigned char data_data[256];
-  int fd;
+  int fd, r = 0;
 
   mkdir(filedir, 0777);
 
@@ -33,34 +32,22 @@ int main(void)
   write(fd, data_data, 256);
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_VERBOSE);
-  int ret = dirfile_alter_frameoffset(D, 16, 0, 1);
-  int error = get_error(D);
-  off_t fo = get_frameoffset(D, 0);
-  off_t nf = get_nframes(D);
+  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
+  int ret = gd_alter_frameoffset(D, 16, 0, 1);
+  int error = gd_error(D);
+  off_t fo = gd_get_frameoffset(D, 0);
+  off_t nf = gd_get_nframes(D);
 
-  dirfile_close(D);
+  gd_close(D);
 
   unlink(data);
   unlink(format);
   rmdir(filedir);
 
-  if (error) {
-    fprintf(stderr, "1=%i\n", error);
-    return 1;
-  }
-  if (ret != 0) {
-    fprintf(stderr, "2=%i\n", ret);
-    return 1;
-  }
-  if (fo != 16) {
-    fprintf(stderr, "3=%lli\n", (long long)fo);
-    return 1;
-  }
-  if (nf != 45) {
-    fprintf(stderr, "4=%lli\n", (long long)nf);
-    return 1;
-  }
+  CHECKI(error, 0);
+  CHECKI(ret, 0);
+  CHECKI(fo, 16);
+  CHECKI(nf, 45);
 
-  return 0;
+  return r;
 }

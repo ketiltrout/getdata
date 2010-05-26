@@ -208,7 +208,7 @@ static double _GD_GetIndex(DIRFILE* D, gd_entry_t *E, int repr, double value,
   return sample;
 }
 
-double get_framenum_subset64(DIRFILE* D, const char* field_code_in,
+double gd_get_framenum_subset64(DIRFILE* D, const char* field_code_in,
     double value, off64_t field_start, off64_t field_end)
 {
   double frame = NAN;
@@ -253,7 +253,7 @@ double get_framenum_subset64(DIRFILE* D, const char* field_code_in,
     field_start *= spf;
 
   if (field_end == 0)
-    field_end = (get_nframes64(D) + 1) * spf - 1;
+    field_end = (gd_get_nframes64(D) + 1) * spf - 1;
   else
     field_end = field_end * spf - 1;
 
@@ -267,7 +267,7 @@ double get_framenum_subset64(DIRFILE* D, const char* field_code_in,
   return frame;
 }
 
-double get_framenum_subset(DIRFILE* D, const char* field_code, double value,
+double gd_get_framenum_subset(DIRFILE* D, const char* field_code, double value,
     off_t field_start, off_t field_end)
 {
   double frame;
@@ -275,20 +275,20 @@ double get_framenum_subset(DIRFILE* D, const char* field_code, double value,
   dtrace("%p, \"%s\", %g, %lli, %lli", D, field_code, value,
       (long long int)field_start, (long long int)field_end);
 
-  frame = get_framenum_subset64(D, field_code,  value, (off64_t)field_start,
+  frame = gd_get_framenum_subset64(D, field_code,  value, (off64_t)field_start,
       (off64_t)field_end);
 
   dreturn("%g", frame);
   return frame;
 }
 
-double get_framenum(DIRFILE* D, const char* field_code, double value)
+double gd_get_framenum(DIRFILE* D, const char* field_code, double value)
 {
   double frame;
 
   dtrace("%p, \"%s\", %g", D, field_code, value);
 
-  frame = get_framenum_subset64(D, field_code,  value, 0, 0);
+  frame = gd_get_framenum_subset64(D, field_code,  value, 0, 0);
 
   dreturn("%g", frame);
   return frame;

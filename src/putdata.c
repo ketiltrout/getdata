@@ -522,7 +522,7 @@ size_t _GD_DoFieldOut(DIRFILE *D, gd_entry_t* E, int repr, off64_t first_samp,
 }
 
 /* this function is little more than a public boilerplate for _GD_DoFieldOut */
-size_t putdata64(DIRFILE* D, const char *field_code_in, off64_t first_frame,
+size_t gd_putdata64(DIRFILE* D, const char *field_code_in, off64_t first_frame,
     off64_t first_samp, size_t num_frames, size_t num_samp, gd_type_t data_type,
     const void *data_in)
 {
@@ -585,12 +585,12 @@ size_t putdata64(DIRFILE* D, const char *field_code_in, off64_t first_frame,
 }
 
 /* 32(ish)-bit wrapper for the 64-bit version, when needed */
-size_t putdata(DIRFILE* D, const char *field_code, off_t first_frame,
+size_t gd_putdata(DIRFILE* D, const char *field_code, off_t first_frame,
     off_t first_samp, size_t num_frames, size_t num_samp, gd_type_t data_type,
     const void *data_in)
 {
-  return putdata64(D, field_code, first_frame, first_samp, num_frames, num_samp,
-      data_type, data_in);
+  return gd_putdata64(D, field_code, first_frame, first_samp, num_frames,
+      num_samp, data_type, data_in);
 }
 /* vim: ts=2 sw=2 et
 */

@@ -22,11 +22,6 @@
 #ifndef GETDATA_DIRFILE_H
 #define GETDATA_DIRFILE_H
 
-// Enable 64-bit offsets, if not already set
-#ifndef _FILE_OFFSET_BITS
-# define _FILE_OFFSET_BITS 64
-#endif
-
 // We don't want the legacy API since its symbols clash with us.
 #define NO_GETDATA_LEGACY_API
 

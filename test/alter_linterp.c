@@ -1,6 +1,5 @@
 /* Test field modifying */
-#include "../src/getdata.h"
-
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -48,55 +47,31 @@ int main(void)
   write(fd, data_data, 256 * sizeof(int32_t));
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_VERBOSE);
-  int ret = dirfile_alter_linterp(D, "lut", NULL, "table1", 0);
-  int error = get_error(D);
-  get_entry(D, "lut", &e);
-  int error2 = get_error(D);
-  int n = getdata(D, "lut", 5, 0, 1, 0, GD_INT32, c);
+  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
+  int ret = gd_alter_linterp(D, "lut", NULL, "table1", 0);
+  int error = gd_error(D);
+  gd_get_entry(D, "lut", &e);
+  int error2 = gd_error(D);
+  int n = gd_getdata(D, "lut", 5, 0, 1, 0, GD_INT32, c);
 
-  dirfile_close(D);
+  gd_close(D);
 
   unlink(data);
   int unlink_table = unlink(table);
   unlink(table1);
-  //unlink(format);
+  unlink(format);
   rmdir(filedir);
 
   for (i = 0; i < 8; ++i)
-    if (c[i] != (i + 40) * 10) {
-        fprintf(stderr, "%i = %i\n", (i + 40) * 10, c[i]);
-        r = 1;
-      }
+    CHECKIi(i,c[i], (i + 40) * 10);
 
-  if (error) {
-    fprintf(stderr, "1=%i\n", error);
-    r = 1;
-  }
-  if (n != 8) {
-    fprintf(stderr, "2=%lli\n", (long long)n);
-    r = 1;
-  }
-  if (ret != 0) {
-    fprintf(stderr, "3=%i\n", ret);
-    r = 1;
-  }
-  if (unlink_table != 0) {
-    fprintf(stderr, "5=%i\n", unlink_table);
-    r = 1;
-  }
-  if (error2) {
-    fprintf(stderr, "6=%i\n", error2);
-    r = 1;
-  }
-  if (strcmp(e.in_fields[0], "data")) {
-    fprintf(stderr, "7=%s\n", e.in_fields[0]);
-    r = 1;
-  }
-  if (strcmp(e.table, "table1")) {
-    fprintf(stderr, "7=%s\n", e.table);
-    r = 1;
-  }
+  CHECKI(error, 0);
+  CHECKI(n, 8);
+  CHECKI(ret, 0);
+  CHECKI(unlink_table, 0);
+  CHECKI(error2, 0);
+  CHECKS(e.in_fields[0], "data");
+  CHECKS(e.table, "table1");
 
   return r;
 }

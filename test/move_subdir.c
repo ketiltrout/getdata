@@ -1,5 +1,5 @@
 /* Test move */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -20,7 +20,7 @@ int main(void)
   const char* new_data = __TEST__ "dirfile/subdir/data";
   const char* format_data = "INCLUDE subdir/format1\ndata RAW UINT8 11\n";
   const char* format1_data = "\n";
-  int fd;
+  int fd, r = 0;
   gd_entry_t E;
 
   mkdir(filedir, 0777);
@@ -38,11 +38,11 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_UNENCODED | GD_VERBOSE);
-  int ret = dirfile_move(D, "data", 1, 1);
-  int error = get_error(D);
-  int ge_ret =  get_entry(D, "data", &E);
-  dirfile_close(D);
+  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_UNENCODED | GD_VERBOSE);
+  int ret = gd_move(D, "data", 1, 1);
+  int error = gd_error(D);
+  int ge_ret =  gd_get_entry(D, "data", &E);
+  gd_close(D);
 
   int unlink_data = unlink(data);
   int unlink_new_data = unlink(new_data);
@@ -51,30 +51,12 @@ int main(void)
   rmdir(subdir);
   rmdir(filedir);
 
-  if (ret != 0) {
-    fprintf(stderr, "1=%i\n", ret);
-    return 1;
-  }
-  if (error != GD_E_OK) {
-    fprintf(stderr, "2=%i\n", error);
-    return 1;
-  }
-  if (ge_ret != 0) {
-    fprintf(stderr, "3=%i\n", ge_ret);
-    return 1;
-  }
-  if (E.fragment_index != 1) {
-    fprintf(stderr, "4=%i\n", E.fragment_index);
-    return 1;
-  }
-  if (unlink_data == 0) {
-    fprintf(stderr, "5=%i\n", unlink_data);
-    return 1;
-  }
-  if (unlink_new_data != 0) {
-    fprintf(stderr, "6=%i\n", unlink_new_data);
-    return 1;
-  }
+  CHECKI(ret, 0);
+  CHECKI(error, GD_E_OK);
+  CHECKI(ge_ret, 0);
+  CHECKI(E.fragment_index, 1);
+  CHECKI(unlink_data, -1);
+  CHECKI(unlink_new_data, 0);
 
-  return 0;
+  return r;
 }

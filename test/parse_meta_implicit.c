@@ -1,5 +1,5 @@
 /* Parser check */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -26,17 +26,16 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY | GD_VERBOSE);
-  if (get_error(D))
-    r = 1;
+  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  int error = gd_error(D);
+  CHECKI(error,0);
 
-  get_constant(D, "parent/child", GD_INT8, &c);
-  if (get_error(D))
-    r = 1;
-  if (c != 1)
-    r = 1;
+  gd_get_constant(D, "parent/child", GD_INT8, &c);
+  int error2 = gd_error(D);
+  CHECKI(error2,0);
+  CHECKI(c,1);
 
-  dirfile_close(D);
+  gd_close(D);
 
   unlink(format);
   rmdir(filedir);
