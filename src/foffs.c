@@ -102,8 +102,7 @@ static void _GD_ShiftFragment(DIRFILE* D, off64_t offset, int fragment,
   dreturnvoid();
 }
 
-int dirfile_alter_frameoffset64(DIRFILE* D, off64_t offset, int fragment,
-    int move)
+int gd_alter_frameoffset64(DIRFILE* D, off64_t offset, int fragment, int move)
 {
   int i;
 
@@ -149,7 +148,7 @@ int dirfile_alter_frameoffset64(DIRFILE* D, off64_t offset, int fragment,
   return (D->error) ? -1 : 0;
 }
 
-off64_t get_frameoffset64(DIRFILE* D, int fragment)
+off64_t gd_get_frameoffset64(DIRFILE* D, int fragment)
 {
   dtrace("%p, %i", D, fragment);
 
@@ -172,12 +171,12 @@ off64_t get_frameoffset64(DIRFILE* D, int fragment)
 }
 
 /* 32(ish)-bit wrappers for the 64-bit versions, when needed */
-int dirfile_alter_frameoffset(DIRFILE* D, off_t offset, int fragment, int move)
+int gd_alter_frameoffset(DIRFILE* D, off_t offset, int fragment, int move)
 {
-  return dirfile_alter_frameoffset64(D, offset, fragment, move);
+  return gd_alter_frameoffset64(D, offset, fragment, move);
 }
 
-off_t get_frameoffset(DIRFILE* D, int fragment)
+off_t gd_get_frameoffset(DIRFILE* D, int fragment)
 {
-  return get_frameoffset64(D, fragment);
+  return gd_get_frameoffset64(D, fragment);
 }

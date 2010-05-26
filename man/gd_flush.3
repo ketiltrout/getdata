@@ -1,0 +1,75 @@
+.\" gd_flush.3.  The gd_flush man page.
+.\"
+.\" (C) 2008, 2009, 2010 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_flush 3 "25 May 2010" "Version 0.7.0" "GETDATA"
+.SH NAME
+gd_flush \(em write all pending dirfile changes to disk.
+.SH SYNOPSIS
+.B #include <getdata.h>
+.HP
+.nh
+.ad l
+.BI "int gd_flush(DIRFILE *" dirfile ", const char *" field_code );
+.hy
+.ad n
+.SH DESCRIPTION
+The
+.BR gd_flush ()
+function flushes and closes all file handles associated with
+.IR field_code ,
+or its input(s), in the dirfile specified by
+.IR dirfile .
+If the
+.I field_code
+contains a valid representation suffix, it will be ignored.  As a special case,
+if
+.I field_code
+is NULL, all fields in
+.I dirfile
+will be flushed and closed.  In this special case, modified metadata will
+also be flushed to disk as if
+.BR gd_metaflush (3)
+had been called.
+.SH RETURN VALUE
+On success, zero is returned.  On error, -1 is returned and the dirfile error is
+set to a non-zero error value.  Possible error values are:
+.TP 8
+.B GD_E_BAD_CODE
+The field specified by
+.I field_code
+was not found in the database.
+.TP
+.B GD_E_BAD_DIRFILE
+The supplied dirfile was invalid.
+.TP
+.B GD_E_BAD_REPR
+The representation suffix specified in
+.I field_code
+was not recognised.
+.TP
+.B GD_E_RAW_IO
+An error occurred while trying to flush or close the field(s).
+.P
+The dirfile error may be retrieved by calling
+.BR gd_error (3).
+A descriptive error string for the last error encountered can be obtained from
+a call to
+.BR gd_error_string (3).
+.SH SEE ALSO
+.BR gd_open (3),
+.BR gd_close (3),
+.BR gd_error (3),
+.BR gd_error_string (3),
+.BR gd_metaflush (3)

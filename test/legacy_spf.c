@@ -1,6 +1,6 @@
 /* Retreiving the samples-per-frame of a field via the legacy API should
  * succeed cleanly */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -18,7 +18,7 @@ int main(void)
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
   const char* format_data = "data RAW UINT8 11\n";
-  int fd;
+  int fd, r = 0;
 
   mkdir(filedir, 0777);
 
@@ -32,6 +32,7 @@ int main(void)
   unlink(format);
   rmdir(filedir);
 
-  return (spf != 11);
+  CHECKU(spf, 11);
+  return r;
 #endif
 }

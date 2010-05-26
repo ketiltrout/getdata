@@ -1,5 +1,5 @@
 /* Retreiving the samples-per-frame of a field should succeed cleanly */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -14,7 +14,7 @@ int main(void)
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
   const char* format_data = "data RAW UINT8 11\n";
-  int fd;
+  int fd, r = 0;
 
   mkdir(filedir, 0777);
 
@@ -22,16 +22,15 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY | GD_VERBOSE);
-  unsigned int spf = get_spf(D, "data");
-  int error = get_error(D);
-  dirfile_close(D);
+  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  unsigned int spf = gd_get_spf(D, "data");
+  int error = gd_error(D);
+  gd_close(D);
 
   unlink(format);
   rmdir(filedir);
 
-  if (error)
-    return 1;
-
-  return (spf != 11);
+  CHECKI(error,0);
+  CHECKI(spf,11);
+  return r;
 }

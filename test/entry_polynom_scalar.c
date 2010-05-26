@@ -1,5 +1,5 @@
 /* Try to read LINCOM entry */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -30,100 +30,30 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY | GD_VERBOSE);
+  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
   gd_entry_t E;
 
-  int n = get_entry(D, "data", &E);
-  int error = get_error(D);
+  int n = gd_get_entry(D, "data", &E);
+  int error = gd_error(D);
 
-  dirfile_close(D);
+  gd_close(D);
   unlink(format);
   rmdir(filedir);
 
-  if (error != GD_E_OK) {
-    fprintf(stderr, "error = %i\n", error);
-    r = 1;
-  }
-
-  if (n) {
-    fprintf(stderr, "n = %i\n", n);
-    r = 1;
-  }
-
-  if (strcmp(E.field, "data")) {
-    fprintf(stderr, "E.field = %s\n", E.field);
-    r = 1;
-  }
-
-  if (E.field_type != GD_POLYNOM_ENTRY) {
-    fprintf(stderr, "E.field_type = %i\n", E.field_type);
-    r = 1;
-  }
-
-  if (E.poly_ord != 4) {
-    fprintf(stderr, "E.poly_ord = %i\n", E.poly_ord);
-    r = 1;
-  }
-
-  if (strcmp(E.in_fields[0], "in")) {
-    fprintf(stderr, "E.in_fields[0] = %s\n", E.in_fields[0]);
-    r = 1;
-  }
-
-  if (strcmp(E.scalar[0], "a0")) {
-    fprintf(stderr, "E.scalar[0] = %s\n", E.scalar[0]);
-    r = 1;
-  }
-
-  if (strcmp(E.scalar[1], "a1")) {
-    fprintf(stderr, "E.scalar[1] = %s\n", E.scalar[1]);
-    r = 1;
-  }
-
-  if (strcmp(E.scalar[2], "a2")) {
-    fprintf(stderr, "E.scalar[2] = %s\n", E.scalar[2]);
-    r = 1;
-  }
-
-  if (strcmp(E.scalar[3], "a3")) {
-    fprintf(stderr, "E.scalar[3] = %s\n", E.scalar[3]);
-    r = 1;
-  }
-
-  if (strcmp(E.scalar[4], "a4")) {
-    fprintf(stderr, "E.scalar[4] = %s\n", E.scalar[4]);
-    r = 1;
-  }
-
-  if (E.scalar[5] != NULL) {
-    fprintf(stderr, "E.scalar[5] = %p\n", E.scalar[5]);
-    r = 1;
-  }
-
-  if (fabs(E.a[0] - 1.) > 1e-10) {
-    fprintf(stderr, "E.a[0] = %g\n", E.a[0]);
-    r = 1;
-  }
-
-  if (fabs(E.a[1] - 2.) > 1e-10) {
-    fprintf(stderr, "E.a[1] = %g\n", E.a[1]);
-    r = 1;
-  }
-
-  if (fabs(E.a[2] - 3.) > 1e-10) {
-    fprintf(stderr, "E.a[2] = %g\n", E.a[2]);
-    r = 1;
-  }
-
-  if (fabs(E.a[3] - 4.) > 1e-10) {
-    fprintf(stderr, "E.a[3] = %g\n", E.a[3]);
-    r = 1;
-  }
-
-  if (fabs(E.a[4] - 5.) > 1e-10) {
-    fprintf(stderr, "E.a[4] = %g\n", E.a[4]);
-    r = 1;
-  }
+  CHECKI(error, GD_E_OK);
+  CHECKI(n, 0);
+  CHECKS(E.field, "data");
+  CHECKX(E.field_type, GD_POLYNOM_ENTRY);
+  CHECKI(E.comp_scal, 0);
+  CHECKI(E.poly_ord, 4);
+  CHECKS(E.in_fields[0], "in");
+  CHECKS(E.scalar[0], "a0");
+  CHECKS(E.scalar[1], "a1");
+  CHECKS(E.scalar[2], "a2");
+  CHECKS(E.scalar[3], "a3");
+  CHECKS(E.scalar[4], "a4");
+  for (fd = 0; fd < 4; ++fd)
+    CHECKFi(fd,E.a[fd], fd + 1.);
 
   return r;
 }

@@ -1,8 +1,8 @@
 ! General test
 !
 ! This very large test checks almost every procedure defined by the F95
-! bindings.  Procedures not tested include: fdirfile_copen fdirfile_metaflush
-! fdirfile_flush fdirfile_discard fdirfile_callback fdirfile_close
+! bindings.  Procedures not tested include: fgd_copen fgd_metaflush
+! fgd_flush fgd_discard fgd_callback fgd_close
 ! (although this last one is used)
 
 program big_test
@@ -72,9 +72,9 @@ program big_test
   write(1, rec=1) datadata
   close(1, status='keep')
 
-! fget_error check
-  d = fdirfile_open('x', GD_RDONLY)
-  e = fget_error(d)
+! fgd_error check
+  d = fgd_open('x', GD_RDONLY)
+  e = fgd_error(d)
 
   ne = 0
   if (e .ne. GD_E_OPEN) then
@@ -82,18 +82,18 @@ program big_test
     write(*, 2001), 0, e
   end if
 
-! 1: fdirfile_open check
-  d = fdirfile_open(fildir, GD_RDWR)
-  e = fget_error(d)
+! 1: fgd_open check
+  d = fgd_open(fildir, GD_RDWR)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
     write(*, 2001) 1, e
   end if
 
-! 2: fgetdata_i1 check
-  n = fgetdata_i1(d, 'data', 5, 0, 1, 0, ci1)
-  e = fget_error(d)
+! 2: fgd_getdata_i1 check
+  n = fgd_getdata_i1(d, 'data', 5, 0, 1, 0, ci1)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -112,9 +112,9 @@ program big_test
   end if
   end do 
 
-! 102: fgetdata_i2 check
-  n = fgetdata_i2(d, 'data', 5, 0, 1, 0, ci2)
-  e = fget_error(d)
+! 102: fgd_getdata_i2 check
+  n = fgd_getdata_i2(d, 'data', 5, 0, 1, 0, ci2)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -133,9 +133,9 @@ program big_test
   end if
   end do 
 
-! 103: fgetdata_i4 check
-  n = fgetdata_i4(d, 'data', 5, 0, 1, 0, ci4)
-  e = fget_error(d)
+! 103: fgd_getdata_i4 check
+  n = fgd_getdata_i4(d, 'data', 5, 0, 1, 0, ci4)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -154,9 +154,9 @@ program big_test
   end if
   end do 
 
-! 104: fgetdata_i8 check
-  n = fgetdata_i8(d, 'data', 5, 0, 1, 0, ci8)
-  e = fget_error(d)
+! 104: fgd_getdata_i8 check
+  n = fgd_getdata_i8(d, 'data', 5, 0, 1, 0, ci8)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -175,9 +175,9 @@ program big_test
   end if
   end do 
 
-! 105: fgetdata_r4 check
-  n = fgetdata_r4(d, 'data', 5, 0, 1, 0, cr4)
-  e = fget_error(d)
+! 105: fgd_getdata_r4 check
+  n = fgd_getdata_r4(d, 'data', 5, 0, 1, 0, cr4)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -196,9 +196,9 @@ program big_test
   end if
   end do 
 
-! 106: fgetdata_r8 check
-  n = fgetdata_r8(d, 'data', 5, 0, 1, 0, cr8)
-  e = fget_error(d)
+! 106: fgd_getdata_r8 check
+  n = fgd_getdata_r8(d, 'data', 5, 0, 1, 0, cr8)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -217,9 +217,9 @@ program big_test
   end if
   end do 
 
-! 107: fgetdata_c8 check
-  n = fgetdata_c8(d, 'data', 5, 0, 1, 0, cc8)
-  e = fget_error(d)
+! 107: fgd_getdata_c8 check
+  n = fgd_getdata_c8(d, 'data', 5, 0, 1, 0, cc8)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -238,9 +238,9 @@ program big_test
   end if
   end do 
 
-! 108: fgetdata_c16 check
-  n = fgetdata_c16(d, 'data', 5, 0, 1, 0, cc16)
-  e = fget_error(d)
+! 108: fgd_getdata_c16 check
+  n = fgd_getdata_c16(d, 'data', 5, 0, 1, 0, cc16)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -259,9 +259,9 @@ program big_test
   end if
   end do 
 
-! 109: fgetdata_n check
-  n = fgetdata_n(d, 'data', 5, 0, 1, 0)
-  e = fget_error(d)
+! 109: fgd_getdata_n check
+  n = fgd_getdata_n(d, 'data', 5, 0, 1, 0)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -273,9 +273,9 @@ program big_test
     write(*, 2002) 109, n
   end if
 
-! 3: fget_constant_i1 check
-  n = fget_constant_i1(d, 'const', ci1(1))
-  e = fget_error(d)
+! 3: fgd_get_constant_i1 check
+  n = fgd_get_constant_i1(d, 'const', ci1(1))
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -292,9 +292,9 @@ program big_test
     write(*, 2002) 3, ci1(1)
   end if
 
-! 110: fget_constant_i2 check
-  n = fget_constant_i2(d, 'const', ci2(1))
-  e = fget_error(d)
+! 110: fgd_get_constant_i2 check
+  n = fgd_get_constant_i2(d, 'const', ci2(1))
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -311,9 +311,9 @@ program big_test
     write(*, 2002) 110, ci2(1)
   end if
 
-! 111: fget_constant_i4 check
-  n = fget_constant_i4(d, 'const', ci4(1))
-  e = fget_error(d)
+! 111: fgd_get_constant_i4 check
+  n = fgd_get_constant_i4(d, 'const', ci4(1))
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -330,9 +330,9 @@ program big_test
     write(*, 2002) 111, ci4(1)
   end if
 
-! 112: fget_constant_i8 check
-  n = fget_constant_i8(d, 'const', ci8(1))
-  e = fget_error(d)
+! 112: fgd_get_constant_i8 check
+  n = fgd_get_constant_i8(d, 'const', ci8(1))
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -349,9 +349,9 @@ program big_test
     write(*, 2002) 112, ci8(1)
   end if
 
-! 113: fget_constant_r4 check
-  n = fget_constant_r4(d, 'const', cr4(1))
-  e = fget_error(d)
+! 113: fgd_get_constant_r4 check
+  n = fgd_get_constant_r4(d, 'const', cr4(1))
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -368,9 +368,9 @@ program big_test
     write(*, 2005) 113, cr4(1)
   end if
 
-! 114: fget_constant_r8 check
-  n = fget_constant_r8(d, 'const', cr8(1))
-  e = fget_error(d)
+! 114: fgd_get_constant_r8 check
+  n = fgd_get_constant_r8(d, 'const', cr8(1))
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -387,9 +387,9 @@ program big_test
     write(*, 2012) 114, cr8(1)
   end if
 
-! 115: fget_constant_c8 check
-  n = fget_constant_c8(d, 'const', cc8(1))
-  e = fget_error(d)
+! 115: fgd_get_constant_c8 check
+  n = fgd_get_constant_c8(d, 'const', cc8(1))
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -406,9 +406,9 @@ program big_test
     write(*, 2013) 115, real(real(cc8(i))), real(aimag(cc8(i)))
   end if
 
-! 116: fget_constant_c16 check
-  n = fget_constant_c16(d, 'const', cc16(1))
-  e = fget_error(d)
+! 116: fgd_get_constant_c16 check
+  n = fgd_get_constant_c16(d, 'const', cc16(1))
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -425,9 +425,9 @@ program big_test
     write(*, 2013) 116, real(real(cc16(i))), real(aimag(cc16(i)))
   end if
 
-! 117: fget_constant_n check
-  n = fget_constant_n(d, 'const')
-  e = fget_error(d)
+! 117: fgd_get_constant_n check
+  n = fgd_get_constant_n(d, 'const')
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -439,9 +439,9 @@ program big_test
     write(*, 2002) 117, n
   end if
 
-! 4: fget_field_name_max check
-  i = fget_field_name_max(d)
-  e = fget_error(d)
+! 4: fgd_get_field_name_max check
+  i = fgd_get_field_name_max(d)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -453,9 +453,9 @@ program big_test
     write(*, 2002) 4, i
   end if
 
-! 5: fget_mfield_name_max check
-  i = fget_mfield_name_max(d, 'data')
-  e = fget_error(d)
+! 5: fgd_get_mfield_name_max check
+  i = fgd_get_mfield_name_max(d, 'data')
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -467,9 +467,9 @@ program big_test
     write(*, 2002) 5, i
   end if
 
-! 6: fget_nfields check
-  n = fget_nfields(d)
-  e = fget_error(d)
+! 6: fgd_get_nfields check
+  n = fgd_get_nfields(d)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -481,10 +481,10 @@ program big_test
     write(*, 2002) 6, n
   end if
 
-! 8: fget_field_list check
+! 8: fgd_get_field_list check
   l = flen
-  call fget_field_list(flist, d, l)
-  e = fget_error(d)
+  call fgd_get_field_list(flist, d, l)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -503,9 +503,9 @@ program big_test
   end if
   end do
 
-! 9: fget_nmfields check
-  n = fget_nmfields(d, 'data')
-  e = fget_error(d)
+! 9: fgd_get_nmfields check
+  n = fgd_get_nmfields(d, 'data')
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -517,14 +517,14 @@ program big_test
     write(*, 2002) 9, n
   end if
 
-! 10: fget_mfield_list check
+! 10: fgd_get_mfield_list check
   fields(1) = 'mstr'
   fields(2) = 'mconst'
   fields(3) = 'mlut'
 
   l = flen
-  call fget_mfield_list(flist, d, 'data', l)
-  e = fget_error(d)
+  call fgd_get_mfield_list(flist, d, 'data', l)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -543,9 +543,9 @@ program big_test
   end if
   end do
 
-! 11: fget_nframes check
-  n = fget_nframes(d)
-  e = fget_error(d)
+! 11: fgd_get_nframes check
+  n = fgd_get_nframes(d)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -557,9 +557,9 @@ program big_test
     write(*, 2002) 11, n
   end if
 
-! 12: fget_spf check
-  n = fget_spf(d, 'data')
-  e = fget_error(d)
+! 12: fgd_get_spf check
+  n = fgd_get_spf(d, 'data')
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -571,10 +571,10 @@ program big_test
     write(*, 2002) 12, n
   end if
 
-! 13: fputdata_i1 check
+! 13: fgd_putdata_i1 check
   ci1 = (/ 13, 14, 15, 16, 17, 18, 19, 20 /)
-  n = fputdata_i1(d, 'data', 5, 1, 0, 4, ci1)
-  e = fget_error(d)
+  n = fgd_putdata_i1(d, 'data', 5, 1, 0, 4, ci1)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -586,7 +586,7 @@ program big_test
     write(*, 2002) 13, n
   end if
 
-  n = fgetdata_i1(d, 'data', 5, 0, 1, 0, ci1)
+  n = fgd_getdata_i1(d, 'data', 5, 0, 1, 0, ci1)
 
   DO i = 1, 8
   if (((i .EQ. 1 .OR. i .GT. 5) .AND. ci1(i) .ne. 40 + i) .OR. &
@@ -596,10 +596,10 @@ program big_test
   end if
   end do
 
-! 118: fputdata_i2 check
+! 118: fgd_putdata_i2 check
   ci2 = (/ 23, 24, 25, 26, 27, 28, 29, 30 /)
-  n = fputdata_i2(d, 'data', 5, 1, 0, 4, ci2)
-  e = fget_error(d)
+  n = fgd_putdata_i2(d, 'data', 5, 1, 0, 4, ci2)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -611,7 +611,7 @@ program big_test
     write(*, 2002) 118, n
   end if
 
-  n = fgetdata_i2(d, 'data', 5, 0, 1, 0, ci2)
+  n = fgd_getdata_i2(d, 'data', 5, 0, 1, 0, ci2)
 
   DO i = 1, 8
   if (((i .EQ. 1 .OR. i .GT. 5) .AND. ci2(i) .ne. 40 + i) .OR. &
@@ -621,10 +621,10 @@ program big_test
   end if
   end do
 
-! 119: fputdata_i4 check
+! 119: fgd_putdata_i4 check
   ci4 = (/ 33, 34, 35, 36, 37, 38, 39, 40 /)
-  n = fputdata_i4(d, 'data', 5, 1, 0, 4, ci4)
-  e = fget_error(d)
+  n = fgd_putdata_i4(d, 'data', 5, 1, 0, 4, ci4)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -636,7 +636,7 @@ program big_test
     write(*, 2002) 119, n
   end if
 
-  n = fgetdata_i4(d, 'data', 5, 0, 1, 0, ci4)
+  n = fgd_getdata_i4(d, 'data', 5, 0, 1, 0, ci4)
 
   DO i = 1, 8
   if (((i .EQ. 1 .OR. i .GT. 5) .AND. ci4(i) .ne. 40 + i) .OR. &
@@ -646,10 +646,10 @@ program big_test
   end if
   end do
 
-! 120: fputdata_i8 check
+! 120: fgd_putdata_i8 check
   ci8 = (/ 43, 44, 45, 46, 47, 48, 49, 50 /)
-  n = fputdata_i8(d, 'data', 5, 1, 0, 4, ci8)
-  e = fget_error(d)
+  n = fgd_putdata_i8(d, 'data', 5, 1, 0, 4, ci8)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -661,7 +661,7 @@ program big_test
     write(*, 2002) 120, n
   end if
 
-  n = fgetdata_i8(d, 'data', 5, 0, 1, 0, ci8)
+  n = fgd_getdata_i8(d, 'data', 5, 0, 1, 0, ci8)
 
   DO i = 1, 8
   if (((i .EQ. 1 .OR. i .GT. 5) .AND. ci8(i) .ne. 40 + i) .OR. &
@@ -671,10 +671,10 @@ program big_test
   end if
   end do
 
-! 121: fputdata_r4 check
+! 121: fgd_putdata_r4 check
   cr4 = (/ 33, 34, 35, 36, 37, 38, 39, 40 /)
-  n = fputdata_r4(d, 'data', 5, 1, 0, 4, cr4)
-  e = fget_error(d)
+  n = fgd_putdata_r4(d, 'data', 5, 1, 0, 4, cr4)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -686,7 +686,7 @@ program big_test
     write(*, 2002) 121, n
   end if
 
-  n = fgetdata_r4(d, 'data', 5, 0, 1, 0, cr4)
+  n = fgd_getdata_r4(d, 'data', 5, 0, 1, 0, cr4)
 
   DO i = 1, 8
   if (((i .EQ. 1 .OR. i .GT. 5) .AND. abs(cr4(i) - 40 - i) .gt. 1e-5) .OR. &
@@ -696,10 +696,10 @@ program big_test
   end if
   end do
 
-! 122: fputdata_r8 check
+! 122: fgd_putdata_r8 check
   cr8 = (/ 43, 44, 45, 46, 47, 48, 49, 50 /)
-  n = fputdata_r8(d, 'data', 5, 1, 0, 4, cr8)
-  e = fget_error(d)
+  n = fgd_putdata_r8(d, 'data', 5, 1, 0, 4, cr8)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -711,7 +711,7 @@ program big_test
     write(*, 2002) 122, n
   end if
 
-  n = fgetdata_r8(d, 'data', 5, 0, 1, 0, cr8)
+  n = fgd_getdata_r8(d, 'data', 5, 0, 1, 0, cr8)
 
   DO i = 1, 8
   if (((i .EQ. 1 .OR. i .GT. 5) .AND. abs(cr8(i) - 40 - i) .gt. 1e-5) .OR. &
@@ -721,10 +721,10 @@ program big_test
   end if
   end do
 
-! 123: fputdata_c8 check
+! 123: fgd_putdata_c8 check
   cc8 = (/ 53, 54, 55, 56, 57, 58, 59, 60 /)
-  n = fputdata_c8(d, 'data', 5, 1, 0, 4, cc8)
-  e = fget_error(d)
+  n = fgd_putdata_c8(d, 'data', 5, 1, 0, 4, cc8)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -736,7 +736,7 @@ program big_test
     write(*, 2002) 123, n
   end if
 
-  n = fgetdata_c8(d, 'data', 5, 0, 1, 0, cc8)
+  n = fgd_getdata_c8(d, 'data', 5, 0, 1, 0, cc8)
 
   DO i = 1, 8
   if (((i .EQ. 1 .OR. i .GT. 5) .AND. abs(cc8(i) - 40 - i) .gt. 1e-5) .OR. &
@@ -746,10 +746,10 @@ program big_test
   end if
   end do
 
-! 124: fputdata_c16 check
+! 124: fgd_putdata_c16 check
   cc16 = (/ 63, 64, 65, 66, 67, 68, 69, 70 /)
-  n = fputdata_c16(d, 'data', 5, 1, 0, 4, cc16)
-  e = fget_error(d)
+  n = fgd_putdata_c16(d, 'data', 5, 1, 0, 4, cc16)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -761,7 +761,7 @@ program big_test
     write(*, 2002) 124, n
   end if
 
-  n = fgetdata_c16(d, 'data', 5, 0, 1, 0, cc16)
+  n = fgd_getdata_c16(d, 'data', 5, 0, 1, 0, cc16)
 
   DO i = 1, 8
   if (((i .EQ. 1 .OR. i .GT. 5) .AND. abs(cc16(i) - 40 - i) .gt. 1e-5) .OR. &
@@ -771,18 +771,18 @@ program big_test
   end if
   end do
 
-! 14: fget_error_string check
-  n = fgetdata_n(d, 'x', 5, 0, 1, 0)
-  call fget_error_string(d, str, GD_FIELD_LEN)
+! 14: fgd_error_string check
+  n = fgd_getdata_n(d, 'x', 5, 0, 1, 0)
+  call fgd_error_string(d, str, GD_FIELD_LEN)
 
   if (str .ne. 'Field not found: x') then
     ne = ne + 1
     write(*, 2009) 14, str
   end if
 
-! 15: fget_entry_type check
-  n = fget_entry_type(d, 'data')
-  e = fget_error(d)
+! 15: fgd_get_entry_type check
+  n = fgd_get_entry_type(d, 'data')
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -794,9 +794,9 @@ program big_test
     write(*, 2002) 15, n
   end if
 
-! 16: fget_entry (raw) check
-  n = fget_entry(d, 'data', ent)
-  e = fget_error(d)
+! 16: fgd_get_entry (raw) check
+  n = fgd_get_entry(d, 'data', ent)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -823,9 +823,9 @@ program big_test
     write(*, 2007) 16, 4, ent%data_type
   end if
 
-! 18: fget_entry (lincom) check
-  n = fget_entry(d, 'lincom', ent)
-  e = fget_error(d)
+! 18: fgd_get_entry (lincom) check
+  n = fgd_get_entry(d, 'lincom', ent)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -894,9 +894,9 @@ program big_test
   end if
   end do
 
-! 20: fget_entry (polynom) check
-  n = fget_entry(d, 'polynom', ent)
-  e = fget_error(d)
+! 20: fgd_get_entry (polynom) check
+  n = fgd_get_entry(d, 'polynom', ent)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -936,9 +936,9 @@ program big_test
   end if
   end do
 
-! 21: fget_entry (linterp) check
-  n = fget_entry(d, 'linterp', ent)
-  e = fget_error(d)
+! 21: fgd_get_entry (linterp) check
+  n = fgd_get_entry(d, 'linterp', ent)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -965,9 +965,9 @@ program big_test
     write(*, 2008) 21, 4, ent%field(2)
   end if
 
-! 22: fget_entry (bit) check
-  n = fget_entry(d, 'bit', ent)
-  e = fget_error(d)
+! 22: fgd_get_entry (bit) check
+  n = fgd_get_entry(d, 'bit', ent)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -999,9 +999,9 @@ program big_test
     write(*, 2008) 22, 5, ent%field(1)
   end if
 
-! 23: fget_entry (Sbit) check
-  n = fget_entry(d, 'sbit', ent)
-  e = fget_error(d)
+! 23: fgd_get_entry (Sbit) check
+  n = fgd_get_entry(d, 'sbit', ent)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -1033,9 +1033,9 @@ program big_test
     write(*, 2008) 23, 5, ent%field(1)
   end if
 
-! 24: fget_entry (multiply) check
-  n = fget_entry(d, 'mult', ent)
-  e = fget_error(d)
+! 24: fgd_get_entry (multiply) check
+  n = fgd_get_entry(d, 'mult', ent)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -1062,9 +1062,9 @@ program big_test
     write(*, 2008) 24, 4, ent%field(2)
   end if
 
-! 25: fget_entry (phase) check
-  n = fget_entry(d, 'phase', ent)
-  e = fget_error(d)
+! 25: fgd_get_entry (phase) check
+  n = fgd_get_entry(d, 'phase', ent)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -1091,9 +1091,9 @@ program big_test
     write(*, 2008) 25, 4, ent%field(1)
   end if
 
-! 26: fget_entry (const) check
-  n = fget_entry(d, 'const', ent)
-  e = fget_error(d)
+! 26: fgd_get_entry (const) check
+  n = fgd_get_entry(d, 'const', ent)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -1115,9 +1115,9 @@ program big_test
     write(*, 2007) 26, 3, ent%data_type
   end if
 
-! 27: fget_fragment_index check
-  n = fget_fragment_index(d, 'const')
-  e = fget_error(d)
+! 27: fgd_get_fragment_index check
+  n = fgd_get_fragment_index(d, 'const')
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -1129,17 +1129,17 @@ program big_test
     write(*, 2002) 27, n
   end if
 
-! 28: fdirfile_add_raw check
-  call fdirfile_add_raw(d, 'new1', GD_FLOAT64, 3, 0)
-  e = fget_error(d)
+! 28: fgd_add_raw check
+  call fgd_add_raw(d, 'new1', GD_FLOAT64, 3, 0)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
     write(*, 2006) 28, 1, e
   end if
 
-  n = fget_entry(d, 'new1', ent)
-  e = fget_error(d)
+  n = fgd_get_entry(d, 'new1', ent)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -1166,18 +1166,18 @@ program big_test
     write(*, 2007) 28, 6, n
   end if
 
-! 29: fdirfile_add_lincom check
-  call fdirfile_add_lincom(d, 'new2', 2, 'in1', 9.9d0, 8.8d0, &
+! 29: fgd_add_lincom check
+  call fgd_add_lincom(d, 'new2', 2, 'in1', 9.9d0, 8.8d0, &
   'in2', 7.7d0, 6.6d0, '', 0d0, 0d0, 0)
-  e = fget_error(d)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
     write(*, 2006) 29, 1, e
   end if
 
-  n = fget_entry(d, 'new2', ent)
-  e = fget_error(d)
+  n = fgd_get_entry(d, 'new2', ent)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -1226,22 +1226,22 @@ program big_test
   end if
   end do
 
-! 30: fdirfile_add_clincom check
+! 30: fgd_add_clincom check
   cq(1) = dcmplx(1.1, 1.2)
   cq(2) = dcmplx(1.3, 1.4)
   cq(3) = dcmplx(1.4, 1.5)
   cq(4) = dcmplx(1.6, 1.7)
-  call fdirfile_add_clincom(d, 'new3', 2, 'in1', cq(1), cq(2), &
+  call fgd_add_clincom(d, 'new3', 2, 'in1', cq(1), cq(2), &
   'in2', cq(3), cq(4), '', cq(5), cq(6), 0)
-  e = fget_error(d)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
     write(*, 2006) 30, 1, e
   end if
 
-  n = fget_entry(d, 'new3', ent)
-  e = fget_error(d)
+  n = fgd_get_entry(d, 'new3', ent)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -1293,18 +1293,18 @@ program big_test
   end if
   end do
 
-! 31: fdirfile_add_polynom check
-  call fdirfile_add_polynom(d, 'new4', 3, 'in1', 3d3, 4d4, 5d5, 6d6, 0d0, 0d0, &
+! 31: fgd_add_polynom check
+  call fgd_add_polynom(d, 'new4', 3, 'in1', 3d3, 4d4, 5d5, 6d6, 0d0, 0d0, &
   0)
-  e = fget_error(d)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
     write(*, 2006) 31, 1, e
   end if
 
-  n = fget_entry(d, 'new4', ent)
-  e = fget_error(d)
+  n = fgd_get_entry(d, 'new4', ent)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -1344,22 +1344,22 @@ program big_test
   end if
   end do
 
-! 32: fdirfile_add_cpolynom check
+! 32: fgd_add_cpolynom check
   cq(1) = dcmplx(3.1, 7.0)
   cq(2) = dcmplx(4.2, 8.0)
   cq(3) = dcmplx(5.2, 9.0)
   cq(4) = dcmplx(6.3, 4.4)
-  call fdirfile_add_cpolynom(d, 'new5', 3, 'in1', cq(1), cq(2), cq(3), cq(4), &
+  call fgd_add_cpolynom(d, 'new5', 3, 'in1', cq(1), cq(2), cq(3), cq(4), &
   dcmplx(0d0,0d0), dcmplx(0d0,0d0), 0)
-  e = fget_error(d)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
     write(*, 2006) 32, 1, e
   end if
 
-  n = fget_entry(d, 'new5', ent)
-  e = fget_error(d)
+  n = fgd_get_entry(d, 'new5', ent)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -1402,17 +1402,17 @@ program big_test
   end if
   end do
 
-! 33: fdirfile_add_linterp check
-  call fdirfile_add_linterp(d, "new6", "in", "./some/table", 0)
-  e = fget_error(d)
+! 33: fgd_add_linterp check
+  call fgd_add_linterp(d, "new6", "in", "./some/table", 0)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
     write(*, 2006) 33, 1, e
   end if
 
-  n = fget_entry(d, 'new6', ent)
-  e = fget_error(d)
+  n = fgd_get_entry(d, 'new6', ent)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -1439,17 +1439,17 @@ program big_test
     write(*, 2008) 33, 4, ent%field(2)
   end if
 
-! 34: fdirfile_add_bit check
-  call fdirfile_add_bit(d, "new7", "in", 13, 12, 0)
-  e = fget_error(d)
+! 34: fgd_add_bit check
+  call fgd_add_bit(d, "new7", "in", 13, 12, 0)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
     write(*, 2006) 34, 1, e
   end if
 
-  n = fget_entry(d, 'new7', ent)
-  e = fget_error(d)
+  n = fgd_get_entry(d, 'new7', ent)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -1481,17 +1481,17 @@ program big_test
     write(*, 2008) 34, 5, ent%field(1)
   end if
 
-! 35: fdirfile_add_sbit check
-  call fdirfile_add_sbit(d, "new8", "in", 13, 12, 0)
-  e = fget_error(d)
+! 35: fgd_add_sbit check
+  call fgd_add_sbit(d, "new8", "in", 13, 12, 0)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
     write(*, 2006) 35, 1, e
   end if
 
-  n = fget_entry(d, "new8", ent)
-  e = fget_error(d)
+  n = fgd_get_entry(d, "new8", ent)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -1523,17 +1523,17 @@ program big_test
     write(*, 2008) 35, 5, ent%field(1)
   end if
 
-! 36: fdirfile_add_multiply check
-  call fdirfile_add_multiply(d, 'new9', 'in1', 'in2', 0)
-  e = fget_error(d)
+! 36: fgd_add_multiply check
+  call fgd_add_multiply(d, 'new9', 'in1', 'in2', 0)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
     write(*, 2006) 36, 1, e
   end if
 
-  n = fget_entry(d, 'new9', ent)
-  e = fget_error(d)
+  n = fgd_get_entry(d, 'new9', ent)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -1560,17 +1560,17 @@ program big_test
     write(*, 2008) 36, 4, ent%field(2)
   end if
 
-! 37: fdirfile_add_phase check
-  call fdirfile_add_phase(d, 'new10', 'in1', 22, 0)
-  e = fget_error(d)
+! 37: fgd_add_phase check
+  call fgd_add_phase(d, 'new10', 'in1', 22, 0)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
     write(*, 2006) 37, 1, e
   end if
 
-  n = fget_entry(d, 'new10', ent)
-  e = fget_error(d)
+  n = fgd_get_entry(d, 'new10', ent)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -1597,17 +1597,17 @@ program big_test
     write(*, 2008) 37, 4, ent%field(1)
   end if
 
-! 38: fdirfile_add_const check
-  call fdirfile_add_const(d, 'new11', GD_FLOAT64, 0)
-  e = fget_error(d)
+! 38: fgd_add_const check
+  call fgd_add_const(d, 'new11', GD_FLOAT64, 0)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
     write(*, 2006) 38, 1, e
   end if
 
-  n = fget_entry(d, 'new11', ent)
-  e = fget_error(d)
+  n = fgd_get_entry(d, 'new11', ent)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -1629,8 +1629,8 @@ program big_test
     write(*, 2007) 38, 3, ent%data_type
   end if
 
-  n = fget_constant_r4(d, 'new11', fl)
-  e = fget_error(d)
+  n = fgd_get_constant_r4(d, 'new11', fl)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -1642,21 +1642,21 @@ program big_test
     write(*, 2005) 38, fl
   end if
 
-! 125: fdirfile_add check
+! 125: fgd_add check
   ent%shift = 33
   ent%field(1) = 'new9'
   ent%fragment_index = 0
   ent%field_type = GD_PHASE_ENTRY
-  call fdirfile_add(d, 'new13', ent)
-  e = fget_error(d)
+  call fgd_add(d, 'new13', ent)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
     write(*, 2006) 125, 1, e
   end if
 
-  n = fget_entry(d, 'new13', ent)
-  e = fget_error(d)
+  n = fgd_get_entry(d, 'new13', ent)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -1683,9 +1683,9 @@ program big_test
     write(*, 2008) 125, 4, ent%field(1)
   end if
 
-! 39: fget_fragmentname check
-  str = fget_fragmentname(d, 0)
-  e = fget_error(d)
+! 39: fgd_get_fragmentname check
+  str = fgd_get_fragmentname(d, 0)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -1697,9 +1697,9 @@ program big_test
     write(*, 2009), 39, str
   end if
 
-! 40: fget_nfragments check
-  n = fget_nfragments(d)
-  e = fget_error(d)
+! 40: fgd_get_nfragments check
+  n = fgd_get_nfragments(d)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -1711,17 +1711,17 @@ program big_test
     write(*, 2002), 40, n
   end if
 
-! 41: fdirfile_include check
-  call fdirfile_include(d, 'form2', 0, 0)
-  e = fget_error(d)
+! 41: fgd_include check
+  call fgd_include(d, 'form2', 0, 0)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
     write(*, 2006) 41, 3, e
   end if
 
-  n = fget_constant_i1(d, 'const2', ci1(1))
-  e = fget_error(d)
+  n = fgd_get_constant_i1(d, 'const2', ci1(1))
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -1733,9 +1733,9 @@ program big_test
     write(*, 2004) 1, 41, ci1(1)
   end if
 
-! 42: fget_nfields_by_type check
-  n = fget_nfields_by_type(d, GD_LINCOM_ENTRY)
-  e = fget_error(d)
+! 42: fgd_get_nfields_by_type check
+  n = fgd_get_nfields_by_type(d, GD_LINCOM_ENTRY)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -1747,13 +1747,13 @@ program big_test
     write(*, 2002), 42, n
   end if
 
-! 43: fget_field_list_by_type check
+! 43: fgd_get_field_list_by_type check
   fields(1) = 'lincom'
   fields(2) = 'new2'
   fields(3) = 'new3'
   l = flen
-  call fget_field_list_by_type(flist, d, GD_LINCOM_ENTRY, l)
-  e = fget_error(d)
+  call fgd_get_field_list_by_type(flist, d, GD_LINCOM_ENTRY, l)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -1772,9 +1772,9 @@ program big_test
   end if
   end do
 
-! 44: fget_nvectors check
-  n = fget_nvectors(d)
-  e = fget_error(d)
+! 44: fgd_get_nvectors check
+  n = fgd_get_nvectors(d)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -1786,14 +1786,14 @@ program big_test
     write(*, 2002), 44, n
   end if
 
-! 45: fget_vector_list check
+! 45: fgd_get_vector_list check
   fields = (/ 'INDEX  ', 'bit    ', 'data   ', 'lincom ', 'linterp', &
   'mult   ', 'new1   ', 'new10  ', 'new13  ', 'new2   ', 'new3   ', 'new4   ', &
   'new5   ', 'new6   ', 'new7   ', 'new8   ', 'new9   ', 'phase  ', 'polynom', &
   'sbit   ', 'string ' /)
   l = flen
-  call fget_vector_list(flist, d, l)
-  e = fget_error(d)
+  call fgd_get_vector_list(flist, d, l)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -1812,18 +1812,18 @@ program big_test
   end if
   end do
 
-! 46: fdirfile_madd_lincom check
-  call fdirfile_madd_lincom(d, 'data', 'mnew1', 2, 'in1', 9.9d0, 8.8d0, &
+! 46: fgd_madd_lincom check
+  call fgd_madd_lincom(d, 'data', 'mnew1', 2, 'in1', 9.9d0, 8.8d0, &
   'in2', 7.7d0, 6.6d0, '', 0d0, 0d0)
-  e = fget_error(d)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
     write(*, 2006) 46, 1, e
   end if
 
-  n = fget_entry(d, 'data/mnew1', ent)
-  e = fget_error(d)
+  n = fgd_get_entry(d, 'data/mnew1', ent)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -1872,22 +1872,22 @@ program big_test
   end if
   end do
 
-! 47: fdirfile_madd_clincom check
+! 47: fgd_madd_clincom check
   cq(1) = dcmplx(1.1, 1.2)
   cq(2) = dcmplx(1.3, 1.4)
   cq(3) = dcmplx(1.4, 1.5)
   cq(4) = dcmplx(1.6, 1.7)
-  call fdirfile_madd_clincom(d, 'data', 'mnew2', 2, 'in1', cq(1), cq(2), &
+  call fgd_madd_clincom(d, 'data', 'mnew2', 2, 'in1', cq(1), cq(2), &
   'in2', cq(3), cq(4), '', cq(5), cq(6))
-  e = fget_error(d)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
     write(*, 2006) 47, 1, e
   end if
 
-  n = fget_entry(d, 'data/mnew2', ent)
-  e = fget_error(d)
+  n = fgd_get_entry(d, 'data/mnew2', ent)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -1939,18 +1939,18 @@ program big_test
   end if
   end do
 
-! 48: fdirfile_madd_polynom check
-  call fdirfile_madd_polynom(d, 'data', 'mnew3', 3, 'in1', 3d3, 4d4, 5d5, &
+! 48: fgd_madd_polynom check
+  call fgd_madd_polynom(d, 'data', 'mnew3', 3, 'in1', 3d3, 4d4, 5d5, &
      6d6, 0d0, 0d0)
-  e = fget_error(d)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
     write(*, 2006) 48, 1, e
   end if
 
-  n = fget_entry(d, 'data/mnew3', ent)
-  e = fget_error(d)
+  n = fgd_get_entry(d, 'data/mnew3', ent)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -1985,22 +1985,22 @@ program big_test
   end if
   end do
 
-! 49: fdirfile_madd_cpolynom check
+! 49: fgd_madd_cpolynom check
   cq(1) = dcmplx(1.1, 0.0)
   cq(2) = dcmplx(2.2, 0.0)
   cq(3) = dcmplx(2.2, 0.0)
   cq(4) = dcmplx(3.3, 4.4)
-  call fdirfile_madd_cpolynom(d, 'data', 'mnew5', 3, 'in1', cq(1), cq(2), &
+  call fgd_madd_cpolynom(d, 'data', 'mnew5', 3, 'in1', cq(1), cq(2), &
      cq(3), cq(4), dcmplx(0d0,0d0), dcmplx(0d0,0d0))
-  e = fget_error(d)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
     write(*, 2006) 49, 1, e
   end if
 
-  n = fget_entry(d, 'data/mnew5', ent)
-  e = fget_error(d)
+  n = fgd_get_entry(d, 'data/mnew5', ent)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -2038,17 +2038,17 @@ program big_test
   end if
   end do
 
-! 50: fdirfile_madd_linterp check
-  call fdirfile_madd_linterp(d, "data", "mnew6", "in", "./more/table")
-  e = fget_error(d)
+! 50: fgd_madd_linterp check
+  call fgd_madd_linterp(d, "data", "mnew6", "in", "./more/table")
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
     write(*, 2006) 50, 1, e
   end if
 
-  n = fget_entry(d, 'data/mnew6', ent)
-  e = fget_error(d)
+  n = fgd_get_entry(d, 'data/mnew6', ent)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -2075,17 +2075,17 @@ program big_test
     write(*, 2008) 50, 4, ent%field(2)
   end if
 
-! 51: fdirfile_madd_bit check
-  call fdirfile_madd_bit(d, "data", "mnew7", "in", 13, 12)
-  e = fget_error(d)
+! 51: fgd_madd_bit check
+  call fgd_madd_bit(d, "data", "mnew7", "in", 13, 12)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
     write(*, 2006) 51, 1, e
   end if
 
-  n = fget_entry(d, 'data/mnew7', ent)
-  e = fget_error(d)
+  n = fgd_get_entry(d, 'data/mnew7', ent)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -2117,17 +2117,17 @@ program big_test
     write(*, 2008) 51, 5, ent%field(1)
   end if
 
-! 52: fdirfile_madd_sbit check
-  call fdirfile_madd_sbit(d, "data", "mnew8", "in", 13, 12)
-  e = fget_error(d)
+! 52: fgd_madd_sbit check
+  call fgd_madd_sbit(d, "data", "mnew8", "in", 13, 12)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
     write(*, 2006) 52, 1, e
   end if
 
-  n = fget_entry(d, 'data/mnew8', ent)
-  e = fget_error(d)
+  n = fgd_get_entry(d, 'data/mnew8', ent)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -2159,17 +2159,17 @@ program big_test
     write(*, 2008) 52, 5, ent%field(1)
   end if
 
-! 53: fdirfile_madd_multiply check
-  call fdirfile_madd_multiply(d, 'data', 'mnew9', 'in1', 'in2')
-  e = fget_error(d)
+! 53: fgd_madd_multiply check
+  call fgd_madd_multiply(d, 'data', 'mnew9', 'in1', 'in2')
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
     write(*, 2006) 53, 1, e
   end if
 
-  n = fget_entry(d, 'data/mnew9', ent)
-  e = fget_error(d)
+  n = fgd_get_entry(d, 'data/mnew9', ent)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -2196,17 +2196,17 @@ program big_test
     write(*, 2008) 53, 4, ent%field(2)
   end if
 
-! 54: fdirfile_madd_phase check
-  call fdirfile_madd_phase(d, 'data', 'mnew10', 'in1', 22)
-  e = fget_error(d)
+! 54: fgd_madd_phase check
+  call fgd_madd_phase(d, 'data', 'mnew10', 'in1', 22)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
     write(*, 2006) 54, 1, e
   end if
 
-  n = fget_entry(d, 'data/mnew10', ent)
-  e = fget_error(d)
+  n = fgd_get_entry(d, 'data/mnew10', ent)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -2233,17 +2233,17 @@ program big_test
     write(*, 2008) 54, 4, ent%field(1)
   end if
 
-! 55: fdirfile_madd_const check
-  call fdirfile_madd_const(d, 'data', 'mnew11', GD_FLOAT64)
-  e = fget_error(d)
+! 55: fgd_madd_const check
+  call fgd_madd_const(d, 'data', 'mnew11', GD_FLOAT64)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
     write(*, 2006) 55, 1, e
   end if
 
-  n = fget_entry(d, 'data/mnew11', ent)
-  e = fget_error(d)
+  n = fgd_get_entry(d, 'data/mnew11', ent)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -2265,8 +2265,8 @@ program big_test
     write(*, 2007) 55, 3, ent%data_type
   end if
 
-  n = fget_constant_r4(d, 'data/mnew11', fl)
-  e = fget_error(d)
+  n = fgd_get_constant_r4(d, 'data/mnew11', fl)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -2278,21 +2278,21 @@ program big_test
     write(*, 2005) 55, fl
   end if
 
-! 126: fdirfile_madd check
+! 126: fgd_madd check
   ent%shift = 33
   ent%field(1) = 'data/mnew10'
   ent%fragment_index = 0
   ent%field_type = GD_PHASE_ENTRY
-  call fdirfile_madd(d, 'data', 'mnew4', ent)
-  e = fget_error(d)
+  call fgd_madd(d, 'data', 'mnew4', ent)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
     write(*, 2006) 126, 1, e
   end if
 
-  n = fget_entry(d, 'data/mnew4', ent)
-  e = fget_error(d)
+  n = fgd_get_entry(d, 'data/mnew4', ent)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -2319,9 +2319,9 @@ program big_test
     write(*, 2008) 126, 4, ent%field(1)
   end if
 
-! 56: fget_string check
-  n = fget_string(d, 'string', GD_FIELD_LEN, str)
-  e = fget_error(d)
+! 56: fgd_get_string check
+  n = fgd_get_string(d, 'string', GD_FIELD_LEN, str)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -2338,17 +2338,17 @@ program big_test
     write(*, 2009) 56, str
   end if
 
-! 57: fdirfile_add_string check
-  call fdirfile_add_string(d, 'new12', 0)
-  e = fget_error(d)
+! 57: fgd_add_string check
+  call fgd_add_string(d, 'new12', 0)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
     write(*, 2006) 57, 1, e
   end if
 
-  n = fget_string(d, 'new12', GD_FIELD_LEN, str)
-  e = fget_error(d)
+  n = fgd_get_string(d, 'new12', GD_FIELD_LEN, str)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -2360,17 +2360,17 @@ program big_test
     write(*, 2009) 57, str
   end if
 
-! 58: fdirfile_madd_string check
-  call fdirfile_madd_string(d, "data", 'mnew12')
-  e = fget_error(d)
+! 58: fgd_madd_string check
+  call fgd_madd_string(d, "data", 'mnew12')
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
     write(*, 2006) 58, 1, e
   end if
 
-  n = fget_string(d, 'data/mnew12', GD_FIELD_LEN, str)
-  e = fget_error(d)
+  n = fgd_get_string(d, 'data/mnew12', GD_FIELD_LEN, str)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -2382,17 +2382,17 @@ program big_test
     write(*, 2009) 58, str
   end if
 
-! 59: fdirfile_add_spec check
-  call fdirfile_add_spec(d, 'lorem STRING "Lorem ipsum"', 0)
-  e = fget_error(d)
+! 59: fgd_add_spec check
+  call fgd_add_spec(d, 'lorem STRING "Lorem ipsum"', 0)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
     write(*, 2006) 59, 1, e
   end if
 
-  n = fget_string(d, 'lorem', GD_FIELD_LEN, str)
-  e = fget_error(d)
+  n = fgd_get_string(d, 'lorem', GD_FIELD_LEN, str)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -2404,17 +2404,17 @@ program big_test
     write(*, 2009) 59, str
   end if
 
-! 60: fdirfile_madd_spec check
-  call fdirfile_madd_spec(d, 'ipsum STRING "dolor sit amet."', 'lorem')
-  e = fget_error(d)
+! 60: fgd_madd_spec check
+  call fgd_madd_spec(d, 'ipsum STRING "dolor sit amet."', 'lorem')
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
     write(*, 2006) 60, 1, e
   end if
 
-  n = fget_string(d, 'lorem/ipsum', GD_FIELD_LEN, str)
-  e = fget_error(d)
+  n = fgd_get_string(d, 'lorem/ipsum', GD_FIELD_LEN, str)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -2426,10 +2426,10 @@ program big_test
     write(*, 2009) 60, str
   end if
 
-! 61: fput_constant_i1 check
+! 61: fgd_put_constant_i1 check
   ci1(1) = 61
-  n = fput_constant_i1(d, 'const', ci1(1))
-  e = fget_error(d)
+  n = fgd_put_constant_i1(d, 'const', ci1(1))
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -2441,8 +2441,8 @@ program big_test
     write(*, 2002) 61, n
   end if
 
-  n = fget_constant_r4(d, 'const', fl)
-  e = fget_error(d)
+  n = fgd_get_constant_r4(d, 'const', fl)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -2454,10 +2454,10 @@ program big_test
     write(*, 2005) 61, fl
   end if
 
-! 127: fput_constant_i2 check
+! 127: fgd_put_constant_i2 check
   ci2(1) = 127
-  n = fput_constant_i2(d, 'const', ci2(1))
-  e = fget_error(d)
+  n = fgd_put_constant_i2(d, 'const', ci2(1))
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -2469,8 +2469,8 @@ program big_test
     write(*, 2002) 127, n
   end if
 
-  n = fget_constant_r4(d, 'const', fl)
-  e = fget_error(d)
+  n = fgd_get_constant_r4(d, 'const', fl)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -2482,10 +2482,10 @@ program big_test
     write(*, 2005) 127, fl
   end if
 
-! 128: fput_constant_i4 check
+! 128: fgd_put_constant_i4 check
   ci4(1) = 128
-  n = fput_constant_i4(d, 'const', ci4(1))
-  e = fget_error(d)
+  n = fgd_put_constant_i4(d, 'const', ci4(1))
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -2497,8 +2497,8 @@ program big_test
     write(*, 2002) 128, n
   end if
 
-  n = fget_constant_r4(d, 'const', fl)
-  e = fget_error(d)
+  n = fgd_get_constant_r4(d, 'const', fl)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -2510,10 +2510,10 @@ program big_test
     write(*, 2005) 128, fl
   end if
 
-! 129: fput_constant_i8 check
+! 129: fgd_put_constant_i8 check
   ci8(1) = 129
-  n = fput_constant_i8(d, 'const', ci8(1))
-  e = fget_error(d)
+  n = fgd_put_constant_i8(d, 'const', ci8(1))
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -2525,8 +2525,8 @@ program big_test
     write(*, 2002) 129, n
   end if
 
-  n = fget_constant_r4(d, 'const', fl)
-  e = fget_error(d)
+  n = fgd_get_constant_r4(d, 'const', fl)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -2538,10 +2538,10 @@ program big_test
     write(*, 2005) 129, fl
   end if
 
-! 130: fput_constant_r4 check
+! 130: fgd_put_constant_r4 check
   cr4(1) = 130
-  n = fput_constant_r4(d, 'const', cr4(1))
-  e = fget_error(d)
+  n = fgd_put_constant_r4(d, 'const', cr4(1))
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -2553,8 +2553,8 @@ program big_test
     write(*, 2002) 130, n
   end if
 
-  n = fget_constant_r4(d, 'const', fl)
-  e = fget_error(d)
+  n = fgd_get_constant_r4(d, 'const', fl)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -2566,10 +2566,10 @@ program big_test
     write(*, 2005) 130, fl
   end if
 
-! 131: fput_constant_r8 check
+! 131: fgd_put_constant_r8 check
   cr8(1) = 131
-  n = fput_constant_r8(d, 'const', cr8(1))
-  e = fget_error(d)
+  n = fgd_put_constant_r8(d, 'const', cr8(1))
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -2581,8 +2581,8 @@ program big_test
     write(*, 2002) 131, n
   end if
 
-  n = fget_constant_r4(d, 'const', fl)
-  e = fget_error(d)
+  n = fgd_get_constant_r4(d, 'const', fl)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -2594,10 +2594,10 @@ program big_test
     write(*, 2005) 131, fl
   end if
 
-! 132: fput_constant_c8 check
+! 132: fgd_put_constant_c8 check
   cc8(1) = 132
-  n = fput_constant_c8(d, 'const', cc8(1))
-  e = fget_error(d)
+  n = fgd_put_constant_c8(d, 'const', cc8(1))
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -2609,8 +2609,8 @@ program big_test
     write(*, 2002) 132, n
   end if
 
-  n = fget_constant_r4(d, 'const', fl)
-  e = fget_error(d)
+  n = fgd_get_constant_r4(d, 'const', fl)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -2622,10 +2622,10 @@ program big_test
     write(*, 2005) 132, fl
   end if
 
-! 133: fput_constant_c16 check
+! 133: fgd_put_constant_c16 check
   cc16(1) = 133
-  n = fput_constant_c16(d, 'const', cc16(1))
-  e = fget_error(d)
+  n = fgd_put_constant_c16(d, 'const', cc16(1))
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -2637,8 +2637,8 @@ program big_test
     write(*, 2002) 133, n
   end if
 
-  n = fget_constant_r4(d, 'const', fl)
-  e = fget_error(d)
+  n = fgd_get_constant_r4(d, 'const', fl)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -2650,9 +2650,9 @@ program big_test
     write(*, 2005) 133, fl
   end if
 
-! 62: fput_string check
-  n = fput_string(d, 'string', "Arthur Dent")
-  e = fget_error(d)
+! 62: fgd_put_string check
+  n = fgd_put_string(d, 'string', "Arthur Dent")
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -2664,8 +2664,8 @@ program big_test
     write(*, 2002) 62, n
   end if
 
-  n = fget_string(d, 'string', GD_FIELD_LEN, str)
-  e = fget_error(d)
+  n = fgd_get_string(d, 'string', GD_FIELD_LEN, str)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -2677,9 +2677,9 @@ program big_test
     write(*, 2009) 62, str
   end if
 
-! 63: fget_nmfields_by_type check
-  n = fget_nmfields_by_type(d, "data", GD_LINCOM_ENTRY)
-  e = fget_error(d)
+! 63: fgd_get_nmfields_by_type check
+  n = fgd_get_nmfields_by_type(d, "data", GD_LINCOM_ENTRY)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -2691,12 +2691,12 @@ program big_test
     write(*, 2002), 63, n
   end if
 
-! 64: fget_mfield_list_by_type check
+! 64: fgd_get_mfield_list_by_type check
   fields(1) = 'mnew1'
   fields(2) = 'mnew2'
   l = flen
-  call fget_mfield_list_by_type(flist, d, "data", GD_LINCOM_ENTRY, l)
-  e = fget_error(d)
+  call fgd_get_mfield_list_by_type(flist, d, "data", GD_LINCOM_ENTRY, l)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -2715,9 +2715,9 @@ program big_test
   end if
   end do
 
-! 65: fget_nmvectors check
-  n = fget_nmvectors(d, "data")
-  e = fget_error(d)
+! 65: fgd_get_nmvectors check
+  n = fgd_get_nmvectors(d, "data")
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -2729,14 +2729,14 @@ program big_test
     write(*, 2002), 65, n
   end if
 
-! 66: fget_mvector_list check
+! 66: fgd_get_mvector_list check
   fields = (/ 'mlut  ', 'mnew1 ', 'mnew2 ', 'mnew3 ', 'mnew5 ', 'mnew6 ', &
   'mnew7 ', 'mnew8 ', 'mnew9 ', 'mnew10', 'mnew4 ', '      ', '      ', &
   '      ', '      ', '      ', '      ', '      ', '      ', '      ', &
   '      ' /)
   l = flen
-  call fget_mvector_list(flist, d, "data", l)
-  e = fget_error(d)
+  call fgd_get_mvector_list(flist, d, "data", l)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -2755,17 +2755,17 @@ program big_test
   end if
   end do
 
-! 67: fdirfile_alter_raw check
-  call fdirfile_alter_raw(d, 'new1', GD_INT32, 4, 0)
-  e = fget_error(d)
+! 67: fgd_alter_raw check
+  call fgd_alter_raw(d, 'new1', GD_INT32, 4, 0)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
     write(*, 2006) 67, 1, e
   end if
 
-  n = fget_entry(d, 'new1', ent)
-  e = fget_error(d)
+  n = fgd_get_entry(d, 'new1', ent)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -2792,18 +2792,18 @@ program big_test
     write(*, 2007), 67, 6, n
   end if
 
-! 68: fdirfile_alter_lincom check
-  call fdirfile_alter_lincom(d, 'new2', 3, 'in4', 9.9d-1, 7.8d0, 'in5', &
+! 68: fgd_alter_lincom check
+  call fgd_alter_lincom(d, 'new2', 3, 'in4', 9.9d-1, 7.8d0, 'in5', &
      1.1d1, 2.2d-2, 'in6', 1.96d0, 0d0)
-  e = fget_error(d)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
     write(*, 2006) 68, 1, e
   end if
 
-  n = fget_entry(d, 'new2', ent)
-  e = fget_error(d)
+  n = fgd_get_entry(d, 'new2', ent)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -2857,22 +2857,22 @@ program big_test
   end if
   end do
 
-! 69: fdirfile_alter_clincom check
+! 69: fgd_alter_clincom check
   cq(1) = dcmplx(0.1, 0.2)
   cq(2) = dcmplx(0.3, 0.4)
   cq(3) = dcmplx(0.4, 0.5)
   cq(4) = dcmplx(0.6, 0.7)
-  call fdirfile_alter_clincom(d, 'new3', 2, 'in4', cq(1), cq(2), 'in3', &
+  call fgd_alter_clincom(d, 'new3', 2, 'in4', cq(1), cq(2), 'in3', &
      cq(3), cq(4), '', cq(5), cq(6))
-  e = fget_error(d)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
     write(*, 2006) 69, 1, e
   end if
 
-  n = fget_entry(d, 'new3', ent)
-  e = fget_error(d)
+  n = fgd_get_entry(d, 'new3', ent)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -2924,17 +2924,17 @@ program big_test
   end if
   end do
 
-! 70: fdirfile_alter_polynom check
-  call fdirfile_alter_polynom(d, 'new4', 4, 'in1', 3d0, 4d0, 5d0, 6d0, 7d0, 0d0)
-  e = fget_error(d)
+! 70: fgd_alter_polynom check
+  call fgd_alter_polynom(d, 'new4', 4, 'in1', 3d0, 4d0, 5d0, 6d0, 7d0, 0d0)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
     write(*, 2006) 70, 1, e
   end if
 
-  n = fget_entry(d, 'new4', ent)
-  e = fget_error(d)
+  n = fgd_get_entry(d, 'new4', ent)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -2969,22 +2969,22 @@ program big_test
   end if
   end do
 
-! 71: fdirfile_alter_cpolynom check
+! 71: fgd_alter_cpolynom check
   cq(1) = dcmplx(1.1, 5.0)
   cq(2) = dcmplx(1.2, 4.0)
   cq(3) = dcmplx(1.2, 3.0)
   cq(4) = dcmplx(1.3, 2.4)
-  call fdirfile_alter_cpolynom(d, 'new5', 3, 'in1', cq(1), cq(2), cq(3), &
+  call fgd_alter_cpolynom(d, 'new5', 3, 'in1', cq(1), cq(2), cq(3), &
   cq(4), dcmplx(0d0,0d0), dcmplx(0d0,0d0))
-  e = fget_error(d)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
     write(*, 2006) 71, 1, e
   end if
 
-  n = fget_entry(d, 'new5', ent)
-  e = fget_error(d)
+  n = fgd_get_entry(d, 'new5', ent)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -3027,17 +3027,17 @@ program big_test
   end if
   710 CONTINUE
 
-! 72: fdirfile_alter_linterp check
-  call fdirfile_alter_linterp(d, "new6", "in3", "./other/table", 0)
-  e = fget_error(d)
+! 72: fgd_alter_linterp check
+  call fgd_alter_linterp(d, "new6", "in3", "./other/table", 0)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
     write(*, 2006) 72, 1, e
   end if
 
-  n = fget_entry(d, 'new6', ent)
-  e = fget_error(d)
+  n = fgd_get_entry(d, 'new6', ent)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -3064,17 +3064,17 @@ program big_test
     write(*, 2008) 72, 4, ent%field(2)
   end if
 
-! 73: fdirfile_alter_bit check
-  call fdirfile_alter_bit(d, "new7", "in3", 3, 2)
-  e = fget_error(d)
+! 73: fgd_alter_bit check
+  call fgd_alter_bit(d, "new7", "in3", 3, 2)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
     write(*, 2006) 73, 1, e
   end if
 
-  n = fget_entry(d, 'new7', ent)
-  e = fget_error(d)
+  n = fgd_get_entry(d, 'new7', ent)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -3106,17 +3106,17 @@ program big_test
     write(*, 2008) 73, 5, ent%field(1)
   end if
 
-! 74: fdirfile_alter_sbit check
-  call fdirfile_alter_sbit(d, "new8", "out", 1, 22)
-  e = fget_error(d)
+! 74: fgd_alter_sbit check
+  call fgd_alter_sbit(d, "new8", "out", 1, 22)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
     write(*, 2006) 74, 1, e
   end if
 
-  n = fget_entry(d, 'new8', ent)
-  e = fget_error(d)
+  n = fgd_get_entry(d, 'new8', ent)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -3148,17 +3148,17 @@ program big_test
     write(*, 2008) 74, 5, ent%field(1)
   end if
 
-! 75: fdirfile_alter_multiply check
-  call fdirfile_alter_multiply(d, 'new9', 'in6', 'in4')
-  e = fget_error(d)
+! 75: fgd_alter_multiply check
+  call fgd_alter_multiply(d, 'new9', 'in6', 'in4')
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
     write(*, 2006) 75, 1, e
   end if
 
-  n = fget_entry(d, 'new9', ent)
-  e = fget_error(d)
+  n = fgd_get_entry(d, 'new9', ent)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -3185,17 +3185,17 @@ program big_test
     write(*, 2008) 75, 4, ent%field(2)
   end if
 
-! 76: fdirfile_alter_phase check
-  call fdirfile_alter_phase(d, 'new10', 'in2', 8)
-  e = fget_error(d)
+! 76: fgd_alter_phase check
+  call fgd_alter_phase(d, 'new10', 'in2', 8)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
     write(*, 2006) 76, 1, e
   end if
 
-  n = fget_entry(d, 'new10', ent)
-  e = fget_error(d)
+  n = fgd_get_entry(d, 'new10', ent)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -3222,17 +3222,17 @@ program big_test
     write(*, 2008) 76, 4, ent%field(1)
   end if
 
-! 77: fdirfile_alter_const check
-  call fdirfile_alter_const(d, 'new11', GD_FLOAT32)
-  e = fget_error(d)
+! 77: fgd_alter_const check
+  call fgd_alter_const(d, 'new11', GD_FLOAT32)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
     write(*, 2006) 77, 1, e
   end if
 
-  n = fget_entry(d, 'new11', ent)
-  e = fget_error(d)
+  n = fgd_get_entry(d, 'new11', ent)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -3254,8 +3254,8 @@ program big_test
     write(*, 2007) 77, 3, ent%data_type
   end if
 
-  n = fget_constant_r4(d, 'new11', fl)
-  e = fget_error(d)
+  n = fgd_get_constant_r4(d, 'new11', fl)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -3267,9 +3267,9 @@ program big_test
     write(*, 2005) 77, fl
   end if
 
-! 78: fget_encoding check
-  n = fget_encoding(d, 0)
-  e = fget_error(d)
+! 78: fgd_get_encoding check
+  n = fgd_get_encoding(d, 0)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -3281,9 +3281,9 @@ program big_test
     write(*, 2002) 78, n
   end if
 
-! 79: fget_endianness check
-  n = fget_endianness(d, 0)
-  e = fget_error(d)
+! 79: fgd_get_endianness check
+  n = fgd_get_endianness(d, 0)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -3295,10 +3295,10 @@ program big_test
     write(*, 2002) 79, n
   end if
 
-! 80: fdirfilename check
+! 80: fgd_dirfilename check
   l = GD_FIELD_LEN
-  call fdirfilename(str, l, d, 0)
-  e = fget_error(d)
+  call fgd_dirfilename(str, l, d, 0)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -3315,9 +3315,9 @@ program big_test
     write(*, 2009) 80, str
   end if
 
-! 81: fget_parent_fragment check
-  n = fget_parent_fragment(d, 1)
-  e = fget_error(d)
+! 81: fgd_get_parent_fragment check
+  n = fgd_get_parent_fragment(d, 1)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -3329,18 +3329,18 @@ program big_test
     write(*, 2002) 81, n
   end if
 
-! 82: fdirfile_protect check
-  call fdirfile_protect(d, GD_PROTECT_DATA, 1)
-  e = fget_error(d)
+! 82: fgd_protect check
+  call fgd_protect(d, GD_PROTECT_DATA, 1)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
     write(*, 2001) 82, e
   end if
 
-! 83: fget_protection check
-  n = fget_protection(d, 1)
-  e = fget_error(d)
+! 83: fgd_get_protection check
+  n = fgd_get_protection(d, 1)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -3352,9 +3352,9 @@ program big_test
     write(*, 2002) 83, n
   end if
 
-! 84: fget_raw_filename check
-  str = fget_raw_filename(d, "data")
-  e = fget_error(d)
+! 84: fgd_get_raw_filename check
+  str = fgd_get_raw_filename(d, "data")
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -3366,9 +3366,9 @@ program big_test
     write(*, 2009) 84, str
   end if
 
-! 85: fdirfile_reference check
-  str = fdirfile_reference(d, "new1")
-  e = fget_error(d)
+! 85: fgd_reference check
+  str = fgd_reference(d, "new1")
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -3380,31 +3380,17 @@ program big_test
     write(*, 2009) 85, str
   end if
 
-! 86: fget_reference check
-  str = fget_reference(d)
-  e = fget_error(d)
-
-  if (e .ne. GD_E_OK) then
-    ne = ne + 1
-    write(*, 2001) 86, e
-  end if
-
-  if (str .ne. 'new1') then
-    ne = ne + 1
-    write(*, 2009) 86, str
-  end if
-
-! 87: fdirfile_alter_encoding check
-  call fdirfile_alter_encoding(d, GD_SLIM_ENCODED, 1, 0)
-  e = fget_error(d)
+! 87: fgd_alter_encoding check
+  call fgd_alter_encoding(d, GD_SLIM_ENCODED, 1, 0)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
     write(*, 2006) 87, 1, e
   end if
 
-  n = fget_encoding(d, 1)
-  e = fget_error(d)
+  n = fgd_get_encoding(d, 1)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -3416,17 +3402,17 @@ program big_test
     write(*, 2002) 87, n
   end if
 
-! 88: fdirfile_alter_endianness check
-  call fdirfile_alter_endianness(d, GD_BIG_ENDIAN, 1, 0)
-  e = fget_error(d)
+! 88: fgd_alter_endianness check
+  call fgd_alter_endianness(d, GD_BIG_ENDIAN, 1, 0)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
     write(*, 2006) 88, 1, e
   end if
 
-  n = fget_endianness(d, 1)
-  e = fget_error(d)
+  n = fgd_get_endianness(d, 1)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -3438,17 +3424,17 @@ program big_test
     write(*, 2002) 88, n
   end if
 
-! 89: fdirfile_alter_spec check
-  call fdirfile_alter_spec(d, 'new10 PHASE in1 3', 0)
-  e = fget_error(d)
+! 89: fgd_alter_spec check
+  call fgd_alter_spec(d, 'new10 PHASE in1 3', 0)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
     write(*, 2006) 89, 1, e
   end if
 
-  n = fget_entry(d, 'new10', ent)
-  e = fget_error(d)
+  n = fgd_get_entry(d, 'new10', ent)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -3475,34 +3461,34 @@ program big_test
     write(*, 2008) 89, 4, ent%field(1)
   end if
 
-! 90: fdirfile_delete check
-  call fdirfile_delete(d, 'new10', 0)
-  e = fget_error(d)
+! 90: fgd_delete check
+  call fgd_delete(d, 'new10', 0)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
     write(*, 2006) 90, 1, e
   end if
 
-  n = fget_entry(d, 'new10', ent)
-  e = fget_error(d)
+  n = fgd_get_entry(d, 'new10', ent)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_BAD_CODE) then
     ne = ne + 1
     write(*, 2006) 90, 2, e
   end if
 
-! 91: fdirfile_malter_spec check
-  call fdirfile_malter_spec(d, 'mnew10 PHASE in4 11', 'data', 0)
-  e = fget_error(d)
+! 91: fgd_malter_spec check
+  call fgd_malter_spec(d, 'mnew10 PHASE in4 11', 'data', 0)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
     write(*, 2006) 91, 1, e
   end if
 
-  n = fget_entry(d, 'data/mnew10', ent)
-  e = fget_error(d)
+  n = fgd_get_entry(d, 'data/mnew10', ent)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -3529,17 +3515,17 @@ program big_test
     write(*, 2008) 91, 4, ent%field(1)
   end if
 
-! 92: fdirfile_move check
-  call fdirfile_move(d, 'new9', 1, 0)
-  e = fget_error(d)
+! 92: fgd_move check
+  call fgd_move(d, 'new9', 1, 0)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
     write(*, 2006) 92, 1, e
   end if
 
-  n = fget_entry(d, 'new9', ent)
-  e = fget_error(d)
+  n = fgd_get_entry(d, 'new9', ent)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -3566,25 +3552,25 @@ program big_test
     write(*, 2008) 92, 4, ent%field(2)
   end if
 
-! 93: fdirfile_rename check
-  call fdirfile_rename(d, 'new9', 'newer', 0)
-  e = fget_error(d)
+! 93: fgd_rename check
+  call fgd_rename(d, 'new9', 'newer', 0)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
     write(*, 2006) 93, 1, e
   end if
 
-  n = fget_entry(d, 'new9', ent)
-  e = fget_error(d)
+  n = fgd_get_entry(d, 'new9', ent)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_BAD_CODE) then
     ne = ne + 1
     write(*, 2006) 93, 2, e
   end if
 
-  n = fget_entry(d, 'newer', ent)
-  e = fget_error(d)
+  n = fgd_get_entry(d, 'newer', ent)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -3611,26 +3597,26 @@ program big_test
     write(*, 2008) 92, 4, ent%field(2)
   end if
 
-! 94: fdirfile_uninclude check
-  call fdirfile_uninclude(d, 1, 0)
-  e = fget_error(d)
+! 94: fgd_uninclude check
+  call fgd_uninclude(d, 1, 0)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
     write(*, 2006) 94, 1, e
   end if
 
-  n = fget_entry(d, 'newer', ent)
-  e = fget_error(d)
+  n = fgd_get_entry(d, 'newer', ent)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_BAD_CODE) then
     ne = ne + 1
     write(*, 2006) 94, 2, e
   end if
 
-! 95: fget_frameoffset check
-  n = fget_frameoffset(d, 0)
-  e = fget_error(d)
+! 95: fgd_get_frameoffset check
+  n = fgd_get_frameoffset(d, 0)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -3642,17 +3628,17 @@ program big_test
     write(*, 2002) 95, n
   end if
 
-! 96: fdirfile_alter_frameoffset check
-  call fdirfile_alter_frameoffset(d, 33, 0, 0)
-  e = fget_error(d)
+! 96: fgd_alter_frameoffset check
+  call fgd_alter_frameoffset(d, 33, 0, 0)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
     write(*, 2006) 96, 1, e
   end if
 
-  n = fget_frameoffset(d, 0)
-  e = fget_error(d)
+  n = fgd_get_frameoffset(d, 0)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -3664,9 +3650,9 @@ program big_test
     write(*, 2002) 96, n
   end if
 
-! 97: fget_native_type check
-  n = fget_native_type(d, 'data')
-  e = fget_error(d)
+! 97: fgd_get_native_type check
+  n = fgd_get_native_type(d, 'data')
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -3678,9 +3664,9 @@ program big_test
     write(*, 2002) 97, n
   end if
 
-! 99: fdirfile_validate check
-  n = fdirfile_validate(d, 'new7')
-  e = fget_error(d)
+! 99: fgd_validate check
+  n = fgd_validate(d, 'new7')
+  e = fgd_error(d)
 
   if (e .ne. GD_E_BAD_CODE) then
     ne = ne + 1
@@ -3692,10 +3678,10 @@ program big_test
     write(*, 2002) 99, n
   end if
 
-! 100: fget_framenum check
-  str = fdirfile_reference(d, "data")
-  dp = fget_framenum(d, 'INDEX', 33.3d0)
-  e = fget_error(d)
+! 100: fgd_get_framenum check
+  str = fgd_reference(d, "data")
+  dp = fgd_get_framenum(d, 'INDEX', 33.3d0)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -3707,9 +3693,9 @@ program big_test
     write(*, 2012) 100, dp
   end if
 
-! 101: fget_framenum_subset check
-  dp = fget_framenum_subset(d, 'data', 33.3d0, 6, 0)
-  e = fget_error(d)
+! 101: fgd_get_framenum_subset check
+  dp = fgd_get_framenum_subset(d, 'data', 33.3d0, 6, 0)
+  e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
@@ -3721,7 +3707,7 @@ program big_test
     write(*, 2012) 101, dp
   end if
 
-  call fdirfile_close(d)
+  call fgd_close(d)
 
   call system ( 'rm -rf ' // fildir )
 

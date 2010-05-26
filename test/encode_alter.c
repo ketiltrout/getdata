@@ -1,5 +1,5 @@
-/* Test endianness */
-#include "../src/getdata.h"
+/* Test encoding */
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -22,7 +22,7 @@ int main(void)
     "0\n1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12\n13\n14\n15\n";
   uint16_t data_data[128];
   uint16_t c[8];
-  int fd;
+  int fd, r = 0;
 
   memset(c, 0, 8);
   mkdir(filedir, 0777);
@@ -42,30 +42,21 @@ int main(void)
   write(fd, data_data, 256);
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_VERBOSE);
-  int ret = dirfile_alter_encoding(D, GD_TEXT_ENCODED, 0, 0);
-  int error = get_error(D);
-  off_t n = get_nframes(D);
+  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
+  int ret = gd_alter_encoding(D, GD_TEXT_ENCODED, 0, 0);
+  int error = gd_error(D);
+  off_t n = gd_get_nframes(D);
 
-  dirfile_close(D);
+  gd_close(D);
 
   unlink(txtdata);
   unlink(data);
   unlink(format);
   rmdir(filedir);
 
-  if (error) {
-    fprintf(stderr, "1=%i\n", error);
-    return 1;
-  }
-  if (ret != 0) {
-    fprintf(stderr, "2=%i\n", ret);
-    return 1;
-  }
-  if (n != 2) {
-    fprintf(stderr, "3=%lli\n", (long long)n);
-    return 1;
-  }
+  CHECKI(error, 0);
+  CHECKI(ret, 0);
+  CHECKI(n, 2);
 
-  return 0;
+  return r;
 }

@@ -24,7 +24,7 @@
 #include <stdlib.h>
 #endif
 
-int get_protection(DIRFILE* D, int fragment_index)
+int gd_get_protection(DIRFILE* D, int fragment_index)
 {
   dtrace("%p, %i", D, fragment_index);
 
@@ -46,7 +46,7 @@ int get_protection(DIRFILE* D, int fragment_index)
   return D->fragment[fragment_index].protection;
 }
 
-int dirfile_protect(DIRFILE *D, int protection_level, int fragment_index)
+int gd_protect(DIRFILE *D, int protection_level, int fragment_index)
 {
   int i;
 

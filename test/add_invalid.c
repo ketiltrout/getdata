@@ -1,5 +1,5 @@
 /* Getting data from an invalid dirfile should fail cleanly */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -11,6 +11,7 @@
 int main(void)
 {
   const char* filedir = __TEST__ "dirfile";
+  int r = 0;
 
   gd_entry_t E;
   E.field =  "data";
@@ -19,10 +20,12 @@ int main(void)
   E.spf = 2;
   E.data_type = GD_UINT8;
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
-  dirfile_add(D, &E);
-  int error = get_error(D);
-  dirfile_close(D);
+  DIRFILE* D = gd_open(filedir, GD_RDONLY);
+  gd_add(D, &E);
+  int error = gd_error(D);
+  gd_close(D);
 
-  return (error != GD_E_BAD_DIRFILE);
+  CHECKI(error, GD_E_BAD_DIRFILE);
+
+  return r;
 }

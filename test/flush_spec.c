@@ -1,5 +1,5 @@
 /* Check the writing of field specs */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <stdio.h>
 #include <inttypes.h>
@@ -36,13 +36,13 @@ int main(void)
 
   int i = 0;
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_CREAT | GD_TRUNC |
+  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_TRUNC |
       GD_VERBOSE);
   for (i = 0; spec[i] != NULL; ++i)
-    dirfile_add_spec(D, spec[i], 0);
-  int error = get_error(D);
+    gd_add_spec(D, spec[i], 0);
+  int error = gd_error(D);
 
-  dirfile_close(D);
+  gd_close(D);
 
   FILE* stream = fopen(format, "rt");
   i = 0;

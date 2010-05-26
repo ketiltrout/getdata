@@ -1023,7 +1023,7 @@ size_t _GD_DoField(DIRFILE *D, gd_entry_t *E, int repr, off64_t first_samp,
 }
 
 /* this function is little more than a public boilerplate for _GD_DoField */
-size_t getdata64(DIRFILE* D, const char *field_code_in, off64_t first_frame,
+size_t gd_getdata64(DIRFILE* D, const char *field_code_in, off64_t first_frame,
     off64_t first_samp, size_t num_frames, size_t num_samp,
     gd_type_t return_type, void *data_out)
 {
@@ -1080,12 +1080,12 @@ size_t getdata64(DIRFILE* D, const char *field_code_in, off64_t first_frame,
 }
 
 /* 32(ish)-bit wrapper for the 64-bit version, when needed */
-size_t getdata(DIRFILE* D, const char *field_code, off_t first_frame,
+size_t gd_getdata(DIRFILE* D, const char *field_code, off_t first_frame,
     off_t first_samp, size_t num_frames, size_t num_samp,
     gd_type_t return_type, void *data_out)
 {
-  return getdata64(D, field_code, first_frame, first_samp, num_frames, num_samp,
-      return_type, data_out);
+  return gd_getdata64(D, field_code, first_frame, first_samp, num_frames,
+      num_samp, return_type, data_out);
 }
 /* vim: ts=2 sw=2 et tw=80
 */

@@ -1,5 +1,5 @@
 /* Opening an non-dirfile should fail cleanly */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -11,12 +11,15 @@
 int main(void)
 {
   const char* filedir = __TEST__ "dirfile";
+  int r = 0;
 
   mkdir(filedir, 0777);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
+  DIRFILE* D = gd_open(filedir, GD_RDONLY);
 
   rmdir(filedir);
+  int error = gd_error(D);
+  CHECKI(error, GD_E_OPEN);
 
-  return (get_error(D) != GD_E_OPEN);
+  return r;
 }

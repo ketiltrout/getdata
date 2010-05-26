@@ -1,5 +1,5 @@
 /* Add a RAW field */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <inttypes.h>
 #include <stdlib.h>
@@ -16,27 +16,25 @@ int main(void)
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
   uint8_t val = 0;
+  int r = 0;
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
-  dirfile_add_const(D, "data", GD_UINT8, GD_UINT8, &val, 0);
+  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
+  gd_add_const(D, "data", GD_UINT8, GD_UINT8, &val, 0);
   val = 23;
-  put_constant(D, "data", GD_UINT8, &val);
-  int error = get_error(D);
-  dirfile_close(D);
+  gd_put_constant(D, "data", GD_UINT8, &val);
+  int error = gd_error(D);
+  gd_close(D);
 
   /* check */
   val = 0;
-  D = dirfile_open(filedir, GD_RDONLY | GD_VERBOSE);
-  get_constant(D, "data", GD_UINT8, &val);
-  dirfile_close(D);
+  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  gd_get_constant(D, "data", GD_UINT8, &val);
+  gd_close(D);
 
   unlink(format);
   rmdir(filedir);
 
-  if (val != 23) {
-    fprintf(stderr, "val=%i\n", val);
-    return 1;
-  }
-
-  return (error != GD_E_OK);
+  CHECKU(val, 23);
+  CHECKI(error,GD_E_OK);
+  return r;
 }

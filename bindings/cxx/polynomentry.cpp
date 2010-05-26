@@ -18,6 +18,10 @@
 // along with GetData; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 //
+#ifdef HAVE_CONFIG_H
+#include "../../src/config.h"
+#endif
+#undef GETDATA_LEGACY_API
 #include "getdata/dirfile.h"
 
 #include <stdlib.h>
@@ -69,7 +73,7 @@ int PolynomEntry::SetInput(const char* field)
   E.in_fields[0] = ptr;
 
   if (D != NULL)
-    return dirfile_alter_entry(D->D, E.field, &E, 0);
+    return gd_alter_entry(D->D, E.field, &E, 0);
   
   return 0;
 }
@@ -83,7 +87,7 @@ int PolynomEntry::SetCoefficient(double coeff, int index)
   E.ca[index][1] = 0;
 
   if (D != NULL)
-    return dirfile_alter_entry(D->D, E.field, &E, 0);
+    return gd_alter_entry(D->D, E.field, &E, 0);
   
   return 0;
 }
@@ -103,10 +107,10 @@ int PolynomEntry::SetCoefficient(const char *scale, int index)
     E.scalar[index] = strdup(scale);
 
   if (D != NULL) {
-    r = dirfile_alter_entry(D->D, E.field, &E, 0);
+    r = gd_alter_entry(D->D, E.field, &E, 0);
 
     if (!r) {
-      r = get_constant(D->D, scale, GD_COMPLEX128, E.ca + index);
+      r = gd_get_constant(D->D, scale, GD_COMPLEX128, E.ca + index);
       E.a[index] = E.ca[index][0];
     }
   }
@@ -124,7 +128,7 @@ int PolynomEntry::SetCoefficient(std::complex<double> coeff, int index)
   E.comp_scal = 1;
 
   if (D != NULL)
-    return dirfile_alter_entry(D->D, E.field, &E, 0);
+    return gd_alter_entry(D->D, E.field, &E, 0);
   
   return 0;
 }
@@ -146,7 +150,7 @@ int PolynomEntry::SetPolyOrd(int poly_ord)
   E.poly_ord = poly_ord;
 
   if (D != NULL)
-    return dirfile_alter_entry(D->D, E.field, &E, 0);
+    return gd_alter_entry(D->D, E.field, &E, 0);
 
   return 0;
 }

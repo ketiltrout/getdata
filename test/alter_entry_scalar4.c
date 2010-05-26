@@ -1,5 +1,5 @@
 /* Test field modifying */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -24,42 +24,27 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_VERBOSE);
-  get_entry(D, "data", &E);
+  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
+  gd_get_entry(D, "data", &E);
   free(E.scalar[1]);
   E.scalar[1] = NULL;
   E.numbits = 11;
-  int ret = dirfile_alter_entry(D, "data", &E, 0);
-  int error = get_error(D);
+  int ret = gd_alter_entry(D, "data", &E, 0);
+  int error = gd_error(D);
 
-  dirfile_free_entry_strings(&E);
-  int n = get_entry(D, "data", &E);
+  gd_free_entry_strings(&E);
+  int n = gd_get_entry(D, "data", &E);
 
-  dirfile_close(D);
+  gd_close(D);
 
   unlink(format);
   rmdir(filedir);
 
-  if (error) {
-    fprintf(stderr, "1=%i\n", error);
-    r = 1;
-  }
-  if (n != 0) {
-    fprintf(stderr, "n=%i\n", n);
-    r = 1;
-  }
-  if (ret != 0) {
-    fprintf(stderr, "ret=%i\n", ret);
-    r = 1;
-  }
-  if (E.numbits != 11) {
-    fprintf(stderr, "E.numbits=%i\n", E.numbits);
-    r = 1;
-  }
-  if (E.scalar[1] != NULL) {
-    fprintf(stderr, "E.scalar[1]=%p\n", E.scalar[1]);
-    r = 1;
-  }
+  CHECKI(error, 0);
+  CHECKI(n, 0);
+  CHECKI(ret, 0);
+  CHECKI(E.numbits, 11);
+  CHECKP(E.scalar[1]);
 
   return r;
 }

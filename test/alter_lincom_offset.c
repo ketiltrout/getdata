@@ -1,6 +1,5 @@
 /* Test field modifying */
-#include "../src/getdata.h"
-
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -21,7 +20,7 @@ int main(void)
     "lincom LINCOM 2 data 1 0 data 1 0\n";
   int32_t data_data[256];
   int32_t c[8];
-  int fd, i, we = 0;
+  int fd, i, r = 0;
   const char* in_fields[3] = {"data", "phase", NULL};
   double b[3] = {2, 3, 0};
 
@@ -38,39 +37,23 @@ int main(void)
   write(fd, data_data, 256 * sizeof(int32_t));
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_VERBOSE);
-  int ret = dirfile_alter_lincom(D, "lincom", 0, in_fields, NULL, b);
-  int error = get_error(D);
-  int n = getdata(D, "lincom", 5, 0, 1, 0, GD_INT32, c);
+  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
+  int ret = gd_alter_lincom(D, "lincom", 0, in_fields, NULL, b);
+  int error = gd_error(D);
+  int n = gd_getdata(D, "lincom", 5, 0, 1, 0, GD_INT32, c);
 
-  dirfile_close(D);
+  gd_close(D);
 
   for (i = 0; i < 8; ++i)
-    if (c[i] != i * 2 + 86) {
-        printf("%i = %i\n", i * 2 + 86, c[i]);
-        we++;
-      }
+    CHECKIi(i,c[i], i * 2 + 86);
 
   unlink(data);
   unlink(format);
   rmdir(filedir);
 
-  if (error) {
-    fprintf(stderr, "1=%i\n", error);
-    return 1;
-  }
-  if (n != 8) {
-    fprintf(stderr, "2=%lli\n", (long long)n);
-    return 1;
-  }
-  if (ret != 0) {
-    fprintf(stderr, "3=%i\n", ret);
-    return 1;
-  }
-  if (we != 0) {
-    fprintf(stderr, "4=%i\n", we);
-    return 1;
-  }
+  CHECKI(error, 0);
+  CHECKI(n, 8);
+  CHECKI(ret, 0);
 
-  return 0;
+  return r;
 }

@@ -1,0 +1,57 @@
+.\" gd_parser_callback.3.  The gd_parser_callback man page.
+.\"
+.\" (C) 2008, 2009, 2010 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_parser_callback 3 "25 May 2010" "Version 0.7.0" "GETDATA"
+.SH NAME
+gd_parser_callback \(em set the syntax error callback handler for a dirfile
+.SH SYNOPSIS
+.B #include <getdata.h>
+.HP
+.nh
+.ad l
+.BI "void gd_parser_callback(DIRFILE *" dirfile ", gd_parser_callback_t"
+.IB sehandler ", void *" extra );
+.hy
+.ad n
+.SH DESCRIPTION
+The
+.BR gd_parser_callback ()
+updates the syntax error callback function of the DIRFILE object
+.I dirfile
+to be
+.IR sehandler ,
+and the caller supplied extra pointer passed to the handler to be
+.IR extra ,
+discarding any syntax error handler and extra pointer which were previously
+registered for this DIRFILE.  If
+.I sehandler
+is NULL, the existing handler will be removed and the default behaviour (abort
+on error) restored.  See
+.BR gd_cbopen (3)
+for a discussion on the requirements for the syntax handler.
+
+Since parsing of an existing format file occurs when the DIRFILE object is
+created, before this function can be called, this function is only useful to
+set or modify a callback function or its caller data before calling
+.BR gd_include (3),
+which will invoke the callback function if syntax errors are found in the
+included fragment.
+
+This function always succeeds, and has no return value.
+
+.SH SEE ALSO
+.BR gd_cbopen (3),
+.BR gd_include (3),
+.BR dirfile (5)

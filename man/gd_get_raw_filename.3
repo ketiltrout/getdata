@@ -1,0 +1,86 @@
+.\" gd_get_raw_filename.3.  The gd_get_raw_filename man page.
+.\"
+.\" (C) 2008, 2009, 2010 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_get_raw_filename 3 "25 May 2010" "Version 0.7.0" "GETDATA"
+.SH NAME
+gd_get_raw_filename \(em retrieve the pathname of a binary file in a dirfile
+.SH SYNOPSIS
+.B #include <getdata.h>
+.HP
+.nh
+.ad l
+.BI "const char *gd_get_raw_filename(DIRFILE *" dirfile ", const char"
+.BI * field_code );
+.hy
+.ad n
+.SH DESCRIPTION
+The
+.BR gd_get_raw_filename ()
+function retrieves the pathname of the file backing the
+.B RAW
+field specified by
+.I field_code
+in the dirfile specified by
+.IR dirfile .
+If
+.I field_code
+contains a valid representation suffix, it will be ignored.
+
+.SH RETURN VALUE
+On success,
+.BR gd_get_raw_filename ()
+returns the full pathname of the binary file associated with the specified
+field.  On error, NULL is returned and the dirfile error is set to a non-zero
+error value.  Possible error values are:
+.TP 8
+.B GD_E_ALLOC
+The library was unable to allocate memory.
+.TP
+.B GD_E_BAD_CODE
+The field specified by
+.I field_code
+was not found.
+.TP
+.B GD_E_BAD_DIRFILE
+The supplied dirfile was invalid.
+.TP
+.B GD_E_BAD_FIELD_TYPE
+The field specified by
+.I field_code
+was not a
+.B RAW
+field.
+.TP
+.B GD_E_BAD_REPR
+The representation suffix specified in
+.I field_code
+was not recognised.
+.TP
+.B GD_E_UNKNOWN_ENCODING
+The encoding scheme of the specified field could not be determined or was not
+understood by GetData.
+.P
+The dirfile error may be retrieved by calling
+.BR gd_error (3).
+A descriptive error string for the last error encountered can be obtained from
+a call to
+.BR gd_error_string (3).
+.SH SEE ALSO
+.BR gd_get_entry (3),
+.BR gd_error (3),
+.BR gd_error_string (3),
+.BR dirfile (5),
+.BR dirfile-encoding (5),
+.BR dirfile-format (5)

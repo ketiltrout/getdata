@@ -1,0 +1,64 @@
+.\" gd_metaflush.3.  The gd_metaflush man page.
+.\"
+.\" (C) 2008, 2010 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_metaflush 3 "25 May 2010" "Version 0.7.0" "GETDATA"
+.SH NAME
+gd_metaflush \(em close a dirfile and free associated memory.
+.SH SYNOPSIS
+.B #include <getdata.h>
+.HP
+.nh
+.ad l
+.BI "int gd_metaflush(DIRFILE *" dirfile );
+.hy
+.ad n
+.SH DESCRIPTION
+The
+.BR gd_metaflush ()
+function flushes all pending metadata changes in the dirfile specified by
+.I dirfile 
+to disk.  This is accomplished by re-writing the format file fragments
+containing modified metadata.  Format file fragments which are unchanged are
+not touched.
+.P
+This function flushes only metadata.  To flush the field data as well, call
+.BR gd_flush (3)
+instead.
+.SH RETURN VALUE
+On success, zero is returned.  On error, -1 is returned and the dirfile error is
+set to a non-zero error value.  Possible error values are:
+.TP 8
+.B GD_E_BAD_DIRFILE
+The supplied dirfile was invalid.
+.TP
+.B GD_E_INTERNAL_ERROR
+An internal error occurred in the library while trying to perform the task.
+This indicates a bug in the library.  Please report the incident to the
+maintainer.
+.TP
+.B GD_E_OPEN_INCLUDE
+A temporary file could not be opened into which to write the modified metadata.
+.P
+The dirfile error may be retrieved by calling
+.BR gd_error (3).
+A descriptive error string for the last error encountered can be obtained from
+a call to
+.BR gd_error_string (3).
+.SH SEE ALSO
+.BR gd_open (3),
+.BR gd_flush (3),
+.BR gd_close (3),
+.BR gd_error (3),
+.BR gd_error_string (3)

@@ -440,7 +440,7 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
 }
 
 /* add a META field by parsing a field spec */
-int dirfile_madd_spec(DIRFILE* D, const char* line, const char* parent)
+int gd_madd_spec(DIRFILE* D, const char* line, const char* parent)
 {
   char instring[GD_MAX_LINE_LENGTH];
   char outstring[GD_MAX_LINE_LENGTH];
@@ -511,7 +511,7 @@ int dirfile_madd_spec(DIRFILE* D, const char* line, const char* parent)
 }
 
 /* add a field by parsing a field spec */
-int dirfile_add_spec(DIRFILE* D, const char* line, int fragment_index)
+int gd_add_spec(DIRFILE* D, const char* line, int fragment_index)
 {
   char instring[GD_MAX_LINE_LENGTH];
   char outstring[GD_MAX_LINE_LENGTH];
@@ -577,7 +577,7 @@ int dirfile_add_spec(DIRFILE* D, const char* line, int fragment_index)
   return 0;
 }
 
-int dirfile_add(DIRFILE* D, const gd_entry_t* entry)
+int gd_add(DIRFILE* D, const gd_entry_t* entry)
 {
   int ret;
 
@@ -596,7 +596,7 @@ int dirfile_add(DIRFILE* D, const gd_entry_t* entry)
 }
 
 /* add a RAW entry */
-int dirfile_add_raw(DIRFILE* D, const char* field_code, gd_type_t data_type,
+int gd_add_raw(DIRFILE* D, const char* field_code, gd_type_t data_type,
     gd_spf_t spf, int fragment_index)
 {
   dtrace("%p, \"%s\", %x, %i %i", D, field_code, data_type, spf,
@@ -622,7 +622,7 @@ int dirfile_add_raw(DIRFILE* D, const char* field_code, gd_type_t data_type,
 }
 
 /* add a LINCOM entry */
-int dirfile_add_lincom(DIRFILE* D, const char* field_code, int n_fields,
+int gd_add_lincom(DIRFILE* D, const char* field_code, int n_fields,
     const char** in_fields, const double* m, const double* b,
     int fragment_index)
 {
@@ -664,7 +664,7 @@ int dirfile_add_lincom(DIRFILE* D, const char* field_code, int n_fields,
 }
 
 /* add a LINCOM entry with complex scalars */
-int dirfile_add_clincom(DIRFILE* D, const char* field_code, int n_fields,
+int gd_add_clincom(DIRFILE* D, const char* field_code, int n_fields,
     const char** in_fields, const double complex* cm, const double complex* cb,
     int fragment_index)
 {
@@ -706,7 +706,7 @@ int dirfile_add_clincom(DIRFILE* D, const char* field_code, int n_fields,
 }
 
 /* add a LINTERP entry */
-int dirfile_add_linterp(DIRFILE* D, const char* field_code,
+int gd_add_linterp(DIRFILE* D, const char* field_code,
     const char* in_field, const char* table, int fragment_index)
 {
   dtrace("%p, \"%s\", \"%s\", \"%s\", %i", D, field_code, in_field, table,
@@ -732,7 +732,7 @@ int dirfile_add_linterp(DIRFILE* D, const char* field_code,
 }
 
 /* add a BIT entry */
-int dirfile_add_bit(DIRFILE* D, const char* field_code, const char* in_field,
+int gd_add_bit(DIRFILE* D, const char* field_code, const char* in_field,
     gd_bit_t bitnum, gd_bit_t numbits, int fragment_index)
 {
   dtrace("%p, \"%s\", \"%s\", %i, %i, %i\n", D, field_code, in_field, bitnum,
@@ -759,7 +759,7 @@ int dirfile_add_bit(DIRFILE* D, const char* field_code, const char* in_field,
 }
 
 /* add a SBIT entry */
-int dirfile_add_sbit(DIRFILE* D, const char* field_code, const char* in_field,
+int gd_add_sbit(DIRFILE* D, const char* field_code, const char* in_field,
     gd_bit_t bitnum, gd_bit_t numbits, int fragment_index)
 {
   dtrace("%p, \"%s\", \"%s\", %i, %i, %i\n", D, field_code, in_field, bitnum,
@@ -786,7 +786,7 @@ int dirfile_add_sbit(DIRFILE* D, const char* field_code, const char* in_field,
 }
 
 /* add a MULTIPLY entry */
-int dirfile_add_multiply(DIRFILE* D, const char* field_code,
+int gd_add_multiply(DIRFILE* D, const char* field_code,
     const char* in_field1, const char* in_field2, int fragment_index)
 {
   dtrace("%p, \"%s\", \"%s\", \"%s\", %i", D, field_code, in_field1, in_field2,
@@ -812,7 +812,7 @@ int dirfile_add_multiply(DIRFILE* D, const char* field_code,
 }
 
 /* add a POLYNOM entry */
-int dirfile_add_polynom(DIRFILE* D, const char* field_code, int poly_ord,
+int gd_add_polynom(DIRFILE* D, const char* field_code, int poly_ord,
     const char* in_field, const double* a, int fragment_index)
 {
   dtrace("%p, \"%s\", %i, \"%s\", %p, %i", D, field_code, poly_ord, in_field,
@@ -852,7 +852,7 @@ int dirfile_add_polynom(DIRFILE* D, const char* field_code, int poly_ord,
 }
 
 /* add a POLYNOM entry */
-int dirfile_add_cpolynom(DIRFILE* D, const char* field_code, int poly_ord,
+int gd_add_cpolynom(DIRFILE* D, const char* field_code, int poly_ord,
     const char* in_field, const double complex* ca, int fragment_index)
 {
   dtrace("%p, \"%s\", %i, \"%s\", %p, %i", D, field_code, poly_ord, in_field,
@@ -892,8 +892,8 @@ int dirfile_add_cpolynom(DIRFILE* D, const char* field_code, int poly_ord,
 }
 
 /* add a PHASE entry */
-int dirfile_add_phase(DIRFILE* D, const char* field_code, const char* in_field,
-    gd_shift_t shift, int fragment_index)
+int gd_add_phase(DIRFILE* D, const char* field_code,
+    const char* in_field, gd_shift_t shift, int fragment_index)
 {
   dtrace("%p, \"%s\", \"%s\", %lli, %i", D, field_code, in_field,
       (long long)shift, fragment_index);
@@ -918,7 +918,7 @@ int dirfile_add_phase(DIRFILE* D, const char* field_code, const char* in_field,
 }
 
 /* add a STRING entry */
-int dirfile_add_string(DIRFILE* D, const char* field_code, const char* value,
+int gd_add_string(DIRFILE* D, const char* field_code, const char* value,
     int fragment_index)
 {
   dtrace("%p, \"%s\", \"%s\", %i", D, field_code, value, fragment_index);
@@ -955,8 +955,9 @@ int dirfile_add_string(DIRFILE* D, const char* field_code, const char* value,
 }
 
 /* add a CONST entry */
-int dirfile_add_const(DIRFILE* D, const char* field_code, gd_type_t const_type,
-    gd_type_t data_type, const void* value, int fragment_index)
+int gd_add_const(DIRFILE* D, const char* field_code,
+    gd_type_t const_type, gd_type_t data_type, const void* value,
+    int fragment_index)
 {
   dtrace("%p, \"%s\", 0x%x, 0x%x, %p, %i", D, field_code, const_type, data_type,
       value, fragment_index);
@@ -993,7 +994,7 @@ int dirfile_add_const(DIRFILE* D, const char* field_code, gd_type_t const_type,
   return error;
 }
 
-int dirfile_madd(DIRFILE* D, const gd_entry_t* entry, const char* parent)
+int gd_madd(DIRFILE* D, const gd_entry_t* entry, const char* parent)
 {
   int ret;
 
@@ -1012,8 +1013,9 @@ int dirfile_madd(DIRFILE* D, const gd_entry_t* entry, const char* parent)
 }
 
 /* add a META LINCOM entry */
-int dirfile_madd_lincom(DIRFILE* D, const char* parent, const char* field_code,
-    int n_fields, const char** in_fields, const double* m, const double* b)
+int gd_madd_lincom(DIRFILE* D, const char* parent,
+    const char* field_code, int n_fields, const char** in_fields,
+    const double* m, const double* b)
 {
   dtrace("%p, \"%s\", \"%s\", %i, %p, %p, %p", D, field_code, parent,
       n_fields, in_fields, m, b);
@@ -1054,9 +1056,9 @@ int dirfile_madd_lincom(DIRFILE* D, const char* parent, const char* field_code,
 }
 
 /* add a META LINCOM entry, with complex scalaras */
-int dirfile_madd_clincom(DIRFILE* D, const char* parent, const char* field_code,
-    int n_fields, const char** in_fields, const double complex* cm,
-    const double complex* cb)
+int gd_madd_clincom(DIRFILE* D, const char* parent,
+    const char* field_code, int n_fields, const char** in_fields,
+    const double complex* cm, const double complex* cb)
 {
   dtrace("%p, \"%s\", \"%s\", %i, %p, %p, %p", D, field_code, parent,
       n_fields, in_fields, cm, cb);
@@ -1097,8 +1099,8 @@ int dirfile_madd_clincom(DIRFILE* D, const char* parent, const char* field_code,
 }
 
 /* add a META LINTERP entry */
-int dirfile_madd_linterp(DIRFILE* D, const char* parent, const char* field_code,
-    const char* in_field, const char* table)
+int gd_madd_linterp(DIRFILE* D, const char* parent,
+    const char* field_code, const char* in_field, const char* table)
 {
   dtrace("%p, \"%s\", \"%s\", \"%s\", \"%s\"", D, field_code, parent, in_field,
       table);
@@ -1122,7 +1124,7 @@ int dirfile_madd_linterp(DIRFILE* D, const char* parent, const char* field_code,
 }
 
 /* add a META BIT entry */
-int dirfile_madd_bit(DIRFILE* D, const char* parent, const char* field_code,
+int gd_madd_bit(DIRFILE* D, const char* parent, const char* field_code,
     const char* in_field, gd_bit_t bitnum, gd_bit_t numbits)
 {
   dtrace("%p, \"%s\", \"%s\", \"%s\", %i, %in", D, field_code, parent, in_field,
@@ -1149,7 +1151,7 @@ int dirfile_madd_bit(DIRFILE* D, const char* parent, const char* field_code,
 }
 
 /* add a META SBIT entry */
-int dirfile_madd_sbit(DIRFILE* D, const char* parent, const char* field_code,
+int gd_madd_sbit(DIRFILE* D, const char* parent, const char* field_code,
     const char* in_field, gd_bit_t bitnum, gd_bit_t numbits)
 {
   dtrace("%p, \"%s\", \"%s\", \"%s\", %i, %in", D, field_code, parent, in_field,
@@ -1176,7 +1178,7 @@ int dirfile_madd_sbit(DIRFILE* D, const char* parent, const char* field_code,
 }
 
 /* add a META MULTIPLY entry */
-int dirfile_madd_multiply(DIRFILE* D, const char* parent,
+int gd_madd_multiply(DIRFILE* D, const char* parent,
     const char* field_code, const char* in_field1, const char* in_field2)
 {
   dtrace("%p, \"%s\", \"%s\", \"%s\", \"%s\"", D, field_code, parent,
@@ -1201,7 +1203,7 @@ int dirfile_madd_multiply(DIRFILE* D, const char* parent,
 }
 
 /* add a META PHASE entry */
-int dirfile_madd_phase(DIRFILE* D, const char* parent, const char* field_code,
+int gd_madd_phase(DIRFILE* D, const char* parent, const char* field_code,
     const char* in_field, gd_shift_t shift)
 {
   dtrace("%p, \"%s\", \"%s\", \"%s\", %lli", D, field_code, parent, in_field,
@@ -1227,8 +1229,8 @@ int dirfile_madd_phase(DIRFILE* D, const char* parent, const char* field_code,
 }
 
 /* add a META POLYNOM entry */
-int dirfile_madd_polynom(DIRFILE* D, const char* parent, const char* field_code,
-    int poly_ord, const char* in_field, const double* a)
+int gd_madd_polynom(DIRFILE* D, const char* parent,
+    const char* field_code, int poly_ord, const char* in_field, const double* a)
 {
   dtrace("%p, \"%s\", \"%s\", %i, \"%s\", %p", D, field_code, parent, poly_ord,
       in_field, a);
@@ -1268,7 +1270,7 @@ int dirfile_madd_polynom(DIRFILE* D, const char* parent, const char* field_code,
 }
 
 /* add a META POLYNOM entry */
-int dirfile_madd_cpolynom(DIRFILE* D, const char* parent,
+int gd_madd_cpolynom(DIRFILE* D, const char* parent,
     const char* field_code, int poly_ord, const char* in_field,
     const double complex* ca)
 {
@@ -1310,8 +1312,8 @@ int dirfile_madd_cpolynom(DIRFILE* D, const char* parent,
 }
 
 /* add a META STRING entry */
-int dirfile_madd_string(DIRFILE* D, const char* parent, const char* field_code,
-    const char* value)
+int gd_madd_string(DIRFILE* D, const char* parent,
+    const char* field_code, const char* value)
 {
   char buffer[GD_MAX_LINE_LENGTH];
   dtrace("%p, \"%s\", \"%s\", \"%s\"", D, field_code, parent, value);
@@ -1348,7 +1350,7 @@ int dirfile_madd_string(DIRFILE* D, const char* parent, const char* field_code,
 }
 
 /* add a META CONST entry */
-int dirfile_madd_const(DIRFILE* D, const char* parent, const char* field_code,
+int gd_madd_const(DIRFILE* D, const char* parent, const char* field_code,
     gd_type_t const_type, gd_type_t data_type, const void* value)
 {
   char buffer[GD_MAX_LINE_LENGTH];

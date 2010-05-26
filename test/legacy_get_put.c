@@ -1,6 +1,6 @@
 /* Attempt a write following a read via the legacy API -- this requires
  * closing and then re-opening the legacy dirfile */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <inttypes.h>
 #include <stdlib.h>
@@ -22,7 +22,7 @@ int main(void)
   const char* format_data = "data RAW UINT8 8\n";
   uint8_t c[8];
   unsigned char data_data[256];
-  int fd, i;
+  int fd, i, r = 0;
 
   memset(c, 0, 8);
   mkdir(filedir, 0777);
@@ -50,13 +50,10 @@ int main(void)
   unlink(format);
   rmdir(filedir);
 
-  if (get_error)
-    return 1;
-  if (put_error)
-    return 1;
-  if (n != 8)
-    return 1;
+  CHECKI(get_error,0);
+  CHECKI(put_error,0);
+  CHECKI(n,8);
 
-  return 0;
+  return r;
 #endif
 }

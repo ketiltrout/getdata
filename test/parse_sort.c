@@ -1,5 +1,5 @@
 /* Field sort check */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -34,10 +34,10 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY | GD_VERBOSE);
-  const char** field_list = get_field_list(D);
+  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  const char** field_list = gd_get_field_list(D);
 
-  if (get_error(D))
+  if (gd_error(D))
     r = 1;
   else if (field_list == NULL)
     r = 1;
@@ -66,7 +66,7 @@ int main(void)
   else if (field_list[11][0] != 'k')
     r = 1;
 
-  dirfile_close(D);
+  gd_close(D);
   unlink(format);
   rmdir(filedir);
 

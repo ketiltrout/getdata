@@ -1,5 +1,5 @@
 /* Attempt to write FLOAT64 with the opposite endianness */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <inttypes.h>
 #include <stdlib.h>
@@ -28,7 +28,7 @@ int main(void)
   const char* data = __TEST__ "dirfile/data";
   char format_data[1000];
   double c = 4. / 3.;
-  int fd, i;
+  int fd, i, r = 0;
   const int big_endian = BigEndian();
   union {
     double f;
@@ -45,11 +45,11 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_UNENCODED | GD_VERBOSE);
-  int n = putdata(D, "data", 5, 0, 1, 0, GD_FLOAT64, &c);
-  int error = get_error(D);
+  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_UNENCODED | GD_VERBOSE);
+  int n = gd_putdata(D, "data", 5, 0, 1, 0, GD_FLOAT64, &c);
+  int error = gd_error(D);
 
-  dirfile_close(D);
+  gd_close(D);
 
   fd = open(data, O_RDONLY);
   lseek(fd, 5 * sizeof(double), SEEK_SET);
@@ -60,18 +60,11 @@ int main(void)
   unlink(format);
   rmdir(filedir);
 
-  if (n != 1)
-    return 1;
-  if (error)
-    return 1;
+  CHECKI(n,1);
+  CHECKI(error, 0);
   
   for (i = 0; i < 8; ++i)
-    if (x[(big_endian) ? 7 - i : i] != u.b[i]) {
-      printf("%02x %02x %02x %02x %02x %02x %02x %02x %.15g %i\n", 
-          u.b[0], u.b[1], u.b[2], u.b[3], u.b[4], u.b[5], u.b[6], u.b[7], u.f,
-          big_endian);
-      return 1;
-    }
+    CHECKXi(i,u.b[i],x[(big_endian) ? 7 - i : i]);
 
-  return 0;
+  return r;
 }

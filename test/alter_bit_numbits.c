@@ -1,6 +1,5 @@
 /* Test field modifying */
-#include "../src/getdata.h"
-
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -20,7 +19,7 @@ int main(void)
   const char* format_data = "data RAW UINT8 8\nbit BIT data 1 1\n";
   unsigned char data_data[256];
   unsigned char c[8];
-  int fd, i, we = 0;
+  int fd, i, r = 0;
 
   mkdir(filedir, 0777);
 
@@ -35,39 +34,23 @@ int main(void)
   write(fd, data_data, 256);
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_VERBOSE);
-  int ret = dirfile_alter_bit(D, "bit", NULL, -1, 2);
-  int error = get_error(D);
-  int n = getdata(D, "bit", 5, 0, 1, 0, GD_UINT8, c);
+  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
+  int ret = gd_alter_bit(D, "bit", NULL, -1, 2);
+  int error = gd_error(D);
+  int n = gd_getdata(D, "bit", 5, 0, 1, 0, GD_UINT8, c);
 
-  dirfile_close(D);
+  gd_close(D);
 
   for (i = 0; i < 8; ++i)
-    if (c[i] != i / 2) {
-        printf("%i = %i\n", i / 2, c[i]);
-        we++;
-      }
+    CHECKIi(i,c[i], i / 2);
 
   unlink(data);
   unlink(format);
   rmdir(filedir);
 
-  if (error) {
-    fprintf(stderr, "1=%i\n", error);
-    return 1;
-  }
-  if (n != 8) {
-    fprintf(stderr, "2=%lli\n", (long long)n);
-    return 1;
-  }
-  if (ret != 0) {
-    fprintf(stderr, "3=%i\n", ret);
-    return 1;
-  }
-  if (we != 0) {
-    fprintf(stderr, "4=%i\n", we);
-    return 1;
-  }
+  CHECKI(error,0);
+  CHECKI(n, 8);
+  CHECKI(ret, 0);
 
-  return 0;
+  return r;
 }

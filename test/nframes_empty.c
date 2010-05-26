@@ -1,5 +1,5 @@
 /* Requesting the number of frames from an empty dirfile should fail cleanly */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -16,10 +16,10 @@ int main(void)
   mkdir(filedir, 0777);
   close(open(format, O_CREAT | O_EXCL | O_WRONLY, 0666));
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY | GD_VERBOSE);
-  size_t n = get_nframes(D);
-  int error = get_error(D);
-  dirfile_close(D);
+  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  size_t n = gd_get_nframes(D);
+  int error = gd_error(D);
+  gd_close(D);
 
   unlink(format);
   rmdir(filedir);

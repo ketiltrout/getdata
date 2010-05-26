@@ -1,5 +1,5 @@
 /* Test field modifying */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -33,38 +33,26 @@ int main(void)
   write(fd, data_data, 256);
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_VERBOSE);
-  get_entry(D, "data", &E);
+  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
+  gd_get_entry(D, "data", &E);
   E.scalar[0] = "const";
-  int ret = dirfile_alter_entry(D, "data", &E, 0);
-  int error = get_error(D);
+  int ret = gd_alter_entry(D, "data", &E, 0);
+  int error = gd_error(D);
 
   E.scalar[0] = NULL;
-  dirfile_free_entry_strings(&E);
-  int n = get_entry(D, "data", &E);
+  gd_free_entry_strings(&E);
+  int n = gd_get_entry(D, "data", &E);
 
-  dirfile_close(D);
+  gd_close(D);
 
   unlink(data);
   unlink(format);
   rmdir(filedir);
 
-  if (error) {
-    fprintf(stderr, "1=%i\n", error);
-    r = 1;
-  }
-  if (n != 0) {
-    fprintf(stderr, "n=%i\n", n);
-    r = 1;
-  }
-  if (ret != 0) {
-    fprintf(stderr, "ret=%i\n", ret);
-    r = 1;
-  }
-  if (E.spf != 11) {
-    fprintf(stderr, "E.spf=%i\n", E.spf);
-    r = 1;
-  }
+  CHECKI(error, 0);
+  CHECKI(n, 0);
+  CHECKI(ret, 0);
+  CHECKI(E.spf, 11);
 
   return r;
 }

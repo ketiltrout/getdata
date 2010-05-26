@@ -155,7 +155,7 @@ int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,
   return D->n_fragment - 1;
 }
 
-int dirfile_include(DIRFILE* D, const char* file, int fragment_index,
+int gd_include(DIRFILE* D, const char* file, int fragment_index,
     unsigned long flags)
 {
   int standards = DIRFILE_STANDARDS_VERSION;
@@ -280,7 +280,7 @@ static int _GD_ContainsFragment(int* f, int nf, int fragment)
   return 0;
 }
 
-int dirfile_uninclude(DIRFILE* D, int fragment_index, int del)
+int gd_uninclude(DIRFILE* D, int fragment_index, int del)
 {
   int parent, j;
   unsigned int i, o;

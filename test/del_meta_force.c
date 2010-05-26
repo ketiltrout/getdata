@@ -1,6 +1,5 @@
 /* Attempt to delete a field */
-#include "../src/getdata.h"
-
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -23,7 +22,7 @@ int main(void)
     "META data z STRING 5\n"
     "META data l STRING 6\n"
     "s STRING e\n";
-  int fd;
+  int fd, r = 0;
 
   mkdir(filedir, 0777);
 
@@ -31,27 +30,18 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDWR);
-  int ret = dirfile_delete(D, "data", GD_DEL_META);
-  int error = get_error(D);
-  int nf = get_nfields(D);
-  dirfile_close(D);
+  DIRFILE* D = gd_open(filedir, GD_RDWR);
+  int ret = gd_delete(D, "data", GD_DEL_META);
+  int error = gd_error(D);
+  int nf = gd_get_nfields(D);
+  gd_close(D);
 
   unlink(format);
   rmdir(filedir);
 
-  if (error != GD_E_OK) {
-    fprintf(stderr, "2=%i\n", error);
-    return 1;
-  }
-  if (nf != 2) {
-    fprintf(stderr, "3=%i\n", nf);
-    return 1;
-  }
-  if (ret != 0) {
-    fprintf(stderr, "4=%i\n", ret);
-    return 1;
-  }
+  CHECKI(error, GD_E_OK);
+  CHECKI(nf, 2);
+  CHECKI(ret, 0);
 
-  return 0;
+  return r;
 }

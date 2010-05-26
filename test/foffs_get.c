@@ -1,6 +1,5 @@
 /* Test frameoffset */
-#include "../src/getdata.h"
-
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -17,7 +16,7 @@ int main(void)
   const char* data = __TEST__ "dirfile/data";
   const char* format_data = "data RAW UINT8 8\nFRAMEOFFSET 13\n";
   unsigned char data_data[256];
-  int fd;
+  int fd,r = 0;
 
   mkdir(filedir, 0777);
 
@@ -32,20 +31,18 @@ int main(void)
   write(fd, data_data, 256);
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY | GD_VERBOSE);
-  off_t n = get_frameoffset(D, 0);
-  int error = get_error(D);
+  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  off_t n = gd_get_frameoffset(D, 0);
+  int error = gd_error(D);
 
-  dirfile_close(D);
+  gd_close(D);
 
   unlink(data);
   unlink(format);
   rmdir(filedir);
 
-  if (error)
-    return 1;
-  if (n != 13)
-    return 1;
+  CHECKI(error,0);
+  CHECKI(n, 13);
 
-  return 0;
+  return r;
 }

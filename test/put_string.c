@@ -1,5 +1,5 @@
 /* Add a RAW field */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <inttypes.h>
 #include <stdlib.h>
@@ -16,25 +16,23 @@ int main(void)
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
   char string[1024] = "";
+  int r = 0;
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
-  dirfile_add_string(D, "data", "some string", 0);
-  put_string(D, "data", "some other string");
-  int error = get_error(D);
-  dirfile_close(D);
+  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
+  gd_add_string(D, "data", "some string", 0);
+  gd_put_string(D, "data", "some other string");
+  int error = gd_error(D);
+  gd_close(D);
 
   /* check */
-  D = dirfile_open(filedir, GD_RDONLY | GD_VERBOSE);
-  get_string(D, "data", 1023, string);
-  dirfile_close(D);
+  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  gd_get_string(D, "data", 1023, string);
+  gd_close(D);
 
   unlink(format);
   rmdir(filedir);
 
-  if (strcmp(string, "some other string")) {
-    fprintf(stderr, "string=%s\n", string);
-    return 1;
-  }
-
-  return (error != GD_E_OK);
+  CHECKS(string,"some other string");
+  CHECKI(error,GD_E_OK);
+  return r;
 }

@@ -1,6 +1,6 @@
-/* Test get_fragmentname */
+/* Test gd_get_fragmentname */
 #define _SVID_SOURCE
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -20,7 +20,7 @@ int main(void)
   const char* format1_data = "data RAW UINT8 11\n";
   char* form0 = NULL;
   char* form1 = NULL;
-  int fd;
+  int fd, r = 0;
 
   mkdir(filedir, 0777);
 
@@ -32,20 +32,17 @@ int main(void)
   write(fd, format1_data, strlen(format1_data));
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY | GD_VERBOSE);
-  form0 = strdup(get_fragmentname(D, 0));
-  form1 = strdup(get_fragmentname(D, 1));
-  dirfile_close(D);
+  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  form0 = strdup(gd_get_fragmentname(D, 0));
+  form1 = strdup(gd_get_fragmentname(D, 1));
+  gd_close(D);
 
   unlink(format1);
   unlink(format);
   rmdir(filedir);
 
-  if (form0 == NULL || form1 == NULL)
-    return 1;
+  CHECKS(form0, __TEST__ "dirfile/format");
+  CHECKS(form1, __TEST__ "dirfile/format1");
 
-  if (form0[0] == 0 || form1[0] == 0)
-    return 1;
-
-  return 0;
+  return r;
 }

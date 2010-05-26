@@ -1,6 +1,6 @@
 /* Attempt to read UINT8 */
 #include "../src/config.h"
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <inttypes.h>
 #include <stdlib.h>
@@ -22,7 +22,7 @@ int main(void)
   uint16_t c[8];
   char command[4096];
   uint16_t data_data[256];
-  int fd;
+  int fd, r = 0;
 
   memset(c, 0, 8);
   mkdir(filedir, 0777);
@@ -44,14 +44,14 @@ int main(void)
     return 1;
 
 #ifdef USE_LZMA
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY | GD_VERBOSE);
+  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
 #else
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
+  DIRFILE* D = gd_open(filedir, GD_RDONLY);
 #endif
-  int n = getdata(D, "data", 5, 0, 1, 0, GD_UINT16, c);
-  int error = get_error(D);
+  int n = gd_getdata(D, "data", 5, 0, 1, 0, GD_UINT16, c);
+  int error = gd_error(D);
 
-  dirfile_close(D);
+  gd_close(D);
 
   unlink(lzmadata);
   unlink(format);
@@ -60,21 +60,14 @@ int main(void)
 #ifdef USE_LZMA
   int i;
 
-  if (error)
-    return 1;
-  if (n != 8) {
-    printf("n = %i\n", n);
-    return 1;
-  }
+  CHECKI(error, 0);
+  CHECKI(n, 8);
   for (i = 0; i < 8; ++i)
-    if (c[i] != 40 + i)
-      return 1;
+    CHECKUi(i, c[i], 40 + i);
 #else
-  if (error != GD_E_UNSUPPORTED)
-    return 1;
-  if (n != 0)
-    return 1;
+  CHECKI(error, GD_E_UNSUPPORTED);
+  CHECKI(n, 0);
 #endif
 
-  return 0;
+  return r;
 }

@@ -1,5 +1,5 @@
 /* Add a RAW field */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -13,25 +13,24 @@ int main(void)
 {
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
+  int r = 0;
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_CREAT);
-  dirfile_madd_spec(D, "META INDEX RAW UINT8 2", "INDEX");
-  int error = get_error(D);
+  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_CREAT);
+  gd_madd_spec(D, "META INDEX RAW UINT8 2", "INDEX");
+  int error = gd_error(D);
 
   /* check */
-  int n = get_nfields(D);
-  int m = get_nmfields(D, "INDEX");
+  int n = gd_get_nfields(D);
+  int m = gd_get_nmfields(D, "INDEX");
 
-  dirfile_close(D);
+  gd_close(D);
 
   unlink(format);
   rmdir(filedir);
 
-  if (n != 1)
-    return 1;
+  CHECKI(n, 1);
+  CHECKI(m, 0);
+  CHECKI(error, GD_E_FORMAT);
 
-  if (m != 0)
-    return 1;
-
-  return (error != GD_E_FORMAT);
+  return r;
 }

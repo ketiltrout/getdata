@@ -1,6 +1,6 @@
 /* (C) 2002-2005 C. Barth Netterfield
  * (C) 2003-2005 Theodore Kisner
- * (C) 2005-2008 D. V. Wiebe
+ * (C) 2005-2010 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -28,7 +28,7 @@
 #error "Never use <getdata_legacy.h> directly; include <getdata.h> instead."
 #endif
 
-extern const char *GD_ERROR_CODES[GD_N_ERROR_CODES] __attribute_deprecated__;
+extern const char *GD_ERROR_CODES[GD_N_ERROR_CODES] gd_deprecated;
 
 struct RawEntryType {
   const char* field;
@@ -97,31 +97,31 @@ extern "C" {
 #endif
 
 extern struct FormatType *GetFormat(const char *filedir, int *error_code)
-  __THROW __gd_nonnull ((1,2)) __attribute_deprecated__;
+  gd_nothrow gd_nonnull ((1,2)) gd_deprecated;
 
 /* legacy API for get_error_string() */
-extern char* GetDataErrorString(char* buffer, size_t buflen) __THROW
-  __gd_nonnull ((1)) __attribute_deprecated__;
+extern char* GetDataErrorString(char* buffer, size_t buflen) gd_nothrow
+  gd_nonnull ((1)) gd_deprecated;
 
 /* legacy API for getdata() */
 extern int GetData(const char *dirfilename, const char *field_code,
     int first_frame, int first_samp, int num_frames, int num_samp,
-    char return_type, void *data_out, int *error_code) __gd_nonnull ((1,2,9))
-  __attribute_deprecated__;
+    char return_type, void *data_out, int *error_code) gd_nonnull ((1,2,9))
+  gd_deprecated;
 
 /* legacy API for get_nframes() */
 extern int GetNFrames(const char *dirfilename, int *error_code,
-    const void *unused) __gd_nonnull ((1,2)) __attribute_deprecated__;
+    const void *unused) gd_nonnull ((1,2)) gd_deprecated;
 
 /* legacy API for get_spf() */
 extern int GetSamplesPerFrame(const char *dirfilename, const char *field_code,
-    int *error_code) __THROW __gd_nonnull ((1,2,3)) __attribute_deprecated__;
+    int *error_code) gd_nothrow gd_nonnull ((1,2,3)) gd_deprecated;
 
 /* legacy API for putdata() */
 extern int PutData(const char *filename_in, const char *field_code,
     int first_frame, int first_samp, int num_frames, int num_samp,
     char data_type, const void *data_in, int *error_code)
-__gd_nonnull ((1,2,9)) __attribute_deprecated__;
+gd_nonnull ((1,2,9)) gd_deprecated;
 
 #ifdef __cplusplus
 }

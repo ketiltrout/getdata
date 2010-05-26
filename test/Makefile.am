@@ -33,14 +33,16 @@ endif
 LDADD=../src/libgetdata.la
 INCLUDES=-Wall $(WEXTRA) -I$(top_srcdir)/src -D__TEST__=\"$@\"
 
+EXTRA_DIST=test.h
+
 ADD_TESTS=add add_bit add_bit_bitnum add_bit_bitsize add_bit_invalid \
 					add_bit_numbits add_clincom add_code add_const add_cpolynom \
 					add_duplicate add_format add_invalid add_lincom add_lincom_invalid \
-					add_lincom_nfields add_linterp add_linterp_invalid add_many \
-					add_multiply add_multiply_invalid add_phase add_phase_invalid \
-					add_polynom add_protect add_raw add_raw_invalid add_raw_spf \
-					add_raw_type add_rdonly add_sbit add_scalar add_sort add_spec \
-					add_spec_directive add_spec_invalid add_spec_meta add_string add_type
+					add_lincom_nfields add_linterp add_linterp_invalid add_multiply \
+					add_multiply_invalid add_phase add_phase_invalid add_polynom \
+					add_protect add_raw add_raw_invalid add_raw_spf add_raw_type \
+					add_rdonly add_sbit add_scalar add_sort add_spec add_spec_directive \
+					add_spec_invalid add_spec_meta add_string add_type
 
 ALTER_TESTS=alter_bit_bitnum alter_bit_numbits alter_cpolynom alter_const \
 						alter_entry alter_entry_recode alter_entry_scalar2a \
@@ -153,8 +155,7 @@ GET_TESTS=get64 get_bad_code get_bit get_char get_clincom get_complex128 \
 					get_polynom_noin get_recurse get_sbit get_sf get_ss get_type \
 					get_uint16 get_uint32 get_uint64 get_zero
 
-GLOBAL_TESTS=global_name global_ref global_ref_empty global_ref_get \
-						 global_ref_set
+GLOBAL_TESTS=global_name global_ref global_ref_empty global_ref_set
 
 if TEST_GZIP
 GZIP_TESTS=gzip_get gzip_get_get gzip_move_from gzip_nframes
@@ -276,8 +277,8 @@ XZ_TESTS=xz_get xz_nframes
 endif
 
 TESTS=$(ADD_TESTS)        $(ALTER_TESTS)      $(ASCII_TESTS)      \
-			$(BZIP_TESTS)       $(CVLIST_TESTS)     $(CLOSE_TESTS)      \
-			$(CONVERT_TESTS)    $(CREAT_TESTS)      $(DEL_TESTS)        \
+			$(BZIP_TESTS)       $(CLOSE_TESTS)      $(CONVERT_TESTS)    \
+			$(CREAT_TESTS)      $(CVLIST_TESTS)     $(DEL_TESTS)        \
 			$(DFES_TESTS)       $(ENCODE_TESTS)     $(ENDIAN_TESTS)     \
 			$(ENTRY_TESTS)      $(ERROR_TESTS)      $(FILE_TESTS)       \
 			$(FLIST_TESTS)      $(FLUSH_TESTS)      $(FOFFS_TESTS)      \
@@ -294,6 +295,10 @@ TESTS=$(ADD_TESTS)        $(ALTER_TESTS)      $(ASCII_TESTS)      \
 			$(VLIST_TESTS)      $(XZ_TESTS)
 
 check_PROGRAMS=$(TESTS)
+
+# test.h dependency
+%.o: %.c test.h
+	$(COMPILE) -c $<
 
 # clean up after the tests
 check-local: check-TESTS

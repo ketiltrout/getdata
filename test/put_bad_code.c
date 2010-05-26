@@ -1,6 +1,5 @@
 /* Attempt to write a non-existant field */
-#include "../src/getdata.h"
-
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -16,7 +15,7 @@ int main(void)
   const char* format = __TEST__ "dirfile/format";
   const char* format_data = "\n";
   unsigned char c = 0;
-  int fd;
+  int fd, r = 0;
 
   mkdir(filedir, 0777);
 
@@ -24,17 +23,16 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_UNENCODED);
-  int n = putdata(D, "no-such-field", 5, 0, 1, 0, GD_UINT8, &c);
+  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_UNENCODED);
+  int n = gd_putdata(D, "no-such-field", 5, 0, 1, 0, GD_UINT8, &c);
 
-  int error = get_error(D);
-  dirfile_close(D);
+  int error = gd_error(D);
+  gd_close(D);
 
   unlink(format);
   rmdir(filedir);
 
-  if (n != 0)
-    return 1;
-
-  return (error != GD_E_BAD_CODE);
+  CHECKI(n, 0);
+  CHECKI(error,GD_E_BAD_CODE);
+  return r;
 }

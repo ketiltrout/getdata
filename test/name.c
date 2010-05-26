@@ -1,6 +1,5 @@
 /* Attempt to rename a field */
-#include "../src/getdata.h"
-
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -20,7 +19,7 @@ int main(void)
   const char* format_data = "cata RAW UINT8 8\ndata RAW UINT8 8\n"
     "eata RAW UINT8 8\n";
   unsigned char data_data[256];
-  int fd;
+  int fd, r = 0;
 
   mkdir(filedir, 0777);
 
@@ -35,10 +34,10 @@ int main(void)
   write(fd, data_data, 256);
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_VERBOSE);
-  int r = dirfile_rename(D, "data", "zata", 0);
-  int error = get_error(D);
-  const char** fl = get_field_list(D);
+  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
+  int ret = gd_rename(D, "data", "zata", 0);
+  int error = gd_error(D);
+  const char** fl = gd_get_field_list(D);
 
   const char* field_list[4];
 
@@ -47,45 +46,21 @@ int main(void)
   field_list[2] = strdup(fl[2]);
   field_list[3] = strdup(fl[3]);
 
-  dirfile_close(D);
+  gd_close(D);
 
   int unlink_data = unlink(data);
   int unlink_zata = unlink(zata);
   unlink(format);
   rmdir(filedir);
 
-  if (error) {
-    fprintf(stderr, "1=%i\n", error);
-    return 1;
-  }
-  if (r != 0) {
-    fprintf(stderr, "2=%i\n", r);
-    return 1;
-  }
-  if (strcmp(field_list[0], "INDEX")) {
-    fprintf(stderr, "3=%s\n", field_list[0]);
-    return 1;
-  }
-  if (strcmp(field_list[1], "cata")) {
-    fprintf(stderr, "4=%s\n", field_list[1]);
-    return 1;
-  }
-  if (strcmp(field_list[2], "eata")) {
-    fprintf(stderr, "5=%s\n", field_list[2]);
-    return 1;
-  }
-  if (strcmp(field_list[3], "zata")) {
-    fprintf(stderr, "6=%s\n", field_list[3]);
-    return 1;
-  }
-  if (unlink_data != 0) {
-    fprintf(stderr, "7=%i\n", unlink_data);
-    return 1;
-  }
-  if (unlink_zata == 0) {
-    fprintf(stderr, "7=%i\n", unlink_zata);
-    return 1;
-  }
+  CHECKI(error,0);
+  CHECKI(ret,0);
+  CHECKS(field_list[0], "INDEX");
+  CHECKS(field_list[1], "cata");
+  CHECKS(field_list[2], "eata");
+  CHECKS(field_list[3], "zata");
+  CHECKI(unlink_data, 0);
+  CHECKI(unlink_zata, -1);
 
-  return 0;
+  return r;
 }

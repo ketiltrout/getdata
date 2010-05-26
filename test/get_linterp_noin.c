@@ -1,6 +1,5 @@
 /* Attempt to read LINTERP */
-#include "../src/getdata.h"
-
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -18,7 +17,7 @@ int main(void)
   const char* table = __TEST__ "dirfile/table";
   const char* format_data = "linterp LINTERP data ./table\n";
   unsigned char c = 0;
-  int fd, i;
+  int fd, i, r = 0;
 
   mkdir(filedir, 0777);
 
@@ -31,18 +30,18 @@ int main(void)
     fprintf(t, "%i %i\n", i * 6, i * 12);
   fclose(t);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
-  int n = getdata(D, "linterp", 5, 0, 1, 0, GD_UINT8, &c);
-  int error = get_error(D);
+  DIRFILE* D = gd_open(filedir, GD_RDONLY);
+  int n = gd_getdata(D, "linterp", 5, 0, 1, 0, GD_UINT8, &c);
+  int error = gd_error(D);
 
-  dirfile_close(D);
+  gd_close(D);
 
   unlink(table);
   unlink(format);
   rmdir(filedir);
 
-  if (n != 0)
-    return 1;
+  CHECKI(n, 0);
+  CHECKI(error, GD_E_BAD_CODE);
 
-  return (error != GD_E_BAD_CODE);
+  return r;
 }

@@ -1,5 +1,5 @@
 /* Attempt to read COMPLEX128 as INT16 */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <complex.h>
 #include <inttypes.h>
@@ -19,7 +19,7 @@ int main(void)
   const char* format_data = "data RAW COMPLEX128 8\n";
   double complex  data_data[256];
   int16_t c[8];
-  int fd, i;
+  int fd, i, r = 0;
 
   memset(c, 0, 8);
   mkdir(filedir, 0777);
@@ -35,22 +35,21 @@ int main(void)
   write(fd, data_data, 256 * sizeof(double complex));
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY | GD_VERBOSE);
-  int n = getdata(D, "data", 5, 0, 1, 0, GD_INT16, c);
+  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  int n = gd_getdata(D, "data", 5, 0, 1, 0, GD_INT16, c);
 
-  if (get_error(D))
-    return 1;
-  if (n != 8)
-    return 1;
+  int error = gd_error(D);
+  CHECKI(error, 0);
+  CHECKI(n,8);
   for (i = 0; i < 8; ++i)
     if (c[i] != 40 + i)
-      return 1;
+      CHECKIi(i,c[i], 40 + i);
 
-  dirfile_close(D);
+  gd_close(D);
 
   unlink(data);
   unlink(format);
   rmdir(filedir);
 
-  return 0;
+  return r;
 }

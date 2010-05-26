@@ -54,14 +54,14 @@ IDL_StructDefPtr gdidl_const_def = NULL;
   do { \
     if (kw.error != NULL) { \
       IDL_ALLTYPES a; \
-      a.i = get_error(D); \
+      a.i = gd_error(D); \
       IDL_StoreScalar(kw.error, IDL_TYP_INT, &a); \
     } \
     if (kw.estr != NULL) { \
       IDL_StoreScalarZero(kw.estr, IDL_TYP_INT); \
       char buffer[GD_MAX_LINE_LENGTH]; \
       kw.estr->type = IDL_TYP_STRING; \
-      IDL_StrStore((IDL_STRING*)&kw.estr->value.s, get_error_string(D, buffer, \
+      IDL_StrStore((IDL_STRING*)&kw.estr->value.s, gd_error_string(D, buffer, \
             GD_MAX_LINE_LENGTH)); \
     } \
   } while(0)
@@ -148,7 +148,7 @@ static void gdidl_clear_dirfile(IDL_LONG d)
   dreturnvoid();
 }
 
-/* convert a getdata type code to an IDL type code */
+/* convert a GetData type code to an IDL type code */
 static inline UCHAR gdidl_idl_type(gd_type_t t) {
   switch (t) {
     case GD_UINT8:
@@ -183,7 +183,7 @@ static inline UCHAR gdidl_idl_type(gd_type_t t) {
   return IDL_TYP_UNDEF;
 }
 
-/* convert an IDL type code to a getdata type code */
+/* convert an IDL type code to a GetData type code */
 static inline gd_type_t gdidl_gd_type(int t) {
   switch (t) {
     case IDL_TYP_BYTE:
@@ -274,7 +274,7 @@ static inline IDL_ALLTYPES gdidl_to_alltypes(gd_type_t t, void* d)
   return v;
 }
 
-/* convert an ALLTYPES to a value suitable for getdata -- all we do is 
+/* convert an ALLTYPES to a value suitable for GetData -- all we do is 
  * reference the appropriate member */
 static inline const void* gdidl_from_alltypes(UCHAR t, IDL_ALLTYPES* v)
 {
@@ -809,7 +809,7 @@ void gdidl_read_idl_entry(gd_entry_t *E, IDL_VPTR v, int alter)
   dreturnvoid();
 }
 
-/* convert an IDL string or numerical encoding key to a getdata flag */
+/* convert an IDL string or numerical encoding key to a GetData flag */
 unsigned long gdidl_convert_encoding(IDL_VPTR idl_enc)
 {
   dtrace("%p", idl_enc);
@@ -849,7 +849,7 @@ unsigned long gdidl_convert_encoding(IDL_VPTR idl_enc)
 
 /* The public subroutines begin here.  The `DLM' lines are magical. */
 
-/* @@DLM: F gdidl_dirfilename DIRFILENAME 1 1 KEYWORDS */
+/* @@DLM: F gdidl_dirfilename GD_DIRFILENAME 1 1 KEYWORDS */
 IDL_VPTR gdidl_dirfilename(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
@@ -858,7 +858,7 @@ IDL_VPTR gdidl_dirfilename(int argc, IDL_VPTR argv[], char *argk)
 
   DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
 
-  const char* name = dirfilename(D);
+  const char* name = gd_dirfilename(D);
 
   GDIDL_SET_ERROR(D);
 
@@ -869,8 +869,8 @@ IDL_VPTR gdidl_dirfilename(int argc, IDL_VPTR argv[], char *argk)
   return r;
 }
 
-/* @@DLM: P gdidl_dirfile_add DIRFILE_ADD 2 2 KEYWORDS */
-void gdidl_dirfile_add(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_gd_add GD_ADD 2 2 KEYWORDS */
+void gdidl_gd_add(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -903,9 +903,9 @@ void gdidl_dirfile_add(int argc, IDL_VPTR argv[], char *argk)
 
   if (kw.parent_x) {
     const char* parent = IDL_STRING_STR(&kw.parent);
-    dirfile_madd(D, &E, parent);
+    gd_madd(D, &E, parent);
   } else
-    dirfile_add(D, &E);
+    gd_add(D, &E);
 
   GDIDL_SET_ERROR(D);
 
@@ -914,8 +914,8 @@ void gdidl_dirfile_add(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_dirfile_add_bit DIRFILE_ADD_BIT 3 3 KEYWORDS */
-void gdidl_dirfile_add_bit(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_gd_add_bit GD_ADD_BIT 3 3 KEYWORDS */
+void gdidl_gd_add_bit(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -954,9 +954,9 @@ void gdidl_dirfile_add_bit(int argc, IDL_VPTR argv[], char *argk)
 
   if (kw.parent_x) {
     const char* parent = IDL_STRING_STR(&kw.parent);
-    dirfile_madd_bit(D, parent, field_code, in_field, kw.bitnum, kw.numbits);
+    gd_madd_bit(D, parent, field_code, in_field, kw.bitnum, kw.numbits);
   } else
-    dirfile_add_bit(D, field_code, in_field, kw.bitnum, kw.numbits,
+    gd_add_bit(D, field_code, in_field, kw.bitnum, kw.numbits,
         kw.fragment_index);
 
   GDIDL_SET_ERROR(D);
@@ -966,10 +966,10 @@ void gdidl_dirfile_add_bit(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_dirfile_add_lincom DIRFILE_ADD_CLINCOM 5 11 KEYWORDS */
+/* @@DLM: P gdidl_gd_add_lincom GD_ADD_CLINCOM 5 11 KEYWORDS */
 
-/* @@DLM: P gdidl_dirfile_add_const DIRFILE_ADD_CONST 2 2 KEYWORDS */
-void gdidl_dirfile_add_const(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_gd_add_const GD_ADD_CONST 2 2 KEYWORDS */
+void gdidl_gd_add_const(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -1032,9 +1032,9 @@ void gdidl_dirfile_add_const(int argc, IDL_VPTR argv[], char *argk)
 
   if (kw.parent_x) {
     const char* parent = IDL_STRING_STR(&kw.parent);
-    dirfile_madd_const(D, parent, field_code, kw.const_type, data_type, ptr);
+    gd_madd_const(D, parent, field_code, kw.const_type, data_type, ptr);
   } else
-    dirfile_add_const(D, field_code, kw.const_type, data_type, ptr,
+    gd_add_const(D, field_code, kw.const_type, data_type, ptr,
         kw.fragment_index);
 
   GDIDL_SET_ERROR(D);
@@ -1044,10 +1044,10 @@ void gdidl_dirfile_add_const(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_dirfile_add_polynom DIRFILE_ADD_CPOLYNOM 4 8 KEYWORDS */
+/* @@DLM: P gdidl_gd_add_polynom GD_ADD_CPOLYNOM 4 8 KEYWORDS */
 
-/* @@DLM: P gdidl_dirfile_add_lincom DIRFILE_ADD_LINCOM 5 11 KEYWORDS */
-void gdidl_dirfile_add_lincom(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_gd_add_lincom GD_ADD_LINCOM 5 11 KEYWORDS */
+void gdidl_gd_add_lincom(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -1109,14 +1109,14 @@ void gdidl_dirfile_add_lincom(int argc, IDL_VPTR argv[], char *argk)
   if (kw.parent_x) {
     const char* parent = IDL_STRING_STR(&kw.parent);
     if (comp_scal) 
-      dirfile_madd_clincom(D, parent, field_code, n_fields, in_field, cm, cb);
+      gd_madd_clincom(D, parent, field_code, n_fields, in_field, cm, cb);
     else
-      dirfile_madd_lincom(D, parent, field_code, n_fields, in_field, m, b);
+      gd_madd_lincom(D, parent, field_code, n_fields, in_field, m, b);
   } else if (comp_scal) 
-    dirfile_add_clincom(D, field_code, n_fields, in_field, cm, cb,
+    gd_add_clincom(D, field_code, n_fields, in_field, cm, cb,
         kw.fragment_index);
   else
-    dirfile_add_lincom(D, field_code, n_fields, in_field, m, b,
+    gd_add_lincom(D, field_code, n_fields, in_field, m, b,
         kw.fragment_index);
 
   GDIDL_SET_ERROR(D);
@@ -1126,8 +1126,8 @@ void gdidl_dirfile_add_lincom(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_dirfile_add_linterp DIRFILE_ADD_LINTERP 4 4 KEYWORDS */
-void gdidl_dirfile_add_linterp(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_gd_add_linterp GD_ADD_LINTERP 4 4 KEYWORDS */
+void gdidl_gd_add_linterp(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -1162,9 +1162,9 @@ void gdidl_dirfile_add_linterp(int argc, IDL_VPTR argv[], char *argk)
 
   if (kw.parent_x) {
     const char* parent = IDL_STRING_STR(&kw.parent);
-    dirfile_madd_linterp(D, parent, field_code, in_field, table);
+    gd_madd_linterp(D, parent, field_code, in_field, table);
   } else
-    dirfile_add_linterp(D, field_code, in_field, table, kw.fragment_index);
+    gd_add_linterp(D, field_code, in_field, table, kw.fragment_index);
 
   GDIDL_SET_ERROR(D);
 
@@ -1173,8 +1173,8 @@ void gdidl_dirfile_add_linterp(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_dirfile_add_multiply DIRFILE_ADD_MULTIPLY 4 4 KEYWORDS */
-void gdidl_dirfile_add_multiply(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_gd_add_multiply GD_ADD_MULTIPLY 4 4 KEYWORDS */
+void gdidl_gd_add_multiply(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -1209,9 +1209,9 @@ void gdidl_dirfile_add_multiply(int argc, IDL_VPTR argv[], char *argk)
 
   if (kw.parent_x) {
     const char* parent = IDL_STRING_STR(&kw.parent);
-    dirfile_madd_multiply(D, parent, field_code, in_field1, in_field2);
+    gd_madd_multiply(D, parent, field_code, in_field1, in_field2);
   } else
-    dirfile_add_multiply(D, field_code, in_field1, in_field2,
+    gd_add_multiply(D, field_code, in_field1, in_field2,
         kw.fragment_index);
 
   GDIDL_SET_ERROR(D);
@@ -1221,8 +1221,8 @@ void gdidl_dirfile_add_multiply(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_dirfile_add_phase DIRFILE_ADD_PHASE 4 4 KEYWORDS */
-void gdidl_dirfile_add_phase(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_gd_add_phase GD_ADD_PHASE 4 4 KEYWORDS */
+void gdidl_gd_add_phase(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -1257,9 +1257,9 @@ void gdidl_dirfile_add_phase(int argc, IDL_VPTR argv[], char *argk)
 
   if (kw.parent_x) {
     const char* parent = IDL_STRING_STR(&kw.parent);
-    dirfile_madd_phase(D, parent, field_code, in_field, shift);
+    gd_madd_phase(D, parent, field_code, in_field, shift);
   } else
-    dirfile_add_phase(D, field_code, in_field, shift, kw.fragment_index);
+    gd_add_phase(D, field_code, in_field, shift, kw.fragment_index);
 
   GDIDL_SET_ERROR(D);
 
@@ -1268,8 +1268,8 @@ void gdidl_dirfile_add_phase(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_dirfile_add_polynom DIRFILE_ADD_POLYNOM 4 9 KEYWORDS */
-void gdidl_dirfile_add_polynom(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_gd_add_polynom GD_ADD_POLYNOM 4 9 KEYWORDS */
+void gdidl_gd_add_polynom(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -1380,14 +1380,14 @@ void gdidl_dirfile_add_polynom(int argc, IDL_VPTR argv[], char *argk)
   if (kw.parent_x) {
     const char* parent = IDL_STRING_STR(&kw.parent);
     if (comp_scal)
-      dirfile_madd_cpolynom(D, parent, field_code, poly_ord, in_field, ca);
+      gd_madd_cpolynom(D, parent, field_code, poly_ord, in_field, ca);
     else
-      dirfile_madd_polynom(D, parent, field_code, poly_ord, in_field, a);
+      gd_madd_polynom(D, parent, field_code, poly_ord, in_field, a);
   } else if (comp_scal)
-    dirfile_add_cpolynom(D, field_code, poly_ord, in_field, ca,
+    gd_add_cpolynom(D, field_code, poly_ord, in_field, ca,
         kw.fragment_index);
   else
-    dirfile_add_polynom(D, field_code, poly_ord, in_field, a,
+    gd_add_polynom(D, field_code, poly_ord, in_field, a,
         kw.fragment_index);
 
   GDIDL_SET_ERROR(D);
@@ -1397,8 +1397,8 @@ void gdidl_dirfile_add_polynom(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_dirfile_add_raw DIRFILE_ADD_RAW 3 3 KEYWORDS */
-void gdidl_dirfile_add_raw(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_gd_add_raw GD_ADD_RAW 3 3 KEYWORDS */
+void gdidl_gd_add_raw(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -1427,7 +1427,7 @@ void gdidl_dirfile_add_raw(int argc, IDL_VPTR argv[], char *argk)
   DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
   const char* field_code = IDL_VarGetString(argv[1]);
 
-  dirfile_add_raw(D, field_code, IDL_LongScalar(argv[2]), kw.spf,
+  gd_add_raw(D, field_code, IDL_LongScalar(argv[2]), kw.spf,
       kw.fragment_index);
 
   GDIDL_SET_ERROR(D);
@@ -1436,8 +1436,8 @@ void gdidl_dirfile_add_raw(int argc, IDL_VPTR argv[], char *argk)
 
   dreturnvoid();
 }
-/* @@DLM: P gdidl_dirfile_add_sbit DIRFILE_ADD_SBIT 3 3 KEYWORDS */
-void gdidl_dirfile_add_sbit(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_gd_add_sbit GD_ADD_SBIT 3 3 KEYWORDS */
+void gdidl_gd_add_sbit(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -1476,9 +1476,9 @@ void gdidl_dirfile_add_sbit(int argc, IDL_VPTR argv[], char *argk)
 
   if (kw.parent_x) {
     const char* parent = IDL_STRING_STR(&kw.parent);
-    dirfile_madd_sbit(D, parent, field_code, in_field, kw.bitnum, kw.numbits);
+    gd_madd_sbit(D, parent, field_code, in_field, kw.bitnum, kw.numbits);
   } else
-    dirfile_add_sbit(D, field_code, in_field, kw.bitnum, kw.numbits,
+    gd_add_sbit(D, field_code, in_field, kw.bitnum, kw.numbits,
         kw.fragment_index);
 
   GDIDL_SET_ERROR(D);
@@ -1488,8 +1488,8 @@ void gdidl_dirfile_add_sbit(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_dirfile_add_spec DIRFILE_ADD_SPEC 2 2 KEYWORDS */
-void gdidl_dirfile_add_spec(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_gd_add_spec GD_ADD_SPEC 2 2 KEYWORDS */
+void gdidl_gd_add_spec(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -1522,9 +1522,9 @@ void gdidl_dirfile_add_spec(int argc, IDL_VPTR argv[], char *argk)
 
   if (kw.parent_x) {
     const char* parent = IDL_STRING_STR(&kw.parent);
-    dirfile_madd_spec(D, line, parent);
+    gd_madd_spec(D, line, parent);
   } else
-    dirfile_add_spec(D, line, kw.fragment_index);
+    gd_add_spec(D, line, kw.fragment_index);
 
   GDIDL_SET_ERROR(D);
 
@@ -1533,8 +1533,8 @@ void gdidl_dirfile_add_spec(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_dirfile_add_string DIRFILE_ADD_STRING 2 2 KEYWORDS */
-void gdidl_dirfile_add_string(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_gd_add_string GD_ADD_STRING 2 2 KEYWORDS */
+void gdidl_gd_add_string(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -1577,9 +1577,9 @@ void gdidl_dirfile_add_string(int argc, IDL_VPTR argv[], char *argk)
 
   if (kw.parent_x) {
     const char* parent = IDL_STRING_STR(&kw.parent);
-    dirfile_madd_string(D, parent, field_code, str);
+    gd_madd_string(D, parent, field_code, str);
   } else
-    dirfile_add_string(D, field_code, str, kw.fragment_index);
+    gd_add_string(D, field_code, str, kw.fragment_index);
 
   GDIDL_SET_ERROR(D);
 
@@ -1588,8 +1588,8 @@ void gdidl_dirfile_add_string(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_dirfile_alter_bit DIRFILE_ALTER_BIT 2 2 KEYWORDS */
-void gdidl_dirfile_alter_bit(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_gd_alter_bit GD_ALTER_BIT 2 2 KEYWORDS */
+void gdidl_gd_alter_bit(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -1634,7 +1634,7 @@ void gdidl_dirfile_alter_bit(int argc, IDL_VPTR argv[], char *argk)
   if (kw.in_field_x)
     in_field = IDL_STRING_STR(&kw.in_field);
 
-  dirfile_alter_bit(D, field_code, in_field, kw.bitnum, kw.numbits);
+  gd_alter_bit(D, field_code, in_field, kw.bitnum, kw.numbits);
 
   GDIDL_SET_ERROR(D);
 
@@ -1643,10 +1643,10 @@ void gdidl_dirfile_alter_bit(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_dirfile_alter_lincom DIRFILE_ALTER_CLINCOM 2 2 KEYWORDS */
+/* @@DLM: P gdidl_gd_alter_lincom GD_ALTER_CLINCOM 2 2 KEYWORDS */
 
-/* @@DLM: P gdidl_dirfile_alter_const DIRFILE_ALTER_CONST 2 2 KEYWORDS */
-void gdidl_dirfile_alter_const(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_gd_alter_const GD_ALTER_CONST 2 2 KEYWORDS */
+void gdidl_gd_alter_const(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -1672,7 +1672,7 @@ void gdidl_dirfile_alter_const(int argc, IDL_VPTR argv[], char *argk)
   DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
   const char* field_code = IDL_VarGetString(argv[1]);
 
-  dirfile_alter_const(D, field_code, kw.const_type);
+  gd_alter_const(D, field_code, kw.const_type);
 
   GDIDL_SET_ERROR(D);
 
@@ -1681,10 +1681,10 @@ void gdidl_dirfile_alter_const(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_dirfile_alter_polynom DIRFILE_ALTER_CPOLYNOM 2 2 KEYWORDS */
+/* @@DLM: P gdidl_gd_alter_polynom GD_ALTER_CPOLYNOM 2 2 KEYWORDS */
 
-/* @@DLM: P gdidl_dirfile_alter_encoding DIRFILE_ALTER_ENCODING 2 2 KEYWORDS */
-void gdidl_dirfile_alter_encoding(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_gd_alter_encoding GD_ALTER_ENCODING 2 2 KEYWORDS */
+void gdidl_gd_alter_encoding(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -1717,7 +1717,7 @@ void gdidl_dirfile_alter_encoding(int argc, IDL_VPTR argv[], char *argk)
 
   DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
 
-  dirfile_alter_encoding(D, gdidl_convert_encoding(argv[1]), kw.fragment_index,
+  gd_alter_encoding(D, gdidl_convert_encoding(argv[1]), kw.fragment_index,
       kw.recode);
 
   GDIDL_SET_ERROR(D);
@@ -1727,8 +1727,8 @@ void gdidl_dirfile_alter_encoding(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_dirfile_alter_endianness DIRFILE_ALTER_ENDIANNESS 1 1 KEYWORDS */
-void gdidl_dirfile_alter_endianness(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_gd_alter_endianness GD_ALTER_ENDIANNESS 1 1 KEYWORDS */
+void gdidl_gd_alter_endianness(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -1766,7 +1766,7 @@ void gdidl_dirfile_alter_endianness(int argc, IDL_VPTR argv[], char *argk)
 
   DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
 
-  dirfile_alter_endianness(D, (kw.big_end ? GD_BIG_ENDIAN : 0) | 
+  gd_alter_endianness(D, (kw.big_end ? GD_BIG_ENDIAN : 0) | 
       (kw.little_end ? GD_LITTLE_ENDIAN : 0), kw.fragment_index, kw.recode);
 
   GDIDL_SET_ERROR(D);
@@ -1776,8 +1776,8 @@ void gdidl_dirfile_alter_endianness(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_dirfile_alter_entry DIRFILE_ALTER_ENTRY 3 3 KEYWORDS */
-void gdidl_dirfile_alter_entry(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_gd_alter_entry GD_ALTER_ENTRY 3 3 KEYWORDS */
+void gdidl_gd_alter_entry(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -1806,7 +1806,7 @@ void gdidl_dirfile_alter_entry(int argc, IDL_VPTR argv[], char *argk)
   IDL_ENSURE_STRUCTURE(argv[2]);
   gdidl_read_idl_entry(&E, argv[2], 1);
 
-  dirfile_alter_entry(D, field_code, &E, kw.recode);
+  gd_alter_entry(D, field_code, &E, kw.recode);
 
   GDIDL_SET_ERROR(D);
 
@@ -1815,8 +1815,8 @@ void gdidl_dirfile_alter_entry(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_dirfile_alter_frameoffset DIRFILE_ALTER_FRAMEOFFSET 2 2 KEYWORDS */
-void gdidl_dirfile_alter_frameoffset(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_gd_alter_frameoffset GD_ALTER_FRAMEOFFSET 2 2 KEYWORDS */
+void gdidl_gd_alter_frameoffset(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -1849,7 +1849,7 @@ void gdidl_dirfile_alter_frameoffset(int argc, IDL_VPTR argv[], char *argk)
 
   DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
 
-  dirfile_alter_frameoffset64(D, IDL_Long64Scalar(argv[1]), kw.fragment_index,
+  gd_alter_frameoffset64(D, IDL_Long64Scalar(argv[1]), kw.fragment_index,
       kw.recode);
 
   GDIDL_SET_ERROR(D);
@@ -1859,8 +1859,8 @@ void gdidl_dirfile_alter_frameoffset(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_dirfile_alter_lincom DIRFILE_ALTER_LINCOM 2 2 KEYWORDS */
-void gdidl_dirfile_alter_lincom(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_gd_alter_lincom GD_ALTER_LINCOM 2 2 KEYWORDS */
+void gdidl_gd_alter_lincom(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -1975,9 +1975,9 @@ void gdidl_dirfile_alter_lincom(int argc, IDL_VPTR argv[], char *argk)
   }
 
   if (comp_scal)
-    dirfile_alter_clincom(D, field_code, kw.n_fields, in_field, cm, cb);
+    gd_alter_clincom(D, field_code, kw.n_fields, in_field, cm, cb);
   else
-    dirfile_alter_lincom(D, field_code, kw.n_fields, in_field, m, b);
+    gd_alter_lincom(D, field_code, kw.n_fields, in_field, m, b);
 
   GDIDL_SET_ERROR(D);
 
@@ -1994,8 +1994,8 @@ void gdidl_dirfile_alter_lincom(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_dirfile_alter_linterp DIRFILE_ALTER_LINTERP 2 2 KEYWORDS */
-void gdidl_dirfile_alter_linterp(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_gd_alter_linterp GD_ALTER_LINTERP 2 2 KEYWORDS */
+void gdidl_gd_alter_linterp(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -2039,7 +2039,7 @@ void gdidl_dirfile_alter_linterp(int argc, IDL_VPTR argv[], char *argk)
   if (kw.table_x)
     table = IDL_STRING_STR(&kw.table);
 
-  dirfile_alter_linterp(D, field_code, in_field, table, kw.rename);
+  gd_alter_linterp(D, field_code, in_field, table, kw.rename);
 
   GDIDL_SET_ERROR(D);
 
@@ -2048,8 +2048,8 @@ void gdidl_dirfile_alter_linterp(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_dirfile_alter_multiply DIRFILE_ALTER_MULTIPLY 2 2 KEYWORDS */
-void gdidl_dirfile_alter_multiply(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_gd_alter_multiply GD_ALTER_MULTIPLY 2 2 KEYWORDS */
+void gdidl_gd_alter_multiply(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -2090,7 +2090,7 @@ void gdidl_dirfile_alter_multiply(int argc, IDL_VPTR argv[], char *argk)
   if (kw.in_field2_x)
     in_field2 = IDL_STRING_STR(&kw.in_field2);
 
-  dirfile_alter_multiply(D, field_code, in_field1, in_field2);
+  gd_alter_multiply(D, field_code, in_field1, in_field2);
 
   GDIDL_SET_ERROR(D);
 
@@ -2099,8 +2099,8 @@ void gdidl_dirfile_alter_multiply(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_dirfile_alter_phase DIRFILE_ALTER_PHASE 2 2 KEYWORDS */
-void gdidl_dirfile_alter_phase(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_gd_alter_phase GD_ALTER_PHASE 2 2 KEYWORDS */
+void gdidl_gd_alter_phase(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -2135,7 +2135,7 @@ void gdidl_dirfile_alter_phase(int argc, IDL_VPTR argv[], char *argk)
   if (kw.in_field_x)
     in_field = IDL_STRING_STR(&kw.in_field);
 
-  dirfile_alter_phase(D, field_code, in_field, kw.shift);
+  gd_alter_phase(D, field_code, in_field, kw.shift);
 
   GDIDL_SET_ERROR(D);
 
@@ -2144,8 +2144,8 @@ void gdidl_dirfile_alter_phase(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_dirfile_alter_polynom DIRFILE_ALTER_POLYNOM 2 2 KEYWORDS */
-void gdidl_dirfile_alter_polynom(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_gd_alter_polynom GD_ALTER_POLYNOM 2 2 KEYWORDS */
+void gdidl_gd_alter_polynom(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -2209,9 +2209,9 @@ void gdidl_dirfile_alter_polynom(int argc, IDL_VPTR argv[], char *argk)
   }
 
   if (comp_scal)
-    dirfile_alter_cpolynom(D, field_code, kw.poly_ord, in_field, ca);
+    gd_alter_cpolynom(D, field_code, kw.poly_ord, in_field, ca);
   else
-    dirfile_alter_polynom(D, field_code, kw.poly_ord, in_field, a);
+    gd_alter_polynom(D, field_code, kw.poly_ord, in_field, a);
 
   GDIDL_SET_ERROR(D);
 
@@ -2228,8 +2228,8 @@ void gdidl_dirfile_alter_polynom(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_dirfile_alter_raw DIRFILE_ALTER_RAW 2 2 KEYWORDS */
-void gdidl_dirfile_alter_raw(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_gd_alter_raw GD_ALTER_RAW 2 2 KEYWORDS */
+void gdidl_gd_alter_raw(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -2261,7 +2261,7 @@ void gdidl_dirfile_alter_raw(int argc, IDL_VPTR argv[], char *argk)
   DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
   const char* field_code = IDL_VarGetString(argv[1]);
 
-  dirfile_alter_raw(D, field_code, IDL_LongScalar(argv[2]), kw.spf,
+  gd_alter_raw(D, field_code, IDL_LongScalar(argv[2]), kw.spf,
       kw.recode);
 
   GDIDL_SET_ERROR(D);
@@ -2271,8 +2271,8 @@ void gdidl_dirfile_alter_raw(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_dirfile_alter_sbit DIRFILE_ALTER_SBIT 2 2 KEYWORDS */
-void gdidl_dirfile_alter_sbit(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_gd_alter_sbit GD_ALTER_SBIT 2 2 KEYWORDS */
+void gdidl_gd_alter_sbit(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -2316,7 +2316,7 @@ void gdidl_dirfile_alter_sbit(int argc, IDL_VPTR argv[], char *argk)
   if (kw.in_field_x)
     in_field = IDL_STRING_STR(&kw.in_field);
 
-  dirfile_alter_sbit(D, field_code, in_field, kw.bitnum, kw.numbits);
+  gd_alter_sbit(D, field_code, in_field, kw.bitnum, kw.numbits);
 
   GDIDL_SET_ERROR(D);
 
@@ -2325,8 +2325,8 @@ void gdidl_dirfile_alter_sbit(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_dirfile_alter_spec DIRFILE_ALTER_SPEC 2 2 KEYWORDS */
-void gdidl_dirfile_alter_spec(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_gd_alter_spec GD_ALTER_SPEC 2 2 KEYWORDS */
+void gdidl_gd_alter_spec(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -2359,9 +2359,9 @@ void gdidl_dirfile_alter_spec(int argc, IDL_VPTR argv[], char *argk)
 
   if (kw.parent_x) {
     const char* parent = IDL_STRING_STR(&kw.parent);
-    dirfile_malter_spec(D, line, parent, kw.recode);
+    gd_malter_spec(D, line, parent, kw.recode);
   } else
-    dirfile_alter_spec(D, line, kw.recode);
+    gd_alter_spec(D, line, kw.recode);
 
   GDIDL_SET_ERROR(D);
 
@@ -2370,8 +2370,8 @@ void gdidl_dirfile_alter_spec(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_dirfile_close DIRFILE_CLOSE 1 1 KEYWORDS */
-void gdidl_dirfile_close(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_gd_close GD_CLOSE 1 1 KEYWORDS */
+void gdidl_gd_close(int argc, IDL_VPTR argv[], char *argk)
 {
   int ret = 0;
   DIRFILE* D = NULL;
@@ -2402,9 +2402,9 @@ void gdidl_dirfile_close(int argc, IDL_VPTR argv[], char *argk)
     D = gdidl_get_dirfile(d);
 
     if (kw.discard)
-      ret = dirfile_discard(D);
+      ret = gd_discard(D);
     else
-      ret = dirfile_close(D);
+      ret = gd_close(D);
   }
 
   if (ret)
@@ -2427,8 +2427,8 @@ void gdidl_dirfile_close(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_dirfile_delete DIRFILE_DELETE 2 2 KEYWORDS */
-void gdidl_dirfile_delete(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_gd_delete GD_DELETE 2 2 KEYWORDS */
+void gdidl_gd_delete(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -2457,7 +2457,7 @@ void gdidl_dirfile_delete(int argc, IDL_VPTR argv[], char *argk)
   DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
   const char* field_code = IDL_VarGetString(argv[1]);
 
-  dirfile_delete(D, field_code, (kw.data ? GD_DEL_DATA : 0) |
+  gd_delete(D, field_code, (kw.data ? GD_DEL_DATA : 0) |
       (kw.deref ? GD_DEL_DEREF : 0) | (kw.force) ? GD_DEL_FORCE : 0);
 
   GDIDL_SET_ERROR(D);
@@ -2467,8 +2467,8 @@ void gdidl_dirfile_delete(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_dirfile_flush DIRFILE_FLUSH 1 1 KEYWORDS */
-void gdidl_dirfile_flush(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_gd_flush GD_FLUSH 1 1 KEYWORDS */
+void gdidl_gd_flush(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -2500,7 +2500,7 @@ void gdidl_dirfile_flush(int argc, IDL_VPTR argv[], char *argk)
   if (kw.field_code_x)
     field_code = IDL_STRING_STR(&kw.field_code);
 
-  dirfile_flush(D, field_code);
+  gd_flush(D, field_code);
 
   GDIDL_SET_ERROR(D);
 
@@ -2509,8 +2509,8 @@ void gdidl_dirfile_flush(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_dirfile_include DIRFILE_INCLUDE 2 2 KEYWORDS */
-void gdidl_dirfile_include(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_gd_include GD_INCLUDE 2 2 KEYWORDS */
+void gdidl_gd_include(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -2582,7 +2582,7 @@ void gdidl_dirfile_include(int argc, IDL_VPTR argv[], char *argk)
   if (kw.enc_x)
     flags |= gdidl_convert_encoding(kw.enc);
 
-  int index = (int16_t)dirfile_include(D, file, kw.fragment_index, flags);
+  int index = (int16_t)gd_include(D, file, kw.fragment_index, flags);
 
   if (kw.index_x) {
     IDL_ALLTYPES v;
@@ -2597,25 +2597,25 @@ void gdidl_dirfile_include(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* The following are aliases for the DIRFILE_ADD_* functions */
+/* The following are aliases for the GD_ADD_* functions */
 
-/* @@DLM: P gdidl_dirfile_add DIRFILE_MADD 2 2 KEYWORDS */
-/* @@DLM: P gdidl_dirfile_add_bit DIRFILE_MADD_BIT 3 3 KEYWORDS */
-/* @@DLM: P gdidl_dirfile_add_lincom DIRFILE_MADD_CLINCOM 5 11 KEYWORDS */
-/* @@DLM: P gdidl_dirfile_add_const DIRFILE_MADD_CONST 2 2 KEYWORDS */
-/* @@DLM: P gdidl_dirfile_add_polynom DIRFILE_MADD_CPOLYNOM 4 9 KEYWORDS */
-/* @@DLM: P gdidl_dirfile_add_lincom DIRFILE_MADD_LINCOM 5 11 KEYWORDS */
-/* @@DLM: P gdidl_dirfile_add_linterp DIRFILE_MADD_LINTERP 4 4 KEYWORDS */
-/* @@DLM: P gdidl_dirfile_add_multiply DIRFILE_MADD_MULTIPLY 4 4 KEYWORDS */
-/* @@DLM: P gdidl_dirfile_add_phase DIRFILE_MADD_PHASE 4 4 KEYWORDS */
-/* @@DLM: P gdidl_dirfile_add_polynom DIRFILE_MADD_POLYNOM 4 9 KEYWORDS */
-/* @@DLM: P gdidl_dirfile_add_sbit DIRFILE_MADD_SBIT 3 3 KEYWORDS */
-/* @@DLM: P gdidl_dirfile_add_spec DIRFILE_MADD_SPEC 2 2 KEYWORDS */
-/* @@DLM: P gdidl_dirfile_add_string DIRFILE_MADD_STRING 2 2 KEYWORDS */
-/* @@DLM: P gdidl_dirfile_alter_spec DIRFILE_MALTER_SPEC 2 2 KEYWORDS */
+/* @@DLM: P gdidl_gd_add GD_MADD 2 2 KEYWORDS */
+/* @@DLM: P gdidl_gd_add_bit GD_MADD_BIT 3 3 KEYWORDS */
+/* @@DLM: P gdidl_gd_add_lincom GD_MADD_CLINCOM 5 11 KEYWORDS */
+/* @@DLM: P gdidl_gd_add_const GD_MADD_CONST 2 2 KEYWORDS */
+/* @@DLM: P gdidl_gd_add_polynom GD_MADD_CPOLYNOM 4 9 KEYWORDS */
+/* @@DLM: P gdidl_gd_add_lincom GD_MADD_LINCOM 5 11 KEYWORDS */
+/* @@DLM: P gdidl_gd_add_linterp GD_MADD_LINTERP 4 4 KEYWORDS */
+/* @@DLM: P gdidl_gd_add_multiply GD_MADD_MULTIPLY 4 4 KEYWORDS */
+/* @@DLM: P gdidl_gd_add_phase GD_MADD_PHASE 4 4 KEYWORDS */
+/* @@DLM: P gdidl_gd_add_polynom GD_MADD_POLYNOM 4 9 KEYWORDS */
+/* @@DLM: P gdidl_gd_add_sbit GD_MADD_SBIT 3 3 KEYWORDS */
+/* @@DLM: P gdidl_gd_add_spec GD_MADD_SPEC 2 2 KEYWORDS */
+/* @@DLM: P gdidl_gd_add_string GD_MADD_STRING 2 2 KEYWORDS */
+/* @@DLM: P gdidl_gd_alter_spec GD_MALTER_SPEC 2 2 KEYWORDS */
 
-/* @@DLM: P gdidl_dirfile_metaflush DIRFILE_METAFLUSH 1 1 KEYWORDS */
-void gdidl_dirfile_metaflush(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_gd_metaflush GD_METAFLUSH 1 1 KEYWORDS */
+void gdidl_gd_metaflush(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -2623,7 +2623,7 @@ void gdidl_dirfile_metaflush(int argc, IDL_VPTR argv[], char *argk)
 
   DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
 
-  dirfile_metaflush(D);
+  gd_metaflush(D);
 
   GDIDL_SET_ERROR(D);
 
@@ -2632,8 +2632,8 @@ void gdidl_dirfile_metaflush(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_dirfile_move DIRFILE_MOVE 3 3 KEYWORDS */
-void gdidl_dirfile_move(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_gd_move GD_MOVE 3 3 KEYWORDS */
+void gdidl_gd_move(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -2658,7 +2658,7 @@ void gdidl_dirfile_move(int argc, IDL_VPTR argv[], char *argk)
   DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
   const char* field_code = IDL_VarGetString(argv[1]);
 
-  dirfile_move(D, field_code, IDL_LongScalar(argv[2]), kw.move_data);
+  gd_move(D, field_code, IDL_LongScalar(argv[2]), kw.move_data);
 
   GDIDL_SET_ERROR(D);
 
@@ -2667,8 +2667,8 @@ void gdidl_dirfile_move(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: F gdidl_dirfile_open DIRFILE_OPEN 1 1 KEYWORDS */
-IDL_VPTR gdidl_dirfile_open(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: F gdidl_gd_open GD_OPEN 1 1 KEYWORDS */
+IDL_VPTR gdidl_gd_open(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -2733,7 +2733,7 @@ IDL_VPTR gdidl_dirfile_open(int argc, IDL_VPTR argv[], char *argk)
   if (kw.enc_x)
     flags |= gdidl_convert_encoding(kw.enc);
 
-  DIRFILE* D = dirfile_open(name, flags);
+  DIRFILE* D = gd_open(name, flags);
 
   GDIDL_SET_ERROR(D);
 
@@ -2744,8 +2744,8 @@ IDL_VPTR gdidl_dirfile_open(int argc, IDL_VPTR argv[], char *argk)
   return r;
 }
 
-/* @@DLM: P gdidl_dirfile_protect DIRFILE_PROTECT 2 2 KEYWORDS */
-void gdidl_dirfile_protect(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_gd_protect GD_PROTECT 2 2 KEYWORDS */
+void gdidl_gd_protect(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -2776,7 +2776,7 @@ void gdidl_dirfile_protect(int argc, IDL_VPTR argv[], char *argk)
 
   DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
 
-  dirfile_protect(D, IDL_LongScalar(argv[1]), kw.fragment_index);
+  gd_protect(D, IDL_LongScalar(argv[1]), kw.fragment_index);
 
   GDIDL_SET_ERROR(D);
 
@@ -2785,8 +2785,8 @@ void gdidl_dirfile_protect(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_dirfile_reference DIRFILE_REFERENCE 2 2 KEYWORDS */
-void gdidl_dirfile_reference(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_gd_reference GD_REFERENCE 2 2 KEYWORDS */
+void gdidl_gd_reference(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -2795,7 +2795,7 @@ void gdidl_dirfile_reference(int argc, IDL_VPTR argv[], char *argk)
   DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
   const char* field_code = IDL_VarGetString(argv[1]);
 
-  dirfile_reference(D, field_code);
+  gd_reference(D, field_code);
 
   GDIDL_SET_ERROR(D);
 
@@ -2804,8 +2804,8 @@ void gdidl_dirfile_reference(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_dirfile_rename DIRFILE_RENAME 3 3 KEYWORDS */
-void gdidl_dirfile_rename(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_gd_rename GD_RENAME 3 3 KEYWORDS */
+void gdidl_gd_rename(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -2831,7 +2831,7 @@ void gdidl_dirfile_rename(int argc, IDL_VPTR argv[], char *argk)
   const char* field_code = IDL_VarGetString(argv[1]);
   const char* new_code = IDL_VarGetString(argv[2]);
 
-  dirfile_rename(D, field_code, new_code, kw.move_data);
+  gd_rename(D, field_code, new_code, kw.move_data);
 
   GDIDL_SET_ERROR(D);
 
@@ -2840,8 +2840,8 @@ void gdidl_dirfile_rename(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_dirfile_uninclude DIRFILE_UNINCLUDE 2 2 KEYWORDS */
-void gdidl_dirfile_uninclude(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_gd_uninclude GD_UNINCLUDE 2 2 KEYWORDS */
+void gdidl_gd_uninclude(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -2865,7 +2865,7 @@ void gdidl_dirfile_uninclude(int argc, IDL_VPTR argv[], char *argk)
 
   DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
 
-  dirfile_uninclude(D, IDL_LongScalar(argv[1]), kw.del);
+  gd_uninclude(D, IDL_LongScalar(argv[1]), kw.del);
 
   GDIDL_SET_ERROR(D);
 
@@ -2874,8 +2874,8 @@ void gdidl_dirfile_uninclude(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: F gdidl_dirfile_validate DIRFILE_VALIDATE 2 2 KEYWORDS */
-IDL_VPTR gdidl_dirfile_validate(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: F gdidl_gd_validate GD_VALIDATE 2 2 KEYWORDS */
+IDL_VPTR gdidl_gd_validate(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -2884,7 +2884,7 @@ IDL_VPTR gdidl_dirfile_validate(int argc, IDL_VPTR argv[], char *argk)
   DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
   const char* field_code = IDL_VarGetString(argv[1]);
 
-  int v = dirfile_validate(D, field_code);
+  int v = gd_validate(D, field_code);
 
   GDIDL_SET_ERROR(D);
 
@@ -2894,7 +2894,7 @@ IDL_VPTR gdidl_dirfile_validate(int argc, IDL_VPTR argv[], char *argk)
   dreturn("%p", r);
   return r;
 }
-/* @@DLM: F gdidl_getdata GETDATA 2 2 KEYWORDS */
+/* @@DLM: F gdidl_getdata GD_GETDATA 2 2 KEYWORDS */
 IDL_VPTR gdidl_getdata(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
@@ -2935,18 +2935,18 @@ IDL_VPTR gdidl_getdata(int argc, IDL_VPTR argv[], char *argk)
   DIRFILE *D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
   const char* field_code = IDL_VarGetString(argv[1]);
 
-  unsigned int spf = get_spf(D, field_code);
+  unsigned int spf = gd_get_spf(D, field_code);
 
-  if (get_error(D))
+  if (gd_error(D))
     r = IDL_GettmpInt(0);
   else {
     void* data = malloc((kw.n_frames * spf + kw.n_samples) *
         GD_SIZE(kw.return_type));
 
-    getdata64(D, field_code, kw.first_frame, kw.first_sample, kw.n_frames,
+    gd_getdata64(D, field_code, kw.first_frame, kw.first_sample, kw.n_frames,
         kw.n_samples, kw.return_type, data);
 
-    if (get_error(D))
+    if (gd_error(D))
       r = IDL_GettmpInt(0);
     else {
       IDL_MEMINT dim[] = { kw.n_frames * spf + kw.n_samples };
@@ -2963,7 +2963,7 @@ IDL_VPTR gdidl_getdata(int argc, IDL_VPTR argv[], char *argk)
   return r;
 }
 
-/* @@DLM: F gdidl_get_constant GET_CONSTANT 2 2 KEYWORDS */
+/* @@DLM: F gdidl_get_constant GD_GET_CONSTANT 2 2 KEYWORDS */
 IDL_VPTR gdidl_get_constant(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
@@ -2992,7 +2992,7 @@ IDL_VPTR gdidl_get_constant(int argc, IDL_VPTR argv[], char *argk)
 
   void* data = malloc(8);
 
-  int ret = get_constant(D, field_code, kw.const_type, data);
+  int ret = gd_get_constant(D, field_code, kw.const_type, data);
 
   IDL_VPTR r;
   if (!ret) {
@@ -3010,7 +3010,7 @@ IDL_VPTR gdidl_get_constant(int argc, IDL_VPTR argv[], char *argk)
   return r;
 }
 
-/* @@DLM: F gdidl_get_constants GET_CONSTANTS 1 1 KEYWORDS */
+/* @@DLM: F gdidl_get_constants GD_GET_CONSTANTS 1 1 KEYWORDS */
 IDL_VPTR gdidl_get_constants(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
@@ -3050,11 +3050,11 @@ IDL_VPTR gdidl_get_constants(int argc, IDL_VPTR argv[], char *argk)
 
   if (kw.parent_x) {
     const char* parent = IDL_STRING_STR(&kw.parent);
-    nconst = get_nmfields_by_type(D, parent, GD_CONST_ENTRY);
-    consts = get_mconstants(D, parent, kw.const_type);
+    nconst = gd_get_nmfields_by_type(D, parent, GD_CONST_ENTRY);
+    consts = gd_get_mconstants(D, parent, kw.const_type);
   } else {
-    nconst = get_nfields_by_type(D, GD_CONST_ENTRY);
-    consts = get_constants(D, kw.const_type);
+    nconst = gd_get_nfields_by_type(D, GD_CONST_ENTRY);
+    consts = gd_get_constants(D, kw.const_type);
   }
 
   IDL_VPTR r;
@@ -3078,7 +3078,7 @@ IDL_VPTR gdidl_get_constants(int argc, IDL_VPTR argv[], char *argk)
   return r;
 }
 
-/* @@DLM: F gdidl_get_encoding GET_ENCODING 1 1 KEYWORDS */
+/* @@DLM: F gdidl_get_encoding GD_GET_ENCODING 1 1 KEYWORDS */
 IDL_VPTR gdidl_get_encoding(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
@@ -3104,7 +3104,7 @@ IDL_VPTR gdidl_get_encoding(int argc, IDL_VPTR argv[], char *argk)
 
   DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
 
-  unsigned long enc = get_encoding(D, kw.fragment_index);
+  unsigned long enc = gd_get_encoding(D, kw.fragment_index);
 
   GDIDL_SET_ERROR(D);
 
@@ -3115,7 +3115,7 @@ IDL_VPTR gdidl_get_encoding(int argc, IDL_VPTR argv[], char *argk)
   return r;
 }
 
-/* @@DLM: F gdidl_get_endianness GET_ENDIANNESS 1 1 KEYWORDS */
+/* @@DLM: F gdidl_get_endianness GD_GET_ENDIANNESS 1 1 KEYWORDS */
 IDL_VPTR gdidl_get_endianness(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
@@ -3141,7 +3141,7 @@ IDL_VPTR gdidl_get_endianness(int argc, IDL_VPTR argv[], char *argk)
 
   DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
 
-  unsigned long end = get_endianness(D, kw.fragment_index);
+  unsigned long end = gd_get_endianness(D, kw.fragment_index);
 
   GDIDL_SET_ERROR(D);
 
@@ -3152,7 +3152,7 @@ IDL_VPTR gdidl_get_endianness(int argc, IDL_VPTR argv[], char *argk)
   return r;
 }
 
-/* @@DLM: F gdidl_get_entry GET_ENTRY 2 2 KEYWORDS */
+/* @@DLM: F gdidl_get_entry GD_GET_ENTRY 2 2 KEYWORDS */
 IDL_VPTR gdidl_get_entry(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
@@ -3163,7 +3163,7 @@ IDL_VPTR gdidl_get_entry(int argc, IDL_VPTR argv[], char *argk)
   const char* field_code = IDL_VarGetString(argv[1]);
 
   gd_entry_t E;
-  int ret = get_entry(D, field_code, &E);
+  int ret = gd_get_entry(D, field_code, &E);
 
   IDL_VPTR r = NULL;
   if (ret) {
@@ -3171,7 +3171,7 @@ IDL_VPTR gdidl_get_entry(int argc, IDL_VPTR argv[], char *argk)
     r = IDL_GettmpInt(0);
   } else {
     r = gdidl_make_idl_entry(&E);
-    dirfile_free_entry_strings(&E);
+    gd_free_entry_strings(&E);
   }
 
   IDL_KW_FREE;
@@ -3180,7 +3180,7 @@ IDL_VPTR gdidl_get_entry(int argc, IDL_VPTR argv[], char *argk)
   return r;
 }
 
-/* @@DLM: F gdidl_get_entry_type GET_ENTRY_TYPE 2 2 KEYWORDS */
+/* @@DLM: F gdidl_get_entry_type GD_GET_ENTRY_TYPE 2 2 KEYWORDS */
 IDL_VPTR gdidl_get_entry_type(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
@@ -3190,7 +3190,7 @@ IDL_VPTR gdidl_get_entry_type(int argc, IDL_VPTR argv[], char *argk)
   DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
   const char* field_code = IDL_VarGetString(argv[1]);
 
-  gd_entype_t type = get_entry_type(D, field_code);
+  gd_entype_t type = gd_get_entry_type(D, field_code);
 
   GDIDL_SET_ERROR(D);
 
@@ -3201,25 +3201,25 @@ IDL_VPTR gdidl_get_entry_type(int argc, IDL_VPTR argv[], char *argk)
   return r;
 }
 
-/* @@DLM: F gdidl_get_error GET_ERROR 1 1 */
-IDL_VPTR gdidl_get_error(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: F gdidl_gd_error GD_ERROR 1 1 */
+IDL_VPTR gdidl_gd_error(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
-  int err = get_error(gdidl_get_dirfile(IDL_LongScalar(argv[0])));
+  int err = gd_error(gdidl_get_dirfile(IDL_LongScalar(argv[0])));
 
   IDL_VPTR r = IDL_GettmpInt(err);
   dreturn("%p", r);
   return r;
 }
 
-/* @@DLM: F gdidl_get_error_string GET_ERROR_STRING 1 1 */
-IDL_VPTR gdidl_get_error_string(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: F gdidl_gd_error_string GD_ERROR_STRING 1 1 */
+IDL_VPTR gdidl_gd_error_string(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
   char buffer[GD_MAX_LINE_LENGTH];
-  get_error_string(gdidl_get_dirfile(IDL_LongScalar(argv[0])), buffer,
+  gd_error_string(gdidl_get_dirfile(IDL_LongScalar(argv[0])), buffer,
       GD_MAX_LINE_LENGTH);
 
   IDL_VPTR r = IDL_StrToSTRING(buffer);
@@ -3227,8 +3227,8 @@ IDL_VPTR gdidl_get_error_string(int argc, IDL_VPTR argv[], char *argk)
   return r;
 }
 
-/* @@DLM: F gdidl_get_field_list GET_FIELD_LIST 1 1 KEYWORDS */
-/* @@DLM: F gdidl_get_field_list GET_FIELD_LIST_BY_TYPE 1 1 KEYWORDS */
+/* @@DLM: F gdidl_get_field_list GD_GET_FIELD_LIST 1 1 KEYWORDS */
+/* @@DLM: F gdidl_get_field_list GD_GET_FIELD_LIST_BY_TYPE 1 1 KEYWORDS */
 IDL_VPTR gdidl_get_field_list(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
@@ -3268,19 +3268,19 @@ IDL_VPTR gdidl_get_field_list(int argc, IDL_VPTR argv[], char *argk)
   if (kw.parent_x) {
     const char* parent = IDL_STRING_STR(&kw.parent);
     if (kw.type_x) {
-      nfields = get_nmfields_by_type(D, parent, kw.type);
-      list = get_mfield_list_by_type(D, parent, kw.type);
+      nfields = gd_get_nmfields_by_type(D, parent, kw.type);
+      list = gd_get_mfield_list_by_type(D, parent, kw.type);
     } else {
-      nfields = get_nmfields(D, parent);
-      list = get_mfield_list(D, parent);
+      nfields = gd_get_nmfields(D, parent);
+      list = gd_get_mfield_list(D, parent);
     }
   } else {
     if (kw.type_x) {
-      nfields = get_nfields_by_type(D, kw.type);
-      list = get_field_list_by_type(D, kw.type);
+      nfields = gd_get_nfields_by_type(D, kw.type);
+      list = gd_get_field_list_by_type(D, kw.type);
     } else {
-      nfields = get_nfields(D);
-      list = get_field_list(D);
+      nfields = gd_get_nfields(D);
+      list = gd_get_field_list(D);
     }
   }
 
@@ -3299,7 +3299,7 @@ IDL_VPTR gdidl_get_field_list(int argc, IDL_VPTR argv[], char *argk)
   return r;
 }
 
-/* @@DLM: F gdidl_get_fragment_index GET_FRAGMENT_INDEX 2 2 KEYWORDS */
+/* @@DLM: F gdidl_get_fragment_index GD_GET_FRAGMENT_INDEX 2 2 KEYWORDS */
 IDL_VPTR gdidl_get_fragment_index(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
@@ -3309,7 +3309,7 @@ IDL_VPTR gdidl_get_fragment_index(int argc, IDL_VPTR argv[], char *argk)
   DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
   char* field_code = IDL_VarGetString(argv[1]);
 
-  int index = get_fragment_index(D, field_code);
+  int index = gd_get_fragment_index(D, field_code);
 
   GDIDL_SET_ERROR(D);
 
@@ -3320,7 +3320,7 @@ IDL_VPTR gdidl_get_fragment_index(int argc, IDL_VPTR argv[], char *argk)
   return r;
 }
 
-/* @@DLM: F gdidl_get_fragmentname GET_FRAGMENTNAME 2 2 KEYWORDS */
+/* @@DLM: F gdidl_get_fragmentname GD_GET_FRAGMENTNAME 2 2 KEYWORDS */
 IDL_VPTR gdidl_get_fragmentname(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
@@ -3330,7 +3330,7 @@ IDL_VPTR gdidl_get_fragmentname(int argc, IDL_VPTR argv[], char *argk)
   DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
   int index = (int)IDL_LongScalar(argv[1]);
 
-  const char* name = get_fragmentname(D, index);
+  const char* name = gd_get_fragmentname(D, index);
 
   GDIDL_SET_ERROR(D);
 
@@ -3341,8 +3341,8 @@ IDL_VPTR gdidl_get_fragmentname(int argc, IDL_VPTR argv[], char *argk)
   return r;
 }
 
-/* @@DLM: F gdidl_get_framenum GET_FRAMENUM 3 3 KEYWORDS */
-/* @@DLM: F gdidl_get_framenum GET_FRAMENUM_SUBSET 3 3 KEYWORDS */
+/* @@DLM: F gdidl_get_framenum GD_GET_FRAMENUM 3 3 KEYWORDS */
+/* @@DLM: F gdidl_get_framenum GD_GET_FRAMENUM_SUBSET 3 3 KEYWORDS */
 IDL_VPTR gdidl_get_framenum(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
@@ -3373,7 +3373,7 @@ IDL_VPTR gdidl_get_framenum(int argc, IDL_VPTR argv[], char *argk)
   const char* field_code = IDL_VarGetString(argv[1]);
   double value = IDL_DoubleScalar(argv[2]);
 
-  double frame = get_framenum_subset64(D, field_code, value, kw.frame_start,
+  double frame = gd_get_framenum_subset64(D, field_code, value, kw.frame_start,
       kw.frame_end);
 
   GDIDL_SET_ERROR(D);
@@ -3387,7 +3387,7 @@ IDL_VPTR gdidl_get_framenum(int argc, IDL_VPTR argv[], char *argk)
   return r;
 }
 
-/* @@DLM: F gdidl_get_frameoffset GET_FRAMEOFFSET 1 1 KEYWORDS */
+/* @@DLM: F gdidl_get_frameoffset GD_GET_FRAMEOFFSET 1 1 KEYWORDS */
 IDL_VPTR gdidl_get_frameoffset(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
@@ -3413,7 +3413,7 @@ IDL_VPTR gdidl_get_frameoffset(int argc, IDL_VPTR argv[], char *argk)
 
   DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
 
-  off64_t foffs = get_frameoffset64(D, kw.fragment_index);
+  off64_t foffs = gd_get_frameoffset64(D, kw.fragment_index);
 
   GDIDL_SET_ERROR(D);
 
@@ -3427,13 +3427,13 @@ IDL_VPTR gdidl_get_frameoffset(int argc, IDL_VPTR argv[], char *argk)
 }
 
 /* aliases for the meta field functions */
-/* @@DLM: F gdidl_get_constants GET_MCONSTANTS 1 1 KEYWORDS */
-/* @@DLM: F gdidl_get_field_list GET_MFIELD_LIST 1 1 KEYWORDS */
-/* @@DLM: F gdidl_get_field_list GET_MFIELD_LIST_BY_TYPE 1 1 KEYWORDS */
-/* @@DLM: F gdidl_get_strings GET_MSTRINGS 1 1 KEYWORDS */
-/* @@DLM: F gdidl_get_vector_list GET_MVECTOR_LIST 1 1 KEYWORDS */
+/* @@DLM: F gdidl_get_constants GD_GET_MCONSTANTS 1 1 KEYWORDS */
+/* @@DLM: F gdidl_get_field_list GD_GET_MFIELD_LIST 1 1 KEYWORDS */
+/* @@DLM: F gdidl_get_field_list GD_GET_MFIELD_LIST_BY_TYPE 1 1 KEYWORDS */
+/* @@DLM: F gdidl_get_strings GD_GET_MSTRINGS 1 1 KEYWORDS */
+/* @@DLM: F gdidl_get_vector_list GD_GET_MVECTOR_LIST 1 1 KEYWORDS */
 
-/* @@DLM: F gdidl_get_native_type GET_NATIVE_TYPE 2 2 KEYWORDS */
+/* @@DLM: F gdidl_get_native_type GD_GET_NATIVE_TYPE 2 2 KEYWORDS */
 IDL_VPTR gdidl_get_native_type(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
@@ -3443,7 +3443,7 @@ IDL_VPTR gdidl_get_native_type(int argc, IDL_VPTR argv[], char *argk)
   DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
   const char* field_code = IDL_VarGetString(argv[1]);
 
-  gd_type_t t = get_native_type(D, field_code);
+  gd_type_t t = gd_get_native_type(D, field_code);
 
   GDIDL_SET_ERROR(D);
 
@@ -3454,8 +3454,8 @@ IDL_VPTR gdidl_get_native_type(int argc, IDL_VPTR argv[], char *argk)
   return r;
 }
 
-/* @@DLM: F gdidl_get_nfields GET_NFIELDS 1 1 KEYWORDS */
-/* @@DLM: F gdidl_get_nfields GET_NFIELDS_BY_TYPE 1 1 KEYWORDS */
+/* @@DLM: F gdidl_get_nfields GD_GET_NFIELDS 1 1 KEYWORDS */
+/* @@DLM: F gdidl_get_nfields GD_GET_NFIELDS_BY_TYPE 1 1 KEYWORDS */
 IDL_VPTR gdidl_get_nfields(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
@@ -3493,14 +3493,14 @@ IDL_VPTR gdidl_get_nfields(int argc, IDL_VPTR argv[], char *argk)
   if (kw.parent_x) {
     const char* parent = IDL_STRING_STR(&kw.parent);
     if (kw.type_x) 
-      nfields = get_nmfields_by_type(D, parent, kw.type);
+      nfields = gd_get_nmfields_by_type(D, parent, kw.type);
     else 
-      nfields = get_nmfields(D, parent);
+      nfields = gd_get_nmfields(D, parent);
   } else {
     if (kw.type_x) 
-      nfields = get_nfields_by_type(D, kw.type);
+      nfields = gd_get_nfields_by_type(D, kw.type);
     else 
-      nfields = get_nfields(D);
+      nfields = gd_get_nfields(D);
   }
 
   GDIDL_SET_ERROR(D);
@@ -3512,7 +3512,7 @@ IDL_VPTR gdidl_get_nfields(int argc, IDL_VPTR argv[], char *argk)
   return r;
 }
 
-/* @@DLM: F gdidl_get_nfragments GET_NFRAGMENTS 1 1 KEYWORDS */
+/* @@DLM: F gdidl_get_nfragments GD_GET_NFRAGMENTS 1 1 KEYWORDS */
 IDL_VPTR gdidl_get_nfragments(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
@@ -3523,7 +3523,7 @@ IDL_VPTR gdidl_get_nfragments(int argc, IDL_VPTR argv[], char *argk)
 
   DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
 
-  nfrags = get_nfragments(D);
+  nfrags = gd_get_nfragments(D);
 
   GDIDL_SET_ERROR(D);
 
@@ -3534,7 +3534,7 @@ IDL_VPTR gdidl_get_nfragments(int argc, IDL_VPTR argv[], char *argk)
   return r;
 }
 
-/* @@DLM: F gdidl_get_nframes GET_NFRAMES 1 1 KEYWORDS */
+/* @@DLM: F gdidl_get_nframes GD_GET_NFRAMES 1 1 KEYWORDS */
 IDL_VPTR gdidl_get_nframes(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
@@ -3543,7 +3543,7 @@ IDL_VPTR gdidl_get_nframes(int argc, IDL_VPTR argv[], char *argk)
 
   DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
 
-  off64_t nframes = get_nframes64(D);
+  off64_t nframes = gd_get_nframes64(D);
 
   GDIDL_SET_ERROR(D);
 
@@ -3556,11 +3556,11 @@ IDL_VPTR gdidl_get_nframes(int argc, IDL_VPTR argv[], char *argk)
   return r;
 }
 
-/* @@DLM: F gdidl_get_nfields GET_NMFIELDS 1 1 KEYWORDS */
-/* @@DLM: F gdidl_get_nfields GET_NMFIELDS_BY_TYPE 1 1 KEYWORDS */
+/* @@DLM: F gdidl_get_nfields GD_GET_NMFIELDS 1 1 KEYWORDS */
+/* @@DLM: F gdidl_get_nfields GD_GET_NMFIELDS_BY_TYPE 1 1 KEYWORDS */
 
-/* @@DLM: F gdidl_get_nvectors GET_NMVECTORS 1 1 KEYWORDS */
-/* @@DLM: F gdidl_get_nvectors GET_NVECTORS 1 1 KEYWORDS */
+/* @@DLM: F gdidl_get_nvectors GD_GET_NMVECTORS 1 1 KEYWORDS */
+/* @@DLM: F gdidl_get_nvectors GD_GET_NVECTORS 1 1 KEYWORDS */
 IDL_VPTR gdidl_get_nvectors(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
@@ -3592,9 +3592,9 @@ IDL_VPTR gdidl_get_nvectors(int argc, IDL_VPTR argv[], char *argk)
 
   if (kw.parent_x) {
     const char* parent = IDL_STRING_STR(&kw.parent);
-    nfields = get_nmvectors(D, parent);
+    nfields = gd_get_nmvectors(D, parent);
   } else 
-    nfields = get_nvectors(D);
+    nfields = gd_get_nvectors(D);
 
   GDIDL_SET_ERROR(D);
 
@@ -3605,7 +3605,7 @@ IDL_VPTR gdidl_get_nvectors(int argc, IDL_VPTR argv[], char *argk)
   return r;
 }
 
-/* @@DLM: F gdidl_get_parent_fragment GET_PARENT_FRAGMENT 1 1 KEYWORDS */
+/* @@DLM: F gdidl_get_parent_fragment GD_GET_PARENT_FRAGMENT 1 1 KEYWORDS */
 IDL_VPTR gdidl_get_parent_fragment(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
@@ -3631,7 +3631,7 @@ IDL_VPTR gdidl_get_parent_fragment(int argc, IDL_VPTR argv[], char *argk)
 
   DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
 
-  int parent = get_parent_fragment(D, kw.fragment_index);
+  int parent = gd_get_parent_fragment(D, kw.fragment_index);
 
   GDIDL_SET_ERROR(D);
 
@@ -3642,7 +3642,7 @@ IDL_VPTR gdidl_get_parent_fragment(int argc, IDL_VPTR argv[], char *argk)
   return r;
 }
 
-/* @@DLM: F gdidl_get_protection GET_PROTECTION 1 1 KEYWORDS */
+/* @@DLM: F gdidl_get_protection GD_GET_PROTECTION 1 1 KEYWORDS */
 IDL_VPTR gdidl_get_protection(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
@@ -3668,7 +3668,7 @@ IDL_VPTR gdidl_get_protection(int argc, IDL_VPTR argv[], char *argk)
 
   DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
 
-  int prot = get_protection(D, kw.fragment_index);
+  int prot = gd_get_protection(D, kw.fragment_index);
 
   GDIDL_SET_ERROR(D);
 
@@ -3679,7 +3679,7 @@ IDL_VPTR gdidl_get_protection(int argc, IDL_VPTR argv[], char *argk)
   return r;
 }
 
-/* @@DLM: F gdidl_get_raw_filename GET_RAW_FILENAME 2 2 KEYWORDS */
+/* @@DLM: F gdidl_get_raw_filename GD_GET_RAW_FILENAME 2 2 KEYWORDS */
 IDL_VPTR gdidl_get_raw_filename(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
@@ -3689,7 +3689,7 @@ IDL_VPTR gdidl_get_raw_filename(int argc, IDL_VPTR argv[], char *argk)
   DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
   const char* field_code = IDL_VarGetString(argv[1]);
 
-  const char* name = get_raw_filename(D, field_code);
+  const char* name = gd_get_raw_filename(D, field_code);
 
   GDIDL_SET_ERROR(D);
 
@@ -3700,27 +3700,7 @@ IDL_VPTR gdidl_get_raw_filename(int argc, IDL_VPTR argv[], char *argk)
   return r;
 }
 
-/* @@DLM: F gdidl_get_reference GET_REFERENCE 1 1 KEYWORDS */
-IDL_VPTR gdidl_get_reference(int argc, IDL_VPTR argv[], char *argk)
-{
-  dtraceidl();
-
-  GDIDL_KW_ONLY_ERROR;
-
-  DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
-
-  const char* name = get_reference(D);
-
-  GDIDL_SET_ERROR(D);
-
-  IDL_KW_FREE;
-
-  IDL_VPTR r = IDL_StrToSTRING((char*)name);
-  dreturn("%p", r);
-  return r;
-}
-
-/* @@DLM: F gdidl_get_spf GET_SPF 2 2 KEYWORDS */
+/* @@DLM: F gdidl_get_spf GD_GET_SPF 2 2 KEYWORDS */
 IDL_VPTR gdidl_get_spf(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
@@ -3730,7 +3710,7 @@ IDL_VPTR gdidl_get_spf(int argc, IDL_VPTR argv[], char *argk)
   DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
   const char* field_code = IDL_VarGetString(argv[1]);
 
-  unsigned int spf = get_spf(D, field_code);
+  unsigned int spf = gd_get_spf(D, field_code);
 
   GDIDL_SET_ERROR(D);
 
@@ -3741,7 +3721,7 @@ IDL_VPTR gdidl_get_spf(int argc, IDL_VPTR argv[], char *argk)
   return r;
 }
 
-/* @@DLM: F gdidl_get_string GET_STRING 2 2 KEYWORDS */
+/* @@DLM: F gdidl_get_string GD_GET_STRING 2 2 KEYWORDS */
 IDL_VPTR gdidl_get_string(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
@@ -3753,10 +3733,10 @@ IDL_VPTR gdidl_get_string(int argc, IDL_VPTR argv[], char *argk)
   DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
   const char* field_code = IDL_VarGetString(argv[1]);
 
-  get_string(D, field_code, GD_MAX_LINE_LENGTH, buffer);
+  gd_get_string(D, field_code, GD_MAX_LINE_LENGTH, buffer);
 
   IDL_VPTR r;
-  if (get_error(D)) {
+  if (gd_error(D)) {
     GDIDL_SET_ERROR(D);
     r = IDL_StrToSTRING("");
   } else 
@@ -3766,7 +3746,7 @@ IDL_VPTR gdidl_get_string(int argc, IDL_VPTR argv[], char *argk)
   return r;
 }
 
-/* @@DLM: F gdidl_get_strings GET_STRINGS 1 1 KEYWORDS */
+/* @@DLM: F gdidl_get_strings GD_GET_STRINGS 1 1 KEYWORDS */
 IDL_VPTR gdidl_get_strings(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
@@ -3799,11 +3779,11 @@ IDL_VPTR gdidl_get_strings(int argc, IDL_VPTR argv[], char *argk)
 
   if (kw.parent_x) {
     const char* parent = IDL_STRING_STR(&kw.parent);
-    nstring = get_nmfields_by_type(D, parent, GD_STRING_ENTRY);
-    strings = get_mstrings(D, parent);
+    nstring = gd_get_nmfields_by_type(D, parent, GD_STRING_ENTRY);
+    strings = gd_get_mstrings(D, parent);
   } else {
-    nstring = get_nfields_by_type(D, GD_STRING_ENTRY);
-    strings = get_strings(D);
+    nstring = gd_get_nfields_by_type(D, GD_STRING_ENTRY);
+    strings = gd_get_strings(D);
   }
 
   IDL_VPTR r;
@@ -3824,7 +3804,7 @@ IDL_VPTR gdidl_get_strings(int argc, IDL_VPTR argv[], char *argk)
   return r;
 }
 
-/* @@DLM: F gdidl_get_vector_list GET_VECTOR_LIST 1 1 KEYWORDS */
+/* @@DLM: F gdidl_get_vector_list GD_GET_VECTOR_LIST 1 1 KEYWORDS */
 IDL_VPTR gdidl_get_vector_list(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
@@ -3859,11 +3839,11 @@ IDL_VPTR gdidl_get_vector_list(int argc, IDL_VPTR argv[], char *argk)
 
   if (kw.parent_x) {
     const char* parent = IDL_STRING_STR(&kw.parent);
-    nfields = get_nmvectors(D, parent);
-    list = get_mvector_list(D, parent);
+    nfields = gd_get_nmvectors(D, parent);
+    list = gd_get_mvector_list(D, parent);
   } else {
-    nfields = get_nvectors(D);
-    list = get_vector_list(D);
+    nfields = gd_get_nvectors(D);
+    list = gd_get_vector_list(D);
   }
 
   GDIDL_SET_ERROR(D);
@@ -3881,7 +3861,7 @@ IDL_VPTR gdidl_get_vector_list(int argc, IDL_VPTR argv[], char *argk)
   return r;
 }
 
-/* @@DLM: P gdidl_putdata PUTDATA 3 3 KEYWORDS */
+/* @@DLM: P gdidl_putdata GD_PUTDATA 3 3 KEYWORDS */
 void gdidl_putdata(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
@@ -3915,7 +3895,7 @@ void gdidl_putdata(int argc, IDL_VPTR argv[], char *argk)
 
   off64_t n_samples = argv[2]->value.arr->n_elts;
 
-  putdata64(D, field_code, kw.first_frame, kw.first_sample, 0, n_samples,
+  gd_putdata64(D, field_code, kw.first_frame, kw.first_sample, 0, n_samples,
       gdidl_gd_type(argv[2]->type), argv[2]->value.arr->data);
 
   GDIDL_SET_ERROR(D);
@@ -3925,7 +3905,7 @@ void gdidl_putdata(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_put_constant PUT_CONSTANT 3 3 KEYWORDS */
+/* @@DLM: P gdidl_put_constant GD_PUT_CONSTANT 3 3 KEYWORDS */
 void gdidl_put_constant(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
@@ -3936,7 +3916,7 @@ void gdidl_put_constant(int argc, IDL_VPTR argv[], char *argk)
   const char* field_code = IDL_VarGetString(argv[1]);
 
   const void* data = gdidl_from_alltypes(argv[2]->type, &argv[2]->value);
-  put_constant(D, field_code, gdidl_gd_type(argv[2]->type), data);
+  gd_put_constant(D, field_code, gdidl_gd_type(argv[2]->type), data);
 
   GDIDL_SET_ERROR(D);
 
@@ -3945,7 +3925,7 @@ void gdidl_put_constant(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_put_string PUT_STRING 3 3 KEYWORDS */
+/* @@DLM: P gdidl_put_string GD_PUT_STRING 3 3 KEYWORDS */
 void gdidl_put_string(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
@@ -3956,7 +3936,7 @@ void gdidl_put_string(int argc, IDL_VPTR argv[], char *argk)
   const char* field_code = IDL_VarGetString(argv[1]);
   const char* data = IDL_VarGetString(argv[2]);
 
-  put_string(D, field_code, data);
+  gd_put_string(D, field_code, data);
 
   GDIDL_SET_ERROR(D);
 

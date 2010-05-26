@@ -1,5 +1,5 @@
 /* Try to free the strings from NULL */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -11,7 +11,7 @@
 
 int main(void)
 {
-  dirfile_free_entry_strings(NULL);
+  gd_free_entry_strings(NULL);
 
   return 0;
 }

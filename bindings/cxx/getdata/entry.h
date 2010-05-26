@@ -22,6 +22,10 @@
 #ifndef GETDATA_ENTRY_H
 #define GETDATA_ENTRY_H
 
+#ifndef _FILE_OFFSET_BITS
+# define _FILE_OFFSET_BITS 64
+#endif
+
 #define NO_GETDATA_LEGACY_API
 #define GETDATA_C89_API
 

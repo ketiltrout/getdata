@@ -1,0 +1,159 @@
+.\" gd_alter_spec.3.  The gd_alter_spec man page.
+.\"
+.\" (C) 2008, 2010 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_alter_spec 3 "25 May 2010" "Version 0.7.0" "GETDATA"
+.SH NAME
+gd_alter_spec, gd_malter_spec \(em modify a field in a dirfile
+.SH SYNOPSIS
+.B #include <getdata.h>
+.HP
+.nh
+.ad l
+.BI "int gd_alter_spec(DIRFILE *" dirfile ", const char *" line ,
+.BI "int " recode );
+.HP
+.BI "int gd_malter_spec(DIRFILE *" dirfile ", const char *" line ,
+.BI "const char *" parent ", int " recode );
+.hy
+.ad n
+.SH DESCRIPTION
+The
+.BR gd_alter_spec ()
+function modifies the field described by the field specification line in
+.I line
+to the dirfile specified by
+.IR dirfile .
+The
+.BR gd_malter_spec ()
+function behaves similarly, but modifies the metafield under the field
+indicated by the field code
+.IR parent .
+Field specification lines are described in detail in
+.BR dirfile-format (5).
+
+The name of the field to be modified, which must already exist, will be
+obtained from the field specification line.  When adding a metafield, 
+.I line
+should only contain a field specification, and not a
+.B /META
+directive.
+
+If the modified field is of type
+.B RAW
+and the
+.I recode
+argument is non-zero, the binary file associated with the field will be
+converted for changes in data type and samples-per-frame.  If
+.I recode
+is zero, no binary file conversion will take place.
+
+If the modified field is of type
+.B LINTERP
+and the
+.I recode
+argument is non-zero, the look-up table file will be moved if
+.IR entry -> table
+specifies a different path, overwriting an existing file with the new
+pathname, if present.  If the field specified by
+.I field_code
+is of type other than
+.B RAW
+or
+.BR LINTERP ,
+the
+.I recode
+argument is ignored.
+
+Passing these functions a directive line instead of a field specification line
+will result in a syntax error.  These functions never call the registered
+parser callback function, even if
+.IR line 
+contains a syntax error.
+
+.SH RETURN VALUE
+On success,
+.BR gd_alter_spec ()
+and
+.BR gd_malter_spec ()
+return zero.   On error, -1 is returned and the dirfile error is set to a
+non-zero error value.  Possible error values are:
+.TP 8
+.B GD_E_ACCMODE
+The specified dirfile was opened read-only.
+.TP
+.B GD_E_ALLOC
+The library was unable to allocate memory.
+.TP
+.B GD_E_BAD_CODE
+The field specified in
+.I line
+was not found, or the
+.I parent
+field code was not found.
+.TP
+.B GD_E_BAD_DIRFILE
+The supplied dirfile was invalid.
+.TP
+.B GD_E_FORMAT
+A syntax error was encountered in
+.IR line .
+.TP
+.B GD_E_PROTECTED
+The metadata of the fragment was protected from change.  Or, a request to
+translate the binary file associated with a
+.B RAW
+field was attempted, but the data of the fragment was protected.
+.TP
+.B GD_E_RAW_IO
+An I/O error occurred while translating the binary file associated with a
+modified
+.B RAW
+field, or an I/O error occurred while attempting to rename a
+.B LINTERP
+table file.
+.TP
+.B GD_E_UNKNOWN_ENCODING
+The encoding scheme of the specified format file fragment is not known to the
+library.  As a result, the library was unable to translate the binary file 
+be associated with a modified
+.B RAW
+field.
+.TP
+.B GD_E_UNSUPPORTED
+The encoding scheme of the specified format file fragment does not support
+translating the empty binary file associated with a modified
+.B RAW
+field.
+.P
+The dirfile error may be retrieved by calling
+.BR gd_error (3).
+A descriptive error string for the last error encountered can be obtained from
+a call to
+.BR gd_error_string (3).
+.SH SEE ALSO
+.BR gd_alter_bit (3),
+.BR gd_alter_const (3),
+.BR gd_alter_entry (3),
+.BR gd_alter_lincom (3),
+.BR gd_alter_linterp (3),
+.BR gd_alter_multiply (3),
+.BR gd_alter_phase (3),
+.BR gd_alter_raw (3),
+.BR gd_alter_spec (3),
+.BR gd_metaflush (3),
+.BR gd_open (3),
+.BR gd_error (3),
+.BR gd_error_string (3),
+.BR dirfile-format (5)

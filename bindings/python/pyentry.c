@@ -64,7 +64,7 @@ static void gdpy_entry_delete(struct gdpy_entry_t* self)
 {
   dtrace("%p", self);
 
-  dirfile_free_entry_strings(self->E);
+  gd_free_entry_strings(self->E);
   free(self->E);
 
   dreturnvoid();
@@ -517,7 +517,7 @@ static int gdpy_entry_init(struct gdpy_entry_t* self, PyObject *args,
       return -1;
     }
   } else 
-    dirfile_free_entry_strings(self->E);
+    gd_free_entry_strings(self->E);
 
   memcpy(self->E, &E, sizeof(gd_entry_t));
 
@@ -1588,7 +1588,7 @@ static int gdpy_entry_setparms(struct gdpy_entry_t* self, PyObject *value,
 
   self->E->field = NULL;
 
-  dirfile_free_entry_strings(self->E);
+  gd_free_entry_strings(self->E);
   memcpy(self->E, &E, sizeof(gd_entry_t));
 
   dreturn("%i", 0);

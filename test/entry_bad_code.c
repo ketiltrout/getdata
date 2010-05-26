@@ -1,5 +1,5 @@
 /* Try to read RAW entry */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -14,7 +14,7 @@ int main(void)
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
   const char* format_data = "data RAW UINT8 8\n";
-  int fd;
+  int fd, r = 0;
 
   mkdir(filedir, 0777);
 
@@ -22,20 +22,18 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
+  DIRFILE* D = gd_open(filedir, GD_RDONLY);
   gd_entry_t E;
 
-  int n = get_entry(D, "not a field", &E);
-  int error = get_error(D);
+  int n = gd_get_entry(D, "not a field", &E);
+  int error = gd_error(D);
 
-  dirfile_close(D);
+  gd_close(D);
   unlink(format);
   rmdir(filedir);
 
-  if (error != GD_E_BAD_CODE)
-    return 1;
-  if (n == 0)
-    return 1;
+  CHECKI(error, GD_E_BAD_CODE);
+  CHECKI(n, -1);
 
-  return 0;
+  return r;
 }

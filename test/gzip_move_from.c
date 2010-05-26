@@ -2,7 +2,7 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -25,7 +25,7 @@ int main(void)
     "/INCLUDE format1\ndata RAW UINT16 11\nENCODING gzip\n";
   const char* format1_data = "ENCODING none\n";
   uint16_t data_data[128];
-  int fd;
+  int fd, r = 0;
   char command[4096];
   gd_entry_t E;
 
@@ -52,17 +52,16 @@ int main(void)
     return 1;
 
 #ifdef USE_GZIP
-  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_VERBOSE | GD_UNENCODED);
+  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_VERBOSE | GD_UNENCODED);
 #else
-  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_UNENCODED);
+  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_UNENCODED);
 #endif
-  int ret = dirfile_move(D, "data", 1, 1);
-  int error = get_error(D);
-  int ge_ret =  get_entry(D, "data", &E);
-  dirfile_close(D);
+  int ret = gd_move(D, "data", 1, 1);
+  int error = gd_error(D);
+  int ge_ret =  gd_get_entry(D, "data", &E);
+  gd_close(D);
 
 #ifdef USE_GZIP
-  int we = 0;
   uint16_t d;
 
   fd = open(data, O_RDONLY);
@@ -70,16 +69,14 @@ int main(void)
 
   if (fd >= 0) {
     while (read(fd, &d, sizeof(uint16_t))) {
-      if (d != i * 0x201) {
-        printf("%i = %4x\n", i, d);
-        we++;
-      }
-
+      CHECKUi(i, d, i * 0x201);
       i++;
     }
     close(fd);
-  } else
-    we = -1;
+  } else {
+    perror("open");
+    r = 1;
+  }
 #endif
 
   unlink(format1);
@@ -89,60 +86,20 @@ int main(void)
   rmdir(filedir);
 
 #ifdef USE_GZIP
-  if (ret != 0) {
-    fprintf(stderr, "1=%i\n", ret);
-    return 1;
-  }
-  if (error != GD_E_OK) {
-    fprintf(stderr, "2=%i\n", error);
-    return 1;
-  }
-  if (ge_ret != 0) {
-    fprintf(stderr, "3=%i\n", ge_ret);
-    return 1;
-  }
-  if (E.fragment_index != 1) {
-    fprintf(stderr, "4=%i\n", E.fragment_index);
-    return 1;
-  }
-  if (we != 0) {
-    fprintf(stderr, "5=%i\n", we);
-    return 1;
-  }
-  if (unlink_data != 0) {
-    fprintf(stderr, "6=%i\n", unlink_data);
-    return 1;
-  }
-  if (unlink_gzdata != -1) {
-    fprintf(stderr, "7=%i\n", unlink_gzdata);
-    return 1;
-  }
+  CHECKI(ret, 0);
+  CHECKI(error, 0);
+  CHECKI(ge_ret, 0);
+  CHECKI(E.fragment_index, 1);
+  CHECKI(unlink_data, 0);
+  CHECKI(unlink_gzdata, -1);
 #else
-  if (ret != -1) {
-    fprintf(stderr, "1=%i\n", ret);
-    return 1;
-  }
-  if (error != GD_E_UNSUPPORTED) {
-    fprintf(stderr, "2=%i\n", error);
-    return 1;
-  }
-  if (ge_ret != 0) {
-    fprintf(stderr, "3=%i\n", ge_ret);
-    return 1;
-  }
-  if (E.fragment_index != 0) {
-    fprintf(stderr, "4=%i\n", E.fragment_index);
-    return 1;
-  }
-  if (unlink_data != -1) {
-    fprintf(stderr, "6=%i\n", unlink_data);
-    return 1;
-  }
-  if (unlink_gzdata != 0) {
-    fprintf(stderr, "7=%i\n", unlink_gzdata);
-    return 1;
-  }
+  CHECKI(ret, -1);
+  CHECKI(error, GD_E_UNSUPPORTED);
+  CHECKI(ge_ret, 0);
+  CHECKI(E.fragment_index, 0);
+  CHECKI(unlink_data, -1);
+  CHECKI(unlink_gzdata, 0);
 #endif
 
-  return 0;
+  return r;
 }

@@ -31,7 +31,7 @@ static int gdpy_callback_func(gd_parser_data_t* pdata, void* extra)
 
   if (self->callback != NULL) {
     char buffer[GD_MAX_LINE_LENGTH];
-    get_error_string(pdata->dirfile, buffer, GD_MAX_LINE_LENGTH);
+    gd_error_string(pdata->dirfile, buffer, GD_MAX_LINE_LENGTH);
 
     PyObject* arglist = Py_BuildValue("({sssisssiss}O)", "error_string", buffer,
         "suberror", pdata->suberror, "line", pdata->line, "linenum",
@@ -119,7 +119,7 @@ static void gdpy_dirfile_delete(struct gdpy_dirfile_t* self)
 {
   dtrace("%p", self);
 
-  dirfile_close(self->D);
+  gd_close(self->D);
 
   dreturnvoid();
 }
@@ -174,7 +174,7 @@ static int gdpy_dirfile_init(struct gdpy_dirfile_t* self, PyObject *args,
   self->callback_data = pycallback_data;
   self->callback_exception = 0;
 
-  self->D = dirfile_cbopen(name, (unsigned int)flags,
+  self->D = gd_cbopen(name, (unsigned int)flags,
       (pycallback == NULL) ? NULL : gdpy_callback_func, self);
 
   if (self->callback_exception) {
@@ -203,7 +203,7 @@ static PyObject* gdpy_dirfile_add(struct gdpy_dirfile_t* self,
     return NULL;
   }
 
-  dirfile_add(self->D, entry->E);
+  gd_add(self->D, entry->E);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -228,7 +228,7 @@ static PyObject* gdpy_dirfile_addspec(struct gdpy_dirfile_t* self,
     return NULL;
   }
 
-  dirfile_add_spec(self->D, spec, fragment);
+  gd_add_spec(self->D, spec, fragment);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -254,7 +254,7 @@ static PyObject* gdpy_dirfile_alter(struct gdpy_dirfile_t* self,
     return NULL;
   }
 
-  dirfile_alter_entry(self->D, field_code, entry->E, recode);
+  gd_alter_entry(self->D, field_code, entry->E, recode);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -279,7 +279,7 @@ static PyObject* gdpy_dirfile_alterspec(struct gdpy_dirfile_t* self,
     return NULL;
   }
 
-  dirfile_alter_spec(self->D, spec, recode);
+  gd_alter_spec(self->D, spec, recode);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -292,13 +292,13 @@ static PyObject* gdpy_dirfile_close(struct gdpy_dirfile_t* self)
 {
   dtrace("%p", self);
 
-  dirfile_close(self->D);
+  gd_close(self->D);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
   /* Here we replace D with an empty, invalid dirfile object.  The following
    * uses getdata internals, but this could be done just as simply (but with
-   * more overhead) using the public API by calling dirfile_open("", 0)
+   * more overhead) using the public API by calling gd_open("", 0)
    */
   self->D = malloc(sizeof(struct _GD_DIRFILE));
   memset(self->D, 0, sizeof(struct _GD_DIRFILE));
@@ -325,7 +325,7 @@ static PyObject* gdpy_dirfile_delentry(struct gdpy_dirfile_t* self,
     return NULL;
   }
 
-  dirfile_delete(self->D, field_code, flags);
+  gd_delete(self->D, field_code, flags);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -338,13 +338,13 @@ static PyObject* gdpy_dirfile_discard(struct gdpy_dirfile_t* self)
 {
   dtrace("%p", self);
 
-  dirfile_discard(self->D);
+  gd_discard(self->D);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
   /* Here we replace D with an empty, invalid dirfile object.  The following
    * uses getdata internals, but this could be done just as simply (but with
-   * more overhead) using the public API by calling dirfile_open("", 0)
+   * more overhead) using the public API by calling gd_open("", 0)
    */
   self->D = malloc(sizeof(struct _GD_DIRFILE));
   memset(self->D, 0, sizeof(struct _GD_DIRFILE));
@@ -374,7 +374,7 @@ static PyObject* gdpy_dirfile_getconstant(struct gdpy_dirfile_t* self,
 
   char data[16];
 
-  get_constant(self->D, field_code, return_type, data);
+  gd_get_constant(self->D, field_code, return_type, data);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -402,11 +402,11 @@ static PyObject* gdpy_dirfile_getconstants(struct gdpy_dirfile_t* self,
     return NULL;
   }
 
-  fields = get_field_list_by_type(self->D, GD_CONST_ENTRY);
+  fields = gd_get_field_list_by_type(self->D, GD_CONST_ENTRY);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
-  values = get_constants(self->D, return_type);
+  values = gd_get_constants(self->D, return_type);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -450,7 +450,7 @@ static PyObject* gdpy_dirfile_getdata(struct gdpy_dirfile_t* self,
 
   /* we need the SPF to know how many samples we have to allocate */
   if (num_frames) {
-    spf = get_spf(self->D, field_code);
+    spf = gd_get_spf(self->D, field_code);
 
     PYGD_CHECK_ERROR(self->D, NULL);
   }
@@ -475,9 +475,8 @@ static PyObject* gdpy_dirfile_getdata(struct gdpy_dirfile_t* self,
 #endif
       data = malloc(ns * GD_SIZE(return_type));
 
-    ns = getdata64(self->D, field_code, (off64_t)first_frame,
-        (off64_t)first_sample, (size_t)num_frames, (size_t)num_samples,
-        return_type, data);
+    ns = gd_getdata(self->D, field_code, first_frame, first_sample,
+        (size_t)num_frames, (size_t)num_samples, return_type, data);
 
 
 #ifdef USE_NUMPY
@@ -520,7 +519,7 @@ static PyObject* gdpy_dirfile_getentry(struct gdpy_dirfile_t* self,
     return NULL;
   }
 
-  get_entry(self->D, field_code, E);
+  gd_get_entry(self->D, field_code, E);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -544,7 +543,7 @@ static PyObject* gdpy_dirfile_geterror(struct gdpy_dirfile_t* self,
 {
   dtrace("%p, %p", self, closure);
 
-  PyObject* error = PyInt_FromLong(get_error(self->D));
+  PyObject* error = PyInt_FromLong(gd_error(self->D));
 
   dreturn("%p", error);
   return error;
@@ -597,7 +596,7 @@ static PyObject* gdpy_dirfile_getfragmentindex(struct gdpy_dirfile_t* self,
     return NULL;
   }
 
-  int index = get_fragment_index(self->D, field_code);
+  int index = gd_get_fragment_index(self->D, field_code);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -614,7 +613,7 @@ static PyObject* gdpy_dirfile_geterrorstring(struct gdpy_dirfile_t* self,
 
   char buffer[GD_MAX_LINE_LENGTH];
 
-  PyObject* error = PyString_FromString(get_error_string(self->D, buffer,
+  PyObject* error = PyString_FromString(gd_error_string(self->D, buffer,
         GD_MAX_LINE_LENGTH));
 
   dreturn("%p", error);
@@ -627,7 +626,7 @@ static PyObject* gdpy_dirfile_getvectorlist(struct gdpy_dirfile_t* self)
 
   int i;
 
-  const char **vectors = get_vector_list(self->D);
+  const char **vectors = gd_get_vector_list(self->D);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -657,9 +656,9 @@ static PyObject* gdpy_dirfile_getfieldlist(struct gdpy_dirfile_t* self,
   }
 
   if (type == GD_NO_ENTRY)
-    fields = get_field_list(self->D);
+    fields = gd_get_field_list(self->D);
   else
-    fields = get_field_list_by_type(self->D, (gd_type_t)type);
+    fields = gd_get_field_list_by_type(self->D, (gd_type_t)type);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -687,7 +686,7 @@ static PyObject* gdpy_dirfile_flush(struct gdpy_dirfile_t* self,
     return NULL;
   }
 
-  dirfile_flush(self->D, field_code);
+  gd_flush(self->D, field_code);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -715,7 +714,7 @@ static PyObject* gdpy_dirfile_include(struct gdpy_dirfile_t* self,
 
   self->callback_exception = 0;
 
-  long index = dirfile_include(self->D, file, fragment_index, flags);
+  long index = gd_include(self->D, file, fragment_index, flags);
 
   if (self->callback_exception) {
     dreturn("%p", NULL);
@@ -746,7 +745,7 @@ static PyObject* gdpy_dirfile_madd(struct gdpy_dirfile_t* self,
     return NULL;
   }
 
-  dirfile_madd(self->D, entry->E, parent);
+  gd_madd(self->D, entry->E, parent);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -771,7 +770,7 @@ static PyObject* gdpy_dirfile_maddspec(struct gdpy_dirfile_t* self,
     return NULL;
   }
 
-  dirfile_madd_spec(self->D, spec, parent);
+  gd_madd_spec(self->D, spec, parent);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -797,7 +796,7 @@ static PyObject* gdpy_dirfile_malterspec(struct gdpy_dirfile_t* self,
     return NULL;
   }
 
-  dirfile_malter_spec(self->D, spec, parent, recode);
+  gd_malter_spec(self->D, spec, parent, recode);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -825,11 +824,11 @@ static PyObject* gdpy_dirfile_getmconstants(struct gdpy_dirfile_t* self,
     return NULL;
   }
 
-  fields = get_mfield_list_by_type(self->D, parent, GD_CONST_ENTRY);
+  fields = gd_get_mfield_list_by_type(self->D, parent, GD_CONST_ENTRY);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
-  values = get_mconstants(self->D, parent, return_type);
+  values = gd_get_mconstants(self->D, parent, return_type);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -848,7 +847,7 @@ static PyObject* gdpy_dirfile_metaflush(struct gdpy_dirfile_t* self)
 {
   dtrace("%p", self);
 
-  dirfile_metaflush(self->D);
+  gd_metaflush(self->D);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -876,9 +875,9 @@ static PyObject* gdpy_dirfile_getmfieldlist(struct gdpy_dirfile_t* self,
   }
 
   if (type == GD_NO_ENTRY)
-    fields = get_mfield_list(self->D, parent);
+    fields = gd_get_mfield_list(self->D, parent);
   else
-    fields = get_mfield_list_by_type(self->D, parent, (gd_type_t)type);
+    fields = gd_get_mfield_list_by_type(self->D, parent, (gd_type_t)type);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -896,7 +895,7 @@ static PyObject* gdpy_dirfile_getname(struct gdpy_dirfile_t* self,
 {
   dtrace("%p, %p", self, closure);
 
-  const char* name = dirfilename(self->D);
+  const char* name = gd_dirfilename(self->D);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -924,11 +923,11 @@ static PyObject* gdpy_dirfile_getmstrings(struct gdpy_dirfile_t* self,
     return NULL;
   }
 
-  fields = get_mfield_list_by_type(self->D, parent, GD_STRING_ENTRY);
+  fields = gd_get_mfield_list_by_type(self->D, parent, GD_STRING_ENTRY);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
-  values = get_mstrings(self->D, parent);
+  values = gd_get_mstrings(self->D, parent);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -957,7 +956,7 @@ static PyObject* gdpy_dirfile_getmvectorlist(struct gdpy_dirfile_t* self,
     return NULL;
   }
 
-  const char **fields = get_mvector_list(self->D, parent);
+  const char **fields = gd_get_mvector_list(self->D, parent);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -986,7 +985,7 @@ static PyObject* gdpy_dirfile_getrawfilename(struct gdpy_dirfile_t* self,
     return NULL;
   }
 
-  filename = get_raw_filename(self->D, field_code);
+  filename = gd_get_raw_filename(self->D, field_code);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -1010,7 +1009,7 @@ static PyObject* gdpy_dirfile_getnativetype(struct gdpy_dirfile_t* self,
     return NULL;
   }
 
-  gd_type_t ntype = get_native_type(self->D, field_code);
+  gd_type_t ntype = gd_get_native_type(self->D, field_code);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -1035,7 +1034,7 @@ static PyObject* gdpy_dirfile_getnativetypename(struct gdpy_dirfile_t* self,
     return NULL;
   }
 
-  gd_type_t t = get_native_type(self->D, field_code);
+  gd_type_t t = gd_get_native_type(self->D, field_code);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -1065,9 +1064,9 @@ static PyObject* gdpy_dirfile_getnfields(struct gdpy_dirfile_t* self,
   }
 
   if (type == GD_NO_ENTRY)
-    nfields = get_nfields(self->D);
+    nfields = gd_get_nfields(self->D);
   else
-    nfields = get_nfields_by_type(self->D, (gd_entype_t)type);
+    nfields = gd_get_nfields_by_type(self->D, (gd_entype_t)type);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -1082,7 +1081,7 @@ static PyObject* gdpy_dirfile_getnfragments(struct gdpy_dirfile_t* self,
 {
   dtrace("%p, %p", self, closure);
 
-  long nfragments = get_nfragments(self->D);
+  long nfragments = gd_get_nfragments(self->D);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -1097,7 +1096,7 @@ static PyObject* gdpy_dirfile_getnframes(struct gdpy_dirfile_t* self,
 {
   dtrace("%p, %p", self, closure);
 
-  off64_t nframes = get_nframes64(self->D);
+  off_t nframes = gd_get_nframes(self->D);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -1125,9 +1124,9 @@ static PyObject* gdpy_dirfile_getnmfields(struct gdpy_dirfile_t* self,
   }
 
   if (type == GD_NO_ENTRY)
-    nmfields = get_nmfields(self->D, parent);
+    nmfields = gd_get_nmfields(self->D, parent);
   else
-    nmfields = get_nmfields_by_type(self->D, parent, (gd_type_t)type);
+    nmfields = gd_get_nmfields_by_type(self->D, parent, (gd_type_t)type);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -1152,7 +1151,7 @@ static PyObject* gdpy_dirfile_getnmvectors(struct gdpy_dirfile_t* self,
     return NULL;
   }
 
-  unsigned int nmvectors = get_nmvectors(self->D, parent);
+  unsigned int nmvectors = gd_get_nmvectors(self->D, parent);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -1166,7 +1165,7 @@ static PyObject* gdpy_dirfile_getnvectors(struct gdpy_dirfile_t* self)
 {
   dtrace("%p", self);
 
-  unsigned int nvectors = get_nvectors(self->D);
+  unsigned int nvectors = gd_get_nvectors(self->D);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -1181,7 +1180,7 @@ static PyObject* gdpy_dirfile_getreference(struct gdpy_dirfile_t* self,
 {
   dtrace("%p, %p", self, closure);
 
-  const char *ref = dirfile_reference(self->D, NULL);
+  const char *ref = gd_reference(self->D, NULL);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -1204,7 +1203,7 @@ static int gdpy_dirfile_setreference(struct gdpy_dirfile_t* self,
     return -1;
   }
 
-  dirfile_reference(self->D, ref);
+  gd_reference(self->D, ref);
 
   PYGD_CHECK_ERROR(self->D, -1);
 
@@ -1220,7 +1219,7 @@ static PyObject* gdpy_dirfile_getstring(struct gdpy_dirfile_t* self,
   char* keywords[] = { "field_code", NULL };
   const char* field_code;
 
-  if (!PyArg_ParseTupleAndKeywords(args, keys, "s:pygetdata.dirifle.get_string",
+  if (!PyArg_ParseTupleAndKeywords(args, keys, "s:pygetdata.dirfile.get_string",
         keywords, &field_code))
   {
     dreturn("%p", NULL);
@@ -1229,7 +1228,7 @@ static PyObject* gdpy_dirfile_getstring(struct gdpy_dirfile_t* self,
 
   char data[GD_MAX_LINE_LENGTH];
 
-  get_string(self->D, field_code, GD_MAX_LINE_LENGTH, data);
+  gd_get_string(self->D, field_code, GD_MAX_LINE_LENGTH, data);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -1251,11 +1250,11 @@ static PyObject* gdpy_dirfile_getstrings(struct gdpy_dirfile_t* self)
   const char** fields;
   const char** values;
 
-  fields = get_field_list_by_type(self->D, GD_STRING_ENTRY);
+  fields = gd_get_field_list_by_type(self->D, GD_STRING_ENTRY);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
-  values = get_strings(self->D);
+  values = gd_get_strings(self->D);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -1295,13 +1294,13 @@ static PyObject* gdpy_dirfile_putconstant(struct gdpy_dirfile_t* self,
   }
 
   if ((data_type & 0xf) == GDPY_SIGNED)
-    put_constant(self->D, field_code, GD_INT64, &data.s);
+    gd_put_constant(self->D, field_code, GD_INT64, &data.s);
   else if ((data_type & 0xf) == GDPY_IEEE754)
-    put_constant(self->D, field_code, GD_FLOAT64, &data.f);
+    gd_put_constant(self->D, field_code, GD_FLOAT64, &data.f);
   else if ((data_type & 0xf) == GDPY_COMPLEX)
-    put_constant(self->D, field_code, GD_COMPLEX128, &data.c);
+    gd_put_constant(self->D, field_code, GD_COMPLEX128, &data.c);
   else
-    put_constant(self->D, field_code, GD_UINT64, &data.u);
+    gd_put_constant(self->D, field_code, GD_UINT64, &data.u);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -1318,7 +1317,7 @@ static PyObject* gdpy_dirfile_putdata(struct gdpy_dirfile_t* self,
   char* keywords[] = { "field_code", "data", "type", "first_frame",
     "first_sample", NULL };
   const char* field_code;
-  off64_t first_frame = 0, first_sample = 0;
+  off_t first_frame = 0, first_sample = 0;
   gd_type_t type = GD_UNKNOWN;
   PyObject* pyobj;
   size_t ns;
@@ -1402,7 +1401,7 @@ static PyObject* gdpy_dirfile_putdata(struct gdpy_dirfile_t* self,
       }
     }
 
-    ns = putdata64(self->D, field_code, first_frame, first_sample, 0, ns, type,
+    ns = gd_putdata(self->D, field_code, first_frame, first_sample, 0, ns, type,
         data);
 
 #ifdef USE_NUMPY
@@ -1439,7 +1438,7 @@ static PyObject* gdpy_dirfile_putstring(struct gdpy_dirfile_t* self,
     return NULL;
   }
 
-  put_string(self->D, field_code, data);
+  gd_put_string(self->D, field_code, data);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -1462,7 +1461,7 @@ static PyObject* gdpy_dirfile_getspf(struct gdpy_dirfile_t* self,
     return NULL;
   }
 
-  unsigned int spf = get_spf(self->D, field_code);
+  unsigned int spf = gd_get_spf(self->D, field_code);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -1485,7 +1484,7 @@ static PyObject* gdpy_dirfile_validate(struct gdpy_dirfile_t* self,
     return NULL;
   }
 
-  dirfile_validate(self->D, field_code);
+  gd_validate(self->D, field_code);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -1502,8 +1501,8 @@ static PyObject* gdpy_dirfile_getframenum(struct gdpy_dirfile_t* self,
   char* keywords[] = { "field_code", "value", "start", "end", NULL };
   const char* field_code;
   double value;
-  off64_t frame_start = 0;
-  off64_t frame_end = 0;
+  off_t frame_start = 0;
+  off_t frame_end = 0;
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
         "sd|KK:pygetdata.dirfile.get_framenum", keywords, &field_code, &value,
@@ -1513,7 +1512,7 @@ static PyObject* gdpy_dirfile_getframenum(struct gdpy_dirfile_t* self,
     return NULL;
   }
 
-  double frame = get_framenum_subset64(self->D, field_code, value, frame_start,
+  double frame = gd_get_framenum_subset(self->D, field_code, value, frame_start,
       frame_end);
 
   PYGD_CHECK_ERROR(self->D, NULL);
@@ -1553,7 +1552,7 @@ static PyObject* gdpy_dirfile_callback(struct gdpy_dirfile_t* self,
   self->callback = pycallback;
   self->callback_data = pycallback_data;
 
-  dirfile_parser_callback(self->D, (pycallback == NULL) ? NULL :
+  gd_parser_callback(self->D, (pycallback == NULL) ? NULL :
       gdpy_callback_func, self);
 
   PYGD_CHECK_ERROR(self->D, NULL);
@@ -1579,7 +1578,7 @@ static PyObject* gdpy_dirfile_uninclude(struct gdpy_dirfile_t* self,
     return NULL;
   }
 
-  dirfile_uninclude(self->D, fragment_index, del);
+  gd_uninclude(self->D, fragment_index, del);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -1604,7 +1603,7 @@ static PyObject* gdpy_dirfile_move(struct gdpy_dirfile_t* self, PyObject* args,
     return NULL;
   }
 
-  dirfile_move(self->D, field_code, new_fragment, move_data);
+  gd_move(self->D, field_code, new_fragment, move_data);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -1629,7 +1628,7 @@ static PyObject* gdpy_dirfile_rename(struct gdpy_dirfile_t* self,
     return NULL;
   }
 
-  dirfile_rename(self->D, old_code, new_name, move_data);
+  gd_rename(self->D, old_code, new_name, move_data);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -1644,25 +1643,25 @@ static PyGetSetDef gdpy_dirfile_getset[] = {
       "library for this dirfile.  If the last call was successful, this\n"
       "will be zero.  Because pygetdata throws exceptions on GetData\n"
       "errors, it is typically not necessary to check this value; use a\n"
-      "try/except statement instead.  See get_error(3).",
+      "try/except statement instead.  See gd_error(3).",
     NULL },
   { "error_string", (getter)gdpy_dirfile_geterrorstring, NULL,
     "A human-readable description of the last error encountered by the\n"
-      "GetData library for this dirfile.  See get_error_string(3).",
+      "GetData library for this dirfile.  See gd_error_string(3).",
     NULL },
   { "name", (getter)gdpy_dirfile_getname, NULL,
-    "The name of the Dirfile.  See dirfilename(3).",
+    "The name of the Dirfile.  See gd_dirfilename(3).",
     NULL },
   { "nfragments", (getter)gdpy_dirfile_getnfragments, NULL,
     "The number of format file fragments in the dirfile.  See\n"
-      "get_nfragments(3)",
+      "gd_get_nfragments(3)",
     NULL },
   { "nframes", (getter)gdpy_dirfile_getnframes, NULL,
-    "The number of frames in the dirfile.  See get_nframes(3).", NULL },
+    "The number of frames in the dirfile.  See gd_get_nframes(3).", NULL },
   { "reference", (getter)gdpy_dirfile_getreference,
     (setter)gdpy_dirfile_setreference,
     "The reference field for the dirfile, which may be modified.  See\n"
-      "dirfile_reference(3).",
+      "gd_reference(3).",
     NULL },
   { NULL }
 };
@@ -1671,14 +1670,14 @@ static PyMethodDef gdpy_dirfile_methods[] = {
   {"add", (PyCFunction)gdpy_dirfile_add, METH_VARARGS | METH_KEYWORDS,
     "add(entry)\n\n"
       "Add a field described by 'entry', which should be a pygetdata.entry\n"
-      "object, to the database.  See dirfile_add(3)."
+      "object, to the database.  See gd_add(3)."
   },
   {"add_spec", (PyCFunction)gdpy_dirfile_addspec, METH_VARARGS | METH_KEYWORDS,
     "add_spec(line [, fragment_index])\n\n"
       "Add a field described by the field specification line 'line' to the\n"
       "database, by adding it to the format file fragment indexed by\n"
       "'fragment_index', which defaults to 0, if not given.  See\n"
-      "dirfile_add_spec(3)."
+      "gd_add_spec(3)."
   },
   {"alter", (PyCFunction)gdpy_dirfile_alter, METH_VARARGS | METH_KEYWORDS,
     "alter(field_code, entry [, recode])\n\n"
@@ -1688,14 +1687,14 @@ static PyMethodDef gdpy_dirfile_methods[] = {
       "updated, if relevant, to reflect changes in the field metatdata.\n"
       "The entry.name and entry.fragment_index data descriptors are ignored\n"
       "by this function.  To rename or change the fragment of a field\n"
-      "use the rename() or move() methods. See dirfile_alter_entry(3)."
+      "use the rename() or move() methods. See gd_alter_entry(3)."
   },
   {"alter_spec", (PyCFunction)gdpy_dirfile_alterspec, METH_VARARGS |
     METH_KEYWORDS, "alter_spec(line [, recode])\n\n"
       "Modify the field metadata described by the field specification line\n"
       "'line'.  If recode is given and is non-zero, the data on disk will\n"
       "also be updated, if relevant, to reflect changes in the field\n"
-      "metadata.  See dirfile_alter_spec(3)."
+      "metadata.  See gd_alter_spec(3)."
   },
   {"close", (PyCFunction)gdpy_dirfile_close, METH_NOARGS,
     "close()\n\n"
@@ -1704,15 +1703,15 @@ static PyMethodDef gdpy_dirfile_methods[] = {
       "method explicitly: the dirfile will be closed when the dirfile\n"
       "object is destroyed.  After successful completion, the dirfile will\n"
       "be invalidated, prohibiting further use of this object.  See\n"
-      "dirfile_close(3)."
+      "gd_close(3)."
   },
   {"delete", (PyCFunction)gdpy_dirfile_delentry, METH_VARARGS | METH_KEYWORDS,
     "delete(field_code [, flags])\n\n"
       "Delete the field 'field_code' from the database.  If 'flags' is\n"
       "omitted, it is assumed to be zero.  Otherwise, 'flags' should be a\n"
       "bitwise or'd collection of the pygetdata.DEL_* symbols, whose\n"
-      "meanings are described in the dirfile_delete manual page.  See\n"
-      "dirfile_delete(3)."
+      "meanings are described in the gd_delete manual page.  See\n"
+      "gd_delete(3)."
   },
   {"discard", (PyCFunction)gdpy_dirfile_discard, METH_NOARGS,
     "discard()\n\n"
@@ -1720,15 +1719,15 @@ static PyMethodDef gdpy_dirfile_methods[] = {
       "still written) and then close the dirfile.  After this method\n"
       "successfully returns, the dirfile will be invalidated, prohibiting\n"
       "further use of this object.  Call this method if you don't want the\n"
-      "object to implicitly call dirfile_close() when it is deleted.  See\n"
-      "dirfile_discard(3)."
+      "object to implicitly call gd_close() when it is deleted.  See\n"
+      "gd_discard(3)."
   },
   {"flush", (PyCFunction)gdpy_dirfile_flush, METH_VARARGS | METH_KEYWORDS,
     "flush([field_code])\n\n"
       "Flush pending writes to the specified field to disk.  This does\n"
       "not flush pending metadata changes.  For that, use metaflush.\n"
       "However, if field_code is omitted, all data *and* metadata will be\n"
-      "written to disk.  See dirfile_flush(3)."
+      "written to disk.  See gd_flush(3)."
   },
   {"get_constant", (PyCFunction)gdpy_dirfile_getconstant,
     METH_VARARGS | METH_KEYWORDS,
@@ -1738,7 +1737,7 @@ static PyMethodDef gdpy_dirfile_methods[] = {
       "returned, and should be (typically) one of: pygetdata.INT,\n"
       "pygetdata.LONG, pygetdata.ULONG, pygetdata.FLOAT, or\n"
       "pygetdata.COMPLEX, although any GetData data type code is permitted.\n"
-      "See get_constant(3)."
+      "See gd_get_constant(3)."
   },
   {"get_constants", (PyCFunction)gdpy_dirfile_getconstants,
     METH_VARARGS | METH_KEYWORDS,
@@ -1749,11 +1748,11 @@ static PyMethodDef gdpy_dirfile_methods[] = {
       "the values returned, and should be (typically) one of:\n"
       "pygetdata.INT, pygetdata.LONG, pygetdata.ULONG, pygetdata.FLOAT, or\n"
       "pygetdata.COMPLEX, although any GetData data type code is permitted.\n"
-      "See get_constants(3), but note that this method returns both names\n"
+      "See gd_get_constants(3), but note that this method returns both names\n"
       "and values, unlike the C API counterpart."
   },
   {"getdata", (PyCFunction)gdpy_dirfile_getdata, METH_VARARGS | METH_KEYWORDS,
-    "getdata(field_code, return_type [, first_frame, first_sample,\n"
+    "gd_getdata(field_code, return_type [, first_frame, first_sample,\n"
       "num_frames, num_samples, as_list])\n\n"
       "Retrieve a data vector from the dirfile.  If NumPy support is\n"
       "present in pygetdata, and 'as_list' is not given or zero, a NumPy\n"
@@ -1771,13 +1770,13 @@ static PyMethodDef gdpy_dirfile_methods[] = {
       "first sample.  Similarly, 'num_frames' and 'num_samples' indicate\n"
       "the amount of data.  Omitting both of these results in an error.\n"
       "Fewer samples than requested may be returned without causing an\n"
-      "error.  See getdata(3)."
+      "error.  See gd_getdata(3)."
   },
   { "get_entry", (PyCFunction)gdpy_dirfile_getentry,
     METH_VARARGS | METH_KEYWORDS,
     "get_entry(field_code)\n\n"
       "Retrieve the field metadata for the specified 'field_code'.  A\n"
-      "pygetdata.entry object is returned.  See get_entry(3).\n"
+      "pygetdata.entry object is returned.  See gd_get_entry(3).\n"
   },
   { "get_field_list", (PyCFunction)gdpy_dirfile_getfieldlist,
     METH_VARARGS | METH_KEYWORDS,
@@ -1786,7 +1785,7 @@ static PyMethodDef gdpy_dirfile_methods[] = {
       "be one of the pygetdata.*_ENTRY symbols.  If 'entry_type' is not\n"
       "given, or is pygetdata.NO_ENTRY, all fields in the database are\n"
       "returned.  Otherwise, only the fields of the given type are\n"
-      "returned.  See get_field_list(3) and get_field_list_by_type(3)."
+      "returned.  See gd_get_field_list(3) and gd_get_field_list_by_type(3)."
   },
   { "get_fragment", (PyCFunction)gdpy_dirfile_getfragment,
     METH_VARARGS | METH_KEYWORDS,
@@ -1799,7 +1798,7 @@ static PyMethodDef gdpy_dirfile_methods[] = {
     METH_VARARGS | METH_KEYWORDS,
     "get_fragment_index(field_code)\n\n"
       "Return the fragment index of the format file fragment which defines\n"
-      "the field specified by 'field_code'.  See get_fragment_index(3)."
+      "the field specified by 'field_code'.  See gd_get_fragment_index(3)."
   },
   {"get_framenum", (PyCFunction)gdpy_dirfile_getframenum,
     METH_VARARGS | METH_KEYWORDS,
@@ -1809,7 +1808,7 @@ static PyMethodDef gdpy_dirfile_methods[] = {
       "where the field equals 'value'.  The search is performed between\n"
       "the frame limits 'start' and 'end'.  If 'start' is omitted, the\n"
       "search begins at the first sample.  If 'end' is omitted, the search\n"
-      "ends at the last sample.  See get_framenum_subset(3)."
+      "ends at the last sample.  See gd_get_framenum_subset(3)."
   },
   {"get_mconstants", (PyCFunction)gdpy_dirfile_getmconstants,
     METH_VARARGS | METH_KEYWORDS,
@@ -1820,7 +1819,7 @@ static PyMethodDef gdpy_dirfile_methods[] = {
       "parameter indicates the desired type of the values returned, and\n"
       "should be (typically) one of: pygetdata.INT, pygetdata.LONG,\n"
       "pygetdata.ULONG, pygetdata.FLOAT, or pygetdata.COMPLEX, although any\n"
-      "GetData data type code is permitted.  See get_mconstants(3), but\n"
+      "GetData data type code is permitted.  See gd_get_mconstants(3), but\n"
       "note that this method returns both names and values, unlike the\n"
       "C API counterpart."
   },
@@ -1832,7 +1831,7 @@ static PyMethodDef gdpy_dirfile_methods[] = {
       "symbols.  If 'entry_type' is not given, or is pygetdata.NO_ENTRY,\n"
       "all metafields for the given parent field are returned.  Otherwise,\n"
       "only the metafields of the given type are returned.  See\n"
-      "get_mfield_list(3) and get_mfield_list_by_type(3)."
+      "gd_get_mfield_list(3) and gd_get_mfield_list_by_type(3)."
   },
   {"get_mstrings", (PyCFunction)gdpy_dirfile_getmstrings,
     METH_VARARGS | METH_KEYWORDS,
@@ -1848,7 +1847,7 @@ static PyMethodDef gdpy_dirfile_methods[] = {
     "get_mvector_list(parent)\n\n"
       "Retrieve a list of all vector type metafields (that is: BIT, LINCOM,\n"
       "LINTERP, MULTIPLY, PHASE, POLYNOM, and SBIT metafields) for the\n"
-      "parent field 'parent'.  See get_mvector_list(3)."
+      "parent field 'parent'.  See gd_get_mvector_list(3)."
   },
   {"get_native_type", (PyCFunction)gdpy_dirfile_getnativetype,
     METH_VARARGS | METH_KEYWORDS,
@@ -1857,7 +1856,7 @@ static PyMethodDef gdpy_dirfile_methods[] = {
       "'field_code'.  The return value will be one of the data type codes:\n"
       "pygetdata.UINT8, pygetdata.INT8, &c.  The get_native_type_name\n"
       "method behaves identically, but returns a human-readable string\n"
-      "describing the data type.  See get_native_type(3)."
+      "describing the data type.  See gd_get_native_type(3)."
   },
   {"get_native_type_name", (PyCFunction)gdpy_dirfile_getnativetypename,
     METH_VARARGS | METH_KEYWORDS,
@@ -1866,7 +1865,7 @@ static PyMethodDef gdpy_dirfile_methods[] = {
       "'field_code'.  The return value will be a string describing the\n"
       "data type: 'UINT8', 'INT8', &c.  The get_native_type method behaves\n"
       "identically, but returns a numeric data type code.  See\n"
-      "get_native_type(3)."
+      "gd_get_native_type(3)."
   },
   {"get_nfields", (PyCFunction)gdpy_dirfile_getnfields,
     METH_VARARGS | METH_KEYWORDS,
@@ -1876,7 +1875,7 @@ static PyMethodDef gdpy_dirfile_methods[] = {
       "'entry_type' is not given, or is pygetdata.NO_ENTRY, the total\n"
       "number of fields in the database is returned.  Otherwise, only\n"
       "the number of fields of the given type is returned.  See\n"
-      "get_nfields(3) and get_nfields_by_type(3)."
+      "gd_get_nfields(3) and gd_get_nfields_by_type(3)."
   },
   {"get_nmfields", (PyCFunction)gdpy_dirfile_getnmfields,
     METH_VARARGS | METH_KEYWORDS,
@@ -1886,50 +1885,50 @@ static PyMethodDef gdpy_dirfile_methods[] = {
       "pygetdata.*_ENTRY symbols.  If 'entry_type' is not given, or is\n"
       "pygetdata.NO_ENTRY, the total number of metafields for this parent\n"
       "is returned.  Otherwise, only the number of metafields of the given\n"
-      "type is returned.  See get_nmfields(3) and get_nmfields_by_type(3)."
+      "type is returned.  See gd_get_nmfields(3) and gd_get_nmfields_by_type(3)."
   },
   {"get_nmvectors", (PyCFunction)gdpy_dirfile_getnmvectors,
     METH_VARARGS | METH_KEYWORDS,
     "get_nmvectors(parent)\n\n"
       "Return the number of vector type metafields (that is: BIT, LINCOM,\n"
       "LINTERP, MULTIPLY, PHASE, POLYNOM, and SBIT metafields) for the\n"
-      "parent field 'parent'.  See get_nmvectors(3)."
+      "parent field 'parent'.  See gd_get_nmvectors(3)."
   },
   {"get_nvectors", (PyCFunction)gdpy_dirfile_getnvectors, METH_NOARGS,
     "get_nvectors()\n\n"
       "Return the number of vector type fields (that is: BIT, LINCOM,\n"
       "LINTERP, MULTIPLY, PHASE, POLYNOM, RAW, and SBIT fields) defined in\n"
-      "the database.  See get_nvectors(3)."
+      "the database.  See gd_get_nvectors(3)."
   },
   {"get_raw_filename", (PyCFunction)gdpy_dirfile_getrawfilename,
     METH_VARARGS | METH_KEYWORDS,
     "get_raw_filename(field_code)\n\n"
       "Return the pathname of the data file on disk backing the RAW field\n"
-      "specified by 'field_code'.  See get_raw_filename(3)."
+      "specified by 'field_code'.  See gd_get_raw_filename(3)."
   },
   {"get_spf", (PyCFunction)gdpy_dirfile_getspf, METH_VARARGS | METH_KEYWORDS,
     "get_spf(field_code)\n\n"
       "Return the number of samples per frame of the field specified by\n"
-      "field code.  See get_spf(3)."
+      "field code.  See gd_get_spf(3)."
   },
   {"get_string", (PyCFunction)gdpy_dirfile_getstring,
     METH_VARARGS | METH_KEYWORDS,
     "get_string(field_code)\n\n"
       "Retrieve the value of the STRING field specified by 'field_code'.\n"
-      "See get_string(3)."
+      "See gd_get_string(3)."
   },
   { "get_strings", (PyCFunction)gdpy_dirfile_getstrings, METH_NOARGS,
     "get_strings()\n\n"
       "Retrieve all STRING fields defined in the database.  A list of\n"
       "tuples will be returned, each tuple containing the name and value of\n"
-      "a field.  See get_strings(3), but note that this method returns both\n"
+      "a field.  See gd_get_strings(3), but note that this method returns both\n"
       "names and values, unlike the C API counterpart."
   },
   { "get_vector_list", (PyCFunction)gdpy_dirfile_getvectorlist, METH_NOARGS,
     "get_vector_list()\n\n"
       "Retrieve a list of all vector type fields (that is: BIT, LINCOM,\n"
       "LINTERP, MULTIPLY, PHASE, POLYNOM, RAW, and SBIT metafields) defined\n"
-      "in the database.  See get_vector_list(3)."
+      "in the database.  See gd_get_vector_list(3)."
   },
   {"include", (PyCFunction)gdpy_dirfile_include, METH_VARARGS | METH_KEYWORDS,
     "include(filename [, fragment_index, flags])\n\n"
@@ -1938,20 +1937,20 @@ static PyMethodDef gdpy_dirfile_methods[] = {
       "indexed by 'fragment_index'.  If 'fragment_index' is not given,\n"
       "zero is assumed (ie. the primary format file).  If flags is given,\n"
       "it should be a bitwise or'd collection of flags listed in the\n"
-      "dirfile_include manual page.  See dirfile_include(3)."
+      "gd_include manual page.  See gd_include(3)."
   },
   {"madd", (PyCFunction)gdpy_dirfile_madd, METH_VARARGS | METH_KEYWORDS,
     "madd(entry, parent)\n\n"
       "Add a field described by 'entry', which should be a pygetdata.entry\n"
       "object, to the database as a metafield under the parent field given\n"
-      "by 'parent'.  See dirfile_madd(3)."
+      "by 'parent'.  See gd_madd(3)."
   },
   {"madd_spec", (PyCFunction)gdpy_dirfile_maddspec,
     METH_VARARGS | METH_KEYWORDS,
     "madd_spec(line, parent)\n\n"
       "Add a field described by the field specification line 'line' to the\n"
       "database as a metafield under the parent field given by 'parent'.\n"
-      "See dirfile_madd_spec(3)."
+      "See gd_madd_spec(3)."
   },
   {"malter_spec", (PyCFunction)gdpy_dirfile_malterspec,
     METH_VARARGS | METH_KEYWORDS,
@@ -1960,12 +1959,11 @@ static PyMethodDef gdpy_dirfile_methods[] = {
       "'line' for a metafield under the parent field 'parent'.  If recode\n"
       "is given and is non-zero, the data on disk will also be updated, if\n"
       "relevant, to reflect changes in the metafield metadata.  See\n"
-      "dirfile_malter_spec(3)."
+      "gd_malter_spec(3)."
   },
   {"metaflush", (PyCFunction)gdpy_dirfile_metaflush, METH_NOARGS,
     "metaflush()\n\n"
-      "Flush all pending metadata changes to disk.  See\n"
-      "dirfile_metaflush(3)."
+      "Flush all pending metadata changes to disk.  See gd_metaflush(3)."
   },
   {"move", (PyCFunction)gdpy_dirfile_move, METH_VARARGS | METH_KEYWORDS,
     "move(field_code, new_fragment [, move_data])\n\n"
@@ -1973,7 +1971,7 @@ static PyMethodDef gdpy_dirfile_methods[] = {
       "format file fragment indexed by 'new_fragment'.  If 'move_data' is\n"
       "given and is non-zero, and 'field_code' specifies a RAW field, the\n"
       "associated file on disk will also be moved, if necessary.  See\n"
-      "dirfile_move(3)."
+      "gd_move(3)."
   },
   {"put_constant", (PyCFunction)gdpy_dirfile_putconstant,
     METH_VARARGS | METH_KEYWORDS,
@@ -1986,7 +1984,7 @@ static PyMethodDef gdpy_dirfile_methods[] = {
       "'type' should be one of the data type codes: pygetdata.UINT8,\n"
       "pygetdata.INT8, &c.  Note that this does not affect the storage type\n"
       "of the CONST field, merely how the data is transferred to the C API.\n"
-      "See put_constant(3)."
+      "See gd_put_constant(3)."
   },
   {"putdata", (PyCFunction)gdpy_dirfile_putdata, METH_VARARGS | METH_KEYWORDS,
     "putdata(field_code, data [, type, first_frame, first_sample])\n\n"
@@ -2003,20 +2001,20 @@ static PyMethodDef gdpy_dirfile_methods[] = {
       "specified, 'type' should be one of the data type codes:\n"
       "pygetdata.UINT8, pygetdata.INT8, &c.  Note that this does not affect\n"
       "the storage type of the field, merely how the data is transferred to\n"
-      "the C API.  See putdata(3)."
+      "the C API.  See gd_putdata(3)."
   },
   {"put_string", (PyCFunction)gdpy_dirfile_putstring,
     METH_VARARGS | METH_KEYWORDS,
     "put_string(field_code, value)\n\n"
       "Store the string given by 'value' in the STRING field specified by\n"
-      "'field_code'.  See put_string(3)."
+      "'field_code'.  See gd_put_string(3)."
   },
   {"rename", (PyCFunction)gdpy_dirfile_rename, METH_VARARGS | METH_KEYWORDS,
     "rename(old_code, new_name [, move_data])\n\n"
       "Change the name of the field specified by 'old_code' to 'new_name'.\n"
       "If 'move_data' is given and is non-zero, and if 'old_code' specifies\n"
       "a RAW field, the file on disk will also be renamed accordingly.\n"
-      "See dirfile_rename(3)."
+      "See gd_rename(3)."
   },
   {"set_callback", (PyCFunction)gdpy_dirfile_callback,
     METH_VARARGS | METH_KEYWORDS,
@@ -2027,7 +2025,7 @@ static PyMethodDef gdpy_dirfile_methods[] = {
       "replaced by 'sehandler', which must be a callable object.  The\n"
       "'extra' parameter is any object which will be passed to the callback\n"
       "handler, or None, if no such object is needed.  See\n"
-      "dirfile_parser_callback(3)."
+      "gd_parser_callback(3)."
   },
   {"uninclude", (PyCFunction)gdpy_dirfile_uninclude,
     METH_VARARGS | METH_KEYWORDS,
@@ -2035,13 +2033,13 @@ static PyMethodDef gdpy_dirfile_methods[] = {
       "Remove the format file fragment indexed by 'fragment_index' from the\n"
       "database.  If 'del' is given, and is non-zero, the file will also be\n"
       "deleted from disk.  This also removes all field defined in the\n"
-      "specified fragment from the database.  See dirfile_uninclude(3)."
+      "specified fragment from the database.  See gd_uninclude(3)."
   },
   {"validate", (PyCFunction)gdpy_dirfile_validate, METH_VARARGS | METH_KEYWORDS,
     "validate(field_code)\n\n"
       "Check whether the field specified by 'field_code' is valid for\n"
       "reading and writing.  Throws an error if it is not.  See\n"
-      "dirfile_validate(3)."
+      "gd_validate(3)."
   },
   { NULL, NULL, 0, NULL }
 };
@@ -2049,9 +2047,9 @@ static PyMethodDef gdpy_dirfile_methods[] = {
 #define DIRFILE_DOC \
   "dirfile(dirfilename [, flags [, sehandler [, extra ]])\n\n" \
 "Returns a dirfile object representing the dirfile specified by\n" \
-"'dirfilename'.  The dirfile is opened by a call to dirfile_cbopen(3).\n"\
+"'dirfilename'.  The dirfile is opened by a call to gd_cbopen(3).\n"\
 "See that manual page for full details on arguments.  If present 'flags'\n"\
-"should be a bitwise or'd collection of dirfile_cbopen flags.  If it is\n"\
+"should be a bitwise or'd collection of gd_cbopen flags.  If it is\n"\
 "omitted, the default, pygetdata.RDRW, is used.\n\n" \
 "If a callback handler is desired, 'sehandler' should be a callable\n"\
 "object (ie. a function) which accepts two objects.  The first object is\n"\

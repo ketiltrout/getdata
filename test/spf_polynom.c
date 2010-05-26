@@ -1,5 +1,5 @@
 /* The SPF of a polynom should equal the SPF of its input field */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -16,7 +16,7 @@ int main(void)
   const char* format_data =
     "in RAW UINT8 11\n"
     "polynom POLYNOM in 1 2 1 3\n";
-  int fd;
+  int fd, r = 0;
 
   mkdir(filedir, 0777);
 
@@ -24,12 +24,13 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY | GD_VERBOSE);
-  unsigned int spf = get_spf(D, "polynom");
-  dirfile_close(D);
+  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  unsigned int spf = gd_get_spf(D, "polynom");
+  gd_close(D);
 
   unlink(format);
   rmdir(filedir);
 
-  return (spf != 11);
+  CHECKI(spf,11);
+  return r;
 }

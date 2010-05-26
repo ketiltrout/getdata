@@ -31,6 +31,10 @@
 #include <math.h>
 #include "getdata.h"
 
+#ifndef HAVE_OFF64_T
+#define off64_t off_t
+#endif
+
 #define BUF_LEN GD_MAX_LINE_LENGTH
 #define F_LEN 16
 #define VALID_PRECISION_CHARS "#- +`I.0123456789"
@@ -296,41 +300,41 @@ int main (int argc, char **argv)
   if (skip < 1)
     skip = 1;
 
-  dirfile = dirfile_open(dirfile_name, GD_RDONLY);
-  if (get_error(dirfile)) {
-    fprintf(stderr, "GetData error: %s\n", get_error_string(dirfile,
-          char_buffer, BUF_LEN));
-    dirfile_close(dirfile);
+  dirfile = gd_open(dirfile_name, GD_RDONLY);
+  if (gd_error(dirfile)) {
+    fprintf(stderr, "GetData error: %s\n", gd_error_string(dirfile, char_buffer,
+          BUF_LEN));
+    gd_close(dirfile);
     exit(1);
   }
 
   if (nf == 0) {
-    nf = get_nframes(dirfile) - ff;
-    if (get_error(dirfile)) {
-      fprintf(stderr, "GetData error: %s\n", get_error_string(dirfile,
-            char_buffer, BUF_LEN));
-      dirfile_close(dirfile);
+    nf = gd_get_nframes(dirfile) - ff;
+    if (gd_error(dirfile)) {
+      fprintf(stderr, "GetData error: %s\n", gd_error_string(dirfile, char_buffer,
+            BUF_LEN));
+      gd_close(dirfile);
       exit(3);
     }
   }
 
   if (ff == -1) {
-    ff = get_nframes(dirfile) - nf;
-    if (get_error(dirfile)) {
-      fprintf(stderr, "GetData error: %s\n", get_error_string(dirfile,
-            char_buffer, BUF_LEN));
-      dirfile_close(dirfile);
+    ff = gd_get_nframes(dirfile) - nf;
+    if (gd_error(dirfile)) {
+      fprintf(stderr, "GetData error: %s\n", gd_error_string(dirfile, char_buffer,
+            BUF_LEN));
+      gd_close(dirfile);
       exit(3);
     }
   }
 
   /* Get spfs and sanity checks for all fields */
   for (int i = 0; i < numfields; i++) {
-    fields[i].spf = get_spf(dirfile, fields[i].name);
-    if (get_error(dirfile)) {
-      fprintf(stderr, "GetData error: %s\n", get_error_string(dirfile,
-            char_buffer, BUF_LEN));
-      dirfile_close(dirfile);
+    fields[i].spf = gd_get_spf(dirfile, fields[i].name);
+    if (gd_error(dirfile)) {
+      fprintf(stderr, "GetData error: %s\n", gd_error_string(dirfile, char_buffer,
+            BUF_LEN));
+      gd_close(dirfile);
       exit(3);
     }
 
@@ -364,36 +368,36 @@ int main (int argc, char **argv)
       fields[i].dbl = malloc(sizeof(double) * n_want);
       if (fields[i].dbl == NULL) {
         perror("malloc");
-        dirfile_close(dirfile);
+        gd_close(dirfile);
         exit(4);
       }
 
-      n_read = getdata(dirfile, fields[i].name, ff, 0, nf, 0, GD_FLOAT64,
+      n_read = gd_getdata(dirfile, fields[i].name, ff, 0, nf, 0, GD_FLOAT64,
           fields[i].dbl);
     } else if (type_data[fields[i].type].t == READ_AS_INT) {
       fields[i].i64 = malloc(sizeof(int64_t) * n_want);
       if (fields[i].i64 == NULL) {
         perror("malloc");
-        dirfile_close(dirfile);
+        gd_close(dirfile);
         exit(4);
       }
-      n_read = getdata(dirfile, fields[i].name, ff, 0, nf, 0, GD_INT64,
+      n_read = gd_getdata(dirfile, fields[i].name, ff, 0, nf, 0, GD_INT64,
           fields[i].i64);
     } else {
       fields[i].u64 = malloc(sizeof(uint64_t) * n_want);
       if (fields[i].u64 == NULL) {
         perror("malloc");
-        dirfile_close(dirfile);
+        gd_close(dirfile);
         exit(4);
       }
-      n_read = getdata(dirfile, fields[i].name, ff, 0, nf, 0, GD_UINT64,
+      n_read = gd_getdata(dirfile, fields[i].name, ff, 0, nf, 0, GD_UINT64,
           fields[i].u64);
     }
 
-    if (get_error(dirfile)) {
-      fprintf(stderr, "GetData error: %s\n", get_error_string(dirfile,
-            char_buffer, BUF_LEN));
-      dirfile_close(dirfile);
+    if (gd_error(dirfile)) {
+      fprintf(stderr, "GetData error: %s\n", gd_error_string(dirfile, char_buffer,
+            BUF_LEN));
+      gd_close(dirfile);
       exit(5);
     }
   }
@@ -467,6 +471,6 @@ int main (int argc, char **argv)
     }
   }
 
-  dirfile_close(dirfile);
+  gd_close(dirfile);
   return 0;
 }

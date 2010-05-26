@@ -1,5 +1,5 @@
 /* Attempt to write UINT8 via the legacy interface*/
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <inttypes.h>
 #include <stdlib.h>
@@ -17,7 +17,7 @@ int main(void)
   const char* data = __TEST__ "dirfile/data";
   const char* format_data = "data RAW UINT8 8\n";
   uint8_t c[8], d;
-  int fd, i;
+  int fd, i, r = 0;
   struct stat buf;
 
   memset(c, 0, 8);
@@ -33,19 +33,17 @@ int main(void)
   int error;
   int n = PutData(filedir, "data", 5, 0, 1, 0, 'c', c, &error);
 
-  if (stat(data, &buf))
-    return 1;
-  if (buf.st_size != 40 + 8 * sizeof(uint8_t))
-    return 1;
+  int stat_ret = stat(data, &buf);
+  CHECKI(stat_ret, 0);
+  CHECKI(buf.st_size, 40 + 8 * sizeof(uint8_t));
 
   fd = open(data, O_RDONLY);
   i = 0;
   while (read(fd, &d, sizeof(uint8_t))) {
     if (i < 40 || i > 48) {
-      if (d != 0)
-        return 1;
-    } else if (d != i)
-      return 1;
+      CHECKUi(i,d,0);
+    } else
+      CHECKUi(i,d,i);
     i++;
   }
   close(fd);
@@ -54,10 +52,8 @@ int main(void)
   unlink(format);
   rmdir(filedir);
 
-  if (error)
-    return 1;
-  if (n != 8)
-    return 1;
+  CHECKI(error,0);
+  CHECKI(n,8);
 
-  return 0;
+  return r;
 }

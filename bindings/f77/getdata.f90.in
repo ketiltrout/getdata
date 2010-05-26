@@ -39,17 +39,17 @@ type gd_entry
 end type
 
 contains
-function fdirfile_open (dirfilename, flags)
-  integer :: fdirfile_open
+function fgd_open (dirfilename, flags)
+  integer :: fgd_open
   character (len=*), intent (in) :: dirfilename
   integer, intent (in) :: flags
 
   ! call f77 library
-  call gdopen(fdirfile_open, TRIM(dirfilename), LEN_TRIM(dirfilename), flags)
+  call gdopen(fgd_open, TRIM(dirfilename), LEN_TRIM(dirfilename), flags)
 end function
 
-function fdirfile_cbopen (dirfilename, flags, sehandler)
-  integer :: fdirfile_cbopen
+function fgd_cbopen (dirfilename, flags, sehandler)
+  integer :: fgd_cbopen
   character (len=*), intent (in) :: dirfilename
   integer, intent (in) :: flags
   interface
@@ -61,25 +61,25 @@ function fdirfile_cbopen (dirfilename, flags, sehandler)
   end interface
 
   ! call f77 library
-  call gdcopn(fdirfile_cbopen, TRIM(dirfilename), LEN_TRIM(dirfilename), &
-  flags, sehandler)
+  call gdcopn(fgd_cbopen, TRIM(dirfilename), LEN_TRIM(dirfilename), flags, &
+  sehandler)
 end function
 
-subroutine fdirfile_discard (dirfile)
+subroutine fgd_discard (dirfile)
   integer, intent(in) :: dirfile
 
   ! call f77 library
   call gddscd(dirfile)
 end subroutine
 
-subroutine fdirfile_close (dirfile)
+subroutine fgd_close (dirfile)
   integer, intent(in) :: dirfile
 
   ! call f77 library
   call gdclos(dirfile)
 end subroutine
 
-subroutine fdirfile_flush (dirfile, field_code)
+subroutine fgd_flush (dirfile, field_code)
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: field_code
 
@@ -89,326 +89,327 @@ subroutine fdirfile_flush (dirfile, field_code)
 end subroutine
 
 ! getdata with return_type=GD_NULL
-function fgetdata_n (dirfile, field_code, first_frame, first_sample, &
+function fgd_getdata_n (dirfile, field_code, first_frame, first_sample, &
   num_frames, num_samples)
-  integer :: fgetdata_n
+  integer :: fgd_getdata_n
   integer, intent(in) :: dirfile, first_frame, first_sample, num_frames
   character (len=*), intent(in) :: field_code
   integer, intent(in) :: num_samples
 
   ! call f77 library
-  call gdgetd(fgetdata_n, dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+  call gdgetd(fgd_getdata_n, dirfile, TRIM(field_code), LEN_TRIM(field_code), &
   first_frame, first_sample, num_frames, num_samples, GD_NULL, 0)
 end function
 
 ! getdata with return_type=GD_INT8
-function fgetdata_i1 (dirfile, field_code, first_frame, first_sample, &
+function fgd_getdata_i1 (dirfile, field_code, first_frame, first_sample, &
   num_frames, num_samples, data_out)
-  integer :: fgetdata_i1
+  integer :: fgd_getdata_i1
   integer, intent(in) :: dirfile, first_frame, first_sample, num_frames
   character (len=*), intent(in) :: field_code
   integer, intent(in) :: num_samples
   integer*1, dimension(:), intent(out) :: data_out
 
   ! call f77 library
-  call gdgetd(fgetdata_i1, dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+  call gdgetd(fgd_getdata_i1, dirfile, TRIM(field_code), LEN_TRIM(field_code), &
   first_frame, first_sample, num_frames, num_samples, GD_INT8, data_out)
 end function
 
 ! getdata with return_type=GD_INT16
-function fgetdata_i2 (dirfile, field_code, first_frame, first_sample, &
+function fgd_getdata_i2 (dirfile, field_code, first_frame, first_sample, &
   num_frames, num_samples, data_out)
-  integer :: fgetdata_i2
+  integer :: fgd_getdata_i2
   integer, intent(in) :: dirfile, first_frame, first_sample, num_frames
   character (len=*), intent(in) :: field_code
   integer, intent(in) :: num_samples
   integer*2, dimension(:), intent(out) :: data_out
 
   ! call f77 library
-  call gdgetd(fgetdata_i2, dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+  call gdgetd(fgd_getdata_i2, dirfile, TRIM(field_code), LEN_TRIM(field_code), &
   first_frame, first_sample, num_frames, num_samples, GD_INT16, data_out)
 end function
 
 ! getdata with return_type=GD_INT32
-function fgetdata_i4 (dirfile, field_code, first_frame, first_sample, &
+function fgd_getdata_i4 (dirfile, field_code, first_frame, first_sample, &
   num_frames, num_samples, data_out)
-  integer :: fgetdata_i4
+  integer :: fgd_getdata_i4
   integer, intent(in) :: dirfile, first_frame, first_sample, num_frames
   character (len=*), intent(in) :: field_code
   integer, intent(in) :: num_samples
   integer*4, dimension(:), intent(out) :: data_out
 
   ! call f77 library
-  call gdgetd(fgetdata_i4, dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+  call gdgetd(fgd_getdata_i4, dirfile, TRIM(field_code), LEN_TRIM(field_code), &
   first_frame, first_sample, num_frames, num_samples, GD_INT32, data_out)
 end function
 
 ! getdata with return_type=GD_INT64
-function fgetdata_i8 (dirfile, field_code, first_frame, first_sample, &
+function fgd_getdata_i8 (dirfile, field_code, first_frame, first_sample, &
   num_frames, num_samples, data_out)
-  integer :: fgetdata_i8
+  integer :: fgd_getdata_i8
   integer, intent(in) :: dirfile, first_frame, first_sample, num_frames
   character (len=*), intent(in) :: field_code
   integer, intent(in) :: num_samples
   integer*8, dimension(:), intent(out) :: data_out
 
   ! call f77 library
-  call gdgetd(fgetdata_i8, dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+  call gdgetd(fgd_getdata_i8, dirfile, TRIM(field_code), LEN_TRIM(field_code), &
   first_frame, first_sample, num_frames, num_samples, GD_INT64, data_out)
 end function
 
 ! getdata with return_type=GD_FLOAT32
-function fgetdata_r4 (dirfile, field_code, first_frame, first_sample, &
+function fgd_getdata_r4 (dirfile, field_code, first_frame, first_sample, &
   num_frames, num_samples, data_out)
-  integer :: fgetdata_r4
+  integer :: fgd_getdata_r4
   integer, intent(in) :: dirfile, first_frame, first_sample, num_frames
   character (len=*), intent(in) :: field_code
   integer, intent(in) :: num_samples
   real*4, dimension(:), intent(out) :: data_out
 
   ! call f77 library
-  call gdgetd(fgetdata_r4, dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+  call gdgetd(fgd_getdata_r4, dirfile, TRIM(field_code), LEN_TRIM(field_code), &
   first_frame, first_sample, num_frames, num_samples, GD_FLOAT32, data_out)
 end function
 
 ! getdata with return_type=GD_FLOAT64
-function fgetdata_r8 (dirfile, field_code, first_frame, first_sample, &
+function fgd_getdata_r8 (dirfile, field_code, first_frame, first_sample, &
   num_frames, num_samples, data_out)
-  integer :: fgetdata_r8
+  integer :: fgd_getdata_r8
   integer, intent(in) :: dirfile, first_frame, first_sample, num_frames
   character (len=*), intent(in) :: field_code
   integer, intent(in) :: num_samples
   double precision, dimension(:), intent(out) :: data_out
 
   ! call f77 library
-  call gdgetd(fgetdata_r8, dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+  call gdgetd(fgd_getdata_r8, dirfile, TRIM(field_code), LEN_TRIM(field_code), &
   first_frame, first_sample, num_frames, num_samples, GD_FLOAT64, data_out)
 end function
 
 ! getdata with return_type=GD_COMPLEX64
-function fgetdata_c8 (dirfile, field_code, first_frame, first_sample, &
+function fgd_getdata_c8 (dirfile, field_code, first_frame, first_sample, &
   num_frames, num_samples, data_out)
-  integer :: fgetdata_c8
+  integer :: fgd_getdata_c8
   integer, intent(in) :: dirfile, first_frame, first_sample, num_frames
   character (len=*), intent(in) :: field_code
   integer, intent(in) :: num_samples
   complex, dimension(:), intent(out) :: data_out
 
   ! call f77 library
-  call gdgetd(fgetdata_c8, dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+  call gdgetd(fgd_getdata_c8, dirfile, TRIM(field_code), LEN_TRIM(field_code), &
   first_frame, first_sample, num_frames, num_samples, GD_COMPLEX64, data_out)
 end function
 
 ! getdata with return_type=GD_COMPLEX128
-function fgetdata_c16 (dirfile, field_code, first_frame, first_sample, &
+function fgd_getdata_c16 (dirfile, field_code, first_frame, first_sample, &
   num_frames, num_samples, data_out)
-  integer :: fgetdata_c16
+  integer :: fgd_getdata_c16
   integer, intent(in) :: dirfile, first_frame, first_sample, num_frames
   character (len=*), intent(in) :: field_code
   integer, intent(in) :: num_samples
   double complex, dimension(:), intent(out) :: data_out
 
   ! call f77 library
-  call gdgetd(fgetdata_c16, dirfile, TRIM(field_code), LEN_TRIM(field_code), &
-  first_frame, first_sample, num_frames, num_samples, GD_COMPLEX128, data_out)
+  call gdgetd(fgd_getdata_c16, dirfile, TRIM(field_code), &
+  LEN_TRIM(field_code), first_frame, first_sample, num_frames, num_samples, &
+  GD_COMPLEX128, data_out)
 end function
 
 !get_constant with return_type=GD_NULL
-function fget_constant_n (dirfile, field_code)
-  integer :: fget_constant_n
+function fgd_get_constant_n (dirfile, field_code)
+  integer :: fgd_get_constant_n
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: field_code
   
   ! call f77 library
-  call gdgtco(fget_constant_n, dirfile, TRIM(field_code), &
+  call gdgtco(fgd_get_constant_n, dirfile, TRIM(field_code), &
   LEN_TRIM(field_code), GD_NULL, 0)
 end function
 
 !get_constant with return_type=GD_INT8
-function fget_constant_i1 (dirfile, field_code, data_out)
-  integer :: fget_constant_i1
+function fgd_get_constant_i1 (dirfile, field_code, data_out)
+  integer :: fgd_get_constant_i1
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: field_code
   integer*1, intent(out)  :: data_out
   
   ! call f77 library
-  call gdgtco(fget_constant_i1, dirfile, TRIM(field_code), &
+  call gdgtco(fgd_get_constant_i1, dirfile, TRIM(field_code), &
   LEN_TRIM(field_code), GD_INT8, data_out)
 end function
 
 !get_constant with return_type=GD_INT16
-function fget_constant_i2 (dirfile, field_code, data_out)
-  integer :: fget_constant_i2
+function fgd_get_constant_i2 (dirfile, field_code, data_out)
+  integer :: fgd_get_constant_i2
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: field_code
   integer*2, intent(out)  :: data_out
   
   ! call f77 library
-  call gdgtco(fget_constant_i2, dirfile, TRIM(field_code), &
+  call gdgtco(fgd_get_constant_i2, dirfile, TRIM(field_code), &
   LEN_TRIM(field_code), GD_INT16, data_out)
 end function
 
 !get_constant with return_type=GD_INT32
-function fget_constant_i4 (dirfile, field_code, data_out)
-  integer :: fget_constant_i4
+function fgd_get_constant_i4 (dirfile, field_code, data_out)
+  integer :: fgd_get_constant_i4
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: field_code
   integer*4, intent(out)  :: data_out
   
   ! call f77 library
-  call gdgtco(fget_constant_i4, dirfile, TRIM(field_code), &
+  call gdgtco(fgd_get_constant_i4, dirfile, TRIM(field_code), &
   LEN_TRIM(field_code), GD_INT32, data_out)
 end function
 
 !get_constant with return_type=GD_INT64
-function fget_constant_i8 (dirfile, field_code, data_out)
-  integer :: fget_constant_i8
+function fgd_get_constant_i8 (dirfile, field_code, data_out)
+  integer :: fgd_get_constant_i8
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: field_code
   integer*8, intent(out)  :: data_out
   
   ! call f77 library
-  call gdgtco(fget_constant_i8, dirfile, TRIM(field_code), &
+  call gdgtco(fgd_get_constant_i8, dirfile, TRIM(field_code), &
   LEN_TRIM(field_code), GD_INT64, data_out)
 end function
 
 !get_constant with return_type=GD_FLOAT32
-function fget_constant_r4 (dirfile, field_code, data_out)
-  integer :: fget_constant_r4
+function fgd_get_constant_r4 (dirfile, field_code, data_out)
+  integer :: fgd_get_constant_r4
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: field_code
   real*4, intent(out)  :: data_out
   
   ! call f77 library
-  call gdgtco(fget_constant_r4, dirfile, TRIM(field_code), &
+  call gdgtco(fgd_get_constant_r4, dirfile, TRIM(field_code), &
   LEN_TRIM(field_code), GD_FLOAT32, data_out)
 end function
 
 !get_constant with return_type=GD_FLOAT64
-function fget_constant_r8 (dirfile, field_code, data_out)
-  integer :: fget_constant_r8
+function fgd_get_constant_r8 (dirfile, field_code, data_out)
+  integer :: fgd_get_constant_r8
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: field_code
   double precision, intent(out)  :: data_out
   
   ! call f77 library
-  call gdgtco(fget_constant_r8, dirfile, TRIM(field_code), &
+  call gdgtco(fgd_get_constant_r8, dirfile, TRIM(field_code), &
   LEN_TRIM(field_code), GD_FLOAT64, data_out)
 end function
 
 !get_constant with return_type=GD_COMPLEX64
-function fget_constant_c8 (dirfile, field_code, data_out)
-  integer :: fget_constant_c8
+function fgd_get_constant_c8 (dirfile, field_code, data_out)
+  integer :: fgd_get_constant_c8
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: field_code
   complex, intent(out)  :: data_out
   
   ! call f77 library
-  call gdgtco(fget_constant_c8, dirfile, TRIM(field_code), &
+  call gdgtco(fgd_get_constant_c8, dirfile, TRIM(field_code), &
   LEN_TRIM(field_code), GD_COMPLEX64, data_out)
 end function
 
 !get_constant with return_type=GD_COMPLEX128
-function fget_constant_c16 (dirfile, field_code, data_out)
-  integer :: fget_constant_c16
+function fgd_get_constant_c16 (dirfile, field_code, data_out)
+  integer :: fgd_get_constant_c16
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: field_code
   double complex, intent(out)  :: data_out
   
   ! call f77 library
-  call gdgtco(fget_constant_c16, dirfile, TRIM(field_code), &
+  call gdgtco(fgd_get_constant_c16, dirfile, TRIM(field_code), &
   LEN_TRIM(field_code), GD_COMPLEX128, data_out)
 end function
 
-function fget_string (dirfile, field_code, length, data_out)
-  integer :: fget_string
+function fgd_get_string (dirfile, field_code, length, data_out)
+  integer :: fgd_get_string
   integer, intent(in) :: dirfile, length
   character (len=*), intent(in) :: field_code
   character (len=*), intent(out) :: data_out
 
   ! call f77 library
-  call gdgtst(fget_string, dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+  call gdgtst(fgd_get_string, dirfile, TRIM(field_code), LEN_TRIM(field_code), &
   length, data_out)
 end function
 
-function fget_nfields (dirfile)
-  integer :: fget_nfields
+function fgd_get_nfields (dirfile)
+  integer :: fgd_get_nfields
   integer, intent(in) :: dirfile
 
   ! call f77 library
-  call gdnfld(fget_nfields, dirfile)
+  call gdnfld(fgd_get_nfields, dirfile)
 end function
 
-function fget_nfields_by_type (dirfile, entype)
-  integer :: fget_nfields_by_type
+function fgd_get_nfields_by_type (dirfile, entype)
+  integer :: fgd_get_nfields_by_type
   integer, intent(in) :: dirfile, entype
 
-  call gdnfdt(fget_nfields_by_type, dirfile, entype)
+  call gdnfdt(fgd_get_nfields_by_type, dirfile, entype)
 end function
 
-function fget_nvectors (dirfile)
-  integer :: fget_nvectors
+function fgd_get_nvectors (dirfile)
+  integer :: fgd_get_nvectors
   integer, intent(in) :: dirfile
 
-  call gdnvec(fget_nvectors, dirfile)
+  call gdnvec(fgd_get_nvectors, dirfile)
 end function
 
-function fget_nmfields (dirfile, parent)
-  integer :: fget_nmfields
+function fgd_get_nmfields (dirfile, parent)
+  integer :: fgd_get_nmfields
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: parent
 
   ! call f77 library
-  call gdnmfd(fget_nmfields, dirfile, TRIM(parent), LEN_TRIM(parent))
+  call gdnmfd(fgd_get_nmfields, dirfile, TRIM(parent), LEN_TRIM(parent))
 end function
 
-function fget_nmfields_by_type (dirfile, parent, entype)
-  integer :: fget_nmfields_by_type
+function fgd_get_nmfields_by_type (dirfile, parent, entype)
+  integer :: fgd_get_nmfields_by_type
   integer, intent(in) :: dirfile, entype
   character (len=*), intent(in) :: parent
 
-  call gdnmft(fget_nmfields_by_type, dirfile, TRIM(parent), LEN_TRIM(parent), &
-  entype)
+  call gdnmft(fgd_get_nmfields_by_type, dirfile, TRIM(parent), &
+  LEN_TRIM(parent), entype)
 end function
 
-function fget_nmvectors (dirfile, parent)
-  integer :: fget_nmvectors
+function fgd_get_nmvectors (dirfile, parent)
+  integer :: fgd_get_nmvectors
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: parent
 
-  call gdnmve(fget_nmvectors, dirfile, TRIM(parent), LEN_TRIM(parent))
+  call gdnmve(fgd_get_nmvectors, dirfile, TRIM(parent), LEN_TRIM(parent))
 end function
 
-function fget_field_name_max (dirfile)
-  integer :: fget_field_name_max
+function fgd_get_field_name_max (dirfile)
+  integer :: fgd_get_field_name_max
   integer, intent(in) :: dirfile
 
   ! call f77 library
-  call gdfdnx(fget_field_name_max, dirfile)
+  call gdfdnx(fgd_get_field_name_max, dirfile)
 end function
 
-function fget_mfield_name_max (dirfile, parent)
-  integer :: fget_mfield_name_max
+function fgd_get_mfield_name_max (dirfile, parent)
+  integer :: fgd_get_mfield_name_max
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: parent
 
   ! call f77 library
-  call gdmfnx(fget_mfield_name_max, dirfile, TRIM(parent), LEN_TRIM(parent))
+  call gdmfnx(fgd_get_mfield_name_max, dirfile, TRIM(parent), LEN_TRIM(parent))
 end function
 
-subroutine fget_field_list (field_list, dirfile, field_len)
+subroutine fgd_get_field_list (field_list, dirfile, field_len)
   character(len=*), dimension(:), intent(out) :: field_list
   integer, intent(in) :: dirfile
   integer, intent(inout) :: field_len
   integer :: max_len, nfields, i
 
   ! make sure the field list is large enough
-  max_len = fget_field_name_max(dirfile)
+  max_len = fgd_get_field_name_max(dirfile)
 
   if (field_len .lt. max_len) then
     field_len = max_len
   else
-    nfields = fget_nfields(dirfile)
+    nfields = fgd_get_nfields(dirfile)
     do i=1,nfields
       ! call f77 library
       call gdfldn(field_list(i), field_len, dirfile, i)
@@ -416,19 +417,19 @@ subroutine fget_field_list (field_list, dirfile, field_len)
   end if
 end subroutine
 
-subroutine fget_field_list_by_type (field_list, dirfile, entype, field_len)
+subroutine fgd_get_field_list_by_type (field_list, dirfile, entype, field_len)
   character(len=*), dimension(:), intent(out) :: field_list
   integer, intent(in) :: dirfile, entype
   integer, intent(inout) :: field_len
   integer :: max_len, nfields, i
 
   ! make sure the field list is large enough
-  max_len = fget_field_name_max(dirfile)
+  max_len = fgd_get_field_name_max(dirfile)
 
   if (field_len .lt. max_len) then
     field_len = max_len
   else
-    nfields = fget_nfields_by_type(dirfile, entype)
+    nfields = fgd_get_nfields_by_type(dirfile, entype)
     do i=1,nfields
       ! call f77 library
       call gdfdnt(field_list(i), field_len, dirfile, entype, i)
@@ -436,19 +437,19 @@ subroutine fget_field_list_by_type (field_list, dirfile, entype, field_len)
   end if
 end subroutine
 
-subroutine fget_vector_list (field_list, dirfile, field_len)
+subroutine fgd_get_vector_list (field_list, dirfile, field_len)
   character(len=*), dimension(:), intent(out) :: field_list
   integer, intent(in) :: dirfile
   integer, intent(inout) :: field_len
   integer :: max_len, nfields, i
 
   ! make sure the field list is large enough
-  max_len = fget_field_name_max(dirfile)
+  max_len = fgd_get_field_name_max(dirfile)
 
   if (field_len .lt. max_len) then
     field_len = max_len
   else
-    nfields = fget_nvectors(dirfile)
+    nfields = fgd_get_nvectors(dirfile)
     do i=1,nfields
       ! call f77 library
       call gdvecn(field_list(i), field_len, dirfile, i)
@@ -456,7 +457,7 @@ subroutine fget_vector_list (field_list, dirfile, field_len)
   end if
 end subroutine
 
-subroutine fget_mfield_list (field_list, dirfile, parent, field_len)
+subroutine fgd_get_mfield_list (field_list, dirfile, parent, field_len)
   character(len=*), dimension(:), intent(out) :: field_list
   integer, intent(in) :: dirfile
   integer, intent(inout) :: field_len
@@ -464,12 +465,12 @@ subroutine fget_mfield_list (field_list, dirfile, parent, field_len)
   character (len=*), intent(in) :: parent
 
   ! make sure the field list is large enough
-  max_len = fget_mfield_name_max(dirfile, parent)
+  max_len = fgd_get_mfield_name_max(dirfile, parent)
 
   if (field_len .lt. max_len) then
     field_len = max_len
   else
-    nfields = fget_nmfields(dirfile, parent)
+    nfields = fgd_get_nmfields(dirfile, parent)
     do i=1,nfields
       ! call f77 library
       call gdmfdn(field_list(i), field_len, dirfile, TRIM(parent), &
@@ -478,7 +479,7 @@ subroutine fget_mfield_list (field_list, dirfile, parent, field_len)
   end if
 end subroutine
 
-subroutine fget_mfield_list_by_type (field_list, dirfile, parent, entype, &
+subroutine fgd_get_mfield_list_by_type (field_list, dirfile, parent, entype, &
 field_len)
   character(len=*), dimension(:), intent(out) :: field_list
   integer, intent(in) :: dirfile, entype
@@ -487,12 +488,12 @@ field_len)
   character (len=*), intent(in) :: parent
 
   ! make sure the field list is large enough
-  max_len = fget_mfield_name_max(dirfile, parent)
+  max_len = fgd_get_mfield_name_max(dirfile, parent)
 
   if (field_len .lt. max_len) then
     field_len = max_len
   else
-    nfields = fget_nmfields_by_type(dirfile, parent, entype)
+    nfields = fgd_get_nmfields_by_type(dirfile, parent, entype)
     do i=1,nfields
       ! call f77 library
       call gdmfdt(field_list(i), field_len, dirfile, TRIM(parent), &
@@ -501,7 +502,7 @@ field_len)
   end if
 end subroutine
 
-subroutine fget_mvector_list (field_list, dirfile, parent, field_len)
+subroutine fgd_get_mvector_list (field_list, dirfile, parent, field_len)
   character(len=*), dimension(:), intent(out) :: field_list
   integer, intent(in) :: dirfile
   integer, intent(inout) :: field_len
@@ -509,12 +510,12 @@ subroutine fget_mvector_list (field_list, dirfile, parent, field_len)
   character (len=*), intent(in) :: parent
 
   ! make sure the field list is large enough
-  max_len = fget_mfield_name_max(dirfile, parent)
+  max_len = fgd_get_mfield_name_max(dirfile, parent)
 
   if (field_len .lt. max_len) then
     field_len = max_len
   else
-    nfields = fget_nmvectors(dirfile, parent)
+    nfields = fgd_get_nmvectors(dirfile, parent)
     do i=1,nfields
       ! call f77 library
       call gdmven(field_list(i), field_len, dirfile, TRIM(parent), &
@@ -523,249 +524,250 @@ subroutine fget_mvector_list (field_list, dirfile, parent, field_len)
   end if
 end subroutine
 
-function fget_nframes (dirfile)
-  integer :: fget_nframes
+function fgd_get_nframes (dirfile)
+  integer :: fgd_get_nframes
   integer, intent(in) :: dirfile
 
   ! call f77 library
-  call gdnfrm(fget_nframes, dirfile)
+  call gdnfrm(fgd_get_nframes, dirfile)
 end function
 
-function fget_spf (dirfile, field_code)
-  integer :: fget_spf
+function fgd_get_spf (dirfile, field_code)
+  integer :: fgd_get_spf
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: field_code
 
   ! call f77 library
-  call gdgspf(fget_spf, dirfile, TRIM(field_code), LEN_TRIM(field_code))
+  call gdgspf(fgd_get_spf, dirfile, TRIM(field_code), LEN_TRIM(field_code))
 end function
 
 ! putdata with data_type=GD_INT8
-function fputdata_i1 (dirfile, field_code, first_frame, first_sample, &
+function fgd_putdata_i1 (dirfile, field_code, first_frame, first_sample, &
   num_frames, num_samples, data_in)
-  integer :: fputdata_i1
+  integer :: fgd_putdata_i1
   integer, intent(in) :: dirfile, first_frame, first_sample, num_frames
   character (len=*), intent(in) :: field_code
   integer, intent(in) :: num_samples
   integer*1, dimension(:), intent(in) :: data_in
 
   ! call f77 library
-  call gdputd(fputdata_i1, dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+  call gdputd(fgd_putdata_i1, dirfile, TRIM(field_code), LEN_TRIM(field_code), &
   first_frame, first_sample, num_frames, num_samples, GD_INT8, data_in)
 end function
 
 ! putdata with data_type=GD_INT16
-function fputdata_i2 (dirfile, field_code, first_frame, first_sample, &
+function fgd_putdata_i2 (dirfile, field_code, first_frame, first_sample, &
   num_frames, num_samples, data_in)
-  integer :: fputdata_i2
+  integer :: fgd_putdata_i2
   integer, intent(in) :: dirfile, first_frame, first_sample, num_frames
   character (len=*), intent(in) :: field_code
   integer, intent(in) :: num_samples
   integer*2, dimension(:), intent(in) :: data_in
 
   ! call f77 library
-  call gdputd(fputdata_i2, dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+  call gdputd(fgd_putdata_i2, dirfile, TRIM(field_code), LEN_TRIM(field_code), &
   first_frame, first_sample, num_frames, num_samples, GD_INT16, data_in)
 end function
 
 ! putdata with data_type=GD_INT32
-function fputdata_i4 (dirfile, field_code, first_frame, first_sample, &
+function fgd_putdata_i4 (dirfile, field_code, first_frame, first_sample, &
   num_frames, num_samples, data_in)
-  integer :: fputdata_i4
+  integer :: fgd_putdata_i4
   integer, intent(in) :: dirfile, first_frame, first_sample, num_frames
   character (len=*), intent(in) :: field_code
   integer, intent(in) :: num_samples
   integer*4, dimension(:), intent(in) :: data_in
 
   ! call f77 library
-  call gdputd(fputdata_i4, dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+  call gdputd(fgd_putdata_i4, dirfile, TRIM(field_code), LEN_TRIM(field_code), &
   first_frame, first_sample, num_frames, num_samples, GD_INT32, data_in)
 end function
 
 ! putdata with data_type=GD_INT64
-function fputdata_i8 (dirfile, field_code, first_frame, first_sample, &
+function fgd_putdata_i8 (dirfile, field_code, first_frame, first_sample, &
   num_frames, num_samples, data_in)
-  integer :: fputdata_i8
+  integer :: fgd_putdata_i8
   integer, intent(in) :: dirfile, first_frame, first_sample, num_frames
   character (len=*), intent(in) :: field_code
   integer, intent(in) :: num_samples
   integer*8, dimension(:), intent(in) :: data_in
 
   ! call f77 library
-  call gdputd(fputdata_i8, dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+  call gdputd(fgd_putdata_i8, dirfile, TRIM(field_code), LEN_TRIM(field_code), &
   first_frame, first_sample, num_frames, num_samples, GD_INT64, data_in)
 end function
 
 ! putdata with data_type=GD_FLOAT32
-function fputdata_r4 (dirfile, field_code, first_frame, first_sample, &
+function fgd_putdata_r4 (dirfile, field_code, first_frame, first_sample, &
   num_frames, num_samples, data_in)
-  integer :: fputdata_r4
+  integer :: fgd_putdata_r4
   integer, intent(in) :: dirfile, first_frame, first_sample, num_frames
   character (len=*), intent(in) :: field_code
   integer, intent(in) :: num_samples
   real*4, dimension(:), intent(in) :: data_in
 
   ! call f77 library
-  call gdputd(fputdata_r4, dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+  call gdputd(fgd_putdata_r4, dirfile, TRIM(field_code), LEN_TRIM(field_code), &
   first_frame, first_sample, num_frames, num_samples, GD_FLOAT32, data_in)
 end function
 
 ! putdata with data_type=GD_FLOAT64
-function fputdata_r8 (dirfile, field_code, first_frame, first_sample, &
+function fgd_putdata_r8 (dirfile, field_code, first_frame, first_sample, &
   num_frames, num_samples, data_in)
-  integer :: fputdata_r8
+  integer :: fgd_putdata_r8
   integer, intent(in) :: dirfile, first_frame, first_sample, num_frames
   character (len=*), intent(in) :: field_code
   integer, intent(in) :: num_samples
   double precision, dimension(:), intent(in) :: data_in
 
   ! call f77 library
-  call gdputd(fputdata_r8, dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+  call gdputd(fgd_putdata_r8, dirfile, TRIM(field_code), LEN_TRIM(field_code), &
   first_frame, first_sample, num_frames, num_samples, GD_FLOAT64, data_in)
 end function
 
 ! putdata with data_type=GD_COMPLEX64
-function fputdata_c8 (dirfile, field_code, first_frame, first_sample, &
+function fgd_putdata_c8 (dirfile, field_code, first_frame, first_sample, &
   num_frames, num_samples, data_in)
-  integer :: fputdata_c8
+  integer :: fgd_putdata_c8
   integer, intent(in) :: dirfile, first_frame, first_sample, num_frames
   character (len=*), intent(in) :: field_code
   integer, intent(in) :: num_samples
   complex, dimension(:), intent(in) :: data_in
 
   ! call f77 library
-  call gdputd(fputdata_c8, dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+  call gdputd(fgd_putdata_c8, dirfile, TRIM(field_code), LEN_TRIM(field_code), &
   first_frame, first_sample, num_frames, num_samples, GD_COMPLEX64, data_in)
 end function
 
 ! putdata with data_type=GD_COMPLEX128
-function fputdata_c16 (dirfile, field_code, first_frame, first_sample, &
+function fgd_putdata_c16 (dirfile, field_code, first_frame, first_sample, &
   num_frames, num_samples, data_in)
-  integer :: fputdata_c16
+  integer :: fgd_putdata_c16
   integer, intent(in) :: dirfile, first_frame, first_sample, num_frames
   character (len=*), intent(in) :: field_code
   integer, intent(in) :: num_samples
   double complex, dimension(:), intent(in) :: data_in
 
   ! call f77 library
-  call gdputd(fputdata_c16, dirfile, TRIM(field_code), LEN_TRIM(field_code), &
-  first_frame, first_sample, num_frames, num_samples, GD_COMPLEX128, data_in)
+  call gdputd(fgd_putdata_c16, dirfile, TRIM(field_code), &
+  LEN_TRIM(field_code), first_frame, first_sample, num_frames, num_samples, &
+  GD_COMPLEX128, data_in)
 end function
 
 ! put_constant with data_type=GD_INT8
-function fput_constant_i1 (dirfile, field_code, data_in)
-  integer :: fput_constant_i1
+function fgd_put_constant_i1 (dirfile, field_code, data_in)
+  integer :: fgd_put_constant_i1
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: field_code
   integer*1, intent(in) :: data_in
 
   ! call f77 library
-  call gdptco(fput_constant_i1, dirfile, TRIM(field_code), &
+  call gdptco(fgd_put_constant_i1, dirfile, TRIM(field_code), &
   LEN_TRIM(field_code), GD_INT8, data_in)
 end function
 
 ! put_constant with data_type=GD_INT16
-function fput_constant_i2 (dirfile, field_code, data_in)
-  integer :: fput_constant_i2
+function fgd_put_constant_i2 (dirfile, field_code, data_in)
+  integer :: fgd_put_constant_i2
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: field_code
   integer*2, intent(in) :: data_in
 
   ! call f77 library
-  call gdptco(fput_constant_i2, dirfile, TRIM(field_code), &
+  call gdptco(fgd_put_constant_i2, dirfile, TRIM(field_code), &
   LEN_TRIM(field_code), GD_INT16, data_in)
 end function
 
 ! put_constant with data_type=GD_INT32
-function fput_constant_i4 (dirfile, field_code, data_in)
-  integer :: fput_constant_i4
+function fgd_put_constant_i4 (dirfile, field_code, data_in)
+  integer :: fgd_put_constant_i4
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: field_code
   integer*4, intent(in) :: data_in
 
   ! call f77 library
-  call gdptco(fput_constant_i4, dirfile, TRIM(field_code), &
+  call gdptco(fgd_put_constant_i4, dirfile, TRIM(field_code), &
   LEN_TRIM(field_code), GD_INT32, data_in)
 end function
 
 ! put_constant with data_type=GD_INT64
-function fput_constant_i8 (dirfile, field_code, data_in)
-  integer :: fput_constant_i8
+function fgd_put_constant_i8 (dirfile, field_code, data_in)
+  integer :: fgd_put_constant_i8
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: field_code
   integer*8, intent(in) :: data_in
 
   ! call f77 library
-  call gdptco(fput_constant_i8, dirfile, TRIM(field_code), &
+  call gdptco(fgd_put_constant_i8, dirfile, TRIM(field_code), &
   LEN_TRIM(field_code), GD_INT64, data_in)
 end function
 
 ! put_constant with data_type=GD_FLOAT32
-function fput_constant_r4 (dirfile, field_code, data_in)
-  integer :: fput_constant_r4
+function fgd_put_constant_r4 (dirfile, field_code, data_in)
+  integer :: fgd_put_constant_r4
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: field_code
   real*4, intent(in) :: data_in
 
   ! call f77 library
-  call gdptco(fput_constant_r4, dirfile, TRIM(field_code), &
+  call gdptco(fgd_put_constant_r4, dirfile, TRIM(field_code), &
   LEN_TRIM(field_code), GD_FLOAT32, data_in)
 end function
 
 ! put_constant with data_type=GD_FLOAT64
-function fput_constant_r8 (dirfile, field_code, data_in)
-  integer :: fput_constant_r8
+function fgd_put_constant_r8 (dirfile, field_code, data_in)
+  integer :: fgd_put_constant_r8
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: field_code
   double precision, intent(in) :: data_in
 
   ! call f77 library
-  call gdptco(fput_constant_r8, dirfile, TRIM(field_code), &
+  call gdptco(fgd_put_constant_r8, dirfile, TRIM(field_code), &
   LEN_TRIM(field_code), GD_FLOAT64, data_in)
 end function
 
 ! put_constant with data_type=GD_COMPLEX64
-function fput_constant_c8 (dirfile, field_code, data_in)
-  integer :: fput_constant_c8
+function fgd_put_constant_c8 (dirfile, field_code, data_in)
+  integer :: fgd_put_constant_c8
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: field_code
   complex, intent(in) :: data_in
 
   ! call f77 library
-  call gdptco(fput_constant_c8, dirfile, TRIM(field_code), &
+  call gdptco(fgd_put_constant_c8, dirfile, TRIM(field_code), &
   LEN_TRIM(field_code), GD_COMPLEX64, data_in)
 end function
 
 ! put_constant with data_type=GD_COMPLEX128
-function fput_constant_c16 (dirfile, field_code, data_in)
-  integer :: fput_constant_c16
+function fgd_put_constant_c16 (dirfile, field_code, data_in)
+  integer :: fgd_put_constant_c16
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: field_code
   double complex, intent(in) :: data_in
 
   ! call f77 library
-  call gdptco(fput_constant_c16, dirfile, TRIM(field_code), &
+  call gdptco(fgd_put_constant_c16, dirfile, TRIM(field_code), &
   LEN_TRIM(field_code), GD_COMPLEX128, data_in)
 end function
 
-function fput_string (dirfile, field_code, data_in)
-  integer :: fput_string
+function fgd_put_string (dirfile, field_code, data_in)
+  integer :: fgd_put_string
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: field_code, data_in
 
-  call gdptst(fput_string, dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+  call gdptst(fgd_put_string, dirfile, TRIM(field_code), LEN_TRIM(field_code), &
   LEN_TRIM(data_in), TRIM(data_in))
 end function
 
-function fget_error (dirfile)
-  integer :: fget_error
+function fgd_error (dirfile)
+  integer :: fgd_error
   integer, intent(in) :: dirfile
 
   ! call f77 library
-  call gderor(fget_error, dirfile)
+  call gderor(fgd_error, dirfile)
 end function
 
-subroutine fget_error_string (dirfile, buffer, len)
+subroutine fgd_error_string (dirfile, buffer, len)
   integer, intent(in) :: dirfile, len
   character (len=*), intent(out) :: buffer
 
@@ -773,8 +775,8 @@ subroutine fget_error_string (dirfile, buffer, len)
   call gdestr(dirfile, buffer, len)
 end subroutine
 
-function fget_entry (dirfile, field_code, ent)
-  integer :: fget_entry
+function fgd_get_entry (dirfile, field_code, ent)
+  integer :: fgd_get_entry
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: field_code
   type(gd_entry), intent(out) :: ent
@@ -786,15 +788,15 @@ function fget_entry (dirfile, field_code, ent)
   integer :: len3 = GD_FIELD_LEN
 
   ! get field type from f77 library
-  call gdenty(fget_entry, dirfile, TRIM(field_code), LEN_TRIM(field_code))
+  call gdenty(fgd_get_entry, dirfile, TRIM(field_code), LEN_TRIM(field_code))
 
-  if (fget_entry .EQ. GD_RAW_ENTRY) then
+  if (fgd_get_entry .EQ. GD_RAW_ENTRY) then
     ! raw
     call gdgerw(ent%spf, ent%data_type, ent%fragment_index, dirfile, &
     TRIM(field_code), LEN_TRIM(field_code))
     call gdgsca(ent%scalar(1), len1, dirfile, TRIM(field_code), &
     LEN_TRIM(field_code), 1)
-  else if (fget_entry .EQ. GD_LINCOM_ENTRY) then
+  else if (fgd_get_entry .EQ. GD_LINCOM_ENTRY) then
     ! lincom
     call gdcscl(ent%comp_scal, dirfile, TRIM(field_code), &
     LEN_TRIM(field_code))
@@ -814,11 +816,11 @@ function fget_entry (dirfile, field_code, ent)
       call gdgsca(ent%scalar(i), len1, dirfile, TRIM(field_code), &
       LEN_TRIM(field_code), i)
     end do
-  else if (fget_entry .EQ. GD_LINTERP_ENTRY) then
+  else if (fgd_get_entry .EQ. GD_LINTERP_ENTRY) then
     ! linterp
     call gdgelt(ent%field(1), len1, ent%field(2), len2, ent%fragment_index, &
     dirfile, TRIM(field_code), LEN_TRIM(field_code))
-  else if (fget_entry .EQ. GD_BIT_ENTRY) then
+  else if (fgd_get_entry .EQ. GD_BIT_ENTRY) then
     ! bit
     call gdgebt(ent%field(1), len1, ent%bitnum, ent%numbits, &
     ent%fragment_index, dirfile, TRIM(field_code), LEN_TRIM(field_code))
@@ -826,7 +828,7 @@ function fget_entry (dirfile, field_code, ent)
     LEN_TRIM(field_code), 1)
     call gdgsca(ent%scalar(2), len1, dirfile, TRIM(field_code), &
     LEN_TRIM(field_code), 2)
-  else if (fget_entry .EQ. GD_SBIT_ENTRY) then
+  else if (fgd_get_entry .EQ. GD_SBIT_ENTRY) then
     ! sbit
     call gdgesb(ent%field(1), len1, ent%bitnum, ent%numbits, &
     ent%fragment_index, dirfile, TRIM(field_code), LEN_TRIM(field_code))
@@ -834,17 +836,17 @@ function fget_entry (dirfile, field_code, ent)
     LEN_TRIM(field_code), 1)
     call gdgsca(ent%scalar(2), len1, dirfile, TRIM(field_code), &
     LEN_TRIM(field_code), 2)
-  else if (fget_entry .EQ. GD_MULTIPLY_ENTRY) then
+  else if (fgd_get_entry .EQ. GD_MULTIPLY_ENTRY) then
     ! multiply
     call gdgemt(ent%field(1), len1, ent%field(2), len2, ent%fragment_index, &
     dirfile, TRIM(field_code), LEN_TRIM(field_code))
-  else if (fget_entry .EQ. GD_PHASE_ENTRY) then
+  else if (fgd_get_entry .EQ. GD_PHASE_ENTRY) then
     !phase
     call gdgeph(ent%field(1), len1, ent%shift, ent%fragment_index, dirfile, &
     TRIM(field_code), LEN_TRIM(field_code))
     call gdgsca(ent%scalar(1), len1, dirfile, TRIM(field_code), &
     LEN_TRIM(field_code), 1)
-  else if (fget_entry .EQ. GD_POLYNOM_ENTRY) then
+  else if (fgd_get_entry .EQ. GD_POLYNOM_ENTRY) then
     ! polynom
     call gdcscl(ent%comp_scal, dirfile, TRIM(field_code), &
       LEN_TRIM(field_code))
@@ -862,39 +864,40 @@ function fget_entry (dirfile, field_code, ent)
       call gdgsca(ent%scalar(i), len1, dirfile, TRIM(field_code), &
       LEN_TRIM(field_code), i)
     end do
-  else if (fget_entry .EQ. GD_CONST_ENTRY) then
+  else if (fgd_get_entry .EQ. GD_CONST_ENTRY) then
     !const
     call gdgeco(ent%data_type, ent%fragment_index, dirfile, TRIM(field_code), &
     LEN_TRIM(field_code))
-  else if (fget_entry .EQ. GD_STRING_ENTRY) then
+  else if (fgd_get_entry .EQ. GD_STRING_ENTRY) then
     !string
     call gdfrgi(ent%fragment_index, dirfile, TRIM(field_code), &
     LEN_TRIM(field_code))
   else
     ! on the off chance we got a type we weren't prepared to deal with
-    fget_entry = GD_NO_ENTRY
+    fgd_get_entry = GD_NO_ENTRY
   end if
-  ent%field_type = fget_entry
+  ent%field_type = fgd_get_entry
 end function
 
-function fget_entry_type (dirfile, field_code)
-  integer :: fget_entry_type
+function fgd_get_entry_type (dirfile, field_code)
+  integer :: fgd_get_entry_type
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: field_code
 
-  call gdenty(fget_entry_type, dirfile, TRIM(field_code), LEN_TRIM(field_code))
-end function
-
-function fget_fragment_index (dirfile, field_code)
-  integer :: fget_fragment_index
-  integer, intent(in) :: dirfile
-  character (len=*), intent(in) :: field_code
-
-  call gdfrgi(fget_fragment_index, dirfile, TRIM(field_code), &
+  call gdenty(fgd_get_entry_type, dirfile, TRIM(field_code), &
   LEN_TRIM(field_code))
 end function
 
-subroutine fdirfile_add (dirfile, field_code, ent)
+function fgd_get_fragment_index (dirfile, field_code)
+  integer :: fgd_get_fragment_index
+  integer, intent(in) :: dirfile
+  character (len=*), intent(in) :: field_code
+
+  call gdfrgi(fgd_get_fragment_index, dirfile, TRIM(field_code), &
+  LEN_TRIM(field_code))
+end function
+
+subroutine fgd_add (dirfile, field_code, ent)
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: field_code
   type(gd_entry), intent(in) :: ent
@@ -956,7 +959,7 @@ subroutine fdirfile_add (dirfile, field_code, ent)
   end if
 end subroutine
 
-subroutine fdirfile_add_bit (dirfile, field_name, in_field, bitnum, numbits, &
+subroutine fgd_add_bit (dirfile, field_name, in_field, bitnum, numbits, &
   fragment_index)
   integer, intent(in) :: dirfile, bitnum, numbits, fragment_index
   character (len=*), intent(in) :: field_name, in_field
@@ -965,7 +968,7 @@ subroutine fdirfile_add_bit (dirfile, field_name, in_field, bitnum, numbits, &
   LEN_TRIM(in_field), bitnum, numbits, fragment_index)
 end subroutine
 
-subroutine fdirfile_add_sbit (dirfile, field_name, in_field, bitnum, numbits, &
+subroutine fgd_add_sbit (dirfile, field_name, in_field, bitnum, numbits, &
   fragment_index)
   integer, intent(in) :: dirfile, bitnum, numbits, fragment_index
   character (len=*), intent(in) :: field_name, in_field
@@ -974,7 +977,7 @@ subroutine fdirfile_add_sbit (dirfile, field_name, in_field, bitnum, numbits, &
   LEN_TRIM(in_field), bitnum, numbits, fragment_index)
 end subroutine
 
-subroutine fdirfile_add_const (dirfile, field_name, const_type, fragment_index)
+subroutine fgd_add_const (dirfile, field_name, const_type, fragment_index)
   integer, intent(in) :: dirfile, const_type, fragment_index
   character (len=*), intent(in) :: field_name
   integer*4 :: zero = 0
@@ -983,8 +986,8 @@ subroutine fdirfile_add_const (dirfile, field_name, const_type, fragment_index)
   GD_INT32, zero, fragment_index)
 end subroutine
 
-subroutine fdirfile_add_lincom (dirfile, field_name, n_fields, in_field1, m1, &
-  b1, in_field2, m2, b2, in_field3, m3, b3, fragment_index)
+subroutine fgd_add_lincom (dirfile, field_name, n_fields, in_field1, m1, b1, &
+  in_field2, m2, b2, in_field3, m3, b3, fragment_index)
   integer, intent(in) :: dirfile, n_fields, fragment_index
   character (len=*), intent(in) :: field_name, in_field1, in_field2, in_field3
   double precision, intent(in) :: m1, b1, m2, b2, m3, b3
@@ -995,8 +998,8 @@ subroutine fdirfile_add_lincom (dirfile, field_name, n_fields, in_field1, m1, &
   fragment_index)
 end subroutine
 
-subroutine fdirfile_add_clincom (dirfile, field_name, n_fields, in_field1, m1, &
-  b1, in_field2, m2, b2, in_field3, m3, b3, fragment_index)
+subroutine fgd_add_clincom (dirfile, field_name, n_fields, in_field1, m1, b1, &
+  in_field2, m2, b2, in_field3, m3, b3, fragment_index)
   integer, intent(in) :: dirfile, n_fields, fragment_index
   character (len=*), intent(in) :: field_name, in_field1, in_field2, in_field3
   double complex, intent(in) :: m1, b1, m2, b2, m3, b3
@@ -1007,8 +1010,8 @@ subroutine fdirfile_add_clincom (dirfile, field_name, n_fields, in_field1, m1, &
   fragment_index)
 end subroutine
 
-subroutine fdirfile_add_polynom (dirfile, field_name, poly_ord, in_field, a0, &
-  a1, a2, a3, a4, a5, fragment_index)
+subroutine fgd_add_polynom (dirfile, field_name, poly_ord, in_field, a0, a1, &
+  a2, a3, a4, a5, fragment_index)
   integer, intent(in) :: dirfile, poly_ord, fragment_index
   character (len=*), intent(in) :: field_name, in_field
   double precision, intent(in) :: a0, a1, a2, a3, a4, a5
@@ -1018,8 +1021,8 @@ subroutine fdirfile_add_polynom (dirfile, field_name, poly_ord, in_field, a0, &
   fragment_index)
 end subroutine
 
-subroutine fdirfile_add_cpolynom (dirfile, field_name, poly_ord, in_field, a0, &
-  a1, a2, a3, a4, a5, fragment_index)
+subroutine fgd_add_cpolynom (dirfile, field_name, poly_ord, in_field, a0, a1, &
+  a2, a3, a4, a5, fragment_index)
   integer, intent(in) :: dirfile, poly_ord, fragment_index
   character (len=*), intent(in) :: field_name, in_field
   double complex, intent(in) :: a0, a1, a2, a3, a4, a5
@@ -1029,7 +1032,7 @@ subroutine fdirfile_add_cpolynom (dirfile, field_name, poly_ord, in_field, a0, &
   fragment_index)
 end subroutine
 
-subroutine fdirfile_add_linterp (dirfile, field_name, in_field, table, &
+subroutine fgd_add_linterp (dirfile, field_name, in_field, table, &
   fragment_index)
   integer, intent(in) :: dirfile, fragment_index
   character (len=*), intent(in) :: field_name, in_field, table
@@ -1038,7 +1041,7 @@ subroutine fdirfile_add_linterp (dirfile, field_name, in_field, table, &
   LEN_TRIM(in_field), TRIM(table), LEN_TRIM(table), fragment_index)
 end subroutine
 
-subroutine fdirfile_add_multiply (dirfile, field_name, in_field1, in_field2, &
+subroutine fgd_add_multiply (dirfile, field_name, in_field1, in_field2, &
   fragment_index)
   integer, intent(in) :: dirfile, fragment_index
   character (len=*), intent(in) :: field_name, in_field1, in_field2
@@ -1048,8 +1051,7 @@ subroutine fdirfile_add_multiply (dirfile, field_name, in_field1, in_field2, &
   fragment_index)
 end subroutine
 
-subroutine fdirfile_add_phase (dirfile, field_name, in_field, phase, &
-  fragment_index)
+subroutine fgd_add_phase (dirfile, field_name, in_field, phase, fragment_index)
   integer, intent(in) :: dirfile, phase, fragment_index
   character (len=*), intent(in) :: field_name, in_field
 
@@ -1057,8 +1059,7 @@ subroutine fdirfile_add_phase (dirfile, field_name, in_field, phase, &
   TRIM(in_field), LEN_TRIM(in_field), phase, fragment_index)
 end subroutine
 
-subroutine fdirfile_add_raw (dirfile, field_code, data_type, spf, &
-  fragment_index)
+subroutine fgd_add_raw (dirfile, field_code, data_type, spf, fragment_index)
   integer, intent(in) :: dirfile, data_type, spf, fragment_index
   character (len=*), intent(in) :: field_code
 
@@ -1066,7 +1067,7 @@ subroutine fdirfile_add_raw (dirfile, field_code, data_type, spf, &
   fragment_index)
 end subroutine
 
-subroutine fdirfile_add_string (dirfile, field_code, fragment_index)
+subroutine fgd_add_string (dirfile, field_code, fragment_index)
   integer, intent(in) :: dirfile, fragment_index
   character (len=*), intent(in) :: field_code
   
@@ -1076,7 +1077,7 @@ subroutine fdirfile_add_string (dirfile, field_code, fragment_index)
   fragment_index)
 end subroutine
 
-subroutine fdirfile_madd (dirfile, parent, field_code, ent)
+subroutine fgd_madd (dirfile, parent, field_code, ent)
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: field_code, parent
   type(gd_entry), intent(in) :: ent
@@ -1137,7 +1138,7 @@ subroutine fdirfile_madd (dirfile, parent, field_code, ent)
   end if
 end subroutine
 
-subroutine fdirfile_madd_bit (dirfile, parent, field_name, in_field, bitnum, &
+subroutine fgd_madd_bit (dirfile, parent, field_name, in_field, bitnum, &
   numbits)
   integer, intent(in) :: dirfile, bitnum, numbits
   character (len=*), intent(in) :: field_name, in_field, parent
@@ -1146,7 +1147,7 @@ subroutine fdirfile_madd_bit (dirfile, parent, field_name, in_field, bitnum, &
   LEN_TRIM(field_name), TRIM(in_field), LEN_TRIM(in_field), bitnum, numbits)
 end subroutine
 
-subroutine fdirfile_madd_sbit (dirfile, parent, field_name, in_field, bitnum, &
+subroutine fgd_madd_sbit (dirfile, parent, field_name, in_field, bitnum, &
   numbits)
   integer, intent(in) :: dirfile, bitnum, numbits
   character (len=*), intent(in) :: field_name, in_field, parent
@@ -1155,7 +1156,7 @@ subroutine fdirfile_madd_sbit (dirfile, parent, field_name, in_field, bitnum, &
   LEN_TRIM(field_name), TRIM(in_field), LEN_TRIM(in_field), bitnum, numbits)
 end subroutine
 
-subroutine fdirfile_madd_const (dirfile, parent, field_name, const_type)
+subroutine fgd_madd_const (dirfile, parent, field_name, const_type)
   integer, intent(in) :: dirfile, const_type
   character (len=*), intent(in) :: field_name, parent
   integer*4 :: zero = 0
@@ -1164,8 +1165,8 @@ subroutine fdirfile_madd_const (dirfile, parent, field_name, const_type)
   LEN_TRIM(field_name), const_type, GD_INT32, zero)
 end subroutine
 
-subroutine fdirfile_madd_lincom (dirfile, parent, field_name, n_fields, &
-  in_field1, m1, b1, in_field2, m2, b2, in_field3, m3, b3)
+subroutine fgd_madd_lincom (dirfile, parent, field_name, n_fields, in_field1, &
+  m1, b1, in_field2, m2, b2, in_field3, m3, b3)
   integer, intent(in) :: dirfile, n_fields
   character (len=*), intent(in) :: field_name, in_field1, in_field2, in_field3
   character (len=*), intent(in) :: parent
@@ -1177,8 +1178,8 @@ subroutine fdirfile_madd_lincom (dirfile, parent, field_name, n_fields, &
   LEN_TRIM(in_field3), m3, b3)
 end subroutine
 
-subroutine fdirfile_madd_clincom (dirfile, parent, field_name, n_fields, &
-  in_field1, m1, b1, in_field2, m2, b2, in_field3, m3, b3)
+subroutine fgd_madd_clincom (dirfile, parent, field_name, n_fields, in_field1, &
+  m1, b1, in_field2, m2, b2, in_field3, m3, b3)
   integer, intent(in) :: dirfile, n_fields
   character (len=*), intent(in) :: field_name, in_field1, in_field2, in_field3
   character (len=*), intent(in) :: parent
@@ -1190,8 +1191,8 @@ subroutine fdirfile_madd_clincom (dirfile, parent, field_name, n_fields, &
   LEN_TRIM(in_field3), m3, b3)
 end subroutine
 
-subroutine fdirfile_madd_polynom (dirfile, parent, field_name, poly_ord, &
-  in_field, a0, a1, a2, a3, a4, a5)
+subroutine fgd_madd_polynom (dirfile, parent, field_name, poly_ord, in_field, &
+  a0, a1, a2, a3, a4, a5)
   integer, intent(in) :: dirfile, poly_ord
   character (len=*), intent(in) :: field_name, in_field
   character (len=*), intent(in) :: parent
@@ -1202,8 +1203,8 @@ subroutine fdirfile_madd_polynom (dirfile, parent, field_name, poly_ord, &
   a1, a2, a3, a4, a5)
 end subroutine
 
-subroutine fdirfile_madd_cpolynom (dirfile, parent, field_name, poly_ord, &
-  in_field, a0, a1, a2, a3, a4, a5)
+subroutine fgd_madd_cpolynom (dirfile, parent, field_name, poly_ord, in_field, &
+  a0, a1, a2, a3, a4, a5)
   integer, intent(in) :: dirfile, poly_ord
   character (len=*), intent(in) :: field_name, in_field
   character (len=*), intent(in) :: parent
@@ -1214,7 +1215,7 @@ subroutine fdirfile_madd_cpolynom (dirfile, parent, field_name, poly_ord, &
   a1, a2, a3, a4, a5)
 end subroutine
 
-subroutine fdirfile_madd_linterp (dirfile, parent, field_name, in_field, table)
+subroutine fgd_madd_linterp (dirfile, parent, field_name, in_field, table)
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: field_name, in_field, table, parent
 
@@ -1223,8 +1224,7 @@ subroutine fdirfile_madd_linterp (dirfile, parent, field_name, in_field, table)
   LEN_TRIM(table))
 end subroutine
 
-subroutine fdirfile_madd_multiply (dirfile, parent, field_name, in_field1, &
-  in_field2)
+subroutine fgd_madd_multiply (dirfile, parent, field_name, in_field1, in_field2)
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: field_name, in_field1, in_field2, parent
 
@@ -1233,7 +1233,7 @@ subroutine fdirfile_madd_multiply (dirfile, parent, field_name, in_field1, &
   LEN_TRIM(in_field2))
 end subroutine
 
-subroutine fdirfile_madd_phase (dirfile, parent, field_name, in_field, phase)
+subroutine fgd_madd_phase (dirfile, parent, field_name, in_field, phase)
   integer, intent(in) :: dirfile, phase
   character (len=*), intent(in) :: field_name, in_field, parent
 
@@ -1241,7 +1241,7 @@ subroutine fdirfile_madd_phase (dirfile, parent, field_name, in_field, phase)
   LEN_TRIM(field_name), TRIM(in_field), LEN_TRIM(in_field), phase)
 end subroutine
 
-subroutine fdirfile_madd_string (dirfile, parent, field_code)
+subroutine fgd_madd_string (dirfile, parent, field_code)
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: field_code, parent
   
@@ -1251,14 +1251,14 @@ subroutine fdirfile_madd_string (dirfile, parent, field_code)
   LEN_TRIM(field_code), nil, 0)
 end subroutine
 
-subroutine fdirfile_add_spec (dirfile, spec, fragment_index)
+subroutine fgd_add_spec (dirfile, spec, fragment_index)
   integer, intent(in) :: dirfile, fragment_index
   character (len=*), intent(in) :: spec
 
   call gdadsp(dirfile, TRIM(spec), LEN_TRIM(spec), fragment_index)
 end subroutine
 
-subroutine fdirfile_madd_spec (dirfile, spec, parent)
+subroutine fgd_madd_spec (dirfile, spec, parent)
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: parent, spec
 
@@ -1266,28 +1266,28 @@ subroutine fdirfile_madd_spec (dirfile, spec, parent)
   LEN_TRIM(parent))
 end subroutine
 
-function fget_fragmentname (dirfile, ind)
-  character (len=GD_FIELD_LEN) :: fget_fragmentname
+function fgd_get_fragmentname (dirfile, ind)
+  character (len=GD_FIELD_LEN) :: fgd_get_fragmentname
   integer, intent(in) :: dirfile, ind
   integer :: l = GD_FIELD_LEN
 
-  call gdfrgn(fget_fragmentname, l, dirfile, ind)
+  call gdfrgn(fgd_get_fragmentname, l, dirfile, ind)
 end function
 
-function fget_nfragments (dirfile)
-  integer :: fget_nfragments
+function fgd_get_nfragments (dirfile)
+  integer :: fgd_get_nfragments
   integer, intent(in) :: dirfile
 
-  call gdnfrg(fget_nfragments, dirfile)
+  call gdnfrg(fgd_get_nfragments, dirfile)
 end function
 
-subroutine fdirfile_metaflush (dirfile)
+subroutine fgd_metaflush (dirfile)
   integer, intent(in) :: dirfile
 
   call gdmfls(dirfile)
 end subroutine
 
-subroutine fdirfile_include (dirfile, fragmentname, fragment_index, flags)
+subroutine fgd_include (dirfile, fragmentname, fragment_index, flags)
   integer, intent(in) :: dirfile, fragment_index, flags
   character (len=*), intent(in) :: fragmentname
 
@@ -1295,27 +1295,17 @@ subroutine fdirfile_include (dirfile, fragmentname, fragment_index, flags)
   fragment_index, flags)
 end subroutine
 
-function fget_reference (dirfile)
-  character (len=GD_FIELD_LEN) :: fget_reference
-  integer, intent(in) :: dirfile
-
-  integer :: l = GD_FIELD_LEN
-
-  call gdgref(fget_reference, l, dirfile)
-end function
-
-function fdirfile_reference (dirfile, field_code)
-  character (len=GD_FIELD_LEN) :: fdirfile_reference
+function fgd_reference (dirfile, field_code)
+  character (len=GD_FIELD_LEN) :: fgd_reference
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: field_code
 
   integer :: l = GD_FIELD_LEN
 
-  call gdrefe(fdirfile_reference, l, dirfile, TRIM(field_code), &
-  LEN_TRIM(field_code))
+  call gdrefe(fgd_reference, l, dirfile, TRIM(field_code), LEN_TRIM(field_code))
 end function 
 
-subroutine fdirfile_parser_callback (dirfile, sehandler)
+subroutine fgd_parser_callback (dirfile, sehandler)
   integer, intent(in) :: dirfile
   interface
     subroutine sehandler(act, dirfile_unit, suberror, line)
@@ -1328,83 +1318,83 @@ subroutine fdirfile_parser_callback (dirfile, sehandler)
   call gdclbk(dirfile, sehandler)
 end subroutine
 
-function fget_encoding (dirfile, fragment)
-  integer :: fget_encoding
+function fgd_get_encoding (dirfile, fragment)
+  integer :: fgd_get_encoding
   integer, intent(in) :: dirfile, fragment
 
-  call gdgenc(fget_encoding, dirfile, fragment)
+  call gdgenc(fgd_get_encoding, dirfile, fragment)
 end function
 
-subroutine fdirfile_alter_encoding (dirfile, encoding, fragment, recode)
+subroutine fgd_alter_encoding (dirfile, encoding, fragment, recode)
   integer, intent(in) :: dirfile, encoding, fragment, recode
 
   call gdaenc(dirfile, encoding, fragment, recode)
 end subroutine
 
-function fget_endianness (dirfile, fragment)
-  integer :: fget_endianness
+function fgd_get_endianness (dirfile, fragment)
+  integer :: fgd_get_endianness
   integer, intent(in) :: dirfile, fragment
 
-  call gdgend(fget_endianness, dirfile, fragment)
+  call gdgend(fgd_get_endianness, dirfile, fragment)
 end function
 
-subroutine fdirfile_alter_endianness (dirfile, endianness, fragment, recode)
+subroutine fgd_alter_endianness (dirfile, endianness, fragment, recode)
   integer, intent(in) :: dirfile, endianness, fragment, recode
 
   call gdaend(dirfile, endianness, fragment, recode)
 end subroutine
 
-function fget_frameoffset (dirfile, fragment)
-  integer :: fget_frameoffset
+function fgd_get_frameoffset (dirfile, fragment)
+  integer :: fgd_get_frameoffset
   integer, intent(in) :: dirfile, fragment
 
-  call gdgfof(fget_frameoffset, dirfile, fragment)
+  call gdgfof(fgd_get_frameoffset, dirfile, fragment)
 end function
 
-subroutine fdirfile_alter_frameoffset (dirfile, frameoffset, fragment, recode)
+subroutine fgd_alter_frameoffset (dirfile, frameoffset, fragment, recode)
   integer, intent(in) :: dirfile, frameoffset, fragment, recode
 
   call gdafof(dirfile, frameoffset, fragment, recode)
 end subroutine
 
-function fget_protection (dirfile, fragment)
-  integer :: fget_protection
+function fgd_get_protection (dirfile, fragment)
+  integer :: fgd_get_protection
   integer, intent(in) :: dirfile, fragment
 
-  call gdgprt(fget_protection, dirfile, fragment)
+  call gdgprt(fgd_get_protection, dirfile, fragment)
 end function
 
-subroutine fdirfile_protect (dirfile, protection_level, fragment)
+subroutine fgd_protect (dirfile, protection_level, fragment)
   integer, intent(in) :: dirfile, protection_level, fragment
 
   call gdprot(dirfile, protection_level, fragment)
 end subroutine
 
-function fget_parent_fragment (dirfile, fragment)
-  integer :: fget_parent_fragment
+function fgd_get_parent_fragment (dirfile, fragment)
+  integer :: fgd_get_parent_fragment
   integer, intent(in) :: dirfile, fragment
 
-  call gdpfrg(fget_parent_fragment, dirfile, fragment)
+  call gdpfrg(fgd_get_parent_fragment, dirfile, fragment)
 end function
 
-subroutine fdirfile_uninclude (dirfile, fragment, del)
+subroutine fgd_uninclude (dirfile, fragment, del)
   integer, intent(in) :: dirfile, fragment, del
 
   call gduinc(dirfile, fragment, del)
 end subroutine
 
-function fget_raw_filename (dirfile, field_code)
-  character (len=GD_MAX_LINE_LENGTH) :: fget_raw_filename
+function fgd_get_raw_filename (dirfile, field_code)
+  character (len=GD_MAX_LINE_LENGTH) :: fgd_get_raw_filename
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: field_code
 
   integer :: l = GD_MAX_LINE_LENGTH
 
-  call gdrwfn (fget_raw_filename, l, dirfile, TRIM(field_code), &
+  call gdrwfn (fgd_get_raw_filename, l, dirfile, TRIM(field_code), &
   LEN_TRIM(field_code))
 end function
 
-subroutine fdirfile_move (dirfile, field_code, new_fragment, move_data)
+subroutine fgd_move (dirfile, field_code, new_fragment, move_data)
   integer, intent(in) :: dirfile, new_fragment, move_data
   character (len=*), intent(in) :: field_code
 
@@ -1412,7 +1402,7 @@ subroutine fdirfile_move (dirfile, field_code, new_fragment, move_data)
   move_data)
 end subroutine
 
-subroutine fdirfile_alter_entry (dirfile, field_code, ent, recode)
+subroutine fgd_alter_entry (dirfile, field_code, ent, recode)
   integer, intent(in) :: dirfile, recode
   character (len=*), intent(in) :: field_code
   type(gd_entry), intent(in) :: ent
@@ -1465,7 +1455,7 @@ subroutine fdirfile_alter_entry (dirfile, field_code, ent, recode)
   end if
 end subroutine
 
-subroutine fdirfile_alter_bit (dirfile, field_name, in_field, bitnum, numbits)
+subroutine fgd_alter_bit (dirfile, field_name, in_field, bitnum, numbits)
   integer, intent(in) :: dirfile, bitnum, numbits
   character (len=*), intent(in) :: field_name, in_field
 
@@ -1473,7 +1463,7 @@ subroutine fdirfile_alter_bit (dirfile, field_name, in_field, bitnum, numbits)
   LEN_TRIM(in_field), bitnum, numbits)
 end subroutine
 
-subroutine fdirfile_alter_sbit (dirfile, field_name, in_field, bitnum, numbits)
+subroutine fgd_alter_sbit (dirfile, field_name, in_field, bitnum, numbits)
   integer, intent(in) :: dirfile, bitnum, numbits
   character (len=*), intent(in) :: field_name, in_field
 
@@ -1481,15 +1471,15 @@ subroutine fdirfile_alter_sbit (dirfile, field_name, in_field, bitnum, numbits)
   LEN_TRIM(in_field), bitnum, numbits)
 end subroutine
 
-subroutine fdirfile_alter_const (dirfile, field_name, const_type)
+subroutine fgd_alter_const (dirfile, field_name, const_type)
   integer, intent(in) :: dirfile, const_type
   character (len=*), intent(in) :: field_name
 
   call gdalco(dirfile, TRIM(field_name), LEN_TRIM(field_name), const_type)
 end subroutine
 
-subroutine fdirfile_alter_lincom (dirfile, field_name, n_fields, in_field1, &
-  m1, b1, in_field2, m2, b2, in_field3, m3, b3)
+subroutine fgd_alter_lincom (dirfile, field_name, n_fields, in_field1, m1, b1, &
+  in_field2, m2, b2, in_field3, m3, b3)
   integer, intent(in) :: dirfile, n_fields
   character (len=*), intent(in) :: field_name, in_field1, in_field2, in_field3
   double precision, intent(in) :: m1, b1, m2, b2, m3, b3
@@ -1499,8 +1489,8 @@ subroutine fdirfile_alter_lincom (dirfile, field_name, n_fields, in_field1, &
   LEN_TRIM(in_field2), m2, b2, TRIM(in_field3), LEN_TRIM(in_field3), m3, b3)
 end subroutine
 
-subroutine fdirfile_alter_clincom (dirfile, field_name, n_fields, in_field1, &
-  m1, b1, in_field2, m2, b2, in_field3, m3, b3)
+subroutine fgd_alter_clincom (dirfile, field_name, n_fields, in_field1, m1, &
+  b1, in_field2, m2, b2, in_field3, m3, b3)
   integer, intent(in) :: dirfile, n_fields
   character (len=*), intent(in) :: field_name, in_field1, in_field2, in_field3
   double complex, intent(in) :: m1, b1, m2, b2, m3, b3
@@ -1510,8 +1500,8 @@ subroutine fdirfile_alter_clincom (dirfile, field_name, n_fields, in_field1, &
   LEN_TRIM(in_field2), m2, b2, TRIM(in_field3), LEN_TRIM(in_field3), m3, b3)
 end subroutine
 
-subroutine fdirfile_alter_polynom (dirfile, field_name, poly_ord, in_field, &
-  a0, a1, a2, a3, a4, a5)
+subroutine fgd_alter_polynom (dirfile, field_name, poly_ord, in_field, a0, a1, &
+  a2, a3, a4, a5)
   integer, intent(in) :: dirfile, poly_ord
   character (len=*), intent(in) :: field_name, in_field
   double precision, intent(in) :: a0, a1, a2, a3, a4, a5
@@ -1520,8 +1510,8 @@ subroutine fdirfile_alter_polynom (dirfile, field_name, poly_ord, in_field, &
   TRIM(in_field), LEN_TRIM(in_field), a0, a1, a2, a3, a4, a5)
 end subroutine
 
-subroutine fdirfile_alter_cpolynom (dirfile, field_name, poly_ord, in_field, &
-  a0, a1, a2, a3, a4, a5)
+subroutine fgd_alter_cpolynom (dirfile, field_name, poly_ord, in_field, a0, &
+  a1, a2, a3, a4, a5)
   integer, intent(in) :: dirfile, poly_ord
   character (len=*), intent(in) :: field_name, in_field
   double complex, intent(in) :: a0, a1, a2, a3, a4, a5
@@ -1530,7 +1520,7 @@ subroutine fdirfile_alter_cpolynom (dirfile, field_name, poly_ord, in_field, &
   TRIM(in_field), LEN_TRIM(in_field), a0, a1, a2, a3, a4, a5)
 end subroutine
 
-subroutine fdirfile_alter_linterp (dirfile, field_name, in_field, table, move)
+subroutine fgd_alter_linterp (dirfile, field_name, in_field, table, move)
   integer, intent(in) :: dirfile, move
   character (len=*), intent(in) :: field_name, in_field, table
 
@@ -1538,7 +1528,7 @@ subroutine fdirfile_alter_linterp (dirfile, field_name, in_field, table, move)
   LEN_TRIM(in_field), TRIM(table), LEN_TRIM(table), move)
 end subroutine
 
-subroutine fdirfile_alter_multiply (dirfile, field_name, in_field1, in_field2)
+subroutine fgd_alter_multiply (dirfile, field_name, in_field1, in_field2)
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: field_name, in_field1, in_field2
 
@@ -1546,7 +1536,7 @@ subroutine fdirfile_alter_multiply (dirfile, field_name, in_field1, in_field2)
   TRIM(in_field1), LEN_TRIM(in_field1), TRIM(in_field2), LEN_TRIM(in_field2))
 end subroutine
 
-subroutine fdirfile_alter_phase (dirfile, field_name, in_field, phase)
+subroutine fgd_alter_phase (dirfile, field_name, in_field, phase)
   integer, intent(in) :: dirfile, phase
   character (len=*), intent(in) :: field_name, in_field
 
@@ -1554,7 +1544,7 @@ subroutine fdirfile_alter_phase (dirfile, field_name, in_field, phase)
   TRIM(in_field), LEN_TRIM(in_field), phase)
 end subroutine
 
-subroutine fdirfile_alter_raw (dirfile, field_code, data_type, spf, move)
+subroutine fgd_alter_raw (dirfile, field_code, data_type, spf, move)
   integer, intent(in) :: dirfile, data_type, spf, move
   character (len=*), intent(in) :: field_code
 
@@ -1562,14 +1552,14 @@ subroutine fdirfile_alter_raw (dirfile, field_code, data_type, spf, move)
   move)
 end subroutine
 
-subroutine fdirfile_alter_spec (dirfile, spec, recode)
+subroutine fgd_alter_spec (dirfile, spec, recode)
   integer, intent(in) :: dirfile, recode
   character (len=*), intent(in) :: spec
 
   call gdalsp(dirfile, TRIM(spec), LEN_TRIM(spec), recode)
 end subroutine
 
-subroutine fdirfile_malter_spec (dirfile, spec, parent, recode)
+subroutine fgd_malter_spec (dirfile, spec, parent, recode)
   integer, intent(in) :: dirfile, recode
   character (len=*), intent(in) :: parent, spec
 
@@ -1577,7 +1567,7 @@ subroutine fdirfile_malter_spec (dirfile, spec, parent, recode)
   LEN_TRIM(parent), recode)
 end subroutine
 
-subroutine fdirfile_rename (dirfile, field_code, new_name, move_data)
+subroutine fgd_rename (dirfile, field_code, new_name, move_data)
   integer, intent(in) :: dirfile, move_data
   character (len=*), intent(in) :: field_code, new_name
 
@@ -1585,52 +1575,52 @@ subroutine fdirfile_rename (dirfile, field_code, new_name, move_data)
   LEN_TRIM(new_name), move_data)
 end subroutine
 
-subroutine fdirfile_delete (dirfile, field_code, flags)
+subroutine fgd_delete (dirfile, field_code, flags)
   integer, intent(in) :: dirfile, flags
   character (len=*), intent(in) :: field_code
 
   call gddele(dirfile, TRIM(field_code), LEN_TRIM(field_code), flags)
 end subroutine
 
-function fget_native_type (dirfile, field_code)
-  integer :: fget_native_type
+function fgd_get_native_type (dirfile, field_code)
+  integer :: fgd_get_native_type
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: field_code
 
-  call gdntyp(fget_native_type, dirfile, TRIM(field_code), LEN_TRIM(field_code))
-end function
-
-function fdirfile_validate (dirfile, field_code)
-  integer :: fdirfile_validate
-  integer, intent(in) :: dirfile
-  character (len=*), intent(in) :: field_code
-
-  call gdvldt(fdirfile_validate, dirfile, TRIM(field_code), &
+  call gdntyp(fgd_get_native_type, dirfile, TRIM(field_code), &
   LEN_TRIM(field_code))
 end function
 
-function fget_framenum (dirfile, field_code, value)
-  double precision :: fget_framenum
+function fgd_validate (dirfile, field_code)
+  integer :: fgd_validate
+  integer, intent(in) :: dirfile
+  character (len=*), intent(in) :: field_code
+
+  call gdvldt(fgd_validate, dirfile, TRIM(field_code), LEN_TRIM(field_code))
+end function
+
+function fgd_get_framenum (dirfile, field_code, value)
+  double precision :: fgd_get_framenum
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: field_code
   double precision, intent(in) :: value
 
-  call gdfnum(fget_framenum, dirfile, TRIM(field_code), LEN_TRIM(field_code), &
-  value)
+  call gdfnum(fgd_get_framenum, dirfile, TRIM(field_code), &
+  LEN_TRIM(field_code), value)
 end function
 
-function fget_framenum_subset (dirfile, field_code, value, frame_start, &
+function fgd_get_framenum_subset (dirfile, field_code, value, frame_start, &
 frame_end)
-  double precision :: fget_framenum_subset
+  double precision :: fgd_get_framenum_subset
   integer, intent(in) :: dirfile, frame_start, frame_end
   character (len=*), intent(in) :: field_code
   double precision, intent(in) :: value
 
-  call gdfnss(fget_framenum_subset, dirfile, TRIM(field_code), &
+  call gdfnss(fgd_get_framenum_subset, dirfile, TRIM(field_code), &
   LEN_TRIM(field_code), value, frame_start, frame_end)
 end function
 
-subroutine fdirfilename (dirfilename, l, dirfile, fragment_index)
+subroutine fgd_dirfilename (dirfilename, l, dirfile, fragment_index)
   character (len=*), intent(out) :: dirfilename
   integer, intent(in) :: dirfile, fragment_index
   integer, intent(inout) :: l

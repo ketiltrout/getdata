@@ -1,5 +1,5 @@
 /* Retreive a list of string metafields */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -20,7 +20,7 @@ int main(void)
     "META parent data2 STRING valu2\n"
     "META parent data3 STRING valu3\n"
     "META parent data4 CONST UINT8 1\n";
-  int fd, r = 0;
+  int fd, i, r = 0;
 
   mkdir(filedir, 0777);
 
@@ -28,66 +28,34 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY | GD_VERBOSE);
-  get_nfields(D);
-  get_nmfields(D, "parent");
-  get_nmfields_by_type(D, "parent", GD_STRING_ENTRY);
-  const char** field_list = get_mstrings(D, "parent");
+  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  gd_get_nfields(D);
+  gd_get_nmfields(D, "parent");
+  gd_get_nmfields_by_type(D, "parent", GD_STRING_ENTRY);
+  const char** field_list = gd_get_mstrings(D, "parent");
 
-  if (get_error(D)) {
-    fprintf(stderr, "error = %i\n", get_error(D));
-    r = 1;
-  }
+  int error = gd_error(D);
+  CHECKI(error, 0);
+  CHECKPN(field_list);
 
-  if (field_list == NULL) {
-    fprintf(stderr, "field_list = %p\n", field_list);
-    r = 1;
-  }
+  for (i = 0; field_list[i]; ++i) {
+    int len = strlen(field_list[i]);
+    CHECKIi(i,len,5);
 
-  fd = 0;
-  if (!r)
-    for (fd = 0; ; ++fd) {
-      if (field_list[fd] == NULL)
-        break;
+    CHECKIi(i,field_list[i][0], 'v');
+    CHECKIi(i,field_list[i][1], 'a');
+    CHECKIi(i,field_list[i][2], 'l');
+    CHECKIi(i,field_list[i][3], 'u');
 
-      if (strlen(field_list[fd]) != 5) {
-        fprintf(stderr, "strlen(field_list[%i]) = %i\n", fd,
-            strlen(field_list[fd]));
-        r = 1;
-      }
-
-      if (field_list[fd][0] != 'v') {
-        fprintf(stderr, "field_list[%i][0] = %i\n", fd, field_list[fd][0]);
-        r = 1;
-      }
-
-      if (field_list[fd][1] != 'a') {
-        fprintf(stderr, "field_list[%i][0] = %i\n", fd, field_list[fd][0]);
-        r = 1;
-      }
-
-      if (field_list[fd][2] != 'l') {
-        fprintf(stderr, "field_list[%i][0] = %i\n", fd, field_list[fd][0]);
-        r = 1;
-      }
-
-      if (field_list[fd][3] != 'u') {
-        fprintf(stderr, "field_list[%i][0] = %i\n", fd, field_list[fd][0]);
-        r = 1;
-      }
-
-      if (field_list[fd][4] < '1' || field_list[fd][4] > '3') {
-        fprintf(stderr, "field_list[%i][0] = %i\n", fd, field_list[fd][0]);
-        r = 1;
-      }
+    if (field_list[i][4] < '1' || field_list[i][4] > '3') {
+      fprintf(stderr, "field_list[%i] = \"%s\"\n", i, field_list[i]);
+      r = 1;
     }
-
-  if (fd != 3) {
-    fprintf(stderr, "fd = %i\n", fd);
-    r = 1;
   }
 
-  dirfile_close(D);
+  CHECKI(i,3);
+
+  gd_close(D);
   unlink(format);
   rmdir(filedir);
 

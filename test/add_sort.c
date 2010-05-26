@@ -1,8 +1,26 @@
 /* Field sort test for dirfile_add */
 #include <stdio.h>
 #include <stdlib.h>
-#include "../src/getdata.h"
+#include "test.h"
 #include <unistd.h>
+
+int r = 0;
+
+void CheckSPF(DIRFILE *D, const char* f, int v)
+{
+  gd_entry_t e;
+
+  gd_get_entry(D, f, &e);
+
+  if (gd_error(D)) {
+    r = 1;
+    return;
+  }
+
+  CHECKS(e.field, f);
+  CHECKI(e.spf, v);
+  gd_free_entry_strings(&e);
+}
 
 int main (void)
 {
@@ -19,55 +37,36 @@ int main (void)
   const char* i = __TEST__ "dirfile/i";
   const char* j = __TEST__ "dirfile/j";
   const char* k = __TEST__ "dirfile/k";
-  int r = 0;
 
   DIRFILE *D;
 
-  D = dirfile_open(filedir, GD_RDWR | GD_CREAT | GD_EXCL | GD_VERBOSE);
-  dirfile_add_raw(D, "d", GD_FLOAT64, 1, 0);
-  dirfile_add_raw(D, "b", GD_FLOAT64, 1, 0);
-  dirfile_add_raw(D, "h", GD_FLOAT64, 1, 0);
-  dirfile_add_raw(D, "e", GD_FLOAT64, 1, 0);
-  dirfile_add_raw(D, "g", GD_FLOAT64, 1, 0);
-  dirfile_add_raw(D, "c", GD_FLOAT64, 1, 0);
-  dirfile_add_raw(D, "k", GD_FLOAT64, 1, 0);
-  dirfile_add_raw(D, "a", GD_FLOAT64, 1, 0);
-  dirfile_add_raw(D, "f", GD_FLOAT64, 1, 0);
-  dirfile_add_raw(D, "i", GD_FLOAT64, 1, 0);
-  dirfile_add_raw(D, "j", GD_FLOAT64, 1, 0);
+  D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_EXCL | GD_VERBOSE);
+  gd_add_raw(D, "d", GD_FLOAT64, 1, 0);
+  gd_add_raw(D, "b", GD_FLOAT64, 2, 0);
+  gd_add_raw(D, "h", GD_FLOAT64, 3, 0);
+  gd_add_raw(D, "e", GD_FLOAT64, 4, 0);
+  gd_add_raw(D, "g", GD_FLOAT64, 5, 0);
+  gd_add_raw(D, "c", GD_FLOAT64, 6, 0);
+  gd_add_raw(D, "k", GD_FLOAT64, 7, 0);
+  gd_add_raw(D, "a", GD_FLOAT64, 8, 0);
+  gd_add_raw(D, "f", GD_FLOAT64, 9, 0);
+  gd_add_raw(D, "i", GD_FLOAT64, 10, 0);
+  gd_add_raw(D, "j", GD_FLOAT64, 11, 0);
 
-  const char** field_list = get_field_list(D);
-
-  /* FIXME: the public API function get_field_list() is not required to
-   * return the field_list in the internally sorted order */
-  if (get_error(D))
-    r = 1;
-  else if (field_list == NULL)
-    r = 1;
-  else if (field_list[0][0] != 'I')
-    r = 1;
-  else if (field_list[1][0] != 'a')
-    r = 1;
-  else if (field_list[2][0] != 'b')
-    r = 1;
-  else if (field_list[3][0] != 'c')
-    r = 1;
-  else if (field_list[4][0] != 'd')
-    r = 1;
-  else if (field_list[5][0] != 'e')
-    r = 1;
-  else if (field_list[6][0] != 'f')
-    r = 1;
-  else if (field_list[7][0] != 'g')
-    r = 1;
-  else if (field_list[8][0] != 'h')
-    r = 1;
-  else if (field_list[9][0] != 'i')
-    r = 1;
-  else if (field_list[10][0] != 'j')
-    r = 1;
-  else if (field_list[11][0] != 'k')
-    r = 1;
+  /* The idea here is that a field look-up will fail unless the library has
+   * added the field in the correct location */
+  CheckSPF(D, "a", 8);
+  CheckSPF(D, "b", 2);
+  CheckSPF(D, "c", 6);
+  CheckSPF(D, "d", 1);
+  CheckSPF(D, "e", 4);
+  CheckSPF(D, "f", 9);
+  CheckSPF(D, "g", 5);
+  CheckSPF(D, "h", 3);
+  CheckSPF(D, "i", 10);
+  CheckSPF(D, "j", 11);
+  CheckSPF(D, "k", 7);
+  gd_close(D);
 
   unlink(k);
   unlink(j);
@@ -82,5 +81,6 @@ int main (void)
   unlink(a);
   unlink(format);
   rmdir(filedir);
+
   return r;
 }

@@ -1,5 +1,5 @@
 /* Frameindex look-up */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -18,7 +18,7 @@ int main(void)
   const char* data = __TEST__ "dirfile/data";
   const char* format_data = "data RAW FLOAT64 1\n";
   double d[1000];
-  int i;
+  int i, r = 0;
 
   mkdir(filedir, 0777);
 
@@ -33,24 +33,18 @@ int main(void)
   write(i, d, 1000 * sizeof(double));
   close(i);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
-  double f1 = get_framenum(D, "data", 1.09);
-  int error = get_error(D);
+  DIRFILE* D = gd_open(filedir, GD_RDONLY);
+  double f1 = gd_get_framenum(D, "data", 1.09);
+  int error = gd_error(D);
 
-  dirfile_close(D);
+  gd_close(D);
 
   unlink(data);
   unlink(format);
   rmdir(filedir);
 
-  if (error != GD_E_RANGE) {
-    fprintf(stderr, "error=%i\n", error);
-    return 1;
-  }
-  if (!isnan(f1)) {
-    fprintf(stderr, "f1=%.15g\n", f1);
-    return 1;
-  }
+  CHECKI(error, GD_E_RANGE);
+  CHECK(!isnan(f1),f1,"%.15g","%s",f1,"not a number");
 
-  return 0;
+  return r;
 }

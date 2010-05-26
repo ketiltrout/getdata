@@ -1,5 +1,5 @@
 /* Attempt to write COMPLEX128 with the opposite endianness */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <complex.h>
 #include <inttypes.h>
@@ -52,11 +52,11 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_UNENCODED | GD_VERBOSE);
-  int n = putdata(D, "data", 5, 0, 1, 0, GD_COMPLEX128, &c);
-  int error = get_error(D);
+  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_UNENCODED | GD_VERBOSE);
+  int n = gd_putdata(D, "data", 5, 0, 1, 0, GD_COMPLEX128, &c);
+  int error = gd_error(D);
 
-  dirfile_close(D);
+  gd_close(D);
 
   fd = open(data, O_RDONLY);
   lseek(fd, 5 * sizeof(double complex), SEEK_SET);
@@ -67,21 +67,11 @@ int main(void)
   unlink(format);
   rmdir(filedir);
 
-  if (n != 1) {
-    fprintf(stderr, "n=%i\n", n);
-    r = 1;
-  }
-  if (error) {
-    fprintf(stderr, "error=%i\n", error);
-    r = 1;
-  }
+  CHECKI(n,1);
+  CHECKI(error,0);
   
   for (i = 0; i < 16; ++i)
-    if (x[i] != u.b[i]) {
-      fprintf(stderr, "x[%i] = %2x, u.b[%i] = %2x (%g;%g)\n", i, x[i], i,
-          u.b[i], creal(u.f), cimag(u.f));
-      r = 1;
-    }
+    CHECKXi(i,u.b[i],x[i]);
 
   return r;
 }

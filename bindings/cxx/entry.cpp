@@ -18,6 +18,10 @@
 // along with GetData; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 //
+#ifdef HAVE_CONFIG_H
+#include "../../src/config.h"
+#endif
+#undef GETDATA_LEGACY_API
 #include "getdata/dirfile.h"
 
 #include <stdlib.h>
@@ -34,12 +38,12 @@ Entry::Entry()
 Entry::Entry(GetData::Dirfile *dirfile, const char* field_code)
 {
   D = dirfile;
-  get_entry(D->D, field_code, &E);
+  gd_get_entry(D->D, field_code, &E);
 }
 
 Entry::~Entry()
 {
-  dirfile_free_entry_strings(&E);
+  gd_free_entry_strings(&E);
 }
 
 int Entry::CheckIndex(gd_entype_t field_type, int n_fields, int index)
@@ -70,7 +74,7 @@ int Entry::Move(int new_fragment, int move_data)
   int ret = -1;
 
   if (D != NULL)
-    ret = dirfile_move(D->D, E.field, new_fragment, move_data);
+    ret = gd_move(D->D, E.field, new_fragment, move_data);
 
   if (!ret)
     E.fragment_index = new_fragment;
@@ -84,7 +88,7 @@ int Entry::Rename(const char* new_name, int move_data)
   int ret = -1;
 
   if (D != NULL)
-    ret = dirfile_rename(D->D, E.field, new_name, move_data);
+    ret = gd_rename(D->D, E.field, new_name, move_data);
 
   if (ret) {
     if (E.field == NULL) {

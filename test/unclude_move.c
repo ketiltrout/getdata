@@ -1,5 +1,5 @@
 /* Test include */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -19,7 +19,7 @@ int main(void)
   const char* format_data = "/INCLUDE format1\na CONST UINT8 1\n";
   const char* format1_data = "b CONST UINT8 11\n/INCLUDE format2\n";
   const char* format2_data = "c CONST UINT8 11\n";
-  int fd;
+  int fd, r = 0;
 
   mkdir(filedir, 0777);
 
@@ -35,44 +35,26 @@ int main(void)
   write(fd, format2_data, strlen(format2_data));
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_VERBOSE);
-  int ret1 = dirfile_uninclude(D, 2, 0);
-  int error1 = get_error(D);
-  int ret2 = dirfile_include(D, "format2", 0, 0);
-  int error2 = get_error(D);
-  unsigned int nfields = get_nfields(D);
-  unsigned int nfragments = get_nfragments(D);
-  dirfile_close(D);
+  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
+  int ret1 = gd_uninclude(D, 2, 0);
+  int error1 = gd_error(D);
+  int ret2 = gd_include(D, "format2", 0, 0);
+  int error2 = gd_error(D);
+  unsigned int nfields = gd_get_nfields(D);
+  unsigned int nfragments = gd_get_nfragments(D);
+  gd_close(D);
 
   unlink(format2);
   unlink(format1);
   unlink(format);
   rmdir(filedir);
 
-  if (error1) {
-    fprintf(stderr, "1=%i\n", error1);
-    return 1;
-  }
-  if (error2) {
-    fprintf(stderr, "2=%i\n", error2);
-    return 1;
-  }
-  if (ret1 != 0) {
-    fprintf(stderr, "3=%i\n", ret1);
-    return 1;
-  }
-  if (ret2 != 2) {
-    fprintf(stderr, "4=%i\n", ret2);
-    return 1;
-  }
-  if (nfields != 4) {
-    fprintf(stderr, "5=%i\n", nfields);
-    return 1;
-  }
-  if (nfragments != 3) {
-    fprintf(stderr, "6=%i\n", nfragments);
-    return 1;
-  }
+  CHECKI(error1,0);
+  CHECKI(error2,0);
+  CHECKI(ret1,0);
+  CHECKI(ret2,2);
+  CHECKI(nfields,4);
+  CHECKI(nfragments,3);
 
-  return 0;
+  return r;
 }

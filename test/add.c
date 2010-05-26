@@ -1,5 +1,5 @@
 /* Add a dirfile field */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -25,46 +25,30 @@ int main(void)
   E.data_type = GD_UINT8;
   E.scalar[0] = NULL;
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
-  dirfile_add(D, &E);
-  int error = get_error(D);
+  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
+  gd_add(D, &E);
+  int error = gd_error(D);
 
   /* check */
-  get_entry(D, "data", &e);
-  if (get_error(D))
+  gd_get_entry(D, "data", &e);
+  if (gd_error(D))
     r = 1;
   else {
-    if (e.field_type != GD_RAW_ENTRY) {
-      fprintf(stderr, "field_type = %i\n", e.field_type);
-      r = 1;
-    }
-    if (e.fragment_index != 0) {
-      fprintf(stderr, "fragment_index = %i\n", e.fragment_index);
-      r = 1;
-    }
-    if (e.spf != 2) {
-      fprintf(stderr, "spf = %i\n", e.spf);
-      r = 1;
-    }
-    if (e.data_type != GD_UINT8) {
-      fprintf(stderr, "data_type = %i\n", e.data_type);
-      r = 1;
-    }
-    if (e.scalar[0] != NULL) {
-      fprintf(stderr, "scalar = %p\n", e.scalar[0]);
-      r = 1;
-    }
-    dirfile_free_entry_strings(&e);
+    CHECKI(e.field_type, GD_RAW_ENTRY);
+    CHECKI(e.fragment_index, 0);
+    CHECKI(e.spf, 2);
+    CHECKI(e.data_type, GD_UINT8);
+    CHECKP(e.scalar[0]);
+    gd_free_entry_strings(&e);
   }
 
-  dirfile_close(D);
+  gd_close(D);
 
   unlink(data);
   unlink(format);
   rmdir(filedir);
 
-  if (r)
-    return 1;
+  CHECKI(error, GD_E_OK);
 
-  return (error != GD_E_OK);
+  return r;
 }

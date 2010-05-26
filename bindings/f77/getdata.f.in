@@ -19,223 +19,221 @@ C     along with GetData; if not, write to the Free Software Foundation, Inc.,
 C     51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 C
 
-C     Fortran 77 parameters for getdata.  This file defines handy
-C     constants useful to Fortran programs
+C     Fortran 77 parameters for GetData.  This file defines handy
+C     constants useful to Fortran programs.
 
       @PARAMETERS@
 
 C Externals
-C     Corresponding to dirfile_add_bit(3)
+C     Corresponding to gd_add_bit(3)
       EXTERNAL GDADBT
-C     Corresponding to dirfile_add_clincom(3)
+C     Corresponding to gd_add_clincom(3)
       EXTERNAL GDADCL
-C     Corresponding to dirfile_add_const(3)
+C     Corresponding to gd_add_const(3)
       EXTERNAL GDADCO
-C     Corresponding to dirfile_add_cpolynom(3)
+C     Corresponding to gd_add_cpolynom(3)
       EXTERNAL GDADCP
-C     Corresponding to dirfile_add_lincom(3)
+C     Corresponding to gd_add_lincom(3)
       EXTERNAL GDADLC
-C     Corresponding to dirfile_add_linterp(3)
+C     Corresponding to gd_add_linterp(3)
       EXTERNAL GDADLT
-C     Corresponding to dirfile_add_multiply(3)
+C     Corresponding to gd_add_multiply(3)
       EXTERNAL GDADMT
-C     Corresponding to dirfile_add_phase(3)
+C     Corresponding to gd_add_phase(3)
       EXTERNAL GDADPH
-C     Corresponding to dirfile_add_polynom(3)
+C     Corresponding to gd_add_polynom(3)
       EXTERNAL GDADPN
-C     Corresponding to dirfile_add_raw(3)
+C     Corresponding to gd_add_raw(3)
       EXTERNAL GDADRW
-C     Corresponding to dirfile_add_sbit(3)
+C     Corresponding to gd_add_sbit(3)
       EXTERNAL GDADSB
-C     Corresponding to dirfile_add_spec(3)
+C     Corresponding to gd_add_spec(3)
       EXTERNAL GDADSP
-C     Corresponding to dirfile_add_string(3)
+C     Corresponding to gd_add_string(3)
       EXTERNAL GDADST
-C     Correpsonding to dirfile_alter_encoding(3)
+C     Correpsonding to gd_alter_encoding(3)
       EXTERNAL GDAENC
-C     Correpsonding to dirfile_alter_endianness(3)
+C     Correpsonding to gd_alter_endianness(3)
       EXTERNAL GDAEND
-C     Correpsonding to dirfile_alter_frameoffset(3)
+C     Correpsonding to gd_alter_frameoffset(3)
       EXTERNAL GDAFOF
-C     Correpsonding to dirfile_alter_bit(3)
+C     Correpsonding to gd_alter_bit(3)
       EXTERNAL GDALBT
-C     Correpsonding to dirfile_alter_clincom(3)
+C     Correpsonding to gd_alter_clincom(3)
       EXTERNAL GDALCL
-C     Correpsonding to dirfile_alter_const(3)
+C     Correpsonding to gd_alter_const(3)
       EXTERNAL GDALCO
-C     Correpsonding to dirfile_alter_cpolynom(3)
+C     Correpsonding to gd_alter_cpolynom(3)
       EXTERNAL GDALCP
-C     Correpsonding to dirfile_alter_lincom(3)
+C     Correpsonding to gd_alter_lincom(3)
       EXTERNAL GDALLC
-C     Correpsonding to dirfile_alter_linterp(3)
+C     Correpsonding to gd_alter_linterp(3)
       EXTERNAL GDALLT
-C     Correpsonding to dirfile_alter_multiply(3)
+C     Correpsonding to gd_alter_multiply(3)
       EXTERNAL GDALMT
-C     Correpsonding to dirfile_alter_phase(3)
+C     Correpsonding to gd_alter_phase(3)
       EXTERNAL GDALPH
-C     Correpsonding to dirfile_alter_polynom(3)
+C     Correpsonding to gd_alter_polynom(3)
       EXTERNAL GDALPN
-C     Correpsonding to dirfile_alter_raw(3)
+C     Correpsonding to gd_alter_raw(3)
       EXTERNAL GDALRW
-C     Correpsonding to dirfile_alter_sbit(3)
+C     Correpsonding to gd_alter_sbit(3)
       EXTERNAL GDALSB
-C     Correpsonding to dirfile_alter_spec(3)
+C     Correpsonding to gd_alter_spec(3)
       EXTERNAL GDALSP
-C     Corresponding to dirfile_parser_callback(3)
+C     Corresponding to gd_parser_callback(3)
       EXTERNAL GDCLBK
-C     Corresponding to dirfile_close(3)
+C     Corresponding to gd_close(3)
       EXTERNAL GDCLOS
-C     Corresponding to dirfile_copen(3)
+C     Corresponding to gd_copen(3)
       EXTERNAL GDCOPN
 C     Check whether an entry contains complex scalars
       EXTERNAL GDCSCL
-C     Correpsonding to dirfile_delete(3)
+C     Correpsonding to gd_delete(3)
       EXTERNAL GDDELE
-C     Corresponding to dirfile_discard(3)
+C     Corresponding to gd_discard(3)
       EXTERNAL GDDSCD
-C     Corresponding to get_entry_type(3)
+C     Corresponding to gd_get_entry_type(3)
       EXTERNAL GDENTY
-C     Returns the dirfile->error member
+C     Corresponding to gd_error(3)
       EXTERNAL GDEROR
-C     Corresponding to get_error_string(3)
+C     Corresponding to gd_error_string(3)
       EXTERNAL GDESTR
-C     Corresponding to get_field_list_by_type(3) (sort of)
+C     Corresponding to gd_get_field_list_by_type(3) (sort of)
       EXTERNAL GDFDNT
 C     Returns the maximum field name length
       EXTERNAL GDFDNX
-C     Corresponding to get_field_list(3) (sort of)
+C     Corresponding to gd_get_field_list(3) (sort of)
       EXTERNAL GDFLDN
-C     Corresponding to dirfile_flush(3)
+C     Corresponding to gd_flush(3)
       EXTERNAL GDFLSH
-C     Corresponding to get_framenum_subset(3)
+C     Corresponding to gd_get_framenum_subset(3)
       EXTERNAL GDFNSS
-C     Corresponding to get_framenum(3)
+C     Corresponding to gd_get_framenum(3)
       EXTERNAL GDFNUM
-C     Corresponding to get_fragment_index(3)
+C     Corresponding to gd_get_fragment_index(3)
       EXTERNAL GDFRGI
-C     Corresponding to get_fragmentname(3)
+C     Corresponding to gd_get_fragmentname(3)
       EXTERNAL GDFRGN
-C     Corresponding to get_entry(3) for BIT fields
+C     Corresponding to gd_get_entry(3) for BIT fields
       EXTERNAL GDGEBT
-C     Corresponding to get_entry(3) for complex valued LINCOM fields
+C     Corresponding to gd_get_entry(3) for complex valued LINCOM fields
       EXTERNAL GDGECL
-C     Corresponding to get_entry(3) for CONST fields
+C     Corresponding to gd_get_entry(3) for CONST fields
       EXTERNAL GDGECO
-C     Corresponding to get_entry(3) for complex valued POLYNOM fields
+C     Corresponding to gd_get_entry(3) for complex valued POLYNOM fields
       EXTERNAL GDGECP
-C     Corresponding to get_entry(3) for LINCOM fields
+C     Corresponding to gd_get_entry(3) for LINCOM fields
       EXTERNAL GDGELC
-C     Corresponding to get_entry(3) for LINTERP fields
+C     Corresponding to gd_get_entry(3) for LINTERP fields
       EXTERNAL GDGELT
-C     Corresponding to get_entry(3) for MULTIPLY fields
+C     Corresponding to gd_get_entry(3) for MULTIPLY fields
       EXTERNAL GDGEMT
-C     Corresponding to get_encoding(3)
+C     Corresponding to gd_get_encoding(3)
       EXTERNAL GDGENC
-C     Corresponding to get_endianness(3)
+C     Corresponding to gd_get_endianness(3)
       EXTERNAL GDGEND
-C     Corresponding to get_entry(3) for PHASE fields
+C     Corresponding to gd_get_entry(3) for PHASE fields
       EXTERNAL GDGEPH
-C     Corresponding to get_entry(3) for POLYNOM fields
+C     Corresponding to gd_get_entry(3) for POLYNOM fields
       EXTERNAL GDGEPN
-C     Corresponding to get_entry(3) for RAW fields
+C     Corresponding to gd_get_entry(3) for RAW fields
       EXTERNAL GDGERW
-C     Corresponding to get_entry(3) for SBIT fields
+C     Corresponding to gd_get_entry(3) for SBIT fields
       EXTERNAL GDGESB
-C     Corresponding to getdata(3)
+C     Corresponding to gd_getdata(3)
       EXTERNAL GDGETD
-C     Correpsonding to get_frameoffset(3)
+C     Correpsonding to gd_get_frameoffset(3)
       EXTERNAL GDGFOF
-C     Corresponding to get_protection(3)
+C     Corresponding to gd_get_protection(3)
       EXTERNAL GDGPRT
-C     Corresponding to get_reference(3)
-      EXTERNAL GDGREF
-C     Corresponding to get_spf(3)
+C     Corresponding to gd_get_spf(3)
       EXTERNAL GDGSPF
-C     Corresponding to get_constant(3)
+C     Corresponding to gd_get_constant(3)
       EXTERNAL GDGTCO
-C     Corresponding to get_string(3)
+C     Corresponding to gd_get_string(3)
       EXTERNAL GDGTST
-C     Corresponding to dirfile_include(3)
+C     Corresponding to gd_include(3)
       EXTERNAL GDINCL
-C     Corresponding to dirfile_madd_bit(3)
+C     Corresponding to gd_madd_bit(3)
       EXTERNAL GDMDBT
-C     Corresponding to complex valued dirfile_madd_clincom(3)
+C     Corresponding to complex valued gd_madd_clincom(3)
       EXTERNAL GDMDCL
-C     Corresponding to dirfile_madd_const(3)
+C     Corresponding to gd_madd_const(3)
       EXTERNAL GDMDCO
-C     Corresponding to dirfile_madd_cpolynom(3)
+C     Corresponding to gd_madd_cpolynom(3)
       EXTERNAL GDMDCP
-C     Corresponding to dirfile_madd_lincom(3)
+C     Corresponding to gd_madd_lincom(3)
       EXTERNAL GDMDLC
-C     Corresponding to dirfile_madd_linterp(3)
+C     Corresponding to gd_madd_linterp(3)
       EXTERNAL GDMDLT
-C     Corresponding to dirfile_madd_multiply(3)
+C     Corresponding to gd_madd_multiply(3)
       EXTERNAL GDMDMT
-C     Corresponding to dirfile_madd_phase(3)
+C     Corresponding to gd_madd_phase(3)
       EXTERNAL GDMDPH
-C     Corresponding to dirfile_madd_polynom(3)
+C     Corresponding to gd_madd_polynom(3)
       EXTERNAL GDMDPN
-C     Corresponding to dirfile_madd_sbit(3)
+C     Corresponding to gd_madd_sbit(3)
       EXTERNAL GDMDSB
-C     Corresponding to dirfile_madd_spec(3)
+C     Corresponding to gd_madd_spec(3)
       EXTERNAL GDMDSP
-C     Corresponding to dirfile_madd_string(3)
+C     Corresponding to gd_madd_string(3)
       EXTERNAL GDMDST
-C     Corresponding to get_mfield_list(3) (sort of)
+C     Corresponding to gd_get_mfield_list(3) (sort of)
       EXTERNAL GDMFDN
-C     Corresponding to get_mfield_list_by_type(3) (sort of)
+C     Corresponding to gd_get_mfield_list_by_type(3) (sort of)
       EXTERNAL GDMFDT
-C     Corresponding to dirfile_metaflush(3)
+C     Corresponding to gd_metaflush(3)
       EXTERNAL GDMFLS
 C     Returns the maximum field name length for a meta field list
       EXTERNAL GDMFNX
-C     Correpsonding to dirfile_malter_spec(3)
+C     Correpsonding to gd_malter_spec(3)
       EXTERNAL GDMLSP
-C     Correpsonding to dirfile_move(3)
+C     Correpsonding to gd_move(3)
       EXTERNAL GDMOVE
-C     Corresponding to get_mvector_list(3) (sort of)
+C     Corresponding to gd_get_mvector_list(3) (sort of)
       EXTERNAL GDMVEN
-C     Corresponding to dirfilename(3)
+C     Corresponding to gd_dirfilename(3)
       EXTERNAL GDNAME
-C     Corresponding to get_nfields_by_type(3)
+C     Corresponding to gd_get_nfields_by_type(3)
       EXTERNAL GDNFDT
-C     Corresponding to get_nfields(3)
+C     Corresponding to gd_get_nfields(3)
       EXTERNAL GDNFLD
-C     Corresponding to get_nfragments(3)
+C     Corresponding to gd_get_nfragments(3)
       EXTERNAL GDNFRG
-C     Corresponding to get_nframes(3)
+C     Corresponding to gd_get_nframes(3)
       EXTERNAL GDNFRM
-C     Corresponding to get_nmfields(3)
+C     Corresponding to gd_get_nmfields(3)
       EXTERNAL GDNMFD
-C     Corresponding to get_nmfields_by_type(3)
+C     Corresponding to gd_get_nmfields_by_type(3)
       EXTERNAL GDNMFT
-C     Corresponding to get_nmvectors(3)
+C     Corresponding to gd_get_nmvectors(3)
       EXTERNAL GDNMVE
-C     Corresponding to get_native_type(3)
+C     Corresponding to gd_get_native_type(3)
       EXTERNAL GDNTYP
-C     Corresponding to get_nvectors(3)
+C     Corresponding to gd_get_nvectors(3)
       EXTERNAL GDNVEC
-C     Corresponding to dirfile_open(3)
+C     Corresponding to gd_open(3)
       EXTERNAL GDOPEN
-C     Corresponding to get_parent_fragment(3)
+C     Corresponding to gd_get_parent_fragment(3)
       EXTERNAL GDPFRG
-C     Corresponding to dirfile_protect(3)
+C     Corresponding to gd_protect(3)
       EXTERNAL GDPROT
-C     Corresponding to put_constant(3)
+C     Corresponding to gd_put_constant(3)
       EXTERNAL GDPTCO
-C     Corresponding to put_string(3)
+C     Corresponding to gd_put_string(3)
       EXTERNAL GDPTST
-C     Corresponding to putdata(3)
+C     Corresponding to gd_putdata(3)
       EXTERNAL GDPUTD
-C     Corresponding to dirfile_reference(3)
+C     Corresponding to gd_reference(3)
       EXTERNAL GDREFE
-C     Correpsonding to dirfile_rename(3)
+C     Correpsonding to gd_rename(3)
       EXTERNAL GDRENM
-C     Corresponding to get_raw_filename(3)
+C     Corresponding to gd_get_raw_filename(3)
       EXTERNAL GDRWFN
-C     Corresponding to dirfile_uninclude(3)
+C     Corresponding to gd_uninclude(3)
       EXTERNAL GDUINC
-C     Corresponding to get_vector_list(3) (sort of)
+C     Corresponding to gd_get_vector_list(3) (sort of)
       EXTERNAL GDVECN
-C     Corresponding to dirfile_validate(3)
+C     Corresponding to gd_validate(3)
       EXTERNAL GDVLDT

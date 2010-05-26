@@ -1,6 +1,5 @@
 /* Attempt to get RAW filename */
-#include "../src/getdata.h"
-
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -17,7 +16,7 @@ int main(void)
   const char* data = __TEST__ "dirfile/data";
   const char* format_data = "data RAW UINT8 8\n";
   unsigned char data_data[256];
-  int fd;
+  int fd, r = 0;
 
   mkdir(filedir, 0777);
 
@@ -32,20 +31,18 @@ int main(void)
   write(fd, data_data, 256);
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
-  const char *path = get_raw_filename(D, "bata");
-  int error = get_error(D);
+  DIRFILE* D = gd_open(filedir, GD_RDONLY);
+  const char *path = gd_get_raw_filename(D, "bata");
+  int error = gd_error(D);
 
-  dirfile_close(D);
+  gd_close(D);
 
   unlink(data);
   unlink(format);
   rmdir(filedir);
 
-  if (error != GD_E_BAD_CODE)
-    return 1;
-  if (path != NULL)
-    return 1;
+  CHECKI(error, GD_E_BAD_CODE);
+  CHECKP(path);
 
-  return 0;
+  return r;
 }

@@ -2680,26 +2680,6 @@ C     85: GDREFE check
         WRITE(*, 2009) 85, str
       ENDIF
 
-C     86: GDGREF check
-      l = 20
-      CALL GDGREF(str, l, d)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 2001) 86, e
-      ENDIF
-
-      IF (l .NE. 20) THEN
-        ne = ne + 1
-        WRITE(*, 2002) 86, l
-      ENDIF
-
-      IF (str .NE. 'new1') THEN
-        ne = ne + 1
-        WRITE(*, 2009) 86, str
-      ENDIF
-
 C     87: GDAENC check
       CALL GDAENC(d, GD_ES, 1, 0)
       CALL GDEROR(e, d)

@@ -1,5 +1,5 @@
 /* Attempt to write FLOAT32 */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <inttypes.h>
 #include <stdlib.h>
@@ -18,7 +18,7 @@ int main(void)
   const char* data = __TEST__ "dirfile/data";
   const char* format_data = "data RAW FLOAT32 8\n";
   float c[8], d;
-  int fd, i;
+  int fd, i, r = 0;
   struct stat buf;
 
   memset(c, 0, 8);
@@ -31,25 +31,25 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_UNENCODED | GD_VERBOSE);
-  int n = putdata(D, "data", 5, 0, 1, 0, GD_FLOAT32, c);
-  int error = get_error(D);
+  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_UNENCODED | GD_VERBOSE);
+  int n = gd_putdata(D, "data", 5, 0, 1, 0, GD_FLOAT32, c);
+  int error = gd_error(D);
 
-  dirfile_close(D);
+  gd_close(D);
 
-  if (stat(data, &buf))
-    return 1;
-  if (buf.st_size != 48 * sizeof(float))
-    return 1;
+  if (stat(data, &buf)) {
+    perror("stat");
+    r = 1;
+  }
+  CHECKI(buf.st_size, 48 * sizeof(float));
 
   fd = open(data, O_RDONLY);
   i = 0;
   while (read(fd, &d, sizeof(float))) {
     if (i < 40 || i > 48) {
-      if (fabs(d) > 1e-10)
-        return 1;
-    } else if (fabs(d - i) > 1e-10)
-      return 1;
+      CHECKFi(i,d,0);
+    } else
+      CHECKFi(i,d,i);
     i++;
   }
   close(fd);
@@ -58,10 +58,8 @@ int main(void)
   unlink(format);
   rmdir(filedir);
 
-  if (error)
-    return 1;
-  if (n != 8)
-    return 1;
+  CHECKI(n,8);
+  CHECKI(error, 0);
 
-  return 0;
+  return r;
 }

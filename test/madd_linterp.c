@@ -1,5 +1,5 @@
 /* Add a LINTERP field */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -17,42 +17,28 @@ int main(void)
   int r = 0;
   gd_entry_t e;
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
-  dirfile_add_phase(D, "new", "in", 3, 0);
-  dirfile_madd_linterp(D, "new", "meta", "in", "table");
-  int error = get_error(D);
+  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
+  gd_add_phase(D, "new", "in", 3, 0);
+  gd_madd_linterp(D, "new", "meta", "in", "table");
+  int error = gd_error(D);
 
   /* check */
-  get_entry(D, "new/meta", &e);
-  if (get_error(D))
-    r = 1;
-  else {
-    if (e.field_type != GD_LINTERP_ENTRY) {
-      fprintf(stderr, "field_type = %i\n", e.field_type);
-      r = 1;
-    }
-    if (strcmp(e.in_fields[0], "in")) {
-      fprintf(stderr, "in_field = %s\n", e.in_fields[0]);
-      r = 1;
-    }
-    if (strcmp(e.table, "table")) {
-      fprintf(stderr, "table = %s\n", e.table);
-      r = 1;
-    }
-    if (e.fragment_index != 0) {
-      fprintf(stderr, "fragment_index = %i\n", e.fragment_index);
-      r = 1;
-    }
-    dirfile_free_entry_strings(&e);
+  gd_get_entry(D, "new/meta", &e);
+  int ge_error = gd_error(D);
+  CHECKI(ge_error, 0);
+  if (!r) {
+    CHECKI(e.field_type, GD_LINTERP_ENTRY);
+    CHECKS(e.in_fields[0], "in");
+    CHECKS(e.table, "table");
+    CHECKI(e.fragment_index, 0);
+    gd_free_entry_strings(&e);
   }
 
-  dirfile_close(D);
+  gd_close(D);
 
   unlink(format);
   rmdir(filedir);
 
-  if (r)
-    return 1;
-
-  return (error != GD_E_OK);
+  CHECKI(error, GD_E_OK); 
+  return r;
 }

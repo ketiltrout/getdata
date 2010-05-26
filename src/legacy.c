@@ -33,8 +33,8 @@ static struct {
 } _GD_Dirfiles = {0, NULL};
 
 /* Error-reporting kludge for deprecated API */
-static char _GD_GlobalErrorString[FILENAME_MAX];
-static char _GD_GlobalErrorFile[FILENAME_MAX];
+static char _GD_GlobalErrorString[GD_MAX_LINE_LENGTH];
+static char _GD_GlobalErrorFile[GD_MAX_LINE_LENGTH];
 static DIRFILE _GD_GlobalErrors = {
   .error = 0,
   .suberror = 0,
@@ -98,18 +98,18 @@ static int _GD_CopyGlobalError(DIRFILE* D)
 
   _GD_GlobalErrors.suberror = D->suberror;
   _GD_GlobalErrors.error_line = D->error_line;
-  strncpy(_GD_GlobalErrors.error_file, D->error_file, FILENAME_MAX);
-  strncpy(_GD_GlobalErrors.error_string, D->error_string, FILENAME_MAX);
+  strncpy(_GD_GlobalErrors.error_file, D->error_file, GD_MAX_LINE_LENGTH);
+  strncpy(_GD_GlobalErrors.error_string, D->error_string, GD_MAX_LINE_LENGTH);
 
   dreturn("%i", D->error);
   return _GD_GlobalErrors.error = D->error;
 }
 
-/* legacy wrapper for get_error_string()
+/* legacy wrapper for gd_error_string()
  */
 char* GetDataErrorString(char* buffer, size_t buflen)
 {
-  return get_error_string(&_GD_GlobalErrors, buffer, buflen);
+  return gd_error_string(&_GD_GlobalErrors, buffer, buflen);
 }
 
 /* _GD_GetDirfile: Locate the legacy DIRFILE given the filespec.  This started
@@ -135,7 +135,7 @@ static DIRFILE* _GD_GetDirfile(const char *filename_in, int mode)
       if ((mode & GD_RDWR) && (_GD_Dirfiles.D[i_dirfile]->flags & GD_ACCMODE) ==
           GD_RDONLY) {
         /* close it */
-        dirfile_close(_GD_Dirfiles.D[i_dirfile]);
+        gd_close(_GD_Dirfiles.D[i_dirfile]);
 
         /* copy the last dirfile in the list over top of this one and decrement
          * the counter -- next realloc will do nothing */
@@ -164,7 +164,7 @@ static DIRFILE* _GD_GetDirfile(const char *filename_in, int mode)
   _GD_Dirfiles.D = ptr;
 
   /* Open a dirfile */
-  _GD_Dirfiles.D[_GD_Dirfiles.n - 1] = dirfile_open(filedir, mode);
+  _GD_Dirfiles.D[_GD_Dirfiles.n - 1] = gd_open(filedir, mode);
 
   /* Error encountered -- the dirfile will shortly be deleted */
   if (_GD_Dirfiles.D[_GD_Dirfiles.n - 1]->error != GD_E_OK) {
@@ -477,7 +477,7 @@ int GetData(const char *filename, const char *field_code,
     return 0;
   }
 
-  nread = (int)getdata64(D, field_code, (off64_t)first_frame,
+  nread = (int)gd_getdata64(D, field_code, (off64_t)first_frame,
       (off64_t)first_samp, (size_t)num_frames, (size_t)num_samp,
       _GD_LegacyType(return_type), data_out);
   *error_code = _GD_CopyGlobalError(D);
@@ -506,7 +506,7 @@ int GetNFrames(const char *filename, int *error_code,
     return 0;
   }
 
-  nf = (int)get_nframes(D);
+  nf = (int)gd_get_nframes(D);
   *error_code = _GD_CopyGlobalError(D);
 
   dreturn("%i", nf);
@@ -530,7 +530,7 @@ int GetSamplesPerFrame(const char *filename, const char *field_code,
     return 0;
   }
 
-  int spf = (int)get_spf(D, field_code);
+  int spf = (int)gd_get_spf(D, field_code);
   *error_code = _GD_CopyGlobalError(D);
 
   dreturn("%i", spf);
@@ -558,7 +558,7 @@ int PutData(const char *filename, const char *field_code,
     return 0;
   }
 
-  n_write = (int)putdata64(D, field_code, (off64_t)first_frame,
+  n_write = (int)gd_putdata64(D, field_code, (off64_t)first_frame,
       (off64_t)first_samp, (size_t)num_frames, (size_t)num_samp,
       _GD_LegacyType(data_type), data_in);
   *error_code = _GD_CopyGlobalError(D);

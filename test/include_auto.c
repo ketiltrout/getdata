@@ -1,5 +1,5 @@
 /* Test include */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -17,7 +17,7 @@ int main(void)
   const char* format1 = __TEST__ "dirfile/format1";
   const char* format_data = "\n";
   const char* format1_data = "data RAW UINT8 11\n";
-  int fd;
+  int fd, r = 0;
 
   mkdir(filedir, 0777);
 
@@ -29,35 +29,24 @@ int main(void)
   write(fd, format1_data, strlen(format1_data));
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_VERBOSE);
-  dirfile_include(D, "format1", 0, GD_VERBOSE);
-  int error1 = get_error(D);
-  const char* ptr = dirfile_reference(D, NULL);
+  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
+  gd_include(D, "format1", 0, GD_VERBOSE);
+  int error1 = gd_error(D);
+  const char* ptr = gd_reference(D, NULL);
   const char* reference = strdup(ptr);
-  int error2 = get_error(D);
-  unsigned int spf = get_spf(D, "data");
-  dirfile_close(D);
+  int error2 = gd_error(D);
+  unsigned int spf = gd_get_spf(D, "data");
+  gd_close(D);
 
   unlink(format1);
   unlink(format);
   rmdir(filedir);
 
-  if (error1) {
-    fprintf(stderr, "1=%i\n", error1);
-    return 1;
-  }
-  if (error2) {
-    fprintf(stderr, "2=%i\n", error2);
-    return 1;
-  }
-  if (ptr == NULL) {
-    fprintf(stderr, "3=%p\n", ptr);
-    return 1;
-  }
-  if (strcmp(reference, "data")) {
-    fprintf(stderr, "4=%s\n", reference);
-    return 1;
-  }
+  CHECKI(error1, 0);
+  CHECKI(error2, 0);
+  CHECKPN(ptr);
+  CHECKS(reference, "data");
+  CHECKU(spf, 11);
 
-  return (spf != 11);
+  return r;
 }

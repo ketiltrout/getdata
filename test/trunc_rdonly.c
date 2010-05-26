@@ -1,5 +1,5 @@
 /* Truncating a read-only dirfile should fail cleanly */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -14,7 +14,7 @@ int main(void)
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
   const char* data = __TEST__ "dirfile/data";
-  int fd;
+  int fd, r = 0;
 
   mkdir(filedir, 0777);
 
@@ -24,15 +24,16 @@ int main(void)
 
   close(open(data, O_CREAT | O_EXCL | O_WRONLY, 0666));
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY | GD_TRUNC);
-  int error = get_error(D);
-  dirfile_close(D);
+  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_TRUNC);
+  int error = gd_error(D);
+  gd_close(D);
 
-  if (unlink(data))
-    return 1;
+  int unlink_data = unlink(data);
+  CHECKI(unlink_data, 0);
 
   unlink(format);
   rmdir(filedir);
 
-  return (error != GD_E_ACCMODE);
+  CHECKI(error,GD_E_ACCMODE);
+  return r;
 }

@@ -1,6 +1,5 @@
 /* Attempt to read PHASE */
-#include "../src/getdata.h"
-
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -34,11 +33,11 @@ int main(void)
   write(fd, data_data, 256);
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY | GD_VERBOSE);
-  int n = getdata(D, "phase", 5, 0, 1, 0, GD_UINT8, &c);
-  int error = get_error(D);
+  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  int n = gd_getdata(D, "phase", 5, 0, 1, 0, GD_UINT8, &c);
+  int error = gd_error(D);
 
-  dirfile_close(D);
+  gd_close(D);
 
   unlink(data);
   unlink(format);
@@ -56,6 +55,9 @@ int main(void)
     fprintf(stderr, "c=%i\n", c);
     r = 1;
   }
+  CHECKI(error, 0);
+  CHECKI(n, 1);
+  CHECKI(c, 3);
 
   return r;
 }

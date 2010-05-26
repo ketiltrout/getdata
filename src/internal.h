@@ -30,6 +30,12 @@
 #include <complex.h>
 #include <string.h>
 
+/* For FILENAME_MAX */
+#include <stdio.h>
+
+/* For the C99 integer types */
+#include <inttypes.h>
+
 /* Type conventions:
  *
  *  - samples per frame is always gd_spf_t (aka uin16_t)
@@ -40,15 +46,6 @@
  *  - public functions taking or returning types of off64_t should have both
  *    a off_t prototype and and off64_t type prototype.
  */
-
-/* if we don't have off64_t, we probably don't have the rest of the transitional
- * LFS API
- */
-#ifndef HAVE_OFF64_T
-typedef off_t off64_t
-# define lseek64 lseek
-# define stat64 stat
-#endif
 
 #ifndef __attribute_malloc__
 # define __attribute_malloc__
@@ -68,8 +65,6 @@ typedef off_t off64_t
 #ifdef USE_MODULES
 # ifdef HAVE_LTDL_H
 #  include <ltdl.h>
-# else
-#  include "gd_ltdl.h"
 # endif
 #endif
 
@@ -106,12 +101,6 @@ const char* _gd_colsub(void);
 
 /* maximum number of recursions */
 #define GD_MAX_RECURSE_LEVEL  32
-
-/* For FILENAME_MAX */
-#include <stdio.h>
-
-/* For the C99 integer types */
-#include <inttypes.h>
 
 #define MAX_IN_COLS (3 * GD_MAX_LINCOM + 5) /* for META lincom */
 
@@ -260,6 +249,17 @@ struct _gd_private_entry {
 
 #define BUFFER_SIZE 9000000
 
+/* if we don't have off64_t, we probably don't have the rest of the transitional
+ * LFS API
+ */
+#ifndef HAVE_OFF64_T
+# ifndef __APPLE__
+typedef off_t off64_t;
+# endif
+# define lseek64 lseek
+# define stat64 stat
+#endif
+
 /* Encoding schemes */
 extern struct encoding_t {
   unsigned long int scheme;
@@ -386,7 +386,7 @@ void _GD_CLinterpData(DIRFILE* D, void *data, gd_type_t type,
     const double *data_in, size_t npts, const double *lx,
     const double complex *ly, size_t n_ln);
 void _GD_ConvertType(DIRFILE* D, const void *data_in, gd_type_t in_type,
-    void *data_out, gd_type_t out_type, size_t n) __THROW;
+    void *data_out, gd_type_t out_type, size_t n) gd_nothrow;
 size_t _GD_DoField(DIRFILE*, gd_entry_t*, int, off64_t, size_t, gd_type_t,
     void*);
 size_t _GD_DoFieldOut(DIRFILE*, gd_entry_t*, int, off64_t, size_t, gd_type_t,
@@ -409,7 +409,7 @@ gd_spf_t _GD_GetSPF(DIRFILE* D, gd_entry_t* E);
 int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,
     int linenum, char** ref_name, int me, int* standards, unsigned long *flags);
 void _GD_InitialiseFramework(void);
-void _GD_InsertSort(DIRFILE* D, gd_entry_t* E, int u) __THROW;
+void _GD_InsertSort(DIRFILE* D, gd_entry_t* E, int u) gd_nothrow;
 
 #define _GD_InternalError(D) \
   _GD_SetError(D, GD_E_INTERNAL_ERROR, 0, __FILE__, __LINE__, NULL)

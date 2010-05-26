@@ -174,7 +174,7 @@ static void _GD_DeReference(DIRFILE* D, gd_entry_t* E, gd_entry_t* C,
   dreturnvoid();
 }
 
-int dirfile_delete(DIRFILE* D, const char* field_code_in, int flags)
+int gd_delete(DIRFILE* D, const char* field_code_in, int flags)
 {
   unsigned int index;
   unsigned int first, last = 0;

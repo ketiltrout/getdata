@@ -1,5 +1,5 @@
 /* Try to read entry from an invalid DIRFILE */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -11,17 +11,16 @@
 
 int main(void)
 {
-  DIRFILE* D = dirfile_open("not a dirfile", GD_RDONLY);
+  DIRFILE* D = gd_open("not a dirfile", GD_RDONLY);
   gd_entry_t E;
+  int r = 0;
 
-  int n = get_entry(D, "data", &E);
-  int error = get_error(D);
-  dirfile_close(D);
+  int n = gd_get_entry(D, "data", &E);
+  int error = gd_error(D);
+  gd_close(D);
 
-  if (error != GD_E_BAD_DIRFILE)
-    return 1;
-  if (n == 0)
-    return 1;
+  CHECKI(error, GD_E_BAD_DIRFILE);
+  CHECKI(n, -1);
 
-  return 0;
+  return r;
 }

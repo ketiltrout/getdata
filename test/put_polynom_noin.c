@@ -1,5 +1,5 @@
 /* Attempt to write POLYNOM */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <inttypes.h>
 #include <stdlib.h>
@@ -16,7 +16,7 @@ int main(void)
   const char* format = __TEST__ "dirfile/format";
   const char* format_data = "polynom POLYNOM data 0.5 3.0\n";
   int8_t c[8];
-  int fd, i;
+  int fd, i, r = 0;
 
   memset(c, 0, 8);
   mkdir(filedir, 0777);
@@ -28,17 +28,16 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_UNENCODED);
-  int n = putdata(D, "polynom", 5, 0, 1, 0, GD_INT8, c);
-  int error = get_error(D);
+  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_UNENCODED);
+  int n = gd_putdata(D, "polynom", 5, 0, 1, 0, GD_INT8, c);
+  int error = gd_error(D);
 
-  dirfile_close(D);
+  gd_close(D);
 
   unlink(format);
   rmdir(filedir);
 
-  if (n != 0)
-    return 1;
-
-  return (error != GD_E_BAD_CODE);
+  CHECKI(n,0);
+  CHECKI(error,GD_E_BAD_CODE);
+  return r;
 }

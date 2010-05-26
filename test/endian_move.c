@@ -1,6 +1,6 @@
 /* Test endianness */
 #include "../src/config.h"
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -21,8 +21,7 @@ int main(void)
   uint16_t data_data[128];
   uint16_t c[8], d;
   int fd;
-  int we = 0;
-  int xe = 0;
+  int r = 0;
 
   memset(c, 0, 8);
   mkdir(filedir, 0777);
@@ -38,28 +37,26 @@ int main(void)
   write(fd, data_data, 256);
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_VERBOSE);
-  int ret = dirfile_alter_endianness(D, GD_BIG_ENDIAN, 0, 1);
-  int error = get_error(D);
-  int n = getdata(D, "data", 5, 0, 1, 0, GD_UINT16, c);
+  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
+  int ret = gd_alter_endianness(D, GD_BIG_ENDIAN, 0, 1);
+  int error = gd_error(D);
+  int n = gd_getdata(D, "data", 5, 0, 1, 0, GD_UINT16, c);
 
-  dirfile_close(D);
+  gd_close(D);
 
   fd = open(data, O_RDONLY);
   int i = 0;
 
   if (fd >= 0) {
     while (read(fd, &d, sizeof(uint16_t))) {
-      if (d != i * 0x102) {
-        printf("%x = %x\n", i, d);
-        xe++;
-      }
-
+      CHECKX(d, i * 0x102);
       i++;
     }
     close(fd);
-  } else
-    xe = -1;
+  } else {
+    perror("open");
+    r = 1;
+  }
 
   unlink(data);
   unlink(format);
@@ -72,31 +69,11 @@ int main(void)
 #endif
 
   for (i = 0; i < 8; ++i)
-    if (c[i] != (40 + i) * FACTOR) {
-      fprintf(stderr, "%x - %x\n", c[i], (40 + i) * FACTOR);
-      we++;
-    }
+    CHECKXi(i,c[i], (40 + i) * FACTOR);
 
-  if (error) {
-    fprintf(stderr, "1=%i\n", error);
-    return 1;
-  }
-  if (ret != 0) {
-    fprintf(stderr, "2=%i\n", ret);
-    return 1;
-  }
-  if (n != 8) {
-    fprintf(stderr, "3=%i\n", n);
-    return 1;
-  }
-  if (we != 0) {
-    fprintf(stderr, "4=%i\n", we);
-    return 1;
-  }
-  if (xe != 0) {
-    fprintf(stderr, "5=%i\n", xe);
-    return 1;
-  }
+  CHECKI(error, 0);
+  CHECKI(ret, 0);
+  CHECKI(n, 8);
 
-  return 0;
+  return r;
 }

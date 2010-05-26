@@ -192,7 +192,7 @@ void _GD_SetError(DIRFILE* D, int error, int suberror,
 
   if (D->flags & GD_VERBOSE) {
     char buffer[GD_MAX_LINE_LENGTH];
-    fprintf(stderr, PACKAGE_NAME ": %s\n", get_error_string(D, buffer,
+    fprintf(stderr, PACKAGE_NAME ": %s\n", gd_error_string(D, buffer,
           GD_MAX_LINE_LENGTH));
   }
 
@@ -200,9 +200,9 @@ void _GD_SetError(DIRFILE* D, int error, int suberror,
 }
 
 /* Return the error */
-int get_error(const DIRFILE* D)
+int gd_error(const DIRFILE* D)
 {
-  dtrace("%p", get_error);
+  dtrace("%p", D);
 
   dreturn("%i", D->error);
 
@@ -213,7 +213,7 @@ int get_error(const DIRFILE* D)
  * library error.  The message may be truncated but will be null terminated.
  * Returns buffer, or NULL if buflen < 1.
  */
-char* get_error_string(const DIRFILE* D, char* buffer, size_t buflen)
+char* gd_error_string(const DIRFILE* D, char* buffer, size_t buflen)
 {
   const char* ip;
   char* op = buffer;

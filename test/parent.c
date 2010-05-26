@@ -1,5 +1,5 @@
-/* Test get_parent_fragment */
-#include "../src/getdata.h"
+/* Test gd_get_parent_fragment */
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -19,7 +19,7 @@ int main(void)
   const char* format_data = "/INCLUDE format1\na CONST UINT8 1\n";
   const char* format1_data = "b CONST UINT8 11\n/INCLUDE format2 UINT8 11";
   const char* format2_data = "c CONST UINT8 11\n";
-  int fd;
+  int fd, r = 0;
 
   mkdir(filedir, 0777);
 
@@ -35,24 +35,18 @@ int main(void)
   write(fd, format2_data, strlen(format2_data));
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_VERBOSE);
-  int parent = get_parent_fragment(D, 2);
-  int error = get_error(D);
-  dirfile_close(D);
+  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
+  int parent = gd_get_parent_fragment(D, 2);
+  int error = gd_error(D);
+  gd_close(D);
 
   unlink(format2);
   unlink(format1);
   unlink(format);
   rmdir(filedir);
 
-  if (error) {
-    fprintf(stderr, "1=%i\n", error);
-    return 1;
-  }
-  if (parent != 1) {
-    fprintf(stderr, "2=%i\n", parent);
-    return 1;
-  }
+  CHECKI(error, 0);
+  CHECKI(parent, 1);
 
-  return 0;
+  return r;
 }

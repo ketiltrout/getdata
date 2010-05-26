@@ -1,5 +1,5 @@
 /* Attempt to read POLYNOM */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -18,7 +18,7 @@ int main(void)
   const char* format_data = "polynom POLYNOM data 3 2 1\ndata RAW UINT8 1\n";
   unsigned char c = 0;
   unsigned char data_data[256];
-  int fd;
+  int fd, r = 0;
 
   mkdir(filedir, 0777);
 
@@ -33,28 +33,19 @@ int main(void)
   write(fd, data_data, 256);
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY | GD_VERBOSE);
-  int n = getdata(D, "polynom", 5, 0, 1, 0, GD_UINT8, &c);
-  int error = get_error(D);
+  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  int n = gd_getdata(D, "polynom", 5, 0, 1, 0, GD_UINT8, &c);
+  int error = gd_error(D);
 
-  dirfile_close(D);
+  gd_close(D);
 
   unlink(data);
   unlink(format);
   rmdir(filedir);
 
-  if (error) {
-    printf("1=%i\n", error);
-    return 1;
-  }
-  if (n != 1) {
-    printf("2=%i\n", n);
-    return 1;
-  }
-  if (c != 3 + 2 * 5 + 1 * 5 * 5) {
-    printf("3=%i\n", c);
-    return 1;
-  }
+  CHECKI(error, 0);
+  CHECKI(n, 1);
+  CHECKU(c, 3 + 2 * 5 + 1 * 5 * 5);
 
-  return 0;
+  return r;
 }

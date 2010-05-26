@@ -21,6 +21,7 @@
 #include <Python.h>
 #define NO_GETDATA_LEGACY_API
 
+#define _FILE_OFFSET_BITS 64
 #undef _BSD_SOURCE
 #undef _POSIX_SOURCE
 #undef _SVID_SOURCE
@@ -63,9 +64,9 @@
 #define PYGD_CHECK_ERROR2(D,R,E) \
   do { \
     int the_error; \
-    if ((the_error = get_error(D))) { \
+    if ((the_error = gd_error(D))) { \
       char buffer[GD_MAX_LINE_LENGTH]; \
-      PyErr_SetString(gdpy_exceptions[the_error], get_error_string((D), \
+      PyErr_SetString(gdpy_exceptions[the_error], gd_error_string((D), \
             buffer, GD_MAX_LINE_LENGTH)); \
       E; \
       dreturnvoid(); \

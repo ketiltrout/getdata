@@ -1,7 +1,7 @@
 /* Attempt to write UINT8 */
 #define _LARGEFILE64_SOURCE
 
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <inttypes.h>
 #include <stdlib.h>
@@ -32,11 +32,11 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_UNENCODED | GD_VERBOSE);
-  int n = putdata64(D, "data", 5, 0, 1, 0, GD_UINT8, c);
-  int error = get_error(D);
+  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_UNENCODED | GD_VERBOSE);
+  int n = gd_putdata64(D, "data", 5, 0, 1, 0, GD_UINT8, c);
+  int error = gd_error(D);
 
-  dirfile_close(D);
+  gd_close(D);
 
   if (stat(data, &buf))
     return 1;

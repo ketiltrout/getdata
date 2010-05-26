@@ -1,5 +1,5 @@
 /* Attempt to write UINT8 with FRAMEOFFSET */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <inttypes.h>
 #include <stdlib.h>
@@ -30,29 +30,25 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_UNENCODED | GD_VERBOSE);
-  int n = putdata(D, "data", 5, 0, 1, 0, GD_UINT8, c);
-  int error = get_error(D);
+  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_UNENCODED | GD_VERBOSE);
+  int n = gd_putdata(D, "data", 5, 0, 1, 0, GD_UINT8, c);
+  int error = gd_error(D);
 
-  dirfile_close(D);
+  gd_close(D);
 
-  if (stat(data, &buf))
-    return 1;
-  if (buf.st_size != 32 * sizeof(uint8_t))
-    return 1;
+  if (stat(data, &buf)) {
+    perror("stat");
+    r = 1;
+  }
+  CHECKI(buf.st_size, 32 * sizeof(uint8_t));
 
   fd = open(data, O_RDONLY);
   i = 0;
   while (read(fd, &d, sizeof(uint8_t))) {
     if (i < 24 || i >= 32) {
-      if (d != 0) {
-        fprintf(stderr, "d[%i] = %i\n", i, d);
-        r = 1;
-      }
-    } else if (d != i + 16) {
-      fprintf(stderr, "d[%i] = %i\n", i, d);
-      r = 1;
-    }
+      CHECKUi(i,d,0);
+    } else
+      CHECKUi(i,d,i+16);
     i++;
   }
   close(fd);
@@ -61,14 +57,8 @@ int main(void)
   unlink(format);
   rmdir(filedir);
 
-  if (error) {
-    fprintf(stderr, "error = %i\n", error);
-    r = 1;
-  }
-  if (n != 8) {
-    fprintf(stderr, "n = %i\n", n);
-    r = 1;
-  }
+  CHECKI(n,8);
+  CHECKI(error, 0);
 
   return r;
 }

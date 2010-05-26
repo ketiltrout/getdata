@@ -1,5 +1,5 @@
 /* Try to read PHASE entry */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -14,7 +14,7 @@ int main(void)
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
   const char* format_data = "data PHASE in1 3\n";
-  int fd;
+  int fd, r = 0;
 
   mkdir(filedir, 0777);
 
@@ -22,28 +22,22 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY | GD_VERBOSE);
+  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
   gd_entry_t E;
 
-  int n = get_entry(D, "data", &E);
-  int error = get_error(D);
+  int n = gd_get_entry(D, "data", &E);
+  int error = gd_error(D);
 
-  dirfile_close(D);
+  gd_close(D);
   unlink(format);
   rmdir(filedir);
 
-  if (error != GD_E_OK)
-    return 1;
-  if (n)
-    return 1;
-  if (strcmp(E.field, "data"))
-    return 1;
-  if (E.field_type != GD_PHASE_ENTRY)
-    return 1;
-  if (strcmp(E.in_fields[0], "in1"))
-    return 1;
-  if (E.shift != 3)
-    return 1;
+  CHECKI(error, GD_E_OK);
+  CHECKI(n, 0);
+  CHECKS(E.field, "data");
+  CHECKX(E.field_type, GD_PHASE_ENTRY);
+  CHECKS(E.in_fields[0], "in1");
+  CHECKI(E.shift, 3);
 
   return 0;
 }

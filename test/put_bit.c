@@ -1,5 +1,5 @@
 /* Attempt to write BIT */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <inttypes.h>
 #include <stdlib.h>
@@ -19,7 +19,7 @@ int main(void)
   const char* format_data = "bit BIT data 2 3\ndata RAW UINT8 8\n";
   uint8_t c[8];
   uint8_t d = 0xA5;
-  int fd, i;
+  int fd, i, r = 0;
 
   mkdir(filedir, 0777);
 
@@ -35,25 +35,19 @@ int main(void)
     write(fd, &d, sizeof(uint8_t));
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_UNENCODED | GD_VERBOSE);
-  int n = putdata(D, "bit", 5, 0, 1, 0, GD_INT8, c);
-  int error = get_error(D);
+  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_UNENCODED | GD_VERBOSE);
+  int n = gd_putdata(D, "bit", 5, 0, 1, 0, GD_INT8, c);
+  int error = gd_error(D);
 
-  dirfile_close(D);
+  gd_close(D);
 
   fd = open(data, O_RDONLY);
   i = 0;
-  int ne = 0;
   while (read(fd, &d, sizeof(uint8_t))) {
     if (i < 40 || i >= 48) {
-      if (d != 0xA5) {
-        ne++;
-        fprintf(stderr, "%i=%2x A5\n", i, d);
-      }
-    } else if (d != (0xA1 | (i - 40) << 2)) {
-      ne++;
-      fprintf(stderr, "%i=%2x %2x\n", i, d, (0xA1 | (i - 40) << 2));
-    }
+      CHECKXi(i,d, 0xA5);
+    } else
+      CHECKXi(i,d,(0xA1 | (i - 40) << 2));
     i++;
   }
   close(fd);
@@ -62,16 +56,8 @@ int main(void)
   unlink(format);
   rmdir(filedir);
 
-  if (error) {
-    fprintf(stderr, "n=%i\n", error);
-    return 1;
-  }
-  if (n != 8) {
-    fprintf(stderr, "n=%i\n", n);
-    return 1;
-  }
-  if (ne)
-    return 1;
+  CHECKI(error, 0);
+  CHECKI(n, 8);
 
-  return 0;
+  return r;
 }

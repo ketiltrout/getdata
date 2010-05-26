@@ -1,5 +1,5 @@
 /* Try to free the strings from a MULTIPLY entry */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -22,13 +22,13 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY | GD_VERBOSE);
+  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
   gd_entry_t E;
 
-  get_entry(D, "data", &E);
-  dirfile_free_entry_strings(&E);
+  gd_get_entry(D, "data", &E);
+  gd_free_entry_strings(&E);
 
-  dirfile_close(D);
+  gd_close(D);
   unlink(format);
   rmdir(filedir);
 

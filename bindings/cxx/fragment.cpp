@@ -18,9 +18,10 @@
 // along with GetData; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 //
-
-#define __USE_LARGEFILE64
-
+#ifdef HAVE_CONFIG_H
+#include "../../src/config.h"
+#endif
+#undef GETDATA_LEGACY_API
 #include "getdata/dirfile.h"
 
 #include <stdlib.h>
@@ -33,12 +34,12 @@ Fragment::Fragment(GetData::Dirfile *dirfile, int index)
   D = dirfile;
 
   ind = index;
-  enc = (GetData::EncodingScheme)get_encoding(D->D, index);
-  end = get_endianness(D->D, index);
-  off = get_frameoffset64(D->D, index);
-  prot = get_protection(D->D, index);
-  name = strdup(get_fragmentname(D->D, index));
-  parent = (index == 0) ? -1 : get_parent_fragment(D->D, index);
+  enc = (GetData::EncodingScheme)gd_get_encoding(D->D, index);
+  end = gd_get_endianness(D->D, index);
+  off = gd_get_frameoffset(D->D, index);
+  prot = gd_get_protection(D->D, index);
+  name = strdup(gd_get_fragmentname(D->D, index));
+  parent = (index == 0) ? -1 : gd_get_parent_fragment(D->D, index);
 }
 
 Fragment::~Fragment()
@@ -48,7 +49,7 @@ Fragment::~Fragment()
 
 int Fragment::SetEncoding(GetData::EncodingScheme encoding, int recode)
 {
-  int ret = dirfile_alter_encoding(D->D, (unsigned long)encoding, ind, recode);
+  int ret = gd_alter_encoding(D->D, (unsigned long)encoding, ind, recode);
 
   if (!ret)
     enc = encoding;
@@ -58,7 +59,7 @@ int Fragment::SetEncoding(GetData::EncodingScheme encoding, int recode)
 
 int Fragment::SetEndianness(unsigned long byte_sex, int recode)
 {
-  int ret = dirfile_alter_endianness(D->D, byte_sex, ind, recode);
+  int ret = gd_alter_endianness(D->D, byte_sex, ind, recode);
 
   if (!ret)
     end = byte_sex;
@@ -68,7 +69,7 @@ int Fragment::SetEndianness(unsigned long byte_sex, int recode)
 
 int Fragment::SetFrameOffset(off_t offset, int recode)
 {
-  int ret = dirfile_alter_frameoffset64(D->D, (off64_t)offset, ind, recode);
+  int ret = gd_alter_frameoffset(D->D, offset, ind, recode);
 
   if (!ret)
     off = offset;
@@ -78,7 +79,7 @@ int Fragment::SetFrameOffset(off_t offset, int recode)
 
 int Fragment::SetProtection(int protection_level)
 {
-  int ret = dirfile_protect(D->D, protection_level, ind);
+  int ret = gd_protect(D->D, protection_level, ind);
 
   if (!ret)
     prot = protection_level;

@@ -314,12 +314,13 @@ static void _GD_FlushFragment(DIRFILE* D, int i)
   int j;
   FILE* stream;
   char buffer[GD_MAX_LINE_LENGTH];
-  char temp_file[FILENAME_MAX];
+  char *temp_file;
   char* ptr;
   struct tm now;
   int fd;
   int pretty = 0;
   size_t max_len = 0;
+  const size_t name_len = strlen(D->name);
   unsigned int u;
   mode_t mode;
   struct stat stat_buf;
@@ -333,16 +334,19 @@ static void _GD_FlushFragment(DIRFILE* D, int i)
     mode = stat_buf.st_mode;
 
   /* open a temporary file */
-  snprintf(temp_file, GD_MAX_LINE_LENGTH, "%s/format_XXXXXX", D->name);
+  temp_file = malloc(name_len + 15);
+  snprintf(temp_file, name_len + 15, "%s/format_XXXXXX", D->name);
   fd = mkstemp(temp_file);
   if (fd == -1) {
     _GD_SetError(D, GD_E_OPEN_INCLUDE, errno, NULL, 0, temp_file);
+    free(temp_file);
     dreturnvoid();
     return;
   }
   stream = fdopen(fd, "w");
   if (stream == NULL) {
     _GD_SetError(D, GD_E_OPEN_INCLUDE, errno, NULL, 0, temp_file);
+    free(temp_file);
     dreturnvoid();
     return;
   }
@@ -462,17 +466,20 @@ static void _GD_FlushFragment(DIRFILE* D, int i)
    * old format file, otherwise abort */
   if (D->error != GD_E_OK) {
     unlink(temp_file);
+    free(temp_file);
     dreturnvoid();
     return;
     /* Only assume we've synced the file if the rename succeeds */
   } else if (rename(temp_file, D->fragment[i].cname)) {
     _GD_SetError(D, GD_E_OPEN_INCLUDE, errno, NULL, 0, D->fragment[i].cname);
     unlink(temp_file);
+    free(temp_file);
     dreturnvoid();
     return;
   } else
     D->fragment[i].modified = 0;
 
+  free(temp_file);
   dreturnvoid();
 }
 
@@ -498,7 +505,7 @@ void _GD_FlushMeta(DIRFILE* D, int fragment)
   dreturnvoid();
 }
 
-int dirfile_metaflush(DIRFILE* D)
+int gd_metaflush(DIRFILE* D)
 {
   dtrace("%p", D);
 
@@ -513,7 +520,7 @@ int dirfile_metaflush(DIRFILE* D)
   return (D->error == GD_E_OK) ? 0 : -1;
 }
 
-int dirfile_flush(DIRFILE* D, const char* field_code)
+int gd_flush(DIRFILE* D, const char* field_code)
 {
   unsigned int i;
   int repr;
@@ -676,7 +683,7 @@ uint32_t _GD_FindVersion(DIRFILE *D)
   return D->av;
 }
 
-int dirfile_standards(DIRFILE *D, int vers)
+int gd_dirfile_standards(DIRFILE *D, int vers)
 {
   dtrace("%p, %i", D, vers);
 

@@ -1,5 +1,5 @@
 /* Retreiving the number of fields of a field should succeed cleanly */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -18,7 +18,7 @@ int main(void)
     "data1 RAW UINT8 1\n"
     "data2 RAW UINT8 1\n"
     "data3 RAW UINT8 1\n";
-  int fd, r = 0;
+  int fd, i, r = 0;
 
   mkdir(filedir, 0777);
 
@@ -26,36 +26,34 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY | GD_VERBOSE);
-  const char** field_list = get_field_list(D);
+  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  const char** field_list = gd_get_field_list(D);
 
-  if (get_error(D))
+  int error = gd_error(D);
+
+  CHECKI(error, 0);
+  CHECKPN(field_list);
+
+  for (i = 0; ; ++i) {
+    if (field_list[i] == NULL)
+      break;
+
+    if (strcmp(field_list[i], "data1") == 0)
+      continue;
+    else if (strcmp(field_list[i], "data2") == 0)
+      continue;
+    else if (strcmp(field_list[i], "data3") == 0)
+      continue;
+    else if (strcmp(field_list[i], "INDEX") == 0)
+      continue;
+
+    fprintf(stderr, "field_list[%i] = \"%s\"\n", i, field_list[i]);
     r = 1;
+  }
 
-  if (field_list == NULL)
-    r = 1;
+  CHECKI(i, 4);
 
-  if (!r)
-    for (fd = 0; ; ++fd) {
-      if (field_list[fd] == NULL)
-        break;
-
-      if (strcmp(field_list[fd], "data1") == 0)
-        continue;
-      else if (strcmp(field_list[fd], "data2") == 0)
-        continue;
-      else if (strcmp(field_list[fd], "data3") == 0)
-        continue;
-      else if (strcmp(field_list[fd], "INDEX") == 0)
-        continue;
-
-      r = 1;
-    }
-
-  if (fd != 4)
-    r = 1;
-
-  dirfile_close(D);
+  gd_close(D);
   unlink(format);
   rmdir(filedir);
 

@@ -1,5 +1,5 @@
 /* Attempt to flush meta data */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <inttypes.h>
 #include <stdlib.h>
@@ -18,13 +18,13 @@ int main(void)
   struct stat buf;
   int r = 0;
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_CREAT | GD_TRUNC |
+  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_TRUNC |
       GD_VERBOSE);
-  dirfile_add_raw(D, "new", GD_UINT8, 2, 0);
-  dirfile_metaflush(D);
-  int error = get_error(D);
+  gd_add_raw(D, "new", GD_UINT8, 2, 0);
+  gd_metaflush(D);
+  int error = gd_error(D);
 
-  dirfile_close(D);
+  gd_close(D);
 
   if (stat(format, &buf))
     r =  1;

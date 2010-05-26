@@ -1,5 +1,5 @@
 /* Opening an dirfile with no read permission should fail cleanly */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -12,16 +12,18 @@ int main(void)
 {
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
+  int r = 0;
 
   mkdir(filedir, 0777);
   close(open(format, O_CREAT | O_EXCL | O_WRONLY, 0000));
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY);
-  int error = get_error(D);
-  dirfile_close(D);
+  DIRFILE* D = gd_open(filedir, GD_RDONLY);
+  int error = gd_error(D);
+  gd_close(D);
 
   unlink(format);
   rmdir(filedir);
 
-  return (error != GD_E_OPEN);
+  CHECKI(error, GD_E_OPEN);
+  return r;
 }

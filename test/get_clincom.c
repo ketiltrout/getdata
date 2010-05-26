@@ -1,5 +1,5 @@
 /* Attempt to read LINCOM */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <complex.h>
 #include <stdlib.h>
@@ -19,7 +19,7 @@ int main(void)
   const char* format_data = "lincom LINCOM 2 data 2;3 3;2 data 0;1 0\ndata RAW UINT8 1\n";
   double complex c = 0;
   unsigned char data_data[256];
-  int fd;
+  int fd, r = 0;
 
   mkdir(filedir, 0777);
 
@@ -34,11 +34,11 @@ int main(void)
   write(fd, data_data, 256);
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY | GD_VERBOSE);
-  int n = getdata(D, "lincom", 5, 0, 1, 0, GD_COMPLEX128, &c);
-  int error = get_error(D);
+  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  int n = gd_getdata(D, "lincom", 5, 0, 1, 0, GD_COMPLEX128, &c);
+  int error = gd_error(D);
 
-  dirfile_close(D);
+  gd_close(D);
 
   unlink(data);
   unlink(format);
@@ -47,14 +47,9 @@ int main(void)
   const double complex v = 3 + _Complex_I * 2 + (2 + _Complex_I * 3) * 5
     + _Complex_I * 5;
 
-  if (error)
-    return 1;
-  if (n != 1)
-    return 1;
-  if (c != v) {
-    fprintf(stderr, "%g;%g = %g;%g\n", creal(c), cimag(c), creal(v), cimag(v));
-    return 1;
-  }
+  CHECKI(error, 0);
+  CHECKI(n, 1);
+  CHECKC(c, v);
 
-  return 0;
+  return r;
 }

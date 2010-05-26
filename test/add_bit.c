@@ -1,5 +1,5 @@
 /* Add a BIT field */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -17,46 +17,29 @@ int main(void)
   int r = 0;
   gd_entry_t e;
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
-  dirfile_add_bit(D, "new", "input", 1, 1, 0);
-  int error = get_error(D);
+  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
+  gd_add_bit(D, "new", "input", 1, 1, 0);
+  int error = gd_error(D);
 
   /* check */
-  get_entry(D, "new", &e);
-  if (get_error(D))
+  gd_get_entry(D, "new", &e);
+  if (gd_error(D))
     r = 1;
   else {
-    if (e.field_type != GD_BIT_ENTRY) {
-      fprintf(stderr, "field_type = %i\n", e.field_type);
-      r = 1;
-    }
-    if (strcmp(e.in_fields[0], "input")) {
-      fprintf(stderr, "in_field = %s\n", e.in_fields[0]);
-      r = 1;
-    }
-    if (e.fragment_index != 0) {
-      fprintf(stderr, "fragment_index = %i\n", e.fragment_index);
-      r = 1;
-    }
-    if (e.bitnum != 1) {
-      fprintf(stderr, "bitnum = %i\n", e.bitnum);
-      r = 1;
-    }
-    if (e.numbits != 1) {
-      fprintf(stderr, "numbits = %i\n", e.numbits);
-      r = 1;
-    }
-    dirfile_free_entry_strings(&e);
+    CHECKI(e.field_type, GD_BIT_ENTRY);
+    CHECKS(e.in_fields[0], "input");
+    CHECKI(e.fragment_index, 0);
+    CHECKI(e.bitnum, 1);
+    CHECKI(e.numbits, 1);
+    gd_free_entry_strings(&e);
   }
 
-
-  dirfile_close(D);
+  gd_close(D);
 
   unlink(format);
   rmdir(filedir);
 
-  if (r)
-    return 1;
+  CHECKI(error, GD_E_OK);
 
-  return (error != GD_E_OK);
+  return r;
 }

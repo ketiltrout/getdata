@@ -1,0 +1,141 @@
+.\" gd_alter_frameoffset.3.  The gd_alter_frameoffset man page.
+.\"
+.\" @configure_input@
+.\"
+.\" (C) 2008, 2010 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_alter_frameoffset 3 "25 May 2010" "Version 0.7.0" "GETDATA"
+.SH NAME
+gd_alter_frameoffset \(em modify the starting frame of fields in a dirfile
+.SH SYNOPSIS
+.B #include <getdata.h>
+.HP
+.nh
+.ad l
+.BI "int gd_alter_frameoffset(DIRFILE *" dirfile ", off_t " offset ,
+.BI "int " fragment_index ", int " recode );
+.hy
+.ad n
+.SH DESCRIPTION
+The
+.BR gd_alter_frameoffset ()
+function sets the frame offset of the format file fragment specified by
+.I fragment_index
+to
+.I offset
+in the dirfile(5) database specified by
+.IR dirfile .
+The frame offset of a fragment indicate the frame number of the first sample
+of data stored in binary files associated with
+.B RAW
+fields defined in the specified fragment.  The frame offset of a fragment
+containing no
+.B RAW
+fields is ignored.  The frame offset may not be negative.
+
+The
+.I dirfile
+argument must point to a valid DIRFILE object previously created by a call to
+.BR gd_open (3).
+
+In addition to being simply a valid fragment index,
+.I fragment_index
+may also be the special value
+.BR GD_ALL_FRAGMENTS ,
+which indicates that the frame offset of all fragments in the database should
+be changed.
+
+If the
+.I recode
+argument is non-zero, this call will shift the binary data of affected
+.B RAW
+fields to account for the change in frame offset.  If the new frame offset
+is larger than the old frame offset, this will result in permanent deletion of
+data from the database.  If the new frame offset is smaller than the old frame
+offset, the binary file will be padded at the front with zeroes.  If
+.I recode
+is zero, affected binary files are left untouched.
+
+.SH RETURN VALUE
+Upon successful completion,
+.BR gd_alter_frameoffset ()
+returns zero.  On error, it returns -1 and sets the dirfile error to a non-zero
+error value.  Possible error values are:
+.TP 8
+.B GD_E_ACCMODE
+The specified dirfile was opened read-only.
+.TP
+.B GD_E_ALLOC
+The library was unable to allocate memory.
+.TP
+.B GD_E_BAD_DIRFILE
+The supplied dirfile was invalid.
+.TP
+.B GD_E_BAD_INDEX
+The supplied index was out of range.
+.TP
+.B GD_E_PROTECTED
+The metadata of the specified format file fragment was protected from change,
+or the binary data of the fragment was protected from change and binary file
+shifting was requested.
+.TP
+.B GD_E_RANGE
+The supplied offset was less than zero.
+.TP
+.B GD_E_RAW_IO
+An I/O error occurred while attempting to shift a binary file.
+.TP
+.B GD_E_UNCLEAN_DB
+An error occurred while moving the shifted file into place.  As a result, the
+database may be in an unclean state.  See the
+.B NOTES
+section below for recovery instructions.  In this case, the dirfile will be
+flagged as invalid, to prevent further database corruption.  It should be
+immediately closed.
+.TP
+.B GD_E_UNKNOWN_ENCODING
+The encoding scheme of the fragment is unknown.
+.TP
+.B GD_E_UNSUPPORTED
+The encoding scheme of the fragment does not support binary file shifting.
+.P
+The dirfile error may be retrieved by calling
+.BR gd_error (3).
+A descriptive error string for the last error encountered can be obtained from
+a call to
+.BR gd_error_string (3).
+.SH NOTES
+A binary file shift occurs out-of-place.  As a result, sufficient space
+must be present on the filesystem for the binary files of all
+.B RAW
+fields in the fragment both before and after translation.  If all fragments
+are updated by specifying
+.BR GD_ALL_FRAGMENTS ,
+the shifting occurs one fragment at a time.
+
+An error code of
+.B GD_E_UNCLEAN_DB
+indicates a system error occurred while moving the shifted binary data into
+place or when deleting the old data.  If this happens, the database may be left
+in an unclean state.  The caller should check the filesystem directly to
+ascertain the state of the dirfile data before continuing.  For recovery
+instructions, see the file
+@absolute_docdir@/unclean_database_recovery.txt.
+.SH SEE ALSO
+.BR gd_open (3),
+.BR gd_error (3),
+.BR gd_error_string (3),
+.BR gd_get_frameoffset (3),
+.BR dirfile (5),
+.BR dirfile-format (5)

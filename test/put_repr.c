@@ -1,5 +1,5 @@
 /* Attempt to write COMPLEX64 */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <inttypes.h>
 #include <stdlib.h>
@@ -31,24 +31,18 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_UNENCODED);
-  int n = putdata(D, "data.r", 5, 0, 1, 0, GD_FLOAT32, c);
-  int error = get_error(D);
+  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_UNENCODED);
+  int n = gd_putdata(D, "data.r", 5, 0, 1, 0, GD_FLOAT32, c);
+  int error = gd_error(D);
 
-  dirfile_close(D);
+  gd_close(D);
 
   unlink(data);
   unlink(format);
   rmdir(filedir);
 
-  if (error != GD_E_BAD_REPR) {
-    r = 1;
-    fprintf(stderr, "error=%i\n", error);
-  }
-  if (n != 0) {
-    r = 1;
-    fprintf(stderr, "n=%i\n", n);
-  }
+  CHECKI(error, GD_E_BAD_REPR);
+  CHECKI(n,0);
 
   return r;
 }

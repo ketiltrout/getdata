@@ -93,7 +93,7 @@ char* _GD_ValidateField(const gd_entry_t* parent, const char* field_code,
   return ptr;
 }
 
-int dirfile_rename(DIRFILE *D, const char *old_code, const char *new_name,
+int gd_rename(DIRFILE *D, const char *old_code, const char *new_name,
     int move_data)
 {
   gd_entry_t *E, *Q;

@@ -66,6 +66,10 @@ ENCODINGS_LEFT=
 
 echo "*** Checking GetData configuration"
 echo
+
+dnl Build/Host triplets
+AC_CANONICAL_HOST
+
 dnl Legacy API
 AC_ARG_ENABLE(legacy-api, AS_HELP_STRING([--disable-legacy-api],
               [don't include the legacy API wrapper in the library]),
@@ -184,6 +188,13 @@ fi
 
 AC_MSG_CHECKING([whether to include the Fortran 77 bindings])
 AC_MSG_RESULT([$make_f77bindings])
+
+dnl DL library path munging for test suite
+case "${host}" in
+  *-apple-darwin*) DL_LIBRARY_PATH="DYLD_LIBRARY_PATH" ;;
+  *) DL_LIBRARY_PATH="LD_LIBRARY_PATH" ;;
+esac
+AC_SUBST(DL_LIBRARY_PATH)
 
 dnl Python bindings
 AC_ARG_ENABLE(python, AS_HELP_STRING([--disable-python],
@@ -348,17 +359,6 @@ if test "x$make_f77bindings" != "xno"; then
   fi
   AC_F77_WRAPPERS
 fi
-
-dnl Is this darwin?
-AC_CACHE_CHECK([whether the compiler defines SYS_DARWIN], [gd_cv_sys_darwin], [
-AC_COMPILE_IFELSE(
-[AC_LANG_SOURCE(
-[[#ifndef SYS_DARWIN
-  not darwin
-#endif
-]])],
-[gd_cv_sys_darwin="yes"],
-[gd_cv_sys_darwin="no"])])
 
 dnl libraries
 echo
@@ -585,9 +585,9 @@ if test "x$make_pybindings" = "xyes"; then
 fi
 AC_CONFIG_FILES([doc/Makefile])
 AC_CONFIG_FILES([man/Makefile])
-AC_CONFIG_FILES([man/dirfile_alter_encoding.3])
-AC_CONFIG_FILES([man/dirfile_alter_endianness.3])
-AC_CONFIG_FILES([man/dirfile_alter_frameoffset.3])
+AC_CONFIG_FILES([man/gd_alter_encoding.3])
+AC_CONFIG_FILES([man/gd_alter_endianness.3])
+AC_CONFIG_FILES([man/gd_alter_frameoffset.3])
 AC_CONFIG_FILES([src/Makefile])
 AC_CONFIG_HEADERS([src/getdata.h], [chmod a-w src/getdata.h])
 AC_CONFIG_FILES([src/getdata.pc])
@@ -607,8 +607,7 @@ AM_CONDITIONAL(GNU_FC_COMPILER, [test "x$gd_cv_fc_compiler_intel" == "xno"]dnl
 AM_CONDITIONAL(INTEL_F77_COMPILER,
                [test "x$gd_cv_f77_compiler_intel" == "xyes"])
 AM_CONDITIONAL(INTEL_FC_COMPILER, [test "x$gd_cv_fc_compiler_intel" == "xyes"])
-AM_CONDITIONAL(LFS_TRANSITIONAL_API,
-               [test "x$have_off64_t" = "xyes" -a "x$gd_cv_sys_darwin" = "xno"])
+AM_CONDITIONAL(LFS_TRANSITIONAL_API, [test "x$have_off64_t" = "xyes"])
 AM_CONDITIONAL(INCLUDE_LEGACY_API, [test "x$include_legacy_api" != "xno"])
 AM_CONDITIONAL(MAKE_CHECKDIRFILE, [test "x$make_checkdirfile" = "xbuild"])
 AM_CONDITIONAL(MAKE_CXXBINDINGS, [test "x$make_cxxbindings" = "xyes"])

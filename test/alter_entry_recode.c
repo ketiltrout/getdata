@@ -1,6 +1,5 @@
 /* Test field modifying */
-#include "../src/getdata.h"
-
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -20,7 +19,7 @@ int main(void)
   const char* format_data = "data RAW UINT8 8\n";
   unsigned char data_data[256];
   uint16_t d;
-  int fd, i, we = 0;
+  int fd, i, r = 0;
   gd_entry_t E;
 
   mkdir(filedir, 0777);
@@ -36,52 +35,37 @@ int main(void)
   write(fd, data_data, 256);
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDWR | GD_VERBOSE);
-  get_entry(D, "data", &E);
+  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
+  gd_get_entry(D, "data", &E);
   E.data_type = GD_UINT16;
   E.spf = 11;
-  int ret = dirfile_alter_entry(D, "data", &E, 1);
-  int error = get_error(D);
-  off_t n = get_nframes(D);
+  int ret = gd_alter_entry(D, "data", &E, 1);
+  int error = gd_error(D);
+  off_t n = gd_get_nframes(D);
 
-  dirfile_close(D);
+  gd_close(D);
 
   fd = open(data, O_RDONLY);
   i = 0;
 
   if (fd >= 0) {
     while (read(fd, &d, sizeof(uint16_t))) {
-      if (d != i * 8 / 11) {
-        printf("%4x = %4x\n", i * 8 / 11, d);
-        we++;
-      }
-
+      CHECKX(d, i * 8 / 11);
       i++;
     }
     close(fd);
-  } else
-    we = -1;
+  } else {
+    perror("open");
+    r = 1;
+  }
 
   unlink(data);
   unlink(format);
   rmdir(filedir);
 
-  if (error) {
-    fprintf(stderr, "1=%i\n", error);
-    return 1;
-  }
-  if (n != 32) {
-    fprintf(stderr, "2=%lli\n", (long long)n);
-    return 1;
-  }
-  if (ret != 0) {
-    fprintf(stderr, "3=%i\n", ret);
-    return 1;
-  }
-  if (we != 0) {
-    fprintf(stderr, "4=%i\n", we);
-    return 1;
-  }
+  CHECKI(error, 0);
+  CHECKI(n, 32);
+  CHECKI(ret, 0);
 
-  return 0;
+  return r;
 }

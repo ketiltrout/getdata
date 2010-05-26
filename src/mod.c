@@ -42,9 +42,9 @@ static unsigned int max(unsigned int A, unsigned int B)
 /*  sold snew alit 
  * 0a N    N0   0     -> do nothing         ()
  * 1  N    N0   1     -> set lout           ()
- * 2  Na   a    01    -> set sout           (      free scalar; need recalc)
- * 3  a    N    0     -> recalc, set sout   (      free scalar)
- * 4  a    N    1     -> set sout, set lout (      free scalar)
+ * 2  Na   a    01    -> set sout           (free scalar; need recalc)
+ * 3  a    N    0     -> recalc, set sout   (free scalar)
+ * 4  a    N    1     -> set sout, set lout (free scalar)
  * 0b a    0    01    -> do nothing         ()
  */
 static int _GD_AlterScalar(DIRFILE* D, int alter_literal, gd_type_t type,
@@ -71,7 +71,7 @@ static int _GD_AlterScalar(DIRFILE* D, int alter_literal, gd_type_t type,
          *    get_constant. */
         r = GD_AS_FREE_SCALAR | GD_AS_MODIFIED;
         if (!calculated)
-          error = get_constant(D, *sout, GD_INT64, lout);
+          error = gd_get_constant(D, *sout, GD_INT64, lout);
         *sout = NULL;
       }
     } else if (alter_literal) {
@@ -186,7 +186,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
         void *buffer2;
 
         if (j & GD_AS_NEED_RECALC)
-          if (get_constant(D, Q.scalar[0], GD_UINT16, &Q.spf))
+          if (gd_get_constant(D, Q.scalar[0], GD_UINT16, &Q.spf))
             break;
 
         const off64_t nf = BUFFER_SIZE / max(E->e->size, GD_SIZE(Q.data_type)) /
@@ -604,7 +604,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
   return 0;
 }
 
-int dirfile_alter_entry(DIRFILE* D, const char* field_code,
+int gd_alter_entry(DIRFILE* D, const char* field_code,
     const gd_entry_t *entry, int move)
 {
   dtrace("%p, \"%s\", %p, %i", D, field_code, entry, move);
@@ -631,8 +631,8 @@ int dirfile_alter_entry(DIRFILE* D, const char* field_code,
   return ret;
 }
 
-int dirfile_alter_raw(DIRFILE *D, const char *field_code, gd_type_t data_type,
-    gd_spf_t spf, int move)
+int gd_alter_raw(DIRFILE *D, const char *field_code,
+    gd_type_t data_type, gd_spf_t spf, int move)
 {
   gd_entry_t N;
 
@@ -658,7 +658,7 @@ int dirfile_alter_raw(DIRFILE *D, const char *field_code, gd_type_t data_type,
   return ret;
 }
 
-int dirfile_alter_lincom(DIRFILE* D, const char* field_code, int n_fields,
+int gd_alter_lincom(DIRFILE* D, const char* field_code, int n_fields,
     const char** in_fields, const double* m, const double* b)
 {
   gd_entry_t N;
@@ -725,7 +725,7 @@ int dirfile_alter_lincom(DIRFILE* D, const char* field_code, int n_fields,
   return ret;
 }
 
-int dirfile_alter_clincom(DIRFILE* D, const char* field_code, int n_fields,
+int gd_alter_clincom(DIRFILE* D, const char* field_code, int n_fields,
     const char** in_fields, const double complex* cm, const double complex* cb)
 {
   gd_entry_t N;
@@ -792,8 +792,8 @@ int dirfile_alter_clincom(DIRFILE* D, const char* field_code, int n_fields,
   return ret;
 }
 
-int dirfile_alter_linterp(DIRFILE* D, const char* field_code,
-    const char* in_field, const char* table, int move)
+int gd_alter_linterp(DIRFILE* D, const char* field_code, const char* in_field,
+    const char* table, int move)
 {
   gd_entry_t N;
 
@@ -817,7 +817,7 @@ int dirfile_alter_linterp(DIRFILE* D, const char* field_code,
   return ret;
 }
 
-int dirfile_alter_bit(DIRFILE* D, const char* field_code, const char* in_field,
+int gd_alter_bit(DIRFILE* D, const char* field_code, const char* in_field,
     gd_bit_t bitnum, gd_bit_t numbits)
 {
   gd_entry_t N;
@@ -845,7 +845,7 @@ int dirfile_alter_bit(DIRFILE* D, const char* field_code, const char* in_field,
   return ret;
 }
 
-int dirfile_alter_sbit(DIRFILE* D, const char* field_code, const char* in_field,
+int gd_alter_sbit(DIRFILE* D, const char* field_code, const char* in_field,
     gd_bit_t bitnum, gd_bit_t numbits)
 {
   gd_entry_t N;
@@ -873,8 +873,8 @@ int dirfile_alter_sbit(DIRFILE* D, const char* field_code, const char* in_field,
   return ret;
 }
 
-int dirfile_alter_multiply(DIRFILE* D, const char* field_code,
-    const char* in_field1, const char* in_field2)
+int gd_alter_multiply(DIRFILE* D, const char* field_code, const char* in_field1,
+    const char* in_field2)
 {
   gd_entry_t N;
 
@@ -897,8 +897,8 @@ int dirfile_alter_multiply(DIRFILE* D, const char* field_code,
   return ret;
 }
 
-int dirfile_alter_phase(DIRFILE* D, const char* field_code,
-    const char* in_field, gd_shift_t shift)
+int gd_alter_phase(DIRFILE* D, const char* field_code, const char* in_field,
+    gd_shift_t shift)
 {
   gd_entry_t N;
 
@@ -922,8 +922,7 @@ int dirfile_alter_phase(DIRFILE* D, const char* field_code,
   return ret;
 }
 
-int dirfile_alter_const(DIRFILE* D, const char* field_code,
-    gd_type_t const_type)
+int gd_alter_const(DIRFILE* D, const char* field_code, gd_type_t const_type)
 {
   gd_entry_t N;
 
@@ -945,7 +944,7 @@ int dirfile_alter_const(DIRFILE* D, const char* field_code,
   return ret;
 }
 
-int dirfile_alter_polynom(DIRFILE* D, const char* field_code, int poly_ord,
+int gd_alter_polynom(DIRFILE* D, const char* field_code, int poly_ord,
     const char* in_field, const double* a)
 {
   gd_entry_t N;
@@ -1001,7 +1000,7 @@ int dirfile_alter_polynom(DIRFILE* D, const char* field_code, int poly_ord,
   return ret;
 }
 
-int dirfile_alter_cpolynom(DIRFILE* D, const char* field_code, int poly_ord,
+int gd_alter_cpolynom(DIRFILE* D, const char* field_code, int poly_ord,
     const char* in_field, const double complex* ca)
 {
   gd_entry_t N;
@@ -1057,7 +1056,7 @@ int dirfile_alter_cpolynom(DIRFILE* D, const char* field_code, int poly_ord,
   return ret;
 }
 
-int dirfile_alter_spec(DIRFILE* D, const char* line, int move)
+int gd_alter_spec(DIRFILE* D, const char* line, int move)
 {
   char instring[GD_MAX_LINE_LENGTH];
   char outstring[GD_MAX_LINE_LENGTH];
@@ -1132,8 +1131,7 @@ int dirfile_alter_spec(DIRFILE* D, const char* line, int move)
   return ret;
 }
 
-int dirfile_malter_spec(DIRFILE* D, const char* line, const char* parent,
-    int move)
+int gd_malter_spec(DIRFILE* D, const char* line, const char* parent, int move)
 {
   char instring[GD_MAX_LINE_LENGTH];
   char outstring[GD_MAX_LINE_LENGTH];

@@ -1,0 +1,61 @@
+.\" gd_dirfilename.3.  The dirfilename man page.
+.\"
+.\" (C) 2008, 2010 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_dirfilename 3 "25 May 2010" "Version 0.7.0" "GETDATA"
+.SH NAME
+gd_dirfilename \(em retrieve the name of a dirfile
+.SH SYNOPSIS
+.B #include <getdata.h>
+.HP
+.nh
+.ad l
+.BI "const char *gd_dirfilename(const DIRFILE *" dirfile );
+.hy
+.ad n
+.SH DESCRIPTION
+The
+.BR gd_dirfilename ()
+function queries a dirfile(5) database specified by
+.I dirfile
+and returns its name.  The name of a dirfile is the pathname passed to
+.BR gd_cbopen ()
+or
+.BR gd_open ()
+when the dirfile was opened.
+
+The 
+.I dirfile
+argument must point to a valid DIRFILE object previously created by a call to
+.BR gd_open (3).
+
+.SH RETURN VALUE
+Upon successful completion,
+.BR gd_dirfilename ()
+returns a pointer to a constant string containing the pathname of the dirfile.
+On error, 
+.BR gd_dirfilename ()
+returns NULL and sets the dirfile error to a non-zero value.  Possible error
+values are:
+.TP 8
+.B GD_E_BAD_DIRFILE
+The supplied dirfile was invalid.
+.P
+The dirfile error may be retrieved by calling
+.BR gd_error (3).
+A descriptive error string for the last error encountered can be obtained from
+a call to
+.BR gd_error_string (3).
+.SH SEE ALSO
+.BR gd_cbopen (3)

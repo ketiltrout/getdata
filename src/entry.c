@@ -105,7 +105,7 @@ void _GD_FreeE(gd_entry_t* entry, int priv)
   return;
 }
 
-gd_entry_t* dirfile_free_entry_strings(gd_entry_t* entry)
+gd_entry_t* gd_free_entry_strings(gd_entry_t* entry)
 {
   dtrace("%p", entry);
 
@@ -230,7 +230,7 @@ int _GD_CalculateEntry(DIRFILE* D, gd_entry_t* E)
   return E->e->calculated;
 }
 
-const char* get_raw_filename(DIRFILE* D, const char* field_code_in)
+const char* gd_get_raw_filename(DIRFILE* D, const char* field_code_in)
 {
   int repr;
   char* field_code;
@@ -282,7 +282,7 @@ const char* get_raw_filename(DIRFILE* D, const char* field_code_in)
   return E->e->file[0].name;
 }
 
-int get_entry(DIRFILE* D, const char* field_code_in, gd_entry_t* entry)
+int gd_get_entry(DIRFILE* D, const char* field_code_in, gd_entry_t* entry)
 {
   int i, repr;
   gd_entry_t *E;
@@ -378,7 +378,7 @@ int get_entry(DIRFILE* D, const char* field_code_in, gd_entry_t* entry)
   return 0;
 }
 
-gd_entype_t get_entry_type(DIRFILE* D, const char* field_code_in)
+gd_entype_t gd_get_entry_type(DIRFILE* D, const char* field_code_in)
 {
   gd_entry_t* E;
   char* field_code;
@@ -409,7 +409,7 @@ gd_entype_t get_entry_type(DIRFILE* D, const char* field_code_in)
   return E->field_type;
 }
 
-int get_fragment_index(DIRFILE* D, const char* field_code_in)
+int gd_get_fragment_index(DIRFILE* D, const char* field_code_in)
 {
   gd_entry_t* E;
   char* field_code;
@@ -440,7 +440,7 @@ int get_fragment_index(DIRFILE* D, const char* field_code_in)
   return E->fragment_index;
 }
 
-int dirfile_validate(DIRFILE *D, const char *field_code_in)
+int gd_validate(DIRFILE *D, const char *field_code_in)
 {
   int i, repr;
   gd_entry_t* E;

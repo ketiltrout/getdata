@@ -1,5 +1,5 @@
 /* The SPF of a lincom should equal the SPF of the first field */
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -17,7 +17,7 @@ int main(void)
     "in1 RAW UINT8 11\n"
     "in2 RAW UINT8 13\n"
     "lincom LINCOM 2 in1 1 0 in2 1 0\n";
-  int fd;
+  int fd, r = 0;
 
   mkdir(filedir, 0777);
 
@@ -25,12 +25,13 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY | GD_VERBOSE);
-  unsigned int spf = get_spf(D, "lincom");
-  dirfile_close(D);
+  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  unsigned int spf = gd_get_spf(D, "lincom");
+  gd_close(D);
 
   unlink(format);
   rmdir(filedir);
 
-  return (spf != 11);
+  CHECKI(spf,11);
+  return r;
 }

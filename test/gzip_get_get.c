@@ -1,6 +1,6 @@
 /* Attempt to read UINT8 */
 #include "../src/config.h"
-#include "../src/getdata.h"
+#include "test.h"
 
 #include <inttypes.h>
 #include <stdlib.h>
@@ -25,7 +25,7 @@ int main(void)
   uint16_t c1[8], c2[8];
   char command[4096];
   uint16_t data_data[256];
-  int fd, i;
+  int fd, i, r = 0;
 
   memset(c1, 0, 16);
   memset(c2, 0, 16);
@@ -47,39 +47,29 @@ int main(void)
   if (system(command))
     return 1;
 
-  DIRFILE* D = dirfile_open(filedir, GD_RDONLY | GD_VERBOSE);
-  int n1 = getdata(D, "data", 5, 0, 1, 0, GD_UINT16, c1);
-  int error1 = get_error(D);
-  dirfile_close(D);
+  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  int n1 = gd_getdata(D, "data", 5, 0, 1, 0, GD_UINT16, c1);
+  int error1 = gd_error(D);
+  gd_close(D);
 
-  D = dirfile_open(filedir, GD_RDONLY | GD_VERBOSE);
-  int n2 = getdata(D, "data", 5, 0, 1, 0, GD_UINT16, c2);
-  int error2 = get_error(D);
-  dirfile_close(D);
+  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  int n2 = gd_getdata(D, "data", 5, 0, 1, 0, GD_UINT16, c2);
+  int error2 = gd_error(D);
+  gd_close(D);
 
   unlink(gzipdata);
   unlink(format);
   rmdir(filedir);
 
-  if (error1)
-    return 1;
-  if (error2)
-    return 1;
-  if (n1 != 8) {
-    printf("n1 = %i\n", n1);
-    return 1;
-  }
-  if (n2 != 8) {
-    printf("n2 = %i\n", n2);
-    return 1;
-  }
+  CHECKI(error1, 0);
+  CHECKI(error2, 0);
+  CHECKI(n1, 8);
+  CHECKI(n2, 8);
   for (i = 0; i < 8; ++i) {
-    if (c1[i] != 40 + i)
-      return 1;
-    if (c2[i] != 40 + i)
-      return 1;
+    CHECKUi(i,c1[i], 40 + i);
+    CHECKUi(i,c2[i], 40 + i);
   }
 
-  return 0;
+  return r;
 #endif
 }

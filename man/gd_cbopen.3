@@ -1,0 +1,526 @@
+.\" gd_cbopen.3.  The gd_cbopen man page.
+.\"
+.\" (C) 2008, 2009, 2010 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_cbopen 3 "25 May 2010" "Version 0.7.0" "GETDATA"
+.SH NAME
+gd_cbopen, gd_open \(em open or create a dirfile
+.SH SYNOPSIS
+.B #include <getdata.h>
+.HP
+.nh
+.ad l
+.BI "DIRFILE* gd_cbopen(const char *" dirfilename ", unsigned long"
+.IB flags ", gd_parser_callback_t " sehandler ", void *" extra );
+.HP
+.BI "DIRFILE* gd_open(const char *" dirfilename ", unsigned long " flags );
+.hy
+.ad n
+.SH DESCRIPTION
+The
+.BR gd_cbopen ()
+function opens or creates the dirfile specified by
+.IR dirfilename ,
+returning a DIRFILE object associated with it.  Opening a dirfile will cause the
+library to read and parse the dirfile's format file (see
+.BR dirfile-format (5)).
+
+If not NULL,
+.I sehandler
+should be a pointer to a function which will be called whenever a syntax error
+is encountered during parsing the format file.  Specify NULL for this parameter
+if no callback function is to be used.  The caller may use this function
+to correct the error or modify the error handling of the format file parser.
+See
+.B The Callback Function
+section below for details on this function.  The
+.I extra
+argument allows the caller to pass data to the callback function.  The pointer
+will be passed to the callback function verbatim.
+
+The
+.BR gd_open ()
+function is equivalent to
+.BR gd_cbopen (),
+with
+.I sehandler
+and
+.I extra
+set to NULL.
+
+The 
+.I flags
+argument should include one of the
+.IR "access modes" :
+.B GD_RDONLY
+(read-only) or 
+.BR GD_RDWR
+(read-write), and may also contain zero or more of the following flags,
+bitwise-or'd together:
+.TP
+.B GD_BIG_ENDIAN
+Specifies that raw data on disk is stored as big-endian data (most significant
+byte first).  Specifying this flag along with the contradictory
+.BR GD_LITTLE_ENDIAN 
+will cause the library to assume that the endianness of the data is opposite to
+that of the native architecture.
+
+This flag is ignored completely if an
+.B ENDIAN
+directive occurs in the dirfile format file, unless
+.B GD_FORCE_ENDIAN
+is also specified.
+.TP
+.B GD_CREAT
+An empty dirfile will be created, if one does not already exist.  This will
+create both the dirfile directory and an empty format file.  The directory will
+have have mode
+.BR S_IRWXU " | " S_IRWXG " | "  S_IRWXO 
+(0777), modified by the caller's umask value (see
+.BR umask (2)).
+The format file will have mode
+.BR S_IRUSR " | " S_IWUSR " | "  S_IRGRP " | "  S_IWGRP " | " S_IROTH " | " S_IWOTH
+(0666), also modified by the caller's umask.
+
+The owner of the dirfile directory and format file will be the effective user ID
+of the caller.  Group ownership follows the rules outlined in
+.BR mkdir (2).
+.TP
+.B GD_EXCL
+Ensure that this call creates a dirfile: when specified along with
+.BR GD_CREAT ,
+the call will fail if the dirfile specified by
+.I dirfilename
+already exists.  Behaviour of this flag is undefined if
+.B GD_CREAT
+is not specified.  This flag suffers from all the limitations of the
+.B O_EXCL
+flag as indicated in
+.BR open (2).
+.TP
+.B GD_FORCE_ENCODING
+Specifies that
+.B ENCODING
+directives (see
+.BR dirfile-format (5))
+found in the dirfile format file should be ignored.  The encoding scheme
+specified in
+.I flags
+will be used instead (see below).
+.TP
+.B GD_FORCE_ENDIAN
+Specifies that
+.B ENDIAN
+directives (see
+.BR dirfile-format (5))
+found in the dirfile format file should be ignored.  When specified with one of
+.BR GD_BIG_ENDIAN " or " GD_LITTLE_ENDIAN ,
+the endianness specified will be assumed.  If this flag is specified with
+neither of those flags, the dirfile will be assumed to have the endianness of
+the native architecture.
+.TP
+.B GD_IGNORE_DUPS
+If the dirfile format metadata specifies more than one field with the same name,
+all but one of them will be ignored by the parser.  Without this flag, parsing
+would fail with the
+.B GD_E_FORMAT 
+error, possibly resulting in invocation of the registered callback function.
+Which of the duplicate fields is kept is not specified.  As a result,
+this flag is typically only useful in the case where identical copies of a
+field specification line are present.
+
+No indication is provided to indicate whether a duplicate field has been
+discarded.  If finer grained control is required, the caller should handle
+.B GD_E_FORMAT_DUPLICATE
+suberrors itself with an appropriate callback function.
+.TP
+.B GD_LITTLE_ENDIAN
+Specifies that raw data on disk is stored as little-endian data (least
+significant byte first).  Specifying this flag along with the contradictory
+.BR GD_BIG_ENDIAN 
+will cause the library to assume that the endianness of the data is opposite to
+that of the native architecture.
+
+This flag is ignored completely if an
+.B ENDIAN
+directive occurs in the dirfile format file, unless
+.B GD_FORCE_ENDIAN
+is also specified.
+.TP
+.B GD_PEDANTIC
+Specifies that unrecognised lines found during the parsing of the format file
+should always cause a fatal error.  Without this flag, if a
+.B VERSION
+directive (see
+.BR dirfile-format (5))
+indicates that the dirfile being opened conforms Standards Version newer than
+the version understood by the library, unrecognised lines will be silently
+ignored.
+.TP
+.B GD_PRETTY_PRINT
+When dirfile metadata is flushed to disc (either explicitly via
+.BR gd_metaflush()
+or 
+.BR gd_flush()
+or implicitly by closing the dirfile), an attempt will be made to create a
+nicer looking format file (from a human-readable standpoint).  What this
+explicitly means is not part of the API, and any particular behaviour should not
+be relied on.  If the dirfile is opened read-only, this flag is ignored.
+.TP
+.B GD_TRUNC
+If
+.I dirfilename
+specifies an already existing dirfile, it will be truncated before opening.
+Since
+.BR gd_cbopen ()
+decides whether
+.I dirfilename
+specifies an existing dirfile before attempting to parse the dirfile,
+.I dirfilename
+is considered to specify an existing dirfile if it refers to a directory
+containing a regular file called
+.BR format ,
+regardless of the content or form of that file.
+
+Truncation occurs by deleting every regular file in the specified directory,
+whether the files were referred to by the dirfile before truncation or not.
+Accordingly, this flag should be used with caution.  Subdirectories are
+left untouched.  Notably, this operation does not consider the presence of
+subdirfiles declared by
+.B INCLUDE
+directives.  If the dirfile does not exist, this flag is ignored.
+.TP
+.B GD_VERBOSE
+Specifies that whenever an error is triggered by the library when working
+on this dirfile, the corresponding error string, which can be retrieved by
+calling 
+.BR gd_error_string (3),
+should be written on standard error by the library.  Without this flag,
+GetData writes nothing to standard error.  (GetData never writes to standard
+output.)
+
+.P
+The
+.I flags
+argument may also be bitwise or'd with one of the following symbols indicating
+the default encoding scheme of the dirfile.  Like the endianness flags, the
+choice of encoding here is ignored if the encoding is specified in the dirfile
+itself, unless
+.B GD_FORCE_ENCODED
+is also specified.  If none of these symbols is present,
+.B GD_AUTO_ENCODED
+is assumed, unless the
+.BR gd_cbopen ()
+call results in creation or truncation of the dirfile.  In that case,
+.B GD_UNENCODED
+is assumed.  See
+.BR dirfile-encoding (5)
+for details on dirfile encoding schemes.
+.TP
+.B GD_AUTO_ENCODED
+Specifies that the encoding type is not known in advance, but should be detected
+by the GetData library.  Detection is accomplished by searching for raw data
+files with extensions appropriate to the encoding scheme.  This method will
+notably fail if the the library is called via
+.BR putdata (3)
+to create a previously non-existent raw field unless a read is first
+successfully performed on the dirfile.  Once the library has determined the
+encoding scheme for the first time, it remembers it for subsequent calls.
+.TP
+.B GD_BZIP2_ENDODED
+Specifies that raw data files are compressed using the Burrows-Wheeler block
+sorting text compression algorithm and Huffman coding, as implemented in the
+bzip2 format.
+.TP
+.B GD_GZIP_ENDODED
+Specifies that raw data files are compressed using Lempel-Ziv coding (LZ77)
+as implemented in the gzip format.
+.TP
+.B GD_LZMA_ENDODED
+Specifies that raw data files are compressed using the Lempel-Ziv Markov Chain
+Algorithm (LZMA) as implemented in the xz container format.
+.TP
+.B GD_SLIM_ENCODED
+Specifies that raw data files are compressed using the slimlib library.
+.TP
+.B GD_TEXT_ENCODED
+Specifies that raw data files are encoded as text files containing one data
+sample per line.  
+.TP
+.B GD_UNENCODED
+Specifies that raw data files are not encoded, but written verbatim to disk.
+
+.SS The Callback Function
+The caller-supplied
+.I sehandler
+function is called whenever the format file parser encounters a syntax error
+.RI ( i.e.
+whenever it would return the
+.B GD_E_FORMAT
+error).  This callback may be used to correct the error, or to tell the parser
+how to recover from it.
+
+This function should take two pointers as arguments, and return an int:
+.RS
+.HP
+.nh
+.ad l
+.BI "int " sehandler "(gd_parser_data_t *" pdata ", void *" extra );
+.hy
+.ad n
+.RE
+.P
+The
+.I extra
+parameter is the pointer supplied to
+.BR gd_cbopen (),
+passed verbatim to this function.  It can be used to pass caller data to the
+callback.  GetData does not inspect this pointer, not even to check its
+validity.  If the caller needs to pass no data to the callback, it may be NULL.
+
+The
+.B gd_parser_data_t
+type is a structure with at least the following members:
+
+.in +4n
+.nf
+typedef struct {
+  const DIRFILE* dirfile;
+  int suberror;
+  int linenum;
+  const char* filename;
+  char* line;
+
+  ...
+} gd_parser_data_t;
+.fi
+.in
+.P
+The
+.IR pdata -> dirfile
+member will be a pointer to a DIRFILE object suitable only for passing to
+.BR gd_error_string ().
+Notably, the caller should not assume this pointer will be the same as the
+pointer eventually returned by
+.BR gd_cbopen (),
+nor that it will be valid after the callback function returns.
+
+The
+.IR pdata -> suberror
+parameter will be one of the following symbols indicating the type of syntax
+error encountered:
+.TP
+.B GD_E_FORMAT_BAD_LINE
+The line was indecipherable.  Typically this means that the line contained
+neither a reserved word, nor a field type.
+.TP
+.B GD_E_FORMAT_BAD_NAME
+The specified field name was invalid.
+.TP
+.B GD_E_FORMAT_BAD_SPF
+The samples-per-frame of a RAW field was out-of-range.
+.TP
+.B GD_E_FORMAT_BAD_TYPE
+The data type of a RAW field was unrecognised.
+.TP
+.B GD_E_FORMAT_BITNUM
+The first bit of a BIT field was out-of-range.
+.TP
+.B GD_E_FORMAT_BITSIZE
+The last bit of a BIT field was out-of-range.
+.TP
+.B GD_E_FORMAT_CHARACTER
+An invalid character was found in the line, or a character escape sequence was
+malformed.
+.TP
+.B GD_E_FORMAT_DUPLICATE
+The specified field name already exists.
+.TP
+.B GD_E_FORMAT_ENDIAN
+The byte sex specified by an
+.B ENDIAN
+directive was unrecognised.
+.TP
+.B GD_E_FORMAT_LITTERAL
+An unexpected character was encountered in a complex literal. 
+.TP
+.B GD_E_FORMAT_LOCATION
+The parent of a metafield was defined in another fragment.
+.TP
+.B GD_E_FORMAT_METARAW
+An attempt was made to add a RAW metafield.
+.TP
+.B GD_E_FORMAT_N_FIELDS
+The number of fields of a LINCOM field was out-of-range.
+.TP
+.B GD_E_FORMAT_N_TOK
+An insufficient number of tokens was found on the line.
+.TP
+.B GD_E_FORMAT_NO_PARENT
+The parent of a metafield was not found.
+.TP
+.B GD_E_FORMAT_NUMBITS
+The number of bits of a BIT field was out-of-range.
+.TP
+.B GD_E_FORMAT_PROTECT
+The protection level specified by a
+.B PROTECT
+directive was unrecognised.
+.TP
+.B GD_E_FORMAT_RES_NAME
+A field was specified with the reserved name
+.IR INDEX .
+.TP
+.B GD_E_FORMAT_UNTERM
+The last token of the line was unterminated.
+.PP
+.IR pdata -> filename
+and
+.IR pdata -> linenum
+members contains the name of the fragment and line number where the syntax error
+was encountered.  The first line in a fragment is line one.
+
+The
+.IR pdata -> line
+member contains a copy of the line containing the syntax error.  This line may
+be freely modified by the callback function.  It will then be reparsed if the
+callback function returns the symbol
+.B GD_SYNTAX_RESCAN
+(see below).  Space is available for at least GD_MAX_LINE_LENGTH characters,
+including the terminating NUL.
+
+The callback function should return one of the following symbols, which
+tells the parser how to subsequently handle the error:
+.TP
+.B GD_SYNTAX_ABORT
+The parser should immediately abort parsing the format file and fail with
+the error
+.BR GD_E_FORMAT .
+This is the default behaviour, if no callback function is provided (or if
+the parser is invoked by calling
+.BR gd_open ()).
+.TP
+.B GD_SYNTAX_CONTINUE
+The parser should continue parsing the format file.  However, once parsing has
+finished, the parser will fail with the error
+.BR GD_E_FORMAT ,
+even if no further syntax errors are encountered.  This behaviour may be used by
+the caller to identify all lines containing syntax errors in the format file,
+instead of just the first one.
+.TP
+.B GD_SYNTAX_IGNORE
+The parser should ignore the line containing the syntax error completely, and
+carry on parsing the format file.  If no further errors are encountered, the
+dirfile will be successfully opened.
+.TP
+.B GD_SYNTAX_RESCAN
+The parser should rescan the
+.I line
+argument, which replaces the line which originally contained the syntax error.
+The line is assumed to have been corrected by the callback function.  If the
+line still contains a syntax error, the callback function will be called again.
+.P
+The callback function handles only syntax errors.  The parser may still abort
+early, if a different kind of library error is encountered.  Furthermore,
+although a line may contain more than one syntax error, the parser will only
+ever report one syntax error per line, even if the callback function returns
+.BR GD_SYNTAX_CONTINUE .
+
+.SH RETURN VALUE
+A call to
+.BR gd_cbopen ()
+or
+.BR gd_open ()
+always returns a pointer to a newly allocated DIRFILE object.  The DIRFILE
+object is an opaque structure containing the parsed dirfile metadata.
+If an error occurred, the dirfile error will be set to a non-zero error value.
+The DIRFILE object will also be internally flagged as invalid.  Possible error
+values are:
+.TP 8
+.B GD_E_ACCMODE
+The library was asked to create or truncate a dirfile opened read-only (i.e.
+.B GD_CREAT
+or
+.B GD_TRUNC
+was specified in
+.I flags
+along with
+.BR GD_RDONLY ).
+.TP
+.B GD_E_ALLOC
+The library was unable to allocate memory.
+.TP
+.B GD_E_BAD_REFERENCE
+The reference field specified by a
+.B /REFERENCE
+directive in the format file (see
+.BR dirfile-format (5))
+was not found, or was not a
+.B RAW
+field.
+.TP
+.B GD_E_CALLBACK
+The registered callback function,
+.IR sehandler ,
+returned an unrecognised response.
+.TP
+.B GD_E_CREAT
+The library was unable to create the dirfile, or the dirfile exists and both
+.BR GD_CREAT " and " GD_EXCL
+were specified.
+.TP
+.B GD_E_FORMAT
+A syntax error occurred in the format file.  See also
+.B The Callback Function
+section above.
+.TP
+.B GD_E_INTERNAL_ERROR
+An internal error occurred in the library while trying to perform the task.
+This indicates a bug in the library.  Please report the incident to the
+GetData developers.
+.TP
+.B GD_E_OPEN
+The dirfile format file could not be opened, or
+.I dirfilename
+does not specify a valid dirfile.
+.TP
+.B GD_E_OPEN_INCLUDE
+A file specified in an
+.B /INCLUDE
+directive could not be opened.
+.TP
+.B GD_E_TRUNC
+The library was unable to truncate the dirfile.
+.P
+The dirfile error may be retrieved by calling
+.BR gd_error (3).
+A descriptive error string for the last error encountered can be obtained from
+a call to
+.BR gd_error_string (3).
+When finished with it, the DIRFILE object should be deallocated with a call to
+.BR gd_close (3),
+even if the open failed.
+.SH BUGS
+GetData's parser assumes it is running on an ASCII-compatible platform.  Format
+file parsing will fail gloriously on an EBCDIC platform.
+.SH SEE ALSO
+.BR dirfile (5),
+.BR dirfile-encoding (5),
+.BR dirfile-format (5),
+.BR gd_close (3),
+.BR gd_error (3),
+.BR gd_error_string (3),
+.BR gd_getdata (3),
+.BR gd_include (3),
+.BR gd_parser_callback (3)

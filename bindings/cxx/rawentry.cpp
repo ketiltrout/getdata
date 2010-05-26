@@ -18,6 +18,10 @@
 // along with GetData; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 //
+#ifdef HAVE_CONFIG_H
+#include "../../src/config.h"
+#endif
+#undef GETDATA_LEGACY_API
 #include "getdata/dirfile.h"
 
 #include <cstring>
@@ -41,7 +45,7 @@ int RawEntry::SetSamplesPerFrame(gd_spf_t spf, int recode)
   E.spf = spf;
 
   if (D != NULL)
-    return dirfile_alter_entry(D->D, E.field, &E, recode);
+    return gd_alter_entry(D->D, E.field, &E, recode);
   
   return 0;
 }
@@ -57,10 +61,10 @@ int RawEntry::SetSamplesPerFrame(const char *spf, int recode)
     E.scalar[0] = strdup(spf);
 
   if (D != NULL) {
-    r = dirfile_alter_entry(D->D, E.field, &E, recode);
+    r = gd_alter_entry(D->D, E.field, &E, recode);
 
     if (!r)
-      r = get_constant(D->D, spf, GD_UINT16, &E.spf);
+      r = gd_get_constant(D->D, spf, GD_UINT16, &E.spf);
   }
   
   return r;
@@ -71,12 +75,12 @@ int RawEntry::SetType(DataType type, int recode)
   E.data_type = (gd_type_t)type;
 
   if (D != NULL)
-    return dirfile_alter_entry(D->D, E.field, &E, recode);
+    return gd_alter_entry(D->D, E.field, &E, recode);
   
   return 0;
 }
 
 const char* RawEntry::FileName()
 {
-  return get_raw_filename(D->D, E.field);
+  return gd_get_raw_filename(D->D, E.field);
 }
