@@ -169,7 +169,7 @@ ssize_t _GD_Bzip2Read(struct _gd_raw_file *file, void *data,
 {
   void* output = data;
 
-  dtrace("%p, %p, %x, %zi", file, data, data_type, nmemb);
+  dtrace("%p, %p, %x, %zu", file, data, data_type, nmemb);
 
   struct gd_bzdata *ptr = file->edata;
   unsigned long long nbytes = nmemb * GD_SIZE(data_type);

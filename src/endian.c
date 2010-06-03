@@ -129,7 +129,7 @@ int gd_alter_endianness(DIRFILE* D, unsigned long byte_sex, int fragment, int mo
 
   if ((D->flags & GD_ACCMODE) != GD_RDWR) {
     _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
-    dreturn("%zi", -1);
+    dreturn("%i", -1);
     return -1;
   }
 
@@ -188,7 +188,7 @@ void _GD_FixEndianness(char* databuffer, size_t size, size_t ns)
   size_t i, j;
   char b;
 
-  dtrace("%p, %zi, %zi", databuffer, size, ns);
+  dtrace("%p, %zu, %zu", databuffer, size, ns);
 
   if (size == 1) {
     dreturnvoid();

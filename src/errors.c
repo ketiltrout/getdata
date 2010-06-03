@@ -220,7 +220,7 @@ char* gd_error_string(const DIRFILE* D, char* buffer, size_t buflen)
   char* bufend = buffer + buflen;
   int i, s = -1;
 
-  dtrace("%p, %p, %zi", D, buffer, buflen);
+  dtrace("%p, %p, %zu", D, buffer, buflen);
 
   /* Sanity check */
   if (buffer == NULL || D == NULL || buflen < 1) {

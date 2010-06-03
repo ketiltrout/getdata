@@ -81,14 +81,14 @@ off64_t _GD_GzipSeek(struct _gd_raw_file* file, off64_t count,
 ssize_t _GD_GzipRead(struct _gd_raw_file *file, void *ptr, gd_type_t data_type,
     size_t nmemb)
 {
-  dtrace("%p, %p, %x, %zi", file, ptr, data_type, nmemb);
+  dtrace("%p, %p, %x, %zu", file, ptr, data_type, nmemb);
 
   ssize_t n = gzread(file->edata, ptr, GD_SIZE(data_type) * nmemb);
 
   if (n >= 0)
     n /= GD_SIZE(data_type);
 
-  dreturn("%zi", n);
+  dreturn("%zu", n);
   return n;
 }
 

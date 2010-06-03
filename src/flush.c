@@ -169,7 +169,7 @@ static char* _GD_PadField(char* out, const char* in, size_t len)
 {
   size_t i;
 
-  dtrace("%p, \"%s\", %zi", out, in ,len);
+  dtrace("%p, \"%s\", %zu", out, in ,len);
 
   for (i = strlen(_GD_StringEscapeise(out, in)); i < len; ++i)
     out[i] = ' ';

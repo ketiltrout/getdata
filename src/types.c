@@ -37,7 +37,7 @@ void _GD_ConvertType(DIRFILE* D, const void *data_in, gd_type_t in_type,
 {
   size_t i;
 
-  dtrace("%p, %p, 0x%x, %p, 0x%x, %zi", D, data_in, in_type, data_out, out_type,
+  dtrace("%p, %p, 0x%x, %p, 0x%x, %zu", D, data_in, in_type, data_out, out_type,
       n);
   dreturnvoid();
 

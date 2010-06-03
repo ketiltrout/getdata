@@ -501,7 +501,7 @@ int gd_alter_encoding(DIRFILE* D, unsigned long encoding, int fragment, int move
 
   if ((D->flags & GD_ACCMODE) != GD_RDWR) {
     _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
-    dreturn("%zi", -1);
+    dreturn("%i", -1);
     return -1;
   }
 

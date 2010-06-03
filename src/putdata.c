@@ -44,11 +44,11 @@ static size_t _GD_DoRawOut(DIRFILE *D, gd_entry_t *E, off64_t s0,
     return 0;
   }
 
-  dtrace("%p, %p, %lli, %zi, 0x%x, %p", D, E, s0, ns, data_type, data_in);
+  dtrace("%p, %p, %lli, %zu, 0x%x, %p", D, E, s0, ns, data_type, data_in);
 
   if (s0 < D->fragment[E->fragment_index].frame_offset * E->spf) {
     _GD_SetError(D, GD_E_RANGE, GD_E_OUT_OF_RANGE, NULL, 0, NULL);
-    dreturn("%zi", 0);
+    dreturn("%i", 0);
     return 0;
   }
 
@@ -57,7 +57,7 @@ static size_t _GD_DoRawOut(DIRFILE *D, gd_entry_t *E, off64_t s0,
   databuffer = _GD_Alloc(D, E->data_type, ns);
 
   if (databuffer == NULL) {
-    dreturn("%zi", 0);
+    dreturn("%i", 0);
     return 0;
   }
 
@@ -65,7 +65,7 @@ static size_t _GD_DoRawOut(DIRFILE *D, gd_entry_t *E, off64_t s0,
 
   if (D->error) { /* bad input type */
     free(databuffer);
-    dreturn("%zi", 0);
+    dreturn("%i", 0);
     return 0;
   }
 
@@ -101,7 +101,7 @@ static size_t _GD_DoRawOut(DIRFILE *D, gd_entry_t *E, off64_t s0,
           D->flags & GD_ACCMODE, 1))
     {
       _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[0].name, errno, NULL);
-      dreturn("%zi", 0);
+      dreturn("%i", 0);
       return 0;
     }
   }
@@ -110,7 +110,7 @@ static size_t _GD_DoRawOut(DIRFILE *D, gd_entry_t *E, off64_t s0,
       == -1)
   {
       _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[0].name, errno, NULL);
-      dreturn("%zi", 0);
+      dreturn("%i", 0);
       return 0;
   }
 
@@ -119,7 +119,7 @@ static size_t _GD_DoRawOut(DIRFILE *D, gd_entry_t *E, off64_t s0,
 
   free(databuffer);
 
-  dreturn("%zi", n_wrote);
+  dreturn("%zu", n_wrote);
   return n_wrote;
 }
 
@@ -128,34 +128,34 @@ static size_t _GD_DoLinterpOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
 {
   size_t n_wrote;
 
-  dtrace("%p, %p, %lli, %zi, 0x%x, %p", D, E, first_samp, num_samp, data_type,
+  dtrace("%p, %p, %lli, %zu, 0x%x, %p", D, E, first_samp, num_samp, data_type,
       data_in);
 
   /* if the table is complex valued, we can't invert it */
   if (E->e->complex_table) {
     _GD_SetError(D, GD_E_DOMAIN, GD_E_DOMAIN_COMPLEX, NULL, 0, NULL);
-    dreturn("%zi", 0);
+    dreturn("%i", 0);
     return 0;
   }
 
   if (E->e->table_len < 0) {
     _GD_ReadLinterpFile(D, E);
     if (D->error != GD_E_OK) {
-      dreturn("%zi", 0);
+      dreturn("%i", 0);
       return 0;
     }
   }
 
   /* Interpolate X(y) instead of Y(x) */
   if (_GD_BadInput(D, E, 0)) {
-    dreturn("%zi", 0);
+    dreturn("%i", 0);
     return 0;
   }
 
   double *tmpbuf = _GD_Alloc(D, GD_FLOAT64, num_samp);
   if (tmpbuf == NULL) {
     free(tmpbuf);
-    dreturn("%zi", 0);
+    dreturn("%i", 0);
     return 0;
   }
 
@@ -163,7 +163,7 @@ static size_t _GD_DoLinterpOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
 
   if (D->error) {
     free(tmpbuf);
-    dreturn("%zi", 0);
+    dreturn("%i", 0);
     return 0;
   }
 
@@ -172,7 +172,7 @@ static size_t _GD_DoLinterpOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
 
   if (D->error != GD_E_OK) {
     free(tmpbuf);
-    dreturn("%zi", 0);
+    dreturn("%i", 0);
     return 0;
   }
 
@@ -181,7 +181,7 @@ static size_t _GD_DoLinterpOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
 
   free(tmpbuf);
 
-  dreturn("%zi", n_wrote);
+  dreturn("%zu", n_wrote);
   return n_wrote;
 }
 
@@ -191,7 +191,7 @@ static size_t _GD_DoLincomOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
   size_t n_wrote;
   void* tmpbuf;
 
-  dtrace("%p, %p, %lli, %zi, 0x%x, %p", D, E, first_samp, num_samp, data_type,
+  dtrace("%p, %p, %lli, %zu, 0x%x, %p", D, E, first_samp, num_samp, data_type,
       data_in);
 
   /* we cannot write to LINCOM fields that are a linear combination */
@@ -199,18 +199,18 @@ static size_t _GD_DoLincomOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
 
   if (E->n_fields > 1) {
     _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_PUT, NULL, 0, E->field);
-    dreturn("%zi", 0);
+    dreturn("%i", 0);
     return 0;
   }
 
   if (_GD_BadInput(D, E, 0)) {
-    dreturn("%zi", 0);
+    dreturn("%i", 0);
     return 0;
   }
 
   /* do the inverse scaling */
   if (D->error != GD_E_OK) {
-    dreturn("%zi", 0);
+    dreturn("%i", 0);
     return 0;
   }
 
@@ -218,7 +218,7 @@ static size_t _GD_DoLincomOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
   tmpbuf = _GD_Alloc(D, data_type, num_samp);
 
   if (tmpbuf == NULL) {
-    dreturn("%zi", 0);
+    dreturn("%i", 0);
     return 0;
   }
 
@@ -237,7 +237,7 @@ static size_t _GD_DoLincomOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
 
   if (D->error != GD_E_OK) {
     free(tmpbuf);
-    dreturn("%zi", 0);
+    dreturn("%i", 0);
     return 0;
   }
 
@@ -245,7 +245,7 @@ static size_t _GD_DoLincomOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
       num_samp, data_type, tmpbuf);
   free(tmpbuf);
 
-  dreturn("%zi", n_wrote);
+  dreturn("%zu", n_wrote);
   return n_wrote;
 }
 
@@ -256,14 +256,14 @@ static size_t _GD_DoBitOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
   uint64_t *readbuf;
   size_t i, n_wrote;
 
-  dtrace("%p, %p, %lli, %zi, 0x%x, %p", D, E, first_samp, num_samp, data_type,
+  dtrace("%p, %p, %lli, %zu, 0x%x, %p", D, E, first_samp, num_samp, data_type,
       data_in);
 
   const uint64_t mask = (E->numbits == 64) ? 0xffffffffffffffffULL :
     ((uint64_t)1 << E->numbits) - 1;
 
   if (_GD_BadInput(D, E, 0)) {
-    dreturn("%zi", 0);
+    dreturn("%i", 0);
     return 0;
   }
 
@@ -273,7 +273,7 @@ static size_t _GD_DoBitOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
   if (tmpbuf == NULL || readbuf == NULL) {
     free(tmpbuf);
     free(readbuf);
-    dreturn("%zi", 0);
+    dreturn("%i", 0);
     return 0;
   }
 
@@ -288,7 +288,7 @@ static size_t _GD_DoBitOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
 
   /* error encountered, abort */
   if (D->error != GD_E_OK) {
-    dreturn("%zi", 0);
+    dreturn("%i", 0);
     return 0;
   }
 
@@ -304,7 +304,7 @@ static size_t _GD_DoBitOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
   free(readbuf);
   free(tmpbuf);
 
-  dreturn("%zi", n_wrote);
+  dreturn("%zu", n_wrote);
   return n_wrote;
 }
 
@@ -313,7 +313,7 @@ static size_t _GD_DoPhaseOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
 {
   size_t n_wrote;
 
-  dtrace("%p, %p, %lli, %zi, 0x%x, %p", D, E, first_samp, num_samp, data_type,
+  dtrace("%p, %p, %lli, %zu, 0x%x, %p", D, E, first_samp, num_samp, data_type,
       data_in);
 
   if (_GD_BadInput(D, E, 0)) {
@@ -324,7 +324,7 @@ static size_t _GD_DoPhaseOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
   n_wrote = _GD_DoFieldOut(D, E->e->entry[0], E->e->repr[0], first_samp +
       E->shift, num_samp, data_type, data_in);
 
-  dreturn("%zi", n_wrote);
+  dreturn("%zu", n_wrote);
 
   return n_wrote;
 }
@@ -335,25 +335,25 @@ static size_t _GD_DoPolynomOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
   size_t n_wrote;
   void* tmpbuf;
 
-  dtrace("%p, %p, %lli, %zi, 0x%x, %p", D, E, first_samp, num_samp, data_type,
+  dtrace("%p, %p, %lli, %zu, 0x%x, %p", D, E, first_samp, num_samp, data_type,
       data_in);
 
   /* we cannot write to POLYNOM fields that are quadradic or higher order */
 
   if (E->poly_ord > 1) {
     _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_PUT, NULL, 0, E->field);
-    dreturn("%zi", 0);
+    dreturn("%i", 0);
     return 0;
   }
 
   if (_GD_BadInput(D, E, 0)) {
-    dreturn("%zi", 0);
+    dreturn("%i", 0);
     return 0;
   }
 
   /* do the inverse scaling */
   if (D->error != GD_E_OK) {
-    dreturn("%zi", 0);
+    dreturn("%i", 0);
     return 0;
   }
 
@@ -361,7 +361,7 @@ static size_t _GD_DoPolynomOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
   tmpbuf = _GD_Alloc(D, data_type, num_samp);
 
   if (tmpbuf == NULL) {
-    dreturn("%zi", 0);
+    dreturn("%i", 0);
     return 0;
   }
 
@@ -380,7 +380,7 @@ static size_t _GD_DoPolynomOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
 
   if (D->error != GD_E_OK) {
     free(tmpbuf);
-    dreturn("%zi", 0);
+    dreturn("%i", 0);
     return 0;
   }
 
@@ -388,7 +388,7 @@ static size_t _GD_DoPolynomOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
       num_samp, data_type, tmpbuf);
   free(tmpbuf);
 
-  dreturn("%zi", n_wrote);
+  dreturn("%zu", n_wrote);
   return n_wrote;
 }
 
@@ -411,7 +411,7 @@ static size_t _GD_DoConstOut(DIRFILE* D, gd_entry_t *E, gd_type_t data_type,
     _GD_ConvertType(D, data_in, data_type, &E->e->uconst, GD_UINT64, 1);
 
   if (D->error) { /* bad input type */
-    dreturn("%zi", 0);
+    dreturn("%i", 0);
     return 0;
   }
 
@@ -444,7 +444,7 @@ static size_t _GD_DoStringOut(DIRFILE* D, gd_entry_t *E, const char *data_in)
   free(ptr);
   D->fragment[E->fragment_index].modified = 1;
 
-  dreturn("%i", strlen(E->e->string) + 1);
+  dreturn("%zu", strlen(E->e->string) + 1);
   return strlen(E->e->string) + 1;
 }
 
@@ -453,13 +453,13 @@ size_t _GD_DoFieldOut(DIRFILE *D, gd_entry_t* E, int repr, off64_t first_samp,
 {
   size_t n_wrote = 0;
 
-  dtrace("%p, %p, %i, %lli, %zi, 0x%x, %p", D, E, repr, first_samp, num_samp,
+  dtrace("%p, %p, %i, %lli, %zu, 0x%x, %p", D, E, repr, first_samp, num_samp,
       data_type, data_in);
 
   if (++D->recurse_level >= GD_MAX_RECURSE_LEVEL) {
     _GD_SetError(D, GD_E_RECURSE_LEVEL, 0, NULL, 0, E->field);
     D->recurse_level--;
-    dreturn("%zi", 0);
+    dreturn("%i", 0);
     return 0;
   }
 
@@ -475,7 +475,7 @@ size_t _GD_DoFieldOut(DIRFILE *D, gd_entry_t* E, int repr, off64_t first_samp,
   if (repr != GD_REPR_NONE) {
     const char r[2] = {(char)repr, 0};
     _GD_SetError(D, GD_E_BAD_REPR, GD_E_REPR_PUT, NULL, 0, r);
-    dreturn("%zi", 0);
+    dreturn("%i", 0);
     return 0;
   }
 
@@ -517,7 +517,7 @@ size_t _GD_DoFieldOut(DIRFILE *D, gd_entry_t* E, int repr, off64_t first_samp,
   }
 
   D->recurse_level--;
-  dreturn("%zi", n_wrote);
+  dreturn("%zu", n_wrote);
   return n_wrote;
 }
 
@@ -531,18 +531,18 @@ size_t gd_putdata64(DIRFILE* D, const char *field_code_in, off64_t first_frame,
   char* field_code;
   int repr;
 
-  dtrace("%p, \"%s\", %lli, %lli, %zi, %zi, 0x%x, %p", D, field_code_in,
+  dtrace("%p, \"%s\", %lli, %lli, %zu, %zu, 0x%x, %p", D, field_code_in,
       first_frame, first_samp, num_frames, num_samp, data_type, data_in);
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%zi", 0);
+    dreturn("%i", 0);
     return 0;
   }
 
   if ((D->flags & GD_ACCMODE) != GD_RDWR) {
     _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
-    dreturn("%zi", 0);
+    dreturn("%i", 0);
     return 0;
   }
 
@@ -580,7 +580,7 @@ size_t gd_putdata64(DIRFILE* D, const char *field_code_in, off64_t first_frame,
   n_wrote = _GD_DoFieldOut(D, entry, repr, first_samp, num_samp, data_type,
       data_in);
 
-  dreturn("%zi", n_wrote);
+  dreturn("%zu", n_wrote);
   return n_wrote;
 }
 

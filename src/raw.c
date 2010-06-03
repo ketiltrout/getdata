@@ -59,28 +59,28 @@ off64_t _GD_RawSeek(struct _gd_raw_file* file, off64_t count,
 ssize_t _GD_RawRead(struct _gd_raw_file *file, void *ptr, gd_type_t data_type,
     size_t nmemb)
 {
-  dtrace("%p, %p, %x, %zi", file, ptr, data_type, nmemb);
+  dtrace("%p, %p, %x, %zu", file, ptr, data_type, nmemb);
 
   int nread = read(file->fp, ptr, nmemb * GD_SIZE(data_type));
 
   if (nread >= 0)
     nread /= GD_SIZE(data_type);
 
-  dreturn("%zi", nread);
+  dreturn("%zu", nread);
   return nread;
 }
 
 ssize_t _GD_RawWrite(struct _gd_raw_file *file, const void *ptr,
     gd_type_t data_type, size_t nmemb)
 {
-  dtrace("%p, %p, %x, %zi", file, ptr, data_type, nmemb);
+  dtrace("%p, %p, %x, %zu", file, ptr, data_type, nmemb);
 
   ssize_t nwrote = write(file->fp, ptr, nmemb * GD_SIZE(data_type));
 
   if (nwrote >= 0)
     nwrote /= GD_SIZE(data_type);
 
-  dreturn("%zi", nwrote);
+  dreturn("%zu", nwrote);
   return nwrote;
 }
 

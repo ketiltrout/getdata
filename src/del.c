@@ -192,7 +192,7 @@ int gd_delete(DIRFILE* D, const char* field_code_in, int flags)
 
   if ((D->flags & GD_ACCMODE) != GD_RDWR) {
     _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
-    dreturn("%zi", -1);
+    dreturn("%i", -1);
     return -1;
   }
 
@@ -262,7 +262,7 @@ int gd_delete(DIRFILE* D, const char* field_code_in, int flags)
 
   if (del_list == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-    dreturn("%zi", -1);
+    dreturn("%i", -1);
     return -1;
   }
 
@@ -283,7 +283,7 @@ int gd_delete(DIRFILE* D, const char* field_code_in, int flags)
 
         if (D->error) {
           free(del_list);
-          dreturn("%zi", -1);
+          dreturn("%i", -1);
           return -1;
         }
       }
@@ -301,27 +301,27 @@ int gd_delete(DIRFILE* D, const char* field_code_in, int flags)
 
     if (!_GD_Supports(D, E, GD_EF_UNLINK)) {
       free(del_list);
-      dreturn("%zi", -1);
+      dreturn("%i", -1);
       return -1;
     }
 
     if (_GD_SetEncodedName(D, E->e->file, E->e->filebase, 0)) {
       free(del_list);
-      dreturn("%zi", -1);
+      dreturn("%i", -1);
       return -1;
     }
 
     if ((*_gd_ef[E->e->file[0].encoding].unlink)(E->e->file)) {
       _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[0].name, errno, NULL);
       free(del_list);
-      dreturn("%zi", -1);
+      dreturn("%i", -1);
       return -1;
     }
   } else if (E->field_type == GD_RAW_ENTRY && E->e->file->fp != -1) {
     if ((*_gd_ef[E->e->file[0].encoding].close)(E->e->file)) {
       _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[0].name, errno, NULL);
       free(del_list);
-      dreturn("%zi", -1);
+      dreturn("%i", -1);
       return -1;
     }
   }
@@ -335,7 +335,7 @@ int gd_delete(DIRFILE* D, const char* field_code_in, int flags)
     if (new_ref == NULL) {
       free(del_list);
       _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-      dreturn("%zi", -1);
+      dreturn("%i", -1);
       return -1;
     }
     memset(new_ref, 0, sizeof(char*) * D->n_fragment);
@@ -367,7 +367,7 @@ int gd_delete(DIRFILE* D, const char* field_code_in, int flags)
                 free(new_ref);
                 free(del_list);
                 _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-                dreturn("%zi", -1);
+                dreturn("%i", -1);
                 return -1;
               }
 

@@ -147,7 +147,7 @@ void* _GD_Alloc(DIRFILE* D, gd_type_t type, size_t n)
 {
   void* ptr = NULL;
 
-  dtrace("%p, 0x%x, %zi", D, type, n);
+  dtrace("%p, 0x%x, %zu", D, type, n);
   if (n == 0) {
     _GD_InternalError(D);
     dreturn("%p", NULL);
@@ -313,7 +313,7 @@ void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E)
 */
 static size_t _GD_GetIndex(double x, const double *lx, size_t idx, size_t n)
 {
-  dtrace("%g, %p, %zi, %zi", x, lx, idx, n);
+  dtrace("%g, %p, %zu, %zu", x, lx, idx, n);
 
   /* Just linearly search - we're probably right to start    */
   /* increment until we are bigger */
@@ -324,7 +324,7 @@ static size_t _GD_GetIndex(double x, const double *lx, size_t idx, size_t n)
   while ((idx > 0) && (x < lx[idx]))
     idx--;
 
-  dreturn("%zi", idx);
+  dreturn("%zu", idx);
   return idx;
 }
 
@@ -335,7 +335,7 @@ void _GD_AddData(DIRFILE* D, void *A, gd_spf_t spfA, void *B,
 {
   size_t i;
 
-  dtrace("%p, %p, %u, %p, %u, 0x%x, %zi", D, A, spfA, B, spfB, type, n);
+  dtrace("%p, %p, %u, %p, %u, 0x%x, %zu", D, A, spfA, B, spfB, type, n);
 
   switch (type) {
     case GD_NULL: /* null read */
@@ -414,7 +414,7 @@ void _GD_LinterpData(DIRFILE* D, void *data, gd_type_t type,
   size_t i;
   double x;
 
-  dtrace("%p, %p, 0x%x, %p, %zi, %p, %p, %zi", D, data, type, data_in, npts,
+  dtrace("%p, %p, 0x%x, %p, %zu, %p, %p, %zu", D, data, type, data_in, npts,
       lx, ly, n_ln);
 
   switch (type) {
@@ -534,7 +534,7 @@ void _GD_CLinterpData(DIRFILE* D, void *data, gd_type_t type,
   size_t i;
   double x;
 
-  dtrace("%p, %p, 0x%x, %zi, %p, %p, %zi", D, data, type, npts, lx, ly, n_ln);
+  dtrace("%p, %p, 0x%x, %zu, %p, %p, %zu", D, data, type, npts, lx, ly, n_ln);
 
   switch (type) {
     case GD_NULL:
@@ -672,7 +672,7 @@ void _GD_LincomData(DIRFILE* D, int n, void* data1, gd_type_t return_type,
 {
   size_t i;
 
-  dtrace("%p, %i, %p, 0x%x, %p, %p, %p, %p, %p, %zi", D, n, data1, return_type,
+  dtrace("%p, %i, %p, 0x%x, %p, %p, %p, %p, %p, %zu", D, n, data1, return_type,
       data2, data3, m, b, spf, n_read);
 
   switch(return_type) {
@@ -728,7 +728,7 @@ void _GD_CLincomData(DIRFILE* D, int n, void* data1, gd_type_t return_type,
 {
   size_t i;
 
-  dtrace("%p, %i, %p, 0x%x, %p, %p, %p, %p, %p, %zi", D, n, data1, return_type,
+  dtrace("%p, %i, %p, 0x%x, %p, %p, %p, %p, %p, %zu", D, n, data1, return_type,
       data2, data3, m, b, spf, n_read);
 
   switch(return_type) {
@@ -843,7 +843,7 @@ int _GD_BadInput(DIRFILE* D, gd_entry_t* E, int i)
   /* scalar entries not allowed */
   if (E->e->entry[0]->field_type & GD_SCALAR_ENTRY) {
     _GD_SetError(D, GD_E_DIMENSION, 0, E->field, 0, E->e->entry[0]->field);
-    dreturn("%zi", 1);
+    dreturn("%i", 1);
     return 1;
   }
 

@@ -168,7 +168,7 @@ int gd_include(DIRFILE* D, const char* file, int fragment_index,
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%zi", -1);
+    dreturn("%i", -1);
     return -1;
   }
   /* check access mode */
@@ -292,7 +292,7 @@ int gd_uninclude(DIRFILE* D, int fragment_index, int del)
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%zi", -1);
+    dreturn("%i", -1);
     return -1;
   }
 

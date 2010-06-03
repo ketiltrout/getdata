@@ -78,11 +78,11 @@ off64_t _GD_SlimSeek(struct _gd_raw_file* file, off64_t count,
 ssize_t _GD_SlimRead(struct _gd_raw_file *file, void *ptr, gd_type_t data_type,
     size_t nmemb)
 {
-  dtrace("%p, %p, %x, %zi", file, ptr, data_type, nmemb);
+  dtrace("%p, %p, %x, %zu", file, ptr, data_type, nmemb);
 
   ssize_t n = slimread(ptr, GD_SIZE(data_type), nmemb, file->edata);
 
-  dreturn("%zi", n);
+  dreturn("%zu", n);
   return n;
 }
 

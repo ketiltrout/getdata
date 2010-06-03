@@ -68,7 +68,7 @@ static void _GD_ExtractRepr(DIRFILE* D, const void* cdata, gd_type_t in_type,
 {
   size_t i;
 
-  dtrace("%p, %p, %x, %p, %x, %zi, %i", D, cdata, in_type, rdata, type, n,
+  dtrace("%p, %p, %x, %p, %x, %zu, %i", D, cdata, in_type, rdata, type, n,
       repr);
 
   switch (type) {
@@ -98,7 +98,7 @@ static void _GD_FillFileFrame(void *dataout, gd_type_t rtype, off64_t s0,
 {
   size_t i;
 
-  dtrace("%p, 0x%x, %lli, %zi", dataout, rtype, s0, n);
+  dtrace("%p, 0x%x, %lli, %zu", dataout, rtype, s0, n);
 
   switch (rtype) {
     case GD_INT8:
@@ -163,7 +163,7 @@ int _GD_FillZero(void *databuffer, gd_type_t type, size_t nz)
   size_t i;
   const double NaN = NAN;
 
-  dtrace("%p, 0x%x, %zi", databuffer, type, nz);
+  dtrace("%p, 0x%x, %zu", databuffer, type, nz);
 
   if (type & GD_IEEE754) {
     if (type == GD_FLOAT32)
@@ -184,7 +184,7 @@ int _GD_FillZero(void *databuffer, gd_type_t type, size_t nz)
   } else 
     memset(databuffer, 0, nz * GD_SIZE(type));
 
-  dreturn("%i", nz);
+  dreturn("%zu", nz);
 
   return (nz);
 }
@@ -199,7 +199,7 @@ static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *E, off64_t s0, size_t ns,
   char *databuffer;
   size_t zero_pad = 0;
 
-  dtrace("%p, %p, %lli, %zi, 0x%x, %p)", D, E, s0, ns, return_type, data_out);
+  dtrace("%p, %p, %lli, %zu, 0x%x, %p)", D, E, s0, ns, return_type, data_out);
 
   if (s0 < E->spf * D->fragment[E->fragment_index].frame_offset)
     zero_pad = E->spf * D->fragment[E->fragment_index].frame_offset - s0;
@@ -209,7 +209,7 @@ static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *E, off64_t s0, size_t ns,
   databuffer = malloc(ns * E->e->size);
   if (databuffer == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-    dreturn("%zi", 0);
+    dreturn("%i", 0);
     return 0;
   }
 
@@ -233,7 +233,7 @@ static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *E, off64_t s0, size_t ns,
             D->flags & GD_ACCMODE, 0))
       {
         _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[0].name, errno, NULL);
-        dreturn("%zi", 0);
+        dreturn("%i", 0);
         return 0;
       }
     }
@@ -242,7 +242,7 @@ static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *E, off64_t s0, size_t ns,
         == -1)
     {
       _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[0].name, errno, NULL);
-      dreturn("%zi", 0);
+      dreturn("%i", 0);
       return 0;
     }
 
@@ -252,7 +252,7 @@ static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *E, off64_t s0, size_t ns,
     if (samples_read == -1) {
       _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[0].name, errno, NULL);
       free(databuffer);
-      dreturn("%zi", 0);
+      dreturn("%i", 0);
       return 0;
     }
 
@@ -279,8 +279,8 @@ static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *E, off64_t s0, size_t ns,
 
   free(databuffer);
 
-  dreturn("%zi", (D->error == GD_E_OK) ? n_read : 0);
-  return (D->error == GD_E_OK) ? n_read : 0;
+  dreturn("%zu", (D->error == GD_E_OK) ? n_read : (size_t)0);
+  return (D->error == GD_E_OK) ? n_read : (size_t)0;
 }
 
 /* Macros to reduce tangly code */
@@ -332,7 +332,7 @@ static void _GD_PolynomData(DIRFILE* D, void *data, gd_type_t type, size_t npts,
 {
   size_t i;
 
-  dtrace("%p, %p, 0x%x, %zi, %i, %p", D, data, type, npts, n, a);
+  dtrace("%p, %p, 0x%x, %zu, %i, %p", D, data, type, npts, n, a);
 
   if (n == 1) {
     /* no need to duplicate this case */
@@ -370,7 +370,7 @@ static void _GD_CPolynomData(DIRFILE* D, void *data, gd_type_t type,
 {
   size_t i;
 
-  dtrace("%p, %p, 0x%x, %zi, %i, %p", D, data, type, npts, n, a);
+  dtrace("%p, %p, 0x%x, %zu, %i, %p", D, data, type, npts, n, a);
 
   if (n == 1) {
     /* no need to duplicate this case */
@@ -414,7 +414,7 @@ static void _GD_MultiplyData(DIRFILE* D, void *A, gd_spf_t spfA, double *B,
 {
   size_t i;
 
-  dtrace("%p, %p, %u, %p, %u, 0x%x, %zi", D, A, spfA, B, spfB, type, n);
+  dtrace("%p, %p, %u, %p, %u, 0x%x, %zu", D, A, spfA, B, spfB, type, n);
 
   switch (type) {
     case GD_NULL: /* null read */
@@ -446,7 +446,7 @@ static void _GD_CMultiplyData(DIRFILE* D, void *A, gd_spf_t spfA,
 {
   size_t i;
 
-  dtrace("%p, %p, %u, %p, %u, 0x%x, %zi", D, A, spfA, B, spfB, type, n);
+  dtrace("%p, %p, %u, %p, %u, 0x%x, %zu", D, A, spfA, B, spfB, type, n);
 
   switch (type) {
     case GD_NULL:
@@ -482,7 +482,7 @@ static size_t _GD_DoLincom(DIRFILE *D, gd_entry_t *E, off64_t first_samp,
   void *tmpbuf2 = NULL;
   void *tmpbuf3 = NULL;
 
-  dtrace("%p, %p, %lli, %zi, 0x%x, %p", D, E, first_samp, num_samp, return_type,
+  dtrace("%p, %p, %lli, %zu, 0x%x, %p", D, E, first_samp, num_samp, return_type,
       data_out);
 
   const gd_type_t ntype = (return_type & GD_COMPLEX) ? GD_COMPLEX128
@@ -491,13 +491,13 @@ static size_t _GD_DoLincom(DIRFILE *D, gd_entry_t *E, off64_t first_samp,
   /* input field checks */
   for (i = 0; i < E->n_fields; ++i) {
     if (_GD_BadInput(D, E, i)) {
-      dreturn("%zi", 0);
+      dreturn("%i", 0);
       return 0;
     }
 
     spf[i] = _GD_GetSPF(D, E->e->entry[0]);
     if (D->error != GD_E_OK) {
-      dreturn("%zi", 0);
+      dreturn("%i", 0);
       return 0;
     }
   }
@@ -515,7 +515,7 @@ static size_t _GD_DoLincom(DIRFILE *D, gd_entry_t *E, off64_t first_samp,
 
   /* Nothing to lincomise */
   if (n_read == 0) {
-    dreturn("%zi", 0);
+    dreturn("%i", 0);
     return 0;
   }
 
@@ -523,7 +523,7 @@ static size_t _GD_DoLincom(DIRFILE *D, gd_entry_t *E, off64_t first_samp,
    * recommend using "bar PHASE foo 0" in this case, but we'll accomodate them
    * as much as we can.  Suggested by MDT. */
   if (E->n_fields == 1 && E->cm[0] == 1 && E->cb[0] == 0) {
-    dreturn("%zi", n_read);
+    dreturn("%zu", n_read);
     return n_read;
   }
 
@@ -597,7 +597,7 @@ static size_t _GD_DoLincom(DIRFILE *D, gd_entry_t *E, off64_t first_samp,
   if (D->error)
     n_read = 0;
 
-  dreturn("%zi", n_read);
+  dreturn("%zu", n_read);
   return n_read;
 }
 
@@ -611,24 +611,24 @@ static size_t _GD_DoMultiply(DIRFILE *D, gd_entry_t* E, off64_t first_samp,
   size_t n_read, n_read2, num_samp2;
   off64_t first_samp2;
 
-  dtrace("%p, %p, %lli, %zi, 0x%x, %p", D, E, first_samp, num_samp, return_type,
+  dtrace("%p, %p, %lli, %zu, 0x%x, %p", D, E, first_samp, num_samp, return_type,
       data_out);
 
   /* Check input fields */
   if (_GD_BadInput(D, E, 0)) {
-    dreturn("%zi", 0);
+    dreturn("%i", 0);
     return 0;
   }
 
   if (_GD_BadInput(D, E, 1)) {
-    dreturn("%zi", 0);
+    dreturn("%i", 0);
     return 0;
   }
 
   /* find the samples per frame of the first field */
   spf1 = _GD_GetSPF(D, E->e->entry[0]);
   if (D->error != GD_E_OK) {
-    dreturn("%zi", 0);
+    dreturn("%i", 0);
     return 0;
   }
 
@@ -637,20 +637,20 @@ static size_t _GD_DoMultiply(DIRFILE *D, gd_entry_t* E, off64_t first_samp,
       return_type, data_out);
 
   if (D->error != GD_E_OK) {
-    dreturn("%zi", 0);
+    dreturn("%i", 0);
     return 0;
   }
 
   /* Nothing to multiply */
   if (n_read == 0) {
-    dreturn("%zi", 0);
+    dreturn("%i", 0);
     return 0;
   }
 
   /* find the samples per frame of the second field */
   spf2 = _GD_GetSPF(D, E->e->entry[1]);
   if (D->error != GD_E_OK) {
-    dreturn("%zi", 0);
+    dreturn("%i", 0);
     return 0;
   }
 
@@ -668,7 +668,7 @@ static size_t _GD_DoMultiply(DIRFILE *D, gd_entry_t* E, off64_t first_samp,
 
   if (D->error != GD_E_OK) {
     free(tmpbuf);
-    dreturn("%zi", 0);
+    dreturn("%i", 0);
     return 0;
   }
 
@@ -678,7 +678,7 @@ static size_t _GD_DoMultiply(DIRFILE *D, gd_entry_t* E, off64_t first_samp,
 
   if (D->error != GD_E_OK) {
     free(tmpbuf);
-    dreturn("%zi", 0);
+    dreturn("%i", 0);
     return 0;
   }
 
@@ -692,7 +692,7 @@ static size_t _GD_DoMultiply(DIRFILE *D, gd_entry_t* E, off64_t first_samp,
 
   free(tmpbuf);
 
-  dreturn("%zi", n_read);
+  dreturn("%zu", n_read);
   return n_read;
 }
 
@@ -706,14 +706,14 @@ static size_t _GD_DoBit(DIRFILE *D, gd_entry_t *E, int is_signed,
   size_t i;
   size_t n_read;
 
-  dtrace("%p, %p, %i, %lli, %zi, 0x%x, %p", D, E, is_signed, first_samp,
+  dtrace("%p, %p, %i, %lli, %zu, 0x%x, %p", D, E, is_signed, first_samp,
       num_samp, return_type, data_out);
 
   const uint64_t mask = (E->numbits == 64) ? 0xffffffffffffffffULL :
     ((uint64_t)1 << E->numbits) - 1;
 
   if (_GD_BadInput(D, E, 0)) {
-    dreturn("%zi", 0);
+    dreturn("%i", 0);
     return 0;
   }
 
@@ -723,7 +723,7 @@ static size_t _GD_DoBit(DIRFILE *D, gd_entry_t *E, int is_signed,
     tmpbuf = (uint64_t *)malloc(num_samp * sizeof(uint64_t));
   if (tmpbuf == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-    dreturn("%zi", 0);
+    dreturn("%i", 0);
     return 0;
   }
 
@@ -732,7 +732,7 @@ static size_t _GD_DoBit(DIRFILE *D, gd_entry_t *E, int is_signed,
 
   if (D->error != GD_E_OK) {
     free(tmpbuf);
-    dreturn("%zi", 0);
+    dreturn("%i", 0);
     return 0;
   }
 
@@ -750,7 +750,7 @@ static size_t _GD_DoBit(DIRFILE *D, gd_entry_t *E, int is_signed,
       return_type, n_read);
   free(tmpbuf);
 
-  dreturn("%zi", n_read);
+  dreturn("%zu", n_read);
   return n_read;
 }
 
@@ -761,18 +761,18 @@ static size_t _GD_DoPhase(DIRFILE *D, gd_entry_t *E, off64_t first_samp,
 {
   size_t n_read;
 
-  dtrace("%p, %p, %lli, %zi, 0x%x, %p", D, E, first_samp, num_samp, return_type,
+  dtrace("%p, %p, %lli, %zu, 0x%x, %p", D, E, first_samp, num_samp, return_type,
       data_out);
 
   if (_GD_BadInput(D, E, 0)) {
-    dreturn("%zi", 0);
+    dreturn("%i", 0);
     return 0;
   }
 
   n_read = _GD_DoField(D, E->e->entry[0], E->e->repr[0], first_samp + E->shift,
       num_samp, return_type, data_out);
 
-  dreturn("%zi", n_read);
+  dreturn("%zu", n_read);
   return n_read;
 }
 
@@ -784,19 +784,19 @@ static size_t _GD_DoLinterp(DIRFILE *D, gd_entry_t* E, off64_t first_samp,
   size_t n_read = 0;
   double* data_in;
 
-  dtrace("%p, %p, %lli, %zi, 0x%x, %p", D, E, first_samp, num_samp, return_type,
+  dtrace("%p, %p, %lli, %zu, 0x%x, %p", D, E, first_samp, num_samp, return_type,
       data_out);
 
   if (E->e->table_len < 0) {
     _GD_ReadLinterpFile(D, E);
     if (D->error != GD_E_OK) {
-      dreturn("%zi", 0);
+      dreturn("%i", 0);
       return 0;
     }
   }
 
   if (_GD_BadInput(D, E, 0)) {
-    dreturn("%zi", 0);
+    dreturn("%i", 0);
     return 0;
   }
 
@@ -805,7 +805,7 @@ static size_t _GD_DoLinterp(DIRFILE *D, gd_entry_t* E, off64_t first_samp,
 
   if (D->error) {
     free(data_in);
-    dreturn("%zi", 0);
+    dreturn("%i", 0);
     return 0;
   }
 
@@ -814,7 +814,7 @@ static size_t _GD_DoLinterp(DIRFILE *D, gd_entry_t* E, off64_t first_samp,
 
   if (D->error != GD_E_OK) {
     free(data_in);
-    dreturn("%zi", 0);
+    dreturn("%i", 0);
     return 0;
   }
 
@@ -826,7 +826,7 @@ static size_t _GD_DoLinterp(DIRFILE *D, gd_entry_t* E, off64_t first_samp,
         E->e->table_len);
 
   free(data_in);
-  dreturn("%zi", n_read);
+  dreturn("%zu", n_read);
   return n_read;
 }
 
@@ -837,11 +837,11 @@ static size_t _GD_DoPolynom(DIRFILE *D, gd_entry_t *E, off64_t first_samp,
 {
   size_t n_read;
 
-  dtrace("%p, %p, %lli, %zi, 0x%x, %p", D, E, first_samp, num_samp, return_type,
+  dtrace("%p, %p, %lli, %zu, 0x%x, %p", D, E, first_samp, num_samp, return_type,
       data_out);
 
   if (_GD_BadInput(D, E, 0)) {
-    dreturn("%zi", 0);
+    dreturn("%i", 0);
     return 0;
   }
 
@@ -850,13 +850,13 @@ static size_t _GD_DoPolynom(DIRFILE *D, gd_entry_t *E, off64_t first_samp,
       return_type, data_out);
 
   if (D->error != GD_E_OK) {
-    dreturn("%zi", 0);
+    dreturn("%i", 0);
     return 0;
   }
 
   /* Nothing to polynomise */
   if (n_read == 0) {
-    dreturn("%zi", 0);
+    dreturn("%i", 0);
     return 0;
   }
 
@@ -865,7 +865,7 @@ static size_t _GD_DoPolynom(DIRFILE *D, gd_entry_t *E, off64_t first_samp,
   else
     _GD_PolynomData(D, data_out, return_type, n_read, E->poly_ord, E->a);
 
-  dreturn("%zi", n_read);
+  dreturn("%zu", n_read);
   return n_read;
 }
 
@@ -899,12 +899,12 @@ static size_t _GD_DoConst(DIRFILE *D, const gd_entry_t *E,
  */
 static size_t _GD_DoString(gd_entry_t *E, size_t num_samp, void *data_out)
 {
-  dtrace("%p, %zi, %p", E, num_samp, data_out);
+  dtrace("%p, %zu, %p", E, num_samp, data_out);
 
   if (num_samp > 0 && data_out != NULL)
     strncpy(data_out, E->e->string, num_samp); 
 
-  dreturn("%i", strlen(E->e->string) + 1);
+  dreturn("%zu", strlen(E->e->string) + 1);
   return strlen(E->e->string) + 1;
 }
 
@@ -919,13 +919,13 @@ size_t _GD_DoField(DIRFILE *D, gd_entry_t *E, int repr, off64_t first_samp,
   const gd_type_t true_return_type = return_type; 
   int out_of_place = 0;
 
-  dtrace("%p, %p(%s), %i, %lli, %zi, 0x%x, %p", D, E, E->field, repr,
+  dtrace("%p, %p(%s), %i, %lli, %zu, 0x%x, %p", D, E, E->field, repr,
       first_samp, num_samp, return_type, data_out);
 
   if (++D->recurse_level >= GD_MAX_RECURSE_LEVEL) {
     _GD_SetError(D, GD_E_RECURSE_LEVEL, 0, NULL, 0, E->field);
     D->recurse_level--;
-    dreturn("%zi", 0);
+    dreturn("%i", 0);
     return 0;
   }
 
@@ -949,7 +949,7 @@ size_t _GD_DoField(DIRFILE *D, gd_entry_t *E, int repr, off64_t first_samp,
   if (~ntype & GD_COMPLEX) {
     if (repr == GD_REPR_IMAG) {
       memset(data_out, 0, GD_SIZE(return_type) * num_samp);
-      dreturn("%zi", num_samp);
+      dreturn("%zu", num_samp);
       return num_samp;
     } else if (repr == GD_REPR_REAL)
       repr = GD_REPR_NONE;
@@ -1018,7 +1018,7 @@ size_t _GD_DoField(DIRFILE *D, gd_entry_t *E, int repr, off64_t first_samp,
     free(data_out);
 
   D->recurse_level--;
-  dreturn("%zi", n_read);
+  dreturn("%zu", n_read);
   return n_read;
 }
 
@@ -1032,12 +1032,12 @@ size_t gd_getdata64(DIRFILE* D, const char *field_code_in, off64_t first_frame,
   char* field_code;
   int repr;
 
-  dtrace("%p, \"%s\", %lli, %lli, %zi, %zi, 0x%x, %p", D, field_code_in,
+  dtrace("%p, \"%s\", %lli, %lli, %zu, %zu, 0x%x, %p", D, field_code_in,
       first_frame, first_samp, num_frames, num_samp, return_type, data_out);
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%zi", 0);
+    dreturn("%i", 0);
     return 0;
   }
 
@@ -1075,7 +1075,7 @@ size_t gd_getdata64(DIRFILE* D, const char *field_code_in, off64_t first_frame,
   n_read = _GD_DoField(D, entry, repr, first_samp, num_samp, return_type,
       data_out);
 
-  dreturn("%zi", n_read);
+  dreturn("%zu", n_read);
   return n_read;
 }
 
