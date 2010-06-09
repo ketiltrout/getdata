@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH dirfile\-format 5 "1 May 2010" "Standards Version 7" "DATA FORMATS"
+.TH dirfile\-format 5 "9 June 2010" "Standards Version 7" "DATA FORMATS"
 .SH NAME
 dirfile\-format \(em the dirfile database format specification file
 .SH DESCRIPTION
@@ -852,7 +852,7 @@ This representation indicates the angle (in radians) between the positive real
 axis and the value (ie. the complex argument).  The argument is in the range
 [-pi, pi], and a branch cut exists along the negative real axis.  At the branch
 cut, -pi is returned if the imaginary part is -0, and pi is returned if the
-branch cut is +0.  If z=0, zero is returned.
+imaginary part is +0.  If z=0, zero is returned.
 .TP
 .B .i
 This representation indicates the projection of the value onto the imaginary
