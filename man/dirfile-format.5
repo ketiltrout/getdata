@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH dirfile\-format 5 "9 June 2010" "Standards Version 7" "DATA FORMATS"
+.TH dirfile\-format 5 "18 June 2010" "Standards Version 7" "DATA FORMATS"
 .SH NAME
 dirfile\-format \(em the dirfile database format specification file
 .SH DESCRIPTION
@@ -133,7 +133,16 @@ Any other character which is escaped is interpreted as the character itself.
 .RI ( i.e.
 .B \ec
 is interpreted as
-.BR c ).
+.BR c ;
+also, as pointed out above,
+.B \e"
+and
+.B \e#
+are interpreted as simply
+.B """"
+and
+.BR # ,
+without their special meanings).
 
 No token may contain the NULL character (ASCII 0x00 / U+0000).  Furthermore,
 although support is present to create UTF-8 byte sequences, tokens are not
