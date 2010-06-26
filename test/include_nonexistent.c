@@ -13,7 +13,7 @@ int main(void)
 {
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
-  const char* format_data = "\n";
+  const char* format_data = "#\n";
   int fd, r = 0;
 
   mkdir(filedir, 0777);

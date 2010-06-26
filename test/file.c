@@ -27,12 +27,12 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  fd = open(data, O_CREAT | O_EXCL | O_WRONLY, 0666);
+  fd = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
   write(fd, data_data, 256);
   close(fd);
 
   DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  const char *path = gd_get_raw_filename(D, "data");
+  const char *path = strdup(gd_get_raw_filename(D, "data"));
   int error = gd_error(D);
 
   gd_close(D);

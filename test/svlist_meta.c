@@ -1,4 +1,4 @@
-/* Retreive a list of string metafields */
+/* Retrieve a list of string metafields */
 #include "test.h"
 
 #include <stdlib.h>

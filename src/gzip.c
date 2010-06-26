@@ -112,7 +112,7 @@ off64_t _GD_GzipSize(struct _gd_raw_file *file, gd_type_t data_type)
 
   dtrace("%p, %x", file, data_type);
 
-  int fd = open(file->name, O_RDONLY);
+  int fd = open(file->name, O_RDONLY | O_BINARY);
   if (fd < 0) {
     dreturn("%i", -1);
     return -1;

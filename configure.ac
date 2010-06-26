@@ -194,7 +194,6 @@ case "${host}" in
   *-apple-darwin*) DL_LIBRARY_PATH="DYLD_LIBRARY_PATH" ;;
   *) DL_LIBRARY_PATH="LD_LIBRARY_PATH" ;;
 esac
-AC_SUBST(DL_LIBRARY_PATH)
 
 dnl Python bindings
 AC_ARG_ENABLE(python, AS_HELP_STRING([--disable-python],
@@ -254,6 +253,10 @@ echo "*** Initialising build system"
 echo
 AM_INIT_AUTOMAKE
 AC_PROG_LN_S
+AC_PROG_GREP
+AC_PROG_AWK
+AC_PROG_SED
+GD_MSYS_SHELL
 echo
 echo "*** Checking C compiler characteristics"
 echo
@@ -276,7 +279,8 @@ echo "*** Checking Fortran 90 compiler characteristics"
 echo
 AC_PROG_FC
 AC_PROG_FC_C_O
-# does $FC accept fortran code with .f90 extension?
+
+dnl does $FC accept fortran code with .f90 extension?
 AC_MSG_CHECKING([whether the Fortran 90 compiler works])
 AC_LANG_PUSH([Fortran])
 ac_ext="f90"
@@ -289,6 +293,12 @@ echo "*** Building libtool"
 echo
 LT_INIT([dlopen])
 AC_SUBST([LIBTOOL_DEPS])
+
+dnl Add -no-undefined, if required
+case "${host}" in
+  *-pc-mingw*) NO_UNDEFINED=" -no-undefined --enable-auto-import" ;;
+esac
+
 LT_OUTPUT
 
 dnl libltdl stuff
@@ -333,6 +343,23 @@ AC_LANG_POP([C++])
 GD_LANG_F77_COMPILER_INTEL
 GD_LANG_FC_COMPILER_INTEL
 
+AC_MSG_CHECKING([if we're linking against the Microsoft C Run-Time])
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([], [[#ifndef __MSVCRT__
+       choke me
+#endif
+]])],
+[gd_msvcrt=yes],
+[gd_msvcrt=no])
+AC_MSG_RESULT([$gd_msvcrt])
+
+
+if test "$gd_msvcrt" = "yes"; then
+  AC_DEFINE([__MSVCRT_VERSION__], [0x601],
+            [ If compiling aginst the MSVCRT, define to the minimum version ])
+fi
+
+dnl We define this to allow us to use off64_t in addition to the usual off_t
+
 dnl check if we found a C++ compiler
 if test "x$CXX" == "x"; then
   make_cxxbindings=no
@@ -351,7 +378,6 @@ fi
 
 dnl F77 stuff
 if test "x$make_f77bindings" != "xno"; then
-  AC_PROG_SED
   AC_CHECK_PROGS([DIFF], [diff], [not found])
 
   if test "x$DIFF" = "xnot found"; then
@@ -378,7 +404,12 @@ if test "x${use_modules}" != "xno"; then
 fi
 
 dnl functions
-AC_CHECK_FUNCS([strtoll strtoull])
+AC_CHECK_FUNCS([_commit fchmod _fdopen fsync gmtime_r _lseeki64 _mkdir mkstemp \
+                _open _read _rmdir stat64 _stat64 strtoll strtoull _unlink \
+                _write])
+AC_FUNC_STRERROR_R
+
+dnl AC_MSG_CHECKING([for _
 
 dnl headers
 echo
@@ -386,6 +417,29 @@ echo "*** Looking for additional header files"
 echo
 AC_CHECK_HEADERS([complex.h fcntl.h libgen.h])
 AC_HEADER_DIRENT
+
+AC_CHECK_HEADERS([io.h])
+
+AC_MSG_CHECKING([whether mkdir accepts two arguments])
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([
+#if HAVE_IO_H
+#include <io.h>
+#endif
+], [[
+#ifdef HAVE__MKDIR
+_mkdir("x", 00777);
+#else
+mkdir("x", 00777);
+#endif
+]])],
+[gd_2arg_mkdir=yes],
+[gd_2arg_mkdir=no])
+AC_MSG_RESULT([$gd_2arg_mkdir])
+
+if test $gd_2arg_mkdir = "no"; then
+  AC_DEFINE([MKDIR_NO_MODE], [1],
+            [ Define to 1 if the `mkdir' function takes only one argument.])
+fi dnl`
 
 dnl Declare a few feature test macros
 AC_DEFINE([_BSD_SOURCE], [], [ Expose BSD-derived definitions ])
@@ -411,6 +465,7 @@ AC_TYPE_UINT32_T
 AC_TYPE_INT32_T
 AC_TYPE_UINT64_T
 AC_TYPE_INT64_T
+
 AC_CHECK_TYPES([complex float, complex double],,,
 [
 #ifdef HAVE_COMPLEX_H
@@ -418,7 +473,15 @@ AC_CHECK_TYPES([complex float, complex double],,,
 #endif
 ])
 
-dnl We define this to allow us to use off64_t in addition to the usual off_t
+
+AC_CHECK_TYPES([struct stat64, struct __stat64],,,
+[
+#ifdef STDC_HEADERS
+#include <sys/types.h>
+#include <sys/stat.h>
+#endif
+])
+
 AC_DEFINE([_LARGEFILE64_SOURCE], [1],
           [ Additional functionality from LFS for large files. ])
 dnl We use off64_t to probe whether to include the LFS transitional API.
@@ -543,9 +606,9 @@ fi
 
 dnl external encodings
 GD_CHECK_ENCODING([bzip2],[bz2],[BZ2_bzReadOpen],[bzlib.h],[bzip2],[bunzip2])
-GD_CHECK_ENCODING([slim],[slim],[slimopen],[slimlib.h],[slim],[unslim])
-GD_CHECK_ENCODING([gzip],[z],[gzopen],[zlib.h],[gzip],[gunzip])
-GD_CHECK_ENCODING([lzma],[lzma],[lzma_auto_decoder],[lzma.h],[xz],[])
+GD_CHECK_ENCODING([slim],[slim],[slimopen],[slimlib.h],[slim],[unslim],[])
+GD_CHECK_ENCODING([gzip],[z],[gzopen],[zlib.h],[gzip],[gunzip],[])
+GD_CHECK_ENCODING([lzma],[lzma],[lzma_auto_decoder],[lzma.h],[xz],[],[])
 
 dnl Calculate absolute docdir
 cat <<EOF > conftest.sh
@@ -594,7 +657,7 @@ AC_CONFIG_FILES([src/getdata.pc])
 AC_CONFIG_FILES([test/Makefile])
 AC_CONFIG_FILES([util/Makefile])
 
-# Automake conditionals
+dnl Automake conditionals
 AM_CONDITIONAL(GETDATA_DEBUG, [test "x$enable_debug" == "xyes"])
 AM_CONDITIONAL(GNU_C_COMPILER, [test "x$gd_cv_c_compiler_intel" == "xno"]dnl
                [-a "x$ac_cv_c_compiler_gnu" == "xyes"])
@@ -616,6 +679,9 @@ AM_CONDITIONAL(MAKE_F95BINDINGS, [test "x$make_f95bindings" = "xyes"])
 AM_CONDITIONAL(MAKE_PYBINDINGS, [test "x$make_pybindings" = "xyes"])
 AM_CONDITIONAL(MAKE_IDLBINDINGS, [test "x$make_idlbindings" = "xyes"])
 AM_CONDITIONAL(USE_MODULES, [test "x$use_modules" != "xno"])
+
+dnl we do this here to avoid screwing up other tests
+LDFLAGS="${LDFLAGS}${NO_UNDEFINED}"
 
 AC_OUTPUT
 

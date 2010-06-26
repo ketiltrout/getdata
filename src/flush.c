@@ -338,14 +338,14 @@ static void _GD_FlushFragment(DIRFILE* D, int i)
   snprintf(temp_file, name_len + 15, "%s/format_XXXXXX", D->name);
   fd = mkstemp(temp_file);
   if (fd == -1) {
-    _GD_SetError(D, GD_E_OPEN_INCLUDE, errno, NULL, 0, temp_file);
+    _GD_SetError(D, GD_E_OPEN_INCLUDE, errno, "", 0, temp_file);
     free(temp_file);
     dreturnvoid();
     return;
   }
-  stream = fdopen(fd, "w");
+  stream = fdopen(fd, "w+");
   if (stream == NULL) {
-    _GD_SetError(D, GD_E_OPEN_INCLUDE, errno, NULL, 0, temp_file);
+    _GD_SetError(D, GD_E_OPEN_INCLUDE, errno, "", 0, temp_file);
     free(temp_file);
     dreturnvoid();
     return;
@@ -459,7 +459,9 @@ static void _GD_FlushFragment(DIRFILE* D, int i)
   /* That's all, flush, sync, and close */
   fflush(stream);
   fsync(fd);
+#ifdef HAVE_FCHMOD  
   fchmod(fd, mode);
+#endif
   fclose(stream);
 
   /* If no error was encountered, move the temporary file over the
@@ -470,8 +472,8 @@ static void _GD_FlushFragment(DIRFILE* D, int i)
     dreturnvoid();
     return;
     /* Only assume we've synced the file if the rename succeeds */
-  } else if (rename(temp_file, D->fragment[i].cname)) {
-    _GD_SetError(D, GD_E_OPEN_INCLUDE, errno, NULL, 0, D->fragment[i].cname);
+  } else if (_GD_Rename(temp_file, D->fragment[i].cname)) {
+    _GD_SetError(D, GD_E_OPEN_INCLUDE, errno, "", 0, D->fragment[i].cname);
     unlink(temp_file);
     free(temp_file);
     dreturnvoid();

@@ -30,7 +30,7 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  fd = open(data, O_CREAT | O_EXCL | O_WRONLY, 0666);
+  fd = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
   write(fd, data_data, 128 * sizeof(uint16_t));
   close(fd);
 
@@ -47,7 +47,7 @@ int main(void)
   CHECKI(error, 0);
   CHECKI(n, 8);
   for (i = 0; i < 8; ++i)
-    CHECKUi(i,c[i], 0x5028 + i * 0x0201);
+    CHECKXi(i,c[i], 0x5028 + i * 0x0201);
 
   return r;
 }

@@ -24,6 +24,7 @@
 #include <inttypes.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <sys/types.h>
 #include <sys/stat.h>
 #include <math.h>
 #include <stdlib.h>
@@ -281,7 +282,7 @@ static unsigned long _GD_ResolveEncoding(const char* name, unsigned long scheme,
   char candidate[FILENAME_MAX];
   char* ptr;
   int i, len = strlen(name);
-  struct stat64 statbuf;
+  gd_stat64_t statbuf;
 
   dtrace("\"%s\", 0x%08lx, %p", name, scheme, file);
 
@@ -293,7 +294,7 @@ static unsigned long _GD_ResolveEncoding(const char* name, unsigned long scheme,
     if (scheme == GD_AUTO_ENCODED || scheme == _gd_ef[i].scheme) {
       strcpy(ptr, _gd_ef[i].ext);
 
-      if (stat64(candidate, &statbuf) == 0) 
+      if (gd_stat64(candidate, &statbuf) == 0) 
         if (S_ISREG(statbuf.st_mode)) {
           if (file != NULL)
             file->encoding = i;
@@ -581,7 +582,7 @@ int _GD_GenericTouch(struct _gd_raw_file* file)
 {
   dtrace("%p", file);
 
-  int fd = open(file->name, O_RDWR | O_CREAT | O_TRUNC, 0666);
+  int fd = open(file->name, O_RDWR | O_CREAT | O_TRUNC | O_BINARY, 0666);
 
   if (fd != -1)
     fd = close(fd);
@@ -604,7 +605,7 @@ int _GD_GenericMove(struct _gd_raw_file* file, char* new_path)
 {
   dtrace("%p, \"%s\"", file, new_path);
 
-  int r = rename(file->name, new_path);
+  int r = _GD_Rename(file->name, new_path);
 
   int rename_errno = errno;
 

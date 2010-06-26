@@ -2,6 +2,7 @@
 #include "test.h"
 
 #include <stdlib.h>
+#include <errno.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -17,6 +18,12 @@ int main(void)
   mkdir(filedir, 0777);
   close(open(format, O_CREAT | O_EXCL | O_WRONLY, 0666));
   chmod(filedir, 0555);
+
+  /* ensure filesystem honours read-onlyness */
+  if (!unlink(format) || errno != EACCES) {
+    rmdir(filedir);
+    return 77;
+  }
 
   DIRFILE* D = gd_open(filedir, GD_RDWR | GD_TRUNC);
 

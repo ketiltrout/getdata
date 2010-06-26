@@ -34,13 +34,13 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  fd = open(data, O_CREAT | O_EXCL | O_WRONLY, 0666);
+  fd = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
   write(fd, data_data, 256 * sizeof(uint16_t));
   close(fd);
 
   /* compress */
   snprintf(command, 4096, "%s -k %s > /dev/null", SLIM, data);
-  if (system(command)) {
+  if (gd_system(command)) {
     perror("command");
     r = 1;
   }

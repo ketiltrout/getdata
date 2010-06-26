@@ -31,13 +31,13 @@ int main(void)
   write(i, format_data, strlen(format_data));
   close(i);
 
-  i = open(data, O_CREAT | O_EXCL | O_WRONLY, 0666);
+  i = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
   write(i, data_data, 256 * sizeof(uint16_t));
   close(i);
 
   /* compress */
   snprintf(command, 4096, "%s -f %s > /dev/null", GZIP, data);
-  if (system(command))
+  if (gd_system(command))
     return 1;
 
 #ifdef USE_GZIP

@@ -72,8 +72,8 @@ int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,
   /* Otherwise, try to open the file */
   if ((D->flags & GD_ACCMODE) == GD_RDWR) {
     i = open(temp_buf1, O_RDWR | ((*flags & GD_CREAT) ? O_CREAT : 0) |
-        ((*flags & GD_TRUNC) ? O_TRUNC : 0) | ((*flags & GD_EXCL) ? O_EXCL : 0),
-        0666);
+        ((*flags & GD_TRUNC) ? O_TRUNC : 0) | ((*flags & GD_EXCL) ? O_EXCL : 0)
+        | O_BINARY, 0666);
     if (i < 0) {
       _GD_SetError(D, GD_E_OPEN_INCLUDE, errno, format_file, linenum,
           temp_buf1);

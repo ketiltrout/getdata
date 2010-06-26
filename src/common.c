@@ -247,7 +247,7 @@ void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E)
 
   E->e->complex_table = 0;
 
-  fp = fopen(E->e->table_path, "r");
+  fp = fopen(E->e->table_path, "r" FOPEN_TEXT);
   if (fp == NULL) {
     _GD_MakeDummyLinterp(D, E->e);
     _GD_SetError(D, GD_E_OPEN_LINFILE, GD_E_LINFILE_OPEN, NULL, 0,

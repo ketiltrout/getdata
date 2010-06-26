@@ -36,6 +36,10 @@
 /* For the C99 integer types */
 #include <inttypes.h>
 
+#ifdef HAVE_IO_H
+#  include <io.h>
+#endif
+
 /* Type conventions:
  *
  *  - samples per frame is always gd_spf_t (aka uin16_t)
@@ -91,6 +95,22 @@ const char* _gd_colsub(void);
 #define dwatch(...)
 #endif
 
+#ifndef O_BINARY
+#define O_BINARY 0
+#endif
+#ifndef O_TEXT
+#define O_TEXT 0
+#define FOPEN_TEXT
+#else
+#define FOPEN_TEXT "t"
+#endif
+
+/* The Microsoft CRT appears to treat %hh as %h */
+#ifdef __MSVCRT__
+#define NO_8BIT_INT_PREFIX
+#endif
+
+/* function aliases */
 #ifndef HAVE_STRTOLL
 #  define strtoll strtol
 #endif
@@ -98,6 +118,81 @@ const char* _gd_colsub(void);
 #ifndef HAVE_STRTOULL
 #  define stroull strtoul
 #endif
+
+#ifdef HAVE__FDOPEN
+#define fdopen _fdopen
+#endif
+
+#if !HAVE_FSYNC && HAVE__COMMIT
+#  define fsync _commit
+#endif
+
+#ifndef HAVE_GMTIME_R
+#include <time.h>
+struct tm *gmtime_r(const time_t *timep, struct tm *result);
+#endif
+
+#ifdef HAVE__LSEEKI64
+#define lseek64 (off64_t)_lseeki64
+#endif
+
+#if MKDIR_NO_MODE
+#ifdef HAVE__MKDIR
+#define mkdir(f,m) _mkdir(f)
+#else
+#define mkdir(f,m) mkdir(f)
+#endif
+#endif
+
+#ifndef HAVE_MKSTEMP
+int mkstemp(char*);
+#endif
+
+#ifdef HAVE__OPEN
+#define open _open
+#endif
+
+#ifdef HAVE__READ
+#define read _read
+#endif
+
+/* rename shenanigans: MSVCRT's rename doesn't overwrite existing files, so
+ * we have to make a rename function that will, otherwise we just use the
+ * system function. */
+#ifdef __MSVCRT__
+int _GD_Rename(const char*, const char*);
+#else
+#define _GD_Rename rename
+#endif
+
+#ifdef HAVE__RMDIR
+#define rmdir _rmdir
+#endif
+
+#if HAVE_STAT64
+#  define gd_stat64 stat64
+#elif HAVE__STAT64
+#  define gd_stat64 _stat64
+#endif
+
+#if HAVE_STRUCT_STAT64
+typedef struct stat64 gd_stat64_t;
+#elif HAVE_STRUCT___STAT64
+typedef struct __stat64 gd_stat64_t;
+#endif
+
+#if ! HAVE_DECL_STRERROR_R
+int strerror_r(int, char*, size_t);
+#endif
+
+#ifdef HAVE__UNLINK
+#define unlink _unlink
+#endif
+
+#ifdef HAVE__WRITE
+#define write _write
+#endif
+
 
 /* maximum number of recursions */
 #define GD_MAX_RECURSE_LEVEL  32

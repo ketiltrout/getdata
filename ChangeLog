@@ -1,3 +1,47 @@
+2010-06-25   D. V. Wiebe <getdata@ketiltrout.net>   svn:409
+  * test/: Include O_BINARY in open() calls.  Write "#\n" instead of "\n" in
+	empty fragments.
+	* test/test.h (gd_system): Added.  Use PRIxxx codes for format specifiers.
+	* test/trunc_rofs.c test/open_eaccess.c: Skip the test if the FS doesn't
+	honour access permissions.
+	* test/ascii_put.c: Read data as ints.
+	* test/legacy_put.c: Skip the stat() check.
+
+  * src/open.c (_GD_CreateDirfile): Use mode "rb" in fopen() call. 
+  * src/gzip.c (_GD_GzipSize) src/encoding.c (_GD_GenericTouch) src/include.c
+	(_GD_Include) src/raw.c (_GD_RawOpen): Include O_BINARY in open() calls.
+
+  * src/errors.c (gd_error_string): Handle STRERROR_R_CHAR_P.
+
+  * src/flush.c (_GD_FlushFragment): Skip fchmod() call unless HAVE_FCHMOD
+	defined.
+
+  * src/flush.c (_GD_FlushFragment) src/mod.c (_GD_Change) src/encoding.c
+	(_GD_GenericMove) src/raw.c (_GD_RawTemp): Replaced rename() with
+	_GD_Rename().
+
+  * src/encoding.c (_GD_ResolveEncoding) src/raw.c (_GD_RawSize): Use
+	gd_stat64_t and gd_stat64().
+
+  * src/ascii.c (_GD_AsciiOpen _GD_AsciiSize _GD_AsciiTemp): Use O_TEXT in open
+	call.
+  * src/ascii.c (_GD_ScanFormat _GD_AsciiRead): Handle NO_8BIT_INT_PREFIX.
+
+  * src/internal.h: Include <io.h> for Win32.  Define O_BINARY, O_TEXT if
+	necessary.  Define NO_8BIT_INT_PREFIX when appropriate.  Handle Win32
+	function aliases.
+
+  * src/compat.c: Added.
+
+  * src/common.c (GD_ReadLinterpFile): Call fopen() with FOPEN_TEXT.
+
+  * bindings/cxx/test/big_test.cpp bindings/cxx/test/putdata.cpp
+	bindings/cxx/test/spf.cpp bindings/cxx/test/getdata.cpp
+	bindings/cxx/test/nframes.cpp: Handle Win32 stuff.
+
+  * configure.ac: Call GD_MSYS_SHELL.  Add various Win32 checks.
+	* m4/win32.m4: Added.
+
 2010-05-22   D. V. Wiebe <getdata@ketiltrout.net>   svn:401, 402
 	* test/: Update for new function names.  Modernise error reporting.
 	* test/test.h: Added.
@@ -38,7 +82,7 @@
 
 	* bindings/python/pydirfile.c bindings/python/pyfragment.c: De-LFSise.
 	* bindings/python/pydirfile.h: Define _FILE_OFFSET_BITS.
-	
+
 	* bindings/cxx/fragment.cpp: De-LFSise.
 	* bindings/cxx/getdata/indexentry.h bindings/cxx/getdata/rawentry.h
 	bindings/cxx/getdata/dirfile.h bindings/cxx/getdata/linterpentry.h
@@ -189,7 +233,7 @@
 
 2010-02-03   D. V. Wiebe <getdata@ketiltrout.net>   svn:346
 	GetData-0.6.1rc1:
-	
+
 	* test/convert_complex128_float64.c test/add_cpolynom.c
 	test/convert_float32_complex128.c test/get_const_complex.c
 	test/get_complex128.c test/convert_float64_complex128.c test/repr_uint64.c
@@ -405,7 +449,7 @@
 	* bindings/make_parameters.c: Add E_FORMAT_LITERAL (=GDF_LT).
 
 	* bindings/idl/getdata.c: Make SHIFT long.
-	
+
 	* bindings/idl/getdata.c (gdidl_dirfile_alter_encoding
 	gdidl_dirfile_alter_endianness gdidl_dirfile_alter_frameoffset
 	gdidl_dirfile_protect): fragment_index is GD_ALL_FRAGMENTS by default.
@@ -427,7 +471,7 @@
 
 	* src/entry.c (get_entry get_entry_type get_fragment_index
 	dirfile_validate): Throw GD_E_BAD_REPR when necessary.
-	
+
 	* src/native.c (_GD_NativeType): Only calculate the entry if needed.
 	Properly calculate LINTERP and MULTIPLY native types.
 
@@ -442,7 +486,7 @@
 
 2009-10-16   D. V. Wiebe <getdata@ketiltrout.net>  svn:322
 	* test/madd.c: Properly initialise E.
-	
+
 	* src/getdata.c (_GD_DoRaw): Don't assume size_t is signed.
 
 	* src/flush.c (_GD_FlushFragment): Don't justify field names if they're very
@@ -500,7 +544,7 @@
 	dirfile_alter_phase dirfile_alter_polynom dirfile_alter_cpolynom):
 	Initialise E.scalar[].
 	* src/add.c (_GD_Add): Allow adding of non-literal scalars via dirfile_add.
-	
+
 	* src/mod.c (_GD_AlterScalar): Added.
 	* src/mod.c (_GD_Change): Call _GD_AlterScalar to allow scalar
 	modifications.
@@ -619,7 +663,7 @@
 	make_parameters.
 
 	* bindings/python/test/callback.py: Clean-up after test.o
-	
+
 	* bindings/python/test/Makefile.am: Fix for rpath builds.
 
 	* bindings/idl/test: Added.
@@ -644,7 +688,7 @@
 	* bindings/idl/getdata.c: IDL 6 appears to be adding INT type keyword
 	paramters to the existing value, instead of replacing them.  Fix the
 	bindings to allow for this.
-	
+
 	* bindings/idl/getdata.c (gdidl_dirfile_alter_lincom
 	gdidl_dirfile_alter_polynom): Initialise n_fields/poly_ord if necessary.
 	Fix complex data conversion.
@@ -655,11 +699,11 @@
 	* bindings/idl/getdata.c (gdidl_dirfile_discard): Removed.
 
 	* bindings/idl/getdata.c (gdidl_get_entry): Handle look-up failure.
-	
+
 	* bindings/idl/getdata.c (IDL_Load): Initialise the GD_CONSTANTS structure.
 
 	* configure.ac: Add getdata_extra macro.o
-	
+
 	* man/dirfile_alter_encoding.3.in man/dirfile_alter_entry.3 man/getdata.3
 	man/dirfile_add_bit.3 man/dirfile_alter_bit.3 man/dirfile_cbopen.3
 	man/dirfile_add.3 man/dirfile-format.5 man/dirfile.5 man/get_constant.3
@@ -675,7 +719,7 @@
 	test/convert_complex128_complex64.c test/repr_r.c test/get_const_repr.c
 	test/convert_complex64_float64.c test/repr_real_i.c: Clean compiler
 	warnings.
-	
+
 	* src/open.c (dirfile_parser_callback): Changed the parser callback protoype
 	again.  This is hopefully less likely to break things in the future.
 	* src/getdata.h.in: Define two new types: gd_parser_data_t, a structure
@@ -901,7 +945,7 @@
 	* src/add.c (dirfile_madd_clincom): Set comp_scal correctly.
 
 	* src/add.c (dirfile_madd_const): Search for the correct field code.
-	
+
 	* bindings/python/test/callback.py bindings/python/test/tst_getdata.py:
 	Added.
 
@@ -1048,7 +1092,7 @@
 	* m4/ax_compare_version.m4 m4/idl.m4: Added.
 	* m4/idl.m4: Added.
 	* bindings/idl: Added.
-	
+
 	* src/getdata.h.in: Renamed GD_MAX_POLYNOM to GD_MAX_POLYORD to remove
 	confusion as to what this actually is.
 
@@ -1225,7 +1269,7 @@
 	of n_fields before use.
 
 2009-01-16   D. V. Wiebe <getdata@ketiltrout.net>  svn:285
-	GetData 0.5.0 released.	
+	GetData 0.5.0 released.
 
 2009-01-13   D. V. Wiebe <getdata@ketiltrout.net>  svn:283
 	GetData-0.5.0rc4:
@@ -1247,7 +1291,7 @@
 	* src/gzip.c (_GD_GzipSize): Byte swap size on big endian machines.
 
 	* src/flush.c (_GD_FlushFragment): Static.
-	
+
 	* bindings/cxx/dirfile.cpp (Dirfile::Add Dirfile::MAdd): Don't return before
 	setting the dirfile for the entry.
 
@@ -1347,7 +1391,7 @@
 	* bindings/f77/fgetdata.c bindings/f77/getdata.f.in bindings/f77/fgetdata.h
 	bindings/f77/getdata.f90.in README.f77 bindings/f77/test/gdfget.f: Convert
 	all Fortran-77 function names from GDFxxx to GDxxxx.
-	
+
 	* test/alter_mspec.c test/alter_spec.c: Added.
 
 	* src/mod.c (dirfile_alter_spec dirfile_malter_spec): Call
@@ -1574,7 +1618,7 @@
 2008-11-27   D. V. Wiebe <getdata@ketiltrout.net>  svn:250
 	* test/open_cb_ignore.c test/open_cb_cont.c test/open_cb_abort.c
 	test/open_cb_rescan.c: Added.
-	
+
 	* src/open.c (_GD_ParseFragment): Properly ABORT or RESCAN.
 
 	* src/internal.h src/getdata.h.in: GD_SYNTAX_* macros should be public.
@@ -1717,7 +1761,7 @@
 	input file if not already open.  Check seek success.  Seek on both files.
 
 	* src/getdata.h.in legacy.c: Add GD_E_BAD_ENDIANNESS.
-	
+
 	* src/putdata.c (_GD_DoRawOut): Don't divide n_wrote by size.
 
 	* src/slim.c (_GD_SlimSeek) src/raw.c (_GD_RawSeek): Return samples, not
@@ -1817,7 +1861,7 @@
 	* src/foffs.c: Added.
 	* src/del.c: Added.
 	* src/globals.c: Added.
-	
+
 	* src/encoding.c: Split from getdata.c.
 
 2008-11-14   D. V. Wiebe <getdata@ketiltrout.net>  svn:216
@@ -1879,7 +1923,7 @@
 
 2008-10-21   D. V. Wiebe <getdata@ketiltrout.net>  svn:184
 	* src/open.c: Fix PROTECT parsing.
-	
+
 	* src/putdata.c: Check protection for STRING, not PHASE.
 
 	* src/putdata.c (_GD_DoStringOut): Don't de-allocate old string until
@@ -2018,7 +2062,7 @@
 
 	* src/format_list.c: Renamed get_format_filename to get_fragmentname and
 	get_nformats to get_nfragments.  Bindings changed.
-	
+
 	* src/constant.c (get_constant put_constant): Reutrn -1 on error.
 
 2008-10-16   D. V. Wiebe <getdata@ketiltrout.net>  svn:161
@@ -2083,7 +2127,7 @@
 	get_<foo>() functions.
 
 	* src/getdata.h.in: Add some missing public prototypes.
-	
+
 	* src/nfields.c src/nmeta.c: Removed the _ after nmeta in public function
 	names.
 	* test/nmeta_type.c test/nmeta_vectors_parent.c test/nmeta_parent.c
@@ -2269,7 +2313,7 @@
 
 	* src/raw.c (_GD_RawTouch): Add mode to open call (patch from Matthew
 	Truch).
-	
+
 	* src/getdata.h.in: Add GD_E_DIMENSION
 	* src/getdata.c src/putdata.c src/spf.c: Detect and fail if a vector type
 	contains an input field that's a scalar.
@@ -2772,7 +2816,7 @@
 2008-09-01  D. V. Wiebe <getdata@ketiltrout.net>  svn:57
 	* man/get_error_string.3 src/errors.c: Renamed getdata_error_string to
 	get_error_string so people don't think its relevance is exclusive to getdata()
-	
+
 	* src/internal.h: Suberror codes may not = 0.
 
 	* README.cxx README.f77 README.f95 bindings/cxx/dirfile.cpp
@@ -2785,10 +2829,10 @@
 	dirfile_close calls dirfile_flush and might now fail (if fsync(2) or
 	close(2) returns with an error); ergo, it now returns an integer success
 	value, since D->error can't be checked if the call was successful.
-	
+
 	* src/close.c (dirfile_close): per the man page, now always succeeds when
 	passed NULL.
-	
+
 	* man/dirfile-format.5 src/open.c test/Makefile.am test/parse_endian_slash.c
 	test/parse_foffs_slash.c test/parse_include_slash.c
 	test/parse_version_slash.c: reserved words in the format file may now have
@@ -2870,7 +2914,7 @@
 2008-08-25  D. V. Wiebe <getdata@ketiltrout.net>  svn:36 svn:37
 	* src/getdata.c src/getdata_internal.h src/putdata.c src/spf.c: Add
 	_GD_InternalError()
-	
+
 	* src/errors.c: Rename _GD_SetGetDataError and _GD_ClearGetDataError to
 	_GD_SetError and _GD_ClearError
 
@@ -2950,7 +2994,7 @@
 
 2008-08-12  D. V. Wiebe <getdata@ketiltrout.net>  svn:6
 	* src/getdata.c (_GD_SetGetDataError): don't crash on NULL
-	
+
 	* src/putdata.c (_GD_DoPhaseOut): add
 
 2008-08-12  D. V. Wiebe <getdata@ketiltrout.net>  svn:5

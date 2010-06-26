@@ -18,7 +18,7 @@ int main(void)
 
   mkdir(filedir, 0777);
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
+  fd = open(format, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
   write(fd, format_data, strlen(format_data));
   close(fd);
 

@@ -46,7 +46,7 @@ int main(void)
 
   gd_close(D);
 
-  fd = open(data, O_RDONLY);
+  fd = open(data, O_RDONLY | O_BINARY);
   lseek(fd, 5 * sizeof(uint32_t), SEEK_SET);
   read(fd, &d, sizeof(uint32_t));
   close(fd);

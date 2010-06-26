@@ -43,11 +43,11 @@ int main(void)
   write(fd, format2_data, strlen(format2_data));
   close(fd);
 
-  fd = open(data1, O_CREAT | O_EXCL | O_WRONLY, 0666);
+  fd = open(data1, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
   write(fd, data_data, 4);
   close(fd);
 
-  fd = open(data2, O_CREAT | O_EXCL | O_WRONLY, 0666);
+  fd = open(data2, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
   write(fd, data_data, 4);
   close(fd);
 

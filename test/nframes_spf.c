@@ -32,7 +32,7 @@ int main(void)
 
   mkdir(filedir, 0777);
 
-  fd = open(data, O_CREAT | O_EXCL | O_WRONLY, 0666);
+  fd = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
   write(fd, data, len);
   close(fd);
 

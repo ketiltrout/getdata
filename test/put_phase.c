@@ -42,7 +42,7 @@ int main(void)
   }
   CHECKI(buf.st_size, 46 * sizeof(int8_t));
 
-  fd = open(data, O_RDONLY);
+  fd = open(data, O_RDONLY | O_BINARY);
   i = 0;
   while (read(fd, &d, sizeof(int8_t))) {
     if (i < 38 || i > 46) {

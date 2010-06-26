@@ -260,9 +260,17 @@ char* gd_error_string(const DIRFILE* D, char* buffer, size_t buflen)
     }
 
     *op = '\0';
-    if (op < bufend - 1 && error_string[s].adderr)
+    if (op < bufend - 1 && error_string[s].adderr) {
+#if STRERROR_R_CHAR_P
+      char *ptr = strerror_r((error_string[s].adderr == 2) ? D->suberror :
+          D->error_line, op, bufend - op);
+      if (ptr != op)
+        strncpy(op, ptr, buend - op);
+#else
       strerror_r((error_string[s].adderr == 2) ? D->suberror : D->error_line,
           op, bufend - op);
+#endif
+    }
   }
 
   dreturn("\"%s\"", buffer);

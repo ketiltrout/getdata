@@ -37,7 +37,7 @@ int main(void)
   close(fd);
 
   DIRFILE* D = gd_open(filedir, GD_RDWR | GD_UNENCODED | GD_VERBOSE);
-  fd = open(data, O_CREAT | O_EXCL | O_WRONLY, 0666);
+  fd = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
   write(fd, data_data, 256);
   close(fd);
 
@@ -46,7 +46,7 @@ int main(void)
   int ge_ret =  gd_get_entry(D, "data", &E);
   gd_close(D);
 
-  fd = open(data, O_RDONLY);
+  fd = open(data, O_RDONLY | O_BINARY);
   i = 0;
   while (read(fd, &d, sizeof(uint8_t))) {
     CHECKUi(i,d,i + 11);

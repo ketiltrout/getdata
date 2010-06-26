@@ -23,7 +23,7 @@ int main(void)
   write(fd, format, strlen(format));
   close(fd);
 
-  close(open(data, O_CREAT | O_EXCL | O_WRONLY, 0666));
+  close(open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666));
 
   DIRFILE* D = gd_open(filedir, GD_RDWR | GD_TRUNC | GD_VERBOSE);
   int error = gd_error(D);

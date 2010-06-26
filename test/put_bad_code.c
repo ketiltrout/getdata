@@ -13,7 +13,7 @@ int main(void)
 {
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
-  const char* format_data = "\n";
+  const char* format_data = "#\n";
   unsigned char c = 0;
   int fd, r = 0;
 

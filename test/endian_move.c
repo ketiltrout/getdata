@@ -33,7 +33,7 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  fd = open(data, O_CREAT | O_EXCL | O_WRONLY, 0666);
+  fd = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
   write(fd, data_data, 256);
   close(fd);
 
@@ -44,7 +44,7 @@ int main(void)
 
   gd_close(D);
 
-  fd = open(data, O_RDONLY);
+  fd = open(data, O_RDONLY | O_BINARY);
   int i = 0;
 
   if (fd >= 0) {

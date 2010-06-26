@@ -1,4 +1,9 @@
 /* Retreiving the number of frames should succeed cleanly */
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#undef GETDATA_LEGACY_API
+#endif
+
 #include "getdata/dirfile.h"
 
 #include <stdlib.h>
@@ -8,6 +13,14 @@
 #include <string.h>
 #include <errno.h>
 #include <unistd.h>
+
+#if MKDIR_NO_MODE
+#ifdef HAVE__MKDIR
+#define mkdir(f,m) _mkdir(f)
+#else
+#define mkdir(f,m) mkdir(f)
+#endif
+#endif
 
 using namespace GetData;
 

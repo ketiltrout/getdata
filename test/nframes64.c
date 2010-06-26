@@ -1,5 +1,5 @@
 /* Retreiving the number of frames should succeed cleanly */
-#define _LARGEFILE64_SOURCE
+#define _LARGEFILE64_SOURCE 1
 
 #include "test.h"
 
@@ -26,7 +26,7 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  fd = open(data, O_CREAT | O_EXCL | O_WRONLY, 0666);
+  fd = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
   write(fd, data, len);
   close(fd);
 

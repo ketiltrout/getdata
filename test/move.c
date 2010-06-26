@@ -16,7 +16,7 @@ int main(void)
   const char* format = __TEST__ "dirfile/format";
   const char* format1 = __TEST__ "dirfile/format1";
   const char* format_data = "INCLUDE format1\ndata RAW UINT8 11";
-  const char* format1_data = "\n";
+  const char* format1_data = "#\n";
   int fd, r = 0;
   gd_entry_t E;
 

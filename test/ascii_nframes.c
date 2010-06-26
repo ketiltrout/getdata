@@ -24,7 +24,7 @@ int main(void)
   write(i, format_data, strlen(format_data));
   close(i);
 
-  stream = fopen(data, "w");
+  stream = fopen(data, "w" FOPEN_TEXT);
   for (i = 0; i < 256; ++i)
     fprintf(stream, "%i\n", i);
   fclose(stream);

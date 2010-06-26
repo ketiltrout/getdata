@@ -40,9 +40,10 @@ int _GD_AsciiOpen(struct _gd_raw_file* file, int mode, int creat)
   dtrace("%p, %i, %i", file, mode, creat);
 
   int fp = open(file->name, ((mode == GD_RDWR) ? O_RDWR : O_RDONLY) |
-      (creat ? O_CREAT : 0), 0666);
+      (creat ? O_CREAT : 0) | O_TEXT, 0666);
 
-  file->edata = fdopen(fp, (mode == GD_RDWR) ? "r+" : "r");
+  file->edata = fdopen(fp, (mode == GD_RDWR) ? "r+" FOPEN_TEXT :
+      "r" FOPEN_TEXT);
 
   if (file->edata != NULL) {
     file->fp = 0;
@@ -86,14 +87,18 @@ void _GD_ScanFormat(char* fmt, gd_type_t data_type)
 
   switch(data_type) {
     case GD_UINT8:
+#ifndef NO_8BIT_INT_PREFIX
       strcpy(fmt, "%" SCNu8);
       break;
-    case GD_INT8:
-      strcpy(fmt, "%" SCNi8);
-      break;
+#endif
     case GD_UINT16:
       strcpy(fmt, "%" SCNu16);
       break;
+    case GD_INT8:
+#ifndef NO_8BIT_INT_PREFIX
+      strcpy(fmt, "%" SCNi8);
+      break;
+#endif
     case GD_INT16:
       strcpy(fmt, "%" SCNi16);
       break;
@@ -135,6 +140,9 @@ ssize_t _GD_AsciiRead(struct _gd_raw_file *file, void *ptr, gd_type_t data_type,
   char fmt[50];
   size_t n = 0;
   ssize_t ret = 0;
+#ifdef NO_8BIT_INT_PREFIX
+  short int i16;
+#endif
 
   dtrace("%p, %p, 0x%x, %zu", file, ptr, data_type, nmemb);
 
@@ -156,12 +164,28 @@ ssize_t _GD_AsciiRead(struct _gd_raw_file *file, void *ptr, gd_type_t data_type,
       if (feof((FILE*)file->edata))
         break;
 
-      if (fscanf((FILE*)file->edata, fmt, (char*)ptr + GD_SIZE(data_type) * n)
-          < 1)
+
+#ifdef NO_8BIT_INT_PREFIX
+      if (GD_SIZE(data_type) == 1) {
+        if (fscanf((FILE*)file->edata, fmt, &i16) < 1) {
+          if (!feof((FILE*)file->edata))
+            ret = -1;
+          break;
+        }
+        if (data_type & GD_SIGNED)
+          *((int8_t*)ptr + GD_SIZE(data_type) * n) = (int8_t)i16;
+        else
+          *((uint8_t*)ptr + GD_SIZE(data_type) * n) = (uint8_t)i16;
+      } else
+#endif
       {
-        if (!feof((FILE*)file->edata))
-          ret = -1;
-        break;
+        if (fscanf((FILE*)file->edata, fmt, (char*)ptr + GD_SIZE(data_type) * n)
+            < 1)
+        {
+          if (!feof((FILE*)file->edata))
+            ret = -1;
+          break;
+        }
       }
     }
   }
@@ -332,7 +356,7 @@ off64_t _GD_AsciiSize(struct _gd_raw_file* file,
 
   off64_t n = 0;
 
-  stream = fopen(file->name, "r");
+  stream = fopen(file->name, "r" FOPEN_TEXT);
 
   if (stream == NULL) {
     dreturn("%i", -1);
@@ -362,7 +386,7 @@ int _GD_AsciiTemp(struct _gd_raw_file *file, int method)
     case GD_TEMP_OPEN:
       fp = mkstemp(file[1].name);
 
-      file[1].edata = fdopen(fp, "r+");
+      file[1].edata = fdopen(fp, "r+" FOPEN_TEXT);
 
       if (file[1].edata == NULL) {
         dreturn("%i", -1);
@@ -380,7 +404,7 @@ int _GD_AsciiTemp(struct _gd_raw_file *file, int method)
       else
         mode = stat_buf.st_mode;
 
-      if (!rename(file[1].name, file[0].name)) {
+      if (!_GD_Rename(file[1].name, file[0].name)) {
         chmod(file[0].name, mode);
         free(file[1].name);
         file[1].name = NULL;

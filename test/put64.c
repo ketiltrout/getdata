@@ -1,5 +1,5 @@
 /* Attempt to write UINT8 */
-#define _LARGEFILE64_SOURCE
+#define _LARGEFILE64_SOURCE 1
 
 #include "test.h"
 
@@ -43,7 +43,7 @@ int main(void)
   if (buf.st_size != 40 + 8 * sizeof(uint8_t))
     return 1;
 
-  fd = open(data, O_RDONLY);
+  fd = open(data, O_RDONLY | O_BINARY);
   i = 0;
   while (read(fd, &d, sizeof(uint8_t))) {
     if (i < 40 || i > 48) {

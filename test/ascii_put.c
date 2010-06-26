@@ -17,7 +17,8 @@ int main(void)
   const char* format = __TEST__ "dirfile/format";
   const char* data = __TEST__ "dirfile/data.txt";
   const char* format_data = "data RAW UINT8 8\n";
-  uint8_t c[8], d;
+  uint8_t c[8];
+  int d;
   int fd, i, r = 0;
   struct stat buf;
   FILE* stream;
@@ -41,10 +42,10 @@ int main(void)
   if (stat(data, &buf))
     return 1;
 
-  stream = fopen(data, "r");
+  stream = fopen(data, "r" FOPEN_TEXT);
   i = 0;
   for (;;) {
-    fscanf(stream, "%hhu", &d);
+    fscanf(stream, "%i", &d);
     if (feof(stream))
       break;
     if (i < 40 || i > 48) {

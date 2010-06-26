@@ -51,7 +51,7 @@ int main(void)
 
   gd_close(D);
 
-  fd = open(data, O_RDONLY);
+  fd = open(data, O_RDONLY | O_BINARY);
   lseek(fd, 5 * sizeof(float), SEEK_SET);
   read(fd, &u.f, sizeof(float));
   close(fd);

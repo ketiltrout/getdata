@@ -24,7 +24,7 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  close(open(data, O_CREAT | O_EXCL | O_WRONLY, 0444));
+  close(open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0444));
 
   DIRFILE* D = gd_open(filedir, GD_RDWR | GD_UNENCODED);
   int n = gd_putdata(D, "data", 5, 0, 1, 0, GD_UINT8, &c);

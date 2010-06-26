@@ -34,7 +34,7 @@ int _GD_RawOpen(struct _gd_raw_file* file, int mode, int creat)
   dtrace("%p, %i, %i", file, mode, creat);
 
   file->fp = open(file->name, ((mode == GD_RDWR) ? O_RDWR : O_RDONLY) |
-      (creat ? O_CREAT : 0), 0666);
+      (creat ? O_CREAT : 0) | O_BINARY, 0666);
 
   dreturn("%i", file->fp < 0);
   return (file->fp < 0);
@@ -45,7 +45,7 @@ off64_t _GD_RawSeek(struct _gd_raw_file* file, off64_t count,
 {
   dtrace("%p, %lli, %x, <unused>", file, (long long)count, data_type);
 
-  off64_t pos =  lseek64(file->fp, count * GD_SIZE(data_type), SEEK_SET);
+  off64_t pos = lseek64(file->fp, count * GD_SIZE(data_type), SEEK_SET);
 
   if (pos == -1) {
     dreturn("%i", -1);
@@ -103,11 +103,11 @@ int _GD_RawClose(struct _gd_raw_file *file)
 
 off64_t _GD_RawSize(struct _gd_raw_file *file, gd_type_t data_type)
 {
-  struct stat64 statbuf;
+  gd_stat64_t statbuf;
 
   dtrace("%p, %x", file, data_type);
 
-  if (stat64(file->name, &statbuf) < 0)  {
+  if (gd_stat64(file->name, &statbuf) < 0)  {
     dreturn("%lli", -1LL);
     return -1;
   }
@@ -142,7 +142,7 @@ int _GD_RawTemp(struct _gd_raw_file *file, int method)
       else
         mode = stat_buf.st_mode;
 
-      if (!rename(file[1].name, file[0].name)) {
+      if (!_GD_Rename(file[1].name, file[0].name)) {
         chmod(file[0].name, mode);
         free(file[1].name);
         file[1].name = NULL;

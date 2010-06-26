@@ -24,7 +24,7 @@ EXTRA_DIST = ChangeLog
 
 ACLOCAL_AMFLAGS = -I m4
 
-SUBDIRS = src util man . doc test bindings
+SUBDIRS = src . test bindings util man doc
 
 dist_doc_DATA = COPYING.DOC
 

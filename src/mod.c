@@ -396,7 +396,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
             if (_GD_SetTablePath(D, &Q, &Qe))
               break;
 
-          if (rename(E->e->table_path, Qe.table_path)) {
+          if (_GD_Rename(E->e->table_path, Qe.table_path)) {
             _GD_SetError(D, GD_E_RAW_IO, 0, E->e->table_path, errno, 0);
             break;
           }

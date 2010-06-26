@@ -13,8 +13,8 @@ int main(void)
 {
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
-  const char* format_data = "\n";
-  int fd;
+  const char* format_data = "#\n";
+  int fd, r = 0;
 
   mkdir(filedir, 0777);
 
@@ -31,5 +31,7 @@ int main(void)
   unlink(format);
   rmdir(filedir);
 
-  return (error != GD_E_BAD_CODE);
+  CHECKI(error, GD_E_BAD_CODE);
+
+  return r;
 }

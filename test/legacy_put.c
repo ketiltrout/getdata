@@ -33,11 +33,15 @@ int main(void)
   int error;
   int n = PutData(filedir, "data", 5, 0, 1, 0, 'c', c, &error);
 
+  /* Hmmm... the legacy API has no way to flush data to disk, so the following
+   * test may report a false negative */
+#if 0
   int stat_ret = stat(data, &buf);
   CHECKI(stat_ret, 0);
   CHECKI(buf.st_size, 40 + 8 * sizeof(uint8_t));
+#endif
 
-  fd = open(data, O_RDONLY);
+  fd = open(data, O_RDONLY | O_BINARY);
   i = 0;
   while (read(fd, &d, sizeof(uint8_t))) {
     if (i < 40 || i > 48) {

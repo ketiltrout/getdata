@@ -48,7 +48,7 @@ int main(void)
   int ge_ret =  gd_get_entry(D, "data", &E);
   gd_close(D);
 
-  fd = open(data, O_RDONLY);
+  fd = open(data, O_RDONLY | O_BINARY);
   i = 0;
 
   if (fd >= 0) {

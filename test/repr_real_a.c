@@ -31,7 +31,7 @@ int main(void)
   write(i, format_data, strlen(format_data));
   close(i);
 
-  i = open(data, O_CREAT | O_EXCL | O_WRONLY, 0666);
+  i = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
   write(i, data_data, 100 * sizeof(double));
   close(i);
 

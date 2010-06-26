@@ -17,7 +17,7 @@ int main(void)
   const char* format1 = __TEST__ "dirfile/format1";
   const char* data = __TEST__ "dirfile/data";
   const char* format_data = "/INCLUDE format1\ndata RAW UINT8 11";
-  const char* format1_data = "\n";
+  const char* format1_data = "#\n";
   unsigned char data_data[256];
   int fd, r = 0;
   gd_entry_t E;
@@ -36,7 +36,7 @@ int main(void)
   close(fd);
 
   DIRFILE* D = gd_open(filedir, GD_RDWR | GD_UNENCODED | GD_VERBOSE);
-  fd = open(data, O_CREAT | O_EXCL | O_WRONLY, 0666);
+  fd = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
   write(fd, data_data, 256);
   close(fd);
 

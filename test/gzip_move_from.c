@@ -42,13 +42,13 @@ int main(void)
   write(fd, format1_data, strlen(format1_data));
   close(fd);
 
-  fd = open(data, O_CREAT | O_EXCL | O_WRONLY, 0666);
+  fd = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
   write(fd, data_data, 128 * sizeof(uint16_t));
   close(fd);
 
   /* compress */
   snprintf(command, 4096, "%s -f %s > /dev/null", GZIP, data);
-  if (system(command))
+  if (gd_system(command))
     return 1;
 
 #ifdef USE_GZIP
@@ -64,7 +64,7 @@ int main(void)
 #ifdef USE_GZIP
   uint16_t d;
 
-  fd = open(data, O_RDONLY);
+  fd = open(data, O_RDONLY | O_BINARY);
   int i = 0;
 
   if (fd >= 0) {

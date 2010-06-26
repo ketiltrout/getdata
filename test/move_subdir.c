@@ -19,7 +19,7 @@ int main(void)
   const char* data = __TEST__ "dirfile/data";
   const char* new_data = __TEST__ "dirfile/subdir/data";
   const char* format_data = "INCLUDE subdir/format1\ndata RAW UINT8 11\n";
-  const char* format1_data = "\n";
+  const char* format1_data = "#\n";
   int fd, r = 0;
   gd_entry_t E;
 
@@ -34,7 +34,7 @@ int main(void)
   write(fd, format1_data, strlen(format1_data));
   close(fd);
 
-  fd = open(data, O_CREAT | O_EXCL | O_WRONLY, 0666);
+  fd = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
   write(fd, format_data, strlen(format_data));
   close(fd);
 

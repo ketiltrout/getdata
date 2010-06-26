@@ -55,7 +55,7 @@ static FILE* _GD_CreateDirfile(DIRFILE* D, const char* format_file,
   dtrace("%p, \"%s\", \"%s\"", D, format_file, filedir);
 
   /* naively try to open the format file */
-  if ((fp = fopen(format_file, "r")) == NULL) {
+  if ((fp = fopen(format_file, "rb")) == NULL) {
     format_error = errno;
 
     /* open failed, try to stat the directory itself */
@@ -172,7 +172,7 @@ static FILE* _GD_CreateDirfile(DIRFILE* D, const char* format_file,
       }
 
     /* create a new, empty format file */
-    if ((fp = fopen(format_file, "wt")) == NULL) {
+    if ((fp = fopen(format_file, "w")) == NULL) {
       _GD_SetError(D, GD_E_CREAT, GD_E_CREAT_FORMAT, format_file, errno, NULL);
       dreturn("%p", NULL);
       return NULL;

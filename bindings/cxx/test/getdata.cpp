@@ -1,10 +1,32 @@
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#undef GETDATA_LEGACY_API
+#endif
+
 #include "getdata/dirfile.h"
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <stdlib.h>
+#include <stdio.h>
 #include <fcntl.h>
 #include <string.h>
 #include <errno.h>
 #include <unistd.h>
+
+#ifdef HAVE_IO_H
+#include <io.h>
+#endif
+
+#if MKDIR_NO_MODE
+#ifdef HAVE__MKDIR
+#define mkdir(f,m) _mkdir(f)
+#else
+#define mkdir(f,m) mkdir(f)
+#endif
+#endif
+#ifndef O_BINARY
+#define O_BINARY 0
+#endif
 
 using namespace GetData;
 
@@ -16,7 +38,7 @@ int main(void)
   const char* format_data = "data RAW UINT8 8\n";
   unsigned char c[8];
   unsigned char data_data[256];
-  int fd, i;
+  int fd, i, r = 0;
 
   memset(c, 0, 8);
   mkdir(filedir, 0777);
@@ -28,7 +50,7 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  fd = open(data, O_CREAT | O_EXCL | O_WRONLY, 0666);
+  fd = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
   write(fd, data_data, 256);
   close(fd);
 
@@ -40,13 +62,19 @@ int main(void)
   unlink(format);
   rmdir(filedir);
 
-  if (error)
-    return 1;
-  if (n != 8)
-    return 1;
+  if (error) {
+    fprintf(stderr, "error = %i (expected 0)\n", error);
+    r = 1;
+  }
+  if (n != 8) {
+    fprintf(stderr, "n = %i (expected 8)\n", n);
+    r = 1;
+  }
   for (i = 0; i < 8; ++i)
-    if (c[i] != 40 + i)
-      return 1;
+    if (c[i] != 40 + i) {
+      fprintf(stderr, "c[%i] = %i (expected %i)\n", i, c[i], 40 + i);
+      r = 1;
+    }
 
-  return 0;
+  return r;
 }

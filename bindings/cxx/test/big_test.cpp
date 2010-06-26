@@ -1,3 +1,8 @@
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#undef GETDATA_LEGACY_API
+#endif
+
 #include "getdata/dirfile.h"
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -7,6 +12,17 @@
 #include <unistd.h>
 #include <iostream>
 #include <math.h>
+
+#if MKDIR_NO_MODE
+#ifdef HAVE__MKDIR
+#define mkdir(f,m) _mkdir(f)
+#else
+#define mkdir(f,m) mkdir(f)
+#endif
+#endif
+#ifndef O_BINARY
+#define O_BINARY 0
+#endif
 
 using namespace std;
 using namespace GetData;
@@ -111,15 +127,15 @@ int main(void)
   for (n = 0; n < 80; ++n)
     data_data[n] = (unsigned char)n + 1;
 
-  n = open(format, O_CREAT | O_TRUNC | O_WRONLY, 0666);
+  n = open(format, O_CREAT | O_TRUNC | O_WRONLY | O_BINARY, 0666);
   write(n, format_data, strlen(format_data));
   close(n);
 
-  n = open(form2, O_CREAT | O_TRUNC | O_WRONLY, 0666);
+  n = open(form2, O_CREAT | O_TRUNC | O_WRONLY | O_BINARY, 0666);
   write(n, form2_data, strlen(form2_data));
   close(n);
 
-  n = open(data, O_CREAT | O_TRUNC | O_WRONLY, 0666);
+  n = open(data, O_CREAT | O_TRUNC | O_WRONLY | O_BINARY, 0666);
   write(n, data_data, 80);
   close(n);
 
