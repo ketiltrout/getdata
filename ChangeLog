@@ -1,4 +1,8 @@
-2010-06-25   D. V. Wiebe <getdata@ketiltrout.net>   svn:409
+2010-06-26   D. V. Wiebe <getdata@ketiltrout.net>   svn:409
+	* configure.ac: Fix test for struct stat64.  Restore accidentally deleted
+	AC_SUBST.
+
+2010-06-25   D. V. Wiebe <getdata@ketiltrout.net>   svn:408
   * test/: Include O_BINARY in open() calls.  Write "#\n" instead of "\n" in
 	empty fragments.
 	* test/test.h (gd_system): Added.  Use PRIxxx codes for format specifiers.

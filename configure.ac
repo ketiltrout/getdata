@@ -194,6 +194,7 @@ case "${host}" in
   *-apple-darwin*) DL_LIBRARY_PATH="DYLD_LIBRARY_PATH" ;;
   *) DL_LIBRARY_PATH="LD_LIBRARY_PATH" ;;
 esac
+AC_SUBST([DL_LIBRARY_PATH])
 
 dnl Python bindings
 AC_ARG_ENABLE(python, AS_HELP_STRING([--disable-python],
@@ -476,9 +477,11 @@ AC_CHECK_TYPES([complex float, complex double],,,
 
 AC_CHECK_TYPES([struct stat64, struct __stat64],,,
 [
+#define _LARGEFILE64_SOURCE
 #ifdef STDC_HEADERS
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <unistd.h>
 #endif
 ])
 
