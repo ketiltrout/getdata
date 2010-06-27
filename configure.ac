@@ -491,6 +491,7 @@ dnl We use off64_t to probe whether to include the LFS transitional API.
 AC_CHECK_TYPES([off64_t], [have_off64_t="yes"], [have_off64_t="no"],
 [
 #define _LARGEFILE64_SOURCE 1
+#include <unistd.h>
 ])
 
 if test "x$have_off64_t" = "xyes"; then
@@ -687,8 +688,8 @@ AM_CONDITIONAL(MAKE_F95BINDINGS, [test "x$make_f95bindings" = "xyes"])
 AM_CONDITIONAL(MAKE_PYBINDINGS, [test "x$make_pybindings" = "xyes"])
 AM_CONDITIONAL(MAKE_IDLBINDINGS, [test "x$make_idlbindings" = "xyes"])
 AM_CONDITIONAL(USE_MODULES, [test "x$use_modules" != "xno"])
-AM_CONDITIONAL(TEST_PYTHON, [test "x$NO_DLOPEN_TESTS" = "x1"])
-AM_CONDITIONAL(TEST_IDL, [test "x$NO_DLOPEN_TESTS" = "x1"])
+AM_CONDITIONAL(TEST_PYTHON, [test "x$NO_DLOPEN_TESTS" = "x0"])
+AM_CONDITIONAL(TEST_IDL, [test "x$NO_DLOPEN_TESTS" = "x0"])
 
 dnl we do this here to avoid screwing up other tests
 LDFLAGS="${LDFLAGS}${NO_UNDEFINED}"
