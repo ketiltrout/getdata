@@ -29,6 +29,10 @@
 #include "getdata.h"
 #include <string.h>
 
+#ifdef __APPLE__
+typedef off_t off64_t;
+#endif
+
 #ifdef HAVE_COMPLEX_H
 #include <complex.h>
 #elif defined HAVE_CABS && defined __GNUC__ && (__GNUC__ > 3)
@@ -182,10 +186,10 @@ int _GD_Rename(const char*, const char*);
 #define rmdir _rmdir
 #endif
 
-#if HAVE_STAT64
-#  define gd_stat64 stat64
-#elif defined __CYGWIN__
+#if defined __CYGWIN__ || defined __APPLE__
 #  define gd_stat64 stat
+#elif HAVE_STAT64
+#  define gd_stat64 stat64
 #elif HAVE__STAT64
 #  define gd_stat64 _stat64
 #endif
@@ -194,7 +198,7 @@ int _GD_Rename(const char*, const char*);
 typedef struct stat64 gd_stat64_t;
 #elif HAVE_STRUCT___STAT64
 typedef struct __stat64 gd_stat64_t;
-#elif defined __CYGWIN__
+#elif defined __CYGWIN__ || defined __APPLE__
 typedef struct stat gd_stat64_t;
 #endif
 

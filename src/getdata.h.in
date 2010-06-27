@@ -691,7 +691,7 @@ extern double __REDIRECT (gd_get_framenum_subset, (DIRFILE* D,
 
 /* if required, declare the LFS transitional extension */
 #if defined _LARGEFILE64_SOURCE || (defined _FILE_OFFSET_BITS && \
-    _FILE_OFFSET_BITS == 64) || (defined __CYGWIN__)
+    _FILE_OFFSET_BITS == 64) || (defined __CYGWIN__) || (defined __APPLE__)
 
 #if (defined _FILE_OFFSET_BITS && _FILE_OFFSET_BITS == 64) || \
                                     (defined __APPLE__) || (defined __CYGWIN__)
@@ -715,6 +715,11 @@ extern double gd_get_framenum_subset64(DIRFILE* D, const char* field_code_in,
     double value, off64_t field_start, off64_t field_end) gd_nonnull ((1,2));
 
 extern off64_t gd_get_nframes64(DIRFILE *dirfile) gd_nonnull ((1));
+
+#if (defined _FILE_OFFSET_BITS && _FILE_OFFSET_BITS == 64) || \
+                                    (defined __APPLE__) || (defined __CYGWIN__)
+#undef off64_t
+#endif
 #endif
 
 /* The caller can disable the legacy API by defining NO_GETDATA_LEGACY_API
