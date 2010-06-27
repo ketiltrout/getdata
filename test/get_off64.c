@@ -1,5 +1,5 @@
 /* Attempt to read UINT8 */
-#if defined _FILE_OFFSET_BITS && _FILE_OFFSET_BITS == 64
+#if (defined _FILE_OFFSET_BITS && _FILE_OFFSET_BITS == 64) || __MSVCRT__
 #  define SKIP_TEST
 #else
 #  define _FILE_OFFSET_BITS 64
