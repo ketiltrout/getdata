@@ -5,7 +5,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <complex.h>
 
 /* System call kludge for Win32 */
 #if defined __MSVCRT__ && defined MSYS_SHELL

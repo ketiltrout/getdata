@@ -1,7 +1,6 @@
 /* Attempt to read UINT8 as COMPLEX128 */
 #include "test.h"
 
-#include <complex.h>
 #include <math.h>
 #include <stddef.h>
 #include <stdlib.h>

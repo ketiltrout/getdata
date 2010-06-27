@@ -25,8 +25,11 @@ WEXTRA=-Wextra
 endif
 
 if LFS_TRANSITIONAL_API
+GET64=get64
 GET_OFF64=get_off64
-NF_OFF64=nframes_off64
+NFRAMES64=nframes64
+NFRAMES_OFF64=nframes_off64
+PUT64=put64
 PUT_OFF64=put_off64
 endif
 
@@ -143,7 +146,7 @@ FOFFS_TESTS=foffs_alter foffs_get foffs_move
 
 FRAGMENT_TESTS=fragment_index fragment_name fragment_name_oor
 
-GET_TESTS=get64 get_bad_code get_bit get_char get_clincom get_complex128 \
+GET_TESTS=${GET64} get_bad_code get_bit get_char get_clincom get_complex128 \
 					get_complex64 get_const get_const_complex get_const_repr \
 					get_cpolynom get_endian8 get_endian16 get_endian32 get_endian64 \
 					get_endian_complex128 get_endian_complex64 get_endian_float32 \
@@ -194,8 +197,8 @@ NFIELDS_TESTS=nfields nfields_invalid nfields_type nfields_type_invalid
 
 NFRAGMENTS_TESTS=nfragments
 
-NFRAMES_TESTS=nframes nframes64 nframes_empty nframes_invalid $(NF_OFF64) \
-							nframes_spf
+NFRAMES_TESTS=nframes ${NFRAMES64} nframes_empty nframes_invalid \
+							$(NFRAMES_OFF64) nframes_spf
 
 NMETA_TESTS=nmeta nmeta_invalid nmeta_parent nmeta_type nmeta_type_invalid \
 						nmeta_type_parent nmeta_vectors nmeta_vectors_invalid \
@@ -235,7 +238,7 @@ PARSE_TESTS=parse_badline parse_bit parse_bit4 parse_bit_bitnum \
 
 PROTECT_TESTS=protect_alter protect_get
 
-PUT_TESTS=put64 put_bad_code put_bit put_bof put_char put_complex128 \
+PUT_TESTS=${PUT64} put_bad_code put_bit put_bof put_char put_complex128 \
 					put_complex64 put_const put_const_protect put_endian8 put_endian16 \
 					put_endian32 put_endian64 put_endian_complex128 put_endian_complex64 \
 					put_endian_float32 put_endian_float64 put_ff put_float32 put_float64 \

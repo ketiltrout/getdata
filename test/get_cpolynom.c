@@ -1,7 +1,6 @@
 /* Attempt to read POLYNOM */
 #include "test.h"
 
-#include <complex.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>

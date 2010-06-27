@@ -27,8 +27,21 @@
 #endif
 
 #include "getdata.h"
-#include <complex.h>
 #include <string.h>
+
+#ifdef HAVE_COMPLEX_H
+#include <complex.h>
+#elif defined HAVE_CABS && defined __GNUC__ && (__GNUC__ > 3)
+/* This is a cygwin hack: the Cygwin C library isn't C99 compliant, but gcc 3+
+ * contains built-in versions of these functions */
+#define complex _Complex
+#define _Complex_I (__extension__ 1.0iF)
+double cabs(double complex z);
+double carg(double complex z);
+#define cexp(z) (exp(__real__ (z)) * (cos(__imag__ (z)) + _Complex_I * sin(__imag__ (z))))
+double creal(double complex z);
+double cimag(double complex z);
+#endif
 
 /* For FILENAME_MAX */
 #include <stdio.h>
@@ -48,7 +61,7 @@
  *  - variables holding object sizes or counts of items read or written should
  *    be of type size_t
  *  - public functions taking or returning types of off64_t should have both
- *    a off_t prototype and and off64_t type prototype.
+ *    a off_t prototype and an off64_t type prototype.
  */
 
 #ifndef __attribute_malloc__
@@ -119,7 +132,7 @@ const char* _gd_colsub(void);
 #  define stroull strtoul
 #endif
 
-#ifdef HAVE__FDOPEN
+#if defined __MSVCRT__ && defined HAVE__FDOPEN
 #define fdopen _fdopen
 #endif
 
@@ -148,11 +161,11 @@ struct tm *gmtime_r(const time_t *timep, struct tm *result);
 int mkstemp(char*);
 #endif
 
-#ifdef HAVE__OPEN
+#if defined __MSVCRT__ && defined HAVE__OPEN
 #define open _open
 #endif
 
-#ifdef HAVE__READ
+#if defined __MSVCRT__ && defined HAVE__READ
 #define read _read
 #endif
 
@@ -165,12 +178,14 @@ int _GD_Rename(const char*, const char*);
 #define _GD_Rename rename
 #endif
 
-#ifdef HAVE__RMDIR
+#if defined __MSVCRT__ && defined HAVE__RMDIR
 #define rmdir _rmdir
 #endif
 
 #if HAVE_STAT64
 #  define gd_stat64 stat64
+#elif defined __CYGWIN__
+#  define gd_stat64 stat
 #elif HAVE__STAT64
 #  define gd_stat64 _stat64
 #endif
@@ -179,17 +194,19 @@ int _GD_Rename(const char*, const char*);
 typedef struct stat64 gd_stat64_t;
 #elif HAVE_STRUCT___STAT64
 typedef struct __stat64 gd_stat64_t;
+#elif defined __CYGWIN__
+typedef struct stat gd_stat64_t;
 #endif
 
 #if ! HAVE_DECL_STRERROR_R
 int strerror_r(int, char*, size_t);
 #endif
 
-#ifdef HAVE__UNLINK
+#if defined __MSVCRT__ && defined HAVE__UNLINK
 #define unlink _unlink
 #endif
 
-#ifdef HAVE__WRITE
+#if defined __MSVCRT__ && defined HAVE__WRITE
 #define write _write
 #endif
 

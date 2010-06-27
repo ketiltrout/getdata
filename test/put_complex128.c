@@ -1,7 +1,6 @@
 /* Attempt to write COMPLEX128 */
 #include "test.h"
 
-#include <complex.h>
 #include <inttypes.h>
 #include <stdlib.h>
 #include <sys/types.h>

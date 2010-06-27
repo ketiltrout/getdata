@@ -20,9 +20,11 @@
 #
 AUTOMAKE_OPTIONS = foreign
 
+if TEST_IDL
 TESTS_ENVIRONMENT=IDL_PATH="${srcdir}" IDL_DLM_PATH=../.libs LD_PRELOAD=../../../src/.libs/libgetdata.so ${IDL}
 idlTESTS=big_test.pro
 TESTS=$(addprefix ${srcdir}/,$(idlTESTS))
+endif
 
 EXTRA_DIST=getdata_idl_test_routines.pro ${idlTESTS}
 

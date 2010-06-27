@@ -1,7 +1,6 @@
 /* Attempt to read real representation */
 #include "test.h"
 
-#include <complex.h>
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>

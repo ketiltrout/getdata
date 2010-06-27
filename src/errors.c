@@ -265,7 +265,7 @@ char* gd_error_string(const DIRFILE* D, char* buffer, size_t buflen)
       char *ptr = strerror_r((error_string[s].adderr == 2) ? D->suberror :
           D->error_line, op, bufend - op);
       if (ptr != op)
-        strncpy(op, ptr, buend - op);
+        strncpy(op, ptr, bufend - op);
 #else
       strerror_r((error_string[s].adderr == 2) ? D->suberror : D->error_line,
           op, bufend - op);

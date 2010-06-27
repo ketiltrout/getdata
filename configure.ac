@@ -295,9 +295,11 @@ echo
 LT_INIT([dlopen])
 AC_SUBST([LIBTOOL_DEPS])
 
-dnl Add -no-undefined, if required
 case "${host}" in
-  *-pc-mingw*) NO_UNDEFINED=" -no-undefined --enable-auto-import" ;;
+  *-pc-mingw*|*-pc-cygwin*)
+  NO_UNDEFINED=" -no-undefined --enable-auto-import";
+  NO_DLOPEN_TESTS=1 ;;
+  *) NO_DLOPEN_TESTS=0 ;;
 esac
 
 LT_OUTPUT
@@ -405,9 +407,9 @@ if test "x${use_modules}" != "xno"; then
 fi
 
 dnl functions
-AC_CHECK_FUNCS([_commit fchmod _fdopen fsync gmtime_r _lseeki64 _mkdir mkstemp \
-                _open _read _rmdir stat64 _stat64 strtoll strtoull _unlink \
-                _write])
+AC_CHECK_FUNCS([_commit cabs fchmod _fdopen fsync gmtime_r _lseeki64 _mkdir \
+                mkstemp _open _read _rmdir stat64 _stat64 strtoll strtoull \
+                _unlink _write])
 AC_FUNC_STRERROR_R
 
 dnl AC_MSG_CHECKING([for _
@@ -477,7 +479,7 @@ AC_CHECK_TYPES([complex float, complex double],,,
 
 AC_CHECK_TYPES([struct stat64, struct __stat64],,,
 [
-#define _LARGEFILE64_SOURCE
+#define _LARGEFILE64_SOURCE 1
 #ifdef STDC_HEADERS
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -485,15 +487,18 @@ AC_CHECK_TYPES([struct stat64, struct __stat64],,,
 #endif
 ])
 
-AC_DEFINE([_LARGEFILE64_SOURCE], [1],
-          [ Additional functionality from LFS for large files. ])
 dnl We use off64_t to probe whether to include the LFS transitional API.
-AC_CHECK_TYPES([off64_t], [have_off64_t="yes"], [have_off64_t="no"])
+AC_CHECK_TYPES([off64_t], [have_off64_t="yes"], [have_off64_t="no"],
+[
+#define _LARGEFILE64_SOURCE 1
+])
 
 if test "x$have_off64_t" = "xyes"; then
   dnl Assume we have the entire LFS defined transitional API
   AC_DEFINE([HAVE_OFF64_T], [1],
             [ Define to 1 if the system has the type `off64_t'. ]) dnl `
+  AC_DEFINE([_LARGEFILE64_SOURCE], [1],
+            [ Additional functionality from LFS for large files. ])
 fi
 
 dnl integer sizes
@@ -682,6 +687,8 @@ AM_CONDITIONAL(MAKE_F95BINDINGS, [test "x$make_f95bindings" = "xyes"])
 AM_CONDITIONAL(MAKE_PYBINDINGS, [test "x$make_pybindings" = "xyes"])
 AM_CONDITIONAL(MAKE_IDLBINDINGS, [test "x$make_idlbindings" = "xyes"])
 AM_CONDITIONAL(USE_MODULES, [test "x$use_modules" != "xno"])
+AM_CONDITIONAL(TEST_PYTHON, [test "x$NO_DLOPEN_TESTS" = "x1"])
+AM_CONDITIONAL(TEST_IDL, [test "x$NO_DLOPEN_TESTS" = "x1"])
 
 dnl we do this here to avoid screwing up other tests
 LDFLAGS="${LDFLAGS}${NO_UNDEFINED}"

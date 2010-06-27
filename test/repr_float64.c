@@ -1,7 +1,6 @@
 /* Attempt to read COMPLEX128 as FLOAT64 */
 #include "test.h"
 
-#include <complex.h>
 #include <math.h>
 #include <inttypes.h>
 #include <stdlib.h>

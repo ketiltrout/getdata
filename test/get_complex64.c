@@ -1,7 +1,6 @@
 /* Attempt to read COMPLEX64 */
 #include "test.h"
 
-#include <complex.h>
 #include <math.h>
 #include <stdlib.h>
 #include <sys/types.h>

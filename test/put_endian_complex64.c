@@ -1,7 +1,6 @@
 /* Attempt to write COMPLEX64 with the opposite endianness */
 #include "test.h"
 
-#include <complex.h>
 #include <inttypes.h>
 #include <stdlib.h>
 #include <sys/types.h>

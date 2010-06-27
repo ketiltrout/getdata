@@ -79,11 +79,6 @@
 # define gd_nonnull(...) /**/
 #endif
 
-/* darwin's off_t is always 64 bits long and it doesn't define off64_t */
-#ifdef __APPLE__
-typedef off_t off64_t;
-#endif
-
 /* error codes */
 #define GD_E_OK                0 /* this MUST be zero */
 #define GD_E_OPEN              1
@@ -675,8 +670,9 @@ extern size_t __REDIRECT (gd_getdata, (DIRFILE *dirfile, const char *field_code,
       gd_type_t return_type, void *data), gd_getdata64) gd_nonnull ((1, 2));
 
 extern size_t __REDIRECT (gd_putdata, (DIRFILE *dirfile, const char *field_code,
-      off_t first_frame, off_t first_sample, size_t num_frames, size_t num_samples,
-      gd_type_t data_type, const void *data), gd_putdata64) gd_nonnull ((1, 2));
+      off_t first_frame, off_t first_sample, size_t num_frames,
+      size_t num_samples, gd_type_t data_type, const void *data),
+    gd_putdata64) gd_nonnull ((1, 2));
 
 extern off_t __REDIRECT (gd_get_nframes, (DIRFILE *dirfile),
     gd_get_nframes64) gd_nonnull ((1));
@@ -693,8 +689,14 @@ extern double __REDIRECT (gd_get_framenum_subset, (DIRFILE* D,
 # endif
 #endif
 
-/* if requested, declare the LFS transitional extension */
-#if defined _LARGEFILE64_SOURCE
+/* if required, declare the LFS transitional extension */
+#if defined _LARGEFILE64_SOURCE || (defined _FILE_OFFSET_BITS && \
+    _FILE_OFFSET_BITS == 64) || (defined __CYGWIN__)
+
+#if (defined _FILE_OFFSET_BITS && _FILE_OFFSET_BITS == 64) || \
+                                    (defined __APPLE__) || (defined __CYGWIN__)
+#define off64_t off_t
+#endif
 extern int gd_alter_frameoffset64(DIRFILE *dirfile, off64_t offset, int fragment,
     int recode) gd_nonnull ((1));
 

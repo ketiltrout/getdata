@@ -2055,12 +2055,16 @@ void F77_FUNC(gdfnss, GDFNSS) (double *framenum, const int *dirfile,
     const char *field_code, const int *field_code_l, const double *value,
     const int *start, const int *end)
 {
+  dtrace("%p, %i, \"%s\", %i, %g, %i, %i", framenum, *dirfile, field_code,
+      *field_code_l, *value, *start, *end);
   char *fc = malloc(*field_code_l + 1);
 
   *framenum = gd_get_framenum_subset64(_GDF_GetDirfile(*dirfile),
       _GDF_CString(fc, field_code, *field_code_l), *value, *start, *end);
 
   free(fc);
+
+  dreturn("%g", *framenum);
 }
 
 /* retrieve a scalar parameter */

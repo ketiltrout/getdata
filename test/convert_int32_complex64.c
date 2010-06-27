@@ -1,7 +1,6 @@
 /* Attempt to read INT32 as COMPLEX64 */
 #include "test.h"
 
-#include <complex.h>
 #include <math.h>
 #include <inttypes.h>
 #include <stdlib.h>

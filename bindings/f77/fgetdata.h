@@ -25,7 +25,6 @@
 #include "config.h"
 #endif
 
-#include "getdata.h"
 #include "../../src/internal.h"
 
 /* If F77_FUNC isn't defined, we have no knowledge of the F77 mangling scheme */

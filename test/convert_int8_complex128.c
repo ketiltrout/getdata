@@ -1,7 +1,6 @@
 /* Attempt to read INT8 as COMPLEX128 */
 #include "test.h"
 
-#include <complex.h>
 #include <math.h>
 #include <inttypes.h>
 #include <stdlib.h>

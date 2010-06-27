@@ -1317,8 +1317,8 @@ static int _GD_ParseDirective(DIRFILE *D, char** in_cols, int n_cols,
   int i;
   int pedantic = *flags & GD_PEDANTIC;
 
-  dtrace("%p, %p, %i, %u, %p, %i, %p, %p, %p", D, in_cols, n_cols, me,
-      standards, linenum, ref_name, flags);
+  dtrace("%p, %p, %i, %u, %p, %i, %p, %p", D, in_cols, n_cols, me, standards,
+      linenum, ref_name, flags);
 
   /* set up for possibly slashed reserved words */
   ptr = in_cols[0];

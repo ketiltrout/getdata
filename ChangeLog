@@ -1,9 +1,19 @@
+2010-06-26   D. V. Wiebe <getdata@ketiltrout.net>   svn:410
+	* src/internal.h: Only use the MSVCRT aliases when appropriate.  Handle no
+	complex.h, but with complex support in GCC (for Cygwin).  Deal with Cygwin
+	64-bit stat.
+
+	* src/getdata.h.in: Define LFS transitional functions under Cygwin.
+
+	* configure.ac: Disable Python and IDL tests for both Cygwin and MinGW.
+	Only conditionally define _LARGEFILE64_SOURCE.
+
 2010-06-26   D. V. Wiebe <getdata@ketiltrout.net>   svn:409
 	* configure.ac: Fix test for struct stat64.  Restore accidentally deleted
 	AC_SUBST.
 
 2010-06-25   D. V. Wiebe <getdata@ketiltrout.net>   svn:408
-  * test/: Include O_BINARY in open() calls.  Write "#\n" instead of "\n" in
+	* test/: Include O_BINARY in open() calls.  Write "#\n" instead of "\n" in
 	empty fragments.
 	* test/test.h (gd_system): Added.  Use PRIxxx codes for format specifiers.
 	* test/trunc_rofs.c test/open_eaccess.c: Skip the test if the FS doesn't
@@ -11,39 +21,39 @@
 	* test/ascii_put.c: Read data as ints.
 	* test/legacy_put.c: Skip the stat() check.
 
-  * src/open.c (_GD_CreateDirfile): Use mode "rb" in fopen() call. 
-  * src/gzip.c (_GD_GzipSize) src/encoding.c (_GD_GenericTouch) src/include.c
+	* src/open.c (_GD_CreateDirfile): Use mode "rb" in fopen() call. 
+	* src/gzip.c (_GD_GzipSize) src/encoding.c (_GD_GenericTouch) src/include.c
 	(_GD_Include) src/raw.c (_GD_RawOpen): Include O_BINARY in open() calls.
 
-  * src/errors.c (gd_error_string): Handle STRERROR_R_CHAR_P.
+	* src/errors.c (gd_error_string): Handle STRERROR_R_CHAR_P.
 
-  * src/flush.c (_GD_FlushFragment): Skip fchmod() call unless HAVE_FCHMOD
+	* src/flush.c (_GD_FlushFragment): Skip fchmod() call unless HAVE_FCHMOD
 	defined.
 
-  * src/flush.c (_GD_FlushFragment) src/mod.c (_GD_Change) src/encoding.c
+	* src/flush.c (_GD_FlushFragment) src/mod.c (_GD_Change) src/encoding.c
 	(_GD_GenericMove) src/raw.c (_GD_RawTemp): Replaced rename() with
 	_GD_Rename().
 
-  * src/encoding.c (_GD_ResolveEncoding) src/raw.c (_GD_RawSize): Use
+	* src/encoding.c (_GD_ResolveEncoding) src/raw.c (_GD_RawSize): Use
 	gd_stat64_t and gd_stat64().
 
-  * src/ascii.c (_GD_AsciiOpen _GD_AsciiSize _GD_AsciiTemp): Use O_TEXT in open
+	* src/ascii.c (_GD_AsciiOpen _GD_AsciiSize _GD_AsciiTemp): Use O_TEXT in open
 	call.
-  * src/ascii.c (_GD_ScanFormat _GD_AsciiRead): Handle NO_8BIT_INT_PREFIX.
+	* src/ascii.c (_GD_ScanFormat _GD_AsciiRead): Handle NO_8BIT_INT_PREFIX.
 
-  * src/internal.h: Include <io.h> for Win32.  Define O_BINARY, O_TEXT if
+	* src/internal.h: Include <io.h> for Win32.  Define O_BINARY, O_TEXT if
 	necessary.  Define NO_8BIT_INT_PREFIX when appropriate.  Handle Win32
 	function aliases.
 
-  * src/compat.c: Added.
+	* src/compat.c: Added.
 
-  * src/common.c (GD_ReadLinterpFile): Call fopen() with FOPEN_TEXT.
+	* src/common.c (GD_ReadLinterpFile): Call fopen() with FOPEN_TEXT.
 
-  * bindings/cxx/test/big_test.cpp bindings/cxx/test/putdata.cpp
+	* bindings/cxx/test/big_test.cpp bindings/cxx/test/putdata.cpp
 	bindings/cxx/test/spf.cpp bindings/cxx/test/getdata.cpp
 	bindings/cxx/test/nframes.cpp: Handle Win32 stuff.
 
-  * configure.ac: Call GD_MSYS_SHELL.  Add various Win32 checks.
+	* configure.ac: Call GD_MSYS_SHELL.  Add various Win32 checks.
 	* m4/win32.m4: Added.
 
 2010-05-22   D. V. Wiebe <getdata@ketiltrout.net>   svn:401, 402
