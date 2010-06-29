@@ -17,7 +17,8 @@ int main(void)
   const char* format = __TEST__ "dirfile/format";
   const char* data = __TEST__ "dirfile/data";
   const char* format_data = "data RAW FLOAT64 1\nENDIAN little\n";
-  int fd, i, r = 0;
+  int fd, r = 0;
+  unsigned int i;
   const double c = 1.5;
   unsigned char x[sizeof(double)] = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xF8, 0x3F

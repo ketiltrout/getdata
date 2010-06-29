@@ -17,7 +17,8 @@ int main(void)
   const char* format = __TEST__ "dirfile/format";
   const char* data = __TEST__ "dirfile/data";
   const char* format_data = "data RAW FLOAT32 1\nENDIAN little arm\n";
-  int fd, i, r = 0;
+  int fd, r = 0;
+  unsigned int i;
   const float c = 1.5;
   unsigned char x[sizeof(float)] = { 0x00, 0x00, 0xC0, 0x3F };
   unsigned char u[sizeof(float)];

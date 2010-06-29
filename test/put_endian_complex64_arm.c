@@ -1,7 +1,6 @@
 /* Attempt to write arm-endian COMPLEX64 */
 #include "test.h"
 
-#include <complex.h>
 #include <inttypes.h>
 #include <stdlib.h>
 #include <sys/types.h>
@@ -18,7 +17,8 @@ int main(void)
   const char* format = __TEST__ "dirfile/format";
   const char* data = __TEST__ "dirfile/data";
   const char* format_data = "data RAW COMPLEX64 1\nENDIAN little arm\n";
-  int fd, i, r = 0;
+  int fd, r = 0;
+  unsigned int i;
   const float complex c = 1.5 + _Complex_I * 2.25;
   unsigned char x[sizeof(float complex)] = {
     0x00, 0x00, 0xC0, 0x3F, 0x00, 0x00, 0x10, 0x40

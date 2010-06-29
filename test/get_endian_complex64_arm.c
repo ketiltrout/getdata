@@ -1,7 +1,6 @@
 /* Attempt to read arm-endian COMPLEX64 (which is just little endian) */
 #include "test.h"
 
-#include <complex.h>
 #include <inttypes.h>
 #include <stdlib.h>
 #include <sys/types.h>

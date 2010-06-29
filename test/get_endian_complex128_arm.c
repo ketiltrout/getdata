@@ -1,7 +1,6 @@
 /* Attempt to read arm-endian COMPLEX128 */
 #include "test.h"
 
-#include <complex.h>
 #include <inttypes.h>
 #include <stdlib.h>
 #include <math.h>

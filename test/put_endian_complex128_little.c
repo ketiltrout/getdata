@@ -17,7 +17,8 @@ int main(void)
   const char* format = __TEST__ "dirfile/format";
   const char* data = __TEST__ "dirfile/data";
   const char* format_data = "data RAW COMPLEX128 1\nENDIAN little\n";
-  int fd, i, r = 0;
+  int fd, r = 0;
+  unsigned int i;
   const double complex c = 1.5 + _Complex_I * 2.25;
   unsigned char x[sizeof(double complex)] = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xF8, 0x3F,
