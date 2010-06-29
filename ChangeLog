@@ -1,3 +1,9 @@
+2010-06-29   D. V. Wiebe <getdata@ketiltrout.net>   svn:418
+	* m4/compiler.m4 (GD_CHECK_LFS_TYPE): Added.
+	* configure.ac: Better tests for LFS Transitional API types.  Don't rely on
+	the `complex' macro when checking types.  Move the MSCVRT test back to the
+	proper place.
+
 2010-06-28   D. V. Wiebe <getdata@ketiltrout.net>   svn:414
 	Merged in changes from the ARM branch, revision 385:
 

@@ -121,8 +121,7 @@ AC_DEFUN([GD_C_FLOATORDERING],
   [AC_CACHE_CHECK([floating point endianness], [gd_cv_c_floatordering],
 [gd_cv_c_floatordering=unknown
 # check for arm middle endianness
-AC_COMPILE_IFELSE(
-[AC_LANG_SOURCE(
+AC_COMPILE_IFELSE([AC_LANG_SOURCE(
 [[#if ! (defined __arm__ && ! (defined __VFP_FP__ || defined __MAVERICK___))
   not arm middle endian
 #endif
@@ -164,3 +163,38 @@ AC_DEFINE([FLOATS_BIGENDIAN], [1],
   [ Define to 1 if your processor stores double-precision floats in big-endian
     order])
 fi])
+
+dnl GD_CHECK_LFS_TYPE
+dnl -----------------------------------------------------------
+dnl Check whether the specified type exists, and whether _LARGEFILE64_SOURCE
+dnl must be defined.
+AC_DEFUN([GD_CHECK_LFS_TYPE],[
+AC_CACHE_CHECK([for $1], [AS_TR_SH([gd_cv_type_$1])],[
+if test "x$gd_cv_c_need_lfs_defined" != "xyes"; then
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([$2],[
+if (sizeof($1))
+return 0;])],
+[gd_cv_type_[]AS_TR_SH($1)="yes"])
+fi
+
+if test "x$AS_TR_SH([gd_cv_type_$1])" != "xyes"; then
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([
+#define _LARGEFILE64_SOURCE 1
+$2],[
+if (sizeof($1))
+return 0;])],
+[if test "x$gd_cv_c_need_lfs_defined" = "xyes"; then
+AS_TR_SH([gd_cv_type_$1])="yes"
+else
+AS_TR_SH([gd_cv_type_$1])="yes, with _LARGEFILE64_SOURCE defined"
+fi
+gd_cv_c_need_lfs_defined="yes"],
+[AS_TR_SH([gd_cv_type_$1])="no"])
+fi
+])
+
+if test "x$AS_TR_SH([gd_cv_type_$1])" != "xno"; then
+AC_DEFINE(AS_TR_CPP([HAVE_$1]), [1],
+[ Define to 1 if you have the type `$1' ])
+fi
+])

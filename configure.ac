@@ -384,23 +384,6 @@ fi
 AC_SUBST([LIBLTDL])
 AC_SUBST([LTDLINCL])
 
-AC_MSG_CHECKING([if we're linking against the Microsoft C Run-Time])
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM([], [[#ifndef __MSVCRT__
-       choke me
-#endif
-]])],
-[gd_msvcrt=yes],
-[gd_msvcrt=no])
-AC_MSG_RESULT([$gd_msvcrt])
-
-
-if test "$gd_msvcrt" = "yes"; then
-  AC_DEFINE([__MSVCRT_VERSION__], [0x601],
-            [ If compiling aginst the MSVCRT, define to the minimum version ])
-fi
-
-dnl We define this to allow us to use off64_t in addition to the usual off_t
-
 dnl check if we found a C++ compiler
 if test "x$CXX" == "x"; then
   make_cxxbindings=no
@@ -441,6 +424,21 @@ dnl F77 stuff
 if test "x$make_f77bindings" != "xno"; then
   AC_CHECK_PROGS([DIFF], [diff], [])
   AC_F77_WRAPPERS
+fi
+
+AC_MSG_CHECKING([if we're linking against the Microsoft C Run-Time])
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([], [[#ifndef __MSVCRT__
+       choke me
+#endif
+]])],
+[gd_msvcrt=yes],
+[gd_msvcrt=no])
+AC_MSG_RESULT([$gd_msvcrt])
+
+
+if test "$gd_msvcrt" = "yes"; then
+  AC_DEFINE([__MSVCRT_VERSION__], [0x601],
+            [ If compiling aginst the MSVCRT, define to the minimum version ])
 fi
 
 dnl libraries
@@ -524,17 +522,9 @@ AC_TYPE_INT32_T
 AC_TYPE_UINT64_T
 AC_TYPE_INT64_T
 
-AC_CHECK_TYPES([complex float, complex double],,,
-[
-#ifdef HAVE_COMPLEX_H
-#include <complex.h>
-#endif
-])
+AC_CHECK_TYPES([_Complex float, _Complex double])
 
-
-AC_CHECK_TYPES([struct stat64, struct __stat64],,,
-[
-#define _LARGEFILE64_SOURCE 1
+GD_CHECK_LFS_TYPE([struct stat64],[
 #ifdef STDC_HEADERS
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -542,19 +532,30 @@ AC_CHECK_TYPES([struct stat64, struct __stat64],,,
 #endif
 ])
 
-dnl We use off64_t to probe whether to include the LFS transitional API.
-AC_CHECK_TYPES([off64_t], [have_off64_t="yes"], [have_off64_t="no"],
-[
-#define _LARGEFILE64_SOURCE 1
+GD_CHECK_LFS_TYPE([struct __stat64],[
+#ifdef STDC_HEADERS
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <unistd.h>
+#endif
 ])
 
-if test "x$have_off64_t" = "xyes"; then
+GD_CHECK_LFS_TYPE([off64_t],[
+#ifdef STDC_HEADERS
+#include <sys/types.h>
+#include <unistd.h>
+#endif
+])
+
+if test "x$gd_cv_c_need_lfs_defined" = "xyes"; then
+  AC_DEFINE([_LARGEFILE64_SOURCE], [1],
+            [ Additional functionality from LFS for large files. ])
+fi
+
+if test "x$gd_cv_type_off64_t" = "xyes"; then
   dnl Assume we have the entire LFS defined transitional API
   AC_DEFINE([HAVE_OFF64_T], [1],
             [ Define to 1 if the system has the type `off64_t'. ]) dnl `
-  AC_DEFINE([_LARGEFILE64_SOURCE], [1],
-            [ Additional functionality from LFS for large files. ])
 fi
 
 dnl integer sizes
@@ -730,7 +731,7 @@ AM_CONDITIONAL(FC_WEXTRA, [test "x$gd_cv_prog_fc_wextra" == "xyes"])
 AM_CONDITIONAL(INTEL_F77_COMPILER,
                [test "x$gd_cv_f77_compiler_intel" == "xyes"])
 AM_CONDITIONAL(INTEL_FC_COMPILER, [test "x$gd_cv_fc_compiler_intel" == "xyes"])
-AM_CONDITIONAL(LFS_TRANSITIONAL_API, [test "x$have_off64_t" = "xyes"])
+AM_CONDITIONAL(LFS_TRANSITIONAL_API, [test "x$gd_cv_type_off64_t" = "xyes"])
 AM_CONDITIONAL(INCLUDE_LEGACY_API, [test "x$include_legacy_api" != "xno"])
 AM_CONDITIONAL(MAKE_CHECKDIRFILE, [test "x$make_checkdirfile" = "xbuild"])
 AM_CONDITIONAL(MAKE_CXXBINDINGS, [test "x$make_cxxbindings" = "xyes"])
