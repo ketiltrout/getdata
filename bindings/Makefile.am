@@ -1,4 +1,4 @@
-# (C) 2008 D. V. Wiebe
+# (C) 2008-2010 D. V. Wiebe
 #
 ##########################################################################
 #
@@ -19,6 +19,8 @@
 # 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 AUTOMAKE_OPTIONS = foreign
+
+BUILDCC=@BUILDCC@
 
 if MAKE_CXXBINDINGS
 CXX_SUBDIR=cxx
@@ -42,6 +44,9 @@ make_parameters_SOURCES = make_parameters.c
 nodist_make_parameters_SOURCES = ../src/getdata.h
 
 SUBDIRS = . ${CXX_SUBDIR} ${F77_SUBDIR} ${PY_SUBDIR} ${IDL_SUBDIR}
+
+make_parameters$(EXEEXT): $(make_parameters_SOURCES) $(nodist_make_parameters_SOURCES)
+	${BUILDCC} -I../src -o make_parameters$(EXEEXT) $(srcdir)/$(make_parameters_SOURCES)
 
 clean-local:
 	rm -rf *~ 

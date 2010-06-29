@@ -1361,6 +1361,18 @@ static int _GD_ParseDirective(DIRFILE *D, char** in_cols, int n_cols,
       else 
         _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_ENDIAN,
             D->fragment[me].cname, linenum, NULL);
+      if (n_cols > 2) {
+        if (strcmp(in_cols[2], "big") == 0)
+          D->fragment[me].float_sex = GD_BIG_ENDIAN;
+        else if (strcmp(in_cols[2], "little") == 0)
+          D->fragment[me].float_sex = GD_LITTLE_ENDIAN;
+        else if (strcmp(in_cols[2], "arm") == 0)
+          D->fragment[me].float_sex = GD_ARM_ENDIAN;
+        else 
+          _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_ENDIAN,
+              D->fragment[me].cname, linenum, NULL);
+      } else
+        D->fragment[me].float_sex = D->fragment[me].byte_sex;
     }
   } else if (strcmp(ptr, "FRAMEOFFSET") == 0 && (!pedantic || *standards >= 1))
     D->fragment[me].frame_offset = strtoll(in_cols[1], NULL, 10);

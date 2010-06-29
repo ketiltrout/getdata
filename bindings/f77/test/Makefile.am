@@ -20,11 +20,11 @@
 #
 AUTOMAKE_OPTIONS = foreign
 
-if GNU_FC_COMPILER
+if FC_WEXTRA
 FC_WALL=-Wall
 endif
 
-if GNU_F77_COMPILER
+if F77_WEXTRA
 F77_WALL=-Wall
 endif
 

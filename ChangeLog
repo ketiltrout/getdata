@@ -1,4 +1,66 @@
-2010-06-26   D. V. Wiebe <getdata@ketiltrout.net>   svn:410
+2010-06-28   D. V. Wiebe <getdata@ketiltrout.net>   svn:414
+	Merged in changes from the ARM branch, revision 385:
+
+	* bindings/make_parameters.c: Don't include the legacy API.
+
+	* test/put_endian_float32_big.c test/put_endian_float64_big.c
+	test/put_endian_complex64_little.c test/put_endian_float32_arm.c
+	test/put_endian_float64_arm.c test/get_endian_complex64_big.c
+	test/put_endian_float32_little.c test/put_endian_complex64_big.c
+	test/endian_get.c test/get_endian_complex64_arm.c
+	test/put_endian_complex64_arm.c test/put_endian_complex128_big.c
+	test/get_endian_float32_little.c test/put_endian_complex128_arm.c
+	test/get_endian_complex128_big.c test/get_endian_float32_big.c
+	test/get_endian_float64_big.c test/get_endian_complex128_little.c
+	test/get_endian_complex128_arm.c test/get_endian_float32_arm.c
+	test/get_endian_float64_arm.c test/get_endian_complex64_little.c
+	test/put_endian_float64_little.c test/put_endian_complex128_little.c
+	test/get_endian_float64_little.c: Added.
+
+	* test/put_endian_float32.c test/get_endian_float64.c
+	test/put_endian_complex128.c test/put_endian_complex64.c
+	test/put_endian_float64.c test/get_endian_complex64.c
+	test/get_endian_complex128.c test/get_endian_float32.c: Removed.
+
+	* src/parse.c (_GD_ParseDirective): Handle missing second parameter to
+	/ENDIAN.
+
+	* m4/python.m4: Don't specify -L unless needed.
+	
+	* bindings/idl/getdata.c (gdidl_read_idl_entry): Fix compiler warning.
+
+	* configure.ac: Calculate BUILDCC
+	* bindings/Makefile.am: use BUILDCC
+
+	* bindings/make_parameters.c (main): Return zero.
+
+	* src/open.c (dirfile_cbopen): Fix default float_sex.
+
+	* test/endian_get.c: Test both sexes.
+
+	* configure.ac: Calculate BUILDCC
+	* bindings/Makefile.am: use BUILDCC
+
+	* configure.ac: Call GD_C_FLOATORDERING.
+	* m4/compiler.m4 (GD_C_FLOATORDERING): Added.
+
+	* configure.ac bindings/f77/Makefile.am: Handle missing diff gracefully.
+
+	* src/getdata.c (_GD_DoRaw) src/putdata.c (_GD_DoRawOut): Call
+	_GD_ArmEndianise when appropriate.  Check float_sex when appropriate.
+	* src/endian.c (_GD_ArmEndianise): Added.
+
+	* bindings/cxx/Makefile.am bindings/cxx/test/Makefile.am
+	bindings/f77/Makefile.am bindings/f77/test/Makefile.am src/Makefile.am
+	test/Makefile.am util/Makefile.am: use *_WEXTRA conditionals.
+	* configure.ac: Call GD_PROG_CC_WEXTRA, GD_PROG_CXX_WEXTRA,
+	GD_PROG_F77_WEXTRA, GD_PROG_FC_WEXTRA; don't bother checking compilers we
+	aren't going to use.
+	* compiler.m4: Renamed from intel.m4.
+	* compiler.m4 (GD_PROG_CC_WEXTRA GD_PROG_CXX_WEXTRA GD_PROG_F77_WEXTRA
+	GD_PROG_FC_WEXTRA): Added.
+
+2010-06-27   D. V. Wiebe <getdata@ketiltrout.net>   svn:410
 	* src/internal.h: Only use the MSVCRT aliases when appropriate.  Handle no
 	complex.h, but with complex support in GCC (for Cygwin).  Deal with Cygwin
 	64-bit stat.

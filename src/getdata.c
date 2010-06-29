@@ -256,21 +256,42 @@ static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *E, off64_t s0, size_t ns,
       return 0;
     }
 
-    if (_gd_ef[E->e->file[0].encoding].ecor &&
-        (D->fragment[E->fragment_index].byte_sex ==
-#ifdef WORDS_BIGENDIAN
-         GD_LITTLE_ENDIAN
+    if (_gd_ef[E->e->file[0].encoding].ecor) {
+      /* convert to/from middle-ended doubles */
+      if ((E->data_type == GD_FLOAT64 || E->data_type == GD_COMPLEX128) &&
+          D->fragment[E->fragment_index].float_sex
+#ifdef ARM_ENDIAN_DOUBLES          
+          !=
 #else
-         GD_BIG_ENDIAN
+          ==
 #endif
-        ))
-    {
-      if (E->data_type & GD_COMPLEX)
-        _GD_FixEndianness(databuffer + n_read * E->e->size, E->e->size / 2,
-            samples_read * 2);
-      else
-        _GD_FixEndianness(databuffer + n_read * E->e->size, E->e->size,
-            samples_read);
+          GD_ARM_ENDIAN) {
+        _GD_ArmEndianise((uint64_t*)(databuffer + n_read * E->e->size),
+            E->data_type & GD_COMPLEX, samples_read);
+      }
+
+      if (((E->data_type & (GD_COMPLEX | GD_IEEE754)) &&
+            (D->fragment[E->fragment_index].float_sex
+#ifdef FLOATS_BIGENDIAN
+             !=
+#else
+             ==
+#endif
+             GD_BIG_ENDIAN)) || (D->fragment[E->fragment_index].byte_sex ==
+#ifdef WORDS_BIGENDIAN
+             GD_LITTLE_ENDIAN
+#else
+             GD_BIG_ENDIAN
+#endif
+             ))
+      {
+        if (E->data_type & GD_COMPLEX)
+          _GD_FixEndianness(databuffer + n_read * E->e->size, E->e->size / 2,
+              samples_read * 2);
+        else
+          _GD_FixEndianness(databuffer + n_read * E->e->size, E->e->size,
+              samples_read);
+      }
     }
 
     n_read += samples_read;
@@ -296,24 +317,24 @@ static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *E, off64_t s0, size_t ns,
 
 #define POLYNOM4(t) \
   for (i = 0; i < npts; i++) ((t*)data)[i] = (t)( \
-    ((t*)data)[i] * ((t*)data)[i] * ((t*)data)[i] * ((t*)data)[i] * a[4] \
-    + ((t*)data)[i] * ((t*)data)[i] * ((t*)data)[i] * a[3] \
-    + ((t*)data)[i] * ((t*)data)[i] * a[2] \
-    + ((t*)data)[i] * a[1] + a[0] \
-    )
+      ((t*)data)[i] * ((t*)data)[i] * ((t*)data)[i] * ((t*)data)[i] * a[4] \
+      + ((t*)data)[i] * ((t*)data)[i] * ((t*)data)[i] * a[3] \
+      + ((t*)data)[i] * ((t*)data)[i] * a[2] \
+      + ((t*)data)[i] * a[1] + a[0] \
+      )
 
 #define POLYNOM3(t) \
   for (i = 0; i < npts; i++) ((t*)data)[i] = (t)( \
-    ((t*)data)[i] * ((t*)data)[i] * ((t*)data)[i] * a[3] \
-    + ((t*)data)[i] * ((t*)data)[i] * a[2] \
-    + ((t*)data)[i] * a[1] + a[0] \
-    )
+      ((t*)data)[i] * ((t*)data)[i] * ((t*)data)[i] * a[3] \
+      + ((t*)data)[i] * ((t*)data)[i] * a[2] \
+      + ((t*)data)[i] * a[1] + a[0] \
+      )
 
 #define POLYNOM2(t) \
   for (i = 0; i < npts; i++) ((t*)data)[i] = (t)( \
-    ((t*)data)[i] * ((t*)data)[i] * a[2] \
-    + ((t*)data)[i] * a[1] + a[0] \
-    )
+      ((t*)data)[i] * ((t*)data)[i] * a[2] \
+      + ((t*)data)[i] * a[1] + a[0] \
+      )
 
 #define POLYNOM(t) \
   switch (n) { \
@@ -354,8 +375,8 @@ static void _GD_PolynomData(DIRFILE* D, void *data, gd_type_t type, size_t npts,
       case GD_COMPLEX64:  POLYNOM( float complex); break;
       case GD_COMPLEX128: POLYNOM(double complex); break;
       default:
-        _GD_SetError(D, GD_E_BAD_TYPE, type, NULL, 0, NULL);
-        break;
+                          _GD_SetError(D, GD_E_BAD_TYPE, type, NULL, 0, NULL);
+                          break;
     }
   }
 
@@ -392,8 +413,8 @@ static void _GD_CPolynomData(DIRFILE* D, void *data, gd_type_t type,
       case GD_COMPLEX64:  POLYNOM( float complex); break;
       case GD_COMPLEX128: POLYNOM(double complex); break;
       default:
-        _GD_SetError(D, GD_E_BAD_TYPE, type, NULL, 0, NULL);
-        break;
+                          _GD_SetError(D, GD_E_BAD_TYPE, type, NULL, 0, NULL);
+                          break;
     }
   }
 
@@ -432,8 +453,8 @@ static void _GD_MultiplyData(DIRFILE* D, void *A, gd_spf_t spfA, double *B,
     case GD_COMPLEX64:  MULTIPLY( float complex); break;
     case GD_COMPLEX128: MULTIPLY(double complex); break;
     default:
-      _GD_SetError(D, GD_E_BAD_TYPE, type, NULL, 0, NULL);
-      break;
+                        _GD_SetError(D, GD_E_BAD_TYPE, type, NULL, 0, NULL);
+                        break;
   }
 
   dreturnvoid();
@@ -464,8 +485,8 @@ static void _GD_CMultiplyData(DIRFILE* D, void *A, gd_spf_t spfA,
     case GD_COMPLEX64:  CMULTIPLY( float complex); break;
     case GD_COMPLEX128: CMULTIPLY(double complex); break;
     default:
-      _GD_SetError(D, GD_E_BAD_TYPE, type, NULL, 0, NULL);
-      break;
+                        _GD_SetError(D, GD_E_BAD_TYPE, type, NULL, 0, NULL);
+                        break;
   }
 
   dreturnvoid();

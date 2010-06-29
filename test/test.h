@@ -36,7 +36,7 @@ int gd_system(const char* command)
 
 #define CHECKC(n,v)    CHECK(cabs((n)-(v))>1e-10,n,"%.15g;%.15g","%.15g;%.15g", \
     creal((n)), cimag((n)), creal((v)), cimag((v)))
-#define CHECKCi(i,n,v) CHECKi(i,cabs((n)-(v))>1e-10,n,"%.15g;%.15g",\
+#define CHECKCi(i,n,v) CHECKi(i,cabs((n)-(v)) / cabs((v))>3e-6,n,"%.15g;%.15g",\
     "%.15g;%.15g",creal((n)), cimag((n)), creal((v)), cimag((v)))
 #define CHECKF(n,v)    CHECK(fabs((n)-(v))>1e-10,n,"%.15g","%.15g",(double)(n),\
     (double)(v))

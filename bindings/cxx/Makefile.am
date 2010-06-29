@@ -21,7 +21,7 @@
 AUTOMAKE_OPTIONS = foreign
 getdata_includedir = ${includedir}/getdata
 
-if GNU_CXX_COMPILER
+if CXX_WEXTRA
 WEXTRA=-Wextra
 endif
 

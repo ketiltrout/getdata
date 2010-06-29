@@ -1,4 +1,4 @@
-/* (C) 2008 D. V. Wiebe
+/* (C) 2008-2010 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -26,6 +26,7 @@
 #include <stdio.h>
 #include <unistd.h>
 
+#define NO_GETDATA_LEGACY_API
 #include "getdata.h"
 
 #define CONSTANT(s,f,t) { "GD_" #s, #s, f, GD_ ## s, t }

@@ -311,6 +311,7 @@ typedef int (*gd_parser_callback_t)(gd_parser_data_t*, void*);
 #define GD_IGNORE_REFS    0x00000800 /* ignore REFERENCE directives --
                                         dirfile_include only */
 #define GD_PRETTY_PRINT   0x00001000 /* make a nicer looking format file */
+#define GD_ARM_ENDIAN     0x00002000 /* ARM-endian doubles */
 #define GD_PERMISSIVE     0x00004000 /* be permissive */
 
 #define GD_ENCODING       0x0F000000 /* mask */

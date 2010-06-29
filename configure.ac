@@ -39,6 +39,9 @@ AC_CONFIG_MACRO_DIR([m4])
 
 LT_PREREQ([2.2.6b])
 
+AC_ARG_VAR([BUILDCC],
+           [C compiler command on the build system (only needed if cross-compiling)])
+
 dnl libgetdata current interface version
 AC_SUBST(GETDATA_IFACE_VERSION, [3])
 dnl libgetdata current interface implementation revision
@@ -265,6 +268,52 @@ AC_PROG_CC
 AC_PROG_CC_C_O
 AC_PROG_CC_C99
 AC_HEADER_STDC
+if test "x$make_cxxbindings" != "xno"; then
+  echo
+  echo "*** Checking C++ compiler characteristics"
+  echo
+  AC_PROG_CXX
+  AC_PROG_CXX_C_O
+fi
+if test "x$make_f77bindings" != "xno"; then
+  echo
+  echo "*** Checking Fortran 77 compiler characteristics"
+  echo
+  AC_PROG_F77
+  AC_PROG_F77_C_O
+fi
+if test "x$make_f95bindings" != "xno"; then
+  echo
+  echo "*** Checking Fortran 90 compiler characteristics"
+  echo
+  AC_PROG_FC
+  AC_PROG_FC_C_O
+  # does $FC accept fortran code with .f90 extension?
+  AC_MSG_CHECKING([whether the Fortran 90 compiler works])
+  AC_LANG_PUSH([Fortran])
+  ac_ext="f90"
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM()],
+  [AC_MSG_RESULT([yes])],
+  [AC_MSG_RESULT([no]); FC=;])
+  AC_LANG_POP
+fi
+if test "x${cross_compiling}" != "xno"; then
+  echo
+  echo "*** Checking the build environment"
+  echo
+  if test -z "$BUILDCC"; then
+    if test -n "$build_alias"; then
+      AC_CHECK_PROGS([BUILDCC],
+                     [${build_alias}-gcc ${build_alias}-cc ${build_alias}-cl])
+    fi
+  fi
+  if test -z "$BUILDCC"; then
+    AC_CHECK_PROGS([BUILDCC], [gcc cc cl])
+  fi
+else
+  BUILDCC=$CC
+  AC_SUBST([BUILDCC])
+fi
 echo
 echo "*** Checking C++ compiler characteristics"
 echo
@@ -320,7 +369,7 @@ if test "x${use_modules}" != "xno"; then
   LIBS=$saved_libs
 
   if test "x$have_ltdl" == "xno"; then
-    AC_MSG_ERROR([libltdl is required to build modules.  Please specify either the location of the libltdl library using --with-ldtl-prefix=PREFIX or else disable the building of modules by using --disable-modules.])
+    AC_MSG_ERROR([libltdl is required to build modules.  Please either specify the location of the libltdl library using --with-ldtl-prefix=PREFIX or else disable the building of modules by using --disable-modules.])
   fi
 
   if test "x$ltdl_prefix" != "x"; then
@@ -334,17 +383,6 @@ if test "x${use_modules}" != "xno"; then
 fi
 AC_SUBST([LIBLTDL])
 AC_SUBST([LTDLINCL])
-
-dnl ICC checks
-echo
-echo "*** Checking additional compiler characteristics"
-echo
-GD_LANG_COMPILER_INTEL
-AC_LANG_PUSH([C++])
-GD_LANG_COMPILER_INTEL
-AC_LANG_POP([C++])
-GD_LANG_F77_COMPILER_INTEL
-GD_LANG_FC_COMPILER_INTEL
 
 AC_MSG_CHECKING([if we're linking against the Microsoft C Run-Time])
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM([], [[#ifndef __MSVCRT__
@@ -379,13 +417,29 @@ if test "x$FC" == "x"; then
   make_f95bindings=no
 fi
 
+dnl compiler checks
+echo
+echo "*** Checking additional compiler characteristics"
+echo
+GD_PROG_CC_WEXTRA
+
+if test "x$make_c++bindings" != "xno"; then
+  GD_PROG_CXX_WEXTRA
+fi
+
+if test "x$make_f77bindings" != "xno"; then
+  GD_PROG_F77_WEXTRA
+  GD_LANG_F77_COMPILER_INTEL
+fi
+
+if test "x$make_f95bindings" != "xno"; then
+  GD_PROG_FC_WEXTRA
+  GD_LANG_FC_COMPILER_INTEL
+fi
+
 dnl F77 stuff
 if test "x$make_f77bindings" != "xno"; then
-  AC_CHECK_PROGS([DIFF], [diff], [not found])
-
-  if test "x$DIFF" = "xnot found"; then
-    AC_MSG_ERROR([diff is needed to build the Fortran bindings])
-  fi
+  AC_CHECK_PROGS([DIFF], [diff], [])
   AC_F77_WRAPPERS
 fi
 
@@ -457,6 +511,7 @@ echo "*** Checking data types"
 echo
 AC_C_CONST
 AC_C_BIGENDIAN
+GD_C_FLOATORDERING
 AC_TYPE_SIZE_T
 AC_TYPE_OFF_T
 AC_CHECK_SIZEOF([off_t])
@@ -668,14 +723,10 @@ AC_CONFIG_FILES([util/Makefile])
 
 dnl Automake conditionals
 AM_CONDITIONAL(GETDATA_DEBUG, [test "x$enable_debug" == "xyes"])
-AM_CONDITIONAL(GNU_C_COMPILER, [test "x$gd_cv_c_compiler_intel" == "xno"]dnl
-               [-a "x$ac_cv_c_compiler_gnu" == "xyes"])
-AM_CONDITIONAL(GNU_CXX_COMPILER, [test "x$gd_cv_cxx_compiler_intel" == "xno"]dnl
-               [-a "x$ac_cv_cxx_compiler_gnu" == "xyes"])
-AM_CONDITIONAL(GNU_F77_COMPILER, [test "x$gd_cv_f77_compiler_intel" == "xno"]dnl
-               [-a "x$ac_cv_f77_compiler_gnu" == "xyes"])
-AM_CONDITIONAL(GNU_FC_COMPILER, [test "x$gd_cv_fc_compiler_intel" == "xno"]dnl
-               [-a "x$ac_cv_fc_compiler_gnu" == "xyes"])
+AM_CONDITIONAL(CC_WEXTRA, [test "x$gd_cv_prog_cc_wextra" == "xyes"])
+AM_CONDITIONAL(CXX_WEXTRA, [test "x$gd_cv_prog_cxx_wextra" == "xyes"])
+AM_CONDITIONAL(F77_WEXTRA, [test "x$gd_cv_prog_f77_wextra" == "xyes"])
+AM_CONDITIONAL(FC_WEXTRA, [test "x$gd_cv_prog_fc_wextra" == "xyes"])
 AM_CONDITIONAL(INTEL_F77_COMPILER,
                [test "x$gd_cv_f77_compiler_intel" == "xyes"])
 AM_CONDITIONAL(INTEL_FC_COMPILER, [test "x$gd_cv_fc_compiler_intel" == "xyes"])
@@ -690,6 +741,7 @@ AM_CONDITIONAL(MAKE_IDLBINDINGS, [test "x$make_idlbindings" = "xyes"])
 AM_CONDITIONAL(USE_MODULES, [test "x$use_modules" != "xno"])
 AM_CONDITIONAL(TEST_PYTHON, [test "x$NO_DLOPEN_TESTS" = "x0"])
 AM_CONDITIONAL(TEST_IDL, [test "x$NO_DLOPEN_TESTS" = "x0"])
+AM_CONDITIONAL(HAVE_DIFF, test "x$DIFF" != "x")
 
 dnl we do this here to avoid screwing up other tests
 LDFLAGS="${LDFLAGS}${NO_UNDEFINED}"

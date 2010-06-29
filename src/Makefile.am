@@ -20,7 +20,7 @@
 #
 AUTOMAKE_OPTIONS = foreign
 
-if GNU_C_COMPILER
+if CC_WEXTRA
 WEXTRA=-Wextra
 endif
 

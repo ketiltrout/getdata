@@ -183,6 +183,20 @@ unsigned long gd_get_endianness(DIRFILE* D, int fragment)
   return D->fragment[fragment].byte_sex;
 }
 
+void _GD_ArmEndianise(uint64_t* databuffer, int is_complex, size_t ns)
+{
+  uint64_t *p;
+  dtrace("%p, %i, %zi", databuffer, is_complex, ns);
+
+  if (is_complex)
+    ns *= 2;
+
+  for (p = databuffer; p < databuffer + ns; ++p)
+    *p = ((*p & 0xffffffff) << 32) | ((*p & 0xffffffff00000000ULL) >> 32);
+
+  dreturnvoid();
+}
+
 void _GD_FixEndianness(char* databuffer, size_t size, size_t ns)
 {
   size_t i, j;

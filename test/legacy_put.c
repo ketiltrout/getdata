@@ -18,7 +18,6 @@ int main(void)
   const char* format_data = "data RAW UINT8 8\n";
   uint8_t c[8], d;
   int fd, i, r = 0;
-  struct stat buf;
 
   memset(c, 0, 8);
   mkdir(filedir, 0777);
@@ -36,6 +35,7 @@ int main(void)
   /* Hmmm... the legacy API has no way to flush data to disk, so the following
    * test may report a false negative */
 #if 0
+  struct stat buf;
   int stat_ret = stat(data, &buf);
   CHECKI(stat_ret, 0);
   CHECKI(buf.st_size, 40 + 8 * sizeof(uint8_t));

@@ -392,13 +392,11 @@ static void _GD_FlushFragment(DIRFILE* D, int i)
   fprintf(stream, "/VERSION %i\n", DIRFILE_STANDARDS_VERSION);
 
   /* Byte Sex */
-  fprintf(stream, "/ENDIAN %s\n",
-#ifdef WORDS_BIGENDIAN
-      (D->fragment[i].byte_sex == GD_LITTLE_ENDIAN) ? "little" : "big"
-#else
-      (D->fragment[i].byte_sex == GD_BIG_ENDIAN) ? "big" : "little"
-#endif
-      );
+  fprintf(stream, "/ENDIAN %s%s\n",
+      (D->fragment[i].byte_sex == GD_LITTLE_ENDIAN) ? "little" : "big",
+      (D->fragment[i].float_sex == D->fragment[i].byte_sex) ? "" :
+      (D->fragment[i].float_sex == GD_ARM_ENDIAN) ? " arm" :
+      (D->fragment[i].float_sex == GD_LITTLE_ENDIAN) ? " little" : " big");
 
   if (D->fragment[i].protection == GD_PROTECT_NONE)
     fputs("/PROTECT none\n", stream);
