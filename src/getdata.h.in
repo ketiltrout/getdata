@@ -114,8 +114,9 @@
 #define GD_E_DOMAIN           31
 #define GD_E_BAD_REPR         32
 #define GD_E_BAD_VERSION      33
+#define GD_E_FLUSH            34
 
-#define GD_N_ERROR_CODES      34
+#define GD_N_ERROR_CODES      35
 
 /* maximum length of a format file line */
 #define GD_MAX_LINE_LENGTH  4096

@@ -78,7 +78,8 @@ const char *GD_ERROR_CODES[GD_N_ERROR_CODES] = {
   NULL, /* GD_E_UNCLEAN_DB */
   "Improper domain", /* GD_E_DOMAIN */
   "Bad representation", /* GD_E_BAD_REPR */
-  NULL /* GD_E_BAD_VERSION */
+  NULL, /* GD_E_BAD_VERSION */
+  "I/O error flushing metadata to disc" /* GD_E_FLUSH */
 };
 
 static struct FormatType Format = {

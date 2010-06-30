@@ -163,13 +163,19 @@ static const struct {
   /* GD_E_UNCLEAN_DB: 3 = fragment */
   { GD_E_UNCLEAN_DB, 0,
     "Unexpected system error processing {3}; database unclean", 0 },
+  /* GD_E_DOMAIN: (nothing) */
+  { GD_E_DOMAIN, GD_E_DOMAIN_COMPLEX, "Improper domain: complex valued", 0 },
+  { GD_E_DOMAIN, GD_E_DOMAIN_EMPTY, "Improper domain: empty set", 0 },
   /* GD_E_UNCLEAN_DB: 4 = repr */
   { GD_E_BAD_REPR, GD_E_REPR_UNKNOWN, "Unknown field representation: .{4}", 0 },
   { GD_E_BAD_REPR, GD_E_REPR_PUT, "Unable to write to field reprentation: .{4}",
     0 },
-  /* GD_E_DOMAIN: (nothing) */
-  { GD_E_DOMAIN, GD_E_DOMAIN_COMPLEX, "Improper domain: complex valued", 0 },
-  { GD_E_DOMAIN, GD_E_DOMAIN_EMPTY, "Improper domain: empty set", 0 },
+  /* GD_E_BAD_VERSION 3 = version */
+  { GD_E_BAD_VERSION, 0, "Bad version specified: {3}", 0 },
+  /* GD_E_FLUSH: 3 = suberror, 4 = filename */
+  { GD_E_FLUSH, GD_E_FLUSH_MKTMP, "I/O error creating temporary file: ", 1 },
+  { GD_E_FLUSH, GD_E_FLUSH_OPEN, "I/O error opening temporary file: ", 1 },
+  { GD_E_FLUSH, GD_E_FLUSH_RENAME, "I/O error replacing format metadata: ", 1 },
   /* GD_E_OK: (nothing) */
   { 0, 0, "Success", 0} /* this must be the last error string defined */
 };

@@ -277,6 +277,10 @@ int strerror_r(int, char*, size_t);
 #define GD_E_OUT_OF_RANGE       1
 #define GD_E_SINGULAR_RANGE     2
 
+#define GD_E_FLUSH_MKTMP        1
+#define GD_E_FLUSH_OPEN         2
+#define GD_E_FLUSH_RENAME       3
+
 struct _gd_raw_file {
   char* name;
   int fp;

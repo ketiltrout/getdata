@@ -1,3 +1,10 @@
+2010-06-30   D. V. Wiebe <getdata@ketiltrout.net>   svn:420
+	* src/errors.c: Update for GD_E_BAD_VERSION and GD_E_FLUSH.
+	* src/flush.c (_GD_FlushFragment): Replace GD_E_OPEN_INCLUDE errors with
+	GD_E_FLUSH for more sensical error reporting.
+	* src/getdata.h.in: Added GD_E_FLUSH.
+	* src/internal.h: Added GD_E_FLUSH suberrors.
+
 2010-06-30   D. V. Wiebe <getdata@ketiltrout.net>   svn:419
 	* src/mod.c (_GD_SPFConvert): _GD_AddData is only used by _GD_Change to
 	convert SPFs, so pare it down and rename.

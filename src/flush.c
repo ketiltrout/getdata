@@ -338,14 +338,14 @@ static void _GD_FlushFragment(DIRFILE* D, int i)
   snprintf(temp_file, name_len + 15, "%s/format_XXXXXX", D->name);
   fd = mkstemp(temp_file);
   if (fd == -1) {
-    _GD_SetError(D, GD_E_OPEN_INCLUDE, errno, "", 0, temp_file);
+    _GD_SetError(D, GD_E_FLUSH, GD_E_FLUSH_MKTMP, NULL, errno, temp_file);
     free(temp_file);
     dreturnvoid();
     return;
   }
   stream = fdopen(fd, "w+");
   if (stream == NULL) {
-    _GD_SetError(D, GD_E_OPEN_INCLUDE, errno, "", 0, temp_file);
+    _GD_SetError(D, GD_E_FLUSH, GD_E_FLUSH_OPEN, NULL, errno, temp_file);
     free(temp_file);
     dreturnvoid();
     return;
@@ -471,7 +471,7 @@ static void _GD_FlushFragment(DIRFILE* D, int i)
     return;
     /* Only assume we've synced the file if the rename succeeds */
   } else if (_GD_Rename(temp_file, D->fragment[i].cname)) {
-    _GD_SetError(D, GD_E_OPEN_INCLUDE, errno, "", 0, D->fragment[i].cname);
+    _GD_SetError(D, GD_E_FLUSH, GD_E_FLUSH_RENAME, NULL, errno, D->fragment[i].cname);
     unlink(temp_file);
     free(temp_file);
     dreturnvoid();
@@ -739,7 +739,7 @@ int gd_dirfile_standards(DIRFILE *D, int vers)
     vers = earliest_magic[(~(D->av - 1) & D->av) % 67];
 
   if (vers < 0 || vers > DIRFILE_STANDARDS_VERSION || ~D->av & (1ULL << vers)) {
-    _GD_SetError(D, GD_E_BAD_VERSION, 0, NULL, 0, NULL);
+    _GD_SetError(D, GD_E_BAD_VERSION, 0, NULL, vers, NULL);
     dreturn("%i", -1);
     return -1;
   }
