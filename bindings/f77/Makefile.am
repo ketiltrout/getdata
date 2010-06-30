@@ -1,4 +1,4 @@
-# (C) 2008 D. V. Wiebe
+# (C) 2008-2010 D. V. Wiebe
 #
 ##########################################################################
 #
@@ -102,10 +102,10 @@ endif
 
 getdata.f: $(srcdir)/getdata.f.in make_parameters.sed
 	rm -f $@
-	$(SED) $< -f make_parameters.sed > $@
+	$(SED) -f make_parameters.sed $< > $@
 	chmod a-w $@
 
 getdata.f90: $(srcdir)/getdata.f90.in make_parameters.sed
 	rm -f $@
-	$(SED) $< -f make_parameters.sed > $@
+	$(SED) -f make_parameters.sed $< > $@
 	chmod a-w $@
