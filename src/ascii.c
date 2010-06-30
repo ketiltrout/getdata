@@ -81,7 +81,7 @@ off64_t _GD_AsciiSeek(struct _gd_raw_file* file, off64_t count,
   return file->fp;
 }
 
-void _GD_ScanFormat(char* fmt, gd_type_t data_type)
+static void _GD_ScanFormat(char* fmt, gd_type_t data_type)
 {
   dtrace("%p, %x", fmt, data_type);
 

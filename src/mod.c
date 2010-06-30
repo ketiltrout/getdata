@@ -118,6 +118,76 @@ static int _GD_AlterScalar(DIRFILE* D, int alter_literal, gd_type_t type,
   return r;
 }
 
+/* _GD_SPFConvert: this is the no-longer used AddData, cut down for use by
+ * _GD_Change.  NB: Don't precompute (spfB / spfA) here: the order of operations
+ * is important to get proper integer trucation.
+ */
+static void _GD_SPFConvert(DIRFILE* D, void *A, gd_spf_t spfA, void *B,
+    gd_spf_t spfB, gd_type_t type, size_t n)
+{
+  size_t i;
+
+  dtrace("%p, %p, %u, %p, %u, 0x%x, %zu", D, A, spfA, B, spfB, type, n);
+
+  switch (type) {
+    case GD_NULL: /* null read */
+      break;
+    case GD_INT8:
+      for (i = 0; i < n; i++)
+        ((int8_t*)A)[i] = ((int8_t*)B)[i * spfB / spfA];
+      break;
+    case GD_UINT8:
+      for (i = 0; i < n; i++)
+        ((uint8_t*)A)[i] = ((uint8_t*)B)[i * spfB / spfA];
+      break;
+    case GD_INT16:
+      for (i = 0; i < n; i++)
+        ((int16_t*)A)[i] = ((int16_t*)B)[i * spfB / spfA];
+      break;
+    case GD_UINT16:
+      for (i = 0; i < n; i++)
+        ((uint16_t*)A)[i] = ((uint16_t*)B)[i * spfB / spfA];
+      break;
+    case GD_INT32:
+      for (i = 0; i < n; i++)
+        ((int32_t*)A)[i] = ((int32_t*)B)[i * spfB / spfA];
+      break;
+    case GD_UINT32:
+      for (i = 0; i < n; i++)
+        ((uint32_t*)A)[i] = ((uint32_t*)B)[i * spfB / spfA];
+      break;
+    case GD_INT64:
+      for (i = 0; i < n; i++)
+        ((int64_t*)A)[i] = ((int64_t*)B)[i * spfB / spfA];
+      break;
+    case GD_UINT64:
+      for (i = 0; i < n; i++)
+        ((uint64_t*)A)[i] = ((uint64_t*)B)[i * spfB / spfA];
+      break;
+    case GD_FLOAT32:
+      for (i = 0; i < n; i++)
+        ((float*)A)[i] = ((float*)B)[i * spfB / spfA];
+      break;
+    case GD_FLOAT64:
+      for (i = 0; i < n; i++)
+        ((double*)A)[i] = ((double*)B)[i * spfB / spfA];
+      break;
+    case GD_COMPLEX64:
+      for (i = 0; i < n; i++)
+        ((float complex*)A)[i] = ((float complex*)B)[i * spfB / spfA];
+      break;
+    case GD_COMPLEX128:
+      for (i = 0; i < n; i++)
+        ((double complex*)A)[i] = ((double complex*)B)[i * spfB / spfA];
+      break;
+    default:
+      _GD_SetError(D, GD_E_BAD_TYPE, type, NULL, 0, NULL);
+      break;
+  }
+
+  dreturnvoid();
+}
+
 static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
     int flags)
 {
@@ -230,7 +300,6 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
 
         buffer1 = malloc(BUFFER_SIZE);
         buffer2 = malloc(BUFFER_SIZE);
-        memset(buffer2, 0, BUFFER_SIZE);
 
         /* Now copy the old file to the new file */
         for (;;) {
@@ -246,9 +315,9 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
 
           ns_out = nread * Q.spf / E->spf;
 
-          /* spf convert -- this is done via AddData */
+          /* spf convert */
           if (Q.spf != E->spf)
-            _GD_AddData(D, buffer2, Q.spf, buffer1, E->spf, E->data_type,
+            _GD_SPFConvert(D, buffer2, Q.spf, buffer1, E->spf, E->data_type,
                 ns_out);
           else {
             ptr = buffer1;

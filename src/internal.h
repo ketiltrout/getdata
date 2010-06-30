@@ -490,8 +490,6 @@ struct _GD_DIRFILE {
 
 extern const gd_entype_t _gd_entype_index[GD_N_ENTYPES];
 
-void _GD_AddData(DIRFILE* D, void *A, gd_spf_t spfA, void *B, gd_spf_t spfB,
-    gd_type_t type, size_t n);
 void* _GD_Alloc(DIRFILE* D, gd_type_t type, size_t n);
 void _GD_ArmEndianise(uint64_t* databuffer, int is_complex, size_t ns);
 int _GD_BadInput(DIRFILE* D, gd_entry_t* E, int i);
@@ -512,9 +510,6 @@ size_t _GD_DoField(DIRFILE*, gd_entry_t*, int, off64_t, size_t, gd_type_t,
     void*);
 size_t _GD_DoFieldOut(DIRFILE*, gd_entry_t*, int, off64_t, size_t, gd_type_t,
     const void*);
-int _GD_EntryCmp(const void *A, const void *B);
-int _GD_EncodingUnderstood(unsigned long int encoding); 
-int _GD_FillZero(void *databuffer, gd_type_t type, size_t nz);
 gd_entry_t* _GD_FindField(DIRFILE* D, const char* field_code,
     gd_entry_t** list, unsigned int u, unsigned int *index);
 gd_entry_t* _GD_FindFieldAndRepr(DIRFILE* D, const char* field_code_in,
@@ -553,7 +548,6 @@ gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, char** in_cols,
 char* _GD_ParseFragment(FILE* fp, DIRFILE *D, int me, int* standards,
     unsigned long int *flags);
 void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E);
-void _GD_ScanFormat(char* fmt, gd_type_t data_type);
 int _GD_SetEncodedName(DIRFILE* D, struct _gd_raw_file* file, const char* base,
     int temp);
 void _GD_SetError(DIRFILE* D, int error, int suberror, const char* format_file,

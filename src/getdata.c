@@ -158,7 +158,7 @@ static void _GD_FillFileFrame(void *dataout, gd_type_t rtype, off64_t s0,
 
 /* _GD_FillZero: fill data buffer with zero/NaN of the appropriate type.
  */
-int _GD_FillZero(void *databuffer, gd_type_t type, size_t nz)
+static int _GD_FillZero(void *databuffer, gd_type_t type, size_t nz)
 {
   size_t i;
   const double NaN = NAN;

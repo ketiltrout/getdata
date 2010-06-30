@@ -170,12 +170,10 @@ void _GD_InitialiseFramework(void)
   dreturnvoid();
 }
 
-int _GD_EncodingUnderstood(unsigned long encoding)
-{
-  return (encoding == GD_UNENCODED || encoding == GD_SLIM_ENCODED ||
-      encoding == GD_GZIP_ENCODED || encoding == GD_BZIP2_ENCODED ||
-      encoding == GD_TEXT_ENCODED || encoding == GD_LZMA_ENCODED);
-}
+#define _GD_EncodingUnderstood(encoding) \
+  ((encoding == GD_UNENCODED || encoding == GD_SLIM_ENCODED || \
+    encoding == GD_GZIP_ENCODED || encoding == GD_BZIP2_ENCODED || \
+    encoding == GD_TEXT_ENCODED || encoding == GD_LZMA_ENCODED))
 
 #ifdef USE_MODULES
 static void* _GD_ResolveSymbol(void* lib, struct encoding_t* enc,
@@ -189,7 +187,7 @@ static void* _GD_ResolveSymbol(void* lib, struct encoding_t* enc,
   sprintf(symbol, "libgetdata%s_LTX_GD_%s%s", enc->affix, enc->affix, name);
   symbol[10] -= 'A' - 'a';
   func = lt_dlsym(lib, symbol);
-  
+
   dreturn("%p", func);
   return func;
 }
@@ -198,7 +196,7 @@ static void* _GD_ResolveSymbol(void* lib, struct encoding_t* enc,
 int _GD_MissingFramework(int encoding, unsigned int funcs)
 {
   dtrace("%x, %x", encoding, funcs);
- 
+
 #ifdef USE_MODULES
 #ifdef USE_PTHREAD
   pthread_mutex_lock(&_gd_mutex);
@@ -255,7 +253,7 @@ int _GD_MissingFramework(int encoding, unsigned int funcs)
     _gd_ef[encoding].provides = 0;
   }
 #ifdef USE_PTHREAD
-    pthread_mutex_unlock(&_gd_mutex);
+  pthread_mutex_unlock(&_gd_mutex);
 #endif
 #endif
 
@@ -455,7 +453,7 @@ static void _GD_RecodeFragment(DIRFILE* D, unsigned long encoding, int fragment,
           raw_entry[i]->e->file[0].encoding = temp.encoding;
         } else
           free(temp.name);
-    }
+      }
 
     free(raw_entry);
 
