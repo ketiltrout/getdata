@@ -655,6 +655,9 @@ extern off_t gd_get_frameoffset(DIRFILE *dirfile,
     int fragment) gd_nothrow gd_nonnull ((1));
 
 extern off_t gd_get_nframes(DIRFILE *dirfile) gd_nonnull ((1));
+
+extern off_t gd_get_nsamples(DIRFILE *dirfile, const char* field_code)
+  gd_nonnull ((1,2));
 #else
 # ifdef __REDIRECT_NTH
 extern off_t __REDIRECT_NTH (gd_get_frameoffset, (DIRFILE *dirfile, int fragment),
@@ -679,6 +682,9 @@ extern size_t __REDIRECT (gd_putdata, (DIRFILE *dirfile, const char *field_code,
 extern off_t __REDIRECT (gd_get_nframes, (DIRFILE *dirfile),
     gd_get_nframes64) gd_nonnull ((1));
 
+extern off_t __REDIRECT (gd_get_nsamples, (DIRFILE *dirfile,
+      const char* field_code), gd_get_nsamples64) gd_nonnull ((1,2));
+
 extern double __REDIRECT (gd_get_framenum_subset, (DIRFILE* D,
       const char* field_code, double value, off_t field_start, off_t field_end),
     gd_get_framenum_subset64) gd_nonnull ((1,2));
@@ -687,6 +693,7 @@ extern double __REDIRECT (gd_get_framenum_subset, (DIRFILE* D,
 #  define gd_getdata gd_getdata64
 #  define gd_putdata gd_putdata64
 #  define gd_get_nframes gd_get_nframes64
+#  define gd_get_nsamples gd_get_nsamples64
 #  define gd_get_framenum_subset gd_get_framenum_subset64
 # endif
 #endif
@@ -717,6 +724,9 @@ extern double gd_get_framenum_subset64(DIRFILE* D, const char* field_code_in,
     double value, off64_t field_start, off64_t field_end) gd_nonnull ((1,2));
 
 extern off64_t gd_get_nframes64(DIRFILE *dirfile) gd_nonnull ((1));
+
+extern off64_t gd_get_nsamples64(DIRFILE *dirfile, const char* field_code)
+  gd_nonnull ((1,2));
 
 #if (defined _FILE_OFFSET_BITS && _FILE_OFFSET_BITS == 64) || \
                                     (defined __APPLE__) || (defined __CYGWIN__)

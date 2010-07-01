@@ -36,12 +36,12 @@ off64_t gd_get_nframes64(DIRFILE* D)
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%lli", 0LL);
+    dreturn("%i", 0);
     return 0;
   }
 
   if (D->reference_field == NULL) {
-    dreturn("%lli", 0LL);
+    dreturn("%i", 0);
     return 0;
   }
 

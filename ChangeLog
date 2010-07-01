@@ -1,3 +1,6 @@
+2010-06-30   D. V. Wiebe <getdata@ketiltrout.net>   svn:425
+	* src/nsamples.c: Added.
+
 2010-06-30   D. V. Wiebe <getdata@ketiltrout.net>   svn:420
 	* src/errors.c: Update for GD_E_BAD_VERSION and GD_E_FLUSH.
 	* src/flush.c (_GD_FlushFragment): Replace GD_E_OPEN_INCLUDE errors with
