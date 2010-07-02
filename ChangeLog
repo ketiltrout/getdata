@@ -1,4 +1,7 @@
-2010-06-30   D. V. Wiebe <getdata@ketiltrout.net>   svn:425
+2010-06-30   D. V. Wiebe <getdata@ketiltrout.net>   svn:425 svn:426
+	* test/nsamples.c test/nsamples_index.c test/nsamples_lincom.c
+	test/nsamples_phase.c: Added.
+
 	* src/nsamples.c: Added.
 
 2010-06-30   D. V. Wiebe <getdata@ketiltrout.net>   svn:420
@@ -139,7 +142,7 @@
 	* configure.ac: Call GD_MSYS_SHELL.  Add various Win32 checks.
 	* m4/win32.m4: Added.
 
-2010-05-22   D. V. Wiebe <getdata@ketiltrout.net>   svn:401, 402
+2010-05-22   D. V. Wiebe <getdata@ketiltrout.net>   svn:401 svn:402
 	* test/: Update for new function names.  Modernise error reporting.
 	* test/test.h: Added.
 	* test/add_many.h test/global_ref_get.c: Deleted.
@@ -1006,7 +1009,7 @@
 
 	* configure.ac: Remove spurious AC_SUBST.
 
-2009-09-21   D. V. Wiebe <getdata@ketiltrout.net>  svn:311 
+2009-09-21   D. V. Wiebe <getdata@ketiltrout.net>  svn:311
 	* src/getdata.h.in: complex_scalars member shortened to comp_scal.
 
 	* test/add_cpolynom.c test/add_clincom.c test/index.c test/index_range.c
@@ -1080,7 +1083,7 @@
 
 	* bindings/idl/getdata.c: Update.
 
-2009-09-21   D. V. Wiebe <getdata@ketiltrout.net>  svn:309 
+2009-09-21   D. V. Wiebe <getdata@ketiltrout.net>  svn:309
 	* src/meta_list.c (get_mstrings): Properly terminate the list.  Bug
 	report from Matthew Truch.
 

@@ -14,7 +14,7 @@ int main(void)
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
   const char* data = __TEST__ "dirfile/data";
-  const char* format_data = "data RAW UINT16 1\n";
+  const char* format_data = "data RAW UINT16 1\nphase PHASE data 3";
   int fd, r = 0;
   const size_t len = strlen(data);
 
@@ -29,7 +29,7 @@ int main(void)
   close(fd);
 
   DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  off_t n = gd_get_nframes(D);
+  off_t n = gd_get_nsamples(D, "phase");
   int error = gd_error(D);
   gd_close(D);
 
@@ -38,7 +38,7 @@ int main(void)
   rmdir(filedir);
 
   CHECKI(error, 0);
-  CHECKI(n, len / 2);
+  CHECKI(n, (int)len / 2 - 3);
 
   return r;
 }

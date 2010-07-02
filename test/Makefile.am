@@ -208,6 +208,8 @@ NMETA_TESTS=nmeta nmeta_invalid nmeta_parent nmeta_type nmeta_type_invalid \
 						nmeta_type_parent nmeta_vectors nmeta_vectors_invalid \
 						nmeta_vectors_parent
 
+NSAMPLES_TESTS=nsamples nsamples_index nsamples_lincom nsamples_phase
+
 NVECTORS_TESTS=nvectors nvectors_invalid
 
 OPEN_TESTS=open open_cb_abort open_cb_cont open_cb_ignore open_cb_invalid \
@@ -299,12 +301,12 @@ TESTS=$(ADD_TESTS)        $(ALTER_TESTS)      $(ASCII_TESTS)      \
 			$(INDEX_TESTS)      $(LEGACY_TESTS)     $(LZMA_TESTS)       \
 			$(MADD_TESTS)       $(MOVE_TESTS)       $(NAME_TESTS)       \
 			$(NFIELDS_TESTS)    $(NFRAGMENTS_TESTS) $(NFRAMES_TESTS)    \
-			$(NMETA_TESTS)      $(NVECTORS_TESTS)   $(OPEN_TESTS)       \
-			$(PARENT_TESTS)     $(PARSE_TESTS)      $(PROTECT_TESTS)    \
-			$(PUT_TESTS)        $(REF_TESTS)        $(REPR_TESTS)       \
-			$(SLIM_TESTS)       $(SPF_TESTS)        $(SVLIST_TESTS)     \
-			$(TRUNC_TESTS)      $(UNCLUDE_TESTS)    $(VERSION_TESTS)    \
-			$(VLIST_TESTS)      $(XZ_TESTS)
+			$(NMETA_TESTS)      $(NSAMPLES_TESTS)   $(NVECTORS_TESTS)   \
+			$(OPEN_TESTS)       $(PARENT_TESTS)     $(PARSE_TESTS)      \
+			$(PROTECT_TESTS)    $(PUT_TESTS)        $(REF_TESTS)        \
+			$(REPR_TESTS)       $(SLIM_TESTS)       $(SPF_TESTS)        \
+			$(SVLIST_TESTS)     $(TRUNC_TESTS)      $(UNCLUDE_TESTS)    \
+			$(VERSION_TESTS)    $(VLIST_TESTS)      $(XZ_TESTS)
 
 check_PROGRAMS=$(TESTS)
 

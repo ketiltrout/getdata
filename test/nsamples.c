@@ -29,7 +29,7 @@ int main(void)
   close(fd);
 
   DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  off_t n = gd_get_nframes(D);
+  off_t n = gd_get_nsamples(D, "data");
   int error = gd_error(D);
   gd_close(D);
 
@@ -38,7 +38,7 @@ int main(void)
   rmdir(filedir);
 
   CHECKI(error, 0);
-  CHECKI(n, len / 2);
+  CHECKI((int)n, (int)len / 2);
 
   return r;
 }

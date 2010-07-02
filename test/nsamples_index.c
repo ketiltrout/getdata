@@ -1,4 +1,3 @@
-/* Retreiving the number of frames should succeed cleanly */
 #include "test.h"
 
 #include <stdlib.h>
@@ -28,8 +27,8 @@ int main(void)
   write(fd, data, len);
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  off_t n = gd_get_nframes(D);
+  DIRFILE* D = gd_open(filedir, GD_RDONLY);
+  off_t n = gd_get_nsamples(D, "INDEX");
   int error = gd_error(D);
   gd_close(D);
 
@@ -37,8 +36,8 @@ int main(void)
   unlink(format);
   rmdir(filedir);
 
-  CHECKI(error, 0);
-  CHECKI(n, len / 2);
+  CHECKI(error, GD_E_BAD_FIELD_TYPE);
+  CHECKI(n, 0);
 
   return r;
 }
