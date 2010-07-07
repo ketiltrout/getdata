@@ -178,29 +178,6 @@ void* _GD_Alloc(DIRFILE* D, gd_type_t type, size_t n)
   return ptr;
 }
 
-/* _GD_MakeDummyLinterp: Make an empty linterp
-*/
-static void _GD_MakeDummyLinterp(DIRFILE* D, struct _gd_private_entry *e)
-{
-  dtrace("%p, %p", D, e);
-
-  e->table_len = 2;
-  e->table_monotonic = -1;
-  e->complex_table = 0;
-  e->lut = (struct _gd_lut*)malloc(2 * sizeof(struct _gd_lut));
-
-  if (e->lut == NULL)
-    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-  else {
-    e->lut[0].x = 0;
-    e->lut[0].y = 0;
-    e->lut[1].x = 1;
-    e->lut[1].y = 1;
-  }
-
-  dreturnvoid();
-}
-
 /* compute LUT table path -- this is used by _GD_Change, so e may not be E->e */
 int _GD_SetTablePath(DIRFILE *D, gd_entry_t *E, struct _gd_private_entry *e)
 {
@@ -257,12 +234,8 @@ void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E)
       return;
     }
 
-  E->e->complex_table = 0;
-  E->e->table_monotonic = -1;
-
   fp = fopen(E->e->table_path, "r" FOPEN_TEXT);
   if (fp == NULL) {
-    _GD_MakeDummyLinterp(D, E->e);
     _GD_SetError(D, GD_E_OPEN_LINFILE, GD_E_LINFILE_OPEN, NULL, 0,
         E->e->table_path);
     dreturnvoid();
@@ -279,7 +252,6 @@ void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E)
   E->e->lut = (struct _gd_lut *)malloc(buf_len * sizeof(struct _gd_lut));
 
   if (E->e->lut == NULL) {
-    _GD_MakeDummyLinterp(D, E->e);
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     fclose(fp);
     dreturnvoid();
@@ -304,7 +276,6 @@ void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E)
 
       if (ptr == NULL) {
         free(E->e->lut);
-        _GD_MakeDummyLinterp(D, E->e);
         _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
         fclose(fp);
         dreturnvoid();
@@ -317,7 +288,6 @@ void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E)
 
   if (i < 2) {
     free(E->e->lut);
-    _GD_MakeDummyLinterp(D, E->e);
     _GD_SetError(D, GD_E_OPEN_LINFILE, GD_E_LINFILE_LENGTH, NULL, 0,
         E->e->table_path);
     fclose(fp);
@@ -330,13 +300,13 @@ void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E)
 
   if (ptr == NULL) {
     free(E->e->lut);
-    _GD_MakeDummyLinterp(D, E->e);
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     fclose(fp);
     dreturnvoid();
     return;
   }
 
+  E->e->table_monotonic = -1;
   E->e->lut = ptr;
   E->e->table_len = i;
 

@@ -34,8 +34,10 @@ int main(void)
   close(fd);
 
   DIRFILE* D = gd_open(filedir, GD_RDONLY);
-  int n = gd_getdata(D, "linterp", 5, 0, 1, 0, GD_UINT8, &c);
-  int error = gd_error(D);
+  int n1 = gd_getdata(D, "linterp", 5, 0, 1, 0, GD_UINT8, &c);
+  int error1 = gd_error(D);
+  int n2 = gd_getdata(D, "linterp", 5, 0, 1, 0, GD_UINT8, &c);
+  int error2 = gd_error(D);
 
   gd_close(D);
 
@@ -43,8 +45,10 @@ int main(void)
   unlink(format);
   rmdir(filedir);
 
-  CHECKI(n, 0);
-  CHECKI(error, GD_E_OPEN_LINFILE);
+  CHECKI(n1, 0);
+  CHECKI(error1, GD_E_OPEN_LINFILE);
+  CHECKI(n2, 0);
+  CHECKI(error2, GD_E_OPEN_LINFILE);
 
   return r;
 }

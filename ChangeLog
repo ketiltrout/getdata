@@ -1,3 +1,9 @@
+2010-07-07   D. V. Wiebe <getdata@ketiltrout.net>   svn:431
+	* test/get_linterp_notab.c: Test for dummy linterp creation.
+
+	* src/common.c (_GD_MakeDummyLinterp): Deleted.
+	* src/common.c (_GD_ReadLinterpFile): Don't make a dummy LUT on error.
+
 2010-07-07   D. V. Wiebe <getdata@ketiltrout.net>   svn:430
 	* test/bof_lincom.c: Fix.
 
