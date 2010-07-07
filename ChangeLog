@@ -1,4 +1,9 @@
-2010-07-05   D. V. Wiebe <getdata@ketiltrout.net>   svn:427
+2010-07-07   D. V. Wiebe <getdata@ketiltrout.net>   svn:428
+	* bindings/cxx/test/addentry.cpp bindings/cxx/test/getdata.cpp
+	bindings/cxx/test/nframes.cpp bindings/cxx/test/spf.cpp
+	bindings/cxx/test/putdata.cpp: Deleted; coverage duplicated by big_test.
+
+2010-07-06   D. V. Wiebe <getdata@ketiltrout.net>   svn:427
 	* test/eof_phase.c test/eof.c test/eof_lincom.c test/eof_index.c: Renamed
 	from nsamples*.c
 	* test/bof.c test/bof_lincom.c test/bof_phase.c: Added.

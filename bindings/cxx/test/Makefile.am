@@ -26,14 +26,9 @@ endif
 
 INCLUDES = -Wall $(WEXTRA) -I$(srcdir)/.. -I$(top_srcdir)/src -D__TEST__=\"$@\"
 LDADD=../libgetdata++.la
-TESTS=addentry big_test getdata nframes putdata spf
+TESTS=big_test
 
-addentry_SOURCES=addentry.cpp
 big_test_SOURCES=big_test.cpp
-getdata_SOURCES=getdata.cpp
-nframes_SOURCES=nframes.cpp
-putdata_SOURCES=putdata.cpp
-spf_SOURCES=spf.cpp
 
 check_PROGRAMS=${TESTS}
 
