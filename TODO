@@ -1,6 +1,5 @@
 * Perl bindings
 * Locking
-* LUT sorting
 * Hashed compressed files
 * streaming
 * linterp table path munging [MH]

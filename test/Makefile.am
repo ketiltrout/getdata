@@ -162,9 +162,10 @@ GET_TESTS=${GET64} get_bad_code get_bit get_char get_clincom get_complex128 \
 					get_float64 get_foffs get_fs get_int8 get_int16 get_int32 get_int64 \
 					get_invalid get_lincom1 get_lincom2 get_lincom3 get_lincom_noin \
 					get_lincom_non get_linterp get_linterp_noin get_linterp_notab \
-					get_multiply get_multiply_noin get_nonexistent get_null $(GET_OFF64) \
-					get_phase get_polynom get_polynom_noin get_recurse get_sbit get_sf \
-					get_ss get_type get_uint16 get_uint32 get_uint64 get_zero
+					get_linterp_sort get_multiply get_multiply_noin get_nonexistent \
+					get_null $(GET_OFF64) get_phase get_polynom get_polynom_noin \
+					get_recurse get_sbit get_sf get_ss get_type get_uint16 get_uint32 \
+					get_uint64 get_zero
 
 GLOBAL_TESTS=global_name global_ref global_ref_empty global_ref_set
 
@@ -257,11 +258,11 @@ PUT_TESTS=${PUT64} put_bad_code put_bit put_bof put_char put_complex128 \
 					put_endian_float64_little put_ff put_float32 put_float64 \
 					put_foffs put_fs put_int8 put_int16 put_int32 put_int64 put_invalid \
 					put_lincom1 put_lincom2 put_lincom_noin put_linterp put_linterp_noin \
-					put_linterp_notab put_multiply put_null $(PUT_OFF64) put_phase \
-					put_phase_noin put_polynom1 put_polynom2 put_polynom_noin \
-					put_protect put_rdonly put_recurse put_repr put_rofs put_sbit put_sf \
-					put_ss put_string put_string_protect put_type put_uint16 put_uint32 \
-					put_uint64
+					put_linterp_nomono put_linterp_notab put_linterp_reverse \
+					put_multiply put_null $(PUT_OFF64) put_phase put_phase_noin \
+					put_polynom1 put_polynom2 put_polynom_noin put_protect put_rdonly \
+					put_recurse put_repr put_rofs put_sbit put_sf put_ss put_string \
+					put_string_protect put_type put_uint16 put_uint32 put_uint64
 
 REF_TESTS=ref ref_none ref_two
 

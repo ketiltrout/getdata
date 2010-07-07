@@ -166,6 +166,7 @@ static const struct {
   /* GD_E_DOMAIN: (nothing) */
   { GD_E_DOMAIN, GD_E_DOMAIN_COMPLEX, "Improper domain: complex valued", 0 },
   { GD_E_DOMAIN, GD_E_DOMAIN_EMPTY, "Improper domain: empty set", 0 },
+  { GD_E_DOMAIN, GD_E_DOMAIN_ANTITONIC, "Improper domain: not monotonic", 0 },
   /* GD_E_UNCLEAN_DB: 4 = repr */
   { GD_E_BAD_REPR, GD_E_REPR_UNKNOWN, "Unknown field representation: .{4}", 0 },
   { GD_E_BAD_REPR, GD_E_REPR_PUT, "Unable to write to field reprentation: .{4}",

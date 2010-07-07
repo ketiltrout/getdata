@@ -145,10 +145,16 @@ static size_t _GD_DoRawOut(DIRFILE *D, gd_entry_t *E, off64_t s0,
 static size_t _GD_DoLinterpOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
     size_t num_samp, gd_type_t data_type, const void *data_in)
 {
-  size_t n_wrote;
+  size_t n_wrote, i;
+  int dir = -1;
 
   dtrace("%p, %p, %lli, %zu, 0x%x, %p", D, E, first_samp, num_samp, data_type,
       data_in);
+
+  if (_GD_BadInput(D, E, 0)) {
+    dreturn("%i", 0);
+    return 0;
+  }
 
   /* if the table is complex valued, we can't invert it */
   if (E->e->complex_table) {
@@ -165,8 +171,23 @@ static size_t _GD_DoLinterpOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
     }
   }
 
-  /* Interpolate X(y) instead of Y(x) */
-  if (_GD_BadInput(D, E, 0)) {
+  /* Check whether the LUT is monotonic */
+  if (E->e->table_monotonic == -1) {
+    E->e->table_monotonic = 1;
+    for (i = 1; i < (size_t)E->e->table_len; ++i)
+      if (E->e->lut[i].y != E->e->lut[i - 1].y) {
+        if (dir == -1) 
+          dir = (E->e->lut[i].y > E->e->lut[i - 1].y);
+        else if (dir != (E->e->lut[i].y > E->e->lut[i - 1].y)) {
+          E->e->table_monotonic = 0;
+          break;
+        }
+      }
+  }
+
+  /* Can't invert a non-monotonic function */
+  if (E->e->table_monotonic == 0) {
+    _GD_SetError(D, GD_E_DOMAIN, GD_E_DOMAIN_ANTITONIC, NULL, 0, NULL);
     dreturn("%i", 0);
     return 0;
   }
@@ -186,9 +207,24 @@ static size_t _GD_DoLinterpOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
     return 0;
   }
 
-  _GD_LinterpData(D, tmpbuf, GD_FLOAT64, tmpbuf, num_samp, E->e->y, E->e->x,
+  /* Make the reverse lut */
+  struct _gd_lut *tmp_lut = malloc(E->e->table_len * sizeof(struct _gd_lut));
+  if (tmp_lut == NULL) {
+    free(tmpbuf);
+    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  for (i = 0; i < E->e->table_len; ++i) {
+    tmp_lut[i].x = E->e->lut[i].y;
+    tmp_lut[i].y = E->e->lut[i].x;
+  }
+
+  _GD_LinterpData(D, tmpbuf, GD_FLOAT64, 0, tmpbuf, num_samp, tmp_lut,
       E->e->table_len);
 
+  free(tmp_lut);
   if (D->error != GD_E_OK) {
     free(tmpbuf);
     dreturn("%i", 0);

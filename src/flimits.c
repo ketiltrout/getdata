@@ -317,7 +317,7 @@ static off64_t _GD_GetEOF(DIRFILE *D, gd_entry_t* E, int *is_index)
         break;
 
       ns = _GD_GetEOF(D, E->e->entry[0], is_index);
-      if (!is_index && !D->error)
+      if (!*is_index && !D->error)
         ns -= E->shift;
       break;
     case GD_INDEX_ENTRY:

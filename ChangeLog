@@ -1,3 +1,23 @@
+2010-07-07   D. V. Wiebe <getdata@ketiltrout.net>   svn:430
+	* test/bof_lincom.c: Fix.
+
+	* test/get_linterp_sort.c test/put_linterp_reverse.c
+	test/put_linterp_nomono.c: Added.
+
+	* src/getdata.c (_GD_DoLinterp): Update call to _GD_LinterpData.
+	* src/putdata.c (_GD_DoLinterpOut): Reject non-monotonic LUTs.  Update for
+	new LUT struct.
+	* src/common.c (_GD_LinterpData): Handle both complex and real tables.
+	* src/common.c (_GD_CLinterpData): Deleted.
+	* src/common.c (_GD_ReadLinterpFile): Sort the LUT.
+	* src/internal.h: GD_E_DOMAIN_ANTITONIC added.  Define new LUT struct.
+
+	* src/common.c (_GD_ReadLinterpFile): Don't read the file twice, instead
+	dynamically resize the LUT buffer.
+	* src/common.c (_GD_GetLine): Abort early on EOF.
+
+	* src/flimits.c (_GD_GetEOF): Fix INDEX check in PHASE.
+
 2010-07-07   D. V. Wiebe <getdata@ketiltrout.net>   svn:428
 	* bindings/cxx/test/addentry.cpp bindings/cxx/test/getdata.cpp
 	bindings/cxx/test/nframes.cpp bindings/cxx/test/spf.cpp

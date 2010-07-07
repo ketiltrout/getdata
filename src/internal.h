@@ -273,6 +273,7 @@ int strerror_r(int, char*, size_t);
 
 #define GD_E_DOMAIN_COMPLEX     1
 #define GD_E_DOMAIN_EMPTY       2
+#define GD_E_DOMAIN_ANTITONIC   3
 
 #define GD_E_OUT_OF_RANGE       1
 #define GD_E_SINGULAR_RANGE     2
@@ -286,6 +287,14 @@ struct _gd_raw_file {
   int fp;
   void* edata;
   int encoding;
+};
+
+struct _gd_lut {
+  double x;
+  union {
+    double y;
+    complex double cy;
+  };
 };
 
 /* Unified entry struct */
@@ -320,11 +329,8 @@ struct _gd_private_entry {
       char *table_path;
       int table_len;
       int complex_table;
-      double* x;
-      union {
-        double* y;
-        double complex *cy;
-      };
+      int table_monotonic;
+      struct _gd_lut *lut;
     };
     struct { /* CONST */
       union {
@@ -505,9 +511,6 @@ int _GD_CalculateEntry(DIRFILE* D, gd_entry_t* E);
 void _GD_CLincomData(DIRFILE* D, int n, void* data1, gd_type_t return_type,
     double complex *data2, double complex *data3, double complex* m,
     double complex *b, gd_spf_t *spf, size_t n_read);
-void _GD_CLinterpData(DIRFILE* D, void *data, gd_type_t type,
-    const double *data_in, size_t npts, const double *lx,
-    const double complex *ly, size_t n_ln);
 void _GD_ConvertType(DIRFILE* D, const void *data_in, gd_type_t in_type,
     void *data_out, gd_type_t out_type, size_t n) gd_nothrow;
 size_t _GD_DoField(DIRFILE*, gd_entry_t*, int, off64_t, size_t, gd_type_t,
@@ -538,9 +541,8 @@ gd_type_t _GD_LegacyType(char c);
 void _GD_LincomData(DIRFILE* D, int n, void* data1, gd_type_t return_type,
     double *data2, double *data3, double* m, double *b, gd_spf_t *spf,
     size_t n_read);
-void _GD_LinterpData(DIRFILE* D, void *data, gd_type_t type,
-    const double *data_in, size_t npts, const double *lx, const double *ly,
-    size_t n_ln);
+void _GD_LinterpData(DIRFILE* D, void *data, gd_type_t type, int complex_table,
+    const double *data_in, size_t npts, const struct _gd_lut *lut, size_t n_ln);
 int _GD_MissingFramework(int32_t encoding, unsigned int funcs);
 int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned long int encoding,
     unsigned long int byte_sex, off64_t offset, int finalise, int new_fragment,

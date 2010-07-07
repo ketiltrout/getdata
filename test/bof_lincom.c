@@ -52,9 +52,9 @@ int main(void)
   CHECKI(error2, 0);
   CHECKI(bof_data2, 99);
   CHECKI(error3, 0);
-  CHECKI(bof_lincom, 99);
+  CHECKI(bof_lincom, 105);
   CHECKI(error4, 0);
-  CHECKI(bof_lincom2, 66);
+  CHECKI(bof_lincom2, 70);
 
   return r;
 }

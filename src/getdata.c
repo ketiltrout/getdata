@@ -839,12 +839,8 @@ static size_t _GD_DoLinterp(DIRFILE *D, gd_entry_t* E, off64_t first_samp,
     return 0;
   }
 
-  if (E->e->complex_table)
-    _GD_CLinterpData(D, data_out, return_type, data_in, n_read, E->e->x,
-        E->e->cy, E->e->table_len);
-  else
-    _GD_LinterpData(D, data_out, return_type, data_in, n_read, E->e->x, E->e->y,
-        E->e->table_len);
+  _GD_LinterpData(D, data_out, return_type, E->e->complex_table, data_in,
+      n_read, E->e->lut, E->e->table_len);
 
   free(data_in);
   dreturn("%zu", n_read);
