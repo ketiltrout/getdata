@@ -221,6 +221,7 @@ void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E)
   FILE *fp;
   struct _gd_lut *ptr;
   int i;
+  int dir = -1;
   char line[GD_MAX_LINE_LENGTH];
   int linenum = 0;
   double yr, yi;
@@ -268,6 +269,13 @@ void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E)
     } else
       sscanf(line, "%lg %lg", &(E->e->lut[i].x), &(E->e->lut[i].y));
 
+    if (dir > -2 && i > 0 && E->e->lut[i].x != E->e->lut[i - 1].x) {
+      if (dir == -1)
+        dir = (E->e->lut[i].x > E->e->lut[i - 1].x);
+      else if (dir != (E->e->lut[i].x > E->e->lut[i - 1].x))
+        dir = -2;
+    }
+
     i++;
     if (i >= buf_len) {
       buf_len += 100;
@@ -311,7 +319,8 @@ void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E)
   E->e->table_len = i;
 
   /* sort the LUT */
-  qsort(E->e->lut, i, sizeof(struct _gd_lut), lutcmp);
+  if (dir == -2)
+    qsort(E->e->lut, i, sizeof(struct _gd_lut), lutcmp);
 
   fclose(fp);
   dreturnvoid();

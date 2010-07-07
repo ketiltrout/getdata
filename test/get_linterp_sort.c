@@ -35,7 +35,7 @@ int main(void)
   close(fd);
 
   FILE* t = fopen(table, "wt");
-  fprintf(t, "%s", "100 200\n2 4\n50 100\n0 0\n7 14\n");
+  fprintf(t, "%s", "100 600\n2 4\n50 100\n0 0\n7 14\n");
   fclose(t);
 
   DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);

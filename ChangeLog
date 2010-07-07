@@ -1,3 +1,6 @@
+2010-07-07   D. V. Wiebe <getdata@ketiltrout.net>   svn:432
+	* src/common.c (_GD_ReadLinterpFile): Only sort if necessary.
+
 2010-07-07   D. V. Wiebe <getdata@ketiltrout.net>   svn:431
 	* test/get_linterp_notab.c: Test for dummy linterp creation.
 
