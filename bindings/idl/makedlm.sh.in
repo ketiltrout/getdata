@@ -1,5 +1,5 @@
 #!/bin/sh
-# (C) 2009 D. V. Wiebe
+# (C) 2009, 2010 D. V. Wiebe
 #
 ##########################################################################
 #
@@ -44,7 +44,7 @@ SOURCE The GetData Project <@PACKAGE_BUGREPORT@>
 STRUCTURE GD_ENTRY
 EOF
 fi
-grep @@DLM $in | {
+grep @@DLM $in | sort -k 5 | {
 nfunc=0
 nproc=0
 while read sc magic type func idl min max key extra; do if test "$opt" = "-c"; then

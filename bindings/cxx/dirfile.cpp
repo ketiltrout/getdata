@@ -232,6 +232,16 @@ off_t Dirfile::NFrames()
   return gd_get_nframes(D);
 }
 
+off_t Dirfile::EOF(const char *field_code)
+{
+  return gd_get_eof(D, field_code);
+}
+
+off_t Dirfile::BOF(const char *field_code)
+{
+  return gd_get_bof(D, field_code);
+}
+
 size_t Dirfile::GetConstant(const char *field_code, DataType type,
     void *data_out)
 {

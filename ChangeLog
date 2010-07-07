@@ -1,3 +1,28 @@
+2010-07-05   D. V. Wiebe <getdata@ketiltrout.net>   svn:427
+	* test/eof_phase.c test/eof.c test/eof_lincom.c test/eof_index.c: Renamed
+	from nsamples*.c
+	* test/bof.c test/bof_lincom.c test/bof_phase.c: Added.
+
+	* bindings/python/test/big_test.py bindings/cxx/test/big_test.cpp
+	bindings/f77/test/big_test.f bindings/f77/test/big_test95.f90
+	bindings/idl/test/big_test.pro: Add a new test 86 and also add test 142.
+
+	* bindings/cxx/dirfile.cpp (Dirfile::EOF Dirfile::BOF): Added.
+	* bindings/python/pydirfile.c (gdpy_dirfile_getbof gdpy_dirfile_geteof):
+	Added.
+	* bindings/f77/fgetdata.c (GDGBOF GDGEOF): Added.
+	* bindings/f77/getdata.f90.in (fgd_get_bof fgd_get_eof): Added.
+	* bindings/idl/getdata.c (gdidl_get_bof gdidl_get_eof): Added.
+
+	* bindings/idl/makedlm.sh.in: Sort the subroutine list.
+
+	* src/flimits.c (gd_get_bof gd_get_bof64 _GD_GetBOF): Added.
+	* src/flimits.c (gd_get_eof gd_get_eof64 _GD_GetEOF): Renamed.  Proper INDEX
+	handling added.
+
+	* src/foffs.c src/flimits.c src/nsamples.c: fofds.c and nsamples.c merged
+	and renamed flimits.c.
+
 2010-06-30   D. V. Wiebe <getdata@ketiltrout.net>   svn:425 svn:426
 	* test/nsamples.c test/nsamples_index.c test/nsamples_lincom.c
 	test/nsamples_phase.c: Added.
@@ -142,7 +167,9 @@
 	* configure.ac: Call GD_MSYS_SHELL.  Add various Win32 checks.
 	* m4/win32.m4: Added.
 
-2010-05-22   D. V. Wiebe <getdata@ketiltrout.net>   svn:401 svn:402
+2010-05-22   D. V. Wiebe <getdata@ketiltrout.net>   svn:401 svn:402 svn:403
+	The Great Renaming:
+
 	* test/: Update for new function names.  Modernise error reporting.
 	* test/test.h: Added.
 	* test/add_many.h test/global_ref_get.c: Deleted.
@@ -150,6 +177,10 @@
 	* util/dirfile2ascii.c util/checkdirfile.c: Update for new function names.
 
 	* util/checkdirifle.c: Report standards version compliance.
+
+	* bindings/python/test/big_test.py bindings/cxx/test/big_test.cpp
+	bindings/f77/test/big_test.f bindings/f77/test/big_test95.f90
+	bindings/idl/test/big_test.pro: Remove test 86.
 
 	* bindings/python/*.c: Update for new function names.
 	* bindings/cxx/*.cxx: Ditto.
@@ -237,8 +268,6 @@
 
 	* src/parse.c (_GD_ParseDirective): Remove unnecessary first_fragment
 	parameter.
-
-	* configure.ac: Bump interface version.
 
 2010-03-02   D. V. Wiebe <getdata@ketiltrout.net>   svn:380
 	* test/version_0.c test/version_1.c test/version_2.c test/version_6_strict.c

@@ -83,6 +83,8 @@ namespace GetData {
 
       int AlterSpec(const char* spec, int recode = 0);
 
+      off_t BOF(const char *field_code);
+
       int Close();
 
       const void *Constants(DataType type = Float64);
@@ -92,6 +94,8 @@ namespace GetData {
       int Discard();
 
       GetData::Entry* Entry(const char *field_code);
+
+      off_t EOF(const char *field_code);
 
       int Error();
 

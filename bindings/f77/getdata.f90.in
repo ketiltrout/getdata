@@ -524,6 +524,24 @@ subroutine fgd_get_mvector_list (field_list, dirfile, parent, field_len)
   end if
 end subroutine
 
+function fgd_get_bof (dirfile, field_code)
+  integer :: fgd_get_bof
+  integer, intent(in) :: dirfile
+  character (len=*), intent(in) :: field_code
+
+  ! call f77 library
+  call gdgbof(fgd_get_bof, dirfile, TRIM(field_code), LEN_TRIM(field_code))
+end function
+
+function fgd_get_eof (dirfile, field_code)
+  integer :: fgd_get_eof
+  integer, intent(in) :: dirfile
+  character (len=*), intent(in) :: field_code
+
+  ! call f77 library
+  call gdgeof(fgd_get_eof, dirfile, TRIM(field_code), LEN_TRIM(field_code))
+end function
+
 function fgd_get_nframes (dirfile)
   integer :: fgd_get_nframes
   integer, intent(in) :: dirfile

@@ -2894,6 +2894,7 @@ IDL_VPTR gdidl_gd_validate(int argc, IDL_VPTR argv[], char *argk)
   dreturn("%p", r);
   return r;
 }
+
 /* @@DLM: F gdidl_getdata GD_GETDATA 2 2 KEYWORDS */
 IDL_VPTR gdidl_getdata(int argc, IDL_VPTR argv[], char *argk)
 {
@@ -2959,6 +2960,29 @@ IDL_VPTR gdidl_getdata(int argc, IDL_VPTR argv[], char *argk)
 
   IDL_KW_FREE;
 
+  dreturn("%p", r);
+  return r;
+}
+
+/* @@DLM: F gdidl_get_bof GD_GET_BOF 2 2 KEYWORDS */
+IDL_VPTR gdidl_get_bof(int argc, IDL_VPTR argv[], char *argk)
+{
+  dtraceidl();
+
+  GDIDL_KW_ONLY_ERROR;
+
+  DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
+  const char *field_code = IDL_VarGetString(argv[1]);
+
+  off64_t bof = gd_get_bof(D, field_code);
+
+  GDIDL_SET_ERROR(D);
+
+  IDL_KW_FREE;
+
+  IDL_VPTR r = IDL_Gettmp();
+  r->type = IDL_TYP_LONG64;
+  r->value.l64 = (IDL_LONG64)bof;
   dreturn("%p", r);
   return r;
 }
@@ -3223,6 +3247,29 @@ IDL_VPTR gdidl_gd_error_string(int argc, IDL_VPTR argv[], char *argk)
       GD_MAX_LINE_LENGTH);
 
   IDL_VPTR r = IDL_StrToSTRING(buffer);
+  dreturn("%p", r);
+  return r;
+}
+
+/* @@DLM: F gdidl_get_eof GD_GET_EOF 2 2 KEYWORDS */
+IDL_VPTR gdidl_get_eof(int argc, IDL_VPTR argv[], char *argk)
+{
+  dtraceidl();
+
+  GDIDL_KW_ONLY_ERROR;
+
+  DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
+  const char *field_code = IDL_VarGetString(argv[1]);
+
+  off64_t eof = gd_get_eof(D, field_code);
+
+  GDIDL_SET_ERROR(D);
+
+  IDL_KW_FREE;
+
+  IDL_VPTR r = IDL_Gettmp();
+  r->type = IDL_TYP_LONG64;
+  r->value.l64 = (IDL_LONG64)eof;
   dreturn("%p", r);
   return r;
 }

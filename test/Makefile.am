@@ -58,6 +58,8 @@ ALTER_TESTS=alter_bit_bitnum alter_bit_numbits alter_cpolynom alter_const \
 
 ASCII_TESTS=ascii_get ascii_nframes ascii_put
 
+BOF_TESTS=bof bof_lincom bof_phase
+
 if TEST_BZIP2
 BZIP_TESTS=bzip_get bzip_get_get bzip_move_from bzip_nframes
 endif
@@ -133,6 +135,8 @@ ENTRY_TESTS=entry_bad_code entry_bit entry_bit_scalar entry_invalid \
 						entry_raw entry_raw_scalar entry_raw_scalar_code \
 						entry_raw_scalar_type entry_scalar_repr entry_type
 
+EOF_TESTS=eof eof_index eof_lincom eof_phase
+
 ERROR_TESTS=error error_error error_short
 
 FILE_TESTS=file file_code file_type
@@ -207,8 +211,6 @@ NFRAMES_TESTS=nframes ${NFRAMES64} nframes_empty nframes_invalid \
 NMETA_TESTS=nmeta nmeta_invalid nmeta_parent nmeta_type nmeta_type_invalid \
 						nmeta_type_parent nmeta_vectors nmeta_vectors_invalid \
 						nmeta_vectors_parent
-
-NSAMPLES_TESTS=nsamples nsamples_index nsamples_lincom nsamples_phase
 
 NVECTORS_TESTS=nvectors nvectors_invalid
 
@@ -291,22 +293,23 @@ XZ_TESTS=xz_get xz_nframes
 endif
 
 TESTS=$(ADD_TESTS)        $(ALTER_TESTS)      $(ASCII_TESTS)      \
-			$(BZIP_TESTS)       $(CLOSE_TESTS)      $(CONVERT_TESTS)    \
-			$(CREAT_TESTS)      $(CVLIST_TESTS)     $(DEL_TESTS)        \
-			$(DFES_TESTS)       $(ENCODE_TESTS)     $(ENDIAN_TESTS)     \
-			$(ENTRY_TESTS)      $(ERROR_TESTS)      $(FILE_TESTS)       \
-			$(FLIST_TESTS)      $(FLUSH_TESTS)      $(FOFFS_TESTS)      \
-			$(FRAGMENT_TESTS)   $(GET_TESTS)        $(GLOBAL_TESTS)     \
-			$(GZIP_TESTS)       $(HEADER_TESTS)     $(INCLUDE_TESTS)    \
-			$(INDEX_TESTS)      $(LEGACY_TESTS)     $(LZMA_TESTS)       \
-			$(MADD_TESTS)       $(MOVE_TESTS)       $(NAME_TESTS)       \
-			$(NFIELDS_TESTS)    $(NFRAGMENTS_TESTS) $(NFRAMES_TESTS)    \
-			$(NMETA_TESTS)      $(NSAMPLES_TESTS)   $(NVECTORS_TESTS)   \
-			$(OPEN_TESTS)       $(PARENT_TESTS)     $(PARSE_TESTS)      \
-			$(PROTECT_TESTS)    $(PUT_TESTS)        $(REF_TESTS)        \
-			$(REPR_TESTS)       $(SLIM_TESTS)       $(SPF_TESTS)        \
-			$(SVLIST_TESTS)     $(TRUNC_TESTS)      $(UNCLUDE_TESTS)    \
-			$(VERSION_TESTS)    $(VLIST_TESTS)      $(XZ_TESTS)
+			$(BOF_TESTS)        $(BZIP_TESTS)       $(CLOSE_TESTS)      \
+			$(CONVERT_TESTS)    $(CREAT_TESTS)      $(CVLIST_TESTS)     \
+			$(DEL_TESTS)        $(DFES_TESTS)       $(ENCODE_TESTS)     \
+			$(ENDIAN_TESTS)     $(ENTRY_TESTS)      $(EOF_TESTS)        \
+			$(ERROR_TESTS)      $(FILE_TESTS)       $(FLIST_TESTS)      \
+			$(FLUSH_TESTS)      $(FOFFS_TESTS)      $(FRAGMENT_TESTS)   \
+			$(GET_TESTS)        $(GLOBAL_TESTS)     $(GZIP_TESTS)       \
+			$(HEADER_TESTS)     $(INCLUDE_TESTS)    $(INDEX_TESTS)      \
+			$(LEGACY_TESTS)     $(LZMA_TESTS)       $(MADD_TESTS)       \
+			$(MOVE_TESTS)       $(NAME_TESTS)       $(NFIELDS_TESTS)    \
+			$(NFRAGMENTS_TESTS) $(NFRAMES_TESTS)    $(NMETA_TESTS)      \
+			$(NVECTORS_TESTS)   $(OPEN_TESTS)       $(PARENT_TESTS)     \
+			$(PARSE_TESTS)      $(PROTECT_TESTS)    $(PUT_TESTS)        \
+			$(REF_TESTS)        $(REPR_TESTS)       $(SLIM_TESTS)       \
+			$(SPF_TESTS)        $(SVLIST_TESTS)     $(TRUNC_TESTS)      \
+			$(UNCLUDE_TESTS)    $(VERSION_TESTS)    $(VLIST_TESTS)      \
+			$(XZ_TESTS)
 
 check_PROGRAMS=$(TESTS)
 

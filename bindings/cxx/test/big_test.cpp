@@ -1,3 +1,23 @@
+// (C) 2009-2010 D. V. Wiebe
+//
+///////////////////////////////////////////////////////////////////////////
+//
+// This file is part of the GetData project.
+//
+// GetData is free software; you can redistribute it and/or modify it under
+// the terms of the GNU Lesser General Public License as published by the
+// Free Software Foundation; either version 2.1 of the License, or (at your
+// option) any later version.
+//
+// GetData is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+// FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
+// License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public License
+// along with GetData; if not, write to the Free Software Foundation, Inc.,
+// 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+//
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #undef GETDATA_LEGACY_API
@@ -997,6 +1017,16 @@ int main(void)
   dp = d->FrameNum("data", 33.3, 6);
   CHECK_OK(101);
   CHECK_DOUBLE(101,dp,37.0375);
+
+  // 86: Dirfile::EOF check
+  n = d->EOF("lincom");
+  CHECK_OK(86);
+  CHECK_INT(86,n,344);
+  
+  // 142: Dirfile::BOF check
+  n = d->BOF("lincom");
+  CHECK_OK(142);
+  CHECK_INT(142,n,264);
   
   delete d;
   unlink(data);

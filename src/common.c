@@ -807,7 +807,7 @@ gd_entry_t* _GD_FindFieldAndRepr(DIRFILE* D, const char* field_code_in,
       free(*field_code);
   }
 
-  dreturn("%p", E);
+  dreturn("%p %i", E, *repr);
   return E;
 }
 /* vim: ts=2 sw=2 et tw=80

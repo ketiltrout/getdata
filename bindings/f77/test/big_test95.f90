@@ -1,3 +1,25 @@
+! (C) 2009-2010 D. V. Wiebe
+!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!
+! This file is part of the GetData project.
+!
+! GetData is free software; you can redistribute it and/or modify it under
+! the terms of the GNU Lesser General Public License as published by the
+! Free Software Foundation; either version 2.1 of the License, or (at your
+! option) any later version.
+!
+! GetData is distributed in the hope that it will be useful, but WITHOUT
+! ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+! FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
+! License for more details.
+!
+! You should have received a copy of the GNU Lesser General Public License
+! along with GetData; if not, write to the Free Software Foundation, Inc.,
+! 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+!
+! -*- F95 -*-
+
 ! General test
 !
 ! This very large test checks almost every procedure defined by the F95
@@ -3705,6 +3727,34 @@ program big_test
   if (abs(dp - 37.0375) > 0.001) then
     ne = ne + 1
     write(*, 2012) 101, dp
+  end if
+
+! 86: fgd_get_eof check
+  n = fgd_get_eof(d, 'lincom')
+  e = fgd_error(d)
+
+  if (e .ne. GD_E_OK) then
+    ne = ne + 1
+    write(*, 2001), 86, e
+  end if
+
+  if (n .ne. 344) then
+    ne = ne + 1
+    write(*, 2002), 86, n
+  end if
+
+! 142: fgd_get_bof check
+  n = fgd_get_bof(d, 'lincom')
+  e = fgd_error(d)
+
+  if (e .ne. GD_E_OK) then
+    ne = ne + 1
+    write(*, 2001), 142, e
+  end if
+
+  if (n .ne. 264) then
+    ne = ne + 1
+    write(*, 2002), 142, n
   end if
 
   call fgd_close(d)

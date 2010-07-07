@@ -312,6 +312,26 @@ void F77_FUNC(gdnfld, GDNFLD) (int* nfields, const int* dirfile)
   *nfields = gd_get_nfields(_GDF_GetDirfile(*dirfile));
 }
 
+/* gd_get_bof wrapper */
+void F77_FUNC(gdgbof, GDGBOF) (int* bof, const int* dirfile,
+    const char* field_code, const int* field_code_l)
+{
+  char *fc = malloc(*field_code_l + 1);
+  *bof = gd_get_bof(_GDF_GetDirfile(*dirfile), _GDF_CString(fc, field_code,
+        *field_code_l));
+  free(fc);
+}
+
+/* gd_get_eof wrapper */
+void F77_FUNC(gdgeof, GDGEOF) (int* eof, const int* dirfile,
+    const char* field_code, const int* field_code_l)
+{
+  char *fc = malloc(*field_code_l + 1);
+  *eof = gd_get_eof(_GDF_GetDirfile(*dirfile), _GDF_CString(fc, field_code,
+        *field_code_l));
+  free(fc);
+}
+
 /* gd_get_nframes wrapper */
 void F77_FUNC(gdnfrm, GDNFRM) (int* nframes, const int* dirfile)
 {

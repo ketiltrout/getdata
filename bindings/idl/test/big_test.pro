@@ -1,3 +1,23 @@
+; (C) 2009-2010 D. V. Wiebe
+;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+; This file is part of the GetData project.
+;
+; GetData is free software; you can redistribute it and/or modify it under
+; the terms of the GNU Lesser General Public License as published by the
+; Free Software Foundation; either version 2.1 of the License, or (at your
+; option) any later version.
+;
+; GetData is distributed in the hope that it will be useful, but WITHOUT
+; ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+; FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
+; License for more details.
+;
+; You should have received a copy of the GNU Lesser General Public License
+; along with GetData; if not, write to the Free Software Foundation, Inc.,
+; 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
 ; Load the helper routines
 .r getdata_idl_test_routines
 
@@ -904,6 +924,16 @@ nume += check_simple(99,n,-1)
 n = gd_get_framenum(d, "data", 33.3, field_start=6)
 nume += check_ok(101,d)
 nume += check_float(101, n, 37.037500D)
+
+;  86: gd_get_eof
+n = gd_get_eof(d, "lincom")
+nume += check_ok(86,d)
+nume += check_simple(86,n,344)
+
+;  142: gd_get_bof
+n = gd_get_bof(d, "lincom")
+nume += check_ok(142,d)
+nume += check_simple(142,n,264)
 
 spawn, "rm -rf " + filedir
 

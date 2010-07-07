@@ -1,4 +1,3 @@
-/* Retreiving the number of frames should succeed cleanly */
 #include "test.h"
 
 #include <stdlib.h>
@@ -14,7 +13,12 @@ int main(void)
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
   const char* data = __TEST__ "dirfile/data";
-  const char* format_data = "data RAW UINT16 1\n";
+  const char* data2 = __TEST__ "dirfile/data2";
+  const char* format_data =
+    "data RAW UINT16 1\n"
+    "data2 RAW UINT8 1\n"
+    "lincom LINCOM 2 data2 1. 0. data 1. 0.\n"
+    "lincom2 LINCOM 2 data 1. 0. data2 1. 0.\n";
   int fd, r = 0;
   const size_t len = strlen(data);
 
@@ -28,9 +32,15 @@ int main(void)
   write(fd, data, len);
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  off_t n = gd_get_nsamples(D, "data");
+  fd = open(data2, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
+  write(fd, data, len);
+  close(fd);
+
+  DIRFILE* D = gd_open(filedir, GD_RDONLY);
+  off_t n = gd_get_eof(D, "lincom");
   int error = gd_error(D);
+  off_t m = gd_get_eof(D, "lincom");
+  int error2 = gd_error(D);
   gd_close(D);
 
   unlink(data);
@@ -38,7 +48,9 @@ int main(void)
   rmdir(filedir);
 
   CHECKI(error, 0);
-  CHECKI((int)n, (int)len / 2);
+  CHECKI(n, (int)len / 2);
+  CHECKI(error2, 0);
+  CHECKI(m, (int)len / 2);
 
   return r;
 }

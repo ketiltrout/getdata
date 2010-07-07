@@ -1,4 +1,3 @@
-/* Retreiving the number of frames should succeed cleanly */
 #include "test.h"
 
 #include <stdlib.h>
@@ -29,7 +28,7 @@ int main(void)
   close(fd);
 
   DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  off_t n = gd_get_nsamples(D, "phase");
+  off_t n = gd_get_eof(D, "phase");
   int error = gd_error(D);
   gd_close(D);
 

@@ -1161,6 +1161,56 @@ static PyObject* gdpy_dirfile_getnmvectors(struct gdpy_dirfile_t* self,
   return pyobj;
 }
 
+static PyObject* gdpy_dirfile_getbof(struct gdpy_dirfile_t* self,
+    PyObject* args, PyObject* keys)
+{
+  dtrace("%p, %p, %p", self, args, keys);
+
+  char* keywords[] = { "field_code", NULL };
+  const char* field_code;
+
+  if (!PyArg_ParseTupleAndKeywords(args, keys,
+        "s:pygetdata.dirfile.get_bof", keywords, &field_code))
+  {
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  off_t bof = gd_get_bof(self->D, field_code);
+
+  PYGD_CHECK_ERROR(self->D, NULL);
+
+  PyObject* pybof = PyLong_FromLongLong(bof);
+
+  dreturn("%p", pybof);
+  return pybof;
+}
+
+static PyObject* gdpy_dirfile_geteof(struct gdpy_dirfile_t* self,
+    PyObject* args, PyObject* keys)
+{
+  dtrace("%p, %p, %p", self, args, keys);
+
+  char* keywords[] = { "field_code", NULL };
+  const char* field_code;
+
+  if (!PyArg_ParseTupleAndKeywords(args, keys,
+        "s:pygetdata.dirfile.get_eof", keywords, &field_code))
+  {
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  off_t eof = gd_get_eof(self->D, field_code);
+
+  PYGD_CHECK_ERROR(self->D, NULL);
+
+  PyObject* pyeof = PyLong_FromLongLong(eof);
+
+  dreturn("%p", pyeof);
+  return pyeof;
+}
+
 static PyObject* gdpy_dirfile_getnvectors(struct gdpy_dirfile_t* self)
 {
   dtrace("%p", self);
@@ -1729,6 +1779,12 @@ static PyMethodDef gdpy_dirfile_methods[] = {
       "However, if field_code is omitted, all data *and* metadata will be\n"
       "written to disk.  See gd_flush(3)."
   },
+  {"get_bof", (PyCFunction)gdpy_dirfile_getbof, METH_VARARGS | METH_KEYWORDS,
+    "get_bof(field_code)\n\n"
+      /* -----------------------------------------------------------------| */
+      "Retrieve the sample number corresponding to the beginning-of-field\n"
+      "marker for the field specified by 'field_code'.  See gd_get_bof(3)."
+  },
   {"get_constant", (PyCFunction)gdpy_dirfile_getconstant,
     METH_VARARGS | METH_KEYWORDS,
     "get_constant(field_code, return_type)\n\n"
@@ -1777,6 +1833,12 @@ static PyMethodDef gdpy_dirfile_methods[] = {
     "get_entry(field_code)\n\n"
       "Retrieve the field metadata for the specified 'field_code'.  A\n"
       "pygetdata.entry object is returned.  See gd_get_entry(3).\n"
+  },
+  {"get_eof", (PyCFunction)gdpy_dirfile_geteof, METH_VARARGS | METH_KEYWORDS,
+    "get_eof(field_code)\n\n"
+      "Retrieve the sample number corresponding to the end-of-field marker\n"
+      "(ie. the number of samples in the field) for the field specified by\n"
+      "'field_code'.  See gd_get_eof(3)."
   },
   { "get_field_list", (PyCFunction)gdpy_dirfile_getfieldlist,
     METH_VARARGS | METH_KEYWORDS,
@@ -1988,7 +2050,6 @@ static PyMethodDef gdpy_dirfile_methods[] = {
   },
   {"putdata", (PyCFunction)gdpy_dirfile_putdata, METH_VARARGS | METH_KEYWORDS,
     "putdata(field_code, data [, type, first_frame, first_sample])\n\n"
-      /* -----------------------------------------------------------------| */
       "Store the data in the list or NumPy array 'data' in the field given\n"
       "by 'field_code'.  If a list is provided, all entries must be of the\n"
       "same type.  The parameters 'first_frame' and 'first_sample' indicate\n"

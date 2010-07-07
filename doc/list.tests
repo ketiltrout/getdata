@@ -1,0 +1,143 @@
+  0 F9CIP gd_error
+  1 F9CIP gd_open
+  2 F9CIP gd_getdata (INT8)
+  3 F9CIP gd_get_constant (INT8)
+  4 F9... fgd_get_field_name_max
+  5 F9... fgd_get_mfield_name_max
+  6 F9CIP gd_get_nfields
+  7 F.... _GDF_FString
+  8 F9CIP gd_get_field_list
+  9 F9CIP gd_get_nmfields
+ 10 F9CIP gd_get_mfield_list
+ 11 F9CIP gd_get_nframes
+ 12 F9CIP gd_get_spf
+ 13 F9CIP gd_putdata (INT8)
+ 14 F9CIP gd_error_string
+ 15 F9.I. gd_get_entry_type
+ 16 F9CIP gd_get_entry (RAW)
+ 17 F.... gd_get_entry (LINCOM)
+ 18 F9CIP gd_get_entry (CLINCOM)
+ 19 F.... gd_get_entry (POLYNOM)
+ 20 F9CIP gd_get_entry (CPOLYNOM)
+ 21 F9CIP gd_get_entry (LINTERP)
+ 22 F9CIP gd_get_entry (BIT)
+ 23 F9CIP gd_get_entry (SBIT)
+ 24 F9CIP gd_get_entry (MULTIPLY)
+ 25 F9CIP gd_get_entry (PHASE)
+ 26 F9CIP gd_get_entry (CONST)
+ 27 F9CIP gd_get_fragment_index
+ 28 F9CIP gd_add_raw
+ 29 F9C.P gd_add_lincom
+ 30 F9CI. gd_add_clincom
+ 31 F9C.P gd_add_polynom
+ 32 F9CI. gd_add_cpolynom
+ 33 F9CIP gd_add_linterp
+ 34 F9CIP gd_add_bit
+ 35 F9CIP gd_add_sbit
+ 36 F9CIP gd_add_multiply
+ 37 F9CIP gd_add_phase
+ 38 F9CIP gd_add_const
+ 39 F9CIP gd_get_fragment_name
+ 40 F9CIP gd_get_nframgents
+ 41 F9CIP gd_include
+ 42 F9CIP gd_get_nfields_by_type
+ 43 F9CIP gd_get_field_list_by_type
+ 44 F9CIP gd_get_nvectors
+ 45 F9CIP gd_get_vector_list
+ 46 F9.IP gd_madd_lincom
+ 47 F9... gd_madd_clincom
+ 48 F9.IP gd_madd_polynom
+ 49 F9... gd_madd_cpolynom
+ 50 F9.IP gd_madd_linterp
+ 51 F9.IP gd_madd_bit
+ 52 F9.IP gd_madd_sbit
+ 53 F9.IP gd_madd_multiply
+ 54 F9.IP gd_madd_phase
+ 55 F9.IP gd_madd_const
+ 56 F9CIP gd_get_string
+ 57 F9CIP gd_add_string
+ 58 F9.I. gd_madd_string
+ 59 F9CIP gd_add_spec
+ 60 F9CIP gd_madd_spec
+ 61 F9CIP gd_put_constant (INT8)
+ 62 F9CIP gd_put_string
+ 63 F9CIP gd_get_nmfields_by_type
+ 64 F9CIP gd_get_mfield_list_by_type
+ 65 F9CIP gd_get_nmvectors
+ 66 F9CIP gd_get_mvector_list
+ 67 F9CIP gd_alter_raw
+ 68 F9C.. gd_alter_lincom
+ 69 F9.I. gd_alter_clincom
+ 70 F9C.. gd_alter_polynom
+ 71 F9.I. gd_alter_cpolynom
+ 72 F9CI. gd_alter_linterp
+ 73 F9CI. gd_alter_bit
+ 74 F9CI. gd_alter_sbit
+ 75 F9CI. gd_alter_multiply
+ 76 F9CI. gd_alter_phase
+ 77 F9CI. gd_alter_const
+ 78 F9CIP gd_get_encoding
+ 79 F9CIP gd_get_endianness
+ 80 F9CIP gd_dirfilename
+ 81 F9CIP gd_get_parent_fragment
+ 82 F9CIP gd_protect
+ 83 F9CIP gd_get_protection
+ 84 F9CIP gd_raw_filename
+ 85 F9CIP gd_reference
+ 86 F9CIP gd_get_eof
+ 87 F9CIP gd_alter_encoding
+ 88 F9CIP gd_alter_endianness
+ 89 F9CIP gd_alter_spec
+ 90 F9CIP gd_delete
+ 91 F9CIP gd_malter_spec
+ 92 F9CIP gd_move
+ 93 F9CIP gd_rename
+ 94 F9CIP gd_uninclude
+ 95 F9CIP gd_get_frameoffset
+ 96 F9CIP gd_alter_frameoffset
+ 97 F9CIP gd_native_type
+ 98 F.... GDCSCL
+ 99 F9CIP gd_validate
+100 F9... gd_get_framenum
+101 F9CIP gd_get_framenum_subset
+102 .9... gd_getdata (INT16)
+103 .9... gd_getdata (INT32)
+104 .9..P gd_getdata (INT64)
+105 .9... gd_getdata (FLOAT32)
+106 .9..P gd_getdata (FLOAT64)
+107 .9... gd_getdata (COMPLEX64)
+108 .9..P gd_getdata (COMPLEX128)
+109 .9... gd_getdata (NULL)
+110 .9... gd_get_constant (INT16)
+111 .9... gd_get_constant (INT32)
+112 .9..P gd_get_constant (INT64)
+113 .9... gd_get_constant (FLOAT32)
+114 .9..P gd_get_constant (FLOAT64)
+115 .9... gd_get_constant (COMPLEX64)
+116 .9..P gd_get_constant (COMPLEX128)
+117 .9... gd_get_constant (NULL)
+118 .9... gd_putdata (INT16)
+119 .9..P gd_putdata (INT32)
+120 .9..P gd_putdata (INT64)
+121 .9... gd_putdata (FLOAT32)
+122 .9.IP gd_putdata (FLOAT64)
+123 .9... gd_putdata (COMPLEX64)
+124 .9.IP gd_putdata (COMPLEX128)
+125 .9.I. gd_add
+126 .9CI. gd_madd
+127 .9... gd_put_constant (INT16)
+128 .9..P gd_put_constant (INT32)
+129 .9..P gd_put_constant (INT64)
+130 .9... gd_put_constant (FLOAT32)
+131 .9..P gd_put_constant (FLOAT64)
+132 .9... gd_put_constant (COMPLEX64)
+133 .9..P gd_put_constant (COMPLEX128)
+134 ..CIP gd_get_entry (STRING)
+135 ..C.. Dirifle::ReferenceFilename
+136 ....P gd_putdata (auto-type-detect)
+137 ....P gd_get_native_type_name
+138 F.... GDGSCA
+139 F.... GDASCA
+140 ...I. getdata_constants
+141 ...I. gd_alter
+142 F9CIP gd_get_bof

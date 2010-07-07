@@ -1,9 +1,29 @@
+C     (C) 2009-2010 D. V. Wiebe
+C
+C     CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+C
+C     This file is part of the GetData project.
+C
+C     GetData is free software; you can redistribute it and/or modify it under
+C     the terms of the GNU Lesser General Public License as published by the
+C     Free Software Foundation; either version 2.1 of the License, or (at your
+C     option) any later version.
+C    
+C     GetData is distributed in the hope that it will be useful, but WITHOUT
+C     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+C     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
+C     License for more details.
+C    
+C     You should have received a copy of the GNU Lesser General Public License
+C     along with GetData; if not, write to the Free Software Foundation, Inc.,
+C     51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+C
+
 C     General test
 C
 C     This very large test checks almost every procedure defined by the
 C     F77 bindings.  Procedures not tested include: GDCOPN GDMFLS GDFLSH
-C     GDDSCD GDCLBK
-C     GDCLOS (although this last one is used)
+C     GDDSCD GDCLBK GDCLOS (although this last one is used)
 
       PROGRAM GETTST
       INCLUDE "getdata.f"
@@ -1242,7 +1262,7 @@ C     39: GDFRGN check
         WRITE(*, 2009), 39, str
       ENDIF
 
-C     40: GDFNRG check
+C     40: GDNFRG check
       CALL GDNFRG(n, d)
       CALL GDEROR(e, d)
 
@@ -3063,6 +3083,34 @@ C     139: GDASCA check
       IF (str .NE. "new11") THEN
         ne = ne + 1
         WRITE(*, 2009) 139, str
+      ENDIF
+
+C     86: GDGEOF check
+      CALL GDGEOF(n, d, 'lincom', 6)
+      CALL GDEROR(e, d)
+
+      IF (e. NE. GD_EOK) THEN
+        ne = ne + 1
+        WRITE(*, 2001) 86, e
+      ENDIF
+
+      IF (n .NE. 344) THEN
+        ne = ne + 1
+        WRITE(*, 2002) 86, n
+      ENDIF
+
+C     142: GDGBOF check
+      CALL GDGBOF(n, d, 'lincom', 6)
+      CALL GDEROR(e, d)
+
+      IF (e. NE. GD_EOK) THEN
+        ne = ne + 1
+        WRITE(*, 2001) 142, e
+      ENDIF
+
+      IF (n .NE. 264) THEN
+        ne = ne + 1
+        WRITE(*, 2002) 142, n
       ENDIF
 
 C     Cleanup

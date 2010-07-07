@@ -27,8 +27,8 @@ int main(void)
   write(fd, data, len);
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDONLY);
-  off_t n = gd_get_nsamples(D, "INDEX");
+  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  off_t n = gd_get_eof(D, "data");
   int error = gd_error(D);
   gd_close(D);
 
@@ -36,8 +36,8 @@ int main(void)
   unlink(format);
   rmdir(filedir);
 
-  CHECKI(error, GD_E_BAD_FIELD_TYPE);
-  CHECKI(n, 0);
+  CHECKI(error, 0);
+  CHECKI((int)n, (int)len / 2);
 
   return r;
 }

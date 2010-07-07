@@ -1,3 +1,23 @@
+# (C) 2009-2010 D. V. Wiebe
+#
+##########################################################################
+#
+# This file is part of the GetData project.
+#
+# GetData is free software; you can redistribute it and/or modify it under
+# the terms of the GNU Lesser General Public License as published by the
+# Free Software Foundation; either version 2.1 of the License, or (at your
+# option) any later version.
+#
+# GetData is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
+# License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with GetData; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
 import sys
 import os
 import array
@@ -1009,13 +1029,12 @@ CheckSimple(84,n,"dirfile/data")
 try:
   d.reference = "new1"
 except:
-  CheckOK(85)
+  CheckOK2(85,1)
 
-# 86: reference check
 try:
-  CheckSimple(86,d.reference,"new1")
+  CheckSimple(85,d.reference,"new1")
 except:
-  CheckOK(86)
+  CheckOK2(85,2)
 
 # 87: alter_encoding check
 try:
@@ -1160,7 +1179,19 @@ except:
   CheckOK(101)
 CheckSimple(101,n,37.0375)
 
+# 86: get_eof check
+try:
+  n = d.get_eof("lincom")
+except:
+  CheckOK(86)
+CheckSimple(86,n,344)
 
+# 142: get_bof check
+try:
+  n = d.get_bof("lincom")
+except:
+  CheckOK(142)
+CheckSimple(142,n,264)
 
 
 os.system("rm -rf dirfile")
