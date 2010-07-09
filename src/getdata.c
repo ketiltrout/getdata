@@ -422,11 +422,7 @@ static void _GD_CPolynomData(DIRFILE* D, void *data, gd_type_t type,
 }
 
 #define MULTIPLY(t) \
-  for (i = 0; i < n; i++) ((t*)A)[i] = (t)((double)((t*)A)[i] * \
-      B[i * spfB / spfA])
-#define CMULTIPLY(t) \
-  for (i = 0; i < n; i++) ((t*)A)[i] = (t)((double complex)((t*)A)[i] * \
-      (t)B[i * spfB / spfA])
+  for (i = 0; i < n; i++) ((t*)A)[i] = (t)(((t*)A)[i] * B[i * spfB / spfA])
 
 /* MultiplyData: Multiply A by B.  B is unchanged.
 */
@@ -460,7 +456,7 @@ static void _GD_MultiplyData(DIRFILE* D, void *A, gd_spf_t spfA, double *B,
   dreturnvoid();
 }
 
-/* MultiplyData: Multiply A by B.  B is complex.
+/* CMultiplyData: Multiply A by B.  B is complex.
 */
 static void _GD_CMultiplyData(DIRFILE* D, void *A, gd_spf_t spfA,
     double complex *B, gd_spf_t spfB, gd_type_t type, size_t n)
@@ -472,18 +468,85 @@ static void _GD_CMultiplyData(DIRFILE* D, void *A, gd_spf_t spfA,
   switch (type) {
     case GD_NULL:
       break;
-    case GD_UINT8:      CMULTIPLY(       uint8_t); break;
-    case GD_INT8:       CMULTIPLY(        int8_t); break;
-    case GD_UINT16:     CMULTIPLY(      uint16_t); break;
-    case GD_INT16:      CMULTIPLY(       int16_t); break;
-    case GD_UINT32:     CMULTIPLY(      uint32_t); break;
-    case GD_INT32:      CMULTIPLY(       int32_t); break;
-    case GD_UINT64:     CMULTIPLY(      uint64_t); break;
-    case GD_INT64:      CMULTIPLY(       int64_t); break;
-    case GD_FLOAT32:    CMULTIPLY(         float); break;
-    case GD_FLOAT64:    CMULTIPLY(        double); break;
-    case GD_COMPLEX64:  CMULTIPLY( float complex); break;
-    case GD_COMPLEX128: CMULTIPLY(double complex); break;
+    case GD_UINT8:      MULTIPLY(       uint8_t); break;
+    case GD_INT8:       MULTIPLY(        int8_t); break;
+    case GD_UINT16:     MULTIPLY(      uint16_t); break;
+    case GD_INT16:      MULTIPLY(       int16_t); break;
+    case GD_UINT32:     MULTIPLY(      uint32_t); break;
+    case GD_INT32:      MULTIPLY(       int32_t); break;
+    case GD_UINT64:     MULTIPLY(      uint64_t); break;
+    case GD_INT64:      MULTIPLY(       int64_t); break;
+    case GD_FLOAT32:    MULTIPLY(         float); break;
+    case GD_FLOAT64:    MULTIPLY(        double); break;
+    case GD_COMPLEX64:  MULTIPLY( float complex); break;
+    case GD_COMPLEX128: MULTIPLY(double complex); break;
+    default:
+                        _GD_SetError(D, GD_E_BAD_TYPE, type, NULL, 0, NULL);
+                        break;
+  }
+
+  dreturnvoid();
+}
+
+#define DIVIDE(t) \
+  for (i = 0; i < n; i++) ((t*)A)[i] = (t)(B[i * spfB / spfA] / ((t*)A)[i])
+
+/* DivideData: Divide B by A.  B is unchanged.
+*/
+static void _GD_DivideData(DIRFILE *D, void *A, gd_spf_t spfA, double *B,
+    gd_spf_t spfB, gd_type_t type, size_t n)
+{
+  size_t i;
+
+  dtrace("%p, %p, %u, %p, %u, 0x%x, %zu", D, A, spfA, B, spfB, type, n);
+
+  switch (type) {
+    case GD_NULL: /* null read */
+      break;
+    case GD_UINT8:      DIVIDE(       uint8_t); break;
+    case GD_INT8:       DIVIDE(        int8_t); break;
+    case GD_UINT16:     DIVIDE(      uint16_t); break;
+    case GD_INT16:      DIVIDE(       int16_t); break;
+    case GD_UINT32:     DIVIDE(      uint32_t); break;
+    case GD_INT32:      DIVIDE(       int32_t); break;
+    case GD_UINT64:     DIVIDE(      uint64_t); break;
+    case GD_INT64:      DIVIDE(       int64_t); break;
+    case GD_FLOAT32:    DIVIDE(         float); break;
+    case GD_FLOAT64:    DIVIDE(        double); break;
+    case GD_COMPLEX64:  DIVIDE( float complex); break;
+    case GD_COMPLEX128: DIVIDE(double complex); break;
+    default:
+                        _GD_SetError(D, GD_E_BAD_TYPE, type, NULL, 0, NULL);
+                        break;
+  }
+
+  dreturnvoid();
+}
+
+/* CDivideData: Divide B by A.  B is complex.
+*/
+static void _GD_CDivideData(DIRFILE *D, void *A, gd_spf_t spfA,
+    double complex *B, gd_spf_t spfB, gd_type_t type, size_t n)
+{
+  size_t i;
+
+  dtrace("%p, %p, %u, %p, %u, 0x%x, %zu", D, A, spfA, B, spfB, type, n);
+
+  switch (type) {
+    case GD_NULL: /* null read */
+      break;
+    case GD_UINT8:      DIVIDE(       uint8_t); break;
+    case GD_INT8:       DIVIDE(        int8_t); break;
+    case GD_UINT16:     DIVIDE(      uint16_t); break;
+    case GD_INT16:      DIVIDE(       int16_t); break;
+    case GD_UINT32:     DIVIDE(      uint32_t); break;
+    case GD_INT32:      DIVIDE(       int32_t); break;
+    case GD_UINT64:     DIVIDE(      uint64_t); break;
+    case GD_INT64:      DIVIDE(       int64_t); break;
+    case GD_FLOAT32:    DIVIDE(         float); break;
+    case GD_FLOAT64:    DIVIDE(        double); break;
+    case GD_COMPLEX64:  DIVIDE( float complex); break;
+    case GD_COMPLEX128: DIVIDE(double complex); break;
     default:
                         _GD_SetError(D, GD_E_BAD_TYPE, type, NULL, 0, NULL);
                         break;
@@ -712,6 +775,111 @@ static size_t _GD_DoMultiply(DIRFILE *D, gd_entry_t* E, off64_t first_samp,
     _GD_MultiplyData(D, data_out, spf1, tmpbuf, spf2, return_type, n_read);
 
   free(tmpbuf);
+
+  dreturn("%zu", n_read);
+  return n_read;
+}
+
+/* _GD_DoDivide:  Read from a divide.  Returns number of samples read.
+*/
+static size_t _GD_DoDivide(DIRFILE *D, gd_entry_t* E, off64_t first_samp,
+    size_t num_samp, gd_type_t return_type, void *data_out)
+{
+  void *tmpbuf = NULL;
+  gd_spf_t spf1, spf2;
+  size_t n_read, n_read2, num_samp2;
+  off64_t first_samp2;
+
+  dtrace("%p, %p, %lli, %zu, 0x%x, %p", D, E, first_samp, num_samp, return_type,
+      data_out);
+
+  /* Check input fields */
+  if (_GD_BadInput(D, E, 0)) {
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  if (!E->reciprocal && _GD_BadInput(D, E, 1)) {
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  /* read the first field and record the number of samples returned */
+  n_read = _GD_DoField(D, E->e->entry[0], E->e->repr[0], first_samp, num_samp,
+      return_type, data_out);
+
+  if (D->error != GD_E_OK) {
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  /* Nothing to divide */
+  if (n_read == 0) {
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  if (E->reciprocal) {
+    /* Compute a reciprocal */
+    if (E->comp_scal)
+      _GD_CInvertData(D, data_out, return_type, E->cdividend, num_samp);
+    else
+      _GD_InvertData(D, data_out, return_type, E->dividend, num_samp);
+  } else {
+    /* compute a division */
+
+    /* find the samples per frame of the divisor */
+    spf1 = _GD_GetSPF(D, E->e->entry[0]);
+    if (D->error != GD_E_OK) {
+      dreturn("%i", 0);
+      return 0;
+    }
+
+    /* find the samples per frame of the second field */
+    spf2 = _GD_GetSPF(D, E->e->entry[1]);
+    if (D->error != GD_E_OK) {
+      dreturn("%i", 0);
+      return 0;
+    }
+
+    /* calculate the first sample and number of samples to read of the
+     * second field */
+    num_samp2 = (int)ceil((double)n_read * spf2 / spf1);
+    first_samp2 = first_samp * spf2 / spf1;
+
+    /* find the native type of the second field */
+    gd_type_t type2 = (_GD_NativeType(D, E->e->entry[1], E->e->repr[1])
+        & GD_COMPLEX) ? GD_COMPLEX128 : GD_FLOAT64;
+
+    /* Allocate a temporary buffer for the second field */
+    tmpbuf = _GD_Alloc(D, type2, num_samp2);
+
+    if (D->error != GD_E_OK) {
+      free(tmpbuf);
+      dreturn("%i", 0);
+      return 0;
+    }
+
+    /* read the second field */
+    n_read2 = _GD_DoField(D, E->e->entry[1], E->e->repr[1], first_samp2,
+        num_samp2, type2, tmpbuf);
+
+    if (D->error != GD_E_OK) {
+      free(tmpbuf);
+      dreturn("%i", 0);
+      return 0;
+    }
+
+    if (n_read2 > 0 && n_read2 * spf1 < n_read * spf2)
+      n_read = n_read2 * spf1 / spf2;
+
+    if (type2 & GD_COMPLEX)
+      _GD_CDivideData(D, data_out, spf1, tmpbuf, spf2, return_type, n_read);
+    else
+      _GD_DivideData(D, data_out, spf1, tmpbuf, spf2, return_type, n_read);
+
+    free(tmpbuf);
+  }
 
   dreturn("%zu", n_read);
   return n_read;
@@ -996,6 +1164,9 @@ size_t _GD_DoField(DIRFILE *D, gd_entry_t *E, int repr, off64_t first_samp,
       break;
     case GD_BIT_ENTRY:
       n_read = _GD_DoBit(D, E, 0, first_samp, num_samp, return_type, data_out);
+      break;
+    case GD_DIVIDE_ENTRY:
+      n_read = _GD_DoDivide(D, E, first_samp, num_samp, return_type, data_out);
       break;
     case GD_MULTIPLY_ENTRY:
       n_read = _GD_DoMultiply(D, E, first_samp, num_samp, return_type,

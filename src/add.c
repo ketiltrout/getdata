@@ -265,6 +265,23 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
       else if ((E->in_fields[1] = strdup(entry->in_fields[1])) == NULL)
         _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
       break;
+    case GD_DIVIDE_ENTRY:
+      E->reciprocal = entry->reciprocal;
+
+      if ((E->in_fields[0] = strdup(entry->in_fields[0])) == NULL)
+        _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+
+      if (entry->reciprocal) {
+        copy_scalar[0] = 1;
+        if (entry->comp_scal) {
+          E->dividend = E->cdividend = entry->cdividend;
+          E->comp_scal = (cimag(E->cdividend) == 0) ? 0 : 1;
+        } else {
+          E->cdividend = E->dividend = entry->dividend;
+          E->comp_scal = 0;
+        }
+      } else if ((E->in_fields[1] = strdup(entry->in_fields[1])) == NULL)
+        _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     case GD_BIT_ENTRY:
     case GD_SBIT_ENTRY:
       E->numbits = entry->numbits;

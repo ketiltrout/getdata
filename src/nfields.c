@@ -76,20 +76,13 @@ unsigned int gd_get_nfields_by_type(DIRFILE* D, gd_entype_t type)
     case GD_INDEX_ENTRY:
       r = 1;
       break;
-    case GD_RAW_ENTRY:
-    case GD_LINCOM_ENTRY:
-    case GD_LINTERP_ENTRY:
-    case GD_MULTIPLY_ENTRY:
-    case GD_BIT_ENTRY:
-    case GD_PHASE_ENTRY:
-    case GD_POLYNOM_ENTRY:
-    case GD_SBIT_ENTRY:
+    case GD_NO_ENTRY:
+      _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_TYPE, NULL, type, NULL);
+      break;
+    default:
       for (i = 0; i < D->n_entries; ++i)
         if (D->entry[i]->field_type == type && D->entry[i]->e->n_meta != -1)
           r++;
-      break;
-    case GD_NO_ENTRY:
-      _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_TYPE, NULL, type, NULL);
       break;
   }
 

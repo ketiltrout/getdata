@@ -57,8 +57,13 @@ void _GD_Flush(DIRFILE* D, gd_entry_t *E)
           _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[0].name, errno, NULL);
       }
       break;
+    case GD_DIVIDE_ENTRY:
+      if (!E->reciprocal)
+        _GD_Flush(D, E->e->entry[1]);
+      _GD_Flush(D, E->e->entry[0]);
+      break;
     case GD_LINCOM_ENTRY:
-      for (i = 2; i < GD_MAX_LINCOM; ++i)
+      for (i = 2; i < E->n_fields; ++i)
         _GD_Flush(D, E->e->entry[i]);
       /* fallthrough */
     case GD_MULTIPLY_ENTRY:
@@ -258,6 +263,15 @@ static void _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
       fprintf(stream, " BIT%s %s ", pretty ? "     " : "", E->in_fields[0]);
       _GD_WriteConst(D, stream, GD_INT16, &E->bitnum, E->scalar[0], " ");
       _GD_WriteConst(D, stream, GD_INT16, &E->numbits, E->scalar[1], "\n");
+      break;
+    case GD_DIVIDE_ENTRY:
+      fprintf(stream, " DIVIDE%s ", pretty ? "  " : "");
+      if (E->reciprocal)
+        _GD_WriteConst(D, stream, GD_COMPLEX128, &E->cdividend, E->scalar[0],
+            "");
+      else 
+        fprintf(stream, "%s", E->in_fields[1]);
+      fprintf(stream, " %s", E->in_fields[0]);
       break;
     case GD_MULTIPLY_ENTRY:
       fprintf(stream, " MULTIPLY %s %s\n", E->in_fields[0], E->in_fields[1]);

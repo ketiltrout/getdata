@@ -180,12 +180,13 @@ typedef enum {
   GD_INDEX_ENTRY    = 0x07,
   GD_POLYNOM_ENTRY  = 0x08,
   GD_SBIT_ENTRY     = 0x09,
+  GD_DIVIDE_ENTRY   = 0x0A,
   GD_CONST_ENTRY    = GD_SCALAR_ENTRY | 0x00,
   GD_STRING_ENTRY   = GD_SCALAR_ENTRY | 0x01
 } gd_entype_t;
 
 /* GD_NO_ENTRY is not part of this count */
-#define GD_N_ENTYPES 11
+#define GD_N_ENTYPES 12
 
 #undef _gd_int16_t
 #undef _gd_uint16_t
@@ -269,6 +270,11 @@ struct _gd_unified_entry {
       int poly_ord;
       double a[GD_MAX_POLYORD + 1];
       GD_DCOMPLEXM(ca[GD_MAX_POLYORD + 1]);
+    };
+    struct { /* DIVIDE */
+      gd_type_t reciprocal;
+      double dividend;
+      GD_DCOMPLEXM(cdividend);
     };
   };
 

@@ -145,8 +145,8 @@ static size_t _GD_DoRawOut(DIRFILE *D, gd_entry_t *E, off64_t s0,
 static size_t _GD_DoLinterpOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
     size_t num_samp, gd_type_t data_type, const void *data_in)
 {
-  size_t n_wrote, i;
-  int dir = -1;
+  size_t n_wrote;
+  int dir = -1, i;
 
   dtrace("%p, %p, %lli, %zu, 0x%x, %p", D, E, first_samp, num_samp, data_type,
       data_in);
@@ -174,7 +174,7 @@ static size_t _GD_DoLinterpOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
   /* Check whether the LUT is monotonic */
   if (E->e->table_monotonic == -1) {
     E->e->table_monotonic = 1;
-    for (i = 1; i < (size_t)E->e->table_len; ++i)
+    for (i = 1; i < E->e->table_len; ++i)
       if (E->e->lut[i].y != E->e->lut[i - 1].y) {
         if (dir == -1) 
           dir = (E->e->lut[i].y > E->e->lut[i - 1].y);
@@ -259,12 +259,6 @@ static size_t _GD_DoLincomOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
   }
 
   if (_GD_BadInput(D, E, 0)) {
-    dreturn("%i", 0);
-    return 0;
-  }
-
-  /* do the inverse scaling */
-  if (D->error != GD_E_OK) {
     dreturn("%i", 0);
     return 0;
   }
@@ -378,6 +372,57 @@ static size_t _GD_DoPhaseOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
 
   n_wrote = _GD_DoFieldOut(D, E->e->entry[0], E->e->repr[0], first_samp +
       E->shift, num_samp, data_type, data_in);
+
+  dreturn("%zu", n_wrote);
+
+  return n_wrote;
+}
+
+static size_t _GD_DoDivideOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
+    size_t num_samp, gd_type_t data_type, const void *data_in)
+{
+  size_t n_wrote;
+  void* tmpbuf;
+
+  dtrace("%p, %p, %lli, %zu, 0x%x, %p", D, E, first_samp, num_samp, data_type,
+      data_in);
+  
+  /* can't write to a division */
+  if (!E->reciprocal) {
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  if (_GD_BadInput(D, E, 0)) {
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  /* writeable copy */
+  tmpbuf = _GD_Alloc(D, data_type, num_samp);
+
+  if (tmpbuf == NULL) {
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  memcpy(tmpbuf, data_in, num_samp * GD_SIZE(data_type));
+
+  /* calculate x = a/y instead of y = a/x */
+  if (E->comp_scal)
+    _GD_CInvertData(D, tmpbuf, data_type, E->cdividend, num_samp);
+  else
+    _GD_InvertData(D, tmpbuf, data_type, E->dividend, num_samp);
+
+  if (D->error) {
+    free(tmpbuf);
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  n_wrote = _GD_DoFieldOut(D, E->e->entry[0], E->e->repr[0], first_samp,
+      num_samp, data_type, tmpbuf);
+  free(tmpbuf);
 
   dreturn("%zu", n_wrote);
 
@@ -552,6 +597,9 @@ size_t _GD_DoFieldOut(DIRFILE *D, gd_entry_t* E, int repr, off64_t first_samp,
     case GD_MULTIPLY_ENTRY:
     case GD_INDEX_ENTRY:
       _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_PUT, NULL, 0, E->field);
+      break;
+    case GD_DIVIDE_ENTRY:
+      n_wrote = _GD_DoDivideOut(D, E, first_samp, num_samp, data_type, data_in);
       break;
     case GD_PHASE_ENTRY:
       n_wrote = _GD_DoPhaseOut(D, E, first_samp, num_samp, data_type, data_in);

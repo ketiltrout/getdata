@@ -67,8 +67,7 @@ int _GD_GetLine(FILE *fp, char *line, int* linenum)
   return 0;  /* there were no valid lines */
 }
 
-/* This function is needed outside the legacy API to handle old format
- * files
+/* This function is needed outside the legacy API to handle old format files
  */
 gd_type_t _GD_LegacyType(char c)
 {
@@ -382,47 +381,20 @@ void _GD_LinterpData(DIRFILE* D, void *data, gd_type_t type, int complex_table,
       data_in, npts, lut, n_ln);
 
   switch (type) {
-    case GD_NULL:
-      break;
-    case GD_INT8:
-      LINTERP(int8_t);
-      break;
-    case GD_UINT8:
-      LINTERP(uint8_t);
-      break;
-    case GD_INT16:
-      LINTERP(int16_t);
-      break;
-    case GD_UINT16:
-      LINTERP(uint16_t);
-      break;
-    case GD_INT32:
-      LINTERP(int32_t);
-      break;
-    case GD_UINT32:
-      LINTERP(uint32_t);
-      break;
-    case GD_INT64:
-      LINTERP(int64_t);
-      break;
-    case GD_UINT64:
-      LINTERP(uint64_t);
-      break;
-    case GD_FLOAT32:
-      LINTERP(float);
-      break;
-    case GD_FLOAT64:
-      LINTERP(double);
-      break;
-    case GD_COMPLEX64:
-      LINTERP(complex float);
-      break;
-    case GD_COMPLEX128:
-      LINTERP(complex double);
-      break;
-    default:
-      _GD_SetError(D, GD_E_BAD_TYPE, type, NULL, 0, NULL);
-      break;
+    case GD_NULL:                                break;
+    case GD_INT8:       LINTERP(int8_t        ); break;
+    case GD_UINT8:      LINTERP(uint8_t       ); break;
+    case GD_INT16:      LINTERP(int16_t       ); break;
+    case GD_UINT16:     LINTERP(uint16_t      ); break;
+    case GD_INT32:      LINTERP(int32_t       ); break;
+    case GD_UINT32:     LINTERP(uint32_t      ); break;
+    case GD_INT64:      LINTERP(int64_t       ); break;
+    case GD_UINT64:     LINTERP(uint64_t      ); break;
+    case GD_FLOAT32:    LINTERP(float         ); break;
+    case GD_FLOAT64:    LINTERP(double        ); break;
+    case GD_COMPLEX64:  LINTERP(complex float ); break;
+    case GD_COMPLEX128: LINTERP(complex double); break;
+    default:            _GD_SetError(D, GD_E_BAD_TYPE, type, NULL, 0, NULL);
   }
 
   dreturnvoid();
@@ -461,46 +433,20 @@ void _GD_LincomData(DIRFILE* D, int n, void* data1, gd_type_t return_type,
       data2, data3, m, b, spf, n_read);
 
   switch(return_type) {
-    case GD_NULL:
-      break;
-    case GD_UINT8:
-      LINCOM(uint8_t);
-      break;
-    case GD_INT8:
-      LINCOM(int8_t);
-      break;
-    case GD_UINT16:
-      LINCOM(uint16_t);
-      break;
-    case GD_INT16:
-      LINCOM(int16_t);
-      break;
-    case GD_UINT32:
-      LINCOM(uint32_t);
-      break;
-    case GD_INT32:
-      LINCOM(int32_t);
-      break;
-    case GD_UINT64:
-      LINCOM(uint64_t);
-      break;
-    case GD_INT64:
-      LINCOM(int64_t);
-      break;
-    case GD_FLOAT32:
-      LINCOM(float);
-      break;
-    case GD_FLOAT64:
-      LINCOM(double);
-      break;
-    case GD_COMPLEX64:
-      LINCOM(float complex);
-      break;
-    case GD_COMPLEX128:
-      LINCOM(double complex);
-      break;
-    default:
-      _GD_InternalError(D);
+    case GD_NULL:                               break;
+    case GD_UINT8:      LINCOM(uint8_t);        break;
+    case GD_INT8:       LINCOM(int8_t);         break;
+    case GD_UINT16:     LINCOM(uint16_t);       break;
+    case GD_INT16:      LINCOM(int16_t);        break;
+    case GD_UINT32:     LINCOM(uint32_t);       break;
+    case GD_INT32:      LINCOM(int32_t);        break;
+    case GD_UINT64:     LINCOM(uint64_t);       break;
+    case GD_INT64:      LINCOM(int64_t);        break;
+    case GD_FLOAT32:    LINCOM(float);          break;
+    case GD_FLOAT64:    LINCOM(double);         break;
+    case GD_COMPLEX64:  LINCOM(float complex);  break;
+    case GD_COMPLEX128: LINCOM(double complex); break;
+    default:            _GD_InternalError(D);
   }
 
   dreturnvoid();
@@ -517,46 +463,80 @@ void _GD_CLincomData(DIRFILE* D, int n, void* data1, gd_type_t return_type,
       data2, data3, m, b, spf, n_read);
 
   switch(return_type) {
-    case GD_NULL:
-      break;
-    case GD_UINT8:
-      LINCOM(uint8_t);
-      break;
-    case GD_INT8:
-      LINCOM(int8_t);
-      break;
-    case GD_UINT16:
-      LINCOM(uint16_t);
-      break;
-    case GD_INT16:
-      LINCOM(int16_t);
-      break;
-    case GD_UINT32:
-      LINCOM(uint32_t);
-      break;
-    case GD_INT32:
-      LINCOM(int32_t);
-      break;
-    case GD_UINT64:
-      LINCOM(uint64_t);
-      break;
-    case GD_INT64:
-      LINCOM(int64_t);
-      break;
-    case GD_FLOAT32:
-      LINCOM(float);
-      break;
-    case GD_FLOAT64:
-      LINCOM(double);
-      break;
-    case GD_COMPLEX64:
-      LINCOM(float complex);
-      break;
-    case GD_COMPLEX128:
-      LINCOM(double complex);
-      break;
-    default:
-      _GD_InternalError(D);
+    case GD_NULL:                               break;
+    case GD_UINT8:      LINCOM(uint8_t);        break;
+    case GD_INT8:       LINCOM(int8_t);         break;
+    case GD_UINT16:     LINCOM(uint16_t);       break;
+    case GD_INT16:      LINCOM(int16_t);        break;
+    case GD_UINT32:     LINCOM(uint32_t);       break;
+    case GD_INT32:      LINCOM(int32_t);        break;
+    case GD_UINT64:     LINCOM(uint64_t);       break;
+    case GD_INT64:      LINCOM(int64_t);        break;
+    case GD_FLOAT32:    LINCOM(float);          break;
+    case GD_FLOAT64:    LINCOM(double);         break;
+    case GD_COMPLEX64:  LINCOM(float complex);  break;
+    case GD_COMPLEX128: LINCOM(double complex); break;
+    default:            _GD_InternalError(D);
+  }
+
+  dreturnvoid();
+}
+
+#define DIVIDE(t) for (i = 0; i < n_read; i++) \
+                           ((t*)data)[i] = (t)(dividend / ((t*)data)[i])
+
+/* Invert a vector */
+void _GD_InvertData(DIRFILE* D, void* data, gd_type_t return_type,
+    double dividend, size_t n_read)
+{
+  size_t i;
+
+  dtrace("%p, %p, 0x%x, %g, %zu", D, data, return_type, dividend, n_read);
+
+  switch(return_type) {
+    case GD_NULL:                               break;
+    case GD_UINT8:      DIVIDE(uint8_t);        break;
+    case GD_INT8:       DIVIDE(int8_t);         break;
+    case GD_UINT16:     DIVIDE(uint16_t);       break;
+    case GD_INT16:      DIVIDE(int16_t);        break;
+    case GD_UINT32:     DIVIDE(uint32_t);       break;
+    case GD_INT32:      DIVIDE(int32_t);        break;
+    case GD_UINT64:     DIVIDE(uint64_t);       break;
+    case GD_INT64:      DIVIDE(int64_t);        break;
+    case GD_FLOAT32:    DIVIDE(float);          break;
+    case GD_FLOAT64:    DIVIDE(double);         break;
+    case GD_COMPLEX64:  DIVIDE(float complex);  break;
+    case GD_COMPLEX128: DIVIDE(double complex); break;
+    default:            _GD_InternalError(D);
+  }
+
+  dreturnvoid();
+}
+
+/* Invert a vector */
+void _GD_CInvertData(DIRFILE* D, void* data, gd_type_t return_type,
+    double complex dividend, size_t n_read)
+{
+  size_t i;
+
+  dtrace("%p, %p, 0x%x, %g;%g, %zu", D, data, return_type, creal(dividend),
+      cimag(dividend), n_read);
+
+  switch(return_type) {
+    case GD_NULL:                               break;
+    case GD_UINT8:      DIVIDE(uint8_t);        break;
+    case GD_INT8:       DIVIDE(int8_t);         break;
+    case GD_UINT16:     DIVIDE(uint16_t);       break;
+    case GD_INT16:      DIVIDE(int16_t);        break;
+    case GD_UINT32:     DIVIDE(uint32_t);       break;
+    case GD_INT32:      DIVIDE(int32_t);        break;
+    case GD_UINT64:     DIVIDE(uint64_t);       break;
+    case GD_INT64:      DIVIDE(int64_t);        break;
+    case GD_FLOAT32:    DIVIDE(float);          break;
+    case GD_FLOAT64:    DIVIDE(double);         break;
+    case GD_COMPLEX64:  DIVIDE(float complex);  break;
+    case GD_COMPLEX128: DIVIDE(double complex); break;
+    default:            _GD_InternalError(D);
   }
 
   dreturnvoid();

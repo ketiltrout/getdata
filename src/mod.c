@@ -188,6 +188,9 @@ static void _GD_SPFConvert(DIRFILE* D, void *A, gd_spf_t spfA, void *B,
   dreturnvoid();
 }
 
+/* N is the new entry, supplied by the user
+ * E is the old entry, stored in the database
+ * Q is our workspace; in the end, Q is a sanitised N which replaces E */
 static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
     int flags)
 {
@@ -367,22 +370,29 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
         break;
       }
 
-      if (Q.n_fields != E->n_fields)
+      if (Q.n_fields != E->n_fields) {
         modified = 1;
+        if (Q.n_fields < E->n_fields)
+          for (i = Q.n_fields; i < E->n_fields; ++i) {
+            field_free |= 1 << i;
+            scalar_free |= 1 << i;
+            scalar_free |= 1 << (i + GD_MAX_LINCOM);
+          }
+      }
 
       Q.comp_scal = 0;
 
       for (i = 0; i < Q.n_fields; ++i) {
         if (flags & 0x1)
           if (E->n_fields <= i || (N->in_fields[i] != NULL && 
-              strcmp(E->in_fields[i], N->in_fields[i])))
+                strcmp(E->in_fields[i], N->in_fields[i])))
           {
             if ((Q.in_fields[i] = strdup(N->in_fields[i])) == NULL) {
               _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
               break;
             }
             modified = 1;
-            field_free |= 2 << i;
+            field_free |= 1 << i;
           }
 
         if (flags & 0x2) {
@@ -533,6 +543,67 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
         modified = 1;
         field_free |= 2;
       }
+
+      break;
+    case GD_DIVIDE_ENTRY:
+      if (N->in_fields[0] != NULL && strcmp(E->in_fields[0], N->in_fields[0])) {
+        if ((Q.in_fields[0] = strdup(N->in_fields[0])) == NULL) {
+          _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+          break;
+        }
+        modified = 1;
+        field_free = 1;
+      }
+
+      Q.comp_scal = 0;
+      if (N->reciprocal) {
+        if (!E->reciprocal) {
+          modified = 1;
+          field_free |= 2;
+        }
+
+        if (N->comp_scal) {
+          j = _GD_AlterScalar(D, E->cdividend != N->cdividend, GD_COMPLEX128,
+              &Q.cdividend, &(N->cdividend), Q.scalar, N->scalar[0],
+              E->e->calculated);
+          Q.dividend = creal(Q.cdividend);
+          if (cimag(Q.cdividend) != 0)
+            Q.comp_scal = 1;
+        } else {
+          j = _GD_AlterScalar(D, E->dividend != N->dividend, GD_FLOAT64,
+              &Q.dividend, &(N->dividend), Q.scalar, N->scalar[0],
+              E->e->calculated);
+          Q.cdividend = Q.dividend;
+        }
+
+        if (j & GD_AS_ERROR)
+          break;
+        if (j & GD_AS_FREE_SCALAR)
+          scalar_free = 1;
+        if (j & GD_AS_NEED_RECALC)
+          Qe.calculated = 0;
+        if (j & GD_AS_MODIFIED)
+          modified = 1;
+      } else {
+        if (E->reciprocal) {
+          scalar_free = 1;
+          modified = 1;
+        } else {
+          if (N->in_fields[1] != NULL &&
+              strcmp(E->in_fields[1], N->in_fields[1]))
+          {
+            if ((Q.in_fields[1] = strdup(N->in_fields[1])) == NULL) {
+              _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+              break;
+            }
+            modified = 1;
+            field_free |= 2;
+          }
+        }
+      }
+
+      if ((Q.comp_scal && !E->comp_scal) || (!Q.comp_scal && E->comp_scal))
+        modified = 1;
 
       break;
     case GD_PHASE_ENTRY:

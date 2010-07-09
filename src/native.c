@@ -74,8 +74,17 @@ gd_type_t _GD_NativeType(DIRFILE* D, gd_entry_t* E, int repr)
         break;
 
       type = (_GD_NativeType(D, E->e->entry[0], E->e->repr[0]) & GD_COMPLEX
-          || _GD_NativeType(D, E->e->entry[0], E->e->repr[0]) & GD_COMPLEX)
+          || _GD_NativeType(D, E->e->entry[1], E->e->repr[1]) & GD_COMPLEX)
         ? GD_COMPLEX128 : GD_FLOAT64;
+      break;
+    case GD_DIVIDE_ENTRY:
+      if (_GD_BadInput(D, E, 0) || (!E->reciprocal && _GD_BadInput(D, E, 1)))
+        break;
+
+      type = ((E->reciprocal && E->comp_scal) || (!E->reciprocal &&
+            _GD_NativeType(D, E->e->entry[1], E->e->repr[1]) & GD_COMPLEX) ||
+          (_GD_NativeType(D, E->e->entry[0], E->e->repr[0]) & GD_COMPLEX)) ?
+        GD_COMPLEX128 : GD_FLOAT64;
       break;
     case GD_BIT_ENTRY:
     case GD_INDEX_ENTRY:

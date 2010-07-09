@@ -224,6 +224,15 @@ static off64_t _GD_GetEOF(DIRFILE *D, gd_entry_t* E, int *is_index)
 
       ns = _GD_GetEOF(D, E->e->entry[0], is_index);
       break;
+    case GD_DIVIDE_ENTRY:
+      if (E->reciprocal) {
+        if (_GD_BadInput(D, E, 0))
+          break;
+
+        ns = _GD_GetEOF(D, E->e->entry[0], is_index);
+        break;
+      }
+      /* fallthrough on a two vector divide */
     case GD_MULTIPLY_ENTRY:
       if (_GD_BadInput(D, E, 0) || _GD_BadInput(D, E, 1))
         break;
@@ -435,6 +444,15 @@ static off64_t _GD_GetBOF(DIRFILE *D, gd_entry_t* E, gd_spf_t *spf,
       }
 
       break;
+    case GD_DIVIDE_ENTRY:
+      if (E->reciprocal) {
+        if (_GD_BadInput(D, E, 0))
+          break;
+
+        bof = _GD_GetBOF(D, E->e->entry[0], spf, ds);
+        break;
+      }
+      /* fallthrough on a two vector divide */
     case GD_MULTIPLY_ENTRY:
       if (_GD_BadInput(D, E, 0) || _GD_BadInput(D, E, 1))
         break;

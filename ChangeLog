@@ -1,3 +1,28 @@
+2010-07-07   D. V. Wiebe <getdata@ketiltrout.net>   svn:433
+	* test/alter_lincom_32.c: Added.
+
+	* src/native.c (_GD_NativeType): Fix computation of MULTIPLY.
+
+	* src/mod.c (_GD_Change): Fix memory leaks in LINCOM.
+
+	* src/putdata.c (_GD_DoLincomOut): Remove unnecessary error check.
+
+	* src/entry.c (_GD_FreeE _GD_CalculateEntry gd_get_entry gd_validate)
+	src/getdata.c (_GD_DoField) src/native.c (_GD_NativeType) src/spf.c
+	(_GD_GetSPF) src/putdata.c (_GD_DoFieldOut) src/del.c (_GD_DeReference
+	_GD_ClearDerived) src/flimits.c (_GD_GetEOF _GD_GetBOF) src/mod.c (_GD_Change)
+	src/add.c (_GD_Add): Handle DIVIDE.
+	* src/getdata.c (_GD_DivideData _GD_CDivideData _GD_DoDivide) src/putdata.c
+	(_GD_DoDivideOut) src/common.c (_GD_InvertData _GD_CInvertData): Added.
+	* src/nfields.c (gd_get_nfields_by_type): Use a default case.
+	* src/getdata.h.in: Add GD_DIVIDE_ENTRY and DIVIDE entries to the entry
+	struct.
+
+	* src/legacy.c (CopyReciprocalEntry): Added.
+	* src/legacy.c (GetFormat): Store DIVIDEs as LINCOMs or MULTIPLYs.
+
+	* src/getdata.c: Combine MULTIPLY() and CMULTIPLY() macros.
+
 2010-07-07   D. V. Wiebe <getdata@ketiltrout.net>   svn:432
 	* src/common.c (_GD_ReadLinterpFile): Only sort if necessary.
 

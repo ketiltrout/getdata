@@ -52,6 +52,22 @@ static void _GD_ClearDerived(DIRFILE* D, gd_entry_t* E, const gd_entry_t* C,
         else
           E->e->entry[1] = NULL;
       }
+      if (strcmp(E->in_fields[0], C->field) == 0) {
+        if (check)
+          _GD_SetError(D, GD_E_DELETE, GD_E_DEL_DERIVED, E->field, 0,
+              C->field);
+        else
+          E->e->entry[0] = NULL;
+      }
+      break;
+    case GD_DIVIDE_ENTRY:
+      if (!E->reciprocal && strcmp(E->in_fields[1], C->field) == 0) {
+        if (check)
+          _GD_SetError(D, GD_E_DELETE, GD_E_DEL_DERIVED, E->field, 0,
+              C->field);
+        else
+          E->e->entry[1] = NULL;
+      }
       /* Fallthrough */
     case GD_LINTERP_ENTRY:
     case GD_BIT_ENTRY:
@@ -150,6 +166,14 @@ static void _GD_DeReference(DIRFILE* D, gd_entry_t* E, gd_entry_t* C,
 
         if (!check)
           E->b[i] = creal(E->cb[i]);
+      }
+      break;
+    case GD_DIVIDE_ENTRY:
+      if (E->reciprocal) {
+        _GD_DeReferenceOne(D, E, C, check, 0, GD_COMPLEX128, &E->cdividend);
+
+        if (!check)
+          E->dividend = creal(E->cdividend);
       }
       break;
     case GD_BIT_ENTRY:

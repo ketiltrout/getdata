@@ -504,6 +504,8 @@ void* _GD_Alloc(DIRFILE* D, gd_type_t type, size_t n);
 void _GD_ArmEndianise(uint64_t* databuffer, int is_complex, size_t ns);
 int _GD_BadInput(DIRFILE* D, gd_entry_t* E, int i);
 int _GD_CalculateEntry(DIRFILE* D, gd_entry_t* E);
+void _GD_CInvertData(DIRFILE* D, void* data, gd_type_t return_type,
+    double complex dividend, size_t n_read);
 
 /* _GD_ClearError: Everything's A-OK; clear the last error. */
 #define _GD_ClearError(D) (D)->error = 0
@@ -532,6 +534,8 @@ gd_spf_t _GD_GetSPF(DIRFILE* D, gd_entry_t* E);
 int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,
     int linenum, char** ref_name, int me, int* standards, unsigned long *flags);
 void _GD_InitialiseFramework(void);
+void _GD_InvertData(DIRFILE* D, void* data, gd_type_t return_type,
+    double dividend, size_t n_read);
 void _GD_InsertSort(DIRFILE* D, gd_entry_t* E, int u) gd_nothrow;
 
 #define _GD_InternalError(D) \

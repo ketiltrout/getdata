@@ -52,6 +52,13 @@ void _GD_FreeE(gd_entry_t* entry, int priv)
       if (priv)
         free(entry->e->table_path);
       break;
+    case GD_DIVIDE_ENTRY:
+      free(entry->in_fields[0]);
+      if (entry->reciprocal)
+        free(entry->scalar[0]);
+      else
+        free(entry->in_fields[1]);
+      break;
     case GD_MULTIPLY_ENTRY:
       free(entry->in_fields[1]);
       free(entry->in_fields[0]);
@@ -206,6 +213,14 @@ int _GD_CalculateEntry(DIRFILE* D, gd_entry_t* E)
           break;
       }
       break;
+    case GD_DIVIDE_ENTRY:
+      if (E->reciprocal) {
+        _GD_GetScalar(D, E, E->scalar[0], GD_COMPLEX128, &E->cdividend);
+        E->dividend = creal(E->cdividend);
+
+        E->comp_scal = (cimag(E->cdividend) == 0) ? 0 : 1;
+      }
+      break;
     case GD_BIT_ENTRY:
     case GD_SBIT_ENTRY:
       _GD_GetScalar(D, E, E->scalar[0], GD_INT16, &E->bitnum);
@@ -350,6 +365,12 @@ int gd_get_entry(DIRFILE* D, const char* field_code_in, gd_entry_t* entry)
       entry->in_fields[0] = strdup(E->in_fields[0]);
       entry->in_fields[1] = strdup(E->in_fields[1]);
       break;
+    case GD_DIVIDE_ENTRY:
+      entry->in_fields[0] = strdup(E->in_fields[0]);
+      if (E->reciprocal)
+        entry->scalar[0] = strdup(E->scalar[0]);
+      else
+        entry->in_fields[1] = strdup(E->in_fields[1]);
     case GD_PHASE_ENTRY:
       entry->in_fields[0] = strdup(E->in_fields[0]);
       if (E->scalar[0])
@@ -479,6 +500,11 @@ int gd_validate(DIRFILE *D, const char *field_code_in)
       break;
     case GD_MULTIPLY_ENTRY:
       _GD_BadInput(D, E, 1);
+      _GD_BadInput(D, E, 0);
+      break;
+    case GD_DIVIDE_ENTRY:
+      if (!E->reciprocal)
+        _GD_BadInput(D, E, 1);
     case GD_LINTERP_ENTRY:
     case GD_BIT_ENTRY:
     case GD_PHASE_ENTRY:
