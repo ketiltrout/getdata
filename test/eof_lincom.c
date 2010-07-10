@@ -43,6 +43,7 @@ int main(void)
   int error2 = gd_error(D);
   gd_close(D);
 
+  unlink(data2);
   unlink(data);
   unlink(format);
   rmdir(filedir);

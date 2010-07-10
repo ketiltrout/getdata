@@ -526,6 +526,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
 
       break;
     case GD_MULTIPLY_ENTRY:
+    case GD_DIVIDE_ENTRY:
       if (N->in_fields[0] != NULL && strcmp(E->in_fields[0], N->in_fields[0])) {
         if ((Q.in_fields[0] = strdup(N->in_fields[0])) == NULL) {
           _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
@@ -545,7 +546,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
       }
 
       break;
-    case GD_DIVIDE_ENTRY:
+    case GD_RECIP_ENTRY:
       if (N->in_fields[0] != NULL && strcmp(E->in_fields[0], N->in_fields[0])) {
         if ((Q.in_fields[0] = strdup(N->in_fields[0])) == NULL) {
           _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
@@ -556,51 +557,28 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
       }
 
       Q.comp_scal = 0;
-      if (N->reciprocal) {
-        if (!E->reciprocal) {
-          modified = 1;
-          field_free |= 2;
-        }
-
-        if (N->comp_scal) {
-          j = _GD_AlterScalar(D, E->cdividend != N->cdividend, GD_COMPLEX128,
-              &Q.cdividend, &(N->cdividend), Q.scalar, N->scalar[0],
-              E->e->calculated);
-          Q.dividend = creal(Q.cdividend);
-          if (cimag(Q.cdividend) != 0)
-            Q.comp_scal = 1;
-        } else {
-          j = _GD_AlterScalar(D, E->dividend != N->dividend, GD_FLOAT64,
-              &Q.dividend, &(N->dividend), Q.scalar, N->scalar[0],
-              E->e->calculated);
-          Q.cdividend = Q.dividend;
-        }
-
-        if (j & GD_AS_ERROR)
-          break;
-        if (j & GD_AS_FREE_SCALAR)
-          scalar_free = 1;
-        if (j & GD_AS_NEED_RECALC)
-          Qe.calculated = 0;
-        if (j & GD_AS_MODIFIED)
-          modified = 1;
+      if (N->comp_scal) {
+        j = _GD_AlterScalar(D, E->cdividend != N->cdividend, GD_COMPLEX128,
+            &Q.cdividend, &(N->cdividend), Q.scalar, N->scalar[0],
+            E->e->calculated);
+        Q.dividend = creal(Q.cdividend);
+        if (cimag(Q.cdividend) != 0)
+          Q.comp_scal = 1;
       } else {
-        if (E->reciprocal) {
-          scalar_free = 1;
-          modified = 1;
-        } else {
-          if (N->in_fields[1] != NULL &&
-              strcmp(E->in_fields[1], N->in_fields[1]))
-          {
-            if ((Q.in_fields[1] = strdup(N->in_fields[1])) == NULL) {
-              _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-              break;
-            }
-            modified = 1;
-            field_free |= 2;
-          }
-        }
+        j = _GD_AlterScalar(D, E->dividend != N->dividend, GD_FLOAT64,
+            &Q.dividend, &(N->dividend), Q.scalar, N->scalar[0],
+            E->e->calculated);
+        Q.cdividend = Q.dividend;
       }
+
+      if (j & GD_AS_ERROR)
+        break;
+      if (j & GD_AS_FREE_SCALAR)
+        scalar_free = 1;
+      if (j & GD_AS_NEED_RECALC)
+        Qe.calculated = 0;
+      if (j & GD_AS_MODIFIED)
+        modified = 1;
 
       if ((Q.comp_scal && !E->comp_scal) || (!Q.comp_scal && E->comp_scal))
         modified = 1;
@@ -1006,6 +984,96 @@ int gd_alter_sbit(DIRFILE* D, const char* field_code, const char* in_field,
   N.e = NULL;
   N.scalar[0] = (bitnum == -1) ? "" : NULL;
   N.scalar[1] = (numbits == 0) ? "" : NULL;
+
+  int ret = _GD_Change(D, field_code, &N, 0);
+
+  dreturn("%i", ret);
+  return ret;
+}
+
+int gd_alter_recip(DIRFILE* D, const char* field_code, const char* in_field,
+    double dividend)
+{
+  gd_entry_t N;
+
+  dtrace("%p, \"%s\", \"%s\", %g", D, field_code, in_field, dividend);
+
+  if (D->flags & GD_INVALID) {/* don't crash */
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  N.field_type = GD_RECIP_ENTRY;
+  N.in_fields[0] = (char*)in_field;
+  N.scalar[0] = (dividend == 0) ? "" : NULL;
+  N.dividend = dividend;
+  N.comp_scal = 0;
+  N.e = NULL;
+
+  int ret = _GD_Change(D, field_code, &N, 0);
+
+  dreturn("%i", ret);
+  return ret;
+}
+
+int gd_alter_crecip(DIRFILE* D, const char* field_code, const char* in_field,
+    double complex cdividend)
+{
+  gd_entry_t N;
+
+  dtrace("%p, \"%s\", \"%s\", %g;%g", D, field_code, in_field, creal(cdividend),
+      cimag(cdividend));
+
+  if (D->flags & GD_INVALID) {/* don't crash */
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  N.field_type = GD_RECIP_ENTRY;
+  N.in_fields[0] = (char*)in_field;
+  N.scalar[0] = (cdividend == 0) ? "" : NULL;
+  N.cdividend = cdividend;
+  N.comp_scal = 1;
+  N.e = NULL;
+
+  int ret = _GD_Change(D, field_code, &N, 0);
+
+  dreturn("%i", ret);
+  return ret;
+}
+
+int gd_alter_crecip89(DIRFILE* D, const char* field_code, const char* in_field,
+    double cdividend[2])
+{
+  dtrace("%p, \"%s\", \"%s\", [%g, %g]", D, field_code, in_field, cdividend[0],
+      cdividend[1]);
+
+  int ret = gd_alter_crecip(D, field_code, in_field,
+      *(complex double*)cdividend);
+
+  dreturn("%i", ret);
+  return ret;
+}
+
+int gd_alter_divide(DIRFILE* D, const char* field_code, const char* in_field1,
+    const char* in_field2)
+{
+  gd_entry_t N;
+
+  dtrace("%p, \"%s\", \"%s\", \"%s\"", D, field_code, in_field1, in_field2);
+
+  if (D->flags & GD_INVALID) {/* don't crash */
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  N.field_type = GD_DIVIDE_ENTRY;
+  N.in_fields[0] = (char*)in_field1;
+  N.in_fields[1] = (char*)in_field2;
+  N.e = NULL;
 
   int ret = _GD_Change(D, field_code, &N, 0);
 

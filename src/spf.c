@@ -50,6 +50,7 @@ gd_spf_t _GD_GetSPF(DIRFILE* D, gd_entry_t* E)
     case GD_LINCOM_ENTRY:
     case GD_MULTIPLY_ENTRY:
     case GD_DIVIDE_ENTRY:
+    case GD_RECIP_ENTRY:
     case GD_BIT_ENTRY:
     case GD_PHASE_ENTRY:
     case GD_LINTERP_ENTRY:

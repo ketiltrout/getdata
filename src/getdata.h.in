@@ -41,7 +41,7 @@
 #define GETDATA_H
 
 /* The most recent standards version supported by this library */
-#define DIRFILE_STANDARDS_VERSION 7
+#define DIRFILE_STANDARDS_VERSION 8
 
 /* one or more of these should give us:
  *    size_t, off_t, __REDIRECT, &c., if present
@@ -181,12 +181,13 @@ typedef enum {
   GD_POLYNOM_ENTRY  = 0x08,
   GD_SBIT_ENTRY     = 0x09,
   GD_DIVIDE_ENTRY   = 0x0A,
+  GD_RECIP_ENTRY    = 0x0B,
   GD_CONST_ENTRY    = GD_SCALAR_ENTRY | 0x00,
   GD_STRING_ENTRY   = GD_SCALAR_ENTRY | 0x01
 } gd_entype_t;
 
 /* GD_NO_ENTRY is not part of this count */
-#define GD_N_ENTYPES 12
+#define GD_N_ENTYPES 13
 
 #undef _gd_int16_t
 #undef _gd_uint16_t
@@ -271,8 +272,7 @@ struct _gd_unified_entry {
       double a[GD_MAX_POLYORD + 1];
       GD_DCOMPLEXM(ca[GD_MAX_POLYORD + 1]);
     };
-    struct { /* DIVIDE */
-      gd_type_t reciprocal;
+    struct { /* RECIP */
       double dividend;
       GD_DCOMPLEXM(cdividend);
     };
@@ -349,9 +349,26 @@ extern int gd_add_const(DIRFILE *dirfile, const char *field_code,
     gd_type_t const_type, gd_type_t data_type, const void* value,
     int fragment_index) gd_nothrow gd_nonnull ((1,2,5));
 
-extern int gd_add_cpolynom(DIRFILE *dirfile, const char *field_code, int poly_ord,
-    const char *in_field, const GD_DCOMPLEXP(ca), int fragment_index) gd_nothrow
-gd_nonnull ((1,2,4));
+extern int gd_add_cpolynom(DIRFILE *dirfile, const char *field_code,
+    int poly_ord, const char *in_field, const GD_DCOMPLEXP(ca),
+    int fragment_index) gd_nothrow gd_nonnull ((1,2,4));
+
+/* The native gd_add_crecip cannot be used in C89 mode */
+#ifndef GETDATA_C89_API
+extern int gd_add_crecip(DIRFILE *dirfile, const char *field_code,
+    const char *in_field, _Complex double cdividend, int fragment_index)
+  gd_nothrow gd_nonnull ((1,2,3));
+#else
+#define gd_add_crecip gd_add_crecip89
+#endif
+
+extern int gd_add_crecip89(DIRFILE *dirfile, const char *field_code,
+    const char *in_field, double cdividend[2], int fragment_index)
+  gd_nothrow gd_nonnull ((1,2,3));
+
+extern int gd_add_divide(DIRFILE *dirfile, const char *field_code,
+    const char *in_field1, const char *in_field2, int fragment_index)
+gd_nothrow gd_nonnull ((1,2,3,4));
 
 extern int gd_add_lincom(DIRFILE *dirfile, const char *field_code, int n_fields,
     const char **in_fields, const double *m, const double *b,
@@ -369,9 +386,13 @@ extern int gd_add_phase(DIRFILE *dirfile, const char *field_code,
     const char *in_field, gd_shift_t shift, int fragment_index) gd_nothrow
 gd_nonnull ((1,2,3));
 
-extern int gd_add_polynom(DIRFILE *dirfile, const char *field_code, int poly_ord,
-    const char *in_field, const double *a, int fragment_index)
+extern int gd_add_polynom(DIRFILE *dirfile, const char *field_code,
+    int poly_ord, const char *in_field, const double *a, int fragment_index)
 gd_nothrow gd_nonnull ((1,2,4));
+
+extern int gd_add_recip(DIRFILE *dirfile, const char *field_code,
+    const char *in_field, double dividend, int fragment_index) gd_nothrow
+gd_nonnull ((1,2,3));
 
 extern int gd_add_sbit(DIRFILE *dirfile, const char *field_code,
     const char *in_field, gd_bit_t bitnum, gd_bit_t numbits,
@@ -384,8 +405,8 @@ extern int gd_alter_bit(DIRFILE *dirfile, const char *field_code,
     const char *in_field, gd_bit_t bitnum, gd_bit_t numbits) gd_nothrow
 gd_nonnull((1,2));
 
-extern int gd_alter_clincom(DIRFILE *dirfile, const char *field_code, int n_fields,
-    const char **in_fields, const GD_DCOMPLEXP(m),
+extern int gd_alter_clincom(DIRFILE *dirfile, const char *field_code,
+    int n_fields, const char **in_fields, const GD_DCOMPLEXP(m),
     const GD_DCOMPLEXP(b)) gd_nothrow gd_nonnull((1,2));
 
 extern int gd_alter_const(DIRFILE *dirfile, const char *field_code,
@@ -395,8 +416,22 @@ extern int gd_alter_cpolynom(DIRFILE *dirfile, const char *field_code,
     int poly_ord, const char *in_field, const GD_DCOMPLEXP(a)) gd_nothrow
 gd_nonnull((1,2));
 
-extern int gd_alter_lincom(DIRFILE *dirfile, const char *field_code, int n_fields,
-    const char **in_fields, const double *m, const double *b)
+#ifndef GETDATA_C89_API
+extern int gd_alter_crecip(DIRFILE *dirfile, const char *field_code,
+    const char *in_field, _Complex double cdividend) gd_nothrow
+gd_nonnull((1,2));
+#else
+#define gd_alter_crecip gd_alter_crecip89
+#endif
+
+extern int gd_alter_crecip89(DIRFILE *dirfile, const char *field_code,
+    const char *in_field, double cdividend[2]) gd_nothrow gd_nonnull((1,2));
+
+extern int gd_alter_divide(DIRFILE *dirfile, const char *field_code,
+    const char *in_field1, const char *in_field2) gd_nothrow gd_nonnull((1,2));
+
+extern int gd_alter_lincom(DIRFILE *dirfile, const char *field_code,
+    int n_fields, const char **in_fields, const double *m, const double *b)
 gd_nothrow gd_nonnull((1,2));
 
 extern int gd_alter_multiply(DIRFILE *dirfile, const char *field_code,
@@ -405,8 +440,12 @@ extern int gd_alter_multiply(DIRFILE *dirfile, const char *field_code,
 extern int gd_alter_phase(DIRFILE *dirfile, const char *field_code,
     const char *in_field, gd_shift_t shift) gd_nothrow gd_nonnull((1,2));
 
-extern int gd_alter_polynom(DIRFILE *dirfile, const char *field_code, int poly_ord,
-    const char *in_field, const double *a) gd_nothrow gd_nonnull((1,2));
+extern int gd_alter_polynom(DIRFILE *dirfile, const char *field_code,
+    int poly_ord, const char *in_field, const double *a) gd_nothrow
+gd_nonnull((1,2));
+
+extern int gd_alter_recip(DIRFILE *dirfile, const char *field_code,
+    const char *in_field, double cdividend) gd_nothrow gd_nonnull((1,2));
 
 extern int gd_alter_sbit(DIRFILE *dirfile, const char *field_code,
     const char *in_field, gd_bit_t bitnum, gd_bit_t numbits) gd_nothrow
@@ -472,6 +511,22 @@ extern int gd_madd_cpolynom(DIRFILE *dirfile, const char *parent,
     const char *field_code, int poly_ord, const char *in_field,
     const GD_DCOMPLEXP(ca)) gd_nothrow gd_nonnull ((1,2,3,5));
 
+#ifndef GETDATA_C89_API
+extern int gd_madd_crecip(DIRFILE *dirfile, const char *parent,
+    const char *field_code, const char *in_field, _Complex double cdividend)
+gd_nothrow gd_nonnull ((1,2,3,4));
+#else
+#define gd_madd_crecip gd_madd_crecip89
+#endif
+
+extern int gd_madd_crecip89(DIRFILE *dirfile, const char *parent,
+    const char *field_code, const char *in_field, double cdividend[2])
+gd_nothrow gd_nonnull ((1,2,3,4));
+
+extern int gd_madd_divide(DIRFILE *dirfile, const char *parent,
+    const char *field_code, const char *in_field1, const char *in_field2)
+gd_nothrow gd_nonnull ((1,2,3,4,5));
+
 extern int gd_madd_lincom(DIRFILE *dirfile, const char *parent,
     const char *field_code, int n_fields, const char **in_fields,
     const double *m, const double *b) gd_nothrow gd_nonnull((1,2,3,5,6,7));
@@ -491,6 +546,10 @@ gd_nothrow gd_nonnull ((1,2,3,4));
 extern int gd_madd_polynom(DIRFILE *dirfile, const char *parent,
     const char *field_code, int poly_ord, const char *in_field, const double *a)
 gd_nothrow gd_nonnull ((1,2,3,5));
+
+extern int gd_madd_recip(DIRFILE *dirfile, const char *parent,
+    const char *field_code, const char *in_field, double dividend) gd_nothrow
+gd_nonnull ((1,2,3,4));
 
 extern int gd_madd_sbit(DIRFILE *dirfile, const char *parent,
     const char *field_code, const char *in_field, gd_bit_t bitnum,

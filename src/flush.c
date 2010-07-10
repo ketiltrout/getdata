@@ -57,16 +57,12 @@ void _GD_Flush(DIRFILE* D, gd_entry_t *E)
           _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[0].name, errno, NULL);
       }
       break;
-    case GD_DIVIDE_ENTRY:
-      if (!E->reciprocal)
-        _GD_Flush(D, E->e->entry[1]);
-      _GD_Flush(D, E->e->entry[0]);
-      break;
     case GD_LINCOM_ENTRY:
       for (i = 2; i < E->n_fields; ++i)
         _GD_Flush(D, E->e->entry[i]);
       /* fallthrough */
     case GD_MULTIPLY_ENTRY:
+    case GD_DIVIDE_ENTRY:
       _GD_Flush(D, E->e->entry[1]);
       /* fallthrough */
     case GD_LINTERP_ENTRY:
@@ -74,6 +70,7 @@ void _GD_Flush(DIRFILE* D, gd_entry_t *E)
     case GD_PHASE_ENTRY:
     case GD_POLYNOM_ENTRY:
     case GD_SBIT_ENTRY:
+    case GD_RECIP_ENTRY:
       _GD_Flush(D, E->e->entry[0]);
     case GD_CONST_ENTRY:
     case GD_STRING_ENTRY:
@@ -265,12 +262,12 @@ static void _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
       _GD_WriteConst(D, stream, GD_INT16, &E->numbits, E->scalar[1], "\n");
       break;
     case GD_DIVIDE_ENTRY:
-      fprintf(stream, " DIVIDE%s ", pretty ? "  " : "");
-      if (E->reciprocal)
-        _GD_WriteConst(D, stream, GD_COMPLEX128, &E->cdividend, E->scalar[0],
-            "");
-      else 
-        fprintf(stream, "%s", E->in_fields[1]);
+      fprintf(stream, " DIVIDE%s %s %s", pretty ? "  " : "", E->in_fields[1],
+          E->in_fields[0]);
+      break;
+    case GD_RECIP_ENTRY:
+      fprintf(stream, " RECIP%s ", pretty ? "   " : "");
+      _GD_WriteConst(D, stream, GD_COMPLEX128, &E->cdividend, E->scalar[0], "");
       fprintf(stream, " %s", E->in_fields[0]);
       break;
     case GD_MULTIPLY_ENTRY:
@@ -575,6 +572,7 @@ int gd_flush(DIRFILE* D, const char* field_code)
 #define GD_VERS_GE_5  0xFFFFFFFFFFFFFFE0
 #define GD_VERS_GE_6  0xFFFFFFFFFFFFFFC0
 #define GD_VERS_GE_7  0xFFFFFFFFFFFFFF80
+#define GD_VERS_GE_8  0xFFFFFFFFFFFFFF00
 
 #define GD_VERS_LE_0  0x0000000000000001
 #define GD_VERS_LE_1  0x0000000000000003
@@ -584,6 +582,7 @@ int gd_flush(DIRFILE* D, const char* field_code)
 #define GD_VERS_LE_5  0x000000000000003f
 #define GD_VERS_LE_6  0x000000000000007f
 #define GD_VERS_LE_7  0x00000000000000ff
+#define GD_VERS_LE_8  0x00000000000001ff
 
 uint32_t _GD_FindVersion(DIRFILE *D)
 {
@@ -627,6 +626,10 @@ uint32_t _GD_FindVersion(DIRFILE *D)
             break;
         }
         break;
+      case GD_DIVIDE_ENTRY:
+      case GD_RECIP_ENTRY:
+        D->av &= GD_VERS_GE_8;
+        break;
       case GD_MULTIPLY_ENTRY:
         D->av &= GD_VERS_GE_2;
         break;
@@ -652,7 +655,10 @@ uint32_t _GD_FindVersion(DIRFILE *D)
         else if (D->entry[i]->bitnum + D->entry[i]->numbits - 1 > 32)
           D->av &= GD_VERS_GE_5;
         break;
-      default:
+      case GD_LINTERP_ENTRY:
+      case GD_LINCOM_ENTRY:
+      case GD_INDEX_ENTRY:
+      case GD_NO_ENTRY:
         break;
     }
     if (D->av & GD_VERS_GE_1 && strcmp(D->entry[i]->field, "FRAMEOFFSET") == 0)

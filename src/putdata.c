@@ -378,7 +378,7 @@ static size_t _GD_DoPhaseOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
   return n_wrote;
 }
 
-static size_t _GD_DoDivideOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
+static size_t _GD_DoRecipOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
     size_t num_samp, gd_type_t data_type, const void *data_in)
 {
   size_t n_wrote;
@@ -387,12 +387,6 @@ static size_t _GD_DoDivideOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
   dtrace("%p, %p, %lli, %zu, 0x%x, %p", D, E, first_samp, num_samp, data_type,
       data_in);
   
-  /* can't write to a division */
-  if (!E->reciprocal) {
-    dreturn("%i", 0);
-    return 0;
-  }
-
   if (_GD_BadInput(D, E, 0)) {
     dreturn("%i", 0);
     return 0;
@@ -595,11 +589,12 @@ size_t _GD_DoFieldOut(DIRFILE *D, gd_entry_t* E, int repr, off64_t first_samp,
       n_wrote = _GD_DoBitOut(D, E, first_samp, num_samp, data_type, data_in);
       break;
     case GD_MULTIPLY_ENTRY:
+    case GD_DIVIDE_ENTRY:
     case GD_INDEX_ENTRY:
       _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_PUT, NULL, 0, E->field);
       break;
-    case GD_DIVIDE_ENTRY:
-      n_wrote = _GD_DoDivideOut(D, E, first_samp, num_samp, data_type, data_in);
+    case GD_RECIP_ENTRY:
+      n_wrote = _GD_DoRecipOut(D, E, first_samp, num_samp, data_type, data_in);
       break;
     case GD_PHASE_ENTRY:
       n_wrote = _GD_DoPhaseOut(D, E, first_samp, num_samp, data_type, data_in);

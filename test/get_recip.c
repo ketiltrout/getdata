@@ -1,9 +1,8 @@
-/* Open a Standards Version 7 conformant dirfile */
+/* Attempt to read DIVIDE */
 #include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
-#include <stdio.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <string.h>
@@ -14,17 +13,18 @@ int main(void)
 {
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
-  const char* data = __TEST__ "dirfile/ar";
-  const char* format_data = "/VERSION 7\nar RAW UINT8 8\nar/q SBIT ar 0 10\n";
-  uint16_t c[8];
+  const char* data = __TEST__ "dirfile/data";
+  const char* format_data =
+    "div RECIP 2. data\n"
+    "data RAW UINT8 1\n";
+  double c = 0;
   unsigned char data_data[256];
-  int fd, i, r = 0;
+  int fd, r = 0;
 
-  memset(c, 0, 8);
   mkdir(filedir, 0777);
 
   for (fd = 0; fd < 256; ++fd)
-    data_data[fd] = (unsigned char)fd;
+    data_data[fd] = (unsigned char)(fd + 2);
 
   fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
   write(fd, format_data, strlen(format_data));
@@ -35,12 +35,8 @@ int main(void)
   close(fd);
 
   DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  int n = gd_getdata(D, "ar/q", 5, 0, 1, 0, GD_UINT16, c);
+  int n = gd_getdata(D, "div", 5, 0, 1, 0, GD_FLOAT64, &c);
   int error = gd_error(D);
-
-  int v = gd_dirfile_standards(D, GD_VERSION_CURRENT);
-  int l = gd_dirfile_standards(D, GD_VERSION_LATEST);
-  int e = gd_dirfile_standards(D, GD_VERSION_EARLIEST);
 
   gd_close(D);
 
@@ -48,16 +44,9 @@ int main(void)
   unlink(format);
   rmdir(filedir);
 
-  CHECKI(error,0);
-  CHECKI(n,8);
-
-  for (i = 0; i < 8; ++i)
-    CHECKUi(i,c[i],40 + i);
-
-  /* Version 7 is forward compatible with version 8 */
-  CHECKI(v,7);
-  CHECKI(l,8);
-  CHECKI(e,7);
+  CHECKI(error, 0);
+  CHECKI(n, 1);
+  CHECKF(c, 2. / 7.);
 
   return r;
 }

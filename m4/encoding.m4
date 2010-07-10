@@ -38,6 +38,10 @@ AC_ARG_WITH([lib$2], AS_HELP_STRING([--with-lib$2=PREFIX],
 m4_divert_once([HELP_WITH], AS_HELP_STRING([--without-lib$2],
             [disable encodings supported by lib$2, even if the library is present]))
 
+if test "x$no_extern" = "xyes"; then
+  use_$1="no";
+fi
+
 if test "x$use_$1" = "xyes"; then
   dnl search for library
   echo

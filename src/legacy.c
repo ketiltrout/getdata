@@ -296,7 +296,7 @@ static void CopyBitEntry(struct BitEntryType* B, gd_entry_t* E)
   dreturnvoid();
 }
 
-static void CopyMultiplyEntry(struct MultiplyEntryType* M, gd_entry_t* E)
+static void CopyMultDivEntry(struct MultiplyEntryType* M, gd_entry_t* E)
 {
   dtrace("%p, %p", M, E);
 
@@ -389,6 +389,7 @@ struct FormatType *GetFormat(const char *filedir, int *error_code) {
         Format.n_raw++;
         break;
       case GD_LINCOM_ENTRY:
+      case GD_RECIP_ENTRY:
         Format.n_lincom++;
         break;
       case GD_LINTERP_ENTRY:
@@ -400,13 +401,8 @@ struct FormatType *GetFormat(const char *filedir, int *error_code) {
         Format.n_bit++;
         break;
       case GD_MULTIPLY_ENTRY:
-        Format.n_multiply++;
-        break;
       case GD_DIVIDE_ENTRY:
-        if (D->entry[i]->reciprocal)
-          Format.n_lincom++;
-        else
-          Format.n_multiply++;
+        Format.n_multiply++;
         break;
       case GD_PHASE_ENTRY:
         Format.n_phase++;
@@ -465,14 +461,12 @@ struct FormatType *GetFormat(const char *filedir, int *error_code) {
       case GD_SBIT_ENTRY:
         CopyBitEntry(&Format.bitEntries[nbit++], D->entry[i]);
         break;
-      case GD_DIVIDE_ENTRY:
-        if (D->entry[i]->reciprocal)
-          CopyReciprocalEntry(&Format.lincomEntries[nlincom++], D->entry[i]);
-        else
-          CopyMultiplyEntry(&Format.multiplyEntries[nmultiply++], D->entry[i]);
+      case GD_RECIP_ENTRY:
+        CopyReciprocalEntry(&Format.lincomEntries[nlincom++], D->entry[i]);
         break;
       case GD_MULTIPLY_ENTRY:
-        CopyMultiplyEntry(&Format.multiplyEntries[nmultiply++], D->entry[i]);
+      case GD_DIVIDE_ENTRY:
+        CopyMultDivEntry(&Format.multiplyEntries[nmultiply++], D->entry[i]);
         break;
       case GD_PHASE_ENTRY:
         CopyPhaseEntry(&Format.phaseEntries[nphase++], D->entry[i]);

@@ -1,4 +1,40 @@
-2010-07-07   D. V. Wiebe <getdata@ketiltrout.net>   svn:433
+2010-07-10   D. V. Wiebe <getdata@ketiltrout.net>   svn:434
+	* test/madd_crecip.c test/add_recip.c test/add_crecip.c test/dfes_recip.c
+	test/get_recip.c test/spf_divide.c test/parse_recip.c test/alter_recip.c
+	test/put_recip.c test/spf_recip.c test/version_8.c test/madd_recip.c
+	test/madd_crecip89.c test/dfes_divide.c test/get_recip_const.c
+	test/alter_crecip89.c test/get_divide.c test/parse_divide.c
+	test/version_8_strict.c test/add_divide_invalid.c test/madd_divide.c
+	test/add_divide.c test/put_divide.c test/add_crecip89.c test/alter_crecip.c:
+	Added.
+
+	* src/entry.c (_GD_FreeE _GD_CalculateEntry gd_get_entry gd_validate)
+	src/getdata.c (_GD_DoField) src/native.c (_GD_NativeType) src/spf.c
+	(_GD_GetSPF) src/putdata.c (_GD_DoFieldOut) src/del.c (_GD_DeReference
+	_GD_ClearDerived) src/flimits.c (_GD_GetEOF _GD_GetBOF) src/mod.c (_GD_Change)
+	src/add.c (_GD_Add): Split RECIP from DIVIDE.
+	* src/legacy.c (CopyMultDivEntry CopyMultiplyEntry): Renamed
+	CopyMultiplyEntry to CopyMultDivEntry.
+	* src/getdata.c (_GD_DoRecip) src/parse.c (_GD_ParseRecip _GD_ParseDivide)
+	src/mod.c (gd_alter_recip gd_alter_crecip gd_alter_crecip89 gd_alter_divide)
+	src/add.c (gd_add_divide gd_add_recip gd_add_crecip gd_add_crecip89
+	gd_madd_divide gd_madd_recip gd_madd_crecip gd_madd_crecip89): Added.
+	* src/getdata.h.in: Bump standards version to Version 8.  Add
+	GD_RECIP_ENTRY.  Fix unified entry struct for RECIP.
+	* src/parse.c (_GD_ParseFieldSpec): Recognise DIVIDE and RECIP.
+	* src/flush.c (_GD_FindVersion): Add Version 8.
+	* src/putdata.c (_GD_DoDivideOut _GD_DoRecipOut): Renamed _GD_DoDivideOut to
+	_GD_DoRecipOut.
+
+	* src/getdata.c (DIVIDE): Swap divisor and dividend in entry struct.
+
+	* test/version_6.c test/version_7.c: Update for Standards Version 8.
+
+	* test/convert_float64_int8.c test/eof_lincom.c: Delete the test dirfile.
+
+	* configure.ac m4/encoding.m4: Add --without-external-libraries switch.
+
+2010-07-08   D. V. Wiebe <getdata@ketiltrout.net>   svn:433
 	* test/alter_lincom_32.c: Added.
 
 	* src/native.c (_GD_NativeType): Fix computation of MULTIPLY.

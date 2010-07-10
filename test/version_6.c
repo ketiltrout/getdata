@@ -54,9 +54,9 @@ int main(void)
   for (i = 0; i < 8; ++i)
     CHECKUi(i,c[i],40 + i);
 
-  /* Version 6 is forward compatible with version 7 */
+  /* Version 6 is forward compatible with versions 7 and 8 */
   CHECKI(v,6);
-  CHECKI(l,7);
+  CHECKI(l,8);
   CHECKI(e,6);
 
   return r;

@@ -88,6 +88,8 @@ static gd_type_t _GD_RawType(const char* type, int standards, int pedantic)
   return t;
 }
 
+/* Returns a newly malloc'd string containing the scalar field name, or NULL on
+ * numeric literal or error */
 static char* _GD_SetScalar(DIRFILE* D, const char* token, void* data, int type,
     const char* format_file, int line, int *comp_scal)
 {
@@ -196,7 +198,7 @@ static char* _GD_SetScalar(DIRFILE* D, const char* token, void* data, int type,
   return NULL;
 }
 
-/* _GD_ParseRaw: parse a RAW data type in the format file
+/* _GD_ParseRaw: parse a RAW entry in the format file
 */
 static gd_entry_t* _GD_ParseRaw(DIRFILE* D, char* in_cols[MAX_IN_COLS],
     int n_cols, const gd_entry_t* parent, int me, const char* format_file,
@@ -288,7 +290,7 @@ static gd_entry_t* _GD_ParseRaw(DIRFILE* D, char* in_cols[MAX_IN_COLS],
   return E;
 }
 
-/* _GD_ParseLincom: parse a LINCOM data type in the format file.
+/* _GD_ParseLincom: parse a LINCOM entry in the format file.
 */
 static gd_entry_t* _GD_ParseLincom(DIRFILE* D, char* in_cols[MAX_IN_COLS],
     int n_cols, const gd_entry_t* parent, const char* format_file, int line,
@@ -388,7 +390,7 @@ static gd_entry_t* _GD_ParseLincom(DIRFILE* D, char* in_cols[MAX_IN_COLS],
   return E;
 }
 
-/* _GD_ParseLinterp: parse a LINTERP data type in the format file.
+/* _GD_ParseLinterp: parse a LINTERP entry in the format file.
 */
 static gd_entry_t* _GD_ParseLinterp(DIRFILE* D,
     char* in_cols[MAX_IN_COLS], int n_cols, const gd_entry_t* parent,
@@ -452,7 +454,7 @@ static gd_entry_t* _GD_ParseLinterp(DIRFILE* D,
   return E;
 }
 
-/* _GD_ParseMultiply: parse MULTIPLY data type entry in format file.
+/* _GD_ParseMultiply: parse MULTIPLY entry in format file.
 */
 static gd_entry_t* _GD_ParseMultiply(DIRFILE* D,
     char* in_cols[MAX_IN_COLS], int n_cols, const gd_entry_t* parent,
@@ -512,7 +514,132 @@ static gd_entry_t* _GD_ParseMultiply(DIRFILE* D,
   return E;
 }
 
-/* _GD_ParseBit: parse BIT data type entry in format file.
+/* _GD_ParseRecip: parse RECIP entry in format file.
+*/
+static gd_entry_t* _GD_ParseRecip(DIRFILE* D,
+    char* in_cols[MAX_IN_COLS], int n_cols, const gd_entry_t* parent,
+    const char* format_file, int line, int standards, int pedantic, int* is_dot)
+{
+  dtrace("%p, %p, %i, %p, \"%s\", %i, %i, %i, %p", D, in_cols, n_cols, parent,
+      format_file, line, standards, pedantic, is_dot);
+
+  if (n_cols < 4) {
+    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_TOK, format_file, line, NULL);
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  gd_entry_t* E = malloc(sizeof(gd_entry_t));
+  if (E == NULL) {
+    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    dreturn("%p", NULL);
+    return NULL;
+  }
+  memset(E, 0, sizeof(gd_entry_t));
+
+  E->e = malloc(sizeof(struct _gd_private_entry));
+  if (E->e == NULL) {
+    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    free(E);
+    dreturn("%p", NULL);
+    return NULL;
+  }
+  memset(E->e, 0, sizeof(struct _gd_private_entry));
+
+  E->field_type = GD_RECIP_ENTRY;
+  E->in_fields[0] = NULL;
+  E->e->entry[0] = NULL;
+  E->e->calculated = 0;
+
+  E->field = _GD_ValidateField(parent, in_cols[0], standards, pedantic, is_dot);
+  if (E->field == in_cols[0]) {
+    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_NAME, format_file, line,
+        in_cols[0]);
+    E->field = NULL;
+    _GD_FreeE(E, 1);
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  E->in_fields[0] = strdup(in_cols[3]);
+
+  if (E->field == NULL || E->in_fields[0] == NULL) {
+    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    _GD_FreeE(E, 1);
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  E->scalar[0] = _GD_SetScalar(D, in_cols[2], &E->cdividend, GD_COMPLEX128,
+      format_file, line, &E->comp_scal);
+  E->dividend = creal(E->cdividend);
+
+  dreturn("%p", E);
+  return E;
+}
+
+/* _GD_ParseDivide: parse DIVIDE entry in format file.
+*/
+static gd_entry_t* _GD_ParseDivide(DIRFILE* D,
+    char* in_cols[MAX_IN_COLS], int n_cols, const gd_entry_t* parent,
+    const char* format_file, int line, int standards, int pedantic, int* is_dot)
+{
+  dtrace("%p, %p, %i, %p, \"%s\", %i, %i, %i, %p", D, in_cols, n_cols, parent,
+      format_file, line, standards, pedantic, is_dot);
+
+  if (n_cols < 4) {
+    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_TOK, format_file, line, NULL);
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  gd_entry_t* E = malloc(sizeof(gd_entry_t));
+  if (E == NULL) {
+    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    dreturn("%p", NULL);
+    return NULL;
+  }
+  memset(E, 0, sizeof(gd_entry_t));
+
+  E->e = malloc(sizeof(struct _gd_private_entry));
+  if (E->e == NULL) {
+    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    free(E);
+    dreturn("%p", NULL);
+    return NULL;
+  }
+  memset(E->e, 0, sizeof(struct _gd_private_entry));
+
+  E->field_type = GD_DIVIDE_ENTRY;
+  E->in_fields[0] = E->in_fields[1] = NULL;
+  E->e->entry[0] = E->e->entry[1] = NULL;
+  E->e->calculated = 0;
+
+  E->field = _GD_ValidateField(parent, in_cols[0], standards, pedantic, is_dot);
+  if (E->field == in_cols[0]) {
+    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_NAME, format_file, line,
+        in_cols[0]);
+    E->field = NULL;
+    _GD_FreeE(E, 1);
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  E->in_fields[0] = strdup(in_cols[2]);
+  E->in_fields[1] = strdup(in_cols[3]);
+
+  if (E->field == NULL || E->in_fields[0] == NULL || E->in_fields[1] == NULL) {
+    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    _GD_FreeE(E, 1);
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  dreturn("%p", E);
+  return E;
+}
+
+/* _GD_ParseBit: parse BIT entry in format file.
 */
 static gd_entry_t* _GD_ParseBit(DIRFILE* D, int is_signed,
     char* in_cols[MAX_IN_COLS], int n_cols, const gd_entry_t* parent,
@@ -593,7 +720,7 @@ static gd_entry_t* _GD_ParseBit(DIRFILE* D, int is_signed,
   return E;
 }
 
-/* _GD_ParsePhase: parse PHASE data type entry in formats file.
+/* _GD_ParsePhase: parse PHASE entry in formats file.
 */
 static gd_entry_t* _GD_ParsePhase(DIRFILE* D, char* in_cols[MAX_IN_COLS],
     int n_cols, const gd_entry_t* parent, const char* format_file, int line,
@@ -657,7 +784,7 @@ static gd_entry_t* _GD_ParsePhase(DIRFILE* D, char* in_cols[MAX_IN_COLS],
   return E;
 }
 
-/* _GD_ParsePolynom: parse a POLYNOM data type in the format file.
+/* _GD_ParsePolynom: parse a POLYNOM in the format file.
 */
 static gd_entry_t* _GD_ParsePolynom(DIRFILE* D,
     char* in_cols[MAX_IN_COLS], int n_cols, const gd_entry_t* parent,
@@ -736,7 +863,7 @@ static gd_entry_t* _GD_ParsePolynom(DIRFILE* D,
   return E;
 }
 
-/* _GD_ParseConst: parse CONST data type entry in formats file.
+/* _GD_ParseConst: parse CONST entry in formats file.
 */
 static gd_entry_t* _GD_ParseConst(DIRFILE* D, char* in_cols[MAX_IN_COLS],
     int n_cols, const gd_entry_t* parent, const char* format_file, int line,
@@ -831,7 +958,7 @@ static gd_entry_t* _GD_ParseConst(DIRFILE* D, char* in_cols[MAX_IN_COLS],
   return E;
 }
 
-/* _GD_ParseString: parse STRING data type entry in formats file.
+/* _GD_ParseString: parse STRING entry in formats file.
 */
 static gd_entry_t* _GD_ParseString(DIRFILE* D, char *in_cols[MAX_IN_COLS],
     int n_cols, const gd_entry_t* parent, const char* format_file, int line,
@@ -1013,8 +1140,7 @@ gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, char** in_cols,
   else if (strcmp(in_cols[1], "LINTERP") == 0)
     E = _GD_ParseLinterp(D, in_cols, n_cols, P, format_file, linenum, standards,
         pedantic, &is_dot);
-  else if (strcmp(in_cols[1], "MULTIPLY") == 0 && (!pedantic ||
-        standards >= 2))
+  else if (strcmp(in_cols[1], "MULTIPLY") == 0 && (!pedantic || standards >= 2))
     E = _GD_ParseMultiply(D, in_cols, n_cols, P, format_file, linenum,
         standards, pedantic, &is_dot);
   else if (strcmp(in_cols[1], "BIT") == 0)
@@ -1029,13 +1155,18 @@ gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, char** in_cols,
   else if (strcmp(in_cols[1], "SBIT") == 0 && (!pedantic || standards >= 7))
     E = _GD_ParseBit(D, 1, in_cols, n_cols, P, format_file, linenum, standards,
         pedantic, &is_dot);
+  else if (strcmp(in_cols[1], "DIVIDE") == 0 && (!pedantic || standards >= 8))
+    E = _GD_ParseDivide(D, in_cols, n_cols, P, format_file, linenum, standards,
+        pedantic, &is_dot);
+  else if (strcmp(in_cols[1], "RECIP") == 0 && (!pedantic || standards >= 8))
+    E = _GD_ParseRecip(D, in_cols, n_cols, P, format_file, linenum, standards,
+        pedantic, &is_dot);
   else if (strcmp(in_cols[1], "CONST") == 0 && (!pedantic || standards >= 6)) {
     E = _GD_ParseConst(D, in_cols, n_cols, P, format_file, linenum, standards,
         pedantic, &is_dot);
     if (D->error == GD_E_OK && P == NULL)
       D->n_const++;
-  } else if (strcmp(in_cols[1], "STRING") == 0 && (!pedantic ||
-        standards >= 6))
+  } else if (strcmp(in_cols[1], "STRING") == 0 && (!pedantic || standards >= 6))
   {
     E = _GD_ParseString(D, in_cols, n_cols, P, format_file, linenum, standards,
         pedantic, &is_dot);

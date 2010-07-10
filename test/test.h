@@ -44,8 +44,8 @@ int gd_system(const char* command)
     (double)(n),(double)(v))
 #define CHECKI(n,v)    CHECK((n) != (v),n,"%" PRIi64,"%" PRIi64,(long long)(n),\
     (long long)(v))
-#define CHECKIi(i,n,v) CHECKi(i,(n) != (v),n,"%" PRIi64,"%" PRIi64,\
-    (long long)(n),(long long)(v))
+#define CHECKIi(i,n,v) CHECKi(i,(long long)(n) != (long long)(v),n,"%" PRIi64,\
+    "%" PRIi64, (long long)(n),(long long)(v))
 #define CHECKP(n)      CHECK((n) != NULL,n,"%p","%s",n,"NULL")
 #define CHECKPi(i,n)   CHECKi(i,(n) != NULL,n,"%p","%s",n,"NULL")
 #define CHECKPN(n)     CHECK((n) == NULL,n,"%p","%s",n,"non-NULL")

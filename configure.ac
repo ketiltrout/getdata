@@ -251,6 +251,16 @@ AC_ARG_WITH([ltdl], AS_HELP_STRING([--with-ltdl=PREFIX],
                esac
               ], [ ltdl_prefix= ])
 
+dnl Kill switch for external libraries
+AC_ARG_WITH([external-libraries], AS_HELP_STRING([--without-external-libraries],
+            [disable all features relying on external libraries]),
+            [
+             case "${withval}" in
+               no) no_extern="yes";;
+               *) no_extern="no";;
+             esac
+             ], [ no_extern="no" ])
+
 dnl Programs
 echo
 echo "*** Initialising build system"
