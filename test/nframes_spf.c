@@ -39,8 +39,8 @@ int main(void)
   for (i = 1; i < len + 1; ++i) {
     write_format(format, i);
     DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-    unsigned int spf = gd_get_spf(D, "data");
-    size_t n = gd_get_nframes(D);
+    unsigned int spf = gd_spf(D, "data");
+    size_t n = gd_nframes(D);
     if (n != len / spf)
       return 1;
     gd_close(D);

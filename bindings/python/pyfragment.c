@@ -83,7 +83,7 @@ static PyObject* gdpy_fragment_getname(struct gdpy_fragment_t* self,
 {
   dtrace("%p, %p", self, closure);
   
-  const char* name = gd_get_fragmentname(self->dirfile->D, self->n);
+  const char* name = gd_fragmentname(self->dirfile->D, self->n);
 
   PYGD_CHECK_ERROR(self->dirfile->D, NULL);
 
@@ -98,7 +98,7 @@ static PyObject* gdpy_fragment_getencoding(struct gdpy_fragment_t* self,
 {
   dtrace("%p, %p", self, closure);
   
-  unsigned long enc = gd_get_encoding(self->dirfile->D, self->n);
+  unsigned long enc = gd_encoding(self->dirfile->D, self->n);
 
   PYGD_CHECK_ERROR(self->dirfile->D, NULL);
 
@@ -138,7 +138,7 @@ static PyObject* gdpy_fragment_getendianness(struct gdpy_fragment_t* self,
 {
   dtrace("%p, %p", self, closure);
   
-  unsigned long end = gd_get_endianness(self->dirfile->D, self->n);
+  unsigned long end = gd_endianness(self->dirfile->D, self->n);
 
   PYGD_CHECK_ERROR(self->dirfile->D, NULL);
 
@@ -178,7 +178,7 @@ static PyObject* gdpy_fragment_getoffset(struct gdpy_fragment_t* self,
 {
   dtrace("%p, %p", self, closure);
   
-  off_t offset = gd_get_frameoffset(self->dirfile->D, self->n);
+  off_t offset = gd_frameoffset(self->dirfile->D, self->n);
 
   PYGD_CHECK_ERROR(self->dirfile->D, NULL);
 
@@ -219,7 +219,7 @@ static PyObject* gdpy_fragment_getparent(struct gdpy_fragment_t* self,
 {
   dtrace("%p, %p", self, closure);
   
-  int parent = gd_get_parent_fragment(self->dirfile->D, self->n);
+  int parent = gd_parent_fragment(self->dirfile->D, self->n);
 
   PYGD_CHECK_ERROR(self->dirfile->D, NULL);
 
@@ -234,7 +234,7 @@ static PyObject* gdpy_fragment_getprotection(struct gdpy_fragment_t* self,
 {
   dtrace("%p, %p", self, closure);
   
-  int prot = gd_get_protection(self->dirfile->D, self->n);
+  int prot = gd_protection(self->dirfile->D, self->n);
 
   PYGD_CHECK_ERROR(self->dirfile->D, NULL);
 
@@ -256,7 +256,7 @@ static int gdpy_fragment_setprotection(struct gdpy_fragment_t* self,
     return -1;
   }
 
-  gd_protect(self->dirfile->D, p, self->n);
+  gd_alter_protection(self->dirfile->D, p, self->n);
 
   PYGD_CHECK_ERROR(self->dirfile->D, -1);
 
@@ -286,7 +286,7 @@ static PyGetSetDef gdpy_fragment_getset[] = {
   { "name", (getter)gdpy_fragment_getname, NULL,
     "The pathname of this fragment.  This attribute cannot be changed.\n"
       /* -----------------------------------------------------------------| */
-      "See gd_get_fragmentname(3).",
+      "See gd_fragmentname(3).",
     NULL },
   { "parent", (getter)gdpy_fragment_getparent, NULL,
     "The fragment index of this fragment's parent.  Since the primary\n"
@@ -300,7 +300,7 @@ static PyGetSetDef gdpy_fragment_getset[] = {
     "The (advisory) protection level of this fragment.  This will be one\n"
       "the pygetdata.PROTECT_* symbols.  The protection level of this\n"
       "fragment can be changed by assigning to this attribute.  See\n"
-      "gd_get_protection(3) and gd_protect(3).",
+      "gd_protection(3) and gd_alter_protection(3).",
     NULL },
   { NULL }
 };

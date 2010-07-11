@@ -40,8 +40,8 @@ int main(void)
   int error1 = gd_error(D);
   int ret2 = gd_include(D, "format2", 0, 0);
   int error2 = gd_error(D);
-  unsigned int nfields = gd_get_nfields(D);
-  unsigned int nfragments = gd_get_nfragments(D);
+  unsigned int nfields = gd_nfields(D);
+  unsigned int nfragments = gd_nfragments(D);
   gd_close(D);
 
   unlink(format2);

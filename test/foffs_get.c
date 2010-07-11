@@ -32,7 +32,7 @@ int main(void)
   close(fd);
 
   DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  off_t n = gd_get_frameoffset(D, 0);
+  off_t n = gd_frameoffset(D, 0);
   int error = gd_error(D);
 
   gd_close(D);

@@ -23,7 +23,7 @@ int main(void)
   int error = gd_error(D);
 
   /* check */
-  gd_get_entry(D, "data", &e);
+  gd_entry(D, "data", &e);
   if (gd_error(D))
     r = 1;
   else {

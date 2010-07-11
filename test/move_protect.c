@@ -33,7 +33,7 @@ int main(void)
   DIRFILE* D = gd_open(filedir, GD_RDWR | GD_UNENCODED);
   int ret = gd_move(D, "data", 1, 0);
   int error = gd_error(D);
-  int ge_ret =  gd_get_entry(D, "data", &E);
+  int ge_ret =  gd_entry(D, "data", &E);
   gd_close(D);
 
   unlink(format1);

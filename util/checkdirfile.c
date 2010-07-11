@@ -108,14 +108,14 @@ int main(int argc, char* argv[])
   /* Check the validity of each field defined */
   ne = 0;
   puts("\nChecking fields...");
-  flist = gd_get_field_list(dirfile);
+  flist = gd_field_list(dirfile);
   for (i = 0; flist[i] != NULL; ++i) {
     if (gd_validate(dirfile, flist[i])) {
       printf("  getdata error checking %s: %s\n", flist[i],
           gd_error_string(dirfile, getdata_error, 2048));
       ne++;
     }
-    mflist = gd_get_mfield_list(dirfile, flist[i]);
+    mflist = gd_mfield_list(dirfile, flist[i]);
     for (j = 0; mflist[j] != NULL; ++j) {
       char code[GD_MAX_LINE_LENGTH];
       snprintf(code, GD_MAX_LINE_LENGTH, "%s/%s", flist[i], mflist[j]);
@@ -127,7 +127,7 @@ int main(int argc, char* argv[])
     }
   }
 
-  nfields = gd_get_nfields(dirfile);
+  nfields = gd_nfields(dirfile);
 
   if (ne > 0)
     printf("  Found %i problems in %u fields.\n", ne, nfields);
@@ -136,7 +136,7 @@ int main(int argc, char* argv[])
 
   /* try to retrieve the number of frames in the dirfile */
   puts("\nChecking frames...");
-  n = gd_get_nframes(dirfile);
+  n = gd_nframes(dirfile);
 
   if (gd_error(dirfile)) {
     printf("  getdata error: %s\n", gd_error_string(dirfile, getdata_error,

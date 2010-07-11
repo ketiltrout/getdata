@@ -95,33 +95,33 @@ n = gd_get_constant(d, "const", type=!GD.FLOAT64)
 nume += check_ok(3, d)
 nume += check_simple(3, n, 5.5)
 
-;  6: gd_get_nfields check
-n = gd_get_nfields(d)
+;  6: gd_nfields check
+n = gd_nfields(d)
 nume += check_ok(6, d)
 nume += check_simple(6, n, nfields)
 
-;  8: gd_get_field_list check
-n = gd_get_field_list(d)
+;  8: gd_field_list check
+n = gd_field_list(d)
 nume += check_ok(8, d)
 nume += check_simple(8, n, fields)
 
-;  9: gd_get_nmfields_check
-n = gd_get_nfields(d, parent="data")
+;  9: gd_nmfields_check
+n = gd_nfields(d, parent="data")
 nume += check_ok(9, d)
 nume += check_simple(9, n, 3)
 
-;  10: gd_get_mfield_list check
-n = gd_get_field_list(d, parent="data")
+;  10: gd_mfield_list check
+n = gd_field_list(d, parent="data")
 nume += check_ok(10, d)
 nume += check_simple(10, n, [ "mstr", "mconst", "mlut" ])
 
-;  11: gd_get_nframes check
-n = gd_get_nframes(d)
+;  11: gd_nframes check
+n = gd_nframes(d)
 nume += check_ok(11, d)
 nume += check_simple(11, n, 10)
 
-;  12: gd_get_spf check
-n = gd_get_spf(d, "data")
+;  12: gd_spf check
+n = gd_spf(d, "data")
 nume += check_ok(12, d)
 nume += check_simple(12, n, 8)
 
@@ -156,13 +156,13 @@ nume += check_error(14, d, !GD.E_BAD_CODE)
 nume += check_simple2(14, 1, gd_error_string(d), "Field not found: x")
 nume += check_simple2(14, 2, estring, "Field not found: x")
 
-;  15: gd_get_entry_type check
-n = gd_get_entry_type(d, "data")
+;  15: gd_entry_type check
+n = gd_entry_type(d, "data")
 nume += check_ok(15, d)
 nume += check_simple(15, n, !GD.RAW_ENTRY)
 
-;  16: gd_get_entry (raw)
-n = gd_get_entry(d, "data")
+;  16: gd_entry (raw)
+n = gd_entry(d, "data")
 nume += check_ok(16, d)
 nume += check_simple2(16, 1, n.field_type, !GD.RAW_ENTRY)
 nume += check_simple2(16, 2, n.field, "data")
@@ -170,8 +170,8 @@ nume += check_simple2(16, 3, n.fragment, 0)
 nume += check_simple2(16, 4, n.data_type, !GD.INT8)
 nume += check_simple2(16, 5, n.spf, 8)
 
-;  18: gd_get_entry (lincom)
-n = gd_get_entry(d, "lincom")
+;  18: gd_entry (lincom)
+n = gd_entry(d, "lincom")
 nume += check_ok(18, d)
 nume += check_simple2(18, 1, n.field_type, !GD.LINCOM_ENTRY)
 nume += check_simple2(18, 2, n.field, "lincom")
@@ -185,8 +185,8 @@ nume += check_simple2(18, 8, n.cb, [ DCOMPLEX(2.2D,0), DCOMPLEX(3.3D,4.4D), $
   DCOMPLEX(5.5D,0) ])
 nume += check_simple2(18, 9, n.scalar, [ "", "", "const", "", "", "const" ])
 
-;  20: gd_get_entry (polynom)
-n = gd_get_entry(d, "polynom")
+;  20: gd_entry (polynom)
+n = gd_entry(d, "polynom")
 nume += check_ok(20, d)
 nume += check_simple2(20, 1, n.field_type, !GD.POLYNOM_ENTRY)
 nume += check_simple2(20, 2, n.field, "polynom")
@@ -198,8 +198,8 @@ nume += check_simple2(20, 7, n.ca, [ DCOMPLEX(1.1D,0), DCOMPLEX(2.2D,0), $
   DCOMPLEX(2.2D,0), DCOMPLEX(3.3D,4.4D), DCOMPLEX(5.5D,0), DCOMPLEX(5.5D,0) ])
 nume += check_simple2(20, 8, n.scalar, [ "", "", "", "", "const", "const" ])
 
-;  21: gd_get_entry (linterp)
-n = gd_get_entry(d, "linterp")
+;  21: gd_entry (linterp)
+n = gd_entry(d, "linterp")
 nume += check_ok(21, d)
 nume += check_simple2(21, 1, n.field_type, !GD.LINTERP_ENTRY)
 nume += check_simple2(21, 2, n.field, "linterp")
@@ -207,8 +207,8 @@ nume += check_simple2(21, 3, n.fragment, 0)
 nume += check_simple2(21, 4, n.in_fields, [ "data" ])
 nume += check_simple2(21, 5, n.table, "/look/up/file")
 
-;  22: gd_get_entry (bit)
-n = gd_get_entry(d, "bit")
+;  22: gd_entry (bit)
+n = gd_entry(d, "bit")
 nume += check_ok(22, d)
 nume += check_simple2(22, 1, n.field_type, !GD.BIT_ENTRY)
 nume += check_simple2(22, 2, n.field, "bit")
@@ -217,8 +217,8 @@ nume += check_simple2(22, 4, n.in_fields, [ "data" ])
 nume += check_simple2(22, 5, n.numbits, 4)
 nume += check_simple2(22, 6, n.bitnum, 3)
 
-;  23: gd_get_entry (sbit)
-n = gd_get_entry(d, "sbit")
+;  23: gd_entry (sbit)
+n = gd_entry(d, "sbit")
 nume += check_ok(23, d)
 nume += check_simple2(23, 1, n.field_type, !GD.SBIT_ENTRY)
 nume += check_simple2(23, 2, n.field, "sbit")
@@ -227,16 +227,16 @@ nume += check_simple2(23, 4, n.in_fields, [ "data" ])
 nume += check_simple2(23, 5, n.numbits, 6)
 nume += check_simple2(23, 6, n.bitnum, 5)
 
-;  24: gd_get_entry (multiply)
-n = gd_get_entry(d, "mult")
+;  24: gd_entry (multiply)
+n = gd_entry(d, "mult")
 nume += check_ok(24, d)
 nume += check_simple2(24, 1, n.field_type, !GD.MULTIPLY_ENTRY)
 nume += check_simple2(24, 2, n.field, "mult")
 nume += check_simple2(24, 3, n.fragment, 0)
 nume += check_simple2(24, 4, n.in_fields, [ "data", "sbit" ])
 
-;  25: gd_get_entry (phase)
-n = gd_get_entry(d, "phase")
+;  25: gd_entry (phase)
+n = gd_entry(d, "phase")
 nume += check_ok(25, d)
 nume += check_simple2(25, 1, n.field_type, !GD.PHASE_ENTRY)
 nume += check_simple2(25, 2, n.field, "phase")
@@ -244,23 +244,23 @@ nume += check_simple2(25, 3, n.fragment, 0)
 nume += check_simple2(25, 4, n.in_fields, [ "data" ])
 nume += check_simple2(25, 5, n.shift, 11)
 
-;  26: gd_get_entry (const)
-n = gd_get_entry(d, "const")
+;  26: gd_entry (const)
+n = gd_entry(d, "const")
 nume += check_ok(26, d)
 nume += check_simple2(26, 1, n.field_type, !GD.CONST_ENTRY)
 nume += check_simple2(26, 2, n.field, "const")
 nume += check_simple2(26, 3, n.fragment, 0)
 nume += check_simple2(26, 4, n.data_type, !GD.FLOAT64)
 
-;  134: gd_get_entry (string)
-n = gd_get_entry(d, "string")
+;  134: gd_entry (string)
+n = gd_entry(d, "string")
 nume += check_ok(134, d)
 nume += check_simple2(134, 1, n.field_type, !GD.STRING_ENTRY)
 nume += check_simple2(134, 2, n.field, "string")
 nume += check_simple2(134, 3, n.fragment, 0)
 
-;  27: gd_get_fragment_index check
-n = gd_get_fragment_index(d, "data")
+;  27: gd_fragment_index check
+n = gd_fragment_index(d, "data")
 nume += check_ok(27, d)
 nume += check_simple(27, n, 0)
 
@@ -268,7 +268,7 @@ nume += check_simple(27, n, 0)
 gd_add_raw, d, "new1", !GD.FLOAT64, spf=3
 nume += check_ok2(28, 1, d)
 
-n = gd_get_entry(d, "new1")
+n = gd_entry(d, "new1")
 nume += check_ok2(28, 2, d)
 nume += check_simple2(28, 1, n.field_type, !GD.RAW_ENTRY)
 nume += check_simple2(28, 2, n.field, "new1")
@@ -281,7 +281,7 @@ gd_add_lincom, d, "new2", "in1", COMPLEX(1.1, 1.2), COMPLEX(1.3, 1.4), $
   "in2", COMPLEX(1.4, 1.5), COMPLEX(1.6, 1.7)
 nume += check_ok2(30, 1, d)
 
-n = gd_get_entry(d, "new2")
+n = gd_entry(d, "new2")
 nume += check_ok2(30, 2, d)
 nume += check_simple2(30, 1, n.field_type, !GD.LINCOM_ENTRY)
 nume += check_simple2(30, 2, n.field, "new2")
@@ -297,7 +297,7 @@ gd_add_polynom, d, "new4", "in1", DCOMPLEX(3.1,7.0D), DCOMPLEX(4.2,8.0), $
   DCOMPLEX(5.2,9.0), DCOMPLEX(6.3,4.4)
 nume += check_ok2(32, 1, d)
 
-n = gd_get_entry(d, "new4")
+n = gd_entry(d, "new4")
 nume += check_ok2(32, 2, d)
 nume += check_simple2(32, 1, n.field_type, !GD.POLYNOM_ENTRY)
 nume += check_simple2(32, 2, n.field, "new4")
@@ -312,7 +312,7 @@ nume += check_simple2(32, 7, n.ca, [ DCOMPLEX(3.1,7.0D), DCOMPLEX(4.2,8.0), $
 gd_add_linterp, d, "new6", "in", "./some/table"
 nume += check_ok2(33, 1, d)
 
-n = gd_get_entry(d, "new6")
+n = gd_entry(d, "new6")
 nume += check_ok2(33, 2, d)
 nume += check_simple2(33, 1, n.field_type, !GD.LINTERP_ENTRY)
 nume += check_simple2(33, 2, n.field, "new6")
@@ -324,7 +324,7 @@ nume += check_simple2(33, 5, n.table, "./some/table")
 gd_add_bit, d, "new7", "in1", bitnum=11, numbits=22
 nume += check_ok2(34, 1, d)
 
-n = gd_get_entry(d, "new7")
+n = gd_entry(d, "new7")
 nume += check_ok2(34, 2, d)
 nume += check_simple2(34, 1, n.field_type, !GD.BIT_ENTRY)
 nume += check_simple2(34, 2, n.field, "new7")
@@ -337,7 +337,7 @@ nume += check_simple2(34, 6, n.bitnum, 11)
 gd_add_sbit, d, "new8", "in2", bitnum=5, numbits=10
 nume += check_ok2(35, 1, d)
 
-n = gd_get_entry(d, "new8")
+n = gd_entry(d, "new8")
 nume += check_ok2(35, 2, d)
 nume += check_simple2(35, 1, n.field_type, !GD.SBIT_ENTRY)
 nume += check_simple2(35, 2, n.field, "new8")
@@ -350,7 +350,7 @@ nume += check_simple2(35, 6, n.bitnum, 5)
 gd_add_multiply, d, "new9", "in2", "in3"
 nume += check_ok2(36, 1, d)
 
-n = gd_get_entry(d, "new9")
+n = gd_entry(d, "new9")
 nume += check_ok(36, d)
 nume += check_simple2(36, 1, n.field_type, !GD.MULTIPLY_ENTRY)
 nume += check_simple2(36, 2, n.field, "new9")
@@ -361,7 +361,7 @@ nume += check_simple2(36, 4, n.in_fields, [ "in2", "in3" ])
 gd_add_phase, d, "new10", "in6", 42
 nume += check_ok2(37, 1, d)
 
-n = gd_get_entry(d, "new10")
+n = gd_entry(d, "new10")
 nume += check_ok2(37, 2, d)
 nume += check_simple2(37, 1, n.field_type, !GD.PHASE_ENTRY)
 nume += check_simple2(37, 2, n.field, "new10")
@@ -373,7 +373,7 @@ nume += check_simple2(37, 5, n.shift, 42)
 gd_add_const, d, "new11", type=!GD.FLOAT64, value=4.3D
 nume += check_ok2(38, 1, d)
 
-n = gd_get_entry(d, "new11")
+n = gd_entry(d, "new11")
 nume += check_ok2(38, 2, d)
 nume += check_simple2(38, 1, n.field_type, !GD.CONST_ENTRY)
 nume += check_simple2(38, 2, n.field, "new11")
@@ -390,7 +390,7 @@ n = {field: "new13", field_type: !GD.PHASE_ENTRY, fragment: 0, $
 gd_add, d, n
 nume += check_ok2(125, 1, d)
 
-n = gd_get_entry(d, "new13")
+n = gd_entry(d, "new13")
 nume += check_ok2(125, 2, d)
 nume += check_simple2(125, 1, n.field_type, !GD.PHASE_ENTRY)
 nume += check_simple2(125, 2, n.field, "new13")
@@ -398,13 +398,13 @@ nume += check_simple2(125, 3, n.fragment, 0)
 nume += check_simple2(125, 4, n.in_fields, [ "new9" ])
 nume += check_simple2(125, 5, n.shift, -88)
 
-;  39: gd_get_fragmentname
-n = gd_get_fragmentname(d, 0)
+;  39: gd_fragmentname
+n = gd_fragmentname(d, 0)
 nume += check_ok(39, d)
 nume += check_simple(39, n, "test_dirfile/format")
 
-;  40: gd_get_nfragments
-n = gd_get_nfragments(d)
+;  40: gd_nfragments
+n = gd_nfragments(d)
 nume += check_ok(40, d)
 nume += check_simple(40, n, 1)
 
@@ -416,23 +416,23 @@ n = gd_get_constant(d, "const2", type=!GD.INT16)
 nume += check_ok2(41, 2, d)
 nume += check_simple(41, n, -19)
 
-;  42: gd_get_nfields_by_type check
-n = gd_get_nfields(d,type=!GD.LINCOM_ENTRY)
+;  42: gd_nfields_by_type check
+n = gd_nfields(d,type=!GD.LINCOM_ENTRY)
 nume += check_ok(42, d)
 nume += check_simple(42, n, 2)
 
-;  43: gd_get_field_list_by_type check
-n = gd_get_field_list(d, type=!GD.LINCOM_ENTRY)
+;  43: gd_field_list_by_type check
+n = gd_field_list(d, type=!GD.LINCOM_ENTRY)
 nume += check_ok(43, d)
 nume += check_simple(43, n, [ "lincom", "new2"  ])
 
-;  44: gd_get_nvectors check
-n = gd_get_nvectors(d)
+;  44: gd_nvectors check
+n = gd_nvectors(d)
 nume += check_ok(44, d)
 nume += check_simple(44, n, 18)
 
-;  45: gd_get_vector_list check
-n = gd_get_vector_list(d)
+;  45: gd_vector_list check
+n = gd_vector_list(d)
 nume += check_ok(45, d)
 nume += check_simple(45, n, [ 'INDEX', 'bit', 'data', 'lincom', 'linterp', $
   'mult', 'new1', 'new10', 'new13', 'new2', 'new4', 'new6', 'new7', 'new8', $
@@ -443,7 +443,7 @@ gd_add_lincom, d, "mnew2", "in1", 9.9D, 8.8D, "in2", 7.7D, 6.6D, $
   parent="data"
 nume += check_ok2(46, 1, d)
 
-n = gd_get_entry(d, "data/mnew2")
+n = gd_entry(d, "data/mnew2")
 nume += check_ok2(46, 2, d)
 nume += check_simple2(46, 1, n.field_type, !GD.LINCOM_ENTRY)
 nume += check_simple2(46, 2, n.field, "data/mnew2")
@@ -459,7 +459,7 @@ gd_add_polynom, d, "mnew4", "in1", [ 3.3D, 4.4D, 5.5D, 6.6D ], $
   parent="data"
 nume += check_ok2(48, 1, d)
 
-n = gd_get_entry(d, "data/mnew4")
+n = gd_entry(d, "data/mnew4")
 nume += check_ok2(48, 2, d)
 nume += check_simple2(48, 1, n.field_type, !GD.POLYNOM_ENTRY)
 nume += check_simple2(48, 2, n.field, "data/mnew4")
@@ -473,7 +473,7 @@ nume += check_simple2(48, 7, n.a, [ 3.3D, 4.4D, 5.5D, 6.6D ])
 gd_add_linterp, d, "mnew6", "in", "./more/table", parent="data"
 nume += check_ok2(50, 1, d)
 
-n = gd_get_entry(d, "data/mnew6")
+n = gd_entry(d, "data/mnew6")
 nume += check_ok2(50, 2, d)
 nume += check_simple2(50, 1, n.field_type, !GD.LINTERP_ENTRY)
 nume += check_simple2(50, 2, n.field, "data/mnew6")
@@ -485,7 +485,7 @@ nume += check_simple2(50, 5, n.table, "./more/table")
 gd_add_bit, d, "mnew7", "in1", bitnum=21, numbits=12, parent="data"
 nume += check_ok2(51, 1, d)
 
-n = gd_get_entry(d, "data/mnew7")
+n = gd_entry(d, "data/mnew7")
 nume += check_ok2(51, 2, d)
 nume += check_simple2(51, 1, n.field_type, !GD.BIT_ENTRY)
 nume += check_simple2(51, 2, n.field, "data/mnew7")
@@ -498,7 +498,7 @@ nume += check_simple2(51, 6, n.bitnum, 21)
 gd_add_sbit, d, "mnew8", "in3", bitnum=2, numbits=14, parent="data"
 nume += check_ok2(52, 1, d)
 
-n = gd_get_entry(d, "data/mnew8")
+n = gd_entry(d, "data/mnew8")
 nume += check_ok2(52, 2, d)
 nume += check_simple2(52, 1, n.field_type, !GD.SBIT_ENTRY)
 nume += check_simple2(52, 2, n.field, "data/mnew8")
@@ -511,7 +511,7 @@ nume += check_simple2(52, 6, n.bitnum, 2)
 gd_add_multiply, d, "mnew9", "in4", "in1", parent="data"
 nume += check_ok2(53, 1, d)
 
-n = gd_get_entry(d, "data/mnew9")
+n = gd_entry(d, "data/mnew9")
 nume += check_ok2(53, 2, d)
 nume += check_simple2(53, 1, n.field_type, !GD.MULTIPLY_ENTRY)
 nume += check_simple2(53, 2, n.field, "data/mnew9")
@@ -522,7 +522,7 @@ nume += check_simple2(53, 4, n.in_fields, [ "in4", "in1" ])
 gd_add_phase, d, "mnew10", "in1", -4, parent="data"
 nume += check_ok2(54, 1, d)
 
-n = gd_get_entry(d, "data/mnew10")
+n = gd_entry(d, "data/mnew10")
 nume += check_ok2(54, 2, d)
 nume += check_simple2(54, 1, n.field_type, !GD.PHASE_ENTRY)
 nume += check_simple2(54, 2, n.field, "data/mnew10")
@@ -534,7 +534,7 @@ nume += check_simple2(54, 5, n.shift, -4)
 gd_add_const, d, "mnew11", type=!GD.UINT64, parent="data"
 nume += check_ok2(55, 1, d)
 
-n = gd_get_entry(d, "data/mnew11")
+n = gd_entry(d, "data/mnew11")
 nume += check_ok2(55, 2, d)
 nume += check_simple2(55, 1, n.field_type, !GD.CONST_ENTRY)
 nume += check_simple2(55, 2, n.field, "data/mnew11")
@@ -547,7 +547,7 @@ n = {field: "mnew13", field_type: !GD.PHASE_ENTRY, fragment: 0, $
 gd_add, d, n, parent="data"
 nume += check_ok2(126, 1, d)
 
-n = gd_get_entry(d, "data/mnew13")
+n = gd_entry(d, "data/mnew13")
 nume += check_ok2(126, 2, d)
 nume += check_simple2(126, 1, n.field_type, !GD.PHASE_ENTRY)
 nume += check_simple2(126, 2, n.field, "data/mnew13")
@@ -564,7 +564,7 @@ nume += check_simple(56, n, "Zaphod Beeblebrox")
 gd_add_string, d, "new12", value="a string"
 nume += check_ok2(57, 1, d)
 
-n = gd_get_entry(d, "new12")
+n = gd_entry(d, "new12")
 nume += check_ok2(57, 2, d)
 nume += check_simple2(57, 1, n.field_type, !GD.STRING_ENTRY)
 nume += check_simple2(57, 2, n.field, "new12")
@@ -578,7 +578,7 @@ nume += check_simple2(57, 4, n, "a string")
 gd_add_string, d, "mnew12", value="another string", parent="data"
 nume += check_ok2(58, 1, d)
 
-n = gd_get_entry(d, "data/mnew12")
+n = gd_entry(d, "data/mnew12")
 nume += check_ok2(58, 2, d)
 nume += check_simple2(58, 1, n.field_type, !GD.STRING_ENTRY)
 nume += check_simple2(58, 2, n.field, "data/mnew12")
@@ -592,7 +592,7 @@ nume += check_simple2(58, 4, n, "another string")
 gd_add_spec, d, 'lorem STRING "Lorem ipsum"'
 nume += check_ok2(59, 1, d)
 
-n = gd_get_entry(d, "lorem")
+n = gd_entry(d, "lorem")
 nume += check_ok2(59, 2, d)
 nume += check_simple2(59, 1, n.field_type, !GD.STRING_ENTRY)
 nume += check_simple2(59, 2, n.field, "lorem")
@@ -606,7 +606,7 @@ nume += check_simple2(59, 4, n, "Lorem ipsum")
 gd_add_spec, d, 'ipsum STRING "dolor sit amet."', parent="lorem"
 nume += check_ok2(60, 1, d)
 
-n = gd_get_entry(d, "lorem/ipsum")
+n = gd_entry(d, "lorem/ipsum")
 nume += check_ok2(60, 2, d)
 nume += check_simple2(60, 1, n.field_type, !GD.STRING_ENTRY)
 nume += check_simple2(60, 2, n.field, "lorem/ipsum")
@@ -632,23 +632,23 @@ n = gd_get_string(d, "string")
 nume += check_ok2(62, 2, d)
 nume += check_simple(62, n, "Arthur Dent")
 
-;  63: gd_get_nmfields_by_type
-n = gd_get_nfields(d, parent="data", type=!GD.LINCOM_ENTRY)
+;  63: gd_nmfields_by_type
+n = gd_nfields(d, parent="data", type=!GD.LINCOM_ENTRY)
 nume += check_ok(63, d)
 nume += check_simple(63, n, 1)
 
-;  64: gd_get_mfield_list_by_type
-n = gd_get_field_list(d, parent="data", type=!GD.LINCOM_ENTRY)
+;  64: gd_mfield_list_by_type
+n = gd_field_list(d, parent="data", type=!GD.LINCOM_ENTRY)
 nume += check_ok(64, d)
 nume += check_simple(64, n, [ "mnew2" ])
 
-;  65: gd_get_nmvectors
-n = gd_get_nvectors(d, parent="data")
+;  65: gd_nmvectors
+n = gd_nvectors(d, parent="data")
 nume += check_ok(65, d)
 nume += check_simple(65, n, 9)
 
-;  66: gd_get_mvector_list check
-n = gd_get_vector_list(d, parent="data")
+;  66: gd_mvector_list check
+n = gd_vector_list(d, parent="data")
 nume += check_ok(66, d)
 nume += check_simple(66, n, [ 'mlut', 'mnew2', 'mnew4', 'mnew6', $
   'mnew7', 'mnew8', 'mnew9', 'mnew10', 'mnew13' ])
@@ -657,7 +657,7 @@ nume += check_simple(66, n, [ 'mlut', 'mnew2', 'mnew4', 'mnew6', $
 gd_alter_raw, d, "new1", type=!GD.INT32
 nume += check_ok2(67, 1, d)
 
-n = gd_get_entry(d, "new1")
+n = gd_entry(d, "new1")
 nume += check_ok2(67, 2, d)
 nume += check_simple2(67, 1, n.field_type, !GD.RAW_ENTRY)
 nume += check_simple2(67, 2, n.field, "new1")
@@ -670,7 +670,7 @@ gd_alter_lincom, d, "new2", in_fields=[ "in3", "in4" ], $
   m=[ COMPLEX(2.3, 4.5), COMPLEX(6.7, 8.9) ]
 nume += check_ok2(69, 1, d)
 
-n = gd_get_entry(d, "new2")
+n = gd_entry(d, "new2")
 nume += check_ok2(69, 2, d)
 nume += check_simple2(69, 1, n.field_type, !GD.LINCOM_ENTRY)
 nume += check_simple2(69, 2, n.field, "new2")
@@ -686,7 +686,7 @@ gd_alter_polynom, d, "new4", poly_ord=4, a=[ DCOMPLEX(1.2,3.4), $
   DCOMPLEX(5.6,7.8), DCOMPLEX(9.0,1.2), DCOMPLEX(3.4,5.6), DCOMPLEX(7.8,9.0) ]
 nume += check_ok2(71, 1, d)
 
-n = gd_get_entry(d, "new4")
+n = gd_entry(d, "new4")
 nume += check_ok2(71, 2, d)
 nume += check_simple2(71, 1, n.field_type, !GD.POLYNOM_ENTRY)
 nume += check_simple2(71, 2, n.field, "new4")
@@ -701,7 +701,7 @@ nume += check_simple2(71, 7, n.ca, [ DCOMPLEX(1.2,3.4), DCOMPLEX(5.6,7.8), $
 gd_alter_linterp, d, "new6", table="./other/table"
 nume += check_ok2(72, 1, d)
 
-n = gd_get_entry(d, "new6")
+n = gd_entry(d, "new6")
 nume += check_ok2(72, 2, d)
 nume += check_simple2(72, 1, n.field_type, !GD.LINTERP_ENTRY)
 nume += check_simple2(72, 2, n.field, "new6")
@@ -713,7 +713,7 @@ nume += check_simple2(72, 5, n.table, "./other/table")
 gd_alter_bit, d, "new7", in_field="in3",  numbits=8
 nume += check_ok2(73, 1, d)
 
-n = gd_get_entry(d, "new7")
+n = gd_entry(d, "new7")
 nume += check_ok2(73, 2, d)
 nume += check_simple2(73, 1, n.field_type, !GD.BIT_ENTRY)
 nume += check_simple2(73, 2, n.field, "new7")
@@ -726,7 +726,7 @@ nume += check_simple2(73, 6, n.bitnum, 11)
 gd_alter_sbit, d, "new8", bitnum=15, numbits=1
 nume += check_ok2(74, 1, d)
 
-n = gd_get_entry(d, "new8")
+n = gd_entry(d, "new8")
 nume += check_ok2(74, 2, d)
 nume += check_simple2(74, 1, n.field_type, !GD.SBIT_ENTRY)
 nume += check_simple2(74, 2, n.field, "new8")
@@ -739,7 +739,7 @@ nume += check_simple2(74, 6, n.bitnum, 15)
 gd_alter_multiply, d, "new9", in_field1="in6"
 nume += check_ok2(75, 1, d)
 
-n = gd_get_entry(d, "new9")
+n = gd_entry(d, "new9")
 nume += check_ok(75, d)
 nume += check_simple2(75, 1, n.field_type, !GD.MULTIPLY_ENTRY)
 nume += check_simple2(75, 2, n.field, "new9")
@@ -750,7 +750,7 @@ nume += check_simple2(75, 4, n.in_fields, [ "in6", "in3" ])
 gd_alter_phase, d, "new10", shift=76
 nume += check_ok2(76, 1, d)
 
-n = gd_get_entry(d, "new10")
+n = gd_entry(d, "new10")
 nume += check_ok2(76, 2, d)
 nume += check_simple2(76, 1, n.field_type, !GD.PHASE_ENTRY)
 nume += check_simple2(76, 2, n.field, "new10")
@@ -762,7 +762,7 @@ nume += check_simple2(76, 5, n.shift, 76)
 gd_alter_const, d, "new11", type=!GD.FLOAT32
 nume += check_ok2(77, 1, d)
 
-n = gd_get_entry(d, "new11")
+n = gd_entry(d, "new11")
 nume += check_ok2(77, 2, d)
 nume += check_simple2(77, 1, n.field_type, !GD.CONST_ENTRY)
 nume += check_simple2(77, 2, n.field, "new11")
@@ -774,7 +774,7 @@ n = {field_type: !GD.PHASE_ENTRY, shift: -8L}
 gd_alter_entry, d, "new13", n
 nume += check_ok2(141, 1, d)
 
-n = gd_get_entry(d, "new13")
+n = gd_entry(d, "new13")
 nume += check_ok2(141, 2, d)
 nume += check_simple2(141, 1, n.field_type, !GD.PHASE_ENTRY)
 nume += check_simple2(141, 2, n.field, "new13")
@@ -782,13 +782,13 @@ nume += check_simple2(141, 3, n.fragment, 0)
 nume += check_simple2(141, 4, n.in_fields, [ "new9" ])
 nume += check_simple2(141, 5, n.shift, -8)
 
-;  78: gd_get_encoding
-n = gd_get_encoding(d, fragment=0)
+;  78: gd_encoding
+n = gd_encoding(d, fragment=0)
 nume += check_ok(78, d)
 nume += check_simple(78, n, !GD.UNENCODED)
 
-;  79: gd_get_endianness
-n = gd_get_endianness(d, fragment=0)
+;  79: gd_endianness
+n = gd_endianness(d, fragment=0)
 nume += check_ok(79, d)
 nume += check_simple(79, n, !GD.LITTLE_ENDIAN)
 
@@ -797,22 +797,22 @@ n = gd_dirfilename(d)
 nume += check_ok(80, d)
 nume += check_simple(80, n, "test_dirfile")
 
-;  81: gd_get_parent_fragment
-n = gd_get_parent_fragment(d, fragment=1)
+;  81: gd_parent_fragment
+n = gd_parent_fragment(d, fragment=1)
 nume += check_ok(81, d)
 nume += check_simple(80, n, 0)
 
-;  82: gd_protect
-gd_protect, d, !GD.PROTECT_DATA, fragment=1
+;  82: gd_alter_protection
+gd_alter_protection, d, !GD.PROTECT_DATA, fragment=1
 nume += check_ok(82, d)
 
-;  83: gd_get_protection
-n = gd_get_protection(d, fragment=1)
+;  83: gd_protection
+n = gd_protection(d, fragment=1)
 nume += check_ok(83, d)
 nume += check_simple(83, n, !GD.PROTECT_DATA)
 
-;  84: gd_get_raw_filename
-n = gd_get_raw_filename(d, 'data')
+;  84: gd_raw_filename
+n = gd_raw_filename(d, 'data')
 nume += check_ok(84, d)
 nume += check_simple(84, n, "test_dirfile/data")
 
@@ -824,7 +824,7 @@ nume += check_ok(85, d)
 gd_alter_encoding, d, !GD.SLIM_ENCODED, fragment=1
 nume += check_ok2(87, 1, d)
 
-n = gd_get_encoding(d, fragment=1)
+n = gd_encoding(d, fragment=1)
 nume += check_ok2(87, 2, d)
 nume += check_simple(87, n, !GD.SLIM_ENCODED)
 
@@ -832,7 +832,7 @@ nume += check_simple(87, n, !GD.SLIM_ENCODED)
 gd_alter_endianness, d, /big_endian, fragment=1
 nume += check_ok2(88, 1, d)
 
-n = gd_get_endianness(d, fragment=1)
+n = gd_endianness(d, fragment=1)
 nume += check_ok2(88, 2, d)
 nume += check_simple(88, n, !GD.BIG_ENDIAN)
 
@@ -840,7 +840,7 @@ nume += check_simple(88, n, !GD.BIG_ENDIAN)
 gd_alter_spec, d, "new10 PHASE in 3"
 nume += check_ok2(89, 1, d)
 
-n = gd_get_entry(d, "new10")
+n = gd_entry(d, "new10")
 nume += check_ok2(89, 2, d)
 nume += check_simple2(89, 1, n.field_type, !GD.PHASE_ENTRY)
 nume += check_simple2(89, 2, n.field, "new10")
@@ -852,14 +852,14 @@ nume += check_simple2(89, 5, n.shift, 3)
 gd_delete, d, "new10"
 nume += check_ok2(90, 1, d)
 
-n = gd_get_entry(d, "new10")
+n = gd_entry(d, "new10")
 nume += check_error2(90, 2, d, !GD.E_BAD_CODE)
 
 ;  91: gd_malter_spec
 gd_alter_spec, d, "mnew10 PHASE in4 11", parent="data"
 nume += check_ok2(91, 1, d)
 
-n = gd_get_entry(d, "data/mnew10")
+n = gd_entry(d, "data/mnew10")
 nume += check_ok2(91, 2, d)
 nume += check_simple2(91, 1, n.field_type, !GD.PHASE_ENTRY)
 nume += check_simple2(91, 2, n.field, "data/mnew10")
@@ -871,7 +871,7 @@ nume += check_simple2(91, 5, n.shift, 11)
 gd_move, d, "new9", 1
 nume += check_ok2(92, 1, d)
 
-n = gd_get_entry(d, "new9")
+n = gd_entry(d, "new9")
 nume += check_ok2(92, 2, d)
 nume += check_simple2(92, 1, n.field_type, !GD.MULTIPLY_ENTRY)
 nume += check_simple2(92, 2, n.field, "new9")
@@ -881,10 +881,10 @@ nume += check_simple2(92, 3, n.fragment, 1)
 gd_rename, d, "new9", "newer"
 nume += check_ok2(93, 1, d)
 
-n = gd_get_entry(d, "new9")
+n = gd_entry(d, "new9")
 nume += check_error2(93, 2, d, !GD.E_BAD_CODE)
 
-n = gd_get_entry(d, "newer")
+n = gd_entry(d, "newer")
 nume += check_ok2(93, 3, d)
 nume += check_simple2(93, 1, n.field_type, !GD.MULTIPLY_ENTRY)
 nume += check_simple2(93, 2, n.field, "newer")
@@ -894,11 +894,11 @@ nume += check_simple2(93, 3, n.fragment, 1)
 gd_uninclude, d, 1
 nume += check_ok2(94, 1, d)
 
-n = gd_get_entry(d, "newer")
+n = gd_entry(d, "newer")
 nume += check_error2(94, 2, d, !GD.E_BAD_CODE)
 
-;  95: gd_get_frameoffset
-n = gd_get_frameoffset(d,fragment=0)
+;  95: gd_frameoffset
+n = gd_frameoffset(d,fragment=0)
 nume += check_ok(95,d)
 nume += check_simple(95,n,0)
 
@@ -906,12 +906,12 @@ nume += check_simple(95,n,0)
 gd_alter_frameoffset, d, 33, fragment=0
 nume += check_ok2(96,1,d)
 
-n = gd_get_frameoffset(d,fragment=0)
+n = gd_frameoffset(d,fragment=0)
 nume += check_ok(96,d)
 nume += check_simple(96,n,33)
 
-;  97: gd_get_native_type
-n = gd_get_native_type(d, "data")
+;  97: gd_native_type
+n = gd_native_type(d, "data")
 nume += check_ok(97, d)
 nume += check_simple(97,n,!GD.INT8)
 
@@ -920,18 +920,18 @@ n =  gd_validate(d, "new7")
 nume += check_error(99,d,!GD.E_BAD_CODE)
 nume += check_simple(99,n,-1)
 
-;  101: gd_get_framenum
-n = gd_get_framenum(d, "data", 33.3, field_start=6)
+;  101: gd_framenum
+n = gd_framenum(d, "data", 33.3, field_start=6)
 nume += check_ok(101,d)
 nume += check_float(101, n, 37.037500D)
 
-;  86: gd_get_eof
-n = gd_get_eof(d, "lincom")
+;  86: gd_eof
+n = gd_eof(d, "lincom")
 nume += check_ok(86,d)
 nume += check_simple(86,n,344)
 
-;  142: gd_get_bof
-n = gd_get_bof(d, "lincom")
+;  142: gd_bof
+n = gd_bof(d, "lincom")
 nume += check_ok(142,d)
 nume += check_simple(142,n,264)
 

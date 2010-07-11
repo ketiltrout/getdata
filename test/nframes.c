@@ -29,7 +29,7 @@ int main(void)
   close(fd);
 
   DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  off_t n = gd_get_nframes(D);
+  off_t n = gd_nframes(D);
   int error = gd_error(D);
   gd_close(D);
 

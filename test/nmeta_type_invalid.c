@@ -13,7 +13,7 @@ int main(void)
   const char* filedir = __TEST__ "dirfile";
 
   DIRFILE* D = gd_open(filedir, GD_RDONLY);
-  unsigned int n = gd_get_nmfields_by_type(D, "raw1", GD_STRING_ENTRY);
+  unsigned int n = gd_nmfields_by_type(D, "raw1", GD_STRING_ENTRY);
   int error = gd_error(D);
   gd_close(D);
 

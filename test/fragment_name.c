@@ -1,4 +1,4 @@
-/* Test gd_get_fragmentname */
+/* Test gd_fragmentname */
 #define _SVID_SOURCE
 #include "test.h"
 
@@ -33,8 +33,8 @@ int main(void)
   close(fd);
 
   DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  form0 = strdup(gd_get_fragmentname(D, 0));
-  form1 = strdup(gd_get_fragmentname(D, 1));
+  form0 = strdup(gd_fragmentname(D, 0));
+  form1 = strdup(gd_fragmentname(D, 1));
   gd_close(D);
 
   unlink(format1);

@@ -25,7 +25,7 @@ int main(void)
   close(fd);
 
   DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  unsigned int spf = gd_get_spf(D, "polynom");
+  unsigned int spf = gd_spf(D, "polynom");
   gd_close(D);
 
   unlink(format);

@@ -23,7 +23,7 @@ int main(void)
   close(fd);
 
   DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  unsigned int spf = gd_get_spf(D, "data");
+  unsigned int spf = gd_spf(D, "data");
   int error = gd_error(D);
   gd_close(D);
 

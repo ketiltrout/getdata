@@ -38,8 +38,8 @@ int main(void)
   DIRFILE* D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
   int ret = gd_uninclude(D, 1, 0);
   int error = gd_error(D);
-  unsigned int nfields = gd_get_nfields(D);
-  unsigned int nfragments = gd_get_nfragments(D);
+  unsigned int nfields = gd_nfields(D);
+  unsigned int nfragments = gd_nfragments(D);
   gd_close(D);
 
   int unlink_format2 = unlink(format2);

@@ -309,20 +309,20 @@ int main (int argc, char **argv)
   }
 
   if (nf == 0) {
-    nf = gd_get_nframes(dirfile) - ff;
+    nf = gd_nframes(dirfile) - ff;
     if (gd_error(dirfile)) {
-      fprintf(stderr, "GetData error: %s\n", gd_error_string(dirfile, char_buffer,
-            BUF_LEN));
+      fprintf(stderr, "GetData error: %s\n", gd_error_string(dirfile,
+            char_buffer, BUF_LEN));
       gd_close(dirfile);
       exit(3);
     }
   }
 
   if (ff == -1) {
-    ff = gd_get_nframes(dirfile) - nf;
+    ff = gd_nframes(dirfile) - nf;
     if (gd_error(dirfile)) {
-      fprintf(stderr, "GetData error: %s\n", gd_error_string(dirfile, char_buffer,
-            BUF_LEN));
+      fprintf(stderr, "GetData error: %s\n", gd_error_string(dirfile,
+            char_buffer, BUF_LEN));
       gd_close(dirfile);
       exit(3);
     }
@@ -330,10 +330,10 @@ int main (int argc, char **argv)
 
   /* Get spfs and sanity checks for all fields */
   for (int i = 0; i < numfields; i++) {
-    fields[i].spf = gd_get_spf(dirfile, fields[i].name);
+    fields[i].spf = gd_spf(dirfile, fields[i].name);
     if (gd_error(dirfile)) {
-      fprintf(stderr, "GetData error: %s\n", gd_error_string(dirfile, char_buffer,
-            BUF_LEN));
+      fprintf(stderr, "GetData error: %s\n", gd_error_string(dirfile,
+            char_buffer, BUF_LEN));
       gd_close(dirfile);
       exit(3);
     }
@@ -395,8 +395,8 @@ int main (int argc, char **argv)
     }
 
     if (gd_error(dirfile)) {
-      fprintf(stderr, "GetData error: %s\n", gd_error_string(dirfile, char_buffer,
-            BUF_LEN));
+      fprintf(stderr, "GetData error: %s\n", gd_error_string(dirfile,
+            char_buffer, BUF_LEN));
       gd_close(dirfile);
       exit(5);
     }

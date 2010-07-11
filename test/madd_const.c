@@ -25,7 +25,7 @@ int main(void)
   int error = gd_error(D);
 
   /* check */
-  gd_get_entry(D, "new/data", &e);
+  gd_entry(D, "new/data", &e);
   int ge_error = gd_error(D);
   CHECKI(ge_error, 0);
   if (!r) {

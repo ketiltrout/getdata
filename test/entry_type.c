@@ -24,7 +24,7 @@ int main(void)
 
   DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
 
-  gd_entype_t n = gd_get_entry_type(D, "data");
+  gd_entype_t n = gd_entry_type(D, "data");
   int error = gd_error(D);
 
   gd_close(D);

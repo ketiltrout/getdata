@@ -1,4 +1,4 @@
-/* Test gd_get_fragmentname out-of-range handling */
+/* Test gd_fragmentname out-of-range handling */
 #include "test.h"
 
 #include <stdlib.h>
@@ -32,8 +32,8 @@ int main(void)
   close(fd);
 
   DIRFILE* D = gd_open(filedir, GD_RDONLY);
-  form0 = gd_get_fragmentname(D, -3000);
-  form1 = gd_get_fragmentname(D, 1000);
+  form0 = gd_fragmentname(D, -3000);
+  form1 = gd_fragmentname(D, 1000);
   int error = gd_error(D);
   gd_close(D);
 

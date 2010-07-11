@@ -35,8 +35,8 @@ int main(void)
   int error = gd_error(D);
 
   /* check */
-  int n = gd_get_nfields(D);
-  gd_get_entry(D, "data/data", &e);
+  int n = gd_nfields(D);
+  gd_entry(D, "data/data", &e);
   int ge_error = gd_error(D);
   CHECKI(ge_error, 0);
   if (!r) {

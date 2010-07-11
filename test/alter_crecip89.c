@@ -40,7 +40,7 @@ int main(void)
   DIRFILE* D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
   int ret = gd_alter_crecip(D, "div", "phase", div);
   int error = gd_error(D);
-  int n = gd_get_entry(D, "div", &E);
+  int n = gd_entry(D, "div", &E);
 
   gd_close(D);
 

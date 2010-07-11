@@ -23,7 +23,7 @@ int main(void)
   gd_add_spec(D, "data RAW UINT8 1", 0);
   int ret = gd_discard(D);
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  int n = gd_get_nfields(D);
+  int n = gd_nfields(D);
   gd_close(D);
 
   unlink(data);

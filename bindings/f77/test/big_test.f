@@ -2637,8 +2637,8 @@ C     81: GDPFRG check
         WRITE(*, 2002) 81, n
       ENDIF
 
-C     82: GDPROT check
-      CALL GDPROT(d, GDPR_D, 1)
+C     82: GDAPRT check
+      CALL GDAPRT(d, GDPR_D, 1)
       CALL GDEROR(e, d)
 
       IF (e .NE. GD_EOK) THEN

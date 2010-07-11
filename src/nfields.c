@@ -20,7 +20,7 @@
  */
 #include "internal.h"
 
-unsigned int gd_get_nfields(DIRFILE* D)
+unsigned int gd_nfields(DIRFILE* D)
 {
   dtrace("%p", D);
 
@@ -36,7 +36,7 @@ unsigned int gd_get_nfields(DIRFILE* D)
   return D->n_entries - D->n_meta;
 }
 
-unsigned int gd_get_nvectors(DIRFILE* D)
+unsigned int gd_nvectors(DIRFILE* D)
 {
   dtrace("%p", D);
 
@@ -52,7 +52,7 @@ unsigned int gd_get_nvectors(DIRFILE* D)
   return D->n_entries - D->n_meta - D->n_string - D->n_const;
 }
 
-unsigned int gd_get_nfields_by_type(DIRFILE* D, gd_entype_t type)
+unsigned int gd_nfields_by_type(DIRFILE* D, gd_entype_t type)
 {
   unsigned int i, r = 0;
 

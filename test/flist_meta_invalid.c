@@ -14,7 +14,7 @@ int main(void)
   int r = 0;
 
   DIRFILE* D = gd_open(filedir, GD_RDONLY);
-  const char** fl = gd_get_mfield_list(D, "parent");
+  const char** fl = gd_mfield_list(D, "parent");
   int error = gd_error(D);
   gd_close(D);
 

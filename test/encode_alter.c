@@ -45,7 +45,7 @@ int main(void)
   DIRFILE* D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
   int ret = gd_alter_encoding(D, GD_TEXT_ENCODED, 0, 0);
   int error = gd_error(D);
-  off_t n = gd_get_nframes(D);
+  off_t n = gd_nframes(D);
 
   gd_close(D);
 

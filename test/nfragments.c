@@ -1,4 +1,4 @@
-/* Test gd_get_nfragments */
+/* Test gd_nfragments */
 #include "test.h"
 
 #include <stdlib.h>
@@ -29,7 +29,7 @@ int main(void)
   close(fd);
 
   DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  int nfragments = gd_get_nfragments(D);
+  int nfragments = gd_nfragments(D);
   gd_close(D);
 
   unlink(format1);

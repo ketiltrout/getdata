@@ -23,11 +23,11 @@ int main(void)
   unsigned char val;
 
   /* check */
-  int n = gd_get_nfields(D);
+  int n = gd_nfields(D);
 
   CHECKI(n, 1);
 
-  gd_get_entry(D, "INDEX/meta", &e);
+  gd_entry(D, "INDEX/meta", &e);
   if (gd_error(D))
     r = 1;
   else {

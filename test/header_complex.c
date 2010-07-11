@@ -28,7 +28,7 @@ int main(void)
   close(fd);
 
   DIRFILE* D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
-  gd_get_entry(D, "lincom", &E);
+  gd_entry(D, "lincom", &E);
 
   int error = gd_error(D);
   CHECKI(error, 0);
@@ -50,7 +50,7 @@ int main(void)
   int error2 = gd_error(D);
   CHECKI(error2, 0);
 
-  gd_get_entry(D, "polynom", &E);
+  gd_entry(D, "polynom", &E);
 
   int error3 = gd_error(D);
   CHECKI(error3, 0);

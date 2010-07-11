@@ -14,7 +14,7 @@ int main(void)
   int r = 0;
 
   DIRFILE* D = gd_open(filedir, GD_RDONLY);
-  unsigned int n = gd_get_nvectors(D);
+  unsigned int n = gd_nvectors(D);
   int error = gd_error(D);
   gd_close(D);
 

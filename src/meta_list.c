@@ -28,7 +28,7 @@
 /* a zero length list */
 static const char* zero_list[1] = { NULL };
 
-const void* gd_get_mconstants(DIRFILE* D, const char* parent,
+const void* gd_mconstants(DIRFILE* D, const char* parent,
     gd_type_t return_type)
 {
   dtrace("%p, \"%s\", 0x%x", D, parent, return_type);
@@ -82,7 +82,7 @@ const void* gd_get_mconstants(DIRFILE* D, const char* parent,
   return e->const_value_list;
 }
 
-const char** gd_get_mstrings(DIRFILE* D, const char* parent)
+const char** gd_mstrings(DIRFILE* D, const char* parent)
 {
   dtrace("%p, \"%s\"", D, parent);
 
@@ -133,7 +133,7 @@ const char** gd_get_mstrings(DIRFILE* D, const char* parent)
   return e->string_value_list;
 }
 
-const char** gd_get_mfield_list_by_type(DIRFILE* D, const char* parent,
+const char** gd_mfield_list_by_type(DIRFILE* D, const char* parent,
     gd_entype_t type)
 {
   dtrace("%p, \"%s\", %x", D, parent, type);
@@ -161,7 +161,7 @@ const char** gd_get_mfield_list_by_type(DIRFILE* D, const char* parent,
   struct _gd_private_entry* e = P->e;
   size_t offs = strlen(P->field) + 1;
 
-  n = gd_get_nmfields_by_type(D, parent, type);
+  n = gd_nmfields_by_type(D, parent, type);
 
   if (D->error) {
     dreturn("%p", NULL);
@@ -207,7 +207,7 @@ const char** gd_get_mfield_list_by_type(DIRFILE* D, const char* parent,
   return (const char**)e->type_list[index];
 }
 
-const char** gd_get_mvector_list(DIRFILE* D, const char* parent)
+const char** gd_mvector_list(DIRFILE* D, const char* parent)
 {
   dtrace("%p, \"%s\"", D, parent);
 
@@ -261,7 +261,7 @@ const char** gd_get_mvector_list(DIRFILE* D, const char* parent)
   return e->vector_list;
 }
 
-const char** gd_get_mfield_list(DIRFILE* D, const char* parent)
+const char** gd_mfield_list(DIRFILE* D, const char* parent)
 {
   dtrace("%p, \"%s\"", D, parent);
 

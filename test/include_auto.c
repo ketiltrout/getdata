@@ -35,7 +35,7 @@ int main(void)
   const char* ptr = gd_reference(D, NULL);
   const char* reference = strdup(ptr);
   int error2 = gd_error(D);
-  unsigned int spf = gd_get_spf(D, "data");
+  unsigned int spf = gd_spf(D, "data");
   gd_close(D);
 
   unlink(format1);

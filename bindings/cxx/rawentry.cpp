@@ -82,5 +82,5 @@ int RawEntry::SetType(DataType type, int recode)
 
 const char* RawEntry::FileName()
 {
-  return gd_get_raw_filename(D->D, E.field);
+  return gd_raw_filename(D->D, E.field);
 }

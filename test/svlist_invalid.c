@@ -14,7 +14,7 @@ int main(void)
   int r = 0;
 
   DIRFILE* D = gd_open(filedir, GD_RDONLY);
-  const char** fl = gd_get_strings(D);
+  const char** fl = gd_strings(D);
   int error = gd_error(D);
   gd_close(D);
 

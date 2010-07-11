@@ -28,7 +28,7 @@ int main(void)
   close(fd);
 
   DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  off_t n = gd_get_eof(D, "data");
+  off_t n = gd_eof(D, "data");
   int error = gd_error(D);
   gd_close(D);
 

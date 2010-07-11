@@ -1651,7 +1651,7 @@ static PyGetSetDef gdpy_entry_getset[] = {
       "of this data.\n",
     NULL },
   { "fragment", (getter)gdpy_entry_getfragment, (setter)gdpy_entry_setfragment,
-    "If this entry object was created by a call to dirfile.get_entry,\n"
+    "If this entry object was created by a call to dirfile.entry,\n"
       "this is index number of the format file fragment which defines the\n"
       "field described by this entry object.  Otherwise, it is the index of\n"
       "the fragment to which this entry will be added, if this entry is\n"

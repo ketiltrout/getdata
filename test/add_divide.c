@@ -21,7 +21,7 @@ int main(void)
   int error = gd_error(D);
 
   /* check */
-  gd_get_entry(D, "new", &e);
+  gd_entry(D, "new", &e);
   if (gd_error(D))
     r = 1;
   else {

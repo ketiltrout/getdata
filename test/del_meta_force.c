@@ -33,7 +33,7 @@ int main(void)
   DIRFILE* D = gd_open(filedir, GD_RDWR);
   int ret = gd_delete(D, "data", GD_DEL_META);
   int error = gd_error(D);
-  int nf = gd_get_nfields(D);
+  int nf = gd_nfields(D);
   gd_close(D);
 
   unlink(format);

@@ -25,14 +25,14 @@ int main(void)
   close(fd);
 
   DIRFILE* D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
-  gd_get_entry(D, "data", &E);
+  gd_entry(D, "data", &E);
   free(E.scalar[0]);
   E.scalar[0] = NULL;
   int ret = gd_alter_entry(D, "data", &E, 0);
   int error = gd_error(D);
 
   gd_free_entry_strings(&E);
-  int n = gd_get_entry(D, "data", &E);
+  int n = gd_entry(D, "data", &E);
 
   gd_close(D);
 

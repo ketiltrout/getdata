@@ -37,9 +37,9 @@ int main(void)
   close(fd);
 
   DIRFILE* D = gd_open(filedir, GD_RDONLY);
-  off_t n = gd_get_eof(D, "lincom");
+  off_t n = gd_eof(D, "lincom");
   int error = gd_error(D);
-  off_t m = gd_get_eof(D, "lincom");
+  off_t m = gd_eof(D, "lincom");
   int error2 = gd_error(D);
   gd_close(D);
 

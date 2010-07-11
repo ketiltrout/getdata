@@ -20,8 +20,8 @@ int main(void)
   int error = gd_error(D);
 
   /* check */
-  int n = gd_get_nfields(D);
-  int m = gd_get_nmfields(D, "INDEX");
+  int n = gd_nfields(D);
+  int m = gd_nmfields(D, "INDEX");
 
   gd_close(D);
 

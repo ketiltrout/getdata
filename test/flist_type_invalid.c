@@ -14,7 +14,7 @@ int main(void)
   int r = 0;
 
   DIRFILE* D = gd_open(filedir, GD_RDONLY);
-  const char** fl = gd_get_field_list_by_type(D, GD_STRING_ENTRY);
+  const char** fl = gd_field_list_by_type(D, GD_STRING_ENTRY);
   int error = gd_error(D);
   gd_close(D);
 

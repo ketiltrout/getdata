@@ -43,7 +43,7 @@ int main(void)
 
   int ret = gd_move(D, "data", 1, 1);
   int error = gd_error(D);
-  int ge_ret =  gd_get_entry(D, "data", &E);
+  int ge_ret =  gd_entry(D, "data", &E);
   gd_close(D);
 
   fd = open(data, O_RDONLY | O_BINARY);

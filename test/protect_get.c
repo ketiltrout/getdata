@@ -32,7 +32,7 @@ int main(void)
   close(fd);
 
   DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  int p = gd_get_protection(D, 0);
+  int p = gd_protection(D, 0);
   int error = gd_error(D);
 
   gd_close(D);

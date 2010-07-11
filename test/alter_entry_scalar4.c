@@ -25,7 +25,7 @@ int main(void)
   close(fd);
 
   DIRFILE* D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
-  gd_get_entry(D, "data", &E);
+  gd_entry(D, "data", &E);
   free(E.scalar[1]);
   E.scalar[1] = NULL;
   E.numbits = 11;
@@ -33,7 +33,7 @@ int main(void)
   int error = gd_error(D);
 
   gd_free_entry_strings(&E);
-  int n = gd_get_entry(D, "data", &E);
+  int n = gd_entry(D, "data", &E);
 
   gd_close(D);
 

@@ -161,7 +161,7 @@ int gd_alter_endianness(DIRFILE* D, unsigned long byte_sex, int fragment, int mo
   return (D->error) ? -1 : 0;
 }
 
-unsigned long gd_get_endianness(DIRFILE* D, int fragment)
+unsigned long gd_endianness(DIRFILE* D, int fragment)
 {
   dtrace("%p, %i", D, fragment);
 

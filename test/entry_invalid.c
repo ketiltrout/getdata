@@ -15,7 +15,7 @@ int main(void)
   gd_entry_t E;
   int r = 0;
 
-  int n = gd_get_entry(D, "data", &E);
+  int n = gd_entry(D, "data", &E);
   int error = gd_error(D);
   gd_close(D);
 

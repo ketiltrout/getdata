@@ -50,7 +50,7 @@ int main(void)
   DIRFILE* D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
   int ret = gd_alter_linterp(D, "lut", NULL, "table1", 0);
   int error = gd_error(D);
-  gd_get_entry(D, "lut", &e);
+  gd_entry(D, "lut", &e);
   int error2 = gd_error(D);
   int n = gd_getdata(D, "lut", 5, 0, 1, 0, GD_INT32, c);
 

@@ -396,17 +396,17 @@ static PyObject* gdpy_dirfile_getconstants(struct gdpy_dirfile_t* self,
   gd_type_t return_type;
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
-        "i:pygetdata.dirfile.get_constants", keywords, &return_type))
+        "i:pygetdata.dirfile.constants", keywords, &return_type))
   {
     dreturn("%p", NULL);
     return NULL;
   }
 
-  fields = gd_get_field_list_by_type(self->D, GD_CONST_ENTRY);
+  fields = gd_field_list_by_type(self->D, GD_CONST_ENTRY);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
-  values = gd_get_constants(self->D, return_type);
+  values = gd_constants(self->D, return_type);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -450,7 +450,7 @@ static PyObject* gdpy_dirfile_getdata(struct gdpy_dirfile_t* self,
 
   /* we need the SPF to know how many samples we have to allocate */
   if (num_frames) {
-    spf = gd_get_spf(self->D, field_code);
+    spf = gd_spf(self->D, field_code);
 
     PYGD_CHECK_ERROR(self->D, NULL);
   }
@@ -504,7 +504,7 @@ static PyObject* gdpy_dirfile_getentry(struct gdpy_dirfile_t* self,
   char* keywords[] = {"field_code", NULL};
   const char* field_code;
 
-  if (!PyArg_ParseTupleAndKeywords(args, keys, "s:pygetdata.dirfile.get_entry",
+  if (!PyArg_ParseTupleAndKeywords(args, keys, "s:pygetdata.dirfile.entry",
         keywords, &field_code))
   {
     dreturn("%p", NULL);
@@ -519,7 +519,7 @@ static PyObject* gdpy_dirfile_getentry(struct gdpy_dirfile_t* self,
     return NULL;
   }
 
-  gd_get_entry(self->D, field_code, E);
+  gd_entry(self->D, field_code, E);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -557,7 +557,7 @@ static PyObject* gdpy_dirfile_getfragment(struct gdpy_dirfile_t* self,
   char* keywords[] = {"fragment_index", NULL};
   int fragment_index;
 
-  if (!PyArg_ParseTupleAndKeywords(args, keys, "i:pygetdata.dirfile.get_entry",
+  if (!PyArg_ParseTupleAndKeywords(args, keys, "i:pygetdata.dirfile.fragment",
         keywords, &fragment_index))
   {
     dreturn("%p", NULL);
@@ -590,13 +590,13 @@ static PyObject* gdpy_dirfile_getfragmentindex(struct gdpy_dirfile_t* self,
   const char* field_code;
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
-        "s:pygetdata.dirfile.get_fragment_index", keywords, &field_code))
+        "s:pygetdata.dirfile.fragment_index", keywords, &field_code))
   {
     dreturn("%p", NULL);
     return NULL;
   }
 
-  int index = gd_get_fragment_index(self->D, field_code);
+  int index = gd_fragment_index(self->D, field_code);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -626,7 +626,7 @@ static PyObject* gdpy_dirfile_getvectorlist(struct gdpy_dirfile_t* self)
 
   int i;
 
-  const char **vectors = gd_get_vector_list(self->D);
+  const char **vectors = gd_vector_list(self->D);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -656,9 +656,9 @@ static PyObject* gdpy_dirfile_getfieldlist(struct gdpy_dirfile_t* self,
   }
 
   if (type == GD_NO_ENTRY)
-    fields = gd_get_field_list(self->D);
+    fields = gd_field_list(self->D);
   else
-    fields = gd_get_field_list_by_type(self->D, (gd_type_t)type);
+    fields = gd_field_list_by_type(self->D, (gd_type_t)type);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -818,17 +818,17 @@ static PyObject* gdpy_dirfile_getmconstants(struct gdpy_dirfile_t* self,
   gd_type_t return_type;
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
-        "si:pygetdata.dirfile.get_mconstants", keywords, &parent, &return_type))
+        "si:pygetdata.dirfile.mconstants", keywords, &parent, &return_type))
   {
     dreturn("%p", NULL);
     return NULL;
   }
 
-  fields = gd_get_mfield_list_by_type(self->D, parent, GD_CONST_ENTRY);
+  fields = gd_mfield_list_by_type(self->D, parent, GD_CONST_ENTRY);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
-  values = gd_get_mconstants(self->D, parent, return_type);
+  values = gd_mconstants(self->D, parent, return_type);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -875,9 +875,9 @@ static PyObject* gdpy_dirfile_getmfieldlist(struct gdpy_dirfile_t* self,
   }
 
   if (type == GD_NO_ENTRY)
-    fields = gd_get_mfield_list(self->D, parent);
+    fields = gd_mfield_list(self->D, parent);
   else
-    fields = gd_get_mfield_list_by_type(self->D, parent, (gd_type_t)type);
+    fields = gd_mfield_list_by_type(self->D, parent, (gd_type_t)type);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -917,17 +917,17 @@ static PyObject* gdpy_dirfile_getmstrings(struct gdpy_dirfile_t* self,
   const char* parent = NULL;
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
-        "s:pygetdata.dirfile.get_mconstants", keywords, &parent))
+        "s:pygetdata.dirfile.mconstants", keywords, &parent))
   {
     dreturn("%p", NULL);
     return NULL;
   }
 
-  fields = gd_get_mfield_list_by_type(self->D, parent, GD_STRING_ENTRY);
+  fields = gd_mfield_list_by_type(self->D, parent, GD_STRING_ENTRY);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
-  values = gd_get_mstrings(self->D, parent);
+  values = gd_mstrings(self->D, parent);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -950,13 +950,13 @@ static PyObject* gdpy_dirfile_getmvectorlist(struct gdpy_dirfile_t* self,
   char* keywords[] = {"parent", NULL};
   const char* parent = NULL;
   if (!PyArg_ParseTupleAndKeywords(args, keys,
-        "s:pygetdata.dirfile.get_mvector_list", keywords, &parent))
+        "s:pygetdata.dirfile.mvector_list", keywords, &parent))
   {
     dreturn("%p", NULL);
     return NULL;
   }
 
-  const char **fields = gd_get_mvector_list(self->D, parent);
+  const char **fields = gd_mvector_list(self->D, parent);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -979,13 +979,13 @@ static PyObject* gdpy_dirfile_getrawfilename(struct gdpy_dirfile_t* self,
   const char* filename;
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
-        "s:pygetdata.dirfile.get_raw_filename", keywords, &field_code))
+        "s:pygetdata.dirfile.raw_filename", keywords, &field_code))
   {
     dreturn ("%p", NULL);
     return NULL;
   }
 
-  filename = gd_get_raw_filename(self->D, field_code);
+  filename = gd_raw_filename(self->D, field_code);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -1003,13 +1003,13 @@ static PyObject* gdpy_dirfile_getnativetype(struct gdpy_dirfile_t* self,
   const char* field_code;
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
-        "s:pygetdata.dirfile.get_native_type", keywords, &field_code))
+        "s:pygetdata.dirfile.native_type", keywords, &field_code))
   {
     dreturn ("%p", NULL);
     return NULL;
   }
 
-  gd_type_t ntype = gd_get_native_type(self->D, field_code);
+  gd_type_t ntype = gd_native_type(self->D, field_code);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -1028,13 +1028,13 @@ static PyObject* gdpy_dirfile_getnativetypename(struct gdpy_dirfile_t* self,
   char tbuffer[11];
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
-        "s:pygetdata.dirfile.get_native_type_name", keywords, &field_code))
+        "s:pygetdata.dirfile.native_type_name", keywords, &field_code))
   {
     dreturn ("%p", NULL);
     return NULL;
   }
 
-  gd_type_t t = gd_get_native_type(self->D, field_code);
+  gd_type_t t = gd_native_type(self->D, field_code);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -1064,9 +1064,9 @@ static PyObject* gdpy_dirfile_getnfields(struct gdpy_dirfile_t* self,
   }
 
   if (type == GD_NO_ENTRY)
-    nfields = gd_get_nfields(self->D);
+    nfields = gd_nfields(self->D);
   else
-    nfields = gd_get_nfields_by_type(self->D, (gd_entype_t)type);
+    nfields = gd_nfields_by_type(self->D, (gd_entype_t)type);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -1081,7 +1081,7 @@ static PyObject* gdpy_dirfile_getnfragments(struct gdpy_dirfile_t* self,
 {
   dtrace("%p, %p", self, closure);
 
-  long nfragments = gd_get_nfragments(self->D);
+  long nfragments = gd_nfragments(self->D);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -1096,7 +1096,7 @@ static PyObject* gdpy_dirfile_getnframes(struct gdpy_dirfile_t* self,
 {
   dtrace("%p, %p", self, closure);
 
-  off_t nframes = gd_get_nframes(self->D);
+  off_t nframes = gd_nframes(self->D);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -1124,9 +1124,9 @@ static PyObject* gdpy_dirfile_getnmfields(struct gdpy_dirfile_t* self,
   }
 
   if (type == GD_NO_ENTRY)
-    nmfields = gd_get_nmfields(self->D, parent);
+    nmfields = gd_nmfields(self->D, parent);
   else
-    nmfields = gd_get_nmfields_by_type(self->D, parent, (gd_type_t)type);
+    nmfields = gd_nmfields_by_type(self->D, parent, (gd_type_t)type);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -1151,7 +1151,7 @@ static PyObject* gdpy_dirfile_getnmvectors(struct gdpy_dirfile_t* self,
     return NULL;
   }
 
-  unsigned int nmvectors = gd_get_nmvectors(self->D, parent);
+  unsigned int nmvectors = gd_nmvectors(self->D, parent);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -1170,13 +1170,13 @@ static PyObject* gdpy_dirfile_getbof(struct gdpy_dirfile_t* self,
   const char* field_code;
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
-        "s:pygetdata.dirfile.get_bof", keywords, &field_code))
+        "s:pygetdata.dirfile.bof", keywords, &field_code))
   {
     dreturn("%p", NULL);
     return NULL;
   }
 
-  off_t bof = gd_get_bof(self->D, field_code);
+  off_t bof = gd_bof(self->D, field_code);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -1195,13 +1195,13 @@ static PyObject* gdpy_dirfile_geteof(struct gdpy_dirfile_t* self,
   const char* field_code;
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
-        "s:pygetdata.dirfile.get_eof", keywords, &field_code))
+        "s:pygetdata.dirfile.eof", keywords, &field_code))
   {
     dreturn("%p", NULL);
     return NULL;
   }
 
-  off_t eof = gd_get_eof(self->D, field_code);
+  off_t eof = gd_eof(self->D, field_code);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -1215,7 +1215,7 @@ static PyObject* gdpy_dirfile_getnvectors(struct gdpy_dirfile_t* self)
 {
   dtrace("%p", self);
 
-  unsigned int nvectors = gd_get_nvectors(self->D);
+  unsigned int nvectors = gd_nvectors(self->D);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -1300,11 +1300,11 @@ static PyObject* gdpy_dirfile_getstrings(struct gdpy_dirfile_t* self)
   const char** fields;
   const char** values;
 
-  fields = gd_get_field_list_by_type(self->D, GD_STRING_ENTRY);
+  fields = gd_field_list_by_type(self->D, GD_STRING_ENTRY);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
-  values = gd_get_strings(self->D);
+  values = gd_strings(self->D);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -1505,13 +1505,13 @@ static PyObject* gdpy_dirfile_getspf(struct gdpy_dirfile_t* self,
   char* keywords[] = { "field_code", NULL };
   const char* field_code;
 
-  if (!PyArg_ParseTupleAndKeywords(args, keys, "s:pygetdata.dirfile.get_spf",
+  if (!PyArg_ParseTupleAndKeywords(args, keys, "s:pygetdata.dirfile.spf",
         keywords, &field_code)) {
     dreturn ("%p", NULL);
     return NULL;
   }
 
-  unsigned int spf = gd_get_spf(self->D, field_code);
+  unsigned int spf = gd_spf(self->D, field_code);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -1555,14 +1555,14 @@ static PyObject* gdpy_dirfile_getframenum(struct gdpy_dirfile_t* self,
   off_t frame_end = 0;
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
-        "sd|KK:pygetdata.dirfile.get_framenum", keywords, &field_code, &value,
+        "sd|KK:pygetdata.dirfile.framenum", keywords, &field_code, &value,
         &frame_start, &frame_end))
   {
     dreturn ("%p", NULL);
     return NULL;
   }
 
-  double frame = gd_get_framenum_subset(self->D, field_code, value, frame_start,
+  double frame = gd_framenum_subset(self->D, field_code, value, frame_start,
       frame_end);
 
   PYGD_CHECK_ERROR(self->D, NULL);
@@ -1704,10 +1704,10 @@ static PyGetSetDef gdpy_dirfile_getset[] = {
     NULL },
   { "nfragments", (getter)gdpy_dirfile_getnfragments, NULL,
     "The number of format file fragments in the dirfile.  See\n"
-      "gd_get_nfragments(3)",
+      "gd_nfragments(3)",
     NULL },
   { "nframes", (getter)gdpy_dirfile_getnframes, NULL,
-    "The number of frames in the dirfile.  See gd_get_nframes(3).", NULL },
+    "The number of frames in the dirfile.  See gd_nframes(3).", NULL },
   { "reference", (getter)gdpy_dirfile_getreference,
     (setter)gdpy_dirfile_setreference,
     "The reference field for the dirfile, which may be modified.  See\n"
@@ -1779,11 +1779,11 @@ static PyMethodDef gdpy_dirfile_methods[] = {
       "However, if field_code is omitted, all data *and* metadata will be\n"
       "written to disk.  See gd_flush(3)."
   },
-  {"get_bof", (PyCFunction)gdpy_dirfile_getbof, METH_VARARGS | METH_KEYWORDS,
-    "get_bof(field_code)\n\n"
+  {"bof", (PyCFunction)gdpy_dirfile_getbof, METH_VARARGS | METH_KEYWORDS,
+    "bof(field_code)\n\n"
       /* -----------------------------------------------------------------| */
       "Retrieve the sample number corresponding to the beginning-of-field\n"
-      "marker for the field specified by 'field_code'.  See gd_get_bof(3)."
+      "marker for the field specified by 'field_code'.  See gd_bof(3)."
   },
   {"get_constant", (PyCFunction)gdpy_dirfile_getconstant,
     METH_VARARGS | METH_KEYWORDS,
@@ -1795,16 +1795,16 @@ static PyMethodDef gdpy_dirfile_methods[] = {
       "pygetdata.COMPLEX, although any GetData data type code is permitted.\n"
       "See gd_get_constant(3)."
   },
-  {"get_constants", (PyCFunction)gdpy_dirfile_getconstants,
+  {"constants", (PyCFunction)gdpy_dirfile_getconstants,
     METH_VARARGS | METH_KEYWORDS,
-    "get_constants(return_type)\n\n"
+    "constants(return_type)\n\n"
       "Retrieve all CONST fields, and their values.  A list of tuples\n"
       "will be returned, each tuple containing the name and value of the\n"
       "field.  The 'return_type' parameter indicates the desired type of\n"
       "the values returned, and should be (typically) one of:\n"
       "pygetdata.INT, pygetdata.LONG, pygetdata.ULONG, pygetdata.FLOAT, or\n"
       "pygetdata.COMPLEX, although any GetData data type code is permitted.\n"
-      "See gd_get_constants(3), but note that this method returns both names\n"
+      "See gd_constants(3), but note that this method returns both names\n"
       "and values, unlike the C API counterpart."
   },
   {"getdata", (PyCFunction)gdpy_dirfile_getdata, METH_VARARGS | METH_KEYWORDS,
@@ -1828,150 +1828,150 @@ static PyMethodDef gdpy_dirfile_methods[] = {
       "Fewer samples than requested may be returned without causing an\n"
       "error.  See gd_getdata(3)."
   },
-  { "get_entry", (PyCFunction)gdpy_dirfile_getentry,
+  { "entry", (PyCFunction)gdpy_dirfile_getentry,
     METH_VARARGS | METH_KEYWORDS,
-    "get_entry(field_code)\n\n"
+    "entry(field_code)\n\n"
       "Retrieve the field metadata for the specified 'field_code'.  A\n"
-      "pygetdata.entry object is returned.  See gd_get_entry(3).\n"
+      "pygetdata.entry object is returned.  See gd_entry(3).\n"
   },
-  {"get_eof", (PyCFunction)gdpy_dirfile_geteof, METH_VARARGS | METH_KEYWORDS,
-    "get_eof(field_code)\n\n"
+  {"eof", (PyCFunction)gdpy_dirfile_geteof, METH_VARARGS | METH_KEYWORDS,
+    "eof(field_code)\n\n"
       "Retrieve the sample number corresponding to the end-of-field marker\n"
       "(ie. the number of samples in the field) for the field specified by\n"
-      "'field_code'.  See gd_get_eof(3)."
+      "'field_code'.  See gd_eof(3)."
   },
-  { "get_field_list", (PyCFunction)gdpy_dirfile_getfieldlist,
+  { "field_list", (PyCFunction)gdpy_dirfile_getfieldlist,
     METH_VARARGS | METH_KEYWORDS,
-    "get_field_list([entry_type])\n\n"
+    "field_list([entry_type])\n\n"
       "Return a list of field names.  If 'entry_type' is given, it should\n"
       "be one of the pygetdata.*_ENTRY symbols.  If 'entry_type' is not\n"
       "given, or is pygetdata.NO_ENTRY, all fields in the database are\n"
       "returned.  Otherwise, only the fields of the given type are\n"
-      "returned.  See gd_get_field_list(3) and gd_get_field_list_by_type(3)."
+      "returned.  See gd_field_list(3) and gd_field_list_by_type(3)."
   },
-  { "get_fragment", (PyCFunction)gdpy_dirfile_getfragment,
+  { "fragment", (PyCFunction)gdpy_dirfile_getfragment,
     METH_VARARGS | METH_KEYWORDS,
-    "get_fragment(fragment_index)\n\n"
+    "fragment(fragment_index)\n\n"
       "Retrieve the metadata associated with the format file fragment\n"
       "indexed by 'fragment_index'.  A pygetdata.fragment object is\n"
       "returned."
   },
-  {"get_fragment_index", (PyCFunction)gdpy_dirfile_getfragmentindex,
+  {"fragment_index", (PyCFunction)gdpy_dirfile_getfragmentindex,
     METH_VARARGS | METH_KEYWORDS,
-    "get_fragment_index(field_code)\n\n"
+    "fragment_index(field_code)\n\n"
       "Return the fragment index of the format file fragment which defines\n"
-      "the field specified by 'field_code'.  See gd_get_fragment_index(3)."
+      "the field specified by 'field_code'.  See gd_fragment_index(3)."
   },
-  {"get_framenum", (PyCFunction)gdpy_dirfile_getframenum,
+  {"framenum", (PyCFunction)gdpy_dirfile_getframenum,
     METH_VARARGS | METH_KEYWORDS,
-    "get_framenum(field_code, value [, start, end])\n\n"
+    "framenum(field_code, value [, start, end])\n\n"
       "Perform a reverse look-up on the field specified by 'field_code'\n"
       "(which must be monotonic) and returns the fractional frame number\n"
       "where the field equals 'value'.  The search is performed between\n"
       "the frame limits 'start' and 'end'.  If 'start' is omitted, the\n"
       "search begins at the first sample.  If 'end' is omitted, the search\n"
-      "ends at the last sample.  See gd_get_framenum_subset(3)."
+      "ends at the last sample.  See gd_framenum_subset(3)."
   },
-  {"get_mconstants", (PyCFunction)gdpy_dirfile_getmconstants,
+  {"mconstants", (PyCFunction)gdpy_dirfile_getmconstants,
     METH_VARARGS | METH_KEYWORDS,
-    "get_mconstants(parent, return_type)\n\n"
+    "mconstants(parent, return_type)\n\n"
       "Retrieve all CONST metafields defined for the parent field 'parent',\n"
       "and their values.  A list of tuples will be returned, each tuple\n"
       "containing the name and value of a field.  The 'return_type'\n"
       "parameter indicates the desired type of the values returned, and\n"
       "should be (typically) one of: pygetdata.INT, pygetdata.LONG,\n"
       "pygetdata.ULONG, pygetdata.FLOAT, or pygetdata.COMPLEX, although any\n"
-      "GetData data type code is permitted.  See gd_get_mconstants(3), but\n"
+      "GetData data type code is permitted.  See gd_mconstants(3), but\n"
       "note that this method returns both names and values, unlike the\n"
       "C API counterpart."
   },
-  { "get_mfield_list", (PyCFunction)gdpy_dirfile_getmfieldlist,
+  { "mfield_list", (PyCFunction)gdpy_dirfile_getmfieldlist,
     METH_VARARGS | METH_KEYWORDS,
-    "get_mfield_list(parent [, entry_type])\n\n"
+    "mfield_list(parent [, entry_type])\n\n"
       "Return a list of metafield names for the parent field 'parent'.  If\n"
       "'entry_type' is given, it should be one of the pygetdata.*_ENTRY\n"
       "symbols.  If 'entry_type' is not given, or is pygetdata.NO_ENTRY,\n"
       "all metafields for the given parent field are returned.  Otherwise,\n"
       "only the metafields of the given type are returned.  See\n"
-      "gd_get_mfield_list(3) and gd_get_mfield_list_by_type(3)."
+      "gd_mfield_list(3) and gd_mfield_list_by_type(3)."
   },
-  {"get_mstrings", (PyCFunction)gdpy_dirfile_getmstrings,
+  {"mstrings", (PyCFunction)gdpy_dirfile_getmstrings,
     METH_VARARGS | METH_KEYWORDS,
-    "get_mstrings(parent, return_type)\n\n"
+    "mstrings(parent, return_type)\n\n"
       "Retrieve all STRING metafields defined for the parent field\n"
       "'parent', and their values.  A list of tuples will be returned, each\n"
       "tuple containing the name and value of a field.  See\n"
-      "get_mstrings(3), but note that this method returns both names and\n"
+      "gd_mstrings(3), but note that this method returns both names and\n"
       "values, unlike the C API counterpart."
   },
-  { "get_mvector_list", (PyCFunction)gdpy_dirfile_getmvectorlist,
+  { "mvector_list", (PyCFunction)gdpy_dirfile_getmvectorlist,
     METH_VARARGS | METH_KEYWORDS,
-    "get_mvector_list(parent)\n\n"
+    "mvector_list(parent)\n\n"
       "Retrieve a list of all vector type metafields (that is: BIT, LINCOM,\n"
       "LINTERP, MULTIPLY, PHASE, POLYNOM, and SBIT metafields) for the\n"
-      "parent field 'parent'.  See gd_get_mvector_list(3)."
+      "parent field 'parent'.  See gd_mvector_list(3)."
   },
-  {"get_native_type", (PyCFunction)gdpy_dirfile_getnativetype,
+  {"native_type", (PyCFunction)gdpy_dirfile_getnativetype,
     METH_VARARGS | METH_KEYWORDS,
-    "get_native_type(field_code)\n\n"
+    "native_type(field_code)\n\n"
       "Retrieve the native data type of the field specified by\n"
       "'field_code'.  The return value will be one of the data type codes:\n"
-      "pygetdata.UINT8, pygetdata.INT8, &c.  The get_native_type_name\n"
+      "pygetdata.UINT8, pygetdata.INT8, &c.  The native_type_name\n"
       "method behaves identically, but returns a human-readable string\n"
-      "describing the data type.  See gd_get_native_type(3)."
+      "describing the data type.  See gd_native_type(3)."
   },
-  {"get_native_type_name", (PyCFunction)gdpy_dirfile_getnativetypename,
+  {"native_type_name", (PyCFunction)gdpy_dirfile_getnativetypename,
     METH_VARARGS | METH_KEYWORDS,
-    "get_native_type_name(field_code)\n\n"
+    "native_type_name(field_code)\n\n"
       "Retrieve the native data type of the field specified by\n"
       "'field_code'.  The return value will be a string describing the\n"
-      "data type: 'UINT8', 'INT8', &c.  The get_native_type method behaves\n"
+      "data type: 'UINT8', 'INT8', &c.  The native_type method behaves\n"
       "identically, but returns a numeric data type code.  See\n"
-      "gd_get_native_type(3)."
+      "gd_native_type(3)."
   },
-  {"get_nfields", (PyCFunction)gdpy_dirfile_getnfields,
+  {"nfields", (PyCFunction)gdpy_dirfile_getnfields,
     METH_VARARGS | METH_KEYWORDS,
-    "get_nfields([entry_type])\n\n"
+    "nfields([entry_type])\n\n"
       "Return the number of fields in the database.  If 'entry_type' is\n"
       "given, it should be one of the pygetdata.*_ENTRY symbols.  If\n"
       "'entry_type' is not given, or is pygetdata.NO_ENTRY, the total\n"
       "number of fields in the database is returned.  Otherwise, only\n"
       "the number of fields of the given type is returned.  See\n"
-      "gd_get_nfields(3) and gd_get_nfields_by_type(3)."
+      "gd_nfields(3) and gd_nfields_by_type(3)."
   },
-  {"get_nmfields", (PyCFunction)gdpy_dirfile_getnmfields,
+  {"nmfields", (PyCFunction)gdpy_dirfile_getnmfields,
     METH_VARARGS | METH_KEYWORDS,
-    "get_nmfields(parent [, entry_type])\n\n"
+    "nmfields(parent [, entry_type])\n\n"
       "Return the number of metafields defined for the parent field\n"
       "'parent'.  If 'entry_type' is given, it should be one of the\n"
       "pygetdata.*_ENTRY symbols.  If 'entry_type' is not given, or is\n"
       "pygetdata.NO_ENTRY, the total number of metafields for this parent\n"
       "is returned.  Otherwise, only the number of metafields of the given\n"
-      "type is returned.  See gd_get_nmfields(3) and gd_get_nmfields_by_type(3)."
+      "type is returned.  See gd_nmfields(3) and gd_nmfields_by_type(3)."
   },
-  {"get_nmvectors", (PyCFunction)gdpy_dirfile_getnmvectors,
+  {"nmvectors", (PyCFunction)gdpy_dirfile_getnmvectors,
     METH_VARARGS | METH_KEYWORDS,
-    "get_nmvectors(parent)\n\n"
+    "nmvectors(parent)\n\n"
       "Return the number of vector type metafields (that is: BIT, LINCOM,\n"
       "LINTERP, MULTIPLY, PHASE, POLYNOM, and SBIT metafields) for the\n"
-      "parent field 'parent'.  See gd_get_nmvectors(3)."
+      "parent field 'parent'.  See gd_nmvectors(3)."
   },
-  {"get_nvectors", (PyCFunction)gdpy_dirfile_getnvectors, METH_NOARGS,
-    "get_nvectors()\n\n"
+  {"nvectors", (PyCFunction)gdpy_dirfile_getnvectors, METH_NOARGS,
+    "nvectors()\n\n"
       "Return the number of vector type fields (that is: BIT, LINCOM,\n"
       "LINTERP, MULTIPLY, PHASE, POLYNOM, RAW, and SBIT fields) defined in\n"
-      "the database.  See gd_get_nvectors(3)."
+      "the database.  See gd_nvectors(3)."
   },
-  {"get_raw_filename", (PyCFunction)gdpy_dirfile_getrawfilename,
+  {"raw_filename", (PyCFunction)gdpy_dirfile_getrawfilename,
     METH_VARARGS | METH_KEYWORDS,
-    "get_raw_filename(field_code)\n\n"
+    "raw_filename(field_code)\n\n"
       "Return the pathname of the data file on disk backing the RAW field\n"
-      "specified by 'field_code'.  See gd_get_raw_filename(3)."
+      "specified by 'field_code'.  See gd_raw_filename(3)."
   },
-  {"get_spf", (PyCFunction)gdpy_dirfile_getspf, METH_VARARGS | METH_KEYWORDS,
-    "get_spf(field_code)\n\n"
+  {"spf", (PyCFunction)gdpy_dirfile_getspf, METH_VARARGS | METH_KEYWORDS,
+    "spf(field_code)\n\n"
       "Return the number of samples per frame of the field specified by\n"
-      "field code.  See gd_get_spf(3)."
+      "field code.  See gd_spf(3)."
   },
   {"get_string", (PyCFunction)gdpy_dirfile_getstring,
     METH_VARARGS | METH_KEYWORDS,
@@ -1979,18 +1979,18 @@ static PyMethodDef gdpy_dirfile_methods[] = {
       "Retrieve the value of the STRING field specified by 'field_code'.\n"
       "See gd_get_string(3)."
   },
-  { "get_strings", (PyCFunction)gdpy_dirfile_getstrings, METH_NOARGS,
-    "get_strings()\n\n"
+  { "strings", (PyCFunction)gdpy_dirfile_getstrings, METH_NOARGS,
+    "strings()\n\n"
       "Retrieve all STRING fields defined in the database.  A list of\n"
       "tuples will be returned, each tuple containing the name and value of\n"
-      "a field.  See gd_get_strings(3), but note that this method returns both\n"
+      "a field.  See gd_strings(3), but note that this method returns both\n"
       "names and values, unlike the C API counterpart."
   },
-  { "get_vector_list", (PyCFunction)gdpy_dirfile_getvectorlist, METH_NOARGS,
-    "get_vector_list()\n\n"
+  { "vector_list", (PyCFunction)gdpy_dirfile_getvectorlist, METH_NOARGS,
+    "vector_list()\n\n"
       "Retrieve a list of all vector type fields (that is: BIT, LINCOM,\n"
       "LINTERP, MULTIPLY, PHASE, POLYNOM, RAW, and SBIT metafields) defined\n"
-      "in the database.  See gd_get_vector_list(3)."
+      "in the database.  See gd_vector_list(3)."
   },
   {"include", (PyCFunction)gdpy_dirfile_include, METH_VARARGS | METH_KEYWORDS,
     "include(filename [, fragment_index, flags])\n\n"

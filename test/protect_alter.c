@@ -33,9 +33,9 @@ int main(void)
   close(fd);
 
   DIRFILE* D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
-  int ret = gd_protect(D, GD_PROTECT_DATA, 0);
+  int ret = gd_alter_protection(D, GD_PROTECT_DATA, 0);
   int error = gd_error(D);
-  int p = gd_get_protection(D, 0);
+  int p = gd_protection(D, 0);
 
   gd_close(D);
 

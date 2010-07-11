@@ -31,8 +31,8 @@ int main(void)
   close(fd);
 
   DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  unsigned long n = gd_get_endianness(D, 0);
-  unsigned long m = gd_get_endianness(D, 1);
+  unsigned long n = gd_endianness(D, 0);
+  unsigned long m = gd_endianness(D, 1);
   int error = gd_error(D);
 
   gd_close(D);

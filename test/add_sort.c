@@ -10,7 +10,7 @@ void CheckSPF(DIRFILE *D, const char* f, int v)
 {
   gd_entry_t e;
 
-  gd_get_entry(D, f, &e);
+  gd_entry(D, f, &e);
 
   if (gd_error(D)) {
     r = 1;

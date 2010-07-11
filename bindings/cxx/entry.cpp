@@ -38,7 +38,7 @@ Entry::Entry()
 Entry::Entry(GetData::Dirfile *dirfile, const char* field_code)
 {
   D = dirfile;
-  gd_get_entry(D->D, field_code, &E);
+  gd_entry(D->D, field_code, &E);
 }
 
 Entry::~Entry()

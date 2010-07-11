@@ -1,3 +1,6 @@
+2010-07-11   D. V. Wiebe <getdata@ketiltrout.net>   svn:435
+	The Great Renaming, part 2: removed get_ from many public function names.
+
 2010-07-10   D. V. Wiebe <getdata@ketiltrout.net>   svn:434
 	* test/madd_crecip.c test/add_recip.c test/add_crecip.c test/dfes_recip.c
 	test/get_recip.c test/spf_divide.c test/parse_recip.c test/alter_recip.c

@@ -341,9 +341,10 @@ extern int gd_add_bit(DIRFILE *dirfile, const char *field_code,
     const char *in_field, gd_bit_t bitnum, gd_bit_t numbits, int fragment_index)
 gd_nothrow gd_nonnull ((1,2,3));
 
-extern int gd_add_clincom(DIRFILE *dirfile, const char *field_code, int n_fields,
-    const char **in_fields, const GD_DCOMPLEXP(cm), const GD_DCOMPLEXP(cb),
-    int fragment_index) gd_nothrow gd_nonnull ((1,2,4,5,6));
+extern int gd_add_clincom(DIRFILE *dirfile, const char *field_code,
+    int n_fields, const char **in_fields, const GD_DCOMPLEXP(cm),
+    const GD_DCOMPLEXP(cb), int fragment_index) gd_nothrow
+gd_nonnull ((1,2,4,5,6));
 
 extern int gd_add_const(DIRFILE *dirfile, const char *field_code,
     gd_type_t const_type, gd_type_t data_type, const void* value,
@@ -457,21 +458,21 @@ extern int gd_get_constant(DIRFILE *dirfile, const char *field_code,
 extern int gd_put_constant(DIRFILE *dirfile, const char *field_code,
     gd_type_t data_type, const void *data) gd_nothrow gd_nonnull ((1, 2, 4));
 
-extern const void *gd_get_constants(DIRFILE *dirfile,
+extern const void *gd_constants(DIRFILE *dirfile,
     gd_type_t return_type) gd_nothrow gd_nonnull ((1));
 
 extern gd_entry_t *gd_free_entry_strings(gd_entry_t *entry) gd_nothrow;
 
-extern unsigned long int gd_get_encoding(DIRFILE *dirfile,
+extern unsigned long int gd_encoding(DIRFILE *dirfile,
     int fragment) gd_nothrow gd_nonnull ((1));
 
-extern unsigned long int gd_get_endianness(DIRFILE *dirfile,
+extern unsigned long int gd_endianness(DIRFILE *dirfile,
     int fragment) gd_nothrow gd_nonnull((1));
 
-extern int gd_get_entry(DIRFILE *dirfile, const char *field_code,
+extern int gd_entry(DIRFILE *dirfile, const char *field_code,
     gd_entry_t *entry) gd_nothrow gd_nonnull ((1, 2));
 
-extern gd_entype_t gd_get_entry_type(DIRFILE *dirfile,
+extern gd_entype_t gd_entry_type(DIRFILE *dirfile,
     const char *field_code) gd_nothrow gd_nonnull ((1));
 
 extern int gd_error(const DIRFILE *dirfile) gd_nothrow gd_nonnull ((1));
@@ -479,16 +480,15 @@ extern int gd_error(const DIRFILE *dirfile) gd_nothrow gd_nonnull ((1));
 extern char *gd_error_string(const DIRFILE *dirfile, char *buffer,
     size_t buflen) gd_nothrow gd_nonnull ((1, 2));
 
-extern const char **gd_get_field_list(DIRFILE *dirfile) gd_nothrow
-gd_nonnull ((1));
+extern const char **gd_field_list(DIRFILE *dirfile) gd_nothrow gd_nonnull ((1));
 
-extern const char **gd_get_field_list_by_type(DIRFILE *dirfile,
+extern const char **gd_field_list_by_type(DIRFILE *dirfile,
     gd_entype_t type) gd_nothrow gd_nonnull ((1));
 
-extern int gd_get_fragment_index(DIRFILE *dirfile,
+extern int gd_fragment_index(DIRFILE *dirfile,
     const char *field_code) gd_nothrow gd_nonnull ((1));
 
-extern const char *gd_get_fragmentname(DIRFILE *dirfile,
+extern const char *gd_fragmentname(DIRFILE *dirfile,
     int index) gd_nothrow gd_nonnull ((1));
 
 extern int gd_madd(DIRFILE *dirfile, const gd_entry_t *entry,
@@ -559,68 +559,70 @@ extern int gd_madd_spec(DIRFILE *dirfile, const char *line,
     const char *parent) gd_nothrow gd_nonnull ((1,2,3));
 
 extern int gd_madd_string(DIRFILE *dirfile, const char *parent,
-    const char *field_code, const char *value) gd_nothrow gd_nonnull ((1,2,3,4));
+    const char *field_code, const char *value) gd_nothrow
+gd_nonnull ((1,2,3,4));
 
-extern int gd_dirfile_standards(DIRFILE *D, int vers) gd_nothrow gd_nonnull((1));
+extern int gd_dirfile_standards(DIRFILE *D, int vers) gd_nothrow
+gd_nonnull ((1));
 
-extern const void *gd_get_mconstants(DIRFILE *dirfile, const char *parent,
+extern const void *gd_mconstants(DIRFILE *dirfile, const char *parent,
     gd_type_t return_type) gd_nothrow gd_nonnull((1,2));
 
-extern const char **gd_get_mfield_list(DIRFILE *dirfile,
+extern const char **gd_mfield_list(DIRFILE *dirfile,
     const char *parent) gd_nothrow gd_nonnull((1,2));
 
-extern const char **gd_get_mfield_list_by_type(DIRFILE *dirfile,
+extern const char **gd_mfield_list_by_type(DIRFILE *dirfile,
     const char *parent, gd_entype_t type) gd_nothrow gd_nonnull((1,2));
 
-extern const char **gd_get_mstrings(DIRFILE *dirfile,
-    const char *parent) gd_nothrow gd_nonnull((1,2));
+extern const char **gd_mstrings(DIRFILE *dirfile, const char *parent) gd_nothrow
+gd_nonnull((1,2));
 
-extern const char **gd_get_mvector_list(DIRFILE *dirfile,
+extern const char **gd_mvector_list(DIRFILE *dirfile,
     const char *parent) gd_nothrow gd_nonnull((1,2));
 
 extern const char *gd_dirfilename(DIRFILE *dirfile) gd_nothrow gd_nonnull ((1));
 
-extern gd_type_t gd_get_native_type(DIRFILE *dirfile,
+extern gd_type_t gd_native_type(DIRFILE *dirfile,
     const char *field_code_in) gd_nothrow gd_nonnull ((1,2));
 
-extern unsigned int gd_get_nfields(DIRFILE *dirfile) gd_nothrow gd_nonnull ((1));
+extern unsigned int gd_nfields(DIRFILE *dirfile) gd_nothrow gd_nonnull ((1));
 
-extern unsigned int gd_get_nfields_by_type(DIRFILE *dirfile,
+extern unsigned int gd_nfields_by_type(DIRFILE *dirfile,
     gd_entype_t type) gd_nothrow gd_nonnull ((1));
 
-extern int gd_get_nfragments(DIRFILE *dirfile) gd_nothrow gd_nonnull((1));
+extern int gd_nfragments(DIRFILE *dirfile) gd_nothrow gd_nonnull((1));
 
-extern unsigned int gd_get_nmfields(DIRFILE *dirfile,
-    const char *parent) gd_nothrow gd_nonnull((1,2));
+extern unsigned int gd_nmfields(DIRFILE *dirfile, const char *parent) gd_nothrow
+gd_nonnull((1,2));
 
-extern unsigned int gd_get_nmfields_by_type(DIRFILE *dirfile, const char *parent,
+extern unsigned int gd_nmfields_by_type(DIRFILE *dirfile, const char *parent,
     gd_entype_t type) gd_nothrow gd_nonnull((1,2));
 
-extern unsigned int gd_get_nmvectors(DIRFILE *dirfile,
+extern unsigned int gd_nmvectors(DIRFILE *dirfile,
     const char *parent) gd_nothrow gd_nonnull((1,2));
 
-extern unsigned int gd_get_nvectors(DIRFILE *dirfile) gd_nothrow gd_nonnull ((1));
+extern unsigned int gd_nvectors(DIRFILE *dirfile) gd_nothrow gd_nonnull ((1));
 
-extern int gd_get_parent_fragment(DIRFILE *dirfile,
-    int fragment_index) gd_nothrow gd_nonnull ((1));
+extern int gd_parent_fragment(DIRFILE *dirfile, int fragment_index) gd_nothrow
+gd_nonnull ((1));
 
 extern void gd_parser_callback(DIRFILE *dirfile, gd_parser_callback_t sehandler,
     void*) gd_nothrow gd_nonnull ((1));
 
-extern int gd_protect(DIRFILE *dirfile, int protection_level,
+extern int gd_alter_protection(DIRFILE *dirfile, int protection_level,
     int fragment_index) gd_nothrow gd_nonnull ((1));
 
-extern int gd_get_protection(DIRFILE *dirfile,
-    int fragment_index) gd_nothrow gd_nonnull ((1));
+extern int gd_protection(DIRFILE *dirfile, int fragment_index) gd_nothrow
+gd_nonnull ((1));
 
-extern const char *gd_get_raw_filename(DIRFILE *dirfile,
+extern const char *gd_raw_filename(DIRFILE *dirfile,
     const char *field_code) gd_nothrow gd_nonnull ((1, 2));
 
 extern const char *gd_reference(DIRFILE *dirfile,
     const char *field_code) gd_nothrow gd_nonnull ((1));
 
-extern gd_spf_t gd_get_spf(DIRFILE *dirfile,
-    const char *field_code) gd_nothrow gd_nonnull ((1, 2));
+extern gd_spf_t gd_spf(DIRFILE *dirfile, const char *field_code) gd_nothrow
+gd_nonnull ((1, 2));
 
 extern size_t gd_get_string(DIRFILE *dirfile, const char *field_code,
     size_t len, char *data) gd_nothrow gd_nonnull ((1, 2, 4));
@@ -628,13 +630,12 @@ extern size_t gd_get_string(DIRFILE *dirfile, const char *field_code,
 extern size_t gd_put_string(DIRFILE *dirfile, const char *field_code,
     const char *data) gd_nothrow gd_nonnull ((1, 2, 3));
 
-extern const char **gd_get_strings(DIRFILE *dirfile) gd_nothrow gd_nonnull ((1));
+extern const char **gd_strings(DIRFILE *dirfile) gd_nothrow gd_nonnull ((1));
 
-extern int gd_validate(DIRFILE *dirfile,
-    const char *field_code_in) gd_nothrow gd_nonnull((1,2));
+extern int gd_validate(DIRFILE *dirfile, const char *field_code_in) gd_nothrow
+gd_nonnull((1,2));
 
-extern const char **gd_get_vector_list(DIRFILE *dirfile) gd_nothrow
-gd_nonnull((1));
+extern const char **gd_vector_list(DIRFILE *dirfile) gd_nothrow gd_nonnull((1));
 
 /* The following functions contain calls to I/O functions, making them
  * cancellation points.  As a result we cannot mark them with gd_nothrow.
@@ -680,11 +681,11 @@ extern int gd_flush(DIRFILE *dirfile, const char *field_code) gd_nonnull ((1));
 extern int gd_include(DIRFILE *dirfile, const char *file, int fragment_index,
     unsigned long int flags) gd_nonnull ((1,2));
 
-double gd_get_framenum(DIRFILE* D, const char* field_code_in,
+double gd_framenum(DIRFILE* D, const char* field_code_in,
     double value) gd_nonnull ((1,2));
 
-extern int gd_malter_spec(DIRFILE *dirfile, const char *line, const char *parent,
-    int recode) gd_nonnull ((1,2,3));
+extern int gd_malter_spec(DIRFILE *dirfile, const char *line,
+    const char *parent, int recode) gd_nonnull ((1,2,3));
 
 extern int gd_metaflush(DIRFILE *dirfile) gd_nonnull ((1));
 
@@ -694,8 +695,8 @@ extern int gd_move(DIRFILE *dirfile, const char *field_code, int new_fragment,
 extern DIRFILE *gd_open(const char *dirfilename,
     unsigned long int flags) gd_nonnull ((1));
 
-extern int gd_rename(DIRFILE *dirfile, const char *old_code, const char *new_name,
-    int move_data) gd_nonnull ((1,2,3));
+extern int gd_rename(DIRFILE *dirfile, const char *old_code,
+    const char *new_name, int move_data) gd_nonnull ((1,2,3));
 
 extern int gd_uninclude(DIRFILE *dirfile, int fragment_index,
     int del) gd_nonnull ((1));
@@ -706,36 +707,37 @@ extern int gd_alter_frameoffset(DIRFILE *dirfile, off_t offset, int fragment,
     int recode) gd_nonnull ((1));
 
 extern size_t gd_getdata(DIRFILE *dirfile, const char *field_code,
-    off_t first_frame, off_t first_sample, size_t num_frames, size_t num_samples,
-    gd_type_t return_type, void *data) gd_nonnull ((1, 2));
+    off_t first_frame, off_t first_sample, size_t num_frames,
+    size_t num_samples, gd_type_t return_type, void *data) gd_nonnull ((1, 2));
 
 extern size_t gd_putdata(DIRFILE *dirfile, const char *field_code,
-    off_t first_frame, off_t first_sample, size_t num_frames, size_t num_samples,
-    gd_type_t data_type, const void *data) gd_nonnull ((1, 2));
+    off_t first_frame, off_t first_sample, size_t num_frames,
+    size_t num_samples, gd_type_t data_type, const void *data)
+gd_nonnull ((1, 2));
 
-extern double gd_get_framenum_subset(DIRFILE* D, const char* field_code,
+extern double gd_framenum_subset(DIRFILE* D, const char* field_code,
     double value, off_t field_start, off_t field_end) gd_nonnull ((1,2));
 
-extern off_t gd_get_frameoffset(DIRFILE *dirfile, int fragment)
-  gd_nothrow gd_nonnull ((1));
+extern off_t gd_frameoffset(DIRFILE *dirfile, int fragment) gd_nothrow
+gd_nonnull ((1));
 
-extern off_t gd_get_nframes(DIRFILE *dirfile) gd_nonnull ((1));
+extern off_t gd_nframes(DIRFILE *dirfile) gd_nonnull ((1));
 
-extern off_t gd_get_bof(DIRFILE *dirfile, const char* field_code)
-  gd_nothrow gd_nonnull ((1,2));
+extern off_t gd_bof(DIRFILE *dirfile, const char* field_code) gd_nothrow
+gd_nonnull ((1,2));
 
-extern off_t gd_get_eof(DIRFILE *dirfile, const char* field_code)
+extern off_t gd_eof(DIRFILE *dirfile, const char* field_code)
   gd_nonnull ((1,2));
 #else
 # ifdef __REDIRECT_NTH
-extern off_t __REDIRECT_NTH (gd_get_bof, (DIRFILE *dirfile,
-      const char* field_code), gd_get_bof64) gd_nonnull ((1,2));
+extern off_t __REDIRECT_NTH (gd_bof, (DIRFILE *dirfile, const char* field_code),
+    gd_bof64) gd_nonnull ((1,2));
 
-extern off_t __REDIRECT_NTH (gd_get_frameoffset, (DIRFILE *dirfile, int fragment),
-    gd_get_frameoffset64) gd_nonnull ((1));
+extern off_t __REDIRECT_NTH (gd_frameoffset, (DIRFILE *dirfile, int fragment),
+    gd_frameoffset64) gd_nonnull ((1));
 # else
-#  define gd_get_bof gd_get_bof64
-#  define gd_get_frameoffset gd_get_frameoffset64
+#  define gd_bof gd_bof64
+#  define gd_frameoffset gd_frameoffset64
 # endif
 
 # ifdef __REDIRECT
@@ -751,22 +753,22 @@ extern size_t __REDIRECT (gd_putdata, (DIRFILE *dirfile, const char *field_code,
       size_t num_samples, gd_type_t data_type, const void *data),
     gd_putdata64) gd_nonnull ((1, 2));
 
-extern off_t __REDIRECT (gd_get_nframes, (DIRFILE *dirfile),
-    gd_get_nframes64) gd_nonnull ((1));
+extern off_t __REDIRECT (gd_nframes, (DIRFILE *dirfile),
+    gd_nframes64) gd_nonnull ((1));
 
-extern off_t __REDIRECT (gd_get_eof, (DIRFILE *dirfile,
-      const char* field_code), gd_get_eof64) gd_nonnull ((1,2));
+extern off_t __REDIRECT (gd_eof, (DIRFILE *dirfile, const char* field_code),
+    gd_eof64) gd_nonnull ((1,2));
 
-extern double __REDIRECT (gd_get_framenum_subset, (DIRFILE* D,
+extern double __REDIRECT (gd_framenum_subset, (DIRFILE* D,
       const char* field_code, double value, off_t field_start, off_t field_end),
-    gd_get_framenum_subset64) gd_nonnull ((1,2));
+    gd_framenum_subset64) gd_nonnull ((1,2));
 # else
 #  define gd_alter_frameoffset gd_alter_frameoffset64
 #  define gd_getdata gd_getdata64
 #  define gd_putdata gd_putdata64
-#  define gd_get_nframes gd_get_nframes64
-#  define gd_get_eof gd_get_eof64
-#  define gd_get_framenum_subset gd_get_framenum_subset64
+#  define gd_nframes gd_nframes64
+#  define gd_eof gd_eof64
+#  define gd_framenum_subset gd_framenum_subset64
 # endif
 #endif
 
@@ -778,8 +780,8 @@ extern double __REDIRECT (gd_get_framenum_subset, (DIRFILE* D,
                                     (defined __APPLE__) || (defined __CYGWIN__)
 #define off64_t off_t
 #endif
-extern int gd_alter_frameoffset64(DIRFILE *dirfile, off64_t offset, int fragment,
-    int recode) gd_nonnull ((1));
+extern int gd_alter_frameoffset64(DIRFILE *dirfile, off64_t offset,
+    int fragment, int recode) gd_nonnull ((1));
 
 extern size_t gd_getdata64(DIRFILE *dirfile, const char *field_code,
     off64_t first_frame, off64_t first_samp, size_t num_frames, size_t num_samp,
@@ -787,20 +789,20 @@ extern size_t gd_getdata64(DIRFILE *dirfile, const char *field_code,
 
 extern size_t gd_putdata64(DIRFILE *dirfile, const char *field_code,
     off64_t first_frame, off64_t first_sample, size_t num_frames,
-    size_t num_samples, gd_type_t data_type, const void *data) gd_nonnull ((1, 2));
+    size_t num_samples, gd_type_t data_type, const void *data)
+gd_nonnull ((1, 2));
 
-extern off64_t gd_get_frameoffset64(DIRFILE *dirfile,
-    int fragment) gd_nonnull ((1));
+extern off64_t gd_frameoffset64(DIRFILE *dirfile, int fragment) gd_nonnull((1));
 
-extern double gd_get_framenum_subset64(DIRFILE* D, const char* field_code_in,
+extern double gd_framenum_subset64(DIRFILE* D, const char* field_code_in,
     double value, off64_t field_start, off64_t field_end) gd_nonnull ((1,2));
 
-extern off64_t gd_get_nframes64(DIRFILE *dirfile) gd_nonnull ((1));
+extern off64_t gd_nframes64(DIRFILE *dirfile) gd_nonnull ((1));
 
-extern off64_t gd_get_bof64(DIRFILE *dirfile, const char* field_code)
-  gd_nothrow gd_nonnull ((1,2));
+extern off64_t gd_bof64(DIRFILE *dirfile, const char* field_code) gd_nothrow
+gd_nonnull ((1,2));
 
-extern off64_t gd_get_eof64(DIRFILE *dirfile, const char* field_code)
+extern off64_t gd_eof64(DIRFILE *dirfile, const char* field_code)
   gd_nonnull ((1,2));
 
 #if (defined _FILE_OFFSET_BITS && _FILE_OFFSET_BITS == 64) || \
@@ -861,28 +863,28 @@ extern off64_t gd_get_eof64(DIRFILE *dirfile, const char* field_code)
 #  define dirfile_close gd_close
 #  define get_constant gd_get_constant
 #  define put_constant gd_put_constant
-#  define get_constants gd_get_constants
+#  define get_constants gd_constants
 #  define getdata gd_getdata
 #  define putdata gd_putdata
 #  define getdata64 gd_getdata64
 #  define putdata64 gd_putdata64
 #  define dirfile_delete gd_delete
 #  define dirfile_discard gd_discard
-#  define get_encoding gd_get_encoding
-#  define get_endianness gd_get_endianness
-#  define get_entry gd_get_entry
-#  define get_entry_type gd_get_entry_type
+#  define get_encoding gd_encoding
+#  define get_endianness gd_endianness
+#  define get_entry gd_entry
+#  define get_entry_type gd_entry_type
 #  define get_error gd_error
 #  define get_error_string gd_error_string
-#  define get_field_list gd_get_field_list
-#  define get_field_list_by_type gd_get_field_list_by_type
+#  define get_field_list gd_field_list
+#  define get_field_list_by_type gd_field_list_by_type
 #  define dirfile_flush gd_flush
-#  define get_fragment_index gd_get_fragment_index
-#  define get_fragmentname gd_get_fragmentname
-#  define get_framenum_subset gd_get_framenum_subset
-#  define get_framenum_subset64 gd_get_framenum_subset64
-#  define get_frameoffset gd_get_frameoffset
-#  define get_frameoffset64 gd_get_frameoffset64
+#  define get_fragment_index gd_fragment_index
+#  define get_fragmentname gd_fragmentname
+#  define get_framenum_subset gd_framenum_subset
+#  define get_framenum_subset64 gd_framenum_subset64
+#  define get_frameoffset gd_frameoffset
+#  define get_frameoffset64 gd_frameoffset64
 #  define dirfile_free_entry_strings gd_free_entry_strings
 #  define dirfile_include gd_include
 #  define dirfile_madd gd_madd
@@ -899,41 +901,41 @@ extern off64_t gd_get_eof64(DIRFILE *dirfile, const char* field_code)
 #  define dirfile_madd_spec gd_madd_spec
 #  define dirfile_madd_string gd_madd_string
 #  define dirfile_malter_spec gd_malter_spec
-#  define get_mconstants gd_get_mconstants
+#  define get_mconstants gd_mconstants
 #  define dirfile_metaflush gd_metaflush
-#  define get_mfield_list gd_get_mfield_list
-#  define get_mfield_list_by_type gd_get_mfield_list_by_type
+#  define get_mfield_list gd_mfield_list
+#  define get_mfield_list_by_type gd_mfield_list_by_type
 #  define dirfile_move gd_move
-#  define get_mstrings gd_get_mstrings
-#  define get_mvector_list gd_get_mvector_list
+#  define get_mstrings gd_mstrings
+#  define get_mvector_list gd_mvector_list
 #  define dirfilename gd_dirfilename
-#  define get_native_type gd_get_native_type
-#  define get_nfields gd_get_nfields
-#  define get_nfields_by_type gd_get_nfields_by_type
-#  define get_nfragments gd_get_nfragments
-#  define get_nframes gd_get_nframes
-#  define get_nframes64 gd_get_nframes64
-#  define get_nmfields gd_get_nmfields
-#  define get_nmfields_by_type gd_get_nmfields_by_type
-#  define get_nmvectors gd_get_nmvectors
-#  define get_nvectors gd_get_nvectors
+#  define get_native_type gd_native_type
+#  define get_nfields gd_nfields
+#  define get_nfields_by_type gd_nfields_by_type
+#  define get_nfragments gd_nfragments
+#  define get_nframes gd_nframes
+#  define get_nframes64 gd_nframes64
+#  define get_nmfields gd_nmfields
+#  define get_nmfields_by_type gd_nmfields_by_type
+#  define get_nmvectors gd_nmvectors
+#  define get_nvectors gd_nvectors
 #  define dirfile_open gd_open
-#  define get_parent_fragment gd_get_parent_fragment
+#  define get_parent_fragment gd_parent_fragment
 #  define dirfile_parser_callback gd_parser_callback
-#  define dirfile_protect gd_protect
-#  define get_protection gd_get_protection
-#  define get_raw_filename gd_get_raw_filename
+#  define dirfile_protect gd_alter_protection
+#  define get_protection gd_protection
+#  define get_raw_filename gd_raw_filename
 #  define dirfile_reference gd_reference
-#  define get_reference(D) gd_get_reference(D,NULL)
+#  define get_reference(D) gd_reference(D,NULL)
 #  define dirfile_rename gd_rename
-#  define get_spf gd_get_spf
+#  define get_spf gd_spf
 #  define dirfile_standards gd_dirfile_standards
 #  define get_string gd_get_string
 #  define put_string gd_put_string
-#  define get_strings gd_get_strings
+#  define get_strings gd_strings
 #  define dirfile_uninclude gd_uninclude
 #  define dirfile_validate gd_validate
-#  define get_vector_list gd_get_vector_list
+#  define get_vector_list gd_vector_list
 #endif
 
 #endif

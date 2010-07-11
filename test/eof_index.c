@@ -32,13 +32,13 @@ int main(void)
   close(fd);
 
   DIRFILE* D = gd_open(filedir, GD_RDONLY);
-  off_t eof_INDEX = gd_get_eof(D, "INDEX");
+  off_t eof_INDEX = gd_eof(D, "INDEX");
   int error0 = gd_error(D);
-  off_t eof_mult1 = gd_get_eof(D, "mult1");
+  off_t eof_mult1 = gd_eof(D, "mult1");
   int error1 = gd_error(D);
-  off_t eof_mult2 = gd_get_eof(D, "mult2");
+  off_t eof_mult2 = gd_eof(D, "mult2");
   int error2 = gd_error(D);
-  off_t eof_mult3 = gd_get_eof(D, "mult3");
+  off_t eof_mult3 = gd_eof(D, "mult3");
   int error3 = gd_error(D);
   gd_close(D);
 

@@ -20,13 +20,13 @@
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "internal.h"
-#undef gd_get_nframes64
+#undef gd_nframes64
 
 #ifdef STDC_HEADERS
 #include <errno.h>
 #endif
 
-off64_t gd_get_nframes64(DIRFILE* D)
+off64_t gd_nframes64(DIRFILE* D)
 {
   off64_t nf;
 
@@ -75,9 +75,9 @@ off64_t gd_get_nframes64(DIRFILE* D)
 }
 
 /* 32(ish)-bit wrapper for the 64-bit version, when needed */
-off_t gd_get_nframes(DIRFILE* D)
+off_t gd_nframes(DIRFILE* D)
 {
-  return (off_t)gd_get_nframes64(D);
+  return (off_t)gd_nframes64(D);
 }
 /* vim: ts=2 sw=2 et tw=80
 */

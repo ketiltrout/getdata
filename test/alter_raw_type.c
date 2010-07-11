@@ -37,7 +37,7 @@ int main(void)
   DIRFILE* D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
   int ret = gd_alter_raw(D, "data", GD_UINT16, 0, 1);
   int error = gd_error(D);
-  off_t n = gd_get_nframes(D);
+  off_t n = gd_nframes(D);
 
   gd_close(D);
 

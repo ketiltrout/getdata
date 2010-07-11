@@ -43,7 +43,7 @@ int main(void)
 
   CHECKI(error,0);
 
-  int n = gd_get_entry(D, "polynom", &E);
+  int n = gd_entry(D, "polynom", &E);
   int error2 = gd_error(D);
 
   gd_close(D);

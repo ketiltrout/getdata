@@ -148,7 +148,7 @@ int gd_alter_frameoffset64(DIRFILE* D, off64_t offset, int fragment, int move)
   return (D->error) ? -1 : 0;
 }
 
-off64_t gd_get_frameoffset64(DIRFILE* D, int fragment)
+off64_t gd_frameoffset64(DIRFILE* D, int fragment)
 {
   dtrace("%p, %i", D, fragment);
 
@@ -176,9 +176,9 @@ int gd_alter_frameoffset(DIRFILE* D, off_t offset, int fragment, int move)
   return gd_alter_frameoffset64(D, offset, fragment, move);
 }
 
-off_t gd_get_frameoffset(DIRFILE* D, int fragment)
+off_t gd_frameoffset(DIRFILE* D, int fragment)
 {
-  return gd_get_frameoffset64(D, fragment);
+  return gd_frameoffset64(D, fragment);
 }
 
 static off64_t _GD_GetEOF(DIRFILE *D, gd_entry_t* E, int *is_index)
@@ -343,7 +343,7 @@ static off64_t _GD_GetEOF(DIRFILE *D, gd_entry_t* E, int *is_index)
   return ns;
 }
 
-off64_t gd_get_eof64(DIRFILE* D, const char *field_code_in)
+off64_t gd_eof64(DIRFILE* D, const char *field_code_in)
 {
   off64_t ns;
   gd_entry_t *entry;
@@ -380,9 +380,9 @@ off64_t gd_get_eof64(DIRFILE* D, const char *field_code_in)
 }
 
 /* 32(ish)-bit wrapper for the 64-bit version, when needed */
-off_t gd_get_eof(DIRFILE* D, const char *field_code)
+off_t gd_eof(DIRFILE* D, const char *field_code)
 {
-  return (off_t)gd_get_eof64(D, field_code);
+  return (off_t)gd_eof64(D, field_code);
 }
 
 static off64_t _GD_GetBOF(DIRFILE *D, gd_entry_t* E, gd_spf_t *spf,
@@ -524,7 +524,7 @@ static off64_t _GD_GetBOF(DIRFILE *D, gd_entry_t* E, gd_spf_t *spf,
   return bof;
 }
 
-off64_t gd_get_bof64(DIRFILE* D, const char *field_code_in)
+off64_t gd_bof64(DIRFILE* D, const char *field_code_in)
 {
   off64_t bof;
   gd_entry_t *entry;
@@ -563,9 +563,9 @@ off64_t gd_get_bof64(DIRFILE* D, const char *field_code_in)
 }
 
 /* 32(ish)-bit wrapper for the 64-bit version, when needed */
-off_t gd_get_bof(DIRFILE* D, const char *field_code)
+off_t gd_bof(DIRFILE* D, const char *field_code)
 {
-  return (off_t)gd_get_bof64(D, field_code);
+  return (off_t)gd_bof64(D, field_code);
 }
 /* vim: ts=2 sw=2 et tw=80
 */

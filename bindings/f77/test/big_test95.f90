@@ -461,8 +461,8 @@ program big_test
     write(*, 2002) 117, n
   end if
 
-! 4: fgd_get_field_name_max check
-  i = fgd_get_field_name_max(d)
+! 4: fgd_field_name_max check
+  i = fgd_field_name_max(d)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -475,8 +475,8 @@ program big_test
     write(*, 2002) 4, i
   end if
 
-! 5: fgd_get_mfield_name_max check
-  i = fgd_get_mfield_name_max(d, 'data')
+! 5: fgd_mfield_name_max check
+  i = fgd_mfield_name_max(d, 'data')
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -489,8 +489,8 @@ program big_test
     write(*, 2002) 5, i
   end if
 
-! 6: fgd_get_nfields check
-  n = fgd_get_nfields(d)
+! 6: fgd_nfields check
+  n = fgd_nfields(d)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -503,9 +503,9 @@ program big_test
     write(*, 2002) 6, n
   end if
 
-! 8: fgd_get_field_list check
+! 8: fgd_field_list check
   l = flen
-  call fgd_get_field_list(flist, d, l)
+  call fgd_field_list(flist, d, l)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -525,8 +525,8 @@ program big_test
   end if
   end do
 
-! 9: fgd_get_nmfields check
-  n = fgd_get_nmfields(d, 'data')
+! 9: fgd_nmfields check
+  n = fgd_nmfields(d, 'data')
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -539,13 +539,13 @@ program big_test
     write(*, 2002) 9, n
   end if
 
-! 10: fgd_get_mfield_list check
+! 10: fgd_mfield_list check
   fields(1) = 'mstr'
   fields(2) = 'mconst'
   fields(3) = 'mlut'
 
   l = flen
-  call fgd_get_mfield_list(flist, d, 'data', l)
+  call fgd_mfield_list(flist, d, 'data', l)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -565,8 +565,8 @@ program big_test
   end if
   end do
 
-! 11: fgd_get_nframes check
-  n = fgd_get_nframes(d)
+! 11: fgd_nframes check
+  n = fgd_nframes(d)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -579,8 +579,8 @@ program big_test
     write(*, 2002) 11, n
   end if
 
-! 12: fgd_get_spf check
-  n = fgd_get_spf(d, 'data')
+! 12: fgd_spf check
+  n = fgd_spf(d, 'data')
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -802,8 +802,8 @@ program big_test
     write(*, 2009) 14, str
   end if
 
-! 15: fgd_get_entry_type check
-  n = fgd_get_entry_type(d, 'data')
+! 15: fgd_entry_type check
+  n = fgd_entry_type(d, 'data')
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -816,8 +816,8 @@ program big_test
     write(*, 2002) 15, n
   end if
 
-! 16: fgd_get_entry (raw) check
-  n = fgd_get_entry(d, 'data', ent)
+! 16: fgd_entry (raw) check
+  n = fgd_entry(d, 'data', ent)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -845,8 +845,8 @@ program big_test
     write(*, 2007) 16, 4, ent%data_type
   end if
 
-! 18: fgd_get_entry (lincom) check
-  n = fgd_get_entry(d, 'lincom', ent)
+! 18: fgd_entry (lincom) check
+  n = fgd_entry(d, 'lincom', ent)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -916,8 +916,8 @@ program big_test
   end if
   end do
 
-! 20: fgd_get_entry (polynom) check
-  n = fgd_get_entry(d, 'polynom', ent)
+! 20: fgd_entry (polynom) check
+  n = fgd_entry(d, 'polynom', ent)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -958,8 +958,8 @@ program big_test
   end if
   end do
 
-! 21: fgd_get_entry (linterp) check
-  n = fgd_get_entry(d, 'linterp', ent)
+! 21: fgd_entry (linterp) check
+  n = fgd_entry(d, 'linterp', ent)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -987,8 +987,8 @@ program big_test
     write(*, 2008) 21, 4, ent%field(2)
   end if
 
-! 22: fgd_get_entry (bit) check
-  n = fgd_get_entry(d, 'bit', ent)
+! 22: fgd_entry (bit) check
+  n = fgd_entry(d, 'bit', ent)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -1021,8 +1021,8 @@ program big_test
     write(*, 2008) 22, 5, ent%field(1)
   end if
 
-! 23: fgd_get_entry (Sbit) check
-  n = fgd_get_entry(d, 'sbit', ent)
+! 23: fgd_entry (Sbit) check
+  n = fgd_entry(d, 'sbit', ent)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -1055,8 +1055,8 @@ program big_test
     write(*, 2008) 23, 5, ent%field(1)
   end if
 
-! 24: fgd_get_entry (multiply) check
-  n = fgd_get_entry(d, 'mult', ent)
+! 24: fgd_entry (multiply) check
+  n = fgd_entry(d, 'mult', ent)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -1084,8 +1084,8 @@ program big_test
     write(*, 2008) 24, 4, ent%field(2)
   end if
 
-! 25: fgd_get_entry (phase) check
-  n = fgd_get_entry(d, 'phase', ent)
+! 25: fgd_entry (phase) check
+  n = fgd_entry(d, 'phase', ent)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -1113,8 +1113,8 @@ program big_test
     write(*, 2008) 25, 4, ent%field(1)
   end if
 
-! 26: fgd_get_entry (const) check
-  n = fgd_get_entry(d, 'const', ent)
+! 26: fgd_entry (const) check
+  n = fgd_entry(d, 'const', ent)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -1137,8 +1137,8 @@ program big_test
     write(*, 2007) 26, 3, ent%data_type
   end if
 
-! 27: fgd_get_fragment_index check
-  n = fgd_get_fragment_index(d, 'const')
+! 27: fgd_fragment_index check
+  n = fgd_fragment_index(d, 'const')
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -1160,7 +1160,7 @@ program big_test
     write(*, 2006) 28, 1, e
   end if
 
-  n = fgd_get_entry(d, 'new1', ent)
+  n = fgd_entry(d, 'new1', ent)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -1198,7 +1198,7 @@ program big_test
     write(*, 2006) 29, 1, e
   end if
 
-  n = fgd_get_entry(d, 'new2', ent)
+  n = fgd_entry(d, 'new2', ent)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -1262,7 +1262,7 @@ program big_test
     write(*, 2006) 30, 1, e
   end if
 
-  n = fgd_get_entry(d, 'new3', ent)
+  n = fgd_entry(d, 'new3', ent)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -1325,7 +1325,7 @@ program big_test
     write(*, 2006) 31, 1, e
   end if
 
-  n = fgd_get_entry(d, 'new4', ent)
+  n = fgd_entry(d, 'new4', ent)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -1380,7 +1380,7 @@ program big_test
     write(*, 2006) 32, 1, e
   end if
 
-  n = fgd_get_entry(d, 'new5', ent)
+  n = fgd_entry(d, 'new5', ent)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -1433,7 +1433,7 @@ program big_test
     write(*, 2006) 33, 1, e
   end if
 
-  n = fgd_get_entry(d, 'new6', ent)
+  n = fgd_entry(d, 'new6', ent)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -1470,7 +1470,7 @@ program big_test
     write(*, 2006) 34, 1, e
   end if
 
-  n = fgd_get_entry(d, 'new7', ent)
+  n = fgd_entry(d, 'new7', ent)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -1512,7 +1512,7 @@ program big_test
     write(*, 2006) 35, 1, e
   end if
 
-  n = fgd_get_entry(d, "new8", ent)
+  n = fgd_entry(d, "new8", ent)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -1554,7 +1554,7 @@ program big_test
     write(*, 2006) 36, 1, e
   end if
 
-  n = fgd_get_entry(d, 'new9', ent)
+  n = fgd_entry(d, 'new9', ent)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -1591,7 +1591,7 @@ program big_test
     write(*, 2006) 37, 1, e
   end if
 
-  n = fgd_get_entry(d, 'new10', ent)
+  n = fgd_entry(d, 'new10', ent)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -1628,7 +1628,7 @@ program big_test
     write(*, 2006) 38, 1, e
   end if
 
-  n = fgd_get_entry(d, 'new11', ent)
+  n = fgd_entry(d, 'new11', ent)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -1677,7 +1677,7 @@ program big_test
     write(*, 2006) 125, 1, e
   end if
 
-  n = fgd_get_entry(d, 'new13', ent)
+  n = fgd_entry(d, 'new13', ent)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -1705,8 +1705,8 @@ program big_test
     write(*, 2008) 125, 4, ent%field(1)
   end if
 
-! 39: fgd_get_fragmentname check
-  str = fgd_get_fragmentname(d, 0)
+! 39: fgd_fragmentname check
+  str = fgd_fragmentname(d, 0)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -1719,8 +1719,8 @@ program big_test
     write(*, 2009), 39, str
   end if
 
-! 40: fgd_get_nfragments check
-  n = fgd_get_nfragments(d)
+! 40: fgd_nfragments check
+  n = fgd_nfragments(d)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -1755,8 +1755,8 @@ program big_test
     write(*, 2004) 1, 41, ci1(1)
   end if
 
-! 42: fgd_get_nfields_by_type check
-  n = fgd_get_nfields_by_type(d, GD_LINCOM_ENTRY)
+! 42: fgd_nfields_by_type check
+  n = fgd_nfields_by_type(d, GD_LINCOM_ENTRY)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -1769,12 +1769,12 @@ program big_test
     write(*, 2002), 42, n
   end if
 
-! 43: fgd_get_field_list_by_type check
+! 43: fgd_field_list_by_type check
   fields(1) = 'lincom'
   fields(2) = 'new2'
   fields(3) = 'new3'
   l = flen
-  call fgd_get_field_list_by_type(flist, d, GD_LINCOM_ENTRY, l)
+  call fgd_field_list_by_type(flist, d, GD_LINCOM_ENTRY, l)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -1794,8 +1794,8 @@ program big_test
   end if
   end do
 
-! 44: fgd_get_nvectors check
-  n = fgd_get_nvectors(d)
+! 44: fgd_nvectors check
+  n = fgd_nvectors(d)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -1808,13 +1808,13 @@ program big_test
     write(*, 2002), 44, n
   end if
 
-! 45: fgd_get_vector_list check
+! 45: fgd_vector_list check
   fields = (/ 'INDEX  ', 'bit    ', 'data   ', 'lincom ', 'linterp', &
   'mult   ', 'new1   ', 'new10  ', 'new13  ', 'new2   ', 'new3   ', 'new4   ', &
   'new5   ', 'new6   ', 'new7   ', 'new8   ', 'new9   ', 'phase  ', 'polynom', &
   'sbit   ', 'string ' /)
   l = flen
-  call fgd_get_vector_list(flist, d, l)
+  call fgd_vector_list(flist, d, l)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -1844,7 +1844,7 @@ program big_test
     write(*, 2006) 46, 1, e
   end if
 
-  n = fgd_get_entry(d, 'data/mnew1', ent)
+  n = fgd_entry(d, 'data/mnew1', ent)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -1908,7 +1908,7 @@ program big_test
     write(*, 2006) 47, 1, e
   end if
 
-  n = fgd_get_entry(d, 'data/mnew2', ent)
+  n = fgd_entry(d, 'data/mnew2', ent)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -1971,7 +1971,7 @@ program big_test
     write(*, 2006) 48, 1, e
   end if
 
-  n = fgd_get_entry(d, 'data/mnew3', ent)
+  n = fgd_entry(d, 'data/mnew3', ent)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -2021,7 +2021,7 @@ program big_test
     write(*, 2006) 49, 1, e
   end if
 
-  n = fgd_get_entry(d, 'data/mnew5', ent)
+  n = fgd_entry(d, 'data/mnew5', ent)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -2069,7 +2069,7 @@ program big_test
     write(*, 2006) 50, 1, e
   end if
 
-  n = fgd_get_entry(d, 'data/mnew6', ent)
+  n = fgd_entry(d, 'data/mnew6', ent)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -2106,7 +2106,7 @@ program big_test
     write(*, 2006) 51, 1, e
   end if
 
-  n = fgd_get_entry(d, 'data/mnew7', ent)
+  n = fgd_entry(d, 'data/mnew7', ent)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -2148,7 +2148,7 @@ program big_test
     write(*, 2006) 52, 1, e
   end if
 
-  n = fgd_get_entry(d, 'data/mnew8', ent)
+  n = fgd_entry(d, 'data/mnew8', ent)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -2190,7 +2190,7 @@ program big_test
     write(*, 2006) 53, 1, e
   end if
 
-  n = fgd_get_entry(d, 'data/mnew9', ent)
+  n = fgd_entry(d, 'data/mnew9', ent)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -2227,7 +2227,7 @@ program big_test
     write(*, 2006) 54, 1, e
   end if
 
-  n = fgd_get_entry(d, 'data/mnew10', ent)
+  n = fgd_entry(d, 'data/mnew10', ent)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -2264,7 +2264,7 @@ program big_test
     write(*, 2006) 55, 1, e
   end if
 
-  n = fgd_get_entry(d, 'data/mnew11', ent)
+  n = fgd_entry(d, 'data/mnew11', ent)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -2313,7 +2313,7 @@ program big_test
     write(*, 2006) 126, 1, e
   end if
 
-  n = fgd_get_entry(d, 'data/mnew4', ent)
+  n = fgd_entry(d, 'data/mnew4', ent)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -2699,8 +2699,8 @@ program big_test
     write(*, 2009) 62, str
   end if
 
-! 63: fgd_get_nmfields_by_type check
-  n = fgd_get_nmfields_by_type(d, "data", GD_LINCOM_ENTRY)
+! 63: fgd_nmfields_by_type check
+  n = fgd_nmfields_by_type(d, "data", GD_LINCOM_ENTRY)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -2713,11 +2713,11 @@ program big_test
     write(*, 2002), 63, n
   end if
 
-! 64: fgd_get_mfield_list_by_type check
+! 64: fgd_mfield_list_by_type check
   fields(1) = 'mnew1'
   fields(2) = 'mnew2'
   l = flen
-  call fgd_get_mfield_list_by_type(flist, d, "data", GD_LINCOM_ENTRY, l)
+  call fgd_mfield_list_by_type(flist, d, "data", GD_LINCOM_ENTRY, l)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -2737,8 +2737,8 @@ program big_test
   end if
   end do
 
-! 65: fgd_get_nmvectors check
-  n = fgd_get_nmvectors(d, "data")
+! 65: fgd_nmvectors check
+  n = fgd_nmvectors(d, "data")
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -2751,13 +2751,13 @@ program big_test
     write(*, 2002), 65, n
   end if
 
-! 66: fgd_get_mvector_list check
+! 66: fgd_mvector_list check
   fields = (/ 'mlut  ', 'mnew1 ', 'mnew2 ', 'mnew3 ', 'mnew5 ', 'mnew6 ', &
   'mnew7 ', 'mnew8 ', 'mnew9 ', 'mnew10', 'mnew4 ', '      ', '      ', &
   '      ', '      ', '      ', '      ', '      ', '      ', '      ', &
   '      ' /)
   l = flen
-  call fgd_get_mvector_list(flist, d, "data", l)
+  call fgd_mvector_list(flist, d, "data", l)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -2786,7 +2786,7 @@ program big_test
     write(*, 2006) 67, 1, e
   end if
 
-  n = fgd_get_entry(d, 'new1', ent)
+  n = fgd_entry(d, 'new1', ent)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -2824,7 +2824,7 @@ program big_test
     write(*, 2006) 68, 1, e
   end if
 
-  n = fgd_get_entry(d, 'new2', ent)
+  n = fgd_entry(d, 'new2', ent)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -2893,7 +2893,7 @@ program big_test
     write(*, 2006) 69, 1, e
   end if
 
-  n = fgd_get_entry(d, 'new3', ent)
+  n = fgd_entry(d, 'new3', ent)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -2955,7 +2955,7 @@ program big_test
     write(*, 2006) 70, 1, e
   end if
 
-  n = fgd_get_entry(d, 'new4', ent)
+  n = fgd_entry(d, 'new4', ent)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -3005,7 +3005,7 @@ program big_test
     write(*, 2006) 71, 1, e
   end if
 
-  n = fgd_get_entry(d, 'new5', ent)
+  n = fgd_entry(d, 'new5', ent)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -3058,7 +3058,7 @@ program big_test
     write(*, 2006) 72, 1, e
   end if
 
-  n = fgd_get_entry(d, 'new6', ent)
+  n = fgd_entry(d, 'new6', ent)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -3095,7 +3095,7 @@ program big_test
     write(*, 2006) 73, 1, e
   end if
 
-  n = fgd_get_entry(d, 'new7', ent)
+  n = fgd_entry(d, 'new7', ent)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -3137,7 +3137,7 @@ program big_test
     write(*, 2006) 74, 1, e
   end if
 
-  n = fgd_get_entry(d, 'new8', ent)
+  n = fgd_entry(d, 'new8', ent)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -3179,7 +3179,7 @@ program big_test
     write(*, 2006) 75, 1, e
   end if
 
-  n = fgd_get_entry(d, 'new9', ent)
+  n = fgd_entry(d, 'new9', ent)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -3216,7 +3216,7 @@ program big_test
     write(*, 2006) 76, 1, e
   end if
 
-  n = fgd_get_entry(d, 'new10', ent)
+  n = fgd_entry(d, 'new10', ent)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -3253,7 +3253,7 @@ program big_test
     write(*, 2006) 77, 1, e
   end if
 
-  n = fgd_get_entry(d, 'new11', ent)
+  n = fgd_entry(d, 'new11', ent)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -3289,8 +3289,8 @@ program big_test
     write(*, 2005) 77, fl
   end if
 
-! 78: fgd_get_encoding check
-  n = fgd_get_encoding(d, 0)
+! 78: fgd_encoding check
+  n = fgd_encoding(d, 0)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -3303,8 +3303,8 @@ program big_test
     write(*, 2002) 78, n
   end if
 
-! 79: fgd_get_endianness check
-  n = fgd_get_endianness(d, 0)
+! 79: fgd_endianness check
+  n = fgd_endianness(d, 0)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -3337,8 +3337,8 @@ program big_test
     write(*, 2009) 80, str
   end if
 
-! 81: fgd_get_parent_fragment check
-  n = fgd_get_parent_fragment(d, 1)
+! 81: fgd_parent_fragment check
+  n = fgd_parent_fragment(d, 1)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -3351,8 +3351,8 @@ program big_test
     write(*, 2002) 81, n
   end if
 
-! 82: fgd_protect check
-  call fgd_protect(d, GD_PROTECT_DATA, 1)
+! 82: fgd_alter_protection check
+  call fgd_alter_protection(d, GD_PROTECT_DATA, 1)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -3360,8 +3360,8 @@ program big_test
     write(*, 2001) 82, e
   end if
 
-! 83: fgd_get_protection check
-  n = fgd_get_protection(d, 1)
+! 83: fgd_protection check
+  n = fgd_protection(d, 1)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -3374,8 +3374,8 @@ program big_test
     write(*, 2002) 83, n
   end if
 
-! 84: fgd_get_raw_filename check
-  str = fgd_get_raw_filename(d, "data")
+! 84: fgd_raw_filename check
+  str = fgd_raw_filename(d, "data")
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -3411,7 +3411,7 @@ program big_test
     write(*, 2006) 87, 1, e
   end if
 
-  n = fgd_get_encoding(d, 1)
+  n = fgd_encoding(d, 1)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -3433,7 +3433,7 @@ program big_test
     write(*, 2006) 88, 1, e
   end if
 
-  n = fgd_get_endianness(d, 1)
+  n = fgd_endianness(d, 1)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -3455,7 +3455,7 @@ program big_test
     write(*, 2006) 89, 1, e
   end if
 
-  n = fgd_get_entry(d, 'new10', ent)
+  n = fgd_entry(d, 'new10', ent)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -3492,7 +3492,7 @@ program big_test
     write(*, 2006) 90, 1, e
   end if
 
-  n = fgd_get_entry(d, 'new10', ent)
+  n = fgd_entry(d, 'new10', ent)
   e = fgd_error(d)
 
   if (e .ne. GD_E_BAD_CODE) then
@@ -3509,7 +3509,7 @@ program big_test
     write(*, 2006) 91, 1, e
   end if
 
-  n = fgd_get_entry(d, 'data/mnew10', ent)
+  n = fgd_entry(d, 'data/mnew10', ent)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -3546,7 +3546,7 @@ program big_test
     write(*, 2006) 92, 1, e
   end if
 
-  n = fgd_get_entry(d, 'new9', ent)
+  n = fgd_entry(d, 'new9', ent)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -3583,7 +3583,7 @@ program big_test
     write(*, 2006) 93, 1, e
   end if
 
-  n = fgd_get_entry(d, 'new9', ent)
+  n = fgd_entry(d, 'new9', ent)
   e = fgd_error(d)
 
   if (e .ne. GD_E_BAD_CODE) then
@@ -3591,7 +3591,7 @@ program big_test
     write(*, 2006) 93, 2, e
   end if
 
-  n = fgd_get_entry(d, 'newer', ent)
+  n = fgd_entry(d, 'newer', ent)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -3628,7 +3628,7 @@ program big_test
     write(*, 2006) 94, 1, e
   end if
 
-  n = fgd_get_entry(d, 'newer', ent)
+  n = fgd_entry(d, 'newer', ent)
   e = fgd_error(d)
 
   if (e .ne. GD_E_BAD_CODE) then
@@ -3636,8 +3636,8 @@ program big_test
     write(*, 2006) 94, 2, e
   end if
 
-! 95: fgd_get_frameoffset check
-  n = fgd_get_frameoffset(d, 0)
+! 95: fgd_frameoffset check
+  n = fgd_frameoffset(d, 0)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -3659,7 +3659,7 @@ program big_test
     write(*, 2006) 96, 1, e
   end if
 
-  n = fgd_get_frameoffset(d, 0)
+  n = fgd_frameoffset(d, 0)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -3672,8 +3672,8 @@ program big_test
     write(*, 2002) 96, n
   end if
 
-! 97: fgd_get_native_type check
-  n = fgd_get_native_type(d, 'data')
+! 97: fgd_native_type check
+  n = fgd_native_type(d, 'data')
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -3700,9 +3700,9 @@ program big_test
     write(*, 2002) 99, n
   end if
 
-! 100: fgd_get_framenum check
+! 100: fgd_framenum check
   str = fgd_reference(d, "data")
-  dp = fgd_get_framenum(d, 'INDEX', 33.3d0)
+  dp = fgd_framenum(d, 'INDEX', 33.3d0)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -3715,8 +3715,8 @@ program big_test
     write(*, 2012) 100, dp
   end if
 
-! 101: fgd_get_framenum_subset check
-  dp = fgd_get_framenum_subset(d, 'data', 33.3d0, 6, 0)
+! 101: fgd_framenum_subset check
+  dp = fgd_framenum_subset(d, 'data', 33.3d0, 6, 0)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -3729,8 +3729,8 @@ program big_test
     write(*, 2012) 101, dp
   end if
 
-! 86: fgd_get_eof check
-  n = fgd_get_eof(d, 'lincom')
+! 86: fgd_eof check
+  n = fgd_eof(d, 'lincom')
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -3743,8 +3743,8 @@ program big_test
     write(*, 2002), 86, n
   end if
 
-! 142: fgd_get_bof check
-  n = fgd_get_bof(d, 'lincom')
+! 142: fgd_bof check
+  n = fgd_bof(d, 'lincom')
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then

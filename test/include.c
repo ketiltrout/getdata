@@ -31,7 +31,7 @@ int main(void)
   DIRFILE* D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
   gd_include(D, "format1", 0, 0);
   int error = gd_error(D);
-  unsigned int spf = gd_get_spf(D, "data");
+  unsigned int spf = gd_spf(D, "data");
   gd_close(D);
 
   unlink(format1);

@@ -25,7 +25,7 @@ int main(void)
   DIRFILE* D = gd_open(filedir, GD_RDONLY);
   gd_entry_t E;
 
-  int n = gd_get_entry(D, "data", &E);
+  int n = gd_entry(D, "data", &E);
   int error = gd_error(D);
 
   gd_close(D);

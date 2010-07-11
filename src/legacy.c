@@ -531,7 +531,7 @@ int GetNFrames(const char *filename, int *error_code,
     return 0;
   }
 
-  nf = (int)gd_get_nframes(D);
+  nf = (int)gd_nframes(D);
   *error_code = _GD_CopyGlobalError(D);
 
   dreturn("%i", nf);
@@ -555,7 +555,7 @@ int GetSamplesPerFrame(const char *filename, const char *field_code,
     return 0;
   }
 
-  int spf = (int)gd_get_spf(D, field_code);
+  int spf = (int)gd_spf(D, field_code);
   *error_code = _GD_CopyGlobalError(D);
 
   dreturn("%i", spf);

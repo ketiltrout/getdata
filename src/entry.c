@@ -241,7 +241,7 @@ int _GD_CalculateEntry(DIRFILE* D, gd_entry_t* E)
   return E->e->calculated;
 }
 
-const char* gd_get_raw_filename(DIRFILE* D, const char* field_code_in)
+const char* gd_raw_filename(DIRFILE* D, const char* field_code_in)
 {
   int repr;
   char* field_code;
@@ -293,7 +293,7 @@ const char* gd_get_raw_filename(DIRFILE* D, const char* field_code_in)
   return E->e->file[0].name;
 }
 
-int gd_get_entry(DIRFILE* D, const char* field_code_in, gd_entry_t* entry)
+int gd_entry(DIRFILE* D, const char* field_code_in, gd_entry_t* entry)
 {
   int i, repr;
   gd_entry_t *E;
@@ -391,7 +391,7 @@ int gd_get_entry(DIRFILE* D, const char* field_code_in, gd_entry_t* entry)
   return 0;
 }
 
-gd_entype_t gd_get_entry_type(DIRFILE* D, const char* field_code_in)
+gd_entype_t gd_entry_type(DIRFILE* D, const char* field_code_in)
 {
   gd_entry_t* E;
   char* field_code;
@@ -422,7 +422,7 @@ gd_entype_t gd_get_entry_type(DIRFILE* D, const char* field_code_in)
   return E->field_type;
 }
 
-int gd_get_fragment_index(DIRFILE* D, const char* field_code_in)
+int gd_fragment_index(DIRFILE* D, const char* field_code_in)
 {
   gd_entry_t* E;
   char* field_code;

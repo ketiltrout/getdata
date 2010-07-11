@@ -24,7 +24,7 @@ int main(void)
   close(fd);
 
   DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  unsigned int spf = gd_get_spf(D, "div");
+  unsigned int spf = gd_spf(D, "div");
   gd_close(D);
 
   unlink(format);

@@ -33,7 +33,7 @@ int main(void)
   close(fd);
 
   DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  unsigned long n = gd_get_encoding(D, 0);
+  unsigned long n = gd_encoding(D, 0);
   int error = gd_error(D);
 
   gd_close(D);

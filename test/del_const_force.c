@@ -27,7 +27,7 @@ int main(void)
   DIRFILE* D = gd_open(filedir, GD_RDWR);
   int ret = gd_delete(D, "data", GD_DEL_FORCE);
   int error1 = gd_error(D);
-  unsigned int spf = gd_get_spf(D, "raw");
+  unsigned int spf = gd_spf(D, "raw");
   int error2 = gd_error(D);
   gd_close(D);
 

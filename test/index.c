@@ -34,9 +34,9 @@ int main(void)
   close(i);
 
   DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  double f1 = gd_get_framenum(D, "data", 1.09);
-  double f2 = gd_get_framenum(D, "data", 1.49);
-  double f3 = gd_get_framenum(D, "data", 1.79);
+  double f1 = gd_framenum(D, "data", 1.09);
+  double f2 = gd_framenum(D, "data", 1.49);
+  double f3 = gd_framenum(D, "data", 1.79);
   int error = gd_error(D);
 
   gd_close(D);

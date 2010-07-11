@@ -25,7 +25,7 @@ int main(void)
   DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
   gd_entry_t E;
 
-  gd_get_entry(D, "data", &E);
+  gd_entry(D, "data", &E);
   gd_free_entry_strings(&E);
 
   gd_close(D);

@@ -35,8 +35,8 @@ int main(void)
   DIRFILE* D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
   int ret = gd_alter_frameoffset(D, 16, 0, 0);
   int error = gd_error(D);
-  off_t fo = gd_get_frameoffset(D, 0);
-  off_t nf = gd_get_nframes(D);
+  off_t fo = gd_frameoffset(D, 0);
+  off_t nf = gd_nframes(D);
 
   gd_close(D);
 

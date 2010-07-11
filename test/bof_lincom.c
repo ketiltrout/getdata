@@ -33,13 +33,13 @@ int main(void)
   close(fd);
 
   DIRFILE* D = gd_open(filedir, GD_RDONLY);
-  off_t bof_data = gd_get_bof(D, "data");
+  off_t bof_data = gd_bof(D, "data");
   int error1 = gd_error(D);
-  off_t bof_data2 = gd_get_bof(D, "data2");
+  off_t bof_data2 = gd_bof(D, "data2");
   int error2 = gd_error(D);
-  off_t bof_lincom = gd_get_bof(D, "lincom");
+  off_t bof_lincom = gd_bof(D, "lincom");
   int error3 = gd_error(D);
-  off_t bof_lincom2 = gd_get_bof(D, "lincom2");
+  off_t bof_lincom2 = gd_bof(D, "lincom2");
   int error4 = gd_error(D);
   gd_close(D);
 

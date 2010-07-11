@@ -37,7 +37,7 @@ int main(void)
   DIRFILE* D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
   int ret = gd_rename(D, "data", "zata", 1);
   int error = gd_error(D);
-  const char** fl = gd_get_field_list(D);
+  const char** fl = gd_field_list(D);
 
   const char* field_list[4];
 

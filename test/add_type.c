@@ -27,7 +27,7 @@ int main(void)
   int error = gd_error(D);
 
   /* check */
-  int n = gd_get_nfields(D);
+  int n = gd_nfields(D);
 
   gd_close(D);
 

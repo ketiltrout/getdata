@@ -34,7 +34,7 @@ int main(void)
   close(i);
 
   DIRFILE* D = gd_open(filedir, GD_RDONLY);
-  double f1 = gd_get_framenum(D, "data", 1.09);
+  double f1 = gd_framenum(D, "data", 1.09);
   int error = gd_error(D);
 
   gd_close(D);

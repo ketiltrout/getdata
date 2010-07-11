@@ -29,10 +29,10 @@ int main(void)
   close(fd);
 
   DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  gd_get_nfields(D);
-  gd_get_nmfields(D, "parent");
-  gd_get_nmfields_by_type(D, "parent", GD_STRING_ENTRY);
-  const char** field_list = gd_get_mstrings(D, "parent");
+  gd_nfields(D);
+  gd_nmfields(D, "parent");
+  gd_nmfields_by_type(D, "parent", GD_STRING_ENTRY);
+  const char** field_list = gd_mstrings(D, "parent");
 
   int error = gd_error(D);
   CHECKI(error, 0);

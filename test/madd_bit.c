@@ -23,7 +23,7 @@ int main(void)
   int error = gd_error(D);
 
   /* check */
-  gd_get_entry(D, "new/meta", &e);
+  gd_entry(D, "new/meta", &e);
   int ge_error = gd_error(D);
   CHECKI(ge_error, 0);
   if (!r) {

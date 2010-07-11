@@ -14,7 +14,7 @@ int main(void)
   int r = 0;
 
   DIRFILE* D = gd_open(filedir, GD_RDONLY);
-  unsigned int n = gd_get_nfields_by_type(D, GD_RAW_ENTRY);
+  unsigned int n = gd_nfields_by_type(D, GD_RAW_ENTRY);
   int error = gd_error(D);
   gd_close(D);
 

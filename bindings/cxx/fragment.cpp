@@ -34,12 +34,12 @@ Fragment::Fragment(GetData::Dirfile *dirfile, int index)
   D = dirfile;
 
   ind = index;
-  enc = (GetData::EncodingScheme)gd_get_encoding(D->D, index);
-  end = gd_get_endianness(D->D, index);
-  off = gd_get_frameoffset(D->D, index);
-  prot = gd_get_protection(D->D, index);
-  name = strdup(gd_get_fragmentname(D->D, index));
-  parent = (index == 0) ? -1 : gd_get_parent_fragment(D->D, index);
+  enc = (GetData::EncodingScheme)gd_encoding(D->D, index);
+  end = gd_endianness(D->D, index);
+  off = gd_frameoffset(D->D, index);
+  prot = gd_protection(D->D, index);
+  name = strdup(gd_fragmentname(D->D, index));
+  parent = (index == 0) ? -1 : gd_parent_fragment(D->D, index);
 }
 
 Fragment::~Fragment()
@@ -79,7 +79,7 @@ int Fragment::SetFrameOffset(off_t offset, int recode)
 
 int Fragment::SetProtection(int protection_level)
 {
-  int ret = gd_protect(D->D, protection_level, ind);
+  int ret = gd_alter_protection(D->D, protection_level, ind);
 
   if (!ret)
     prot = protection_level;

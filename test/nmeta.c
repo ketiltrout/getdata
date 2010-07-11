@@ -36,7 +36,7 @@ int main(void)
   close(fd);
 
   DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  unsigned int nfields = gd_get_nmfields(D, "raw1");
+  unsigned int nfields = gd_nmfields(D, "raw1");
   int error = gd_error(D);
   gd_close(D);
 

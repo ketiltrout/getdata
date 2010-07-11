@@ -32,7 +32,7 @@ int main(void)
   close(fd);
 
   DIRFILE* D = gd_open(filedir, GD_RDONLY);
-  const char *path = gd_get_raw_filename(D, "data");
+  const char *path = gd_raw_filename(D, "data");
   int error = gd_error(D);
 
   gd_close(D);

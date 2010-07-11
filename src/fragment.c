@@ -24,7 +24,7 @@
 #include <stdlib.h>
 #endif
 
-const char* gd_get_fragmentname(DIRFILE* D, int index)
+const char* gd_fragmentname(DIRFILE* D, int index)
 {
   dtrace("%p, %i", D, index);
 
@@ -46,7 +46,7 @@ const char* gd_get_fragmentname(DIRFILE* D, int index)
   return D->fragment[index].cname;
 }
 
-int gd_get_nfragments(DIRFILE* D)
+int gd_nfragments(DIRFILE* D)
 {
   dtrace("%p", D);
 
@@ -62,7 +62,7 @@ int gd_get_nfragments(DIRFILE* D)
   return D->n_fragment;
 }
 
-int gd_get_parent_fragment(DIRFILE* D, int fragment_index)
+int gd_parent_fragment(DIRFILE* D, int fragment_index)
 {
   dtrace("%p, %i", D, fragment_index);
 

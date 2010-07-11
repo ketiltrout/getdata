@@ -48,7 +48,7 @@ int main(void)
   int error = gd_error(D);
   CHECKI(error, 0);
 
-  off_t nf = gd_get_nframes(D);
+  off_t nf = gd_nframes(D);
 
   int error2 = gd_error(D);
   CHECKI(error2, 0);

@@ -81,6 +81,8 @@ C     Correpsonding to gd_alter_sbit(3)
       EXTERNAL GDALSB
 C     Correpsonding to gd_alter_spec(3)
       EXTERNAL GDALSP
+C     Corresponding to gd_alter_protection(3)
+      EXTERNAL GDAPRT
 C     Alter a scalar parameter
       EXTERNAL GDASCA
 C     Corresponding to gd_parser_callback(3)
@@ -95,67 +97,67 @@ C     Correpsonding to gd_delete(3)
       EXTERNAL GDDELE
 C     Corresponding to gd_discard(3)
       EXTERNAL GDDSCD
-C     Corresponding to gd_get_entry_type(3)
+C     Corresponding to gd_entry_type(3)
       EXTERNAL GDENTY
 C     Corresponding to gd_error(3)
       EXTERNAL GDEROR
 C     Corresponding to gd_error_string(3)
       EXTERNAL GDESTR
-C     Corresponding to gd_get_field_list_by_type(3) (sort of)
+C     Corresponding to gd_field_list_by_type(3) (sort of)
       EXTERNAL GDFDNT
 C     Returns the maximum field name length
       EXTERNAL GDFDNX
-C     Corresponding to gd_get_field_list(3) (sort of)
+C     Corresponding to gd_field_list(3) (sort of)
       EXTERNAL GDFLDN
 C     Corresponding to gd_flush(3)
       EXTERNAL GDFLSH
-C     Corresponding to gd_get_framenum_subset(3)
+C     Corresponding to gd_framenum_subset(3)
       EXTERNAL GDFNSS
-C     Corresponding to gd_get_framenum(3)
+C     Corresponding to gd_framenum(3)
       EXTERNAL GDFNUM
-C     Corresponding to gd_get_fragment_index(3)
+C     Corresponding to gd_fragment_index(3)
       EXTERNAL GDFRGI
-C     Corresponding to gd_get_fragmentname(3)
+C     Corresponding to gd_fragmentname(3)
       EXTERNAL GDFRGN
-C     Corresponding to gd_get_bof(3)
+C     Corresponding to gd_bof(3)
       EXTERNAL GDGBOF
-C     Corresponding to gd_get_entry(3) for BIT fields
+C     Corresponding to gd_entry(3) for BIT fields
       EXTERNAL GDGEBT
-C     Corresponding to gd_get_entry(3) for complex valued LINCOM fields
+C     Corresponding to gd_entry(3) for complex valued LINCOM fields
       EXTERNAL GDGECL
-C     Corresponding to gd_get_entry(3) for CONST fields
+C     Corresponding to gd_entry(3) for CONST fields
       EXTERNAL GDGECO
-C     Corresponding to gd_get_entry(3) for complex valued POLYNOM fields
+C     Corresponding to gd_entry(3) for complex valued POLYNOM fields
       EXTERNAL GDGECP
-C     Corresponding to gd_get_entry(3) for LINCOM fields
+C     Corresponding to gd_entry(3) for LINCOM fields
       EXTERNAL GDGELC
-C     Corresponding to gd_get_entry(3) for LINTERP fields
+C     Corresponding to gd_entry(3) for LINTERP fields
       EXTERNAL GDGELT
-C     Corresponding to gd_get_entry(3) for MULTIPLY fields
+C     Corresponding to gd_entry(3) for MULTIPLY fields
       EXTERNAL GDGEMT
-C     Corresponding to gd_get_encoding(3)
+C     Corresponding to gd_encoding(3)
       EXTERNAL GDGENC
-C     Corresponding to gd_get_endianness(3)
+C     Corresponding to gd_endianness(3)
       EXTERNAL GDGEND
-C     Corresponding to gd_get_eof(3)
+C     Corresponding to gd_eof(3)
       EXTERNAL GDGEOF
-C     Corresponding to gd_get_entry(3) for PHASE fields
+C     Corresponding to gd_entry(3) for PHASE fields
       EXTERNAL GDGEPH
-C     Corresponding to gd_get_entry(3) for POLYNOM fields
+C     Corresponding to gd_entry(3) for POLYNOM fields
       EXTERNAL GDGEPN
-C     Corresponding to gd_get_entry(3) for RAW fields
+C     Corresponding to gd_entry(3) for RAW fields
       EXTERNAL GDGERW
-C     Corresponding to gd_get_entry(3) for SBIT fields
+C     Corresponding to gd_entry(3) for SBIT fields
       EXTERNAL GDGESB
 C     Corresponding to gd_getdata(3)
       EXTERNAL GDGETD
-C     Correpsonding to gd_get_frameoffset(3)
+C     Correpsonding to gd_frameoffset(3)
       EXTERNAL GDGFOF
-C     Corresponding to gd_get_protection(3)
+C     Corresponding to gd_protection(3)
       EXTERNAL GDGPRT
 C     Retrieve a scalar parameter
       EXTERNAL GDGSCA
-C     Corresponding to gd_get_spf(3)
+C     Corresponding to gd_spf(3)
       EXTERNAL GDGSPF
 C     Corresponding to gd_get_constant(3)
       EXTERNAL GDGTCO
@@ -187,9 +189,9 @@ C     Corresponding to gd_madd_spec(3)
       EXTERNAL GDMDSP
 C     Corresponding to gd_madd_string(3)
       EXTERNAL GDMDST
-C     Corresponding to gd_get_mfield_list(3) (sort of)
+C     Corresponding to gd_mfield_list(3) (sort of)
       EXTERNAL GDMFDN
-C     Corresponding to gd_get_mfield_list_by_type(3) (sort of)
+C     Corresponding to gd_mfield_list_by_type(3) (sort of)
       EXTERNAL GDMFDT
 C     Corresponding to gd_metaflush(3)
       EXTERNAL GDMFLS
@@ -199,34 +201,32 @@ C     Correpsonding to gd_malter_spec(3)
       EXTERNAL GDMLSP
 C     Correpsonding to gd_move(3)
       EXTERNAL GDMOVE
-C     Corresponding to gd_get_mvector_list(3) (sort of)
+C     Corresponding to gd_mvector_list(3) (sort of)
       EXTERNAL GDMVEN
 C     Corresponding to gd_dirfilename(3)
       EXTERNAL GDNAME
-C     Corresponding to gd_get_nfields_by_type(3)
+C     Corresponding to gd_nfields_by_type(3)
       EXTERNAL GDNFDT
-C     Corresponding to gd_get_nfields(3)
+C     Corresponding to gd_nfields(3)
       EXTERNAL GDNFLD
-C     Corresponding to gd_get_nfragments(3)
+C     Corresponding to gd_nfragments(3)
       EXTERNAL GDNFRG
-C     Corresponding to gd_get_nframes(3)
+C     Corresponding to gd_nframes(3)
       EXTERNAL GDNFRM
-C     Corresponding to gd_get_nmfields(3)
+C     Corresponding to gd_nmfields(3)
       EXTERNAL GDNMFD
-C     Corresponding to gd_get_nmfields_by_type(3)
+C     Corresponding to gd_nmfields_by_type(3)
       EXTERNAL GDNMFT
-C     Corresponding to gd_get_nmvectors(3)
+C     Corresponding to gd_nmvectors(3)
       EXTERNAL GDNMVE
-C     Corresponding to gd_get_native_type(3)
+C     Corresponding to gd_native_type(3)
       EXTERNAL GDNTYP
-C     Corresponding to gd_get_nvectors(3)
+C     Corresponding to gd_nvectors(3)
       EXTERNAL GDNVEC
 C     Corresponding to gd_open(3)
       EXTERNAL GDOPEN
-C     Corresponding to gd_get_parent_fragment(3)
+C     Corresponding to gd_parent_fragment(3)
       EXTERNAL GDPFRG
-C     Corresponding to gd_protect(3)
-      EXTERNAL GDPROT
 C     Corresponding to gd_put_constant(3)
       EXTERNAL GDPTCO
 C     Corresponding to gd_put_string(3)
@@ -237,11 +237,11 @@ C     Corresponding to gd_reference(3)
       EXTERNAL GDREFE
 C     Correpsonding to gd_rename(3)
       EXTERNAL GDRENM
-C     Corresponding to gd_get_raw_filename(3)
+C     Corresponding to gd_raw_filename(3)
       EXTERNAL GDRWFN
 C     Corresponding to gd_uninclude(3)
       EXTERNAL GDUINC
-C     Corresponding to gd_get_vector_list(3) (sort of)
+C     Corresponding to gd_vector_list(3) (sort of)
       EXTERNAL GDVECN
 C     Corresponding to gd_validate(3)
       EXTERNAL GDVLDT

@@ -30,7 +30,7 @@ int main(void)
 
   DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
 
-  gd_entype_t n = gd_get_fragment_index(D, "data");
+  gd_entype_t n = gd_fragment_index(D, "data");
   int error = gd_error(D);
 
   gd_close(D);
