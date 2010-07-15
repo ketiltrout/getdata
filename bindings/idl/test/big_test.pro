@@ -33,7 +33,7 @@ form2   = "test_dirfile/form2"
 data    = "test_dirfile/data"
 
 flen    = 7
-nfields = 11
+nfields = 13
 nume    = 0
 
 spawn, "rm -rf " + filedir
@@ -41,8 +41,8 @@ file_mkdir, filedir
 
 datadata = bindgen(80) + 1
 
-fields = [ 'INDEX', 'bit', 'const', 'data', 'lincom', 'linterp', 'mult', $
-  'phase', 'polynom', 'sbit', 'string' ]
+fields = [ 'INDEX', 'bit', 'const', 'data', 'div', 'lincom', 'linterp', $
+  'mult', 'phase', 'polynom', 'recip', 'sbit', 'string' ]
 
 ; Write the test dirfile
 openw,1,format
@@ -58,6 +58,8 @@ printf,1,'polynom POLYNOM data 1.1 2.2 2.2 3.3;4.4 const const'
 printf,1,'bit BIT data 3 4'
 printf,1,'sbit SBIT data 5 6'
 printf,1,'mult MULTIPLY data sbit'
+printf,1,'div DIVIDE mult bit'
+printf,1,'recip RECIP div 6.5;4.3'
 printf,1,'phase PHASE data 11'
 printf,1,'string STRING "Zaphod Beeblebrox"'
 close,1
@@ -429,14 +431,14 @@ nume += check_simple(43, n, [ "lincom", "new2"  ])
 ;  44: gd_nvectors check
 n = gd_nvectors(d)
 nume += check_ok(44, d)
-nume += check_simple(44, n, 18)
+nume += check_simple(44, n, 20)
 
 ;  45: gd_vector_list check
 n = gd_vector_list(d)
 nume += check_ok(45, d)
-nume += check_simple(45, n, [ 'INDEX', 'bit', 'data', 'lincom', 'linterp', $
-  'mult', 'new1', 'new10', 'new13', 'new2', 'new4', 'new6', 'new7', 'new8', $
-  'new9', 'phase', 'polynom', 'sbit', 'string' ])
+nume += check_simple(45, n, [ 'INDEX', 'bit', 'data', 'div', 'lincom', $
+  'linterp', 'mult', 'new1', 'new10', 'new13', 'new2', 'new4', 'new6', 'new7', $
+  'new8', 'new9', 'phase', 'polynom', 'recip', 'sbit', 'string' ])
 
 ;  46: gd_madd_lincom
 gd_add_lincom, d, "mnew2", "in1", 9.9D, 8.8D, "in2", 7.7D, 6.6D, $
@@ -934,6 +936,75 @@ nume += check_simple(86,n,344)
 n = gd_bof(d, "lincom")
 nume += check_ok(142,d)
 nume += check_simple(142,n,264)
+
+;  143: gd_entry (divide)
+n = gd_entry(d, "div")
+nume += check_ok(143, d)
+nume += check_simple2(143, 1, n.field_type, !GD.DIVIDE_ENTRY)
+nume += check_simple2(143, 2, n.field, "div")
+nume += check_simple2(143, 3, n.fragment, 0)
+nume += check_simple2(143, 4, n.in_fields, [ "mult", "bit" ])
+
+;  145: gd_entry (recip)
+n = gd_entry(d, "recip")
+nume += check_ok(145, d)
+nume += check_simple2(145, 1, n.field_type, !GD.RECIP_ENTRY)
+nume += check_simple2(145, 2, n.field, "recip")
+nume += check_simple2(145, 3, n.fragment, 0)
+nume += check_simple2(145, 4, n.in_fields, [ "div" ])
+nume += check_simple2(145, 5, n.comp_scal, 1)
+nume += check_simple2(145, 6, n.cdividend, DCOMPLEX(6.5D,4.3D))
+
+;  146: gd_add_divide
+gd_add_divide, d, "new14", "in2", "in3"
+nume += check_ok2(146, 1, d)
+
+n = gd_entry(d, "new14")
+nume += check_ok(146, d)
+nume += check_simple2(146, 1, n.field_type, !GD.DIVIDE_ENTRY)
+nume += check_simple2(146, 2, n.field, "new14")
+nume += check_simple2(146, 3, n.fragment, 0)
+nume += check_simple2(146, 4, n.in_fields, [ "in2", "in3" ])
+
+;  148: gd_add_recip
+gd_add_recip, d, "new16", "in2", COMPLEX(33.3, 44.4)
+nume += check_ok2(148, 1, d)
+
+n = gd_entry(d, "new16")
+nume += check_ok(148, d)
+nume += check_simple2(148, 1, n.field_type, !GD.RECIP_ENTRY)
+nume += check_simple2(148, 2, n.field, "new16")
+nume += check_simple2(148, 3, n.fragment, 0)
+nume += check_simple2(148, 4, n.in_fields, [ "in2" ])
+nume += check_simple2(148, 5, n.comp_scal, 1)
+nume += check_simple2(148, 6, n.cdividend, DCOMPLEX(33.3, 44.4))
+
+;  152: gd_alter_multiply
+gd_alter_divide, d, "new14", in_field1="in6"
+nume += check_ok2(152, 1, d)
+
+n = gd_entry(d, "new14")
+nume += check_ok(152, d)
+nume += check_simple2(152, 1, n.field_type, !GD.DIVIDE_ENTRY)
+nume += check_simple2(152, 2, n.field, "new14")
+nume += check_simple2(152, 3, n.fragment, 0)
+nume += check_simple2(152, 4, n.in_fields, [ "in6", "in3" ])
+
+;  153: gd_alter_multiply
+gd_alter_recip, d, "new16", dividend=1.01
+nume += check_ok2(153, 1, d)
+
+n = gd_entry(d, "new16")
+nume += check_ok(153, d)
+nume += check_simple2(153, 1, n.field_type, !GD.RECIP_ENTRY)
+nume += check_simple2(153, 2, n.field, "new16")
+nume += check_simple2(153, 3, n.fragment, 0)
+nume += check_simple2(153, 5, n.comp_scal, 0)
+nume += check_simple2(153, 4, n.in_fields, [ "in2" ])
+nume += check_simple2(153, 6, n.dividend, 1.01)
+
+
+
 
 spawn, "rm -rf " + filedir
 

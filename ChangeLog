@@ -1,3 +1,53 @@
+2010-07-15   D. V. Wiebe <getdata@ketiltrout.net>   svn:436
+	* bindings/f77/test/big_test.f: Added tests 143-154
+	* bindings/f77/test/big_test95.f90: Added tests 143, 145-154
+	* bindings/cxx/test/big_test.cpp: Added tests 143, 145-148, 152, 153
+	* bindings/idl/test/big_test.pro: Added tests 143, 145, 146, 148, 152, 153
+	* bindings/python/test/big_test.py: Added tests 143, 145, 146, 149, 151
+
+	* bindings/f77/fgetdata.c (GDGEDV GDGERC GDGECR GDADDV GDADRC GDADCR GDMDDV
+	GDMDRC GDMDCR GDALDV GDALRC GDALCR): Added.
+	* bindings/f77/fgetdata.c (GDGSCA GDASCA): Update for DIVIDE and RECIP.
+
+	* bindings/f77/getdata.f90.in (fgd_entry fgd_add fgd_madd fgd_alter_entry):
+	Update for DIVIDE and RECIP.
+	* bindings/f77/getdata.f90.in (fgd_add_divide fgd_add_recip fgd_add_crecip
+	fgd_madd_divide fgd_madd_recip fgd_madd_crecip):
+	Added.
+
+	* bindings/cxx/entry.cpp (Entry::CheckIndex Entry::Scalar)
+	bindings/cxx/dirfile.cpp (Dirfile::Entry) bindings/cxx/getdata/entry.h:
+	Update for DIVIDE and RECIP.
+	* bindings/cxx/entry.cpp (Entry::Scalar): Don't reject valid indicies.
+	* bindings/cxx/recipentry.cpp bindings/cxx/divideentry.cpp
+	bindings/cxx/getdata/recipentry.h bindings/cxx/getdata/divideentry.h: Added.
+	
+	* bindings/python/pyentry.c (gdpy_entry_getdividend gdpy_entry_setdividend):
+	Added.
+	* bindings/python/pyentry.c (gdpy_set_entry_from_tuple
+	gdpy_set_entry_from_dict gdpy_entry_getinfields gdpy_entry_setinfields
+	gdpy_entry_getparms): Update for DIVIDE and RECIP.
+
+	* bindings/idl/getdata.c (gdidl_make_idl_entry gdidl_read_idl_entry): Update
+	for DIVIDE and RECIP.
+	* bindings/idl/getdata.c (gdidl_gd_add_divide gdidl_gd_add_recip
+	gdidl_gd_alter_divide gdidl_gd_alter_recip): Added.
+
+	* bindings/python/pydirfile.c: Doc updates.
+
+	* bindings/python/pyentry.c (gdpy_entry_getshift): Properly handle
+	non-literal scalar fields.
+
+	* bindings/make_parameters.c: Update.
+
+	* test/dfes_recip.c test/get_recip.c test/parse_recip.c test/alter_recip.c
+	test/put_recip.c test/spf_recip.c test/version_8.c test/get_recip_const.c
+	test/alter_crecip89.c test/alter_crecip.c: Update for swapped parameters.
+	* src/parse.c (_GD_ParseRecip): Swap order of parameters in spec line to
+	agree with other derived fields.  Initalise comp_scal.
+
+	* src/debug.c: Export the shift buffer.
+
 2010-07-11   D. V. Wiebe <getdata@ketiltrout.net>   svn:435
 	The Great Renaming, part 2: removed get_ from many public function names.
 

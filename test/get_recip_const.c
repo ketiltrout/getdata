@@ -15,7 +15,7 @@ int main(void)
   const char* format = __TEST__ "dirfile/format";
   const char* data = __TEST__ "dirfile/data";
   const char* format_data =
-    "div RECIP const data\n"
+    "div RECIP data const\n"
     "const CONST FLOAT64 2.\n"
     "data RAW UINT8 1\n";
   double c = 0;

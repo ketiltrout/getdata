@@ -39,7 +39,7 @@ C     GDDSCD GDCLBK GDCLOS (although this last one is used)
       INTEGER flen
       PARAMETER (flen = 7)
       INTEGER nfields
-      PARAMETER (nfields = 11)
+      PARAMETER (nfields = 13)
 
       CHARACTER*7 fields(nfields + 9)
       CHARACTER*7 fn
@@ -56,6 +56,7 @@ C     GDDSCD GDCLBK GDCLOS (although this last one is used)
       REAL fl
       REAL*8 dp
       REAL*8 p(6), q(6)
+      COMPLEX*16 dc
       COMPLEX*16 cp(6), cq(6)
 
       CALL SYSTEM ( 'rm -rf ' // fildir )
@@ -65,10 +66,10 @@ C     GDDSCD GDCLBK GDCLOS (although this last one is used)
       datdat(i) = i
    10 CONTINUE
 
-      fields = (/ 'INDEX  ', 'bit    ', 'const  ', 'data   ', 'lincom ',
-     +'linterp', 'mult   ', 'phase  ', 'polynom', 'sbit   ', 'string ',
-     +'       ', '       ', '       ', '       ', '       ', '       ',
-     +'       ', '       ', '       ' /)
+      fields =(/ 'INDEX  ', 'bit    ', 'const  ', 'data   ', 'div    ',
+     +'lincom ', 'linterp', 'mult   ', 'phase  ', 'polynom', 'recip  ',
+     +'sbit   ', 'string ', '       ', '       ', '       ', '       ',
+     +'       ', '       ', '       ', '       ', '       ' /)
 
 C     Write the test dirfile
       OPEN(1, FILE=frmat, STATUS='NEW')
@@ -87,6 +88,8 @@ C     Write the test dirfile
       WRITE(1, *) 'sbit SBIT data 5 6'
       WRITE(1, *) 'mult MULTIPLY data sbit'
       WRITE(1, *) 'phase PHASE data 11'
+      WRITE(1, *) 'div DIVIDE mult bit'
+      WRITE(1, *) 'recip RECIP div 6.5;4.3'
       WRITE(1, *) 'string STRING "Zaphod Beeblebrox"'
       CLOSE(1, STATUS='KEEP')
 
@@ -1346,16 +1349,16 @@ C     44: GDNVEC check
         WRITE(*, 2001) 44, e
       ENDIF
 
-      IF (n .NE. 19) THEN
+      IF (n .NE. 21) THEN
         ne = ne + 1
         WRITE(*, 2002), 44, n
       ENDIF
 
 C     45: GDVECN check
-      fields = (/ 'INDEX  ', 'bit    ', 'data   ', 'lincom ', 'linterp',
-     +'mult   ', 'new1   ', 'new10  ', 'new2   ', 'new3   ', 'new4   ',
-     +'new5   ', 'new6   ', 'new7   ', 'new8   ', 'new9   ', 'phase  ',
-     +'polynom', 'sbit   ', 'string ' /)
+      fields =(/ 'INDEX  ', 'bit    ', 'data   ', 'div    ', 'lincom ',
+     +'linterp', 'mult   ', 'new1   ', 'new10  ', 'new2   ', 'new3   ',
+     +'new4   ', 'new5   ', 'new6   ', 'new7   ', 'new8   ', 'new9   ',
+     +'phase  ', 'polynom', 'recip  ', 'sbit   ', 'string ' /)
       DO 450 i = 1, n
       l = flen
       CALL GDVECN(fn, l, d, i)
@@ -2052,10 +2055,10 @@ C     65: GDNMVE check
       ENDIF
 
 C     66: GDMVEN check
-      fields = (/ 'mlut  ', 'mnew1 ', 'mnew2 ', 'mnew3 ', 'mnew5 ',
+      fields =(/'mlut  ', 'mnew1 ', 'mnew2 ', 'mnew3 ', 'mnew5 ',
      +'mnew6 ', 'mnew7 ', 'mnew8 ', 'mnew9 ', 'mnew10', '      ',
      +'      ', '      ', '      ', '      ', '      ', '      ',
-     +'      ', '      ', '      ' /)
+     +'      ', '      ', '      ', '      ', '      '/)
       DO 660 i = 1, n
       l = flen
       CALL GDMVEN(fn, l, d, "data", 4, i)
@@ -3113,8 +3116,453 @@ C     142: GDGBOF check
         WRITE(*, 2002) 142, n
       ENDIF
 
+C     143: GDGEDV check
+      l = flen
+      CALL GDGEDV(fields(1), l, fields(2), l, n, d, 'div', 3)
+      CALL GDEROR(e, d)
+
+      IF (e .NE. GD_EOK) THEN
+        ne = ne + 1
+        WRITE(*, 2001) 143, e
+      ENDIF
+
+      IF (l .NE. flen) THEN
+        ne = ne + 1
+        WRITE(*, 2007) 143, 1, l
+      ENDIF
+
+      IF (n .NE. 0) THEN
+        ne = ne + 1
+        WRITE(*, 2007) 143, 2, n
+      ENDIF
+
+      IF (fields(1) .NE. 'mult') THEN
+        ne = ne + 1
+        WRITE(*, 2008) 143, 3, fields(1)
+      ENDIF
+
+      IF (fields(2) .NE. 'bit') THEN
+        ne = ne + 1
+        WRITE(*, 2008) 143, 4, fields(2)
+      ENDIF
+
+C     144: GDGERC check
+      l = flen
+      CALL GDGERC(fields(1), l, dp, n, d, 'recip', 5)
+      CALL GDEROR(e, d)
+
+      IF (e .NE. GD_EOK) THEN
+        ne = ne + 1
+        WRITE(*, 2001) 144, e
+      ENDIF
+
+      IF (l .NE. flen) THEN
+        ne = ne + 1
+        WRITE(*, 2007) 144, 1, l
+      ENDIF
+
+      IF (n .NE. 0) THEN
+        ne = ne + 1
+        WRITE(*, 2007) 144, 2, n
+      ENDIF
+
+      IF (fields(1) .NE. 'div') THEN
+        ne = ne + 1
+        WRITE(*, 2008) 144, 3, fields(1)
+      ENDIF
+
+      IF (abs(dp - 6.5) .gt. 0.001) THEN
+        ne = ne + 1
+        WRITE(*, 2012) 144, dp
+      ENDIF
+
+C     145: GDGECR check
+      l = flen
+      CALL GDGECR(fields(1), l, dc, n, d, 'recip', 5)
+      CALL GDEROR(e, d)
+
+      IF (e .NE. GD_EOK) THEN
+        ne = ne + 1
+        WRITE(*, 2001) 145, e
+      ENDIF
+
+      IF (l .NE. flen) THEN
+        ne = ne + 1
+        WRITE(*, 2007) 145, 1, l
+      ENDIF
+
+      IF (n .NE. 0) THEN
+        ne = ne + 1
+        WRITE(*, 2007) 145, 2, n
+      ENDIF
+
+      IF (fields(1) .NE. 'div') THEN
+        ne = ne + 1
+        WRITE(*, 2008) 145, 3, fields(1)
+      ENDIF
+
+      IF (abs(dc - cmplx(6.5, 4.3)) .gt. 0.001) THEN
+        ne = ne + 1
+        WRITE(*, 2013) 145, REAL(REAL(dc)), REAL(AIMAG(dc))
+      ENDIF
+
+C     146: GDADDV check
+      CALL GDADDV(d, 'new14', 5, 'in1', 3, 'in2', 3, 0)
+      CALL GDEROR(e, d)
+
+      IF (e .NE. GD_EOK) THEN
+        ne = ne + 1
+        WRITE(*, 2006) 146, 1, e
+      ENDIF
+
+      l = flen
+      CALL GDGEDV(fields(1), l, fields(2), l, n, d, 'new14', 5)
+      CALL GDEROR(e, d)
+
+      IF (e .NE. GD_EOK) THEN
+        ne = ne + 1
+        WRITE(*, 2006) 146, 2, e
+      ENDIF
+
+      IF (l .NE. flen) THEN
+        ne = ne + 1
+        WRITE(*, 2007) 146, 1, l
+      ENDIF
+
+      IF (n .NE. 0) THEN
+        ne = ne + 1
+        WRITE(*, 2007) 146, 2, n
+      ENDIF
+
+      IF (fields(1) .NE. 'in1') THEN
+        ne = ne + 1
+        WRITE(*, 2008) 146, 3, fields(1)
+      ENDIF
+
+      IF (fields(2) .NE. 'in2') THEN
+        ne = ne + 1
+        WRITE(*, 2008) 146, 4, fields(2)
+      ENDIF
+
+C     147: GDADRC check
+      p(1) = 31.9
+      CALL GDADRC(d, 'new15', 5, 'in1', 3, p(1), 0)
+      CALL GDEROR(e, d)
+
+      IF (e .NE. GD_EOK) THEN
+        ne = ne + 1
+        WRITE(*, 2006) 147, 1, e
+      ENDIF
+
+      l = flen
+      CALL GDGERC(fields(1), l, dp, n, d, 'new15', 5)
+      CALL GDEROR(e, d)
+
+      IF (e .NE. GD_EOK) THEN
+        ne = ne + 1
+        WRITE(*, 2006) 147, 2, e
+      ENDIF
+
+      IF (l .NE. flen) THEN
+        ne = ne + 1
+        WRITE(*, 2007) 147, 1, l
+      ENDIF
+
+      IF (n .NE. 0) THEN
+        ne = ne + 1
+        WRITE(*, 2007) 147, 2, n
+      ENDIF
+
+      IF (fields(1) .NE. 'in1') THEN
+        ne = ne + 1
+        WRITE(*, 2008) 147, 3, fields(1)
+      ENDIF
+
+      IF (abs(dp - p(1)) .gt. 0.001) THEN
+        ne = ne + 1
+        WRITE(*, 2012) 147, dp
+      ENDIF
+
+C     148: GDADCR check
+      cp(1) = cmplx(31.9, 38.2)
+      CALL GDADCR(d, 'new16', 5, 'in1', 3, cp(1), 0)
+      CALL GDEROR(e, d)
+
+      IF (e .NE. GD_EOK) THEN
+        ne = ne + 1
+        WRITE(*, 2006) 148, 1, e
+      ENDIF
+
+      l = flen
+      CALL GDGECR(fields(1), l, dc, n, d, 'new16', 5)
+      CALL GDEROR(e, d)
+
+      IF (e .NE. GD_EOK) THEN
+        ne = ne + 1
+        WRITE(*, 2006) 148, 2, e
+      ENDIF
+
+      IF (l .NE. flen) THEN
+        ne = ne + 1
+        WRITE(*, 2007) 148, 1, l
+      ENDIF
+
+      IF (n .NE. 0) THEN
+        ne = ne + 1
+        WRITE(*, 2007) 148, 2, n
+      ENDIF
+
+      IF (fields(1) .NE. 'in1') THEN
+        ne = ne + 1
+        WRITE(*, 2008) 148, 3, fields(1)
+      ENDIF
+
+      IF (abs(dc - cp(1)) .gt. 0.001) THEN
+        ne = ne + 1
+        WRITE(*, 2013) 148, dc
+      ENDIF
+
+C     149: GDMDDV check
+      CALL GDMDDV(d, 'data', 4, 'new14', 5, 'in3', 3, 'in4', 3)
+      CALL GDEROR(e, d)
+
+      IF (e .NE. GD_EOK) THEN
+        ne = ne + 1
+        WRITE(*, 2006) 149, 1, e
+      ENDIF
+
+      l = flen
+      CALL GDGEDV(fields(1), l, fields(2), l, n, d, 'data/new14', 10)
+      CALL GDEROR(e, d)
+
+      IF (e .NE. GD_EOK) THEN
+        ne = ne + 1
+        WRITE(*, 2006) 149, 2, e
+      ENDIF
+
+      IF (l .NE. flen) THEN
+        ne = ne + 1
+        WRITE(*, 2007) 149, 1, l
+      ENDIF
+
+      IF (n .NE. 0) THEN
+        ne = ne + 1
+        WRITE(*, 2007) 149, 2, n
+      ENDIF
+
+      IF (fields(1) .NE. 'in3') THEN
+        ne = ne + 1
+        WRITE(*, 2008) 149, 3, fields(1)
+      ENDIF
+
+      IF (fields(2) .NE. 'in4') THEN
+        ne = ne + 1
+        WRITE(*, 2008) 149, 4, fields(2)
+      ENDIF
+
+C     150: GDMDRC check
+      p(1) = 95.5
+      CALL GDMDRC(d, 'data', 4, 'new15', 5, 'in0', 3, p(1))
+      CALL GDEROR(e, d)
+
+      IF (e .NE. GD_EOK) THEN
+        ne = ne + 1
+        WRITE(*, 2006) 150, 1, e
+      ENDIF
+
+      l = flen
+      CALL GDGERC(fields(1), l, dp, n, d, 'data/new15', 10)
+      CALL GDEROR(e, d)
+
+      IF (e .NE. GD_EOK) THEN
+        ne = ne + 1
+        WRITE(*, 2006) 150, 2, e
+      ENDIF
+
+      IF (l .NE. flen) THEN
+        ne = ne + 1
+        WRITE(*, 2007) 150, 1, l
+      ENDIF
+
+      IF (n .NE. 0) THEN
+        ne = ne + 1
+        WRITE(*, 2007) 150, 2, n
+      ENDIF
+
+      IF (fields(1) .NE. 'in0') THEN
+        ne = ne + 1
+        WRITE(*, 2008) 150, 3, fields(1)
+      ENDIF
+
+      IF (abs(dp - p(1)) .gt. 0.001) THEN
+        ne = ne + 1
+        WRITE(*, 2012) 150, dp
+      ENDIF
+
+C     151: GDADCR check
+      cp(1) = cmplx(8.47, 6.22)
+      CALL GDMDCR(d,'data', 4,  'new16', 5, 'in3', 3, cp(1))
+      CALL GDEROR(e, d)
+
+      IF (e .NE. GD_EOK) THEN
+        ne = ne + 1
+        WRITE(*, 2006) 151, 1, e
+      ENDIF
+
+      l = flen
+      CALL GDGECR(fields(1), l, dc, n, d, 'data/new16', 10)
+      CALL GDEROR(e, d)
+
+      IF (e .NE. GD_EOK) THEN
+        ne = ne + 1
+        WRITE(*, 2006) 151, 2, e
+      ENDIF
+
+      IF (l .NE. flen) THEN
+        ne = ne + 1
+        WRITE(*, 2007) 151, 1, l
+      ENDIF
+
+      IF (n .NE. 0) THEN
+        ne = ne + 1
+        WRITE(*, 2007) 151, 2, n
+      ENDIF
+
+      IF (fields(1) .NE. 'in3') THEN
+        ne = ne + 1
+        WRITE(*, 2008) 151, 3, fields(1)
+      ENDIF
+
+      IF (abs(dc - cp(1)) .gt. 0.001) THEN
+        ne = ne + 1
+        WRITE(*, 2013) 151, dc
+      ENDIF
+
+C     152: GDALDV check
+      CALL GDALDV(d, 'new14', 5, 'in6', 3, 'in4', 3)
+      CALL GDEROR(e, d)
+
+      IF (e .NE. GD_EOK) THEN
+        ne = ne + 1
+        WRITE(*, 2006) 152, 1, e
+      ENDIF
+
+      l = flen
+      CALL GDGEDV(fields(1), l, fields(2), l, n, d, 'new14', 5)
+      CALL GDEROR(e, d)
+
+      IF (e .NE. GD_EOK) THEN
+        ne = ne + 1
+        WRITE(*, 2006) 152, 2, e
+      ENDIF
+
+      IF (l .NE. flen) THEN
+        ne = ne + 1
+        WRITE(*, 2007) 152, 1, l
+      ENDIF
+
+      IF (n .NE. 0) THEN
+        ne = ne + 1
+        WRITE(*, 2007) 152, 2, n
+      ENDIF
+
+      IF (fields(1) .NE. 'in6') THEN
+        ne = ne + 1
+        WRITE(*, 2008) 152, 3, fields(1)
+      ENDIF
+
+      IF (fields(2) .NE. 'in4') THEN
+        ne = ne + 1
+        WRITE(*, 2008) 152, 4, fields(2)
+      ENDIF
+
+C     153: GDALRC check
+      p(1) = 0.187
+      CALL GDALRC(d, 'new15', 5, 'in5', 3, p(1))
+      CALL GDEROR(e, d)
+
+      IF (e .NE. GD_EOK) THEN
+        ne = ne + 1
+        WRITE(*, 2006) 153, 1, e
+      ENDIF
+
+      l = flen
+      CALL GDGERC(fields(1), l, dp, n, d, 'new15', 5)
+      CALL GDEROR(e, d)
+
+      IF (e .NE. GD_EOK) THEN
+        ne = ne + 1
+        WRITE(*, 2006) 153, 2, e
+      ENDIF
+
+      IF (l .NE. flen) THEN
+        ne = ne + 1
+        WRITE(*, 2007) 153, 1, l
+      ENDIF
+
+      IF (n .NE. 0) THEN
+        ne = ne + 1
+        WRITE(*, 2007) 153, 2, n
+      ENDIF
+
+      IF (fields(1) .NE. 'in5') THEN
+        ne = ne + 1
+        WRITE(*, 2008) 153, 3, fields(1)
+      ENDIF
+
+      IF (abs(dp - p(1)) .gt. 0.001) THEN
+        ne = ne + 1
+        WRITE(*, 2012) 153, dp
+      ENDIF
+
+C     154: GDALCR check
+      cp(1) = cmplx(4.3, 81.81)
+      CALL GDALCR(d, 'new16', 5, 'in6', 3, cp(1))
+      CALL GDEROR(e, d)
+
+      IF (e .NE. GD_EOK) THEN
+        ne = ne + 1
+        WRITE(*, 2006) 154, 1, e
+      ENDIF
+
+      l = flen
+      CALL GDGECR(fields(1), l, dc, n, d, 'new16', 5)
+      CALL GDEROR(e, d)
+
+      IF (e .NE. GD_EOK) THEN
+        ne = ne + 1
+        WRITE(*, 2006) 154, 2, e
+      ENDIF
+
+      IF (l .NE. flen) THEN
+        ne = ne + 1
+        WRITE(*, 2007) 154, 1, l
+      ENDIF
+
+      IF (n .NE. 0) THEN
+        ne = ne + 1
+        WRITE(*, 2007) 154, 2, n
+      ENDIF
+
+      IF (fields(1) .NE. 'in6') THEN
+        ne = ne + 1
+        WRITE(*, 2008) 154, 3, fields(1)
+      ENDIF
+
+      IF (abs(dc - cp(1)) .gt. 0.001) THEN
+        ne = ne + 1
+        WRITE(*, 2013) 154, dp
+      ENDIF
+
+
+
+
+
+
+
+C     ===============================================================
 C     Cleanup
-      CALL GDCLOS(d)
+      CALL GDDSCD(d)
 
       CALL SYSTEM ( 'rm -rf ' // fildir )
 
@@ -3135,6 +3583,7 @@ C     Cleanup
  2010 FORMAT('p(', i0, ')[', i0, '] = ', d16.10)
  2011 FORMAT('p(', i0, ')[', i0, '] = ', d16.10, ';', d16.10)
  2012 FORMAT('d[', i0, '] = ', d16.10)
+ 2013 FORMAT('x[', i0, '] = ', d16.10, ';', d16.10)
 
       STOP
       END 

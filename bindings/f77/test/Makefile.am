@@ -44,6 +44,7 @@ FFLAGS += -I.. $(F77_WALL) $(F77_WEXTRA) $(F77_ASSUME)
 FCFLAGS += -I.. $(F77_WALL) $(FC_WEXTRA) $(FC_ASSUME)
 F95LDADD=../libf95getdata.la $(F77LDADD)
 F77LDADD=../libfgetdata.la
+AM_LDFLAGS = -L..
 
 TESTS=gdcopn big_test $(F95TESTS)
 

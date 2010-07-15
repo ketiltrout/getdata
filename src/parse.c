@@ -561,7 +561,7 @@ static gd_entry_t* _GD_ParseRecip(DIRFILE* D,
     return NULL;
   }
 
-  E->in_fields[0] = strdup(in_cols[3]);
+  E->in_fields[0] = strdup(in_cols[2]);
 
   if (E->field == NULL || E->in_fields[0] == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
@@ -570,9 +570,10 @@ static gd_entry_t* _GD_ParseRecip(DIRFILE* D,
     return NULL;
   }
 
-  E->scalar[0] = _GD_SetScalar(D, in_cols[2], &E->cdividend, GD_COMPLEX128,
+  E->scalar[0] = _GD_SetScalar(D, in_cols[3], &E->cdividend, GD_COMPLEX128,
       format_file, line, &E->comp_scal);
   E->dividend = creal(E->cdividend);
+  E->comp_scal = (cimag(E->cdividend) == 0) ? 0 : 1;
 
   dreturn("%p", E);
   return E;

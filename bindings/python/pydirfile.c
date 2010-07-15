@@ -1781,7 +1781,6 @@ static PyMethodDef gdpy_dirfile_methods[] = {
   },
   {"bof", (PyCFunction)gdpy_dirfile_getbof, METH_VARARGS | METH_KEYWORDS,
     "bof(field_code)\n\n"
-      /* -----------------------------------------------------------------| */
       "Retrieve the sample number corresponding to the beginning-of-field\n"
       "marker for the field specified by 'field_code'.  See gd_bof(3)."
   },
@@ -1907,9 +1906,9 @@ static PyMethodDef gdpy_dirfile_methods[] = {
   { "mvector_list", (PyCFunction)gdpy_dirfile_getmvectorlist,
     METH_VARARGS | METH_KEYWORDS,
     "mvector_list(parent)\n\n"
-      "Retrieve a list of all vector type metafields (that is: BIT, LINCOM,\n"
-      "LINTERP, MULTIPLY, PHASE, POLYNOM, and SBIT metafields) for the\n"
-      "parent field 'parent'.  See gd_mvector_list(3)."
+      "Retrieve a list of all vector type metafields (that is: BIT, DIVIDE,\n"
+      "LINCOM, LINTERP, MULTIPLY, PHASE, POLYNOM, RECIP, and SBIT\n"
+      "metafields) for the parent field 'parent'.  See gd_mvector_list(3)."
   },
   {"native_type", (PyCFunction)gdpy_dirfile_getnativetype,
     METH_VARARGS | METH_KEYWORDS,
@@ -1952,15 +1951,15 @@ static PyMethodDef gdpy_dirfile_methods[] = {
   {"nmvectors", (PyCFunction)gdpy_dirfile_getnmvectors,
     METH_VARARGS | METH_KEYWORDS,
     "nmvectors(parent)\n\n"
-      "Return the number of vector type metafields (that is: BIT, LINCOM,\n"
-      "LINTERP, MULTIPLY, PHASE, POLYNOM, and SBIT metafields) for the\n"
-      "parent field 'parent'.  See gd_nmvectors(3)."
+      "Return the number of vector type metafields (that is: BIT, DIVIDE,\n"
+      "LINCOM, LINTERP, MULTIPLY, PHASE, POLYNOM, RECIP, and SBIT\n"
+      "metafields) for the parent field 'parent'.  See gd_nmvectors(3)."
   },
   {"nvectors", (PyCFunction)gdpy_dirfile_getnvectors, METH_NOARGS,
     "nvectors()\n\n"
-      "Return the number of vector type fields (that is: BIT, LINCOM,\n"
-      "LINTERP, MULTIPLY, PHASE, POLYNOM, RAW, and SBIT fields) defined in\n"
-      "the database.  See gd_nvectors(3)."
+      "Return the number of vector type fields (that is: BIT, DIVIDE,\n"
+      "INDEX, LINCOM, LINTERP, MULTIPLY, PHASE, POLYNOM, RAW, RECIP, and\n"
+      "SBIT fields) defined in the database.  See gd_nvectors(3)."
   },
   {"raw_filename", (PyCFunction)gdpy_dirfile_getrawfilename,
     METH_VARARGS | METH_KEYWORDS,
@@ -1988,9 +1987,10 @@ static PyMethodDef gdpy_dirfile_methods[] = {
   },
   { "vector_list", (PyCFunction)gdpy_dirfile_getvectorlist, METH_NOARGS,
     "vector_list()\n\n"
-      "Retrieve a list of all vector type fields (that is: BIT, LINCOM,\n"
-      "LINTERP, MULTIPLY, PHASE, POLYNOM, RAW, and SBIT metafields) defined\n"
-      "in the database.  See gd_vector_list(3)."
+      "Retrieve a list of all vector type fields (that is: BIT, DIVIDE,\n"
+      /* -----------------------------------------------------------------| */
+      "INDEX, LINCOM, LINTERP, MULTIPLY, PHASE, POLYNOM, RAW, RECIP, and\n"
+      "SBIT metafields) defined in the database.  See gd_vector_list(3)."
   },
   {"include", (PyCFunction)gdpy_dirfile_include, METH_VARARGS | METH_KEYWORDS,
     "include(filename [, fragment_index, flags])\n\n"
@@ -2117,14 +2117,17 @@ static PyMethodDef gdpy_dirfile_methods[] = {
 "a dictionary with keys: 'suberror', 'line', 'linenum', and 'filename',\n"\
 "providing the same information as the gd_pdata_t structure in the C API.\n"\
 "The second object is the 'extra' object passed to this constructor, and\n"\
-/* ---------------------------------------------------------------------| */\
 "may be any object desired by the caller.  If no extra parameter was\n"\
 "specified, this will be None.  The sehandler should return one of the\n"\
 "pygetdata.SYNTAX_* symbols.\n\n"\
 "The dirfile will be automatically closed when garbage collection is run\n"\
-"on the object.  This may be performed explicitly by calling the close()\n"\
-"or discard() methods.  After explicitly calling close() or discard()\n"\
-"the dirfile will be invalidated, prohibiting further use of it.\n"
+"on the object.  In general, however, an explicit call to close() or\n"\
+"discard() is preferable on a writeable dirfile, since the implicit close\n"\
+/* ---------------------------------------------------------------------| */\
+"performed on the dirfile when the object is deleted silently discards\n"\
+"any errors encountered when the dirfile is flushed to disc.  After\n"\
+"explicitly calling close() or discard(), the dirfile will be\n"\
+"invalidated, prohibiting further use of it.\n"
 
 
 PyTypeObject gdpy_dirfile =

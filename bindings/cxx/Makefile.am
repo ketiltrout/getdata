@@ -35,13 +35,14 @@ getdata_include_HEADERS = getdata/dirfile.h getdata/entry.h getdata/rawentry.h \
 													getdata/phaseentry.h getdata/constentry.h \
 													getdata/stringentry.h getdata/indexentry.h \
 													getdata/sbitentry.h getdata/polynomentry.h \
-													getdata/fragment.h
+													getdata/fragment.h getdata/divideentry.h
 
 lib_LTLIBRARIES=libgetdata++.la
-libgetdata___la_SOURCES = dirfile.cpp bitentry.cpp constentry.cpp entry.cpp \
-													fragment.cpp indexentry.cpp lincomentry.cpp \
-													linterpentry.cpp multiplyentry.cpp phaseentry.cpp \
-													polynomentry.cpp rawentry.cpp sbitentry.cpp \
+libgetdata___la_SOURCES = dirfile.cpp bitentry.cpp constentry.cpp \
+													divideentry.cpp entry.cpp fragment.cpp \
+													indexentry.cpp lincomentry.cpp linterpentry.cpp \
+													multiplyentry.cpp phaseentry.cpp polynomentry.cpp \
+													rawentry.cpp recipentry.cpp sbitentry.cpp \
 													stringentry.cpp ${getdata_include_HEADERS}
 libgetdata___la_LIBADD=../../src/libgetdata.la
 libgetdata___la_LDFLAGS = -version-info @GETDATAXX_VERSION@

@@ -17,7 +17,7 @@ int main(void)
   const char* format = __TEST__ "dirfile/format";
   const char* data = __TEST__ "dirfile/data";
   const char* format_data = "data RAW INT32 8\nphase PHASE data 1\n"
-    "div RECIP 230. data\n";
+    "div RECIP data 230.\n";
   int32_t data_data[256];
   double c[8];
   int fd, i, r = 0;

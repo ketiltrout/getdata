@@ -46,6 +46,8 @@ extern "C" {
 #include <getdata/constentry.h>
 #include <getdata/stringentry.h>
 #include <getdata/multiplyentry.h>
+#include <getdata/divideentry.h>
+#include <getdata/recipentry.h>
 
 namespace GetData {
   
@@ -60,6 +62,8 @@ namespace GetData {
     friend class BitEntry;
     friend class SBitEntry;
     friend class MultiplyEntry;
+    friend class DivideEntry;
+    friend class RecipEntry;
     friend class PhaseEntry;
     friend class PolynomEntry;
     friend class ConstEntry;

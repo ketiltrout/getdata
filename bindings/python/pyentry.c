@@ -33,8 +33,8 @@ static const char* gdpy_entry_type_names[] =
   "INDEX_ENTRY",    /* 0x07 */
   "POLYNOM_ENTRY",  /* 0x08 */
   "SBIT_ENTRY",     /* 0x09 */
-  NULL,             /* 0x0A - unused */
-  NULL,             /* 0x0B - unused */
+  "DIVIDE_ENTRY",   /* 0x0A */
+  "RECIP_ENTRY",    /* 0x0B */
   NULL,             /* 0x0C - unused */
   NULL,             /* 0x0D - unused */
   NULL,             /* 0x0E - unused */
@@ -135,6 +135,8 @@ static void gdpy_set_entry_from_tuple(gd_entry_t *E, PyObject* tuple,
     case GD_BIT_ENTRY:
     case GD_SBIT_ENTRY:
     case GD_MULTIPLY_ENTRY:
+    case GD_DIVIDE_ENTRY:
+    case GD_RECIP_ENTRY:
     case GD_PHASE_ENTRY:
     case GD_POLYNOM_ENTRY:
       min = 2;
@@ -276,6 +278,7 @@ static void gdpy_set_entry_from_tuple(gd_entry_t *E, PyObject* tuple,
       }
       break;
     case GD_MULTIPLY_ENTRY:
+    case GD_DIVIDE_ENTRY:
       E->in_fields[0] = gdpy_dup_pystring(PyTuple_GetItem(tuple, 0));
 
       if (PyErr_Occurred()) {
@@ -284,6 +287,32 @@ static void gdpy_set_entry_from_tuple(gd_entry_t *E, PyObject* tuple,
       }
 
       E->in_fields[1] = gdpy_dup_pystring(PyTuple_GetItem(tuple, 1));
+
+      if (PyErr_Occurred()) {
+        dreturnvoid();
+        return;
+      }
+      break;
+    case GD_RECIP_ENTRY:
+      E->in_fields[0] = gdpy_dup_pystring(PyTuple_GetItem(tuple, 0));
+
+      if (PyErr_Occurred()) {
+        dreturnvoid();
+        return;
+      }
+
+      obj = PyTuple_GetItem(tuple, 1);
+      if (PyComplex_Check(obj)) {
+        E->comp_scal = 1;
+        E->cdividend = gdpy_as_complex(obj);
+      } else if (E->comp_scal)
+        gdpy_set_scalar_from_pyobj(obj, GD_COMPLEX128, &E->scalar[0],
+            &E->cdividend);
+      else {
+        gdpy_set_scalar_from_pyobj(obj, GD_FLOAT64, &E->scalar[0],
+            &E->dividend);
+        E->cdividend = E->dividend;
+      }
 
       if (PyErr_Occurred()) {
         dreturnvoid();
@@ -373,6 +402,8 @@ static void gdpy_set_entry_from_dict(gd_entry_t *E, PyObject* parms,
    * (S)BIT:   in_field, bitnum, (numbits) = 2/3
    * PHASE:    in_field, shift             = 2
    * MULTIPLY: in_field1, in_field2        = 2
+   * DIVIDE:   in_field1, in_field2        = 2
+   * RECIP:    in_field, dividend          = 2
    * POLYNOM:  in_field, a                 = 2
    * CONST:    type                        = 1
    * STRING:   (none)                      = 0
@@ -408,8 +439,14 @@ static void gdpy_set_entry_from_dict(gd_entry_t *E, PyObject* parms,
         size = 2;
       break;
     case GD_MULTIPLY_ENTRY:
+    case GD_DIVIDE_ENTRY:
       key[0] = "in_field1";
       key[1] = "in_field2";
+      size = 2;
+      break;
+    case GD_RECIP_ENTRY:
+      key[0] = "in_field";
+      key[1] = "dividend";
       size = 2;
       break;
     case GD_PHASE_ENTRY:
@@ -625,9 +662,11 @@ static PyObject* gdpy_entry_getinfields(struct gdpy_entry_t* self,
     case GD_PHASE_ENTRY:
     case GD_POLYNOM_ENTRY:
     case GD_SBIT_ENTRY:
+    case GD_RECIP_ENTRY:
       tuple = Py_BuildValue("(s)", self->E->in_fields[0]);
       break;
     case GD_MULTIPLY_ENTRY:
+    case GD_DIVIDE_ENTRY:
       tuple = Py_BuildValue("(ss)", self->E->in_fields[0],
           self->E->in_fields[1]);
       break;
@@ -689,6 +728,7 @@ static int gdpy_entry_setinfields(struct gdpy_entry_t* self, PyObject *value,
     case GD_PHASE_ENTRY:
     case GD_POLYNOM_ENTRY:
     case GD_SBIT_ENTRY:
+    case GD_RECIP_ENTRY:
       if (!PyTuple_Check(value))
         s[0] = gdpy_dup_pystring(value);
       else {
@@ -710,6 +750,7 @@ static int gdpy_entry_setinfields(struct gdpy_entry_t* self, PyObject *value,
       self->E->in_fields[0] = s[0];
       break;
     case GD_MULTIPLY_ENTRY:
+    case GD_DIVIDE_ENTRY:
       if (!PyTuple_Check(value)) {
         PyErr_SetString(PyExc_TypeError, "'pygetdata.entry' "
             "attribute 'in_fields' must be a tuple");
@@ -1286,15 +1327,85 @@ static int gdpy_entry_setnumbits(struct gdpy_entry_t* self, PyObject *value,
   return 0;
 }
 
+static PyObject* gdpy_entry_getdividend(struct gdpy_entry_t* self,
+    void* closure)
+{
+  PyObject* obj = NULL;
+
+  dtrace("%p, %p", self, closure);
+
+  if (self->E->field_type == GD_RECIP_ENTRY) {
+    if (self->E->scalar[0])
+      obj = PyString_FromString(self->E->scalar[0]);
+    else if (self->E->comp_scal)
+      obj = gdpy_from_complex(self->E->cdividend);
+    else
+      obj = PyFloat_FromDouble(self->E->dividend);
+  } else
+    PyErr_Format(PyExc_AttributeError, "'pygetdata.entry' "
+        "attribute 'dividend' not available for entry type %s",
+        gdpy_entry_type_names[self->E->field_type]); 
+
+  dreturn("%p", obj);
+  return obj;
+}
+
+static int gdpy_entry_setdividend(struct gdpy_entry_t* self, PyObject *value,
+    void *closure)
+{
+  int comp_scal = 0;
+  char *scalar;
+  double complex cdividend = 0;
+  double dividend = 0;
+
+  dtrace("%p, %p, %p", self, value, closure);
+
+  if (self->E->field_type != GD_RECIP_ENTRY) {
+    PyErr_Format(PyExc_AttributeError, "'pygetdata.entry' "
+        "attribute 'dividend' not available for entry type %s",
+        gdpy_entry_type_names[self->E->field_type]); 
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  if (PyComplex_Check(value) || PyString_Check(value))
+    comp_scal = 1;
+
+  if (comp_scal) {
+    gdpy_set_scalar_from_pyobj(value, GD_COMPLEX128, &scalar, &cdividend);
+    dividend = creal(cdividend);
+  } else {
+    gdpy_set_scalar_from_pyobj(value, GD_FLOAT64, &scalar, &dividend);
+    cdividend = dividend;
+  }
+
+  if (PyErr_Occurred()) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  self->E->comp_scal = comp_scal;
+  self->E->cdividend = cdividend;
+  self->E->dividend = dividend;
+  free(self->E->scalar[0]);
+  self->E->scalar[0] = scalar;
+
+  dreturn("%i", 0);
+  return 0;
+}
+
 static PyObject* gdpy_entry_getshift(struct gdpy_entry_t* self, void* closure)
 {
   PyObject* obj = NULL;
 
   dtrace("%p, %p", self, closure);
 
-  if (self->E->field_type == GD_PHASE_ENTRY)
-    obj = PyLong_FromLongLong((PY_LONG_LONG)self->E->shift);
-  else
+  if (self->E->field_type == GD_PHASE_ENTRY) {
+    if (self->E->scalar[0] == NULL)
+      obj = PyLong_FromLongLong((PY_LONG_LONG)self->E->shift);
+    else
+      obj = PyString_FromString(self->E->scalar[0]);
+  } else
     PyErr_Format(PyExc_AttributeError, "'pygetdata.entry' "
         "attribute 'shift' not available for entry type %s",
         gdpy_entry_type_names[self->E->field_type]); 
@@ -1494,18 +1605,27 @@ static PyObject* gdpy_entry_getparms(struct gdpy_entry_t* self, void* closure)
       tuple = Py_BuildValue("(ss)", self->E->in_fields[0], self->E->table);
       break;
     case GD_MULTIPLY_ENTRY:
+    case GD_DIVIDE_ENTRY:
       tuple = Py_BuildValue("(ss)", self->E->in_fields[0],
           self->E->in_fields[1]);
+      break;
+    case GD_RECIP_ENTRY:
+      if (self->E->comp_scal) 
+        tuple = Py_BuildValue("(sO)", self->E->in_fields[0],
+            gdpy_from_complex(self->E->cdividend));
+      else
+        tuple = Py_BuildValue("(sd)", self->E->in_fields[0], self->E->dividend);
       break;
     case GD_PHASE_ENTRY:
       tuple = Py_BuildValue("(si)", self->E->in_fields[0], self->E->shift);
       break;
     case GD_POLYNOM_ENTRY:
       a = PyTuple_New(self->E->poly_ord + 1);
-      for (i = 0; i <= self->E->poly_ord; ++i)
-        if (self->E->comp_scal)
+      if (self->E->comp_scal)
+        for (i = 0; i <= self->E->poly_ord; ++i)
           PyTuple_SetItem(a, i, gdpy_from_complex(self->E->ca[i]));
-        else
+      else
+        for (i = 0; i <= self->E->poly_ord; ++i)
           PyTuple_SetItem(a, i, PyFloat_FromDouble(self->E->a[i]));
       tuple = Py_BuildValue("(sO)", self->E->in_fields[0], a);
       break;
@@ -1637,6 +1757,12 @@ static PyGetSetDef gdpy_entry_getset[] = {
       "CONST or RAW field.  This attribute is read-only.  To change the\n"
       "data type modify the data_type attribute.\n",
     NULL },
+  { "dividend", (getter)gdpy_entry_getdividend, (setter)gdpy_entry_setdividend,
+    "The dividend of a RECIP field.  If this is specified using a CONST\n"
+      /* -----------------------------------------------------------------| */
+      "scalar field, this will be the field code of that field, otherwise,\n"
+      "it will be the number itself.",
+    NULL },
   { "field_type", (getter)gdpy_entry_gettype, NULL,
     "A numeric code indicating the field type.  This will be one of the\n"
       "pygetdata.*_ENTRY symbols.  This attribute is read-only.  An entry's\n"
@@ -1644,7 +1770,6 @@ static PyGetSetDef gdpy_entry_getset[] = {
       "field_type_name attribute for a human-readable version of this data.\n",
     NULL },
   { "field_type_name", (getter)gdpy_entry_gettypename, NULL,
-      /* -----------------------------------------------------------------| */
     "A human-readable string indicating the field type.  This attribute\n"
       "is read-only.  An entry's field type may not be changed after\n"
       "creation.  See also the field_type attribute for a numeric version\n"
@@ -1702,7 +1827,7 @@ static PyGetSetDef gdpy_entry_getset[] = {
       "parameters of the entry.  This attribute may be assigned a\n"
       "dictionary, in which case it will be converted internally to the\n"
       "corresponding parameters tuple.",
-      NULL },
+    NULL },
   { "poly_ord", (getter)gdpy_entry_getpolyord, (setter)gdpy_entry_setpolyord,
     "The polynomial order of a POLYNOM field.  Modifying this will change\n"
       "the number of terms in the polynomial.  If this number is increased,\n"
@@ -1765,12 +1890,17 @@ static PyGetSetDef gdpy_entry_getset[] = {
 "  LINTERP:      (in_field, table)\n"\
 "    'in_field':   a string containing the input field code.\n"\
 "    'table':      the pathname to the look-up table on disk.\n\n"\
-"  MULTIPLY:     (in_field1, in_field2)\n"\
+"  MULTIPLY or DIVIDE:\n"\
+"                (in_field1, in_field2)\n"\
 "    'in_field1':   a string containing the first input field code.\n"\
 "    'in_field2':   a string containing the second input field code.\n\n"\
 "  PHASE:        (in_field, shift)\n"\
 "    'in_field':   a string containing the input field code.\n"\
 "    'shift:       a number or CONST field code specifying the number of\n"\
+"                    samples to shift the data.\n\n"\
+"  PHASE:        (in_field, shift)\n"\
+"    'in_field':   a string containing the input field code.\n"\
+"    'shift':      a number or CONST field code specifying the number of\n"\
 "                    samples to shift the data.\n\n"\
 "  POLYNOM:      (in_field, a)\n"\
 "    'in_field':   a string containing the input field code.\n"\
@@ -1786,6 +1916,10 @@ static PyGetSetDef gdpy_entry_getset[] = {
 "                    pygetdata.INT8 &.c\n"\
 "    'spf':        the number of samples per frame of the data on disk,\n"\
 "                    or a CONST field code specifying the same.\n\n"\
+"  RECIP:        (in_field, dividend)\n"\
+"    'in_field':   a string containing the input field code.\n"\
+"    'dividend':   a number or CONST field code specifying the dividend of\n"\
+"                    the RECIP.\n\n"\
 "If a dictionary, the keys of 'parameters' should be the names of the\n"\
 "tuple parameters listed above (ie. 'type' and 'spf' for a RAW field),\n"\
 "and the values the same as their tuple counterparts.\n\n"\

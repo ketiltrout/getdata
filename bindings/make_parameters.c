@@ -69,6 +69,8 @@ static struct {
   CONSTANT(E_UNCLEAN_DB,     "GD_UCL", 0),
   CONSTANT(E_DOMAIN,         "GD_EDO", 0),
   CONSTANT(E_BAD_REPR,       "GD_ERP", 0),
+  CONSTANT(E_BAD_VERSION,    "GD_EVR", 0),
+  CONSTANT(E_FLUSH,          "GD_EFL", 0),
 
   CONSTANT(RDONLY,           "GD_RO",  1),
   CONSTANT(RDWR,             "GD_RW",  1),
@@ -103,6 +105,8 @@ static struct {
   CONSTANT(INDEX_ENTRY,      "GD_IXE", 3),
   CONSTANT(POLYNOM_ENTRY,    "GD_PNE", 3),
   CONSTANT(SBIT_ENTRY,       "GD_SBE", 3),
+  CONSTANT(DIVIDE_ENTRY,     "GD_DVE", 3),
+  CONSTANT(RECIP_ENTRY,      "GD_RCE", 3),
   CONSTANT(CONST_ENTRY,      "GD_COE", 3),
   CONSTANT(STRING_ENTRY,     "GD_STE", 3),
 

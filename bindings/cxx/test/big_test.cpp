@@ -83,6 +83,10 @@ using namespace GetData;
   for (i = 0; i < m; ++i) if (strcmp((v), (g))) { \
     ne++; cerr << "s(" << i << ")[" << t << "] = " << (v) << endl; }
 
+#define CHECK_COMPLEX2(t,m,v,g) \
+  if (abs((v) - (g)) > 1e-10) { \
+    ne++; cerr << "c[" << t << ", " << m << "] = " << (v).real() << ";" \
+    << (v).imag() << endl; }
 #define CHECK_COMPLEX_ARRAY(t,m,v,g) \
   for (i = 0; i < m; ++i) if (abs((v) - (g)) > 1e-10) { \
     ne++; cerr << "c(" << i << ")[" << t << "] = " << v.real() \
@@ -108,10 +112,12 @@ int main(void)
     "bit BIT data 3 4\n"
     "sbit SBIT data 5 6\n"
     "mult MULTIPLY data sbit\n"
+    "div DIVIDE mult bit\n"
+    "recip RECIP div 6.5;4.3\n"
     "phase PHASE data 11\n"
     "string STRING \"Zaphod Beeblebrox\"\n";
   const char* form2_data = "const2 CONST INT8 -19\n";
-  const int nfields = 11;
+  const int nfields = 13;
   unsigned char c[8];
   unsigned char data_data[80];
   signed char sc;
@@ -131,15 +137,18 @@ int main(void)
   MultiplyEntry ment, *mep;
   PhaseEntry pent, *pep;
   PolynomEntry yent, *yep;
+  DivideEntry dent, *dep;
+  RecipEntry oent, *oep;
   SBitEntry sent, *sep;
   ConstEntry cent, *cep;
   StringEntry gent;
   Fragment *frag;
 
   char* fields[nfields + 9] = {(char*)"INDEX", (char*)"bit", (char*)"const",
-    (char*)"data", (char*)"lincom", (char*)"linterp", (char*)"mult",
-    (char*)"phase", (char*)"polynom", (char*)"sbit", (char*)"string", NULL,
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
+    (char*)"data", (char*)"div", (char*)"lincom", (char*)"linterp",
+    (char*)"mult", (char*)"phase", (char*)"polynom", (char*)"recip",
+    (char*)"sbit", (char*)"string", NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+    NULL, NULL};
 
   // Write the test dirfile
   mkdir(filedir, 0777);
@@ -578,29 +587,31 @@ int main(void)
   // 44: Dirfile::NVectors check
   n = d->NVectors();
   CHECK_OK(44);
-  CHECK_INT(44,n,19);
+  CHECK_INT(44,n,21);
 
   // 45: Dirfile::VectorList check
   fields[0] = (char*)"INDEX";
   fields[1] = (char*)"bit";
   fields[2] = (char*)"data";
-  fields[3] = (char*)"lincom";
-  fields[4] = (char*)"linterp";
-  fields[5] = (char*)"mult";
-  fields[6] = (char*)"new1";
-  fields[7] = (char*)"new10";
-  fields[8] = (char*)"new2";
-  fields[9] = (char*)"new3";
-  fields[10] = (char*)"new4";
-  fields[11] = (char*)"new5";
-  fields[12] = (char*)"new6";
-  fields[13] = (char*)"new7";
-  fields[14] = (char*)"new8";
-  fields[15] = (char*)"new9";
-  fields[16] = (char*)"phase";
-  fields[17] = (char*)"polynom";
-  fields[18] = (char*)"sbit";
-  fields[19] = (char*)"string";
+  fields[3] = (char*)"div";
+  fields[4] = (char*)"lincom";
+  fields[5] = (char*)"linterp";
+  fields[6] = (char*)"mult";
+  fields[7] = (char*)"new1";
+  fields[8] = (char*)"new10";
+  fields[9] = (char*)"new2";
+  fields[10] = (char*)"new3";
+  fields[11] = (char*)"new4";
+  fields[12] = (char*)"new5";
+  fields[13] = (char*)"new6";
+  fields[14] = (char*)"new7";
+  fields[15] = (char*)"new8";
+  fields[16] = (char*)"new9";
+  fields[17] = (char*)"phase";
+  fields[18] = (char*)"polynom";
+  fields[19] = (char*)"recip";
+  fields[20] = (char*)"sbit";
+  fields[21] = (char*)"string";
   list = d->VectorList();
   CHECK_OK(45);
   CHECK_STRING_ARRAY(45,n,list[i],fields[i]);
@@ -1028,6 +1039,102 @@ int main(void)
   CHECK_OK(142);
   CHECK_INT(142,n,264);
   
+  // 143: Dirfile::Entry / DivideEntry check
+  ent = d->Entry("div");
+  CHECK_OK(143);
+  CHECK_INT2(143,1,ent->Type(),DivideEntryType);
+  CHECK_INT2(143,2,ent->FragmentIndex(),0);
+  CHECK_STRING2(143,3,ent->Input(0),"mult");
+  CHECK_STRING2(143,4,ent->Input(1),"bit");
+  
+  // 145: Dirfile::Entry / RecipEntry check
+  ent = d->Entry("recip");
+  CHECK_OK(145);
+  CHECK_INT2(145,1,ent->Type(),RecipEntryType);
+  CHECK_INT2(145,2,ent->FragmentIndex(),0);
+  CHECK_STRING2(145,3,ent->Input(0),"div");
+  CHECK_INT2(145,4,ent->ComplexScalars(),1);
+  CHECK_COMPLEX2(145,5,ent->CDividend(),complex<double>(6.5,4.3));
+
+  // 146: Dirfile::Add / DivideEntry check
+  dent.SetName("new14");
+  dent.SetFragmentIndex(0);
+  dent.SetInput("in1", 0);
+  dent.SetInput("in2", 1);
+  d->Add(dent);
+  CHECK_OK2(146,1);
+
+  ent = d->Entry("new14");
+  CHECK_OK2(146,2);
+  CHECK_INT2(146,1,ent->Type(),DivideEntryType);
+  CHECK_INT2(146,2,ent->FragmentIndex(),0);
+  CHECK_STRING2(146,3,ent->Input(0),"in1");
+  CHECK_STRING2(146,4,ent->Input(1),"in2");
+
+  // 147: Dirfile::Add / RecipEntry check
+  oent.SetName("new15");
+  oent.SetFragmentIndex(0);
+  oent.SetInput("in3");
+  oent.SetDividend(31.9);
+  d->Add(oent);
+
+  ent = d->Entry("new15");
+  CHECK_OK2(147,1);
+  CHECK_INT2(147,1,ent->Type(),RecipEntryType);
+  CHECK_INT2(147,2,ent->FragmentIndex(),0);
+  CHECK_STRING2(147,3,ent->Input(0),"in3");
+  CHECK_INT2(147,4,ent->ComplexScalars(),0);
+  CHECK_DOUBLE2(147,5,ent->Dividend(),31.9);
+
+  // 148: Dirfile::Add / RecipEntry check
+  oent.Dissociate();
+  oent.SetName("new16");
+  oent.SetFragmentIndex(0);
+  oent.SetInput("in2");
+  oent.SetDividend(complex<double>(33.3,44.4));
+  d->Add(oent);
+
+  ent = d->Entry("new16");
+  CHECK_OK2(148,1);
+  CHECK_INT2(148,1,ent->Type(),RecipEntryType);
+  CHECK_INT2(148,2,ent->FragmentIndex(),0);
+  CHECK_STRING2(148,3,ent->Input(0),"in2");
+  CHECK_INT2(148,4,ent->ComplexScalars(),1);
+  CHECK_COMPLEX2(148,5,ent->CDividend(),complex<double>(33.3,44.4));
+
+  // 152: DivideEntry check
+  dep = reinterpret_cast<DivideEntry*>(d->Entry("new14"));
+  CHECK_OK2(152,1);
+  dep->SetInput("in4",0);
+  CHECK_OK2(152,2);
+  dep->SetInput("in5",1);
+  CHECK_OK2(152,3);
+
+  ent = d->Entry("new14");
+  CHECK_OK2(152,2);
+  CHECK_INT2(152,1,ent->Type(),DivideEntryType);
+  CHECK_INT2(152,2,ent->FragmentIndex(),0);
+  CHECK_STRING2(152,3,ent->Input(0),"in4");
+  CHECK_STRING2(152,4,ent->Input(1),"in5");
+
+  // 153: RecipEntry check
+  oep = reinterpret_cast<RecipEntry*>(d->Entry("new15"));
+  CHECK_OK2(153,1);
+  oep->SetInput("in1");
+  CHECK_OK2(153,2);
+  oep->SetDividend(complex<double>(1.01,9.33));
+  CHECK_OK2(153,3);
+
+  ent = d->Entry("new15");
+  CHECK_INT2(148,1,ent->Type(),RecipEntryType);
+  CHECK_INT2(148,2,ent->FragmentIndex(),0);
+  CHECK_STRING2(148,3,ent->Input(0),"in1");
+  CHECK_INT2(148,4,ent->ComplexScalars(),1);
+  CHECK_COMPLEX2(148,5,ent->CDividend(),complex<double>(1.01,9.33));
+
+
+  // ===================================================================
+  d->Discard();
   delete d;
   unlink(data);
   unlink(new1);

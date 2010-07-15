@@ -12,7 +12,7 @@ int main(void)
 {
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
-  const char* format_data = "data RECIP e b\ne CONST UINT8 3";
+  const char* format_data = "data RECIP b e\ne CONST UINT8 3";
   int fd;
 
   mkdir(filedir, 0777);

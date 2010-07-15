@@ -34,7 +34,7 @@ program big_test
   character (len=*), parameter :: frm2 = 'test95_dirfile/form2'
   character (len=*), parameter :: dat = 'test95_dirfile/data'
   integer, parameter :: flen = 7
-  integer, parameter :: nfields = 11
+  integer, parameter :: nfields = 13
 
   character (len=flen), dimension(nfields + 10) :: fields
   character (len=flen), dimension(nfields + 10) :: flist
@@ -63,10 +63,10 @@ program big_test
   call system ( 'rm -rf ' // fildir )
   call system ( 'mkdir ' // fildir )
 
-  fields = (/ 'INDEX  ', 'bit    ', 'const  ', 'data   ', 'lincom ', &
-  'linterp', 'mult   ', 'phase  ', 'polynom', 'sbit   ', 'string ', '       ', &
+  fields =(/ 'INDEX  ', 'bit    ', 'const  ', 'data   ', 'div    ', 'lincom ', &
+  'linterp', 'mult   ', 'phase  ', 'polynom', 'recip  ', 'sbit   ', 'string ', &
   '       ', '       ', '       ', '       ', '       ', '       ', '       ', &
-  '       ', '       ' /)
+  '       ', '       ', '       ' /)
 
   open(1, file=frmat, status='new')
   write(1, *) '/ENDIAN little'
@@ -82,6 +82,8 @@ program big_test
   write(1, *) 'sbit SBIT data 5 6'
   write(1, *) 'mult MULTIPLY data sbit'
   write(1, *) 'phase PHASE data 11'
+  write(1, *) 'div DIVIDE mult bit'
+  write(1, *) 'recip RECIP div 6.5;4.3'
   write(1, *) 'string STRING "Zaphod Beeblebrox"'
   close(1, status='keep')
 
@@ -1803,16 +1805,16 @@ program big_test
     write(*, 2001) 44, e
   end if
 
-  if (n .ne. 20) then
+  if (n .ne. 22) then
     ne = ne + 1
     write(*, 2002), 44, n
   end if
 
 ! 45: fgd_vector_list check
-  fields = (/ 'INDEX  ', 'bit    ', 'data   ', 'lincom ', 'linterp', &
+  fields =(/ 'INDEX  ', 'bit    ', 'data   ', 'div    ', 'lincom ', 'linterp', &
   'mult   ', 'new1   ', 'new10  ', 'new13  ', 'new2   ', 'new3   ', 'new4   ', &
   'new5   ', 'new6   ', 'new7   ', 'new8   ', 'new9   ', 'phase  ', 'polynom', &
-  'sbit   ', 'string ' /)
+  'recip  ', 'sbit   ', 'string ' /)
   l = flen
   call fgd_vector_list(flist, d, l)
   e = fgd_error(d)
@@ -2752,10 +2754,10 @@ program big_test
   end if
 
 ! 66: fgd_mvector_list check
-  fields = (/ 'mlut  ', 'mnew1 ', 'mnew2 ', 'mnew3 ', 'mnew5 ', 'mnew6 ', &
+  fields =(/ 'mlut  ', 'mnew1 ', 'mnew2 ', 'mnew3 ', 'mnew5 ', 'mnew6 ', &
   'mnew7 ', 'mnew8 ', 'mnew9 ', 'mnew10', 'mnew4 ', '      ', '      ', &
   '      ', '      ', '      ', '      ', '      ', '      ', '      ', &
-  '      ' /)
+  '      ', '      ', '      ' /)
   l = flen
   call fgd_mvector_list(flist, d, "data", l)
   e = fgd_error(d)
@@ -3757,7 +3759,425 @@ program big_test
     write(*, 2002), 142, n
   end if
 
-  call fgd_close(d)
+! 143: fgd_entry (divide) check
+  n = fgd_entry(d, 'div', ent)
+  e = fgd_error(d)
+
+  if (e .ne. GD_E_OK) then
+    ne = ne + 1
+    write(*, 2001) 143, e
+  end if
+
+  if (n .ne. GD_DIVIDE_ENTRY) then
+    ne = ne + 1
+    write(*, 2007) 143, 1, n
+  end if
+
+  if (ent%fragment_index .ne. 0) then
+    ne = ne + 1
+    write(*, 2007) 143, 2, ent%fragment_index
+  end if
+
+  if (ent%field(1) .ne. 'mult') then
+    ne = ne + 1
+    write(*, 2008) 143, 3, ent%field(1)
+  end if
+
+  if (ent%field(2) .ne. 'bit') then
+    ne = ne + 1
+    write(*, 2008) 143, 4, ent%field(2)
+  end if
+
+! 145: fgd_entry (recip) check
+  n = fgd_entry(d, 'recip', ent)
+  e = fgd_error(d)
+
+  if (e .ne. GD_E_OK) then
+    ne = ne + 1
+    write(*, 2001) 145, e
+  end if
+
+  if (n .ne. GD_RECIP_ENTRY) then
+    ne = ne + 1
+    write(*, 2007) 145, 1, n
+  end if
+
+  if (ent%fragment_index .ne. 0) then
+    ne = ne + 1
+    write(*, 2007) 145, 2, ent%fragment_index
+  end if
+
+  if (ent%comp_scal .ne. 1) then
+    ne = ne + 1
+    write(*, 2007) 145, 3, ent%comp_scal
+  end if
+
+  if (ent%field(1) .ne. 'div') then
+    ne = ne + 1
+    write(*, 2008) 145, 4, ent%field(1)
+  end if
+
+  if (abs(ent%cdividend - dcmplx(6.5, 4.3)) .gt. 1e-5) then
+    ne = ne + 1
+    write(*, 2013) 145, real(real(ent%cdividend)), real(aimag(ent%cdividend))
+  end if
+
+! 146: fgd_add_divide check
+  call fgd_add_divide(d, 'new14', 'in1', 'in2', 0)
+  e = fgd_error(d)
+
+  if (e .ne. GD_E_OK) then
+    ne = ne + 1
+    write(*, 2006) 146, 1, e
+  end if
+
+  n = fgd_entry(d, 'new14', ent)
+  e = fgd_error(d)
+
+  if (e .ne. GD_E_OK) then
+    ne = ne + 1
+    write(*, 2006) 146, 2, e
+  end if
+
+  if (n .ne. GD_DIVIDE_ENTRY) then
+    ne = ne + 1
+    write(*, 2007) 146, 1, n
+  end if
+
+  if (ent%fragment_index .ne. 0) then
+    ne = ne + 1
+    write(*, 2007) 146, 2, ent%fragment_index
+  end if
+
+  if (ent%field(1) .ne. 'in1') then
+    ne = ne + 1
+    write(*, 2008) 146, 3, ent%field(1)
+  end if
+
+  if (ent%field(2) .ne. 'in2') then
+    ne = ne + 1
+    write(*, 2008) 146, 4, ent%field(2)
+  end if
+
+! 147: fgd_add_recip check
+  call fgd_add_recip(d, 'new15', 'in1', 31.9d0, 0)
+  e = fgd_error(d)
+
+  if (e .ne. GD_E_OK) then
+    ne = ne + 1
+    write(*, 2006) 147, 1, e
+  end if
+
+  n = fgd_entry(d, 'new15', ent)
+  e = fgd_error(d)
+
+  if (e .ne. GD_E_OK) then
+    ne = ne + 1
+    write(*, 2006) 147, 2, e
+  end if
+
+  if (n .ne. GD_RECIP_ENTRY) then
+    ne = ne + 1
+    write(*, 2007) 147, 1, n
+  end if
+
+  if (ent%fragment_index .ne. 0) then
+    ne = ne + 1
+    write(*, 2007) 147, 2, ent%fragment_index
+  end if
+
+  if (ent%field(1) .ne. 'in1') then
+    ne = ne + 1
+    write(*, 2008) 147, 3, ent%field(1)
+  end if
+
+  if (ent%comp_scal .ne. 0) then
+    ne = ne + 1
+    write(*, 2007) 147, 4, ent%comp_scal
+  end if
+
+  if (abs(ent%dividend - 31.9) > 1e-5) then
+    ne = ne + 1
+    write(*, 2012) 147, ent%dividend
+  end if
+
+! 148: fgd_add_recip check
+  call fgd_add_crecip(d, 'new16', 'in1', dcmplx(31.9d0, 38.2d0), 0)
+  e = fgd_error(d)
+
+  if (e .ne. GD_E_OK) then
+    ne = ne + 1
+    write(*, 2006) 148, 1, e
+  end if
+
+  n = fgd_entry(d, 'new16', ent)
+  e = fgd_error(d)
+
+  if (e .ne. GD_E_OK) then
+    ne = ne + 1
+    write(*, 2006) 148, 2, e
+  end if
+
+  if (n .ne. GD_RECIP_ENTRY) then
+    ne = ne + 1
+    write(*, 2007) 148, 1, n
+  end if
+
+  if (ent%fragment_index .ne. 0) then
+    ne = ne + 1
+    write(*, 2007) 148, 2, ent%fragment_index
+  end if
+
+  if (ent%field(1) .ne. 'in1') then
+    ne = ne + 1
+    write(*, 2008) 148, 3, ent%field(1)
+  end if
+
+  if (ent%comp_scal .ne. 1) then
+    ne = ne + 1
+    write(*, 2007) 148, 4, ent%comp_scal
+  end if
+
+  if (abs(ent%cdividend - dcmplx(31.9, 38.2)) > 1e-5) then
+    ne = ne + 1
+    write(*, 2012) 148, ent%cdividend
+  end if
+
+! 149: fgd_madd_divide check
+  call fgd_madd_divide(d, 'data', 'new14', 'in3', 'in4')
+  e = fgd_error(d)
+
+  if (e .ne. GD_E_OK) then
+    ne = ne + 1
+    write(*, 2006) 149, 1, e
+  end if
+
+  n = fgd_entry(d, 'data/new14', ent)
+  e = fgd_error(d)
+
+  if (e .ne. GD_E_OK) then
+    ne = ne + 1
+    write(*, 2006) 149, 2, e
+  end if
+
+  if (n .ne. GD_DIVIDE_ENTRY) then
+    ne = ne + 1
+    write(*, 2007) 149, 1, n
+  end if
+
+  if (ent%fragment_index .ne. 0) then
+    ne = ne + 1
+    write(*, 2007) 149, 2, ent%fragment_index
+  end if
+
+  if (ent%field(1) .ne. 'in3') then
+    ne = ne + 1
+    write(*, 2008) 149, 3, ent%field(1)
+  end if
+
+  if (ent%field(2) .ne. 'in4') then
+    ne = ne + 1
+    write(*, 2008) 149, 4, ent%field(2)
+  end if
+
+! 150: fgd_madd_recip check
+  call fgd_madd_recip(d, 'data', 'new15', 'in0', 95.5d0)
+  e = fgd_error(d)
+
+  if (e .ne. GD_E_OK) then
+    ne = ne + 1
+    write(*, 2006) 150, 1, e
+  end if
+
+  n = fgd_entry(d, 'data/new15', ent)
+  e = fgd_error(d)
+
+  if (e .ne. GD_E_OK) then
+    ne = ne + 1
+    write(*, 2006) 150, 2, e
+  end if
+
+  if (n .ne. GD_RECIP_ENTRY) then
+    ne = ne + 1
+    write(*, 2007) 150, 1, n
+  end if
+
+  if (ent%fragment_index .ne. 0) then
+    ne = ne + 1
+    write(*, 2007) 150, 2, ent%fragment_index
+  end if
+
+  if (ent%field(1) .ne. 'in0') then
+    ne = ne + 1
+    write(*, 2008) 150, 3, ent%field(1)
+  end if
+
+  if (ent%comp_scal .ne. 0) then
+    ne = ne + 1
+    write(*, 2007) 150, 4, ent%comp_scal
+  end if
+
+  if (abs(ent%dividend - 95.5) > 1e-5) then
+    ne = ne + 1
+    write(*, 2012) 150, ent%dividend
+  end if
+
+! 151: fgd_madd_recip check
+  call fgd_madd_crecip(d, 'data', 'new16', 'in3', dcmplx(8.47d0, 6.22d0))
+  e = fgd_error(d)
+
+  if (e .ne. GD_E_OK) then
+    ne = ne + 1
+    write(*, 2006) 151, 1, e
+  end if
+
+  n = fgd_entry(d, 'data/new16', ent)
+  e = fgd_error(d)
+
+  if (e .ne. GD_E_OK) then
+    ne = ne + 1
+    write(*, 2006) 151, 2, e
+  end if
+
+  if (n .ne. GD_RECIP_ENTRY) then
+    ne = ne + 1
+    write(*, 2007) 151, 1, n
+  end if
+
+  if (ent%fragment_index .ne. 0) then
+    ne = ne + 1
+    write(*, 2007) 151, 2, ent%fragment_index
+  end if
+
+  if (ent%field(1) .ne. 'in3') then
+    ne = ne + 1
+    write(*, 2008) 151, 3, ent%field(1)
+  end if
+
+  if (ent%comp_scal .ne. 1) then
+    ne = ne + 1
+    write(*, 2007) 151, 4, ent%comp_scal
+  end if
+
+  if (abs(ent%cdividend - dcmplx(8.47, 6.22)) > 1e-5) then
+    ne = ne + 1
+    write(*, 2012) 151, ent%cdividend
+  end if
+
+! 152: fgd_alter_divide check
+  call fgd_alter_divide(d, 'new14', 'in6', 'in4')
+  e = fgd_error(d)
+
+  if (e .ne. GD_E_OK) then
+    ne = ne + 1
+    write(*, 2006) 152, 1, e
+  end if
+
+  n = fgd_entry(d, 'new14', ent)
+  e = fgd_error(d)
+
+  if (e .ne. GD_E_OK) then
+    ne = ne + 1
+    write(*, 2006) 152, 2, e
+  end if
+
+  if (n .ne. GD_DIVIDE_ENTRY) then
+    ne = ne + 1
+    write(*, 2007) 152, 1, n
+  end if
+
+  if (ent%fragment_index .ne. 0) then
+    ne = ne + 1
+    write(*, 2007) 152, 2, ent%fragment_index
+  end if
+
+  if (ent%field(1) .ne. 'in6') then
+    ne = ne + 1
+    write(*, 2008) 152, 3, ent%field(1)
+  end if
+
+  if (ent%field(2) .ne. 'in4') then
+    ne = ne + 1
+    write(*, 2008) 152, 4, ent%field(2)
+  end if
+
+! 153: fgd_alter_recip check
+  call fgd_alter_recip(d, 'new15', 'in5', 0.187d0)
+  e = fgd_error(d)
+
+  if (e .ne. GD_E_OK) then
+    ne = ne + 1
+    write(*, 2006) 153, 1, e
+  end if
+
+  n = fgd_entry(d, 'new15', ent)
+  e = fgd_error(d)
+
+  if (e .ne. GD_E_OK) then
+    ne = ne + 1
+    write(*, 2006) 153, 2, e
+  end if
+
+  if (n .ne. GD_RECIP_ENTRY) then
+    ne = ne + 1
+    write(*, 2007) 153, 1, n
+  end if
+
+  if (ent%fragment_index .ne. 0) then
+    ne = ne + 1
+    write(*, 2007) 153, 2, ent%fragment_index
+  end if
+
+  if (ent%field(1) .ne. 'in5') then
+    ne = ne + 1
+    write(*, 2008) 153, 3, ent%field(1)
+  end if
+
+  if (abs(ent%dividend - 0.187) > 1e-5) then
+    ne = ne + 1
+    write(*, 2012) 153, ent%dividend
+  end if
+
+! 154: fgd_alter_crecip check
+  call fgd_alter_crecip(d, 'new16', 'in2', dcmplx(4.3d0, 81.81d0))
+  e = fgd_error(d)
+
+  if (e .ne. GD_E_OK) then
+    ne = ne + 1
+    write(*, 2006) 154, 1, e
+  end if
+
+  n = fgd_entry(d, 'new16', ent)
+  e = fgd_error(d)
+
+  if (e .ne. GD_E_OK) then
+    ne = ne + 1
+    write(*, 2006) 154, 2, e
+  end if
+
+  if (n .ne. GD_RECIP_ENTRY) then
+    ne = ne + 1
+    write(*, 2007) 154, 1, n
+  end if
+
+  if (ent%fragment_index .ne. 0) then
+    ne = ne + 1
+    write(*, 2007) 154, 2, ent%fragment_index
+  end if
+
+  if (ent%field(1) .ne. 'in2') then
+    ne = ne + 1
+    write(*, 2008) 154, 3, ent%field(1)
+  end if
+
+  if (abs(ent%cdividend - dcmplx(4.3d0, 81.81d0)) > 1e-5) then
+    ne = ne + 1
+    write(*, 2013) 154, ent%cdividend
+  end if
+
+
+!================================================================
+  call fgd_discard(d)
 
   call system ( 'rm -rf ' // fildir )
 

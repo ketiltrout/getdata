@@ -14,7 +14,7 @@ int main(void)
   const char* format = __TEST__ "dirfile/format";
   const char* format_data =
     "in2 RAW UINT8 13\n"
-    "div RECIP 3. in2\n";
+    "div RECIP in2 3.\n";
   int fd, r = 0;
 
   mkdir(filedir, 0777);

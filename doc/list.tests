@@ -2,30 +2,30 @@
   1 F9CIP gd_open
   2 F9CIP gd_getdata (INT8)
   3 F9CIP gd_get_constant (INT8)
-  4 F9... fgd_get_field_name_max
-  5 F9... fgd_get_mfield_name_max
-  6 F9CIP gd_get_nfields
+  4 F9... fgd_field_name_max
+  5 F9... fgd_mfield_name_max
+  6 F9CIP gd_nfields
   7 F.... _GDF_FString
-  8 F9CIP gd_get_field_list
-  9 F9CIP gd_get_nmfields
- 10 F9CIP gd_get_mfield_list
- 11 F9CIP gd_get_nframes
- 12 F9CIP gd_get_spf
+  8 F9CIP gd_field_list
+  9 F9CIP gd_nmfields
+ 10 F9CIP gd_mfield_list
+ 11 F9CIP gd_nframes
+ 12 F9CIP gd_spf
  13 F9CIP gd_putdata (INT8)
  14 F9CIP gd_error_string
- 15 F9.I. gd_get_entry_type
- 16 F9CIP gd_get_entry (RAW)
- 17 F.... gd_get_entry (LINCOM)
- 18 F9CIP gd_get_entry (CLINCOM)
- 19 F.... gd_get_entry (POLYNOM)
- 20 F9CIP gd_get_entry (CPOLYNOM)
- 21 F9CIP gd_get_entry (LINTERP)
- 22 F9CIP gd_get_entry (BIT)
- 23 F9CIP gd_get_entry (SBIT)
- 24 F9CIP gd_get_entry (MULTIPLY)
- 25 F9CIP gd_get_entry (PHASE)
- 26 F9CIP gd_get_entry (CONST)
- 27 F9CIP gd_get_fragment_index
+ 15 F9.I. gd_entry_type
+ 16 F9CIP gd_entry (RAW)
+ 17 F.... gd_entry (LINCOM)
+ 18 F9CIP gd_entry (CLINCOM)
+ 19 F.... gd_entry (POLYNOM)
+ 20 F9CIP gd_entry (CPOLYNOM)
+ 21 F9CIP gd_entry (LINTERP)
+ 22 F9CIP gd_entry (BIT)
+ 23 F9CIP gd_entry (SBIT)
+ 24 F9CIP gd_entry (MULTIPLY)
+ 25 F9CIP gd_entry (PHASE)
+ 26 F9CIP gd_entry (CONST)
+ 27 F9CIP gd_fragment_index
  28 F9CIP gd_add_raw
  29 F9C.P gd_add_lincom
  30 F9CI. gd_add_clincom
@@ -37,13 +37,13 @@
  36 F9CIP gd_add_multiply
  37 F9CIP gd_add_phase
  38 F9CIP gd_add_const
- 39 F9CIP gd_get_fragment_name
- 40 F9CIP gd_get_nframgents
+ 39 F9CIP gd_fragment_name
+ 40 F9CIP gd_nframgents
  41 F9CIP gd_include
- 42 F9CIP gd_get_nfields_by_type
- 43 F9CIP gd_get_field_list_by_type
- 44 F9CIP gd_get_nvectors
- 45 F9CIP gd_get_vector_list
+ 42 F9CIP gd_nfields_by_type
+ 43 F9CIP gd_field_list_by_type
+ 44 F9CIP gd_nvectors
+ 45 F9CIP gd_vector_list
  46 F9.IP gd_madd_lincom
  47 F9... gd_madd_clincom
  48 F9.IP gd_madd_polynom
@@ -61,10 +61,10 @@
  60 F9CIP gd_madd_spec
  61 F9CIP gd_put_constant (INT8)
  62 F9CIP gd_put_string
- 63 F9CIP gd_get_nmfields_by_type
- 64 F9CIP gd_get_mfield_list_by_type
- 65 F9CIP gd_get_nmvectors
- 66 F9CIP gd_get_mvector_list
+ 63 F9CIP gd_nmfields_by_type
+ 64 F9CIP gd_mfield_list_by_type
+ 65 F9CIP gd_nmvectors
+ 66 F9CIP gd_mvector_list
  67 F9CIP gd_alter_raw
  68 F9C.. gd_alter_lincom
  69 F9.I. gd_alter_clincom
@@ -76,15 +76,15 @@
  75 F9CI. gd_alter_multiply
  76 F9CI. gd_alter_phase
  77 F9CI. gd_alter_const
- 78 F9CIP gd_get_encoding
- 79 F9CIP gd_get_endianness
+ 78 F9CIP gd_encoding
+ 79 F9CIP gd_endianness
  80 F9CIP gd_dirfilename
- 81 F9CIP gd_get_parent_fragment
+ 81 F9CIP gd_parent_fragment
  82 F9CIP gd_protect
- 83 F9CIP gd_get_protection
+ 83 F9CIP gd_protection
  84 F9CIP gd_raw_filename
  85 F9CIP gd_reference
- 86 F9CIP gd_get_eof
+ 86 F9CIP gd_eof
  87 F9CIP gd_alter_encoding
  88 F9CIP gd_alter_endianness
  89 F9CIP gd_alter_spec
@@ -93,13 +93,13 @@
  92 F9CIP gd_move
  93 F9CIP gd_rename
  94 F9CIP gd_uninclude
- 95 F9CIP gd_get_frameoffset
+ 95 F9CIP gd_frameoffset
  96 F9CIP gd_alter_frameoffset
  97 F9CIP gd_native_type
  98 F.... GDCSCL
  99 F9CIP gd_validate
-100 F9... gd_get_framenum
-101 F9CIP gd_get_framenum_subset
+100 F9... gd_framenum
+101 F9CIP gd_framenum_subset
 102 .9... gd_getdata (INT16)
 103 .9... gd_getdata (INT32)
 104 .9..P gd_getdata (INT64)
@@ -132,12 +132,24 @@
 131 .9..P gd_put_constant (FLOAT64)
 132 .9... gd_put_constant (COMPLEX64)
 133 .9..P gd_put_constant (COMPLEX128)
-134 ..CIP gd_get_entry (STRING)
+134 ..CIP gd_entry (STRING)
 135 ..C.. Dirifle::ReferenceFilename
 136 ....P gd_putdata (auto-type-detect)
-137 ....P gd_get_native_type_name
+137 ....P gd_native_type_name
 138 F.... GDGSCA
 139 F.... GDASCA
 140 ...I. getdata_constants
 141 ...I. gd_alter
-142 F9CIP gd_get_bof
+142 F9CIP gd_bof
+143 F9CIP gd_entry (DIVIDE)
+144 F.... gd_entry (RECIP)
+145 F9CIP gd_entry (CRECIP)
+146 F9CIP gd_add_divide
+147 F9C.. gd_add_recip
+148 F9CIP gd_add_crecip
+149 F9..P gd_madd_divide
+150 F9... gd_madd_recip
+151 F9..P gd_madd_crecip
+152 F9CI. gd_alter_divide
+153 F9CI. gd_alter_recip
+154 F9... gd_alter_crecip

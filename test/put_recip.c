@@ -15,7 +15,7 @@ int main(void)
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
   const char* data = __TEST__ "dirfile/data";
-  const char* format_data = "div RECIP 1000. data\ndata RAW INT8 8\n";
+  const char* format_data = "div RECIP data 1000.\ndata RAW INT8 8\n";
   int8_t c[8], d;
   int fd, i, r = 0;
   struct stat buf;

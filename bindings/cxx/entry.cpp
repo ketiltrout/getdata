@@ -59,6 +59,7 @@ int Entry::CheckIndex(gd_entype_t field_type, int n_fields, int index)
         return 0;
       break;
     case GD_MULTIPLY_ENTRY:
+    case GD_DIVIDE_ENTRY:
       if (index > 2)
         return 0;
     default:
@@ -140,19 +141,25 @@ const char *Entry::Scalar(int index)
       {
         return NULL;
       }
+      break;
     case GD_POLYNOM_ENTRY:
       if (index > E.poly_ord)
         return NULL;
+      break;
     case GD_BIT_ENTRY:
     case GD_SBIT_ENTRY:
       if (index >= 2)
         return NULL;
+      break;
     case GD_RAW_ENTRY:
     case GD_PHASE_ENTRY:
+    case GD_RECIP_ENTRY:
       if (index >= 1)
         return NULL;
+      break;
     case GD_LINTERP_ENTRY:
     case GD_MULTIPLY_ENTRY:
+    case GD_DIVIDE_ENTRY:
     case GD_INDEX_ENTRY:
     case GD_CONST_ENTRY:
     case GD_STRING_ENTRY:

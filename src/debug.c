@@ -1,4 +1,4 @@
-/* (C) 2008 D. V. Wiebe
+/* (C) 2008, 2010 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -25,18 +25,23 @@
 #include "internal.h"
 
 #define COL_SIZE 100
-static char debug_col[COL_SIZE + 1] = "";
-static int col_count = 0;
+
+extern char gd_debug_col[COL_SIZE + 1];
+extern int gd_col_count;
+#ifdef GDLIB
+int gd_col_count = 0;
+char gd_debug_col[COL_SIZE + 1] = "";
+#endif
 
 const char* _gd_colnil(void) {
-  return debug_col;
+  return gd_debug_col;
 }
 
 const char* _gd_coladd(void)
 {
-  if (col_count < COL_SIZE) {
-    debug_col[col_count++] = ':';
-    debug_col[col_count] = '\0';
+  if (gd_col_count < COL_SIZE) {
+    gd_debug_col[gd_col_count++] = ':';
+    gd_debug_col[gd_col_count] = '\0';
   }
 
   return _gd_colnil();
@@ -47,8 +52,8 @@ const char* _gd_colsub(void)
   static char buffer[COL_SIZE + 1];
   strcpy(buffer, _gd_colnil());
 
-  if (col_count > 0)
-    debug_col[--col_count] = '\0';
+  if (gd_col_count > 0)
+    gd_debug_col[--gd_col_count] = '\0';
 
   return buffer;
 }

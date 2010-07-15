@@ -19,7 +19,7 @@ int main(void)
     "/VERSION 8\n"
     "ar RAW UINT8 8\n"
     "q DIVIDE ar ar\n"
-    "r RECIP 1. ar\n";
+    "r RECIP ar 1.\n";
   double c[8];
   unsigned char data_data[256];
   int fd, i, r = 0;

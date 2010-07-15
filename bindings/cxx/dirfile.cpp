@@ -94,6 +94,10 @@ Entry *Dirfile::Entry(const char* field_code)
       return new GetData::SBitEntry(this, field_code);
     case MultiplyEntryType:
       return new GetData::MultiplyEntry(this, field_code);
+    case DivideEntryType:
+      return new GetData::DivideEntry(this, field_code);
+    case RecipEntryType:
+      return new GetData::RecipEntry(this, field_code);
     case PhaseEntryType:
       return new GetData::PhaseEntry(this, field_code);
     case PolynomEntryType:

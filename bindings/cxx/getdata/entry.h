@@ -63,7 +63,9 @@ namespace GetData {
     PolynomEntryType  = GD_POLYNOM_ENTRY,
     ConstEntryType    = GD_CONST_ENTRY,
     StringEntryType   = GD_STRING_ENTRY,
-    IndexEntryType    = GD_INDEX_ENTRY
+    IndexEntryType    = GD_INDEX_ENTRY,
+    DivideEntryType   = GD_DIVIDE_ENTRY,
+    RecipEntryType    = GD_RECIP_ENTRY
   };
 
   class Entry {
@@ -177,6 +179,16 @@ namespace GetData {
         return (E.field_type == GD_POLYNOM_ENTRY && index <= E.poly_ord)
           ? std::complex<double>(E.ca[index][0], E.ca[index][1]) : 0;
       }
+
+      /* RECIP methods */
+      virtual double Dividend() {
+        return (E.field_type == GD_RECIP_ENTRY) ? E.dividend : 0;
+      };
+
+      virtual std::complex<double> CDividend() {
+        return (E.field_type == GD_RECIP_ENTRY) ?
+          std::complex<double>(E.cdividend[0], E.cdividend[1]) : 0;
+      };
 
       void SetName(const char* name);
 

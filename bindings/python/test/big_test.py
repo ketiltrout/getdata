@@ -82,10 +82,10 @@ file.close()
 
 ne = 0
 
-fields = ["INDEX", "bit", "const", "data", "lincom", "linterp", "mult",
-      "phase", "polynom", "sbit", "string"]
+fields = ["INDEX", "bit", "const", "data", "div", "lincom", "linterp", "mult",
+      "phase", "polynom", "recip", "sbit", "string"]
 
-nfields = 11
+nfields = 13
 file=open("dirfile/format", 'w')
 file.write(
     "/ENDIAN little\n"
@@ -100,6 +100,8 @@ file.write(
     "bit BIT data 3 4\n"
     "sbit SBIT data 5 6\n"
     "mult MULTIPLY data sbit\n"
+    "div DIVIDE mult bit\n"
+    "recip RECIP div 6.5;4.3\n"
     "phase PHASE data 11\n"
     "string STRING \"Zaphod Beeblebrox\"\n"
     )
@@ -654,16 +656,16 @@ try:
   n = d.nvectors()
 except:
   CheckOK(44)
-CheckSimple(44,n,17)
+CheckSimple(44,n,19)
 
 # 45: field_list check
 try:
   n = d.vector_list()
 except:
   CheckOK(45)
-CheckSimple(45,n,['INDEX', 'bit', 'data', 'lincom', 'linterp', 'mult', 'new1',
-  'new10', 'new2', 'new4', 'new6', 'new7', 'new8', 'new9', 'phase', 'polynom',
-  'sbit'])
+CheckSimple(45,n,['INDEX', 'bit', 'data', 'div', 'lincom', 'linterp', 'mult',
+  'new1', 'new10', 'new2', 'new4', 'new6', 'new7', 'new8', 'new9', 'phase',
+  'polynom', 'recip', 'sbit'])
 
 # 46: add / entry (lincom) check
 ent = pygetdata.entry(pygetdata.LINCOM_ENTRY, "mnew1", 0,
@@ -1193,7 +1195,96 @@ except:
   CheckOK(142)
 CheckSimple(142,n,264)
 
+# 143: entry (div) check
+try:
+  ent = d.entry("div")
+except:
+  CheckOK(143)
+CheckSimple2(143,1,ent.field_type,pygetdata.DIVIDE_ENTRY)
+CheckSimple2(143,2,ent.field_type_name,"DIVIDE_ENTRY")
+CheckSimple2(143,3,ent.fragment,0)
+CheckSimple2(143,4,ent.in_fields,( "mult", "bit"))
 
+# 145: entry (recip) check
+try:
+  ent = d.entry("recip")
+except:
+  CheckOK(145)
+CheckSimple2(145,1,ent.field_type,pygetdata.RECIP_ENTRY)
+CheckSimple2(145,2,ent.field_type_name,"RECIP_ENTRY")
+CheckSimple2(145,3,ent.fragment,0)
+CheckSimple2(145,4,ent.in_fields,( "div",))
+CheckSimple2(145,6,ent.dividend,6.5+4.3j)
+
+# 146: add / entry (divide) check
+ent = pygetdata.entry(pygetdata.DIVIDE_ENTRY, "new14", 0, ("in1", "in2"))
+try:
+  d.add(ent)
+except:
+  CheckOK2(146,1)
+
+try:
+  ent = d.entry("new14")
+except:
+  CheckOK2(146,2)
+CheckSimple2(146,1,ent.field_type,pygetdata.DIVIDE_ENTRY)
+CheckSimple2(146,2,ent.fragment,0)
+CheckSimple2(146,3,ent.in_fields,( "in1", "in2"))
+
+# 148: add / entry (divide) check
+ent = pygetdata.entry(pygetdata.RECIP_ENTRY, "new16", 0, ("in3", 33.3))
+try:
+  d.add(ent)
+except:
+  CheckOK2(148,1)
+
+try:
+  ent = d.entry("new16")
+except:
+  CheckOK2(148,2)
+CheckSimple2(148,1,ent.field_type,pygetdata.RECIP_ENTRY)
+CheckSimple2(148,2,ent.fragment,0)
+CheckSimple2(148,3,ent.in_fields,( "in3",))
+CheckSimple2(148,4,ent.dividend,33.3)
+
+# 149: add / entry (mult) check
+ent = pygetdata.entry(pygetdata.DIVIDE_ENTRY, "mnew14", 0,
+    {"in_field1": "in3", "in_field2": "in2"})
+try:
+  d.madd(ent,"data")
+except:
+  CheckOK2(149,1)
+
+try:
+  ent = d.entry("data/mnew14")
+except:
+  CheckOK2(149,2)
+CheckSimple2(149,1,ent.field_type,pygetdata.DIVIDE_ENTRY)
+CheckSimple2(149,2,ent.fragment,0)
+CheckSimple2(149,3,ent.in_fields,( "in3", "in2"))
+
+# 151: add / entry (mult) check
+ent = pygetdata.entry(pygetdata.RECIP_ENTRY, "mnew16", 0,
+    {"in_field": "in3", "dividend": "const"})
+try:
+  d.madd(ent,"data")
+except:
+  CheckOK2(151,1)
+
+try:
+  ent = d.entry("data/mnew16")
+except:
+  CheckOK2(151,2)
+CheckSimple2(151,1,ent.field_type,pygetdata.RECIP_ENTRY)
+CheckSimple2(151,2,ent.fragment,0)
+CheckSimple2(151,3,ent.in_fields,( "in3",))
+CheckSimple2(151,4,ent.dividend,"const")
+
+
+
+# the following causes the d object to silently fault on delete, since it
+# can't flush itself anymore.  The moral of the story: always explicity
+# call d.close() if you care about your dirfile.  (Fortunately we don't.)
 os.system("rm -rf dirfile")
 
 if (ne > 0):

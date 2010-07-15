@@ -34,8 +34,10 @@ type gd_entry
   character (len=GD_FIELD_LEN), dimension(6) :: scalar
   double precision, dimension(3) :: m, b
   double precision, dimension(6) :: a
+  double precision :: dividend
   double complex, dimension(3) :: cm, cb
   double complex, dimension(6) :: ca
+  double complex :: cdividend
 end type
 
 contains
@@ -816,8 +818,7 @@ function fgd_entry (dirfile, field_code, ent)
     LEN_TRIM(field_code), 1)
   else if (fgd_entry .EQ. GD_LINCOM_ENTRY) then
     ! lincom
-    call gdcscl(ent%comp_scal, dirfile, TRIM(field_code), &
-    LEN_TRIM(field_code))
+    call gdcscl(ent%comp_scal, dirfile, TRIM(field_code), LEN_TRIM(field_code))
     if (ent%comp_scal .NE. 0) then
       call gdgecl(ent%n_fields, ent%field(1), len1, ent%cm(1), ent%cb(1), &
       ent%field(2), len2, ent%cm(2), ent%cb(2), ent%field(3), len3, ent%cm(3), &
@@ -858,6 +859,10 @@ function fgd_entry (dirfile, field_code, ent)
     ! multiply
     call gdgemt(ent%field(1), len1, ent%field(2), len2, ent%fragment_index, &
     dirfile, TRIM(field_code), LEN_TRIM(field_code))
+  else if (fgd_entry .EQ. GD_DIVIDE_ENTRY) then
+    ! divide
+    call gdgedv(ent%field(1), len1, ent%field(2), len2, ent%fragment_index, &
+    dirfile, TRIM(field_code), LEN_TRIM(field_code))
   else if (fgd_entry .EQ. GD_PHASE_ENTRY) then
     !phase
     call gdgeph(ent%field(1), len1, ent%shift, ent%fragment_index, dirfile, &
@@ -866,8 +871,7 @@ function fgd_entry (dirfile, field_code, ent)
     LEN_TRIM(field_code), 1)
   else if (fgd_entry .EQ. GD_POLYNOM_ENTRY) then
     ! polynom
-    call gdcscl(ent%comp_scal, dirfile, TRIM(field_code), &
-      LEN_TRIM(field_code))
+    call gdcscl(ent%comp_scal, dirfile, TRIM(field_code), LEN_TRIM(field_code))
     if (ent%comp_scal .NE. 0) then
       call gdgecp(ent%poly_ord, ent%field(1), len1, ent%ca(1), ent%ca(2), &
       ent%ca(3), ent%ca(4), ent%ca(5), ent%ca(6), ent%fragment_index, dirfile, &
@@ -882,6 +886,19 @@ function fgd_entry (dirfile, field_code, ent)
       call gdgsca(ent%scalar(i), len1, dirfile, TRIM(field_code), &
       LEN_TRIM(field_code), i)
     end do
+  else if (fgd_entry .EQ. GD_RECIP_ENTRY) then
+    ! recip
+    call gdcscl(ent%comp_scal, dirfile, TRIM(field_code), LEN_TRIM(field_code))
+    if (ent%comp_scal .NE. 0) then
+      call gdgecr(ent%field(1), len1, ent%cdividend, ent%fragment_index, &
+      dirfile, TRIM(field_code), LEN_TRIM(field_code))
+    else
+      call gdgerc(ent%field(1), len1, ent%dividend, ent%fragment_index, &
+      dirfile, TRIM(field_code), LEN_TRIM(field_code))
+    endif
+    len1 = GD_FIELD_LEN
+    call gdgsca(ent%scalar(1), len1, dirfile, TRIM(field_code), &
+    LEN_TRIM(field_code), 1)
   else if (fgd_entry .EQ. GD_CONST_ENTRY) then
     !const
     call gdgeco(ent%data_type, ent%fragment_index, dirfile, TRIM(field_code), &
@@ -926,7 +943,7 @@ subroutine fgd_add (dirfile, field_code, ent)
     call gdadrw(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
     ent%data_type, ent%spf, ent%fragment_index)
   else if (ent%field_type .EQ. GD_LINCOM_ENTRY) then
-    if (ent%comp_scal .NE. 0) then
+    if (ent%comp_scal .EQ. 0) then
       call gdadlc(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
       ent%n_fields, TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), ent%m(1), &
       ent%b(1), TRIM(ent%field(2)), LEN_TRIM(ent%field(2)), ent%m(2), &
@@ -955,18 +972,32 @@ subroutine fgd_add (dirfile, field_code, ent)
     call gdadmt(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
     TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), TRIM(ent%field(2)), &
     LEN_TRIM(ent%field(2)), ent%fragment_index)
+  else if (ent%field_type .EQ. GD_DIVIDE_ENTRY) then
+    call gdaddv(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+    TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), TRIM(ent%field(2)), &
+    LEN_TRIM(ent%field(2)), ent%fragment_index)
   else if (ent%field_type .EQ. GD_PHASE_ENTRY) then
     call gdadph(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
     TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), ent%shift, ent%fragment_index)
   else if (ent%field_type .EQ. GD_POLYNOM_ENTRY) then
-    if (ent%comp_scal .NE. 0) then
+    if (ent%comp_scal .EQ. 0) then
       call gdadpn(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
       ent%poly_ord, TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), ent%a(1), &
       ent%a(2), ent%a(3), ent%a(4), ent%a(5), ent%a(6), ent%fragment_index)
     else
-      call gdadpn(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+      call gdadcp(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
       ent%poly_ord, TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), ent%ca(1), &
       ent%ca(2), ent%ca(3), ent%ca(4), ent%ca(5), ent%ca(6), ent%fragment_index)
+    end if
+  else if (ent%field_type .EQ. GD_RECIP_ENTRY) then
+    if (ent%comp_scal .EQ. 0) then
+      call gdadcr(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+      TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), ent%dividend, &
+      ent%fragment_index)
+    else
+      call gdadrc(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+      TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), ent%cdividend, &
+      ent%fragment_index)
     end if
   else if (ent%field_type .EQ. GD_CONST_ENTRY) then
     call gdadco(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
@@ -1069,6 +1100,36 @@ subroutine fgd_add_multiply (dirfile, field_name, in_field1, in_field2, &
   fragment_index)
 end subroutine
 
+subroutine fgd_add_divide (dirfile, field_name, in_field1, in_field2, &
+  fragment_index)
+  integer, intent(in) :: dirfile, fragment_index
+  character (len=*), intent(in) :: field_name, in_field1, in_field2
+
+  call gdaddv(dirfile, TRIM(field_name), LEN_TRIM(field_name), &
+  TRIM(in_field1), LEN_TRIM(in_field1), TRIM(in_field2), LEN_TRIM(in_field2), &
+  fragment_index)
+end subroutine
+
+subroutine fgd_add_recip (dirfile, field_name, in_field, dividend, &
+  fragment_index)
+  integer, intent(in) :: dirfile, fragment_index
+  double precision, intent(in) :: dividend
+  character (len=*), intent(in) :: field_name, in_field
+
+  call gdadrc(dirfile, TRIM(field_name), LEN_TRIM(field_name), TRIM(in_field), &
+  LEN_TRIM(in_field), dividend, fragment_index)
+end subroutine
+
+subroutine fgd_add_crecip (dirfile, field_name, in_field, cdividend, &
+  fragment_index)
+  integer, intent(in) :: dirfile, fragment_index
+  double complex, intent(in) :: cdividend
+  character (len=*), intent(in) :: field_name, in_field
+
+  call gdadcr(dirfile, TRIM(field_name), LEN_TRIM(field_name), TRIM(in_field), &
+  LEN_TRIM(in_field), cdividend, fragment_index)
+end subroutine
+
 subroutine fgd_add_phase (dirfile, field_name, in_field, phase, fragment_index)
   integer, intent(in) :: dirfile, phase, fragment_index
   character (len=*), intent(in) :: field_name, in_field
@@ -1132,6 +1193,10 @@ subroutine fgd_madd (dirfile, parent, field_code, ent)
     call gdmdmt(dirfile, TRIM(parent), LEN_TRIM(parent), TRIM(field_code), &
     LEN_TRIM(field_code), TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), &
     TRIM(ent%field(2)), LEN_TRIM(ent%field(2)))
+  else if (ent%field_type .EQ. GD_DIVIDE_ENTRY) then
+    call gdmddv(dirfile, TRIM(parent), LEN_TRIM(parent), TRIM(field_code), &
+    LEN_TRIM(field_code), TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), &
+    TRIM(ent%field(2)), LEN_TRIM(ent%field(2)))
   else if (ent%field_type .EQ. GD_POLYNOM_ENTRY) then
     if (ent%comp_scal .NE. 0) then
       call gdmdcp(dirfile, TRIM(parent), LEN_TRIM(parent), TRIM(field_code), &
@@ -1143,6 +1208,16 @@ subroutine fgd_madd (dirfile, parent, field_code, ent)
       LEN_TRIM(field_code), ent%poly_ord, TRIM(ent%field(1)), &
       LEN_TRIM(ent%field(1)), ent%a(1), ent%a(2), ent%a(3), ent%a(4), &
       ent%a(5), ent%a(6))
+    endif
+  else if (ent%field_type .EQ. GD_RECIP_ENTRY) then
+    if (ent%comp_scal .NE. 0) then
+      call gdmdcr(dirfile, TRIM(parent), LEN_TRIM(parent), TRIM(field_code), &
+      LEN_TRIM(field_code), TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), &
+      ent%cdividend)
+    else
+      call gdmdrc(dirfile, TRIM(parent), LEN_TRIM(parent), TRIM(field_code), &
+      LEN_TRIM(field_code), TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), &
+      ent%dividend)
     endif
   else if (ent%field_type .EQ. GD_PHASE_ENTRY) then
     call gdmdph(dirfile, TRIM(parent), LEN_TRIM(parent), TRIM(field_code), &
@@ -1249,6 +1324,33 @@ subroutine fgd_madd_multiply (dirfile, parent, field_name, in_field1, in_field2)
   call gdmdmt(dirfile, TRIM(parent), LEN_TRIM(parent), TRIM(field_name), &
   LEN_TRIM(field_name), TRIM(in_field1), LEN_TRIM(in_field1), TRIM(in_field2), &
   LEN_TRIM(in_field2))
+end subroutine
+
+subroutine fgd_madd_divide (dirfile, parent, field_name, in_field1, in_field2)
+  integer, intent(in) :: dirfile
+  character (len=*), intent(in) :: field_name, in_field1, in_field2, parent
+
+  call gdmddv(dirfile, TRIM(parent), LEN_TRIM(parent), TRIM(field_name), &
+  LEN_TRIM(field_name), TRIM(in_field1), LEN_TRIM(in_field1), TRIM(in_field2), &
+  LEN_TRIM(in_field2))
+end subroutine
+
+subroutine fgd_madd_recip (dirfile, parent, field_name, in_field, dividend)
+  integer, intent(in) :: dirfile
+  double precision, intent(in) :: dividend
+  character (len=*), intent(in) :: field_name, in_field, parent
+
+  call gdmdrc(dirfile, TRIM(parent), LEN_TRIM(parent), TRIM(field_name), &
+  LEN_TRIM(field_name), TRIM(in_field), LEN_TRIM(in_field), dividend)
+end subroutine
+
+subroutine fgd_madd_crecip (dirfile, parent, field_name, in_field, cdividend)
+  integer, intent(in) :: dirfile
+  double complex, intent(in) :: cdividend
+  character (len=*), intent(in) :: field_name, in_field, parent
+
+  call gdmdcr(dirfile, TRIM(parent), LEN_TRIM(parent), TRIM(field_name), &
+  LEN_TRIM(field_name), TRIM(in_field), LEN_TRIM(in_field), cdividend)
 end subroutine
 
 subroutine fgd_madd_phase (dirfile, parent, field_name, in_field, phase)
@@ -1455,6 +1557,10 @@ subroutine fgd_alter_entry (dirfile, field_code, ent, recode)
     call gdalmt(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
     TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), TRIM(ent%field(2)), &
     LEN_TRIM(ent%field(2)))
+  else if (ent%field_type .EQ. GD_DIVIDE_ENTRY) then
+    call gdaldv(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+    TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), TRIM(ent%field(2)), &
+    LEN_TRIM(ent%field(2)))
   else if (ent%field_type .EQ. GD_PHASE_ENTRY) then
     call gdalph(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
     TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), ent%shift)
@@ -1467,6 +1573,14 @@ subroutine fgd_alter_entry (dirfile, field_code, ent, recode)
       call gdalpn(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
       ent%poly_ord, TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), ent%a(1), &
       ent%a(2), ent%a(3), ent%a(4), ent%a(5), ent%a(6))
+    endif
+  else if (ent%field_type .EQ. GD_RECIP_ENTRY) then
+    if (ent%comp_scal .NE. 0) then
+      call gdalcr(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+      TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), ent%cdividend)
+    else
+      call gdalrc(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+      TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), ent%a(1), ent%dividend)
     endif
   else if (ent%field_type .EQ. GD_CONST_ENTRY) then
     call gdalco(dirfile, TRIM(field_code), LEN_TRIM(field_code), ent%data_type)
@@ -1552,6 +1666,32 @@ subroutine fgd_alter_multiply (dirfile, field_name, in_field1, in_field2)
 
   call gdalmt(dirfile, TRIM(field_name), LEN_TRIM(field_name), &
   TRIM(in_field1), LEN_TRIM(in_field1), TRIM(in_field2), LEN_TRIM(in_field2))
+end subroutine
+
+subroutine fgd_alter_divide (dirfile, field_name, in_field1, in_field2)
+  integer, intent(in) :: dirfile
+  character (len=*), intent(in) :: field_name, in_field1, in_field2
+
+  call gdaldv(dirfile, TRIM(field_name), LEN_TRIM(field_name), &
+  TRIM(in_field1), LEN_TRIM(in_field1), TRIM(in_field2), LEN_TRIM(in_field2))
+end subroutine
+
+subroutine fgd_alter_recip (dirfile, field_name, in_field, dividend)
+  integer, intent(in) :: dirfile
+  double precision, intent(in) :: dividend
+  character (len=*), intent(in) :: field_name, in_field
+
+  call gdalrc(dirfile, TRIM(field_name), LEN_TRIM(field_name), &
+  TRIM(in_field), LEN_TRIM(in_field), dividend)
+end subroutine
+
+subroutine fgd_alter_crecip (dirfile, field_name, in_field, cdividend)
+  integer, intent(in) :: dirfile
+  double complex, intent(in) :: cdividend
+  character (len=*), intent(in) :: field_name, in_field
+
+  call gdalcr(dirfile, TRIM(field_name), LEN_TRIM(field_name), &
+  TRIM(in_field), LEN_TRIM(in_field), cdividend)
 end subroutine
 
 subroutine fgd_alter_phase (dirfile, field_name, in_field, phase)

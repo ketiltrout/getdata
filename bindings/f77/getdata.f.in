@@ -33,6 +33,10 @@ C     Corresponding to gd_add_const(3)
       EXTERNAL GDADCO
 C     Corresponding to gd_add_cpolynom(3)
       EXTERNAL GDADCP
+C     Corresponding to gd_add_crecip(3)
+      EXTERNAL GDADCR
+C     Corresponding to gd_add_divide(3)
+      EXTERNAL GDADDV
 C     Corresponding to gd_add_lincom(3)
       EXTERNAL GDADLC
 C     Corresponding to gd_add_linterp(3)
@@ -43,6 +47,8 @@ C     Corresponding to gd_add_phase(3)
       EXTERNAL GDADPH
 C     Corresponding to gd_add_polynom(3)
       EXTERNAL GDADPN
+C     Corresponding to gd_add_recip(3)
+      EXTERNAL GDADRC
 C     Corresponding to gd_add_raw(3)
       EXTERNAL GDADRW
 C     Corresponding to gd_add_sbit(3)
@@ -65,6 +71,10 @@ C     Correpsonding to gd_alter_const(3)
       EXTERNAL GDALCO
 C     Correpsonding to gd_alter_cpolynom(3)
       EXTERNAL GDALCP
+C     Correpsonding to gd_alter_crecip(3)
+      EXTERNAL GDALCR
+C     Correpsonding to gd_alter_divide(3)
+      EXTERNAL GDALDV
 C     Correpsonding to gd_alter_lincom(3)
       EXTERNAL GDALLC
 C     Correpsonding to gd_alter_linterp(3)
@@ -75,6 +85,8 @@ C     Correpsonding to gd_alter_phase(3)
       EXTERNAL GDALPH
 C     Correpsonding to gd_alter_polynom(3)
       EXTERNAL GDALPN
+C     Correpsonding to gd_alter_recip(3)
+      EXTERNAL GDALRC
 C     Correpsonding to gd_alter_raw(3)
       EXTERNAL GDALRW
 C     Correpsonding to gd_alter_sbit(3)
@@ -129,6 +141,8 @@ C     Corresponding to gd_entry(3) for CONST fields
       EXTERNAL GDGECO
 C     Corresponding to gd_entry(3) for complex valued POLYNOM fields
       EXTERNAL GDGECP
+C     Corresponding to gd_entry(3) for complex valued RECIP fields
+      EXTERNAL GDGECR
 C     Corresponding to gd_entry(3) for LINCOM fields
       EXTERNAL GDGELC
 C     Corresponding to gd_entry(3) for LINTERP fields
@@ -145,6 +159,8 @@ C     Corresponding to gd_entry(3) for PHASE fields
       EXTERNAL GDGEPH
 C     Corresponding to gd_entry(3) for POLYNOM fields
       EXTERNAL GDGEPN
+C     Corresponding to gd_entry(3) for RECIP fields
+      EXTERNAL GDGERC
 C     Corresponding to gd_entry(3) for RAW fields
       EXTERNAL GDGERW
 C     Corresponding to gd_entry(3) for SBIT fields
@@ -173,6 +189,10 @@ C     Corresponding to gd_madd_const(3)
       EXTERNAL GDMDCO
 C     Corresponding to gd_madd_cpolynom(3)
       EXTERNAL GDMDCP
+C     Corresponding to gd_madd_crecip(3)
+      EXTERNAL GDMDCR
+C     Corresponding to gd_madd_divide(3)
+      EXTERNAL GDMDDV
 C     Corresponding to gd_madd_lincom(3)
       EXTERNAL GDMDLC
 C     Corresponding to gd_madd_linterp(3)
@@ -183,6 +203,8 @@ C     Corresponding to gd_madd_phase(3)
       EXTERNAL GDMDPH
 C     Corresponding to gd_madd_polynom(3)
       EXTERNAL GDMDPN
+C     Corresponding to gd_madd_recip(3)
+      EXTERNAL GDMDRC
 C     Corresponding to gd_madd_sbit(3)
       EXTERNAL GDMDSB
 C     Corresponding to gd_madd_spec(3)
