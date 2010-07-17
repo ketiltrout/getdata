@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH dirfile\-format 5 "18 June 2010" "Standards Version 7" "DATA FORMATS"
+.TH dirfile\-format 5 "15 July 2010" "Standards Version 8" "DATA FORMATS"
 .SH NAME
 dirfile\-format \(em the dirfile database format specification file
 .SH DESCRIPTION
@@ -156,11 +156,11 @@ used as a field name).
 There are eight 
 .IR "reserved words" ,
 which cannot be used as field names in the dirfile.  Instead, these specify
-directives.  Any reserved word may omit its initial forward slash
+directives.  All reserved words start with an initial forward slash
 .RB ( / ),
-without change in meaning.  Future versions of the Standards may require the
-slash to distinguish a reserved word from a field name.  Like the rest of the
-format specification, directives are case sensitive.
+to distinguish them from field names.  Previous versions of the Standards
+permitted the omission of the slash.  Like the rest of the format specification,
+directives are case sensitive.
 
 A number of the directives have
 .IR "fragment scope" .
@@ -218,16 +218,16 @@ The ENCODING directive has
 .TP
 .B /ENDIAN
 The ENDIAN directive specifies the endianness of the raw data in the database.
-In previous versions of the Dirfile Standard, raw data was always assumed to be
-little-endian.  This assumption has been removed.  The assumed endianness of raw
-data in dirfiles which omit this directive is implementation dependent.  Syntax
+The assumed endianness of raw data in dirfiles which omit this directive is
+implementation dependent.  Syntax
 is:
 .RS
 .IP
 .B /ENDIAN
-.IR "( " big " | " little " )"
+.IR "( " big " | " little " ) [ " arm " ]"
 .PP
-The ENDIAN directive has
+where the "arm" token should be included if double precision floating point data
+are stored in the ARM middle-endian format.  The ENDIAN directive has
 .IR "fragment scope" .
 .RE
 .TP
@@ -418,9 +418,9 @@ character, the line is assumed to specify a metafield.  See the
 directive above for further details.
 
 .SS Field Types
-There are ten field types.  Of these, eight are of vector type
-.RB ( BIT ", " LINCOM ", " LINTERP ", " MULTIPLY ", " PHASE ,
-.BR POLYNOM ", " RAW ", and " SBIT )
+There are twelve field types.  Of these, ten are of vector type
+.RB ( BIT ", " DIVIDE ", " LINCOM ", " LINTERP ", " MULTIPLY ", " PHASE ,
+.BR POLYNOM ", " RAW ", " RECIP ", and " SBIT )
 and two are of scalar type
 .RB ( CONST " and " STRING ).
 The possible fields types are:
@@ -473,6 +473,25 @@ field type below), and
 .I value
 is the numerical value of the constant interpreted as indicated by
 .IR type .
+.RE
+.TP
+.B DIVIDE
+The DIVIDE vector field type is the quotient of two vector fields.  Syntax is:
+.RS
+.IP
+.I <field-name>
+.B DIVIDE
+.I <field1> <field1>
+.PP
+The derived field will be computed as:
+.IP
+field-name[n] = field1[n] / field2[n2]
+.PP
+with the index
+.I n2
+computed appropriately for the (potentially differing) sample rates of the
+input fields.  The resultant field will have the same sample rate as
+.IR field1 .
 .RE
 .TP
 .B LINCOM
@@ -623,6 +642,29 @@ or else the field code of a
 field type containing the value.
 .RE
 .TP
+.B RECIP
+The RECIP vector field type computes the reciprocal of a single input vector
+field.  Syntax is:
+.RS
+.IP
+.I <field_name>
+.B RECIP
+.I <input> <dividend>
+.PP
+where
+.I <input>
+is the input field code and
+.I <dividend>
+is a scalar quantity.  The derived field is computed as:
+.IP
+field-name[n] = dividend / input[n].
+.PP
+The dividend, if specified, may be either literal numbers, or else the field
+code of a
+.B CONST
+field type containing the value.
+.RE
+.TP
 .B RAW
 The RAW vector field type specifies raw time streams on disk.  In this case, the
 field name should correspond to the name of the file containing the time stream.
@@ -714,7 +756,8 @@ Types
 and
 .I COMPLEX128
 are not supported before Standards Version 5, so no single character type
-aliases exist for these types.
+aliases exist for these types.  Standards Version 8 removed support for these
+single character type codes.
 
 The
 .I sample-rate
@@ -898,7 +941,16 @@ would be.)
 
 .SH STANDARDS VERSIONS
 
-This document describes Version 7 of the Dirfile Standards.
+This document describes Version 8 of the Dirfile Standards.
+
+Version 8 of the Standards (August 2010) added the
+.B DIVIDE
+and
+.B RECIP
+field types, made the forward slash on reserved words mandatory, and prohibited
+using the single character data type aliases in the specification of
+.B RAW
+fields.
 
 Version 7 of the Standards (October 2009) added the
 .B SBIT
@@ -948,7 +1000,7 @@ and
 the new-style type specifiers, and increased the range of the
 .B BIT
 field type from 32 to 64 bits.  It also prohibited the characters
-.B #&/;<>\e|
+.B #&;<>\e|
 in field names.
 
 Version 4 of the Standards (October 2006) added the

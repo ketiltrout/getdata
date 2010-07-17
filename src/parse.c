@@ -45,7 +45,7 @@ static gd_type_t _GD_RawType(const char* type, int standards, int pedantic)
   dtrace("\"%s\", %i, %i\n", type, standards, pedantic);
 
   /* for backwards compatibility */
-  if (strlen(type) == 1) 
+  if (strlen(type) == 1 && (!pedantic || standards < 8)) 
     t = _GD_LegacyType(type[0]);
   else if (pedantic && standards < 5)
     t = GD_UNKNOWN;
@@ -1452,6 +1452,12 @@ static int _GD_ParseDirective(DIRFILE *D, char** in_cols, int n_cols,
   dtrace("%p, %p, %i, %u, %p, %i, %p, %p", D, in_cols, n_cols, me, standards,
       linenum, ref_name, flags);
 
+  /* Starting with Standards Version 8, the forward slash is required. */
+  if (*standards >= 8 && pedantic && in_cols[0][0] != '/') {
+    dreturn("%i", 0);
+    return 0;
+  }
+
   /* set up for possibly slashed reserved words */
   ptr = in_cols[0];
   if (*standards >= 5 || !pedantic)
@@ -1494,17 +1500,12 @@ static int _GD_ParseDirective(DIRFILE *D, char** in_cols, int n_cols,
         _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_ENDIAN,
             D->fragment[me].cname, linenum, NULL);
       if (n_cols > 2) {
-        if (strcmp(in_cols[2], "big") == 0)
-          D->fragment[me].float_sex = GD_BIG_ENDIAN;
-        else if (strcmp(in_cols[2], "little") == 0)
-          D->fragment[me].float_sex = GD_LITTLE_ENDIAN;
-        else if (strcmp(in_cols[2], "arm") == 0)
-          D->fragment[me].float_sex = GD_ARM_ENDIAN;
+        if (strcmp(in_cols[2], "arm") == 0)
+          D->fragment[me].byte_sex |= GD_ARM_ENDIAN;
         else 
           _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_ENDIAN,
               D->fragment[me].cname, linenum, NULL);
-      } else
-        D->fragment[me].float_sex = D->fragment[me].byte_sex;
+      }
     }
   } else if (strcmp(ptr, "FRAMEOFFSET") == 0 && (!pedantic || *standards >= 1))
     D->fragment[me].frame_offset = strtoll(in_cols[1], NULL, 10);

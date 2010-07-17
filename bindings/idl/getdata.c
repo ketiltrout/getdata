@@ -1898,6 +1898,7 @@ void gdidl_gd_alter_endianness(int argc, IDL_VPTR argv[], char *argk)
   typedef struct {
     IDL_KW_RESULT_FIRST_FIELD;
     GDIDL_KW_RESULT_ERROR;
+    int arm_end;
     int big_end;
     int fragment_index;
     int fragment_index_x;
@@ -1909,10 +1910,11 @@ void gdidl_gd_alter_endianness(int argc, IDL_VPTR argv[], char *argk)
   kw.recode = 0;
   kw.fragment_index = 0;
   kw.fragment_index_x = 0;
-  kw.big_end = kw.little_end = 0;
+  kw.arm_end = kw.big_end = kw.little_end = 0;
   GDIDL_KW_INIT_ERROR;
 
   static IDL_KW_PAR kw_pars[] = {
+    { "ARM_ENDIAN", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(arm_end) },
     { "BIG_ENDIAN", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(big_end) },
     GDIDL_KW_PAR_ERROR,
     GDIDL_KW_PAR_ESTRING,
@@ -1930,7 +1932,8 @@ void gdidl_gd_alter_endianness(int argc, IDL_VPTR argv[], char *argk)
   DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
 
   gd_alter_endianness(D, (kw.big_end ? GD_BIG_ENDIAN : 0) | 
-      (kw.little_end ? GD_LITTLE_ENDIAN : 0), kw.fragment_index, kw.recode);
+      (kw.little_end ? GD_LITTLE_ENDIAN : 0) | (kw.arm_end ? GD_ARM_ENDIAN : 0),
+      kw.fragment_index, kw.recode);
 
   GDIDL_SET_ERROR(D);
 
@@ -2798,6 +2801,7 @@ void gdidl_gd_include(int argc, IDL_VPTR argv[], char *argk)
   typedef struct {
     IDL_KW_RESULT_FIRST_FIELD;
     GDIDL_KW_RESULT_ERROR;
+    int arm_end;
     int big_end;
     int creat;
     int excl;
@@ -2807,6 +2811,7 @@ void gdidl_gd_include(int argc, IDL_VPTR argv[], char *argk)
     int ignore_refs;
     int little_end;
     int pedantic;
+    int permissive;
     int trunc;
     int enc_x;
     IDL_VPTR enc;
@@ -2822,6 +2827,7 @@ void gdidl_gd_include(int argc, IDL_VPTR argv[], char *argk)
 
   static IDL_KW_PAR kw_pars[] = {
     IDL_KW_FAST_SCAN,
+    { "ARM_ENDIAN", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(arm_end) },
     { "BIG_ENDIAN", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(big_end) },
     { "CREAT", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(creat) },
     { "ENCODING", 0, 1, IDL_KW_VIN, IDL_KW_OFFSETOF(enc_x),
@@ -2838,6 +2844,7 @@ void gdidl_gd_include(int argc, IDL_VPTR argv[], char *argk)
     { "IGNORE_REFS", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(ignore_dups) },
     { "LITTLE_ENDIAN", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(little_end) },
     { "PEDANTIC", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(pedantic) },
+    { "PERMISSIVE", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(permissive) },
     { "TRUNC", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(trunc) },
     { NULL }
   };
@@ -2851,14 +2858,15 @@ void gdidl_gd_include(int argc, IDL_VPTR argv[], char *argk)
   DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
   const char *file = IDL_VarGetString(argv[1]);
 
-  unsigned long flags = (kw.big_end ? GD_BIG_ENDIAN : 0)
-    | (kw.creat ? GD_CREAT : 0) | (kw.excl ? GD_EXCL : 0)
-    | (kw.force_enc ? GD_FORCE_ENCODING : 0)
+  unsigned long flags = (kw.arm_end ? GD_ARM_ENDIAN : 0)
+    | (kw.big_end ? GD_BIG_ENDIAN : 0) | (kw.creat ? GD_CREAT : 0)
+    | (kw.excl ? GD_EXCL : 0) | (kw.force_enc ? GD_FORCE_ENCODING : 0)
     | (kw.force_end ? GD_FORCE_ENDIAN : 0)
     | (kw.ignore_dups ? GD_IGNORE_DUPS : 0)
     | (kw.ignore_refs ? GD_IGNORE_REFS : 0)
     | (kw.little_end ? GD_LITTLE_ENDIAN : 0)
-    | (kw.pedantic ? GD_PEDANTIC : 0) | (kw.trunc ? GD_TRUNC : 0);
+    | (kw.pedantic ? GD_PEDANTIC : 0) | (kw.permissive ? GD_PERMISSIVE : 0)
+    | (kw.trunc ? GD_TRUNC : 0);
 
   if (kw.enc_x)
     flags |= gdidl_convert_encoding(kw.enc);
@@ -2942,6 +2950,7 @@ IDL_VPTR gdidl_gd_open(int argc, IDL_VPTR argv[], char *argk)
     IDL_KW_RESULT_FIRST_FIELD;
     GDIDL_KW_RESULT_ERROR;
     int rdwr;
+    int arm_end;
     int big_end;
     int creat;
     int excl;
@@ -2950,6 +2959,7 @@ IDL_VPTR gdidl_gd_open(int argc, IDL_VPTR argv[], char *argk)
     int ignore_dups;
     int little_end;
     int pedantic;
+    int permissive;
     int trunc;
     int verbose;
     int enc_x;
@@ -2963,6 +2973,7 @@ IDL_VPTR gdidl_gd_open(int argc, IDL_VPTR argv[], char *argk)
 
   static IDL_KW_PAR kw_pars[] = {
     IDL_KW_FAST_SCAN,
+    { "ARM_ENDIAN", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(big_end) },
     { "BIG_ENDIAN", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(big_end) },
     { "CREAT", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(creat) },
     { "ENCODING", 0, 1, IDL_KW_VIN, IDL_KW_OFFSETOF(enc_x),
@@ -2986,13 +2997,14 @@ IDL_VPTR gdidl_gd_open(int argc, IDL_VPTR argv[], char *argk)
   name = IDL_VarGetString(argv[0]);
 
   unsigned long flags = (kw.rdwr ? GD_RDWR : GD_RDONLY)
-    | (kw.big_end ? GD_BIG_ENDIAN : 0) | (kw.creat ? GD_CREAT : 0)
-    | (kw.excl ? GD_EXCL : 0) | (kw.force_enc ? GD_FORCE_ENCODING : 0)
+    | (kw.arm_end ? GD_ARM_ENDIAN : 0) | (kw.big_end ? GD_BIG_ENDIAN : 0)
+    | (kw.creat ? GD_CREAT : 0) | (kw.excl ? GD_EXCL : 0)
+    | (kw.force_enc ? GD_FORCE_ENCODING : 0)
     | (kw.force_end ? GD_FORCE_ENDIAN : 0)
     | (kw.ignore_dups ? GD_IGNORE_DUPS : 0)
     | (kw.little_end ? GD_LITTLE_ENDIAN : 0)
-    | (kw.pedantic ? GD_PEDANTIC : 0) | (kw.trunc ? GD_TRUNC : 0)
-    | (kw.verbose ? GD_VERBOSE : 0);
+    | (kw.pedantic ? GD_PEDANTIC : 0) | (kw.permissive ? GD_PERMISSIVE : 0)
+    | (kw.trunc ? GD_TRUNC : 0) | (kw.verbose ? GD_VERBOSE : 0);
 
   if (kw.enc_x)
     flags |= gdidl_convert_encoding(kw.enc);

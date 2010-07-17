@@ -15,7 +15,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_alter_frameoffset 3 "25 May 2010" "Version 0.7.0" "GETDATA"
+.TH gd_alter_frameoffset 3 "16 June 2010" "Version 0.7.0" "GETDATA"
 .SH NAME
 gd_alter_frameoffset \(em modify the starting frame of fields in a dirfile
 .SH SYNOPSIS
@@ -136,6 +136,6 @@ instructions, see the file
 .BR gd_open (3),
 .BR gd_error (3),
 .BR gd_error_string (3),
-.BR gd_get_frameoffset (3),
+.BR gd_frameoffset (3),
 .BR dirfile (5),
 .BR dirfile-format (5)

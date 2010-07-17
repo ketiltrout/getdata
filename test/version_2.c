@@ -15,7 +15,10 @@ int main(void)
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
   const char* data = __TEST__ "dirfile/INCLUDE";
-  const char* format_data = "INCLUDE RAW c 8\nm MULTIPLY INCLUDE INCLUDE\n";
+  const char* format_data =
+    "INCLUDE RAW c 8\n"
+    "a&b RAW c 8\n"
+    "m MULTIPLY INCLUDE INCLUDE\n";
   uint16_t c[8];
   unsigned char data_data[256];
   int fd, i, r = 0;

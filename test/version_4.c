@@ -17,7 +17,7 @@ int main(void)
   const char* format1 = __TEST__ "dirfile/RAW";
   const char* data = __TEST__ "dirfile/ENDIAN";
   const char* format_data = "ENDIAN RAW c 8\nINCLUDE RAW\n";
-  const char* format_data1 = "VERSION PHASE ENDIAN 1\n";
+  const char* format_data1 = "VERSION PHASE ENDIAN 1\na&b RAW c 8\n";
   uint16_t c[8];
   unsigned char data_data[256];
   int fd, i, r = 0;

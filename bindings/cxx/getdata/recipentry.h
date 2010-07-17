@@ -70,10 +70,10 @@ namespace GetData {
         return std::complex<double>(E.cdividend[0], E.cdividend[1]);
       };
 
-      int SetInput(const char* field);
-      int SetDividend(double coeff);
-      int SetDividend(const char* coeff);
-      int SetDividend(std::complex<double> coeff);
+      virtual int SetInput(const char* field);
+      virtual int SetDividend(double coeff);
+      virtual int SetDividend(const char* coeff);
+      virtual int SetDividend(std::complex<double> coeff);
 
     private:
       RecipEntry(GetData::Dirfile *dirfile, const char* field_code) :

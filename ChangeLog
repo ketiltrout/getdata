@@ -1,3 +1,34 @@
+2010-07-17   D. V. Wiebe <getdata@ketiltrout.net>   svn:438
+	* test/version_0.c test/version_1.c test/version_2.c
+	test/version_3.ctest/version_4.c: Weed out version 8.
+
+	* test/add_spec_directive.c: The test works again in version 8, so try it in
+	version 7.
+
+	* test/version_8_strict.c: Test syntax removed in version 8.
+
+	* bindings/idl/getdata.c (gdidl_gd_alter_endianness gdidl_gd_include
+	gdidl_gd_open): Handle ARM_ENDIAN and PERMISSIVE.
+
+	* bindings/make_parameters.c: Add GD_ARM_ENDIAN and GD_PERMISSIVE.
+
+	* src/add.c (gd_madd_spec gd_add_spec): Use the current version rather than
+	DIRFILE_STANDARDS_VERSION when calling the parser.
+
+	* src/name.c (_GD_ValidateField): Allow directives as field names in version 8
+	* src/endian.c (_GD_ByteSwapFragment) src/move.c (_GD_MogrifyFile): Handle ARM
+	ended floats.
+	* src/flush.c (_GD_FindVersion): Directives are permitted as field names in
+	version 8.
+	* src/parse.c (_GD_RawType): Single character types aren't permitted in
+	version 8.
+	* src/parse.c (_GD_ParseDirective): Slash is mandatory in version 8.
+
+	* src/open.c (gd_cbopen) getdata.c (_GD_DoRaw) putdata.c (_GD_DoRawOut: Merge
+	byte_sex and float_sex.
+	* src/flush.c (_GD_FlushFragment) src/parse.c (_GD_ParseDirective): Allow only
+	"arm" as float sex in format.
+
 2010-07-15   D. V. Wiebe <getdata@ketiltrout.net>   svn:436
 	* bindings/f77/test/big_test.f: Added tests 143-154
 	* bindings/f77/test/big_test95.f90: Added tests 143, 145-154

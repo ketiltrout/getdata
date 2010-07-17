@@ -36,6 +36,7 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned long encoding,
   ssize_t nread, nwrote;
   int subencoding = GD_ENC_UNKNOWN;
   int i;
+  int arm_endianise;
   void *buffer;
 
   dtrace("%p, %p, %lu, %lu, %lli, %i, %i, %p", D, E, encoding, byte_sex,
@@ -97,6 +98,10 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned long encoding,
 
   enc_in = _gd_ef + E->e->file[0].encoding;
 
+  /* Need to do the ARM thing? */
+  arm_endianise = ((byte_sex & GD_ARM_ENDIAN) && enc_out->ecor) ^
+    ((D->fragment[E->fragment_index].byte_sex & GD_ARM_ENDIAN) && enc_in->ecor);
+
   /* Normalise endiannesses */
 #ifdef WORDS_BIGENDIAN
   byte_sex = ((byte_sex & GD_LITTLE_ENDIAN) && enc_out->ecor) ^
@@ -111,7 +116,7 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned long encoding,
   /* If all that's changing is the byte sex, but we don't need to do
    * endianness conversion, don't do anything */
   if (offset == 0 && encoding == D->fragment[E->fragment_index].encoding &&
-      !byte_sex && strcmp(new_filebase, E->e->filebase) == 0)
+      !byte_sex && !arm_endianise && strcmp(new_filebase, E->e->filebase) == 0)
   {
     free(new_filebase);
     dreturn("%i", 0);
@@ -195,6 +200,10 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned long encoding,
 
     if (nread == 0)
       break;
+
+    /* fix army-ness, if required */
+    if (arm_endianise)
+        _GD_ArmEndianise(buffer, E->data_type & GD_COMPLEX, ns);
 
     /* swap endianness, if required */
     if (byte_sex) {

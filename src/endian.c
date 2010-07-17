@@ -33,13 +33,13 @@ static void _GD_ByteSwapFragment(DIRFILE* D, unsigned long byte_sex,
 
   dtrace("%p, %lx, %i, %i", D, (unsigned long)byte_sex, fragment, move);
 
-  byte_sex = 
+  byte_sex = (
 #ifdef WORDS_BIGENDIAN
     (byte_sex & GD_LITTLE_ENDIAN) ? GD_LITTLE_ENDIAN : GD_BIG_ENDIAN
 #else
     (byte_sex & GD_BIG_ENDIAN) ? GD_BIG_ENDIAN : GD_LITTLE_ENDIAN
 #endif
-    ;
+    ) | (byte_sex & GD_ARM_ENDIAN);
 
   /* check protection */
   if (D->fragment[fragment].protection & GD_PROTECT_FORMAT) {

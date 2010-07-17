@@ -272,8 +272,9 @@ static PyGetSetDef gdpy_fragment_getset[] = {
     NULL },
   { "endianness", (getter)gdpy_fragment_getendianness, NULL,
     "The byte sex of this fragment.  This will be either\n"
-      "pygetdata.BIG_ENDIAN or pygetdata.LITTLE_ENDIAN.  To change this\n"
-      "value, use the alter_endianness method.",
+      "pygetdata.BIG_ENDIAN or pygetdata.LITTLE_ENDIAN, possibly bitwise\n"
+      "or'd with pygetdata.ARM_ENDIAN.  To change this value, use the\n"
+      "alter_endianness method.",
     NULL },
   { "frameoffset", (getter)gdpy_fragment_getoffset, NULL,
     "The frame offset of this fragment.  To change this value, use the\n"
@@ -285,7 +286,6 @@ static PyGetSetDef gdpy_fragment_getset[] = {
     NULL },
   { "name", (getter)gdpy_fragment_getname, NULL,
     "The pathname of this fragment.  This attribute cannot be changed.\n"
-      /* -----------------------------------------------------------------| */
       "See gd_fragmentname(3).",
     NULL },
   { "parent", (getter)gdpy_fragment_getparent, NULL,
@@ -321,8 +321,10 @@ static PyMethodDef gdpy_fragment_methods[] = {
       "Change the byte sex of this fragment.  The 'endianness' parameter\n"
       "should be pygetdata.LITTLE_ENDIAN, pygetdata.BIG_ENDIAN, or some\n"
       "combination of these two as described in the gd_alter_endianness\n"
-      "manual page.  If 'recode' is given, and is non-zero, the RAW files\n"
-      "affected by this change will be converted to the byte sex.  See\n"
+      "manual page, and possibly bitwise or'd with pygetdata.ARM_ENDIAN.\n"
+      "If 'recode' is given, and is non-zero, the RAW files affected by\n"
+      "this change will be converted to the byte sex.  See\n"
+      /* -----------------------------------------------------------------| */
       "gd_alter_endianness(3)."
   },
   {"alter_frameoffset", (PyCFunction)gdpy_fragment_setoffset,

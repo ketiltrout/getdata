@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_free_entry_strings 3 "25 May 2010" "Version 0.7.0" "GETDATA"
+.TH gd_free_entry_strings 3 "16 June 2010" "Version 0.7.0" "GETDATA"
 .SH NAME
 gd_free_entry_strings \(em free strings in a GetData gd_entry_t object
 .SH SYNOPSIS
@@ -30,7 +30,7 @@ The
 function frees the character strings found in the gd_entry_t object
 .I entry
 which were previously allocated by a call to
-.BR gd_get_entry (3).
+.BR gd_entry (3).
 If
 .I entry
 is NULL, this function does nothing.
@@ -39,7 +39,7 @@ If non-NULL,
 .I entry
 must point to a valid and properly initialised gd_entry_t object, such as that
 returned by
-.BR gd_get_entry (3).
+.BR gd_entry (3).
 As well, the caller may construct a properly initialised gd_entry_t object by
 first setting all bits to zero, then setting the field_type parameter to the
 desired gd_entype_t symbol, and finally initialising only the members defined
@@ -51,7 +51,7 @@ have not been allocated with
 unless these pointer members are equal to NULL.
 
 See 
-.BR gd_get_entry (3)
+.BR gd_entry (3)
 for a complete description of the gd_entry_t data type.
 .SH RETURN VALUE
 A call to 
@@ -61,10 +61,10 @@ always returns its input,
 .SH NOTES
 This function is provided as a convenience only.  Callers may free strings
 allocated by
-.BR gd_get_entry (3)
+.BR gd_entry (3)
 themselves by simply calling
 .BR free (3)
 on the appropriate members for the given entry type, if they prefer to do so.
 .SH SEE ALSO
-.BR gd_get_entry (3),
+.BR gd_entry (3),
 .BR free (3)

@@ -47,7 +47,7 @@ namespace GetData {
       PhaseEntry(const char* field_code, const char* in_field, gd_shift_t shift,
           int fragment_index = 0);
 
-      virtual const char *Input(int __gd_unused index = 0) {
+      virtual const char *Input() {
         return E.in_fields[0];
       };
 

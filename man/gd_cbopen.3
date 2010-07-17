@@ -69,6 +69,10 @@ argument should include one of the
 (read-write), and may also contain zero or more of the following flags,
 bitwise-or'd together:
 .TP
+.B GD_ARM_ENDIAN
+Specifies that double precision floating point raw data on disk is stored in the
+middle-endian format used by older ARM processors.
+.TP
 .B GD_BIG_ENDIAN
 Specifies that raw data on disk is stored as big-endian data (most significant
 byte first).  Specifying this flag along with the contradictory
@@ -159,14 +163,17 @@ directive occurs in the dirfile format file, unless
 is also specified.
 .TP
 .B GD_PEDANTIC
-Specifies that unrecognised lines found during the parsing of the format file
-should always cause a fatal error.  Without this flag, if a
-.B VERSION
-directive (see
-.BR dirfile-format (5))
-indicates that the dirfile being opened conforms Standards Version newer than
-the version understood by the library, unrecognised lines will be silently
-ignored.
+Reject dirfiles which don't conform to the Dirfile Standards.  See the
+.B Standards Compliance
+section below for full details.
+.TP
+.B GD_PERMISSIVE
+Allow non-compliant format specification syntax, even when given along with a
+conflicting
+.B /VERSION
+directive.  See the
+.B Standards Compliance
+section below for full details.
 .TP
 .B GD_PRETTY_PRINT
 When dirfile metadata is flushed to disc (either explicitly via
@@ -260,6 +267,78 @@ sample per line.
 .TP
 .B GD_UNENCODED
 Specifies that raw data files are not encoded, but written verbatim to disk.
+
+.SS Standards Compliance
+The latest Dirfile Standards Version which this version of GetData understands
+is provided in the preprocessor macro
+.B DIRFILE_STANDARDS_VERSION
+defined in getdata.h.  GetData is able to open and parse any Dirfile which
+conforms to this Standards Version, or to any earlier Version.  The
+.BR dirfile-format (5)
+manual page lists the changes between Standards Versions.
+
+The GetData parser can operate in two modes: a
+.I permissive
+mode, in which much
+non-Standards compliant sytax is allowed, and a
+.I pedanitc
+mode, in which the parser adheres strictly to the Standards.  If
+.B GD_PEDANTIC
+is passed to
+.BR gd_cbopen (),
+the parser will start parsing the format specification in
+.I pedantic
+mode, otherwise it will start in
+.I permissive
+mode.
+
+.I Permissive
+mode is provided primarily to allow GetData to be used on Dirfiles which
+conform to no single Standard, but which were accepted by the GetData parser
+in previous versions.  It is notably lax regarding reserved field names, and
+field name characters, the mixing of old and new data type specifiers, and
+generally ignores the presense of
+.B /VERSION
+directives.
+In read-write mode,
+.I permissive
+mode should be used with caution, as it can cause unintentional corruption of
+dirfile metadata on write, if the heuristics in the parser incorrectly guessed
+the intention of non-compliant syntax.  In
+.I permissive
+mode, actual syntax errors are still reported as such.
+
+In
+.I pedantic
+mode, the parser conforms to one specified Standards Version. This target
+version may change any number of times in the course of scanning a single
+format file.  If invoked using the
+.B GD_PEDANTIC
+flag, the parser will start in
+.I pedantic
+mode with a target version equal to
+.BR DIRFILE_STANDARDS_VERSION .
+Whenever a
+.B /VERSION
+directive is encountered in the format specification, the target version is
+changed to the Standards Version specified.  When encountering a
+.B /VERSION
+directive in
+.I permissive
+mode, the parser will switch to
+.I pedantic
+mode, unless the
+.B GD_PERMISSIVE
+flag was passed to
+.BR gd_cbopen (),
+in which case, no mode switch will take place.
+
+Independant of the mode of the parser when parsing the format specification,
+GetData will calculate a list of Standards Versions to which the parsed
+metadata conform to.  The
+.BR gd_dirfile_standards (3)
+function can provide this information, and also specify the desired
+Standards Version for writing format metadata back to disk.
 
 .SS The Callback Function
 The caller-supplied
@@ -519,6 +598,7 @@ file parsing will fail gloriously on an EBCDIC platform.
 .BR dirfile-encoding (5),
 .BR dirfile-format (5),
 .BR gd_close (3),
+.BR gd_dirfile_standards (3),
 .BR gd_error (3),
 .BR gd_error_string (3),
 .BR gd_getdata (3),

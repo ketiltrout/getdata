@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_getdata 3 "25 May 2010" "Version 0.7.0" "GETDATA"
+.TH gd_getdata 3 "16 June 2010" "Version 0.7.0" "GETDATA"
 .SH NAME
 gd_getdata \(em retrieve data from a dirfile database
 .SH SYNOPSIS
@@ -69,7 +69,7 @@ The first sample returned will be
 as measured from the start of the dirfile, where
 .I samples_per_frame
 is the number of samples per frame as returned by
-.BR gd_get_spf (3).
+.BR gd_spf (3).
 The number of samples fetched is, similarly,
 .RS
 .IR num_frames " * " samples_per_frame " + " num_samples .
@@ -270,7 +270,7 @@ systematically less data to the first
 .B RAW
 field in proportion to the maximal forward phase shift.  This method will work
 with applications which respect the database size reported by
-.BR gd_get_nframes (3)
+.BR gd_nframes (3)
 resulting in these applications effectively ignoring all frames past the frame
 containing the maximally forward-shifted
 .B PHASE
@@ -283,7 +283,7 @@ field's end-of-field marker.
 .BR gd_get_constant (3),
 .BR gd_error (3),
 .BR gd_error_string (3),
-.BR gd_get_nframes (3),
-.BR gd_get_spf (3),
+.BR gd_nframes (3),
+.BR gd_spf (3),
 .BR gd_get_string (3),
 .BR gd_putdata (3)

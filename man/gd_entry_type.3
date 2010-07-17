@@ -1,0 +1,87 @@
+.\" gd_entry_type.3.  The gd_entry_type man page.
+.\"
+.\" (C) 2008, 2009, 2010 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_entry_type 3 "15 July 2010" "Version 0.7.0" "GETDATA"
+.SH NAME
+gd_entry_type \(em retrieve the type of a dirfile field
+.SH SYNOPSIS
+.B #include <getdata.h>
+.HP
+.nh
+.ad l
+.BI "gd_entype_t gd_entry_type(const DIRFILE *" dirfile ", const char"
+.BI * field_code );
+.hy
+.ad n
+.SH DESCRIPTION
+The
+.BR gd_entry_type ()
+function queries a dirfile(5) database specified by
+.I dirfile
+and returns the field type of the field specified by
+.IR field_code .
+If
+.I field_code
+contains a valid representation suffix, it will be ignored.
+
+The
+.B gd_entype_t
+type is an enumerated type which may take any of the following values:
+.IP
+.nh
+.ad l
+.BR GD_BIT_ENTRY ,\~ GD_CONST_ENTRY ,\~ GD_DIVIDE_ENTRY ,\~ GD_INDEX_ENTRY ,\~
+.BR GD_LINCOM_ENTRY ,\~ GD_LINTERP_ENTRY ,\~ GD_MULTIPLY_ENTRY ,\~
+.BR GD_PHASE_ENTRY ,\~ GD_POLYNOM_ENTRY ,\~ GD_RAW_ENTRY ,\~ GD_RECIP_ENTRY ,\~
+.BR GD_SBIT_ENTRY ,\~ GD_STRING_ENTRY .
+.ad n
+.hy
+.SH RETURN VALUE
+Upon successful completion,
+.BR gd_entry_type ()
+returns the field type of the specified field.  On error,
+.BR gd_entry_type ()
+returns
+.B GD_NO_ENTRY
+and sets the dirfile error a non-zero error value.  Possible error
+values are:
+.TP 8
+.B GD_E_BAD_DIRFILE
+The supplied dirfile was invalid.
+.TP
+.B GD_E_BAD_CODE
+The field specified by
+.I field_code
+was not found in the database.
+.TP
+.B GD_E_BAD_REPR
+The representation suffix specified in
+.I field_code
+was not recognised.
+.P
+The dirfile error may be retrieved by calling
+.BR gd_error (3).
+A descriptive error string for the last error encountered can be obtained from
+a call to
+.BR gd_error_string (3).
+
+.SH SEE ALSO
+.BR gd_cbopen (3),
+.BR gd_entry (3),
+.BR gd_error (3),
+.BR gd_error_string (3),
+.BR gd_fragmentname (3),
+.BR gd_parent_fragment (3),
+.BR dirfile (5)

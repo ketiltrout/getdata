@@ -168,9 +168,9 @@ are available:
   which are aliases for the gd_type_t values GD_NULL, GD_UNKNOWN, GD_UINT8, &c.
   Arguments of type GetData::EntryType should be one of 
 
-    NoEntryType, RawEntryType, LincomEntryType, LinterpEntryType, BitEntryType,
-    MultiplyEntryType, PhaseEntryType, ConstEntryType, StringEntryType,
-    IndexEntryType
+    NoEntryType, BitEntryType, ConstEntryType, DivideEntryType, IndexEntryType,
+    LincomEntryType, LinterpEntryType, MultiplyEntryType, PhaseEntryType,
+    RawEntryType, RecipEntryType, StringEntryType
 
   which are aliases for the gd_entype_t values GD_NO_ENTRY, GD_RAW_ENTRY, &c.
   Note that the arguments to AddSpec are opposite of the corresponding function
@@ -246,8 +246,9 @@ The following methods are available:
 
   This will return the field type of the Entry's field.  This will be one of:
 
-    NoEntry, RawEntry, LincomEntry, LinterpEntry, BitEntry, MultiplyEntry,
-    PhaseEntry
+    NoEntryType, BitEntryType, ConstEntryType, DivideEntryType, LincomEntryType,
+    LinterpEntryType, MultiplyEntryType, PhaseEntryType, PolynomEntryType,
+    RawEntryType, RecipEntry, SBitEntryType, StringEntryType
 
 * int Entry::SetFragmentIndex(int fragment_index)
 * int Entry::Move(int new_fragment, int move_data = 0)
@@ -288,12 +289,15 @@ The following methods are available:
 
 * virtual const char *Entry::Input(int index = 0)
 * virtual double Entry::Scale(int index = 0)
-* virtual double complex Entry::CScale(int index = 0)
+* virtual std::complex<double> Entry::CScale(int index = 0)
 * virtual double Entry::Offset(int index = 0)
-* virtual double complex Entry::COffset(int index = 0)
+* virtual std::complex<double> Entry::COffset(int index = 0)
 * virtual double Entry::Coefficient(int index = 0)
-* virtual double complex Entry::CCoefficient(int index = 0)
+* virtual std::complex<double> Entry::CCoefficient(int index = 0)
 * virtual const char *Entry::Scalar(int index = 0)
+* virtual int SetDividend(double coeff)
+* virtual int SetDividend(const char* coeff)
+* virtual int SetDividend(std::complex<double> coeff)
 
   These methods will return an element from the gd_entry_t members in_fields[],
   m[], or b[], indexed by the supplied parameter.  Attempts to access elements
@@ -356,16 +360,16 @@ Defined in getdata/lincomentry.h
 * LincomEntry::LincomEntry(const char *field_code, int n_fields,
     const char **in_fields, double *m, double *b, int format_file = 0)
 * LincomEntry::LincomEntry(const char *field_code, int n_fields,
-    const char **in_fields, double complex *m, double complex *b,
+    const char **in_fields, std::complex<double> *m, std::complex<double> *b,
     int format_file = 0)
 
 * virtual const char *LincomEntry::Input(int index = 0)
 * virtual int LincomEntry::ComplexScalars()
 * virtual int LincomEntry::NFields()
 * virtual double LincomEntry::Scale(int index = 0)
-* virtual double complex LincomEntry::CScale(int index = 0)
+* virtual std::complex<double> LincomEntry::CScale(int index = 0)
 * virtual double LincomEntry::Offset(int index = 0)
-* virtual double complex LincomEntry::COffset(int index = 0)
+* virtual std::complex<double> LincomEntry::COffset(int index = 0)
 * virtual const char *LincomEntry::Scalar(int index = 0)
 
   These methods, re-implemented from the Entry class, return the corresponding
@@ -374,10 +378,10 @@ Defined in getdata/lincomentry.h
 * int LincomEntry::SetInput(const char *field, int index = 0)
 * int LincomEntry::SetScale(double scale, int index = 0)
 * int LincomEntry::SetScale(const char* scale, int index = 0)
-* int LincomEntry::SetScale(double complex scale, int index = 0)
+* int LincomEntry::SetScale(std::complex<double> scale, int index = 0)
 * int LincomEntry::SetOffset(double offset, int index = 0)
 * int LincomEntry::SetOffset(const char* scale, int index = 0)
-* int LincomEntry::SetOffset(double complex offset, int index = 0)
+* int LincomEntry::SetOffset(std::complex<double> offset, int index = 0)
 
   These functions will change the specified field parameter associated with the
   input field with the given index, which should be between zero and two.  To
@@ -465,7 +469,7 @@ Defined in getdata/multiplyentry.h
 
 * virtual const char *MultiplyEntry::Input(int index = 0)
 
-  This methods, re-implemented from the Entry class, returns one of the input
+  This method, re-implemented from the Entry class, returns one of the input
   fields.
 
 * int MultiplyEntry::SetInput(const char *field, int index = 0)
@@ -486,7 +490,7 @@ Defined in getdata/phaseentry.h
 * PhaseEntry::PhaseEntry(const char *field_code, const char *in_field,
     int shift, int format_file = 0)
 
-* virtual const char *PhaseEntry::Input(int __gd_unused index = 0)
+* virtual const char *PhaseEntry::Input()
 * virtual long int PhaseEntry::Shift()
 
   These methods, re-implemented from the Entry class, return the corresponding
@@ -512,13 +516,13 @@ Defined in getdata/lincomentry.h
 * PolynomEntry::PolynomEntry(const char *field_code, int poly_ord,
     const char *in_field, double *a, int format_file = 0)
 * PolynomEntry::PolynomEntry(const char *field_code, int poly_ord,
-    const char *in_field, double complex *a int format_file = 0)
+    const char *in_field, std::complex<double> *a int format_file = 0)
 
 * virtual const char *PolynomEntry::Input(int index = 0)
 * virtual int PolynomEntry::ComplexScalars()
 * virtual int PolynomEntry::PolyOrd()
 * virtual double PolynomEntry::Coefficient(int index = 0)
-* virtual double complex PolynomEntry::CCoefficient(int index = 0)
+* virtual std::complex<double> PolynomEntry::CCoefficient(int index = 0)
 * virtual const char *PolynomEntry::Scalar(int index = 0)
 
   These methods, re-implemented from the Entry class, return the corresponding
@@ -527,7 +531,7 @@ Defined in getdata/lincomentry.h
 * int PolynomEntry::SetInput(const char *field)
 * int PolynomEntry::SetCoefficient(double scale, int index = 0)
 * int PolynomEntry::SetCoefficient(const char* scale, int index = 0)
-* int PolynomEntry::SetCoefficient(double complex scale, int index = 0)
+* int PolynomEntry::SetCoefficient(std::complex<double> scale, int index = 0)
 
   These functions will change the specified field parameter associated with the
   input field with the given index, which should be between zero and two.  To
@@ -540,6 +544,61 @@ Defined in getdata/lincomentry.h
   This will set the polynomial order for the POLYNOM.  If this is greater than
   its previous value, the Set methods above should be used to initialise the
   data.
+
+
+DivideEntry Class
+-------------------
+
+Defined in getdata/divideentry.h
+
+* DivideEntry::DivideEntry()
+  
+  This creates a new DIVIDE entry object with default parameters.
+
+* DivideEntry::DivideEntry(const char *field_code, const char *in_field1,
+    const char *in_field2, int format_file = 0)
+
+* virtual const char *DivideEntry::Input(int index = 0)
+
+  This method, re-implemented from the Entry class, returns one of the input
+  fields.
+
+* int DivideEntry::SetInput(const char *field, int index = 0)
+
+  This function will change the specified input field with the given index,
+  which should be zero or one.
+
+
+RecipEntry Class
+-------------------
+
+Defined in getdata/recipentry.h
+
+* RecipEntry::RecipEntry()
+  
+  This creates a new RECIP entry object with default parameters.
+
+* RecipEntry::RecipEntry(const char *field_code, const char *in_field1,
+    const char *in_field2, int format_file = 0)
+
+* virtual const char *RecipEntry::Input()
+* virtual int RecipEntry::ComplexScalars()
+* virtual double RecipEntry::Dividend()
+* virtual std::complex<double> RecipEntry::CDividend()
+* virtual const char *RecipEntry::Scalar()
+
+  These methods, re-implemented from the Entry class, return the corresponding
+  field parameter.
+
+* int RecipEntry::SetInput(const char *field)
+* virtual std::complex<double> CDividend()
+* int SetInput(const char* field)
+* int SetDividend(double coeff)
+* int SetDividend(const char* coeff)
+* int SetDividend(std::complex<double> coeff)
+
+  This function will change the specified input field with the given index,
+  which should be zero or one.
 
 
 ConstEntry Class

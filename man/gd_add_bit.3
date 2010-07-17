@@ -13,11 +13,11 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_add_bit 3 "25 May 2010" "Version 0.7.0" "GETDATA"
+.TH gd_add_bit 3 "16 June 2010" "Version 0.7.0" "GETDATA"
 .SH NAME
-gd_add_bit, gd_add_clincom, gd_add_const, gd_add_cpolynom, gd_add_lincom,
-gd_add_linterp, gd_add_multiply, gd_add_phase, gd_add_polynom, gd_add_raw,
-gd_add_sbit, gd_add_string
+gd_add_bit, gd_add_clincom, gd_add_const, gd_add_cpolynom, gd_add_crecip,
+gd_add_divide, gd_add_lincom, gd_add_linterp, gd_add_multiply, gd_add_phase,
+gd_add_polynom, gd_add_raw, gd_add_recip, gd_add_sbit, gd_add_string
 \(em add a field to a dirfile
 .SH SYNOPSIS
 .B #include <getdata.h>
@@ -40,6 +40,14 @@ gd_add_sbit, gd_add_string
 .BI "int " poly_ord ", const char *" in_fields ", const double complex *" ca ,
 .BI int " fragment_index );
 .HP
+.BI "int gd_add_crecip(DIRFILE *" dirfile ", const char *" field_name ,
+.BI "const char *" in_field ", double complex " cdividend ,
+.BI "int " fragment_index );
+.HP
+.BI "int gd_add_divide(DIRFILE *" dirfile ", const char *" field_name ,
+.BI "const char *" in_field1 ", const char *" in_field2 ,
+.BI "int " fragment_index );
+.HP
 .BI "int gd_add_lincom(DIRFILE *" dirfile ", const char *" field_name ,
 .BI "int " n_fields ", const char **" in_fields ", const double *" m ,
 .BI "const double *" b ", int " fragment_index );
@@ -61,6 +69,9 @@ gd_add_sbit, gd_add_string
 .BI "int gd_add_raw(DIRFILE *" dirfile ", const char *" field_name ,
 .BI "gd_type_t " data_type ", gd_spf_t " spf ", int " fragment_index );
 .HP
+.BI "int gd_add_recip(DIRFILE *" dirfile ", const char *" field_name ,
+.BI "const char *" in_field ", double " dividend ", int " fragment_index );
+.HP
 .BI "int gd_add_sbit(DIRFILE *" dirfile ", const char *" field_name ,
 .BI "const char *" in_field ", gd_bit_t " bitnum ", gd_bit_t " numbits ,
 .BI "int " fragment_index );
@@ -72,7 +83,9 @@ gd_add_sbit, gd_add_string
 .SH DESCRIPTION
 These functions provide alternatives to using the
 .BR gd_add (3)
-function to add a new field of the indicated type to the dirfile specified by
+or
+.BR gd_add_spec (3)
+functions to add a new field of the indicated type to the dirfile specified by
 .IR dirfile .
 .P
 In all of these calls,
@@ -81,9 +94,9 @@ indicates the name of the field to be added.  Further,
 .I fragment_index
 is the index of the format file fragment into which the field should be added.
 (To convert a fragment index to its file name, see
-.BR gd_get_fragmentname (3).)
+.BR gd_fragmentname (3).)
 The meaning and valid types of other arguments may be obtained from the
-.BR gd_get_entry (3)
+.BR gd_entry (3)
 and
 .BR dirfile-format (5)
 manual pages.
@@ -230,9 +243,9 @@ a call to
 
 .SH NOTES
 The C89 GetData API provides different prototypes for
-.BR gd_add_clincom ()
+.BR gd_add_clincom (),\~ gd_add_cpolynom (),
 and
-.BR gd_add_cpolynom ():
+.BR gd_add_crecip ():
 .P
 .nf
 .B #define GETDATA_C89_API
@@ -247,6 +260,10 @@ and
 .BI "int gd_add_cpolynom(DIRFILE *" dirfile ", const char *" field_name ,
 .BI "int " poly_ord ", const char *" in_fields ", const double *" ca ,
 .BI int " fragment_index );
+.HP
+.BI "int gd_add_crecip(DIRFILE *" dirfile ", const char *" field_name ,
+.BI "const char *" in_field ", double " cdividend [2],
+.BI "int " fragment_index );
 .hy
 .ad n
 .fi
@@ -264,7 +281,9 @@ the imaginary part of the first co-efficient,
 .IR ca [2]
 the real part of the second co-efficient,
 .IR ca [3]
-the imaginary part of the second co-efficient, and so on.
+the imaginary part of the second co-efficient, and so on.  Similarly, the
+.I cdividend
+parameter becomes a double precision array of length two.
 
 .SH SEE ALSO
 .BR gd_add (3),
@@ -275,11 +294,14 @@ the imaginary part of the second co-efficient, and so on.
 .BR gd_madd_clincom (3),
 .BR gd_madd_const (3),
 .BR gd_madd_cpolynom (3),
+.BR gd_madd_crecip (3),
+.BR gd_madd_divide (3),
 .BR gd_madd_lincom (3),
 .BR gd_madd_linterp (3),
 .BR gd_madd_multiply (3),
 .BR gd_madd_phase (3),
 .BR gd_madd_polynom (3),
+.BR gd_madd_recip (3),
 .BR gd_madd_sbit (3),
 .BR gd_madd_string (3),
 .BR gd_metaflush (3),

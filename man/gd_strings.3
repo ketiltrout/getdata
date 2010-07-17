@@ -1,0 +1,94 @@
+.\" gd_strings.3.  The gd_strings man page.
+.\"
+.\" (C) 2008, 2010 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_strings 3 "16 July 2010" "Version 0.7.0" "GETDATA"
+.SH NAME
+gd_strings \(em retrieve a list of string values from a dirfile
+.SH SYNOPSIS
+.B #include <getdata.h>
+.HP
+.nh
+.ad l
+.BI "const char **gd_strings(DIRFILE *" dirfile );
+.hy
+.ad n
+.SH DESCRIPTION
+The
+.BR gd_strings ()
+function queries a dirfile(5) database specified by
+.I dirfile
+and returns a read-only list of values of the all
+.B STRING
+type fields defined in the database.  Notably, this list does not include
+/META subfields.
+
+The 
+.I dirfile
+argument must point to a valid DIRFILE object previously created by a call to
+.BR gd_open (3).
+
+The array returned will be de-allocated by a call to
+.BR gd_close (3)
+and should not be de-allocated by the caller.  The list returned should not be
+assumed to be in any particular order, although it is guaranteed to be in the
+same order as the list of
+.B STRING
+fields returned by
+.BR gd_field_list_by_type (3).
+The array is terminated by a NULL pointer.  The number of strings in the array
+can be obtained from a call to
+.BR gd_nfields_by_type (3).
+
+The caller may not modify any strings in the array, or the array itself.  Doing
+so may cause database corruption.  The pointer returned is guaranteed to be
+valid until
+.BR gd_strings ()
+is called again with the same arguments, or until the array is deallocated by
+a call to
+.BR gd_close (3).
+
+A corresponding list of names for these fields may be obtained by
+calling
+.BR gd_field_list_by_type (3).
+
+.SH RETURN VALUE
+Upon successful completion,
+.BR gd_strings ()
+returns a pointer to an array of strings containing the values of all the
+.B STRING
+fields defined in the dirfile database.  If no strings are defined in the
+database, NULL is returned.  On error it returns NULL and sets the dirfile error
+to a non-zero error value.  Possible error values are:
+.TP 8
+.B GD_E_ALLOC
+The library was unable to allocate memory.
+.TP
+.B GD_E_BAD_DIRFILE
+The supplied dirfile was invalid.
+.P
+The dirfile error may be retrieved by calling
+.BR gd_error (3).
+A descriptive error string for the last error encountered can be obtained from
+a call to
+.BR gd_error_string (3).
+.SH SEE ALSO
+.BR dirfile (5),
+.BR gd_open (3),
+.BR gd_error (3),
+.BR gd_error_string (3),
+.BR gd_field_list_by_type (3),
+.BR gd_mstrings (3),
+.BR gd_nfields_by_type (3),
+.BR gd_string (3)

@@ -259,31 +259,22 @@ static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *E, off64_t s0, size_t ns,
     if (_gd_ef[E->e->file[0].encoding].ecor) {
       /* convert to/from middle-ended doubles */
       if ((E->data_type == GD_FLOAT64 || E->data_type == GD_COMPLEX128) &&
-          D->fragment[E->fragment_index].float_sex
 #ifdef ARM_ENDIAN_DOUBLES          
-          !=
-#else
-          ==
+          ~
 #endif
-          GD_ARM_ENDIAN) {
+          D->fragment[E->fragment_index].byte_sex & GD_ARM_ENDIAN)
+      {
         _GD_ArmEndianise((uint64_t*)(databuffer + n_read * E->e->size),
             E->data_type & GD_COMPLEX, samples_read);
       }
 
-      if (((E->data_type & (GD_COMPLEX | GD_IEEE754)) &&
-            (D->fragment[E->fragment_index].float_sex
-#ifdef FLOATS_BIGENDIAN
-             !=
-#else
-             ==
-#endif
-             GD_BIG_ENDIAN)) || (D->fragment[E->fragment_index].byte_sex ==
+      if (D->fragment[E->fragment_index].byte_sex ==
 #ifdef WORDS_BIGENDIAN
              GD_LITTLE_ENDIAN
 #else
              GD_BIG_ENDIAN
 #endif
-             ))
+             )
       {
         if (E->data_type & GD_COMPLEX)
           _GD_FixEndianness(databuffer + n_read * E->e->size, E->e->size / 2,

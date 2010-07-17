@@ -15,7 +15,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_alter_endianness 3 "25 May 2010" "Version 0.7.0" "GETDATA"
+.TH gd_alter_endianness 3 "16 June 2010" "Version 0.7.0" "GETDATA"
 .SH NAME
 gd_alter_endianness \(em modify the byte sex of fields in a dirfile
 .SH SYNOPSIS
@@ -61,6 +61,12 @@ Indicating that the byte sex should be little endian.
 .RB ( GD_BIG_ENDIAN " | " GD_LITTLE_ENDIAN )
 Indicating that the byte sex should be the opposite of the native endianness of
 the host, whichever that may be.
+.P
+Furthermore, any of these may be bitwise or'd
+with
+.B GD_ARM_ENDIAN
+indicating that the floating point data are stored in the ARM middle-endian
+format.
 .P
 In addition to being simply a valid fragment index,
 .I fragment_index
@@ -145,6 +151,6 @@ instructions, see the file
 .BR gd_open (3),
 .BR gd_error (3),
 .BR gd_error_string (3),
-.BR gd_get_endianness (3),
+.BR gd_endianness (3),
 .BR dirfile (5),
 .BR dirfile-format (5)

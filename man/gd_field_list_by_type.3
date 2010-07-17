@@ -1,0 +1,108 @@
+.\" gd_field_list_by_type.3.  The gd_field_list_by_type man page.
+.\"
+.\" (C) 2008, 2009, 2010 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_field_list_by_type 3 "15 July 2010" "Version 0.7.0" "GETDATA"
+.SH NAME
+gd_field_list_by_type \(em retrieve a list of fields in a dirfile
+.SH SYNOPSIS
+.B #include <getdata.h>
+.HP
+.nh
+.ad l
+.BI "const char **gd_field_list_by_type(DIRFILE *" dirfile ", gd_entype_t "
+.IB type );
+.hy
+.ad n
+.SH DESCRIPTION
+The
+.BR gd_field_list_by_type ()
+function queries a dirfile(5) database specified by
+.I dirfile
+and returns a read-only list of names of the all fields of the indicated type
+which are defined in the database.  Notably, this list does not include /META
+subfields.
+
+The 
+.I dirfile
+argument must point to a valid DIRFILE object previously created by a call to
+.BR gd_open (3).
+The
+.I type
+argument should be one of the following symbols indicating the desired field
+type:
+.IP
+.nh
+.ad l
+.BR GD_BIT_ENTRY ,\~ GD_CONST_ENTRY ,\~ GD_DIVIDE_ENTRY ,\~ GD_INDEX_ENTRY ,\~
+.BR GD_LINCOM_ENTRY ,\~ GD_LINTERP_ENTRY ,\~ GD_MULTIPLY_ENTRY ,\~
+.BR GD_PHASE_ENTRY ,\~ GD_POLYNOM_ENTRY ,\~ GD_RAW_ENTRY ,\~ GD_RECIP_ENTRY ,\~
+.BR GD_SBIT_ENTRY ,\~ GD_STRING_ENTRY .
+.ad n
+.hy
+.PP
+The array returned will be de-allocated by a call to
+.BR gd_close (3)
+and should not be de-allocated by the caller.  The list returned should not be
+assumed to be in any particular order.  The array is terminated by a NULL
+pointer.  The number of fields in the array can be obtained from a call to
+.BR gd_nfields_by_type (3).
+
+The caller may not modify any strings in the array, or the array itself.  Doing
+so may cause database corruption.  The pointer returned is guaranteed to be
+valid until
+.BR gd_field_list_by_type ()
+is called again on the same DIRFILE object with the same
+.I type
+argument, or until the array is deallocated by a call to
+.BR gd_close (3).
+
+For
+.B CONST
+and
+.B STRING
+field types, corresponding lists of values for may be obtained by calling
+.BR gd_constants (3)
+or
+.BR gd_strings (3).
+
+.SH RETURN VALUE
+Upon successful completion,
+.BR gd_field_list_by_type ()
+returns a pointer to an array of strings containing the names of all the fields
+defined in the dirfile database of the specific type.  On error it returns NULL
+and sets the dirfile error to a non-zero error value.  Possible error values
+are:
+.TP 8
+.B GD_E_ALLOC
+The library was unable to allocate memory.
+.TP
+.B GD_E_BAD_DIRFILE
+The supplied dirfile was invalid.
+.P
+The dirfile error may be retrieved by calling
+.BR gd_error (3).
+A descriptive error string for the last error encountered can be obtained from
+a call to
+.BR gd_error_string (3).
+.SH SEE ALSO
+.BR dirfile (5),
+.BR gd_open (3),
+.BR gd_constants (3),
+.BR gd_error (3),
+.BR gd_error_string (3),
+.BR gd_field_list (3),
+.BR gd_mfield_list_by_type (3),
+.BR gd_nfields_by_type (3),
+.BR gd_strings (3)

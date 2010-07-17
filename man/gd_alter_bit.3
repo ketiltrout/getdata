@@ -13,11 +13,12 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_alter_bit 3 "25 May 2010" "Version 0.7.0" "GETDATA"
+.TH gd_alter_bit 3 "16 June 2010" "Version 0.7.0" "GETDATA"
 .SH NAME
 gd_alter_bit, gd_alter_clincom, gd_alter_const, gd_alter_cpolynom,
-gd_alter_lincom, gd_alter_linterp, gd_alter_multiply, gd_alter_phase,
-gd_alter_polynom, gd_alter_raw, gd_alter_sbit
+gd_alter_crecip, gd_alter_divide, gd_alter_lincom, gd_alter_linterp,
+gd_alter_multiply, gd_alter_phase, gd_alter_polynom, gd_alter_raw,
+gd_alter_recip, gd_alter_sbit
 \(em modify a field in a dirfile
 .SH SYNOPSIS
 .B #include <getdata.h>
@@ -37,6 +38,12 @@ gd_alter_polynom, gd_alter_raw, gd_alter_sbit
 .BI "int gd_alter_cpolynom(DIRFILE *" dirfile ", const char *" field_code ,
 .BI "int " poly_ord ", const char *" in_field ", const double complex *" ca );
 .HP
+.BI "int gd_alter_crecip(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "const char *" in_field ", complex double " cdividend );
+.HP
+.BI "int gd_alter_divide(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "const char *" in_field1 ", const char *" in_field2 );
+.HP
 .BI "int gd_alter_lincom(DIRFILE *" dirfile ", const char *" field_code ,
 .BI "int " n_fields ", const char **" in_fields ", const double *" m ,
 .BI "const double *" b );
@@ -55,6 +62,9 @@ gd_alter_polynom, gd_alter_raw, gd_alter_sbit
 .HP
 .BI "int gd_alter_raw(DIRFILE *" dirfile ", const char *" field_code ,
 .BI "gd_type_t " data_type ", gd_spf_t " spf ", int " recode );
+.HP
+.BI "int gd_alter_recip(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "const char *" in_field ", double " dividend );
 .HP
 .BI "int gd_alter_sbit(DIRFILE *" dirfile ", const char *" field_code ,
 .BI "const char *" in_field ", gd_bit_t " bitnum ", gd_bit_t " numbits );
@@ -120,7 +130,9 @@ made to the parameter.  Specifically, if any of the string parameters or
 .IR m ,\~ b ", or " a
 .RI ( cm ,\~ cb ", or " ca )
 are NULL, the old values will be retained.  Similarly, if
-.IR spf ", " n_fields ", or " numbits
+.IR spf ,\~ n_fields ,\~ numbits ,\~ cdividend ,
+or
+.I dividend
 is zero, or if
 .IR bitnum
 is -1, or if
@@ -233,9 +245,9 @@ a call to
 
 .SH NOTES
 The C89 GetData API provides different prototypes for
-.BR gd_alter_clincom ()
+.BR gd_alter_clincom (),\~ gd_alter_cpolynom (),
 and
-.BR gd_alter_cpolynom ():
+.BR gd_alter_crecip ():
 .P
 .nf
 .B #define GETDATA_C89_API
@@ -249,6 +261,9 @@ and
 .HP
 .BI "int gd_alter_cpolynom(DIRFILE *" dirfile ", const char *" field_code ,
 .BI "int " poly_ord ", const char *" in_fields ", const double *" ca );
+.HP
+.BI "int gd_alter_crecip(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "const char *" in_field ", double " cdividend [2]);
 .hy
 .ad n
 .fi
@@ -266,7 +281,9 @@ the imaginary part of the first co-efficient,
 .IR ca [2]
 the real part of the second co-efficient,
 .IR ca [3]
-the imaginary part of the second co-efficient, and so on.
+the imaginary part of the second co-efficient, and so on.  Similarly, the
+.I cdividend
+parameter becomes a double precision array of length two.
 
 .SH SEE ALSO
 .BR gd_alter_entry (3),

@@ -16,6 +16,7 @@ int cb(gd_parser_data_t* pdata, void* ll)
   return GD_SYNTAX_IGNORE;
 }
 
+#define NLINES 13
 int main(void)
 {
   const char* filedir = __TEST__ "dirfile";
@@ -29,15 +30,19 @@ int main(void)
     "Xr POLYNOM INDEX 8 3 1 2\n"
     "ar RAW UINT8 8\n"
     "e RECIP 3. Xr\n"
+    "FRAMEOFFSET 3\n"
+    "FRAMEOFFSET RAW UINT8 3\n"
+    "/FRAMEOFFSET 3\n"
     "e RECIP ar/c Xr\n"
     "e DIVIDE ar Xr\n"
     "ar/c CONST COMPLEX128 3;3\n";
   uint16_t c[8];
-  int ll[7] = {0, 0, 0, 0, 0, 0, 0};
+  int ll[NLINES];
   unsigned char data_data[256];
   int fd, i, r = 0;
 
   memset(c, 0, 8);
+  memset(ll, 0, NLINES * sizeof(int));
   mkdir(filedir, 0777);
 
   for (fd = 0; fd < 256; ++fd)
@@ -63,8 +68,8 @@ int main(void)
 
   CHECKI(error,0);
 
-  for (i = 0; i < 7; ++i) {
-    if (i == 1 || i == 2) {
+  for (i = 0; i < NLINES; ++i) {
+    if (i == 1 || i == 2 || i == 7 || i == 10 || i == 11) {
       CHECKIi(i,ll[i], 1);
     } else {
       CHECKIi(i,ll[i],0);
@@ -73,8 +78,8 @@ int main(void)
 
   CHECKI(n,8);
 
-  for (i = 0; i < 8; ++i)
-    CHECKUi(i,c[i],40 +i);
+  for (i = 0; i < n; ++i)
+    CHECKUi(i,c[i],16 +i);
 
   return r;
 }

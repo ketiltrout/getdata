@@ -404,10 +404,8 @@ static void _GD_FlushFragment(DIRFILE* D, int i)
 
   /* Byte Sex */
   fprintf(stream, "/ENDIAN %s%s\n",
-      (D->fragment[i].byte_sex == GD_LITTLE_ENDIAN) ? "little" : "big",
-      (D->fragment[i].float_sex == D->fragment[i].byte_sex) ? "" :
-      (D->fragment[i].float_sex == GD_ARM_ENDIAN) ? " arm" :
-      (D->fragment[i].float_sex == GD_LITTLE_ENDIAN) ? " little" : " big");
+      (D->fragment[i].byte_sex & GD_LITTLE_ENDIAN) ? "little" : "big",
+      (D->fragment[i].byte_sex & GD_ARM_ENDIAN) ? " arm" : "");
 
   if (D->fragment[i].protection == GD_PROTECT_NONE)
     fputs("/PROTECT none\n", stream);
@@ -662,21 +660,22 @@ uint32_t _GD_FindVersion(DIRFILE *D)
         break;
     }
     if (D->av & GD_VERS_GE_1 && strcmp(D->entry[i]->field, "FRAMEOFFSET") == 0)
-      D->av &= GD_VERS_LE_0;
+      D->av &= (GD_VERS_LE_0 | GD_VERS_GE_8);
     else if (D->av & GD_VERS_GE_3 && strcmp(D->entry[i]->field, "INCLUDE") == 0)
-      D->av &= GD_VERS_LE_2;
+      D->av &= (GD_VERS_LE_2 | GD_VERS_GE_8);
     else if (D->av & GD_VERS_GE_5 && (strcmp(D->entry[i]->field, "VERSION") == 0
           || strcmp(D->entry[i]->field, "ENDIAN") == 0))
-      D->av &= GD_VERS_LE_4;
+      D->av &= (GD_VERS_LE_4 | GD_VERS_GE_8);
     else if (D->av & GD_VERS_GE_6 &&
         (strcmp(D->entry[i]->field, "ENCODING") == 0
           || strcmp(D->entry[i]->field, "META") == 0
           || strcmp(D->entry[i]->field, "PROTECT") == 0
           || strcmp(D->entry[i]->field, "REFERENCE") == 0))
-      D->av &= GD_VERS_LE_5;
+      D->av &= (GD_VERS_LE_5 | GD_VERS_GE_8);
     else if (D->av & GD_VERS_LE_5 &&
         strcmp(D->entry[i]->field, "FILEFRAM") == 0)
       D->av &= GD_VERS_GE_6;
+
     for (ptr = D->entry[i]->field; *ptr != 0 && D->av; ++ptr)
       switch(*ptr) {
         case '/': /* a metafield */

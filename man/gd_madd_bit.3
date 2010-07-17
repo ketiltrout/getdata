@@ -13,12 +13,12 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_madd_bit 3 "25 May 2010" "Version 0.7.0" "GETDATA"
+.TH gd_madd_bit 3 "16 June 2010" "Version 0.7.0" "GETDATA"
 .SH NAME
-gd_madd_bit, gd_madd_clincom, gd_madd_const, gd_madd_cpolynom, gd_madd_lincom,
-gd_madd_linterp, gd_madd_multiply, gd_madd_phase, gd_madd_polynom, gd_madd_sbit,
-gd_madd_string \(em add a field
-to a dirfile
+gd_madd_bit, gd_madd_clincom, gd_madd_const, gd_madd_cpolynom, gd_madd_crecip,
+gd_madd_divide, gd_madd_lincom, gd_madd_linterp, gd_madd_multiply,
+gd_madd_phase, gd_madd_polynom, gd_madd_recip, gd_madd_sbit, gd_madd_string
+\(em add a field to a dirfile
 .SH SYNOPSIS
 .B #include <getdata.h>
 .HP
@@ -40,6 +40,14 @@ to a dirfile
 .BI "const char *" field_name ", int " poly_ord ", const char *" in_field ,
 .BI "const double complex *" ca );
 .HP
+.BI "int gd_madd_crecip(DIRFILE *" dirfile ", const char *" parent ,
+.BI "const char *" field_name ", const char *" in_field ,
+.BI "double complex " cdividend ", int " fragment_index );
+.HP
+.BI "int gd_madd_divide(DIRFILE *" dirfile ,
+.BI "const char *" parent ", const char *" field_name ,
+.BI " const char *" in_field1 ", const char *" in_field2 );
+.HP
 .BI "int gd_madd_lincom(DIRFILE *" dirfile ", const char *" parent ,
 .BI "const char *" field_name ", int " n_fields ", const char **" in_fields ,
 .BI "const double *" m ", const double *" b );
@@ -59,6 +67,10 @@ to a dirfile
 .BI "int gd_madd_phase(DIRFILE *" dirfile ,
 .BI "const char *" parent ", const char *" field_name ,
 .BI "const char *" in_field ", gd_shift_t " shift );
+.HP
+.BI "int gd_madd_recip(DIRFILE *" dirfile ", const char *" parent ,
+.BI "const char *" field_name ", const char *" in_field ,
+.BI "double " dividend ", int " fragment_index );
 .HP
 .BI "int gd_madd_sbit(DIRFILE *" dirfile ,
 .BI "const char *" parent ", const char *" field_name ,
@@ -83,7 +95,7 @@ indicates the name of the field to be added.  It should not be the full
 .IB <parent-field> / <meta-field>
 field code.  The meaning and valid types of other arguments may be obtained from
 the
-.BR gd_get_entry (3)
+.BR gd_entry (3)
 and
 .BR dirfile-format (5)
 manual pages.
@@ -204,9 +216,9 @@ a call to
 
 .SH NOTES
 The C89 GetData API provides different prototypes for
-.BR gd_madd_clincom ()
+.BR gd_madd_clincom (),\~ gd_madd_cpolynom (),
 and
-.BR gd_madd_cpolynom ():
+.BR gd_madd_crecip ():
 .P
 .nf
 .B #define GETDATA_C89_API
@@ -221,6 +233,10 @@ and
 .BI "int gd_madd_cpolynom(DIRFILE *" dirfile ", const char *" parent ,
 .BI "const char *" field_name ", int " poly_ord ", const char *" in_field ,
 .BI "const double *" ca );
+.HP
+.BI "int gd_madd_crecip(DIRFILE *" dirfile ", const char *" parent ,
+.BI "const char *" field_name ", const char *" in_field ,
+.BI "double " cdividend "[2], int " fragment_index );
 .hy
 .ad n
 .fi
@@ -238,7 +254,9 @@ the imaginary part of the first co-efficient,
 .IR ca [2]
 the real part of the second co-efficient,
 .IR ca [3]
-the imaginary part of the second co-efficient, and so on.
+the imaginary part of the second co-efficient, and so on.  Similarly, the
+.I cdividend
+parameter becomes a double precision array of length two.
 
 .SH SEE ALSO
 .BR gd_add_bit (3),

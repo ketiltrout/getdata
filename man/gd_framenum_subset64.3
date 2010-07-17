@@ -1,0 +1,51 @@
+.\" gd_framenum_subset64.3.  The gd_framenum_subset64 man page.
+.\"
+.\" (C) 2008, 2010 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_framenum_subset64 3 "15 July 2010" "Version 0.7.0" "GETDATA"
+.SH NAME
+gd_framenum_subset64 \(em perform a reverse look-up on a monotonic dirfile
+field
+.SH SYNOPSIS
+.B #define _LARGEFILE64_SOURCE
+
+.B #include <getdata.h>
+.HP
+.nh
+.ad l
+.BI "double gd_framenum_subset64(DIRFILE *" dirfile ,
+.BI "const char *" field_code ", double " value ", off64_t " field_start ,
+.BI "off64_t " field_end );
+.hy
+.ad n
+.SH DESCRIPTION
+This version of
+.BR gd_framenum_subset (3)
+uses a 64-bit offset type, even if
+.I off_t
+is a 32-bit type.  It is only available if one defines
+.IR _LARGEFILE64_SOURCE .
+If
+.I off_t
+is a 64-bit type (i.e. if
+.I _FILE_OFFSET_BITS
+is defined to be 64), this function will be called
+.BR gd_framenum_subset ().
+Otherwise,
+.BR gd_framenum_subset ()
+will be a version of this function which uses a 32-bit
+.IR off_t .
+.SH SEE ALSO
+.BR gd_framenum_subset (3),
+.BR feature_test_macros (7)

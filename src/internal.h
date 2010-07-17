@@ -423,7 +423,6 @@ struct gd_fragment_t {
   int parent;
   unsigned long int encoding;
   unsigned long int byte_sex;
-  unsigned long int float_sex;
   int protection;
   char* ref_name;
   off64_t frame_offset;

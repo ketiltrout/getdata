@@ -68,8 +68,7 @@ char* _GD_ValidateField(const gd_entry_t* parent, const char* field_code,
         *is_dot = 1;
     }
 
-
-  if (strict)
+  if (strict && standards < 8)
     if ((strcmp("FRAMEOFFSET", field_code) == 0 && standards >= 1)
         || (strcmp("ENCODING", field_code) == 0 && standards >= 6)
         || (strcmp("ENDIAN", field_code) == 0 && standards >= 5)

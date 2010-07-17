@@ -288,25 +288,13 @@ DIRFILE* gd_cbopen(const char* filedir, unsigned long flags,
   D->fragment[0].modified = 0;
   D->fragment[0].parent = -1;
   D->fragment[0].encoding = D->flags & GD_ENCODING;
-  D->fragment[0].byte_sex =
+  D->fragment[0].byte_sex = (
 #ifdef WORDS_BIGENDIAN
     (D->flags & GD_LITTLE_ENDIAN) ? GD_LITTLE_ENDIAN : GD_BIG_ENDIAN
 #else
     (D->flags & GD_BIG_ENDIAN) ? GD_BIG_ENDIAN : GD_LITTLE_ENDIAN
 #endif
-    ;
-  if (D->flags & GD_LITTLE_ENDIAN & (GD_LITTLE_ENDIAN | GD_BIG_ENDIAN))
-    D->fragment[0].float_sex = D->fragment[0].byte_sex;
-  else
-    D->fragment[0].float_sex =
-#ifdef ARM_ENDIAN_DOUBLES
-      GD_ARM_ENDIAN
-#elif defined FLOATS_BIGENDIAN
-      GD_BIG_ENDIAN
-#else
-      GD_LITTLE_ENDIAN
-#endif
-      ;
+    ) | (D->flags & GD_ARM_ENDIAN);
   D->fragment[0].ref_name = NULL;
   D->fragment[0].frame_offset = 0;
   D->fragment[0].protection = GD_PROTECT_NONE;

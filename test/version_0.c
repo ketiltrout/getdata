@@ -15,7 +15,7 @@ int main(void)
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
   const char* data = __TEST__ "dirfile/FRAMEOFFSET";
-  const char* format_data = "FRAMEOFFSET RAW c 8\n";
+  const char* format_data = "FRAMEOFFSET RAW c 8\na&b RAW c 8";
   unsigned char c[8];
   unsigned char data_data[256];
   int fd, i, r = 0;
