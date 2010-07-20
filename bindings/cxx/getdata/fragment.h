@@ -66,6 +66,8 @@ namespace GetData {
 
       int Protection() { return prot; }
 
+      int ReWrite();
+
       int SetEncoding(EncodingScheme encoding, int recode = 0);
 
       int SetEndianness(unsigned long byte_sex, int recode = 0);

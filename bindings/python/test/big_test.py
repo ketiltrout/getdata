@@ -1280,6 +1280,12 @@ CheckSimple2(151,2,ent.fragment,0)
 CheckSimple2(151,3,ent.in_fields,( "in3",))
 CheckSimple2(151,4,ent.dividend,"const")
 
+# 155: fragment.rewrite check
+try:
+  f.rewrite()
+except:
+  CheckOK(155)
+
 
 
 # the following causes the d object to silently fault on delete, since it

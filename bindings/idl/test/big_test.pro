@@ -1003,6 +1003,9 @@ nume += check_simple2(153, 5, n.comp_scal, 0)
 nume += check_simple2(153, 4, n.in_fields, [ "in2" ])
 nume += check_simple2(153, 6, n.dividend, 1.01)
 
+;  155: gd_rewrite_fragment
+gd_rewrite_fragment, d, fragment=0
+nume += check_ok(155, d)
 
 
 

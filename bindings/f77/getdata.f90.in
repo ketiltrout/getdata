@@ -1407,6 +1407,12 @@ subroutine fgd_metaflush (dirfile)
   call gdmfls(dirfile)
 end subroutine
 
+subroutine fgd_rewrite_fragment (dirfile, fragment)
+  integer, intent(in) :: dirfile, fragment
+
+  call gdrfrg(dirfile, fragment)
+end subroutine
+
 subroutine fgd_include (dirfile, fragmentname, fragment_index, flags)
   integer, intent(in) :: dirfile, fragment_index, flags
   character (len=*), intent(in) :: fragmentname

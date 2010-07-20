@@ -2904,6 +2904,46 @@ void gdidl_gd_metaflush(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
+/* @@DLM: P gdidl_gd_rewrite_fragment GD_REWRITE_FRAGMENT 1 1 KEYWORDS */
+void gdidl_gd_rewrite_fragment(int argc, IDL_VPTR argv[], char *argk)
+{
+  dtraceidl();
+
+  typedef struct {
+    IDL_KW_RESULT_FIRST_FIELD;
+    GDIDL_KW_RESULT_ERROR;
+    int fragment_index;
+    int fragment_index_x;
+  } KW_RESULT;
+  KW_RESULT kw;
+
+  kw.fragment_index = 0;
+  kw.fragment_index_x = 0;
+  GDIDL_KW_INIT_ERROR;
+
+  static IDL_KW_PAR kw_pars[] = {
+    GDIDL_KW_PAR_ERROR,
+    GDIDL_KW_PAR_ESTRING,
+    { "FRAGMENT", IDL_TYP_INT, 1, 0, IDL_KW_OFFSETOF(fragment_index_x),
+      IDL_KW_OFFSETOF(fragment_index) }
+  };
+
+  IDL_KWProcessByOffset(argc, argv, argk, kw_pars, NULL, 1, &kw);
+
+  if (!kw.fragment_index_x)
+    kw.fragment_index = GD_ALL_FRAGMENTS;
+
+  DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
+
+  gd_rewrite_fragment(D, kw.fragment_index);
+
+  GDIDL_SET_ERROR(D);
+
+  IDL_KW_FREE;
+
+  dreturnvoid();
+}
+
 /* @@DLM: P gdidl_gd_move GD_MOVE 3 3 KEYWORDS */
 void gdidl_gd_move(int argc, IDL_VPTR argv[], char *argk)
 {

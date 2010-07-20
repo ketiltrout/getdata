@@ -135,20 +135,64 @@ static const char* _GD_TypeName(DIRFILE* D, gd_type_t data_type)
   return ptr;
 }
 
-static char* _GD_StringEscapeise(char* out, const char* in)
+static const char* _GD_OldTypeName(DIRFILE* D, gd_type_t data_type)
+{
+  dtrace("%p, 0x%x", D, data_type);
+  const char* ptr;
+
+  switch(data_type) {
+    case GD_UINT8:
+      ptr = "c";
+      break;
+    case GD_UINT16:
+      ptr = "u";
+      break;
+    case GD_INT16:
+      ptr = "s";
+      break;
+    case GD_UINT32:
+      ptr = "U";
+      break;
+    case GD_INT32:
+      ptr = "S";
+      break;
+    case GD_FLOAT32:
+      ptr = "f";
+      break;
+    case GD_FLOAT64:
+      ptr = "d";
+      break;
+    default:
+      _GD_InternalError(D);
+      ptr = "";
+      break;
+  }
+
+  dreturn("\"%s\"", ptr);
+  return ptr;
+}
+
+static char* _GD_StringEscapeise(char* out, const char* in, int permissive,
+    int standards)
 {
   char* ptr = out;
   const char* HexDigit = "0123456789ABCDEF";
 
-  dtrace("%p, \"%s\"", out, in);
+  dtrace("%p, \"%s\", %i, %i", out, in, permissive, standards);
+
+  if (!permissive && standards < 6) {
+    strcpy(out, in);
+    dreturn("\"%s\"", out);
+    return out;
+  }
 
   for (; *in != '\0'; ++in) {
     if (*in == '"') {
       *(ptr++) = '\\';
       *(ptr++) = '"';
-    } else if (*in == '\\') {
+    } else if (*in == '\\' || *in == '#' || *in == '"') {
       *(ptr++) = '\\';
-      *(ptr++) = '\\';
+      *(ptr++) = *in;
     } else if (*in < 0x20
 #if CHAR_MIN != 0
         && *in >= 0x00
@@ -167,14 +211,18 @@ static char* _GD_StringEscapeise(char* out, const char* in)
   return out;
 }
 
-static char* _GD_PadField(char* out, const char* in, size_t len)
+static char* _GD_PadField(char* out, const char* in, size_t len, int permissive,
+    int standards)
 {
   size_t i;
 
-  dtrace("%p, \"%s\", %zu", out, in ,len);
+  dtrace("%p, \"%s\", %zu, %i, %i", out, in, len, permissive, standards);
 
-  for (i = strlen(_GD_StringEscapeise(out, in)); i < len; ++i)
+  for (i = strlen(_GD_StringEscapeise(out, in, permissive, standards)); i < len;
+      ++i)
+  {
     out[i] = ' ';
+  }
   out[i] = '\0';
 
   dreturn("\"%s\"", out);
@@ -209,13 +257,20 @@ static void _GD_WriteConst(DIRFILE *D, FILE* stream, int type,
 
 /* Write a field specification line */
 static void _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
-    int meta, size_t max_len, int pretty)
+    int meta, size_t max_len, int pretty, int permissive)
 {
   int i;
   char buffer[GD_MAX_LINE_LENGTH];
   char* ptr;
 
-  dtrace("%p, %p, %p, %i, %zi, %i", D, stream, E, meta, max_len, pretty);
+  dtrace("%p, %p, %p, %i, %zi, %i, %i", D, stream, E, meta, max_len, pretty,
+      permissive);
+
+  /* INDEX is implicit, and it is an error to define it in the format file */
+  if (E->field_type == GD_INDEX_ENTRY) {
+    dreturnvoid();
+    return;
+  }
 
   ptr = (meta) ? strchr(E->field, '/') + 1 : E->field;
 
@@ -226,13 +281,14 @@ static void _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
   }
 
   /* field name */
-  if (E->field_type != GD_INDEX_ENTRY)
-    fprintf(stream, "%s", _GD_PadField(buffer, ptr, max_len));
+  fprintf(stream, "%s", _GD_PadField(buffer, ptr, max_len, permissive,
+        D->standards));
 
   switch(E->field_type) {
     case GD_RAW_ENTRY:
       fprintf(stream, " RAW%s %s ", pretty ? "     " : "",
-          _GD_TypeName(D, E->data_type));
+          (permissive || D->standards >= 5) ?  _GD_TypeName(D, E->data_type) :
+          _GD_OldTypeName(D, E->data_type));
       _GD_WriteConst(D, stream, GD_UINT16, &E->spf, E->scalar[0], "\n");
       break;
     case GD_LINCOM_ENTRY:
@@ -282,10 +338,10 @@ static void _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
       for (i = 0; i <= E->poly_ord; ++i)
         if (E->comp_scal)
           _GD_WriteConst(D, stream, GD_COMPLEX128, &E->ca[i], E->scalar[i],
-            (i == E->poly_ord) ? "\n" : " ");
+              (i == E->poly_ord) ? "\n" : " ");
         else
           _GD_WriteConst(D, stream, GD_FLOAT64, &E->a[i], E->scalar[i],
-            (i == E->poly_ord) ? "\n" : " ");
+              (i == E->poly_ord) ? "\n" : " ");
       break;
     case GD_SBIT_ENTRY:
       fprintf(stream, " SBIT%s %s ", pretty ? "    " : "", E->in_fields[0]);
@@ -307,11 +363,9 @@ static void _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
       break;
     case GD_STRING_ENTRY:
       fprintf(stream, " STRING%s \"%s\"\n", pretty ? "  " : "",
-          _GD_StringEscapeise(buffer, E->e->string));
-    case GD_INDEX_ENTRY:
-      /* INDEX is implicit, and it is an error to define it in the format
-       * file */
+          _GD_StringEscapeise(buffer, E->e->string, permissive, D->standards));
       break;
+    case GD_INDEX_ENTRY:
     case GD_NO_ENTRY:
       _GD_InternalError(D);
       break;
@@ -320,7 +374,7 @@ static void _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
   dreturnvoid();
 }
 
-static void _GD_FlushFragment(DIRFILE* D, int i)
+static void _GD_FlushFragment(DIRFILE* D, int i, int permissive)
 {
   int j;
   FILE* stream;
@@ -336,7 +390,7 @@ static void _GD_FlushFragment(DIRFILE* D, int i)
   mode_t mode;
   struct stat stat_buf;
 
-  dtrace("%p, %i", D, i);
+  dtrace("%p, %i, %i", D, i, permissive);
 
   /* get the permissions of the old file */
   if (stat(D->fragment[i].cname, &stat_buf))
@@ -395,73 +449,89 @@ static void _GD_FlushFragment(DIRFILE* D, int i)
     if ((ptr = getenv("HOSTNAME")) != NULL)
       fprintf(stream, "@%s", ptr);
   }
-  fputs(".\n", stream);
+  fputs(".\n\n", stream);
 
-  /* Regardless of the version of the input dirfile, we always write
-   * the latest version to disk -- this is present in every format file
-   * fragment as the first non-comment line for sanity's sake. */
-  fprintf(stream, "/VERSION %i\n", DIRFILE_STANDARDS_VERSION);
+  if (permissive)
+    fprintf(stream, "# WARNING: This fragment may not conform to any "
+        "Dirfile Standards Version.\n");
+  else if (D->standards >= 5)
+    fprintf(stream, "/VERSION %i\n", D->standards);
+  else
+    fprintf(stream, "# This fragment conforms to "
+        "Dirfile Standards Version %i.\n", D->standards);
 
   /* Byte Sex */
-  fprintf(stream, "/ENDIAN %s%s\n",
-      (D->fragment[i].byte_sex & GD_LITTLE_ENDIAN) ? "little" : "big",
-      (D->fragment[i].byte_sex & GD_ARM_ENDIAN) ? " arm" : "");
+  if (permissive || D->standards >= 5)
+    fprintf(stream, "/ENDIAN %s%s\n",
+        (D->fragment[i].byte_sex & GD_LITTLE_ENDIAN) ? "little" : "big",
+        ((permissive || D->standards >= 8) &&
+         D->fragment[i].byte_sex & GD_ARM_ENDIAN) ? " arm" : "");
 
-  if (D->fragment[i].protection == GD_PROTECT_NONE)
-    fputs("/PROTECT none\n", stream);
-  else if (D->fragment[i].protection == GD_PROTECT_FORMAT)
-    fputs("/PROTECT format\n", stream);
-  else if (D->fragment[i].protection == GD_PROTECT_FORMAT)
-    fputs("/PROTECT data\n", stream);
-  else
-    fputs("/PROTECT all\n", stream);
+  if (permissive || D->standards >= 6) {
+    if (D->fragment[i].protection == GD_PROTECT_NONE)
+      fputs("/PROTECT none\n", stream);
+    else if (D->fragment[i].protection == GD_PROTECT_FORMAT)
+      fputs("/PROTECT format\n", stream);
+    else if (D->fragment[i].protection == GD_PROTECT_FORMAT)
+      fputs("/PROTECT data\n", stream);
+    else
+      fputs("/PROTECT all\n", stream);
+  }
 
-  if (D->fragment[i].frame_offset != 0)
-    fprintf(stream, "/FRAMEOFFSET %llu\n",
-        (unsigned long long)D->fragment[i].frame_offset);
+  if (permissive || D->standards >= 1)
+    if (D->fragment[i].frame_offset != 0)
+      fprintf(stream, "%sFRAMEOFFSET %llu\n", (D->standards >= 5) ? "/" : "",
+          (unsigned long long)D->fragment[i].frame_offset);
 
-  switch(D->fragment[i].encoding) {
-    case GD_UNENCODED:
-      fputs("/ENCODING none\n", stream);
-      break;
-    case GD_BZIP2_ENCODED:
-      fputs("/ENCODING bzip2\n", stream);
-      break;
-    case GD_GZIP_ENCODED:
-      fputs("/ENCODING gzip\n", stream);
-      break;
-    case GD_LZMA_ENCODED:
-      fputs("/ENCODING lzma\n", stream);
-      break;
-    case GD_SLIM_ENCODED:
-      fputs("/ENCODING slim\n", stream);
-      break;
-    case GD_TEXT_ENCODED:
-      fputs("/ENCODING text\n", stream);
-      break;
-    default:
-      fprintf(stream, "/ENCODING unknown # (%lx)\n", D->fragment[i].encoding);
-      break;
+  if (permissive || D->standards >= 6) {
+    switch(D->fragment[i].encoding) {
+      case GD_UNENCODED:
+        fputs("/ENCODING none\n", stream);
+        break;
+      case GD_BZIP2_ENCODED:
+        fputs("/ENCODING bzip2\n", stream);
+        break;
+      case GD_GZIP_ENCODED:
+        fputs("/ENCODING gzip\n", stream);
+        break;
+      case GD_LZMA_ENCODED:
+        fputs("/ENCODING lzma\n", stream);
+        break;
+      case GD_SLIM_ENCODED:
+        fputs("/ENCODING slim\n", stream);
+        break;
+      case GD_TEXT_ENCODED:
+        fputs("/ENCODING text\n", stream);
+        break;
+      default:
+        fprintf(stream, "/ENCODING unknown # (%lx)\n", D->fragment[i].encoding);
+        break;
+    }
   }
 
   /* The includes */
-  for (j = 0; j < D->n_fragment; ++j)
-    if (D->fragment[j].parent == i)
-      fprintf(stream, "/INCLUDE %s\n", D->fragment[j].ename);
+  if (permissive || D->standards >= 3)
+    for (j = 0; j < D->n_fragment; ++j)
+      if (D->fragment[j].parent == i)
+        fprintf(stream, "%sINCLUDE %s\n", (D->standards >= 5) ? "/" : "",
+            D->fragment[j].ename);
 
   /* The fields */
   for (u = 0; u < D->n_entries; ++u)
     if (D->entry[u]->fragment_index == i && D->entry[u]->e->n_meta != -1) {
-      _GD_FieldSpec(D, stream, D->entry[u], 0, max_len, pretty);
-      for (j = 0; j < D->entry[u]->e->n_meta; ++j)
-        _GD_FieldSpec(D, stream, D->entry[u]->e->meta_entry[j], 1, 0, pretty);
+      _GD_FieldSpec(D, stream, D->entry[u], 0, max_len, pretty, permissive);
+      if (permissive || D->standards >= 6)
+        for (j = 0; j < D->entry[u]->e->n_meta; ++j)
+          _GD_FieldSpec(D, stream, D->entry[u]->e->meta_entry[j], 1, 0,
+              pretty, permissive);
     }
 
   /* REFERENCE is written at the end, because its effect can propagate
    * upwards */
-  if (D->fragment[i].ref_name != NULL)
-    fprintf(stream, "/REFERENCE %s\n", _GD_StringEscapeise(buffer,
-          D->fragment[i].ref_name));
+  if (permissive || D->standards >= 6)
+    if (D->fragment[i].ref_name != NULL)
+      fprintf(stream, "/REFERENCE %s\n", _GD_StringEscapeise(buffer,
+            D->fragment[i].ref_name, permissive, D->standards));
 
   /* That's all, flush, sync, and close */
   fflush(stream);
@@ -492,11 +562,11 @@ static void _GD_FlushFragment(DIRFILE* D, int i)
   dreturnvoid();
 }
 
-void _GD_FlushMeta(DIRFILE* D, int fragment)
+void _GD_FlushMeta(DIRFILE* D, int fragment, int force)
 {
   int i;
 
-  dtrace("%p, %i", D, fragment);
+  dtrace("%p, %i, %i", D, fragment, force);
 
   if ((D->flags & GD_ACCMODE) == GD_RDONLY) {
     /* nothing to do */
@@ -506,10 +576,10 @@ void _GD_FlushMeta(DIRFILE* D, int fragment)
 
   if (fragment == GD_ALL_FRAGMENTS) {
     for (i = 0; i < D->n_fragment; ++i)
-      if (D->fragment[i].modified)
-        _GD_FlushFragment(D, i);
-  } else if (D->fragment[fragment].modified)
-    _GD_FlushFragment(D, fragment);
+      if (force || D->fragment[i].modified)
+        _GD_FlushFragment(D, i, D->flags & GD_PERMISSIVE);
+  } else if (force || D->fragment[fragment].modified)
+    _GD_FlushFragment(D, fragment, D->flags & GD_PERMISSIVE);
 
   dreturnvoid();
 }
@@ -523,7 +593,32 @@ int gd_metaflush(DIRFILE* D)
   if (D->flags & GD_INVALID) /* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
   else
-    _GD_FlushMeta(D, GD_ALL_FRAGMENTS);
+    _GD_FlushMeta(D, GD_ALL_FRAGMENTS, 0);
+
+  dreturn("%i", (D->error == GD_E_OK) ? 0 : -1);
+  return (D->error == GD_E_OK) ? 0 : -1;
+}
+
+int gd_rewrite_fragment(DIRFILE* D, int fragment)
+{
+  dtrace("%p, %i", D, fragment);
+
+  _GD_ClearError(D);
+
+  if (D->flags & GD_INVALID) {
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%i", 1);
+    return -1;
+  }
+
+  if (fragment < GD_ALL_FRAGMENTS || fragment >= D->n_fragment) {
+    _GD_SetError(D, GD_E_BAD_INDEX, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  else
+    _GD_FlushMeta(D, fragment, 1);
 
   dreturn("%i", (D->error == GD_E_OK) ? 0 : -1);
   return (D->error == GD_E_OK) ? 0 : -1;
@@ -543,7 +638,7 @@ int gd_flush(DIRFILE* D, const char* field_code)
   if (D->flags & GD_INVALID) /* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
   else if (field_code == NULL) {
-    _GD_FlushMeta(D, GD_ALL_FRAGMENTS);
+    _GD_FlushMeta(D, GD_ALL_FRAGMENTS, 0);
     if (!D->error)
       for (i = 0; i < D->n_entries; ++i)
         if (D->entry[i]->field_type == GD_RAW_ENTRY)
@@ -603,9 +698,6 @@ uint32_t _GD_FindVersion(DIRFILE *D)
         D->fragment[i].protection)
       D->av &= GD_VERS_GE_6;
   }
-
-  if (D->reference_field != NULL && D->reference_field->fragment_index != 0)
-    D->av &= GD_VERS_GE_6; /* indicating the use of a /REFERENCE directive */
 
   for (i = 0; D->av && i < D->n_entries; ++i) {
     switch (D->entry[i]->field_type) {
@@ -668,9 +760,9 @@ uint32_t _GD_FindVersion(DIRFILE *D)
       D->av &= (GD_VERS_LE_4 | GD_VERS_GE_8);
     else if (D->av & GD_VERS_GE_6 &&
         (strcmp(D->entry[i]->field, "ENCODING") == 0
-          || strcmp(D->entry[i]->field, "META") == 0
-          || strcmp(D->entry[i]->field, "PROTECT") == 0
-          || strcmp(D->entry[i]->field, "REFERENCE") == 0))
+         || strcmp(D->entry[i]->field, "META") == 0
+         || strcmp(D->entry[i]->field, "PROTECT") == 0
+         || strcmp(D->entry[i]->field, "REFERENCE") == 0))
       D->av &= (GD_VERS_LE_5 | GD_VERS_GE_8);
     else if (D->av & GD_VERS_LE_5 &&
         strcmp(D->entry[i]->field, "FILEFRAM") == 0)

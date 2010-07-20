@@ -3554,6 +3554,15 @@ C     154: GDALCR check
         WRITE(*, 2013) 154, dp
       ENDIF
 
+C     155: GDRFRG check
+      CALL GDRFRG(d, 0)
+      CALL GDEROR(e, d)
+
+      IF (e .NE. GD_EOK) THEN
+        ne = ne + 1
+        WRITE(*, 2001), 154, e
+      ENDIF
+
 
 
 

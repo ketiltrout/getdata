@@ -1,3 +1,29 @@
+2010-07-20   D. V. Wiebe <getdata@ketiltrout.net>   svn:438
+	* test/version_0_write.c test/version_1_write.c test/version_2_write.c
+	test/version_3_write.c test/version_4_write.c test/version_5_write.c
+	test/version_6_write.c test/version_7_write.c test/version_8_write.c: Added.
+
+	* bindings/python/test/big_test.py bindings/cxx/test/big_test.cpp
+	bindings/f77/test/big_test95.f90 bindings/f77/test/big_test.f
+	bindings/idl/test/big_test.pro: Add test 155.
+	* bindings/python/pyfragment.c (gdpy_fragment_rewrite): Added.
+	* bindings/cxx/fragment.cpp (Fragment::ReWrite): Added.
+	* bindings/f77/fgetdata.c (GDRFRG): Added.
+	* bindings/f77/getdata.f90.in (fgd_rewrite_fragment): Added.
+	* bindings/idl/getdata.c (gdidl_gd_rewrite_fragment): Added.
+
+	* src/flush.c (_GD_OldTypeName): Added
+	* src/flush.c (_GD_StringEscapeise _GD_PadField): Avoid escaping on early
+	versions.
+	* src/flush.c (_GD_FieldSpec _GD_FlushFragment): Write the specified version
+	metadata.
+
+	* src/flush.c (_GD_FlushMeta): Add force parameter.
+	* src/flush.c (gd_rewrite_fragment): Added.
+
+	* src/flush.c (_GD_FindVersion): Remove the REFERENCE check: it can be
+	wrong.
+
 2010-07-17   D. V. Wiebe <getdata@ketiltrout.net>   svn:438
 	* test/version_0.c test/version_1.c test/version_2.c
 	test/version_3.ctest/version_4.c: Weed out version 8.

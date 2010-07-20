@@ -1132,6 +1132,11 @@ int main(void)
   CHECK_INT2(148,4,ent->ComplexScalars(),1);
   CHECK_COMPLEX2(148,5,ent->CDividend(),complex<double>(1.01,9.33));
 
+  // 155: Fragment::ReWrite check
+  frag->ReWrite();
+  CHECK_OK(155);
+
+
 
   // ===================================================================
   d->Discard();

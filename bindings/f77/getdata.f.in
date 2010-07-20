@@ -259,6 +259,8 @@ C     Corresponding to gd_reference(3)
       EXTERNAL GDREFE
 C     Correpsonding to gd_rename(3)
       EXTERNAL GDRENM
+C     Corresponding to gd_rewrite_fragment(3)
+      EXTERNAL GDRFRG
 C     Corresponding to gd_raw_filename(3)
       EXTERNAL GDRWFN
 C     Corresponding to gd_uninclude(3)

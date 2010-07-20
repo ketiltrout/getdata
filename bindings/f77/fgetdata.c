@@ -1184,6 +1184,16 @@ void F77_FUNC(gdmfls, GDMFLS) (const int* dirfile)
   gd_metaflush(_GDF_GetDirfile(*dirfile));
 }
 
+/* gd_rewrite_fragment wrapper */
+void F77_FUNC(gdrfrg, GDRFRG) (const int* dirfile, const int* fragment)
+{
+  dtrace("%i, %i", *dirfile, *fragment);
+
+  gd_rewrite_fragment(_GDF_GetDirfile(*dirfile), *fragment);
+
+  dreturnvoid();
+}
+
 /* gd_include wrapper */
 void F77_FUNC(gdincl, GDINCL) (const int* dirfile, const char* file,
     const int* file_l, const int* fragment_index, const int* flags)

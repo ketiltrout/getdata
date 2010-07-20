@@ -525,7 +525,7 @@ gd_entry_t* _GD_FindFieldAndRepr(DIRFILE* D, const char* field_code_in,
 uint32_t _GD_FindVersion(DIRFILE *D);
 void _GD_FixEndianness(char* databuffer, size_t size, size_t ns);
 void _GD_Flush(DIRFILE* D, gd_entry_t *E);
-void _GD_FlushMeta(DIRFILE* D, int fragment);
+void _GD_FlushMeta(DIRFILE* D, int fragment, int force);
 void _GD_FreeE(gd_entry_t* E, int priv);
 int _GD_GetLine(FILE *fp, char *line, int* linenum);
 int _GD_GetRepr(DIRFILE*, const char*, char**);

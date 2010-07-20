@@ -288,9 +288,12 @@ TRUNC_TESTS=trunc trunc_rdonly trunc_rofs
 
 UNCLUDE_TESTS=unclude unclude_del unclude_move
 
-VERSION_TESTS=version_0 version_1 version_2 version_3 version_4 version_5 \
-							version_5_strict version_6 version_6_strict version_7 \
-							version_7_strict version_8 version_8_strict
+VERSION_TESTS=version_0 version_0_write version_1 version_1_write version_2 \
+							version_2_write version_3 version_3_write version_4 \
+							version_4_write version_5 version_5_strict version_5_write \
+							version_6 version_6_strict version_6_write version_7 \
+							version_7_strict version_7_write version_8 version_8_strict \
+							version_8_write
 
 VLIST_TESTS=vlist vlist_invalid vlist_meta vlist_meta_invalid
 

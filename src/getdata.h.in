@@ -698,6 +698,8 @@ extern DIRFILE *gd_open(const char *dirfilename,
 extern int gd_rename(DIRFILE *dirfile, const char *old_code,
     const char *new_name, int move_data) gd_nonnull ((1,2,3));
 
+extern int gd_rewrite_fragment(DIRFILE *dirfile, int fragment) gd_nonnull ((1));
+
 extern int gd_uninclude(DIRFILE *dirfile, int fragment_index,
     int del) gd_nonnull ((1));
 

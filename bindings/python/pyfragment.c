@@ -173,6 +173,19 @@ static PyObject* gdpy_fragment_setendianness(struct gdpy_fragment_t* self,
   return Py_None;
 }
 
+static PyObject* gdpy_fragment_rewrite(struct gdpy_fragment_t* self)
+{
+  dtrace("%p", self);
+
+  gd_rewrite_fragment(self->dirfile->D, self->n);
+
+  PYGD_CHECK_ERROR(self->dirfile->D, NULL);
+
+  Py_INCREF(Py_None);
+  dreturn("%p", Py_None);
+  return Py_None;
+}
+
 static PyObject* gdpy_fragment_getoffset(struct gdpy_fragment_t* self,
     void* closure)
 {
@@ -317,14 +330,13 @@ static PyMethodDef gdpy_fragment_methods[] = {
   },
   {"alter_endianness", (PyCFunction)gdpy_fragment_setendianness,
     METH_VARARGS | METH_KEYWORDS,
-    "alter_endianness(endianness [, recode)\n\n"
+    "alter_endianness(endianness [, recode])\n\n"
       "Change the byte sex of this fragment.  The 'endianness' parameter\n"
       "should be pygetdata.LITTLE_ENDIAN, pygetdata.BIG_ENDIAN, or some\n"
       "combination of these two as described in the gd_alter_endianness\n"
       "manual page, and possibly bitwise or'd with pygetdata.ARM_ENDIAN.\n"
       "If 'recode' is given, and is non-zero, the RAW files affected by\n"
       "this change will be converted to the byte sex.  See\n"
-      /* -----------------------------------------------------------------| */
       "gd_alter_endianness(3)."
   },
   {"alter_frameoffset", (PyCFunction)gdpy_fragment_setoffset,
@@ -335,6 +347,12 @@ static PyMethodDef gdpy_fragment_methods[] = {
       "given, and is non-zero, the RAW files affected bt this change will\n"
       "be shifted appropriately for the new frame offset.  See\n"
       "gd_alter_frameoffset(3)."
+  },
+  {"rewrite", (PyCFunction)gdpy_fragment_rewrite, METH_NOARGS,
+    "rewrite()\n\n"
+      /* -----------------------------------------------------------------| */
+      "Force re-writing of this fragment on disc, regardless of whether\n"
+      "it has been modified or not.  See gd_rewrite_fragment(3)."
   },
   { NULL, NULL, 0, NULL }
 };

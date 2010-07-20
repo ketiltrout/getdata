@@ -47,6 +47,11 @@ Fragment::~Fragment()
   free(name);
 }
 
+int Fragment::ReWrite()
+{
+  return gd_rewrite_fragment(D->D, ind);
+}
+
 int Fragment::SetEncoding(GetData::EncodingScheme encoding, int recode)
 {
   int ret = gd_alter_encoding(D->D, (unsigned long)encoding, ind, recode);

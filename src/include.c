@@ -337,7 +337,7 @@ int gd_uninclude(DIRFILE* D, int fragment_index, int del)
   /* flush the fragment's metadata, if requested */
   if (!del)
     for (j = 0; j < nf; ++j)
-      _GD_FlushMeta(D, f[j]);
+      _GD_FlushMeta(D, f[j], 0);
 
   if (D->error) {
     free(f);

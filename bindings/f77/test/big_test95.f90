@@ -4175,6 +4175,15 @@ program big_test
     write(*, 2013) 154, ent%cdividend
   end if
 
+! 155: fgd_rewrite_fragment check
+  call fgd_rewrite_fragment(d, 0)
+  e = fgd_error(d)
+
+  if (e .ne. GD_E_OK) then
+    ne = ne + 1
+    write(*, 2001), 155, e
+  end if
+
 
 !================================================================
   call fgd_discard(d)
