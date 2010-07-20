@@ -89,18 +89,63 @@ int main(int argc, char* argv[])
   if (ne > 0)
     printf("  Found %i line%s with syntax errors.\n", ne, (ne == 1) ? "" : "s");
   else {
+    int vers[DIRFILE_STANDARDS_VERSION + 1];
+    int nvers = 0;
+    int first = -1;
+    int start = 1;
+
     printf("  Syntax OK.\n\n");
-    int e = gd_dirfile_standards(dirfile, GD_VERSION_EARLIEST);
-    if (e == -1) {
-      printf("WARNING: Dirfile conforms to no Standards Version.\n");
+
+    for (i = 0; i <= DIRFILE_STANDARDS_VERSION; ++i) {
+      if (gd_dirfile_standards(dirfile, i) == i) {
+        vers[i] = 1;
+        nvers++;
+      } else
+        vers[i] = 0;
+    }
+
+    if (nvers == 0) {
+      puts("WARNING: Dirfile conforms to no Standards Version.");
     } else {
-      int l = gd_dirfile_standards(dirfile, GD_VERSION_LATEST);
-      if (e == l)
-        printf("Dirfile conforms to Standards Version %i%s.\n", l,
-            (l == DIRFILE_STANDARDS_VERSION) ? " (the newest version)" : "");
-      else
-        printf("Dirfile conforms to Standards Versions %i through %i%s.\n", e, l,
-            (l == DIRFILE_STANDARDS_VERSION) ? " (the newest version)" : "");
+      printf("Dirfile conforms to Standards %s ",
+          (nvers == 1) ? "Version" : "Versions");
+
+      for (i = 0; i <= DIRFILE_STANDARDS_VERSION; ++i) {
+        if (vers[i]) {
+          if (first == -1)
+            first = i;
+        } else if (first != -1) {
+          if (!start)
+            fputs(", ", stdout);
+          else
+            start = 0;
+
+          if (first == i)
+            printf("%i", i);
+          else if (first + 1 == i)
+            printf("%i, %i", first, i);
+          else
+            printf("%i-%i", first, i);
+
+          first = -1;
+        }
+      }
+
+      if (first != -1) {
+        if (!start)
+          fputs(", ", stdout);
+
+        if (first == DIRFILE_STANDARDS_VERSION)
+          printf("%i", DIRFILE_STANDARDS_VERSION);
+        else if (first + 1 == DIRFILE_STANDARDS_VERSION)
+          printf("%i, %i", first, DIRFILE_STANDARDS_VERSION);
+        else
+          printf("%i-%i", first, DIRFILE_STANDARDS_VERSION);
+
+        fputs(" (the latest version)", stdout);
+      }
+
+      puts("");
     }
 
   }

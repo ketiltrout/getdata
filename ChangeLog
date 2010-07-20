@@ -1,4 +1,7 @@
-2010-07-20   D. V. Wiebe <getdata@ketiltrout.net>   svn:438
+2010-07-20   D. V. Wiebe <getdata@ketiltrout.net>   svn:440
+	* util/checkdirfile.c: Fix reporting of conformant Standards Versions.
+
+2010-07-20   D. V. Wiebe <getdata@ketiltrout.net>   svn:439
 	* test/version_0_write.c test/version_1_write.c test/version_2_write.c
 	test/version_3_write.c test/version_4_write.c test/version_5_write.c
 	test/version_6_write.c test/version_7_write.c test/version_8_write.c: Added.
