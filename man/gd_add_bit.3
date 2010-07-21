@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_add_bit 3 "16 June 2010" "Version 0.7.0" "GETDATA"
+.TH gd_add_bit 3 "21 July 2010" "Version 0.7.0" "GETDATA"
 .SH NAME
 gd_add_bit, gd_add_clincom, gd_add_const, gd_add_cpolynom, gd_add_crecip,
 gd_add_divide, gd_add_lincom, gd_add_linterp, gd_add_multiply, gd_add_phase,
@@ -92,8 +92,8 @@ In all of these calls,
 .I field_name
 indicates the name of the field to be added.  Further,
 .I fragment_index
-is the index of the format file fragment into which the field should be added.
-(To convert a fragment index to its file name, see
+is the index of the format specification fragment into which the field should be
+added.  (To convert a fragment index to its file name, see
 .BR gd_fragmentname (3).)
 The meaning and valid types of other arguments may be obtained from the
 .BR gd_entry (3)
@@ -223,15 +223,15 @@ a newly added
 field.
 .TP
 .B GD_E_UNKNOWN_ENCODING
-The encoding scheme of the specified format file fragment is not known to the
-library.  As a result, the library was unable to create an empty binary file to
-be associated with a newly added
+The encoding scheme of the indicated format specification fragment is not known
+to the library.  As a result, the library was unable to create an empty binary
+file to be associated with a newly added
 .B RAW
 field.
 .TP
 .B GD_E_UNSUPPORTED
-The encoding scheme of the specified format file fragment does not support
-creating an empty binary file to be associated with a newly added
+The encoding scheme of the indicated format specification fragment does not
+support creating an empty binary file to be associated with a newly added
 .B RAW
 field.
 .P

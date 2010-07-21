@@ -15,7 +15,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_alter_frameoffset 3 "16 June 2010" "Version 0.7.0" "GETDATA"
+.TH gd_alter_frameoffset 3 "20 July 2010" "Version 0.7.0" "GETDATA"
 .SH NAME
 gd_alter_frameoffset \(em modify the starting frame of fields in a dirfile
 .SH SYNOPSIS
@@ -30,7 +30,7 @@ gd_alter_frameoffset \(em modify the starting frame of fields in a dirfile
 .SH DESCRIPTION
 The
 .BR gd_alter_frameoffset ()
-function sets the frame offset of the format file fragment specified by
+function sets the frame offset of the format specification fragment given by
 .I fragment_index
 to
 .I offset
@@ -86,9 +86,9 @@ The supplied dirfile was invalid.
 The supplied index was out of range.
 .TP
 .B GD_E_PROTECTED
-The metadata of the specified format file fragment was protected from change,
-or the binary data of the fragment was protected from change and binary file
-shifting was requested.
+The metadata of the given format specification fragment was protected from
+change, or the binary data of the fragment was protected from change and binary
+file shifting was requested.
 .TP
 .B GD_E_RANGE
 The supplied offset was less than zero.

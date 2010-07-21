@@ -45,8 +45,8 @@ dist_man_MANS = gd_add.3 gd_add_bit.3 gd_add_spec.3 gd_alter_bit.3 \
 								gd_nmfields_by_type.3 gd_nmvectors.3 gd_nvectors.3 \
 								gd_parent_fragment.3 gd_parser_callback.3 \
 								gd_protection.3 gd_raw_filename.3 gd_reference.3 \
-								gd_rename.3 gd_spf.3 gd_get_string.3 gd_put_string.3 \
-								gd_strings.3 gd_uninclude.3 gd_validate.3 \
+								gd_rename.3 gd_rewrite_fragment.3 gd_spf.3 gd_get_string.3 \
+								gd_put_string.3 gd_strings.3 gd_uninclude.3 gd_validate.3 \
 								gd_vector_list.3 dirfile.5 dirfile-encoding.5 \
 								dirfile-format.5 $(LFS_transitional_mans)
 

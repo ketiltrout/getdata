@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_entry 3 "15 July 2010" "Version 0.7.0" "GETDATA"
+.TH gd_entry 3 "21 July 2010" "Version 0.7.0" "GETDATA"
 .SH NAME
 gd_entry \(em retrieve a dirfile field's metadata
 .SH SYNOPSIS
@@ -108,7 +108,7 @@ typedef struct {
 
   const char  *field;          /* field code */
   gd_entype_t  field_type;     /* field type */
-  int          fragment_index; /* format file fragment index */
+  int          fragment_index; /* format specification fragment index */
 
   ...
 } gd_entry_t;
@@ -145,14 +145,14 @@ field.  The meaning of the other symbols should be self-explanatory.
 .P
 The 
 .I fragment_index
-member indicates the format file fragment in which this field is defined.  This
-is an integer index to the Dirfile's list of parsed format file fragments.  The
-name of the file corresponding to
+member indicates the format specification fragment in which this field is
+defined.  This is an integer index to the Dirfile's list of parsed format
+specification fragments.  The name of the file corresponding to
 .I fragment_index
 may be obtained by calling
 .BR gd_fragmentname (3).
 A value of zero for this field indicates that the field is defined in the
-primary format file, the file called
+primary fragment, the file called
 .B format
 in the root dirfile directory (see 
 .IR dirfile (5)).
@@ -237,7 +237,7 @@ entry, will also provide:
 typedef struct {
   ...
 
-  gd_type_t   const_type;       /* data type in format file */
+  gd_type_t   const_type;       /* data type in format specification */
 
   ...
 } gd_entry_t;

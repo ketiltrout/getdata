@@ -13,9 +13,10 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_nfragments 3 "16 July 2010" "Version 0.7.0" "GETDATA"
+.TH gd_nfragments 3 "21 July 2010" "Version 0.7.0" "GETDATA"
 .SH NAME
-gd_nfragments \(em retrieve the number of format file fragments in a dirfile
+gd_nfragments \(em retrieve the number of format specification fragments in a
+dirfile
 .SH SYNOPSIS
 .B #include <getdata.h>
 .HP
@@ -29,7 +30,8 @@ The
 .BR gd_nfragments ()
 function queries a dirfile(5) database specified by
 .I dirfile
-and returns the total number of parsed format file fragments in the database.
+and returns the total number of parsed format specification fragments in the
+database.
 
 The 
 .I dirfile
@@ -39,8 +41,8 @@ argument must point to a valid DIRFILE object previously created by a call to
 .SH RETURN VALUE
 Upon successful completion,
 .BR gd_nfragments ()
-returns the total number of format file fragments which are present in the
-dirfile.  On error, 
+returns the total number of format specification fragments which are present in
+the dirfile.  On error, 
 .BR gd_nfragments ()
 returns zero and sets the dirfile error to a non-zero value.  Possible error
 values are:

@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_cbopen 3 "25 May 2010" "Version 0.7.0" "GETDATA"
+.TH gd_cbopen 3 "21 July 2010" "Version 0.7.0" "GETDATA"
 .SH NAME
 gd_cbopen, gd_open \(em open or create a dirfile
 .SH SYNOPSIS
@@ -33,16 +33,16 @@ The
 function opens or creates the dirfile specified by
 .IR dirfilename ,
 returning a DIRFILE object associated with it.  Opening a dirfile will cause the
-library to read and parse the dirfile's format file (see
+library to read and parse the dirfile's format specification (see
 .BR dirfile-format (5)).
 
 If not NULL,
 .I sehandler
 should be a pointer to a function which will be called whenever a syntax error
-is encountered during parsing the format file.  Specify NULL for this parameter
-if no callback function is to be used.  The caller may use this function
-to correct the error or modify the error handling of the format file parser.
-See
+is encountered during parsing the format specification.  Specify NULL for this
+parameter if no callback function is to be used.  The caller may use this
+function to correct the error or modify the error handling of the format
+specification parser.  See
 .B The Callback Function
 section below for details on this function.  The
 .I extra
@@ -72,6 +72,12 @@ bitwise-or'd together:
 .B GD_ARM_ENDIAN
 Specifies that double precision floating point raw data on disk is stored in the
 middle-endian format used by older ARM processors.
+
+This flag is only honoured if no
+.B ENDIAN
+directive occurs in the dirfile format specification, unless
+.B GD_FORCE_ENDIAN
+is also specified.
 .TP
 .B GD_BIG_ENDIAN
 Specifies that raw data on disk is stored as big-endian data (most significant
@@ -80,25 +86,30 @@ byte first).  Specifying this flag along with the contradictory
 will cause the library to assume that the endianness of the data is opposite to
 that of the native architecture.
 
-This flag is ignored completely if an
+This flag is only honoured if no
 .B ENDIAN
-directive occurs in the dirfile format file, unless
+directive occurs in the dirfile format specification, unless
 .B GD_FORCE_ENDIAN
 is also specified.
 .TP
 .B GD_CREAT
 An empty dirfile will be created, if one does not already exist.  This will
-create both the dirfile directory and an empty format file.  The directory will
-have have mode
+create both the dirfile directory and an empty format specification file called
+.IR format .
+The directory will have have mode
 .BR S_IRWXU " | " S_IRWXG " | "  S_IRWXO 
 (0777), modified by the caller's umask value (see
 .BR umask (2)).
-The format file will have mode
+The
+.I format
+file will have mode
 .BR S_IRUSR " | " S_IWUSR " | "  S_IRGRP " | "  S_IWGRP " | " S_IROTH " | " S_IWOTH
 (0666), also modified by the caller's umask.
 
-The owner of the dirfile directory and format file will be the effective user ID
-of the caller.  Group ownership follows the rules outlined in
+The owner of the dirfile directory and
+.I format
+file will be the effective user ID of the caller.  Group ownership follows the
+rules outlined in
 .BR mkdir (2).
 .TP
 .B GD_EXCL
@@ -118,7 +129,7 @@ Specifies that
 .B ENCODING
 directives (see
 .BR dirfile-format (5))
-found in the dirfile format file should be ignored.  The encoding scheme
+found in the dirfile format specification should be ignored.  The encoding scheme
 specified in
 .I flags
 will be used instead (see below).
@@ -128,10 +139,11 @@ Specifies that
 .B ENDIAN
 directives (see
 .BR dirfile-format (5))
-found in the dirfile format file should be ignored.  When specified with one of
-.BR GD_BIG_ENDIAN " or " GD_LITTLE_ENDIAN ,
-the endianness specified will be assumed.  If this flag is specified with
-neither of those flags, the dirfile will be assumed to have the endianness of
+found in the dirfile format specification should be ignored.  When specified
+with one or more of
+.BR GD_ARM_ENDIAN ,\~ GD_BIG_ENDIAN " or " GD_LITTLE_ENDIAN ,
+the specified endianness will be assumed.  If this flag is specified with
+none of those flags, the dirfile will be assumed to have the endianness of
 the native architecture.
 .TP
 .B GD_IGNORE_DUPS
@@ -156,9 +168,9 @@ significant byte first).  Specifying this flag along with the contradictory
 will cause the library to assume that the endianness of the data is opposite to
 that of the native architecture.
 
-This flag is ignored completely if an
+This flag is only honoured if no
 .B ENDIAN
-directive occurs in the dirfile format file, unless
+directive occurs in the dirfile format specification, unless
 .B GD_FORCE_ENDIAN
 is also specified.
 .TP
@@ -176,14 +188,15 @@ directive.  See the
 section below for full details.
 .TP
 .B GD_PRETTY_PRINT
-When dirfile metadata is flushed to disc (either explicitly via
-.BR gd_metaflush()
+When dirfile metadata is flushed to disk (either explicitly via
+.BR gd_metaflush (),\~ gd_rewrite_fragment (),
 or 
-.BR gd_flush()
+.BR gd_flush ()
 or implicitly by closing the dirfile), an attempt will be made to create a
-nicer looking format file (from a human-readable standpoint).  What this
-explicitly means is not part of the API, and any particular behaviour should not
-be relied on.  If the dirfile is opened read-only, this flag is ignored.
+nicer looking format specification (from a human-readable standpoint).  What
+this explicitly means is not part of the API, and any particular behaviour
+should not be relied on.  If the dirfile is opened read-only, this flag is
+ignored.
 .TP
 .B GD_TRUNC
 If
@@ -312,7 +325,7 @@ In
 .I pedantic
 mode, the parser conforms to one specified Standards Version. This target
 version may change any number of times in the course of scanning a single
-format file.  If invoked using the
+format specification.  If invoked using the
 .B GD_PEDANTIC
 flag, the parser will start in
 .I pedantic
@@ -343,14 +356,16 @@ Standards Version for writing format metadata back to disk.
 .SS The Callback Function
 The caller-supplied
 .I sehandler
-function is called whenever the format file parser encounters a syntax error
+function is called whenever the format specification parser encounters a syntax
+error
 .RI ( i.e.
 whenever it would return the
 .B GD_E_FORMAT
 error).  This callback may be used to correct the error, or to tell the parser
 how to recover from it.
 
-This function should take two pointers as arguments, and return an int:
+This function should take two pointers as arguments, and return an
+.BR int :
 .RS
 .HP
 .nh
@@ -431,7 +446,7 @@ The byte sex specified by an
 .B ENDIAN
 directive was unrecognised.
 .TP
-.B GD_E_FORMAT_LITTERAL
+.B GD_E_FORMAT_LITERAL
 An unexpected character was encountered in a complex literal. 
 .TP
 .B GD_E_FORMAT_LOCATION
@@ -459,7 +474,10 @@ directive was unrecognised.
 .TP
 .B GD_E_FORMAT_RES_NAME
 A field was specified with the reserved name
-.IR INDEX .
+.IR INDEX
+(or with the reserved name
+.IR FILEFRAM
+in a dirfile conforming to Standards Version 5 or earlier).
 .TP
 .B GD_E_FORMAT_UNTERM
 The last token of the line was unterminated.
@@ -467,8 +485,8 @@ The last token of the line was unterminated.
 .IR pdata -> filename
 and
 .IR pdata -> linenum
-members contains the name of the fragment and line number where the syntax error
-was encountered.  The first line in a fragment is line one.
+members contains the pathname of the fragment and line number where the syntax
+error was encountered.  The first line in a fragment is line one.
 
 The
 .IR pdata -> line
@@ -483,25 +501,25 @@ The callback function should return one of the following symbols, which
 tells the parser how to subsequently handle the error:
 .TP
 .B GD_SYNTAX_ABORT
-The parser should immediately abort parsing the format file and fail with
-the error
+The parser should immediately abort parsing the format specification and fail
+with the error
 .BR GD_E_FORMAT .
 This is the default behaviour, if no callback function is provided (or if
 the parser is invoked by calling
 .BR gd_open ()).
 .TP
 .B GD_SYNTAX_CONTINUE
-The parser should continue parsing the format file.  However, once parsing has
-finished, the parser will fail with the error
+The parser should continue parsing the format specification.  However, once
+parsing has finished, the parser will fail with the error
 .BR GD_E_FORMAT ,
 even if no further syntax errors are encountered.  This behaviour may be used by
-the caller to identify all lines containing syntax errors in the format file,
-instead of just the first one.
+the caller to identify all lines containing syntax errors in the format
+specification, instead of just the first one.
 .TP
 .B GD_SYNTAX_IGNORE
 The parser should ignore the line containing the syntax error completely, and
-carry on parsing the format file.  If no further errors are encountered, the
-dirfile will be successfully opened.
+carry on parsing the format specification.  If no further errors are
+encountered, the dirfile will be successfully opened.
 .TP
 .B GD_SYNTAX_RESCAN
 The parser should rescan the
@@ -509,6 +527,10 @@ The parser should rescan the
 argument, which replaces the line which originally contained the syntax error.
 The line is assumed to have been corrected by the callback function.  If the
 line still contains a syntax error, the callback function will be called again.
+
+Note: the line is not corrected on disk; however, the caller may subsequently
+correct the fragment on disk by calling
+.BR gd_rewrite_fragment (3).
 .P
 The callback function handles only syntax errors.  The parser may still abort
 early, if a different kind of library error is encountered.  Furthermore,
@@ -543,7 +565,7 @@ The library was unable to allocate memory.
 .B GD_E_BAD_REFERENCE
 The reference field specified by a
 .B /REFERENCE
-directive in the format file (see
+directive in the format specification (see
 .BR dirfile-format (5))
 was not found, or was not a
 .B RAW
@@ -560,7 +582,7 @@ The library was unable to create the dirfile, or the dirfile exists and both
 were specified.
 .TP
 .B GD_E_FORMAT
-A syntax error occurred in the format file.  See also
+A syntax error occurred in the format specification.  See also
 .B The Callback Function
 section above.
 .TP
@@ -570,7 +592,7 @@ This indicates a bug in the library.  Please report the incident to the
 GetData developers.
 .TP
 .B GD_E_OPEN
-The dirfile format file could not be opened, or
+The dirfile format specification could not be opened, or
 .I dirfilename
 does not specify a valid dirfile.
 .TP
@@ -587,12 +609,12 @@ The dirfile error may be retrieved by calling
 A descriptive error string for the last error encountered can be obtained from
 a call to
 .BR gd_error_string (3).
-When finished with it, the DIRFILE object should be deallocated with a call to
+When finished with it, a caller should deallocate the DIRFILE object by calling
 .BR gd_close (3),
 even if the open failed.
 .SH BUGS
 GetData's parser assumes it is running on an ASCII-compatible platform.  Format
-file parsing will fail gloriously on an EBCDIC platform.
+specification parsing will fail gloriously on an EBCDIC platform.
 .SH SEE ALSO
 .BR dirfile (5),
 .BR dirfile-encoding (5),

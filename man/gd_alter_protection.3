@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_alter_protection 3 "16 July 2010" "Version 0.7.0" "GETDATA"
+.TH gd_alter_protection 3 "21 July 2010" "Version 0.7.0" "GETDATA"
 .SH NAME
 gd_alter_protection \(em modify the protection level of a dirfile fragment
 .SH SYNOPSIS
@@ -28,8 +28,8 @@ gd_alter_protection \(em modify the protection level of a dirfile fragment
 .SH DESCRIPTION
 The
 .BR gd_alter_protection ()
-function sets the advisory protection level of the format file fragment
-specified by
+function sets the advisory protection level of the format specification fragment
+given by
 .I fragment_index
 to
 .I protection_level
@@ -88,7 +88,7 @@ a call to
 .BR gd_error_string (3).
 .SH NOTES
 This is the only GetData function which ignores the (existing) protection
-level of a format file fragment.
+level of a format specification fragment.
 .SH SEE ALSO
 .BR gd_open (3),
 .BR gd_error (3),

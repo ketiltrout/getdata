@@ -15,7 +15,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_alter_endianness 3 "16 June 2010" "Version 0.7.0" "GETDATA"
+.TH gd_alter_endianness 3 "20 July 2010" "Version 0.7.0" "GETDATA"
 .SH NAME
 gd_alter_endianness \(em modify the byte sex of fields in a dirfile
 .SH SYNOPSIS
@@ -30,7 +30,7 @@ gd_alter_endianness \(em modify the byte sex of fields in a dirfile
 .SH DESCRIPTION
 The
 .BR gd_alter_endianness ()
-function sets the byte sex of the format file fragment specified by
+function sets the byte sex of the format specification fragment given by
 .I fragment_index
 to
 .I byte_sex
@@ -104,9 +104,9 @@ The supplied dirfile was invalid.
 The supplied index was out of range.
 .TP
 .B GD_E_PROTECTED
-The metadata of the specified format file fragment was protected from change,
-or the binary data of the fragment was protected from change and binary file
-byte swapping was requested.
+The metadata of the indicated format specification fragment was protected from
+change, or the binary data of the fragment was protected from change and binary
+file byte swapping was requested.
 .TP
 .B GD_E_RAW_IO
 An I/O error occurred while attempting to byte swap a binary file.

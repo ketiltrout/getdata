@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_parser_callback 3 "25 May 2010" "Version 0.7.0" "GETDATA"
+.TH gd_parser_callback 3 "21 July 2010" "Version 0.7.0" "GETDATA"
 .SH NAME
 gd_parser_callback \(em set the syntax error callback handler for a dirfile
 .SH SYNOPSIS
@@ -42,8 +42,8 @@ on error) restored.  See
 .BR gd_cbopen (3)
 for a discussion on the requirements for the syntax handler.
 
-Since parsing of an existing format file occurs when the DIRFILE object is
-created, before this function can be called, this function is only useful to
+Since parsing of an existing format specification occurs when the DIRFILE object
+is created, before this function can be called, this function is only useful to
 set or modify a callback function or its caller data before calling
 .BR gd_include (3),
 which will invoke the callback function if syntax errors are found in the

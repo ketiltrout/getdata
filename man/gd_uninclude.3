@@ -13,9 +13,9 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_uninclude 3 "16 June 2010" "Version 0.7.0" "GETDATA"
+.TH gd_uninclude 3 "20 July 2010" "Version 0.7.0" "GETDATA"
 .SH NAME
-gd_uninclude \(em remove a format file fragment from a dirfile
+gd_uninclude \(em remove a format specification fragment from a dirfile
 .SH SYNOPSIS
 .B #include <getdata.h>
 .HP
@@ -28,9 +28,9 @@ gd_uninclude \(em remove a format file fragment from a dirfile
 .SH DESCRIPTION
 The
 .BR gd_uninclude ()
-removes the format file fragment indexed by
+removes the format specification fragment indexed by
 .I fragment_index
-from the specified dirfile, as well as any fragments the specified fragment
+from the specified dirfile, as well as any fragments the indicated fragment
 INCLUDEs.  Fields defined in the removed fragments will be removed from the
 dirfile.
 
@@ -40,8 +40,8 @@ fields defined the the removed fragments.  If
 .I del
 is zero, metadata changes will also be written to the removed fragments.  If
 .I del
-is non-zero, the format file fragments will be deleted from disk, if possible.
-Regardless of the value of
+is non-zero, the format specification fragments will be deleted from disk, if
+possible.  Regardless of the value of
 .IR del ,
 binary data files associated with
 .B RAW
@@ -50,8 +50,8 @@ binary files, use
 .BR gd_delete (3)
 before calling this function.
 
-The primary format file (the fragment indexed by zero) cannot be removed
-from the dirfile.
+The primary format specification (the fragment indexed by zero) cannot be
+removed from the dirfile.
 .SH RETURN VALUE
 On success,
 .BR gd_uninclude ()
@@ -69,7 +69,7 @@ The supplied dirfile was invalid.
 .TP
 .B GD_E_BAD_INDEX
 The supplied fragment index was out of range, or an attempt was made to remove
-the primary format file.
+the primary format specification.
 .TP
 .B GD_E_OPEN_INCLUDE
 A temporary file could not be opened into which to write the metadata of a
@@ -91,9 +91,9 @@ When finished with it, the DIRFILE object may be deallocated with a call to
 .BR gd_close (3),
 even if the open failed.
 .SH NOTES
-This function re-arranges the remaining format file fragments in some
+This function re-arranges the remaining format specification fragments in some
 unspecified way, except for the primary fragment, which is guaranteed to remain
-at index zero.  Callers which cache format file fragment indices must
+at index zero.  Callers which cache format specification fragment indices must
 re-initialise their cache after calling this function.
 
 Unlike

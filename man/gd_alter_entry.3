@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_alter_entry 3 "25 May 2010" "Version 0.7.0" "GETDATA"
+.TH gd_alter_entry 3 "21 July 2010" "Version 0.7.0" "GETDATA"
 .SH NAME
 gd_alter_entry \(em modify the metadata of a dirfile field
 .SH SYNOPSIS
@@ -219,15 +219,15 @@ field, or an I/O error occurred while attempting to rename a
 table file.
 .TP
 .B GD_E_UNKNOWN_ENCODING
-The encoding scheme of the specified format file fragment is not known to the
-library.  As a result, the library was unable to translate the binary file 
-be associated with a modified
+The encoding scheme of the indicated format specification fragment is not known
+to the library.  As a result, the library was unable to translate the binary
+file be associated with a modified
 .B RAW
 field.
 .TP
 .B GD_E_UNSUPPORTED
-The encoding scheme of the specified format file fragment does not support
-translating the empty binary file associated with a modified
+The encoding scheme of the indicated format specification fragment does not
+support translating the binary file associated with a modified
 .B RAW
 field.
 .P

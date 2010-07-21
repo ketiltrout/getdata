@@ -568,12 +568,6 @@ void _GD_FlushMeta(DIRFILE* D, int fragment, int force)
 
   dtrace("%p, %i, %i", D, fragment, force);
 
-  if ((D->flags & GD_ACCMODE) == GD_RDONLY) {
-    /* nothing to do */
-    dreturnvoid();
-    return;
-  }
-
   if (fragment == GD_ALL_FRAGMENTS) {
     for (i = 0; i < D->n_fragment; ++i)
       if (force || D->fragment[i].modified)
@@ -590,10 +584,19 @@ int gd_metaflush(DIRFILE* D)
 
   _GD_ClearError(D);
 
-  if (D->flags & GD_INVALID) /* don't crash */
+  if (D->flags & GD_INVALID) {
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-  else
-    _GD_FlushMeta(D, GD_ALL_FRAGMENTS, 0);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  if ((D->flags & GD_ACCMODE) == GD_RDONLY) {
+    _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  _GD_FlushMeta(D, GD_ALL_FRAGMENTS, 0);
 
   dreturn("%i", (D->error == GD_E_OK) ? 0 : -1);
   return (D->error == GD_E_OK) ? 0 : -1;
@@ -617,8 +620,13 @@ int gd_rewrite_fragment(DIRFILE* D, int fragment)
     return -1;
   }
 
-  else
-    _GD_FlushMeta(D, fragment, 1);
+  if ((D->flags & GD_ACCMODE) == GD_RDONLY) {
+    _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  _GD_FlushMeta(D, fragment, 1);
 
   dreturn("%i", (D->error == GD_E_OK) ? 0 : -1);
   return (D->error == GD_E_OK) ? 0 : -1;

@@ -1,6 +1,6 @@
-.\" gd_metaflush.3.  The gd_metaflush man page.
+.\" gd_rewrite_fragment.3.  The gd_rewrite_fragment man page.
 .\"
-.\" (C) 2008, 2010 D. V. Wiebe
+.\" (C) 2010 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,29 +13,30 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_metaflush 3 "21 July 2010" "Version 0.7.0" "GETDATA"
+.TH gd_rewrite_fragment 3 "20 July 2010" "Version 0.7.0" "GETDATA"
 .SH NAME
-gd_metaflush \(em write modified dirfile metadata to disk
+gd_rewrite_fragment \(em re-write a dirfile format specification fragment
 .SH SYNOPSIS
 .B #include <getdata.h>
 .HP
 .nh
 .ad l
-.BI "int gd_metaflush(DIRFILE *" dirfile );
+.BI "int gd_rewrite_fragment(DIRFILE *" dirfile ", int " fragment );
 .hy
 .ad n
 .SH DESCRIPTION
 The
-.BR gd_metaflush ()
-function flushes all pending metadata changes in the dirfile specified by
-.I dirfile 
-to disk.  This is accomplished by re-writing the format specification fragments
-containing modified metadata overwriting the existing files.  Format file
-fragments which are unchanged are not touched.
+.BR gd_rewrite_fragment ()
+writes the format specification fragment specified by
+.I fragment_index
+to disk, regardless of whether it has changed or not, overwriting the existing
+file.
 .P
-This function flushes only metadata.  To flush the field data as well, call
-.BR gd_flush (3)
-instead.
+In addition to being simply a valid fragment index,
+.I fragment_index
+may also be the special value
+.BR GD_ALL_FRAGMENTS ,
+which indicates that all fragments should be rewriten.
 .SH RETURN VALUE
 On success, zero is returned.  On error, -1 is returned and the dirfile error is
 set to a non-zero error value.  Possible error values are:
@@ -45,6 +46,9 @@ The supplied dirfile was opened in read-only mode.
 .TP
 .B GD_E_BAD_DIRFILE
 The supplied dirfile was invalid.
+.TP
+.B GD_E_BAD_INDEX
+The supplied fragment index was out of range.
 .TP
 .B GD_E_INTERNAL_ERROR
 An internal error occurred in the library while trying to perform the task.
@@ -61,8 +65,9 @@ a call to
 .BR gd_error_string (3).
 .SH SEE ALSO
 .BR gd_open (3),
-.BR gd_flush (3),
 .BR gd_close (3),
 .BR gd_error (3),
 .BR gd_error_string (3),
-.BR gd_rewrite_fragment (3)
+.BR gd_flush (3),
+.BR gd_metaflush (3)
+

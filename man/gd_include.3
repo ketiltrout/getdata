@@ -13,9 +13,9 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_include 3 "16 June 2010" "Version 0.7.0" "GETDATA"
+.TH gd_include 3 "21 July 2010" "Version 0.7.0" "GETDATA"
 .SH NAME
-gd_include \(em add a format file fragment to a dirfile
+gd_include \(em add a format specification fragment to a dirfile
 .SH SYNOPSIS
 .B #include <getdata.h>
 .HP
@@ -28,7 +28,7 @@ gd_include \(em add a format file fragment to a dirfile
 .SH DESCRIPTION
 The
 .BR gd_include ()
-adds the format file fragment specified by the path
+adds the format specification fragment given by the path
 .I include_file
 to the specified dirfile, possibly creating the fragment.  This occurs as if,
 in the existing fragment indexed
@@ -102,7 +102,7 @@ directives (see
 .BR dirfile-format (5))
 found in the fragment should be ignored.  When specified with one of
 .BR GD_BIG_ENDIAN " or " GD_LITTLE_ENDIAN ,
-the endianness specified will be assumed.  If this flag is specified with
+the indicated endianness will be assumed.  If this flag is specified with
 neither of those flags, the fragment will be assumed to have the endianness of
 the native architecture.
 .TP
@@ -216,9 +216,9 @@ Specifies that raw data files are not encoded, but written verbatim to disk.
 .SH RETURN VALUE
 On success,
 .BR gd_include ()
-returns the format file index of the newly added fragment.  On error, -1 is
-returned and the dirfile error is set to a non-zero error value.  Possible error
-values are:
+returns the format specification index of the newly added fragment.  On error,
+-1 is returned and the dirfile error is set to a non-zero error value.  Possible
+error values are:
 .TP 8
 .B GD_E_ACCMODE
 The supplied dirfile was opened in read-only mode.

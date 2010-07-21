@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_delete 3 "25 May 2010" "Version 0.7.0" "GETDATA"
+.TH gd_delete 3 "21 July 2010" "Version 0.7.0" "GETDATA"
 .SH NAME
 gd_delete \(em remove a field from a dirfile
 .SH SYNOPSIS
@@ -65,7 +65,7 @@ in their field specifications with the value of the
 field.
 .TP
 .B GD_DEL_FORCE
-Delete the specified field even if it is used in the specification of other
+Delete the indicated field even if it is used in the specification of other
 fields, either as a input for a derived vector field or as a
 .B CONST
 parameter in a field specification.
@@ -124,17 +124,17 @@ field.
 .B GD_E_UNKNOWN_ENCODING
 The
 .B GD_DEL_DATA
-flag was specified but the encoding scheme of the specified format file fragment
-is not known to the library.  As a result, the library was unable to delete the
-binary file associated with a
+flag was given but the encoding scheme of the indicated format specification
+fragment is not known to the library.  As a result, the library was unable to
+delete the binary file associated with a
 .B RAW
 field.
 .TP
 .B GD_E_UNSUPPORTED
 The
 .B GD_DEL_DATA
-flag was specified but the encoding scheme of the specified format file fragment
-does not support deleting the binary file associated with a
+flag was given but the encoding scheme of the indicated format specification
+fragment does not support deleting the binary file associated with a
 .B RAW
 field.
 .P

@@ -1,3 +1,7 @@
+2010-07-20   D. V. Wiebe <getdata@ketiltrout.net>   svn:441
+	* src/flush.c (_GD_FlushMeta gd_metaflush gd_rewrite_fragment): Return error
+	on read-only dirfile.
+
 2010-07-20   D. V. Wiebe <getdata@ketiltrout.net>   svn:440
 	* util/checkdirfile.c: Fix reporting of conformant Standards Versions.
 

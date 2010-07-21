@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_nframes 3 "16 July 2010" "Version 0.7.0" "GETDATA"
+.TH gd_nframes 3 "20 July 2010" "Version 0.7.0" "GETDATA"
 .SH NAME
 gd_nframes \(em report the size of a dirfile
 .SH SYNOPSIS
@@ -33,7 +33,12 @@ and returns the number of frames in the database.  Since different fields may
 have differing number of frames, the Dirfile Standards (see
 .BR dirfile (5))
 dictate that the number of frames in the database is defined to be equal to the
-number of frames in the first raw field specified in the format file.
+number of frames in the reference field defined by the
+.B /REFERENCE
+directive (see
+.BR dirfile-format (5))
+or, if no such reference field is defined, by the first raw field specified in
+the format specification.
 
 If no vector fields are defined in the database,
 .BR gd_nframes ()
@@ -73,5 +78,7 @@ a call to
 .BR dirfile (5),
 .BR dirfile-encoding (5),
 .BR gd_open (3),
+.BR gd_bof (3),
+.BR gd_eof (3),
 .BR gd_error (3),
 .BR gd_error_string (3)
