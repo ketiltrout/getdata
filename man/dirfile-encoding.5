@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH dirfile-encoding 5 "21 July 2010" "Standards Version 8" "DATA FORMATS"
+.TH dirfile-encoding 5 "4 August 2010" "Standards Version 8" "DATA FORMATS"
 .SH NAME
 dirfile-encoding \(em dirfile database encoding schemes
 .SH DESCRIPTION
@@ -56,13 +56,13 @@ The GetData library provides an encoding framework which abstracts binary file
 I/O, allowing for generic support for a wide variety of encoding schemes.
 Functions which may make use of the encoding framework are:
 .IP
-.BR dirfile_add (3),\~ dirfile_add_raw (3),\~ dirfile_add_spec (3),
-.BR dirfile_alter_encoding (3),\~ dirfile_alter_endianness (3),
-.BR dirfile_alter_frameoffset (3),\~ dirfile_alter_entry (3),
-.BR dirfile_alter_raw (3),\~ dirfile_alter_spec (3),\~ dirfile_move (3),
-.BR dirfile_rename (3),\~ getdata (3),\~ get_nframes (3),
+.BR gd_add (3),\~ gd_add_raw (3),\~ gd_add_spec (3),
+.BR gd_alter_encoding (3),\~ gd_alter_endianness (3),
+.BR gd_alter_frameoffset (3),\~ gd_alter_entry (3),
+.BR gd_alter_raw (3),\~ gd_alter_spec (3),\~ gd_getdata (3),
+.BR gd_move (3),\~ gd_nframes (3),\~ gd_putdata (3),
 and
-.BR putdata (3).
+.BR gd_rename (3).
 .P
 Most of the encodings supported by GetData are implemented through external
 libraries which handle the actual file I/O and data translation.  All such

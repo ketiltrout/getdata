@@ -1,0 +1,119 @@
+.\" gd_dirfile_standards.3.  The gd_dirfile_standards man page.
+.\"
+.\" (C) 2010 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_dirfile_standards 3 "24 July 2010" "Version 0.7.0" "GETDATA"
+.SH NAME
+gd_dirfile_standards \(em change or report the current Dirfile Standards Version
+for a DirFile
+.SH SYNOPSIS
+.B #include <getdata.h>
+.HP
+.nh
+.ad l
+.BI "int gd_dirfile_standards(DIRFILE *" dirfile ", int version );
+.hy
+.ad n
+.SH DESCRIPTION
+The
+.BR gd_dirfile_standards ()
+version updates the current Standards Version for the open dirfile
+.I dirfile
+to the value specified by
+.IR version ,
+if possible, and then reports the current Standards Version.  Metadata writen to
+disk for
+.I dirfile
+will conform to the current Standards Version.
+
+The Standards Version of the loaded dirfile also affects the operation of
+functions which add fields, such as
+.BR dirfile_add (3)
+or 
+.BR dirfile_add_spec (3);
+and functions which modify field metadata, such as
+.BR dirfile_alter_entry (3)
+or 
+.BR dirfile_alter_spec (3).
+For specific behaviour see the manual page of the appropriate function.
+
+The
+.I version
+parameter should be between zero and the value of the symbol
+.BR GD_DIRFILE_STANDARDS_VERSION ,
+which is the newest Standards Version understood by GetData, inclusive or else
+one of the following special symbols:
+.TP
+.B GD_VERSION_EARLIEST
+Specifies the current Standards Version should be set to the earliest version
+to which the loaded dirfile conforms.
+.TP
+.B GD_VERSION_CURRENT
+Specifies that the current Standards Version should not be changed.  In this
+case, this function simply reports the current Standards Version.
+.TP
+.B GD_VERSION_LATEST
+Specifies the current Standards Version should be set to the latest version
+to which the loaded dirfile conforms.
+.P
+If the loaded dirfile cannot conform to the specified
+.IR version ,
+this function fails, and the current Standards Version is unchanged.  If the
+loaded dirfile conforms to no known Standards Version, this function will fail
+regardless of the value of
+.I version
+(even if
+.B GD_VERSION_CURRENT
+is used).
+
+The caller should not assume that the loaded dirfile conforms to every Standards
+Version between the values reported by
+.B GD_VERSION_EARLIEST
+and
+.BR GD_VERSION_LATEST .
+
+.SH RETURN VALUE
+On success,
+.BR gd_dirfile_standards ()
+returns the current Standards Version of the loaded dirfile, after possibly
+having been updated by the call.  This will be a number between zero and
+.BR GD_DIRFILE_STANDARDS_VERSION
+inclusive.  On error, -1 is returned and the dirfile error is set to a non-zero
+error value, and the current Standards Version is not changed.  Possible error
+values are:
+.TP 8
+.B GD_E_BAD_DIRFILE
+The supplied dirfile was invalid.
+.TP
+.B GD_E_BAD_VERSION
+The loaded dirfile did not conform to the specified version.  Or the dirfile
+conforms to no known Standards Version.
+.P
+The dirfile error may be retrieved by calling
+.BR gd_error (3).
+A descriptive error string for the last error encountered can be obtained from
+a call to
+.BR gd_error_string (3).
+
+.SH NOTES
+This function only changes the current Standards Version of the loaded dirfile.
+It does not update the any format specification fragments on disk to conform to
+the specified Standards Version.  To do that, use
+.BR gd_metaflush (3)
+or 
+.BR gd_rewrite_fragment (3).
+.SH SEE ALSO
+.BR gd_open (3),
+.BR gd_metaflush (3),
+.BR gd_rewrite_fragment (3)

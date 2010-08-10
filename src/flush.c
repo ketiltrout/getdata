@@ -691,7 +691,7 @@ uint32_t _GD_FindVersion(DIRFILE *D)
   char* ptr;
   dtrace("%p", D);
 
-  D->av = (1 << (1 + DIRFILE_STANDARDS_VERSION)) - 1;
+  D->av = (1 << (1 + GD_DIRFILE_STANDARDS_VERSION)) - 1;
 
   if (D->n_fragment > 1)
     D->av &= GD_VERS_GE_3;
@@ -857,7 +857,9 @@ int gd_dirfile_standards(DIRFILE *D, int vers)
   } else if (vers == GD_VERSION_EARLIEST)
     vers = earliest_magic[(~(D->av - 1) & D->av) % 67];
 
-  if (vers < 0 || vers > DIRFILE_STANDARDS_VERSION || ~D->av & (1ULL << vers)) {
+  if (vers < 0 || vers > GD_DIRFILE_STANDARDS_VERSION ||
+      ~D->av & (1ULL << vers))
+  {
     _GD_SetError(D, GD_E_BAD_VERSION, 0, NULL, vers, NULL);
     dreturn("%i", -1);
     return -1;

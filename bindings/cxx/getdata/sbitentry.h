@@ -26,8 +26,8 @@
 # define _FILE_OFFSET_BITS 64
 #endif
 
-#define NO_GETDATA_LEGACY_API
-#define GETDATA_C89_API
+#define GD_NO_LEGACY_API
+#define GD_C89_API
 
 extern "C" {
 #include <getdata.h>
@@ -47,7 +47,7 @@ namespace GetData {
       SBitEntry(const char* field_code, const char* in_field, gd_bit_t bitnum,
           gd_bit_t numbits = 1, int fragment_index = 0);
 
-      virtual const char *Input(int __gd_unused index = 0) {
+      virtual const char *Input() {
         return E.in_fields[0];
       };
 

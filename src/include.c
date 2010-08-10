@@ -75,7 +75,7 @@ int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,
         ((*flags & GD_TRUNC) ? O_TRUNC : 0) | ((*flags & GD_EXCL) ? O_EXCL : 0)
         | O_BINARY, 0666);
     if (i < 0) {
-      _GD_SetError(D, GD_E_OPEN_INCLUDE, errno, format_file, linenum,
+      _GD_SetError(D, GD_E_OPEN_FRAGMENT, errno, format_file, linenum,
           temp_buf1);
       dreturn("%i", -1);
       return -1;
@@ -86,7 +86,7 @@ int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,
 
   /* If opening the file failed, set the error code and abort parsing. */
   if (new_fp == NULL) {
-    _GD_SetError(D, GD_E_OPEN_INCLUDE, errno, format_file, linenum, temp_buf1);
+    _GD_SetError(D, GD_E_OPEN_FRAGMENT, errno, format_file, linenum, temp_buf1);
     dreturn("%i", -1);
     return -1;
   }
@@ -158,11 +158,18 @@ int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,
 int gd_include(DIRFILE* D, const char* file, int fragment_index,
     unsigned long flags)
 {
-  int standards = DIRFILE_STANDARDS_VERSION;
+  int standards = GD_DIRFILE_STANDARDS_VERSION;
   char* ref_name = NULL; 
   int i;
 
   dtrace("%p, \"%s\", %i, %lx", D, file, fragment_index, (unsigned long)flags);
+
+  if (~D->flags & GD_HAVE_VERSION)
+    _GD_FindVersion(D);
+
+  /* only set if the dirfile conforms to some standard */
+  if (D->av)
+    standards = D->standards;
 
   _GD_ClearError(D);
 
@@ -196,8 +203,10 @@ int gd_include(DIRFILE* D, const char* file, int fragment_index,
   int new_fragment = _GD_Include(D, file, "dirfile_include()", 0, &ref_name,
       fragment_index, &standards, &flags);
 
-  if (!D->error)
+  if (!D->error) {
     D->fragment[fragment_index].modified = 1;
+    D->flags &= ~GD_HAVE_VERSION;
+  }
 
   /* If ref_name is non-NULL, the included fragment contained a REFERENCE
    * directive.  If ref_name is NULL but D->fragment[new_fragment].ref_name is
@@ -372,6 +381,7 @@ int gd_uninclude(DIRFILE* D, int fragment_index, int del)
 
   /* Flag the parent as modified */
   D->fragment[parent].modified = 1;
+  D->flags &= ~GD_HAVE_VERSION;
 
   /* delete the fragments -- again, don't bother resizing D->fragment */
   for (j = 0; j < nf; ++j) {

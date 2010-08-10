@@ -87,9 +87,9 @@ static const struct {
   { GD_E_BAD_TYPE, 0, "Unsupported data type: {1}", 0 },
   /* GD_E_RAW_IO: 1 = suberror, 2 = filename, 3 = errno */
   { GD_E_RAW_IO, 0, "Error accessing {2}: ", 1 },
-  /* GD_E_OPEN_INCLUDE: 1 = errno, 2 = format file, 3 = line, 4 = includefile */
-  { GD_E_OPEN_INCLUDE, 0,
-    "Unable to open INCLUDEd file {4} on line {3} of {2}: ", 2 },
+  /* GD_E_OPEN_FRAGMENT: 1 = errno, 2 = format file, 3 = line, 4 = includefile*/
+  { GD_E_OPEN_FRAGMENT, 0,
+    "Unable to open fragment {4} on line {3} of {2}: ", 2 },
   /* GD_E_INTERNAL_ERROR: 2 = source file, 3 = line */
   { GD_E_INTERNAL_ERROR, 0, "Internal error at [{2},{3}]; "
     "please report to " PACKAGE_BUGREPORT , 0 },
@@ -132,6 +132,11 @@ static const struct {
     0 },
   /* GD_E_DUPLICATE: 4 = name */
   { GD_E_DUPLICATE, 0, "Field code already present: {4}", 0 },
+  /* GD_E_DIMENSION: 2 = parent field (if any), 4 = field code */
+  { GD_E_DIMENSION, GD_E_DIM_FORMAT, "Scalar field {4} found where vector "
+    "field expected in definition of {2}", 0 },
+  { GD_E_DIMENSION, GD_E_DIM_CALLER,
+    "Vector field expected, but scalar field given: {4}", 0 },
   /* GD_E_BAD_INDEX: 3 = index */
   { GD_E_BAD_INDEX, 0, "Invalid format file index: {3}", 0 },
   /* GD_E_BAD_SCALAR: 2 = parent field, 4 = scalar field */

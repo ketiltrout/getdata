@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_close 3 "25 May 2010" "Version 0.7.0" "GETDATA"
+.TH gd_close 3 "24 July 2010" "Version 0.7.0" "GETDATA"
 .SH NAME
 gd_close, gd_discard \(em close a dirfile and free associated memory.
 .SH SYNOPSIS
@@ -31,8 +31,10 @@ The
 .BR gd_close ()
 function first calls
 .BR gd_flush (3)
-to flush all metadata changes to disk and to close all file handles associated
-with 
+(with
+.I field_code
+set to NULL) to flush all metadata changes to disk and to close all file handles
+associated with 
 .IR dirfile .
 It then frees memory associated with the DIRFILE object.  If
 .I dirfile
@@ -65,6 +67,14 @@ or
 returns successfully, the pointer
 .I dirfile
 should be considered invalid.
+.P
+Metadata is written to disk using the current Standards Version as stored in the
+.I dirfile
+object.  See
+.BR gd_dirfile_standards (3)
+to change or report the current Standards Version.  If the dirfile metadata
+conforms to no known Standards Version, a Standards non-compliant fragment will
+be written.
 .SH RETURN VALUE
 .BR gd_close ()
 and
@@ -74,6 +84,10 @@ return zero on success.  On error, they do not deallocate
 and set the dirfile error to a non-zero error value.  Possible error values
 are:
 .TP 8
+.B GD_E_FLUSH
+A temporary file could not be opened into which to write the modified metadata,
+or renaming the temporary file over the original fragment failed.
+.TP
 .B GD_E_RAW_IO
 An error occurred while trying to flush or close one or more open raw files.
 In this case, another call to
@@ -89,6 +103,7 @@ a call to
 .BR gd_error_string (3).
 .SH SEE ALSO
 .BR gd_cbopen (3),
+.BR gd_dirfile_standards (3),
 .BR gd_error (3),
 .BR gd_error_string (3),
 .BR gd_flush (3),

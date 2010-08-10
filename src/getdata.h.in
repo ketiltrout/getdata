@@ -24,24 +24,29 @@
 /* GETDATA.H -- GetData Library public API definition
  * --------------------------------------------------
  *
- * Two preprocessor symbols may be defined before including this file to
+ * Several preprocessor symbols may be defined before including this file to
  * modify it's use:
  *
- * - defining NO_GETDATA_LEGACY_API will prevent the Legacy API declarations in
+ * - defining GD_NO_LEGACY_API will prevent the Legacy API declarations in
  *   getdata_legacy.h from being declared.  If the Legacy API was omitted from
  *   the library when it was built, this symbol does nothing.
  * 
- * - defining GETDATA_C89_API will prevent declarations herein from
+ * - defining GD_C89_API will prevent declarations herein from
  *   using the C99 keyword `_Complex'.  Affected declarations will instead use a
  *   two-element array of doubles in place of the complex types.  This symbol
  *   permits including these declarations using a non-C99 conforming compiler.
+ *
+ * - defining GD_FUNCTION_ALIASES will result in a number of function aliases
+ *   which map the version 0.7 function names to the names used in GetData-0.6.
+ *   This feature is provided only to ease transistion, and will be removed in
+ *   some unpecified future release.
  */
 
 #ifndef GETDATA_H
 #define GETDATA_H
 
 /* The most recent standards version supported by this library */
-#define DIRFILE_STANDARDS_VERSION 8
+#define GD_DIRFILE_STANDARDS_VERSION 8
 
 /* one or more of these should give us:
  *    size_t, off_t, __REDIRECT, &c., if present
@@ -88,7 +93,7 @@
 #define GD_E_BAD_CODE          5
 #define GD_E_BAD_TYPE          6
 #define GD_E_RAW_IO            7
-#define GD_E_OPEN_INCLUDE      8
+#define GD_E_OPEN_FRAGMENT     8
 #define GD_E_INTERNAL_ERROR    9
 #define GD_E_ALLOC            10
 #define GD_E_RANGE            11
@@ -117,6 +122,9 @@
 #define GD_E_FLUSH            34
 
 #define GD_N_ERROR_CODES      35
+
+/* Deprecated error codes */
+#define GD_E_OPEN_INCLUDE      GD_E_OPEN_FRAGMENT
 
 /* maximum length of a format file line */
 #define GD_MAX_LINE_LENGTH  4096
@@ -192,7 +200,7 @@ typedef enum {
 #undef _gd_int16_t
 #undef _gd_uint16_t
 #undef _gd_int64_t
-#ifndef GETDATA_C89_API
+#ifndef GD_C89_API
 #  include <inttypes.h>
 #  define GD_DCOMPLEXM(v) double _Complex v
 #  define GD_DCOMPLEXP(v) double _Complex *v
@@ -355,7 +363,7 @@ extern int gd_add_cpolynom(DIRFILE *dirfile, const char *field_code,
     int fragment_index) gd_nothrow gd_nonnull ((1,2,4));
 
 /* The native gd_add_crecip cannot be used in C89 mode */
-#ifndef GETDATA_C89_API
+#ifndef GD_C89_API
 extern int gd_add_crecip(DIRFILE *dirfile, const char *field_code,
     const char *in_field, _Complex double cdividend, int fragment_index)
   gd_nothrow gd_nonnull ((1,2,3));
@@ -417,7 +425,7 @@ extern int gd_alter_cpolynom(DIRFILE *dirfile, const char *field_code,
     int poly_ord, const char *in_field, const GD_DCOMPLEXP(a)) gd_nothrow
 gd_nonnull((1,2));
 
-#ifndef GETDATA_C89_API
+#ifndef GD_C89_API
 extern int gd_alter_crecip(DIRFILE *dirfile, const char *field_code,
     const char *in_field, _Complex double cdividend) gd_nothrow
 gd_nonnull((1,2));
@@ -511,7 +519,7 @@ extern int gd_madd_cpolynom(DIRFILE *dirfile, const char *parent,
     const char *field_code, int poly_ord, const char *in_field,
     const GD_DCOMPLEXP(ca)) gd_nothrow gd_nonnull ((1,2,3,5));
 
-#ifndef GETDATA_C89_API
+#ifndef GD_C89_API
 extern int gd_madd_crecip(DIRFILE *dirfile, const char *parent,
     const char *field_code, const char *in_field, _Complex double cdividend)
 gd_nothrow gd_nonnull ((1,2,3,4));
@@ -813,23 +821,22 @@ extern off64_t gd_eof64(DIRFILE *dirfile, const char* field_code)
 #endif
 #endif
 
-/* The caller can disable the legacy API by defining NO_GETDATA_LEGACY_API
- * before including getdata.h
- */
-#ifndef NO_GETDATA_LEGACY_API
 
 /* If this symbol is defined here, the legacy API is present in the library */
-#undef GETDATA_LEGACY_API
+#undef GD_LEGACY_API
 
-#endif
-
+/* The caller can disable the legacy API by defining GD_NO_LEGACY_API
+ * before including getdata.h
+ */
+#ifndef GD_NO_LEGACY_API
 /* include the legacy api, if present */
-#ifdef GETDATA_LEGACY_API
-#include <getdata_legacy.h>
+#  ifdef GD_LEGACY_API
+#    include <getdata_legacy.h>
+#  endif
 #endif
 
 /* function aliases */
-#ifdef GETDATA_FUNCTION_ALIASES
+#ifdef GD_FUNCTION_ALIASES
 #  define dirfile_add gd_add
 #  define dirfile_add_bit gd_add_bit
 #  define dirfile_add_clincom gd_add_clincom

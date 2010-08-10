@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_uninclude 3 "20 July 2010" "Version 0.7.0" "GETDATA"
+.TH gd_uninclude 3 "24 July 2010" "Version 0.7.0" "GETDATA"
 .SH NAME
 gd_uninclude \(em remove a format specification fragment from a dirfile
 .SH SYNOPSIS
@@ -71,9 +71,10 @@ The supplied dirfile was invalid.
 The supplied fragment index was out of range, or an attempt was made to remove
 the primary format specification.
 .TP
-.B GD_E_OPEN_INCLUDE
+.B GD_E_FLUSH
 A temporary file could not be opened into which to write the metadata of a
-modified, removed fragment.
+modified, removed fragment, or renaming the temporary file over the original
+fragment failed.
 .TP
 .B GD_E_PROTECTED
 The metadata of the fragment which included the removed fragment was protected

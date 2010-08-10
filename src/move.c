@@ -394,6 +394,7 @@ int gd_move(DIRFILE* D, const char* field_code, int new_fragment, int move_data)
   /* nothing from now on may fail */
   D->fragment[E->fragment_index].modified = 1;
   D->fragment[new_fragment].modified = 1;
+  D->flags &= ~GD_HAVE_VERSION;
   E->fragment_index = new_fragment;
 
   /* update meta fields */

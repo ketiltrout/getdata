@@ -35,7 +35,8 @@ getdata_include_HEADERS = getdata/dirfile.h getdata/entry.h getdata/rawentry.h \
 													getdata/phaseentry.h getdata/constentry.h \
 													getdata/stringentry.h getdata/indexentry.h \
 													getdata/sbitentry.h getdata/polynomentry.h \
-													getdata/fragment.h getdata/divideentry.h
+													getdata/fragment.h getdata/divideentry.h \
+													getdata/recipentry.h
 
 lib_LTLIBRARIES=libgetdata++.la
 libgetdata___la_SOURCES = dirfile.cpp bitentry.cpp constentry.cpp \

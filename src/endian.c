@@ -111,6 +111,7 @@ static void _GD_ByteSwapFragment(DIRFILE* D, unsigned long byte_sex,
 
   D->fragment[fragment].byte_sex = byte_sex;
   D->fragment[fragment].modified = 1;
+  D->flags &= ~GD_HAVE_VERSION;
 
   dreturnvoid();
 }

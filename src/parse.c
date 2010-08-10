@@ -1173,7 +1173,7 @@ gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, char** in_cols,
         pedantic, &is_dot);
     if (D->error == GD_E_OK && P == NULL)
       D->n_string++;
-  } else if (standards <= DIRFILE_STANDARDS_VERSION || pedantic)
+  } else if (standards <= GD_DIRFILE_STANDARDS_VERSION || pedantic)
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_LINE, format_file, linenum,
         NULL);
 

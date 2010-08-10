@@ -98,6 +98,7 @@ static void _GD_ShiftFragment(DIRFILE* D, off64_t offset, int fragment,
 
   D->fragment[fragment].frame_offset = offset;
   D->fragment[fragment].modified = 1;
+  D->flags &= ~GD_HAVE_VERSION;
 
   dreturnvoid();
 }
@@ -181,13 +182,14 @@ off_t gd_frameoffset(DIRFILE* D, int fragment)
   return gd_frameoffset64(D, fragment);
 }
 
-static off64_t _GD_GetEOF(DIRFILE *D, gd_entry_t* E, int *is_index)
+static off64_t _GD_GetEOF(DIRFILE *D, gd_entry_t* E, const char *parent,
+    int *is_index)
 {
   off64_t ns = -1, ns1;
   gd_spf_t spf0, spf1;
   int i, is_index1;
 
-  dtrace("%p, %p, %p", D, E, is_index);
+  dtrace("%p, %p, \"%s\", %p", D, E, parent, is_index);
 
   if (++D->recurse_level >= GD_MAX_RECURSE_LEVEL) {
     _GD_SetError(D, GD_E_RECURSE_LEVEL, 0, NULL, 0, E->field);
@@ -222,20 +224,20 @@ static off64_t _GD_GetEOF(DIRFILE *D, gd_entry_t* E, int *is_index)
       if (_GD_BadInput(D, E, 0))
         break;
 
-      ns = _GD_GetEOF(D, E->e->entry[0], is_index);
+      ns = _GD_GetEOF(D, E->e->entry[0], E->field, is_index);
       break;
     case GD_RECIP_ENTRY:
       if (_GD_BadInput(D, E, 0))
         break;
 
-      ns = _GD_GetEOF(D, E->e->entry[0], is_index);
+      ns = _GD_GetEOF(D, E->e->entry[0], E->field, is_index);
       break;
     case GD_DIVIDE_ENTRY:
     case GD_MULTIPLY_ENTRY:
       if (_GD_BadInput(D, E, 0) || _GD_BadInput(D, E, 1))
         break;
 
-      ns = _GD_GetEOF(D, E->e->entry[0], is_index);
+      ns = _GD_GetEOF(D, E->e->entry[0], E->field, is_index);
 
       if (D->error)
         break;
@@ -247,7 +249,7 @@ static off64_t _GD_GetEOF(DIRFILE *D, gd_entry_t* E, int *is_index)
         break;
       }
 
-      ns1 = _GD_GetEOF(D, E->e->entry[1], &is_index1);
+      ns1 = _GD_GetEOF(D, E->e->entry[1], E->field, &is_index1);
 
       if (D->error) {
         ns = -1;
@@ -273,7 +275,7 @@ static off64_t _GD_GetEOF(DIRFILE *D, gd_entry_t* E, int *is_index)
       if (_GD_BadInput(D, E, 0))
         break;
 
-      ns = _GD_GetEOF(D, E->e->entry[0], is_index);
+      ns = _GD_GetEOF(D, E->e->entry[0], E->field, is_index);
 
       if (D->error) {
         ns = -1;
@@ -296,7 +298,7 @@ static off64_t _GD_GetEOF(DIRFILE *D, gd_entry_t* E, int *is_index)
           break;
         }
 
-        ns1 = _GD_GetEOF(D, E->e->entry[i], &is_index1);
+        ns1 = _GD_GetEOF(D, E->e->entry[i], E->field, &is_index1);
 
         if (D->error) {
           ns = -1;
@@ -323,15 +325,25 @@ static off64_t _GD_GetEOF(DIRFILE *D, gd_entry_t* E, int *is_index)
       if (_GD_BadInput(D, E, 0))
         break;
 
-      ns = _GD_GetEOF(D, E->e->entry[0], is_index);
+      ns = _GD_GetEOF(D, E->e->entry[0], E->field, is_index);
       if (!*is_index && !D->error)
         ns -= E->shift;
+
+      /* The EOF may never be negative. */
+      if (ns < 0)
+        ns = 0;
+
       break;
     case GD_INDEX_ENTRY:
       *is_index = 1;
       break;
     case GD_CONST_ENTRY:
     case GD_STRING_ENTRY:
+      if (parent)
+        _GD_SetError(D, GD_E_DIMENSION, GD_E_DIM_FORMAT, parent, 0, E->field);
+      else
+        _GD_SetError(D, GD_E_DIMENSION, GD_E_DIM_CALLER, NULL, 0, E->field);
+      break;
     case GD_NO_ENTRY:
       _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, E->field);
       break;
@@ -367,7 +379,7 @@ off64_t gd_eof64(DIRFILE* D, const char *field_code_in)
     return -1;
   }
 
-  ns = _GD_GetEOF(D, entry, &is_index);
+  ns = _GD_GetEOF(D, entry, NULL, &is_index);
 
   if (is_index)
     _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
@@ -385,15 +397,15 @@ off_t gd_eof(DIRFILE* D, const char *field_code)
   return (off_t)gd_eof64(D, field_code);
 }
 
-static off64_t _GD_GetBOF(DIRFILE *D, gd_entry_t* E, gd_spf_t *spf,
-    long long *ds)
+static off64_t _GD_GetBOF(DIRFILE *D, gd_entry_t* E, const char *parent,
+    gd_spf_t *spf, long long *ds)
 {
   off64_t bof = -1, bof1;
   gd_spf_t spf1;
   long long ds1;
   int i;
 
-  dtrace("%p, %p, %p, %p", D, E, spf, ds);
+  dtrace("%p, %p, \"%s\", %p, %p", D, E, parent, spf, ds);
 
   if (++D->recurse_level >= GD_MAX_RECURSE_LEVEL) {
     _GD_SetError(D, GD_E_RECURSE_LEVEL, 0, NULL, 0, E->field);
@@ -415,13 +427,13 @@ static off64_t _GD_GetBOF(DIRFILE *D, gd_entry_t* E, gd_spf_t *spf,
       if (_GD_BadInput(D, E, 0))
         break;
 
-      bof = _GD_GetBOF(D, E->e->entry[0], spf, ds);
+      bof = _GD_GetBOF(D, E->e->entry[0], E->field, spf, ds);
       break;
     case GD_PHASE_ENTRY:
       if (_GD_BadInput(D, E, 0))
         break;
 
-      bof = _GD_GetBOF(D, E->e->entry[0], spf, ds);
+      bof = _GD_GetBOF(D, E->e->entry[0], E->field, spf, ds);
 
       if (!D->error) {
         *ds -= E->shift;
@@ -446,21 +458,21 @@ static off64_t _GD_GetBOF(DIRFILE *D, gd_entry_t* E, gd_spf_t *spf,
       if (_GD_BadInput(D, E, 0))
         break;
 
-      bof = _GD_GetBOF(D, E->e->entry[0], spf, ds);
+      bof = _GD_GetBOF(D, E->e->entry[0], E->field, spf, ds);
       break;
     case GD_MULTIPLY_ENTRY:
     case GD_DIVIDE_ENTRY:
       if (_GD_BadInput(D, E, 0) || _GD_BadInput(D, E, 1))
         break;
 
-      bof = _GD_GetBOF(D, E->e->entry[0], spf, ds);
+      bof = _GD_GetBOF(D, E->e->entry[0], E->field, spf, ds);
 
       if (D->error) {
         bof = -1;
         break;
       }
 
-      bof1 = _GD_GetBOF(D, E->e->entry[1], &spf1, &ds1);
+      bof1 = _GD_GetBOF(D, E->e->entry[1], E->field, &spf1, &ds1);
 
       if (D->error) {
         bof = -1;
@@ -478,7 +490,7 @@ static off64_t _GD_GetBOF(DIRFILE *D, gd_entry_t* E, gd_spf_t *spf,
       if (_GD_BadInput(D, E, 0))
         break;
 
-      bof = _GD_GetBOF(D, E->e->entry[0], spf, ds);
+      bof = _GD_GetBOF(D, E->e->entry[0], E->field, spf, ds);
 
       if (D->error) {
         bof = -1;
@@ -491,7 +503,7 @@ static off64_t _GD_GetBOF(DIRFILE *D, gd_entry_t* E, gd_spf_t *spf,
           break;
         }
 
-        bof1 = _GD_GetBOF(D, E->e->entry[i], &spf1, &ds1);
+        bof1 = _GD_GetBOF(D, E->e->entry[i], E->field, &spf1, &ds1);
 
         if (D->error) {
           bof = -1;
@@ -513,6 +525,11 @@ static off64_t _GD_GetBOF(DIRFILE *D, gd_entry_t* E, gd_spf_t *spf,
       break;
     case GD_CONST_ENTRY:
     case GD_STRING_ENTRY:
+      if (parent)
+        _GD_SetError(D, GD_E_DIMENSION, GD_E_DIM_FORMAT, parent, 0, E->field);
+      else
+        _GD_SetError(D, GD_E_DIMENSION, GD_E_DIM_CALLER, NULL, 0, E->field);
+      break;
     case GD_NO_ENTRY:
       _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, E->field);
       break;
@@ -550,7 +567,7 @@ off64_t gd_bof64(DIRFILE* D, const char *field_code_in)
     return -1;
   }
 
-  bof = _GD_GetBOF(D, entry, &spf, &ds);
+  bof = _GD_GetBOF(D, entry, NULL, &spf, &ds);
 
   if (bof != -1)
     bof = bof * spf + ds;

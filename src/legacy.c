@@ -53,7 +53,7 @@ const char *GD_ERROR_CODES[GD_N_ERROR_CODES] = {
   "Bad field code", /* GD_E_BAD_CODE */
   "Unrecognized data type", /* GD_E_BAD_TYPE */
   "I/O error accessing field file", /* GD_E_RAW_IO */
-  "Could not open included fragment", /* GD_E_OPEN_INCLUDE */
+  "Could not open fragment", /* GD_E_OPEN_FRAGMENT */
   "Internal error", /* GD_E_INTERNAL_ERROR */
   "Memory allocation failed", /* GD_E_ALLOC */
   "Request out-of-range", /* GD_E_RANGE */

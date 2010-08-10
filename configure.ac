@@ -86,7 +86,7 @@ AC_MSG_CHECKING([whether to include the legacy API])
 AC_MSG_RESULT([$include_legacy_api])
 
 if test "x$include_legacy_api" != "xno"; then
-  AC_DEFINE([GETDATA_LEGACY_API], [], [ This symbol is defined whenever the library contains the legacy API ])
+  AC_DEFINE([GD_LEGACY_API], [], [ This symbol is defined whenever the library contains the legacy API ])
 fi
 
 dnl debugging

@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_nframes 3 "20 July 2010" "Version 0.7.0" "GETDATA"
+.TH gd_nframes 3 "22 July 2010" "Version 0.7.0" "GETDATA"
 .SH NAME
 gd_nframes \(em report the size of a dirfile
 .SH SYNOPSIS
@@ -61,13 +61,15 @@ The supplied dirfile was invalid.
 .B GD_E_RAW_IO
 An attempt to
 .BR stat (2)
-the file associated with first raw field defined in the format failed.
+the file associated with the reference field failed.
+.TP
+.B GD_E_UNKNOWN_ENCODING
+The size of the decoded data file associated with the reference field could not
+be not be determined because its encoding was not understood.
 .TP
 .B GD_E_UNSUPPORTED
-Reading from dirfiles with the encoding scheme of the specified dirfile is not
-supported by the library.  See
-.BR dirfile-encoding (5)
-for details on dirfile encoding schemes.
+The size of the decoded data file associated with the reference field could not
+be not be determined because its encoding was not supported.
 .P
 The dirfile error may be retrieved by calling
 .BR gd_error (3).

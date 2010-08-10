@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_putdata 3 "16 June 2010" "Version 0.7.0" "GETDATA"
+.TH gd_putdata 3 "24 June 2010" "Version 0.7.0" "GETDATA"
 .SH NAME
 gd_putdata \(em write data to a dirfile database
 .SH SYNOPSIS
@@ -166,6 +166,9 @@ instead of the underlying field.
 An invalid
 .I data_type
 was specified.
+.TP
+.B GD_E_DIMENSION
+A scalar field was found where a vector field was expected.
 .TP
 .B GD_E_INTERNAL_ERROR
 An internal error occurred in the library while trying to perform the task.

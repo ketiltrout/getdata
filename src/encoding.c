@@ -482,6 +482,7 @@ static void _GD_RecodeFragment(DIRFILE* D, unsigned long encoding, int fragment,
 
   D->fragment[fragment].encoding = encoding;
   D->fragment[fragment].modified = 1;
+  D->flags &= ~GD_HAVE_VERSION;
 
   dreturnvoid();
 }

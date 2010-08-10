@@ -716,6 +716,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
     Q.e = E->e;
     memcpy(E, &Q, sizeof(gd_entry_t));
     D->fragment[E->fragment_index].modified = 1;
+    D->flags &= ~GD_HAVE_VERSION;
   }
 
   dreturn("%i", 0);
@@ -1270,6 +1271,7 @@ int gd_alter_spec(DIRFILE* D, const char* line, int move)
   char outstring[GD_MAX_LINE_LENGTH];
   char *in_cols[MAX_IN_COLS];
   int n_cols;
+  int standards = GD_DIRFILE_STANDARDS_VERSION;
   gd_entry_t *N = NULL;
 
   dtrace("%p, \"%s\", %i", D, line, move);
@@ -1293,9 +1295,15 @@ int gd_alter_spec(DIRFILE* D, const char* line, int move)
   strncpy(instring, line, GD_MAX_LINE_LENGTH - 1);
   instring[GD_MAX_LINE_LENGTH - 2] = '\0';
 
+  if (~D->flags & GD_HAVE_VERSION)
+    _GD_FindVersion(D);
+
+  if (D->av)
+    standards = D->standards;
+
   /* start parsing */
   n_cols = _GD_Tokenise(D, instring, outstring, in_cols,
-      "dirfile_alter_spec()", 0, D->standards, D->flags & GD_PERMISSIVE);
+      "dirfile_alter_spec()", 0, standards, D->flags & GD_PERMISSIVE);
 
   if (D->error) {
     dreturn("%i", -1); /* tokeniser threw an error */
@@ -1320,7 +1328,7 @@ int gd_alter_spec(DIRFILE* D, const char* line, int move)
 
   /* Let the parser compose the entry */
   N = _GD_ParseFieldSpec(D, n_cols, in_cols, NULL, "dirfile_alter_spec()", 0, 
-      N->fragment_index, DIRFILE_STANDARDS_VERSION, 0, 1, 0);
+      N->fragment_index, standards, 0, 1, 0);
 
   if (D->error) {
     dreturn("%i", -1); /* field spec parser threw an error */
@@ -1345,6 +1353,7 @@ int gd_malter_spec(DIRFILE* D, const char* line, const char* parent, int move)
   char outstring[GD_MAX_LINE_LENGTH];
   char *in_cols[MAX_IN_COLS];
   int n_cols;
+  int standards = GD_DIRFILE_STANDARDS_VERSION;
   gd_entry_t *N = NULL;
 
   dtrace("%p, \"%s\", \"%s\", %i", D, line, parent, move);
@@ -1375,9 +1384,15 @@ int gd_malter_spec(DIRFILE* D, const char* line, const char* parent, int move)
   strncpy(instring, line, GD_MAX_LINE_LENGTH - 1);
   instring[GD_MAX_LINE_LENGTH - 2] = '\0';
 
+  if (~D->flags & GD_HAVE_VERSION)
+    _GD_FindVersion(D);
+
+  if (D->av)
+    standards = D->standards;
+
   /* start parsing */
   n_cols = _GD_Tokenise(D, instring, outstring, in_cols,
-      "dirfile_malter_spec()", 0, D->standards, D->flags & GD_PERMISSIVE);
+      "dirfile_malter_spec()", 0, standards, D->flags & GD_PERMISSIVE);
 
   if (D->error) {
     dreturn("%i", -1); /* tokeniser threw an error */
@@ -1386,7 +1401,7 @@ int gd_malter_spec(DIRFILE* D, const char* line, const char* parent, int move)
 
   /* Let the parser compose the entry */
   N = _GD_ParseFieldSpec(D, n_cols, in_cols, N, "dirfile_malter_spec()", 0,
-      N->fragment_index, DIRFILE_STANDARDS_VERSION, 0, 1, 0);
+      N->fragment_index, standards, 0, 1, 0);
 
   if (D->error) {
     dreturn("%i", -1); /* field spec parser threw an error */

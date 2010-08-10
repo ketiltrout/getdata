@@ -446,6 +446,7 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
   _GD_InsertSort(D, E, u);
   D->n_entries++;
   D->fragment[E->fragment_index].modified = 1;
+  D->flags &= ~GD_HAVE_VERSION;
 
   /* Invalidate the field lists */
   D->list_validity = 0;
@@ -522,6 +523,7 @@ int gd_madd_spec(DIRFILE* D, const char* line, const char* parent)
   }
 
   D->fragment[me].modified = 1;
+  D->flags &= ~GD_HAVE_VERSION;
   dreturn("%i", 0);
   return 0;
 }
@@ -589,6 +591,7 @@ int gd_add_spec(DIRFILE* D, const char* line, int fragment_index)
   }
 
   D->fragment[fragment_index].modified = 1;
+  D->flags &= ~GD_HAVE_VERSION;
   dreturn("%i", 0);
   return 0;
 }

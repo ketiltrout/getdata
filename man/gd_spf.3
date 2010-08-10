@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_spf 3 "16 July 2010" "Version 0.7.0" "GETDATA"
+.TH gd_spf 3 "24 July 2010" "Version 0.7.0" "GETDATA"
 .SH NAME
 gd_spf \(em returns the samples per frame for a field in a
 dirfile
@@ -62,6 +62,9 @@ The supplied dirfile was invalid.
 The representation suffix specified in
 .I field_code
 was not recognised.
+.TP
+.B GD_E_DIMENSION
+A scalar field was found where a vector field was expected.
 .TP
 .B GD_E_INTERNAL_ERROR
 An internal error occurred in the library while trying to perform the task.

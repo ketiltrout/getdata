@@ -1,3 +1,37 @@
+2010-08-10   D. V. Wiebe <getdata@ketiltrout.net>   svn:442
+	* bindings/cxx/getdata/linterpentry.h bindings/cxx/getdata/bitentry.h
+	bindings/cxx/getdata/entry.h bindings/cxx/getdata/sbitentry.h: Remove
+	__gd_unused.
+
+	* src/endian.c (_GD_ByteSwapFragment) src/encoding.c (_GD_RecodeFragment)
+	src/move.c (gd_move) src/flimits.c (_GD_ShiftFragment) src/mod.c
+	(_GD_Change) src/globals.c (gd_reference) src/add.c (_GD_Add gd_madd_spec
+	gd_add_spec): Clear GD_HAVE_VERSION.
+
+	* src/mod.c (gd_alter_spec gd_malter_spec): Use the standards version of the
+	open dirfile rather than GD_DIRFILE_STANDARDS_VERSION.
+	* src/include.c (gd_include): Calculate the opend dirfile's version if
+	necessary, and use this instead of GD_DIRFILE_STANDARDS_VERSION.  Clear
+	GD_HAVE_VERSION at the end.
+
+	* src/getdata.c (gd_getdata64) src/putdata.c (gd_putdata64) src/flimits.c
+	(_GD_GetEOF _GD_GetBOF): Return GD_E_DIMENSION instead of GD_E_BAD_FIELD_TYPE
+	on scalar field.
+	* src/errors.c: Add GD_E_DIMENSION errors.
+	* src/internal.h: Add GD_E_DIMENSION suberrors.
+
+	* src/getdata.h.in src/errors.c: Rename GD_E_OPEN_INCLUDE to
+	GD_E_OPEN_FRAGMENT.
+	* bindings/make_parameters.c: Add GD_E_OPEN_FRAGMENT (in addition to the
+	legacy GD_E_OPEN_INCLUDE, which remains).
+
+	* src/getdata.h.in configure.ac: Rename GETDATA_LEGACY_API,
+	NO_GETDATA_LEGACY_API, GETDATA_C89_API, GETDATA_FUNCTION_ALIASES,
+	DIRFILE_STANDARDS_VERSION to GD_LEGACY_API, GD_NO_LEGACY_API, GD_C89_API,
+	GD_FUNCTION_ALIASES, GD_DIRFILE_STANDARDS_VERSION.
+
+	* util/checkdirfile.c: Fix pluralisations.
+
 2010-07-20   D. V. Wiebe <getdata@ketiltrout.net>   svn:441
 	* src/flush.c (_GD_FlushMeta gd_metaflush gd_rewrite_fragment): Return error
 	on read-only dirfile.

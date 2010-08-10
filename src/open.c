@@ -226,7 +226,7 @@ DIRFILE* gd_cbopen(const char* filedir, unsigned long flags,
   D->flags = (flags | GD_INVALID) & ~GD_IGNORE_REFS;
   D->sehandler = sehandler;
   D->sehandler_extra = extra;
-  D->standards = DIRFILE_STANDARDS_VERSION;
+  D->standards = GD_DIRFILE_STANDARDS_VERSION;
 
   if (D->error_string == NULL || D->error_file == NULL || D->name == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
@@ -298,7 +298,8 @@ DIRFILE* gd_cbopen(const char* filedir, unsigned long flags,
   D->fragment[0].ref_name = NULL;
   D->fragment[0].frame_offset = 0;
   D->fragment[0].protection = GD_PROTECT_NONE;
-  D->fragment[0].vers = (flags & GD_PEDANTIC) ? DIRFILE_STANDARDS_VERSION : 0;
+  D->fragment[0].vers = (flags & GD_PEDANTIC) ? GD_DIRFILE_STANDARDS_VERSION :
+    0;
 
   ref_name = _GD_ParseFragment(fp, D, 0, &D->standards, &D->flags);
   fclose(fp);

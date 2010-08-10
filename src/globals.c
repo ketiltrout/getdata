@@ -110,6 +110,7 @@ const char* gd_reference(DIRFILE* D, const char* field_code)
   free(D->fragment[0].ref_name);
   D->fragment[0].ref_name = ptr;
   D->fragment[0].modified = 1;
+  D->flags &= ~GD_HAVE_VERSION;
 
   dreturn("\"%s\"", D->reference_field->field);
   return D->reference_field->field;

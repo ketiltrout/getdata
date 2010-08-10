@@ -89,14 +89,14 @@ int main(int argc, char* argv[])
   if (ne > 0)
     printf("  Found %i line%s with syntax errors.\n", ne, (ne == 1) ? "" : "s");
   else {
-    int vers[DIRFILE_STANDARDS_VERSION + 1];
+    int vers[GD_DIRFILE_STANDARDS_VERSION + 1];
     int nvers = 0;
     int first = -1;
     int start = 1;
 
     printf("  Syntax OK.\n\n");
 
-    for (i = 0; i <= DIRFILE_STANDARDS_VERSION; ++i) {
+    for (i = 0; i <= GD_DIRFILE_STANDARDS_VERSION; ++i) {
       if (gd_dirfile_standards(dirfile, i) == i) {
         vers[i] = 1;
         nvers++;
@@ -110,7 +110,7 @@ int main(int argc, char* argv[])
       printf("Dirfile conforms to Standards %s ",
           (nvers == 1) ? "Version" : "Versions");
 
-      for (i = 0; i <= DIRFILE_STANDARDS_VERSION; ++i) {
+      for (i = 0; i <= GD_DIRFILE_STANDARDS_VERSION; ++i) {
         if (vers[i]) {
           if (first == -1)
             first = i;
@@ -135,12 +135,12 @@ int main(int argc, char* argv[])
         if (!start)
           fputs(", ", stdout);
 
-        if (first == DIRFILE_STANDARDS_VERSION)
-          printf("%i", DIRFILE_STANDARDS_VERSION);
-        else if (first + 1 == DIRFILE_STANDARDS_VERSION)
-          printf("%i, %i", first, DIRFILE_STANDARDS_VERSION);
+        if (first == GD_DIRFILE_STANDARDS_VERSION)
+          printf("%i", GD_DIRFILE_STANDARDS_VERSION);
+        else if (first + 1 == GD_DIRFILE_STANDARDS_VERSION)
+          printf("%i, %i", first, GD_DIRFILE_STANDARDS_VERSION);
         else
-          printf("%i-%i", first, DIRFILE_STANDARDS_VERSION);
+          printf("%i-%i", first, GD_DIRFILE_STANDARDS_VERSION);
 
         fputs(" (the latest version)", stdout);
       }
@@ -165,8 +165,8 @@ int main(int argc, char* argv[])
       char code[GD_MAX_LINE_LENGTH];
       snprintf(code, GD_MAX_LINE_LENGTH, "%s/%s", flist[i], mflist[j]);
       if (gd_validate(dirfile, code)) {
-        printf("  getdata error checking %s: %s\n", code, gd_error_string(dirfile,
-              getdata_error, 2048));
+        printf("  getdata error checking %s: %s\n", code,
+            gd_error_string(dirfile, getdata_error, 2048));
         ne++;
       }
     }
@@ -175,9 +175,11 @@ int main(int argc, char* argv[])
   nfields = gd_nfields(dirfile);
 
   if (ne > 0)
-    printf("  Found %i problems in %u fields.\n", ne, nfields);
+    printf("  Found %i problems in %u %s.\n", ne, nfields,
+        nfields > 1 ? "fields" : "field");
   else
-    printf("  No problems found in %u fields.\n", nfields);
+    printf("  No problems found in %u %s.\n", nfields,
+        nfields > 1 ? "fields" : "field");
 
   /* try to retrieve the number of frames in the dirfile */
   puts("\nChecking frames...");

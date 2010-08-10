@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_cbopen 3 "21 July 2010" "Version 0.7.0" "GETDATA"
+.TH gd_cbopen 3 "24 July 2010" "Version 0.7.0" "GETDATA"
 .SH NAME
 gd_cbopen, gd_open \(em open or create a dirfile
 .SH SYNOPSIS
@@ -284,7 +284,7 @@ Specifies that raw data files are not encoded, but written verbatim to disk.
 .SS Standards Compliance
 The latest Dirfile Standards Version which this version of GetData understands
 is provided in the preprocessor macro
-.B DIRFILE_STANDARDS_VERSION
+.B GD_DIRFILE_STANDARDS_VERSION
 defined in getdata.h.  GetData is able to open and parse any Dirfile which
 conforms to this Standards Version, or to any earlier Version.  The
 .BR dirfile-format (5)
@@ -330,7 +330,7 @@ format specification.  If invoked using the
 flag, the parser will start in
 .I pedantic
 mode with a target version equal to
-.BR DIRFILE_STANDARDS_VERSION .
+.BR GD_DIRFILE_STANDARDS_VERSION .
 Whenever a
 .B /VERSION
 directive is encountered in the format specification, the target version is
@@ -596,7 +596,7 @@ The dirfile format specification could not be opened, or
 .I dirfilename
 does not specify a valid dirfile.
 .TP
-.B GD_E_OPEN_INCLUDE
+.B GD_E_OPEN_FRAGMENT
 A file specified in an
 .B /INCLUDE
 directive could not be opened.

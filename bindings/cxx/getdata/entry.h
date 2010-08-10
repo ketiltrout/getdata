@@ -26,16 +26,14 @@
 # define _FILE_OFFSET_BITS 64
 #endif
 
-#define NO_GETDATA_LEGACY_API
-#define GETDATA_C89_API
+#define GD_NO_LEGACY_API
+#define GD_C89_API
 
 extern "C" {
 #include <getdata.h>
 }
 
 #include <complex>
-
-#define __gd_unused __attribute__ (( unused ))
 
 namespace GetData {
 

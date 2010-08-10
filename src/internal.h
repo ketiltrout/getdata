@@ -278,6 +278,9 @@ int strerror_r(int, char*, size_t);
 #define GD_E_OUT_OF_RANGE       1
 #define GD_E_SINGULAR_RANGE     2
 
+#define GD_E_DIM_FORMAT         1
+#define GD_E_DIM_CALLER         2
+
 #define GD_E_FLUSH_MKTMP        1
 #define GD_E_FLUSH_OPEN         2
 #define GD_E_FLUSH_RENAME       3

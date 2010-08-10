@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_metaflush 3 "21 July 2010" "Version 0.7.0" "GETDATA"
+.TH gd_metaflush 3 "24 July 2010" "Version 0.7.0" "GETDATA"
 .SH NAME
 gd_metaflush \(em write modified dirfile metadata to disk
 .SH SYNOPSIS
@@ -33,6 +33,14 @@ to disk.  This is accomplished by re-writing the format specification fragments
 containing modified metadata overwriting the existing files.  Format file
 fragments which are unchanged are not touched.
 .P
+Metadata is written to disk using the current Standards Version as stored in the
+.I dirfile
+object.  See
+.BR gd_dirfile_standards (3)
+to change or report the current Standards Version.  If the dirfile metadata
+conforms to no known Standards Version, a Standards non-compliant fragment will
+be written.
+.P
 This function flushes only metadata.  To flush the field data as well, call
 .BR gd_flush (3)
 instead.
@@ -46,23 +54,30 @@ The supplied dirfile was opened in read-only mode.
 .B GD_E_BAD_DIRFILE
 The supplied dirfile was invalid.
 .TP
+.B GD_E_FLUSH
+A temporary file could not be opened into which to write the modified metadata,
+or renaming the temporary file over the original fragment failed.
+.TP
 .B GD_E_INTERNAL_ERROR
 An internal error occurred in the library while trying to perform the task.
 This indicates a bug in the library.  Please report the incident to the
 maintainer.
-.TP
-.B GD_E_OPEN_INCLUDE
-A temporary file could not be opened into which to write the modified metadata.
 .P
 The dirfile error may be retrieved by calling
 .BR gd_error (3).
 A descriptive error string for the last error encountered can be obtained from
 a call to
 .BR gd_error_string (3).
+.SH BUGS
+When writing metadata using Standards Version 4 or earlier, the reference field
+may change, owing to the lack of a
+.B /REFERENCE
+directive.  A work-around is to upgrade to Standards Version 5 or later.
 .SH SEE ALSO
 .BR gd_open (3),
-.BR gd_flush (3),
 .BR gd_close (3),
+.BR gd_dirfile_standards (3),
 .BR gd_error (3),
 .BR gd_error_string (3),
+.BR gd_flush (3),
 .BR gd_rewrite_fragment (3)
