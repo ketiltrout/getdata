@@ -606,9 +606,9 @@ int _GD_BadInput(DIRFILE* D, gd_entry_t* E, int i)
   }
 
   /* scalar entries not allowed */
-  if (E->e->entry[0]->field_type & GD_SCALAR_ENTRY) {
+  if (E->e->entry[i]->field_type & GD_SCALAR_ENTRY) {
     _GD_SetError(D, GD_E_DIMENSION, GD_E_DIM_FORMAT, E->field, 0,
-        E->e->entry[0]->field);
+        E->e->entry[i]->field);
     dreturn("%i", 1);
     return 1;
   }

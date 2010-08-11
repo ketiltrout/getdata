@@ -1,3 +1,6 @@
+2010-08-10   D. V. Wiebe <getdata@ketiltrout.net>   svn:443
+	* src/common.c (_GD_BadInput): Check the propper entry for scalarness.
+
 2010-08-10   D. V. Wiebe <getdata@ketiltrout.net>   svn:442
 	* bindings/cxx/getdata/linterpentry.h bindings/cxx/getdata/bitentry.h
 	bindings/cxx/getdata/entry.h bindings/cxx/getdata/sbitentry.h: Remove
