@@ -35,7 +35,7 @@ static void _GD_ClearDerived(DIRFILE* D, gd_entry_t* E, const gd_entry_t* C,
 
   switch(E->field_type) {
     case GD_LINCOM_ENTRY:
-      for (i = 0; i < E->n_fields; ++i)
+      for (i = 0; i < E->u.lincom.n_fields; ++i)
         if (strcmp(E->in_fields[i], C->field) == 0) {
           if (check)
             _GD_SetError(D, GD_E_DELETE, GD_E_DEL_DERIVED, E->field, 0,
@@ -128,48 +128,51 @@ static void _GD_DeReference(DIRFILE* D, gd_entry_t* E, gd_entry_t* C,
 
   switch(E->field_type) {
     case GD_RAW_ENTRY:
-      _GD_DeReferenceOne(D, E, C, check, 0, GD_UINT16, &E->spf);
+      _GD_DeReferenceOne(D, E, C, check, 0, GD_UINT16, &E->u.raw.spf);
       break;
     case GD_POLYNOM_ENTRY:
-      for (i = 0; i <= E->poly_ord; ++i) {
-        if (_GD_DeReferenceOne(D, E, C, check, i, GD_COMPLEX128, &E->ca[i]))
+      for (i = 0; i <= E->u.polynom.poly_ord; ++i) {
+        if (_GD_DeReferenceOne(D, E, C, check, i, GD_COMPLEX128,
+              &E->u.polynom.ca[i]))
           break;
 
         if (!check)
-          E->a[i] = creal(E->ca[i]);
+          E->u.polynom.a[i] = creal(E->u.polynom.ca[i]);
       }
       break;
     case GD_LINCOM_ENTRY:
-      for (i = 0; i < E->n_fields; ++i) {
-        if (_GD_DeReferenceOne(D, E, C, check, i, GD_COMPLEX128, &E->cm[i]))
+      for (i = 0; i < E->u.lincom.n_fields; ++i) {
+        if (_GD_DeReferenceOne(D, E, C, check, i, GD_COMPLEX128,
+              &E->u.lincom.cm[i]))
           break;
 
         if (!check)
-          E->m[i] = creal(E->cm[i]);
+          E->u.lincom.m[i] = creal(E->u.lincom.cm[i]);
 
         if (_GD_DeReferenceOne(D, E, C, check, i + GD_MAX_LINCOM, GD_COMPLEX128,
-              &E->cb[i]))
+              &E->u.lincom.cb[i]))
           break;
 
         if (!check)
-          E->b[i] = creal(E->cb[i]);
+          E->u.lincom.b[i] = creal(E->u.lincom.cb[i]);
       }
       break;
     case GD_RECIP_ENTRY:
-      _GD_DeReferenceOne(D, E, C, check, 0, GD_COMPLEX128, &E->cdividend);
+      _GD_DeReferenceOne(D, E, C, check, 0, GD_COMPLEX128,
+          &E->u.recip.cdividend);
 
       if (!check)
-        E->dividend = creal(E->cdividend);
+        E->u.recip.dividend = creal(E->u.recip.cdividend);
       break;
     case GD_BIT_ENTRY:
     case GD_SBIT_ENTRY:
-      if (_GD_DeReferenceOne(D, E, C, check, 0, GD_INT16, &E->bitnum))
+      if (_GD_DeReferenceOne(D, E, C, check, 0, GD_INT16, &E->u.bit.bitnum))
         break;
 
-      _GD_DeReferenceOne(D, E, C, check, 1, GD_INT16, &E->numbits);
+      _GD_DeReferenceOne(D, E, C, check, 1, GD_INT16, &E->u.bit.numbits);
       break;
     case GD_PHASE_ENTRY:
-      _GD_DeReferenceOne(D, E, C, check, 0, GD_INT64, &E->shift);
+      _GD_DeReferenceOne(D, E, C, check, 0, GD_INT64, &E->u.phase.shift);
       break;
     case GD_NO_ENTRY:
     case GD_LINTERP_ENTRY:
@@ -235,7 +238,7 @@ int gd_delete(DIRFILE* D, const char* field_code_in, int flags)
   } else if (E->e->n_meta > 0) {
     /* find one of the meta fields -- it's not true that metafields are
      * necessarily sorted directly after their parent */
-    if (_GD_FindField(D, E->e->meta_entry[0]->field, D->entry, D->n_entries,
+    if (_GD_FindField(D, E->e->p.meta_entry[0]->field, D->entry, D->n_entries,
           &first) == NULL)
     {
       _GD_InternalError(D);
@@ -268,7 +271,8 @@ int gd_delete(DIRFILE* D, const char* field_code_in, int flags)
     free(field_code);
 
   /* gather a list of fields */
-  gd_entry_t **del_list = malloc(sizeof(gd_entry_t*) * (1 + E->e->n_meta));
+  gd_entry_t **del_list = (gd_entry_t **)malloc(sizeof(gd_entry_t*) *
+      (1 + E->e->n_meta));
 
   if (del_list == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
@@ -280,7 +284,7 @@ int gd_delete(DIRFILE* D, const char* field_code_in, int flags)
   n_del = 1;
 
   for (i = 0; i < E->e->n_meta; ++i)
-    del_list[n_del++] = E->e->meta_entry[i];
+    del_list[n_del++] = E->e->p.meta_entry[i];
 
   /* Check for clients and derived fields */
   if (~flags & GD_DEL_FORCE)
@@ -315,21 +319,21 @@ int gd_delete(DIRFILE* D, const char* field_code_in, int flags)
       return -1;
     }
 
-    if (_GD_SetEncodedName(D, E->e->file, E->e->filebase, 0)) {
+    if (_GD_SetEncodedName(D, E->e->u.raw.file, E->e->u.raw.filebase, 0)) {
       free(del_list);
       dreturn("%i", -1);
       return -1;
     }
 
-    if ((*_gd_ef[E->e->file[0].encoding].unlink)(E->e->file)) {
-      _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[0].name, errno, NULL);
+    if ((*_gd_ef[E->e->u.raw.file[0].encoding].unlink)(E->e->u.raw.file)) {
+      _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
       free(del_list);
       dreturn("%i", -1);
       return -1;
     }
-  } else if (E->field_type == GD_RAW_ENTRY && E->e->file->fp != -1) {
-    if ((*_gd_ef[E->e->file[0].encoding].close)(E->e->file)) {
-      _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[0].name, errno, NULL);
+  } else if (E->field_type == GD_RAW_ENTRY && E->e->u.raw.file->fp != -1) {
+    if ((*_gd_ef[E->e->u.raw.file[0].encoding].close)(E->e->u.raw.file)) {
+      _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
       free(del_list);
       dreturn("%i", -1);
       return -1;
@@ -341,7 +345,7 @@ int gd_delete(DIRFILE* D, const char* field_code_in, int flags)
   gd_entry_t* reference = NULL;
 
   if (E->field_type == GD_RAW_ENTRY) {
-    new_ref = malloc(sizeof(char*) * D->n_fragment);
+    new_ref = (char **)malloc(sizeof(char*) * D->n_fragment);
     if (new_ref == NULL) {
       free(del_list);
       _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
@@ -355,7 +359,7 @@ int gd_delete(DIRFILE* D, const char* field_code_in, int flags)
           strcmp(D->fragment[i].ref_name, E->field) == 0)
       {
         /* Flag for replacement */
-        new_ref[i] = (char*)E;
+        new_ref[i] = (char *)E;
         /* Search for a replacement */
         for (j = 0; j < D->n_entries; ++j)
           if (j != index && D->entry[j]->field_type == GD_RAW_ENTRY) {
@@ -400,7 +404,7 @@ int gd_delete(DIRFILE* D, const char* field_code_in, int flags)
     for (i = 0; i < D->n_fragment; ++i)
       if (new_ref[i] != NULL) {
         free(D->fragment[i].ref_name);
-        D->fragment[i].ref_name = (new_ref[i] == (char*)E) ? NULL : new_ref[i];
+        D->fragment[i].ref_name = (new_ref[i] == (char *)E) ? NULL : new_ref[i];
       }
     free(new_ref);
   }
@@ -438,7 +442,7 @@ int gd_delete(DIRFILE* D, const char* field_code_in, int flags)
   _GD_FreeE(E, 1);
 
   memmove(D->entry + index, D->entry + index + 1,
-      sizeof(gd_entry_t*) * (D->n_entries - index - 1));
+      sizeof(gd_entry_t *) * (D->n_entries - index - 1));
   D->n_entries--;
 
   dreturn("%i", 0);

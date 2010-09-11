@@ -37,7 +37,7 @@ int main(void)
   CHECKS(E.field, "data");
   CHECKI(E.field_type, GD_LINTERP_ENTRY);
   CHECKS(E.in_fields[0], "in1");
-  CHECKS(E.table, "../tablefile");
+  CHECKS(E.u.linterp.table, "../tablefile");
 
   return r;
 }

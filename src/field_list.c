@@ -35,7 +35,7 @@ const gd_entype_t _gd_entype_index[GD_N_ENTYPES] =
   GD_SBIT_ENTRY, GD_CONST_ENTRY, GD_STRING_ENTRY
 };
 
-const void* gd_constants(DIRFILE* D, gd_type_t return_type)
+const void *gd_constants(DIRFILE* D, gd_type_t return_type) gd_nothrow
 {
   dtrace("%p, 0x%x", D, return_type);
 
@@ -56,7 +56,7 @@ const void* gd_constants(DIRFILE* D, gd_type_t return_type)
   }
 
   free(D->const_value_list);
-  fl = _GD_Alloc(D, return_type, D->n_const);
+  fl = (char *)_GD_Alloc(D, return_type, D->n_const);
 
   if (fl == NULL) {
     dreturn("%p", NULL);
@@ -77,7 +77,7 @@ const void* gd_constants(DIRFILE* D, gd_type_t return_type)
   return D->const_value_list;
 }
 
-const char** gd_strings(DIRFILE* D)
+const char **gd_strings(DIRFILE* D) gd_nothrow
 {
   dtrace("%p", D);
 
@@ -103,7 +103,7 @@ const char** gd_strings(DIRFILE* D)
     return D->string_value_list;
   }
 
-  fl = realloc((char**)D->string_value_list, sizeof(const char*) *
+  fl = (char **)realloc((char **)D->string_value_list, sizeof(const char*) *
       (D->n_string + 1));
 
   if (fl == NULL) {
@@ -115,18 +115,18 @@ const char** gd_strings(DIRFILE* D)
   for (i = n = 0; i < D->n_entries; ++i) {
     if (D->entry[i]->field_type == GD_STRING_ENTRY &&
         D->entry[i]->e->n_meta != -1)
-      fl[n++] = D->entry[i]->e->string;
+      fl[n++] = D->entry[i]->e->u.string;
   }
   fl[n] = NULL;
 
-  D->string_value_list = (const char**)fl;
+  D->string_value_list = (const char **)fl;
   D->list_validity |= LIST_VALID_STRING_VALUE;
 
   dreturn("%p", D->string_value_list);
   return D->string_value_list;
 }
 
-const char** gd_field_list_by_type(DIRFILE* D, gd_entype_t type)
+const char **gd_field_list_by_type(DIRFILE* D, gd_entype_t type) gd_nothrow
 {
   dtrace("%p, %x", D, type);
 
@@ -174,7 +174,8 @@ const char** gd_field_list_by_type(DIRFILE* D, gd_entype_t type)
     return D->type_list[index];
   }
 
-  fl = realloc((char**)D->type_list[index], sizeof(const char*) * (n + 1));
+  fl = (char **)realloc((char **)D->type_list[index],
+      sizeof(const char*) * (n + 1));
 
   if (fl == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
@@ -188,14 +189,14 @@ const char** gd_field_list_by_type(DIRFILE* D, gd_entype_t type)
   }
   fl[n] = NULL;
 
-  D->type_list[index] = (const char**)fl;
+  D->type_list[index] = (const char **)fl;
   D->type_list_validity |= 1 << index;
 
   dreturn("%p", D->type_list[index]);
   return D->type_list[index];
 }
 
-const char** gd_vector_list(DIRFILE* D)
+const char **gd_vector_list(DIRFILE* D) gd_nothrow
 {
   dtrace("%p", D);
 
@@ -223,7 +224,7 @@ const char** gd_vector_list(DIRFILE* D)
     return D->vector_list;
   }
 
-  fl = realloc((char**)D->vector_list, sizeof(const char*) * (n + 1));
+  fl = (char **)realloc((char **)D->vector_list, sizeof(const char*) * (n + 1));
 
   if (fl == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
@@ -238,14 +239,14 @@ const char** gd_vector_list(DIRFILE* D)
   }
   fl[n] = NULL;
 
-  D->vector_list = (const char**)fl;
+  D->vector_list = (const char **)fl;
   D->list_validity |= LIST_VALID_VECTOR;
 
   dreturn("%p", D->vector_list);
   return D->vector_list;
 }
 
-const char** gd_field_list(DIRFILE* D)
+const char **gd_field_list(DIRFILE* D) gd_nothrow
 {
   dtrace("%p", D);
 
@@ -271,7 +272,7 @@ const char** gd_field_list(DIRFILE* D)
     return D->field_list;
   }
 
-  fl = realloc((char**)D->field_list, sizeof(const char*) *
+  fl = (char **)realloc((char **)D->field_list, sizeof(const char*) *
       (D->n_entries + 1 - D->n_meta));
 
   if (fl == NULL) {
@@ -285,7 +286,7 @@ const char** gd_field_list(DIRFILE* D)
       fl[n++] = D->entry[i]->field;
   fl[n] = NULL;
 
-  D->field_list = (const char**)fl;
+  D->field_list = (const char **)fl;
   D->list_validity |= LIST_VALID_FIELD;
 
   dreturn("%p", D->field_list);

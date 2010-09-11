@@ -52,7 +52,7 @@ namespace GetData {
           int fragment_index = 0);
 
       virtual const char *Input(int index = 0) {
-        return (CheckIndex(E.field_type, E.n_fields, index)) ? 
+        return (CheckIndex(E.field_type, E.u.lincom.n_fields, index)) ? 
             E.in_fields[index] : NULL;
       };
 
@@ -61,25 +61,25 @@ namespace GetData {
       }
 
       virtual int NFields() {
-        return E.n_fields;
+        return E.u.lincom.n_fields;
       };
 
       virtual double Scale(int index = 0) {
-        return (CheckIndex(E.field_type, E.n_fields, index)) ? E.m[index] : 0;
+        return (CheckIndex(E.field_type, E.u.lincom.n_fields, index)) ? E.u.lincom.m[index] : 0;
       };
 
       virtual std::complex<double> CScale(int index = 0) {
-        return (CheckIndex(E.field_type, E.n_fields, index))
-          ? std::complex<double>(E.cm[index][0], E.cm[index][1]) : 0;
+        return (CheckIndex(E.field_type, E.u.lincom.n_fields, index))
+          ? std::complex<double>(E.u.lincom.cm[index][0], E.u.lincom.cm[index][1]) : 0;
       };
 
       virtual double Offset(int index = 0) {
-        return (CheckIndex(E.field_type, E.n_fields, index)) ? E.b[index] : 0;
+        return (CheckIndex(E.field_type, E.u.lincom.n_fields, index)) ? E.u.lincom.b[index] : 0;
       };
 
       virtual std::complex<double> COffset(int index = 0) {
-        return (CheckIndex(E.field_type, E.n_fields, index))
-          ? std::complex<double>(E.cb[index][0], E.cb[index][1]) : 0;
+        return (CheckIndex(E.field_type, E.u.lincom.n_fields, index))
+          ? std::complex<double>(E.u.lincom.cb[index][0], E.u.lincom.cb[index][1]) : 0;
       };
 
       virtual const char *Scalar(int index = 0);

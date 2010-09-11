@@ -18,7 +18,11 @@ int main(void)
   const char* data = __TEST__ "dirfile/data";
   const char* format_data = "data RAW INT32 8\n";
   int32_t  data_data[256];
+#ifdef GD_NO_C99_API
+  float c[16];
+#else
   float complex c[8];
+#endif
   int fd, i, r = 0;
 
   memset(c, 0, 8);
@@ -47,8 +51,14 @@ int main(void)
 
   CHECKI(error, 0);
   CHECKI(n, 8);
-  for (i = 0; i < 8; ++i)
+  for (i = 0; i < 8; ++i) {
+#ifdef GD_NO_C99_API
+    float v[] = {40 + i, 0};
+    CHECKCi(i,c + 2 * i, v);
+#else
     CHECKCi(i,c[i], 40 + i);
+#endif
+  }
 
   return r;
 }

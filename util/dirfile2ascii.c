@@ -1,4 +1,5 @@
 /* (C) 2010 Matthew Truch
+ * (C) 2010 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -21,6 +22,8 @@
 #endif
 
 #define _XOPEN_SOURCE 1000
+#define __STDC_FORMAT_MACROS
+#define __STDC_LIMIT_MACROS
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -48,7 +51,7 @@ struct field
     double *dbl;
     int64_t *i64;
     uint64_t *u64;
-  };
+  } u;
   char format[F_LEN];
 };
 
@@ -174,24 +177,23 @@ int main (int argc, char **argv)
 #define READ_AS_DOUBLE 0x000
 #define READ_AS_INT    0x100
 #define READ_AS_UINT   0x200
-  const struct {
+  struct {
     int t;
     const char* f;
-  } type_data[0x7f] = {
-    [(int)'a'] = { READ_AS_DOUBLE, "a" },
-    [(int)'A'] = { READ_AS_DOUBLE, "A" },
-    [(int)'e'] = { READ_AS_DOUBLE, "e" },
-    [(int)'E'] = { READ_AS_DOUBLE, "E" },
-    [(int)'f'] = { READ_AS_DOUBLE, "f" },
-    [(int)'F'] = { READ_AS_DOUBLE, "F" },
-    [(int)'g'] = { READ_AS_DOUBLE, "g" },
-    [(int)'G'] = { READ_AS_DOUBLE, "G" },
-    [(int)'i'] = { READ_AS_INT,    PRIi64 },
-    [(int)'o'] = { READ_AS_UINT,   PRIo64 },
-    [(int)'u'] = { READ_AS_UINT,   PRIu64 },
-    [(int)'x'] = { READ_AS_UINT,   PRIx64 },
-    [(int)'X'] = { READ_AS_UINT,   PRIX64 }
-  };
+  } type_data[0x7f];
+  type_data[(int)'a'] = { READ_AS_DOUBLE, "a" };
+  type_data[(int)'A'] = { READ_AS_DOUBLE, "A" };
+  type_data[(int)'e'] = { READ_AS_DOUBLE, "e" };
+  type_data[(int)'E'] = { READ_AS_DOUBLE, "E" };
+  type_data[(int)'f'] = { READ_AS_DOUBLE, "f" };
+  type_data[(int)'F'] = { READ_AS_DOUBLE, "F" };
+  type_data[(int)'g'] = { READ_AS_DOUBLE, "g" };
+  type_data[(int)'G'] = { READ_AS_DOUBLE, "G" };
+  type_data[(int)'i'] = { READ_AS_INT,    PRIi64 };
+  type_data[(int)'o'] = { READ_AS_UINT,   PRIo64 };
+  type_data[(int)'u'] = { READ_AS_UINT,   PRIu64 };
+  type_data[(int)'x'] = { READ_AS_UINT,   PRIx64 };
+  type_data[(int)'X'] = { READ_AS_UINT,   PRIX64 };
 
   while ((c = getopt_long(argc, argv,
           "-f:n:d:x:X:g:G:e:E:a:A:F:i:o:p:s:bvqh?", longopts, &optind)) != -1)
@@ -286,11 +288,12 @@ int main (int argc, char **argv)
     ff = 0;
   }
 
-  for (size_t i = 0; i < strlen(precision); i++) {
-    if (strchr(VALID_PRECISION_CHARS, precision[i]) == NULL) {
+  size_t z;
+  for (z = 0; z < strlen(precision); z++) {
+    if (strchr(VALID_PRECISION_CHARS, precision[z]) == NULL) {
       fprintf(stderr,
           "Error: Invalid character (%c) found in precision string (%s).\n", 
-          precision[i], precision);
+          precision[z], precision);
       exit(-5);
     }
   }
@@ -329,7 +332,8 @@ int main (int argc, char **argv)
   }
 
   /* Get spfs and sanity checks for all fields */
-  for (int i = 0; i < numfields; i++) {
+  int i;
+  for (i = 0; i < numfields; i++) {
     fields[i].spf = gd_spf(dirfile, fields[i].name);
     if (gd_error(dirfile)) {
       fprintf(stderr, "GetData error: %s\n", gd_error_string(dirfile,
@@ -361,37 +365,37 @@ int main (int argc, char **argv)
         (long long)ff, nf);
   }
 
-  for (int i = 0; i < numfields; i++) { /* Read in all the fields */
+  for (i = 0; i < numfields; i++) { /* Read in all the fields */
     n_want = nf * fields[i].spf;
 
     if (type_data[fields[i].type].t == READ_AS_DOUBLE) {
-      fields[i].dbl = malloc(sizeof(double) * n_want);
-      if (fields[i].dbl == NULL) {
+      fields[i].u.dbl = (double *)malloc(sizeof(double) * n_want);
+      if (fields[i].u.dbl == NULL) {
         perror("malloc");
         gd_close(dirfile);
         exit(4);
       }
 
       n_read = gd_getdata(dirfile, fields[i].name, ff, 0, nf, 0, GD_FLOAT64,
-          fields[i].dbl);
+          fields[i].u.dbl);
     } else if (type_data[fields[i].type].t == READ_AS_INT) {
-      fields[i].i64 = malloc(sizeof(int64_t) * n_want);
-      if (fields[i].i64 == NULL) {
+      fields[i].u.i64 = (int64_t *)malloc(sizeof(int64_t) * n_want);
+      if (fields[i].u.i64 == NULL) {
         perror("malloc");
         gd_close(dirfile);
         exit(4);
       }
       n_read = gd_getdata(dirfile, fields[i].name, ff, 0, nf, 0, GD_INT64,
-          fields[i].i64);
+          fields[i].u.i64);
     } else {
-      fields[i].u64 = malloc(sizeof(uint64_t) * n_want);
-      if (fields[i].u64 == NULL) {
+      fields[i].u.u64 = (uint64_t *)malloc(sizeof(uint64_t) * n_want);
+      if (fields[i].u.u64 == NULL) {
         perror("malloc");
         gd_close(dirfile);
         exit(4);
       }
       n_read = gd_getdata(dirfile, fields[i].name, ff, 0, nf, 0, GD_UINT64,
-          fields[i].u64);
+          fields[i].u.u64);
     }
 
     if (gd_error(dirfile)) {
@@ -403,20 +407,22 @@ int main (int argc, char **argv)
   }
 
   /* Generate format string with precision */
-  for (int i = 0; i < numfields; i++)
+  for (i = 0; i < numfields; i++)
     snprintf(fields[i].format, F_LEN, "%%%s%s", precision,
         type_data[fields[i].type].f);
 
-  for (size_t k = 0; k < nf; k += skip) {
-    for (gd_spf_t j = 0; j < (skipping ? 1 : max_spf); j++) {
-      for (int i = 0; i < numfields; i++) {
+  size_t k;
+  gd_spf_t j;
+  for (k = 0; k < nf; k += skip) {
+    for (j = 0; j < (skipping ? 1 : max_spf); j++) {
+      for (i = 0; i < numfields; i++) {
         if (fields[i].spf == max_spf || skipping) {
           if (type_data[fields[i].type].t == READ_AS_DOUBLE)
-            printf(fields[i].format, fields[i].dbl[k * fields[i].spf + j]);
+            printf(fields[i].format, fields[i].u.dbl[k * fields[i].spf + j]);
           else if (type_data[fields[i].type].t == READ_AS_INT)
-            printf(fields[i].format, fields[i].i64[k * fields[i].spf + j]);
+            printf(fields[i].format, fields[i].u.i64[k * fields[i].spf + j]);
           else
-            printf(fields[i].format, fields[i].u64[k * fields[i].spf + j]);
+            printf(fields[i].format, fields[i].u.u64[k * fields[i].spf + j]);
         } else { /* need to interpolate: */
           /*      formula is  y = y0 + (x-x0) * (y1-y0)/(x1-x0) */
           /*                 val= y0 +  diff  *     slope       */
@@ -438,25 +444,25 @@ int main (int argc, char **argv)
             offset = 0;
 
           if (type_data[fields[i].type].t == READ_AS_DOUBLE) {
-            slope = (fields[i].dbl[k * fields[i].spf + next_samp - offset] -
-                fields[i].dbl[k * fields[i].spf + prev_samp - offset]) /
+            slope = (fields[i].u.dbl[k * fields[i].spf + next_samp - offset] -
+                fields[i].u.dbl[k * fields[i].spf + prev_samp - offset]) /
               ((double)next_samp - (double)prev_samp);
-            val = fields[i].dbl[k * fields[i].spf + prev_samp] + diff * slope;
+            val = fields[i].u.dbl[k * fields[i].spf + prev_samp] + diff * slope;
             printf(fields[i].format, val);
           } else if (type_data[fields[i].type].t == READ_AS_INT) {
-            slope = ((double)fields[i].i64[k * fields[i].spf + next_samp
-                - offset] - (double)fields[i].i64[k * fields[i].spf
+            slope = ((double)fields[i].u.i64[k * fields[i].spf + next_samp
+                - offset] - (double)fields[i].u.i64[k * fields[i].spf
                 + prev_samp - offset]) / ((double)next_samp
                   - (double)prev_samp);
-            val = (double)fields[i].i64[k * fields[i].spf + prev_samp] + diff
+            val = (double)fields[i].u.i64[k * fields[i].spf + prev_samp] + diff
               * slope;
             printf(fields[i].format, (int64_t)val);
           } else {
-            slope = ((double)fields[i].u64[k * fields[i].spf + next_samp
-                - offset] - (double)fields[i].u64[k * fields[i].spf
+            slope = ((double)fields[i].u.u64[k * fields[i].spf + next_samp
+                - offset] - (double)fields[i].u.u64[k * fields[i].spf
                 + prev_samp - offset]) / ((double)next_samp
                   - (double)prev_samp);
-            val = (double)fields[i].u64[k * fields[i].spf + prev_samp] + diff
+            val = (double)fields[i].u.u64[k * fields[i].spf + prev_samp] + diff
               * slope;
             printf(fields[i].format, (uint64_t)val);
           }

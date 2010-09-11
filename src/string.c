@@ -22,7 +22,7 @@
 
 /* this function is little more than a public boilerplate for _GD_DoField */
 size_t gd_get_string(DIRFILE* D, const char *field_code, size_t len,
-    char *data_out)
+    char *data_out) gd_nothrow
 {
   size_t n_read = 0;
   gd_entry_t *entry;
@@ -52,6 +52,7 @@ size_t gd_get_string(DIRFILE* D, const char *field_code, size_t len,
 
 /* this function is little more than a public boilerplate for _GD_DoFieldOut */
 size_t gd_put_string(DIRFILE* D, const char *field_code, const char *data_in)
+  gd_nothrow
 {
   size_t n_wrote = 0;
   gd_entry_t *entry;

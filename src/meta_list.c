@@ -26,10 +26,10 @@
 #endif
 
 /* a zero length list */
-static const char* zero_list[1] = { NULL };
+static const char *zero_list[1] = { NULL };
 
-const void* gd_mconstants(DIRFILE* D, const char* parent,
-    gd_type_t return_type)
+const void *gd_mconstants(DIRFILE* D, const char* parent,
+    gd_type_t return_type) gd_nothrow
 {
   dtrace("%p, \"%s\", 0x%x", D, parent, return_type);
 
@@ -60,7 +60,7 @@ const void* gd_mconstants(DIRFILE* D, const char* parent,
   }
 
   free(e->const_value_list);
-  fl = _GD_Alloc(D, return_type, e->n_meta_const);
+  fl = (char *)_GD_Alloc(D, return_type, e->n_meta_const);
 
   if (fl == NULL) {
     dreturn("%p", NULL);
@@ -70,8 +70,8 @@ const void* gd_mconstants(DIRFILE* D, const char* parent,
   /* DoField will implicitly choose GD_REPR_AUTO for complex data being returned
    * as purely real */
   for (i = n = 0; i < e->n_meta; ++i) {
-    if (e->meta_entry[i]->field_type == GD_CONST_ENTRY)
-      if (_GD_DoField(D, e->meta_entry[i], 0, 0, 0, return_type,
+    if (e->p.meta_entry[i]->field_type == GD_CONST_ENTRY)
+      if (_GD_DoField(D, e->p.meta_entry[i], 0, 0, 0, return_type,
             fl + n++ * GD_SIZE(return_type)) != 1)
         break;
   }
@@ -82,7 +82,7 @@ const void* gd_mconstants(DIRFILE* D, const char* parent,
   return e->const_value_list;
 }
 
-const char** gd_mstrings(DIRFILE* D, const char* parent)
+const char **gd_mstrings(DIRFILE* D, const char* parent) gd_nothrow
 {
   dtrace("%p, \"%s\"", D, parent);
 
@@ -112,7 +112,7 @@ const char** gd_mstrings(DIRFILE* D, const char* parent)
     return zero_list;
   }
 
-  fl = realloc((char**)e->string_value_list, sizeof(const char*) *
+  fl = (char **)realloc((char **)e->string_value_list, sizeof(const char*) *
       (e->n_meta_string + 1));
 
   if (fl == NULL) {
@@ -122,19 +122,19 @@ const char** gd_mstrings(DIRFILE* D, const char* parent)
   }
 
   for (i = n = 0; i < e->n_meta; ++i) {
-    if (e->meta_entry[i]->field_type == GD_STRING_ENTRY)
-      fl[n++] = e->meta_entry[i]->e->string;
+    if (e->p.meta_entry[i]->field_type == GD_STRING_ENTRY)
+      fl[n++] = e->p.meta_entry[i]->e->u.string;
   }
   fl[n] = NULL;
 
-  e->string_value_list = (const char**)fl;
+  e->string_value_list = (const char **)fl;
 
   dreturn("%p", e->string_value_list);
   return e->string_value_list;
 }
 
-const char** gd_mfield_list_by_type(DIRFILE* D, const char* parent,
-    gd_entype_t type)
+const char **gd_mfield_list_by_type(DIRFILE* D, const char* parent,
+    gd_entype_t type) gd_nothrow
 {
   dtrace("%p, \"%s\", %x", D, parent, type);
 
@@ -187,7 +187,7 @@ const char** gd_mfield_list_by_type(DIRFILE* D, const char* parent,
     return NULL;
   }
 
-  fl = realloc(e->type_list[index], sizeof(const char*) * (n + 1));
+  fl = (char **)realloc(e->type_list[index], sizeof(const char*) * (n + 1));
 
   if (fl == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
@@ -196,18 +196,18 @@ const char** gd_mfield_list_by_type(DIRFILE* D, const char* parent,
   }
 
   for (i = n = 0; i < e->n_meta; ++i) {
-    if (e->meta_entry[i]->field_type == type)
-      fl[n++] = e->meta_entry[i]->field + offs;
+    if (e->p.meta_entry[i]->field_type == type)
+      fl[n++] = e->p.meta_entry[i]->field + offs;
   }
   fl[n] = NULL;
 
   e->type_list[index] = fl;
 
   dreturn("%p", e->type_list[index]);
-  return (const char**)e->type_list[index];
+  return (const char **)e->type_list[index];
 }
 
-const char** gd_mvector_list(DIRFILE* D, const char* parent)
+const char **gd_mvector_list(DIRFILE* D, const char* parent) gd_nothrow
 {
   dtrace("%p, \"%s\"", D, parent);
 
@@ -241,7 +241,7 @@ const char** gd_mvector_list(DIRFILE* D, const char* parent)
     return zero_list;
   }
 
-  fl = realloc((char**)e->vector_list, sizeof(const char*) * (n + 1));
+  fl = (char **)realloc((char **)e->vector_list, sizeof(const char*) * (n + 1));
 
   if (fl == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
@@ -250,18 +250,18 @@ const char** gd_mvector_list(DIRFILE* D, const char* parent)
   }
 
   for (i = n = 0; i < e->n_meta; ++i) {
-    if (!(e->meta_entry[i]->field_type & GD_SCALAR_ENTRY))
-      fl[n++] = e->meta_entry[i]->field + offs;
+    if (!(e->p.meta_entry[i]->field_type & GD_SCALAR_ENTRY))
+      fl[n++] = e->p.meta_entry[i]->field + offs;
   }
   fl[n] = NULL;
 
-  e->vector_list = (const char**)fl;
+  e->vector_list = (const char **)fl;
 
   dreturn("%p", e->vector_list);
   return e->vector_list;
 }
 
-const char** gd_mfield_list(DIRFILE* D, const char* parent)
+const char **gd_mfield_list(DIRFILE* D, const char* parent) gd_nothrow
 {
   dtrace("%p, \"%s\"", D, parent);
 
@@ -293,7 +293,7 @@ const char** gd_mfield_list(DIRFILE* D, const char* parent)
     return zero_list;
   }
 
-  fl = realloc((char**)e->field_list, sizeof(const char*) *
+  fl = (char **)realloc((char **)e->field_list, sizeof(const char*) *
       (e->n_meta + 1));
 
   if (fl == NULL) {
@@ -303,10 +303,10 @@ const char** gd_mfield_list(DIRFILE* D, const char* parent)
   }
 
   for (i = n = 0; i < e->n_meta; ++i)
-    fl[n++] = e->meta_entry[i]->field + offs;
+    fl[n++] = e->p.meta_entry[i]->field + offs;
   fl[n] = NULL;
 
-  e->field_list = (const char**)fl;
+  e->field_list = (const char **)fl;
 
   dreturn("%p", e->field_list);
   return e->field_list;

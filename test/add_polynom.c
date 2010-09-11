@@ -32,10 +32,10 @@ int main(void)
     CHECKI(e.field_type, GD_POLYNOM_ENTRY);
     CHECKS(e.in_fields[0], "in");
     CHECKI(e.fragment_index, 0);
-    CHECKI(e.poly_ord, 3);
+    CHECKI(e.u.polynom.poly_ord, 3);
     CHECKI(e.comp_scal, 0);
     for (j = 0; j < 4; ++j)
-      CHECKCi(j,e.a[j], a[j]);
+      CHECKFi(j,e.u.polynom.a[j], a[j]);
     gd_free_entry_strings(&e);
   }
 

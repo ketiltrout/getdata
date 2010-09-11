@@ -33,13 +33,13 @@ int main(void)
   else {
     CHECKI(e.field_type, GD_LINCOM_ENTRY);
     CHECKI(e.fragment_index, 0);
-    CHECKI(e.n_fields, 2);
+    CHECKI(e.u.lincom.n_fields, 2);
     CHECKS(e.in_fields[0], "in1");
     CHECKS(e.in_fields[1], "in2");
-    CHECKF(e.m[0], m[0]);
-    CHECKF(e.m[1], m[1]);
-    CHECKF(e.b[0], b[0]);
-    CHECKF(e.b[1], b[1]);
+    CHECKF(e.u.lincom.m[0], m[0]);
+    CHECKF(e.u.lincom.m[1], m[1]);
+    CHECKF(e.u.lincom.b[0], b[0]);
+    CHECKF(e.u.lincom.b[1], b[1]);
     CHECKI(e.comp_scal, 0);
     gd_free_entry_strings(&e);
   }

@@ -20,7 +20,7 @@
  */
 #include "internal.h"
 
-unsigned int gd_nmfields(DIRFILE* D, const char* parent)
+unsigned int gd_nmfields(DIRFILE* D, const char* parent) gd_nothrow
 {
   dtrace("%p", D);
 
@@ -46,7 +46,7 @@ unsigned int gd_nmfields(DIRFILE* D, const char* parent)
   return P->e->n_meta;
 }
 
-unsigned int gd_nmvectors(DIRFILE* D, const char* parent)
+unsigned int gd_nmvectors(DIRFILE* D, const char* parent) gd_nothrow
 {
   dtrace("%p", D);
 
@@ -73,7 +73,7 @@ unsigned int gd_nmvectors(DIRFILE* D, const char* parent)
 }
 
 unsigned int gd_nmfields_by_type(DIRFILE* D, const char* parent,
-    gd_entype_t type)
+    gd_entype_t type) gd_nothrow
 {
   unsigned int r = 0;
   int i;
@@ -103,7 +103,7 @@ unsigned int gd_nmfields_by_type(DIRFILE* D, const char* parent,
     r = P->e->n_meta_const;
   else
     for (i = 0; i < P->e->n_meta; ++i)
-      if (P->e->meta_entry[i]->field_type == type)
+      if (P->e->p.meta_entry[i]->field_type == type)
         r++;
 
   dreturn("%u", r);

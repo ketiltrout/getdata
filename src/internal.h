@@ -33,6 +33,43 @@
 typedef off_t off64_t;
 #endif
 
+#ifdef GD_NO_C99_API
+#  define GD_DCOMPLEXP_t double *
+#  define GD_DCOMPLEXA(v) double v[2]
+#  define GD_DCOMPLEXV(v) double v[][2]
+#  define cabs(z)  sqrt((z)[0] * (z)[0] + (z)[1] * (z)[1])
+#  define carg(z)  atan2((z)[1], (z)[0])
+#  define creal(z) ((z)[0])
+#  define cimag(z) ((z)[1])
+#  define _gd_a2c _gd_c2c
+#  define _gd_c2c(a,b) do { (a)[0] = (b)[0]; (a)[1] = (b)[1]; } while(0)
+#  define _gd_c2cp _gd_c2c
+#  define _gd_ca2c(a,b,i) _gd_c2c((a),(b) + 2 * i)
+#  define _gd_cp2ca(a,i,b) do { \
+  (a)[2 * i] = (b)[0]; (a)[2 * i + 1] = (b)[1]; \
+} while(0)
+#  define _gd_l2c(a,x,y) do { (a)[0] = (x); (a)[1] = (y); } while(0)
+#  define _gd_r2c(a,b) do { (a)[0] = b; (a)[1] = 0; } while(0)
+#  define _gd_r2ca(a,i,b,t) do { \
+  ((t*)a)[2 * i] = (t)(b); ((t*)a)[2 * i + 1] = 0; \
+} while(0)
+#  define _gd_ccmpl(a,x,y) ((a)[0] == x && (a)[1] == y)
+#  define _gd_ccmpc(a,b) ((a)[0] == (b)[0] && (a)[1] == (b)[1])
+#else
+#  define GD_DCOMPLEXP_t double _Complex *
+#  define GD_DCOMPLEXA(v) double _Complex v
+#  define GD_DCOMPLEXV(v) double _Complex* v
+#  define _gd_a2c(a,b) a = *((double complex*)(b))
+#  define _gd_c2c(a,b) a = b
+#  define _gd_c2cp(a,b) *a = b
+#  define _gd_ca2c(a,b,i) a = b[i]
+#  define _gd_cp2ca(a,i,b) (a)[i] = *(b)
+#  define _gd_l2c(a,x,y) a = (x + _Complex_I * y)
+#  define _gd_r2c(a,b) a = b
+#  define _gd_r2ca(a,i,b,t) ((complex t*)a)[i] = (complex t)(b)
+#  define _gd_ccmpl(a,x,y) (a == (x + _Complex_I * y))
+#  define _gd_ccmpc(a,b) (a == b)
+
 #ifdef HAVE_COMPLEX_H
 #include <complex.h>
 #elif defined HAVE_CABS && defined __GNUC__ && (__GNUC__ > 3)
@@ -42,16 +79,23 @@ typedef off_t off64_t;
 #define _Complex_I (__extension__ 1.0iF)
 double cabs(double complex z);
 double carg(double complex z);
-#define cexp(z) (exp(__real__ (z)) * (cos(__imag__ (z)) + _Complex_I * sin(__imag__ (z))))
+#define cexp(z) (exp(__real__ (z)) * (cos(__imag__ (z)) + _Complex_I \
+      * sin(__imag__ (z))))
 double creal(double complex z);
 double cimag(double complex z);
+#endif
 #endif
 
 /* For FILENAME_MAX */
 #include <stdio.h>
 
 /* For the C99 integer types */
+#ifdef HAVE_INTTYPES_H
+# ifndef __STDC_FORMAT_MACROS
+#  define __STDC_FORMAT_MACROS
+# endif
 #include <inttypes.h>
+#endif
 
 #ifdef HAVE_IO_H
 #  include <io.h>
@@ -91,6 +135,7 @@ double cimag(double complex z);
 
 /* debugging macros */
 #ifdef GETDATA_DEBUG
+#define GD_COL_SIZE 100
 const char* _gd_colnil(void);
 const char* _gd_coladd(void);
 const char* _gd_colsub(void);
@@ -203,7 +248,11 @@ typedef struct stat gd_stat64_t;
 #endif
 
 #if ! HAVE_DECL_STRERROR_R
+#ifdef STRERROR_R_CHAR_P
+char* strerror_r(int, char*, size_t);
+#else
 int strerror_r(int, char*, size_t);
+#endif
 #endif
 
 #if defined __MSVCRT__ && defined HAVE__UNLINK
@@ -295,9 +344,9 @@ struct _gd_raw_file {
 struct _gd_lut {
   double x;
   union {
-    double y;
-    complex double cy;
-  };
+    double r;
+    GD_DCOMPLEXM(c);
+  } y;
 };
 
 /* Unified entry struct */
@@ -313,7 +362,7 @@ struct _gd_private_entry {
   union {
     gd_entry_t** meta_entry;
     const gd_entry_t* parent;
-  };
+  } p;
 
   /* field lists */
   const char** field_list;
@@ -327,26 +376,26 @@ struct _gd_private_entry {
       char* filebase;
       size_t size;
       struct _gd_raw_file file[2]; /* encoding framework data */
-    };
+    } raw;
     struct { /* LINTERP */
       char *table_path;
       int table_len;
       int complex_table;
       int table_monotonic;
       struct _gd_lut *lut;
-    };
+    } linterp;
     struct { /* CONST */
       union {
-        double complex cconst;
-        double dconst;
-        uint64_t uconst;
-        int64_t iconst;
-      };
+        GD_DCOMPLEXM(c);
+        double d;
+        uint64_t u;
+        int64_t i;
+      } d;
       int n_client;
       gd_entry_t** client;
-    };
+    } cons;
     char* string;
-  };
+  } u;
 };
 
 #define GD_ENC_NONE       0
@@ -450,6 +499,18 @@ struct gd_fragment_t {
 
 /* The DIRFILE struct.  */
 struct _GD_DIRFILE {
+  /* library error data */
+  int error;
+  int suberror;
+  char* error_string;
+  char* error_file;
+  int error_line;
+
+  /* global data */
+  unsigned long int flags;
+  uint64_t av;
+  int standards;
+
   /* field counts */
   unsigned int n_entries;
   unsigned int n_string;
@@ -486,18 +547,6 @@ struct _GD_DIRFILE {
   /* syntax error callback */
   gd_parser_callback_t sehandler;
   void* sehandler_extra;
-
-  /* library error data */
-  int error;
-  int suberror;
-  char* error_string;
-  char* error_file;
-  int error_line;
-
-  /* global data */
-  uint32_t av;
-  int standards;
-  unsigned long int flags;
 };
 
 extern const gd_entype_t _gd_entype_index[GD_N_ENTYPES];
@@ -507,14 +556,14 @@ void _GD_ArmEndianise(uint64_t* databuffer, int is_complex, size_t ns);
 int _GD_BadInput(DIRFILE* D, gd_entry_t* E, int i);
 int _GD_CalculateEntry(DIRFILE* D, gd_entry_t* E);
 void _GD_CInvertData(DIRFILE* D, void* data, gd_type_t return_type,
-    double complex dividend, size_t n_read);
+    GD_DCOMPLEXA(dividend), size_t n_read);
 
 /* _GD_ClearError: Everything's A-OK; clear the last error. */
 #define _GD_ClearError(D) (D)->error = 0
 
 void _GD_CLincomData(DIRFILE* D, int n, void* data1, gd_type_t return_type,
-    double complex *data2, double complex *data3, double complex* m,
-    double complex *b, gd_spf_t *spf, size_t n_read);
+    GD_DCOMPLEXP(data2), GD_DCOMPLEXP(data3), GD_DCOMPLEXV(m), GD_DCOMPLEXV(b),
+    gd_spf_t *spf, size_t n_read);
 void _GD_ConvertType(DIRFILE* D, const void *data_in, gd_type_t in_type,
     void *data_out, gd_type_t out_type, size_t n) gd_nothrow;
 size_t _GD_DoField(DIRFILE*, gd_entry_t*, int, off64_t, size_t, gd_type_t,
@@ -525,7 +574,7 @@ gd_entry_t* _GD_FindField(DIRFILE* D, const char* field_code,
     gd_entry_t** list, unsigned int u, unsigned int *index);
 gd_entry_t* _GD_FindFieldAndRepr(DIRFILE* D, const char* field_code_in,
     char** field_code, int* repr, unsigned int *index, int set);
-uint32_t _GD_FindVersion(DIRFILE *D);
+uint64_t _GD_FindVersion(DIRFILE *D);
 void _GD_FixEndianness(char* databuffer, size_t size, size_t ns);
 void _GD_Flush(DIRFILE* D, gd_entry_t *E);
 void _GD_FlushMeta(DIRFILE* D, int fragment, int force);
@@ -668,5 +717,10 @@ static inline __attribute__ ((__const__)) double __NAN()
 }
 #define NAN __NAN()
 #endif /* !defined(NAN) */
+
+#ifndef __cplusplus
+# undef gd_nothrow
+# define gd_nothrow
+#endif
 
 #endif

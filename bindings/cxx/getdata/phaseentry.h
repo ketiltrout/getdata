@@ -52,7 +52,7 @@ namespace GetData {
       };
 
       virtual gd_shift_t Shift() {
-        return E.shift;
+        return E.u.phase.shift;
       };
 
       int SetInput(const char* field);

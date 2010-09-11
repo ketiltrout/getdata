@@ -42,7 +42,7 @@ int main(void)
   CHECKI(error,0);
   CHECKI(n,0);
   CHECKI(ret,0);
-  CHECKI(E.bitnum, 3);
+  CHECKI(E.u.bit.bitnum, 3);
   CHECKP(E.scalar[0]);
 
   return r;

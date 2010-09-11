@@ -112,7 +112,6 @@ libgetdata_la_LDFLAGS = $(EXPORT_DYNAMIC) -export-symbols-regex '^[^_]' \
 libgetdata_la_LIBADD = $(LIBLTDL) $(DLOPEN_LIBGETDATASLIM_LA) \
 											 $(DLOPEN_LIBGETDATAGZIP_LA) \
 											 $(DLOPEN_LIBGETDATABZIP2_LA) $(DLOPEN_LIBGETDATALZMA_LA)
-libgetdata_la_CPPFLAGS = $(AM_CPPFLAGS) -DGDLIB
 
 libgetdataslim_la_SOURCES = slim.c ${DEBUG_C}
 libgetdataslim_la_LDFLAGS = $(SLIM_LDFLAGS) -release $(PACKAGE_VERSION) \

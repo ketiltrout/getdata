@@ -37,7 +37,7 @@ int main(void)
   CHECKS(E.field, "data");
   CHECKX(E.field_type, GD_PHASE_ENTRY);
   CHECKS(E.in_fields[0], "in1");
-  CHECKI(E.shift, 3);
+  CHECKI(E.u.phase.shift, 3);
 
   return 0;
 }

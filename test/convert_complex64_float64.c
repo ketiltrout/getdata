@@ -17,7 +17,11 @@ int main(void)
   const char* format = __TEST__ "dirfile/format";
   const char* format_data = "data CONST FLOAT64 0\n";
   double c = 0;
+#ifdef GD_NO_C99_API
+  float d[] = {8, 0};
+#else
   float complex d = 8;
+#endif
   int fd, r = 0;
 
   mkdir(filedir, 0777);
@@ -27,7 +31,11 @@ int main(void)
   close(fd);
 
   DIRFILE* D = gd_open(filedir, GD_RDWR);
+#ifdef GD_NO_C99_API
+  int n1 = gd_put_constant(D, "data", GD_COMPLEX64, d);
+#else
   int n1 = gd_put_constant(D, "data", GD_COMPLEX64, &d);
+#endif
   int n2 = gd_get_constant(D, "data", GD_FLOAT64, &c);
   int error = gd_error(D);
 

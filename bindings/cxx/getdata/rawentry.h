@@ -48,11 +48,11 @@ namespace GetData {
           int fragment_index = 0);
 
       virtual gd_spf_t SamplesPerFrame() {
-        return E.spf;
+        return E.u.raw.spf;
       };
 
       virtual DataType RawType() {
-        return (DataType)E.data_type;
+        return (DataType)E.u.raw.type;
       };
 
       const char* FileName();

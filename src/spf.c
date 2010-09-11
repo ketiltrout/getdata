@@ -45,7 +45,7 @@ gd_spf_t _GD_GetSPF(DIRFILE* D, gd_entry_t* E)
     case GD_RAW_ENTRY:
       if (!E->e->calculated)
         _GD_CalculateEntry(D, E);
-      spf = E->spf;
+      spf = E->u.raw.spf;
       break;
     case GD_LINCOM_ENTRY:
     case GD_MULTIPLY_ENTRY:
@@ -77,7 +77,7 @@ gd_spf_t _GD_GetSPF(DIRFILE* D, gd_entry_t* E)
 
 /* Get the number of samples for each frame for the given field
 */
-gd_spf_t gd_spf(DIRFILE* D, const char *field_code_in)
+gd_spf_t gd_spf(DIRFILE* D, const char *field_code_in) gd_nothrow
 {
   gd_spf_t spf = 0;
   gd_entry_t* entry;

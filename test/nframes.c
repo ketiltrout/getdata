@@ -38,7 +38,7 @@ int main(void)
   rmdir(filedir);
 
   CHECKI(error, 0);
-  CHECKI(n, len / 2);
+  CHECKI(n, (off_t)len / 2);
 
   return r;
 }

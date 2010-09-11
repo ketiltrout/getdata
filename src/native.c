@@ -37,7 +37,7 @@ gd_type_t _GD_NativeType(DIRFILE* D, gd_entry_t* E, int repr)
 
   switch(E->field_type) {
     case GD_RAW_ENTRY:
-      type = E->data_type;
+      type = E->u.raw.type;
       break;
     case GD_LINCOM_ENTRY:
       if (!E->e->calculated)
@@ -48,7 +48,7 @@ gd_type_t _GD_NativeType(DIRFILE* D, gd_entry_t* E, int repr)
         break;
       }
 
-      for (i = 0; i < E->n_fields; ++i) {
+      for (i = 0; i < E->u.lincom.n_fields; ++i) {
         if (_GD_BadInput(D, E, i))
           break;
 
@@ -61,13 +61,13 @@ gd_type_t _GD_NativeType(DIRFILE* D, gd_entry_t* E, int repr)
       break;
     case GD_LINTERP_ENTRY:
       /* initialise the table, if necessary */
-      if (E->e->table_len < 0) {
+      if (E->e->u.linterp.table_len < 0) {
         _GD_ReadLinterpFile(D, E);
         if (D->error != GD_E_OK)
           break;
       }
 
-      type = E->e->complex_table ? GD_COMPLEX128 : GD_FLOAT64;
+      type = E->e->u.linterp.complex_table ? GD_COMPLEX128 : GD_FLOAT64;
       break;
     case GD_MULTIPLY_ENTRY:
     case GD_DIVIDE_ENTRY:
@@ -115,7 +115,7 @@ gd_type_t _GD_NativeType(DIRFILE* D, gd_entry_t* E, int repr)
       type = GD_INT64;
       break;
     case GD_CONST_ENTRY:
-      type = E->const_type;
+      type = E->u.cons.type;
       break;
     case GD_STRING_ENTRY:
       type = GD_NULL;
@@ -142,7 +142,7 @@ gd_type_t _GD_NativeType(DIRFILE* D, gd_entry_t* E, int repr)
   return type;
 }
 
-gd_type_t gd_native_type(DIRFILE* D, const char* field_code_in)
+gd_type_t gd_native_type(DIRFILE* D, const char* field_code_in) gd_nothrow
 {
   gd_type_t type = GD_UNKNOWN;
   gd_entry_t* entry;

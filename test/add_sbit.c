@@ -29,8 +29,8 @@ int main(void)
     CHECKI(e.field_type, GD_SBIT_ENTRY);
     CHECKS(e.in_fields[0], "input");
     CHECKI(e.fragment_index, 0);
-    CHECKI(e.bitnum, 1);
-    CHECKI(e.numbits, 1);
+    CHECKI(e.u.bit.bitnum, 1);
+    CHECKI(e.u.bit.numbits, 1);
     gd_free_entry_strings(&e);
   }
 

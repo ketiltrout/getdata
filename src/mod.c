@@ -98,15 +98,15 @@ static int _GD_AlterScalar(DIRFILE* D, int alter_literal, gd_type_t type,
   if (!error && set_lout) {
     r |= GD_AS_MODIFIED;
     if (type == GD_INT64)
-      *(int64_t*)lout = *(int64_t*)lin;
+      *(int64_t *)lout = *(int64_t *)lin;
     else if (type == GD_COMPLEX128)
-      *(double complex*)lout = *(double complex*)lin;
+      memcpy(lout, lin, 2 * sizeof(double));
     else if (type == GD_FLOAT64)
-      *(double*)lout = *(double*)lin;
+      *(double *)lout = *(double *)lin;
     else if (type == GD_INT16)
-      *(int16_t*)lout = *(int16_t*)lin;
+      *(int16_t *)lout = *(int16_t *)lin;
     else if (type == GD_UINT16)
-      *(uint16_t*)lout = *(uint16_t*)lin;
+      *(uint16_t *)lout = *(uint16_t *)lin;
     else
       _GD_InternalError(D);
   }
@@ -134,51 +134,53 @@ static void _GD_SPFConvert(DIRFILE* D, void *A, gd_spf_t spfA, void *B,
       break;
     case GD_INT8:
       for (i = 0; i < n; i++)
-        ((int8_t*)A)[i] = ((int8_t*)B)[i * spfB / spfA];
+        ((int8_t *)A)[i] = ((int8_t *)B)[i * spfB / spfA];
       break;
     case GD_UINT8:
       for (i = 0; i < n; i++)
-        ((uint8_t*)A)[i] = ((uint8_t*)B)[i * spfB / spfA];
+        ((uint8_t *)A)[i] = ((uint8_t *)B)[i * spfB / spfA];
       break;
     case GD_INT16:
       for (i = 0; i < n; i++)
-        ((int16_t*)A)[i] = ((int16_t*)B)[i * spfB / spfA];
+        ((int16_t *)A)[i] = ((int16_t *)B)[i * spfB / spfA];
       break;
     case GD_UINT16:
       for (i = 0; i < n; i++)
-        ((uint16_t*)A)[i] = ((uint16_t*)B)[i * spfB / spfA];
+        ((uint16_t *)A)[i] = ((uint16_t *)B)[i * spfB / spfA];
       break;
     case GD_INT32:
       for (i = 0; i < n; i++)
-        ((int32_t*)A)[i] = ((int32_t*)B)[i * spfB / spfA];
+        ((int32_t *)A)[i] = ((int32_t *)B)[i * spfB / spfA];
       break;
     case GD_UINT32:
       for (i = 0; i < n; i++)
-        ((uint32_t*)A)[i] = ((uint32_t*)B)[i * spfB / spfA];
+        ((uint32_t *)A)[i] = ((uint32_t *)B)[i * spfB / spfA];
       break;
     case GD_INT64:
       for (i = 0; i < n; i++)
-        ((int64_t*)A)[i] = ((int64_t*)B)[i * spfB / spfA];
+        ((int64_t *)A)[i] = ((int64_t *)B)[i * spfB / spfA];
       break;
     case GD_UINT64:
       for (i = 0; i < n; i++)
-        ((uint64_t*)A)[i] = ((uint64_t*)B)[i * spfB / spfA];
+        ((uint64_t *)A)[i] = ((uint64_t *)B)[i * spfB / spfA];
       break;
     case GD_FLOAT32:
       for (i = 0; i < n; i++)
-        ((float*)A)[i] = ((float*)B)[i * spfB / spfA];
+        ((float *)A)[i] = ((float *)B)[i * spfB / spfA];
       break;
     case GD_FLOAT64:
       for (i = 0; i < n; i++)
-        ((double*)A)[i] = ((double*)B)[i * spfB / spfA];
+        ((double *)A)[i] = ((double *)B)[i * spfB / spfA];
       break;
     case GD_COMPLEX64:
       for (i = 0; i < n; i++)
-        ((float complex*)A)[i] = ((float complex*)B)[i * spfB / spfA];
+        memcpy((float *)A + 2 * i, (float *)B + 2 * (i * spfB / spfA),
+            2 * sizeof(float));
       break;
     case GD_COMPLEX128:
       for (i = 0; i < n; i++)
-        ((double complex*)A)[i] = ((double complex*)B)[i * spfB / spfA];
+        memcpy((double *)A + 2 * i, (double *)B + 2 * (i * spfB / spfA),
+            2 * sizeof(double));
       break;
     default:
       _GD_SetError(D, GD_E_BAD_TYPE, type, NULL, 0, NULL);
@@ -227,8 +229,9 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
 
   switch(E->field_type) {
     case GD_RAW_ENTRY:
-      j = _GD_AlterScalar(D, N->spf && N->spf != E->spf, GD_UINT16, &Q.spf,
-          &N->spf, Q.scalar + 0, N->scalar[0], E->e->calculated);
+      j = _GD_AlterScalar(D, N->u.raw.spf && N->u.raw.spf != E->u.raw.spf,
+          GD_UINT16, &Q.u.raw.spf, &N->u.raw.spf, Q.scalar + 0, N->scalar[0],
+          E->e->calculated);
       
       if (j & GD_AS_ERROR)
         break;
@@ -237,17 +240,20 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
       if (j & GD_AS_NEED_RECALC)
         Qe.calculated = 0;
 
-      Q.data_type = (N->data_type == GD_NULL) ? E->data_type : N->data_type;
+      Q.u.raw.type = (N->u.raw.type == GD_NULL) ? E->u.raw.type :
+        N->u.raw.type;
 
       /* nothing to do */
-      if (Q.spf == E->spf && Q.data_type == E->data_type &&
-          Q.scalar[0] == E->scalar[0])
+      if (Q.u.raw.spf == E->u.raw.spf && Q.u.raw.type == E->u.raw.type
+          && Q.scalar[0] == E->scalar[0])
         break;
 
       modified = 1;
 
-      if (Q.data_type & 0x40 || (Qe.size = GD_SIZE(Q.data_type)) == 0) {
-        _GD_SetError(D, GD_E_BAD_TYPE, Q.data_type, NULL, 0, NULL);
+      if (Q.u.raw.type & 0x40 ||
+          (Qe.u.raw.size = GD_SIZE(Q.u.raw.type)) == 0)
+      {
+        _GD_SetError(D, GD_E_BAD_TYPE, Q.u.raw.type, NULL, 0, NULL);
         dreturn("%i", -1);
         return -1;
       }
@@ -259,11 +265,11 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
         void *buffer2;
 
         if (j & GD_AS_NEED_RECALC)
-          if (gd_get_constant(D, Q.scalar[0], GD_UINT16, &Q.spf))
+          if (gd_get_constant(D, Q.scalar[0], GD_UINT16, &Q.u.raw.spf))
             break;
 
-        const off64_t nf = BUFFER_SIZE / max(E->e->size, GD_SIZE(Q.data_type)) /
-          max(E->spf, Q.spf);
+        const off64_t nf = BUFFER_SIZE / max(E->e->u.raw.size,
+            GD_SIZE(Q.u.raw.type)) / max(E->u.raw.spf, Q.u.raw.spf);
 
         if (D->fragment[E->fragment_index].protection & GD_PROTECT_DATA)
           _GD_SetError(D, GD_E_PROTECTED, GD_E_PROTECTED_DATA, NULL, 0,
@@ -276,28 +282,35 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
         if (D->error)
           break;
 
-        const struct encoding_t* enc = _gd_ef + E->e->file[0].encoding;
+        const struct encoding_t* enc = _gd_ef + E->e->u.raw.file[0].encoding;
 
-        if (_GD_SetEncodedName(D, E->e->file, E->e->filebase, 0))
+        if (_GD_SetEncodedName(D, E->e->u.raw.file, E->e->u.raw.filebase, 0))
           ; /* error already set */
-        else if (E->e->file[0].fp == -1 && (*enc->open)(E->e->file, 0, 0))
-          _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[0].name, errno, NULL);
-        else if ((*enc->seek)(E->e->file, 0, E->data_type, 1) == -1)
-          _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[0].name, errno, NULL);
+        else if (E->e->u.raw.file[0].fp == -1 && (*enc->open)(E->e->u.raw.file,
+              0, 0))
+          _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno,
+              NULL);
+        else if ((*enc->seek)(E->e->u.raw.file, 0, E->u.raw.type, 1) == -1)
+          _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno,
+              NULL);
 
         if (D->error)
           break;
 
         /* Create a temporary file and open it */
-        if (_GD_SetEncodedName(D, E->e->file + 1, E->e->filebase, 1))
+        if (_GD_SetEncodedName(D, E->e->u.raw.file + 1, E->e->u.raw.filebase,
+              1))
           ; /* error already set */
-        else if ((*enc->temp)(E->e->file, GD_TEMP_OPEN))
-          _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[1].name, errno, NULL);
-        else if ((*enc->seek)(E->e->file + 1, 0, E->data_type, 1) == -1)
-          _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[1].name, errno, NULL);
+        else if ((*enc->temp)(E->e->u.raw.file, GD_TEMP_OPEN))
+          _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[1].name, errno,
+              NULL);
+        else if ((*enc->seek)(E->e->u.raw.file + 1, 0, E->u.raw.type, 1) ==
+            -1)
+          _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[1].name, errno,
+              NULL);
 
         if (D->error) {
-          (*enc->temp)(E->e->file, GD_TEMP_DESTROY);
+          (*enc->temp)(E->e->u.raw.file, GD_TEMP_DESTROY);
           break;
         }
 
@@ -306,22 +319,24 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
 
         /* Now copy the old file to the new file */
         for (;;) {
-          nread = (*enc->read)(E->e->file, buffer1, E->data_type, nf * E->spf);
+          nread = (*enc->read)(E->e->u.raw.file, buffer1, E->u.raw.type,
+              nf * E->u.raw.spf);
 
           if (nread < 0) {
-            _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[1].name, errno, NULL);
+            _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[1].name, errno,
+                NULL);
             break;
           }
 
           if (nread == 0)
             break;
 
-          ns_out = nread * Q.spf / E->spf;
+          ns_out = nread * Q.u.raw.spf / E->u.raw.spf;
 
           /* spf convert */
-          if (Q.spf != E->spf)
-            _GD_SPFConvert(D, buffer2, Q.spf, buffer1, E->spf, E->data_type,
-                ns_out);
+          if (Q.u.raw.spf != E->u.raw.spf)
+            _GD_SPFConvert(D, buffer2, Q.u.raw.spf, buffer1, E->u.raw.spf,
+                E->u.raw.type, ns_out);
           else {
             ptr = buffer1;
             buffer1 = buffer2;
@@ -329,19 +344,21 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
           }
 
           /* type convert */
-          if (Q.data_type != E->data_type)
-            _GD_ConvertType(D, buffer2, E->data_type, buffer1, Q.data_type,
-                ns_out);
+          if (Q.u.raw.type != E->u.raw.type)
+            _GD_ConvertType(D, buffer2, E->u.raw.type, buffer1,
+                Q.u.raw.type, ns_out);
           else {
             ptr = buffer1;
             buffer1 = buffer2;
             buffer2 = ptr;
           }
 
-          nwrote = (*enc->write)(E->e->file + 1, buffer1, Q.data_type, ns_out);
+          nwrote = (*enc->write)(E->e->u.raw.file + 1, buffer1,
+              Q.u.raw.type, ns_out);
 
           if (nwrote < ns_out) {
-            _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[1].name, errno, NULL);
+            _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[1].name, errno,
+                NULL);
             break;
           }
         }
@@ -351,29 +368,34 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
 
         /* An error occurred, clean up */
         if (D->error)
-          (*enc->temp)(E->e->file, GD_TEMP_DESTROY);
+          (*enc->temp)(E->e->u.raw.file, GD_TEMP_DESTROY);
         /* Well, I suppose the copy worked.  Close both files */
-        else if ((*enc->close)(E->e->file) || (*enc->sync)(E->e->file + 1) ||
-            (*enc->close)(E->e->file + 1))
-          _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[1].name, errno, NULL);
+        else if ((*enc->close)(E->e->u.raw.file) ||
+            (*enc->sync)(E->e->u.raw.file + 1) ||
+            (*enc->close)(E->e->u.raw.file + 1))
+        {
+          _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[1].name, errno,
+              NULL);
         /* Move the temporary file over the old file */
-        else if ((*enc->temp)(E->e->file, GD_TEMP_MOVE))
-          _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[0].name, errno, NULL);
+        } else if ((*enc->temp)(E->e->u.raw.file, GD_TEMP_MOVE))
+          _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno,
+              NULL);
       }
 
       break;
     case GD_LINCOM_ENTRY:
-      Q.n_fields = (N->n_fields == 0) ? E->n_fields : N->n_fields;
-      if (Q.n_fields < 1 || Q.n_fields > GD_MAX_LINCOM) {
+      Q.u.lincom.n_fields = (N->u.lincom.n_fields == 0) ? E->u.lincom.n_fields :
+        N->u.lincom.n_fields;
+      if (Q.u.lincom.n_fields < 1 || Q.u.lincom.n_fields > GD_MAX_LINCOM) {
         _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_NFIELDS, NULL,
-            E->n_fields, NULL);
+            E->u.lincom.n_fields, NULL);
         break;
       }
 
-      if (Q.n_fields != E->n_fields) {
+      if (Q.u.lincom.n_fields != E->u.lincom.n_fields) {
         modified = 1;
-        if (Q.n_fields < E->n_fields)
-          for (i = Q.n_fields; i < E->n_fields; ++i) {
+        if (Q.u.lincom.n_fields < E->u.lincom.n_fields)
+          for (i = Q.u.lincom.n_fields; i < E->u.lincom.n_fields; ++i) {
             field_free |= 1 << i;
             scalar_free |= 1 << i;
             scalar_free |= 1 << (i + GD_MAX_LINCOM);
@@ -382,9 +404,9 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
 
       Q.comp_scal = 0;
 
-      for (i = 0; i < Q.n_fields; ++i) {
+      for (i = 0; i < Q.u.lincom.n_fields; ++i) {
         if (flags & 0x1)
-          if (E->n_fields <= i || (N->in_fields[i] != NULL && 
+          if (E->u.lincom.n_fields <= i || (N->in_fields[i] != NULL && 
                 strcmp(E->in_fields[i], N->in_fields[i])))
           {
             if ((Q.in_fields[i] = strdup(N->in_fields[i])) == NULL) {
@@ -397,14 +419,16 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
 
         if (flags & 0x2) {
           if (N->comp_scal) {
-            j = _GD_AlterScalar(D, E->cm[i] != N->cm[i], GD_COMPLEX128,
-                Q.cm + i, N->cm + i, Q.scalar + i, N->scalar[i],
+            j = _GD_AlterScalar(D, !_gd_ccmpc(E->u.lincom.cm[i],
+                  N->u.lincom.cm[i]), GD_COMPLEX128, Q.u.lincom.cm + i,
+                N->u.lincom.cm + i, Q.scalar + i, N->scalar[i],
                 E->e->calculated);
-            Q.m[i] = creal(Q.cm[i]);
+            Q.u.lincom.m[i] = creal(Q.u.lincom.cm[i]);
           } else {
-            j = _GD_AlterScalar(D, E->m[i] != N->m[i], GD_FLOAT64, Q.m + i,
-                N->m + i, Q.scalar + i, N->scalar[i], E->e->calculated);
-            Q.cm[i] = Q.m[i];
+            j = _GD_AlterScalar(D, E->u.lincom.m[i] != N->u.lincom.m[i],
+                GD_FLOAT64, Q.u.lincom.m + i, N->u.lincom.m + i, Q.scalar + i,
+                N->scalar[i], E->e->calculated);
+            _gd_r2c(Q.u.lincom.cm[i], Q.u.lincom.m[i]);
           }
 
           if (j & GD_AS_FREE_SCALAR)
@@ -419,15 +443,17 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
 
         if (flags & 0x4) {
           if (N->comp_scal) {
-            j = _GD_AlterScalar(D, E->cb[i] != N->cb[i], GD_COMPLEX128,
-                Q.cb + i, N->cb + i, Q.scalar + i + GD_MAX_LINCOM,
+            j = _GD_AlterScalar(D, !_gd_ccmpc(E->u.lincom.cb[i],
+                  N->u.lincom.cb[i]), GD_COMPLEX128, Q.u.lincom.cb + i,
+                N->u.lincom.cb + i, Q.scalar + i + GD_MAX_LINCOM,
                 N->scalar[i +  GD_MAX_LINCOM], E->e->calculated);
-            Q.b[i] = creal(Q.cb[i]);
+            Q.u.lincom.b[i] = creal(Q.u.lincom.cb[i]);
           } else {
-            j = _GD_AlterScalar(D, E->b[i] != N->b[i], GD_FLOAT64, Q.b + i,
-                N->b + i, Q.scalar + i + GD_MAX_LINCOM,
-                N->scalar[i + GD_MAX_LINCOM], E->e->calculated);
-            Q.cb[i] = Q.b[i];
+            j = _GD_AlterScalar(D, E->u.lincom.b[i] != N->u.lincom.b[i],
+                GD_FLOAT64, Q.u.lincom.b + i, N->u.lincom.b + i,
+                Q.scalar + i + GD_MAX_LINCOM, N->scalar[i + GD_MAX_LINCOM],
+                E->e->calculated);
+            _gd_r2c(Q.u.lincom.cb[i], Q.u.lincom.b[i]);
           }
 
           if (j & GD_AS_FREE_SCALAR)
@@ -440,7 +466,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
             modified = 1;
         }
 
-        if (cimag(Q.cm[i]) || cimag(Q.cb[i]))
+        if (cimag(Q.u.lincom.cm[i]) || cimag(Q.u.lincom.cb[i]))
           Q.comp_scal = 1;
       }
 
@@ -457,41 +483,44 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
         field_free = 1;
       }
 
-      if (N->table != NULL && strcmp(E->table, N->table)) {
-        Q.table = strdup(N->table);
-        Qe.table_path = NULL;
+      if (N->u.linterp.table != NULL && strcmp(E->u.linterp.table,
+            N->u.linterp.table))
+      {
+        Q.u.linterp.table = strdup(N->u.linterp.table);
+        Qe.u.linterp.table_path = NULL;
 
-        if (Q.table == NULL) {
+        if (Q.u.linterp.table == NULL) {
           _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
           break;
         }
 
         if (flags) {
-          if (E->e->table_path == NULL)
+          if (E->e->u.linterp.table_path == NULL)
             if (_GD_SetTablePath(D, E, E->e))
               break;
 
-          if (Qe.table_path == NULL)
+          if (Qe.u.linterp.table_path == NULL)
             if (_GD_SetTablePath(D, &Q, &Qe))
               break;
 
-          if (_GD_Rename(E->e->table_path, Qe.table_path)) {
-            _GD_SetError(D, GD_E_RAW_IO, 0, E->e->table_path, errno, 0);
+          if (_GD_Rename(E->e->u.linterp.table_path, Qe.u.linterp.table_path)) {
+            _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.linterp.table_path, errno,
+                0);
             break;
           }
         }
 
         modified = 1;
-        free(E->table);
-        free(E->e->table_path);
+        free(E->u.linterp.table);
+        free(E->e->u.linterp.table_path);
       }
 
       break;
     case GD_BIT_ENTRY:
     case GD_SBIT_ENTRY:
-      j = _GD_AlterScalar(D, N->numbits >= 1 && E->numbits != N->numbits,
-          GD_INT16, &Q.numbits, &N->numbits, Q.scalar + 1, N->scalar[1],
-          E->e->calculated);
+      j = _GD_AlterScalar(D, N->u.bit.numbits >= 1 && E->u.bit.numbits !=
+          N->u.bit.numbits, GD_INT16, &Q.u.bit.numbits, &N->u.bit.numbits,
+          Q.scalar + 1, N->scalar[1], E->e->calculated);
 
       if (j & GD_AS_ERROR)
         break;
@@ -502,9 +531,9 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
       if (j & GD_AS_MODIFIED)
         modified = 1;
 
-      j = _GD_AlterScalar(D, N->bitnum >= 0 && E->bitnum != N->bitnum,
-          GD_INT16, &Q.bitnum, &N->bitnum, Q.scalar + 0, N->scalar[0],
-          E->e->calculated);
+      j = _GD_AlterScalar(D, N->u.bit.bitnum >= 0 && E->u.bit.bitnum !=
+          N->u.bit.bitnum, GD_INT16, &Q.u.bit.bitnum, &N->u.bit.bitnum,
+          Q.scalar + 0, N->scalar[0], E->e->calculated);
 
       if (j & GD_AS_ERROR)
         break;
@@ -558,17 +587,18 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
 
       Q.comp_scal = 0;
       if (N->comp_scal) {
-        j = _GD_AlterScalar(D, E->cdividend != N->cdividend, GD_COMPLEX128,
-            &Q.cdividend, &(N->cdividend), Q.scalar, N->scalar[0],
+        j = _GD_AlterScalar(D, !_gd_ccmpc(E->u.recip.cdividend,
+              N->u.recip.cdividend), GD_COMPLEX128, &Q.u.recip.cdividend,
+            &(N->u.recip.cdividend), Q.scalar, N->scalar[0],
             E->e->calculated);
-        Q.dividend = creal(Q.cdividend);
-        if (cimag(Q.cdividend) != 0)
+        Q.u.recip.dividend = creal(Q.u.recip.cdividend);
+        if (cimag(Q.u.recip.cdividend) != 0)
           Q.comp_scal = 1;
       } else {
-        j = _GD_AlterScalar(D, E->dividend != N->dividend, GD_FLOAT64,
-            &Q.dividend, &(N->dividend), Q.scalar, N->scalar[0],
-            E->e->calculated);
-        Q.cdividend = Q.dividend;
+        j = _GD_AlterScalar(D, E->u.recip.dividend != N->u.recip.dividend,
+            GD_FLOAT64, &Q.u.recip.dividend, &(N->u.recip.dividend), Q.scalar,
+            N->scalar[0], E->e->calculated);
+        _gd_r2c(Q.u.recip.cdividend, Q.u.recip.dividend);
       }
 
       if (j & GD_AS_ERROR)
@@ -585,8 +615,9 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
 
       break;
     case GD_PHASE_ENTRY:
-      j = _GD_AlterScalar(D, E->shift != N->shift, GD_INT64, &Q.shift,
-          &N->shift, Q.scalar + 0, N->scalar[0], E->e->calculated);
+      j = _GD_AlterScalar(D, E->u.phase.shift != N->u.phase.shift, GD_INT64,
+          &Q.u.phase.shift, &N->u.phase.shift, Q.scalar + 0, N->scalar[0],
+          E->e->calculated);
 
       if (j & GD_AS_ERROR)
         break;
@@ -617,23 +648,26 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
         field_free = 1;
       }
 
-      Q.poly_ord = (N->poly_ord == 0) ? E->poly_ord : N->poly_ord;
-      if (Q.poly_ord != E->poly_ord)
+      Q.u.polynom.poly_ord = (N->u.polynom.poly_ord == 0) ?
+        E->u.polynom.poly_ord : N->u.polynom.poly_ord;
+      if (Q.u.polynom.poly_ord != E->u.polynom.poly_ord)
         modified = 1;
 
       Q.comp_scal = 0;
 
       if (flags & 0x1)
-        for (i = 0; i <= Q.poly_ord; ++i) {
+        for (i = 0; i <= Q.u.polynom.poly_ord; ++i) {
           if (N->comp_scal) {
-            j = _GD_AlterScalar(D, E->ca[i] != N->ca[i], GD_COMPLEX128,
-                Q.ca + i, N->ca + i, Q.scalar + i, N->scalar[i],
+            j = _GD_AlterScalar(D, !_gd_ccmpc(E->u.polynom.ca[i],
+                  N->u.polynom.ca[i]), GD_COMPLEX128, Q.u.polynom.ca + i,
+                N->u.polynom.ca + i, Q.scalar + i, N->scalar[i],
                 E->e->calculated);
-            Q.a[i] = creal(Q.ca[i]);
+            Q.u.polynom.a[i] = creal(Q.u.polynom.ca[i]);
           } else {
-            j = _GD_AlterScalar(D, E->a[i] != N->a[i], GD_FLOAT64, Q.a + i,
-                N->a + i, Q.scalar + i, N->scalar[i], E->e->calculated);
-            Q.ca[i] = Q.a[i];
+            j = _GD_AlterScalar(D, E->u.polynom.a[i] != N->u.polynom.a[i],
+                GD_FLOAT64, Q.u.polynom.a + i, N->u.polynom.a + i, Q.scalar + i,
+                N->scalar[i], E->e->calculated);
+            _gd_r2c(Q.u.polynom.ca[i], Q.u.polynom.a[i]);
           }
 
           if (j & GD_AS_FREE_SCALAR)
@@ -645,7 +679,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
           if (j & GD_AS_MODIFIED)
             modified = 1;
 
-          if (cimag(Q.ca[i]))
+          if (cimag(Q.u.polynom.ca[i]))
             Q.comp_scal = 1;
         }
 
@@ -654,35 +688,47 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
 
       break;
     case GD_CONST_ENTRY:
-      Q.const_type = (N->const_type == GD_NULL) ? E->const_type : N->const_type;
+      Q.u.cons.type = (N->u.cons.type == GD_NULL) ? E->u.cons.type :
+        N->u.cons.type;
 
-      if (Q.const_type & 0x40 || GD_SIZE(Q.const_type) == 0) {
-        _GD_SetError(D, GD_E_BAD_TYPE, Q.const_type, NULL, 0, NULL);
+      if (Q.u.cons.type & 0x40 || GD_SIZE(Q.u.cons.type) == 0) {
+        _GD_SetError(D, GD_E_BAD_TYPE, Q.u.cons.type, NULL, 0, NULL);
         dreturn("%i", -1);
         return -1;
       }
 
-      if (Q.const_type != E->const_type) {
+      if (Q.u.cons.type != E->u.cons.type) {
         modified = 1; 
         /* type convert */
-        if (Q.const_type & GD_COMPLEX)
-          Qe.cconst = (E->const_type & GD_COMPLEX) ? E->e->cconst :
-            (E->const_type & GD_IEEE754) ? (double complex)E->e->dconst :
-            (E->const_type & GD_SIGNED) ? (double complex)E->e->iconst :
-            (double complex)E->e->uconst;
-        if (Q.const_type & GD_IEEE754)
-          Qe.dconst = (E->const_type & GD_IEEE754) ? E->e->dconst :
-            (E->const_type & GD_COMPLEX) ? (double)E->e->cconst :
-            (E->const_type & GD_SIGNED) ? (double)E->e->iconst :
-            (double)E->e->uconst;
-        else if (Q.const_type & GD_SIGNED)
-          Qe.iconst = (E->const_type & GD_IEEE754) ? (int64_t)E->e->dconst :
-            (E->const_type & GD_COMPLEX) ? (int64_t)E->e->cconst :
-            (E->const_type & GD_SIGNED) ? E->e->iconst : (int64_t)E->e->uconst;
+        if (Q.u.cons.type & GD_COMPLEX)
+#ifdef GD_NO_C99_API
+          Qe.u.cons.d.c[0] = (E->u.cons.type & GD_COMPLEX) ?
+            E->e->u.cons.d.c[0] : (E->u.cons.type & GD_IEEE754) ?
+            E->e->u.cons.d.d : (E->u.cons.type & GD_SIGNED) ?
+            (double)E->e->u.cons.d.i : (double)E->e->u.cons.d.u;
+          Qe.u.cons.d.c[1] = (E->u.cons.type & GD_COMPLEX) ?
+            E->e->u.cons.d.c[1] : 0;
+#else
+          Qe.u.cons.d.c = (E->u.cons.type & GD_COMPLEX) ? E->e->u.cons.d.c :
+            (E->u.cons.type & GD_IEEE754) ? (double complex)E->e->u.cons.d.d :
+            (E->u.cons.type & GD_SIGNED) ? (double complex)E->e->u.cons.d.i :
+            (double complex)E->e->u.cons.d.u;
+#endif
+        if (Q.u.cons.type & GD_IEEE754)
+          Qe.u.cons.d.d = (E->u.cons.type & GD_IEEE754) ? E->e->u.cons.d.d :
+            (E->u.cons.type & GD_COMPLEX) ? creal(E->e->u.cons.d.c):
+            (E->u.cons.type & GD_SIGNED) ? (double)E->e->u.cons.d.i :
+            (double)E->e->u.cons.d.u;
+        else if (Q.u.cons.type & GD_SIGNED)
+          Qe.u.cons.d.i = (E->u.cons.type & GD_IEEE754) ?
+            (int64_t)E->e->u.cons.d.d : (E->u.cons.type & GD_COMPLEX) ?
+            (int64_t)creal(E->e->u.cons.d.c) : (E->u.cons.type & GD_SIGNED) ?
+            E->e->u.cons.d.i : (int64_t)E->e->u.cons.d.u;
         else
-          Qe.uconst = (E->const_type & GD_IEEE754) ? (uint64_t)E->e->dconst :
-            (E->const_type & GD_COMPLEX) ? (uint64_t)E->e->cconst :
-            (E->const_type & GD_SIGNED) ? (uint64_t)E->e->iconst : E->e->uconst;
+          Qe.u.cons.d.u = (E->u.cons.type & GD_IEEE754) ?
+            (uint64_t)E->e->u.cons.d.d : (E->u.cons.type & GD_COMPLEX) ?
+            (uint64_t)creal(E->e->u.cons.d.c) : (E->u.cons.type & GD_SIGNED) ?
+            (uint64_t)E->e->u.cons.d.i : E->e->u.cons.d.u;
       }
 
       break;
@@ -766,10 +812,10 @@ int gd_alter_raw(DIRFILE *D, const char *field_code,
   _GD_ClearError(D);
 
   N.field_type = GD_RAW_ENTRY;
-  N.spf = spf;
-  N.data_type = data_type;
+  N.u.raw.spf = spf;
+  N.u.raw.type = data_type;
   N.e = NULL;
-  N.scalar[0] = (spf == 0) ? "" : NULL;
+  N.scalar[0] = (spf == 0) ? (char *)"" : NULL;
 
   int ret = _GD_Change(D, field_code, &N, move);
 
@@ -778,7 +824,7 @@ int gd_alter_raw(DIRFILE *D, const char *field_code,
 }
 
 int gd_alter_lincom(DIRFILE* D, const char* field_code, int n_fields,
-    const char** in_fields, const double* m, const double* b)
+    const char** in_fields, const double* m, const double* b) gd_nothrow
 {
   gd_entry_t N;
   int i;
@@ -803,7 +849,7 @@ int gd_alter_lincom(DIRFILE* D, const char* field_code, int n_fields,
     dreturn("%i", -1);
     return -1;
   } else if (n_fields != 0)
-    N.n_fields = n_fields;
+    N.u.lincom.n_fields = n_fields;
   else {
     gd_entry_t *E = _GD_FindField(D, field_code, D->entry, D->n_entries, NULL);
 
@@ -813,26 +859,26 @@ int gd_alter_lincom(DIRFILE* D, const char* field_code, int n_fields,
       return -1;
     }
 
-    N.n_fields = E->n_fields;
+    N.u.lincom.n_fields = E->u.lincom.n_fields;
   }
   N.e = NULL;
 
-  for (i = 0; i < N.n_fields; ++i) {
+  for (i = 0; i < N.u.lincom.n_fields; ++i) {
     if (in_fields != NULL) {
       flags |= 1;
-      N.in_fields[i] = (char*)in_fields[i];
+      N.in_fields[i] = (char *)in_fields[i];
     }
 
     if (m != NULL) {
       flags |= 2;
-      N.m[i] = m[i];
+      N.u.lincom.m[i] = m[i];
       N.scalar[i] = NULL;
     } else
       N.scalar[i] = "";
 
     if (b != NULL) {
       flags |= 4;
-      N.b[i] = b[i];
+      N.u.lincom.b[i] = b[i];
       N.scalar[i + GD_MAX_LINCOM] = NULL;
     } else
       N.scalar[i + GD_MAX_LINCOM] = "";
@@ -845,7 +891,8 @@ int gd_alter_lincom(DIRFILE* D, const char* field_code, int n_fields,
 }
 
 int gd_alter_clincom(DIRFILE* D, const char* field_code, int n_fields,
-    const char** in_fields, const double complex* cm, const double complex* cb)
+    const char** in_fields, const GD_DCOMPLEXP(cm), const GD_DCOMPLEXP(cb))
+  gd_nothrow
 {
   gd_entry_t N;
   int i;
@@ -870,7 +917,7 @@ int gd_alter_clincom(DIRFILE* D, const char* field_code, int n_fields,
     dreturn("%i", -1);
     return -1;
   } else if (n_fields != 0)
-    N.n_fields = n_fields;
+    N.u.lincom.n_fields = n_fields;
   else {
     gd_entry_t *E = _GD_FindField(D, field_code, D->entry, D->n_entries, NULL);
 
@@ -880,26 +927,26 @@ int gd_alter_clincom(DIRFILE* D, const char* field_code, int n_fields,
       return -1;
     }
 
-    N.n_fields = E->n_fields;
+    N.u.lincom.n_fields = E->u.lincom.n_fields;
   }
   N.e = NULL;
 
-  for (i = 0; i < N.n_fields; ++i) {
+  for (i = 0; i < N.u.lincom.n_fields; ++i) {
     if (in_fields != NULL) {
       flags |= 1;
-      N.in_fields[i] = (char*)in_fields[i];
+      N.in_fields[i] = (char *)in_fields[i];
     }
 
     if (cm != NULL) {
       flags |= 2;
-      N.cm[i] = cm[i];
+      _gd_ca2c(N.u.lincom.cm[i], cm, i);
       N.scalar[i] = NULL;
     } else
       N.scalar[i] = "";
 
     if (cb != NULL) {
       flags |= 4;
-      N.cb[i] = cb[i];
+      _gd_ca2c(N.u.lincom.cb[i], cb, i);
       N.scalar[i + GD_MAX_LINCOM] = NULL;
     } else
       N.scalar[i + GD_MAX_LINCOM] = "";
@@ -926,8 +973,8 @@ int gd_alter_linterp(DIRFILE* D, const char* field_code, const char* in_field,
   }
 
   N.field_type = GD_LINTERP_ENTRY;
-  N.in_fields[0] = (char*)in_field;
-  N.table = (char*)table;
+  N.in_fields[0] = (char *)in_field;
+  N.u.linterp.table = (char *)table;
   N.e = NULL;
 
   int ret = _GD_Change(D, field_code, &N, move);
@@ -937,7 +984,7 @@ int gd_alter_linterp(DIRFILE* D, const char* field_code, const char* in_field,
 }
 
 int gd_alter_bit(DIRFILE* D, const char* field_code, const char* in_field,
-    gd_bit_t bitnum, gd_bit_t numbits)
+    gd_bit_t bitnum, gd_bit_t numbits) gd_nothrow
 {
   gd_entry_t N;
 
@@ -951,12 +998,12 @@ int gd_alter_bit(DIRFILE* D, const char* field_code, const char* in_field,
   }
 
   N.field_type = GD_BIT_ENTRY;
-  N.in_fields[0] = (char*)in_field;
-  N.bitnum = bitnum;
-  N.numbits = numbits;
+  N.in_fields[0] = (char *)in_field;
+  N.u.bit.bitnum = bitnum;
+  N.u.bit.numbits = numbits;
   N.e = NULL;
-  N.scalar[0] = (bitnum == -1) ? "" : NULL;
-  N.scalar[1] = (numbits == 0) ? "" : NULL;
+  N.scalar[0] = (bitnum == -1) ? (char *)"" : NULL;
+  N.scalar[1] = (numbits == 0) ? (char *)"" : NULL;
 
   int ret = _GD_Change(D, field_code, &N, 0);
 
@@ -965,7 +1012,7 @@ int gd_alter_bit(DIRFILE* D, const char* field_code, const char* in_field,
 }
 
 int gd_alter_sbit(DIRFILE* D, const char* field_code, const char* in_field,
-    gd_bit_t bitnum, gd_bit_t numbits)
+    gd_bit_t bitnum, gd_bit_t numbits) gd_nothrow
 {
   gd_entry_t N;
 
@@ -979,12 +1026,12 @@ int gd_alter_sbit(DIRFILE* D, const char* field_code, const char* in_field,
   }
 
   N.field_type = GD_SBIT_ENTRY;
-  N.in_fields[0] = (char*)in_field;
-  N.bitnum = bitnum;
-  N.numbits = numbits;
+  N.in_fields[0] = (char *)in_field;
+  N.u.bit.bitnum = bitnum;
+  N.u.bit.numbits = numbits;
   N.e = NULL;
-  N.scalar[0] = (bitnum == -1) ? "" : NULL;
-  N.scalar[1] = (numbits == 0) ? "" : NULL;
+  N.scalar[0] = (bitnum == -1) ? (char *)"" : NULL;
+  N.scalar[1] = (numbits == 0) ? (char *)"" : NULL;
 
   int ret = _GD_Change(D, field_code, &N, 0);
 
@@ -993,7 +1040,7 @@ int gd_alter_sbit(DIRFILE* D, const char* field_code, const char* in_field,
 }
 
 int gd_alter_recip(DIRFILE* D, const char* field_code, const char* in_field,
-    double dividend)
+    double dividend) gd_nothrow
 {
   gd_entry_t N;
 
@@ -1006,9 +1053,9 @@ int gd_alter_recip(DIRFILE* D, const char* field_code, const char* in_field,
   }
 
   N.field_type = GD_RECIP_ENTRY;
-  N.in_fields[0] = (char*)in_field;
-  N.scalar[0] = (dividend == 0) ? "" : NULL;
-  N.dividend = dividend;
+  N.in_fields[0] = (char *)in_field;
+  N.scalar[0] = (dividend == 0) ? (char *)"" : NULL;
+  N.u.recip.dividend = dividend;
   N.comp_scal = 0;
   N.e = NULL;
 
@@ -1018,6 +1065,7 @@ int gd_alter_recip(DIRFILE* D, const char* field_code, const char* in_field,
   return ret;
 }
 
+#ifndef GD_NO_C99_API
 int gd_alter_crecip(DIRFILE* D, const char* field_code, const char* in_field,
     double complex cdividend)
 {
@@ -1033,9 +1081,37 @@ int gd_alter_crecip(DIRFILE* D, const char* field_code, const char* in_field,
   }
 
   N.field_type = GD_RECIP_ENTRY;
-  N.in_fields[0] = (char*)in_field;
+  N.in_fields[0] = (char *)in_field;
   N.scalar[0] = (cdividend == 0) ? "" : NULL;
-  N.cdividend = cdividend;
+  N.u.recip.cdividend = cdividend;
+  N.comp_scal = 1;
+  N.e = NULL;
+
+  int ret = _GD_Change(D, field_code, &N, 0);
+
+  dreturn("%i", ret);
+  return ret;
+}
+#endif
+
+int gd_alter_crecip89(DIRFILE* D, const char* field_code, const char* in_field,
+    const double cdividend[2]) gd_nothrow
+{
+  gd_entry_t N;
+
+  dtrace("%p, \"%s\", \"%s\", [%g, %g]", D, field_code, in_field, cdividend[0],
+      cdividend[1]);
+
+  if (D->flags & GD_INVALID) {/* don't crash */
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  N.field_type = GD_RECIP_ENTRY;
+  N.in_fields[0] = (char *)in_field;
+  N.scalar[0] = (cdividend[0] == 0 && cdividend[1] == 0) ? (char *)"" : NULL;
+  _gd_a2c(N.u.recip.cdividend, cdividend);
   N.comp_scal = 1;
   N.e = NULL;
 
@@ -1045,21 +1121,8 @@ int gd_alter_crecip(DIRFILE* D, const char* field_code, const char* in_field,
   return ret;
 }
 
-int gd_alter_crecip89(DIRFILE* D, const char* field_code, const char* in_field,
-    double cdividend[2])
-{
-  dtrace("%p, \"%s\", \"%s\", [%g, %g]", D, field_code, in_field, cdividend[0],
-      cdividend[1]);
-
-  int ret = gd_alter_crecip(D, field_code, in_field,
-      *(complex double*)cdividend);
-
-  dreturn("%i", ret);
-  return ret;
-}
-
 int gd_alter_divide(DIRFILE* D, const char* field_code, const char* in_field1,
-    const char* in_field2)
+    const char* in_field2) gd_nothrow
 {
   gd_entry_t N;
 
@@ -1072,8 +1135,8 @@ int gd_alter_divide(DIRFILE* D, const char* field_code, const char* in_field1,
   }
 
   N.field_type = GD_DIVIDE_ENTRY;
-  N.in_fields[0] = (char*)in_field1;
-  N.in_fields[1] = (char*)in_field2;
+  N.in_fields[0] = (char *)in_field1;
+  N.in_fields[1] = (char *)in_field2;
   N.e = NULL;
 
   int ret = _GD_Change(D, field_code, &N, 0);
@@ -1083,7 +1146,7 @@ int gd_alter_divide(DIRFILE* D, const char* field_code, const char* in_field1,
 }
 
 int gd_alter_multiply(DIRFILE* D, const char* field_code, const char* in_field1,
-    const char* in_field2)
+    const char* in_field2) gd_nothrow
 {
   gd_entry_t N;
 
@@ -1096,8 +1159,8 @@ int gd_alter_multiply(DIRFILE* D, const char* field_code, const char* in_field1,
   }
 
   N.field_type = GD_MULTIPLY_ENTRY;
-  N.in_fields[0] = (char*)in_field1;
-  N.in_fields[1] = (char*)in_field2;
+  N.in_fields[0] = (char *)in_field1;
+  N.in_fields[1] = (char *)in_field2;
   N.e = NULL;
 
   int ret = _GD_Change(D, field_code, &N, 0);
@@ -1107,7 +1170,7 @@ int gd_alter_multiply(DIRFILE* D, const char* field_code, const char* in_field1,
 }
 
 int gd_alter_phase(DIRFILE* D, const char* field_code, const char* in_field,
-    gd_shift_t shift)
+    gd_shift_t shift) gd_nothrow
 {
   gd_entry_t N;
 
@@ -1120,8 +1183,8 @@ int gd_alter_phase(DIRFILE* D, const char* field_code, const char* in_field,
   }
 
   N.field_type = GD_PHASE_ENTRY;
-  N.in_fields[0] = (char*)in_field;
-  N.shift = shift;
+  N.in_fields[0] = (char *)in_field;
+  N.u.phase.shift = shift;
   N.e = NULL;
   N.scalar[0] = NULL;
 
@@ -1132,6 +1195,7 @@ int gd_alter_phase(DIRFILE* D, const char* field_code, const char* in_field,
 }
 
 int gd_alter_const(DIRFILE* D, const char* field_code, gd_type_t const_type)
+  gd_nothrow
 {
   gd_entry_t N;
 
@@ -1144,7 +1208,7 @@ int gd_alter_const(DIRFILE* D, const char* field_code, gd_type_t const_type)
   }
 
   N.field_type = GD_CONST_ENTRY;
-  N.const_type = const_type;
+  N.u.cons.type = const_type;
   N.e = NULL;
 
   int ret = _GD_Change(D, field_code, &N, 0);
@@ -1154,7 +1218,7 @@ int gd_alter_const(DIRFILE* D, const char* field_code, gd_type_t const_type)
 }
 
 int gd_alter_polynom(DIRFILE* D, const char* field_code, int poly_ord,
-    const char* in_field, const double* a)
+    const char* in_field, const double* a) gd_nothrow
 {
   gd_entry_t N;
   int i;
@@ -1178,7 +1242,7 @@ int gd_alter_polynom(DIRFILE* D, const char* field_code, int poly_ord,
     dreturn("%i", -1);
     return -1;
   } else if (poly_ord != 0)
-    N.poly_ord = poly_ord;
+    N.u.polynom.poly_ord = poly_ord;
   else {
     gd_entry_t *E = _GD_FindField(D, field_code, D->entry, D->n_entries, NULL);
 
@@ -1188,19 +1252,19 @@ int gd_alter_polynom(DIRFILE* D, const char* field_code, int poly_ord,
       return -1;
     }
 
-    N.poly_ord = E->poly_ord;
+    N.u.polynom.poly_ord = E->u.polynom.poly_ord;
   }
-  N.in_fields[0] = (char*)in_field;
+  N.in_fields[0] = (char *)in_field;
   N.e = NULL;
 
   if (a != NULL) {
     flags |= 1;
-    for (i = 0; i <= N.poly_ord; ++i) {
-      N.a[i] = a[i];
+    for (i = 0; i <= N.u.polynom.poly_ord; ++i) {
+      N.u.polynom.a[i] = a[i];
       N.scalar[i] = NULL;
     }
   } else
-    for (i = 0; i <= N.poly_ord; ++i)
+    for (i = 0; i <= N.u.polynom.poly_ord; ++i)
       N.scalar[i] = "";
 
   int ret = _GD_Change(D, field_code, &N, flags);
@@ -1210,7 +1274,7 @@ int gd_alter_polynom(DIRFILE* D, const char* field_code, int poly_ord,
 }
 
 int gd_alter_cpolynom(DIRFILE* D, const char* field_code, int poly_ord,
-    const char* in_field, const double complex* ca)
+    const char* in_field, const GD_DCOMPLEXP(ca)) gd_nothrow
 {
   gd_entry_t N;
   int i;
@@ -1234,7 +1298,7 @@ int gd_alter_cpolynom(DIRFILE* D, const char* field_code, int poly_ord,
     dreturn("%i", -1);
     return -1;
   } else if (poly_ord != 0)
-    N.poly_ord = poly_ord;
+    N.u.polynom.poly_ord = poly_ord;
   else {
     gd_entry_t *E = _GD_FindField(D, field_code, D->entry, D->n_entries, NULL);
 
@@ -1244,19 +1308,19 @@ int gd_alter_cpolynom(DIRFILE* D, const char* field_code, int poly_ord,
       return -1;
     }
 
-    N.poly_ord = E->poly_ord;
+    N.u.polynom.poly_ord = E->u.polynom.poly_ord;
   }
-  N.in_fields[0] = (char*)in_field;
+  N.in_fields[0] = (char *)in_field;
   N.e = NULL;
 
   if (ca != NULL)  {
     flags |= 1;
-    for (i = 0; i <= N.poly_ord; ++i) {
-      N.ca[i] = ca[i];
+    for (i = 0; i <= N.u.polynom.poly_ord; ++i) {
+      _gd_ca2c(N.u.polynom.ca[i], ca, i);
       N.scalar[i] = NULL;
     }
   } else
-    for (i = 0; i <= N.poly_ord; ++i)
+    for (i = 0; i <= N.u.polynom.poly_ord; ++i)
       N.scalar[i] = "";
 
   int ret = _GD_Change(D, field_code, &N, flags);

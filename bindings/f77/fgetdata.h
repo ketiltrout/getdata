@@ -82,16 +82,16 @@ void F77_FUNC(gdenty, GDENTY) (int* type, const int* dirfile,
     const char* field_code, const int* field_code_l);
 
 void F77_FUNC(gdgecl, GDGECL) (int* nfields,
-    char* infield1, int* infield1_l, double complex* m1, double complex* b1,
-    char* infield2, int* infield2_l, double complex* m2, double complex* b2,
-    char* infield3, int* infield3_l, double complex* m3, double complex* b3,
+    char* infield1, int* infield1_l, GD_DCOMPLEXP(m1), GD_DCOMPLEXP(b1),
+    char* infield2, int* infield2_l, GD_DCOMPLEXP(m2), GD_DCOMPLEXP(b2),
+    char* infield3, int* infield3_l, GD_DCOMPLEXP(m3), GD_DCOMPLEXP(b3),
     int* fragment_index, const int* dirfile, const char* field_code,
     const int* field_code_l);
 
 void F77_FUNC(gdgecp, GDGECP) (int* poly_ord,
-    char* infield, int* infield_l, double complex* a0, double complex* a1,
-    double complex* a2, double complex* a3, double complex* a4,
-    double complex* a5, int* fragment_index, const int* dirfile,
+    char* infield, int* infield_l, GD_DCOMPLEXP(a0), GD_DCOMPLEXP(a1),
+    GD_DCOMPLEXP(a2), GD_DCOMPLEXP(a3), GD_DCOMPLEXP(a4),
+    GD_DCOMPLEXP(a5), int* fragment_index, const int* dirfile,
     const char* field_code, const int* field_code_l);
 
 void F77_FUNC(gdgerw, GDGERW) (int* spf, int* dtype, int* fragment_index,
@@ -388,49 +388,49 @@ void F77_FUNC(gdgfof, GDGFOF) (int* offset, const int* dirfile,
 
 void F77_FUNC(gdadcl, GDADCL) (const int* dirfile, const char* field_code,
     const int* field_code_l, const int* n_fields, const char* in_field1,
-    const int* in_field1_l, const double complex* m1, const double complex* b1,
-    const char* in_field2, const int* in_field2_l, const double complex* m2,
-    const double complex* b2, const char* in_field3, const int* in_field3_l,
-    const double complex* m3, const double complex* b3,
+    const int* in_field1_l, const GD_DCOMPLEXP(m1), const GD_DCOMPLEXP(b1),
+    const char* in_field2, const int* in_field2_l, const GD_DCOMPLEXP(m2),
+    const GD_DCOMPLEXP(b2), const char* in_field3, const int* in_field3_l,
+    const GD_DCOMPLEXP(m3), const GD_DCOMPLEXP(b3),
     const int* fragment_index);
 
 void F77_FUNC(gdadcp, GDADCP) (const int* dirfile, const char* field_code,
     const int* field_code_l, const int* poly_ord, const char* in_field,
-    const int* in_field_l, const double complex* a0, const double complex* a1,
-    const double complex* a2, const double complex* a3,
-    const double complex* a4, const double complex* a5,
+    const int* in_field_l, const GD_DCOMPLEXP(a0), const GD_DCOMPLEXP(a1),
+    const GD_DCOMPLEXP(a2), const GD_DCOMPLEXP(a3),
+    const GD_DCOMPLEXP(a4), const GD_DCOMPLEXP(a5),
     const int* fragment_index);
 
 void F77_FUNC(gdmdcl, GDMDCL) (const int* dirfile, const char* parent,
     const int* parent_l, const char* field_code, const int* field_code_l,
     const int* n_fields, const char* in_field1, const int* in_field1_l,
-    const double complex* m1, const double complex* b1, const char* in_field2,
-    const int* in_field2_l, const double complex* m2, const double complex* b2,
-    const char* in_field3, const int* in_field3_l, const double complex* m3,
-    const double complex* b3);
+    const GD_DCOMPLEXP(m1), const GD_DCOMPLEXP(b1), const char* in_field2,
+    const int* in_field2_l, const GD_DCOMPLEXP(m2), const GD_DCOMPLEXP(b2),
+    const char* in_field3, const int* in_field3_l, const GD_DCOMPLEXP(m3),
+    const GD_DCOMPLEXP(b3));
 
 void F77_FUNC(gdmdcp, GDMDCP) (const int* dirfile, const char* parent,
     const int* parent_l, const char* field_code, const int* field_code_l,
     const int* poly_ord, const char* in_field, const int* in_field_l,
-    const double complex* a0, const double complex* a1,
-    const double complex* a2, const double complex* a3,
-    const double complex* a4, const double complex* a5);
+    const GD_DCOMPLEXP(a0), const GD_DCOMPLEXP(a1),
+    const GD_DCOMPLEXP(a2), const GD_DCOMPLEXP(a3),
+    const GD_DCOMPLEXP(a4), const GD_DCOMPLEXP(a5));
 
 void F77_FUNC(gdntyp, GDNTYP) (int* type, const int* dirfile,
     const char* field_code, const int* field_code_l);
 
 void F77_FUNC(gdalcl, GDALCL) (const int* dirfile, const char* field_code,
     const int* field_code_l, const int* n_fields, const char* in_field1,
-    const int* in_field1_l, const double complex* m1, const double complex* b1,
-    const char* in_field2, const int* in_field2_l, const double complex* m2,
-    const double complex* b2, const char* in_field3, const int* in_field3_l,
-    const double complex* m3, const double complex* b3);
+    const int* in_field1_l, const GD_DCOMPLEXP(m1), const GD_DCOMPLEXP(b1),
+    const char* in_field2, const int* in_field2_l, const GD_DCOMPLEXP(m2),
+    const GD_DCOMPLEXP(b2), const char* in_field3, const int* in_field3_l,
+    const GD_DCOMPLEXP(m3), const GD_DCOMPLEXP(b3));
 
 void F77_FUNC(gdalcp, GDALCP) (const int* dirfile, const char* field_code,
     const int* field_code_l, const int* poly_ord, const char* in_field,
-    const int* in_field_l, const double complex* a0, const double complex* a1,
-    const double complex* a2, const double complex* a3,
-    const double complex* a4, const double complex* a5);
+    const int* in_field_l, const GD_DCOMPLEXP(a0), const GD_DCOMPLEXP(a1),
+    const GD_DCOMPLEXP(a2), const GD_DCOMPLEXP(a3),
+    const GD_DCOMPLEXP(a4), const GD_DCOMPLEXP(a5));
 
 void F77_FUNC(gdcscl, GDCSCL) (int *comp_scal, const int *dirfile,
     const char *field_code, const int *field_code_l);

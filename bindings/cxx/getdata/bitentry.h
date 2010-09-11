@@ -52,11 +52,11 @@ namespace GetData {
       };
 
       virtual gd_bit_t FirstBit() {
-        return E.bitnum;
+        return E.u.bit.bitnum;
       };
 
       virtual gd_bit_t NumBits() {
-        return E.numbits;
+        return E.u.bit.numbits;
       };
 
       int SetInput(const char* field);

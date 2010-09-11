@@ -98,7 +98,7 @@ int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,
     dreturn("%i", -1);
     return -1;
   }
-  D->fragment = ptr;
+  D->fragment = (struct gd_fragment_t *)ptr;
 
   D->fragment[D->n_fragment - 1].cname = strdup(temp_buf1);
   D->fragment[D->n_fragment - 1].ename = strdup(ename);
@@ -252,7 +252,7 @@ static int _GD_CollectFragments(DIRFILE* D, int** f, int fragment, int nf)
 
   dtrace("%p, %p, %i, %i", D, f, fragment, nf);
 
-  int* new_f = realloc(*f, sizeof(int) * ++nf);
+  int* new_f = (int *)realloc(*f, sizeof(int) * ++nf);
   if (new_f == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     dreturn("%i", -1);

@@ -18,8 +18,13 @@ int main(void)
   const char* format = __TEST__ "dirfile/format";
   const char* data = __TEST__ "dirfile/data";
   const char* format_data = "data RAW COMPLEX64 1\nENDIAN big\n";
+#ifdef GD_NO_C99_API
+  float u[20];
+  float v[20][2];
+#else
   float complex u[10];
   float complex v[20];
+#endif
   const unsigned char data_data[64 * 8] = {
     0x3F, 0xC0, 0x00, 0x00,  0x40, 0x10, 0x00, 0x00,
     0x40, 0x58, 0x00, 0x00,  0x40, 0xA2, 0x00, 0x00,
@@ -90,16 +95,25 @@ int main(void)
 
   mkdir(filedir, 0777); 
 
+#ifdef GD_NO_C99_API
+  v[0][0] = 1.5;
+  v[0][1] = 2.25;
+  for (i = 1; i < 20; ++i) {
+    v[i][0] = v[i - 1][0] * 2.25;
+    v[i][1] = v[i - 1][1] * 2.25;
+  }
+#else
   v[0] = 1.5 + _Complex_I * 2.25;
   for (i = 1; i < 20; ++i)
     v[i] = v[i - 1] * 2.25;
+#endif
 
   fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
   write(fd, format_data, strlen(format_data));
   close(fd);
 
   fd = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
-  write(fd, data_data, 64 * sizeof(float complex));
+  write(fd, data_data, 64 * 8 * sizeof(unsigned char));
   close(fd);
 
   DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
@@ -116,7 +130,11 @@ int main(void)
   CHECKI(n, 10);
 
   for (i = 0; i < 10; ++i)
+#ifdef GD_NO_C99_API
+    CHECKCi(i, u + 2 * i, v[i + 5]);
+#else
     CHECKCi(i, u[i], v[i + 5]);
+#endif
 
   return r;
 }

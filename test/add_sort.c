@@ -18,7 +18,7 @@ void CheckSPF(DIRFILE *D, const char* f, int v)
   }
 
   CHECKS(e.field, f);
-  CHECKI(e.spf, v);
+  CHECKI(e.u.raw.spf, v);
   gd_free_entry_strings(&e);
 }
 

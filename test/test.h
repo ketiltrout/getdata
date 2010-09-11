@@ -34,10 +34,20 @@ int gd_system(const char* command)
     fprintf(stderr, #i ":%i " #n " = " nf " (expected " vf ")\n", (int)i, \
         __VA_ARGS__); }
 
-#define CHECKC(n,v)    CHECK(cabs((n)-(v))>1e-10,n,"%.15g;%.15g","%.15g;%.15g", \
+#ifdef GD_NO_C99_API
+#define CHECKC(n,v)    CHECK(sqrt(((n)[0]-(v)[0])*((n)[0]-(v)[0]) + \
+      (((n)[1]-(v)[1])*((n)[1]-(v)[1])))>1e-10,n,"%.15g;%.15g","%.15g;%.15g",\
+    creal((n)), cimag((n)), creal((v)), cimag((v)))
+#define CHECKCi(i,n,v) CHECKi(i,sqrt(((n)[0]-(v)[0])*((n)[0]-(v)[0]) + \
+            (((n)[1]-(v)[1])*((n)[1]-(v)[1]))) / cabs((v))>3e-6,n,\
+    "%.15g;%.15g","%.15g;%.15g",creal((n)), cimag((n)), creal((v)), cimag((v)))
+#else
+#define CHECKC(n,v)    CHECK(cabs((n)-(v))>1e-10,n,"%.15g;%.15g","%.15g;%.15g",\
     creal((n)), cimag((n)), creal((v)), cimag((v)))
 #define CHECKCi(i,n,v) CHECKi(i,cabs((n)-(v)) / cabs((v))>3e-6,n,"%.15g;%.15g",\
     "%.15g;%.15g",creal((n)), cimag((n)), creal((v)), cimag((v)))
+#endif
+
 #define CHECKF(n,v)    CHECK(fabs((n)-(v))>1e-10,n,"%.15g","%.15g",(double)(n),\
     (double)(v))
 #define CHECKFi(i,n,v) CHECKi(i,fabs((n)-(v)) > 1e-10,n,"%.15g","%.15g",\

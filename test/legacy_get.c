@@ -11,7 +11,7 @@
 
 int main(void)
 {
-#ifndef GETDATA_LEGACY_API
+#ifndef GD_LEGACY_API
   return 77; /* skipped */
 #else
   const char* filedir = __TEST__ "dirfile";

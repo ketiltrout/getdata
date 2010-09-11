@@ -91,7 +91,7 @@ namespace GetData {
 
       /* Specific data */
       virtual const char *Input(int index = 0) {
-        return (CheckIndex(E.field_type, E.n_fields, index)) ?
+        return (CheckIndex(E.field_type, E.u.lincom.n_fields, index)) ?
           E.in_fields[index] : NULL;
       };
 
@@ -104,88 +104,88 @@ namespace GetData {
 
       /* RAW methods */
       virtual gd_spf_t SamplesPerFrame() {
-        return (E.field_type == GD_RAW_ENTRY) ? E.spf : 0;
+        return (E.field_type == GD_RAW_ENTRY) ? E.u.raw.spf : 0;
       };
 
       virtual DataType RawType() {
-        return (E.field_type == GD_RAW_ENTRY) ? (DataType)E.data_type : Unknown;
+        return (E.field_type == GD_RAW_ENTRY) ? (DataType)E.u.raw.type : Unknown;
       };
 
       /* LINCOM methods */
       virtual int NFields() {
-        return (E.field_type == GD_LINCOM_ENTRY) ? E.n_fields : 0;
+        return (E.field_type == GD_LINCOM_ENTRY) ? E.u.lincom.n_fields : 0;
       };
 
       virtual double Scale(int index = 0) {
         return (E.field_type == GD_LINCOM_ENTRY &&
-            CheckIndex(E.field_type, E.n_fields, index)) ? E.m[index] : 0;
+            CheckIndex(E.field_type, E.u.lincom.n_fields, index)) ? E.u.lincom.m[index] : 0;
       }
 
       virtual std::complex<double> CScale(int index = 0) {
         return (E.field_type == GD_LINCOM_ENTRY &&
-            CheckIndex(E.field_type, E.n_fields, index))
-          ? std::complex<double>(E.cm[index][0], E.cm[index][1]) : 0;
+            CheckIndex(E.field_type, E.u.lincom.n_fields, index))
+          ? std::complex<double>(E.u.lincom.cm[index][0], E.u.lincom.cm[index][1]) : 0;
       }
 
       virtual double Offset(int index = 0) {
         return (E.field_type == GD_LINCOM_ENTRY &&
-            CheckIndex(E.field_type, E.n_fields, index)) ? E.b[index] : 0;
+            CheckIndex(E.field_type, E.u.lincom.n_fields, index)) ? E.u.lincom.b[index] : 0;
       }
 
       virtual std::complex<double> COffset(int index = 0) {
         return (E.field_type == GD_LINCOM_ENTRY &&
-            CheckIndex(E.field_type, E.n_fields, index))
-          ? std::complex<double>(E.cb[index][0], E.cb[index][1]) : 0;
+            CheckIndex(E.field_type, E.u.lincom.n_fields, index))
+          ? std::complex<double>(E.u.lincom.cb[index][0], E.u.lincom.cb[index][1]) : 0;
       }
 
       /* LINTERP methods */
       virtual const char *Table() {
-        return (E.field_type == GD_LINTERP_ENTRY) ? E.table : NULL;
+        return (E.field_type == GD_LINTERP_ENTRY) ? E.u.linterp.table : NULL;
       };
 
       /* (S)BIT methods */
       virtual gd_bit_t FirstBit() {
-        return (E.field_type == GD_BIT_ENTRY) ? E.bitnum : -1;
+        return (E.field_type == GD_BIT_ENTRY) ? E.u.bit.bitnum : -1;
       };
 
       virtual gd_bit_t NumBits() {
-        return (E.field_type == GD_BIT_ENTRY) ? E.numbits : -1;
+        return (E.field_type == GD_BIT_ENTRY) ? E.u.bit.numbits : -1;
       };
 
       /* PHASE methods */
       virtual gd_shift_t Shift() {
-        return (E.field_type == GD_PHASE_ENTRY) ? E.shift : 0;
+        return (E.field_type == GD_PHASE_ENTRY) ? E.u.phase.shift : 0;
       };
 
       /* CONST methods */
       virtual DataType ConstType() {
-        return (E.field_type == GD_CONST_ENTRY) ? (DataType)E.const_type :
+        return (E.field_type == GD_CONST_ENTRY) ? (DataType)E.u.cons.type :
           Unknown;
       };
 
       /* POLYNOM methods */
       virtual int PolyOrd() {
-        return (E.field_type == GD_POLYNOM_ENTRY) ? E.poly_ord : 0;
+        return (E.field_type == GD_POLYNOM_ENTRY) ? E.u.polynom.poly_ord : 0;
       };
 
       virtual double Coefficient(int index = 0) {
-        return (E.field_type == GD_POLYNOM_ENTRY && index <= E.poly_ord)
-          ? E.a[index] : 0;
+        return (E.field_type == GD_POLYNOM_ENTRY && index <= E.u.polynom.poly_ord)
+          ? E.u.polynom.a[index] : 0;
       }
 
       virtual std::complex<double> CCoefficient(int index = 0) {
-        return (E.field_type == GD_POLYNOM_ENTRY && index <= E.poly_ord)
-          ? std::complex<double>(E.ca[index][0], E.ca[index][1]) : 0;
+        return (E.field_type == GD_POLYNOM_ENTRY && index <= E.u.polynom.poly_ord)
+          ? std::complex<double>(E.u.polynom.ca[index][0], E.u.polynom.ca[index][1]) : 0;
       }
 
       /* RECIP methods */
       virtual double Dividend() {
-        return (E.field_type == GD_RECIP_ENTRY) ? E.dividend : 0;
+        return (E.field_type == GD_RECIP_ENTRY) ? E.u.recip.dividend : 0;
       };
 
       virtual std::complex<double> CDividend() {
         return (E.field_type == GD_RECIP_ENTRY) ?
-          std::complex<double>(E.cdividend[0], E.cdividend[1]) : 0;
+          std::complex<double>(E.u.recip.cdividend[0], E.u.recip.cdividend[1]) : 0;
       };
 
       void SetName(const char* name);

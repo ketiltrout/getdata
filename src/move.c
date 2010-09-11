@@ -32,7 +32,7 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned long encoding,
 {
   const struct encoding_t* enc_in;
   const struct encoding_t* enc_out;
-  const size_t ns = BUFFER_SIZE / E->e->size;
+  const size_t ns = BUFFER_SIZE / E->e->u.raw.size;
   ssize_t nread, nwrote;
   int subencoding = GD_ENC_UNKNOWN;
   int i;
@@ -46,7 +46,7 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned long encoding,
     new_fragment = E->fragment_index;
 
   if (new_filebase == NULL) {
-    new_filebase = strdup(E->e->filebase);
+    new_filebase = strdup(E->e->u.raw.filebase);
     if (new_filebase == NULL) {
       _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
       dreturn("%i", -1);
@@ -58,8 +58,8 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned long encoding,
 
   /* Figure out the new subencoding scheme */
   if (encoding == D->fragment[E->fragment_index].encoding &&
-      E->e->file[0].encoding != GD_ENC_UNKNOWN) {
-    subencoding = E->e->file[0].encoding;
+      E->e->u.raw.file[0].encoding != GD_ENC_UNKNOWN) {
+    subencoding = E->e->u.raw.file[0].encoding;
   } else
     for (i = 0; _gd_ef[i].scheme != GD_ENC_UNSUPPORTED; i++) {
       if (_gd_ef[i].scheme == encoding) {
@@ -96,7 +96,7 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned long encoding,
     return -1;
   }
 
-  enc_in = _gd_ef + E->e->file[0].encoding;
+  enc_in = _gd_ef + E->e->u.raw.file[0].encoding;
 
   /* Need to do the ARM thing? */
   arm_endianise = ((byte_sex & GD_ARM_ENDIAN) && enc_out->ecor) ^
@@ -116,7 +116,8 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned long encoding,
   /* If all that's changing is the byte sex, but we don't need to do
    * endianness conversion, don't do anything */
   if (offset == 0 && encoding == D->fragment[E->fragment_index].encoding &&
-      !byte_sex && !arm_endianise && strcmp(new_filebase, E->e->filebase) == 0)
+      !byte_sex && !arm_endianise && strcmp(new_filebase,
+        E->e->u.raw.filebase) == 0)
   {
     free(new_filebase);
     dreturn("%i", 0);
@@ -137,12 +138,12 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned long encoding,
   /* Create the output file and open it. If we're changing encodings, we
    * could write to the new file directly.  However, we use a temporary file
    * anyway just to keep things clean. */
-  E->e->file[1].encoding = subencoding;
+  E->e->u.raw.file[1].encoding = subencoding;
 
-  if (_GD_SetEncodedName(D, E->e->file + 1, new_filebase, 1))
+  if (_GD_SetEncodedName(D, E->e->u.raw.file + 1, new_filebase, 1))
     ; /* error already set */
-  else if ((*enc_out->temp)(E->e->file, GD_TEMP_OPEN))
-    _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[1].name, errno, NULL);
+  else if ((*enc_out->temp)(E->e->u.raw.file, GD_TEMP_OPEN))
+    _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[1].name, errno, NULL);
 
   if (D->error) {
     free(new_filebase);
@@ -151,10 +152,13 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned long encoding,
   }
 
   /* Open the input file, if necessary */
-  if (_GD_SetEncodedName(D, E->e->file, E->e->filebase, 0))
+  if (_GD_SetEncodedName(D, E->e->u.raw.file, E->e->u.raw.filebase, 0))
     ; /* error already set */
-  else if (E->e->file[0].fp == -1 && (*enc_in->open)(E->e->file, 0, 0))
-    _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[0].name, errno, NULL);
+  else if (E->e->u.raw.file[0].fp == -1 && (*enc_in->open)(E->e->u.raw.file, 0,
+        0))
+  {
+    _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
+  }
 
   if (D->error) {
     free(new_filebase);
@@ -164,16 +168,23 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned long encoding,
 
   /* Adjust for the change in offset */
   if (offset < 0) { /* new offset is less, pad new file */
-    if ((*enc_in->seek)(E->e->file, 0, E->data_type, 1) == -1)
-      _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[0].name, errno, NULL);
-    else if ((*enc_out->seek)(E->e->file + 1, -offset * E->spf, E->data_type, 1)
-        == -1)
-      _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[1].name, errno, NULL);
+    if ((*enc_in->seek)(E->e->u.raw.file, 0, E->u.raw.type, 1) == -1)
+      _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
+    else if ((*enc_out->seek)(E->e->u.raw.file + 1, -offset * E->u.raw.spf,
+          E->u.raw.type, 1) == -1)
+    {
+      _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[1].name, errno, NULL);
+    }
   } else { /* new offset is more, truncate old file */
-    if ((*enc_in->seek)(E->e->file, offset * E->spf, E->data_type, 0) == -1)
-      _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[0].name, errno, NULL);
-    else if ((*enc_out->seek)(E->e->file + 1, 0, E->data_type, 1) == -1)
-      _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[1].name, errno, NULL);
+    if ((*enc_in->seek)(E->e->u.raw.file, offset * E->u.raw.spf,
+          E->u.raw.type, 0) == -1)
+    {
+      _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
+    } else if ((*enc_out->seek)(E->e->u.raw.file + 1, 0, E->u.raw.type, 1)
+        == -1)
+    {
+      _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[1].name, errno, NULL);
+    }
   }
 
   if (D->error) {
@@ -191,10 +202,10 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned long encoding,
 
   /* Now copy the old file to the new file */
   for (;;) {
-    nread = (*enc_in->read)(E->e->file, buffer, E->data_type, ns);
+    nread = (*enc_in->read)(E->e->u.raw.file, buffer, E->u.raw.type, ns);
 
     if (nread < 0) {
-      _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[0].name, errno, NULL);
+      _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
       break;
     }
 
@@ -203,20 +214,21 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned long encoding,
 
     /* fix army-ness, if required */
     if (arm_endianise)
-        _GD_ArmEndianise(buffer, E->data_type & GD_COMPLEX, ns);
+        _GD_ArmEndianise((uint64_t *)buffer, E->u.raw.type & GD_COMPLEX, ns);
 
     /* swap endianness, if required */
     if (byte_sex) {
-      if (E->data_type & GD_COMPLEX)
-        _GD_FixEndianness(buffer, E->e->size / 2, ns * 2);
+      if (E->u.raw.type & GD_COMPLEX)
+        _GD_FixEndianness((char *)buffer, E->e->u.raw.size / 2, ns * 2);
       else
-        _GD_FixEndianness(buffer, E->e->size, ns);
+        _GD_FixEndianness((char *)buffer, E->e->u.raw.size, ns);
     }
 
-    nwrote = (*enc_out->write)(E->e->file + 1, buffer, E->data_type, nread);
+    nwrote = (*enc_out->write)(E->e->u.raw.file + 1, buffer,
+        E->u.raw.type, nread);
 
     if (nwrote < nread) {
-      _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[1].name, errno, NULL);
+      _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[1].name, errno, NULL);
       break;
     }
   }
@@ -224,41 +236,44 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned long encoding,
   free(buffer);
 
   /* Close both files */
-  if ((*enc_in->close)(E->e->file))
-    _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[0].name, errno, NULL);
+  if ((*enc_in->close)(E->e->u.raw.file))
+    _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
 
-  if ((*enc_out->sync)(E->e->file + 1) || (*enc_out->close)(E->e->file + 1))
-    _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[1].name, errno, NULL);
+  if ((*enc_out->sync)(E->e->u.raw.file + 1) ||
+      (*enc_out->close)(E->e->u.raw.file + 1))
+  {
+    _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[1].name, errno, NULL);
+  }
 
   if (finalise) {
     /* Finalise the conversion: on error delete the temporary file, otherwise
      * copy it over top of the new one. */
     if (D->error)
-      (*enc_out->temp)(E->e->file, GD_TEMP_DESTROY);
+      (*enc_out->temp)(E->e->u.raw.file, GD_TEMP_DESTROY);
     else {
       struct _gd_raw_file temp;
-      memcpy(&temp, E->e->file, sizeof(temp));
+      memcpy(&temp, E->e->u.raw.file, sizeof(temp));
 
-      E->e->file[0].name = NULL;
-      E->e->file[0].encoding = subencoding;
+      E->e->u.raw.file[0].name = NULL;
+      E->e->u.raw.file[0].encoding = subencoding;
 
-      if (_GD_SetEncodedName(D, E->e->file, new_filebase, 0)) {
-        E->e->file[0].name = temp.name;
-        E->e->file[0].encoding = temp.encoding;
-      } else if ((*enc_out->temp)(E->e->file, GD_TEMP_MOVE)) {
-        _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[1].name, errno, NULL);
-        E->e->file[0].name = temp.name;
-        E->e->file[0].encoding = temp.encoding;
-      } else if ((subencoding != temp.encoding || strcmp(E->e->filebase,
+      if (_GD_SetEncodedName(D, E->e->u.raw.file, new_filebase, 0)) {
+        E->e->u.raw.file[0].name = temp.name;
+        E->e->u.raw.file[0].encoding = temp.encoding;
+      } else if ((*enc_out->temp)(E->e->u.raw.file, GD_TEMP_MOVE)) {
+        _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[1].name, errno, NULL);
+        E->e->u.raw.file[0].name = temp.name;
+        E->e->u.raw.file[0].encoding = temp.encoding;
+      } else if ((subencoding != temp.encoding || strcmp(E->e->u.raw.filebase,
               new_filebase)) && (*enc_in->unlink)(&temp))
       {
         _GD_SetError(D, GD_E_RAW_IO, 0, temp.name, errno, NULL);
-        E->e->file[0].name = temp.name;
-        E->e->file[0].encoding = temp.encoding;
+        E->e->u.raw.file[0].name = temp.name;
+        E->e->u.raw.file[0].encoding = temp.encoding;
       } else {
         free(temp.name);
-        free(E->e->filebase);
-        E->e->filebase = new_filebase;
+        free(E->e->u.raw.filebase);
+        E->e->u.raw.filebase = new_filebase;
       }
     }
   }
@@ -368,7 +383,7 @@ int gd_move(DIRFILE* D, const char* field_code, int new_fragment, int move_data)
        strcmpnull(D->fragment[E->fragment_index].sname,
          D->fragment[new_fragment].sname)))
   {
-    new_filebase = malloc(FILENAME_MAX);
+    new_filebase = (char *)malloc(FILENAME_MAX);
     if (new_filebase == NULL) {
       _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
       dreturn("%i", -1);
@@ -399,7 +414,7 @@ int gd_move(DIRFILE* D, const char* field_code, int new_fragment, int move_data)
 
   /* update meta fields */
   for (i = 0; i < E->e->n_meta; ++i)
-    E->e->meta_entry[i]->fragment_index = new_fragment;
+    E->e->p.meta_entry[i]->fragment_index = new_fragment;
 
   dreturn("%i", 0);
   return 0;

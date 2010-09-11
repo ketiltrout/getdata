@@ -38,8 +38,8 @@ int main(void)
   CHECKS(E.field, "data");
   CHECKX(E.field_type, GD_RAW_ENTRY);
   CHECKS(E.scalar[0], "const");
-  CHECKU(E.spf, 8);
-  CHECKX(E.data_type, GD_UINT8);
+  CHECKU(E.u.raw.spf, 8);
+  CHECKX(E.u.raw.type, GD_UINT8);
 
   return r;
 }

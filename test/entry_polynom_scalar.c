@@ -45,7 +45,7 @@ int main(void)
   CHECKS(E.field, "data");
   CHECKX(E.field_type, GD_POLYNOM_ENTRY);
   CHECKI(E.comp_scal, 0);
-  CHECKI(E.poly_ord, 4);
+  CHECKI(E.u.polynom.poly_ord, 4);
   CHECKS(E.in_fields[0], "in");
   CHECKS(E.scalar[0], "a0");
   CHECKS(E.scalar[1], "a1");
@@ -53,7 +53,7 @@ int main(void)
   CHECKS(E.scalar[3], "a3");
   CHECKS(E.scalar[4], "a4");
   for (fd = 0; fd < 4; ++fd)
-    CHECKFi(fd,E.a[fd], fd + 1.);
+    CHECKFi(fd,E.u.polynom.a[fd], fd + 1.);
 
   return r;
 }

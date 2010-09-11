@@ -33,13 +33,13 @@ ConstEntry::ConstEntry(const char* field_code, DataType data_type,
 {
   E.field = strdup(field_code);
   E.field_type = GD_CONST_ENTRY;
-  E.const_type = (gd_type_t)data_type;
+  E.u.cons.type = (gd_type_t)data_type;
   E.fragment_index = fragment_index;
 }
 
 int ConstEntry::SetType(DataType type)
 {
-  E.const_type = (gd_type_t)type;
+  E.u.cons.type = (gd_type_t)type;
 
   if (D != NULL)
     return gd_alter_entry(D->D, E.field, &E, 0);

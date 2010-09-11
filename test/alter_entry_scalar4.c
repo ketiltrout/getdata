@@ -28,7 +28,7 @@ int main(void)
   gd_entry(D, "data", &E);
   free(E.scalar[1]);
   E.scalar[1] = NULL;
-  E.numbits = 11;
+  E.u.bit.numbits = 11;
   int ret = gd_alter_entry(D, "data", &E, 0);
   int error = gd_error(D);
 
@@ -43,7 +43,7 @@ int main(void)
   CHECKI(error, 0);
   CHECKI(n, 0);
   CHECKI(ret, 0);
-  CHECKI(E.numbits, 11);
+  CHECKI(E.u.bit.numbits, 11);
   CHECKP(E.scalar[1]);
 
   return r;

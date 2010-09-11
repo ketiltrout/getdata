@@ -71,7 +71,8 @@ static struct gd_lzmadata *_GD_LzmaDoOpen(struct _gd_raw_file* file)
 
   dtrace("%p", file);
 
-  if ((ptr = malloc(sizeof(struct gd_lzmadata))) == NULL) {
+  if ((ptr = (struct gd_lzmadata *)malloc(sizeof(struct gd_lzmadata))) == NULL)
+  {
     dreturn("%p", NULL);
     return NULL;
   }
@@ -151,8 +152,10 @@ static int _GD_LzmaDecode(struct gd_lzmadata *ptr)
 
   dprintf("read_in=%i  n=%i", ptr->read_in, n);
   ptr->xzfile.avail_in = ptr->read_in + n;
-  dprintf("avail_in=%zu   total_in=%llu", ptr->xzfile.avail_in, ptr->xzfile.total_in);
-  dprintf("avail_out=%zu  total_out=%llu", ptr->xzfile.avail_out, ptr->xzfile.total_out);
+  dprintf("avail_in=%zu   total_in=%llu", ptr->xzfile.avail_in,
+      ptr->xzfile.total_in);
+  dprintf("avail_out=%zu  total_out=%llu", ptr->xzfile.avail_out,
+      ptr->xzfile.total_out);
 
   /* no more data to convert -- end of stream reached */
   if (ptr->xzfile.avail_in == 0) {
@@ -163,8 +166,10 @@ static int _GD_LzmaDecode(struct gd_lzmadata *ptr)
 
   /* amount of data = amount already in buffer + amount just now read */
   ptr->xzerror = lzma_code(&ptr->xzfile, LZMA_RUN);
-  dprintf("avail_in=%zu   total_in=%llu", ptr->xzfile.avail_in, ptr->xzfile.total_in);
-  dprintf("avail_out=%zu  total_out=%llu", ptr->xzfile.avail_out, ptr->xzfile.total_out);
+  dprintf("avail_in=%zu   total_in=%llu", ptr->xzfile.avail_in,
+      ptr->xzfile.total_in);
+  dprintf("avail_out=%zu  total_out=%llu", ptr->xzfile.avail_out,
+      ptr->xzfile.total_out);
 
   if (ptr->xzerror == LZMA_OK || ptr->xzerror == LZMA_STREAM_END) {
     ptr->base += ptr->end;
@@ -187,7 +192,7 @@ off64_t _GD_LzmaSeek(struct _gd_raw_file* file, off64_t count,
 {
   dtrace("%p, %lli, %x, <unused>", file, (long long)count, data_type);
 
-  struct gd_lzmadata *ptr = file->edata;
+  struct gd_lzmadata *ptr = (struct gd_lzmadata *)file->edata;
 
   count *= GD_SIZE(data_type);
 
@@ -228,14 +233,14 @@ off64_t _GD_LzmaSeek(struct _gd_raw_file* file, off64_t count,
   return (ptr->base + ptr->out_pos) / GD_SIZE(data_type);
 }
 
-ssize_t _GD_LzmaRead(struct _gd_raw_file *file, void *data,
-    gd_type_t data_type, size_t nmemb)
+ssize_t _GD_LzmaRead(struct _gd_raw_file *file, void *data, gd_type_t data_type,
+    size_t nmemb)
 {
-  void* output = data;
+  char* output = (char *)data;
 
   dtrace("%p, %p, %x, %zu", file, data, data_type, nmemb);
 
-  struct gd_lzmadata *ptr = file->edata;
+  struct gd_lzmadata *ptr = (struct gd_lzmadata *)file->edata;
   uint64_t nbytes = nmemb * GD_SIZE(data_type);
 
   /* this loops over chunks of uncompressed data of size data_out until we
@@ -281,7 +286,7 @@ int _GD_LzmaClose(struct _gd_raw_file *file)
 {
   dtrace("%p", file);
 
-  struct gd_lzmadata *ptr = file->edata;
+  struct gd_lzmadata *ptr = (struct gd_lzmadata *)file->edata;
 
   ptr->xzerror = 0;
   lzma_end(&ptr->xzfile);

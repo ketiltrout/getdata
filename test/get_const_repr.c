@@ -35,7 +35,7 @@ int main(void)
 
   CHECKI(error, 0);
   CHECKI(n, 0);
-  CHECKF(c, cabs(8.3 + _Complex_I * 9.2));
+  CHECKF(c, sqrt(8.3 * 8.3 + 9.2 * 9.2));
 
   return r;
 }

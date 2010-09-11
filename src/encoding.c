@@ -176,7 +176,7 @@ void _GD_InitialiseFramework(void)
     encoding == GD_TEXT_ENCODED || encoding == GD_LZMA_ENCODED))
 
 #ifdef USE_MODULES
-static void* _GD_ResolveSymbol(void* lib, struct encoding_t* enc,
+static void* _GD_ResolveSymbol(lt__handle* lib, struct encoding_t* enc,
     const char* name)
 {
   void* func;
@@ -225,29 +225,36 @@ int _GD_MissingFramework(int encoding, unsigned int funcs)
 
     /* Try to resolve the symbols */
     if (_gd_ef[encoding].provides & GD_EF_OPEN)
-      _gd_ef[encoding].open = _GD_ResolveSymbol(lib, _gd_ef + encoding, "Open");
+      _gd_ef[encoding].open = (int (*)(_gd_raw_file*, int,
+            int))_GD_ResolveSymbol(lib, _gd_ef + encoding, "Open");
     if (_gd_ef[encoding].provides & GD_EF_CLOSE)
-      _gd_ef[encoding].close = _GD_ResolveSymbol(lib, _gd_ef + encoding,
-          "Close");
+      _gd_ef[encoding].close = (int (*)(_gd_raw_file*))_GD_ResolveSymbol(lib,
+          _gd_ef + encoding, "Close");
     if (_gd_ef[encoding].provides & GD_EF_TOUCH)
-      _gd_ef[encoding].touch = _GD_ResolveSymbol(lib, _gd_ef + encoding,
-          "Touch");
+      _gd_ef[encoding].touch = (int (*)(_gd_raw_file*))_GD_ResolveSymbol(lib,
+          _gd_ef + encoding, "Touch");
     if (_gd_ef[encoding].provides & GD_EF_SEEK)
-      _gd_ef[encoding].seek = _GD_ResolveSymbol(lib, _gd_ef + encoding, "Seek");
+      _gd_ef[encoding].seek = (off64_t (*)(_gd_raw_file*, off64_t, gd_type_t,
+            int))_GD_ResolveSymbol(lib, _gd_ef + encoding, "Seek");
     if (_gd_ef[encoding].provides & GD_EF_READ)
-      _gd_ef[encoding].read = _GD_ResolveSymbol(lib, _gd_ef + encoding, "Read");
+      _gd_ef[encoding].read = (ssize_t (*)(_gd_raw_file*, void*, gd_type_t,
+            size_t))_GD_ResolveSymbol(lib, _gd_ef + encoding, "Read");
     if (_gd_ef[encoding].provides & GD_EF_SIZE)
-      _gd_ef[encoding].size = _GD_ResolveSymbol(lib, _gd_ef + encoding, "Size");
+      _gd_ef[encoding].size = (off64_t (*)(_gd_raw_file*,
+            gd_type_t))_GD_ResolveSymbol(lib, _gd_ef + encoding, "Size");
     if (_gd_ef[encoding].provides & GD_EF_WRITE)
-      _gd_ef[encoding].write = _GD_ResolveSymbol(lib, _gd_ef + encoding,
-          "Write");
+      _gd_ef[encoding].write = (ssize_t (*)(_gd_raw_file*, const void*,
+            gd_type_t, size_t))_GD_ResolveSymbol(lib, _gd_ef + encoding,
+            "Write");
     if (_gd_ef[encoding].provides & GD_EF_SYNC)
-      _gd_ef[encoding].sync = _GD_ResolveSymbol(lib, _gd_ef + encoding, "Sync");
+      _gd_ef[encoding].sync = (int (*)(_gd_raw_file*))_GD_ResolveSymbol(lib,
+          _gd_ef + encoding, "Sync");
     if (_gd_ef[encoding].provides & GD_EF_UNLINK)
-      _gd_ef[encoding].unlink = _GD_ResolveSymbol(lib, _gd_ef + encoding,
-          "Unlink");
+      _gd_ef[encoding].unlink = (int (*)(_gd_raw_file*))_GD_ResolveSymbol(lib,
+          _gd_ef + encoding, "Unlink");
     if (_gd_ef[encoding].provides & GD_EF_TEMP)
-      _gd_ef[encoding].temp = _GD_ResolveSymbol(lib, _gd_ef + encoding, "Temp");
+      _gd_ef[encoding].temp = (int (*)(_gd_raw_file*,
+            int))_GD_ResolveSymbol(lib, _gd_ef + encoding, "Temp");
 
     /* we tried our best, don't bother trying again */
     _gd_ef[encoding].provides = 0;
@@ -322,7 +329,8 @@ int _GD_Supports(DIRFILE* D, gd_entry_t* E, unsigned int funcs)
   /* Figure out the dirfile encoding type, if required */
   if (D->fragment[E->fragment_index].encoding == GD_AUTO_ENCODED) {
     D->fragment[E->fragment_index].encoding =
-      _GD_ResolveEncoding(E->e->filebase, GD_AUTO_ENCODED, E->e->file);
+      _GD_ResolveEncoding(E->e->u.raw.filebase, GD_AUTO_ENCODED,
+          E->e->u.raw.file);
   }
 
   /* If the encoding scheme is unknown, complain */
@@ -333,12 +341,12 @@ int _GD_Supports(DIRFILE* D, gd_entry_t* E, unsigned int funcs)
   }
 
   /* Figure out the encoding subtype, if required */
-  if (E->e->file[0].encoding == GD_ENC_UNKNOWN)
-    _GD_ResolveEncoding(E->e->filebase, D->fragment[E->fragment_index].encoding,
-        E->e->file);
+  if (E->e->u.raw.file[0].encoding == GD_ENC_UNKNOWN)
+    _GD_ResolveEncoding(E->e->u.raw.filebase,
+        D->fragment[E->fragment_index].encoding, E->e->u.raw.file);
 
   /* check for our function(s) */
-  if (_GD_MissingFramework(E->e->file[0].encoding, funcs)) {
+  if (_GD_MissingFramework(E->e->u.raw.file[0].encoding, funcs)) {
     _GD_SetError(D, GD_E_UNSUPPORTED, 0, NULL, 0, NULL);
     dreturn("%i", 0);
     return 0;
@@ -354,7 +362,7 @@ int _GD_SetEncodedName(DIRFILE* D, struct _gd_raw_file* file, const char* base,
   dtrace("%p, %p, \"%s\", %i", D, file, base, temp);
 
   if (file->name == NULL) {
-    file->name = malloc(FILENAME_MAX);
+    file->name = (char *)malloc(FILENAME_MAX);
     if (file->name == NULL) {
       _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
       dreturn("%i", -1);
@@ -385,7 +393,8 @@ static void _GD_RecodeFragment(DIRFILE* D, unsigned long encoding, int fragment,
   }
 
   if (move && encoding != D->fragment[fragment].encoding) {
-    gd_entry_t **raw_entry = malloc(sizeof(gd_entry_t*) * D->n_entries);
+    gd_entry_t **raw_entry = (gd_entry_t **)malloc(sizeof(gd_entry_t*) *
+        D->n_entries);
 
     if (raw_entry == NULL) {
       _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
@@ -416,41 +425,42 @@ static void _GD_RecodeFragment(DIRFILE* D, unsigned long encoding, int fragment,
      * remove the temporary files */
     if (D->error) {
       for (i = 0; i < n_raw; ++i)
-        if (_gd_ef[raw_entry[i]->e->file[1].encoding].temp != NULL && 
-            (*_gd_ef[raw_entry[i]->e->file[1].encoding].temp)(
-              raw_entry[i]->e->file, GD_TEMP_DESTROY))
+        if (_gd_ef[raw_entry[i]->e->u.raw.file[1].encoding].temp != NULL && 
+            (*_gd_ef[raw_entry[i]->e->u.raw.file[1].encoding].temp)(
+              raw_entry[i]->e->u.raw.file, GD_TEMP_DESTROY))
         {
-          _GD_SetError(D, GD_E_RAW_IO, 0, raw_entry[i]->e->file[0].name,
+          _GD_SetError(D, GD_E_RAW_IO, 0, raw_entry[i]->e->u.raw.file[0].name,
               errno, NULL);
         }
     } else 
       for (i = 0; i < n_raw; ++i) {
         struct _gd_raw_file temp;
-        memcpy(&temp, raw_entry[i]->e->file, sizeof(temp));
+        memcpy(&temp, raw_entry[i]->e->u.raw.file, sizeof(temp));
 
-        raw_entry[i]->e->file[0].name = NULL;
-        raw_entry[i]->e->file[0].encoding = raw_entry[i]->e->file[1].encoding;
+        raw_entry[i]->e->u.raw.file[0].name = NULL;
+        raw_entry[i]->e->u.raw.file[0].encoding =
+          raw_entry[i]->e->u.raw.file[1].encoding;
 
-        if (_GD_SetEncodedName(D, raw_entry[i]->e->file,
-              raw_entry[i]->e->filebase, 0))
+        if (_GD_SetEncodedName(D, raw_entry[i]->e->u.raw.file,
+              raw_entry[i]->e->u.raw.filebase, 0))
         {
-          raw_entry[i]->e->file[0].name = temp.name;
-          raw_entry[i]->e->file[0].encoding = temp.encoding;
+          raw_entry[i]->e->u.raw.file[0].name = temp.name;
+          raw_entry[i]->e->u.raw.file[0].encoding = temp.encoding;
         } else if (
-            (*_gd_ef[raw_entry[i]->e->file[1].encoding].temp)(
-              raw_entry[i]->e->file, GD_TEMP_MOVE))
+            (*_gd_ef[raw_entry[i]->e->u.raw.file[1].encoding].temp)(
+              raw_entry[i]->e->u.raw.file, GD_TEMP_MOVE))
         {
           _GD_SetError(D, GD_E_UNCLEAN_DB, 0,
               D->fragment[D->entry[i]->fragment_index].cname, 0, NULL);
           D->flags |= GD_INVALID;
-          raw_entry[i]->e->file[0].name = temp.name;
-          raw_entry[i]->e->file[0].encoding = temp.encoding;
+          raw_entry[i]->e->u.raw.file[0].name = temp.name;
+          raw_entry[i]->e->u.raw.file[0].encoding = temp.encoding;
         } else if ((*_gd_ef[temp.encoding].unlink)(&temp)) {
           _GD_SetError(D, GD_E_UNCLEAN_DB, 0,
               D->fragment[D->entry[i]->fragment_index].cname, 0, NULL);
           D->flags |= GD_INVALID;
-          raw_entry[i]->e->file[0].name = temp.name;
-          raw_entry[i]->e->file[0].encoding = temp.encoding;
+          raw_entry[i]->e->u.raw.file[0].name = temp.name;
+          raw_entry[i]->e->u.raw.file[0].encoding = temp.encoding;
         } else
           free(temp.name);
       }
@@ -467,16 +477,16 @@ static void _GD_RecodeFragment(DIRFILE* D, unsigned long encoding, int fragment,
           D->entry[i]->field_type == GD_RAW_ENTRY)
       {
         /* close the old file */
-        if (D->entry[i]->e->file[0].fp != -1 &&
-            (*_gd_ef[D->entry[i]->e->file[0].encoding].close)(
-              D->entry[i]->e->file))
+        if (D->entry[i]->e->u.raw.file[0].fp != -1 &&
+            (*_gd_ef[D->entry[i]->e->u.raw.file[0].encoding].close)(
+              D->entry[i]->e->u.raw.file))
         {
-          _GD_SetError(D, GD_E_RAW_IO, 0, D->entry[i]->e->file[1].name,
+          _GD_SetError(D, GD_E_RAW_IO, 0, D->entry[i]->e->u.raw.file[1].name,
               errno, NULL);
           break;
         }
         /* reset encoding subscheme. */
-        D->entry[i]->e->file[0].encoding = GD_ENC_UNKNOWN;
+        D->entry[i]->e->u.raw.file[0].encoding = GD_ENC_UNKNOWN;
       }
   }
 
@@ -487,7 +497,8 @@ static void _GD_RecodeFragment(DIRFILE* D, unsigned long encoding, int fragment,
   dreturnvoid();
 }
 
-int gd_alter_encoding(DIRFILE* D, unsigned long encoding, int fragment, int move)
+int gd_alter_encoding(DIRFILE* D, unsigned long encoding, int fragment,
+    int move)
 {
   int i;
 
@@ -533,7 +544,7 @@ int gd_alter_encoding(DIRFILE* D, unsigned long encoding, int fragment, int move
   return (D->error) ? -1 : 0;
 }
 
-unsigned long gd_encoding(DIRFILE* D, int fragment)
+unsigned long gd_encoding(DIRFILE* D, int fragment) gd_nothrow
 {
   unsigned long reported_encoding = GD_ENC_UNSUPPORTED;
   unsigned int i;
@@ -562,8 +573,8 @@ unsigned long gd_encoding(DIRFILE* D, int fragment)
           D->entry[i]->field_type == GD_RAW_ENTRY)
       {
         D->fragment[fragment].encoding =
-          _GD_ResolveEncoding(D->entry[i]->e->filebase, GD_AUTO_ENCODED,
-              D->entry[i]->e->file);
+          _GD_ResolveEncoding(D->entry[i]->e->u.raw.filebase, GD_AUTO_ENCODED,
+              D->entry[i]->e->u.raw.file);
 
         if (D->fragment[fragment].encoding != GD_AUTO_ENCODED)
           break;

@@ -21,17 +21,8 @@
 #include "internal.h"
 
 #include <string.h>
-#include "getdata.h"
-#include "internal.h"
-
-#define COL_SIZE 100
-
-extern char gd_debug_col[COL_SIZE + 1];
+extern char gd_debug_col[GD_COL_SIZE + 1];
 extern int gd_col_count;
-#ifdef GDLIB
-int gd_col_count = 0;
-char gd_debug_col[COL_SIZE + 1] = "";
-#endif
 
 const char* _gd_colnil(void) {
   return gd_debug_col;
@@ -39,7 +30,7 @@ const char* _gd_colnil(void) {
 
 const char* _gd_coladd(void)
 {
-  if (gd_col_count < COL_SIZE) {
+  if (gd_col_count < GD_COL_SIZE) {
     gd_debug_col[gd_col_count++] = ':';
     gd_debug_col[gd_col_count] = '\0';
   }
@@ -49,7 +40,7 @@ const char* _gd_coladd(void)
 
 const char* _gd_colsub(void)
 {
-  static char buffer[COL_SIZE + 1];
+  static char buffer[GD_COL_SIZE + 1];
   strcpy(buffer, _gd_colnil());
 
   if (gd_col_count > 0)

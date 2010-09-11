@@ -21,8 +21,8 @@ int main(void)
   E.field = "data";
   E.field_type = GD_RAW_ENTRY;
   E.fragment_index = 0;
-  E.spf = 2;
-  E.data_type = GD_UINT8;
+  E.u.raw.spf = 2;
+  E.u.raw.type = GD_UINT8;
   E.scalar[0] = NULL;
 
   DIRFILE* D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
@@ -36,8 +36,8 @@ int main(void)
   else {
     CHECKI(e.field_type, GD_RAW_ENTRY);
     CHECKI(e.fragment_index, 0);
-    CHECKI(e.spf, 2);
-    CHECKI(e.data_type, GD_UINT8);
+    CHECKI(e.u.raw.spf, 2);
+    CHECKI(e.u.raw.type, GD_UINT8);
     CHECKP(e.scalar[0]);
     gd_free_entry_strings(&e);
   }

@@ -212,7 +212,7 @@ void _GD_SetError(DIRFILE* D, int error, int suberror,
 }
 
 /* Return the error */
-int gd_error(const DIRFILE* D)
+int gd_error(const DIRFILE* D) gd_nothrow
 {
   dtrace("%p", D);
 
@@ -225,7 +225,7 @@ int gd_error(const DIRFILE* D)
  * library error.  The message may be truncated but will be null terminated.
  * Returns buffer, or NULL if buflen < 1.
  */
-char* gd_error_string(const DIRFILE* D, char* buffer, size_t buflen)
+char* gd_error_string(const DIRFILE* D, char* buffer, size_t buflen) gd_nothrow
 {
   const char* ip;
   char* op = buffer;

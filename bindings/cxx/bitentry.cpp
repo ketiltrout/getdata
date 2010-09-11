@@ -35,8 +35,8 @@ BitEntry::BitEntry(const char* field_code, const char* in_field,
   E.field = strdup(field_code);
   E.field_type = GD_BIT_ENTRY;
   E.in_fields[0] = strdup(in_field);
-  E.bitnum = bitnum;
-  E.numbits = numbits;
+  E.u.bit.bitnum = bitnum;
+  E.u.bit.numbits = numbits;
   E.fragment_index = fragment_index;
 }
 
@@ -58,7 +58,7 @@ int BitEntry::SetInput(const char* field)
 
 int BitEntry::SetFirstBit(gd_bit_t first_bit)
 {
-  E.bitnum = first_bit;
+  E.u.bit.bitnum = first_bit;
 
   if (D != NULL)
     return gd_alter_entry(D->D, E.field, &E, 0);
@@ -68,7 +68,7 @@ int BitEntry::SetFirstBit(gd_bit_t first_bit)
 
 int BitEntry::SetNumBits(gd_bit_t num_bits)
 {
-  E.numbits = num_bits;
+  E.u.bit.numbits = num_bits;
 
   if (D != NULL)
     return gd_alter_entry(D->D, E.field, &E, 0);
@@ -98,7 +98,7 @@ int BitEntry::SetFirstBit(const char *first_bit)
     r = gd_alter_entry(D->D, E.field, &E, 0);
 
     if (!r)
-      r = gd_get_constant(D->D, first_bit, GD_INT16, &E.bitnum);
+      r = gd_get_constant(D->D, first_bit, GD_INT16, &E.u.bit.bitnum);
   }
   
   return r;
@@ -118,7 +118,7 @@ int BitEntry::SetNumBits(const char *num_bits)
     r = gd_alter_entry(D->D, E.field, &E, 0);
 
     if (!r)
-      r = gd_get_constant(D->D, num_bits, GD_INT16, &E.numbits);
+      r = gd_get_constant(D->D, num_bits, GD_INT16, &E.u.bit.numbits);
   }
   
   return r;

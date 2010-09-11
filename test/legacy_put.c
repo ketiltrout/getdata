@@ -12,6 +12,9 @@
 
 int main(void)
 {
+#ifndef GD_LEGACY_API
+  return 77; /* skipped */
+#else
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
   const char* data = __TEST__ "dirfile/data";
@@ -60,4 +63,5 @@ int main(void)
   CHECKI(n,8);
 
   return r;
+#endif
 }

@@ -19,8 +19,8 @@ int main(void)
   E.field =  "new";
   E.field_type = GD_NO_ENTRY;
   E.fragment_index = 0;
-  E.spf = 2;
-  E.data_type = GD_UINT8;
+  E.u.raw.spf = 2;
+  E.u.raw.type = GD_UINT8;
 
   DIRFILE* D = gd_open(filedir, GD_RDWR | GD_CREAT);
   gd_add(D, &E);

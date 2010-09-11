@@ -189,6 +189,7 @@ static FILE* _GD_CreateDirfile(DIRFILE* D, const char* format_file,
 }
 
 void gd_parser_callback(DIRFILE* D, gd_parser_callback_t sehandler, void* extra)
+  gd_nothrow
 {
   dtrace("%p, %p, %p", D, sehandler, extra);
 
@@ -209,19 +210,20 @@ DIRFILE* gd_cbopen(const char* filedir, unsigned long flags,
   gd_entry_t* E;
   char format_file[FILENAME_MAX];
 
-  dtrace("\"%s\", 0x%lx, %p, %p", filedir, (unsigned long)flags, sehandler, extra);
+  dtrace("\"%s\", 0x%lx, %p, %p", filedir, (unsigned long)flags, sehandler,
+      extra);
 
   _GD_InitialiseFramework();
 
-  D = malloc(sizeof(DIRFILE));
+  D = (DIRFILE *)malloc(sizeof(DIRFILE));
   memset(D, 0, sizeof(DIRFILE));
 
   /* clear GD_PERMISSIVE if it was specified along with GD_PEDANTIC */
   if (flags & GD_PERMISSIVE && flags & GD_PEDANTIC)
     flags &= ~GD_PERMISSIVE;
 
-  D->error_string = malloc(FILENAME_MAX);
-  D->error_file = malloc(FILENAME_MAX);
+  D->error_string = (char *)malloc(FILENAME_MAX);
+  D->error_file = (char *)malloc(FILENAME_MAX);
   D->name = strdup(filedir);
   D->flags = (flags | GD_INVALID) & ~GD_IGNORE_REFS;
   D->sehandler = sehandler;
@@ -237,14 +239,14 @@ DIRFILE* gd_cbopen(const char* filedir, unsigned long flags,
   /* Add the INDEX entry */
   D->n_entries = 1;
 
-  D->entry = malloc(sizeof(gd_entry_t*));
+  D->entry = (gd_entry_t **)malloc(sizeof(gd_entry_t*));
   if (D->entry == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     dreturn("%p", D);
     return D;
   }
 
-  D->entry[0] = malloc(sizeof(gd_entry_t));
+  D->entry[0] = (gd_entry_t *)malloc(sizeof(gd_entry_t));
   if (D->entry == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     dreturn("%p", D);
@@ -253,7 +255,8 @@ DIRFILE* gd_cbopen(const char* filedir, unsigned long flags,
   memset(D->entry[0], 0, sizeof(gd_entry_t));
 
   D->entry[0]->field_type = GD_INDEX_ENTRY;
-  D->entry[0]->e = malloc(sizeof(struct _gd_private_entry));
+  D->entry[0]->e =
+    (struct _gd_private_entry *)malloc(sizeof(struct _gd_private_entry));
   D->entry[0]->field = strdup("INDEX");
   if (D->entry[0]->field == NULL || D->entry[0]->e == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
@@ -275,7 +278,7 @@ DIRFILE* gd_cbopen(const char* filedir, unsigned long flags,
   /* Parse the file.  This will take care of any necessary inclusions */
   D->n_fragment = 1;
 
-  D->fragment = malloc(sizeof(struct gd_fragment_t));
+  D->fragment = (struct gd_fragment_t *)malloc(sizeof(struct gd_fragment_t));
   if (D->fragment == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     dreturn("%p", D);

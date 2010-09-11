@@ -20,6 +20,11 @@ int main(void)
     "div RECIP data 230.\n";
   int32_t data_data[256];
   double c[8];
+#ifdef GD_NO_C99_API
+  double v[2] = {1093, 3290};
+#else
+  double complex v = 1093 + _Complex_I * 3290;
+#endif
   int fd, i, r = 0;
 
   mkdir(filedir, 0777);
@@ -36,14 +41,14 @@ int main(void)
   close(fd);
 
   DIRFILE* D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
-  int ret = gd_alter_crecip(D, "div", "phase", 1093. + _Complex_I * 3290.);
+  int ret = gd_alter_crecip(D, "div", "phase", v);
   int error = gd_error(D);
   int n = gd_getdata(D, "div", 5, 0, 1, 0, GD_FLOAT64, c);
 
   gd_close(D);
 
   for (i = 0; i < 8; ++i)
-    CHECKFi(i,c[i], (1093. + _Complex_I * 3290.) / (i + 41.));
+    CHECKFi(i,c[i], creal(v) / (i + 41.));
 
   unlink(data);
   unlink(format);

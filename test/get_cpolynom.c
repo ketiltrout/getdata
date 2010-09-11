@@ -16,7 +16,11 @@ int main(void)
   const char* format = __TEST__ "dirfile/format";
   const char* data = __TEST__ "dirfile/data";
   const char* format_data = "polynom POLYNOM data 3;2 2;4 0;1\ndata RAW UINT8 1\n";
+#ifdef GD_NO_C99_API
+  double c[2] = {0, 0};
+#else
   double complex c = 0;
+#endif
   unsigned char data_data[256];
   int fd, r = 0;
 
@@ -43,8 +47,11 @@ int main(void)
   unlink(format);
   rmdir(filedir);
 
-  const double complex v = (3 + _Complex_I * 2) + (2 + _Complex_I * 4) * 5
-    + _Complex_I * 5 * 5;
+#ifdef GD_NO_C99_API
+  const double v[2] = {13, 47};
+#else
+  const double complex v = 13 + _Complex_I * 47;
+#endif
 
   CHECKI(error, 0);
   CHECKI(n, 1);

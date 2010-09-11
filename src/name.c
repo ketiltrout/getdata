@@ -41,7 +41,7 @@ char* _GD_ValidateField(const gd_entry_t* parent, const char* field_code,
         ((len > 50 && standards < 5) || (len > 16 && standards < 3))))
   {
     dreturn("%p", field_code);
-    return (char*)field_code;
+    return (char *)field_code;
   }
 
   *is_dot = 0;
@@ -49,21 +49,21 @@ char* _GD_ValidateField(const gd_entry_t* parent, const char* field_code,
     if (field_code[i] == '/') {
       /* fields may never contain '/', regardless of version and strictness */
       dreturn("%p", field_code);
-      return (char*)field_code;
+      return (char *)field_code;
     } else if (field_code[i] < 0x20) {
       dreturn("%p", field_code);
-      return (char*)field_code;
+      return (char *)field_code;
     } else if (strict && ((standards >= 5 && (field_code[i] == '<' ||
             field_code[i] == '>' || field_code[i] == ';' ||
             field_code[i] == '|' || field_code[i] == '&')) ||
         (standards == 5 && (field_code[i] == '\\' || field_code[i] == '#'))))
     {
       dreturn("%p", field_code);
-      return (char*)field_code;
+      return (char *)field_code;
     } else if (field_code[i] == '.') {
       if (standards >= 6 && strict) {
         dreturn("%p", field_code);
-        return (char*)field_code;
+        return (char *)field_code;
       } else
         *is_dot = 1;
     }
@@ -79,11 +79,11 @@ char* _GD_ValidateField(const gd_entry_t* parent, const char* field_code,
         || (strcmp("REFERENCE", field_code) == 0 && standards >= 6))
     {
       dreturn("%p", field_code);
-      return (char*)field_code;
+      return (char *)field_code;
     }
 
   if (parent != NULL) {
-    ptr = malloc(strlen(parent->field) + strlen(field_code) + 2);
+    ptr = (char *)malloc(strlen(parent->field) + strlen(field_code) + 2);
     sprintf(ptr, "%s/%s", parent->field, field_code);
   } else
     ptr = strdup(field_code);
@@ -143,7 +143,7 @@ int gd_rename(DIRFILE *D, const char *old_code, const char *new_name,
     return -1;
   }
 
-  name = _GD_ValidateField(E->e->parent, new_name, D->standards, 1, &new_dot);
+  name = _GD_ValidateField(E->e->p.parent, new_name, D->standards, 1, &new_dot);
   if (name == new_name) {
     _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, new_name);
     dreturn("%i", -1);
@@ -171,7 +171,7 @@ int gd_rename(DIRFILE *D, const char *old_code, const char *new_name,
 
   if (E->field_type == GD_RAW_ENTRY) {
     /* Compose the new filename */
-    char* filebase = malloc(FILENAME_MAX);
+    char* filebase = (char *)malloc(FILENAME_MAX);
 
     if (filebase == NULL) {
       _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
@@ -187,10 +187,10 @@ int gd_rename(DIRFILE *D, const char *old_code, const char *new_name,
       snprintf(filebase, FILENAME_MAX, "%s/%s", D->name, new_name);
 
     /* Close the old file */
-    if (E->e->file->fp != -1 && (*_gd_ef[E->e->file[0].encoding].close)(
-          E->e->file))
+    if (E->e->u.raw.file->fp != -1 &&
+        (*_gd_ef[E->e->u.raw.file[0].encoding].close)(E->e->u.raw.file))
     {
-      _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[0].name, errno, NULL);
+      _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
       free(name);
       free(filebase);
       dreturn("%i", -1);
@@ -199,7 +199,7 @@ int gd_rename(DIRFILE *D, const char *old_code, const char *new_name,
 
     /* Resize the dot list; this must be done early in case it fails */
     if (new_dot && !old_dot) {
-      gd_entry_t** ptr = realloc(D->dot_list,
+      gd_entry_t** ptr = (gd_entry_t **)realloc(D->dot_list,
           sizeof(gd_entry_t*) * (D->n_dot + 1));
 
       if (ptr == NULL) {
@@ -232,7 +232,7 @@ int gd_rename(DIRFILE *D, const char *old_code, const char *new_name,
         return -1;
       }
 
-      memcpy(&temp, E->e->file, sizeof(struct _gd_raw_file));
+      memcpy(&temp, E->e->u.raw.file, sizeof(struct _gd_raw_file));
       temp.name = NULL;
       if (_GD_SetEncodedName(D, &temp, filebase, 0)) {
         free(name);
@@ -241,15 +241,17 @@ int gd_rename(DIRFILE *D, const char *old_code, const char *new_name,
         return -1;
       }
 
-      if (_GD_SetEncodedName(D, E->e->file, E->e->filebase, 0)) {
+      if (_GD_SetEncodedName(D, E->e->u.raw.file, E->e->u.raw.filebase, 0)) {
         free(name);
         free(filebase);
         dreturn("%i", -1);
         return -1;
       }
 
-      if ((*_gd_ef[E->e->file[0].encoding].move)(E->e->file, temp.name)) {
-        _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[0].name, errno, NULL);
+      if ((*_gd_ef[E->e->u.raw.file[0].encoding].move)(E->e->u.raw.file,
+            temp.name))
+      {
+        _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
         free(filebase);
         dreturn("%i", -1);
         return -1;
@@ -258,12 +260,12 @@ int gd_rename(DIRFILE *D, const char *old_code, const char *new_name,
       /* Nothing may fail from now on */
 
     } else {
-      free(E->e->file[0].name);
-      E->e->file[0].name = NULL;
+      free(E->e->u.raw.file[0].name);
+      E->e->u.raw.file[0].name = NULL;
     }
 
-    free(E->e->filebase);
-    E->e->filebase = filebase;
+    free(E->e->u.raw.filebase);
+    E->e->u.raw.filebase = filebase;
   }
 
   free(E->field);

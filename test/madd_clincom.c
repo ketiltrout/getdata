@@ -20,9 +20,15 @@ int main(void)
   DIRFILE* D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
   gd_add_phase(D, "new", "in", 3, 0);
   const char* in_fields[2] = {"in1", "in2"};
+#ifdef GD_NO_C99_API
+  const double m[2][2] = {{1, 3.3}, {0.3, 18.3}};
+  const double b[2][2] = {{2, 3.8}, {2.1, 9.8}};
+  gd_madd_clincom(D, "new", "meta", 2, in_fields, (double*)m, (double*)b);
+#else
   const double complex m[2] = {1 + _Complex_I * 3.3, 0.3 + _Complex_I * 18.3};
   const double complex b[2] = {2 + _Complex_I * 3.8, 2.1 + _Complex_I * 9.8};
   gd_madd_clincom(D, "new", "meta", 2, in_fields, m, b);
+#endif
   int error = gd_error(D);
 
   /* check */
@@ -32,13 +38,13 @@ int main(void)
   if (!r) {
     CHECKI(e.field_type, GD_LINCOM_ENTRY);
     CHECKI(e.fragment_index, 0);
-    CHECKI(e.n_fields, 2);
+    CHECKI(e.u.lincom.n_fields, 2);
     CHECKS(e.in_fields[0], "in1");
     CHECKS(e.in_fields[1], "in2");
-    CHECKC(e.cm[0], m[0]);
-    CHECKC(e.cm[1], m[1]);
-    CHECKC(e.cb[0], b[0]);
-    CHECKC(e.cb[1], b[1]);
+    CHECKC(e.u.lincom.cm[0], m[0]);
+    CHECKC(e.u.lincom.cm[1], m[1]);
+    CHECKC(e.u.lincom.cb[0], b[0]);
+    CHECKC(e.u.lincom.cb[1], b[1]);
     gd_free_entry_strings(&e);
   }
 

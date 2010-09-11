@@ -121,6 +121,19 @@ if test "x$enable_assert" = "xno"; then
   AC_DEFINE(NDEBUG, 1, [ Define to disable assertions ])
 fi
 
+dnl C99 stuff
+AC_ARG_ENABLE(ansi-c, AS_HELP_STRING([--enable-ansi-c],
+              [use ANSI C (C89) work-arounds for C99 code]),
+              [
+               if test "x${enableval}" != "xno"; then
+                 disable_c99="yes";
+               else
+                 disable_c99="no";
+               fi
+              ], [disable_c99="no"])
+AC_MSG_CHECKING([whether to build in ANSI C compliance mode])
+AC_MSG_RESULT([$disable_c99])
+
 dnl checkdirfile
 AC_ARG_ENABLE(checkdirfile, AS_HELP_STRING([--disable-checkdirfile],
               [don't build or install the checkdirfile utility]),
@@ -210,7 +223,12 @@ AC_ARG_ENABLE(python, AS_HELP_STRING([--disable-python],
               ])
 
 AC_MSG_CHECKING([whether to include the Python bindings])
-AC_MSG_RESULT([$make_pybindings])
+if test "x$disable_c99" = "xyes"; then
+  make_pybindings="no";
+  AC_MSG_RESULT([no (requires C99 compiler)])
+else
+  AC_MSG_RESULT([$make_pybindings])
+fi
 
 dnl IDL bindings
 AC_ARG_ENABLE(idl, AS_HELP_STRING([--disable-idl],
@@ -223,7 +241,12 @@ AC_ARG_ENABLE(idl, AS_HELP_STRING([--disable-idl],
               ])
 
 AC_MSG_CHECKING([whether to include the IDL bindings])
-AC_MSG_RESULT([$make_idlbindings])
+if test "x$disable_c99" = "xyes"; then
+  make_idlbindings="no";
+  AC_MSG_RESULT([no (requires C99 compiler)])
+else
+  AC_MSG_RESULT([$make_idlbindings])
+fi
 
 dnl Modules
 AC_ARG_ENABLE(modules, AS_HELP_STRING([--enable-modules],
@@ -276,7 +299,20 @@ echo "*** Checking C compiler characteristics"
 echo
 AC_PROG_CC
 AC_PROG_CC_C_O
-AC_PROG_CC_C99
+
+if test "x$disable_c99" != "xyes"; then
+  AC_PROG_CC_C99
+  if test "x$ac_cv_prog_cc_c99" = "xno"; then
+    disable_c99="yes"
+    make_pybindings="no"
+    make_idlbindings="no"
+  fi
+fi
+if test "x$disable_c99" = "xyes"; then
+  AC_DEFINE([GD_NO_C99_API], [1],
+            [define to disable C99-specific code in the library source])
+fi
+
 AC_HEADER_STDC
 if test "x$make_cxxbindings" != "xno"; then
   echo
@@ -414,6 +450,7 @@ dnl compiler checks
 echo
 echo "*** Checking additional compiler characteristics"
 echo
+AC_C_INLINE
 GD_PROG_CC_WEXTRA
 
 if test "x$make_c++bindings" != "xno"; then
@@ -436,7 +473,7 @@ if test "x$make_f77bindings" != "xno"; then
   AC_F77_WRAPPERS
 fi
 
-AC_MSG_CHECKING([if we're linking against the Microsoft C Run-Time])
+AC_MSG_CHECKING([if we're linking against the Microsoft C Run-Time]) #'
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM([], [[#ifndef __MSVCRT__
        choke me
 #endif
@@ -448,8 +485,15 @@ AC_MSG_RESULT([$gd_msvcrt])
 
 if test "$gd_msvcrt" = "yes"; then
   AC_DEFINE([__MSVCRT_VERSION__], [0x601],
-            [ If compiling aginst the MSVCRT, define to the minimum version ])
+            [ If compiling aginst the MSVCRT, define to 0x601 ])
 fi
+
+dnl Declare a few feature test macros
+AC_DEFINE([_BSD_SOURCE], [], [ Expose BSD-derived definitions ])
+AC_DEFINE([_SVID_SOURCE], [], [ Expose System V-derived definitions ])
+AC_DEFINE([_POSIX_SOURCE], [], [ Expose POSIX.1-1990 conforming definitions ])
+AC_DEFINE([_POSIX_C_SOURCE], [200112L],
+          [ Expose POSIX.1-2001 conforming definitions ])
 
 dnl libraries
 echo
@@ -469,18 +513,22 @@ if test "x${use_modules}" != "xno"; then
 fi
 
 dnl functions
-AC_CHECK_FUNCS([_commit cabs fchmod _fdopen fsync gmtime_r _lseeki64 _mkdir \
+AC_CHECK_FUNCS([_commit fchmod _fdopen fsync gmtime_r _lseeki64 _mkdir \
                 mkstemp _open _read _rmdir stat64 _stat64 strtoll strtoull \
                 _unlink _write])
+if test "x$disable_c99" = "xno"; then
+  AC_CHECK_FUNCS([cabs])
+fi
 AC_FUNC_STRERROR_R
-
-dnl AC_MSG_CHECKING([for _
 
 dnl headers
 echo
 echo "*** Looking for additional header files"
 echo
-AC_CHECK_HEADERS([complex.h fcntl.h libgen.h])
+AC_CHECK_HEADERS([fcntl.h libgen.h])
+if test "x$disable_c99" = "xno"; then
+AC_CHECK_HEADERS([complex.h])
+fi
 AC_HEADER_DIRENT
 
 AC_CHECK_HEADERS([io.h])
@@ -506,13 +554,6 @@ if test $gd_2arg_mkdir = "no"; then
             [ Define to 1 if the `mkdir' function takes only one argument.])
 fi dnl`
 
-dnl Declare a few feature test macros
-AC_DEFINE([_BSD_SOURCE], [], [ Expose BSD-derived definitions ])
-AC_DEFINE([_SVID_SOURCE], [], [ Expose System V-derived definitions ])
-AC_DEFINE([_POSIX_SOURCE], [], [ Expose POSIX.1-1990 conforming definitions ])
-AC_DEFINE([_POSIX_C_SOURCE], [200112L],
-          [ Expose POSIX.1-2001 conforming definitions ])
-
 dnl types
 echo
 echo "*** Checking data types"
@@ -532,7 +573,9 @@ AC_TYPE_INT32_T
 AC_TYPE_UINT64_T
 AC_TYPE_INT64_T
 
+if test "x$disable_c99" = "xno"; then
 AC_CHECK_TYPES([_Complex float, _Complex double])
+fi
 
 GD_CHECK_LFS_TYPE([struct stat64],[
 #ifdef STDC_HEADERS
@@ -810,7 +853,7 @@ if test "x$enable_debug$enable_assert" = "xnoyes"; then
   enable_debug="assert only"
 fi
 
-if test "x$have_off64_t" = "xyes" -a "x$gd_cv_sys_darwin" = "xno"; then
+if test "x$gd_cv_type_off64_t" = "xyes"; then
   lfs_transitional_api="yes"
 else
   lfs_transitional_api="no"
@@ -819,6 +862,7 @@ fi
 echo
 echo "Configuration summary: "
 echo "  checkdirfile utility:         ${make_checkdirfile}"
+echo "  ANSI C compatibility mode:    ${disable_c99}"
 echo "  LFS transitional API:         ${lfs_transitional_api}"
 echo "  Legacy API:                   ${include_legacy_api}"
 echo "  Verbose debugging:            ${enable_debug}"

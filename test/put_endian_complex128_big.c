@@ -19,12 +19,16 @@ int main(void)
   const char* format_data = "data RAW COMPLEX128 1\nENDIAN big\n";
   int fd, r = 0;
   unsigned int i;
+#ifdef GD_NO_C99_API
+  const double c[] = {1.5, 2.25};
+#else
   const double complex c = 1.5 + _Complex_I * 2.25;
-  unsigned char x[sizeof(double complex)] = {
+#endif
+  unsigned char x[2 * sizeof(double)] = {
     0x3F, 0xF8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x40, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
   };
-  unsigned char u[sizeof(double complex)];
+  unsigned char u[2 * sizeof(double)];
 
   mkdir(filedir, 0777); 
 
@@ -33,14 +37,18 @@ int main(void)
   close(fd);
 
   DIRFILE* D = gd_open(filedir, GD_RDWR | GD_UNENCODED | GD_VERBOSE);
+#ifdef GD_NO_C99_API
+  int n = gd_putdata(D, "data", 5, 0, 1, 0, GD_COMPLEX128, c);
+#else
   int n = gd_putdata(D, "data", 5, 0, 1, 0, GD_COMPLEX128, &c);
+#endif
   int error = gd_error(D);
 
   gd_close(D);
 
   fd = open(data, O_RDONLY);
-  lseek(fd, 5 * sizeof(double complex), SEEK_SET);
-  read(fd, u, sizeof(double complex));
+  lseek(fd, 5 * 2 * sizeof(double), SEEK_SET);
+  read(fd, u, 2 * sizeof(double));
   close(fd);
 
   unlink(data);
@@ -50,7 +58,7 @@ int main(void)
   CHECKI(error, 0);
   CHECKI(n, 1);
   
-  for (i = 0; i < sizeof(double complex); ++i)
+  for (i = 0; i < 2 * sizeof(double); ++i)
     CHECKXi(i, u[i], x[i]);
 
   return r;

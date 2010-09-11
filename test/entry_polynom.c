@@ -38,10 +38,10 @@ int main(void)
   CHECKS(E.field, "data");
   CHECKX(E.field_type, GD_POLYNOM_ENTRY);
   CHECKI(E.comp_scal, 0);
-  CHECKI(E.poly_ord, 4);
+  CHECKI(E.u.polynom.poly_ord, 4);
   CHECKS(E.in_fields[0], "in");
   for (fd = 0; fd < 4; ++fd)
-    CHECKFi(fd,E.a[fd], fd + 1.);
+    CHECKFi(fd,E.u.polynom.a[fd], fd + 1.);
 
   return r;
 }

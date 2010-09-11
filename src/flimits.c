@@ -42,7 +42,8 @@ static void _GD_ShiftFragment(DIRFILE* D, off64_t offset, int fragment,
   }
 
   if (move && offset != D->fragment[fragment].frame_offset) {
-    gd_entry_t **raw_entry = malloc(sizeof(gd_entry_t*) * D->n_entries);
+    gd_entry_t **raw_entry = (gd_entry_t **)malloc(sizeof(gd_entry_t*) *
+        D->n_entries);
 
     if (raw_entry == NULL) {
       _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
@@ -73,14 +74,14 @@ static void _GD_ShiftFragment(DIRFILE* D, off64_t offset, int fragment,
      * remove the temporary files */
     if (D->error) {
       for (i = 0; i < n_raw; ++i)
-        if ((*_gd_ef[raw_entry[i]->e->file[0].encoding].temp)(
-              raw_entry[i]->e->file, GD_TEMP_DESTROY))
-          _GD_SetError(D, GD_E_RAW_IO, 0, raw_entry[i]->e->file[0].name,
+        if ((*_gd_ef[raw_entry[i]->e->u.raw.file[0].encoding].temp)(
+              raw_entry[i]->e->u.raw.file, GD_TEMP_DESTROY))
+          _GD_SetError(D, GD_E_RAW_IO, 0, raw_entry[i]->e->u.raw.file[0].name,
               errno, NULL);
     } else {
       for (i = 0; i < n_raw; ++i)
-        if ((*_gd_ef[raw_entry[i]->e->file[0].encoding].temp)(
-              raw_entry[i]->e->file, GD_TEMP_MOVE))
+        if ((*_gd_ef[raw_entry[i]->e->u.raw.file[0].encoding].temp)(
+              raw_entry[i]->e->u.raw.file, GD_TEMP_MOVE))
         {
           _GD_SetError(D, GD_E_UNCLEAN_DB, 0,
               D->fragment[D->entry[i]->fragment_index].cname, 0, NULL);
@@ -177,7 +178,7 @@ int gd_alter_frameoffset(DIRFILE* D, off_t offset, int fragment, int move)
   return gd_alter_frameoffset64(D, offset, fragment, move);
 }
 
-off_t gd_frameoffset(DIRFILE* D, int fragment)
+off_t gd_frameoffset(DIRFILE* D, int fragment) gd_nothrow
 {
   return gd_frameoffset64(D, fragment);
 }
@@ -204,18 +205,19 @@ static off64_t _GD_GetEOF(DIRFILE *D, gd_entry_t* E, const char *parent,
       if (!_GD_Supports(D, E, GD_EF_SIZE))
         break;
 
-      if (_GD_SetEncodedName(D, E->e->file, E->e->filebase, 0))
+      if (_GD_SetEncodedName(D, E->e->u.raw.file, E->e->u.raw.filebase, 0))
         break;
 
-      ns = (*_gd_ef[E->e->file[0].encoding].size)(E->e->file, E->data_type);
+      ns = (*_gd_ef[E->e->u.raw.file[0].encoding].size)(E->e->u.raw.file,
+          E->u.raw.type);
 
       if (ns < 0) {
-        _GD_SetError(D, GD_E_RAW_IO, 0, E->e->file[0].name, errno, NULL);
+        _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
         ns = -1;
         break;
       }
 
-      ns += D->fragment[E->fragment_index].frame_offset * E->spf;
+      ns += D->fragment[E->fragment_index].frame_offset * E->u.raw.spf;
       break;
     case GD_BIT_ENTRY:
     case GD_LINTERP_ENTRY:
@@ -282,7 +284,7 @@ static off64_t _GD_GetEOF(DIRFILE *D, gd_entry_t* E, const char *parent,
         break;
       }
 
-      if (E->n_fields == 1)
+      if (E->u.lincom.n_fields == 1)
         break;
 
       spf0 = _GD_GetSPF(D, E->e->entry[0]);
@@ -292,7 +294,7 @@ static off64_t _GD_GetEOF(DIRFILE *D, gd_entry_t* E, const char *parent,
         break;
       }
 
-      for (i = 1; i < E->n_fields; ++i) {
+      for (i = 1; i < E->u.lincom.n_fields; ++i) {
         if (_GD_BadInput(D, E, i)) {
           ns = -1;
           break;
@@ -327,7 +329,7 @@ static off64_t _GD_GetEOF(DIRFILE *D, gd_entry_t* E, const char *parent,
 
       ns = _GD_GetEOF(D, E->e->entry[0], E->field, is_index);
       if (!*is_index && !D->error)
-        ns -= E->shift;
+        ns -= E->u.phase.shift;
 
       /* The EOF may never be negative. */
       if (ns < 0)
@@ -417,7 +419,7 @@ static off64_t _GD_GetBOF(DIRFILE *D, gd_entry_t* E, const char *parent,
   switch (E->field_type) {
     case GD_RAW_ENTRY:
       bof = D->fragment[E->fragment_index].frame_offset;
-      *spf = E->spf;
+      *spf = E->u.raw.spf;
       *ds = 0;
       break;
     case GD_BIT_ENTRY:
@@ -436,7 +438,7 @@ static off64_t _GD_GetBOF(DIRFILE *D, gd_entry_t* E, const char *parent,
       bof = _GD_GetBOF(D, E->e->entry[0], E->field, spf, ds);
 
       if (!D->error) {
-        *ds -= E->shift;
+        *ds -= E->u.phase.shift;
 
         while (*ds < 0) {
           *ds += *spf;
@@ -497,7 +499,7 @@ static off64_t _GD_GetBOF(DIRFILE *D, gd_entry_t* E, const char *parent,
         break;
       }
 
-      for (i = 1; i < E->n_fields; ++i) {
+      for (i = 1; i < E->u.lincom.n_fields; ++i) {
         if (_GD_BadInput(D, E, i)) {
           bof = -1;
           break;
@@ -541,7 +543,7 @@ static off64_t _GD_GetBOF(DIRFILE *D, gd_entry_t* E, const char *parent,
   return bof;
 }
 
-off64_t gd_bof64(DIRFILE* D, const char *field_code_in)
+off64_t gd_bof64(DIRFILE* D, const char *field_code_in) gd_nothrow
 {
   off64_t bof;
   gd_entry_t *entry;
@@ -580,7 +582,7 @@ off64_t gd_bof64(DIRFILE* D, const char *field_code_in)
 }
 
 /* 32(ish)-bit wrapper for the 64-bit version, when needed */
-off_t gd_bof(DIRFILE* D, const char *field_code)
+off_t gd_bof(DIRFILE* D, const char *field_code) gd_nothrow
 {
   return (off_t)gd_bof64(D, field_code);
 }

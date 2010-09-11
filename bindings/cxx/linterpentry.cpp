@@ -35,7 +35,7 @@ LinterpEntry::LinterpEntry(const char* field_code, const char* in_field,
   E.field = strdup(field_code);
   E.field_type = GD_LINTERP_ENTRY;
   E.in_fields[0] = strdup(in_field);
-  E.table = strdup(table);
+  E.u.linterp.table = strdup(table);
   E.fragment_index = fragment_index;
 }
 
@@ -62,8 +62,8 @@ int LinterpEntry::SetTable(const char* table, int move_table)
   if (ptr == NULL)
     return 0;
 
-  free(E.table);
-  E.table = ptr;
+  free(E.u.linterp.table);
+  E.u.linterp.table = ptr;
 
   if (D != NULL)
     return gd_alter_entry(D->D, E.field, &E, move_table);

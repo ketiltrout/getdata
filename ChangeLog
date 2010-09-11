@@ -1,3 +1,32 @@
+2010-09-11   D. V. Wiebe <getdata@ketiltrout.net>   svn:444
+	* test/ src/ bindings/ util/: ANSI-C-ify.
+	* src/getdata.h.in: Define GD_NO_C99_API when the C99-compliant API has been
+	disabled at build time.
+	* src/getdata.h.in src/internal.h: ANSI C does not permit anonymous union
+	and structures, so name all the sub-bits of gd_entry_t and gd_private_entry.
+
+	* src/getdata.h.in: Encompass everything in an extern "C" block
+	for C++ compilers.
+
+	* src/: include gd_throw in definition of functions.
+
+	* src/debug.c src/common.c src/Makefile.am: Move gd_col_count and
+	gd_debug_col to common.c to remove the need for GDLIB.
+
+	* test/legacy_get_rofs.c test/legacy_get.c test/legacy_nonexistent.c
+	test/legacy_put.c: Fix skip test.
+
+	* test/flush_spec.c: Skip the blank line.
+
+	* test/slim_nframes.c: Add missing r.
+
+	* bindings/idl/test/Makefile.am: Use DL_LIBRARY_PATH in TESTS_ENVIRONMENT.
+
+	* configure.ac: Add --enable-ansi-c, which will disable Python and IDL.
+	A fail of AC_PROG_CC_C99 will also cause this to be asserted.
+
+	* configure.ac: Fix lfs_transitional_api check.
+
 2010-08-10   D. V. Wiebe <getdata@ketiltrout.net>   svn:443
 	* src/common.c (_GD_BadInput): Check the propper entry for scalarness.
 

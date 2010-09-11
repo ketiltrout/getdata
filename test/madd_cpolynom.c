@@ -21,9 +21,14 @@ int main(void)
 
   DIRFILE* D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
   gd_add_phase(D, "new", "in", 3, 0);
+#ifdef GD_NO_C99_API
+  const double a[4][2] = {{1, 29.03}, {0.3, 12.34}, {0.5, 99.55}, {1.8, 45.32}};
+  gd_madd_cpolynom(D, "new", "meta", 3, "in", (double*)a);
+#else
   const double complex a[4] = {1 + _Complex_I * 29.03, 0.3 + _Complex_I * 12.34,
     0.5 + _Complex_I * 99.55, 1.8 + _Complex_I * 45.32};
   gd_madd_cpolynom(D, "new", "meta", 3, "in", a);
+#endif
   int error = gd_error(D);
 
   /* check */
@@ -34,10 +39,10 @@ int main(void)
     CHECKI(e.field_type, GD_POLYNOM_ENTRY);
     CHECKS(e.in_fields[0], "in");
     CHECKI(e.fragment_index, 0);
-    CHECKI(e.poly_ord, 3);
+    CHECKI(e.u.polynom.poly_ord, 3);
     CHECKI(e.comp_scal, 1);
     for (j = 0; j < 4; ++j)
-      CHECKCi(j,e.ca[j], a[j]);
+      CHECKCi(j,e.u.polynom.ca[j], a[j]);
     gd_free_entry_strings(&e);
   }
 

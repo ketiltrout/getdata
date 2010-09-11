@@ -1,4 +1,4 @@
-#define GETDATA_C89_API
+#define GD_C89_API
 #include "test.h"
 
 #include <stdlib.h>
@@ -30,8 +30,8 @@ int main(void)
     CHECKI(e.field_type, GD_RECIP_ENTRY);
     CHECKS(e.in_fields[0], "in");
     CHECKI(e.comp_scal, 1);
-    CHECKF(e.cdividend[0], dividend[0]);
-    CHECKF(e.cdividend[1], dividend[1]);
+    CHECKF(e.u.recip.cdividend[0], dividend[0]);
+    CHECKF(e.u.recip.cdividend[1], dividend[1]);
     CHECKI(e.fragment_index, 0);
 
     gd_free_entry_strings(&e);

@@ -47,7 +47,7 @@ int main(void)
   CHECKI(error,0);
   CHECKI(n,8);
   for (i = 0; i < 8; ++i)
-    CHECKFi(i,c[i],carg(data_data[5 + i]));
+    CHECKFi(i,c[i],(data_data[i] > 0) ? 3.14159265358979323846 : 0);
 
   return r;
 }

@@ -50,12 +50,12 @@ int main(void)
 
   CHECKS(E.field, "polynom");
   CHECKI(E.field_type, GD_POLYNOM_ENTRY);
-  CHECKI(E.poly_ord, 2);
+  CHECKI(E.u.polynom.poly_ord, 2);
   CHECKI(E.comp_scal, 0);
   CHECKS(E.in_fields[0], "data"); 
 
   for (i = 0; i < 3; ++i) 
-    CHECKFi(i,E.a[i], a[i]);
+    CHECKFi(i,E.u.polynom.a[i], a[i]);
 
   unlink(data);
   unlink(format);

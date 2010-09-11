@@ -18,7 +18,12 @@ int main(void)
 
   DIRFILE* D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
   gd_add_phase(D, "new", "in", 3, 0);
-  gd_madd_crecip(D, "new", "meta", "in1", 3.2 + _Complex_I * 3.1);
+#ifdef GD_NO_C99_API
+  const double v[] = {3.2, 3.1};
+#else
+  const double complex v = 3.2 + _Complex_I * 3.1;
+#endif
+  gd_madd_crecip(D, "new", "meta", "in1", v);
   int error = gd_error(D);
 
   /* check */
@@ -28,7 +33,7 @@ int main(void)
   if (!r) {
     CHECKI(e.field_type, GD_RECIP_ENTRY);
     CHECKS(e.in_fields[0], "in1");
-    CHECKC(e.cdividend, 3.2 + _Complex_I * 3.1);
+    CHECKC(e.u.recip.cdividend, v);
     CHECKI(e.comp_scal, 1);
     CHECKI(e.fragment_index, 0);
     gd_free_entry_strings(&e);

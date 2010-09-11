@@ -36,12 +36,12 @@ PolynomEntry::PolynomEntry(const char* field_code, int poly_ord,
 
   E.field = strdup(field_code);
   E.field_type = GD_POLYNOM_ENTRY;
-  E.poly_ord = poly_ord;
+  E.u.polynom.poly_ord = poly_ord;
   E.fragment_index = fragment_index;
   E.comp_scal = 0;
   E.in_fields[0] = strdup(in_field);
   for (i = 0; i <= poly_ord; ++i)
-    E.a[i] = a[i];
+    E.u.polynom.a[i] = a[i];
 }
 
 PolynomEntry::PolynomEntry(const char* field_code, int poly_ord,
@@ -52,13 +52,13 @@ PolynomEntry::PolynomEntry(const char* field_code, int poly_ord,
 
   E.field = strdup(field_code);
   E.field_type = GD_POLYNOM_ENTRY;
-  E.poly_ord = poly_ord;
+  E.u.polynom.poly_ord = poly_ord;
   E.fragment_index = fragment_index;
   E.comp_scal = 1;
   E.in_fields[0] = strdup(in_field);
   for (i = 0; i <= poly_ord; ++i) {
-    E.ca[i][0] = ca[i].real();
-    E.ca[i][1] = ca[i].imag();
+    E.u.polynom.ca[i][0] = ca[i].real();
+    E.u.polynom.ca[i][1] = ca[i].imag();
   }
 }
 
@@ -83,8 +83,8 @@ int PolynomEntry::SetCoefficient(double coeff, int index)
   if (index < 0 || index > GD_MAX_POLYORD)
     return -1;
 
-  E.ca[index][0] = E.a[index] = coeff;
-  E.ca[index][1] = 0;
+  E.u.polynom.ca[index][0] = E.u.polynom.a[index] = coeff;
+  E.u.polynom.ca[index][1] = 0;
 
   if (D != NULL)
     return gd_alter_entry(D->D, E.field, &E, 0);
@@ -110,8 +110,8 @@ int PolynomEntry::SetCoefficient(const char *scale, int index)
     r = gd_alter_entry(D->D, E.field, &E, 0);
 
     if (!r) {
-      r = gd_get_constant(D->D, scale, GD_COMPLEX128, E.ca + index);
-      E.a[index] = E.ca[index][0];
+      r = gd_get_constant(D->D, scale, GD_COMPLEX128, E.u.polynom.ca + index);
+      E.u.polynom.a[index] = E.u.polynom.ca[index][0];
     }
   }
   
@@ -123,8 +123,8 @@ int PolynomEntry::SetCoefficient(std::complex<double> coeff, int index)
   if (index < 0 || index > GD_MAX_POLYORD)
     return -1;
 
-  E.a[index] = E.ca[index][0] = coeff.real();
-  E.ca[index][1] = coeff.imag();
+  E.u.polynom.a[index] = E.u.polynom.ca[index][0] = coeff.real();
+  E.u.polynom.ca[index][1] = coeff.imag();
   E.comp_scal = 1;
 
   if (D != NULL)
@@ -135,7 +135,7 @@ int PolynomEntry::SetCoefficient(std::complex<double> coeff, int index)
 
 int PolynomEntry::SetPolyOrd(int poly_ord)
 {
-  int old_n = E.poly_ord;
+  int old_n = E.u.polynom.poly_ord;
 
   if (poly_ord < 2 || poly_ord > GD_MAX_POLYORD)
     return -1;
@@ -144,10 +144,10 @@ int PolynomEntry::SetPolyOrd(int poly_ord)
     int i;
 
     for (i = old_n + 1; i <= poly_ord; ++i)
-      E.a[i] = 0;
+      E.u.polynom.a[i] = 0;
   }
 
-  E.poly_ord = poly_ord;
+  E.u.polynom.poly_ord = poly_ord;
 
   if (D != NULL)
     return gd_alter_entry(D->D, E.field, &E, 0);
@@ -157,7 +157,7 @@ int PolynomEntry::SetPolyOrd(int poly_ord)
 
 const char *PolynomEntry::Scalar(int index)
 {
-  if (index < 0 || index > E.poly_ord)
+  if (index < 0 || index > E.u.polynom.poly_ord)
     return NULL;
 
   return E.scalar[index];

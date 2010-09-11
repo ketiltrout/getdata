@@ -21,7 +21,7 @@
 AUTOMAKE_OPTIONS = foreign
 
 if TEST_IDL
-TESTS_ENVIRONMENT=IDL_PATH="${srcdir}" IDL_DLM_PATH=../.libs LD_PRELOAD=../../../src/.libs/libgetdata.so ${IDL}
+TESTS_ENVIRONMENT=${DL_LIBRARY_PATH}=${${DL_LIBRARY_PATH}}:../../../src/.libs IDL_PATH="${srcdir}" IDL_DLM_PATH=../.libs ${IDL}
 idlTESTS=big_test.pro
 TESTS=$(addprefix ${srcdir}/,$(idlTESTS))
 endif

@@ -14,10 +14,15 @@ int main(void)
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
   int r = 0;
+#ifdef GD_NO_C99_API
+  const double cdividend[2] = {33.3, 44.4};
+#else
+  const double complex cdividend = 33.3 + _Complex_I * 44.4;
+#endif
   gd_entry_t e;
 
   DIRFILE* D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
-  gd_add_crecip(D, "new", "in", 33.3 + _Complex_I * 44.4, 0);
+  gd_add_crecip(D, "new", "in", cdividend, 0);
   int error = gd_error(D);
 
   /* check */
@@ -28,7 +33,7 @@ int main(void)
     CHECKI(e.field_type, GD_RECIP_ENTRY);
     CHECKS(e.in_fields[0], "in");
     CHECKI(e.comp_scal, 1);
-    CHECKC(e.cdividend, 33.3 + _Complex_I * 44.4);
+    CHECKC(e.u.recip.cdividend, cdividend);
     CHECKI(e.fragment_index, 0);
 
     gd_free_entry_strings(&e);

@@ -59,16 +59,16 @@ namespace GetData {
       }
 
       virtual int PolyOrd() {
-        return E.poly_ord;
+        return E.u.polynom.poly_ord;
       };
 
       virtual double Coefficient(int index = 0) {
-        return (index <= E.poly_ord) ? E.a[index] : 0;
+        return (index <= E.u.polynom.poly_ord) ? E.u.polynom.a[index] : 0;
       };
 
       virtual std::complex<double> CCoefficient(int index = 0) {
-        return (index <= E.poly_ord)
-          ? std::complex<double>(E.ca[index][0], E.ca[index][1]) : 0;
+        return (index <= E.u.polynom.poly_ord)
+          ? std::complex<double>(E.u.polynom.ca[index][0], E.u.polynom.ca[index][1]) : 0;
       };
 
       virtual const char *Scalar(int index = 0);

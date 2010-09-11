@@ -29,7 +29,7 @@ int main(void)
     CHECKI(e.field_type, GD_PHASE_ENTRY);
     CHECKS(e.in_fields[0], "in");
     CHECKI(e.fragment_index, 0);
-    CHECKI(e.shift, 3);
+    CHECKI(e.u.phase.shift, 3);
     gd_free_entry_strings(&e);
   }
 

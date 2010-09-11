@@ -52,7 +52,7 @@ namespace GetData {
       };
 
       virtual const char *Table() {
-        return E.table;
+        return E.u.linterp.table;
       };
 
       int SetInput(const char* field);

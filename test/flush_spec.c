@@ -51,7 +51,7 @@ int main(void)
     if (fgets(line, GD_MAX_LINE_LENGTH, stream) == NULL)
       break;
 
-    if (line[0] == '/' || line[0] == '#')
+    if (line[0] == '/' || line[0] == '#' || line[0] < ' ')
       continue;
 
     if (strcmp(line, spec[i]) != 0) {

@@ -20,7 +20,7 @@ int main(void)
   const char* format_data = "data RAW UINT16 1\n";
   char command[4096];
   uint16_t data_data[256];
-  int i;
+  int i, r = 0;
 
   mkdir(filedir, 0777);
 

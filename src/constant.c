@@ -26,7 +26,7 @@
 
 /* this function is little more than a public boilerplate for _GD_DoField */
 int gd_get_constant(DIRFILE* D, const char *field_code_in,
-    gd_type_t return_type, void *data_out)
+    gd_type_t return_type, void *data_out) gd_nothrow
 {
   gd_entry_t *entry;
   char* field_code;
@@ -68,7 +68,7 @@ int gd_get_constant(DIRFILE* D, const char *field_code_in,
 
 /* this function is little more than a public boilerplate for _GD_DoFieldOut */
 int gd_put_constant(DIRFILE* D, const char *field_code_in, gd_type_t data_type,
-    const void *data_in)
+    const void *data_in) gd_nothrow
 {
   int i;
   gd_entry_t *entry;
@@ -112,13 +112,13 @@ int gd_put_constant(DIRFILE* D, const char *field_code_in, gd_type_t data_type,
   }
 
   /* Flag all clients as needing recalculation */
-  for (i = 0; i < entry->e->n_client; ++i)
-    entry->e->client[i]->e->calculated = 0;
+  for (i = 0; i < entry->e->u.cons.n_client; ++i)
+    entry->e->u.cons.client[i]->e->calculated = 0;
 
   /* Clear the client list */
-  free(entry->e->client);
-  entry->e->client = NULL;
-  entry->e->n_client = 0;
+  free(entry->e->u.cons.client);
+  entry->e->u.cons.client = NULL;
+  entry->e->u.cons.n_client = 0;
 
   dreturn("%i", 0);
   return 0;

@@ -63,11 +63,11 @@ namespace GetData {
       }
 
       virtual double Dividend() {
-        return E.dividend;
+        return E.u.recip.dividend;
       };
 
       virtual std::complex<double> CDividend() {
-        return std::complex<double>(E.cdividend[0], E.cdividend[1]);
+        return std::complex<double>(E.u.recip.cdividend[0], E.u.recip.cdividend[1]);
       };
 
       virtual int SetInput(const char* field);

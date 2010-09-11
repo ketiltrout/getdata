@@ -37,13 +37,13 @@ LincomEntry::LincomEntry(const char* field_code, int n_fields,
 
   E.field = strdup(field_code);
   E.field_type = GD_LINCOM_ENTRY;
-  E.n_fields = n_fields;
+  E.u.lincom.n_fields = n_fields;
   E.fragment_index = fragment_index;
   E.comp_scal = 0;
   for (i = 0; i < n_fields; ++i) {
     E.in_fields[i] = strdup(in_fields[i]);
-    E.m[i] = m[i];
-    E.b[i] = b[i];
+    E.u.lincom.m[i] = m[i];
+    E.u.lincom.b[i] = b[i];
   }
 }
 
@@ -55,15 +55,15 @@ LincomEntry::LincomEntry(const char* field_code, int n_fields,
 
   E.field = strdup(field_code);
   E.field_type = GD_LINCOM_ENTRY;
-  E.n_fields = n_fields;
+  E.u.lincom.n_fields = n_fields;
   E.fragment_index = fragment_index;
   E.comp_scal = 1;
   for (i = 0; i < n_fields; ++i) {
     E.in_fields[i] = strdup(in_fields[i]);
-    E.cm[i][0] = cm[i].real();
-    E.cm[i][1] = cm[i].imag();
-    E.cb[i][0] = cb[i].real();
-    E.cb[i][1] = cb[i].imag();
+    E.u.lincom.cm[i][0] = cm[i].real();
+    E.u.lincom.cm[i][1] = cm[i].imag();
+    E.u.lincom.cb[i][0] = cb[i].real();
+    E.u.lincom.cb[i][1] = cb[i].imag();
   }
 }
 
@@ -91,8 +91,8 @@ int LincomEntry::SetScale(double scale, int index)
   if (index < 0 || index >= GD_MAX_LINCOM)
     return -1;
 
-  E.cm[index][0] = E.m[index] = scale;
-  E.cm[index][1] = 0;
+  E.u.lincom.cm[index][0] = E.u.lincom.m[index] = scale;
+  E.u.lincom.cm[index][1] = 0;
 
   if (D != NULL)
     return gd_alter_entry(D->D, E.field, &E, 0);
@@ -118,8 +118,8 @@ int LincomEntry::SetScale(const char *scale, int index)
     r = gd_alter_entry(D->D, E.field, &E, 0);
 
     if (!r) {
-      r = gd_get_constant(D->D, scale, GD_COMPLEX128, E.cm + index);
-      E.m[index] = E.cm[index][0];
+      r = gd_get_constant(D->D, scale, GD_COMPLEX128, E.u.lincom.cm + index);
+      E.u.lincom.m[index] = E.u.lincom.cm[index][0];
     }
   }
   
@@ -131,8 +131,8 @@ int LincomEntry::SetScale(std::complex<double> scale, int index)
   if (index < 0 || index >= GD_MAX_LINCOM)
     return -1;
 
-  E.m[index] = E.cm[index][0] = scale.real();
-  E.cm[index][1] = scale.imag();
+  E.u.lincom.m[index] = E.u.lincom.cm[index][0] = scale.real();
+  E.u.lincom.cm[index][1] = scale.imag();
   E.comp_scal = 1;
 
   if (D != NULL)
@@ -146,8 +146,8 @@ int LincomEntry::SetOffset(double offset, int index)
   if (index < 0 || index >= GD_MAX_LINCOM)
     return -1;
 
-  E.cb[index][0] = E.b[index] = offset;
-  E.cb[index][1] = 0;
+  E.u.lincom.cb[index][0] = E.u.lincom.b[index] = offset;
+  E.u.lincom.cb[index][1] = 0;
 
   if (D != NULL)
     return gd_alter_entry(D->D, E.field, &E, 0);
@@ -173,8 +173,8 @@ int LincomEntry::SetOffset(const char *scale, int index)
     r = gd_alter_entry(D->D, E.field, &E, 0);
 
     if (!r) {
-      r = gd_get_constant(D->D, scale, GD_COMPLEX128, E.cb + index);
-      E.b[index] = E.cb[index][0];
+      r = gd_get_constant(D->D, scale, GD_COMPLEX128, E.u.lincom.cb + index);
+      E.u.lincom.b[index] = E.u.lincom.cb[index][0];
     }
   }
   
@@ -186,8 +186,8 @@ int LincomEntry::SetOffset(std::complex<double> offset, int index)
   if (index < 0 || index >= GD_MAX_LINCOM)
     return -1;
 
-  E.b[index] = E.cb[index][0] = offset.real();
-  E.cb[index][1] = offset.imag();
+  E.u.lincom.b[index] = E.u.lincom.cb[index][0] = offset.real();
+  E.u.lincom.cb[index][1] = offset.imag();
   E.comp_scal = 1;
 
   if (D != NULL)
@@ -198,7 +198,7 @@ int LincomEntry::SetOffset(std::complex<double> offset, int index)
 
 int LincomEntry::SetNFields(int nfields)
 {
-  int old_n = E.n_fields;
+  int old_n = E.u.lincom.n_fields;
 
   if (nfields < 1 || nfields > GD_MAX_LINCOM)
     return -1;
@@ -209,11 +209,11 @@ int LincomEntry::SetNFields(int nfields)
     for (i = old_n; i < nfields; ++i) {
       free(E.in_fields[i]);
       E.in_fields[i] = strdup("INDEX");
-      E.m[i] = E.b[i] = 0;
+      E.u.lincom.m[i] = E.u.lincom.b[i] = 0;
     }
   }
 
-  E.n_fields = nfields;
+  E.u.lincom.n_fields = nfields;
 
   if (D != NULL)
     return gd_alter_entry(D->D, E.field, &E, 0);
@@ -223,7 +223,7 @@ int LincomEntry::SetNFields(int nfields)
 
 const char *LincomEntry::Scalar(int index)
 {
-  if (index < 0 || index >= E.n_fields)
+  if (index < 0 || index >= E.u.lincom.n_fields)
     return NULL;
 
   return E.scalar[index];

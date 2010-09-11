@@ -71,7 +71,7 @@ int main(void)
   CHECKI(unlink_table, 0);
   CHECKI(error2, 0);
   CHECKS(e.in_fields[0], "data");
-  CHECKS(e.table, "table1");
+  CHECKS(e.u.linterp.table, "table1");
 
   return r;
 }

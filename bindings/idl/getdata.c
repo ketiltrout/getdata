@@ -15,8 +15,8 @@
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * License along with GetData; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #define _LARGEFILE64_SOURCE 1
 #include <stdio.h>
@@ -423,18 +423,18 @@ IDL_VPTR gdidl_make_idl_entry(const gd_entry_t* E)
   {
     case GD_RAW_ENTRY:
       *(IDL_UINT*)(data + IDL_StructTagInfoByName(gdidl_entry_def, "SPF",
-            IDL_MSG_LONGJMP, NULL)) = E->spf;
+            IDL_MSG_LONGJMP, NULL)) = E->u.raw.spf;
       *(IDL_INT*)(data + IDL_StructTagInfoByName(gdidl_entry_def, "DATA_TYPE",
-            IDL_MSG_LONGJMP, NULL)) = E->data_type;
+            IDL_MSG_LONGJMP, NULL)) = E->u.raw.type;
       IDL_StrStore((IDL_STRING*)(data + IDL_StructTagInfoByName(gdidl_entry_def,
               "SCALAR", IDL_MSG_LONGJMP, NULL)), E->scalar[0]);
       break;
     case GD_LINCOM_ENTRY:
       *(IDL_INT*)(data + IDL_StructTagInfoByName(gdidl_entry_def,
-            "N_FIELDS", IDL_MSG_LONGJMP, NULL)) = E->n_fields;
+            "N_FIELDS", IDL_MSG_LONGJMP, NULL)) = E->u.lincom.n_fields;
       *(IDL_INT*)(data + IDL_StructTagInfoByName(gdidl_entry_def,
             "COMP_SCAL", IDL_MSG_LONGJMP, NULL)) = E->comp_scal;
-      for (i = 0; i < E->n_fields; ++i) {
+      for (i = 0; i < E->u.lincom.n_fields; ++i) {
         IDL_StrStore((IDL_STRING*)(data +
               IDL_StructTagInfoByName(gdidl_entry_def, "IN_FIELDS",
                 IDL_MSG_LONGJMP, NULL)) + i, E->in_fields[i]);
@@ -449,27 +449,29 @@ IDL_VPTR gdidl_make_idl_entry(const gd_entry_t* E)
       if (E->comp_scal) {
         gdidl_c99_to_dcmp((IDL_DCOMPLEX*)(data +
             IDL_StructTagInfoByName(gdidl_entry_def, "CM", IDL_MSG_LONGJMP,
-              NULL)), E->cm, E->n_fields);
+              NULL)), E->u.lincom.cm, E->u.lincom.n_fields);
         gdidl_c99_to_dcmp((IDL_DCOMPLEX*)(data +
             IDL_StructTagInfoByName(gdidl_entry_def, "CB", IDL_MSG_LONGJMP,
-              NULL)), E->cb, E->n_fields);
+              NULL)), E->u.lincom.cb, E->u.lincom.n_fields);
       } else {
         memcpy(data + IDL_StructTagInfoByName(gdidl_entry_def, "M",
-              IDL_MSG_LONGJMP, NULL), E->m, E->n_fields * sizeof(double));
+              IDL_MSG_LONGJMP, NULL), E->u.lincom.m, E->u.lincom.n_fields *
+            sizeof(double));
         memcpy(data + IDL_StructTagInfoByName(gdidl_entry_def, "B",
-              IDL_MSG_LONGJMP, NULL), E->b, E->n_fields * sizeof(double));
+              IDL_MSG_LONGJMP, NULL), E->u.lincom.b, E->u.lincom.n_fields *
+            sizeof(double));
       }
       break;
     case GD_LINTERP_ENTRY:
       IDL_StrStore((IDL_STRING*)(data + IDL_StructTagInfoByName(gdidl_entry_def,
-              "TABLE", IDL_MSG_LONGJMP, NULL)), E->table);
+              "TABLE", IDL_MSG_LONGJMP, NULL)), E->u.linterp.table);
       break;
     case GD_BIT_ENTRY:
     case GD_SBIT_ENTRY:
       *(IDL_INT*)(data + IDL_StructTagInfoByName(gdidl_entry_def, "BITNUM",
-            IDL_MSG_LONGJMP, NULL)) = E->bitnum;
+            IDL_MSG_LONGJMP, NULL)) = E->u.bit.bitnum;
       *(IDL_INT*)(data + IDL_StructTagInfoByName(gdidl_entry_def, "NUMBITS",
-            IDL_MSG_LONGJMP, NULL)) = E->numbits;
+            IDL_MSG_LONGJMP, NULL)) = E->u.bit.numbits;
       IDL_StrStore((IDL_STRING*)(data + IDL_StructTagInfoByName(gdidl_entry_def,
               "SCALAR", IDL_MSG_LONGJMP, NULL)), E->scalar[0]);
       IDL_StrStore((IDL_STRING*)(data + IDL_StructTagInfoByName(gdidl_entry_def,
@@ -489,14 +491,14 @@ IDL_VPTR gdidl_make_idl_entry(const gd_entry_t* E)
       if (E->comp_scal)
         gdidl_c99_to_dcmp((IDL_DCOMPLEX*)(data +
               IDL_StructTagInfoByName(gdidl_entry_def, "CDIVIDEND",
-              IDL_MSG_LONGJMP, NULL)), &E->cdividend, 1);
+              IDL_MSG_LONGJMP, NULL)), &E->u.recip.cdividend, 1);
       else
         *(double*)(data + IDL_StructTagInfoByName(gdidl_entry_def, "DIVIDEND",
-              IDL_MSG_LONGJMP, NULL)) = E->dividend;
+              IDL_MSG_LONGJMP, NULL)) = E->u.recip.dividend;
       break;
     case GD_PHASE_ENTRY:
       *(IDL_LONG*)(data + IDL_StructTagInfoByName(gdidl_entry_def, "SHIFT",
-            IDL_MSG_LONGJMP, NULL)) = E->shift;
+            IDL_MSG_LONGJMP, NULL)) = E->u.phase.shift;
       IDL_StrStore((IDL_STRING*)(data + IDL_StructTagInfoByName(gdidl_entry_def,
               "SCALAR", IDL_MSG_LONGJMP, NULL)), E->scalar[0]);
       break;
@@ -504,9 +506,9 @@ IDL_VPTR gdidl_make_idl_entry(const gd_entry_t* E)
       *(IDL_INT*)(data + IDL_StructTagInfoByName(gdidl_entry_def,
             "COMP_SCAL", IDL_MSG_LONGJMP, NULL)) = E->comp_scal;
       *(IDL_INT*)(data + IDL_StructTagInfoByName(gdidl_entry_def,
-            "POLY_ORD", IDL_MSG_LONGJMP, NULL)) = E->poly_ord;
+            "POLY_ORD", IDL_MSG_LONGJMP, NULL)) = E->u.polynom.poly_ord;
 
-      for (i = 0; i <= E->poly_ord; ++i)
+      for (i = 0; i <= E->u.polynom.poly_ord; ++i)
         IDL_StrStore((IDL_STRING*)(data +
               IDL_StructTagInfoByName(gdidl_entry_def, "SCALAR",
                 IDL_MSG_LONGJMP, NULL)) + i, E->scalar[i]);
@@ -514,14 +516,15 @@ IDL_VPTR gdidl_make_idl_entry(const gd_entry_t* E)
       if (E->comp_scal)
         gdidl_c99_to_dcmp((IDL_DCOMPLEX*)(data +
             IDL_StructTagInfoByName(gdidl_entry_def, "CA", IDL_MSG_LONGJMP,
-              NULL)), E->ca, E->poly_ord + 1);
+              NULL)), E->u.polynom.ca, E->u.polynom.poly_ord + 1);
       else
         memcpy(data + IDL_StructTagInfoByName(gdidl_entry_def, "A",
-              IDL_MSG_LONGJMP, NULL), E->a, (E->poly_ord + 1) * sizeof(double));
+              IDL_MSG_LONGJMP, NULL), E->u.polynom.a,
+            (E->u.polynom.poly_ord + 1) * sizeof(double));
       break;
     case GD_CONST_ENTRY:
       *(IDL_INT*)(data + IDL_StructTagInfoByName(gdidl_entry_def, "DATA_TYPE",
-            IDL_MSG_LONGJMP, NULL)) = E->const_type;
+            IDL_MSG_LONGJMP, NULL)) = E->u.cons.type;
       break;
     case GD_NO_ENTRY:
     case GD_INDEX_ENTRY:
@@ -594,16 +597,16 @@ void gdidl_read_idl_entry(gd_entry_t *E, IDL_VPTR v, int alter)
       if (o != -1) {
         if (d->type != IDL_TYP_UINT)
           idl_abort("GD_ENTRY element INDEX must be of type UINT");
-        E->spf = *(uint16_t*)(data + o);
+        E->u.raw.spf = *(uint16_t*)(data + o);
       }
 
       o = IDL_StructTagInfoByName(v->value.s.sdef, "DATA_TYPE", action, &d);
       if (o != -1) {
         if (d->type != IDL_TYP_INT)
           idl_abort("GD_ENTRY element DATA_TYPE must be of type INT");
-        E->data_type = *(int16_t*)(data + o);
+        E->u.raw.type = *(int16_t*)(data + o);
       } else
-        E->data_type = GD_NULL;
+        E->u.raw.type = GD_NULL;
 
       copy_scalar[0] = 1;
 
@@ -613,7 +616,7 @@ void gdidl_read_idl_entry(gd_entry_t *E, IDL_VPTR v, int alter)
       if (o != -1) {
         if (d->type != IDL_TYP_INT)
           idl_abort("GD_ENTRY element N_FIELDS must be of type INT");
-        n = E->n_fields = *(int16_t*)(data + o);
+        n = E->u.lincom.n_fields = *(int16_t*)(data + o);
       }
 
       o = IDL_StructTagInfoByName(v->value.s.sdef, "COMP_SCAL", action, &d);
@@ -651,7 +654,7 @@ void gdidl_read_idl_entry(gd_entry_t *E, IDL_VPTR v, int alter)
               n = GD_MAX_LINCOM;
           }
           if (d->type == IDL_TYP_DCOMPLEX)
-            gdidl_dcmp_to_c99(E->cm, (IDL_DCOMPLEX*)data + o, n);
+            gdidl_dcmp_to_c99(E->u.lincom.cm, (IDL_DCOMPLEX*)data + o, n);
           else
             idl_abort("GD_ENTRY element CM must be of type DCOMPLEX");
         }
@@ -665,9 +668,9 @@ void gdidl_read_idl_entry(gd_entry_t *E, IDL_VPTR v, int alter)
               n = GD_MAX_LINCOM;
           }
           if (d->type == IDL_TYP_DOUBLE) {
-            memcpy(E->m, data + o, n * sizeof(double));
+            memcpy(E->u.lincom.m, data + o, n * sizeof(double));
             for (i = 0; i < n; ++i)
-              E->cm[i] = E->m[i];
+              E->u.lincom.cm[i] = E->u.lincom.m[i];
           } else
             idl_abort("GD_ENTRY element M must be of type DOUBLE");
         }
@@ -683,7 +686,8 @@ void gdidl_read_idl_entry(gd_entry_t *E, IDL_VPTR v, int alter)
               n = GD_MAX_LINCOM;
           }
           if (d->type == IDL_TYP_DCOMPLEX)
-            gdidl_dcmp_to_c99(E->cb, (IDL_DCOMPLEX*)data + o, E->n_fields);
+            gdidl_dcmp_to_c99(E->u.lincom.cb, (IDL_DCOMPLEX*)data + o,
+                E->u.lincom.n_fields);
           else
             idl_abort("GD_ENTRY element CB must be of type DCOMPLEX");
         }
@@ -697,9 +701,10 @@ void gdidl_read_idl_entry(gd_entry_t *E, IDL_VPTR v, int alter)
               n = GD_MAX_LINCOM;
           }
           if (d->type == IDL_TYP_DOUBLE) {
-            memcpy(E->b, data + o, E->n_fields * sizeof(double));
-            for (i = 0; i < E->n_fields; ++i)
-              E->cb[i] = E->b[i];
+            memcpy(E->u.lincom.b, data + o, E->u.lincom.n_fields *
+                sizeof(double));
+            for (i = 0; i < E->u.lincom.n_fields; ++i)
+              E->u.lincom.cb[i] = E->u.lincom.b[i];
           } else
             idl_abort("GD_ENTRY element B must be of type DOUBLE");
         }
@@ -718,15 +723,15 @@ void gdidl_read_idl_entry(gd_entry_t *E, IDL_VPTR v, int alter)
       if (o != -1) {
         if (d->type != IDL_TYP_INT)
           idl_abort("GD_ENTRY element BITNUM must be of type INT");
-        E->bitnum = *(int16_t*)(data + o);
+        E->u.bit.bitnum = *(int16_t*)(data + o);
       } else
-        E->bitnum = -1;
+        E->u.bit.bitnum = -1;
 
       o = IDL_StructTagInfoByName(v->value.s.sdef, "NUMBITS", action, &d);
       if (o != -1) {
         if (d->type != IDL_TYP_INT)
           idl_abort("GD_ENTRY element NUMBITS must be of type INT");
-        E->numbits = *(int16_t*)(data + o);
+        E->u.bit.numbits = *(int16_t*)(data + o);
       }
 
       copy_scalar[0] = copy_scalar[1] = 1;
@@ -751,7 +756,8 @@ void gdidl_read_idl_entry(gd_entry_t *E, IDL_VPTR v, int alter)
         o = IDL_StructTagInfoByName(v->value.s.sdef, "CDIVIDEND", action, &d);
         if (o != -1) {
           if (d->type == IDL_TYP_DCOMPLEX)
-            gdidl_dcmp_to_c99(&E->cdividend, (IDL_DCOMPLEX*)data + o, 1);
+            gdidl_dcmp_to_c99(&E->u.recip.cdividend, (IDL_DCOMPLEX*)data + o,
+                1);
           else
             idl_abort("GD_ENTRY element CDIVIDEND must be of type DCOMPLEX");
         }
@@ -759,7 +765,7 @@ void gdidl_read_idl_entry(gd_entry_t *E, IDL_VPTR v, int alter)
         o = IDL_StructTagInfoByName(v->value.s.sdef, "DIVIDEND", action, &d);
         if (o != -1) {
           if (d->type == IDL_TYP_DOUBLE)
-            E->dividend = *(double*)(data + o);
+            E->u.recip.dividend = *(double*)(data + o);
           else
             idl_abort("GD_ENTRY element DIVIDEND must be of type DOUBLE");
         }
@@ -771,7 +777,7 @@ void gdidl_read_idl_entry(gd_entry_t *E, IDL_VPTR v, int alter)
           &d);
       if (d->type != IDL_TYP_LONG)
         idl_abort("GD_ENTRY element SHIFT must be of type LONG");
-      E->shift = *(int16_t*)(data + o);
+      E->u.phase.shift = *(int16_t*)(data + o);
       copy_scalar[0] = 1;
       break;
     case GD_POLYNOM_ENTRY:
@@ -779,8 +785,8 @@ void gdidl_read_idl_entry(gd_entry_t *E, IDL_VPTR v, int alter)
       if (o != -1) {
         if (d->type != IDL_TYP_INT)
           idl_abort("GD_ENTRY element POLY_ORD must be of type INT");
-        E->poly_ord = *(int16_t*)(data + o);
-        n = E->poly_ord + 1;
+        E->u.polynom.poly_ord = *(int16_t*)(data + o);
+        n = E->u.polynom.poly_ord + 1;
       }
 
       for (i = 0 ; i < n; ++i)
@@ -803,7 +809,7 @@ void gdidl_read_idl_entry(gd_entry_t *E, IDL_VPTR v, int alter)
               n = GD_MAX_POLYORD;
           }
           if (d->type == IDL_TYP_DCOMPLEX)
-            gdidl_dcmp_to_c99(E->ca, (IDL_DCOMPLEX*)data + o, n);
+            gdidl_dcmp_to_c99(E->u.polynom.ca, (IDL_DCOMPLEX*)data + o, n);
           else
             idl_abort("GD_ENTRY element CA must be of type DCOMPLEX");
         }
@@ -817,7 +823,7 @@ void gdidl_read_idl_entry(gd_entry_t *E, IDL_VPTR v, int alter)
               n = GD_MAX_POLYORD;
           }
           if (d->type == IDL_TYP_DOUBLE)
-            memcpy(E->a, data + o, n * sizeof(double));
+            memcpy(E->u.polynom.a, data + o, n * sizeof(double));
           else
             idl_abort("GD_ENTRY element A must be of type DOUBLE");
         }
@@ -828,9 +834,9 @@ void gdidl_read_idl_entry(gd_entry_t *E, IDL_VPTR v, int alter)
       if (o != -1) {
         if (d->type != IDL_TYP_INT)
           idl_abort("GD_ENTRY element DATA_TYPE must be of type INT");
-        E->const_type = *(int16_t*)(data + o);
+        E->u.cons.type = *(int16_t*)(data + o);
       } else
-        E->const_type = GD_NULL;
+        E->u.cons.type = GD_NULL;
       break;
     case GD_NO_ENTRY:
     case GD_INDEX_ENTRY:

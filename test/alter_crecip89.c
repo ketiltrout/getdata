@@ -1,5 +1,5 @@
 /* Test field modifying */
-#define GETDATA_C89_API
+#define GD_C89_API
 #include "test.h"
 
 #include <stdlib.h>
@@ -51,8 +51,8 @@ int main(void)
   CHECKI(error,0);
   CHECKI(n,0);
   CHECKI(ret,0);
-  CHECKF(E.cdividend[0], div[0]);
-  CHECKF(E.cdividend[1], div[1]);
+  CHECKF(E.u.recip.cdividend[0], div[0]);
+  CHECKF(E.u.recip.cdividend[1], div[1]);
   CHECKS(E.in_fields[0], "phase");
 
   return r;

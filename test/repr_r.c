@@ -18,20 +18,31 @@ int main(void)
   const char* data = __TEST__ "dirfile/data";
   const char* format_data = "data RAW COMPLEX128 1\n";
   double c[8];
+#ifdef GD_NO_C99_API
+  double data_data[100][2];
+#else
   double complex data_data[100];
+#endif
   int i, r = 0;
 
   mkdir(filedir, 0777);
 
-  for (i = 0; i < 100; ++i)
+  for (i = 0; i < 100; ++i) {
+#ifdef GD_NO_C99_API
+    const double v = i * 3.14159265358979323846 / 5.;
+    data_data[i][0] = cos(v);
+    data_data[i][1] = sin(v);
+#else
     data_data[i] = cexp(_Complex_I * i * 3.14159265358979323846 / 5.);
+#endif
+  }
 
   i = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
   write(i, format_data, strlen(format_data));
   close(i);
 
   i = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
-  write(i, data_data, 100 * sizeof(double complex));
+  write(i, data_data, 200 * sizeof(double));
   close(i);
 
   DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);

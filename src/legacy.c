@@ -36,11 +36,7 @@ static struct {
 static char _GD_GlobalErrorString[GD_MAX_LINE_LENGTH];
 static char _GD_GlobalErrorFile[GD_MAX_LINE_LENGTH];
 static DIRFILE _GD_GlobalErrors = {
-  .error = 0,
-  .suberror = 0,
-  .error_string = _GD_GlobalErrorString,
-  .error_file = _GD_GlobalErrorFile,
-  .flags = GD_INVALID
+  0, 0, _GD_GlobalErrorString, _GD_GlobalErrorFile, 0, GD_INVALID
 };
 
 /* old error strings */
@@ -82,14 +78,7 @@ const char *GD_ERROR_CODES[GD_N_ERROR_CODES] = {
   "I/O error flushing metadata to disc" /* GD_E_FLUSH */
 };
 
-static struct FormatType Format = {
-  .rawEntries = NULL,
-  .linterpEntries = NULL,
-  .multiplyEntries = NULL,
-  .mplexEntries = NULL,
-  .bitEntries = NULL,
-  .phaseEntries = NULL
-};
+static struct FormatType Format;
 
 /* _GD_CopyGlobalError: Copy the last error message to the global error buffer.
  */
@@ -108,7 +97,7 @@ static int _GD_CopyGlobalError(DIRFILE* D)
 
 /* legacy wrapper for gd_error_string()
  */
-char* GetDataErrorString(char* buffer, size_t buflen)
+char *GetDataErrorString(char* buffer, size_t buflen) gd_nothrow
 {
   return gd_error_string(&_GD_GlobalErrors, buffer, buflen);
 }
@@ -162,7 +151,7 @@ static DIRFILE* _GD_GetDirfile(const char *filename_in, int mode)
     return &_GD_GlobalErrors;
   }
 
-  _GD_Dirfiles.D = ptr;
+  _GD_Dirfiles.D = (DIRFILE **)ptr;
 
   /* Open a dirfile */
   _GD_Dirfiles.D[_GD_Dirfiles.n - 1] = gd_open(filedir, mode);
@@ -188,7 +177,7 @@ static void CopyRawEntry(struct RawEntryType* R, gd_entry_t* E)
 
   R->field = E->field;
   
-  switch(E->data_type) {
+  switch(E->u.raw.type) {
     case GD_UINT8:
       R->type = 'c';
       break;
@@ -215,8 +204,8 @@ static void CopyRawEntry(struct RawEntryType* R, gd_entry_t* E)
       break;
   }
 
-  R->size = (int)E->e->size;
-  R->samples_per_frame = (int)E->spf;
+  R->size = (int)E->e->u.raw.size;
+  R->samples_per_frame = (int)E->u.raw.spf;
 
   dreturnvoid();
 }
@@ -235,8 +224,8 @@ static void CopyPolynomEntry(struct LincomEntryType* L, gd_entry_t* E)
   L->field = E->field;
   L->n_fields = 1;
   L->in_fields[0] = E->in_fields[0];
-  L->m[0] = E->a[1];
-  L->b[0] = E->a[0];
+  L->m[0] = E->u.polynom.a[1];
+  L->b[0] = E->u.polynom.a[0];
 
   dreturnvoid();
 }
@@ -253,11 +242,11 @@ static void CopyLincomEntry(struct LincomEntryType* L, gd_entry_t* E)
   }
 
   L->field = E->field;
-  L->n_fields = E->n_fields;
-  for (i = 0; i < E->n_fields; ++i) {
+  L->n_fields = E->u.lincom.n_fields;
+  for (i = 0; i < E->u.lincom.n_fields; ++i) {
     L->in_fields[i] = E->in_fields[i];
-    L->m[i] = E->m[i];
-    L->b[i] = E->b[i];
+    L->m[i] = E->u.lincom.m[i];
+    L->b[i] = E->u.lincom.b[i];
   }
 
   dreturnvoid();
@@ -274,7 +263,7 @@ static void CopyLinterpEntry(struct LinterpEntryType* L, gd_entry_t* E)
 
   L->field = E->field;
   L->raw_field = E->in_fields[0];
-  L->linterp_file = E->table;
+  L->linterp_file = E->u.linterp.table;
 
   dreturnvoid();
 }
@@ -290,8 +279,8 @@ static void CopyBitEntry(struct BitEntryType* B, gd_entry_t* E)
 
   B->field = E->field;
   B->raw_field = E->in_fields[0];
-  B->bitnum = E->bitnum;
-  B->numbits = E->numbits;
+  B->bitnum = E->u.bit.bitnum;
+  B->numbits = E->u.bit.numbits;
 
   dreturnvoid();
 }
@@ -324,7 +313,7 @@ static void CopyReciprocalEntry(struct LincomEntryType* L, gd_entry_t* E)
   L->field = E->field;
   L->n_fields = 1;
   L->in_fields[0] = E->in_fields[0];
-  L->m[0] = E->dividend;
+  L->m[0] = E->u.recip.dividend;
   L->b[0] = 0;
 
   dreturnvoid();
@@ -341,13 +330,14 @@ static void CopyPhaseEntry(struct PhaseEntryType* P, gd_entry_t* E)
 
   P->field = E->field;
   P->raw_field = E->in_fields[0];
-  P->shift = E->shift;
+  P->shift = E->u.phase.shift;
 
   dreturnvoid();
 }
 
 /* Okay, reconstruct the old FormatType.  This is painful. */
-struct FormatType *GetFormat(const char *filedir, int *error_code) {
+struct FormatType *GetFormat(const char *filedir, int *error_code) gd_nothrow
+{
   dtrace("\"%s\", %p", filedir, error_code);
 
   DIRFILE *D = _GD_GetDirfile(filedir, GD_RDONLY);
@@ -367,6 +357,8 @@ struct FormatType *GetFormat(const char *filedir, int *error_code) {
     return NULL;
   }
   
+  memset(&Format, sizeof(Format), 0);
+
   /* fill the structure -- like everything about the legacy API, this is
    * not thread-safe */
   Format.FileDirName = filedir; 
@@ -375,14 +367,6 @@ struct FormatType *GetFormat(const char *filedir, int *error_code) {
 
   /* Pass one: run through the entry list and count the number of different
    * types */
-  Format.n_raw = 0; 
-  Format.n_lincom = 0; 
-  Format.n_linterp = 0; 
-  Format.n_multiply = 0; 
-  Format.n_mplex = 0; /* Erm... yeah... */
-  Format.n_bit = 0; 
-  Format.n_phase = 0; 
-
   for (i = 0; i < D->n_entries; ++i) 
     switch(D->entry[i]->field_type) {
       case GD_RAW_ENTRY:
@@ -422,15 +406,18 @@ struct FormatType *GetFormat(const char *filedir, int *error_code) {
   free(Format.bitEntries);
   free(Format.phaseEntries);
 
-  Format.rawEntries = malloc(Format.n_raw * sizeof(struct RawEntryType));
-  Format.lincomEntries = malloc(Format.n_lincom *
+  Format.rawEntries = (struct RawEntryType *)malloc(Format.n_raw *
+      sizeof(struct RawEntryType));
+  Format.lincomEntries = (struct LincomEntryType *)malloc(Format.n_lincom *
       sizeof(struct LincomEntryType));
-  Format.linterpEntries = malloc(Format.n_linterp *
+  Format.linterpEntries = (struct LinterpEntryType *)malloc(Format.n_linterp *
       sizeof(struct LinterpEntryType));
-  Format.multiplyEntries = malloc(Format.n_multiply *
-      sizeof(struct MultiplyEntryType));
-  Format.bitEntries = malloc(Format.n_bit * sizeof(struct BitEntryType));
-  Format.phaseEntries = malloc(Format.n_phase * sizeof(struct PhaseEntryType));
+  Format.multiplyEntries = (struct MultiplyEntryType *)malloc(Format.n_multiply
+      * sizeof(struct MultiplyEntryType));
+  Format.bitEntries = (struct BitEntryType *)malloc(Format.n_bit *
+      sizeof(struct BitEntryType));
+  Format.phaseEntries = (struct PhaseEntryType *)malloc(Format.n_phase *
+      sizeof(struct PhaseEntryType));
 
   if (Format.rawEntries == NULL || Format.lincomEntries == NULL ||
       Format.linterpEntries == NULL || Format.multiplyEntries == NULL || 
@@ -541,7 +528,7 @@ int GetNFrames(const char *filename, int *error_code,
 /* legacy interface to get_spf()
 */
 int GetSamplesPerFrame(const char *filename, const char *field_code,
-    int *error_code)
+    int *error_code) gd_nothrow
 {
   DIRFILE* D;
 

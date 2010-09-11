@@ -45,6 +45,10 @@
 #ifndef GETDATA_H
 #define GETDATA_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* The most recent standards version supported by this library */
 #define GD_DIRFILE_STANDARDS_VERSION 8
 
@@ -53,6 +57,9 @@
  */
 #include <sys/types.h>
 #include <unistd.h>
+
+/* If this symbol is defined here, the C99-API is not present in the library */
+#undef GD_NO_C99_API
 
 /* define function attributes */
 #define gd_gnu_enough ((__GNUC__ * 100 + __GNUC_MINOR__) >= 303)
@@ -200,7 +207,7 @@ typedef enum {
 #undef _gd_int16_t
 #undef _gd_uint16_t
 #undef _gd_int64_t
-#ifndef GD_C89_API
+#if ! defined GD_C89_API && ! defined GD_NO_C99_API
 #  include <inttypes.h>
 #  define GD_DCOMPLEXM(v) double _Complex v
 #  define GD_DCOMPLEXP(v) double _Complex *v
@@ -259,32 +266,38 @@ struct _gd_unified_entry {
   union {
     struct { /* RAW */
       gd_spf_t spf;
-      gd_type_t data_type;
-    };
+      gd_type_t type;
+    } raw;
     struct { /* LINCOM */
       int n_fields;
       double m[GD_MAX_LINCOM];
       GD_DCOMPLEXM(cm[GD_MAX_LINCOM]);
       double b[GD_MAX_LINCOM];
       GD_DCOMPLEXM(cb[GD_MAX_LINCOM]);
-    };
-    char *table; /* LINTERP */
+    } lincom;
+    struct { /* LINTERP */
+      char *table;
+    } linterp;
     struct { /* BIT and SBIT */
       gd_bit_t bitnum;
       gd_bit_t numbits;
-    };
-    gd_shift_t shift; /* PHASE */
-    gd_type_t const_type; /* CONST */
+    } bit;
+    struct { /* PHASE */
+      gd_shift_t shift;
+    } phase;
+    struct { /* CONST */
+      gd_type_t type;
+    } cons;
     struct { /* POLYNOM */
       int poly_ord;
       double a[GD_MAX_POLYORD + 1];
       GD_DCOMPLEXM(ca[GD_MAX_POLYORD + 1]);
-    };
+    } polynom;
     struct { /* RECIP */
       double dividend;
       GD_DCOMPLEXM(cdividend);
-    };
-  };
+    } recip;
+  } u;
 
   struct _gd_private_entry *e;
 };
@@ -363,7 +376,7 @@ extern int gd_add_cpolynom(DIRFILE *dirfile, const char *field_code,
     int fragment_index) gd_nothrow gd_nonnull ((1,2,4));
 
 /* The native gd_add_crecip cannot be used in C89 mode */
-#ifndef GD_C89_API
+#if ! defined GD_C89_API && ! defined GD_NO_C99_API
 extern int gd_add_crecip(DIRFILE *dirfile, const char *field_code,
     const char *in_field, _Complex double cdividend, int fragment_index)
   gd_nothrow gd_nonnull ((1,2,3));
@@ -372,7 +385,7 @@ extern int gd_add_crecip(DIRFILE *dirfile, const char *field_code,
 #endif
 
 extern int gd_add_crecip89(DIRFILE *dirfile, const char *field_code,
-    const char *in_field, double cdividend[2], int fragment_index)
+    const char *in_field, const double cdividend[2], int fragment_index)
   gd_nothrow gd_nonnull ((1,2,3));
 
 extern int gd_add_divide(DIRFILE *dirfile, const char *field_code,
@@ -425,7 +438,7 @@ extern int gd_alter_cpolynom(DIRFILE *dirfile, const char *field_code,
     int poly_ord, const char *in_field, const GD_DCOMPLEXP(a)) gd_nothrow
 gd_nonnull((1,2));
 
-#ifndef GD_C89_API
+#if ! defined GD_C89_API && ! defined GD_NO_C99_API
 extern int gd_alter_crecip(DIRFILE *dirfile, const char *field_code,
     const char *in_field, _Complex double cdividend) gd_nothrow
 gd_nonnull((1,2));
@@ -434,7 +447,8 @@ gd_nonnull((1,2));
 #endif
 
 extern int gd_alter_crecip89(DIRFILE *dirfile, const char *field_code,
-    const char *in_field, double cdividend[2]) gd_nothrow gd_nonnull((1,2));
+    const char *in_field, const double cdividend[2]) gd_nothrow
+gd_nonnull((1,2));
 
 extern int gd_alter_divide(DIRFILE *dirfile, const char *field_code,
     const char *in_field1, const char *in_field2) gd_nothrow gd_nonnull((1,2));
@@ -519,7 +533,7 @@ extern int gd_madd_cpolynom(DIRFILE *dirfile, const char *parent,
     const char *field_code, int poly_ord, const char *in_field,
     const GD_DCOMPLEXP(ca)) gd_nothrow gd_nonnull ((1,2,3,5));
 
-#ifndef GD_C89_API
+#if ! defined GD_C89_API && ! defined GD_NO_C99_API
 extern int gd_madd_crecip(DIRFILE *dirfile, const char *parent,
     const char *field_code, const char *in_field, _Complex double cdividend)
 gd_nothrow gd_nonnull ((1,2,3,4));
@@ -528,7 +542,7 @@ gd_nothrow gd_nonnull ((1,2,3,4));
 #endif
 
 extern int gd_madd_crecip89(DIRFILE *dirfile, const char *parent,
-    const char *field_code, const char *in_field, double cdividend[2])
+    const char *field_code, const char *in_field, const double cdividend[2])
 gd_nothrow gd_nonnull ((1,2,3,4));
 
 extern int gd_madd_divide(DIRFILE *dirfile, const char *parent,
@@ -824,6 +838,10 @@ extern off64_t gd_eof64(DIRFILE *dirfile, const char* field_code)
 
 /* If this symbol is defined here, the legacy API is present in the library */
 #undef GD_LEGACY_API
+
+#ifdef __cplusplus
+}
+#endif
 
 /* The caller can disable the legacy API by defining GD_NO_LEGACY_API
  * before including getdata.h

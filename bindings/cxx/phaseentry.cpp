@@ -35,7 +35,7 @@ PhaseEntry::PhaseEntry(const char* field_code, const char* in_field,
   E.field = strdup(field_code);
   E.field_type = GD_PHASE_ENTRY;
   E.in_fields[0] = strdup(in_field);
-  E.shift = shift;
+  E.u.phase.shift = shift;
   E.fragment_index = fragment_index;
 }
 
@@ -57,7 +57,7 @@ int PhaseEntry::SetInput(const char* field)
 
 int PhaseEntry::SetShift(gd_shift_t shift)
 {
-  E.shift = shift;
+  E.u.phase.shift = shift;
 
   if (D != NULL)
     return gd_alter_entry(D->D, E.field, &E, 0);
@@ -79,7 +79,7 @@ int PhaseEntry::SetShift(const char *shift)
     r = gd_alter_entry(D->D, E.field, &E, 0);
 
     if (!r)
-      r = gd_get_constant(D->D, shift, GD_INT64, &E.shift);
+      r = gd_get_constant(D->D, shift, GD_INT64, &E.u.phase.shift);
   }
   
   return r;

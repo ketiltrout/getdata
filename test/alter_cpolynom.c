@@ -19,9 +19,14 @@ int main(void)
   const char* format_data = "data RAW INT32 8\n"
     "polynom POLYNOM data 1 2 1\n";
   int32_t data_data[256];
+#ifdef GD_NO_C99_API
+  double c[16];
+  const double a[] = {2, 1, 1, 2, 1, 3};
+#else
   double complex c[8];
   const double complex a[] = {2 + _Complex_I * 1,
     1 + _Complex_I * 2, 1 + _Complex_I * 3};
+#endif
   int fd, i, r = 0;
 
   mkdir(filedir, 0777);
@@ -46,9 +51,14 @@ int main(void)
 
   for (i = 0; i < 8; ++i) {
     int x = i + 40;
+#ifdef GD_NO_C99_API
+    double v[2] = {2 + x + x * x, 1 + 2 * x + 3 * x * x};
+    CHECKCi(i,c + 2 * i, v);
+#else
     double complex v = (2 + _Complex_I * 1) + (1 + _Complex_I * 2) * x
       + (1 + _Complex_I * 3) * x * x;
     CHECKCi(i,c[i], v);
+#endif
   }
 
   unlink(data);

@@ -65,7 +65,7 @@ static struct gd_bzdata *_GD_Bzip2DoOpen(struct _gd_raw_file* file)
 
   dtrace("%p", file);
 
-  if ((ptr = malloc(sizeof(struct gd_bzdata))) == NULL) {
+  if ((ptr = (struct gd_bzdata *)malloc(sizeof(struct gd_bzdata))) == NULL) {
     dreturn("%p", NULL);
     return NULL;
   }
@@ -117,7 +117,7 @@ off64_t _GD_Bzip2Seek(struct _gd_raw_file* file, off64_t count,
 {
   dtrace("%p, %lli, %x, <unused>", file, (long long)count, data_type);
 
-  struct gd_bzdata *ptr = file->edata;
+  struct gd_bzdata *ptr = (struct gd_bzdata *)file->edata;
 
   count *= GD_SIZE(data_type);
 
@@ -167,11 +167,10 @@ off64_t _GD_Bzip2Seek(struct _gd_raw_file* file, off64_t count,
 ssize_t _GD_Bzip2Read(struct _gd_raw_file *file, void *data,
     gd_type_t data_type, size_t nmemb)
 {
-  void* output = data;
-
   dtrace("%p, %p, %x, %zu", file, data, data_type, nmemb);
 
-  struct gd_bzdata *ptr = file->edata;
+  char* output = (char*)data;
+  struct gd_bzdata *ptr = (struct gd_bzdata *)file->edata;
   unsigned long long nbytes = nmemb * GD_SIZE(data_type);
 
   while (nbytes > (unsigned long long)(ptr->end - ptr->pos)) {
@@ -223,7 +222,7 @@ int _GD_Bzip2Close(struct _gd_raw_file *file)
 {
   dtrace("%p", file);
 
-  struct gd_bzdata *ptr = file->edata;
+  struct gd_bzdata *ptr = (struct gd_bzdata *)file->edata;
 
   ptr->bzerror = 0;
   BZ2_bzReadClose(&ptr->bzerror, ptr->bzfile);

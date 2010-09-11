@@ -50,7 +50,8 @@ static void _GD_ByteSwapFragment(DIRFILE* D, unsigned long byte_sex,
   }
 
   if (move && byte_sex != D->fragment[fragment].byte_sex) {
-    gd_entry_t **raw_entry = malloc(sizeof(gd_entry_t*) * D->n_entries);
+    gd_entry_t **raw_entry = (gd_entry_t **)malloc(sizeof(gd_entry_t*) *
+        D->n_entries);
 
     if (raw_entry == NULL) {
       _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
@@ -65,7 +66,7 @@ static void _GD_ByteSwapFragment(DIRFILE* D, unsigned long byte_sex,
           D->entry[i]->field_type == GD_RAW_ENTRY)
       {
         /* if the field's data type is one byte long, do nothing */
-        if (D->entry[i]->e->size == 1)
+        if (D->entry[i]->e->u.raw.size == 1)
           continue;
 
         /* check subencoding support */
@@ -86,14 +87,14 @@ static void _GD_ByteSwapFragment(DIRFILE* D, unsigned long byte_sex,
      * remove the temporary files */
     if (D->error) {
       for (i = 0; i < n_raw; ++i)
-        if ((*_gd_ef[raw_entry[i]->e->file[0].encoding].temp)(
-              raw_entry[i]->e->file, GD_TEMP_DESTROY))
-          _GD_SetError(D, GD_E_RAW_IO, 0, raw_entry[i]->e->file[0].name,
+        if ((*_gd_ef[raw_entry[i]->e->u.raw.file[0].encoding].temp)(
+              raw_entry[i]->e->u.raw.file, GD_TEMP_DESTROY))
+          _GD_SetError(D, GD_E_RAW_IO, 0, raw_entry[i]->e->u.raw.file[0].name,
               errno, NULL);
     } else {
       for (i = 0; i < n_raw; ++i)
-        if ((*_gd_ef[raw_entry[i]->e->file[0].encoding].temp)(
-              raw_entry[i]->e->file, GD_TEMP_MOVE))
+        if ((*_gd_ef[raw_entry[i]->e->u.raw.file[0].encoding].temp)(
+              raw_entry[i]->e->u.raw.file, GD_TEMP_MOVE))
         {
           _GD_SetError(D, GD_E_UNCLEAN_DB, 0,
               D->fragment[D->entry[i]->fragment_index].cname, 0, NULL);
@@ -116,7 +117,8 @@ static void _GD_ByteSwapFragment(DIRFILE* D, unsigned long byte_sex,
   dreturnvoid();
 }
 
-int gd_alter_endianness(DIRFILE* D, unsigned long byte_sex, int fragment, int move)
+int gd_alter_endianness(DIRFILE* D, unsigned long byte_sex, int fragment,
+    int move)
 {
   int i;
 
@@ -162,7 +164,7 @@ int gd_alter_endianness(DIRFILE* D, unsigned long byte_sex, int fragment, int mo
   return (D->error) ? -1 : 0;
 }
 
-unsigned long gd_endianness(DIRFILE* D, int fragment)
+unsigned long gd_endianness(DIRFILE* D, int fragment) gd_nothrow
 {
   dtrace("%p, %i", D, fragment);
 

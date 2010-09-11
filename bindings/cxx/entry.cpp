@@ -136,14 +136,14 @@ const char *Entry::Scalar(int index)
 
   switch (E.field_type) {
     case GD_LINCOM_ENTRY:
-      if (index >= GD_MAX_LINCOM + E.n_fields ||
-          (index >= E.n_fields && index < GD_MAX_LINCOM))
+      if (index >= GD_MAX_LINCOM + E.u.lincom.n_fields ||
+          (index >= E.u.lincom.n_fields && index < GD_MAX_LINCOM))
       {
         return NULL;
       }
       break;
     case GD_POLYNOM_ENTRY:
-      if (index > E.poly_ord)
+      if (index > E.u.polynom.poly_ord)
         return NULL;
       break;
     case GD_BIT_ENTRY:

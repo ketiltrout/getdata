@@ -29,7 +29,7 @@ int main(void)
   if (!r) {
     CHECKI(e.field_type, GD_LINTERP_ENTRY);
     CHECKS(e.in_fields[0], "in");
-    CHECKS(e.table, "table");
+    CHECKS(e.u.linterp.table, "table");
     CHECKI(e.fragment_index, 0);
     gd_free_entry_strings(&e);
   }

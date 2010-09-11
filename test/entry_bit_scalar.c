@@ -41,8 +41,8 @@ int main(void)
   CHECKS(E.field, "data");
   CHECKI(E.field_type, GD_BIT_ENTRY);
   CHECKS(E.in_fields[0], "in1");
-  CHECKI(E.bitnum, 3);
-  CHECKI(E.numbits, 4);
+  CHECKI(E.u.bit.bitnum, 3);
+  CHECKI(E.u.bit.numbits, 4);
 
   return r;
 }
