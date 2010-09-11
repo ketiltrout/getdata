@@ -1,3 +1,10 @@
+2010-09-11   D. V. Wiebe <getdata@ketiltrout.net>   svn:445
+	* bindings/f77/fgetdata.c (GDFNSS): Don't call the explicitly 64-bit
+	version of gd_framenum_subset.
+
+	* util/dirfile2ascii.c: Unroll type_data initialisation some more.
+
+
 2010-09-11   D. V. Wiebe <getdata@ketiltrout.net>   svn:444
 	* test/ src/ bindings/ util/: ANSI-C-ify.
 	* src/getdata.h.in: Define GD_NO_C99_API when the C99-compliant API has been

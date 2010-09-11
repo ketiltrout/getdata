@@ -181,19 +181,32 @@ int main (int argc, char **argv)
     int t;
     const char* f;
   } type_data[0x7f];
-  type_data[(int)'a'] = { READ_AS_DOUBLE, "a" };
-  type_data[(int)'A'] = { READ_AS_DOUBLE, "A" };
-  type_data[(int)'e'] = { READ_AS_DOUBLE, "e" };
-  type_data[(int)'E'] = { READ_AS_DOUBLE, "E" };
-  type_data[(int)'f'] = { READ_AS_DOUBLE, "f" };
-  type_data[(int)'F'] = { READ_AS_DOUBLE, "F" };
-  type_data[(int)'g'] = { READ_AS_DOUBLE, "g" };
-  type_data[(int)'G'] = { READ_AS_DOUBLE, "G" };
-  type_data[(int)'i'] = { READ_AS_INT,    PRIi64 };
-  type_data[(int)'o'] = { READ_AS_UINT,   PRIo64 };
-  type_data[(int)'u'] = { READ_AS_UINT,   PRIu64 };
-  type_data[(int)'x'] = { READ_AS_UINT,   PRIx64 };
-  type_data[(int)'X'] = { READ_AS_UINT,   PRIX64 };
+  type_data[(int)'a'].t = READ_AS_DOUBLE;
+  type_data[(int)'a'].f = "a";
+  type_data[(int)'A'].t = READ_AS_DOUBLE;
+  type_data[(int)'A'].f = "A";
+  type_data[(int)'e'].t = READ_AS_DOUBLE;
+  type_data[(int)'e'].f = "e";
+  type_data[(int)'E'].t = READ_AS_DOUBLE;
+  type_data[(int)'E'].f = "E";
+  type_data[(int)'f'].t = READ_AS_DOUBLE;
+  type_data[(int)'f'].f = "f";
+  type_data[(int)'F'].t = READ_AS_DOUBLE;
+  type_data[(int)'F'].f = "F";
+  type_data[(int)'g'].t = READ_AS_DOUBLE;
+  type_data[(int)'g'].f = "g";
+  type_data[(int)'G'].t = READ_AS_DOUBLE;
+  type_data[(int)'G'].f = "G";
+  type_data[(int)'i'].t = READ_AS_INT;
+  type_data[(int)'i'].f = PRIi64;
+  type_data[(int)'o'].t = READ_AS_UINT;
+  type_data[(int)'o'].f = PRIo64;
+  type_data[(int)'u'].t = READ_AS_UINT;
+  type_data[(int)'u'].f = PRIu64;
+  type_data[(int)'x'].t = READ_AS_UINT;
+  type_data[(int)'x'].f = PRIx64;
+  type_data[(int)'X'].t = READ_AS_UINT;
+  type_data[(int)'X'].f = PRIX64;
 
   while ((c = getopt_long(argc, argv,
           "-f:n:d:x:X:g:G:e:E:a:A:F:i:o:p:s:bvqh?", longopts, &optind)) != -1)

@@ -2478,7 +2478,7 @@ void F77_FUNC(gdfnss, GDFNSS) (double *framenum, const int *dirfile,
       *field_code_l, *value, *start, *end);
   char *fc = (char *)malloc(*field_code_l + 1);
 
-  *framenum = gd_framenum_subset64(_GDF_GetDirfile(*dirfile),
+  *framenum = gd_framenum_subset(_GDF_GetDirfile(*dirfile),
       _GDF_CString(fc, field_code, *field_code_l), *value, *start, *end);
 
   free(fc);
