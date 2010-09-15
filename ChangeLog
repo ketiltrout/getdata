@@ -1,3 +1,6 @@
+2010-09-15   D. V. Wiebe <getdata@ketiltrout.net>   svn:446
+	* bindings/cxx/dirfile.cpp (Dirfile::EoF Dirfile::BoF): Renamed.
+
 2010-09-11   D. V. Wiebe <getdata@ketiltrout.net>   svn:445
 	* bindings/f77/fgetdata.c (GDFNSS): Don't call the explicitly 64-bit
 	version of gd_framenum_subset.

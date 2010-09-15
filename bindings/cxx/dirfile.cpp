@@ -236,12 +236,12 @@ off_t Dirfile::NFrames()
   return gd_nframes(D);
 }
 
-off_t Dirfile::EOF(const char *field_code)
+off_t Dirfile::EoF(const char *field_code)
 {
   return gd_eof(D, field_code);
 }
 
-off_t Dirfile::BOF(const char *field_code)
+off_t Dirfile::BoF(const char *field_code)
 {
   return gd_bof(D, field_code);
 }

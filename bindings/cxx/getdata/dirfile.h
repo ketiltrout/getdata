@@ -29,9 +29,7 @@
 // C99 _Complex keyword
 #define GD_C89_API
 
-extern "C" {
 #include <getdata.h>
-}
 
 #include <getdata/fragment.h>
 #include <getdata/entry.h>
@@ -87,7 +85,7 @@ namespace GetData {
 
       int AlterSpec(const char* spec, int recode = 0);
 
-      off_t BOF(const char *field_code);
+      off_t BoF(const char *field_code);
 
       int Close();
 
@@ -99,7 +97,7 @@ namespace GetData {
 
       GetData::Entry* Entry(const char *field_code);
 
-      off_t EOF(const char *field_code);
+      off_t EoF(const char *field_code);
 
       int Error();
 
