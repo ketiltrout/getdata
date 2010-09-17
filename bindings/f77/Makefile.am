@@ -25,11 +25,18 @@ DIFF = @DIFF@
 
 if FC_WEXTRA
 FC_WEXTRA=-Wextra
+endif
+
+if FC_WALL
 FC_WALL=-Wall
 endif
 
 if CC_WEXTRA
-C_WEXTRA=-Wextra
+CC_WEXTRA=-Wextra
+endif
+
+if CC_WALL
+CC_WALL=-Wall
 endif
 
 if MAKE_F95BINDINGS
@@ -52,7 +59,7 @@ BUILT_SOURCES=getdata.f $(F95_INC)
 nodist_include_HEADERS=getdata.f $(F95_INC)
 
 lib_LTLIBRARIES=libfgetdata.la $(F95_LIB)
-libfgetdata_la_CPPFLAGS = -Wall $(C_WEXTRA)
+libfgetdata_la_CPPFLAGS = ${CC_WALL} $(CC_WEXTRA)
 libfgetdata_la_SOURCES = fgetdata.c fgetdata.h $(DEBUG_C)
 libfgetdata_la_LIBADD=../../src/libgetdata.la
 libfgetdata_la_LDFLAGS = -version-info @FGETDATA_VERSION@

@@ -20,6 +20,10 @@
 #
 AUTOMAKE_OPTIONS = foreign
 
+if CC_WALL
+WALL=-Wall
+endif
+
 if GETDATA_DEBUG
 DEBUG_C = ../../src/debug.c
 endif
@@ -29,7 +33,7 @@ SUBDIRS=test
 python_LTLIBRARIES = pygetdata.la
 
 BUILT_SOURCES = pyconstants.c
-AM_CFLAGS = -Wall -fno-strict-aliasing
+AM_CFLAGS = ${WALL} -fno-strict-aliasing
 AM_CPPFLAGS = $(CPPFLAGS) $(PYTHON_CPPFLAGS) $(NUMPY_CPPFLAGS)
 pygetdata_la_LDFLAGS = -module -avoid-version \
 											 -export-symbols-regex initpygetdata

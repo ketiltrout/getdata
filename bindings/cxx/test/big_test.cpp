@@ -1029,13 +1029,13 @@ int main(void)
   CHECK_OK(101);
   CHECK_DOUBLE(101,dp,37.0375);
 
-  // 86: Dirfile::EOF check
-  n = d->EOF("lincom");
+  // 86: Dirfile::EoF check
+  n = d->EoF("lincom");
   CHECK_OK(86);
   CHECK_INT(86,n,344);
   
-  // 142: Dirfile::BOF check
-  n = d->BOF("lincom");
+  // 142: Dirfile::BoF check
+  n = d->BoF("lincom");
   CHECK_OK(142);
   CHECK_INT(142,n,264);
   

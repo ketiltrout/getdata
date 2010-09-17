@@ -20,6 +20,10 @@
 #
 AUTOMAKE_OPTIONS = foreign
 
+if CC_WALL
+WALL=-Wall
+endif
+
 if GETDATA_DEBUG
 DEBUG_C = ../../src/debug.c
 endif
@@ -30,7 +34,7 @@ idl_LTLIBRARIES = idl_getdata.la
 idl_HEADERS = idl_getdata.dlm
 
 # idl makes heavy use of type punning, ergo -fno-strict-aliasing
-AM_CFLAGS = -Wall $(IDL_CFLAGS) -fno-strict-aliasing
+AM_CFLAGS = ${WALL} $(IDL_CFLAGS) -fno-strict-aliasing
 BUILT_SOURCES=sublist.c constants.c
 idl_getdata_la_LDFLAGS = -module -avoid-version -export-symbols-regex IDL_Load \
 												 -precious-files-regex 'idl_getdata\.dlm'

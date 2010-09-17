@@ -20,12 +20,16 @@
 #
 AUTOMAKE_OPTIONS = foreign
 
+if CC_WALL
+WALL=-Wall
+endif
+
 if CC_WEXTRA
 WEXTRA=-Wextra
 endif
 
 LDADD=../src/libgetdata.la
-INCLUDES=-Wall $(WEXTRA) -I$(top_srcdir)/src
+INCLUDES=${WALL} $(WEXTRA) -I$(top_srcdir)/src
 
 if MAKE_CHECKDIRFILE
 CHECKDIRFILE=checkdirfile dirfile2ascii

@@ -20,6 +20,10 @@
 #
 AUTOMAKE_OPTIONS = foreign
 
+if CC_WALL
+WALL=-Wall
+endif
+
 if CC_WEXTRA
 WEXTRA=-Wextra
 endif
@@ -34,7 +38,7 @@ PUT_OFF64=put_off64
 endif
 
 LDADD=../src/libgetdata.la
-INCLUDES=-Wall $(WEXTRA) -I$(top_srcdir)/src -D__TEST__=\"$@\"
+INCLUDES=${WALL} $(WEXTRA) -I$(top_srcdir)/src -D__TEST__=\"$@\"
 
 EXTRA_DIST=test.h
 

@@ -1,3 +1,14 @@
+2010-09-17   D. V. Wiebe <getdata@ketiltrout.net>   svn:447
+	* test/Makefile.am src/Makefile.am bindings/python/Makefile.am
+	bindings/cxx/Makefile.am bindings/f77/test/Makefile.am
+	bindings/f77/Makefile.am bindings/idl/Makefile.am util/Makefile.am: Remove
+	hardcoded -Wall.
+	* m4/compiler.m4 (GD_PROG_CC_WALL GD_PROG_CXX_WALL GD_PROG_FC_WALL
+	GD_PROG_F77_WALL): Added.
+	* configure.ac: Check whether the compilers accept -Wall
+
+	* bindings/cxx/big_test.cpp: Fix for renamed functions.
+
 2010-09-15   D. V. Wiebe <getdata@ketiltrout.net>   svn:446
 	* bindings/cxx/dirfile.cpp (Dirfile::EoF Dirfile::BoF): Renamed.
 
@@ -6,7 +17,6 @@
 	version of gd_framenum_subset.
 
 	* util/dirfile2ascii.c: Unroll type_data initialisation some more.
-
 
 2010-09-11   D. V. Wiebe <getdata@ketiltrout.net>   svn:444
 	* test/ src/ bindings/ util/: ANSI-C-ify.

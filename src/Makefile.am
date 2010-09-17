@@ -20,6 +20,10 @@
 #
 AUTOMAKE_OPTIONS = foreign
 
+if CC_WALL
+WALL=-Wall
+endif
+
 if CC_WEXTRA
 WEXTRA=-Wextra
 endif
@@ -86,7 +90,7 @@ DEBUG_C = debug.c
 endif
 
 pkgconfigdir = @libdir@/pkgconfig
-AM_CFLAGS = -Wall ${WEXTRA} 
+AM_CFLAGS = ${WALL} ${WEXTRA} 
 AM_CPPFLAGS = $(LTDLINCL) $(EXTERNAL_CPPFLAGS)
 
 BUILT_SOURCES = getdata.h

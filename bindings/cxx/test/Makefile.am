@@ -20,11 +20,15 @@
 #
 AUTOMAKE_OPTIONS = foreign
 
+if CXX_WALL
+WALL=-Wall
+endif
+
 if CXX_WEXTRA
 WEXTRA=-Wextra
 endif
 
-INCLUDES = -Wall $(WEXTRA) -I$(srcdir)/.. -I$(top_srcdir)/src -D__TEST__=\"$@\"
+INCLUDES = ${WALL} $(WEXTRA) -I$(srcdir)/.. -I$(top_srcdir)/src -D__TEST__=\"$@\"
 LDADD=../libgetdata++.la
 TESTS=big_test
 

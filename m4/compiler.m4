@@ -114,6 +114,59 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM()], [gd_cv_prog_fc_wextra=yes],
 AC_LANG_POP([Fortran 77])])
 FCFLAGS=$gd_saved_FCFLAGS])
 
+dnl GD_PROG_CC_WALL
+dnl -------------------------------------------------------------
+dnl Check whether the C compiler accepts -Wall
+AC_DEFUN([GD_PROG_CC_WALL],
+[gd_saved_CFLAGS=$CFLAGS
+AC_CACHE_CHECK([whether $CC accepts -Wall], gd_cv_prog_cc_wall,
+[CFLAGS="-Wall"
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM()], [gd_cv_prog_cc_wall=yes],
+[gd_cv_prog_cc_wall=no])])
+CFLAGS=$gd_saved_CFLAGS])
+
+
+dnl GD_PROG_CXX_WALL
+dnl -------------------------------------------------------------
+dnl Check whether the C++ compiler accepts -Wall
+AC_DEFUN([GD_PROG_CXX_WALL],
+[gd_saved_CXXFLAGS=$CXXFLAGS
+AC_CACHE_CHECK([whether $CXX accepts -Wall], gd_cv_prog_cxx_wall,
+[CXXFLAGS="-Wall"
+AC_LANG_PUSH([C++])
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM()], [gd_cv_prog_cxx_wall=yes],
+[gd_cv_prog_cxx_wall=no])
+AC_LANG_POP([C++])])
+CXXFLAGS=$gd_saved_CXXFLAGS])
+
+
+dnl GD_PROG_F77_WALL
+dnl -------------------------------------------------------------
+dnl Check whether the Fotran-77 compiler accepts -Wall
+AC_DEFUN([GD_PROG_F77_WALL],
+[gd_saved_FFLAGS=$FFLAGS
+AC_CACHE_CHECK([whether $F77 accepts -Wall], gd_cv_prog_f77_wall,
+[FFLAGS="-Wall"
+AC_LANG_PUSH([Fortran 77])
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM()], [gd_cv_prog_f77_wall=yes],
+[gd_cv_prog_f77_wall=no])
+AC_LANG_POP([Fortran 77])])
+FFLAGS=$gd_saved_FFLAGS])
+
+
+dnl GD_PROG_FC_WALL
+dnl -------------------------------------------------------------
+dnl Check whether the free-form Fotran compiler accepts -Wall
+AC_DEFUN([GD_PROG_FC_WALL],
+[gd_saved_FCFLAGS=$FCFLAGS
+AC_CACHE_CHECK([whether $FC accepts -Wall], gd_cv_prog_fc_wall,
+[FCFLAGS="-Wall"
+AC_LANG_PUSH([Fortran 77])
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM()], [gd_cv_prog_fc_wall=yes],
+[gd_cv_prog_fc_wall=no])
+AC_LANG_POP([Fortran 77])])
+FCFLAGS=$gd_saved_FCFLAGS])
+
 dnl GD_C_FLOATORDERING
 dnl -----------------------------------------------------------
 dnl Attempt to determine the ordering of double precision floats

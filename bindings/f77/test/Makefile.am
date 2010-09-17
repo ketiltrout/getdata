@@ -20,11 +20,11 @@
 #
 AUTOMAKE_OPTIONS = foreign
 
-if FC_WEXTRA
+if FC_WALL
 FC_WALL=-Wall
 endif
 
-if F77_WEXTRA
+if F77_WALL
 F77_WALL=-Wall
 endif
 

@@ -21,11 +21,15 @@
 AUTOMAKE_OPTIONS = foreign
 getdata_includedir = ${includedir}/getdata
 
+if CXX_WALL
+WALL=-Wall
+endif
+
 if CXX_WEXTRA
 WEXTRA=-Wextra
 endif
 
-INCLUDES = -Wall $(WEXTRA) -I$(top_srcdir)/src
+INCLUDES = ${WALL} $(WEXTRA) -I$(top_srcdir)/src
 
 SUBDIRS=test
 

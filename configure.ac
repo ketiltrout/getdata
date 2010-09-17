@@ -451,18 +451,22 @@ echo
 echo "*** Checking additional compiler characteristics"
 echo
 AC_C_INLINE
+GD_PROG_CC_WALL
 GD_PROG_CC_WEXTRA
 
 if test "x$make_c++bindings" != "xno"; then
+  GD_PROG_CXX_WALL
   GD_PROG_CXX_WEXTRA
 fi
 
 if test "x$make_f77bindings" != "xno"; then
+  GD_PROG_F77_WALL
   GD_PROG_F77_WEXTRA
   GD_LANG_F77_COMPILER_INTEL
 fi
 
 if test "x$make_f95bindings" != "xno"; then
+  GD_PROG_FC_WALL
   GD_PROG_FC_WEXTRA
   GD_LANG_FC_COMPILER_INTEL
 fi
@@ -777,6 +781,10 @@ AC_CONFIG_FILES([util/Makefile])
 
 dnl Automake conditionals
 AM_CONDITIONAL(GETDATA_DEBUG, [test "x$enable_debug" == "xyes"])
+AM_CONDITIONAL(CC_WALL, [test "x$gd_cv_prog_cc_wall" == "xyes"])
+AM_CONDITIONAL(CXX_WALL, [test "x$gd_cv_prog_cxx_wall" == "xyes"])
+AM_CONDITIONAL(F77_WALL, [test "x$gd_cv_prog_f77_wall" == "xyes"])
+AM_CONDITIONAL(FC_WALL, [test "x$gd_cv_prog_fc_wall" == "xyes"])
 AM_CONDITIONAL(CC_WEXTRA, [test "x$gd_cv_prog_cc_wextra" == "xyes"])
 AM_CONDITIONAL(CXX_WEXTRA, [test "x$gd_cv_prog_cxx_wextra" == "xyes"])
 AM_CONDITIONAL(F77_WEXTRA, [test "x$gd_cv_prog_f77_wextra" == "xyes"])
