@@ -22,16 +22,6 @@
 #ifndef GETDATA_LINTERPENTRY_H
 #define GETDATA_LINTERPENTRY_H
 
-#ifndef _FILE_OFFSET_BITS
-# define _FILE_OFFSET_BITS 64
-#endif
-
-#define GD_NO_LEGACY_API
-#define GD_C89_API
-
-extern "C" {
-#include <getdata.h>
-}
 #include <getdata/entry.h>
 
 namespace GetData {
@@ -47,19 +37,15 @@ namespace GetData {
       LinterpEntry(const char* field_code, const char* in_field,
           const char* table, int fragment_index = 0);
 
-      virtual const char *Input() {
-        return E.in_fields[0];
-      };
+      virtual const char *Input() const { return E.in_fields[0]; };
 
-      virtual const char *Table() {
-        return E.u.linterp.table;
-      };
+      virtual const char *Table() const { return E.u.linterp.table; };
 
       int SetInput(const char* field);
       int SetTable(const char* table, int move_table = 0);
 
     private:
-      LinterpEntry(GetData::Dirfile *dirfile, const char* field_code) :
+      LinterpEntry(const GetData::Dirfile *dirfile, const char* field_code) :
         Entry(dirfile, field_code) { };
   };
 }

@@ -22,16 +22,6 @@
 #ifndef GETDATA_INDEXENTRY_H
 #define GETDATA_INDEXENTRY_H
 
-#ifndef _FILE_OFFSET_BITS
-# define _FILE_OFFSET_BITS 64
-#endif
-
-#define GD_NO_LEGACY_API
-#define GD_C89_API
-
-extern "C" {
-#include <getdata.h>
-}
 #include <getdata/entry.h>
 
 namespace GetData {
@@ -42,7 +32,7 @@ namespace GetData {
     friend class Dirfile;
 
     private:
-      IndexEntry(GetData::Dirfile *dirfile, const char* field_code) :
+      IndexEntry(const GetData::Dirfile *dirfile, const char* field_code) :
         Entry(dirfile, field_code) { };
   };
 }

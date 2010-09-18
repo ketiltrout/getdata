@@ -22,16 +22,6 @@
 #ifndef GETDATA_RAWENTRY_H
 #define GETDATA_RAWENTRY_H
 
-#ifndef _FILE_OFFSET_BITS
-# define _FILE_OFFSET_BITS 64
-#endif
-
-#define GD_NO_LEGACY_API
-#define GD_C89_API
-
-extern "C" {
-#include <getdata.h>
-}
 #include <getdata/entry.h>
 
 namespace GetData {
@@ -47,25 +37,19 @@ namespace GetData {
       RawEntry(const char* field_code, DataType data_type, gd_spf_t spf,
           int fragment_index = 0);
 
-      virtual gd_spf_t SamplesPerFrame() {
-        return E.u.raw.spf;
-      };
+      virtual gd_spf_t SamplesPerFrame() const { return E.u.raw.spf; };
 
-      virtual DataType RawType() {
-        return (DataType)E.u.raw.type;
-      };
+      virtual DataType RawType() const { return (DataType)E.u.raw.type; };
 
       const char* FileName();
       int SetSamplesPerFrame(gd_spf_t spf, int recode = 0);
       int SetSamplesPerFrame(const char *spf, int recode = 0);
       int SetType(DataType type, int recode = 0);
 
-      virtual const char *Scalar() {
-        return E.scalar[0];
-      };
+      virtual const char *Scalar() const { return E.scalar[0]; };
 
     private:
-      RawEntry(GetData::Dirfile *dirfile, const char* field_code) :
+      RawEntry(const GetData::Dirfile *dirfile, const char* field_code) :
         Entry(dirfile, field_code) { };
   };
 }

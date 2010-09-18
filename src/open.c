@@ -199,6 +199,20 @@ void gd_parser_callback(DIRFILE* D, gd_parser_callback_t sehandler, void* extra)
   dreturnvoid();
 }
 
+DIRFILE* gd_invalid_dirfile(void) gd_nothrow
+{
+  DIRFILE *D;
+
+  dtracevoid();
+
+  D = (DIRFILE *)malloc(sizeof(DIRFILE));
+  memset(D, 0, sizeof(DIRFILE));
+  D->flags = GD_INVALID;
+
+  dreturn("%p", D);
+  return D;
+}
+
 /* dirfile_cbopen: open (or, perhaps, create) and parse the specified dirfile
 */
 DIRFILE* gd_cbopen(const char* filedir, unsigned long flags,

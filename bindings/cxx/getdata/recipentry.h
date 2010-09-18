@@ -22,16 +22,6 @@
 #ifndef GETDATA_RECIPENTRY_H
 #define GETDATA_RECIPENTRY_H
 
-#ifndef _FILE_OFFSET_BITS
-# define _FILE_OFFSET_BITS 64
-#endif
-
-#define GD_NO_LEGACY_API
-#define GD_C89_API
-
-extern "C" {
-#include <getdata.h>
-}
 #include <getdata/entry.h>
 
 namespace GetData {
@@ -50,24 +40,17 @@ namespace GetData {
       RecipEntry(const char* field_code, const char* in_field,
           std::complex<double> cdividend, int fragment_index = 0);
 
-      virtual const char *Input() {
-        return E.in_fields[0];
-      };
+      virtual const char *Input() const { return E.in_fields[0]; };
 
-      virtual const char *Scalar() {
-        return E.scalar[0];
-      }
+      virtual const char *Scalar() const { return E.scalar[0]; }
 
-      virtual int ComplexScalars() {
-        return E.comp_scal;
-      }
+      virtual int ComplexScalars() const { return E.comp_scal; }
 
-      virtual double Dividend() {
-        return E.u.recip.dividend;
-      };
+      virtual double Dividend() const { return E.u.recip.dividend; };
 
-      virtual std::complex<double> CDividend() {
-        return std::complex<double>(E.u.recip.cdividend[0], E.u.recip.cdividend[1]);
+      virtual std::complex<double> CDividend() const {
+        return std::complex<double>(E.u.recip.cdividend[0],
+            E.u.recip.cdividend[1]);
       };
 
       virtual int SetInput(const char* field);
@@ -76,7 +59,7 @@ namespace GetData {
       virtual int SetDividend(std::complex<double> coeff);
 
     private:
-      RecipEntry(GetData::Dirfile *dirfile, const char* field_code) :
+      RecipEntry(const GetData::Dirfile *dirfile, const char* field_code) :
         Entry(dirfile, field_code) { };
   };
 }

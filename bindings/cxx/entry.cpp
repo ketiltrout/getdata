@@ -35,7 +35,7 @@ Entry::Entry()
   D = NULL;
 }
 
-Entry::Entry(GetData::Dirfile *dirfile, const char* field_code)
+Entry::Entry(const GetData::Dirfile *dirfile, const char* field_code)
 {
   D = dirfile;
   gd_entry(D->D, field_code, &E);
@@ -114,7 +114,7 @@ int Entry::Rename(const char* new_name, int move_data)
   return ret;
 }
 
-void Entry::SetDirfile(GetData::Dirfile* dirfile)
+void Entry::SetDirfile(const GetData::Dirfile* dirfile)
 {
   D = dirfile;
 }
@@ -129,7 +129,7 @@ void Entry::SetFragmentIndex(int fragment_index)
   this->Move(fragment_index);
 }
 
-const char *Entry::Scalar(int index)
+const char *Entry::Scalar(int index) const
 {
   if (index < 0)
     return NULL;

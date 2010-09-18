@@ -22,16 +22,6 @@
 #ifndef GETDATA_MULTIPLYENTRY_H
 #define GETDATA_MULTIPLYENTRY_H
 
-#ifndef _FILE_OFFSET_BITS
-# define _FILE_OFFSET_BITS 64
-#endif
-
-#define GD_NO_LEGACY_API
-#define GD_C89_API
-
-extern "C" {
-#include <getdata.h>
-}
 #include <getdata/entry.h>
 
 namespace GetData {
@@ -47,14 +37,14 @@ namespace GetData {
       MultiplyEntry(const char* field_code, const char* in_field1,
           const char* in_field2, int fragment_index = 0);
 
-      virtual const char *Input(int index = 0) {
+      virtual const char *Input(int index = 0) const {
         return E.in_fields[(index == 0) ? 0 : 1];
       };
 
       int SetInput(const char* field, int index);
 
     private:
-      MultiplyEntry(GetData::Dirfile *dirfile, const char* field_code) :
+      MultiplyEntry(const GetData::Dirfile *dirfile, const char* field_code) :
         Entry(dirfile, field_code) { };
   };
 }

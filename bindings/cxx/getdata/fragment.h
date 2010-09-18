@@ -52,21 +52,21 @@ namespace GetData {
     public:
       virtual ~Fragment();
 
-      EncodingScheme Encoding() { return enc; };
+      EncodingScheme Encoding() const { return enc; };
 
-      unsigned long Endianness() { return end; };
+      unsigned long Endianness() const { return end; };
 
-      off_t FrameOffset() { return (off_t)off; };
+      off_t FrameOffset() const { return (off_t)off; };
 
-      int Index() { return ind; }
+      int Index() const { return ind; }
 
-      const char* Name() { return name; }
+      const char* Name() const { return name; }
 
-      int Parent() { return parent; }
+      int Parent() const { return parent; }
 
-      int Protection() { return prot; }
+      int Protection() const { return prot; }
 
-      int ReWrite();
+      int ReWrite() const;
 
       int SetEncoding(EncodingScheme encoding, int recode = 0);
 
@@ -77,15 +77,15 @@ namespace GetData {
       int SetProtection(int protection_level);
 
     protected:
-      Fragment(Dirfile *dirfile, int index);
+      Fragment(const Dirfile *dirfile, int index);
 
-      Dirfile* D;
+      const Dirfile *D;
       EncodingScheme enc;
       unsigned long end;
       int ind;
       int prot;
       off_t off;
-      char* name;
+      const char* name;
       int parent;
   };
 }

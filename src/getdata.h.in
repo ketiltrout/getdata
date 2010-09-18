@@ -513,6 +513,8 @@ extern int gd_fragment_index(DIRFILE *dirfile,
 extern const char *gd_fragmentname(DIRFILE *dirfile,
     int index) gd_nothrow gd_nonnull ((1));
 
+DIRFILE* gd_invalid_dirfile(void) gd_nothrow;
+
 extern int gd_madd(DIRFILE *dirfile, const gd_entry_t *entry,
     const char *parent) gd_nothrow gd_nonnull ((1,2,3));
 

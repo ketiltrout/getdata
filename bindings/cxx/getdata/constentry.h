@@ -22,16 +22,6 @@
 #ifndef GETDATA_CONSTENTRY_H
 #define GETDATA_CONSTENTRY_H
 
-#ifndef _FILE_OFFSET_BITS
-# define _FILE_OFFSET_BITS 64
-#endif
-
-#define GD_NO_LEGACY_API
-#define GD_C89_API
-
-extern "C" {
-#include <getdata.h>
-}
 #include <getdata/entry.h>
 
 namespace GetData {
@@ -46,12 +36,12 @@ namespace GetData {
 
       ConstEntry(const char* field_code, DataType type, int fragment_index = 0);
 
-      virtual DataType ConstType() { return (DataType)E.u.cons.type; }
+      virtual DataType ConstType() const { return (DataType)E.u.cons.type; }
 
       int SetType(DataType type);
 
     private:
-      ConstEntry(GetData::Dirfile *dirfile, const char* field_code) :
+      ConstEntry(const GetData::Dirfile *dirfile, const char* field_code) :
         Entry(dirfile, field_code) { };
   };
 }

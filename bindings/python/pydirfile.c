@@ -296,13 +296,7 @@ static PyObject* gdpy_dirfile_close(struct gdpy_dirfile_t* self)
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
-  /* Here we replace D with an empty, invalid dirfile object.  The following
-   * uses getdata internals, but this could be done just as simply (but with
-   * more overhead) using the public API by calling gd_open("", 0)
-   */
-  self->D = malloc(sizeof(struct _GD_DIRFILE));
-  memset(self->D, 0, sizeof(struct _GD_DIRFILE));
-  self->D->flags = GD_INVALID;
+  self->D = gd_invalid_dirfile();
 
   Py_INCREF(Py_None);
   dreturn("%p", Py_None);
@@ -342,13 +336,8 @@ static PyObject* gdpy_dirfile_discard(struct gdpy_dirfile_t* self)
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
-  /* Here we replace D with an empty, invalid dirfile object.  The following
-   * uses getdata internals, but this could be done just as simply (but with
-   * more overhead) using the public API by calling gd_open("", 0)
-   */
-  self->D = malloc(sizeof(struct _GD_DIRFILE));
-  memset(self->D, 0, sizeof(struct _GD_DIRFILE));
-  self->D->flags = GD_INVALID;
+  /* Here we replace D with an empty, invalid dirfile object.  */
+  self->D = gd_invalid_dirfile();
 
   Py_INCREF(Py_None);
   dreturn("%p", Py_None);

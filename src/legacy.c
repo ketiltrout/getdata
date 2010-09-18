@@ -36,7 +36,16 @@ static struct {
 static char _GD_GlobalErrorString[GD_MAX_LINE_LENGTH];
 static char _GD_GlobalErrorFile[GD_MAX_LINE_LENGTH];
 static DIRFILE _GD_GlobalErrors = {
+#ifndef GD_NO_C99_API
+  .error = 0,
+  .suberror = 0,
+  .error_string = _GD_GlobalErrorString,
+  .error_file = _GD_GlobalErrorFile,
+  .error_line = 0,
+  .flags = GD_INVALID,
+#else
   0, 0, _GD_GlobalErrorString, _GD_GlobalErrorFile, 0, GD_INVALID
+#endif
 };
 
 /* old error strings */
@@ -81,7 +90,7 @@ const char *GD_ERROR_CODES[GD_N_ERROR_CODES] = {
 static struct FormatType Format;
 
 /* _GD_CopyGlobalError: Copy the last error message to the global error buffer.
- */
+*/
 static int _GD_CopyGlobalError(DIRFILE* D)
 {
   dtrace("%p", D);
@@ -96,7 +105,7 @@ static int _GD_CopyGlobalError(DIRFILE* D)
 }
 
 /* legacy wrapper for gd_error_string()
- */
+*/
 char *GetDataErrorString(char* buffer, size_t buflen) gd_nothrow
 {
   return gd_error_string(&_GD_GlobalErrors, buffer, buflen);
@@ -176,7 +185,7 @@ static void CopyRawEntry(struct RawEntryType* R, gd_entry_t* E)
   }
 
   R->field = E->field;
-  
+
   switch(E->u.raw.type) {
     case GD_UINT8:
       R->type = 'c';
@@ -356,7 +365,7 @@ struct FormatType *GetFormat(const char *filedir, int *error_code) gd_nothrow
     dreturn("%p", NULL);
     return NULL;
   }
-  
+
   memset(&Format, sizeof(Format), 0);
 
   /* fill the structure -- like everything about the legacy API, this is

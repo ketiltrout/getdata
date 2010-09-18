@@ -22,16 +22,6 @@
 #ifndef GETDATA_LINCOMENTRY_H
 #define GETDATA_LINCOMENTRY_H
 
-#ifndef _FILE_OFFSET_BITS
-# define _FILE_OFFSET_BITS 64
-#endif
-
-#define GD_NO_LEGACY_API
-#define GD_C89_API
-
-extern "C" {
-#include <getdata.h>
-}
 #include <getdata/entry.h>
 
 namespace GetData {
@@ -51,38 +41,38 @@ namespace GetData {
           std::complex<double>* cm, std::complex<double>* cb,
           int fragment_index = 0);
 
-      virtual const char *Input(int index = 0) {
+      virtual const char *Input(int index = 0) const {
         return (CheckIndex(E.field_type, E.u.lincom.n_fields, index)) ? 
             E.in_fields[index] : NULL;
       };
 
-      virtual int ComplexScalars() {
-        return E.comp_scal;
-      }
+      virtual int ComplexScalars() const { return E.comp_scal; }
 
-      virtual int NFields() {
-        return E.u.lincom.n_fields;
+      virtual int NFields() const { return E.u.lincom.n_fields; };
+
+      virtual double Scale(int index = 0) const {
+        return (CheckIndex(E.field_type, E.u.lincom.n_fields, index)) ?
+          E.u.lincom.m[index] : 0;
       };
 
-      virtual double Scale(int index = 0) {
-        return (CheckIndex(E.field_type, E.u.lincom.n_fields, index)) ? E.u.lincom.m[index] : 0;
-      };
-
-      virtual std::complex<double> CScale(int index = 0) {
+      virtual std::complex<double> CScale(int index = 0) const {
         return (CheckIndex(E.field_type, E.u.lincom.n_fields, index))
-          ? std::complex<double>(E.u.lincom.cm[index][0], E.u.lincom.cm[index][1]) : 0;
+          ? std::complex<double>(E.u.lincom.cm[index][0],
+              E.u.lincom.cm[index][1]) : 0;
       };
 
-      virtual double Offset(int index = 0) {
-        return (CheckIndex(E.field_type, E.u.lincom.n_fields, index)) ? E.u.lincom.b[index] : 0;
+      virtual double Offset(int index = 0) const {
+        return (CheckIndex(E.field_type, E.u.lincom.n_fields, index)) ?
+          E.u.lincom.b[index] : 0;
       };
 
-      virtual std::complex<double> COffset(int index = 0) {
+      virtual std::complex<double> COffset(int index = 0) const {
         return (CheckIndex(E.field_type, E.u.lincom.n_fields, index))
-          ? std::complex<double>(E.u.lincom.cb[index][0], E.u.lincom.cb[index][1]) : 0;
+          ? std::complex<double>(E.u.lincom.cb[index][0],
+              E.u.lincom.cb[index][1]) : 0;
       };
 
-      virtual const char *Scalar(int index = 0);
+      virtual const char *Scalar(int index = 0) const;
 
       int SetNFields(int nfields);
       int SetInput(const char* field, int index = 0);
@@ -94,7 +84,7 @@ namespace GetData {
       int SetOffset(std::complex<double> offset, int index = 0);
 
     private:
-      LincomEntry(GetData::Dirfile *dirfile, const char* field_code) :
+      LincomEntry(const GetData::Dirfile *dirfile, const char* field_code) :
         Entry(dirfile, field_code) { };
   };
 }

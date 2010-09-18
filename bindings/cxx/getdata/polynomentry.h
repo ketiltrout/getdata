@@ -22,16 +22,6 @@
 #ifndef GETDATA_POLYNOMENTRY_H
 #define GETDATA_POLYNOMENTRY_H
 
-#ifndef _FILE_OFFSET_BITS
-# define _FILE_OFFSET_BITS 64
-#endif
-
-#define GD_NO_LEGACY_API
-#define GD_C89_API
-
-extern "C" {
-#include <getdata.h>
-}
 #include <getdata/entry.h>
 
 namespace GetData {
@@ -50,28 +40,23 @@ namespace GetData {
       PolynomEntry(const char* field_code, int poly_ord, const char* in_field,
           std::complex<double>* ca, int fragment_index = 0);
 
-      virtual const char *Input() {
-        return E.in_fields[0];
-      };
+      virtual const char *Input() const { return E.in_fields[0]; };
 
-      virtual int ComplexScalars() {
-        return E.comp_scal;
-      }
+      virtual int ComplexScalars() const { return E.comp_scal; }
 
-      virtual int PolyOrd() {
-        return E.u.polynom.poly_ord;
-      };
+      virtual int PolyOrd() const { return E.u.polynom.poly_ord; };
 
-      virtual double Coefficient(int index = 0) {
+      virtual double Coefficient(int index = 0) const {
         return (index <= E.u.polynom.poly_ord) ? E.u.polynom.a[index] : 0;
       };
 
-      virtual std::complex<double> CCoefficient(int index = 0) {
+      virtual std::complex<double> CCoefficient(int index = 0) const {
         return (index <= E.u.polynom.poly_ord)
-          ? std::complex<double>(E.u.polynom.ca[index][0], E.u.polynom.ca[index][1]) : 0;
+          ? std::complex<double>(E.u.polynom.ca[index][0],
+              E.u.polynom.ca[index][1]) : 0;
       };
 
-      virtual const char *Scalar(int index = 0);
+      virtual const char *Scalar(int index = 0) const;
 
       int SetPolyOrd(int poly_ord);
       int SetInput(const char* field);
@@ -80,7 +65,7 @@ namespace GetData {
       int SetCoefficient(std::complex<double> coeff, int index = 0);
 
     private:
-      PolynomEntry(GetData::Dirfile *dirfile, const char* field_code) :
+      PolynomEntry(const GetData::Dirfile *dirfile, const char* field_code) :
         Entry(dirfile, field_code) { };
   };
 }

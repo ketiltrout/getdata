@@ -155,7 +155,7 @@ int PolynomEntry::SetPolyOrd(int poly_ord)
   return 0;
 }
 
-const char *PolynomEntry::Scalar(int index)
+const char *PolynomEntry::Scalar(int index) const
 {
   if (index < 0 || index > E.u.polynom.poly_ord)
     return NULL;

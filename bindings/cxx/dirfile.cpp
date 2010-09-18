@@ -53,31 +53,31 @@ Dirfile::~Dirfile()
   gd_close(D);
 }
 
-int Dirfile::Add(GetData::Entry &entry)
+int Dirfile::Add(GetData::Entry &entry) const
 {
   int ret = gd_add(D, &entry.E);
   entry.SetDirfile(this);
   return ret;
 }
 
-int Dirfile::AddSpec(const char *spec, int format_file)
+int Dirfile::AddSpec(const char *spec, int format_file) const
 {
   return gd_add_spec(D, spec, format_file);
 }
 
-int Dirfile::MAdd(GetData::Entry &entry, const char *parent)
+int Dirfile::MAdd(GetData::Entry &entry, const char *parent) const
 {
   int ret = gd_madd(D, &entry.E, parent);
   entry.SetDirfile(this);
   return ret;
 }
 
-int Dirfile::MAddSpec(const char *spec, const char *parent)
+int Dirfile::MAddSpec(const char *spec, const char *parent) const
 {
   return gd_madd_spec(D, spec, parent);
 }
 
-Entry *Dirfile::Entry(const char* field_code)
+Entry *Dirfile::Entry(const char* field_code) const
 {
   GetData::EntryType type = (GetData::EntryType)gd_entry_type(D, field_code);
 
@@ -115,17 +115,17 @@ Entry *Dirfile::Entry(const char* field_code)
   return NULL;
 }
 
-int Dirfile::Flush(const char* field_code)
+int Dirfile::Flush(const char* field_code) const
 {
   return gd_flush(D, field_code);
 }
 
-int Dirfile::MetaFlush()
+int Dirfile::MetaFlush() const
 {
   return gd_metaflush(D);
 }
 
-int Dirfile::Error()
+int Dirfile::Error() const
 {
   return gd_error(D);
 }
@@ -142,149 +142,151 @@ const char* Dirfile::ErrorString(size_t len)
 }
 
 int Dirfile::Include(const char* file, int format_file, unsigned long flags)
+  const
 {
   return gd_include(D, file, format_file, flags);
 }
 
-unsigned int Dirfile::SamplesPerFrame(const char* field_code)
+unsigned int Dirfile::SamplesPerFrame(const char* field_code) const
 {
   return gd_spf(D, field_code);
 }
 
-unsigned int Dirfile::NFields()
+unsigned int Dirfile::NFields() const
 {
   return gd_nfields(D);
 }
 
-unsigned int Dirfile::NFieldsByType(EntryType type)
+unsigned int Dirfile::NFieldsByType(EntryType type) const
 {
   return gd_nfields_by_type(D, (gd_entype_t)type);
 }
 
-const char** Dirfile::FieldListByType(EntryType type)
+const char** Dirfile::FieldListByType(EntryType type) const
 {
   return gd_field_list_by_type(D, (gd_entype_t)type);
 }
 
-unsigned int Dirfile::NMFields(const char *parent)
+unsigned int Dirfile::NMFields(const char *parent) const
 {
   return gd_nmfields(D, parent);
 }
 
-unsigned int Dirfile::NMFieldsByType(const char *parent, EntryType type)
+unsigned int Dirfile::NMFieldsByType(const char *parent, EntryType type) const
 {
   return gd_nmfields_by_type(D, parent, (gd_entype_t)type);
 }
 
-const char** Dirfile::MFieldListByType(const char *parent, EntryType type)
+const char** Dirfile::MFieldListByType(const char *parent, EntryType type) const
 {
   return gd_mfield_list_by_type(D, parent, (gd_entype_t)type);
 }
 
-const void *Dirfile::Constants(DataType type)
+const void *Dirfile::Constants(DataType type) const
 {
   return gd_constants(D, (gd_type_t)type);
 }
 
-const char **Dirfile::Strings()
+const char **Dirfile::Strings() const
 {
   return gd_strings(D);
 }
 
-const void *Dirfile::MConstants(const char *parent, DataType type)
+const void *Dirfile::MConstants(const char *parent, DataType type) const
 {
   return gd_mconstants(D, parent, (gd_type_t)type);
 }
 
-const char **Dirfile::MStrings(const char *parent)
+const char **Dirfile::MStrings(const char *parent) const
 {
   return gd_mstrings(D, parent);
 }
 
-const char** Dirfile::FieldList()
+const char** Dirfile::FieldList() const
 {
   return gd_field_list(D);
 }
 
-const char** Dirfile::MFieldList(const char *parent)
+const char** Dirfile::MFieldList(const char *parent) const
 {
   return gd_mfield_list(D, parent);
 }
 
-unsigned int Dirfile::NVectors()
+unsigned int Dirfile::NVectors() const
 {
   return gd_nvectors(D);
 }
 
-const char** Dirfile::VectorList()
+const char** Dirfile::VectorList() const
 {
   return gd_vector_list(D);
 }
 
-unsigned int Dirfile::NMVectors(const char *parent)
+unsigned int Dirfile::NMVectors(const char *parent) const
 {
   return gd_nmvectors(D, parent);
 }
 
-const char** Dirfile::MVectorList(const char *parent)
+const char** Dirfile::MVectorList(const char *parent) const
 {
   return gd_mvector_list(D, parent);
 }
 
-off_t Dirfile::NFrames()
+off_t Dirfile::NFrames() const
 {
   return gd_nframes(D);
 }
 
-off_t Dirfile::EoF(const char *field_code)
+off_t Dirfile::EoF(const char *field_code) const
 {
   return gd_eof(D, field_code);
 }
 
-off_t Dirfile::BoF(const char *field_code)
+off_t Dirfile::BoF(const char *field_code) const
 {
   return gd_bof(D, field_code);
 }
 
 size_t Dirfile::GetConstant(const char *field_code, DataType type,
-    void *data_out)
+    void *data_out) const
 {
   return gd_get_constant(D, field_code, (gd_type_t)type, data_out);
 }
 
 size_t Dirfile::GetData(const char* field_code, off_t first_frame,
     off_t first_sample, size_t num_frames, size_t num_samples,
-    DataType type, void* data_out)
+    DataType type, void* data_out) const
 {
   return gd_getdata(D, field_code, first_frame, first_sample, num_frames,
       num_samples, (gd_type_t)type, data_out);
 }
 
 size_t Dirfile::GetString(const char *field_code, size_t len, char* data_out)
+  const
 {
   return gd_get_string(D, field_code, len, data_out);
 }
 
 size_t Dirfile::PutConstant(const char *field_code, DataType type,
-    const void *data_in)
+    const void *data_in) const
 {
   return gd_put_constant(D, field_code, (gd_type_t)type, data_in);
 }
 
 size_t Dirfile::PutData(const char* field_code, off_t first_frame,
     off_t first_sample, size_t num_frames, size_t num_samples,
-    DataType type, const void* data_in)
+    DataType type, const void* data_in) const
 {
   return gd_putdata(D, field_code, first_frame, first_sample, num_frames,
       num_samples, (gd_type_t)type, data_in);
 }
 
-size_t Dirfile::PutString(const char *field_code, const char* data_in)
+size_t Dirfile::PutString(const char *field_code, const char* data_in) const
 {
   return gd_put_string(D, field_code, data_in);
 }
 
-GetData::Fragment* Dirfile::Fragment(int index)
+GetData::Fragment* Dirfile::Fragment(int index) const
 {
   if (index < 0 || index >= gd_nfragments(D))
     return NULL;
@@ -292,12 +294,12 @@ GetData::Fragment* Dirfile::Fragment(int index)
   return new GetData::Fragment(this, index);
 }
 
-int Dirfile::NFragments()
+int Dirfile::NFragments() const
 {
   return gd_nfragments(D);
 }
 
-const char* Dirfile::ReferenceFilename()
+const char* Dirfile::ReferenceFilename() const
 {
   const char* ref = gd_reference(D, NULL);
 
@@ -312,7 +314,7 @@ int Dirfile::Discard()
   int ret = gd_discard(D);
 
   if (!ret)
-    D = NULL;
+    D = gd_invalid_dirfile();
 
   return ret;
 }
@@ -322,17 +324,17 @@ int Dirfile::Close()
   int ret = gd_close(D);
 
   if (!ret)
-    D = NULL;
+    D = gd_invalid_dirfile();
 
   return ret;
 }
 
-void Dirfile::SetCallback(gd_parser_callback_t sehandler, void* extra)
+void Dirfile::SetCallback(gd_parser_callback_t sehandler, void* extra) const
 {
   gd_parser_callback(D, sehandler, extra);
 }
 
-RawEntry* Dirfile::Reference(const char* field_code)
+RawEntry* Dirfile::Reference(const char* field_code) const
 {
   const char* ref = gd_reference(D, field_code);
 
@@ -342,48 +344,48 @@ RawEntry* Dirfile::Reference(const char* field_code)
   return new RawEntry(this, ref);
 }
 
-int Dirfile::AlterSpec(const char *line, int recode)
+int Dirfile::AlterSpec(const char *line, int recode) const
 {
   return gd_alter_spec(D, line, recode);
 }
 
-int Dirfile::MAlterSpec(const char* line, const char *parent, int recode)
+int Dirfile::MAlterSpec(const char* line, const char *parent, int recode) const
 {
   return gd_malter_spec(D, line, parent, recode);
 }
 
-int Dirfile::Delete(const char* field_code, int flags)
+int Dirfile::Delete(const char* field_code, int flags) const
 {
   return gd_delete(D, field_code, flags);
 }
 
-int Dirfile::UnInclude(int fragment_index, int del)
+int Dirfile::UnInclude(int fragment_index, int del) const
 {
   return gd_uninclude(D, fragment_index, del);
 }
 
-DataType Dirfile::NativeType(const char* field_code)
+DataType Dirfile::NativeType(const char* field_code) const
 {
   return (DataType)gd_native_type(D, field_code);
 }
 
-int Dirfile::Validate(const char* field_code)
+int Dirfile::Validate(const char* field_code) const
 {
   return gd_validate(D, field_code);
 }
 
 double Dirfile::FrameNum(const char* field_code, double value,
-    off_t frame_start, off_t frame_end)
+    off_t frame_start, off_t frame_end) const
 {
   return gd_framenum_subset(D, field_code, value, frame_start, frame_end);
 }
 
-int Dirfile::FragmentIndex(const char* field_code)
+int Dirfile::FragmentIndex(const char* field_code) const
 {
   return gd_fragment_index(D, field_code);
 }
 
-const char* Dirfile::Name()
+const char* Dirfile::Name() const
 {
   return gd_dirfilename(D);
 }

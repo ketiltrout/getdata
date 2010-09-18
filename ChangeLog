@@ -1,3 +1,18 @@
+2010-09-18   D. V. Wiebe <getdata@ketiltrout.net>   svn:448
+	* bindings/python/pydirfile.c (gdpy_dirfile_close gdpy_dirfile_discard)
+	bindings/cxx/dirfile.cpp (Dirfile::Discard Dirfile::Close)
+	bindings/f77/fgetdata.c (_GDF_InitDirfiles) bindings/idl/getdata.c
+	(gdidl_init_dirfile): Call gd_invalid_dirfile() instead of using
+	GetData C internals.
+	* src/open.c (gd_invalid_dirfile): Added.
+
+	* src/cxx/: Declare const member functions.
+
+	* configure.ac: Fix mkdir check for C++ compilers masquerading as C
+	compilers.
+
+	* src/legacy.c: Humanely initialise _GD_GlobalErrors when possible.
+
 2010-09-17   D. V. Wiebe <getdata@ketiltrout.net>   svn:447
 	* test/Makefile.am src/Makefile.am bindings/python/Makefile.am
 	bindings/cxx/Makefile.am bindings/f77/test/Makefile.am

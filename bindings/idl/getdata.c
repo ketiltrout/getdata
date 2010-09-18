@@ -90,9 +90,7 @@ static void gdidl_init_dirfile(void)
 
   /* we keep entry zero as a generic, invalid dirfile to return if
    * dirfile lookup fails */
-  idldirfiles[0] = (DIRFILE*)malloc(sizeof(DIRFILE));
-  memset(idldirfiles[0], 0, sizeof(DIRFILE));
-  idldirfiles[0]->flags = GD_INVALID;
+  idldirfiles[0] = gd_invalid_dirfile();
 
   idldirfiles_initialised = 1;
   dreturnvoid();

@@ -79,116 +79,120 @@ namespace GetData {
 
       ~Dirfile();
 
-      int Add(GetData::Entry &entry);
+      int Add(GetData::Entry &entry) const;
 
-      int AddSpec(const char *spec, int fragment_index = 0);
+      int AddSpec(const char *spec, int fragment_index = 0) const;
 
-      int AlterSpec(const char* spec, int recode = 0);
+      int AlterSpec(const char* spec, int recode = 0) const;
 
-      off_t BoF(const char *field_code);
+      off_t BoF(const char *field_code) const;
 
       int Close();
 
-      const void *Constants(DataType type = Float64);
+      const void *Constants(DataType type = Float64) const;
 
-      int Delete(const char* field_code, int flags = 0);
+      int Delete(const char* field_code, int flags = 0) const;
 
       int Discard();
 
-      GetData::Entry* Entry(const char *field_code);
+      GetData::Entry* Entry(const char *field_code) const;
 
-      off_t EoF(const char *field_code);
+      off_t EoF(const char *field_code) const;
 
-      int Error();
+      int Error() const;
 
       const char *ErrorString(size_t len = 4096);
 
-      const char **FieldList();
+      const char **FieldList() const;
 
-      const char **FieldListByType(EntryType type);
+      const char **FieldListByType(EntryType type) const;
 
-      int Flush(const char *field_code = NULL);
+      int Flush(const char *field_code = NULL) const;
 
-      GetData::Fragment *Fragment(int index);
+      GetData::Fragment *Fragment(int index) const;
 
-      int FragmentIndex(const char* field_code);
+      int FragmentIndex(const char* field_code) const;
 
       double FrameNum(const char* field_code, double value,
-          off_t frame_start = 0, off_t frame_end = 0);
+          off_t frame_start = 0, off_t frame_end = 0) const;
 
-      size_t GetConstant(const char *field_code, DataType type, void *data_out);
+      size_t GetConstant(const char *field_code, DataType type, void *data_out)
+        const;
 
       size_t GetData(const char *field_code, off_t first_frame,
           off_t first_sample, size_t num_frames, size_t num_samples,
-          DataType type, void* data_out);
+          DataType type, void* data_out) const;
 
-      size_t GetString(const char *field_code, size_t len, char *data_out);
+      size_t GetString(const char *field_code, size_t len, char *data_out)
+        const;
 
       int Include(const char *file, int fragment_index = 0,
-          unsigned long flags = 0);
+          unsigned long flags = 0) const;
 
-      int MAdd(GetData::Entry &entry, const char *parent);
+      int MAdd(GetData::Entry &entry, const char *parent) const;
 
-      int MAddSpec(const char *spec, const char *parent);
+      int MAddSpec(const char *spec, const char *parent) const;
 
-      int MAlterSpec(const char *line, const char *parent, int recode = 0);
+      int MAlterSpec(const char *line, const char *parent, int recode = 0)
+        const;
 
-      const void *MConstants(const char *parent, DataType type = Float64);
+      const void *MConstants(const char *parent, DataType type = Float64) const;
 
-      int MetaFlush();
+      int MetaFlush() const;
 
-      const char **MFieldList(const char *parent);
+      const char **MFieldList(const char *parent) const;
 
-      const char **MFieldListByType(const char *parent, EntryType type);
+      const char **MFieldListByType(const char *parent, EntryType type) const;
 
-      const char **MStrings(const char *parent);
+      const char **MStrings(const char *parent) const;
 
-      const char **MVectorList(const char *parent);
+      const char **MVectorList(const char *parent) const;
 
-      unsigned int NFields();
+      unsigned int NFields() const;
 
-      unsigned int NFieldsByType(EntryType type);
+      unsigned int NFieldsByType(EntryType type) const;
 
-      unsigned int NMFields(const char *parent);
+      unsigned int NMFields(const char *parent) const;
 
-      unsigned int NMFieldsByType(const char *parent, EntryType type);
+      unsigned int NMFieldsByType(const char *parent, EntryType type) const;
 
-      unsigned int NMVectors(const char *parent);
+      unsigned int NMVectors(const char *parent) const;
 
-      const char* Name();
+      const char* Name() const;
 
-      DataType NativeType(const char* field_code);
+      DataType NativeType(const char* field_code) const;
 
-      int NFragments();
+      int NFragments() const;
 
-      off_t NFrames();
+      off_t NFrames() const;
 
-      unsigned int NVectors();
+      unsigned int NVectors() const;
 
       size_t PutConstant(const char *field_code, DataType type,
-          const void *data_in);
+          const void *data_in) const;
 
       size_t PutData(const char *field_code, off_t first_frame,
           off_t first_sample, size_t num_frames, size_t num_samples,
-          DataType type, const void* data_in);
+          DataType type, const void* data_in) const;
 
-      size_t PutString(const char *field_code, const char *data_in);
+      size_t PutString(const char *field_code, const char *data_in) const;
 
-      GetData::RawEntry *Reference(const char* field_code = NULL);
+      GetData::RawEntry *Reference(const char* field_code = NULL) const;
 
-      const char *ReferenceFilename();
+      const char *ReferenceFilename() const;
 
-      unsigned int SamplesPerFrame(const char *field_code);
+      unsigned int SamplesPerFrame(const char *field_code) const;
 
-      void SetCallback(gd_parser_callback_t sehandler, void* extra = NULL);
+      void SetCallback(gd_parser_callback_t sehandler, void* extra = NULL)
+        const;
 
-      const char **Strings();
+      const char **Strings() const;
 
-      int UnInclude(int fragment_index, int del = 0);
+      int UnInclude(int fragment_index, int del = 0) const;
 
-      int Validate(const char* field_code);
+      int Validate(const char* field_code) const;
 
-      const char **VectorList();
+      const char **VectorList() const;
 
     private:
       DIRFILE* D; 

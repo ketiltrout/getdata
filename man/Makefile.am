@@ -37,9 +37,9 @@ dist_man_MANS = gd_add.3 gd_add_bit.3 gd_add_spec.3 gd_alter_bit.3 \
 								gd_field_list.3 gd_field_list_by_type.3 gd_flush.3 \
 								gd_fragment_index.3 gd_fragmentname.3 gd_framenum_subset.3 \
 								gd_frameoffset.3 gd_free_entry_strings.3 gd_include.3 \
-								gd_madd_bit.3 gd_mconstants.3 gd_metaflush.3 \
-								gd_mfield_list.3 gd_mfield_list_by_type.3 gd_move.3 \
-								gd_mstrings.3 gd_mvector_list.3 gd_dirfilename.3 \
+								gd_invalid_dirfile.3 gd_madd_bit.3 gd_mconstants.3 \
+								gd_metaflush.3 gd_mfield_list.3 gd_mfield_list_by_type.3 \
+								gd_move.3 gd_mstrings.3 gd_mvector_list.3 gd_dirfilename.3 \
 								gd_native_type.3 gd_nfields.3 gd_nfields_by_type.3 \
 								gd_nfragments.3 gd_nframes.3 gd_nmfields.3 \
 								gd_nmfields_by_type.3 gd_nmvectors.3 gd_nvectors.3 \

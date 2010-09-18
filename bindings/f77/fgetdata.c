@@ -42,9 +42,7 @@ static void _GDF_InitDirfiles(void)
 
   /* we keep entry zero as a generic, invalid dirfile to return if
    * dirfile lookup fails */
-  f77dirfiles[0] = (DIRFILE*)malloc(sizeof(DIRFILE));
-  memset(f77dirfiles[0], 0, sizeof(DIRFILE));
-  f77dirfiles[0]->flags = GD_INVALID;
+  f77dirfiles[0] = gd_invalid_dirfile();
 
   f77dirfiles_initialised = 1;
   dreturnvoid();

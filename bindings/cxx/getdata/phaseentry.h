@@ -22,16 +22,6 @@
 #ifndef GETDATA_PHASEENTRY_H
 #define GETDATA_PHASEENTRY_H
 
-#ifndef _FILE_OFFSET_BITS
-# define _FILE_OFFSET_BITS 64
-#endif
-
-#define GD_NO_LEGACY_API
-#define GD_C89_API
-
-extern "C" {
-#include <getdata.h>
-}
 #include <getdata/entry.h>
 
 namespace GetData {
@@ -47,24 +37,18 @@ namespace GetData {
       PhaseEntry(const char* field_code, const char* in_field, gd_shift_t shift,
           int fragment_index = 0);
 
-      virtual const char *Input() {
-        return E.in_fields[0];
-      };
+      virtual const char *Input() const { return E.in_fields[0]; };
 
-      virtual gd_shift_t Shift() {
-        return E.u.phase.shift;
-      };
+      virtual gd_shift_t Shift() const { return E.u.phase.shift; };
 
       int SetInput(const char* field);
       int SetShift(gd_shift_t shift);
       int SetShift(const char* shift);
 
-      const char *Scalar() {
-        return E.scalar[0];
-      };
+      const char *Scalar() const { return E.scalar[0]; };
 
     private:
-      PhaseEntry(GetData::Dirfile *dirfile, const char* field_code) :
+      PhaseEntry(const GetData::Dirfile *dirfile, const char* field_code) :
         Entry(dirfile, field_code) { };
   };
 }

@@ -29,7 +29,7 @@
 
 using namespace GetData;
 
-Fragment::Fragment(GetData::Dirfile *dirfile, int index)
+Fragment::Fragment(const GetData::Dirfile *dirfile, int index)
 {
   D = dirfile;
 
@@ -38,16 +38,16 @@ Fragment::Fragment(GetData::Dirfile *dirfile, int index)
   end = gd_endianness(D->D, index);
   off = gd_frameoffset(D->D, index);
   prot = gd_protection(D->D, index);
-  name = strdup(gd_fragmentname(D->D, index));
+  name = gd_fragmentname(D->D, index);
   parent = (index == 0) ? -1 : gd_parent_fragment(D->D, index);
 }
 
 Fragment::~Fragment()
 {
-  free(name);
+  ;
 }
 
-int Fragment::ReWrite()
+int Fragment::ReWrite() const
 {
   return gd_rewrite_fragment(D->D, ind);
 }

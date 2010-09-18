@@ -221,7 +221,7 @@ int LincomEntry::SetNFields(int nfields)
   return 0;
 }
 
-const char *LincomEntry::Scalar(int index)
+const char *LincomEntry::Scalar(int index) const
 {
   if (index < 0 || index >= E.u.lincom.n_fields)
     return NULL;

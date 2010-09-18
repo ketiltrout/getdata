@@ -76,7 +76,7 @@ int BitEntry::SetNumBits(gd_bit_t num_bits)
   return 0;
 }
 
-const char *BitEntry::Scalar(int index)
+const char *BitEntry::Scalar(int index) const
 {
   if (index != 0 && index != 1)
     return NULL;

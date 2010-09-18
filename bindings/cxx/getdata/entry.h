@@ -75,117 +75,125 @@ namespace GetData {
       virtual ~Entry();
 
       /* Generic data */
-      int Associated() { return (D != NULL); };
+      int Associated() const { return (D != NULL); };
 
-      const char *Name() { return E.field; };
+      const char *Name() const { return E.field; };
 
-      EntryType Type() { return (EntryType)E.field_type; };
+      EntryType Type() const { return (EntryType)E.field_type; };
       
       void Dissociate() { D = NULL; };
 
-      int FragmentIndex() { return E.fragment_index; };
+      int FragmentIndex() const { return E.fragment_index; };
 
       int Move(int new_fragment, int move_data = 0);
 
       int Rename(const char* new_name, int move_data = 0);
 
       /* Specific data */
-      virtual const char *Input(int index = 0) {
+      virtual const char *Input(int index = 0) const {
         return (CheckIndex(E.field_type, E.u.lincom.n_fields, index)) ?
           E.in_fields[index] : NULL;
       };
 
-      virtual int ComplexScalars() {
+      virtual int ComplexScalars() const {
         return (E.field_type == GD_LINCOM_ENTRY ||
             E.field_type == GD_POLYNOM_ENTRY) ? E.comp_scal : 0;
       }
 
-      virtual const char *Scalar(int index = 0);
+      virtual const char *Scalar(int index = 0) const;
 
       /* RAW methods */
-      virtual gd_spf_t SamplesPerFrame() {
+      virtual gd_spf_t SamplesPerFrame() const {
         return (E.field_type == GD_RAW_ENTRY) ? E.u.raw.spf : 0;
       };
 
-      virtual DataType RawType() {
-        return (E.field_type == GD_RAW_ENTRY) ? (DataType)E.u.raw.type : Unknown;
+      virtual DataType RawType() const {
+        return (E.field_type == GD_RAW_ENTRY) ? (DataType)E.u.raw.type :
+          Unknown;
       };
 
       /* LINCOM methods */
-      virtual int NFields() {
+      virtual int NFields() const {
         return (E.field_type == GD_LINCOM_ENTRY) ? E.u.lincom.n_fields : 0;
       };
 
-      virtual double Scale(int index = 0) {
+      virtual double Scale(int index = 0) const {
         return (E.field_type == GD_LINCOM_ENTRY &&
-            CheckIndex(E.field_type, E.u.lincom.n_fields, index)) ? E.u.lincom.m[index] : 0;
+            CheckIndex(E.field_type, E.u.lincom.n_fields, index)) ?
+          E.u.lincom.m[index] : 0;
       }
 
-      virtual std::complex<double> CScale(int index = 0) {
+      virtual std::complex<double> CScale(int index = 0) const {
         return (E.field_type == GD_LINCOM_ENTRY &&
             CheckIndex(E.field_type, E.u.lincom.n_fields, index))
-          ? std::complex<double>(E.u.lincom.cm[index][0], E.u.lincom.cm[index][1]) : 0;
+          ? std::complex<double>(E.u.lincom.cm[index][0],
+              E.u.lincom.cm[index][1]) : 0;
       }
 
-      virtual double Offset(int index = 0) {
+      virtual double Offset(int index = 0) const {
         return (E.field_type == GD_LINCOM_ENTRY &&
-            CheckIndex(E.field_type, E.u.lincom.n_fields, index)) ? E.u.lincom.b[index] : 0;
+            CheckIndex(E.field_type, E.u.lincom.n_fields, index)) ?
+          E.u.lincom.b[index] : 0;
       }
 
-      virtual std::complex<double> COffset(int index = 0) {
+      virtual std::complex<double> COffset(int index = 0) const {
         return (E.field_type == GD_LINCOM_ENTRY &&
             CheckIndex(E.field_type, E.u.lincom.n_fields, index))
-          ? std::complex<double>(E.u.lincom.cb[index][0], E.u.lincom.cb[index][1]) : 0;
+          ? std::complex<double>(E.u.lincom.cb[index][0],
+              E.u.lincom.cb[index][1]) : 0;
       }
 
       /* LINTERP methods */
-      virtual const char *Table() {
+      virtual const char *Table() const {
         return (E.field_type == GD_LINTERP_ENTRY) ? E.u.linterp.table : NULL;
       };
 
       /* (S)BIT methods */
-      virtual gd_bit_t FirstBit() {
+      virtual gd_bit_t FirstBit() const {
         return (E.field_type == GD_BIT_ENTRY) ? E.u.bit.bitnum : -1;
       };
 
-      virtual gd_bit_t NumBits() {
+      virtual gd_bit_t NumBits() const {
         return (E.field_type == GD_BIT_ENTRY) ? E.u.bit.numbits : -1;
       };
 
       /* PHASE methods */
-      virtual gd_shift_t Shift() {
+      virtual gd_shift_t Shift() const {
         return (E.field_type == GD_PHASE_ENTRY) ? E.u.phase.shift : 0;
       };
 
       /* CONST methods */
-      virtual DataType ConstType() {
+      virtual DataType ConstType() const {
         return (E.field_type == GD_CONST_ENTRY) ? (DataType)E.u.cons.type :
           Unknown;
       };
 
       /* POLYNOM methods */
-      virtual int PolyOrd() {
+      virtual int PolyOrd() const {
         return (E.field_type == GD_POLYNOM_ENTRY) ? E.u.polynom.poly_ord : 0;
       };
 
-      virtual double Coefficient(int index = 0) {
-        return (E.field_type == GD_POLYNOM_ENTRY && index <= E.u.polynom.poly_ord)
-          ? E.u.polynom.a[index] : 0;
+      virtual double Coefficient(int index = 0) const {
+        return (E.field_type == GD_POLYNOM_ENTRY && index <=
+            E.u.polynom.poly_ord) ? E.u.polynom.a[index] : 0;
       }
 
-      virtual std::complex<double> CCoefficient(int index = 0) {
-        return (E.field_type == GD_POLYNOM_ENTRY && index <= E.u.polynom.poly_ord)
-          ? std::complex<double>(E.u.polynom.ca[index][0], E.u.polynom.ca[index][1]) : 0;
+      virtual std::complex<double> CCoefficient(int index = 0) const {
+        return (E.field_type == GD_POLYNOM_ENTRY && index <=
+            E.u.polynom.poly_ord) ?
+          std::complex<double>(E.u.polynom.ca[index][0],
+              E.u.polynom.ca[index][1]) : 0;
       }
 
       /* RECIP methods */
-      virtual double Dividend() {
+      virtual double Dividend() const {
         return (E.field_type == GD_RECIP_ENTRY) ? E.u.recip.dividend : 0;
       };
 
-      virtual std::complex<double> CDividend() {
+      virtual std::complex<double> CDividend() const {
         return (E.field_type == GD_RECIP_ENTRY) ?
-          std::complex<double>(E.u.recip.cdividend[0], E.u.recip.cdividend[1]) : 0;
+          std::complex<double>(E.u.recip.cdividend[0], E.u.recip.cdividend[1]) :
+          0;
       };
 
       void SetName(const char* name);
@@ -193,14 +201,14 @@ namespace GetData {
       void SetFragmentIndex(int fragment_index);
 
     protected:
-      Entry(Dirfile *dirfile, const char* field_code);
+      Entry(const Dirfile *dirfile, const char* field_code);
 
       static int CheckIndex(gd_entype_t field_type, int n_fields, int index);
 
-      void SetDirfile(GetData::Dirfile* dirfile);
+      void SetDirfile(const GetData::Dirfile* dirfile);
 
       gd_entry_t E;
-      Dirfile* D;
+      const Dirfile* D;
   };
 }
 

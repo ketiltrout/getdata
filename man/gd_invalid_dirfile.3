@@ -1,0 +1,71 @@
+.\" gd_invalid_dirfile.3.  The gd_invalid_dirfile man page.
+.\"
+.\" (C) 2010 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_invalid_dirfile 3 "17 September 2010" "Version 0.7.0" "GETDATA"
+.SH NAME
+gd_invalid_dirfile \(em obtain an pointer to an invalid DIRFILE object
+.SH SYNOPSIS
+.B #include <getdata.h>
+.HP
+.nh
+.ad l
+.BI "DIRFILE* gd_invalid_dirfile(void);
+.hy
+.ad n
+.SH DESCRIPTION
+The
+.BR gd_invalid_dirfile ()
+returns a pointer to a newly allocated, invalid DIRFILE object.  Like any
+other DIRFILE object, the invalid DIRFILE object should be deallocated by
+calling
+.BR gd_close (3)
+or
+.BR gd_discard (3)
+when it is no longer needed.
+
+The DIRFILE object reutrned may be passed to any other GetData function which
+requires one, but doing so will inevitably result in that function failing
+with the
+.B GD_BAD_DIRFILE
+error.
+
+A similar effect can be achieved by making an invalid
+.BR gd_open (3)
+call, such as:
+.HP
+.in +2n
+.nf
+.fam C
+.BR gd_open( """""" ,\~ 0 );
+.fam
+.fi
+.in
+.PP
+which also returns a pointer to an invalid DIRFILE object.  The difference
+is that an invalid DIRFILE created in this way has a non-zero Dirfile
+error (obtainable with
+.BR gd_error (3)),
+while the dirfile error of the invalid DIRFILE returned by
+.BR gd_invalid_dirfile (3)
+is zero (indicating success).
+
+.SH RETURN VALUE
+This function always returns a pointer to a newly allocated, invalid DIRFILE
+object.
+
+.SH SEE ALSO
+.BR gd_close (3),
+.BR gd_discard (3),
+.BR gd_open (3)

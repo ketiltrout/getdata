@@ -22,16 +22,6 @@
 #ifndef GETDATA_BITENTRY_H
 #define GETDATA_BITENTRY_H
 
-#ifndef _FILE_OFFSET_BITS
-# define _FILE_OFFSET_BITS 64
-#endif
-
-#define GD_NO_LEGACY_API
-#define GD_C89_API
-
-extern "C" {
-#include <getdata.h>
-}
 #include <getdata/entry.h>
 
 namespace GetData {
@@ -47,17 +37,11 @@ namespace GetData {
       BitEntry(const char* field_code, const char* in_field, gd_bit_t bitnum,
           gd_bit_t numbits = 1, int fragment_index = 0);
 
-      virtual const char *Input() {
-        return E.in_fields[0];
-      };
+      virtual const char *Input() const { return E.in_fields[0]; };
 
-      virtual gd_bit_t FirstBit() {
-        return E.u.bit.bitnum;
-      };
+      virtual gd_bit_t FirstBit() const { return E.u.bit.bitnum; };
 
-      virtual gd_bit_t NumBits() {
-        return E.u.bit.numbits;
-      };
+      virtual gd_bit_t NumBits() const { return E.u.bit.numbits; };
 
       int SetInput(const char* field);
       int SetFirstBit(gd_bit_t first_bit);
@@ -65,10 +49,10 @@ namespace GetData {
       int SetNumBits(gd_bit_t num_bits);
       int SetNumBits(const char* num_bits);
 
-      virtual const char *Scalar(int index = 0);
+      virtual const char *Scalar(int index = 0) const;
 
     private:
-      BitEntry(GetData::Dirfile *dirfile, const char* field_code) :
+      BitEntry(const GetData::Dirfile *dirfile, const char* field_code) :
         Entry(dirfile, field_code) { };
   };
 }

@@ -539,6 +539,12 @@ AC_CHECK_HEADERS([io.h])
 
 AC_MSG_CHECKING([whether mkdir accepts two arguments])
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM([
+#if HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
+#if HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
 #if HAVE_IO_H
 #include <io.h>
 #endif
