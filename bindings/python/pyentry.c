@@ -391,7 +391,7 @@ static void gdpy_set_entry_from_dict(gd_entry_t *E, PyObject* parms,
 {
   dtrace("%p, %p, \"%s\"", E, parms, name);
 
-  PyObject* tuple;
+  PyObject* tuple = Py_None;
   const char* key[3];
   int i, size = 0;
 
@@ -468,8 +468,6 @@ static void gdpy_set_entry_from_dict(gd_entry_t *E, PyObject* parms,
     case GD_STRING_ENTRY:
     case GD_NO_ENTRY:
     case GD_INDEX_ENTRY:
-      tuple = Py_None;
-      size = 0;
       break;
   }
 
