@@ -486,7 +486,8 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([], [[#ifndef __MSVCRT__
 [gd_msvcrt=no])
 AC_MSG_RESULT([$gd_msvcrt])
 
-
+dnl 64-bit stat() requires MSVCRT 6.1 or later.  This may prohibit using
+dnl GetData on Windows95.  Oh no!
 if test "$gd_msvcrt" = "yes"; then
   AC_DEFINE([__MSVCRT_VERSION__], [0x601],
             [ If compiling aginst the MSVCRT, define to 0x601 ])
