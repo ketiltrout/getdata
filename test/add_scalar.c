@@ -21,10 +21,10 @@ int main(void)
   E.field = "data";
   E.field_type = GD_LINCOM_ENTRY;
   E.fragment_index = 0;
-  E.u.lincom.n_fields = 1;
+  E.EN(lincom,n_fields) = 1;
   E.comp_scal = 0;
   E.in_fields[0] = "INDEX";
-  E.u.lincom.m[0] = 1.;
+  E.EN(lincom,m)[0] = 1.;
   E.scalar[0] = NULL;
   E.scalar[0 + GD_MAX_LINCOM] = "c";
 
@@ -40,9 +40,9 @@ int main(void)
   else {
     CHECKI(e.field_type, GD_LINCOM_ENTRY);
     CHECKI(e.fragment_index, 0);
-    CHECKI(e.u.lincom.n_fields, 1);
-    CHECKF(e.u.lincom.m[0], 1);
-    CHECKF(e.u.lincom.b[0], 4);
+    CHECKI(e.EN(lincom,n_fields), 1);
+    CHECKF(e.EN(lincom,m)[0], 1);
+    CHECKF(e.EN(lincom,b)[0], 4);
     CHECKP(e.scalar[0]);
     CHECKS(e.scalar[0 + GD_MAX_LINCOM], "c");
     gd_free_entry_strings(&e);

@@ -36,7 +36,7 @@ namespace GetData {
 
       ConstEntry(const char* field_code, DataType type, int fragment_index = 0);
 
-      virtual DataType ConstType() const { return (DataType)E.u.cons.type; }
+      virtual DataType ConstType() const { return (DataType)E.u.cons.const_type; }
 
       int SetType(DataType type);
 

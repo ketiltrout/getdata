@@ -108,7 +108,7 @@ namespace GetData {
       };
 
       virtual DataType RawType() const {
-        return (E.field_type == GD_RAW_ENTRY) ? (DataType)E.u.raw.type :
+        return (E.field_type == GD_RAW_ENTRY) ? (DataType)E.u.raw.data_type :
           Unknown;
       };
 
@@ -164,7 +164,7 @@ namespace GetData {
 
       /* CONST methods */
       virtual DataType ConstType() const {
-        return (E.field_type == GD_CONST_ENTRY) ? (DataType)E.u.cons.type :
+        return (E.field_type == GD_CONST_ENTRY) ? (DataType)E.u.cons.const_type :
           Unknown;
       };
 

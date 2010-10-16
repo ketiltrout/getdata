@@ -38,13 +38,13 @@ int main(void)
   if (!r) {
     CHECKI(e.field_type, GD_LINCOM_ENTRY);
     CHECKI(e.fragment_index, 0);
-    CHECKI(e.u.lincom.n_fields, 2);
+    CHECKI(e.EN(lincom,n_fields), 2);
     CHECKS(e.in_fields[0], "in1");
     CHECKS(e.in_fields[1], "in2");
-    CHECKC(e.u.lincom.cm[0], m[0]);
-    CHECKC(e.u.lincom.cm[1], m[1]);
-    CHECKC(e.u.lincom.cb[0], b[0]);
-    CHECKC(e.u.lincom.cb[1], b[1]);
+    CHECKC(e.EN(lincom,cm)[0], m[0]);
+    CHECKC(e.EN(lincom,cm)[1], m[1]);
+    CHECKC(e.EN(lincom,cb)[0], b[0]);
+    CHECKC(e.EN(lincom,cb)[1], b[1]);
     gd_free_entry_strings(&e);
   }
 

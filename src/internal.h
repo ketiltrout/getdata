@@ -376,26 +376,26 @@ struct _gd_private_entry {
       char* filebase;
       size_t size;
       struct _gd_raw_file file[2]; /* encoding framework data */
-    } raw;
+    } GD_ANON(raw);
     struct { /* LINTERP */
       char *table_path;
       int table_len;
       int complex_table;
       int table_monotonic;
       struct _gd_lut *lut;
-    } linterp;
+    } GD_ANON(linterp);
     struct { /* CONST */
       union {
         GD_DCOMPLEXM(c);
         double d;
         uint64_t u;
         int64_t i;
-      } d;
+      } GD_ANON(d);
       int n_client;
       gd_entry_t** client;
-    } cons;
+    } GD_ANON(cons);
     char* string;
-  } u;
+  } GD_ANON(u);
 };
 
 #define GD_ENC_NONE       0
@@ -721,6 +721,14 @@ static inline __attribute__ ((__const__)) double __NAN()
 #ifndef __cplusplus
 # undef gd_nothrow
 # define gd_nothrow
+#endif
+
+#if GD_NO_C99_API
+# define EN(t,v) u.t.v
+# define ES(v) u.v
+#else
+# define EN(t,v) v
+# define ES(v) v
 #endif
 
 #endif

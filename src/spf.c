@@ -45,7 +45,7 @@ gd_spf_t _GD_GetSPF(DIRFILE* D, gd_entry_t* E)
     case GD_RAW_ENTRY:
       if (!E->e->calculated)
         _GD_CalculateEntry(D, E);
-      spf = E->u.raw.spf;
+      spf = E->EN(raw,spf);
       break;
     case GD_LINCOM_ENTRY:
     case GD_MULTIPLY_ENTRY:

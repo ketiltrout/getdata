@@ -39,7 +39,7 @@ namespace GetData {
 
       virtual gd_spf_t SamplesPerFrame() const { return E.u.raw.spf; };
 
-      virtual DataType RawType() const { return (DataType)E.u.raw.type; };
+      virtual DataType RawType() const { return (DataType)E.u.raw.data_type; };
 
       const char* FileName();
       int SetSamplesPerFrame(gd_spf_t spf, int recode = 0);

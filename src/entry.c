@@ -40,7 +40,7 @@ void _GD_FreeE(gd_entry_t* entry, int priv)
 
   switch(entry->field_type) {
     case GD_LINCOM_ENTRY:
-      for (i = 0; i < entry->u.lincom.n_fields; ++i) {
+      for (i = 0; i < entry->EN(lincom,n_fields); ++i) {
         free(entry->in_fields[i]);
         free(entry->scalar[i]);
         free(entry->scalar[i + GD_MAX_LINCOM]);
@@ -48,9 +48,9 @@ void _GD_FreeE(gd_entry_t* entry, int priv)
       break;
     case GD_LINTERP_ENTRY:
       free(entry->in_fields[0]);
-      free(entry->u.linterp.table);
+      free(entry->EN(linterp,table));
       if (priv)
-        free(entry->e->u.linterp.table_path);
+        free(entry->e->EN(linterp,table_path));
       break;
     case GD_RECIP_ENTRY:
       free(entry->in_fields[0]);
@@ -71,23 +71,23 @@ void _GD_FreeE(gd_entry_t* entry, int priv)
       break;
     case GD_POLYNOM_ENTRY:
       free(entry->in_fields[0]);
-      for (i = 0; i <= entry->u.polynom.poly_ord; ++i)
+      for (i = 0; i <= entry->EN(polynom,poly_ord); ++i)
         free(entry->scalar[i]);
       break;
     case GD_STRING_ENTRY:
       if (priv)
-        free(entry->e->u.string);
+        free(entry->e->ES(string));
       break;
     case GD_CONST_ENTRY:
       if (priv)
-        free(entry->e->u.cons.client);
+        free(entry->e->EN(cons,client));
       break;
     case GD_RAW_ENTRY:
       free(entry->scalar[0]);
       if (priv) {
-        free(entry->e->u.raw.filebase);
-        free(entry->e->u.raw.file[0].name);
-        free(entry->e->u.raw.file[1].name);
+        free(entry->e->EN(raw,filebase));
+        free(entry->e->EN(raw,file)[0].name);
+        free(entry->e->EN(raw,file)[1].name);
       }
       break;
     case GD_INDEX_ENTRY:
@@ -146,7 +146,7 @@ static void _GD_GetScalar(DIRFILE* D, gd_entry_t* E, const char* scalar,
           field_code);
     else {
       if ((D->flags & GD_ACCMODE) == GD_RDWR) {
-        ptr = realloc(C->e->u.cons.client, (C->e->u.cons.n_client + 1) *
+        ptr = realloc(C->e->EN(cons,client), (C->e->EN(cons,n_client) + 1) *
             sizeof(gd_entry_t*));
         if (ptr == NULL)
           _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
@@ -155,8 +155,8 @@ static void _GD_GetScalar(DIRFILE* D, gd_entry_t* E, const char* scalar,
       _GD_DoField(D, C, repr, 0, 1, type, data);
 
       if (ptr) {
-        C->e->u.cons.client = (gd_entry_t **)ptr;
-        C->e->u.cons.client[C->e->u.cons.n_client++] = E;
+        C->e->EN(cons,client) = (gd_entry_t **)ptr;
+        C->e->EN(cons,client)[C->e->EN(cons,n_client)++] = E;
       }
     }
 
@@ -176,15 +176,15 @@ int _GD_CalculateEntry(DIRFILE* D, gd_entry_t* E)
 
   switch(E->field_type) {
     case GD_RAW_ENTRY:
-      _GD_GetScalar(D, E, E->scalar[0], GD_UINT16, &E->u.raw.spf);
+      _GD_GetScalar(D, E, E->scalar[0], GD_UINT16, &E->EN(raw,spf));
       break;
     case GD_POLYNOM_ENTRY:
       E->comp_scal = 0;
-      for (i = 0; i <= E->u.polynom.poly_ord; ++i) {
-        _GD_GetScalar(D, E, E->scalar[i], GD_COMPLEX128, &E->u.polynom.ca[i]);
-        E->u.polynom.a[i] = creal(E->u.polynom.ca[i]);
+      for (i = 0; i <= E->EN(polynom,poly_ord); ++i) {
+        _GD_GetScalar(D, E, E->scalar[i], GD_COMPLEX128, &E->EN(polynom,ca)[i]);
+        E->EN(polynom,a)[i] = creal(E->EN(polynom,ca)[i]);
 
-        if (cimag(E->u.polynom.ca[i]))
+        if (cimag(E->EN(polynom,ca)[i]))
           E->comp_scal = 1;
 
         if (D->error)
@@ -193,18 +193,18 @@ int _GD_CalculateEntry(DIRFILE* D, gd_entry_t* E)
       break;
     case GD_LINCOM_ENTRY:
       E->comp_scal = 0;
-      for (i = 0; i < E->u.lincom.n_fields; ++i) {
-        _GD_GetScalar(D, E, E->scalar[i], GD_COMPLEX128, &E->u.lincom.cm[i]);
-        E->u.lincom.m[i] = creal(E->u.lincom.cm[i]);
+      for (i = 0; i < E->EN(lincom,n_fields); ++i) {
+        _GD_GetScalar(D, E, E->scalar[i], GD_COMPLEX128, &E->EN(lincom,cm)[i]);
+        E->EN(lincom,m)[i] = creal(E->EN(lincom,cm)[i]);
 
-        if (cimag(E->u.lincom.cm[i]))
+        if (cimag(E->EN(lincom,cm)[i]))
           E->comp_scal = 1;
 
         _GD_GetScalar(D, E, E->scalar[i + GD_MAX_LINCOM], GD_COMPLEX128,
-            &E->u.lincom.cb[i]);
-        E->u.lincom.b[i] = creal(E->u.lincom.cb[i]);
+            &E->EN(lincom,cb)[i]);
+        E->EN(lincom,b)[i] = creal(E->EN(lincom,cb)[i]);
 
-        if (cimag(E->u.lincom.cb[i]))
+        if (cimag(E->EN(lincom,cb)[i]))
           E->comp_scal = 1;
 
         if (D->error)
@@ -212,17 +212,17 @@ int _GD_CalculateEntry(DIRFILE* D, gd_entry_t* E)
       }
       break;
     case GD_RECIP_ENTRY:
-      _GD_GetScalar(D, E, E->scalar[0], GD_COMPLEX128, &E->u.recip.cdividend);
-      E->u.recip.dividend = creal(E->u.recip.cdividend);
-      E->comp_scal = (cimag(E->u.recip.cdividend) == 0) ? 0 : 1;
+      _GD_GetScalar(D, E, E->scalar[0], GD_COMPLEX128, &E->EN(recip,cdividend));
+      E->EN(recip,dividend) = creal(E->EN(recip,cdividend));
+      E->comp_scal = (cimag(E->EN(recip,cdividend)) == 0) ? 0 : 1;
       break;
     case GD_BIT_ENTRY:
     case GD_SBIT_ENTRY:
-      _GD_GetScalar(D, E, E->scalar[0], GD_INT16, &E->u.bit.bitnum);
-      _GD_GetScalar(D, E, E->scalar[1], GD_INT16, &E->u.bit.numbits);
+      _GD_GetScalar(D, E, E->scalar[0], GD_INT16, &E->EN(bit,bitnum));
+      _GD_GetScalar(D, E, E->scalar[1], GD_INT16, &E->EN(bit,numbits));
       break;
     case GD_PHASE_ENTRY:
-      _GD_GetScalar(D, E, E->scalar[0], GD_INT64, &E->u.phase.shift);
+      _GD_GetScalar(D, E, E->scalar[0], GD_INT64, &E->EN(phase,shift));
       break;
     case GD_NO_ENTRY:
     case GD_LINTERP_ENTRY:
@@ -272,26 +272,27 @@ const char* gd_raw_filename(DIRFILE* D, const char* field_code_in) gd_nothrow
   if (field_code != field_code_in)
     free(field_code);
 
-  if (E->e->u.raw.file[0].name == NULL) {
+  if (E->e->EN(raw,file)[0].name == NULL) {
     /* ensure encoding sybtype is known */
     if (!_GD_Supports(D, E, 0)) {
       dreturn("%p", NULL);
       return NULL;
     }
 
-    if (E->e->u.raw.file[0].encoding == GD_ENC_UNKNOWN) {
+    if (E->e->EN(raw,file)[0].encoding == GD_ENC_UNKNOWN) {
       _GD_SetError(D, GD_E_UNKNOWN_ENCODING, 0, NULL, 0, NULL);
       dreturn("%p", NULL);
       return NULL;
-    } else if (_GD_SetEncodedName(D, E->e->u.raw.file, E->e->u.raw.filebase, 0))
+    } else if (_GD_SetEncodedName(D, E->e->EN(raw,file), E->e->EN(raw,filebase),
+          0))
     {
       dreturn("%p", NULL);
       return NULL;
     }
   }
 
-  dreturn("%p", E->e->u.raw.file[0].name);
-  return E->e->u.raw.file[0].name;
+  dreturn("%p", E->e->EN(raw,file)[0].name);
+  return E->e->EN(raw,file)[0].name;
 }
 
 int gd_entry(DIRFILE* D, const char* field_code_in, gd_entry_t* entry)
@@ -340,7 +341,7 @@ int gd_entry(DIRFILE* D, const char* field_code_in, gd_entry_t* entry)
 
   switch(E->field_type) {
     case GD_LINCOM_ENTRY:
-      for (i = 0; i < E->u.lincom.n_fields; ++i) {
+      for (i = 0; i < E->EN(lincom,n_fields); ++i) {
         entry->in_fields[i] = strdup(E->in_fields[i]);
         if (E->scalar[i])
           entry->scalar[i] = strdup(E->scalar[i]);
@@ -351,11 +352,11 @@ int gd_entry(DIRFILE* D, const char* field_code_in, gd_entry_t* entry)
       break;
     case GD_LINTERP_ENTRY:
       entry->in_fields[0] = strdup(E->in_fields[0]);
-      entry->u.linterp.table = strdup(E->u.linterp.table);
+      entry->EN(linterp,table) = strdup(E->EN(linterp,table));
       break;
     case GD_POLYNOM_ENTRY:
       entry->in_fields[0] = strdup(E->in_fields[0]);
-      for (i = 0; i <= E->u.polynom.poly_ord; ++i)
+      for (i = 0; i <= E->EN(polynom,poly_ord); ++i)
         if (E->scalar[i])
           entry->scalar[i] = strdup(E->scalar[i]);
       break;
@@ -489,7 +490,7 @@ int gd_validate(DIRFILE *D, const char *field_code_in) gd_nothrow
   /* check input fields */
   switch (E->field_type) {
     case GD_LINCOM_ENTRY:
-      for (i = 0; i < E->u.lincom.n_fields; ++i)
+      for (i = 0; i < E->EN(lincom,n_fields); ++i)
         _GD_BadInput(D, E, i);
       break;
     case GD_DIVIDE_ENTRY:

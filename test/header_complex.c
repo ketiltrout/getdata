@@ -33,14 +33,14 @@ int main(void)
   int error = gd_error(D);
   CHECKI(error, 0);
   CHECKIi(0,E.comp_scal, 1);
-  CHECKFi(0,E.u.lincom.cm[0][0], 3.3);
-  CHECKFi(0,E.u.lincom.cm[0][1], 4.4);
-  CHECKFi(0,E.u.lincom.cb[0][0], 5.5);
-  CHECKFi(0,E.u.lincom.cb[0][1], 6.6);
-  CHECKFi(0,E.u.lincom.cm[1][0], 7.7);
-  CHECKFi(0,E.u.lincom.cm[1][1], 8.8);
-  CHECKFi(0,E.u.lincom.cb[1][0], 9.9);
-  CHECKFi(0,E.u.lincom.cb[1][1], 1.1);
+  CHECKFi(0,E.EN(lincom,cm)[0][0], 3.3);
+  CHECKFi(0,E.EN(lincom,cm)[0][1], 4.4);
+  CHECKFi(0,E.EN(lincom,cb)[0][0], 5.5);
+  CHECKFi(0,E.EN(lincom,cb)[0][1], 6.6);
+  CHECKFi(0,E.EN(lincom,cm)[1][0], 7.7);
+  CHECKFi(0,E.EN(lincom,cm)[1][1], 8.8);
+  CHECKFi(0,E.EN(lincom,cb)[1][0], 9.9);
+  CHECKFi(0,E.EN(lincom,cb)[1][1], 1.1);
 
   gd_free_entry_strings(&E);
 
@@ -54,14 +54,14 @@ int main(void)
 
   int error3 = gd_error(D);
   CHECKI(error3, 0);
-  CHECKIi(1,E.u.polynom.poly_ord,2);
+  CHECKIi(1,E.EN(polynom,poly_ord),2);
   CHECKIi(1,E.comp_scal,1);
-  CHECKFi(1,E.u.polynom.ca[0][0], ca[0]);
-  CHECKFi(1,E.u.polynom.ca[0][1], ca[1]);
-  CHECKFi(1,E.u.polynom.ca[1][0], ca[2]);
-  CHECKFi(1,E.u.polynom.ca[1][1], ca[3]);
-  CHECKFi(1,E.u.polynom.ca[2][0], ca[4]);
-  CHECKFi(1,E.u.polynom.ca[2][1], ca[5]);
+  CHECKFi(1,E.EN(polynom,ca)[0][0], ca[0]);
+  CHECKFi(1,E.EN(polynom,ca)[0][1], ca[1]);
+  CHECKFi(1,E.EN(polynom,ca)[1][0], ca[2]);
+  CHECKFi(1,E.EN(polynom,ca)[1][1], ca[3]);
+  CHECKFi(1,E.EN(polynom,ca)[2][0], ca[4]);
+  CHECKFi(1,E.EN(polynom,ca)[2][1], ca[5]);
 
   gd_close(D);
 

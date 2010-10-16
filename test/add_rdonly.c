@@ -20,8 +20,8 @@ int main(void)
   E.field =  "new";
   E.field_type = GD_RAW_ENTRY;
   E.fragment_index = 0;
-  E.u.raw.spf = 2;
-  E.u.raw.type = GD_UINT8;
+  E.EN(raw,spf) = 2;
+  E.EN(raw,data_type) = GD_UINT8;
 
   mkdir(filedir, 0777);
 

@@ -37,8 +37,8 @@ int main(void)
 
   DIRFILE* D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
   gd_entry(D, "data", &E);
-  E.u.raw.type = GD_UINT16;
-  E.u.raw.spf = 11;
+  E.EN(raw,data_type) = GD_UINT16;
+  E.EN(raw,spf) = 11;
   int ret = gd_alter_entry(D, "data", &E, 1);
   int error = gd_error(D);
   off_t n = gd_nframes(D);

@@ -38,19 +38,19 @@ int main(void)
   else {
     CHECKI(e.field_type, GD_LINCOM_ENTRY);
     CHECKI(e.fragment_index, 0);
-    CHECKI(e.u.lincom.n_fields,2);
+    CHECKI(e.EN(lincom,n_fields),2);
     CHECKS(e.in_fields[0], "in1");
     CHECKS(e.in_fields[1], "in2");
 #ifdef GD_NO_C99_API
-    CHECKC(e.u.lincom.cm[0], m);
-    CHECKC(e.u.lincom.cm[1], m + 2);
-    CHECKC(e.u.lincom.cb[0], b);
-    CHECKC(e.u.lincom.cb[1], b + 2);
+    CHECKC(e.EN(lincom,cm)[0], m);
+    CHECKC(e.EN(lincom,cm)[1], m + 2);
+    CHECKC(e.EN(lincom,cb)[0], b);
+    CHECKC(e.EN(lincom,cb)[1], b + 2);
 #else
-    CHECKC(e.u.lincom.cm[0], m[0]);
-    CHECKC(e.u.lincom.cm[1], m[1]);
-    CHECKC(e.u.lincom.cb[0], b[0]);
-    CHECKC(e.u.lincom.cb[1], b[1]);
+    CHECKC(e.EN(lincom,cm)[0], m[0]);
+    CHECKC(e.EN(lincom,cm)[1], m[1]);
+    CHECKC(e.EN(lincom,cb)[0], b[0]);
+    CHECKC(e.EN(lincom,cb)[1], b[1]);
 #endif
     CHECKI(e.comp_scal,1);
     gd_free_entry_strings(&e);

@@ -44,7 +44,7 @@ int main(void)
   CHECKI(error, 0);
   CHECKI(n, 0);
   CHECKI(ret, 0);
-  CHECKI(E.u.bit.bitnum, 11);
+  CHECKI(E.EN(bit,bitnum), 11);
 
   return r;
 }

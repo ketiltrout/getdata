@@ -36,7 +36,7 @@ RawEntry::RawEntry(const char* field_code, DataType data_type, gd_spf_t spf,
   E.field = strdup(field_code);
   E.field_type = GD_RAW_ENTRY;
   E.u.raw.spf = spf;
-  E.u.raw.type = (gd_type_t)data_type;
+  E.u.raw.data_type = (gd_type_t)data_type;
   E.fragment_index = fragment_index;
 }
 
@@ -72,7 +72,7 @@ int RawEntry::SetSamplesPerFrame(const char *spf, int recode)
 
 int RawEntry::SetType(DataType type, int recode)
 {
-  E.u.raw.type = (gd_type_t)type;
+  E.u.raw.data_type = (gd_type_t)type;
 
   if (D != NULL)
     return gd_alter_entry(D->D, E.field, &E, recode);

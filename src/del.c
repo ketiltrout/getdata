@@ -35,7 +35,7 @@ static void _GD_ClearDerived(DIRFILE* D, gd_entry_t* E, const gd_entry_t* C,
 
   switch(E->field_type) {
     case GD_LINCOM_ENTRY:
-      for (i = 0; i < E->u.lincom.n_fields; ++i)
+      for (i = 0; i < E->EN(lincom,n_fields); ++i)
         if (strcmp(E->in_fields[i], C->field) == 0) {
           if (check)
             _GD_SetError(D, GD_E_DELETE, GD_E_DEL_DERIVED, E->field, 0,
@@ -128,51 +128,51 @@ static void _GD_DeReference(DIRFILE* D, gd_entry_t* E, gd_entry_t* C,
 
   switch(E->field_type) {
     case GD_RAW_ENTRY:
-      _GD_DeReferenceOne(D, E, C, check, 0, GD_UINT16, &E->u.raw.spf);
+      _GD_DeReferenceOne(D, E, C, check, 0, GD_UINT16, &E->EN(raw,spf));
       break;
     case GD_POLYNOM_ENTRY:
-      for (i = 0; i <= E->u.polynom.poly_ord; ++i) {
+      for (i = 0; i <= E->EN(polynom,poly_ord); ++i) {
         if (_GD_DeReferenceOne(D, E, C, check, i, GD_COMPLEX128,
-              &E->u.polynom.ca[i]))
+              &E->EN(polynom,ca)[i]))
           break;
 
         if (!check)
-          E->u.polynom.a[i] = creal(E->u.polynom.ca[i]);
+          E->EN(polynom,a)[i] = creal(E->EN(polynom,ca)[i]);
       }
       break;
     case GD_LINCOM_ENTRY:
-      for (i = 0; i < E->u.lincom.n_fields; ++i) {
+      for (i = 0; i < E->EN(lincom,n_fields); ++i) {
         if (_GD_DeReferenceOne(D, E, C, check, i, GD_COMPLEX128,
-              &E->u.lincom.cm[i]))
+              &E->EN(lincom,cm)[i]))
           break;
 
         if (!check)
-          E->u.lincom.m[i] = creal(E->u.lincom.cm[i]);
+          E->EN(lincom,m)[i] = creal(E->EN(lincom,cm)[i]);
 
         if (_GD_DeReferenceOne(D, E, C, check, i + GD_MAX_LINCOM, GD_COMPLEX128,
-              &E->u.lincom.cb[i]))
+              &E->EN(lincom,cb)[i]))
           break;
 
         if (!check)
-          E->u.lincom.b[i] = creal(E->u.lincom.cb[i]);
+          E->EN(lincom,b)[i] = creal(E->EN(lincom,cb)[i]);
       }
       break;
     case GD_RECIP_ENTRY:
       _GD_DeReferenceOne(D, E, C, check, 0, GD_COMPLEX128,
-          &E->u.recip.cdividend);
+          &E->EN(recip,cdividend));
 
       if (!check)
-        E->u.recip.dividend = creal(E->u.recip.cdividend);
+        E->EN(recip,dividend) = creal(E->EN(recip,cdividend));
       break;
     case GD_BIT_ENTRY:
     case GD_SBIT_ENTRY:
-      if (_GD_DeReferenceOne(D, E, C, check, 0, GD_INT16, &E->u.bit.bitnum))
+      if (_GD_DeReferenceOne(D, E, C, check, 0, GD_INT16, &E->EN(bit,bitnum)))
         break;
 
-      _GD_DeReferenceOne(D, E, C, check, 1, GD_INT16, &E->u.bit.numbits);
+      _GD_DeReferenceOne(D, E, C, check, 1, GD_INT16, &E->EN(bit,numbits));
       break;
     case GD_PHASE_ENTRY:
-      _GD_DeReferenceOne(D, E, C, check, 0, GD_INT64, &E->u.phase.shift);
+      _GD_DeReferenceOne(D, E, C, check, 0, GD_INT64, &E->EN(phase,shift));
       break;
     case GD_NO_ENTRY:
     case GD_LINTERP_ENTRY:
@@ -319,21 +319,21 @@ int gd_delete(DIRFILE* D, const char* field_code_in, int flags)
       return -1;
     }
 
-    if (_GD_SetEncodedName(D, E->e->u.raw.file, E->e->u.raw.filebase, 0)) {
+    if (_GD_SetEncodedName(D, E->e->EN(raw,file), E->e->EN(raw,filebase), 0)) {
       free(del_list);
       dreturn("%i", -1);
       return -1;
     }
 
-    if ((*_gd_ef[E->e->u.raw.file[0].encoding].unlink)(E->e->u.raw.file)) {
-      _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
+    if ((*_gd_ef[E->e->EN(raw,file)[0].encoding].unlink)(E->e->EN(raw,file))) {
+      _GD_SetError(D, GD_E_RAW_IO, 0, E->e->EN(raw,file)[0].name, errno, NULL);
       free(del_list);
       dreturn("%i", -1);
       return -1;
     }
-  } else if (E->field_type == GD_RAW_ENTRY && E->e->u.raw.file->fp != -1) {
-    if ((*_gd_ef[E->e->u.raw.file[0].encoding].close)(E->e->u.raw.file)) {
-      _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
+  } else if (E->field_type == GD_RAW_ENTRY && E->e->EN(raw,file)->fp != -1) {
+    if ((*_gd_ef[E->e->EN(raw,file)[0].encoding].close)(E->e->EN(raw,file))) {
+      _GD_SetError(D, GD_E_RAW_IO, 0, E->e->EN(raw,file)[0].name, errno, NULL);
       free(del_list);
       dreturn("%i", -1);
       return -1;

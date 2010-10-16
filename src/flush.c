@@ -48,20 +48,22 @@ void _GD_Flush(DIRFILE* D, gd_entry_t *E)
 
   switch(E->field_type) {
     case GD_RAW_ENTRY:
-      if (E->e->u.raw.file[0].fp >= 0) {
+      if (E->e->EN(raw,file)[0].fp >= 0) {
         if ((D->flags & GD_ACCMODE) == GD_RDWR &&
-            _gd_ef[E->e->u.raw.file[0].encoding].sync != NULL &&
-            (*_gd_ef[E->e->u.raw.file[0].encoding].sync)(E->e->u.raw.file))
-          _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno,
+            _gd_ef[E->e->EN(raw,file)[0].encoding].sync != NULL &&
+            (*_gd_ef[E->e->EN(raw,file)[0].encoding].sync)(E->e->EN(raw,file)))
+          _GD_SetError(D, GD_E_RAW_IO, 0, E->e->EN(raw,file)[0].name, errno,
               NULL);
-        else
-          if ((*_gd_ef[E->e->u.raw.file[0].encoding].close)(E->e->u.raw.file))
-          _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno,
+        else if ((*_gd_ef[E->e->EN(raw,file)[0].encoding].close)(E->e->EN(raw,
+                  file)))
+        {
+          _GD_SetError(D, GD_E_RAW_IO, 0, E->e->EN(raw,file)[0].name, errno,
               NULL);
+        }
       }
       break;
     case GD_LINCOM_ENTRY:
-      for (i = 2; i < E->u.lincom.n_fields; ++i)
+      for (i = 2; i < E->EN(lincom,n_fields); ++i)
         _GD_Flush(D, E->e->entry[i]);
       /* fallthrough */
     case GD_MULTIPLY_ENTRY:
@@ -291,22 +293,23 @@ static void _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
     case GD_RAW_ENTRY:
       fprintf(stream, " RAW%s %s ", pretty ? "     " : "",
           (permissive || D->standards >= 5) ?  _GD_TypeName(D,
-            E->u.raw.type) : _GD_OldTypeName(D, E->u.raw.type));
-      _GD_WriteConst(D, stream, GD_UINT16, &E->u.raw.spf, E->scalar[0], "\n");
+            E->EN(raw,data_type)) : _GD_OldTypeName(D, E->EN(raw,data_type)));
+      _GD_WriteConst(D, stream, GD_UINT16, &E->EN(raw,spf), E->scalar[0], "\n");
       break;
     case GD_LINCOM_ENTRY:
-      fprintf(stream, " LINCOM%s %i", pretty ? "  " : "", E->u.lincom.n_fields);
-      for (i = 0; i < E->u.lincom.n_fields; ++i) {
+      fprintf(stream, " LINCOM%s %i", pretty ? "  " : "",
+          E->EN(lincom,n_fields));
+      for (i = 0; i < E->EN(lincom,n_fields); ++i) {
         fprintf(stream, " %s ", E->in_fields[i]);
         if (E->comp_scal) {
-          _GD_WriteConst(D, stream, GD_COMPLEX128, &E->u.lincom.cm[i],
+          _GD_WriteConst(D, stream, GD_COMPLEX128, &E->EN(lincom,cm)[i],
               E->scalar[i], " ");
-          _GD_WriteConst(D, stream, GD_COMPLEX128, &E->u.lincom.cb[i],
+          _GD_WriteConst(D, stream, GD_COMPLEX128, &E->EN(lincom,cb)[i],
               E->scalar[i + GD_MAX_LINCOM], "");
         } else {
-          _GD_WriteConst(D, stream, GD_FLOAT64, &E->u.lincom.m[i],
+          _GD_WriteConst(D, stream, GD_FLOAT64, &E->EN(lincom,m)[i],
               E->scalar[i], " ");
-          _GD_WriteConst(D, stream, GD_FLOAT64, &E->u.lincom.b[i],
+          _GD_WriteConst(D, stream, GD_FLOAT64, &E->EN(lincom,b)[i],
               E->scalar[i + GD_MAX_LINCOM], "");
         }
       }
@@ -314,12 +317,13 @@ static void _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
       break;
     case GD_LINTERP_ENTRY:
       fprintf(stream, " LINTERP%s %s %s\n", pretty ? " " : "", E->in_fields[0],
-          E->u.linterp.table);
+          E->EN(linterp,table));
       break;
     case GD_BIT_ENTRY:
       fprintf(stream, " BIT%s %s ", pretty ? "     " : "", E->in_fields[0]);
-      _GD_WriteConst(D, stream, GD_INT16, &E->u.bit.bitnum, E->scalar[0], " ");
-      _GD_WriteConst(D, stream, GD_INT16, &E->u.bit.numbits, E->scalar[1],
+      _GD_WriteConst(D, stream, GD_INT16, &E->EN(bit,bitnum), E->scalar[0],
+          " ");
+      _GD_WriteConst(D, stream, GD_INT16, &E->EN(bit,numbits), E->scalar[1],
           "\n");
       break;
     case GD_DIVIDE_ENTRY:
@@ -328,7 +332,7 @@ static void _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
       break;
     case GD_RECIP_ENTRY:
       fprintf(stream, " RECIP%s ", pretty ? "   " : "");
-      _GD_WriteConst(D, stream, GD_COMPLEX128, &E->u.recip.cdividend,
+      _GD_WriteConst(D, stream, GD_COMPLEX128, &E->EN(recip,cdividend),
           E->scalar[0], "");
       fprintf(stream, " %s", E->in_fields[0]);
       break;
@@ -337,41 +341,42 @@ static void _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
       break;
     case GD_PHASE_ENTRY:
       fprintf(stream, " PHASE%s %s ", pretty ? "   " : "", E->in_fields[0]);
-      _GD_WriteConst(D, stream, GD_INT64, &E->u.phase.shift, E->scalar[0],
+      _GD_WriteConst(D, stream, GD_INT64, &E->EN(phase,shift), E->scalar[0],
           "\n");
       break;
     case GD_POLYNOM_ENTRY:
       fprintf(stream, " POLYNOM%s %s ", pretty ? " " : "", E->in_fields[0]);
-      for (i = 0; i <= E->u.polynom.poly_ord; ++i)
+      for (i = 0; i <= E->EN(polynom,poly_ord); ++i)
         if (E->comp_scal)
-          _GD_WriteConst(D, stream, GD_COMPLEX128, &E->u.polynom.ca[i],
-              E->scalar[i], (i == E->u.polynom.poly_ord) ? "\n" : " ");
+          _GD_WriteConst(D, stream, GD_COMPLEX128, &E->EN(polynom,ca)[i],
+              E->scalar[i], (i == E->EN(polynom,poly_ord)) ? "\n" : " ");
         else
-          _GD_WriteConst(D, stream, GD_FLOAT64, &E->u.polynom.a[i],
-              E->scalar[i], (i == E->u.polynom.poly_ord) ? "\n" : " ");
+          _GD_WriteConst(D, stream, GD_FLOAT64, &E->EN(polynom,a)[i],
+              E->scalar[i], (i == E->EN(polynom,poly_ord)) ? "\n" : " ");
       break;
     case GD_SBIT_ENTRY:
       fprintf(stream, " SBIT%s %s ", pretty ? "    " : "", E->in_fields[0]);
-      _GD_WriteConst(D, stream, GD_INT16, &E->u.bit.bitnum, E->scalar[0], " ");
-      _GD_WriteConst(D, stream, GD_INT16, &E->u.bit.numbits, E->scalar[1],
+      _GD_WriteConst(D, stream, GD_INT16, &E->EN(bit,bitnum), E->scalar[0],
+          " ");
+      _GD_WriteConst(D, stream, GD_INT16, &E->EN(bit,numbits), E->scalar[1],
           "\n");
       break;
     case GD_CONST_ENTRY:
       fprintf(stream, " CONST%s %s ", pretty ? "   " : "", _GD_TypeName(D,
-            E->u.cons.type));
-      if (E->u.cons.type & GD_SIGNED)
-        fprintf(stream, "%" PRIi64 "\n", E->e->u.cons.d.i);
-      else if (E->u.cons.type & GD_IEEE754)
-        fprintf(stream, "%.15g\n", E->e->u.cons.d.d);
-      else if (E->u.cons.type & GD_COMPLEX)
-        fprintf(stream, "%.15g;%.15g\n", creal(E->e->u.cons.d.c),
-            cimag(E->e->u.cons.d.c));
+            E->EN(cons,const_type)));
+      if (E->EN(cons,const_type) & GD_SIGNED)
+        fprintf(stream, "%" PRIi64 "\n", E->e->EN(cons.d,i));
+      else if (E->EN(cons,const_type) & GD_IEEE754)
+        fprintf(stream, "%.15g\n", E->e->EN(cons.d,d));
+      else if (E->EN(cons,const_type) & GD_COMPLEX)
+        fprintf(stream, "%.15g;%.15g\n", creal(E->e->EN(cons.d,c)),
+            cimag(E->e->EN(cons.d,c)));
       else
-        fprintf(stream, "%" PRIu64 "\n", E->e->u.cons.d.u);
+        fprintf(stream, "%" PRIu64 "\n", E->e->EN(cons.d,u));
       break;
     case GD_STRING_ENTRY:
       fprintf(stream, " STRING%s \"%s\"\n", pretty ? "  " : "",
-          _GD_StringEscapeise(buffer, E->e->u.string, permissive,
+          _GD_StringEscapeise(buffer, E->e->ES(string), permissive,
             D->standards));
       break;
     case GD_INDEX_ENTRY:
@@ -720,7 +725,7 @@ uint64_t _GD_FindVersion(DIRFILE *D)
   for (i = 0; D->av && i < D->n_entries; ++i) {
     switch (D->entry[i]->field_type) {
       case GD_RAW_ENTRY:
-        switch (D->entry[i]->u.raw.type) {
+        switch (D->entry[i]->EN(raw,data_type)) {
           case GD_COMPLEX128:
           case GD_COMPLEX64:
             D->av &= GD_VERS_GE_7;
@@ -749,7 +754,7 @@ uint64_t _GD_FindVersion(DIRFILE *D)
         D->av &= GD_VERS_GE_7;
         break;
       case GD_CONST_ENTRY:
-        if (D->entry[i]->u.cons.type & GD_COMPLEX128)
+        if (D->entry[i]->EN(cons,const_type) & GD_COMPLEX128)
           D->av &= GD_VERS_GE_7;
         else
           D->av &= GD_VERS_GE_6;
@@ -758,11 +763,13 @@ uint64_t _GD_FindVersion(DIRFILE *D)
         D->av &= GD_VERS_GE_6;
         break;
       case GD_BIT_ENTRY:
-        if (D->entry[i]->u.bit.numbits > 1)
+        if (D->entry[i]->EN(bit,numbits) > 1)
           D->av &= GD_VERS_GE_1;
-        else if (D->entry[i]->u.bit.bitnum + D->entry[i]->u.bit.numbits - 1 >
-            32)
+        else if (D->entry[i]->EN(bit,bitnum) + D->entry[i]->EN(bit,numbits) - 1
+            > 32)
+        {
           D->av &= GD_VERS_GE_5;
+        }
         break;
       case GD_LINTERP_ENTRY:
       case GD_LINCOM_ENTRY:

@@ -61,6 +61,10 @@ extern "C" {
 /* If this symbol is defined here, the C99-API is not present in the library */
 #undef GD_NO_C99_API
 
+#if GD_NO_C99_API && ! defined(GD_C89_API)
+# define GD_C89_API
+#endif
+
 /* define function attributes */
 #define gd_gnu_enough ((__GNUC__ * 100 + __GNUC_MINOR__) >= 303)
 
@@ -207,7 +211,7 @@ typedef enum {
 #undef _gd_int16_t
 #undef _gd_uint16_t
 #undef _gd_int64_t
-#if ! defined GD_C89_API && ! defined GD_NO_C99_API
+#if ! defined GD_C89_API
 #  include <inttypes.h>
 #  define GD_DCOMPLEXM(v) double _Complex v
 #  define GD_DCOMPLEXP(v) double _Complex *v
@@ -255,6 +259,12 @@ typedef enum {
 
 struct _gd_private_entry;
 
+/* ANSI C does not permit anonymous structs/unions */
+#ifdef GD_C89_API
+# define GD_ANON(x) x
+#else
+# define GD_ANON(x)
+#endif
 /* Unified entry struct */
 struct _gd_unified_entry {
   char *field;
@@ -266,38 +276,44 @@ struct _gd_unified_entry {
   union {
     struct { /* RAW */
       gd_spf_t spf;
-      gd_type_t type;
-    } raw;
+      gd_type_t data_type;
+    } GD_ANON(raw);
     struct { /* LINCOM */
       int n_fields;
       double m[GD_MAX_LINCOM];
       GD_DCOMPLEXM(cm[GD_MAX_LINCOM]);
       double b[GD_MAX_LINCOM];
       GD_DCOMPLEXM(cb[GD_MAX_LINCOM]);
-    } lincom;
-    struct { /* LINTERP */
-      char *table;
-    } linterp;
+    } GD_ANON(lincom);
     struct { /* BIT and SBIT */
       gd_bit_t bitnum;
       gd_bit_t numbits;
-    } bit;
-    struct { /* PHASE */
-      gd_shift_t shift;
-    } phase;
-    struct { /* CONST */
-      gd_type_t type;
-    } cons;
+    } GD_ANON(bit);
     struct { /* POLYNOM */
       int poly_ord;
       double a[GD_MAX_POLYORD + 1];
       GD_DCOMPLEXM(ca[GD_MAX_POLYORD + 1]);
-    } polynom;
+    } GD_ANON(polynom);
     struct { /* RECIP */
       double dividend;
       GD_DCOMPLEXM(cdividend);
-    } recip;
-  } u;
+    } GD_ANON(recip);;
+#ifdef GD_C89_API
+    struct { /* LINTERP */
+      char *table;
+    } GD_ANON(linterp);
+    struct { /* PHASE */
+      gd_shift_t shift;
+    } GD_ANON(phase);
+    struct { /* CONST */
+      gd_type_t const_type;
+    } GD_ANON(cons);
+#else
+    char *table; /* LINTERP */
+    gd_shift_t shift; /* PHASE */
+    gd_type_t const_type; /* CONST */
+#endif
+  } GD_ANON(u);
 
   struct _gd_private_entry *e;
 };
@@ -376,7 +392,7 @@ extern int gd_add_cpolynom(DIRFILE *dirfile, const char *field_code,
     int fragment_index) gd_nothrow gd_nonnull ((1,2,4));
 
 /* The native gd_add_crecip cannot be used in C89 mode */
-#if ! defined GD_C89_API && ! defined GD_NO_C99_API
+#if ! defined GD_C89_API
 extern int gd_add_crecip(DIRFILE *dirfile, const char *field_code,
     const char *in_field, _Complex double cdividend, int fragment_index)
   gd_nothrow gd_nonnull ((1,2,3));
@@ -438,7 +454,7 @@ extern int gd_alter_cpolynom(DIRFILE *dirfile, const char *field_code,
     int poly_ord, const char *in_field, const GD_DCOMPLEXP(a)) gd_nothrow
 gd_nonnull((1,2));
 
-#if ! defined GD_C89_API && ! defined GD_NO_C99_API
+#if ! defined GD_C89_API
 extern int gd_alter_crecip(DIRFILE *dirfile, const char *field_code,
     const char *in_field, _Complex double cdividend) gd_nothrow
 gd_nonnull((1,2));
@@ -535,7 +551,7 @@ extern int gd_madd_cpolynom(DIRFILE *dirfile, const char *parent,
     const char *field_code, int poly_ord, const char *in_field,
     const GD_DCOMPLEXP(ca)) gd_nothrow gd_nonnull ((1,2,3,5));
 
-#if ! defined GD_C89_API && ! defined GD_NO_C99_API
+#if ! defined GD_C89_API
 extern int gd_madd_crecip(DIRFILE *dirfile, const char *parent,
     const char *field_code, const char *in_field, _Complex double cdividend)
 gd_nothrow gd_nonnull ((1,2,3,4));

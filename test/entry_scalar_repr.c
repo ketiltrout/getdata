@@ -41,12 +41,12 @@ int main(void)
   CHECKI(n, 0);
   CHECKS(E.field, "data");
   CHECKX(E.field_type, GD_LINCOM_ENTRY);
-  CHECKI(E.u.lincom.n_fields, 1);
+  CHECKI(E.EN(lincom,n_fields), 1);
   CHECKS(E.in_fields[0], "in1");
   CHECKS(E.scalar[0], "m1.r");
   CHECKS(E.scalar[GD_MAX_LINCOM], "b1.i");
-  CHECKF(E.u.lincom.m[0], 1.1);
-  CHECKF(E.u.lincom.b[0], 9.3);
+  CHECKF(E.EN(lincom,m)[0], 1.1);
+  CHECKF(E.EN(lincom,b)[0], 9.3);
 
   return r;
 }

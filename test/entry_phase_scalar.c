@@ -39,7 +39,7 @@ int main(void)
   CHECKI(E.field_type, GD_PHASE_ENTRY);
   CHECKS(E.in_fields[0], "in1");
   CHECKS(E.scalar[0], "shift");
-  CHECKI(E.u.phase.shift, 3);
+  CHECKI(E.EN(phase,shift), 3);
 
   return r;
 }

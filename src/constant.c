@@ -112,13 +112,13 @@ int gd_put_constant(DIRFILE* D, const char *field_code_in, gd_type_t data_type,
   }
 
   /* Flag all clients as needing recalculation */
-  for (i = 0; i < entry->e->u.cons.n_client; ++i)
-    entry->e->u.cons.client[i]->e->calculated = 0;
+  for (i = 0; i < entry->e->EN(cons,n_client); ++i)
+    entry->e->EN(cons,client)[i]->e->calculated = 0;
 
   /* Clear the client list */
-  free(entry->e->u.cons.client);
-  entry->e->u.cons.client = NULL;
-  entry->e->u.cons.n_client = 0;
+  free(entry->e->EN(cons,client));
+  entry->e->EN(cons,client) = NULL;
+  entry->e->EN(cons,n_client) = 0;
 
   dreturn("%i", 0);
   return 0;

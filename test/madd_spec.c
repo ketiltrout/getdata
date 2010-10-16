@@ -33,7 +33,7 @@ int main(void)
   if (!r) {
     CHECKI(e.field_type, GD_CONST_ENTRY);
     CHECKI(e.fragment_index, 0);
-    CHECKI(e.u.cons.type, GD_UINT8);
+    CHECKI(e.EN(cons,const_type), GD_UINT8);
     gd_get_constant(D, "INDEX/meta", GD_UINT8, &val);
     CHECKU(val, 2);
     gd_free_entry_strings(&e);

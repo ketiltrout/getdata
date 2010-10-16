@@ -17,8 +17,8 @@ int main(void)
   E.field =  "data";
   E.field_type = GD_RAW_ENTRY;
   E.fragment_index = 0;
-  E.u.raw.spf = 2;
-  E.u.raw.type = GD_UINT8;
+  E.EN(raw,spf) = 2;
+  E.EN(raw,data_type) = GD_UINT8;
 
   DIRFILE* D = gd_open(filedir, GD_RDONLY);
   gd_add(D, &E);

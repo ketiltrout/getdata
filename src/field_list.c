@@ -115,7 +115,7 @@ const char **gd_strings(DIRFILE* D) gd_nothrow
   for (i = n = 0; i < D->n_entries; ++i) {
     if (D->entry[i]->field_type == GD_STRING_ENTRY &&
         D->entry[i]->e->n_meta != -1)
-      fl[n++] = D->entry[i]->e->u.string;
+      fl[n++] = D->entry[i]->e->ES(string);
   }
   fl[n] = NULL;
 

@@ -187,10 +187,10 @@ int gd_rename(DIRFILE *D, const char *old_code, const char *new_name,
       snprintf(filebase, FILENAME_MAX, "%s/%s", D->name, new_name);
 
     /* Close the old file */
-    if (E->e->u.raw.file->fp != -1 &&
-        (*_gd_ef[E->e->u.raw.file[0].encoding].close)(E->e->u.raw.file))
+    if (E->e->EN(raw,file)->fp != -1 &&
+        (*_gd_ef[E->e->EN(raw,file)[0].encoding].close)(E->e->EN(raw,file)))
     {
-      _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
+      _GD_SetError(D, GD_E_RAW_IO, 0, E->e->EN(raw,file)[0].name, errno, NULL);
       free(name);
       free(filebase);
       dreturn("%i", -1);
@@ -232,7 +232,7 @@ int gd_rename(DIRFILE *D, const char *old_code, const char *new_name,
         return -1;
       }
 
-      memcpy(&temp, E->e->u.raw.file, sizeof(struct _gd_raw_file));
+      memcpy(&temp, E->e->EN(raw,file), sizeof(struct _gd_raw_file));
       temp.name = NULL;
       if (_GD_SetEncodedName(D, &temp, filebase, 0)) {
         free(name);
@@ -241,17 +241,19 @@ int gd_rename(DIRFILE *D, const char *old_code, const char *new_name,
         return -1;
       }
 
-      if (_GD_SetEncodedName(D, E->e->u.raw.file, E->e->u.raw.filebase, 0)) {
+      if (_GD_SetEncodedName(D, E->e->EN(raw,file), E->e->EN(raw,filebase), 0))
+      {
         free(name);
         free(filebase);
         dreturn("%i", -1);
         return -1;
       }
 
-      if ((*_gd_ef[E->e->u.raw.file[0].encoding].move)(E->e->u.raw.file,
+      if ((*_gd_ef[E->e->EN(raw,file)[0].encoding].move)(E->e->EN(raw,file),
             temp.name))
       {
-        _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
+        _GD_SetError(D, GD_E_RAW_IO, 0, E->e->EN(raw,file)[0].name, errno,
+            NULL);
         free(filebase);
         dreturn("%i", -1);
         return -1;
@@ -260,12 +262,12 @@ int gd_rename(DIRFILE *D, const char *old_code, const char *new_name,
       /* Nothing may fail from now on */
 
     } else {
-      free(E->e->u.raw.file[0].name);
-      E->e->u.raw.file[0].name = NULL;
+      free(E->e->EN(raw,file)[0].name);
+      E->e->EN(raw,file)[0].name = NULL;
     }
 
-    free(E->e->u.raw.filebase);
-    E->e->u.raw.filebase = filebase;
+    free(E->e->EN(raw,filebase));
+    E->e->EN(raw,filebase) = filebase;
   }
 
   free(E->field);

@@ -186,7 +186,7 @@ static void CopyRawEntry(struct RawEntryType* R, gd_entry_t* E)
 
   R->field = E->field;
 
-  switch(E->u.raw.type) {
+  switch(E->EN(raw,data_type)) {
     case GD_UINT8:
       R->type = 'c';
       break;
@@ -213,8 +213,8 @@ static void CopyRawEntry(struct RawEntryType* R, gd_entry_t* E)
       break;
   }
 
-  R->size = (int)E->e->u.raw.size;
-  R->samples_per_frame = (int)E->u.raw.spf;
+  R->size = (int)E->e->EN(raw,size);
+  R->samples_per_frame = (int)E->EN(raw,spf);
 
   dreturnvoid();
 }
@@ -233,8 +233,8 @@ static void CopyPolynomEntry(struct LincomEntryType* L, gd_entry_t* E)
   L->field = E->field;
   L->n_fields = 1;
   L->in_fields[0] = E->in_fields[0];
-  L->m[0] = E->u.polynom.a[1];
-  L->b[0] = E->u.polynom.a[0];
+  L->m[0] = E->EN(polynom,a)[1];
+  L->b[0] = E->EN(polynom,a)[0];
 
   dreturnvoid();
 }
@@ -251,11 +251,11 @@ static void CopyLincomEntry(struct LincomEntryType* L, gd_entry_t* E)
   }
 
   L->field = E->field;
-  L->n_fields = E->u.lincom.n_fields;
-  for (i = 0; i < E->u.lincom.n_fields; ++i) {
+  L->n_fields = E->EN(lincom,n_fields);
+  for (i = 0; i < E->EN(lincom,n_fields); ++i) {
     L->in_fields[i] = E->in_fields[i];
-    L->m[i] = E->u.lincom.m[i];
-    L->b[i] = E->u.lincom.b[i];
+    L->m[i] = E->EN(lincom,m)[i];
+    L->b[i] = E->EN(lincom,b)[i];
   }
 
   dreturnvoid();
@@ -272,7 +272,7 @@ static void CopyLinterpEntry(struct LinterpEntryType* L, gd_entry_t* E)
 
   L->field = E->field;
   L->raw_field = E->in_fields[0];
-  L->linterp_file = E->u.linterp.table;
+  L->linterp_file = E->EN(linterp,table);
 
   dreturnvoid();
 }
@@ -288,8 +288,8 @@ static void CopyBitEntry(struct BitEntryType* B, gd_entry_t* E)
 
   B->field = E->field;
   B->raw_field = E->in_fields[0];
-  B->bitnum = E->u.bit.bitnum;
-  B->numbits = E->u.bit.numbits;
+  B->bitnum = E->EN(bit,bitnum);
+  B->numbits = E->EN(bit,numbits);
 
   dreturnvoid();
 }
@@ -322,7 +322,7 @@ static void CopyReciprocalEntry(struct LincomEntryType* L, gd_entry_t* E)
   L->field = E->field;
   L->n_fields = 1;
   L->in_fields[0] = E->in_fields[0];
-  L->m[0] = E->u.recip.dividend;
+  L->m[0] = E->EN(recip,dividend);
   L->b[0] = 0;
 
   dreturnvoid();
@@ -339,7 +339,7 @@ static void CopyPhaseEntry(struct PhaseEntryType* P, gd_entry_t* E)
 
   P->field = E->field;
   P->raw_field = E->in_fields[0];
-  P->shift = E->u.phase.shift;
+  P->shift = E->EN(phase,shift);
 
   dreturnvoid();
 }

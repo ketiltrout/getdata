@@ -266,12 +266,13 @@ static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *E, off64_t s0, size_t ns,
 
   dtrace("%p, %p, %lli, %zu, 0x%x, %p)", D, E, s0, ns, return_type, data_out);
 
-  if (s0 < E->u.raw.spf * D->fragment[E->fragment_index].frame_offset)
-    zero_pad = E->u.raw.spf * D->fragment[E->fragment_index].frame_offset - s0;
+  if (s0 < E->EN(raw,spf) * D->fragment[E->fragment_index].frame_offset)
+    zero_pad = E->EN(raw,spf) * D->fragment[E->fragment_index].frame_offset -
+      s0;
   else
-    s0 -= E->u.raw.spf * D->fragment[E->fragment_index].frame_offset;
+    s0 -= E->EN(raw,spf) * D->fragment[E->fragment_index].frame_offset;
 
-  databuffer = (char *)malloc(ns * E->e->u.raw.size);
+  databuffer = (char *)malloc(ns * E->e->EN(raw,size));
   if (databuffer == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     dreturn("%i", 0);
@@ -279,7 +280,8 @@ static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *E, off64_t s0, size_t ns,
   }
 
   if (zero_pad > 0) {
-    n_read = _GD_FillZero(databuffer, E->u.raw.type, (zero_pad > ns) ? ns :
+    n_read = _GD_FillZero(databuffer, E->EN(raw,data_type), (zero_pad > ns) ?
+        ns :
         zero_pad);
     ns -= n_read;
     s0 = 0;
@@ -287,55 +289,56 @@ static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *E, off64_t s0, size_t ns,
 
   if (ns > 0) {
     /** open the file (and cache the fp) if it hasn't been opened yet. */
-    if (E->e->u.raw.file[0].fp < 0) {
+    if (E->e->EN(raw,file)[0].fp < 0) {
       if (!_GD_Supports(D, E, GD_EF_OPEN | GD_EF_SEEK | GD_EF_READ)) {
         dreturn("%i", 0);
         return 0;
-      } else if (_GD_SetEncodedName(D, E->e->u.raw.file, E->e->u.raw.filebase,
-            0))
+      } else if (_GD_SetEncodedName(D, E->e->EN(raw,file),
+            E->e->EN(raw,filebase), 0))
       {
         dreturn("%i", 0);
         return 0;
-      } else if ((*_gd_ef[E->e->u.raw.file[0].encoding].open)(E->e->u.raw.file,
-            D->flags & GD_ACCMODE, 0))
+      } else if ((*_gd_ef[E->e->EN(raw,file)[0].encoding].open)(E->e->EN(raw,
+              file), D->flags & GD_ACCMODE, 0))
       {
-        _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
+        _GD_SetError(D, GD_E_RAW_IO, 0, E->e->EN(raw,file)[0].name, errno,
+            NULL);
         dreturn("%i", 0);
         return 0;
       }
     }
 
-    if ((*_gd_ef[E->e->u.raw.file[0].encoding].seek)(E->e->u.raw.file, s0,
-          E->u.raw.type, 0)
+    if ((*_gd_ef[E->e->EN(raw,file)[0].encoding].seek)(E->e->EN(raw,file), s0,
+          E->EN(raw,data_type), 0)
         == -1)
     {
-      _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
+      _GD_SetError(D, GD_E_RAW_IO, 0, E->e->EN(raw,file)[0].name, errno, NULL);
       dreturn("%i", 0);
       return 0;
     }
 
     samples_read =
-      (*_gd_ef[E->e->u.raw.file[0].encoding].read)(E->e->u.raw.file,
-        databuffer + n_read * E->e->u.raw.size, E->u.raw.type, ns);
+      (*_gd_ef[E->e->EN(raw,file)[0].encoding].read)(E->e->EN(raw,file),
+        databuffer + n_read * E->e->EN(raw,size), E->EN(raw,data_type), ns);
 
     if (samples_read == -1) {
-      _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
+      _GD_SetError(D, GD_E_RAW_IO, 0, E->e->EN(raw,file)[0].name, errno, NULL);
       free(databuffer);
       dreturn("%i", 0);
       return 0;
     }
 
-    if (_gd_ef[E->e->u.raw.file[0].encoding].ecor) {
+    if (_gd_ef[E->e->EN(raw,file)[0].encoding].ecor) {
       /* convert to/from middle-ended doubles */
-      if ((E->u.raw.type == GD_FLOAT64 ||
-            E->u.raw.type == GD_COMPLEX128) &&
+      if ((E->EN(raw,data_type) == GD_FLOAT64 ||
+            E->EN(raw,data_type) == GD_COMPLEX128) &&
 #ifdef ARM_ENDIAN_DOUBLES          
           ~
 #endif
           D->fragment[E->fragment_index].byte_sex & GD_ARM_ENDIAN)
       {
-        _GD_ArmEndianise((uint64_t *)(databuffer + n_read * E->e->u.raw.size),
-            E->u.raw.type & GD_COMPLEX, samples_read);
+        _GD_ArmEndianise((uint64_t *)(databuffer + n_read * E->e->EN(raw,size)),
+            E->EN(raw,data_type) & GD_COMPLEX, samples_read);
       }
 
       if (D->fragment[E->fragment_index].byte_sex ==
@@ -346,18 +349,18 @@ static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *E, off64_t s0, size_t ns,
 #endif
              )
       {
-        if (E->u.raw.type & GD_COMPLEX)
-          _GD_FixEndianness(databuffer + n_read * E->e->u.raw.size,
-              E->e->u.raw.size / 2, samples_read * 2);
+        if (E->EN(raw,data_type) & GD_COMPLEX)
+          _GD_FixEndianness(databuffer + n_read * E->e->EN(raw,size),
+              E->e->EN(raw,size) / 2, samples_read * 2);
         else
-          _GD_FixEndianness(databuffer + n_read * E->e->u.raw.size,
-              E->e->u.raw.size, samples_read);
+          _GD_FixEndianness(databuffer + n_read * E->e->EN(raw,size),
+              E->e->EN(raw,size), samples_read);
       }
     }
 
     n_read += samples_read;
   }
-  _GD_ConvertType(D, databuffer, E->u.raw.type, data_out, return_type,
+  _GD_ConvertType(D, databuffer, E->EN(raw,data_type), data_out, return_type,
       n_read);
 
   free(databuffer);
@@ -854,7 +857,7 @@ static size_t _GD_DoLincom(DIRFILE *D, gd_entry_t *E, off64_t first_samp,
     : GD_FLOAT64;
 
   /* input field checks */
-  for (i = 0; i < E->u.lincom.n_fields; ++i) {
+  for (i = 0; i < E->EN(lincom,n_fields); ++i) {
     if (_GD_BadInput(D, E, i)) {
       dreturn("%i", 0);
       return 0;
@@ -887,15 +890,15 @@ static size_t _GD_DoLincom(DIRFILE *D, gd_entry_t *E, off64_t first_samp,
   /* Some dirfiles use "bar LINCOM foo 1 0" to rename <foo> to <bar>.  I
    * recommend using "bar PHASE foo 0" in this case, but we'll accomodate them
    * as much as we can.  Suggested by MDT. */
-  if (E->u.lincom.n_fields == 1 && _gd_ccmpl(E->u.lincom.cm[0],1,0) &&
-      _gd_ccmpl(E->u.lincom.cb[0],0,0))
+  if (E->EN(lincom,n_fields) == 1 && _gd_ccmpl(E->EN(lincom,cm)[0],1,0) &&
+      _gd_ccmpl(E->EN(lincom,cb)[0],0,0))
   {
     dreturn("%zu", n_read);
     return n_read;
   }
 
   /* Read the second field, if present */
-  if (E->u.lincom.n_fields > 1) {
+  if (E->EN(lincom,n_fields) > 1) {
     /* calculate the first sample, type and number of samples to read of the
      * second field */
     size_t num_samp2 = (int)ceil((double)n_read * spf[1] / spf[0]);
@@ -923,7 +926,7 @@ static size_t _GD_DoLincom(DIRFILE *D, gd_entry_t *E, off64_t first_samp,
       n_read = n_read2 * spf[0] / spf[1];
 
     /* Do the same for the third field, if needed */
-    if (E->u.lincom.n_fields > 2) {
+    if (E->EN(lincom,n_fields) > 2) {
       size_t num_samp3 = (int)ceil((double)n_read * spf[2] / spf[0]);
       off64_t first_samp3 = first_samp * spf[2] / spf[0];
 
@@ -951,13 +954,13 @@ static size_t _GD_DoLincom(DIRFILE *D, gd_entry_t *E, off64_t first_samp,
 
   /* Compute everything at once */
   if (E->comp_scal)
-    _GD_CLincomData(D, E->u.lincom.n_fields, data_out, return_type,
-        (GD_DCOMPLEXP_t)tmpbuf2, (GD_DCOMPLEXP_t)tmpbuf3, E->u.lincom.cm,
-        E->u.lincom.cb, spf, n_read);
+    _GD_CLincomData(D, E->EN(lincom,n_fields), data_out, return_type,
+        (GD_DCOMPLEXP_t)tmpbuf2, (GD_DCOMPLEXP_t)tmpbuf3, E->EN(lincom,cm),
+        E->EN(lincom,cb), spf, n_read);
   else
-    _GD_LincomData(D, E->u.lincom.n_fields, data_out, return_type,
-        (double *)tmpbuf2, (double *)tmpbuf3, E->u.lincom.m, E->u.lincom.b, spf,
-        n_read);
+    _GD_LincomData(D, E->EN(lincom,n_fields), data_out, return_type,
+        (double *)tmpbuf2, (double *)tmpbuf3, E->EN(lincom,m), E->EN(lincom,b),
+        spf, n_read);
 
   /* free temporary buffers */
   free(tmpbuf2);
@@ -1100,9 +1103,9 @@ static size_t _GD_DoRecip(DIRFILE *D, gd_entry_t* E, off64_t first_samp,
 
   /* Compute a reciprocal */
   if (E->comp_scal)
-    _GD_CInvertData(D, data_out, return_type, E->u.recip.cdividend, num_samp);
+    _GD_CInvertData(D, data_out, return_type, E->EN(recip,cdividend), num_samp);
   else
-    _GD_InvertData(D, data_out, return_type, E->u.recip.dividend, num_samp);
+    _GD_InvertData(D, data_out, return_type, E->EN(recip,dividend), num_samp);
 
   dreturn("%zu", n_read);
   return n_read;
@@ -1214,8 +1217,8 @@ static size_t _GD_DoBit(DIRFILE *D, gd_entry_t *E, int is_signed,
   dtrace("%p, %p, %i, %lli, %zu, 0x%x, %p", D, E, is_signed, first_samp,
       num_samp, return_type, data_out);
 
-  const uint64_t mask = (E->u.bit.numbits == 64) ? 0xffffffffffffffffULL :
-    ((uint64_t)1 << E->u.bit.numbits) - 1;
+  const uint64_t mask = (E->EN(bit,numbits) == 64) ? 0xffffffffffffffffULL :
+    ((uint64_t)1 << E->EN(bit,numbits)) - 1;
 
   if (_GD_BadInput(D, E, 0)) {
     dreturn("%i", 0);
@@ -1243,13 +1246,13 @@ static size_t _GD_DoBit(DIRFILE *D, gd_entry_t *E, int is_signed,
 
   /* extract bits */
   if (is_signed) {
-    uint64_t sign = -1 << (E->u.bit.numbits + - 1);
+    uint64_t sign = -1 << (E->EN(bit,numbits) + - 1);
     for (i = 0; i < n_read; i++)
       ((int64_t *)tmpbuf)[i] =
-        (((((uint64_t *)tmpbuf)[i] >> E->u.bit.bitnum) & mask) + sign) ^ sign;
+        (((((uint64_t *)tmpbuf)[i] >> E->EN(bit,bitnum)) & mask) + sign) ^ sign;
   } else
     for (i = 0; i < n_read; i++)
-      ((uint64_t *)tmpbuf)[i] = (((uint64_t *)tmpbuf)[i] >> E->u.bit.bitnum)
+      ((uint64_t *)tmpbuf)[i] = (((uint64_t *)tmpbuf)[i] >> E->EN(bit,bitnum))
         & mask;
 
   _GD_ConvertType(D, tmpbuf, (is_signed) ? GD_INT64 : GD_UINT64, data_out,
@@ -1276,7 +1279,7 @@ static size_t _GD_DoPhase(DIRFILE *D, gd_entry_t *E, off64_t first_samp,
   }
 
   n_read = _GD_DoField(D, E->e->entry[0], E->e->repr[0], first_samp +
-      E->u.phase.shift, num_samp, return_type, data_out);
+      E->EN(phase,shift), num_samp, return_type, data_out);
 
   dreturn("%zu", n_read);
   return n_read;
@@ -1293,7 +1296,7 @@ static size_t _GD_DoLinterp(DIRFILE *D, gd_entry_t* E, off64_t first_samp,
   dtrace("%p, %p, %lli, %zu, 0x%x, %p", D, E, first_samp, num_samp, return_type,
       data_out);
 
-  if (E->e->u.linterp.table_len < 0) {
+  if (E->e->EN(linterp,table_len) < 0) {
     _GD_ReadLinterpFile(D, E);
     if (D->error != GD_E_OK) {
       dreturn("%i", 0);
@@ -1324,8 +1327,8 @@ static size_t _GD_DoLinterp(DIRFILE *D, gd_entry_t* E, off64_t first_samp,
     return 0;
   }
 
-  _GD_LinterpData(D, data_out, return_type, E->e->u.linterp.complex_table,
-      data_in, n_read, E->e->u.linterp.lut, E->e->u.linterp.table_len);
+  _GD_LinterpData(D, data_out, return_type, E->e->EN(linterp,complex_table),
+      data_in, n_read, E->e->EN(linterp,lut), E->e->EN(linterp,table_len));
 
   free(data_in);
   dreturn("%zu", n_read);
@@ -1363,11 +1366,11 @@ static size_t _GD_DoPolynom(DIRFILE *D, gd_entry_t *E, off64_t first_samp,
   }
 
   if (E->comp_scal)
-    _GD_CPolynomData(D, data_out, return_type, n_read, E->u.polynom.poly_ord,
-        E->u.polynom.ca);
+    _GD_CPolynomData(D, data_out, return_type, n_read, E->EN(polynom,poly_ord),
+        E->EN(polynom,ca));
   else
-    _GD_PolynomData(D, data_out, return_type, n_read, E->u.polynom.poly_ord,
-        E->u.polynom.a);
+    _GD_PolynomData(D, data_out, return_type, n_read, E->EN(polynom,poly_ord),
+        E->EN(polynom,a));
 
   dreturn("%zu", n_read);
   return n_read;
@@ -1380,15 +1383,17 @@ static size_t _GD_DoConst(DIRFILE *D, const gd_entry_t *E,
 {
   dtrace("%p, %p, 0x%x, %p", D, E, return_type, data_out);
 
-  if (E->u.cons.type & GD_SIGNED)
-    _GD_ConvertType(D, &E->e->u.cons.d.i, GD_INT64, data_out, return_type, 1);
-  else if (E->u.cons.type & GD_IEEE754)
-    _GD_ConvertType(D, &E->e->u.cons.d.d, GD_FLOAT64, data_out, return_type, 1);
-  else if (E->u.cons.type & GD_COMPLEX)
-    _GD_ConvertType(D, &E->e->u.cons.d.c, GD_COMPLEX128, data_out, return_type,
+  if (E->EN(cons,const_type) & GD_SIGNED)
+    _GD_ConvertType(D, &E->e->EN(cons.d,i), GD_INT64, data_out, return_type, 1);
+  else if (E->EN(cons,const_type) & GD_IEEE754)
+    _GD_ConvertType(D, &E->e->EN(cons.d,d), GD_FLOAT64, data_out, return_type,
         1);
+  else if (E->EN(cons,const_type) & GD_COMPLEX)
+    _GD_ConvertType(D, &E->e->EN(cons.d,c), GD_COMPLEX128, data_out,
+        return_type, 1);
   else
-    _GD_ConvertType(D, &E->e->u.cons.d.u, GD_UINT64, data_out, return_type, 1);
+    _GD_ConvertType(D, &E->e->EN(cons.d,u), GD_UINT64, data_out, return_type,
+        1);
 
   if (D->error) { /* bad input type */
     dreturn("%i", 0);
@@ -1407,10 +1412,10 @@ static size_t _GD_DoString(gd_entry_t *E, size_t num_samp, char *data_out)
   dtrace("%p, %zu, %p", E, num_samp, data_out);
 
   if (num_samp > 0 && data_out != NULL)
-    strncpy(data_out, E->e->u.string, num_samp); 
+    strncpy(data_out, E->e->ES(string), num_samp); 
 
-  dreturn("%zu", strlen(E->e->u.string) + 1);
-  return strlen(E->e->u.string) + 1;
+  dreturn("%zu", strlen(E->e->ES(string)) + 1);
+  return strlen(E->e->ES(string)) + 1;
 }
 
 /* _GD_DoField: Locate the field in the database and read it.

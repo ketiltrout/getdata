@@ -187,25 +187,25 @@ int _GD_SetTablePath(DIRFILE *D, gd_entry_t *E, struct _gd_private_entry *e)
 {
   dtrace("%p, %p, %p", D, E, e);
 
-  if (E->u.linterp.table[0] == '/') {
-    e->u.linterp.table_path = strdup(E->u.linterp.table);
-    if (e->u.linterp.table_path == NULL) {
+  if (E->EN(linterp,table)[0] == '/') {
+    e->EN(linterp,table_path) = strdup(E->EN(linterp,table));
+    if (e->EN(linterp,table_path) == NULL) {
       _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
       dreturn("%i", 1);
       return 1;
     }
   } else {
-    e->u.linterp.table_path = (char *)malloc(FILENAME_MAX);
-    if (e->u.linterp.table_path == NULL) {
+    e->EN(linterp,table_path) = (char *)malloc(FILENAME_MAX);
+    if (e->EN(linterp,table_path) == NULL) {
       _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
       dreturn("%i", 1);
       return 1;
     }
     char temp_buffer[FILENAME_MAX];
     strcpy(temp_buffer, D->fragment[E->fragment_index].cname);
-    strcpy(e->u.linterp.table_path, dirname(temp_buffer));
-    strcat(e->u.linterp.table_path, "/");
-    strcat(e->u.linterp.table_path, E->u.linterp.table);
+    strcpy(e->EN(linterp,table_path), dirname(temp_buffer));
+    strcat(e->EN(linterp,table_path), "/");
+    strcat(e->EN(linterp,table_path), E->EN(linterp,table));
   }
 
   dreturn("%i", 0);
@@ -233,16 +233,16 @@ void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E)
 
   dtrace("%p, %p", D, E);
 
-  if (E->e->u.linterp.table_path == NULL)
+  if (E->e->EN(linterp,table_path) == NULL)
     if (_GD_SetTablePath(D, E, E->e)) {
       dreturnvoid();
       return;
     }
 
-  fp = fopen(E->e->u.linterp.table_path, "r" FOPEN_TEXT);
+  fp = fopen(E->e->EN(linterp,table_path), "r" FOPEN_TEXT);
   if (fp == NULL) {
     _GD_SetError(D, GD_E_OPEN_LINFILE, GD_E_LINFILE_OPEN, NULL, 0,
-        E->e->u.linterp.table_path);
+        E->e->EN(linterp,table_path));
     dreturnvoid();
     return;
   }
@@ -251,13 +251,13 @@ void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E)
   if (_GD_GetLine(fp, line, &linenum)) {
     char ystr[50];
     if (sscanf(line, "%lg %49s", &yr, ystr) == 2)
-      E->e->u.linterp.complex_table = (strchr(ystr, ';') == NULL) ? 0 : 1;
+      E->e->EN(linterp,complex_table) = (strchr(ystr, ';') == NULL) ? 0 : 1;
   }
 
-  E->e->u.linterp.lut = (struct _gd_lut *)malloc(buf_len *
+  E->e->EN(linterp,lut) = (struct _gd_lut *)malloc(buf_len *
       sizeof(struct _gd_lut));
 
-  if (E->e->u.linterp.lut == NULL) {
+  if (E->e->EN(linterp,lut) == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     fclose(fp);
     dreturnvoid();
@@ -268,68 +268,71 @@ void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E)
   i = 0;
   linenum = 0;
   do {
-    if (E->e->u.linterp.complex_table) {
-      sscanf(line, "%lg %lg;%lg", &(E->e->u.linterp.lut[i].x), &yr, &yi);
-      _gd_l2c(E->e->u.linterp.lut[i].y.c, yr, yi);
+    if (E->e->EN(linterp,complex_table)) {
+      sscanf(line, "%lg %lg;%lg", &(E->e->EN(linterp,lut)[i].x), &yr, &yi);
+      _gd_l2c(E->e->EN(linterp,lut)[i].y.c, yr, yi);
     } else
-      sscanf(line, "%lg %lg", &(E->e->u.linterp.lut[i].x),
-          &(E->e->u.linterp.lut[i].y.r));
+      sscanf(line, "%lg %lg", &(E->e->EN(linterp,lut)[i].x),
+          &(E->e->EN(linterp,lut)[i].y.r));
 
-    if (dir > -2 && i > 0 && E->e->u.linterp.lut[i].x !=
-        E->e->u.linterp.lut[i - 1].x)
+    if (dir > -2 && i > 0 && E->e->EN(linterp,lut)[i].x !=
+        E->e->EN(linterp,lut)[i - 1].x)
     {
       if (dir == -1)
-        dir = (E->e->u.linterp.lut[i].x > E->e->u.linterp.lut[i - 1].x);
-      else if (dir != (E->e->u.linterp.lut[i].x > E->e->u.linterp.lut[i - 1].x))
+        dir = (E->e->EN(linterp,lut)[i].x > E->e->EN(linterp,lut)[i - 1].x);
+      else if (dir != (E->e->EN(linterp,lut)[i].x > E->e->EN(linterp,lut)[i
+            - 1].x))
+      {
         dir = -2;
+      }
     }
 
     i++;
     if (i >= buf_len) {
       buf_len += 100;
-      ptr = (struct _gd_lut *)realloc(E->e->u.linterp.lut, buf_len *
+      ptr = (struct _gd_lut *)realloc(E->e->EN(linterp,lut), buf_len *
           sizeof(struct _gd_lut));
 
       if (ptr == NULL) {
-        free(E->e->u.linterp.lut);
+        free(E->e->EN(linterp,lut));
         _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
         fclose(fp);
         dreturnvoid();
         return;
       }
 
-      E->e->u.linterp.lut = ptr;
+      E->e->EN(linterp,lut) = ptr;
     }
   } while (_GD_GetLine(fp, line, &linenum));
 
   if (i < 2) {
-    free(E->e->u.linterp.lut);
+    free(E->e->EN(linterp,lut));
     _GD_SetError(D, GD_E_OPEN_LINFILE, GD_E_LINFILE_LENGTH, NULL, 0,
-        E->e->u.linterp.table_path);
+        E->e->EN(linterp,table_path));
     fclose(fp);
     dreturnvoid();
     return;
   }
 
   /* Free unused memory */
-  ptr = (struct _gd_lut *)realloc(E->e->u.linterp.lut, i
+  ptr = (struct _gd_lut *)realloc(E->e->EN(linterp,lut), i
       * sizeof(struct _gd_lut));
 
   if (ptr == NULL) {
-    free(E->e->u.linterp.lut);
+    free(E->e->EN(linterp,lut));
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     fclose(fp);
     dreturnvoid();
     return;
   }
 
-  E->e->u.linterp.table_monotonic = -1;
-  E->e->u.linterp.lut = ptr;
-  E->e->u.linterp.table_len = i;
+  E->e->EN(linterp,table_monotonic) = -1;
+  E->e->EN(linterp,lut) = ptr;
+  E->e->EN(linterp,table_len) = i;
 
   /* sort the LUT */
   if (dir == -2)
-    qsort(E->e->u.linterp.lut, i, sizeof(struct _gd_lut), lutcmp);
+    qsort(E->e->EN(linterp,lut), i, sizeof(struct _gd_lut), lutcmp);
 
   fclose(fp);
   dreturnvoid();

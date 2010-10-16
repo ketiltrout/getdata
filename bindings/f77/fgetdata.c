@@ -413,8 +413,8 @@ void F77_FUNC(gdgerw, GDGERW) (int* spf, int* dtype, int* fragment_index,
           *field_code_l), &E) || E.field_type != GD_RAW_ENTRY)
     *spf = 0;
   else {
-    *spf = E.u.raw.spf;
-    *dtype = E.u.raw.type;
+    *spf = E.EN(raw,spf);
+    *dtype = E.EN(raw,data_type);
     *fragment_index = E.fragment_index;
     gd_free_entry_strings(&E);
   }
@@ -444,23 +444,23 @@ void F77_FUNC(gdgelc, GDGELC) (int* nfields,
           *field_code_l), &E) || E.field_type != GD_LINCOM_ENTRY)
     *nfields = 0;
   else {
-    *nfields = E.u.lincom.n_fields;
+    *nfields = E.EN(lincom,n_fields);
     *fragment_index = E.fragment_index;
 
     _GDF_FString(infield1, infield1_l, E.in_fields[0]);
-    *m1 = E.u.lincom.m[0];
-    *b1 = E.u.lincom.b[0];
+    *m1 = E.EN(lincom,m)[0];
+    *b1 = E.EN(lincom,b)[0];
 
-    if (E.u.lincom.n_fields > 1) {
+    if (E.EN(lincom,n_fields) > 1) {
       _GDF_FString(infield2, infield2_l, E.in_fields[1]);
-      *m2 = E.u.lincom.m[1];
-      *b2 = E.u.lincom.b[1];
+      *m2 = E.EN(lincom,m)[1];
+      *b2 = E.EN(lincom,b)[1];
     }
 
-    if (E.u.lincom.n_fields > 2) {
+    if (E.EN(lincom,n_fields) > 2) {
       _GDF_FString(infield3, infield3_l, E.in_fields[2]);
-      *m3 = E.u.lincom.m[2];
-      *b3 = E.u.lincom.b[2];
+      *m3 = E.EN(lincom,m)[2];
+      *b3 = E.EN(lincom,b)[2];
     }
 
     gd_free_entry_strings(&E);
@@ -492,23 +492,23 @@ void F77_FUNC(gdgecl, GDGECL) (int* nfields,
     *nfields = 0;
     gd_free_entry_strings(&E);
   } else {
-    *nfields = E.u.lincom.n_fields;
+    *nfields = E.EN(lincom,n_fields);
     *fragment_index = E.fragment_index;
 
     _GDF_FString(infield1, infield1_l, E.in_fields[0]);
-    _gd_c2cp(m1, E.u.lincom.cm[0]);
-    _gd_c2cp(b1, E.u.lincom.cb[0]);
+    _gd_c2cp(m1, E.EN(lincom,cm)[0]);
+    _gd_c2cp(b1, E.EN(lincom,cb)[0]);
 
-    if (E.u.lincom.n_fields > 1) {
+    if (E.EN(lincom,n_fields) > 1) {
       _GDF_FString(infield2, infield2_l, E.in_fields[1]);
-      _gd_c2cp(m2, E.u.lincom.cm[1]);
-      _gd_c2cp(b2, E.u.lincom.cb[1]);
+      _gd_c2cp(m2, E.EN(lincom,cm)[1]);
+      _gd_c2cp(b2, E.EN(lincom,cb)[1]);
     }
 
-    if (E.u.lincom.n_fields > 2) {
+    if (E.EN(lincom,n_fields) > 2) {
       _GDF_FString(infield3, infield3_l, E.in_fields[2]);
-      _gd_c2cp(m3, E.u.lincom.cm[2]);
-      _gd_c2cp(b3, E.u.lincom.cb[2]);
+      _gd_c2cp(m3, E.EN(lincom,cm)[2]);
+      _gd_c2cp(b3, E.EN(lincom,cb)[2]);
     }
     gd_free_entry_strings(&E);
   }
@@ -535,23 +535,23 @@ void F77_FUNC(gdgepn, GDGEPN) (int* poly_ord, char* infield, int* infield_l,
           *field_code_l), &E) || E.field_type != GD_POLYNOM_ENTRY)
     *poly_ord = 0;
   else {
-    *poly_ord = E.u.polynom.poly_ord;
+    *poly_ord = E.EN(polynom,poly_ord);
     *fragment_index = E.fragment_index;
 
     _GDF_FString(infield, infield_l, E.in_fields[0]);
 
-    switch (E.u.polynom.poly_ord) {
+    switch (E.EN(polynom,poly_ord)) {
       case 5:
-        *a5 = E.u.polynom.a[5];
+        *a5 = E.EN(polynom,a)[5];
       case 4:
-        *a4 = E.u.polynom.a[4];
+        *a4 = E.EN(polynom,a)[4];
       case 3:
-        *a3 = E.u.polynom.a[3];
+        *a3 = E.EN(polynom,a)[3];
       case 2:
-        *a2 = E.u.polynom.a[2];
+        *a2 = E.EN(polynom,a)[2];
       case 1:
-        *a1 = E.u.polynom.a[1];
-        *a0 = E.u.polynom.a[0];
+        *a1 = E.EN(polynom,a)[1];
+        *a0 = E.EN(polynom,a)[0];
     }
     gd_free_entry_strings(&E);
   }
@@ -577,23 +577,23 @@ void F77_FUNC(gdgecp, GDGECP) (int* poly_ord, char* infield, int* infield_l,
           *field_code_l), &E) || E.field_type != GD_POLYNOM_ENTRY)
     *poly_ord = 0;
   else {
-    *poly_ord = E.u.polynom.poly_ord;
+    *poly_ord = E.EN(polynom,poly_ord);
     *fragment_index = E.fragment_index;
 
     _GDF_FString(infield, infield_l, E.in_fields[0]);
 
-    switch (E.u.polynom.poly_ord) {
+    switch (E.EN(polynom,poly_ord)) {
       case 5:
-        _gd_c2cp(a5, E.u.polynom.ca[5]);
+        _gd_c2cp(a5, E.EN(polynom,ca)[5]);
       case 4:
-        _gd_c2cp(a4, E.u.polynom.ca[4]);
+        _gd_c2cp(a4, E.EN(polynom,ca)[4]);
       case 3:
-        _gd_c2cp(a3, E.u.polynom.ca[3]);
+        _gd_c2cp(a3, E.EN(polynom,ca)[3]);
       case 2:
-        _gd_c2cp(a2, E.u.polynom.ca[2]);
+        _gd_c2cp(a2, E.EN(polynom,ca)[2]);
       case 1:
-        _gd_c2cp(a1, E.u.polynom.ca[1]);
-        _gd_c2cp(a0, E.u.polynom.ca[0]);
+        _gd_c2cp(a1, E.EN(polynom,ca)[1]);
+        _gd_c2cp(a0, E.EN(polynom,ca)[0]);
     }
     gd_free_entry_strings(&E);
   }
@@ -618,7 +618,7 @@ void F77_FUNC(gdgelt, GDGELT) (char* in_field, int* in_field_l, char* table,
           *field_code_l), &E) || E.field_type != GD_LINTERP_ENTRY)
     *in_field_l = 0;
   else {
-    _GDF_FString(table, table_l, E.u.linterp.table);
+    _GDF_FString(table, table_l, E.EN(linterp,table));
     _GDF_FString(in_field, in_field_l, E.in_fields[0]);
     *fragment_index = E.fragment_index;
     gd_free_entry_strings(&E);
@@ -644,8 +644,8 @@ void F77_FUNC(gdgebt, GDGEBT) (char* in_field, int* in_field_l, int* bitnum,
     *in_field_l = 0;
   else {
     _GDF_FString(in_field, in_field_l, E.in_fields[0]);
-    *bitnum = E.u.bit.bitnum;
-    *numbits = E.u.bit.numbits;
+    *bitnum = E.EN(bit,bitnum);
+    *numbits = E.EN(bit,numbits);
     *fragment_index = E.fragment_index;
     gd_free_entry_strings(&E);
   }
@@ -670,8 +670,8 @@ void F77_FUNC(gdgesb, GDGESB) (char* in_field, int* in_field_l, int* bitnum,
     *in_field_l = 0;
   else {
     _GDF_FString(in_field, in_field_l, E.in_fields[0]);
-    *bitnum = E.u.bit.bitnum;
-    *numbits = E.u.bit.numbits;
+    *bitnum = E.EN(bit,bitnum);
+    *numbits = E.EN(bit,numbits);
     *fragment_index = E.fragment_index;
     gd_free_entry_strings(&E);
   }
@@ -749,7 +749,7 @@ void F77_FUNC(gdgerc, GDGERC) (char* in_field, int* in_field_l,
     *in_field_l = 0;
   else {
     _GDF_FString(in_field, in_field_l, E.in_fields[0]);
-    *dividend = E.u.recip.dividend;
+    *dividend = E.EN(recip,dividend);
     *fragment_index = E.fragment_index;
     gd_free_entry_strings(&E);
   }
@@ -774,7 +774,7 @@ void F77_FUNC(gdgecr, GDGECR) (char* in_field, int* in_field_l,
     *in_field_l = 0;
   else {
     _GDF_FString(in_field, in_field_l, E.in_fields[0]);
-    _gd_c2cp(cdividend, E.u.recip.cdividend);
+    _gd_c2cp(cdividend, E.EN(recip,cdividend));
     *fragment_index = E.fragment_index;
     gd_free_entry_strings(&E);
   }
@@ -800,7 +800,7 @@ void F77_FUNC(gdgeph, GDGEPH) (char* in_field, int* in_field_l, int* shift,
     *in_field_l = 0;
   else {
     _GDF_FString(in_field, in_field_l, E.in_fields[0]);
-    *shift = E.u.phase.shift;
+    *shift = E.EN(phase,shift);
     *fragment_index = E.fragment_index;
     gd_free_entry_strings(&E);
   }
@@ -823,7 +823,7 @@ void F77_FUNC(gdgeco, GDGECO) (int* data_type, int* fragment_index,
           *field_code_l), &E) || E.field_type != GD_CONST_ENTRY)
     *data_type = 0;
   else {
-    *data_type = E.u.cons.type;
+    *data_type = E.EN(cons,const_type);
     *fragment_index = E.fragment_index;
     gd_free_entry_strings(&E);
   }
@@ -2513,14 +2513,14 @@ void F77_FUNC(gdgsca, GDGSCA) (char* scalar, int* scalar_l, const int* dirfile,
         ok = 0;
         break;
       case GD_LINCOM_ENTRY:
-        if (*index > GD_MAX_LINCOM + E.u.lincom.n_fields ||
-            (*index > E.u.lincom.n_fields && *index <= GD_MAX_LINCOM))
+        if (*index > GD_MAX_LINCOM + E.EN(lincom,n_fields) ||
+            (*index > E.EN(lincom,n_fields) && *index <= GD_MAX_LINCOM))
         {
           ok = 0;
         }
         break;
       case GD_POLYNOM_ENTRY:
-        if (*index > E.u.polynom.poly_ord + 1)
+        if (*index > E.EN(polynom,poly_ord) + 1)
           ok = 0;
         break;
       case GD_BIT_ENTRY:
@@ -2578,14 +2578,14 @@ void F77_FUNC(gdasca, GDASCA) (const int* dirfile, const char* field_code,
       ok = 0;
       break;
     case GD_LINCOM_ENTRY:
-      if (*index > GD_MAX_LINCOM + E.u.lincom.n_fields ||
-          (*index > E.u.lincom.n_fields && *index <= GD_MAX_LINCOM))
+      if (*index > GD_MAX_LINCOM + E.EN(lincom,n_fields) ||
+          (*index > E.EN(lincom,n_fields) && *index <= GD_MAX_LINCOM))
       {
         ok = 0;
       }
       break;
     case GD_POLYNOM_ENTRY:
-      if (*index > E.u.polynom.poly_ord + 1)
+      if (*index > E.EN(polynom,poly_ord) + 1)
         ok = 0;
       break;
     case GD_BIT_ENTRY:

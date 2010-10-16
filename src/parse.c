@@ -240,8 +240,8 @@ static gd_entry_t* _GD_ParseRaw(DIRFILE* D, char* in_cols[MAX_IN_COLS],
   memset(E->e, 0, sizeof(struct _gd_private_entry));
 
   E->field_type = GD_RAW_ENTRY;
-  E->e->u.raw.file[0].fp = E->e->u.raw.file[1].fp = -1;
-  E->e->u.raw.file[0].encoding = GD_ENC_UNKNOWN; /* don't know the encoding
+  E->e->EN(raw,file)[0].fp = E->e->EN(raw,file)[1].fp = -1;
+  E->e->EN(raw,file)[0].encoding = GD_ENC_UNKNOWN; /* don't know the encoding
                                               subscheme yet */
 
   E->field = _GD_ValidateField(NULL, in_cols[0], standards, pedantic, is_dot);
@@ -254,8 +254,8 @@ static gd_entry_t* _GD_ParseRaw(DIRFILE* D, char* in_cols[MAX_IN_COLS],
     return NULL;
   }
 
-  E->e->u.raw.filebase = (char *)malloc(FILENAME_MAX);
-  if (E->e->u.raw.filebase == NULL) {
+  E->e->EN(raw,filebase) = (char *)malloc(FILENAME_MAX);
+  if (E->e->EN(raw,filebase) == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     _GD_FreeE(E, 1);
     dreturn("%p", NULL);
@@ -263,22 +263,23 @@ static gd_entry_t* _GD_ParseRaw(DIRFILE* D, char* in_cols[MAX_IN_COLS],
   }
 
   if (D->fragment[me].sname)
-    snprintf(E->e->u.raw.filebase, FILENAME_MAX, "%s/%s/%s", D->name,
+    snprintf(E->e->EN(raw,filebase), FILENAME_MAX, "%s/%s/%s", D->name,
         D->fragment[me].sname, in_cols[0]);
   else
-    snprintf(E->e->u.raw.filebase, FILENAME_MAX, "%s/%s", D->name, in_cols[0]);
+    snprintf(E->e->EN(raw,filebase), FILENAME_MAX, "%s/%s", D->name,
+        in_cols[0]);
 
-  E->u.raw.type = _GD_RawType(in_cols[2], standards, pedantic);
-  E->e->u.raw.size = GD_SIZE(E->u.raw.type);
+  E->EN(raw,data_type) = _GD_RawType(in_cols[2], standards, pedantic);
+  E->e->EN(raw,size) = GD_SIZE(E->EN(raw,data_type));
 
-  if (E->e->u.raw.size == 0 || E->u.raw.type & 0x40)
+  if (E->e->EN(raw,size) == 0 || E->EN(raw,data_type) & 0x40)
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_TYPE, format_file, line,
         in_cols[2]);
-  else if ((E->scalar[0] = _GD_SetScalar(D, in_cols[3], &E->u.raw.spf,
+  else if ((E->scalar[0] = _GD_SetScalar(D, in_cols[3], &E->EN(raw,spf),
           GD_UINT16, format_file, line, NULL)) == NULL)
   {
     E->e->calculated = 1;
-    if (E->u.raw.spf <= 0)
+    if (E->EN(raw,spf) <= 0)
       _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_SPF, format_file, line,
           in_cols[3]);
   }
@@ -344,12 +345,12 @@ static gd_entry_t* _GD_ParseLincom(DIRFILE* D, char* in_cols[MAX_IN_COLS],
   }
 
   E->e->calculated = 1;
-  E->u.lincom.n_fields = (int)(strtol(in_cols[2], &ptr, 10));
+  E->EN(lincom,n_fields) = (int)(strtol(in_cols[2], &ptr, 10));
   if (*ptr != '\0') {
-    E->u.lincom.n_fields = (n_cols - 2) / 3;
+    E->EN(lincom,n_fields) = (n_cols - 2) / 3;
     /* assume <n> has been omitted */
-    if (n_cols % 3 != 2 || E->u.lincom.n_fields < 1 || E->u.lincom.n_fields >
-        GD_MAX_LINCOM)
+    if (n_cols % 3 != 2 || E->EN(lincom,n_fields) < 1 || E->EN(lincom,n_fields)
+        > GD_MAX_LINCOM)
     {
       _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_TOK, format_file, line, NULL);
       _GD_FreeE(E, 1);
@@ -363,23 +364,25 @@ static gd_entry_t* _GD_ParseLincom(DIRFILE* D, char* in_cols[MAX_IN_COLS],
 
   if (E->field == NULL)
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-  else if ((E->u.lincom.n_fields < 1) || (E->u.lincom.n_fields > GD_MAX_LINCOM))
+  else if ((E->EN(lincom,n_fields) < 1) || (E->EN(lincom,n_fields) >
+        GD_MAX_LINCOM))
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_FIELDS, format_file, line,
         in_cols[2]);
-  else if (n_cols < E->u.lincom.n_fields * 3 + 3)
+  else if (n_cols < E->EN(lincom,n_fields) * 3 + 3)
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_TOK, format_file, line, NULL);
   else
-    for (i = 0; i < E->u.lincom.n_fields; i++) {
+    for (i = 0; i < E->EN(lincom,n_fields); i++) {
       E->in_fields[i] = strdup(in_cols[i * 3 + 3]);
       if (E->in_fields[i] == NULL)
         _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
 
-      E->scalar[i] = _GD_SetScalar(D, in_cols[i * 3 + 4], &E->u.lincom.cm[i],
+      E->scalar[i] = _GD_SetScalar(D, in_cols[i * 3 + 4], &E->EN(lincom,cm)[i],
           GD_COMPLEX128, format_file, line, &E->comp_scal);
-      E->u.lincom.m[i] = creal(E->u.lincom.cm[i]);
+      E->EN(lincom,m)[i] = creal(E->EN(lincom,cm)[i]);
       E->scalar[i + GD_MAX_LINCOM] = _GD_SetScalar(D, in_cols[i * 3 + 5],
-          &E->u.lincom.cb[i], GD_COMPLEX128, format_file, line, &E->comp_scal);
-      E->u.lincom.b[i] = creal(E->u.lincom.cb[i]);
+          &E->EN(lincom,cb)[i], GD_COMPLEX128, format_file, line,
+          &E->comp_scal);
+      E->EN(lincom,b)[i] = creal(E->EN(lincom,cb)[i]);
 
       if (E->scalar[i] != NULL || E->scalar[i + GD_MAX_LINCOM] != NULL)
         E->e->calculated = 0;
@@ -430,7 +433,7 @@ static gd_entry_t* _GD_ParseLinterp(DIRFILE* D,
   E->in_fields[0] = NULL;
   E->e->entry[0] = NULL;
   E->e->calculated = 1;
-  E->u.linterp.table = NULL;
+  E->EN(linterp,table) = NULL;
 
   E->field = _GD_ValidateField(parent, in_cols[0], standards, pedantic, is_dot);
   if (E->field == in_cols[0]) {
@@ -443,12 +446,13 @@ static gd_entry_t* _GD_ParseLinterp(DIRFILE* D,
   }
 
   E->in_fields[0] = strdup(in_cols[2]);
-  E->e->u.linterp.table_len = -1; /* linterp file not read yet */
+  E->e->EN(linterp,table_len) = -1; /* linterp file not read yet */
 
 
-  E->u.linterp.table = strdup(in_cols[3]);
+  E->EN(linterp,table) = strdup(in_cols[3]);
 
-  if (E->field == NULL || E->in_fields[0] == NULL || E->u.linterp.table == NULL)
+  if (E->field == NULL || E->in_fields[0] == NULL || E->EN(linterp,table) ==
+      NULL)
   {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     _GD_FreeE(E, 1);
@@ -575,10 +579,10 @@ static gd_entry_t* _GD_ParseRecip(DIRFILE* D,
     return NULL;
   }
 
-  E->scalar[0] = _GD_SetScalar(D, in_cols[3], &E->u.recip.cdividend,
+  E->scalar[0] = _GD_SetScalar(D, in_cols[3], &E->EN(recip,cdividend),
       GD_COMPLEX128, format_file, line, &E->comp_scal);
-  E->u.recip.dividend = creal(E->u.recip.cdividend);
-  E->comp_scal = (cimag(E->u.recip.cdividend) == 0) ? 0 : 1;
+  E->EN(recip,dividend) = creal(E->EN(recip,cdividend));
+  E->comp_scal = (cimag(E->EN(recip,cdividend)) == 0) ? 0 : 1;
 
   dreturn("%p", E);
   return E;
@@ -698,23 +702,23 @@ static gd_entry_t* _GD_ParseBit(DIRFILE* D, int is_signed,
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
 
 
-  E->scalar[0] = _GD_SetScalar(D, in_cols[3], &E->u.bit.bitnum, GD_INT16,
+  E->scalar[0] = _GD_SetScalar(D, in_cols[3], &E->EN(bit,bitnum), GD_INT16,
       format_file, line, NULL);
 
   if (n_cols > 4)
-    E->scalar[1] = _GD_SetScalar(D, in_cols[4], &E->u.bit.numbits, GD_INT16,
+    E->scalar[1] = _GD_SetScalar(D, in_cols[4], &E->EN(bit,numbits), GD_INT16,
         format_file, line, NULL);
   else
-    E->u.bit.numbits = 1;
+    E->EN(bit,numbits) = 1;
 
   if (E->scalar[0] != NULL || E->scalar[1] != NULL)
     E->e->calculated = 0;
 
-  if (E->scalar[1] == NULL && E->u.bit.numbits < 1)
+  if (E->scalar[1] == NULL && E->EN(bit,numbits) < 1)
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_NUMBITS, format_file, line, NULL);
-  else if (E->scalar[0] == NULL && E->u.bit.bitnum < 0)
+  else if (E->scalar[0] == NULL && E->EN(bit,bitnum) < 0)
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BITNUM, format_file, line, NULL);
-  else if (E->e->calculated && E->u.bit.bitnum + E->u.bit.numbits - 1 > 63)
+  else if (E->e->calculated && E->EN(bit,bitnum) + E->EN(bit,numbits) - 1 > 63)
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BITSIZE, format_file, line, NULL);
 
   if (D->error != GD_E_OK) {
@@ -780,8 +784,8 @@ static gd_entry_t* _GD_ParsePhase(DIRFILE* D, char* in_cols[MAX_IN_COLS],
     E = NULL;
   }
 
-  if ((E->scalar[0] = _GD_SetScalar(D, in_cols[3], &E->u.phase.shift, GD_INT64,
-          format_file, line, NULL)) == NULL)
+  if ((E->scalar[0] = _GD_SetScalar(D, in_cols[3], &E->EN(phase,shift),
+          GD_INT64, format_file, line, NULL)) == NULL)
   {
     E->e->calculated = 1;
   }
@@ -835,11 +839,11 @@ static gd_entry_t* _GD_ParsePolynom(DIRFILE* D,
     return NULL;
   }
 
-  E->u.polynom.poly_ord = n_cols - 4;
+  E->EN(polynom,poly_ord) = n_cols - 4;
 
   /* the legacy ignore-trailing-tokens "feature" */
-  if (E->u.polynom.poly_ord > GD_MAX_POLYORD)
-    E->u.polynom.poly_ord = GD_MAX_POLYORD;
+  if (E->EN(polynom,poly_ord) > GD_MAX_POLYORD)
+    E->EN(polynom,poly_ord) = GD_MAX_POLYORD;
 
   E->e->calculated = 1;
 
@@ -850,10 +854,10 @@ static gd_entry_t* _GD_ParsePolynom(DIRFILE* D,
     if (E->in_fields[0] == NULL)
       _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     else
-      for (i = 0; i <= E->u.polynom.poly_ord; i++) {
-        E->scalar[i] = _GD_SetScalar(D, in_cols[i + 3], &E->u.polynom.ca[i],
+      for (i = 0; i <= E->EN(polynom,poly_ord); i++) {
+        E->scalar[i] = _GD_SetScalar(D, in_cols[i + 3], &E->EN(polynom,ca)[i],
             GD_COMPLEX128, format_file, line, &E->comp_scal);
-        E->u.polynom.a[i] = creal(E->u.polynom.ca[i]);
+        E->EN(polynom,a)[i] = creal(E->EN(polynom,ca)[i]);
 
         if (E->scalar[i] != NULL)
           E->e->calculated = 0;
@@ -925,9 +929,9 @@ static gd_entry_t* _GD_ParseConst(DIRFILE* D, char* in_cols[MAX_IN_COLS],
     return NULL;
   }
 
-  E->u.cons.type = _GD_RawType(in_cols[2], standards, pedantic);
+  E->EN(cons,const_type) = _GD_RawType(in_cols[2], standards, pedantic);
 
-  if (GD_SIZE(E->u.cons.type) == 0 || E->u.raw.type & 0x40) {
+  if (GD_SIZE(E->EN(cons,const_type)) == 0 || E->EN(raw,data_type) & 0x40) {
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_TYPE, format_file, line,
         in_cols[2]);
     _GD_FreeE(E, 1);
@@ -936,17 +940,17 @@ static gd_entry_t* _GD_ParseConst(DIRFILE* D, char* in_cols[MAX_IN_COLS],
     return NULL;
   }
 
-  if (E->u.cons.type & GD_COMPLEX)
-    ptr = _GD_SetScalar(D, in_cols[3], &E->e->u.cons.d.c, GD_COMPLEX128,
+  if (E->EN(cons,const_type) & GD_COMPLEX)
+    ptr = _GD_SetScalar(D, in_cols[3], &E->e->EN(cons.d,c), GD_COMPLEX128,
         format_file, line, &dummy);
-  else if (E->u.cons.type & GD_IEEE754)
-    ptr = _GD_SetScalar(D, in_cols[3], &E->e->u.cons.d.d, GD_FLOAT64,
+  else if (E->EN(cons,const_type) & GD_IEEE754)
+    ptr = _GD_SetScalar(D, in_cols[3], &E->e->EN(cons.d,d), GD_FLOAT64,
         format_file, line, NULL);
-  else if (E->u.cons.type & GD_SIGNED)
-    ptr = _GD_SetScalar(D, in_cols[3], &E->e->u.cons.d.i, GD_INT64, format_file,
-        line, NULL);
+  else if (E->EN(cons,const_type) & GD_SIGNED)
+    ptr = _GD_SetScalar(D, in_cols[3], &E->e->EN(cons.d,i), GD_INT64,
+        format_file, line, NULL);
   else
-    ptr = _GD_SetScalar(D, in_cols[3], &E->e->u.cons.d.u, GD_UINT64,
+    ptr = _GD_SetScalar(D, in_cols[3], &E->e->EN(cons.d,u), GD_UINT64,
         format_file, line, NULL);
 
   if (ptr) {
@@ -997,7 +1001,7 @@ static gd_entry_t* _GD_ParseString(DIRFILE* D, char *in_cols[MAX_IN_COLS],
   memset(E->e, 0, sizeof(struct _gd_private_entry));
 
   E->field_type = GD_STRING_ENTRY;
-  E->e->u.string = strdup(in_cols[2]);
+  E->e->ES(string) = strdup(in_cols[2]);
   E->e->calculated = 1;
 
   E->field = _GD_ValidateField(parent, in_cols[0], standards, pedantic, is_dot);
@@ -1010,7 +1014,7 @@ static gd_entry_t* _GD_ParseString(DIRFILE* D, char *in_cols[MAX_IN_COLS],
     return NULL;
   }
 
-  if (E->field == NULL || E->e->u.string == NULL) {
+  if (E->field == NULL || E->e->ES(string) == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     _GD_FreeE(E, 1);
     E = NULL;
@@ -1130,10 +1134,16 @@ gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, char** in_cols,
         _GD_SetError(D, GD_E_UNSUPPORTED, 0, NULL, 0, NULL);
       else if (!_GD_Supports(D, E, GD_EF_TOUCH))
         ; /* error already set */
-      else if (_GD_SetEncodedName(D, E->e->u.raw.file, E->e->u.raw.filebase, 0))
+      else if (_GD_SetEncodedName(D, E->e->EN(raw,file), E->e->EN(raw,filebase),
+            0))
+      {
         ; /* error already set */
-      else if ((*_gd_ef[E->e->u.raw.file[0].encoding].touch)(E->e->u.raw.file))
-        _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
+      } else if ((*_gd_ef[E->e->EN(raw,file)[0].encoding].touch)(E->e->EN(raw,
+              file)))
+      {
+        _GD_SetError(D, GD_E_RAW_IO, 0, E->e->EN(raw,file)[0].name, errno,
+            NULL);
+      }
     }
 
     /* Is this the first raw field ever defined? */

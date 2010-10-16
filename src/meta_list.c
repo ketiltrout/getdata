@@ -123,7 +123,7 @@ const char **gd_mstrings(DIRFILE* D, const char* parent) gd_nothrow
 
   for (i = n = 0; i < e->n_meta; ++i) {
     if (e->p.meta_entry[i]->field_type == GD_STRING_ENTRY)
-      fl[n++] = e->p.meta_entry[i]->e->u.string;
+      fl[n++] = e->p.meta_entry[i]->e->ES(string);
   }
   fl[n] = NULL;
 

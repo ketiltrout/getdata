@@ -52,7 +52,7 @@ int main(void)
   CHECKI(error, 0);
   CHECKI(n, 0);
   CHECKI(ret, 0);
-  CHECKI(E.u.raw.spf, 11);
+  CHECKI(E.EN(raw,spf), 11);
 
   return r;
 }

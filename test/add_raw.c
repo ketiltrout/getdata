@@ -29,8 +29,8 @@ int main(void)
   else {
     CHECKI(e.field_type, GD_RAW_ENTRY);
     CHECKI(e.fragment_index, 0);
-    CHECKI(e.u.raw.spf, 2);
-    CHECKI(e.u.raw.type, GD_UINT8);
+    CHECKI(e.EN(raw,spf), 2);
+    CHECKI(e.EN(raw,data_type), GD_UINT8);
     gd_free_entry_strings(&e);
   }
 
