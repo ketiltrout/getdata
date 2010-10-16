@@ -699,7 +699,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
 
       break;
     case GD_CONST_ENTRY:
-      Q.EN(cons,const_type) = (N->EN(cons,const_type) == GD_NULL) 
+      Q.EN(cons,const_type) = (N->EN(cons,const_type) == GD_NULL) ?
         E->EN(cons,const_type) : N->EN(cons,const_type);
 
       if (Q.EN(cons,const_type) & 0x40 || GD_SIZE(Q.EN(cons,const_type)) == 0) {

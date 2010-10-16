@@ -33,7 +33,7 @@ int main(void)
     CHECKI(e.field_type, GD_RECIP_ENTRY);
     CHECKS(e.in_fields[0], "in");
     CHECKI(e.comp_scal, 1);
-    CHECKC(e.u.recip.cdividend, cdividend);
+    CHECKC(e.EN(recip,cdividend), cdividend);
     CHECKI(e.fragment_index, 0);
 
     gd_free_entry_strings(&e);

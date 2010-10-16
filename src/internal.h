@@ -723,7 +723,7 @@ static inline __attribute__ ((__const__)) double __NAN()
 # define gd_nothrow
 #endif
 
-#if GD_NO_C99_API
+#ifdef GD_C89_API
 # define EN(t,v) u.t.v
 # define ES(v) u.v
 #else
