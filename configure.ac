@@ -758,23 +758,15 @@ echo "*** Writing configure output"
 echo
 AC_CONFIG_FILES([Makefile])
 AC_CONFIG_FILES([bindings/Makefile])
-if test "x$make_cxxbindings" = "xyes"; then
-  AC_CONFIG_FILES([bindings/cxx/Makefile])
-  AC_CONFIG_FILES([bindings/cxx/test/Makefile])
-fi
-if test "x$make_f77bindings" = "xyes"; then
-  AC_CONFIG_FILES([bindings/f77/Makefile])
-  AC_CONFIG_FILES([bindings/f77/test/Makefile])
-fi
-if test "x$make_idlbindings" = "xyes"; then
-  AC_CONFIG_FILES([bindings/idl/Makefile])
-  AC_CONFIG_FILES([bindings/idl/makedlm.sh])
-  AC_CONFIG_FILES([bindings/idl/test/Makefile])
-fi
-if test "x$make_pybindings" = "xyes"; then
-  AC_CONFIG_FILES([bindings/python/Makefile])
-  AC_CONFIG_FILES([bindings/python/test/Makefile])
-fi
+AC_CONFIG_FILES([bindings/cxx/Makefile])
+AC_CONFIG_FILES([bindings/cxx/test/Makefile])
+AC_CONFIG_FILES([bindings/f77/Makefile])
+AC_CONFIG_FILES([bindings/f77/test/Makefile])
+AC_CONFIG_FILES([bindings/idl/Makefile])
+AC_CONFIG_FILES([bindings/idl/makedlm.sh])
+AC_CONFIG_FILES([bindings/idl/test/Makefile])
+AC_CONFIG_FILES([bindings/python/Makefile])
+AC_CONFIG_FILES([bindings/python/test/Makefile])
 AC_CONFIG_FILES([doc/Makefile])
 AC_CONFIG_FILES([man/Makefile])
 AC_CONFIG_FILES([man/gd_alter_encoding.3])
@@ -888,13 +880,13 @@ fi
 echo
 echo "  Supported internal encodings:${ENCODINGS_BUILT}"
 if test "x${use_modules}" != "xno"; then
-echo "  Supported external encodings:${ENCODINGS_MODS}"
+  echo "  Supported external encodings:${ENCODINGS_MODS}"
 fi
 echo "  Unsupported encodings:       ${ENCODINGS_LEFT}"
 echo
 echo "  Bindings built:              ${BINDINGS_BUILT}"
 echo "  Bindings not built:          ${BINDINGS_LEFT}"
 if test "x$make_pybindings" != "xno"; then
-echo "  NumPy support in Python:      ${have_numpy}"
+  echo "  NumPy support in Python:      ${have_numpy}"
 fi
 echo

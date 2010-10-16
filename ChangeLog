@@ -1,10 +1,11 @@
+2010-10-16   D. V. Wiebe <getdata@ketiltrout.net>   svn:453
+	* configure.ac: Generate Makefiles even for bindings we're not using (so we
+	can still run maintainer tasks on them.)
+
 2010-10-16   D. V. Wiebe <getdata@ketiltrout.net>   svn:452
 	* src/getdata.h.in: Keep anonymous structs and unions in C99-mode.
 	* src/internal.h: Helper macros for C99/C89 differences.
 	* test/ src/ bindings/: Update for changes.
-
-	* configure.ac: Generate Makefiles even for bindings we're not using (so we
-	can still run maintainer tasks on them.)
 
 2010-09-18   D. V. Wiebe <getdata@ketiltrout.net>   svn:448
 	* bindings/python/pydirfile.c (gdpy_dirfile_close gdpy_dirfile_discard)
