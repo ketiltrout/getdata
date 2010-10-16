@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_bof 3 "24 July 2010" "Version 0.7.0" "GETDATA"
+.TH gd_bof 3 "15 October 2010" "Version 0.7.0" "GETDATA"
 .SH NAME
 gd_bof \(em report the start of data in a field
 .SH SYNOPSIS
@@ -41,15 +41,15 @@ For a
 field, the beginning-of-field corresponds to the frame offset of that field
 (see
 .BR gd_frameoffset (3)).
-For other field types, the beginning-of-field marker is equivalent to the
-beginning-of-field marker furthest from the start of the dirfile of any of the
-field inputs.  The beginning-of-field marker for the special field
+The beginning-of-field for all other vector field type is the same as the
+beginning-of-field of whichever of its input fields that starts latest.  The
+beginning-of-field marker for the special field
 .I INDEX
-is always sample zero.
+is always zero.
 
 The beginning-of-field marker for a field containing no data is in the same
 location as, or after, its end-of-field marker (see
-.BR gd_bof (3)).
+.BR gd_eof (3)).
 For a
 .B RAW
 field, the difference between the locations of the beginning- and end-of-field

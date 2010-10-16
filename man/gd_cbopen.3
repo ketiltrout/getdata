@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_cbopen 3 "24 July 2010" "Version 0.7.0" "GETDATA"
+.TH gd_cbopen 3 "15 October 2010" "Version 0.7.0" "GETDATA"
 .SH NAME
 gd_cbopen, gd_open \(em open or create a dirfile
 .SH SYNOPSIS
@@ -282,7 +282,7 @@ sample per line.
 Specifies that raw data files are not encoded, but written verbatim to disk.
 
 .SS Standards Compliance
-The latest Dirfile Standards Version which this version of GetData understands
+The latest Dirfile Standards Version which this release of GetData understands
 is provided in the preprocessor macro
 .B GD_DIRFILE_STANDARDS_VERSION
 defined in getdata.h.  GetData is able to open and parse any Dirfile which
@@ -293,7 +293,7 @@ manual page lists the changes between Standards Versions.
 The GetData parser can operate in two modes: a
 .I permissive
 mode, in which much
-non-Standards compliant sytax is allowed, and a
+non-Standards compliant syntax is allowed, and a
 .I pedanitc
 mode, in which the parser adheres strictly to the Standards.  If
 .B GD_PEDANTIC
@@ -310,7 +310,7 @@ mode is provided primarily to allow GetData to be used on Dirfiles which
 conform to no single Standard, but which were accepted by the GetData parser
 in previous versions.  It is notably lax regarding reserved field names, and
 field name characters, the mixing of old and new data type specifiers, and
-generally ignores the presense of
+generally ignores the presence of
 .B /VERSION
 directives.
 In read-write mode,
@@ -344,9 +344,9 @@ mode, unless the
 .B GD_PERMISSIVE
 flag was passed to
 .BR gd_cbopen (),
-in which case, no mode switch will take place.
+in which case no mode switch will take place.
 
-Independant of the mode of the parser when parsing the format specification,
+Independent of the mode of the parser when parsing the format specification,
 GetData will calculate a list of Standards Versions to which the parsed
 metadata conform to.  The
 .BR gd_dirfile_standards (3)
@@ -609,7 +609,7 @@ The dirfile error may be retrieved by calling
 A descriptive error string for the last error encountered can be obtained from
 a call to
 .BR gd_error_string (3).
-When finished with it, a caller should deallocate the DIRFILE object by calling
+When finished with it, a caller should de-allocate the DIRFILE object by calling
 .BR gd_close (3),
 even if the open failed.
 .SH BUGS

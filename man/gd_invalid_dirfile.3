@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_invalid_dirfile 3 "17 September 2010" "Version 0.7.0" "GETDATA"
+.TH gd_invalid_dirfile 3 "15 October 2010" "Version 0.7.0" "GETDATA"
 .SH NAME
 gd_invalid_dirfile \(em obtain an pointer to an invalid DIRFILE object
 .SH SYNOPSIS
@@ -28,14 +28,14 @@ gd_invalid_dirfile \(em obtain an pointer to an invalid DIRFILE object
 The
 .BR gd_invalid_dirfile ()
 returns a pointer to a newly allocated, invalid DIRFILE object.  Like any
-other DIRFILE object, the invalid DIRFILE object should be deallocated by
+other DIRFILE object, the invalid DIRFILE object should be de-allocated by
 calling
 .BR gd_close (3)
 or
 .BR gd_discard (3)
 when it is no longer needed.
 
-The DIRFILE object reutrned may be passed to any other GetData function which
+The DIRFILE object returned may be passed to any other GetData function which
 requires one, but doing so will inevitably result in that function failing
 with the
 .B GD_BAD_DIRFILE

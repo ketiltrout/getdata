@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_eof 3 "22 July 2010" "Version 0.7.0" "GETDATA"
+.TH gd_eof 3 "15 October 2010" "Version 0.7.0" "GETDATA"
 .SH NAME
 gd_eof \(em report the number of samples in a dirfile field
 .SH SYNOPSIS
@@ -32,8 +32,8 @@ function queries a dirfile(5) database specified by
 and returns the sample number of the end-of-field marker for the vector field
 given by
 .IR field_code .
-This is effectively the total number of samples available for the field, taking
-into account the frame offset of the field.
+This is effectively the total number of samples available for the field,
+including any frame offset.
 
 The caller should not assume that this is equivalent (when accounting for the samples-per-frame of the indicated field) to the number of frames in the database
 returned by
@@ -51,8 +51,8 @@ has no end-of-field marker.
 
 The end-of-field marker for a field containing no data is in the same location
 as, or before, its beginning-of-field marker (see
-.BR gd_bof (3)),
-which will be non-zero, if the frame offset for the field is non-zero.  For a
+.BR gd_bof (3)).
+For a
 .B RAW
 field, the difference between the locations of the beginning- and end-of-field
 markers indicates the number of samples of data actually stored on disk.
@@ -78,7 +78,7 @@ or one of the fields it uses as input was not found in the database.
 The supplied dirfile was invalid.
 .TP
 .B GD_E_BAD_FIELD_TYPE
-The location of the non-existant end-of-field marker for the special field
+The location of the non-existent end-of-field marker for the special field
 .I INDEX
 was requested, possibly as a result of the field specified by
 .I field_code

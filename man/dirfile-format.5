@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH dirfile\-format 5 "15 July 2010" "Standards Version 8" "DATA FORMATS"
+.TH dirfile\-format 5 "15 October 2010" "Standards Version 8" "DATA FORMATS"
 .SH NAME
 dirfile\-format \(em the dirfile database format specification file
 .SH DESCRIPTION
@@ -32,7 +32,7 @@ The primary fragment is the file called
 located in the base dirfile directory.  This file may contain only part of
 the format specification, and may reference other fragments (using the
 .B /INCLUDE
-directive) containing futher format specification.  This inclusion mechanism
+directive) containing further format specification.  This inclusion mechanism
 may be nested arbitrarily deep.
 
 The explicit text encoding of these files is not specified by these standards,
@@ -411,7 +411,7 @@ to specify metafields).  The field name may not be
 which is a special, implicit field which contains the integer frame index.
 Field names are case sensitive.
 
-If the field name beginning a field specifiction line does contain a
+If the field name beginning a field specification line does contain a
 .B /
 character, the line is assumed to specify a metafield.  See the
 .B META
@@ -614,7 +614,7 @@ field type containing its values.
 .TP
 .B POLYNOM
 The POLYNOM vector field type specifies a polynomial function of a single input
-vector field.  Synax is:
+vector field.  Syntax is:
 .RS
 .IP
 .I <field_name>

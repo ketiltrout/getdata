@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_entry 3 "21 July 2010" "Version 0.7.0" "GETDATA"
+.TH gd_entry 3 "15 October 2010" "Version 0.7.0" "GETDATA"
 .SH NAME
 gd_entry \(em retrieve a dirfile field's metadata
 .SH SYNOPSIS
@@ -55,7 +55,7 @@ see below) will by dynamically allocated by
 .BR gd_entry ()
 and should not point to allocated memory locations before calling this function.
 Only strings provided by the gd_entry_t for the particular field type described
-will be allocated.  These strings should be deallocated with
+will be allocated.  These strings should be de-allocated with
 .BR free (3)
 by the caller once they are no longer needed.  The
 .BR gd_free_entry_strings (3)
@@ -318,7 +318,7 @@ The
 member is an array of length twice
 .B GD_MAX_LINCOM
 containing the field codes specifying the slope factors and offset terms for the
-field, or NULLs if numberical literal parameters were used.
+field, or NULLs if numerical literal parameters were used.
 The first
 .B GD_MAX_LINCOM
 array elements contain the scale factors.  The remaining
@@ -523,7 +523,7 @@ The
 member is an array of length one more than
 .B GD_MAX_POLYORD
 containing the field codes specifying the co-efficients for the field, or NULLs
-if numberical literal parameters were used.
+if numerical literal parameters were used.
 Only the first
 .I poly_ord
 + 1

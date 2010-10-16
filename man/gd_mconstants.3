@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_mconstants 3 "15 July May 2010" "Version 0.7.0" "GETDATA"
+.TH gd_mconstants 3 "15 October 2010" "Version 0.7.0" "GETDATA"
 .SH NAME
 gd_mconstants \(em retrieve a list of constant values from a dirfile
 .SH SYNOPSIS
@@ -58,7 +58,7 @@ The caller may not modify any values in the array, or the array itself.  Doing
 so may cause database corruption.  The pointer returned is guaranteed to be
 valid until
 .BR gd_mconstants ()
-is called again with the same arguments, or until the array is deallocated by
+is called again with the same arguments, or until the array is de-allocated by
 a call to
 .BR gd_close (3).
 

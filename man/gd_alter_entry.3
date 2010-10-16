@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_alter_entry 3 "21 July 2010" "Version 0.7.0" "GETDATA"
+.TH gd_alter_entry 3 "15 October 2010" "Version 0.7.0" "GETDATA"
 .SH NAME
 gd_alter_entry \(em modify the metadata of a dirfile field
 .SH SYNOPSIS
@@ -39,7 +39,7 @@ In addition to specifying a regular field,
 may also refer to a metafield by specifying it using its full (slashed) field
 code.  However,
 .I field_code
-should never contain a represenation suffix.
+should never contain a representation suffix.
 
 The form of
 .I entry
@@ -136,12 +136,12 @@ a pointer to a field code indicating a new
 .B CONST
 field to be used for the corresponding field parameter.  If the parameter was
 previously a literal number, it will be replaced by the specified field code.
-If the paramter was previously a field code, the new field code will replace the
+If the parameter was previously a field code, the new field code will replace the
 old one.
 .IP \(bu 4
 a pointer the empty string ("").  In this case, no change is made to the field
 code for the corresponding field parameter: if one already existed, it is kept,
-otherise the correponding literal numerical parameter is used.  If the value
+otherwise the corresponding literal numerical parameter is used.  If the value
 of the corresponding numerical
 .I entry
 member is the special value listed above indicating no change, no change is
@@ -171,7 +171,7 @@ The library was unable to allocate memory.
 The field specified by
 .I field_code
 was not found.  This error may also result from attempting to dereference a
-scalar field code which indicates a non-existant field.
+scalar field code which indicates a non-existent field.
 .TP
 .B GD_E_BAD_DIRFILE
 The supplied dirfile was invalid.
