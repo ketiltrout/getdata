@@ -1904,10 +1904,6 @@ static PyGetSetDef gdpy_entry_getset[] = {
 "    'in_field':   a string containing the input field code.\n"\
 "    'shift:       a number or CONST field code specifying the number of\n"\
 "                    samples to shift the data.\n\n"\
-"  PHASE:        (in_field, shift)\n"\
-"    'in_field':   a string containing the input field code.\n"\
-"    'shift':      a number or CONST field code specifying the number of\n"\
-"                    samples to shift the data.\n\n"\
 "  POLYNOM:      (in_field, a)\n"\
 "    'in_field':   a string containing the input field code.\n"\
 "    'a':          a tuple of the co-efficients of the polynomial.  The\n"\

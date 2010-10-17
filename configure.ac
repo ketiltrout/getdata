@@ -22,7 +22,7 @@ dnl
 m4_define(getdata_major,    0)
 m4_define(getdata_minor,    7)
 m4_define(getdata_revision, 0)
-m4_define(getdata_extra,    [a2])
+m4_define(getdata_extra,    [rc1])
 m4_define(getdata_version,
           getdata_major.getdata_minor.getdata_revision[]getdata_extra)
 
@@ -43,20 +43,20 @@ AC_ARG_VAR([BUILDCC],
            [C compiler command on the build system (only needed if cross-compiling)])
 
 dnl libgetdata current interface version
-AC_SUBST(GETDATA_IFACE_VERSION, [3])
+AC_SUBST(GETDATA_IFACE_VERSION, [4])
 dnl libgetdata current interface implementation revision
 AC_SUBST(GETDATA_IMPL_REVISION, [0])
 dnl libgetdata interface age (current interface - oldest supported interface)
-AC_SUBST(GETDATA_IFACE_AGE, [1])
+AC_SUBST(GETDATA_IFACE_AGE, [0])
 
 dnl libgetdata++ interface version info
-AC_SUBST(GETDATAXX_VERSION, [1:0:0])
+AC_SUBST(GETDATAXX_VERSION, [2:0:1])
 
 dnl libfgetdata interface version info
-AC_SUBST(FGETDATA_VERSION, [1:0:0])
+AC_SUBST(FGETDATA_VERSION, [2:0:1])
 
 dnl libf95getdata interface version info
-AC_SUBST(F95GETDATA_VERSION, [1:0:0])
+AC_SUBST(F95GETDATA_VERSION, [2:0:0])
 
 AC_CONFIG_SRCDIR([src/getdata.c])
 AC_CONFIG_HEADER([src/config.h])
@@ -133,18 +133,6 @@ AC_ARG_ENABLE(ansi-c, AS_HELP_STRING([--enable-ansi-c],
               ], [disable_c99="no"])
 AC_MSG_CHECKING([whether to build in ANSI C compliance mode])
 AC_MSG_RESULT([$disable_c99])
-
-dnl checkdirfile
-AC_ARG_ENABLE(checkdirfile, AS_HELP_STRING([--disable-checkdirfile],
-              [don't build or install the checkdirfile utility]),
-              [
-               case "${enableval}" in
-                 no) make_checkdirfile="don't build" ;;
-                 *) make_checkdirfile="build" ;;
-               esac
-              ], [ make_checkdirfile="build" ])
-AC_MSG_CHECKING([whether to compile and install checkdirfile])
-AC_MSG_RESULT([$make_checkdirfile])
 
 dnl bindings, globally
 make_cxxbindings="yes"
@@ -793,7 +781,6 @@ AM_CONDITIONAL(INTEL_F77_COMPILER,
 AM_CONDITIONAL(INTEL_FC_COMPILER, [test "x$gd_cv_fc_compiler_intel" == "xyes"])
 AM_CONDITIONAL(LFS_TRANSITIONAL_API, [test "x$gd_cv_type_off64_t" = "xyes"])
 AM_CONDITIONAL(INCLUDE_LEGACY_API, [test "x$include_legacy_api" != "xno"])
-AM_CONDITIONAL(MAKE_CHECKDIRFILE, [test "x$make_checkdirfile" = "xbuild"])
 AM_CONDITIONAL(MAKE_CXXBINDINGS, [test "x$make_cxxbindings" = "xyes"])
 AM_CONDITIONAL(MAKE_F77BINDINGS, [test "x$make_f77bindings" != "xno"])
 AM_CONDITIONAL(MAKE_F95BINDINGS, [test "x$make_f95bindings" = "xyes"])
@@ -868,7 +855,6 @@ fi
 
 echo
 echo "Configuration summary: "
-echo "  checkdirfile utility:         ${make_checkdirfile}"
 echo "  ANSI C compatibility mode:    ${disable_c99}"
 echo "  LFS transitional API:         ${lfs_transitional_api}"
 echo "  Legacy API:                   ${include_legacy_api}"

@@ -31,11 +31,7 @@ endif
 LDADD=../src/libgetdata.la
 INCLUDES=${WALL} $(WEXTRA) -I$(top_srcdir)/src
 
-if MAKE_CHECKDIRFILE
-CHECKDIRFILE=checkdirfile dirfile2ascii
-endif
-
-bin_PROGRAMS=$(CHECKDIRFILE)
+bin_PROGRAMS=checkdirfile dirfile2ascii
 checkdirfile_SOURCES=checkdirfile.c
 dirfile2ascii_SOURCES=dirfile2ascii.c
 

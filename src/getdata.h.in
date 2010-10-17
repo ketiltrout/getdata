@@ -873,6 +873,7 @@ extern off64_t gd_eof64(DIRFILE *dirfile, const char* field_code)
 
 /* function aliases */
 #ifdef GD_FUNCTION_ALIASES
+#  warning "Using deprecated function aliases."
 #  define dirfile_add gd_add
 #  define dirfile_add_bit gd_add_bit
 #  define dirfile_add_clincom gd_add_clincom

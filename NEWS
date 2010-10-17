@@ -1,6 +1,165 @@
-New in version 0.7.0a2:
+New in version 0.7.0rc1:
 
-  * Plus ça change, plus c'est la même chose.
+  Dirfile Changes
+
+  * Dirfile Standards Version 8 has been released.  It adds two new field types:
+    DIVIDE, which computes X/Y for vectors X and Y, and RECIP, which computes
+    A/X for vector X and scalar A.  A few other changes are listed below.
+  * Slashes on reserved words are now mandatory, allowing fields with reserved
+    words as names.
+  * The long deprecated single character data type codes have been removed.
+  * Just to be clear: these removed features are still supported by GetData,
+    since it can handle older Standards Versions as well.
+  * The /ENDIAN directive now takes an optional second parameter.  The only
+    allowed value for this second token is "arm", which indicates that double
+    precision floating point data (including double precision complex data) are
+    stored in the ARM middle-endian format.
+
+  Library Changes
+
+  * GetData, including its bindings, is now supported under MacOS X, Cygwin, and
+    Win32 using MinGW.  In the case of MinGW, this includes linking against the
+    Microsoft C Runtime, which isn't POSIX compliant.  Users should excercise
+    caution when writing to dirfiles in this case.
+  * GetData can now be used on ARM processors.  As a side-effect, GetData can
+    now read and write the middle-ended floating point format used by older ARM
+    processors (on any processor).
+  * Some changes have been made to the parser.  It now operates in one of two
+    modes: pedantic mode, which adheres strictly to one particular Dirfile
+    Standards Version, and permissive mode (the default) which is more
+    lenient, as the old parser was.  Encountering a /VERSION directive will
+    switch the parser from permissive to pedantic mode unless told not to (see
+    GD_PERMISSIVE below), and will change the particular Standards Version to
+    which pedantic mode is adhering.
+  * As a result of the previous change, the Standards compliance of the parser
+    in strict mode has been greatly increased.  This affects allowed characters
+    in field names, and field name lengths.  The existance or lack thereof of
+    the implicit FILEFRAM field (an alias for INDEX) is also affected.
+  * Since Standards Versions 4 and earlier were never codified, we've made some
+    assumptions as to their behaviour in certain undocumented situtations.  Most
+    noticably, they still prohibit ASCII control codes (bytes < 0x20) and '/'
+    in field names.
+  * Every Dirfile object now complies to a particular Standards Version, which
+    affects functions such as gd_add_spec().  The Version will start out as the
+    value of the last /VERSION directive encountered by the parser, or else the
+    latest compliant Standards Version.  It can be changed (see below).
+  * When writing metadata to disk, fragments will be written according to the
+    current Standards Version of the dirfile object, rather than always using
+    the latest version, as before.
+  * The C library now sports an "ANSI C" mode, which allows compilation of
+    GetData without a C99-compliant compiler.  Some functionality may be lost,
+    most prominently, but unsurprisingly, the default (C99) API.
+  * LINTERP tables are no longer required to be sorted.  The library will
+    sort them, if needed.  As a side-effect of this, tables are no longer read
+    twice when loading, leading to potential speed-up.
+  * BUG FIX: The library wasn't properly checking that the second and higher
+    input fields in LINCOM and MULTIPLY fields were, in fact, vectors, leading
+    to possible segfaults.
+  * BUG FIX: A memory leak associated with modifying LINCOM metadata has been
+    fixed.
+  * BUG FIX: Using a complex valued vector as the second input field in a
+    MULTIPLY wouldn't result in the field being internally flagged as complex,
+    leading to loss of the imaginary part in certain situtaitons.
+  * BUG FIX: Trying to write to a LINTERP which isn't monotonic now results in
+    error.  Previously, this was allowed, with arbitrary data stored to disk.
+
+  API Changes
+
+  * Due to namespace conflicts with the MacOS X System Library (which contains
+    the C Standard Library), a wholesale renaming of public symbols has been
+    performed.  All public functions, and data types now begin with 'gd_'.  All
+    public preprocessor macros now begin with 'GD_'.  Symbol renaming has
+    occurred in the following manner:
+    - functions which started with 'put' simply prefix 'gd_' to their name.  So
+      put_constant() becomes gd_put_constant().
+    - functions which started with 'get' replace 'get' with 'gd', except those
+      functions with a corresponding 'put' function, these simply prefix 'gd_'.
+      So, get_constants() becomes gd_constants(), but get_constant() becomes
+      gd_get_constant().
+    - functions which started with 'dirfile' replace 'dirfile' with 'gd',
+      except for dirfilename(), which becomes gd_dirfilename().  So,
+      dirfile_alter_encoding() become gd_alter_encoding().
+    - macros which started with 'GETDATA_' now start with 'GD_'.  Those that
+      started with 'NO_GETDATA_' now start with 'GD_NO_'.  So GETDATA_LEGACY_API
+      becomes GD_LEGACY_API and NO_GETDATA_LEGACY_API becomes GD_NO_LEGACY_API.
+  * The above renaming rules result in one gd_ namespace clash.  As a result,
+    get_reference() has been removed completely.  Calls will have to be
+    changed to use gd_reference(), formerly dirfile_reference().
+  * To ease transition to the new namespace, defining GD_FUNCTION_ALIASES before
+    including getdata.h will create a bunch of preprocessor macros which map the
+    old names to the new.
+  * The meaning of the GD_PEDANTIC flag to gd_[cb]open() has changed.  It now
+    forces the parser to start off in pedantic mode (see above), following the
+    latest Standards Version, rather than the default permissive mode.  This is
+    a subtle change, and in most cases the effects of GD_PEDANTIC will be the
+    same as they were before.
+  * A new dirfile flag, GD_PERMISSIVE, has been added.  Passing this to
+    gd_[cb]open() will prohibit the parser from switching into pedantic mode
+    when it encounters a /VERSION directive.  This flag is needed to read
+    dirfiles which claim to adhere to the Standards via a /VERSION directive,
+    but contain invalid syntax nonetheless.
+  * The current Standards Version of an open dirfile can be set or queried by
+    calling the new function gd_dirfile_standards().  NB: this only affects the
+    open dirfile, not the metadata stored on disk.
+  * A new function, gd_rewrite_fragment() will force GetData to write the
+    specified fragment to disk, even if no metadata in the fragment has changed.
+  * Two new functions, gd_bof() and gd_eof() can be used to find the sample
+    number of the beginning- or end-of-field for a given field.  Notably, these
+    can be used to calculate the amount of raw data on disk for a given field.
+  * The new gd_invalid_dirfile() function will return a newly created, invalid
+    dirfile.  Primarily useful to callers as a "null dirfile" placeholder.
+  * GD_E_OPEN_INCLUDE has been renamed to GD_E_OPEN_FRAGMENT, but the former
+    symbol remains as an alias.
+  * Where gd_flush() and gd_metaflush() in the past raised GD_E_OPEN_INCLUDE
+    on I/O error, they now raise the new GD_FLUSH.
+  * All functions now raise GD_E_DIMENSION when encountering a scalar field
+    when expecting a vector.  In the past, the error value returned was
+    different for different functions.
+  * getdata.h now wraps itself in an extern "C" block if included by a C++
+    compiler.
+  * BUG FIX: gd_metaflush() now fails and raises GD_E_ACCMODE if called on a
+    read-only dirfile
+
+  Bindings
+
+  * C++: Const member functions are now flagged as such.
+  * F95: For consistency sake, the Fortran 95 bindings have undergone the same
+    renaming as the C bindings.  All functions are now preceded by 'fgd_'.
+  * IDL: The IDL bindings have also followed suit in the great renaming.  The
+    exception to this is GETDATA_CONSTANTS(), which is not renamed.
+  * C++ BUG FIX: Entry::Scalar() no longer rejects valid values of index. 
+  * Python BUG FIX: A non-litteral phase shift is now properly reported.
+
+  Miscellaneous
+
+  * The --disable-checkdirfile option has been removed from ./configure.  It
+    is now always installed.
+  * A utility, dirfile2ascii, is now installed alongside checkdirfile.  This
+    utility converts all or part of a dirfile into ASCII text.  dirfile2ascii
+    was written by Matthew Truch.
+  * The thoroughness of the checks done by checkdirfile have increased.  It now
+    reports format syntax errors, Dirfile Standards compliance, problems with
+    field definitions (such as missing input fields), and the size of the
+    dirfile.
+
+|==============================================================================|
+
+New in version 0.6.3:
+
+  Bindings 
+
+  * A memory leak has been plugged in the Python bindings manifesting in calls
+    to dirfile.getdata() returning a NumPy array.  In previous versions, the
+    memory used by the returned array to hold the data was not reclaimed by GC.
+
+|==============================================================================|
+
+New in version 0.6.2:
+
+  Library Changes
+
+  * Attempting to get the number of frames from an ASCII file no longer fails
+    the second time.
 
 |==============================================================================|
 

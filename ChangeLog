@@ -1,3 +1,11 @@
+2010-10-17   D. V. Wiebe <getdata@ketiltrout.net>   svn:455
+	GetData-0.7.0rc1:
+
+	* configure.ac: update library interface numbers.  Removed
+	--disable-checkdirfile.
+
+	* MEWS: Update.
+
 2010-10-16   D. V. Wiebe <getdata@ketiltrout.net>   svn:453
 	* configure.ac: Generate Makefiles even for bindings we're not using (so we
 	can still run maintainer tasks on them.)
