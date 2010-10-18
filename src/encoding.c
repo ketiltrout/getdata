@@ -176,7 +176,7 @@ void _GD_InitialiseFramework(void)
     encoding == GD_TEXT_ENCODED || encoding == GD_LZMA_ENCODED))
 
 #ifdef USE_MODULES
-static void* _GD_ResolveSymbol(lt__handle* lib, struct encoding_t* enc,
+static void* _GD_ResolveSymbol(lt_dlhandle lib, struct encoding_t* enc,
     const char* name)
 {
   void* func;
@@ -225,35 +225,39 @@ int _GD_MissingFramework(int encoding, unsigned int funcs)
 
     /* Try to resolve the symbols */
     if (_gd_ef[encoding].provides & GD_EF_OPEN)
-      _gd_ef[encoding].open = (int (*)(_gd_raw_file*, int,
+      _gd_ef[encoding].open = (int (*)(struct _gd_raw_file*, int,
             int))_GD_ResolveSymbol(lib, _gd_ef + encoding, "Open");
     if (_gd_ef[encoding].provides & GD_EF_CLOSE)
-      _gd_ef[encoding].close = (int (*)(_gd_raw_file*))_GD_ResolveSymbol(lib,
-          _gd_ef + encoding, "Close");
+      _gd_ef[encoding].close =
+        (int (*)(struct _gd_raw_file*))_GD_ResolveSymbol(lib, _gd_ef + encoding,
+            "Close");
     if (_gd_ef[encoding].provides & GD_EF_TOUCH)
-      _gd_ef[encoding].touch = (int (*)(_gd_raw_file*))_GD_ResolveSymbol(lib,
-          _gd_ef + encoding, "Touch");
+      _gd_ef[encoding].touch = (int (*)(struct _gd_raw_file*))
+        _GD_ResolveSymbol(lib, _gd_ef + encoding, "Touch");
     if (_gd_ef[encoding].provides & GD_EF_SEEK)
-      _gd_ef[encoding].seek = (off64_t (*)(_gd_raw_file*, off64_t, gd_type_t,
-            int))_GD_ResolveSymbol(lib, _gd_ef + encoding, "Seek");
+      _gd_ef[encoding].seek = (off64_t (*)(struct _gd_raw_file*, off64_t,
+            gd_type_t, int))_GD_ResolveSymbol(lib, _gd_ef + encoding, "Seek");
     if (_gd_ef[encoding].provides & GD_EF_READ)
-      _gd_ef[encoding].read = (ssize_t (*)(_gd_raw_file*, void*, gd_type_t,
-            size_t))_GD_ResolveSymbol(lib, _gd_ef + encoding, "Read");
+      _gd_ef[encoding].read = (ssize_t (*)(struct _gd_raw_file*, void*,
+            gd_type_t, size_t))_GD_ResolveSymbol(lib, _gd_ef + encoding,
+            "Read");
     if (_gd_ef[encoding].provides & GD_EF_SIZE)
-      _gd_ef[encoding].size = (off64_t (*)(_gd_raw_file*,
+      _gd_ef[encoding].size = (off64_t (*)(struct _gd_raw_file*,
             gd_type_t))_GD_ResolveSymbol(lib, _gd_ef + encoding, "Size");
     if (_gd_ef[encoding].provides & GD_EF_WRITE)
-      _gd_ef[encoding].write = (ssize_t (*)(_gd_raw_file*, const void*,
+      _gd_ef[encoding].write = (ssize_t (*)(struct _gd_raw_file*, const void*,
             gd_type_t, size_t))_GD_ResolveSymbol(lib, _gd_ef + encoding,
             "Write");
     if (_gd_ef[encoding].provides & GD_EF_SYNC)
-      _gd_ef[encoding].sync = (int (*)(_gd_raw_file*))_GD_ResolveSymbol(lib,
-          _gd_ef + encoding, "Sync");
+      _gd_ef[encoding].sync =
+        (int (*)(struct _gd_raw_file*))_GD_ResolveSymbol(lib, _gd_ef + encoding,
+            "Sync");
     if (_gd_ef[encoding].provides & GD_EF_UNLINK)
-      _gd_ef[encoding].unlink = (int (*)(_gd_raw_file*))_GD_ResolveSymbol(lib,
-          _gd_ef + encoding, "Unlink");
+      _gd_ef[encoding].unlink =
+        (int (*)(struct _gd_raw_file*))_GD_ResolveSymbol(lib, _gd_ef + encoding,
+            "Unlink");
     if (_gd_ef[encoding].provides & GD_EF_TEMP)
-      _gd_ef[encoding].temp = (int (*)(_gd_raw_file*,
+      _gd_ef[encoding].temp = (int (*)(struct _gd_raw_file*,
             int))_GD_ResolveSymbol(lib, _gd_ef + encoding, "Temp");
 
     /* we tried our best, don't bother trying again */

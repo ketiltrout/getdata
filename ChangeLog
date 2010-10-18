@@ -1,3 +1,9 @@
+2010-10-18   D. V. Wiebe <getdata@ketiltrout.net>   svn:455
+	GetData-0.7.0rc2:
+
+	* encoding.c (_GD_ResolveSymbol _GD_MissingFramework): Fix types for
+	USE_MODULES.
+
 2010-10-17   D. V. Wiebe <getdata@ketiltrout.net>   svn:455
 	GetData-0.7.0rc1:
 
