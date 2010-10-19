@@ -853,7 +853,7 @@ static PyObject* gdpy_dirfile_getmfieldlist(struct gdpy_dirfile_t* self,
   const char** fields;
   char* keywords[] = { "parent", "type", NULL };
   const char* parent = NULL;
-  gd_type_t type = (int)GD_NO_ENTRY;
+  gd_entype_t type = GD_NO_ENTRY;
   int i;
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
