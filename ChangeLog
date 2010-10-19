@@ -1,4 +1,8 @@
-2010-10-18   D. V. Wiebe <getdata@ketiltrout.net>   svn:455
+2010-10-19   D. V. Wiebe <getdata@ketiltrout.net>   svn:457
+	* legacy.c (_GD_GetDirfile): On error, set *error_code (now passed as a
+	parameter), copy the error, discard the bad dirfile, and return NULL.
+
+2010-10-18   D. V. Wiebe <getdata@ketiltrout.net>   svn:456
 	GetData-0.7.0rc2:
 
 	* encoding.c (_GD_ResolveSymbol _GD_MissingFramework): Fix types for

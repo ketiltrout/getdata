@@ -120,6 +120,14 @@ New in version 0.7.0rc2:
   * BUG FIX: gd_metaflush() now fails and raises GD_E_ACCMODE if called on a
     read-only dirfile
 
+  Legacy API Changes
+
+  * In the legacy format struct, DIVIDE fields are listed as MULTIPLYs and RECIP
+    fields are listed as LINCOMs, with the dividend stored in m[0].
+  * BUG FIX: In previous versions, attempting to access an invalid dirfile
+    (anything that would cause gd_open to fail) resulted in leaked memory.  This
+    leak has been plugged.
+
   Bindings
 
   * C++: Const member functions are now flagged as such.

@@ -114,7 +114,7 @@ char *GetDataErrorString(char* buffer, size_t buflen) gd_nothrow
 /* _GD_GetDirfile: Locate the legacy DIRFILE given the filespec.  This started
  * life as GetFormat...
  */
-static DIRFILE* _GD_GetDirfile(const char *filename_in, int mode)
+static DIRFILE* _GD_GetDirfile(const char *filename_in, int mode, int *error_code)
 {
   unsigned int i_dirfile;
   void *ptr;
@@ -134,7 +134,7 @@ static DIRFILE* _GD_GetDirfile(const char *filename_in, int mode)
       if ((mode & GD_RDWR) && (_GD_Dirfiles.D[i_dirfile]->flags & GD_ACCMODE) ==
           GD_RDONLY) {
         /* close it */
-        gd_close(_GD_Dirfiles.D[i_dirfile]);
+        gd_discard(_GD_Dirfiles.D[i_dirfile]);
 
         /* copy the last dirfile in the list over top of this one and decrement
          * the counter -- next realloc will do nothing */
@@ -150,29 +150,28 @@ static DIRFILE* _GD_GetDirfile(const char *filename_in, int mode)
   /* if we get here, the file has not yet been read */
   /* Allocate the memory, then fill.  If we have an error, */
   /*  we will have to free the memory... */
-  _GD_Dirfiles.n++;
-  ptr = realloc(_GD_Dirfiles.D, _GD_Dirfiles.n * sizeof(DIRFILE*));
+  ptr = realloc(_GD_Dirfiles.D, (_GD_Dirfiles.n + 1) * sizeof(DIRFILE*));
   if (ptr == NULL) {
-    /* There's been a problem trying to create a new dirfile object, even an
-     * invalid one.  So, return the only one we're guaranteed to have... */
-    _GD_GlobalErrors.error = GD_E_ALLOC;
-    dreturn("%p", &_GD_GlobalErrors);
-    return &_GD_GlobalErrors;
+    *error_code = _GD_GlobalErrors.error = GD_E_ALLOC;
+    dreturn("%p", NULL);
+    return NULL;
   }
 
   _GD_Dirfiles.D = (DIRFILE **)ptr;
 
   /* Open a dirfile */
-  _GD_Dirfiles.D[_GD_Dirfiles.n - 1] = gd_open(filedir, mode);
+  _GD_Dirfiles.D[_GD_Dirfiles.n] = gd_open(filedir, mode);
 
-  /* Error encountered -- the dirfile will shortly be deleted */
-  if (_GD_Dirfiles.D[_GD_Dirfiles.n - 1]->error != GD_E_OK) {
-    dreturn("%p", _GD_Dirfiles.D[_GD_Dirfiles.n - 1]);
-    return _GD_Dirfiles.D[--_GD_Dirfiles.n];
+  /* Error encountered -- clean up */
+  if (_GD_Dirfiles.D[_GD_Dirfiles.n]->error != GD_E_OK) {
+    *error_code = _GD_CopyGlobalError(_GD_Dirfiles.D[_GD_Dirfiles.n]);
+    gd_discard(_GD_Dirfiles.D[_GD_Dirfiles.n]);
+    dreturn("%p", NULL);
+    return NULL;
   }
 
-  dreturn("%p", _GD_Dirfiles.D[_GD_Dirfiles.n - 1]);
-  return _GD_Dirfiles.D[_GD_Dirfiles.n - 1];
+  dreturn("%p", _GD_Dirfiles.D[_GD_Dirfiles.n]);
+  return _GD_Dirfiles.D[_GD_Dirfiles.n++];
 }
 
 static void CopyRawEntry(struct RawEntryType* R, gd_entry_t* E)
@@ -349,8 +348,6 @@ struct FormatType *GetFormat(const char *filedir, int *error_code) gd_nothrow
 {
   dtrace("\"%s\", %p", filedir, error_code);
 
-  DIRFILE *D = _GD_GetDirfile(filedir, GD_RDONLY);
-
   unsigned int i;
 
   int nraw = 0;
@@ -360,8 +357,9 @@ struct FormatType *GetFormat(const char *filedir, int *error_code) gd_nothrow
   int nbit = 0;
   int nphase = 0;
 
-  if (D->error) {
-    *error_code = _GD_CopyGlobalError(D);
+  DIRFILE *D = _GD_GetDirfile(filedir, GD_RDONLY, error_code);
+
+  if (!D) {
     dreturn("%p", NULL);
     return NULL;
   }
@@ -490,10 +488,9 @@ int GetData(const char *filename, const char *field_code,
       first_frame, first_samp, num_frames, num_samp, return_type, data_out,
       error_code);
 
-  D = _GD_GetDirfile(filename, GD_RDONLY);
+  D = _GD_GetDirfile(filename, GD_RDONLY, error_code);
 
-  if (D->error) {
-    *error_code = _GD_CopyGlobalError(D);
+  if (!D) {
     dreturn("%i", 0);
     return 0;
   }
@@ -519,10 +516,9 @@ int GetNFrames(const char *filename, int *error_code,
 
   dtrace("\"%s\", %p, <unused>", filename, error_code);
 
-  D = _GD_GetDirfile(filename, GD_RDONLY);
+  D = _GD_GetDirfile(filename, GD_RDONLY, error_code);
 
-  if (D->error) {
-    *error_code = _GD_CopyGlobalError(D);
+  if (!D) {
     dreturn("%i", 0);
     return 0;
   }
@@ -543,10 +539,9 @@ int GetSamplesPerFrame(const char *filename, const char *field_code,
 
   dtrace("\"%s\", \"%s\", %p", filename, field_code, error_code);
 
-  D = _GD_GetDirfile(filename, GD_RDONLY);
+  D = _GD_GetDirfile(filename, GD_RDONLY, error_code);
 
-  if (D->error) {
-    *error_code = _GD_CopyGlobalError(D);
+  if (!D) {
     dreturn("%i", 0);
     return 0;
   }
@@ -571,10 +566,9 @@ int PutData(const char *filename, const char *field_code,
       first_frame, first_samp, num_frames, num_samp, data_type, data_in,
       error_code);
 
-  D = _GD_GetDirfile(filename, GD_RDWR | GD_UNENCODED);
+  D = _GD_GetDirfile(filename, GD_RDWR | GD_UNENCODED, error_code);
 
-  if (D->error) {
-    *error_code = _GD_CopyGlobalError(D);
+  if (!D) {
     dreturn("%i", 0);
     return 0;
   }
