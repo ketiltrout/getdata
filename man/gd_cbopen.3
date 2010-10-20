@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_cbopen 3 "15 October 2010" "Version 0.7.0" "GETDATA"
+.TH gd_cbopen 3 "20 October 2010" "Version 0.7.0" "GETDATA"
 .SH NAME
 gd_cbopen, gd_open \(em open or create a dirfile
 .SH SYNOPSIS
@@ -285,7 +285,7 @@ Specifies that raw data files are not encoded, but written verbatim to disk.
 The latest Dirfile Standards Version which this release of GetData understands
 is provided in the preprocessor macro
 .B GD_DIRFILE_STANDARDS_VERSION
-defined in getdata.h.  GetData is able to open and parse any Dirfile which
+defined in getdata.h.  GetData is able to open and parse any dirfile which
 conforms to this Standards Version, or to any earlier Version.  The
 .BR dirfile-format (5)
 manual page lists the changes between Standards Versions.
@@ -306,7 +306,7 @@ mode, otherwise it will start in
 mode.
 
 .I Permissive
-mode is provided primarily to allow GetData to be used on Dirfiles which
+mode is provided primarily to allow GetData to be used on dirfiles which
 conform to no single Standard, but which were accepted by the GetData parser
 in previous versions.  It is notably lax regarding reserved field names, and
 field name characters, the mixing of old and new data type specifiers, and
@@ -611,8 +611,27 @@ a call to
 .BR gd_error_string (3).
 When finished with it, a caller should de-allocate the DIRFILE object by calling
 .BR gd_close (3),
+or
+.BR gd_discard (3),
 even if the open failed.
 .SH BUGS
+When working with dirfiles conforming to Standards Versions 4 and earlier
+(before the introduction of the
+.B ENDIAN
+directive), GetData assumes the dirfile has native byte sex, even though,
+officially, these early Standards stipulated data to be little-endian.  This is
+necessary since, in the absense of an explicit
+.B /VERSION
+directive, it is often impossible to determine the intended Standards Version of
+a dirfile, and the current behaviour is to assume native byte sex for modern
+dirfiles lacking
+.BR /ENDIAN .
+To read an old, little-ended dirfile on a big-ended platform, an
+.B /ENDIAN
+directive should be added to the format specification, or else
+.B GD_LITTLE_ENDIAN
+should be specified by the caller.
+
 GetData's parser assumes it is running on an ASCII-compatible platform.  Format
 specification parsing will fail gloriously on an EBCDIC platform.
 .SH SEE ALSO
@@ -621,6 +640,7 @@ specification parsing will fail gloriously on an EBCDIC platform.
 .BR dirfile-format (5),
 .BR gd_close (3),
 .BR gd_dirfile_standards (3),
+.BR gd_discard (3),
 .BR gd_error (3),
 .BR gd_error_string (3),
 .BR gd_getdata (3),

@@ -1,3 +1,11 @@
+2010-10-20   D. V. Wiebe <getdata@ketiltrout.net>   svn:459
+	* test/version_5.c: Fix for WORDS_BIGENDIAN.
+
+	* src/getdata.c (_GD_DoRaw) src/putdata.c (_GD_DoRawOut): Fix
+	_GD_FixEndianness test.
+
+	* src/flush.c (_GD_FindVersion): Native byte sex is assumed in early versions.
+
 2010-10-19   D. V. Wiebe <getdata@ketiltrout.net>   svn:457
 	* legacy.c (_GD_GetDirfile): On error, set *error_code (now passed as a
 	parameter), copy the error, discard the bad dirfile, and return NULL.

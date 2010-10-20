@@ -17,7 +17,11 @@ int main(void)
   const char* data = __TEST__ "dirfile/a.r";
   const char* format_data =
     "/VERSION 5\n"
+#ifdef WORDS_BIGENDIAN
+    "/ENDIAN little\n"
+#else
     "/ENDIAN big\n"
+#endif
     "a.r RAW UINT8 8\n"
     "ENCODING PHASE a.r 0\n";
   uint16_t c[8];

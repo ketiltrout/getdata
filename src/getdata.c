@@ -341,7 +341,7 @@ static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *E, off64_t s0, size_t ns,
             E->EN(raw,data_type) & GD_COMPLEX, samples_read);
       }
 
-      if (D->fragment[E->fragment_index].byte_sex ==
+      if (D->fragment[E->fragment_index].byte_sex &
 #ifdef WORDS_BIGENDIAN
              GD_LITTLE_ENDIAN
 #else

@@ -714,7 +714,13 @@ uint64_t _GD_FindVersion(DIRFILE *D)
   for (i = 0; D->av && i < (unsigned int)D->n_fragment; ++i) {
     if (D->fragment[i].frame_offset > 0)
       D->av &= GD_VERS_GE_1;
-    else if (D->fragment[i].byte_sex != GD_LITTLE_ENDIAN)
+    else if (D->fragment[i].byte_sex !=
+#ifdef WORDS_BIGENDIAN
+        GD_BIG_ENDIAN
+#else
+        GD_LITTLE_ENDIAN
+#endif
+        )
       D->av &= GD_VERS_GE_5;
     else if ((D->fragment[i].encoding != GD_UNENCODED &&
           D->fragment[i].encoding != GD_AUTO_ENCODED) ||

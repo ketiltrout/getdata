@@ -87,7 +87,7 @@ static size_t _GD_DoRawOut(DIRFILE *D, gd_entry_t *E, off64_t s0,
           ns);
     }
 
-    if (D->fragment[E->fragment_index].byte_sex ==
+    if (D->fragment[E->fragment_index].byte_sex &
 #ifdef WORDS_BIGENDIAN
            GD_LITTLE_ENDIAN
 #else

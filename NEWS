@@ -38,8 +38,10 @@ New in version 0.7.0rc2:
   * Since Standards Versions 4 and earlier were never codified, we've made some
     assumptions as to their behaviour in certain undocumented situtations.  Most
     noticably, they still prohibit ASCII control codes (bytes < 0x20) and '/'
-    in field names.
-  * Every Dirfile object now complies to a particular Standards Version, which
+    in field names.  We also assume these dirfiles have native byte sex, even
+    though some early Standards Version implied only little-ended data was
+    acceptable.
+  * Every Dirfile object now records its current Standards Version, which
     affects functions such as gd_add_spec().  The Version will start out as the
     value of the last /VERSION directive encountered by the parser, or else the
     latest compliant Standards Version.  It can be changed (see below).
@@ -60,8 +62,9 @@ New in version 0.7.0rc2:
   * BUG FIX: Using a complex valued vector as the second input field in a
     MULTIPLY wouldn't result in the field being internally flagged as complex,
     leading to loss of the imaginary part in certain situtaitons.
-  * BUG FIX: Trying to write to a LINTERP which isn't monotonic now results in
-    error.  Previously, this was allowed, with arbitrary data stored to disk.
+  * BUG FIX: Trying to write to a LINTERP via a table which isn't monotonic now
+    results in error.  Previously, this was allowed, with arbitrary data stored
+    to disk.
 
   API Changes
 

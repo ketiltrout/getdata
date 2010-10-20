@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_invalid_dirfile 3 "15 October 2010" "Version 0.7.0" "GETDATA"
+.TH gd_invalid_dirfile 3 "20 October 2010" "Version 0.7.0" "GETDATA"
 .SH NAME
 gd_invalid_dirfile \(em obtain an pointer to an invalid DIRFILE object
 .SH SYNOPSIS
@@ -54,7 +54,7 @@ call, such as:
 .in
 .PP
 which also returns a pointer to an invalid DIRFILE object.  The difference
-is that an invalid DIRFILE created in this way has a non-zero Dirfile
+is that an invalid DIRFILE created in this way has a non-zero dirfile
 error (obtainable with
 .BR gd_error (3)),
 while the dirfile error of the invalid DIRFILE returned by
@@ -68,4 +68,5 @@ object.
 .SH SEE ALSO
 .BR gd_close (3),
 .BR gd_discard (3),
+.BR gd_error (3),
 .BR gd_open (3)
