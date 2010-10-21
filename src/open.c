@@ -311,7 +311,7 @@ DIRFILE* gd_cbopen(const char* filedir, unsigned long flags,
 #else
     (D->flags & GD_BIG_ENDIAN) ? GD_BIG_ENDIAN : GD_LITTLE_ENDIAN
 #endif
-    ) | (D->flags & GD_ARM_ENDIAN);
+    ) | (D->flags & GD_ARM_FLAG);
   D->fragment[0].ref_name = NULL;
   D->fragment[0].frame_offset = 0;
   D->fragment[0].protection = GD_PROTECT_NONE;

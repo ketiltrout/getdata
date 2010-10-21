@@ -101,6 +101,8 @@ double cimag(double complex z);
 #  include <io.h>
 #endif
 
+#define GD_ARM_FLAG (GD_ARM_ENDIAN | GD_NOT_ARM_ENDIAN)
+
 /* Type conventions:
  *
  *  - samples per frame is always gd_spf_t (aka uin16_t)
@@ -333,6 +335,9 @@ int strerror_r(int, char*, size_t);
 #define GD_E_FLUSH_MKTMP        1
 #define GD_E_FLUSH_OPEN         2
 #define GD_E_FLUSH_RENAME       3
+
+#define GD_E_VERS_NONE          1
+#define GD_E_VERS_MISSING       2
 
 struct _gd_raw_file {
   char* name;

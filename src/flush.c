@@ -479,7 +479,8 @@ static void _GD_FlushFragment(DIRFILE* D, int i, int permissive)
     fprintf(stream, "/ENDIAN %s%s\n",
         (D->fragment[i].byte_sex & GD_LITTLE_ENDIAN) ? "little" : "big",
         ((permissive || D->standards >= 8) &&
-         D->fragment[i].byte_sex & GD_ARM_ENDIAN) ? " arm" : "");
+         (D->fragment[i].byte_sex & GD_ARM_FLAG) == GD_ARM_ENDIAN) ? " arm" :
+        "");
 
   if (permissive || D->standards >= 6) {
     if (D->fragment[i].protection == GD_PROTECT_NONE)
@@ -712,20 +713,30 @@ uint64_t _GD_FindVersion(DIRFILE *D)
     D->av &= GD_VERS_GE_3;
 
   for (i = 0; D->av && i < (unsigned int)D->n_fragment; ++i) {
-    if (D->fragment[i].frame_offset > 0)
-      D->av &= GD_VERS_GE_1;
-    else if (D->fragment[i].byte_sex !=
-#ifdef WORDS_BIGENDIAN
-        GD_BIG_ENDIAN
-#else
-        GD_LITTLE_ENDIAN
-#endif
-        )
+    /* on an arm-endian platform, the arm flag is set by /ENDIAN directives
+     * missing an "arm" token, but it's absense might mean either an "arm"
+     * token was present, or else there was no /ENDIAN directive at all */
+    if (D->fragment[i].byte_sex & GD_ARM_FLAG)
+#if ARM_ENDIAN_DOUBLES
       D->av &= GD_VERS_GE_5;
-    else if ((D->fragment[i].encoding != GD_UNENCODED &&
+#else
+      D->av &= GD_VERS_GE_8;
+    else
+#endif
+    if ((D->fragment[i].encoding != GD_UNENCODED &&
           D->fragment[i].encoding != GD_AUTO_ENCODED) ||
         D->fragment[i].protection)
       D->av &= GD_VERS_GE_6;
+    else if (D->fragment[i].byte_sex &
+#if WORDS_BIGENDIAN
+        GD_LITTLE_ENDIAN
+#else
+        GD_BIG_ENDIAN
+#endif
+        )
+      D->av &= GD_VERS_GE_5;
+    else if (D->fragment[i].frame_offset > 0)
+      D->av &= GD_VERS_GE_1;
   }
 
   for (i = 0; D->av && i < D->n_entries; ++i) {
@@ -884,7 +895,8 @@ int gd_dirfile_standards(DIRFILE *D, int vers) gd_nothrow
   if (vers < 0 || vers > GD_DIRFILE_STANDARDS_VERSION ||
       ~D->av & (1ULL << vers))
   {
-    _GD_SetError(D, GD_E_BAD_VERSION, 0, NULL, vers, NULL);
+    _GD_SetError(D, GD_E_BAD_VERSION, (D->av == 0) ? GD_E_VERS_NONE :
+        GD_E_VERS_MISSING, NULL, vers, NULL);
     dreturn("%i", -1);
     return -1;
   }

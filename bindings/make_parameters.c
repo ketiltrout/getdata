@@ -88,6 +88,7 @@ static struct {
   CONSTANT(IGNORE_REFS,      "GD_IR",  1),
   CONSTANT(PRETTY_PRINT,     "GD_PP",  1),
   CONSTANT(ARM_ENDIAN,       "GD_AE",  1),
+  CONSTANT(NOT_ARM_ENDIAN,   "GD_NA",  1),
   CONSTANT(PERMISSIVE,       "GD_PM",  1),
 
   CONSTANT(AUTO_ENCODED,     "GD_EA",  1),

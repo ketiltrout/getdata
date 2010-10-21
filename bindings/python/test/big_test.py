@@ -990,7 +990,8 @@ except:
 
 # 79: endianness check
 try:
-  CheckSimple(79,f.endianness,pygetdata.LITTLE_ENDIAN)
+  CheckSimple(79,f.endianness,pygetdata.LITTLE_ENDIAN |
+		  pygetdata.NOT_ARM_ENDIAN)
 except:
   CheckOK(79)
 

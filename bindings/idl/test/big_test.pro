@@ -792,7 +792,7 @@ nume += check_simple(78, n, !GD.UNENCODED)
 ;  79: gd_endianness
 n = gd_endianness(d, fragment=0)
 nume += check_ok(79, d)
-nume += check_simple(79, n, !GD.LITTLE_ENDIAN)
+nume += check_simple(79, n, (!GD.LITTLE_ENDIAN + !GD.NOT_ARM_ENDIAN))
 
 ;  80: dirfilename
 n = gd_dirfilename(d)

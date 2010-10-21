@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_cbopen 3 "20 October 2010" "Version 0.7.0" "GETDATA"
+.TH gd_cbopen 3 "21 October 2010" "Version 0.7.0" "GETDATA"
 .SH NAME
 gd_cbopen, gd_open \(em open or create a dirfile
 .SH SYNOPSIS
@@ -68,27 +68,49 @@ argument should include one of the
 .BR GD_RDWR
 (read-write), and may also contain zero or more of the following flags,
 bitwise-or'd together:
-.TP
+.P
 .B GD_ARM_ENDIAN
-Specifies that double precision floating point raw data on disk is stored in the
-middle-endian format used by older ARM processors.
+.PD 0
+.TP
+.PD
+.B GD_NOT_ARM_ENDIAN
+Specifies that double precision floating point raw data on disk is, or is not,
+stored in the middle-endian format used by older ARM processors.
 
-This flag is only honoured if no
-.B ENDIAN
-directive occurs in the dirfile format specification, unless
+These flag are only set the default endianness, and will be overridden when an
+.B /ENDIAN
+directive specifies the byte sex of
+.B RAW
+fields, unless
 .B GD_FORCE_ENDIAN
 is also specified.
-.TP
-.B GD_BIG_ENDIAN
-Specifies that raw data on disk is stored as big-endian data (most significant
-byte first).  Specifying this flag along with the contradictory
-.BR GD_LITTLE_ENDIAN 
-will cause the library to assume that the endianness of the data is opposite to
-that of the native architecture.
 
-This flag is only honoured if no
-.B ENDIAN
-directive occurs in the dirfile format specification, unless
+On every platform, one of these flags
+.RB ( GD_NOT_ARM_ENDIAN
+on all but middle-ended ARM systems)
+indicates the native behaviour of the platform.  That symbol will equal zero,
+and may be omitted.
+.P
+.B GD_BIG_ENDIAN
+.PD 0
+.TP
+.PD
+.B GD_LITTLE_ENDIAN
+Specifies the default byte sex of raw data stored on disk to be either
+big-endian (most significant byte first) or little-endian (least significant
+byte first).  Omitting both flags indicates the default should be the native
+endianness of the platform.
+
+Unlike the ARM endianness flags above, neither of these symbols is ever zero.
+Specifying both these flags together will cause the library to assume that the
+endianness of the data is opposite to that of the native architecture, whatever
+that might be.
+
+These flag are only set the default endianness, and will be overridden when an
+.B /ENDIAN
+directive specifies the byte sex of
+.B RAW
+fields, unless
 .B GD_FORCE_ENDIAN
 is also specified.
 .TP
@@ -126,7 +148,7 @@ flag as indicated in
 .TP
 .B GD_FORCE_ENCODING
 Specifies that
-.B ENCODING
+.B /ENCODING
 directives (see
 .BR dirfile-format (5))
 found in the dirfile format specification should be ignored.  The encoding scheme
@@ -136,15 +158,15 @@ will be used instead (see below).
 .TP
 .B GD_FORCE_ENDIAN
 Specifies that
-.B ENDIAN
+.B /ENDIAN
 directives (see
 .BR dirfile-format (5))
-found in the dirfile format specification should be ignored.  When specified
-with one or more of
-.BR GD_ARM_ENDIAN ,\~ GD_BIG_ENDIAN " or " GD_LITTLE_ENDIAN ,
-the specified endianness will be assumed.  If this flag is specified with
-none of those flags, the dirfile will be assumed to have the endianness of
-the native architecture.
+found in the dirfile format specification should be ignored.  All raw data will
+be assumed to have the byte sex indicated through the presence or absense of the
+.BR GD_ARM_ENDIAN ,\~ GD_BIG_ENDIAN ,\~ GD_LITTLE_ENDIAN ,
+and
+.B GD_NOT_ARM_ENDIAN
+flags.
 .TP
 .B GD_IGNORE_DUPS
 If the dirfile format metadata specifies more than one field with the same name,
@@ -160,19 +182,6 @@ No indication is provided to indicate whether a duplicate field has been
 discarded.  If finer grained control is required, the caller should handle
 .B GD_E_FORMAT_DUPLICATE
 suberrors itself with an appropriate callback function.
-.TP
-.B GD_LITTLE_ENDIAN
-Specifies that raw data on disk is stored as little-endian data (least
-significant byte first).  Specifying this flag along with the contradictory
-.BR GD_BIG_ENDIAN 
-will cause the library to assume that the endianness of the data is opposite to
-that of the native architecture.
-
-This flag is only honoured if no
-.B ENDIAN
-directive occurs in the dirfile format specification, unless
-.B GD_FORCE_ENDIAN
-is also specified.
 .TP
 .B GD_PEDANTIC
 Reject dirfiles which don't conform to the Dirfile Standards.  See the
@@ -443,7 +452,7 @@ The specified field name already exists.
 .TP
 .B GD_E_FORMAT_ENDIAN
 The byte sex specified by an
-.B ENDIAN
+.B /ENDIAN
 directive was unrecognised.
 .TP
 .B GD_E_FORMAT_LITERAL

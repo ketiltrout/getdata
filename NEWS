@@ -113,6 +113,11 @@ New in version 0.7.0rc2:
     dirfile.  Primarily useful to callers as a "null dirfile" placeholder.
   * GD_E_OPEN_INCLUDE has been renamed to GD_E_OPEN_FRAGMENT, but the former
     symbol remains as an alias.
+  * Two new bitflags to gd_cbopen and gd_open: GD_ARM_ENDIAN and
+    GD_NOT_ARM_ENDIAN allow specifying the default ordering of double precision
+    data.  These flags may also be used with gd_alter_endianness() and will be
+    returned by gd_endianness().  On all platforms except for middle-endian
+    ARMs, GD_NOT_ARM_ENDIAN equals zero and may be omitted.
   * Where gd_flush() and gd_metaflush() in the past raised GD_E_OPEN_INCLUDE
     on I/O error, they now raise the new GD_FLUSH.
   * All functions now raise GD_E_DIMENSION when encountering a scalar field

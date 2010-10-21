@@ -16,8 +16,12 @@ int main(void)
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
   const char* format1 = __TEST__ "dirfile/format1";
+  const char* format2 = __TEST__ "dirfile/format2";
+  const char* format3 = __TEST__ "dirfile/format3";
   const char* format_data = "ENDIAN little\nINCLUDE format1\n";
-  const char* format_data1 = "ENDIAN big\n";
+  const char* format_data1 = "ENDIAN big\nINCLUDE format2\n";
+  const char* format_data2 = "ENDIAN big arm\nINCLUDE format3\n";
+  const char* format_data3 = "ENDIAN little arm\n";
   int fd, r = 0;
 
   mkdir(filedir, 0777);
@@ -30,20 +34,34 @@ int main(void)
   write(fd, format_data1, strlen(format_data1));
   close(fd);
 
+  fd = open(format2, O_CREAT | O_EXCL | O_WRONLY, 0666);
+  write(fd, format_data2, strlen(format_data2));
+  close(fd);
+
+  fd = open(format3, O_CREAT | O_EXCL | O_WRONLY, 0666);
+  write(fd, format_data3, strlen(format_data3));
+  close(fd);
+
   DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
   unsigned long n = gd_endianness(D, 0);
   unsigned long m = gd_endianness(D, 1);
+  unsigned long l = gd_endianness(D, 2);
+  unsigned long k = gd_endianness(D, 3);
   int error = gd_error(D);
 
   gd_close(D);
 
   unlink(format);
   unlink(format1);
+  unlink(format2);
+  unlink(format3);
   rmdir(filedir);
 
   CHECKI(error, 0);
-  CHECKX(n, GD_LITTLE_ENDIAN);
-  CHECKX(m, GD_BIG_ENDIAN);
+  CHECKX(n, GD_LITTLE_ENDIAN | GD_NOT_ARM_ENDIAN);
+  CHECKX(m, GD_BIG_ENDIAN | GD_NOT_ARM_ENDIAN);
+  CHECKX(l, GD_BIG_ENDIAN | GD_ARM_ENDIAN);
+  CHECKX(k, GD_LITTLE_ENDIAN | GD_ARM_ENDIAN);
 
   return r;
 }

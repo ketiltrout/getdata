@@ -3314,7 +3314,7 @@ program big_test
     write(*, 2001) 79, e
   end if
 
-  if (n .ne. GD_LITTLE_ENDIAN) then
+  if (n .ne. (GD_LITTLE_ENDIAN + GD_NOT_ARM_ENDIAN)) then
     ne = ne + 1
     write(*, 2002) 79, n
   end if

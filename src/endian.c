@@ -39,7 +39,7 @@ static void _GD_ByteSwapFragment(DIRFILE* D, unsigned long byte_sex,
 #else
     (byte_sex & GD_BIG_ENDIAN) ? GD_BIG_ENDIAN : GD_LITTLE_ENDIAN
 #endif
-    ) | (byte_sex & GD_ARM_ENDIAN);
+    ) | (byte_sex & GD_ARM_FLAG);
 
   /* check protection */
   if (D->fragment[fragment].protection & GD_PROTECT_FORMAT) {

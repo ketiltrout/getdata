@@ -99,8 +99,10 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned long encoding,
   enc_in = _gd_ef + E->e->EN(raw,file)[0].encoding;
 
   /* Need to do the ARM thing? */
-  arm_endianise = ((byte_sex & GD_ARM_ENDIAN) && enc_out->ecor) ^
-    ((D->fragment[E->fragment_index].byte_sex & GD_ARM_ENDIAN) && enc_in->ecor);
+  arm_endianise = (((byte_sex & GD_ARM_FLAG) && enc_out->ecor) ^
+    ((D->fragment[E->fragment_index].byte_sex & GD_ARM_FLAG) && enc_in->ecor))
+    && (E->EN(raw,data_type) == GD_FLOAT64 ||
+        E->EN(raw,data_type) == GD_COMPLEX128);
 
   /* Normalise endiannesses */
 #ifdef WORDS_BIGENDIAN
@@ -216,14 +218,14 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned long encoding,
     /* fix army-ness, if required */
     if (arm_endianise)
         _GD_ArmEndianise((uint64_t *)buffer, E->EN(raw,data_type) & GD_COMPLEX,
-            ns);
+            nread);
 
     /* swap endianness, if required */
     if (byte_sex) {
       if (E->EN(raw,data_type) & GD_COMPLEX)
-        _GD_FixEndianness((char *)buffer, E->e->EN(raw,size) / 2, ns * 2);
+        _GD_FixEndianness((char *)buffer, E->e->EN(raw,size) / 2, nread * 2);
       else
-        _GD_FixEndianness((char *)buffer, E->e->EN(raw,size), ns);
+        _GD_FixEndianness((char *)buffer, E->e->EN(raw,size), nread);
     }
 
     nwrote = (*enc_out->write)(E->e->EN(raw,file) + 1, buffer,

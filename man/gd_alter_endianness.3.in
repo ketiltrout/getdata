@@ -15,7 +15,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_alter_endianness 3 "20 July 2010" "Version 0.7.0" "GETDATA"
+.TH gd_alter_endianness 3 "21 October 2010" "Version 0.7.0" "GETDATA"
 .SH NAME
 gd_alter_endianness \(em modify the byte sex of fields in a dirfile
 .SH SYNOPSIS
@@ -23,7 +23,7 @@ gd_alter_endianness \(em modify the byte sex of fields in a dirfile
 .HP
 .nh
 .ad l
-.BI "int gd_alter_endianness(DIRFILE *" dirfile ", unsigned int"
+.BI "int gd_alter_endianness(DIRFILE *" dirfile ", unsigned long"
 .IB byte_sex ", int " fragment_index ", int " recode );
 .hy
 .ad n
@@ -65,6 +65,8 @@ the host, whichever that may be.
 Furthermore, any of these may be bitwise or'd
 with
 .B GD_ARM_ENDIAN
+or
+.B GD_NOT_ARM_ENDIAN
 indicating that the floating point data are stored in the ARM middle-endian
 format.
 .P

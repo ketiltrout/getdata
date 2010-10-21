@@ -49,11 +49,13 @@ Upon successful completion,
 .BR gd_endianness ()
 returns the byte sex of the specified fragment, which will be either
 .BR GD_BIG_ENDIAN " or " GD_LITTLE_ENDIAN ,
-possibly bitwise-or'd with 
-.BR GD_ARM_ENDIAN ,
-if floating point data in this fragment are stored in the old ARM middle-endian
-format.  On error, it returns zero and sets the dirfile error to a non-zero
-error value.  Possible error values are:
+bitwise-or'd with either
+.B GD_ARM_ENDIAN 
+or 
+.BR GD_NOT_ARM_ENDIAN ,
+indicating whether double-precision floating point data in this fragment are
+stored in the old ARM middle-endian format.  On error, it returns zero and
+sets the dirfile error to a non-zero error value.  Possible error values are:
 .TP 8
 .B GD_E_BAD_DIRFILE
 The supplied dirfile was invalid.

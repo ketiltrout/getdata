@@ -1,3 +1,26 @@
+2010-10-21   D. V. Wiebe <getdata@ketiltrout.net>   svn:460
+	* test/endian_get.c: Test ARM endianness.
+	* bindings/python/test/big_test.py bindings/cxx/test/big_test.cpp
+	bindings/f77/test/big_test.f bindings/f77/test/big_test95.f90
+	bindings/idl/test/big_test.pro: Fix test 79 on middle-ended platforms.
+
+	* src/getdata.h.in: Added GD_NOT_ARM_ENDIAN and conditionally figure out
+	whether it or GD_ARM_ENDIAN should be zero.
+	* bindings/make_parameters.c: Added GD_NOT_ARM_ENDIAN.
+	* src/internal.h: compute GD_ARM_FLAG.
+	* src/endian.c (_GD_ByteSwapFragment) src/open.c (gd_cbopen) src/getdata.c
+	(_GD_DoRaw) src/flush.c (_GD_FlushFragment) src/putdata.c (_GD_DoRawOut)
+	src/parse.c (_GD_ParseDirective): Fix handling of ARM flag.
+	* src/move.c (_GD_MogrifyFile): Only apply the ARM fix to double precision
+	data.  Also fixed the count in byte swapping calls.
+
+	* src/flush.c (_GD_FindVersion): Fix logic for ARM endianness.  Fix ordering
+	of fragment metadata tests.
+
+	* src/flush.c (_GD_FindVersion) src/errors.c: Better script for
+	GD_E_BAD_VERSION.  Differentiate between a non-conformant dirfile and an
+	invalid version number.
+
 2010-10-20   D. V. Wiebe <getdata@ketiltrout.net>   svn:459
 	* test/version_5.c: Fix for WORDS_BIGENDIAN.
 

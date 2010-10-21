@@ -332,10 +332,7 @@ static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *E, off64_t s0, size_t ns,
       /* convert to/from middle-ended doubles */
       if ((E->EN(raw,data_type) == GD_FLOAT64 ||
             E->EN(raw,data_type) == GD_COMPLEX128) &&
-#ifdef ARM_ENDIAN_DOUBLES          
-          ~
-#endif
-          D->fragment[E->fragment_index].byte_sex & GD_ARM_ENDIAN)
+          D->fragment[E->fragment_index].byte_sex & GD_ARM_FLAG)
       {
         _GD_ArmEndianise((uint64_t *)(databuffer + n_read * E->e->EN(raw,size)),
             E->EN(raw,data_type) & GD_COMPLEX, samples_read);

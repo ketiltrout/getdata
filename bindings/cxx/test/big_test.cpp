@@ -896,7 +896,7 @@ int main(void)
   CHECK_INT(78,frag->Encoding(),RawEncoding);
 
   // 79: Fragment::Endianness check
-  CHECK_INT(79,frag->Endianness(),GD_LITTLE_ENDIAN);
+  CHECK_INT(79,frag->Endianness(),GD_LITTLE_ENDIAN | GD_NOT_ARM_ENDIAN);
 
   // 80: Dirfile::Name check
   str = d->Name();

@@ -177,7 +177,10 @@ static const struct {
   { GD_E_BAD_REPR, GD_E_REPR_PUT, "Unable to write to field reprentation: .{4}",
     0 },
   /* GD_E_BAD_VERSION 3 = version */
-  { GD_E_BAD_VERSION, 0, "Bad version specified: {3}", 0 },
+  { GD_E_BAD_VERSION, GD_E_VERS_NONE,
+    "Dirfile conforms to no Standards Version", 0 },
+  { GD_E_BAD_VERSION, GD_E_VERS_MISSING,
+    "Dirfile does not conform to Standards Version {3}", 0 },
   /* GD_E_FLUSH: 3 = suberror, 4 = filename */
   { GD_E_FLUSH, GD_E_FLUSH_MKTMP, "I/O error creating temporary file: ", 1 },
   { GD_E_FLUSH, GD_E_FLUSH_OPEN, "I/O error opening temporary file: ", 1 },

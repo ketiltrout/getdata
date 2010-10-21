@@ -2601,7 +2601,7 @@ C     79: GDGEND check
         WRITE(*, 2001) 79, e
       ENDIF
 
-      IF (n .NE. GD_LE) THEN
+      IF (n .NE. (GD_LE + GD_NA)) THEN
         ne = ne + 1
         WRITE(*, 2002) 79, n
       ENDIF
