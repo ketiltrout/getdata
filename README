@@ -48,7 +48,9 @@ CONTENTS
 This package provides:
   * the Dirfile Standards documents (three Unix manual pages)
   * the C GetData library (libgetdata) including Unix manual pages
-  * The handy checkdirfile utility, included also as an example
+  * Several utitilities, which also serve as examples of use:
+    - checkdirfile, which checks the metadata of a dirfile for problems
+    - dirfile2ascii, which can convert all or part of a dirfile to ASCII text
   * several bindings to the library from other languages:
     - C++ (libgetdata++)
     - Fortran 77 (libfgetdata)
@@ -64,96 +66,26 @@ A full list of features new to this release of GetData may be found in the
 file called `NEWS'.
 
 
-DIRFILE STANDARDS VERSION 7
+DIRFILE STANDARDS VERSION 8
 ===========================
 
-The 0.6.0 release of the GetData Library (October 2009), was released in
+The 0.7.0 release of the GetData Library (October 2010), was released in
 conjunction with a new version of the Dirfile Standards, known as Standards
-Version 7.
+Version 8.
 
-Standards Version 7 introduces the following:
-  * Support for single and double precision floating-point complex data.
-    This includes the support for complex literals in the format file, as well
-    as operators ("representations") to compute norms of complex data.
-  * Two new field types: SBIT, a (two's complement) signed bitfield; and
-    POLYNOM, a polynomial function of a given input field.
-  * The number of fields parameter for LINCOM is now optional.
+Standards Version 8 introduces the following:
+  * Two new field types: DIVIDE, the quotient of two input vector fields,
+    and RECIP, the reciprocal of a vector field.
+  * Support for middle-endian ARM double-precision floating point data.
+  * Furthermore, several deprecated features have been removed.  The old single
+    character type names are no longer accepted, and directives now require an
+    initial forward slash.  (NB: these features are only removed from Standards
+    Version 8; GetData, which understands all Standards Versions, still can work
+    with these features.)
 
-This is the first update to the Dirfile Standards since Standards Version 6
-(October 2008).
-
-Standards Version 6 introduced the following:
-  * Support for two scalar types: CONST (numerical) and STRING (a character
-    string)
-  * The ability to attach subdata to fields using the META directive.
-  * Support for different "encodings", which change how binary data is stored
-    on disk.
-  * Significantly more permissive and explicit rules on allowed characters in
-    format file tokens.
-  * Removal of "FILEFRAM" as an alias for the implicit "INDEX" field.  It is
-    encouraged that made use of FILEFRAM be updated to use INDEX instead.
-    However, a work-around is to add:
-
-      FILEFRAM LINCOM 1 INDEX 1 0
-
-    to the dirfile's format file to recreate the old behaviour.
-  * The ability to flag portions of the dirfile as protected.
-
-Standards Version 6 follows closely on the heels of Standards Version 5,
-released in August of 2006 with GetData 0.3.0.
-
-Standards Version 5 introduced the following:
-  * Three new supported data type: 8-bit signed integers, and 64-bit signed
-    and unsigned integers
-  * A new, uniform way of referring to data types.  Previous versions of the
-    Standards used the single character data specifiers: c, u, s, U, S, i, f,
-    and d.  The new standard defines the specifiers UINT8, INT8, UINT16, INT16,
-    UINT32, INT32, UINT64, INT64, FLOAT32, and FLOAT64.  (FLOAT is also accepted
-    as an alias for FLOAT32 and DOUBLE for FLOAT64.)  Accordingly, a RAW field
-    declaration, which in previous versions of the Dirfile Standards would
-    have been:
-
-      field RAW u 20
-
-    would be preferred by Standards Version 5 to be:
-
-      field RAW UINT16 20
-
-    For backwards compatibility, the single character specifiers are still
-    fully acceptable in format file declarations, although no single character
-    specifiers exist for the new data types.
-  * Unlimited field name lengths.  Previous versions of the Standards limited
-    fields to 50 characters or less.  Field name length is still effectively
-    limited by the maximum length of a filename and the maximum length of a
-    format file line, either of which will typically effectively limit field
-    names to a few thousand characters.
-  * Forbidding the implicit fields INDEX and FILEFRAM to be defined in the
-    format file.  Previous Standards Versions allowed fields with these names to
-    be defined, but old GetData implementations would never let you access them,
-    returning the implicit frame-count field instead.
-  * 64-bit BIT fields.  Previous Standards Versions limited BITs to 32-bits.
-    The size of any particular BIT field is still limited by the underlying RAW
-    type on which it depends.
-  * The ENDIAN directive for format files, which can be used to specify the
-    byte-sex of the underlying raw data.  Previous Standards Versions indicated
-    that the byte-sex of raw data in a dirfile was always little-endian, but
-    old GetData implementations assumed data was native endian, by never doing
-    endianness conversion.  Dirfile Standards Version 5 adopts the behaviour
-    of GetData rather than that of previous Standards Versions: dirfiles lacking
-    an ENDIAN directive will be assumed to have native endianness.  Facilities
-    exist in the new GetData API to override this behaviour.
-  * The VERSION directive for format files, which specifies the Standards
-    Version to which the dirfile conforms.  The Standards indicate that this
-    directive is optional, and should not be needed to properly parse a format
-    file conforming to Standards Version 5 or any earlier version.  It is used
-    by GetData to ease forward-compatibility: if GetData encounters a Dirfile
-    conforming to a newer Standards Version than it is prepared to parse,
-    GetData will silently ignore any lines it doesn't understand.  This allows
-    GetData to make a best-effort attempt at reading Standards newer than it
-    knows.
-
-A full history of the Dirfile Standards can be found in the dirfile-format(5)
-man page.
+This is the first update to the Dirfile Standards since Standards Version 7
+(October 2009).  A full history of the Dirfile Standards can be found in the
+dirfile-format(5) man page.
 
 
 BUILDING THE LIBRARY
@@ -162,7 +94,8 @@ BUILDING THE LIBRARY
 This package may be configured and built using the GNU autotools.  Generic
 installation instructions are provided in the file called `INSTALL'.  A
 brief summary follows.  A C99-compliant compiler is required to build (but not
-to use) the package.
+to use) the package, although a compatible library with reduced functionality
+can be built with any ANSI C compiler.
 
 Most users should be able to build the package by simply executing:
 
@@ -189,6 +122,24 @@ insufficient, before building it by passing options to ./configure.  Running
 will display a brief help message summarising available options.
 
 
+PREREQUISITES
+=============
+
+The only library required to build GetData is the C Standard Library.  Several
+other external will be used if found by ./configure to provide support for
+various data encodings (typically compression schemes).  These are:
+
+- the slim compression library by Joseph Fowler;
+- the zlib library by Jean-loup Gailly and Mark Adler;
+- the bzip2 compression library by Julian Seward; and,
+- the lzma library, part of the XZ Utils suite by Lasse Collin, Ville Koskinen,
+  and Igor Pavlov.
+
+If these libraries are not found by configure, GetData will lack support for
+the associated encoding scheme and fail gracefully if encountering dirfiles so
+encoded.
+
+
 USING THE LIBRARY
 =================
 
@@ -199,15 +150,13 @@ Library, in addition to GetData itself, plus any other libraries required for
 encodings supported by the library, e.g. using `-lgetdata -lm
 <other-libraries>'.
 
-The `checkdirfile' program is provided as an example of library use in the
-`util' subdirectory of the package.  This program will be installed in
-${prefix}/bin, unless disabled by passing `--disable-checkdirfile' to
-./configure.
+The various small programs in the `util' subdirectory of the package provide
+examples of use.
 
-This utility was designed to report syntax error in the format file(s) of the
-large, complex dirfiles used in the analysis of the BLAST experiment data.
-This utility will report all syntax errors it find in the supplied dirfile,
-plus any problems in the metadata itself.
+The checkdirfile utility was designed to report syntax errors in the format
+file(s) of the large, complex dirfiles used in the analysis of the BLAST
+experiment data.  This utility will report all syntax errors it find in the
+supplied dirfile, plus any problems in the metadata itself.
 
 Bindings exist for using the GetData library in languages other than C.  If
 language bindings exist for your particular library, a README.<language> file
@@ -223,18 +172,19 @@ USING MODULES
 =============
 
 Starting with GetData 0.5.0, encoding schemes which rely on optional external
-libraries (slim, gzip, bzip2) may be built as stand-alone library modules which
-will be dynamically loaded, as needed, at runtime by the core GetData library.
-This architecture is provided to permit packaging the core GetData library
-separately from the parts of the library requiring the optional external
+libraries (slim, gzip, bzip2, &c.) may be built as stand-alone library modules
+which will be dynamically loaded, as needed, at runtime by the core GetData
+library.  This architecture is provided to permit packaging the core GetData
+library separately from the parts of the library requiring the optional external
 libraries without having to give up the functionality these extra libraries
 provide.  To enable this behaviour, pass `--enable-modules' to ./configure.
 
 The modules are dynamically loaded via GNU libtool's portable dlopen wrapper
 library, libltdl.  The libltdl library permits dynamic loading of modules on at
-least Solaris, Linux, BSD, HP-UX, Win16, Win32, BeOS, Darwin, Mac OS X.  The
+least Solaris, Linux, BSD, HP-UX, Win16, Win32, BeOS, Darwin, MacOS X.  The
 libltdl library is no longer distributed with GetData.  It can usually be found
-as part of the GNU libtool package, on any modern system.
+as part of the GNU libtool package on any modern GNU system, or else obtained
+for free from the GNU Project.
 
 GetData will fail gracefully if a library module is not found or cannot be
 opened at runtime.  In this case, the call which triggered the attempt to load
@@ -251,15 +201,21 @@ THE GETDATA HEADER FILE
 The GetData header file, `getdata.h', installed in ${prefix}/include, declares
 the new API.  It also includes `getdata_legacy.h' (also installed) which
 declares the legacy API.  The legacy header should never be included directly.
-Defining the preprocessor symbol `NO_GETDATA_LEGACY_API' before including
-getdata.h will prevent the legacy API from being declared.  In cases when the
-legacy API is declared, getdata.h will define the symbol GETDATA_LEGACY_API,
-which can be used by callers to determine whether the legacy API is present at
-compile time.
+Defining the preprocessor symbol `GD_NO_LEGACY_API' before including getdata.h
+will prevent the legacy API from being declared.  In cases when the legacy API
+is declared, getdata.h will define the symbol GD_LEGACY_API, which can be used
+by callers to determine whether the legacy API is present at compile time.
 
 If the legacy API is not built (as a result of passing `--disable-legacy-api'
 to ./configure), getdata_legacy.h will not be installed, and the legacy API will
 never be declared.
+
+The default GetData API makes use of C99 features.  An ANSI C API is also
+available and can be used by defining GD_C89_API before including getdata.h.  If
+GetData was built without a C99-compliant compiler, the C99 API will be missing.
+In this case, the ANSI C API will be enabled by default (as if GD_C89_API were
+always defined) and, furthermore, getdata.h will define the symbol GD_NO_C99_API
+to indicate this.
 
 
 LARGEFILE SUPPORT
@@ -297,62 +253,6 @@ GetData library will not support large files either, no matter what you do with
 these macros.
 
 
-THE API CHANGE
-==============
-
-Users of older versions of GetData will notice a fairly substantial change in
-the API starting with version 0.3.0 as compared with older version.  Older
-versions of this library (hereafter referred to as the "legacy API") suffered
-from thread safety issues, and lacked LFS (large file) support.
-
-The new API separates the opening of a Dirfile from reading or writing to it.
-Where in the old API one would use:
-
-  int n_read = GetData("dirfile", "field", 1, 0, 1, 0, 'S', data, &error_code);
-
-the corresponding new API would have:
-
-  DIRFILE* D = gd_open("dirfile", GD_RDONLY);
-  size_t n_read = gd_getdata(D, "field", 1, 0, 1, 0, GD_INT32, data);
-
-Here, D is a pointer to a DIRFILE object.  This object is modelled after
-the FILE object of the C Library's stdio interface.
-
-Where the old API was passed an integer pointer to store the error code, this is
-now accessed via the DIRFILE object directly: D->error, which is of type int.
-This is the only public member of the DIRFILE object.  As a side-effect of this
-change, the descriptive error string which can be generated by the library is
-now local to a particular instance of a particular dirfile, rather than being
-global across the library.
-
-Once a DIRFILE object has been created by a call to gd_open, all subsequent
-operations on the dirfile operate on this object.  Once the program is finished
-with the dirfile, the object can be destroyed, and all open file handles closed,
-with the call:
-
-  gd_close(D);
-
-Partially in order to fully support large files (>2 GB) as defined by the LFS,
-a consistent data type structure is used in the new API:
-
-  * database offsets and database sizes are of type `off_t'
-  * object sizes and counts of items read are of type `size_t'
-  * samples-per-frame are of type `unsigned int'
-  * data type specifiers are of type `gd_type_t', which is defined in getdata.h.
-    Any time this type is specified, one of the following symbols, also defined
-    in getdata.h, should be used: GD_NULL, GD_UINT8, GD_INT8, GD_UINT16,
-    GD_INT16, GD_UINT32, GD_INT32, GD_UINT64, GD_INT64, GD_FLOAT32, GD_FLOAT64,
-    or GD_UNKNOWN.  Using a legacy API single character type specifier for this
-    type will result in the library error GD_E_BAD_TYPE.
-
-The legacy API continues to use `int' for offsets, sizes, and counts, which
-prevents it from supporting large files.
-
-The new API is fully documented in the included man pages.  A translation
-example from the legacy API to the new API is present as an Appendix at the end
-of this document.
-
-
 AUTHOR
 ======
 
@@ -363,121 +263,3 @@ Since Standards Version 3 (January 2006), the Dirfile Standards and GetData
 have been maintained by D. V. Wiebe <dvw@ketiltrout.net>.
 
 A full list of contributors is given in the file called `AUTHORS'.
-
-
-APPENDIX:  API TRANSLATION EXAMPLE
-==================================
-
-The following example programs demonstrate how to convert from the legacy to
-the new API:
-
-  /* Legacy API */
-  #include <getdata.h>
-  #include <stdlib.h>
-  #include <stdio.h>
-
-  int main(void)
-  {
-    const char* gd_name = "/var/dirfile"; /* dirfile name */
-    const char* field_name = "datafield";      /* field code */
-    char error_buffer[1024];
-    int first_frame = 1000;
-    int error_code;
-
-    /* Get size of the database -- third argument is ignored */
-    int nf = GetNFrames(gd_name, &error_code, NULL);
-    if (error_code) {
-      printf("GetData error: %s\n", GetDataErrorString(error_buffer, 1024));
-      exit(1);
-    }
-
-    /* Get samples-per-frame */
-    int spf = GetSamplesPerFrame(gd_name, field_name, &error_code);
-    if (error_code) {
-      printf("GetData error: %s\n", GetDataErrorString(error_buffer, 1024));
-      exit(1);
-    }
-
-    /* Allocate a buffer */
-    double* data_buffer = malloc(sizeof(double) * spf * (nf - first_frame));
-
-    /* Retrieve all but the first 1000 frames */
-    int n_read = GetData(gd_name, field_name, first_frame, 0,
-        nf - first_frame, 0, 'd', data_buffer, &error_code);
-    if (error_code) {
-      printf("GetData error: %s\n", GetDataErrorString(error_buffer, 1024));
-      exit(1);
-    }
-
-    /* Clean up */
-    free(data_buffer);
-
-    return 0;
-  }
-
-  /* New API -- same header file */
-  #include <getdata.h>
-  #include <stdlib.h>
-  #include <stdio.h>
-
-  int main(void)
-  {
-    const char* gd_name = "/var/dirfile"; /* dirfile name */
-    const char* field_name = "datafield";      /* field code */
-    char error_buffer[1024];
-    off_t first_frame = 1000; /* off_t is for dirfile offsets and lengths */
-
-    /* Open the dirfile */
-    DIRFILE* dirfile = gd_open(gd_name, GD_RDONLY);
-    if (gd_error(dirfile)) {
-      /* gd_open() returns a pointer to a newly allocated DIRFILE
-         object even if the open failed. This DIRFILE object should still
-         be freed by calling gd_close() after checking the error state */
-
-      printf("GetData error: %s\n",
-          gd_error_string(dirfile, error_buffer, 1024));
-      gd_close(dirfile);
-      exit(1);
-      }
-
-      /* Get size of the database */
-      off_t nf = gd_get_nframes(dirfile); /* again off_t */
-      if (gd_error(dirfile)) {
-        printf("GetData error: %s\n",
-            gd_error_string(dirfile, error_buffer, 1024));
-        gd_close(dirfile);
-        exit(1);
-      }
-
-      /* Get samples-per-frame */
-      unsigned int spf = gd_get_spf(dirfile, field_name);
-      if (gd_error(dirfile)) {
-        printf("GetData error: %s\n",
-            gd_error_string(dirfile, error_buffer, 1024));
-        gd_close(dirfile);
-        exit(1);
-      }
-
-      /* Allocate a buffer */
-      double* data_buffer = malloc(sizeof(double) * spf * (nf - first_frame));
-
-      /* Retrieve all but the first 1000 frames -- size_t is for counts of
-         objects read */
-      size_t n_read = gd_getdata(dirfile, field_name, first_frame, 0,
-          nf - first_frame, 0, GD_FLOAT64, data_buffer);
-      if (gd_error(dirfile)) {
-        printf("GetData error: %s\n",
-            gd_error_string(dirfile, error_buffer, 1024));
-        gd_close(dirfile);
-        exit(1);
-      }
-
-      /* Clean up */
-      free(data_buffer);
-
-      /* not strictly necessary at the end of the program for a dirfile opened
-         read-only */
-      gd_close(dirfile);
-
-      return 0;
-    }

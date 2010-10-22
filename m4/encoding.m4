@@ -109,12 +109,17 @@ AM_CONDITIONAL(AS_TR_CPP([USE_$1]), [test "x$use_$1" = "xyes"])
 AM_CONDITIONAL(AS_TR_CPP([TEST_$1]),
               [test "x$path_$5" != "xnot found" -a "x$path_$6" != "xnot found"])
 
-dnl add to summary
+dnl add to summary and private lib list
 if test "x$use_$1" != "xno"; then
   if test "x$use_modules" != "xno"; then
     ENCODINGS_MODS="${ENCODINGS_MODS} $1";
   else
     ENCODINGS_BUILT="${ENCODINGS_BUILT} $1";
+    if test -z "$PRIVATE_LIBS"; then
+      PRIVATE_LIBS="[$]AS_TR_CPP([$1_LDFLAGS])"
+    else
+      PRIVATE_LIBS="$PRIVATE_LIBS [$]AS_TR_CPP([$1_LDFLAGS])"
+    fi
   fi
 else
   ENCODINGS_LEFT="${ENCODINGS_LEFT} $1";

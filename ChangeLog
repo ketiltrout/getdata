@@ -1,4 +1,8 @@
-2010-10-21   D. V. Wiebe <getdata@ketiltrout.net>   svn:461
+2010-10-22   D. V. Wiebe <getdata@ketiltrout.net>   svn:462
+	* configure.ac m4/encoding.m4: Compute PRIVATE_LIBS
+	* src/getdata.pc: Correct private libs.
+
+2010-10-22   D. V. Wiebe <getdata@ketiltrout.net>   svn:461
 	* bindings/python/test/big_test.py bindings/cxx/test/big_test.cpp
 	bindings/f77/test/big_test.f bindings/f77/test/big_test95.f90
 	bindings/idl/test/big_test.pro: Added tests 156 and 157.

@@ -9,5 +9,5 @@ Description: Dirfile Interface Library
 Version: @PACKAGE_VERSION@
 URL: http://getdata.sourceforge.net/
 Libs: -L${libdir} -lgetdata
-Libs.private: @LIBS@
+Libs.private: @PRIVATE_LIBS@
 Cflags: -I${includedir}
