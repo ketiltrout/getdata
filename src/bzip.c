@@ -96,11 +96,9 @@ static struct gd_bzdata *_GD_Bzip2DoOpen(struct _gd_raw_file* file)
 int _GD_Bzip2Open(struct _gd_raw_file* file, int mode __gd_unused,
     int creat __gd_unused)
 {
-  struct gd_bzdata *ptr;
-
   dtrace("%p, <unused>, <unused>", file);
 
-  file->edata = ptr = _GD_Bzip2DoOpen(file);
+  file->edata = _GD_Bzip2DoOpen(file);
 
   if (file->edata == NULL) {
     dreturn("%i", 1);

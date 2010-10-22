@@ -213,9 +213,10 @@ int _GD_SetTablePath(DIRFILE *D, gd_entry_t *E, struct _gd_private_entry *e)
 }
 
 /* LUT comparison function for qsort */
-int lutcmp(const void* a, const void* b)
+static int lutcmp(const void* a, const void* b)
 {
-  return ((struct _gd_lut *)a)->x - ((struct _gd_lut *)b)->x;
+  double dx = ((struct _gd_lut *)a)->x - ((struct _gd_lut *)b)->x;
+  return (dx < 0) ? -1 : (dx > 0) ? 1 : 0;
 }
 
 /* _GD_ReadLinterpFile: Read in the linterp data for this field

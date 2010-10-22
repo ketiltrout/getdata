@@ -1,3 +1,12 @@
+2010-10-22   D. V. Wiebe <getdata@ketiltrout.net>   svn:463
+	GetData-0.7.0rc3:
+
+	* src/parse.c (_GD_ParseDirective): Update passed flags, not D->flags after
+	/INCLUDE.
+	
+	* src/common.c (lutcmp): Don't rely on typecasting to retain the -0+
+	distiction.
+
 2010-10-22   D. V. Wiebe <getdata@ketiltrout.net>   svn:462
 	* configure.ac m4/encoding.m4: Compute PRIVATE_LIBS
 	* src/getdata.pc: Correct private libs.

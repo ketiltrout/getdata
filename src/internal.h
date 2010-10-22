@@ -200,7 +200,7 @@ struct tm *gmtime_r(const time_t *timep, struct tm *result);
 #define lseek64 (off64_t)_lseeki64
 #endif
 
-#if MKDIR_NO_MODE
+#ifdef MKDIR_NO_MODE
 #ifdef HAVE__MKDIR
 #define mkdir(f,m) _mkdir(f)
 #else
@@ -711,7 +711,7 @@ static inline __attribute__ ((__const__)) double __NAN()
   typedef union { unsigned char b[8]; double d; } nan_t;
 #ifdef ARM_ENDIAN_DOUBLES
   static const nan_t NaN_Bytes = { { 0, 0, 0xf8, 0x7f, 0, 0, 0, 0 } };
-#elif FLOATS_BIGENDIAN
+#elif defined(FLOATS_BIGENDIAN)
   static const nan_t NaN_Bytes = { { 0x7f, 0xf8, 0, 0, 0, 0, 0, 0 } };
 #else
   static const nan_t NaN_Bytes = { { 0, 0, 0, 0, 0, 0, 0xf8, 0x7f } };

@@ -461,3 +461,64 @@ void F77_FUNC(gdadsb, GDADSB) (const int* dirfile, const char* field_code,
 void F77_FUNC(gdinvd, GDINVD) (int *dirfile);
 
 void F77_FUNC(gdstdv, GDSTDV) (int *vers, const int *dirfile);
+
+void F77_FUNC(gdgbof, GDGBOF) (int* bof, const int* dirfile,
+    const char* field_code, const int* field_code_l);
+
+void F77_FUNC(gdgeof, GDGEOF) (int* eof, const int* dirfile,
+    const char* field_code, const int* field_code_l);
+
+void F77_FUNC(gdgedv, GDGEDV) (char* in_field1, int* in_field1_l,
+    char* in_field2, int* in_field2_l, int* fragment_index, const int* dirfile,
+    const char* field_code, const int* field_code_l);
+
+void F77_FUNC(gdgerc, GDGERC) (char* in_field, int* in_field_l,
+    double* dividend, int* fragment_index, const int* dirfile,
+    const char* field_code, const int* field_code_l);
+
+void F77_FUNC(gdgecr, GDGECR) (char* in_field, int* in_field_l,
+    GD_DCOMPLEXP(cdividend), int* fragment_index, const int* dirfile,
+    const char* field_code, const int* field_code_l);
+
+void F77_FUNC(gdaddv, GDADDV) (const int* dirfile, const char* field_code,
+    const int* field_code_l, const char* in_field1, const int* in_field1_l,
+    const char* in_field2, const int* in_field2_l, const int* fragment_index);
+
+void F77_FUNC(gdadrc, GDADRC) (const int* dirfile, const char* field_code,
+    const int* field_code_l, const char* in_field, const int* in_field_l,
+    const double* dividend, const int* fragment_index);
+
+void F77_FUNC(gdadcr, GDADCR) (const int* dirfile, const char* field_code,
+    const int* field_code_l, const char* in_field, const int* in_field_l,
+    const GD_DCOMPLEXP(cdividend), const int* fragment_index);
+
+void F77_FUNC(gdmddv, GDMDDV) (const int* dirfile, const char* parent,
+    const int* parent_l, const char* field_code, const int* field_code_l,
+    const char* in_field1, const int* in_field1_l, const char* in_field2,
+    const int* in_field2_l);
+
+void F77_FUNC(gdrfrg, GDRFRG) (const int* dirfile, const int* fragment);
+
+void F77_FUNC(gdmdrc, GDMDRC) (const int* dirfile, const char* parent,
+    const int* parent_l, const char* field_code, const int* field_code_l,
+    const char* in_field, const int* in_field_l, const double* dividend);
+
+void F77_FUNC(gdmdcr, GDMDCR) (const int* dirfile, const char* parent,
+    const int* parent_l, const char* field_code, const int* field_code_l,
+    const char* in_field, const int* in_field_l,
+    const GD_DCOMPLEXP(cdividend));
+
+void F77_FUNC(gdaldv, GDALDV) (const int* dirfile, const char* field_code,
+    const int* field_code_l, const char* in_field1, const int* in_field1_l,
+    const char* in_field2, const int* in_field2_l);
+
+void F77_FUNC(gdalrc, GDALRC) (const int* dirfile, const char* field_code,
+    const int* field_code_l, const char* in_field1, const int* in_field1_l,
+    const double* dividend);
+
+void F77_FUNC(gdalcr, GDALCR) (const int* dirfile, const char* field_code,
+    const int* field_code_l, const char* in_field1, const int* in_field1_l,
+    const GD_DCOMPLEXP(cdividend));
+
+void F77_FUNC(gdaprt, GDAPRT) (const int* dirfile, const int* protection_level,
+    const int* fragment);

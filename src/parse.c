@@ -144,8 +144,8 @@ static char* _GD_SetScalar(DIRFILE* D, const char* token, void* data, int type,
       *(double *)data = d;
       *((double *)data + 1) = i;
     } else if (type == GD_COMPLEX64) {
-      *(float *)data = d;
-      *((float *)data + 1) = i;
+      *(float *)data = (float)d;
+      *((float *)data + 1) = (float)i;
     } else if (type == GD_FLOAT64)
       *(double *)data = d;
     else if (type == GD_FLOAT32)
@@ -1517,14 +1517,14 @@ static int _GD_ParseDirective(DIRFILE *D, char** in_cols, int n_cols,
             D->fragment[me].cname, linenum, NULL);
       if (n_cols > 2 && (!pedantic || *standards >= 8)) {
         if (strcmp(in_cols[2], "arm") == 0) {
-#if ! ARM_ENDIAN_DOUBLES
+#if ! defined(ARM_ENDIAN_DOUBLES)
           D->fragment[me].byte_sex |= GD_ARM_FLAG;
 #endif
         } else 
           _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_ENDIAN,
               D->fragment[me].cname, linenum, NULL);
       }
-#if ARM_ENDIAN_DOUBLES
+#ifdef ARM_ENDIAN_DOUBLES
       else
         D->fragment[me].byte_sex |= GD_ARM_FLAG;
 #endif
@@ -1532,13 +1532,13 @@ static int _GD_ParseDirective(DIRFILE *D, char** in_cols, int n_cols,
   } else if (strcmp(ptr, "FRAMEOFFSET") == 0 && (!pedantic || *standards >= 1))
     D->fragment[me].frame_offset = strtoll(in_cols[1], NULL, 10);
   else if (strcmp(ptr, "INCLUDE") == 0 && (!pedantic || *standards >= 3)) {
-    unsigned long flags = D->fragment[me].encoding | D->fragment[me].byte_sex |
-      (D->flags & (GD_PEDANTIC | GD_PERMISSIVE | GD_FORCE_ENDIAN |
+    unsigned long subflags = D->fragment[me].encoding | D->fragment[me].byte_sex
+      | (*flags & (GD_PEDANTIC | GD_PERMISSIVE | GD_FORCE_ENDIAN |
                    GD_FORCE_ENCODING | GD_IGNORE_DUPS | GD_IGNORE_REFS));
     int frag = _GD_Include(D, in_cols[1], D->fragment[me].cname, linenum,
-        ref_name, me, standards, &flags);
-    if ((pedantic = flags & GD_PEDANTIC))
-      D->flags |= GD_PEDANTIC;
+        ref_name, me, standards, &subflags);
+    if ((pedantic = subflags & GD_PEDANTIC))
+      *flags |= GD_PEDANTIC;
     D->fragment[me].vers |= D->fragment[frag].vers;
   } else if (strcmp(ptr, "META") == 0 && (!pedantic || *standards >= 6)) {
     const gd_entry_t* P =  _GD_FindField(D, in_cols[1], D->entry, D->n_entries,

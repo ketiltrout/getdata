@@ -717,7 +717,7 @@ uint64_t _GD_FindVersion(DIRFILE *D)
      * missing an "arm" token, but it's absense might mean either an "arm"
      * token was present, or else there was no /ENDIAN directive at all */
     if (D->fragment[i].byte_sex & GD_ARM_FLAG)
-#if ARM_ENDIAN_DOUBLES
+#ifdef ARM_ENDIAN_DOUBLES
       D->av &= GD_VERS_GE_5;
 #else
       D->av &= GD_VERS_GE_8;
@@ -728,7 +728,7 @@ uint64_t _GD_FindVersion(DIRFILE *D)
         D->fragment[i].protection)
       D->av &= GD_VERS_GE_6;
     else if (D->fragment[i].byte_sex &
-#if WORDS_BIGENDIAN
+#ifdef WORDS_BIGENDIAN
         GD_LITTLE_ENDIAN
 #else
         GD_BIG_ENDIAN

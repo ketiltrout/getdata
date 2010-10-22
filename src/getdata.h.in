@@ -61,7 +61,7 @@ extern "C" {
 /* If this symbol is defined here, the C99-API is not present in the library */
 #undef GD_NO_C99_API
 
-#if GD_NO_C99_API && ! defined(GD_C89_API)
+#if defined(GD_NO_C99_API) && ! defined(GD_C89_API)
 # define GD_C89_API
 #endif
 
@@ -297,7 +297,7 @@ struct _gd_unified_entry {
     struct { /* RECIP */
       double dividend;
       GD_DCOMPLEXM(cdividend);
-    } GD_ANON(recip);;
+    } GD_ANON(recip);
 #ifdef GD_C89_API
     struct { /* LINTERP */
       char *table;

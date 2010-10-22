@@ -22,7 +22,7 @@ dnl
 m4_define(getdata_major,    0)
 m4_define(getdata_minor,    7)
 m4_define(getdata_revision, 0)
-m4_define(getdata_extra,    [rc2])
+m4_define(getdata_extra,    [rc3])
 m4_define(getdata_version,
           getdata_major.getdata_minor.getdata_revision[]getdata_extra)
 

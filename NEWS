@@ -1,4 +1,4 @@
-New in version 0.7.0rc2:
+New in version 0.7.0rc3:
 
   Dirfile Changes
 
@@ -88,6 +88,8 @@ New in version 0.7.0rc2:
   * The above renaming rules result in one gd_ namespace clash.  As a result,
     get_reference() has been removed completely.  Calls will have to be
     changed to use gd_reference(), formerly dirfile_reference().
+  * Furthermore, the function dirfile_protect() is now gd_alter_protection() to
+    match the naming of other fragment metadata altering functions.
   * To ease transition to the new namespace, defining GD_FUNCTION_ALIASES before
     including getdata.h will create a bunch of preprocessor macros which map the
     old names to the new.
@@ -139,9 +141,12 @@ New in version 0.7.0rc2:
   Bindings
 
   * Bindings for the functionality introduced into 0.7.0 have been added.
-  * C++: Const member functions are now flagged as such.
+  * F77: GDPROT has been renamed GDAPRT to mirror the renaming of
+    gd_alter_protection().
   * F95: For consistency sake, the Fortran 95 bindings have undergone the same
-    renaming as the C bindings.  All functions are now preceded by 'fgd_'.
+    renaming so they have the same name as their C counterparts.  All functions
+    are now preceded by 'fgd_'.
+  * C++: Const member functions are now flagged as such.
   * IDL: The IDL bindings have also followed suit in the great renaming.  The
     exception to this is GETDATA_CONSTANTS(), which is not renamed.
   * IDL: Various constants defined in getdata.h but not used by the IDL bindings

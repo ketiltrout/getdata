@@ -608,7 +608,7 @@ Subroutines interacting with fragment metadata
   level of the specified fragment, which will be one of the symbols listed
   below.
 
-* GDPROT(dirfile_unit, protection_level, fragment)
+* GDAPRT(dirfile_unit, protection_level, fragment)
 
   Input:
     INTEGER dirfile_unit, protection_level, fragment
@@ -1627,7 +1627,7 @@ Delete flags (required by GDDELE):
   GDD_DR          GD_DEL_DEREF
   GDD_FO          GD_DEL_FORCE
 
-Protection levels (returned by GDGPRT and required by GDPROT):
+Protection levels (returned by GDGPRT and required by GDAPRT):
 
   F77 symbol      C symbol          Notes
   ----------      ----------------- --------------------------------------
