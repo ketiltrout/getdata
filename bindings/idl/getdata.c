@@ -918,9 +918,9 @@ IDL_VPTR gdidl_dirfilename(int argc, IDL_VPTR argv[], char *argk)
   return r;
 }
 
-/* @@DLM: P gdidl_gd_add GD_ADD 2 2 KEYWORDS */
-/* @@DLM: P gdidl_gd_add GD_MADD 2 2 KEYWORDS */
-void gdidl_gd_add(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_add GD_ADD 2 2 KEYWORDS */
+/* @@DLM: P gdidl_add GD_MADD 2 2 KEYWORDS */
+void gdidl_add(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -964,9 +964,9 @@ void gdidl_gd_add(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_gd_add_bit GD_ADD_BIT 3 3 KEYWORDS */
-/* @@DLM: P gdidl_gd_add_bit GD_MADD_BIT 3 3 KEYWORDS */
-void gdidl_gd_add_bit(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_add_bit GD_ADD_BIT 3 3 KEYWORDS */
+/* @@DLM: P gdidl_add_bit GD_MADD_BIT 3 3 KEYWORDS */
+void gdidl_add_bit(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -1017,9 +1017,9 @@ void gdidl_gd_add_bit(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_gd_add_const GD_ADD_CONST 2 2 KEYWORDS */
-/* @@DLM: P gdidl_gd_add_const GD_MADD_CONST 2 2 KEYWORDS */
-void gdidl_gd_add_const(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_add_const GD_ADD_CONST 2 2 KEYWORDS */
+/* @@DLM: P gdidl_add_const GD_MADD_CONST 2 2 KEYWORDS */
+void gdidl_add_const(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -1094,11 +1094,11 @@ void gdidl_gd_add_const(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_gd_add_lincom GD_ADD_LINCOM 5 11 KEYWORDS */
-/* @@DLM: P gdidl_gd_add_lincom GD_ADD_CLINCOM 5 11 KEYWORDS */
-/* @@DLM: P gdidl_gd_add_lincom GD_MADD_CLINCOM 5 11 KEYWORDS */
-/* @@DLM: P gdidl_gd_add_lincom GD_MADD_LINCOM 5 11 KEYWORDS */
-void gdidl_gd_add_lincom(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_add_lincom GD_ADD_LINCOM 5 11 KEYWORDS */
+/* @@DLM: P gdidl_add_lincom GD_ADD_CLINCOM 5 11 KEYWORDS */
+/* @@DLM: P gdidl_add_lincom GD_MADD_CLINCOM 5 11 KEYWORDS */
+/* @@DLM: P gdidl_add_lincom GD_MADD_LINCOM 5 11 KEYWORDS */
+void gdidl_add_lincom(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -1177,9 +1177,9 @@ void gdidl_gd_add_lincom(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_gd_add_linterp GD_ADD_LINTERP 4 4 KEYWORDS */
-/* @@DLM: P gdidl_gd_add_linterp GD_MADD_LINTERP 4 4 KEYWORDS */
-void gdidl_gd_add_linterp(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_add_linterp GD_ADD_LINTERP 4 4 KEYWORDS */
+/* @@DLM: P gdidl_add_linterp GD_MADD_LINTERP 4 4 KEYWORDS */
+void gdidl_add_linterp(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -1225,9 +1225,9 @@ void gdidl_gd_add_linterp(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_gd_add_multiply GD_ADD_MULTIPLY 4 4 KEYWORDS */
-/* @@DLM: P gdidl_gd_add_multiply GD_MADD_MULTIPLY 4 4 KEYWORDS */
-void gdidl_gd_add_multiply(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_add_multiply GD_ADD_MULTIPLY 4 4 KEYWORDS */
+/* @@DLM: P gdidl_add_multiply GD_MADD_MULTIPLY 4 4 KEYWORDS */
+void gdidl_add_multiply(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -1273,9 +1273,9 @@ void gdidl_gd_add_multiply(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_gd_add_divide GD_ADD_DIVIDE 4 4 KEYWORDS */
-/* @@DLM: P gdidl_gd_add_divide GD_MADD_DIVIDE 4 4 KEYWORDS */
-void gdidl_gd_add_divide(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_add_divide GD_ADD_DIVIDE 4 4 KEYWORDS */
+/* @@DLM: P gdidl_add_divide GD_MADD_DIVIDE 4 4 KEYWORDS */
+void gdidl_add_divide(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -1321,21 +1321,23 @@ void gdidl_gd_add_divide(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_gd_add_recip GD_ADD_RECIP 4 4 KEYWORDS */
-/* @@DLM: P gdidl_gd_add_recip GD_ADD_CRECIP 4 4 KEYWORDS */
-/* @@DLM: P gdidl_gd_add_recip GD_MADD_RECIP 4 4 KEYWORDS */
-/* @@DLM: P gdidl_gd_add_recip GD_MADD_CRECIP 4 4 KEYWORDS */
-void gdidl_gd_add_recip(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_add_recip GD_ADD_RECIP 3 3 KEYWORDS */
+/* @@DLM: P gdidl_add_recip GD_ADD_CRECIP 3 3 KEYWORDS */
+/* @@DLM: P gdidl_add_recip GD_MADD_RECIP 3 3 KEYWORDS */
+/* @@DLM: P gdidl_add_recip GD_MADD_CRECIP 3 3 KEYWORDS */
+void gdidl_add_recip(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
   int comp_scal = 0;
   double complex cdividend = 0;
-  double dividend = 0;
+  double dividend = 1;
 
   typedef struct {
     IDL_KW_RESULT_FIRST_FIELD;
     GDIDL_KW_RESULT_ERROR;
+    IDL_VPTR dividend;
+    int dividend_x;
     int fragment_index;
     IDL_STRING parent;
     int parent_x;
@@ -1344,9 +1346,12 @@ void gdidl_gd_add_recip(int argc, IDL_VPTR argv[], char *argk)
 
   GDIDL_KW_INIT_ERROR;
   kw.fragment_index = 0;
-  kw.parent_x = 0;
+  kw.parent_x = kw.dividend_x = 0;
+  kw.dividend = NULL;
 
   static IDL_KW_PAR kw_pars[] = {
+    { "DIVIDEND", 0, 1, IDL_KW_VIN, IDL_KW_OFFSETOF(dividend_x),
+      IDL_KW_OFFSETOF(dividend) },
     GDIDL_KW_PAR_ERROR,
     GDIDL_KW_PAR_ESTRING,
     { "FRAGMENT", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(fragment_index) },
@@ -1361,11 +1366,15 @@ void gdidl_gd_add_recip(int argc, IDL_VPTR argv[], char *argk)
   const char* field_code = IDL_VarGetString(argv[1]);
   const char* in_field1 = IDL_VarGetString(argv[2]);
 
-  if (argv[3]->type == IDL_TYP_DCOMPLEX || argv[3]->type == IDL_TYP_COMPLEX) {
-    comp_scal = 1;
-    cdividend = gdidl_dcomplexScalar(argv[3]);
-  } else
-    dividend = IDL_DoubleScalar(argv[3]);
+  if (kw.dividend_x) {
+    if (kw.dividend->type == IDL_TYP_DCOMPLEX ||
+        kw.dividend->type == IDL_TYP_COMPLEX)
+    {
+      comp_scal = 1;
+      cdividend = gdidl_dcomplexScalar(kw.dividend);
+    } else
+      dividend = IDL_DoubleScalar(kw.dividend);
+  }
 
   if (kw.parent_x) {
     const char* parent = IDL_STRING_STR(&kw.parent);
@@ -1385,9 +1394,9 @@ void gdidl_gd_add_recip(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_gd_add_phase GD_ADD_PHASE 4 4 KEYWORDS */
-/* @@DLM: P gdidl_gd_add_phase GD_MADD_PHASE 4 4 KEYWORDS */
-void gdidl_gd_add_phase(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_add_phase GD_ADD_PHASE 4 4 KEYWORDS */
+/* @@DLM: P gdidl_add_phase GD_MADD_PHASE 4 4 KEYWORDS */
+void gdidl_add_phase(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -1433,11 +1442,11 @@ void gdidl_gd_add_phase(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_gd_add_polynom GD_ADD_POLYNOM 4 9 KEYWORDS */
-/* @@DLM: P gdidl_gd_add_polynom GD_ADD_CPOLYNOM 4 8 KEYWORDS */
-/* @@DLM: P gdidl_gd_add_polynom GD_MADD_CPOLYNOM 4 9 KEYWORDS */
-/* @@DLM: P gdidl_gd_add_polynom GD_MADD_POLYNOM 4 9 KEYWORDS */
-void gdidl_gd_add_polynom(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_add_polynom GD_ADD_POLYNOM 4 9 KEYWORDS */
+/* @@DLM: P gdidl_add_polynom GD_ADD_CPOLYNOM 4 8 KEYWORDS */
+/* @@DLM: P gdidl_add_polynom GD_MADD_CPOLYNOM 4 9 KEYWORDS */
+/* @@DLM: P gdidl_add_polynom GD_MADD_POLYNOM 4 9 KEYWORDS */
+void gdidl_add_polynom(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -1565,8 +1574,8 @@ void gdidl_gd_add_polynom(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_gd_add_raw GD_ADD_RAW 3 3 KEYWORDS */
-void gdidl_gd_add_raw(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_add_raw GD_ADD_RAW 3 3 KEYWORDS */
+void gdidl_add_raw(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -1604,9 +1613,9 @@ void gdidl_gd_add_raw(int argc, IDL_VPTR argv[], char *argk)
 
   dreturnvoid();
 }
-/* @@DLM: P gdidl_gd_add_sbit GD_ADD_SBIT 3 3 KEYWORDS */
-/* @@DLM: P gdidl_gd_add_sbit GD_MADD_SBIT 3 3 KEYWORDS */
-void gdidl_gd_add_sbit(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_add_sbit GD_ADD_SBIT 3 3 KEYWORDS */
+/* @@DLM: P gdidl_add_sbit GD_MADD_SBIT 3 3 KEYWORDS */
+void gdidl_add_sbit(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -1657,9 +1666,9 @@ void gdidl_gd_add_sbit(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_gd_add_spec GD_ADD_SPEC 2 2 KEYWORDS */
-/* @@DLM: P gdidl_gd_add_spec GD_MADD_SPEC 2 2 KEYWORDS */
-void gdidl_gd_add_spec(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_add_spec GD_ADD_SPEC 2 2 KEYWORDS */
+/* @@DLM: P gdidl_add_spec GD_MADD_SPEC 2 2 KEYWORDS */
+void gdidl_add_spec(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -1703,9 +1712,9 @@ void gdidl_gd_add_spec(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_gd_add_string GD_ADD_STRING 2 2 KEYWORDS */
-/* @@DLM: P gdidl_gd_add_string GD_MADD_STRING 2 2 KEYWORDS */
-void gdidl_gd_add_string(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_add_string GD_ADD_STRING 2 2 KEYWORDS */
+/* @@DLM: P gdidl_add_string GD_MADD_STRING 2 2 KEYWORDS */
+void gdidl_add_string(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -1759,8 +1768,8 @@ void gdidl_gd_add_string(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_gd_alter_bit GD_ALTER_BIT 2 2 KEYWORDS */
-void gdidl_gd_alter_bit(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_alter_bit GD_ALTER_BIT 2 2 KEYWORDS */
+void gdidl_alter_bit(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -1814,8 +1823,8 @@ void gdidl_gd_alter_bit(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_gd_alter_const GD_ALTER_CONST 2 2 KEYWORDS */
-void gdidl_gd_alter_const(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_alter_const GD_ALTER_CONST 2 2 KEYWORDS */
+void gdidl_alter_const(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -1850,8 +1859,8 @@ void gdidl_gd_alter_const(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_gd_alter_encoding GD_ALTER_ENCODING 2 2 KEYWORDS */
-void gdidl_gd_alter_encoding(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_alter_encoding GD_ALTER_ENCODING 2 2 KEYWORDS */
+void gdidl_alter_encoding(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -1894,8 +1903,8 @@ void gdidl_gd_alter_encoding(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_gd_alter_endianness GD_ALTER_ENDIANNESS 1 1 KEYWORDS */
-void gdidl_gd_alter_endianness(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_alter_endianness GD_ALTER_ENDIANNESS 1 1 KEYWORDS */
+void gdidl_alter_endianness(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -1907,6 +1916,7 @@ void gdidl_gd_alter_endianness(int argc, IDL_VPTR argv[], char *argk)
     int fragment_index;
     int fragment_index_x;
     int little_end;
+    int not_arm_end;
     int recode;
   } KW_RESULT;
   KW_RESULT kw;
@@ -1925,6 +1935,7 @@ void gdidl_gd_alter_endianness(int argc, IDL_VPTR argv[], char *argk)
     { "FRAGMENT", IDL_TYP_INT, 1, 0, IDL_KW_OFFSETOF(fragment_index_x),
       IDL_KW_OFFSETOF(fragment_index) },
     { "LITTLE_ENDIAN", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(little_end) },
+    { "NOT_ARM_ENDIAN", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(not_arm_end) },
     { "RECODE", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(recode) },
   };
 
@@ -1936,8 +1947,8 @@ void gdidl_gd_alter_endianness(int argc, IDL_VPTR argv[], char *argk)
   DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
 
   gd_alter_endianness(D, (kw.big_end ? GD_BIG_ENDIAN : 0) | 
-      (kw.little_end ? GD_LITTLE_ENDIAN : 0) | (kw.arm_end ? GD_ARM_ENDIAN : 0),
-      kw.fragment_index, kw.recode);
+      (kw.little_end ? GD_LITTLE_ENDIAN : 0) | (kw.arm_end ? GD_ARM_ENDIAN : 0)
+      | (kw.not_arm_end ? GD_NOT_ARM_ENDIAN : 0), kw.fragment_index, kw.recode);
 
   GDIDL_SET_ERROR(D);
 
@@ -1946,8 +1957,8 @@ void gdidl_gd_alter_endianness(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_gd_alter_entry GD_ALTER_ENTRY 3 3 KEYWORDS */
-void gdidl_gd_alter_entry(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_alter_entry GD_ALTER_ENTRY 3 3 KEYWORDS */
+void gdidl_alter_entry(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -1985,8 +1996,8 @@ void gdidl_gd_alter_entry(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_gd_alter_frameoffset GD_ALTER_FRAMEOFFSET 2 2 KEYWORDS */
-void gdidl_gd_alter_frameoffset(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_alter_frameoffset GD_ALTER_FRAMEOFFSET 2 2 KEYWORDS */
+void gdidl_alter_frameoffset(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -2029,9 +2040,9 @@ void gdidl_gd_alter_frameoffset(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_gd_alter_lincom GD_ALTER_LINCOM 2 2 KEYWORDS */
-/* @@DLM: P gdidl_gd_alter_lincom GD_ALTER_CLINCOM 2 2 KEYWORDS */
-void gdidl_gd_alter_lincom(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_alter_lincom GD_ALTER_LINCOM 2 2 KEYWORDS */
+/* @@DLM: P gdidl_alter_lincom GD_ALTER_CLINCOM 2 2 KEYWORDS */
+void gdidl_alter_lincom(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -2165,8 +2176,8 @@ void gdidl_gd_alter_lincom(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_gd_alter_linterp GD_ALTER_LINTERP 2 2 KEYWORDS */
-void gdidl_gd_alter_linterp(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_alter_linterp GD_ALTER_LINTERP 2 2 KEYWORDS */
+void gdidl_alter_linterp(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -2219,8 +2230,8 @@ void gdidl_gd_alter_linterp(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_gd_alter_multiply GD_ALTER_MULTIPLY 2 2 KEYWORDS */
-void gdidl_gd_alter_multiply(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_alter_multiply GD_ALTER_MULTIPLY 2 2 KEYWORDS */
+void gdidl_alter_multiply(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -2270,8 +2281,8 @@ void gdidl_gd_alter_multiply(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_gd_alter_divide GD_ALTER_DIVIDE 2 2 KEYWORDS */
-void gdidl_gd_alter_divide(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_alter_divide GD_ALTER_DIVIDE 2 2 KEYWORDS */
+void gdidl_alter_divide(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -2321,9 +2332,9 @@ void gdidl_gd_alter_divide(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_gd_alter_recip GD_ALTER_RECIP 2 2 KEYWORDS */
-/* @@DLM: P gdidl_gd_alter_recip GD_ALTER_CRECIP 2 2 KEYWORDS */
-void gdidl_gd_alter_recip(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_alter_recip GD_ALTER_RECIP 2 2 KEYWORDS */
+/* @@DLM: P gdidl_alter_recip GD_ALTER_CRECIP 2 2 KEYWORDS */
+void gdidl_alter_recip(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -2385,8 +2396,8 @@ void gdidl_gd_alter_recip(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_gd_alter_phase GD_ALTER_PHASE 2 2 KEYWORDS */
-void gdidl_gd_alter_phase(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_alter_phase GD_ALTER_PHASE 2 2 KEYWORDS */
+void gdidl_alter_phase(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -2430,9 +2441,9 @@ void gdidl_gd_alter_phase(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_gd_alter_polynom GD_ALTER_POLYNOM 2 2 KEYWORDS */
-/* @@DLM: P gdidl_gd_alter_polynom GD_ALTER_CPOLYNOM 2 2 KEYWORDS */
-void gdidl_gd_alter_polynom(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_alter_polynom GD_ALTER_POLYNOM 2 2 KEYWORDS */
+/* @@DLM: P gdidl_alter_polynom GD_ALTER_CPOLYNOM 2 2 KEYWORDS */
+void gdidl_alter_polynom(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -2515,8 +2526,8 @@ void gdidl_gd_alter_polynom(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_gd_alter_raw GD_ALTER_RAW 2 2 KEYWORDS */
-void gdidl_gd_alter_raw(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_alter_raw GD_ALTER_RAW 2 2 KEYWORDS */
+void gdidl_alter_raw(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -2558,8 +2569,8 @@ void gdidl_gd_alter_raw(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_gd_alter_sbit GD_ALTER_SBIT 2 2 KEYWORDS */
-void gdidl_gd_alter_sbit(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_alter_sbit GD_ALTER_SBIT 2 2 KEYWORDS */
+void gdidl_alter_sbit(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -2612,9 +2623,9 @@ void gdidl_gd_alter_sbit(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_gd_alter_spec GD_ALTER_SPEC 2 2 KEYWORDS */
-/* @@DLM: P gdidl_gd_alter_spec GD_MALTER_SPEC 2 2 KEYWORDS */
-void gdidl_gd_alter_spec(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_alter_spec GD_ALTER_SPEC 2 2 KEYWORDS */
+/* @@DLM: P gdidl_alter_spec GD_MALTER_SPEC 2 2 KEYWORDS */
+void gdidl_alter_spec(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -2658,8 +2669,8 @@ void gdidl_gd_alter_spec(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_gd_close GD_CLOSE 1 1 KEYWORDS */
-void gdidl_gd_close(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_close GD_CLOSE 1 1 KEYWORDS */
+void gdidl_close(int argc, IDL_VPTR argv[], char *argk)
 {
   int ret = 0;
   DIRFILE* D = NULL;
@@ -2715,8 +2726,8 @@ void gdidl_gd_close(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_gd_delete GD_DELETE 2 2 KEYWORDS */
-void gdidl_gd_delete(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_delete GD_DELETE 2 2 KEYWORDS */
+void gdidl_delete(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -2755,8 +2766,8 @@ void gdidl_gd_delete(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_gd_flush GD_FLUSH 1 1 KEYWORDS */
-void gdidl_gd_flush(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_flush GD_FLUSH 1 1 KEYWORDS */
+void gdidl_flush(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -2797,8 +2808,8 @@ void gdidl_gd_flush(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_gd_include GD_INCLUDE 2 2 KEYWORDS */
-void gdidl_gd_include(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_include GD_INCLUDE 2 2 KEYWORDS */
+void gdidl_include(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -2814,6 +2825,7 @@ void gdidl_gd_include(int argc, IDL_VPTR argv[], char *argk)
     int ignore_dups;
     int ignore_refs;
     int little_end;
+    int not_arm_end;
     int pedantic;
     int permissive;
     int trunc;
@@ -2826,7 +2838,7 @@ void gdidl_gd_include(int argc, IDL_VPTR argv[], char *argk)
   KW_RESULT kw;
   kw.big_end = kw.creat = kw.excl = kw.force_enc = kw.force_end =
     kw.ignore_dups = kw.ignore_refs = kw.little_end = kw.pedantic = kw.trunc =
-    kw.enc_x = kw.index_x = kw.fragment_index = 0;
+    kw.enc_x = kw.index_x = kw.fragment_index = kw.arm_end = kw.not_arm_end = 0;
   GDIDL_KW_INIT_ERROR;
 
   static IDL_KW_PAR kw_pars[] = {
@@ -2847,6 +2859,7 @@ void gdidl_gd_include(int argc, IDL_VPTR argv[], char *argk)
     { "IGNORE_DUPS", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(ignore_dups) },
     { "IGNORE_REFS", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(ignore_dups) },
     { "LITTLE_ENDIAN", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(little_end) },
+    { "NOT_ARM_ENDIAN", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(not_arm_end) },
     { "PEDANTIC", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(pedantic) },
     { "PERMISSIVE", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(permissive) },
     { "TRUNC", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(trunc) },
@@ -2869,6 +2882,7 @@ void gdidl_gd_include(int argc, IDL_VPTR argv[], char *argk)
     | (kw.ignore_dups ? GD_IGNORE_DUPS : 0)
     | (kw.ignore_refs ? GD_IGNORE_REFS : 0)
     | (kw.little_end ? GD_LITTLE_ENDIAN : 0)
+    | (kw.not_arm_end ? GD_NOT_ARM_ENDIAN : 0)
     | (kw.pedantic ? GD_PEDANTIC : 0) | (kw.permissive ? GD_PERMISSIVE : 0)
     | (kw.trunc ? GD_TRUNC : 0);
 
@@ -2890,8 +2904,8 @@ void gdidl_gd_include(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_gd_metaflush GD_METAFLUSH 1 1 KEYWORDS */
-void gdidl_gd_metaflush(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_metaflush GD_METAFLUSH 1 1 KEYWORDS */
+void gdidl_metaflush(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -2908,8 +2922,8 @@ void gdidl_gd_metaflush(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_gd_rewrite_fragment GD_REWRITE_FRAGMENT 1 1 KEYWORDS */
-void gdidl_gd_rewrite_fragment(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_rewrite_fragment GD_REWRITE_FRAGMENT 1 1 KEYWORDS */
+void gdidl_rewrite_fragment(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -2948,8 +2962,8 @@ void gdidl_gd_rewrite_fragment(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_gd_move GD_MOVE 3 3 KEYWORDS */
-void gdidl_gd_move(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_move GD_MOVE 3 3 KEYWORDS */
+void gdidl_move(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -2983,8 +2997,8 @@ void gdidl_gd_move(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: F gdidl_gd_open GD_OPEN 1 1 KEYWORDS */
-IDL_VPTR gdidl_gd_open(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: F gdidl_open GD_OPEN 1 1 KEYWORDS */
+IDL_VPTR gdidl_open(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -3002,6 +3016,7 @@ IDL_VPTR gdidl_gd_open(int argc, IDL_VPTR argv[], char *argk)
     int force_end;
     int ignore_dups;
     int little_end;
+    int not_arm_end;
     int pedantic;
     int permissive;
     int trunc;
@@ -3012,12 +3027,12 @@ IDL_VPTR gdidl_gd_open(int argc, IDL_VPTR argv[], char *argk)
   KW_RESULT kw;
   kw.rdwr = kw.big_end = kw.creat = kw.excl = kw.force_enc = kw.force_end =
     kw.ignore_dups = kw.little_end = kw.pedantic = kw.trunc = kw.verbose =
-    kw.enc_x = 0;
+    kw.enc_x = kw.arm_end = kw.not_arm_end = 0;
   GDIDL_KW_INIT_ERROR;
 
   static IDL_KW_PAR kw_pars[] = {
     IDL_KW_FAST_SCAN,
-    { "ARM_ENDIAN", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(big_end) },
+    { "ARM_ENDIAN", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(arm_end) },
     { "BIG_ENDIAN", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(big_end) },
     { "CREAT", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(creat) },
     { "ENCODING", 0, 1, IDL_KW_VIN, IDL_KW_OFFSETOF(enc_x),
@@ -3029,7 +3044,9 @@ IDL_VPTR gdidl_gd_open(int argc, IDL_VPTR argv[], char *argk)
     { "FORCE_ENDIANNESS", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(force_end) },
     { "IGNORE_DUPS", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(ignore_dups) },
     { "LITTLE_ENDIAN", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(little_end) },
+    { "NOT_ARM_ENDIAN", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(not_arm_end) },
     { "PEDANTIC", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(pedantic) },
+    { "PERMISSIVE", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(permissive) },
     { "RDWR", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(rdwr) },
     { "TRUNC", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(trunc) },
     { "VERBOSE", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(verbose) },
@@ -3047,6 +3064,7 @@ IDL_VPTR gdidl_gd_open(int argc, IDL_VPTR argv[], char *argk)
     | (kw.force_end ? GD_FORCE_ENDIAN : 0)
     | (kw.ignore_dups ? GD_IGNORE_DUPS : 0)
     | (kw.little_end ? GD_LITTLE_ENDIAN : 0)
+    | (kw.not_arm_end ? GD_NOT_ARM_ENDIAN : 0)
     | (kw.pedantic ? GD_PEDANTIC : 0) | (kw.permissive ? GD_PERMISSIVE : 0)
     | (kw.trunc ? GD_TRUNC : 0) | (kw.verbose ? GD_VERBOSE : 0);
 
@@ -3064,8 +3082,8 @@ IDL_VPTR gdidl_gd_open(int argc, IDL_VPTR argv[], char *argk)
   return r;
 }
 
-/* @@DLM: P gdidl_gd_alter_protection GD_ALTER_PROTECTION 2 2 KEYWORDS */
-void gdidl_gd_alter_protection(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_alter_protection GD_ALTER_PROTECTION 2 2 KEYWORDS */
+void gdidl_alter_protection(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -3105,8 +3123,8 @@ void gdidl_gd_alter_protection(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_gd_reference GD_REFERENCE 2 2 KEYWORDS */
-void gdidl_gd_reference(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_reference GD_REFERENCE 2 2 KEYWORDS */
+void gdidl_reference(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -3124,8 +3142,8 @@ void gdidl_gd_reference(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_gd_rename GD_RENAME 3 3 KEYWORDS */
-void gdidl_gd_rename(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_rename GD_RENAME 3 3 KEYWORDS */
+void gdidl_rename(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -3160,8 +3178,8 @@ void gdidl_gd_rename(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_gd_uninclude GD_UNINCLUDE 2 2 KEYWORDS */
-void gdidl_gd_uninclude(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: P gdidl_uninclude GD_UNINCLUDE 2 2 KEYWORDS */
+void gdidl_uninclude(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -3194,8 +3212,8 @@ void gdidl_gd_uninclude(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: F gdidl_gd_validate GD_VALIDATE 2 2 KEYWORDS */
-IDL_VPTR gdidl_gd_validate(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: F gdidl_validate GD_VALIDATE 2 2 KEYWORDS */
+IDL_VPTR gdidl_validate(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -3546,8 +3564,8 @@ IDL_VPTR gdidl_get_entry_type(int argc, IDL_VPTR argv[], char *argk)
   return r;
 }
 
-/* @@DLM: F gdidl_gd_error GD_ERROR 1 1 */
-IDL_VPTR gdidl_gd_error(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: F gdidl_error GD_ERROR 1 1 */
+IDL_VPTR gdidl_error(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -3558,8 +3576,8 @@ IDL_VPTR gdidl_gd_error(int argc, IDL_VPTR argv[], char *argk)
   return r;
 }
 
-/* @@DLM: F gdidl_gd_error_string GD_ERROR_STRING 1 1 */
-IDL_VPTR gdidl_gd_error_string(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: F gdidl_error_string GD_ERROR_STRING 1 1 */
+IDL_VPTR gdidl_error_string(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -4308,6 +4326,64 @@ void gdidl_put_string(int argc, IDL_VPTR argv[], char *argk)
 
   dreturnvoid();
 }
+
+/* @@DLM: F gdidl_invalid_dirfile GD_INVALID_DIRFILE 0 0 */
+IDL_VPTR gdidl_invalid_dirfile(int argc, IDL_VPTR argv[], char *argk)
+{
+  dtraceidl();
+
+  IDL_VPTR r = IDL_GettmpInt(gdidl_set_dirfile(gd_invalid_dirfile()));
+  dreturn("%p", r);
+  return r;
+}
+
+/* @@DLM: F gdidl_dirfile_standards GD_DIRFILE_STANDARDS 1 2 KEYWORDS */
+IDL_VPTR gdidl_dirfile_standards(int argc, IDL_VPTR argv[], char *argk)
+{
+  dtraceidl();
+
+  typedef struct {
+    IDL_KW_RESULT_FIRST_FIELD;
+    GDIDL_KW_RESULT_ERROR;
+    int earliest;
+    int current;
+    int latest;
+  } KW_RESULT;
+  KW_RESULT kw;
+  int vers = 16384;
+
+  kw.earliest = kw.current = kw.latest = 0;
+  GDIDL_KW_INIT_ERROR;
+
+  static IDL_KW_PAR kw_pars[] = {
+    { "CURRENT", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(current) },
+    { "EARLIEST", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(earliest) },
+    GDIDL_KW_PAR_ERROR,
+    GDIDL_KW_PAR_ESTRING,
+    { "LATEST", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(latest) },
+  };
+
+  argc = IDL_KWProcessByOffset(argc, argv, argk, kw_pars, NULL, 1, &kw);
+
+  DIRFILE *D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
+
+  if (argc > 1)
+    vers = IDL_LongScalar(argv[1]);
+
+  vers = gd_dirfile_standards(D, (vers != 16384) ? vers :
+      kw.current ? GD_VERSION_CURRENT : kw.latest ? GD_VERSION_LATEST :
+      kw.earliest ? GD_VERSION_EARLIEST : 16384);
+
+  GDIDL_SET_ERROR(D);
+
+  IDL_KW_FREE;
+
+  IDL_VPTR r = IDL_GettmpInt(vers);
+  dreturn("%p", r);
+  return r;
+}
+
+  
 
 /**** Module initialisation ****/
 

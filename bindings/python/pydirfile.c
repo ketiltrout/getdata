@@ -149,13 +149,29 @@ static int gdpy_dirfile_init(struct gdpy_dirfile_t* self, PyObject *args,
   PyObject* pycallback = NULL;
   PyObject* pycallback_data = Py_None;
   char *keywords[] = {"name", "flags", "callback", "extra", NULL};
-  const char* name = NULL;
+  PyObject* name = NULL;
   unsigned long flags = GD_RDWR;
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
-        "s|kOO:pygetdata.dirfile.__init__", keywords, &name, &flags,
+        "|OkOO:pygetdata.dirfile.__init__", keywords, &name, &flags,
         &pycallback, &pycallback_data))
   {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  /* An invalid dirfile was requested */
+  if (name == NULL || name == Py_None) {
+    self->D = gd_invalid_dirfile();
+
+    PYGD_CHECK_ERROR(self->D, -1);
+
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  if (!PyString_Check(name)) {
+    PyErr_SetString(PyExc_TypeError, "name must be a string or None");
     dreturn("%i", -1);
     return -1;
   }
@@ -174,7 +190,7 @@ static int gdpy_dirfile_init(struct gdpy_dirfile_t* self, PyObject *args,
   self->callback_data = pycallback_data;
   self->callback_exception = 0;
 
-  self->D = gd_cbopen(name, (unsigned int)flags,
+  self->D = gd_cbopen(PyString_AsString(name), (unsigned int)flags,
       (pycallback == NULL) ? NULL : gdpy_callback_func, self);
 
   if (self->callback_exception) {
@@ -292,9 +308,8 @@ static PyObject* gdpy_dirfile_close(struct gdpy_dirfile_t* self)
 {
   dtrace("%p", self);
 
-  gd_close(self->D);
-
-  PYGD_CHECK_ERROR(self->D, NULL);
+  if (gd_close(self->D))
+    PYGD_CHECK_ERROR(self->D, NULL);
 
   self->D = gd_invalid_dirfile();
 
@@ -332,9 +347,9 @@ static PyObject* gdpy_dirfile_discard(struct gdpy_dirfile_t* self)
 {
   dtrace("%p", self);
 
-  gd_discard(self->D);
-
-  PYGD_CHECK_ERROR(self->D, NULL);
+  if (gd_discard(self->D)) {
+    PYGD_CHECK_ERROR(self->D, NULL);
+  }
 
   /* Here we replace D with an empty, invalid dirfile object.  */
   self->D = gd_invalid_dirfile();
@@ -1676,6 +1691,41 @@ static PyObject* gdpy_dirfile_rename(struct gdpy_dirfile_t* self,
   return Py_None;
 }
 
+static PyObject* gdpy_dirfile_getstandards(struct gdpy_dirfile_t* self,
+    void* closure)
+{
+  dtrace("%p, %p", self, closure);
+
+  int vers = gd_dirfile_standards(self->D, GD_VERSION_CURRENT);
+
+  PYGD_CHECK_ERROR(self->D, NULL);
+
+  PyObject* pyobj = PyInt_FromLong(vers);
+
+  dreturn("%p", pyobj);
+  return pyobj;
+}
+
+static int gdpy_dirfile_setstandards(struct gdpy_dirfile_t* self,
+    PyObject *value, void *closure)
+{
+  dtrace("%p, %p, %p", self, value, closure);
+
+  int vers = (int)PyInt_AsLong(value);
+
+  if (PyErr_Occurred()) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  gd_dirfile_standards(self->D, vers);
+
+  PYGD_CHECK_ERROR(self->D, -1);
+
+  dreturn("%i", 0);
+  return 0;
+}
+
 static PyGetSetDef gdpy_dirfile_getset[] = {
   { "error", (getter)gdpy_dirfile_geterror, NULL,
     "The numerical error code encountered by the last call to the GetData\n"
@@ -1701,6 +1751,14 @@ static PyGetSetDef gdpy_dirfile_getset[] = {
     (setter)gdpy_dirfile_setreference,
     "The reference field for the dirfile, which may be modified.  See\n"
       "gd_reference(3).",
+    NULL },
+  { "standards", (getter)gdpy_dirfile_getstandards,
+    (setter)gdpy_dirfile_setstandards,
+    "The current Standards Version of the loaded dirfile.  Setting this\n"
+      "to pygetdata.VERSION_EARLIEST or pygetdata.VERSION_LATEST has the\n"
+      "same effect as passing the corresponding C API symbols to\n"
+      /* -----------------------------------------------------------------| */
+      "gd_dirfile_standards(3), q.v.",
     NULL },
   { NULL }
 };
@@ -1977,7 +2035,6 @@ static PyMethodDef gdpy_dirfile_methods[] = {
   { "vector_list", (PyCFunction)gdpy_dirfile_getvectorlist, METH_NOARGS,
     "vector_list()\n\n"
       "Retrieve a list of all vector type fields (that is: BIT, DIVIDE,\n"
-      /* -----------------------------------------------------------------| */
       "INDEX, LINCOM, LINTERP, MULTIPLY, PHASE, POLYNOM, RAW, RECIP, and\n"
       "SBIT metafields) defined in the database.  See gd_vector_list(3)."
   },
@@ -2095,12 +2152,15 @@ static PyMethodDef gdpy_dirfile_methods[] = {
 };
 
 #define DIRFILE_DOC \
-  "dirfile(dirfilename [, flags [, sehandler [, extra ]])\n\n" \
-"Returns a dirfile object representing the dirfile specified by\n" \
-"'dirfilename'.  The dirfile is opened by a call to gd_cbopen(3).\n"\
-"See that manual page for full details on arguments.  If present 'flags'\n"\
-"should be a bitwise or'd collection of gd_cbopen flags.  If it is\n"\
-"omitted, the default, pygetdata.RDRW, is used.\n\n" \
+  "dirfile([name [, flags [, sehandler [, extra ]]])\n\n" \
+"If 'name' is omitted or None, returns an invalid dirfile, as if\n" \
+"gd_invalid_dirfile(3) were called.  Othwerwise, if 'name' is a string,\n" \
+"returns a dirfile object representing the dirfile specified by 'name'.\n" \
+/* ---------------------------------------------------------------------| */\
+"The dirfile is opened by a call to gd_cbopen(3).  See that manual page\n" \
+"for full details on arguments.  If present, 'flags' should be a bitwise\n" \
+"or'd collection of gd_cbopen flags.  If it is omitted, the default,\n" \
+"pygetdata.RDRW, is used.\n\n" \
 "If a callback handler is desired, 'sehandler' should be a callable\n"\
 "object (ie. a function) which accepts two objects.  The first object is\n"\
 "a dictionary with keys: 'suberror', 'line', 'linenum', and 'filename',\n"\

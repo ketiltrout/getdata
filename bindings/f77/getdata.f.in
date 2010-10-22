@@ -181,6 +181,8 @@ C     Corresponding to gd_get_string(3)
       EXTERNAL GDGTST
 C     Corresponding to gd_include(3)
       EXTERNAL GDINCL
+C     Corresponding to gd_invalid_dirfile(3)
+      EXTERNAL GDINVD
 C     Corresponding to gd_madd_bit(3)
       EXTERNAL GDMDBT
 C     Corresponding to complex valued gd_madd_clincom(3)
@@ -263,6 +265,8 @@ C     Corresponding to gd_rewrite_fragment(3)
       EXTERNAL GDRFRG
 C     Corresponding to gd_raw_filename(3)
       EXTERNAL GDRWFN
+C     Corresponding to gd_dirfile_standards(3)
+      EXTERNAL GDSTDV
 C     Corresponding to gd_uninclude(3)
       EXTERNAL GDUINC
 C     Corresponding to gd_vector_list(3) (sort of)

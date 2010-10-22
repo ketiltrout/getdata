@@ -186,6 +186,8 @@ namespace GetData {
       void SetCallback(gd_parser_callback_t sehandler, void* extra = NULL)
         const;
 
+      int Standards(int version = GD_VERSION_CURRENT) const;
+
       const char **Strings() const;
 
       int UnInclude(int fragment_index, int del = 0) const;

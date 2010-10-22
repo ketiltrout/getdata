@@ -967,7 +967,7 @@ nume += check_simple2(146, 3, n.fragment, 0)
 nume += check_simple2(146, 4, n.in_fields, [ "in2", "in3" ])
 
 ;  148: gd_add_recip
-gd_add_recip, d, "new16", "in2", COMPLEX(33.3, 44.4)
+gd_add_recip, d, "new16", "in2", dividend=COMPLEX(33.3, 44.4)
 nume += check_ok2(148, 1, d)
 
 n = gd_entry(d, "new16")
@@ -1007,7 +1007,27 @@ nume += check_simple2(153, 6, n.dividend, 1.01)
 gd_rewrite_fragment, d, fragment=0
 nume += check_ok(155, d)
 
+;  156: gd_invalid_dirfile
+m = gd_invalid_dirfile()
+nume += check_ok2(156, 1, m)
+n = gd_nfragments(m)
+nume += check_error2(156, 2, m, !GD.E_BAD_DIRFILE)
+gd_close, m
 
+;  157: gd_dirfile_standards
+n = gd_dirfile_standards(d, /CURRENT)
+nume += check_ok2(157, 1, d)
+nume += check_simple(157, n, 8)
+n = gd_dirfile_standards(d, 0)
+nume += check_error2(157, 2, d, !GD.E_BAD_VERSION)
+
+
+
+
+
+; ===============================================================
+; Cleanup
+gd_close, d, /DISCARD
 
 spawn, "rm -rf " + filedir
 

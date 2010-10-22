@@ -1,4 +1,4 @@
-Fgd_gd_ORTRAN 77 BINDINGS FOR GETDATA
+FORTRAN 77 BINDINGS FOR GETDATA
 ===============================
 
 This README describes the Fortran 77 bindings for the GetData library.  These
@@ -89,6 +89,14 @@ Subroutines interacting with the database
   interface with GetData.  Other than GDCOPN, the only other subroutine which
   potentially could cause the callback subroutine to be called is GDINCL.  Use
   GDCLBK to change the callback function before calling GDINCL, if required.
+
+* GDINVD(dirfile_unit)
+
+  Output:
+    INTEGER dirfile_unit
+
+  This wraps gd_invalid_dirfile(3), and returns the unit number of a
+  newly-created, invalid dirfile.
 
 * GDCLOS(dirfile_unit)
 
@@ -241,7 +249,7 @@ Subroutines interacting with data
     REAL*8 value
     CHARACTER*<field_code_len> field_code
 
-  This subroutine wraps gd_get_framenum(3), and performs a reverse look-up on a
+  This subroutine wraps gd_framenum(3), and performs a reverse look-up on a
   field.
 
 * GDFNSS(framenum, dirfile_unit, field_code, field_code_len, value, field_start,
@@ -254,7 +262,7 @@ Subroutines interacting with data
     REAL*8 value
     CHARACTER*<field_code_len> field_code
 
-  This subroutine wraps gd_get_framenum_subset(3), and performs a reverse
+  This subroutine wraps gd_framenum_subset(3), and performs a reverse
   look-up on a field.
 
 
@@ -268,7 +276,7 @@ Subroutines interacting with global metadata
   Input:
     INTEGER dirfile_unit
 
-  This wraps gd_get_nfields(3).  It takes the dirfile unit number as input and
+  This wraps gd_nfields(3).  It takes the dirfile unit number as input and
   returns the number of fields in the dirfile in nfields.
 
 * GDNFDT(nfields, dirfile_unit, type)
@@ -278,7 +286,7 @@ Subroutines interacting with global metadata
   Input:
     INTEGER dirfile_unit, type
 
-  This wraps gd_get_nfields_by_type(3).  It takes the dirfile unit number, and
+  This wraps gd_nfields_by_type(3).  It takes the dirfile unit number, and
   type specifier as input and returns the number of fields of the specified type
   in the dirfile in nfields.
 
@@ -289,15 +297,15 @@ Subroutines interacting with global metadata
   Input:
     INTEGER dirfile_unit
 
-  This wraps gd_get_nvectors(3).  It takes the dirfile unit number as input and
+  This wraps gd_nvectors(3).  It takes the dirfile unit number as input and
   returns the number of vector fields in the dirfile in nfields.
 
 * GDNMFD(nfields, dirfile, parent, parent_l)
 * GDNMFT(nfields, dirfile, parent, parent_l, type)
 * GDNMVE(nvectors, dirfile, parent, parent_l)
 
-  These subroutine wrap gd_get_nmfields(3), gd_get_nmfields_by_type(3), and
-  gd_get_nmvectors(3).  They behave analogously to GDNFLD, GDNFDT, and GDNVEC.
+  These subroutine wrap gd_nmfields(3), gd_nmfields_by_type(3), and
+  gd_nmvectors(3).  They behave analogously to GDNFLD, GDNFDT, and GDNVEC.
 
 * GDFDNX(field_max, dirfile_unit)
 
@@ -333,7 +341,7 @@ Subroutines interacting with global metadata
   Input:
     INTEGER dirfile_unit, field_num
 
-  This subroutine is the replacement for gd_get_field_list(3).  It returns in
+  This subroutine is the replacement for gd_field_list(3).  It returns in
   name a Fortran 77 string containing the field name of the field indexed by
   field_num (which is should be a number between 1 and the output of GDNFLD).
   If the name of the field is longer than name_len, it will return the actual
@@ -350,7 +358,7 @@ Subroutines interacting with global metadata
   Input:
     INTEGER dirfile_unit, field_num, type
 
-  This subroutine is the replacement for gd_get_field_list_by_type(3) and
+  This subroutine is the replacement for gd_field_list_by_type(3) and
   behaves in the same manner as GDFLDN.  Type should be one of the parameters
   defined in getdata.f (see below).
     
@@ -363,7 +371,7 @@ Subroutines interacting with global metadata
   Input:
     INTEGER dirfile_unit, field_num
 
-  This subroutine is the replacement for gd_get_vector_list(3) and behaves in
+  This subroutine is the replacement for gd_vector_list(3) and behaves in
   the same manner as GDFLDN.
 
 * GDMFDN(name, name_len, dirfile_unit, parent, parent_len, field_num)
@@ -376,7 +384,7 @@ Subroutines interacting with global metadata
     INTEGER dirfile_unit, field_num, parent_len
     CHARACTER*<parent_len> parent
 
-  This subroutine is the replacement for gd_get_mfield_list(3) and behaves in
+  This subroutine is the replacement for gd_mfield_list(3) and behaves in
   the same manner as GDFLDN.
 
 * GDMFDT(name, name_len, dirfile_unit, parent, parent_len, type, field_num)
@@ -389,7 +397,7 @@ Subroutines interacting with global metadata
     INTEGER dirfile_unit, field_num, parent_len, type
     CHARACTER*<parent_len> parent
 
-  This subroutine is the replacement for gd_get_mfield_list_by_type(3) and
+  This subroutine is the replacement for gd_mfield_list_by_type(3) and
   behaves in the same manner as GDFDNT.
     
 * GDMVEN(name, name_len, dirfile_unit, parent, parent_len, field_num)
@@ -402,7 +410,7 @@ Subroutines interacting with global metadata
     INTEGER dirfile_unit, field_num, parent_len
     CHARACTER*<parent_len> parent
 
-  This subroutine is the replacement for gd_get_mvector_list(3) and behaves in
+  This subroutine is the replacement for gd_mvector_list(3) and behaves in
   the same manner as GDVECN.
 
 * GDNFRM(nframes, dirfile_unit)
@@ -412,7 +420,7 @@ Subroutines interacting with global metadata
   Input:
     INTEGER dirfile_unit
 
-  This wraps gd_get_nframes(3).  It takes the dirfile unit number as input and
+  This wraps gd_nframes(3).  It takes the dirfile unit number as input and
   returns the number of frames in the dirfile in nframes.
 
 * GDEROR(error, dirfile_unit)
@@ -477,17 +485,17 @@ Subroutines interacting with global metadata
   name_len it will return the actual length of the field in name_len and not
   modify the name argument.
 
-* GDGREF(name, name_len, dirfile_unit)
+* GDSTDV(version, dirfile_unit)
 
-  Output:
-    CHARACTER*<name_len> name
   Input/Output:
-    INTEGER name_len
+    INTEGER version
   Input:
     INTEGER dirfile_unit
 
-  This wraps gd_get_reference(3).  It behaves as if GDREFE was called with
-  field_code_len equal to zero.
+  This wraps gd_dirfile_standards(3).  It attempts to set the current Standards
+  Version of the loaded dirfile to the value specified by version (which may
+  equal the parameter GDSV_C indicating no change).  It then returns the
+  current Version in version, or -1 on error.
 
 
 Subroutines interacting with fragment metadata
@@ -521,7 +529,7 @@ Subroutines interacting with fragment metadata
 * GDUINC(dirfile_unit, fragment, del)
 
   Input:
-    INTEGER dirifle_unit, fragment, del
+    INTEGER dirfile_unit, fragment, del
 
   This subroutine wraps gd_uninclude(3).  It removes the specified fragment
   from the dirfile.  If del is non-zero, the fragment file will be deleted.
@@ -533,7 +541,7 @@ Subroutines interacting with fragment metadata
   Input:
     INTEGER dirfile_unit, fragment_index
 
-  This subroutine wraps gd_get_encoding(3).  It returns the current encoding
+  This subroutine wraps gd_encoding(3).  It returns the current encoding
   scheme of the specified fragment, which will be one of the symbols listed
   below.
 
@@ -555,7 +563,7 @@ Subroutines interacting with fragment metadata
   Input:
     INTEGER dirfile_unit, fragment_index
 
-  This subroutine wraps gd_get_endianness(3).  It returns the current byte sex
+  This subroutine wraps gd_endianness(3).  It returns the current byte sex
   of the specified fragment, which will be one of the symbols listed below.
 
 * GDAEND(dirfile_unit, endianness, fragment, recode)
@@ -576,7 +584,7 @@ Subroutines interacting with fragment metadata
   Input:
     INTEGER dirfile_unit, fragment_index
 
-  This subroutine wraps gd_get_frameoffset(3).  It returns the current frame
+  This subroutine wraps gd_frameoffset(3).  It returns the current frame
   offset of the specified fragment.
 
 * GDAFOF(dirfile_unit, frame_offset, fragment, recode)
@@ -596,7 +604,7 @@ Subroutines interacting with fragment metadata
   Input:
     INTEGER dirfile_unit, fragment_index
 
-  This subroutine wraps gd_get_protection(3).  It returns the current protection
+  This subroutine wraps gd_protection(3).  It returns the current protection
   level of the specified fragment, which will be one of the symbols listed
   below.
 
@@ -616,7 +624,7 @@ Subroutines interacting with fragment metadata
   Input:
     INTEGER dirfile_unit, fragment
 
-  This subroutine wraps gd_get_parent_fragment(3).  It returns the parent
+  This subroutine wraps gd_parent_fragment(3).  It returns the parent
   fragment of the specified fragment, or -1 on error.
 
 
@@ -729,6 +737,58 @@ Subroutines interacting with field metadata
   is not found, or the field specified is not of SBIT type, infield_len will
   be set to zero.  In this case the value of the remaining data is unspecified.
 
+* GDGECR(infield, infield_len, dividend, fragment_index, dirfile_unit,
+  field_code, field_code_len)
+
+  Output: 
+    CHARACTER*<infield_len> infield
+    COMPLEX*16 dividend
+    INTEGER fragment_index
+  Input/Output:
+    INTEGER infield_len
+  Input:
+    INTEGER dirfile_unit, field_code_len
+    CHARACTER*<field_code_len> field_code
+
+  This subroutine returns metadata describing a RECIP field.  If field_code
+  is not found, or the field specified is not of RECIP type, infield_len will
+  be set to zero.  In this case the value of the remaining data is unspecified.
+
+* GDGERC(infield, infield_len, dividend, fragment_index, dirfile_unit,
+  field_code, field_code_len)
+
+  Output: 
+    CHARACTER*<infield_len> infield
+    REAL*8 dividend
+    INTEGER fragment_index
+  Input/Output:
+    INTEGER infield_len
+  Input:
+    INTEGER dirfile_unit, field_code_len
+    CHARACTER*<field_code_len> field_code
+
+  This subroutine returns metadata describing a RECIP field.  If field_code
+  is not found, or the field specified is not of RECIP type, infield_len will
+  be set to zero.  In this case the value of the remaining data is unspecified.
+
+* GDGEDV(infield1, infield1_len, infield2, infield2_len, fragment_index,
+  dirfile_unit, field_code, field_code_len)
+
+  Output: 
+    CHARACTER*<infield1_len> infield1
+    CHARACTER*<infield2_len> infield2
+    INTEGER fragment_index
+  Input/Output:
+    INTEGER infield1_len, infield2_len
+  Input:
+    INTEGER dirfile_unit, field_code_len
+    CHARACTER*<field_code_len> field_code
+
+  This subroutine returns metadata describing a DIVIDE field.  If field_code
+  is not found, or the field specified is not of DIVIDE type, infield1_len
+  will be set to zero.  In this case the value of the remaining data is
+  unspecified.
+
 * GDGEMT(infield1, infield1_len, infield2, infield2_len, fragment_index,
   dirfile_unit, field_code, field_code_len)
 
@@ -777,7 +837,41 @@ Subroutines interacting with field metadata
     CHARACTER*<field_code_len> field_code
 
   This subroutine returns metadata describing a POLYNOM field.  Although six
-  coefficents, only poly_ord + 1 of them will be updated.  If field_code is not
+  coefficients, only poly_ord + 1 of them will be updated.  If field_code is not
+  found, or the field specified is not of POLYNOM type, nfields will be set to
+  zero.  In this case the value of the remaining data is unspecified.
+
+* GDGEPN(poly_ord, infield, infield_len, a0, a1, a2, a3, a4, a5, fragment_index,
+  dirfile_unit, field_code, field_code_len)
+
+  Output:
+    INTEGER poly_ord, fragment_index
+    CHARACTER*<infield_len> infield
+    REAL*8 a0, a1, a2, a3, a4, a5
+  Input/Output:
+    INTEGER infield1_len, infield2_len, infield3_len
+  Input:
+    INTEGER dirfile_unit, field_code_len
+    CHARACTER*<field_code_len> field_code
+
+  This is equivalent to GDGECP above, but returns only the real part of the
+  coefficients.
+
+* GDGECP(poly_ord, infield, infield_len, a0, a1, a2, a3, a4, a5, fragment_index,
+  dirfile_unit, field_code, field_code_len)
+
+  Output:
+    INTEGER poly_ord, fragment_index
+    CHARACTER*<infield_len> infield
+    COMPLEX*16 a0, a1, a2, a3, a4, a5
+  Input/Output:
+    INTEGER infield1_len, infield2_len, infield3_len
+  Input:
+    INTEGER dirfile_unit, field_code_len
+    CHARACTER*<field_code_len> field_code
+
+  This subroutine returns metadata describing a POLYNOM field.  Although six
+  coefficients, only poly_ord + 1 of them will be updated.  If field_code is not
   found, or the field specified is not of POLYNOM type, nfields will be set to
   zero.  In this case the value of the remaining data is unspecified.
 
@@ -817,7 +911,7 @@ Subroutines interacting with field metadata
     INTEGER dirfile_unit, field_code_len
     CHARACTER*<field_code_len> field_code
 
-  This wraps gd_get_spf(3).  The field_code_len parameter should contain the
+  This wraps gd_spf(3).  The field_code_len parameter should contain the
   string length of field_code.  The number of samples per frame in field_code
   will be returned in spf.
 
@@ -829,11 +923,11 @@ Subroutines interacting with field metadata
     INTEGER dirfile_unit, field_code_len
     CHARACTER*<field_code_len> field_code
 
-  This subroutine wraps gd_get_entry_type(3), and returns the field type of the
+  This subroutine wraps gd_entry_type(3), and returns the field type of the
   specified field_code in entry_type.  The entry_type will be one of the entry
   type parameters listed below.
 
-* GDFRGI(fragment_index, dirfile_unit, field_code, field_code_len
+* GDFRGI(fragment_index, dirfile_unit, field_code, field_code_len)
 
   Output: 
     INTEGER fragment_index
@@ -841,9 +935,31 @@ Subroutines interacting with field metadata
     INTEGER dirfile_unit, field_code_len
     CHARACTER*<field_code_len> field_code
 
-  This subroutine wraps gd_get_fragment_index(3), and returns the format file
+  This subroutine wraps gd_fragment_index(3), and returns the format file
   fragment index for the supplied field.  If the field does not exist, or an
   error occurred, -1 is returned.
+
+* GDGBOF(bof, dirfile, field_code, field_code_len)
+
+  Output:
+    INTEGER bof
+  Input:
+    INTEGER dirfile_unit, field_code_len
+    CHARACTER*<field_code_len> field_code
+
+  This subroutine wraps gd_bof(3), and returns the location of the beginning-
+  of-field marker for the specified field.
+
+* GDGEOF(eof, dirfile, field_code, field_code_len)
+
+  Output:
+    INTEGER eof
+  Input:
+    INTEGER dirfile_unit, field_code_len
+    CHARACTER*<field_code_len> field_code
+
+  This subroutine wraps gd_eof(3), and returns the location of the end-of-field
+  marker for the specified field.
 
 * GDALRW(dirfile_unit, field_code, field_code_len, data_type, spf, recode)
 
@@ -896,7 +1012,7 @@ Subroutines interacting with field metadata
     CHARACTER*<table_len> table
 
   This subroutine wraps gd_alter_linterp(3), and modifies the specified field
-  metadata.  If move is non-zero, the lookup table will be moved to the path
+  metadata.  If move is non-zero, the look-up table will be moved to the path
   specified by table.
 
 * GDALBT(dirfile_unit, field_code, field_code_len, in_field, in_field_len,
@@ -908,6 +1024,18 @@ Subroutines interacting with field metadata
     CHARACTER*<in_field_len> in_field
 
   This subroutine wraps gd_alter_bit(3), and modifies the specified field
+  metadata.
+
+* GDALDV(dirfile_unit, field_code, field_code_len, in_field1, in_field1_len,
+  in_field2, in_field2_len)
+
+  Input:
+    INTEGER dirfile_unit, field_code_len, in_field1_len, in_field2_len
+    CHARACTER*<field_code_len> field_code
+    CHARACTER*<in_field1_len> in_field1
+    CHARACTER*<in_field2_len> in_field2
+
+  This subroutine wraps gd_alter_divide(3), and modifies the specified field
   metadata.
 
 * GDALMT(dirfile_unit, field_code, field_code_len, in_field1, in_field1_len,
@@ -954,7 +1082,7 @@ Subroutines interacting with field metadata
     CHARACTER*<field_code_len> field_code
     CHARACTER*<in_field_len> in_field
 
-  This subroutine is equivalnet to GDALCP above, but takes purely real
+  This subroutine is equivalent to GDALCP above, but takes purely real
   parameters.
 
 * GDALSB(dirfile_unit, field_code, field_code_len, in_field, in_field_len,
@@ -966,6 +1094,30 @@ Subroutines interacting with field metadata
     CHARACTER*<in_field_len> in_field
 
   This subroutine wraps gd_alter_sbit(3), and modifies the specified field
+  metadata.
+
+* GDALCR(dirfile_unit, field_code, field_code_len, in_field, in_field_len,
+  dividend)
+
+  Input:
+    INTEGER dirfile_unit, field_code_len, in_field_len
+    CHARACTER*<field_code_len> field_code
+    CHARACTER*<in_field_len> in_field
+    COMPLEX*16 dividend
+
+  This subroutine wraps gd_alter_crecip(3), and modifies the specified field
+  metadata.
+
+* GDALRC(dirfile_unit, field_code, field_code_len, in_field, in_field_len,
+  dividend)
+
+  Input:
+    INTEGER dirfile_unit, field_code_len, in_field_len
+    CHARACTER*<field_code_len> field_code
+    CHARACTER*<in_field_len> in_field
+    REAL*8 dividend
+
+  This subroutine wraps gd_alter_recip(3), and modifies the specified field
   metadata.
 
 * GDALCO(dirfile_unit, field_code, field_code_len, const_type)
@@ -987,7 +1139,7 @@ Subroutines interacting with field metadata
   This subroutine wraps gd_alter_spec(3), and modifies the specified field
   metadata.  If move is non-zero, and the field is a RAW field, the binary
   file will be modified.  If move is non-zero, and the field is a LINTERP,
-  the lookup table will be moved.  Otherwise, move is ignored.
+  the look-up table will be moved.  Otherwise, move is ignored.
 
 * GDMLSP(dirfile_unit, spec, spec_len, parent, parent_len, move)
 
@@ -1010,7 +1162,7 @@ Subroutines interacting with field metadata
     INTEGER dirfile_unit, field_code_len
     CHARACTER*<field_code_len> field_code
 
-  This subroutine wraps gd_get_raw_filename(3).  It returns in name the name of
+  This subroutine wraps gd_raw_filename(3).  It returns in name the name of
   the binary file associated with the raw field indicated by field_code.  On
   error, it sets name_len to zero.
 
@@ -1044,7 +1196,7 @@ Subroutines interacting with field metadata
     INTEGER dirfile_unit, field_code_len
     CHARACTER*<field_code_len> field_code
 
-  This subroutine wraps gd_get_native_type(3), and returns the native type of
+  This subroutine wraps gd_native_type(3), and returns the native type of
   the specified field.  The return value will be one of the data type symbols
   listed below.
 
@@ -1182,6 +1334,32 @@ Subroutines which add or delete fields
   This subroutine adds a SBIT field with the supplied parameters to the
   specified format file fragment of the dirfile.
 
+* GDADCR(dirfile_unit, field_code, field_code_len, in_field, in_field_len,
+  dividend, fragment_index)
+
+  Input:
+    INTEGER dirfile_unit, field_code_len, in_field_len
+    INTEGER fragment_index
+    CHARACTER*<field_code_len> field_code
+    CHARACTER*<in_field_len> in_field
+    COMPLEX*16 dividend
+
+  This subroutine adds a RECIP field with the supplied parameters to the
+  specified format file fragment of the dirfile.
+
+* GDADRC(dirfile_unit, field_code, field_code_len, in_field, in_field_len,
+  dividend, fragment_index)
+
+  Input:
+    INTEGER dirfile_unit, field_code_len, in_field_len
+    INTEGER fragment_index
+    CHARACTER*<field_code_len> field_code
+    CHARACTER*<in_field_len> in_field
+    REAL*8 dividend
+
+  This subroutine adds a RECIP field with the supplied parameters to the
+  specified format file fragment of the dirfile.
+
 * GDADMT(dirfile_unit, field_code, field_code_len, in_field1, in_field1_len,
   in_field2, in_field2_len, fragment_index)
 
@@ -1195,6 +1373,19 @@ Subroutines which add or delete fields
   This subroutine adds a MULTIPLY field with the supplied parameters to the
   specified format file fragment of the dirfile.
 
+* GDADDV(dirfile_unit, field_code, field_code_len, in_field1, in_field1_len,
+  in_field2, in_field2_len, fragment_index)
+
+  Input:
+    INTEGER dirfile_unit, field_code_len, in_field1_len, in_field2_len
+    INTEGER fragment_index
+    CHARACTER*<field_code_len> field_code
+    CHARACTER*<in_field1_len> in_field1
+    CHARACTER*<in_field2_len> in_field2
+
+  This subroutine adds a DIVIDE field with the supplied parameters to the
+  specified format file fragment of the dirfile.
+
 * GDADCP(dirfile_unit, field_code, field_code_len, poly_ord, in_field,
   in_field_len, a0, a1, a2, a3, a4, a5, fragment_index)
 
@@ -1206,7 +1397,7 @@ Subroutines which add or delete fields
     CHARACTER*<in_field_len> in_field
 
   This subroutine adds a POLYNOM field with the supplied parameters to the
-  specified format file fragment of the dirfile.  All six coeffiecients are
+  specified format file fragment of the dirfile.  All six coefficients are
   required to be passed to the call, but only the first poly_ord + 1 will be
   examined.
 
@@ -1278,11 +1469,17 @@ Subroutines which add or delete fields
 
 * GDMDBT(dirfile_unit, parent, parent_len, field_code, field_code_len, in_field,
   in_field_len, bitnum, numbits)
-* GDFACO(dirfile_unit, parent, parent_len, field_code, field_code_len,
-  const_type, data_type, value)
 * GDMDCL(dirfile_unit, parent, parent_len, field_code, field_code_len, nfields,
   in_field1, in_field1_len, m1, b1, in_field2, in_field2_len, m2, b2, in_field3,
   in_field3_len, m3, b3)
+* GDFACO(dirfile_unit, parent, parent_len, field_code, field_code_len,
+  const_type, data_type, value)
+* GDMDCP(dirfile_unit, parent, parent_len, field_code, field_code_len, poly_ord,
+  int_field, in_field_len, a0, a1, a2, a3, a4, a5)
+* GDMDCR(dirfile_unit, parent, parent_len, field_code, field_code_len, in_field,
+  in_field_len, dividend)
+* GDMDDV(dirfile_unit, parent, parent_len, field_code, field_code_len,
+  in_field1, in_field1_len, in_field2, in_field2_len)
 * GDMDLC(dirfile_unit, parent, parent_len, field_code, field_code_len, nfields,
   in_field1, in_field1_len, m1, b1, in_field2, in_field2_len, m2, b2, in_field3,
   in_field3_len, m3, b3)
@@ -1292,10 +1489,10 @@ Subroutines which add or delete fields
   in_field1, in_field1_len, in_field2, in_field2_len)
 * GDMDPH(dirfile_unit, parent, parent_len, field_code, field_code_len,
   in_field, in_field_len, shift)
-* GDMDCP(dirfile_unit, parent, parent_len, field_code, field_code_len, poly_ord,
-  int_field, in_field_len, a0, a1, a2, a3, a4, a5)
 * GDMDPN(dirfile_unit, parent, parent_len, field_code, field_code_len, poly_ord,
   int_field, in_field_len, a0, a1, a2, a3, a4, a5)
+* GDMDRC(dirfile_unit, parent, parent_len, field_code, field_code_len, in_field,
+  in_field_len, dividend)
 * GDMDSB(dirfile_unit, parent, parent_len, field_code, field_code_len, in_field,
   in_field_len, bitnum, numbits)
 * GDMDCO(dirfile_unit, parent, parent_len, field_code, field_code_len,
@@ -1315,9 +1512,9 @@ Fortran 77 bindings.
 
 Error codes (returned by GDEROR):
 
-  F77 symbol      C symbol          Notes
-  ----------      ----------------- --------------------------------------
-  GD_EOK          GD_E_OK           This is guaranteed to be equal to zero
+  F77 symbol      C symbol             Notes
+  ----------      -------------------  ---------------------------------------
+  GD_EOK          GD_E_OK              This is guaranteed to be equal to zero.
   GD_EOP          GD_E_OPEN
   GD_EFO          GD_E_FORMAT
   GD_ETR          GD_E_TRUNC
@@ -1325,7 +1522,8 @@ Error codes (returned by GDEROR):
   GD_EBC          GD_E_BAD_CODE
   GD_EBT          GD_E_BAD_TYPE
   GD_ERW          GD_E_RAW_IO
-  GD_EOI          GD_E_OPEN_INCLUDE
+  GD_EOF          GD_E_OPEN_FRAGMENT
+  GD_EOI          GD_E_OPEN_INCLUDE    An alias for GD_E_OPEN_FRAGMENT.
   GD_EIE          GD_E_INTERNAL_ERROR
   GD_EAL          GD_E_ALLOC
   GD_ERA          GD_E_RANGE
@@ -1348,6 +1546,8 @@ Error codes (returned by GDEROR):
   GD_UCL          GD_E_UNCLEAN_DB
   GD_EDO          GD_E_DOMAIN
   GD_ERP          GD_E_BAD_REPR
+  GD_EVR          GD_E_BAD_VERSION
+  GD_EFL          GD_E_FLUSH
 
 Dirfile flags (required by GDOPEN, GDCOPN, and GDINCL):
 
@@ -1358,11 +1558,14 @@ Dirfile flags (required by GDOPEN, GDCOPN, and GDINCL):
   GD_CR           GD_CREAT
   GD_EX           GD_EXCL
   GD_TR           GD_TRUNC
+  GD_AE           GD_ARM_ENDIAN
   GD_BE           GD_BIG_ENDIAN
   GD_LE           GD_LITTLE_ENDIAN
+  GD_NA           GD_NOT_ARM_ENDIAN
   GD_FC           GD_FORCE_ENCODING
   GD_FE           GD_FORCE_ENDIAN
   GD_PE           GD_PEDANTIC
+  GD_PM           GD_PERMISSIVE
   GD_VB           GD_VERBOSE
   GD_ID           GD_IGNORE_DUPS
   GD_IR           GD_IGNORE_REFS
@@ -1389,6 +1592,8 @@ Entry types (required by GDFLDT):
   GD_IXE          GD_INDEX_ENTRY
   GD_PNE          GD_POLYNOM_ENTRY
   GD_SBE          GD_SBIT_ENTRY
+  GD_DVE          GD_DIVIDE_ENTRY
+  GD_RCE          GD_RECIP_ENTRY
   GD_COE          GD_CONST_ENTRY
   GD_STE          GD_STRING_ENTRY
 
@@ -1431,7 +1636,7 @@ Protection levels (returned by GDGPRT and required by GDPROT):
   GDPR_D          GD_PROTECT_DATA
   GDPR_A          GD_PROTECT_ALL    This is the bitwise or of GDPR_D and GDPR_A
 
-Sytax error handler actions (returned by the registered callback function, see
+Syntax error handler actions (returned by the registered callback function, see
 GDCOPN)
 
   F77 symbol      C symbol
@@ -1441,7 +1646,7 @@ GDCOPN)
   GDSX_I          GD_PROTECT_IGNORE
   GDSX_C          GD_PROTECT_CONTINUE
 
-Callback actions (returned by the registered callback function, see GDCOPN):
+Syntax suberrors (provided to the registered callback function, see GDCOPN):
 
   F77 symbol      C symbol
   ----------      ---------------------
@@ -1464,6 +1669,14 @@ Callback actions (returned by the registered callback function, see GDCOPN):
   GDF_TY          GD_E_FORMAT_BAD_TYPE
   GDF_UM          GD_E_FORMAT_UNTERM
   GDF_LT          GD_E_FORMAT_LITERAL
+
+Special version symbols:
+
+  F77 symbol      C symbol
+  ----------      ---------------------
+  GDSV_C          GD_VERSION_CURRENT
+  GDSV_L          GD_VERSION_LATEST
+  GDSV_E          GD_VERSION_EARLIEST
 
 Miscellaneous parameters:
 

@@ -4184,6 +4184,49 @@ program big_test
     write(*, 2001), 155, e
   end if
 
+! 156: fgd_invalid_dirfile check
+  m = fgd_invalid_dirfile()
+  e = fgd_error(m)
+
+  if (e .ne. GD_E_OK) then
+    ne = ne + 1
+    write(*, 2006), 156, 1, e
+  end if
+
+  n = fgd_nfragments(m)
+  e = fgd_error(m)
+
+  if (e .ne. GD_E_BAD_DIRFILE) then
+    ne = ne + 1
+    write(*, 2006), 156, 2, e
+  end if
+
+  call fgd_close(m)
+
+! 157: fgd_dirfile_standards
+  n = fgd_dirfile_standards(d, GD_VERSION_CURRENT)
+  e = fgd_error(d)
+
+  if (e .ne. GD_E_OK) then
+    ne = ne + 1
+    write(*, 2006), 157, 1, e
+  end if
+
+  if (n .ne. 8) then
+    ne = ne + 1
+    write(*, 2002), 157, n
+  end if
+
+  n = fgd_dirfile_standards(d, 0)
+  e = fgd_error(d)
+
+  if (e .ne. GD_E_BAD_VERSION) then
+    ne = ne + 1
+    write(*, 2006), 156, 2, e
+  end if
+
+  
+
 
 !================================================================
   call fgd_discard(d)

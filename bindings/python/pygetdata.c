@@ -30,7 +30,7 @@ static const char *gdpy_exception_list[GD_N_ERROR_CODES] = {
   "BadCode",
   "BadType",
   "RawIO",
-  "OpenInclude",
+  "OpenFragment",
   "InternalError",
   "Alloc",
   "Range",
@@ -54,7 +54,9 @@ static const char *gdpy_exception_list[GD_N_ERROR_CODES] = {
   "BadProtection",
   "UncleanDatabase",
   "Domain",
-  "BadRepr"
+  "BadRepr",
+  "BadVersion",
+  "Flush"
 };
 PyObject *gdpy_exceptions[GD_N_ERROR_CODES];
 
@@ -604,7 +606,6 @@ PyMODINIT_FUNC initpygetdata(void)
     sprintf(name, "pygetdata.%sError", gdpy_exception_list[i]);
     gdpy_exceptions[i] = PyErr_NewException(name, GdPy_DirfileError, NULL);
     Py_INCREF(gdpy_exceptions[i]);
-    sprintf(name, "%sError", gdpy_exception_list[i]);
-    PyModule_AddObject(mod, name, gdpy_exceptions[i]);
+    PyModule_AddObject(mod, name + 10, gdpy_exceptions[i]);
   }
 }

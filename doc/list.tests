@@ -154,3 +154,5 @@
 153 F9CI. gd_alter_recip
 154 F9... gd_alter_crecip
 155 F9CIP gd_rewrite_fragment
+156 F9CIP gd_invalid_dirfile
+157 F9CIP gd_dirfile_standards

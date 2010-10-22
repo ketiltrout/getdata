@@ -138,13 +138,18 @@ New in version 0.7.0rc2:
 
   Bindings
 
+  * Bindings for the functionality introduced into 0.7.0 have been added.
   * C++: Const member functions are now flagged as such.
   * F95: For consistency sake, the Fortran 95 bindings have undergone the same
     renaming as the C bindings.  All functions are now preceded by 'fgd_'.
   * IDL: The IDL bindings have also followed suit in the great renaming.  The
     exception to this is GETDATA_CONSTANTS(), which is not renamed.
+  * IDL: Various constants defined in getdata.h but not used by the IDL bindings
+    have been removed from the structure returned by GETDATA_CONSTANTS().
   * C++ BUG FIX: Entry::Scalar() no longer rejects valid values of index. 
-  * Python BUG FIX: A non-litteral phase shift is now properly reported.
+  * Python BUG FIX: A non-literal phase shift is now properly reported.
+  * Python BUG FIX: Calling Dirfile.discard() or Dirfile.close() no longer
+    results in a segfault.
 
   Miscellaneous
 

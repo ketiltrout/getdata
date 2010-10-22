@@ -47,11 +47,13 @@
 using namespace std;
 using namespace GetData;
 
-#define CHECK_ERROR(t,g) \
+#define CHECK_ERRORb(d,t,g) \
   e = d->Error(); if (e != (g)) { ne++; cerr << "e[" << t << "] = " << e << endl; }
-#define CHECK_ERROR2(t,n,g) \
+#define CHECK_ERROR2b(d,t,n,g) \
   e = d->Error(); if (e != (g)) { \
     ne++; cerr << "e[" << t << ", " << n << "] = " << e << endl; }
+#define CHECK_ERROR(t,g) CHECK_ERRORb(d,t,g)
+#define CHECK_ERROR2(t,n,g) CHECK_ERROR2b(d,t,n,g)
 #define CHECK_OK(t) CHECK_ERROR(t,GD_E_OK)
 #define CHECK_OK2(t,n) CHECK_ERROR2(t,n,GD_E_OK)
 
@@ -1135,6 +1137,20 @@ int main(void)
   // 155: Fragment::ReWrite check
   frag->ReWrite();
   CHECK_OK(155);
+  
+  // 156: Invalid Dirfile check
+  Dirfile *id = new Dirfile();
+  CHECK_ERROR2b(id,156,1,GD_E_OK);
+  id->NFragments();
+  CHECK_ERROR2b(id,156,2,GD_E_BAD_DIRFILE);
+  delete id;
+
+  // 157: Dirfile::Standards check
+  n = d->Standards();
+  CHECK_OK2(157,1);
+  CHECK_INT(157,n,8);
+  d->Standards(0);
+  CHECK_ERROR2(157,2,GD_E_BAD_VERSION);
 
 
 

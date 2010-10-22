@@ -3560,10 +3560,51 @@ C     155: GDRFRG check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2001), 154, e
+        WRITE(*, 2001), 155, e
       ENDIF
 
+C     156: GDINVD check
+      CALL GDINVD(m)
+      CALL GDEROR(e, m)
 
+      IF (e .NE. GD_EOK) THEN
+        ne = ne + 1
+        WRITE(*, 2006), 156, 1, e
+      ENDIF
+
+      CALL GDNFRG(n, m)
+      CALL GDEROR(e, m)
+
+      IF (e .NE. GD_EBD) THEN
+        ne = ne + 1
+        WRITE(*, 2006), 156, 2, e
+      ENDIF
+
+      CALL GDCLOS(m)
+
+C     157: GDSTDV check
+      n = GDSV_C
+      CALL GDSTDV(n, d)
+      CALL GDEROR(e, d)
+
+      IF (e .NE. GD_EOK) THEN
+        ne = ne + 1
+        WRITE(*, 2006), 157, 1, e
+      ENDIF
+
+      IF (n .NE. 8) THEN
+        ne = ne + 1
+        WRITE(*, 2002), 157, n
+      ENDIF
+
+      n = 0
+      CALL GDSTDV(n, d)
+      CALL GDEROR(e, d)
+
+      IF (e .NE. GD_EVR) THEN
+        ne = ne + 1
+        WRITE(*, 2006), 157, 2, e
+      ENDIF
 
 
 

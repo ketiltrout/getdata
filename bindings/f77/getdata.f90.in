@@ -1387,9 +1387,9 @@ subroutine fgd_madd_spec (dirfile, spec, parent)
 end subroutine
 
 function fgd_fragmentname (dirfile, ind)
-  character (len=GD_FIELD_LEN) :: fgd_fragmentname
+  character (len=GD_MAX_LINE_LENGTH) :: fgd_fragmentname
   integer, intent(in) :: dirfile, ind
-  integer :: l = GD_FIELD_LEN
+  integer :: l = GD_MAX_LINE_LENGTH
 
   call gdfrgn(fgd_fragmentname, l, dirfile, ind)
 end function
@@ -1790,5 +1790,20 @@ subroutine fgd_dirfilename (dirfilename, l, dirfile, fragment_index)
 
   call gdname(dirfilename, l, dirfile, fragment_index)
 end subroutine
+
+function fgd_invalid_dirfile ()
+  integer :: fgd_invalid_dirfile
+
+  call gdinvd(fgd_invalid_dirfile)
+end function
+
+function fgd_dirfile_standards (dirfile, version)
+  integer :: fgd_dirfile_standards
+  integer, intent(in) :: dirfile, version
+
+  fgd_dirfile_standards = version
+
+  call gdstdv(fgd_dirfile_standards, dirfile)
+end function
 
 end module

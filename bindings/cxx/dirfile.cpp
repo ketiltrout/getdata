@@ -28,7 +28,7 @@ using namespace GetData;
 
 Dirfile::Dirfile()
 {
-  D = gd_open("", 0);
+  D = gd_invalid_dirfile();
   error_string = NULL;
 }
 
@@ -388,4 +388,9 @@ int Dirfile::FragmentIndex(const char* field_code) const
 const char* Dirfile::Name() const
 {
   return gd_dirfilename(D);
+}
+
+int Dirfile::Standards(int version) const
+{
+  return gd_dirfile_standards(D, version);
 }

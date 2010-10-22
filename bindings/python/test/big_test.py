@@ -1287,6 +1287,34 @@ try:
 except:
   CheckOK(155)
 
+# 156: invalid dirfile check
+try:
+  m = pygetdata.dirfile(None);
+except:
+  CheckOK2(156,1)
+
+try:
+  n = m.nfragments()
+except:
+  CheckException2(156,2,pygetdata.BadDirfileError)
+
+try:
+  m.discard();
+except:
+  pass;
+
+# 157: standards version
+try:
+  n = d.standards;
+except:
+  CheckOK2(157,1);
+CheckSimple(157,n,8)
+
+try:
+  d.standards = 0;
+except:
+  CheckException2(157,2,pygetdata.BadVersionError)
+
 
 
 # the following causes the d object to silently fault on delete, since it

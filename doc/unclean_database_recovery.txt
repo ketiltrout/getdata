@@ -67,20 +67,20 @@ by passing GD_ALL_FRAGMENTS as the fragment index, the operation
 proceeds one fragment at a time, aborting early in the case of error.
 As a result, at most one fragment will ever be unclean (the ones
 before the unclean fragment will have been successfully modified, the
-one's after will be still in their unmodifed state).
+ones after will be still in their unmodified state).
 
 
 2  Mitigation
 =-=-=-=-=-=-=
 
 Once GD_E_UNCLEAN_DB is encountered by an application, the open
-DIRFILE object should be closed using dirfile_close(3) or
-dirfile_discard(3) since further use of the dirfile may corrupt the
-database.  The GetData library encourages this behaviour by marking
-the database as invalid, which will cause most calls on the dirfile
-to fail.  If the pathname of the fragment in which the error
-occurred is not known (possibly because GD_ALL_FRAGMENTS was used),
-get_error_string(3) may be called before closing the dirfile to get
+DIRFILE object should be closed using gd_close(3) or gd_discard(3)
+since further use of the dirfile may corrupt the database.  The
+GetData library encourages this behaviour by marking the database
+as invalid, which will cause most calls on the dirfile to fail.  If
+the pathname of the fragment in which the error occurred is not
+known (possibly because GD_ALL_FRAGMENTS was used),
+gd_error_string(3) may be called before closing the dirfile to get
 the pathname of the affected fragment.
 
 
@@ -120,13 +120,14 @@ Now go through the RAW field list.  Each RAW field should fall into
 one of these classes:
 
 Class A:  A temporary file exists with a name of the form
-<field_name>_XXXXXX where the "XXXXXX" represents an arbitrary set of six
-characters.  In this case there should also be a file with the propper
-binary file name, ie. the field name, possibly appended with an encoding
-suffix.
+<field_name>_XXXXXX where the "XXXXXX" represents an arbitrary set of
+six characters.  In this case there should also be a file with the
+proper binary file name, i.e. the field name, possibly appended with
+an encoding suffix.
 
 Class B: No temporary file exists, the only file is the one with the
-propper binary file name (with the new encoding suffix, if appropriate).
+proper binary file name (with the new encoding suffix, if
+appropriate).
 
 Of these two classes, RAW fields of Class B can be ignored: they are
 already clean.  The RAW fields of Class A need to be cleaned.
@@ -139,12 +140,12 @@ Cleaning is a simple procedure: the temporary file contains the newly
 modified binary data, but it has the wrong name.  The correctly named
 binary file contains the old unmodified data.
 
-If the encoding was not changed (ie. GD_E_UNCLEAN_DB was returned by
+If the encoding was not changed (i.e. GD_E_UNCLEAN_DB was returned by
 a function other than dirfile_alter_encoding(3)), the field should be
-cleaned by simply moving the temporary file over top of the exising
+cleaned by simply moving the temporary file over top of the existing
 binary file with the correct name.
 
-If the encoding was changed (ie. GD_E_UNCLEAN_DB was returned by
+If the encoding was changed (i.e. GD_E_UNCLEAN_DB was returned by
 dirfile_alter_encoding(3)), the field should be cleaned by renaming
 the temporary file and replacing the "_XXXXXX" part with the correct
 encoding suffix (see dirfile-encoding(5)).  The old file should then
@@ -165,7 +166,7 @@ correctly, the expected data should be returned.
 
 If the data returned appear corrupted, it is possible that the old
 data file was not deleted; recheck the dirfile.  If an I/O error
-occurrs, it is possible that the replacement file has an incorrect
+occurs, it is possible that the replacement file has an incorrect
 name or permissions; again, recheck the dirfile.
 
 

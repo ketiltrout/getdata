@@ -344,8 +344,6 @@ void F77_FUNC(gdrwfn, GDRWFN) (char* name, int* name_l, const int* dirfile,
 void F77_FUNC(gdrefe, GDREFE) (char* name, int* name_l, const int* dirfile,
     const char* field_code, const int *field_code_l);
 
-void F77_FUNC(gdgref, GDGREF) (char *name, int* name_l, const int* dirfile);
-
 void F77_FUNC(gdaenc, GDAENC) (const int* dirfile, const int* encoding,
     const int* fragment, const int* recode);
 
@@ -459,3 +457,7 @@ void F77_FUNC(gdalsb, GDALSB) (const int* dirfile, const char* field_code,
 void F77_FUNC(gdadsb, GDADSB) (const int* dirfile, const char* field_code,
     const int* field_code_l, const char* in_field, const int* in_field_l,
     const int* bitnum, const int* numbits, const int* fragment_index);
+
+void F77_FUNC(gdinvd, GDINVD) (int *dirfile);
+
+void F77_FUNC(gdstdv, GDSTDV) (int *vers, const int *dirfile);

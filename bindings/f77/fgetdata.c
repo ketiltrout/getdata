@@ -202,7 +202,7 @@ void F77_FUNC(gdflsh, GDFLSH) (const int* dirfile, const char* field_code,
   }
 }
 
-/* getdata wrapper */
+/* gd_getdata wrapper */
 void F77_FUNC(gdgetd, GDGETD) (int* n_read, const int* dirfile,
     const char* field_code, const int* field_code_l,
     const int* first_frame, const int* first_sample,
@@ -346,7 +346,7 @@ void F77_FUNC(gdgspf, GDGSPF) (int* spf, const int* dirfile,
   free(out);
 }
 
-/* putdata wrapper */
+/* gd_putdata wrapper */
 void F77_FUNC(gdputd, GDPUTD) (int* n_wrote, const int* dirfile,
     const char* field_code, const int* field_code_l, const int* first_frame,
     const int* first_sample, const int* num_frames, const int* num_samples,
@@ -2613,4 +2613,24 @@ void F77_FUNC(gdasca, GDASCA) (const int* dirfile, const char* field_code,
   gd_alter_entry(D, fc, &E, *recode);
 
   dreturnvoid();
+}
+
+/* gd_invalid_dirfile wrapper */
+void F77_FUNC(gdinvd, GDINVD) (int *dirfile)
+{
+  dtrace("%p", dirfile);
+
+  *dirfile = _GDF_SetDirfile(gd_invalid_dirfile());
+
+  dreturn("%i", *dirfile);
+}
+
+/* gd_dirfile_standards wrapper */
+void F77_FUNC(gdstdv, GDSTDV) (int *vers, const int *dirfile)
+{
+  dtrace("%p, %i", vers, *dirfile);
+
+  *vers = gd_dirfile_standards(_GDF_GetDirfile(*dirfile), *vers);
+
+  dreturn("%i", *vers);
 }

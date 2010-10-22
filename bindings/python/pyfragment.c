@@ -285,9 +285,9 @@ static PyGetSetDef gdpy_fragment_getset[] = {
     NULL },
   { "endianness", (getter)gdpy_fragment_getendianness, NULL,
     "The byte sex of this fragment.  This will be either\n"
-      "pygetdata.BIG_ENDIAN or pygetdata.LITTLE_ENDIAN, possibly bitwise\n"
-      "or'd with pygetdata.ARM_ENDIAN.  To change this value, use the\n"
-      "alter_endianness method.",
+      "pygetdata.BIG_ENDIAN or pygetdata.LITTLE_ENDIAN, bitwise or'd with\n"
+      "pygetdata.ARM_ENDIAN or pygetdata.NOT_ARM_ENDIAN.  To change this\n"
+      "value, use the alter_endianness method.",
     NULL },
   { "frameoffset", (getter)gdpy_fragment_getoffset, NULL,
     "The frame offset of this fragment.  To change this value, use the\n"
@@ -334,10 +334,11 @@ static PyMethodDef gdpy_fragment_methods[] = {
       "Change the byte sex of this fragment.  The 'endianness' parameter\n"
       "should be pygetdata.LITTLE_ENDIAN, pygetdata.BIG_ENDIAN, or some\n"
       "combination of these two as described in the gd_alter_endianness\n"
-      "manual page, and possibly bitwise or'd with pygetdata.ARM_ENDIAN.\n"
-      "If 'recode' is given, and is non-zero, the RAW files affected by\n"
-      "this change will be converted to the byte sex.  See\n"
-      "gd_alter_endianness(3)."
+      /* -----------------------------------------------------------------| */
+      "manual page, and possibly bitwise or'd with pygetdata.ARM_ENDIAN or\n"
+      "pygetdata.NOT_ARM_ENDIAN.  If 'recode' is given, and is non-zero,\n"
+      "the RAW files affected by this change will be converted to the byte\n"
+      "sex.  See gd_alter_endianness(3)."
   },
   {"alter_frameoffset", (PyCFunction)gdpy_fragment_setoffset,
     METH_VARARGS | METH_KEYWORDS,
@@ -350,7 +351,6 @@ static PyMethodDef gdpy_fragment_methods[] = {
   },
   {"rewrite", (PyCFunction)gdpy_fragment_rewrite, METH_NOARGS,
     "rewrite()\n\n"
-      /* -----------------------------------------------------------------| */
       "Force re-writing of this fragment on disc, regardless of whether\n"
       "it has been modified or not.  See gd_rewrite_fragment(3)."
   },

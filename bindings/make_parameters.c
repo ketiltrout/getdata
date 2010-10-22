@@ -87,8 +87,8 @@ static struct {
   CONSTANT(IGNORE_DUPS,      "GD_ID",  1),
   CONSTANT(IGNORE_REFS,      "GD_IR",  1),
   CONSTANT(PRETTY_PRINT,     "GD_PP",  1),
-  CONSTANT(ARM_ENDIAN,       "GD_AE",  1),
-  CONSTANT(NOT_ARM_ENDIAN,   "GD_NA",  1),
+  CONSTANT(ARM_ENDIAN,       "GD_AE",  2),
+  CONSTANT(NOT_ARM_ENDIAN,   "GD_NA",  2),
   CONSTANT(PERMISSIVE,       "GD_PM",  1),
 
   CONSTANT(AUTO_ENCODED,     "GD_EA",  1),
@@ -163,8 +163,12 @@ static struct {
   CONSTANT(E_FORMAT_PROTECT, "GDF_PR", 8),
   CONSTANT(E_FORMAT_LITERAL, "GDF_LT", 8),
 
-  CONSTANT(MAX_LINE_LENGTH,  "GD_MLL", 9),
-  CONSTANT(ALL_FRAGMENTS,    "GD_ALL", 10),
+  CONSTANT(VERSION_CURRENT,  "GDSV_C", 9),
+  CONSTANT(VERSION_LATEST,   "GDSV_L", 10),
+  CONSTANT(VERSION_EARLIEST, "GDSV_E", 10),
+
+  CONSTANT(MAX_LINE_LENGTH,  "GD_MLL", 11),
+  CONSTANT(ALL_FRAGMENTS,    "GD_ALL", 11),
   CONSTANT(DIRFILE_STANDARDS_VERSION, "GD_DSV", 11),
   { NULL }
 };
@@ -251,10 +255,17 @@ void Fortran(void)
         parameter(constant_list[j].lname, constant_list[j].fname,
             constant_list[j].value, i);
 
+    printf("\\\n%c Special version codes\\\n", c);
+
+    for (j = 0; constant_list[j].lname != NULL; ++j)
+      if (constant_list[j].type == 9 || constant_list[j].type == 10)
+        parameter(constant_list[j].lname, constant_list[j].fname,
+            constant_list[j].value, i);
+
     printf("\\\n%c Miscellaneous parameters\\\n", c);
 
     for (j = 0; constant_list[j].lname != NULL; ++j)
-      if (constant_list[j].type >= 9 && constant_list[j].type <= 11)
+      if (constant_list[j].type == 11)
         parameter(constant_list[j].lname, constant_list[j].fname,
             constant_list[j].value, i);
 
@@ -274,7 +285,8 @@ void Python(void)
       "const struct gdpy_constant_t gdpy_constant_list[] = {\n");
   
   for (i = 0; constant_list[i].lname != NULL; ++i)
-    printf("{\"%s\", %s}, ", constant_list[i].sname, constant_list[i].lname);
+    if (constant_list[i].type != 9)
+      printf("{\"%s\", %s}, ", constant_list[i].sname, constant_list[i].lname);
 
   /* Python numerical type aliases */
   printf(
@@ -300,9 +312,12 @@ void IDL(void)
       );
 
   for (i = 0; constant_list[i].lname != NULL; ++i)
-    if (constant_list[i].type != 1)
-    printf("{ \"%s\", 0, (void*)IDL_TYP_%s }, ", constant_list[i].sname,
-        (constant_list[i].type == 2) ? "LONG" : "INT"); 
+    if ((constant_list[i].type != 1) && (constant_list[i].type != 5) &&
+        (constant_list[i].type != 7) && (constant_list[i].type != 8))
+    {
+      printf("{ \"%s\", 0, (void*)IDL_TYP_%s }, ", constant_list[i].sname,
+          (constant_list[i].type == 2) ? "LONG" : "INT"); 
+    }
 
   printf("{ NULL }};\n");
 
@@ -317,10 +332,13 @@ void IDL(void)
       "\n");
 
   for (n = i = 0; constant_list[i].lname != NULL; ++i)
-    if (constant_list[i].type != 1)
+    if ((constant_list[i].type != 1) && (constant_list[i].type != 5) &&
+        (constant_list[i].type != 7) && (constant_list[i].type != 8))
+    {
       printf("*(IDL_%s*)(data + IDL_StructTagInfoByIndex(gdidl_const_def, %i, "
           "IDL_MSG_LONGJMP, NULL)) = %li;\n", (constant_list[i].type == 2) ?
           "LONG" : "INT", n++, constant_list[i].value);
+    }
 
   printf("return r; }\n");
 }

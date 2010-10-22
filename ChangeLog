@@ -1,3 +1,32 @@
+2010-10-21   D. V. Wiebe <getdata@ketiltrout.net>   svn:461
+	* bindings/python/test/big_test.py bindings/cxx/test/big_test.cpp
+	bindings/f77/test/big_test.f bindings/f77/test/big_test95.f90
+	bindings/idl/test/big_test.pro: Added tests 156 and 157.
+
+	* bindings/python/pydirfile.c (gdpy_dirfile_init): Allow name=None to create
+	an invalid dirfile.
+
+	* bindings/python/pydirfile.c (gdpy_dirfile_close gdpy_dirfile_discard):
+	Don't check dirfile error on success.
+	* bindings/python/pygetdata.c: Add missing exceptions.
+
+	* bindings/python/pydirfile.c bindings/python/pyfragment.c: Update docs.
+
+	* bindings/make_parameters.c: GD_ARM_ENDIAN and GD_NOT_ARM_ENDIAN are type 2
+	constants.  Exclude unnecessary constants in Python and IDL.  GD_VERSION_*
+	added.
+
+	* bindings/cxx/dirfile.cpp (Dirfile::Dirfile): Create the invalid dirfile
+	using gd_invalid_dirfile().
+
+	* bindings/python/pydirfile.c (gdpy_dirfile_getstandards
+	gdpy_dirfile_setstandards) bindings/f77/fgetdata.c (GDINVD GDSTDV)
+	bindings/f77/getdata.f90.in (fgd_invalid_dirfile fgd_dirfile_standards)
+	bindings/idl/getdata.c (gdidl_invalid_dirfile gdidl_dirfile_standards)
+	bindings/cxx/dirfile.cpp (Dirfile::Standards): Added.
+
+	* bindings/idl/getdata.c: Fix for GD_NOT_ARM_ENDIAN.
+
 2010-10-21   D. V. Wiebe <getdata@ketiltrout.net>   svn:460
 	* test/endian_get.c: Test ARM endianness.
 	* bindings/python/test/big_test.py bindings/cxx/test/big_test.cpp

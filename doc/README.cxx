@@ -58,12 +58,22 @@ are available:
   the buffer.  The string written to the buffer will be at most len characters
   long, up to a maximum of 4096 characters.
 
+* off_t BoF(const char *field_code)
+  
+  This method will call gd_bof(3) and return the location of the
+  beginning-of-field marker of the specified field.
+
 * GetData::Entry *Dirfile::Entry(const char *field_code)
 
   This method will return a pointer to a newly allocated object of the
   appropriate Entry Child class, cast as a plain GetData::Entry, created after
-  calling gd_get_entry(3) with the supplied field_code.  See below for a
+  calling gd_entry(3) with the supplied field_code.  See below for a
   description of the Entry classes.
+
+* off_t EoF(const char *field_code)
+  
+  This method will call gd_eof(3) and return the location of the end-of-field
+  marker of the specified field.
 
 * GetData::Fragment *Dirfile::Fragment(int index)
   
@@ -72,13 +82,13 @@ are available:
 
 * int Dirfile::FragmentIndex(const char *field_code)
 
-  This method will call gd_get_fragment_index(3) and return the index number of
+  This method will call gd_fragment_index(3) and return the index number of
   the fragment defining the specified field.
 
 * double Dirfile::FrameNum(const char *field_code, double value,
     off_t frame_start = 0, off_t frame_end = 0)
 
-  This method will call gd_get_framenum_subset(3) to perform a reverse look-up
+  This method will call gd_framenum_subset(3) to perform a reverse look-up
   on the specified field.  If frame_start or frame_end are omitted, the start or
   end of the field will be used as the limit.
 
@@ -103,6 +113,11 @@ are available:
   
   This method will call gd_parser_callback(3) to change or remove the parser
   callback function.
+
+* int Dirfile::Standards(int version = GD_VERSION_CURRENT)
+
+  This method will call gd_dirfile_standards(3) to set or report the current
+  Standards Version of the loaded dirfile.
 
 * int Dirfile::UnInclude(int fragment_index, int del = 0)
 
@@ -170,7 +185,8 @@ are available:
 
     NoEntryType, BitEntryType, ConstEntryType, DivideEntryType, IndexEntryType,
     LincomEntryType, LinterpEntryType, MultiplyEntryType, PhaseEntryType,
-    RawEntryType, RecipEntryType, StringEntryType
+    PolynomEntryType, RawEntryType, RecipEntryType, SBitEntryType,
+    StringEntryType
 
   which are aliases for the gd_entype_t values GD_NO_ENTRY, GD_RAW_ENTRY, &c.
   Note that the arguments to AddSpec are opposite of the corresponding function
@@ -185,7 +201,7 @@ about an individual fragment in a dirfile.  This class has no public
 constructor, but may be created by calling Dirfile::Fragment.
 
 Note: The Fragment class caches the format file index for the associated
-fragment.  As a result, if Dirfile::UnInclude is called, these indicies will
+fragment.  As a result, if Dirfile::UnInclude is called, these indices will
 be incorrect, and all pre-existing Fragment objects should be destroyed.
 
 * GetData::EncodingScheme Fragment::Encoding()
@@ -223,7 +239,7 @@ returned by Dirfile::Entry will be associated with that dirfile.  Entry objects
 created by using one of the constructors will not be associated.
 
 Changing the value of one of the data members of an associated entry object will
-result in a call to the C API to update the corresponding entry in the dirifle.
+result in a call to the C API to update the corresponding entry in the dirfile.
 Changing the value of one of the data members of an unassociated entry has no
 such side effect.
 
@@ -239,16 +255,17 @@ The following methods are available:
 
 * void Entry::Dissociate()
   
-  Dissociates this entry object.  If the object is already dissocated, this
-  function does nothign.
+  Dissociates this entry object.  If the object is already dissociated, this
+  function does nothing.
 
 * EntryType Entry::Type()
 
   This will return the field type of the Entry's field.  This will be one of:
 
-    NoEntryType, BitEntryType, ConstEntryType, DivideEntryType, LincomEntryType,
-    LinterpEntryType, MultiplyEntryType, PhaseEntryType, PolynomEntryType,
-    RawEntryType, RecipEntry, SBitEntryType, StringEntryType
+    NoEntryType, BitEntryType, ConstEntryType, DivideEntryType, IndexEntryType,
+    LincomEntryType, LinterpEntryType, MultiplyEntryType, PhaseEntryType,
+    PolynomEntryType, RawEntryType, RecipEntryType, SBitEntryType,
+    StringEntryType
 
 * int Entry::SetFragmentIndex(int fragment_index)
 * int Entry::Move(int new_fragment, int move_data = 0)
@@ -328,7 +345,7 @@ Defined in getdata/rawentry.h
 
 * const char *RawEntry::FileName()
 
-  This calls gd_get_raw_filename(3) and returns the pathname of the binary file
+  This calls gd_raw_filename(3) and returns the pathname of the binary file
   associated with the RAW field.
 
 * virtual unsigned int RawEntry::SamplesPerFrame()
