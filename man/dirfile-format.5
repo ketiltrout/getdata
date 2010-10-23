@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH dirfile\-format 5 "21 October 2010" "Standards Version 8" "DATA FORMATS"
+.TH dirfile\-format 5 "23 October 2010" "Standards Version 8" "DATA FORMATS"
 .SH NAME
 dirfile\-format \(em the dirfile database format specification file
 .SH DESCRIPTION
@@ -181,7 +181,7 @@ directives are discussed below.
 
 .TP
 .B /ENCODING
-The ENCODING directive specifies the encoding scheme used to encode binary
+The /ENCODING directive specifies the encoding scheme used to encode binary
 files in the dirfile.  The encoding scheme may be one of the predefined names
 listed below, which are described in more detail in
 .BR dirfile\-encoding (5),
@@ -212,12 +212,12 @@ dependent.  Syntax is:
 .IP
 .BI /ENCODING\~ <scheme>
 .PP
-The ENCODING directive has
+The /ENCODING directive has
 .IR "fragment scope" .
 .RE
 .TP
 .B /ENDIAN
-The ENDIAN directive specifies the endianness of the raw data in the database.
+The /ENDIAN directive specifies the endianness of the raw data in the database.
 The assumed endianness of raw data in dirfiles which omit this directive is
 implementation dependent.  Syntax
 is:
@@ -227,12 +227,12 @@ is:
 .IR "( " big " | " little " ) [ " arm " ]"
 .PP
 where the "arm" token should be included if double precision floating point data
-are stored in the ARM middle-endian format.  The ENDIAN directive has
+are stored in the ARM middle-endian format.  The /ENDIAN directive has
 .IR "fragment scope" .
 .RE
 .TP
 .B /FRAMEOFFSET
-The FRAMEOFFSET directive specifies the frame number of the first frame for
+The /FRAMEOFFSET directive specifies the frame number of the first frame for
 which data exists in binary files associated with
 .B RAW
 fields.  Syntax is:
@@ -240,12 +240,12 @@ fields.  Syntax is:
 .IP
 .BI /FRAMEOFFSET\~ <integer>
 .PP
-The FRAMEOFFSET directive has
+The /FRAMEOFFSET directive has
 .IR "fragment scope" .
 .RE
 .TP
 .B /INCLUDE
-The INCLUDE directive specifies another file (called a
+The /INCLUDE directive specifies another file (called a
 .IR "fragment" )
 to parse for additional format specification for the dirfile.  The inclusion is
 treated as if the lines of the fragment were pasted verbatim in place of the
@@ -258,12 +258,12 @@ absolute path, or else a relative path from the current file.  Syntax is:
 .IP
 .BI /INCLUDE\~ <file>
 .PP
-The INCLUDE directive has no scope: it is processed immediately and has no
+The /INCLUDE directive has no scope: it is processed immediately and has no
 long-term effect.
 .RE
 .TP
 .B /META
-The META directive specifies a metafield attached to a particular parent
+The /META directive specifies a metafield attached to a particular parent
 field.  The field metadata may be of any allowed type except
 .BR RAW .
 Metafields are retrieved in exactly the same way as regular field data, but the
@@ -297,7 +297,7 @@ This particular metafield may be referred to by the
 the same name, since all references to metafields must include the parent
 field name.  Metafields may not themselves have further sub-metafields.
 .PP
-As an alternative to the META directive, a metafield may be specified by a
+As an alternative to the /META directive, a metafield may be specified by a
 standard field specification line, using
 .IP
 .IB <parent-field> / <meta-field>
@@ -309,12 +309,12 @@ pfield/meta
 .B CONST FLOAT64
 3.291882
 .PP
-The META directive has no scope: it is processed immediately and has no
+The /META directive has no scope: it is processed immediately and has no
 long-term effect.
 .RE
 .TP
 .B /PROTECT
-The PROTECT directive specifies the advisory protection level of the current
+The /PROTECT directive specifies the advisory protection level of the current
 fragment and of the
 .B RAW
 fields defined therein.  The protection level indicates whether writing to the
@@ -327,7 +327,7 @@ Four advisory protection levels are defined:
 .TP
 .I none
 No protection at all: data and metadata may be freely changed.  This is the
-default, if no PROTECT directive is present.
+default, if no /PROTECT directive is present.
 .TP
 .I format
 The dirfile metadata is protected from change, but
@@ -342,17 +342,17 @@ data on disk is protected from change, but metadata may be modified.
 .I all
 Both metadata and data on disk are protected from change.
 .PP
-The PROTECT directive has
+The /PROTECT directive has
 .IR "fragment scope" .
 .RE
 .TP
 .B /REFERENCE
-The REFERENCE directive specifies the name of the field to use as the dirfile's
+The /REFERENCE directive specifies the name of the field to use as the dirfile's
 reference field (see
 .BR dirfile (5)).
-If no REFERENCE directive is specified, the first
+If no /REFERENCE directive is specified, the first
 .B RAW
-field encountered is used as the reference field.  The REFERENCE directive must
+field encountered is used as the reference field.  The /REFERENCE directive must
 specify a
 .B RAW
 field.  Syntax is:
@@ -360,14 +360,14 @@ field.  Syntax is:
 .IP
 .BI /REFERENCE\~ <field-code>
 .PP
-The REFERENCE directive has
+The /REFERENCE directive has
 .IR "global scope" :
-if multiple REFERENCE directives appear in the dirfile metadata, only the last
+if multiple /REFERENCE directives appear in the dirfile metadata, only the last
 such will be honoured.
 .RE
 .TP
 .B /VERSION
-The VERSION directive specifies the particular version of the Dirfile Standards
+The /VERSION directive specifies the particular version of the Dirfile Standards
 to which the dirfile format specification conforms.  This directive should
 occur before any version dependent syntax is encountered.  As of Standards
 Version 6, no such syntax exists, and this directive is provided primarily to
@@ -376,7 +376,7 @@ ease forward compatibility.  Syntax is:
 .IP
 .BI /VERSION\~ <integer>
 .PP
-The VERSION directive has
+The /VERSION directive has
 .IR "immediate scope" :
 its effect is immediate, and it applies only to metadata below it, including
 and propagating downwards to sub-fragments after the directive.  Its effect
@@ -414,7 +414,7 @@ Field names are case sensitive.
 If the field name beginning a field specification line does contain a
 .B /
 character, the line is assumed to specify a metafield.  See the
-.B META
+.B /META
 directive above for further details.
 
 .SS Field Types
@@ -885,7 +885,7 @@ a simple field name, indicating a vector or scalar field
 .IP \(bu 4
 a parent field name, followed by a forward slash, followed by a metafield name,
 indicating a metafield.  See the description of the
-.B META
+.B /META
 directive above for further details. 
 .IP \(bu 4
 either of the above, followed by a period, followed by a
@@ -950,7 +950,11 @@ and
 field types, made the forward slash on reserved words mandatory, and prohibited
 using the single character data type aliases in the specification of
 .B RAW
-fields.
+fields.  It also introduced the optional second
+.RI ( arm )
+token to the
+.B /ENDIAN
+directive.
 
 Version 7 of the Standards (October 2009) added the
 .B SBIT
@@ -989,9 +993,9 @@ and
 in field names.
 
 Version 5 of the Standards (August 2008) added
-.B /VERSION
+.B VERSION
 and
-.BR /ENDIAN ,
+.BR ENDIAN ,
 slash demarcation of reserved words, and removed the restriction on field
 name length.  It introduced the data types
 .IR INT8 ,\~ INT64 ,
@@ -1000,7 +1004,7 @@ and
 the new-style type specifiers, and increased the range of the
 .B BIT
 field type from 32 to 64 bits.  It also prohibited the characters
-.B #&;<>\e|
+.B &;<>\e|
 in field names.
 
 Version 4 of the Standards (October 2006) added the
