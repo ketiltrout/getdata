@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_entry 3 "15 October 2010" "Version 0.7.0" "GETDATA"
+.TH gd_entry 3 "24 October 2010" "Version 0.7.0" "GETDATA"
 .SH NAME
 gd_entry \(em retrieve a dirfile field's metadata
 .SH SYNOPSIS
@@ -237,7 +237,7 @@ entry, will also provide:
 typedef struct {
   ...
 
-  gd_type_t   const_type;       /* data type in format specification */
+  gd_type_t   const_type;     /* data type in format specification */
 
   ...
 } gd_entry_t;
@@ -666,27 +666,37 @@ entry provides no additional data.
 .SH NOTES
 When using the C89 GetData API (by defining
 .B GD_C89_API
-before including getdata.h), the complex valued array members of gd_entry_t used
-in the specification of
-.BR LINCOM ,\~ POLYNOM ,
-and
-.B RECIP
-entries will be replaced by purely real arrays.  These will have the prototypes
-such as:
-.PP
-.in +4n
-.nf
-.fam C
-  double        cm[GD_MAX_LINCOM][2];
-  double        cb[GD_MAX_LINCOM][2];
-  double        ca[GD_MAX_POLY_ORD + 1][2];
-  double        cdividend[2];
-.fam
-.fi
-.in
+before including getdata.h), the data types and names of several of the entry
+parameters are different.  The following table lists the correspondences between
+members in the C99 and C89 APIs.
+
+.TS
+center tab(|);
+cbscbs
+rlrl.
+C99 API|C89 API
+gd_spf_t|spf|gd_spf_t|u.raw.spf
+gd_type_t|data_type|gd_type_t|u.raw.data_type
+int|n_fields|int|u.lincom.n_fields
+double compex|cm[3]|double|u.lincom.cm[3][2]
+double|m[3]|double|u.lincom.m[3]
+double compex|cb[3]|double|u.lincom.cb[3][2]
+double|b[3]|double|u.lincom.b[3]
+int|poly_ord|int|u.polynom.poly_ord
+double compex|ca[3]|double|u.polynom.ca[3][2]
+double|a[3]|double|u.polynom.a[3]
+const char*|table|const char*|u.linterp.table
+gd_bit_t|bitnum|gd_bit_t|u.bit.bitnum
+gd_bit_t|numbits|gd_bit_t|u.bit.numbits
+gd_shift_t|shift|gd_shift_t|u.phase.shift
+double compex|cdividend|double|u.recip.cdividend[2]
+double|dividend|double|u.recip.dividend
+gd_type_t|const_type|gd_type_t|u.cons.const_type
+.TE
 .P
-The first element of the two element array is the real part of the complex
-number, and the second element is the imaginary part.
+In the case of complex valued data in the C89 API, the first element of the two
+element array is the real part of the complex number, and the second element is
+the imaginary part.
 
 .SH SEE ALSO
 .BR dirfile (5),
