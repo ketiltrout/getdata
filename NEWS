@@ -137,6 +137,8 @@ New in version 0.7.0rc3:
   * BUG FIX: In previous versions, attempting to access an invalid dirfile
     (anything that would cause gd_open to fail) resulted in leaked memory.  This
     leak has been plugged.
+  * BUG FIX: A segfault involving the reporting of POLYNOM fields has been fixed
+    in GetFormat().
 
   Bindings
 

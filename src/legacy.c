@@ -380,11 +380,11 @@ struct FormatType *GetFormat(const char *filedir, int *error_code) gd_nothrow
         Format.n_raw++;
         break;
       case GD_LINCOM_ENTRY:
+      case GD_POLYNOM_ENTRY:
       case GD_RECIP_ENTRY:
         Format.n_lincom++;
         break;
       case GD_LINTERP_ENTRY:
-      case GD_POLYNOM_ENTRY:
         Format.n_linterp++;
         break;
       case GD_BIT_ENTRY:

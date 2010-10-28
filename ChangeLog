@@ -1,3 +1,6 @@
+2010-10-28   D. V. Wiebe <getdata@ketiltrout.net>   svn:468
+	* src/legacy.c (GetFormat): Fix counting of POLYNOM fields.
+
 2010-10-22   D. V. Wiebe <getdata@ketiltrout.net>   svn:463
 	GetData-0.7.0rc3:
 
