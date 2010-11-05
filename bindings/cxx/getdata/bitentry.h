@@ -51,6 +51,8 @@ namespace GetData {
 
       virtual const char *Scalar(int index = 0) const;
 
+      virtual int ScalarIndex(int index = 0) const;
+
     private:
       BitEntry(const GetData::Dirfile *dirfile, const char* field_code) :
         Entry(dirfile, field_code) { };

@@ -108,3 +108,95 @@ int strerror_r(int errnum, char *buf, size_t buflen)
   return 0;
 }
 #endif
+
+/* A getdelim() for platforms lacking it.  getdelim was originally a GNU
+ * extension and has subsequently been POSIXised in POSIX.1-2008.
+ */
+#ifndef HAVE_GETDELIM
+#define GD_SSIZE_T_MAX ((ssize_t)((size_t)-1>>1))
+ssize_t getdelim(char **lineptr, size_t *n, int delim, FILE *stream)
+{
+  size_t nread;
+  ssize_t count = 0;
+  char *p, *q;
+  size_t len, new_len;
+
+  dtrace("%p, %p, '\\x%02x', %p", lineptr, n, (char)delim, stream);
+
+  /* create a new buffer, if necessary */
+  if (*lineptr == NULL || *n == 0) {
+    *lineptr = (char *)malloc(*n = 100);
+    if (*lineptr == NULL) {
+      dreturn("%i)", -1);
+      return -1;
+    }
+  }
+  p = *lineptr;
+  len = *n;
+
+  /* apparently getdelim returns -1 if encountering EOF at the start of
+   * a read, so try reading some text before beginning the main loop */
+  nread = fread(p, 1, len, stream);
+
+  if (nread == 0) {
+    /* this is an error or EOF with no data read */
+    dreturn("%i)", -1);
+    return -1;
+  }
+
+  for (;;) {
+    /* look for delim */
+    q = (char *)memchr(p, delim, nread);
+    if (q) {
+      /* found delim */
+      count += (q - p) + 1;
+
+      /* make sure we have room for a terminating NUL */
+      new_len = count;
+      /* rewind */
+      fseek(stream, -nread + (q - p) + 1, SEEK_CUR);
+    } else {
+      /* no delim, increase the buffer size */
+      count += nread;
+      p += nread;
+
+      if (count == GD_SSIZE_T_MAX) {
+        /* out of ssize_t room */
+        errno = EOVERFLOW;
+        dreturn("%i", -1);
+        return -1;
+      } else if (count >= GD_SSIZE_T_MAX / 2)
+        new_len = GD_SSIZE_T_MAX;
+      else
+        new_len = count * 2;
+      len = new_len - count;
+    }
+
+    /* realloc, if necessary */
+    if (*n < new_len) {
+      char *ptr = (char *)realloc(*lineptr, new_len);
+      if (!ptr) {
+        dreturn("%i", -1);
+        return -1;
+      }
+      *n = new_len;
+    }
+
+    /* quit if there's not need to read more */
+    if (q)
+      break;
+
+    if (feof(stream)) {
+      q = p - 1;
+      break;
+    }
+
+    /* read some more */
+    nread = fread(p, 1, len, stream);
+  }
+  *(q + 1) = '\0';
+
+  dreturn("%li %li (\"%s\")", (long int)count, (long int)*n, *lineptr);
+  return count;
+}
+#endif

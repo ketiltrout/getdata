@@ -37,8 +37,8 @@ char* _GD_ValidateField(const gd_entry_t* parent, const char* field_code,
   dtrace("%p, \"%s\", %i, %i, %p", parent, field_code, standards, strict,
       is_dot);
 
-  if (field_code[0] == '\0' || len >= GD_MAX_LINE_LENGTH || (strict &&
-        ((len > 50 && standards < 5) || (len > 16 && standards < 3))))
+  if (field_code[0] == '\0' || (strict && ((len > 50 && standards < 5) ||
+          (len > 16 && standards < 3))))
   {
     dreturn("%p", field_code);
     return (char *)field_code;
@@ -284,6 +284,10 @@ int gd_rename(DIRFILE *D, const char *old_code, const char *new_name,
   qsort(D->entry, D->n_entries, sizeof(gd_entry_t*), entry_cmp);
   if (new_dot)
     qsort(D->dot_list, D->n_dot, sizeof(gd_entry_t*), entry_cmp);
+
+  /* Invalidate the field lists */
+  D->list_validity = 0;
+  D->type_list_validity = 0;
 
   dreturn("%i", 0);
   return 0;

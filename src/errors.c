@@ -22,6 +22,8 @@
 #include "internal.h"
 
 #ifdef STDC_HEADERS
+#include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 #endif
 
@@ -38,8 +40,8 @@ static const struct {
     "Cannot open dirfile {2}: permission denied", 0 },
   { GD_E_OPEN, GD_E_OPEN_NOT_EXIST, "Dirfile does not exist: {2}", 0 },
   /* GD_E_FORMAT: 1 = suberror, 2 = formatfile, 3 = line number, 4 = token */
-  { GD_E_FORMAT, GD_E_FORMAT_BAD_TYPE,
-    "Bad RAW field type on line {3} of {2}: {4}", 0 },
+  { GD_E_FORMAT, GD_E_FORMAT_BAD_TYPE, "Bad data type on line {3} of {2}: {4}",
+    0 },
   { GD_E_FORMAT, GD_E_FORMAT_BAD_SPF,
     "Samples per frame out of range on line {3} of {2}: {4}", 0 },
   { GD_E_FORMAT, GD_E_FORMAT_N_FIELDS,
@@ -206,9 +208,9 @@ void _GD_SetError(DIRFILE* D, int error, int suberror,
     strncpy(D->error_string, token, FILENAME_MAX);
 
   if (D->flags & GD_VERBOSE) {
-    char buffer[GD_MAX_LINE_LENGTH];
-    fprintf(stderr, PACKAGE_NAME ": %s\n", gd_error_string(D, buffer,
-          GD_MAX_LINE_LENGTH));
+    char *error = gd_error_string(D, NULL, 0);
+    fprintf(stderr, PACKAGE_NAME ": %s\n", error);
+    free(error);
   }
 
   dreturnvoid();
@@ -228,17 +230,18 @@ int gd_error(const DIRFILE* D) gd_nothrow
  * library error.  The message may be truncated but will be null terminated.
  * Returns buffer, or NULL if buflen < 1.
  */
+#define UNKNOWN "Unknown error %i:%i. Please report to " PACKAGE_BUGREPORT
 char* gd_error_string(const DIRFILE* D, char* buffer, size_t buflen) gd_nothrow
 {
   const char* ip;
-  char* op = buffer;
-  char* bufend = buffer + buflen;
+  char* op;
+  char* bufend;
   int i, s = -1;
 
   dtrace("%p, %p, %zu", D, buffer, buflen);
 
   /* Sanity check */
-  if (buffer == NULL || D == NULL || buflen < 1) {
+  if (D == NULL || (buffer && buflen < 1)) {
     dreturn("%p", NULL);
     return NULL;
   }
@@ -254,9 +257,37 @@ char* gd_error_string(const DIRFILE* D, char* buffer, size_t buflen) gd_nothrow
   if (D->error == 0)
     s = i;
 
+  if (buffer == NULL) {
+    /* computer buffer length */
+    if (s == -1) {
+      /* a 64-bit int is 20 decimal digits, the %i takes up two characters,
+       * so at most 18 more are needed for each integer */
+      buflen = sizeof(UNKNOWN) + 2 * 18 + 1;
+    } else {
+      /* again, space for two 64-bit ints - "{n}" = 17 */
+      buflen = strlen(error_string[s].format) + 2 * 17 + 1;
+      if (D->error_file)
+        buflen += strlen(D->error_file);
+      if (D->error_string)
+        buflen += strlen(D->error_string);
+      if (error_string[s].adderr)
+        /* hmmm... how long is our strerror string?  Really, the only way to
+         * find out is to run strerror_r with increasingly long buffers until
+         * we don't get ERANGE anymore.  Um, let's just guess. */
+        buflen += GD_MAX_LINE_LENGTH;
+    }
+
+    buffer = (char *)malloc(buflen);
+    if (buffer == NULL) {
+      dreturn("%p", NULL);
+      return NULL;
+    }
+  }
+  op = buffer;
+  bufend = buffer + buflen;
+
   if (s == -1) /* Unhandled error */
-    snprintf(buffer, buflen, "Unknown error %i:%i. Please report to "
-        PACKAGE_BUGREPORT, D->error, D->suberror);
+    snprintf(buffer, buflen, UNKNOWN, D->error, D->suberror);
   else {
     for (ip = error_string[s].format; *ip != '\0' && op < bufend - 1; ++ip) {
       if (*ip == '{') {

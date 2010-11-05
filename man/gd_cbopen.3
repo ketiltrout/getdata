@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_cbopen 3 "21 October 2010" "Version 0.7.0" "GETDATA"
+.TH gd_cbopen 3 "3 November 2010" "Version 0.7.0" "GETDATA"
 .SH NAME
 gd_cbopen, gd_open \(em open or create a dirfile
 .SH SYNOPSIS
@@ -404,6 +404,7 @@ typedef struct {
   int linenum;
   const char* filename;
   char* line;
+  size_t buflen;
 
   ...
 } gd_parser_data_t;
@@ -503,8 +504,22 @@ member contains a copy of the line containing the syntax error.  This line may
 be freely modified by the callback function.  It will then be reparsed if the
 callback function returns the symbol
 .B GD_SYNTAX_RESCAN
-(see below).  Space is available for at least GD_MAX_LINE_LENGTH characters,
-including the terminating NUL.
+(see below).  The size of the memory buffer (which may be greater than the
+length of the actual string) is provided in
+.IR pdata -> buflen ,
+and space is available for at least GD_MAX_LINE_LENGTH bytes.  A larger buffer
+may be used if desired, by assigning a pointer to the new buffer of the desired
+length to
+.IR pdata -> line .
+The new buffer should be allocated with
+.BR malloc (3).
+It will be freed by the parser.  Do not call
+.BR free (3)
+or
+.BR realloc (3)
+on the original pointer passed to the callback as
+.IR pdata -> line :
+it, too, will be freed by the parser.
 
 The callback function should return one of the following symbols, which
 tells the parser how to subsequently handle the error:
@@ -600,6 +615,13 @@ An internal error occurred in the library while trying to perform the task.
 This indicates a bug in the library.  Please report the incident to the
 GetData developers.
 .TP
+.B GD_E_LINE_TOO_LONG
+The parser encountered a line in the format specification longer than it was
+able to deal with.  Lines are limited by the storage size of
+.BR ssize_t .
+On 32-bit systems, this limits format specification lines to 2**31 bytes.  The
+limit is larger on 64-bit systems.
+.TP
 .B GD_E_OPEN
 The dirfile format specification could not be opened, or
 .I dirfilename
@@ -640,6 +662,13 @@ To read an old, little-ended dirfile on a big-ended platform, an
 directive should be added to the format specification, or else
 .B GD_LITTLE_ENDIAN
 should be specified by the caller.
+
+GetData artifically limits the size of a
+.B CARRAY
+field to GD_MAX_CARRAY_LENGTH elements, to be certain it is always able to
+write the CARRAY back to disk without overrunning its maximum line length.
+On 32-bit systems, GD_MAX_CARRAY_LENGTH is 2**24.  It is larger on 64-bit
+systems.  Excess elements are silently truncatd on dirfile open.
 
 GetData's parser assumes it is running on an ASCII-compatible platform.  Format
 specification parsing will fail gloriously on an EBCDIC platform.

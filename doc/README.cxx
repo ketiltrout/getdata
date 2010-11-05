@@ -50,13 +50,13 @@ are available:
   The Error method provides access to the error member of the underlying
   DIRFILE* object.
 
-* const char *Dirfile::ErrorString(size_t len = 4096)
+* const char *Dirfile::ErrorString()
+* const char *Dirfile::ErrorString(size_t len)
 
   The ErrorString method will return a buffer containing a description of the
   last GetData library error as obtained from gd_error_string(3).  This buffer
   is local to the object, and subsequent calls to ErrorString() will overwrite
-  the buffer.  The string written to the buffer will be at most len characters
-  long, up to a maximum of 4096 characters.
+  the buffer.  The len parameter, if specified, is ignored.
 
 * off_t BoF(const char *field_code)
   
@@ -129,13 +129,17 @@ are available:
 * int Dirfile::Add(const Entry &entry)
 * int Dirfile::AddSpec(const char *spec, int format_file = 0)
 * int Dirfile::AlterSpec(const char *line, int recode = 0)
+* const gd_carray_t *Dirfile::Carrays(GetData::DataType type = Float64)
+* const size_t Dirfile::CarrayLen(const char *field_code)
 * const void *Dirfile::Constants(GetData::DataType type = Float64)
 * int Delete(const char *field_code, int flags = 0)
 * const char **Dirfile::FieldList()
 * const char **Dirfile::FieldListByType(GetData::EntryType type)
 * int Dirfile::Flush(const char *field_code = NULL)
 * const char *Dirfile::FormatFilename(int index)
-* size_t Dirfile::GetConstant(const char *field_code, GetData::DataType type,
+* int Dirfile::GetCarray(const char *field_code, GetData::DataType type,
+    void *data_out, unsigned int start = 0, size_t len = 0)
+* int Dirfile::GetConstant(const char *field_code, GetData::DataType type,
     void *data_out)
 * size_t Dirfile::GetData(const char *field_code, off_t first_frame,
     off_t first_sample, size_t num_frames, size_t num_samples,
@@ -145,6 +149,7 @@ are available:
 * int Dirfile::MAdd(const Entry &entry, const char *parent)
 * int Dirfile::MAddSpec(const char *spec, const char *parent)
 * int Dirfile::MAlterSpec(const char *line, const char *parent)
+* const gd_carray_t *Dirfile::MCarrays(GetData::DataType type = Float64)
 * const void *Dirfile::MConstants(const char *parent, GetData::DataType type)
 * const char **Dirfile::MFieldList(const char *parent)
 * const char **Dirfile::MFieldListByType(const char *parent,
@@ -162,7 +167,9 @@ are available:
     GetData::EntryType type)
 * unsigned int Dirfile::NMVectors(const char *parent)
 * int Dirfile::NVectors()
-* size_t Dirfile::PutConstant(const char *field_code, GetData::DataType type,
+* int Dirfile::PutCarray(const char *field_code, GetData::DataType type,
+    const void *data_in, unsigned int start = 0, size_t len = 0)
+* int Dirfile::PutConstant(const char *field_code, GetData::DataType type,
     const void *data_in)
 * size_t Dirfile::PutData(const char *field_code, off_t first_frame,
     off_t first_sample, size_t num_frames, size_t num_samples,
@@ -183,10 +190,10 @@ are available:
   which are aliases for the gd_type_t values GD_NULL, GD_UNKNOWN, GD_UINT8, &c.
   Arguments of type GetData::EntryType should be one of 
 
-    NoEntryType, BitEntryType, ConstEntryType, DivideEntryType, IndexEntryType,
-    LincomEntryType, LinterpEntryType, MultiplyEntryType, PhaseEntryType,
-    PolynomEntryType, RawEntryType, RecipEntryType, SBitEntryType,
-    StringEntryType
+    NoEntryType, BitEntryType, CarrayEntry, ConstEntryType, DivideEntryType,
+    IndexEntryType, LincomEntryType, LinterpEntryType, MultiplyEntryType,
+    PhaseEntryType, PolynomEntryType, RawEntryType, RecipEntryType,
+    SBitEntryType, StringEntryType
 
   which are aliases for the gd_entype_t values GD_NO_ENTRY, GD_RAW_ENTRY, &c.
   Note that the arguments to AddSpec are opposite of the corresponding function
@@ -298,6 +305,7 @@ The following methods are available:
 * virtual int Entry::NumBits()
 * virtual int Entry::Shift()
 * virtual DataType Entry::ConstType()
+* virtual size_t Entry::ArrayLen()
 * virtual const char *Entry::Table()
 
   These methods will return the corresponding member of the gd_entry_t object.
@@ -312,9 +320,7 @@ The following methods are available:
 * virtual double Entry::Coefficient(int index = 0)
 * virtual std::complex<double> Entry::CCoefficient(int index = 0)
 * virtual const char *Entry::Scalar(int index = 0)
-* virtual int SetDividend(double coeff)
-* virtual int SetDividend(const char* coeff)
-* virtual int SetDividend(std::complex<double> coeff)
+* virtual int Entry::ScalaIndexr(int index = 0)
 
   These methods will return an element from the gd_entry_t members in_fields[],
   m[], or b[], indexed by the supplied parameter.  Attempts to access elements
@@ -388,6 +394,7 @@ Defined in getdata/lincomentry.h
 * virtual double LincomEntry::Offset(int index = 0)
 * virtual std::complex<double> LincomEntry::COffset(int index = 0)
 * virtual const char *LincomEntry::Scalar(int index = 0)
+* virtual int LincomEntry::ScalarIndex(int index = 0)
 
   These methods, re-implemented from the Entry class, return the corresponding
   field parameter.
@@ -541,6 +548,7 @@ Defined in getdata/lincomentry.h
 * virtual double PolynomEntry::Coefficient(int index = 0)
 * virtual std::complex<double> PolynomEntry::CCoefficient(int index = 0)
 * virtual const char *PolynomEntry::Scalar(int index = 0)
+* virtual int PolynomEntry::ScalarIndex(int index = 0)
 
   These methods, re-implemented from the Entry class, return the corresponding
   field parameter.
@@ -603,6 +611,7 @@ Defined in getdata/recipentry.h
 * virtual double RecipEntry::Dividend()
 * virtual std::complex<double> RecipEntry::CDividend()
 * virtual const char *RecipEntry::Scalar()
+* virtual int RecipEntry::ScalarIndex()
 
   These methods, re-implemented from the Entry class, return the corresponding
   field parameter.
@@ -616,6 +625,31 @@ Defined in getdata/recipentry.h
 
   This function will change the specified input field with the given index,
   which should be zero or one.
+
+
+CarraytEntry Class
+----------------
+
+Defined in getdata/constentry.h
+
+* CarraytEntry::CarraytEntry()
+  
+  This creates a new CONST entry object with default parameters.
+
+* CarraytEntry::CarraytEntry(const char *field_code, DataType type,
+    int format_file = 0)
+
+* virtual DataType CarraytEntry::ConstType()
+* virtual size_t Carray::ArrayLen()
+
+  This method, re-implemented from the Entry class, returns the data type of the
+  CONST field.
+
+* int SetArrayLen(size_t array_len)
+* int SetType(DataType field)
+
+  These method will change the data type or length of the CARRAY field.  They
+  return non-zero on error.
 
 
 ConstEntry Class
@@ -637,7 +671,8 @@ Defined in getdata/constentry.h
 
 * int SetType(DataType field)
 
-  This method will change the data type of the CONST field.
+  This method will change the data type of the CONST field.  It returns non-zero
+  on error.
 
 
 StringEntry Class

@@ -29,7 +29,8 @@ int main(void)
   close(fd);
 
   DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  const uint8_t* field_list = gd_mconstants(D, "parent", GD_UINT8);
+  const uint8_t* field_list = (const uint8_t *)gd_mconstants(D, "parent",
+      GD_UINT8);
 
   int error = gd_error(D);
   CHECKI(error, 0);

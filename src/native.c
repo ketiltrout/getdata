@@ -115,6 +115,7 @@ gd_type_t _GD_NativeType(DIRFILE* D, gd_entry_t* E, int repr)
       type = GD_INT64;
       break;
     case GD_CONST_ENTRY:
+    case GD_CARRAY_ENTRY:
       type = E->EN(cons,const_type);
       break;
     case GD_STRING_ENTRY:

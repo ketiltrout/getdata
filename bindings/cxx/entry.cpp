@@ -129,43 +129,70 @@ void Entry::SetFragmentIndex(int fragment_index)
   this->Move(fragment_index);
 }
 
-const char *Entry::Scalar(int index) const
+static inline int scalar_ok(const gd_entry_t &E, int index)
 {
   if (index < 0)
-    return NULL;
+    return 0;
 
   switch (E.field_type) {
     case GD_LINCOM_ENTRY:
       if (index >= GD_MAX_LINCOM + E.u.lincom.n_fields ||
           (index >= E.u.lincom.n_fields && index < GD_MAX_LINCOM))
       {
-        return NULL;
+        return 0;
       }
       break;
     case GD_POLYNOM_ENTRY:
       if (index > E.u.polynom.poly_ord)
-        return NULL;
+        return 0;
       break;
     case GD_BIT_ENTRY:
     case GD_SBIT_ENTRY:
       if (index >= 2)
-        return NULL;
+        return 0;
       break;
     case GD_RAW_ENTRY:
     case GD_PHASE_ENTRY:
     case GD_RECIP_ENTRY:
       if (index >= 1)
-        return NULL;
+        return 0;
       break;
     case GD_LINTERP_ENTRY:
     case GD_MULTIPLY_ENTRY:
     case GD_DIVIDE_ENTRY:
     case GD_INDEX_ENTRY:
     case GD_CONST_ENTRY:
+    case GD_CARRAY_ENTRY:
     case GD_STRING_ENTRY:
     case GD_NO_ENTRY:
-      return NULL;
+      return 0;
   }
 
-  return E.scalar[index];
+  return 1;
+}
+
+const char *Entry::Scalar(int index) const
+{
+  return scalar_ok(E, index) ? E.scalar[index] : NULL;
+}
+
+int Entry::ScalarIndex(int index) const
+{
+  return scalar_ok(E, index) ? E.scalar_ind[index] : 0;
+}
+
+void Entry::SetScalar(int n, const char *code)
+{
+  free(E.scalar[n]);
+  if (code == NULL)
+    E.scalar[n] = NULL;
+  else {
+    E.scalar[n] = strdup(code);
+    char *ptr = strchr(E.scalar[n], '<');
+    if (ptr) {
+      *ptr = '\0';
+      E.scalar_ind[n] = atoi(ptr + 1);
+    } else
+      E.scalar_ind[n] = -1;
+  }
 }

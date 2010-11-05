@@ -25,6 +25,7 @@ int main(void)
     "raw3 RAW UINT8 1\n"
     "raw4 RAW UINT8 1\n"
     "const CONST UINT8 1\n"
+    "carray CARRAY UINT8 1\n"
     "string STRING value\n"
     "string2 STRING value\n";
   int fd, r = 0;

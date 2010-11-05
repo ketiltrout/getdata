@@ -110,6 +110,7 @@ is essentially equivalent and is defined as:
   IN_FIELDS    STRING     Array[3]
   A            DOUBLE     Array[6]
   CA           DCOMPLEX   Array[6]
+  ARRAY_LEN    INTEGER
   B            DOUBLE     Array[3]
   CB           DCOMPLEX   Array[3]
   BITNUM       INTEGER
@@ -123,6 +124,7 @@ is essentially equivalent and is defined as:
   NUMBITS      INTEGER
   POLY_ORD     INTEGER
   SCALAR       STRING     Array[6]
+  SCALAR_IND   INTEGER    Array[6]
   SHIFT        LONG
   SPF          UINT
   TABLE        STRING
@@ -166,6 +168,20 @@ PROCEDURE GD_ADD_BIT, dirfile_unit, field_name, in_field, BITNUM=bitnum,
   FRAGMENT is not given either.  This procedure may also be called as
   GD_MADD_BIT with no change in functionality.  See gd_add_bit(3) and
   gd_madd_bit(3).
+
+PROCEDURE GD_ADD_CARRAY, dirfile_unit, field_name, FRAGMENT=fragment,
+  LENGTH=length, PARENT=parent, TYPE=type, VALUE=value
+
+  This procedure adds a CARRAY field with the name 'field_name' to the dirfile.
+  The storage type of the field is given by the TYPE keyword, which defaults to
+  !GD.FLOAT64.  If given, the initial value of the field is given by the VALUE
+  keyword, in this case LENGTH is ignored, if also given.  if VALUE is not
+  given, LENGTH must be specified, and the field will be initialised to all
+  zeros.  If PARENT is given, this field is added as a metafield under the
+  given parent field.  Otherwise, the field is added to the fragment indexed by
+  FRAGMENT, or the primary format file if FRAGMENT is not given either.  This
+  procedure may also be called as GD_MADD_CARRAY with no change in
+  functionality.  See gd_add_carray(3) and gd_madd_carray(3).
 
 PROCEDURE GD_ADD_CONST, dirfile_unit, field_name, FRAGMENT=fragment,
   PARENT=parent, TYPE=type, VALUE=value
@@ -315,6 +331,13 @@ PROCEDURE GD_ALTER_BIT, dirfile_unit, field_code, BITNUM=bitnum,
   'field_code', updating only those field parameters specified as keyword
   parameters.  See gd_alter_bit(3).
 
+PROCEDURE GD_ALTER_CARRAY, dirfile_unit, field_code, TYPE=type, LENGTH=length
+
+  This procedure modifies the metadata of the field specified by 'field_code',
+  updating the storage data type and array length if specified as keyword
+  parameters.  If given, TYPE should be one of the data type constants:
+  !GD.UINT8, !GD.INT8, &c.  See gd_alter_carray(3).
+
 PROCEDURE GD_ALTER_CONST, dirfile_unit, field_code, TYPE=type
 
   This procedure modifies the metadata of the field specified by 'field_code',
@@ -456,6 +479,11 @@ FUNCTION GD_BOF(dirfile_unit, field_code)
   This function returns the sample number of the position of the
   beginning-of-field marker for the specified field.  See gd_bof(3).
 
+FUNCTION GD_CARRAY_LEN(dirfileunit, field_code)
+
+  This function returns the length of the specified field.  See
+  gd_carray_len(3).
+
 PROCEDURE GD_CLOSE, dirfile_unit, /DISCARD
 
   This procedure closes the specified dirfile.  If DISCARD is not given, pending
@@ -590,12 +618,22 @@ FUNCTION GD_GETDATA(dirfile_unit, field_code, FIRST_FRAME=first_frame,
   samples than requested may be returned, without causing an error, if the end
   of the field is encountered.  See getdata(3).
 
-FUNCTION GD_GET_CONSTANT(dirfile_unit, field_code, TYPE=type)
+FUNCTION GD_GET_CARRAY(dirfile_unit, field_code, TYPE=type)
 
   This function returns the value of a CONST field, converting it to the return
   type specified by TYPE, which should be one of the data type constants:
   !GD.UINT8, !GD.UINT16, &c.  If TYPE is not specified, the value is returned as
   a double precision number, even if complex valued.  See gd_get_constant(3).
+
+FUNCTION GD_GET_CONSTANT(dirfile_unit, field_code, LENGTH=length, START=start,
+  TYPE=type)
+
+  This function returns all or part of a CARRAY field, converting the data to
+  the return type specified by TYPE, which should be one of the data type
+  constants: !GD.UINT8, !GD.UINT16, &c.  If TYPE is not specified, !GD.FLOAT64
+  is assumed.  The first element returned is given by the START keyword,
+  which defaults to zero.  If LENGTH is not specified, all elements from START
+  to the end of the field are returned, otherwise.  See gd_get_carray_slice(3).
 
 FUNCTION GD_GET_STRING(dirfile_unit, field_code)
 
@@ -707,6 +745,12 @@ PROCEDURE GD_PUTDATA, dirfile_unit, field_code, data, FIRST_FRAME=first_frame,
   specified by 'field_code'.  The keywords FIRST_FRAME and/or FIRST_SAMPLE
   indicate the first sample written.  If neither of these are specified, the
   data is written from the beginning of the frame.  See putdata(3).
+
+PROCEDURE GD_PUT_CARRAY, dirfile_unit, field_code, value, START=start
+
+  This procedure stores the data in 'value' to the CARRAY field specified by
+  'field_code'.  START indicates the first element of the field which is
+  written.  Zero is assumed for START if not given.  See gd_put_carray_slice(3).
 
 PROCEDURE GD_PUT_CONSTANT, dirfile_unit, field_code, value
 

@@ -82,10 +82,10 @@ file.close()
 
 ne = 0
 
-fields = ["INDEX", "bit", "const", "data", "div", "lincom", "linterp", "mult",
-      "phase", "polynom", "recip", "sbit", "string"]
+fields = ["INDEX", "bit", "carray", "const", "data", "div", "lincom",
+"linterp", "mult", "phase", "polynom", "recip", "sbit", "string"]
 
-nfields = 13
+nfields = 14
 file=open("dirfile/format", 'w')
 file.write(
     "/ENDIAN little\n"
@@ -95,6 +95,7 @@ file.write(
     "/META data mconst CONST COMPLEX128 3.3;4.4\n"
     "/META data mlut LINTERP DATA ./lut\n"
     "const CONST FLOAT64 5.5\n"
+    "carray CARRAY FLOAT64 1.1 2.2 3.3 4.4 5.5 6.6\n"
     "linterp LINTERP data /look/up/file\n"
     "polynom POLYNOM data 1.1 2.2 2.2 3.3;4.4 const const\n"
     "bit BIT data 3 4\n"
@@ -152,7 +153,7 @@ except:
   CheckOK(106)
 CheckSimple(106,len(n),8)
 if (pygetdata.__numpy_supported__):
-  CheckNumpy(104,n,numpy.arange(41.,49.))
+  CheckNumpy(106,n,numpy.arange(41.,49.))
 else:
   CheckSimple(106,n,[41.,42.,43.,44.,45.,46.,47.,48.])
 
@@ -163,7 +164,7 @@ except:
   CheckOK(108)
 CheckSimple(108,len(n),8)
 if (pygetdata.__numpy_supported__):
-  CheckNumpy(104,n,numpy.arange(41,49,dtype=numpy.complex128))
+  CheckNumpy(108,n,numpy.arange(41,49,dtype=numpy.complex128))
 else:
   CheckSimple(108,n,[41.+0j,42.+0j,43.+0j,44.+0j,45.+0j,46.+0j,47.+0j,48.+0j])
 
@@ -1315,6 +1316,212 @@ try:
 except:
   CheckException2(157,2,pygetdata.BadVersionError)
 
+# 158: gd_get_carray
+try:
+  n = d.get_carray("carray", pygetdata.INT)
+except:
+  CheckOK(158)
+
+if (pygetdata.__numpy_supported__):
+  CheckNumpy(158,n,numpy.arange(1,7))
+else:
+  CheckSimple(158,n,[1, 2, 3, 4, 5, 6])
+
+# 159: gd_get_carray_slice (INT8)
+try:
+  n = d.get_carray("carray", pygetdata.INT, start=2, len=2)
+except:
+  CheckOK(159)
+
+if (pygetdata.__numpy_supported__):
+  CheckNumpy(159,n,numpy.arange(3,5))
+else:
+  CheckSimple(159,n,[3, 4])
+
+# 162: gd_get_carray_slice (INT64)
+try:
+  n = d.get_carray("carray", pygetdata.LONG, start=2, len=2)
+except:
+  CheckOK(162)
+
+if (pygetdata.__numpy_supported__):
+  CheckNumpy(162,n,numpy.arange(3L,5L))
+else:
+  CheckSimple(162,n,[3L, 4L])
+
+# 164: gd_get_carray_slice (FLOAT64)
+try:
+  n = d.get_carray("carray", pygetdata.FLOAT, start=2, len=2)
+except:
+  CheckOK(164)
+
+if (pygetdata.__numpy_supported__):
+  CheckNumpy(164,n,numpy.array([3.3, 4.4]))
+else:
+  CheckSimple(164,n,[3.3, 4.4])
+
+# 166: gd_get_carray_slice (COMPLEX128)
+try:
+  n = d.get_carray("carray", pygetdata.COMPLEX, start=2, len=2)
+except:
+  CheckOK(166)
+
+if (pygetdata.__numpy_supported__):
+  CheckNumpy(166,n,numpy.array([3.3+0j, 4.4+0j]))
+else:
+  CheckSimple(166,n,[3.3+0j, 4.4+0j])
+
+# 167: gd_carrays
+try:
+  n = d.carrays(pygetdata.INT)
+except:
+  CheckOK(167)
+
+CheckSimple2(167,1,len(n),1)
+if (pygetdata.__numpy_supported__):
+  CheckSimple2(167,2,n[0][0],"carray")
+  CheckNumpy2(167,2,n[0][1],numpy.arange(1,7))
+else:
+  CheckSimple(167,n,[("carray", [1,2,3,4,5,6])])
+
+# 168: gd_put_carray
+try:
+  d.put_carray("carray", [9,8,7,6,5,4])
+except:
+  CheckOK2(168,1)
+
+try:
+  n = d.get_carray("carray", pygetdata.INT)
+except:
+  CheckOK2(168,2)
+
+if (pygetdata.__numpy_supported__):
+  CheckNumpy(168,n,numpy.arange(9,3,-1))
+else:
+  CheckSimple(168,n,[9,8,7,6,5,4])
+
+# 169: gd_put_carray_slice (INT8)
+try:
+  d.put_carray("carray", [169,169], start=2)
+except:
+  CheckOK2(169,1)
+
+try:
+  n = d.get_carray("carray", pygetdata.INT)
+except:
+  CheckOK2(169,2)
+
+if (pygetdata.__numpy_supported__):
+  CheckNumpy(169,n,numpy.array([9,8,169,169,5,4]))
+else:
+  CheckSimple(169,n,[9,8,169,169,5,4])
+
+# 172: gd_put_carray_slice (INT64)
+try:
+  d.put_carray("carray", [172L,172L], start=2)
+except:
+  CheckOK2(172,1)
+
+try:
+  n = d.get_carray("carray", pygetdata.INT)
+except:
+  CheckOK2(172,2)
+
+if (pygetdata.__numpy_supported__):
+  CheckNumpy(172,n,numpy.array([9,8,172,172,5,4]))
+else:
+  CheckSimple(172,n,[9,8,172,172,5,4])
+
+# 174: gd_put_carray_slice (FLOAT64)
+try:
+  d.put_carray("carray", [174.,174.], start=2)
+except:
+  CheckOK2(174,1)
+
+try:
+  n = d.get_carray("carray", pygetdata.INT)
+except:
+  CheckOK2(174,2)
+
+if (pygetdata.__numpy_supported__):
+  CheckNumpy(174,n,numpy.array([9,8,174,174,5,4]))
+else:
+  CheckSimple(174,n,[9,8,174,174,5,4])
+
+# 176: gd_put_carray_slice (COMPLEX128)
+try:
+  d.put_carray("carray", [176.+0j,176.+0j], start=2)
+except:
+  CheckOK2(176,1)
+
+try:
+  n = d.get_carray("carray", pygetdata.INT)
+except:
+  CheckOK2(176,2)
+
+if (pygetdata.__numpy_supported__):
+  CheckNumpy(176,n,numpy.array([9,8,176,176,5,4]))
+else:
+  CheckSimple(176,n,[9,8,176,176,5,4])
+
+# 177: gd_carray_len
+try:
+  n = d.carray_len("carray")
+except:
+  CheckOK(177)
+
+CheckSimple(177,n,6)
+
+# 178: gd_entry (CARRAY)
+try:
+  ent = d.entry("carray")
+except:
+  CheckOK(178)
+CheckSimple2(178,1,ent.field_type,pygetdata.CARRAY_ENTRY)
+CheckSimple2(178,2,ent.field_type_name,"CARRAY_ENTRY")
+CheckSimple2(178,3,ent.fragment,0)
+CheckSimple2(178,4,ent.data_type,pygetdata.FLOAT64)
+CheckSimple2(178,5,ent.data_type_name,"FLOAT64")
+CheckSimple2(178,6,ent.array_len,6)
+
+# 179: gd_add_carray
+ent = pygetdata.entry(pygetdata.CARRAY_ENTRY, "new17", 0, (pygetdata.FLOAT64,2))
+try:
+  d.add(ent)
+except:
+  CheckOK2(179,1)
+
+try:
+  ent = d.entry("new17")
+except:
+  CheckOK2(179,2)
+CheckSimple2(179,1,ent.field_type,pygetdata.CARRAY_ENTRY)
+CheckSimple2(179,2,ent.field_type_name,"CARRAY_ENTRY")
+CheckSimple2(179,3,ent.fragment,0)
+CheckSimple2(179,4,ent.data_type,pygetdata.FLOAT64)
+CheckSimple2(179,5,ent.data_type_name,"FLOAT64")
+CheckSimple2(179,6,ent.array_len,2)
+
+# 180: gd_madd_carray
+ent = pygetdata.entry(pygetdata.CARRAY_ENTRY, "mnew17", 0,
+    {"type": pygetdata.FLOAT64, "array_len": 2})
+try:
+  d.madd(ent,"data")
+except:
+  CheckOK2(180,1)
+
+try:
+  ent = d.entry("data/mnew17")
+except:
+  CheckOK2(180,2)
+CheckSimple2(180,1,ent.field_type,pygetdata.CARRAY_ENTRY)
+CheckSimple2(180,2,ent.field_type_name,"CARRAY_ENTRY")
+CheckSimple2(180,3,ent.fragment,0)
+CheckSimple2(180,4,ent.data_type,pygetdata.FLOAT64)
+CheckSimple2(180,5,ent.data_type_name,"FLOAT64")
+CheckSimple2(180,6,ent.array_len,2)
+
+# 181: gd_alter_carray
 
 
 # the following causes the d object to silently fault on delete, since it
@@ -1324,4 +1531,5 @@ os.system("rm -rf dirfile")
 
 if (ne > 0):
   print "ne =", ne
+  print "__numpy_supported__ =", pygetdata.__numpy_supported__
   sys.exit(1)

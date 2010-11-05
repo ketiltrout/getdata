@@ -16,7 +16,6 @@ int main(void)
   const char* format = __TEST__ "dirfile/format";
   const char* data = __TEST__ "dirfile/data";
   int r = 0;
-  unsigned char val;
   gd_entry_t e;
 
   gd_entry_t E;
@@ -43,8 +42,6 @@ int main(void)
     CHECKI(e.field_type, GD_CONST_ENTRY);
     CHECKI(e.fragment_index, 0);
     CHECKI(e.EN(cons,const_type), GD_UINT8);
-    gd_get_constant(D, "data/data", GD_UINT8, &val);
-    CHECKU(val, 0);
     gd_free_entry_strings(&e);
   }
 

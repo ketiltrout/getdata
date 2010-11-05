@@ -13,11 +13,12 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_add_bit 3 "21 July 2010" "Version 0.7.0" "GETDATA"
+.TH gd_add_bit 3 "3 November 2010" "Version 0.7.0" "GETDATA"
 .SH NAME
-gd_add_bit, gd_add_clincom, gd_add_const, gd_add_cpolynom, gd_add_crecip,
-gd_add_divide, gd_add_lincom, gd_add_linterp, gd_add_multiply, gd_add_phase,
-gd_add_polynom, gd_add_raw, gd_add_recip, gd_add_sbit, gd_add_string
+gd_add_bit, gd_add_carray gd_add_clincom, gd_add_const, gd_add_cpolynom,
+gd_add_crecip, gd_add_divide, gd_add_lincom, gd_add_linterp, gd_add_multiply,
+gd_add_phase, gd_add_polynom, gd_add_raw, gd_add_recip, gd_add_sbit,
+gd_add_string
 \(em add a field to a dirfile
 .SH SYNOPSIS
 .B #include <getdata.h>
@@ -27,6 +28,10 @@ gd_add_polynom, gd_add_raw, gd_add_recip, gd_add_sbit, gd_add_string
 .BI "int gd_add_bit(DIRFILE *" dirfile ", const char *" field_name ,
 .BI "const char *" in_field ", gd_bit_t " bitnum ", gd_bit_t " numbits ,
 .BI "int " fragment_index );
+.HP
+.BI "int gd_add_carray(DIRFILE *" dirfile ", const char *" field_name ,
+.BI "gd_type_t " const_type ", size_t " array_len ", gd_type_t " data_type ,
+.BI "void *" value ", int " fragment_index );
 .HP
 .BI "int gd_add_clincom(DIRFILE *" dirfile ", const char *" field_name ,
 .BI "int " n_fields ", const char **" in_fields ", const double complex *" cm ,
@@ -134,13 +139,15 @@ containing the polynomial co-efficients
 .RI ( a " or " ca ).
 
 The
-.BR gd_add_string ()
+.BR gd_add_string (),\~ gd_add_carry (),
 and
 .BR gd_add_const ()
-functions both add the field and set the value of the field to
+functions add the field and set the value of the field to
 .IR value .
 For
-.BR gd_add_const (),
+.BR gd_add_const ()
+and 
+.BR gd_add_carray (),
 the
 .I const_type
 argument specifies the storage type for the const, while
@@ -156,11 +163,9 @@ type is a signed 64-bit integer type.  The
 .B gd_spf_t
 type is an unsigned 16-bit integer type.
 
-All fields added with this interface must contain numerical parameters.  Fields
-with
-.B CONST
-fields as parameters cannot be added with these functions.  Those fields must
-be added with
+All fields added with this interface must contain literal parameters.  Fields
+with scalar fields as parameters cannot be added with these functions.  Those
+fields must be added with
 .BR gd_add (3)
 or
 .BR gd_add_spec (3).
@@ -168,7 +173,7 @@ or
 See
 .B NOTES
 below for information on using
-.BR gd_add_clincom ()
+.BR gd_add_clincom (),\~ gd_add_carray (),
 and 
 .BR gd_add_cpolynom ()
 in the C89 GetData API.
@@ -206,10 +211,22 @@ argument provided to
 .BR gd_add_raw "()  or " gd_add_const (),
 was invalid.
 .TP
+.B GD_E_BOUNDS
+The
+.I array_len
+parameter provided to
+.BR gd_add_carray ()
+was greater than GD_MAX_CARRAY_LENGTH.
+.TP
 .B GD_E_DUPLICATE
 The
 .IR field_name
 provided duplicated that of an already existing field.
+.TP
+.B GD_E_INTERNAL_ERROR
+An internal error occurred in the library while trying to perform the task.
+This indicates a bug in the library.  Please report the incident to the
+GetData developers.
 .TP
 .B GD_E_PROTECTED
 The metadata of the fragment was protected from change.  Or, the creation of a
@@ -242,6 +259,14 @@ a call to
 .BR gd_error_string (3).
 
 .SH NOTES
+GetData artifically limits the number of elements in a
+.B CARRAY
+to the value of the symbol GD_MAX_CARRAY_LENGTH defined in getdata.h.  This is
+done to be certain that the
+.B CARRAY
+won't overrun the line when flushed to disk.  On a 32-bit system, this number
+is 2**24.  It is larger on a 64-bit system.
+
 The C89 GetData API provides different prototypes for
 .BR gd_add_clincom (),\~ gd_add_cpolynom (),
 and
@@ -291,10 +316,8 @@ parameter becomes a double precision array of length two.
 .BR gd_error (3),
 .BR gd_error_string (3),
 .BR gd_madd_bit (3),
-.BR gd_madd_clincom (3),
+.BR gd_madd_carray (3),
 .BR gd_madd_const (3),
-.BR gd_madd_cpolynom (3),
-.BR gd_madd_crecip (3),
 .BR gd_madd_divide (3),
 .BR gd_madd_lincom (3),
 .BR gd_madd_linterp (3),

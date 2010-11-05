@@ -57,6 +57,9 @@ using namespace GetData;
 #define CHECK_OK(t) CHECK_ERROR(t,GD_E_OK)
 #define CHECK_OK2(t,n) CHECK_ERROR2(t,n,GD_E_OK)
 
+#define CHECK_NONNULL(t,v) \
+  if ((v) == NULL) { ne++; cerr << "p[" << t << "] = " << (v) << endl; }
+
 #define CHECK_INT(t,v,g) \
   if ((v) != (g)) { ne++; cerr << "n[" << t << "] = " << (v) << endl; }
 #define CHECK_INT2(t,n,v,g) \
@@ -109,6 +112,7 @@ int main(void)
     "/META data mconst CONST COMPLEX128 3.3;4.4\n"
     "/META data mlut LINTERP DATA ./lut\n"
     "const CONST FLOAT64 5.5\n"
+    "carray CARRAY FLOAT64 1.1 2.2 3.3 4.4 5.5 6.6\n"
     "linterp LINTERP data /look/up/file\n"
     "polynom POLYNOM data 1.1 2.2 2.2 3.3;4.4 const const\n"
     "bit BIT data 3 4\n"
@@ -119,13 +123,13 @@ int main(void)
     "phase PHASE data 11\n"
     "string STRING \"Zaphod Beeblebrox\"\n";
   const char* form2_data = "const2 CONST INT8 -19\n";
-  const int nfields = 13;
+  const int nfields = 14;
   unsigned char c[8];
   unsigned char data_data[80];
   signed char sc;
   int n, i, e, ne = 0;
   float fl;
-  double dp, q[6];
+  double dp, p[6], q[6];
   complex<double> cq[6];
   const char **list;
   const char* str;
@@ -143,14 +147,15 @@ int main(void)
   RecipEntry oent, *oep;
   SBitEntry sent, *sep;
   ConstEntry cent, *cep;
+  CarrayEntry aent, *aep;
   StringEntry gent;
   Fragment *frag;
 
-  char* fields[nfields + 9] = {(char*)"INDEX", (char*)"bit", (char*)"const",
-    (char*)"data", (char*)"div", (char*)"lincom", (char*)"linterp",
-    (char*)"mult", (char*)"phase", (char*)"polynom", (char*)"recip",
-    (char*)"sbit", (char*)"string", NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL};
+  char* fields[nfields + 7] = {(char*)"INDEX", (char*)"bit", (char*)"carray",
+    (char*)"const", (char*)"data", (char*)"div", (char*)"lincom",
+    (char*)"linterp", (char*)"mult", (char*)"phase", (char*)"polynom",
+    (char*)"recip", (char*)"sbit", (char*)"string", NULL, NULL, NULL, NULL,
+    NULL, NULL, NULL};
 
   // Write the test dirfile
   mkdir(filedir, 0777);
@@ -613,7 +618,6 @@ int main(void)
   fields[18] = (char*)"polynom";
   fields[19] = (char*)"recip";
   fields[20] = (char*)"sbit";
-  fields[21] = (char*)"string";
   list = d->VectorList();
   CHECK_OK(45);
   CHECK_STRING_ARRAY(45,n,list[i],fields[i]);
@@ -756,6 +760,7 @@ int main(void)
   CHECK_OK2(68,4);
   lep->SetOffset(0.22,2);
   CHECK_OK2(68,5);
+  delete lep;
 
   q[0] = 9.9;
   q[1] = 8.8;
@@ -784,6 +789,7 @@ int main(void)
   CHECK_OK2(70,3);
   yep->SetCoefficient(55.5,4);
   CHECK_OK2(70,4);
+  delete yep;
 
   q[0] = 3.9;
   q[1] = 4.8;
@@ -806,6 +812,7 @@ int main(void)
   CHECK_OK2(72,2);
   nep->SetTable("./other/table");
   CHECK_OK2(72,3);
+  delete nep;
 
   ent = d->Entry("new6");
   CHECK_OK2(72,2);
@@ -823,6 +830,7 @@ int main(void)
   CHECK_OK2(73,3);
   bep->SetNumBits(2);
   CHECK_OK2(73,4);
+  delete bep;
 
   ent = d->Entry("new7");
   CHECK_OK(73);
@@ -841,6 +849,7 @@ int main(void)
   CHECK_OK2(74,3);
   sep->SetNumBits(22);
   CHECK_OK2(74,4);
+  delete sep;
 
   ent = d->Entry("new8");
   CHECK_OK(74);
@@ -857,6 +866,7 @@ int main(void)
   CHECK_OK2(75,2);
   mep->SetInput("in5",1);
   CHECK_OK2(75,3);
+  delete mep;
 
   ent = d->Entry("new9");
   CHECK_OK2(75,2);
@@ -872,6 +882,7 @@ int main(void)
   CHECK_OK2(76,2);
   pep->SetShift(8);
   CHECK_OK2(76,3);
+  delete pep;
 
   ent = d->Entry("new10");
   CHECK_OK(76);
@@ -882,9 +893,10 @@ int main(void)
 
   // 77: ConstEntry check
   cep = reinterpret_cast<ConstEntry*>(d->Entry("new11"));
-  CHECK_OK2(76,1);
+  CHECK_OK2(77,1);
   cep->SetType(Float32);
-  CHECK_OK2(76,2);
+  CHECK_OK2(77,2);
+  delete cep;
 
   ent = d->Entry("new11");
   CHECK_OK2(77,2);
@@ -928,6 +940,7 @@ int main(void)
   rep = d->Reference("new1");
   CHECK_OK(85);
   CHECK_STRING(85,rep->Name(),"new1");
+  delete rep;
 
   // 135: Dirfile::ReferenceFilename check
   str = d->ReferenceFilename();
@@ -1111,6 +1124,7 @@ int main(void)
   CHECK_OK2(152,2);
   dep->SetInput("in5",1);
   CHECK_OK2(152,3);
+  delete dep;
 
   ent = d->Entry("new14");
   CHECK_OK2(152,2);
@@ -1126,6 +1140,7 @@ int main(void)
   CHECK_OK2(153,2);
   oep->SetDividend(complex<double>(1.01,9.33));
   CHECK_OK2(153,3);
+  delete oep;
 
   ent = d->Entry("new15");
   CHECK_INT2(148,1,ent->Type(),RecipEntryType);
@@ -1151,6 +1166,95 @@ int main(void)
   CHECK_INT(157,n,8);
   d->Standards(0);
   CHECK_ERROR2(157,2,GD_E_BAD_VERSION);
+
+  // 158 gd_get_carray
+  n = d->GetCarray("carray", Float64, p);
+  CHECK_OK(158);
+  CHECK_INT(158,n,0);
+  CHECK_DOUBLE_ARRAY(158,1,6,p[i],1.1 * (i + 1));
+
+  // 159 gd_get_carray_slice (INT8)
+  n = d->GetCarray("carray", Float64, p, 2, 2);
+  CHECK_OK(159);
+  CHECK_INT(159,n,0);
+  CHECK_DOUBLE_ARRAY(159,1,2,p[i],1.1 * (i + 3));
+
+  // 167 gd_carrays
+  const gd_carray_t *carrays = d->Carrays(Float64);
+  CHECK_OK(167);
+  CHECK_NONNULL(167,carrays);
+  CHECK_INT2(167,1,carrays[0].n,6);
+  CHECK_DOUBLE_ARRAY(167,2,6,((double*)carrays[0].d)[i],1.1 * (i + 1));
+  CHECK_INT2(167,2,carrays[1].n,0);
+
+  // 168 gd_put_carray
+  p[0] = 9.6;
+  p[1] = 8.5;
+  p[2] = 7.4;
+  p[3] = 6.3;
+  p[4] = 5.2;
+  p[5] = 4.1;
+  n = d->PutCarray("carray", Float64, p);
+  CHECK_OK2(168, 1);
+
+  n = d->GetCarray("carray", Float64, q);
+  CHECK_OK2(168,2);
+  CHECK_INT(168,n,0);
+  CHECK_DOUBLE_ARRAY(168,1,6,q[i],9.6 - i * 1.1);
+
+  // 169 gd_put_carray_slice (INT8)
+  p[0] = 2.2;
+  p[1] = 3.3;
+  n = d->PutCarray("carray", Float64, p, 2, 2);
+  CHECK_OK2(168, 1);
+
+  n = d->GetCarray("carray", Float64, q);
+  CHECK_OK2(168,2);
+  CHECK_INT(168,n,0);
+  CHECK_DOUBLE_ARRAY(168,1,6,q[i],(i == 2 || i == 3) ? i * 1.1 : 9.6 - i * 1.1);
+
+  // 177 gd_carray_len
+  n = (int)d->CarrayLen("carray");
+  CHECK_OK(177);
+  CHECK_INT(177,n,6);
+
+  // 178 gd_entry (CARRAY)
+  ent = d->Entry("const");
+  CHECK_OK(178);
+  CHECK_INT2(178,1,ent->Type(),ConstEntryType);
+  CHECK_INT2(178,2,ent->FragmentIndex(),0);
+  CHECK_INT2(178,3,ent->ConstType(),Float64);
+
+  // 179 gd_add_carray
+  aent.SetName("new17");
+  aent.SetFragmentIndex(0);
+  aent.SetType(Float64);
+  aent.SetArrayLen(4);
+  d->Add(aent);
+  CHECK_OK2(179,1);
+
+  ent = d->Entry("new17");
+  CHECK_OK2(179,2);
+  CHECK_INT2(179,1,ent->Type(),CarrayEntryType);
+  CHECK_INT2(179,2,ent->FragmentIndex(),0);
+  CHECK_INT2(179,3,ent->ConstType(),Float64);
+  CHECK_INT2(179,4,ent->ArrayLen(),4);
+
+  // 181 gd_alter_carray
+  aep = reinterpret_cast<CarrayEntry*>(d->Entry("new17"));
+  CHECK_OK2(181,1);
+  aep->SetType(Float32);
+  CHECK_OK2(181,2);
+  aep->SetArrayLen(12);
+  CHECK_OK2(181,3);
+  delete aep;
+
+  ent = d->Entry("new17");
+  CHECK_OK2(181,2);
+  CHECK_INT2(181,1,ent->Type(),CarrayEntryType);
+  CHECK_INT2(181,2,ent->FragmentIndex(),0);
+  CHECK_INT2(181,3,ent->ConstType(),Float32);
+  CHECK_INT2(181,4,ent->ArrayLen(),12);
 
 
 

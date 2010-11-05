@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_putdata 3 "24 June 2010" "Version 0.7.0" "GETDATA"
+.TH gd_putdata 3 "4 November 2010" "Version 0.7.0" "GETDATA"
 .SH NAME
 gd_putdata \(em write data to a dirfile database
 .SH SYNOPSIS
@@ -149,6 +149,8 @@ Either the field specified by
 .IR field_code ,
 or one of the fields it uses for input, was of
 .B MULTIPLY
+or
+.B DIVIDE
 type, or
 .B LINCOM
 type with more than one input fields.  In this case,
@@ -183,7 +185,7 @@ The data of the
 .B RAW
 field backing
 .I field_code
-was protected from change by a PROTECT directive.
+was protected from change by a /PROTECT directive.
 .TP
 .B GD_E_RANGE
 An attempt was made to write data before the beginning-of-frame marker for
@@ -219,4 +221,6 @@ a call to
 .BR gd_error (3),
 .BR gd_error_string (3),
 .BR gd_getdata (3),
+.BR gd_put_carray (3),
+.BR gd_put_constant (3),
 .BR gd_spf (3)

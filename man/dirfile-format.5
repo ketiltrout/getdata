@@ -418,11 +418,11 @@ character, the line is assumed to specify a metafield.  See the
 directive above for further details.
 
 .SS Field Types
-There are twelve field types.  Of these, ten are of vector type
+There are thirteen field types.  Of these, ten are of vector type
 .RB ( BIT ", " DIVIDE ", " LINCOM ", " LINTERP ", " MULTIPLY ", " PHASE ,
 .BR POLYNOM ", " RAW ", " RECIP ", and " SBIT )
-and two are of scalar type
-.RB ( CONST " and " STRING ).
+and three are of scalar type
+.RB ( CONST ", " CARRAY ", and " STRING ).
 The possible fields types are:
 .TP
 .B BIT
@@ -451,9 +451,37 @@ is omitted, it is assumed to be 1.  Both
 .IR first-bit " and " bits
 may be either literal numbers, or else the field code of a
 .B CONST
+or
+.B CARRAY
 field type containing their values.  The
 .B SBIT
 field type is a signed version of this field type.
+.RE
+.TP
+.B CARRAY
+The CARRAY scalar field type is a list of constants fully specified in the
+format specification metadata.  Syntax is:
+.RS
+.IP
+.I <field-name>
+.B CARRAY
+.I <type> <value0> <value1> <value2> ...
+.PP
+where
+.I type
+may be any supported native data type (see the description of the
+.B RAW
+field type below), and
+.IR value0 ", " value1 ,
+&c. are the values of successive elements in the scalar list interpreted as
+indicated by
+.IR type .
+No limit is placed on the number of elements in a
+.BR CARRAY .
+(Note: despite being multivalued, this is not considered a vector field since
+the elements of the
+.B CARRAY
+are not indexed by frames.)
 .RE
 .TP
 .B CONST
@@ -526,6 +554,8 @@ Each supplied co-efficient
 .RI ( a1 ,\~ b1 ,\~ a2 ,
 &c.) may be either a literal number, or else the field code of a
 .B CONST
+or
+.B CARRAY
 field type containing its value.
 
 If
@@ -609,6 +639,8 @@ the beginning- or end-of-field is implementation dependent.  The
 .I shift
 parameter may be either a literal number, or else the field code of a
 .B CONST
+or
+.B CARRAY
 field type containing its values.
 .RE
 .TP
@@ -639,6 +671,8 @@ if the corresponding co-efficients
 are specified.  The coefficients, if specified, may be either literal numbers,
 or else the field code of a
 .B CONST
+or
+.B CARRAY
 field type containing the value.
 .RE
 .TP
@@ -662,6 +696,8 @@ field-name[n] = dividend / input[n].
 The dividend, if specified, may be either literal numbers, or else the field
 code of a
 .B CONST
+or
+.B CARRAY
 field type containing the value.
 .RE
 .TP
@@ -763,6 +799,8 @@ The
 .I sample-rate
 parameter may be either a literal number, or else the name of a
 .B CONST
+or
+.B CARRAY
 field type containing its values.
 .RE
 .TP
@@ -792,6 +830,8 @@ is omitted, it is assumed to be 1.  Both
 .IR first-bit " and " bits
 may be either literal numbers, or else the field code of a
 .B CONST
+or
+.B CARRAY
 field type containing their values.  The
 .B BIT
 field type is an unsigned version of this field type.
@@ -826,17 +866,35 @@ literal numbers or else the
 .I field code
 of a
 .B CONST
-field containing the value.  Parameters for which this is possible are indicated
-above.  Since it is possible to create a field code which is identical to a
-literal number, a parameter is assumed to be the field code of a 
-.B CONST
-field only if the entire token cannot be parsed as a literal number using the
-rules outlined in
+field containing the value, or the
+.I field code
+of a
+.B CARRAY
+followed by a left angle bracket
+.RI ( < ),
+then an non-negative integer used as the
+.B CARRAY
+element index, then a right angle bracket
+.RI ( > ),
+that is:
+.IP
+.IB field_code < n >
+.PP
+Parameters which allow non-literal values are indicated above.  If the angle
+brackets and element index are omitted from a
+.B CARRAY
+field code used as a parameter, the first element in the field (index zero) is
+assumed.
+
+Since it is possible to create a field code which is identical to a literal
+number, a parameter is assumed to be the field code of a scalar field only if
+the entire token cannot be parsed as a literal number using the rules outlined
+in
 .BR strtod (3).
-(So, for example, a
+For example, a
 .B CONST
 field whose field code consists solely of digits can never be used as a
-parameter in a field specification line.)
+parameter in a field specification line.
 
 A literal complex number is specified as two real (floating point) numbers
 separated by a semicolon
@@ -871,9 +929,8 @@ specification:
 0;1 0
 
 .SS Field Codes
-When specifying the input to a field, either as a
-.B CONST
-scalar parameter, or as an input vector field to a
+When specifying the input to a field, either as a scalar parameter, or as an
+input vector field to a
 .RB non- RAW
 vector field,
 .I field codes
@@ -943,10 +1000,10 @@ would be.)
 
 This document describes Version 8 of the Dirfile Standards.
 
-Version 8 of the Standards (October 2010) added the
-.B DIVIDE
+Version 8 of the Standards (November 2010) added the
+.BR DIVIDE ", " RECIP ,
 and
-.B RECIP
+.B CARRAY
 field types, made the forward slash on reserved words mandatory, and prohibited
 using the single character data type aliases in the specification of
 .B RAW

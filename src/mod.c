@@ -48,14 +48,15 @@ static unsigned int max(unsigned int A, unsigned int B)
  * 0b a    0    01    -> do nothing         ()
  */
 static int _GD_AlterScalar(DIRFILE* D, int alter_literal, gd_type_t type,
-    void* lout, const void* lin, char** sout, const char *sin, int calculated)
+    void *lout, const void *lin, char **sout, int *iout, const char *sin,
+    int iin, int calculated)
 {
   int r = 0;
   int set_lout = 0;
   int error = 0;
 
-  dtrace("%p, %i, %x, %p, %p, %p, \"%s\", %i", D, alter_literal, type, lout,
-      lin, sout, sin, calculated);
+  dtrace("%p, %i, %x, %p, %p, %p, %p, \"%s\", %i, %i", D, alter_literal, type,
+      lout, lin, sout, iout, sin, iin, calculated);
 
   if (sin == NULL) {
     if (*sout != NULL) {
@@ -93,6 +94,7 @@ static int _GD_AlterScalar(DIRFILE* D, int alter_literal, gd_type_t type,
     *sout = strdup(sin);
     if (*sout == NULL)
       _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    *iout = iin;
   }
 
   if (!error && set_lout) {
@@ -200,6 +202,8 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
   int field_free = 0;
   int scalar_free = 0;
   int modified = 0;
+  size_t n;
+  gd_type_t type;
   void *ptr;
   gd_entry_t *E = NULL;
   gd_entry_t Q;
@@ -230,8 +234,8 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
   switch(E->field_type) {
     case GD_RAW_ENTRY:
       j = _GD_AlterScalar(D, N->EN(raw,spf) && N->EN(raw,spf) != E->EN(raw,spf),
-          GD_UINT16, &Q.EN(raw,spf), &N->EN(raw,spf), Q.scalar + 0,
-          N->scalar[0], E->e->calculated);
+          GD_UINT16, &Q.EN(raw,spf), &N->EN(raw,spf), Q.scalar, Q.scalar_ind,
+          N->scalar[0], N->scalar_ind[0], E->e->calculated);
       
       if (j & GD_AS_ERROR)
         break;
@@ -430,13 +434,14 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
           if (N->comp_scal) {
             j = _GD_AlterScalar(D, !_gd_ccmpc(E->EN(lincom,cm)[i],
                   N->EN(lincom,cm)[i]), GD_COMPLEX128, Q.EN(lincom,cm) + i,
-                N->EN(lincom,cm) + i, Q.scalar + i, N->scalar[i],
-                E->e->calculated);
+                N->EN(lincom,cm) + i, Q.scalar + i, Q.scalar_ind + i,
+                N->scalar[i], N->scalar_ind[i], E->e->calculated);
             Q.EN(lincom,m)[i] = creal(Q.EN(lincom,cm)[i]);
           } else {
             j = _GD_AlterScalar(D, E->EN(lincom,m)[i] != N->EN(lincom,m)[i],
                 GD_FLOAT64, Q.EN(lincom,m) + i, N->EN(lincom,m) + i,
-                Q.scalar + i, N->scalar[i], E->e->calculated);
+                Q.scalar + i, Q.scalar_ind + i, N->scalar[i], N->scalar_ind[i],
+                E->e->calculated);
             _gd_r2c(Q.EN(lincom,cm)[i], Q.EN(lincom,m)[i]);
           }
 
@@ -455,12 +460,14 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
             j = _GD_AlterScalar(D, !_gd_ccmpc(E->EN(lincom,cb)[i],
                   N->EN(lincom,cb)[i]), GD_COMPLEX128, Q.EN(lincom,cb) + i,
                 N->EN(lincom,cb) + i, Q.scalar + i + GD_MAX_LINCOM,
-                N->scalar[i +  GD_MAX_LINCOM], E->e->calculated);
+                Q.scalar_ind + i + GD_MAX_LINCOM, N->scalar[i +  GD_MAX_LINCOM],
+                N->scalar_ind[i + GD_MAX_LINCOM], E->e->calculated);
             Q.EN(lincom,b)[i] = creal(Q.EN(lincom,cb)[i]);
           } else {
             j = _GD_AlterScalar(D, E->EN(lincom,b)[i] != N->EN(lincom,b)[i],
                 GD_FLOAT64, Q.EN(lincom,b) + i, N->EN(lincom,b) + i,
-                Q.scalar + i + GD_MAX_LINCOM, N->scalar[i + GD_MAX_LINCOM],
+                Q.scalar + i + GD_MAX_LINCOM, Q.scalar_ind + i + GD_MAX_LINCOM,
+                N->scalar[i + GD_MAX_LINCOM], N->scalar_ind[i + GD_MAX_LINCOM],
                 E->e->calculated);
             _gd_r2c(Q.EN(lincom,cb)[i], Q.EN(lincom,b)[i]);
           }
@@ -531,7 +538,8 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
     case GD_SBIT_ENTRY:
       j = _GD_AlterScalar(D, N->EN(bit,numbits) >= 1 && E->EN(bit,numbits) !=
           N->EN(bit,numbits), GD_INT16, &Q.EN(bit,numbits), &N->EN(bit,numbits),
-          Q.scalar + 1, N->scalar[1], E->e->calculated);
+          Q.scalar + 1, Q.scalar_ind + 1, N->scalar[1], N->scalar_ind[1],
+          E->e->calculated);
 
       if (j & GD_AS_ERROR)
         break;
@@ -544,7 +552,8 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
 
       j = _GD_AlterScalar(D, N->EN(bit,bitnum) >= 0 && E->EN(bit,bitnum) !=
           N->EN(bit,bitnum), GD_INT16, &Q.EN(bit,bitnum), &N->EN(bit,bitnum),
-          Q.scalar + 0, N->scalar[0], E->e->calculated);
+          Q.scalar, Q.scalar_ind, N->scalar[0], N->scalar_ind[0],
+          E->e->calculated);
 
       if (j & GD_AS_ERROR)
         break;
@@ -600,15 +609,16 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
       if (N->comp_scal) {
         j = _GD_AlterScalar(D, !_gd_ccmpc(E->EN(recip,cdividend),
               N->EN(recip,cdividend)), GD_COMPLEX128, &Q.EN(recip,cdividend),
-            &(N->EN(recip,cdividend)), Q.scalar, N->scalar[0],
-            E->e->calculated);
+            &(N->EN(recip,cdividend)), Q.scalar, Q.scalar_ind, N->scalar[0],
+            N->scalar_ind[0], E->e->calculated);
         Q.EN(recip,dividend) = creal(Q.EN(recip,cdividend));
         if (cimag(Q.EN(recip,cdividend)) != 0)
           Q.comp_scal = 1;
       } else {
         j = _GD_AlterScalar(D, E->EN(recip,dividend) != N->EN(recip,dividend),
             GD_FLOAT64, &Q.EN(recip,dividend), &(N->EN(recip,dividend)),
-            Q.scalar, N->scalar[0], E->e->calculated);
+            Q.scalar, Q.scalar_ind, N->scalar[0], N->scalar_ind[0],
+            E->e->calculated);
         _gd_r2c(Q.EN(recip,cdividend), Q.EN(recip,dividend));
       }
 
@@ -627,8 +637,8 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
       break;
     case GD_PHASE_ENTRY:
       j = _GD_AlterScalar(D, E->EN(phase,shift) != N->EN(phase,shift), GD_INT64,
-          &Q.EN(phase,shift), &N->EN(phase,shift), Q.scalar + 0, N->scalar[0],
-          E->e->calculated);
+          &Q.EN(phase,shift), &N->EN(phase,shift), Q.scalar, Q.scalar_ind,
+          N->scalar[0], N->scalar_ind[0], E->e->calculated);
 
       if (j & GD_AS_ERROR)
         break;
@@ -671,13 +681,14 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
           if (N->comp_scal) {
             j = _GD_AlterScalar(D, !_gd_ccmpc(E->EN(polynom,ca)[i],
                   N->EN(polynom,ca)[i]), GD_COMPLEX128, Q.EN(polynom,ca) + i,
-                N->EN(polynom,ca) + i, Q.scalar + i, N->scalar[i],
-                E->e->calculated);
+                N->EN(polynom,ca) + i, Q.scalar + i, Q.scalar_ind + i,
+                N->scalar[i], N->scalar_ind[i], E->e->calculated);
             Q.EN(polynom,a)[i] = creal(Q.EN(polynom,ca)[i]);
           } else {
             j = _GD_AlterScalar(D, E->EN(polynom,a)[i] != N->EN(polynom,a)[i],
                 GD_FLOAT64, Q.EN(polynom,a) + i, N->EN(polynom,a) + i,
-                Q.scalar + i, N->scalar[i], E->e->calculated);
+                Q.scalar + i, Q.scalar_ind + i, N->scalar[i], N->scalar_ind[i],
+                E->e->calculated);
             _gd_r2c(Q.EN(polynom,ca)[i], Q.EN(polynom,a)[i]);
           }
 
@@ -708,43 +719,90 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
         return -1;
       }
 
-      if (Q.EN(cons,const_type) != E->EN(cons,const_type)) {
+      type = _GD_ConstType(D, Q.EN(cons,const_type));
+      if (Q.EN(cons,const_type) != E->EN(cons,const_type)) 
         modified = 1; 
+
+      if (type == _GD_ConstType(D, E->EN(cons,const_type))) {
+        Qe.EN(cons,d) = E->e->EN(cons,d);
+        E->e->EN(cons,d) = NULL;
+      } else {
         /* type convert */
-        if (Q.EN(cons,const_type) & GD_COMPLEX)
-#ifdef GD_NO_C99_API
-          Qe.EN(cons.d,c)[0] = (E->EN(cons,const_type) & GD_COMPLEX) ?
-            E->e->EN(cons.d,c)[0] : (E->EN(cons,const_type) & GD_IEEE754) ?
-            E->e->EN(cons.d,d) : (E->EN(cons,const_type) & GD_SIGNED) ?
-            (double)E->e->EN(cons.d,i) : (double)E->e->EN(cons.d,u);
-          Qe.EN(cons.d,c)[1] = (E->EN(cons,const_type) & GD_COMPLEX) ?
-            E->e->EN(cons.d,c)[1] : 0;
-#else
-          Qe.EN(cons.d,c) = (E->EN(cons,const_type) & GD_COMPLEX) ?
-            E->e->EN(cons.d,c) : (E->EN(cons,const_type) & GD_IEEE754) ?
-            (double complex)E->e->EN(cons.d,d) :
-            (E->EN(cons,const_type) & GD_SIGNED) ?
-            (double complex)E->e->EN(cons.d,i) :
-            (double complex)E->e->EN(cons.d,u);
-#endif
-        if (Q.EN(cons,const_type) & GD_IEEE754)
-          Qe.EN(cons.d,d) = (E->EN(cons,const_type) & GD_IEEE754) ?
-            E->e->EN(cons.d,d) : (E->EN(cons,const_type) & GD_COMPLEX) ?
-            creal(E->e->EN(cons.d,c)) : (E->EN(cons,const_type) & GD_SIGNED) ?
-            (double)E->e->EN(cons.d,i) : (double)E->e->EN(cons.d,u);
-        else if (Q.EN(cons,const_type) & GD_SIGNED)
-          Qe.EN(cons.d,i) = (E->EN(cons,const_type) & GD_IEEE754) ?
-            (int64_t)E->e->EN(cons.d,d) : (E->EN(cons,const_type) & GD_COMPLEX)
-            ? (int64_t)creal(E->e->EN(cons.d,c)) : (E->EN(cons,const_type) &
-                GD_SIGNED) ?  E->e->EN(cons.d,i) : (int64_t)E->e->EN(cons.d,u);
+        Qe.EN(cons,d) = malloc(GD_SIZE(type));
+        if (Qe.EN(cons,d) == NULL) {
+          _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+          dreturn("%i", -1);
+          return -1;
+        }
+        if (type == GD_COMPLEX128) {
+          *(double*)Qe.EN(cons,d) = (E->EN(cons,const_type) & GD_IEEE754) ?
+            *(double*)E->e->EN(cons,d) : (E->EN(cons,const_type) & GD_SIGNED) ?
+            (double)*(int64_t*)E->e->EN(cons,d) :
+            (double)*(uint64_t*)E->e->EN(cons,d);
+          ((double*)Qe.EN(cons,d))[1] = 0;
+        } else if (type == GD_IEEE754)
+          *(double*)Qe.EN(cons,d) = (E->EN(cons,const_type) & GD_COMPLEX) ?
+            *(double*)E->e->EN(cons,d) : (E->EN(cons,const_type) & GD_SIGNED) ?
+            (double)*(int64_t*)E->e->EN(cons,d) :
+            (double)*(uint64_t*)E->e->EN(cons,d);
+        else if (type == GD_INT64)
+          *(int64_t*)Qe.EN(cons,d) = (E->EN(cons,const_type) & (GD_COMPLEX |
+                GD_IEEE754)) ? (int64_t)*(double*)E->e->EN(cons,d) :
+            (int64_t)*(uint64_t*)E->e->EN(cons,d);
         else
-          Qe.EN(cons.d,u) = (E->EN(cons,const_type) & GD_IEEE754) ?
-            (uint64_t)E->e->EN(cons.d,d) : (E->EN(cons,const_type) &
-                GD_COMPLEX) ?  (uint64_t)creal(E->e->EN(cons.d,c)) :
-            (E->EN(cons,const_type) & GD_SIGNED) ?
-            (uint64_t)E->e->EN(cons.d,i) : E->e->EN(cons.d,u);
+          *(uint64_t*)Qe.EN(cons,d) = (E->EN(cons,const_type) & (GD_COMPLEX |
+                GD_IEEE754)) ? (uint64_t)*(double*)E->e->EN(cons,d) :
+            (uint64_t)*(int64_t*)E->e->EN(cons,d);
       }
 
+      break;
+    case GD_CARRAY_ENTRY:
+      Q.EN(cons,array_len) = (N->EN(cons,array_len) == 0) ?
+        E->EN(cons,array_len) : N->EN(cons,array_len);
+
+      Q.EN(cons,const_type) = (N->EN(cons,const_type) == GD_NULL) ?
+        E->EN(cons,const_type) : N->EN(cons,const_type);
+
+      if (Q.EN(cons,const_type) & 0x40 || GD_SIZE(Q.EN(cons,const_type)) == 0) {
+        _GD_SetError(D, GD_E_BAD_TYPE, Q.EN(cons,const_type), NULL, 0, NULL);
+        dreturn("%i", -1);
+        return -1;
+      } else if (E->EN(cons,array_len) > GD_MAX_CARRAY_LENGTH) {
+        _GD_SetError(D, GD_E_BOUNDS, 0, NULL, 0, NULL);
+        dreturn("%i", -1);
+        return -1;
+      }
+
+      if (Q.EN(cons,const_type) != E->EN(cons,const_type) ||
+          Q.EN(cons,array_len) != E->EN(cons,array_len))
+      {
+        modified = 1; 
+      }
+
+      type = _GD_ConstType(D, Q.EN(cons,const_type));
+      Qe.EN(cons,d) = malloc(GD_SIZE(type) * Q.EN(cons,array_len));
+      if (Qe.EN(cons,d) == NULL) {
+        _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+        dreturn("%i", -1);
+        return -1;
+      }
+
+      /* copy via type conversion, if array_len has increased, trailing elements
+       * are uninitialised. */
+      n = E->EN(cons,array_len);
+      if (n > Q.EN(cons,array_len))
+        n = Q.EN(cons,array_len);
+
+      _GD_ConvertType(D, E->e->EN(cons,d), _GD_ConstType(D,
+            E->EN(cons,const_type)), Qe.EN(cons,d), type, n);
+
+      if (D->error) {
+        free(Qe.EN(cons,d));
+        dreturn("%i", -1);
+        return -1;
+      }
+
+      free(E->e->EN(cons,d));
       break;
     case GD_INDEX_ENTRY:
       /* INDEX may not be modified */
@@ -1231,6 +1289,30 @@ int gd_alter_const(DIRFILE* D, const char* field_code, gd_type_t const_type)
   return ret;
 }
 
+int gd_alter_carray(DIRFILE* D, const char* field_code, gd_type_t const_type,
+    size_t array_len) gd_nothrow
+{
+  gd_entry_t N;
+
+  dtrace("%p, \"%s\", 0x%x, %zu", D, field_code, const_type, array_len);
+
+  if (D->flags & GD_INVALID) {
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  N.field_type = GD_CARRAY_ENTRY;
+  N.EN(cons,const_type) = const_type;
+  N.EN(cons,array_len) = array_len;
+  N.e = NULL;
+
+  int ret = _GD_Change(D, field_code, &N, 0);
+
+  dreturn("%i", ret);
+  return ret;
+}
+
 int gd_alter_polynom(DIRFILE* D, const char* field_code, int poly_ord,
     const char* in_field, const double* a) gd_nothrow
 {
@@ -1345,8 +1427,8 @@ int gd_alter_cpolynom(DIRFILE* D, const char* field_code, int poly_ord,
 
 int gd_alter_spec(DIRFILE* D, const char* line, int move)
 {
-  char instring[GD_MAX_LINE_LENGTH];
-  char outstring[GD_MAX_LINE_LENGTH];
+  const char *tok_pos = NULL;
+  char *outstring = NULL;
   char *in_cols[MAX_IN_COLS];
   int n_cols;
   int standards = GD_DIRFILE_STANDARDS_VERSION;
@@ -1369,10 +1451,6 @@ int gd_alter_spec(DIRFILE* D, const char* line, int move)
 
   _GD_ClearError(D);
 
-  /* we do this to ensure line is not too long */
-  strncpy(instring, line, GD_MAX_LINE_LENGTH - 1);
-  instring[GD_MAX_LINE_LENGTH - 2] = '\0';
-
   if (~D->flags & GD_HAVE_VERSION)
     _GD_FindVersion(D);
 
@@ -1380,16 +1458,18 @@ int gd_alter_spec(DIRFILE* D, const char* line, int move)
     standards = D->standards;
 
   /* start parsing */
-  n_cols = _GD_Tokenise(D, instring, outstring, in_cols,
+  n_cols = _GD_Tokenise(D, line, &outstring, &tok_pos, in_cols,
       "dirfile_alter_spec()", 0, standards, D->flags & GD_PERMISSIVE);
 
   if (D->error) {
+    free(outstring);
     dreturn("%i", -1); /* tokeniser threw an error */
     return -1;
   }
 
   /* Sanity check */
   if (n_cols == 0) {
+    free(outstring);
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_TOK, "dirfile_alter_spec()", 0,
         NULL);
     dreturn("%i", -1);
@@ -1399,6 +1479,7 @@ int gd_alter_spec(DIRFILE* D, const char* line, int move)
   N = _GD_FindField(D, in_cols[0], D->entry, D->n_entries, NULL);
 
   if (N == NULL) {
+    free(outstring);
     _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, in_cols[0]);
     dreturn("%i", -1);
     return -1;
@@ -1406,7 +1487,9 @@ int gd_alter_spec(DIRFILE* D, const char* line, int move)
 
   /* Let the parser compose the entry */
   N = _GD_ParseFieldSpec(D, n_cols, in_cols, NULL, "dirfile_alter_spec()", 0, 
-      N->fragment_index, standards, 0, 1, 0);
+      N->fragment_index, standards, 0, 1, 0, &outstring, tok_pos);
+
+  free(outstring);
 
   if (D->error) {
     dreturn("%i", -1); /* field spec parser threw an error */
@@ -1427,8 +1510,8 @@ int gd_alter_spec(DIRFILE* D, const char* line, int move)
 
 int gd_malter_spec(DIRFILE* D, const char* line, const char* parent, int move)
 {
-  char instring[GD_MAX_LINE_LENGTH];
-  char outstring[GD_MAX_LINE_LENGTH];
+  char *outstring = NULL;
+  const char *tok_pos;
   char *in_cols[MAX_IN_COLS];
   int n_cols;
   int standards = GD_DIRFILE_STANDARDS_VERSION;
@@ -1458,10 +1541,6 @@ int gd_malter_spec(DIRFILE* D, const char* line, const char* parent, int move)
     return -1;
   }
 
-  /* we do this to ensure line is not too long */
-  strncpy(instring, line, GD_MAX_LINE_LENGTH - 1);
-  instring[GD_MAX_LINE_LENGTH - 2] = '\0';
-
   if (~D->flags & GD_HAVE_VERSION)
     _GD_FindVersion(D);
 
@@ -1469,17 +1548,15 @@ int gd_malter_spec(DIRFILE* D, const char* line, const char* parent, int move)
     standards = D->standards;
 
   /* start parsing */
-  n_cols = _GD_Tokenise(D, instring, outstring, in_cols,
+  n_cols = _GD_Tokenise(D, line, &outstring, &tok_pos, in_cols,
       "dirfile_malter_spec()", 0, standards, D->flags & GD_PERMISSIVE);
 
-  if (D->error) {
-    dreturn("%i", -1); /* tokeniser threw an error */
-    return -1;
-  }
+  if (!D->error)
+    /* Let the parser compose the entry */
+    N = _GD_ParseFieldSpec(D, n_cols, in_cols, N, "dirfile_malter_spec()", 0,
+        N->fragment_index, standards, 0, 1, 0, &outstring, tok_pos);
 
-  /* Let the parser compose the entry */
-  N = _GD_ParseFieldSpec(D, n_cols, in_cols, N, "dirfile_malter_spec()", 0,
-      N->fragment_index, standards, 0, 1, 0);
+  free(outstring);
 
   if (D->error) {
     dreturn("%i", -1); /* field spec parser threw an error */

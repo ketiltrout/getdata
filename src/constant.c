@@ -66,6 +66,131 @@ int gd_get_constant(DIRFILE* D, const char *field_code_in,
   return 0;
 }
 
+int gd_get_carray_slice(DIRFILE* D, const char *field_code_in,
+    unsigned int start, size_t n, gd_type_t return_type, void *data_out)
+gd_nothrow
+{
+  gd_entry_t *entry;
+  char* field_code;
+  int repr;
+
+  dtrace("%p, \"%s\", %i, %zi, 0x%x, %p", D, field_code_in, (int)start, n,
+      return_type, data_out);
+
+  if (D->flags & GD_INVALID) {
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  _GD_ClearError(D);
+
+  entry = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1);
+    
+  if (D->error) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  if (entry->field_type != GD_CARRAY_ENTRY)
+    _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
+  else if (start + n > entry->EN(cons,array_len))
+    _GD_SetError(D, GD_E_BOUNDS, 0, NULL, 0, NULL);
+  else if (!D->error)
+    _GD_DoField(D, entry, repr, start, n, return_type, data_out);
+
+  if (field_code != field_code_in)
+    free(field_code);
+
+  if (D->error) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  dreturn("%i", 0);
+  return 0;
+}
+
+int gd_get_carray(DIRFILE *D, const char *field_code_in, gd_type_t return_type,
+    void *data_out) gd_nothrow
+{
+  gd_entry_t *entry;
+  char* field_code;
+  int repr;
+
+  dtrace("%p, \"%s\", 0x%x, %p", D, field_code_in, return_type, data_out);
+
+  if (D->flags & GD_INVALID) {
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  _GD_ClearError(D);
+
+  entry = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1);
+    
+  if (D->error) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  if (entry->field_type != GD_CARRAY_ENTRY)
+    _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
+  else if (!D->error)
+    _GD_DoField(D, entry, repr, 0, entry->EN(cons,array_len), return_type,
+        data_out);
+
+  if (field_code != field_code_in)
+    free(field_code);
+
+  if (D->error) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  dreturn("%i", 0);
+  return 0;
+}
+
+size_t gd_carray_len(DIRFILE *D, const char *field_code_in) gd_nothrow
+{
+  gd_entry_t *entry;
+  char* field_code;
+  int repr;
+
+  dtrace("%p, \"%s\"", D, field_code_in);
+
+  if (D->flags & GD_INVALID) {
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  _GD_ClearError(D);
+
+  entry = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1);
+    
+  if (D->error) {
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  if (entry->field_type != GD_CARRAY_ENTRY)
+    _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
+
+  if (field_code != field_code_in)
+    free(field_code);
+
+  if (D->error) {
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  dreturn("%zu", entry->EN(cons,array_len));
+  return entry->EN(cons,array_len);
+}
+
 /* this function is little more than a public boilerplate for _GD_DoFieldOut */
 int gd_put_constant(DIRFILE* D, const char *field_code_in, gd_type_t data_type,
     const void *data_in) gd_nothrow
@@ -101,7 +226,126 @@ int gd_put_constant(DIRFILE* D, const char *field_code_in, gd_type_t data_type,
   if (entry->field_type != GD_CONST_ENTRY)
     _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
   else 
-    _GD_DoFieldOut(D, entry, repr, 0, 0, data_type, data_in);
+    _GD_DoFieldOut(D, entry, repr, 0, 1, data_type, data_in);
+
+  if (field_code != field_code_in)
+    free(field_code);
+
+  if (D->error) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  /* Flag all clients as needing recalculation */
+  for (i = 0; i < entry->e->EN(cons,n_client); ++i)
+    entry->e->EN(cons,client)[i]->e->calculated = 0;
+
+  /* Clear the client list */
+  free(entry->e->EN(cons,client));
+  entry->e->EN(cons,client) = NULL;
+  entry->e->EN(cons,n_client) = 0;
+
+  dreturn("%i", 0);
+  return 0;
+}
+
+int gd_put_carray_slice(DIRFILE* D, const char *field_code_in,
+    unsigned int first, size_t n, gd_type_t data_type, const void *data_in)
+gd_nothrow
+{
+  int i;
+  gd_entry_t *entry;
+  int repr;
+  char* field_code;
+
+  dtrace("%p, \"%s\", %i, %zu, 0x%x, %p", D, field_code_in, first, n, data_type,
+      data_in);
+
+  if (D->flags & GD_INVALID) {
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  if ((D->flags & GD_ACCMODE) != GD_RDWR) {
+    _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  _GD_ClearError(D);
+
+  entry = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1);
+
+  if (D->error) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  if (entry->field_type != GD_CARRAY_ENTRY)
+    _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
+  else if (first + n > entry->EN(cons,array_len))
+    _GD_SetError(D, GD_E_BOUNDS, 0, NULL, 0, NULL);
+  else 
+    _GD_DoFieldOut(D, entry, repr, first, n, data_type, data_in);
+
+  if (field_code != field_code_in)
+    free(field_code);
+
+  if (D->error) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  /* Flag all clients as needing recalculation */
+  for (i = 0; i < entry->e->EN(cons,n_client); ++i)
+    entry->e->EN(cons,client)[i]->e->calculated = 0;
+
+  /* Clear the client list */
+  free(entry->e->EN(cons,client));
+  entry->e->EN(cons,client) = NULL;
+  entry->e->EN(cons,n_client) = 0;
+
+  dreturn("%i", 0);
+  return 0;
+}
+
+int gd_put_carray(DIRFILE* D, const char *field_code_in, gd_type_t data_type,
+    const void *data_in) gd_nothrow
+{
+  int i;
+  gd_entry_t *entry;
+  int repr;
+  char* field_code;
+
+  dtrace("%p, \"%s\", 0x%x, %p", D, field_code_in, data_type, data_in);
+
+  if (D->flags & GD_INVALID) {
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  if ((D->flags & GD_ACCMODE) != GD_RDWR) {
+    _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  _GD_ClearError(D);
+
+  entry = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1);
+
+  if (D->error) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  if (entry->field_type != GD_CARRAY_ENTRY)
+    _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
+  else 
+    _GD_DoFieldOut(D, entry, repr, 0, entry->EN(cons,array_len), data_type,
+        data_in);
 
   if (field_code != field_code_in)
     free(field_code);

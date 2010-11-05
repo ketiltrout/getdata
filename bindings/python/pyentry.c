@@ -41,6 +41,7 @@ static const char* gdpy_entry_type_names[] =
   NULL,             /* 0x0F - unused */
   "CONST_ENTRY",    /* 0x10 */
   "STRING_ENTRY",   /* 0x11 */
+  "CARRAY_ENTRY",   /* 0x12 */
 };
 
 /* Entry */
@@ -139,6 +140,7 @@ static void gdpy_set_entry_from_tuple(gd_entry_t *E, PyObject* tuple,
     case GD_RECIP_ENTRY:
     case GD_PHASE_ENTRY:
     case GD_POLYNOM_ENTRY:
+    case GD_CARRAY_ENTRY:
       min = 2;
       break;
     case GD_LINCOM_ENTRY:
@@ -372,6 +374,9 @@ static void gdpy_set_entry_from_tuple(gd_entry_t *E, PyObject* tuple,
         }
       }
       break;
+    case GD_CARRAY_ENTRY:
+      E->array_len = (size_t)PyLong_AsUnsignedLong(PyTuple_GetItem(tuple, 1));
+      /* fallthrough */
     case GD_CONST_ENTRY:
       E->const_type = (gd_type_t)PyInt_AsLong(PyTuple_GetItem(tuple, 0));
       if (GDPY_INVALID_TYPE(E->const_type))
@@ -408,6 +413,7 @@ static void gdpy_set_entry_from_dict(gd_entry_t *E, PyObject* parms,
    * RECIP:    in_field, dividend          = 2
    * POLYNOM:  in_field, a                 = 2
    * CONST:    type                        = 1
+   * CARRAY:   type, array_len             = 2
    * STRING:   (none)                      = 0
    * INDEX:    (none)                      = 0
    */
@@ -459,6 +465,11 @@ static void gdpy_set_entry_from_dict(gd_entry_t *E, PyObject* parms,
     case GD_POLYNOM_ENTRY:
       key[0] = "in_field";
       key[1] = "a";
+      size = 2;
+      break;
+    case GD_CARRAY_ENTRY:
+      key[0] = "type";
+      key[1] = "array_len";
       size = 2;
       break;
     case GD_CONST_ENTRY:
@@ -519,7 +530,7 @@ static int gdpy_entry_init(struct gdpy_entry_t* self, PyObject *args,
   }
 
   /* check for valid field type */
-  if (E.field_type > 0x11 || E.field_type <= 0 ||
+  if (E.field_type > 0x12 || E.field_type <= 0 ||
       gdpy_entry_type_names[E.field_type] == NULL) {
     PyErr_SetString(PyExc_ValueError,
         "'pygetdata.entry.__init__' invalid entry type");
@@ -674,6 +685,7 @@ static PyObject* gdpy_entry_getinfields(struct gdpy_entry_t* self,
     case GD_RAW_ENTRY:
     case GD_INDEX_ENTRY:
     case GD_CONST_ENTRY:
+    case GD_CARRAY_ENTRY:
     case GD_STRING_ENTRY:
       PyErr_Format(PyExc_AttributeError, "'pygetdata.entry' "
           "attribute 'in_fields' not available for entry type %s",
@@ -782,6 +794,7 @@ static int gdpy_entry_setinfields(struct gdpy_entry_t* self, PyObject *value,
     case GD_RAW_ENTRY:
     case GD_INDEX_ENTRY:
     case GD_CONST_ENTRY:
+    case GD_CARRAY_ENTRY:
     case GD_STRING_ENTRY:
       PyErr_Format(PyExc_AttributeError, "'pygetdata.entry' "
           "attribute 'in_fields' not available for entry type %s",
@@ -805,7 +818,8 @@ static PyObject* gdpy_entry_getdatatypename(struct gdpy_entry_t* self,
 
   if (self->E->field_type == GD_RAW_ENTRY)
     t = self->E->data_type;
-  else if (self->E->field_type == GD_CONST_ENTRY)
+  else if (self->E->field_type == GD_CONST_ENTRY ||
+      self->E->field_type == GD_CARRAY_ENTRY)
     t = self->E->const_type;
   else
     PyErr_Format(PyExc_AttributeError, "'pygetdata.entry' "
@@ -832,7 +846,8 @@ static PyObject* gdpy_entry_getdatatype(struct gdpy_entry_t* self,
 
   if (self->E->field_type == GD_RAW_ENTRY)
     obj = PyInt_FromLong(self->E->data_type);
-  else if (self->E->field_type == GD_CONST_ENTRY)
+  else if (self->E->field_type == GD_CONST_ENTRY ||
+      self->E->field_type == GD_CARRAY_ENTRY)
     obj = PyInt_FromLong(self->E->const_type);
   else
     PyErr_Format(PyExc_AttributeError, "'pygetdata.entry' "
@@ -849,7 +864,8 @@ static int gdpy_entry_setdatatype(struct gdpy_entry_t* self, PyObject *value,
   dtrace("%p, %p, %p", self, value, closure);
 
   if (self->E->field_type != GD_RAW_ENTRY &&
-      self->E->field_type != GD_CONST_ENTRY)
+      self->E->field_type != GD_CONST_ENTRY &&
+      self->E->field_type != GD_CARRAY_ENTRY)
   {
     PyErr_Format(PyExc_AttributeError, "'pygetdata.entry' "
         "attribute 'data_type' not available for entry type %s",
@@ -928,6 +944,52 @@ static int gdpy_entry_setspf(struct gdpy_entry_t* self, PyObject *value,
   free(self->E->scalar[0]);
   self->E->scalar[0] = scalar;
   self->E->spf = spf;
+
+  dreturn("%i", 0);
+  return 0;
+}
+
+static PyObject* gdpy_entry_getarraylen(struct gdpy_entry_t* self,
+    void* closure)
+{
+  PyObject* obj = NULL;
+
+  dtrace("%p, %p", self, closure);
+
+  if (self->E->field_type == GD_CARRAY_ENTRY)
+      obj = PyLong_FromUnsignedLong(self->E->array_len);
+  else
+    PyErr_Format(PyExc_AttributeError, "'pygetdata.entry' "
+        "attribute 'array_len' not available for entry type %s",
+        gdpy_entry_type_names[self->E->field_type]); 
+
+  dreturn("%p", obj);
+  return obj;
+}
+
+static int gdpy_entry_setarraylen(struct gdpy_entry_t* self, PyObject *value,
+    void *closure)
+{
+  size_t array_len;
+
+  dtrace("%p, %p, %p", self, value, closure);
+
+  if (self->E->field_type != GD_CARRAY_ENTRY) {
+    PyErr_Format(PyExc_AttributeError, "'pygetdata.entry' "
+        "attribute 'array_len' not available for entry type %s",
+        gdpy_entry_type_names[self->E->field_type]); 
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  array_len = PyLong_AsUnsignedLong(value);
+
+  if (PyErr_Occurred()) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  self->E->array_len = array_len;
 
   dreturn("%i", 0);
   return 0;
@@ -1598,6 +1660,9 @@ static PyObject* gdpy_entry_getparms(struct gdpy_entry_t* self, void* closure)
     case GD_CONST_ENTRY:
       tuple = Py_BuildValue("(i)", self->E->const_type);
       break;
+    case GD_CARRAY_ENTRY:
+      tuple = Py_BuildValue("(iI)", self->E->const_type, self->E->array_len);
+      break;
     case GD_RAW_ENTRY:
       tuple = Py_BuildValue("(iI)", self->E->data_type, self->E->spf);
       break;
@@ -1733,6 +1798,9 @@ static PyGetSetDef gdpy_entry_getset[] = {
       "attribute will not result in a change in the polynomial order.  To\n"
       "do that, modify the poly_ord attribute directly.\n",
     NULL },
+  { "array_len", (getter)gdpy_entry_getarraylen, (setter)gdpy_entry_setarraylen,
+    "The length of a CARRAY scalar field.\n",
+    NULL },
   { "b", (getter)gdpy_entry_getb, (setter)gdpy_entry_setb,
     "The LINCOM offset terms.  A tuple of numerical and/or string data.\n"
       "If a CONST scalar is used as an offset, the corresponding element of\n"
@@ -1847,7 +1915,7 @@ static PyGetSetDef gdpy_entry_getset[] = {
       "it will be the number itself.",
     NULL },
   { "spf", (getter)gdpy_entry_getspf, (setter)gdpy_entry_setspf,
-    "The number of sample per frame of the data on disk for a RAW field.\n"
+    "The number of samples per frame of the data on disk for a RAW field.\n"
       "If this is specified using a CONST scalar field, this will be the\n"
       "field code of that field, otherwise, it will be the number itself.",
     NULL },

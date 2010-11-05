@@ -156,3 +156,27 @@
 155 F9CIP gd_rewrite_fragment
 156 F9CIP gd_invalid_dirfile
 157 F9CIP gd_dirfile_standards
+158 F9CIP gd_get_carray
+159 F9CIP gd_get_carray_slice (INT8)
+160 .9... gd_get_carray_slice (INT16)
+161 .9... gd_get_carray_slice (INT32)
+162 .9..P gd_get_carray_slice (INT64)
+163 .9... gd_get_carray_slice (FLOAT32)
+164 .9..P gd_get_carray_slice (FLOAT64)
+165 .9... gd_get_carray_slice (COMPLEX64)
+166 .9..P gd_get_carray_slice (COMPLEX128)
+167 ..C_P gd_carrays
+168 F9CIP gd_put_carray
+169 F9CIP gd_put_carray_slice (INT8)
+170 .9... gd_put_carray_slice (INT16)
+171 .9..P gd_put_carray_slice (INT32)
+172 .9..P gd_put_carray_slice (INT64)
+173 .9... gd_put_carray_slice (FLOAT32)
+174 .9..P gd_put_carray_slice (FLOAT64)
+175 .9... gd_put_carray_slice (COMPLEX64)
+176 .9..P gd_put_carray_slice (COMPLEX128)
+177 F9CIP gd_carray_len
+178 F9CIP gd_entry (CARRAY)
+179 F9CIP gd_add_carray
+180 F9.IP gd_madd_carray
+181 F9CI. gd_alter_carray

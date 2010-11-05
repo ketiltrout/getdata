@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_alter_entry 3 "15 October 2010" "Version 0.7.0" "GETDATA"
+.TH gd_alter_entry 3 "3 November 2010" "Version 0.7.0" "GETDATA"
 .SH NAME
 gd_alter_entry \(em modify the metadata of a dirfile field
 .SH SYNOPSIS
@@ -132,12 +132,15 @@ All
 elements relevant for the given field type must be initialised to one of the
 following values:
 .IP \(bu 4
-a pointer to a field code indicating a new
-.B CONST
-field to be used for the corresponding field parameter.  If the parameter was
-previously a literal number, it will be replaced by the specified field code.
-If the parameter was previously a field code, the new field code will replace the
-old one.
+a pointer to a field code indicating a new scalar field to be used for the
+corresponding field parameter.  If the parameter was previously a literal
+number, it will be replaced by the specified field code.  If the parameter was
+previously a field code, the new field code will replace the old one.  If the
+field code specifies a
+.B CARRAY
+field, the corresponding
+.IR entry -> scalar_ind
+element should also be set.
 .IP \(bu 4
 a pointer the empty string ("").  In this case, no change is made to the field
 code for the corresponding field parameter: if one already existed, it is kept,
@@ -191,6 +194,8 @@ or an attempt was made to modify the immutable
 field.  This error may also result from attempting to dereference a scalar
 field code which does not indicate a
 .B CONST
+or
+.B CARRAY
 field.
 .TP
 .B GD_E_BAD_TYPE
@@ -202,6 +207,8 @@ entry, or the
 .IR entry -> const_type
 parameter provided with a
 .BR CONST
+or
+.BR CARRAY
 entry, was invalid.
 .TP
 .B GD_E_PROTECTED
@@ -238,15 +245,16 @@ a call to
 .BR gd_error_string (3).
 .SH SEE ALSO
 .BR gd_alter_bit (3),
-.BR gd_alter_clincom (3),
+.BR gd_alter_carray (3),
 .BR gd_alter_const (3),
-.BR gd_alter_cpolynom (3),
+.BR gd_alter_divide (3),
 .BR gd_alter_lincom (3),
 .BR gd_alter_linterp (3),
 .BR gd_alter_multiply (3),
 .BR gd_alter_phase (3),
 .BR gd_alter_polynom (3),
 .BR gd_alter_raw (3),
+.BR gd_alter_recip (3),
 .BR gd_alter_spec (3),
 .BR gd_delete (3),
 .BR gd_error (3),

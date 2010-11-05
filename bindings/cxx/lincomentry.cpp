@@ -107,12 +107,7 @@ int LincomEntry::SetScale(const char *scale, int index)
   if (index < 0 || index >= GD_MAX_LINCOM)
     return -1;
 
-  free(E.scalar[index]);
-
-  if (scale == NULL)
-    E.scalar[index] = NULL;
-  else
-    E.scalar[index] = strdup(scale);
+  SetScalar(index, scale);
 
   if (D != NULL) {
     r = gd_alter_entry(D->D, E.field, &E, 0);
@@ -162,12 +157,7 @@ int LincomEntry::SetOffset(const char *scale, int index)
   if (index < 0 || index >= GD_MAX_LINCOM)
     return -1;
 
-  free(E.scalar[index + GD_MAX_LINCOM]);
-
-  if (scale == NULL)
-    E.scalar[index + GD_MAX_LINCOM] = NULL;
-  else
-    E.scalar[index + GD_MAX_LINCOM] = strdup(scale);
+  SetScalar(index + GD_MAX_LINCOM, scale);
 
   if (D != NULL) {
     r = gd_alter_entry(D->D, E.field, &E, 0);
@@ -227,4 +217,12 @@ const char *LincomEntry::Scalar(int index) const
     return NULL;
 
   return E.scalar[index];
+}
+
+int LincomEntry::ScalarIndex(int index) const
+{
+  if (index < 0 || index >= E.u.lincom.n_fields)
+    return 0;
+
+  return E.scalar_ind[index];
 }

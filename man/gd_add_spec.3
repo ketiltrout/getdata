@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_add_spec 3 "21 July 2010" "Version 0.7.0" "GETDATA"
+.TH gd_add_spec 3 "4 November 2010" "Version 0.7.0" "GETDATA"
 .SH NAME
 gd_add_spec, gd_madd_spec \(em add a field to a dirfile
 .SH SYNOPSIS
@@ -94,6 +94,16 @@ argument was out of range.
 A syntax error was encountered in
 .IR line .
 .TP
+.B GD_E_LINE_TOO_LONG
+The supplied
+.I line
+was longer than the parser was able to deal with.  Lines are limited by the
+storage size of
+.BR ssize_t .
+On 32-bit systems, this limits
+.I line
+to 2**31 bytes.  The limit is larger on 64-bit systems.
+.TP
 .B GD_E_PROTECTED
 The metadata of the fragment was protected from change.  Or, the creation of a
 .B RAW
@@ -126,21 +136,28 @@ a call to
 .SH SEE ALSO
 .BR gd_add (3),
 .BR gd_add_bit (3),
+.BR gd_add_carray (3),
 .BR gd_add_const (3),
+.BR gd_add_divide (3),
 .BR gd_add_lincom (3),
 .BR gd_add_linterp (3),
 .BR gd_add_multiply (3),
 .BR gd_add_phase (3),
+.BR gd_add_recip (3),
 .BR gd_add_raw (3),
 .BR gd_error (3),
 .BR gd_error_string (3),
 .BR gd_madd (3),
 .BR gd_madd_bit (3),
+.BR gd_madd_carray (3),
 .BR gd_madd_const (3),
+.BR gd_madd_divide (3),
 .BR gd_madd_lincom (3),
 .BR gd_madd_linterp (3),
 .BR gd_madd_multiply (3),
 .BR gd_madd_phase (3),
+.BR gd_madd_polynom (3),
+.BR gd_madd_recip (3),
 .BR gd_madd_string (3),
 .BR gd_metaflush (3),
 .BR gd_open (3),

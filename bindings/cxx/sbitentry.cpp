@@ -84,15 +84,19 @@ const char *SBitEntry::Scalar(int index) const
   return E.scalar[index];
 }
 
+int SBitEntry::ScalarIndex(int index) const
+{
+  if (index != 0 && index != 1)
+    return 0;
+
+  return E.scalar_ind[index];
+}
+
 int SBitEntry::SetFirstBit(const char *first_bit)
 {
   int r = 0;
 
-  free(E.scalar[0]);
-  if (first_bit == NULL)
-    E.scalar[0] = NULL;
-  else
-    E.scalar[0] = strdup(first_bit);
+  SetScalar(0, first_bit);
 
   if (D != NULL) {
     r = gd_alter_entry(D->D, E.field, &E, 0);
@@ -108,11 +112,7 @@ int SBitEntry::SetNumBits(const char *num_bits)
 {
   int r = 0;
 
-  free(E.scalar[1]);
-  if (num_bits == NULL)
-    E.scalar[1] = NULL;
-  else
-    E.scalar[1] = strdup(num_bits);
+  SetScalar(1, num_bits);
 
   if (D != NULL) {
     r = gd_alter_entry(D->D, E.field, &E, 0);

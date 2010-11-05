@@ -33,7 +33,7 @@ form2   = "test_dirfile/form2"
 data    = "test_dirfile/data"
 
 flen    = 7
-nfields = 13
+nfields = 14
 nume    = 0
 
 spawn, "rm -rf " + filedir
@@ -41,8 +41,8 @@ file_mkdir, filedir
 
 datadata = bindgen(80) + 1
 
-fields = [ 'INDEX', 'bit', 'const', 'data', 'div', 'lincom', 'linterp', $
-  'mult', 'phase', 'polynom', 'recip', 'sbit', 'string' ]
+fields = [ 'INDEX', 'bit', 'carray', 'const', 'data', 'div', 'lincom', $
+  'linterp', 'mult', 'phase', 'polynom', 'recip', 'sbit', 'string' ]
 
 ; Write the test dirfile
 openw,1,format
@@ -53,6 +53,7 @@ printf,1,'/META data mstr STRING "This is a string constant."'
 printf,1,'/META data mconst CONST COMPLEX128 3.3;4.4'
 printf,1,'/META data mlut LINTERP DATA ./lut'
 printf,1,'const CONST FLOAT64 5.5'
+printf,1,'carray CARRAY FLOAT64 1.1 2.2 3.3 4.4 5.5 6.6'
 printf,1,'linterp LINTERP data /look/up/file'
 printf,1,'polynom POLYNOM data 1.1 2.2 2.2 3.3;4.4 const const'
 printf,1,'bit BIT data 3 4'
@@ -388,7 +389,7 @@ nume += check_simple2(38, 5, n, 4.3D)
 
 ;  125: gd_add
 n = {field: "new13", field_type: !GD.PHASE_ENTRY, fragment: 0, $
-  shift: -88L, in_fields: [ "new9" ], scalar: [ "" ]}
+  shift: -88L, in_fields: [ "new9" ], scalar: [ "" ], scalar_ind: [ 0 ]}
 gd_add, d, n
 nume += check_ok2(125, 1, d)
 
@@ -438,7 +439,7 @@ n = gd_vector_list(d)
 nume += check_ok(45, d)
 nume += check_simple(45, n, [ 'INDEX', 'bit', 'data', 'div', 'lincom', $
   'linterp', 'mult', 'new1', 'new10', 'new13', 'new2', 'new4', 'new6', 'new7', $
-  'new8', 'new9', 'phase', 'polynom', 'recip', 'sbit', 'string' ])
+  'new8', 'new9', 'phase', 'polynom', 'recip', 'sbit' ])
 
 ;  46: gd_madd_lincom
 gd_add_lincom, d, "mnew2", "in1", 9.9D, 8.8D, "in2", 7.7D, 6.6D, $
@@ -545,7 +546,7 @@ nume += check_simple2(55, 4, n.data_type, !GD.UINT64)
 
 ;  126: gd_madd
 n = {field: "mnew13", field_type: !GD.PHASE_ENTRY, fragment: 0, $
-  shift: 2L, in_fields: [ "in1" ], scalar: [ "" ]}
+  shift: 2L, in_fields: [ "in1" ], scalar: [ "" ], scalar_ind: [ 0 ]}
 gd_add, d, n, parent="data"
 nume += check_ok2(126, 1, d)
 
@@ -1021,6 +1022,91 @@ nume += check_simple(157, n, 8)
 n = gd_dirfile_standards(d, 0)
 nume += check_error2(157, 2, d, !GD.E_BAD_VERSION)
 
+;  158: gd_get_carray
+n = gd_get_carray(d, "carray", type=!GD.FLOAT32)
+nume += check_ok(158, d)
+nume += check_simple(158, n, [ 1.1, 2.2, 3.3, 4.4, 5.5, 6.6 ])
+
+;  159: gd_get_carray_slice
+n = gd_get_carray(d, "carray", type=!GD.FLOAT32, len=2, start=2)
+nume += check_ok(159, d)
+nume += check_simple(159, n, [ 3.3, 4.4 ])
+
+;  167: gd_carrays
+;  168: gd_put_carray
+m = [ 9.8, 8.7, 7.6, 6.5, 5.4, 4.3 ]
+gd_put_carray, d, "carray", m
+nume += check_ok(168, d)
+
+n = gd_get_carray(d, "carray", type=!GD.FLOAT32)
+nume += check_ok(168, d)
+nume += check_simple(168, n, m)
+
+;  169: gd_put_carray_slice
+gd_put_carray, d, "carray", [ 33, 34 ], start=2
+nume += check_ok(169, d)
+
+n = gd_get_carray(d, "carray", type=!GD.FLOAT32)
+nume += check_ok(169, d)
+nume += check_simple(169, n, [ 9.8, 8.7, 33., 34., 5.4, 4.3 ])
+
+;  177: gd_carray_len
+n = gd_carray_len(d, "carray")
+nume += check_ok(170, d)
+nume += check_simple(170, n, 6)
+
+;  178: gd_entry (CARRAY)
+n = gd_entry(d, "carray")
+nume += check_ok(178, d)
+nume += check_simple2(178, 1, n.field_type, !GD.CARRAY_ENTRY)
+nume += check_simple2(178, 2, n.field, "carray")
+nume += check_simple2(178, 3, n.fragment, 0)
+nume += check_simple2(178, 4, n.data_type, !GD.FLOAT64)
+nume += check_simple2(178, 5, n.array_len, 6)
+
+;  179: gd_add_carray
+gd_add_carray, d, "new17", type=!GD.FLOAT64, value=[3.3D, 4.3D]
+nume += check_ok2(179, 1, d)
+
+n = gd_entry(d, "new17")
+nume += check_ok2(179, 2, d)
+nume += check_simple2(179, 1, n.field_type, !GD.CARRAY_ENTRY)
+nume += check_simple2(179, 2, n.field, "new17")
+nume += check_simple2(179, 3, n.fragment, 0)
+nume += check_simple2(179, 4, n.data_type, !GD.FLOAT64)
+nume += check_simple2(179, 5, n.array_len, 2)
+
+n = gd_get_carray(d, "new17")
+nume += check_ok2(179, 3, d)
+nume += check_simple2(179, 5, n, [3.3D, 4.3D])
+
+;  180: gd_madd_carray
+gd_add_carray, d, "mnew17", type=!GD.INT16, parent="data", value=[33, 43]
+nume += check_ok2(180, 1, d)
+
+n = gd_entry(d, "data/mnew17")
+nume += check_ok2(180, 2, d)
+nume += check_simple2(180, 1, n.field_type, !GD.CARRAY_ENTRY)
+nume += check_simple2(180, 2, n.field, "data/mnew17")
+nume += check_simple2(180, 3, n.fragment, 0)
+nume += check_simple2(180, 4, n.data_type, !GD.INT16)
+nume += check_simple2(180, 5, n.array_len, 2)
+
+n = gd_get_carray(d, "data/mnew17", type=!GD.INT16)
+nume += check_ok2(180, 3, d)
+nume += check_simple2(180, 6, n, [33, 43])
+
+;  181: gd_alter_carray
+gd_alter_carray, d, "new17", type=!GD.FLOAT32, len=3
+nume += check_ok2(181, 1, d)
+
+n = gd_entry(d, "new17")
+nume += check_ok2(181, 2, d)
+nume += check_simple2(181, 1, n.field_type, !GD.CARRAY_ENTRY)
+nume += check_simple2(181, 2, n.field, "new17")
+nume += check_simple2(181, 3, n.fragment, 0)
+nume += check_simple2(181, 4, n.data_type, !GD.FLOAT32)
+nume += check_simple2(181, 5, n.array_len, 3)
 
 
 

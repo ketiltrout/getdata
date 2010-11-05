@@ -42,6 +42,7 @@
 #include <getdata/indexentry.h>
 #include <getdata/polynomentry.h>
 #include <getdata/constentry.h>
+#include <getdata/carrayentry.h>
 #include <getdata/stringentry.h>
 #include <getdata/multiplyentry.h>
 #include <getdata/divideentry.h>
@@ -65,6 +66,7 @@ namespace GetData {
     friend class PhaseEntry;
     friend class PolynomEntry;
     friend class ConstEntry;
+    friend class CarrayEntry;
     friend class StringEntry;
     friend class IndexEntry;
     friend class Fragment;
@@ -87,6 +89,10 @@ namespace GetData {
 
       off_t BoF(const char *field_code) const;
 
+      size_t CarrayLen(const char *field_code) const;
+
+      const gd_carray_t *Carrays(DataType type = Float64) const;
+
       int Close();
 
       const void *Constants(DataType type = Float64) const;
@@ -101,7 +107,8 @@ namespace GetData {
 
       int Error() const;
 
-      const char *ErrorString(size_t len = 4096);
+      const char *ErrorString();
+      const char *ErrorString(size_t n) gd_deprecated;
 
       const char **FieldList() const;
 
@@ -116,7 +123,10 @@ namespace GetData {
       double FrameNum(const char* field_code, double value,
           off_t frame_start = 0, off_t frame_end = 0) const;
 
-      size_t GetConstant(const char *field_code, DataType type, void *data_out)
+      int GetCarray(const char *field_code, DataType type, void *data_out,
+          unsigned int start = 0, size_t len = 0) const;
+
+      int GetConstant(const char *field_code, DataType type, void *data_out)
         const;
 
       size_t GetData(const char *field_code, off_t first_frame,
@@ -134,6 +144,9 @@ namespace GetData {
       int MAddSpec(const char *spec, const char *parent) const;
 
       int MAlterSpec(const char *line, const char *parent, int recode = 0)
+        const;
+
+      const gd_carray_t *MCarrays(const char *parent, DataType type = Float64)
         const;
 
       const void *MConstants(const char *parent, DataType type = Float64) const;
@@ -168,7 +181,10 @@ namespace GetData {
 
       unsigned int NVectors() const;
 
-      size_t PutConstant(const char *field_code, DataType type,
+      int PutCarray(const char *field_code, DataType type, const void *data_in,
+          unsigned int start = 0, size_t len = 0) const;
+
+      int PutConstant(const char *field_code, DataType type,
           const void *data_in) const;
 
       size_t PutData(const char *field_code, off_t first_frame,

@@ -514,24 +514,20 @@ static size_t _GD_DoPolynomOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
   return n_wrote;
 }
 
-static size_t _GD_DoConstOut(DIRFILE* D, gd_entry_t *E, gd_type_t data_type,
-    const void *data_in)
+static size_t _GD_DoConstOut(DIRFILE* D, gd_entry_t *E, off64_t first,
+    size_t len, gd_type_t data_type, const void *data_in)
 {
-  dtrace("%p, %p, 0x%x, %p", D, E, data_type, data_in);
+  dtrace("%p, %p, %lli, %zu, 0x%x, %p", D, E, first, len, data_type, data_in);
 
   /* check protection */
   if (D->fragment[E->fragment_index].protection & GD_PROTECT_FORMAT)
     _GD_SetError(D, GD_E_PROTECTED, GD_E_PROTECTED_FORMAT, NULL, 0,
         D->fragment[E->fragment_index].cname);
-  else if (E->EN(cons,const_type) & GD_SIGNED)
-    _GD_ConvertType(D, data_in, data_type, &E->e->EN(cons.d,i), GD_INT64, 1);
-  else if (E->EN(cons,const_type) & GD_COMPLEX)
-    _GD_ConvertType(D, data_in, data_type, &E->e->EN(cons.d,c), GD_COMPLEX128,
-        1);
-  else if (E->EN(cons,const_type) & GD_IEEE754)
-    _GD_ConvertType(D, data_in, data_type, &E->e->EN(cons.d,d), GD_FLOAT64, 1);
-  else
-    _GD_ConvertType(D, data_in, data_type, &E->e->EN(cons.d,u), GD_UINT64, 1);
+  else {
+    gd_type_t type = _GD_ConstType(D, E->EN(cons,const_type));
+    _GD_ConvertType(D, data_in, data_type, E->e->EN(cons,d) + first *
+        GD_SIZE(type), type, len);
+  }
 
   if (D->error) { /* bad input type */
     dreturn("%i", 0);
@@ -633,7 +629,8 @@ size_t _GD_DoFieldOut(DIRFILE *D, gd_entry_t* E, int repr, off64_t first_samp,
           data_in);
       break;
     case GD_CONST_ENTRY:
-      n_wrote = _GD_DoConstOut(D, E, data_type, data_in);
+    case GD_CARRAY_ENTRY:
+      n_wrote = _GD_DoConstOut(D, E, first_samp, num_samp, data_type, data_in);
       break;
     case GD_STRING_ENTRY:
       n_wrote = _GD_DoStringOut(D, E, (const char *)data_in);

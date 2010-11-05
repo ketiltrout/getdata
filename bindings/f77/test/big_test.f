@@ -39,9 +39,9 @@ C     GDDSCD GDCLBK GDCLOS (although this last one is used)
       INTEGER flen
       PARAMETER (flen = 7)
       INTEGER nfields
-      PARAMETER (nfields = 13)
+      PARAMETER (nfields = 14)
 
-      CHARACTER*7 fields(nfields + 9)
+      CHARACTER*7 fields(nfields + 7)
       CHARACTER*7 fn
       CHARACTER*20 str
       INTEGER*1 c(8)
@@ -66,10 +66,10 @@ C     GDDSCD GDCLBK GDCLOS (although this last one is used)
       datdat(i) = i
    10 CONTINUE
 
-      fields =(/ 'INDEX  ', 'bit    ', 'const  ', 'data   ', 'div    ',
-     +'lincom ', 'linterp', 'mult   ', 'phase  ', 'polynom', 'recip  ',
-     +'sbit   ', 'string ', '       ', '       ', '       ', '       ',
-     +'       ', '       ', '       ', '       ', '       ' /)
+      fields =(/ 'INDEX  ', 'bit    ', 'carray ', 'const  ', 'data   ',
+     +'div    ', 'lincom ', 'linterp', 'mult   ', 'phase  ', 'polynom',
+     +'recip  ', 'sbit   ', 'string ', '       ', '       ', '       ',
+     +'       ', '       ', '       ', '       ' /)
 
 C     Write the test dirfile
       OPEN(1, FILE=frmat, STATUS='NEW')
@@ -81,6 +81,7 @@ C     Write the test dirfile
       WRITE(1, *) '/META data mconst CONST COMPLEX128 3.3;4.4'
       WRITE(1, *) '/META data mlut LINTERP DATA ./lut'
       WRITE(1, *) 'const CONST FLOAT64 5.5'
+      WRITE(1, *) 'carray CARRAY FLOAT64 1.1 2.2 3.3 4.4 5.5 6.6'
       WRITE(1, *) 'linterp LINTERP data /look/up/file'
       WRITE(1, *) 'polynom POLYNOM data 1.1 2.2 2.2 3.3;4.4
      + const const'
@@ -99,7 +100,7 @@ C     Write the test dirfile
 
       OPEN(1, FILE=dat, FORM='UNFORMATTED', ACCESS='DIRECT', RECL=80,
      +STATUS='NEW')
-      WRITE (1,REC=1) datdat
+      WRITE(1, REC=1) datdat
       CLOSE(1, STATUS='KEEP')
 
 C     0: GDEROR check
@@ -143,17 +144,12 @@ C     2: GDGETD check
    20 CONTINUE
 
 C     3: GDGTCO check
-      CALL GDGTCO(n, d, 'const', 5, GD_F32, fl)
+      CALL GDGTCO(d, 'const', 5, GD_F32, fl)
       CALL GDEROR(e, d)
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
         WRITE(*, 2001) 3, e
-      ENDIF
-
-      IF (n .NE. 0) THEN
-        ne = ne + 1
-        WRITE(*, 2002) 3, n
       ENDIF
 
       IF (abs(fl - 5.5) .gt. 0.001) THEN
@@ -734,19 +730,14 @@ C     26: GDGECO check
         WRITE(*, 2001) 26, e
       ENDIF
 
-      IF (l .NE. flen) THEN
-        ne = ne + 1
-        WRITE(*, 2007) 26, 1, l
-      ENDIF
-
       IF (n .NE. 0) THEN
         ne = ne + 1
-        WRITE(*, 2007) 26, 2, n
+        WRITE(*, 2007) 26, 1, n
       ENDIF
 
       IF (i .NE. GD_F64) THEN
         ne = ne + 1
-        WRITE(*, 2007) 26, 3, i
+        WRITE(*, 2007) 26, 2, i
       ENDIF
 
 C     27: GDFRGI check
@@ -1238,7 +1229,7 @@ C     38: GDADCO check
         WRITE(*, 2007) 38, 2, i
       ENDIF
 
-      CALL GDGTCO(n, d, 'new11', 5, GD_F32, fl)
+      CALL GDGTCO(d, 'new11', 5, GD_F32, fl)
       CALL GDEROR(e, d)
 
       IF (e .NE. GD_EOK) THEN
@@ -1288,7 +1279,7 @@ C     41: GDINCL check
         WRITE(*, 2006) 41, 3, e
       ENDIF
 
-      CALL GDGTCO(n, d, 'const2', 6, GD_I8, c(1))
+      CALL GDGTCO(d, 'const2', 6, GD_I8, c(1))
       CALL GDEROR(e, d)
 
       IF (e .NE. GD_EOK) THEN
@@ -1358,7 +1349,7 @@ C     45: GDVECN check
       fields =(/ 'INDEX  ', 'bit    ', 'data   ', 'div    ', 'lincom ',
      +'linterp', 'mult   ', 'new1   ', 'new10  ', 'new2   ', 'new3   ',
      +'new4   ', 'new5   ', 'new6   ', 'new7   ', 'new8   ', 'new9   ',
-     +'phase  ', 'polynom', 'recip  ', 'sbit   ', 'string ' /)
+     +'phase  ', 'polynom', 'recip  ', 'sbit   ' /)
       DO 450 i = 1, n
       l = flen
       CALL GDVECN(fn, l, d, i)
@@ -1828,7 +1819,7 @@ C     55: GDMDCO check
         WRITE(*, 2007) 55, 3, i
       ENDIF
 
-      CALL GDGTCO(n, d, 'data/mnew11', 11, GD_F32, fl)
+      CALL GDGTCO(d, 'data/mnew11', 11, GD_F32, fl)
       CALL GDEROR(e, d)
 
       IF (e .NE. GD_EOK) THEN
@@ -1949,7 +1940,7 @@ C     60: GDMDSP check
       ENDIF
 
 C     61: GDPTCO check
-      CALL GDPTCO(n, d, 'const', 5, GD_I32, 10)
+      CALL GDPTCO(d, 'const', 5, GD_I32, 10)
       CALL GDEROR(e, d)
 
       IF (e .NE. GD_EOK) THEN
@@ -1957,12 +1948,7 @@ C     61: GDPTCO check
         WRITE(*, 2006) 61, 1, e
       ENDIF
 
-      IF (n .NE. 0) THEN
-        ne = ne + 1
-        WRITE(*, 2002) 61, n
-      ENDIF
-
-      CALL GDGTCO(n, d, 'const', 11, GD_F32, fl)
+      CALL GDGTCO(d, 'const', 11, GD_F32, fl)
       CALL GDEROR(e, d)
 
       IF (e .NE. GD_EOK) THEN
@@ -2058,7 +2044,7 @@ C     66: GDMVEN check
       fields =(/'mlut  ', 'mnew1 ', 'mnew2 ', 'mnew3 ', 'mnew5 ',
      +'mnew6 ', 'mnew7 ', 'mnew8 ', 'mnew9 ', 'mnew10', '      ',
      +'      ', '      ', '      ', '      ', '      ', '      ',
-     +'      ', '      ', '      ', '      ', '      '/)
+     +'      ', '      ', '      ', '      '/)
       DO 660 i = 1, n
       l = flen
       CALL GDMVEN(fn, l, d, "data", 4, i)
@@ -2565,7 +2551,7 @@ C     77: GDALCO check
         WRITE(*, 2007) 77, 3, i
       ENDIF
 
-      CALL GDGTCO(n, d, 'new11', 5, GD_F32, fl)
+      CALL GDGTCO(d, 'new11', 5, GD_F32, fl)
       CALL GDEROR(e, d)
 
       IF (e .NE. GD_EOK) THEN
@@ -3052,12 +3038,17 @@ C     101: GDFNSS check
 
 C     138: GDGSCA check
       l = 20
-      CALL GDGSCA(str, l, d, 'lincom', 6, 6)
+      CALL GDGSCA(str, l, n, d, 'lincom', 6, 6)
       CALL GDEROR(e, d)
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
         WRITE(*, 2001) 138, e
+      ENDIF
+
+      IF (n .NE. -1) THEN
+        ne = ne + 1
+        WRITE(*, 2002) 138, n
       ENDIF
 
       IF (str .NE. "const") THEN
@@ -3066,7 +3057,7 @@ C     138: GDGSCA check
       ENDIF
 
 C     139: GDASCA check
-      CALL GDASCA(d, 'lincom', 6, 6, 'new11', 5, 0)
+      CALL GDASCA(d, 'lincom', 6, 6, 'new11', 5, -1, 0)
       CALL GDEROR(e, d)
 
       IF (e .NE. GD_EOK) THEN
@@ -3075,12 +3066,17 @@ C     139: GDASCA check
       ENDIF
 
       l = 20
-      CALL GDGSCA(str, l, d, 'lincom', 6, 6)
+      CALL GDGSCA(str, l, n, d, 'lincom', 6, 6)
       CALL GDEROR(e, d)
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
         WRITE(*, 2006) 139, 2, e
+      ENDIF
+
+      IF (n .NE. -1) THEN
+        ne = ne + 1
+        WRITE(*, 2002) 139, n
       ENDIF
 
       IF (str .NE. "new11") THEN
@@ -3551,7 +3547,7 @@ C     154: GDALCR check
 
       IF (abs(dc - cp(1)) .gt. 0.001) THEN
         ne = ne + 1
-        WRITE(*, 2013) 154, dp
+        WRITE(*, 2013) 154, dc
       ENDIF
 
 C     155: GDRFRG check
@@ -3605,6 +3601,266 @@ C     157: GDSTDV check
         ne = ne + 1
         WRITE(*, 2006), 157, 2, e
       ENDIF
+
+C     158: GDGTCA check
+      CALL GDGTCA(d, 'carray', 6, GD_F64, p)
+      CALL GDEROR(e, d)
+
+      IF (e .NE. GD_EOK) THEN
+        ne = ne + 1
+        WRITE(*, 2001) 158, e
+      ENDIF
+
+      DO 1580 i=1,6
+      IF (abs(p(i) - 1.1 * i) .gt. 0.001) THEN
+        ne = ne + 1
+        WRITE(*, 2010) 158, i, p(i)
+      ENDIF
+ 1580 CONTINUE
+
+C     159: GDGCAS check
+      CALL GDGCAS(d, 'carray', 6, 3, 2, GD_F64, p)
+      CALL GDEROR(e, d)
+
+      IF (e .NE. GD_EOK) THEN
+        ne = ne + 1
+        WRITE(*, 2001) 159, e
+      ENDIF
+
+      DO 1590 i=1,2
+      IF (abs(p(i) - 2.2 - 1.1 * i) .gt. 0.001) THEN
+        ne = ne + 1
+        WRITE(*, 2010) 159, i, p(i)
+      ENDIF
+ 1590 CONTINUE
+
+C     168: GDPTCA check
+      p = (/ 9.6, 8.5, 7.4, 6.3, 5.2, 4.1 /)
+      CALL GDPTCA(d, 'carray', 6, GD_F64, p)
+      CALL GDEROR(e, d)
+
+      IF (e .NE. GD_EOK) THEN
+        ne = ne + 1
+        WRITE(*, 2006) 168, 1, e
+      ENDIF
+
+      CALL GDGTCA(d, 'carray', 6, GD_F64, q)
+      CALL GDEROR(e, d)
+
+      IF (e .NE. GD_EOK) THEN
+        ne = ne + 1
+        WRITE(*, 2006) 168, 2, e
+      ENDIF
+
+      DO 1680 i=1,6
+      IF (abs(q(i) - 10.7 + 1.1 * i) .gt. 0.001) THEN
+        ne = ne + 1
+        WRITE(*, 2010) 168, i, p(i)
+      ENDIF
+ 1680 CONTINUE
+
+C     169: GDGCAS check
+      p = (/ 5.5, 5.6, 5.7, 5.8, 5.9, 6.0 /)
+      CALL GDPCAS(d, 'carray', 6, 3, 2, GD_F64, p)
+      CALL GDEROR(e, d)
+
+      IF (e .NE. GD_EOK) THEN
+        ne = ne + 1
+        WRITE(*, 2001) 169, 1, e
+      ENDIF
+
+      CALL GDGTCA(d, 'carray', 6, GD_F64, q)
+      CALL GDEROR(e, d)
+
+      IF (e .NE. GD_EOK) THEN
+        ne = ne + 1
+        WRITE(*, 2006) 169, 2, e
+      ENDIF
+
+      DO 1690 i=1,6
+      IF (i .eq. 3 .or. i .eq. 4) THEN
+        IF (abs(q(i) - 5.2 - 0.1 * i) .gt. 0.001) THEN
+          ne = ne + 1
+          WRITE(*, 2010) 169, i, p(i)
+        ENDIF
+      ELSE
+        IF (abs(q(i) - 10.7 + 1.1 * i) .gt. 0.001) THEN
+          ne = ne + 1
+          WRITE(*, 2010) 169, i, p(i)
+        ENDIF
+      ENDIF
+ 1690 CONTINUE
+
+C     177: GDCALN check
+      CALL GDCALN(n, d, 'carray', 6)
+      CALL GDEROR(e, d)
+
+      IF (e .NE. GD_EOK) THEN
+        ne = ne + 1
+        WRITE(*, 2001) 177, e
+      ENDIF
+
+      IF (n .NE. 6) THEN
+        ne = ne + 1
+        WRITE(*, 2002) 177, n
+      ENDIF
+
+C     178: GDGECA check
+      CALL GDGECA(i, l, n, d, 'carray', 6)
+      CALL GDEROR(e, d)
+
+      IF (e .NE. GD_EOK) THEN
+        ne = ne + 1
+        WRITE(*, 2001) 178, e
+      ENDIF
+
+      IF (l .NE. 6) THEN
+        ne = ne + 1
+        WRITE(*, 2007) 178, 1, l
+      ENDIF
+
+      IF (n .NE. 0) THEN
+        ne = ne + 1
+        WRITE(*, 2007) 178, 2, n
+      ENDIF
+
+      IF (i .NE. GD_F64) THEN
+        ne = ne + 1
+        WRITE(*, 2007) 178, 3, i
+      ENDIF
+
+C     179: GDADCA check
+      p = (/ 1.2, 3.4, 5.6, 7.8, 0., 0. /)
+      CALL GDADCA(d, 'new17', 5, GD_F64, 4, GD_F64, p, 0)
+      CALL GDEROR(e, d)
+
+      IF (e .NE. GD_EOK) THEN
+        ne = ne + 1
+        WRITE(*, 2006) 179, 1, e
+      ENDIF
+
+      CALL GDGECA(i, l, n, d, 'new17', 5)
+      CALL GDEROR(e, d)
+
+      IF (e .NE. GD_EOK) THEN
+        ne = ne + 1
+        WRITE(*, 2006) 179, 2, e
+      ENDIF
+
+      IF (n .NE. 0) THEN
+        ne = ne + 1
+        WRITE(*, 2007) 179, 1, n
+      ENDIF
+
+      IF (i .NE. GD_F64) THEN
+        ne = ne + 1
+        WRITE(*, 2007) 179, 2, i
+      ENDIF
+
+      IF (l .NE. 4) THEN
+        ne = ne + 1
+        WRITE(*, 2007) 179, 3, l
+      ENDIF
+
+      CALL GDGTCA(d, 'new17', 5, GD_F64, q)
+      CALL GDEROR(e, d)
+
+      IF (e .NE. GD_EOK) THEN
+        ne = ne + 1
+        WRITE(*, 2006) 179, 3, e
+      ENDIF
+
+      DO 1790 i=1,4
+      IF (abs(q(i) + 1.0 - i * 2.2) .gt. 0.001) THEN
+        ne = ne + 1
+        WRITE(*, 2005) 179, fl
+      ENDIF
+ 1790 CONTINUE
+
+C     180: GDMDCA check
+      p = (/ 3.2, 5.4, 7.6, 9.8, 0., 0. /)
+      CALL GDMDCA(d, 'data', 4, 'new17', 5, GD_F64, 4, GD_F64, p)
+      CALL GDEROR(e, d)
+
+      IF (e .NE. GD_EOK) THEN
+        ne = ne + 1
+        WRITE(*, 2006) 180, 1, e
+      ENDIF
+
+      CALL GDGECA(i, l, n, d, 'data/new17', 10)
+      CALL GDEROR(e, d)
+
+      IF (e .NE. GD_EOK) THEN
+        ne = ne + 1
+        WRITE(*, 2006) 180, 2, e
+      ENDIF
+
+      IF (n .NE. 0) THEN
+        ne = ne + 1
+        WRITE(*, 2007) 180, 1, n
+      ENDIF
+
+      IF (i .NE. GD_F64) THEN
+        ne = ne + 1
+        WRITE(*, 2007) 180, 2, i
+      ENDIF
+
+      IF (l .NE. 4) THEN
+        ne = ne + 1
+        WRITE(*, 2007) 180, 3, l
+      ENDIF
+
+      CALL GDGTCA(d, 'data/new17', 10, GD_F64, q)
+      CALL GDEROR(e, d)
+
+      IF (e .NE. GD_EOK) THEN
+        ne = ne + 1
+        WRITE(*, 2006) 180, 3, e
+      ENDIF
+
+      DO 1800 i=1,4
+      IF (abs(q(i) - 1.0 - i * 2.2) .gt. 0.001) THEN
+        ne = ne + 1
+        WRITE(*, 2005) 180, fl
+      ENDIF
+ 1800 CONTINUE
+
+C     181: GDALCA check
+      CALL GDALCA(d, 'new17', 5, GD_F32, 3)
+      CALL GDEROR(e, d)
+
+      IF (e .NE. GD_EOK) THEN
+        ne = ne + 1
+        WRITE(*, 2006) 181, 1, e
+      ENDIF
+
+      CALL GDGECA(i, l, n, d, 'new17', 5)
+      CALL GDEROR(e, d)
+
+      IF (e .NE. GD_EOK) THEN
+        ne = ne + 1
+        WRITE(*, 2006) 181, 2, e
+      ENDIF
+
+      IF (n .NE. 0) THEN
+        ne = ne + 1
+        WRITE(*, 2007) 181, 1, n
+      ENDIF
+
+      IF (i .NE. GD_F32) THEN
+        ne = ne + 1
+        WRITE(*, 2007) 181, 2, i
+      ENDIF
+
+      IF (l .NE. 3) THEN
+        ne = ne + 1
+        WRITE(*, 2007) 181, 3, l
+      ENDIF
+
+
+
+
+
 
 
 

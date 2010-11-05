@@ -43,22 +43,23 @@ INCLUDES=${WALL} $(WEXTRA) -I$(top_srcdir)/src -D__TEST__=\"$@\"
 EXTRA_DIST=test.h
 
 ADD_TESTS=add add_bit add_bit_bitnum add_bit_bitsize add_bit_invalid \
-					add_bit_numbits add_clincom add_code add_const add_cpolynom \
-					add_crecip add_crecip89 add_divide add_divide_invalid add_duplicate \
-					add_format add_invalid add_lincom add_lincom_invalid \
+					add_bit_numbits add_carray add_clincom add_code add_const \
+					add_cpolynom add_crecip add_crecip89 add_divide add_divide_invalid \
+					add_duplicate add_format add_invalid add_lincom add_lincom_invalid \
 					add_lincom_nfields add_linterp add_linterp_invalid add_multiply \
 					add_multiply_invalid add_phase add_phase_invalid add_polynom \
 					add_protect add_raw add_raw_invalid add_raw_spf add_raw_type \
 					add_rdonly add_recip add_sbit add_scalar add_sort add_spec \
 					add_spec_directive add_spec_invalid add_spec_meta add_string add_type
 
-ALTER_TESTS=alter_bit_bitnum alter_bit_numbits alter_const alter_cpolynom \
-						alter_crecip alter_crecip89 alter_divide alter_entry \
-						alter_entry_recode alter_entry_scalar2a alter_entry_scalar2n \
-						alter_entry_scalar3 alter_entry_scalar4 alter_lincom_23 \
-						alter_lincom_32 alter_lincom_input alter_lincom_offset \
-						alter_lincom_slope alter_linterp alter_linterp_move alter_mspec \
-						alter_multiply alter_phase alter_polynom_coeff alter_polynom_input \
+ALTER_TESTS=alter_bit_bitnum alter_bit_numbits alter_carray_len \
+						alter_carray_type alter_const alter_cpolynom alter_crecip \
+						alter_crecip89 alter_divide alter_entry alter_entry_recode \
+						alter_entry_scalar2a alter_entry_scalar2n alter_entry_scalar3 \
+						alter_entry_scalar4 alter_lincom_23 alter_lincom_32 \
+						alter_lincom_input alter_lincom_offset alter_lincom_slope \
+						alter_linterp alter_linterp_move alter_mspec alter_multiply \
+						alter_phase alter_polynom_coeff alter_polynom_input \
 						alter_polynom_ord alter_raw_spf alter_raw_type alter_recip \
 						alter_spec alter_spec_meta
 
@@ -70,7 +71,8 @@ if TEST_BZIP2
 BZIP_TESTS=bzip_get bzip_get_get bzip_move_from bzip_nframes
 endif
 
-CVLIST_TESTS=cvlist cvlist_invalid cvlist_meta cvlist_meta_invalid
+CVLIST_TESTS=cvlist cvlist_array cvlist_array_meta cvlist_invalid cvlist_meta \
+						 cvlist_meta_invalid
 
 CLOSE_TESTS=close close_bad close_discard close_null
 
@@ -125,8 +127,9 @@ CONVERT_TESTS=convert_complex128_complex64 convert_complex128_float64 \
 
 CREAT_TESTS=creat creat_excl creat_rdonly
 
-DEL_TESTS=del del_const del_const_deref del_const_force del_data del_derived \
-					del_derived_force del_meta del_meta_force
+DEL_TESTS=del del_carray del_carray_deref del_const del_const_deref \
+					del_const_force del_data del_derived del_derived_force del_meta \
+					del_meta_force
 
 DFES_TESTS=dfes_bit dfes_divide dfes_lincom dfes_linterp dfes_multiply \
 					 dfes_null dfes_phase dfes_raw dfes_recip dfes_zero
@@ -156,7 +159,8 @@ FOFFS_TESTS=foffs_alter foffs_get foffs_move
 
 FRAGMENT_TESTS=fragment_index fragment_name fragment_name_oor
 
-GET_TESTS=${GET64} get_bad_code get_bit get_char get_clincom get_complex128 \
+GET_TESTS=${GET64} get_bad_code get_bit get_carray get_carray_len \
+					get_carray_slice get_char get_clincom get_complex128 \
 					get_complex64 get_const get_const_complex get_const_repr \
 					get_cpolynom get_divide get_endian8 get_endian16 get_endian32 \
 					get_endian64 get_endian_complex128_arm get_endian_complex128_big \
@@ -196,7 +200,7 @@ if TEST_LZMA
 LZMA_TESTS=lzma_get lzma_nframes
 endif
 
-MADD_TESTS=madd madd_bit madd_bit_invalid madd_clincom madd_const \
+MADD_TESTS=madd madd_bit madd_bit_invalid madd_carray madd_clincom madd_const \
 					 madd_cpolynom madd_crecip madd_crecip89 madd_divide madd_lincom \
 					 madd_lincom_invalid madd_linterp madd_linterp_invalid madd_multiply \
 					 madd_multiply_invalid madd_phase madd_phase_invalid madd_polynom \
@@ -217,8 +221,8 @@ NFRAMES_TESTS=nframes ${NFRAMES64} nframes_empty nframes_invalid \
 							$(NFRAMES_OFF64) nframes_spf
 
 NMETA_TESTS=nmeta nmeta_invalid nmeta_parent nmeta_type nmeta_type_invalid \
-						nmeta_type_parent nmeta_vectors nmeta_vectors_invalid \
-						nmeta_vectors_parent
+						nmeta_type_parent nmeta_vectors nmeta_vectors_del \
+						nmeta_vectors_invalid nmeta_vectors_parent
 
 NVECTORS_TESTS=nvectors nvectors_invalid
 
@@ -229,15 +233,16 @@ PARENT_TESTS=parent
 
 PARSE_TESTS=parse_badline parse_bit parse_bit4 parse_bit_bitnum \
 						parse_bit_bitsize parse_bit_ncols parse_bit_numbits \
-						parse_bit_scalar parse_const parse_const_ncols parse_divide \
-						parse_duplicate parse_duplicate_ignore parse_endian_bad \
-						parse_endian_big parse_endian_force parse_endian_little \
-						parse_endian_slash parse_eol parse_foffs parse_foffs_include \
-						parse_foffs_slash parse_include parse_include_nonexistent \
-						parse_include_slash parse_index parse_lincom parse_lincom_ncols1 \
-						parse_lincom_ncols2 parse_lincom_nfields parse_lincom_nofields \
-						parse_lincom_non parse_lincom_non_ncols parse_lincom_scalar \
-						parse_linterp parse_linterp_ncols parse_meta parse_meta_implicit \
+						parse_bit_scalar parse_carray parse_carray_long parse_const \
+						parse_const_ncols parse_divide parse_duplicate \
+						parse_duplicate_ignore parse_endian_bad parse_endian_big \
+						parse_endian_force parse_endian_little parse_endian_slash \
+						parse_eol parse_foffs parse_foffs_include parse_foffs_slash \
+						parse_include parse_include_nonexistent parse_include_slash \
+						parse_index parse_lincom parse_lincom_ncols1 parse_lincom_ncols2 \
+						parse_lincom_nfields parse_lincom_nofields parse_lincom_non \
+						parse_lincom_non_ncols parse_lincom_scalar parse_linterp \
+						parse_linterp_ncols parse_meta parse_meta_implicit \
 						parse_meta_implicit2 parse_meta_index parse_meta_index2 \
 						parse_meta_parent parse_meta_raw parse_multiply \
 						parse_multiply_ncols parse_name parse_name_dot parse_name_ext \
@@ -254,23 +259,23 @@ PARSE_TESTS=parse_badline parse_bit parse_bit4 parse_bit_bitnum \
 
 PROTECT_TESTS=protect_alter protect_get
 
-PUT_TESTS=${PUT64} put_bad_code put_bit put_bof put_char put_complex128 \
-					put_complex64 put_const put_const_protect put_divide put_endian8 \
-					put_endian16 put_endian32 put_endian64 put_endian_complex128_arm \
-					put_endian_complex128_big put_endian_complex128_little \
-					put_endian_complex64_arm put_endian_complex64_big \
-					put_endian_complex64_little put_endian_float32_arm \
-					put_endian_float32_big put_endian_float32_little \
-					put_endian_float64_arm put_endian_float64_big \
-					put_endian_float64_little put_ff put_float32 put_float64 \
-					put_foffs put_fs put_int8 put_int16 put_int32 put_int64 put_invalid \
-					put_lincom1 put_lincom2 put_lincom_noin put_linterp put_linterp_noin \
-					put_linterp_nomono put_linterp_notab put_linterp_reverse \
-					put_multiply put_null $(PUT_OFF64) put_phase put_phase_noin \
-					put_polynom1 put_polynom2 put_polynom_noin put_protect put_rdonly \
-					put_recip put_recurse put_repr put_rofs put_sbit put_sf put_ss \
-					put_string put_string_protect put_type put_uint16 put_uint32 \
-					put_uint64
+PUT_TESTS=${PUT64} put_bad_code put_bit put_bof put_carray put_carray_slice \
+					put_char put_complex128 put_complex64 put_const put_const_protect \
+					put_divide put_endian8 put_endian16 put_endian32 put_endian64 \
+					put_endian_complex128_arm put_endian_complex128_big \
+					put_endian_complex128_little put_endian_complex64_arm \
+					put_endian_complex64_big put_endian_complex64_little \
+					put_endian_float32_arm put_endian_float32_big \
+					put_endian_float32_little put_endian_float64_arm \
+					put_endian_float64_big put_endian_float64_little put_ff put_float32 \
+					put_float64 put_foffs put_fs put_int8 put_int16 put_int32 put_int64 \
+					put_invalid put_lincom1 put_lincom2 put_lincom_noin put_linterp \
+					put_linterp_noin put_linterp_nomono put_linterp_notab \
+					put_linterp_reverse put_multiply put_null $(PUT_OFF64) \
+					put_phase put_phase_noin put_polynom1 put_polynom2 put_polynom_noin \
+					put_protect put_rdonly put_recip put_recurse put_repr put_rofs \
+					put_sbit put_sf put_ss put_string put_string_protect put_type \
+					put_uint16 put_uint32 put_uint64
 
 REF_TESTS=ref ref_none ref_two
 

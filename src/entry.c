@@ -79,8 +79,11 @@ void _GD_FreeE(gd_entry_t* entry, int priv)
         free(entry->e->ES(string));
       break;
     case GD_CONST_ENTRY:
-      if (priv)
+    case GD_CARRAY_ENTRY:
+      if (priv) {
         free(entry->e->EN(cons,client));
+        free(entry->e->EN(cons,d));
+      }
       break;
     case GD_RAW_ENTRY:
       free(entry->scalar[0]);
@@ -102,6 +105,10 @@ void _GD_FreeE(gd_entry_t* entry, int priv)
     for (i = 0; i < GD_N_ENTYPES; ++i)
       free(entry->e->type_list[i]);
     free(entry->e->const_value_list);
+    if (entry->e->carray_value_list)
+      for (i = 0; entry->e->carray_value_list[i].n != 0; ++i)
+        free(entry->e->carray_value_list[i].d);
+    free(entry->e->carray_value_list);
     free(entry->e);
     free(entry);
   }
@@ -120,15 +127,18 @@ gd_entry_t* gd_free_entry_strings(gd_entry_t* entry) gd_nothrow
   return entry;
 }
 
-static void _GD_GetScalar(DIRFILE* D, gd_entry_t* E, const char* scalar,
-    gd_type_t type, void* data)
+static void _GD_GetScalar(DIRFILE* D, gd_entry_t* E, int i, gd_type_t type,
+    void* data)
 {
   void *ptr = NULL;
   gd_entry_t* C;
   int repr;
   char* field_code;
 
-  dtrace("%p, %p, \"%s\", %i, %p", D, E, scalar, type, data);
+  dtrace("%p, %p, %i, %i, %p", D, E, i, type, data);
+
+  const char* scalar = E->scalar[i];
+  int index = E->scalar_ind[i];
 
   if (scalar != NULL) {
     C = _GD_FindFieldAndRepr(D, scalar, &field_code, &repr, NULL, 0);
@@ -141,10 +151,16 @@ static void _GD_GetScalar(DIRFILE* D, gd_entry_t* E, const char* scalar,
     if (C == NULL)
       _GD_SetError(D, GD_E_BAD_SCALAR, GD_E_SCALAR_CODE, E->field, 0,
           field_code);
-    else if (C->field_type != GD_CONST_ENTRY) 
+    else if (C->field_type != GD_CONST_ENTRY &&
+        C->field_type != GD_CARRAY_ENTRY) 
       _GD_SetError(D, GD_E_BAD_SCALAR, GD_E_SCALAR_TYPE, E->field, 0,
           field_code);
     else {
+      if (C->field_type == GD_CONST_ENTRY) {
+        index = 0;
+        E->scalar_ind[i] = -1;
+      }
+
       if ((D->flags & GD_ACCMODE) == GD_RDWR) {
         ptr = realloc(C->e->EN(cons,client), (C->e->EN(cons,n_client) + 1) *
             sizeof(gd_entry_t*));
@@ -152,7 +168,7 @@ static void _GD_GetScalar(DIRFILE* D, gd_entry_t* E, const char* scalar,
           _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
       }
 
-      _GD_DoField(D, C, repr, 0, 1, type, data);
+      _GD_DoField(D, C, repr, index, 1, type, data);
 
       if (ptr) {
         C->e->EN(cons,client) = (gd_entry_t **)ptr;
@@ -176,12 +192,12 @@ int _GD_CalculateEntry(DIRFILE* D, gd_entry_t* E)
 
   switch(E->field_type) {
     case GD_RAW_ENTRY:
-      _GD_GetScalar(D, E, E->scalar[0], GD_UINT16, &E->EN(raw,spf));
+      _GD_GetScalar(D, E, 0, GD_UINT16, &E->EN(raw,spf));
       break;
     case GD_POLYNOM_ENTRY:
       E->comp_scal = 0;
       for (i = 0; i <= E->EN(polynom,poly_ord); ++i) {
-        _GD_GetScalar(D, E, E->scalar[i], GD_COMPLEX128, &E->EN(polynom,ca)[i]);
+        _GD_GetScalar(D, E, i, GD_COMPLEX128, &E->EN(polynom,ca)[i]);
         E->EN(polynom,a)[i] = creal(E->EN(polynom,ca)[i]);
 
         if (cimag(E->EN(polynom,ca)[i]))
@@ -194,13 +210,13 @@ int _GD_CalculateEntry(DIRFILE* D, gd_entry_t* E)
     case GD_LINCOM_ENTRY:
       E->comp_scal = 0;
       for (i = 0; i < E->EN(lincom,n_fields); ++i) {
-        _GD_GetScalar(D, E, E->scalar[i], GD_COMPLEX128, &E->EN(lincom,cm)[i]);
+        _GD_GetScalar(D, E, i, GD_COMPLEX128, &E->EN(lincom,cm)[i]);
         E->EN(lincom,m)[i] = creal(E->EN(lincom,cm)[i]);
 
         if (cimag(E->EN(lincom,cm)[i]))
           E->comp_scal = 1;
 
-        _GD_GetScalar(D, E, E->scalar[i + GD_MAX_LINCOM], GD_COMPLEX128,
+        _GD_GetScalar(D, E, i + GD_MAX_LINCOM, GD_COMPLEX128,
             &E->EN(lincom,cb)[i]);
         E->EN(lincom,b)[i] = creal(E->EN(lincom,cb)[i]);
 
@@ -212,17 +228,17 @@ int _GD_CalculateEntry(DIRFILE* D, gd_entry_t* E)
       }
       break;
     case GD_RECIP_ENTRY:
-      _GD_GetScalar(D, E, E->scalar[0], GD_COMPLEX128, &E->EN(recip,cdividend));
+      _GD_GetScalar(D, E, 0, GD_COMPLEX128, &E->EN(recip,cdividend));
       E->EN(recip,dividend) = creal(E->EN(recip,cdividend));
       E->comp_scal = (cimag(E->EN(recip,cdividend)) == 0) ? 0 : 1;
       break;
     case GD_BIT_ENTRY:
     case GD_SBIT_ENTRY:
-      _GD_GetScalar(D, E, E->scalar[0], GD_INT16, &E->EN(bit,bitnum));
-      _GD_GetScalar(D, E, E->scalar[1], GD_INT16, &E->EN(bit,numbits));
+      _GD_GetScalar(D, E, 0, GD_INT16, &E->EN(bit,bitnum));
+      _GD_GetScalar(D, E, 1, GD_INT16, &E->EN(bit,numbits));
       break;
     case GD_PHASE_ENTRY:
-      _GD_GetScalar(D, E, E->scalar[0], GD_INT64, &E->EN(phase,shift));
+      _GD_GetScalar(D, E, 0, GD_INT64, &E->EN(phase,shift));
       break;
     case GD_NO_ENTRY:
     case GD_LINTERP_ENTRY:
@@ -230,6 +246,7 @@ int _GD_CalculateEntry(DIRFILE* D, gd_entry_t* E)
     case GD_DIVIDE_ENTRY:
     case GD_STRING_ENTRY:
     case GD_CONST_ENTRY:
+    case GD_CARRAY_ENTRY:
     case GD_INDEX_ENTRY:
       break;
   }
@@ -385,6 +402,7 @@ int gd_entry(DIRFILE* D, const char* field_code_in, gd_entry_t* entry)
       break;
     case GD_INDEX_ENTRY:
     case GD_CONST_ENTRY:
+    case GD_CARRAY_ENTRY:
     case GD_STRING_ENTRY:
     case GD_NO_ENTRY:
       break;
@@ -507,6 +525,7 @@ int gd_validate(DIRFILE *D, const char *field_code_in) gd_nothrow
       /* Fallthrough */
     case GD_RAW_ENTRY:
     case GD_CONST_ENTRY:
+    case GD_CARRAY_ENTRY:
     case GD_STRING_ENTRY:
     case GD_INDEX_ENTRY:
     case GD_NO_ENTRY:

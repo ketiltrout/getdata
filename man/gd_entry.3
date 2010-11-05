@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_entry 3 "24 October 2010" "Version 0.7.0" "GETDATA"
+.TH gd_entry 3 "3 November 2010" "Version 0.7.0" "GETDATA"
 .SH NAME
 gd_entry \(em retrieve a dirfile field's metadata
 .SH SYNOPSIS
@@ -108,7 +108,7 @@ typedef struct {
 
   const char  *field;          /* field code */
   gd_entype_t  field_type;     /* field type */
-  int          fragment_index; /* format specification fragment index */
+  int          fragment_index; /* format fragment index */
 
   ...
 } gd_entry_t;
@@ -131,10 +131,10 @@ to one of the following symbols:
 .IP
 .nh
 .ad l
-.BR GD_BIT_ENTRY ,\~ GD_CONST_ENTRY ,\~ GD_DIVIDE_ENTRY ,\~ GD_INDEX_ENTRY ,\~
-.BR GD_LINCOM_ENTRY ,\~ GD_LINTERP_ENTRY ,\~ GD_MULTIPLY_ENTRY ,\~
-.BR GD_PHASE_ENTRY ,\~ GD_POLYNOM_ENTRY ,\~ GD_RAW_ENTRY ,\~ GD_RECIP_ENTRY ,\~
-.BR GD_SBIT_ENTRY ,\~ GD_STRING_ENTRY .
+.BR GD_BIT_ENTRY ", " GD_CARRAY_ENTRY ", " GD_CONST_ENTRY ", " GD_DIVIDE_ENTRY ,
+.BR GD_INDEX_ENTRY ", " GD_LINCOM_ENTRY ", " GD_LINTERP_ENTRY ,
+.BR GD_MULTIPLY_ENTRY ", " GD_PHASE_ENTRY ", " GD_POLYNOM_ENTRY ,
+.BR GD_RAW_ENTRY ", " GD_RECIP_ENTRY ", " GD_SBIT_ENTRY ", " GD_STRING_ENTRY .
 .ad n
 .hy
 .P
@@ -166,6 +166,104 @@ field types may be stored in the same physical location in core.  Accordingly,
 attempting to access a member not declared for the appropriate field type will
 have unspecified results.
 
+.SS Scalar Parameter Members
+A gd_entry_t describing any field type which permits non-literal scalar field
+parameters
+.RB ( BIT ", " LINCOM ", " PHASE ", " POLYNOM ", " RECIP ", " RAW ", or " SBIT )
+will also provide:
+.PP
+.in +4n
+.nf
+.fam C
+typedef struct {
+  ...
+
+  const char *scalar[GD_MAX_POLY_ORD + 1];     /* param. fields */
+  int         scalar_ind[GD_MAX_POLY_ORD + 1]; /* CARRAY indices */
+
+  ...
+} gd_entry_t;
+.fam
+.fi
+.in
+.P
+Only certain elements of these arrays will be initialised:
+.IP \(bu 4
+For
+.B BIT
+and
+.B SBIT
+fields, the first element corresponds to
+.I bitnum
+and the second to
+.IR numbits .
+The remainder are uninitialised.
+.IP \(bu 4
+For
+.B LINCOM
+fields, the first
+.B GD_MAX_LINCOM
+elements correspond to the slopes
+.RI ( cm )
+and the next
+.B GD_MAX_LINCOM
+elements correspond to the offsets
+.RI ( cb ).
+Only the first
+.I n_fields
+elements of these two sets are initialised.  Notably, this means for
+.I n_fields
+< GD_MAX_LINCOM, there will be uninitialised elements in the middle of these
+arrays between the element corresponding to
+.IR cm [ n_fields
+- 1] and the element corresponding to
+.IR cb [0].
+.IP \(bu 4
+For
+.B PHASE
+fields, the first element corresponds to
+.IR shift .
+The remainder are unitialised.
+.IP \(bu 4
+For
+.B POLYNOM
+fields, these arrays correspond with the co-efficients
+.IR ca .
+Only the first
+.I poly_ord
++ 1 elements are initialised.
+.IP \(bu 4
+For
+.B RECIP
+fields, the first element corresponds to
+.IR cdividend .
+The remainder are unitialised.
+.IP \(bu 4
+For
+.B RAW
+fields, the first element corresponds to
+.IR spf .
+The remainder are unitialised.
+.P
+The
+.I scalar
+parameters are NULL if a literal parameter was used, or else a field code
+specifying the scalar parameters. 
+.P
+If an element of
+.I scalar
+specifies a
+.B CARRAY
+field, the corresponding
+.I scalar_ind
+will indicate the element of the
+.B CARRAY
+used.  For
+.B CONST
+fields,
+.I scalar_ind
+will be -1.
+
 .SS BIT and SBIT Members
 A gd_entry_t describing a
 .B BIT
@@ -180,7 +278,6 @@ typedef struct {
   ...
 
   const char *in_fields[1];     /* input field code */
-  const char *scalar[2];        /* parameter field codes */
   gd_bit_t    bitnum;           /* first bit */
   gd_bit_t    numbits;          /* bit length */
 
@@ -195,21 +292,12 @@ The
 member is an array of length one containing the input field code.
 .P
 The
-.I scalar
-member is an array of length two containing the field codes specifying
-.I bitnum
-and
-.IR numbits ,
-or NULLs if numeric literal parameters were used.
-.P
-The
 .I bitnum
 member indicates the number of the first bit (counted from zero) extracted from
 the input.  The
 .I gd_bit_t
 type is a signed 16-bit integer type.  If this value was specified as a
-.B CONST
-field code, this will be the numerical value of that field, and
+scalar field code, this will be the numerical value of that field, and
 .IR scalar [0]
 will contain the field code itself, otherwise
 .IR scalar [0]
@@ -218,13 +306,45 @@ will be NULL.
 The
 .I numbits
 member indicates the number of bits which are extracted from the input.
-If this value was specified as a
-.B CONST
-field code, this will be the numerical value of that field, and
+If this value was specified as a scalar field code, this will be the numerical
+value of that field, and
 .IR scalar [1]
 will contain the field code itself, otherwise
 .IR scalar [1]
 will be NULL.
+
+.SS CARRAY Members
+A gd_entry_t describing a
+.B CARRAY
+entry, will also provide:
+.PP
+.in +4n
+.nf
+.fam C
+typedef struct {
+  ...
+
+  gd_type_t   const_type;     /* data type in format specification */
+  size_t      array_len;      /* length of array data */
+
+  ...
+} gd_entry_t;
+.fam
+.fi
+.in
+.P
+The
+.I const_type
+member indicates the data type of the constant value stored in the format
+file metadata.  See
+.BR gd_getdata (3)
+for a list of valid values that a variable of type
+.B gd_type_t
+may take.
+.P
+The
+.I array_len
+member gives the number of elements in the array.
 
 .SS CONST Members
 A gd_entry_t describing a
@@ -275,7 +395,6 @@ typedef struct {
   int            n_fields;                  /* # of input fields */
   int            comp_scal;                 /* complex scalar flag */
   const char    *in_fields[GD_MAX_LINCOM];  /* input field code(s) */
-  const char    *scalar[2 * GD_MAX_LINCOM]; /* param. field codes */
   double complex cm[GD_MAX_LINCOM];         /* scale factor(s) */
   double         m[GD_MAX_LINCOM];          /* scale factor(s) */
   double complex cb[GD_MAX_LINCOM];         /* offset terms(s) */
@@ -314,26 +433,6 @@ elements of this array are initialised.  The remaining elements contain
 uninitialised data.
 .P
 The
-.I scalar
-member is an array of length twice
-.B GD_MAX_LINCOM
-containing the field codes specifying the slope factors and offset terms for the
-field, or NULLs if numerical literal parameters were used.
-The first
-.B GD_MAX_LINCOM
-array elements contain the scale factors.  The remaining
-.B GD_MAX_LINCOM
-array elements contain the offset terms.  Array elements
-.IR scalar [ i ]
-and
-.IR scalar [ i
-+
-.BR GD_MAX_LINCOM ],
-for
-.IR i \~>=\~ n_fields ,
-contain uninitialised data.
-.P
-The
 .I cm
 and
 .I cb
@@ -342,10 +441,8 @@ members are arrays of the scale factor(s) and offset term(s) for the
 Only the first
 .I n_fields
 elements of these array contain meaningful data.
-If any of these values were specified as a
-.B CONST
-field code, this will be the numerical value of that field.  The field code
-corresponding to
+If any of these values were specified as a scalar field code, this will be the
+numerical value of that field.  The field code corresponding to
 .IR cm [ i ]
 will be stored in
 .IR scalar [ i ]
@@ -440,7 +537,6 @@ typedef struct {
   ...
 
   const char *in_fields[1];     /* input field code */
-  const char *scalar[1];        /* parameter field codes */
   gd_shift_t  shift;            /* phase shift */
 
   ...
@@ -454,20 +550,12 @@ The
 member is an array of length one containing the input field code.
 .P
 The
-.I scalar
-member is an array of length one containing the field code specifying
-.IR shift ,
-or NULL if a numeric literal parameter was used.
-.P
-The
 .I shift
 member indicates the shift in samples.  The
 .I gd_shift_t
 type is a 64-bit signed integer type.  A positive value indicates a shift
-forward in time (towards larger frame numbers).
-If this value was specified as a
-.B CONST
-field code, this will be the numerical value of that field, and
+forward in time (towards larger frame numbers).  If this value was specified as
+a scalar field code, this will be the numerical value of that field, and
 .IR scalar [0]
 will contain the field code itself, otherwise
 .IR scalar [0]
@@ -487,8 +575,6 @@ typedef struct {
   int            poly_ord;                  /* polynomial order */
   int            comp_scal;                 /* complex scalar flag */
   const char    *in_fields[1];              /* input field code(s) */
-  const char    *scalar[GD_MAX_POLY_ORD + 1];
-                                            /* co-eff. field codes */
   double complex ca[GD_MAX_POLY_ORD + 1];   /* co-efficients(s) */
   double         a[GD_MAX_POLY_ORD + 1];    /* co-efficients(s) */
 
@@ -519,27 +605,14 @@ The
 member is an array of length one containing the input field code.
 .P
 The
-.I scalar
-member is an array of length one more than
-.B GD_MAX_POLYORD
-containing the field codes specifying the co-efficients for the field, or NULLs
-if numerical literal parameters were used.
-Only the first
-.I poly_ord
-+ 1
-elements are initialised.  The remaining elements contain uninitialised data.
-.P
-The
 .I ca
 members are arrays of the co-efficient(s) for the
 .BR POLYNOM .
 Only the first
 .I poly_ord
-+ 1 elements of this array contains meaningful data.
-If any of these values were specified as a
-.B CONST
-field code, this will be the numerical value of that field.  The field code
-corresponding to
++ 1 elements of this array contains meaningful data.  If any of these values
+were specified as a scalar field code, this will be the numerical value of that
+field.  The field code corresponding to
 .IR ca [ i ]
 will be stored in
 .IR scalar [ i ].
@@ -569,7 +642,6 @@ typedef struct {
 
   int            comp_scal;            /* complex scalar flag */
   const char    *in_fields[1];         /* input field code */
-  const char    *scalar[1];            /* parameter field codes */
   double complex cdividend;            /* scalar dividend */
   double         dividend;             /* scalar dividend */
 
@@ -592,17 +664,10 @@ The
 member is an array of length one containing the input field code.
 .P
 The
-.I scalar
-member is an array of length one containing the field code specifying
-.IR cdividend ,
-or NULL if a numeric literal parameter was used.
-.P
-The
 .I cdividend
 member provides the constant dividend of the computed division.  If this value
-was specified as a
-.B CONST
-field code, this will be the numerical value of that field, and
+was specified as a scalar field code, this will be the numerical value of that
+field, and
 .IR scalar [0]
 will contain the field code itself, otherwise
 .IR scalar [0]
@@ -622,7 +687,6 @@ entry, will also provide:
 typedef struct {
   ...
 
-  const char   *scalar[1];    /* parameter field codes */
   gd_spf_t      spf;          /* samples per frame on disk */
   gd_type_t     data_type;    /* data type on disk */
 
@@ -633,18 +697,11 @@ typedef struct {
 .in
 .P
 The
-.I scalar
-member is an array of length one containing the field code specifying
-.IR spf ,
-or NULL if a numeric literal parameter was used.
-.P
-The
 .I spf
 member contains the samples per frame of the binary data on disk.  The
 .I gd_spf_t
 type is an unsigned 16-bit integer type.  If this value was specified as a
-.B CONST
-field code, this will be the numerical value of that field, and
+scalar field code, this will be the numerical value of that field, and
 .IR scalar [0]
 will contain the field code itself, otherwise
 .IR scalar [0]
@@ -692,6 +749,7 @@ gd_shift_t|shift|gd_shift_t|u.phase.shift
 double compex|cdividend|double|u.recip.cdividend[2]
 double|dividend|double|u.recip.dividend
 gd_type_t|const_type|gd_type_t|u.cons.const_type
+size_t|array_len|size_t|u.cons.array_len
 .TE
 .P
 In the case of complex valued data in the C89 API, the first element of the two

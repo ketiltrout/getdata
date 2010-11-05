@@ -60,6 +60,7 @@ namespace GetData {
     SBitEntryType     = GD_SBIT_ENTRY,
     PolynomEntryType  = GD_POLYNOM_ENTRY,
     ConstEntryType    = GD_CONST_ENTRY,
+    CarrayEntryType   = GD_CARRAY_ENTRY,
     StringEntryType   = GD_STRING_ENTRY,
     IndexEntryType    = GD_INDEX_ENTRY,
     DivideEntryType   = GD_DIVIDE_ENTRY,
@@ -101,6 +102,8 @@ namespace GetData {
       }
 
       virtual const char *Scalar(int index = 0) const;
+
+      virtual int ScalarIndex(int index = 0) const;
 
       /* RAW methods */
       virtual gd_spf_t SamplesPerFrame() const {
@@ -164,8 +167,13 @@ namespace GetData {
 
       /* CONST methods */
       virtual DataType ConstType() const {
-        return (E.field_type == GD_CONST_ENTRY) ? (DataType)E.u.cons.const_type :
-          Unknown;
+        return (E.field_type == GD_CONST_ENTRY || E.field_type ==
+            GD_CARRAY_ENTRY) ? (DataType)E.u.cons.const_type : Unknown;
+      };
+
+      /* CARRAY methods */
+      virtual size_t ArrayLen() const {
+        return (E.field_type == GD_CARRAY_ENTRY) ? E.u.cons.array_len : 0;
       };
 
       /* POLYNOM methods */
@@ -203,9 +211,12 @@ namespace GetData {
     protected:
       Entry(const Dirfile *dirfile, const char* field_code);
 
-      static int CheckIndex(gd_entype_t field_type, int n_fields, int index);
+      static int CheckIndex(gd_entype_t field_type, int n_fields,
+          int index);
 
       void SetDirfile(const GetData::Dirfile* dirfile);
+
+      void SetScalar(int n, const char *code);
 
       gd_entry_t E;
       const Dirfile* D;

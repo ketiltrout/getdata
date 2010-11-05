@@ -265,6 +265,10 @@ int strerror_r(int, char*, size_t);
 #define write _write
 #endif
 
+#ifndef HAVE_GETDELIM
+ssize_t getdelim(char**, size_t*, int, FILE*);
+#endif
+
 
 /* maximum number of recursions */
 #define GD_MAX_RECURSE_LEVEL  32
@@ -363,6 +367,7 @@ struct _gd_private_entry {
 
   int n_meta;
   int n_meta_string;
+  int n_meta_carray;
   int n_meta_const;
   union {
     gd_entry_t** meta_entry;
@@ -375,6 +380,7 @@ struct _gd_private_entry {
   char** type_list[GD_N_ENTYPES];
   const char** string_value_list;
   void* const_value_list;
+  gd_carray_t *carray_value_list;
 
   union {
     struct { /* RAW */
@@ -390,12 +396,7 @@ struct _gd_private_entry {
       struct _gd_lut *lut;
     } GD_ANON(linterp);
     struct { /* CONST */
-      union {
-        GD_DCOMPLEXM(c);
-        double d;
-        uint64_t u;
-        int64_t i;
-      } GD_ANON(d);
+      void *d;
       int n_client;
       gd_entry_t** client;
     } GD_ANON(cons);
@@ -519,6 +520,7 @@ struct _GD_DIRFILE {
   /* field counts */
   unsigned int n_entries;
   unsigned int n_string;
+  unsigned int n_carray;
   unsigned int n_const;
   unsigned int n_meta;
   unsigned int n_dot;
@@ -546,6 +548,7 @@ struct _GD_DIRFILE {
   const char** type_list[GD_N_ENTYPES];
   const char** string_value_list;
   void* const_value_list;
+  gd_carray_t *carray_value_list;
   int list_validity;
   int type_list_validity;
 
@@ -571,6 +574,7 @@ void _GD_CLincomData(DIRFILE* D, int n, void* data1, gd_type_t return_type,
     gd_spf_t *spf, size_t n_read);
 void _GD_ConvertType(DIRFILE* D, const void *data_in, gd_type_t in_type,
     void *data_out, gd_type_t out_type, size_t n) gd_nothrow;
+gd_type_t _GD_ConstType(DIRFILE *D, gd_type_t type);
 size_t _GD_DoField(DIRFILE*, gd_entry_t*, int, off64_t, size_t, gd_type_t,
     void*);
 size_t _GD_DoFieldOut(DIRFILE*, gd_entry_t*, int, off64_t, size_t, gd_type_t,
@@ -584,7 +588,7 @@ void _GD_FixEndianness(char* databuffer, size_t size, size_t ns);
 void _GD_Flush(DIRFILE* D, gd_entry_t *E);
 void _GD_FlushMeta(DIRFILE* D, int fragment, int force);
 void _GD_FreeE(gd_entry_t* E, int priv);
-int _GD_GetLine(FILE *fp, char *line, int* linenum);
+char *_GD_GetLine(FILE *fp, size_t *n, int* linenum);
 int _GD_GetRepr(DIRFILE*, const char*, char**);
 gd_spf_t _GD_GetSPF(DIRFILE* D, gd_entry_t* E);
 int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,
@@ -609,8 +613,9 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned long int encoding,
     char* new_filebase);
 gd_type_t _GD_NativeType(DIRFILE* D, gd_entry_t* E, int repr);
 gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, char** in_cols,
-    const gd_entry_t* parent, const char* format_file, int linenum,
-    int me, int standards, int creat, int pedantic, int insert);
+    const gd_entry_t* P, const char* format_file, int linenum, int me,
+    int standards, int creat, int pedantic, int insert, char **outstring,
+    const char *tok_pos);
 char* _GD_ParseFragment(FILE* fp, DIRFILE *D, int me, int* standards,
     unsigned long int *flags);
 void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E);
@@ -620,9 +625,9 @@ void _GD_SetError(DIRFILE* D, int error, int suberror, const char* format_file,
     int line, const char* token);
 int _GD_SetTablePath(DIRFILE *D, gd_entry_t *E, struct _gd_private_entry *e);
 int _GD_Supports(DIRFILE* D, gd_entry_t* E, unsigned int funcs);
-int _GD_Tokenise(DIRFILE *D, const char* instring, char* outstring,
-    char** in_cols, const char* format_file, int linenum, int standards,
-    int pedantic);
+int _GD_Tokenise(DIRFILE *D, const char* instring, char **outstring,
+    const char **pos, char** in_cols, const char* format_file, int linenum,
+    int standards, int pedantic);
 char* _GD_ValidateField(const gd_entry_t* parent, const char* field_code,
     int standards, int pedantic, int* is_dot);
 

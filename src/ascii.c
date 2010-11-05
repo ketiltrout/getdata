@@ -353,11 +353,11 @@ off64_t _GD_AsciiSize(struct _gd_raw_file* file,
     gd_type_t data_type __gd_unused)
 {
   FILE* stream;
-  char buffer[GD_MAX_LINE_LENGTH];
+  char *buffer = NULL;
+  size_t len = 0;
+  off64_t n = 0;
 
   dtrace("%p, <unused>", file);
-
-  off64_t n = 0;
 
   stream = fopen(file->name, "r" FOPEN_TEXT);
 
@@ -366,9 +366,9 @@ off64_t _GD_AsciiSize(struct _gd_raw_file* file,
     return -1;
   }
 
-  while (!feof(stream))
-    if (fgets(buffer, FILENAME_MAX, stream) != NULL)
-      n++;
+  while (getdelim(&buffer, &len, '\n', stream) != -1)
+    n++;
+  free(buffer);
 
   fclose(stream);
 

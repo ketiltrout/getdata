@@ -142,7 +142,7 @@ Subroutines interacting with data
 
   Output:
     INTEGER n_read
-    <datatype>*<n> data_out
+    <datatype> data_out(n)
   Input:
     INTEGER dirfile_unit, field_code_len, first_frame, first_sample
     INTEGER num_frames, num_samples, return_type
@@ -154,26 +154,51 @@ Subroutines interacting with data
   parameters defined in getdata.f (see below).  data_out must be of sufficient
   length and of appropriate data type width for the data returned.
 
-* GDGTCO(n_read, dirfile_unit, field_code, field_code_len, return_type,
+* GDGTCA(dirfile_unit, field_code, field_code_len, return_type, data_out)
+
+  Output:
+    <datatype> data_out(array_len)
+  Input:
+    INTEGER dirfile_unit, field_code_len, return_type
+    CHARACTER*<field_code_len> field_code
+
+  This wraps gd_get_carray(3), with the same input arguments (field_code_len
+  should contain the string length of the field_code).  The return_type
+  parameter should be one of the parameters defined in getdata.f.  data_out must
+  be of appropriate data type width and length for the data returned.
+
+* GDGCAS(dirfile_unit, field_code, field_code_len, start, n, return_type,
   data_out)
 
   Output:
-    INTEGER n_read
+    <datatype> data_out(array_len)
+  Input:
+    INTEGER dirfile_unit, field_code_len, return_type, start, n
+    CHARACTER*<field_code_len> field_code
+
+  This wraps gd_get_carray_slice(3), with the same input arguments
+  (field_code_len should contain the string length of the field_code).  The
+  return_type parameter should be one of the parameters defined in getdata.f.
+  data_out must be of appropriate data type width and length for the data
+  returned.
+
+* GDGTCO(dirfile_unit, field_code, field_code_len, return_type, data_out)
+
+  Output:
     <datatype> data_out
   Input:
     INTEGER dirfile_unit, field_code_len, return_type
     CHARACTER*<field_code_len> field_code
 
   This wraps gd_get_constant(3), with the same input arguments (field_code_len
-  should contain the string length of the field_code).  If the call is
-  successful, n_read will be non-zero.  The return_type parameter should be one
-  of the parameters defined in getdata.f.  data_out must be of appropriate data
-  type width for the data returned.
+  should contain the string length of the field_code).  The return_type
+  parameter should be one of the parameters defined in getdata.f.  data_out must
+  be of appropriate data type width for the data returned.
 
-* GDGTST(n_read, dirfile_unit, field_code, field_code_len, len, data_out)
+* GDGTST(size, dirfile_unit, field_code, field_code_len, len, data_out)
 
   Output:
-    INTEGER n_read
+    INTEGER size
     CHARACTER*<len> data_out
   Input:
     INTEGER dirfile_unit, field_code_len, len
@@ -181,7 +206,7 @@ Subroutines interacting with data
 
   This wraps gd_get_string(3), with the same input arguments (field_code_len
   should contain the string length of the field_code).  The number of characters
-  actually read is returned in n_read.  At most len characters will be returned.
+  actually read is returned in size.  At most len characters will be returned.
 
 * GDPUTD(n_wrote, dirfile_unit, field_code, field_code_len, first_frame,
   first_sample, num_frames, num_samples, data_type, data_in)
@@ -192,7 +217,7 @@ Subroutines interacting with data
     INTEGER dirfile_unit, field_code_len, first_frame, first_sample
     INTEGER num_frames, num_samples, data_type
     CHARACTER*<field_code_len> field_code
-    <datatype>*<n> data_out
+    <datatype> data_out(n)
 
   This wraps gd_putdata(3), with the same input arguments (field_code_len should
   contain the string length of the field_code).  The number of samples actually
@@ -200,25 +225,43 @@ Subroutines interacting with data
   parameters defined in getdata.f.  data_in must be of sufficient length and
   of appropriate data type width for the data input.
 
-* GDPTCO(n_read, dirfile_unit, field_code, field_code_len, data_type,
-  data_in)
+* GDPTCA(dirfile_unit, field_code, field_code_len, data_type, data_in)
 
-  Output:
-    INTEGER n_wrote
+  Input:
+    INTEGER dirfile_unit, field_code_len, data_type
+    CHARACTER*<field_code_len> field_code
+    <datatype> data_in(array_len)
+
+  This wraps gd_put_carray(3), with the same input arguments (field_code_len
+  should contain the string length of the field_code).  The data_type parameter
+  should be one of the parameters defined in getdata.f.
+
+* GDPCAS(dirfile_unit, field_code, field_code_len, start, n, data_type, data_in)
+
+  Input:
+    INTEGER dirfile_unit, field_code_len, data_type
+    CHARACTER*<field_code_len> field_code
+    <datatype> data_in(n)
+
+  This wraps gd_put_carray_slice(3), with the same input arguments
+  (field_code_len should contain the string length of the field_code).  The
+  data_type parameter should be one of the parameters defined in getdata.f.
+
+* GDPTCO(dirfile_unit, field_code, field_code_len, data_type, data_in)
+
   Input:
     INTEGER dirfile_unit, field_code_len, data_type
     CHARACTER*<field_code_len> field_code
     <datatype> data_in
 
   This wraps gd_put_constant(3), with the same input arguments (field_code_len
-  should contain the string length of the field_code).  If the call is
-  successful, n_wrote will be non-zero.  The data_type parameter should be one
-  of the parameters defined in getdata.f.
+  should contain the string length of the field_code).  The data_type parameter
+  should be one of the parameters defined in getdata.f.
 
-* GDPTST(n_read, dirfile_unit, field_code, field_code_len, len, data_out)
+* GDPTST(size, dirfile_unit, field_code, field_code_len, len, data_out)
 
   Output:
-    INTEGER n_wrote
+    INTEGER size
   Input:
     INTEGER dirfile_unit, field_code_len, len
     CHARACTER*<field_code_len> field_code
@@ -226,8 +269,8 @@ Subroutines interacting with data
 
   This wraps gd_put_string(3), with the same input arguments (field_code_len
   should contain the string length of the field_code, and len should contain the
-  string length of data_in).  The number of characters actually wrote is
-  returned in n_wrote.
+  string length of data_in).  The number of characters actually written is
+  returned in size.
 
 * GDVLDT(invalid, dirfile_unit, field_code, field_code_len)
 
@@ -891,6 +934,19 @@ Subroutines interacting with field metadata
   This is equivalent to GDGECP above, but returns only the real part of the
   coefficients.
 
+* GDGECO(const_type, array_len, fragment_index, dirfile_unit, field_code,
+  field_code_len)
+
+  Output: 
+    INTEGER const_type, array_len, fragment_index
+  Input:
+    INTEGER dirfile_unit, field_code_len
+    CHARACTER*<field_code_len> field_code
+
+  This subroutine returns metadata describing a CARRAY field.  If field_code
+  is not found, or the field specified is not of CARRAY type, const_type will
+  be set to zero.  In this case the value of the remaining data is unspecified.
+
 * GDGECO(const_type, fragment_index, dirfile_unit, field_code, field_code_len)
 
   Output: 
@@ -902,6 +958,18 @@ Subroutines interacting with field metadata
   This subroutine returns metadata describing a CONST field.  If field_code
   is not found, or the field specified is not of CONST type, const_type will
   be set to zero.  In this case the value of the remaining data is unspecified.
+
+* GDCALN(array_len, dirfile_unit, field_code, field_code_len)
+
+  Output:
+    INTEGER array_len
+  Input:
+    INTEGER dirfile_unit, field_code_len
+    CHARACTER*<field_code_len> field_code
+
+  This wraps gd_carray_len(3).  The field_code_len parameter should contain the
+  string length of field_code.  The length of the field will be returned in
+  array_len.
 
 * GDGSPF(spf, dirfile_unit, field_code, field_code_len)
 
@@ -1120,12 +1188,20 @@ Subroutines interacting with field metadata
   This subroutine wraps gd_alter_recip(3), and modifies the specified field
   metadata.
 
+* GDALCA(dirfile_unit, field_code, field_code_len, const_type, array_len)
+
+  Input:
+    INTEGER dirfile_unit, field_code_len, const_type, array_len
+    CHARACTER*<field_code_len> field_code
+
+  This subroutine wraps gd_alter_carray(3), and modifies the specified field
+  metadata.
+
 * GDALCO(dirfile_unit, field_code, field_code_len, const_type)
 
   Input:
     INTEGER dirfile_unit, field_code_len, const_type
     CHARACTER*<field_code_len> field_code
-    <data_type> value
 
   This subroutine wraps gd_alter_const(3), and modifies the specified field
   metadata.
@@ -1212,10 +1288,12 @@ Subroutines interacting with field metadata
   specified field is not a LINCOM or POLYNOM, the return value will not be
   meaningful.
 
-* GDGSCA(scalar, scalar_len, dirfile_unit, field_code, field_code_len, index)
+* GDGSCA(scalar, scalar_len, scalar_index, dirfile_unit, field_code,
+  field_code_len, index)
 
   Output:
     CHARACTER*<scalar_len> scalar
+    INTEGER scalar_index
   Input/Output:
     INTEGER scalar_len
   Input:
@@ -1228,17 +1306,19 @@ Subroutines interacting with field metadata
   indexed starting from one.
 
 * GDGACA(dirfile_unit, field_code, field_code_len, index, scalar, scalar_len,
-  recode)
+  scalar_index, recode)
 
   Input:
     INTEGER dirfile_unit, field_code_len, scalar_len, index, recode
+    INTEGER scalar_index
     CHARACTER*<field_code_len> field_code
     CHARACTER*<scalar_len> scalar
 
   This subroutine modifies the element indexed by index of the scalar array
   member of the gd_entry_t object associated with the specified field code.  If
   index is too large for the specified field, nothing happens.  The array is
-  indexed starting from one.
+  indexed starting from one.  If scalar indicates a CONST field, sclaar_index
+  is ignored.
 
 
 Subroutines which add or delete fields
@@ -1424,6 +1504,20 @@ Subroutines which add or delete fields
   This subroutine adds a PHASE field with the supplied parameters to the
   specified format file fragment of the dirfile.
 
+* GDADCA(dirfile_unit, field_code, field_code_len, const_type, array_len,
+  data_type, data, fragment_index)
+
+  Input:
+    INTEGER dirfile_unit, field_code_len, const_type, data_type, fragment_index
+    INTEGER array_len
+    CHARACTER*<field_code_len> field_code
+    <data_type> data(array_len)
+
+  This subroutine adds a CARRAY field with the supplied parameters to the
+  specified format file fragment of the dirfile.  const_type is the data type
+  of the field when stored in the dirfile.  data_type is the data type of the
+  supplied data.  These need not be the same.
+
 * GDADCO(dirfile_unit, field_code, field_code_len, const_type, data_type,
   value, fragment_index)
 
@@ -1495,6 +1589,8 @@ Subroutines which add or delete fields
   in_field_len, dividend)
 * GDMDSB(dirfile_unit, parent, parent_len, field_code, field_code_len, in_field,
   in_field_len, bitnum, numbits)
+* GDMDCA(dirfile_unit, parent, parent_len, field_code, field_code_len,
+  const_type, array_len, data_type, data)
 * GDMDCO(dirfile_unit, parent, parent_len, field_code, field_code_len,
   const_type, data_type, value)
 * GDMDST(dirfile_unit, parent, parent_len, field_code, field_code_len, value,
@@ -1548,6 +1644,8 @@ Error codes (returned by GDEROR):
   GD_ERP          GD_E_BAD_REPR
   GD_EVR          GD_E_BAD_VERSION
   GD_EFL          GD_E_FLUSH
+  GD_EBO          GD_E_BOUNDS
+  GD_ETL          GD_E_LINE_TOO_LONG
 
 Dirfile flags (required by GDOPEN, GDCOPN, and GDINCL):
 
@@ -1595,6 +1693,7 @@ Entry types (required by GDFLDT):
   GD_DVE          GD_DIVIDE_ENTRY
   GD_RCE          GD_RECIP_ENTRY
   GD_COE          GD_CONST_ENTRY
+  GD_CAE          GD_CARRAY_ENTRY
   GD_STE          GD_STRING_ENTRY
 
 Data types.  Note, Fortran does not support unsigned data types, but GDGERW may

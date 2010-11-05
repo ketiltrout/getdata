@@ -47,6 +47,8 @@ namespace GetData {
 
       const char *Scalar() const { return E.scalar[0]; };
 
+      virtual int ScalarIndex() const { return E.scalar_ind[0]; };
+
     private:
       PhaseEntry(const GetData::Dirfile *dirfile, const char* field_code) :
         Entry(dirfile, field_code) { };

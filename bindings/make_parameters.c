@@ -72,6 +72,8 @@ static struct {
   CONSTANT(E_BAD_REPR,       "GD_ERP", 0),
   CONSTANT(E_BAD_VERSION,    "GD_EVR", 0),
   CONSTANT(E_FLUSH,          "GD_EFL", 0),
+  CONSTANT(E_BOUNDS,         "GD_EBO", 0),
+  CONSTANT(E_LINE_TOO_LONG,  "GD_ETL", 0),
 
   CONSTANT(RDONLY,           "GD_RO",  1),
   CONSTANT(RDWR,             "GD_RW",  1),
@@ -112,6 +114,7 @@ static struct {
   CONSTANT(DIVIDE_ENTRY,     "GD_DVE", 3),
   CONSTANT(RECIP_ENTRY,      "GD_RCE", 3),
   CONSTANT(CONST_ENTRY,      "GD_COE", 3),
+  CONSTANT(CARRAY_ENTRY,     "GD_CAE", 3),
   CONSTANT(STRING_ENTRY,     "GD_STE", 3),
 
   CONSTANT(NULL,             "GD_NUL", 4),

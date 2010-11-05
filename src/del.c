@@ -73,6 +73,7 @@ static void _GD_ClearDerived(DIRFILE* D, gd_entry_t* E, const gd_entry_t* C,
     case GD_RAW_ENTRY:
     case GD_INDEX_ENTRY:
     case GD_CONST_ENTRY:
+    case GD_CARRAY_ENTRY:
     case GD_STRING_ENTRY:
       break;
   }
@@ -106,7 +107,8 @@ static int _GD_DeReferenceOne(DIRFILE* D, gd_entry_t* E, gd_entry_t* C,
         dreturn("%i", 1);
         return 1;
       } else {
-        _GD_DoField(D, C, repr, 0, 1, type, data);
+        _GD_DoField(D, C, repr, (C->field_type == GD_CONST_ENTRY) ? 0 :
+            E->scalar_ind[i], 1, type, data);
         free(E->scalar[i]);
         E->scalar[i] = NULL;
       }
@@ -180,6 +182,7 @@ static void _GD_DeReference(DIRFILE* D, gd_entry_t* E, gd_entry_t* C,
     case GD_DIVIDE_ENTRY:
     case GD_STRING_ENTRY:
     case GD_CONST_ENTRY:
+    case GD_CARRAY_ENTRY:
     case GD_INDEX_ENTRY:
       break;
   }
@@ -290,7 +293,9 @@ int gd_delete(DIRFILE* D, const char* field_code_in, int flags)
   if (~flags & GD_DEL_FORCE)
     for (j = 0; j < D->n_entries; ++j)
       for (i = 0; i < n_del; ++i) {
-        if (del_list[i]->field_type == GD_CONST_ENTRY && ~flags & GD_DEL_DEREF)
+        if ((del_list[i]->field_type == GD_CONST_ENTRY ||
+              del_list[i]->field_type == GD_CARRAY_ENTRY) &&
+            ~flags & GD_DEL_DEREF)
           _GD_DeReference(D, D->entry[j], del_list[i], 1);
         else if (~del_list[i]->field_type & GD_SCALAR_ENTRY)
           _GD_ClearDerived(D, D->entry[j], del_list[i], 1);
@@ -412,7 +417,8 @@ int gd_delete(DIRFILE* D, const char* field_code_in, int flags)
   /* Clear clients and derived fields */
   for (j = 0; j < D->n_entries; ++j)
     for (i = 0; i < n_del; ++i)
-      if (del_list[i]->field_type == GD_CONST_ENTRY && flags & GD_DEL_DEREF)
+      if ((del_list[i]->field_type == GD_CONST_ENTRY ||
+            del_list[i]->field_type == GD_CARRAY_ENTRY) && flags & GD_DEL_DEREF)
         _GD_DeReference(D, D->entry[j], del_list[i], 0);
       else if (~del_list[i]->field_type & GD_SCALAR_ENTRY)
         _GD_ClearDerived(D, D->entry[j], del_list[i], 0);
@@ -420,30 +426,56 @@ int gd_delete(DIRFILE* D, const char* field_code_in, int flags)
   free(del_list);
 
   /* Remove meta fields, if present */
-  if (E->e->n_meta > 0) {
-    /* Remove all meta fields -- there are no RAW fields here */
-    for (j = first; j <= last; ++j)
-      _GD_FreeE(D->entry[j], 1);
+  if (E->e->n_meta >= 0) {
+    if (E->e->n_meta > 0) {
+      /* Remove all meta fields -- there are no RAW fields here */
+      for (j = first; j <= last; ++j)
+        _GD_FreeE(D->entry[j], 1);
 
-    memmove(D->entry + first, D->entry + last + 1,
-        sizeof(gd_entry_t*) * (D->n_entries - last - 1));
-    D->n_meta -= last - first + 1;
-    D->n_entries -= last - first + 1;
+      memmove(D->entry + first, D->entry + last + 1,
+          sizeof(gd_entry_t*) * (D->n_entries - last - 1));
+      D->n_meta -= last - first + 1;
+      D->n_entries -= last - first + 1;
+    }
+
+    if (E->field_type == GD_CONST_ENTRY)
+      D->n_const--;
+    else if (E->field_type == GD_CARRAY_ENTRY)
+      D->n_carray--;
+    else if (E->field_type == GD_STRING_ENTRY)
+      D->n_string--;
+  } else {
+    /* If this is a metafield, update its parent's lists */
+    struct _gd_private_entry *Pe = E->e->p.parent->e;
+
+    /* search and destroy */
+    for (i = 0; i < Pe->n_meta; ++i) 
+      if (Pe->p.meta_entry[i] == E) {
+        Pe->p.meta_entry[i] = Pe->p.meta_entry[Pe->n_meta - 1];
+        break;
+      }
+
+    Pe->n_meta--;
+    if (E->field_type == GD_CONST_ENTRY)
+      Pe->n_meta_const--;
+    else if (E->field_type == GD_CARRAY_ENTRY)
+      Pe->n_meta_carray--;
+    else if (E->field_type == GD_STRING_ENTRY)
+      Pe->n_meta_string--;
   }
 
   /* Remove the entry from the list -- we need not worry about the way we've
    * already modified D->entry, since E is guaranteed to be before the stuff
    * we've already removed */
-  if (E->field_type == GD_CONST_ENTRY)
-    D->n_const--;
-  else if (E->field_type == GD_STRING_ENTRY)
-    D->n_string--;
-
   _GD_FreeE(E, 1);
 
   memmove(D->entry + index, D->entry + index + 1,
       sizeof(gd_entry_t *) * (D->n_entries - index - 1));
   D->n_entries--;
+
+  /* Invalidate the field lists */
+  D->list_validity = 0;
+  D->type_list_validity = 0;
 
   dreturn("%i", 0);
   return 0;

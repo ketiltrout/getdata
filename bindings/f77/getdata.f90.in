@@ -29,9 +29,10 @@ integer, parameter :: GD_FIELD_LEN=@GD_MAX_LINE_LENGTH@
 
 type gd_entry
   integer :: field_type, n_fields, spf, data_type, bitnum, numbits, shift
-  integer :: fragment_index, comp_scal, poly_ord
+  integer :: fragment_index, comp_scal, poly_ord, array_len
   character (len=GD_FIELD_LEN), dimension(3) :: field
   character (len=GD_FIELD_LEN), dimension(6) :: scalar
+  integer, dimension(6) :: scalar_ind
   double precision, dimension(3) :: m, b
   double precision, dimension(6) :: a
   double precision :: dividend
@@ -217,111 +218,101 @@ function fgd_getdata_c16 (dirfile, field_code, first_frame, first_sample, &
 end function
 
 !get_constant with return_type=GD_NULL
-function fgd_get_constant_n (dirfile, field_code)
-  integer :: fgd_get_constant_n
+subroutine fgd_get_constant_n (dirfile, field_code)
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: field_code
   
   ! call f77 library
-  call gdgtco(fgd_get_constant_n, dirfile, TRIM(field_code), &
-  LEN_TRIM(field_code), GD_NULL, 0)
-end function
+  call gdgtco(dirfile, TRIM(field_code), LEN_TRIM(field_code), GD_NULL, 0)
+end subroutine
 
 !get_constant with return_type=GD_INT8
-function fgd_get_constant_i1 (dirfile, field_code, data_out)
-  integer :: fgd_get_constant_i1
+subroutine fgd_get_constant_i1 (dirfile, field_code, data_out)
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: field_code
   integer*1, intent(out)  :: data_out
   
   ! call f77 library
-  call gdgtco(fgd_get_constant_i1, dirfile, TRIM(field_code), &
-  LEN_TRIM(field_code), GD_INT8, data_out)
-end function
+  call gdgtco(dirfile, TRIM(field_code), LEN_TRIM(field_code), GD_INT8, &
+  data_out)
+end subroutine
 
 !get_constant with return_type=GD_INT16
-function fgd_get_constant_i2 (dirfile, field_code, data_out)
-  integer :: fgd_get_constant_i2
+subroutine fgd_get_constant_i2 (dirfile, field_code, data_out)
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: field_code
   integer*2, intent(out)  :: data_out
   
   ! call f77 library
-  call gdgtco(fgd_get_constant_i2, dirfile, TRIM(field_code), &
-  LEN_TRIM(field_code), GD_INT16, data_out)
-end function
+  call gdgtco(dirfile, TRIM(field_code), LEN_TRIM(field_code), GD_INT16, &
+  data_out)
+end subroutine
 
 !get_constant with return_type=GD_INT32
-function fgd_get_constant_i4 (dirfile, field_code, data_out)
-  integer :: fgd_get_constant_i4
+subroutine fgd_get_constant_i4 (dirfile, field_code, data_out)
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: field_code
   integer*4, intent(out)  :: data_out
   
   ! call f77 library
-  call gdgtco(fgd_get_constant_i4, dirfile, TRIM(field_code), &
-  LEN_TRIM(field_code), GD_INT32, data_out)
-end function
+  call gdgtco(dirfile, TRIM(field_code), LEN_TRIM(field_code), GD_INT32, &
+  data_out)
+end subroutine
 
 !get_constant with return_type=GD_INT64
-function fgd_get_constant_i8 (dirfile, field_code, data_out)
-  integer :: fgd_get_constant_i8
+subroutine fgd_get_constant_i8 (dirfile, field_code, data_out)
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: field_code
   integer*8, intent(out)  :: data_out
   
   ! call f77 library
-  call gdgtco(fgd_get_constant_i8, dirfile, TRIM(field_code), &
-  LEN_TRIM(field_code), GD_INT64, data_out)
-end function
+  call gdgtco(dirfile, TRIM(field_code), LEN_TRIM(field_code), GD_INT64, &
+  data_out)
+end subroutine
 
 !get_constant with return_type=GD_FLOAT32
-function fgd_get_constant_r4 (dirfile, field_code, data_out)
-  integer :: fgd_get_constant_r4
+subroutine fgd_get_constant_r4 (dirfile, field_code, data_out)
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: field_code
   real*4, intent(out)  :: data_out
   
   ! call f77 library
-  call gdgtco(fgd_get_constant_r4, dirfile, TRIM(field_code), &
-  LEN_TRIM(field_code), GD_FLOAT32, data_out)
-end function
+  call gdgtco(dirfile, TRIM(field_code), LEN_TRIM(field_code), GD_FLOAT32, &
+  data_out)
+end subroutine
 
 !get_constant with return_type=GD_FLOAT64
-function fgd_get_constant_r8 (dirfile, field_code, data_out)
-  integer :: fgd_get_constant_r8
+subroutine fgd_get_constant_r8 (dirfile, field_code, data_out)
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: field_code
   double precision, intent(out)  :: data_out
   
   ! call f77 library
-  call gdgtco(fgd_get_constant_r8, dirfile, TRIM(field_code), &
-  LEN_TRIM(field_code), GD_FLOAT64, data_out)
-end function
+  call gdgtco(dirfile, TRIM(field_code), LEN_TRIM(field_code), GD_FLOAT64, &
+  data_out)
+end subroutine
 
 !get_constant with return_type=GD_COMPLEX64
-function fgd_get_constant_c8 (dirfile, field_code, data_out)
-  integer :: fgd_get_constant_c8
+subroutine fgd_get_constant_c8 (dirfile, field_code, data_out)
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: field_code
   complex, intent(out)  :: data_out
   
   ! call f77 library
-  call gdgtco(fgd_get_constant_c8, dirfile, TRIM(field_code), &
-  LEN_TRIM(field_code), GD_COMPLEX64, data_out)
-end function
+  call gdgtco(dirfile, TRIM(field_code), LEN_TRIM(field_code), GD_COMPLEX64, &
+  data_out)
+end subroutine
 
 !get_constant with return_type=GD_COMPLEX128
-function fgd_get_constant_c16 (dirfile, field_code, data_out)
-  integer :: fgd_get_constant_c16
+subroutine fgd_get_constant_c16 (dirfile, field_code, data_out)
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: field_code
   double complex, intent(out)  :: data_out
   
   ! call f77 library
-  call gdgtco(fgd_get_constant_c16, dirfile, TRIM(field_code), &
-  LEN_TRIM(field_code), GD_COMPLEX128, data_out)
-end function
+  call gdgtco(dirfile, TRIM(field_code), LEN_TRIM(field_code), GD_COMPLEX128, &
+  data_out)
+end subroutine
 
 function fgd_get_string (dirfile, field_code, length, data_out)
   integer :: fgd_get_string
@@ -675,100 +666,91 @@ function fgd_putdata_c16 (dirfile, field_code, first_frame, first_sample, &
 end function
 
 ! put_constant with data_type=GD_INT8
-function fgd_put_constant_i1 (dirfile, field_code, data_in)
-  integer :: fgd_put_constant_i1
+subroutine fgd_put_constant_i1 (dirfile, field_code, data_in)
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: field_code
   integer*1, intent(in) :: data_in
 
   ! call f77 library
-  call gdptco(fgd_put_constant_i1, dirfile, TRIM(field_code), &
-  LEN_TRIM(field_code), GD_INT8, data_in)
-end function
+  call gdptco(dirfile, TRIM(field_code), LEN_TRIM(field_code), GD_INT8, data_in)
+end subroutine
 
 ! put_constant with data_type=GD_INT16
-function fgd_put_constant_i2 (dirfile, field_code, data_in)
-  integer :: fgd_put_constant_i2
+subroutine fgd_put_constant_i2 (dirfile, field_code, data_in)
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: field_code
   integer*2, intent(in) :: data_in
 
   ! call f77 library
-  call gdptco(fgd_put_constant_i2, dirfile, TRIM(field_code), &
-  LEN_TRIM(field_code), GD_INT16, data_in)
-end function
+  call gdptco(dirfile, TRIM(field_code), LEN_TRIM(field_code), GD_INT16, &
+  data_in)
+end subroutine
 
 ! put_constant with data_type=GD_INT32
-function fgd_put_constant_i4 (dirfile, field_code, data_in)
-  integer :: fgd_put_constant_i4
+subroutine fgd_put_constant_i4 (dirfile, field_code, data_in)
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: field_code
   integer*4, intent(in) :: data_in
 
   ! call f77 library
-  call gdptco(fgd_put_constant_i4, dirfile, TRIM(field_code), &
-  LEN_TRIM(field_code), GD_INT32, data_in)
-end function
+  call gdptco(dirfile, TRIM(field_code), LEN_TRIM(field_code), GD_INT32, &
+  data_in)
+end subroutine
 
 ! put_constant with data_type=GD_INT64
-function fgd_put_constant_i8 (dirfile, field_code, data_in)
-  integer :: fgd_put_constant_i8
+subroutine fgd_put_constant_i8 (dirfile, field_code, data_in)
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: field_code
   integer*8, intent(in) :: data_in
 
   ! call f77 library
-  call gdptco(fgd_put_constant_i8, dirfile, TRIM(field_code), &
-  LEN_TRIM(field_code), GD_INT64, data_in)
-end function
+  call gdptco(dirfile, TRIM(field_code), LEN_TRIM(field_code), GD_INT64, &
+  data_in)
+end subroutine
 
 ! put_constant with data_type=GD_FLOAT32
-function fgd_put_constant_r4 (dirfile, field_code, data_in)
-  integer :: fgd_put_constant_r4
+subroutine fgd_put_constant_r4 (dirfile, field_code, data_in)
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: field_code
   real*4, intent(in) :: data_in
 
   ! call f77 library
-  call gdptco(fgd_put_constant_r4, dirfile, TRIM(field_code), &
-  LEN_TRIM(field_code), GD_FLOAT32, data_in)
-end function
+  call gdptco(dirfile, TRIM(field_code), LEN_TRIM(field_code), GD_FLOAT32, &
+  data_in)
+end subroutine
 
 ! put_constant with data_type=GD_FLOAT64
-function fgd_put_constant_r8 (dirfile, field_code, data_in)
-  integer :: fgd_put_constant_r8
+subroutine fgd_put_constant_r8 (dirfile, field_code, data_in)
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: field_code
   double precision, intent(in) :: data_in
 
   ! call f77 library
-  call gdptco(fgd_put_constant_r8, dirfile, TRIM(field_code), &
-  LEN_TRIM(field_code), GD_FLOAT64, data_in)
-end function
+  call gdptco(dirfile, TRIM(field_code), LEN_TRIM(field_code), GD_FLOAT64, &
+  data_in)
+end subroutine
 
 ! put_constant with data_type=GD_COMPLEX64
-function fgd_put_constant_c8 (dirfile, field_code, data_in)
-  integer :: fgd_put_constant_c8
+subroutine fgd_put_constant_c8 (dirfile, field_code, data_in)
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: field_code
   complex, intent(in) :: data_in
 
   ! call f77 library
-  call gdptco(fgd_put_constant_c8, dirfile, TRIM(field_code), &
-  LEN_TRIM(field_code), GD_COMPLEX64, data_in)
-end function
+  call gdptco(dirfile, TRIM(field_code), LEN_TRIM(field_code), GD_COMPLEX64, &
+  data_in)
+end subroutine
 
 ! put_constant with data_type=GD_COMPLEX128
-function fgd_put_constant_c16 (dirfile, field_code, data_in)
-  integer :: fgd_put_constant_c16
+subroutine fgd_put_constant_c16 (dirfile, field_code, data_in)
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: field_code
   double complex, intent(in) :: data_in
 
   ! call f77 library
-  call gdptco(fgd_put_constant_c16, dirfile, TRIM(field_code), &
-  LEN_TRIM(field_code), GD_COMPLEX128, data_in)
-end function
+  call gdptco(dirfile, TRIM(field_code), LEN_TRIM(field_code), GD_COMPLEX128, &
+  data_in)
+end subroutine
 
 function fgd_put_string (dirfile, field_code, data_in)
   integer :: fgd_put_string
@@ -814,8 +796,8 @@ function fgd_entry (dirfile, field_code, ent)
     ! raw
     call gdgerw(ent%spf, ent%data_type, ent%fragment_index, dirfile, &
     TRIM(field_code), LEN_TRIM(field_code))
-    call gdgsca(ent%scalar(1), len1, dirfile, TRIM(field_code), &
-    LEN_TRIM(field_code), 1)
+    call gdgsca(ent%scalar(1), len1, ent%scalar_ind(1), dirfile, &
+    TRIM(field_code), LEN_TRIM(field_code), 1)
   else if (fgd_entry .EQ. GD_LINCOM_ENTRY) then
     ! lincom
     call gdcscl(ent%comp_scal, dirfile, TRIM(field_code), LEN_TRIM(field_code))
@@ -832,8 +814,8 @@ function fgd_entry (dirfile, field_code, ent)
     end if
     do i=1,6
       len1 = GD_FIELD_LEN
-      call gdgsca(ent%scalar(i), len1, dirfile, TRIM(field_code), &
-      LEN_TRIM(field_code), i)
+      call gdgsca(ent%scalar(i), len1, ent%scalar_ind(i), dirfile, &
+      TRIM(field_code), LEN_TRIM(field_code), i)
     end do
   else if (fgd_entry .EQ. GD_LINTERP_ENTRY) then
     ! linterp
@@ -843,18 +825,21 @@ function fgd_entry (dirfile, field_code, ent)
     ! bit
     call gdgebt(ent%field(1), len1, ent%bitnum, ent%numbits, &
     ent%fragment_index, dirfile, TRIM(field_code), LEN_TRIM(field_code))
-    call gdgsca(ent%scalar(1), len1, dirfile, TRIM(field_code), &
-    LEN_TRIM(field_code), 1)
-    call gdgsca(ent%scalar(2), len1, dirfile, TRIM(field_code), &
-    LEN_TRIM(field_code), 2)
+    len1 = GD_FIELD_LEN
+    call gdgsca(ent%scalar(1), len1, ent%scalar_ind(1), dirfile, &
+    TRIM(field_code), LEN_TRIM(field_code), 1)
+    len1 = GD_FIELD_LEN
+    call gdgsca(ent%scalar(2), len1, ent%scalar_ind(1), dirfile, &
+    TRIM(field_code), LEN_TRIM(field_code), 2)
   else if (fgd_entry .EQ. GD_SBIT_ENTRY) then
     ! sbit
     call gdgesb(ent%field(1), len1, ent%bitnum, ent%numbits, &
     ent%fragment_index, dirfile, TRIM(field_code), LEN_TRIM(field_code))
-    call gdgsca(ent%scalar(1), len1, dirfile, TRIM(field_code), &
-    LEN_TRIM(field_code), 1)
-    call gdgsca(ent%scalar(2), len1, dirfile, TRIM(field_code), &
-    LEN_TRIM(field_code), 2)
+    call gdgsca(ent%scalar(1), len1, ent%scalar_ind(1), dirfile, &
+    TRIM(field_code), LEN_TRIM(field_code), 1)
+    len1 = GD_FIELD_LEN
+    call gdgsca(ent%scalar(2), len1, ent%scalar_ind(2), dirfile, &
+    TRIM(field_code), LEN_TRIM(field_code), 2)
   else if (fgd_entry .EQ. GD_MULTIPLY_ENTRY) then
     ! multiply
     call gdgemt(ent%field(1), len1, ent%field(2), len2, ent%fragment_index, &
@@ -867,8 +852,9 @@ function fgd_entry (dirfile, field_code, ent)
     !phase
     call gdgeph(ent%field(1), len1, ent%shift, ent%fragment_index, dirfile, &
     TRIM(field_code), LEN_TRIM(field_code))
-    call gdgsca(ent%scalar(1), len1, dirfile, TRIM(field_code), &
-    LEN_TRIM(field_code), 1)
+    len1 = GD_FIELD_LEN
+    call gdgsca(ent%scalar(1), len1, ent%scalar_ind(1), dirfile, &
+    TRIM(field_code), LEN_TRIM(field_code), 1)
   else if (fgd_entry .EQ. GD_POLYNOM_ENTRY) then
     ! polynom
     call gdcscl(ent%comp_scal, dirfile, TRIM(field_code), LEN_TRIM(field_code))
@@ -883,8 +869,8 @@ function fgd_entry (dirfile, field_code, ent)
     end if
     do i=1,6
       len1 = GD_FIELD_LEN
-      call gdgsca(ent%scalar(i), len1, dirfile, TRIM(field_code), &
-      LEN_TRIM(field_code), i)
+      call gdgsca(ent%scalar(i), len1, ent%scalar_ind(1), dirfile, &
+      TRIM(field_code), LEN_TRIM(field_code), i)
     end do
   else if (fgd_entry .EQ. GD_RECIP_ENTRY) then
     ! recip
@@ -895,14 +881,18 @@ function fgd_entry (dirfile, field_code, ent)
     else
       call gdgerc(ent%field(1), len1, ent%dividend, ent%fragment_index, &
       dirfile, TRIM(field_code), LEN_TRIM(field_code))
-    endif
+    end if
     len1 = GD_FIELD_LEN
-    call gdgsca(ent%scalar(1), len1, dirfile, TRIM(field_code), &
-    LEN_TRIM(field_code), 1)
+    call gdgsca(ent%scalar(1), len1, ent%scalar_ind(1), dirfile, &
+    TRIM(field_code), LEN_TRIM(field_code), 1)
   else if (fgd_entry .EQ. GD_CONST_ENTRY) then
     !const
     call gdgeco(ent%data_type, ent%fragment_index, dirfile, TRIM(field_code), &
     LEN_TRIM(field_code))
+  else if (fgd_entry .EQ. GD_CARRAY_ENTRY) then
+    !carray
+    call gdgeca(ent%data_type, ent%array_len, ent%fragment_index, dirfile, &
+    TRIM(field_code), LEN_TRIM(field_code))
   else if (fgd_entry .EQ. GD_STRING_ENTRY) then
     !string
     call gdfrgi(ent%fragment_index, dirfile, TRIM(field_code), &
@@ -1002,9 +992,12 @@ subroutine fgd_add (dirfile, field_code, ent)
   else if (ent%field_type .EQ. GD_CONST_ENTRY) then
     call gdadco(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
     ent%data_type, GD_INT32, zero, ent%fragment_index)
+  else if (ent%field_type .EQ. GD_CARRAY_ENTRY) then
+    call fgd_add_carray(dirfile, field_code, ent%data_type, ent%array_len, &
+    ent%fragment_index)
   else if (ent%field_type .EQ. GD_STRING_ENTRY) then
     call gdadst(dirfile, TRIM(field_code), LEN_TRIM(field_code), nil, zero, &
-    ent%fragment_index);
+    ent%fragment_index)
   end if
 end subroutine
 
@@ -1208,7 +1201,7 @@ subroutine fgd_madd (dirfile, parent, field_code, ent)
       LEN_TRIM(field_code), ent%poly_ord, TRIM(ent%field(1)), &
       LEN_TRIM(ent%field(1)), ent%a(1), ent%a(2), ent%a(3), ent%a(4), &
       ent%a(5), ent%a(6))
-    endif
+    end if
   else if (ent%field_type .EQ. GD_RECIP_ENTRY) then
     if (ent%comp_scal .NE. 0) then
       call gdmdcr(dirfile, TRIM(parent), LEN_TRIM(parent), TRIM(field_code), &
@@ -1218,13 +1211,16 @@ subroutine fgd_madd (dirfile, parent, field_code, ent)
       call gdmdrc(dirfile, TRIM(parent), LEN_TRIM(parent), TRIM(field_code), &
       LEN_TRIM(field_code), TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), &
       ent%dividend)
-    endif
+    end if
   else if (ent%field_type .EQ. GD_PHASE_ENTRY) then
     call gdmdph(dirfile, TRIM(parent), LEN_TRIM(parent), TRIM(field_code), &
     LEN_TRIM(field_code), TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), ent%shift)
   else if (ent%field_type .EQ. GD_CONST_ENTRY) then
     call gdmdco(dirfile, TRIM(parent), LEN_TRIM(parent), TRIM(field_code), &
     LEN_TRIM(field_code), ent%data_type, GD_INT32, zero)
+  else if (ent%field_type .EQ. GD_CARRAY_ENTRY) then
+    call fgd_madd_carray(dirfile, parent, field_code, ent%data_type, &
+    ent%array_len)
   else if (ent%field_type .EQ. GD_STRING_ENTRY) then
     call gdmdst(dirfile, TRIM(parent), LEN_TRIM(parent), TRIM(field_code), &
     LEN_TRIM(field_code), nil, zero)
@@ -1579,7 +1575,7 @@ subroutine fgd_alter_entry (dirfile, field_code, ent, recode)
       call gdalpn(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
       ent%poly_ord, TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), ent%a(1), &
       ent%a(2), ent%a(3), ent%a(4), ent%a(5), ent%a(6))
-    endif
+    end if
   else if (ent%field_type .EQ. GD_RECIP_ENTRY) then
     if (ent%comp_scal .NE. 0) then
       call gdalcr(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
@@ -1587,9 +1583,12 @@ subroutine fgd_alter_entry (dirfile, field_code, ent, recode)
     else
       call gdalrc(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
       TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), ent%a(1), ent%dividend)
-    endif
+    end if
   else if (ent%field_type .EQ. GD_CONST_ENTRY) then
     call gdalco(dirfile, TRIM(field_code), LEN_TRIM(field_code), ent%data_type)
+  else if (ent%field_type .EQ. GD_CARRAY_ENTRY) then
+    call gdalca(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+    ent%data_type, ent%array_len)
   end if
 end subroutine
 
@@ -1805,5 +1804,318 @@ function fgd_dirfile_standards (dirfile, version)
 
   call gdstdv(fgd_dirfile_standards, dirfile)
 end function
+
+!gd_get_carray_slice with return_type=GD_NULL
+subroutine fgd_get_carray_n (dirfile, field_code, start, array_len)
+  integer, intent(in) :: dirfile, start, array_len
+  character (len=*), intent(in) :: field_code
+  
+  ! call f77 library
+  if (array_len .eq. 0) then
+    call gdgtca(dirfile, TRIM(field_code), LEN_TRIM(field_code), GD_NULL, 0)
+  else
+    call gdgcas(dirfile, TRIM(field_code), LEN_TRIM(field_code), start, &
+    array_len, GD_NULL, 0)
+  end if
+end subroutine
+
+!gd_get_carray_slice with return_type=GD_INT8
+subroutine fgd_get_carray_i1 (dirfile, field_code, start, array_len, data_out)
+  integer, intent(in) :: dirfile, start, array_len
+  character (len=*), intent(in) :: field_code
+  integer*1, dimension(:), intent(out)  :: data_out
+  
+  ! call f77 library
+  if (array_len .eq. 0) then
+    call gdgtca(dirfile, TRIM(field_code), LEN_TRIM(field_code), GD_INT8, &
+    data_out)
+  else
+    call gdgcas(dirfile, TRIM(field_code), LEN_TRIM(field_code), start, &
+    array_len, GD_INT8, data_out)
+  end if
+end subroutine
+
+!gd_get_carray_slice with return_type=GD_INT16
+subroutine fgd_get_carray_i2 (dirfile, field_code, start, array_len, data_out)
+  integer, intent(in) :: dirfile, start, array_len
+  character (len=*), intent(in) :: field_code
+  integer*2, dimension(:), intent(out)  :: data_out
+  
+  ! call f77 library
+  if (array_len .eq. 0) then
+    call gdgtca(dirfile, TRIM(field_code), LEN_TRIM(field_code), GD_INT16, &
+    data_out)
+  else
+    call gdgcas(dirfile, TRIM(field_code), LEN_TRIM(field_code), start, &
+    array_len, GD_INT16, data_out)
+  end if
+end subroutine
+
+!gd_get_carray_slice with return_type=GD_INT32
+subroutine fgd_get_carray_i4 (dirfile, field_code, start, array_len, data_out)
+  integer, intent(in) :: dirfile, start, array_len
+  character (len=*), intent(in) :: field_code
+  integer*4, dimension(:), intent(out)  :: data_out
+  
+  ! call f77 library
+  if (array_len .eq. 0) then
+    call gdgtca(dirfile, TRIM(field_code), LEN_TRIM(field_code), GD_INT32, &
+    data_out)
+  else
+    call gdgcas(dirfile, TRIM(field_code), LEN_TRIM(field_code), start, &
+    array_len, GD_INT32, data_out)
+  end if
+end subroutine
+
+!gd_get_carray_slice with return_type=GD_INT64
+subroutine fgd_get_carray_i8 (dirfile, field_code, start, array_len, data_out)
+  integer, intent(in) :: dirfile, start, array_len
+  character (len=*), intent(in) :: field_code
+  integer*8, dimension(:), intent(out)  :: data_out
+  
+  ! call f77 library
+  if (array_len .eq. 0) then
+    call gdgtca(dirfile, TRIM(field_code), LEN_TRIM(field_code), GD_INT64, &
+    data_out)
+  else
+    call gdgcas(dirfile, TRIM(field_code), LEN_TRIM(field_code), start, &
+    array_len, GD_INT64, data_out)
+  end if
+end subroutine
+
+!gd_get_carray_slice with return_type=GD_FLOAT32
+subroutine fgd_get_carray_r4 (dirfile, field_code, start, array_len, data_out)
+  integer, intent(in) :: dirfile, start, array_len
+  character (len=*), intent(in) :: field_code
+  real*4, dimension(:), intent(out)  :: data_out
+  
+  ! call f77 library
+  if (array_len .eq. 0) then
+    call gdgtca(dirfile, TRIM(field_code), LEN_TRIM(field_code), GD_FLOAT32, &
+    data_out)
+  else
+    call gdgcas(dirfile, TRIM(field_code), LEN_TRIM(field_code), start, &
+    array_len, GD_FLOAT32, data_out)
+  end if
+end subroutine
+
+!gd_get_carray_slice with return_type=GD_FLOAT64
+subroutine fgd_get_carray_r8 (dirfile, field_code, start, array_len, data_out)
+  integer, intent(in) :: dirfile, start, array_len
+  character (len=*), intent(in) :: field_code
+  double precision, dimension(:), intent(out)  :: data_out
+  
+  ! call f77 library
+  if (array_len .eq. 0) then
+    call gdgtca(dirfile, TRIM(field_code), LEN_TRIM(field_code), GD_FLOAT64, &
+    data_out)
+  else
+    call gdgcas(dirfile, TRIM(field_code), LEN_TRIM(field_code), start, &
+    array_len, GD_FLOAT64, data_out)
+  end if
+end subroutine
+
+!gd_get_carray_slice with return_type=GD_COMPLEX64
+subroutine fgd_get_carray_c8 (dirfile, field_code, start, array_len, data_out)
+  integer, intent(in) :: dirfile, start, array_len
+  character (len=*), intent(in) :: field_code
+  complex, dimension(:), intent(out)  :: data_out
+  
+  ! call f77 library
+  if (array_len .eq. 0) then
+    call gdgtca(dirfile, TRIM(field_code), LEN_TRIM(field_code), GD_COMPLEX64, &
+    data_out)
+  else
+    call gdgcas(dirfile, TRIM(field_code), LEN_TRIM(field_code), start, &
+    array_len, GD_COMPLEX64, data_out)
+  end if
+end subroutine
+
+!gd_get_carray_slice with return_type=GD_COMPLEX128
+subroutine fgd_get_carray_c16 (dirfile, field_code, start, array_len, data_out)
+  integer, intent(in) :: dirfile, start, array_len
+  character (len=*), intent(in) :: field_code
+  double complex, dimension(:), intent(out)  :: data_out
+  
+  ! call f77 library
+  if (array_len .eq. 0) then
+    call gdgtca(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+    GD_COMPLEX128, data_out)
+  else
+    call gdgcas(dirfile, TRIM(field_code), LEN_TRIM(field_code), start, &
+    array_len, GD_COMPLEX128, data_out)
+  end if
+end subroutine
+
+! put_carray_slice with data_type=GD_INT8
+subroutine fgd_put_carray_i1 (dirfile, field_code, start, array_len, data_in)
+  integer, intent(in) :: dirfile, start, array_len
+  character (len=*), intent(in) :: field_code
+  integer*1, dimension(:), intent(in) :: data_in
+
+  ! call f77 library
+  if (array_len .eq. 0) then
+    call gdptca(dirfile, TRIM(field_code), LEN_TRIM(field_code), GD_INT8, &
+    data_in)
+  else
+    call gdpcas(dirfile, TRIM(field_code), LEN_TRIM(field_code), start, &
+    array_len, GD_INT8, data_in)
+  end if
+end subroutine
+
+! put_carray_slice with data_type=GD_INT16
+subroutine fgd_put_carray_i2 (dirfile, field_code, start, array_len, data_in)
+  integer, intent(in) :: dirfile, start, array_len
+  character (len=*), intent(in) :: field_code
+  integer*2, dimension(:), intent(in) :: data_in
+
+  ! call f77 library
+  if (array_len .eq. 0) then
+    call gdptca(dirfile, TRIM(field_code), LEN_TRIM(field_code), GD_INT16, &
+    data_in)
+  else
+    call gdpcas(dirfile, TRIM(field_code), LEN_TRIM(field_code), start, &
+    array_len, GD_INT16, data_in)
+  end if
+end subroutine
+
+! put_carray_slice with data_type=GD_INT32
+subroutine fgd_put_carray_i4 (dirfile, field_code, start, array_len, data_in)
+  integer, intent(in) :: dirfile, start, array_len
+  character (len=*), intent(in) :: field_code
+  integer*4, dimension(:), intent(in) :: data_in
+
+  ! call f77 library
+  if (array_len .eq. 0) then
+    call gdptca(dirfile, TRIM(field_code), LEN_TRIM(field_code), GD_INT32, &
+    data_in)
+  else
+    call gdpcas(dirfile, TRIM(field_code), LEN_TRIM(field_code), start, &
+    array_len, GD_INT32, data_in)
+  end if
+end subroutine
+
+! put_carray_slice with data_type=GD_INT64
+subroutine fgd_put_carray_i8 (dirfile, field_code, start, array_len, data_in)
+  integer, intent(in) :: dirfile, start, array_len
+  character (len=*), intent(in) :: field_code
+  integer*8, dimension(:), intent(in) :: data_in
+
+  ! call f77 library
+  if (array_len .eq. 0) then
+    call gdptca(dirfile, TRIM(field_code), LEN_TRIM(field_code), GD_INT64, &
+    data_in)
+  else
+    call gdpcas(dirfile, TRIM(field_code), LEN_TRIM(field_code), start, &
+    array_len, GD_INT64, data_in)
+  end if
+end subroutine
+
+! put_carray_slice with data_type=GD_FLOAT32
+subroutine fgd_put_carray_r4 (dirfile, field_code, start, array_len, data_in)
+  integer, intent(in) :: dirfile, start, array_len
+  character (len=*), intent(in) :: field_code
+  real*4, dimension(:), intent(in) :: data_in
+
+  ! call f77 library
+  if (array_len .eq. 0) then
+    call gdptca(dirfile, TRIM(field_code), LEN_TRIM(field_code), GD_FLOAT32, &
+    data_in)
+  else
+    call gdpcas(dirfile, TRIM(field_code), LEN_TRIM(field_code), start, &
+    array_len, GD_FLOAT32, data_in)
+  end if
+end subroutine
+
+! put_carray_slice with data_type=GD_FLOAT64
+subroutine fgd_put_carray_r8 (dirfile, field_code, start, array_len, data_in)
+  integer, intent(in) :: dirfile, start, array_len
+  character (len=*), intent(in) :: field_code
+  double precision, dimension(:), intent(in) :: data_in
+
+  ! call f77 library
+  if (array_len .eq. 0) then
+    call gdptca(dirfile, TRIM(field_code), LEN_TRIM(field_code), GD_FLOAT64, &
+    data_in)
+  else
+    call gdpcas(dirfile, TRIM(field_code), LEN_TRIM(field_code), start, &
+    array_len, GD_FLOAT64, data_in)
+  end if
+end subroutine
+
+! put_carray_slice with data_type=GD_COMPLEX64
+subroutine fgd_put_carray_c8 (dirfile, field_code, start, array_len, data_in)
+  integer, intent(in) :: dirfile, start, array_len
+  character (len=*), intent(in) :: field_code
+  complex, dimension(:), intent(in) :: data_in
+
+  ! call f77 library
+  if (array_len .eq. 0) then
+    call gdptca(dirfile, TRIM(field_code), LEN_TRIM(field_code), GD_COMPLEX64, &
+    data_in)
+  else
+    call gdpcas(dirfile, TRIM(field_code), LEN_TRIM(field_code), start, &
+    array_len, GD_COMPLEX64, data_in)
+  end if
+end subroutine
+
+! put_carray_slice with data_type=GD_COMPLEX128
+subroutine fgd_put_carray_c16 (dirfile, field_code, start, array_len, data_in)
+  integer, intent(in) :: dirfile, start, array_len
+  character (len=*), intent(in) :: field_code
+  double complex, dimension(:), intent(in) :: data_in
+
+  ! call f77 library
+  if (array_len .eq. 0) then
+    call gdptca(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+    GD_COMPLEX128, data_in)
+  else
+    call gdpcas(dirfile, TRIM(field_code), LEN_TRIM(field_code), start, &
+    array_len, GD_COMPLEX128, data_in)
+  end if
+end subroutine
+
+function fgd_carray_len (dirfile, field_code)
+  integer :: fgd_carray_len
+  integer, intent(in) :: dirfile
+  character (len=*), intent(in) :: field_code
+
+  ! call f77 library
+  call gdcaln(fgd_carray_len, dirfile, TRIM(field_code), LEN_TRIM(field_code))
+end function
+
+subroutine fgd_add_carray (dirfile, field_name, const_type, array_len, &
+fragment_index)
+  integer, intent(in) :: dirfile, const_type, fragment_index, array_len
+  character (len=*), intent(in) :: field_name
+  integer*1, dimension(array_len) :: zero
+
+  zero = 0.
+
+  call gdadca(dirfile, TRIM(field_name), LEN_TRIM(field_name), const_type, &
+  array_len, GD_INT8, zero, fragment_index)
+end subroutine
+
+subroutine fgd_madd_carray (dirfile, parent, field_name, const_type, array_len)
+  integer, intent(in) :: dirfile, const_type, array_len
+  character (len=*), intent(in) :: field_name, parent
+  integer*1, dimension(array_len) :: zero
+
+  zero = 0.
+
+  call gdmdca(dirfile, TRIM(parent), LEN_TRIM(parent), TRIM(field_name), &
+  LEN_TRIM(field_name), const_type, array_len, GD_INT8, zero)
+end subroutine
+
+subroutine fgd_alter_carray (dirfile, field_name, const_type, array_len)
+  integer, intent(in) :: dirfile, const_type, array_len
+  character (len=*), intent(in) :: field_name
+  integer*1, dimension(array_len) :: zero
+
+  zero = 0.
+
+  call gdalca(dirfile, TRIM(field_name), LEN_TRIM(field_name), const_type, &
+  array_len)
+end subroutine
 
 end module

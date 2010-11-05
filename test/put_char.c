@@ -29,7 +29,7 @@ int main(void)
   close(fd);
 
   DIRFILE* D = gd_open(filedir, GD_RDWR | GD_UNENCODED);
-  int n = gd_putdata(D, "data", 5, 0, 1, 0, 'c', c);
+  int n = gd_putdata(D, "data", 5, 0, 1, 0, (gd_type_t)'c', c);
   int error = gd_error(D);
 
   gd_close(D);

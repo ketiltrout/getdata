@@ -78,6 +78,7 @@ void _GD_Flush(DIRFILE* D, gd_entry_t *E)
     case GD_RECIP_ENTRY:
       _GD_Flush(D, E->e->entry[0]);
     case GD_CONST_ENTRY:
+    case GD_CARRAY_ENTRY:
     case GD_STRING_ENTRY:
     case GD_INDEX_ENTRY:
     case GD_NO_ENTRY:
@@ -177,73 +178,74 @@ static const char* _GD_OldTypeName(DIRFILE* D, gd_type_t data_type)
   return ptr;
 }
 
-static char* _GD_StringEscapeise(char* out, const char* in, int permissive,
+static size_t _GD_StringEscapeise(FILE* stream, const char* in, int permissive,
     int standards)
 {
-  char* ptr = out;
   const char* HexDigit = "0123456789ABCDEF";
+  size_t len = 0;
 
-  dtrace("%p, \"%s\", %i, %i", out, in, permissive, standards);
+  dtrace("%p, \"%s\", %i, %i", stream, in, permissive, standards);
 
   if (!permissive && standards < 6) {
-    strcpy(out, in);
-    dreturn("\"%s\"", out);
-    return out;
+    fputs(in, stream);
+    dreturn("%i", strlen(in));
+    return strlen(in);
   }
 
   for (; *in != '\0'; ++in) {
     if (*in == '"') {
-      *(ptr++) = '\\';
-      *(ptr++) = '"';
+      fputs("\\\"", stream);
+      len += 2;
+      fputc('\\', stream);
     } else if (*in == '\\' || *in == '#' || *in == '"') {
-      *(ptr++) = '\\';
-      *(ptr++) = *in;
+      fputc('\\', stream);
+      fputc(*in, stream);
+      len += 2;
     } else if (*in < 0x20
 #if CHAR_MIN != 0
         && *in >= 0x00
 #endif
         ) {
-      *(ptr++) = '\\';
-      *(ptr++) = 'x';
-      *(ptr++) = HexDigit[*in >> 8];
-      *(ptr++) = HexDigit[*in & 0xF];
-    } else
-      *(ptr++) = *in;
+      fputs("\\x", stream);
+      fputc(HexDigit[*in >> 8], stream);
+      fputc(HexDigit[*in & 0xF], stream);
+      len += 4;
+    } else {
+      fputc(*in, stream);
+      len++;
+    }
   }
-  *ptr = '\0';
 
-  dreturn("\"%s\"", out);
-  return out;
+  dreturn("%zu", len);
+  return len;
 }
 
-static char* _GD_PadField(char* out, const char* in, size_t len, int permissive,
-    int standards)
+static void _GD_PadField(FILE* stream, const char* in, size_t len,
+    int permissive, int standards)
 {
   size_t i;
 
-  dtrace("%p, \"%s\", %zu, %i, %i", out, in, len, permissive, standards);
+  dtrace("%p, \"%s\", %zu, %i, %i", stream, in, len, permissive, standards);
 
-  for (i = strlen(_GD_StringEscapeise(out, in, permissive, standards)); i < len;
-      ++i)
-  {
-    out[i] = ' ';
-  }
-  out[i] = '\0';
+  for (i = _GD_StringEscapeise(stream, in, permissive, standards); i < len; ++i)
+    fputc(' ', stream);
 
-  dreturn("\"%s\"", out);
-  return out;
+  dreturnvoid();
 }
 
-/* Write a litteral parameter or CONST name */
+/* Write a litteral parameter or CONST name or CARRAY element */
 static void _GD_WriteConst(DIRFILE *D, FILE* stream, int type,
-    const void* value, const char* scalar, const char* postamble)
+    const void* value, const char* scalar, int index, const char* postamble)
 {
-  dtrace("%p, %p, %i, %p, \"%s\", \"%s\"", D, stream, type, value, scalar,
-      postamble);
+  dtrace("%p, %p, %i, %p, \"%s\", %i, \"%s\"", D, stream, type, value, scalar,
+      index, postamble);
 
-  if (scalar != NULL)
-    fprintf(stream, "%s%s", scalar, postamble);
-  else if (type == GD_UINT16)
+  if (scalar != NULL) {
+    if (index == -1)
+      fprintf(stream, "%s%s", scalar, postamble);
+    else
+      fprintf(stream, "%s<%i>%s", scalar, index, postamble);
+  } else if (type == GD_UINT16)
     fprintf(stream, "%" PRIu16 "%s", *(uint16_t *)value, postamble);
   else if (type == GD_INT64)
     fprintf(stream, "%" PRIi64 "%s", *(uint64_t *)value, postamble);
@@ -265,8 +267,8 @@ static void _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
     int meta, size_t max_len, int pretty, int permissive)
 {
   int i;
-  char buffer[GD_MAX_LINE_LENGTH];
-  char* ptr;
+  size_t z;
+  char *ptr;
 
   dtrace("%p, %p, %p, %i, %zi, %i, %i", D, stream, E, meta, max_len, pretty,
       permissive);
@@ -277,24 +279,26 @@ static void _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
     return;
   }
 
-  ptr = (meta) ? strchr(E->field, '/') + 1 : E->field;
+  ptr = E->field;
 
   if (meta) {
-    strcpy(buffer, E->field);
-    *strchr(buffer, '/') = '\0';
-    fprintf(stream, "META %s ", buffer);
+    fputs("META ", stream);
+    for (; *ptr != '/'; ++ptr)
+      fputc(*ptr, stream);
+    fputc(' ', stream);
+    ++ptr;
   }
 
   /* field name */
-  fprintf(stream, "%s", _GD_PadField(buffer, ptr, max_len, permissive,
-        D->standards));
+  _GD_PadField(stream, ptr, max_len, permissive, D->standards);
 
   switch(E->field_type) {
     case GD_RAW_ENTRY:
       fprintf(stream, " RAW%s %s ", pretty ? "     " : "",
           (permissive || D->standards >= 5) ?  _GD_TypeName(D,
             E->EN(raw,data_type)) : _GD_OldTypeName(D, E->EN(raw,data_type)));
-      _GD_WriteConst(D, stream, GD_UINT16, &E->EN(raw,spf), E->scalar[0], "\n");
+      _GD_WriteConst(D, stream, GD_UINT16, &E->EN(raw,spf), E->scalar[0],
+          E->scalar_ind[0], "\n");
       break;
     case GD_LINCOM_ENTRY:
       fprintf(stream, " LINCOM%s %i", pretty ? "  " : "",
@@ -303,14 +307,16 @@ static void _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
         fprintf(stream, " %s ", E->in_fields[i]);
         if (E->comp_scal) {
           _GD_WriteConst(D, stream, GD_COMPLEX128, &E->EN(lincom,cm)[i],
-              E->scalar[i], " ");
+              E->scalar[i], E->scalar_ind[i], " ");
           _GD_WriteConst(D, stream, GD_COMPLEX128, &E->EN(lincom,cb)[i],
-              E->scalar[i + GD_MAX_LINCOM], "");
+              E->scalar[i + GD_MAX_LINCOM], E->scalar_ind[i + GD_MAX_LINCOM],
+              "");
         } else {
           _GD_WriteConst(D, stream, GD_FLOAT64, &E->EN(lincom,m)[i],
-              E->scalar[i], " ");
+              E->scalar[i], E->scalar_ind[i], " ");
           _GD_WriteConst(D, stream, GD_FLOAT64, &E->EN(lincom,b)[i],
-              E->scalar[i + GD_MAX_LINCOM], "");
+              E->scalar[i + GD_MAX_LINCOM], E->scalar_ind[i + GD_MAX_LINCOM],
+              "");
         }
       }
       fputs("\n", stream);
@@ -322,9 +328,9 @@ static void _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
     case GD_BIT_ENTRY:
       fprintf(stream, " BIT%s %s ", pretty ? "     " : "", E->in_fields[0]);
       _GD_WriteConst(D, stream, GD_INT16, &E->EN(bit,bitnum), E->scalar[0],
-          " ");
+          E->scalar_ind[0], " ");
       _GD_WriteConst(D, stream, GD_INT16, &E->EN(bit,numbits), E->scalar[1],
-          "\n");
+          E->scalar_ind[1], "\n");
       break;
     case GD_DIVIDE_ENTRY:
       fprintf(stream, " DIVIDE%s %s %s", pretty ? "  " : "", E->in_fields[1],
@@ -333,7 +339,7 @@ static void _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
     case GD_RECIP_ENTRY:
       fprintf(stream, " RECIP%s ", pretty ? "   " : "");
       _GD_WriteConst(D, stream, GD_COMPLEX128, &E->EN(recip,cdividend),
-          E->scalar[0], "");
+          E->scalar[0], E->scalar_ind[0], "");
       fprintf(stream, " %s", E->in_fields[0]);
       break;
     case GD_MULTIPLY_ENTRY:
@@ -342,42 +348,62 @@ static void _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
     case GD_PHASE_ENTRY:
       fprintf(stream, " PHASE%s %s ", pretty ? "   " : "", E->in_fields[0]);
       _GD_WriteConst(D, stream, GD_INT64, &E->EN(phase,shift), E->scalar[0],
-          "\n");
+          E->scalar_ind[0], "\n");
       break;
     case GD_POLYNOM_ENTRY:
       fprintf(stream, " POLYNOM%s %s ", pretty ? " " : "", E->in_fields[0]);
       for (i = 0; i <= E->EN(polynom,poly_ord); ++i)
         if (E->comp_scal)
           _GD_WriteConst(D, stream, GD_COMPLEX128, &E->EN(polynom,ca)[i],
-              E->scalar[i], (i == E->EN(polynom,poly_ord)) ? "\n" : " ");
+              E->scalar[i], E->scalar_ind[i], (i == E->EN(polynom,poly_ord)) ?
+              "\n" : " ");
         else
           _GD_WriteConst(D, stream, GD_FLOAT64, &E->EN(polynom,a)[i],
-              E->scalar[i], (i == E->EN(polynom,poly_ord)) ? "\n" : " ");
+              E->scalar[i], E->scalar_ind[i], (i == E->EN(polynom,poly_ord)) ?
+              "\n" : " ");
       break;
     case GD_SBIT_ENTRY:
       fprintf(stream, " SBIT%s %s ", pretty ? "    " : "", E->in_fields[0]);
       _GD_WriteConst(D, stream, GD_INT16, &E->EN(bit,bitnum), E->scalar[0],
-          " ");
+          E->scalar_ind[0], " ");
       _GD_WriteConst(D, stream, GD_INT16, &E->EN(bit,numbits), E->scalar[1],
-          "\n");
+          E->scalar_ind[1], "\n");
       break;
     case GD_CONST_ENTRY:
       fprintf(stream, " CONST%s %s ", pretty ? "   " : "", _GD_TypeName(D,
             E->EN(cons,const_type)));
       if (E->EN(cons,const_type) & GD_SIGNED)
-        fprintf(stream, "%" PRIi64 "\n", E->e->EN(cons.d,i));
+        fprintf(stream, "%" PRIi64 "\n", *(int64_t*)E->e->EN(cons,d));
       else if (E->EN(cons,const_type) & GD_IEEE754)
-        fprintf(stream, "%.15g\n", E->e->EN(cons.d,d));
+        fprintf(stream, "%.15g\n", *(double*)E->e->EN(cons,d));
       else if (E->EN(cons,const_type) & GD_COMPLEX)
-        fprintf(stream, "%.15g;%.15g\n", creal(E->e->EN(cons.d,c)),
-            cimag(E->e->EN(cons.d,c)));
+        fprintf(stream, "%.15g;%.15g\n", *(double*)E->e->EN(cons,d),
+            *((double*)E->e->EN(cons,d) + 1));
       else
-        fprintf(stream, "%" PRIu64 "\n", E->e->EN(cons.d,u));
+        fprintf(stream, "%" PRIu64 "\n", *(uint64_t*)E->e->EN(cons,d));
+      break;
+    case GD_CARRAY_ENTRY:
+      fprintf(stream, " CARRAY%s %s", pretty ? "  " : "", _GD_TypeName(D,
+            E->EN(cons,const_type)));
+      if (E->EN(cons,const_type) & GD_SIGNED)
+        for (z = 0; z < E->EN(cons,array_len); ++z)
+          fprintf(stream, " %" PRIi64, ((int64_t*)E->e->EN(cons,d))[z]);
+      else if (E->EN(cons,const_type) & GD_IEEE754)
+        for (z = 0; z < E->EN(cons,array_len); ++z)
+          fprintf(stream, " %.15g", ((double*)E->e->EN(cons,d))[z]);
+      else if (E->EN(cons,const_type) & GD_COMPLEX)
+        for (z = 0; z < E->EN(cons,array_len); ++z)
+          fprintf(stream, " %.15g;%.15g", ((double*)E->e->EN(cons,d))[2 * z],
+              ((double*)E->e->EN(cons,d))[2 * z + 1]);
+      else
+        for (z = 0; z < E->EN(cons,array_len); ++z)
+          fprintf(stream, " %" PRIu64, ((uint64_t*)E->e->EN(cons,d))[z]);
+      fputs("\n", stream);
       break;
     case GD_STRING_ENTRY:
-      fprintf(stream, " STRING%s \"%s\"\n", pretty ? "  " : "",
-          _GD_StringEscapeise(buffer, E->e->ES(string), permissive,
-            D->standards));
+      fprintf(stream, " STRING%s \"", pretty ? "  " : "");
+      _GD_StringEscapeise(stream, E->e->ES(string), permissive, D->standards);
+      fputs("\"\n", stream);
       break;
     case GD_INDEX_ENTRY:
     case GD_NO_ENTRY:
@@ -518,6 +544,8 @@ static void _GD_FlushFragment(DIRFILE* D, int i, int permissive)
       case GD_TEXT_ENCODED:
         fputs("/ENCODING text\n", stream);
         break;
+      case 0:
+        break;
       default:
         fprintf(stream, "/ENCODING unknown # (%lx)\n", D->fragment[i].encoding);
         break;
@@ -544,11 +572,14 @@ static void _GD_FlushFragment(DIRFILE* D, int i, int permissive)
   /* REFERENCE is written at the end, because its effect can propagate
    * upwards */
   if (permissive || D->standards >= 6)
-    if (D->fragment[i].ref_name != NULL)
-      fprintf(stream, "/REFERENCE %s\n", _GD_StringEscapeise(buffer,
-            D->fragment[i].ref_name, permissive, D->standards));
+    if (D->fragment[i].ref_name != NULL) {
+      fputs("/REFERENCE ", stream);
+      _GD_StringEscapeise(stream, D->fragment[i].ref_name, permissive,
+          D->standards);
+      fputc('\n', stream);
+    }
 
-  /* That's all, flush, sync, and close */
+  /* That's all; flush, sync, and close */
   fflush(stream);
   fsync(fd);
 #ifdef HAVE_FCHMOD  
@@ -720,23 +751,23 @@ uint64_t _GD_FindVersion(DIRFILE *D)
 #ifdef ARM_ENDIAN_DOUBLES
       D->av &= GD_VERS_GE_5;
 #else
-      D->av &= GD_VERS_GE_8;
+    D->av &= GD_VERS_GE_8;
     else
 #endif
-    if ((D->fragment[i].encoding != GD_UNENCODED &&
-          D->fragment[i].encoding != GD_AUTO_ENCODED) ||
-        D->fragment[i].protection)
-      D->av &= GD_VERS_GE_6;
-    else if (D->fragment[i].byte_sex &
+      if ((D->fragment[i].encoding != GD_UNENCODED &&
+            D->fragment[i].encoding != GD_AUTO_ENCODED) ||
+          D->fragment[i].protection)
+        D->av &= GD_VERS_GE_6;
+      else if (D->fragment[i].byte_sex &
 #ifdef WORDS_BIGENDIAN
-        GD_LITTLE_ENDIAN
+          GD_LITTLE_ENDIAN
 #else
-        GD_BIG_ENDIAN
+          GD_BIG_ENDIAN
 #endif
-        )
-      D->av &= GD_VERS_GE_5;
-    else if (D->fragment[i].frame_offset > 0)
-      D->av &= GD_VERS_GE_1;
+          )
+        D->av &= GD_VERS_GE_5;
+      else if (D->fragment[i].frame_offset > 0)
+        D->av &= GD_VERS_GE_1;
   }
 
   for (i = 0; D->av && i < D->n_entries; ++i) {
@@ -758,6 +789,7 @@ uint64_t _GD_FindVersion(DIRFILE *D)
         break;
       case GD_DIVIDE_ENTRY:
       case GD_RECIP_ENTRY:
+      case GD_CARRAY_ENTRY:
         D->av &= GD_VERS_GE_8;
         break;
       case GD_MULTIPLY_ENTRY:

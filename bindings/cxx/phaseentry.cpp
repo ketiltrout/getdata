@@ -69,11 +69,7 @@ int PhaseEntry::SetShift(const char *shift)
 {
   int r = 0;
 
-  free(E.scalar[0]);
-  if (shift == NULL)
-    E.scalar[0] = NULL;
-  else
-    E.scalar[0] = strdup(shift);
+  SetScalar(0, shift);
 
   if (D != NULL) {
     r = gd_alter_entry(D->D, E.field, &E, 0);

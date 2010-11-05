@@ -33,18 +33,16 @@ static struct {
 } _GD_Dirfiles = {0, NULL};
 
 /* Error-reporting kludge for deprecated API */
-static char _GD_GlobalErrorString[GD_MAX_LINE_LENGTH];
-static char _GD_GlobalErrorFile[GD_MAX_LINE_LENGTH];
 static DIRFILE _GD_GlobalErrors = {
 #ifndef GD_NO_C99_API
   .error = 0,
   .suberror = 0,
-  .error_string = _GD_GlobalErrorString,
-  .error_file = _GD_GlobalErrorFile,
+  .error_string = NULL,
+  .error_file = NULL,
   .error_line = 0,
   .flags = GD_INVALID,
 #else
-  0, 0, _GD_GlobalErrorString, _GD_GlobalErrorFile, 0, GD_INVALID
+  0, 0, NULL, NULL, 0, GD_INVALID
 #endif
 };
 
@@ -84,7 +82,9 @@ const char *GD_ERROR_CODES[GD_N_ERROR_CODES] = {
   "Improper domain", /* GD_E_DOMAIN */
   "Bad representation", /* GD_E_BAD_REPR */
   NULL, /* GD_E_BAD_VERSION */
-  "I/O error flushing metadata to disc" /* GD_E_FLUSH */
+  NULL, /* GD_E_FLUSH */
+  NULL, /* GD_E_BOUNDS */
+  "Line too long", /* GD_E_LINE_TOO_LONG */
 };
 
 static struct FormatType Format;
@@ -97,8 +97,11 @@ static int _GD_CopyGlobalError(DIRFILE* D)
 
   _GD_GlobalErrors.suberror = D->suberror;
   _GD_GlobalErrors.error_line = D->error_line;
-  strncpy(_GD_GlobalErrors.error_file, D->error_file, GD_MAX_LINE_LENGTH);
-  strncpy(_GD_GlobalErrors.error_string, D->error_string, GD_MAX_LINE_LENGTH);
+  free(_GD_GlobalErrors.error_file);
+  _GD_GlobalErrors.error_file = (D->error_file) ? strdup(D->error_file) : NULL;
+  free(_GD_GlobalErrors.error_string);
+  _GD_GlobalErrors.error_string = (D->error_string) ? strdup(D->error_string) :
+    NULL;
 
   dreturn("%i", D->error);
   return _GD_GlobalErrors.error = D->error;
@@ -400,6 +403,7 @@ struct FormatType *GetFormat(const char *filedir, int *error_code) gd_nothrow
         break;
       case GD_NO_ENTRY:
       case GD_CONST_ENTRY:
+      case GD_CARRAY_ENTRY:
       case GD_INDEX_ENTRY:
       case GD_STRING_ENTRY:
         break;
@@ -467,6 +471,7 @@ struct FormatType *GetFormat(const char *filedir, int *error_code) gd_nothrow
         break;
       case GD_STRING_ENTRY:
       case GD_CONST_ENTRY:
+      case GD_CARRAY_ENTRY:
       case GD_INDEX_ENTRY:
       case GD_NO_ENTRY:
         break;

@@ -39,37 +39,38 @@ int gd_col_count = 0;
 char gd_debug_col[GD_COL_SIZE + 1] = "";
 #endif
 
-/* _GD_GetLine: read non-comment line from format file.  The line is placed in
- *       *line.  Returns 1 if successful, 0 if unsuccessful.
+/* _GD_GetLine: read non-comment line from format file.  The line is newly
+ *      malloc'd.  Returns a pointer if successful, NULL if unsuccessful.
+ *      The length read is provided in *n.  Increments *linenum as appropriate;
  */
-int _GD_GetLine(FILE *fp, char *line, int* linenum)
+char *_GD_GetLine(FILE *fp, size_t *n, int* linenum)
 {
-  char *ret_val;
+  ssize_t len;
   int first_char;
 
-  dtrace("%p, %p, %p", fp, line, linenum);
+  char *line = NULL;
+
+  dtrace("%p, %p, %p", fp, n, linenum);
 
   do {
-    ret_val = fgets(line, GD_MAX_LINE_LENGTH, fp);
-    (*linenum)++;
-
-    if (ret_val == NULL)
+    errno = 0;
+    len = getdelim(&line, n, '\n', fp);
+    if (len == -1)
       break;
 
+    (*linenum)++;
+
     first_char = 0;
-    while (line[first_char] == ' ' || line[first_char] == '\t')
-      ++first_char;
-    line += first_char;
-  } while (line[0] == '#' || line[0] == 0 || line[1] == 0);
+  } while (line[0] == '#' || line[0] == 0 || line[0] == '\n');
 
 
-  if (ret_val) {
-    dreturn("\"%s\"", line);
-    return 1; /* a line was read */
+  if (len != -1) {
+    dreturn("\"%s\" (%i)", line, *n);
+    return line; /* a line was read */
   }
 
-  dreturn("%i", 0);
-  return 0;  /* there were no valid lines */
+  dreturn("%p", NULL);
+  return NULL;  /* there were no valid lines */
 }
 
 /* This function is needed outside the legacy API to handle old format files
@@ -227,7 +228,8 @@ void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E)
   struct _gd_lut *ptr;
   int i;
   int dir = -1;
-  char line[GD_MAX_LINE_LENGTH];
+  char *line;
+  size_t n = 0;
   int linenum = 0;
   double yr, yi;
   int buf_len = 100;
@@ -249,10 +251,22 @@ void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E)
   }
 
   /* read the first line to see whether the table is complex valued */
-  if (_GD_GetLine(fp, line, &linenum)) {
+  if ((line = _GD_GetLine(fp, &n, &linenum))) {
     char ystr[50];
     if (sscanf(line, "%lg %49s", &yr, ystr) == 2)
       E->e->EN(linterp,complex_table) = (strchr(ystr, ';') == NULL) ? 0 : 1;
+  } else {
+    if (errno == EOVERFLOW)
+      /* line too long */
+      _GD_SetError(D, GD_E_LINE_TOO_LONG, 0, E->e->EN(linterp,table_path),
+          linenum, NULL);
+    else 
+      /* no data in file! */
+      _GD_SetError(D, GD_E_OPEN_LINFILE, GD_E_LINFILE_LENGTH, NULL, 0,
+          E->e->EN(linterp,table_path));
+    fclose(fp);
+    dreturnvoid();
+    return;
   }
 
   E->e->EN(linterp,lut) = (struct _gd_lut *)malloc(buf_len *
@@ -267,7 +281,6 @@ void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E)
 
   /* now read in the data -- we've already read line one */
   i = 0;
-  linenum = 0;
   do {
     if (E->e->EN(linterp,complex_table)) {
       sscanf(line, "%lg %lg;%lg", &(E->e->EN(linterp,lut)[i].x), &yr, &yi);
@@ -304,7 +317,8 @@ void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E)
 
       E->e->EN(linterp,lut) = ptr;
     }
-  } while (_GD_GetLine(fp, line, &linenum));
+    free(line);
+  } while ((line = _GD_GetLine(fp, &n, &linenum)));
 
   if (i < 2) {
     free(E->e->EN(linterp,lut));

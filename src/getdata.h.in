@@ -66,7 +66,11 @@ extern "C" {
 #endif
 
 /* define function attributes */
-#define gd_gnu_enough ((__GNUC__ * 100 + __GNUC_MINOR__) >= 303)
+#if defined __GNUC__ && defined __GNUC_MINOR__
+#  define gd_gnu_enough ((__GNUC__ * 100 + __GNUC_MINOR__) >= 303)
+#else
+#  define gd_gnu_enough 0
+#endif
 
 #ifdef __attribute_deprecated__
 # define gd_deprecated __attribute_deprecated__
@@ -94,6 +98,19 @@ extern "C" {
 #else
 # define gd_nonnull(...) /**/
 #endif
+
+/* formerly, this was the maximum length of a format file line.  We keep it
+ * around for legacy reasons.  (The actualy maximum length of a format file
+ * line is the maximum value of ssize_t, i.e. 2**(n-1)-1 on a n-bit system.)
+ */
+#define GD_MAX_LINE_LENGTH  4096
+
+/* maximum number of elements allowed in a CARRAY.  Really the maximum should be
+ * whatever fits on a format file line, but that's hard to calculate.  This is
+ * 2**(n-8)-1 on a n-bit system.
+ */
+#define GD_MAX_CARRAY_LENGTH ((int)(((unsigned int)-1) >> 8))
+
 
 /* error codes */
 #define GD_E_OK                0 /* this MUST be zero */
@@ -131,14 +148,13 @@ extern "C" {
 #define GD_E_BAD_REPR         32
 #define GD_E_BAD_VERSION      33
 #define GD_E_FLUSH            34
+#define GD_E_BOUNDS           35
+#define GD_E_LINE_TOO_LONG    36
 
-#define GD_N_ERROR_CODES      35
+#define GD_N_ERROR_CODES      37
 
 /* Deprecated error codes */
 #define GD_E_OPEN_INCLUDE      GD_E_OPEN_FRAGMENT
-
-/* maximum length of a format file line */
-#define GD_MAX_LINE_LENGTH  4096
 
 #define GD_MAX_LINCOM 3
 
@@ -202,11 +218,12 @@ typedef enum {
   GD_DIVIDE_ENTRY   = 0x0A,
   GD_RECIP_ENTRY    = 0x0B,
   GD_CONST_ENTRY    = GD_SCALAR_ENTRY | 0x00,
-  GD_STRING_ENTRY   = GD_SCALAR_ENTRY | 0x01
+  GD_STRING_ENTRY   = GD_SCALAR_ENTRY | 0x01,
+  GD_CARRAY_ENTRY   = GD_SCALAR_ENTRY | 0x02
 } gd_entype_t;
 
 /* GD_NO_ENTRY is not part of this count */
-#define GD_N_ENTYPES 13
+#define GD_N_ENTYPES 14
 
 #undef _gd_int16_t
 #undef _gd_uint16_t
@@ -271,6 +288,7 @@ struct _gd_unified_entry {
   gd_entype_t field_type;
   char *in_fields[GD_MAX_LINCOM];
   char *scalar[GD_MAX_POLYORD + 1];
+  int scalar_ind[GD_MAX_POLYORD + 1];
   int fragment_index;
   int comp_scal;
   union {
@@ -298,7 +316,6 @@ struct _gd_unified_entry {
       double dividend;
       GD_DCOMPLEXM(cdividend);
     } GD_ANON(recip);
-#ifdef GD_C89_API
     struct { /* LINTERP */
       char *table;
     } GD_ANON(linterp);
@@ -307,12 +324,8 @@ struct _gd_unified_entry {
     } GD_ANON(phase);
     struct { /* CONST */
       gd_type_t const_type;
+      size_t array_len;
     } GD_ANON(cons);
-#else
-    char *table; /* LINTERP */
-    gd_shift_t shift; /* PHASE */
-    gd_type_t const_type; /* CONST */
-#endif
   } GD_ANON(u);
 
   struct _gd_private_entry *e;
@@ -325,12 +338,21 @@ typedef struct _GD_DIRFILE DIRFILE;
 
 /* Parser callback objects */
 struct _gd_callback_data {
-  const DIRFILE* dirfile;
+  const DIRFILE *dirfile;
   int suberror;
   int linenum;
-  const char* filename;
-  char* line;
+  const char *filename;
+  char *line;
+  size_t buflen;
 };
+
+/* the carray list object */
+struct _gd_carray_data {
+  size_t n;
+  void *d;
+};
+
+typedef struct _gd_carray_data gd_carray_t;
 
 typedef struct _gd_callback_data gd_parser_data_t;
 
@@ -390,6 +412,10 @@ extern int gd_add_clincom(DIRFILE *dirfile, const char *field_code,
     int n_fields, const char **in_fields, const GD_DCOMPLEXP(cm),
     const GD_DCOMPLEXP(cb), int fragment_index) gd_nothrow
 gd_nonnull ((1,2,4,5,6));
+
+extern int gd_add_carray(DIRFILE* D, const char* field_code,
+    gd_type_t const_type, size_t array_len, gd_type_t data_type,
+    const void* values, int fragment_index) gd_nothrow gd_nonnull((1,2,6));
 
 extern int gd_add_const(DIRFILE *dirfile, const char *field_code,
     gd_type_t const_type, gd_type_t data_type, const void* value,
@@ -451,6 +477,9 @@ extern int gd_alter_bit(DIRFILE *dirfile, const char *field_code,
     const char *in_field, gd_bit_t bitnum, gd_bit_t numbits) gd_nothrow
 gd_nonnull((1,2));
 
+extern int gd_alter_carray(DIRFILE* D, const char* field_code,
+    gd_type_t const_type, size_t array_len) gd_nothrow gd_nonnull((1,2));
+
 extern int gd_alter_clincom(DIRFILE *dirfile, const char *field_code,
     int n_fields, const char **in_fields, const GD_DCOMPLEXP(m),
     const GD_DCOMPLEXP(b)) gd_nothrow gd_nonnull((1,2));
@@ -498,6 +527,23 @@ extern int gd_alter_sbit(DIRFILE *dirfile, const char *field_code,
     const char *in_field, gd_bit_t bitnum, gd_bit_t numbits) gd_nothrow
 gd_nonnull((1,2));
 
+extern size_t gd_carray_len(DIRFILE *D, const char *field_code_in) gd_nothrow
+gd_nonnull((1,2));
+
+extern int gd_get_carray(DIRFILE *D, const char *field_code_in,
+    gd_type_t return_type, void *data_out) gd_nothrow gd_nonnull((1,2));
+
+extern int gd_get_carray_slice(DIRFILE* D, const char *field_code_in,
+    unsigned int start, size_t n, gd_type_t return_type, void *data_out)
+gd_nothrow gd_nonnull((1,2));
+
+extern int gd_put_carray(DIRFILE* D, const char *field_code_in,
+  gd_type_t data_type, const void *data_in) gd_nothrow gd_nonnull((1,2,4));
+
+extern int gd_put_carray_slice(DIRFILE* D, const char *field_code_in,
+    unsigned int first, size_t n, gd_type_t data_type, const void *data_in)
+gd_nothrow gd_nonnull((1,2,6));
+
 extern int gd_get_constant(DIRFILE *dirfile, const char *field_code,
     gd_type_t return_type, void *data) gd_nothrow gd_nonnull ((1, 2));
 
@@ -506,6 +552,9 @@ extern int gd_put_constant(DIRFILE *dirfile, const char *field_code,
 
 extern const void *gd_constants(DIRFILE *dirfile,
     gd_type_t return_type) gd_nothrow gd_nonnull ((1));
+
+const gd_carray_t *gd_carrays(DIRFILE* D, gd_type_t return_type) gd_nothrow
+gd_nonnull ((1));
 
 extern gd_entry_t *gd_free_entry_strings(gd_entry_t *entry) gd_nothrow;
 
@@ -524,7 +573,7 @@ extern gd_entype_t gd_entry_type(DIRFILE *dirfile,
 extern int gd_error(const DIRFILE *dirfile) gd_nothrow gd_nonnull ((1));
 
 extern char *gd_error_string(const DIRFILE *dirfile, char *buffer,
-    size_t buflen) gd_nothrow gd_nonnull ((1, 2));
+    size_t buflen) gd_nothrow gd_nonnull ((1));
 
 extern const char **gd_field_list(DIRFILE *dirfile) gd_nothrow gd_nonnull ((1));
 
@@ -545,6 +594,10 @@ extern int gd_madd(DIRFILE *dirfile, const gd_entry_t *entry,
 extern int gd_madd_bit(DIRFILE *dirfile, const char *parent,
     const char *field_code, const char *in_field, gd_bit_t bitnum,
     gd_bit_t numbits) gd_nothrow gd_nonnull ((1,2,3,4));
+
+int gd_madd_carray(DIRFILE* D, const char* parent, const char* field_code,
+    gd_type_t const_type, size_t array_len, gd_type_t data_type,
+    const void* values) gd_nothrow gd_nonnull((1,2,3,7));
 
 extern int gd_madd_clincom(DIRFILE *dirfile, const char *parent,
     const char *field_code, int n_fields, const char **in_fields,
@@ -615,6 +668,9 @@ gd_nonnull ((1));
 
 extern const void *gd_mconstants(DIRFILE *dirfile, const char *parent,
     gd_type_t return_type) gd_nothrow gd_nonnull((1,2));
+
+const gd_carray_t *gd_mcarrays(DIRFILE* D, const char* parent,
+    gd_type_t return_type) gd_nothrow;
 
 extern const char **gd_mfield_list(DIRFILE *dirfile,
     const char *parent) gd_nothrow gd_nonnull((1,2));

@@ -1,0 +1,186 @@
+.\" gd_put_carray_slice.3.  The gd_put_carray_slice man page.
+.\"
+.\" (C) 2010 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_put_carray_slice 3 "4 Novmeber 2010" "Version 0.7.0" "GETDATA"
+.SH NAME
+gd_put_carray gd_put_carray_slice \(em write CARRAY data to a dirfile database
+.SH SYNOPSIS
+.B #include <getdata.h>
+.HP
+.nh
+.ad l
+.BI "int gd_put_carray_slice(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "unsigned int " start ", size_t " len ", gd_type_t " data_type ,
+.BI "const void *" data_in );
+.HP
+.BI "int gd_put_carray(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "gd_type_t " data_type ", const void *" data_in );
+.hy
+.ad n
+.SH DESCRIPTION
+The
+.BR gd_put_carray_slice ()
+function writes data to a dirfile(5) database specified by
+.I dirfile
+into the
+.B CARRAY
+scalar array
+.IR field_code .
+The data in the field is converted from the data type specified by
+.IR data_type ,
+and read from in the user-supplied buffer
+.IR data_in .
+The location of the first element of the field into which data is stored is
+given by
+.IR start ,
+and the number of elements stored is given by
+.IR len .
+The
+.BR gd_put_carray ()
+function behaves similarly, except the whole scalar array is written.  These
+interface cannot write to field represetations.
+
+The argument
+.I data_in
+must point to a valid memory location containing all the data to be written.
+The number of elements which will be stored by
+.BR gd_put_carray ()
+may be obtained by calling
+.BR gd_carray_len (3).
+Unlike
+.BR gd_putdata (3),
+writing data past the end of the field is not permitted.  To add data to the
+.BR CARRAY ,
+first increase its length by calling
+.BR gd_alter_carray (3),
+or another equivalent function.
+
+The 
+.I data_type
+argument should be one of the following symbols, which indicates the type
+of the data pointed to by
+.IR data_in :
+.RS
+.TP 11
+.I GD_UINT8
+unsigned 8-bit integer
+.TP
+.I GD_INT8
+signed (two's complement) 8-bit integer
+.TP
+.I GD_UINT16
+unsigned 16-bit integer
+.TP
+.I GD_INT16
+signed (two's complement) 16-bit integer
+.TP
+.I GD_UINT32
+unsigned 32-bit integer
+.TP
+.I GD_INT32
+signed (two's complement) 32-bit integer
+.TP
+.I GD_UINT64
+unsigned 64-bit integer
+.TP
+.I GD_INT64
+signed (two's complement) 64-bit integer
+.TP
+.IR GD_FLOAT32
+IEEE-754 standard 32-bit single precision floating point number
+.TP
+.IR GD_FLOAT64
+IEEE-754 standard 64-bit double precision floating point number
+.TP
+.IR GD_COMPLEX64
+C99-conformant 64-bit single precision complex number
+.TP
+.IR GD_COMPLEX128
+C99-conformant 128-bit double precision complex number
+.RE
+
+The type of the input data need not be the same as the
+.B CARRAY
+storage type.  Type conversion will be performed as necessary to return the
+requested type.  The 
+.I dirfile
+argument must point to a valid DIRFILE object previously created by a call to
+.BR gd_open (3).
+.SH RETURN VALUE
+On success,
+.BR gd_put_carray ()
+and
+.BR gd_put_carray_slice ()
+return zero.  On error, they return -1 and set the dirfile error to a non-zero
+value.  Possible error values are:
+.TP 8
+.B GD_E_ACCMODE
+The specified
+.I dirfile
+was opened read-only.
+.TP
+.B GD_E_BAD_CODE
+The field specified by
+.I field_code
+was not found in the database.
+.TP
+.B GD_E_BAD_DIRFILE
+An invalid
+.I dirfile
+was supplied.
+.TP
+.B GD_E_BAD_FIELD_TYPE
+The supplied
+.I field_code
+referred to a field of a type other than 
+.BR CARRAY .
+The caller should use
+.BR gd_putdata (3),
+.BR gd_put_constant (3),
+or
+.BR gd_put_string (3)
+instead.
+.TP
+.B GD_E_BAD_REPR
+A representation suffix in the field definition was invalid, or an attempt was
+made to write to a representation, instead of the underlying field.
+.TP
+.B GD_E_BAD_TYPE
+An invalid
+.I data_type
+was specified.
+.TP
+.B GE_E_BOUNDS
+A request for data beyond the end of the field was made.
+.TP
+.B GD_E_INTERNAL_ERROR
+An internal error occurred in the library while trying to perform the task.
+This indicates a bug in the library.  Please report the incident to the
+maintainer.
+.P
+The dirfile error may be retrieved by calling
+.BR gd_error (3).
+A descriptive error string for the last error encountered may be obtained from
+a call to
+.BR gd_error_string (3).
+.SH SEE ALSO
+.BR dirfile (5),
+.BR gd_carray_len (3),
+.BR gd_carrays (3),
+.BR gd_error (3),
+.BR gd_error_string (3),
+.BR gd_get_carray_slice (3),
+.BR gd_open (3),
+.BR gd_put_constant (3)

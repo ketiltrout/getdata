@@ -22,6 +22,7 @@
 
 #ifdef STDC_HEADERS
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 #include <errno.h>
 #endif
@@ -113,6 +114,7 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
       entry->field_type != GD_SBIT_ENTRY &&
       entry->field_type != GD_DIVIDE_ENTRY &&
       entry->field_type != GD_RECIP_ENTRY &&
+      entry->field_type != GD_CARRAY_ENTRY &&
       entry->field_type != GD_STRING_ENTRY)
   {
     _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_TYPE, NULL,
@@ -324,9 +326,31 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
       break;
     case GD_CONST_ENTRY:
       E->EN(cons,const_type) = entry->EN(cons,const_type);
+      E->EN(cons,array_len) = -1;
 
       if (E->EN(cons,const_type) & 0x40 || GD_SIZE(E->EN(cons,const_type)) == 0)
         _GD_SetError(D, GD_E_BAD_TYPE, E->EN(cons,const_type), NULL, 0, NULL);
+      else {
+        E->e->EN(cons,d) = malloc(GD_SIZE(_GD_ConstType(D,
+                E->EN(cons,const_type))));
+        if (!D->error && E->e->EN(cons,d) == NULL)
+          _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+      }
+      break;
+    case GD_CARRAY_ENTRY:
+      E->EN(cons,const_type) = entry->EN(cons,const_type);
+      E->EN(cons,array_len) = entry->EN(cons,array_len);
+
+      if (E->EN(cons,const_type) & 0x40 || GD_SIZE(E->EN(cons,const_type)) == 0)
+        _GD_SetError(D, GD_E_BAD_TYPE, E->EN(cons,const_type), NULL, 0, NULL);
+      else if (E->EN(cons,array_len) > GD_MAX_CARRAY_LENGTH)
+        _GD_SetError(D, GD_E_BOUNDS, 0, NULL, 0, NULL);
+      else {
+        E->e->EN(cons,d) = malloc(GD_SIZE(_GD_ConstType(D,
+                E->EN(cons,const_type))) * E->EN(cons,array_len));
+        if (!D->error && E->e->EN(cons,d) == NULL)
+          _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+      }
       break;
     case GD_STRING_ENTRY:
       E->e->ES(string) = strdup("");
@@ -441,6 +465,11 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
       P->e->n_meta_const++;
     else
       D->n_const++;
+  } else if (E->field_type == GD_CARRAY_ENTRY) {
+    if (P)
+      P->e->n_meta_carray++;
+    else
+      D->n_carray++;
   } else if (E->field_type == GD_RAW_ENTRY) {
     if (new_ref != NULL) {
       /* This is the first raw field in this fragment; propagate it upwards */
@@ -480,9 +509,9 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
 /* add a META field by parsing a field spec */
 int gd_madd_spec(DIRFILE* D, const char* line, const char* parent) gd_nothrow
 {
-  char instring[GD_MAX_LINE_LENGTH];
-  char outstring[GD_MAX_LINE_LENGTH];
+  char *outstring = NULL;
   char *in_cols[MAX_IN_COLS];
+  const char *tok_pos = NULL;
   int n_cols;
   int me;
   gd_entry_t* E = NULL;
@@ -521,25 +550,19 @@ int gd_madd_spec(DIRFILE* D, const char* line, const char* parent) gd_nothrow
     return -1;
   }
 
-  /* we do this to ensure line is not too long */
-  strncpy(instring, line, GD_MAX_LINE_LENGTH - 1);
-  instring[GD_MAX_LINE_LENGTH - 2] = '\0';
-
   /* start parsing */
-  n_cols = _GD_Tokenise(D, instring, outstring, in_cols, "dirfile_madd_spec()",
-      0, D->standards, D->flags & GD_PERMISSIVE);
-
-  if (D->error) {
-    dreturn("%i", -1); /* tokeniser threw an error */
-    return -1;
-  }
+  n_cols = _GD_Tokenise(D, line, &outstring, &tok_pos, in_cols,
+      "dirfile_madd_spec()", 0, D->standards, D->flags & GD_PERMISSIVE);
 
   /* Directive parsing is skipped -- The Field Spec parser will add the field */
-  _GD_ParseFieldSpec(D, n_cols, in_cols, E, "dirfile_madd_spec()", 0, me,
-      D->standards, 1, 1, 1);
+  if (!D->error) 
+    _GD_ParseFieldSpec(D, n_cols, in_cols, E, "dirfile_madd_spec()", 0, me,
+        D->standards, 1, 1, 1, &outstring, tok_pos);
+
+  free(outstring);
 
   if (D->error) {
-    dreturn("%i", -1); /* field spec parser threw an error */
+    dreturn("%i", -1); /* parser threw an error */
     return -1;
   }
 
@@ -552,8 +575,8 @@ int gd_madd_spec(DIRFILE* D, const char* line, const char* parent) gd_nothrow
 /* add a field by parsing a field spec */
 int gd_add_spec(DIRFILE* D, const char* line, int fragment_index)
 {
-  char instring[GD_MAX_LINE_LENGTH];
-  char outstring[GD_MAX_LINE_LENGTH];
+  char *outstring;
+  const char *tok_pos = NULL;
   char *in_cols[MAX_IN_COLS];
   int n_cols;
 
@@ -589,25 +612,19 @@ int gd_add_spec(DIRFILE* D, const char* line, int fragment_index)
 
   _GD_ClearError(D);
 
-  /* we do this to ensure line is not too long */
-  strncpy(instring, line, GD_MAX_LINE_LENGTH - 1);
-  instring[GD_MAX_LINE_LENGTH - 2] = '\0';
-
   /* start parsing */
-  n_cols = _GD_Tokenise(D, instring, outstring, in_cols, "dirfile_add_spec()",
-      0, D->standards, D->flags & GD_PERMISSIVE);
-
-  if (D->error) {
-    dreturn("%i", -1); /* tokeniser threw an error */
-    return -1;
-  }
+  n_cols = _GD_Tokenise(D, line, &outstring, &tok_pos, in_cols,
+      "dirfile_add_spec()", 0, D->standards, D->flags & GD_PERMISSIVE);
 
   /* Directive parsing is skipped -- The Field Spec parser will add the field */
-  _GD_ParseFieldSpec(D, n_cols, in_cols, NULL, "dirfile_add_spec()", 0, 
-      fragment_index, D->standards, 1, 1, 1);
+  if (!D->error)
+    _GD_ParseFieldSpec(D, n_cols, in_cols, NULL, "dirfile_add_spec()", 0, 
+        fragment_index, D->standards, 1, 1, 1, &outstring, tok_pos);
+
+  free(outstring);
 
   if (D->error) {
-    dreturn("%i", -1); /* field spec parser threw an error */
+    dreturn("%i", -1); /* parser threw an error */
     return -1;
   }
 
@@ -1129,7 +1146,48 @@ int gd_add_const(DIRFILE* D, const char* field_code, gd_type_t const_type,
     if (entry == NULL)
       _GD_InternalError(D); /* We should be able to find it: we just added it */
     else
-      _GD_DoFieldOut(D, entry, 0, 0, 0, data_type, value);
+      _GD_DoFieldOut(D, entry, 0, 0, 1, data_type, value);
+
+    if (D->error)
+      error = -1;
+  }
+
+  dreturn("%i", error);
+  return error;
+}
+
+/* add a CARRAY entry */
+int gd_add_carray(DIRFILE* D, const char* field_code, gd_type_t const_type,
+    size_t array_len, gd_type_t data_type, const void* values,
+    int fragment_index) gd_nothrow
+{
+  dtrace("%p, \"%s\", 0x%x, %zi, 0x%x, %p, %i", D, field_code, const_type,
+      array_len, data_type, values, fragment_index);
+
+  if (D->flags & GD_INVALID) {
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  gd_entry_t *entry;
+  gd_entry_t C;
+  memset(&C, 0, sizeof(gd_entry_t));
+  C.field = (char *)field_code;
+  C.field_type = GD_CARRAY_ENTRY;
+  C.EN(cons,const_type) = const_type;
+  C.EN(cons,array_len) = array_len;
+  C.fragment_index = fragment_index;
+  int error = _GD_Add(D, &C, NULL);
+
+  /* Actually store the carray, now */
+  if (!error) {
+    entry = _GD_FindField(D, field_code, D->entry, D->n_entries, NULL);
+
+    if (entry == NULL)
+      _GD_InternalError(D); /* We should be able to find it: we just added it */
+    else
+      _GD_DoFieldOut(D, entry, 0, 0, array_len, data_type, values);
 
     if (D->error)
       error = -1;
@@ -1562,7 +1620,7 @@ int gd_madd_crecip89(DIRFILE* D, const char *parent, const char* field_code,
 int gd_madd_string(DIRFILE* D, const char* parent,
     const char* field_code, const char* value) gd_nothrow
 {
-  char buffer[GD_MAX_LINE_LENGTH];
+  char *buffer;
   dtrace("%p, \"%s\", \"%s\", \"%s\"", D, parent, field_code, value);
 
   if (D->flags & GD_INVALID) {/* don't crash */
@@ -1580,8 +1638,16 @@ int gd_madd_string(DIRFILE* D, const char* parent,
 
   /* Actually store the string, now */
   if (!error) {
-    snprintf(buffer, GD_MAX_LINE_LENGTH, "%s/%s", parent, field_code);
+    buffer = (char *)malloc(strlen(parent) + strlen(field_code) + 2);
+    if (buffer == NULL) {
+      _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+      dreturn("%i", -1);
+      return -1;
+    }
+
+    sprintf(buffer, "%s/%s", parent, field_code);
     entry = _GD_FindField(D, buffer, D->entry, D->n_entries, NULL);
+    free(buffer);
 
     if (entry == NULL)
       _GD_InternalError(D); /* We should be able to find it: we just added it */
@@ -1600,7 +1666,7 @@ int gd_madd_string(DIRFILE* D, const char* parent,
 int gd_madd_const(DIRFILE* D, const char* parent, const char* field_code,
     gd_type_t const_type, gd_type_t data_type, const void* value) gd_nothrow
 {
-  char buffer[GD_MAX_LINE_LENGTH];
+  char *buffer;
   dtrace("%p, \"%s\", \"%s\", 0x%x, 0x%x, %p", D, parent, field_code,
       const_type, data_type, value);
 
@@ -1620,13 +1686,71 @@ int gd_madd_const(DIRFILE* D, const char* parent, const char* field_code,
 
   /* Actually store the constant, now */
   if (!error) {
-    snprintf(buffer, GD_MAX_LINE_LENGTH, "%s/%s", parent, field_code);
+    buffer = (char *)malloc(strlen(parent) + strlen(field_code) + 2);
+    if (buffer == NULL) {
+      _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+      dreturn("%i", -1);
+      return -1;
+    }
+
+    sprintf(buffer, "%s/%s", parent, field_code);
     entry = _GD_FindField(D, buffer, D->entry, D->n_entries, NULL);
+    free(buffer);
 
     if (entry == NULL)
       _GD_InternalError(D); /* We should be able to find it: we just added it */
     else
-      _GD_DoFieldOut(D, entry, 0, 0, 0, data_type, value);
+      _GD_DoFieldOut(D, entry, 0, 0, 1, data_type, value);
+
+    if (D->error)
+      error = -1;
+  }
+
+  dreturn("%i", error);
+  return error;
+}
+
+/* add a META CARRAY entry */
+int gd_madd_carray(DIRFILE* D, const char* parent, const char* field_code,
+    gd_type_t const_type, size_t array_len, gd_type_t data_type,
+    const void* values) gd_nothrow
+{
+  char *buffer;
+  dtrace("%p, \"%s\", \"%s\", 0x%x, %zi 0x%x, %p", D, parent, field_code,
+      const_type, array_len, data_type, values);
+
+  if (D->flags & GD_INVALID) {/* don't crash */
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  gd_entry_t *entry;
+  gd_entry_t C;
+  C.field = (char *)field_code;
+  C.field_type = GD_CARRAY_ENTRY;
+  C.EN(cons,const_type) = const_type;
+  C.EN(cons,array_len) = array_len;
+  C.fragment_index = 0;
+  int error = _GD_Add(D, &C, parent);
+
+  /* Actually store the carray, now */
+  if (!error) {
+    buffer = (char *)malloc(strlen(parent) + strlen(field_code) + 2);
+    if (buffer == NULL) {
+      _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+      dreturn("%i", -1);
+      return -1;
+    }
+
+    sprintf(buffer, "%s/%s", parent, field_code);
+    entry = _GD_FindField(D, buffer, D->entry, D->n_entries, NULL);
+    free(buffer);
+
+    if (entry == NULL)
+      _GD_InternalError(D); /* We should be able to find it: we just added it */
+    else
+      _GD_DoFieldOut(D, entry, 0, 0, array_len, data_type, values);
 
     if (D->error)
       error = -1;

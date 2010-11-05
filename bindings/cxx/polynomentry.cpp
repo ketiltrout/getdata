@@ -99,12 +99,7 @@ int PolynomEntry::SetCoefficient(const char *scale, int index)
   if (index < 0 || index > GD_MAX_POLYORD)
     return -1;
 
-  free(E.scalar[index]);
-
-  if (scale == NULL)
-    E.scalar[index] = NULL;
-  else
-    E.scalar[index] = strdup(scale);
+  SetScalar(index, scale);
 
   if (D != NULL) {
     r = gd_alter_entry(D->D, E.field, &E, 0);
@@ -161,4 +156,12 @@ const char *PolynomEntry::Scalar(int index) const
     return NULL;
 
   return E.scalar[index];
+}
+
+int PolynomEntry::ScalarIndex(int index) const
+{
+  if (index < 0 || index > E.u.polynom.poly_ord)
+    return 0;
+
+  return E.scalar_ind[index];
 }

@@ -13,7 +13,7 @@ int main(void)
 {
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
-  const char* format_data = "const RAW UINT8 1\n";
+  const char* format_data = "const CONST UINT8 1\n";
   int fd, r = 0;
 
   mkdir(filedir, 0777);

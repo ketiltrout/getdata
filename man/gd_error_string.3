@@ -13,8 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_error_string 3 "25 May 2010" "Version 0.7.0" "GETDATA"
-.SH NAME
+.TH gd_error_string 3 "3 November 2010" "Version 0.7.0" "GETDATA"
 gd_error_string \(em report a GetData library error
 .SH SYNOPSIS
 .B #include <getdata.h>
@@ -31,14 +30,28 @@ The
 function returns a string describing the last dirfile error encountered while
 operating on 
 .IR dirfile .
-The string is written to the user-supplied buffer
-.IR buffer .
-At most
+
+If 
+.I buffer
+is not NULL, the string is written to this memory location.  At most
 .I buflen
 characters will be written. This always includes a terminating null byte, even
 if the error string was truncated.
 The numeric dirfile error itself may be obtained by calling
 .BR gd_error (3).
+
+If
+.I buffer
+is NULL,
+.BR gd_error_string ()
+will allocate a string of sufficient length using
+.BR malloc (3),
+and
+.I buflen
+is ignored.  In this case, the caller should deallocate the returned string
+using
+.BR free (3)
+when it is no longer needed.
 
 The 
 .I dirfile
@@ -46,11 +59,15 @@ argument should point to a DIRFILE object previously created by a call to
 .BR gd_open (3).
 
 .SH RETURN VALUE
-The
+If
+.I buffer
+is non-NULL, the
 .BR gd_error_string ()
 function returns 
 .IR buffer ,
-or NULL if buflen is less than one.  The error state of
+or NULL if buflen is less than one.  Otherwise, it returns a newly malloc'd
+string of sufficient length which should be deallocated by the caller.  The
+error state of
 .I dirfile
 is unchanged.
 .SH SEE ALSO

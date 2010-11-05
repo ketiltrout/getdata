@@ -110,6 +110,16 @@ The supplied dirfile was invalid.
 A syntax error was encountered in
 .IR line .
 .TP
+.B GD_E_LINE_TOO_LONG
+The supplied
+.I line
+was longer than the parser was able to deal with.  Lines are limited by the
+storage size of
+.BR ssize_t .
+On 32-bit systems, this limits
+.I line
+to 2**31 bytes.  The limit is larger on 64-bit systems.
+.TP
 .B GD_E_PROTECTED
 The metadata of the fragment was protected from change.  Or, a request to
 translate the binary file associated with a

@@ -27,6 +27,8 @@ C     constants useful to Fortran programs.
 C Externals
 C     Corresponding to gd_add_bit(3)
       EXTERNAL GDADBT
+C     Corresponding to gd_add_carray(3)
+      EXTERNAL GDADCA
 C     Corresponding to gd_add_clincom(3)
       EXTERNAL GDADCL
 C     Corresponding to gd_add_const(3)
@@ -65,6 +67,8 @@ C     Correpsonding to gd_alter_frameoffset(3)
       EXTERNAL GDAFOF
 C     Correpsonding to gd_alter_bit(3)
       EXTERNAL GDALBT
+C     Correpsonding to gd_alter_carray(3)
+      EXTERNAL GDALCA
 C     Correpsonding to gd_alter_clincom(3)
       EXTERNAL GDALCL
 C     Correpsonding to gd_alter_const(3)
@@ -97,6 +101,8 @@ C     Corresponding to gd_alter_protection(3)
       EXTERNAL GDAPRT
 C     Alter a scalar parameter
       EXTERNAL GDASCA
+C     Corresponding to gd_carray_len(3)
+      EXTERNAL GDCALN
 C     Corresponding to gd_parser_callback(3)
       EXTERNAL GDCLBK
 C     Corresponding to gd_close(3)
@@ -133,8 +139,12 @@ C     Corresponding to gd_fragmentname(3)
       EXTERNAL GDFRGN
 C     Corresponding to gd_bof(3)
       EXTERNAL GDGBOF
+C     Corresponding to gd_get_carray_slice(3)
+      EXTERNAL GDGCAS
 C     Corresponding to gd_entry(3) for BIT fields
       EXTERNAL GDGEBT
+C     Corresponding to gd_entry(3) for CARRAY fields
+      EXTERNAL GDGECA
 C     Corresponding to gd_entry(3) for complex valued LINCOM fields
       EXTERNAL GDGECL
 C     Corresponding to gd_entry(3) for CONST fields
@@ -175,6 +185,8 @@ C     Retrieve a scalar parameter
       EXTERNAL GDGSCA
 C     Corresponding to gd_spf(3)
       EXTERNAL GDGSPF
+C     Corresponding to gd_get_carray(3)
+      EXTERNAL GDGTCA
 C     Corresponding to gd_get_constant(3)
       EXTERNAL GDGTCO
 C     Corresponding to gd_get_string(3)
@@ -185,6 +197,8 @@ C     Corresponding to gd_invalid_dirfile(3)
       EXTERNAL GDINVD
 C     Corresponding to gd_madd_bit(3)
       EXTERNAL GDMDBT
+C     Corresponding to gd_madd_carray(3)
+      EXTERNAL GDMDCA
 C     Corresponding to complex valued gd_madd_clincom(3)
       EXTERNAL GDMDCL
 C     Corresponding to gd_madd_const(3)
@@ -249,8 +263,12 @@ C     Corresponding to gd_nvectors(3)
       EXTERNAL GDNVEC
 C     Corresponding to gd_open(3)
       EXTERNAL GDOPEN
+C     Corresponding to gd_put_carray_slice(3)
+      EXTERNAL GDPCAS
 C     Corresponding to gd_parent_fragment(3)
       EXTERNAL GDPFRG
+C     Corresponding to gd_put_carray(3)
+      EXTERNAL GDPTCA
 C     Corresponding to gd_put_constant(3)
       EXTERNAL GDPTCO
 C     Corresponding to gd_put_string(3)

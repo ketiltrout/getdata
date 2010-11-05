@@ -13,12 +13,12 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_alter_bit 3 "15 October 2010" "Version 0.7.0" "GETDATA"
+.TH gd_alter_bit 3 "3 November 2010" "Version 0.7.0" "GETDATA"
 .SH NAME
-gd_alter_bit, gd_alter_clincom, gd_alter_const, gd_alter_cpolynom,
-gd_alter_crecip, gd_alter_divide, gd_alter_lincom, gd_alter_linterp,
-gd_alter_multiply, gd_alter_phase, gd_alter_polynom, gd_alter_raw,
-gd_alter_recip, gd_alter_sbit
+gd_alter_bit, gd_alter_carray, gd_alter_clincom, gd_alter_const,
+gd_alter_cpolynom, gd_alter_crecip, gd_alter_divide, gd_alter_lincom,
+gd_alter_linterp, gd_alter_multiply, gd_alter_phase, gd_alter_polynom,
+gd_alter_raw, gd_alter_recip, gd_alter_sbit
 \(em modify a field in a dirfile
 .SH SYNOPSIS
 .B #include <getdata.h>
@@ -27,6 +27,9 @@ gd_alter_recip, gd_alter_sbit
 .ad l
 .BI "int gd_alter_bit(DIRFILE *" dirfile ", const char *" field_code ,
 .BI "const char *" in_field ", gd_bit_t " bitnum ", gd_bit_t " numbits );
+.HP
+.BI "int gd_alter_carray(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "gd_type_t " const_type ", size_t " array_len );
 .HP
 .BI "int gd_alter_clincom(DIRFILE *" dirfile ", const char *" field_code ,
 .BI "int " n_fields ", const char **" in_fields ", const double complex *" cm ,
@@ -85,7 +88,13 @@ types of other arguments may be obtained from the
 .BR get_entry (3)
 and
 .BR dirfile-format (5)
-manual pages.
+manual pages.  The
+.B gd_bit_t
+type is a signed 16-bit integer type.  The
+.B gd_shift_t
+type is a signed 64-bit integer type.  The
+.B gd_spf_t
+type is an unsigned 16-bit integer type.
 
 The
 .BR gd_alter_clincom ()
@@ -141,10 +150,9 @@ are equal to
 .BR GD_NULL , 
 these parameters will not be modified.
 
-All field parameters introduced with this interface must contain numerical
-parameters.  Field parameters which are
-.B CONST
-cannot be introduced with these functions.  To do that, use
+All field parameters introduced with this interface must contain literal
+parameters.  Field parameters which are scalar fields cannot be introduced with
+these functions.  To do that, use
 .BR gd_alter_entry (3),
 .BR gd_alter_spec (3)
 or
@@ -166,7 +174,7 @@ field will be re-encoded to reflect the new field parameters.
 See
 .B NOTES
 below for information on using
-.BR gd_alter_clincom ()
+.BR gd_alter_clincom (),\~ gd_alter_crecip (),
 and 
 .BR gd_alter_cpolynom ()
 in the C89 GetData API.
@@ -175,13 +183,6 @@ in the C89 GetData API.
 On success, any of these functions returns zero.   On error, -1 is returned and 
 the dirfile error is set to a non-zero error value.  Possible error values are:
 
-The
-.B gd_bit_t
-type is a signed 16-bit integer type.  The
-.B gd_shift_t
-type is a signed 64-bit integer type.  The
-.B gd_spf_t
-type is an unsigned 16-bit integer type.
 .TP 8
 .B GD_E_ACCMODE
 The specified dirfile was opened read-only.

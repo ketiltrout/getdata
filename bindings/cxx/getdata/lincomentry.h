@@ -74,6 +74,8 @@ namespace GetData {
 
       virtual const char *Scalar(int index = 0) const;
 
+      virtual int ScalarIndex(int index = 0) const;
+
       int SetNFields(int nfields);
       int SetInput(const char* field, int index = 0);
       int SetScale(double scale, int index = 0);

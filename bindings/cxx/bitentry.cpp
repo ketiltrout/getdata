@@ -84,15 +84,19 @@ const char *BitEntry::Scalar(int index) const
   return E.scalar[index];
 }
 
+int BitEntry::ScalarIndex(int index) const
+{
+  if (index != 0 && index != 1)
+    return 0;
+
+  return E.scalar_ind[index];
+}
+
 int BitEntry::SetFirstBit(const char *first_bit)
 {
   int r = 0;
 
-  free(E.scalar[0]);
-  if (first_bit == NULL)
-    E.scalar[0] = NULL;
-  else
-    E.scalar[0] = strdup(first_bit);
+  SetScalar(0, first_bit);
 
   if (D != NULL) {
     r = gd_alter_entry(D->D, E.field, &E, 0);
@@ -108,10 +112,7 @@ int BitEntry::SetNumBits(const char *num_bits)
 {
   int r = 0;
 
-  free(E.scalar[1]);
-  if (num_bits == NULL)
-    E.scalar[1] = NULL;
-  else
+  SetScalar(1, num_bits);
     E.scalar[1] = strdup(num_bits);
 
   if (D != NULL) {

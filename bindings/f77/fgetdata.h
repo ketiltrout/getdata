@@ -246,17 +246,28 @@ void F77_FUNC(gdmdsp, GDMDSP) (const int* dirfile, const char* spec,
 void F77_FUNC(gdfrgi, GDFRGI) (int* fragment_index, const int* dirfile,
     const char* field_code, const int* field_code_l);
 
-void F77_FUNC(gdgtco, GDGTCO) (int* n_read, const int* dirfile,
-    const char* field_code, const int* field_code_l, const int* return_type,
-    void* data_out);
+void F77_FUNC(gdgtco, GDGTCO) (const int *dirfile, const char *field_code,
+    const int *field_code_l, const int *return_type, void *data_out);
 
-void F77_FUNC(gdgtst, GDGTST) (int* n_read, const int* dirfile,
-    const char* field_code, const int* field_code_l, const int* len,
-    char* data_out);
+void F77_FUNC(gdgtca, GDGTCA) (const int *dirfile, const char *field_code,
+    const int *field_code_l, const int *return_type, void *data_out);
 
-void F77_FUNC(gdptco, GDPTCO) (int* n_read, const int* dirfile,
-    const char* field_code, const int* field_code_l, const int* return_type,
-    const void* data_out);
+void F77_FUNC(gdcaln, GDCALN) (int *len, const int *dirfile,
+    const char *field_code, const int *field_code_l);
+
+void F77_FUNC(gdgcas, GDGCAS) (const int *dirfile, const char *field_code,
+    const int *field_code_l, const int *start, const int *n,
+    const int *return_type, void *data_out);
+
+void F77_FUNC(gdgtst, GDGTST) (int *size, const int *dirfile,
+    const char *field_code, const int *field_code_l, const int *len,
+    char *data_out);
+
+void F77_FUNC(gdptco, GDPTCO) (const int *dirfile, const char *field_code,
+    const int *field_code_l, const int *data_type, const void *data_in);
+
+void F77_FUNC(gdptca, GDPTCA) (const int *dirfile, const char *field_code,
+    const int *field_code_l, const int *data_type, const void *data_in);
 
 void F77_FUNC(gdptst, GDPTST) (int* n_read, const int* dirfile,
     const char* field_code, const int* field_code_l, const int* len,
@@ -300,6 +311,9 @@ void F77_FUNC(gdalbt, GDALBT) (const int* dirfile, const char* field_code,
 
 void F77_FUNC(gdalco, GDALCO) (const int* dirfile, const char* field_code,
     const int* field_code_l, const int* const_type);
+
+void F77_FUNC(gdalca, GDALCA) (const int* dirfile, const char* field_code,
+    const int* field_code_l, const int* const_type, const int *array_len);
 
 void F77_FUNC(gdallc, GDALLC) (const int* dirfile, const char* field_code,
     const int* field_code_l, const int* n_fields, const char* in_field1,
@@ -443,12 +457,13 @@ void F77_FUNC(gdfnss, GDFNSS) (double *framenum, const int *dirfile,
     const char *field_code, const int *field_code_l, const double *value,
     const int *start, const int *end);
 
-void F77_FUNC(gdgsca, GDGSCA) (char* scalar, int* scalar_l, const int* dirfile,
-    const char* field_code, const int *field_code_l, const int* index);
+void F77_FUNC(gdgsca, GDGSCA) (char* scalar, int* scalar_l, int *scalar_index,
+    const int* dirfile, const char* field_code, const int *field_code_l,
+    const int* index);
 
 void F77_FUNC(gdasca, GDASCA) (const int* dirfile, const char* field_code,
     const int *field_code_l, const int *index, const char *scalar,
-    const int *scalar_l, int* recode);
+    const int *scalar_l, int *scalar_index, int* recode);
 
 void F77_FUNC(gdalsb, GDALSB) (const int* dirfile, const char* field_code,
     const int* field_code_l, const char* in_field, const int* in_field_l,

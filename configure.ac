@@ -50,10 +50,10 @@ dnl libgetdata interface age (current interface - oldest supported interface)
 AC_SUBST(GETDATA_IFACE_AGE, [0])
 
 dnl libgetdata++ interface version info
-AC_SUBST(GETDATAXX_VERSION, [2:0:1])
+AC_SUBST(GETDATAXX_VERSION, [2:0:0])
 
 dnl libfgetdata interface version info
-AC_SUBST(FGETDATA_VERSION, [2:0:1])
+AC_SUBST(FGETDATA_VERSION, [2:0:0])
 
 dnl libf95getdata interface version info
 AC_SUBST(F95GETDATA_VERSION, [2:0:0])
@@ -507,9 +507,9 @@ if test "x${use_modules}" != "xno"; then
 fi
 
 dnl functions
-AC_CHECK_FUNCS([_commit fchmod _fdopen fsync gmtime_r _lseeki64 _mkdir \
-                mkstemp _open _read _rmdir stat64 _stat64 strtoll strtoull \
-                _unlink _write])
+AC_CHECK_FUNCS([_commit fchmod _fdopen fsync getdelim gmtime_r _lseeki64 \
+                _mkdir mkstemp _open _read _rmdir stat64 _stat64 strtoll \
+                strtoull _unlink _write])
 if test "x$disable_c99" = "xno"; then
   AC_CHECK_FUNCS([cabs])
 fi
@@ -562,6 +562,8 @@ AC_C_CONST
 AC_C_BIGENDIAN
 GD_C_FLOATORDERING
 AC_TYPE_SIZE_T
+AC_CHECK_SIZEOF([size_t])
+AC_CHECK_TYPES([ssize_t])
 AC_TYPE_OFF_T
 AC_CHECK_SIZEOF([off_t])
 AC_TYPE_UINT8_T

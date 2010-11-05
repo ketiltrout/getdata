@@ -1,3 +1,128 @@
+2010-10-28   D. V. Wiebe <getdata@ketiltrout.net>   svn:469
+	* bindings/python/test/big_test.py bindings/cxx/test/big_test.cpp
+	bindings/f77/test/big_test.f bindings/f77/test/big_test95.f90
+	bindings/idl/test/big_test.pro: Added tests 158 through 181.
+	
+	* test/put_carray_slice.c test/cvlist_array_meta.c test/del_carray.c
+	test/get_carray_slice.c test/cvlist_array.c test/del_carray_deref.c
+	test/nmeta_vectors_del.c test/get_carray.c test/parse_carray.c
+	test/madd_carray.c test/add_carray.c test/put_carray.c test/get_carray_len.c
+	test/parse_carray_long.c test/alter_carray_len.c test/alter_carray_type.c:
+	Added.
+
+	* test/madd.c: Remove gd_get_constant call.
+
+	* test/parse_const.c: Actually test what is advertised.
+
+	* bindings/python/pydirfile.c (gdpy_dirfile_getcarray gdpy_dirfile_carraylen
+	gdpy_dirfile_carrays gdpy_dirfile_mcarrays gdpy_dirfile_putcarray)
+	bindings/python/pyentry.c (gdpy_entry_getarraylen gdpy_entry_setarraylen):
+	Added.
+	* bindings/python/pyentry.c (gdpy_set_entry_from_tuple
+	gdpy_set_entry_from_dict gdpy_entry_getinfields gdpy_entry_getdatatypename
+	gdpy_entry_getdatatype): Update for CARRAY.
+
+	* bindings/cxx/bitentry.cpp (BitEntry::ScalarIndex) bindings/cxx/entry.cpp
+	(scalar_ok Entry::ScalarIndex Entry::SetScalar) bindings/cxx/lincomentry.cpp
+	(LincomEntry::ScalarIndex) bindings/cxx/dirfile.cpp (Dirfile::Carrays
+	Dirfile::CarrayLen Dirfile::MCarrays Dirfile::GetCarray Dirfile::PutCarray)
+	bindings/cxx/polynomentry.cpp (PolynomEntry::ScalarIndex)
+	bindings/cxx/sbitentry.cpp (SBitEntry::ScalarIndex)
+	bindings/cxx/getdata/rawentry.h (ScalarIndex)
+	bindings/cxx/getdata/recipentry.h (ScalarIndex): Added.
+	* bindings/cxx/bitentry.cpp (BitEntry::SetFirstBit BitEntry::SetNumBits)
+	bindings/cxx/lincomentry.cpp (LincomEntry::SetScale LincomEntry::SetOffset)
+	bindings/cxx/polynomentry.cpp (PolynomEntry::SetCoefficient)
+	bindings/cxx/phaseentry.cpp (PhaseEntry::SetShift)
+	bindings/cxx/sbitentry.cpp (SBitEntry::SetFirstBit SBitEntry::SetNumBits)
+	bindings/cxx/recipentry.cpp (RecipEntry::SetDividend):
+	Call Entry::SetScalar.
+	* bindings/cxx/entry.cpp (Entry::Scalar): Call scalar_ok.
+	* bindings/cxx/carrayentry.cpp bindings/cxx/getdata/carrayentry.h: Added.
+	* bindings/cxx/dirfile.cpp (Dirfile::ErrorString): Let the C library malloc
+	the string.  Also added a prototype with no parameters.
+
+	* bindings/f77/fgetdata.c (GDGECA GDADCA GDGTCA GDGCAS GDCALN GDPTCA GDPCAS
+	GDALCA):
+	* bindings/f77/fgetdata.c (GDGTCO GDPTCO): Removed the returned integer.
+	* bindings/f77/fgetdata.c (GDGSCA GDASCA): Deal with scalar index.
+	* bindings/f77/getdata.f90.in (fgd_get_constant_n fgd_get_constant_i1
+	fgd_get_constant_i2 fgd_get_constant_i4 fgd_get_constant_i8
+	fgd_get_constant_r4 fgd_get_constant_r8 fgd_get_constant_c8
+	fgd_get_constant_c16 fgd_put_constant_i1 fgd_put_constant_i2
+	fgd_put_constant_i4 fgd_put_constant_i8 fgd_put_constant_r4
+	fgd_put_constant_r8 fgd_put_constant_c8 fgd_put_constant_c16): Convert to
+	subroutines.
+	* bindings/f77/getdata.f90.in (fgd_entry fgd_add fgd_madd fgd_alter_entry):
+	Update for CARRAY.
+	* bindings/f77/getdata.f90.in (fgd_get_carray_n fgd_get_carray_i1
+	fgd_get_carray_i2 fgd_get_carray_i4 fgd_get_carray_i8 fgd_get_carray_c16
+	fgd_put_carray_i1 fgd_put_carray_i2 fgd_put_carray_i4 fgd_put_carray_i8
+	fgd_put_carray_r4 fgd_put_carray_r8 fgd_put_carray_c8 fgd_put_carray_c16
+	fgd_carray_len fgd_add_carray fgd_madd_carray fgd_alter_carray): Added.
+
+	* bindings/idl/getdata.c (gdidl_make_idl_entry): Update for CARRAY.
+	* bindings/idl/getdata.c (gdidl_add_const): fix handling of data values
+	* bindings/idl/getdata.c (gdidl_add_carray gdidl_alter_carray
+	gdidl_get_carray gdidl_carray_len gdidl_put_carray): Added.
+	* bindings/idl/getdata.c (gdidl_getdata): Free data on error.
+	* bindings/idl/getdata.c (gdidl_get_constant): Free data on return.
+
+	* src/interna.h: Replace the const data union with a void pointer.
+	* src/getdata.h.in: Define GD_MAX_CARRAY_LENGTH.
+
+	* src/common.c (_GD_GetLine): Call getdelim.  Return string length not
+	string itself.
+	* src/parse.c (_GD_ParseFragment): Handle n_cols < 2.  Raise
+	GD_E_LINE_TOO_LONG on overflow.
+	* src/parse.c (_GD_ParseFragment) mod.c (gd_alter_spec gd_malter_spec)
+	src/add.c (gd_add_spec gd_madd_spec): Don't provide buffers for instring and
+	outstring: they will be malloc'd by others.
+	* src/parse.c (_GD_Tokenise): Dynamically allocate outstring.  Also,
+	remember position, so tokenising can resume.
+	* src/parse.c (_GD_ParseFieldSpec _GD_ParseDirective): Pass through tok_pos
+	and outstring.
+	* src/compat.c (getdelim): Added.
+
+	* src/parse.c (_GD_ParseFragment): Permit the parser callback to re-malloc
+	pdata.line.  Also pass it the current length of pdata.line.
+
+	* src/entry.c (_GD_FreeE) src/nmeta.c (gd_nmvectors gd_nmfields_by_type)
+	src/close.c (_GD_FreeD) src/flush.c (_GD_FieldSpec) src/nfields.c
+	(gd_nvectors gd_nfields_by_type) src/native.c (_GD_NativeType) src/del.c
+	(gd_delete) src/parse.c (_GD_ParseFieldSpec) src/mod.c (_GD_Change)
+	src/add.c (_GD_Add): Update for CARRAY.
+	* src/getdata.c (_GD_DoConst) src/putdata.c (_GD_DoConstOut) src/flush.c
+	(_GD_WriteConst): Handle both CONST and CARRAY.
+	* src/constant.c (gd_get_carray_slice gd_get_carray gd_carray_len
+	gd_put_carray_slice gd_put_carray) src/parse.c (_GD_ConstType
+	_GD_ParseCarray) gd_field_lists (gd_carrays) src/mod.c (gd_alter_carray)
+	src/meta_list.c (gd_mcarrays) src/add.c (gd_add_carray gd_madd_carray): Added.
+	* src/parse.c (_GD_ParseConst): Storage for constant value is now dynamic.
+
+	* src/del.c (gd_delete): Update parent when deleting a metafield.
+
+	* src/ascii.c (_GD_AsciiSize) src/common.c (_GD_ReadLinterpFile): Call
+	getdelim.
+
+	* src/flush.c (_GD_FlushFragment): Skip writing and /ENCODING directive if
+	not known.
+
+	* src/errors.c (gd_error_string): malloc a suitably sized buffer for the
+	string if passed buffer=NULL.
+
+	* src/name.c (gd_rename) src/del.c (gd_delete) src/include.c (gd_uninclude):
+	Invalidate the field lists.
+
+	* src/flush.c (_GD_StringEscapeise _GD_PadField) _GD_FieldSpec: Write directly
+	to the stream, rathen than an intermediate buffer.
+
+	* src/entry.c (_GD_GetScalar) parse.c (_GD_SetScalar) src/mod.c
+	(_GD_AlterScalar): Handle the scalar index.
+
+	* src/legacy.c (_GD_CopyGlobalError): Dynamically handle error strings, rather
+	than using _GD_GlobalErrorString and _GD_GlobalErrorFile.
+
 2010-10-28   D. V. Wiebe <getdata@ketiltrout.net>   svn:468
 	* src/legacy.c (GetFormat): Fix counting of POLYNOM fields.
 

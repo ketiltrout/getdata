@@ -1375,22 +1375,15 @@ static size_t _GD_DoPolynom(DIRFILE *D, gd_entry_t *E, off64_t first_samp,
 
 /* _GD_DoConst:  Read from a const.  Returns number of samples read (ie. 1).
 */
-static size_t _GD_DoConst(DIRFILE *D, const gd_entry_t *E,
-    gd_type_t return_type, void *data_out)
+static size_t _GD_DoConst(DIRFILE *D, const gd_entry_t *E, off64_t first,
+    size_t len, gd_type_t return_type, void *data_out)
 {
-  dtrace("%p, %p, 0x%x, %p", D, E, return_type, data_out);
+  dtrace("%p, %p, %lli, %zu, 0x%x, %p", D, E, first, len, return_type,
+      data_out);
 
-  if (E->EN(cons,const_type) & GD_SIGNED)
-    _GD_ConvertType(D, &E->e->EN(cons.d,i), GD_INT64, data_out, return_type, 1);
-  else if (E->EN(cons,const_type) & GD_IEEE754)
-    _GD_ConvertType(D, &E->e->EN(cons.d,d), GD_FLOAT64, data_out, return_type,
-        1);
-  else if (E->EN(cons,const_type) & GD_COMPLEX)
-    _GD_ConvertType(D, &E->e->EN(cons.d,c), GD_COMPLEX128, data_out,
-        return_type, 1);
-  else
-    _GD_ConvertType(D, &E->e->EN(cons.d,u), GD_UINT64, data_out, return_type,
-        1);
+  gd_type_t type = _GD_ConstType(D, E->EN(cons,const_type));
+  _GD_ConvertType(D, (char *)E->e->EN(cons,d) + first * GD_SIZE(type), type,
+      data_out, return_type, len);
 
   if (D->error) { /* bad input type */
     dreturn("%i", 0);
@@ -1511,7 +1504,8 @@ size_t _GD_DoField(DIRFILE *D, gd_entry_t *E, int repr, off64_t first_samp,
       n_read = _GD_DoBit(D, E, 1, first_samp, num_samp, return_type, data_out);
       break;
     case GD_CONST_ENTRY:
-      n_read = _GD_DoConst(D, E, return_type, data_out);
+    case GD_CARRAY_ENTRY:
+      n_read = _GD_DoConst(D, E, first_samp, num_samp, return_type, data_out);
       break;
     case GD_STRING_ENTRY:
       n_read = _GD_DoString(E, num_samp, (char *)data_out);

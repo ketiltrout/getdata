@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_mconstants 3 "15 October 2010" "Version 0.7.0" "GETDATA"
+.TH gd_mconstants 3 "3 November 2010" "Version 0.7.0" "GETDATA"
 .SH NAME
 gd_mconstants \(em retrieve a list of constant values from a dirfile
 .SH SYNOPSIS
@@ -21,8 +21,8 @@ gd_mconstants \(em retrieve a list of constant values from a dirfile
 .HP
 .nh
 .ad l
-.BI "const void *gd_mconstants(DIRFILE *" dirfile ", gd_type_t
-.IB return_type ", const char *" parent );
+.BI "const void *gd_mconstants(DIRFILE *" dirfile ", const char"
+.BI * parent ", gd_type_t " return_type );
 .hy
 .ad n
 .SH DESCRIPTION
@@ -58,8 +58,7 @@ The caller may not modify any values in the array, or the array itself.  Doing
 so may cause database corruption.  The pointer returned is guaranteed to be
 valid until
 .BR gd_mconstants ()
-is called again with the same arguments, or until the array is de-allocated by
-a call to
+is called again, or until the array is de-allocated by a call to
 .BR gd_close (3).
 
 A corresponding list of names for these fields may be obtained by calling
@@ -95,8 +94,9 @@ a call to
 .BR gd_error_string (3).
 .SH SEE ALSO
 .BR dirfile (5),
-.BR gd_open (3),
 .BR gd_error (3),
 .BR gd_error_string (3),
 .BR gd_field_list_by_type (3),
-.BR gd_nfields_by_type (3)
+.BR gd_nfields_by_type (3),
+.BR gd_mcarrays (3),
+.BR gd_open (3)

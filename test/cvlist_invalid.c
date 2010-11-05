@@ -14,7 +14,7 @@ int main(void)
   int r = 0;
 
   DIRFILE* D = gd_open(filedir, GD_RDONLY);
-  const char* fl = gd_constants(D, GD_UINT8);
+  const void* fl = gd_constants(D, GD_UINT8);
   int error = gd_error(D);
   gd_close(D);
 

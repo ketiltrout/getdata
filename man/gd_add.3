@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_add 3 "15 October 2010" "Version 0.7.0" "GETDATA"
+.TH gd_add 3 "3 November 2010" "Version 0.7.0" "GETDATA"
 .SH NAME
 gd_add, gd_madd \(em add a field to a dirfile
 .SH SYNOPSIS
@@ -59,19 +59,19 @@ ignores the value of
 and instead adds the new meta field to the same format specification fragment in
 which the parent field is defined.
 
-Fields added with this interface may contain either numerical parameters or 
-parameters based on
-.B CONST
-fields.  If an element of the
+Fields added with this interface may contain either literal parameters or
+parameters based on scalar fields.  If an element of the
 .IR entry -> scalar
 array defined for the specified field type is non-NULL, this element will be
-used as the
-.B CONST
-field code, and the corresponding numerical member will be ignored, and need
-not be initialised.  Conversely, if numerical parameters are intended, the
-corresponding
+used as the scalar field code, and the corresponding numerical member will be
+ignored, and need not be initialised.  Conversely, if numerical parameters are
+intended, the corresponding
 .IR entry -> scalar
-elements should be set to NULL.
+elements should be set to NULL.  If using an element of a
+.B CARRAY
+field,
+.IR entry -> scalar_ind
+should also be set.
 
 .SH RETURN VALUE
 On success,
@@ -117,13 +117,27 @@ parameter provided with a
 entry, or the
 .IR entry -> const_type
 parameter provided with a
-.BR CONST
+.B CONST
+or 
+.B CARRAY
 entry, was invalid.
+.TP
+.B GD_E_BOUNDS
+The
+.IR entry -> array_len
+parameter provided with a
+.B CARRAY
+entry was greater than GD_MAX_CARRAY_LENGTH.
 .TP
 .B GD_E_DUPLICATE
 The field name provided in 
 .IR entry -> field
 duplicated that of an already existing field.
+.TP
+.B GD_E_INTERNAL_ERROR
+An internal error occurred in the library while trying to perform the task.
+This indicates a bug in the library.  Please report the incident to the
+GetData developers.
 .TP
 .B GD_E_PROTECTED
 The metadata of the fragment was protected from change.  Or, the creation of a
@@ -154,17 +168,27 @@ The dirfile error may be retrieved by calling
 A descriptive error string for the last error encountered can be obtained from
 a call to
 .BR gd_error_string (3).
+.SH NOTES
+GetData artifically limits the number of elements in a
+.B CARRAY
+to the value of the symbol GD_MAX_CARRAY_LENGTH defined in getdata.h.  This is
+done to be certain that the
+.B CARRAY
+won't overrun the line when flushed to disk.  On a 32-bit system, this number
+is 2**24.  It is larger on a 64-bit system.
+
 .SH SEE ALSO
 .BR gd_add_bit (3),
-.BR gd_add_clincom (3),
+.BR gd_add_carray (3),
 .BR gd_add_const (3),
-.BR gd_add_cpolynom (3),
+.BR gd_add_divide (3),
 .BR gd_add_lincom (3),
 .BR gd_add_linterp (3),
 .BR gd_add_multiply (3),
 .BR gd_add_phase (3),
 .BR gd_add_polynom (3),
 .BR gd_add_raw (3),
+.BR gd_add_recip (3),
 .BR gd_add_sbit (3),
 .BR gd_add_spec (3),
 .BR gd_add_string (3),
@@ -172,14 +196,15 @@ a call to
 .BR gd_error (3),
 .BR gd_error_string (3),
 .BR gd_madd_bit (3),
-.BR gd_madd_clincom (3),
+.BR gd_madd_carray (3),
 .BR gd_madd_const (3),
-.BR gd_madd_cpolynom (3),
+.BR gd_madd_divide (3),
 .BR gd_madd_lincom (3),
 .BR gd_madd_linterp (3),
 .BR gd_madd_multiply (3),
 .BR gd_madd_phase (3),
 .BR gd_madd_polynom (3),
+.BR gd_madd_recip (3),
 .BR gd_madd_sbit (3),
 .BR gd_madd_spec (3),
 .BR gd_madd_string (3),

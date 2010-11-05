@@ -68,8 +68,10 @@ unsigned int gd_nmvectors(DIRFILE* D, const char* parent) gd_nothrow
 
   _GD_ClearError(D);
 
-  dreturn("%u", P->e->n_meta - P->e->n_meta_string - P->e->n_meta_const);
-  return P->e->n_meta - P->e->n_meta_string - P->e->n_meta_const;
+  dreturn("%u", P->e->n_meta - P->e->n_meta_string - P->e->n_meta_const -
+      P->e->n_meta_carray);
+  return P->e->n_meta - P->e->n_meta_string - P->e->n_meta_const -
+    P->e->n_meta_carray;
 }
 
 unsigned int gd_nmfields_by_type(DIRFILE* D, const char* parent,
@@ -101,6 +103,8 @@ unsigned int gd_nmfields_by_type(DIRFILE* D, const char* parent,
     r = P->e->n_meta_string;
   else if (type == GD_CONST_ENTRY)
     r = P->e->n_meta_const;
+  else if (type == GD_CARRAY_ENTRY)
+    r = P->e->n_meta_carray;
   else
     for (i = 0; i < P->e->n_meta; ++i)
       if (P->e->p.meta_entry[i]->field_type == type)

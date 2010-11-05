@@ -52,6 +52,10 @@ static void _GD_FreeD(DIRFILE* D)
     free(D->type_list[j]);
   free(D->string_value_list);
   free(D->const_value_list);
+  if (D->carray_value_list)
+    for (i = 0; D->carray_value_list[i].n != 0; ++i)
+      free(D->carray_value_list[i].d);
+  free(D->carray_value_list);
   free(D->fragment);
   free(D->name);
   free(D);

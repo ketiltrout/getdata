@@ -44,6 +44,8 @@ namespace GetData {
 
       virtual const char *Scalar() const { return E.scalar[0]; }
 
+      virtual int ScalarIndex() const { return E.scalar_ind[0]; };
+
       virtual int ComplexScalars() const { return E.comp_scal; }
 
       virtual double Dividend() const { return E.u.recip.dividend; };

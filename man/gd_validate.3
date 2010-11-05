@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_validate 3 "25 May 2010" "Version 0.7.0" "GETDATA"
+.TH gd_validate 3 "3 November 2010" "Version 0.7.0" "GETDATA"
 .SH NAME
 gd_validate \(em check a dirfile field code for validity
 .SH SYNOPSIS
@@ -40,9 +40,7 @@ argument must point to a valid DIRFILE object previously created by a call to
 
 This function checks whether the field and its input fields (if any) are found,
 whether the representation suffix (if any) is valid, and also that all
-non-literal scalar parameters specify valid
-.B CONST
-fields.
+non-literal parameters specify valid scalar fields.
 
 .SH RETURN VALUE
 If all checks pass,
@@ -67,6 +65,8 @@ was not recognised.
 A non-literal scalar used in the definition of the field or one of its inputs
 was not found, or was not a
 .B CONST
+or
+.B CARRAY
 field.
 .TP
 .B GD_E_DIMENSION
@@ -89,7 +89,7 @@ GetData function: all functions which accept field codes perform these checks
 themselves.
 .SH SEE ALSO
 .BR dirfile (5),
-.BR gd_open (3),
 .BR gd_getdata (3),
 .BR gd_error (3),
-.BR gd_error_string (3)
+.BR gd_error_string (3),
+.BR gd_open (3)

@@ -34,10 +34,10 @@ program big_test
   character (len=*), parameter :: frm2 = 'test95_dirfile/form2'
   character (len=*), parameter :: dat = 'test95_dirfile/data'
   integer, parameter :: flen = 7
-  integer, parameter :: nfields = 13
+  integer, parameter :: nfields = 14
 
-  character (len=flen), dimension(nfields + 10) :: fields
-  character (len=flen), dimension(nfields + 10) :: flist
+  character (len=flen), dimension(nfields + 8) :: fields
+  character (len=flen), dimension(nfields + 8) :: flist
   character (len=GD_FIELD_LEN) :: str
   integer(1), dimension(80) :: datadata
   integer :: i, d, e, n, l, ne
@@ -63,10 +63,10 @@ program big_test
   call system ( 'rm -rf ' // fildir )
   call system ( 'mkdir ' // fildir )
 
-  fields =(/ 'INDEX  ', 'bit    ', 'const  ', 'data   ', 'div    ', 'lincom ', &
-  'linterp', 'mult   ', 'phase  ', 'polynom', 'recip  ', 'sbit   ', 'string ', &
-  '       ', '       ', '       ', '       ', '       ', '       ', '       ', &
-  '       ', '       ', '       ' /)
+  fields =(/ 'INDEX  ', 'bit    ', 'carray ', 'const  ', 'data   ', 'div    ', &
+  'lincom ', 'linterp', 'mult   ', 'phase  ', 'polynom', 'recip  ', 'sbit   ', &
+  'string ', '       ', '       ', '       ', '       ', '       ', '       ', &
+  '       ', '       ' /)
 
   open(1, file=frmat, status='new')
   write(1, *) '/ENDIAN little'
@@ -76,6 +76,7 @@ program big_test
   write(1, *) '/META data mconst CONST COMPLEX128 3.3;4.4'
   write(1, *) '/META data mlut LINTERP DATA ./lut'
   write(1, *) 'const CONST FLOAT64 5.5'
+  write(1, *) 'carray CARRAY FLOAT64 1.1 2.2 3.3 4.4 5.5 6.6'
   write(1, *) 'linterp LINTERP data /look/up/file'
   write(1, *) 'polynom POLYNOM data 1.1 2.2 2.2 3.3;4.4 const const'
   write(1, *) 'bit BIT data 3 4'
@@ -298,17 +299,12 @@ program big_test
   end if
 
 ! 3: fgd_get_constant_i1 check
-  n = fgd_get_constant_i1(d, 'const', ci1(1))
+  call fgd_get_constant_i1(d, 'const', ci1(1))
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
     write(*, 2001) 3, e
-  end if
-
-  if (n .ne. 0) then
-    ne = ne + 1
-    write(*, 2002) 3, n
   end if
 
   if (ci1(1) .ne. 5) then
@@ -317,17 +313,12 @@ program big_test
   end if
 
 ! 110: fgd_get_constant_i2 check
-  n = fgd_get_constant_i2(d, 'const', ci2(1))
+  call fgd_get_constant_i2(d, 'const', ci2(1))
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
     write(*, 2001) 110, e
-  end if
-
-  if (n .ne. 0) then
-    ne = ne + 1
-    write(*, 2002) 110, n
   end if
 
   if (ci2(1) .ne. 5) then
@@ -336,17 +327,12 @@ program big_test
   end if
 
 ! 111: fgd_get_constant_i4 check
-  n = fgd_get_constant_i4(d, 'const', ci4(1))
+  call fgd_get_constant_i4(d, 'const', ci4(1))
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
     write(*, 2001) 111, e
-  end if
-
-  if (n .ne. 0) then
-    ne = ne + 1
-    write(*, 2002) 111, n
   end if
 
   if (ci4(1) .ne. 5) then
@@ -355,17 +341,12 @@ program big_test
   end if
 
 ! 112: fgd_get_constant_i8 check
-  n = fgd_get_constant_i8(d, 'const', ci8(1))
+  call fgd_get_constant_i8(d, 'const', ci8(1))
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
     write(*, 2001) 112, e
-  end if
-
-  if (n .ne. 0) then
-    ne = ne + 1
-    write(*, 2002) 112, n
   end if
 
   if (ci8(1) .ne. 5) then
@@ -374,17 +355,12 @@ program big_test
   end if
 
 ! 113: fgd_get_constant_r4 check
-  n = fgd_get_constant_r4(d, 'const', cr4(1))
+  call fgd_get_constant_r4(d, 'const', cr4(1))
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
     write(*, 2001) 113, e
-  end if
-
-  if (n .ne. 0) then
-    ne = ne + 1
-    write(*, 2002) 113, n
   end if
 
   if (abs(cr4(1) - 5.5) .gt. 1e-5) then
@@ -393,17 +369,12 @@ program big_test
   end if
 
 ! 114: fgd_get_constant_r8 check
-  n = fgd_get_constant_r8(d, 'const', cr8(1))
+  call fgd_get_constant_r8(d, 'const', cr8(1))
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
     write(*, 2001) 114, e
-  end if
-
-  if (n .ne. 0) then
-    ne = ne + 1
-    write(*, 2002) 114, n
   end if
 
   if (abs(cr8(1) - 5.5) .gt. 1e-5) then
@@ -412,17 +383,12 @@ program big_test
   end if
 
 ! 115: fgd_get_constant_c8 check
-  n = fgd_get_constant_c8(d, 'const', cc8(1))
+  call fgd_get_constant_c8(d, 'const', cc8(1))
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
     write(*, 2001) 115, e
-  end if
-
-  if (n .ne. 0) then
-    ne = ne + 1
-    write(*, 2002) 115, n
   end if
 
   if (abs(cc8(1) - 5.5) .gt. 1e-5) then
@@ -431,17 +397,12 @@ program big_test
   end if
 
 ! 116: fgd_get_constant_c16 check
-  n = fgd_get_constant_c16(d, 'const', cc16(1))
+  call fgd_get_constant_c16(d, 'const', cc16(1))
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
     write(*, 2001) 116, e
-  end if
-
-  if (n .ne. 0) then
-    ne = ne + 1
-    write(*, 2002) 116, n
   end if
 
   if (abs(cc16(1) - 5.5) .gt. 1e-5) then
@@ -450,17 +411,12 @@ program big_test
   end if
 
 ! 117: fgd_get_constant_n check
-  n = fgd_get_constant_n(d, 'const')
+  call fgd_get_constant_n(d, 'const')
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
     ne = ne + 1
     write(*, 2001) 117, e
-  end if
-
-  if (n .ne. 0) then
-    ne = ne + 1
-    write(*, 2002) 117, n
   end if
 
 ! 4: fgd_field_name_max check
@@ -1131,7 +1087,7 @@ program big_test
 
   if (ent%fragment_index .ne. 0) then
     ne = ne + 1
-    write(*, 2007) 26, 2, nfragment_index
+    write(*, 2007) 26, 2, ent%fragment_index
   end if
 
   if (ent%data_type .ne. GD_FLOAT64) then
@@ -1299,7 +1255,7 @@ program big_test
 
   if (ent%comp_scal .ne. 1) then
     ne = ne + 1
-    write(*, 2007) 29, 6, ent%comp_scal
+    write(*, 2007) 30, 6, ent%comp_scal
   end if
 
   cq(1) = dcmplx(1.1, 1.2)
@@ -1643,7 +1599,7 @@ program big_test
     write(*, 2007) 38, 1, n
   end if
 
-  if (ent%fragment_index .ne. ent%fragment_index) then
+  if (ent%fragment_index .ne. 0) then
     ne = ne + 1
     write(*, 2007) 38, 2, ent%fragment_index
   end if
@@ -1653,7 +1609,7 @@ program big_test
     write(*, 2007) 38, 3, ent%data_type
   end if
 
-  n = fgd_get_constant_r4(d, 'new11', fl)
+  call fgd_get_constant_r4(d, 'new11', fl)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -1744,7 +1700,7 @@ program big_test
     write(*, 2006) 41, 3, e
   end if
 
-  n = fgd_get_constant_i1(d, 'const2', ci1(1))
+  call fgd_get_constant_i1(d, 'const2', ci1(1))
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -1814,7 +1770,7 @@ program big_test
   fields =(/ 'INDEX  ', 'bit    ', 'data   ', 'div    ', 'lincom ', 'linterp', &
   'mult   ', 'new1   ', 'new10  ', 'new13  ', 'new2   ', 'new3   ', 'new4   ', &
   'new5   ', 'new6   ', 'new7   ', 'new8   ', 'new9   ', 'phase  ', 'polynom', &
-  'recip  ', 'sbit   ', 'string ' /)
+  'recip  ', 'sbit   ' /)
   l = flen
   call fgd_vector_list(flist, d, l)
   e = fgd_error(d)
@@ -2289,7 +2245,7 @@ program big_test
     write(*, 2007) 55, 3, ent%data_type
   end if
 
-  n = fgd_get_constant_r4(d, 'data/mnew11', fl)
+  call fgd_get_constant_r4(d, 'data/mnew11', fl)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -2452,7 +2408,7 @@ program big_test
 
 ! 61: fgd_put_constant_i1 check
   ci1(1) = 61
-  n = fgd_put_constant_i1(d, 'const', ci1(1))
+  call fgd_put_constant_i1(d, 'const', ci1(1))
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -2460,12 +2416,7 @@ program big_test
     write(*, 2006) 61, 1, e
   end if
 
-  if (n .ne. 0) then
-    ne = ne + 1
-    write(*, 2002) 61, n
-  end if
-
-  n = fgd_get_constant_r4(d, 'const', fl)
+  call fgd_get_constant_r4(d, 'const', fl)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -2480,7 +2431,7 @@ program big_test
 
 ! 127: fgd_put_constant_i2 check
   ci2(1) = 127
-  n = fgd_put_constant_i2(d, 'const', ci2(1))
+  call fgd_put_constant_i2(d, 'const', ci2(1))
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -2488,12 +2439,7 @@ program big_test
     write(*, 2006) 127, 1, e
   end if
 
-  if (n .ne. 0) then
-    ne = ne + 1
-    write(*, 2002) 127, n
-  end if
-
-  n = fgd_get_constant_r4(d, 'const', fl)
+  call fgd_get_constant_r4(d, 'const', fl)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -2508,7 +2454,7 @@ program big_test
 
 ! 128: fgd_put_constant_i4 check
   ci4(1) = 128
-  n = fgd_put_constant_i4(d, 'const', ci4(1))
+  call fgd_put_constant_i4(d, 'const', ci4(1))
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -2516,12 +2462,7 @@ program big_test
     write(*, 2006) 128, 1, e
   end if
 
-  if (n .ne. 0) then
-    ne = ne + 1
-    write(*, 2002) 128, n
-  end if
-
-  n = fgd_get_constant_r4(d, 'const', fl)
+  call fgd_get_constant_r4(d, 'const', fl)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -2536,7 +2477,7 @@ program big_test
 
 ! 129: fgd_put_constant_i8 check
   ci8(1) = 129
-  n = fgd_put_constant_i8(d, 'const', ci8(1))
+  call fgd_put_constant_i8(d, 'const', ci8(1))
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -2544,12 +2485,7 @@ program big_test
     write(*, 2006) 129, 1, e
   end if
 
-  if (n .ne. 0) then
-    ne = ne + 1
-    write(*, 2002) 129, n
-  end if
-
-  n = fgd_get_constant_r4(d, 'const', fl)
+  call fgd_get_constant_r4(d, 'const', fl)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -2564,7 +2500,7 @@ program big_test
 
 ! 130: fgd_put_constant_r4 check
   cr4(1) = 130
-  n = fgd_put_constant_r4(d, 'const', cr4(1))
+  call fgd_put_constant_r4(d, 'const', cr4(1))
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -2572,12 +2508,7 @@ program big_test
     write(*, 2006) 130, 1, e
   end if
 
-  if (n .ne. 0) then
-    ne = ne + 1
-    write(*, 2002) 130, n
-  end if
-
-  n = fgd_get_constant_r4(d, 'const', fl)
+  call fgd_get_constant_r4(d, 'const', fl)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -2592,7 +2523,7 @@ program big_test
 
 ! 131: fgd_put_constant_r8 check
   cr8(1) = 131
-  n = fgd_put_constant_r8(d, 'const', cr8(1))
+  call fgd_put_constant_r8(d, 'const', cr8(1))
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -2600,12 +2531,7 @@ program big_test
     write(*, 2006) 131, 1, e
   end if
 
-  if (n .ne. 0) then
-    ne = ne + 1
-    write(*, 2002) 131, n
-  end if
-
-  n = fgd_get_constant_r4(d, 'const', fl)
+  call fgd_get_constant_r4(d, 'const', fl)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -2620,7 +2546,7 @@ program big_test
 
 ! 132: fgd_put_constant_c8 check
   cc8(1) = 132
-  n = fgd_put_constant_c8(d, 'const', cc8(1))
+  call fgd_put_constant_c8(d, 'const', cc8(1))
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -2628,12 +2554,7 @@ program big_test
     write(*, 2006) 132, 1, e
   end if
 
-  if (n .ne. 0) then
-    ne = ne + 1
-    write(*, 2002) 132, n
-  end if
-
-  n = fgd_get_constant_r4(d, 'const', fl)
+  call fgd_get_constant_r4(d, 'const', fl)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -2648,7 +2569,7 @@ program big_test
 
 ! 133: fgd_put_constant_c16 check
   cc16(1) = 133
-  n = fgd_put_constant_c16(d, 'const', cc16(1))
+  call fgd_put_constant_c16(d, 'const', cc16(1))
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -2656,12 +2577,7 @@ program big_test
     write(*, 2006) 133, 1, e
   end if
 
-  if (n .ne. 0) then
-    ne = ne + 1
-    write(*, 2002) 133, n
-  end if
-
-  n = fgd_get_constant_r4(d, 'const', fl)
+  call fgd_get_constant_r4(d, 'const', fl)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -2757,7 +2673,7 @@ program big_test
   fields =(/ 'mlut  ', 'mnew1 ', 'mnew2 ', 'mnew3 ', 'mnew5 ', 'mnew6 ', &
   'mnew7 ', 'mnew8 ', 'mnew9 ', 'mnew10', 'mnew4 ', '      ', '      ', &
   '      ', '      ', '      ', '      ', '      ', '      ', '      ', &
-  '      ', '      ', '      ' /)
+  '      ', '      ' /)
   l = flen
   call fgd_mvector_list(flist, d, "data", l)
   e = fgd_error(d)
@@ -3278,7 +3194,7 @@ program big_test
     write(*, 2007) 77, 3, ent%data_type
   end if
 
-  n = fgd_get_constant_r4(d, 'new11', fl)
+  call fgd_get_constant_r4(d, 'new11', fl)
   e = fgd_error(d)
 
   if (e .ne. GD_E_OK) then
@@ -4224,6 +4140,633 @@ program big_test
     ne = ne + 1
     write(*, 2006), 156, 2, e
   end if
+
+! 158: gd_get_carray_slice (INT8)
+  call fgd_get_carray_i1(d, "carray", 0, 0, ci1)
+  e = fgd_error(d)
+
+  if (e .ne. GD_E_OK) then
+    ne = ne + 1
+    write(*, 2001), 158, e
+  end if
+
+  do i=1,6
+    if (ci1(i) .ne. i) then
+      ne = ne + 1
+      write(*, 2004), 158, i, ci1(i)
+    end if
+  end do
+
+! 159: gd_get_carray_slice (INT8)
+  call fgd_get_carray_i1(d, "carray", 3, 2, ci1)
+  e = fgd_error(d)
+
+  if (e .ne. GD_E_OK) then
+    ne = ne + 1
+    write(*, 2001), 159, e
+  end if
+
+  do i=1,2
+    if (ci1(i) .ne. i + 2) then
+      ne = ne + 1
+      write(*, 2004), 159, i, ci1(i)
+    end if
+  end do
+
+! 160: gd_get_carray_slice (INT16)
+  call fgd_get_carray_i2(d, "carray", 3, 2, ci2)
+  e = fgd_error(d)
+
+  if (e .ne. GD_E_OK) then
+    ne = ne + 1
+    write(*, 2001), 160, e
+  end if
+
+  do i=1,2
+    if (ci2(i) .ne. i + 2) then
+      ne = ne + 1
+      write(*, 2004), 160, i, ci2(i)
+    end if
+  end do
+
+! 161: gd_get_carray_slice (INT32)
+  call fgd_get_carray_i4(d, "carray", 3, 2, ci4)
+  e = fgd_error(d)
+
+  if (e .ne. GD_E_OK) then
+    ne = ne + 1
+    write(*, 2001), 161, e
+  end if
+
+  do i=1,2
+    if (ci4(i) .ne. i + 2) then
+      ne = ne + 1
+      write(*, 2004), 161, i, ci4(i)
+    end if
+  end do
+
+! 162: gd_get_carray_slice (INT64)
+  call fgd_get_carray_i8(d, "carray", 3, 2, ci8)
+  e = fgd_error(d)
+
+  if (e .ne. GD_E_OK) then
+    ne = ne + 1
+    write(*, 2001), 162, e
+  end if
+
+  do i=1,2
+    if (ci8(i) .ne. i + 2) then
+      ne = ne + 1
+      write(*, 2004), 162, i, ci8(i)
+    end if
+  end do
+
+! 163: gd_get_carray_slice (FLOAT32)
+  call fgd_get_carray_r4(d, "carray", 3, 2, cr4)
+  e = fgd_error(d)
+
+  if (e .ne. GD_E_OK) then
+    ne = ne + 1
+    write(*, 2001), 163, e
+  end if
+
+  do i=1,2
+    if (abs(cr4(i) - (2 + i) * 1.1) > 0.001) then
+      ne = ne + 1
+      write(*, 2010), 163, i, cr4(i)
+    end if
+  end do
+
+! 164: gd_get_carray_slice (FLOAT64)
+  call fgd_get_carray_r8(d, "carray", 3, 2, cr8)
+  e = fgd_error(d)
+
+  if (e .ne. GD_E_OK) then
+    ne = ne + 1
+    write(*, 2001), 164, e
+  end if
+
+  do i=1,2
+    if (abs(cr8(i) - (2 + i) * 1.1) > 0.001) then
+      ne = ne + 1
+      write(*, 2010), 164, i, cr8(i)
+    end if
+  end do
+
+! 165: gd_get_carray_slice (COMPLEX64)
+  call fgd_get_carray_c8(d, "carray", 3, 2, cc8)
+  e = fgd_error(d)
+
+  if (e .ne. GD_E_OK) then
+    ne = ne + 1
+    write(*, 2001), 165, e
+  end if
+
+  do i=1,2
+    if (abs(cc8(i) - (2 + i) * 1.1) > 0.001) then
+      ne = ne + 1
+      write(*, 2011), 165, i, real(real(cc8(i))), real(aimag(cc8(i)))
+    end if
+  end do
+
+! 166: gd_get_carray_slice (COMPLEX128)
+  call fgd_get_carray_c16(d, "carray", 3, 2, cc16)
+  e = fgd_error(d)
+
+  if (e .ne. GD_E_OK) then
+    ne = ne + 1
+    write(*, 2001), 166, e
+  end if
+
+  do i=1,2
+    if (abs(cc16(i) - (2 + i) * 1.1) > 0.001) then
+      ne = ne + 1
+      write(*, 2011), 166, i, real(real(cc16(i))), real(aimag(cc16(i)))
+    end if
+  end do
+
+! 168: gd_put_carray
+  ci1 = (/ 11, 12, 13, 14, 15, 16, 0, 0 /)
+  call fgd_put_carray_i1(d, "carray", 0, 0, ci1)
+  e = fgd_error(d)
+
+  if (e .ne. GD_E_OK) then
+    ne = ne + 1
+    write(*, 2006), 168, 1, e
+  end if
+
+  call fgd_get_carray_i1(d, "carray", 0, 0, ci1)
+  e = fgd_error(d)
+
+  if (e .ne. GD_E_OK) then
+    ne = ne + 1
+    write(*, 2006), 168, 2, e
+  end if
+
+  do i=1,6
+    if (ci1(i) .ne. i + 10) then
+      ne = ne + 1
+      write(*, 2004), 168, i, ci1(i)
+    end if
+  end do
+
+! 169: gd_put_carray_slice (INT8)
+  ci1 = (/ 72, 73, 0, 0, 0, 0, 0, 0 /)
+  call fgd_put_carray_i1(d, "carray", 3, 2, ci1)
+  e = fgd_error(d)
+
+  if (e .ne. GD_E_OK) then
+    ne = ne + 1
+    write(*, 2006), 169, 1, e
+  end if
+
+  call fgd_get_carray_i1(d, "carray", 0, 0, ci1)
+  e = fgd_error(d)
+
+  if (e .ne. GD_E_OK) then
+    ne = ne + 1
+    write(*, 2006), 169, 2, e
+  end if
+
+  do i=1,6
+    if (i .eq. 3 .or. i .eq. 4) then
+      if (ci1(i) .ne. 69 + i) then
+        ne = ne + 1
+        write(*, 2004), 169, i, ci1(i)
+      end if
+    else
+      if (ci1(i) .ne. i + 10) then
+        ne = ne + 1
+        write(*, 2004), 169, i, ci1(i)
+      end if
+    end if
+  end do
+
+! 170: gd_put_carray_slice (INT16)
+  ci2 = (/ 173, 174, 0, 0, 0, 0, 0, 0 /)
+  call fgd_put_carray_i2(d, "carray", 3, 2, ci2)
+  e = fgd_error(d)
+
+  if (e .ne. GD_E_OK) then
+    ne = ne + 1
+    write(*, 2006), 170, 1, e
+  end if
+
+  call fgd_get_carray_i2(d, "carray", 0, 0, ci2)
+  e = fgd_error(d)
+
+  if (e .ne. GD_E_OK) then
+    ne = ne + 1
+    write(*, 2006), 170, 2, e
+  end if
+
+  do i=1,6
+    if (i .eq. 3 .or. i .eq. 4) then
+      if (ci2(i) .ne. 170 + i) then
+        ne = ne + 1
+        write(*, 2004), 170, i, ci2(i)
+      end if
+    else
+      if (ci2(i) .ne. i + 10) then
+        ne = ne + 1
+        write(*, 2004), 170, i, ci2(i)
+      end if
+    end if
+  end do
+
+! 171: gd_put_carray_slice (INT32)
+  ci4 = (/ 174, 175, 0, 0, 0, 0, 0, 0 /)
+  call fgd_put_carray_i4(d, "carray", 3, 2, ci4)
+  e = fgd_error(d)
+
+  if (e .ne. GD_E_OK) then
+    ne = ne + 1
+    write(*, 2006), 171, 1, e
+  end if
+
+  call fgd_get_carray_i4(d, "carray", 0, 0, ci4)
+  e = fgd_error(d)
+
+  if (e .ne. GD_E_OK) then
+    ne = ne + 1
+    write(*, 2006), 171, 2, e
+  end if
+
+  do i=1,6
+    if (i .eq. 3 .or. i .eq. 4) then
+      if (ci4(i) .ne. 171 + i) then
+        ne = ne + 1
+        write(*, 2004), 171, i, ci4(i)
+      end if
+    else
+      if (ci4(i) .ne. i + 10) then
+        ne = ne + 1
+        write(*, 2004), 171, i, ci4(i)
+      end if
+    end if
+  end do
+
+! 172: gd_put_carray_slice (INT64)
+  ci8 = (/ 175, 176, 0, 0, 0, 0, 0, 0 /)
+  call fgd_put_carray_i8(d, "carray", 3, 2, ci8)
+  e = fgd_error(d)
+
+  if (e .ne. GD_E_OK) then
+    ne = ne + 1
+    write(*, 2006), 172, 1, e
+  end if
+
+  call fgd_get_carray_i8(d, "carray", 0, 0, ci8)
+  e = fgd_error(d)
+
+  if (e .ne. GD_E_OK) then
+    ne = ne + 1
+    write(*, 2006), 172, 2, e
+  end if
+
+  do i=1,6
+    if (i .eq. 3 .or. i .eq. 4) then
+      if (ci8(i) .ne. 172 + i) then
+        ne = ne + 1
+        write(*, 2004), 172, i, ci8(i)
+      end if
+    else
+      if (ci8(i) .ne. i + 10) then
+        ne = ne + 1
+        write(*, 2004), 172, i, ci8(i)
+      end if
+    end if
+  end do
+
+! 173: gd_put_carray_slice (FLOAT32)
+  cr4 = (/ 176., 177., 0., 0., 0., 0., 0., 0. /)
+  call fgd_put_carray_r4(d, "carray", 3, 2, cr4)
+  e = fgd_error(d)
+
+  if (e .ne. GD_E_OK) then
+    ne = ne + 1
+    write(*, 2006), 173, 1, e
+  end if
+
+  call fgd_get_carray_r4(d, "carray", 0, 0, cr4)
+  e = fgd_error(d)
+
+  if (e .ne. GD_E_OK) then
+    ne = ne + 1
+    write(*, 2006), 173, 2, e
+  end if
+
+  do i=1,6
+    if (i .eq. 3 .or. i .eq. 4) then
+      if (abs(cr4(i) - 173. - i) > 0.001) then
+        ne = ne + 1
+        write(*, 2010), 173, i, cr4(i)
+      end if
+    else
+      if (cr4(i) .ne. i + 10) then
+        ne = ne + 1
+        write(*, 2010), 173, i, cr4(i)
+      end if
+    end if
+  end do
+
+! 174: gd_put_carray_slice (FLOAT64)
+  cr8 = (/ 177., 178., 0., 0., 0., 0., 0., 0. /)
+  call fgd_put_carray_r8(d, "carray", 3, 2, cr8)
+  e = fgd_error(d)
+
+  if (e .ne. GD_E_OK) then
+    ne = ne + 1
+    write(*, 2006), 174, 1, e
+  end if
+
+  call fgd_get_carray_r8(d, "carray", 0, 0, cr8)
+  e = fgd_error(d)
+
+  if (e .ne. GD_E_OK) then
+    ne = ne + 1
+    write(*, 2006), 174, 2, e
+  end if
+
+  do i=1,6
+    if (i .eq. 3 .or. i .eq. 4) then
+      if (abs(cr8(i) - 174. - i) > 0.001) then
+        ne = ne + 1
+        write(*, 2010), 174, i, cr8(i)
+      end if
+    else
+      if (cr8(i) .ne. i + 10) then
+        ne = ne + 1
+        write(*, 2010), 174, i, cr8(i)
+      end if
+    end if
+  end do
+
+! 175: gd_put_carray_slice (COMPLEX64)
+  cc8 = (/ 178., 179., 0., 0., 0., 0., 0., 0. /)
+  call fgd_put_carray_c8(d, "carray", 3, 2, cc8)
+  e = fgd_error(d)
+
+  if (e .ne. GD_E_OK) then
+    ne = ne + 1
+    write(*, 2006), 175, 1, e
+  end if
+
+  call fgd_get_carray_c8(d, "carray", 0, 0, cc8)
+  e = fgd_error(d)
+
+  if (e .ne. GD_E_OK) then
+    ne = ne + 1
+    write(*, 2006), 175, 2, e
+  end if
+
+  do i=1,6
+    if (i .eq. 3 .or. i .eq. 4) then
+      if (abs(cc8(i) - 175. - i) > 0.001) then
+        ne = ne + 1
+        write(*, 2011), 175, i, real(real(cc8(i))), real(aimag(cc8(i)))
+      end if
+    else
+      if (cc8(i) .ne. i + 10) then
+        ne = ne + 1
+        write(*, 2011), 175, i, real(real(cc8(i))), real(aimag(cc8(i)))
+      end if
+    end if
+  end do
+
+! 176: gd_put_carray_slice (COMPLEX128)
+  cc16 = (/ 179., 180., 0., 0., 0., 0., 0., 0. /)
+  call fgd_put_carray_c16(d, "carray", 3, 2, cc16)
+  e = fgd_error(d)
+
+  if (e .ne. GD_E_OK) then
+    ne = ne + 1
+    write(*, 2006), 176, 1, e
+  end if
+
+  call fgd_get_carray_c16(d, "carray", 0, 0, cc16)
+  e = fgd_error(d)
+
+  if (e .ne. GD_E_OK) then
+    ne = ne + 1
+    write(*, 2006), 176, 2, e
+  end if
+
+  do i=1,6
+    if (i .eq. 3 .or. i .eq. 4) then
+      if (abs(cc16(i) - 176. - i) > 0.001) then
+        ne = ne + 1
+        write(*, 2011), 176, i, real(real(cc16(i))), real(aimag(cc16(i)))
+      end if
+    else
+      if (cc16(i) .ne. i + 10) then
+        ne = ne + 1
+        write(*, 2011), 176, i, real(real(cc16(i))), real(aimag(cc16(i)))
+      end if
+    end if
+  end do
+
+! 177: gd_carray_len
+  n = fgd_carray_len(d, 'carray')
+  e = fgd_error(d)
+
+  if (e .ne. GD_E_OK) then
+    ne = ne + 1
+    write(*, 2001), 177, e
+  end if
+
+  if (n .ne. 6) then
+    ne = ne + 1
+    write(*, 2002), 177, n
+  end if
+
+! 178: gd_entry (CARRAY)
+  n = fgd_entry(d, 'carray', ent)
+  e = fgd_error(d)
+
+  if (e .ne. GD_E_OK) then
+    ne = ne + 1
+    write(*, 2001) 178, e
+  end if
+
+  if (n .ne. GD_CARRAY_ENTRY) then
+    ne = ne + 1
+    write(*, 2007) 178, 1, n
+  end if
+
+  if (ent%fragment_index .ne. 0) then
+    ne = ne + 1
+    write(*, 2007) 178, 2, ent%fragment_index
+  end if
+
+  if (ent%array_len .ne. 6) then
+    ne = ne + 1
+    write(*, 2007) 178, 2, ent%array_len
+  end if
+
+  if (ent%data_type .ne. GD_FLOAT64) then
+    ne = ne + 1
+    write(*, 2007) 178, 3, ent%data_type
+  end if
+
+! 179: gd_add_carray
+  call fgd_add_carray(d, 'new17', GD_FLOAT64, 4, 0)
+  e = fgd_error(d)
+
+  if (e .ne. GD_E_OK) then
+    ne = ne + 1
+    write(*, 2006) 179, 1, e
+  end if
+
+  n = fgd_entry(d, 'new17', ent)
+  e = fgd_error(d)
+
+  if (e .ne. GD_E_OK) then
+    ne = ne + 1
+    write(*, 2006) 179, 2, e
+  end if
+
+  if (n .ne. GD_CARRAY_ENTRY) then
+    ne = ne + 1
+    write(*, 2007) 179, 1, n
+  end if
+
+  if (ent%fragment_index .ne. 0) then
+    ne = ne + 1
+    write(*, 2007) 179, 2, ent%fragment_index
+  end if
+
+  if (ent%array_len .ne. 4) then
+    ne = ne + 1
+    write(*, 2007) 179, 3, ent%array_len
+  end if
+
+  if (ent%data_type .ne. GD_FLOAT64) then
+    ne = ne + 1
+    write(*, 2007) 179, 4, ent%data_type
+  end if
+
+  call fgd_get_carray_r4(d, 'new17', 0, 0, cr4)
+  e = fgd_error(d)
+
+  if (e .ne. GD_E_OK) then
+    ne = ne + 1
+    write(*, 2006) 179, 3, e
+  end if
+
+  do i=1,4
+    if (abs(cr4(i)) > 1e-5) then
+      ne = ne + 1
+      write(*, 2010) 179, i, cr4(i)
+    end if
+  end do
+
+! 180: gd_madd_carray
+  call fgd_madd_carray(d, 'data', 'new17', GD_FLOAT64, 4)
+  e = fgd_error(d)
+
+  if (e .ne. GD_E_OK) then
+    ne = ne + 1
+    write(*, 2006) 180, 1, e
+  end if
+
+  n = fgd_entry(d, 'data/new17', ent)
+  e = fgd_error(d)
+
+  if (e .ne. GD_E_OK) then
+    ne = ne + 1
+    write(*, 2006) 180, 2, e
+  end if
+
+  if (n .ne. GD_CARRAY_ENTRY) then
+    ne = ne + 1
+    write(*, 2007) 180, 1, n
+  end if
+
+  if (ent%fragment_index .ne. 0) then
+    ne = ne + 1
+    write(*, 2007) 180, 2, ent%fragment_index
+  end if
+
+  if (ent%array_len .ne. 4) then
+    ne = ne + 1
+    write(*, 2007) 180, 3, ent%array_len
+  end if
+
+  if (ent%data_type .ne. GD_FLOAT64) then
+    ne = ne + 1
+    write(*, 2007) 180, 4, ent%data_type
+  end if
+
+  call fgd_get_carray_r4(d, 'data/new17', 0, 0, cr4)
+  e = fgd_error(d)
+
+  if (e .ne. GD_E_OK) then
+    ne = ne + 1
+    write(*, 2006) 180, 3, e
+  end if
+
+  do i=1,4
+    if (abs(cr4(i)) > 1e-5) then
+      ne = ne + 1
+      write(*, 2010) 180, i, cr4(i)
+    end if
+  end do
+
+! 181: gd_alter_carray
+  call fgd_alter_carray(d, 'new17', GD_FLOAT32, 3)
+  e = fgd_error(d)
+
+  if (e .ne. GD_E_OK) then
+    ne = ne + 1
+    write(*, 2006) 181, 1, e
+  end if
+
+  n = fgd_entry(d, 'new17', ent)
+  e = fgd_error(d)
+
+  if (e .ne. GD_E_OK) then
+    ne = ne + 1
+    write(*, 2006) 181, 2, e
+  end if
+
+  if (n .ne. GD_CARRAY_ENTRY) then
+    ne = ne + 1
+    write(*, 2007) 181, 1, n
+  end if
+
+  if (ent%fragment_index .ne. 0) then
+    ne = ne + 1
+    write(*, 2007) 181, 2, ent%fragment_index
+  end if
+
+  if (ent%data_type .ne. GD_FLOAT32) then
+    ne = ne + 1
+    write(*, 2007) 181, 3, ent%data_type
+  end if
+
+  if (ent%array_len .ne. 3) then
+    ne = ne + 1
+    write(*, 2007) 181, 4, ent%data_type
+  end if
+
+  call fgd_get_carray_r4(d, 'new17', 0, 0, cr4)
+  e = fgd_error(d)
+
+  if (e .ne. GD_E_OK) then
+    ne = ne + 1
+    write(*, 2006) 181, 3, e
+  end if
+
+  do i=1,4
+    if (abs(cr4(i)) > 1e-5) then
+      ne = ne + 1
+      write(*, 2010) 181, i, cr4(i)
+    end if
+  end do
+
+
+
 
   
 

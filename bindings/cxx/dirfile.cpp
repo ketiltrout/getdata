@@ -24,6 +24,10 @@
 #undef GETDATA_LEGACY_API
 #include "getdata/dirfile.h"
 
+#include <stdlib.h>
+
+#define __gd_unused __attribute__ (( unused ))
+
 using namespace GetData;
 
 Dirfile::Dirfile()
@@ -48,7 +52,7 @@ Dirfile::Dirfile(DIRFILE* dirfile)
 Dirfile::~Dirfile()
 {
   if (error_string != NULL)
-    delete error_string;
+    free(error_string);
 
   gd_close(D);
 }
@@ -104,6 +108,8 @@ Entry *Dirfile::Entry(const char* field_code) const
       return new GetData::PolynomEntry(this, field_code);
     case ConstEntryType:
       return new GetData::ConstEntry(this, field_code);
+    case CarrayEntryType:
+      return new GetData::CarrayEntry(this, field_code);
     case StringEntryType:
       return new GetData::StringEntry(this, field_code);
     case IndexEntryType:
@@ -130,15 +136,18 @@ int Dirfile::Error() const
   return gd_error(D);
 }
 
-const char* Dirfile::ErrorString(size_t len)
+const char *Dirfile::ErrorString(size_t n __gd_unused)
 {
-  if (error_string == NULL)
-    error_string = new char[4096];
+  return ErrorString();
+}
 
-  if (len > 4096)
-    len = 4096;
-
-  return gd_error_string(D, error_string, len);
+const char *Dirfile::ErrorString()
+{
+  if (error_string)
+    free(error_string);
+  error_string = gd_error_string(D, NULL, 0);
+  
+  return error_string;
 }
 
 int Dirfile::Include(const char* file, int format_file, unsigned long flags)
@@ -182,6 +191,16 @@ const char** Dirfile::MFieldListByType(const char *parent, EntryType type) const
   return gd_mfield_list_by_type(D, parent, (gd_entype_t)type);
 }
 
+const gd_carray_t *Dirfile::Carrays(DataType type) const
+{
+  return gd_carrays(D, (gd_type_t)type);
+}
+
+size_t Dirfile::CarrayLen(const char *field_code) const
+{
+  return gd_carray_len(D, field_code);
+}
+
 const void *Dirfile::Constants(DataType type) const
 {
   return gd_constants(D, (gd_type_t)type);
@@ -192,6 +211,10 @@ const char **Dirfile::Strings() const
   return gd_strings(D);
 }
 
+const gd_carray_t *Dirfile::MCarrays(const char *parent, DataType type) const
+{
+  return gd_mcarrays(D, parent, (gd_type_t)type);
+}
 const void *Dirfile::MConstants(const char *parent, DataType type) const
 {
   return gd_mconstants(D, parent, (gd_type_t)type);
@@ -247,8 +270,18 @@ off_t Dirfile::BoF(const char *field_code) const
   return gd_bof(D, field_code);
 }
 
-size_t Dirfile::GetConstant(const char *field_code, DataType type,
-    void *data_out) const
+int Dirfile::GetCarray(const char *field_code, DataType type, void *data_out,
+    unsigned int start, size_t len) const
+{
+  if (len == 0)
+    return gd_get_carray(D, field_code, (gd_type_t)type, data_out);
+  else
+    return gd_get_carray_slice(D, field_code, start, len, (gd_type_t)type,
+        data_out);
+}
+
+int Dirfile::GetConstant(const char *field_code, DataType type, void *data_out)
+  const
 {
   return gd_get_constant(D, field_code, (gd_type_t)type, data_out);
 }
@@ -267,7 +300,17 @@ size_t Dirfile::GetString(const char *field_code, size_t len, char* data_out)
   return gd_get_string(D, field_code, len, data_out);
 }
 
-size_t Dirfile::PutConstant(const char *field_code, DataType type,
+int Dirfile::PutCarray(const char *field_code, DataType type,
+    const void *data_in, unsigned int start, size_t len) const
+{
+  if (len == 0)
+    return gd_put_carray(D, field_code, (gd_type_t)type, data_in);
+  else
+    return gd_put_carray_slice(D, field_code, start, len, (gd_type_t)type,
+        data_in);
+}
+
+int Dirfile::PutConstant(const char *field_code, DataType type,
     const void *data_in) const
 {
   return gd_put_constant(D, field_code, (gd_type_t)type, data_in);

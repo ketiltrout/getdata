@@ -341,6 +341,7 @@ static off64_t _GD_GetEOF(DIRFILE *D, gd_entry_t* E, const char *parent,
       *is_index = 1;
       break;
     case GD_CONST_ENTRY:
+    case GD_CARRAY_ENTRY:
     case GD_STRING_ENTRY:
       if (parent)
         _GD_SetError(D, GD_E_DIMENSION, GD_E_DIM_FORMAT, parent, 0, E->field);
@@ -527,6 +528,7 @@ static off64_t _GD_GetBOF(DIRFILE *D, gd_entry_t* E, const char *parent,
       *ds = 0;
       break;
     case GD_CONST_ENTRY:
+    case GD_CARRAY_ENTRY:
     case GD_STRING_ENTRY:
       if (parent)
         _GD_SetError(D, GD_E_DIMENSION, GD_E_DIM_FORMAT, parent, 0, E->field);

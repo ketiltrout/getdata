@@ -370,6 +370,8 @@ int gd_uninclude(DIRFILE* D, int fragment_index, int del)
         D->n_entries--;
         if (D->entry[i]->field_type == GD_CONST_ENTRY)
           D->n_const--;
+        else if (D->entry[i]->field_type == GD_CARRAY_ENTRY)
+          D->n_carray--;
         else if (D->entry[i]->field_type == GD_STRING_ENTRY)
           D->n_string--;
       } else
@@ -407,6 +409,10 @@ int gd_uninclude(DIRFILE* D, int fragment_index, int del)
     for (j = 0; j < GD_MAX_LINCOM; ++j)
       D->entry[i]->e->entry[j] = NULL;
   }
+
+  /* Invalidate the field lists */
+  D->list_validity = 0;
+  D->type_list_validity = 0;
 
   free(f);
 

@@ -48,8 +48,9 @@ unsigned int gd_nvectors(DIRFILE* D) gd_nothrow
 
   _GD_ClearError(D);
 
-  dreturn("%u", D->n_entries - D->n_meta - D->n_string - D->n_const);
-  return D->n_entries - D->n_meta - D->n_string - D->n_const;
+  dreturn("%u", D->n_entries - D->n_meta - D->n_string - D->n_const -
+      D->n_carray);
+  return D->n_entries - D->n_meta - D->n_string - D->n_const - D->n_carray;
 }
 
 unsigned int gd_nfields_by_type(DIRFILE* D, gd_entype_t type) gd_nothrow
@@ -72,6 +73,9 @@ unsigned int gd_nfields_by_type(DIRFILE* D, gd_entype_t type) gd_nothrow
       break;
     case GD_CONST_ENTRY:
       r = D->n_const;
+      break;
+    case GD_CARRAY_ENTRY:
+      r = D->n_carray;
       break;
     case GD_INDEX_ENTRY:
       r = 1;

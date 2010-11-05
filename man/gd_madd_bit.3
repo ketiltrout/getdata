@@ -13,11 +13,12 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_madd_bit 3 "16 June 2010" "Version 0.7.0" "GETDATA"
+.TH gd_madd_bit 3 "3 November 2010" "Version 0.7.0" "GETDATA"
 .SH NAME
-gd_madd_bit, gd_madd_clincom, gd_madd_const, gd_madd_cpolynom, gd_madd_crecip,
-gd_madd_divide, gd_madd_lincom, gd_madd_linterp, gd_madd_multiply,
-gd_madd_phase, gd_madd_polynom, gd_madd_recip, gd_madd_sbit, gd_madd_string
+gd_madd_bit, gd_madd_carray, gd_madd_clincom, gd_madd_const, gd_madd_cpolynom,
+gd_madd_crecip, gd_madd_divide, gd_madd_lincom, gd_madd_linterp,
+gd_madd_multiply, gd_madd_phase, gd_madd_polynom, gd_madd_recip, gd_madd_sbit,
+gd_madd_string
 \(em add a field to a dirfile
 .SH SYNOPSIS
 .B #include <getdata.h>
@@ -27,6 +28,11 @@ gd_madd_phase, gd_madd_polynom, gd_madd_recip, gd_madd_sbit, gd_madd_string
 .BI "int gd_madd_bit(DIRFILE *" dirfile ,
 .BI "const char *" parent ", const char *" field_name ,
 .BI "const char *" in_field ", gd_bit_t " bitnum ", gd_bit_t " numbits );
+.HP
+.BI "int gd_madd_carray(DIRFILE *" dirfile ,
+.BI "const char *" parent ", const char *" field_name ,
+.BI "gd_type_t " const_type ", size_t " array_len ", gd_type_t " data_type ,
+.BI "void *" value );
 .HP
 .BI "int gd_madd_clincom(DIRFILE *" dirfile ", const char *" parent ,
 .BI "const char *" field_name ", int " n_fields ", const char **" in_fields ,
@@ -133,13 +139,15 @@ containing the polynomial co-efficients
 .RI ( a " or " ca ).
 
 The
-.BR gd_madd_string ()
+.BR gd_madd_string (),\~ gd_madd_carray ,
 and
 .BR gd_madd_const ()
 functions both add the field and set the value of the field to
 .IR value .
 For
-.BR gd_madd_const (),
+.BR gd_madd_const ()
+and
+.BR gd_madd_carray (),
 the
 .I const_type
 argument specifies the storage type for the const, while
@@ -154,10 +162,8 @@ type is a signed 16-bit integer type.  The
 type is a signed 64-bit integer type.
 
 All fields added with this interface must contain numerical parameters.  Fields
-with
-.B CONST
-fields as parameters cannot be added with these functions.  Those fields must
-be added with
+with scalar fields as parameters cannot be added with these functions.  Those
+fields must be added with
 .BR gd_madd (3)
 or
 .BR gd_madd_spec (3).
@@ -197,7 +203,9 @@ One or more of the field parameters specified was invalid.
 The
 .IR data_type " or " const_type
 argument provided to
-.BR gd_madd_const (),
+.BR gd_madd_const ()
+or
+.BR gd_madd_carray ()
 was invalid.
 .TP
 .B GD_E_DUPLICATE
@@ -242,7 +250,7 @@ and
 .fi
 .P
 In this case, the array pointers passed as
-.IR cm ,\~ cb
+.IR cm ", " cb
 or
 .IR ca
 should have twice as many (purely real) elements, consisting of alternating

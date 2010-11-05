@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_native_type 3 "16 July 2010" "Version 0.7.0" "GETDATA"
+.TH gd_native_type 3 "3 November 2010" "Version 0.7.0" "GETDATA"
 .SH NAME
 gd_native_type \(em returns the native data type of a field in a dirfile
 .SH SYNOPSIS
@@ -43,8 +43,8 @@ The native data type of a field of a given entry type is calculated as:
 .BR BIT \~or\~ INDEX \~Entry:
 .BR GD_UINT64 ;
 .TP
-.BR CONST \~Entry:
-the data type of the constant;
+.BR CONST \~or\~ CARRAY \~Entry:
+the data type of the field;
 .TP
 .BR LINCOM \~or\~ POLYNOM \~Entry:
 if any of the scalar parameters is complex valued, or if the native data type of
@@ -59,7 +59,7 @@ if the look-up table is complex valued:
 otherwise:
 .BR GD_FLOAT64 ;
 .TP
-.BR MULTIPLY \~Entry:
+.BR MULTIPLY \~or\~ DIVIDE \~Entry:
 if either input field is complex valued:
 .BR GD_COMPLEX128 ,
 otherwise:
@@ -71,6 +71,12 @@ the native data type of the input field;
 .TP
 .BR RAW \~Entry:
 the data type of the raw data on disk;
+.TP
+.BR RECIP \~Entry:
+if the dividend or the native data type of the input field is complex valued:
+.BR GD_COMPLEX128 ,
+otherwise:
+.BR GD_FLOAT64 ;
 .TP
 .BR SBIT \~Entry:
 .BR GD_INT64 ;
@@ -121,6 +127,8 @@ or in one of its input fields, was not recognised.
 A non-literal scalar used in the definition of the field or one of its inputs
 was not found, or was not a
 .B CONST
+or
+.B CARRAY
 field.
 .TP
 .B GD_E_DIMENSION

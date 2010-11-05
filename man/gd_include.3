@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_include 3 "15 October 2010" "Version 0.7.0" "GETDATA"
+.TH gd_include 3 "3 November 2010" "Version 0.7.0" "GETDATA"
 .SH NAME
 gd_include \(em add a format specification fragment to a dirfile
 .SH SYNOPSIS
@@ -251,6 +251,13 @@ A syntax error occurred in the fragment.
 An internal error occurred in the library while trying to perform the task.
 This indicates a bug in the library.  Please report the incident to the
 maintainer.
+.TP
+.B GD_E_LINE_TOO_LONG
+The parser encountered a line in the format specification longer than it was
+able to deal with.  Lines are limited by the storage size of
+.BR ssize_t .
+On 32-bit systems, this limits format specification lines to 2**31 characters.
+The limit is larger on 64-bit systems.
 .TP
 .B GD_E_OPEN_FRAGMENT
 The fragment could not be opened or created.

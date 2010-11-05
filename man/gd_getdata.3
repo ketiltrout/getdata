@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_getdata 3 "16 June 2010" "Version 0.7.0" "GETDATA"
+.TH gd_getdata 3 "3 November 2010" "Version 0.7.0" "GETDATA"
 .SH NAME
 gd_getdata \(em retrieve data from a dirfile database
 .SH SYNOPSIS
@@ -172,11 +172,11 @@ was supplied.
 The supplied
 .I field_code
 referred to a 
-.B CONST
+.BR CONST ,\~ CARRAY ,
 or 
 .B STRING
 field.  The caller should use
-.BR gd_get_constant (3),
+.BR gd_get_constant (3),\~ gd_get_carray (3) ,
 or
 .BR gd_get_string (3)
 instead.

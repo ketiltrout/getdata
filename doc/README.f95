@@ -42,6 +42,10 @@ unit numbers in place of C's DIRFILE pointers are:
   character (len=*), intent(in) :: dirfilename
   integer, intent(in) :: flags
 
+* integer function fgd_carray_len (dirfile_unit, field_code)
+  integer, intent(in) :: dirfile
+  character (len=*), intent(in) :: field_code
+
 * integer function fgd_cbopen (dirfilename, flags, sehandler)
   character (len=*), intent (in) :: dirfilename
   integer, intent (in) :: flags
@@ -139,13 +143,22 @@ unit numbers in place of C's DIRFILE pointers are:
   character (len=*), intent(in) :: field_name, in_field1, in_field2, in_field3
   double complex, intent(in) :: m1, b1, m2, b2, m3, b3
 
+* subroutine fgd_add_carray (dirfile, field_name, const_type, array_len,
+  fragment_index)
+  integer, intent(in) :: dirfile, const_type, array_len, fragment_index
+  character (len=*), intent(in) :: field_name
+
+  (Unlike the C counterpart, this version cannot be used to simultaneously set
+  the value of the field.  Use one of the fgd_put_carray procedures after
+  creating the field).
+
 * subroutine fgd_add_const (dirfile, field_name, const_type,
   fragment_index)
   integer, intent(in) :: dirfile, const_type, fragment_index
   character (len=*), intent(in) :: field_name
 
   (Unlike the C counterpart, this version cannot be used to simultaneously set
-  the value of the constant.  Use one of the gd_put_constant procedures after
+  the value of the constant.  Use one of the fgd_put_constant procedures after
   creating the field).
 
 * subroutine fgd_add_cpolynom (dirfile, field_name, poly_ord, in_field, a0,
@@ -227,6 +240,15 @@ unit numbers in place of C's DIRFILE pointers are:
   character (len=*), intent(in) :: field_name, in_field1, in_field2, in_field3
   character (len=*), intent(in) :: parent
   double complex, intent(in) :: m1, b1, m2, b2, m3, b3
+
+* subroutine fgd_madd_carray (dirfile, parent, field_name, const_type,
+  array_len)
+  integer, intent(in) :: dirfile, const_type, array_len
+  character (len=*), intent(in) :: field_name, parent
+
+  (Unlike the C counterpart, this version cannot be used to simultaneously set
+  the value of the field.  Use one of the fgd_put_carray procedures after
+  creating the field).
 
 * subroutine fgd_madd_const (dirfile, parent, field_name, const_type)
   integer, intent(in) :: dirfile, const_type
@@ -367,6 +389,10 @@ unit numbers in place of C's DIRFILE pointers are:
   integer, intent(in) :: dirfile, n_fields
   character (len=*), intent(in) :: field_name, in_field1, in_field2, in_field3
   double complex, intent(in) :: cm1, cb1, cm2, cb2, cm3, cb3
+
+* subroutine fgd_alter_carray (dirfile, field_name, const_type, array_len)
+  integer, intent(in) :: dirfile, const_type, array_len
+  character (len=*), intent(in) :: field_name
 
 * subroutine fgd_alter_const (dirfile, field_name, const_type)
   integer, intent(in) :: dirfile, const_type
@@ -548,17 +574,29 @@ Otherwise, they behave the same as their C counterparts.
   No corresponding fgd_putdata_n function exists, since GD_NULL is not an
   acceptable input data_type for putdata(3).
 
-  Analogously for gd_get_constant and gd_put_constant, for which only the _i1
-  versions are shown here:
+  Analogously for gd_get_carray_slice, gd_get_constant, gd_put_carray_slice, and
+  gd_put_constant, for which only the _i1 versions are shown here:
 
-* integer function fgd_get_constant_i1 (dirfile, field_code, data_out)
+* subroutine fgd_get_carray_i1 (dirfile, field_code, data_out, start, array_len)
+  integer, intent(in) :: dirfile_unit, start, array_len
+  character (len=*), intent(in) :: field_code
+  <datatype>, intent(out) :: data_out
+* subroutine fgd_get_constant_i1 (dirfile, field_code, data_out)
   integer, intent(in) :: dirfile_unit
   character (len=*), intent(in) :: field_code
   <datatype>, intent(out) :: data_out
-* integer function fgd_put_constant_i1 (dirfile, field_code, data_in)
+* subroutine fgd_put_carray_i1 (dirfile, field_code, data_in, start, array_len)
+  integer, intent(in) :: dirfile_unit, start, array_len
+  character (len=*), intent(in) :: field_code
+  <datatype>, intent(in) :: data_in
+* subroutine fgd_put_constant_i1 (dirfile, field_code, data_in)
   integer, intent(in) :: dirfile_unit
   character (len=*), intent(in) :: field_code
   <datatype>, intent(in) :: data_in
+
+  For the carray functions, if len is zero, gd_get_carray(3) or gd_put_carray(3)
+  will be called to read or write the whole array.  Otherwise these subroutines
+  will call gd_get_carray_slice(3) or gd_put_carray_slice(3).
 
 Other procedures in the Fortran 95 bindings are:
 
@@ -635,9 +673,10 @@ Other procedures in the Fortran 95 bindings are:
 
   type gd_entry
     integer :: field_type, n_fields, spf, data_type, bitnum, numbits, shift
-    integer :: fragment_index, comp_scal, poly_ord
+    integer :: fragment_index, comp_scal, poly_ord, array_len
     character (len=GD_FIELD_LEN), dimension(3) :: field
     character (len=GD_FIELD_LEN), dimension(6) :: scalar
+    integer, dimension(6) :: scalar_ind
     double precision, dimension(3) :: m, b
     double precision, dimension(6) :: a
     double precision :: dividend
@@ -664,7 +703,7 @@ Other procedures in the Fortran 95 bindings are:
     MULTIPLY / DIVIDE  infield[0]  infield[1]   --
 
   Furthermore, data_type does double duty as the data_type parameter for RAW
-  fields, and the const_type parameter for CONST fields.
+  fields, and the const_type parameter for CONST and CARRAY fields.
 
 * subroutine fgd_add (dirfile_unit, field_code, ent)
   integer, intent(in) :: dirfile_unit

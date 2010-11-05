@@ -65,6 +65,7 @@ gd_spf_t _GD_GetSPF(DIRFILE* D, gd_entry_t* E)
       spf = 1;
       break;
     case GD_CONST_ENTRY:
+    case GD_CARRAY_ENTRY:
     case GD_STRING_ENTRY:
     case GD_NO_ENTRY:
       _GD_InternalError(D);

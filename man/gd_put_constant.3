@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_put_constant 3 "25 May 2010" "Version 0.7.0" "GETDATA"
+.TH gd_put_constant 3 "4 November 2010" "Version 0.7.0" "GETDATA"
 .SH NAME
 gd_put_constant \(em retrieve a scalar constant from a dirfile database
 .SH SYNOPSIS
@@ -98,6 +98,11 @@ On success,
 returns zero.  On error, it returns -1 and sets the dirfile error to a non-zero
 value.  Possible error values are:
 .TP 8
+.B GD_E_ACCMODE
+The specified
+.I dirfile
+was opened read-only.
+.TP
 .B GD_E_BAD_CODE
 The field specified by
 .I field_code
@@ -114,7 +119,7 @@ The supplied
 referred to a field of type other than
 .BR CONST .
 The caller should use
-.BR gd_putdata (3),
+.BR gd_putdata "(3), " gd_put_carray (3),
 or
 .BR gd_put_string (3)
 instead.
@@ -145,9 +150,10 @@ a call to
 .SH SEE ALSO
 .BR dirfile (5),
 .BR gd_metaflush (3),
-.BR gd_open (3),
 .BR gd_get_constant (3),
 .BR gd_error (3),
 .BR gd_error_string (3),
+.BR gd_open (3),
+.BR gd_put_carray (3),
 .BR gd_put_string (3),
 .BR gd_putdata (3)

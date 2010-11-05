@@ -832,6 +832,31 @@ void F77_FUNC(gdgeco, GDGECO) (int* data_type, int* fragment_index,
   dreturnvoid();
 }
 
+/* gd_entry wrapper for CARRAY */
+void F77_FUNC(gdgeca, GDGECA) (int* data_type, int *array_len,
+    int* fragment_index, const int* dirfile, const char* field_code,
+    const int* field_code_l)
+{
+  dtrace("%p, %p, %p, %i, %p, %i", data_type, array_len, fragment_index,
+      *dirfile, field_code, *field_code_l);
+
+  char* out = (char *)malloc(*field_code_l + 1);
+  gd_entry_t E;
+
+  if (gd_entry(_GDF_GetDirfile(*dirfile), _GDF_CString(out, field_code,
+          *field_code_l), &E) || E.field_type != GD_CARRAY_ENTRY)
+    *data_type = 0;
+  else {
+    *data_type = E.EN(cons,const_type);
+    *array_len = E.EN(cons,array_len);
+    *fragment_index = E.fragment_index;
+    gd_free_entry_strings(&E);
+  }
+
+  free(out);
+  dreturnvoid();
+}
+
 /* gd_fragment_index wrapper */
 void F77_FUNC(gdfrgi, GDFRGI) (int* fragment_index, const int* dirfile,
     const char* field_code, const int* field_code_l)
@@ -1253,6 +1278,8 @@ void F77_FUNC(gdfdnt, GDFDNT) (char* name, int* name_l, const int* dirfile,
 void F77_FUNC(gdvecn, GDVECN) (char* name, int* name_l, const int* dirfile,
     const int* field_num)
 {
+  dtrace("%p, %p, %i, %i", name, name_l, *dirfile, *field_num);
+
   const char** fl;
   DIRFILE* D = _GDF_GetDirfile(*dirfile);
   unsigned int nfields = gd_nvectors(D);
@@ -1264,6 +1291,8 @@ void F77_FUNC(gdvecn, GDVECN) (char* name, int* name_l, const int* dirfile,
     _GDF_FString(name, name_l, fl[*field_num - 1]);
   } else
     *name_l = 0;
+
+  dreturnvoid();
 }
 
 /* gd_mfield_list_by_type wrapper -- this only returns one field name */
@@ -1707,6 +1736,46 @@ void F77_FUNC(gdmdco, GDMDCO) (const int* dirfile, const char* parent,
   free(fc);
 }
 
+/* gd_add_carray wrapper */
+void F77_FUNC(gdadca, GDADCA) (const int *dirfile, const char *field_code,
+    const int *field_code_l, const int *const_type, int *array_len,
+    const int *data_type, const void *value, const int *fragment_index)
+{
+  dtrace("%i, %p, %i, %x, %i, %x, %p, %i", *dirfile, field_code,
+      *field_code_l, *const_type, *array_len, *data_type, value,
+      *fragment_index);
+
+  char *fc = (char *)malloc(*field_code_l + 1);
+
+  gd_add_carray(_GDF_GetDirfile(*dirfile), _GDF_CString(fc, field_code,
+        *field_code_l), (gd_type_t)*const_type, *array_len,
+      (gd_type_t)*data_type, value, *fragment_index);
+
+  free(fc);
+  dreturnvoid();
+}
+
+/* gd_madd_carray wrapper */
+void F77_FUNC(gdmdca, GDMDCA) (const int *dirfile, const char *parent,
+    const int *parent_l, const char *field_code, const int *field_code_l,
+    const int *const_type, const int *array_len, const int *data_type,
+    const void *value)
+{
+  dtrace("%i, %p, %i, %p, %i, %x, %i, %x, %p", *dirfile, parent, *parent_l,
+      field_code, *field_code_l, *const_type, *array_len, *data_type, value);
+
+  char *pa = (char *)malloc(*parent_l + 1);
+  char *fc = (char *)malloc(*field_code_l + 1);
+
+  gd_madd_carray(_GDF_GetDirfile(*dirfile), _GDF_CString(pa, parent,
+        *parent_l), _GDF_CString(fc, field_code, *field_code_l),
+      (gd_type_t)*const_type, *array_len, (gd_type_t)*data_type, value);
+
+  free(pa);
+  free(fc);
+  dreturnvoid();
+}
+
 /* gd_add_string wrapper */
 void F77_FUNC(gdadst, GDADST) (const int* dirfile, const char* field_code,
     const int* field_code_l, const char* value, const int* value_l,
@@ -1767,27 +1836,72 @@ void F77_FUNC(gdmdsp, GDMDSP) (const int* dirfile, const char* spec,
 }
 
 /* gd_get_constant wrapper */
-void F77_FUNC(gdgtco, GDGTCO) (int* n_read, const int* dirfile,
-    const char* field_code, const int* field_code_l, const int* return_type,
-    void* data_out)
+void F77_FUNC(gdgtco, GDGTCO) (const int *dirfile, const char *field_code,
+    const int *field_code_l, const int *return_type, void *data_out)
 {
-  char* fc = (char *)malloc(*field_code_l + 1);
-  *n_read = gd_get_constant(_GDF_GetDirfile(*dirfile), _GDF_CString(fc,
-        field_code, *field_code_l), (gd_type_t)*return_type, data_out);
+  dtrace("%i, %p, %i, %i, %p", *dirfile, field_code, *field_code_l,
+      *return_type, data_out);
+
+  char *fc = (char *)malloc(*field_code_l + 1);
+  gd_get_constant(_GDF_GetDirfile(*dirfile), _GDF_CString(fc, field_code,
+        *field_code_l), (gd_type_t)*return_type, data_out);
   free(fc);
+  dreturnvoid();
+}
+
+/* gd_get_carray wrapper */
+void F77_FUNC(gdgtca, GDGTCA) (const int *dirfile, const char *field_code,
+    const int *field_code_l, const int *return_type, void *data_out)
+{
+  dtrace("%i, %p, %i, %x, %p", *dirfile, field_code, *field_code_l,
+      *return_type, data_out);
+
+  char *fc = (char *)malloc(*field_code_l + 1);
+  gd_get_carray(_GDF_GetDirfile(*dirfile), _GDF_CString(fc, field_code,
+        *field_code_l), (gd_type_t)*return_type, data_out);
+  free(fc);
+  dreturnvoid();
+}
+
+/* gd_get_carray_slice wrapper */
+void F77_FUNC(gdgcas, GDGCAS) (const int *dirfile, const char *field_code,
+    const int *field_code_l, const int *start, const int *n,
+    const int *return_type, void *data_out)
+{
+  dtrace("%i, %p, %i, %i, %i, %x, %p", *dirfile, field_code, *field_code_l,
+      *start, *n, *return_type, data_out);
+
+  char *fc = (char *)malloc(*field_code_l + 1);
+  gd_get_carray_slice(_GDF_GetDirfile(*dirfile), _GDF_CString(fc, field_code,
+        *field_code_l), *start - 1, (size_t)*n, (gd_type_t)*return_type,
+      data_out);
+  free(fc);
+  dreturnvoid();
+}
+
+/* gd_carray_len wrapper */
+void F77_FUNC(gdcaln, GDCALN) (int *len, const int *dirfile,
+    const char *field_code, const int *field_code_l)
+{
+  dtrace("%p, %i, %p, %i", len, *dirfile, field_code, *field_code_l);
+  char *fc = (char *)malloc(*field_code_l + 1);
+  *len = gd_carray_len(_GDF_GetDirfile(*dirfile), _GDF_CString(fc, field_code,
+        *field_code_l));
+  free(fc);
+  dreturnvoid();
 }
 
 /* gd_get_string wrapper */
-void F77_FUNC(gdgtst, GDGTST) (int* n_read, const int* dirfile,
-    const char* field_code, const int* field_code_l, const int* len,
-    char* data_out)
+void F77_FUNC(gdgtst, GDGTST) (int *size, const int *dirfile,
+    const char *field_code, const int *field_code_l, const int *len,
+    char *data_out)
 {
-  char* fc = (char *)malloc(*field_code_l + 1);
-  char* out = (char *)malloc(*len + 1);
+  char *fc = (char *)malloc(*field_code_l + 1);
+  char *out = (char *)malloc(*len + 1);
   int l = *len;
 
-  *n_read = gd_get_string(_GDF_GetDirfile(*dirfile), _GDF_CString(fc,
-        field_code, *field_code_l), (size_t)*len, out) - 1;
+  *size = gd_get_string(_GDF_GetDirfile(*dirfile), _GDF_CString(fc, field_code,
+      *field_code_l), (size_t)*len, out) - 1;
 
   _GDF_FString(data_out, &l, out);
   free(fc);
@@ -1795,14 +1909,43 @@ void F77_FUNC(gdgtst, GDGTST) (int* n_read, const int* dirfile,
 }
 
 /* gd_put_constant wrapper */
-void F77_FUNC(gdptco, GDPTCO) (int* n_wrote, const int* dirfile,
-    const char* field_code, const int* field_code_l, const int* data_type,
-    const void* data_in)
+void F77_FUNC(gdptco, GDPTCO) (const int *dirfile, const char *field_code,
+    const int *field_code_l, const int *data_type, const void *data_in)
 {
-  char* fc = (char *)malloc(*field_code_l + 1);
-  *n_wrote = gd_put_constant(_GDF_GetDirfile(*dirfile), _GDF_CString(fc,
-        field_code, *field_code_l), (gd_type_t)*data_type, data_in);
+  dtrace("%i, %p, %i, %x, %p", *dirfile, field_code, *field_code_l, *data_type,
+      data_in);
+  char *fc = (char *)malloc(*field_code_l + 1);
+  gd_put_constant(_GDF_GetDirfile(*dirfile), _GDF_CString(fc, field_code,
+        *field_code_l), (gd_type_t)*data_type, data_in);
   free(fc);
+  dreturnvoid();
+}
+
+/* gd_put_carray wrapper */
+void F77_FUNC(gdptca, GDPTCA) (const int *dirfile, const char *field_code,
+    const int *field_code_l, const int *data_type, const void *data_in)
+{
+  dtrace("%i, %p, %i, %x, %p", *dirfile, field_code, *field_code_l, *data_type,
+      data_in);
+  char *fc = (char *)malloc(*field_code_l + 1);
+  gd_put_carray(_GDF_GetDirfile(*dirfile), _GDF_CString(fc, field_code,
+        *field_code_l), (gd_type_t)*data_type, data_in);
+  free(fc);
+  dreturnvoid();
+}
+
+/* gd_put_carray_slice wrapper */
+void F77_FUNC(gdpcas, GDPCAS) (const int *dirfile, const char *field_code,
+    const int *field_code_l, const int *start, const int *n,
+    const int *data_type, const void *data_in)
+{
+  dtrace("%i, %p, %i, %i, %i, %x, %p", *dirfile, field_code, *field_code_l,
+      *start, *n, *data_type, data_in);
+  char *fc = (char *)malloc(*field_code_l + 1);
+  gd_put_carray_slice(_GDF_GetDirfile(*dirfile), _GDF_CString(fc, field_code,
+        *field_code_l), *start - 1, (size_t)*n, (gd_type_t)*data_type, data_in);
+  free(fc);
+  dreturnvoid();
 }
 
 /* gd_put_string wrapper */
@@ -1932,6 +2075,22 @@ void F77_FUNC(gdalco, GDALCO) (const int* dirfile, const char* field_code,
         *field_code_l), (gd_type_t)*const_type);
 
   free(fc);
+}
+
+/* gd_alter_carray wrapper */
+void F77_FUNC(gdalca, GDALCA) (const int* dirfile, const char* field_code,
+    const int* field_code_l, const int* const_type, const int *array_len)
+{
+  dtrace("%i, %p, %i, %x, %i", *dirfile, field_code, *field_code_l, *const_type,
+      *array_len);
+
+  char* fc = (char *)malloc(*field_code_l + 1);
+
+  gd_alter_carray(_GDF_GetDirfile(*dirfile), _GDF_CString(fc, field_code,
+        *field_code_l), (gd_type_t)*const_type, (size_t)*array_len);
+
+  free(fc);
+  dreturnvoid();
 }
 
 /* gd_alter_lincom wrapper */
@@ -2485,11 +2644,12 @@ void F77_FUNC(gdfnss, GDFNSS) (double *framenum, const int *dirfile,
 }
 
 /* retrieve a scalar parameter */
-void F77_FUNC(gdgsca, GDGSCA) (char* scalar, int* scalar_l, const int* dirfile,
-    const char* field_code, const int *field_code_l, const int* index)
+void F77_FUNC(gdgsca, GDGSCA) (char* scalar, int* scalar_l, int *scalar_index,
+    const int* dirfile, const char* field_code, const int *field_code_l,
+    const int* index)
 {
-  dtrace("%p, %p, %i, %p, %i, %i", scalar, scalar_l, *dirfile, field_code,
-      *field_code_l, *index);
+  dtrace("%p, %p, %p, %i, %p, %i, %i", scalar, scalar_l, scalar_index,
+      *dirfile, field_code, *field_code_l, *index);
 
   char *fc = (char *)malloc(*field_code_l + 1);
   gd_entry_t E;
@@ -2509,6 +2669,7 @@ void F77_FUNC(gdgsca, GDGSCA) (char* scalar, int* scalar_l, const int* dirfile,
       case GD_DIVIDE_ENTRY:
       case GD_INDEX_ENTRY:
       case GD_CONST_ENTRY:
+      case GD_CARRAY_ENTRY:
       case GD_STRING_ENTRY:
         ok = 0;
         break;
@@ -2541,6 +2702,7 @@ void F77_FUNC(gdgsca, GDGSCA) (char* scalar, int* scalar_l, const int* dirfile,
     ok = 0;
 
   _GDF_FString(scalar, scalar_l, (ok) ? E.scalar[*index - 1] : "");
+  *scalar_index = E.scalar_ind[*index - 1];
 
   gd_free_entry_strings(&E);
 
@@ -2548,12 +2710,12 @@ void F77_FUNC(gdgsca, GDGSCA) (char* scalar, int* scalar_l, const int* dirfile,
 }
 
 /* set a scalar parameter */
-void F77_FUNC(gdasca, GDASCA) (const int* dirfile, const char* field_code,
+void F77_FUNC(gdasca, GDASCA) (const int *dirfile, const char *field_code,
     const int *field_code_l, const int *index, const char *scalar,
-    const int *scalar_l, int* recode)
+    const int *scalar_l, int *scalar_index, int *recode)
 {
-  dtrace("%i, %p, %i, %i, %p, %i, %i", *dirfile, field_code, *field_code_l,
-      *index, scalar, *scalar_l, *recode);
+  dtrace("%i, %p, %i, %i, %p, %i, %i, %i", *dirfile, field_code, *field_code_l,
+      *index, scalar, *scalar_l, *scalar_index, *recode);
 
   char *fc = (char *)malloc(*field_code_l + 1);
   gd_entry_t E;
@@ -2574,6 +2736,7 @@ void F77_FUNC(gdasca, GDASCA) (const int* dirfile, const char* field_code,
     case GD_DIVIDE_ENTRY:
     case GD_INDEX_ENTRY:
     case GD_CONST_ENTRY:
+    case GD_CARRAY_ENTRY:
     case GD_STRING_ENTRY:
       ok = 0;
       break;
@@ -2609,6 +2772,7 @@ void F77_FUNC(gdasca, GDASCA) (const int* dirfile, const char* field_code,
   free(E.scalar[*index - 1]);
   E.scalar[*index - 1] = (char *)malloc(*scalar_l + 1);
   _GDF_CString(E.scalar[*index - 1], scalar, *scalar_l);
+  E.scalar_ind[*index - 1] = *scalar_index;
 
   gd_alter_entry(D, fc, &E, *recode);
 
