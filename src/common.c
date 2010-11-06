@@ -332,8 +332,7 @@ void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E)
 
   if (ptr == NULL) {
     free(E->e->u.linterp.lut);
-    _GD_SetEr
-      or(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     fclose(fp);
     dreturnvoid();
     return;
