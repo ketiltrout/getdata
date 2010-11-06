@@ -120,6 +120,7 @@ ssize_t getdelim(char **lineptr, size_t *n, int delim, FILE *stream)
   ssize_t count = 0;
   char *p, *q;
   size_t len, new_len;
+  off64_t pos;
 
   dtrace("%p, %p, '\\x%02x', %p", lineptr, n, (char)delim, stream);
 
@@ -136,6 +137,7 @@ ssize_t getdelim(char **lineptr, size_t *n, int delim, FILE *stream)
 
   /* apparently getdelim returns -1 if encountering EOF at the start of
    * a read, so try reading some text before beginning the main loop */
+  pos = ftello64(stream);
   nread = fread(p, 1, len, stream);
 
   if (nread == 0) {
@@ -154,7 +156,21 @@ ssize_t getdelim(char **lineptr, size_t *n, int delim, FILE *stream)
       /* make sure we have room for a terminating NUL */
       new_len = count;
       /* rewind */
-      fseek(stream, -nread + (q - p) + 1, SEEK_CUR);
+      pos += (q - p);
+#ifndef __MSVCRT__
+      pos++;
+#endif
+      fseeko64(stream, pos, SEEK_SET);
+#ifdef __MSVCRT__
+      /* Even when we open a text file in binary mode, fseek/ftell seem able
+       * to screw up.  So, do things the hard way. */
+      int r = fgetc(stream);
+      off64_t new_pos = ftello64(stream);
+      while (r != EOF && (new_pos <= pos || r != '\n')) {
+        r = fgetc(stream);
+        new_pos = ftello64(stream);
+      }
+#endif
     } else {
       /* no delim, increase the buffer size */
       count += nread;
@@ -180,9 +196,11 @@ ssize_t getdelim(char **lineptr, size_t *n, int delim, FILE *stream)
         return -1;
       }
       *n = new_len;
+      p = ptr + (p - *lineptr);
+      *lineptr = ptr;
     }
 
-    /* quit if there's not need to read more */
+    /* quit if there's no need to read more */
     if (q)
       break;
 
@@ -192,6 +210,7 @@ ssize_t getdelim(char **lineptr, size_t *n, int delim, FILE *stream)
     }
 
     /* read some more */
+    pos = ftello64(stream);
     nread = fread(p, 1, len, stream);
   }
   *(q + 1) = '\0';

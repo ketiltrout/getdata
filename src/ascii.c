@@ -40,10 +40,9 @@ int _GD_AsciiOpen(struct _gd_raw_file* file, int mode, int creat)
   dtrace("%p, %i, %i", file, mode, creat);
 
   int fp = open(file->name, ((mode == GD_RDWR) ? O_RDWR : O_RDONLY) |
-      (creat ? O_CREAT : 0) | O_TEXT, 0666);
+      (creat ? O_CREAT : 0) | O_BINARY, 0666);
 
-  file->edata = fdopen(fp, (mode == GD_RDWR) ? "r+" FOPEN_TEXT :
-      "r" FOPEN_TEXT);
+  file->edata = fdopen(fp, (mode == GD_RDWR) ? "r+" : "r");
 
   if (file->edata != NULL) {
     file->fp = 0;
@@ -359,7 +358,7 @@ off64_t _GD_AsciiSize(struct _gd_raw_file* file,
 
   dtrace("%p, <unused>", file);
 
-  stream = fopen(file->name, "r" FOPEN_TEXT);
+  stream = fopen(file->name, "r");
 
   if (stream == NULL) {
     dreturn("%i", -1);
@@ -389,7 +388,7 @@ int _GD_AsciiTemp(struct _gd_raw_file *file, int method)
     case GD_TEMP_OPEN:
       fp = mkstemp(file[1].name);
 
-      file[1].edata = fdopen(fp, "r+" FOPEN_TEXT);
+      file[1].edata = fdopen(fp, "r+");
 
       if (file[1].edata == NULL) {
         dreturn("%i", -1);

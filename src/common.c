@@ -242,7 +242,7 @@ void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E)
       return;
     }
 
-  fp = fopen(E->e->u.linterp.table_path, "r" FOPEN_TEXT);
+  fp = fopen(E->e->u.linterp.table_path, "r");
   if (fp == NULL) {
     _GD_SetError(D, GD_E_OPEN_LINFILE, GD_E_LINFILE_OPEN, NULL, 0,
         E->e->u.linterp.table_path);

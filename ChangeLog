@@ -1,3 +1,13 @@
+2010-11-06   D. V. Wiebe <getdata@ketiltrout.net>   svn:472
+	* src/ascii.c (_GD_AsciiOpen _GD_AsciiSize _GD_AsciiTemp) src/common.c
+	(_GD_ReadLinterpFile): Open text files in binary mode.
+
+	* src/internal.h: Define EOVERFLOW if necessary.  Also handle missing
+	fseeko64 and ftello64.
+
+	* src/compat.c (getdelim): Work around the bizarre behaviour of MSVCRT's
+	standard I/O.
+
 2010-11-06   D. V. Wiebe <getdata@ketiltrout.net>   svn:470
 	* src/getdata.h.in: Rename 'cons' to 'scalar' in the unified entry struct.
 

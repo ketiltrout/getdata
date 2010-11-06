@@ -175,6 +175,22 @@ const char* _gd_colsub(void);
 #endif
 
 /* function aliases */
+#ifndef HAVE_FSEEKO64
+#  ifndef HAVE_FSEEKO
+#    define fseeko64(a,b,c) fseek(a,(long)(b),c)
+#  else
+#    define fseeko64(a,b,c) fseeko(a,(off_t)(b),c)
+#  endif
+#endif
+
+#ifndef HAVE_FTELLO64
+#  ifndef HAVE_FTELLO
+#    define ftello64 (off64_t)ftell
+#  else
+#    define ftello64 (off64_t)ftello
+#  endif
+#endif
+
 #ifndef HAVE_STRTOLL
 #  define strtoll strtol
 #endif
@@ -206,6 +222,10 @@ struct tm *gmtime_r(const time_t *timep, struct tm *result);
 #else
 #define mkdir(f,m) mkdir(f)
 #endif
+#endif
+
+#ifndef EOVERFLOW
+#define EOVERFLOW EINVAL
 #endif
 
 #ifndef HAVE_MKSTEMP
