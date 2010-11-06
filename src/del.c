@@ -324,21 +324,21 @@ int gd_delete(DIRFILE* D, const char* field_code_in, int flags)
       return -1;
     }
 
-    if (_GD_SetEncodedName(D, E->e->EN(raw,file), E->e->EN(raw,filebase), 0)) {
+    if (_GD_SetEncodedName(D, E->e->u.raw.file, E->e->u.raw.filebase, 0)) {
       free(del_list);
       dreturn("%i", -1);
       return -1;
     }
 
-    if ((*_gd_ef[E->e->EN(raw,file)[0].encoding].unlink)(E->e->EN(raw,file))) {
-      _GD_SetError(D, GD_E_RAW_IO, 0, E->e->EN(raw,file)[0].name, errno, NULL);
+    if ((*_gd_ef[E->e->u.raw.file[0].encoding].unlink)(E->e->u.raw.file)) {
+      _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
       free(del_list);
       dreturn("%i", -1);
       return -1;
     }
-  } else if (E->field_type == GD_RAW_ENTRY && E->e->EN(raw,file)->fp != -1) {
-    if ((*_gd_ef[E->e->EN(raw,file)[0].encoding].close)(E->e->EN(raw,file))) {
-      _GD_SetError(D, GD_E_RAW_IO, 0, E->e->EN(raw,file)[0].name, errno, NULL);
+  } else if (E->field_type == GD_RAW_ENTRY && E->e->u.raw.file->fp != -1) {
+    if ((*_gd_ef[E->e->u.raw.file[0].encoding].close)(E->e->u.raw.file)) {
+      _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
       free(del_list);
       dreturn("%i", -1);
       return -1;

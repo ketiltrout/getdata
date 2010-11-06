@@ -168,12 +168,12 @@ namespace GetData {
       /* CONST methods */
       virtual DataType ConstType() const {
         return (E.field_type == GD_CONST_ENTRY || E.field_type ==
-            GD_CARRAY_ENTRY) ? (DataType)E.u.cons.const_type : Unknown;
+            GD_CARRAY_ENTRY) ? (DataType)E.u.scalar.const_type : Unknown;
       };
 
       /* CARRAY methods */
       virtual size_t ArrayLen() const {
-        return (E.field_type == GD_CARRAY_ENTRY) ? E.u.cons.array_len : 0;
+        return (E.field_type == GD_CARRAY_ENTRY) ? E.u.scalar.array_len : 0;
       };
 
       /* POLYNOM methods */

@@ -486,8 +486,8 @@ dnl Declare a few feature test macros
 AC_DEFINE([_BSD_SOURCE], [], [ Expose BSD-derived definitions ])
 AC_DEFINE([_SVID_SOURCE], [], [ Expose System V-derived definitions ])
 AC_DEFINE([_POSIX_SOURCE], [], [ Expose POSIX.1-1990 conforming definitions ])
-AC_DEFINE([_POSIX_C_SOURCE], [200112L],
-          [ Expose POSIX.1-2001 conforming definitions ])
+AC_DEFINE([_POSIX_C_SOURCE], [200809L],
+          [ Expose POSIX:2008 conforming definitions ])
 
 dnl libraries
 echo

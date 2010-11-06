@@ -251,9 +251,9 @@ static gd_entry_t* _GD_ParseRaw(DIRFILE* D, char* in_cols[MAX_IN_COLS],
   memset(E->e, 0, sizeof(struct _gd_private_entry));
 
   E->field_type = GD_RAW_ENTRY;
-  E->e->EN(raw,file)[0].fp = E->e->EN(raw,file)[1].fp = -1;
-  E->e->EN(raw,file)[0].encoding = GD_ENC_UNKNOWN; /* don't know the encoding
-                                              subscheme yet */
+  E->e->u.raw.file[0].fp = E->e->u.raw.file[1].fp = -1;
+  E->e->u.raw.file[0].encoding = GD_ENC_UNKNOWN; /* don't know the encoding
+                                                    subscheme yet */
 
   E->field = _GD_ValidateField(NULL, in_cols[0], standards, pedantic, is_dot);
   if (E->field == in_cols[0]) {
@@ -265,8 +265,8 @@ static gd_entry_t* _GD_ParseRaw(DIRFILE* D, char* in_cols[MAX_IN_COLS],
     return NULL;
   }
 
-  E->e->EN(raw,filebase) = (char *)malloc(FILENAME_MAX);
-  if (E->e->EN(raw,filebase) == NULL) {
+  E->e->u.raw.filebase = (char *)malloc(FILENAME_MAX);
+  if (E->e->u.raw.filebase == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     _GD_FreeE(E, 1);
     dreturn("%p", NULL);
@@ -274,16 +274,15 @@ static gd_entry_t* _GD_ParseRaw(DIRFILE* D, char* in_cols[MAX_IN_COLS],
   }
 
   if (D->fragment[me].sname)
-    snprintf(E->e->EN(raw,filebase), FILENAME_MAX, "%s/%s/%s", D->name,
+    snprintf(E->e->u.raw.filebase, FILENAME_MAX, "%s/%s/%s", D->name,
         D->fragment[me].sname, in_cols[0]);
   else
-    snprintf(E->e->EN(raw,filebase), FILENAME_MAX, "%s/%s", D->name,
-        in_cols[0]);
+    snprintf(E->e->u.raw.filebase, FILENAME_MAX, "%s/%s", D->name, in_cols[0]);
 
   E->EN(raw,data_type) = _GD_RawType(in_cols[2], standards, pedantic);
-  E->e->EN(raw,size) = GD_SIZE(E->EN(raw,data_type));
+  E->e->u.raw.size = GD_SIZE(E->EN(raw,data_type));
 
-  if (E->e->EN(raw,size) == 0 || E->EN(raw,data_type) & 0x40)
+  if (E->e->u.raw.size == 0 || E->EN(raw,data_type) & 0x40)
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_TYPE, format_file, line,
         in_cols[2]);
   else if ((E->scalar[0] = _GD_SetScalar(D, in_cols[3], &E->EN(raw,spf),
@@ -457,7 +456,7 @@ static gd_entry_t* _GD_ParseLinterp(DIRFILE* D,
   }
 
   E->in_fields[0] = strdup(in_cols[2]);
-  E->e->EN(linterp,table_len) = -1; /* linterp file not read yet */
+  E->e->u.linterp.table_len = -1; /* linterp file not read yet */
 
 
   E->EN(linterp,table) = strdup(in_cols[3]);
@@ -973,10 +972,11 @@ static gd_entry_t* _GD_ParseConst(DIRFILE* D, char* in_cols[MAX_IN_COLS],
     return NULL;
   }
 
-  E->EN(cons,const_type) = _GD_RawType(in_cols[2], standards, pedantic);
-  E->EN(cons,array_len) = -1;
+  E->EN(scalar,const_type) = _GD_RawType(in_cols[2], standards, pedantic);
+  E->EN(scalar,array_len) = -1;
 
-  if (GD_SIZE(E->EN(cons,const_type)) == 0 || E->EN(cons,const_type) & 0x40) {
+  if (GD_SIZE(E->EN(scalar,const_type)) == 0 || E->EN(scalar,const_type) & 0x40)
+  {
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_TYPE, format_file, line,
         in_cols[2]);
     _GD_FreeE(E, 1);
@@ -984,9 +984,9 @@ static gd_entry_t* _GD_ParseConst(DIRFILE* D, char* in_cols[MAX_IN_COLS],
     return NULL;
   }
 
-  gd_type_t type = _GD_ConstType(D, E->EN(cons,const_type));
-  E->e->EN(cons,d) = malloc(GD_SIZE(type));
-  if (!D->error && E->e->EN(cons,d) == NULL)
+  gd_type_t type = _GD_ConstType(D, E->EN(scalar,const_type));
+  E->e->u.scalar.d = malloc(GD_SIZE(type));
+  if (!D->error && E->e->u.scalar.d == NULL)
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
 
   if (D->error) {
@@ -995,8 +995,8 @@ static gd_entry_t* _GD_ParseConst(DIRFILE* D, char* in_cols[MAX_IN_COLS],
     return NULL;
   }
 
-  ptr = _GD_SetScalar(D, in_cols[3], E->e->EN(cons,d), type, format_file,
-      line, &dummy, &dummy);
+  ptr = _GD_SetScalar(D, in_cols[3], E->e->u.scalar.d, type, format_file, line,
+      &dummy, &dummy);
   if (ptr) {
     free(ptr);
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_LITERAL, format_file, line,
@@ -1072,9 +1072,9 @@ static gd_entry_t* _GD_ParseCarray(DIRFILE* D, char* in_cols[MAX_IN_COLS],
     return NULL;
   }
 
-  E->EN(cons,const_type) = _GD_RawType(in_cols[2], standards, pedantic);
+  E->EN(scalar,const_type) = _GD_RawType(in_cols[2], standards, pedantic);
 
-  if (GD_SIZE(E->EN(cons,const_type)) == 0 || E->EN(raw,data_type) & 0x40) {
+  if (GD_SIZE(E->EN(scalar,const_type)) == 0 || E->EN(raw,data_type) & 0x40) {
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_TYPE, format_file, line,
         in_cols[2]);
     _GD_FreeE(E, 1);
@@ -1088,7 +1088,7 @@ static gd_entry_t* _GD_ParseCarray(DIRFILE* D, char* in_cols[MAX_IN_COLS],
   n = 0;
   first = 3;
   data = NULL;
-  t = _GD_ConstType(D, E->EN(cons,const_type));
+  t = _GD_ConstType(D, E->EN(scalar,const_type));
   s = GD_SIZE(t);
 
   for (;;) {
@@ -1133,8 +1133,8 @@ static gd_entry_t* _GD_ParseCarray(DIRFILE* D, char* in_cols[MAX_IN_COLS],
     new_z = z + n_cols;
   }
   /* save the list */
-  E->e->EN(cons,d) = data;
-  E->EN(cons,array_len) = n;
+  E->e->u.scalar.d = data;
+  E->EN(scalar,array_len) = n;
 
   if (D->error) {
     free(data);
@@ -1179,7 +1179,7 @@ static gd_entry_t* _GD_ParseString(DIRFILE* D, char *in_cols[MAX_IN_COLS],
   memset(E->e, 0, sizeof(struct _gd_private_entry));
 
   E->field_type = GD_STRING_ENTRY;
-  E->e->ES(string) = strdup(in_cols[2]);
+  E->e->u.string = strdup(in_cols[2]);
   E->e->calculated = 1;
 
   E->field = _GD_ValidateField(parent, in_cols[0], standards, pedantic, is_dot);
@@ -1192,7 +1192,7 @@ static gd_entry_t* _GD_ParseString(DIRFILE* D, char *in_cols[MAX_IN_COLS],
     return NULL;
   }
 
-  if (E->field == NULL || E->e->ES(string) == NULL) {
+  if (E->field == NULL || E->e->u.string == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     _GD_FreeE(E, 1);
     dreturn("%p", NULL);
@@ -1311,16 +1311,10 @@ gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, char** in_cols,
         _GD_SetError(D, GD_E_UNSUPPORTED, 0, NULL, 0, NULL);
       else if (!_GD_Supports(D, E, GD_EF_TOUCH))
         ; /* error already set */
-      else if (_GD_SetEncodedName(D, E->e->EN(raw,file), E->e->EN(raw,filebase),
-            0))
-      {
+      else if (_GD_SetEncodedName(D, E->e->u.raw.file, E->e->u.raw.filebase, 0))
         ; /* error already set */
-      } else if ((*_gd_ef[E->e->EN(raw,file)[0].encoding].touch)(E->e->EN(raw,
-              file)))
-      {
-        _GD_SetError(D, GD_E_RAW_IO, 0, E->e->EN(raw,file)[0].name, errno,
-            NULL);
-      }
+      else if ((*_gd_ef[E->e->u.raw.file[0].encoding].touch)(E->e->u.raw.file))
+        _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
     }
 
     /* Is this the first raw field ever defined? */

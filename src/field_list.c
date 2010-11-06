@@ -115,7 +115,7 @@ const gd_carray_t *gd_carrays(DIRFILE* D, gd_type_t return_type) gd_nothrow
   for (i = n = 0; i < D->n_entries; ++i) {
     if (D->entry[i]->field_type == GD_CARRAY_ENTRY &&
         D->entry[i]->e->n_meta != -1) {
-      fl[n].n = D->entry[i]->EN(cons,array_len);
+      fl[n].n = D->entry[i]->EN(scalar,array_len);
       fl[n].d = _GD_Alloc(D, return_type, fl[n].n);
       if (D->error || _GD_DoField(D, D->entry[i], 0, 0, fl[n].n, return_type,
             fl[n].d) != 1)
@@ -169,7 +169,7 @@ const char **gd_strings(DIRFILE* D) gd_nothrow
   for (i = n = 0; i < D->n_entries; ++i) {
     if (D->entry[i]->field_type == GD_STRING_ENTRY &&
         D->entry[i]->e->n_meta != -1)
-      fl[n++] = D->entry[i]->e->ES(string);
+      fl[n++] = D->entry[i]->e->u.string;
   }
   fl[n] = NULL;
 

@@ -94,7 +94,7 @@ gd_nothrow
 
   if (entry->field_type != GD_CARRAY_ENTRY)
     _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
-  else if (start + n > entry->EN(cons,array_len))
+  else if (start + n > entry->EN(scalar,array_len))
     _GD_SetError(D, GD_E_BOUNDS, 0, NULL, 0, NULL);
   else if (!D->error)
     _GD_DoField(D, entry, repr, start, n, return_type, data_out);
@@ -138,7 +138,7 @@ int gd_get_carray(DIRFILE *D, const char *field_code_in, gd_type_t return_type,
   if (entry->field_type != GD_CARRAY_ENTRY)
     _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
   else if (!D->error)
-    _GD_DoField(D, entry, repr, 0, entry->EN(cons,array_len), return_type,
+    _GD_DoField(D, entry, repr, 0, entry->EN(scalar,array_len), return_type,
         data_out);
 
   if (field_code != field_code_in)
@@ -187,8 +187,8 @@ size_t gd_carray_len(DIRFILE *D, const char *field_code_in) gd_nothrow
     return 0;
   }
 
-  dreturn("%zu", entry->EN(cons,array_len));
-  return entry->EN(cons,array_len);
+  dreturn("%zu", entry->EN(scalar,array_len));
+  return entry->EN(scalar,array_len);
 }
 
 /* this function is little more than a public boilerplate for _GD_DoFieldOut */
@@ -237,13 +237,13 @@ int gd_put_constant(DIRFILE* D, const char *field_code_in, gd_type_t data_type,
   }
 
   /* Flag all clients as needing recalculation */
-  for (i = 0; i < entry->e->EN(cons,n_client); ++i)
-    entry->e->EN(cons,client)[i]->e->calculated = 0;
+  for (i = 0; i < entry->e->u.scalar.n_client; ++i)
+    entry->e->u.scalar.client[i]->e->calculated = 0;
 
   /* Clear the client list */
-  free(entry->e->EN(cons,client));
-  entry->e->EN(cons,client) = NULL;
-  entry->e->EN(cons,n_client) = 0;
+  free(entry->e->u.scalar.client);
+  entry->e->u.scalar.client = NULL;
+  entry->e->u.scalar.n_client = 0;
 
   dreturn("%i", 0);
   return 0;
@@ -284,7 +284,7 @@ gd_nothrow
 
   if (entry->field_type != GD_CARRAY_ENTRY)
     _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
-  else if (first + n > entry->EN(cons,array_len))
+  else if (first + n > entry->EN(scalar,array_len))
     _GD_SetError(D, GD_E_BOUNDS, 0, NULL, 0, NULL);
   else 
     _GD_DoFieldOut(D, entry, repr, first, n, data_type, data_in);
@@ -298,13 +298,13 @@ gd_nothrow
   }
 
   /* Flag all clients as needing recalculation */
-  for (i = 0; i < entry->e->EN(cons,n_client); ++i)
-    entry->e->EN(cons,client)[i]->e->calculated = 0;
+  for (i = 0; i < entry->e->u.scalar.n_client; ++i)
+    entry->e->u.scalar.client[i]->e->calculated = 0;
 
   /* Clear the client list */
-  free(entry->e->EN(cons,client));
-  entry->e->EN(cons,client) = NULL;
-  entry->e->EN(cons,n_client) = 0;
+  free(entry->e->u.scalar.client);
+  entry->e->u.scalar.client = NULL;
+  entry->e->u.scalar.n_client = 0;
 
   dreturn("%i", 0);
   return 0;
@@ -344,7 +344,7 @@ int gd_put_carray(DIRFILE* D, const char *field_code_in, gd_type_t data_type,
   if (entry->field_type != GD_CARRAY_ENTRY)
     _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
   else 
-    _GD_DoFieldOut(D, entry, repr, 0, entry->EN(cons,array_len), data_type,
+    _GD_DoFieldOut(D, entry, repr, 0, entry->EN(scalar,array_len), data_type,
         data_in);
 
   if (field_code != field_code_in)
@@ -356,13 +356,13 @@ int gd_put_carray(DIRFILE* D, const char *field_code_in, gd_type_t data_type,
   }
 
   /* Flag all clients as needing recalculation */
-  for (i = 0; i < entry->e->EN(cons,n_client); ++i)
-    entry->e->EN(cons,client)[i]->e->calculated = 0;
+  for (i = 0; i < entry->e->u.scalar.n_client; ++i)
+    entry->e->u.scalar.client[i]->e->calculated = 0;
 
   /* Clear the client list */
-  free(entry->e->EN(cons,client));
-  entry->e->EN(cons,client) = NULL;
-  entry->e->EN(cons,n_client) = 0;
+  free(entry->e->u.scalar.client);
+  entry->e->u.scalar.client = NULL;
+  entry->e->u.scalar.n_client = 0;
 
   dreturn("%i", 0);
   return 0;

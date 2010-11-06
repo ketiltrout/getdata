@@ -187,39 +187,35 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
       }
 
       E->EN(raw,data_type) = entry->EN(raw,data_type);
-      E->e->EN(raw,file)[0].fp = E->e->EN(raw,file)[1].fp = -1;
-      E->e->EN(raw,file)[0].encoding = GD_ENC_UNKNOWN;
+      E->e->u.raw.file[0].fp = E->e->u.raw.file[1].fp = -1;
+      E->e->u.raw.file[0].encoding = GD_ENC_UNKNOWN;
 
-      if ((E->e->EN(raw,filebase) = (char *)malloc(FILENAME_MAX)) == NULL) {
+      if ((E->e->u.raw.filebase = (char *)malloc(FILENAME_MAX)) == NULL) {
         _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
         break;
       }
  
       if (D->fragment[E->fragment_index].sname)
-        snprintf(E->e->EN(raw,filebase), FILENAME_MAX, "%s/%s/%s", D->name,
+        snprintf(E->e->u.raw.filebase, FILENAME_MAX, "%s/%s/%s", D->name,
             D->fragment[E->fragment_index].sname, E->field);
       else
-        snprintf(E->e->EN(raw,filebase), FILENAME_MAX, "%s/%s", D->name,
+        snprintf(E->e->u.raw.filebase, FILENAME_MAX, "%s/%s", D->name,
             E->field);
 
       if ((E->EN(raw,spf) = entry->EN(raw,spf)) == 0)
         _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_SPF, NULL,
             entry->EN(raw,spf), NULL);
-      else if (E->EN(raw,data_type) & 0x40 || (E->e->EN(raw,size) =
+      else if (E->EN(raw,data_type) & 0x40 || (E->e->u.raw.size =
             GD_SIZE(E->EN(raw,data_type))) == 0)
         _GD_SetError(D, GD_E_BAD_TYPE, entry->EN(raw,data_type), NULL, 0, NULL);
       else if (!_GD_Supports(D, E, GD_EF_TOUCH))
         ; /* error already set */
-      else if (_GD_SetEncodedName(D, E->e->EN(raw,file), E->e->EN(raw,filebase),
-            0))
-      {
+      else if (_GD_SetEncodedName(D, E->e->u.raw.file, E->e->u.raw.filebase, 0))
         ; /* error already set */
-      } else if ((*_gd_ef[E->e->EN(raw,file)[0].encoding].touch)(E->e->EN(raw,
-              file)))
-      {
-        _GD_SetError(D, GD_E_RAW_IO, 0, E->e->EN(raw,file)[0].name, errno,
+      else if ((*_gd_ef[E->e->u.raw.file[0].encoding].touch)(E->e->u.raw.file))
+        _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno,
             NULL);
-      } else if (D->fragment[E->fragment_index].ref_name == NULL) {
+      else if (D->fragment[E->fragment_index].ref_name == NULL) {
         /* This is the first raw field in this fragment */
         new_ref = strdup(E->field);
         if (new_ref == NULL)
@@ -267,7 +263,7 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
       }
       break;
     case GD_LINTERP_ENTRY:
-      E->e->EN(linterp,table_len) = -1;
+      E->e->u.linterp.table_len = -1;
 
       if ((E->in_fields[0] = strdup(entry->in_fields[0])) == NULL)
         _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
@@ -325,36 +321,40 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
       copy_scalar[0] = 1;
       break;
     case GD_CONST_ENTRY:
-      E->EN(cons,const_type) = entry->EN(cons,const_type);
-      E->EN(cons,array_len) = -1;
+      E->EN(scalar,const_type) = entry->EN(scalar,const_type);
+      E->EN(scalar,array_len) = -1;
 
-      if (E->EN(cons,const_type) & 0x40 || GD_SIZE(E->EN(cons,const_type)) == 0)
-        _GD_SetError(D, GD_E_BAD_TYPE, E->EN(cons,const_type), NULL, 0, NULL);
-      else {
-        E->e->EN(cons,d) = malloc(GD_SIZE(_GD_ConstType(D,
-                E->EN(cons,const_type))));
-        if (!D->error && E->e->EN(cons,d) == NULL)
+      if (E->EN(scalar,const_type) & 0x40 || GD_SIZE(E->EN(scalar,const_type))
+          == 0)
+      {
+        _GD_SetError(D, GD_E_BAD_TYPE, E->EN(scalar,const_type), NULL, 0, NULL);
+      } else {
+        E->e->u.scalar.d = malloc(GD_SIZE(_GD_ConstType(D,
+                E->EN(scalar,const_type))));
+        if (!D->error && E->e->u.scalar.d == NULL)
           _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
       }
       break;
     case GD_CARRAY_ENTRY:
-      E->EN(cons,const_type) = entry->EN(cons,const_type);
-      E->EN(cons,array_len) = entry->EN(cons,array_len);
+      E->EN(scalar,const_type) = entry->EN(scalar,const_type);
+      E->EN(scalar,array_len) = entry->EN(scalar,array_len);
 
-      if (E->EN(cons,const_type) & 0x40 || GD_SIZE(E->EN(cons,const_type)) == 0)
-        _GD_SetError(D, GD_E_BAD_TYPE, E->EN(cons,const_type), NULL, 0, NULL);
-      else if (E->EN(cons,array_len) > GD_MAX_CARRAY_LENGTH)
+      if (E->EN(scalar,const_type) & 0x40 || GD_SIZE(E->EN(scalar,const_type))
+          == 0)
+      {
+        _GD_SetError(D, GD_E_BAD_TYPE, E->EN(scalar,const_type), NULL, 0, NULL);
+      } else if (E->EN(scalar,array_len) > GD_MAX_CARRAY_LENGTH)
         _GD_SetError(D, GD_E_BOUNDS, 0, NULL, 0, NULL);
       else {
-        E->e->EN(cons,d) = malloc(GD_SIZE(_GD_ConstType(D,
-                E->EN(cons,const_type))) * E->EN(cons,array_len));
-        if (!D->error && E->e->EN(cons,d) == NULL)
+        E->e->u.scalar.d = malloc(GD_SIZE(_GD_ConstType(D,
+                E->EN(scalar,const_type))) * E->EN(scalar,array_len));
+        if (!D->error && E->e->u.scalar.d == NULL)
           _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
       }
       break;
     case GD_STRING_ENTRY:
-      E->e->ES(string) = strdup("");
-      if (E->e->ES(string) == NULL)
+      E->e->u.string = strdup("");
+      if (E->e->u.string == NULL)
         _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
       break;
     case GD_POLYNOM_ENTRY:
@@ -1135,7 +1135,7 @@ int gd_add_const(DIRFILE* D, const char* field_code, gd_type_t const_type,
   memset(&C, 0, sizeof(gd_entry_t));
   C.field = (char *)field_code;
   C.field_type = GD_CONST_ENTRY;
-  C.EN(cons,const_type) = const_type;
+  C.EN(scalar,const_type) = const_type;
   C.fragment_index = fragment_index;
   int error = _GD_Add(D, &C, NULL);
 
@@ -1175,8 +1175,8 @@ int gd_add_carray(DIRFILE* D, const char* field_code, gd_type_t const_type,
   memset(&C, 0, sizeof(gd_entry_t));
   C.field = (char *)field_code;
   C.field_type = GD_CARRAY_ENTRY;
-  C.EN(cons,const_type) = const_type;
-  C.EN(cons,array_len) = array_len;
+  C.EN(scalar,const_type) = const_type;
+  C.EN(scalar,array_len) = array_len;
   C.fragment_index = fragment_index;
   int error = _GD_Add(D, &C, NULL);
 
@@ -1680,7 +1680,7 @@ int gd_madd_const(DIRFILE* D, const char* parent, const char* field_code,
   gd_entry_t C;
   C.field = (char *)field_code;
   C.field_type = GD_CONST_ENTRY;
-  C.EN(cons,const_type) = const_type;
+  C.EN(scalar,const_type) = const_type;
   C.fragment_index = 0;
   int error = _GD_Add(D, &C, parent);
 
@@ -1729,8 +1729,8 @@ int gd_madd_carray(DIRFILE* D, const char* parent, const char* field_code,
   gd_entry_t C;
   C.field = (char *)field_code;
   C.field_type = GD_CARRAY_ENTRY;
-  C.EN(cons,const_type) = const_type;
-  C.EN(cons,array_len) = array_len;
+  C.EN(scalar,const_type) = const_type;
+  C.EN(scalar,array_len) = array_len;
   C.fragment_index = 0;
   int error = _GD_Add(D, &C, parent);
 

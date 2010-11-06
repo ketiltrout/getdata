@@ -1,4 +1,10 @@
-2010-10-28   D. V. Wiebe <getdata@ketiltrout.net>   svn:469
+2010-11-06   D. V. Wiebe <getdata@ketiltrout.net>   svn:470
+	* src/getdata.h.in: Rename 'cons' to 'scalar' in the unified entry struct.
+
+	* src/internal.h: Remove GD_ANON from the private entry struct.
+
+2010-11-06   D. V. Wiebe <getdata@ketiltrout.net>   svn:469
+
 	* bindings/python/test/big_test.py bindings/cxx/test/big_test.cpp
 	bindings/f77/test/big_test.f bindings/f77/test/big_test95.f90
 	bindings/idl/test/big_test.pro: Added tests 158 through 181.

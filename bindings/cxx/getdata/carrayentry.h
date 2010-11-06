@@ -39,10 +39,10 @@ namespace GetData {
 
       virtual DataType ConstType() const
       {
-        return (DataType)E.u.cons.const_type;
+        return (DataType)E.u.scalar.const_type;
       }
 
-      virtual size_t ArrayLen() const { return E.u.cons.array_len; }
+      virtual size_t ArrayLen() const { return E.u.scalar.array_len; }
 
       int SetArrayLen(size_t array_len);
 

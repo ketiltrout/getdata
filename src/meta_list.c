@@ -131,7 +131,7 @@ const gd_carray_t *gd_mcarrays(DIRFILE* D, const char* parent,
    * as purely real */
   for (i = n = 0; i < e->n_meta; ++i) {
     if (e->p.meta_entry[i]->field_type == GD_CARRAY_ENTRY) {
-      fl[n].n = e->p.meta_entry[i]->EN(cons,array_len);
+      fl[n].n = e->p.meta_entry[i]->EN(scalar,array_len);
       fl[n].d = _GD_Alloc(D, return_type, fl[n].n);
       if (D->error || _GD_DoField(D, e->p.meta_entry[i], 0, 0, fl[n].n,
             return_type, fl[n].d) != 1)
@@ -188,7 +188,7 @@ const char **gd_mstrings(DIRFILE* D, const char* parent) gd_nothrow
 
   for (i = n = 0; i < e->n_meta; ++i) {
     if (e->p.meta_entry[i]->field_type == GD_STRING_ENTRY)
-      fl[n++] = e->p.meta_entry[i]->e->ES(string);
+      fl[n++] = e->p.meta_entry[i]->e->u.string;
   }
   fl[n] = NULL;
 

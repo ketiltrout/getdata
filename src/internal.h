@@ -387,21 +387,21 @@ struct _gd_private_entry {
       char* filebase;
       size_t size;
       struct _gd_raw_file file[2]; /* encoding framework data */
-    } GD_ANON(raw);
+    } raw;
     struct { /* LINTERP */
       char *table_path;
       int table_len;
       int complex_table;
       int table_monotonic;
       struct _gd_lut *lut;
-    } GD_ANON(linterp);
+    } linterp;
     struct { /* CONST */
       void *d;
       int n_client;
       gd_entry_t** client;
-    } GD_ANON(cons);
+    } scalar;
     char* string;
-  } GD_ANON(u);
+  } u;
 };
 
 #define GD_ENC_NONE       0
@@ -735,10 +735,8 @@ static inline __attribute__ ((__const__)) double __NAN()
 
 #ifdef GD_C89_API
 # define EN(t,v) u.t.v
-# define ES(v) u.v
 #else
 # define EN(t,v) v
-# define ES(v) v
 #endif
 
 #endif

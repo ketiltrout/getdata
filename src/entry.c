@@ -50,7 +50,7 @@ void _GD_FreeE(gd_entry_t* entry, int priv)
       free(entry->in_fields[0]);
       free(entry->EN(linterp,table));
       if (priv)
-        free(entry->e->EN(linterp,table_path));
+        free(entry->e->u.linterp.table_path);
       break;
     case GD_RECIP_ENTRY:
       free(entry->in_fields[0]);
@@ -76,21 +76,21 @@ void _GD_FreeE(gd_entry_t* entry, int priv)
       break;
     case GD_STRING_ENTRY:
       if (priv)
-        free(entry->e->ES(string));
+        free(entry->e->u.string);
       break;
     case GD_CONST_ENTRY:
     case GD_CARRAY_ENTRY:
       if (priv) {
-        free(entry->e->EN(cons,client));
-        free(entry->e->EN(cons,d));
+        free(entry->e->u.scalar.client);
+        free(entry->e->u.scalar.d);
       }
       break;
     case GD_RAW_ENTRY:
       free(entry->scalar[0]);
       if (priv) {
-        free(entry->e->EN(raw,filebase));
-        free(entry->e->EN(raw,file)[0].name);
-        free(entry->e->EN(raw,file)[1].name);
+        free(entry->e->u.raw.filebase);
+        free(entry->e->u.raw.file[0].name);
+        free(entry->e->u.raw.file[1].name);
       }
       break;
     case GD_INDEX_ENTRY:
@@ -162,7 +162,7 @@ static void _GD_GetScalar(DIRFILE* D, gd_entry_t* E, int i, gd_type_t type,
       }
 
       if ((D->flags & GD_ACCMODE) == GD_RDWR) {
-        ptr = realloc(C->e->EN(cons,client), (C->e->EN(cons,n_client) + 1) *
+        ptr = realloc(C->e->u.scalar.client, (C->e->u.scalar.n_client + 1) *
             sizeof(gd_entry_t*));
         if (ptr == NULL)
           _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
@@ -171,8 +171,8 @@ static void _GD_GetScalar(DIRFILE* D, gd_entry_t* E, int i, gd_type_t type,
       _GD_DoField(D, C, repr, index, 1, type, data);
 
       if (ptr) {
-        C->e->EN(cons,client) = (gd_entry_t **)ptr;
-        C->e->EN(cons,client)[C->e->EN(cons,n_client)++] = E;
+        C->e->u.scalar.client = (gd_entry_t **)ptr;
+        C->e->u.scalar.client[C->e->u.scalar.n_client++] = E;
       }
     }
 
@@ -289,27 +289,26 @@ const char* gd_raw_filename(DIRFILE* D, const char* field_code_in) gd_nothrow
   if (field_code != field_code_in)
     free(field_code);
 
-  if (E->e->EN(raw,file)[0].name == NULL) {
+  if (E->e->u.raw.file[0].name == NULL) {
     /* ensure encoding sybtype is known */
     if (!_GD_Supports(D, E, 0)) {
       dreturn("%p", NULL);
       return NULL;
     }
 
-    if (E->e->EN(raw,file)[0].encoding == GD_ENC_UNKNOWN) {
+    if (E->e->u.raw.file[0].encoding == GD_ENC_UNKNOWN) {
       _GD_SetError(D, GD_E_UNKNOWN_ENCODING, 0, NULL, 0, NULL);
       dreturn("%p", NULL);
       return NULL;
-    } else if (_GD_SetEncodedName(D, E->e->EN(raw,file), E->e->EN(raw,filebase),
-          0))
+    } else if (_GD_SetEncodedName(D, E->e->u.raw.file, E->e->u.raw.filebase, 0))
     {
       dreturn("%p", NULL);
       return NULL;
     }
   }
 
-  dreturn("%p", E->e->EN(raw,file)[0].name);
-  return E->e->EN(raw,file)[0].name;
+  dreturn("%p", E->e->u.raw.file[0].name);
+  return E->e->u.raw.file[0].name;
 }
 
 int gd_entry(DIRFILE* D, const char* field_code_in, gd_entry_t* entry)

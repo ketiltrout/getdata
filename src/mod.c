@@ -255,7 +255,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
       modified = 1;
 
       if (Q.EN(raw,data_type) & 0x40 ||
-          (Qe.EN(raw,size) = GD_SIZE(Q.EN(raw,data_type))) == 0)
+          (Qe.u.raw.size = GD_SIZE(Q.EN(raw,data_type))) == 0)
       {
         _GD_SetError(D, GD_E_BAD_TYPE, Q.EN(raw,data_type), NULL, 0, NULL);
         dreturn("%i", -1);
@@ -272,7 +272,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
           if (gd_get_constant(D, Q.scalar[0], GD_UINT16, &Q.EN(raw,spf)))
             break;
 
-        const off64_t nf = BUFFER_SIZE / max(E->e->EN(raw,size),
+        const off64_t nf = BUFFER_SIZE / max(E->e->u.raw.size,
             GD_SIZE(Q.EN(raw,data_type))) / max(E->EN(raw,spf), Q.EN(raw,spf));
 
         if (D->fragment[E->fragment_index].protection & GD_PROTECT_DATA)
@@ -286,21 +286,19 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
         if (D->error)
           break;
 
-        const struct encoding_t* enc = _gd_ef + E->e->EN(raw,file)[0].encoding;
+        const struct encoding_t* enc = _gd_ef + E->e->u.raw.file[0].encoding;
 
-        if (_GD_SetEncodedName(D, E->e->EN(raw,file), E->e->EN(raw,filebase),
-              0))
-        {
+        if (_GD_SetEncodedName(D, E->e->u.raw.file, E->e->u.raw.filebase, 0))
           ; /* error already set */
-        } else if (E->e->EN(raw,file)[0].fp == -1 && (*enc->open)(E->e->EN(raw,
-                file), 0, 0))
+        else if (E->e->u.raw.file[0].fp == -1 && (*enc->open)(E->e->u.raw.file,
+              0, 0))
         {
-          _GD_SetError(D, GD_E_RAW_IO, 0, E->e->EN(raw,file)[0].name, errno,
+          _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno,
               NULL);
-        } else if ((*enc->seek)(E->e->EN(raw,file), 0, E->EN(raw,data_type), 1)
+        } else if ((*enc->seek)(E->e->u.raw.file, 0, E->EN(raw,data_type), 1)
             == -1)
         {
-          _GD_SetError(D, GD_E_RAW_IO, 0, E->e->EN(raw,file)[0].name, errno,
+          _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno,
               NULL);
         }
 
@@ -308,22 +306,22 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
           break;
 
         /* Create a temporary file and open it */
-        if (_GD_SetEncodedName(D, E->e->EN(raw,file) + 1,
-              E->e->EN(raw,filebase), 1))
+        if (_GD_SetEncodedName(D, E->e->u.raw.file + 1, E->e->u.raw.filebase,
+              1))
         {
           ; /* error already set */
-        } else if ((*enc->temp)(E->e->EN(raw,file), GD_TEMP_OPEN))
-          _GD_SetError(D, GD_E_RAW_IO, 0, E->e->EN(raw,file)[1].name, errno,
+        } else if ((*enc->temp)(E->e->u.raw.file, GD_TEMP_OPEN))
+          _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[1].name, errno,
               NULL);
-        else if ((*enc->seek)(E->e->EN(raw,file) + 1, 0, E->EN(raw,data_type),
-              1) == -1)
+        else if ((*enc->seek)(E->e->u.raw.file + 1, 0, E->EN(raw,data_type), 1)
+            == -1)
         {
-          _GD_SetError(D, GD_E_RAW_IO, 0, E->e->EN(raw,file)[1].name, errno,
+          _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[1].name, errno,
               NULL);
         }
 
         if (D->error) {
-          (*enc->temp)(E->e->EN(raw,file), GD_TEMP_DESTROY);
+          (*enc->temp)(E->e->u.raw.file, GD_TEMP_DESTROY);
           break;
         }
 
@@ -332,11 +330,11 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
 
         /* Now copy the old file to the new file */
         for (;;) {
-          nread = (*enc->read)(E->e->EN(raw,file), buffer1,
-              E->EN(raw,data_type), nf * E->EN(raw,spf));
+          nread = (*enc->read)(E->e->u.raw.file, buffer1, E->EN(raw,data_type),
+              nf * E->EN(raw,spf));
 
           if (nread < 0) {
-            _GD_SetError(D, GD_E_RAW_IO, 0, E->e->EN(raw,file)[1].name, errno,
+            _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[1].name, errno,
                 NULL);
             break;
           }
@@ -366,11 +364,11 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
             buffer2 = ptr;
           }
 
-          nwrote = (*enc->write)(E->e->EN(raw,file) + 1, buffer1,
+          nwrote = (*enc->write)(E->e->u.raw.file + 1, buffer1,
               Q.EN(raw,data_type), ns_out);
 
           if (nwrote < ns_out) {
-            _GD_SetError(D, GD_E_RAW_IO, 0, E->e->EN(raw,file)[1].name, errno,
+            _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[1].name, errno,
                 NULL);
             break;
           }
@@ -381,17 +379,17 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
 
         /* An error occurred, clean up */
         if (D->error)
-          (*enc->temp)(E->e->EN(raw,file), GD_TEMP_DESTROY);
+          (*enc->temp)(E->e->u.raw.file, GD_TEMP_DESTROY);
         /* Well, I suppose the copy worked.  Close both files */
-        else if ((*enc->close)(E->e->EN(raw,file)) ||
-            (*enc->sync)(E->e->EN(raw,file) + 1) ||
-            (*enc->close)(E->e->EN(raw,file) + 1))
+        else if ((*enc->close)(E->e->u.raw.file) ||
+            (*enc->sync)(E->e->u.raw.file + 1) ||
+            (*enc->close)(E->e->u.raw.file + 1))
         {
-          _GD_SetError(D, GD_E_RAW_IO, 0, E->e->EN(raw,file)[1].name, errno,
+          _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[1].name, errno,
               NULL);
         /* Move the temporary file over the old file */
-        } else if ((*enc->temp)(E->e->EN(raw,file), GD_TEMP_MOVE))
-          _GD_SetError(D, GD_E_RAW_IO, 0, E->e->EN(raw,file)[0].name, errno,
+        } else if ((*enc->temp)(E->e->u.raw.file, GD_TEMP_MOVE))
+          _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno,
               NULL);
       }
 
@@ -503,7 +501,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
             N->EN(linterp,table)))
       {
         Q.EN(linterp,table) = strdup(N->EN(linterp,table));
-        Qe.EN(linterp,table_path) = NULL;
+        Qe.u.linterp.table_path = NULL;
 
         if (Q.EN(linterp,table) == NULL) {
           _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
@@ -511,18 +509,16 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
         }
 
         if (flags) {
-          if (E->e->EN(linterp,table_path) == NULL)
+          if (E->e->u.linterp.table_path == NULL)
             if (_GD_SetTablePath(D, E, E->e))
               break;
 
-          if (Qe.EN(linterp,table_path) == NULL)
+          if (Qe.u.linterp.table_path == NULL)
             if (_GD_SetTablePath(D, &Q, &Qe))
               break;
 
-          if (_GD_Rename(E->e->EN(linterp,table_path),
-                Qe.EN(linterp,table_path)))
-          {
-            _GD_SetError(D, GD_E_RAW_IO, 0, E->e->EN(linterp,table_path), errno,
+          if (_GD_Rename(E->e->u.linterp.table_path, Qe.u.linterp.table_path)) {
+            _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.linterp.table_path, errno,
                 0);
             break;
           }
@@ -530,7 +526,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
 
         modified = 1;
         free(E->EN(linterp,table));
-        free(E->e->EN(linterp,table_path));
+        free(E->e->u.linterp.table_path);
       }
 
       break;
@@ -710,78 +706,82 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
 
       break;
     case GD_CONST_ENTRY:
-      Q.EN(cons,const_type) = (N->EN(cons,const_type) == GD_NULL) ?
-        E->EN(cons,const_type) : N->EN(cons,const_type);
+      Q.EN(scalar,const_type) = (N->EN(scalar,const_type) == GD_NULL) ?
+        E->EN(scalar,const_type) : N->EN(scalar,const_type);
 
-      if (Q.EN(cons,const_type) & 0x40 || GD_SIZE(Q.EN(cons,const_type)) == 0) {
-        _GD_SetError(D, GD_E_BAD_TYPE, Q.EN(cons,const_type), NULL, 0, NULL);
+      if (Q.EN(scalar,const_type) & 0x40 || GD_SIZE(Q.EN(scalar,const_type))
+          == 0)
+      {
+        _GD_SetError(D, GD_E_BAD_TYPE, Q.EN(scalar,const_type), NULL, 0, NULL);
         dreturn("%i", -1);
         return -1;
       }
 
-      type = _GD_ConstType(D, Q.EN(cons,const_type));
-      if (Q.EN(cons,const_type) != E->EN(cons,const_type)) 
+      type = _GD_ConstType(D, Q.EN(scalar,const_type));
+      if (Q.EN(scalar,const_type) != E->EN(scalar,const_type)) 
         modified = 1; 
 
-      if (type == _GD_ConstType(D, E->EN(cons,const_type))) {
-        Qe.EN(cons,d) = E->e->EN(cons,d);
-        E->e->EN(cons,d) = NULL;
+      if (type == _GD_ConstType(D, E->EN(scalar,const_type))) {
+        Qe.u.scalar.d = E->e->u.scalar.d;
+        E->e->u.scalar.d = NULL;
       } else {
         /* type convert */
-        Qe.EN(cons,d) = malloc(GD_SIZE(type));
-        if (Qe.EN(cons,d) == NULL) {
+        Qe.u.scalar.d = malloc(GD_SIZE(type));
+        if (Qe.u.scalar.d == NULL) {
           _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
           dreturn("%i", -1);
           return -1;
         }
         if (type == GD_COMPLEX128) {
-          *(double*)Qe.EN(cons,d) = (E->EN(cons,const_type) & GD_IEEE754) ?
-            *(double*)E->e->EN(cons,d) : (E->EN(cons,const_type) & GD_SIGNED) ?
-            (double)*(int64_t*)E->e->EN(cons,d) :
-            (double)*(uint64_t*)E->e->EN(cons,d);
-          ((double*)Qe.EN(cons,d))[1] = 0;
+          *(double*)Qe.u.scalar.d = (E->EN(scalar,const_type) & GD_IEEE754) ?
+            *(double*)E->e->u.scalar.d : (E->EN(scalar,const_type) & GD_SIGNED)
+            ? (double)*(int64_t*)E->e->u.scalar.d
+            : (double)*(uint64_t*)E->e->u.scalar.d;
+          ((double*)Qe.u.scalar.d)[1] = 0;
         } else if (type == GD_IEEE754)
-          *(double*)Qe.EN(cons,d) = (E->EN(cons,const_type) & GD_COMPLEX) ?
-            *(double*)E->e->EN(cons,d) : (E->EN(cons,const_type) & GD_SIGNED) ?
-            (double)*(int64_t*)E->e->EN(cons,d) :
-            (double)*(uint64_t*)E->e->EN(cons,d);
+          *(double*)Qe.u.scalar.d = (E->EN(scalar,const_type) & GD_COMPLEX) ?
+            *(double*)E->e->u.scalar.d : (E->EN(scalar,const_type) & GD_SIGNED)
+            ? (double)*(int64_t*)E->e->u.scalar.d
+            : (double)*(uint64_t*)E->e->u.scalar.d;
         else if (type == GD_INT64)
-          *(int64_t*)Qe.EN(cons,d) = (E->EN(cons,const_type) & (GD_COMPLEX |
-                GD_IEEE754)) ? (int64_t)*(double*)E->e->EN(cons,d) :
-            (int64_t)*(uint64_t*)E->e->EN(cons,d);
+          *(int64_t*)Qe.u.scalar.d = (E->EN(scalar,const_type) & (GD_COMPLEX |
+                GD_IEEE754)) ? (int64_t)*(double*)E->e->u.scalar.d :
+            (int64_t)*(uint64_t*)E->e->u.scalar.d;
         else
-          *(uint64_t*)Qe.EN(cons,d) = (E->EN(cons,const_type) & (GD_COMPLEX |
-                GD_IEEE754)) ? (uint64_t)*(double*)E->e->EN(cons,d) :
-            (uint64_t)*(int64_t*)E->e->EN(cons,d);
+          *(uint64_t*)Qe.u.scalar.d = (E->EN(scalar,const_type) & (GD_COMPLEX |
+                GD_IEEE754)) ? (uint64_t)*(double*)E->e->u.scalar.d :
+            (uint64_t)*(int64_t*)E->e->u.scalar.d;
       }
 
       break;
     case GD_CARRAY_ENTRY:
-      Q.EN(cons,array_len) = (N->EN(cons,array_len) == 0) ?
-        E->EN(cons,array_len) : N->EN(cons,array_len);
+      Q.EN(scalar,array_len) = (N->EN(scalar,array_len) == 0) ?
+        E->EN(scalar,array_len) : N->EN(scalar,array_len);
 
-      Q.EN(cons,const_type) = (N->EN(cons,const_type) == GD_NULL) ?
-        E->EN(cons,const_type) : N->EN(cons,const_type);
+      Q.EN(scalar,const_type) = (N->EN(scalar,const_type) == GD_NULL) ?
+        E->EN(scalar,const_type) : N->EN(scalar,const_type);
 
-      if (Q.EN(cons,const_type) & 0x40 || GD_SIZE(Q.EN(cons,const_type)) == 0) {
-        _GD_SetError(D, GD_E_BAD_TYPE, Q.EN(cons,const_type), NULL, 0, NULL);
+      if (Q.EN(scalar,const_type) & 0x40 || GD_SIZE(Q.EN(scalar,const_type)) ==
+          0)
+      {
+        _GD_SetError(D, GD_E_BAD_TYPE, Q.EN(scalar,const_type), NULL, 0, NULL);
         dreturn("%i", -1);
         return -1;
-      } else if (E->EN(cons,array_len) > GD_MAX_CARRAY_LENGTH) {
+      } else if (E->EN(scalar,array_len) > GD_MAX_CARRAY_LENGTH) {
         _GD_SetError(D, GD_E_BOUNDS, 0, NULL, 0, NULL);
         dreturn("%i", -1);
         return -1;
       }
 
-      if (Q.EN(cons,const_type) != E->EN(cons,const_type) ||
-          Q.EN(cons,array_len) != E->EN(cons,array_len))
+      if (Q.EN(scalar,const_type) != E->EN(scalar,const_type) ||
+          Q.EN(scalar,array_len) != E->EN(scalar,array_len))
       {
         modified = 1; 
       }
 
-      type = _GD_ConstType(D, Q.EN(cons,const_type));
-      Qe.EN(cons,d) = malloc(GD_SIZE(type) * Q.EN(cons,array_len));
-      if (Qe.EN(cons,d) == NULL) {
+      type = _GD_ConstType(D, Q.EN(scalar,const_type));
+      Qe.u.scalar.d = malloc(GD_SIZE(type) * Q.EN(scalar,array_len));
+      if (Qe.u.scalar.d == NULL) {
         _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
         dreturn("%i", -1);
         return -1;
@@ -789,20 +789,20 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
 
       /* copy via type conversion, if array_len has increased, trailing elements
        * are uninitialised. */
-      n = E->EN(cons,array_len);
-      if (n > Q.EN(cons,array_len))
-        n = Q.EN(cons,array_len);
+      n = E->EN(scalar,array_len);
+      if (n > Q.EN(scalar,array_len))
+        n = Q.EN(scalar,array_len);
 
-      _GD_ConvertType(D, E->e->EN(cons,d), _GD_ConstType(D,
-            E->EN(cons,const_type)), Qe.EN(cons,d), type, n);
+      _GD_ConvertType(D, E->e->u.scalar.d, _GD_ConstType(D,
+            E->EN(scalar,const_type)), Qe.u.scalar.d, type, n);
 
       if (D->error) {
-        free(Qe.EN(cons,d));
+        free(Qe.u.scalar.d);
         dreturn("%i", -1);
         return -1;
       }
 
-      free(E->e->EN(cons,d));
+      free(E->e->u.scalar.d);
       break;
     case GD_INDEX_ENTRY:
       /* INDEX may not be modified */
@@ -1280,7 +1280,7 @@ int gd_alter_const(DIRFILE* D, const char* field_code, gd_type_t const_type)
   }
 
   N.field_type = GD_CONST_ENTRY;
-  N.EN(cons,const_type) = const_type;
+  N.EN(scalar,const_type) = const_type;
   N.e = NULL;
 
   int ret = _GD_Change(D, field_code, &N, 0);
@@ -1303,8 +1303,8 @@ int gd_alter_carray(DIRFILE* D, const char* field_code, gd_type_t const_type,
   }
 
   N.field_type = GD_CARRAY_ENTRY;
-  N.EN(cons,const_type) = const_type;
-  N.EN(cons,array_len) = array_len;
+  N.EN(scalar,const_type) = const_type;
+  N.EN(scalar,array_len) = array_len;
   N.e = NULL;
 
   int ret = _GD_Change(D, field_code, &N, 0);

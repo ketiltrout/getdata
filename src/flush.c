@@ -48,16 +48,16 @@ void _GD_Flush(DIRFILE* D, gd_entry_t *E)
 
   switch(E->field_type) {
     case GD_RAW_ENTRY:
-      if (E->e->EN(raw,file)[0].fp >= 0) {
+      if (E->e->u.raw.file[0].fp >= 0) {
         if ((D->flags & GD_ACCMODE) == GD_RDWR &&
-            _gd_ef[E->e->EN(raw,file)[0].encoding].sync != NULL &&
-            (*_gd_ef[E->e->EN(raw,file)[0].encoding].sync)(E->e->EN(raw,file)))
-          _GD_SetError(D, GD_E_RAW_IO, 0, E->e->EN(raw,file)[0].name, errno,
+            _gd_ef[E->e->u.raw.file[0].encoding].sync != NULL &&
+            (*_gd_ef[E->e->u.raw.file[0].encoding].sync)(E->e->u.raw.file))
+          _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno,
               NULL);
-        else if ((*_gd_ef[E->e->EN(raw,file)[0].encoding].close)(E->e->EN(raw,
-                  file)))
+        else if ((*_gd_ef[E->e->u.raw.file[0].encoding].close)(
+              E->e->u.raw.file))
         {
-          _GD_SetError(D, GD_E_RAW_IO, 0, E->e->EN(raw,file)[0].name, errno,
+          _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno,
               NULL);
         }
       }
@@ -371,38 +371,38 @@ static void _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
       break;
     case GD_CONST_ENTRY:
       fprintf(stream, " CONST%s %s ", pretty ? "   " : "", _GD_TypeName(D,
-            E->EN(cons,const_type)));
-      if (E->EN(cons,const_type) & GD_SIGNED)
-        fprintf(stream, "%" PRIi64 "\n", *(int64_t*)E->e->EN(cons,d));
-      else if (E->EN(cons,const_type) & GD_IEEE754)
-        fprintf(stream, "%.15g\n", *(double*)E->e->EN(cons,d));
-      else if (E->EN(cons,const_type) & GD_COMPLEX)
-        fprintf(stream, "%.15g;%.15g\n", *(double*)E->e->EN(cons,d),
-            *((double*)E->e->EN(cons,d) + 1));
+            E->EN(scalar,const_type)));
+      if (E->EN(scalar,const_type) & GD_SIGNED)
+        fprintf(stream, "%" PRIi64 "\n", *(int64_t*)E->e->u.scalar.d);
+      else if (E->EN(scalar,const_type) & GD_IEEE754)
+        fprintf(stream, "%.15g\n", *(double*)E->e->u.scalar.d);
+      else if (E->EN(scalar,const_type) & GD_COMPLEX)
+        fprintf(stream, "%.15g;%.15g\n", *(double*)E->e->u.scalar.d,
+            *((double*)E->e->u.scalar.d + 1));
       else
-        fprintf(stream, "%" PRIu64 "\n", *(uint64_t*)E->e->EN(cons,d));
+        fprintf(stream, "%" PRIu64 "\n", *(uint64_t*)E->e->u.scalar.d);
       break;
     case GD_CARRAY_ENTRY:
       fprintf(stream, " CARRAY%s %s", pretty ? "  " : "", _GD_TypeName(D,
-            E->EN(cons,const_type)));
-      if (E->EN(cons,const_type) & GD_SIGNED)
-        for (z = 0; z < E->EN(cons,array_len); ++z)
-          fprintf(stream, " %" PRIi64, ((int64_t*)E->e->EN(cons,d))[z]);
-      else if (E->EN(cons,const_type) & GD_IEEE754)
-        for (z = 0; z < E->EN(cons,array_len); ++z)
-          fprintf(stream, " %.15g", ((double*)E->e->EN(cons,d))[z]);
-      else if (E->EN(cons,const_type) & GD_COMPLEX)
-        for (z = 0; z < E->EN(cons,array_len); ++z)
-          fprintf(stream, " %.15g;%.15g", ((double*)E->e->EN(cons,d))[2 * z],
-              ((double*)E->e->EN(cons,d))[2 * z + 1]);
+            E->EN(scalar,const_type)));
+      if (E->EN(scalar,const_type) & GD_SIGNED)
+        for (z = 0; z < E->EN(scalar,array_len); ++z)
+          fprintf(stream, " %" PRIi64, ((int64_t*)E->e->u.scalar.d)[z]);
+      else if (E->EN(scalar,const_type) & GD_IEEE754)
+        for (z = 0; z < E->EN(scalar,array_len); ++z)
+          fprintf(stream, " %.15g", ((double*)E->e->u.scalar.d)[z]);
+      else if (E->EN(scalar,const_type) & GD_COMPLEX)
+        for (z = 0; z < E->EN(scalar,array_len); ++z)
+          fprintf(stream, " %.15g;%.15g", ((double*)E->e->u.scalar.d)[2 * z],
+              ((double*)E->e->u.scalar.d)[2 * z + 1]);
       else
-        for (z = 0; z < E->EN(cons,array_len); ++z)
-          fprintf(stream, " %" PRIu64, ((uint64_t*)E->e->EN(cons,d))[z]);
+        for (z = 0; z < E->EN(scalar,array_len); ++z)
+          fprintf(stream, " %" PRIu64, ((uint64_t*)E->e->u.scalar.d)[z]);
       fputs("\n", stream);
       break;
     case GD_STRING_ENTRY:
       fprintf(stream, " STRING%s \"", pretty ? "  " : "");
-      _GD_StringEscapeise(stream, E->e->ES(string), permissive, D->standards);
+      _GD_StringEscapeise(stream, E->e->u.string, permissive, D->standards);
       fputs("\"\n", stream);
       break;
     case GD_INDEX_ENTRY:
@@ -803,7 +803,7 @@ uint64_t _GD_FindVersion(DIRFILE *D)
         D->av &= GD_VERS_GE_7;
         break;
       case GD_CONST_ENTRY:
-        if (D->entry[i]->EN(cons,const_type) & GD_COMPLEX128)
+        if (D->entry[i]->EN(scalar,const_type) & GD_COMPLEX128)
           D->av &= GD_VERS_GE_7;
         else
           D->av &= GD_VERS_GE_6;

@@ -74,7 +74,7 @@ static size_t _GD_DoRawOut(DIRFILE *D, gd_entry_t *E, off64_t s0,
     return 0;
   }
 
-  if (_gd_ef[E->e->EN(raw,file)[0].encoding].ecor) {
+  if (_gd_ef[E->e->u.raw.file[0].encoding].ecor) {
     /* convert to/from middle-ended doubles */
     if ((E->EN(raw,data_type) == GD_FLOAT64 || E->EN(raw,data_type) ==
           GD_COMPLEX128) &&
@@ -93,37 +93,37 @@ static size_t _GD_DoRawOut(DIRFILE *D, gd_entry_t *E, off64_t s0,
            )
     {
       if (E->EN(raw,data_type) & GD_COMPLEX)
-        _GD_FixEndianness((char *)databuffer, E->e->EN(raw,size) / 2, ns * 2);
+        _GD_FixEndianness((char *)databuffer, E->e->u.raw.size / 2, ns * 2);
       else
-        _GD_FixEndianness((char *)databuffer, E->e->EN(raw,size), ns);
+        _GD_FixEndianness((char *)databuffer, E->e->u.raw.size, ns);
     }
   }
   /* write data to file. */
 
-  if (E->e->EN(raw,file)[0].fp < 0) {
+  if (E->e->u.raw.file[0].fp < 0) {
     /* open file for reading / writing if not already opened */
 
-    if (_GD_SetEncodedName(D, E->e->EN(raw,file), E->e->EN(raw,filebase), 0)) {
+    if (_GD_SetEncodedName(D, E->e->u.raw.file, E->e->u.raw.filebase, 0)) {
       dreturn("%i", 0);
       return 0;
-    } else if ((*_gd_ef[E->e->EN(raw,file)[0].encoding].open)(E->e->EN(raw,
-            file), D->flags & GD_ACCMODE, 1))
+    } else if ((*_gd_ef[E->e->u.raw.file[0].encoding].open)(E->e->u.raw.file,
+          D->flags & GD_ACCMODE, 1))
     {
-      _GD_SetError(D, GD_E_RAW_IO, 0, E->e->EN(raw,file)[0].name, errno, NULL);
+      _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
       dreturn("%i", 0);
       return 0;
     }
   }
 
-  if ((*_gd_ef[E->e->EN(raw,file)[0].encoding].seek)(E->e->EN(raw,file), s0,
+  if ((*_gd_ef[E->e->u.raw.file[0].encoding].seek)(E->e->u.raw.file, s0,
         E->EN(raw,data_type), 1) == -1)
   {
-      _GD_SetError(D, GD_E_RAW_IO, 0, E->e->EN(raw,file)[0].name, errno, NULL);
+      _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
       dreturn("%i", 0);
       return 0;
   }
 
-  n_wrote = (*_gd_ef[E->e->EN(raw,file)[0].encoding].write)(E->e->EN(raw,file),
+  n_wrote = (*_gd_ef[E->e->u.raw.file[0].encoding].write)(E->e->u.raw.file,
       databuffer, E->EN(raw,data_type), ns);
 
   free(databuffer);
@@ -147,13 +147,13 @@ static size_t _GD_DoLinterpOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
   }
 
   /* if the table is complex valued, we can't invert it */
-  if (E->e->EN(linterp,complex_table)) {
+  if (E->e->u.linterp.complex_table) {
     _GD_SetError(D, GD_E_DOMAIN, GD_E_DOMAIN_COMPLEX, NULL, 0, NULL);
     dreturn("%i", 0);
     return 0;
   }
 
-  if (E->e->EN(linterp,table_len) < 0) {
+  if (E->e->u.linterp.table_len < 0) {
     _GD_ReadLinterpFile(D, E);
     if (D->error != GD_E_OK) {
       dreturn("%i", 0);
@@ -162,24 +162,23 @@ static size_t _GD_DoLinterpOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
   }
 
   /* Check whether the LUT is monotonic */
-  if (E->e->EN(linterp,table_monotonic) == -1) {
-    E->e->EN(linterp,table_monotonic) = 1;
-    for (i = 1; i < E->e->EN(linterp,table_len); ++i)
-      if (E->e->EN(linterp,lut)[i].y.r != E->e->EN(linterp,lut)[i - 1].y.r) {
+  if (E->e->u.linterp.table_monotonic == -1) {
+    E->e->u.linterp.table_monotonic = 1;
+    for (i = 1; i < E->e->u.linterp.table_len; ++i)
+      if (E->e->u.linterp.lut[i].y.r != E->e->u.linterp.lut[i - 1].y.r) {
         if (dir == -1)
-          dir = (E->e->EN(linterp,lut)[i].y.r >
-              E->e->EN(linterp,lut)[i - 1].y.r);
-        else if (dir != (E->e->EN(linterp,lut)[i].y.r >
-              E->e->EN(linterp,lut)[i - 1].y.r))
+          dir = (E->e->u.linterp.lut[i].y.r > E->e->u.linterp.lut[i - 1].y.r);
+        else if (dir != (E->e->u.linterp.lut[i].y.r >
+              E->e->u.linterp.lut[i - 1].y.r))
         {
-          E->e->EN(linterp,table_monotonic) = 0;
+          E->e->u.linterp.table_monotonic = 0;
           break;
         }
       }
   }
 
   /* Can't invert a non-monotonic function */
-  if (E->e->EN(linterp,table_monotonic) == 0) {
+  if (E->e->u.linterp.table_monotonic == 0) {
     _GD_SetError(D, GD_E_DOMAIN, GD_E_DOMAIN_ANTITONIC, NULL, 0, NULL);
     dreturn("%i", 0);
     return 0;
@@ -201,7 +200,7 @@ static size_t _GD_DoLinterpOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
   }
 
   /* Make the reverse lut */
-  struct _gd_lut *tmp_lut = (struct _gd_lut *)malloc(E->e->EN(linterp,table_len)
+  struct _gd_lut *tmp_lut = (struct _gd_lut *)malloc(E->e->u.linterp.table_len
       * sizeof(struct _gd_lut));
   if (tmp_lut == NULL) {
     free(tmpbuf);
@@ -210,13 +209,13 @@ static size_t _GD_DoLinterpOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
     return 0;
   }
 
-  for (i = 0; i < E->e->EN(linterp,table_len); ++i) {
-    tmp_lut[i].x = E->e->EN(linterp,lut)[i].y.r;
-    tmp_lut[i].y.r = E->e->EN(linterp,lut)[i].x;
+  for (i = 0; i < E->e->u.linterp.table_len; ++i) {
+    tmp_lut[i].x = E->e->u.linterp.lut[i].y.r;
+    tmp_lut[i].y.r = E->e->u.linterp.lut[i].x;
   }
 
   _GD_LinterpData(D, tmpbuf, GD_FLOAT64, 0, tmpbuf, num_samp, tmp_lut,
-      E->e->EN(linterp,table_len));
+      E->e->u.linterp.table_len);
 
   free(tmp_lut);
   if (D->error != GD_E_OK) {
@@ -524,8 +523,8 @@ static size_t _GD_DoConstOut(DIRFILE* D, gd_entry_t *E, off64_t first,
     _GD_SetError(D, GD_E_PROTECTED, GD_E_PROTECTED_FORMAT, NULL, 0,
         D->fragment[E->fragment_index].cname);
   else {
-    gd_type_t type = _GD_ConstType(D, E->EN(cons,const_type));
-    _GD_ConvertType(D, data_in, data_type, E->e->EN(cons,d) + first *
+    gd_type_t type = _GD_ConstType(D, E->EN(scalar,const_type));
+    _GD_ConvertType(D, data_in, data_type, E->e->u.scalar.d + first *
         GD_SIZE(type), type, len);
   }
 
@@ -543,7 +542,7 @@ static size_t _GD_DoConstOut(DIRFILE* D, gd_entry_t *E, off64_t first,
 static size_t _GD_DoStringOut(DIRFILE* D, gd_entry_t *E, const char *data_in)
 {
   dtrace("%p, %p, %p", D, E, data_in);
-  char* ptr = E->e->ES(string);
+  char* ptr = E->e->u.string;
 
   /* check protection */
   if (D->fragment[E->fragment_index].protection & GD_PROTECT_FORMAT) {
@@ -553,9 +552,9 @@ static size_t _GD_DoStringOut(DIRFILE* D, gd_entry_t *E, const char *data_in)
     return 0;
   }
 
-  E->e->ES(string) = strdup(data_in);
-  if (E->e->ES(string) == NULL) {
-    E->e->ES(string) = ptr;
+  E->e->u.string = strdup(data_in);
+  if (E->e->u.string == NULL) {
+    E->e->u.string = ptr;
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     dreturn("%i", 0);
     return 0;
@@ -563,8 +562,8 @@ static size_t _GD_DoStringOut(DIRFILE* D, gd_entry_t *E, const char *data_in)
   free(ptr);
   D->fragment[E->fragment_index].modified = 1;
 
-  dreturn("%zu", strlen(E->e->ES(string)) + 1);
-  return strlen(E->e->ES(string)) + 1;
+  dreturn("%zu", strlen(E->e->u.string) + 1);
+  return strlen(E->e->u.string) + 1;
 }
 
 size_t _GD_DoFieldOut(DIRFILE *D, gd_entry_t* E, int repr, off64_t first_samp,

@@ -50,19 +50,19 @@ off64_t gd_nframes64(DIRFILE* D)
     return 0;
   }
 
-  if (_GD_SetEncodedName(D, D->reference_field->e->EN(raw,file),
-        D->reference_field->e->EN(raw,filebase), 0))
+  if (_GD_SetEncodedName(D, D->reference_field->e->u.raw.file,
+        D->reference_field->e->u.raw.filebase, 0))
   {
     dreturn("%i", 0);
     return 0;
   }
 
-  nf = (*_gd_ef[D->reference_field->e->EN(raw,file)[0].encoding].size)(
-      D->reference_field->e->EN(raw,file),
+  nf = (*_gd_ef[D->reference_field->e->u.raw.file[0].encoding].size)(
+      D->reference_field->e->u.raw.file,
       D->reference_field->EN(raw,data_type));
 
   if (nf < 0) {
-    _GD_SetError(D, GD_E_RAW_IO, 0, D->reference_field->e->EN(raw,file)[0].name,
+    _GD_SetError(D, GD_E_RAW_IO, 0, D->reference_field->e->u.raw.file[0].name,
         errno, NULL);
     dreturn("%lli", 0LL);
     return 0;

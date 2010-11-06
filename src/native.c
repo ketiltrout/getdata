@@ -61,13 +61,13 @@ gd_type_t _GD_NativeType(DIRFILE* D, gd_entry_t* E, int repr)
       break;
     case GD_LINTERP_ENTRY:
       /* initialise the table, if necessary */
-      if (E->e->EN(linterp,table_len) < 0) {
+      if (E->e->u.linterp.table_len < 0) {
         _GD_ReadLinterpFile(D, E);
         if (D->error != GD_E_OK)
           break;
       }
 
-      type = E->e->EN(linterp,complex_table) ? GD_COMPLEX128 : GD_FLOAT64;
+      type = E->e->u.linterp.complex_table ? GD_COMPLEX128 : GD_FLOAT64;
       break;
     case GD_MULTIPLY_ENTRY:
     case GD_DIVIDE_ENTRY:
@@ -116,7 +116,7 @@ gd_type_t _GD_NativeType(DIRFILE* D, gd_entry_t* E, int repr)
       break;
     case GD_CONST_ENTRY:
     case GD_CARRAY_ENTRY:
-      type = E->EN(cons,const_type);
+      type = E->EN(scalar,const_type);
       break;
     case GD_STRING_ENTRY:
       type = GD_NULL;

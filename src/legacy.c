@@ -117,7 +117,8 @@ char *GetDataErrorString(char* buffer, size_t buflen) gd_nothrow
 /* _GD_GetDirfile: Locate the legacy DIRFILE given the filespec.  This started
  * life as GetFormat...
  */
-static DIRFILE* _GD_GetDirfile(const char *filename_in, int mode, int *error_code)
+static DIRFILE *_GD_GetDirfile(const char *filename_in, int mode,
+    int *error_code)
 {
   unsigned int i_dirfile;
   void *ptr;
@@ -215,7 +216,7 @@ static void CopyRawEntry(struct RawEntryType* R, gd_entry_t* E)
       break;
   }
 
-  R->size = (int)E->e->EN(raw,size);
+  R->size = (int)E->e->u.raw.size;
   R->samples_per_frame = (int)E->EN(raw,spf);
 
   dreturnvoid();

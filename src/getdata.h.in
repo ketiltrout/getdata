@@ -325,7 +325,7 @@ struct _gd_unified_entry {
     struct { /* CONST */
       gd_type_t const_type;
       size_t array_len;
-    } GD_ANON(cons);
+    } GD_ANON(scalar);
   } GD_ANON(u);
 
   struct _gd_private_entry *e;

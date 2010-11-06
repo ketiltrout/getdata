@@ -33,14 +33,14 @@ CarrayEntry::CarrayEntry(const char* field_code, DataType data_type,
 {
   E.field = strdup(field_code);
   E.field_type = GD_CARRAY_ENTRY;
-  E.u.cons.const_type = (gd_type_t)data_type;
-  E.u.cons.array_len = array_len;
+  E.u.scalar.const_type = (gd_type_t)data_type;
+  E.u.scalar.array_len = array_len;
   E.fragment_index = fragment_index;
 }
 
 int CarrayEntry::SetType(DataType type)
 {
-  E.u.cons.const_type = (gd_type_t)type;
+  E.u.scalar.const_type = (gd_type_t)type;
 
   if (D != NULL)
     return gd_alter_entry(D->D, E.field, &E, 0);
@@ -50,7 +50,7 @@ int CarrayEntry::SetType(DataType type)
 
 int CarrayEntry::SetArrayLen(size_t array_len)
 {
-  E.u.cons.array_len = array_len;
+  E.u.scalar.array_len = array_len;
 
   if (D != NULL)
     return gd_alter_entry(D->D, E.field, &E, 0);

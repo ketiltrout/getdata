@@ -66,7 +66,7 @@ static void _GD_ByteSwapFragment(DIRFILE* D, unsigned long byte_sex,
           D->entry[i]->field_type == GD_RAW_ENTRY)
       {
         /* if the field's data type is one byte long, do nothing */
-        if (D->entry[i]->e->EN(raw,size) == 1)
+        if (D->entry[i]->e->u.raw.size == 1)
           continue;
 
         /* check subencoding support */
@@ -87,14 +87,14 @@ static void _GD_ByteSwapFragment(DIRFILE* D, unsigned long byte_sex,
      * remove the temporary files */
     if (D->error) {
       for (i = 0; i < n_raw; ++i)
-        if ((*_gd_ef[raw_entry[i]->e->EN(raw,file)[0].encoding].temp)(
-              raw_entry[i]->e->EN(raw,file), GD_TEMP_DESTROY))
-          _GD_SetError(D, GD_E_RAW_IO, 0, raw_entry[i]->e->EN(raw,file)[0].name,
+        if ((*_gd_ef[raw_entry[i]->e->u.raw.file[0].encoding].temp)(
+              raw_entry[i]->e->u.raw.file, GD_TEMP_DESTROY))
+          _GD_SetError(D, GD_E_RAW_IO, 0, raw_entry[i]->e->u.raw.file[0].name,
               errno, NULL);
     } else {
       for (i = 0; i < n_raw; ++i)
-        if ((*_gd_ef[raw_entry[i]->e->EN(raw,file)[0].encoding].temp)(
-              raw_entry[i]->e->EN(raw,file), GD_TEMP_MOVE))
+        if ((*_gd_ef[raw_entry[i]->e->u.raw.file[0].encoding].temp)(
+              raw_entry[i]->e->u.raw.file, GD_TEMP_MOVE))
         {
           _GD_SetError(D, GD_E_UNCLEAN_DB, 0,
               D->fragment[D->entry[i]->fragment_index].cname, 0, NULL);

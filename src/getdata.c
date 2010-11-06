@@ -272,7 +272,7 @@ static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *E, off64_t s0, size_t ns,
   else
     s0 -= E->EN(raw,spf) * D->fragment[E->fragment_index].frame_offset;
 
-  databuffer = (char *)malloc(ns * E->e->EN(raw,size));
+  databuffer = (char *)malloc(ns * E->e->u.raw.size);
   if (databuffer == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     dreturn("%i", 0);
@@ -289,52 +289,51 @@ static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *E, off64_t s0, size_t ns,
 
   if (ns > 0) {
     /** open the file (and cache the fp) if it hasn't been opened yet. */
-    if (E->e->EN(raw,file)[0].fp < 0) {
+    if (E->e->u.raw.file[0].fp < 0) {
       if (!_GD_Supports(D, E, GD_EF_OPEN | GD_EF_SEEK | GD_EF_READ)) {
         dreturn("%i", 0);
         return 0;
-      } else if (_GD_SetEncodedName(D, E->e->EN(raw,file),
-            E->e->EN(raw,filebase), 0))
+      } else if (_GD_SetEncodedName(D, E->e->u.raw.file, E->e->u.raw.filebase,
+            0))
       {
         dreturn("%i", 0);
         return 0;
-      } else if ((*_gd_ef[E->e->EN(raw,file)[0].encoding].open)(E->e->EN(raw,
-              file), D->flags & GD_ACCMODE, 0))
+      } else if ((*_gd_ef[E->e->u.raw.file[0].encoding].open)(E->e->u.raw.file,
+            D->flags & GD_ACCMODE, 0))
       {
-        _GD_SetError(D, GD_E_RAW_IO, 0, E->e->EN(raw,file)[0].name, errno,
+        _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno,
             NULL);
         dreturn("%i", 0);
         return 0;
       }
     }
 
-    if ((*_gd_ef[E->e->EN(raw,file)[0].encoding].seek)(E->e->EN(raw,file), s0,
-          E->EN(raw,data_type), 0)
-        == -1)
+    if ((*_gd_ef[E->e->u.raw.file[0].encoding].seek)(E->e->u.raw.file, s0,
+          E->EN(raw,data_type), 0) == -1)
     {
-      _GD_SetError(D, GD_E_RAW_IO, 0, E->e->EN(raw,file)[0].name, errno, NULL);
+      _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
       dreturn("%i", 0);
       return 0;
     }
 
     samples_read =
-      (*_gd_ef[E->e->EN(raw,file)[0].encoding].read)(E->e->EN(raw,file),
-        databuffer + n_read * E->e->EN(raw,size), E->EN(raw,data_type), ns);
+      (*_gd_ef[E->e->u.raw.file[0].encoding].read)(E->e->u.raw.file,
+        databuffer + n_read * E->e->u.raw.size, E->EN(raw,data_type), ns);
 
     if (samples_read == -1) {
-      _GD_SetError(D, GD_E_RAW_IO, 0, E->e->EN(raw,file)[0].name, errno, NULL);
+      _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
       free(databuffer);
       dreturn("%i", 0);
       return 0;
     }
 
-    if (_gd_ef[E->e->EN(raw,file)[0].encoding].ecor) {
+    if (_gd_ef[E->e->u.raw.file[0].encoding].ecor) {
       /* convert to/from middle-ended doubles */
       if ((E->EN(raw,data_type) == GD_FLOAT64 ||
             E->EN(raw,data_type) == GD_COMPLEX128) &&
           D->fragment[E->fragment_index].byte_sex & GD_ARM_FLAG)
       {
-        _GD_ArmEndianise((uint64_t *)(databuffer + n_read * E->e->EN(raw,size)),
+        _GD_ArmEndianise((uint64_t *)(databuffer + n_read * E->e->u.raw.size),
             E->EN(raw,data_type) & GD_COMPLEX, samples_read);
       }
 
@@ -347,11 +346,11 @@ static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *E, off64_t s0, size_t ns,
              )
       {
         if (E->EN(raw,data_type) & GD_COMPLEX)
-          _GD_FixEndianness(databuffer + n_read * E->e->EN(raw,size),
-              E->e->EN(raw,size) / 2, samples_read * 2);
+          _GD_FixEndianness(databuffer + n_read * E->e->u.raw.size,
+              E->e->u.raw.size / 2, samples_read * 2);
         else
-          _GD_FixEndianness(databuffer + n_read * E->e->EN(raw,size),
-              E->e->EN(raw,size), samples_read);
+          _GD_FixEndianness(databuffer + n_read * E->e->u.raw.size,
+              E->e->u.raw.size, samples_read);
       }
     }
 
@@ -1293,7 +1292,7 @@ static size_t _GD_DoLinterp(DIRFILE *D, gd_entry_t* E, off64_t first_samp,
   dtrace("%p, %p, %lli, %zu, 0x%x, %p", D, E, first_samp, num_samp, return_type,
       data_out);
 
-  if (E->e->EN(linterp,table_len) < 0) {
+  if (E->e->u.linterp.table_len < 0) {
     _GD_ReadLinterpFile(D, E);
     if (D->error != GD_E_OK) {
       dreturn("%i", 0);
@@ -1324,8 +1323,8 @@ static size_t _GD_DoLinterp(DIRFILE *D, gd_entry_t* E, off64_t first_samp,
     return 0;
   }
 
-  _GD_LinterpData(D, data_out, return_type, E->e->EN(linterp,complex_table),
-      data_in, n_read, E->e->EN(linterp,lut), E->e->EN(linterp,table_len));
+  _GD_LinterpData(D, data_out, return_type, E->e->u.linterp.complex_table,
+      data_in, n_read, E->e->u.linterp.lut, E->e->u.linterp.table_len);
 
   free(data_in);
   dreturn("%zu", n_read);
@@ -1381,8 +1380,8 @@ static size_t _GD_DoConst(DIRFILE *D, const gd_entry_t *E, off64_t first,
   dtrace("%p, %p, %lli, %zu, 0x%x, %p", D, E, first, len, return_type,
       data_out);
 
-  gd_type_t type = _GD_ConstType(D, E->EN(cons,const_type));
-  _GD_ConvertType(D, (char *)E->e->EN(cons,d) + first * GD_SIZE(type), type,
+  gd_type_t type = _GD_ConstType(D, E->EN(scalar,const_type));
+  _GD_ConvertType(D, (char *)E->e->u.scalar.d + first * GD_SIZE(type), type,
       data_out, return_type, len);
 
   if (D->error) { /* bad input type */
@@ -1402,10 +1401,10 @@ static size_t _GD_DoString(gd_entry_t *E, size_t num_samp, char *data_out)
   dtrace("%p, %zu, %p", E, num_samp, data_out);
 
   if (num_samp > 0 && data_out != NULL)
-    strncpy(data_out, E->e->ES(string), num_samp); 
+    strncpy(data_out, E->e->u.string, num_samp); 
 
-  dreturn("%zu", strlen(E->e->ES(string)) + 1);
-  return strlen(E->e->ES(string)) + 1;
+  dreturn("%zu", strlen(E->e->u.string) + 1);
+  return strlen(E->e->u.string) + 1;
 }
 
 /* _GD_DoField: Locate the field in the database and read it.
