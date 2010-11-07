@@ -29,7 +29,7 @@ int main(void)
   DIRFILE* D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
   gd_add(D, &E);
   E.field_type = GD_CONST_ENTRY;
-  E.EN(cons,const_type) = GD_UINT8;
+  E.EN(scalar,const_type) = GD_UINT8;
   gd_madd(D, &E, "data");
   int error = gd_error(D);
 
@@ -41,7 +41,7 @@ int main(void)
   if (!r) {
     CHECKI(e.field_type, GD_CONST_ENTRY);
     CHECKI(e.fragment_index, 0);
-    CHECKI(e.EN(cons,const_type), GD_UINT8);
+    CHECKI(e.EN(scalar,const_type), GD_UINT8);
     gd_free_entry_strings(&e);
   }
 

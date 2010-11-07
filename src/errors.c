@@ -208,9 +208,9 @@ void _GD_SetError(DIRFILE* D, int error, int suberror,
     strncpy(D->error_string, token, FILENAME_MAX);
 
   if (D->flags & GD_VERBOSE) {
-    char *error = gd_error_string(D, NULL, 0);
-    fprintf(stderr, PACKAGE_NAME ": %s\n", error);
-    free(error);
+    char *error_string = gd_error_string(D, NULL, 0);
+    fprintf(stderr, PACKAGE_NAME ": %s\n", error_string);
+    free(error_string);
   }
 
   dreturnvoid();

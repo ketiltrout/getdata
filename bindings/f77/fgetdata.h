@@ -537,3 +537,20 @@ void F77_FUNC(gdalcr, GDALCR) (const int* dirfile, const char* field_code,
 
 void F77_FUNC(gdaprt, GDAPRT) (const int* dirfile, const int* protection_level,
     const int* fragment);
+
+void F77_FUNC(gdgeca, GDGECA) (int* data_type, int *array_len,
+    int* fragment_index, const int* dirfile, const char* field_code,
+    const int* field_code_l);
+
+void F77_FUNC(gdadca, GDADCA) (const int *dirfile, const char *field_code,
+    const int *field_code_l, const int *const_type, int *array_len,
+    const int *data_type, const void *value, const int *fragment_index);
+
+void F77_FUNC(gdmdca, GDMDCA) (const int *dirfile, const char *parent,
+    const int *parent_l, const char *field_code, const int *field_code_l,
+    const int *const_type, const int *array_len, const int *data_type,
+    const void *value);
+
+void F77_FUNC(gdpcas, GDPCAS) (const int *dirfile, const char *field_code,
+    const int *field_code_l, const int *start, const int *n,
+    const int *data_type, const void *data_in);

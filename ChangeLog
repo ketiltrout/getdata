@@ -1,3 +1,11 @@
+2010-11-06   D. V. Wiebe <getdata@ketiltrout.net>   svn:473
+	GetData-0.7.0rc4:
+
+	* src/errors.c (_GD_SetError): Rename variable.o
+	
+	* bindings/python/pygetdata.c (gdpy_type_from_npytype): Explicitly cast the
+	computed types.
+
 2010-11-06   D. V. Wiebe <getdata@ketiltrout.net>   svn:472
 	* src/ascii.c (_GD_AsciiOpen _GD_AsciiSize _GD_AsciiTemp) src/common.c
 	(_GD_ReadLinterpFile): Open text files in binary mode.

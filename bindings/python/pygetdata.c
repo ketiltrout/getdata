@@ -236,50 +236,50 @@ gd_type_t gdpy_type_from_npytype(int npytype)
       break;
 #if NPY_SIZEOF_SHORT <= 8
     case NPY_SHORT:
-      type = NPY_SIZEOF_SHORT | GD_SIGNED;
+      type = (gd_type_t)(NPY_SIZEOF_SHORT | GD_SIGNED);
       break;
     case NPY_USHORT:
-      type = NPY_SIZEOF_SHORT;
+      type = (gd_type_t)NPY_SIZEOF_SHORT;
       break;
 #endif
 #if NPY_SIZEOF_INT <= 8
     case NPY_INT:
-      type = NPY_SIZEOF_INT | GD_SIGNED;
+      type = (gd_type_t)(NPY_SIZEOF_INT | GD_SIGNED);
       break;
     case NPY_UINT:
-      type = NPY_SIZEOF_INT;
+      type = (gd_type_t)NPY_SIZEOF_INT;
       break;
 #endif
 #if NPY_SIZEOF_LONG <= 8
     case NPY_LONG:
-      type = NPY_SIZEOF_LONG | GD_SIGNED;
+      type = (gd_type_t)(NPY_SIZEOF_LONG | GD_SIGNED);
       break;
     case NPY_ULONG:
-      type = NPY_SIZEOF_LONG;
+      type = (gd_type_t)NPY_SIZEOF_LONG;
       break;
 #endif
 #if NPY_SIZEOF_LONGLONG <= 8
     case NPY_LONGLONG:
-      type = NPY_SIZEOF_LONGLONG | GD_SIGNED;
+      type = (gd_type_t)(NPY_SIZEOF_LONGLONG | GD_SIGNED);
       break;
     case NPY_ULONGLONG:
-      type = NPY_SIZEOF_LONGLONG;
+      type = (gd_type_t)NPY_SIZEOF_LONGLONG;
       break;
 #endif
 #if NPY_SIZEOF_FLOAT <= 8
     case NPY_FLOAT:
-      type = NPY_SIZEOF_FLOAT | GD_IEEE754;
+      type = (gd_type_t)NPY_SIZEOF_FLOAT | GD_IEEE754;
       break;
     case NPY_CFLOAT:
-      type = (2 * NPY_SIZEOF_FLOAT) | GD_COMPLEX;
+      type = (gd_type_t)((2 * NPY_SIZEOF_FLOAT) | GD_COMPLEX);
       break;
 #endif
 #if NPY_SIZEOF_DOUBLE <= 8
     case NPY_DOUBLE:
-      type = NPY_SIZEOF_DOUBLE | GD_IEEE754;
+      type = (gd_type_t)(NPY_SIZEOF_DOUBLE | GD_IEEE754);
       break;
     case NPY_CDOUBLE:
-      type = (2 * NPY_SIZEOF_DOUBLE) | GD_COMPLEX;
+      type = (gd_type_t)((2 * NPY_SIZEOF_DOUBLE) | GD_COMPLEX);
       break;
 #endif
     default:

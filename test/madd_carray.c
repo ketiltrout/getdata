@@ -32,7 +32,7 @@ int main(void)
   else {
     CHECKI(e.field_type, GD_CARRAY_ENTRY);
     CHECKI(e.fragment_index, 0);
-    CHECKI(e.EN(cons,const_type), GD_UINT8);
+    CHECKI(e.EN(scalar,const_type), GD_UINT8);
     gd_free_entry_strings(&e);
   }
   n = (int)gd_carray_len(D, "new/data");

@@ -823,7 +823,7 @@ void F77_FUNC(gdgeco, GDGECO) (int* data_type, int* fragment_index,
           *field_code_l), &E) || E.field_type != GD_CONST_ENTRY)
     *data_type = 0;
   else {
-    *data_type = E.EN(cons,const_type);
+    *data_type = E.EN(scalar,const_type);
     *fragment_index = E.fragment_index;
     gd_free_entry_strings(&E);
   }
@@ -847,8 +847,8 @@ void F77_FUNC(gdgeca, GDGECA) (int* data_type, int *array_len,
           *field_code_l), &E) || E.field_type != GD_CARRAY_ENTRY)
     *data_type = 0;
   else {
-    *data_type = E.EN(cons,const_type);
-    *array_len = E.EN(cons,array_len);
+    *data_type = E.EN(scalar,const_type);
+    *array_len = E.EN(scalar,array_len);
     *fragment_index = E.fragment_index;
     gd_free_entry_strings(&E);
   }
