@@ -136,7 +136,7 @@ int Dirfile::Error() const
   return gd_error(D);
 }
 
-const char *Dirfile::ErrorString(size_t n __gd_unused)
+const char *Dirfile::ErrorString(size_t __gd_unused n)
 {
   return ErrorString();
 }

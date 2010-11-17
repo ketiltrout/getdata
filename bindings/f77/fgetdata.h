@@ -41,6 +41,9 @@
 
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 /* Forward declarations to keep icc happy */
 void F77_FUNC(gdopen, GDOPEN) (int* dirfile, const char* dirfilename,
     const int* dirfilename_l, const int* flags);
@@ -554,3 +557,6 @@ void F77_FUNC(gdmdca, GDMDCA) (const int *dirfile, const char *parent,
 void F77_FUNC(gdpcas, GDPCAS) (const int *dirfile, const char *field_code,
     const int *field_code_l, const int *start, const int *n,
     const int *data_type, const void *data_in);
+#ifdef __cplusplus
+}
+#endif
