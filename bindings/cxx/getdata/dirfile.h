@@ -74,7 +74,7 @@ namespace GetData {
     public:
       Dirfile();
 
-      Dirfile(const char *dirfilename, unsigned long flags = GD_RDWR,
+      Dirfile(const char *dirfilename, unsigned long flags = GD_RDONLY,
           gd_parser_callback_t sehandler = NULL, void* extra = NULL);
 
       Dirfile(DIRFILE *D);

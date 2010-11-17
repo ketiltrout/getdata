@@ -150,7 +150,7 @@ static int gdpy_dirfile_init(struct gdpy_dirfile_t* self, PyObject *args,
   PyObject* pycallback_data = Py_None;
   char *keywords[] = {"name", "flags", "callback", "extra", NULL};
   PyObject* name = NULL;
-  unsigned long flags = GD_RDWR;
+  unsigned long flags = GD_RDONLY;
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
         "|OkOO:pygetdata.dirfile.__init__", keywords, &name, &flags,
@@ -2554,7 +2554,7 @@ static PyMethodDef gdpy_dirfile_methods[] = {
 "The dirfile is opened by a call to gd_cbopen(3).  See that manual page\n" \
 "for full details on arguments.  If present, 'flags' should be a bitwise\n" \
 "or'd collection of gd_cbopen flags.  If it is omitted, the default,\n" \
-"pygetdata.RDRW, is used.\n\n" \
+"pygetdata.RDONLY, is used.\n\n" \
 "If a callback handler is desired, 'sehandler' should be a callable\n"\
 "object (ie. a function) which accepts two objects.  The first object is\n"\
 "a dictionary with keys: 'suberror', 'line', 'linenum', and 'filename',\n"\

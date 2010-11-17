@@ -182,6 +182,7 @@ New in version 0.7.0rc4:
     subroutines, not functions.
   * C++: Const member functions are now flagged as such.
   * C++: The len parameter to Dirfile::ErrorString is now ignored.
+  * C++: dirfiles are now opened read-only by default.
   * IDL: The IDL bindings have also followed suit in the great renaming.  The
     exception to this is GETDATA_CONSTANTS(), which is not renamed.
   * IDL: Various constants defined in getdata.h but not used by the IDL bindings
@@ -189,6 +190,7 @@ New in version 0.7.0rc4:
   * Pyhon: dirfile.getdata() now raises ValueError if neither num_frames nor
     num_samples are specified.  In the past, it would happily return nothing
     in this case.
+  * Python: dirfiles are now opened read-only by default.
 
   * C++ BUG FIX: Entry::Scalar() no longer rejects valid values of index. 
   * Python BUG FIX: A non-literal phase shift is now properly reported.
