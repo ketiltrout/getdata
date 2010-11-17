@@ -186,6 +186,9 @@ New in version 0.7.0rc4:
     exception to this is GETDATA_CONSTANTS(), which is not renamed.
   * IDL: Various constants defined in getdata.h but not used by the IDL bindings
     have been removed from the structure returned by GETDATA_CONSTANTS().
+  * Pyhon: dirfile.getdata() now raises ValueError if neither num_frames nor
+    num_samples are specified.  In the past, it would happily return nothing
+    in this case.
 
   * C++ BUG FIX: Entry::Scalar() no longer rejects valid values of index. 
   * Python BUG FIX: A non-literal phase shift is now properly reported.

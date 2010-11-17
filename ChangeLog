@@ -1,3 +1,7 @@
+2010-11-16   D. V. Wiebe <getdata@ketiltrout.net>   svn:475
+	* bindings/python/pydirfile.c (gdpy_dirfile_getdata): If neither num_samples
+	or num_frames are specified, raise ValueError.
+
 2010-11-06   D. V. Wiebe <getdata@ketiltrout.net>   svn:473
 	GetData-0.7.0rc4:
 

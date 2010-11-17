@@ -3,5 +3,4 @@
 * Hashed compressed files
 * streaming
 * linterp table path munging [MH]
-* Fix ARM python bug
 * Make webpage suck less

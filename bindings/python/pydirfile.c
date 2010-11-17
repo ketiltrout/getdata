@@ -574,6 +574,7 @@ static PyObject* gdpy_dirfile_getdata(struct gdpy_dirfile_t* self,
     "first_sample", "num_frames", "num_samples", "as_list", NULL };
   const char* field_code;
   PY_LONG_LONG first_frame = 0, first_sample = 0;
+  PyObject *num_frames_obj = NULL, *num_samples_obj = NULL;
   long int num_frames = 0, num_samples = 0;
   int as_list = 0;
   gd_type_t return_type;
@@ -584,12 +585,46 @@ static PyObject* gdpy_dirfile_getdata(struct gdpy_dirfile_t* self,
 #endif
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
-        "si|LLlli:pygetdata.dirfile.getdata", keywords, &field_code,
-        &return_type, &first_frame, &first_sample, &num_frames, &num_samples,
-        &as_list))
+        "si|LLOOi:pygetdata.dirfile.getdata", keywords, &field_code,
+        &return_type, &first_frame, &first_sample, &num_frames_obj,
+        &num_samples_obj, &as_list))
   {
     dreturn("%p", NULL);
     return NULL;
+  }
+
+  /* sanity check */
+  if (num_frames_obj == NULL && num_samples_obj == NULL) {
+      PyErr_SetString(PyExc_ValueError, "pygetdata.dirfile.gd_getdata(): at "
+          "least one of num_frames and num_samples must be specified");
+      dreturn("%p", NULL);
+      return NULL;
+  }
+
+  if (num_frames_obj) {
+    num_frames = PyInt_AsLong(num_frames_obj);
+    if (num_frames == -1 && PyErr_Occurred()) {
+      dreturn("%p", NULL);
+      return NULL;
+    } else if (num_frames < 0) {
+      PyErr_SetString(PyExc_ValueError, "pygetdata.dirfile.gd_getdata(): "
+          "num_frames must be non-negative");
+      dreturn("%p", NULL);
+      return NULL;
+    }
+  }
+
+  if (num_samples_obj) {
+    num_samples = PyInt_AsLong(num_samples_obj);
+    if (num_samples == -1 && PyErr_Occurred()) {
+      dreturn("%p", NULL);
+      return NULL;
+    } else if (num_samples < 0) {
+      PyErr_SetString(PyExc_ValueError, "pygetdata.dirfile.gd_getdata(): "
+          "num_samples must be non-negative");
+      dreturn("%p", NULL);
+      return NULL;
+    }
   }
 
   /* we need the SPF to know how many samples we have to allocate */
