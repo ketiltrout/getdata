@@ -18,7 +18,7 @@ are available:
   The empty constructor creates an invalid dirfile.  Attempting to call any
   member function will result in a GD_E_BAD_DIRFILE error.
 
-* Dirfile::Dirfile(const char *dirfilename, unsigned int flags = GD_RDWR,
+* Dirfile::Dirfile(const char *dirfilename, unsigned int flags = GD_RDONLY,
     gd_parser_callback_t sehandler = NULL, void *extra = NULL)
 
   This constructor takes the name of the dirfile, the dirfile flags, and

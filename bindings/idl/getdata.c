@@ -2020,6 +2020,7 @@ void gdidl_alter_encoding(int argc, IDL_VPTR argv[], char *argk)
     { "FRAGMENT", IDL_TYP_INT, 1, 0, IDL_KW_OFFSETOF(fragment_index_x),
       IDL_KW_OFFSETOF(fragment_index) },
     { "RECODE", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(recode) },
+    { NULL }
   };
 
   IDL_KWProcessByOffset(argc, argv, argk, kw_pars, NULL, 1, &kw);
@@ -2073,6 +2074,7 @@ void gdidl_alter_endianness(int argc, IDL_VPTR argv[], char *argk)
     { "LITTLE_ENDIAN", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(little_end) },
     { "NOT_ARM_ENDIAN", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(not_arm_end) },
     { "RECODE", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(recode) },
+    { NULL }
   };
 
   IDL_KWProcessByOffset(argc, argv, argk, kw_pars, NULL, 1, &kw);
@@ -2114,6 +2116,7 @@ void gdidl_alter_entry(int argc, IDL_VPTR argv[], char *argk)
     GDIDL_KW_PAR_ERROR,
     GDIDL_KW_PAR_ESTRING,
     { "RECODE", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(recode) },
+    { NULL }
   };
 
   IDL_KWProcessByOffset(argc, argv, argk, kw_pars, NULL, 1, &kw);
@@ -2157,6 +2160,7 @@ void gdidl_alter_frameoffset(int argc, IDL_VPTR argv[], char *argk)
     { "FRAGMENT", IDL_TYP_INT, 1, 0, IDL_KW_OFFSETOF(fragment_index_x),
       IDL_KW_OFFSETOF(fragment_index) },
     { "RECODE", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(recode) },
+    { NULL }
   };
 
   IDL_KWProcessByOffset(argc, argv, argk, kw_pars, NULL, 1, &kw);
@@ -2827,6 +2831,7 @@ void gdidl_close(int argc, IDL_VPTR argv[], char *argk)
     { "DISCARD", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(discard) },
     GDIDL_KW_PAR_ERROR,
     GDIDL_KW_PAR_ESTRING,
+    { NULL }
   };
 
   IDL_KWProcessByOffset(argc, argv, argk, kw_pars, NULL, 1, &kw);
@@ -2884,7 +2889,8 @@ void gdidl_delete(int argc, IDL_VPTR argv[], char *argk)
     { "DEREF", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(deref) },
     GDIDL_KW_PAR_ERROR,
     GDIDL_KW_PAR_ESTRING,
-    { "FORCE", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(force) }
+    { "FORCE", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(force) },
+    { NULL }
   };
 
   IDL_KWProcessByOffset(argc, argv, argk, kw_pars, NULL, 1, &kw);
@@ -3079,7 +3085,8 @@ void gdidl_rewrite_fragment(int argc, IDL_VPTR argv[], char *argk)
     GDIDL_KW_PAR_ERROR,
     GDIDL_KW_PAR_ESTRING,
     { "FRAGMENT", IDL_TYP_INT, 1, 0, IDL_KW_OFFSETOF(fragment_index_x),
-      IDL_KW_OFFSETOF(fragment_index) }
+      IDL_KW_OFFSETOF(fragment_index) },
+    { NULL }
   };
 
   IDL_KWProcessByOffset(argc, argv, argk, kw_pars, NULL, 1, &kw);
@@ -3117,6 +3124,7 @@ void gdidl_move(int argc, IDL_VPTR argv[], char *argk)
     GDIDL_KW_PAR_ERROR,
     GDIDL_KW_PAR_ESTRING,
     { "MOVE_DATA", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(move_data) },
+    { NULL }
   };
 
   IDL_KWProcessByOffset(argc, argv, argk, kw_pars, NULL, 1, &kw);
@@ -3297,6 +3305,7 @@ void gdidl_rename(int argc, IDL_VPTR argv[], char *argk)
     GDIDL_KW_PAR_ERROR,
     GDIDL_KW_PAR_ESTRING,
     { "MOVE_DATA", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(move_data) },
+    { NULL }
   };
 
   IDL_KWProcessByOffset(argc, argv, argk, kw_pars, NULL, 1, &kw);
@@ -3333,6 +3342,7 @@ void gdidl_uninclude(int argc, IDL_VPTR argv[], char *argk)
     GDIDL_KW_PAR_ERROR,
     GDIDL_KW_PAR_ESTRING,
     { "DELETE", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(del) },
+    { NULL }
   };
 
   IDL_KWProcessByOffset(argc, argv, argk, kw_pars, NULL, 1, &kw);
@@ -3398,7 +3408,8 @@ IDL_VPTR gdidl_getdata(int argc, IDL_VPTR argv[], char *argk)
     { "FIRST_SAMPLE", IDL_TYP_LONG64, 1, 0, 0, IDL_KW_OFFSETOF(first_sample) },
     { "NUM_FRAMES", IDL_TYP_LONG, 1, 0, 0, IDL_KW_OFFSETOF(n_frames) },
     { "NUM_SAMPLES", IDL_TYP_LONG, 1, 0, 0, IDL_KW_OFFSETOF(n_samples) },
-    { "TYPE", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(return_type) }
+    { "TYPE", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(return_type) },
+    { NULL }
   };
 
   IDL_KWProcessByOffset(argc, argv, argk, kw_pars, NULL, 1, &kw);
@@ -4485,6 +4496,7 @@ void gdidl_putdata(int argc, IDL_VPTR argv[], char *argk)
     GDIDL_KW_PAR_ESTRING,
     { "FIRST_FRAME", IDL_TYP_LONG64, 1, 0, 0, IDL_KW_OFFSETOF(first_frame) },
     { "FIRST_SAMPLE", IDL_TYP_LONG64, 1, 0, 0, IDL_KW_OFFSETOF(first_sample) },
+    { NULL }
   };
 
   IDL_KWProcessByOffset(argc, argv, argk, kw_pars, NULL, 1, &kw);
@@ -4625,6 +4637,7 @@ IDL_VPTR gdidl_dirfile_standards(int argc, IDL_VPTR argv[], char *argk)
     GDIDL_KW_PAR_ERROR,
     GDIDL_KW_PAR_ESTRING,
     { "LATEST", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(latest) },
+    { NULL }
   };
 
   argc = IDL_KWProcessByOffset(argc, argv, argk, kw_pars, NULL, 1, &kw);
