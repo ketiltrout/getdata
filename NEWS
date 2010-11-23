@@ -1,4 +1,4 @@
-New in version 0.7.0rc4:
+New in version 0.7.0:
 
   Dirfile Changes
 
@@ -13,9 +13,9 @@ New in version 0.7.0rc4:
     (numbered 0) is assumed.
   * Slashes on reserved words are now mandatory, allowing fields with reserved
     words as names.
-  * The long deprecated single character data type codes have been removed.
-  * Just to be clear: these removed features are still supported by GetData,
-    since it can handle older Standards Versions as well.
+  * The long-deprecated single character data type codes have been removed from
+    Standards Version 8.  (They are still accepted by GetData, which handles
+    all previous Standards Versions as well.)
   * The /ENDIAN directive now takes an optional second parameter.  The only
     allowed value for this second token is "arm", which indicates that double
     precision floating point data (including double precision complex data) are
@@ -45,7 +45,7 @@ New in version 0.7.0rc4:
     assumptions as to their behaviour in certain undocumented situtations.  Most
     noticably, they still prohibit ASCII control codes (bytes < 0x20) and '/'
     in field names.  We also assume these dirfiles have native byte sex, even
-    though some early Standards Version implied only little-ended data was
+    though some early GetData behaviour implied only little-ended data was
     acceptable.
   * Every Dirfile object now records its current Standards Version, which
     affects functions such as gd_add_spec().  The Version will start out as the
@@ -193,6 +193,9 @@ New in version 0.7.0rc4:
   * Python: dirfiles are now opened read-only by default.
 
   * C++ BUG FIX: Entry::Scalar() no longer rejects valid values of index. 
+  * IDL BUG FIX: A memory impropriety involving keyword arguments.  This bug
+    manifested by rejecting valid keyword arguments on 64-bit systems, but may
+    have had other, subtle effects on 32-bit systems as well.
   * Python BUG FIX: A non-literal phase shift is now properly reported.
   * Python BUG FIX: Calling Dirfile.discard() or Dirfile.close() no longer
     results in a segfault.

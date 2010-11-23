@@ -1,3 +1,6 @@
+2010-11-20   D. V. Wiebe <getdata@ketiltrout.net>   svn:478
+	* bindings/idl/getdata.c: Properly terminate IDL keyword lists.
+
 2010-11-17   D. V. Wiebe <getdata@ketiltrout.net>   svn:476
 	* bindings/python/pydirfile.c (gdpy_dirfile_init)
 	bindings/cxx/getdata/dirfile.h: Open dirfiles read-only by default (for

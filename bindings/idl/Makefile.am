@@ -31,7 +31,7 @@ endif
 SUBDIRS=test
 
 idl_LTLIBRARIES = idl_getdata.la
-idl_HEADERS = idl_getdata.dlm
+nodist_idl_HEADERS = idl_getdata.dlm
 
 # idl makes heavy use of type punning, ergo -fno-strict-aliasing
 AM_CFLAGS = ${WALL} $(IDL_CFLAGS) -fno-strict-aliasing

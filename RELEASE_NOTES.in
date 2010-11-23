@@ -1,12 +1,18 @@
 GetData 0.6.1 is known to compile and pass the test suite on the following systems (including C++ and Fortran bindings):
 
-gcc 4.4.2               / glibc 2.11 / i686, x86_64, ppc, ppc64 / Fedora 12 and 13
-gcc 4.4.3               / glibc 2.11 / i686                     / Slackware -current
-gcc 4.1.2, icc 10.1.015 / glibc 2.5  / x86_64                   / CentOS Release 5
+Linux:
+* x86 and x86_64, using gcc 4.5 or icc 10.1, under Slackware, Fedora, Ubuntu, CentOS
+* armv5tej, using gcc 3.3 under Debian
+MacOS X:
+* x86 and x86_64, using Xcode 3.2/gcc 4.2, under MacOS X Snow Leopard
+Cygwin:
+* x86_64, using gcc 4.3
+Win32:
+* x86_64, using mingw/gcc 4.5, under MSys
 
-The Python bindings are known to work and pass the test suite using Python 2.4.3 and Python 2.6.4.
+The Python bindings have been tested with Python 2.4 and Python 2.6.
 
-The IDL bindings are known to work and pass the test suite using IDL 6.0 and IDL 7.1.
+The IDL bindings have been tested with IDL 6.0, IDL 7.1 and IDL 8.0.
 
 --------------------------------------------------------------------------------------------------------
 
