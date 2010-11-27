@@ -1,3 +1,6 @@
+2010-11-27   D. V. Wiebe <getdata@ketiltrout.net>   svn:486
+	* bindings/cxx/test/big_test.cpp: Delete stuff.
+
 2010-11-27   D. V. Wiebe <getdata@ketiltrout.net>   svn:485
 	* test/alter_polynom_coeff.c test/include_ignore.c test/alter_entry.c
 	test/entry_linterp.c test/entry_multiply.c test/move_data_enc_ar.c

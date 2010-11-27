@@ -255,6 +255,7 @@ int main(void)
   CHECK_INT2(16,2,ent->FragmentIndex(),0);
   CHECK_INT2(16,3,ent->SamplesPerFrame(),8);
   CHECK_INT2(16,4,ent->RawType(),Int8);
+  delete ent;
 
   // 18: Dirfile::Entry / LincomEntry check
   cq[0] = 1.1;
@@ -274,6 +275,7 @@ int main(void)
   CHECK_INT2(18,7,ent->ComplexScalars(),1);
   CHECK_COMPLEX_ARRAY(18,3,ent->CScale(i),cq[i * 2]);
   CHECK_COMPLEX_ARRAY(18,3,ent->COffset(i),cq[i * 2 + 1]);
+  delete ent;
 
   // 20: Dirfile::Entry / PolynomEntry check
   ent = d->Entry("polynom");
@@ -284,6 +286,7 @@ int main(void)
   CHECK_STRING2(20,4,ent->Input(),"data");
   CHECK_INT2(20,7,ent->ComplexScalars(),1);
   CHECK_COMPLEX_ARRAY(20,6,ent->CCoefficient(i),cq[i]);
+  delete ent;
 
   // 21: Dirfile::Entry / LinterpEntry check
   ent = d->Entry("linterp");
@@ -292,6 +295,7 @@ int main(void)
   CHECK_INT2(21,2,ent->FragmentIndex(),0);
   CHECK_STRING2(21,3,ent->Input(),"data");
   CHECK_STRING2(21,4,ent->Table(),"/look/up/file");
+  delete ent;
 
   // 22: Dirfile::Entry / BitEntry check
   ent = d->Entry("bit");
@@ -301,6 +305,7 @@ int main(void)
   CHECK_STRING2(22,3,ent->Input(),"data");
   CHECK_INT2(22,4,ent->NumBits(),4);
   CHECK_INT2(22,5,ent->FirstBit(),3);
+  delete ent;
 
   // 23: Dirfile::Entry / SBitEntry check
   ent = d->Entry("sbit");
@@ -310,6 +315,7 @@ int main(void)
   CHECK_STRING2(23,3,ent->Input(),"data");
   CHECK_INT2(23,4,ent->NumBits(),6);
   CHECK_INT2(23,5,ent->FirstBit(),5);
+  delete ent;
 
   // 24: Dirfile::Entry / MultiplyEntry check
   ent = d->Entry("mult");
@@ -318,6 +324,7 @@ int main(void)
   CHECK_INT2(24,2,ent->FragmentIndex(),0);
   CHECK_STRING2(24,3,ent->Input(0),"data");
   CHECK_STRING2(24,4,ent->Input(1),"sbit");
+  delete ent;
 
   // 25: Dirfile::Entry / PhaseEntry check
   ent = d->Entry("phase");
@@ -326,6 +333,7 @@ int main(void)
   CHECK_INT2(25,2,ent->FragmentIndex(),0);
   CHECK_STRING2(25,3,ent->Input(),"data");
   CHECK_INT2(25,4,ent->Shift(),11);
+  delete ent;
 
   // 26: Dirfile::Entry / ConstEntry check
   ent = d->Entry("const");
@@ -333,12 +341,14 @@ int main(void)
   CHECK_INT2(26,1,ent->Type(),ConstEntryType);
   CHECK_INT2(26,2,ent->FragmentIndex(),0);
   CHECK_INT2(26,3,ent->ConstType(),Float64);
+  delete ent;
 
   // 134: Dirfile::Entry / StringEntry check
   ent = d->Entry("string");
   CHECK_OK(134);
   CHECK_INT2(134,1,ent->Type(),StringEntryType);
   CHECK_INT2(134,2,ent->FragmentIndex(),0);
+  delete ent;
 
   // 27: Dirfile::FragmentIndex check
   n = d->FragmentIndex("data");
@@ -359,6 +369,7 @@ int main(void)
   CHECK_INT2(28,2,ent->FragmentIndex(),0);
   CHECK_INT2(28,3,ent->SamplesPerFrame(),3);
   CHECK_INT2(28,4,ent->RawType(),Float64);
+  delete ent;
 
   // 29: Dirfile::Add / LincomEntry check
   q[0] = 9.9;
@@ -387,6 +398,7 @@ int main(void)
   CHECK_INT2(29,6,ent->ComplexScalars(),0);
   CHECK_DOUBLE_ARRAY(29,7,2,ent->Scale(i),q[i * 2]);
   CHECK_DOUBLE_ARRAY(29,8,2,ent->Offset(i),q[i * 2 + 1]);
+  delete ent;
 
   // 30: Dirfile::Add / LincomEntry check
   cq[0] = complex<double>(1.1, 1.2);
@@ -416,6 +428,7 @@ int main(void)
   CHECK_INT2(30,6,ent->ComplexScalars(),1);
   CHECK_COMPLEX_ARRAY(30,2,ent->CScale(i),cq[i * 2]);
   CHECK_COMPLEX_ARRAY(30,2,ent->COffset(i),cq[i * 2 + 1]);
+  delete ent;
 
   // 31: Dirfile::Add / PolynomEntry check
   q[0] = 3.9;
@@ -441,6 +454,7 @@ int main(void)
   CHECK_STRING2(31,4,ent->Input(),"in1");
   CHECK_INT2(31,5,ent->ComplexScalars(),0);
   CHECK_DOUBLE_ARRAY(31,6,4,ent->Coefficient(i),q[i]);
+  delete ent;
 
   // 32: Dirfile::Add / PolynomEntry check
   cq[0] = complex<double>(3.1, 7);
@@ -467,6 +481,7 @@ int main(void)
   CHECK_STRING2(32,4,ent->Input(),"in2");
   CHECK_INT2(32,7,ent->ComplexScalars(),1);
   CHECK_COMPLEX_ARRAY(32,4,ent->CCoefficient(i),cq[i]);
+  delete ent;
 
   // 33: Dirfile::Add / LinterpEntry check
   nent.SetName("new6");
@@ -482,6 +497,7 @@ int main(void)
   CHECK_INT2(33,2,ent->FragmentIndex(),0);
   CHECK_STRING2(33,3,ent->Input(),"in");
   CHECK_STRING2(33,4,ent->Table(),"./some/table");
+  delete ent;
 
   // 34: Dirfile::Add / BitEntry check
   bent.SetName("new7");
@@ -499,6 +515,7 @@ int main(void)
   CHECK_STRING2(34,3,ent->Input(),"in1");
   CHECK_INT2(34,4,ent->NumBits(),12);
   CHECK_INT2(34,5,ent->FirstBit(),13);
+  delete ent;
 
   // 35: Dirfile::Add / SBitEntry check
   sent.SetName("new8");
@@ -516,6 +533,7 @@ int main(void)
   CHECK_STRING2(35,3,ent->Input(),"in2");
   CHECK_INT2(35,4,ent->NumBits(),15);
   CHECK_INT2(35,5,ent->FirstBit(),14);
+  delete ent;
 
   // 36: Dirfile::Add / MultiplyEntry check
   ment.SetName("new9");
@@ -531,6 +549,7 @@ int main(void)
   CHECK_INT2(36,2,ent->FragmentIndex(),0);
   CHECK_STRING2(36,3,ent->Input(0),"in1");
   CHECK_STRING2(36,4,ent->Input(1),"in2");
+  delete ent;
 
   // 37: Dirfile::Add / PhaseEntry check
   pent.SetName("new10");
@@ -546,6 +565,7 @@ int main(void)
   CHECK_INT2(37,2,ent->FragmentIndex(),0);
   CHECK_STRING2(37,3,ent->Input(),"in1");
   CHECK_INT2(37,4,ent->Shift(),22);
+  delete ent;
 
   // 38: Dirfile::Add / ConstEntry check
   cent.SetName("new11");
@@ -559,11 +579,13 @@ int main(void)
   CHECK_INT2(38,1,ent->Type(),ConstEntryType);
   CHECK_INT2(38,2,ent->FragmentIndex(),0);
   CHECK_INT2(38,3,ent->ConstType(),Float64);
+  delete ent;
 
   // 39: Fragment check
   frag = d->Fragment(0);
   CHECK_OK(39);
   CHECK_STRING(39,frag->Name(),__TEST__ "dirfile/format");
+  delete frag;
 
   // 40: Dirfile::NFragments check
   n = d->NFragments();
@@ -649,6 +671,7 @@ int main(void)
   CHECK_INT2(126,6,ent->ComplexScalars(),0);
   CHECK_DOUBLE_ARRAY(126,7,2,ent->Scale(i),q[i * 2]);
   CHECK_DOUBLE_ARRAY(126,8,2,ent->Offset(i),q[i * 2 + 1]);
+  delete ent;
 
   // 56: Dirfile::GetString check
   n = d->GetString("string", GD_MAX_LINE_LENGTH, buf);
@@ -666,6 +689,7 @@ int main(void)
   CHECK_OK2(57,2);
   CHECK_INT2(57,1,ent->Type(),StringEntryType);
   CHECK_INT2(57,2,ent->FragmentIndex(),0);
+  delete ent;
 
   n = d->GetString("new12", GD_MAX_LINE_LENGTH, buf);
   CHECK_OK2(57,3);
@@ -748,6 +772,7 @@ int main(void)
   CHECK_INT2(67,2,ent->FragmentIndex(),0);
   CHECK_INT2(67,3,ent->SamplesPerFrame(),4);
   CHECK_INT2(67,4,ent->RawType(),Int32);
+  delete ent;
 
   // 68: LincomEntry check
   lep = reinterpret_cast<LincomEntry*>(d->Entry("new2"));
@@ -779,6 +804,7 @@ int main(void)
   CHECK_INT2(68,7,ent->ComplexScalars(),0);
   CHECK_DOUBLE_ARRAY(68,8,3,ent->Scale(i),q[i * 2]);
   CHECK_DOUBLE_ARRAY(68,9,3,ent->Offset(i),q[i * 2 + 1]);
+  delete ent;
 
   // 70: PolynomEntry check
   yep = reinterpret_cast<PolynomEntry*>(d->Entry("new4"));
@@ -804,6 +830,7 @@ int main(void)
   CHECK_STRING2(70,4,ent->Input(),"in4");
   CHECK_INT2(70,5,ent->ComplexScalars(),0);
   CHECK_DOUBLE_ARRAY(70,6,5,ent->Coefficient(i),q[i]);
+  delete ent;
 
   // 72: LinterpEntry check
   nep = reinterpret_cast<LinterpEntry*>(d->Entry("new6"));
@@ -820,6 +847,7 @@ int main(void)
   CHECK_INT2(72,2,ent->FragmentIndex(),0);
   CHECK_STRING2(72,3,ent->Input(),"in3");
   CHECK_STRING2(72,4,ent->Table(),"./other/table");
+  delete ent;
 
   // 73: BitEntry check
   bep = reinterpret_cast<BitEntry*>(d->Entry("new7"));
@@ -839,6 +867,7 @@ int main(void)
   CHECK_STRING2(73,3,ent->Input(),"in3");
   CHECK_INT2(73,4,ent->NumBits(),2);
   CHECK_INT2(73,5,ent->FirstBit(),3);
+  delete ent;
 
   // 74: SBitEntry check
   sep = reinterpret_cast<SBitEntry*>(d->Entry("new8"));
@@ -858,6 +887,7 @@ int main(void)
   CHECK_STRING2(74,3,ent->Input(),"in4");
   CHECK_INT2(74,4,ent->NumBits(),22);
   CHECK_INT2(74,5,ent->FirstBit(),1);
+  delete ent;
 
   // 75: MultiplyEntry check
   mep = reinterpret_cast<MultiplyEntry*>(d->Entry("new9"));
@@ -874,6 +904,7 @@ int main(void)
   CHECK_INT2(75,2,ent->FragmentIndex(),0);
   CHECK_STRING2(75,3,ent->Input(0),"in4");
   CHECK_STRING2(75,4,ent->Input(1),"in5");
+  delete ent;
 
   // 76: PhsaeEntry check
   pep = reinterpret_cast<PhaseEntry*>(d->Entry("new10"));
@@ -890,6 +921,7 @@ int main(void)
   CHECK_INT2(76,2,ent->FragmentIndex(),0);
   CHECK_STRING2(76,3,ent->Input(),"in2");
   CHECK_INT2(76,4,ent->Shift(),8);
+  delete ent;
 
   // 77: ConstEntry check
   cep = reinterpret_cast<ConstEntry*>(d->Entry("new11"));
@@ -903,6 +935,7 @@ int main(void)
   CHECK_INT2(77,1,ent->Type(),ConstEntryType);
   CHECK_INT2(77,2,ent->FragmentIndex(),0);
   CHECK_INT2(77,3,ent->ConstType(),Float32);
+  delete ent;
 
   // 78: Fragment::Encoding check
   frag = d->Fragment(0);
@@ -911,6 +944,7 @@ int main(void)
 
   // 79: Fragment::Endianness check
   CHECK_INT(79,frag->Endianness(),GD_LITTLE_ENDIAN | GD_NOT_ARM_ENDIAN);
+  delete frag;
 
   // 80: Dirfile::Name check
   str = d->Name();
@@ -925,6 +959,7 @@ int main(void)
   // 82: Fragment::SetProtection check
   frag->SetProtection(GD_PROTECT_DATA);
   CHECK_OK(82);
+  delete frag;
 
   // 83: Fragment::Protection check
   frag = d->Fragment(1);
@@ -935,6 +970,7 @@ int main(void)
   str = rep->FileName();
   CHECK_OK(84);
   CHECK_STRING(84,str,__TEST__ "dirfile/new1");
+  delete rep;
 
   // 85: Dirfile::Reference check
   rep = d->Reference("new1");
@@ -956,6 +992,7 @@ int main(void)
   frag->SetEndianness(GD_BIG_ENDIAN,0);
   CHECK_OK(88);
   CHECK_INT(88,frag->Endianness(),GD_BIG_ENDIAN);
+  delete frag;
 
   // 89: Dirfile::AlterSpec check
   d->AlterSpec("new10 PHASE in1 3");
@@ -967,6 +1004,7 @@ int main(void)
   CHECK_INT2(89,2,ent->FragmentIndex(),0);
   CHECK_STRING2(89,3,ent->Input(),"in1");
   CHECK_INT2(89,4,ent->Shift(),3);
+  delete ent;
 
   //  90: Dirfile::Delete check
   d->Delete("new10", 0);
@@ -974,6 +1012,7 @@ int main(void)
 
   ent = d->Entry("new10");
   CHECK_ERROR2(90,2,GD_E_BAD_CODE);
+  delete ent;
 
   // 91: Dirfile::MAlterSpec check
   d->MAlterSpec("mnew1 LINCOM 2 in4 1 2 in5 3 4", "data", 0);
@@ -989,6 +1028,7 @@ int main(void)
   CHECK_INT2(91,6,ent->ComplexScalars(),0);
   CHECK_DOUBLE_ARRAY(91,7,2,ent->Scale(i),i * 2 + 1);
   CHECK_DOUBLE_ARRAY(91,8,2,ent->Offset(i),i * 2 + 2);
+  delete ent;
 
   // 92: Entry::Move check
   ent = d->Entry("new9");
@@ -1000,9 +1040,11 @@ int main(void)
   // 93: Entry::Rename check
   ent->Rename("newer",0);
   CHECK_OK2(93,1);
+  delete ent;
 
   ent = d->Entry("new9");
   CHECK_ERROR2(93,2,GD_E_BAD_CODE);
+  delete ent;
 
   ent = d->Entry("newer");
   CHECK_OK2(93,3);
@@ -1010,6 +1052,7 @@ int main(void)
   CHECK_INT2(93,2,ent->FragmentIndex(),1);
   CHECK_STRING2(93,3,ent->Input(0),"in4");
   CHECK_STRING2(93,4,ent->Input(1),"in5");
+  delete ent;
 
   // 94: Dirfile::UnInclude check
   d->UnInclude(1,0);
@@ -1017,6 +1060,7 @@ int main(void)
 
   ent = d->Entry("newer");
   CHECK_ERROR2(94,2,GD_E_BAD_CODE);
+  delete ent;
 
   // 95: Fragment::FrameOffset check
   frag = d->Fragment(0);
@@ -1039,7 +1083,7 @@ int main(void)
   CHECK_INT(99,n,-1);
 
   // 101: Dirfile::FrameNum check
-  d->Reference("data");
+  delete d->Reference("data");
   dp = d->FrameNum("data", 33.3, 6);
   CHECK_OK(101);
   CHECK_DOUBLE(101,dp,37.0375);
@@ -1061,6 +1105,7 @@ int main(void)
   CHECK_INT2(143,2,ent->FragmentIndex(),0);
   CHECK_STRING2(143,3,ent->Input(0),"mult");
   CHECK_STRING2(143,4,ent->Input(1),"bit");
+  delete ent;
   
   // 145: Dirfile::Entry / RecipEntry check
   ent = d->Entry("recip");
@@ -1070,6 +1115,7 @@ int main(void)
   CHECK_STRING2(145,3,ent->Input(0),"div");
   CHECK_INT2(145,4,ent->ComplexScalars(),1);
   CHECK_COMPLEX2(145,5,ent->CDividend(),complex<double>(6.5,4.3));
+  delete ent;
 
   // 146: Dirfile::Add / DivideEntry check
   dent.SetName("new14");
@@ -1085,6 +1131,7 @@ int main(void)
   CHECK_INT2(146,2,ent->FragmentIndex(),0);
   CHECK_STRING2(146,3,ent->Input(0),"in1");
   CHECK_STRING2(146,4,ent->Input(1),"in2");
+  delete ent;
 
   // 147: Dirfile::Add / RecipEntry check
   oent.SetName("new15");
@@ -1100,6 +1147,7 @@ int main(void)
   CHECK_STRING2(147,3,ent->Input(0),"in3");
   CHECK_INT2(147,4,ent->ComplexScalars(),0);
   CHECK_DOUBLE2(147,5,ent->Dividend(),31.9);
+  delete ent;
 
   // 148: Dirfile::Add / RecipEntry check
   oent.Dissociate();
@@ -1116,6 +1164,7 @@ int main(void)
   CHECK_STRING2(148,3,ent->Input(0),"in2");
   CHECK_INT2(148,4,ent->ComplexScalars(),1);
   CHECK_COMPLEX2(148,5,ent->CDividend(),complex<double>(33.3,44.4));
+  delete ent;
 
   // 152: DivideEntry check
   dep = reinterpret_cast<DivideEntry*>(d->Entry("new14"));
@@ -1132,6 +1181,7 @@ int main(void)
   CHECK_INT2(152,2,ent->FragmentIndex(),0);
   CHECK_STRING2(152,3,ent->Input(0),"in4");
   CHECK_STRING2(152,4,ent->Input(1),"in5");
+  delete ent;
 
   // 153: RecipEntry check
   oep = reinterpret_cast<RecipEntry*>(d->Entry("new15"));
@@ -1148,10 +1198,12 @@ int main(void)
   CHECK_STRING2(148,3,ent->Input(0),"in1");
   CHECK_INT2(148,4,ent->ComplexScalars(),1);
   CHECK_COMPLEX2(148,5,ent->CDividend(),complex<double>(1.01,9.33));
+  delete ent;
 
   // 155: Fragment::ReWrite check
   frag->ReWrite();
   CHECK_OK(155);
+  delete frag;
   
   // 156: Invalid Dirfile check
   Dirfile *id = new Dirfile();
@@ -1224,6 +1276,7 @@ int main(void)
   CHECK_INT2(178,1,ent->Type(),ConstEntryType);
   CHECK_INT2(178,2,ent->FragmentIndex(),0);
   CHECK_INT2(178,3,ent->ConstType(),Float64);
+  delete ent;
 
   // 179 gd_add_carray
   aent.SetName("new17");
@@ -1239,6 +1292,7 @@ int main(void)
   CHECK_INT2(179,2,ent->FragmentIndex(),0);
   CHECK_INT2(179,3,ent->ConstType(),Float64);
   CHECK_INT2(179,4,ent->ArrayLen(),4);
+  delete ent;
 
   // 181 gd_alter_carray
   aep = reinterpret_cast<CarrayEntry*>(d->Entry("new17"));
@@ -1255,6 +1309,7 @@ int main(void)
   CHECK_INT2(181,2,ent->FragmentIndex(),0);
   CHECK_INT2(181,3,ent->ConstType(),Float32);
   CHECK_INT2(181,4,ent->ArrayLen(),12);
+  delete ent;
 
 
 
