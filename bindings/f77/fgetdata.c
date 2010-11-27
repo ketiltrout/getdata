@@ -2776,6 +2776,8 @@ void F77_FUNC(gdasca, GDASCA) (const int *dirfile, const char *field_code,
 
   gd_alter_entry(D, fc, &E, *recode);
 
+  gd_free_entry_strings(&E);
+  free(fc);
   dreturnvoid();
 }
 

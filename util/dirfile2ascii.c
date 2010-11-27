@@ -32,6 +32,7 @@
 #include <inttypes.h>
 #include <getopt.h>
 #include <math.h>
+#include "nan.h"
 #include "getdata.h"
 
 #ifndef HAVE_OFF64_T
@@ -53,6 +54,7 @@ struct field
     uint64_t *u64;
   } u;
   char format[F_LEN];
+  size_t n_read;
 };
 
 void version(void)
@@ -142,35 +144,39 @@ int main (int argc, char **argv)
   char *tmp;
   char *delimiter = " ";
   char *precision = "";
+  char *zero = NULL;
   char *dirfile_name = NULL;
   DIRFILE *dirfile;
   size_t nf = 0;
   off64_t ff = 0;
-  size_t n_read, n_want;
+  size_t n_want;
   gd_spf_t max_spf = 0;
   gd_spf_t min_spf = UINT16_MAX;
   int c;
-  int numfields = -1;
+  int numfields = 0;
   struct field fields[BUF_LEN];
   int verbose = 0;
   int interpolate = 0;
   size_t skip = 0;
   int skipping = 0;
+  size_t k;
   int average = 0;
   int optind = 0;
+  const double NaN = NAN;
   const struct option longopts[] = {
 #if 0
     { "boxcar",      0, NULL, 'b' },
 #endif
     { "delimieter",  1, NULL, 'd' },
-    { "help",        0, NULL, '?' },
+    { "empty-sample",1, NULL, 'z' },
     { "first-frame", 1, NULL, 'f' },
+    { "help",        0, NULL, '?' },
     { "num-frames",  1, NULL, 'n' },
     { "precision",   1, NULL, 'p' },
     { "quiet",       0, NULL, 'q' },
     { "skip",        1, NULL, 's' },
     { "verbose",     0, NULL, 'v' },
-    { "version",     0, NULL, 2 }
+    { "version",     0, NULL,  2  }
   };
 
   /* handy things to know about conversion specifiers */
@@ -209,12 +215,11 @@ int main (int argc, char **argv)
   type_data[(int)'X'].f = PRIX64;
 
   while ((c = getopt_long(argc, argv,
-          "-f:n:d:x:X:g:G:e:E:a:A:F:i:o:p:s:bvqh?", longopts, &optind)) != -1)
+          "-f:n:d:x:X:g:G:e:E:a:A:F:i:o:p:s:u:z:bvqh?", longopts, &optind)) != -1)
   {
     switch (c) {
       case 1: /* The case of no option */
-        if (numfields == -1) { /* This is the dirfile */
-          numfields = 0;
+        if (dirfile_name == NULL) {
           dirfile_name = optarg;
         } else { /* Standard output field */
           if (numfields > BUF_LEN) {
@@ -278,6 +283,9 @@ int main (int argc, char **argv)
       case 's':
         skip = strtoll(optarg, NULL, 0);
         break;
+      case 'z':
+        zero = optarg;
+        break;
       case 'b':
         average = 1;
         fprintf(stderr, "Warning: Ignoring -b found on command line.\n");
@@ -288,6 +296,11 @@ int main (int argc, char **argv)
         usage(argv[0]);
         break;
     }
+  }
+
+  if (dirfile_name == NULL) {
+    fprintf(stderr, "Error: No dirfile specified.\n");
+    exit(-4);
   }
 
   if (numfields < 1) {
@@ -355,7 +368,7 @@ int main (int argc, char **argv)
       exit(3);
     }
 
-    if (!max_spf && fields[i].spf != max_spf)
+    if (max_spf && fields[i].spf != max_spf)
       interpolate = 1;
 
     if (fields[i].spf > max_spf)
@@ -389,8 +402,8 @@ int main (int argc, char **argv)
         exit(4);
       }
 
-      n_read = gd_getdata(dirfile, fields[i].name, ff, 0, nf, 0, GD_FLOAT64,
-          fields[i].u.dbl);
+      fields[i].n_read = gd_getdata(dirfile, fields[i].name, ff, 0, nf, 0,
+          GD_FLOAT64, fields[i].u.dbl);
     } else if (type_data[fields[i].type].t == READ_AS_INT) {
       fields[i].u.i64 = (int64_t *)malloc(sizeof(int64_t) * n_want);
       if (fields[i].u.i64 == NULL) {
@@ -398,8 +411,8 @@ int main (int argc, char **argv)
         gd_close(dirfile);
         exit(4);
       }
-      n_read = gd_getdata(dirfile, fields[i].name, ff, 0, nf, 0, GD_INT64,
-          fields[i].u.i64);
+      fields[i].n_read = gd_getdata(dirfile, fields[i].name, ff, 0, nf, 0,
+          GD_INT64, fields[i].u.i64);
     } else {
       fields[i].u.u64 = (uint64_t *)malloc(sizeof(uint64_t) * n_want);
       if (fields[i].u.u64 == NULL) {
@@ -407,8 +420,8 @@ int main (int argc, char **argv)
         gd_close(dirfile);
         exit(4);
       }
-      n_read = gd_getdata(dirfile, fields[i].name, ff, 0, nf, 0, GD_UINT64,
-          fields[i].u.u64);
+      fields[i].n_read = gd_getdata(dirfile, fields[i].name, ff, 0, nf, 0,
+          GD_UINT64, fields[i].u.u64);
     }
 
     if (gd_error(dirfile)) {
@@ -416,6 +429,20 @@ int main (int argc, char **argv)
             char_buffer, BUF_LEN));
       gd_close(dirfile);
       exit(5);
+    } else if (!zero && n_want > fields[i].n_read) {
+      if (verbose)
+        fprintf(stderr, "Short read on field %i, padding %zu frames\n",
+            i, n_want - fields[i].n_read);
+      if (type_data[fields[i].type].t == READ_AS_DOUBLE) {
+        for (k = fields[i].n_read; k < n_want; ++k)
+          fields[i].u.dbl[k] = NaN;
+      } else if (type_data[fields[i].type].t == READ_AS_INT) {
+        memset(fields[i].u.i64 + fields[i].n_read, 0,
+            (n_want - fields[i].n_read) * sizeof(int64_t));
+      } else {
+        memset(fields[i].u.u64 + fields[i].n_read, 0,
+            (n_want - fields[i].n_read) * sizeof(uint64_t));
+      }
     }
   }
 
@@ -424,13 +451,14 @@ int main (int argc, char **argv)
     snprintf(fields[i].format, F_LEN, "%%%s%s", precision,
         type_data[fields[i].type].f);
 
-  size_t k;
   gd_spf_t j;
   for (k = 0; k < nf; k += skip) {
     for (j = 0; j < (skipping ? 1 : max_spf); j++) {
       for (i = 0; i < numfields; i++) {
         if (fields[i].spf == max_spf || skipping) {
-          if (type_data[fields[i].type].t == READ_AS_DOUBLE)
+          if (zero && k * fields[i].spf + j >= fields[i].n_read)
+            printf("%s", zero);
+          else if (type_data[fields[i].type].t == READ_AS_DOUBLE)
             printf(fields[i].format, fields[i].u.dbl[k * fields[i].spf + j]);
           else if (type_data[fields[i].type].t == READ_AS_INT)
             printf(fields[i].format, fields[i].u.i64[k * fields[i].spf + j]);
@@ -456,7 +484,9 @@ int main (int argc, char **argv)
           else
             offset = 0;
 
-          if (type_data[fields[i].type].t == READ_AS_DOUBLE) {
+          if (zero && k * fields[i].spf + j >= fields[i].n_read) {
+            printf("%s", zero);
+          } else if (type_data[fields[i].type].t == READ_AS_DOUBLE) {
             slope = (fields[i].u.dbl[k * fields[i].spf + next_samp - offset] -
                 fields[i].u.dbl[k * fields[i].spf + prev_samp - offset]) /
               ((double)next_samp - (double)prev_samp);

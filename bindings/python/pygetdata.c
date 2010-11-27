@@ -167,13 +167,13 @@ int gdpy_convert_from_pyobj(PyObject* value, union gdpy_quadruple_value *data,
 gd_type_t gdpy_convert_from_pylist(PyObject* value, void *data, gd_type_t type,
     size_t ns)
 {
+  size_t i;
+  union gdpy_quadruple_value tmp;
+
   dtrace("%p, %p, %02x, %zi", value, data, type, ns);
 
-  size_t i;
-
   /* use the first element to determine the data type */
-  int data_type = gdpy_convert_from_pyobj(PyList_GetItem(value, 0),
-      (union gdpy_quadruple_value*)data, type);
+  int data_type = gdpy_convert_from_pyobj(PyList_GetItem(value, 0), &tmp, type);
 
   if (data_type == -1) {
     dreturn("%02x", GD_UNKNOWN);
@@ -183,32 +183,38 @@ gd_type_t gdpy_convert_from_pylist(PyObject* value, void *data, gd_type_t type,
   switch(data_type) {
     case GDPY_INT_AS_LONG:
       type = GD_INT32;
+      *(int32_t*)data = tmp.s;
       for (i = 1; i < ns; ++i)
         ((int32_t*)data)[i] = PyInt_AsLong(PyList_GetItem(value, i));
       break;
     case GDPY_LONG_AS_ULL: 
       type = GD_UINT64;
+      *(uint64_t*)data = tmp.u;
       for (i = 1; i < ns; ++i)
         ((uint64_t*)data)[i] = PyLong_AsUnsignedLongLong(PyList_GetItem(value,
             i));
       break;
     case GDPY_LONG_AS_SLL: 
       type = GD_INT64;
+      *(int64_t*)data = tmp.s;
       for (i = 1; i < ns; ++i)
         ((int64_t*)data)[i] = PyLong_AsLongLong(PyList_GetItem(value, i));
       break;
     case GDPY_LONG_AS_DOUBLE: 
       type = GD_FLOAT64;
+      *(double*)data = tmp.f;
       for (i = 1; i < ns; ++i)
         ((double*)data)[i] = PyLong_AsDouble(PyList_GetItem(value, i));
       break;
     case GDPY_FLOAT_AS_DOUBLE:
       type = GD_FLOAT64;
+      *(double*)data = tmp.f;
       for (i = 1; i < ns; ++i)
         ((double*)data)[i] = PyFloat_AsDouble(PyList_GetItem(value, i));
       break;
     case GDPY_COMPLEX_AS_COMPLEX:
       type = GD_COMPLEX128;
+      *(complex double*)data = tmp.c;
       for (i = 1; i < ns; ++i)
         ((double complex*)data)[i] = gdpy_as_complex(PyList_GetItem(value, i));
       break;

@@ -275,7 +275,7 @@ int gd_delete(DIRFILE* D, const char* field_code_in, int flags)
 
   /* gather a list of fields */
   gd_entry_t **del_list = (gd_entry_t **)malloc(sizeof(gd_entry_t*) *
-      (1 + E->e->n_meta));
+      ((E->e->n_meta == -1) ? 1 : 1 + E->e->n_meta));
 
   if (del_list == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);

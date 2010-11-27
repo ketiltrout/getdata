@@ -236,15 +236,15 @@ DIRFILE* gd_cbopen(const char* filedir, unsigned long flags,
   if (flags & GD_PERMISSIVE && flags & GD_PEDANTIC)
     flags &= ~GD_PERMISSIVE;
 
-  D->error_string = (char *)malloc(FILENAME_MAX);
-  D->error_file = (char *)malloc(FILENAME_MAX);
+  D->error_string = NULL;
+  D->error_file = NULL;
   D->name = strdup(filedir);
   D->flags = (flags | GD_INVALID) & ~GD_IGNORE_REFS;
   D->sehandler = sehandler;
   D->sehandler_extra = extra;
   D->standards = GD_DIRFILE_STANDARDS_VERSION;
 
-  if (D->error_string == NULL || D->error_file == NULL || D->name == NULL) {
+  if (D->name == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     dreturn("%p", D);
     return D;

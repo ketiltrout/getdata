@@ -63,7 +63,7 @@ ALTER_TESTS=alter_bit_bitnum alter_bit_numbits alter_carray_len \
 						alter_polynom_ord alter_raw_spf alter_raw_type alter_recip \
 						alter_spec alter_spec_meta
 
-ASCII_TESTS=ascii_get ascii_nframes ascii_put
+ASCII_TESTS=ascii_get ascii_get_get ascii_nframes ascii_put
 
 BOF_TESTS=bof bof_lincom bof_phase
 

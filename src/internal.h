@@ -724,30 +724,6 @@ static inline int entry_cmp(const void *a, const void *b)
   return strcmp((*(gd_entry_t**)a)->field, (*(gd_entry_t**)b)->field);
 }
 
-/* The following has been extracted from internal.cpp from kjs */
-
-/*
- * For systems without NAN, this is a NAN in IEEE double format.
- */
-
-#if !defined(NAN)
-static inline __attribute__ ((__const__)) double __NAN()
-{
-  typedef union { unsigned char b[8]; double d; } nan_t;
-#ifdef ARM_ENDIAN_DOUBLES
-  static const nan_t NaN_Bytes = { { 0, 0, 0xf8, 0x7f, 0, 0, 0, 0 } };
-#elif defined(FLOATS_BIGENDIAN)
-  static const nan_t NaN_Bytes = { { 0x7f, 0xf8, 0, 0, 0, 0, 0, 0 } };
-#else
-  static const nan_t NaN_Bytes = { { 0, 0, 0, 0, 0, 0, 0xf8, 0x7f } };
-#endif
-
-  const double NaN = NaN_Bytes.d;
-  return NaN;
-}
-#define NAN __NAN()
-#endif /* !defined(NAN) */
-
 #ifndef __cplusplus
 # undef gd_nothrow
 # define gd_nothrow

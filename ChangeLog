@@ -1,3 +1,25 @@
+2010-11-25   D. V. Wiebe <getdata@ketiltrout.net>   svn:484
+	* test/ascii_get_get.c: Added.
+
+	* src/ascii.c (_GD_AsciiRead): Update fp as necessary so we don't get lost.
+
+	* bindings/python/pygetdata.c (gdpy_convert_from_pylist): Don't type-pun
+	the return array into a gdpy_quadruple_value.
+
+	* src/open.c (gd_cbopen): Don't allocate error string buffers.
+	* src/errors.c (_GD_SetError): Use strdup to copy error strings.
+
+	* bindings/f77/fgetdata.c (GDASCA): Clean-up.
+	* src/del.c (gd_delete): Alloc the correct del_list for metafields.
+	* src/common.c (_GD_GetLine): Deallocate the line before returning NULL.
+	* src/entry.c (_GD_FreeE): Free p.meta_entry when appropriate.
+
+	* src/nan.h: Added.
+	* src/internal.h: Removed NAN code.
+	* util/dirfile2ascii.c: Add missing -u option.  Allow cart-before-horse
+	arguments (ie. "dirfile2ascii -e field dirfile").  Handle running past the
+	end-of-field nicelier (added -z option).  Complain on no dirfile.
+
 2010-11-22   D. V. Wiebe <getdata@ketiltrout.net>   svn:480
 	GetData 0.7.0 released.
 

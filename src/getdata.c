@@ -31,6 +31,8 @@
 #include <string.h>
 #endif
 
+#include "nan.h"
+
 #define EXTRACT_REPR(it,ot,f) \
   for (i = 0; i < n; ++i) ((ot *)rdata)[i] = (ot)f(((it *)cdata)[i])
 

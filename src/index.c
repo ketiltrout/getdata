@@ -25,6 +25,8 @@
 #include <string.h>
 #endif
 
+#include "nan.h"
+
 static double _GD_Extrapolate(DIRFILE *D, gd_entry_t *E, int repr, double value,
     off64_t limit, int eof)
 {

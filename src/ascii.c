@@ -158,6 +158,7 @@ ssize_t _GD_AsciiRead(struct _gd_raw_file *file, void *ptr, gd_type_t data_type,
           ret = -1;
         break;
       }
+      file->fp++;
     }
   } else {
     for (n = 0; n < nmemb; ++n) {
@@ -187,6 +188,7 @@ ssize_t _GD_AsciiRead(struct _gd_raw_file *file, void *ptr, gd_type_t data_type,
           break;
         }
       }
+      file->fp++;
     }
   }
 

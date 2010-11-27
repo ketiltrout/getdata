@@ -69,6 +69,7 @@ char *_GD_GetLine(FILE *fp, size_t *n, int* linenum)
     return line; /* a line was read */
   }
 
+  free(line);
   dreturn("%p", NULL);
   return NULL;  /* there were no valid lines */
 }

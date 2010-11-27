@@ -109,6 +109,8 @@ void _GD_FreeE(gd_entry_t* entry, int priv)
       for (i = 0; entry->e->carray_value_list[i].n != 0; ++i)
         free(entry->e->carray_value_list[i].d);
     free(entry->e->carray_value_list);
+    if (entry->e->n_meta > -1)
+      free(entry->e->p.meta_entry);
     free(entry->e);
     free(entry);
   }

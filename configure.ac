@@ -508,8 +508,8 @@ fi
 
 dnl functions
 AC_CHECK_FUNCS([_commit fchmod _fdopen fseeko fseeko64 fsync ftello ftello64 \
-                getdelim gmtime_r _lseeki64 _mkdir mkstemp _open _read _rmdir \
-                stat64 _stat64 strtoll strtoull _unlink _write])
+                getdelim gmtime_r _lseeki64 _mkdir mkstemp nan _open _read \
+                _rmdir stat64 _stat64 strtoll strtoull _unlink _write])
 if test "x$disable_c99" = "xno"; then
   AC_CHECK_FUNCS([cabs])
 fi

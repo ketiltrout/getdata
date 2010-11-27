@@ -202,10 +202,14 @@ void _GD_SetError(DIRFILE* D, int error, int suberror,
   D->error = error;
   D->suberror = suberror;
   D->error_line = line;
-  if (format_file != NULL)
-    strncpy(D->error_file, format_file, FILENAME_MAX);
-  if (token != NULL)
-    strncpy(D->error_string, token, FILENAME_MAX);
+  if (format_file != NULL) {
+    free(D->error_file);
+    D->error_file = strdup(format_file);
+  }
+  if (token != NULL) {
+    free(D->error_string);
+    D->error_string = strdup(token);
+  }
 
   if (D->flags & GD_VERBOSE) {
     char *error_string = gd_error_string(D, NULL, 0);
