@@ -153,7 +153,7 @@ int _GD_RawTemp(struct _gd_raw_file *file, int method)
     case GD_TEMP_DESTROY:
       if (file[1].name != NULL) {
         if (file[1].fp >= 0)
-          if (_GD_AsciiClose(file + 1)) {
+          if (_GD_RawClose(file + 1)) {
             dreturn("%i", -1);
             return -1;
           }

@@ -293,11 +293,13 @@ static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *E, off64_t s0, size_t ns,
     /** open the file (and cache the fp) if it hasn't been opened yet. */
     if (E->e->u.raw.file[0].fp < 0) {
       if (!_GD_Supports(D, E, GD_EF_OPEN | GD_EF_SEEK | GD_EF_READ)) {
+        free(databuffer);
         dreturn("%i", 0);
         return 0;
       } else if (_GD_SetEncodedName(D, E->e->u.raw.file, E->e->u.raw.filebase,
             0))
       {
+        free(databuffer);
         dreturn("%i", 0);
         return 0;
       } else if ((*_gd_ef[E->e->u.raw.file[0].encoding].open)(E->e->u.raw.file,
@@ -305,6 +307,7 @@ static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *E, off64_t s0, size_t ns,
       {
         _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno,
             NULL);
+        free(databuffer);
         dreturn("%i", 0);
         return 0;
       }
@@ -314,6 +317,7 @@ static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *E, off64_t s0, size_t ns,
           E->EN(raw,data_type), 0) == -1)
     {
       _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
+      free(databuffer);
       dreturn("%i", 0);
       return 0;
     }

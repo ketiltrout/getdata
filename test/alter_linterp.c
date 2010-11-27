@@ -72,6 +72,7 @@ int main(void)
   CHECKI(error2, 0);
   CHECKS(e.in_fields[0], "data");
   CHECKS(e.EN(linterp,table), "table1");
+  gd_free_entry_strings(&e);
 
   return r;
 }

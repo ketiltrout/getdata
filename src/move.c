@@ -281,10 +281,10 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned long encoding,
         E->e->u.raw.filebase = new_filebase;
       }
     }
-  }
+  } else
+    free(new_filebase);
 
   if (D->error) {
-    free(new_filebase);
     dreturn("%i", -1);
     return -1;
   }

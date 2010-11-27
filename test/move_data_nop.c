@@ -54,6 +54,7 @@ int main(void)
   CHECKI(error, GD_E_OK);
   CHECKI(ge_ret, 0);
   CHECKI(E.fragment_index, 1);
+  gd_free_entry_strings(&E);
 
   return r;
 }

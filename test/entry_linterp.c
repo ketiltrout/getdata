@@ -38,6 +38,7 @@ int main(void)
   CHECKI(E.field_type, GD_LINTERP_ENTRY);
   CHECKS(E.in_fields[0], "in1");
   CHECKS(E.EN(linterp,table), "../tablefile");
+  gd_free_entry_strings(&E);
 
   return r;
 }

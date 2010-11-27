@@ -1,4 +1,45 @@
-2010-11-25   D. V. Wiebe <getdata@ketiltrout.net>   svn:484
+2010-11-27   D. V. Wiebe <getdata@ketiltrout.net>   svn:485
+	* test/alter_polynom_coeff.c test/include_ignore.c test/alter_entry.c
+	test/entry_linterp.c test/entry_multiply.c test/move_data_enc_ar.c
+	test/gzip_move_from.c test/include_ref.c test/global_name.c
+	test/entry_phase.c test/move_data_foffs.c test/entry_raw_scalar.c
+	test/alter_entry_scalar3.c test/move_data_endian.c test/move.c
+	test/entry_raw.c test/move_data_nop.c test/alter_entry_scalar4.c
+	test/entry_polynom_scalar.c test/move_index.c test/header_complex.c
+	test/alter_entry_recode.c test/entry_bit_scalar.c test/entry_scalar_repr.c
+	test/entry_polynom.c test/file.c test/entry_lincom.c test/name_move.c
+	test/fragment_name.c test/move_data_enc_ra.c test/move_protect.c
+	test/alter_entry_scalar2n.c test/move_subdir.c test/entry_lincom_scalar.c
+	test/entry_phase_scalar.c test/alter_crecip89.c test/bzip_move_from.c
+	test/move_meta.c test/name.c test/entry_bit.c test/alter_entry_scalar2a.c
+	test/alter_linterp.c test/global_ref_set.c test/global_ref.c
+	test/include_auto.c: Free strings.
+
+	* test/trunc_rofs.c test/open_notdirfile.c test/open_nonexistent.c: Close
+	dirfiles.
+
+	* src/entry.c (_GD_FreeE): Free LUT.
+	* src/open.c (_GD_CreateDirfile): Close DIR after truncation.
+	* src/close.c (_GD_FreeD): Free dot list.
+	* src/getdata.c (_GD_DoRaw) src/putdata.c (_GD_DoRawOut): Free databuffer on
+	error.
+	* src/lzma.c (_GD_LzmaSize) src/bzip.c (_GD_Bzip2Size): Close file.
+	* src/move.c (_GD_MogrifyFile): Free new_filebase if necessary.
+	* src/parse.c (_GD_ParseFieldSpec): Free entry on duplicate field name.
+	* src/mod.c (_GD_Change): Transfer the old file structure to the new entry
+	in the case of RAW fields.  Don't forget to free the old CONST storage, if
+	necessary.
+	* src/include.c (gd_include): Always free ref_name.
+
+	* src/raw.c (_GD_RawTemp): Call the right close function on error.
+
+	* src/mod.c (gd_alter_crecip89): For some reason, intialise scalar_ind[0].
+
+	* src/parse.c (_GD_ParseFragment _GD_ParseFieldSpec): Handle GD_IGNORE_DUPS
+	inside _GD_ParseFieldSpec, which eliminates the spurious error message if
+	GD_VERBOSE is given.
+
+2010-11-26   D. V. Wiebe <getdata@ketiltrout.net>   svn:484
 	* test/ascii_get_get.c: Added.
 
 	* src/ascii.c (_GD_AsciiRead): Update fp as necessary so we don't get lost.

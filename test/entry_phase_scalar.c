@@ -40,6 +40,7 @@ int main(void)
   CHECKS(E.in_fields[0], "in1");
   CHECKS(E.scalar[0], "shift");
   CHECKI(E.EN(phase,shift), 3);
+  gd_free_entry_strings(&E);
 
   return r;
 }

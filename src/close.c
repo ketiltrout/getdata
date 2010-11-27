@@ -44,6 +44,7 @@ static void _GD_FreeD(DIRFILE* D)
   }
 
   free(D->entry);
+  free(D->dot_list);
   free(D->error_string);
   free(D->error_file);
   free(D->field_list);

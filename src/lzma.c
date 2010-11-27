@@ -315,10 +315,14 @@ off64_t _GD_LzmaSize(struct _gd_raw_file *file, gd_type_t data_type)
   /* seek forward the slow way  to the end */
   while (!ptr->stream_end) {
     if (_GD_LzmaDecode(ptr)) {
+      lzma_end(&ptr->xzfile);
+      fclose(ptr->stream);
       dreturn("%i", -1);
       return -1;
     }
   }
+  lzma_end(&ptr->xzfile);
+  fclose(ptr->stream);
 
   off_t n = (ptr->base + ptr->end) / GD_SIZE(data_type);
   free(ptr);

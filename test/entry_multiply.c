@@ -38,6 +38,7 @@ int main(void)
   CHECKX(E.field_type, GD_MULTIPLY_ENTRY);
   CHECKS(E.in_fields[0], "in1");
   CHECKS(E.in_fields[1], "in2");
+  gd_free_entry_strings(&E);
 
   return r;
 }

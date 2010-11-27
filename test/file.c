@@ -43,6 +43,7 @@ int main(void)
 
   CHECKI(error, 0);
   CHECKS(path, __TEST__ "dirfile/data");
+  free(path);
 
   return r;
 }

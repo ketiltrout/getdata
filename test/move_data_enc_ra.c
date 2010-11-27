@@ -79,6 +79,7 @@ int main(void)
   CHECKI(E.fragment_index, 1);
   CHECKI(unlink_data, -1);
   CHECKI(unlink_txtdata, 0);
+  gd_free_entry_strings(&E);
 
   return r;
 }

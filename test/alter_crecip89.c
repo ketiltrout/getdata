@@ -54,6 +54,7 @@ int main(void)
   CHECKF(E.EN(recip,cdividend)[0], div[0]);
   CHECKF(E.EN(recip,cdividend)[1], div[1]);
   CHECKS(E.in_fields[0], "phase");
+  gd_free_entry_strings(&E);
 
   return r;
 }

@@ -64,6 +64,7 @@ int main(void)
   CHECKI(error2,0);
   CHECKI(n,0);
   CHECKI(ret,0);
+  gd_free_entry_strings(&E);
 
   return r;
 }

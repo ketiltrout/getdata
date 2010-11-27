@@ -38,6 +38,7 @@ int main(void)
   CHECKI(E.field_type, GD_RAW_ENTRY);
   CHECKU(E.EN(raw,spf), 8);
   CHECKX(E.EN(raw,data_type), GD_UINT8);
+  gd_free_entry_strings(&E);
 
   return r;
 }

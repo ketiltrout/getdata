@@ -557,7 +557,7 @@ int gd_madd_spec(DIRFILE* D, const char* line, const char* parent) gd_nothrow
   /* Directive parsing is skipped -- The Field Spec parser will add the field */
   if (!D->error) 
     _GD_ParseFieldSpec(D, n_cols, in_cols, E, "dirfile_madd_spec()", 0, me,
-        D->standards, 1, 1, 1, &outstring, tok_pos);
+        D->standards, 1, GD_PEDANTIC, 1, &outstring, tok_pos);
 
   free(outstring);
 
@@ -619,7 +619,7 @@ int gd_add_spec(DIRFILE* D, const char* line, int fragment_index)
   /* Directive parsing is skipped -- The Field Spec parser will add the field */
   if (!D->error)
     _GD_ParseFieldSpec(D, n_cols, in_cols, NULL, "dirfile_add_spec()", 0, 
-        fragment_index, D->standards, 1, 1, 1, &outstring, tok_pos);
+        fragment_index, D->standards, 1, GD_PEDANTIC, 1, &outstring, tok_pos);
 
   free(outstring);
 

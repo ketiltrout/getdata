@@ -34,6 +34,7 @@ int main(void)
 
   CHECKI(error, GD_E_OK);
   CHECKS(name, filedir);
+  free(name);
 
   return r;
 }

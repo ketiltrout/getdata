@@ -35,6 +35,7 @@ int main(void)
 
   CHECKI(error, GD_E_OK);
   CHECKS(ref, "data2");
+  free(ref);
 
   return r;
 }

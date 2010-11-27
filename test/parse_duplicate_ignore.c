@@ -22,7 +22,7 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_IGNORE_DUPS);
+  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_IGNORE_DUPS | GD_VERBOSE);
   int error = gd_error(D);
   gd_close(D);
 

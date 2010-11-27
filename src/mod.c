@@ -392,6 +392,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
           _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno,
               NULL);
       }
+      memcpy(Qe.u.raw.file, E->e->u.raw.file, sizeof(struct _gd_raw_file));
 
       break;
     case GD_LINCOM_ENTRY:
@@ -721,10 +722,9 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
       if (Q.EN(scalar,const_type) != E->EN(scalar,const_type)) 
         modified = 1; 
 
-      if (type == _GD_ConstType(D, E->EN(scalar,const_type))) {
+      if (type == _GD_ConstType(D, E->EN(scalar,const_type)))
         Qe.u.scalar.d = E->e->u.scalar.d;
-        E->e->u.scalar.d = NULL;
-      } else {
+      else {
         /* type convert */
         Qe.u.scalar.d = malloc(GD_SIZE(type));
         if (Qe.u.scalar.d == NULL) {
@@ -751,6 +751,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
           *(uint64_t*)Qe.u.scalar.d = (E->EN(scalar,const_type) & (GD_COMPLEX |
                 GD_IEEE754)) ? (uint64_t)*(double*)E->e->u.scalar.d :
             (uint64_t)*(int64_t*)E->e->u.scalar.d;
+        free(E->e->u.scalar.d);
       }
 
       break;
@@ -1184,6 +1185,7 @@ int gd_alter_crecip89(DIRFILE* D, const char* field_code, const char* in_field,
   N.in_fields[0] = (char *)in_field;
   N.scalar[0] = (cdividend[0] == 0 && cdividend[1] == 0) ? (char *)"" : NULL;
   _gd_a2c(N.EN(recip,cdividend), cdividend);
+  N.scalar_ind[0] = 0;
   N.comp_scal = 1;
   N.e = NULL;
 
@@ -1487,7 +1489,7 @@ int gd_alter_spec(DIRFILE* D, const char* line, int move)
 
   /* Let the parser compose the entry */
   N = _GD_ParseFieldSpec(D, n_cols, in_cols, NULL, "dirfile_alter_spec()", 0, 
-      N->fragment_index, standards, 0, 1, 0, &outstring, tok_pos);
+      N->fragment_index, standards, 0, GD_PEDANTIC, 0, &outstring, tok_pos);
 
   free(outstring);
 
@@ -1554,7 +1556,7 @@ int gd_malter_spec(DIRFILE* D, const char* line, const char* parent, int move)
   if (!D->error)
     /* Let the parser compose the entry */
     N = _GD_ParseFieldSpec(D, n_cols, in_cols, N, "dirfile_malter_spec()", 0,
-        N->fragment_index, standards, 0, 1, 0, &outstring, tok_pos);
+        N->fragment_index, standards, 0, GD_PEDANTIC, 0, &outstring, tok_pos);
 
   free(outstring);
 

@@ -61,6 +61,10 @@ int main(void)
   CHECKS(field_list[3], "zata");
   CHECKI(unlink_data, 0);
   CHECKI(unlink_zata, -1);
+  free(field_list[0]);
+  free(field_list[1]);
+  free(field_list[2]);
+  free(field_list[3]);
 
   return r;
 }

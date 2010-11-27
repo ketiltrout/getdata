@@ -239,8 +239,8 @@ int gd_include(DIRFILE* D, const char* file, int fragment_index,
           ref_name);
     else
       D->reference_field = E; 
-    free(ref_name);
   }
+  free(ref_name);
 
   dreturn("%i", new_fragment);
   return new_fragment;

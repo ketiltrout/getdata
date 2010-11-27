@@ -61,6 +61,7 @@ int main(void)
   CHECKF(E.EN(lincom,b)[1], 4.);
   CHECKF(E.EN(lincom,m)[2], 5.);
   CHECKF(E.EN(lincom,b)[2], 6.);
+  gd_free_entry_strings(&E);
 
   return r;
 }

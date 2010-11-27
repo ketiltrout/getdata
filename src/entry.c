@@ -49,8 +49,10 @@ void _GD_FreeE(gd_entry_t* entry, int priv)
     case GD_LINTERP_ENTRY:
       free(entry->in_fields[0]);
       free(entry->EN(linterp,table));
-      if (priv)
+      if (priv) {
         free(entry->e->u.linterp.table_path);
+        free(entry->e->u.linterp.lut);
+      }
       break;
     case GD_RECIP_ENTRY:
       free(entry->in_fields[0]);

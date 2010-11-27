@@ -54,6 +54,7 @@ int main(void)
   CHECKS(E.scalar[4], "a4");
   for (fd = 0; fd < 4; ++fd)
     CHECKFi(fd,E.EN(polynom,a)[fd], fd + 1.);
+  gd_free_entry_strings(&E);
 
   return r;
 }

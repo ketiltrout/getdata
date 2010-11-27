@@ -41,7 +41,6 @@ int main(void)
   CHECKFi(0,E.EN(lincom,cm)[1][1], 8.8);
   CHECKFi(0,E.EN(lincom,cb)[1][0], 9.9);
   CHECKFi(0,E.EN(lincom,cb)[1][1], 1.1);
-
   gd_free_entry_strings(&E);
 
   const double ca[] = { 2.1, 3.2, 4.3, 5.4, 6.5, 7.6 };
@@ -62,6 +61,7 @@ int main(void)
   CHECKFi(1,E.EN(polynom,ca)[1][1], ca[3]);
   CHECKFi(1,E.EN(polynom,ca)[2][0], ca[4]);
   CHECKFi(1,E.EN(polynom,ca)[2][1], ca[5]);
+  gd_free_entry_strings(&E);
 
   gd_close(D);
 

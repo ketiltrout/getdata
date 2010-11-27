@@ -26,12 +26,13 @@ int main(void)
   }
 
   DIRFILE* D = gd_open(filedir, GD_RDWR | GD_TRUNC);
+  int error = gd_error(D);
+  gd_discard(D);
 
   chmod(filedir, 0777);
   unlink(format);
   rmdir(filedir);
 
-  int error = gd_error(D);
   CHECKI(error, GD_E_TRUNC);
   return r;
 }

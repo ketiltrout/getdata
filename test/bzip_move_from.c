@@ -100,6 +100,7 @@ int main(void)
   CHECKI(unlink_data, -1);
   CHECKI(unlink_bz2data, 0);
 #endif
+  gd_free_entry_strings(&E);
 
   return r;
 }

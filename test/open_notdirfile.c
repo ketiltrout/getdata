@@ -20,6 +20,7 @@ int main(void)
   rmdir(filedir);
   int error = gd_error(D);
   CHECKI(error, GD_E_OPEN);
+  gd_discard(D);
 
   return r;
 }

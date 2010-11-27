@@ -47,6 +47,7 @@ int main(void)
   CHECKS(E.scalar[GD_MAX_LINCOM], "b1.i");
   CHECKF(E.EN(lincom,m)[0], 1.1);
   CHECKF(E.EN(lincom,b)[0], 9.3);
+  gd_free_entry_strings(&E);
 
   return r;
 }

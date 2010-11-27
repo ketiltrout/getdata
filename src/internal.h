@@ -634,7 +634,7 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned long int encoding,
 gd_type_t _GD_NativeType(DIRFILE* D, gd_entry_t* E, int repr);
 gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, char** in_cols,
     const gd_entry_t* P, const char* format_file, int linenum, int me,
-    int standards, int creat, int pedantic, int insert, char **outstring,
+    int standards, int creat, unsigned long flags, int insert, char **outstring,
     const char *tok_pos);
 char* _GD_ParseFragment(FILE* fp, DIRFILE *D, int me, int* standards,
     unsigned long int *flags);

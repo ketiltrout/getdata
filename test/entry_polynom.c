@@ -42,6 +42,7 @@ int main(void)
   CHECKS(E.in_fields[0], "in");
   for (fd = 0; fd < 4; ++fd)
     CHECKFi(fd,E.EN(polynom,a)[fd], fd + 1.);
+  gd_free_entry_strings(&E);
 
   return r;
 }

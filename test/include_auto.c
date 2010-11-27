@@ -47,6 +47,7 @@ int main(void)
   CHECKPN(ptr);
   CHECKS(reference, "data");
   CHECKU(spf, 11);
+  free(reference);
 
   return r;
 }

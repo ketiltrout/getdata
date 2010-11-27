@@ -45,6 +45,7 @@ int main(void)
   CHECKI(error2, 0);
   CHECKS(reference, "data");
   CHECKU(spf, 11);
+  free(reference);
 
   return r;
 }

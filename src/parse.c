@@ -1239,16 +1239,17 @@ static int utf8encode(DIRFILE* D, const char* format_file, int linenum,
  * specification */
 gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, char** in_cols,
     const gd_entry_t* P, const char* format_file, int linenum, int me,
-    int standards, int creat, int pedantic, int insert, char **outstring,
+    int standards, int creat, unsigned long flags, int insert, char **outstring,
     const char *tok_pos)
 {
   gd_entry_t* E = NULL;
   void *ptr;
   char *cptr;
   int is_dot = 0;
+  const int pedantic = flags & GD_PEDANTIC;
 
-  dtrace("%p, %i, %p, %p, \"%s\", %i, %u, %i, %i, %i, %i, %p, %p", D, n_cols,
-      in_cols, P, format_file, linenum, me, standards, creat, pedantic, insert,
+  dtrace("%p, %i, %p, %p, \"%s\", %i, %i, %i, %i, %lx, %i, %p, %p", D, n_cols,
+      in_cols, P, format_file, linenum, me, standards, creat, flags, insert,
       outstring, tok_pos);
 
   /* Check for barth-style metafield definition */
@@ -1270,8 +1271,7 @@ gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, char** in_cols,
           /* point in_cols[0] to the metafield name */
           in_cols[0] = cptr + 1;
           E = _GD_ParseFieldSpec(D, n_cols, in_cols, P, D->fragment[me].cname,
-              linenum, me, standards, creat, pedantic, insert, outstring,
-              tok_pos);
+              linenum, me, standards, creat, flags, insert, outstring, tok_pos);
         }
         dreturn("%p", (!insert) ? E : NULL);
         return (!insert) ? E : NULL;
@@ -1389,8 +1389,10 @@ gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, char** in_cols,
         &u);
 
     if (Q) {
-      _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_DUPLICATE, format_file, linenum,
-          D->fragment[Q->fragment_index].cname);
+      if (~flags & GD_IGNORE_DUPS)
+        _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_DUPLICATE, format_file,
+            linenum, D->fragment[Q->fragment_index].cname);
+      _GD_FreeE(E, 1);
       dreturn("%p", NULL);
       return NULL;
     } 
@@ -1741,7 +1743,7 @@ static int _GD_ParseDirective(DIRFILE *D, char** in_cols, int n_cols,
           linenum, NULL);
     else
       _GD_ParseFieldSpec(D, n_cols - 2, in_cols + 2, P, D->fragment[me].cname,
-          linenum, me, *standards, 0, pedantic, 1, outstring, tok_pos);
+          linenum, me, *standards, 0, *flags, 1, outstring, tok_pos);
   } else if (strcmp(ptr, "PROTECT") == 0 && (!pedantic || *standards >= 6)) {
     if (strcmp(in_cols[1], "none") == 0)
       D->fragment[me].protection = GD_PROTECT_NONE;
@@ -1820,13 +1822,10 @@ char* _GD_ParseFragment(FILE* fp, DIRFILE *D, int me, int* standards,
 
     if (D->error == GD_E_OK && !match)
       first_raw = _GD_ParseFieldSpec(D, n_cols, in_cols, NULL,
-          D->fragment[me].cname, linenum, me, *standards, 0,
-          *flags & GD_PEDANTIC, 1, &outstring, tok_pos);
+          D->fragment[me].cname, linenum, me, *standards, 0, *flags, 1,
+          &outstring, tok_pos);
 
-    if (*flags & GD_IGNORE_DUPS && D->error == GD_E_FORMAT &&
-        D->suberror == GD_E_FORMAT_DUPLICATE)
-      _GD_ClearError(D); /* ignore this line, continue parsing */
-    else if (D->error == GD_E_FORMAT) {
+    if (D->error == GD_E_FORMAT) {
       /* we guarantee a buffer size of at least GD_MAX_LINE_LENGTH */
       if (n < GD_MAX_LINE_LENGTH) {
         char *ptr = (char *)realloc(instring, GD_MAX_LINE_LENGTH);

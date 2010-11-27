@@ -43,6 +43,7 @@ int main(void)
   CHECKS(E.in_fields[0], "in1");
   CHECKI(E.EN(bit,bitnum), 3);
   CHECKI(E.EN(bit,numbits), 4);
+  gd_free_entry_strings(&E);
 
   return r;
 }

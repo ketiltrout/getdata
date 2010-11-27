@@ -258,10 +258,14 @@ off64_t _GD_Bzip2Size(struct _gd_raw_file *file, gd_type_t data_type)
       ptr->end = n;
     } else {
       free(ptr);
+      BZ2_bzReadClose(&ptr->bzerror, ptr->bzfile);
+      fclose(ptr->stream);
       dreturn("%i", -1);
       return -1;
     }
   }
+  BZ2_bzReadClose(&ptr->bzerror, ptr->bzfile);
+  fclose(ptr->stream);
 
   off_t n = (ptr->base + ptr->end) / GD_SIZE(data_type);
   free(ptr);

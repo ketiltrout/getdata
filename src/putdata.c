@@ -54,6 +54,11 @@ static size_t _GD_DoRawOut(DIRFILE *D, gd_entry_t *E, off64_t s0,
 
   s0 -= D->fragment[E->fragment_index].frame_offset * E->EN(raw,spf);
 
+  if (!_GD_Supports(D, E, GD_EF_OPEN | GD_EF_SEEK | GD_EF_WRITE)) {
+    dreturn("%i", 0);
+    return 0;
+  }
+
   databuffer = _GD_Alloc(D, E->EN(raw,data_type), ns);
 
   if (databuffer == NULL) {
@@ -65,11 +70,6 @@ static size_t _GD_DoRawOut(DIRFILE *D, gd_entry_t *E, off64_t s0,
 
   if (D->error) { /* bad input type */
     free(databuffer);
-    dreturn("%i", 0);
-    return 0;
-  }
-
-  if (!_GD_Supports(D, E, GD_EF_OPEN | GD_EF_SEEK | GD_EF_WRITE)) {
     dreturn("%i", 0);
     return 0;
   }
@@ -104,12 +104,14 @@ static size_t _GD_DoRawOut(DIRFILE *D, gd_entry_t *E, off64_t s0,
     /* open file for reading / writing if not already opened */
 
     if (_GD_SetEncodedName(D, E->e->u.raw.file, E->e->u.raw.filebase, 0)) {
+      free(databuffer);
       dreturn("%i", 0);
       return 0;
     } else if ((*_gd_ef[E->e->u.raw.file[0].encoding].open)(E->e->u.raw.file,
           D->flags & GD_ACCMODE, 1))
     {
       _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
+      free(databuffer);
       dreturn("%i", 0);
       return 0;
     }
@@ -119,6 +121,7 @@ static size_t _GD_DoRawOut(DIRFILE *D, gd_entry_t *E, off64_t s0,
         E->EN(raw,data_type), 1) == -1)
   {
       _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
+      free(databuffer);
       dreturn("%i", 0);
       return 0;
   }

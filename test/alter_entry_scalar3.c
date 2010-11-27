@@ -44,6 +44,7 @@ int main(void)
   CHECKI(ret,0);
   CHECKI(E.EN(bit,bitnum), 3);
   CHECKP(E.scalar[0]);
+  gd_free_entry_strings(&E);
 
   return r;
 }

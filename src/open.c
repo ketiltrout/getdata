@@ -138,6 +138,7 @@ static FILE* _GD_CreateDirfile(DIRFILE* D, const char* format_file,
 
       if (stat(fullname, &statbuf)) {
         _GD_SetError(D, GD_E_TRUNC, GD_E_TRUNC_STAT, fullname, errno, NULL);
+        closedir(dir);
         dreturn("%p", NULL);
         return NULL;
       }
@@ -146,11 +147,14 @@ static FILE* _GD_CreateDirfile(DIRFILE* D, const char* format_file,
       if (S_ISREG(statbuf.st_mode)) {
         if (unlink(fullname)) {
           _GD_SetError(D, GD_E_TRUNC, GD_E_TRUNC_UNLINK, fullname, errno, NULL);
+          closedir(dir);
           dreturn("%p", NULL);
           return NULL;
         }
       }
     }
+
+    closedir(dir);
   }
 
   /* Create, if needed */

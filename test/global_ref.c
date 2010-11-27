@@ -34,6 +34,7 @@ int main(void)
 
   CHECKI(error, 0);
   CHECKS(ref, "data");
+  free(ref);
 
   return r;
 }

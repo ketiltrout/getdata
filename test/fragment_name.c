@@ -43,6 +43,8 @@ int main(void)
 
   CHECKS(form0, __TEST__ "dirfile/format");
   CHECKS(form1, __TEST__ "dirfile/format1");
+  free(form0);
+  free(form1);
 
   return r;
 }

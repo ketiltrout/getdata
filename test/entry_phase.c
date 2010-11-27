@@ -38,6 +38,7 @@ int main(void)
   CHECKX(E.field_type, GD_PHASE_ENTRY);
   CHECKS(E.in_fields[0], "in1");
   CHECKI(E.EN(phase,shift), 3);
+  gd_free_entry_strings(&E);
 
   return 0;
 }

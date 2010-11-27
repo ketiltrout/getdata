@@ -53,6 +53,7 @@ int main(void)
   CHECKI(n, 0);
   CHECKI(ret, 0);
   CHECKI(E.EN(raw,spf), 11);
+  gd_free_entry_strings(&E);
 
   return r;
 }
