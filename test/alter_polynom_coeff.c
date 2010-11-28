@@ -21,8 +21,9 @@ int main(void)
     "polynom POLYNOM data 1 2 1\n";
   int32_t data_data[256];
   const double a[] = {2, 1, 3};
-  int fd, i, r = 0;
+  int fd, i, ret, error, n, error2, r = 0;
   gd_entry_t E;
+  DIRFILE *D;
 
   mkdir(filedir, 0777);
 
@@ -37,14 +38,14 @@ int main(void)
   write(fd, data_data, 256 * sizeof(int32_t));
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
-  int ret = gd_alter_polynom(D, "polynom", 0, NULL, a);
-  int error = gd_error(D);
+  D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
+  ret = gd_alter_polynom(D, "polynom", 0, NULL, a);
+  error = gd_error(D);
 
   CHECKI(error,0);
 
-  int n = gd_entry(D, "polynom", &E);
-  int error2 = gd_error(D);
+  n = gd_entry(D, "polynom", &E);
+  error2 = gd_error(D);
 
   gd_close(D);
 

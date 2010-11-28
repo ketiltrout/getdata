@@ -14,21 +14,21 @@ int main(void)
 {
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
-  int r = 0;
+  int error, ge_error, n, r = 0;
+  unsigned char val;
   gd_entry_t e;
 
   DIRFILE* D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
   gd_madd_spec(D, "meta CONST UINT8 2", "INDEX");
-  int error = gd_error(D);
-  unsigned char val;
+  error = gd_error(D);
 
   /* check */
-  int n = gd_nfields(D);
+  n = gd_nfields(D);
 
   CHECKI(n, 1);
 
   gd_entry(D, "INDEX/meta", &e);
-  int ge_error = gd_error(D);
+  ge_error = gd_error(D);
   CHECKI(ge_error, 0);
   if (!r) {
     CHECKI(e.field_type, GD_CONST_ENTRY);

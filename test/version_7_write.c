@@ -14,7 +14,8 @@ int main(void)
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
   const char* format_data = "/VERSION 7\nar RAW UINT8 8\nar/q SBIT ar 0 10\n";
-  int fd, r = 0;
+  int fd, e, q, c, r = 0;
+  DIRFILE *D;
 
   mkdir(filedir, 0777);
 
@@ -22,13 +23,13 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
-  int e = gd_dirfile_standards(D, 7);
-  int q = gd_rewrite_fragment(D, 0);
+  D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
+  e = gd_dirfile_standards(D, 7);
+  q = gd_rewrite_fragment(D, 0);
   gd_close(D);
 
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  int c = gd_dirfile_standards(D, GD_VERSION_CURRENT);
+  c = gd_dirfile_standards(D, GD_VERSION_CURRENT);
   gd_close(D);
 
   unlink(format);

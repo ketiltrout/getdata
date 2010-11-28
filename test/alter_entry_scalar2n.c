@@ -17,7 +17,8 @@ int main(void)
   const char* data = __TEST__ "dirfile/data";
   const char* format_data = "data RAW UINT8 8\nconst CONST INT64 11\n";
   unsigned char data_data[256];
-  int fd, r = 0;
+  int fd, ret, error, n, r = 0;
+  DIRFILE *D;
   gd_entry_t E;
 
   mkdir(filedir, 0777);
@@ -33,15 +34,15 @@ int main(void)
   write(fd, data_data, 256);
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
+  D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
   gd_entry(D, "data", &E);
   E.scalar[0] = "const";
-  int ret = gd_alter_entry(D, "data", &E, 0);
-  int error = gd_error(D);
+  ret = gd_alter_entry(D, "data", &E, 0);
+  error = gd_error(D);
 
   E.scalar[0] = NULL;
   gd_free_entry_strings(&E);
-  int n = gd_entry(D, "data", &E);
+  n = gd_entry(D, "data", &E);
 
   gd_close(D);
 

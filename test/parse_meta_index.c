@@ -15,7 +15,8 @@ int main(void)
   const char* format = __TEST__ "dirfile/format";
   const char* format_data =
     "META INDEX child CONST UINT8 1\n";
-  int fd, r = 0;
+  int fd, error, r = 0;
+  DIRFILE *D;
 
   mkdir(filedir, 0777);
 
@@ -23,8 +24,8 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  int error = gd_error(D);
+  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  error = gd_error(D);
   gd_close(D);
 
   unlink(format);

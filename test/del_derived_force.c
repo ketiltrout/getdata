@@ -15,7 +15,8 @@ int main(void)
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
   const char* format_data = "data RAW UINT8 8\nlincom LINCOM 1 data 1 0\n";
-  int fd, r = 0;
+  int fd, ret, error, r = 0;
+  DIRFILE *D;
 
   mkdir(filedir, 0777);
 
@@ -23,9 +24,9 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDWR);
-  int ret = gd_delete(D, "data", GD_DEL_FORCE);
-  int error = gd_error(D);
+  D = gd_open(filedir, GD_RDWR);
+  ret = gd_delete(D, "data", GD_DEL_FORCE);
+  error = gd_error(D);
   gd_close(D);
 
   unlink(format);

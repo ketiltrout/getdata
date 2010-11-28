@@ -18,7 +18,8 @@ int main(void)
   const char* format_data = "data RAW UINT32 8\n";
   uint32_t c[8], i;
   uint32_t data_data[128];
-  int fd, r = 0;
+  int fd, n, error, r = 0;
+  DIRFILE *D;
 
   memset(c, 0, 8);
   mkdir(filedir, 0777);
@@ -34,10 +35,10 @@ int main(void)
   write(fd, data_data, 128 * sizeof(uint32_t));
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  int n = gd_getdata(D, "data", 5, 0, 1, 0, GD_UINT32, c);
+  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  n = gd_getdata(D, "data", 5, 0, 1, 0, GD_UINT32, c);
 
-  int error = gd_error(D);
+  error = gd_error(D);
   CHECKI(error, 0);
   CHECKI(n, 8);
 

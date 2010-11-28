@@ -19,12 +19,13 @@ int main(void)
     "data2 CARRAY UINT8 2 4 6 8 10 12\n"
     "data3 CARRAY UINT8 3 6 9 12 15 18 21\n"
     "data4 RAW UINT8 1\n";
-  int fd, r = 0;
+  int fd, error, r = 0;
   size_t i;
   struct uint8_carrays {
     size_t n;
     uint8_t *d;
-  };
+  } *field_list;
+  DIRFILE *D;
 
   mkdir(filedir, 0777);
 
@@ -32,11 +33,10 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  const struct uint8_carrays* field_list = (struct uint8_carrays*)gd_carrays(D,
-      GD_UINT8);
+  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  field_list = (struct uint8_carrays*)gd_carrays(D, GD_UINT8);
 
-  int error = gd_error(D);
+  error = gd_error(D);
 
   CHECKI(error, 0);
 

@@ -16,14 +16,13 @@ int main(void)
   const char* format = __TEST__ "dirfile/format";
   uint8_t val[] = {3, 4, 5, 6, 7};
   uint8_t data[5];
-  int n;
-  int r = 0;
+  int error, n, r = 0;
   gd_entry_t e;
 
   DIRFILE* D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
   gd_add_phase(D, "new", "in", 3, 0);
   gd_madd_carray(D, "new", "data", GD_UINT8, 5, GD_UINT8, &val);
-  int error = gd_error(D);
+  error = gd_error(D);
 
   /* check */
   gd_entry(D, "new/data", &e);

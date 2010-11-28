@@ -64,10 +64,11 @@ int _GD_GzipOpen(struct _gd_raw_file* file, int mode __gd_unused,
 off64_t _GD_GzipSeek(struct _gd_raw_file* file, off64_t count,
     gd_type_t data_type, int pad __gd_unused)
 {
+  off64_t n;
+
   dtrace("%p, %lli, %x, <unused>", file, (long long)count, data_type);
 
-  off64_t n = (off64_t)gzseek(file->edata, (off_t)count * GD_SIZE(data_type),
-      SEEK_SET);
+  n = (off64_t)gzseek(file->edata, (off_t)count * GD_SIZE(data_type), SEEK_SET);
 
   if (n == -1) {
     dreturn("%i", -1);
@@ -81,9 +82,11 @@ off64_t _GD_GzipSeek(struct _gd_raw_file* file, off64_t count,
 ssize_t _GD_GzipRead(struct _gd_raw_file *file, void *ptr, gd_type_t data_type,
     size_t nmemb)
 {
+  ssize_t n;
+
   dtrace("%p, %p, %x, %zu", file, ptr, data_type, nmemb);
 
-  ssize_t n = gzread(file->edata, ptr, GD_SIZE(data_type) * nmemb);
+  n = gzread(file->edata, ptr, GD_SIZE(data_type) * nmemb);
 
   if (n >= 0)
     n /= GD_SIZE(data_type);
@@ -94,9 +97,11 @@ ssize_t _GD_GzipRead(struct _gd_raw_file *file, void *ptr, gd_type_t data_type,
 
 int _GD_GzipClose(struct _gd_raw_file *file)
 {
+  int ret;
+
   dtrace("%p", file);
 
-  int ret = gzclose(file->edata);
+  ret = gzclose(file->edata);
   if (!ret) {
     file->fp = -1;
     file->edata = NULL;
@@ -108,11 +113,12 @@ int _GD_GzipClose(struct _gd_raw_file *file)
 
 off64_t _GD_GzipSize(struct _gd_raw_file *file, gd_type_t data_type)
 {
+  int fd;
   uint32_t size = 0;
 
   dtrace("%p, %x", file, data_type);
 
-  int fd = open(file->name, O_RDONLY | O_BINARY);
+  fd = open(file->name, O_RDONLY | O_BINARY);
   if (fd < 0) {
     dreturn("%i", -1);
     return -1;

@@ -13,14 +13,14 @@ int main(void)
 {
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
-  int r = 0;
+  int unlink_ret, rmdir_ret, r = 0;
 
   DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_CREAT);
   int error = gd_error(D);
   gd_close(D);
 
-  int unlink_ret = unlink(format);
-  int rmdir_ret = rmdir(filedir);
+  unlink_ret = unlink(format);
+  rmdir_ret = rmdir(filedir);
 
   CHECKI(unlink_ret, -1);
   CHECKI(rmdir_ret, -1);

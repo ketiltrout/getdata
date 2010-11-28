@@ -61,10 +61,12 @@ int _GD_SlimOpen(struct _gd_raw_file* file, int mode __gd_unused,
 off64_t _GD_SlimSeek(struct _gd_raw_file* file, off64_t count,
     gd_type_t data_type, int pad __gd_unused)
 {
+  off64_t n;
+
   dtrace("%p, %lli, %x, <unused>", file, (long long)count, data_type);
 
-  off64_t n = (off64_t)slimseek((SLIMFILE *)file->edata,
-      (off_t)count * GD_SIZE(data_type), SEEK_SET);
+  n = (off64_t)slimseek((SLIMFILE *)file->edata, (off_t)count *
+      GD_SIZE(data_type), SEEK_SET);
 
   if (n == -1) {
     dreturn("%i", -1);
@@ -78,9 +80,11 @@ off64_t _GD_SlimSeek(struct _gd_raw_file* file, off64_t count,
 ssize_t _GD_SlimRead(struct _gd_raw_file *file, void *ptr, gd_type_t data_type,
     size_t nmemb)
 {
+  ssize_t n;
+
   dtrace("%p, %p, %x, %zu", file, ptr, data_type, nmemb);
 
-  ssize_t n = slimread(ptr, GD_SIZE(data_type), nmemb, (SLIMFILE *)file->edata);
+  n = slimread(ptr, GD_SIZE(data_type), nmemb, (SLIMFILE *)file->edata);
 
   dreturn("%zu", n);
   return n;
@@ -88,9 +92,11 @@ ssize_t _GD_SlimRead(struct _gd_raw_file *file, void *ptr, gd_type_t data_type,
 
 int _GD_SlimClose(struct _gd_raw_file *file)
 {
+  int ret;
+
   dtrace("%p", file);
 
-  int ret = slimclose((SLIMFILE *)file->edata);
+  ret = slimclose((SLIMFILE *)file->edata);
   if (!ret) {
     file->fp = -1;
     file->edata = NULL;

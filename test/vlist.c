@@ -19,7 +19,9 @@ int main(void)
     "data2 RAW UINT8 1\n"
     "data3 RAW UINT8 1\n"
     "data4 CONST UINT8 1\n";
-  int fd, i, r = 0;
+  int fd, i, error, r = 0;
+  const char **field_list;
+  DIRFILE *D;
 
   mkdir(filedir, 0777);
 
@@ -27,10 +29,10 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  const char** field_list = gd_vector_list(D);
+  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  field_list = gd_vector_list(D);
 
-  int error = gd_error(D);
+  error = gd_error(D);
   CHECKI(error,0);
   CHECKPN(field_list);
 

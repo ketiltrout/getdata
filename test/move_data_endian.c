@@ -25,8 +25,9 @@ int main(void)
   const char* format1_data = "ENDIAN big\n";
 #endif
   uint16_t d, data_data[128];
-  int fd, i, r = 0;
+  int fd, i, ret, error, ge_ret, r = 0;
   gd_entry_t E;
+  DIRFILE *D;
 
   mkdir(filedir, 0777);
 
@@ -45,10 +46,10 @@ int main(void)
   write(fd, data_data, 256);
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_UNENCODED | GD_VERBOSE);
-  int ret = gd_move(D, "data", 1, 1);
-  int error = gd_error(D);
-  int ge_ret =  gd_entry(D, "data", &E);
+  D = gd_open(filedir, GD_RDWR | GD_UNENCODED | GD_VERBOSE);
+  ret = gd_move(D, "data", 1, 1);
+  error = gd_error(D);
+  ge_ret =  gd_entry(D, "data", &E);
   gd_close(D);
 
   fd = open(data, O_RDONLY | O_BINARY);

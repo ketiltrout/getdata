@@ -22,7 +22,8 @@ int main(void)
   uint16_t c[8];
   char command[4096];
   uint16_t data_data[256];
-  int fd, r = 0;
+  int fd, n, error, i, r = 0;
+  DIRFILE *D;
 
   memset(c, 0, 8);
   mkdir(filedir, 0777);
@@ -44,12 +45,12 @@ int main(void)
     return 1;
 
 #ifdef USE_BZIP2
-  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
 #else
-  DIRFILE* D = gd_open(filedir, GD_RDONLY);
+  D = gd_open(filedir, GD_RDONLY);
 #endif
-  int n = gd_getdata(D, "data", 5, 0, 1, 0, GD_UINT16, c);
-  int error = gd_error(D);
+  n = gd_getdata(D, "data", 5, 0, 1, 0, GD_UINT16, c);
+  error = gd_error(D);
 
   gd_close(D);
 
@@ -58,8 +59,6 @@ int main(void)
   rmdir(filedir);
 
 #ifdef USE_BZIP2
-  int i;
-
   CHECKI(error, 0);
   CHECKI(n, 8);
   for (i = 0; i < 8; ++i)

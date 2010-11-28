@@ -20,8 +20,9 @@ int main(void)
   const char* format_data = "/INCLUDE format1\ndata RAW UINT8 11";
   const char* format1_data = "FRAMEOFFSET 1\n";
   uint8_t d, data_data[256];
-  int fd, i, r = 0;
+  int fd, i, ret, error, ge_ret, r = 0;
   gd_entry_t E;
+  DIRFILE *D;
 
   mkdir(filedir, 0777);
 
@@ -36,14 +37,14 @@ int main(void)
   write(fd, format1_data, strlen(format1_data));
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_UNENCODED | GD_VERBOSE);
+  D = gd_open(filedir, GD_RDWR | GD_UNENCODED | GD_VERBOSE);
   fd = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
   write(fd, data_data, 256);
   close(fd);
 
-  int ret = gd_move(D, "data", 1, 1);
-  int error = gd_error(D);
-  int ge_ret =  gd_entry(D, "data", &E);
+  ret = gd_move(D, "data", 1, 1);
+  error = gd_error(D);
+  ge_ret =  gd_entry(D, "data", &E);
   gd_close(D);
 
   fd = open(data, O_RDONLY | O_BINARY);

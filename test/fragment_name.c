@@ -21,6 +21,7 @@ int main(void)
   char* form0 = NULL;
   char* form1 = NULL;
   int fd, r = 0;
+  DIRFILE *D;
 
   mkdir(filedir, 0777);
 
@@ -32,7 +33,7 @@ int main(void)
   write(fd, format1_data, strlen(format1_data));
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
   form0 = strdup(gd_fragmentname(D, 0));
   form1 = strdup(gd_fragmentname(D, 1));
   gd_close(D);

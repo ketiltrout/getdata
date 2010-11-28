@@ -15,9 +15,10 @@ int main(void)
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
   const char* data = __TEST__ "dirfile/data";
-  int r = 0;
-
+  int error, r = 0;
+  DIRFILE *D;
   gd_entry_t E, e;
+
   E.field = "data";
   E.field_type = GD_RAW_ENTRY;
   E.fragment_index = 0;
@@ -25,9 +26,9 @@ int main(void)
   E.EN(raw,data_type) = GD_UINT8;
   E.scalar[0] = NULL;
 
-  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
+  D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
   gd_add(D, &E);
-  int error = gd_error(D);
+  error = gd_error(D);
 
   /* check */
   gd_entry(D, "data", &e);

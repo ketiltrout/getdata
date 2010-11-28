@@ -26,7 +26,9 @@ int main(void)
     "const CONST UINT8 1\n"
     "string STRING value\n"
     "string2 STRING value\n";
-  int fd, r = 0;
+  int fd, error, error2, error3, r = 0;
+  unsigned int nvec, nvec2, nvec3;
+  DIRFILE *D;
 
   mkdir(filedir, 0777);
 
@@ -34,15 +36,15 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
-  unsigned int nvec = gd_nmvectors(D, "raw1");
-  int error = gd_error(D);
+  D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
+  nvec = gd_nmvectors(D, "raw1");
+  error = gd_error(D);
   gd_delete(D, "raw1/linterp3", 0);
-  unsigned int nvec2 = gd_nmvectors(D, "raw1");
-  int error2 = gd_error(D);
+  nvec2 = gd_nmvectors(D, "raw1");
+  error2 = gd_error(D);
   gd_delete(D, "raw1/string", 0);
-  unsigned int nvec3 = gd_nmvectors(D, "raw1");
-  int error3 = gd_error(D);
+  nvec3 = gd_nmvectors(D, "raw1");
+  error3 = gd_error(D);
   gd_discard(D);
 
   unlink(format);

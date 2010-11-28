@@ -16,13 +16,13 @@ int main(void)
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
   int r = 0;
-  int j;
+  int j, error;
   gd_entry_t e;
 
   DIRFILE* D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
   const double a[4] = {1, 0.3, 0.5, 1.8};
   gd_add_polynom(D, "new", 3, "in", a, 0);
-  int error = gd_error(D);
+  error = gd_error(D);
 
   /* check */
   gd_entry(D, "new", &e);

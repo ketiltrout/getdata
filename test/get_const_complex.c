@@ -22,7 +22,8 @@ int main(void)
   double complex c;
   const double complex v = 8.3 + _Complex_I * 9.2;
 #endif
-  int fd, r = 0;
+  int fd, n, error, r = 0;
+  DIRFILE *D;
 
   mkdir(filedir, 0777);
 
@@ -30,13 +31,13 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
 #ifdef GD_NO_C99_API
-  int n = gd_get_constant(D, "const", GD_COMPLEX128, c);
+  n = gd_get_constant(D, "const", GD_COMPLEX128, c);
 #else
-  int n = gd_get_constant(D, "const", GD_COMPLEX128, &c);
+  n = gd_get_constant(D, "const", GD_COMPLEX128, &c);
 #endif
-  int error = gd_error(D);
+  error = gd_error(D);
 
   gd_close(D);
 

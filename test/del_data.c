@@ -17,7 +17,8 @@ int main(void)
   const char* data = __TEST__ "dirfile/data";
   const char* format_data = "data RAW UINT8 8\n";
   unsigned char data_data[256];
-  int fd, r = 0;
+  int fd, ret, error1, n, error2, unlink_data, r = 0;
+  DIRFILE *D;
 
   mkdir(filedir, 0777);
 
@@ -32,14 +33,14 @@ int main(void)
   write(fd, data_data, 256);
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDWR);
-  int ret = gd_delete(D, "data", GD_DEL_DATA);
-  int error1 = gd_error(D);
-  int n = gd_getdata(D, "data", 5, 0, 1, 0, GD_UINT8, data_data);
-  int error2 = gd_error(D);
+  D = gd_open(filedir, GD_RDWR);
+  ret = gd_delete(D, "data", GD_DEL_DATA);
+  error1 = gd_error(D);
+  n = gd_getdata(D, "data", 5, 0, 1, 0, GD_UINT8, data_data);
+  error2 = gd_error(D);
   gd_close(D);
 
-  int unlink_data = unlink(data);
+  unlink_data = unlink(data);
   unlink(format);
   rmdir(filedir);
 

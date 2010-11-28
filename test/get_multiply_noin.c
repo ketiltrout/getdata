@@ -17,7 +17,8 @@ int main(void)
   const char* format_data = "mult MULTIPLY data data\n";
   unsigned char c = 0;
   unsigned char data_data[256];
-  int fd, r = 0;
+  int fd, n, error, r = 0;
+  DIRFILE *D;
 
   mkdir(filedir, 0777);
 
@@ -32,10 +33,10 @@ int main(void)
   write(fd, data_data, 256);
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDONLY);
-  int n = gd_getdata(D, "mult", 5, 0, 1, 0, GD_UINT8, &c);
+  D = gd_open(filedir, GD_RDONLY);
+  n = gd_getdata(D, "mult", 5, 0, 1, 0, GD_UINT8, &c);
 
-  int error = gd_error(D);
+  error = gd_error(D);
 
   gd_close(D);
 

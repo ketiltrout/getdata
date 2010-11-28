@@ -14,26 +14,29 @@ int main(void)
 {
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
-  int r = 0;
+  int error, ge_error, r = 0;
   gd_entry_t e;
-
-  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
-  gd_add_phase(D, "new", "in", 3, 0);
   const char* in_fields[2] = {"in1", "in2"};
 #ifdef GD_NO_C99_API
   const double m[2][2] = {{1, 3.3}, {0.3, 18.3}};
   const double b[2][2] = {{2, 3.8}, {2.1, 9.8}};
-  gd_madd_clincom(D, "new", "meta", 2, in_fields, (double*)m, (double*)b);
 #else
   const double complex m[2] = {1 + _Complex_I * 3.3, 0.3 + _Complex_I * 18.3};
   const double complex b[2] = {2 + _Complex_I * 3.8, 2.1 + _Complex_I * 9.8};
+#endif
+
+  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
+  gd_add_phase(D, "new", "in", 3, 0);
+#ifdef GD_NO_C99_API
+  gd_madd_clincom(D, "new", "meta", 2, in_fields, (double*)m, (double*)b);
+#else
   gd_madd_clincom(D, "new", "meta", 2, in_fields, m, b);
 #endif
-  int error = gd_error(D);
+  error = gd_error(D);
 
   /* check */
   gd_entry(D, "new/meta", &e);
-  int ge_error = gd_error(D);
+  ge_error = gd_error(D);
   CHECKI(ge_error, 0);
   if (!r) {
     CHECKI(e.field_type, GD_LINCOM_ENTRY);

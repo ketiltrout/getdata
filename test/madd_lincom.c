@@ -15,20 +15,20 @@ int main(void)
 {
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
-  int r = 0;
+  int error, ge_error, r = 0;
   gd_entry_t e;
-
-  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
-  gd_add_phase(D, "new", "in", 3, 0);
   const char* in_fields[2] = {"in1", "in2"};
   const double m[2] = {1, 0.3};
   const double b[2] = {0, 0.9};
+
+  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
+  gd_add_phase(D, "new", "in", 3, 0);
   gd_madd_lincom(D, "new", "meta", 2, in_fields, m, b);
-  int error = gd_error(D);
+  error = gd_error(D);
 
   /* check */
   gd_entry(D, "new/meta", &e);
-  int ge_error = gd_error(D);
+  ge_error = gd_error(D);
   CHECKI(ge_error, 0);
   if (!r) {
     CHECKI(e.field_type, GD_LINCOM_ENTRY);

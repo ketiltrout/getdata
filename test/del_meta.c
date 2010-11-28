@@ -21,7 +21,8 @@ int main(void)
     "META data b CONST UINT8 4\n"
     "META data z CONST UINT8 5\n"
     "META data l CONST UINT8 6\n";
-  int fd, r = 0;
+  int fd, ret, error, r = 0;
+  DIRFILE *D;
 
   mkdir(filedir, 0777);
 
@@ -29,9 +30,9 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDWR);
-  int ret = gd_delete(D, "data", 0);
-  int error = gd_error(D);
+  D = gd_open(filedir, GD_RDWR);
+  ret = gd_delete(D, "data", 0);
+  error = gd_error(D);
   gd_close(D);
 
   unlink(format);

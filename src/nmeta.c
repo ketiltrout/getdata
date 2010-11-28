@@ -22,6 +22,8 @@
 
 unsigned int gd_nmfields(DIRFILE* D, const char* parent) gd_nothrow
 {
+  gd_entry_t *P;
+
   dtrace("%p", D);
 
   if (D->flags & GD_INVALID) {
@@ -32,7 +34,7 @@ unsigned int gd_nmfields(DIRFILE* D, const char* parent) gd_nothrow
 
   _GD_ClearError(D);
 
-  const gd_entry_t* P = _GD_FindField(D, parent, D->entry, D->n_entries, NULL);
+  P = _GD_FindField(D, parent, D->entry, D->n_entries, NULL);
 
   if (P == NULL || P->e->n_meta == -1) {
     _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, parent);
@@ -48,6 +50,8 @@ unsigned int gd_nmfields(DIRFILE* D, const char* parent) gd_nothrow
 
 unsigned int gd_nmvectors(DIRFILE* D, const char* parent) gd_nothrow
 {
+  gd_entry_t *P;
+
   dtrace("%p", D);
 
   if (D->flags & GD_INVALID) {
@@ -58,7 +62,7 @@ unsigned int gd_nmvectors(DIRFILE* D, const char* parent) gd_nothrow
 
   _GD_ClearError(D);
 
-  const gd_entry_t* P = _GD_FindField(D, parent, D->entry, D->n_entries, NULL);
+  P = _GD_FindField(D, parent, D->entry, D->n_entries, NULL);
 
   if (P == NULL || P->e->n_meta == -1) {
     _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, parent);
@@ -79,6 +83,7 @@ unsigned int gd_nmfields_by_type(DIRFILE* D, const char* parent,
 {
   unsigned int r = 0;
   int i;
+  gd_entry_t *P;
 
   dtrace("%p, %i", D, type);
 
@@ -90,7 +95,7 @@ unsigned int gd_nmfields_by_type(DIRFILE* D, const char* parent,
 
   _GD_ClearError(D);
 
-  const gd_entry_t* P = _GD_FindField(D, parent, D->entry, D->n_entries, NULL);
+  P = _GD_FindField(D, parent, D->entry, D->n_entries, NULL);
 
   if (P == NULL || P->e->n_meta == -1) {
     _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, parent);

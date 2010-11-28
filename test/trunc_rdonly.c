@@ -14,7 +14,8 @@ int main(void)
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
   const char* data = __TEST__ "dirfile/data";
-  int fd, r = 0;
+  int fd, error, unlink_data, r = 0;
+  DIRFILE *D;
 
   mkdir(filedir, 0777);
 
@@ -24,11 +25,11 @@ int main(void)
 
   close(open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666));
 
-  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_TRUNC);
-  int error = gd_error(D);
+  D = gd_open(filedir, GD_RDONLY | GD_TRUNC);
+  error = gd_error(D);
   gd_close(D);
 
-  int unlink_data = unlink(data);
+  unlink_data = unlink(data);
   CHECKI(unlink_data, 0);
 
   unlink(format);

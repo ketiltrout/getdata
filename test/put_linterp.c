@@ -19,8 +19,10 @@ int main(void)
   const char* table = __TEST__ "dirfile/table";
   const char* format_data = "linterp LINTERP data ./table\ndata RAW INT8 8\n";
   int8_t c[8], d;
-  int fd, i, r = 0;
   struct stat buf;
+  int fd, i, n, error, r = 0;
+  DIRFILE *D;
+  FILE *t;
 
   memset(c, 0, 8);
   mkdir(filedir, 0777);
@@ -32,14 +34,14 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  FILE* t = fopen(table, "wt");
+  t = fopen(table, "wt");
   for (i = 0; i < 10; ++i)
     fprintf(t, "%i %i\n", i * 6, i * 3);
   fclose(t);
 
-  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_UNENCODED | GD_VERBOSE);
-  int n = gd_putdata(D, "linterp", 5, 0, 1, 0, GD_INT8, c);
-  int error = gd_error(D);
+  D = gd_open(filedir, GD_RDWR | GD_UNENCODED | GD_VERBOSE);
+  n = gd_putdata(D, "linterp", 5, 0, 1, 0, GD_INT8, c);
+  error = gd_error(D);
 
   gd_close(D);
 

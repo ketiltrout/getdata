@@ -20,7 +20,9 @@ int main(void)
     "lincom2 LINCOM 2 data 1. 0. data2 1. 0.\n"
     "INCLUDE format1\n";
   const char* format1_data = "data2 RAW UINT8 3\nFRAMEOFFSET 33\n";
-  int fd, r = 0;
+  int fd, error1, error2, error3, error4, r = 0;
+  off_t bof_data, bof_data2, bof_lincom, bof_lincom2;
+  DIRFILE *D;
 
   mkdir(filedir, 0777);
 
@@ -32,15 +34,15 @@ int main(void)
   write(fd, format1_data, strlen(format1_data));
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDONLY);
-  off_t bof_data = gd_bof(D, "data");
-  int error1 = gd_error(D);
-  off_t bof_data2 = gd_bof(D, "data2");
-  int error2 = gd_error(D);
-  off_t bof_lincom = gd_bof(D, "lincom");
-  int error3 = gd_error(D);
-  off_t bof_lincom2 = gd_bof(D, "lincom2");
-  int error4 = gd_error(D);
+  D = gd_open(filedir, GD_RDONLY);
+  bof_data = gd_bof(D, "data");
+  error1 = gd_error(D);
+  bof_data2 = gd_bof(D, "data2");
+  error2 = gd_error(D);
+  bof_lincom = gd_bof(D, "lincom");
+  error3 = gd_error(D);
+  bof_lincom2 = gd_bof(D, "lincom2");
+  error4 = gd_error(D);
   gd_close(D);
 
   unlink(format1);

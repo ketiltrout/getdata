@@ -11,11 +11,11 @@
 int main(void)
 {
   const char* filedir = __TEST__ "dirfile";
-  int r = 0;
+  int error, r = 0;
 
   DIRFILE* D = gd_open(filedir, GD_RDONLY);
   gd_add_linterp(D, "new", "in", "table", 0);
-  int error = gd_error(D);
+  error = gd_error(D);
   gd_close(D);
 
   CHECKI(error, GD_E_BAD_DIRFILE);

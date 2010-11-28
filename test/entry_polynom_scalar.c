@@ -22,7 +22,9 @@ int main(void)
     "a3 CONST FLOAT64 4\n"
     "a4 CONST FLOAT64 5\n"
     "data POLYNOM in a0 a1 a2 a3 a4\n";
-  int fd, r = 0;
+  int fd, n, error, r = 0;
+  DIRFILE *D;
+  gd_entry_t E;
 
   mkdir(filedir, 0777);
 
@@ -30,11 +32,10 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  gd_entry_t E;
+  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
 
-  int n = gd_entry(D, "data", &E);
-  int error = gd_error(D);
+  n = gd_entry(D, "data", &E);
+  error = gd_error(D);
 
   gd_close(D);
   unlink(format);

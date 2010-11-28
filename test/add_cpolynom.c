@@ -16,7 +16,7 @@ int main(void)
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
   int r = 0;
-  int j;
+  int error, j;
   gd_entry_t e;
 
   DIRFILE* D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
@@ -27,7 +27,7 @@ int main(void)
     0.5 + _Complex_I * 99.55, 1.8 + _Complex_I * 45.32};
 #endif
   gd_add_cpolynom(D, "new", 3, "in", a, 0);
-  int error = gd_error(D);
+  error = gd_error(D);
 
   /* check */
   gd_entry(D, "new", &e);

@@ -18,8 +18,10 @@ int main(void)
   const char* format = __TEST__ "dirfile/format";
   const char* format_data =
     "lincom LINCOM data 3.3;4.4 5.5;6.6 data 7.7;8.8 9.9;1.1\n";
-  int fd, r = 0;
+  int fd, error, error2, error3, r = 0;
+  const double ca[] = { 2.1, 3.2, 4.3, 5.4, 6.5, 7.6 };
   gd_entry_t E;
+  DIRFILE *D;
 
   mkdir(filedir, 0777);
 
@@ -27,10 +29,10 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
+  D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
   gd_entry(D, "lincom", &E);
 
-  int error = gd_error(D);
+  error = gd_error(D);
   CHECKI(error, 0);
   CHECKIi(0,E.comp_scal, 1);
   CHECKFi(0,E.EN(lincom,cm)[0][0], 3.3);
@@ -43,15 +45,14 @@ int main(void)
   CHECKFi(0,E.EN(lincom,cb)[1][1], 1.1);
   gd_free_entry_strings(&E);
 
-  const double ca[] = { 2.1, 3.2, 4.3, 5.4, 6.5, 7.6 };
   gd_add_cpolynom(D, "polynom", 2, "in", ca, 0);
 
-  int error2 = gd_error(D);
+  error2 = gd_error(D);
   CHECKI(error2, 0);
 
   gd_entry(D, "polynom", &E);
 
-  int error3 = gd_error(D);
+  error3 = gd_error(D);
   CHECKI(error3, 0);
   CHECKIi(1,E.EN(polynom,poly_ord),2);
   CHECKIi(1,E.comp_scal,1);

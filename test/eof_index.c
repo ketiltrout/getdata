@@ -18,8 +18,10 @@ int main(void)
     "mult1 MULTIPLY data INDEX\n"
     "mult2 MULTIPLY INDEX INDEX\n"
     "mult3 MULTIPLY INDEX data\n";
-  int fd, r = 0;
+  int fd, error0, error1, error2, error3, r = 0;
   const size_t len = strlen(data);
+  off_t eof_INDEX, eof_mult1, eof_mult2, eof_mult3;
+  DIRFILE *D;
 
   mkdir(filedir, 0777);
 
@@ -31,15 +33,15 @@ int main(void)
   write(fd, data, len);
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDONLY);
-  off_t eof_INDEX = gd_eof(D, "INDEX");
-  int error0 = gd_error(D);
-  off_t eof_mult1 = gd_eof(D, "mult1");
-  int error1 = gd_error(D);
-  off_t eof_mult2 = gd_eof(D, "mult2");
-  int error2 = gd_error(D);
-  off_t eof_mult3 = gd_eof(D, "mult3");
-  int error3 = gd_error(D);
+  D = gd_open(filedir, GD_RDONLY);
+  eof_INDEX = gd_eof(D, "INDEX");
+  error0 = gd_error(D);
+  eof_mult1 = gd_eof(D, "mult1");
+  error1 = gd_error(D);
+  eof_mult2 = gd_eof(D, "mult2");
+  error2 = gd_error(D);
+  eof_mult3 = gd_eof(D, "mult3");
+  error3 = gd_error(D);
   gd_close(D);
 
   unlink(data);

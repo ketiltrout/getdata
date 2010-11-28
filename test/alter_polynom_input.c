@@ -20,7 +20,8 @@ int main(void)
     "polynom POLYNOM data 1 2 1\n";
   int32_t data_data[256];
   int32_t c[8];
-  int fd, i, r = 0;
+  int fd, i, ret, error, n, r = 0;
+  DIRFILE *D;
 
   mkdir(filedir, 0777);
 
@@ -35,15 +36,15 @@ int main(void)
   write(fd, data_data, 256 * sizeof(int32_t));
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
-  int ret = gd_alter_polynom(D, "polynom", 0, "phase", NULL);
-  int error = gd_error(D);
-  int n = gd_getdata(D, "polynom", 5, 0, 1, 0, GD_INT32, c);
+  D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
+  ret = gd_alter_polynom(D, "polynom", 0, "phase", NULL);
+  error = gd_error(D);
+  n = gd_getdata(D, "polynom", 5, 0, 1, 0, GD_INT32, c);
 
   gd_close(D);
 
   for (i = 0; i < 8; ++i) {
-    int x = i + 41;
+    const int x = i + 41;
     CHECKIi(i,c[i], x * x + 2 * x + 1);
   }
 

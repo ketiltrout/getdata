@@ -19,7 +19,8 @@ int main(void)
   const char* format_data = "bit SBIT data 2 3\ndata RAW INT8 8\n";
   int8_t c[8];
   int8_t d = 0xA5;
-  int fd, i, r = 0;
+  int fd, i, n, error, r = 0;
+  DIRFILE *D;
 
   mkdir(filedir, 0777);
 
@@ -35,9 +36,9 @@ int main(void)
     write(fd, &d, sizeof(int8_t));
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_UNENCODED | GD_VERBOSE);
-  int n = gd_putdata(D, "bit", 5, 0, 1, 0, GD_INT8, c);
-  int error = gd_error(D);
+  D = gd_open(filedir, GD_RDWR | GD_UNENCODED | GD_VERBOSE);
+  n = gd_putdata(D, "bit", 5, 0, 1, 0, GD_INT8, c);
+  error = gd_error(D);
 
   gd_close(D);
 

@@ -18,8 +18,9 @@ int main(void)
   const char* data = __TEST__ "dirfile/data";
   const char* format_data = "data RAW UINT8 8\nFRAMEOFFSET 2\n";
   uint8_t c[8], d;
-  int fd, i, r = 0;
   struct stat buf;
+  int fd, i, n, error, r = 0;
+  DIRFILE *D;
 
   mkdir(filedir, 0777);
 
@@ -30,9 +31,9 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_UNENCODED | GD_VERBOSE);
-  int n = gd_putdata(D, "data", 5, 0, 1, 0, GD_UINT8, c);
-  int error = gd_error(D);
+  D = gd_open(filedir, GD_RDWR | GD_UNENCODED | GD_VERBOSE);
+  n = gd_putdata(D, "data", 5, 0, 1, 0, GD_UINT8, c);
+  error = gd_error(D);
 
   gd_close(D);
 

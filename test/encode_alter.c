@@ -22,7 +22,9 @@ int main(void)
     "0\n1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12\n13\n14\n15\n";
   uint16_t data_data[128];
   uint16_t c[8];
-  int fd, r = 0;
+  int fd, ret, error, r = 0;
+  off_t n;
+  DIRFILE *D;
 
   memset(c, 0, 8);
   mkdir(filedir, 0777);
@@ -42,10 +44,10 @@ int main(void)
   write(fd, data_data, 256);
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
-  int ret = gd_alter_encoding(D, GD_TEXT_ENCODED, 0, 0);
-  int error = gd_error(D);
-  off_t n = gd_nframes(D);
+  D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
+  ret = gd_alter_encoding(D, GD_TEXT_ENCODED, 0, 0);
+  error = gd_error(D);
+  n = gd_nframes(D);
 
   gd_close(D);
 

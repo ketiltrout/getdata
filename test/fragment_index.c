@@ -16,7 +16,8 @@ int main(void)
   const char* format1 = __TEST__ "dirfile/format1";
   const char* format_data = "INCLUDE format1\n";
   const char* format1_data = "data RAW UINT8 8\n";
-  int fd, r = 0;
+  int fd, n, error, r = 0;
+  DIRFILE *D;
 
   mkdir(filedir, 0777);
 
@@ -28,10 +29,10 @@ int main(void)
   write(fd, format1_data, strlen(format1_data));
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
 
-  int n = gd_fragment_index(D, "data");
-  int error = gd_error(D);
+  n = gd_fragment_index(D, "data");
+  error = gd_error(D);
 
   gd_close(D);
   unlink(format1);

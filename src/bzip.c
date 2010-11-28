@@ -113,9 +113,9 @@ int _GD_Bzip2Open(struct _gd_raw_file* file, int mode __gd_unused,
 off64_t _GD_Bzip2Seek(struct _gd_raw_file* file, off64_t count,
     gd_type_t data_type, int pad __gd_unused)
 {
-  dtrace("%p, %lli, %x, <unused>", file, (long long)count, data_type);
-
   struct gd_bzdata *ptr = (struct gd_bzdata *)file->edata;
+
+  dtrace("%p, %lli, %x, <unused>", file, (long long)count, data_type);
 
   count *= GD_SIZE(data_type);
 
@@ -136,8 +136,10 @@ off64_t _GD_Bzip2Seek(struct _gd_raw_file* file, off64_t count,
 
   /* seek forward the slow way */
   while (ptr->base + ptr->end < count) {
+    int n;
+
     ptr->bzerror = 0;
-    int n = BZ2_bzRead(&ptr->bzerror, ptr->bzfile, ptr->data,
+    n = BZ2_bzRead(&ptr->bzerror, ptr->bzfile, ptr->data,
         GD_BZIP_BUFFER_SIZE);
 
     if (ptr->bzerror == BZ_OK || ptr->bzerror == BZ_STREAM_END) {
@@ -165,13 +167,15 @@ off64_t _GD_Bzip2Seek(struct _gd_raw_file* file, off64_t count,
 ssize_t _GD_Bzip2Read(struct _gd_raw_file *file, void *data,
     gd_type_t data_type, size_t nmemb)
 {
-  dtrace("%p, %p, %x, %zu", file, data, data_type, nmemb);
-
   char* output = (char*)data;
   struct gd_bzdata *ptr = (struct gd_bzdata *)file->edata;
   unsigned long long nbytes = nmemb * GD_SIZE(data_type);
 
+  dtrace("%p, %p, %x, %zu", file, data, data_type, nmemb);
+
   while (nbytes > (unsigned long long)(ptr->end - ptr->pos)) {
+    int n;
+
     memcpy(output, ptr->data + ptr->pos, ptr->end - ptr->pos);
     output += ptr->end - ptr->pos;
     nbytes -= ptr->end - ptr->pos;
@@ -183,7 +187,7 @@ ssize_t _GD_Bzip2Read(struct _gd_raw_file *file, void *data,
     }
 
     ptr->bzerror = 0;
-    int n = BZ2_bzRead(&ptr->bzerror, ptr->bzfile, ptr->data,
+    n = BZ2_bzRead(&ptr->bzerror, ptr->bzfile, ptr->data,
         GD_BZIP_BUFFER_SIZE);
 
     if (ptr->bzerror == BZ_OK || ptr->bzerror == BZ_STREAM_END) {
@@ -218,9 +222,8 @@ ssize_t _GD_Bzip2Read(struct _gd_raw_file *file, void *data,
 
 int _GD_Bzip2Close(struct _gd_raw_file *file)
 {
-  dtrace("%p", file);
-
   struct gd_bzdata *ptr = (struct gd_bzdata *)file->edata;
+  dtrace("%p", file);
 
   ptr->bzerror = 0;
   BZ2_bzReadClose(&ptr->bzerror, ptr->bzfile);
@@ -237,9 +240,12 @@ int _GD_Bzip2Close(struct _gd_raw_file *file)
 
 off64_t _GD_Bzip2Size(struct _gd_raw_file *file, gd_type_t data_type)
 {
+  struct gd_bzdata *ptr;
+  off_t n;
+
   dtrace("%p, %x", file, data_type);
 
-  struct gd_bzdata *ptr = _GD_Bzip2DoOpen(file);
+  ptr = _GD_Bzip2DoOpen(file);
 
   if (ptr == NULL) {
     dreturn("%i", -1);
@@ -248,8 +254,10 @@ off64_t _GD_Bzip2Size(struct _gd_raw_file *file, gd_type_t data_type)
 
   /* seek forward the slow way  to the end */
   while (ptr->bzerror != BZ_STREAM_END) {
+    int n;
+
     ptr->bzerror = 0;
-    int n = BZ2_bzRead(&ptr->bzerror, ptr->bzfile, ptr->data,
+    n = BZ2_bzRead(&ptr->bzerror, ptr->bzfile, ptr->data,
         GD_BZIP_BUFFER_SIZE);
 
     if (ptr->bzerror == BZ_OK || ptr->bzerror == BZ_STREAM_END) {
@@ -267,7 +275,7 @@ off64_t _GD_Bzip2Size(struct _gd_raw_file *file, gd_type_t data_type)
   BZ2_bzReadClose(&ptr->bzerror, ptr->bzfile);
   fclose(ptr->stream);
 
-  off_t n = (ptr->base + ptr->end) / GD_SIZE(data_type);
+  n = (ptr->base + ptr->end) / GD_SIZE(data_type);
   free(ptr);
 
   dreturn("%lli", (long long)n);

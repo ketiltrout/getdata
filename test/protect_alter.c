@@ -17,7 +17,8 @@ int main(void)
   const char* data = __TEST__ "dirfile/data";
   const char* format_data = "data RAW UINT8 8\nPROTECT format\n";
   unsigned char data_data[256];
-  int fd, r = 0;
+  int fd, ret, p, error, r = 0;
+  DIRFILE *D;
 
   mkdir(filedir, 0777);
 
@@ -32,10 +33,10 @@ int main(void)
   write(fd, data_data, 256);
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
-  int ret = gd_alter_protection(D, GD_PROTECT_DATA, 0);
-  int error = gd_error(D);
-  int p = gd_protection(D, 0);
+  D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
+  ret = gd_alter_protection(D, GD_PROTECT_DATA, 0);
+  error = gd_error(D);
+  p = gd_protection(D, 0);
 
   gd_close(D);
 

@@ -46,6 +46,9 @@ const char *gd_dirfilename(DIRFILE* D) gd_nothrow
 
 const char *gd_reference(DIRFILE* D, const char* field_code) gd_nothrow
 {
+  gd_entry_t *E;
+  char *ptr;
+
   dtrace("%p, \"%s\"", D, field_code);
 
   if (D->flags & GD_INVALID) {/* don't crash */
@@ -75,7 +78,7 @@ const char *gd_reference(DIRFILE* D, const char* field_code) gd_nothrow
   }
 
   /* Check field */
-  gd_entry_t *E = _GD_FindField(D, field_code, D->entry, D->n_entries, NULL);
+  E = _GD_FindField(D, field_code, D->entry, D->n_entries, NULL);
 
   if (E == NULL) {
     _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, field_code);
@@ -97,7 +100,7 @@ const char *gd_reference(DIRFILE* D, const char* field_code) gd_nothrow
     return NULL;
   }
   
-  char* ptr = strdup(E->field);
+  ptr = strdup(E->field);
 
   if (ptr == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);

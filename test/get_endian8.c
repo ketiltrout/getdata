@@ -30,7 +30,8 @@ int main(void)
   uint8_t c = 0;
   uint8_t data_data[128];
   const int big_endian = BigEndian();
-  int fd, r = 0;
+  int fd, n, error, r = 0;
+  DIRFILE *D;
 
   mkdir(filedir, 0777); 
 
@@ -48,9 +49,9 @@ int main(void)
   write(fd, data_data, 128 * sizeof(uint8_t));
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  int n = gd_getdata(D, "data", 5, 0, 1, 0, GD_UINT8, &c);
-  int error = gd_error(D);
+  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  n = gd_getdata(D, "data", 5, 0, 1, 0, GD_UINT8, &c);
+  error = gd_error(D);
 
   gd_close(D);
 

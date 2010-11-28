@@ -22,7 +22,8 @@ int main(void)
 #else
   float complex d = 8;
 #endif
-  int fd, r = 0;
+  int fd, n1, n2, error, r = 0;
+  DIRFILE *D;
 
   mkdir(filedir, 0777);
 
@@ -30,14 +31,14 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDWR);
+  D = gd_open(filedir, GD_RDWR);
 #ifdef GD_NO_C99_API
-  int n1 = gd_put_constant(D, "data", GD_COMPLEX64, d);
+  n1 = gd_put_constant(D, "data", GD_COMPLEX64, d);
 #else
-  int n1 = gd_put_constant(D, "data", GD_COMPLEX64, &d);
+  n1 = gd_put_constant(D, "data", GD_COMPLEX64, &d);
 #endif
-  int n2 = gd_get_constant(D, "data", GD_FLOAT64, &c);
-  int error = gd_error(D);
+  n2 = gd_get_constant(D, "data", GD_FLOAT64, &c);
+  error = gd_error(D);
 
   gd_close(D);
 

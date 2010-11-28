@@ -37,9 +37,11 @@
 
 int _GD_AsciiOpen(struct _gd_raw_file* file, int mode, int creat)
 {
+  int fp;
+
   dtrace("%p, %i, %i", file, mode, creat);
 
-  int fp = open(file->name, ((mode == GD_RDWR) ? O_RDWR : O_RDONLY) |
+  fp = open(file->name, ((mode == GD_RDWR) ? O_RDWR : O_RDONLY) |
       (creat ? O_CREAT : 0) | O_BINARY, 0666);
 
   file->edata = fdopen(fp, (mode == GD_RDWR) ? "r+" : "r");

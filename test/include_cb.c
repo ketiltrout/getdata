@@ -26,7 +26,8 @@ int main(void)
   const char* format1 = __TEST__ "dirfile/format1";
   const char* format_data = "#\n";
   const char* format1_data = "data ROW UINT8 11\n";
-  int fd, r = 0;
+  int fd, error, r = 0;
+  DIRFILE *D;
 
   mkdir(filedir, 0777);
 
@@ -38,9 +39,9 @@ int main(void)
   write(fd, format1_data, strlen(format1_data));
   close(fd);
 
-  DIRFILE* D = gd_cbopen(filedir, GD_RDWR, callback, NULL);
+  D = gd_cbopen(filedir, GD_RDWR, callback, NULL);
   gd_include(D, "format1", 0, 0);
-  int error = gd_error(D);
+  error = gd_error(D);
   gd_close(D);
 
   unlink(format1);

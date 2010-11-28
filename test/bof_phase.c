@@ -23,7 +23,9 @@ int main(void)
   const char* format1_data = "data2 RAW UINT8 3\n"
     "FRAMEOFFSET 43\n"
     "phase2 PHASE data2 -7\n";
-  int fd, r = 0;
+  int fd, error1, error2, error3, error4, r = 0;
+  off_t bof_phase, bof_phase2, bof_lincom, bof_lincom2;
+  DIRFILE *D;
 
   mkdir(filedir, 0777);
 
@@ -35,15 +37,15 @@ int main(void)
   write(fd, format1_data, strlen(format1_data));
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDONLY);
-  off_t bof_phase = gd_bof(D, "phase");
-  int error1 = gd_error(D);
-  off_t bof_phase2 = gd_bof(D, "phase2");
-  int error2 = gd_error(D);
-  off_t bof_lincom = gd_bof(D, "lincom");
-  int error3 = gd_error(D);
-  off_t bof_lincom2 = gd_bof(D, "lincom2");
-  int error4 = gd_error(D);
+  D = gd_open(filedir, GD_RDONLY);
+  bof_phase = gd_bof(D, "phase");
+  error1 = gd_error(D);
+  bof_phase2 = gd_bof(D, "phase2");
+  error2 = gd_error(D);
+  bof_lincom = gd_bof(D, "lincom");
+  error3 = gd_error(D);
+  bof_lincom2 = gd_bof(D, "lincom2");
+  error4 = gd_error(D);
   gd_close(D);
 
   unlink(format1);

@@ -15,7 +15,8 @@ int main(void)
 {
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
-  int r = 0;
+  int error, r = 0;
+  DIRFILE *D;
 
   gd_entry_t E, e;
   E.field = "data";
@@ -28,10 +29,10 @@ int main(void)
   E.scalar[0] = NULL;
   E.scalar[0 + GD_MAX_LINCOM] = "c";
 
-  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
+  D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
   gd_add_spec(D, "c CONST INT64 4", 0);
   gd_add(D, &E);
-  int error = gd_error(D);
+  error = gd_error(D);
 
   /* check */
   gd_entry(D, "data", &e);

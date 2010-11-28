@@ -17,7 +17,9 @@ int main(void)
   const char* data = __TEST__ "dirfile/data";
   const char* format_data = "data RAW UINT8 8\nFRAMEOFFSET 13\n";
   unsigned char data_data[256];
-  int fd, r = 0;
+  int fd, error, r = 0;
+  unsigned long n;
+  DIRFILE *D;
 
   mkdir(filedir, 0777);
 
@@ -32,9 +34,9 @@ int main(void)
   write(fd, data_data, 256);
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  unsigned long n = gd_encoding(D, 0);
-  int error = gd_error(D);
+  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  n = gd_encoding(D, 0);
+  error = gd_error(D);
 
   gd_close(D);
 

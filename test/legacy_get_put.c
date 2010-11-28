@@ -22,7 +22,7 @@ int main(void)
   const char* format_data = "data RAW UINT8 8\n";
   uint8_t c[8];
   unsigned char data_data[256];
-  int fd, i, r = 0;
+  int fd, i, get_error, put_error, n, r = 0;
 
   memset(c, 0, 8);
   mkdir(filedir, 0777);
@@ -41,10 +41,8 @@ int main(void)
   write(fd, data_data, 256);
   close(fd);
 
-  int get_error;
   GetData(filedir, "data", 5, 0, 1, 0, 'c', c, &get_error);
-  int put_error;
-  int n = PutData(filedir, "data", 5, 0, 1, 0, 'c', c, &put_error);
+  n = PutData(filedir, "data", 5, 0, 1, 0, 'c', c, &put_error);
 
   unlink(data);
   unlink(format);

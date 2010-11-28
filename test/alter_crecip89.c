@@ -20,7 +20,8 @@ int main(void)
   const char* format_data = "data RAW INT32 8\nphase PHASE data 1\n"
     "div RECIP data 230.\n";
   int32_t data_data[256];
-  int fd, r = 0;
+  int fd, ret, error, n, r = 0;
+  DIRFILE *D;
   double div[2] = {1093., 3290.};
   gd_entry_t E;
 
@@ -37,10 +38,10 @@ int main(void)
   write(fd, data_data, 256 * sizeof(int32_t));
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
-  int ret = gd_alter_crecip(D, "div", "phase", div);
-  int error = gd_error(D);
-  int n = gd_entry(D, "div", &E);
+  D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
+  ret = gd_alter_crecip(D, "div", "phase", div);
+  error = gd_error(D);
+  n = gd_entry(D, "div", &E);
 
   gd_close(D);
 

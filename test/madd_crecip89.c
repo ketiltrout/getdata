@@ -14,18 +14,18 @@ int main(void)
 {
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
-  int r = 0;
+  int error, ge_error, r = 0;
   gd_entry_t e;
   double div[2] = {3.2, 3.1};
 
   DIRFILE* D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
   gd_add_phase(D, "new", "in", 3, 0);
   gd_madd_crecip(D, "new", "meta", "in1", div);
-  int error = gd_error(D);
+  error = gd_error(D);
 
   /* check */
   gd_entry(D, "new/meta", &e);
-  int ge_error = gd_error(D);
+  ge_error = gd_error(D);
   CHECKI(ge_error, 0);
   if (!r) {
     CHECKI(e.field_type, GD_RECIP_ENTRY);

@@ -20,8 +20,9 @@ int main(void)
   const char* data = __TEST__ "dirfile/data.txt";
   const char* format_data = "data RAW UINT8 8\n";
   uint8_t c[8], d;
-  int fd, i;
+  int fd, n, error, i;
   struct stat buf;
+  DIRFILE *D;
 
   memset(c, 0, 8);
   mkdir(filedir, 0777);
@@ -33,9 +34,9 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_TEXT_ENCODED | GD_VERBOSE);
-  int n = gd_putdata(D, "data", 5, 0, 1, 0, GD_UINT8, c);
-  int error = gd_error(D);
+  D = gd_open(filedir, GD_RDWR | GD_TEXT_ENCODED | GD_VERBOSE);
+  n = gd_putdata(D, "data", 5, 0, 1, 0, GD_UINT8, c);
+  error = gd_error(D);
 
   gd_close(D);
 

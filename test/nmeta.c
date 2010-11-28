@@ -27,7 +27,9 @@ int main(void)
     "const CONST UINT8 1\n"
     "string STRING value\n"
     "string2 STRING value\n";
-  int fd;
+  int fd, error, r = 0;
+  unsigned int nfields;
+  DIRFILE *D;
 
   mkdir(filedir, 0777);
 
@@ -35,16 +37,16 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  unsigned int nfields = gd_nmfields(D, "raw1");
-  int error = gd_error(D);
+  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  nfields = gd_nmfields(D, "raw1");
+  error = gd_error(D);
   gd_close(D);
 
   unlink(format);
   rmdir(filedir);
 
-  if (error)
-    return 1;
+  CHECKI(error, 0);
+  CHECKU(nfields, 6);
 
-  return (nfields != 6);
+  return r;
 }

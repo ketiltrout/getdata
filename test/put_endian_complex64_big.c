@@ -17,7 +17,6 @@ int main(void)
   const char* format = __TEST__ "dirfile/format";
   const char* data = __TEST__ "dirfile/data";
   const char* format_data = "data RAW COMPLEX64 1\nENDIAN big\n";
-  int fd, r = 0;
   unsigned int i;
 #ifdef GD_NO_C99_API
   const float c[] = {1.5, 2.25};
@@ -28,6 +27,8 @@ int main(void)
     0x3F, 0xC0, 0x00, 0x00, 0x40, 0x10, 0x00, 0x00
   };
   unsigned char u[2 * sizeof(float)];
+  int fd, n, error, r = 0;
+  DIRFILE *D;
 
   mkdir(filedir, 0777); 
 
@@ -35,13 +36,13 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_UNENCODED | GD_VERBOSE);
+  D = gd_open(filedir, GD_RDWR | GD_UNENCODED | GD_VERBOSE);
 #ifdef GD_NO_C99_API
-  int n = gd_putdata(D, "data", 5, 0, 1, 0, GD_COMPLEX64, c);
+  n = gd_putdata(D, "data", 5, 0, 1, 0, GD_COMPLEX64, c);
 #else
-  int n = gd_putdata(D, "data", 5, 0, 1, 0, GD_COMPLEX64, &c);
+  n = gd_putdata(D, "data", 5, 0, 1, 0, GD_COMPLEX64, &c);
 #endif
-  int error = gd_error(D);
+  error = gd_error(D);
 
   gd_close(D);
 

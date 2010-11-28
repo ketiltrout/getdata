@@ -22,7 +22,9 @@ int main(void)
   const char* format_data1 = "ENDIAN big\nINCLUDE format2\n";
   const char* format_data2 = "ENDIAN big arm\nINCLUDE format3\n";
   const char* format_data3 = "ENDIAN little arm\n";
-  int fd, r = 0;
+  int fd, error, r = 0;
+  unsigned long n, m, l, k;
+  DIRFILE *D;
 
   mkdir(filedir, 0777);
 
@@ -42,12 +44,12 @@ int main(void)
   write(fd, format_data3, strlen(format_data3));
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  unsigned long n = gd_endianness(D, 0);
-  unsigned long m = gd_endianness(D, 1);
-  unsigned long l = gd_endianness(D, 2);
-  unsigned long k = gd_endianness(D, 3);
-  int error = gd_error(D);
+  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  n = gd_endianness(D, 0);
+  m = gd_endianness(D, 1);
+  l = gd_endianness(D, 2);
+  k = gd_endianness(D, 3);
+  error = gd_error(D);
 
   gd_close(D);
 

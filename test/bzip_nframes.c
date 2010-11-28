@@ -20,7 +20,9 @@ int main(void)
   const char* format_data = "data RAW UINT16 1\n";
   char command[4096];
   uint16_t data_data[256];
-  int i, r = 0;
+  int i, error, r = 0;
+  size_t n;
+  DIRFILE *D;
 
   mkdir(filedir, 0777);
 
@@ -43,12 +45,12 @@ int main(void)
   }
 
 #ifdef USE_BZIP2
-  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
 #else
-  DIRFILE* D = gd_open(filedir, GD_RDONLY);
+  D = gd_open(filedir, GD_RDONLY);
 #endif
-  size_t n = gd_nframes(D);
-  int error = gd_error(D);
+  n = gd_nframes(D);
+  error = gd_error(D);
   gd_close(D);
 
   unlink(gzipdata);

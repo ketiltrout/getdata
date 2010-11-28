@@ -39,10 +39,10 @@ const gd_entype_t _gd_entype_index[GD_N_ENTYPES] =
 
 const void *gd_constants(DIRFILE* D, gd_type_t return_type) gd_nothrow
 {
-  dtrace("%p, 0x%x", D, return_type);
-
   unsigned int i, n;
   char* fl;
+
+  dtrace("%p, 0x%x", D, return_type);
 
   if (D->flags & GD_INVALID) {
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -81,10 +81,10 @@ const void *gd_constants(DIRFILE* D, gd_type_t return_type) gd_nothrow
 
 const gd_carray_t *gd_carrays(DIRFILE* D, gd_type_t return_type) gd_nothrow
 {
-  dtrace("%p, 0x%x", D, return_type);
-
   unsigned int i, n;
   gd_carray_t* fl;
+
+  dtrace("%p, 0x%x", D, return_type);
 
   if (D->flags & GD_INVALID) {
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -133,10 +133,10 @@ const gd_carray_t *gd_carrays(DIRFILE* D, gd_type_t return_type) gd_nothrow
 
 const char **gd_strings(DIRFILE* D) gd_nothrow
 {
-  dtrace("%p", D);
-
   unsigned int i, n;
   char** fl;
+
+  dtrace("%p", D);
 
   if (D->flags & GD_INVALID) {
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -182,11 +182,11 @@ const char **gd_strings(DIRFILE* D) gd_nothrow
 
 const char **gd_field_list_by_type(DIRFILE* D, gd_entype_t type) gd_nothrow
 {
-  dtrace("%p, %x", D, type);
-
   unsigned int i, n;
   char** fl;
   int index = -1;
+
+  dtrace("%p, %x", D, type);
 
   if (D->flags & GD_INVALID) {
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -252,10 +252,10 @@ const char **gd_field_list_by_type(DIRFILE* D, gd_entype_t type) gd_nothrow
 
 const char **gd_vector_list(DIRFILE* D) gd_nothrow
 {
-  dtrace("%p", D);
-
   unsigned int i, n;
-  char** fl;
+  char **fl;
+
+  dtrace("%p", D);
 
   if (D->flags & GD_INVALID) {
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -302,10 +302,10 @@ const char **gd_vector_list(DIRFILE* D) gd_nothrow
 
 const char **gd_field_list(DIRFILE* D) gd_nothrow
 {
-  dtrace("%p", D);
-
   unsigned int i, n;
-  char** fl;
+  char **fl;
+
+  dtrace("%p", D);
 
   if (D->flags & GD_INVALID) {
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);

@@ -23,7 +23,8 @@ int main(void)
 #else
   double complex data_data[100];
 #endif
-  int i, r = 0;
+  int i, n, error, r = 0;
+  DIRFILE *D;
 
   mkdir(filedir, 0777);
 
@@ -45,9 +46,9 @@ int main(void)
   write(i, data_data, 200 * sizeof(double));
   close(i);
 
-  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  int n = gd_getdata(D, "data.i", 5, 0, 8, 0, GD_FLOAT64, &c);
-  int error = gd_error(D);
+  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  n = gd_getdata(D, "data.i", 5, 0, 8, 0, GD_FLOAT64, &c);
+  error = gd_error(D);
 
   gd_close(D);
 

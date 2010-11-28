@@ -19,7 +19,8 @@ int main(void)
   const char* format_data = "data RAW FLOAT64 1\n";
   double c[8];
   double data_data[100];
-  int i, r = 0;
+  int i, n, error, r = 0;
+  DIRFILE *D;
 
   mkdir(filedir, 0777);
 
@@ -34,9 +35,9 @@ int main(void)
   write(i, data_data, 100 * sizeof(double));
   close(i);
 
-  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  int n = gd_getdata(D, "data.a", 5, 0, 8, 0, GD_FLOAT64, &c);
-  int error = gd_error(D);
+  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  n = gd_getdata(D, "data.a", 5, 0, 8, 0, GD_FLOAT64, &c);
+  error = gd_error(D);
 
   gd_close(D);
 

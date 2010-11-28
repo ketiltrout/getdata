@@ -13,22 +13,22 @@ int main(void)
 {
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
-  int r = 0;
+  int error, ge_error, r = 0;
   gd_entry_t e;
-
-  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
-  gd_add_phase(D, "new", "in", 3, 0);
 #ifdef GD_NO_C99_API
   const double v[] = {3.2, 3.1};
 #else
   const double complex v = 3.2 + _Complex_I * 3.1;
 #endif
+
+  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
+  gd_add_phase(D, "new", "in", 3, 0);
   gd_madd_crecip(D, "new", "meta", "in1", v);
-  int error = gd_error(D);
+  error = gd_error(D);
 
   /* check */
   gd_entry(D, "new/meta", &e);
-  int ge_error = gd_error(D);
+  ge_error = gd_error(D);
   CHECKI(ge_error, 0);
   if (!r) {
     CHECKI(e.field_type, GD_RECIP_ENTRY);

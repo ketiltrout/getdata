@@ -17,8 +17,9 @@ int main(void)
   const char* format = __TEST__ "dirfile/format";
   const char* data = __TEST__ "dirfile/data";
   const char* format_data = "data RAW FLOAT64 1\n";
-  double d[1000];
-  int i, r = 0;
+  double d[1000], f1, f2, f3;
+  int i, error, r = 0;
+  DIRFILE *D;
 
   mkdir(filedir, 0777);
 
@@ -33,11 +34,11 @@ int main(void)
   write(i, d, 1000 * sizeof(double));
   close(i);
 
-  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  double f1 = gd_framenum(D, "data", 1.09);
-  double f2 = gd_framenum(D, "data", 1.49);
-  double f3 = gd_framenum(D, "data", 1.79);
-  int error = gd_error(D);
+  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  f1 = gd_framenum(D, "data", 1.09);
+  f2 = gd_framenum(D, "data", 1.49);
+  f3 = gd_framenum(D, "data", 1.79);
+  error = gd_error(D);
 
   gd_close(D);
 

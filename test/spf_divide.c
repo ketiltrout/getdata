@@ -17,6 +17,8 @@ int main(void)
     "in2 RAW UINT8 13\n"
     "div DIVIDE in1 in2\n";
   int fd, r = 0;
+  DIRFILE *D;
+  gd_spf_t spf;
 
   mkdir(filedir, 0777);
 
@@ -24,8 +26,8 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  unsigned int spf = gd_spf(D, "div");
+  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  spf = gd_spf(D, "div");
   gd_close(D);
 
   unlink(format);

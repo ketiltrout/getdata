@@ -851,12 +851,11 @@ static size_t _GD_DoLincom(DIRFILE *D, gd_entry_t *E, off64_t first_samp,
   int i;
   void *tmpbuf2 = NULL;
   void *tmpbuf3 = NULL;
+  const gd_type_t ntype = (return_type & GD_COMPLEX) ? GD_COMPLEX128
+    : GD_FLOAT64;
 
   dtrace("%p, %p, %lli, %zu, 0x%x, %p", D, E, first_samp, num_samp, return_type,
       data_out);
-
-  const gd_type_t ntype = (return_type & GD_COMPLEX) ? GD_COMPLEX128
-    : GD_FLOAT64;
 
   /* input field checks */
   for (i = 0; i < E->EN(lincom,n_fields); ++i) {
@@ -903,6 +902,7 @@ static size_t _GD_DoLincom(DIRFILE *D, gd_entry_t *E, off64_t first_samp,
   if (E->EN(lincom,n_fields) > 1) {
     /* calculate the first sample, type and number of samples to read of the
      * second field */
+    size_t n_read2;
     size_t num_samp2 = (int)ceil((double)n_read * spf[1] / spf[0]);
     off64_t first_samp2 = first_samp * spf[1] / spf[0];
 
@@ -915,7 +915,7 @@ static size_t _GD_DoLincom(DIRFILE *D, gd_entry_t *E, off64_t first_samp,
     }
 
     /* read the second field */
-    size_t n_read2 = _GD_DoField(D, E->e->entry[1], E->e->repr[1], first_samp2,
+    n_read2 = _GD_DoField(D, E->e->entry[1], E->e->repr[1], first_samp2,
         num_samp2, ntype, tmpbuf2);
     if (D->error || n_read2 == 0) {
       free(tmpbuf2);
@@ -929,6 +929,7 @@ static size_t _GD_DoLincom(DIRFILE *D, gd_entry_t *E, off64_t first_samp,
 
     /* Do the same for the third field, if needed */
     if (E->EN(lincom,n_fields) > 2) {
+      size_t n_read3;
       size_t num_samp3 = (int)ceil((double)n_read * spf[2] / spf[0]);
       off64_t first_samp3 = first_samp * spf[2] / spf[0];
 
@@ -940,8 +941,8 @@ static size_t _GD_DoLincom(DIRFILE *D, gd_entry_t *E, off64_t first_samp,
         return 0;
       }
 
-      size_t n_read3 = _GD_DoField(D, E->e->entry[2], E->e->repr[2],
-          first_samp3, num_samp3, ntype, tmpbuf3);
+      n_read3 = _GD_DoField(D, E->e->entry[2], E->e->repr[2], first_samp3,
+          num_samp3, ntype, tmpbuf3);
       if (D->error || n_read3 == 0) {
         free(tmpbuf2);
         free(tmpbuf3);
@@ -984,6 +985,7 @@ static size_t _GD_DoMultiply(DIRFILE *D, gd_entry_t* E, off64_t first_samp,
   gd_spf_t spf1, spf2;
   size_t n_read, n_read2, num_samp2;
   off64_t first_samp2;
+  gd_type_t type2;
 
   dtrace("%p, %p, %lli, %zu, 0x%x, %p", D, E, first_samp, num_samp, return_type,
       data_out);
@@ -1034,8 +1036,8 @@ static size_t _GD_DoMultiply(DIRFILE *D, gd_entry_t* E, off64_t first_samp,
   first_samp2 = first_samp * spf2 / spf1;
 
   /* find the native type of the second field */
-  gd_type_t type2 = (_GD_NativeType(D, E->e->entry[1], E->e->repr[1])
-      & GD_COMPLEX) ? GD_COMPLEX128 : GD_FLOAT64;
+  type2 = (_GD_NativeType(D, E->e->entry[1], E->e->repr[1]) & GD_COMPLEX) ?
+    GD_COMPLEX128 : GD_FLOAT64;
 
   /* Allocate a temporary buffer for the second field */
   tmpbuf = _GD_Alloc(D, type2, num_samp2);
@@ -1122,6 +1124,7 @@ static size_t _GD_DoDivide(DIRFILE *D, gd_entry_t* E, off64_t first_samp,
   gd_spf_t spf1, spf2;
   size_t n_read, n_read2, num_samp2;
   off64_t first_samp2;
+  gd_type_t type2;
 
   dtrace("%p, %p, %lli, %zu, 0x%x, %p", D, E, first_samp, num_samp, return_type,
       data_out);
@@ -1168,8 +1171,8 @@ static size_t _GD_DoDivide(DIRFILE *D, gd_entry_t* E, off64_t first_samp,
   first_samp2 = first_samp * spf2 / spf1;
 
   /* find the native type of the second field */
-  gd_type_t type2 = (_GD_NativeType(D, E->e->entry[1], E->e->repr[1])
-      & GD_COMPLEX) ? GD_COMPLEX128 : GD_FLOAT64;
+  type2 = (_GD_NativeType(D, E->e->entry[1], E->e->repr[1]) & GD_COMPLEX) ?
+    GD_COMPLEX128 : GD_FLOAT64;
 
   /* Allocate a temporary buffer for the second field */
   tmpbuf = _GD_Alloc(D, type2, num_samp2);
@@ -1215,12 +1218,11 @@ static size_t _GD_DoBit(DIRFILE *D, gd_entry_t *E, int is_signed,
   void *tmpbuf;
   size_t i;
   size_t n_read;
+  const uint64_t mask = (E->EN(bit,numbits) == 64) ? 0xffffffffffffffffULL :
+    ((uint64_t)1 << E->EN(bit,numbits)) - 1;
 
   dtrace("%p, %p, %i, %lli, %zu, 0x%x, %p", D, E, is_signed, first_samp,
       num_samp, return_type, data_out);
-
-  const uint64_t mask = (E->EN(bit,numbits) == 64) ? 0xffffffffffffffffULL :
-    ((uint64_t)1 << E->EN(bit,numbits)) - 1;
 
   if (_GD_BadInput(D, E, 0)) {
     dreturn("%i", 0);
@@ -1383,10 +1385,12 @@ static size_t _GD_DoPolynom(DIRFILE *D, gd_entry_t *E, off64_t first_samp,
 static size_t _GD_DoConst(DIRFILE *D, const gd_entry_t *E, off64_t first,
     size_t len, gd_type_t return_type, void *data_out)
 {
+  gd_type_t type;
+
   dtrace("%p, %p, %lli, %zu, 0x%x, %p", D, E, first, len, return_type,
       data_out);
 
-  gd_type_t type = _GD_ConstType(D, E->EN(scalar,const_type));
+  type = _GD_ConstType(D, E->EN(scalar,const_type));
   _GD_ConvertType(D, (char *)E->e->u.scalar.d + first * GD_SIZE(type), type,
       data_out, return_type, len);
 
@@ -1543,6 +1547,7 @@ size_t gd_getdata64(DIRFILE* D, const char *field_code_in, off64_t first_frame,
   gd_entry_t* entry;
   char* field_code;
   int repr;
+  gd_spf_t spf;
 
   dtrace("%p, \"%s\", %lli, %lli, %zu, %zu, 0x%x, %p", D, field_code_in,
       first_frame, first_samp, num_frames, num_samp, return_type, data_out);
@@ -1574,7 +1579,7 @@ size_t gd_getdata64(DIRFILE* D, const char *field_code_in, off64_t first_frame,
   }
 
   /* get the samples per frame */
-  gd_spf_t spf = _GD_GetSPF(D, entry);
+  spf = _GD_GetSPF(D, entry);
 
   if (D->error) {
     dreturn("%i", 0);

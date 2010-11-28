@@ -12,13 +12,14 @@ int main(void)
 {
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
-  int r = 0;
+  int error, r = 0;
+  DIRFILE *D;
 
   mkdir(filedir, 0777);
   close(open(format, O_CREAT | O_EXCL | O_WRONLY, 0666));
 
-  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_EXCL);
-  int error = gd_error(D);
+  D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_EXCL);
+  error = gd_error(D);
   gd_close(D);
 
   unlink(format);

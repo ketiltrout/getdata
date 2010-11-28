@@ -16,25 +16,24 @@ int main(void)
   const char* format = __TEST__ "dirfile/format";
   const char* data = __TEST__ "dirfile/new";
   struct stat buf;
-  int r = 0;
+  int error, stat_format, r = 0;
 
   DIRFILE* D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_TRUNC |
       GD_VERBOSE);
   gd_add_raw(D, "new", GD_UINT8, 2, 0);
   gd_metaflush(D);
-  int error = gd_error(D);
+  error = gd_error(D);
 
   gd_close(D);
 
-  if (stat(format, &buf))
-    r =  1;
+  stat_format = stat(format, &buf);
 
   unlink(data);
   unlink(format);
   rmdir(filedir);
 
-  if (error || r)
-    return 1;
+  CHECKI(stat_format, 0);
+  CHECKI(error, GD_E_OK);
 
-  return 0;
+  return r;
 }

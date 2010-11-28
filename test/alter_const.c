@@ -16,7 +16,8 @@ int main(void)
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
   const char* format_data = "const CONST FLOAT32 8.3\n";
-  int fd, r = 0;
+  int fd, ret, error, n, r = 0;
+  DIRFILE *D;
   double d;
 
   mkdir(filedir, 0777);
@@ -25,10 +26,10 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
-  int ret = gd_alter_const(D, "const", GD_UINT8);
-  int error = gd_error(D);
-  int n = gd_get_constant(D, "const", GD_FLOAT64, &d);
+  D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
+  ret = gd_alter_const(D, "const", GD_UINT8);
+  error = gd_error(D);
+  n = gd_get_constant(D, "const", GD_FLOAT64, &d);
 
   gd_close(D);
 

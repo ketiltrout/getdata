@@ -15,7 +15,9 @@ int main(void)
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
   const char* format_data = "carray CARRAY FLOAT64 8.3 7.2 6.1 5.0 3.9 2.8 1.7\n";
-  int fd, r = 0;
+  int fd, error, r = 0;
+  size_t n;
+  DIRFILE *D;
 
   mkdir(filedir, 0777);
 
@@ -23,9 +25,9 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  size_t n = gd_carray_len(D, "carray");
-  int error = gd_error(D);
+  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  n = gd_carray_len(D, "carray");
+  error = gd_error(D);
 
   gd_close(D);
 

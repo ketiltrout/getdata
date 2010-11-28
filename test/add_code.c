@@ -13,21 +13,22 @@ int main(void)
 {
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
-  int r = 0;
-
+  int error, n, r = 0;
   gd_entry_t E;
+  DIRFILE *D;
+
   E.field =  "ne/w";
   E.field_type = GD_RAW_ENTRY;
   E.fragment_index = 0;
   E.EN(raw,spf) = 2;
   E.EN(raw,data_type) = GD_UINT8;
 
-  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_CREAT);
+  D = gd_open(filedir, GD_RDWR | GD_CREAT);
   gd_add(D, &E);
-  int error = gd_error(D);
+  error = gd_error(D);
 
   /* check */
-  int n = gd_nfields(D);
+  n = gd_nfields(D);
 
   gd_close(D);
 

@@ -25,7 +25,8 @@ int main(void)
   uint16_t c1[8], c2[8];
   char command[4096];
   uint16_t data_data[256];
-  int fd, i, r = 0;
+  int fd, i, n1, error1, n2, error2, r = 0;
+  DIRFILE *D;
 
   memset(c1, 0, 16);
   memset(c2, 0, 16);
@@ -47,14 +48,14 @@ int main(void)
   if (gd_system(command))
     return 1;
 
-  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  int n1 = gd_getdata(D, "data", 5, 0, 1, 0, GD_UINT16, c1);
-  int error1 = gd_error(D);
+  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  n1 = gd_getdata(D, "data", 5, 0, 1, 0, GD_UINT16, c1);
+  error1 = gd_error(D);
   gd_close(D);
 
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  int n2 = gd_getdata(D, "data", 5, 0, 1, 0, GD_UINT16, c2);
-  int error2 = gd_error(D);
+  n2 = gd_getdata(D, "data", 5, 0, 1, 0, GD_UINT16, c2);
+  error2 = gd_error(D);
   gd_close(D);
 
   unlink(gzipdata);

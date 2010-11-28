@@ -25,9 +25,9 @@ int main(void)
   const char* format2 = __TEST__ "dirfile/format2";
   const char* format2_data = "data2 RAW UINT8 1\nFRAMEOFFSET 2";
 
-  int fd;
-  int r = 0;
+  int fd, error, error2, error3, r = 0;
   uint8_t data_data[4] = { 0, 1, 2, 3 };
+  DIRFILE *D;
 
   mkdir(filedir, 0777);
 
@@ -51,20 +51,20 @@ int main(void)
   write(fd, data_data, 4);
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
 
-  int error = gd_error(D);
+  error = gd_error(D);
   CHECKI(error, 0);
 
   gd_getdata(D, "data1", 3, 0, 1, 0, GD_UINT8, data_data);
 
-  int error2 = gd_error(D);
+  error2 = gd_error(D);
   CHECKI(error2, 0);
   CHECKU(data_data[0], 2);
 
   gd_getdata(D, "data2", 3, 0, 1, 0, GD_UINT8, data_data);
 
-  int error3 = gd_error(D);
+  error3 = gd_error(D);
   CHECKI(error3, 0);
   CHECKU(data_data[0], 1);
 

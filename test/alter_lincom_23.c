@@ -20,7 +20,8 @@ int main(void)
     "lincom LINCOM 2 data 1 0 data 1 0\n";
   int32_t data_data[256];
   int32_t c[8];
-  int fd, i, r = 0;
+  int fd, i, ret, error, n, r = 0;
+  DIRFILE *D;
   const char* in_fields[3] = {"data", "phase", "data"};
   const double m[3] = {1, 2, 3};
   const double b[3] = {3, 0, 1};
@@ -38,10 +39,10 @@ int main(void)
   write(fd, data_data, 256 * sizeof(int32_t));
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
-  int ret = gd_alter_lincom(D, "lincom", 3, in_fields, m, b);
-  int error = gd_error(D);
-  int n = gd_getdata(D, "lincom", 5, 0, 1, 0, GD_INT32, c);
+  D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
+  ret = gd_alter_lincom(D, "lincom", 3, in_fields, m, b);
+  error = gd_error(D);
+  n = gd_getdata(D, "lincom", 5, 0, 1, 0, GD_INT32, c);
 
   gd_close(D);
 

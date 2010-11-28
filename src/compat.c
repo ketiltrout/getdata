@@ -34,9 +34,11 @@
 #ifndef HAVE_GMTIME_R
 struct tm *gmtime_r(const time_t *timep, struct tm *result)
 {
+  struct tm *ptr;
+
   dtrace("%p, %p", timep, result);
 
-  struct tm *ptr = gmtime(timep);
+  ptr = gmtime(timep);
   if (!ptr)
     return NULL;
 
@@ -51,18 +53,20 @@ struct tm *gmtime_r(const time_t *timep, struct tm *result)
 #ifndef HAVE_MKSTEMP
 int mkstemp(char *template) {
   int ret = -1;
+  char *template_template;
 
   dtrace("\"%s\"", template);
 
-  char *template_template = strdup(template);
+  template_template = strdup(template);
 
   /* for sanity's sake */
   errno = 0;
 
   /* loop while open returns EEXIST */
   do {
+    char *ptr;
     strcpy(template, template_template);
-    char* ptr = mktemp(template);
+    ptr = mktemp(template);
 
     if (ptr == NULL)
       errno = EINVAL;
@@ -80,6 +84,8 @@ int mkstemp(char *template) {
 #ifdef __MSVCRT__
 int _GD_Rename(const char *oldname, const char *newname)
 {
+  int ret;
+
   dtrace("\"%s\", \"%s\"", oldname, newname);
 
   if (unlink(newname)) {
@@ -89,7 +95,7 @@ int _GD_Rename(const char *oldname, const char *newname)
     }
   }
 
-  int ret = rename(oldname, newname);
+  ret = rename(oldname, newname);
 
   dreturn("%i", ret);
   return ret;
@@ -100,9 +106,11 @@ int _GD_Rename(const char *oldname, const char *newname)
 #ifndef HAVE_STRERROR_R
 int strerror_r(int errnum, char *buf, size_t buflen)
 {
+  char *ptr;
+
   dtrace("%i, %p, %zu", errnum, buf, buflen);
   
-  char *ptr = strerror(errnum);
+  ptr = strerror(errnum);
   strncpy(buf, ptr, buflen);
 
   return 0;
@@ -150,6 +158,9 @@ ssize_t getdelim(char **lineptr, size_t *n, int delim, FILE *stream)
     /* look for delim */
     q = (char *)memchr(p, delim, nread);
     if (q) {
+      int r;
+      off64_t new_pos;
+
       /* found delim */
       count += (q - p) + 1;
 
@@ -164,8 +175,8 @@ ssize_t getdelim(char **lineptr, size_t *n, int delim, FILE *stream)
 #ifdef __MSVCRT__
       /* Even when we open a text file in binary mode, fseek/ftell seem able
        * to screw up.  So, do things the hard way. */
-      int r = fgetc(stream);
-      off64_t new_pos = ftello64(stream);
+      r = fgetc(stream);
+      new_pos = ftello64(stream);
       while (r != EOF && (new_pos <= pos || r != '\n')) {
         r = fgetc(stream);
         new_pos = ftello64(stream);

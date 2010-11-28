@@ -195,6 +195,8 @@ static void* _GD_ResolveSymbol(lt_dlhandle lib, struct encoding_t* enc,
 
 int _GD_MissingFramework(int encoding, unsigned int funcs)
 {
+  int ret;
+
   dtrace("%x, %x", encoding, funcs);
 
 #ifdef USE_MODULES
@@ -268,7 +270,7 @@ int _GD_MissingFramework(int encoding, unsigned int funcs)
 #endif
 #endif
 
-  int ret =
+  ret =
     (funcs & GD_EF_OPEN   && _gd_ef[encoding].open   == NULL) ||
     (funcs & GD_EF_CLOSE  && _gd_ef[encoding].close  == NULL) ||
     (funcs & GD_EF_TOUCH  && _gd_ef[encoding].touch  == NULL) ||
@@ -594,9 +596,11 @@ unsigned long gd_encoding(DIRFILE* D, int fragment) gd_nothrow
 
 int _GD_GenericTouch(struct _gd_raw_file* file)
 {
+  int fd;
+
   dtrace("%p", file);
 
-  int fd = open(file->name, O_RDWR | O_CREAT | O_TRUNC | O_BINARY, 0666);
+  fd = open(file->name, O_RDWR | O_CREAT | O_TRUNC | O_BINARY, 0666);
 
   if (fd != -1)
     fd = close(fd);
@@ -607,9 +611,11 @@ int _GD_GenericTouch(struct _gd_raw_file* file)
 
 int _GD_GenericUnlink(struct _gd_raw_file* file)
 {
+  int r;
+
   dtrace("%p", file);
 
-  int r = unlink(file->name);
+  r = unlink(file->name);
 
   dreturn("%i", r);
   return r;
@@ -617,11 +623,13 @@ int _GD_GenericUnlink(struct _gd_raw_file* file)
 
 int _GD_GenericMove(struct _gd_raw_file* file, char* new_path)
 {
+  int r, rename_errno;
+
   dtrace("%p, \"%s\"", file, new_path);
 
-  int r = _GD_Rename(file->name, new_path);
+  r = _GD_Rename(file->name, new_path);
 
-  int rename_errno = errno;
+  rename_errno = errno;
 
   if (!r) {
     free(file->name);

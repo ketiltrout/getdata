@@ -24,8 +24,10 @@ int main(void)
   const char* format = __TEST__ "dirfile/format";
   const char* data = __TEST__ "dirfile/data";
   const char* format_data = "data RAW UINT8 1\n";
-  int fd;
+  int fd, r = 0;
+  size_t n;
   const size_t len = strlen(data);
+  DIRFILE *D;
 
   mkdir(filedir, 0777);
 
@@ -37,14 +39,16 @@ int main(void)
   write(fd, data, len);
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  size_t n = gd_nframes(D);
+  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  n = gd_nframes(D);
   gd_close(D);
 
   unlink(data);
   unlink(format);
   rmdir(filedir);
 
-  return !(n == len);
+  CHECKU(n, len);
+
+  return r;
 #endif
 }

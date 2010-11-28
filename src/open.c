@@ -367,9 +367,11 @@ DIRFILE* gd_cbopen(const char* filedir, unsigned long flags,
 
 DIRFILE* gd_open(const char* filedir, unsigned long flags)
 {
+  DIRFILE *D;
+
   dtrace("\"%s\", 0x%lx", filedir, (unsigned long)flags);
 
-  DIRFILE* D = gd_cbopen(filedir, flags, NULL, NULL);
+  D = gd_cbopen(filedir, flags, NULL, NULL);
 
   dreturn("%p", D);
   return D;

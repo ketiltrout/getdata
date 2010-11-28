@@ -27,6 +27,8 @@ int main(void)
     "j RAW UINT8 1\n"
     "e RAW UINT8 1\n";
   int fd, r = 0;
+  const char **field_list;
+  DIRFILE *D;
 
   mkdir(filedir, 0777);
 
@@ -34,8 +36,8 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  const char** field_list = gd_field_list(D);
+  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  field_list = gd_field_list(D);
 
   if (gd_error(D))
     r = 1;

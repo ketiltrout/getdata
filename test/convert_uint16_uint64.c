@@ -17,8 +17,9 @@ int main(void)
   const char* data = __TEST__ "dirfile/data";
   const char* format_data = "data RAW UINT16 8\n";
   uint16_t  data_data[256];
-  uint64_t c[8], i;
-  int fd, r = 0;
+  uint64_t c[8];
+  int fd, i, n, error, r = 0;
+  DIRFILE *D;
 
   memset(c, 0, 8);
   mkdir(filedir, 0777);
@@ -34,9 +35,9 @@ int main(void)
   write(fd, data_data, 256 * sizeof(uint16_t));
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  int n = gd_getdata(D, "data", 5, 0, 1, 0, GD_UINT64, c);
-  int error = gd_error(D);
+  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  n = gd_getdata(D, "data", 5, 0, 1, 0, GD_UINT64, c);
+  error = gd_error(D);
 
   gd_close(D);
 
@@ -47,7 +48,7 @@ int main(void)
   CHECKI(error, 0);
   CHECKI(n, 8);
   for (i = 0; i < 8; ++i)
-    CHECKUi(i,c[i], 40 + i);
+    CHECKUi(i,c[i], 40 + (unsigned)i);
 
   return r;
 }

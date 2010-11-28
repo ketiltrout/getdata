@@ -28,8 +28,9 @@ int main(void)
   const char* data = __TEST__ "dirfile/data";
   char format_data[1000];
   uint64_t c = 0x0203000000040001LLU, d = 0;
-  int fd, r = 0;
   const int big_endian = BigEndian();
+  int fd, n, error, r = 0;
+  DIRFILE *D;
 
   mkdir(filedir, 0777); 
 
@@ -40,9 +41,9 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_UNENCODED | GD_VERBOSE);
-  int n = gd_putdata(D, "data", 5, 0, 1, 0, GD_UINT64, &c);
-  int error = gd_error(D);
+  D = gd_open(filedir, GD_RDWR | GD_UNENCODED | GD_VERBOSE);
+  n = gd_putdata(D, "data", 5, 0, 1, 0, GD_UINT64, &c);
+  error = gd_error(D);
 
   gd_close(D);
 

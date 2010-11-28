@@ -155,7 +155,8 @@ int main(void)
     0xc2, 0x90, 0x93, 0x44, 0x9b, 0x9b, 0xd7, 0x66,
     0x23, 0x59, 0x9d, 0x44, 0x68, 0x69, 0x43, 0x9a
   };
-  int fd, i, r = 0;
+  int fd, i, n, error, r = 0;
+  DIRFILE *D;
 
   mkdir(filedir, 0777); 
 
@@ -180,9 +181,9 @@ int main(void)
   write(fd, data_data, 64 * 16 * sizeof(unsigned char));
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  int n = gd_getdata(D, "data", 5, 0, 0, 10, GD_COMPLEX128, u);
-  int error = gd_error(D);
+  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  n = gd_getdata(D, "data", 5, 0, 0, 10, GD_COMPLEX128, u);
+  error = gd_error(D);
 
   gd_close(D);
 

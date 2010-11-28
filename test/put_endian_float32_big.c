@@ -17,11 +17,12 @@ int main(void)
   const char* format = __TEST__ "dirfile/format";
   const char* data = __TEST__ "dirfile/data";
   const char* format_data = "data RAW FLOAT32 1\nENDIAN big\n";
-  int fd, r = 0;
   unsigned int i;
   const float c = 1.5;
   unsigned char x[sizeof(float)] = { 0x3F, 0xC0, 0x00, 0x00 };
   unsigned char u[sizeof(float)];
+  int fd, n, error, r = 0;
+  DIRFILE *D;
 
   mkdir(filedir, 0777); 
 
@@ -29,9 +30,9 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_UNENCODED | GD_VERBOSE);
-  int n = gd_putdata(D, "data", 5, 0, 1, 0, GD_FLOAT32, &c);
-  int error = gd_error(D);
+  D = gd_open(filedir, GD_RDWR | GD_UNENCODED | GD_VERBOSE);
+  n = gd_putdata(D, "data", 5, 0, 1, 0, GD_FLOAT32, &c);
+  error = gd_error(D);
 
   gd_close(D);
 

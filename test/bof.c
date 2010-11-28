@@ -14,7 +14,9 @@ int main(void)
   const char* format = __TEST__ "dirfile/format";
   const char* data = __TEST__ "dirfile/data";
   const char* format_data = "data RAW UINT16 2\n/FRAMEOFFSET 35\n";
-  int fd, r = 0;
+  int fd, error, r = 0;
+  off_t n;
+  DIRFILE *D;
 
   mkdir(filedir, 0777);
 
@@ -26,9 +28,9 @@ int main(void)
   write(fd, data, strlen(data));
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  off_t n = gd_bof(D, "data");
-  int error = gd_error(D);
+  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  n = gd_bof(D, "data");
+  error = gd_error(D);
   gd_close(D);
 
   unlink(data);

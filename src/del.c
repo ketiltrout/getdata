@@ -194,9 +194,12 @@ int gd_delete(DIRFILE* D, const char* field_code_in, int flags)
 {
   unsigned int index;
   unsigned int first, last = 0;
-  int n_del, i, repr;
+  int n_del, i, repr, len;
   unsigned int j;
   char *field_code;
+  char **new_ref = NULL;
+  gd_entry_t *reference = NULL, *E;
+  gd_entry_t **del_list;
 
   dtrace("%p, \"%s\", %x", D, field_code_in, flags);
 
@@ -214,15 +217,14 @@ int gd_delete(DIRFILE* D, const char* field_code_in, int flags)
 
   _GD_ClearError(D);
 
-  gd_entry_t *E = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr,
-      &index, 1);
+  E = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, &index, 1);
 
   if (D->error) {
     dreturn("%i", -1);
     return -1;
   }
 
-  const int len = strlen(field_code);
+  len = strlen(field_code);
 
   /* check protection */
   if (D->fragment[E->fragment_index].protection & GD_PROTECT_FORMAT) {
@@ -274,8 +276,8 @@ int gd_delete(DIRFILE* D, const char* field_code_in, int flags)
     free(field_code);
 
   /* gather a list of fields */
-  gd_entry_t **del_list = (gd_entry_t **)malloc(sizeof(gd_entry_t*) *
-      ((E->e->n_meta == -1) ? 1 : 1 + E->e->n_meta));
+  del_list = (gd_entry_t **)malloc(sizeof(gd_entry_t*) * ((E->e->n_meta == -1) ?
+        1 : 1 + E->e->n_meta));
 
   if (del_list == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
@@ -346,9 +348,6 @@ int gd_delete(DIRFILE* D, const char* field_code_in, int flags)
   }
 
   /* Fix up reference fields */
-  char** new_ref = NULL;
-  gd_entry_t* reference = NULL;
-
   if (E->field_type == GD_RAW_ENTRY) {
     new_ref = (char **)malloc(sizeof(char*) * D->n_fragment);
     if (new_ref == NULL) {

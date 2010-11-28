@@ -20,8 +20,8 @@ int main(void)
   const char* format_data = "data RAW UINT16 8\nENDIAN little\n";
   uint16_t data_data[128];
   uint16_t c[8], d;
-  int fd;
-  int r = 0;
+  int fd, ret, error, n, i = 0, r = 0;
+  DIRFILE *D;
 
   memset(c, 0, 8);
   mkdir(filedir, 0777);
@@ -37,15 +37,14 @@ int main(void)
   write(fd, data_data, 256);
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
-  int ret = gd_alter_endianness(D, GD_BIG_ENDIAN, 0, 0);
-  int error = gd_error(D);
-  int n = gd_getdata(D, "data", 5, 0, 1, 0, GD_UINT16, c);
+  D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
+  ret = gd_alter_endianness(D, GD_BIG_ENDIAN, 0, 0);
+  error = gd_error(D);
+  n = gd_getdata(D, "data", 5, 0, 1, 0, GD_UINT16, c);
 
   gd_close(D);
 
   fd = open(data, O_RDONLY | O_BINARY);
-  int i = 0;
 
   if (fd >= 0) {
     while (read(fd, &d, sizeof(uint16_t))) {

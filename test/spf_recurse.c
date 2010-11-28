@@ -16,7 +16,9 @@ int main(void)
   const char* format_data =
     "in1 RAW UINT8 11\n"
     "lincom LINCOM 2 lincom 1 0 in1 1 0\n";
-  int fd, r = 0;
+  int fd, error, r = 0;
+  gd_spf_t spf;
+  DIRFILE *D;
 
   mkdir(filedir, 0777);
 
@@ -24,9 +26,9 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDONLY);
-  unsigned int spf = gd_spf(D, "lincom");
-  int error = gd_error(D);
+  D = gd_open(filedir, GD_RDONLY);
+  spf = gd_spf(D, "lincom");
+  error = gd_error(D);
   gd_close(D);
 
   unlink(format);

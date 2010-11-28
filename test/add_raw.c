@@ -16,11 +16,11 @@ int main(void)
   const char* format = __TEST__ "dirfile/format";
   const char* data = __TEST__ "dirfile/data";
   gd_entry_t e;
-  int r = 0;
+  int error, r = 0;
 
   DIRFILE* D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
   gd_add_raw(D, "data", GD_UINT8, 2, 0);
-  int error = gd_error(D);
+  error = gd_error(D);
 
   /* check */
   gd_entry(D, "data", &e);

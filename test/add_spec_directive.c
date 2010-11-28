@@ -14,15 +14,15 @@ int main(void)
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
   const char* data = __TEST__ "dirfile/INCLUDE";
-  int r = 0;
+  int error, n, r = 0;
 
   DIRFILE* D = gd_open(filedir, GD_RDWR | GD_CREAT);
   gd_dirfile_standards(D, 7);
   gd_add_spec(D, "INCLUDE RAW UINT8 2", 0);
-  int error = gd_error(D);
+  error = gd_error(D);
 
   /* check */
-  int n = gd_nfields(D);
+  n = gd_nfields(D);
 
   gd_close(D);
 

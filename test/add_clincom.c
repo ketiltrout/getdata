@@ -25,11 +25,11 @@ int main(void)
   const double complex m[2] = {1 + _Complex_I * 3.3, 0.3 + _Complex_I * 18.3};
   const double complex b[2] = {2 + _Complex_I * 3.8, 2.1 + _Complex_I * 9.8};
 #endif
-  int r = 0;
+  int error, r = 0;
   gd_entry_t e;
 
   gd_add_clincom(D, "new", 2, in_fields, m, b, 0);
-  int error = gd_error(D);
+  error = gd_error(D);
 
   /* check */
   gd_entry(D, "new", &e);

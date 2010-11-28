@@ -16,14 +16,15 @@ int main(void)
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
   uint8_t val[] = {0, 0, 0, 0, 0, 0, 0, 0};
-  int r = 0, i;
+  int error, r = 0, i;
+  DIRFILE *D;
 
-  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
+  D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
   gd_add_carray(D, "data", GD_UINT8, 8, GD_UINT8, &val, 0);
   for (i = 0; i < 8; ++i)
     val[i] = i * (i + 1);
   gd_put_carray(D, "data", GD_UINT8, &val);
-  int error = gd_error(D);
+  error = gd_error(D);
   gd_close(D);
 
   /* check */

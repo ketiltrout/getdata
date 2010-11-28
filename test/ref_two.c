@@ -25,9 +25,10 @@ int main(void)
   const char* data1 = __TEST__ "dirfile/data1";
   const char* data2 = __TEST__ "dirfile/data2";
 
-  int fd;
-  int r = 0;
   uint8_t data_data[4] = { 0, 1, 2, 3 };
+  int fd, error, error2, r = 0;
+  DIRFILE *D;
+  off_t nf;
 
   mkdir(filedir, 0777);
 
@@ -43,14 +44,14 @@ int main(void)
   write(fd, data_data, 3);
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
 
-  int error = gd_error(D);
+  error = gd_error(D);
   CHECKI(error, 0);
 
-  off_t nf = gd_nframes(D);
+  nf = gd_nframes(D);
 
-  int error2 = gd_error(D);
+  error2 = gd_error(D);
   CHECKI(error2, 0);
   CHECKI(nf,3);
 

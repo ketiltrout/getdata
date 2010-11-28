@@ -11,14 +11,15 @@
 int main(void)
 {
   const char* filedir = __TEST__ "dirfile";
-  int r = 0;
+  int error, r = 0;
+  DIRFILE *D;
 
   mkdir(filedir, 0777);
 
-  DIRFILE* D = gd_open(filedir, GD_RDONLY);
+  D = gd_open(filedir, GD_RDONLY);
 
   rmdir(filedir);
-  int error = gd_error(D);
+  error = gd_error(D);
   CHECKI(error, GD_E_OPEN);
   gd_discard(D);
 

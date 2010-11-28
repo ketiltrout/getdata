@@ -17,7 +17,8 @@ int main(void)
   const char* format = __TEST__ "dirfile/format";
   const char* format_data = "data CONST UINT8 8\nPROTECT all\n";
   uint8_t d = 3;
-  int fd, r = 0;
+  int fd, n, error, r = 0;
+  DIRFILE *D;
 
   mkdir(filedir, 0777);
 
@@ -25,9 +26,9 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_UNENCODED);
-  int n = gd_put_constant(D, "data", GD_UINT8, &d);
-  int error = gd_error(D);
+  D = gd_open(filedir, GD_RDWR | GD_UNENCODED);
+  n = gd_put_constant(D, "data", GD_UINT8, &d);
+  error = gd_error(D);
 
   gd_close(D);
 

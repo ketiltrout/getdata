@@ -15,6 +15,8 @@ int main(void)
   const char* format = __TEST__ "dirfile/format";
   const char* format_data = "data PHASE in 8\n";
   int fd;
+  DIRFILE *D;
+  gd_entry_t E;
 
   mkdir(filedir, 0777);
 
@@ -22,8 +24,7 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  gd_entry_t E;
+  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
 
   gd_entry(D, "data", &E);
   gd_free_entry_strings(&E);

@@ -19,8 +19,10 @@ int main(void)
     "data2 RAW UINT8 1\n"
     "lincom LINCOM 2 data2 1. 0. data 1. 0.\n"
     "lincom2 LINCOM 2 data 1. 0. data2 1. 0.\n";
-  int fd, r = 0;
+  int fd, error, error2, r = 0;
   const size_t len = strlen(data);
+  off_t n, m;
+  DIRFILE *D;
 
   mkdir(filedir, 0777);
 
@@ -36,11 +38,11 @@ int main(void)
   write(fd, data, len);
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDONLY);
-  off_t n = gd_eof(D, "lincom");
-  int error = gd_error(D);
-  off_t m = gd_eof(D, "lincom");
-  int error2 = gd_error(D);
+  D = gd_open(filedir, GD_RDONLY);
+  n = gd_eof(D, "lincom");
+  error = gd_error(D);
+  m = gd_eof(D, "lincom");
+  error2 = gd_error(D);
   gd_close(D);
 
   unlink(data2);

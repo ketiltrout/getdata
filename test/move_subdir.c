@@ -20,8 +20,9 @@ int main(void)
   const char* new_data = __TEST__ "dirfile/subdir/data";
   const char* format_data = "INCLUDE subdir/format1\ndata RAW UINT8 11\n";
   const char* format1_data = "#\n";
-  int fd, r = 0;
+  int fd, ret, error, ge_ret, unlink_data, unlink_new_data, r = 0;
   gd_entry_t E;
+  DIRFILE *D;
 
   mkdir(filedir, 0777);
   mkdir(subdir, 0777);
@@ -38,14 +39,14 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_UNENCODED | GD_VERBOSE);
-  int ret = gd_move(D, "data", 1, 1);
-  int error = gd_error(D);
-  int ge_ret =  gd_entry(D, "data", &E);
+  D = gd_open(filedir, GD_RDWR | GD_UNENCODED | GD_VERBOSE);
+  ret = gd_move(D, "data", 1, 1);
+  error = gd_error(D);
+  ge_ret =  gd_entry(D, "data", &E);
   gd_close(D);
 
-  int unlink_data = unlink(data);
-  int unlink_new_data = unlink(new_data);
+  unlink_data = unlink(data);
+  unlink_new_data = unlink(new_data);
   unlink(format1);
   unlink(format);
   rmdir(subdir);

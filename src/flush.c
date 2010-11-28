@@ -91,8 +91,9 @@ void _GD_Flush(DIRFILE* D, gd_entry_t *E)
 
 static const char* _GD_TypeName(DIRFILE* D, gd_type_t data_type)
 {
-  dtrace("%p, 0x%x", D, data_type);
   const char* ptr;
+
+  dtrace("%p, 0x%x", D, data_type);
 
   switch(data_type) {
     case GD_UINT8:
@@ -143,8 +144,9 @@ static const char* _GD_TypeName(DIRFILE* D, gd_type_t data_type)
 
 static const char* _GD_OldTypeName(DIRFILE* D, gd_type_t data_type)
 {
-  dtrace("%p, 0x%x", D, data_type);
   const char* ptr;
+
+  dtrace("%p, 0x%x", D, data_type);
 
   switch(data_type) {
     case GD_UINT8:
@@ -429,6 +431,7 @@ static void _GD_FlushFragment(DIRFILE* D, int i, int permissive)
   unsigned int u;
   mode_t mode;
   struct stat stat_buf;
+  time_t t;
 
   dtrace("%p, %i, %i", D, i, permissive);
 
@@ -457,10 +460,10 @@ static void _GD_FlushFragment(DIRFILE* D, int i, int permissive)
   }
 
   if (D->flags & GD_PRETTY_PRINT) {
-    pretty = 1;
     size_t t = 0;
     size_t m = 0;
     int n = 0;
+    pretty = 1;
     for (u = 0; u < D->n_entries; ++u)
       if (D->entry[u]->fragment_index == i && D->entry[u]->e->n_meta != -1) {
         size_t l = strlen(D->entry[u]->field);
@@ -477,7 +480,7 @@ static void _GD_FlushFragment(DIRFILE* D, int i, int permissive)
   }
 
   /* Introit */
-  time_t t = time(NULL);
+  t = time(NULL);
   strftime(buffer, GD_MAX_LINE_LENGTH, "%c", gmtime_r(&t, &now));
 
   fprintf(stream, "# This is a dirfile format file.\n"
@@ -871,8 +874,6 @@ uint64_t _GD_FindVersion(DIRFILE *D)
 
 int gd_dirfile_standards(DIRFILE *D, int vers) gd_nothrow
 {
-  dtrace("%p, %i", D, vers);
-
   /* log2(n) lut */
   static const char ln2[] = { -1,
     0,
@@ -901,6 +902,8 @@ int gd_dirfile_standards(DIRFILE *D, int vers) gd_nothrow
     16, 59, 41, 19, 24, 54,  4,  0, 13, 10, 17, 62, 60, 28, 42, 30, 20, 51, 25,
     44, 55, 47,  5, 32,  0, 38, 14, 22, 11, 58, 18, 53, 63,  9, 61, 27, 29, 50,
     43, 46, 31, 37, 21, 57, 52,  8, 26, 49, 45, 36, 56,  7, 48, 35,  6, 34, 33};
+
+  dtrace("%p, %i", D, vers);
 
   _GD_ClearError(D);
 

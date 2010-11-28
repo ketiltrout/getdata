@@ -43,9 +43,11 @@ int _GD_RawOpen(struct _gd_raw_file* file, int mode, int creat)
 off64_t _GD_RawSeek(struct _gd_raw_file* file, off64_t count,
     gd_type_t data_type, int pad __gd_unused)
 {
+  off64_t pos;
+
   dtrace("%p, %lli, %x, <unused>", file, (long long)count, data_type);
 
-  off64_t pos = lseek64(file->fp, count * GD_SIZE(data_type), SEEK_SET);
+  pos = lseek64(file->fp, count * GD_SIZE(data_type), SEEK_SET);
 
   if (pos == -1) {
     dreturn("%i", -1);
@@ -59,9 +61,11 @@ off64_t _GD_RawSeek(struct _gd_raw_file* file, off64_t count,
 ssize_t _GD_RawRead(struct _gd_raw_file *file, void *ptr, gd_type_t data_type,
     size_t nmemb)
 {
+  int nread;
+
   dtrace("%p, %p, %x, %zu", file, ptr, data_type, nmemb);
 
-  int nread = read(file->fp, ptr, nmemb * GD_SIZE(data_type));
+  nread = read(file->fp, ptr, nmemb * GD_SIZE(data_type));
 
   if (nread >= 0)
     nread /= GD_SIZE(data_type);
@@ -73,9 +77,11 @@ ssize_t _GD_RawRead(struct _gd_raw_file *file, void *ptr, gd_type_t data_type,
 ssize_t _GD_RawWrite(struct _gd_raw_file *file, const void *ptr,
     gd_type_t data_type, size_t nmemb)
 {
+  ssize_t nwrote;
+
   dtrace("%p, %p, %x, %zu", file, ptr, data_type, nmemb);
 
-  ssize_t nwrote = write(file->fp, ptr, nmemb * GD_SIZE(data_type));
+  nwrote = write(file->fp, ptr, nmemb * GD_SIZE(data_type));
 
   if (nwrote >= 0)
     nwrote /= GD_SIZE(data_type);
@@ -91,9 +97,11 @@ int _GD_RawSync(struct _gd_raw_file *file)
 
 int _GD_RawClose(struct _gd_raw_file *file)
 {
+  int ret;
+
   dtrace("%p", file);
 
-  int ret = close(file->fp);
+  ret = close(file->fp);
   if (!ret)
     file->fp = -1;
 

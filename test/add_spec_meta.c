@@ -14,16 +14,16 @@ int main(void)
 {
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
-  int r = 0;
+  int error, n, r = 0;
   gd_entry_t e;
+  unsigned char val;
 
   DIRFILE* D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
   gd_add_spec(D, "INDEX/meta CONST UINT8 2", 0);
-  int error = gd_error(D);
-  unsigned char val;
+  error = gd_error(D);
 
   /* check */
-  int n = gd_nfields(D);
+  n = gd_nfields(D);
 
   CHECKI(n, 1);
 

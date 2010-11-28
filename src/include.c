@@ -160,7 +160,7 @@ int gd_include(DIRFILE* D, const char* file, int fragment_index,
 {
   int standards = GD_DIRFILE_STANDARDS_VERSION;
   char* ref_name = NULL; 
-  int i;
+  int i, new_fragment;
 
   dtrace("%p, \"%s\", %i, %lx", D, file, fragment_index, (unsigned long)flags);
 
@@ -200,7 +200,7 @@ int gd_include(DIRFILE* D, const char* file, int fragment_index,
     return -1;
   }
 
-  int new_fragment = _GD_Include(D, file, "dirfile_include()", 0, &ref_name,
+  new_fragment = _GD_Include(D, file, "dirfile_include()", 0, &ref_name,
       fragment_index, &standards, &flags);
 
   if (!D->error) {
@@ -249,10 +249,11 @@ int gd_include(DIRFILE* D, const char* file, int fragment_index,
 static int _GD_CollectFragments(DIRFILE* D, int** f, int fragment, int nf)
 {
   int i;
+  int *new_f;
 
   dtrace("%p, %p, %i, %i", D, f, fragment, nf);
 
-  int* new_f = (int *)realloc(*f, sizeof(int) * ++nf);
+  new_f = (int *)realloc(*f, sizeof(int) * ++nf);
   if (new_f == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     dreturn("%i", -1);
@@ -291,8 +292,8 @@ static int _GD_ContainsFragment(int* f, int nf, int fragment)
 
 int gd_uninclude(DIRFILE* D, int fragment_index, int del)
 {
-  int parent, j;
-  unsigned int i, o;
+  int parent, j, nf;
+  unsigned int i, o, old_count;
   int *f = NULL;
 
   dtrace("%p, %i, %i", D, fragment_index, del);
@@ -327,7 +328,7 @@ int gd_uninclude(DIRFILE* D, int fragment_index, int del)
   }
 
   /* find all affected fragments */
-  int nf = _GD_CollectFragments(D, &f, fragment_index, 0);
+  nf = _GD_CollectFragments(D, &f, fragment_index, 0);
 
   if (D->error) {
     free(f);
@@ -363,7 +364,7 @@ int gd_uninclude(DIRFILE* D, int fragment_index, int del)
 
   /* delete fields from the fragment -- memory use is not sufficient to warrant
    * resizing D->entry */
-  unsigned int old_count = D->n_entries;
+  old_count = D->n_entries;
   for (i = o = 0; i < old_count; ++i)
     if (_GD_ContainsFragment(f, nf, D->entry[i]->fragment_index)) {
       if (D->entry[i]->e->n_meta >= 0) {

@@ -18,7 +18,8 @@ int main(void)
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
   const char* format_data = "data RAW UINT8 11\n";
-  int fd, r = 0;
+  int fd, error, r = 0;
+  unsigned int spf;
 
   mkdir(filedir, 0777);
 
@@ -26,8 +27,7 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  int error;
-  unsigned int spf = GetSamplesPerFrame(filedir, "data", &error);
+  spf = GetSamplesPerFrame(filedir, "data", &error);
 
   unlink(format);
   rmdir(filedir);

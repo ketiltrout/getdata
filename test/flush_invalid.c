@@ -11,11 +11,14 @@
 int main(void)
 {
   const char* filedir = __TEST__ "dirfile";
+  int error, r = 0;
 
   DIRFILE* D = gd_open(filedir, GD_RDWR);
   gd_flush(D, NULL);
-  int error = gd_error(D);
+  error = gd_error(D);
   gd_close(D);
 
-  return (error != GD_E_BAD_DIRFILE);
+  CHECKI(error, GD_E_BAD_DIRFILE);
+
+  return r;
 }

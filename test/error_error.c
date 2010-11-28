@@ -6,12 +6,12 @@
 int main(void)
 {
   char string[1000];
-  int r = 0;
+  int error, r = 0;
 
   DIRFILE* D = gd_open("a non_existant dirfile", 0);
 
   gd_error_string(D, string, 1000);
-  int error = gd_error(D);
+  error = gd_error(D);
   gd_close(D);
 
   CHECKI(error, GD_E_OPEN);

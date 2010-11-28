@@ -13,7 +13,8 @@ int main(void)
 {
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
-  int r = 0;
+  int error, r = 0;
+  DIRFILE *D;
 
   mkdir(filedir, 0777);
   close(open(format, O_CREAT | O_EXCL | O_WRONLY, 0666));
@@ -25,8 +26,8 @@ int main(void)
     return 77;
   }
 
-  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_TRUNC);
-  int error = gd_error(D);
+  D = gd_open(filedir, GD_RDWR | GD_TRUNC);
+  error = gd_error(D);
   gd_discard(D);
 
   chmod(filedir, 0777);

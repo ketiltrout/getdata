@@ -36,7 +36,8 @@ int main(void)
   int ll[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
   uint16_t d[8];
   unsigned char data_data[256];
-  int fd, i, r = 0;
+  int fd, n, error, m, error2, i, r = 0;
+  DIRFILE *D;
 
   memset(c, 0, 8);
   mkdir(filedir, 0777);
@@ -52,12 +53,12 @@ int main(void)
   write(fd, data_data, 256);
   close(fd);
 
-  DIRFILE* D = gd_cbopen(filedir, GD_RDONLY | GD_PEDANTIC, cb, ll);
-  int n = gd_getdata(D, "ar", 5, 0, 1, 0, GD_UINT16, c);
-  int error = gd_error(D);
+  D = gd_cbopen(filedir, GD_RDONLY | GD_PEDANTIC, cb, ll);
+  n = gd_getdata(D, "ar", 5, 0, 1, 0, GD_UINT16, c);
+  error = gd_error(D);
 
-  int m = gd_getdata(D, "FILEFRAM", 5, 0, 8, 0, GD_UINT16, d);
-  int error2 = gd_error(D);
+  m = gd_getdata(D, "FILEFRAM", 5, 0, 8, 0, GD_UINT16, d);
+  error2 = gd_error(D);
 
   gd_close(D);
 

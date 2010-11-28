@@ -16,7 +16,8 @@ int main(void)
   const char* format1 = __TEST__ "dirfile/format1";
   const char* format_data = "VERSION 999999\nINCLUDE format1\n";
   const char* format1_data = "BADDIRECTIVE BADTYPE\n";
-  int fd, r = 0;
+  int fd, error, r = 0;
+  DIRFILE *D;
 
   mkdir(filedir, 0777);
 
@@ -28,8 +29,8 @@ int main(void)
   write(fd, format1_data, strlen(format1_data));
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE | GD_PERMISSIVE);
-  int error = gd_error(D);
+  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE | GD_PERMISSIVE);
+  error = gd_error(D);
   gd_close(D);
 
   unlink(format1);

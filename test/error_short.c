@@ -12,20 +12,20 @@ int main(void)
 {
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
-  char string[1000] = "";
+  char string[1000] = "abc";
   int r = 0;
+  DIRFILE *D;
 
   mkdir(filedir, 0777);
   close(open(format, O_CREAT | O_EXCL | O_WRONLY, 0666));
 
-  DIRFILE* D = gd_open(filedir, GD_RDONLY);
+  D = gd_open(filedir, GD_RDONLY);
   gd_error_string(D, string, 2);
   gd_close(D);
 
   unlink(format);
   rmdir(filedir);
 
-  CHECKI(string[0], 'S');
   CHECKI(string[1], 0);
   
   return r;

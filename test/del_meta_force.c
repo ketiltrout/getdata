@@ -22,7 +22,8 @@ int main(void)
     "META data z STRING 5\n"
     "META data l STRING 6\n"
     "s STRING e\n";
-  int fd, r = 0;
+  int fd, ret, error, nf, r = 0;
+  DIRFILE *D;
 
   mkdir(filedir, 0777);
 
@@ -30,10 +31,10 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDWR);
-  int ret = gd_delete(D, "data", GD_DEL_META);
-  int error = gd_error(D);
-  int nf = gd_nfields(D);
+  D = gd_open(filedir, GD_RDWR);
+  ret = gd_delete(D, "data", GD_DEL_META);
+  error = gd_error(D);
+  nf = gd_nfields(D);
   gd_close(D);
 
   unlink(format);

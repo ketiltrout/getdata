@@ -17,7 +17,9 @@ int main(void)
   const char* table = __TEST__ "dirfile/table";
   const char* format_data = "linterp LINTERP data ./table\n";
   unsigned char c = 0;
-  int fd, i, r = 0;
+  int fd, i, n, error, r = 0;
+  DIRFILE *D;
+  FILE *t;
 
   mkdir(filedir, 0777);
 
@@ -25,14 +27,14 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  FILE* t = fopen(table, "wt");
+  t = fopen(table, "wt");
   for (i = 0; i < 10; ++i)
     fprintf(t, "%i %i\n", i * 6, i * 12);
   fclose(t);
 
-  DIRFILE* D = gd_open(filedir, GD_RDONLY);
-  int n = gd_getdata(D, "linterp", 5, 0, 1, 0, GD_UINT8, &c);
-  int error = gd_error(D);
+  D = gd_open(filedir, GD_RDONLY);
+  n = gd_getdata(D, "linterp", 5, 0, 1, 0, GD_UINT8, &c);
+  error = gd_error(D);
 
   gd_close(D);
 

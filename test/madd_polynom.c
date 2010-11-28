@@ -15,19 +15,19 @@ int main(void)
 {
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
-  int j, r = 0;
+  int j, error, ge_error, r = 0;
   gd_entry_t e;
+  const char* in_field = "in";
+  const double a[4] = {1, 0.3, 0.5, 1.8};
 
   DIRFILE* D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
   gd_add_phase(D, "new", "in", 3, 0);
-  const char* in_field = "in";
-  const double a[4] = {1, 0.3, 0.5, 1.8};
   gd_madd_polynom(D, "new", "meta", 3, in_field, a);
-  int error = gd_error(D);
+  error = gd_error(D);
 
   /* check */
   gd_entry(D, "new/meta", &e);
-  int ge_error = gd_error(D);
+  ge_error = gd_error(D);
   CHECKI(ge_error, 0);
   if (!r) {
     CHECKI(e.field_type, GD_POLYNOM_ENTRY);

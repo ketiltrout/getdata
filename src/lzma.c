@@ -130,9 +130,9 @@ int _GD_LzmaOpen(struct _gd_raw_file* file, int mode __gd_unused,
  * appropriate.  Returns -1 on error */
 static int _GD_LzmaDecode(struct gd_lzmadata *ptr)
 {
-  dtrace("%p", ptr);
-
   int n = 0;
+
+  dtrace("%p", ptr);
 
   if (!ptr->input_eof) {
     n = fread(ptr->data_in + ptr->read_in, 1, GD_LZMA_BUFFER_SIZE -
@@ -190,9 +190,9 @@ static int _GD_LzmaDecode(struct gd_lzmadata *ptr)
 off64_t _GD_LzmaSeek(struct _gd_raw_file* file, off64_t count,
     gd_type_t data_type, int pad __gd_unused)
 {
-  dtrace("%p, %lli, %x, <unused>", file, (long long)count, data_type);
-
   struct gd_lzmadata *ptr = (struct gd_lzmadata *)file->edata;
+
+  dtrace("%p, %lli, %x, <unused>", file, (long long)count, data_type);
 
   count *= GD_SIZE(data_type);
 
@@ -237,11 +237,10 @@ ssize_t _GD_LzmaRead(struct _gd_raw_file *file, void *data, gd_type_t data_type,
     size_t nmemb)
 {
   char* output = (char *)data;
-
-  dtrace("%p, %p, %x, %zu", file, data, data_type, nmemb);
-
   struct gd_lzmadata *ptr = (struct gd_lzmadata *)file->edata;
   uint64_t nbytes = nmemb * GD_SIZE(data_type);
+
+  dtrace("%p, %p, %x, %zu", file, data, data_type, nmemb);
 
   /* this loops over chunks of uncompressed data of size data_out until we
    * have as much data as we need in data_out, or until EOF */
@@ -284,9 +283,9 @@ ssize_t _GD_LzmaRead(struct _gd_raw_file *file, void *data, gd_type_t data_type,
 
 int _GD_LzmaClose(struct _gd_raw_file *file)
 {
-  dtrace("%p", file);
-
   struct gd_lzmadata *ptr = (struct gd_lzmadata *)file->edata;
+
+  dtrace("%p", file);
 
   ptr->xzerror = 0;
   lzma_end(&ptr->xzfile);
@@ -303,9 +302,12 @@ int _GD_LzmaClose(struct _gd_raw_file *file)
 
 off64_t _GD_LzmaSize(struct _gd_raw_file *file, gd_type_t data_type)
 {
+  struct gd_lzmadata *ptr;
+  off_t n;
+
   dtrace("%p, %x", file, data_type);
 
-  struct gd_lzmadata *ptr = _GD_LzmaDoOpen(file);
+  ptr = _GD_LzmaDoOpen(file);
 
   if (ptr == NULL) {
     dreturn("%i", -1);
@@ -324,7 +326,7 @@ off64_t _GD_LzmaSize(struct _gd_raw_file *file, gd_type_t data_type)
   lzma_end(&ptr->xzfile);
   fclose(ptr->stream);
 
-  off_t n = (ptr->base + ptr->end) / GD_SIZE(data_type);
+  n = (ptr->base + ptr->end) / GD_SIZE(data_type);
   free(ptr);
 
   dreturn("%lli", (long long)n);

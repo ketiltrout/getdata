@@ -17,6 +17,8 @@ int main(void)
   const char* format_data = "data RAW UINT8 1\n";
   int i, r = 0;
   FILE* stream;
+  size_t n, m;
+  DIRFILE *D;
 
   mkdir(filedir, 0777);
 
@@ -29,9 +31,9 @@ int main(void)
     fprintf(stream, "%i\n", i);
   fclose(stream);
 
-  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  size_t n = gd_nframes(D);
-  size_t m = gd_nframes(D);
+  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  n = gd_nframes(D);
+  m = gd_nframes(D);
   gd_close(D);
 
   unlink(data);

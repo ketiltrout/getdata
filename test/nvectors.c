@@ -28,7 +28,9 @@ int main(void)
     "carray CARRAY UINT8 1\n"
     "string STRING value\n"
     "string2 STRING value\n";
-  int fd, r = 0;
+  int fd, error, r = 0;
+  unsigned int nfields;
+  DIRFILE *D;
 
   mkdir(filedir, 0777);
 
@@ -36,9 +38,9 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  unsigned int nfields = gd_nvectors(D);
-  int error = gd_error(D);
+  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  nfields = gd_nvectors(D);
+  error = gd_error(D);
   gd_close(D);
 
   unlink(format);

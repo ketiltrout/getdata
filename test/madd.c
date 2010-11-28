@@ -15,8 +15,9 @@ int main(void)
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
   const char* data = __TEST__ "dirfile/data";
-  int r = 0;
+  int error, ge_error, n, r = 0;
   gd_entry_t e;
+  DIRFILE *D;
 
   gd_entry_t E;
   memset(&E, 0, sizeof(E));
@@ -26,17 +27,17 @@ int main(void)
   E.EN(raw,spf) = 2;
   E.EN(raw,data_type) = GD_UINT8;
 
-  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
+  D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
   gd_add(D, &E);
   E.field_type = GD_CONST_ENTRY;
   E.EN(scalar,const_type) = GD_UINT8;
   gd_madd(D, &E, "data");
-  int error = gd_error(D);
+  error = gd_error(D);
 
   /* check */
-  int n = gd_nfields(D);
+  n = gd_nfields(D);
   gd_entry(D, "data/data", &e);
-  int ge_error = gd_error(D);
+  ge_error = gd_error(D);
   CHECKI(ge_error, 0);
   if (!r) {
     CHECKI(e.field_type, GD_CONST_ENTRY);

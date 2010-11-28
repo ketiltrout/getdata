@@ -16,9 +16,9 @@ int main(void)
   const char* format_data =
     "parent RAW UINT8 1\n"
     "parent/child CONST UINT8 1\n";
-  int fd;
   signed char c;
-  int r = 0;
+  int fd, error, error2, r = 0;
+  DIRFILE *D;
 
   mkdir(filedir, 0777);
 
@@ -26,12 +26,12 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  int error = gd_error(D);
+  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  error = gd_error(D);
   CHECKI(error,0);
 
   gd_get_constant(D, "parent/child", GD_INT8, &c);
-  int error2 = gd_error(D);
+  error2 = gd_error(D);
   CHECKI(error2,0);
   CHECKI(c,1);
 

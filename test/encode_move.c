@@ -20,7 +20,8 @@ int main(void)
   const char* format_data = "data RAW UINT16 8\nENCODING none\n";
   uint16_t data_data[128];
   uint16_t c[8];
-  int fd, i, r = 0;
+  int fd, i, ret, error, n, unlink_txtdata, unlink_data, r = 0;
+  DIRFILE *D;
 
   memset(c, 0, 8);
   mkdir(filedir, 0777);
@@ -36,15 +37,15 @@ int main(void)
   write(fd, data_data, 256);
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
-  int ret = gd_alter_encoding(D, GD_TEXT_ENCODED, 0, 1);
-  int error = gd_error(D);
-  int n = gd_getdata(D, "data", 5, 0, 1, 0, GD_UINT16, c);
+  D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
+  ret = gd_alter_encoding(D, GD_TEXT_ENCODED, 0, 1);
+  error = gd_error(D);
+  n = gd_getdata(D, "data", 5, 0, 1, 0, GD_UINT16, c);
 
   gd_close(D);
 
-  int unlink_txtdata = unlink(txtdata);
-  int unlink_data = unlink(data);
+  unlink_txtdata = unlink(txtdata);
+  unlink_data = unlink(data);
   unlink(format);
   rmdir(filedir);
 

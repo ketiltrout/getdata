@@ -25,9 +25,11 @@ int main(void)
     "/INCLUDE format1\ndata RAW UINT16 11\nENCODING gzip\n";
   const char* format1_data = "ENCODING none\n";
   uint16_t data_data[128];
-  int fd, r = 0;
   char command[4096];
+  int fd, ret, ge_ret, unlink_data, unlink_gzdata, error, i = 0, r = 0;
+  DIRFILE *D;
   gd_entry_t E;
+  uint16_t d;
 
   mkdir(filedir, 0777);
 
@@ -52,20 +54,17 @@ int main(void)
     return 1;
 
 #ifdef USE_GZIP
-  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_VERBOSE | GD_UNENCODED);
+  D = gd_open(filedir, GD_RDWR | GD_VERBOSE | GD_UNENCODED);
 #else
-  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_UNENCODED);
+  D = gd_open(filedir, GD_RDWR | GD_UNENCODED);
 #endif
-  int ret = gd_move(D, "data", 1, 1);
-  int error = gd_error(D);
-  int ge_ret =  gd_entry(D, "data", &E);
+  ret = gd_move(D, "data", 1, 1);
+  error = gd_error(D);
+  ge_ret =  gd_entry(D, "data", &E);
   gd_close(D);
 
 #ifdef USE_GZIP
-  uint16_t d;
-
   fd = open(data, O_RDONLY | O_BINARY);
-  int i = 0;
 
   if (fd >= 0) {
     while (read(fd, &d, sizeof(uint16_t))) {
@@ -81,8 +80,8 @@ int main(void)
 
   unlink(format1);
   unlink(format);
-  int unlink_data = unlink(data);
-  int unlink_gzdata = unlink(gzdata);
+  unlink_data = unlink(data);
+  unlink_gzdata = unlink(gzdata);
   rmdir(filedir);
 
 #ifdef USE_GZIP

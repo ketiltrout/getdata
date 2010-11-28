@@ -656,6 +656,9 @@ int gd_add(DIRFILE* D, const gd_entry_t* entry)
 int gd_add_raw(DIRFILE* D, const char* field_code, gd_type_t data_type,
     gd_spf_t spf, int fragment_index)
 {
+  gd_entry_t R;
+  int error;
+
   dtrace("%p, \"%s\", %x, %i %i", D, field_code, data_type, spf,
       fragment_index);
 
@@ -665,14 +668,13 @@ int gd_add_raw(DIRFILE* D, const char* field_code, gd_type_t data_type,
     return -1;
   }
 
-  gd_entry_t R;
   memset(&R, 0, sizeof(gd_entry_t));
   R.field = (char *)field_code;
   R.field_type = GD_RAW_ENTRY;
   R.EN(raw,spf) = spf;
   R.EN(raw,data_type) = data_type;
   R.fragment_index = fragment_index;
-  int error = _GD_Add(D, &R, NULL);
+  error = _GD_Add(D, &R, NULL);
 
   dreturn("%i", error);
   return error;
@@ -683,10 +685,11 @@ int gd_add_lincom(DIRFILE* D, const char* field_code, int n_fields,
     const char** in_fields, const double* m, const double* b,
     int fragment_index) gd_nothrow
 {
+  int i, error;
+  gd_entry_t L;
+
   dtrace("%p, \"%s\", %i, %p, %p, %p, %i", D, field_code, n_fields, in_fields,
       m, b, fragment_index);
-
-  int i;
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -701,7 +704,6 @@ int gd_add_lincom(DIRFILE* D, const char* field_code, int n_fields,
     return -1;
   }
 
-  gd_entry_t L;
   memset(&L, 0, sizeof(gd_entry_t));
   L.field = (char *)field_code;
   L.field_type = GD_LINCOM_ENTRY;
@@ -714,7 +716,7 @@ int gd_add_lincom(DIRFILE* D, const char* field_code, int n_fields,
     L.EN(lincom,m)[i] = m[i];
     L.EN(lincom,b)[i] = b[i];
   }
-  int error = _GD_Add(D, &L, NULL);
+  error = _GD_Add(D, &L, NULL);
 
   dreturn("%i", error);
   return error;
@@ -725,10 +727,11 @@ int gd_add_clincom(DIRFILE* D, const char* field_code, int n_fields,
     const char** in_fields, const GD_DCOMPLEXP(cm), const GD_DCOMPLEXP(cb),
     int fragment_index) gd_nothrow
 {
+  int i, error;
+  gd_entry_t L;
+
   dtrace("%p, \"%s\", %i, %p, %p, %p, %i", D, field_code, n_fields, in_fields,
       cm, cb, fragment_index);
-
-  int i;
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -743,7 +746,6 @@ int gd_add_clincom(DIRFILE* D, const char* field_code, int n_fields,
     return -1;
   }
 
-  gd_entry_t L;
   memset(&L, 0, sizeof(gd_entry_t));
   L.field = (char *)field_code;
   L.field_type = GD_LINCOM_ENTRY;
@@ -756,7 +758,7 @@ int gd_add_clincom(DIRFILE* D, const char* field_code, int n_fields,
     _gd_ca2c(L.EN(lincom,cm)[i], cm, i);
     _gd_ca2c(L.EN(lincom,cb)[i], cb, i);
   }
-  int error = _GD_Add(D, &L, NULL);
+  error = _GD_Add(D, &L, NULL);
 
   dreturn("%i", error);
   return error;
@@ -766,6 +768,9 @@ int gd_add_clincom(DIRFILE* D, const char* field_code, int n_fields,
 int gd_add_linterp(DIRFILE* D, const char* field_code, const char* in_field,
     const char* table, int fragment_index) gd_nothrow
 {
+  gd_entry_t L;
+  int error;
+
   dtrace("%p, \"%s\", \"%s\", \"%s\", %i", D, field_code, in_field, table,
       fragment_index);
 
@@ -775,14 +780,13 @@ int gd_add_linterp(DIRFILE* D, const char* field_code, const char* in_field,
     return -1;
   }
 
-  gd_entry_t L;
   memset(&L, 0, sizeof(gd_entry_t));
   L.field = (char *)field_code;
   L.field_type = GD_LINTERP_ENTRY;
   L.in_fields[0] = (char *)in_field;
   L.EN(linterp,table) = (char *)table;
   L.fragment_index = fragment_index;
-  int error = _GD_Add(D, &L, NULL);
+  error = _GD_Add(D, &L, NULL);
 
   dreturn("%i", error);
   return error;
@@ -792,6 +796,9 @@ int gd_add_linterp(DIRFILE* D, const char* field_code, const char* in_field,
 int gd_add_bit(DIRFILE* D, const char* field_code, const char* in_field,
     gd_bit_t bitnum, gd_bit_t numbits, int fragment_index) gd_nothrow
 {
+  gd_entry_t B;
+  int error;
+
   dtrace("%p, \"%s\", \"%s\", %i, %i, %i\n", D, field_code, in_field, bitnum,
       numbits, fragment_index);
 
@@ -801,7 +808,6 @@ int gd_add_bit(DIRFILE* D, const char* field_code, const char* in_field,
     return -1;
   }
 
-  gd_entry_t B;
   memset(&B, 0, sizeof(gd_entry_t));
   B.field = (char *)field_code;
   B.field_type = GD_BIT_ENTRY;
@@ -809,7 +815,7 @@ int gd_add_bit(DIRFILE* D, const char* field_code, const char* in_field,
   B.EN(bit,bitnum) = bitnum;
   B.EN(bit,numbits) = numbits;
   B.fragment_index = fragment_index;
-  int error = _GD_Add(D, &B, NULL);
+  error = _GD_Add(D, &B, NULL);
 
   dreturn("%i", error);
   return error;
@@ -819,6 +825,9 @@ int gd_add_bit(DIRFILE* D, const char* field_code, const char* in_field,
 int gd_add_sbit(DIRFILE* D, const char* field_code, const char* in_field,
     gd_bit_t bitnum, gd_bit_t numbits, int fragment_index) gd_nothrow
 {
+  gd_entry_t B;
+  int error;
+
   dtrace("%p, \"%s\", \"%s\", %i, %i, %i\n", D, field_code, in_field, bitnum,
       numbits, fragment_index);
 
@@ -828,7 +837,6 @@ int gd_add_sbit(DIRFILE* D, const char* field_code, const char* in_field,
     return -1;
   }
 
-  gd_entry_t B;
   memset(&B, 0, sizeof(gd_entry_t));
   B.field = (char *)field_code;
   B.field_type = GD_SBIT_ENTRY;
@@ -836,7 +844,7 @@ int gd_add_sbit(DIRFILE* D, const char* field_code, const char* in_field,
   B.EN(bit,bitnum) = bitnum;
   B.EN(bit,numbits) = numbits;
   B.fragment_index = fragment_index;
-  int error = _GD_Add(D, &B, NULL);
+  error = _GD_Add(D, &B, NULL);
 
   dreturn("%i", error);
   return error;
@@ -846,6 +854,9 @@ int gd_add_sbit(DIRFILE* D, const char* field_code, const char* in_field,
 int gd_add_multiply(DIRFILE* D, const char* field_code, const char* in_field1,
     const char* in_field2, int fragment_index) gd_nothrow
 {
+  gd_entry_t M;
+  int error;
+
   dtrace("%p, \"%s\", \"%s\", \"%s\", %i", D, field_code, in_field1, in_field2,
       fragment_index);
 
@@ -855,14 +866,13 @@ int gd_add_multiply(DIRFILE* D, const char* field_code, const char* in_field1,
     return -1;
   }
 
-  gd_entry_t M;
   memset(&M, 0, sizeof(gd_entry_t));
   M.field = (char *)field_code;
   M.field_type = GD_MULTIPLY_ENTRY;
   M.in_fields[0] = (char *)in_field1;
   M.in_fields[1] = (char *)in_field2;
   M.fragment_index = fragment_index;
-  int error = _GD_Add(D, &M, NULL);
+  error = _GD_Add(D, &M, NULL);
 
   dreturn("%i", error);
   return error;
@@ -872,6 +882,9 @@ int gd_add_multiply(DIRFILE* D, const char* field_code, const char* in_field1,
 int gd_add_divide(DIRFILE* D, const char* field_code, const char* in_field1,
     const char* in_field2, int fragment_index) gd_nothrow
 {
+  gd_entry_t E;
+  int error;
+
   dtrace("%p, \"%s\", \"%s\", \"%s\", %i", D, field_code, in_field1, in_field2,
       fragment_index);
 
@@ -881,14 +894,13 @@ int gd_add_divide(DIRFILE* D, const char* field_code, const char* in_field1,
     return -1;
   }
 
-  gd_entry_t E;
   memset(&E, 0, sizeof(gd_entry_t));
   E.field = (char *)field_code;
   E.field_type = GD_DIVIDE_ENTRY;
   E.in_fields[0] = (char *)in_field1;
   E.in_fields[1] = (char *)in_field2;
   E.fragment_index = fragment_index;
-  int error = _GD_Add(D, &E, NULL);
+  error = _GD_Add(D, &E, NULL);
 
   dreturn("%i", error);
   return error;
@@ -898,6 +910,9 @@ int gd_add_divide(DIRFILE* D, const char* field_code, const char* in_field1,
 int gd_add_recip(DIRFILE* D, const char* field_code, const char* in_field,
     double dividend, int fragment_index) gd_nothrow
 {
+  gd_entry_t E;
+  int error;
+
   dtrace("%p, \"%s\", \"%s\", %g, %i", D, field_code, in_field, dividend,
       fragment_index);
 
@@ -907,7 +922,6 @@ int gd_add_recip(DIRFILE* D, const char* field_code, const char* in_field,
     return -1;
   }
 
-  gd_entry_t E;
   memset(&E, 0, sizeof(gd_entry_t));
   E.field = (char *)field_code;
   E.field_type = GD_RECIP_ENTRY;
@@ -915,7 +929,7 @@ int gd_add_recip(DIRFILE* D, const char* field_code, const char* in_field,
   E.comp_scal = 0;
   E.in_fields[0] = (char *)in_field;
   E.fragment_index = fragment_index;
-  int error = _GD_Add(D, &E, NULL);
+  error = _GD_Add(D, &E, NULL);
 
   dreturn("%i", error);
   return error;
@@ -952,6 +966,9 @@ int gd_add_crecip(DIRFILE* D, const char* field_code, const char* in_field,
 int gd_add_crecip89(DIRFILE* D, const char* field_code, const char* in_field,
     const double cdividend[2], int fragment_index) gd_nothrow
 {
+  gd_entry_t E;
+  int error;
+
   dtrace("%p, \"%s\", \"%s\", [%g, %g], %i", D, field_code, in_field,
       cdividend[0], cdividend[1], fragment_index);
 
@@ -961,7 +978,6 @@ int gd_add_crecip89(DIRFILE* D, const char* field_code, const char* in_field,
     return -1;
   }
 
-  gd_entry_t E;
   memset(&E, 0, sizeof(gd_entry_t));
   E.field = (char *)field_code;
   E.field_type = GD_RECIP_ENTRY;
@@ -969,7 +985,7 @@ int gd_add_crecip89(DIRFILE* D, const char* field_code, const char* in_field,
   E.comp_scal = 1;
   E.in_fields[0] = (char *)in_field;
   E.fragment_index = fragment_index;
-  int error = _GD_Add(D, &E, NULL);
+  error = _GD_Add(D, &E, NULL);
 
   dreturn("%i", error);
   return error;
@@ -979,10 +995,11 @@ int gd_add_crecip89(DIRFILE* D, const char* field_code, const char* in_field,
 int gd_add_polynom(DIRFILE* D, const char* field_code, int poly_ord,
     const char* in_field, const double* a, int fragment_index) gd_nothrow
 {
+  int i, error;
+  gd_entry_t E;
+
   dtrace("%p, \"%s\", %i, \"%s\", %p, %i", D, field_code, poly_ord, in_field,
       a, fragment_index);
-
-  int i;
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -997,7 +1014,6 @@ int gd_add_polynom(DIRFILE* D, const char* field_code, int poly_ord,
     return -1;
   }
 
-  gd_entry_t E;
   memset(&E, 0, sizeof(gd_entry_t));
   E.field = (char *)field_code;
   E.field_type = GD_POLYNOM_ENTRY;
@@ -1009,7 +1025,7 @@ int gd_add_polynom(DIRFILE* D, const char* field_code, int poly_ord,
   for (i = 0; i <= poly_ord; ++i)
     E.EN(polynom,a)[i] = a[i];
 
-  int error = _GD_Add(D, &E, NULL);
+  error = _GD_Add(D, &E, NULL);
 
   dreturn("%i", error);
   return error;
@@ -1018,10 +1034,11 @@ int gd_add_polynom(DIRFILE* D, const char* field_code, int poly_ord,
 int gd_add_cpolynom(DIRFILE* D, const char* field_code, int poly_ord,
     const char* in_field, const GD_DCOMPLEXP(ca), int fragment_index) gd_nothrow
 {
+  int i, error;
+  gd_entry_t E;
+
   dtrace("%p, \"%s\", %i, \"%s\", %p, %i", D, field_code, poly_ord, in_field,
       ca, fragment_index);
-
-  int i;
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -1036,7 +1053,6 @@ int gd_add_cpolynom(DIRFILE* D, const char* field_code, int poly_ord,
     return -1;
   }
 
-  gd_entry_t E;
   memset(&E, 0, sizeof(gd_entry_t));
   E.field = (char *)field_code;
   E.field_type = GD_POLYNOM_ENTRY;
@@ -1048,7 +1064,7 @@ int gd_add_cpolynom(DIRFILE* D, const char* field_code, int poly_ord,
   for (i = 0; i <= poly_ord; ++i)
     _gd_ca2c(E.EN(polynom,ca)[i], ca, i);
 
-  int error = _GD_Add(D, &E, NULL);
+  error = _GD_Add(D, &E, NULL);
 
   dreturn("%i", error);
   return error;
@@ -1058,6 +1074,9 @@ int gd_add_cpolynom(DIRFILE* D, const char* field_code, int poly_ord,
 int gd_add_phase(DIRFILE* D, const char* field_code, const char* in_field,
     gd_shift_t shift, int fragment_index) gd_nothrow
 {
+  gd_entry_t P;
+  int error;
+
   dtrace("%p, \"%s\", \"%s\", %lli, %i", D, field_code, in_field,
       (long long)shift, fragment_index);
 
@@ -1067,14 +1086,13 @@ int gd_add_phase(DIRFILE* D, const char* field_code, const char* in_field,
     return -1;
   }
 
-  gd_entry_t P;
   memset(&P, 0, sizeof(gd_entry_t));
   P.field = (char *)field_code;
   P.field_type = GD_PHASE_ENTRY;
   P.in_fields[0] = (char *)in_field;
   P.EN(phase,shift) = shift;
   P.fragment_index = fragment_index;
-  int error = _GD_Add(D, &P, NULL);
+  error = _GD_Add(D, &P, NULL);
 
   dreturn("%i", error);
   return error;
@@ -1084,6 +1102,10 @@ int gd_add_phase(DIRFILE* D, const char* field_code, const char* in_field,
 int gd_add_string(DIRFILE* D, const char* field_code, const char* value,
     int fragment_index) gd_nothrow
 {
+  gd_entry_t *entry;
+  gd_entry_t S;
+  int error;
+
   dtrace("%p, \"%s\", \"%s\", %i", D, field_code, value, fragment_index);
 
   if (D->flags & GD_INVALID) {/* don't crash */
@@ -1092,13 +1114,11 @@ int gd_add_string(DIRFILE* D, const char* field_code, const char* value,
     return -1;
   }
 
-  gd_entry_t *entry;
-  gd_entry_t S;
   memset(&S, 0, sizeof(gd_entry_t));
   S.field = (char *)field_code;
   S.field_type = GD_STRING_ENTRY;
   S.fragment_index = fragment_index;
-  int error = _GD_Add(D, &S, NULL);
+  error = _GD_Add(D, &S, NULL);
 
   /* Actually store the string, now */
   if (!error) {
@@ -1121,6 +1141,10 @@ int gd_add_string(DIRFILE* D, const char* field_code, const char* value,
 int gd_add_const(DIRFILE* D, const char* field_code, gd_type_t const_type,
     gd_type_t data_type, const void* value, int fragment_index) gd_nothrow
 {
+  gd_entry_t *entry;
+  gd_entry_t C;
+  int error;
+
   dtrace("%p, \"%s\", 0x%x, 0x%x, %p, %i", D, field_code, const_type, data_type,
       value, fragment_index);
 
@@ -1130,14 +1154,12 @@ int gd_add_const(DIRFILE* D, const char* field_code, gd_type_t const_type,
     return -1;
   }
 
-  gd_entry_t *entry;
-  gd_entry_t C;
   memset(&C, 0, sizeof(gd_entry_t));
   C.field = (char *)field_code;
   C.field_type = GD_CONST_ENTRY;
   C.EN(scalar,const_type) = const_type;
   C.fragment_index = fragment_index;
-  int error = _GD_Add(D, &C, NULL);
+  error = _GD_Add(D, &C, NULL);
 
   /* Actually store the constant, now */
   if (!error) {
@@ -1161,6 +1183,10 @@ int gd_add_carray(DIRFILE* D, const char* field_code, gd_type_t const_type,
     size_t array_len, gd_type_t data_type, const void* values,
     int fragment_index) gd_nothrow
 {
+  gd_entry_t *entry;
+  gd_entry_t C;
+  int error;
+
   dtrace("%p, \"%s\", 0x%x, %zi, 0x%x, %p, %i", D, field_code, const_type,
       array_len, data_type, values, fragment_index);
 
@@ -1170,15 +1196,13 @@ int gd_add_carray(DIRFILE* D, const char* field_code, gd_type_t const_type,
     return -1;
   }
 
-  gd_entry_t *entry;
-  gd_entry_t C;
   memset(&C, 0, sizeof(gd_entry_t));
   C.field = (char *)field_code;
   C.field_type = GD_CARRAY_ENTRY;
   C.EN(scalar,const_type) = const_type;
   C.EN(scalar,array_len) = array_len;
   C.fragment_index = fragment_index;
-  int error = _GD_Add(D, &C, NULL);
+  error = _GD_Add(D, &C, NULL);
 
   /* Actually store the carray, now */
   if (!error) {
@@ -1220,10 +1244,11 @@ int gd_madd_lincom(DIRFILE* D, const char* parent, const char* field_code,
     int n_fields, const char** in_fields, const double* m, const double* b)
 gd_nothrow
 {
+  int i, error;
+  gd_entry_t L;
+
   dtrace("%p, \"%s\", \"%s\", %i, %p, %p, %p", D, field_code, parent,
       n_fields, in_fields, m, b);
-
-  int i;
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -1238,7 +1263,6 @@ gd_nothrow
     return -1;
   }
 
-  gd_entry_t L;
   L.field = (char *)field_code;
   L.field_type = GD_LINCOM_ENTRY;
   L.EN(lincom,n_fields) = n_fields;
@@ -1252,7 +1276,7 @@ gd_nothrow
     L.scalar[i] = NULL;
     L.scalar[i + GD_MAX_LINCOM] = NULL;
   }
-  int error = _GD_Add(D, &L, parent);
+  error = _GD_Add(D, &L, parent);
 
   dreturn("%i", error);
   return error;
@@ -1263,10 +1287,11 @@ int gd_madd_clincom(DIRFILE* D, const char* parent, const char* field_code,
     int n_fields, const char** in_fields, const GD_DCOMPLEXP(cm),
     const GD_DCOMPLEXP(cb)) gd_nothrow
 {
+  int i, error;
+  gd_entry_t L;
+
   dtrace("%p, \"%s\", \"%s\", %i, %p, %p, %p", D, field_code, parent,
       n_fields, in_fields, cm, cb);
-
-  int i;
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -1281,7 +1306,6 @@ int gd_madd_clincom(DIRFILE* D, const char* parent, const char* field_code,
     return -1;
   }
 
-  gd_entry_t L;
   L.field = (char *)field_code;
   L.field_type = GD_LINCOM_ENTRY;
   L.EN(lincom,n_fields) = n_fields;
@@ -1295,7 +1319,7 @@ int gd_madd_clincom(DIRFILE* D, const char* parent, const char* field_code,
     L.scalar[i] = NULL;
     L.scalar[i + GD_MAX_LINCOM] = NULL;
   }
-  int error = _GD_Add(D, &L, parent);
+  error = _GD_Add(D, &L, parent);
 
   dreturn("%i", error);
   return error;
@@ -1305,6 +1329,9 @@ int gd_madd_clincom(DIRFILE* D, const char* parent, const char* field_code,
 int gd_madd_linterp(DIRFILE* D, const char* parent,
     const char* field_code, const char* in_field, const char* table) gd_nothrow
 {
+  gd_entry_t L;
+  int error;
+
   dtrace("%p, \"%s\", \"%s\", \"%s\", \"%s\"", D, field_code, parent, in_field,
       table);
 
@@ -1314,13 +1341,12 @@ int gd_madd_linterp(DIRFILE* D, const char* parent,
     return -1;
   }
 
-  gd_entry_t L;
   L.field = (char *)field_code;
   L.field_type = GD_LINTERP_ENTRY;
   L.in_fields[0] = (char *)in_field;
   L.EN(linterp,table) = (char *)table;
   L.fragment_index = 0;
-  int error = _GD_Add(D, &L, parent);
+  error = _GD_Add(D, &L, parent);
 
   dreturn("%i", error);
   return error;
@@ -1330,6 +1356,9 @@ int gd_madd_linterp(DIRFILE* D, const char* parent,
 int gd_madd_bit(DIRFILE* D, const char* parent, const char* field_code,
     const char* in_field, gd_bit_t bitnum, gd_bit_t numbits) gd_nothrow
 {
+  gd_entry_t B;
+  int error;
+
   dtrace("%p, \"%s\", \"%s\", \"%s\", %i, %in", D, field_code, parent, in_field,
       bitnum, numbits);
 
@@ -1339,7 +1368,6 @@ int gd_madd_bit(DIRFILE* D, const char* parent, const char* field_code,
     return -1;
   }
 
-  gd_entry_t B;
   B.field = (char *)field_code;
   B.field_type = GD_BIT_ENTRY;
   B.in_fields[0] = (char *)in_field;
@@ -1347,7 +1375,7 @@ int gd_madd_bit(DIRFILE* D, const char* parent, const char* field_code,
   B.EN(bit,numbits) = numbits;
   B.fragment_index = 0;
   B.scalar[0] = B.scalar[1] = NULL;
-  int error = _GD_Add(D, &B, parent);
+  error = _GD_Add(D, &B, parent);
 
   dreturn("%i", error);
   return error;
@@ -1357,6 +1385,9 @@ int gd_madd_bit(DIRFILE* D, const char* parent, const char* field_code,
 int gd_madd_sbit(DIRFILE* D, const char* parent, const char* field_code,
     const char* in_field, gd_bit_t bitnum, gd_bit_t numbits) gd_nothrow
 {
+  gd_entry_t B;
+  int error;
+
   dtrace("%p, \"%s\", \"%s\", \"%s\", %i, %in", D, field_code, parent, in_field,
       bitnum, numbits);
 
@@ -1366,7 +1397,6 @@ int gd_madd_sbit(DIRFILE* D, const char* parent, const char* field_code,
     return -1;
   }
 
-  gd_entry_t B;
   B.field = (char *)field_code;
   B.field_type = GD_SBIT_ENTRY;
   B.in_fields[0] = (char *)in_field;
@@ -1374,7 +1404,7 @@ int gd_madd_sbit(DIRFILE* D, const char* parent, const char* field_code,
   B.EN(bit,numbits) = numbits;
   B.fragment_index = 0;
   B.scalar[0] = B.scalar[1] = NULL;
-  int error = _GD_Add(D, &B, parent);
+  error = _GD_Add(D, &B, parent);
 
   dreturn("%i", error);
   return error;
@@ -1384,6 +1414,9 @@ int gd_madd_sbit(DIRFILE* D, const char* parent, const char* field_code,
 int gd_madd_multiply(DIRFILE* D, const char* parent, const char* field_code,
     const char* in_field1, const char* in_field2) gd_nothrow
 {
+  gd_entry_t M;
+  int error;
+
   dtrace("%p, \"%s\", \"%s\", \"%s\", \"%s\"", D, field_code, parent,
       in_field1, in_field2);
 
@@ -1393,13 +1426,12 @@ int gd_madd_multiply(DIRFILE* D, const char* parent, const char* field_code,
     return -1;
   }
 
-  gd_entry_t M;
   M.field = (char *)field_code;
   M.field_type = GD_MULTIPLY_ENTRY;
   M.in_fields[0] = (char *)in_field1;
   M.in_fields[1] = (char *)in_field2;
   M.fragment_index = 0;
-  int error = _GD_Add(D, &M, parent);
+  error = _GD_Add(D, &M, parent);
 
   dreturn("%i", error);
   return error;
@@ -1409,6 +1441,9 @@ int gd_madd_multiply(DIRFILE* D, const char* parent, const char* field_code,
 int gd_madd_phase(DIRFILE* D, const char* parent, const char* field_code,
     const char* in_field, gd_shift_t shift) gd_nothrow
 {
+  int error;
+  gd_entry_t P;
+
   dtrace("%p, \"%s\", \"%s\", \"%s\", %lli", D, field_code, parent, in_field,
       (long long)shift);
 
@@ -1418,14 +1453,13 @@ int gd_madd_phase(DIRFILE* D, const char* parent, const char* field_code,
     return -1;
   }
 
-  gd_entry_t P;
   P.field = (char *)field_code;
   P.field_type = GD_PHASE_ENTRY;
   P.in_fields[0] = (char *)in_field;
   P.EN(phase,shift) = shift;
   P.fragment_index = 0;
   P.scalar[0] = NULL;
-  int error = _GD_Add(D, &P, parent);
+  error = _GD_Add(D, &P, parent);
 
   dreturn("%i", error);
   return error;
@@ -1435,10 +1469,11 @@ int gd_madd_phase(DIRFILE* D, const char* parent, const char* field_code,
 int gd_madd_polynom(DIRFILE* D, const char* parent, const char* field_code,
     int poly_ord, const char* in_field, const double* a) gd_nothrow
 {
+  int i, error;
+  gd_entry_t E;
+
   dtrace("%p, \"%s\", \"%s\", %i, \"%s\", %p", D, field_code, parent, poly_ord,
       in_field, a);
-
-  int i;
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -1453,7 +1488,6 @@ int gd_madd_polynom(DIRFILE* D, const char* parent, const char* field_code,
     return -1;
   }
 
-  gd_entry_t E;
   E.field = (char *)field_code;
   E.field_type = GD_POLYNOM_ENTRY;
   E.EN(polynom,poly_ord) = poly_ord;
@@ -1466,7 +1500,7 @@ int gd_madd_polynom(DIRFILE* D, const char* parent, const char* field_code,
     E.scalar[i] = NULL;
   }
 
-  int error = _GD_Add(D, &E, parent);
+  error = _GD_Add(D, &E, parent);
 
   dreturn("%i", error);
   return error;
@@ -1476,10 +1510,11 @@ int gd_madd_polynom(DIRFILE* D, const char* parent, const char* field_code,
 int gd_madd_cpolynom(DIRFILE* D, const char* parent, const char* field_code,
     int poly_ord, const char* in_field, const GD_DCOMPLEXP(ca)) gd_nothrow
 {
+  int i, error;
+  gd_entry_t E;
+
   dtrace("%p, \"%s\", \"%s\", %i, \"%s\", %p", D, field_code, parent, poly_ord,
       in_field, ca);
-
-  int i;
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -1494,7 +1529,6 @@ int gd_madd_cpolynom(DIRFILE* D, const char* parent, const char* field_code,
     return -1;
   }
 
-  gd_entry_t E;
   E.field = (char *)field_code;
   E.field_type = GD_POLYNOM_ENTRY;
   E.EN(polynom,poly_ord) = poly_ord;
@@ -1507,7 +1541,7 @@ int gd_madd_cpolynom(DIRFILE* D, const char* parent, const char* field_code,
     E.scalar[i] = NULL;
   }
 
-  int error = _GD_Add(D, &E, parent);
+  error = _GD_Add(D, &E, parent);
 
   dreturn("%i", error);
   return error;
@@ -1517,6 +1551,9 @@ int gd_madd_cpolynom(DIRFILE* D, const char* parent, const char* field_code,
 int gd_madd_divide(DIRFILE* D, const char *parent, const char* field_code,
     const char* in_field1, const char* in_field2) gd_nothrow
 {
+  int error;
+  gd_entry_t E;
+
   dtrace("%p, \"%s\", \"%s\", \"%s\", \"%s\"", D, parent, field_code, in_field1,
       in_field2);
 
@@ -1526,13 +1563,12 @@ int gd_madd_divide(DIRFILE* D, const char *parent, const char* field_code,
     return -1;
   }
 
-  gd_entry_t E;
   memset(&E, 0, sizeof(gd_entry_t));
   E.field = (char *)field_code;
   E.field_type = GD_DIVIDE_ENTRY;
   E.in_fields[0] = (char *)in_field1;
   E.in_fields[1] = (char *)in_field2;
-  int error = _GD_Add(D, &E, parent);
+  error = _GD_Add(D, &E, parent);
 
   dreturn("%i", error);
   return error;
@@ -1542,6 +1578,9 @@ int gd_madd_divide(DIRFILE* D, const char *parent, const char* field_code,
 int gd_madd_recip(DIRFILE* D, const char *parent, const char* field_code,
     const char* in_field, double dividend) gd_nothrow
 {
+  int error;
+  gd_entry_t E;
+
   dtrace("%p, \"%s\", \"%s\", \"%s\", %g", D, parent, field_code, in_field,
       dividend);
 
@@ -1551,14 +1590,13 @@ int gd_madd_recip(DIRFILE* D, const char *parent, const char* field_code,
     return -1;
   }
 
-  gd_entry_t E;
   memset(&E, 0, sizeof(gd_entry_t));
   E.field = (char *)field_code;
   E.field_type = GD_RECIP_ENTRY;
   E.EN(recip,dividend) = dividend;
   E.comp_scal = 0;
   E.in_fields[0] = (char *)in_field;
-  int error = _GD_Add(D, &E, parent);
+  error = _GD_Add(D, &E, parent);
 
   dreturn("%i", error);
   return error;
@@ -1594,6 +1632,9 @@ int gd_madd_crecip(DIRFILE* D, const char *parent, const char* field_code, const
 int gd_madd_crecip89(DIRFILE* D, const char *parent, const char* field_code,
     const char* in_field, const double cdividend[2]) gd_nothrow
 {
+  gd_entry_t E;
+  int error;
+
   dtrace("%p, \"%s\", \"%s\", \"%s\", [%g, %g]", D, parent, field_code,
       in_field, cdividend[0], cdividend[1]);
 
@@ -1603,14 +1644,13 @@ int gd_madd_crecip89(DIRFILE* D, const char *parent, const char* field_code,
     return -1;
   }
 
-  gd_entry_t E;
   memset(&E, 0, sizeof(gd_entry_t));
   E.field = (char *)field_code;
   E.field_type = GD_RECIP_ENTRY;
   _gd_a2c(E.EN(recip,cdividend), cdividend);
   E.comp_scal = 1;
   E.in_fields[0] = (char *)in_field;
-  int error = _GD_Add(D, &E, parent);
+  error = _GD_Add(D, &E, parent);
 
   dreturn("%i", error);
   return error;
@@ -1621,6 +1661,10 @@ int gd_madd_string(DIRFILE* D, const char* parent,
     const char* field_code, const char* value) gd_nothrow
 {
   char *buffer;
+  int error;
+  gd_entry_t *entry;
+  gd_entry_t S;
+
   dtrace("%p, \"%s\", \"%s\", \"%s\"", D, parent, field_code, value);
 
   if (D->flags & GD_INVALID) {/* don't crash */
@@ -1629,12 +1673,10 @@ int gd_madd_string(DIRFILE* D, const char* parent,
     return -1;
   }
 
-  gd_entry_t *entry;
-  gd_entry_t S;
   S.field = (char *)field_code;
   S.field_type = GD_STRING_ENTRY;
   S.fragment_index = 0;
-  int error = _GD_Add(D, &S, parent);
+  error = _GD_Add(D, &S, parent);
 
   /* Actually store the string, now */
   if (!error) {
@@ -1667,6 +1709,10 @@ int gd_madd_const(DIRFILE* D, const char* parent, const char* field_code,
     gd_type_t const_type, gd_type_t data_type, const void* value) gd_nothrow
 {
   char *buffer;
+  int error;
+  gd_entry_t *entry;
+  gd_entry_t C;
+
   dtrace("%p, \"%s\", \"%s\", 0x%x, 0x%x, %p", D, parent, field_code,
       const_type, data_type, value);
 
@@ -1676,13 +1722,11 @@ int gd_madd_const(DIRFILE* D, const char* parent, const char* field_code,
     return -1;
   }
 
-  gd_entry_t *entry;
-  gd_entry_t C;
   C.field = (char *)field_code;
   C.field_type = GD_CONST_ENTRY;
   C.EN(scalar,const_type) = const_type;
   C.fragment_index = 0;
-  int error = _GD_Add(D, &C, parent);
+  error = _GD_Add(D, &C, parent);
 
   /* Actually store the constant, now */
   if (!error) {
@@ -1716,6 +1760,10 @@ int gd_madd_carray(DIRFILE* D, const char* parent, const char* field_code,
     const void* values) gd_nothrow
 {
   char *buffer;
+  int error;
+  gd_entry_t *entry;
+  gd_entry_t C;
+
   dtrace("%p, \"%s\", \"%s\", 0x%x, %zi 0x%x, %p", D, parent, field_code,
       const_type, array_len, data_type, values);
 
@@ -1725,14 +1773,12 @@ int gd_madd_carray(DIRFILE* D, const char* parent, const char* field_code,
     return -1;
   }
 
-  gd_entry_t *entry;
-  gd_entry_t C;
   C.field = (char *)field_code;
   C.field_type = GD_CARRAY_ENTRY;
   C.EN(scalar,const_type) = const_type;
   C.EN(scalar,array_len) = array_len;
   C.fragment_index = 0;
-  int error = _GD_Add(D, &C, parent);
+  error = _GD_Add(D, &C, parent);
 
   /* Actually store the carray, now */
   if (!error) {

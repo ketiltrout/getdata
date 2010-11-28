@@ -19,7 +19,9 @@ int main(void)
   const char* format_data = "/INCLUDE format1\na CONST UINT8 1\n";
   const char* format1_data = "b CONST UINT8 11\n/INCLUDE format2\n";
   const char* format2_data = "c CONST UINT8 11\n";
-  int fd, r = 0;
+  int fd, ret, error, unlink_format1, unlink_format2, r = 0;
+  unsigned int nfields, nfragments;
+  DIRFILE *D;
 
   mkdir(filedir, 0777);
 
@@ -35,15 +37,15 @@ int main(void)
   write(fd, format2_data, strlen(format2_data));
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
-  int ret = gd_uninclude(D, 2, 1);
-  int error = gd_error(D);
-  unsigned int nfields = gd_nfields(D);
-  unsigned int nfragments = gd_nfragments(D);
+  D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
+  ret = gd_uninclude(D, 2, 1);
+  error = gd_error(D);
+  nfields = gd_nfields(D);
+  nfragments = gd_nfragments(D);
   gd_close(D);
 
-  int unlink_format2 = unlink(format2);
-  int unlink_format1 = unlink(format1);
+  unlink_format2 = unlink(format2);
+  unlink_format1 = unlink(format1);
   unlink(format);
   rmdir(filedir);
 

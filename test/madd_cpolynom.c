@@ -15,25 +15,27 @@ int main(void)
 {
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
-  int r = 0;
-  int j;
+  int j, error, ge_error, r = 0;
   gd_entry_t e;
+#ifdef GD_NO_C99_API
+  const double a[4][2] = {{1, 29.03}, {0.3, 12.34}, {0.5, 99.55}, {1.8, 45.32}};
+#else
+  const double complex a[4] = {1 + _Complex_I * 29.03, 0.3 + _Complex_I * 12.34,
+    0.5 + _Complex_I * 99.55, 1.8 + _Complex_I * 45.32};
+#endif
 
   DIRFILE* D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
   gd_add_phase(D, "new", "in", 3, 0);
 #ifdef GD_NO_C99_API
-  const double a[4][2] = {{1, 29.03}, {0.3, 12.34}, {0.5, 99.55}, {1.8, 45.32}};
-  gd_madd_cpolynom(D, "new", "meta", 3, "in", (double*)a);
+  gd_madd_cpolynom(D, "new", "meta", 3, "in", (const double *)a);
 #else
-  const double complex a[4] = {1 + _Complex_I * 29.03, 0.3 + _Complex_I * 12.34,
-    0.5 + _Complex_I * 99.55, 1.8 + _Complex_I * 45.32};
   gd_madd_cpolynom(D, "new", "meta", 3, "in", a);
 #endif
-  int error = gd_error(D);
+  error = gd_error(D);
 
   /* check */
   gd_entry(D, "new/meta", &e);
-  int ge_error = gd_error(D);
+  ge_error = gd_error(D);
   CHECKI(ge_error, 0);
   if (!r) {
     CHECKI(e.field_type, GD_POLYNOM_ENTRY);

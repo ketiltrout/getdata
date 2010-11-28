@@ -16,12 +16,12 @@ int main(void)
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
   uint8_t val = 3;
-  int r = 0;
+  int error, r = 0;
   gd_entry_t e;
 
   DIRFILE* D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
   gd_add_const(D, "data", GD_UINT8, GD_UINT8, &val, 0);
-  int error = gd_error(D);
+  error = gd_error(D);
 
   /* check */
   gd_entry(D, "data", &e);

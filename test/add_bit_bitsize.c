@@ -13,14 +13,14 @@ int main(void)
 {
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
-  int r = 0;
-
+  int error, n, r = 0;
   DIRFILE* D = gd_open(filedir, GD_RDWR | GD_CREAT);
+
   gd_add_bit(D, "new", "input", 1, 99, 0);
-  int error = gd_error(D);
+  error = gd_error(D);
 
   /* check */
-  int n = gd_nfields(D);
+  n = gd_nfields(D);
 
   gd_close(D);
 

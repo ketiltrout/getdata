@@ -17,6 +17,8 @@ int main(void)
     "in RAW UINT8 11\n"
     "polynom POLYNOM in 1 2 1 3\n";
   int fd, r = 0;
+  gd_spf_t spf;
+  DIRFILE *D;
 
   mkdir(filedir, 0777);
 
@@ -24,8 +26,8 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  unsigned int spf = gd_spf(D, "polynom");
+  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  spf = gd_spf(D, "polynom");
   gd_close(D);
 
   unlink(format);

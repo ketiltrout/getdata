@@ -20,7 +20,7 @@ int main(void)
   const char* data = __TEST__ "dirfile/data";
   const char* format_data = "data RAW UINT8 8\n";
   uint8_t c[8], d;
-  int fd, i, r = 0;
+  int fd, i, n, error, r = 0;
 
   memset(c, 0, 8);
   mkdir(filedir, 0777);
@@ -32,17 +32,7 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  int error;
-  int n = PutData(filedir, "data", 5, 0, 1, 0, 'c', c, &error);
-
-  /* Hmmm... the legacy API has no way to flush data to disk, so the following
-   * test may report a false negative */
-#if 0
-  struct stat buf;
-  int stat_ret = stat(data, &buf);
-  CHECKI(stat_ret, 0);
-  CHECKI(buf.st_size, 40 + 8 * sizeof(uint8_t));
-#endif
+  n = PutData(filedir, "data", 5, 0, 1, 0, 'c', c, &error);
 
   fd = open(data, O_RDONLY | O_BINARY);
   i = 0;

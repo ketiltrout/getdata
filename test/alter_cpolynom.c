@@ -27,7 +27,8 @@ int main(void)
   const double complex a[] = {2 + _Complex_I * 1,
     1 + _Complex_I * 2, 1 + _Complex_I * 3};
 #endif
-  int fd, i, r = 0;
+  int fd, i, ret, error, n, r = 0;
+  DIRFILE *D;
 
   mkdir(filedir, 0777);
 
@@ -42,20 +43,20 @@ int main(void)
   write(fd, data_data, 256 * sizeof(int32_t));
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
-  int ret = gd_alter_cpolynom(D, "polynom", 0, NULL, a);
-  int error = gd_error(D);
-  int n = gd_getdata(D, "polynom", 5, 0, 1, 0, GD_COMPLEX128, c);
+  D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
+  ret = gd_alter_cpolynom(D, "polynom", 0, NULL, a);
+  error = gd_error(D);
+  n = gd_getdata(D, "polynom", 5, 0, 1, 0, GD_COMPLEX128, c);
 
   gd_close(D);
 
   for (i = 0; i < 8; ++i) {
     int x = i + 40;
 #ifdef GD_NO_C99_API
-    double v[2] = {2 + x + x * x, 1 + 2 * x + 3 * x * x};
+    const double v[2] = {2 + x + x * x, 1 + 2 * x + 3 * x * x};
     CHECKCi(i,c + 2 * i, v);
 #else
-    double complex v = (2 + _Complex_I * 1) + (1 + _Complex_I * 2) * x
+    const double complex v = (2 + _Complex_I * 1) + (1 + _Complex_I * 2) * x
       + (1 + _Complex_I * 3) * x * x;
     CHECKCi(i,c[i], v);
 #endif

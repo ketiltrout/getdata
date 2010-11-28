@@ -13,15 +13,15 @@ int main(void)
 {
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
-  int r = 0;
+  int error, n, m, r = 0;
 
   DIRFILE* D = gd_open(filedir, GD_RDWR | GD_CREAT);
   gd_madd_spec(D, "META INDEX RAW UINT8 2", "INDEX");
-  int error = gd_error(D);
+  error = gd_error(D);
 
   /* check */
-  int n = gd_nfields(D);
-  int m = gd_nmfields(D, "INDEX");
+  n = gd_nfields(D);
+  m = gd_nmfields(D, "INDEX");
 
   gd_close(D);
 

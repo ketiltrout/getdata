@@ -16,7 +16,8 @@ int main(void)
   const char* format1 = __TEST__ "dirfile/RAW";
   const char* format_data = "ENDIAN RAW c 8\nINCLUDE RAW\n";
   const char* format_data1 = "VERSION PHASE ENDIAN 1\na&b RAW c 8\n";
-  int fd, r = 0;
+  int fd, e, q, c, r = 0;
+  DIRFILE *D;
 
   mkdir(filedir, 0777);
 
@@ -28,13 +29,13 @@ int main(void)
   write(fd, format_data1, strlen(format_data1));
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
-  int e = gd_dirfile_standards(D, 4);
-  int q = gd_rewrite_fragment(D, GD_ALL_FRAGMENTS);
+  D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
+  e = gd_dirfile_standards(D, 4);
+  q = gd_rewrite_fragment(D, GD_ALL_FRAGMENTS);
   gd_close(D);
 
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  int c = gd_dirfile_standards(D, GD_VERSION_EARLIEST);
+  c = gd_dirfile_standards(D, GD_VERSION_EARLIEST);
   gd_close(D);
 
   unlink(format);

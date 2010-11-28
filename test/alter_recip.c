@@ -20,7 +20,8 @@ int main(void)
     "div RECIP data 230.\n";
   int32_t data_data[256];
   double c[8];
-  int fd, i, r = 0;
+  int fd, i, ret, error, n, r = 0;
+  DIRFILE *D;
 
   mkdir(filedir, 0777);
 
@@ -35,10 +36,10 @@ int main(void)
   write(fd, data_data, 256 * sizeof(int32_t));
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
-  int ret = gd_alter_recip(D, "div", "phase", 1093.);
-  int error = gd_error(D);
-  int n = gd_getdata(D, "div", 5, 0, 1, 0, GD_FLOAT64, c);
+  D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
+  ret = gd_alter_recip(D, "div", "phase", 1093.);
+  error = gd_error(D);
+  n = gd_getdata(D, "div", 5, 0, 1, 0, GD_FLOAT64, c);
 
   gd_close(D);
 

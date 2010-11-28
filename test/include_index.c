@@ -14,7 +14,8 @@ int main(void)
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
   const char* format_data = "#\n";
-  int fd, r = 0;
+  int fd, error, r = 0;
+  DIRFILE *D;
 
   mkdir(filedir, 0777);
 
@@ -22,9 +23,9 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDWR);
+  D = gd_open(filedir, GD_RDWR);
   gd_include(D, "format1", 1, 0);
-  int error = gd_error(D);
+  error = gd_error(D);
   gd_close(D);
 
   unlink(format);

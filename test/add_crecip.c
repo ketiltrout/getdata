@@ -13,17 +13,17 @@ int main(void)
 {
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
-  int r = 0;
+  int error, r = 0;
 #ifdef GD_NO_C99_API
   const double cdividend[2] = {33.3, 44.4};
 #else
   const double complex cdividend = 33.3 + _Complex_I * 44.4;
 #endif
   gd_entry_t e;
-
   DIRFILE* D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
+
   gd_add_crecip(D, "new", "in", cdividend, 0);
-  int error = gd_error(D);
+  error = gd_error(D);
 
   /* check */
   gd_entry(D, "new", &e);

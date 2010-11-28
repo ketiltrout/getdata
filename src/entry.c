@@ -138,11 +138,10 @@ static void _GD_GetScalar(DIRFILE* D, gd_entry_t* E, int i, gd_type_t type,
   gd_entry_t* C;
   int repr;
   char* field_code;
-
-  dtrace("%p, %p, %i, %i, %p", D, E, i, type, data);
-
   const char* scalar = E->scalar[i];
   int index = E->scalar_ind[i];
+
+  dtrace("%p, %p, %i, %i, %p", D, E, i, type, data);
 
   if (scalar != NULL) {
     C = _GD_FindFieldAndRepr(D, scalar, &field_code, &repr, NULL, 0);
@@ -266,6 +265,7 @@ const char* gd_raw_filename(DIRFILE* D, const char* field_code_in) gd_nothrow
 {
   int repr;
   char* field_code;
+  gd_entry_t *E;
 
   dtrace("%p, \"%s\"", D, field_code_in);
 
@@ -276,8 +276,7 @@ const char* gd_raw_filename(DIRFILE* D, const char* field_code_in) gd_nothrow
   }
 
   /* Check field */
-  gd_entry_t *E = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr,
-      NULL, 1);
+  E = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1);
 
   if (D->error) {
     dreturn("%p", NULL);

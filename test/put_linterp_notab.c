@@ -17,7 +17,8 @@ int main(void)
   const char* data = __TEST__ "dirfile/data";
   const char* format_data = "linterp LINTERP data ./table\ndata RAW INT8 8\n";
   int8_t c[8];
-  int fd, i, r = 0;
+  int fd, i, n, error, r = 0;
+  DIRFILE *D;
 
   memset(c, 0, 8);
   mkdir(filedir, 0777);
@@ -29,9 +30,9 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_UNENCODED);
-  int n = gd_putdata(D, "linterp", 5, 0, 1, 0, GD_INT8, c);
-  int error = gd_error(D);
+  D = gd_open(filedir, GD_RDWR | GD_UNENCODED);
+  n = gd_putdata(D, "linterp", 5, 0, 1, 0, GD_INT8, c);
+  error = gd_error(D);
 
   gd_close(D);
 

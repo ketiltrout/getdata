@@ -20,7 +20,8 @@ int main(void)
     "data RAW UINT8 1\n";
   double c = 0;
   unsigned char data_data[256];
-  int fd, r = 0;
+  int fd, n, error, r = 0;
+  DIRFILE *D;
 
   mkdir(filedir, 0777);
 
@@ -35,9 +36,9 @@ int main(void)
   write(fd, data_data, 256);
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  int n = gd_getdata(D, "div", 5, 0, 1, 0, GD_FLOAT64, &c);
-  int error = gd_error(D);
+  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  n = gd_getdata(D, "div", 5, 0, 1, 0, GD_FLOAT64, &c);
+  error = gd_error(D);
 
   gd_close(D);
 

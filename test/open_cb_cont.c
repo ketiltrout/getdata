@@ -27,7 +27,8 @@ int main(void)
     "BADDIRECTIVE BADTYPE\n"
     "BADDIRECTIVE BADTYPE\n"
     "BADDIRECTIVE BADTYPE\n";
-  int fd, r = 0;
+  int fd, error, r = 0;
+  DIRFILE *D;
 
   mkdir(filedir, 0777);
 
@@ -35,8 +36,8 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = gd_cbopen(filedir, GD_RDONLY, callback, NULL);
-  int error = gd_error(D);
+  D = gd_cbopen(filedir, GD_RDONLY, callback, NULL);
+  error = gd_error(D);
   gd_close(D);
 
   unlink(format);

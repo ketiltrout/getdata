@@ -17,7 +17,8 @@ int main(void)
   const char* data = __TEST__ "dirfile/data.txt";
   const char* format_data = "data RAW UINT8 8\n";
   unsigned char c[8], d[8];
-  int fd, i, r = 0;
+  int fd, i, n, error, n2, error2, r = 0;
+  DIRFILE *D;
   FILE* stream;
 
   memset(c, 0, 8);
@@ -32,12 +33,12 @@ int main(void)
     fprintf(stream, "%i\n", i);
   fclose(stream);
 
-  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  int n = gd_getdata(D, "data", 5, 0, 1, 0, GD_UINT8, c);
-  int error = gd_error(D);
+  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  n = gd_getdata(D, "data", 5, 0, 1, 0, GD_UINT8, c);
+  error = gd_error(D);
 
-  int n2 = gd_getdata(D, "data", 5, 0, 1, 0, GD_UINT8, d);
-  int error2 = gd_error(D);
+  n2 = gd_getdata(D, "data", 5, 0, 1, 0, GD_UINT8, d);
+  error2 = gd_error(D);
 
   gd_close(D);
 

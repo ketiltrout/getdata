@@ -16,7 +16,9 @@ int main(void)
   const char* format = __TEST__ "dirfile/format";
   const char* format_data = "data CONST UINT8 13\n"
     "raw RAW UINT8 data\n";
-  int fd, r = 0;
+  int fd, ret, error1, error2, r = 0;
+  DIRFILE *D;
+  gd_spf_t spf;
 
   mkdir(filedir, 0777);
 
@@ -24,11 +26,11 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDWR);
-  int ret = gd_delete(D, "data", GD_DEL_FORCE);
-  int error1 = gd_error(D);
-  unsigned int spf = gd_spf(D, "raw");
-  int error2 = gd_error(D);
+  D = gd_open(filedir, GD_RDWR);
+  ret = gd_delete(D, "data", GD_DEL_FORCE);
+  error1 = gd_error(D);
+  spf = gd_spf(D, "raw");
+  error2 = gd_error(D);
   gd_close(D);
 
   unlink(format);

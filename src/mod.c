@@ -264,16 +264,17 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
 
       if (flags) {
         ssize_t nread, nwrote;
-        off64_t ns_out;
+        off64_t ns_out, nf;
         void *buffer1;
         void *buffer2;
+        struct encoding_t *enc;
 
         if (j & GD_AS_NEED_RECALC)
           if (gd_get_constant(D, Q.scalar[0], GD_UINT16, &Q.EN(raw,spf)))
             break;
 
-        const off64_t nf = BUFFER_SIZE / max(E->e->u.raw.size,
-            GD_SIZE(Q.EN(raw,data_type))) / max(E->EN(raw,spf), Q.EN(raw,spf));
+        nf = BUFFER_SIZE / max(E->e->u.raw.size, GD_SIZE(Q.EN(raw,data_type))) /
+          max(E->EN(raw,spf), Q.EN(raw,spf));
 
         if (D->fragment[E->fragment_index].protection & GD_PROTECT_DATA)
           _GD_SetError(D, GD_E_PROTECTED, GD_E_PROTECTED_DATA, NULL, 0,
@@ -286,7 +287,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
         if (D->error)
           break;
 
-        const struct encoding_t* enc = _gd_ef + E->e->u.raw.file[0].encoding;
+        enc = _gd_ef + E->e->u.raw.file[0].encoding;
 
         if (_GD_SetEncodedName(D, E->e->u.raw.file, E->e->u.raw.filebase, 0))
           ; /* error already set */
@@ -845,9 +846,10 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
 int gd_alter_entry(DIRFILE* D, const char* field_code,
     const gd_entry_t *entry, int move)
 {
-  dtrace("%p, \"%s\", %p, %i", D, field_code, entry, move);
-
+  int ret;
   gd_entry_t N;
+
+  dtrace("%p, \"%s\", %p, %i", D, field_code, entry, move);
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -863,7 +865,7 @@ int gd_alter_entry(DIRFILE* D, const char* field_code,
   if (N.field_type == GD_LINCOM_ENTRY || N.field_type == GD_POLYNOM_ENTRY)
     move = 7;
 
-  int ret = _GD_Change(D, field_code, &N, move);
+  ret = _GD_Change(D, field_code, &N, move);
 
   dreturn("%i", ret);
   return ret;
@@ -872,6 +874,7 @@ int gd_alter_entry(DIRFILE* D, const char* field_code,
 int gd_alter_raw(DIRFILE *D, const char *field_code,
     gd_type_t data_type, gd_spf_t spf, int move)
 {
+  int ret;
   gd_entry_t N;
 
   dtrace("%p, \"%s\", %u, %x, %i", D, field_code, spf, data_type, move);
@@ -890,7 +893,7 @@ int gd_alter_raw(DIRFILE *D, const char *field_code,
   N.e = NULL;
   N.scalar[0] = (spf == 0) ? (char *)"" : NULL;
 
-  int ret = _GD_Change(D, field_code, &N, move);
+  ret = _GD_Change(D, field_code, &N, move);
 
   dreturn("%i", ret);
   return ret;
@@ -900,7 +903,7 @@ int gd_alter_lincom(DIRFILE* D, const char* field_code, int n_fields,
     const char** in_fields, const double* m, const double* b) gd_nothrow
 {
   gd_entry_t N;
-  int i;
+  int i, ret;
   int flags = 0;
 
   dtrace("%p, \"%s\", %i, %p, %p, %p", D, field_code, n_fields, in_fields, m,
@@ -957,7 +960,7 @@ int gd_alter_lincom(DIRFILE* D, const char* field_code, int n_fields,
       N.scalar[i + GD_MAX_LINCOM] = "";
   }
 
-  int ret = _GD_Change(D, field_code, &N, flags);
+  ret = _GD_Change(D, field_code, &N, flags);
 
   dreturn("%i", ret);
   return ret;
@@ -968,7 +971,7 @@ int gd_alter_clincom(DIRFILE* D, const char* field_code, int n_fields,
   gd_nothrow
 {
   gd_entry_t N;
-  int i;
+  int i, ret;
   int flags = 0;
 
   dtrace("%p, \"%s\", %i, %p, %p, %p", D, field_code, n_fields, in_fields, cm,
@@ -1025,7 +1028,7 @@ int gd_alter_clincom(DIRFILE* D, const char* field_code, int n_fields,
       N.scalar[i + GD_MAX_LINCOM] = "";
   }
 
-  int ret = _GD_Change(D, field_code, &N, flags);
+  ret = _GD_Change(D, field_code, &N, flags);
 
   dreturn("%i", ret);
   return ret;
@@ -1034,6 +1037,7 @@ int gd_alter_clincom(DIRFILE* D, const char* field_code, int n_fields,
 int gd_alter_linterp(DIRFILE* D, const char* field_code, const char* in_field,
     const char* table, int move)
 {
+  int ret;
   gd_entry_t N;
 
   dtrace("%p, \"%s\", \"%s\", \"%s\", %i", D, field_code, in_field, table,
@@ -1050,7 +1054,7 @@ int gd_alter_linterp(DIRFILE* D, const char* field_code, const char* in_field,
   N.EN(linterp,table) = (char *)table;
   N.e = NULL;
 
-  int ret = _GD_Change(D, field_code, &N, move);
+  ret = _GD_Change(D, field_code, &N, move);
 
   dreturn("%i", ret);
   return ret;
@@ -1059,6 +1063,7 @@ int gd_alter_linterp(DIRFILE* D, const char* field_code, const char* in_field,
 int gd_alter_bit(DIRFILE* D, const char* field_code, const char* in_field,
     gd_bit_t bitnum, gd_bit_t numbits) gd_nothrow
 {
+  int ret;
   gd_entry_t N;
 
   dtrace("%p, \"%s\", \"%s\", %i, %i", D, field_code, in_field, bitnum,
@@ -1078,7 +1083,7 @@ int gd_alter_bit(DIRFILE* D, const char* field_code, const char* in_field,
   N.scalar[0] = (bitnum == -1) ? (char *)"" : NULL;
   N.scalar[1] = (numbits == 0) ? (char *)"" : NULL;
 
-  int ret = _GD_Change(D, field_code, &N, 0);
+  ret = _GD_Change(D, field_code, &N, 0);
 
   dreturn("%i", ret);
   return ret;
@@ -1087,6 +1092,7 @@ int gd_alter_bit(DIRFILE* D, const char* field_code, const char* in_field,
 int gd_alter_sbit(DIRFILE* D, const char* field_code, const char* in_field,
     gd_bit_t bitnum, gd_bit_t numbits) gd_nothrow
 {
+  int ret;
   gd_entry_t N;
 
   dtrace("%p, \"%s\", \"%s\", %i, %i", D, field_code, in_field, bitnum,
@@ -1106,7 +1112,7 @@ int gd_alter_sbit(DIRFILE* D, const char* field_code, const char* in_field,
   N.scalar[0] = (bitnum == -1) ? (char *)"" : NULL;
   N.scalar[1] = (numbits == 0) ? (char *)"" : NULL;
 
-  int ret = _GD_Change(D, field_code, &N, 0);
+  ret = _GD_Change(D, field_code, &N, 0);
 
   dreturn("%i", ret);
   return ret;
@@ -1115,6 +1121,7 @@ int gd_alter_sbit(DIRFILE* D, const char* field_code, const char* in_field,
 int gd_alter_recip(DIRFILE* D, const char* field_code, const char* in_field,
     double dividend) gd_nothrow
 {
+  int ret;
   gd_entry_t N;
 
   dtrace("%p, \"%s\", \"%s\", %g", D, field_code, in_field, dividend);
@@ -1132,7 +1139,7 @@ int gd_alter_recip(DIRFILE* D, const char* field_code, const char* in_field,
   N.comp_scal = 0;
   N.e = NULL;
 
-  int ret = _GD_Change(D, field_code, &N, 0);
+  ret = _GD_Change(D, field_code, &N, 0);
 
   dreturn("%i", ret);
   return ret;
@@ -1142,6 +1149,7 @@ int gd_alter_recip(DIRFILE* D, const char* field_code, const char* in_field,
 int gd_alter_crecip(DIRFILE* D, const char* field_code, const char* in_field,
     double complex cdividend)
 {
+  int ret;
   gd_entry_t N;
 
   dtrace("%p, \"%s\", \"%s\", %g;%g", D, field_code, in_field, creal(cdividend),
@@ -1160,7 +1168,7 @@ int gd_alter_crecip(DIRFILE* D, const char* field_code, const char* in_field,
   N.comp_scal = 1;
   N.e = NULL;
 
-  int ret = _GD_Change(D, field_code, &N, 0);
+  ret = _GD_Change(D, field_code, &N, 0);
 
   dreturn("%i", ret);
   return ret;
@@ -1170,6 +1178,7 @@ int gd_alter_crecip(DIRFILE* D, const char* field_code, const char* in_field,
 int gd_alter_crecip89(DIRFILE* D, const char* field_code, const char* in_field,
     const double cdividend[2]) gd_nothrow
 {
+  int ret;
   gd_entry_t N;
 
   dtrace("%p, \"%s\", \"%s\", [%g, %g]", D, field_code, in_field, cdividend[0],
@@ -1189,7 +1198,7 @@ int gd_alter_crecip89(DIRFILE* D, const char* field_code, const char* in_field,
   N.comp_scal = 1;
   N.e = NULL;
 
-  int ret = _GD_Change(D, field_code, &N, 0);
+  ret = _GD_Change(D, field_code, &N, 0);
 
   dreturn("%i", ret);
   return ret;
@@ -1198,6 +1207,7 @@ int gd_alter_crecip89(DIRFILE* D, const char* field_code, const char* in_field,
 int gd_alter_divide(DIRFILE* D, const char* field_code, const char* in_field1,
     const char* in_field2) gd_nothrow
 {
+  int ret;
   gd_entry_t N;
 
   dtrace("%p, \"%s\", \"%s\", \"%s\"", D, field_code, in_field1, in_field2);
@@ -1213,7 +1223,7 @@ int gd_alter_divide(DIRFILE* D, const char* field_code, const char* in_field1,
   N.in_fields[1] = (char *)in_field2;
   N.e = NULL;
 
-  int ret = _GD_Change(D, field_code, &N, 0);
+  ret = _GD_Change(D, field_code, &N, 0);
 
   dreturn("%i", ret);
   return ret;
@@ -1222,6 +1232,7 @@ int gd_alter_divide(DIRFILE* D, const char* field_code, const char* in_field1,
 int gd_alter_multiply(DIRFILE* D, const char* field_code, const char* in_field1,
     const char* in_field2) gd_nothrow
 {
+  int ret;
   gd_entry_t N;
 
   dtrace("%p, \"%s\", \"%s\", \"%s\"", D, field_code, in_field1, in_field2);
@@ -1237,7 +1248,7 @@ int gd_alter_multiply(DIRFILE* D, const char* field_code, const char* in_field1,
   N.in_fields[1] = (char *)in_field2;
   N.e = NULL;
 
-  int ret = _GD_Change(D, field_code, &N, 0);
+  ret = _GD_Change(D, field_code, &N, 0);
 
   dreturn("%i", ret);
   return ret;
@@ -1246,6 +1257,7 @@ int gd_alter_multiply(DIRFILE* D, const char* field_code, const char* in_field1,
 int gd_alter_phase(DIRFILE* D, const char* field_code, const char* in_field,
     gd_shift_t shift) gd_nothrow
 {
+  int ret;
   gd_entry_t N;
 
   dtrace("%p, \"%s\", \"%s\", %lli", D, field_code, in_field, (long long)shift);
@@ -1262,7 +1274,7 @@ int gd_alter_phase(DIRFILE* D, const char* field_code, const char* in_field,
   N.e = NULL;
   N.scalar[0] = NULL;
 
-  int ret = _GD_Change(D, field_code, &N, 0);
+  ret = _GD_Change(D, field_code, &N, 0);
 
   dreturn("%i", ret);
   return ret;
@@ -1271,6 +1283,7 @@ int gd_alter_phase(DIRFILE* D, const char* field_code, const char* in_field,
 int gd_alter_const(DIRFILE* D, const char* field_code, gd_type_t const_type)
   gd_nothrow
 {
+  int ret;
   gd_entry_t N;
 
   dtrace("%p, \"%s\", 0x%x", D, field_code, const_type);
@@ -1285,7 +1298,7 @@ int gd_alter_const(DIRFILE* D, const char* field_code, gd_type_t const_type)
   N.EN(scalar,const_type) = const_type;
   N.e = NULL;
 
-  int ret = _GD_Change(D, field_code, &N, 0);
+  ret = _GD_Change(D, field_code, &N, 0);
 
   dreturn("%i", ret);
   return ret;
@@ -1294,6 +1307,7 @@ int gd_alter_const(DIRFILE* D, const char* field_code, gd_type_t const_type)
 int gd_alter_carray(DIRFILE* D, const char* field_code, gd_type_t const_type,
     size_t array_len) gd_nothrow
 {
+  int ret;
   gd_entry_t N;
 
   dtrace("%p, \"%s\", 0x%x, %zu", D, field_code, const_type, array_len);
@@ -1309,7 +1323,7 @@ int gd_alter_carray(DIRFILE* D, const char* field_code, gd_type_t const_type,
   N.EN(scalar,array_len) = array_len;
   N.e = NULL;
 
-  int ret = _GD_Change(D, field_code, &N, 0);
+  ret = _GD_Change(D, field_code, &N, 0);
 
   dreturn("%i", ret);
   return ret;
@@ -1319,7 +1333,7 @@ int gd_alter_polynom(DIRFILE* D, const char* field_code, int poly_ord,
     const char* in_field, const double* a) gd_nothrow
 {
   gd_entry_t N;
-  int i;
+  int i, ret;
   int flags = 0;
 
   dtrace("%p, \"%s\", %i, \"%s\", %p", D, field_code, poly_ord, in_field, a);
@@ -1365,7 +1379,7 @@ int gd_alter_polynom(DIRFILE* D, const char* field_code, int poly_ord,
     for (i = 0; i <= N.EN(polynom,poly_ord); ++i)
       N.scalar[i] = "";
 
-  int ret = _GD_Change(D, field_code, &N, flags);
+  ret = _GD_Change(D, field_code, &N, flags);
 
   dreturn("%i", ret);
   return ret;
@@ -1375,7 +1389,7 @@ int gd_alter_cpolynom(DIRFILE* D, const char* field_code, int poly_ord,
     const char* in_field, const GD_DCOMPLEXP(ca)) gd_nothrow
 {
   gd_entry_t N;
-  int i;
+  int i, ret;
   int flags = 0;
 
   dtrace("%p, \"%s\", %i, \"%s\", %p", D, field_code, poly_ord, in_field, ca);
@@ -1421,7 +1435,7 @@ int gd_alter_cpolynom(DIRFILE* D, const char* field_code, int poly_ord,
     for (i = 0; i <= N.EN(polynom,poly_ord); ++i)
       N.scalar[i] = "";
 
-  int ret = _GD_Change(D, field_code, &N, flags);
+  ret = _GD_Change(D, field_code, &N, flags);
 
   dreturn("%i", ret);
   return ret;
@@ -1432,7 +1446,7 @@ int gd_alter_spec(DIRFILE* D, const char* line, int move)
   const char *tok_pos = NULL;
   char *outstring = NULL;
   char *in_cols[MAX_IN_COLS];
-  int n_cols;
+  int n_cols, ret;
   int standards = GD_DIRFILE_STANDARDS_VERSION;
   gd_entry_t *N = NULL;
 
@@ -1502,7 +1516,7 @@ int gd_alter_spec(DIRFILE* D, const char* line, int move)
     move = 7;
 
   /* Change the entry */
-  int ret = _GD_Change(D, N->field, N, move);
+  ret = _GD_Change(D, N->field, N, move);
 
   _GD_FreeE(N, 1);
 
@@ -1515,7 +1529,7 @@ int gd_malter_spec(DIRFILE* D, const char* line, const char* parent, int move)
   char *outstring = NULL;
   const char *tok_pos;
   char *in_cols[MAX_IN_COLS];
-  int n_cols;
+  int n_cols, ret;
   int standards = GD_DIRFILE_STANDARDS_VERSION;
   gd_entry_t *N = NULL;
 
@@ -1569,7 +1583,7 @@ int gd_malter_spec(DIRFILE* D, const char* line, const char* parent, int move)
     move = 7;
 
   /* Change the entry */
-  int ret = _GD_Change(D, N->field, N, move);
+  ret = _GD_Change(D, N->field, N, move);
 
   _GD_FreeE(N, 1);
 

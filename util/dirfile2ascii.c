@@ -150,16 +150,17 @@ int main (int argc, char **argv)
   size_t nf = 0;
   off64_t ff = 0;
   size_t n_want;
+  gd_spf_t j;
   gd_spf_t max_spf = 0;
   gd_spf_t min_spf = UINT16_MAX;
-  int c;
+  int c, i;
   int numfields = 0;
   struct field fields[BUF_LEN];
   int verbose = 0;
   int interpolate = 0;
   size_t skip = 0;
   int skipping = 0;
-  size_t k;
+  size_t k, z;
   int average = 0;
   int optind = 0;
   const double NaN = NAN;
@@ -314,7 +315,6 @@ int main (int argc, char **argv)
     ff = 0;
   }
 
-  size_t z;
   for (z = 0; z < strlen(precision); z++) {
     if (strchr(VALID_PRECISION_CHARS, precision[z]) == NULL) {
       fprintf(stderr,
@@ -358,7 +358,6 @@ int main (int argc, char **argv)
   }
 
   /* Get spfs and sanity checks for all fields */
-  int i;
   for (i = 0; i < numfields; i++) {
     fields[i].spf = gd_spf(dirfile, fields[i].name);
     if (gd_error(dirfile)) {
@@ -451,7 +450,6 @@ int main (int argc, char **argv)
     snprintf(fields[i].format, F_LEN, "%%%s%s", precision,
         type_data[fields[i].type].f);
 
-  gd_spf_t j;
   for (k = 0; k < nf; k += skip) {
     for (j = 0; j < (skipping ? 1 : max_spf); j++) {
       for (i = 0; i < numfields; i++) {

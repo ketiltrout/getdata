@@ -15,7 +15,8 @@ int main(void)
   const char* format = __TEST__ "dirfile/format";
   const char* format_data = "lincom LINCOM 1 data 2 3\n";
   unsigned char c = 0;
-  int fd, r = 0;
+  int fd, n, error, r = 0;
+  DIRFILE *D;
 
   mkdir(filedir, 0777);
 
@@ -23,10 +24,10 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDONLY);
-  int n = gd_getdata(D, "lincom", 5, 0, 1, 0, GD_UINT8, &c);
+  D = gd_open(filedir, GD_RDONLY);
+  n = gd_getdata(D, "lincom", 5, 0, 1, 0, GD_UINT8, &c);
 
-  int error = gd_error(D);
+  error = gd_error(D);
 
   gd_close(D);
 

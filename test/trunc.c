@@ -14,8 +14,9 @@ int main(void)
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
   const char* data = __TEST__ "dirfile/data";
-  int fd, r = 0;
+  int fd, error, unlink_data, stat_format, r = 0;
   struct stat buf;
+  DIRFILE *D;
 
   mkdir(filedir, 0777);
 
@@ -25,14 +26,14 @@ int main(void)
 
   close(open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666));
 
-  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_TRUNC | GD_VERBOSE);
-  int error = gd_error(D);
+  D = gd_open(filedir, GD_RDWR | GD_TRUNC | GD_VERBOSE);
+  error = gd_error(D);
   gd_close(D);
 
-  int unlink_data = unlink(data);
+  unlink_data = unlink(data);
   CHECKI(unlink_data, -1);
 
-  int stat_format = stat(format, &buf);
+  stat_format = stat(format, &buf);
   CHECKI(stat_format, 0);
   CHECK((buf.st_size > 0),buf.st_size,"%lli","%s",(long long)buf.st_size,"> 0");
 

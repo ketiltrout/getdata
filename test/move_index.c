@@ -17,8 +17,9 @@ int main(void)
   const char* format1 = __TEST__ "dirfile/format1";
   const char* format_data = "INCLUDE format1\ndata RAW UINT8 11";
   const char* format1_data = "#\n";
-  int fd, r = 0;
+  int fd, ret, error, ge_ret, r = 0;
   gd_entry_t E;
+  DIRFILE *D;
 
   mkdir(filedir, 0777);
 
@@ -30,10 +31,10 @@ int main(void)
   write(fd, format1_data, strlen(format1_data));
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_UNENCODED);
-  int ret = gd_move(D, "data", 2, 0);
-  int error = gd_error(D);
-  int ge_ret =  gd_entry(D, "data", &E);
+  D = gd_open(filedir, GD_RDWR | GD_UNENCODED);
+  ret = gd_move(D, "data", 2, 0);
+  error = gd_error(D);
+  ge_ret =  gd_entry(D, "data", &E);
   gd_close(D);
 
   unlink(format1);

@@ -24,7 +24,8 @@ int main(void)
   int32_t data_data[256];
   int32_t c[8];
   gd_entry_t e;
-  int fd, i, r = 0;
+  int fd, i, ret, error, error2, n, unlink_table, r = 0;
+  DIRFILE *D;
 
   mkdir(filedir, 0777);
 
@@ -47,17 +48,17 @@ int main(void)
   write(fd, data_data, 256 * sizeof(int32_t));
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
-  int ret = gd_alter_linterp(D, "lut", NULL, "table1", 0);
-  int error = gd_error(D);
+  D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
+  ret = gd_alter_linterp(D, "lut", NULL, "table1", 0);
+  error = gd_error(D);
   gd_entry(D, "lut", &e);
-  int error2 = gd_error(D);
-  int n = gd_getdata(D, "lut", 5, 0, 1, 0, GD_INT32, c);
+  error2 = gd_error(D);
+  n = gd_getdata(D, "lut", 5, 0, 1, 0, GD_INT32, c);
 
   gd_close(D);
 
   unlink(data);
-  int unlink_table = unlink(table);
+  unlink_table = unlink(table);
   unlink(table1);
   unlink(format);
   rmdir(filedir);

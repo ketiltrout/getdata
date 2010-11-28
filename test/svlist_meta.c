@@ -20,7 +20,9 @@ int main(void)
     "META parent data2 STRING valu2\n"
     "META parent data3 STRING valu3\n"
     "META parent data4 CONST UINT8 1\n";
-  int fd, i, r = 0;
+  int fd, i, error, r = 0;
+  const char **field_list;
+  DIRFILE *D;
 
   mkdir(filedir, 0777);
 
@@ -28,13 +30,13 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
   gd_nfields(D);
   gd_nmfields(D, "parent");
   gd_nmfields_by_type(D, "parent", GD_STRING_ENTRY);
-  const char** field_list = gd_mstrings(D, "parent");
+  field_list = gd_mstrings(D, "parent");
 
-  int error = gd_error(D);
+  error = gd_error(D);
   CHECKI(error, 0);
   CHECKPN(field_list);
 

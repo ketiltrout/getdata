@@ -19,7 +19,9 @@ int main(void)
   const char* format_data = "data RAW UINT8 8\n";
   unsigned char data_data[256];
   uint16_t d;
-  int fd, i, r = 0;
+  int fd, i, ret, error, r = 0;
+  off_t n;
+  DIRFILE *D;
   gd_entry_t E;
 
   mkdir(filedir, 0777);
@@ -35,13 +37,13 @@ int main(void)
   write(fd, data_data, 256);
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
+  D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
   gd_entry(D, "data", &E);
   E.EN(raw,data_type) = GD_UINT16;
   E.EN(raw,spf) = 11;
-  int ret = gd_alter_entry(D, "data", &E, 1);
-  int error = gd_error(D);
-  off_t n = gd_nframes(D);
+  ret = gd_alter_entry(D, "data", &E, 1);
+  error = gd_error(D);
+  n = gd_nframes(D);
 
   gd_close(D);
 

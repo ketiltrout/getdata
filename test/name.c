@@ -19,7 +19,10 @@ int main(void)
   const char* format_data = "cata RAW UINT8 8\ndata RAW UINT8 8\n"
     "eata RAW UINT8 8\n";
   unsigned char data_data[256];
-  int fd, r = 0;
+  int fd, ret, error, unlink_data, unlink_zata, r = 0;
+  const char **fl;
+  char *field_list[4];
+  DIRFILE *D;
 
   mkdir(filedir, 0777);
 
@@ -34,12 +37,10 @@ int main(void)
   write(fd, data_data, 256);
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
-  int ret = gd_rename(D, "data", "zata", 0);
-  int error = gd_error(D);
-  const char** fl = gd_field_list(D);
-
-  const char* field_list[4];
+  D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
+  ret = gd_rename(D, "data", "zata", 0);
+  error = gd_error(D);
+  fl = gd_field_list(D);
 
   field_list[0] = strdup(fl[0]);
   field_list[1] = strdup(fl[1]);
@@ -48,8 +49,8 @@ int main(void)
 
   gd_close(D);
 
-  int unlink_data = unlink(data);
-  int unlink_zata = unlink(zata);
+  unlink_data = unlink(data);
+  unlink_zata = unlink(zata);
   unlink(format);
   rmdir(filedir);
 

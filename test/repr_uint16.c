@@ -22,7 +22,8 @@ int main(void)
   double complex data_data[256];
 #endif
   uint16_t c[8], i;
-  int fd, r = 0;
+  int fd, n, error, r = 0;
+  DIRFILE *D;
 
   memset(c, 0, 8);
   mkdir(filedir, 0777);
@@ -43,10 +44,10 @@ int main(void)
   write(fd, data_data, 512 * sizeof(double));
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  int n = gd_getdata(D, "data", 5, 0, 1, 0, GD_UINT16, c);
+  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  n = gd_getdata(D, "data", 5, 0, 1, 0, GD_UINT16, c);
 
-  int error = gd_error(D);
+  error = gd_error(D);
   CHECKI(error, 0);
   CHECKI(n,8);
   for (i = 0; i < 8; ++i)

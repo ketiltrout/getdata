@@ -122,10 +122,10 @@ static DIRFILE *_GD_GetDirfile(const char *filename_in, int mode,
 {
   unsigned int i_dirfile;
   void *ptr;
+  char filedir[FILENAME_MAX];
 
   dtrace("\"%s\", %x", filename_in, mode);
 
-  char filedir[FILENAME_MAX];
   strncpy(filedir, filename_in, FILENAME_MAX);
   if (filedir[strlen(filedir) - 1] == '/')
     filedir[strlen(filedir) - 1] = '\0';
@@ -350,8 +350,6 @@ static void CopyPhaseEntry(struct PhaseEntryType* P, gd_entry_t* E)
 /* Okay, reconstruct the old FormatType.  This is painful. */
 struct FormatType *GetFormat(const char *filedir, int *error_code) gd_nothrow
 {
-  dtrace("\"%s\", %p", filedir, error_code);
-
   unsigned int i;
 
   int nraw = 0;
@@ -360,8 +358,11 @@ struct FormatType *GetFormat(const char *filedir, int *error_code) gd_nothrow
   int nmultiply = 0;
   int nbit = 0;
   int nphase = 0;
+  DIRFILE *D;
 
-  DIRFILE *D = _GD_GetDirfile(filedir, GD_RDONLY, error_code);
+  dtrace("\"%s\", %p", filedir, error_code);
+
+  D = _GD_GetDirfile(filedir, GD_RDONLY, error_code);
 
   if (!D) {
     dreturn("%p", NULL);
@@ -542,6 +543,7 @@ int GetSamplesPerFrame(const char *filename, const char *field_code,
     int *error_code) gd_nothrow
 {
   DIRFILE* D;
+  int spf;
 
   dtrace("\"%s\", \"%s\", %p", filename, field_code, error_code);
 
@@ -552,7 +554,7 @@ int GetSamplesPerFrame(const char *filename, const char *field_code,
     return 0;
   }
 
-  int spf = (int)gd_spf(D, field_code);
+  spf = (int)gd_spf(D, field_code);
   *error_code = _GD_CopyGlobalError(D);
 
   dreturn("%i", spf);

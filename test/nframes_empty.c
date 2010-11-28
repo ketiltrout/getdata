@@ -12,20 +12,23 @@ int main(void)
 {
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
+  int error, r = 0;
+  DIRFILE *D;
+  size_t n;
 
   mkdir(filedir, 0777);
   close(open(format, O_CREAT | O_EXCL | O_WRONLY, 0666));
 
-  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  size_t n = gd_nframes(D);
-  int error = gd_error(D);
+  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  n = gd_nframes(D);
+  error = gd_error(D);
   gd_close(D);
 
   unlink(format);
   rmdir(filedir);
 
-  if (n != 0)
-    return 1;
+  CHECKU(n, 0);
+  CHECKI(error, GD_E_OK);
 
-  return (error != GD_E_OK);
+  return r;
 }

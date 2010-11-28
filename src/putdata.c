@@ -140,6 +140,8 @@ static size_t _GD_DoLinterpOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
 {
   size_t n_wrote;
   int dir = -1, i;
+  double *tmpbuf;
+  struct _gd_lut *tmp_lut;
 
   dtrace("%p, %p, %lli, %zu, 0x%x, %p", D, E, first_samp, num_samp, data_type,
       data_in);
@@ -187,7 +189,7 @@ static size_t _GD_DoLinterpOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
     return 0;
   }
 
-  double *tmpbuf = (double *)_GD_Alloc(D, GD_FLOAT64, num_samp);
+  tmpbuf = (double *)_GD_Alloc(D, GD_FLOAT64, num_samp);
   if (tmpbuf == NULL) {
     free(tmpbuf);
     dreturn("%i", 0);
@@ -203,8 +205,8 @@ static size_t _GD_DoLinterpOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
   }
 
   /* Make the reverse lut */
-  struct _gd_lut *tmp_lut = (struct _gd_lut *)malloc(E->e->u.linterp.table_len
-      * sizeof(struct _gd_lut));
+  tmp_lut = (struct _gd_lut *)malloc(E->e->u.linterp.table_len *
+      sizeof(struct _gd_lut));
   if (tmp_lut == NULL) {
     free(tmpbuf);
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
@@ -317,12 +319,11 @@ static size_t _GD_DoBitOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
   uint64_t *tmpbuf;
   uint64_t *readbuf;
   size_t i, n_wrote;
+  const uint64_t mask = (E->EN(bit,numbits) == 64) ? 0xffffffffffffffffULL :
+    ((uint64_t)1 << E->EN(bit,numbits)) - 1;
 
   dtrace("%p, %p, %lli, %zu, 0x%x, %p", D, E, first_samp, num_samp, data_type,
       data_in);
-
-  const uint64_t mask = (E->EN(bit,numbits) == 64) ? 0xffffffffffffffffULL :
-    ((uint64_t)1 << E->EN(bit,numbits)) - 1;
 
   if (_GD_BadInput(D, E, 0)) {
     dreturn("%i", 0);
@@ -544,8 +545,9 @@ static size_t _GD_DoConstOut(DIRFILE* D, gd_entry_t *E, off64_t first,
 
 static size_t _GD_DoStringOut(DIRFILE* D, gd_entry_t *E, const char *data_in)
 {
-  dtrace("%p, %p, %p", D, E, data_in);
   char* ptr = E->e->u.string;
+
+  dtrace("%p, %p, %p", D, E, data_in);
 
   /* check protection */
   if (D->fragment[E->fragment_index].protection & GD_PROTECT_FORMAT) {
@@ -656,6 +658,7 @@ size_t gd_putdata64(DIRFILE* D, const char *field_code_in, off64_t first_frame,
   gd_entry_t *entry;
   char* field_code;
   int repr;
+  gd_spf_t spf;
 
   dtrace("%p, \"%s\", %lli, %lli, %zu, %zu, 0x%x, %p", D, field_code_in,
       first_frame, first_samp, num_frames, num_samp, data_type, data_in);
@@ -693,7 +696,7 @@ size_t gd_putdata64(DIRFILE* D, const char *field_code_in, off64_t first_frame,
   }
 
   /* get the samples per frame */
-  gd_spf_t spf = _GD_GetSPF(D, entry);
+  spf = _GD_GetSPF(D, entry);
 
   if (D->error) {
     dreturn("%i", 0);

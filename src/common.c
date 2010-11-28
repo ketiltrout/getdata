@@ -187,6 +187,8 @@ void* _GD_Alloc(DIRFILE* D, gd_type_t type, size_t n)
 /* compute LUT table path -- this is used by _GD_Change, so e may not be E->e */
 int _GD_SetTablePath(DIRFILE *D, gd_entry_t *E, struct _gd_private_entry *e)
 {
+  char *temp_buffer;
+
   dtrace("%p, %p, %p", D, E, e);
 
   if (E->EN(linterp,table)[0] == '/') {
@@ -197,17 +199,18 @@ int _GD_SetTablePath(DIRFILE *D, gd_entry_t *E, struct _gd_private_entry *e)
       return 1;
     }
   } else {
-    e->u.linterp.table_path = (char *)malloc(FILENAME_MAX);
+    e->u.linterp.table_path = (char *)malloc(strlen(E->EN(linterp,table)) + 2 +
+        strlen(D->fragment[E->fragment_index].cname));
     if (e->u.linterp.table_path == NULL) {
       _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
       dreturn("%i", 1);
       return 1;
     }
-    char temp_buffer[FILENAME_MAX];
-    strcpy(temp_buffer, D->fragment[E->fragment_index].cname);
+    temp_buffer = strdup(D->fragment[E->fragment_index].cname);
     strcpy(e->u.linterp.table_path, dirname(temp_buffer));
     strcat(e->u.linterp.table_path, "/");
     strcat(e->u.linterp.table_path, E->EN(linterp,table));
+    free(temp_buffer);
   }
 
   dreturn("%i", 0);
@@ -412,10 +415,11 @@ static size_t _GD_GetIndex(double x, const struct _gd_lut *lut, size_t idx,
 #define CLINTERPC(t) \
   do { \
     for (i = 0; i < npts; i++) { \
+      double tx, dx; \
       x = data_in[i]; \
       idx = _GD_GetIndex(x, lut, idx, n_ln); \
-      double tx = lut[idx + 1].x - lut[idx].x; \
-      double dx = x - lut[idx].x; \
+      tx = lut[idx + 1].x - lut[idx].x; \
+      dx = x - lut[idx].x; \
       ((t *)data)[2 * i] = (t)(lut[idx].y.c[0] + \
         (lut[idx + 1].y.c[0] - lut[idx].y.c[0]) / tx * dx); \
       ((t *)data)[2 * i + 1] = (t)(lut[idx].y.c[1] + \
@@ -776,10 +780,9 @@ void _GD_CInvertData(DIRFILE* D, void* data, gd_type_t return_type,
 int _GD_GetRepr(DIRFILE* D, const char* field_code_in, char** field_code)
 {
   int repr = GD_REPR_NONE;
+  const int field_code_len = strlen(field_code_in);
 
   dtrace("%p, \"%s\", %p", D, field_code_in, field_code);
-
-  const int field_code_len = strlen(field_code_in);
 
   *field_code = (char *)field_code_in;
   /* find the representation, if any */

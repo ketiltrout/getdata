@@ -20,6 +20,7 @@ int main(void)
   const char* format_data = "data RAW UINT8 1\n";
   int fd, error, r = 0;
   const size_t len = strlen(data);
+  size_t n;
 
   mkdir(filedir, 0777);
 
@@ -31,7 +32,7 @@ int main(void)
   write(fd, data, len);
   close(fd);
 
-  size_t n = GetNFrames(filedir, &error, NULL);
+  n = GetNFrames(filedir, &error, NULL);
 
   unlink(data);
   unlink(format);

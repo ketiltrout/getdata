@@ -23,7 +23,9 @@ int main(void)
     "m3 CONST FLOAT64 5\n"
     "b3 CONST FLOAT64 6\n"
     "data LINCOM 3 in1 m1 b1 in2 m2 b2 in3 m3 b3\n";
-  int fd, r = 0;
+  int fd, n, error, r = 0;
+  DIRFILE *D;
+  gd_entry_t E;
 
   mkdir(filedir, 0777);
 
@@ -31,11 +33,10 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  gd_entry_t E;
+  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
 
-  int n = gd_entry(D, "data", &E);
-  int error = gd_error(D);
+  n = gd_entry(D, "data", &E);
+  error = gd_error(D);
 
   gd_close(D);
   unlink(format);

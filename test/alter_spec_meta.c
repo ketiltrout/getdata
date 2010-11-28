@@ -19,7 +19,8 @@ int main(void)
   const char* format_data = "data RAW UINT8 8\nMETA data phase PHASE data 1\n";
   unsigned char data_data[256];
   unsigned char c[8];
-  int fd, i, r = 0;
+  int fd, i, ret, error, n, r = 0;
+  DIRFILE *D;
 
   mkdir(filedir, 0777);
 
@@ -34,10 +35,10 @@ int main(void)
   write(fd, data_data, 256);
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
-  int ret = gd_alter_spec(D, "data/phase PHASE data 2", 0);
-  int error = gd_error(D);
-  int n = gd_getdata(D, "data/phase", 5, 0, 1, 0, GD_UINT8, c);
+  D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
+  ret = gd_alter_spec(D, "data/phase PHASE data 2", 0);
+  error = gd_error(D);
+  n = gd_getdata(D, "data/phase", 5, 0, 1, 0, GD_UINT8, c);
 
   gd_close(D);
 

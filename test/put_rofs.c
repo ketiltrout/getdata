@@ -16,7 +16,8 @@ int main(void)
   const char* data = __TEST__ "dirfile/data";
   const char* format_data = "data RAW UINT8 1\n";
   unsigned char c = 0;
-  int fd, r = 0;
+  int fd, n, error, r = 0;
+  DIRFILE *D;
 
   mkdir(filedir, 0777);
 
@@ -26,10 +27,10 @@ int main(void)
 
   close(open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0444));
 
-  DIRFILE* D = gd_open(filedir, GD_RDWR | GD_UNENCODED);
-  int n = gd_putdata(D, "data", 5, 0, 1, 0, GD_UINT8, &c);
+  D = gd_open(filedir, GD_RDWR | GD_UNENCODED);
+  n = gd_putdata(D, "data", 5, 0, 1, 0, GD_UINT8, &c);
 
-  int error = gd_error(D);
+  error = gd_error(D);
   gd_close(D);
 
   unlink(data);

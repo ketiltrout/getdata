@@ -34,17 +34,18 @@ int main(void)
     NULL
   };
 
-  int i = 0;
+  int error, i = 0, r = 0;
+  FILE *stream;
 
   DIRFILE* D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_TRUNC |
       GD_VERBOSE);
   for (i = 0; spec[i] != NULL; ++i)
     gd_add_spec(D, spec[i], 0);
-  int error = gd_error(D);
+  error = gd_error(D);
 
   gd_close(D);
 
-  FILE* stream = fopen(format, "rt");
+  stream = fopen(format, "rt");
   i = 0;
   while (!feof(stream)) {
     char line[GD_MAX_LINE_LENGTH];
@@ -67,8 +68,7 @@ int main(void)
   unlink(format);
   rmdir(filedir);
 
-  if (error)
-    return 1;
+  CHECKI(error, 0);
 
-  return 0;
+  return r;
 }

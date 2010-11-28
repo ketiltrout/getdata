@@ -14,9 +14,10 @@ int main(void)
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
   const char* format_data = "data RAW UINT8 8\nPROTECT all\n";
-  int fd, r = 0;
-
+  int fd, error, n, r = 0;
+  DIRFILE *D;
   gd_entry_t E;
+
   E.field =  "data2";
   E.field_type = GD_RAW_ENTRY;
   E.fragment_index = 0;
@@ -29,12 +30,12 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDWR);
+  D = gd_open(filedir, GD_RDWR);
   gd_add(D, &E);
-  int error = gd_error(D);
+  error = gd_error(D);
 
   /* check */
-  int n = gd_nfields(D);
+  n = gd_nfields(D);
 
   gd_close(D);
 

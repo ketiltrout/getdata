@@ -32,10 +32,12 @@ static const gd_carray_t zero_carrays[1] = { {0, NULL} };
 const void *gd_mconstants(DIRFILE* D, const char* parent,
     gd_type_t return_type) gd_nothrow
 {
-  dtrace("%p, \"%s\", 0x%x", D, parent, return_type);
-
   int i, n;
   char* fl;
+  gd_entry_t *P;
+  struct _gd_private_entry *e;
+
+  dtrace("%p, \"%s\", 0x%x", D, parent, return_type);
 
   if (D->flags & GD_INVALID) {
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -45,7 +47,7 @@ const void *gd_mconstants(DIRFILE* D, const char* parent,
 
   _GD_ClearError(D);
 
-  const gd_entry_t* P = _GD_FindField(D, parent, D->entry, D->n_entries, NULL);
+  P = _GD_FindField(D, parent, D->entry, D->n_entries, NULL);
 
   if (P == NULL || P->e->n_meta == -1) {
     _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, parent);
@@ -53,7 +55,7 @@ const void *gd_mconstants(DIRFILE* D, const char* parent,
     return NULL;
   }
 
-  struct _gd_private_entry* e = P->e;
+  e = P->e;
 
   if (e->n_meta_const == 0) {
     dreturn("%p", NULL);
@@ -86,10 +88,12 @@ const void *gd_mconstants(DIRFILE* D, const char* parent,
 const gd_carray_t *gd_mcarrays(DIRFILE* D, const char* parent,
     gd_type_t return_type) gd_nothrow
 {
-  dtrace("%p, \"%s\", 0x%x", D, parent, return_type);
-
   int i, n;
-  gd_carray_t* fl;
+  gd_carray_t *fl;
+  gd_entry_t *P;
+  struct _gd_private_entry *e;
+
+  dtrace("%p, \"%s\", 0x%x", D, parent, return_type);
 
   if (D->flags & GD_INVALID) {
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -99,7 +103,7 @@ const gd_carray_t *gd_mcarrays(DIRFILE* D, const char* parent,
 
   _GD_ClearError(D);
 
-  const gd_entry_t* P = _GD_FindField(D, parent, D->entry, D->n_entries, NULL);
+  P = _GD_FindField(D, parent, D->entry, D->n_entries, NULL);
 
   if (P == NULL || P->e->n_meta == -1) {
     _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, parent);
@@ -107,7 +111,7 @@ const gd_carray_t *gd_mcarrays(DIRFILE* D, const char* parent,
     return NULL;
   }
 
-  struct _gd_private_entry* e = P->e;
+  e = P->e;
 
   if (e->n_meta_carray == 0) {
     dreturn("%p", zero_carrays);
@@ -149,10 +153,12 @@ const gd_carray_t *gd_mcarrays(DIRFILE* D, const char* parent,
 
 const char **gd_mstrings(DIRFILE* D, const char* parent) gd_nothrow
 {
-  dtrace("%p, \"%s\"", D, parent);
-
   int i, n;
   char** fl;
+  gd_entry_t *P;
+  struct _gd_private_entry *e;
+
+  dtrace("%p, \"%s\"", D, parent);
 
   if (D->flags & GD_INVALID) {
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -162,7 +168,7 @@ const char **gd_mstrings(DIRFILE* D, const char* parent) gd_nothrow
 
   _GD_ClearError(D);
 
-  const gd_entry_t* P = _GD_FindField(D, parent, D->entry, D->n_entries, NULL);
+  P = _GD_FindField(D, parent, D->entry, D->n_entries, NULL);
 
   if (P == NULL || P->e->n_meta == -1) {
     _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, parent);
@@ -170,7 +176,7 @@ const char **gd_mstrings(DIRFILE* D, const char* parent) gd_nothrow
     return NULL;
   }
 
-  struct _gd_private_entry* e = P->e;
+  e = P->e;
 
   if (e->n_meta_string == 0) {
     dreturn("%p", zero_list);
@@ -201,11 +207,14 @@ const char **gd_mstrings(DIRFILE* D, const char* parent) gd_nothrow
 const char **gd_mfield_list_by_type(DIRFILE* D, const char* parent,
     gd_entype_t type) gd_nothrow
 {
-  dtrace("%p, \"%s\", %x", D, parent, type);
-
   int i, index = -1;
   unsigned int n;
-  char** fl;
+  char **fl;
+  gd_entry_t *P;
+  struct _gd_private_entry *e;
+  size_t offs;
+
+  dtrace("%p, \"%s\", %x", D, parent, type);
 
   if (D->flags & GD_INVALID) {
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -215,7 +224,7 @@ const char **gd_mfield_list_by_type(DIRFILE* D, const char* parent,
 
   _GD_ClearError(D);
 
-  const gd_entry_t* P = _GD_FindField(D, parent, D->entry, D->n_entries, NULL);
+  P = _GD_FindField(D, parent, D->entry, D->n_entries, NULL);
 
   if (P == NULL || P->e->n_meta == -1) {
     _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, parent);
@@ -223,8 +232,8 @@ const char **gd_mfield_list_by_type(DIRFILE* D, const char* parent,
     return NULL;
   }
 
-  struct _gd_private_entry* e = P->e;
-  size_t offs = strlen(P->field) + 1;
+  e = P->e;
+  offs = strlen(P->field) + 1;
 
   n = gd_nmfields_by_type(D, parent, type);
 
@@ -274,10 +283,13 @@ const char **gd_mfield_list_by_type(DIRFILE* D, const char* parent,
 
 const char **gd_mvector_list(DIRFILE* D, const char* parent) gd_nothrow
 {
-  dtrace("%p, \"%s\"", D, parent);
-
   int i, n;
-  char** fl;
+  char **fl;
+  struct _gd_private_entry* e;
+  size_t offs;
+  gd_entry_t *P;
+
+  dtrace("%p, \"%s\"", D, parent);
 
   if (D->flags & GD_INVALID) {
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -287,7 +299,7 @@ const char **gd_mvector_list(DIRFILE* D, const char* parent) gd_nothrow
 
   _GD_ClearError(D);
 
-  const gd_entry_t* P = _GD_FindField(D, parent, D->entry, D->n_entries, NULL);
+  P = _GD_FindField(D, parent, D->entry, D->n_entries, NULL);
 
   if (P == NULL) {
     _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, parent);
@@ -295,9 +307,8 @@ const char **gd_mvector_list(DIRFILE* D, const char* parent) gd_nothrow
     return NULL;
   }
 
-  struct _gd_private_entry* e = P->e;
-
-  size_t offs = strlen(P->field) + 1;
+  e = P->e;
+  offs = strlen(P->field) + 1;
 
   n = e->n_meta - e->n_meta_string - e->n_meta_const - e->n_meta_carray;
 
@@ -328,10 +339,13 @@ const char **gd_mvector_list(DIRFILE* D, const char* parent) gd_nothrow
 
 const char **gd_mfield_list(DIRFILE* D, const char* parent) gd_nothrow
 {
-  dtrace("%p, \"%s\"", D, parent);
-
   int i, n;
   char** fl;
+  struct _gd_private_entry *e;
+  gd_entry_t *P;
+  size_t offs;
+
+  dtrace("%p, \"%s\"", D, parent);
 
   if (D->flags & GD_INVALID) {
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -341,7 +355,7 @@ const char **gd_mfield_list(DIRFILE* D, const char* parent) gd_nothrow
 
   _GD_ClearError(D);
 
-  const gd_entry_t* P = _GD_FindField(D, parent, D->entry, D->n_entries, NULL);
+  P = _GD_FindField(D, parent, D->entry, D->n_entries, NULL);
 
   if (P == NULL) {
     _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, parent);
@@ -349,9 +363,9 @@ const char **gd_mfield_list(DIRFILE* D, const char* parent) gd_nothrow
     return NULL;
   }
 
-  struct _gd_private_entry* e = P->e;
+  e = P->e;
 
-  size_t offs = strlen(P->field) + 1;
+  offs = strlen(P->field) + 1;
 
   if (e->n_meta == 0) {
     dreturn("%p", zero_list);

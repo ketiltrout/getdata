@@ -14,7 +14,9 @@ int main(void)
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
   const char* format_data = "const RAW UINT32 8\ndata RAW UINT8 const\n";
-  int fd, r = 0;
+  int fd, n, error, r = 0;
+  DIRFILE *D;
+  gd_entry_t E;
 
   mkdir(filedir, 0777);
 
@@ -22,11 +24,10 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDONLY);
-  gd_entry_t E;
+  D = gd_open(filedir, GD_RDONLY);
 
-  int n = gd_entry(D, "data", &E);
-  int error = gd_error(D);
+  n = gd_entry(D, "data", &E);
+  error = gd_error(D);
 
   gd_close(D);
   unlink(format);

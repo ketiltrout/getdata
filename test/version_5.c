@@ -26,7 +26,8 @@ int main(void)
     "ENCODING PHASE a.r 0\n";
   uint16_t c[8];
   unsigned char data_data[256];
-  int fd, i, r = 0;
+  int fd, i, n, error, v, l, e, r = 0;
+  DIRFILE *D;
 
   memset(c, 0, 8);
   mkdir(filedir, 0777);
@@ -42,13 +43,13 @@ int main(void)
   write(fd, data_data, 256);
   close(fd);
 
-  DIRFILE* D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  int n = gd_getdata(D, "a.r", 5, 0, 1, 0, GD_UINT16, c);
-  int error = gd_error(D);
+  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  n = gd_getdata(D, "a.r", 5, 0, 1, 0, GD_UINT16, c);
+  error = gd_error(D);
 
-  int v = gd_dirfile_standards(D, GD_VERSION_CURRENT);
-  int l = gd_dirfile_standards(D, GD_VERSION_LATEST);
-  int e = gd_dirfile_standards(D, GD_VERSION_EARLIEST);
+  v = gd_dirfile_standards(D, GD_VERSION_CURRENT);
+  l = gd_dirfile_standards(D, GD_VERSION_LATEST);
+  e = gd_dirfile_standards(D, GD_VERSION_EARLIEST);
 
   gd_close(D);
 
