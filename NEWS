@@ -1,3 +1,42 @@
+New in version 0.7.1rc1:
+
+  Library Changes
+
+  * BUG FIX: When the parser fails in a gd_include() call, the internal list of
+    conformant Standards Versions for the loaded dirfile is no longer corrupted.
+  * BUG FIX Performing two consecutive reads of the same field in an ASCII
+    encoded datasources no longer confuses GetData.
+  * BUG FIX: Numerous memory leaks have been patched (mostly pin-holes, although
+    there are a few, rare but egregious ones).
+
+  API Changes:
+
+  * The value(s) of a CONST or CARRAY field added with gd_[m]add() is now
+    guaranteed to be zero; previously, it was unspecified.
+  * BUG FIX: Specifying both GD_VERBOSE and GD_IGNORE_DUPS no longer results in
+    spurious "Field code already defined" messages when duplicate fields are
+    encountered.
+  * BUG FIX: Calling gd_delete on a metafield no longer results in a segfault.
+
+  Bindings Changes:
+
+  * F77 BUG FIX: A memory leak in GDASCA has been fixed.
+  * Python BUG FIX: The first element of a python list (instead of a NumPy
+    array) is no longer dropped when passed to pygetdata on 64-bit systems.
+
+  Utilities Changes:
+
+  * dirfile2ascii now pads reads past the end-of-field.  The value used to
+    pad may be specified with '-z', and defaults to 0/NaN.  Previously, the
+    value of uninitialized memory was output.
+  * BUG FIX: dirfile2ascii now does what the user intends when presented with
+    cart-before-horse arguments, ie. "dirfile2ascii -e field DIRFILE".
+    Previously this resulted in confusion.
+  * BUG FIX: dirfile2ascii now accepts field conversion '-u', which was
+    documented but overlooked in the argument parser.
+
+|==============================================================================|
+
 New in version 0.7.0:
 
   Dirfile Changes

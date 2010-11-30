@@ -102,7 +102,8 @@ void usage(char *exe)
       "                           If not specified, F = 0 is assumed.\n"
       "  -n, --num-frames=N     read at most N frames.  If not specified, or "
       "if N = 0,\n"
-      "                           all frames to the end-of-field are read.\n"
+      "                           all frames to the end of the dirfile are "
+      "read.\n"
       "  -p, --precision=FMT    use FMT to format output.  FMT may contain any "
       "of the\n"
       "                           flag characters, a field width, and/or a "
@@ -115,7 +116,15 @@ void usage(char *exe)
       "                           default).\n"
       "  -s, --skip=S           if S > 0, output only one sample for every S "
       "frames.\n"
-      "  -v, --verbose          write verbosely to standard error.\n\n"
+      "  -v, --verbose          write verbosely to standard error.\n"
+      "  -z, --fill=STRING      print STRING to fill up columns which run past "
+      "the end\n"
+      "                           of their corresponding field.  The default "
+      "is to\n"
+      "                           fill floating point columns with \"NaN\" and "
+      "integer\n"
+      "                           columns with \"0\" (without quotation marks)."
+      "\n\n"
 
       "Any number of fields may be specified.  Each specified field is printed "
       "in a\n"
@@ -169,7 +178,7 @@ int main (int argc, char **argv)
     { "boxcar",      0, NULL, 'b' },
 #endif
     { "delimieter",  1, NULL, 'd' },
-    { "empty-sample",1, NULL, 'z' },
+    { "fill",        1, NULL, 'z' },
     { "first-frame", 1, NULL, 'f' },
     { "help",        0, NULL, '?' },
     { "num-frames",  1, NULL, 'n' },

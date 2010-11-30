@@ -329,10 +329,12 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
       {
         _GD_SetError(D, GD_E_BAD_TYPE, E->EN(scalar,const_type), NULL, 0, NULL);
       } else {
-        E->e->u.scalar.d = malloc(GD_SIZE(_GD_ConstType(D,
-                E->EN(scalar,const_type))));
+        size_t size = GD_SIZE(_GD_ConstType(D, E->EN(scalar,const_type)));
+        E->e->u.scalar.d = malloc(size);
         if (!D->error && E->e->u.scalar.d == NULL)
           _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+        else
+          memset(E->e->u.scalar.d, 0, size);
       }
       break;
     case GD_CARRAY_ENTRY:
@@ -346,10 +348,13 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
       } else if (E->EN(scalar,array_len) > GD_MAX_CARRAY_LENGTH)
         _GD_SetError(D, GD_E_BOUNDS, 0, NULL, 0, NULL);
       else {
-        E->e->u.scalar.d = malloc(GD_SIZE(_GD_ConstType(D,
-                E->EN(scalar,const_type))) * E->EN(scalar,array_len));
+        size_t size = GD_SIZE(_GD_ConstType(D, E->EN(scalar,const_type))) *
+          E->EN(scalar,array_len);
+        E->e->u.scalar.d = malloc(size);
         if (!D->error && E->e->u.scalar.d == NULL)
           _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+        else
+          memset(E->e->u.scalar.d, 0, size);
       }
       break;
     case GD_STRING_ENTRY:

@@ -21,8 +21,8 @@ dnl
 
 m4_define(getdata_major,    0)
 m4_define(getdata_minor,    7)
-m4_define(getdata_revision, 0)
-m4_define(getdata_extra,    [])
+m4_define(getdata_revision, 1)
+m4_define(getdata_extra,    [rc1])
 m4_define(getdata_version,
           getdata_major.getdata_minor.getdata_revision[]getdata_extra)
 
@@ -45,7 +45,7 @@ AC_ARG_VAR([BUILDCC],
 dnl libgetdata current interface version
 AC_SUBST(GETDATA_IFACE_VERSION, [4])
 dnl libgetdata current interface implementation revision
-AC_SUBST(GETDATA_IMPL_REVISION, [0])
+AC_SUBST(GETDATA_IMPL_REVISION, [1])
 dnl libgetdata interface age (current interface - oldest supported interface)
 AC_SUBST(GETDATA_IFACE_AGE, [0])
 
@@ -53,7 +53,7 @@ dnl libgetdata++ interface version info
 AC_SUBST(GETDATAXX_VERSION, [2:0:0])
 
 dnl libfgetdata interface version info
-AC_SUBST(FGETDATA_VERSION, [2:0:0])
+AC_SUBST(FGETDATA_VERSION, [2:1:0])
 
 dnl libf95getdata interface version info
 AC_SUBST(F95GETDATA_VERSION, [2:0:0])

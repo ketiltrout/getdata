@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_add 3 "3 November 2010" "Version 0.7.0" "GETDATA"
+.TH gd_add 3 "30 November 2010" "Version 0.7.1" "GETDATA"
 .SH NAME
 gd_add, gd_madd \(em add a field to a dirfile
 .SH SYNOPSIS
@@ -46,7 +46,17 @@ is described in detail on the
 .BR gd_entry (3)
 man page.  All relevant members of
 .I entry
-for the field type specified must be properly initialised.
+for the field type specified must be properly initialised.  If
+.I entry
+specifies a
+.B CONST
+or
+.B CARRAY
+field, the field's data will be set to zero.  If
+.I entry
+specifies a
+.B STRING
+field, the field data will be set to the empty string.
 
 When adding a metafield, the
 .IR entry -> field

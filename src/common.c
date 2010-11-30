@@ -786,7 +786,7 @@ int _GD_GetRepr(DIRFILE* D, const char* field_code_in, char** field_code)
 
   *field_code = (char *)field_code_in;
   /* find the representation, if any */
-  if (field_code_in[field_code_len - 2] == '.') {
+  if (field_code_len > 2 && field_code_in[field_code_len - 2] == '.') {
     switch (field_code_in[field_code_len - 1]) {
       case 'r':
         repr = GD_REPR_REAL;

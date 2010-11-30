@@ -331,6 +331,14 @@ TESTS=$(ADD_TESTS)        $(ALTER_TESTS)      $(ASCII_TESTS)      \
 
 check_PROGRAMS=$(TESTS)
 
+# valgrind
+valgrind.log: $(TESTS)
+	rm -f $@; \
+		for x in $^; do ( \
+		echo $$x:; \
+		sed -e 's/exec "/exec valgrind --leak-check=full --track-origins=yes --track-fds=yes "/' $$x | sh; \
+		echo $$x = $$? ); done &> $@;
+
 # clean up after the tests
 check-local: check-TESTS
 	$(MAKE) getdata-clean-dirs

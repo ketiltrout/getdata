@@ -258,15 +258,15 @@ int gd_delete(DIRFILE* D, const char* field_code_in, int flags)
      * search linearly in both directions until we find something that isn't a
      * meta field of our parent */
     while (first > 0)
-      if (D->entry[first - 1]->field[len] == '/' &&
-          strncmp(D->entry[first - 1]->field, field_code, len) == 0)
+      if (strncmp(D->entry[first - 1]->field, field_code, len) == 0 &&
+          D->entry[first - 1]->field[len] == '/')
         first--;
       else
         break;
 
     while (last < D->n_entries - 1)
-      if (D->entry[last + 1]->field[len] == '/' &&
-          strncmp(D->entry[last + 1]->field, field_code, len) == 0)
+      if (strncmp(D->entry[last + 1]->field, field_code, len) == 0 &&
+          D->entry[last + 1]->field[len] == '/')
         last++;
       else
         break;

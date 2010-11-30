@@ -1750,7 +1750,8 @@ static int _GD_ParseDirective(DIRFILE *D, char** in_cols, int n_cols,
         ref_name, me, standards, &subflags);
     if ((pedantic = subflags & GD_PEDANTIC))
       *flags |= GD_PEDANTIC;
-    D->fragment[me].vers |= D->fragment[frag].vers;
+    if (frag != -1)
+      D->fragment[me].vers |= D->fragment[frag].vers;
   } else if (strcmp(ptr, "META") == 0 && (!pedantic || *standards >= 6)) {
     const gd_entry_t* P =  _GD_FindField(D, in_cols[1], D->entry, D->n_entries,
         NULL);

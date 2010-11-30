@@ -1,4 +1,16 @@
-2010-11-28   D. V. Wiebe <getdata@ketiltrout.net>   svn:486
+2010-11-30   D. V. Wiebe <getdata@ketiltrout.net>   svn:488
+	GetData-0.7.1rc1:
+
+	* src/del.c (gd_delete): Fix order of tests to avoid accessing out-of-bounds
+	memory.
+	* src/parse.c (_GD_ParseDirective): Don't update the version list if
+	_GD_Include failed.
+	* src/common.c (_GD_GetRepr): Don't attempt to find a representation suffix
+	on field codes which are too short to contain them.
+	* src/add.c (_GD_Add): Zero memory allocated for a CARRAY or CONST so
+	behaviour is deterministic when creating these fields via gd_[m]add().
+
+2010-11-28   D. V. Wiebe <getdata@ketiltrout.net>   svn:487
 	* src/ test/ bindings/: Separate declarations from statements;
 
 	* src/common.c (_GD_SetTablePath): Don't use fixed length buffers.
