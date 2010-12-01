@@ -158,8 +158,10 @@ ssize_t getdelim(char **lineptr, size_t *n, int delim, FILE *stream)
     /* look for delim */
     q = (char *)memchr(p, delim, nread);
     if (q) {
+#ifdef __MSVCRT__
       int r;
       off64_t new_pos;
+#endif
 
       /* found delim */
       count += (q - p) + 1;

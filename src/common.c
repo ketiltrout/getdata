@@ -65,7 +65,7 @@ char *_GD_GetLine(FILE *fp, size_t *n, int* linenum)
 
 
   if (len != -1) {
-    dreturn("\"%s\" (%i)", line, *n);
+    dreturn("\"%s\" (%zu)", line, *n);
     return line; /* a line was read */
   }
 

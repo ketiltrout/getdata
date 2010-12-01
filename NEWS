@@ -42,9 +42,9 @@ New in version 0.7.0:
   Dirfile Changes
 
   * Dirfile Standards Version 8 has been released.  It adds three new field
-    types: DIVIDE, which computes X/Y for vectors X and Y, and RECIP, which
-    computes A/X for vector X and scalar A, and CARRAY, which is an array of
-    CONST scalars.  A few other changes are listed below.
+    types: DIVIDE, which computes X/Y for vectors X and Y, RECIP, which computes
+    A/X for vector X and scalar A, and CARRAY, which is an array of CONST
+    scalars.  A few other changes are listed below.
   * Like CONST fields, CARRAY elements can be used as parametersin the
     definition of other fields.  Syntax is 'field<n>', where 'field' is the
     field name and 'n' the element index in the CARRAY (and the angle brackets
@@ -58,7 +58,8 @@ New in version 0.7.0:
   * The /ENDIAN directive now takes an optional second parameter.  The only
     allowed value for this second token is "arm", which indicates that double
     precision floating point data (including double precision complex data) are
-    stored in the ARM middle-endian format.
+    stored in the ARM middle-endian format.  Without this, floating point data
+    are assumed to have the same byte sex as integer data.
 
   Library Changes
 
@@ -68,7 +69,7 @@ New in version 0.7.0:
     caution when writing to dirfiles in this case.
   * GetData can now be used on ARM processors.  As a side-effect, GetData can
     now read and write the middle-ended floating point format used by older ARM
-    processors (on any processor).
+    processors (on any processor, via endianness conversion).
   * Some changes have been made to the parser.  It now operates in one of two
     modes: pedantic mode, which adheres strictly to one particular Dirfile
     Standards Version, and permissive mode (the default) which is more
@@ -135,12 +136,12 @@ New in version 0.7.0:
     - functions which started with 'put' simply prefix 'gd_' to their name.  So
       put_constant() becomes gd_put_constant().
     - functions which started with 'get' replace 'get' with 'gd', except those
-      functions with a corresponding 'put' function, these simply prefix 'gd_'.
+      functions with a corresponding 'put' function; these simply prefix 'gd_'.
       So, get_constants() becomes gd_constants(), but get_constant() becomes
       gd_get_constant().
     - functions which started with 'dirfile' replace 'dirfile' with 'gd',
       except for dirfilename(), which becomes gd_dirfilename().  So,
-      dirfile_alter_encoding() become gd_alter_encoding().
+      dirfile_alter_encoding() becomes gd_alter_encoding().
     - macros which started with 'GETDATA_' now start with 'GD_'.  Those that
       started with 'NO_GETDATA_' now start with 'GD_NO_'.  So GETDATA_LEGACY_API
       becomes GD_LEGACY_API and NO_GETDATA_LEGACY_API becomes GD_NO_LEGACY_API.

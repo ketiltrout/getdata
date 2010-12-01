@@ -190,7 +190,7 @@ static size_t _GD_StringEscapeise(FILE* stream, const char* in, int permissive,
 
   if (!permissive && standards < 6) {
     fputs(in, stream);
-    dreturn("%i", strlen(in));
+    dreturn("%zu", strlen(in));
     return strlen(in);
   }
 

@@ -21,9 +21,6 @@
 #ifndef GETDATA_NAN_H
 #define GETDATA_NAN_H
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
 #include <math.h>
 
 #ifndef NAN
