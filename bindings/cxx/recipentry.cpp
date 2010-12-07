@@ -30,7 +30,7 @@
 using namespace GetData;
 
 RecipEntry::RecipEntry(const char* field_code, const char* in_field1,
-    double dividend, int fragment_index) : Entry::Entry()
+    double dividend, int fragment_index) : Entry()
 {
   E.field = strdup(field_code);
   E.field_type = GD_RECIP_ENTRY;
@@ -43,7 +43,7 @@ RecipEntry::RecipEntry(const char* field_code, const char* in_field1,
 }
 
 RecipEntry::RecipEntry(const char* field_code, const char* in_field1,
-    std::complex<double> dividend, int fragment_index) : Entry::Entry()
+    std::complex<double> dividend, int fragment_index) : Entry()
 {
   E.field = strdup(field_code);
   E.field_type = GD_RECIP_ENTRY;

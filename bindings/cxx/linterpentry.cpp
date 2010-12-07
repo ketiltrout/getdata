@@ -30,7 +30,7 @@
 using namespace GetData;
 
 LinterpEntry::LinterpEntry(const char* field_code, const char* in_field,
-    const char* table, int fragment_index) : Entry::Entry()
+    const char* table, int fragment_index) : Entry()
 {
   E.field = strdup(field_code);
   E.field_type = GD_LINTERP_ENTRY;

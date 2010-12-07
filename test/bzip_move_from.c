@@ -12,7 +12,6 @@
 #include <stdio.h>
 #include <errno.h>
 #include <inttypes.h>
-#include <unistd.h>
 
 int main(void)
 {

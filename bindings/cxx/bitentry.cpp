@@ -30,7 +30,7 @@
 using namespace GetData;
 
 BitEntry::BitEntry(const char* field_code, const char* in_field,
-    gd_bit_t bitnum, gd_bit_t numbits, int fragment_index) : Entry::Entry()
+    gd_bit_t bitnum, gd_bit_t numbits, int fragment_index) : Entry()
 {
   E.field = strdup(field_code);
   E.field_type = GD_BIT_ENTRY;

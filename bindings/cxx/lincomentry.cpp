@@ -31,7 +31,7 @@ using namespace GetData;
 
 LincomEntry::LincomEntry(const char* field_code, int n_fields,
     const char** in_fields, double* m, double* b, int fragment_index) :
-  Entry::Entry()
+  Entry()
 {
   int i;
 
@@ -49,7 +49,7 @@ LincomEntry::LincomEntry(const char* field_code, int n_fields,
 
 LincomEntry::LincomEntry(const char* field_code, int n_fields,
     const char** in_fields, std::complex<double>* cm, std::complex<double>* cb,
-    int fragment_index) : Entry::Entry()
+    int fragment_index) : Entry()
 {
   int i;
 

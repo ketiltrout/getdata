@@ -519,7 +519,7 @@ dnl headers
 echo
 echo "*** Looking for additional header files"
 echo
-AC_CHECK_HEADERS([fcntl.h libgen.h])
+AC_CHECK_HEADERS([fcntl.h libgen.h stdint.h unistd.h])
 if test "x$disable_c99" = "xno"; then
 AC_CHECK_HEADERS([complex.h])
 fi
@@ -583,6 +583,8 @@ GD_CHECK_LFS_TYPE([struct stat64],[
 #ifdef STDC_HEADERS
 #include <sys/types.h>
 #include <sys/stat.h>
+#endif
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 ])
@@ -591,6 +593,8 @@ GD_CHECK_LFS_TYPE([struct __stat64],[
 #ifdef STDC_HEADERS
 #include <sys/types.h>
 #include <sys/stat.h>
+#endif
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 ])
@@ -598,6 +602,8 @@ GD_CHECK_LFS_TYPE([struct __stat64],[
 GD_CHECK_LFS_TYPE([off64_t],[
 #ifdef STDC_HEADERS
 #include <sys/types.h>
+#endif
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 ])

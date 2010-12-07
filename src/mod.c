@@ -30,7 +30,7 @@
 #include <libgen.h>
 #endif
 
-static unsigned int max(unsigned int A, unsigned int B)
+static unsigned int _gd_max(unsigned int A, unsigned int B)
 {
   return (A > B) ? A : B;
 }
@@ -273,8 +273,9 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
           if (gd_get_constant(D, Q.scalar[0], GD_UINT16, &Q.EN(raw,spf)))
             break;
 
-        nf = BUFFER_SIZE / max(E->e->u.raw.size, GD_SIZE(Q.EN(raw,data_type))) /
-          max(E->EN(raw,spf), Q.EN(raw,spf));
+        nf = BUFFER_SIZE / _gd_max(E->e->u.raw.size,
+            GD_SIZE(Q.EN(raw,data_type))) / _gd_max(E->EN(raw,spf),
+            Q.EN(raw,spf));
 
         if (D->fragment[E->fragment_index].protection & GD_PROTECT_DATA)
           _GD_SetError(D, GD_E_PROTECTED, GD_E_PROTECTED_DATA, NULL, 0,

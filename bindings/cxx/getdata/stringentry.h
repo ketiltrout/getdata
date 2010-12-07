@@ -32,7 +32,7 @@ namespace GetData {
     friend class Dirfile;
 
     public:
-      StringEntry() : Entry::Entry() { E.field_type = GD_STRING_ENTRY; };
+      StringEntry() : Entry() { E.field_type = GD_STRING_ENTRY; };
 
       StringEntry(const char* field_code, int fragment_index = 0);
 

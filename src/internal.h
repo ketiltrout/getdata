@@ -28,6 +28,21 @@
 
 #include "getdata.h"
 #include <string.h>
+#include <errno.h>
+#include <fcntl.h>
+
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+#ifdef HAVE_STDINT_H
+#include <stdint.h>
+#endif
+
+/* MSVC types */
+#ifdef _MSC_VER
+typedef size_t ssize_t;
+typedef int mode_t;
+#endif
 
 #ifdef __APPLE__
 typedef off_t off64_t;
@@ -122,7 +137,11 @@ double cimag(double complex z);
 # define __wur
 #endif
 
-#define __gd_unused __attribute__ (( unused ))
+#ifdef _MSC_VER
+# define __gd_unused
+#else
+# define __gd_unused __attribute__ (( unused ))
+#endif
 
 /* disable the "unspecified order" remark in ICC */
 #ifdef __INTEL_COMPILER
@@ -253,19 +272,19 @@ int _GD_Rename(const char*, const char*);
 #define rmdir _rmdir
 #endif
 
-#if defined __CYGWIN__ || defined __APPLE__
-#  define gd_stat64 stat
-#elif HAVE_STAT64
+#if HAVE_STAT64
 #  define gd_stat64 stat64
 #elif HAVE__STAT64
 #  define gd_stat64 _stat64
+#else
+#  define gd_stat64 stat
 #endif
 
 #if HAVE_STRUCT_STAT64
 typedef struct stat64 gd_stat64_t;
 #elif HAVE_STRUCT___STAT64
 typedef struct __stat64 gd_stat64_t;
-#elif defined __CYGWIN__ || defined __APPLE__
+#else
 typedef struct stat gd_stat64_t;
 #endif
 
@@ -719,7 +738,12 @@ ssize_t _GD_SlimRead(struct _gd_raw_file* file, void *ptr, gd_type_t data_type,
 int _GD_SlimClose(struct _gd_raw_file* file);
 off64_t _GD_SlimSize(struct _gd_raw_file* file, gd_type_t data_type);
 
-static inline int entry_cmp(const void *a, const void *b)
+#ifdef _MSC_VER
+# define _gd_static_inline static
+#else
+# define _gd_static_inline static inline
+#endif
+_gd_static_inline int entry_cmp(const void *a, const void *b)
 {
   return strcmp((*(gd_entry_t**)a)->field, (*(gd_entry_t**)b)->field);
 }

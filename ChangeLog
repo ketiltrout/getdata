@@ -1,4 +1,28 @@
-2010-11-30   D. V. Wiebe <getdata@ketiltrout.net>   svn:493
+2010-12-07   D. V. Wiebe <getdata@ketiltrout.net>   svn:494
+	MSVC fixes from Peter:
+
+	* test/*.c: Remove unistd.h include.  (It will be included in internal.h
+	when needed.)
+
+	* src/flush.c: No need to make the GD_VERS_* macros long longs.
+
+	* src/putdata.c (_GD_DoConstOut): Cast to char* before performing pointer
+	arithmetic.
+
+	* src/mod.c (_gd_max): Renamed from max for better encapsulation.
+
+	* src/internal.h: Conditionalise inclusion of non-ANSI unistd.h and stdint.h.
+	Various _MSC_VER specific code.  Also, define gd_stat64 and gd_stat64_t to
+	plausibly useful things by default.o
+	
+	* src/getdata.h.in: Remove unistd.h. Add math.h and some _MSC_VER specific
+	code.  (There are still unresolved MSVC issues with this file.)
+
+	* bindings/cxx/*.cpp: Fix constructor inhertiance.
+
+	* configure.ac: Check for unistd.h and stdint.h.
+
+2010-12-06   D. V. Wiebe <getdata@ketiltrout.net>   svn:493
 	GetData-0.7.1 released.
 
 2010-11-30   D. V. Wiebe <getdata@ketiltrout.net>   svn:488

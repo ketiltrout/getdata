@@ -26,8 +26,11 @@
 
 #include <stdlib.h>
 
+#ifdef _MSC_VER
+#define __gd_unused 
+#else
 #define __gd_unused __attribute__ (( unused ))
-
+#endif
 using namespace GetData;
 
 Dirfile::Dirfile()

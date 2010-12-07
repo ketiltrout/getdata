@@ -32,7 +32,7 @@ namespace GetData {
     friend class Dirfile;
 
     public:
-      SBitEntry() : Entry::Entry() { E.field_type = GD_SBIT_ENTRY; };
+      SBitEntry() : Entry() { E.field_type = GD_SBIT_ENTRY; };
 
       SBitEntry(const char* field_code, const char* in_field, gd_bit_t bitnum,
           gd_bit_t numbits = 1, int fragment_index = 0);

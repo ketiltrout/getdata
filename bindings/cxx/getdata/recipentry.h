@@ -32,7 +32,7 @@ namespace GetData {
     friend class Dirfile;
 
     public:
-      RecipEntry() : Entry::Entry() { E.field_type = GD_RECIP_ENTRY; };
+      RecipEntry() : Entry() { E.field_type = GD_RECIP_ENTRY; };
 
       RecipEntry(const char* field_code, const char* in_field,
           double dividend, int fragment_index = 0);

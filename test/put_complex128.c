@@ -9,7 +9,6 @@
 #include <string.h>
 #include <errno.h>
 #include <math.h>
-#include <unistd.h>
 #include <stdio.h>
 
 int main(void)

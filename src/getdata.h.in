@@ -52,11 +52,8 @@ extern "C" {
 /* The most recent standards version supported by this library */
 #define GD_DIRFILE_STANDARDS_VERSION 8
 
-/* one or more of these should give us:
- *    size_t, off_t, __REDIRECT, &c., if present
- */
+#include <math.h>
 #include <sys/types.h>
-#include <unistd.h>
 
 /* If this symbol is defined here, the C99-API is not present in the library */
 #undef GD_NO_C99_API
@@ -225,9 +222,16 @@ typedef enum {
 /* GD_NO_ENTRY is not part of this count */
 #define GD_N_ENTYPES 14
 
+#ifdef _MSC_VER /* TODO */
+typedef short _gd_int16_t;
+typedef unsigned short _gd_uint16_t;
+typedef __int64 _gd_int64_t;
+#else
 #undef _gd_int16_t
 #undef _gd_uint16_t
 #undef _gd_int64_t
+#endif
+
 #if ! defined GD_C89_API
 #  include <inttypes.h>
 #  define GD_DCOMPLEXM(v) double _Complex v

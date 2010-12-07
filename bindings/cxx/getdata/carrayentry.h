@@ -32,7 +32,7 @@ namespace GetData {
     friend class Dirfile;
 
     public:
-      CarrayEntry() : Entry::Entry() { E.field_type = GD_CARRAY_ENTRY; };
+      CarrayEntry() : Entry() { E.field_type = GD_CARRAY_ENTRY; };
 
       CarrayEntry(const char* field_code, DataType type, size_t array_len,
           int fragment_index = 0);

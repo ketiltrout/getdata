@@ -6,7 +6,6 @@
 #include <sys/types.h>
 #include <fcntl.h>
 #include <string.h>
-#include <unistd.h>
 
 int main(void)
 {

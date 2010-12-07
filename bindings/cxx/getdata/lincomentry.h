@@ -32,7 +32,7 @@ namespace GetData {
     friend class Dirfile;
 
     public:
-      LincomEntry() : Entry::Entry() { E.field_type = GD_LINCOM_ENTRY; };
+      LincomEntry() : Entry() { E.field_type = GD_LINCOM_ENTRY; };
 
       LincomEntry(const char* field_code, int n_fields, const char** in_fields,
           double* m, double* b, int fragment_index = 0);

@@ -32,7 +32,7 @@ namespace GetData {
     friend class Dirfile;
 
     public:
-      DivideEntry() : Entry::Entry() { E.field_type = GD_DIVIDE_ENTRY; };
+      DivideEntry() : Entry() { E.field_type = GD_DIVIDE_ENTRY; };
 
       DivideEntry(const char* field_code, const char* in_field1,
           const char* in_field2, int fragment_index = 0);

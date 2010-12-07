@@ -32,7 +32,7 @@ namespace GetData {
     friend class Dirfile;
 
     public:
-      RawEntry() : Entry::Entry() { E.field_type = GD_RAW_ENTRY; };
+      RawEntry() : Entry() { E.field_type = GD_RAW_ENTRY; };
 
       RawEntry(const char* field_code, DataType data_type, gd_spf_t spf,
           int fragment_index = 0);

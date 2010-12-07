@@ -8,7 +8,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
-#include <unistd.h>
 
 static void write_format(const char* format, int spf)
 {

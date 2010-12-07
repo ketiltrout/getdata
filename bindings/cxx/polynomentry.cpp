@@ -30,7 +30,7 @@
 using namespace GetData;
 
 PolynomEntry::PolynomEntry(const char* field_code, int poly_ord,
-    const char* in_field, double* a, int fragment_index) : Entry::Entry()
+    const char* in_field, double* a, int fragment_index) : Entry()
 {
   int i;
 
@@ -46,7 +46,7 @@ PolynomEntry::PolynomEntry(const char* field_code, int poly_ord,
 
 PolynomEntry::PolynomEntry(const char* field_code, int poly_ord,
     const char* in_field, std::complex<double>* ca, int fragment_index) :
-  Entry::Entry()
+  Entry()
 {
   int i;
 

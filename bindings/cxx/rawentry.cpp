@@ -31,7 +31,7 @@
 using namespace GetData;
 
 RawEntry::RawEntry(const char* field_code, DataType data_type, gd_spf_t spf,
-      int fragment_index) : Entry::Entry()
+      int fragment_index) : Entry()
 {
   E.field = strdup(field_code);
   E.field_type = GD_RAW_ENTRY;

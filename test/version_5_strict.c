@@ -8,7 +8,6 @@
 #include <fcntl.h>
 #include <string.h>
 #include <errno.h>
-#include <unistd.h>
 
 int cb(gd_parser_data_t* pdata, void* ll)
 {

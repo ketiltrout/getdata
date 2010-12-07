@@ -17,6 +17,8 @@ library.
 Joseph Fowler <jfowler@princeton.edu> provided code which was adapted to
 create the slimlib encoding support.
 
+Peter Kümmel <syntheticpp@gmx.net> ported GetData to MSVC.
+
 George Staikos <staikos@kde.org> maintained the GetData library as part of
 kst.
 

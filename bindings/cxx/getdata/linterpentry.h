@@ -32,7 +32,7 @@ namespace GetData {
     friend class Dirfile;
 
     public:
-      LinterpEntry() : Entry::Entry() { E.field_type = GD_LINTERP_ENTRY; };
+      LinterpEntry() : Entry() { E.field_type = GD_LINTERP_ENTRY; };
 
       LinterpEntry(const char* field_code, const char* in_field,
           const char* table, int fragment_index = 0);

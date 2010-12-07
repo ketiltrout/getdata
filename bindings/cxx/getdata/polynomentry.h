@@ -32,7 +32,7 @@ namespace GetData {
     friend class Dirfile;
 
     public:
-      PolynomEntry() : Entry::Entry() { E.field_type = GD_POLYNOM_ENTRY; };
+      PolynomEntry() : Entry() { E.field_type = GD_POLYNOM_ENTRY; };
 
       PolynomEntry(const char* field_code, int poly_ord, const char* in_field,
           double* a, int fragment_index = 0);

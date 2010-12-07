@@ -30,7 +30,7 @@
 using namespace GetData;
 
 MultiplyEntry::MultiplyEntry(const char* field_code, const char* in_field1,
-    const char* in_field2, int fragment_index) : Entry::Entry()
+    const char* in_field2, int fragment_index) : Entry()
 {
   E.field = strdup(field_code);
   E.field_type = GD_MULTIPLY_ENTRY;

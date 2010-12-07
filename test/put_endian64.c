@@ -9,7 +9,6 @@
 #include <string.h>
 #include <errno.h>
 #include <stdio.h>
-#include <unistd.h>
 
 static int BigEndian(void)
 {

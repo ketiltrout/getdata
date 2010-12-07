@@ -528,7 +528,7 @@ static size_t _GD_DoConstOut(DIRFILE* D, gd_entry_t *E, off64_t first,
         D->fragment[E->fragment_index].cname);
   else {
     gd_type_t type = _GD_ConstType(D, E->EN(scalar,const_type));
-    _GD_ConvertType(D, data_in, data_type, E->e->u.scalar.d + first *
+    _GD_ConvertType(D, data_in, data_type, (char*)E->e->u.scalar.d + first *
         GD_SIZE(type), type, len);
   }
 
