@@ -1,4 +1,4 @@
-GetData 0.7.0 is known to compile and pass the test suite on the following systems (including C++ and Fortran bindings):
+GetData 0.7.1 is known to compile and pass the test suite on the following systems (including C++ and Fortran bindings):
 
 Linux:
 * x86 and x86_64, using gcc 4.5 or icc 10.1, under Slackware, Fedora, Ubuntu, CentOS
