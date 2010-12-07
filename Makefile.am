@@ -29,7 +29,7 @@ SUBDIRS = src . test bindings util man doc
 dist_doc_DATA = COPYING.DOC
 
 clean-local:
-	rm -rf *~  m4/*~ RELEASE_NOTES-*
+	rm -rf *~  m4/*~ README.txt
 
 %.sig: %
 	gpg -abo $@ $<
@@ -37,11 +37,11 @@ clean-local:
 DISTCHECK_CONFIGURE_FLAGS = --with-idl-dlm-dir="$$dc_install_base/idl"
 
 # release stuff
-RELEASE_NOTES-$(PACKAGE_VERSION): NEWS RELEASE_NOTES.in
+README.txt: NEWS RELEASE_NOTES.in
 	cp -f RELEASE_NOTES.in $@ 
 	head -n `grep -nm 1 '^|' NEWS | awk 'BEGIN {FS=":"} {print $$1-1}'` NEWS >> $@
 
 dist-post: $(distdir).tar.gz.sig $(distdir).tar.bz2.sig
 
-dist-push:  $(distdir).tar.gz.sig $(distdir).tar.bz2.sig $(distdir).tar.gz $(distdir).tar.bz2 RELEASE_NOTES-$(PACKAGE_VERSION)
+dist-push:  $(distdir).tar.gz.sig $(distdir).tar.bz2.sig $(distdir).tar.gz $(distdir).tar.bz2 README.txt
 	rsync -avP -e ssh $^ $(SFUSER),getdata@frs.sourceforge.net:/home/frs/project/g/ge/getdata/getdata/$(PACKAGE_VERSION)/
