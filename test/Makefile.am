@@ -67,9 +67,7 @@ ASCII_TESTS=ascii_get ascii_get_get ascii_nframes ascii_put
 
 BOF_TESTS=bof bof_lincom bof_phase
 
-if TEST_BZIP2
 BZIP_TESTS=bzip_get bzip_get_get bzip_move_from bzip_nframes
-endif
 
 CVLIST_TESTS=cvlist cvlist_array cvlist_array_meta cvlist_invalid cvlist_meta \
 						 cvlist_meta_invalid
@@ -179,9 +177,7 @@ GET_TESTS=${GET64} get_bad_code get_bit get_carray get_carray_len \
 
 GLOBAL_TESTS=global_name global_ref global_ref_empty global_ref_set
 
-if TEST_GZIP
 GZIP_TESTS=gzip_get gzip_get_get gzip_move_from gzip_nframes
-endif
 
 HEADER_TESTS=header_complex
 
@@ -196,9 +192,7 @@ LEGACY_TESTS=legacy_get legacy_get_put legacy_get_rofs legacy_nframes \
 			legacy_nonexistent legacy_put legacy_spf
 endif
 
-if TEST_LZMA
 LZMA_TESTS=lzma_get lzma_nframes
-endif
 
 MADD_TESTS=madd madd_bit madd_bit_invalid madd_carray madd_clincom madd_const \
 					 madd_cpolynom madd_crecip madd_crecip89 madd_divide madd_lincom \
@@ -284,9 +278,7 @@ REPR_TESTS=repr_a repr_float32 repr_float64 repr_i repr_int16 repr_int32 \
 					 repr_real_m repr_real_r repr_uint16 repr_uint32 repr_uint64 \
 					 repr_uint8
 
-if TEST_SLIM
 SLIM_TESTS=slim_get slim_nframes
-endif
 
 SVLIST_TESTS=svlist svlist_invalid svlist_meta svlist_meta_invalid
 
@@ -306,9 +298,7 @@ VERSION_TESTS=version_0 version_0_write version_1 version_1_write version_2 \
 
 VLIST_TESTS=vlist vlist_invalid vlist_meta vlist_meta_invalid
 
-if TEST_LZMA
 XZ_TESTS=xz_get xz_nframes
-endif
 
 TESTS=$(ADD_TESTS)        $(ALTER_TESTS)      $(ASCII_TESTS)      \
 			$(BOF_TESTS)        $(BZIP_TESTS)       $(CLOSE_TESTS)      \

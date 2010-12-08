@@ -13,7 +13,7 @@
 
 int main(void)
 {
-#ifndef USE_BZIP2
+#if !defined USE_BZIP2 || !defined TEST_BZIP2
   return 77; /* skip test */
 #else
   const char* filedir = __TEST__ "dirfile";

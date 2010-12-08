@@ -25,6 +25,13 @@ int gd_system(const char* command)
 #define gd_system system
 #endif
 
+/* mkdir for MSVC */
+#ifdef _MSC_VER
+#define mkdir(x,y) \
+  system("rmdir /q/s "__TEST__"dirfile"); \
+  _mkdir(x)
+#endif
+
 #define CHECK(e,n,nf,vf,...) \
   if (e) { r = 1; \
     fprintf(stderr, #n " = " nf " (expected " vf ")\n", __VA_ARGS__); }

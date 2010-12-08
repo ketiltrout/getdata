@@ -15,6 +15,9 @@
 
 int main(void)
 {
+#ifndef TEST_GZIP
+  return 77;
+#else
   const char* filedir = __TEST__ "dirfile";
   const char* format = __TEST__ "dirfile/format";
   const char* format1 = __TEST__ "dirfile/format1";
@@ -101,4 +104,5 @@ int main(void)
   gd_free_entry_strings(&E);
 
   return r;
+#endif
 }

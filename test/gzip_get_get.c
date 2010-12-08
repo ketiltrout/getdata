@@ -13,7 +13,7 @@
 
 int main(void)
 {
-#ifndef USE_GZIP
+#if !defined USE_GZIP || !defined TEST_GZIP
   return 77; /* skip test */
 #else
   const char* filedir = __TEST__ "dirfile";

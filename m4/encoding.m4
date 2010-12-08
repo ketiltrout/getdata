@@ -106,8 +106,10 @@ fi
 $7
 ])
 AM_CONDITIONAL(AS_TR_CPP([USE_$1]), [test "x$use_$1" = "xyes"])
-AM_CONDITIONAL(AS_TR_CPP([TEST_$1]),
-              [test "x$path_$5" != "xnot found" -a "x$path_$6" != "xnot found"])
+
+if test "x$path_$5" != "xnot found" -a "x$path_$6" != "xnot found"; then
+  AC_DEFINE(AS_TR_CPP([TEST_$1]), [], [ Define to enable $1 tests ])
+fi
 
 dnl add to summary and private lib list
 if test "x$use_$1" != "xno"; then

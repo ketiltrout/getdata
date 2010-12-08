@@ -1,3 +1,14 @@
+2010-12-08   D. V. Wiebe <getdata@ketiltrout.net>   svn:497
+	* m4/encoding.m4: Replace TEST_<foo> AM_CONDITIONALs with a preprocessor
+	symbols.
+	* test/Makefile.am: Remove TEST_<foo> conditionals.
+	* test/gzip_move_from.c test/bzip_get_get.c test/gzip_get_get.c
+	test/gzip_get.c test/xz_nframes.c test/slim_nframes.c test/lzma_nframes.c
+	test/slim_get.c test/lzma_get.c test/bzip_move_from.c test/xz_get.c: If
+	helper binaries are unavailable, just skip these tests.
+
+	* test/test.h: MSVC mkdir() patch from Peter Kümmel.
+
 2010-12-07   D. V. Wiebe <getdata@ketiltrout.net>   svn:494
 	MSVC fixes from Peter:
 
