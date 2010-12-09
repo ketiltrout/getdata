@@ -56,7 +56,7 @@ extern "C" {
 #include <sys/types.h>
 
 /* If this symbol is defined here, the C99-API is not present in the library */
-#undef GD_NO_C99_API
+#undef GD_NO_C99_API /**/
 
 #if defined(GD_NO_C99_API) && ! defined(GD_C89_API)
 # define GD_C89_API
@@ -227,9 +227,9 @@ typedef short _gd_int16_t;
 typedef unsigned short _gd_uint16_t;
 typedef __int64 _gd_int64_t;
 #else
-#undef _gd_int16_t
-#undef _gd_uint16_t
-#undef _gd_int64_t
+#undef _gd_int16_t /**/
+#undef _gd_uint16_t /**/
+#undef _gd_int64_t /**/
 #endif
 
 #if ! defined GD_C89_API
@@ -917,13 +917,13 @@ extern off64_t gd_eof64(DIRFILE *dirfile, const char* field_code)
 
 #if (defined _FILE_OFFSET_BITS && _FILE_OFFSET_BITS == 64) || \
                                     (defined __APPLE__) || (defined __CYGWIN__)
-#undef off64_t
+#undef off64_t /**/
 #endif
 #endif
 
 
 /* If this symbol is defined here, the legacy API is present in the library */
-#undef GD_LEGACY_API
+#undef GD_LEGACY_API /**/
 
 #ifdef __cplusplus
 }

@@ -1,3 +1,7 @@
+2010-12-08   D. V. Wiebe <getdata@ketiltrout.net>   svn:498
+	* src/getdata.h.in: Add meaningless stuff after #undef's to appease msys's
+	config.status.
+
 2010-12-08   D. V. Wiebe <getdata@ketiltrout.net>   svn:497
 	* m4/encoding.m4: Replace TEST_<foo> AM_CONDITIONALs with a preprocessor
 	symbols.
