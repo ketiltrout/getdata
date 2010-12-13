@@ -33,7 +33,7 @@ extern "C" {
 #include <getdata.h>
 }
 #include <sys/types.h>
-#include <unistd.h>
+
 
 namespace GetData {
 
