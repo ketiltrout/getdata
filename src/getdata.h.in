@@ -62,6 +62,11 @@ extern "C" {
 # define GD_C89_API
 #endif
 
+/* MSVC build system defines GD_C89_API */
+#if defined(GD_C89_API)
+# define GD_NO_C99_API
+#endif
+
 /* define function attributes */
 #if defined __GNUC__ && defined __GNUC_MINOR__
 #  define gd_gnu_enough ((__GNUC__ * 100 + __GNUC_MINOR__) >= 303)
