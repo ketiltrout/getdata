@@ -1,3 +1,8 @@
+2010-12-13   Peter Kümmel <syntheticpp@gmx.net> svn 499 - 504
+	* cmake folder: CMake build system for Windows using MinGW or MS Visual Studio
+	* src/msvc: files not available in MSVC, patched MinGW files
+	* src/getdata.h.in: patches for MinGW and MSVC
+	
 2010-12-08   D. V. Wiebe <getdata@ketiltrout.net>   svn:498
 	* src/getdata.h.in: Add meaningless stuff after #undef's to appease msys's
 	config.status.
