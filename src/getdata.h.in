@@ -227,7 +227,7 @@ typedef enum {
 /* GD_NO_ENTRY is not part of this count */
 #define GD_N_ENTYPES 14
 
-#ifdef _MSC_VER /* TODO */
+#if defined(__MINGW32__) || defined(_MSC_VER)
 typedef short _gd_int16_t;
 typedef unsigned short _gd_uint16_t;
 typedef __int64 _gd_int64_t;
