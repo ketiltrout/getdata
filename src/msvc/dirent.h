@@ -1,3 +1,7 @@
+//<getdata>
+//http://cygwin.com/cgi-bin/cvsweb.cgi/src/winsup/mingw/include/dirent.h?cvsroot=src
+//</getdata>
+
 /*
  * DIRENT.H (formerly DIRLIB.H)
  * This file has no copyright assigned and is placed in the Public Domain.
@@ -9,9 +13,16 @@
 #define _DIRENT_H_
 
 /* All the headers include this file. */
-#include <_mingw.h>
+//<getdata>
+//#include <_mingw.h>
+//</getdata>
 
 #include <io.h>
+
+//<getdata>
+#define FILENAME_MAX _MAX_FNAME
+#define __MINGW_NOTHROW
+//</getdata>
 
 #ifndef RC_INVOKED
 

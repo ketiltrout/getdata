@@ -28,9 +28,23 @@
 #define SUFFIX	_T("*")
 #define	SLASH	_T("\\")
 
+//<getdata>
+#ifdef _UNICODE
+#define _TDIR WDIR
+#else
+#define _TDIR DIR
+#define _topendir opendir
+#define _tclosedir closedir
+#define _treaddir readdir
+#define _tdirent dirent
+#define _trewinddir rewinddir
+#define _ttelldir telldir
+#define _tseekdir seekdir
+#endif
+//</getdata>
 
 /* Helper for opendir().  */
-static inline unsigned _tGetFileAttributes (const _TCHAR * tPath)
+static  unsigned _tGetFileAttributes (const _TCHAR * tPath)
 {
 #ifdef _UNICODE
   /* GetFileAttributesW does not work on W9x, so convert to ANSI */

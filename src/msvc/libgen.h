@@ -14,14 +14,14 @@
 #define _LIBGEN_H_
 
 /* All the headers include this file. */
-#include <_mingw.h>
+//#include <_mingw.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-extern __cdecl __MINGW_NOTHROW char *basename (char *);
-extern __cdecl __MINGW_NOTHROW char *dirname  (char *);
+char *basename (char *);
+char *dirname  (char *);
 
 #ifdef __cplusplus
 }
