@@ -1521,12 +1521,7 @@ CheckSimple2(180,4,ent.data_type,pygetdata.FLOAT64)
 CheckSimple2(180,5,ent.data_type_name,"FLOAT64")
 CheckSimple2(180,6,ent.array_len,2)
 
-# 181: gd_alter_carray
-
-
-# the following causes the d object to silently fault on delete, since it
-# can't flush itself anymore.  The moral of the story: always explicity
-# call d.close() if you care about your dirfile.  (Fortunately we don't.)
+del d
 os.system("rm -rf dirfile")
 
 if (ne > 0):

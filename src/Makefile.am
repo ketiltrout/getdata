@@ -90,7 +90,7 @@ DEBUG_C = debug.c
 endif
 
 pkgconfigdir = @libdir@/pkgconfig
-AM_CFLAGS = ${WALL} ${WEXTRA} 
+AM_CFLAGS = ${WALL} ${WEXTRA} -DGETDATA_MODULEDIR="\"$(moduledir)\""
 AM_CPPFLAGS = $(LTDLINCL) $(EXTERNAL_CPPFLAGS)
 
 BUILT_SOURCES = getdata.h
@@ -99,7 +99,8 @@ nodist_include_HEADERS = getdata.h
 include_HEADERS = ${GETDATA_LEGACY_H}
 pkgconfig_DATA = getdata.pc
 
-lib_LTLIBRARIES = libgetdata.la ${LIBGETDATASLIM_LA} ${LIBGETDATAGZIP_LA} \
+lib_LTLIBRARIES = libgetdata.la
+module_LTLIBRARIES = ${LIBGETDATASLIM_LA} ${LIBGETDATAGZIP_LA} \
 									${LIBGETDATABZIP2_LA} ${LIBGETDATALZMA_LA}
 libgetdata_la_SOURCES = add.c ascii.c ${BZIP2_C} close.c common.c compat.c \
 												constant.c ${DEBUG_C} del.c encoding.c endian.c \

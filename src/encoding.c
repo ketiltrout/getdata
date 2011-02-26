@@ -210,16 +210,21 @@ int _GD_MissingFramework(int encoding, unsigned int funcs)
     lt_dlhandle lib;
 
     /* make the library name */
-    sprintf(library, "libgetdata%s-%s", _gd_ef[encoding].affix,
-        PACKAGE_VERSION);
+    sprintf(library, "%slibgetdata%s-%s", GETDATA_MODULEDIR,
+        _gd_ef[encoding].affix, PACKAGE_VERSION);
     library[10] -= 'A' - 'a';
 
     /* open */
     if ((lib = lt_dlopenext(library)) == NULL) {
-      /* if that didn't work, try opening an unversioned version */
-      sprintf(library, "libgetdata%s", _gd_ef[encoding].affix);
+      /* if that didn't work, look for it in the search path */
+      sprintf(library, "libgetdata%s-%s", _gd_ef[encoding].affix,
+          PACKAGE_VERSION);
       library[10] -= 'A' - 'a';
       if ((lib = lt_dlopenext(library)) == NULL) {
+        _gd_ef[encoding].provides = 0;
+#ifdef USE_PTHREAD
+        pthread_mutex_unlock(&_gd_mutex);
+#endif
         dreturn("%i", 1);
         return 1;
       }

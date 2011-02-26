@@ -253,9 +253,21 @@ if test "x$use_modules" != "xno"; then
 AC_DEFINE([USE_MODULES], [], [ Define if building with modules ])
 fi
 
+AC_ARG_WITH(module-dir, AS_HELP_STRING([--with-module-dir=DIR],
+            [if building modules, install them in DIR.  This is ignored if
+             --enable-modules isn't specified [default: LIBDIR/getdata]]),dnl'
+            [
+             case "${withval}" in
+               no) moduledir="$libdir/getdata" ;;
+               *) moduledir="${withval}" ;;
+             esac
+             ], [ moduledir="$libdir/getdata" ])
+AC_SUBST([moduledir])
+
 dnl LTDL
 AC_ARG_WITH([ltdl], AS_HELP_STRING([--with-ltdl=PREFIX],
-              [if building modules, use the GNU ltdl library located in PREFIX [[autodetect]]]),
+              [if building modules, use the GNU ltdl library located in
+               PREFIX [autodetect]]),
               [
                case "${withval}" in
                  no) ltdl_prefix= ;;

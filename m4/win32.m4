@@ -24,7 +24,7 @@ dnl Find the Win32 path to the MSYS shell.
 AC_DEFUN([GD_MSYS_SHELL],
 [
 AC_MSG_CHECKING([whether we're running under Msys])
-if test `uname -o 2> /dev/null` = "Msys"; then
+if test "x`uname -o 2> /dev/null`" = "xMsys"; then
 this_is_msys=yes
 else
 this_is_msys=no

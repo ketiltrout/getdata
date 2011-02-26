@@ -1,3 +1,20 @@
+2011-02-26   D. V. Wiebe <getdata@ketiltrout.net>   svn:507
+	* m4/python.m4 m4/encoding.m4 m4/idl.m4 configure.ac: Fix double quoting
+	of brackets.
+	* m4/win32.m4 m4/idl.m4: Fix some non-critical errors for OS X 10.5.
+
+	* src/configure.ac: Added --with-module-dir.
+	* src/Makefile.am: Install modules in $moduledir.  -DGETDATA_MODULEDIR.
+	* src/encoding.c (_GD_MissingFramework): Look for modules in
+	GETDATA_MODULEDIR, but fall back to the default searchpath if that fails.
+	Also removed support for unversioned modules.
+
+	* bindings/python/test/big_test.py: Instead of whining, just delete the
+	dirfile at the end.
+
+	* src/encoding.c (_GD_MissingFramework): Release the mutex and zero
+	_gd_ef[].provides on failure to find a module.
+
 2010-12-13   Peter Kümmel <syntheticpp@gmx.net> svn 499 - 504
 	* cmake folder: CMake build system for Windows using MinGW or MS Visual Studio
 	* src/msvc: files not available in MSVC, patched MinGW files

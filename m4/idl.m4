@@ -32,10 +32,10 @@ if echo $idl_header | grep -q "IDL Version"; then
 fi
 if test "x$idl_version_ok" = "xyes"; then
   $3
-  /bin/true;
+  true
 else
   $4
-  /bin/true;
+  true
 fi
 ])
 
@@ -46,7 +46,7 @@ AC_DEFUN([GD_IDL],
 [
 idl_min_version=$1
 AC_ARG_WITH([idl], AS_HELP_STRING([--with-idl=PATH],
-            [use the IDL interpreter located in PATH [[autodetect]]]),
+            [use the IDL interpreter located in PATH [autodetect]]),
             [
               case "${withval}" in
                 no) have_idl="no" ;;
@@ -57,7 +57,7 @@ AC_ARG_WITH([idl], AS_HELP_STRING([--with-idl=PATH],
 
 
 AC_ARG_WITH([idl-dlm-dir], AS_HELP_STRING([--with-idl-dlm-dir=PATH],
-      [install the IDL bindings into PATH [[autodetect]]]),
+      [install the IDL bindings into PATH [autodetect]]),
       [
         case "${withval}" in
           no) local_idl_dlm_path= ;;
