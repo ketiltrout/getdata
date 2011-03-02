@@ -1,5 +1,5 @@
-/* (C) 2002-2005 C. Barth Netterfield
- * (C) 2005-2010 D. V. Wiebe
+/* Copyright (C) 2002-2005 C. Barth Netterfield
+ * Copyright (C) 2005-2010 D. V. Wiebe
  *
  ***************************************************************************
  *

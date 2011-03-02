@@ -1,5 +1,5 @@
-/* (C) 2010 Matthew Truch
- * (C) 2010 D. V. Wiebe
+/* Copyright (C) 2010 Matthew Truch
+ * Copyright (C) 2010 D. V. Wiebe
  *
  ***************************************************************************
  *

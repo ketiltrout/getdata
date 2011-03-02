@@ -1,4 +1,4 @@
-/* (C) 2007-2010 D. V. Wiebe
+/* Copyright (C) 2007-2010 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -53,7 +53,7 @@ int main(int argc, char* argv[])
         "                                        errors.\n"
         "  checkdirfile [ --help | --version]  Print this message and exit.\n"
         "\n\n"
-        "This program is part of %s.  (C) 2008-2010  D. V. Wiebe\n"
+        "This program is part of %s.  Copyright (C) 2008-2010  D. V. Wiebe\n"
         "Please send reports of bugs and other communication to:\n  %s\n\n"
         "This program comes with NO WARRANTY, not even for MERCHANTABILITY "
         "or FITNESS\n"

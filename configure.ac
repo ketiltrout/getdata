@@ -1,4 +1,4 @@
-dnl (C) 2008-2010 D. V. Wiebe
+dnl Copyright (C) 2008-2011 D. V. Wiebe
 dnl
 dnllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll
 dnl

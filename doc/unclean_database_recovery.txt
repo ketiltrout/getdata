@@ -172,7 +172,7 @@ name or permissions; again, recheck the dirfile.
 
 -----------------------------------
 
-(C) 2008 D. V. Wiebe
+Copyright (C) 2008 D. V. Wiebe
 
 This document is part of the GetData project.
 
