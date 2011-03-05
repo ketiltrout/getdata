@@ -2471,8 +2471,8 @@ static PyMethodDef gdpy_dirfile_methods[] = {
     "put_carray(field_code, data [, start])\n\n"
       "Store the data in the list or NumPy array 'data' in the CARRAY given\n"
       "by 'field_code'.  If a list is provided, all entries must be of the\n"
-      "same type.  The parameter 'start' indicates where the first sample in\n"
-      "which the data will be stored.  Zero is assumed if not given.\n"
+      "same type.  The parameter 'start' indicates where the first sample\n"
+      "in which the data will be stored.  Zero is assumed if not given.\n"
       "See gd_put_carray_slice(3)."
   },
   {"put_constant", (PyCFunction)gdpy_dirfile_putconstant,
@@ -2561,12 +2561,18 @@ static PyMethodDef gdpy_dirfile_methods[] = {
 "providing the same information as the gd_pdata_t structure in the C API.\n"\
 "The second object is the 'extra' object passed to this constructor, and\n"\
 "may be any object desired by the caller.  If no extra parameter was\n"\
-"specified, this will be None.  The sehandler should return one of the\n"\
-"pygetdata.SYNTAX_* symbols.\n\n"\
+/* ---------------------------------------------------------------------| */\
+"specified, this will be None.  The sehandler should return either:\n\n"\
+" * an integer, one of the pygetdata.SYNTAX_... symbols; or\n"\
+" * a string containing the corrected line, and pygetdata.SYNTAX_RESCAN\n"\
+"   is assumed; or\n"\
+" * a tuple consisting of an integer, one of the pygetdata.SYNTAX_...\n"\
+"   symbols, and then, optionally, a string containing the corrected\n"\
+"   line.\n"\
+"\n"\
 "The dirfile will be automatically closed when garbage collection is run\n"\
 "on the object.  In general, however, an explicit call to close() or\n"\
 "discard() is preferable on a writeable dirfile, since the implicit close\n"\
-/* ---------------------------------------------------------------------| */\
 "performed on the dirfile when the object is deleted silently discards\n"\
 "any errors encountered when the dirfile is flushed to disc.  After\n"\
 "explicitly calling close() or discard(), the dirfile will be\n"\

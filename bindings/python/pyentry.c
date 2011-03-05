@@ -1988,8 +1988,8 @@ static PyGetSetDef gdpy_entry_getset[] = {
 "                    or a CONST field code specifying the same.\n\n"\
 "  RECIP:        (in_field, dividend)\n"\
 "    'in_field':   a string containing the input field code.\n"\
-"    'dividend':   a number or CONST field code specifying the dividend of\n"\
-"                    the RECIP.\n\n"\
+"    'dividend':   a number or CONST field code specifying the dividend\n"\
+"                    of the RECIP.\n\n"\
 "If a dictionary, the keys of 'parameters' should be the names of the\n"\
 "tuple parameters listed above (ie. 'type' and 'spf' for a RAW field),\n"\
 "and the values the same as their tuple counterparts.\n\n"\
