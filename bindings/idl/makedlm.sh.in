@@ -48,7 +48,7 @@ grep @@DLM $in | sort -k 5 | {
 nfunc=0
 nproc=0
 while read sc magic type func idl min max key extra; do if test "$opt" = "-c"; then
-  if test $key == "KEYWORDS"; then key=IDL_SYSFUN_DEF_F_KEYWORDS; else key=0; fi
+  if test "x$key" == "xKEYWORDS"; then key=IDL_SYSFUN_DEF_F_KEYWORDS; else key=0; fi
   if test $type == "F"; then
     echo "extern IDL_VPTR $func(int argc, IDL_VPTR argv[], char *argk);"
     if test -n "$funcstruct"; then funcstruct="$funcstruct, "; fi
@@ -63,7 +63,7 @@ while read sc magic type func idl min max key extra; do if test "$opt" = "-c"; t
     (( nproc=nproc+1 ))
   fi
 else
-  if test $key == "KEYWORDS"; then key=" KEYWORDS"; else key=; fi
+  if test "x$key" == "xKEYWORDS"; then key=" KEYWORDS"; else key=; fi
   if test $type == "F"; then type="FUNCTION "; else type="PROCEDURE"; fi
   echo "$type $idl $min $max$key"
 fi; done

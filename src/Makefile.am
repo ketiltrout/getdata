@@ -66,6 +66,7 @@ endif
 
 if USE_MODULES
 EXPORT_DYNAMIC=-export-dynamic
+DGETDATA_MODULEDIR=-DGETDATA_MODULEDIR="\"$(moduledir)\""
 else
 EXTERNAL_CPPFLAGS=$(SLIM_CPPFLAGS) $(GZIP_CPPFLAGS) $(BZIP2_CPPFLAGS) \
 									$(LZMA_CPPFLAGS)
@@ -90,7 +91,7 @@ DEBUG_C = debug.c
 endif
 
 pkgconfigdir = @libdir@/pkgconfig
-AM_CFLAGS = ${WALL} ${WEXTRA} -DGETDATA_MODULEDIR="\"$(moduledir)\""
+AM_CFLAGS = ${WALL} ${WEXTRA} $(DGETDATA_MODULEDIR)
 AM_CPPFLAGS = $(LTDLINCL) $(EXTERNAL_CPPFLAGS)
 
 BUILT_SOURCES = getdata.h

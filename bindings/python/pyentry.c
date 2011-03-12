@@ -1991,7 +1991,7 @@ static PyGetSetDef gdpy_entry_getset[] = {
 "    'dividend':   a number or CONST field code specifying the dividend\n"\
 "                    of the RECIP.\n\n"\
 "If a dictionary, the keys of 'parameters' should be the names of the\n"\
-"tuple parameters listed above (ie. 'type' and 'spf' for a RAW field),\n"\
+"tuple parameters listed above (e.g. 'type' and 'spf' for a RAW field),\n"\
 "and the values the same as their tuple counterparts.\n\n"\
 "An entry object provides all these parameters as attributes, which may\n"\
 "be modified by assignment.  Attempting to access an attribute which is\n"\
@@ -2001,7 +2001,7 @@ static PyGetSetDef gdpy_entry_getset[] = {
 "dirfile.madd() as appropriate.  To propagate changes made to an entry\n"\
 "object back to the dirfile, dirfile.alter() is typically used, unless\n"\
 "the name or fragment index is to be changed, in which case\n"\
-"dirfile.rename() or dirfile,move() should be used.\n"
+"dirfile.rename() or dirfile.move() should be used.\n"
 
 PyTypeObject gdpy_entry = {
   PyObject_HEAD_INIT(NULL)

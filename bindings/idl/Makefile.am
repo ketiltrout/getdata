@@ -1,4 +1,4 @@
-# Copyright (C) 2009 D. V. Wiebe
+# Copyright (C) 2009, 2011 D. V. Wiebe
 #
 ##########################################################################
 #
@@ -30,15 +30,21 @@ endif
 
 SUBDIRS=test
 
+if GDIDL_EXTERNAL
+GDIDL_GETDATA_LIBS=$(GETDATA_LIBS)
+else
+GDIDL_GETDATA_LIBS=../../src/libgetdata.la
+endif
+
 idl_LTLIBRARIES = idl_getdata.la
 nodist_idl_HEADERS = idl_getdata.dlm
 
 # idl makes heavy use of type punning, ergo -fno-strict-aliasing
-AM_CFLAGS = ${WALL} $(IDL_CFLAGS) -fno-strict-aliasing
+AM_CFLAGS = ${WALL} $(IDL_CFLAGS) -fno-strict-aliasing $(GETDATA_CFLAGS)
 BUILT_SOURCES=sublist.c constants.c
 idl_getdata_la_LDFLAGS = -module -avoid-version -export-symbols-regex IDL_Load \
-												 -precious-files-regex 'idl_getdata\.dlm'
-idl_getdata_la_LIBADD = $(IDL_LIBS) ../../src/libgetdata.la
+												 -precious-files-regex 'idl_getdata\.dlm' $(IDL_LIBS)
+idl_getdata_la_LIBADD = $(GDIDL_GETDATA_LIBS)
 idl_getdata_la_SOURCES = getdata.c ${DEBUG_C}
 nodist_idl_getdata_la_SOURCES = constants.c sublist.c
 

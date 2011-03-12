@@ -1,4 +1,4 @@
-/* Copyright (C) 2009-2010 D. V. Wiebe
+/* Copyright (C) 2009-2011 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -27,7 +27,23 @@
 #undef _POSIX_SOURCE
 #undef _POSIX_C_SOURCE
 #undef _SVID_SOURCE
-#include "../../src/internal.h"
+
+#ifdef HAVE_CONFIG_H
+# include "config.h"
+#endif
+
+#ifdef GDIDL_EXTERNAL
+# include <complex.h>
+# include <getdata.h>
+# define dtracevoid()
+# define dtrace(...)
+# define dprintf(...)
+# define dreturnvoid()
+# define dreturn(...)
+# define dwatch(...)
+#else
+# include "../../src/internal.h"
+#endif
 
 #define GDIDL_N_DIRFILES 1024
 static DIRFILE* idldirfiles[GDIDL_N_DIRFILES];

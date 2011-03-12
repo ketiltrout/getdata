@@ -1,0 +1,95 @@
+IDL BINDINGS FOR GETDATA
+========================
+
+This package provides bindings to the GetData library for use with the
+Interactive Data Language (IDL) developed by Research Systems, Incorporated,
+now ITT Visual Information Solutions.
+
+Building the IDL bindings with this package requires a system with a copy of
+GetData already installed.  If you do not already have the GetData library, you
+may want to download and install the entire GetData Project instead, which
+includes these bindings.  GetData source packages, as well as more information
+on the GetData Project, may be found on the World Wide Web:
+
+  http://getdata.sourceforge.net/
+
+
+WARRANTY AND REDISTRIBUTION
+===========================
+
+GetData is free software; you can redistribute it and/or modify it under the
+terms of the GNU Lesser General Public License as published by the Free Software
+Foundation: either version 2.1 of the License, or (at your option) any later
+version.
+
+GetData is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public License along
+with GetData in a file called `COPYING'; if not, write to the Free Software
+Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
+
+
+CONTENTS
+========
+
+This package provides bindings for the Interactive Data Language (IDL) to the
+GetData library.  Documentation for the bindings can be found in file
+`README.idl' in the top level directory.  The C interface is described in this
+document and the associated man pages.
+
+A full list of features new to this release of GetData may be found in the
+file called `NEWS', including features new to this copy of the IDL bindings.
+
+
+BUILDING THE BINDINGS
+=====================
+
+This package may be configured and built using the GNU autotools.  Generic
+installation instructions are provided in the file called `INSTALL'.  A
+brief summary follows.  A C99-compliant compiler is required to build (but not
+to use) the bindings.
+
+Most users should be able to build the package by simply executing:
+
+  $ ./configure
+  $ make
+
+from the top IDL GetData directory (the directory containing this README file). 
+After the project has been built, you may (optionally) test the build by
+executing:
+
+  $ make check
+
+which will run a series of self-tests.  Finally,
+
+  $ make install
+
+will install the bindings, and documentation.
+
+The package configuration can be changed, if the default configuration is
+insufficient, before building it by passing options to ./configure.  Running
+
+  $ ./configure --help
+
+will display a brief help message summarising available options.
+
+
+PREREQUISITES
+=============
+
+These bindings require GetData 0.7 or newer to build, as well as an IDL
+interpreter verison 5.5 or later.  No other external libraries are required,
+save for the C Standard Library.
+
+
+AUTHOR
+======
+
+The IDL GetData Bindings are maintained by D. V. Wiebe <dvw@ketiltrout.net>.
+Bug reports and other communication relevant to these bindings are best directed
+to the GetData mailing list: <getdata-devel@lists.sourceforge.net>.
+
+A full list of contributors to the GetData Project is given in the file called
+`AUTHORS'.

@@ -1,3 +1,14 @@
+2011-03-03   D. V. Wiebe <getdata@ketiltrout.net>   svn:510
+	* m4/idl.m4: Munge IDL_LIBS to convert "-m <arg>" into "-m<arg>" since
+		libtool seems to delete <arg> if that's not the case.
+	* m4/version.m4: Added.
+	* bindings/idl/package: Added.
+	* bindings/idl/Makefile.am bindings/idl/getdata.c: Update for external build.
+	* configure.ac: Shipped version stuff off into m4/version.m4
+	* Makefile.am: Add rules for making idl_getdata package.
+
+	* bindings/idl/makedlm.sh.in: Handle missing keyword "KEYWORD" better.
+
 2011-02-26   D. V. Wiebe <getdata@ketiltrout.net>   svn:507
 	* m4/python.m4 m4/encoding.m4 m4/idl.m4 configure.ac: Fix double quoting
 	of brackets.

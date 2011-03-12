@@ -1,4 +1,4 @@
-# Copyright (C) 2008 D. V. Wiebe
+# Copyright (C) 2008, 2011 D. V. Wiebe
 #
 ##########################################################################
 #
@@ -36,12 +36,42 @@ clean-local:
 
 DISTCHECK_CONFIGURE_FLAGS = --with-idl-dlm-dir="$$dc_install_base/idl"
 
+# idl-only package
+idl_$(distdir).tar.bz2 idl_$(distdir).tar.gz: idldist
+
+idldist: $(DISTFILES)
+	rm -rf idl_getdata
+	mkdir idl_getdata
+	mkdir idl_getdata/m4
+	mkdir idl_getdata/src
+	cp bindings/idl/package/* idl_getdata
+	cp -r bindings/idl/Makefile.am bindings/idl/makedlm.sh.in \
+		bindings/idl/getdata.c bindings/idl/test idl_getdata/src
+	cp -r bindings/make_parameters.c idl_getdata
+	cp -r m4/idl.m4 m4/compiler.m4 m4/ax_compare_version.m4 m4/version.m4 \
+		idl_getdata/m4
+	cp -r doc/README.idl COPYING AUTHORS ChangeLog INSTALL NEWS idl_getdata
+	( cd idl_getdata && \
+		aclocal -I m4 && \
+		libtoolize && \
+		autoconf && \
+		autoheader && \
+		automake --add-missing --force-missing && \
+		./configure && \
+		make dist && \
+		cp idl_${distdir}* .. \
+	)
+	rm -rf idl_getdata
+
 # release stuff
 README.txt: NEWS RELEASE_NOTES.in
 	cp -f RELEASE_NOTES.in $@ 
 	head -n `grep -nm 1 '^|' NEWS | awk 'BEGIN {FS=":"} {print $$1-1}'` NEWS >> $@
 
-dist-post: $(distdir).tar.gz.sig $(distdir).tar.bz2.sig
+dist-post: $(distdir).tar.gz.sig $(distdir).tar.bz2.sig \
+	idl_$(distdir).tar.gz.sig idl_$(distdir).tar.bz2.sig
 
-dist-push:  $(distdir).tar.gz.sig $(distdir).tar.bz2.sig $(distdir).tar.gz $(distdir).tar.bz2 README.txt
+dist-push:  $(distdir).tar.gz.sig $(distdir).tar.bz2.sig \
+	$(distdir).tar.gz $(distdir).tar.bz2 idl_$(distdir).tar.gz.sig \
+	idl_$(distdir).tar.bz2.sig README.txt
 	rsync -avP -e ssh $^ $(SFUSER),getdata@frs.sourceforge.net:/home/frs/project/g/ge/getdata/getdata/$(PACKAGE_VERSION)/

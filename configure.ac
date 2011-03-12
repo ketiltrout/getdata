@@ -19,12 +19,7 @@ dnl along with GetData; if not, write to the Free Software Foundation, Inc.,
 dnl 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 dnl
 
-m4_define(getdata_major,    0)
-m4_define(getdata_minor,    7)
-m4_define(getdata_revision, 1)
-m4_define(getdata_extra,    [])
-m4_define(getdata_version,
-          getdata_major.getdata_minor.getdata_revision[]getdata_extra)
+m4_include([m4/version.m4])
 
 AC_INIT([GetData],[getdata_version],[getdata-devel@lists.sourceforge.net])
 
@@ -42,21 +37,13 @@ LT_PREREQ([2.2.6b])
 AC_ARG_VAR([BUILDCC],
            [C compiler command on the build system (only needed if cross-compiling)])
 
-dnl libgetdata current interface version
-AC_SUBST(GETDATA_IFACE_VERSION, [4])
-dnl libgetdata current interface implementation revision
-AC_SUBST(GETDATA_IMPL_REVISION, [1])
-dnl libgetdata interface age (current interface - oldest supported interface)
-AC_SUBST(GETDATA_IFACE_AGE, [0])
-
-dnl libgetdata++ interface version info
-AC_SUBST(GETDATAXX_VERSION, [2:0:0])
-
-dnl libfgetdata interface version info
-AC_SUBST(FGETDATA_VERSION, [2:1:0])
-
-dnl libf95getdata interface version info
-AC_SUBST(F95GETDATA_VERSION, [2:0:0])
+dnl export version information from m4/version.m4
+AC_SUBST(GETDATA_IFACE_VERSION, [getdata_iface_version])
+AC_SUBST(GETDATA_IMPL_REVISION, [getdata_iface_revision])
+AC_SUBST(GETDATA_IFACE_AGE, [getdata_iface_revision])
+AC_SUBST(GETDATAXX_VERSION, [getdataxx_version])
+AC_SUBST(FGETDATA_VERSION, [fgetdata_version])
+AC_SUBST(F95GETDATA_VERSION, [f95getdata_version])
 
 AC_CONFIG_SRCDIR([src/getdata.c])
 AC_CONFIG_HEADER([src/config.h])
@@ -815,7 +802,8 @@ AM_CONDITIONAL(MAKE_IDLBINDINGS, [test "x$make_idlbindings" = "xyes"])
 AM_CONDITIONAL(USE_MODULES, [test "x$use_modules" != "xno"])
 AM_CONDITIONAL(TEST_PYTHON, [test "x$NO_DLOPEN_TESTS" = "x0"])
 AM_CONDITIONAL(TEST_IDL, [test "x$NO_DLOPEN_TESTS" = "x0"])
-AM_CONDITIONAL(HAVE_DIFF, test "x$DIFF" != "x")
+AM_CONDITIONAL(HAVE_DIFF, [test "x$DIFF" != "x"])
+AM_CONDITIONAL(GDIDL_EXTERNAL, [false])
 
 dnl we do this here to avoid screwing up other tests
 LDFLAGS="${LDFLAGS}${NO_UNDEFINED}"
@@ -841,16 +829,16 @@ else
   BINDINGS_LEFT="${BINDINGS_LEFT} Fortran-95"
 fi
 
-if test "x$make_pybindings" != "xno"; then
-  BINDINGS_BUILT="${BINDINGS_BUILT} Python"
-else
-  BINDINGS_LEFT="${BINDINGS_LEFT} Python"
-fi
-
 if test "x$make_idlbindings" != "xno"; then
   BINDINGS_BUILT="${BINDINGS_BUILT} IDL"
 else
   BINDINGS_LEFT="${BINDINGS_LEFT} IDL"
+fi
+
+if test "x$make_pybindings" != "xno"; then
+  BINDINGS_BUILT="${BINDINGS_BUILT} Python"
+else
+  BINDINGS_LEFT="${BINDINGS_LEFT} Python"
 fi
 
 if test "x$BINDINGS_BUILT" = "x"; then
