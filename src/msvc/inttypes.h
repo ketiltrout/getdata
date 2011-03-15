@@ -297,9 +297,11 @@ imaxdiv_t __cdecl imaxdiv(intmax_t numer, intmax_t denom)
 #define strtoimax _strtoi64
 #define strtoumax _strtoui64
 
+
 // 7.8.2.4 The wcstoimax and wcstoumax functions
 #define wcstoimax _wcstoi64
 #define wcstoumax _wcstoui64
 
+#define strtoull _strtoui64
 
 #endif // _MSC_INTTYPES_H_ ]
