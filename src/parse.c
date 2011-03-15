@@ -275,11 +275,8 @@ static gd_entry_t* _GD_ParseRaw(DIRFILE* D, char* in_cols[MAX_IN_COLS],
     return NULL;
   }
 
-  if (D->fragment[me].sname)
-    snprintf(E->e->u.raw.filebase, FILENAME_MAX, "%s/%s/%s", D->name,
-        D->fragment[me].sname, in_cols[0]);
-  else
-    snprintf(E->e->u.raw.filebase, FILENAME_MAX, "%s/%s", D->name, in_cols[0]);
+  snprintf(E->e->u.raw.filebase, FILENAME_MAX, "%s/%s", D->fragment[me].sname ?
+      D->fragment[me].sname : D->name, in_cols[0]);
 
   E->EN(raw,data_type) = _GD_RawType(in_cols[2], standards, pedantic);
   E->e->u.raw.size = GD_SIZE(E->EN(raw,data_type));

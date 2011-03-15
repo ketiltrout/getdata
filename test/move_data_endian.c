@@ -54,11 +54,16 @@ int main(void)
   fd = open(data, O_RDONLY | O_BINARY);
   i = 0;
 
-  while (read(fd, &d, sizeof(uint16_t))) {
-    CHECKXi(i, d, i * 0x102);
-    i++;
+  if (fd == -1) {
+    perror("open: ");
+    r = 1;
+  } else {
+    while (read(fd, &d, sizeof(uint16_t))) {
+      CHECKXi(i, d, i * 0x102);
+      i++;
+    }
+    close(fd);
   }
-  close(fd);
 
   unlink(format1);
   unlink(format);

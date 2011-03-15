@@ -1,3 +1,13 @@
+2011-03-14   D. V. Wiebe <getdata@ketiltrout.net>   svn:513
+	* test/parse_include_absolute.c test/parse_include_absrel.c
+	test/parse_include_relabs.c test/parse_include_relrel.c: Added.
+
+	* src/include.c (_GD_Include): Handle absolute paths in /INCLUDE directives.
+		The sname now contains D->name when appropriate.
+	* src/add.c (_GD_Add) src/parse.c (_GD_ParseRaw) src/move.c (gd_move): Fix
+		computation of filebase for new sname.
+
+
 2011-03-03   D. V. Wiebe <getdata@ketiltrout.net>   svn:510
 	* m4/idl.m4: Munge IDL_LIBS to convert "-m <arg>" into "-m<arg>" since
 		libtool seems to delete <arg> if that's not the case.
@@ -61,7 +71,7 @@
 
 	* src/internal.h: Conditionalise inclusion of non-ANSI unistd.h and stdint.h.
 	Various _MSC_VER specific code.  Also, define gd_stat64 and gd_stat64_t to
-	plausibly useful things by default.o
+	plausibly useful things by default.
 	
 	* src/getdata.h.in: Remove unistd.h. Add math.h and some _MSC_VER specific
 	code.  (There are still unresolved MSVC issues with this file.)
