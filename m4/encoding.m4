@@ -89,19 +89,21 @@ AC_SUBST(AS_TR_CPP([$1_CPPFLAGS]))
 AC_SUBST(AS_TR_CPP([$1_LDFLAGS]))
 
 dnl executables needed for tests
-AC_PATH_PROGS([path_$5], [$5], [not found], [$AS_TR_CPP([$1_SEARCHPATH])])
+m4_define(gd_progname, regexp([$5 ], [^\([^ ]*\) ], [\1]))
+AC_PATH_PROGS([path_]gd_progname, [$5], [not found], [$AS_TR_CPP([$1_SEARCHPATH])])
 
-if test "x$path_$5" != "xnot found"; then
-  AC_DEFINE_UNQUOTED(AS_TR_CPP([$5]), ["$path_$5"],
-                     [ Define to the full path to the `$5' binary ])
+if test "x$path_[]gd_progname" != "xnot found"; then
+  AC_DEFINE_UNQUOTED(AS_TR_CPP(gd_progname), ["$path_]gd_progname["],
+                     [ Define to the full path to the `]gd_progname[' binary ])
 fi
 
 ifelse(`x$6', `x',,[
-AC_PATH_PROGS([path_$6], [$6], [not found], [$AS_TR_CPP([$1_SEARCHPATH])])
+m4_define(gd_progname, regexp([$6 ], [^\([^ ]*\) ], [\1]))
+AC_PATH_PROGS([path_]gd_progname, [$6], [not found], [$AS_TR_CPP([$1_SEARCHPATH])])
 
-if test "x$path_$6" != "xnot found"; then
-  AC_DEFINE_UNQUOTED(AS_TR_CPP([$6]), ["$path_$6"],
-                     [ Define to the full path to the `$6' binary ])
+if test "x$path_[]gd_progname" != "xnot found"; then
+  AC_DEFINE_UNQUOTED(AS_TR_CPP(gd_progname), ["$path_]gd_progname["],
+                     [ Define to the full path to the `]gd_progname[' binary ])
 fi
 $7
 ])

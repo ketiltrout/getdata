@@ -1,3 +1,9 @@
+2011-03-16   D. V. Wiebe <getdata@ketiltrout.net>   svn:516
+	* configure.ac: check for "slimdata" in addition to "slim", which is what
+	the binary is called under Fedora.
+	* m4/encoding.m4 (GD_CHECK_ENCODING): Handle multiple binary names in $5 and
+	$6.
+
 2011-03-16   D. V. Wiebe <getdata@ketiltrout.net>   svn:515
 	GetData-0.7.2rc1:
 
