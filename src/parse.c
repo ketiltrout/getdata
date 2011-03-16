@@ -22,6 +22,7 @@
 #include "internal.h"
 
 #ifdef STDC_HEADERS
+#include <inttypes.h>
 #include <ctype.h>
 #include <math.h>
 #include <errno.h>
@@ -1410,7 +1411,7 @@ gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, char** in_cols,
     if (Q) {
       if (~flags & GD_IGNORE_DUPS)
         _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_DUPLICATE, format_file,
-            linenum, D->fragment[Q->fragment_index].cname);
+            linenum, E->field);
       _GD_FreeE(E, 1);
       dreturn("%p", NULL);
       return NULL;

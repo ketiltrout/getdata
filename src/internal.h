@@ -44,6 +44,14 @@ typedef size_t ssize_t;
 typedef int mode_t;
 #endif
 
+
+#ifdef _MSC_VER
+// missing in sys/stat.h
+#define S_ISREG(m)  (((m) & _S_IFMT) == _S_IFREG)
+#define S_ISDIR(m) (((m) & _S_IFMT) == _S_IFDIR)
+#define snprintf _snprintf
+#endif
+
 #ifdef __APPLE__
 typedef off_t off64_t;
 #endif

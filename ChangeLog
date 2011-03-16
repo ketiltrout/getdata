@@ -1,3 +1,12 @@
+2011-03-16   D. V. Wiebe <getdata@ketiltrout.net>   svn:515
+	GetData-0.7.2rc1:
+
+	* src/parse.c (_GD_ParseFieldSpec): Fix GD_E_FORMAT_DUPLICATE error data.
+
+	Merged in changes from trunk, revision 514:
+
+	* src/internal.h: Define S_ISREG and S_ISDIR if missing.
+
 2011-03-14   D. V. Wiebe <getdata@ketiltrout.net>   svn:513
 	* test/parse_include_absolute.c test/parse_include_absrel.c
 	test/parse_include_relabs.c test/parse_include_relrel.c: Added.
@@ -768,7 +777,7 @@
 	* src/flimits.c (gd_get_eof gd_get_eof64 _GD_GetEOF): Renamed.  Proper INDEX
 	handling added.
 
-	* src/foffs.c src/flimits.c src/nsamples.c: fofds.c and nsamples.c merged
+	* src/foffs.c src/flimits.c src/nsamples.c: foffs.c and nsamples.c merged
 	and renamed flimits.c.
 
 2010-06-30   D. V. Wiebe <getdata@ketiltrout.net>   svn:425 svn:426
