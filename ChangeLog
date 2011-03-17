@@ -1,3 +1,8 @@
+2010-12-13   Peter Kümmel <syntheticpp@gmx.net>
+	* use _stat64 and struct _stat64 with msvc
+	* fix tests by removing the content of dirfile
+	* guard definitions of macros in C++ binding
+	* build tests with C89 API 
 2011-03-03   D. V. Wiebe <getdata@ketiltrout.net>   svn:510
 	* m4/idl.m4: Munge IDL_LIBS to convert "-m <arg>" into "-m<arg>" since
 		libtool seems to delete <arg> if that's not the case.

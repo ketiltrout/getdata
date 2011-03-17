@@ -290,6 +290,8 @@ int _GD_Rename(const char*, const char*);
 
 #if HAVE_STRUCT_STAT64
 typedef struct stat64 gd_stat64_t;
+#elif HAVE_STRUCT__STAT64
+typedef struct _stat64 gd_stat64_t;
 #elif HAVE_STRUCT___STAT64
 typedef struct __stat64 gd_stat64_t;
 #else

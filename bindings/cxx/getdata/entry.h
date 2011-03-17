@@ -26,8 +26,12 @@
 # define _FILE_OFFSET_BITS 64
 #endif
 
-#define GD_NO_LEGACY_API
-#define GD_C89_API
+#ifndef GD_NO_LEGACY_API
+# define GD_NO_LEGACY_API
+#endif
+#ifndef GD_C89_API
+# define GD_C89_API
+#endif
 
 extern "C" {
 #include <getdata.h>
