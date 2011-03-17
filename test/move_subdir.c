@@ -27,6 +27,7 @@ int main(void)
   // when using msvc the macro mkdir removes dirfile
 #ifdef mkdir
 #undef mkdir
+#define mkdir(x,y) mkdir(x)
 #endif
   mkdir(subdir, 0777);
 
