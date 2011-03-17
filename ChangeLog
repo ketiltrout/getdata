@@ -1,4 +1,4 @@
-2010-12-13   Peter Kümmel <syntheticpp@gmx.net>
+2010-03-17  Peter Kümmel <syntheticpp@gmx.net>
 	* use _stat64 and struct _stat64 with msvc
 	* fix tests by removing the content of dirfile
 	* guard definitions of macros in C++ binding
