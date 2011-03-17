@@ -25,8 +25,20 @@ endmacro()
 #TODO add configure
 add_definitions(
 	-DPACKAGE_NAME=\"GetData\"
-	-DPACKAGE_VERSION=\"0.7\"
-	-DPACKAGE_BUGREPORT=\"www\")
+	-DPACKAGE_VERSION=\"0.7.2\"
+	-DPACKAGE_BUGREPORT=\"getdata-devel@lists.sourceforge.net\")
+
+## Substitutions needed to build getdata.h
+# build in ANSI C mode
+set(DEFINE_GD_NO_C99_API "#define GD_NO_C99_API")
+
+# kst2 doesn't need the legacy API
+set(DEFINE_GD_LEGACY_API "/* #undef GD_LEGACY_API */")
+
+# MSVCRT integer types
+set(DEFINE_gd_int16_t "#define gd_int16_t short int")
+set(DEFINE_gd_uint16_t "#define gd_int16_t unsigned short int")
+set(DEFINE_gd_int64_t "#define gd_int64_t __int64")
 
 
 if(MSVC)
@@ -43,7 +55,8 @@ if(MSVC)
 		-DHAVE_STRUCT__STAT64
 		-DHAVE__STAT64
 		-DHAVE__COMMIT
-		-DGD_NO_C99_API
+    -DHAVE__STRTOI64
+    -DHAVE__STRTOUI64
 		)
 	set(CMAKE_DEBUG_POSTFIX d)
 	
@@ -70,6 +83,8 @@ if(MINGW)
 			-DHAVE_DIRENT_H
 			-DHAVE__COMMIT
 			-DHAVE__STAT64
+      -DHAVE__STRTOI64
+      -DHAVE__STRTOUI64
 			-DHAVE_STRUCT___STAT64
 			-DMKDIR_NO_MODE
 			)

@@ -219,11 +219,19 @@ const char* _gd_colsub(void);
 #endif
 
 #ifndef HAVE_STRTOLL
+# ifdef HAVE__STRTOI64
+#  define strtoll _strtoi64
+# else
 #  define strtoll strtol
+# endif
 #endif
 
 #ifndef HAVE_STRTOULL
+# ifdef HAVE__STRTOUI64
+#  define strtoull _strtoi64
+# else
 #  define stroull strtoul
+# endif
 #endif
 
 #if defined __MSVCRT__ && defined HAVE__FDOPEN

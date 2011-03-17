@@ -63,7 +63,7 @@ AC_CANONICAL_HOST
 
 dnl Legacy API
 AC_ARG_ENABLE(legacy-api, AS_HELP_STRING([--disable-legacy-api],
-              [don't include the legacy API wrapper in the library]),
+              [don't include the legacy API wrapper in the library]), dnl'
               [
                case "${enableval}" in
                  no) include_legacy_api="no" ;;
@@ -74,8 +74,11 @@ AC_MSG_CHECKING([whether to include the legacy API])
 AC_MSG_RESULT([$include_legacy_api])
 
 if test "x$include_legacy_api" != "xno"; then
-  AC_DEFINE([GD_LEGACY_API], [], [ This symbol is defined whenever the library contains the legacy API ])
+  DEFINE_GD_LEGACY_API="#define GD_LEGACY_API"
+else
+  DEFINE_GD_LEGACY_API="/* #undef GD_LEGACY_API */"
 fi
+AC_SUBST([DEFINE_GD_LEGACY_API])
 
 dnl debugging
 AC_ARG_ENABLE(assert, AS_HELP_STRING([--enable-assert],
@@ -297,9 +300,11 @@ if test "x$disable_c99" != "xyes"; then
   fi
 fi
 if test "x$disable_c99" = "xyes"; then
-  AC_DEFINE([GD_NO_C99_API], [1],
-            [define to disable C99-specific code in the library source])
+  DEFINE_GD_NO_C99_API="#define GD_NO_C99_API"
+else
+  DEFINE_GD_NO_C99_API="/* #undef GD_NO_C99_API */"
 fi
+AC_SUBST([DEFINE_GD_NO_C99_API])
 
 AC_HEADER_STDC
 if test "x$make_cxxbindings" != "xno"; then
@@ -508,7 +513,8 @@ fi
 dnl functions
 AC_CHECK_FUNCS([_commit fchmod _fdopen fseeko fseeko64 fsync ftello ftello64 \
                 getdelim gmtime_r _lseeki64 _mkdir mkstemp nan _open _read \
-                _rmdir stat64 _stat64 strtoll strtoull _unlink _write])
+                _rmdir stat64 _stat64 _strtoi64 strtoll _strtoui64 strtoull \
+                _unlink _write])
 if test "x$disable_c99" = "xno"; then
   AC_CHECK_FUNCS([cabs])
 fi
@@ -659,12 +665,12 @@ elif test $ac_cv_sizeof_long_long_int -eq 8; then
   gd_int64_t="long long int"
 fi
 
-AC_DEFINE_UNQUOTED([_gd_int16_t], [$gd_int16_t],
-                   [ Define to a signed 16-bit integer type ])
-AC_DEFINE_UNQUOTED([_gd_uint16_t], [$gd_uint16_t],
-                   [ Define to an unsigned 16-bit integer type ])
-AC_DEFINE_UNQUOTED([_gd_int64_t], [$gd_int64_t],
-                   [ Define to a signed 64-bit integer type ])
+DEFINE_gd_int16_t="#define gd_int16_t $gd_int16_t";
+DEFINE_gd_uint16_t="#define gd_uint16_t $gd_uint16_t";
+DEFINE_gd_int64_t="#define gd_int64_t $gd_int64_t";
+AC_SUBST([DEFINE_gd_int16_t])
+AC_SUBST([DEFINE_gd_uint16_t])
+AC_SUBST([DEFINE_gd_int64_t])
 
 dnl python
 if test "x$make_pybindings" = "xyes"; then
@@ -774,7 +780,10 @@ AC_CONFIG_FILES([man/gd_alter_encoding.3])
 AC_CONFIG_FILES([man/gd_alter_endianness.3])
 AC_CONFIG_FILES([man/gd_alter_frameoffset.3])
 AC_CONFIG_FILES([src/Makefile])
-AC_CONFIG_HEADERS([src/getdata.h], [chmod a-w src/getdata.h])
+dnl This doubling allows us to build getdata.h as a normal AC_CONFIG_FILE, but use
+dnl AC_CONFIG_HEADERS to check whether it has changed.
+AC_CONFIG_FILES([src/getdata.ah:src/getdata.h.in])
+AC_CONFIG_HEADERS([src/getdata.h:src/getdata.ah], [chmod a-w src/getdata.h])
 AC_CONFIG_FILES([src/getdata.pc])
 AC_CONFIG_FILES([test/Makefile])
 AC_CONFIG_FILES([util/Makefile])

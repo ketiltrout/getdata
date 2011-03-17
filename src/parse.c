@@ -22,7 +22,6 @@
 #include "internal.h"
 
 #ifdef STDC_HEADERS
-#include <inttypes.h>
 #include <ctype.h>
 #include <math.h>
 #include <errno.h>

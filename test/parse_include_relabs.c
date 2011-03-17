@@ -62,5 +62,6 @@ int main(void)
   rmdir(filedir);
 
   CHECKU(spf, 11);
+  free(cwd);
   return r;
 }
