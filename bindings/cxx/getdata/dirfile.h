@@ -23,11 +23,15 @@
 #define GETDATA_DIRFILE_H
 
 // We don't want the legacy API since its symbols clash with us.
-#define GD_NO_LEGACY_API
+#ifndef GD_NO_LEGACY_API
+# define GD_NO_LEGACY_API
+#endif
 
 // We use the C89 API since C++ compilers aren't required to support the
 // C99 _Complex keyword
-#define GD_C89_API
+#ifndef GD_C89_API
+# define GD_C89_API
+#endif
 
 #include <getdata.h>
 

@@ -1,3 +1,8 @@
+2011-03-17   Peter Kümmel <syntheticpp@gmx.net>
+ 	* use _stat64 and struct _stat64 with msvc
+ 	* fix tests by removing the content of dirfile
+ 	* guard definitions of macros in C++ binding
+ 	* build tests with C89 API 
 2011-03-17   D. V. Wiebe <getdata@ketiltrout.net>   svn:517
 	* src/getdata.h.in: Replace #undefs with @DEFINE_...@ tokens.   Define
 	gd_off64_t instead of polluting the namespace.  Remove MSCRT specal casing
