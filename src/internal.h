@@ -218,20 +218,20 @@ const char* _gd_colsub(void);
 #  endif
 #endif
 
-#ifndef HAVE_STRTOLL
-# ifdef HAVE__STRTOI64
-#  define strtoll _strtoi64
-# else
-#  define strtoll strtol
-# endif
+#ifdef HAVE__STRTOI64
+#  define gd_strtoll _strtoi64
+#elif defined(HAVE_STRTOLL)
+#  define gd_strtoll strtoll
+#else
+#  define gd_strtoll strtol
 #endif
 
-#ifndef HAVE_STRTOULL
-# ifdef HAVE__STRTOUI64
-#  define strtoull _strtoi64
-# else
-#  define stroull strtoul
-# endif
+#ifdef HAVE__STRTOUI64
+#  define gd_strtoull _strtoi64
+#elif defined(HAVE_STRTOULL)
+#  define gd_strtoull strtoull
+#else
+#  define gd_strtoull strtoul
 #endif
 
 #if defined __MSVCRT__ && defined HAVE__FDOPEN
