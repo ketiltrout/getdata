@@ -26,7 +26,7 @@ C     Tell the parser to ignore syntax errors
       CHARACTER*9 frmdat2
       PARAMETER (frmdat2 =  'bad line')
       INTEGER*1 datdat(80)
-      INTEGER i;
+      INTEGER*1 i;
       INTEGER d;
       INTEGER e;
 
@@ -34,7 +34,7 @@ C     Tell the parser to ignore syntax errors
       CALL SYSTEM ( 'mkdir ' // fildir )
 
       DO 20 i = 1, 80
-      datdat(i) = INT(i,1)
+      datdat(i) = i
    20 CONTINUE
 
       OPEN(1, FILE=frmat, STATUS='NEW')

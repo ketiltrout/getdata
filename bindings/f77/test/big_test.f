@@ -46,6 +46,7 @@ C     GDDSCD GDCLBK GDCLOS (although this last one is used)
       CHARACTER*20 str
       INTEGER*1 c(8)
       INTEGER*1 datdat(80)
+      INTEGER*1 k
       INTEGER i
       INTEGER d
       INTEGER e
@@ -62,8 +63,8 @@ C     GDDSCD GDCLBK GDCLOS (although this last one is used)
       CALL SYSTEM ( 'rm -rf ' // fildir )
       CALL SYSTEM ( 'mkdir ' // fildir )
 
-      DO 10 i = 1, 80
-      datdat(i) = INT(i,1)
+      DO 10 k = 1, 80
+      datdat(k) = k
    10 CONTINUE
 
       fields =(/ 'INDEX  ', 'bit    ', 'carray ', 'const  ', 'data   ',
