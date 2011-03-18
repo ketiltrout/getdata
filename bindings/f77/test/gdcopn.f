@@ -34,7 +34,7 @@ C     Tell the parser to ignore syntax errors
       CALL SYSTEM ( 'mkdir ' // fildir )
 
       DO 20 i = 1, 80
-      datdat(i) = i
+      datdat(i) = INT(i,1)
    20 CONTINUE
 
       OPEN(1, FILE=frmat, STATUS='NEW')

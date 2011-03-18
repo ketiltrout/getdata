@@ -59,21 +59,21 @@ int gd_system(const char* command)
     (double)(v))
 #define CHECKFi(i,n,v) CHECKi(i,fabs((n)-(v)) > 1e-10,n,"%.15g","%.15g",\
     (double)(n),(double)(v))
-#define CHECKI(n,v)    CHECK((n) != (v),n,"%" PRIi64,"%" PRIi64,(long long)(n),\
+#define CHECKI(n,v)    CHECK((n) != (v),n,"%lli","%lli",(long long)(n),\
     (long long)(v))
-#define CHECKIi(i,n,v) CHECKi(i,(long long)(n) != (long long)(v),n,"%" PRIi64,\
-    "%" PRIi64, (long long)(n),(long long)(v))
+#define CHECKIi(i,n,v) CHECKi(i,(long long)(n) != (long long)(v),n,"%lli",\
+    "%lli", (long long)(n),(long long)(v))
 #define CHECKP(n)      CHECK((n) != NULL,n,"%p","%s",n,"NULL")
 #define CHECKPi(i,n)   CHECKi(i,(n) != NULL,n,"%p","%s",n,"NULL")
 #define CHECKPN(n)     CHECK((n) == NULL,n,"%p","%s",n,"non-NULL")
 #define CHECKPNi(i,n)  CHECKi(i,(n) == NULL,n,"%p","%s",n,"non-NULL")
 #define CHECKS(n,v)    CHECK(strcmp((n),(v)),n,"\"%s\"","\"%s\"",(n),(v));
 #define CHECKSi(n,v)   CHECKi(i,strcmp((n),(v)),n,"\"%s\"","\"%s\"",(n),(v));
-#define CHECKU(n,v)    CHECK((n) != (v),n,"%" PRIu64,"%" PRIu64,\
+#define CHECKU(n,v)    CHECK((n) != (v),n,"%llu","%llu",\
     (unsigned long long)(n),(unsigned long long)(v))
-#define CHECKUi(i,n,v) CHECKi(i,(n) != (v),n,"%" PRIu64,"%" PRIu64,\
+#define CHECKUi(i,n,v) CHECKi(i,(n) != (v),n,"%llu","%llu",\
     (unsigned long long)(n),(unsigned long long)(v))
-#define CHECKX(n,v)    CHECK((n) != (v),n,"0x%" PRIX64,"0x%" PRIX64,\
+#define CHECKX(n,v)    CHECK((n) != (v),n,"0x%llX","0x%llX",\
     (unsigned long long)(n),(unsigned long long)(v))
-#define CHECKXi(i,n,v) CHECKi(i,(n) != (v),n,"0x%" PRIX64,"0x%" PRIX64,\
+#define CHECKXi(i,n,v) CHECKi(i,(n) != (v),n,"0x%llX","0x%llX",\
     (unsigned long long)(n),(unsigned long long)(v))

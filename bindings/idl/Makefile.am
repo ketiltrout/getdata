@@ -48,8 +48,34 @@ idl_getdata_la_LIBADD = $(GDIDL_GETDATA_LIBS)
 idl_getdata_la_SOURCES = getdata.c ${DEBUG_C}
 nodist_idl_getdata_la_SOURCES = constants.c sublist.c
 
-sublist.c: getdata.c makedlm.sh
+sublist.c.in: getdata.c makedlm.sh
 	${SHELL} ./makedlm.sh -c $< > $@
+
+sublist.c: sublist.stamp
+	@if test ! -f $@; then \
+		rm -f $<; \
+		$(MAKE) $<; \
+		fi
+
+if HAVE_DIFF
+
+sublist.stamp: sublist.c.in
+	@if $(DIFF) sublist.c sublist.c.in >/dev/null 2>&1; then \
+		echo "sublist.c is unchanged"; \
+		else \
+		rm -f sublist.c; \
+		cp sublist.c.in sublist.c; \
+		fi; \
+		touch sublist.stamp
+
+else
+
+sublist.stamp: sublist.c.in
+	@rm -f sublist.c; \
+		cp sublist.c.in sublist.c; \
+		touch sublist.stamp
+
+endif
 
 constants.c: ../make_parameters
 	../make_parameters i > $@

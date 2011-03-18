@@ -1,8 +1,29 @@
+2011-03-18   D. V. Wiebe <getdata@ketiltrout.net>   svn:527
+	* test/test.h: Explicitly use long long format types in the checks.
+
+	* src/legacy.c (GetFormat): Fix memset call.
+
+	* src/common.c (_GD_GetLine): Remove unused first_char.
+
+	* src/raw.c (_GD_RawSeek): nread is a ssize_t.
+
+	* bindings/python/pydirfile.c (gdpy_dirfile_putcarray): Remove unused ns.
+
+	* bindings/f77/test/big_test.f bindings/f77/test/big_test95.f90
+	bindings/f77/test/gdcopn.f bindings/f77/getdata.f90.in: Explicity specify
+	constant kinds to stop the ridiculous complaints from Fedora's gfortran.
+
+	* bindings/idl/Makefile.am: Don't needlessly rebuild sublist.c.
+
+	* m4/encoding.m4: $1 is going to get overwritten, so save it early.  Also,
+	don't define $5 and $6 to the same name.
+
 2011-03-17   Peter Kümmel <syntheticpp@gmx.net> 
- 	* use _stat64 and struct _stat64 with msvc
- 	* fix tests by removing the content of dirfile
- 	* guard definitions of macros in C++ binding
- 	* build tests with C89 API 
+	* use _stat64 and struct _stat64 with msvc
+	* fix tests by removing the content of dirfile
+	* guard definitions of macros in C++ binding
+	* build tests with C89 API 
+
 2011-03-17   D. V. Wiebe <getdata@ketiltrout.net>   svn:517
 	* src/getdata.h.in: Replace #undefs with @DEFINE_...@ tokens.   Define
 	gd_off64_t instead of polluting the namespace.  Remove MSCRT specal casing

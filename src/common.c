@@ -46,7 +46,6 @@ char gd_debug_col[GD_COL_SIZE + 1] = "";
 char *_GD_GetLine(FILE *fp, size_t *n, int* linenum)
 {
   ssize_t len;
-  int first_char;
 
   char *line = NULL;
 
@@ -59,8 +58,6 @@ char *_GD_GetLine(FILE *fp, size_t *n, int* linenum)
       break;
 
     (*linenum)++;
-
-    first_char = 0;
   } while (line[0] == '#' || line[0] == 0 || line[0] == '\n');
 
 

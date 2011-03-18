@@ -369,7 +369,7 @@ struct FormatType *GetFormat(const char *filedir, int *error_code) gd_nothrow
     return NULL;
   }
 
-  memset(&Format, sizeof(Format), 0);
+  memset(&Format, 0, sizeof(Format));
 
   /* fill the structure -- like everything about the legacy API, this is
    * not thread-safe */

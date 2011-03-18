@@ -63,7 +63,7 @@ C     GDDSCD GDCLBK GDCLOS (although this last one is used)
       CALL SYSTEM ( 'mkdir ' // fildir )
 
       DO 10 i = 1, 80
-      datdat(i) = i
+      datdat(i) = INT(i,1)
    10 CONTINUE
 
       fields =(/ 'INDEX  ', 'bit    ', 'carray ', 'const  ', 'data   ',
@@ -304,7 +304,7 @@ C     12: GDGSPF check
       ENDIF
 
 C     13: GDPUTD check
-      c = (/ 13, 14, 15, 16, 17, 18, 19, 20 /)
+      c = (/ 13_1, 14_1, 15_1, 16_1, 17_1, 18_1, 19_1, 20_1 /)
       CALL GDPUTD(n, d, 'data', 4, 5, 1, 0, 4, GD_I8, c)
       CALL GDEROR(e, d)
 

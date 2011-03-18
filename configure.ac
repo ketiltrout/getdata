@@ -284,6 +284,7 @@ AC_PROG_LN_S
 AC_PROG_GREP
 AC_PROG_AWK
 AC_PROG_SED
+AC_CHECK_PROGS([DIFF], [diff], [])
 GD_MSYS_SHELL
 echo
 echo "*** Checking C compiler characteristics"
@@ -466,7 +467,6 @@ fi
 
 dnl F77 stuff
 if test "x$make_f77bindings" != "xno"; then
-  AC_CHECK_PROGS([DIFF], [diff], [])
   AC_F77_WRAPPERS
 fi
 
@@ -513,8 +513,8 @@ fi
 dnl functions
 AC_CHECK_FUNCS([_commit fchmod _fdopen fseeko fseeko64 fsync ftello ftello64 \
                 getdelim gmtime_r _lseeki64 _mkdir mkstemp nan _open _read \
-                _rmdir stat64 _stat64 _strtoi64 strtoll _strtoui64 strtoull \
-                _unlink _write])
+                _rmdir _snprintf stat64 _stat64 _strtoi64 strtoll _strtoui64 \
+                strtoull _unlink _write])
 if test "x$disable_c99" = "xno"; then
   AC_CHECK_FUNCS([cabs])
 fi
@@ -729,7 +729,7 @@ if test "x$make_idlbindings" = "xyes"; then
     if test "x$DATE" == "xnot found"; then
       BUILD_DATE="Build date unspecified"
     else
-      BUILD_DATE=`date`
+      BUILD_DATE=`$DATE`
     fi
     AC_SUBST([BUILD_DATE])
   fi
