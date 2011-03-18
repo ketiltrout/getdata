@@ -18,6 +18,14 @@ int main(void)
   DIRFILE *D;
   gd_entry_t E, e;
 
+  // remove stuff of failed tests
+  unlink(data);
+  unlink(format);
+  rmdir(filedir);
+#ifdef _WIN32
+  system("rmdir /q/s "__TEST__"dirfile");
+#endif
+  printf(format);
   E.field = "data";
   E.field_type = GD_RAW_ENTRY;
   E.fragment_index = 0;
