@@ -45,8 +45,8 @@ BUILT_SOURCES=sublist.c constants.c
 idl_getdata_la_LDFLAGS = -module -avoid-version -export-symbols-regex IDL_Load \
 												 -precious-files-regex 'idl_getdata\.dlm' $(IDL_LIBS)
 idl_getdata_la_LIBADD = $(GDIDL_GETDATA_LIBS)
-idl_getdata_la_SOURCES = getdata.c ${DEBUG_C}
-nodist_idl_getdata_la_SOURCES = constants.c sublist.c
+idl_getdata_la_SOURCES = getdata.c
+nodist_idl_getdata_la_SOURCES = constants.c sublist.c ${DEBUG_C}
 
 sublist.c.in: getdata.c makedlm.sh
 	${SHELL} ./makedlm.sh -c $< > $@
@@ -94,5 +94,5 @@ all-local: .libs/idl_getdata.dlm
 	cp $< .libs
 
 clean-local:
-	rm -rf ${BUILT_SOURCES} *~ idl_getdata.dlm makedlm.sh
+	rm -rf ${BUILT_SOURCES} *~ idl_getdata.dlm makedlm.sh sublist.c.in sublist.stamp
 

@@ -63,6 +63,7 @@ AM_INIT_AUTOMAKE
 AC_PROG_LN_S
 AC_PROG_GREP
 AC_PROG_AWK
+AC_CHECK_PROGS([DIFF], [diff], [])
 AC_PROG_SED
 echo
 echo "*** Checking C compiler characteristics"
@@ -195,13 +196,14 @@ AC_CONFIG_FILES([src/makedlm.sh])
 AC_CONFIG_FILES([src/test/Makefile])
 
 dnl Automake conditionals
-AM_CONDITIONAL(GETDATA_DEBUG, [test "x$enable_debug" == "xyes"])
+AM_CONDITIONAL(GETDATA_DEBUG, [false])
 AM_CONDITIONAL(CC_WALL, [test "x$gd_cv_prog_cc_wall" == "xyes"])
 AM_CONDITIONAL(INTEL_F77_COMPILER,
                [test "x$gd_cv_f77_compiler_intel" == "xyes"])
 AM_CONDITIONAL(INTEL_FC_COMPILER, [test "x$gd_cv_fc_compiler_intel" == "xyes"])
 AM_CONDITIONAL(LFS_TRANSITIONAL_API, [test "x$gd_cv_type_off64_t" = "xyes"])
 AM_CONDITIONAL(TEST_IDL, [test "x$NO_DLOPEN_TESTS" = "x0"])
+AM_CONDITIONAL(HAVE_DIFF, [test "x$DIFF" != "x"])
 AM_CONDITIONAL(GDIDL_EXTERNAL, [true])
 
 dnl we do this here to avoid screwing up other tests

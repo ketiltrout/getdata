@@ -34,7 +34,8 @@ clean-local:
 %.sig: %
 	gpg -abo $@ $<
 
-DISTCHECK_CONFIGURE_FLAGS = --with-idl-dlm-dir="$$dc_install_base/idl"
+DISTCHECK_CONFIGURE_FLAGS = --with-idl-dlm-dir="$$dc_install_base/idl" \
+														--with-python-module-dir="$$dc_install_base/python"
 
 # idl-only package
 idl_$(distdir).tar.bz2 idl_$(distdir).tar.gz: idldist

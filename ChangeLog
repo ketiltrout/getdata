@@ -1,3 +1,6 @@
+2011-03-18   D. V. Wiebe <getdata@ketiltrout.net>   svn:529
+	* m4/python.m4: Added --with-python-module-dir
+
 2011-03-18   D. V. Wiebe <getdata@ketiltrout.net>   svn:527
 	* test/test.h: Explicitly use long long format types in the checks.
 

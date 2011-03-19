@@ -45,6 +45,15 @@ AC_ARG_WITH([python], AS_HELP_STRING([--with-python=PATH],
               esac
             ], [ user_python=; have_python= ])
 
+AC_ARG_WITH([python-module-dir], AS_HELP_STRING([--with-python-module-dir=PATH],
+      [install the Python bindings into PATH [autodetect]]),
+      [
+        case "${withval}" in
+          no) local_python_modpath= ;;
+          *) local_python_modpath="${withval}"
+        esac
+      ], [ local_python_modpath= ])
+
 if test "x${have_python}" != "xno"; then
 
 dnl try to find a sufficiently new python.
@@ -134,7 +143,11 @@ test "x$pyexec_prefix" = xNONE && pyexec_prefix=$ac_default_prefix
 
 dnl calculate the extension module directory
 AC_MSG_CHECKING([Python extension module directory])
-pythondir=`$PYTHON -c "from distutils import sysconfig; print sysconfig.get_python_lib(1,0,prefix='${pyexec_prefix}')" 2>/dev/null || echo "${pyexec_prefix}/lib/python${PYTHON_VERSION}/site-packages"`
+if test "x${local_python_modpath}" = "x"; then
+  pythondir=`$PYTHON -c "from distutils import sysconfig; print sysconfig.get_python_lib(1,0,prefix='${pyexec_prefix}')" 2>/dev/null || echo "${pyexec_prefix}/lib/python${PYTHON_VERSION}/site-packages"`
+else
+  pythondir=$local_python_modpath
+fi
 AC_SUBST([pythondir])
 AC_MSG_RESULT([$pythondir])
 
