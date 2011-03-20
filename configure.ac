@@ -594,6 +594,16 @@ GD_CHECK_LFS_TYPE([struct stat64],[
 #endif
 ])
 
+GD_CHECK_LFS_TYPE([struct _stat64],[
+#ifdef STDC_HEADERS
+#include <sys/types.h>
+#include <sys/stat.h>
+#endif
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+])
+
 GD_CHECK_LFS_TYPE([struct __stat64],[
 #ifdef STDC_HEADERS
 #include <sys/types.h>
