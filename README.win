@@ -103,16 +103,25 @@ documentation for generic instructions on using CMake.  A brief summary follows.
 This package supports building GetData using either Microsoft's Visual C++ compiler
 or else the free MinGW compiler, both which produce native Win32 binaries.
 
-To create a project file for Microsoft Visual Studio 10 execute:
+Best practice is to build out of source. Call CMake in the build folder and
+point it to the 'cmake' folder within the GetData source. For instance,
+to create a project file for Microsoft Visual Studio 10 execute:
 
-  cmake -G"Visual Studio 10" .
+  cmake -G"Visual Studio 10" ..\getdata-0.7\cmake
 
-from the "cmake" subdirectory of this package.  Then build the project as usual.
-The GetData test suite may be run by executing
+Then build the project as usual.
+
+The GetData test suit could be ebabled by setting the GD_TEST variable:
 
   cmake . -DGD_TEST=1
 
-which will run a series of self-tests.
+In Visual Studio run the test by building the 'RUN_TESTS'. Using mingw
+or nmake run the tests by calling ctest.
+
+The install path could be set via the variable CMAKE_INSTALL_PREFIX.
+By default it installs to <build-dir>/INSTALLED.
+
+
 
 
 PREREQUISITES
