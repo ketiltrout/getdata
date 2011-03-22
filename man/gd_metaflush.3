@@ -32,7 +32,7 @@ function flushes all pending metadata changes in the dirfile specified by
 to disk.  This is accomplished by re-writing the format specification fragments
 containing modified metadata overwriting the existing files.  Format file
 fragments which are unchanged are not touched.
-.P
+.PP
 Metadata is written to disk using the current Standards Version as stored in the
 .I dirfile
 object.  See
@@ -40,7 +40,7 @@ object.  See
 to change or report the current Standards Version.  If the dirfile metadata
 conforms to no known Standards Version, a Standards non-compliant fragment will
 be written.
-.P
+.PP
 This function flushes only metadata.  To flush the field data as well, call
 .BR gd_flush (3)
 instead.
@@ -62,7 +62,7 @@ or renaming the temporary file over the original fragment failed.
 An internal error occurred in the library while trying to perform the task.
 This indicates a bug in the library.  Please report the incident to the
 maintainer.
-.P
+.PP
 The dirfile error may be retrieved by calling
 .BR gd_error (3).
 A descriptive error string for the last error encountered can be obtained from

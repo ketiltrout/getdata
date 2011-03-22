@@ -1,15 +1,19 @@
-New in version 0.7.2rc1:
+New in version 0.7.2rc2:
 
   Library Changes
 
   * If built with modules, the plugin shared objects will now be installed in
     a separate directory (by default "${libdir}/getdata", but see the
     --with-module-dir option in ./configure).
-  * [?MABYE SOMETHING ABOUT MSVC?]
   * BUG FIX: When using modules, a missing plugin no longer results in a lock up
     the second time an attempt is made to find it.
   * BUG FIX: GetData now properly processes /INCLUDE directives with absolute
     paths, as the documentation insists it should.
+
+  Miscellaneous
+
+  * The python module install dir can now be changed by passing
+    --with-python-module-dir to configure.
 
 |==============================================================================|
 

@@ -64,15 +64,49 @@ idldist: $(DISTFILES)
 	)
 	rm -rf idl_getdata
 
+idldistcheck: idl_$(distdir).tar.gz
+	tar -zxvf $<
+	cd idl_$(distdir) && ./configure && make dist && make distcheck
+	rm -rf idl_$(distdir)
+
+# windows source package
+getdata_win-$(PACKAGE_VERSION).zip: windist
+
+windist: $(DISTFILES)
+	rm -rf crlf_export
+	cd man && $(MAKE) htmlman
+	svn --native-eol CRLF export . crlf_export
+	( cd crlf_export && \
+		mkdir $(distdir) && \
+		mkdir $(distdir)/bindings && \
+		mkdir $(distdir)/doc && \
+		mkdir $(distdir)/man && \
+		cp ../man/*[35].html $(distdir)/man && \
+		cp -r bindings/cxx $(distdir)/bindings && \
+		cp -r cmake src test $(distdir) && \
+		$(SED) cmake/CMakeLists.txt \
+		-e 's/-DPACKAGE_VERSION=.*/-DPACKAGE_VERSION="$(PACKAGE_VERSION)"/' \
+		> $(distdir)/cmake/CMakeLists.txt && \
+		cp -r doc/README.cxx doc/unclean_database_recovery.txt $(distdir)/doc && \
+		cp AUTHORS COPYING COPYING.DOC ChangeLog NEWS TODO $(distdir) && \
+		cp README $(distdir)/README && \
+		rm -f $(distdir)/*/Makefile.am $(distdir)/*/*/Makefile.am && \
+		zip -rq getdata_win-$(PACKAGE_VERSION).zip $(distdir) && \
+		cp getdata_win*.zip .. \
+	)
+	rm -rf crlf_export
+
+# package lists
+PACKAGES=$(distdir).tar.gz $(distdir).tar.bz2 idl_$(distdir).tar.gz \
+				 idl_$(distdir).tar.bz2 getdata_win-$(PACKAGE_VERSION).zip
+SIGS=$(addsuffix .sig,$(PACKAGES))
+
 # release stuff
 README.txt: NEWS RELEASE_NOTES.in
 	cp -f RELEASE_NOTES.in $@ 
 	head -n `grep -nm 1 '^|' NEWS | awk 'BEGIN {FS=":"} {print $$1-1}'` NEWS >> $@
 
-dist-post: $(distdir).tar.gz.sig $(distdir).tar.bz2.sig \
-	idl_$(distdir).tar.gz.sig idl_$(distdir).tar.bz2.sig
+dist-post: $(SIGS)
 
-dist-push:  $(distdir).tar.gz.sig $(distdir).tar.bz2.sig \
-	$(distdir).tar.gz $(distdir).tar.bz2 idl_$(distdir).tar.gz.sig \
-	idl_$(distdir).tar.bz2.sig README.txt
+dist-push: $(PACKAGES) $(SIGS) README.txt
 	rsync -avP -e ssh $^ $(SFUSER),getdata@frs.sourceforge.net:/home/frs/project/g/ge/getdata/getdata/$(PACKAGE_VERSION)/
