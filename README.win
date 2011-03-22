@@ -121,7 +121,8 @@ or nmake run the tests by calling ctest.
 The install path could be set via the variable CMAKE_INSTALL_PREFIX.
 By default it installs to <build-dir>/INSTALLED.
 
-
+The file cmake/FindGetData.cmake could be used in projects managed by
+CMake and which have to search for a GetData installation.
 
 
 PREREQUISITES
