@@ -1,8 +1,12 @@
-2010-03-17  Peter Kümmel <syntheticpp@gmx.net>
+2011-03-22   Peter Kümmel <syntheticpp@gmx.net> svn:538
+	* merge from 0.7 branch strtoll/strtoull replacement with gd_* functions 
+
+2011-03-17   Peter Kümmel <syntheticpp@gmx.net>
 	* use _stat64 and struct _stat64 with msvc
 	* fix tests by removing the content of dirfile
 	* guard definitions of macros in C++ binding
-	* build tests with C89 API 
+	* build tests with C89 API
+
 2011-03-03   D. V. Wiebe <getdata@ketiltrout.net>   svn:510
 	* m4/idl.m4: Munge IDL_LIBS to convert "-m <arg>" into "-m<arg>" since
 		libtool seems to delete <arg> if that's not the case.
