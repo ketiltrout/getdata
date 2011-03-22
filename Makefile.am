@@ -85,7 +85,7 @@ windist: $(DISTFILES)
 		cp -r bindings/cxx $(distdir)/bindings && \
 		cp -r cmake src test $(distdir) && \
 		$(SED) cmake/CMakeLists.txt \
-		-e 's/-DPACKAGE_VERSION=.*/-DPACKAGE_VERSION="$(PACKAGE_VERSION)"/' \
+		-e 's/-DPACKAGE_VERSION=\\".*\\"/-DPACKAGE_VERSION=\\"$(PACKAGE_VERSION)\\"/' \
 		> $(distdir)/cmake/CMakeLists.txt && \
 		cp -r doc/README.cxx doc/unclean_database_recovery.txt $(distdir)/doc && \
 		cp AUTHORS COPYING COPYING.DOC ChangeLog NEWS TODO $(distdir) && \
