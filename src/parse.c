@@ -155,7 +155,7 @@ static char* _GD_SetScalar(DIRFILE* D, const char* token, void* data, int type,
       _GD_InternalError(D);
   } else if (type & GD_SIGNED) {
     /* try to convert to long long int */
-    long long int lli = strtoll(token, &ptr, 10);
+    long long int lli = gd_strtoll(token, &ptr, 10);
 
     /* there were trailing characters in the long long int */
     if (*ptr != '\0') {
@@ -175,7 +175,7 @@ static char* _GD_SetScalar(DIRFILE* D, const char* token, void* data, int type,
       _GD_InternalError(D);
   } else {
     /* try to convert to unsigned long long int */
-    unsigned long long int ulli = strtoull(token, &ptr, 10);
+    unsigned long long int ulli = gd_strtoull(token, &ptr, 10);
 
     /* there were trailing characters in the unsigned long long int */
     if (*ptr != '\0') {
@@ -1742,7 +1742,7 @@ static int _GD_ParseDirective(DIRFILE *D, char** in_cols, int n_cols,
 #endif
     }
   } else if (strcmp(ptr, "FRAMEOFFSET") == 0 && (!pedantic || *standards >= 1))
-    D->fragment[me].frame_offset = strtoll(in_cols[1], NULL, 10);
+    D->fragment[me].frame_offset = gd_strtoll(in_cols[1], NULL, 10);
   else if (strcmp(ptr, "INCLUDE") == 0 && (!pedantic || *standards >= 3)) {
     unsigned long subflags = D->fragment[me].encoding | D->fragment[me].byte_sex
       | (*flags & (GD_PEDANTIC | GD_PERMISSIVE | GD_FORCE_ENDIAN |
