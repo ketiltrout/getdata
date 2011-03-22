@@ -89,7 +89,7 @@ windist: $(DISTFILES)
 		> $(distdir)/cmake/CMakeLists.txt && \
 		cp -r doc/README.cxx doc/unclean_database_recovery.txt $(distdir)/doc && \
 		cp AUTHORS COPYING COPYING.DOC ChangeLog NEWS TODO $(distdir) && \
-		cp README $(distdir)/README && \
+		cp README.win $(distdir)/README && \
 		rm -f $(distdir)/*/Makefile.am $(distdir)/*/*/Makefile.am && \
 		zip -rq getdata_win-$(PACKAGE_VERSION).zip $(distdir) && \
 		cp getdata_win*.zip .. \
