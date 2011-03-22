@@ -1,3 +1,9 @@
+2011-03-22   Peter Kümmel <syntheticpp@gmx.net> svn:535-541
+	* backport MSVC support
+	* finish strtoll/strtoull replacement with gd_* functions
+	* update CMake instructions
+	* add CMake module which could be used by other CMake based projects
+
 2011-03-22   D. V. Wiebe <getdata@ketiltrout.net>   svn:532
 	GetData-0.7.2rc2.
 
