@@ -46,12 +46,13 @@ foreach(_item ${tests_ignored})
 	list(REMOVE_ITEM gd_sources ${GD_DIR}/test/${_item}.c)
 endforeach()
 
-#set(gd_sources ${GD_DIR}/test/close.c ${GD_DIR}/test/alter_multiply.c)
-
 
 set(__TEST__ "-D__TEST__=\"${CMAKE_BINARY_DIR}/\"")
+set(__TEST_SLASH__ "-D__TEST_SLASH__=\"${CMAKE_BINARY_DIR}/\"")
 STRING(REGEX REPLACE "/" "\\\\\\\\" __TEST__ ${__TEST__}) 
-add_definitions(${__TEST__})
+add_definitions(${__TEST__} ${__TEST_SLASH__})
+
+#set(gd_sources ${GD_DIR}/test/parse_include_relabs.c)
 
 foreach(_test ${gd_sources})
 	get_filename_component(testname ${_test} NAME_WE)
