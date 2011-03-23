@@ -41,18 +41,20 @@ DISTCHECK_CONFIGURE_FLAGS = --with-idl-dlm-dir="$$dc_install_base/idl" \
 idl_$(distdir).tar.bz2 idl_$(distdir).tar.gz: idldist
 
 idldist: $(DISTFILES)
-	rm -rf idl_getdata
-	mkdir idl_getdata
-	mkdir idl_getdata/m4
-	mkdir idl_getdata/src
-	cp bindings/idl/package/* idl_getdata
-	cp -r bindings/idl/Makefile.am bindings/idl/makedlm.sh.in \
-		bindings/idl/getdata.c bindings/idl/test idl_getdata/src
-	cp -r bindings/make_parameters.c idl_getdata
-	cp -r m4/idl.m4 m4/compiler.m4 m4/ax_compare_version.m4 m4/version.m4 \
-		idl_getdata/m4
-	cp -r doc/README.idl COPYING AUTHORS ChangeLog INSTALL NEWS idl_getdata
-	( cd idl_getdata && \
+	rm -rf svn_export
+	svn export . svn_export
+	( cd svn_export && \
+		mkdir idl_getdata && \
+		mkdir idl_getdata/m4 && \
+		mkdir idl_getdata/src && \
+		cp bindings/idl/package/* idl_getdata && \
+		cp -r bindings/idl/Makefile.am bindings/idl/makedlm.sh.in \
+		bindings/idl/getdata.c bindings/idl/test idl_getdata/src && \
+		cp -r bindings/make_parameters.c idl_getdata && \
+		cp -r m4/idl.m4 m4/compiler.m4 m4/ax_compare_version.m4 m4/version.m4 \
+		idl_getdata/m4 && \
+		cp -r doc/README.idl COPYING AUTHORS ChangeLog INSTALL NEWS idl_getdata && \
+		( cd idl_getdata && \
 		aclocal -I m4 && \
 		libtoolize && \
 		autoconf && \
@@ -60,9 +62,9 @@ idldist: $(DISTFILES)
 		automake --add-missing --force-missing && \
 		./configure && \
 		make dist && \
-		cp idl_${distdir}* .. \
-	)
-	rm -rf idl_getdata
+		cp idl_${distdir}* ../.. \
+		) )
+	rm -rf svn_export
 
 idldistcheck: idl_$(distdir).tar.gz
 	tar -zxvf $<
