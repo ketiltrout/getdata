@@ -1,3 +1,11 @@
+2011-03-23   Peter Kümmel <syntheticpp@gmx.net> svn:545
+	* src/add.c (_GD_Add): strdup ref_name when propagating upwards to prevent
+	double-free when _GD_FreeD() is called.
+	* test/add_raw_include.c: Added.
+
+	* src/include.c (gd_include): If GD_CREAT is specified, but no encoding,
+	inherit encoding from parent.
+
 2011-03-22   Peter Kümmel <syntheticpp@gmx.net> svn:535-541
 	* backport MSVC support
 	* finish strtoll/strtoull replacement with gd_* functions

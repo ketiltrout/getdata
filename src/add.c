@@ -477,7 +477,7 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
       /* This is the first raw field in this fragment; propagate it upwards */
       for (i = E->fragment_index; i != -1; i = D->fragment[i].parent) {
         if (D->fragment[i].ref_name == NULL) {
-          D->fragment[i].ref_name = (char *)new_ref;
+          D->fragment[i].ref_name = strdup(new_ref);
           D->fragment[i].modified = 1;
         } else
           break;

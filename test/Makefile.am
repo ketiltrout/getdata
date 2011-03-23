@@ -48,9 +48,10 @@ ADD_TESTS=add add_bit add_bit_bitnum add_bit_bitsize add_bit_invalid \
 					add_duplicate add_format add_invalid add_lincom add_lincom_invalid \
 					add_lincom_nfields add_linterp add_linterp_invalid add_multiply \
 					add_multiply_invalid add_phase add_phase_invalid add_polynom \
-					add_protect add_raw add_raw_invalid add_raw_spf add_raw_type \
-					add_rdonly add_recip add_sbit add_scalar add_sort add_spec \
-					add_spec_directive add_spec_invalid add_spec_meta add_string add_type
+					add_protect add_raw add_raw_include add_raw_invalid add_raw_spf \
+					add_raw_type add_rdonly add_recip add_sbit add_scalar add_sort \
+					add_spec add_spec_directive add_spec_invalid add_spec_meta \
+					add_string add_type
 
 ALTER_TESTS=alter_bit_bitnum alter_bit_numbits alter_carray_len \
 						alter_carray_type alter_const alter_cpolynom alter_crecip \

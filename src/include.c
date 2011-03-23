@@ -212,6 +212,11 @@ int gd_include(DIRFILE* D, const char* file, int fragment_index,
     return -1;
   }
 
+  /* if the caller specified no encoding scheme, but we were asked to create
+   * the fragment, inherit it from the parent */
+  if ((flags & (GD_ENCODING | GD_CREAT)) == GD_CREAT)
+    flags |= D->flags & GD_ENCODING;
+
   new_fragment = _GD_Include(D, file, "dirfile_include()", 0, &ref_name,
       fragment_index, &standards, &flags);
 
