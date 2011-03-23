@@ -1,4 +1,7 @@
-2011-03-23   Peter Kümmel <syntheticpp@gmx.net> svn:545
+2011-03-23   D. V. Wiebe <getdata@ketiltrout.net>  svn:546
+	* src/include.c (_GD_Include): Handle WIN32 paths.
+
+2011-03-23   D. V. Wiebe <getdata@ketiltrout.net>  svn:545
 	* src/add.c (_GD_Add): strdup ref_name when propagating upwards to prevent
 	double-free when _GD_FreeD() is called.
 	* test/add_raw_include.c: Added.

@@ -51,7 +51,14 @@ int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,
       ref_name, linenum, me, standards, flags);
 
   /* create the format filename */
-  if (ename[0] == '/') {
+  if (
+      /* check for absolute path */
+#if defined _WIN32 || defined _WIN64
+      ename[0] != '\0' && ename[1] == ':'
+#else
+      ename[0] == '/'
+#endif
+     ) {
     strncpy(temp_buf1, ename, FILENAME_MAX - 1);
     temp_buf1[FILENAME_MAX - 1] = '\0';
     abs = 1;
