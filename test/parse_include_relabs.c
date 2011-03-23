@@ -47,7 +47,7 @@ int main(void)
 
   fd = open(format1, O_CREAT | O_EXCL | O_WRONLY, 0666);
   write(fd, format1_data1, strlen(format1_data1));
-  write(fd, cwd, strlen(cwd));
+  gd_pathwrite(fd, cwd);
   write(fd, format1_data2, strlen(format1_data2));
   close(fd);
 

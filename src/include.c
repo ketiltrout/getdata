@@ -164,7 +164,6 @@ int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,
     dreturn("%i", -1);
     return -1;
   }
-  dwatch("%s", D->fragment[D->n_fragment - 1].sname);
 
   *ref_name = _GD_ParseFragment(new_fp, D, D->n_fragment - 1, standards, flags);
 

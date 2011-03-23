@@ -37,6 +37,19 @@ int gd_system(const char* command)
   _mkdir(x)
 #endif
 
+/* path munging for WIN32/64 */
+#if defined _WIN32 || defined _WIN64
+#define gd_pathwrite(x,y) do { \
+  char *ptr; \
+  for (ptr = y; *ptr != '\0'; ++ptr) { \
+    if (*ptr == '\\') write(x,ptr,1); \
+    write(x,ptr,1); \
+  } \
+} while (0)
+#else
+#define gd_pathwrite(x,y) write(x,y,strlen(y))
+#endif
+
 #define CHECK(e,n,nf,vf,...) \
   if (e) { r = 1; \
     fprintf(stderr, #n " = " nf " (expected " vf ")\n", __VA_ARGS__); }
