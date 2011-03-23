@@ -512,9 +512,9 @@ fi
 
 dnl functions
 AC_CHECK_FUNCS([_commit fchmod _fdopen fseeko fseeko64 fsync ftello ftello64 \
-                getdelim gmtime_r _lseeki64 _mkdir mkstemp nan _open _read \
-                _rmdir _snprintf stat64 _stat64 _strtoi64 strtoll _strtoui64 \
-                strtoull _unlink _write])
+                getcwd _getcwd getdelim gmtime_r _lseeki64 _mkdir mkstemp nan \
+                _open _read _rmdir _snprintf stat64 _stat64 _strtoi64 strtoll \
+                _strtoui64 strtoull _unlink _write])
 if test "x$disable_c99" = "xno"; then
   AC_CHECK_FUNCS([cabs])
 fi
@@ -524,7 +524,7 @@ dnl headers
 echo
 echo "*** Looking for additional header files"
 echo
-AC_CHECK_HEADERS([fcntl.h libgen.h stdint.h unistd.h])
+AC_CHECK_HEADERS([direct.h fcntl.h libgen.h stdint.h unistd.h])
 if test "x$disable_c99" = "xno"; then
 AC_CHECK_HEADERS([complex.h])
 fi

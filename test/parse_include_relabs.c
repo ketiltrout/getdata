@@ -11,6 +11,10 @@
 
 int main(void)
 {
+#if defined HAVE_GETCWD || defined HAVE__GETCWD
+#ifdef HAVE__GETCWD
+#define getcwd _getcwd
+#endif
   const char *filedir = __TEST__ "dirfile";
   const char *subdir = __TEST__ "dirfile/sub";
   const char *format = __TEST__ "dirfile/format";
@@ -64,4 +68,7 @@ int main(void)
   CHECKU(spf, 11);
   free(cwd);
   return r;
+#else
+  return 77;
+#endif
 }

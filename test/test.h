@@ -6,6 +6,11 @@
 #include <string.h>
 #include <stdlib.h>
 
+/* for MSVCRT _getcwd */
+#ifdef HAVE_DIRECT_H
+#include <direct.h>
+#endif
+
 /* System call kludge for Win32 */
 #if defined __MSVCRT__ && defined MSYS_SHELL
 #include <process.h>
