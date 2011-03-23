@@ -31,7 +31,7 @@ int main(void)
   gd_spf_t spf;
 
   mkdir(filedir, 0777);
-  mkdir(subdir, 0777);
+  mkdirsub(subdir, 0777);
 
   do {
     ptr = (char*)realloc(cwd, cwd_size *= 2);

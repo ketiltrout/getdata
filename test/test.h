@@ -35,6 +35,10 @@ int gd_system(const char* command)
 #define mkdir(x,y) \
   system("rmdir /q/s "__TEST__"dirfile"); \
   _mkdir(x)
+// when using msvc the macro mkdir removes dirfile
+#define mkdirsub(x,y) _mkdir(x)
+#else
+#define mkdirsub(x,y) mkdir(x,y)
 #endif
 
 /* path munging for WIN32/64 */

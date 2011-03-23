@@ -24,7 +24,7 @@ int main(void)
   gd_spf_t spf;
 
   mkdir(filedir, 0777);
-  mkdir(subdir, 0777);
+  mkdirsub(subdir, 0777);
 
   fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
   write(fd, format_data, strlen(format_data));

@@ -24,12 +24,7 @@ int main(void)
   DIRFILE *D;
 
   mkdir(filedir, 0777);
-  // when using msvc the macro mkdir removes dirfile
-#ifdef mkdir
-#undef mkdir
-#define mkdir(x,y) mkdir(x)
-#endif
-  mkdir(subdir, 0777);
+  mkdirsub(subdir, 0777);
 
   fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
   write(fd, format_data, strlen(format_data));
