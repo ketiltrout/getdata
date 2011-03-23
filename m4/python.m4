@@ -23,15 +23,21 @@ dnl ---------------------------------------------------------------
 dnl Look for python.  Then determine whether we can build extension modules.
 AC_DEFUN([GD_PYTHON],
 [
-last_python=2.6
+last_python=2.7
 first_python=$1
 
 AC_CHECK_PROGS([SEQ], [seq], [not found])
 if test "x$SEQ" == "xnot found"; then
-  python_prog_list="python python2"
+  AC_CHECK_PROGS([JOT], [jot], [not found])
+  if test "x$JOT" == "xnot found"; then
+    python_prog_list="python python2"
+  else
+    python_prog_list="python python2 dnl
+    `$JOT -w 'python%.1f' - $last_python $first_python -0.1`" #'
+  fi
 else
-python_prog_list="python python2 dnl
-`$SEQ -f 'python%.1f' $last_python -0.1 $first_python`" #'
+  python_prog_list="python python2 dnl
+  `$SEQ -f 'python%.1f' $last_python -0.1 $first_python`" #'
 fi
 
 dnl --without-python basically does the same as --disable-python

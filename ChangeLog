@@ -1,3 +1,7 @@
+2011-03-23   D. V. Wiebe <getdata@ketiltrout.net>   svn:549
+	* m4/python.m4: Use the BSD `jot' if the Linux/Plan 9 `seq' is not found.
+		Also, look for python2.7.
+
 2011-03-23   D. V. Wiebe <getdata@ketiltrout.net>  svn:546
 	* src/include.c (_GD_Include): Handle WIN32 paths.
 
