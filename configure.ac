@@ -39,8 +39,8 @@ AC_ARG_VAR([BUILDCC],
 
 dnl export version information from m4/version.m4
 AC_SUBST(GETDATA_IFACE_VERSION, [getdata_iface_version])
-AC_SUBST(GETDATA_IMPL_REVISION, [getdata_iface_revision])
-AC_SUBST(GETDATA_IFACE_AGE, [getdata_iface_revision])
+AC_SUBST(GETDATA_IMPL_REVISION, [getdata_impl_revision])
+AC_SUBST(GETDATA_IFACE_AGE, [getdata_iface_age])
 AC_SUBST(GETDATAXX_VERSION, [getdataxx_version])
 AC_SUBST(FGETDATA_VERSION, [fgetdata_version])
 AC_SUBST(F95GETDATA_VERSION, [f95getdata_version])

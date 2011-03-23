@@ -1,3 +1,8 @@
+2011-03-23   D. V. Wiebe <getdata@ketiltrout.net>  svn:551
+	GetData-0.7.2rc3:
+
+	* m4/version.m4 configure.ac: Fix library soversion defines.
+
 2011-03-23   D. V. Wiebe <getdata@ketiltrout.net>   svn:550
 	* test/test.h: Write paths properly under WIN32/WIN64.
 
