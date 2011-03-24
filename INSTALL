@@ -43,7 +43,7 @@ you want to change it or regenerate `configure' using a newer version
 of `autoconf'. 
 
 To create the configure script, and the rest of the build environment 
-which are not part of a plain checkout from sourcefore, execute:
+which are not part of a plain checkout from sourceforge, execute:
   autoreconf -vifs 
 
 The simplest way to compile this package is:
