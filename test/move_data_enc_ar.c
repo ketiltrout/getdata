@@ -76,5 +76,5 @@ int main(void)
   CHECKI(unlink_txtdata, -1);
   gd_free_entry_strings(&E);
 
-  return 0;
+  return r;
 }

@@ -21,7 +21,7 @@ int main(void)
   DIRFILE* D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_UNENCODED | GD_VERBOSE);
   int frag = gd_include(D, "format1", 0, GD_CREAT);
 
-  gd_add_raw(D, "data", GD_UINT8, 2, 1);
+  gd_add_raw(D, "data", GD_UINT8, 2, frag);
   error = gd_error(D);
 
   /* check */

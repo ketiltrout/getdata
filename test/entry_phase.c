@@ -40,5 +40,5 @@ int main(void)
   CHECKI(E.EN(phase,shift), 3);
   gd_free_entry_strings(&E);
 
-  return 0;
+  return r;
 }

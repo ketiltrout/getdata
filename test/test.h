@@ -60,7 +60,7 @@ int gd_system(const char* command)
 
 #define CHECKi(i,e,n,nf,vf,...) \
   if (e) { r = 1; \
-    fprintf(stderr, #i ":%i " #n " = " nf " (expected " vf ")\n", (int)i, \
+    fprintf(stderr, #i ":%i " #n " = " nf " (expected " vf ")\n", (int)(i), \
         __VA_ARGS__); }
 
 #ifdef GD_NO_C99_API

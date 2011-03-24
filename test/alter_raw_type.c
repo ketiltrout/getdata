@@ -64,5 +64,5 @@ int main(void)
   CHECKI(n, 32);
   CHECKI(ret, 0);
 
-  return 0;
+  return r;
 }
