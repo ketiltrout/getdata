@@ -38,8 +38,6 @@ DISTCHECK_CONFIGURE_FLAGS = --with-idl-dlm-dir="$$dc_install_base/idl" \
 														--with-python-module-dir="$$dc_install_base/python"
 
 # idl-only package
-idl_$(distdir).tar.bz2 idl_$(distdir).tar.gz: idldist
-
 idldist: $(DISTFILES)
 	rm -rf svn_export
 	svn export . svn_export
@@ -72,8 +70,6 @@ idldistcheck: idl_$(distdir).tar.gz
 	rm -rf idl_$(distdir)
 
 # windows source package
-getdata_win-$(PACKAGE_VERSION).zip: windist
-
 windist: $(DISTFILES)
 	rm -rf crlf_export
 	cd man && $(MAKE) htmlman

@@ -1,18 +1,40 @@
-GetData 0.7.1 is known to compile and pass the test suite on the following systems (including C++ and Fortran bindings):
+GetData 0.7.2 is known to compile and pass the test suite on the following
+systems (including C++ and Fortran bindings):
 
 Linux:
-* x86 and x86_64, using gcc 4.5 or icc 10.1, under Slackware, Fedora, Ubuntu, CentOS
-* armv5tej, using gcc 3.3 under Debian
+* x86, x86_64, PPC, S390, SPARC, ARM under (variously) Debian, Slackware,
+  Fedora, Ubuntu, CentOS
 MacOS X:
 * x86 and x86_64, using Xcode 3.2/gcc 4.2, under MacOS X Snow Leopard
 Cygwin:
 * x86_64, using gcc 4.3
 Win32:
 * x86_64, using mingw/gcc 4.5, under MSys
+* X86_64, using MSVC 10
 
-The Python bindings have been tested with Python 2.4 and Python 2.6.
+The Python bindings have been tested with Python 2.4 through Python 2.7.
 
-The IDL bindings have been tested with IDL 6.0, IDL 7.1 and IDL 8.0.
+The IDL bindings have been tested with IDL 6.0, IDL 7.1.
 
---------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 
+Three packages are available:
+* getdata-0.7.2.tar.bz2/.gz: the full source code to the library, with
+    bindings.  This package uses the GNU autotools build system, and is
+    designed for POSIX systems (UNIX, Linux, BSD, MacOS X, Cygwin, MSys, &c.)
+* getdata_win-0.7.2.zip: a reduced source code package, with the CMake build
+    system designed to be built on Microsoft Windows, either using the free
+    MinGW compiler, or else Microsoft's Visual C++ compiler.  (The full
+    source package above can also be built using MinGW, if the MSys shell is
+    used to run the build system.) Currently, the only bindings provided by
+    this package are the C++ bindings, and the package lacks support for
+    compressed dirfiles, the Legacy API, and a few other features.  This
+    build is used in native Microsoft Windows builds of kst2.
+* idl_getdata-0.7.2.tar.bz2/.gz: the Interactive Data Language (IDL) bindings,
+    packaged separately with an autotools build system, designed to be built
+    against an already installed version of GetData.  Due to licensing
+    restrictions, pre-built packages rarely come with these bindings, and
+    this package allows end-users to add support for IDL without having to
+    recompile the whole GetData package.
+
+-------------------------------------------------------------------------------

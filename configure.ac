@@ -354,30 +354,7 @@ else
   BUILDCC=$CC
   AC_SUBST([BUILDCC])
 fi
-echo
-echo "*** Checking C++ compiler characteristics"
-echo
-AC_PROG_CXX
-AC_PROG_CXX_C_O
-echo
-echo "*** Checking Fortran 77 compiler characteristics"
-echo
-AC_PROG_F77
-AC_PROG_F77_C_O
-echo
-echo "*** Checking Fortran 90 compiler characteristics"
-echo
-AC_PROG_FC
-AC_PROG_FC_C_O
 
-dnl does $FC accept fortran code with .f90 extension?
-AC_MSG_CHECKING([whether the Fortran 90 compiler works])
-AC_LANG_PUSH([Fortran])
-ac_ext="f90"
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM()],
-[AC_MSG_RESULT([yes])],
-[AC_MSG_RESULT([no]); FC=;])
-AC_LANG_POP
 echo
 echo "*** Building libtool"
 echo

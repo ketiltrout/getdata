@@ -1,4 +1,7 @@
-2011-03-24   D. V. Wiebe <getdata@ketiltrout.net>  svn:552
+2011-03-24   D. V. Wiebe <getdata@ketiltrout.net>  svn:558
+	GetData-0.7.2 released.
+
+2011-03-24   D. V. Wiebe <getdata@ketiltrout.net>  svn:555
 	
 	* test/move_data_enc_ar.c test/entry_phase.c test/get_ss.c
 	test/alter_raw_type.c: Actually fail on error.
