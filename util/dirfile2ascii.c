@@ -1,4 +1,4 @@
-/* Copyright (C) 2010 Matthew Truch
+/* Copyright (C) 2010, 2011 Matthew Truch
  * Copyright (C) 2010 D. V. Wiebe
  *
  ***************************************************************************
@@ -186,7 +186,8 @@ int main (int argc, char **argv)
     { "quiet",       0, NULL, 'q' },
     { "skip",        1, NULL, 's' },
     { "verbose",     0, NULL, 'v' },
-    { "version",     0, NULL,  2  }
+    { "version",     0, NULL,  2  },
+    { 0,             0, 0,     0  }
   };
 
   /* handy things to know about conversion specifiers */

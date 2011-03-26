@@ -1,3 +1,7 @@
+2011-03-25   D. V. Wiebe <getdata@ketiltrout.net> svn:561
+	* util/checkdirfile.c: Zero-terminate option list.  Patch from Matthew
+	Truch.
+
 2011-03-22   Peter Kümmel <syntheticpp@gmx.net> svn:538
 	* merge from 0.7 branch strtoll/strtoull replacement with gd_* functions 
 
