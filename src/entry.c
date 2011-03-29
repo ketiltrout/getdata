@@ -269,6 +269,8 @@ const char* gd_raw_filename(DIRFILE* D, const char* field_code_in) gd_nothrow
 
   dtrace("%p, \"%s\"", D, field_code_in);
 
+  _GD_ClearError(D);
+
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
     dreturn("%p", NULL);

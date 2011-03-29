@@ -1,3 +1,9 @@
+2011-03-29   D. V. Wiebe <getdata@ketiltrout.net>  svn:562
+	* src/flush.c (_GD_FieldSpec): For Standards Version >= 8, use new-style
+	metafield syntax.
+
+	* src/entry.c (gd_raw_filename): Clear dirfile error on entry.
+
 2011-03-24   D. V. Wiebe <getdata@ketiltrout.net>  svn:558
 	GetData-0.7.2 released.
 

@@ -1,4 +1,15 @@
-New in version 0.7.2rc3:
+New in version 0.7.3:
+
+  Library Changes
+
+  * BUG FIX: Metafield records are now properly stored in the format file for
+    Standards Version 8.
+  * BUG FIX: gd_raw_filename() wasn't clearing the Dirfile error before
+    operation, resulting in it failing erroneously in certain situations.
+
+|==============================================================================|
+
+New in version 0.7.2:
 
   Library Changes
 
