@@ -2,6 +2,8 @@ New in version 0.7.3:
 
   Library Changes
 
+  * BUG FIX: GetData wasn't properly computing the module directory, causing
+    encodings using external modules to fail with GD_E_UNSUPPORTED.
   * BUG FIX: Metafield records are now properly stored in the format file for
     Standards Version 8.
   * BUG FIX: gd_raw_filename() wasn't clearing the Dirfile error before

@@ -210,9 +210,9 @@ int _GD_MissingFramework(int encoding, unsigned int funcs)
     lt_dlhandle lib;
 
     /* make the library name */
-    sprintf(library, "%slibgetdata%s-%s", GETDATA_MODULEDIR,
+    sprintf(library, "%s/libgetdata%s-%s", GETDATA_MODULEDIR,
         _gd_ef[encoding].affix, PACKAGE_VERSION);
-    library[10] -= 'A' - 'a';
+    library[sizeof(GETDATA_MODULEDIR) + 10] -= 'A' - 'a';
 
     /* open */
     if ((lib = lt_dlopenext(library)) == NULL) {

@@ -95,6 +95,7 @@ htmlman: $(HTMLMANS)
 install-data-hook:
 	cd $(DESTDIR)$(mandir)/man3 && \
 		for m in $(MAN3ALIASES); do \
+		rm -f `echo $$m | $(SED) -e 's/.*://'`; \
 		$(LN_S) `echo $$m | $(SED) -e 's/:/ /'`; \
 		done
 

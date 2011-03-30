@@ -1,3 +1,6 @@
+2011-03-30   D. V. Wiebe <getdata@ketiltrout.net>  svn:563
+	* src/encoding.c (_GD_MissingFramework): Properly compute the module path.
+
 2011-03-29   D. V. Wiebe <getdata@ketiltrout.net>  svn:562
 	* src/flush.c (_GD_FieldSpec): For Standards Version >= 8, use new-style
 	metafield syntax.
