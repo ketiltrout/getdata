@@ -2,6 +2,8 @@ New in version 0.7.3:
 
   Library Changes
 
+  * BUG FIX: Passing a zero dividend to alter_crecip() and alter_recip() now
+    results in the dividend not changing, per documentation.
   * BUG FIX: GetData wasn't properly computing the module directory, causing
     encodings using external modules to fail with GD_E_UNSUPPORTED.
   * BUG FIX: Metafield records are now properly stored in the format file for

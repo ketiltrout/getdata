@@ -1,3 +1,8 @@
+2011-04-03   D. V. Wiebe <getdata@ketiltrout.net>  svn:564
+	* test/alter_crecip_zero.c test/alter_recip_zero.c: Added.
+	* src/mod.c (_GD_Change): If [c]dividend is zero, don't change it, per
+	documentation.
+
 2011-03-30   D. V. Wiebe <getdata@ketiltrout.net>  svn:563
 	* src/encoding.c (_GD_MissingFramework): Properly compute the module path.
 
