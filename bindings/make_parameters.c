@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2010 D. V. Wiebe
+/* Copyright (C) 2008-2011 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -19,7 +19,7 @@
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #ifdef HAVE_CONFIG_H
-#include <config.h>
+#include "config.h"
 #endif
 
 #include <stdlib.h>
@@ -346,6 +346,26 @@ void IDL(void)
   printf("return r; }\n");
 }
 
+void Perl(void)
+{
+  int i;
+
+  printf("s/@PARAMETERS@/");
+
+  printf("our $VERSION = %i.%04i;\\\n", GETDATA_MAJOR, GETDATA_MINOR * 100 +
+      GETDATA_REVISION);
+  for (i = 0; constant_list[i].lname != NULL; ++i)
+    printf("our $%s = %li;\\\n", constant_list[i].sname,
+        constant_list[i].value);
+
+  printf("/\n");
+  printf("s/@PARAMLIST@/");
+
+  for (i = 0; constant_list[i].lname != NULL; ++i)
+    printf("%s\\\n", constant_list[i].sname, constant_list[i].value);
+  printf("/\n");
+}
+
 int main(int argc, char* argv[])
 {
   if (argv[1][0] == 'f')
@@ -354,6 +374,8 @@ int main(int argc, char* argv[])
     Python();
   else if (argv[1][0] == 'i')
     IDL();
+  else if (argv[1][0] == 'P')
+    Perl();
 
   return 0;
 }

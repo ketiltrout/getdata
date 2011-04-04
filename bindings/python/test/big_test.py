@@ -963,24 +963,24 @@ except:
 CheckSimple(66,n,['mlut', 'mnew1', 'mnew3', 'mnew6', 'mnew7', 'mnew8', 'mnew9',
   'mnew10'])
 
-# 67: alter / raw check
+# 183: alter / raw check
 ent = pygetdata.entry(pygetdata.RAW_ENTRY, "new1", 0,
     {"type": pygetdata.FLOAT32, "spf": 4})
 try:
   n = d.alter("new1", ent)
 except:
-  CheckOK2(67,1)
+  CheckOK2(183,1)
 
 try:
   ent = d.entry("new1")
 except:
-  CheckOK(67,2)
-CheckSimple2(67,1,ent.field_type,pygetdata.RAW_ENTRY)
-CheckSimple2(67,2,ent.field_type_name,"RAW_ENTRY")
-CheckSimple2(67,3,ent.fragment,0)
-CheckSimple2(67,4,ent.data_type,pygetdata.FLOAT32)
-CheckSimple2(67,5,ent.data_type_name,"FLOAT32")
-CheckSimple2(67,6,ent.spf,4)
+  CheckOK(183,2)
+CheckSimple2(183,1,ent.field_type,pygetdata.RAW_ENTRY)
+CheckSimple2(183,2,ent.field_type_name,"RAW_ENTRY")
+CheckSimple2(183,3,ent.fragment,0)
+CheckSimple2(183,4,ent.data_type,pygetdata.FLOAT32)
+CheckSimple2(183,5,ent.data_type_name,"FLOAT32")
+CheckSimple2(183,6,ent.spf,4)
 
 # 78: encoding check
 try:
@@ -1521,6 +1521,7 @@ CheckSimple2(180,4,ent.data_type,pygetdata.FLOAT64)
 CheckSimple2(180,5,ent.data_type_name,"FLOAT64")
 CheckSimple2(180,6,ent.array_len,2)
 
+d.discard()
 del d
 os.system("rm -rf dirfile")
 

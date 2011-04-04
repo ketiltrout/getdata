@@ -664,7 +664,7 @@ int gd_add_raw(DIRFILE* D, const char* field_code, gd_type_t data_type,
   gd_entry_t R;
   int error;
 
-  dtrace("%p, \"%s\", %x, %i %i", D, field_code, data_type, spf,
+  dtrace("%p, \"%s\", %x, %i, %i", D, field_code, data_type, spf,
       fragment_index);
 
   if (D->flags & GD_INVALID) {/* don't crash */

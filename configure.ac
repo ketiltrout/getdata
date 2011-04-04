@@ -126,6 +126,7 @@ dnl bindings, globally
 make_cxxbindings="yes"
 make_f77bindings="yes"
 make_pybindings="yes"
+make_perlbindings="yes"
 make_idlbindings="yes"
 AC_ARG_ENABLE(bindings, AS_HELP_STRING([--disable-bindings],
               [don't build any bindings, just build the C library]),
@@ -224,6 +225,24 @@ else
   AC_MSG_RESULT([$make_idlbindings])
 fi
 
+dnl Perl bindings
+AC_ARG_ENABLE(perl, AS_HELP_STRING([--disable-perl],
+              [don't build the Perl bindings (GetData)]),
+              [
+               case "${enableval}" in
+                 no) make_perlbindings="no" ;;
+                 *) make_perlbindings="yes" ;;
+               esac
+              ])
+
+AC_MSG_CHECKING([whether to include the Python bindings])
+if test "x$disable_c99" = "xyes"; then
+  make_perlbindings="no";
+  AC_MSG_RESULT([no (requires C99 compiler)])
+else
+  AC_MSG_RESULT([$make_perlbindings])
+fi
+
 dnl Modules
 AC_ARG_ENABLE(modules, AS_HELP_STRING([--enable-modules],
               [build external encodings in dynamically loaded modules instead
@@ -302,6 +321,7 @@ if test "x$disable_c99" = "xyes"; then
 fi
 
 AC_HEADER_STDC
+AM_PROG_AS
 if test "x$make_cxxbindings" != "xno"; then
   echo
   echo "*** Checking C++ compiler characteristics"
@@ -627,6 +647,7 @@ AC_CHECK_SIZEOF([unsigned short int])
 AC_CHECK_SIZEOF([unsigned int])
 AC_CHECK_SIZEOF([unsigned long int])
 AC_CHECK_SIZEOF([unsigned long long int])
+AC_CHECK_SIZEOF([void *])
 
 dnl C89 API types
 if test $ac_cv_sizeof_int -eq 2; then
@@ -705,7 +726,7 @@ EOF
 
   if test "x$have_numpy" = "xyes"; then
     AC_DEFINE([USE_NUMPY], [],
-              [ Define to to enable NumPy support in the Python bindings ])
+              [ Define to enable NumPy support in the Python bindings ])
   fi
 fi
 
@@ -726,6 +747,27 @@ if test "x$make_idlbindings" = "xyes"; then
       BUILD_DATE=`date`
     fi
     AC_SUBST([BUILD_DATE])
+  fi
+fi
+
+dnl perl
+if test "x$make_perlbindings" = "xyes"; then
+  echo
+  echo "*** Configuring Perl bindings"
+  echo
+  GD_PERL
+  have_mathcomplex="no"
+  if test "x$have_perl" = "xno"; then
+    make_perlbindings="no"
+  else
+    AC_MSG_CHECKING([for Math::Complex])
+    if $PERL -MMath::Complex -e 'exit' > /dev/null 2>&1; then
+      have_mathcomplex="yes"
+    fi
+    AC_MSG_RESULT([$have_mathcomplex])
+    if test "x$have_mathcomplex" = "xno"; then
+      make_perlbindings="no"
+    fi
   fi
 fi
 
@@ -766,6 +808,8 @@ AC_CONFIG_FILES([bindings/f77/test/Makefile])
 AC_CONFIG_FILES([bindings/idl/Makefile])
 AC_CONFIG_FILES([bindings/idl/makedlm.sh])
 AC_CONFIG_FILES([bindings/idl/test/Makefile])
+AC_CONFIG_FILES([bindings/perl/Makefile])
+AC_CONFIG_FILES([bindings/perl/test/Makefile])
 AC_CONFIG_FILES([bindings/python/Makefile])
 AC_CONFIG_FILES([bindings/python/test/Makefile])
 AC_CONFIG_FILES([doc/Makefile])
@@ -799,6 +843,7 @@ AM_CONDITIONAL(MAKE_F77BINDINGS, [test "x$make_f77bindings" != "xno"])
 AM_CONDITIONAL(MAKE_F95BINDINGS, [test "x$make_f95bindings" = "xyes"])
 AM_CONDITIONAL(MAKE_PYBINDINGS, [test "x$make_pybindings" = "xyes"])
 AM_CONDITIONAL(MAKE_IDLBINDINGS, [test "x$make_idlbindings" = "xyes"])
+AM_CONDITIONAL(MAKE_PERLBINDINGS, [test "x$make_perlbindings" = "xyes"])
 AM_CONDITIONAL(USE_MODULES, [test "x$use_modules" != "xno"])
 AM_CONDITIONAL(TEST_PYTHON, [test "x$NO_DLOPEN_TESTS" = "x0"])
 AM_CONDITIONAL(TEST_IDL, [test "x$NO_DLOPEN_TESTS" = "x0"])
@@ -835,6 +880,12 @@ else
   BINDINGS_LEFT="${BINDINGS_LEFT} IDL"
 fi
 
+if test "x$make_perlbindings" != "xno"; then
+  BINDINGS_BUILT="${BINDINGS_BUILT} Perl"
+else
+  BINDINGS_LEFT="${BINDINGS_LEFT} Perl"
+fi
+
 if test "x$make_pybindings" != "xno"; then
   BINDINGS_BUILT="${BINDINGS_BUILT} Python"
 else
@@ -869,24 +920,24 @@ fi
 
 echo
 echo "Configuration summary: "
-echo "  ANSI C compatibility mode:    ${disable_c99}"
-echo "  LFS transitional API:         ${lfs_transitional_api}"
-echo "  Legacy API:                   ${include_legacy_api}"
-echo "  Verbose debugging:            ${enable_debug}"
-echo "  Use modules:                  ${use_modules}"
+echo "  ANSI C compatibility mode:     ${disable_c99}"
+echo "  LFS transitional API:          ${lfs_transitional_api}"
+echo "  Legacy API:                    ${include_legacy_api}"
+echo "  Verbose debugging:             ${enable_debug}"
+echo "  Use modules:                   ${use_modules}"
 if test "x${use_modules}" != "xno"; then
-  echo "  Thread-safe dynamic loading:  ${use_pthread}"
+  echo "  Thread-safe dynamic loading:   ${use_pthread}"
 fi
 echo
-echo "  Supported internal encodings:${ENCODINGS_BUILT}"
+echo "  Supported internal encodings: ${ENCODINGS_BUILT}"
 if test "x${use_modules}" != "xno"; then
-  echo "  Supported external encodings:${ENCODINGS_MODS}"
+  echo "  Supported external encodings: ${ENCODINGS_MODS}"
 fi
-echo "  Unsupported encodings:       ${ENCODINGS_LEFT}"
+echo "  Unsupported encodings:        ${ENCODINGS_LEFT}"
 echo
-echo "  Bindings built:              ${BINDINGS_BUILT}"
-echo "  Bindings not built:          ${BINDINGS_LEFT}"
+echo "  Bindings built:               ${BINDINGS_BUILT}"
+echo "  Bindings not built:           ${BINDINGS_LEFT}"
 if test "x$make_pybindings" != "xno"; then
-  echo "  NumPy support in Python:      ${have_numpy}"
+  echo "  NumPy support in Python:       ${have_numpy}"
 fi
 echo

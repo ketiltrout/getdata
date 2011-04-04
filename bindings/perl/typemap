@@ -1,0 +1,113 @@
+TYPEMAP
+# basic C types
+const char ** T_CONST_AVPV
+_Complex double T_COMPLEX
+off64_t T_UV
+unsigned long int T_UV
+
+# GetData types
+DIRFILE * T_DIRFILE
+gd_bit_t T_IV
+gd_entry_t T_ENTRY
+gd_entype_t T_UV
+gd_shift_t T_IV
+gd_spf_t T_UV
+gd_type_t T_UV
+
+# GetData Perl pseudotypes
+gdp_complex_in * T_COMPLEXIN
+gdpu_bitnum_t T_IV_FFFF
+gdpu_char * T_PV_NULL
+gdpu_int T_IV_ZERO
+gdpu_numbits_t T_IV_ZERO
+gdpu_shift_t T_IV_ZERO
+gdpu_spf_t T_UV_ZERO
+gdpu_type_t T_UV_ZERO
+gdpu_complex T_COMPLEX_ZERO
+
+
+INPUT
+T_DIRFILE
+  struct gdp_dirfile_t *gdp_dirfile;
+  if (sv_isa($arg, \"GetData::Dirfile\")) {
+    gdp_dirfile = INT2PTR(struct gdp_dirfile_t*, SvIV((SV*)SvRV($arg)));
+    $var = gdp_dirfile->D;
+    if ($var == NULL)
+      $var = gdp_invalid;
+  } else
+    croak(\"%s::${func_name}() - Invalid dirfile object\", gdp_package);
+T_COMPLEXIN
+  if ($arg == undef)
+    $var = NULL;
+  else if (SvROK($arg) && SvTYPE(SvRV($arg)) == SVt_PVAV) {
+    AV *av = (AV*)SvRV($arg);
+    I32 i, len = av_len(av);
+
+    $var = ($type)safemalloc(sizeof(double complex) * (1 + len));
+    for (i = 0; i <= len; ++i) {
+      SV **sv = av_fetch(av, i, 0);
+      if (sv == NULL) {
+        safefree($var);
+        croak(\"%s::${func_name}() - Expected array of complex numbers\",
+            gdp_package);
+      }
+      ${var}[i] = gdp_cmp_to_c99(*sv, NULL, gdp_package, \"${func_name}\");
+    }
+  } else {
+    $var = NULL;
+    croak(\"%s::${func_name}() - Expected array of complex numbers\",
+      gdp_package);
+  }
+T_CONST_AVPV
+  if ($arg == undef)
+    $var = NULL;
+  else if (SvROK($arg) && SvTYPE(SvRV($arg)) == SVt_PVAV) {
+    AV *av = (AV*)SvRV($arg);
+    I32 i, len = av_len(av);
+
+    $var = ($type)safemalloc(sizeof(char*) * (1 + len));
+    for (i = 0; i <= len; ++i) {
+      SV **sv = av_fetch(av, i, 0);
+      if (sv == NULL || SvTYPE(*sv) != SVt_PV) {
+        safefree($var);
+        croak(\"%s::${func_name}() - Expected array of strings\", gdp_package);
+      }
+      ${var}[i] = SvPV_nolen(*av_fetch(av, i, 0));
+    }
+  } else
+    croak(\"%s::${func_name}() - Expected array of strings\", gdp_package);
+T_COMPLEX
+  { $var = gdp_cmp_to_c99($arg, NULL, gdp_package, \"${func_name}\"); }
+T_ENTRY
+  gdp_to_entry(&$var, $arg, gdp_package, \"${func_name}\");
+T_IV_FFFF
+  if ($arg == undef)
+    $var = ($type)-1;
+  else
+    $var = ($type)SvIV($arg);
+T_IV_ZERO
+  if ($arg == undef)
+    $var = ($type)0;
+  else
+    $var = ($type)SvIV($arg);
+T_UV_ZERO
+  if ($arg == undef)
+    $var = ($type)0;
+  else
+    $var = ($type)SvUV($arg);
+T_PV_NULL
+  if ($arg == undef)
+    $var = NULL;
+  else
+    $var = SvPV_nolen($arg);
+T_COMPLEX_ZERO
+  if ($arg == undef)
+    $var = 0;
+  else
+    $var = gdp_cmp_to_c99($arg, NULL, gdp_package, \"${func_name}\");
+ 
+
+OUTPUT
+T_DIRFILE
+  gdp_dirfile->D = $var;
+  sv_setref_uv($arg, \"${Package}::Dirfile\", PTR2UV(gdp_dirfile));

@@ -1,4 +1,4 @@
-# Copyright (C) 2008-2010 D. V. Wiebe
+# Copyright (C) 2011 D. V. Wiebe
 #
 ##########################################################################
 #
@@ -20,38 +20,20 @@
 #
 AUTOMAKE_OPTIONS = foreign
 
-BUILDCC=@BUILDCC@
+TESTS_ENVIRONMENT=${PERL} -I.. -I../.libs
+#TESTS_ENVIRONMENT=valgrind --leak-check=full --track-origins=yes ${PERL} -I.. -I../.libs
+perlTESTS=callback.pl big_test.pl
+TESTS=$(addprefix ${srcdir}/,$(perlTESTS))
 
-if MAKE_CXXBINDINGS
-CXX_SUBDIR=cxx
-endif
+EXTRA_DIST=${perlTESTS}
 
-if MAKE_F77BINDINGS
-F77_SUBDIR=f77
-endif
+# clean up after the tests
+check-local: check-TESTS
+	$(MAKE) getdata-clean-dirs
 
-if MAKE_IDLBINDINGS
-IDL_SUBDIR=idl
-endif
-
-if MAKE_PYBINDINGS
-PY_SUBDIR=python
-endif
-
-if MAKE_PERLBINDINGS
-PERL_SUBDIR=perl
-endif
-
-noinst_PROGRAMS=make_parameters
-
-make_parameters_SOURCES = make_parameters.c
-nodist_make_parameters_SOURCES = ../src/getdata.h
-
-SUBDIRS = . ${F77_SUBDIR} ${CXX_SUBDIR} ${PY_SUBDIR} ${IDL_SUBDIR} \
-					${PERL_SUBDIR}
-
-make_parameters$(EXEEXT): $(make_parameters_SOURCES) $(nodist_make_parameters_SOURCES)
-	${BUILDCC} $(DEFS) -I../src -o make_parameters$(EXEEXT) $(srcdir)/$(make_parameters_SOURCES)
+getdata-clean-dirs:
+	echo rm -rf dirfile
 
 clean-local:
+	$(MAKE) getdata-clean-dirs
 	rm -rf *~ 

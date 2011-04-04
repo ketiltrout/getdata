@@ -980,7 +980,7 @@ nume += check_simple2(148, 4, n.in_fields, [ "in2" ])
 nume += check_simple2(148, 5, n.comp_scal, 1)
 nume += check_simple2(148, 6, n.cdividend, DCOMPLEX(33.3, 44.4))
 
-;  152: gd_alter_multiply
+;  152: gd_alter_divide
 gd_alter_divide, d, "new14", in_field1="in6"
 nume += check_ok2(152, 1, d)
 
@@ -991,7 +991,7 @@ nume += check_simple2(152, 2, n.field, "new14")
 nume += check_simple2(152, 3, n.fragment, 0)
 nume += check_simple2(152, 4, n.in_fields, [ "in6", "in3" ])
 
-;  153: gd_alter_multiply
+;  153: gd_alter_recip
 gd_alter_recip, d, "new16", dividend=1.01
 nume += check_ok2(153, 1, d)
 

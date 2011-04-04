@@ -1,7 +1,12 @@
-* Perl bindings
 * Locking
 * Hashed compressed files
 * streaming
 * linterp table path munging [MH]
 * Make webpage suck less
 * Handle RW dirfile on RO data better [JPF]
+* INCLUDE name munging [RW/MT]
+* Fix VERSION leakage [MT]
+* Error count [MT]
+* aliasing [MT]
+* Fix REFERENCE spam [MT]
+* Fragment encapsulation [MT]

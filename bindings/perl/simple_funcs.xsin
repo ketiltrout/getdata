@@ -1,0 +1,119 @@
+int add_bit(DIRFILE *dirfile, const char *field_code, const char *in_field,
+    gd_bit_t bitnum, gd_bit_t numbits, int fragment_index=0)
+int add_clincom:add_lincom(DIRFILE *dirfile, const char *field_code,
+    int n_fields, const char **in_fields, gdp_complex_in *cm,
+    gdp_complex_in *cb, int fragment_index=0)
+int add_cpolynom:add_polynom(DIRFILE *dirfile, const char *field_code,
+    int poly_ord, const char *in_field, gdp_complex_in *ca,
+    int fragment_index=0)
+int add_crecip:add_recip(DIRFILE *dirfile, const char *field_code,
+    const char *in_field, _Complex double cdividend, int fragment_index=0)
+int add_divide(DIRFILE *dirfile, const char *field_code, const char *in_field1,
+    const char *in_field2, int fragment_index=0)
+int add_linterp(DIRFILE *dirfile, const char *field_code, const char *in_field,
+    const char *table, int fragment_index=0)
+int add_multiply(DIRFILE *dirfile, const char *field_code,
+    const char *in_field1, const char *in_field2, int fragment_index=0)
+int add_phase(DIRFILE *dirfile, const char *field_code, const char *in_field,
+    gd_shift_t shift, int fragment_index=0)
+int add_sbit(DIRFILE *dirfile, const char *field_code, const char *in_field,
+    gd_bit_t bitnum, gd_bit_t numbits, int fragment_index=0)
+int add_string(DIRFILE *dirfile, const char *field_code, const char *value,
+    int fragment_index=0)
+int alter_bit(DIRFILE *dirfile, const char *field_code,
+    gdpu_char *in_field=NULL, gdpu_bitnum_t bitnum=-1, gdpu_numbits_t numbits=0)
+int alter_carray(DIRFILE* dirfile, const char* field_code, gd_type_t const_type,
+    size_t array_len)
+int alter_clincom:alter_lincom(DIRFILE *dirfile, const char *field_code,
+    gdpu_int n_fields=0, const char **in_fields=NULL, gdp_complex_in *m=NULL,
+    gdp_complex_in *b=NULL)
+int alter_cpolynom:alter_polynom(DIRFILE *dirfile, const char *field_code,
+    gdpu_int poly_ord=0, gdpu_char *in_field=NULL, gdp_complex_in *a=NULL)
+int alter_crecip:alter_recip(DIRFILE *dirfile, const char *field_code,
+    gdpu_char *in_field=NULL, gdpu_complex cdividend=0)
+int alter_divide(DIRFILE *dirfile, const char *field_code,
+    gdpu_char *in_field1=NULL, gdpu_char *in_field2=NULL)
+int alter_multiply(DIRFILE *dirfile, const char *field_code,
+    gdpu_char *in_field1=NULL, gdpu_char *in_field2=NULL)
+int alter_phase(DIRFILE *dirfile, const char *field_code,
+    gdpu_char *in_field=NULL, gdpu_shift_t shift=0)
+int alter_sbit(DIRFILE *dirfile, const char *field_code,
+    gdpu_char *in_field=NULL, gdpu_bitnum_t bitnum=-1, gdpu_numbits_t numbits=0)
+size_t carray_len(DIRFILE *dirfile, const char *field_code)
+unsigned long int encoding(DIRFILE *dirfile, int fragment)
+unsigned long int endianness(DIRFILE *dirfile, int fragment)
+int fragment_index(DIRFILE *dirfile, const char *field_code)
+const char *fragmentname(DIRFILE *dirfile, int index)
+int madd(DIRFILE *dirfile, gd_entry_t &entry, const char *parent)
+int madd_bit(DIRFILE *dirfile, const char *parent, const char *field_code,
+    const char *in_field, gd_bit_t bitnum, gd_bit_t numbits)
+int madd_clincom:madd_lincom(DIRFILE *dirfile, const char *parent,
+    const char *field_code, int n_fields, const char **in_fields,
+    gdp_complex_in *cm, gdp_complex_in *cb)
+int madd_cpolynom:madd_polynom(DIRFILE *dirfile, const char *parent,
+    const char *field_code, int poly_ord, const char *in_field,
+    gdp_complex_in *ca)
+int madd_crecip:madd_recip(DIRFILE *dirfile, const char *parent,
+    const char *field_code, const char *in_field, _Complex double cdividend)
+int madd_divide(DIRFILE *dirfile, const char *parent, const char *field_code,
+    const char *in_field1, const char *in_field2)
+int madd_linterp(DIRFILE *dirfile, const char *parent, const char *field_code,
+    const char *in_field, const char *table)
+int madd_multiply(DIRFILE *dirfile, const char *parent, const char *field_code,
+    const char *in_field1, const char *in_field2)
+int madd_phase(DIRFILE *dirfile, const char *parent, const char *field_code,
+    const char *in_field, gd_shift_t shift)
+int madd_sbit(DIRFILE *dirfile, const char *parent, const char *field_code,
+    const char *in_field, gd_bit_t bitnum, gd_bit_t numbits)
+int madd_spec(DIRFILE *dirfile, const char *line, const char *parent)
+int madd_string(DIRFILE *dirfile, const char *parent, const char *field_code,
+    const char *value)
+int dirfile_standards(DIRFILE *dirfile, int version=GD_VERSION_CURRENT)
+const char *dirfilename(DIRFILE *dirfile)
+gd_type_t native_type(DIRFILE *dirfile, const char *field_code)
+int parent_fragment(DIRFILE *dirfile, int fragment_index)
+int alter_protection(DIRFILE *dirfile, int protection_level, int fragment_index)
+int protection(DIRFILE *dirfile, int fragment_index)
+const char *raw_filename(DIRFILE *dirfile, const char *field_code)
+const char *reference(DIRFILE *dirfile, const char *field_code=NULL)
+gd_spf_t spf(DIRFILE *dirfile, const char *field_code)
+size_t put_string(DIRFILE *dirfile, const char *field_code, const char *data)
+int validate(DIRFILE *dirfile, const char *field_code)
+int add(DIRFILE *dirfile, gd_entry_t &entry)
+int add_raw(DIRFILE *dirfile, const char *field_code, gd_type_t data_type,
+    gd_spf_t spf, int fragment_index=0)
+int add_spec(DIRFILE *dirfile, const char *line, int fragment_index=0)
+int alter_const(DIRFILE *dirfile, const char *field_code,
+    gdpu_type_t const_type=GD_NULL);
+int alter_encoding(DIRFILE *dirfile, unsigned long int encoding, int fragment=0,
+    int recode=0)
+int alter_endianness(DIRFILE *dirfile, unsigned long int byte_sex,
+    int fragment=0, int recode=0)
+int alter_entry(DIRFILE *dirfile, const char *field_code, gd_entry_t &entry,
+    int recode=0)
+int alter_linterp(DIRFILE *dirfile, const char *field_code,
+    gdpu_char *in_field=NULL, gdpu_char *table=NULL, int recode=0)
+int alter_raw(DIRFILE *dirfile, const char *field_code,
+    gdpu_type_t data_type=GD_NULL, gdpu_spf_t spf=0, int recode=0)
+int alter_spec(DIRFILE *dirfile, const char *line, int recode=0)
+int delete(DIRFILE *dirfile, const char *field_code, int flags=0)
+int flush(DIRFILE *dirfile, const char *field_code)
+int include(DIRFILE *dirfile, const char *file, int fragment_index,
+    unsigned long int flags)
+int malter_spec(DIRFILE *dirfile, const char *line, const char *parent,
+    int recode=0)
+int metaflush(DIRFILE *dirfile)
+int move(DIRFILE *dirfile, const char *field_code, int new_fragment,
+    int move_data=0)
+int rename(DIRFILE *dirfile, const char *old_code, const char *new_name,
+    int move_data=0)
+int rewrite_fragment(DIRFILE *dirfile, int fragment)
+int uninclude(DIRFILE *dirfile, int fragment_index, int del=0)
+int alter_frameoffset64(DIRFILE *dirfile, off64_t offset, int fragment=0,
+    int recode=0)
+off64_t frameoffset64(DIRFILE *dirfile, int fragment)
+double framenum_subset64:framenum(DIRFILE *dirfile, const char* field_code_in,
+    double value, off64_t field_start=0, off64_t field_end=0)
+off64_t nframes64(DIRFILE *dirfile)
+off64_t bof64(DIRFILE *dirfile, const char* field_code)
+off64_t eof64(DIRFILE *dirfile, const char* field_code)

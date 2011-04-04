@@ -1,0 +1,132 @@
+# Copyright (C) 2011 D. V. Wiebe
+#
+##########################################################################
+#
+# This file is part of the GetData project.
+#
+# GetData is free software; you can redistribute it and/or modify it under
+# the terms of the GNU Lesser General Public License as published by the
+# Free Software Foundation; either version 2.1 of the License, or (at your
+# option) any later version.
+#
+# GetData is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
+# License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with GetData; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+#
+package GetData;
+
+use 5.00800;
+use strict;
+use warnings;
+
+require Exporter;
+require XSLoader;
+require Math::Complex;
+
+our @ISA = qw(Exporter);
+our %EXPORT_TAGS = ( 'all' => [ qw(VERSION
+    @FUNCLIST@
+    @PARAMLIST@
+    ) ] );
+
+our @EXPORT_OK = ( @{$EXPORT_TAGS{'all'}} );
+our @EXPORT = qw();
+
+@PARAMETERS@
+
+XSLoader::load('GetData', $VERSION);
+
+1;
+__END__
+
+=head1 NAME
+
+GetData - Perl bindings to the GetData library for Dirfile access
+
+=head1 SYNOPSIS
+
+  use GetData;
+
+  my $DIRFILE = GetData::open("./dirfile/", $GetData::RDONLY);
+
+  # the following calls are equivalent
+  my $data = GetData::getdata($DIRFILE, "field", 5, 0, 1,
+                              GetData::UINT8);
+  my $data = $DIRFILE->getdata("field", 5, 0, 1, GetData::UINT8);
+
+=head1 DESCRIPTION
+
+This module provides simple, lightweight bindings from Perl to the C GetData
+library.  It provides a simple mapping between public C functions and Perl
+methods.  All C functions and constants are replicated in the GetData package.
+These methods have the same name as their C counterparts, excluding the C
+namespace prefix `gd_' (or `GD_', for C preprocessor constants).
+
+The dirfile lvalue returned by GetData::cbopen or GetData::cbopen is a
+simplistic object.  Any GetData method which takes a dirfile as a parameter,
+may instead be called as method of the dirfile object itself.  (See the
+synopsis above for an example.)  Dirfile metadata entries (which are C structs
+of type gd_entry_t) are represented as simple hashes.
+
+By default, GetData does not export any symbols.  All symbols in the GetData
+package may be exported with:
+
+  use GetData "all";
+
+but this is discouraged, as it will overwrite useful things like &open.
+
+=head1 METHODS
+
+=over
+
+=item cbopen ( DIRFILENAME, FLAGS, SEHANDLER, EXTRA )
+
+Create or open a Dirfile database called DIRFILENAME.  FLAGS should be either
+$GetData::RDONLY (for read-only access) or $GetData::RDWR (for read-write
+access), optionally bitwise or'd with any of the flags listed in the
+gd_cbopen(3) manual page.
+
+SEHANDLER is a Perl callback function which will be executed whenever a syntax
+error is encountered.  It may be undef, if no callback is desired (but see the
+open() method in that case).  If called, SEHANDLER will be passed two arguments.
+The first is a reference to a hash containing the parser data.  The second is
+the EXTRA object passed to cbopen().  SEHANDLER is called in scalar context,
+and should return either:
+
+=over
+
+=item * an integer, one of the $GetData::SYNTAX_... constants; or
+
+=item * a string containing the corrected line, in which case
+$GetData::SYNTAX_RESCAN is assumed; or,
+
+=item * a reference to a list consisting of an integer, one of the
+$GetData::SYNTAX_...  constants, and then, optionally, a string containing the
+corrected line.
+
+=back
+
+This function always returns a valid Dirfile object, even if the call failed;
+the caller should check GetData::error() on the returned dirfile to test for
+success.
+
+=head1 COPYRIGHT
+
+Copyright (C) 2011 D. V. Wiebe
+
+GetData is free software; you can redistribute it and/or modify it under the
+terms of the GNU Lesser General Public License as published by the Free Software
+Foundation: either version 2.1 of the License, or (at your option) any later
+version.
+
+GetData is distributed in the hope that it will be useful, but without any
+warranty; without even the implied warranty of merchantability or fitness for
+a particular purpose. See the GNU Lesser General Public License for more
+details. 
+
+=cut
