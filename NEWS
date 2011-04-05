@@ -11,6 +11,10 @@ New in version 0.7.3:
   * BUG FIX: gd_raw_filename() wasn't clearing the Dirfile error before
     operation, resulting in it failing erroneously in certain situations.
 
+  Utilities Changes:
+
+  * BUG FIX: A potential segmentation fault has been patched in dirfile2ascii.
+
 |==============================================================================|
 
 New in version 0.7.2:

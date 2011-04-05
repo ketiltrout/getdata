@@ -1,3 +1,9 @@
+2011-03-25   D. V. Wiebe <getdata@ketiltrout.net> svn:567
+	Merge from trunk, r561:
+
+	* util/checkdirfile.c: Zero-terminate option list.  Patch from Matthew
+	Truch.
+
 2011-04-03   D. V. Wiebe <getdata@ketiltrout.net>  svn:564
 	* test/alter_crecip_zero.c test/alter_recip_zero.c: Added.
 	* src/mod.c (_GD_Change): If [c]dividend is zero, don't change it, per
