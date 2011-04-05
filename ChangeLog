@@ -1,4 +1,4 @@
-2011-03-25   D. V. Wiebe <getdata@ketiltrout.net> svn:567
+2011-04-04   D. V. Wiebe <getdata@ketiltrout.net> svn:567
 	Merge from trunk, r561:
 
 	* util/checkdirfile.c: Zero-terminate option list.  Patch from Matthew
