@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_rewrite_fragment 3 "15 October 2010" "Version 0.7.0" "GETDATA"
+.TH gd_rewrite_fragment 3 "22 March 2011" "Version 0.7.2" "GETDATA"
 .SH NAME
 gd_rewrite_fragment \(em re-write a dirfile format specification fragment
 .SH SYNOPSIS
@@ -28,16 +28,16 @@ gd_rewrite_fragment \(em re-write a dirfile format specification fragment
 The
 .BR gd_rewrite_fragment ()
 writes the format specification fragment specified by
-.I fragment_index
+.I fragment
 to disk, regardless of whether it has changed or not, overwriting the existing
 file.
-.P
+.PP
 In addition to being simply a valid fragment index,
-.I fragment_index
+.I fragment
 may also be the special value
 .BR GD_ALL_FRAGMENTS ,
 which indicates that all fragments should be rewritten.
-.P
+.PP
 Metadata is written to disk using the current Standards Version as stored in the
 .I dirfile
 object.  See
@@ -66,7 +66,7 @@ or renaming the temporary file over the original fragment failed.
 An internal error occurred in the library while trying to perform the task.
 This indicates a bug in the library.  Please report the incident to the
 maintainer.
-.P
+.PP
 The dirfile error may be retrieved by calling
 .BR gd_error (3).
 A descriptive error string for the last error encountered can be obtained from

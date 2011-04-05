@@ -26,32 +26,33 @@ AC_DEFUN([GD_CHECK_ENCODING],
 [
 have_this_header=
 have_this_lib=
+m4_define([gd_encoding], [$1])
 AC_ARG_WITH([lib$2], AS_HELP_STRING([--with-lib$2=PREFIX],
             [use the lib$2 installed in PREFIX [autodetect]]),
             [
              case "${withval}" in
-               no) use_$1="no" ;;
-               yes) use_$1="yes"; $1_prefix= ;;
-               *) use_$1="yes"; $1_prefix="${withval}" ;;
+               no) use_[]gd_encoding="no" ;;
+               yes) use_[]gd_encoding="yes"; gd_encoding[]_prefix= ;;
+               *) use_[]gd_encoding="yes"; gd_encoding[]_prefix="${withval}" ;;
              esac
-             ], [ use_$1="yes"; $1_prefix=; ])
+             ], [ use_[]gd_encoding="yes"; gd_encoding[]_prefix=; ])
 m4_divert_once([HELP_WITH], AS_HELP_STRING([--without-lib$2],
             [disable encodings supported by lib$2, even if the library is present]))
 
 echo
-echo "*** Configuring $1 support"
+echo "*** Configuring gd_encoding support"
 echo
 
 if test "x$no_extern" = "xyes"; then
-  use_$1="no";
+  use_[]gd_encoding="no";
 fi
 
-if test "x$use_$1" = "xyes"; then
+if test "x$use_[]gd_encoding" = "xyes"; then
   dnl search for library
   saved_ldflags=$LDFLAGS
   saved_libs=$LIBS
-  if test "x$[]$1_prefix" != "x"; then
-    LDFLAGS="$LDFLAGS -L$[]$1_prefix/lib"
+  if test "x$gd_encoding[]_prefix" != "x"; then
+    LDFLAGS="$LDFLAGS -L$gd_encoding[]_prefix/lib"
   fi
   AC_CHECK_LIB([$2],[$3],[have_this_lib=yes]
   AC_DEFINE(AS_TR_CPP([HAVE_LIB$2]), 1,
@@ -61,69 +62,72 @@ if test "x$use_$1" = "xyes"; then
 
 dnl search for header
   saved_cppflags=$CPPFLAGS
-  if test "x$[]$1_prefix" != "x"; then
-    CPPFLAGS="$CPPFLAGS -I$[]$1_prefix/include"
+  if test "x$gd_encoding[]_prefix" != "x"; then
+    CPPFLAGS="$CPPFLAGS -I$gd_encoding[]_prefix/include"
   fi
   AC_CHECK_HEADERS([$4],[have_this_header=yes])
   CPPFLAGS=$saved_cppflags
 fi
 
 dnl cleanup
-AS_TR_CPP([$1_CPPFLAGS])=
-AS_TR_CPP([$1_LDFLAGS])=
+AS_TR_CPP(gd_encoding[_CPPFLAGS])=
+AS_TR_CPP(gd_encoding[_LDFLAGS])=
 if test "x$have_this_header" = "xyes" -a "x$have_this_lib" = "xyes"; then
-  if test "x$[]$1_prefix" = "x"; then
-    AS_TR_CPP([$1_LDFLAGS])="-l$2"
-    AS_TR_CPP([$1_SEARCHPATH])="$PATH"
+  if test "x$gd_encoding[]_prefix" = "x"; then
+    AS_TR_CPP(gd_encoding[_LDFLAGS])="-l$2"
+    AS_TR_CPP(gd_encoding[_SEARCHPATH])="$PATH"
   else 
-    AS_TR_CPP([$1_CPPFLAGS])="-I$[]$1_prefix/include"
-    AS_TR_CPP([$1_LDFLAGS])="-L$[]$1_prefix/lib -l$2"
-    AS_TR_CPP([$1_SEARCHPATH])="$[]$1_prefix/bin:$PATH"
+    AS_TR_CPP(gd_encoding[_CPPFLAGS])="-I$gd_encoding[]_prefix/include"
+    AS_TR_CPP(gd_encoding[_LDFLAGS])="-L$gd_encoding[]_prefix/lib -l$2"
+    AS_TR_CPP(gd_encoding[_SEARCHPATH])="$gd_encoding[]_prefix/bin:$PATH"
   fi
-  AC_DEFINE(AS_TR_CPP([USE_$1]), [], [ Define to enable $1 support ])
+  AC_DEFINE(AS_TR_CPP([USE_]gd_encoding), [], [ Define to enable ]gd_encoding[ support ])
 else
-  use_$1="no";
-  AS_TR_CPP([$1_SEARCHPATH])="$PATH"
+  use_[]gd_encoding="no";
+  AS_TR_CPP(gd_encoding[_SEARCHPATH])="$PATH"
 fi
-AC_SUBST(AS_TR_CPP([$1_CPPFLAGS]))
-AC_SUBST(AS_TR_CPP([$1_LDFLAGS]))
+AC_SUBST(AS_TR_CPP(gd_encoding[_CPPFLAGS]))
+AC_SUBST(AS_TR_CPP(gd_encoding[_LDFLAGS]))
 
 dnl executables needed for tests
-AC_PATH_PROGS([path_$5], [$5], [not found], [$AS_TR_CPP([$1_SEARCHPATH])])
+m4_define(gd_progname, regexp([$5 ], [^\([^ ]*\) ], [\1]))
+AC_PATH_PROGS([path_]gd_progname, [$5], [not found], [$AS_TR_CPP(gd_encoding[_SEARCHPATH])])
 
-if test "x$path_$5" != "xnot found"; then
-  AC_DEFINE_UNQUOTED(AS_TR_CPP([$5]), ["$path_$5"],
-                     [ Define to the full path to the `$5' binary ])
+if test "x$path_[]gd_progname" != "xnot found"; then
+  AC_DEFINE_UNQUOTED(AS_TR_CPP(gd_progname), ["$path_]gd_progname["],
+                     [ Define to the full path to the `]gd_progname[' binary ])
 fi
 
 ifelse(`x$6', `x',,[
-AC_PATH_PROGS([path_$6], [$6], [not found], [$AS_TR_CPP([$1_SEARCHPATH])])
+m4_define(gd_unprogname, regexp([$6 ], [^\([^ ]*\) ], [\1]))
+AC_PATH_PROGS([path_]gd_unprogname, [$6], [not found], [$AS_TR_CPP(gd_encoding[_SEARCHPATH])])
 
-if test "x$path_$6" != "xnot found"; then
-  AC_DEFINE_UNQUOTED(AS_TR_CPP([$6]), ["$path_$6"],
-                     [ Define to the full path to the `$6' binary ])
+if test "x$path_[]gd_unprogname" != "xnot found"; then
+  AC_DEFINE_UNQUOTED(AS_TR_CPP(gd_unprogname), ["$path_]gd_unprogname["],
+                     [ Define to the full path to the `]gd_unprogname[' binary ])
 fi
 $7
 ])
-AM_CONDITIONAL(AS_TR_CPP([USE_$1]), [test "x$use_$1" = "xyes"])
+AM_CONDITIONAL(AS_TR_CPP([USE_]gd_encoding), [test "x$use_]gd_encoding[" = "xyes"])
 
-if test "x$path_$5" != "xnot found" -a "x$path_$6" != "xnot found"; then
-  AC_DEFINE(AS_TR_CPP([TEST_$1]), [], [ Define to enable $1 tests ])
+if test "x$path_[]gd_progname" != "xnot found" -a \
+  "x$path_[]gd_unprogname" != "xnot found"; then
+  AC_DEFINE(AS_TR_CPP([TEST_]gd_encoding), [], [ Define to enable ]gd_encoding[ tests ])
 fi
 
 dnl add to summary and private lib list
-if test "x$use_$1" != "xno"; then
+if test "x$use_[]gd_encoding" != "xno"; then
   if test "x$use_modules" != "xno"; then
-    ENCODINGS_MODS="${ENCODINGS_MODS} $1";
+    ENCODINGS_MODS="${ENCODINGS_MODS} gd_encoding";
   else
-    ENCODINGS_BUILT="${ENCODINGS_BUILT} $1";
+    ENCODINGS_BUILT="${ENCODINGS_BUILT} gd_encoding";
     if test -z "$PRIVATE_LIBS"; then
-      PRIVATE_LIBS="[$]AS_TR_CPP([$1_LDFLAGS])"
+      PRIVATE_LIBS="[$]AS_TR_CPP(gd_encoding[_LDFLAGS])"
     else
-      PRIVATE_LIBS="$PRIVATE_LIBS [$]AS_TR_CPP([$1_LDFLAGS])"
+      PRIVATE_LIBS="$PRIVATE_LIBS [$]AS_TR_CPP(gd_encoding[_LDFLAGS])"
     fi
   fi
 else
-  ENCODINGS_LEFT="${ENCODINGS_LEFT} $1";
+  ENCODINGS_LEFT="${ENCODINGS_LEFT} gd_encoding";
 fi
 ])

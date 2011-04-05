@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2010 D. V. Wiebe
+/* Copyright (C) 2008-2011 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -606,18 +606,19 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
 
       Q.comp_scal = 0;
       if (N->comp_scal) {
-        j = _GD_AlterScalar(D, !_gd_ccmpc(E->EN(recip,cdividend),
-              N->EN(recip,cdividend)), GD_COMPLEX128, &Q.EN(recip,cdividend),
-            &(N->EN(recip,cdividend)), Q.scalar, Q.scalar_ind, N->scalar[0],
-            N->scalar_ind[0], E->e->calculated);
+        j = _GD_AlterScalar(D, cabs(N->EN(recip,cdividend)) != 0 &&
+              !_gd_ccmpc(E->EN(recip,cdividend), N->EN(recip,cdividend)),
+              GD_COMPLEX128, &Q.EN(recip,cdividend), &(N->EN(recip,cdividend)),
+              Q.scalar, Q.scalar_ind, N->scalar[0], N->scalar_ind[0],
+              E->e->calculated);
         Q.EN(recip,dividend) = creal(Q.EN(recip,cdividend));
         if (cimag(Q.EN(recip,cdividend)) != 0)
           Q.comp_scal = 1;
       } else {
-        j = _GD_AlterScalar(D, E->EN(recip,dividend) != N->EN(recip,dividend),
-            GD_FLOAT64, &Q.EN(recip,dividend), &(N->EN(recip,dividend)),
-            Q.scalar, Q.scalar_ind, N->scalar[0], N->scalar_ind[0],
-            E->e->calculated);
+        j = _GD_AlterScalar(D, N->EN(recip,dividend) != 0 &&
+            E->EN(recip,dividend) != N->EN(recip,dividend), GD_FLOAT64,
+            &Q.EN(recip,dividend), &(N->EN(recip,dividend)), Q.scalar,
+            Q.scalar_ind, N->scalar[0], N->scalar_ind[0], E->e->calculated);
         _gd_r2c(Q.EN(recip,cdividend), Q.EN(recip,dividend));
       }
 

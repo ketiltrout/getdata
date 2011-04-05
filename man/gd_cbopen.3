@@ -68,7 +68,7 @@ argument should include one of the
 .BR GD_RDWR
 (read-write), and may also contain zero or more of the following flags,
 bitwise-or'd together:
-.P
+.PP
 .B GD_ARM_ENDIAN
 .PD 0
 .TP
@@ -90,7 +90,7 @@ On every platform, one of these flags
 on all but middle-ended ARM systems)
 indicates the native behaviour of the platform.  That symbol will equal zero,
 and may be omitted.
-.P
+.PP
 .B GD_BIG_ENDIAN
 .PD 0
 .TP
@@ -239,7 +239,7 @@ should be written on standard error by the library.  Without this flag,
 GetData writes nothing to standard error.  (GetData never writes to standard
 output.)
 
-.P
+.PP
 The
 .I flags
 argument may also be bitwise or'd with one of the following symbols indicating
@@ -383,7 +383,7 @@ This function should take two pointers as arguments, and return an
 .hy
 .ad n
 .RE
-.P
+.PP
 The
 .I extra
 parameter is the pointer supplied to
@@ -410,7 +410,7 @@ typedef struct {
 } gd_parser_data_t;
 .fi
 .in
-.P
+.PP
 The
 .IR pdata -> dirfile
 member will be a pointer to a DIRFILE object suitable only for passing to
@@ -555,7 +555,7 @@ line still contains a syntax error, the callback function will be called again.
 Note: the line is not corrected on disk; however, the caller may subsequently
 correct the fragment on disk by calling
 .BR gd_rewrite_fragment (3).
-.P
+.PP
 The callback function handles only syntax errors.  The parser may still abort
 early, if a different kind of library error is encountered.  Furthermore,
 although a line may contain more than one syntax error, the parser will only
@@ -634,7 +634,7 @@ directive could not be opened.
 .TP
 .B GD_E_TRUNC
 The library was unable to truncate the dirfile.
-.P
+.PP
 The dirfile error may be retrieved by calling
 .BR gd_error (3).
 A descriptive error string for the last error encountered can be obtained from

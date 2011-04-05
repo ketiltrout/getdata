@@ -48,20 +48,21 @@ ADD_TESTS=add add_bit add_bit_bitnum add_bit_bitsize add_bit_invalid \
 					add_duplicate add_format add_invalid add_lincom add_lincom_invalid \
 					add_lincom_nfields add_linterp add_linterp_invalid add_multiply \
 					add_multiply_invalid add_phase add_phase_invalid add_polynom \
-					add_protect add_raw add_raw_invalid add_raw_spf add_raw_type \
-					add_rdonly add_recip add_sbit add_scalar add_sort add_spec \
-					add_spec_directive add_spec_invalid add_spec_meta add_string add_type
+					add_protect add_raw add_raw_include add_raw_invalid add_raw_spf \
+					add_raw_type add_rdonly add_recip add_sbit add_scalar add_sort \
+					add_spec add_spec_directive add_spec_invalid add_spec_meta \
+					add_string add_type
 
 ALTER_TESTS=alter_bit_bitnum alter_bit_numbits alter_carray_len \
 						alter_carray_type alter_const alter_cpolynom alter_crecip \
-						alter_crecip89 alter_divide alter_entry alter_entry_recode \
-						alter_entry_scalar2a alter_entry_scalar2n alter_entry_scalar3 \
-						alter_entry_scalar4 alter_lincom_23 alter_lincom_32 \
-						alter_lincom_input alter_lincom_offset alter_lincom_slope \
-						alter_linterp alter_linterp_move alter_mspec alter_multiply \
-						alter_phase alter_polynom_coeff alter_polynom_input \
+						alter_crecip89 alter_crecip_zero alter_divide alter_entry \
+						alter_entry_recode alter_entry_scalar2a alter_entry_scalar2n \
+						alter_entry_scalar3 alter_entry_scalar4 alter_lincom_23 \
+						alter_lincom_32 alter_lincom_input alter_lincom_offset \
+						alter_lincom_slope alter_linterp alter_linterp_move alter_mspec \
+						alter_multiply alter_phase alter_polynom_coeff alter_polynom_input \
 						alter_polynom_ord alter_raw_spf alter_raw_type alter_recip \
-						alter_spec alter_spec_meta
+						alter_recip_zero alter_spec alter_spec_meta
 
 ASCII_TESTS=ascii_get ascii_get_get ascii_nframes ascii_put
 
@@ -232,13 +233,14 @@ PARSE_TESTS=parse_badline parse_bit parse_bit4 parse_bit_bitnum \
 						parse_duplicate_ignore parse_endian_bad parse_endian_big \
 						parse_endian_force parse_endian_little parse_endian_slash \
 						parse_eol parse_foffs parse_foffs_include parse_foffs_slash \
-						parse_include parse_include_nonexistent parse_include_slash \
-						parse_index parse_lincom parse_lincom_ncols1 parse_lincom_ncols2 \
-						parse_lincom_nfields parse_lincom_nofields parse_lincom_non \
-						parse_lincom_non_ncols parse_lincom_scalar parse_linterp \
-						parse_linterp_ncols parse_meta parse_meta_implicit \
-						parse_meta_implicit2 parse_meta_index parse_meta_index2 \
-						parse_meta_parent parse_meta_raw parse_multiply \
+						parse_include parse_include_absolute parse_include_absrel \
+						parse_include_nonexistent parse_include_relabs \
+						parse_include_relrel parse_include_slash parse_index parse_lincom \
+						parse_lincom_ncols1 parse_lincom_ncols2 parse_lincom_nfields \
+						parse_lincom_nofields parse_lincom_non parse_lincom_non_ncols \
+						parse_lincom_scalar parse_linterp parse_linterp_ncols parse_meta \
+						parse_meta_implicit parse_meta_implicit2 parse_meta_index \
+						parse_meta_index2 parse_meta_parent parse_meta_raw parse_multiply \
 						parse_multiply_ncols parse_name parse_name_dot parse_name_ext \
 						parse_name_pedantic parse_ncols parse_phase parse_phase_ncols \
 						parse_phase_scalar parse_polynom parse_polynom_ncols1 \

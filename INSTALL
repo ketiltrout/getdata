@@ -40,7 +40,11 @@ may remove or edit it.
    The file `configure.ac' (or `configure.in') is used to create
 `configure' by a program called `autoconf'.  You need `configure.ac' if
 you want to change it or regenerate `configure' using a newer version
-of `autoconf'.
+of `autoconf'. 
+
+To create the configure script, and the rest of the build environment 
+which are not part of a plain checkout from sourceforge, execute:
+  autoreconf -vifs 
 
 The simplest way to compile this package is:
 

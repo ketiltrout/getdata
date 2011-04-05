@@ -195,12 +195,9 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
         break;
       }
  
-      if (D->fragment[E->fragment_index].sname)
-        snprintf(E->e->u.raw.filebase, FILENAME_MAX, "%s/%s/%s", D->name,
-            D->fragment[E->fragment_index].sname, E->field);
-      else
-        snprintf(E->e->u.raw.filebase, FILENAME_MAX, "%s/%s", D->name,
-            E->field);
+      snprintf(E->e->u.raw.filebase, FILENAME_MAX, "%s/%s",
+          D->fragment[E->fragment_index].sname ?
+          D->fragment[E->fragment_index].sname : D->name, E->field);
 
       if ((E->EN(raw,spf) = entry->EN(raw,spf)) == 0)
         _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_SPF, NULL,
@@ -480,7 +477,7 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
       /* This is the first raw field in this fragment; propagate it upwards */
       for (i = E->fragment_index; i != -1; i = D->fragment[i].parent) {
         if (D->fragment[i].ref_name == NULL) {
-          D->fragment[i].ref_name = (char *)new_ref;
+          D->fragment[i].ref_name = strdup(new_ref);
           D->fragment[i].modified = 1;
         } else
           break;

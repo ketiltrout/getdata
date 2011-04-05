@@ -90,7 +90,7 @@ was not recognised.
 .TP
 .B GD_E_BAD_SCALAR
 A scalar parameter used in the definition of the field was invalid.
-.P
+.PP
 The dirfile error may be retrieved by calling
 .BR gd_error (3).
 A descriptive error string for the last error encountered can be obtained from
@@ -115,7 +115,7 @@ typedef struct {
 .fam
 .fi
 .in
-.P
+.PP
 The
 .I field
 member is the field code of the entry (i.e. its string name).  If the call to
@@ -123,7 +123,7 @@ member is the field code of the entry (i.e. its string name).  If the call to
 is successful, this will be the field name specified as part of the
 .I field_code
 argument.
-.P
+.PP
 The
 .I field_type
 member indicates the field type of the entry.  This is an integer type equal
@@ -137,12 +137,12 @@ to one of the following symbols:
 .BR GD_RAW_ENTRY ", " GD_RECIP_ENTRY ", " GD_SBIT_ENTRY ", " GD_STRING_ENTRY .
 .ad n
 .hy
-.P
+.PP
 .B GD_INDEX_ENTRY
 is a special field type used only for the implicit
 .I INDEX
 field.  The meaning of the other symbols should be self-explanatory.
-.P
+.PP
 The 
 .I fragment_index
 member indicates the format specification fragment in which this field is
@@ -156,7 +156,7 @@ primary fragment, the file called
 .B format
 in the root dirfile directory (see 
 .IR dirfile (5)).
-.P
+.PP
 Remaining fields in the gd_entry_t structure depend on the value of
 .IR field_type .
 Callers are advised to check
@@ -186,7 +186,7 @@ typedef struct {
 .fam
 .fi
 .in
-.P
+.PP
 Only certain elements of these arrays will be initialised:
 .IP \(bu 4
 For
@@ -244,12 +244,12 @@ For
 fields, the first element corresponds to
 .IR spf .
 The remainder are unitialised.
-.P
+.PP
 The
 .I scalar
 parameters are NULL if a literal parameter was used, or else a field code
 specifying the scalar parameters. 
-.P
+.PP
 If an element of
 .I scalar
 specifies a
@@ -286,11 +286,11 @@ typedef struct {
 .fam
 .fi
 .in
-.P
+.PP
 The
 .I in_fields
 member is an array of length one containing the input field code.
-.P
+.PP
 The
 .I bitnum
 member indicates the number of the first bit (counted from zero) extracted from
@@ -302,7 +302,7 @@ scalar field code, this will be the numerical value of that field, and
 will contain the field code itself, otherwise
 .IR scalar [0]
 will be NULL.
-.P
+.PP
 The
 .I numbits
 member indicates the number of bits which are extracted from the input.
@@ -332,7 +332,7 @@ typedef struct {
 .fam
 .fi
 .in
-.P
+.PP
 The
 .I const_type
 member indicates the data type of the constant value stored in the format
@@ -341,7 +341,7 @@ file metadata.  See
 for a list of valid values that a variable of type
 .B gd_type_t
 may take.
-.P
+.PP
 The
 .I array_len
 member gives the number of elements in the array.
@@ -364,7 +364,7 @@ typedef struct {
 .fam
 .fi
 .in
-.P
+.PP
 The
 .I const_type
 member indicates the data type of the constant value stored in the format
@@ -405,7 +405,7 @@ typedef struct {
 .fam
 .fi
 .in
-.P
+.PP
 The
 .I n_fields
 member indicates the number of input fields.  It will be between one and
@@ -413,7 +413,7 @@ member indicates the number of input fields.  It will be between one and
 inclusive, which is defined in getdata.h to the maximum number of input fields
 permitted by a
 .BR LINCOM .
-.P
+.PP
 The
 .I comp_scal
 member is non-zero if any of the scale factors or offset terms have a non-zero
@@ -422,7 +422,7 @@ imaginary part.  (That is, if comp_scal is zero, the elements of
 equal the corresponding elements of
 .IR m \~and\~ b .)
 members.)
-.P
+.PP
 The
 .I in_fields
 member is an array of length
@@ -431,7 +431,7 @@ containing the input field code(s).  Only the first
 .I n_fields
 elements of this array are initialised.  The remaining elements contain
 uninitialised data.
-.P
+.PP
 The
 .I cm
 and
@@ -462,7 +462,7 @@ below on changes to the declaration of
 and
 .I cb
 when using the C89 GetData API.
-.P
+.PP
 The elements of
 .I m
 and
@@ -491,11 +491,11 @@ typedef struct {
 .fam
 .fi
 .in
-.P
+.PP
 The
 .I table
 member is the pathname to the look up table on disk.
-.P
+.PP
 The
 .I in_fields
 member is an array of length one containing the input field code.
@@ -520,7 +520,7 @@ typedef struct {
 .fam
 .fi
 .in
-.P
+.PP
 The
 .I in_fields
 member is an array of length two containing the input field codes.
@@ -544,11 +544,11 @@ typedef struct {
 .fam
 .fi
 .in
-.P
+.PP
 The
 .I in_fields
 member is an array of length one containing the input field code.
-.P
+.PP
 The
 .I shift
 member indicates the shift in samples.  The
@@ -583,7 +583,7 @@ typedef struct {
 .fam
 .fi
 .in
-.P
+.PP
 The
 .I poly_ord
 member indicates the order of the polynomial.  It will be between one and
@@ -591,7 +591,7 @@ member indicates the order of the polynomial.  It will be between one and
 inclusive, which is defined in getdata.h to the maximum order of polynomial
 permitted by a
 .BR POLYNOM .
-.P
+.PP
 The
 .I comp_scal
 member is non-zero if any of the co-efficients have a non-zero imaginary part.
@@ -599,11 +599,11 @@ member is non-zero if any of the co-efficients have a non-zero imaginary part.
 .I ca
 equal the corresponding elements of
 .IR a .)
-.P
+.PP
 The
 .I in_fields
 member is an array of length one containing the input field code.
-.P
+.PP
 The
 .I ca
 members are arrays of the co-efficient(s) for the
@@ -623,7 +623,7 @@ member will be NULL.  See
 below on changes to the declaration of
 .I ca
 when using the C89 GetData API.
-.P
+.PP
 The elements of
 .I a
 are the real parts of the corresponding elements of
@@ -650,7 +650,7 @@ typedef struct {
 .fam
 .fi
 .in
-.P
+.PP
 The
 .I comp_scal
 member is non-zero if any of the co-efficients have a non-zero imaginary part.
@@ -658,11 +658,11 @@ member is non-zero if any of the co-efficients have a non-zero imaginary part.
 .I cdividend
 equals
 .IR dividend .)
-.P
+.PP
 The
 .I in_fields
 member is an array of length one containing the input field code.
-.P
+.PP
 The
 .I cdividend
 member provides the constant dividend of the computed division.  If this value
@@ -695,7 +695,7 @@ typedef struct {
 .fam
 .fi
 .in
-.P
+.PP
 The
 .I spf
 member contains the samples per frame of the binary data on disk.  The
@@ -706,7 +706,7 @@ scalar field code, this will be the numerical value of that field, and
 will contain the field code itself, otherwise
 .IR scalar [0]
 will be NULL.
-.P
+.PP
 The
 .I data_type
 member indicates the data type of the binary data on disk.  See
@@ -751,7 +751,7 @@ double|dividend|double|u.recip.dividend
 gd_type_t|const_type|gd_type_t|u.scalar.const_type
 size_t|array_len|size_t|u.scalar.array_len
 .TE
-.P
+.PP
 In the case of complex valued data in the C89 API, the first element of the two
 element array is the real part of the complex number, and the second element is
 the imaginary part.

@@ -1,3 +1,82 @@
+2011-04-05   D. V. Wiebe <getdata@ketiltrout.net> svn:573
+	Merge in updates from 0.7 branch, r512 and subsequent:
+
+	* test/alter_crecip_zero.c test/alter_recip_zero.c: Added.
+	* src/mod.c (_GD_Change): If [c]dividend is zero, don't change it, per
+	documentation.
+
+	* src/encoding.c (_GD_MissingFramework): Properly compute the module path.
+
+	* src/flush.c (_GD_FieldSpec): For Standards Version >= 8, use new-style
+	metafield syntax.
+
+	* src/entry.c (gd_raw_filename): Clear dirfile error on entry.
+
+	* test/move_data_enc_ar.c test/entry_phase.c test/get_ss.c
+	test/alter_raw_type.c: Actually fail on error.
+
+	* m4/version.m4 configure.ac: Fix library soversion defines.
+
+	* m4/python.m4: Use the BSD `jot' if the Linux/Plan 9 `seq' is not found.
+		Also, look for python2.7.  Added --with-python-module-dir.
+
+	* src/add.c (_GD_Add): strdup ref_name when propagating upwards to prevent
+	double-free when _GD_FreeD() is called.
+	* test/add_raw_include.c: Added.
+
+	* src/include.c (gd_include): If GD_CREAT is specified, but no encoding,
+	inherit encoding from parent.
+
+	* test/test.h: Explicitly use long long format types in the checks.  Write
+	paths properly under WIN32/WIN64.
+
+	* src/legacy.c (GetFormat): Fix memset call.
+
+	* src/common.c (_GD_GetLine): Remove unused first_char.
+
+	* src/raw.c (_GD_RawSeek): nread is a ssize_t.
+
+	* bindings/python/pydirfile.c (gdpy_dirfile_putcarray): Remove unused ns.
+
+	* bindings/f77/test/big_test.f bindings/f77/test/big_test95.f90
+	bindings/f77/test/gdcopn.f bindings/f77/getdata.f90.in: Explicity specify
+	constant kinds to stop the ridiculous complaints from Fedora's gfortran.
+
+	* bindings/idl/Makefile.am: Don't needlessly rebuild sublist.c.
+
+	* src/getdata.h.in: Replace #undefs with @DEFINE_...@ tokens.   Define
+	gd_off64_t instead of polluting the namespace.  Remove MSCRT specal casing
+	for the gd_*int*_t types.
+	* configure.ac: Update for changes to getdata.h.in.  Run getdata.h.in
+	through config.status twice, first as an AC_CONFIG_FILE to replace all the
+	@DEFINE...@s, second as an AC_CONFIG_HEADER as a NOP, just to get the change
+	check.
+	* cmake/CMakeLists.txt: Add DEFINE_... variables.
+
+	* configure.ac: Check for _strtoi64() and _strtoui64()
+	* src/internal.h: Use MSCRT's _strto[u]i64 for strto[u]ll when found.
+	* cmake/CMakeLists.txt: Add -DHAVE__STRTOI64 -DHAVE__STRTOUI64
+
+	* test/parse_include_absrel.c test/parse_include_relabs.c
+	test/parse_include_absolute.c: Free cwd.
+
+	* configure.ac: check for "slimdata" in addition to "slim", which is what
+	the binary is called under Fedora.
+	* m4/encoding.m4 (GD_CHECK_ENCODING): Handle multiple binary names in $5 and
+	$6.
+
+	* src/parse.c (_GD_ParseFieldSpec): Fix GD_E_FORMAT_DUPLICATE error data.
+
+	* src/internal.h: Define S_ISREG and S_ISDIR if missing.
+
+	* test/parse_include_absolute.c test/parse_include_absrel.c
+	test/parse_include_relabs.c test/parse_include_relrel.c: Added.
+
+	* src/include.c (_GD_Include): Handle absolute paths in /INCLUDE directives.
+		The sname now contains D->name when appropriate.
+	* src/add.c (_GD_Add) src/parse.c (_GD_ParseRaw) src/move.c (gd_move): Fix
+		computation of filebase for new sname.
+
 2011-03-25   D. V. Wiebe <getdata@ketiltrout.net> svn:566
 	* src/perl.m4: Added.
 	* configure.ac: Perl tests.
@@ -80,7 +159,7 @@
 
 	* src/internal.h: Conditionalise inclusion of non-ANSI unistd.h and stdint.h.
 	Various _MSC_VER specific code.  Also, define gd_stat64 and gd_stat64_t to
-	plausibly useful things by default.o
+	plausibly useful things by default.
 	
 	* src/getdata.h.in: Remove unistd.h. Add math.h and some _MSC_VER specific
 	code.  (There are still unresolved MSVC issues with this file.)
@@ -777,7 +856,7 @@
 	* src/flimits.c (gd_get_eof gd_get_eof64 _GD_GetEOF): Renamed.  Proper INDEX
 	handling added.
 
-	* src/foffs.c src/flimits.c src/nsamples.c: fofds.c and nsamples.c merged
+	* src/foffs.c src/flimits.c src/nsamples.c: foffs.c and nsamples.c merged
 	and renamed flimits.c.
 
 2010-06-30   D. V. Wiebe <getdata@ketiltrout.net>   svn:425 svn:426

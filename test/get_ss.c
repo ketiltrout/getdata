@@ -48,5 +48,5 @@ int main(void)
   for (i = 0; i < 8; ++i)
     CHECKUi(i,c[i], 40 + i);
 
-  return 0;
+  return r;
 }

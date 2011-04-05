@@ -25,7 +25,7 @@ C     This very large test checks almost every procedure defined by the
 C     F77 bindings.  Procedures not tested include: GDCOPN GDMFLS GDFLSH
 C     GDDSCD GDCLBK GDCLOS (although this last one is used)
 
-      PROGRAM GETTST
+      PROGRAM BIGTST
       INCLUDE "getdata.f"
 
       CHARACTER*12 fildir
@@ -46,6 +46,7 @@ C     GDDSCD GDCLBK GDCLOS (although this last one is used)
       CHARACTER*20 str
       INTEGER*1 c(8)
       INTEGER*1 datdat(80)
+      INTEGER*1 k
       INTEGER i
       INTEGER d
       INTEGER e
@@ -62,14 +63,24 @@ C     GDDSCD GDCLBK GDCLOS (although this last one is used)
       CALL SYSTEM ( 'rm -rf ' // fildir )
       CALL SYSTEM ( 'mkdir ' // fildir )
 
-      DO 10 i = 1, 80
-      datdat(i) = i
+      DO 10 k = 1, 80
+      datdat(k) = k
    10 CONTINUE
 
-      fields =(/ 'INDEX  ', 'bit    ', 'carray ', 'const  ', 'data   ',
-     +'div    ', 'lincom ', 'linterp', 'mult   ', 'phase  ', 'polynom',
-     +'recip  ', 'sbit   ', 'string ', '       ', '       ', '       ',
-     +'       ', '       ', '       ', '       ' /)
+      fields(1) = 'INDEX  '
+      fields(2) = 'bit    '
+      fields(3) = 'carray '
+      fields(4) = 'const  '
+      fields(5) = 'data   '
+      fields(6) = 'div    '
+      fields(7) = 'lincom '
+      fields(8) = 'linterp'
+      fields(9) = 'mult   '
+      fields(10) = 'phase  '
+      fields(11) = 'polynom'
+      fields(12) = 'recip  '
+      fields(13) = 'sbit   '
+      fields(14) = 'string '
 
 C     Write the test dirfile
       OPEN(1, FILE=frmat, STATUS='NEW')
@@ -304,7 +315,14 @@ C     12: GDGSPF check
       ENDIF
 
 C     13: GDPUTD check
-      c = (/ 13, 14, 15, 16, 17, 18, 19, 20 /)
+      c(1) = 13
+      c(2) = 14
+      c(3) = 15
+      c(4) = 16
+      c(5) = 17
+      c(6) = 18
+      c(7) = 19
+      c(8) = 20
       CALL GDPUTD(n, d, 'data', 4, 5, 1, 0, 4, GD_I8, c)
       CALL GDEROR(e, d)
 
@@ -416,7 +434,12 @@ C     17: GDGELC check
         WRITE(*, 2008) 17, 6, fields(3)
       ENDIF
 
-      q = (/ 1.1, 2.2, 2.2, 3.3, 5.5, 5.5 /)
+      q(1) = 1.1
+      q(2) = 2.2
+      q(3) = 2.2
+      q(4) = 3.3
+      q(5) = 5.5
+      q(6) = 5.5
       DO 170 i=1,6
       IF (abs(p(i) - q(i)) .gt. 0.001) THEN
         ne = ne + 1
@@ -509,7 +532,12 @@ C     19: GDGEPN check
         WRITE(*, 2008) 19, 4, fn
       ENDIF
 
-      q = (/ 1.1, 2.2, 2.2, 3.3, 5.5, 5.5 /)
+      q(1) = 1.1
+      q(2) = 2.2
+      q(3) = 2.2
+      q(4) = 3.3
+      q(5) = 5.5
+      q(6) = 5.5
       DO 190 i=1,6
       IF (abs(p(i) - q(i)) .gt. 0.001) THEN
         ne = ne + 1
@@ -831,7 +859,12 @@ C     29: GDADLC check
         WRITE(*, 2008) 29, 7, fields(2)
       ENDIF
 
-      q = (/ 9.9, 8.8, 7.7, 6.6, 5.5, 5.5 /)
+      q(1) = 9.9
+      q(2) = 8.8
+      q(3) = 7.7
+      q(4) = 6.6
+      q(5) = 5.5
+      q(6) = 5.5
       DO 290 i=1,4
       IF (abs(p(i) - q(i)) .gt. 0.001) THEN
         ne = ne + 1
@@ -939,7 +972,13 @@ C     31: GDADPN check
         WRITE(*, 2008) 31, 4, fn
       ENDIF
 
-      q = (/ 3d3, 4d4, 5d5, 6d6, 5.5d0, 5.5d0 /)
+      q(1) = 3d3
+      q(2) = 4d4
+      q(3) = 5d5
+      q(4) = 6d6
+      q(5) = 5.5d0
+      q(6) = 5.5d0
+
       DO 310 i=1,4
       IF (abs(p(i) - q(i)) .gt. 0.001) THEN
         ne = ne + 1
@@ -1346,10 +1385,27 @@ C     44: GDNVEC check
       ENDIF
 
 C     45: GDVECN check
-      fields =(/ 'INDEX  ', 'bit    ', 'data   ', 'div    ', 'lincom ',
-     +'linterp', 'mult   ', 'new1   ', 'new10  ', 'new2   ', 'new3   ',
-     +'new4   ', 'new5   ', 'new6   ', 'new7   ', 'new8   ', 'new9   ',
-     +'phase  ', 'polynom', 'recip  ', 'sbit   ' /)
+      fields(1) = 'INDEX  '
+      fields(2) = 'bit    '
+      fields(3) = 'data   '
+      fields(4) = 'div    '
+      fields(5) = 'lincom '
+      fields(6) = 'linterp'
+      fields(7) = 'mult   '
+      fields(8) = 'new1   '
+      fields(9) = 'new10  '
+      fields(10) = 'new2   '
+      fields(11) = 'new3   '
+      fields(12) = 'new4   '
+      fields(13) = 'new5   '
+      fields(14) = 'new6   '
+      fields(15) = 'new7   '
+      fields(16) = 'new8   '
+      fields(17) = 'new9   '
+      fields(18) = 'phase  '
+      fields(19) = 'polynom'
+      fields(20) = 'recip  '
+      fields(21) = 'sbit   '
       DO 450 i = 1, n
       l = flen
       CALL GDVECN(fn, l, d, i)
@@ -1416,7 +1472,12 @@ C     46: GDMDLC check
         WRITE(*, 2008) 46, 7, fields(2)
       ENDIF
 
-      q = (/ 9.9, 8.8, 7.7, 6.6, 5.5, 5.5 /)
+      q(1) = 9.9
+      q(2) = 8.8
+      q(3) = 7.7
+      q(4) = 6.6
+      q(5) = 5.5
+      q(6) = 5.5
       DO 460 i=1,4
       IF (abs(p(i) - q(i)) .gt. 0.001) THEN
         ne = ne + 1
@@ -1524,7 +1585,12 @@ C     48: GDMDPN check
         WRITE(*, 2008) 48, 4, fn
       ENDIF
 
-      q = (/ 3d3, 4d4, 5d5, 6d6, 5.5d0, 5.5d0 /)
+      q(1) = 3d3
+      q(2) = 4d4
+      q(3) = 5d5
+      q(4) = 6d6
+      q(5) = 5.5d0
+      q(6) = 5.5d0
       DO 480 i=1,4
       IF (abs(p(i) - q(i)) .gt. 0.001) THEN
         ne = ne + 1
@@ -1948,7 +2014,7 @@ C     61: GDPTCO check
         WRITE(*, 2006) 61, 1, e
       ENDIF
 
-      CALL GDGTCO(d, 'const', 11, GD_F32, fl)
+      CALL GDGTCO(d, 'const', 5, GD_F32, fl)
       CALL GDEROR(e, d)
 
       IF (e .NE. GD_EOK) THEN
@@ -2041,10 +2107,16 @@ C     65: GDNMVE check
       ENDIF
 
 C     66: GDMVEN check
-      fields =(/'mlut  ', 'mnew1 ', 'mnew2 ', 'mnew3 ', 'mnew5 ',
-     +'mnew6 ', 'mnew7 ', 'mnew8 ', 'mnew9 ', 'mnew10', '      ',
-     +'      ', '      ', '      ', '      ', '      ', '      ',
-     +'      ', '      ', '      ', '      '/)
+      fields(1) = 'mlut  '
+      fields(2) = 'mnew1 '
+      fields(3) = 'mnew2 '
+      fields(4) = 'mnew3 '
+      fields(5) = 'mnew5 '
+      fields(6) = 'mnew6 '
+      fields(7) = 'mnew7 '
+      fields(8) = 'mnew8 '
+      fields(9) = 'mnew9 '
+      fields(10) = 'mnew10'
       DO 660 i = 1, n
       l = flen
       CALL GDMVEN(fn, l, d, "data", 4, i)
@@ -2148,7 +2220,12 @@ C     68: GDALLC check
         WRITE(*, 2008) 68, 8, fields(3)
       ENDIF
 
-      q = (/ 9.9d-1, 7.8d0, 1.1d1, 2.2d-2, 1.96d0, 0d0 /)
+      q(1) = 9.9d-1
+      q(2) = 7.8d0
+      q(3) = 1.1d1
+      q(4) = 2.2d-2
+      q(5) = 1.96d0
+      q(6) = 0d0
       DO 680 i=1,6
       IF (abs(p(i) - q(i)) .gt. 0.001) THEN
         ne = ne + 1
@@ -2256,9 +2333,8 @@ C     70: GDALPN check
         WRITE(*, 2008) 70, 4, fn
       ENDIF
 
-      q = (/ 3d0, 4d0, 5d0, 6d0, 7d0, 0d0 /)
       DO 700 i=1,5
-      IF (abs(p(i) - q(i)) .gt. 0.001) THEN
+      IF (abs(p(i) - 2d0 - i) .gt. 0.001) THEN
         ne = ne + 1
         WRITE(*, 2010) i, 70, p(i)
       ENDIF
@@ -3635,7 +3711,12 @@ C     159: GDGCAS check
  1590 CONTINUE
 
 C     168: GDPTCA check
-      p = (/ 9.6, 8.5, 7.4, 6.3, 5.2, 4.1 /)
+      p(1) = 9.6
+      p(2) = 8.5
+      p(3) = 7.4
+      p(4) = 6.3
+      p(5) = 5.2
+      p(6) = 4.1
       CALL GDPTCA(d, 'carray', 6, GD_F64, p)
       CALL GDEROR(e, d)
 
@@ -3660,7 +3741,12 @@ C     168: GDPTCA check
  1680 CONTINUE
 
 C     169: GDGCAS check
-      p = (/ 5.5, 5.6, 5.7, 5.8, 5.9, 6.0 /)
+      p(1) = 5.5
+      p(2) = 5.6
+      p(3) = 5.7
+      p(4) = 5.8
+      p(5) = 5.9
+      p(6) = 6.0
       CALL GDPCAS(d, 'carray', 6, 3, 2, GD_F64, p)
       CALL GDEROR(e, d)
 
@@ -3730,7 +3816,10 @@ C     178: GDGECA check
       ENDIF
 
 C     179: GDADCA check
-      p = (/ 1.2, 3.4, 5.6, 7.8, 0., 0. /)
+      p(1) = 1.2
+      p(2) = 3.4
+      p(3) = 5.6
+      p(4) = 7.8
       CALL GDADCA(d, 'new17', 5, GD_F64, 4, GD_F64, p, 0)
       CALL GDEROR(e, d)
 
@@ -3778,7 +3867,10 @@ C     179: GDADCA check
  1790 CONTINUE
 
 C     180: GDMDCA check
-      p = (/ 3.2, 5.4, 7.6, 9.8, 0., 0. /)
+      p(1) = 3.2
+      p(2) = 5.4
+      p(3) = 7.6
+      p(4) = 9.8
       CALL GDMDCA(d, 'data', 4, 'new17', 5, GD_F64, 4, GD_F64, p)
       CALL GDEROR(e, d)
 
@@ -3877,19 +3969,19 @@ C     Cleanup
         CALL EXIT(1)
       ENDIF
 
- 2001 FORMAT('e[', i0, '] = ', i0)
- 2002 FORMAT('n[', i0, '] = ', i0)
- 2003 FORMAT('ne = ', i0)
- 2004 FORMAT('c(', i0, ')[', i0, '] = ', i0)
- 2005 FORMAT('fl[', i0, '] = ', f0.16)
- 2006 FORMAT('e[', i0, ', ', i0, '] = ', i0)
- 2007 FORMAT('n[', i0, ', ', i0, '] = ', i0)
- 2008 FORMAT('fn(', i0, ')[', i0, '] = "', a, '"')
- 2009 FORMAT('s[' i0, '] = "', a, '"')
- 2010 FORMAT('p(', i0, ')[', i0, '] = ', d16.10)
- 2011 FORMAT('p(', i0, ')[', i0, '] = ', d16.10, ';', d16.10)
- 2012 FORMAT('d[', i0, '] = ', d16.10)
- 2013 FORMAT('x[', i0, '] = ', d16.10, ';', d16.10)
+ 2001 FORMAT('e[', i3, '] = ', i4)
+ 2002 FORMAT('n[', i3, '] = ', i4)
+ 2003 FORMAT('ne = ', i8)
+ 2004 FORMAT('c(', i3, ')[', i3, '] = ', i2)
+ 2005 FORMAT('fl[', i3, '] = ', f0.16)
+ 2006 FORMAT('e[', i3, ', ', i3, '] = ', i4)
+ 2007 FORMAT('n[', i3, ', ', i3, '] = ', i4)
+ 2008 FORMAT('fn(', i3, ')[', i3, '] = "', a, '"')
+ 2009 FORMAT('s[', i3, '] = "', a, '"')
+ 2010 FORMAT('p(', i3, ')[', i3, '] = ', d16.10)
+ 2011 FORMAT('p(', i3, ')[', i3, '] = ', d16.10, ';', d16.10)
+ 2012 FORMAT('d[', i3, '] = ', d16.10)
+ 2013 FORMAT('x[', i3, '] = ', d16.10, ';', d16.10)
 
       STOP
       END 

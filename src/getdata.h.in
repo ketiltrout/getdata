@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 C. Barth Netterfield
  * Copyright (C) 2003-2005 Theodore Kisner
- * Copyright (C) 2005-2010 D. V. Wiebe
+ * Copyright (C) 2005-2011 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -56,7 +56,7 @@ extern "C" {
 #include <sys/types.h>
 
 /* If this symbol is defined here, the C99-API is not present in the library */
-#undef GD_NO_C99_API /**/
+@DEFINE_GD_NO_C99_API@
 
 #if defined(GD_NO_C99_API) && ! defined(GD_C89_API)
 # define GD_C89_API
@@ -227,15 +227,9 @@ typedef enum {
 /* GD_NO_ENTRY is not part of this count */
 #define GD_N_ENTYPES 14
 
-#if defined(__MINGW32__) || defined(_MSC_VER)
-typedef short _gd_int16_t;
-typedef unsigned short _gd_uint16_t;
-typedef __int64 _gd_int64_t;
-#else
-#undef _gd_int16_t /**/
-#undef _gd_uint16_t /**/
-#undef _gd_int64_t /**/
-#endif
+@DEFINE_gd_int16_t@
+@DEFINE_gd_uint16_t@
+@DEFINE_gd_int64_t@
 
 #if ! defined GD_C89_API
 #  include <inttypes.h>
@@ -247,9 +241,9 @@ typedef int64_t gd_shift_t;
 #else
 #  define GD_DCOMPLEXM(v) double v[2]
 #  define GD_DCOMPLEXP(v) double *v
-typedef _gd_int16_t gd_bit_t;
-typedef _gd_uint16_t gd_spf_t;
-typedef _gd_int64_t gd_shift_t;
+typedef gd_int16_t gd_bit_t;
+typedef gd_uint16_t gd_spf_t;
+typedef gd_int64_t gd_shift_t;
 #endif
 
 /* Data types -- No valid type may set 0x40 */
@@ -893,46 +887,45 @@ extern double __REDIRECT (gd_framenum_subset, (DIRFILE *dirfile,
 
 #if (defined _FILE_OFFSET_BITS && _FILE_OFFSET_BITS == 64) || \
                                     (defined __APPLE__) || (defined __CYGWIN__)
-#define off64_t off_t
+#define gd_off64_t off_t
+#else
+#define gd_off64_t off64_t
 #endif
-extern int gd_alter_frameoffset64(DIRFILE *dirfile, off64_t offset,
+extern int gd_alter_frameoffset64(DIRFILE *dirfile, gd_off64_t offset,
     int fragment, int recode) gd_nonnull ((1));
 
 extern size_t gd_getdata64(DIRFILE *dirfile, const char *field_code,
-    off64_t first_frame, off64_t first_samp, size_t num_frames, size_t num_samp,
-    gd_type_t return_type, void *data) gd_nonnull ((1, 2));
+    gd_off64_t first_frame, gd_off64_t first_samp, size_t num_frames,
+    size_t num_samp, gd_type_t return_type, void *data) gd_nonnull ((1, 2));
 
 extern size_t gd_putdata64(DIRFILE *dirfile, const char *field_code,
-    off64_t first_frame, off64_t first_sample, size_t num_frames,
+    gd_off64_t first_frame, gd_off64_t first_sample, size_t num_frames,
     size_t num_samples, gd_type_t data_type, const void *data)
 gd_nonnull ((1, 2));
 
-extern off64_t gd_frameoffset64(DIRFILE *dirfile, int fragment) gd_nonnull((1));
+extern gd_off64_t gd_frameoffset64(DIRFILE *dirfile,
+    int fragment) gd_nonnull((1));
 
 extern double gd_framenum_subset64(DIRFILE *dirfile, const char *field_code,
-    double value, off64_t field_start, off64_t field_end) gd_nonnull ((1,2));
+    double value, gd_off64_t field_start,
+    gd_off64_t field_end) gd_nonnull ((1,2));
 
-extern off64_t gd_nframes64(DIRFILE *dirfile) gd_nonnull ((1));
+extern gd_off64_t gd_nframes64(DIRFILE *dirfile) gd_nonnull ((1));
 
-extern off64_t gd_bof64(DIRFILE *dirfile, const char *field_code) gd_nothrow
+extern gd_off64_t gd_bof64(DIRFILE *dirfile, const char *field_code) gd_nothrow
 gd_nonnull ((1,2));
 
-extern off64_t gd_eof64(DIRFILE *dirfile, const char *field_code)
+extern gd_off64_t gd_eof64(DIRFILE *dirfile, const char *field_code)
   gd_nonnull ((1,2));
-
-#if (defined _FILE_OFFSET_BITS && _FILE_OFFSET_BITS == 64) || \
-                                    (defined __APPLE__) || (defined __CYGWIN__)
-#undef off64_t /**/
-#endif
 #endif
 
-
-/* If this symbol is defined here, the legacy API is present in the library */
-#undef GD_LEGACY_API /**/
 
 #ifdef __cplusplus
 }
 #endif
+
+/* If this symbol is defined here, the legacy API is present in the library */
+@DEFINE_GD_LEGACY_API@
 
 /* The caller can disable the legacy API by defining GD_NO_LEGACY_API
  * before including getdata.h

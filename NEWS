@@ -1,3 +1,48 @@
+New in version 0.7.3:
+
+  Library Changes
+
+  * BUG FIX: Passing a zero dividend to alter_crecip() and alter_recip() now
+    results in the dividend not changing, per documentation.
+  * BUG FIX: GetData wasn't properly computing the module directory, causing
+    encodings using external modules to fail with GD_E_UNSUPPORTED.
+  * BUG FIX: Metafield records are now properly stored in the format file for
+    Standards Version 8.
+  * BUG FIX: gd_raw_filename() wasn't clearing the Dirfile error before
+    operation, resulting in it failing erroneously in certain situations.
+
+  Utilities Changes:
+
+  * BUG FIX: A potential segmentation fault has been patched in dirfile2ascii.
+
+|==============================================================================|
+
+New in version 0.7.2:
+
+  Library Changes
+
+  * If built with modules, the plugin shared objects will now be installed in
+    a separate directory (by default "${libdir}/getdata", but see the
+    --with-module-dir option in ./configure).
+  * BUG FIX: When using modules, a missing plugin no longer results in a lock up
+    the second time an attempt is made to find it.
+  * BUG FIX: GetData now properly processes /INCLUDE directives with absolute
+    paths, as the documentation insists it should.
+  * BUG FIX: gd_add()ing the first raw field in a dirfile to a subfragment no
+    longer results in memory corruption when calling gd_close().
+
+  API Changes
+
+  * If called with GD_CREAT but no encoding specified, gd_include() now will
+    duplicate the encoding of the parent fragment (if any).
+
+  Miscellaneous
+
+  * The python module install dir can now be changed by passing
+    --with-python-module-dir to configure.
+
+|==============================================================================|
+
 New in version 0.7.1:
 
   Library Changes

@@ -57,7 +57,7 @@ program big_test
   double complex, dimension(8) :: cc16
 
   do i=1,80
-    datadata(i) = i
+    datadata(i) = int(i,1)
   end do
 
   call system ( 'rm -rf ' // fildir )
@@ -552,7 +552,7 @@ program big_test
   end if
 
 ! 13: fgd_putdata_i1 check
-  ci1 = (/ 13, 14, 15, 16, 17, 18, 19, 20 /)
+  ci1 = (/ 13_1, 14_1, 15_1, 16_1, 17_1, 18_1, 19_1, 20_1 /)
   n = fgd_putdata_i1(d, 'data', 5, 1, 0, 4, ci1)
   e = fgd_error(d)
 
@@ -577,7 +577,7 @@ program big_test
   end do
 
 ! 118: fgd_putdata_i2 check
-  ci2 = (/ 23, 24, 25, 26, 27, 28, 29, 30 /)
+  ci2 = (/ 23_2, 24_2, 25_2, 26_2, 27_2, 28_2, 29_2, 30_2 /)
   n = fgd_putdata_i2(d, 'data', 5, 1, 0, 4, ci2)
   e = fgd_error(d)
 
@@ -4286,7 +4286,7 @@ program big_test
   end do
 
 ! 168: gd_put_carray
-  ci1 = (/ 11, 12, 13, 14, 15, 16, 0, 0 /)
+  ci1 = (/ 11_1, 12_1, 13_1, 14_1, 15_1, 16_1, 0_1, 0_1 /)
   call fgd_put_carray_i1(d, "carray", 0, 0, ci1)
   e = fgd_error(d)
 
@@ -4311,7 +4311,7 @@ program big_test
   end do
 
 ! 169: gd_put_carray_slice (INT8)
-  ci1 = (/ 72, 73, 0, 0, 0, 0, 0, 0 /)
+  ci1 = (/ 72_1, 73_1, 0_1, 0_1, 0_1, 0_1, 0_1, 0_1 /)
   call fgd_put_carray_i1(d, "carray", 3, 2, ci1)
   e = fgd_error(d)
 
@@ -4343,7 +4343,7 @@ program big_test
   end do
 
 ! 170: gd_put_carray_slice (INT16)
-  ci2 = (/ 173, 174, 0, 0, 0, 0, 0, 0 /)
+  ci2 = (/ 173_2, 174_2, 0_2, 0_2, 0_2, 0_2, 0_2, 0_2 /)
   call fgd_put_carray_i2(d, "carray", 3, 2, ci2)
   e = fgd_error(d)
 

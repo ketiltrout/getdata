@@ -2090,7 +2090,7 @@ fragment_index)
   character (len=*), intent(in) :: field_name
   integer*1, dimension(array_len) :: zero
 
-  zero = 0.
+  zero = 0
 
   call gdadca(dirfile, TRIM(field_name), LEN_TRIM(field_name), const_type, &
   array_len, GD_INT8, zero, fragment_index)
@@ -2101,7 +2101,7 @@ subroutine fgd_madd_carray (dirfile, parent, field_name, const_type, array_len)
   character (len=*), intent(in) :: field_name, parent
   integer*1, dimension(array_len) :: zero
 
-  zero = 0.
+  zero = 0
 
   call gdmdca(dirfile, TRIM(parent), LEN_TRIM(parent), TRIM(field_name), &
   LEN_TRIM(field_name), const_type, array_len, GD_INT8, zero)
@@ -2112,7 +2112,7 @@ subroutine fgd_alter_carray (dirfile, field_name, const_type, array_len)
   character (len=*), intent(in) :: field_name
   integer*1, dimension(array_len) :: zero
 
-  zero = 0.
+  zero = 0
 
   call gdalca(dirfile, TRIM(field_name), LEN_TRIM(field_name), const_type, &
   array_len)

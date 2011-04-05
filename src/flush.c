@@ -282,7 +282,8 @@ static void _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
 
   ptr = E->field;
 
-  if (meta) {
+  /* From Standards Version 8 and on, just use Barth-style */
+  if (meta && D->standards < 8) {
     fputs("META ", stream);
     for (; *ptr != '/'; ++ptr)
       fputc(*ptr, stream);

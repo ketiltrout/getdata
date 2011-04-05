@@ -60,7 +60,7 @@ off64_t _GD_RawSeek(struct _gd_raw_file* file, off64_t count,
 ssize_t _GD_RawRead(struct _gd_raw_file *file, void *ptr, gd_type_t data_type,
     size_t nmemb)
 {
-  size_t nread;
+  ssize_t nread;
 
   dtrace("%p, %p, %x, %zu", file, ptr, data_type, nmemb);
 
@@ -69,7 +69,7 @@ ssize_t _GD_RawRead(struct _gd_raw_file *file, void *ptr, gd_type_t data_type,
   if (nread >= 0)
     nread /= GD_SIZE(data_type);
 
-  dreturn("%zu", nread);
+  dreturn("%zi", nread);
   return nread;
 }
 

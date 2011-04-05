@@ -180,11 +180,9 @@ int gd_rename(DIRFILE *D, const char *old_code, const char *new_name,
       return -1;
     }
 
-    if (D->fragment[E->fragment_index].sname)
-      snprintf(filebase, FILENAME_MAX, "%s/%s/%s", D->name,
-          D->fragment[E->fragment_index].sname, new_name);
-    else
-      snprintf(filebase, FILENAME_MAX, "%s/%s", D->name, new_name);
+    snprintf(filebase, FILENAME_MAX, "%s/%s",
+        D->fragment[E->fragment_index].sname ?
+        D->fragment[E->fragment_index].sname : D->name, new_name);
 
     /* Close the old file */
     if (E->e->u.raw.file->fp != -1 &&

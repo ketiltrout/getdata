@@ -170,7 +170,9 @@ int main (int argc, char **argv)
   size_t skip = 0;
   int skipping = 0;
   size_t k, z;
+#if 0
   int average = 0;
+#endif
   int optind = 0;
   const double NaN = NAN;
   const struct option longopts[] = {
@@ -298,7 +300,9 @@ int main (int argc, char **argv)
         zero = optarg;
         break;
       case 'b':
+#if 0
         average = 1;
+#endif
         fprintf(stderr, "Warning: Ignoring -b found on command line.\n");
         break;
       case 'h':

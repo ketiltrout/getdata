@@ -276,11 +276,8 @@ static gd_entry_t* _GD_ParseRaw(DIRFILE* D, char* in_cols[MAX_IN_COLS],
     return NULL;
   }
 
-  if (D->fragment[me].sname)
-    snprintf(E->e->u.raw.filebase, FILENAME_MAX, "%s/%s/%s", D->name,
-        D->fragment[me].sname, in_cols[0]);
-  else
-    snprintf(E->e->u.raw.filebase, FILENAME_MAX, "%s/%s", D->name, in_cols[0]);
+  snprintf(E->e->u.raw.filebase, FILENAME_MAX, "%s/%s", D->fragment[me].sname ?
+      D->fragment[me].sname : D->name, in_cols[0]);
 
   E->EN(raw,data_type) = _GD_RawType(in_cols[2], standards, pedantic);
   E->e->u.raw.size = GD_SIZE(E->EN(raw,data_type));
@@ -1414,7 +1411,7 @@ gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, char** in_cols,
     if (Q) {
       if (~flags & GD_IGNORE_DUPS)
         _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_DUPLICATE, format_file,
-            linenum, D->fragment[Q->fragment_index].cname);
+            linenum, E->field);
       _GD_FreeE(E, 1);
       dreturn("%p", NULL);
       return NULL;

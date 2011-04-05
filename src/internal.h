@@ -218,7 +218,6 @@ const char* _gd_colsub(void);
 #  endif
 #endif
 
-
 #ifdef HAVE__STRTOI64
 #  define gd_strtoll _strtoi64
 #elif defined(HAVE_STRTOLL)
@@ -361,7 +360,7 @@ ssize_t getdelim(char**, size_t*, int, FILE*);
 
 #define GD_E_BAD_ENTRY_TYPE     1
 #define GD_E_BAD_ENTRY_METARAW  2
-#define GD_E_BAD_ENTRY_SPF      3 
+#define GD_E_BAD_ENTRY_SPF      3
 #define GD_E_BAD_ENTRY_NFIELDS  4
 #define GD_E_BAD_ENTRY_NUMBITS  5
 #define GD_E_BAD_ENTRY_BITNUM   6

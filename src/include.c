@@ -39,6 +39,8 @@ int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,
     int linenum, char** ref_name, int me, int* standards, unsigned long *flags)
 {
   int i;
+  int abs = 0;
+  int sname_null_ok = 0;
   int found = 0;
   char temp_buf1[FILENAME_MAX];
   char temp_buf2[FILENAME_MAX];
@@ -49,11 +51,20 @@ int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,
       ref_name, linenum, me, standards, flags);
 
   /* create the format filename */
-  if (D->fragment[me].sname)
-    snprintf(temp_buf1, FILENAME_MAX, "%s/%s/%s", D->name,
-        D->fragment[me].sname, ename);
-  else
-    snprintf(temp_buf1, FILENAME_MAX, "%s/%s", D->name, ename);
+  if (
+      /* check for absolute path */
+#if defined _WIN32 || defined _WIN64
+      ename[0] != '\0' && ename[1] == ':'
+#else
+      ename[0] == '/'
+#endif
+     ) {
+    strncpy(temp_buf1, ename, FILENAME_MAX - 1);
+    temp_buf1[FILENAME_MAX - 1] = '\0';
+    abs = 1;
+  } else
+    snprintf(temp_buf1, FILENAME_MAX, "%s/%s", D->fragment[me].sname ?
+        D->fragment[me].sname : D->name, ename);
 
   /* Run through the include list to see if we've already included this
    * file */
@@ -129,22 +140,29 @@ int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,
   /* extract the subdirectory name - dirname both returns a volatile string
    * and modifies its argument, ergo strcpy */
   strncpy(temp_buf1, ename, FILENAME_MAX);
-  if (D->fragment[me].sname)
-    snprintf(temp_buf2, FILENAME_MAX, "%s/%s", D->fragment[me].sname,
-        dirname(temp_buf1));
-  else
-    strcpy(temp_buf2, dirname(temp_buf1));
-
-  if (temp_buf2[0] == '.' && temp_buf2[1] == '\0')
-    D->fragment[D->n_fragment - 1].sname = NULL;
+  if (abs)
+    D->fragment[D->n_fragment - 1].sname = strdup(dirname(temp_buf1));
   else {
-    D->fragment[D->n_fragment - 1].sname = strdup(temp_buf2);
-
-    if (D->fragment[D->n_fragment - 1].sname == NULL) {
-      _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-      dreturn("%i", -1);
-      return -1;
+    strcpy(temp_buf2, dirname(temp_buf1));
+    if (temp_buf2[0] == '.' && temp_buf2[1] == '\0') {
+      if (D->fragment[me].sname)
+        D->fragment[D->n_fragment - 1].sname = strdup(D->fragment[me].sname);
+      else {
+        D->fragment[D->n_fragment - 1].sname = NULL;
+        sname_null_ok = 1;
+      }
+    } else {
+      strncpy(temp_buf1, ename, FILENAME_MAX);
+      snprintf(temp_buf2, FILENAME_MAX, "%s/%s", D->fragment[me].sname ? 
+          D->fragment[me].sname : D->name, dirname(temp_buf1));
+      D->fragment[D->n_fragment - 1].sname = strdup(temp_buf2);
     }
+  }
+
+  if (!sname_null_ok && D->fragment[D->n_fragment - 1].sname == NULL) {
+    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
   }
 
   *ref_name = _GD_ParseFragment(new_fp, D, D->n_fragment - 1, standards, flags);
@@ -199,6 +217,11 @@ int gd_include(DIRFILE* D, const char* file, int fragment_index,
     dreturn("%i", -1);
     return -1;
   }
+
+  /* if the caller specified no encoding scheme, but we were asked to create
+   * the fragment, inherit it from the parent */
+  if ((flags & (GD_ENCODING | GD_CREAT)) == GD_CREAT)
+    flags |= D->flags & GD_ENCODING;
 
   new_fragment = _GD_Include(D, file, "dirfile_include()", 0, &ref_name,
       fragment_index, &standards, &flags);

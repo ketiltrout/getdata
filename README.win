@@ -1,0 +1,176 @@
+THE GETDATA PROJECT
+===================
+
+The GetData Project is the reference implementation of the Dirfile Standards.
+The Dirfile database format is designed to provide a fast, simple format for
+storing and reading binary time-ordered data.  The Dirfile Standards are
+described in detail in three Unix manual pages distributed with this package:
+dirfile(5), dirfile-format(5) and dirfile-encoding(5), which may be read before
+installation by running:
+
+  $ man man/dirfile.5
+  $ man man/dirfile-format.5
+  $ man man/dirfile-encoding.5
+
+from the top GetData Project directory (the directory containing this README
+file).  After installation, they can be read with the standard man command:
+
+  $ man dirfile
+  $ man dirfile-format
+  $ man dirfile-encoding
+
+More information on the GetData Project and the Dirfile database format may be
+found on the World Wide Web:
+
+  http://getdata.sourceforge.net/
+
+
+WARRANTY AND REDISTRIBUTION
+===========================
+
+GetData is free software; you can redistribute it and/or modify it under the
+terms of the GNU Lesser General Public License as published by the Free Software
+Foundation: either version 2.1 of the License, or (at your option) any later
+version.
+
+GetData is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public License along
+with GetData in a file called `COPYING'; if not, write to the Free Software
+Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
+
+
+CONTENTS
+========
+
+This package provides:
+  * the Dirfile Standards documents (three Unix manual pages in HTML)
+  * the C GetData library (libgetdata) including HTMLised Unix manual pages
+  * bindings to the library from C++ (libgetdata++)
+
+Documentation for the various bindings, if present, can be found in files
+named `README.<language>' in the doc/ directory.  The C interface is described
+in this document and the associated man pages.
+
+A full list of features new to this release of GetData may be found in the
+file called `NEWS'.
+
+This package only provides a subset of the functionality of the full GetData
+source code release, and is designed to be built on Microsoft Windows using
+Microsoft Corporation's Visual C++ compiler, or else the open source MinGW
+compiler.  Notably missing in this package are bindings for Fortran, Python,
+and the Interactive Data Language, the binary utilities (checkdirfile and
+dirfile2ascii), support for external data encodings (compressed dirfiles),
+and the C Library's C99 and Legacy APIs.
+
+The full GetData source code release, which cannot be built (easily) by Visual
+C++ (but can be built using MinGW, if the associated MSys shell is used) is
+available from the World Wide Web; for details see:
+
+  http://getdata.sourceforge.net/
+
+
+
+DIRFILE STANDARDS VERSION 8
+===========================
+
+The 0.7.0 release of the GetData Library (October 2010), was released in
+conjunction with a new version of the Dirfile Standards, known as Standards
+Version 8.
+
+Standards Version 8 introduces the following:
+  * Two new field types: DIVIDE, the quotient of two input vector fields,
+    and RECIP, the reciprocal of a vector field.
+  * Support for middle-endian ARM double-precision floating point data.
+  * Furthermore, several deprecated features have been removed.  The old single
+    character type names are no longer accepted, and directives now require an
+    initial forward slash.  (NB: these features are only removed from Standards
+    Version 8; GetData, which understands all Standards Versions, still can work
+    with these features.)
+
+This is the first update to the Dirfile Standards since Standards Version 7
+(October 2009).  A full history of the Dirfile Standards can be found in the
+dirfile-format(5) man page.
+
+
+BUILDING THE LIBRARY
+====================
+
+This package may be built using Kitware's CMake build system.  Consult the CMake 
+documentation for generic instructions on using CMake.  A brief summary follows.
+This package supports building GetData using either Microsoft's Visual C++ compiler
+or else the free MinGW compiler, both which produce native Win32 binaries.
+
+Best practice is to build out of source. Call CMake in the build folder and
+point it to the 'cmake' folder within the GetData source. For instance,
+to create a project file for Microsoft Visual Studio 10 execute:
+
+  cmake -G"Visual Studio 10" ..\getdata-0.7\cmake
+
+Then build the project as usual.
+
+The GetData test suit could be ebabled by setting the GD_TEST variable:
+
+  cmake . -DGD_TEST=1
+
+In Visual Studio run the test by building the 'RUN_TESTS'. Using mingw
+or nmake run the tests by calling ctest.
+
+The install path could be set via the variable CMAKE_INSTALL_PREFIX.
+By default it installs to <build-dir>/INSTALLED.
+
+The file cmake/FindGetData.cmake could be used in projects managed by
+CMake and which have to search for a GetData installation.
+
+
+PREREQUISITES
+=============
+
+The only library required to build GetData is the C Standard Library.  Several
+other external will be used if found by ./configure to provide support for
+various data encodings (typically compression schemes).  These are:
+
+- the slim compression library by Joseph Fowler;
+- the zlib library by Jean-loup Gailly and Mark Adler;
+- the bzip2 compression library by Julian Seward; and,
+- the lzma library, part of the XZ Utils suite by Lasse Collin, Ville Koskinen,
+  and Igor Pavlov.
+
+If these libraries are not found by configure, GetData will lack support for
+the associated encoding scheme and fail gracefully if encountering dirfiles so
+encoded.
+
+
+USING THE LIBRARY
+=================
+
+To use the library in C programs, the header file getdata.h should be included.
+
+The various small programs in the `util' subdirectory of the package provide
+examples of use.
+
+The checkdirfile utility was designed to report syntax errors in the format
+file(s) of the large, complex dirfiles used in the analysis of the BLAST
+experiment data.  This utility will report all syntax errors it find in the
+supplied dirfile, plus any problems in the metadata itself.
+
+Bindings exist for using the GetData library in C++.  Documentation for these
+bindings is present in the README.cxx file in the `doc' subdirectory.
+
+Bindings to the GetData library from Fortran, Python, and the Interactive
+Data Language have also been written, but not ported to Microsoft Visual C++.
+If you are interested in these bindings, see the full GetData source release.
+
+
+AUTHOR
+======
+
+The Dirfile Standards and the GetData library were conceived and written by
+C. B. Netterfield <netterfield@astro.utoronto.ca>.
+
+Since Standards Version 3 (January 2006), the Dirfile Standards and GetData
+have been maintained by D. V. Wiebe <dvw@ketiltrout.net>.
+
+A full list of contributors is given in the file called `AUTHORS'.

@@ -42,7 +42,7 @@ will be flushed and closed.  In this special case, modified metadata will
 also be flushed to disk as if
 .BR gd_metaflush (3)
 had been called.
-.P
+.PP
 Metadata is written to disk using the current Standards Version as stored in the
 .I dirfile
 object.  See
@@ -76,7 +76,7 @@ is NULL.
 .TP
 .B GD_E_RAW_IO
 An error occurred while trying to flush or close the field(s).
-.P
+.PP
 The dirfile error may be retrieved by calling
 .BR gd_error (3).
 A descriptive error string for the last error encountered can be obtained from

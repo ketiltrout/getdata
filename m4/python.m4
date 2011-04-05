@@ -23,15 +23,21 @@ dnl ---------------------------------------------------------------
 dnl Look for python.  Then determine whether we can build extension modules.
 AC_DEFUN([GD_PYTHON],
 [
-last_python=2.6
+last_python=2.7
 first_python=$1
 
 AC_CHECK_PROGS([SEQ], [seq], [not found])
 if test "x$SEQ" == "xnot found"; then
-  python_prog_list="python python2"
+  AC_CHECK_PROGS([JOT], [jot], [not found])
+  if test "x$JOT" == "xnot found"; then
+    python_prog_list="python python2"
+  else
+    python_prog_list="python python2 dnl
+    `$JOT -w 'python%.1f' - $last_python $first_python -0.1`" #'
+  fi
 else
-python_prog_list="python python2 dnl
-`$SEQ -f 'python%.1f' $last_python -0.1 $first_python`" #'
+  python_prog_list="python python2 dnl
+  `$SEQ -f 'python%.1f' $last_python -0.1 $first_python`" #'
 fi
 
 dnl --without-python basically does the same as --disable-python
@@ -44,6 +50,15 @@ AC_ARG_WITH([python], AS_HELP_STRING([--with-python=PATH],
                 *) user_python="${withval}"; have_python= ;;
               esac
             ], [ user_python=; have_python= ])
+
+AC_ARG_WITH([python-module-dir], AS_HELP_STRING([--with-python-module-dir=PATH],
+      [install the Python bindings into PATH [autodetect]]),
+      [
+        case "${withval}" in
+          no) local_python_modpath= ;;
+          *) local_python_modpath="${withval}"
+        esac
+      ], [ local_python_modpath= ])
 
 if test "x${have_python}" != "xno"; then
 
@@ -134,7 +149,11 @@ test "x$pyexec_prefix" = xNONE && pyexec_prefix=$ac_default_prefix
 
 dnl calculate the extension module directory
 AC_MSG_CHECKING([Python extension module directory])
-pythondir=`$PYTHON -c "from distutils import sysconfig; print sysconfig.get_python_lib(1,0,prefix='${pyexec_prefix}')" 2>/dev/null || echo "${pyexec_prefix}/lib/python${PYTHON_VERSION}/site-packages"`
+if test "x${local_python_modpath}" = "x"; then
+  pythondir=`$PYTHON -c "from distutils import sysconfig; print sysconfig.get_python_lib(1,0,prefix='${pyexec_prefix}')" 2>/dev/null || echo "${pyexec_prefix}/lib/python${PYTHON_VERSION}/site-packages"`
+else
+  pythondir=$local_python_modpath
+fi
 AC_SUBST([pythondir])
 AC_MSG_RESULT([$pythondir])
 

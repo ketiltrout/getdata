@@ -395,11 +395,9 @@ int gd_move(DIRFILE* D, const char* field_code, int new_fragment, int move_data)
       return -1;
     }
 
-    if (D->fragment[new_fragment].sname)
-      snprintf(new_filebase, FILENAME_MAX, "%s/%s/%s", D->name,
-          D->fragment[new_fragment].sname, E->field);
-    else
-      snprintf(new_filebase, FILENAME_MAX, "%s/%s", D->name, E->field);
+    snprintf(new_filebase, FILENAME_MAX, "%s/%s",
+        D->fragment[new_fragment].sname ? D->fragment[new_fragment].sname :
+        D->name, E->field);
 
     if (_GD_MogrifyFile(D, E, D->fragment[new_fragment].encoding,
           D->fragment[new_fragment].byte_sex,

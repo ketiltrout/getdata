@@ -23,7 +23,7 @@ AUTOMAKE_OPTIONS = foreign
 if LFS_TRANSITIONAL_API
 LFS_transitional_mans = gd_getdata64.3 gd_framenum_subset64.3 \
 												gd_frameoffset64.3 gd_nframes64.3 gd_putdata64.3
-INSTALL_DATA_HOOK64 = install-data-hook64
+MAN3ALIASES64=gd_frameoffset64.3:gd_alter_frameoffset64.3
 endif
 
 nodist_man_MANS = gd_alter_encoding.3 gd_alter_endianness.3 \
@@ -52,92 +52,59 @@ dist_man_MANS = checkdirfile.1 dirfile2ascii.1 gd_add.3 gd_add_bit.3 \
 								dirfile.5 dirfile-encoding.5 dirfile-format.5 \
 								$(LFS_transitional_mans)
 
-install-data-hook: ${INSTALL_DATA_HOOK64}
-	cd $(DESTDIR)$(mandir)/man3 && \
-		$(LN_S) -f gd_add_bit.3 gd_add_clincom.3 && \
-		$(LN_S) -f gd_add_bit.3 gd_add_carray.3 && \
-		$(LN_S) -f gd_add_bit.3 gd_add_clincom.3 && \
-		$(LN_S) -f gd_add_bit.3 gd_add_const.3 && \
-		$(LN_S) -f gd_add_bit.3 gd_add_cpolynom.3 && \
-		$(LN_S) -f gd_add_bit.3 gd_add_crecip.3 && \
-		$(LN_S) -f gd_add_bit.3 gd_add_divide.3 && \
-		$(LN_S) -f gd_add_bit.3 gd_add_lincom.3 && \
-		$(LN_S) -f gd_add_bit.3 gd_add_linterp.3 && \
-		$(LN_S) -f gd_add_bit.3 gd_add_multiply.3 && \
-		$(LN_S) -f gd_add_bit.3 gd_add_polynom.3 && \
-		$(LN_S) -f gd_add_bit.3 gd_add_phase.3 && \
-		$(LN_S) -f gd_add_bit.3 gd_add_raw.3 && \
-		$(LN_S) -f gd_add_bit.3 gd_add_recip.3 && \
-		$(LN_S) -f gd_add_bit.3 gd_add_sbit.3 && \
-		$(LN_S) -f gd_add_bit.3 gd_add_string.3
-	cd $(DESTDIR)$(mandir)/man3 && \
-		$(LN_S) -f gd_madd_bit.3 gd_madd_clincom.3 && \
-		$(LN_S) -f gd_madd_bit.3 gd_madd_carray.3 && \
-		$(LN_S) -f gd_madd_bit.3 gd_madd_clincom.3 && \
-		$(LN_S) -f gd_madd_bit.3 gd_madd_const.3 && \
-		$(LN_S) -f gd_madd_bit.3 gd_madd_cpolynom.3 && \
-		$(LN_S) -f gd_madd_bit.3 gd_madd_crecip.3 && \
-		$(LN_S) -f gd_madd_bit.3 gd_madd_divide.3 && \
-		$(LN_S) -f gd_madd_bit.3 gd_madd_lincom.3 && \
-		$(LN_S) -f gd_madd_bit.3 gd_madd_linterp.3 && \
-		$(LN_S) -f gd_madd_bit.3 gd_madd_multiply.3 && \
-		$(LN_S) -f gd_madd_bit.3 gd_madd_phase.3 && \
-		$(LN_S) -f gd_madd_bit.3 gd_madd_polynom.3 && \
-		$(LN_S) -f gd_madd_bit.3 gd_madd_recip.3 && \
-		$(LN_S) -f gd_madd_bit.3 gd_madd_sbit.3 && \
-		$(LN_S) -f gd_madd_bit.3 gd_madd_string.3
-	cd $(DESTDIR)$(mandir)/man3 && \
-		$(LN_S) -f gd_add.3 gd_madd.3
-	cd $(DESTDIR)$(mandir)/man3 && \
-		$(LN_S) -f gd_add_spec.3 gd_madd_spec.3
-	cd $(DESTDIR)$(mandir)/man3 && \
-		$(LN_S) -f gd_cbopen.3 gd_open.3
-	cd $(DESTDIR)$(mandir)/man3 && \
-		$(LN_S) -f gd_close.3 gd_discard.3
-	cd $(DESTDIR)$(mandir)/man3 && \
-		$(LN_S) -f gd_alter_bit.3 gd_alter_carray.3 && \
-		$(LN_S) -f gd_alter_bit.3 gd_alter_clincom.3 && \
-		$(LN_S) -f gd_alter_bit.3 gd_alter_const.3 && \
-		$(LN_S) -f gd_alter_bit.3 gd_alter_cpolynom.3 && \
-		$(LN_S) -f gd_alter_bit.3 gd_alter_crecip.3 && \
-		$(LN_S) -f gd_alter_bit.3 gd_alter_divide.3 && \
-		$(LN_S) -f gd_alter_bit.3 gd_alter_lincom.3 && \
-		$(LN_S) -f gd_alter_bit.3 gd_alter_linterp.3 && \
-		$(LN_S) -f gd_alter_bit.3 gd_alter_multiply.3 && \
-		$(LN_S) -f gd_alter_bit.3 gd_alter_phase.3 && \
-		$(LN_S) -f gd_alter_bit.3 gd_alter_polynom.3 && \
-		$(LN_S) -f gd_alter_bit.3 gd_alter_recip.3 && \
-		$(LN_S) -f gd_alter_bit.3 gd_alter_raw.3 && \
-		$(LN_S) -f gd_alter_bit.3 gd_alter_sbit.3
-	cd $(DESTDIR)$(mandir)/man3 && \
-		$(LN_S) -f gd_alter_spec.3 gd_malter_spec.3
-	cd $(DESTDIR)$(mandir)/man3 && \
-		$(LN_S) -f gd_framenum_subset.3 gd_framenum.3
-	cd $(DESTDIR)$(mandir)/man3 && \
-		$(LN_S) -f gd_get_carray_slice.3 gd_get_carray.3
-	cd $(DESTDIR)$(mandir)/man3 && \
-		$(LN_S) -f gd_put_carray_slice.3 gd_put_carray.3
+MAN3ALIASES=gd_add_bit.3:gd_add_carray.3 gd_add_bit.3:gd_add_clincom.3 \
+	gd_add_bit.3:gd_add_const.3 gd_add_bit.3:gd_add_cpolynom.3 \
+	gd_add_bit.3:gd_add_crecip.3 gd_add_bit.3:gd_add_divide.3 \
+	gd_add_bit.3:gd_add_lincom.3 gd_add_bit.3:gd_add_linterp.3 \
+	gd_add_bit.3:gd_add_multiply.3 gd_add_bit.3:gd_add_polynom.3 \
+	gd_add_bit.3:gd_add_phase.3 gd_add_bit.3:gd_add_raw.3 \
+	gd_add_bit.3:gd_add_recip.3 gd_add_bit.3:gd_add_sbit.3 \
+	gd_add_bit.3:gd_add_string.3 gd_madd_bit.3:gd_madd_carray.3 \
+	gd_madd_bit.3:gd_madd_clincom.3 gd_madd_bit.3:gd_madd_const.3 \
+	gd_madd_bit.3:gd_madd_cpolynom.3 gd_madd_bit.3:gd_madd_crecip.3 \
+	gd_madd_bit.3:gd_madd_divide.3 gd_madd_bit.3:gd_madd_lincom.3 \
+	gd_madd_bit.3:gd_madd_linterp.3 gd_madd_bit.3:gd_madd_multiply.3 \
+	gd_madd_bit.3:gd_madd_phase.3 gd_madd_bit.3:gd_madd_polynom.3 \
+	gd_madd_bit.3:gd_madd_recip.3 gd_madd_bit.3:gd_madd_sbit.3 \
+	gd_madd_bit.3:gd_madd_string.3 gd_add.3:gd_madd.3 \
+	gd_add_spec.3:gd_madd_spec.3 gd_cbopen.3:gd_open.3 \
+	gd_close.3:gd_discard.3 gd_alter_bit.3:gd_alter_carray.3 \
+	gd_alter_bit.3:gd_alter_clincom.3 gd_alter_bit.3:gd_alter_const.3 \
+	gd_alter_bit.3:gd_alter_cpolynom.3 gd_alter_bit.3:gd_alter_crecip.3 \
+	gd_alter_bit.3:gd_alter_divide.3 gd_alter_bit.3:gd_alter_lincom.3 \
+	gd_alter_bit.3:gd_alter_linterp.3 gd_alter_bit.3:gd_alter_multiply.3 \
+	gd_alter_bit.3:gd_alter_phase.3 gd_alter_bit.3:gd_alter_polynom.3 \
+	gd_alter_bit.3:gd_alter_recip.3 gd_alter_bit.3:gd_alter_raw.3 \
+	gd_alter_bit.3:gd_alter_sbit.3 gd_alter_spec.3:gd_malter_spec.3 \
+	gd_framenum_subset.3:gd_framenum.3 gd_get_carray_slice.3:gd_get_carray.3 \
+	gd_put_carray_slice.3:gd_put_carray.3 $(MAN3ALIASES64)
 
-install-data-hook64:
+#man conversion
+HTMLMANS=$(addsuffix .html,$(nodist_man_MANS)) \
+				 $(addsuffix .html,$(dist_man_MANS))
+
+%.html: %
+	man2html -r $< | tail -n +2 | $(SED) -e 's/~/\&nbsp;/g' > $@
+
+htmlman: $(HTMLMANS)
+	for m in $(MAN3ALIASES); do \
+		rm -f `echo $$m | $(SED) -e 's/3/3.html/g' | $(SED) -e 's/.*://'`; \
+		$(LN_S) `echo $$m | $(SED) -e 's/3/3.html/g' | $(SED) -e 's/:/ /'`; \
+		done
+
+install-data-hook:
 	cd $(DESTDIR)$(mandir)/man3 && \
-		$(LN_S) -f gd_frameoffset64.3 gd_alter_frameoffset64.3
+		for m in $(MAN3ALIASES); do \
+		rm -f `echo $$m | $(SED) -e 's/.*://'`; \
+		$(LN_S) `echo $$m | $(SED) -e 's/:/ /'`; \
+		done
 
 uninstall-hook:
 	cd $(DESTDIR)$(mandir)/man3 && \
-		rm -rf gd_add_carray.3 gd_add_clincom.3 gd_add_const.3 gd_add_cpolynom.3 \
-		gd_add_crecip.3 gd_add_divide.3 gd_add_lincom.3 gd_add_linterp.3 \
-		gd_add_multiply.3 gd_add_phase.3 gd_add_polynom.3 gd_add_raw.3 \
-		gd_add_recip.3 gd_add_sbit.3 gd_add_string.3 gd_alter_carray.3 \
-		gd_alter_clincom.3 gd_alter_const.3 gd_alter_cpolynom.3 gd_alter_crecip.3 \
-		gd_alter_divide.3 gd_alter_frameoffset64.3 gd_alter_lincom.3 \
-		gd_alter_linterp.3 gd_alter_multiply.3 gd_alter_phase.3 gd_alter_polynom.3 \
-		gd_alter_raw.3 gd_alter_recip.3 gd_alter_sbit.3 gd_discard.3 gd_framenum.3 \
-		gd_madd_carray.3 gd_madd_clincom.3 gd_madd_const.3 gd_madd_cpolynom.3 \
-		gd_madd_crecip.3 gd_madd_divide.3 gd_madd_lincom.3 gd_madd_linterp.3 \
-		gd_madd_multiply.3 gd_madd_phase.3 gd_madd_polynom.3 gd_madd_recip.3 \
-		gd_madd_sbit.3 gd_madd_string.3 gd_madd.3 gd_madd_spec.3 gd_malter_spec.3 \
-		gd_open.3
+		for m in $(MAN3ALIASES); do \
+		rm -f `echo $$m | $(SED) -e 's/.*://'`; \
+		done
 
 clean-local:
-	rm -rf *~ 
-	rm -rf gd_alter_encoding.3 gd_alter_endianness.3 gd_alter_frameoffset.3
+	rm -f *~ *.html
+	rm -f $(nodist_man_MANS)

@@ -39,8 +39,8 @@ AC_ARG_VAR([BUILDCC],
 
 dnl export version information from m4/version.m4
 AC_SUBST(GETDATA_IFACE_VERSION, [getdata_iface_version])
-AC_SUBST(GETDATA_IMPL_REVISION, [getdata_iface_revision])
-AC_SUBST(GETDATA_IFACE_AGE, [getdata_iface_revision])
+AC_SUBST(GETDATA_IMPL_REVISION, [getdata_impl_revision])
+AC_SUBST(GETDATA_IFACE_AGE, [getdata_iface_age])
 AC_SUBST(GETDATAXX_VERSION, [getdataxx_version])
 AC_SUBST(FGETDATA_VERSION, [fgetdata_version])
 AC_SUBST(F95GETDATA_VERSION, [f95getdata_version])
@@ -63,7 +63,7 @@ AC_CANONICAL_HOST
 
 dnl Legacy API
 AC_ARG_ENABLE(legacy-api, AS_HELP_STRING([--disable-legacy-api],
-              [don't include the legacy API wrapper in the library]),
+              [don't include the legacy API wrapper in the library]), dnl'
               [
                case "${enableval}" in
                  no) include_legacy_api="no" ;;
@@ -74,8 +74,11 @@ AC_MSG_CHECKING([whether to include the legacy API])
 AC_MSG_RESULT([$include_legacy_api])
 
 if test "x$include_legacy_api" != "xno"; then
-  AC_DEFINE([GD_LEGACY_API], [], [ This symbol is defined whenever the library contains the legacy API ])
+  DEFINE_GD_LEGACY_API="#define GD_LEGACY_API"
+else
+  DEFINE_GD_LEGACY_API="/* #undef GD_LEGACY_API */"
 fi
+AC_SUBST([DEFINE_GD_LEGACY_API])
 
 dnl debugging
 AC_ARG_ENABLE(assert, AS_HELP_STRING([--enable-assert],
@@ -300,6 +303,7 @@ AC_PROG_LN_S
 AC_PROG_GREP
 AC_PROG_AWK
 AC_PROG_SED
+AC_CHECK_PROGS([DIFF], [diff], [])
 GD_MSYS_SHELL
 echo
 echo "*** Checking C compiler characteristics"
@@ -316,9 +320,11 @@ if test "x$disable_c99" != "xyes"; then
   fi
 fi
 if test "x$disable_c99" = "xyes"; then
-  AC_DEFINE([GD_NO_C99_API], [1],
-            [define to disable C99-specific code in the library source])
+  DEFINE_GD_NO_C99_API="#define GD_NO_C99_API"
+else
+  DEFINE_GD_NO_C99_API="/* #undef GD_NO_C99_API */"
 fi
+AC_SUBST([DEFINE_GD_NO_C99_API])
 
 AC_HEADER_STDC
 AM_PROG_AS
@@ -368,30 +374,7 @@ else
   BUILDCC=$CC
   AC_SUBST([BUILDCC])
 fi
-echo
-echo "*** Checking C++ compiler characteristics"
-echo
-AC_PROG_CXX
-AC_PROG_CXX_C_O
-echo
-echo "*** Checking Fortran 77 compiler characteristics"
-echo
-AC_PROG_F77
-AC_PROG_F77_C_O
-echo
-echo "*** Checking Fortran 90 compiler characteristics"
-echo
-AC_PROG_FC
-AC_PROG_FC_C_O
 
-dnl does $FC accept fortran code with .f90 extension?
-AC_MSG_CHECKING([whether the Fortran 90 compiler works])
-AC_LANG_PUSH([Fortran])
-ac_ext="f90"
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM()],
-[AC_MSG_RESULT([yes])],
-[AC_MSG_RESULT([no]); FC=;])
-AC_LANG_POP
 echo
 echo "*** Building libtool"
 echo
@@ -481,7 +464,6 @@ fi
 
 dnl F77 stuff
 if test "x$make_f77bindings" != "xno"; then
-  AC_CHECK_PROGS([DIFF], [diff], [])
   AC_F77_WRAPPERS
 fi
 
@@ -527,8 +509,9 @@ fi
 
 dnl functions
 AC_CHECK_FUNCS([_commit fchmod _fdopen fseeko fseeko64 fsync ftello ftello64 \
-                getdelim gmtime_r _lseeki64 _mkdir mkstemp nan _open _read \
-                _rmdir stat64 _stat64 strtoll strtoull _unlink _write])
+                getcwd _getcwd getdelim gmtime_r _lseeki64 _mkdir mkstemp nan \
+                _open _read _rmdir _snprintf stat64 _stat64 _strtoi64 strtoll \
+                _strtoui64 strtoull _unlink _write])
 if test "x$disable_c99" = "xno"; then
   AC_CHECK_FUNCS([cabs])
 fi
@@ -538,7 +521,7 @@ dnl headers
 echo
 echo "*** Looking for additional header files"
 echo
-AC_CHECK_HEADERS([fcntl.h libgen.h stdint.h unistd.h])
+AC_CHECK_HEADERS([direct.h fcntl.h libgen.h stdint.h unistd.h])
 if test "x$disable_c99" = "xno"; then
 AC_CHECK_HEADERS([complex.h])
 fi
@@ -599,6 +582,16 @@ AC_CHECK_TYPES([_Complex float, _Complex double])
 fi
 
 GD_CHECK_LFS_TYPE([struct stat64],[
+#ifdef STDC_HEADERS
+#include <sys/types.h>
+#include <sys/stat.h>
+#endif
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+])
+
+GD_CHECK_LFS_TYPE([struct _stat64],[
 #ifdef STDC_HEADERS
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -680,12 +673,12 @@ elif test $ac_cv_sizeof_long_long_int -eq 8; then
   gd_int64_t="long long int"
 fi
 
-AC_DEFINE_UNQUOTED([_gd_int16_t], [$gd_int16_t],
-                   [ Define to a signed 16-bit integer type ])
-AC_DEFINE_UNQUOTED([_gd_uint16_t], [$gd_uint16_t],
-                   [ Define to an unsigned 16-bit integer type ])
-AC_DEFINE_UNQUOTED([_gd_int64_t], [$gd_int64_t],
-                   [ Define to a signed 64-bit integer type ])
+DEFINE_gd_int16_t="#define gd_int16_t $gd_int16_t";
+DEFINE_gd_uint16_t="#define gd_uint16_t $gd_uint16_t";
+DEFINE_gd_int64_t="#define gd_int64_t $gd_int64_t";
+AC_SUBST([DEFINE_gd_int16_t])
+AC_SUBST([DEFINE_gd_uint16_t])
+AC_SUBST([DEFINE_gd_int64_t])
 
 dnl python
 if test "x$make_pybindings" = "xyes"; then
@@ -744,7 +737,7 @@ if test "x$make_idlbindings" = "xyes"; then
     if test "x$DATE" == "xnot found"; then
       BUILD_DATE="Build date unspecified"
     else
-      BUILD_DATE=`date`
+      BUILD_DATE=`$DATE`
     fi
     AC_SUBST([BUILD_DATE])
   fi
@@ -773,7 +766,7 @@ fi
 
 dnl external encodings
 GD_CHECK_ENCODING([bzip2],[bz2],[BZ2_bzReadOpen],[bzlib.h],[bzip2],[bunzip2])
-GD_CHECK_ENCODING([slim],[slim],[slimopen],[slimlib.h],[slim],[unslim],[])
+GD_CHECK_ENCODING([slim],[slim],[slimopen],[slimlib.h],[slim slimdata],[unslim],[])
 GD_CHECK_ENCODING([gzip],[z],[gzopen],[zlib.h],[gzip],[gunzip],[])
 GD_CHECK_ENCODING([lzma],[lzma],[lzma_auto_decoder],[lzma.h],[xz],[],[])
 
@@ -818,7 +811,10 @@ AC_CONFIG_FILES([man/gd_alter_encoding.3])
 AC_CONFIG_FILES([man/gd_alter_endianness.3])
 AC_CONFIG_FILES([man/gd_alter_frameoffset.3])
 AC_CONFIG_FILES([src/Makefile])
-AC_CONFIG_HEADERS([src/getdata.h], [chmod a-w src/getdata.h])
+dnl This doubling allows us to build getdata.h as a normal AC_CONFIG_FILE, but use
+dnl AC_CONFIG_HEADERS to check whether it has changed.
+AC_CONFIG_FILES([src/getdata.ah:src/getdata.h.in])
+AC_CONFIG_HEADERS([src/getdata.h:src/getdata.ah], [chmod a-w src/getdata.h])
 AC_CONFIG_FILES([src/getdata.pc])
 AC_CONFIG_FILES([test/Makefile])
 AC_CONFIG_FILES([util/Makefile])

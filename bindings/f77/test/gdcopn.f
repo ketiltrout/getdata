@@ -26,7 +26,7 @@ C     Tell the parser to ignore syntax errors
       CHARACTER*9 frmdat2
       PARAMETER (frmdat2 =  'bad line')
       INTEGER*1 datdat(80)
-      INTEGER i;
+      INTEGER*1 i;
       INTEGER d;
       INTEGER e;
 

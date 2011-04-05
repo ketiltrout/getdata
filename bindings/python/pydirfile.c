@@ -1597,7 +1597,6 @@ static PyObject* gdpy_dirfile_putcarray(struct gdpy_dirfile_t* self,
   unsigned int start = 0, len;
   gd_type_t type = GD_UNKNOWN;
   PyObject* pyobj;
-  size_t ns;
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
         "sO|iI:pygetdata.dirfile.putdata", keywords, &field_code, &pyobj,
@@ -1678,7 +1677,7 @@ static PyObject* gdpy_dirfile_putcarray(struct gdpy_dirfile_t* self,
       }
     }
 
-    ns = gd_put_carray_slice(self->D, field_code, start, len, type, data);
+    gd_put_carray_slice(self->D, field_code, start, len, type, data);
 
 #ifdef USE_NUMPY
     if (have_ndarray)
