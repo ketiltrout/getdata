@@ -38,7 +38,7 @@ PUT_OFF64=put_off64
 endif
 
 LDADD=../src/libgetdata.la
-INCLUDES=${WALL} $(WEXTRA) -I$(top_srcdir)/src -Wdeclaration-after-statement
+INCLUDES=${WALL} $(WEXTRA) -I$(top_srcdir)/src
 
 EXTRA_DIST=test.h
 
