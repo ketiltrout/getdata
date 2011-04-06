@@ -1,3 +1,23 @@
+/* Copyright (C) 2011 D. V. Wiebe
+ *
+ ***************************************************************************
+ *
+ * This file is part of the GetData project.
+ *
+ * GetData is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License as published by the
+ * Free Software Foundation; either version 2.1 of the License, or (at your
+ * option) any later version.
+ *
+ * GetData is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with GetData; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ */
 /* Test include */
 #include "test.h"
 
@@ -11,11 +31,11 @@
 
 int main(void)
 {
-  const char *filedir = __TEST__ "dirfile";
-  const char *subdir = __TEST__ "dirfile/sub";
-  const char *format = __TEST__ "dirfile/format";
-  const char *format1 = __TEST__ "dirfile/sub/format1";
-  const char *format2 = __TEST__ "dirfile/sub/format2";
+  const char *filedir = "dirfile";
+  const char *subdir = "dirfile/sub";
+  const char *format = "dirfile/format";
+  const char *format1 = "dirfile/sub/format1";
+  const char *format2 = "dirfile/sub/format2";
   const char *format_data = "INCLUDE sub/format1\n";
   const char *format1_data = "INCLUDE format2\n";
   const char *format2_data = "data RAW UINT8 11\n";
@@ -23,8 +43,9 @@ int main(void)
   DIRFILE *D;
   gd_spf_t spf;
 
+  rmdirfile();
   mkdir(filedir, 0777);
-  mkdirsub(subdir, 0777);
+  mkdir(subdir, 0777);
 
   fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
   write(fd, format_data, strlen(format_data));

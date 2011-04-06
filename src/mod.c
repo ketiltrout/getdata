@@ -1183,8 +1183,9 @@ int gd_alter_crecip89(DIRFILE* D, const char* field_code, const char* in_field,
   int ret;
   gd_entry_t N;
 
-  dtrace("%p, \"%s\", \"%s\", [%g, %g]", D, field_code, in_field, cdividend[0],
-      cdividend[1]);
+  dtrace("%p, \"%s\", \"%s\", [%g, %g]", D, field_code, in_field,
+      (cdividend == NULL) ? 0 : cdividend[0],
+      (cdividend == NULL) ? 0 : cdividend[1]);
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -1194,8 +1195,13 @@ int gd_alter_crecip89(DIRFILE* D, const char* field_code, const char* in_field,
 
   N.field_type = GD_RECIP_ENTRY;
   N.in_fields[0] = (char *)in_field;
-  N.scalar[0] = (cdividend[0] == 0 && cdividend[1] == 0) ? (char *)"" : NULL;
-  _gd_a2c(N.EN(recip,cdividend), cdividend);
+  if (cdividend == NULL) {
+    N.scalar[0] = "";
+    _gd_l2c(N.EN(recip,cdividend), 0, 0);
+  } else {
+    N.scalar[0] = (cdividend[0] == 0 && cdividend[1] == 0) ? (char *)"" : NULL;
+    _gd_a2c(N.EN(recip,cdividend), cdividend);
+  }
   N.scalar_ind[0] = 0;
   N.comp_scal = 1;
   N.e = NULL;

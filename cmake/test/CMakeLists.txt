@@ -47,11 +47,6 @@ foreach(_item ${tests_ignored})
 endforeach()
 
 
-set(__TEST__ "-D__TEST__=\"${CMAKE_BINARY_DIR}/\"")
-set(__TEST_SLASH__ "-D__TEST_SLASH__=\"${CMAKE_BINARY_DIR}/\"")
-STRING(REGEX REPLACE "/" "\\\\\\\\" __TEST__ ${__TEST__}) 
-add_definitions(${__TEST__} ${__TEST_SLASH__})
-
 #set(gd_sources ${GD_DIR}/test/parse_include_relabs.c)
 
 foreach(_test ${gd_sources})

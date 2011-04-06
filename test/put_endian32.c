@@ -1,3 +1,23 @@
+/* Copyright (C) 2008-2011 D. V. Wiebe
+ *
+ ***************************************************************************
+ *
+ * This file is part of the GetData project.
+ *
+ * GetData is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License as published by the
+ * Free Software Foundation; either version 2.1 of the License, or (at your
+ * option) any later version.
+ *
+ * GetData is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with GetData; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ */
 /* Attempt to write UINT32 with the opposite endianness */
 #include "test.h"
 
@@ -22,15 +42,16 @@ static int BigEndian(void)
 
 int main(void)
 {
-  const char* filedir = __TEST__ "dirfile";
-  const char* format = __TEST__ "dirfile/format";
-  const char* data = __TEST__ "dirfile/data";
+  const char *filedir = "dirfile";
+  const char *format = "dirfile/format";
+  const char *data = "dirfile/data";
   char format_data[1000];
   uint32_t c = 0x2000001, d = 0;
   const int big_endian = BigEndian();
   int fd, n, error, r = 0;
   DIRFILE *D;
 
+  rmdirfile();
   mkdir(filedir, 0777); 
 
   sprintf(format_data, "data RAW UINT32 1\nENDIAN %s\n", (big_endian)

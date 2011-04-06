@@ -1,3 +1,23 @@
+/* Copyright (C) 2008-2011 D. V. Wiebe
+ *
+ ***************************************************************************
+ *
+ * This file is part of the GetData project.
+ *
+ * GetData is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License as published by the
+ * Free Software Foundation; either version 2.1 of the License, or (at your
+ * option) any later version.
+ *
+ * GetData is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with GetData; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ */
 /* Test move */
 #include "test.h"
 
@@ -11,20 +31,21 @@
 
 int main(void)
 {
-  const char* filedir = __TEST__ "dirfile";
-  const char* subdir = __TEST__ "dirfile/subdir";
-  const char* format = __TEST__ "dirfile/format";
-  const char* format1 = __TEST__ "dirfile/subdir/format1";
-  const char* data = __TEST__ "dirfile/data";
-  const char* new_data = __TEST__ "dirfile/subdir/data";
-  const char* format_data = "INCLUDE subdir/format1\ndata RAW UINT8 11\n";
-  const char* format1_data = "#\n";
+  const char *filedir = "dirfile";
+  const char *subdir = "dirfile/subdir";
+  const char *format = "dirfile/format";
+  const char *format1 = "dirfile/subdir/format1";
+  const char *data = "dirfile/data";
+  const char *new_data = "dirfile/subdir/data";
+  const char *format_data = "INCLUDE subdir/format1\ndata RAW UINT8 11\n";
+  const char *format1_data = "#\n";
   int fd, ret, error, ge_ret, unlink_data, unlink_new_data, r = 0;
   gd_entry_t E;
   DIRFILE *D;
 
+  rmdirfile();
   mkdir(filedir, 0777);
-  mkdirsub(subdir, 0777);
+  mkdir(subdir, 0777);
 
   fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
   write(fd, format_data, strlen(format_data));

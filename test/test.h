@@ -30,15 +30,11 @@ int gd_system(const char* command)
 #define gd_system system
 #endif
 
-/* mkdir for MSVC */
+/* rm for MSVC */
 #ifdef _MSC_VER
-#define mkdir(x,y) \
-  system("rmdir /q/s "__TEST__"dirfile"); \
-  _mkdir(x)
-// when using msvc the macro mkdir removes dirfile
-#define mkdirsub(x,y) _mkdir(x)
+#define rmdirfile() system("rmdir /q/s dirfile");
 #else
-#define mkdirsub(x,y) mkdir(x,y)
+#define rmdirfile() system("rm -rf dirfile");
 #endif
 
 /* path munging for WIN32/64 */

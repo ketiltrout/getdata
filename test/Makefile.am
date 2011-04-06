@@ -38,7 +38,7 @@ PUT_OFF64=put_off64
 endif
 
 LDADD=../src/libgetdata.la
-INCLUDES=${WALL} $(WEXTRA) -I$(top_srcdir)/src -D__TEST__=\"$@\"
+INCLUDES=${WALL} $(WEXTRA) -I$(top_srcdir)/src -Wdeclaration-after-statement
 
 EXTRA_DIST=test.h
 
@@ -333,11 +333,11 @@ valgrind.log: $(TESTS)
 
 # clean up after the tests
 check-local: check-TESTS
-	$(MAKE) getdata-clean-dirs
+	$(MAKE) getdata-clean-dir
 
-getdata-clean-dirs:
-	rm -rvf *odirfile
+getdata-clean-dir:
+	rm -rvf dirfile
 
 clean-local:
-	$(MAKE) getdata-clean-dirs
+	$(MAKE) getdata-clean-dir
 	rm -rf *~ 

@@ -91,7 +91,7 @@ DEBUG_C = debug.c
 endif
 
 pkgconfigdir = @libdir@/pkgconfig
-AM_CFLAGS = ${WALL} ${WEXTRA} $(DGETDATA_MODULEDIR)
+AM_CFLAGS = ${WALL} ${WEXTRA} $(DGETDATA_MODULEDIR) -Wdeclaration-after-statement
 AM_CPPFLAGS = $(LTDLINCL) $(EXTERNAL_CPPFLAGS)
 
 BUILT_SOURCES = getdata.h

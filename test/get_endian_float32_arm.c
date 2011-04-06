@@ -1,3 +1,23 @@
+/* Copyright (C) 2008-2011 D. V. Wiebe
+ *
+ ***************************************************************************
+ *
+ * This file is part of the GetData project.
+ *
+ * GetData is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License as published by the
+ * Free Software Foundation; either version 2.1 of the License, or (at your
+ * option) any later version.
+ *
+ * GetData is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with GetData; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ */
 /* Attempt to read arm-endian FLOAT32 (which is just little endian) */
 #include "test.h"
 
@@ -13,10 +33,10 @@
 
 int main(void)
 {
-  const char* filedir = __TEST__ "dirfile";
-  const char* format = __TEST__ "dirfile/format";
-  const char* data = __TEST__ "dirfile/data";
-  const char* format_data = "data RAW FLOAT32 1\nENDIAN little arm\n";
+  const char *filedir = "dirfile";
+  const char *format = "dirfile/format";
+  const char *data = "dirfile/data";
+  const char *format_data = "data RAW FLOAT32 1\nENDIAN little arm\n";
   float u[10];
   float v[20];
   const unsigned char data_data[128 * 4] = {
@@ -88,6 +108,7 @@ int main(void)
   int fd, i, n, error, r = 0;
   DIRFILE *D;
 
+  rmdirfile();
   mkdir(filedir, 0777); 
 
   v[0] = 1.5;
