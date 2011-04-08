@@ -61,7 +61,7 @@ Indicating that the byte sex should be little endian.
 .RB ( GD_BIG_ENDIAN " | " GD_LITTLE_ENDIAN )
 Indicating that the byte sex should be the opposite of the native endianness of
 the host, whichever that may be.
-.P
+.PP
 Furthermore, any of these may be bitwise or'd
 with
 .B GD_ARM_ENDIAN
@@ -69,7 +69,7 @@ or
 .B GD_NOT_ARM_ENDIAN
 indicating that the floating point data are stored in the ARM middle-endian
 format.
-.P
+.PP
 In addition to being simply a valid fragment index,
 .I fragment_index
 may also be the special value
@@ -126,7 +126,7 @@ The encoding scheme of the fragment is unknown.
 .TP
 .B GD_E_UNSUPPORTED
 The encoding scheme of the fragment does not support binary file byte swapping.
-.P
+.PP
 The dirfile error may be retrieved by calling
 .BR gd_error (3).
 A descriptive error string for the last error encountered can be obtained from

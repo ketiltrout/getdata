@@ -54,12 +54,12 @@ argument should be one of the following:
 .BR GD_LZMA_ENCODED ,\~ GD_SLIM_ENCODED  ,\~ GD_TEXT_ENCODED .
 .ad n
 .hy
-.P
+.PP
 See
 .BR gd_cbopen (3)
 and dirfile-encoding(5) for the meanings of these symbols and details on the
 supported encoding schemes.
-.P
+.PP
 In addition to being simply a valid fragment index,
 .I fragment_index
 may also be the special value
@@ -116,7 +116,7 @@ The encoding scheme of the fragment is unknown.
 .TP
 .B GD_E_UNSUPPORTED
 The encoding scheme of the fragment does not support binary file recoding.
-.P
+.PP
 The dirfile error may be retrieved by calling
 .BR gd_error (3).
 A descriptive error string for the last error encountered can be obtained from

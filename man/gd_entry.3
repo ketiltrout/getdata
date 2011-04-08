@@ -223,7 +223,7 @@ For
 .B PHASE
 fields, the first element corresponds to
 .IR shift .
-The remainder are unitialised.
+The remainder are uninitialised.
 .IP \(bu 4
 For
 .B POLYNOM
@@ -237,13 +237,13 @@ For
 .B RECIP
 fields, the first element corresponds to
 .IR cdividend .
-The remainder are unitialised.
+The remainder are uninitialised.
 .IP \(bu 4
 For
 .B RAW
 fields, the first element corresponds to
 .IR spf .
-The remainder are unitialised.
+The remainder are uninitialised.
 .PP
 The
 .I scalar
@@ -735,26 +735,26 @@ C99 API|C89 API
 gd_spf_t|spf|gd_spf_t|u.raw.spf
 gd_type_t|data_type|gd_type_t|u.raw.data_type
 int|n_fields|int|u.lincom.n_fields
-double compex|cm[3]|double|u.lincom.cm[3][2]
+double complex|cm[3]|double|u.lincom.cm[3][2]
 double|m[3]|double|u.lincom.m[3]
-double compex|cb[3]|double|u.lincom.cb[3][2]
+double complex|cb[3]|double|u.lincom.cb[3][2]
 double|b[3]|double|u.lincom.b[3]
 int|poly_ord|int|u.polynom.poly_ord
-double compex|ca[3]|double|u.polynom.ca[3][2]
+double complex|ca[3]|double|u.polynom.ca[3][2]
 double|a[3]|double|u.polynom.a[3]
 const char*|table|const char*|u.linterp.table
 gd_bit_t|bitnum|gd_bit_t|u.bit.bitnum
 gd_bit_t|numbits|gd_bit_t|u.bit.numbits
 gd_shift_t|shift|gd_shift_t|u.phase.shift
-double compex|cdividend|double|u.recip.cdividend[2]
+double complex|cdividend|double|u.recip.cdividend[2]
 double|dividend|double|u.recip.dividend
 gd_type_t|const_type|gd_type_t|u.scalar.const_type
 size_t|array_len|size_t|u.scalar.array_len
 .TE
 .PP
-In the case of complex valued data in the C89 API, the first element of the two
-element array is the real part of the complex number, and the second element is
-the imaginary part.
+In the case of complex valued data in the C89 API, the first element of the
+two-element array is the real part of the complex number, and the second
+element is the imaginary part.
 
 .SH SEE ALSO
 .BR dirfile (5),

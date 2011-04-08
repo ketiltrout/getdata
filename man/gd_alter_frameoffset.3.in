@@ -109,7 +109,7 @@ The encoding scheme of the fragment is unknown.
 .TP
 .B GD_E_UNSUPPORTED
 The encoding scheme of the fragment does not support binary file shifting.
-.P
+.PP
 The dirfile error may be retrieved by calling
 .BR gd_error (3).
 A descriptive error string for the last error encountered can be obtained from

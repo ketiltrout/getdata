@@ -162,7 +162,7 @@ Specifies that
 directives (see
 .BR dirfile-format (5))
 found in the dirfile format specification should be ignored.  All raw data will
-be assumed to have the byte sex indicated through the presence or absense of the
+be assumed to have the byte sex indicated through the presence or absence of the
 .BR GD_ARM_ENDIAN ,\~ GD_BIG_ENDIAN ,\~ GD_LITTLE_ENDIAN ,
 and
 .B GD_NOT_ARM_ENDIAN
@@ -267,16 +267,16 @@ to create a previously non-existent raw field unless a read is first
 successfully performed on the dirfile.  Once the library has determined the
 encoding scheme for the first time, it remembers it for subsequent calls.
 .TP
-.B GD_BZIP2_ENDODED
+.B GD_BZIP2_ENCODED
 Specifies that raw data files are compressed using the Burrows-Wheeler block
 sorting text compression algorithm and Huffman coding, as implemented in the
 bzip2 format.
 .TP
-.B GD_GZIP_ENDODED
+.B GD_GZIP_ENCODED
 Specifies that raw data files are compressed using Lempel-Ziv coding (LZ77)
 as implemented in the gzip format.
 .TP
-.B GD_LZMA_ENDODED
+.B GD_LZMA_ENCODED
 Specifies that raw data files are compressed using the Lempel-Ziv Markov Chain
 Algorithm (LZMA) as implemented in the xz container format.
 .TP
@@ -303,7 +303,7 @@ The GetData parser can operate in two modes: a
 .I permissive
 mode, in which much
 non-Standards compliant syntax is allowed, and a
-.I pedanitc
+.I pedantic
 mode, in which the parser adheres strictly to the Standards.  If
 .B GD_PEDANTIC
 is passed to
@@ -651,7 +651,7 @@ When working with dirfiles conforming to Standards Versions 4 and earlier
 .B ENDIAN
 directive), GetData assumes the dirfile has native byte sex, even though,
 officially, these early Standards stipulated data to be little-endian.  This is
-necessary since, in the absense of an explicit
+necessary since, in the absence of an explicit
 .B /VERSION
 directive, it is often impossible to determine the intended Standards Version of
 a dirfile, and the current behaviour is to assume native byte sex for modern
@@ -663,12 +663,12 @@ directive should be added to the format specification, or else
 .B GD_LITTLE_ENDIAN
 should be specified by the caller.
 
-GetData artifically limits the size of a
+GetData artificially limits the size of a
 .B CARRAY
 field to GD_MAX_CARRAY_LENGTH elements, to be certain it is always able to
 write the CARRAY back to disk without overrunning its maximum line length.
 On 32-bit systems, GD_MAX_CARRAY_LENGTH is 2**24.  It is larger on 64-bit
-systems.  Excess elements are silently truncatd on dirfile open.
+systems.  Excess elements are silently truncated on dirfile open.
 
 GetData's parser assumes it is running on an ASCII-compatible platform.  Format
 specification parsing will fail gloriously on an EBCDIC platform.
