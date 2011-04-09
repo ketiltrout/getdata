@@ -84,7 +84,8 @@ HTMLMANS=$(addsuffix .html,$(nodist_man_MANS)) \
 				 $(addsuffix .html,$(dist_man_MANS))
 
 %.html: %
-	man2html -r $< | tail -n +2 | $(SED) -e 's/~/\&nbsp;/g' > $@
+	man2html -r $< | tail -n +2 | $(SED) -e 's/~/\&nbsp;/g' | head -n -7 > $@
+	echo "</BODY></HTML>" >> $@
 
 htmlman: $(HTMLMANS)
 	for m in $(MAN3ALIASES); do \
