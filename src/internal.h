@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 C. Barth Netterfield
- * Copyright (C) 2005-2010 D. V. Wiebe
+ * Copyright (C) 2005-2011 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -573,6 +573,7 @@ struct _GD_DIRFILE {
   unsigned long int flags;
   uint64_t av;
   int standards;
+  int n_error;
 
   /* field counts */
   unsigned int n_entries;

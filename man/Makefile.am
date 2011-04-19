@@ -35,7 +35,7 @@ dist_man_MANS = checkdirfile.1 dirfile2ascii.1 gd_add.3 gd_add_bit.3 \
 								gd_put_carray_slice.3 gd_get_constant.3 gd_put_constant.3 \
 								gd_constants.3 gd_dirfile_standards.3 gd_getdata.3 \
 								gd_putdata.3 gd_delete.3 gd_encoding.3 gd_endianness.3 \
-								gd_entry.3 gd_entry_type.3 gd_eof.3 gd_error.3 \
+								gd_entry.3 gd_entry_type.3 gd_eof.3 gd_error.3 gd_error_count.3 \
 								gd_error_string.3 gd_field_list.3 gd_field_list_by_type.3 \
 								gd_flush.3 gd_fragment_index.3 gd_fragmentname.3 \
 								gd_framenum_subset.3 gd_frameoffset.3 gd_free_entry_strings.3 \

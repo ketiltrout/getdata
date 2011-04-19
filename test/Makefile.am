@@ -1,4 +1,4 @@
-# (C) 2008-2010 D. V. Wiebe
+# (C) 2008-2011 D. V. Wiebe
 #
 ##########################################################################
 #
@@ -145,7 +145,7 @@ ENTRY_TESTS=entry_bad_code entry_bit entry_bit_scalar entry_invalid \
 
 EOF_TESTS=eof eof_index eof_lincom eof_phase
 
-ERROR_TESTS=error error_error error_short
+ERROR_TESTS=error error_error error_num error_short
 
 FILE_TESTS=file file_code file_type
 

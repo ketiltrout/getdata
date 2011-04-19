@@ -575,6 +575,8 @@ extern gd_entype_t gd_entry_type(DIRFILE *dirfile,
 
 extern int gd_error(const DIRFILE *dirfile) gd_nothrow gd_nonnull ((1));
 
+extern int gd_error_count(DIRFILE *dirfile) gd_nothrow gd_nonnull ((1));
+
 extern char *gd_error_string(const DIRFILE *dirfile, char *buffer,
     size_t buflen) gd_nothrow gd_nonnull ((1));
 

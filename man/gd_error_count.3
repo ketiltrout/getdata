@@ -1,0 +1,59 @@
+\" gd_error_count.3.  The gd_error_count man page.
+.\"
+.\" Copyright (C) 2011 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_error_count 3 "19 April 2011" "Version 0.8.0" "GETDATA"
+.SH NAME
+gd_error_count \(em report the number of errors encountered by the GetData
+library
+.SH SYNOPSIS
+.B #inlcude <getdata.h>
+.HP
+.nh
+.ad l
+.BI "int gd_error_check(DIRFILE *" dirfile );
+.hy
+.ad n
+.SH DESCRIPTION
+The
+.BR gd_error_count ()
+function returns the number of errors encountered by the GetData library
+on the DIRFILE object
+.I dirfile
+since this function was last called on
+.IR dirfile .
+The first time
+.BR gd_error_count ()
+is called on the supplied
+.I dirfile
+object, the count is since
+.I dirfile
+was created.
+
+The
+.I last
+error encountered by the library for
+.I dirfile
+can be obtained by calling
+.BR gd_error (3).
+
+.SH RETURN VALUE
+The
+.BR gd_error_count ()
+function always returns the number of GetData errors encountered since the last
+time it was called, or since the dirfile was created. This will be zero, if no
+error has occurred over the given time.
+.SH SEE ALSO
+.BR gd_error (3),
+.BR gd_error_string (3)

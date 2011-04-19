@@ -240,8 +240,6 @@ DIRFILE* gd_cbopen(const char* filedir, unsigned long flags,
   if (flags & GD_PERMISSIVE && flags & GD_PEDANTIC)
     flags &= ~GD_PERMISSIVE;
 
-  D->error_string = NULL;
-  D->error_file = NULL;
   D->name = strdup(filedir);
   D->flags = (flags | GD_INVALID) & ~GD_IGNORE_REFS;
   D->sehandler = sehandler;

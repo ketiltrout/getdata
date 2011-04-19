@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 C. Barth Netterfield
- * Copyright (C) 2005-2010 D. V. Wiebe
+ * Copyright (C) 2005-2011 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -200,6 +200,8 @@ void _GD_SetError(DIRFILE* D, int error, int suberror,
       line, token);
 
   D->error = error;
+  if (error != GD_E_OK)
+    D->n_error++;
   D->suberror = suberror;
   D->error_line = line;
   if (format_file != NULL) {
@@ -325,6 +327,17 @@ char* gd_error_string(const DIRFILE* D, char* buffer, size_t buflen) gd_nothrow
 
   dreturn("\"%s\"", buffer);
   return buffer;
+}
+
+int gd_error_count(DIRFILE *D)
+{
+  dtrace("%p", D);
+  int count = D->n_error;
+  D->n_error = 0;
+
+  dreturn("%i", count);
+
+  return count;
 }
 /* vim: ts=2 sw=2 et tw=80
 */

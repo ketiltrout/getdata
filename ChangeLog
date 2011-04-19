@@ -1,3 +1,8 @@
+2011-04-20   D. V. Wiebe <getdata@ketiltrout.net> svn:580
+	* test/error_num.c: Added.
+	* src/errors.c (gd_error_count): Added.
+	* man/gd_error_count.3: Added.
+
 2011-04-06   D. V. Wiebe <getdata@ketiltrout.net> svn:574
 	* test/: Remove the unnecessarily baroque (rococo?) __TEST__ macro.
 	Add rmdirfile() to the top of each test before creating the test
