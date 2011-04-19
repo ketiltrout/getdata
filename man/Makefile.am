@@ -84,14 +84,13 @@ HTMLMANS=$(addsuffix .html,$(nodist_man_MANS)) \
 				 $(addsuffix .html,$(dist_man_MANS))
 
 %.html: %
-	man2html -r $< | tail -n +2 | $(SED) -e 's/~/\&nbsp;/g' | head -n -7 > $@
-	echo "</BODY></HTML>" >> $@
+	./make_html.pl $< > $@
 
 htmlman: $(HTMLMANS)
 	for m in $(MAN3ALIASES); do \
-		rm -f `echo $$m | $(SED) -e 's/3/3.html/g' | $(SED) -e 's/.*://'`; \
-		$(LN_S) `echo $$m | $(SED) -e 's/3/3.html/g' | $(SED) -e 's/:/ /'`; \
-		done
+		./make_html.pl `echo $$m | $(SED) -e 's/:\\(.*\\).3/ \\1/'` \
+			> `echo $$m | $(SED) -e 's/3/3.html/g' | $(SED) -e 's/.*://'`; \
+	 done
 
 install-data-hook:
 	cd $(DESTDIR)$(mandir)/man3 && \
