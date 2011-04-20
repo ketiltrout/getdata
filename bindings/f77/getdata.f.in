@@ -115,6 +115,8 @@ C     Correpsonding to gd_delete(3)
       EXTERNAL GDDELE
 C     Corresponding to gd_discard(3)
       EXTERNAL GDDSCD
+C     Corresponding to gd_error_count(3)
+      EXTERNAL GDECNT
 C     Corresponding to gd_entry_type(3)
       EXTERNAL GDENTY
 C     Corresponding to gd_error(3)

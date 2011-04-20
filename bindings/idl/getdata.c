@@ -3803,6 +3803,18 @@ IDL_VPTR gdidl_error(int argc, IDL_VPTR argv[], char *argk)
   return r;
 }
 
+/* @@DLM: F gdidl_error_count GD_ERROR_COUNT 1 1 */
+IDL_VPTR gdidl_error_count(int argc, IDL_VPTR argv[], char *argk)
+{
+  dtraceidl();
+
+  int err = gd_error_count(gdidl_get_dirfile(IDL_LongScalar(argv[0])));
+
+  IDL_VPTR r = IDL_GettmpInt(err);
+  dreturn("%p", r);
+  return r;
+}
+
 /* @@DLM: F gdidl_error_string GD_ERROR_STRING 1 1 */
 IDL_VPTR gdidl_error_string(int argc, IDL_VPTR argv[], char *argk)
 {

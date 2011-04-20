@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_error_count 3 "19 April 2011" "Version 0.8.0" "GETDATA"
+.TH gd_error_count 3 "20 April 2011" "Version 0.8.0" "GETDATA"
 .SH NAME
 gd_error_count \(em report the number of errors encountered by the GetData
 library
@@ -26,22 +26,18 @@ library
 .hy
 .ad n
 .SH DESCRIPTION
-The
-.BR gd_error_count ()
-function returns the number of errors encountered by the GetData library
-on the DIRFILE object
-.I dirfile
-since this function was last called on
-.IR dirfile .
 The first time
 .BR gd_error_count ()
-is called on the supplied
-.I dirfile
-object, the count is since
-.I dirfile
-was created.
+is called with the DIRFILE object
+.IR dirfile ,
+it returns the number of errors encountered by the GetData library while
+operating on the specified DIRFILE object, since the DIRFILE's creation.
+Calling this function resets the internal count, so that subsequent calls to
+.BR gd_error_count ()
+return the number of errors encountered only since the previous call to this
+function, for the specified DIRFILE.
 
-The
+The errors themselves are not cached by the library.  The
 .I last
 error encountered by the library for
 .I dirfile

@@ -47,8 +47,14 @@ are available:
 
 * int Dirfile::Error()
 
-  The Error method provides access to the error member of the underlying
-  DIRFILE* object.
+  The Error method calls gd_error(3) to return the error status of the last
+  GetData library call on this Dirfile object.
+
+* int Dirfile::ErrorCount()
+
+  The ErrorCount method calls gd_error_count(3) to return the number of errors
+  encountered by the GetData library on this Dirfile object since this method
+  was last called (or, the first time, since the object was created)..
 
 * const char *Dirfile::ErrorString()
 * const char *Dirfile::ErrorString(size_t len)

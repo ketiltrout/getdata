@@ -47,10 +47,9 @@ simple_funcs.xs: $(srcdir)/simple_funcs.xsin $(srcdir)/simple_funcs.pl
 	$(PERL) simple_funcs.pl $< > $@
 
 funclist.sed: GetData.c
-	echo $(ECHO_N) "s/@FUNCLIST@/" > $@
-	$(AWK) '/^XS\(XS_GetData_.*\);/ {print $$1}' $< | \
-		$(SED) -e 's/.*XS_GetData_\(.*\));/\1\\/' >> $@
-	echo / >> $@
+	$(PERL) -ne 'BEGIN { print "s/\@FUNCLIST@/" }' \
+	-e 'print "$$1 " if /^XS\(XS_GetData_([a-z].*)\);/;' \
+	-e 'END { print "/\n" }' $< > $@
 
 make_parameters.sed: ../make_parameters ../../src/getdata.h
 	  ../make_parameters P > $@

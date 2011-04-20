@@ -728,6 +728,17 @@ static PyObject* gdpy_dirfile_geterror(struct gdpy_dirfile_t* self,
   return error;
 }
 
+static PyObject* gdpy_dirfile_geterrorcount(struct gdpy_dirfile_t* self,
+    void* closure)
+{
+  dtrace("%p, %p", self, closure);
+
+  PyObject* count = PyInt_FromLong(gd_error_count(self->D));
+
+  dreturn("%p", count);
+  return count;
+}
+
 static PyObject* gdpy_dirfile_getfragment(struct gdpy_dirfile_t* self,
     void* args, void* keys)
 {
@@ -2067,6 +2078,12 @@ static PyGetSetDef gdpy_dirfile_getset[] = {
       "errors, it is typically not necessary to check this value; use a\n"
       "try/except statement instead.  See gd_error(3).",
     NULL },
+  { "error_count", (getter)gdpy_dirfile_geterrorcount, NULL,
+    "The number of errors encountered by the GetData library for this\n"
+      /* -----------------------------------------------------------------| */
+      "dirfile since the last time this member was accessed.  Note:\n"
+      "accessing this member, resets it to zero.  See gd_error_count(3).",
+    NULL },
   { "error_string", (getter)gdpy_dirfile_geterrorstring, NULL,
     "A human-readable description of the last error encountered by the\n"
       "GetData library for this dirfile.  See gd_error_string(3).",
@@ -2214,7 +2231,6 @@ static PyMethodDef gdpy_dirfile_methods[] = {
       "field.  If NumPy support is present in pygetdata, and 'as_list' is\n"
       "not given or zero, the values will be returned in NumPy arrays;\n"
       "otherwise, the values will be returned as lists.\n\n"
-      /* -----------------------------------------------------------------| */
       "The 'return_type' parameter indicates the desired type of the values\n"
       "returned, and should be (typically) one of: pygetdata.INT,\n"
       "pygetdata.LONG, pygetdata.ULONG, pygetdata.FLOAT, or\n"

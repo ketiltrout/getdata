@@ -1,3 +1,18 @@
+2011-04-21   D. V. Wiebe <getdata@ketiltrout.net> svn:581
+	* bindings/python/pydirfile.c (gdpy_dirfile_geterrorcount): Added.
+	* bindings/cxx/dirfile.cpp (Dirfile::ErrorCount): Added.
+	* bindings/f77/fgetdata.c (GDECNT): Added.
+	* bindings/f77/fgetdata.f90.in (fgd_error_count): Added.
+	* bindings/idl/getdata.c (gdidl_error_count): Added.
+
+	* bindings/perl/GetData.xs (gdp_to_entry): Fix initialisation of n for
+	LINCOM and POLYNOM.
+
+	* bindings/perl/GetData.pm.in: add constants and functions export tags.
+
+	* bindings/make_parameters.c (Perl): Don't insert unnecessary newlines.
+	* bindings/perl/Makefile.am: Use perl to generate funclist.sed.
+
 2011-04-20   D. V. Wiebe <getdata@ketiltrout.net> svn:580
 	* test/error_num.c: Added.
 	* src/errors.c (gd_error_count): Added.

@@ -362,7 +362,7 @@ void Perl(void)
   printf("s/@PARAMLIST@/");
 
   for (i = 0; constant_list[i].lname != NULL; ++i)
-    printf("%s\\\n", constant_list[i].sname, constant_list[i].value);
+    printf("%s ", constant_list[i].sname, constant_list[i].value);
   printf("/\n");
 }
 

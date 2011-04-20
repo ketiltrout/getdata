@@ -81,19 +81,20 @@ will result in the call failing with error code !GD.E_BAD_DIRFILE.
 IDL supports all GetData data types with the exception of INT8.  Attempting to
 return data as INT8 will result in an error.
 
-Except for the functions GETDATA_CONSTANTS, GD_ERROR, GD_ERROR_STRING, and
-GD_INVALID_DIRFILE, all IDL GetData functions and procedures may take two
-optional keyword parameters which deal with error reporting:
+Except for the functions GETDATA_CONSTANTS, GD_ERROR, GD_ERROR_COUNT,
+GD_ERROR_STRING, and GD_INVALID_DIRFILE, all IDL GetData functions and
+procedures may take two optional keyword parameters which deal with error
+reporting:
 
   ERROR:   a variable in which the dirfile error number resulting from this
-           call will be stored.  It will be the !GD.E_* error codes
-           corresponding to the C API error code.  On success this will be
-           !GD.E_OK (= 0).  If this parameter is not specified, the dirfile
-           error can still be retrieved by calling GD_ERROR() after this call.
+           call will be stored.  It will be the !GD.E_* error code corresponding
+           to the C API error code.  On success this will be !GD.E_OK (= 0).  If
+           this parameter is not specified, the dirfile error can still be
+           retrieved by calling GD_ERROR() after this call.
   ESTRING: a variable in which the string representation of the error resulting
            from this call will be stored.  If this parameter is not specified,
            the the dirfile error string can still be retrieved by calling
-           GD_ERROR_STRING().
+           GD_ERROR_STRING() after the call.
 
 For brevity, these keyword parameters are omitted from the subroutine prototypes
 given below.
@@ -554,6 +555,13 @@ FUNCTION GD_ERROR(dirfile_unit)
   on the specified dirfile.  The return value will be one of the !GD.E_* codes.
   This function does not take the normal ERROR and ESTRING keyword parameters.
   See gd_error(3).
+
+FUNCTION GD_ERROR_COUNT(dirfile_unit)
+
+  This function returns the number of errors encountered by the GetData library
+  on the specified dirfile since this function was last called (or since the
+  dirfile was opened, if this is the first call to this function).  See
+  gd_error_count(3).
 
 FUNCTION GD_ERROR_STRING(dirfile_unit)
 

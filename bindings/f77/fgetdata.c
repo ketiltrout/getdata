@@ -385,6 +385,16 @@ void F77_FUNC(gderor, GDEROR) (int* error, const int* dirfile)
   dreturn("%i", *error);
 }
 
+/* gd_error_count wrapper */
+void F77_FUNC(gderor, GDECNT) (int* error_count, const int* dirfile)
+{
+  dtrace("%p, %i", error, *dirfile);
+
+  *error_count = gd_error_count(_GDF_GetDirfile(*dirfile));
+
+  dreturn("%i", *error_count);
+}
+
 /* gd_error_string wrapper */
 void F77_FUNC(gdestr, GDESTR) (const int* dirfile, char* buffer, const int* len)
 {

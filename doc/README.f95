@@ -107,6 +107,12 @@ unit numbers in place of C's DIRFILE pointers are:
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: field_code
 
+* integer function fgd_error (dirfile_unit)
+  integer, intent(in) :: dirfile_unit
+ 
+* integer function fgd_error_count (dirfile_unit)
+  integer, intent(in) :: dirfile_unit
+ 
 * integer function fgd_error_string (dirfile, buffer, len)
   integer, intent(in) :: dirfile, len
   character (len=<len>), intent(out) :: buffer
@@ -655,11 +661,6 @@ Other procedures in the Fortran 95 bindings are:
   integer, intent(in) :: dirfile_unit
   integer, intent(inout) :: field_len
   character (len=*), intent(in) :: parent
-
-* integer function fgd_error (dirfile_unit)
-  integer, intent(in) :: dirfile_unit
- 
-  This returns the DIRFILE error associated with the supplied dirfile unit.
 
 * integer function fgd_entry (dirfile_unit, field_code, ent)
   integer, intent(in) :: dirfile_unit

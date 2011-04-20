@@ -29,10 +29,8 @@ require XSLoader;
 require Math::Complex;
 
 our @ISA = qw(Exporter);
-our %EXPORT_TAGS = ( 'all' => [ qw(VERSION
-    @FUNCLIST@
-    @PARAMLIST@
-    ) ] );
+our %EXPORT_TAGS = ( 'all' => [ qw(VERSION @FUNCLIST@ @PARAMLIST@) ],
+'constants' => [ qw(VERSION @PARAMLIST@) ], 'functions' => [ qw(@FUNCLIST@) ]);
 
 our @EXPORT_OK = ( @{$EXPORT_TAGS{'all'}} );
 our @EXPORT = qw();

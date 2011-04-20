@@ -276,7 +276,7 @@ static void gdp_to_entry(gd_entry_t *E, SV *sv, const char *pkg,
       break;
     case GD_LINCOM_ENTRY:
       GDP_EHASH_FETCH_IV("n_fields", n_fields, int);
-      n = (E->n_fields > GD_MAX_LINCOM) ? GD_MAX_LINCOM : n;
+      n = (E->n_fields > GD_MAX_LINCOM) ? GD_MAX_LINCOM : E->n_fields;
       gdp_fetch_in_fields(E->in_fields, sv, n, pkg, func);
       E->comp_scal = 1;
       gdp_fetch_cmp_list(E->cm, (HV*)sv, "cm", n, pkg, func);
@@ -299,7 +299,7 @@ static void gdp_to_entry(gd_entry_t *E, SV *sv, const char *pkg,
     case GD_POLYNOM_ENTRY:
       GDP_EHASH_FETCH_PV("in_field", in_fields[0]);
       GDP_EHASH_FETCH_IV("poly_ord", poly_ord, int);
-      n = (E->poly_ord > GD_MAX_POLYORD) ? GD_MAX_POLYORD : n;
+      n = (E->poly_ord > GD_MAX_POLYORD) ? GD_MAX_POLYORD : E->poly_ord;
       E->comp_scal = 1;
       gdp_fetch_cmp_list(E->ca, (HV*)sv, "ca", n, pkg, func);
       gdp_fetch_scalars(E, (HV*)sv, (1 << (n + 1)) - 1, pkg, func);

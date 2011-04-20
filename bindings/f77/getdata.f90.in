@@ -769,6 +769,14 @@ function fgd_error (dirfile)
   call gderor(fgd_error, dirfile)
 end function
 
+function fgd_error_count (dirfile)
+  integer :: fgd_error_count
+  integer, intent(in) :: dirfile
+
+  ! call f77 library
+  call gdecnt(fgd_error_count, dirfile)
+end function
+
 subroutine fgd_error_string (dirfile, buffer, len)
   integer, intent(in) :: dirfile, len
   character (len=*), intent(out) :: buffer

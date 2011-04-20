@@ -111,6 +111,8 @@ namespace GetData {
 
       int Error() const;
 
+      int ErrorCount();
+
       const char *ErrorString();
       const char *ErrorString(size_t n) gd_deprecated;
 

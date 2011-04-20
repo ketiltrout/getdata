@@ -466,6 +466,18 @@ Subroutines interacting with global metadata
   This wraps gd_nframes(3).  It takes the dirfile unit number as input and
   returns the number of frames in the dirfile in nframes.
 
+* GDECNT(error_count, dirfile_unit)
+
+  Output:
+    INTEGER error_count
+  Input:
+    INTEGER dirfile_unit
+
+  This subroutine wraps gd_error_count(3).  It takes the dirfile unit number as
+  input and returns the number of errors encountered by GetData since the last
+  call to this subroutine (or since the dirfile was first opened) in
+  error_count.
+
 * GDEROR(error, dirfile_unit)
 
   Output:
@@ -473,9 +485,9 @@ Subroutines interacting with global metadata
   Input:
     INTEGER dirfile_unit
 
-  This subroutine takes a dirfile unit as input and returns the DIRFILE.error
-  value associated with it in error.  The value of error will equal one of the
-  error codes defined in getdata.f.
+  This subroutine wraps gd_error(3).  It takes the dirfile unit number as input
+  and returns the error value arising from the last library call in error.  The
+  value of error will equal one of the error codes defined in getdata.f.
 
 * GDESTR(dirfile_unit, buffer, buffer_len)
 

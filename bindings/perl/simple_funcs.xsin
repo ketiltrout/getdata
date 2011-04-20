@@ -117,3 +117,4 @@ double framenum_subset64:framenum(DIRFILE *dirfile, const char* field_code_in,
 off64_t nframes64(DIRFILE *dirfile)
 off64_t bof64(DIRFILE *dirfile, const char* field_code)
 off64_t eof64(DIRFILE *dirfile, const char* field_code)
+int error_count(DIRFILE *dirfile)
