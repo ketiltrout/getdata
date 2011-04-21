@@ -386,9 +386,9 @@ void F77_FUNC(gderor, GDEROR) (int* error, const int* dirfile)
 }
 
 /* gd_error_count wrapper */
-void F77_FUNC(gderor, GDECNT) (int* error_count, const int* dirfile)
+void F77_FUNC(gdecnt, GDECNT) (int* error_count, const int* dirfile)
 {
-  dtrace("%p, %i", error, *dirfile);
+  dtrace("%p, %i", error_count, *dirfile);
 
   *error_count = gd_error_count(_GDF_GetDirfile(*dirfile));
 
