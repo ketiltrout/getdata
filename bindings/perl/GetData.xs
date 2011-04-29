@@ -1659,6 +1659,7 @@ put_carray_slice(dirfile, field_code, start, d, ...)
   CLEANUP:
     if (din.arg_type != GDP_DATA_IN_PACK)
       safefree(din.data_in);
+    dreturn("%i", RETVAL);
 
 int
 add_carray(dirfile, field_code, const_type, fragment_index, d, ...)

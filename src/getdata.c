@@ -158,6 +158,8 @@ static void _GD_ExtractRepr(DIRFILE* D, const void* cdata, gd_type_t in_type,
       _GD_SetError(D, GD_E_BAD_TYPE, type, NULL, 0, NULL);
       break;
   }
+
+  dreturnvoid();
 }
 
 /* _GD_FillFileFrame: fill dataout with frame indices
