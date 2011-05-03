@@ -331,8 +331,10 @@ char* gd_error_string(const DIRFILE* D, char* buffer, size_t buflen) gd_nothrow
 
 int gd_error_count(DIRFILE *D)
 {
+  int count;
+
   dtrace("%p", D);
-  int count = D->n_error;
+  count = D->n_error;
   D->n_error = 0;
 
   dreturn("%i", count);
