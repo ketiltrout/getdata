@@ -239,7 +239,7 @@ AC_ARG_ENABLE(perl, AS_HELP_STRING([--disable-perl],
                esac
               ])
 
-AC_MSG_CHECKING([whether to include the Python bindings])
+AC_MSG_CHECKING([whether to include the Perl bindings])
 if test "x$disable_c99" = "xyes"; then
   make_perlbindings="no";
   AC_MSG_RESULT([no (requires C99 compiler)])
@@ -460,15 +460,19 @@ if test "x$make_f77bindings" != "xno"; then
   GD_LANG_F77_COMPILER_INTEL
 fi
 
+dnl F77 stuff
+if test "x$make_f77bindings" != "xno"; then
+  AC_F77_WRAPPERS
+  if test "x$ac_cv_f77_mangling" == "xunknown"; then
+    make_f77bindings=no
+    make_f95bindings=no
+  fi
+fi
+
 if test "x$make_f95bindings" != "xno"; then
   GD_PROG_FC_WALL
   GD_PROG_FC_WEXTRA
   GD_LANG_FC_COMPILER_INTEL
-fi
-
-dnl F77 stuff
-if test "x$make_f77bindings" != "xno"; then
-  AC_F77_WRAPPERS
 fi
 
 AC_MSG_CHECKING([if we're linking against the Microsoft C Run-Time]) #'

@@ -703,7 +703,7 @@ void _GD_LinterpData(DIRFILE* D, void *data, gd_type_t type, int complex_table,
 #define _GD_MakeFullPath gd_MakeFullPath
 char *_GD_MakeFullPath(const DIRFILE *D, int dirfd, const char *name);
 int gd_MakeTempFile(const DIRFILE*, int, char*);
-int _GD_MissingFramework(unsigned long encoding, unsigned int funcs);
+int _GD_MissingFramework(int encoding, unsigned int funcs);
 int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned long int encoding,
     unsigned long int byte_sex, off64_t offset, int finalise, int new_fragment,
     char* new_filebase);

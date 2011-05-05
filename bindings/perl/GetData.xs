@@ -911,8 +911,8 @@ get_carray(dirfile, field_code, return_type)
   ALIAS:
     GetData::Dirfile::get_carray = 1
   PPCODE:
-    dtrace("%p, \"%s\", %03x; %lu", dirfile, field_code, return_type,
-        GIMME_V);
+    dtrace("%p, \"%s\", %03x; %i", dirfile, field_code, return_type,
+        (int)GIMME_V);
     size_t len = gd_carray_len(dirfile, field_code);
     data_out = safemalloc(GD_SIZE(return_type) * len);
     gd_get_carray(dirfile, field_code, return_type, data_out);
@@ -940,8 +940,8 @@ get_carray_slice(dirfile, field_code, start, len, return_type)
   ALIAS:
     GetData::Dirfile::get_carray_slice = 1
   PPCODE:
-    dtrace("%p, \"%s\", %u, %zi, %03x; %lu", dirfile, field_code, return_type,
-        start, len, GIMME_V);
+    dtrace("%p, \"%s\", %u, %zi, %03x; %i", dirfile, field_code, start, len,
+      return_type, (int)GIMME_V);
     data_out = safemalloc(GD_SIZE(return_type) * len);
     gd_get_carray_slice(dirfile, field_code, start, len, return_type, data_out);
 
@@ -1007,7 +1007,7 @@ constants(dirfile, return_type)
   ALIAS:
     GetData::Dirfile::constants = 1
   PPCODE:
-    dtrace("%p, %03x; %lu", dirfile, return_type, GIMME_V);
+    dtrace("%p, %03x; %i", dirfile, return_type, (int)GIMME_V);
     int len = gd_nfields_by_type(dirfile, GD_CONST_ENTRY);
     data_out = gd_constants(dirfile, return_type);
 
@@ -1030,7 +1030,7 @@ carrays(dirfile, return_type)
   ALIAS:
     GetData::Dirfile::carrays = 1
   PPCODE:
-    dtrace("%p, %03x; %lu", dirfile, return_type, GIMME_V);
+    dtrace("%p, %03x; %i", dirfile, return_type, (int)GIMME_V);
     I32 i, len = (I32)gd_nfields_by_type(dirfile, GD_CARRAY_ENTRY);
     data_out = gd_carrays(dirfile, return_type);
 
@@ -1061,7 +1061,7 @@ entry(dirfile, field_code)
   ALIAS:
     GetData::Dirfile::entry = 1
   PPCODE:
-    dtrace("%p, \"%s\"; %lu", dirfile, field_code, GIMME_V);
+    dtrace("%p, \"%s\"; %i", dirfile, field_code, (int)GIMME_V);
 
     if (GIMME_V == G_ARRAY) {
       gd_entry_t E;
@@ -1219,7 +1219,7 @@ mconstants(dirfile, parent, return_type)
   ALIAS:
     GetData::Dirfile::mconstants = 1
   PPCODE:
-    dtrace("%p, %03x; %lu", dirfile, return_type, GIMME_V);
+    dtrace("%p, %03x; %i", dirfile, return_type, (int)GIMME_V);
     int len = gd_nmfields_by_type(dirfile, parent, GD_CONST_ENTRY);
     data_out = gd_mconstants(dirfile, parent, return_type);
 
@@ -1340,9 +1340,9 @@ getdata(dirfile, field_code, first_frame, first_samp, num_frames, num_samp, retu
   ALIAS:
     GetData::Dirfile::getdata = 1
   PPCODE:
-    dtrace("%p, \"%s\", %lli, %lli, %zi, %zi, %03x; %lu", dirfile, field_code,
+    dtrace("%p, \"%s\", %lli, %lli, %zi, %zi, %03x; %i", dirfile, field_code,
         (long long)first_frame, (long long)first_samp, num_frames, num_samp,
-        return_type, GIMME_V);
+        return_type, (int)GIMME_V);
 
     if (num_frames) {
       spf = gd_spf(dirfile, field_code);
@@ -1375,7 +1375,7 @@ field_list(dirfile)
   ALIAS:
     GetData::Dirfile::field_list = 1
   PPCODE:
-    dtrace("%p; %lu", dirfile, GIMME_V);
+    dtrace("%p; %i", dirfile, (int)GIMME_V);
 
     /* in array context, return the field list, otherwise return nfields */
     if (GIMME_V == G_ARRAY) {
@@ -1405,7 +1405,7 @@ field_list_by_type(dirfile, type)
   ALIAS:
     GetData::Dirfile::field_list_by_type = 1
   PPCODE:
-    dtrace("%p, %i; %lu", dirfile, type, GIMME_V);
+    dtrace("%p, %i; %i", dirfile, type, (int)GIMME_V);
 
     /* in array context, return the field list, otherwise return nfields */
     if (GIMME_V == G_ARRAY) {
@@ -1434,7 +1434,7 @@ vector_list(dirfile)
   ALIAS:
     GetData::Dirfile::vector_list = 1
   PPCODE:
-    dtrace("%p; %lu", dirfile, GIMME_V);
+    dtrace("%p; %i", dirfile, (int)GIMME_V);
 
     /* in array context, return the field list, otherwise return nfields */
     if (GIMME_V == G_ARRAY) {
@@ -1463,7 +1463,7 @@ strings(dirfile)
   ALIAS:
     GetData::Dirfile::strings = 1
   PPCODE:
-    dtrace("%p; %lu", dirfile, GIMME_V);
+    dtrace("%p; %i", dirfile, (int)GIMME_V);
 
     /* in array context, return the field list, otherwise return nfields */
     if (GIMME_V == G_ARRAY) {
@@ -1493,7 +1493,7 @@ mfield_list(dirfile, field_code)
   ALIAS:
     GetData::Dirfile::mfield_list = 1
   PPCODE:
-    dtrace("%p, \"%s\"; %lu", dirfile, field_code, GIMME_V);
+    dtrace("%p, \"%s\"; %i", dirfile, field_code, (int)GIMME_V);
 
     /* in array context, return the field list, otherwise return nfields */
     if (GIMME_V == G_ARRAY) {
@@ -1524,7 +1524,7 @@ mfield_list_by_type(dirfile, parent, type)
   ALIAS:
     GetData::Dirfile::mfield_list_by_type = 1
   PPCODE:
-    dtrace("%p, \"%s\", %i; %lu", dirfile, parent, type, GIMME_V);
+    dtrace("%p, \"%s\", %i; %i", dirfile, parent, type, (int)GIMME_V);
 
     /* in array context, return the field list, otherwise return nfields */
     if (GIMME_V == G_ARRAY) {
@@ -1554,7 +1554,7 @@ mvector_list(dirfile, parent)
   ALIAS:
     GetData::Dirfile::mvector_list = 1
   PPCODE:
-    dtrace("%p; %lu", dirfile, GIMME_V);
+    dtrace("%p; %i", dirfile, (int)GIMME_V);
 
     /* in array context, return the field list, otherwise return nfields */
     if (GIMME_V == G_ARRAY) {
@@ -1584,7 +1584,7 @@ mstrings(dirfile, field_code)
   ALIAS:
     GetData::Dirfile::mstrings = 1
   PPCODE:
-    dtrace("%p, \"%s\"; %lu", dirfile, field_code, GIMME_V);
+    dtrace("%p, \"%s\"; %i", dirfile, field_code, (int)GIMME_V);
 
     /* in array context, return the field list, otherwise return nfields */
     if (GIMME_V == G_ARRAY) {
@@ -1617,7 +1617,7 @@ put_carray(dirfile, field_code, d, ...)
   ALIAS:
     GetData::Dirfile::put_carray = 1
   CODE:
-    dtrace("%p, \"%s\", %p, ...[%li]", dirfile, field_code, d, items - 3);
+    dtrace("%p, \"%s\", %p, ...[%li]", dirfile, field_code, d, (long)items - 3);
     
     din = gdp_convert_data(d, items, ax, 2, gdp_package, "put_carray");
 
@@ -1645,7 +1645,7 @@ put_carray_slice(dirfile, field_code, start, d, ...)
     GetData::Dirfile::put_carray_slice = 1
   CODE:
     dtrace("%p, \"%s\", %lli, %p, ...[%li]", dirfile, field_code,
-        (long long)start, d, items - 4);
+        (long long)start, d, (long)items - 4);
     
     din = gdp_convert_data(d, items, ax, 3, gdp_package, "put_carray");
 
@@ -1675,7 +1675,7 @@ add_carray(dirfile, field_code, const_type, fragment_index, d, ...)
     GetData::Dirfile::add_carray = 1
   CODE:
     dtrace("%p, \"%s\", %03x, %i, %p, ...[%li]", dirfile, field_code,
-        const_type, fragment_index, d, items - 5);
+        const_type, fragment_index, d, (long)items - 5);
     
     din = gdp_convert_data(d, items, ax, 4, gdp_package, "put_carray");
 
@@ -1705,7 +1705,7 @@ madd_carray(dirfile, parent, field_code, const_type, d, ...)
     GetData::Dirfile::madd_carray = 1
   CODE:
     dtrace("%p, \"%s\", \"%s\", %03x, %p, ...[%li]", dirfile, parent,
-        field_code, const_type, d, items - 5);
+        field_code, const_type, d, (long)items - 5);
     
     din = gdp_convert_data(d, items, ax, 4, gdp_package, "put_carray");
 
@@ -1735,7 +1735,7 @@ putdata(dirfile, field_code, first_frame, first_sample, d, ...)
     GetData::Dirfile::putdata = 1
   CODE:
     dtrace("%p, \"%s\", %lli, %lli, %p, ...[%li]", dirfile, field_code,
-        (long long)first_frame, (long long)first_sample, d, items - 5);
+        (long long)first_frame, (long long)first_sample, d, (long)items - 5);
 
     din = gdp_convert_data(d, items, ax, 4, gdp_package, "putdata");
 
@@ -1843,7 +1843,7 @@ fragments(dirfile)
   ALIAS:
     GetData::Dirfile::fragments = 1
   PPCODE:
-    dtrace("%p; %lu", dirfile, GIMME_V);
+    dtrace("%p; %i", dirfile, (int)GIMME_V);
 
     nf = gd_nfragments(dirfile);
 

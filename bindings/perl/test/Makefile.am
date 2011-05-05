@@ -20,8 +20,7 @@
 #
 AUTOMAKE_OPTIONS = foreign
 
-TESTS_ENVIRONMENT=${PERL} -I.. -I../.libs
-#TESTS_ENVIRONMENT=valgrind --leak-check=full --track-origins=yes ${PERL} -I.. -I../.libs
+TESTS_ENVIRONMENT=${DL_LIBRARY_PATH}=../.libs:${${DL_LIBRARY_PATH}}:../../../src/.libs ${PERL} -I.. -I../.libs
 perlTESTS=callback.pl big_test.pl
 TESTS=$(addprefix ${srcdir}/,$(perlTESTS))
 

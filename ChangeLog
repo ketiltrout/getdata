@@ -1,3 +1,6 @@
+2011-05-05   D. V. Wiebe <getdata@ketiltrout.net> svn:587
+	* src/open.c (_GD_CreateDirfile): Handle missing fdopendir.
+
 2011-05-05   D. V. Wiebe <getdata@ketiltrout.net> svn:586
 	* src/internal.h: The encoding framework has changed: open, touch, size,
 	move, unlink, and temp now all take the dirfd.  Furthermore, to allow

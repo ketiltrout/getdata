@@ -124,13 +124,19 @@ static FILE* _GD_CreateDirfile(DIRFILE* D, int dirfd, int dir_error,
       return NULL;
     }
 
+#ifdef HAVE_FDOPENDIR
     /* crawl the directory, and delete everything */
     if ((fd = dup(dirfd)) == -1) {
       _GD_SetError(D, GD_E_TRUNC, GD_E_TRUNC_DIR, filedir, errno, NULL);
       dreturn("%p", NULL);
       return NULL;
     }
-    if ((dir = fdopendir(fd)) == NULL) {
+    dir = fdopendir(fd);
+#else
+    dir = opendir(filedir);
+#endif
+
+    if (dir == NULL) {
       _GD_SetError(D, GD_E_TRUNC, GD_E_TRUNC_DIR, filedir, errno, NULL);
       dreturn("%p", NULL);
       return NULL;
