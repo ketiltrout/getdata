@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2010 D. V. Wiebe
+/* Copyright (C) 2008-2011 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -171,7 +171,7 @@ int gd_rename(DIRFILE *D, const char *old_code, const char *new_name,
 
   if (E->field_type == GD_RAW_ENTRY) {
     /* Compose the new filename */
-    char* filebase = (char *)malloc(FILENAME_MAX);
+    char *filebase = strdup(new_name);
 
     if (filebase == NULL) {
       _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
@@ -179,10 +179,6 @@ int gd_rename(DIRFILE *D, const char *old_code, const char *new_name,
       dreturn("%i", -1);
       return -1;
     }
-
-    snprintf(filebase, FILENAME_MAX, "%s/%s",
-        D->fragment[E->fragment_index].sname ?
-        D->fragment[E->fragment_index].sname : D->name, new_name);
 
     /* Close the old file */
     if (E->e->u.raw.file->fp != -1 &&
@@ -246,8 +242,9 @@ int gd_rename(DIRFILE *D, const char *old_code, const char *new_name,
         return -1;
       }
 
-      if ((*_gd_ef[E->e->u.raw.file[0].encoding].move)(E->e->u.raw.file,
-            temp.name))
+      if ((*_gd_ef[E->e->u.raw.file[0].encoding].move)(
+            D->fragment[E->fragment_index].dirfd, E->e->u.raw.file,
+            D->fragment[E->fragment_index].dirfd, temp.name))
       {
         _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
         free(filebase);

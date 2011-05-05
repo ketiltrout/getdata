@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2010 D. V. Wiebe
+/* Copyright (C) 2008-2011 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -88,12 +88,14 @@ static void _GD_ByteSwapFragment(DIRFILE* D, unsigned long byte_sex,
     if (D->error) {
       for (i = 0; i < n_raw; ++i)
         if ((*_gd_ef[raw_entry[i]->e->u.raw.file[0].encoding].temp)(
+              D->fragment[fragment].dirfd, D->fragment[fragment].dirfd,
               raw_entry[i]->e->u.raw.file, GD_TEMP_DESTROY))
           _GD_SetError(D, GD_E_RAW_IO, 0, raw_entry[i]->e->u.raw.file[0].name,
               errno, NULL);
     } else {
       for (i = 0; i < n_raw; ++i)
         if ((*_gd_ef[raw_entry[i]->e->u.raw.file[0].encoding].temp)(
+              D->fragment[fragment].dirfd, D->fragment[fragment].dirfd,
               raw_entry[i]->e->u.raw.file, GD_TEMP_MOVE))
         {
           _GD_SetError(D, GD_E_UNCLEAN_DB, 0,

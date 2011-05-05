@@ -1,3 +1,67 @@
+2011-05-05   D. V. Wiebe <getdata@ketiltrout.net> svn:586
+	* src/internal.h: The encoding framework has changed: open, touch, size,
+	move, unlink, and temp now all take the dirfd.  Furthermore, to allow
+	operation on non-POSIX.1-2008 systems, we hide the DIRFILE pointer in
+	_gd_raw_file, so callback can be made to the compatibility layer.  All
+	framework callers have been updated to pass dirfds.  fragment->sname is no
+	longer malloc'd and is now marked const; also, fragments now carry their
+	dirfd.  D->dir and D->ndir added.
+	* src/encoding.c (gd_MakeTempFile) src/compat.c (gd_OpenAt gd_RenameAt
+	gd_StatAt gd_StatAt64 gd_UnlinkAt) src/common.c (_GD_DirName
+	_GD_MakeFullPath _GD_GrabDir _GD_ReleaseDir): Added.
+	* src/open.c (gd_cbopen): Open the dirfile directory as soon as possible,
+	then work as much as possible with the descriptor instead of the path
+	itself.
+	* src/open.c (_GD_CreateDirfile): Use the dirfd produced by cb_open()
+	instead of relying on the pathname except with GD_CREAT.  As a side effect,
+	no longer need to compute fullname when truncating.
+	* src/entry.c (_GD_FreeE): Release LUT directory.  This requires passing the
+	DIRFILE to this function.
+	* src/close.c (_GD_FreeD): Don't free fragment->sname (it's no longer
+	malloc'd).  Free D->dir.
+	* src/close.c (_GD_ShutdownDirfile): Close all open directories.
+	* src/flush.c (_GD_FlushFragment): Call gd_MakeTempFile instead of mkstemp.
+	* src/encoding.c (_GD_SetEncodedName): set file->D to the DIRFILE pointer,
+	so the encoding framework has access to it.
+	* src/encoding.c (_GD_ResolveEncoding): Take dirfd for I/O purposes.
+	* src/move.c (_GD_MogrifyFile): Consider changes in dirfd.
+	* src/parse.c (_GD_ParseRaw): E->e->u.raw.filebase is a copy of E->field
+	now, (and could be removed, except we'll need it shortly).  The fragment
+	index (me) is no longer needed in this function.
+	* src/mod.c (_GD_Change): Release the LUT directory if it changes.
+	* src/include.c (_GD_Include): Open the grab the included fragment's
+	directory and store it in fragment->dirfd.  fragment->sname is now just the
+	value returned by _GD_DirName, and not malloc'd.
+	* src/include.c (gd_uninclude): Release the directory.
+	* src/compat.c (mkstemp _GD_Rename): Removed.
+	* src/common.c (_GD_SetTablePath): Open the directory.  table_path is
+	replaced with table_file.
+
+	* src/encoding.c (_GD_GenericTouch _GD_GenericUnlink _GD_GenericMove)
+	src/slim.c (_GD_SlimOpen _GD_SlimSize) src/gzip.c (_GD_GzipOpen _GD_GzipSize)
+	src/ascii.c (_GD_AsciiOpen _GD_AsciiSize _GD_AsciiTemp) src/lzma.c
+	(_GD_LzmaOpen _GD_LzmaSize) src/bzip.c (_GD_Bzip2Open _GD_Bzip2Size): Update
+	for changes in the encoding framework.
+
+	* src/slim.c (_GD_SlimOpen _GD_SlimSize): Slimlib doesn't accept file
+	descriptors, so compute the full path before calling it.  This has the
+	potential for breakage.
+	* src/gzip.c (_GD_GzipOpen _GD_GzipSize): Use gzdopen instead of gzopen.
+	* src/lzma.c (_GD_LzmaDoOpen) src/bzip.c (_GD_Bzip2DoOpen): Use dirfd to
+	create stream.
+
+	* src/legacy.c (_GD_GetDirfile) src/name.c (gd_rename) src/encoding.c
+	(_GD_MissingFramework _GD_ResolveEncoding) src/move.c (gd_move)
+	src/include.c (_GD_Include) src/add.c (_GD_Add): Remove the FILENAME_MAX
+	crutch.
+
+	* src/add.c (_GD_Add): Fix memory leak of new_ref.
+
+	* src/entry.c (gd_raw_filename): Return a malloc'd string.
+
+	* configure.ac: Fix am__fastdepCXX_* for --disable-cplusplus.  This is
+	presumably a autotools bug.  Look for ...at() functions.
+
 2011-04-21   D. V. Wiebe <getdata@ketiltrout.net> svn:581
 	* bindings/python/pydirfile.c (gdpy_dirfile_geterrorcount): Added.
 	* bindings/cxx/dirfile.cpp (Dirfile::ErrorCount): Added.

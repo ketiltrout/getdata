@@ -197,7 +197,7 @@ int _GD_MissingFramework(int encoding, unsigned int funcs)
 {
   int ret;
 
-  dtrace("%x, %x", encoding, funcs);
+  dtrace("%i, %x", encoding, funcs);
 
 #ifdef USE_MODULES
 #ifdef USE_PTHREAD
@@ -206,21 +206,31 @@ int _GD_MissingFramework(int encoding, unsigned int funcs)
 
   /* set up the encoding library if required */
   if (_gd_ef[encoding].provides) {
-    char library[FILENAME_MAX];
+    char *library;
     lt_dlhandle lib;
 
     /* make the library name */
-    sprintf(library, "%s/libgetdata%s-%s", GETDATA_MODULEDIR,
-        _gd_ef[encoding].affix, PACKAGE_VERSION);
+    library = (char *)malloc(sizeof(GETDATA_MODULEDIR) +
+        strlen(_gd_ef[encoding].affix) + sizeof(PACKAGE_VERSION) + 13);
+    if (!library) {
+      _gd_ef[encoding].provides = 0;
+#ifdef USE_PTHREAD
+      pthread_mutex_unlock(&_gd_mutex);
+#endif
+      dreturn("%i", 1);
+      return 1;
+    }
+
+    strcat(strcat(strcpy(library, GETDATA_MODULEDIR "/libgetdata"),
+          _gd_ef[encoding].affix), "-" PACKAGE_VERSION);
     library[sizeof(GETDATA_MODULEDIR) + 10] -= 'A' - 'a';
 
     /* open */
     if ((lib = lt_dlopenext(library)) == NULL) {
       /* if that didn't work, look for it in the search path */
-      sprintf(library, "libgetdata%s-%s", _gd_ef[encoding].affix,
-          PACKAGE_VERSION);
-      library[10] -= 'A' - 'a';
-      if ((lib = lt_dlopenext(library)) == NULL) {
+      if ((lib = lt_dlopenext(library + sizeof(GETDATA_MODULEDIR))) == NULL)
+      {
+        free(library);
         _gd_ef[encoding].provides = 0;
 #ifdef USE_PTHREAD
         pthread_mutex_unlock(&_gd_mutex);
@@ -229,17 +239,18 @@ int _GD_MissingFramework(int encoding, unsigned int funcs)
         return 1;
       }
     }
+    free(library);
 
     /* Try to resolve the symbols */
     if (_gd_ef[encoding].provides & GD_EF_OPEN)
-      _gd_ef[encoding].open = (int (*)(struct _gd_raw_file*, int,
+      _gd_ef[encoding].open = (int (*)(int, struct _gd_raw_file*, int,
             int))_GD_ResolveSymbol(lib, _gd_ef + encoding, "Open");
     if (_gd_ef[encoding].provides & GD_EF_CLOSE)
       _gd_ef[encoding].close =
         (int (*)(struct _gd_raw_file*))_GD_ResolveSymbol(lib, _gd_ef + encoding,
             "Close");
     if (_gd_ef[encoding].provides & GD_EF_TOUCH)
-      _gd_ef[encoding].touch = (int (*)(struct _gd_raw_file*))
+      _gd_ef[encoding].touch = (int (*)(int, struct _gd_raw_file*))
         _GD_ResolveSymbol(lib, _gd_ef + encoding, "Touch");
     if (_gd_ef[encoding].provides & GD_EF_SEEK)
       _gd_ef[encoding].seek = (off64_t (*)(struct _gd_raw_file*, off64_t,
@@ -249,7 +260,7 @@ int _GD_MissingFramework(int encoding, unsigned int funcs)
             gd_type_t, size_t))_GD_ResolveSymbol(lib, _gd_ef + encoding,
             "Read");
     if (_gd_ef[encoding].provides & GD_EF_SIZE)
-      _gd_ef[encoding].size = (off64_t (*)(struct _gd_raw_file*,
+      _gd_ef[encoding].size = (off64_t (*)(int, struct _gd_raw_file*,
             gd_type_t))_GD_ResolveSymbol(lib, _gd_ef + encoding, "Size");
     if (_gd_ef[encoding].provides & GD_EF_WRITE)
       _gd_ef[encoding].write = (ssize_t (*)(struct _gd_raw_file*, const void*,
@@ -260,11 +271,11 @@ int _GD_MissingFramework(int encoding, unsigned int funcs)
         (int (*)(struct _gd_raw_file*))_GD_ResolveSymbol(lib, _gd_ef + encoding,
             "Sync");
     if (_gd_ef[encoding].provides & GD_EF_UNLINK)
-      _gd_ef[encoding].unlink =
-        (int (*)(struct _gd_raw_file*))_GD_ResolveSymbol(lib, _gd_ef + encoding,
+      _gd_ef[encoding].unlink = (int (*)(int,
+            struct _gd_raw_file*))_GD_ResolveSymbol(lib, _gd_ef + encoding,
             "Unlink");
     if (_gd_ef[encoding].provides & GD_EF_TEMP)
-      _gd_ef[encoding].temp = (int (*)(struct _gd_raw_file*,
+      _gd_ef[encoding].temp = (int (*)(int, int, struct _gd_raw_file*,
             int))_GD_ResolveSymbol(lib, _gd_ef + encoding, "Temp");
 
     /* we tried our best, don't bother trying again */
@@ -292,31 +303,31 @@ int _GD_MissingFramework(int encoding, unsigned int funcs)
 }
 
 /* Figure out the encoding scheme */
-static unsigned long _GD_ResolveEncoding(const char* name, unsigned long scheme,
+static unsigned long _GD_ResolveEncoding(const DIRFILE *D gd_unused_d,
+    const char* name, unsigned long scheme, int dirfd,
     struct _gd_raw_file *file)
 {
-  char candidate[FILENAME_MAX];
-  char* ptr;
-  int i, len = strlen(name);
-  gd_stat64_t statbuf;
+  char *candidate;
+  int i;
+  const size_t len = strlen(name);
+  struct stat statbuf;
 
-  dtrace("\"%s\", 0x%08lx, %p", name, scheme, file);
-
-  strcpy(candidate, name);
-  ptr = candidate + len;
-  len = FILENAME_MAX - len;
+  dtrace("%p, \"%s\", 0x%08lx, %i, %p", D, name, scheme, dirfd, file);
 
   for (i = 0; _gd_ef[i].scheme != GD_ENC_UNSUPPORTED; i++) {
     if (scheme == GD_AUTO_ENCODED || scheme == _gd_ef[i].scheme) {
-      strcpy(ptr, _gd_ef[i].ext);
+      candidate = (char *)malloc(len + strlen(_gd_ef[i].ext) + 1);
+      strcat(strcpy(candidate, name), _gd_ef[i].ext);
 
-      if (gd_stat64(candidate, &statbuf) == 0) 
+      if (gd_StatAt(D, dirfd, candidate, &statbuf, 0) == 0) 
         if (S_ISREG(statbuf.st_mode)) {
           if (file != NULL)
             file->encoding = i;
+          free(candidate);
           dreturn("%08lx", _gd_ef[i].scheme);
           return _gd_ef[i].scheme;
         }
+      free(candidate);
     }
   }
 
@@ -340,8 +351,8 @@ int _GD_Supports(DIRFILE* D, gd_entry_t* E, unsigned int funcs)
   /* Figure out the dirfile encoding type, if required */
   if (D->fragment[E->fragment_index].encoding == GD_AUTO_ENCODED) {
     D->fragment[E->fragment_index].encoding =
-      _GD_ResolveEncoding(E->e->u.raw.filebase, GD_AUTO_ENCODED,
-          E->e->u.raw.file);
+      _GD_ResolveEncoding(D, E->e->u.raw.filebase, GD_AUTO_ENCODED,
+          D->fragment[E->fragment_index].dirfd, E->e->u.raw.file);
   }
 
   /* If the encoding scheme is unknown, complain */
@@ -353,8 +364,9 @@ int _GD_Supports(DIRFILE* D, gd_entry_t* E, unsigned int funcs)
 
   /* Figure out the encoding subtype, if required */
   if (E->e->u.raw.file[0].encoding == GD_ENC_UNKNOWN)
-    _GD_ResolveEncoding(E->e->u.raw.filebase,
-        D->fragment[E->fragment_index].encoding, E->e->u.raw.file);
+    _GD_ResolveEncoding(D, E->e->u.raw.filebase,
+        D->fragment[E->fragment_index].encoding,
+        D->fragment[E->fragment_index].dirfd, E->e->u.raw.file);
 
   /* check for our function(s) */
   if (_GD_MissingFramework(E->e->u.raw.file[0].encoding, funcs)) {
@@ -373,14 +385,16 @@ int _GD_SetEncodedName(DIRFILE* D, struct _gd_raw_file* file, const char* base,
   dtrace("%p, %p, \"%s\", %i", D, file, base, temp);
 
   if (file->name == NULL) {
-    file->name = (char *)malloc(FILENAME_MAX);
+    file->D = D;
+    file->name = (char *)malloc(strlen(base) + (temp ? 8 :
+          strlen(_gd_ef[file->encoding].ext) + 1));
     if (file->name == NULL) {
       _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
       dreturn("%i", -1);
       return -1;
     }
 
-    snprintf(file->name, FILENAME_MAX, "%s%s", base, temp ? "_XXXXXX" :
+    strcat(strcpy(file->name, base), temp ? "_XXXXXX" :
         _gd_ef[file->encoding].ext);
   }
 
@@ -438,6 +452,7 @@ static void _GD_RecodeFragment(DIRFILE* D, unsigned long encoding, int fragment,
       for (i = 0; i < n_raw; ++i)
         if (_gd_ef[raw_entry[i]->e->u.raw.file[1].encoding].temp != NULL && 
             (*_gd_ef[raw_entry[i]->e->u.raw.file[1].encoding].temp)(
+              D->fragment[fragment].dirfd, D->fragment[fragment].dirfd,
               raw_entry[i]->e->u.raw.file, GD_TEMP_DESTROY))
         {
           _GD_SetError(D, GD_E_RAW_IO, 0, raw_entry[i]->e->u.raw.file[0].name,
@@ -459,6 +474,7 @@ static void _GD_RecodeFragment(DIRFILE* D, unsigned long encoding, int fragment,
           raw_entry[i]->e->u.raw.file[0].encoding = temp.encoding;
         } else if (
             (*_gd_ef[raw_entry[i]->e->u.raw.file[1].encoding].temp)(
+              D->fragment[fragment].dirfd, D->fragment[fragment].dirfd,
               raw_entry[i]->e->u.raw.file, GD_TEMP_MOVE))
         {
           _GD_SetError(D, GD_E_UNCLEAN_DB, 0,
@@ -466,7 +482,9 @@ static void _GD_RecodeFragment(DIRFILE* D, unsigned long encoding, int fragment,
           D->flags |= GD_INVALID;
           raw_entry[i]->e->u.raw.file[0].name = temp.name;
           raw_entry[i]->e->u.raw.file[0].encoding = temp.encoding;
-        } else if ((*_gd_ef[temp.encoding].unlink)(&temp)) {
+        } else if ((*_gd_ef[temp.encoding].unlink)(D->fragment[fragment].dirfd,
+              &temp))
+        {
           _GD_SetError(D, GD_E_UNCLEAN_DB, 0,
               D->fragment[D->entry[i]->fragment_index].cname, 0, NULL);
           D->flags |= GD_INVALID;
@@ -584,7 +602,8 @@ unsigned long gd_encoding(DIRFILE* D, int fragment) gd_nothrow
           D->entry[i]->field_type == GD_RAW_ENTRY)
       {
         D->fragment[fragment].encoding =
-          _GD_ResolveEncoding(D->entry[i]->e->u.raw.filebase, GD_AUTO_ENCODED,
+          _GD_ResolveEncoding(D, D->entry[i]->e->u.raw.filebase,
+              GD_AUTO_ENCODED, D->fragment[fragment].dirfd,
               D->entry[i]->e->u.raw.file);
 
         if (D->fragment[fragment].encoding != GD_AUTO_ENCODED)
@@ -599,13 +618,51 @@ unsigned long gd_encoding(DIRFILE* D, int fragment) gd_nothrow
   return reported_encoding;
 }
 
-int _GD_GenericTouch(struct _gd_raw_file* file)
+/* This is basically the non-existant POSIX funcion mkstempat.  There are two
+ * approaches we could take here:
+ * 1) fchdir to dirfd, use mkstemp to grab a file descriptor; fchdir back to
+ *    cwd, but this isn't thread-safe, so we're stuck with:
+ * 2) use mktemp to generate a "unique" file name, and then try to openat it
+ *    exclusively; repeat as necessary.
+ */
+int gd_MakeTempFile(const DIRFILE *D gd_unused_d, int dirfd, char *template)
+{
+  int fd = -1;
+  char *tmp = strdup(template);
+
+  dtrace("%i, \"%s\"", dirfd, template);
+
+  if (!tmp) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  do {
+    strcpy(template, tmp);
+    mktemp(template);
+    if (template[0] == 0) {
+      free(tmp);
+      dreturn("%i", -1);
+      return -1;
+    }
+
+    fd = gd_OpenAt(D, dirfd, template, O_RDWR | O_CREAT | O_EXCL, 0666);
+  } while (errno == EEXIST);
+
+  free(tmp);
+
+  dreturn("%i", fd);
+  return fd;
+}
+
+int _GD_GenericTouch(int dirfd, struct _gd_raw_file* file)
 {
   int fd;
 
-  dtrace("%p", file);
+  dtrace("%i, %p", dirfd, file);
 
-  fd = open(file->name, O_RDWR | O_CREAT | O_TRUNC | O_BINARY, 0666);
+  fd = gd_OpenAt(file->D, dirfd, file->name, O_RDWR | O_CREAT | O_TRUNC
+      | O_BINARY, 0666);
 
   if (fd != -1)
     fd = close(fd);
@@ -614,25 +671,26 @@ int _GD_GenericTouch(struct _gd_raw_file* file)
   return fd;
 }
 
-int _GD_GenericUnlink(struct _gd_raw_file* file)
+int _GD_GenericUnlink(int dirfd, struct _gd_raw_file* file)
 {
   int r;
 
-  dtrace("%p", file);
+  dtrace("%i, %p", dirfd, file);
 
-  r = unlink(file->name);
+  r = gd_UnlinkAt(file->D, dirfd, file->name, 0);
 
   dreturn("%i", r);
   return r;
 }
 
-int _GD_GenericMove(struct _gd_raw_file* file, char* new_path)
+int _GD_GenericMove(int olddirfd, struct _gd_raw_file* file, int newdirfd,
+    char* new_path)
 {
   int r, rename_errno;
 
-  dtrace("%p, \"%s\"", file, new_path);
+  dtrace("%i, %p, %i, \"%s\"", olddirfd, file, newdirfd, new_path);
 
-  r = _GD_Rename(file->name, new_path);
+  r = gd_RenameAt(file->D, olddirfd, file->name, newdirfd, new_path);
 
   rename_errno = errno;
 

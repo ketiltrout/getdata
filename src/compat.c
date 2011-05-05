@@ -1,4 +1,4 @@
-/* Copyright (C) 2010 D. V. Wiebe
+/* Copyright (C) 2010, 2011 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -49,53 +49,105 @@ struct tm *gmtime_r(const time_t *timep, struct tm *result)
 }
 #endif
 
-/* MSVCRT based implementation of mkstemp(3). */
-#ifndef HAVE_MKSTEMP
-int mkstemp(char *template) {
-  int ret = -1;
-  char *template_template;
+#ifndef HAVE_OPENAT
+int gd_OpenAt(const DIRFILE *D, int dirfd, const char *name, int flags,
+    mode_t mode)
+{
+  int ret;
+  char *path;
 
-  dtrace("\"%s\"", template);
+  dtrace("%p, %i, \"%s\", %x, 0%o", D, dirfd, name, flags, mode);
 
-  template_template = strdup(template);
+  path = _GD_MakeFullPath(D, dirfd, name);
+  ret = open(path, flags, mode);
+  free(path);
 
-  /* for sanity's sake */
-  errno = 0;
-
-  /* loop while open returns EEXIST */
-  do {
-    char *ptr;
-    strcpy(template, template_template);
-    ptr = mktemp(template);
-
-    if (ptr == NULL)
-      errno = EINVAL;
-    else
-      ret = open(ptr, O_RDWR | O_BINARY | O_CREAT | O_EXCL | O_BINARY, 0600);
-  } while (errno == EEXIST);
-
-  free(template_template);
   dreturn("%i", ret);
   return ret;
 }
 #endif
 
-/* An overwriting rename for use with the MSVCRT */
-#ifdef __MSVCRT__
-int _GD_Rename(const char *oldname, const char *newname)
+#ifndef HAVE_RENAMEAT
+int gd_RenameAt(const DIRFILE *D, int olddirfd, const char *oldname,
+    int newdirfd, const char *newname)
 {
   int ret;
+  char *oldpath, *newpath;
 
-  dtrace("\"%s\", \"%s\"", oldname, newname);
+  dtrace("%p, %i, \"%s\", %i, \"%s\"", D, olddirfd, oldname, newdirfd, newname);
 
-  if (unlink(newname)) {
+  newpath = _GD_MakeFullPath(D, newdirfd, newname);
+#ifdef __MSVCRT__
+  if (unlink(newpath)) {
     if (errno != ENOENT) {
+      free(newpath);
       dreturn("%i", -1);
       return -1;
     }
   }
+#endif
 
-  ret = rename(oldname, newname);
+  oldpath = _GD_MakeFullPath(D, olddirfd, oldname);
+  ret = rename(oldpath, newpath);
+  free(newpath);
+  free(oldpath);
+
+  dreturn("%i", ret);
+  return ret;
+}
+#endif
+
+#ifndef HAVE_FSTATAT
+int gd_StatAt(const DIRFILE* D, int dirfd, const char* name, struct stat* buf,
+    int flags)
+{
+  int ret;
+  char *path;
+
+  dtrace("%p, %i, \"%s\", %p, %x", D, dirfd, name, buf, flags);
+
+  path = _GD_MakeFullPath(D, dirfd, name);
+  if (flags & AT_SYMLINK_NOFOLLOW)
+    ret = lstat(path, buf);
+  else
+    ret = stat(path, buf);
+  free(path);
+
+  dreturn("%i", ret);
+  return ret;
+}
+#endif
+
+#ifndef HAVE_FSTATAT64
+int gd_StatAt64(const DIRFILE* D, int dirfd, const char* name, gd_stat64_t* buf,
+    int flags __gd_unused)
+{
+  int ret;
+  char *path;
+
+  dtrace("%p, %i, \"%s\", %p, <unused>", D, dirfd, name, buf);
+
+  path = _GD_MakeFullPath(D, dirfd, name);
+  ret = gd_stat64(path, buf);
+  free(path);
+
+  dreturn("%i", ret);
+  return ret;
+}
+#endif
+
+#ifndef HAVE_UNLINKAT
+int gd_UnlinkAt(const DIRFILE *D, int dirfd, const char *name,
+    int flags __gd_unused)
+{
+  int ret;
+  char *path;
+
+  dtrace("%p, %i, \"%s\", <unused>", D, dirfd, name);
+
+  path = _GD_MakeFullPath(D, dirfd, name);
+  ret = unlink(path);
+  free(path);
 
   dreturn("%i", ret);
   return ret;

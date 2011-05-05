@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2010 D. V. Wiebe
+/* Copyright (C) 2008-2011 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -22,7 +22,6 @@
 
 #ifdef STDC_HEADERS
 #include <stdlib.h>
-#include <stdio.h>
 #include <string.h>
 #include <errno.h>
 #endif
@@ -34,7 +33,7 @@
 /* add an entry */
 static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
 {
-  char temp_buffer[FILENAME_MAX];
+  char *temp_buffer;
   int i, is_dot;
   int copy_scalar[GD_MAX_POLYORD + 1];
   void* new_list;
@@ -89,18 +88,28 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
       return -1;
     }
 
-    snprintf(temp_buffer, FILENAME_MAX, "%s/%s", parent, entry->field);
+    temp_buffer = (char *)malloc(strlen(parent) + strlen(entry->field) + 2);
+    if (temp_buffer)
+      strcat(strcat(strcpy(temp_buffer, parent), "/"), entry->field);
   } else
-    snprintf(temp_buffer, FILENAME_MAX, "%s", entry->field);
+    temp_buffer = strdup(entry->field);
+
+  if (temp_buffer == NULL) {
+    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
 
   /* check for duplicate field */
   E = _GD_FindField(D, temp_buffer, D->entry, D->n_entries, &u);
 
   if (E != NULL) { /* matched */
     _GD_SetError(D, GD_E_DUPLICATE, 0, NULL, 0, temp_buffer);
+    free(temp_buffer);
     dreturn("%i", -1);
     return -1;
   }
+  free(temp_buffer);
 
   /* check for bad field type */
   if (entry->field_type != GD_RAW_ENTRY &&
@@ -153,12 +162,12 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
   if (E->field == entry->field) {
     _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, entry->field);
     E->field = NULL;
-    _GD_FreeE(E, 1);
+    _GD_FreeE(D, E, 1);
     dreturn("%i", -1);
     return -1;
   } else if (E->field == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-    _GD_FreeE(E, 1);
+    _GD_FreeE(D, E, 1);
     dreturn("%i", -1);
     return -1;
   }
@@ -190,14 +199,10 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
       E->e->u.raw.file[0].fp = E->e->u.raw.file[1].fp = -1;
       E->e->u.raw.file[0].encoding = GD_ENC_UNKNOWN;
 
-      if ((E->e->u.raw.filebase = (char *)malloc(FILENAME_MAX)) == NULL) {
+      if ((E->e->u.raw.filebase = strdup(E->field)) == NULL) {
         _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
         break;
       }
- 
-      snprintf(E->e->u.raw.filebase, FILENAME_MAX, "%s/%s",
-          D->fragment[E->fragment_index].sname ?
-          D->fragment[E->fragment_index].sname : D->name, E->field);
 
       if ((E->EN(raw,spf) = entry->EN(raw,spf)) == 0)
         _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_SPF, NULL,
@@ -209,7 +214,8 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
         ; /* error already set */
       else if (_GD_SetEncodedName(D, E->e->u.raw.file, E->e->u.raw.filebase, 0))
         ; /* error already set */
-      else if ((*_gd_ef[E->e->u.raw.file[0].encoding].touch)(E->e->u.raw.file))
+      else if ((*_gd_ef[E->e->u.raw.file[0].encoding].touch)(
+            D->fragment[E->fragment_index].dirfd, E->e->u.raw.file))
         _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno,
             NULL);
       else if (D->fragment[E->fragment_index].ref_name == NULL) {
@@ -413,7 +419,7 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
 
   if (D->error != GD_E_OK) {
     free(new_ref);
-    _GD_FreeE(E, 1);
+    _GD_FreeE(D, E, 1);
     dreturn("%i", -1);
     return -1;
   }
@@ -421,7 +427,7 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
   new_list = realloc(D->entry, (D->n_entries + 1) * sizeof(gd_entry_t*));
   if (new_list == NULL) {
     free(new_ref);
-    _GD_FreeE(E, 1);
+    _GD_FreeE(D, E, 1);
     dreturn("%i", -1);
     return -1;
   }
@@ -431,7 +437,7 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
     new_list = realloc(D->dot_list, (D->n_dot + 1) * sizeof(gd_entry_t*));
     if (new_list == NULL) {
       free(new_ref);
-      _GD_FreeE(E, 1);
+      _GD_FreeE(D, E, 1);
       dreturn("%i", -1);
       return -1;
     }
@@ -443,7 +449,7 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
         sizeof(gd_entry_t*));
     if (ptr == NULL) {
       free(new_ref);
-      _GD_FreeE(E, 1);
+      _GD_FreeE(D, E, 1);
       dreturn("%i", -1);
       return -1;
     }
@@ -485,6 +491,7 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
 
       if (D->reference_field == NULL)
         D->reference_field = E;
+      free(new_ref);
     }
   }
 
@@ -801,7 +808,7 @@ int gd_add_bit(DIRFILE* D, const char* field_code, const char* in_field,
   gd_entry_t B;
   int error;
 
-  dtrace("%p, \"%s\", \"%s\", %i, %i, %i\n", D, field_code, in_field, bitnum,
+  dtrace("%p, \"%s\", \"%s\", %i, %i, %i", D, field_code, in_field, bitnum,
       numbits, fragment_index);
 
   if (D->flags & GD_INVALID) {/* don't crash */
@@ -830,7 +837,7 @@ int gd_add_sbit(DIRFILE* D, const char* field_code, const char* in_field,
   gd_entry_t B;
   int error;
 
-  dtrace("%p, \"%s\", \"%s\", %i, %i, %i\n", D, field_code, in_field, bitnum,
+  dtrace("%p, \"%s\", \"%s\", %i, %i, %i", D, field_code, in_field, bitnum,
       numbits, fragment_index);
 
   if (D->flags & GD_INVALID) {/* don't crash */

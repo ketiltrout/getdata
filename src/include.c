@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2010 D. V. Wiebe
+/* Copyright (C) 2008-2011 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -39,32 +39,41 @@ int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,
     int linenum, char** ref_name, int me, int* standards, unsigned long *flags)
 {
   int i;
-  int abs = 0;
-  int sname_null_ok = 0;
   int found = 0;
-  char temp_buf1[FILENAME_MAX];
-  char temp_buf2[FILENAME_MAX];
-  void* ptr;
+  int dirfd = -1;
+  char *temp_buf1, *temp_buf2;
+  const char *base;
+  void *ptr = NULL;
   FILE* new_fp = NULL;
 
-  dtrace("%p, \"%s\", \"%s\", %p, %i, %i, %p, %p\n", D, ename, format_file,
+  dtrace("%p, \"%s\", \"%s\", %p, %i, %i, %p, %p", D, ename, format_file,
       ref_name, linenum, me, standards, flags);
 
-  /* create the format filename */
-  if (
-      /* check for absolute path */
-#if defined _WIN32 || defined _WIN64
-      ename[0] != '\0' && ename[1] == ':'
-#else
-      ename[0] == '/'
-#endif
-     ) {
-    strncpy(temp_buf1, ename, FILENAME_MAX - 1);
-    temp_buf1[FILENAME_MAX - 1] = '\0';
-    abs = 1;
-  } else
-    snprintf(temp_buf1, FILENAME_MAX, "%s/%s", D->fragment[me].sname ?
-        D->fragment[me].sname : D->name, ename);
+  temp_buf2 = strdup(ename);
+  if (temp_buf2 == NULL) {
+    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+  base = basename(temp_buf2);
+
+  /* Open the containing directory */
+  dirfd = _GD_GrabDir(D, D->fragment[me].dirfd, ename);
+  if (dirfd == -1 && D->error == GD_E_OK)
+    _GD_SetError(D, GD_E_OPEN_FRAGMENT, errno, format_file, linenum, ename);
+  if (D->error) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  temp_buf1 = _GD_MakeFullPath(D, dirfd, base);
+  free(temp_buf2);
+  if (temp_buf1 == NULL) {
+    _GD_ReleaseDir(D, dirfd);
+    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
 
   /* Run through the include list to see if we've already included this
    * file */
@@ -76,28 +85,35 @@ int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,
 
   /* If we found the file, we won't reopen it.  Continue parsing. */
   if (found) {
+    _GD_ReleaseDir(D, dirfd);
+    free(temp_buf1);
     dreturn("%i", i);
     return i;
   }
 
-  /* Otherwise, try to open the file */
-  if ((D->flags & GD_ACCMODE) == GD_RDWR) {
-    i = open(temp_buf1, O_RDWR | ((*flags & GD_CREAT) ? O_CREAT : 0) |
-        ((*flags & GD_TRUNC) ? O_TRUNC : 0) | ((*flags & GD_EXCL) ? O_EXCL : 0)
-        | O_BINARY, 0666);
-    if (i < 0) {
-      _GD_SetError(D, GD_E_OPEN_FRAGMENT, errno, format_file, linenum,
-          temp_buf1);
-      dreturn("%i", -1);
-      return -1;
-    }
-    new_fp = fdopen(i, "r+");
-  } else
-    new_fp = fopen(temp_buf1, "r");
+  /* Try to open the file */
+  temp_buf2 = strdup(temp_buf1);
+  i = gd_OpenAt(D, dirfd, basename(temp_buf2),
+      (((D->flags & GD_ACCMODE) == GD_RDWR) ? O_RDWR : O_RDONLY) |
+      ((*flags & GD_CREAT) ? O_CREAT : 0) |
+      ((*flags & GD_TRUNC) ? O_TRUNC : 0) | ((*flags & GD_EXCL) ? O_EXCL : 0)
+      | O_BINARY, 0666);
+  free(temp_buf2);
+
+  if (i < 0) {
+    _GD_SetError(D, GD_E_OPEN_FRAGMENT, errno, format_file, linenum,
+        temp_buf1);
+    free(temp_buf1);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  new_fp = fdopen(i, ((D->flags & GD_ACCMODE) == GD_RDWR) ? "r+" : "r");
 
   /* If opening the file failed, set the error code and abort parsing. */
   if (new_fp == NULL) {
     _GD_SetError(D, GD_E_OPEN_FRAGMENT, errno, format_file, linenum, temp_buf1);
+    free(temp_buf1);
     dreturn("%i", -1);
     return -1;
   }
@@ -105,16 +121,19 @@ int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,
   /* If we got here, we managed to open the included file; parse it */
   ptr = realloc(D->fragment, (++D->n_fragment) * sizeof(struct gd_fragment_t));
   if (ptr == NULL) {
+    D->n_fragment--;
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    free(temp_buf1);
     dreturn("%i", -1);
     return -1;
   }
   D->fragment = (struct gd_fragment_t *)ptr;
 
-  D->fragment[D->n_fragment - 1].cname = strdup(temp_buf1);
+  D->fragment[D->n_fragment - 1].cname = temp_buf1;
   D->fragment[D->n_fragment - 1].ename = strdup(ename);
   D->fragment[D->n_fragment - 1].modified = 0;
   D->fragment[D->n_fragment - 1].parent = me;
+  D->fragment[D->n_fragment - 1].dirfd = dirfd;
   D->fragment[D->n_fragment - 1].encoding = *flags & GD_ENCODING;
   D->fragment[D->n_fragment - 1].byte_sex =
 #ifdef WORDS_BIGENDIAN
@@ -129,9 +148,7 @@ int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,
   D->fragment[D->n_fragment - 1].vers =
     (*flags & GD_PEDANTIC) ? 1ULL << *standards : 0;
 
-  if (D->fragment[D->n_fragment - 1].cname == NULL ||
-      D->fragment[D->n_fragment - 1].ename == NULL)
-  {
+  if (D->fragment[D->n_fragment - 1].ename == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     dreturn("%i", -1);
     return -1;
@@ -139,31 +156,8 @@ int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,
 
   /* extract the subdirectory name - dirname both returns a volatile string
    * and modifies its argument, ergo strcpy */
-  strncpy(temp_buf1, ename, FILENAME_MAX);
-  if (abs)
-    D->fragment[D->n_fragment - 1].sname = strdup(dirname(temp_buf1));
-  else {
-    strcpy(temp_buf2, dirname(temp_buf1));
-    if (temp_buf2[0] == '.' && temp_buf2[1] == '\0') {
-      if (D->fragment[me].sname)
-        D->fragment[D->n_fragment - 1].sname = strdup(D->fragment[me].sname);
-      else {
-        D->fragment[D->n_fragment - 1].sname = NULL;
-        sname_null_ok = 1;
-      }
-    } else {
-      strncpy(temp_buf1, ename, FILENAME_MAX);
-      snprintf(temp_buf2, FILENAME_MAX, "%s/%s", D->fragment[me].sname ? 
-          D->fragment[me].sname : D->name, dirname(temp_buf1));
-      D->fragment[D->n_fragment - 1].sname = strdup(temp_buf2);
-    }
-  }
 
-  if (!sname_null_ok && D->fragment[D->n_fragment - 1].sname == NULL) {
-    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
+  D->fragment[D->n_fragment - 1].sname = _GD_DirName(D, dirfd);
 
   *ref_name = _GD_ParseFragment(new_fp, D, D->n_fragment - 1, standards, flags);
 
@@ -401,7 +395,7 @@ int gd_uninclude(DIRFILE* D, int fragment_index, int del)
       } else
         D->n_meta--;
 
-      _GD_FreeE(D->entry[i], 1);
+      _GD_FreeE(D, D->entry[i], 1);
     } else
       D->entry[o++] = D->entry[i];
 
@@ -411,8 +405,8 @@ int gd_uninclude(DIRFILE* D, int fragment_index, int del)
 
   /* delete the fragments -- again, don't bother resizing D->fragment */
   for (j = 0; j < nf; ++j) {
+    _GD_ReleaseDir(D, D->fragment[f[j]].dirfd);
     free(D->fragment[f[j]].cname);
-    free(D->fragment[f[j]].sname);
     free(D->fragment[f[j]].ename);
     free(D->fragment[f[j]].ref_name);
 

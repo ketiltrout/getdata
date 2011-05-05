@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 C. Barth Netterfield
- * Copyright (C) 2005-2010 D. V. Wiebe
+ * Copyright (C) 2005-2011 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -188,27 +188,25 @@ int _GD_SetTablePath(DIRFILE *D, gd_entry_t *E, struct _gd_private_entry *e)
 
   dtrace("%p, %p, %p", D, E, e);
 
-  if (E->EN(linterp,table)[0] == '/') {
-    e->u.linterp.table_path = strdup(E->EN(linterp,table));
-    if (e->u.linterp.table_path == NULL) {
-      _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-      dreturn("%i", 1);
-      return 1;
-    }
-  } else {
-    e->u.linterp.table_path = (char *)malloc(strlen(E->EN(linterp,table)) + 2 +
-        strlen(D->fragment[E->fragment_index].cname));
-    if (e->u.linterp.table_path == NULL) {
-      _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-      dreturn("%i", 1);
-      return 1;
-    }
-    temp_buffer = strdup(D->fragment[E->fragment_index].cname);
-    strcpy(e->u.linterp.table_path, dirname(temp_buffer));
-    strcat(e->u.linterp.table_path, "/");
-    strcat(e->u.linterp.table_path, E->EN(linterp,table));
-    free(temp_buffer);
+  e->u.linterp.table_dirfd = _GD_GrabDir(D,
+      D->fragment[E->fragment_index].dirfd, E->EN(linterp,table));
+
+  temp_buffer = strdup(E->EN(linterp,table));
+  if (temp_buffer == NULL) {
+    _GD_ReleaseDir(D, e->u.linterp.table_dirfd);
+    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    dreturn("%i", 1);
+    return 1;
   }
+  e->u.linterp.table_file = strdup(basename(temp_buffer));
+  if (e->u.linterp.table_file == NULL) {
+    _GD_ReleaseDir(D, e->u.linterp.table_dirfd);
+    free(temp_buffer);
+    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    dreturn("%i", 1);
+    return 1;
+  }
+  free(temp_buffer);
 
   dreturn("%i", 0);
   return 0;
@@ -227,7 +225,7 @@ void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E)
 {
   FILE *fp;
   struct _gd_lut *ptr;
-  int i;
+  int i, fd;
   int dir = -1;
   char *line;
   size_t n = 0;
@@ -237,16 +235,25 @@ void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E)
 
   dtrace("%p, %p", D, E);
 
-  if (E->e->u.linterp.table_path == NULL)
+  if (E->e->u.linterp.table_file == NULL)
     if (_GD_SetTablePath(D, E, E->e)) {
       dreturnvoid();
       return;
     }
 
-  fp = fopen(E->e->u.linterp.table_path, "r");
+  fd = gd_OpenAt(D, E->e->u.linterp.table_dirfd, E->e->u.linterp.table_file,
+      O_RDONLY, 0666);
+  if (fd == -1) {
+    _GD_SetError(D, GD_E_OPEN_LINFILE, GD_E_LINFILE_OPEN, NULL, 0,
+        E->EN(linterp,table));
+    dreturnvoid();
+    return;
+  }
+
+  fp = fdopen(fd, "r");
   if (fp == NULL) {
     _GD_SetError(D, GD_E_OPEN_LINFILE, GD_E_LINFILE_OPEN, NULL, 0,
-        E->e->u.linterp.table_path);
+        E->EN(linterp,table));
     dreturnvoid();
     return;
   }
@@ -259,12 +266,12 @@ void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E)
   } else {
     if (errno == EOVERFLOW)
       /* line too long */
-      _GD_SetError(D, GD_E_LINE_TOO_LONG, 0, E->e->u.linterp.table_path,
-          linenum, NULL);
+      _GD_SetError(D, GD_E_LINE_TOO_LONG, 0, E->EN(linterp,table), linenum,
+          NULL);
     else 
       /* no data in file! */
       _GD_SetError(D, GD_E_OPEN_LINFILE, GD_E_LINFILE_LENGTH, NULL, 0,
-          E->e->u.linterp.table_path);
+          E->EN(linterp,table));
     fclose(fp);
     dreturnvoid();
     return;
@@ -321,7 +328,7 @@ void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E)
   if (i < 2) {
     free(E->e->u.linterp.lut);
     _GD_SetError(D, GD_E_OPEN_LINFILE, GD_E_LINFILE_LENGTH, NULL, 0,
-        E->e->u.linterp.table_path);
+        E->EN(linterp,table));
     fclose(fp);
     dreturnvoid();
     return;
@@ -677,7 +684,7 @@ void _GD_CLincomData(DIRFILE* D, int n, void* data1, gd_type_t return_type,
   do { \
     for (i = 0; i < n_read; i++) { \
       const t d = ((t *)data)[2 * i] * ((t *)data)[2 * i] + \
-        ((t *)data)[2 * i + 1] * ((t *)data)[2 * i + 1]; \
+      ((t *)data)[2 * i + 1] * ((t *)data)[2 * i + 1]; \
       ((t *)data)[2 * i] = (t)(dividend * ((t *)data)[2 * i] / d); \
       ((t *)data)[2 * i + 1] = (t)(-dividend * ((t *)data)[2 * i + 1] / d); \
     } \
@@ -725,7 +732,7 @@ void _GD_InvertData(DIRFILE* D, void* data, gd_type_t return_type,
   do { \
     for (i = 0; i < n_read; i++) { \
       const t d = ((t *)data)[2 * i] * ((t *)data)[2 * i] + \
-        ((t *)data)[2 * i + 1] * ((t *)data)[2 * i + 1]; \
+      ((t *)data)[2 * i + 1] * ((t *)data)[2 * i + 1]; \
       ((t *)data)[2 * i] = (t)((dividend[0] * ((t *)data)[2 * i] - \
           dividend[1] * ((t *)data)[2 * i + 1]) / d); \
       ((t *)data)[2 * i + 1] = (t)((dividend[1] * ((t *)data)[2 * i] - \
@@ -737,7 +744,7 @@ void _GD_InvertData(DIRFILE* D, void* data, gd_type_t return_type,
   do { \
     for (i = 0; i < n_read; i++) { \
       const t d = ((t *)data)[2 * i] * ((t *)data)[2 * i] + \
-        ((t *)data)[2 * i + 1] * ((t *)data)[2 * i + 1]; \
+      ((t *)data)[2 * i + 1] * ((t *)data)[2 * i + 1]; \
       ((t *)data)[2 * i] = (t)((dividend[0] * ((t *)data)[2 * i] - \
           dividend[1] * ((t *)data)[2 * i + 1]) / d); \
     } \
@@ -883,5 +890,149 @@ gd_entry_t* _GD_FindFieldAndRepr(DIRFILE* D, const char* field_code_in,
   dreturn("%p %i", E, *repr);
   return E;
 }
+
+const char *_GD_DirName(const DIRFILE *D, int dirfd)
+{
+  unsigned int i;
+
+  dtrace("%p, %i", D, dirfd);
+
+  for (i = 0; i < D->ndir; ++i)
+    if (dirfd == D->dir[i].fd) {
+      dreturn("\"%s\"", D->dir[i].path);
+      return D->dir[i].path;
+    }
+
+  /* we only get here in the early stages of opening a dirfile */
+  dreturn("%p", D->name);
+  return D->name;
+}
+
+char *_GD_MakeFullPath(const DIRFILE *D, int dirfd, const char *name)
+{
+  const char *dir;
+  char *filepath;
+  dtrace("%p, %i, \"%s\"", D, dirfd, name);
+
+  dir = _GD_DirName(D, dirfd);
+  if (dir == NULL) {
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  filepath = (char *)malloc(strlen(dir) + strlen(name) + 2);
+  if (filepath == NULL) {
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  strcat(strcat(strcpy(filepath, dir), "/"), name);
+
+  dreturn("\"%s\"", filepath);
+  return filepath;
+}
+
+int _GD_GrabDir(DIRFILE *D, int dirfd, const char *name)
+{
+  unsigned int i;
+  char *path, *dir = NULL;
+  void *ptr;
+  int abs = (
+#if defined _WIN32 || defined _WIN64
+      name[0] != '\0' && name[1] == ':'
+#else
+      name[0] == '/'
+#endif
+      );
+
+  dtrace("%p, %i, \"%s\"", D, dirfd, name);
+
+  if (abs)
+    path = strdup(name);
+  else
+    path = _GD_MakeFullPath(D, dirfd, name);
+
+  if (path == NULL) {
+    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  dir = dirname(path);
+
+  for (i = 0; i < D->ndir; ++i)
+    if (strcmp(dir, D->dir[i].path) == 0) {
+      D->dir[i].rc++;
+      free(path);
+      dreturn("%i", D->dir[i].fd);
+      return D->dir[i].fd;
+    }
+
+  /* new one */
+  ptr = realloc(D->dir, sizeof(struct gd_dir_t) * (D->ndir + 1));
+
+  if (ptr == NULL) {
+    free(path);
+    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  D->dir = ptr;
+  D->dir[D->ndir].rc = 1;
+  D->dir[D->ndir].path = strdup(dir);
+
+  if (D->dir[D->ndir].path == NULL) {
+    free(path);
+    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  if (abs) {
+    D->dir[D->ndir].fd = open(dir, O_RDONLY);
+  } else {
+    free(path);
+    path = strdup(name);
+    if (path == NULL) {
+      free(D->dir[D->ndir].path);
+      _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+      dreturn("%i", -1);
+      return -1;
+    }
+    D->dir[D->ndir].fd = gd_OpenAt(D, dirfd, dirname(path), O_RDONLY, 0666);
+  }
+  free(path);
+
+  if (D->dir[D->ndir].fd == -1) {
+    free(D->dir[D->ndir].path);
+    dreturn("%i", -1);
+    return -1;
+  }
+  D->ndir++;
+
+  dreturn("%i", D->dir[D->ndir - 1].fd);
+  return D->dir[D->ndir - 1].fd;
+}
+
+void _GD_ReleaseDir(DIRFILE *D, int dirfd)
+{
+  unsigned int i;
+
+  dtrace("%p, %i", D, dirfd);
+
+  for (i = 0; i < D->ndir; ++i)
+    if (D->dir[i].fd == dirfd) {
+      if (--D->dir[i].rc == 0) {
+        free(D->dir[i].path);
+        close(D->dir[i].fd);
+        D->dir[i] = D->dir[--D->ndir];
+      }
+      break;
+    }
+
+  dreturnvoid();
+}
+
 /* vim: ts=2 sw=2 et tw=80
 */

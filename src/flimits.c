@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2010 D. V. Wiebe
+/* Copyright (C) 2008-2011 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -75,12 +75,14 @@ static void _GD_ShiftFragment(DIRFILE* D, off64_t offset, int fragment,
     if (D->error) {
       for (i = 0; i < n_raw; ++i)
         if ((*_gd_ef[raw_entry[i]->e->u.raw.file[0].encoding].temp)(
+              D->fragment[fragment].dirfd, D->fragment[fragment].dirfd,
               raw_entry[i]->e->u.raw.file, GD_TEMP_DESTROY))
           _GD_SetError(D, GD_E_RAW_IO, 0, raw_entry[i]->e->u.raw.file[0].name,
               errno, NULL);
     } else {
       for (i = 0; i < n_raw; ++i)
         if ((*_gd_ef[raw_entry[i]->e->u.raw.file[0].encoding].temp)(
+              D->fragment[fragment].dirfd, D->fragment[fragment].dirfd,
               raw_entry[i]->e->u.raw.file, GD_TEMP_MOVE))
         {
           _GD_SetError(D, GD_E_UNCLEAN_DB, 0,
@@ -208,7 +210,8 @@ static off64_t _GD_GetEOF(DIRFILE *D, gd_entry_t* E, const char *parent,
       if (_GD_SetEncodedName(D, E->e->u.raw.file, E->e->u.raw.filebase, 0))
         break;
 
-      ns = (*_gd_ef[E->e->u.raw.file[0].encoding].size)(E->e->u.raw.file,
+      ns = (*_gd_ef[E->e->u.raw.file[0].encoding].size)(
+          D->fragment[E->fragment_index].dirfd, E->e->u.raw.file,
           E->EN(raw,data_type));
 
       if (ns < 0) {

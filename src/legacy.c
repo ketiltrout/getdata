@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 C. Barth Netterfield
  * Copyright (C) 2003-2005 Theodore Kisner
- * Copyright (C) 2005-2010 D. V. Wiebe
+ * Copyright (C) 2005-2011 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -122,17 +122,24 @@ static DIRFILE *_GD_GetDirfile(const char *filename_in, int mode,
 {
   unsigned int i_dirfile;
   void *ptr;
-  char filedir[FILENAME_MAX];
+  char *filedir;
 
   dtrace("\"%s\", %x", filename_in, mode);
 
-  strncpy(filedir, filename_in, FILENAME_MAX);
+  filedir = strdup(filename_in);
+
+  if (!filedir) {
+    *error_code = GD_E_ALLOC;
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
   if (filedir[strlen(filedir) - 1] == '/')
     filedir[strlen(filedir) - 1] = '\0';
 
   /* first check to see if we have already read it */
   for (i_dirfile = 0; i_dirfile < _GD_Dirfiles.n; i_dirfile++) {
-    if (strncmp(filedir, _GD_Dirfiles.D[i_dirfile]->name, FILENAME_MAX) == 0) {
+    if (strcmp(filedir, _GD_Dirfiles.D[i_dirfile]->name) == 0) {
       /* if the dirfile was previously opened read-only, close it so we can
        * re-open it read-write */
       if ((mode & GD_RDWR) && (_GD_Dirfiles.D[i_dirfile]->flags & GD_ACCMODE) ==
@@ -144,6 +151,7 @@ static DIRFILE *_GD_GetDirfile(const char *filename_in, int mode,
          * the counter -- next realloc will do nothing */
         _GD_Dirfiles.D[i_dirfile] = _GD_Dirfiles.D[--_GD_Dirfiles.n];
       } else {
+        free(filedir);
         _GD_ClearError(_GD_Dirfiles.D[i_dirfile]);
         dreturn("%p", _GD_Dirfiles.D[i_dirfile]);
         return _GD_Dirfiles.D[i_dirfile];
@@ -165,6 +173,7 @@ static DIRFILE *_GD_GetDirfile(const char *filename_in, int mode,
 
   /* Open a dirfile */
   _GD_Dirfiles.D[_GD_Dirfiles.n] = gd_open(filedir, mode);
+  free(filedir);
 
   /* Error encountered -- clean up */
   if (_GD_Dirfiles.D[_GD_Dirfiles.n]->error != GD_E_OK) {

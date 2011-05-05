@@ -57,8 +57,10 @@ int main(void)
 
   gd_close(D);
 
-  if (unlink(data))
+  if (unlink(data)) {
+    perror("unlink");
     r = 1;
+  }
   unlink(format);
   rmdir(filedir);
 

@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2010 D. V. Wiebe
+/* Copyright (C) 2008-2011 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -119,7 +119,8 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned long encoding,
    * endianness conversion, don't do anything */
   if (offset == 0 && encoding == D->fragment[E->fragment_index].encoding &&
       !byte_sex && !arm_endianise && strcmp(new_filebase,
-        E->e->u.raw.filebase) == 0)
+        E->e->u.raw.filebase) == 0 && D->fragment[new_fragment].dirfd ==
+      D->fragment[E->fragment_index].dirfd)
   {
     free(new_filebase);
     dreturn("%i", 0);
@@ -144,7 +145,8 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned long encoding,
 
   if (_GD_SetEncodedName(D, E->e->u.raw.file + 1, new_filebase, 1))
     ; /* error already set */
-  else if ((*enc_out->temp)(E->e->u.raw.file, GD_TEMP_OPEN))
+  else if ((*enc_out->temp)(D->fragment[E->fragment_index].dirfd,
+        D->fragment[new_fragment].dirfd, E->e->u.raw.file, GD_TEMP_OPEN))
     _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[1].name, errno, NULL);
 
   if (D->error) {
@@ -156,8 +158,8 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned long encoding,
   /* Open the input file, if necessary */
   if (_GD_SetEncodedName(D, E->e->u.raw.file, E->e->u.raw.filebase, 0))
     ; /* error already set */
-  else if (E->e->u.raw.file[0].fp == -1 && (*enc_in->open)(E->e->u.raw.file, 0,
-        0))
+  else if (E->e->u.raw.file[0].fp == -1 && (*enc_in->open)(
+        D->fragment[E->fragment_index].dirfd, E->e->u.raw.file, 0, 0))
   {
     _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
   }
@@ -253,7 +255,8 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned long encoding,
     /* Finalise the conversion: on error delete the temporary file, otherwise
      * copy it over top of the new one. */
     if (D->error)
-      (*enc_out->temp)(E->e->u.raw.file, GD_TEMP_DESTROY);
+      (*enc_out->temp)(D->fragment[E->fragment_index].dirfd,
+          D->fragment[new_fragment].dirfd, E->e->u.raw.file, GD_TEMP_DESTROY);
     else {
       struct _gd_raw_file temp;
       memcpy(&temp, E->e->u.raw.file, sizeof(temp));
@@ -264,13 +267,17 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned long encoding,
       if (_GD_SetEncodedName(D, E->e->u.raw.file, new_filebase, 0)) {
         E->e->u.raw.file[0].name = temp.name;
         E->e->u.raw.file[0].encoding = temp.encoding;
-      } else if ((*enc_out->temp)(E->e->u.raw.file, GD_TEMP_MOVE)) {
+      } else if ((*enc_out->temp)(D->fragment[new_fragment].dirfd,
+            D->fragment[new_fragment].dirfd, E->e->u.raw.file, GD_TEMP_MOVE))
+      {
         _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[1].name, errno,
             NULL);
         E->e->u.raw.file[0].name = temp.name;
         E->e->u.raw.file[0].encoding = temp.encoding;
       } else if ((subencoding != temp.encoding || strcmp(E->e->u.raw.filebase,
-              new_filebase)) && (*enc_in->unlink)(&temp))
+              new_filebase) || D->fragment[new_fragment].dirfd !=
+            D->fragment[E->fragment_index].dirfd) && (*enc_in->unlink)(
+              D->fragment[E->fragment_index].dirfd, &temp))
       {
         _GD_SetError(D, GD_E_RAW_IO, 0, temp.name, errno, NULL);
         E->e->u.raw.file[0].name = temp.name;
@@ -388,16 +395,12 @@ int gd_move(DIRFILE* D, const char* field_code, int new_fragment, int move_data)
        strcmpnull(D->fragment[E->fragment_index].sname,
          D->fragment[new_fragment].sname)))
   {
-    new_filebase = (char *)malloc(FILENAME_MAX);
+    new_filebase = strdup(E->field);
     if (new_filebase == NULL) {
       _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
       dreturn("%i", -1);
       return -1;
     }
-
-    snprintf(new_filebase, FILENAME_MAX, "%s/%s",
-        D->fragment[new_fragment].sname ? D->fragment[new_fragment].sname :
-        D->name, E->field);
 
     if (_GD_MogrifyFile(D, E, D->fragment[new_fragment].encoding,
           D->fragment[new_fragment].byte_sex,

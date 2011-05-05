@@ -1,4 +1,4 @@
-/* Copyright (C) 2008, 2010 D. V. Wiebe
+/* Copyright (C) 2008, 2010, 2011 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -41,12 +41,21 @@
 /* The slim encoding scheme uses edata as a slimfile pointer.  If a file is
  * open, fp = 0 otherwise fp = -1. */
 
-int _GD_SlimOpen(struct _gd_raw_file* file, int mode __gd_unused,
+int _GD_SlimOpen(int dirfd, struct _gd_raw_file* file, int mode __gd_unused,
     int creat __gd_unused)
 {
-  dtrace("%p, <unused>, <unused>", file);
+  char *filepath;
+  dtrace("%i, %p, <unused>, <unused>", dirfd, file);
 
-  file->edata = slimopen(file->name, "r" /* writing not supported */);
+  /* this is easily broken, but the best we can do for now... */
+  filepath = gd_MakeFullPath(file->D, dirfd, file->name);
+  if (filepath == NULL) {
+    dreturn("%i", 1);
+    return 1;
+  }
+
+  file->edata = slimopen(filepath, "r" /* writing not supported */);
+  free(filepath);
 
   if (file->edata != NULL) {
     file->fp = 0;
@@ -106,13 +115,22 @@ int _GD_SlimClose(struct _gd_raw_file *file)
   return ret;
 }
 
-off64_t _GD_SlimSize(struct _gd_raw_file *file, gd_type_t data_type)
+off64_t _GD_SlimSize(int dirfd, struct _gd_raw_file *file, gd_type_t data_type)
 {
+  char *filepath;
   off64_t size;
 
-  dtrace("%p, %x", file, data_type);
+  dtrace("%i, %p, %x", dirfd, file, data_type);
 
-  size = slimrawsize(file->name);
+  /* this is easily broken, but the best we can do for now... */
+  filepath = gd_MakeFullPath(file->D, dirfd, file->name);
+  if (filepath == NULL) {
+    dreturn("%i", 1);
+    return 1;
+  }
+
+  size = slimrawsize(filepath);
+  free(filepath);
 
   if (size < 0) {
     dreturn("%i", -1);

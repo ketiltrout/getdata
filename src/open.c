@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 C. Barth Netterfield
- * Copyright (C) 2005-2010 D. V. Wiebe
+ * Copyright (C) 2005-2011 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -40,36 +40,41 @@
 #endif
 
 /* attempt to open or create a new dirfile - set error appropriately */
-static FILE* _GD_CreateDirfile(DIRFILE* D, const char* format_file,
+static FILE* _GD_CreateDirfile(DIRFILE* D, int dirfd, int dir_error,
     const char* filedir)
 {
   struct stat statbuf;
-  char fullname[FILENAME_MAX];
   DIR* dir;
-  char* dirfile_end;
   struct dirent* lamb;
-  int dir_error = 0;
+  int fd;
   int format_error = 0;
   FILE* fp = NULL;
 
-  dtrace("%p, \"%s\", \"%s\"", D, format_file, filedir);
+  dtrace("%p, %i, %i, \"%s\"", D, dirfd, dir_error, filedir);
 
   /* naively try to open the format file */
-  if ((fp = fopen(format_file, "rb")) == NULL) {
+  if (dirfd < 0)
+    format_error = ENOENT;
+  else if ((fd = gd_OpenAt(D, dirfd, "format", O_RDONLY | O_BINARY, 0666)) < 0)
+  {
     format_error = errno;
 
     /* open failed, try to stat the directory itself */
-    if (stat(filedir, &statbuf))
+    if (fstat(dirfd, &statbuf))
       dir_error = errno;
     else if (!S_ISDIR(statbuf.st_mode))
       dir_error = ENOTDIR;
-  }
+  } else
+    dir_error = 0;
 
   /* First, cast out our four failure modes */
 
   /* unable to read the format file */
   if (format_error == EACCES || dir_error == EACCES) {
+    char *format_file = (char *)malloc(strlen(filedir) + 8);
+    strcat(strcpy(format_file, filedir), "/format");
     _GD_SetError(D, GD_E_OPEN, GD_E_OPEN_NO_ACCESS, format_file, 0, NULL);
+    free(format_file);
     dreturn("%p", NULL);
     return NULL;
   }
@@ -93,7 +98,7 @@ static FILE* _GD_CreateDirfile(DIRFILE* D, const char* format_file,
   /* It does exist, but we were asked to exclusively create it */
   if (!format_error && (D->flags & GD_CREAT) && (D->flags & GD_EXCL)) {
     _GD_SetError(D, GD_E_CREAT, GD_E_CREAT_EXCL, filedir, 0, NULL);
-    fclose(fp);
+    close(fd);
     dreturn("%p", NULL);
     return NULL;
   }
@@ -110,7 +115,7 @@ static FILE* _GD_CreateDirfile(DIRFILE* D, const char* format_file,
    * could be problematic if users use GD_TRUNC cavalierly. */
   if (D->flags & GD_TRUNC && !format_error) {
     /* This file isn't going to be around much longer */
-    fclose(fp);
+    close(fd);
 
     /* can't truncate a read-only dirfile */
     if ((D->flags & GD_ACCMODE) == GD_RDONLY) {
@@ -119,34 +124,38 @@ static FILE* _GD_CreateDirfile(DIRFILE* D, const char* format_file,
       return NULL;
     }
 
-    /* This code is from defile */
-    if ((dir = opendir(filedir)) == NULL) {
+    /* crawl the directory, and delete everything */
+    if ((fd = dup(dirfd)) == -1) {
+      _GD_SetError(D, GD_E_TRUNC, GD_E_TRUNC_DIR, filedir, errno, NULL);
+      dreturn("%p", NULL);
+      return NULL;
+    }
+    if ((dir = fdopendir(fd)) == NULL) {
       _GD_SetError(D, GD_E_TRUNC, GD_E_TRUNC_DIR, filedir, errno, NULL);
       dreturn("%p", NULL);
       return NULL;
     }
 
-    strcpy(fullname, filedir);
-    dirfile_end = fullname + strlen(fullname);
-    if (*(dirfile_end - 1) != '/') {
-      strcat(fullname, "/");
-      dirfile_end++;
-    }
-
     while ((lamb = readdir(dir)) != NULL) {
-      strcpy(dirfile_end, lamb->d_name);
+      if (gd_StatAt(D, dirfd, lamb->d_name, &statbuf, AT_SYMLINK_NOFOLLOW)) {
+        char *name = (char *)malloc(strlen(filedir) + strlen(lamb->d_name) + 2);
+        strcat(strcat(strcpy(name, filedir), "/"), lamb->d_name);
 
-      if (stat(fullname, &statbuf)) {
-        _GD_SetError(D, GD_E_TRUNC, GD_E_TRUNC_STAT, fullname, errno, NULL);
+        _GD_SetError(D, GD_E_TRUNC, GD_E_TRUNC_STAT, name, errno, NULL);
+        free(name);
         closedir(dir);
         dreturn("%p", NULL);
         return NULL;
       }
 
       /* only delete regular files */
-      if (S_ISREG(statbuf.st_mode)) {
-        if (unlink(fullname)) {
-          _GD_SetError(D, GD_E_TRUNC, GD_E_TRUNC_UNLINK, fullname, errno, NULL);
+      if (S_ISREG(statbuf.st_mode) || S_ISLNK(statbuf.st_mode)) {
+        if (gd_UnlinkAt(D, dirfd, lamb->d_name, 0)) {
+          char *name = (char *)malloc(strlen(filedir) + strlen(lamb->d_name)
+              + 2);
+          strcat(strcat(strcpy(name, filedir), "/"), lamb->d_name);
+          _GD_SetError(D, GD_E_TRUNC, GD_E_TRUNC_UNLINK, name, errno, NULL);
+          free(name);
           closedir(dir);
           dreturn("%p", NULL);
           return NULL;
@@ -168,16 +177,28 @@ static FILE* _GD_CreateDirfile(DIRFILE* D, const char* format_file,
     }
 
     /* attempt to create the dirfile directory, if not present */
-    if (dir_error) 
+    if (dir_error) {
       if (mkdir(filedir, 00777) < 0) {
         _GD_SetError(D, GD_E_CREAT, GD_E_CREAT_DIR, filedir, errno, NULL);
         dreturn("%p", NULL);
         return NULL;
       }
 
+      if ((dirfd = open(filedir, O_RDONLY)) < 0) {
+        _GD_SetError(D, GD_E_CREAT, GD_E_CREAT_DIR, filedir, errno, NULL);
+        dreturn("%p", NULL);
+        return NULL;
+      }
+    }
+
     /* create a new, empty format file */
-    if ((fp = fopen(format_file, "w")) == NULL) {
+    if ((fd = gd_OpenAt(D, dirfd, "format", O_CREAT | O_EXCL | O_BINARY, 0666))
+        < 0)
+    {
+      char *format_file = (char *)malloc(strlen(filedir) + 8);
+      strcat(strcpy(format_file, filedir), "/format");
       _GD_SetError(D, GD_E_CREAT, GD_E_CREAT_FORMAT, format_file, errno, NULL);
+      free(format_file);
       dreturn("%p", NULL);
       return NULL;
     }
@@ -187,7 +208,30 @@ static FILE* _GD_CreateDirfile(DIRFILE* D, const char* format_file,
       D->flags = (D->flags & ~GD_ENCODING) | GD_UNENCODED;
   }
 
+  /* associate a stream with the format file */
+  if ((fp = fdopen(fd, "r")) == NULL) {
+    char *format_file = (char *)malloc(strlen(filedir) + 8);
+    strcat(strcpy(format_file, filedir), "/format");
+    _GD_SetError(D, GD_E_CREAT, GD_E_CREAT_FORMAT, format_file, errno, NULL);
+    free(format_file);
+    close(fd);
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
   /* open succeeds */
+  D->dir = (struct gd_dir_t *)malloc(sizeof(struct gd_dir_t));
+  D->dir[0].fd = dirfd;
+  D->dir[0].rc = 1;
+  D->dir[0].path = strdup(filedir);
+  if (D->dir[0].path == NULL) {
+    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    fclose(fp);
+    dreturn("%p", NULL);
+    return NULL;
+  }
+  D->ndir = 1;
+
   dreturn("%p", fp);
   return fp;
 }
@@ -226,10 +270,14 @@ DIRFILE* gd_cbopen(const char* filedir, unsigned long flags,
   char* ref_name;
   DIRFILE* D;
   gd_entry_t* E;
-  char format_file[FILENAME_MAX];
+  int dirfd, dirfd_error;
 
   dtrace("\"%s\", 0x%lx, %p, %p", filedir, (unsigned long)flags, sehandler,
       extra);
+
+  /* quickly, before it goes away, grab the directory (if it exists) */
+  dirfd = open(filedir, O_RDONLY);
+  dirfd_error = errno;
 
   _GD_InitialiseFramework();
 
@@ -282,11 +330,8 @@ DIRFILE* gd_cbopen(const char* filedir, unsigned long flags,
   memset(D->entry[0]->e, 0, sizeof(struct _gd_private_entry));
   D->entry[0]->e->calculated = 1;
 
-  snprintf(format_file, FILENAME_MAX, "%s%sformat", filedir,
-      (filedir[strlen(filedir) - 1] == '/') ? "" : "/");
-
   /* open the format file (or create it) */
-  if ((fp = _GD_CreateDirfile(D, format_file, filedir)) == NULL) {
+  if ((fp = _GD_CreateDirfile(D, dirfd, dirfd_error, filedir)) == NULL) {
     dreturn("%p", D);
     return D; /* errors have already been set */
   }
@@ -300,20 +345,22 @@ DIRFILE* gd_cbopen(const char* filedir, unsigned long flags,
     dreturn("%p", D);
     return D;
   }
-  D->fragment[0].cname = strdup(format_file);
+  D->fragment[0].cname = malloc(strlen(filedir) + 8);
+  strcat(strcpy(D->fragment[0].cname, filedir), "/format");
   D->fragment[0].sname = NULL;
   /* The root format file needs no external name */
   D->fragment[0].ename = NULL;
   D->fragment[0].modified = 0;
   D->fragment[0].parent = -1;
+  D->fragment[0].dirfd = D->dir[0].fd;
   D->fragment[0].encoding = D->flags & GD_ENCODING;
   D->fragment[0].byte_sex = (
 #ifdef WORDS_BIGENDIAN
-    (D->flags & GD_LITTLE_ENDIAN) ? GD_LITTLE_ENDIAN : GD_BIG_ENDIAN
+      (D->flags & GD_LITTLE_ENDIAN) ? GD_LITTLE_ENDIAN : GD_BIG_ENDIAN
 #else
-    (D->flags & GD_BIG_ENDIAN) ? GD_BIG_ENDIAN : GD_LITTLE_ENDIAN
+      (D->flags & GD_BIG_ENDIAN) ? GD_BIG_ENDIAN : GD_LITTLE_ENDIAN
 #endif
-    ) | (D->flags & GD_ARM_FLAG);
+      ) | (D->flags & GD_ARM_FLAG);
   D->fragment[0].ref_name = NULL;
   D->fragment[0].frame_offset = 0;
   D->fragment[0].protection = GD_PROTECT_NONE;

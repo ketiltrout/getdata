@@ -1,4 +1,4 @@
-/* Copyright (C) 2008, 2010 D. V. Wiebe
+/* Copyright (C) 2008, 2010, 2011 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -28,12 +28,12 @@
 #include <errno.h>
 #endif
 
-int _GD_RawOpen(struct _gd_raw_file* file, int mode, int creat)
+int _GD_RawOpen(int dirfd, struct _gd_raw_file* file, int mode, int creat)
 {
-  dtrace("%p, %i, %i", file, mode, creat);
+  dtrace("%i, %p, %i, %i", dirfd, file, mode, creat);
 
-  file->fp = open(file->name, ((mode == GD_RDWR) ? O_RDWR : O_RDONLY) |
-      (creat ? O_CREAT : 0) | O_BINARY, 0666);
+  file->fp = gd_OpenAt(file->D, dirfd, file->name, ((mode == GD_RDWR) ? O_RDWR :
+        O_RDONLY) | (creat ? O_CREAT : 0) | O_BINARY, 0666);
 
   dreturn("%i", file->fp < 0);
   return (file->fp < 0);
@@ -108,13 +108,13 @@ int _GD_RawClose(struct _gd_raw_file *file)
   return ret;
 }
 
-off64_t _GD_RawSize(struct _gd_raw_file *file, gd_type_t data_type)
+off64_t _GD_RawSize(int dirfd, struct _gd_raw_file *file, gd_type_t data_type)
 {
   gd_stat64_t statbuf;
 
-  dtrace("%p, %x", file, data_type);
+  dtrace("%i, %p, %x", dirfd, file, data_type);
 
-  if (gd_stat64(file->name, &statbuf) < 0)  {
+  if (gd_StatAt64(file->D, dirfd, file->name, &statbuf, 0) < 0)  {
     dreturn("%lli", -1LL);
     return -1;
   }
@@ -123,17 +123,17 @@ off64_t _GD_RawSize(struct _gd_raw_file *file, gd_type_t data_type)
   return statbuf.st_size / GD_SIZE(data_type);
 }
 
-int _GD_RawTemp(struct _gd_raw_file *file, int method)
+int _GD_RawTemp(int dirfd0, int dirfd1, struct _gd_raw_file *file, int method)
 {
   struct stat stat_buf;
   int move_error = 0;
   mode_t mode;
 
-  dtrace("%p, %i", file, method);
+  dtrace("%i, %i, %p, %i", dirfd0, dirfd1, file, method);
 
   switch(method) {
     case GD_TEMP_OPEN:
-      file[1].fp = mkstemp(file[1].name);
+      file[1].fp = gd_MakeTempFile(file[1].D, dirfd1, file[1].name);
 
       if (file[1].fp == -1) {
         dreturn("%i", -1);
@@ -144,13 +144,15 @@ int _GD_RawTemp(struct _gd_raw_file *file, int method)
       if (file[1].name == NULL)
         break;
 
-      if (stat(file[0].name, &stat_buf))
+      if (gd_StatAt(file[0].D, dirfd0, file[0].name, &stat_buf, 0))
         mode = 0644;
       else
         mode = stat_buf.st_mode;
 
-      if (!_GD_Rename(file[1].name, file[0].name)) {
-        chmod(file[0].name, mode);
+      if (!gd_RenameAt(file->D, dirfd1, file[1].name, dirfd0, file[0].name)) {
+        int fd = gd_OpenAt(file->D, dirfd0, file[0].name, O_RDONLY, 0666);
+        fchmod(fd, mode);
+        close(fd);
         free(file[1].name);
         file[1].name = NULL;
         dreturn("%i", 0);
@@ -165,7 +167,7 @@ int _GD_RawTemp(struct _gd_raw_file *file, int method)
             return -1;
           }
 
-        if (unlink(file[1].name)) {
+        if (gd_UnlinkAt(file->D, dirfd1, file[1].name, 0)) {
           dreturn("%i", -1);
           return -1;
         }

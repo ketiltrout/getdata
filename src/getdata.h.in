@@ -102,7 +102,7 @@ extern "C" {
 #endif
 
 /* formerly, this was the maximum length of a format file line.  We keep it
- * around for legacy reasons.  (The actualy maximum length of a format file
+ * around for legacy reasons.  (The actual maximum length of a format file
  * line is the maximum value of ssize_t, i.e. 2**(n-1)-1 on a n-bit system.)
  */
 #define GD_MAX_LINE_LENGTH  4096
@@ -724,7 +724,7 @@ extern int gd_alter_protection(DIRFILE *dirfile, int protection_level,
 extern int gd_protection(DIRFILE *dirfile, int fragment_index) gd_nothrow
 gd_nonnull ((1));
 
-extern const char *gd_raw_filename(DIRFILE *dirfile,
+extern char *gd_raw_filename(DIRFILE *dirfile,
     const char *field_code) gd_nothrow gd_nonnull ((1, 2));
 
 extern const char *gd_reference(DIRFILE *dirfile,

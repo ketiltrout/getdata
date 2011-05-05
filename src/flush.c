@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2010 D. V. Wiebe
+/* Copyright (C) 2008-2011 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -28,6 +28,10 @@
 #include <sys/stat.h>
 #include <time.h>
 #include <limits.h>
+#endif
+
+#ifdef HAVE_LIBGEN_H
+#include <libgen.h>
 #endif
 
 #define GD_MAX_PRETTY_FIELD_WIDTH 80
@@ -421,17 +425,17 @@ static void _GD_FlushFragment(DIRFILE* D, int i, int permissive)
   int j;
   FILE* stream;
   char buffer[GD_MAX_LINE_LENGTH];
-  char *temp_file;
+  char temp_file[] = "format_XXXXXX";
   char* ptr;
   struct tm now;
   int fd;
   int pretty = 0;
   size_t max_len = 0;
-  const size_t name_len = strlen(D->name);
   unsigned int u;
   mode_t mode;
   struct stat stat_buf;
   time_t t;
+  int dirfd = D->fragment[i].dirfd;
 
   dtrace("%p, %i, %i", D, i, permissive);
 
@@ -442,19 +446,15 @@ static void _GD_FlushFragment(DIRFILE* D, int i, int permissive)
     mode = stat_buf.st_mode;
 
   /* open a temporary file */
-  temp_file = (char *)malloc(name_len + 15);
-  snprintf(temp_file, name_len + 15, "%s/format_XXXXXX", D->name);
-  fd = mkstemp(temp_file);
+  fd = gd_MakeTempFile(D, dirfd, temp_file);
   if (fd == -1) {
     _GD_SetError(D, GD_E_FLUSH, GD_E_FLUSH_MKTMP, NULL, errno, temp_file);
-    free(temp_file);
     dreturnvoid();
     return;
   }
   stream = fdopen(fd, "w+");
   if (stream == NULL) {
     _GD_SetError(D, GD_E_FLUSH, GD_E_FLUSH_OPEN, NULL, errno, temp_file);
-    free(temp_file);
     dreturnvoid();
     return;
   }
@@ -592,23 +592,24 @@ static void _GD_FlushFragment(DIRFILE* D, int i, int permissive)
 
   /* If no error was encountered, move the temporary file over the
    * old format file, otherwise abort */
-  if (D->error != GD_E_OK) {
-    unlink(temp_file);
-    free(temp_file);
+  ptr = strdup(D->fragment[i].cname);
+  if (ptr == NULL) {
+    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     dreturnvoid();
     return;
-    /* Only assume we've synced the file if the rename succeeds */
-  } else if (_GD_Rename(temp_file, D->fragment[i].cname)) {
+  }
+
+  /* Only assume we've synced the file if the rename succeeds */
+  if (D->error != GD_E_OK)
+    gd_UnlinkAt(D, dirfd, temp_file, 0);
+  else if (gd_RenameAt(D, dirfd, temp_file, dirfd, basename(ptr))) {
     _GD_SetError(D, GD_E_FLUSH, GD_E_FLUSH_RENAME, NULL, errno,
         D->fragment[i].cname);
-    unlink(temp_file);
-    free(temp_file);
-    dreturnvoid();
-    return;
+    gd_UnlinkAt(D, dirfd, temp_file, 0);
   } else
     D->fragment[i].modified = 0;
 
-  free(temp_file);
+  free(ptr);
   dreturnvoid();
 }
 

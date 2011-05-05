@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 C. Barth Netterfield
- * Copyright (C) 2005-2010 D. V. Wiebe
+ * Copyright (C) 2005-2011 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -215,13 +215,13 @@ carray_check:
 /* _GD_ParseRaw: parse a RAW entry in the format file
 */
 static gd_entry_t* _GD_ParseRaw(DIRFILE* D, char* in_cols[MAX_IN_COLS],
-    int n_cols, const gd_entry_t* parent, int me, const char* format_file,
-    int line, int standards, int pedantic, int *is_dot)
+    int n_cols, const gd_entry_t* parent, const char* format_file, int line,
+    int standards, int pedantic, int *is_dot)
 {
   gd_entry_t *E;
 
-  dtrace("%p, %p, %i, %p, %i, \"%s\", %i, %i, %i, %p", D, in_cols, n_cols,
-      parent, me, format_file, line, standards, pedantic, is_dot);
+  dtrace("%p, %p, %i, %p, \"%s\", %i, %i, %i, %p", D, in_cols, n_cols, parent,
+      format_file, line, standards, pedantic, is_dot);
 
   if (n_cols < 4) {
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_TOK, format_file, line, NULL);
@@ -263,21 +263,18 @@ static gd_entry_t* _GD_ParseRaw(DIRFILE* D, char* in_cols[MAX_IN_COLS],
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_NAME, format_file, line,
         in_cols[0]);
     E->field = NULL;
-    _GD_FreeE(E, 1);
+    _GD_FreeE(D, E, 1);
     dreturn("%p", NULL);
     return NULL;
   }
 
-  E->e->u.raw.filebase = (char *)malloc(FILENAME_MAX);
+  E->e->u.raw.filebase = strdup(in_cols[0]);
   if (E->e->u.raw.filebase == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-    _GD_FreeE(E, 1);
+    _GD_FreeE(D, E, 1);
     dreturn("%p", NULL);
     return NULL;
   }
-
-  snprintf(E->e->u.raw.filebase, FILENAME_MAX, "%s/%s", D->fragment[me].sname ?
-      D->fragment[me].sname : D->name, in_cols[0]);
 
   E->EN(raw,data_type) = _GD_RawType(in_cols[2], standards, pedantic);
   E->e->u.raw.size = GD_SIZE(E->EN(raw,data_type));
@@ -295,7 +292,7 @@ static gd_entry_t* _GD_ParseRaw(DIRFILE* D, char* in_cols[MAX_IN_COLS],
   }
 
   if (D->error != GD_E_OK) {
-    _GD_FreeE(E, 1);
+    _GD_FreeE(D, E, 1);
     E = NULL;
   }
 
@@ -350,7 +347,7 @@ static gd_entry_t* _GD_ParseLincom(DIRFILE* D, char* in_cols[MAX_IN_COLS],
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_NAME, format_file, line,
         in_cols[0]);
     E->field = NULL;
-    _GD_FreeE(E, 1);
+    _GD_FreeE(D, E, 1);
     dreturn("%p", NULL);
     return NULL;
   }
@@ -364,7 +361,7 @@ static gd_entry_t* _GD_ParseLincom(DIRFILE* D, char* in_cols[MAX_IN_COLS],
         > GD_MAX_LINCOM)
     {
       _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_TOK, format_file, line, NULL);
-      _GD_FreeE(E, 1);
+      _GD_FreeE(D, E, 1);
       dreturn("%p", NULL);
       return NULL;
     }
@@ -400,7 +397,7 @@ static gd_entry_t* _GD_ParseLincom(DIRFILE* D, char* in_cols[MAX_IN_COLS],
     }
 
   if (D->error != GD_E_OK) {
-    _GD_FreeE(E, 1);
+    _GD_FreeE(D, E, 1);
     E = NULL;
   }
 
@@ -453,7 +450,7 @@ static gd_entry_t* _GD_ParseLinterp(DIRFILE* D,
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_NAME, format_file, line,
         in_cols[0]);
     E->field = NULL;
-    _GD_FreeE(E, 1);
+    _GD_FreeE(D, E, 1);
     dreturn("%p", NULL);
     return NULL;
   }
@@ -468,7 +465,7 @@ static gd_entry_t* _GD_ParseLinterp(DIRFILE* D,
       NULL)
   {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-    _GD_FreeE(E, 1);
+    _GD_FreeE(D, E, 1);
     E = NULL;
   }
 
@@ -520,7 +517,7 @@ static gd_entry_t* _GD_ParseMultiply(DIRFILE* D,
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_NAME, format_file, line,
         in_cols[0]);
     E->field = NULL;
-    _GD_FreeE(E, 1);
+    _GD_FreeE(D, E, 1);
     dreturn("%p", NULL);
     return NULL;
   }
@@ -530,7 +527,7 @@ static gd_entry_t* _GD_ParseMultiply(DIRFILE* D,
 
   if (E->field == NULL || E->in_fields[0] == NULL || E->in_fields[1] == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-    _GD_FreeE(E, 1);
+    _GD_FreeE(D, E, 1);
     E = NULL;
   }
 
@@ -582,7 +579,7 @@ static gd_entry_t* _GD_ParseRecip(DIRFILE* D,
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_NAME, format_file, line,
         in_cols[0]);
     E->field = NULL;
-    _GD_FreeE(E, 1);
+    _GD_FreeE(D, E, 1);
     dreturn("%p", NULL);
     return NULL;
   }
@@ -591,7 +588,7 @@ static gd_entry_t* _GD_ParseRecip(DIRFILE* D,
 
   if (E->field == NULL || E->in_fields[0] == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-    _GD_FreeE(E, 1);
+    _GD_FreeE(D, E, 1);
     dreturn("%p", NULL);
     return NULL;
   }
@@ -649,7 +646,7 @@ static gd_entry_t* _GD_ParseDivide(DIRFILE* D,
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_NAME, format_file, line,
         in_cols[0]);
     E->field = NULL;
-    _GD_FreeE(E, 1);
+    _GD_FreeE(D, E, 1);
     dreturn("%p", NULL);
     return NULL;
   }
@@ -659,7 +656,7 @@ static gd_entry_t* _GD_ParseDivide(DIRFILE* D,
 
   if (E->field == NULL || E->in_fields[0] == NULL || E->in_fields[1] == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-    _GD_FreeE(E, 1);
+    _GD_FreeE(D, E, 1);
     dreturn("%p", NULL);
     return NULL;
   }
@@ -712,7 +709,7 @@ static gd_entry_t* _GD_ParseBit(DIRFILE* D, int is_signed,
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_NAME, format_file, line,
         in_cols[0]);
     E->field = NULL;
-    _GD_FreeE(E, 1);
+    _GD_FreeE(D, E, 1);
     dreturn("%p", NULL);
     return NULL;
   }
@@ -743,7 +740,7 @@ static gd_entry_t* _GD_ParseBit(DIRFILE* D, int is_signed,
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BITSIZE, format_file, line, NULL);
 
   if (D->error != GD_E_OK) {
-    _GD_FreeE(E, 1);
+    _GD_FreeE(D, E, 1);
     E = NULL;
   }
 
@@ -794,7 +791,7 @@ static gd_entry_t* _GD_ParsePhase(DIRFILE* D, char* in_cols[MAX_IN_COLS],
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_NAME, format_file, line,
         in_cols[0]);
     E->field = NULL;
-    _GD_FreeE(E, 1);
+    _GD_FreeE(D, E, 1);
     dreturn("%p", NULL);
     return NULL;
   }
@@ -803,7 +800,7 @@ static gd_entry_t* _GD_ParsePhase(DIRFILE* D, char* in_cols[MAX_IN_COLS],
 
   if (E->field == NULL || E->in_fields[0] == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-    _GD_FreeE(E, 1);
+    _GD_FreeE(D, E, 1);
     E = NULL;
   }
 
@@ -858,7 +855,7 @@ static gd_entry_t* _GD_ParsePolynom(DIRFILE* D,
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_NAME, format_file, line,
         in_cols[0]);
     E->field = NULL;
-    _GD_FreeE(E, 1);
+    _GD_FreeE(D, E, 1);
     dreturn("%p", NULL);
     return NULL;
   }
@@ -889,7 +886,7 @@ static gd_entry_t* _GD_ParsePolynom(DIRFILE* D,
   }
 
   if (D->error != GD_E_OK) {
-    _GD_FreeE(E, 1);
+    _GD_FreeE(D, E, 1);
     E = NULL;
   }
 
@@ -976,14 +973,14 @@ static gd_entry_t* _GD_ParseConst(DIRFILE* D, char* in_cols[MAX_IN_COLS],
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_NAME, format_file, line,
         in_cols[0]);
     E->field = NULL;
-    _GD_FreeE(E, 1);
+    _GD_FreeE(D, E, 1);
     dreturn("%p", NULL);
     return NULL;
   }
 
   if (E->field == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-    _GD_FreeE(E, 1);
+    _GD_FreeE(D, E, 1);
     dreturn("%p", NULL);
     return NULL;
   }
@@ -995,7 +992,7 @@ static gd_entry_t* _GD_ParseConst(DIRFILE* D, char* in_cols[MAX_IN_COLS],
   {
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_TYPE, format_file, line,
         in_cols[2]);
-    _GD_FreeE(E, 1);
+    _GD_FreeE(D, E, 1);
     dreturn("%p", NULL);
     return NULL;
   }
@@ -1006,7 +1003,7 @@ static gd_entry_t* _GD_ParseConst(DIRFILE* D, char* in_cols[MAX_IN_COLS],
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
 
   if (D->error) {
-    _GD_FreeE(E, 1);
+    _GD_FreeE(D, E, 1);
     dreturn("%p", NULL);
     return NULL;
   }
@@ -1020,7 +1017,7 @@ static gd_entry_t* _GD_ParseConst(DIRFILE* D, char* in_cols[MAX_IN_COLS],
   }
 
   if (D->error) {
-    _GD_FreeE(E, 1);
+    _GD_FreeE(D, E, 1);
     E = NULL;
   }
 
@@ -1077,14 +1074,14 @@ static gd_entry_t* _GD_ParseCarray(DIRFILE* D, char* in_cols[MAX_IN_COLS],
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_NAME, format_file, line,
         in_cols[0]);
     E->field = NULL;
-    _GD_FreeE(E, 1);
+    _GD_FreeE(D, E, 1);
     dreturn("%p", NULL);
     return NULL;
   }
 
   if (E->field == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-    _GD_FreeE(E, 1);
+    _GD_FreeE(D, E, 1);
     dreturn("%p", NULL);
     return NULL;
   }
@@ -1094,7 +1091,7 @@ static gd_entry_t* _GD_ParseCarray(DIRFILE* D, char* in_cols[MAX_IN_COLS],
   if (GD_SIZE(E->EN(scalar,const_type)) == 0 || E->EN(raw,data_type) & 0x40) {
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_TYPE, format_file, line,
         in_cols[2]);
-    _GD_FreeE(E, 1);
+    _GD_FreeE(D, E, 1);
     dreturn("%p", NULL);
     return NULL;
   }
@@ -1114,7 +1111,7 @@ static gd_entry_t* _GD_ParseCarray(DIRFILE* D, char* in_cols[MAX_IN_COLS],
       if (new_data == NULL) {
         _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
         free(data);
-        _GD_FreeE(E, 1);
+        _GD_FreeE(D, E, 1);
         dreturn("%p", NULL);
         return NULL;
       }
@@ -1131,7 +1128,7 @@ static gd_entry_t* _GD_ParseCarray(DIRFILE* D, char* in_cols[MAX_IN_COLS],
       if (ptr) {
         free(ptr);
         free(data);
-        _GD_FreeE(E, 1);
+        _GD_FreeE(D, E, 1);
         _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_LITERAL, format_file, line,
             in_cols[c]);
       }
@@ -1155,7 +1152,7 @@ static gd_entry_t* _GD_ParseCarray(DIRFILE* D, char* in_cols[MAX_IN_COLS],
 
   if (D->error) {
     free(data);
-    _GD_FreeE(E, 1);
+    _GD_FreeE(D, E, 1);
     E = NULL;
   }
 
@@ -1206,14 +1203,14 @@ static gd_entry_t* _GD_ParseString(DIRFILE* D, char *in_cols[MAX_IN_COLS],
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_NAME, format_file, line,
         in_cols[0]);
     E->field = NULL;
-    _GD_FreeE(E, 1);
+    _GD_FreeE(D, E, 1);
     dreturn("%p", NULL);
     return NULL;
   }
 
   if (E->field == NULL || E->e->u.string == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-    _GD_FreeE(E, 1);
+    _GD_FreeE(D, E, 1);
     dreturn("%p", NULL);
     return NULL;
   }
@@ -1313,7 +1310,7 @@ gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, char** in_cols,
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_RES_NAME, format_file, linenum,
         NULL);
   else if (strcmp(in_cols[1], "RAW") == 0) {
-    E = _GD_ParseRaw(D, in_cols, n_cols, P, me, format_file, linenum, standards,
+    E = _GD_ParseRaw(D, in_cols, n_cols, P, format_file, linenum, standards,
         pedantic, &is_dot);
 
     /* Create the binary file, if requested */
@@ -1332,7 +1329,8 @@ gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, char** in_cols,
         ; /* error already set */
       else if (_GD_SetEncodedName(D, E->e->u.raw.file, E->e->u.raw.filebase, 0))
         ; /* error already set */
-      else if ((*_gd_ef[E->e->u.raw.file[0].encoding].touch)(E->e->u.raw.file))
+      else if ((*_gd_ef[E->e->u.raw.file[0].encoding].touch)(
+            D->fragment[E->fragment_index].dirfd, E->e->u.raw.file))
         _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
     }
 
@@ -1412,7 +1410,7 @@ gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, char** in_cols,
       if (~flags & GD_IGNORE_DUPS)
         _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_DUPLICATE, format_file,
             linenum, E->field);
-      _GD_FreeE(E, 1);
+      _GD_FreeE(D, E, 1);
       dreturn("%p", NULL);
       return NULL;
     } 

@@ -1,4 +1,4 @@
-/* Copyright (C) 2009-2010 D. V. Wiebe
+/* Copyright (C) 2009-2011 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -65,11 +65,12 @@ struct gd_lzmadata {
 /* The bzip encoding scheme uses edata as a gd_lzmadata pointer.  If a file is
  * open, fp = 0 otherwise fp = -1. */
 
-static struct gd_lzmadata *_GD_LzmaDoOpen(struct _gd_raw_file* file)
+static struct gd_lzmadata *_GD_LzmaDoOpen(int dirfd, struct _gd_raw_file* file)
 {
   struct gd_lzmadata *ptr;
+  int fd;
 
-  dtrace("%p", file);
+  dtrace("%i, %p", dirfd, file);
 
   if ((ptr = (struct gd_lzmadata *)malloc(sizeof(struct gd_lzmadata))) == NULL)
   {
@@ -77,7 +78,16 @@ static struct gd_lzmadata *_GD_LzmaDoOpen(struct _gd_raw_file* file)
     return NULL;
   }
 
-  if ((ptr->stream = fopen(file->name, "rb")) == NULL) {
+  if ((fd = gd_OpenAt(file->D, dirfd, file->name, O_RDONLY | O_BINARY, 0666))
+      == -1)
+  {
+    free(ptr);
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  if ((ptr->stream = fdopen(fd, "rb")) == NULL) {
+    close(fd);
     free(ptr);
     dreturn("%p", NULL);
     return NULL;
@@ -106,14 +116,14 @@ static struct gd_lzmadata *_GD_LzmaDoOpen(struct _gd_raw_file* file)
   return ptr;
 }
 
-int _GD_LzmaOpen(struct _gd_raw_file* file, int mode __gd_unused,
+int _GD_LzmaOpen(int dirfd, struct _gd_raw_file* file, int mode __gd_unused,
     int creat __gd_unused)
 {
   struct gd_lzmadata *ptr;
 
-  dtrace("%p, <unused>, <unused>", file);
+  dtrace("%i, %p, <unused>, <unused>", dirfd, file);
 
-  file->edata = ptr = _GD_LzmaDoOpen(file);
+  file->edata = ptr = _GD_LzmaDoOpen(dirfd, file);
 
   if (file->edata == NULL) {
     dreturn("%i", 1);
@@ -300,14 +310,14 @@ int _GD_LzmaClose(struct _gd_raw_file *file)
   return 1;
 }
 
-off64_t _GD_LzmaSize(struct _gd_raw_file *file, gd_type_t data_type)
+off64_t _GD_LzmaSize(int dirfd, struct _gd_raw_file *file, gd_type_t data_type)
 {
   struct gd_lzmadata *ptr;
   off_t n;
 
-  dtrace("%p, %x", file, data_type);
+  dtrace("%i, %p, %x", dirfd, file, data_type);
 
-  ptr = _GD_LzmaDoOpen(file);
+  ptr = _GD_LzmaDoOpen(dirfd, file);
 
   if (ptr == NULL) {
     dreturn("%i", -1);

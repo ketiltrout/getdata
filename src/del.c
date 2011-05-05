@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2010 D. V. Wiebe
+/* Copyright (C) 2008-2011 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -332,7 +332,9 @@ int gd_delete(DIRFILE* D, const char* field_code_in, int flags)
       return -1;
     }
 
-    if ((*_gd_ef[E->e->u.raw.file[0].encoding].unlink)(E->e->u.raw.file)) {
+    if ((*_gd_ef[E->e->u.raw.file[0].encoding].unlink)(
+          D->fragment[E->fragment_index].dirfd, E->e->u.raw.file))
+    {
       _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
       free(del_list);
       dreturn("%i", -1);
@@ -429,7 +431,7 @@ int gd_delete(DIRFILE* D, const char* field_code_in, int flags)
     if (E->e->n_meta > 0) {
       /* Remove all meta fields -- there are no RAW fields here */
       for (j = first; j <= last; ++j)
-        _GD_FreeE(D->entry[j], 1);
+        _GD_FreeE(D, D->entry[j], 1);
 
       memmove(D->entry + first, D->entry + last + 1,
           sizeof(gd_entry_t*) * (D->n_entries - last - 1));
@@ -466,7 +468,7 @@ int gd_delete(DIRFILE* D, const char* field_code_in, int flags)
   /* Remove the entry from the list -- we need not worry about the way we've
    * already modified D->entry, since E is guaranteed to be before the stuff
    * we've already removed */
-  _GD_FreeE(E, 1);
+  _GD_FreeE(D, E, 1);
 
   memmove(D->entry + index, D->entry + index + 1,
       sizeof(gd_entry_t *) * (D->n_entries - index - 1));

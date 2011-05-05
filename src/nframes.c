@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 C. Barth Netterfield
- * Copyright (C) 2005-2010 D. V. Wiebe
+ * Copyright (C) 2005-2011 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -58,6 +58,7 @@ off64_t gd_nframes64(DIRFILE* D)
   }
 
   nf = (*_gd_ef[D->reference_field->e->u.raw.file[0].encoding].size)(
+      D->fragment[D->reference_field->fragment_index].dirfd,
       D->reference_field->e->u.raw.file,
       D->reference_field->EN(raw,data_type));
 

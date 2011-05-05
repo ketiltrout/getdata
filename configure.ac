@@ -139,6 +139,7 @@ AC_ARG_ENABLE(bindings, AS_HELP_STRING([--disable-bindings],
                  make_f77bindings="no"
                  make_pybindings="no"
                  make_idlbindings="no"
+                 make_perlbindings="no"
                fi
               ])
 
@@ -334,6 +335,9 @@ if test "x$make_cxxbindings" != "xno"; then
   echo
   AC_PROG_CXX
   AC_PROG_CXX_C_O
+else
+  am__fastdepCXX_TRUE=
+  am__fastdepCXX_FALSE='#'
 fi
 if test "x$make_f77bindings" != "xno"; then
   echo
@@ -508,10 +512,11 @@ if test "x${use_modules}" != "xno"; then
 fi
 
 dnl functions
-AC_CHECK_FUNCS([_commit fchmod _fdopen fseeko fseeko64 fsync ftello ftello64 \
-                getcwd _getcwd getdelim gmtime_r _lseeki64 _mkdir mkstemp nan \
-                _open _read _rmdir _snprintf stat64 _stat64 _strtoi64 strtoll \
-                _strtoui64 strtoull _unlink _write])
+AC_CHECK_FUNCS([_commit fchmod _fdopen fdopendir fseeko fseeko64 _fstat \
+                fstatat fstatat64 fsync ftello ftello64 getcwd _getcwd \
+                getdelim gmtime_r _lseeki64 _mkdir nan _open openat _read \
+                renameat _rmdir _snprintf stat64 _stat64 _strtoi64 strtoll \
+                _strtoui64 strtoull _unlink unlinkat _write])
 if test "x$disable_c99" = "xno"; then
   AC_CHECK_FUNCS([cabs])
 fi

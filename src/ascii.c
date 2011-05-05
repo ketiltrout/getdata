@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2010 D. V. Wiebe
+/* Copyright (C) 2008-2011 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -34,14 +34,14 @@
 /* The ASCII encoding uses file->fp as to indicate the current line and
  * file->edata for the stream pointer */
 
-int _GD_AsciiOpen(struct _gd_raw_file* file, int mode, int creat)
+int _GD_AsciiOpen(int dirfd, struct _gd_raw_file* file, int mode, int creat)
 {
   int fp;
 
-  dtrace("%p, %i, %i", file, mode, creat);
+  dtrace("%i, %p, %i, %i", dirfd, file, mode, creat);
 
-  fp = open(file->name, ((mode == GD_RDWR) ? O_RDWR : O_RDONLY) |
-      (creat ? O_CREAT : 0) | O_BINARY, 0666);
+  fp = gd_OpenAt(file->D, dirfd, file->name, ((mode == GD_RDWR) ? O_RDWR :
+        O_RDONLY) | (creat ? O_CREAT : 0) | O_BINARY, 0666);
 
   file->edata = fdopen(fp, (mode == GD_RDWR) ? "r+" : "r");
 
@@ -351,17 +351,24 @@ int _GD_AsciiClose(struct _gd_raw_file* file)
   return 1;
 }
 
-off64_t _GD_AsciiSize(struct _gd_raw_file* file,
+off64_t _GD_AsciiSize(int dirfd, struct _gd_raw_file* file,
     gd_type_t data_type __gd_unused)
 {
   FILE* stream;
   char *buffer = NULL;
   size_t len = 0;
   off64_t n = 0;
+  int fd;
 
-  dtrace("%p, <unused>", file);
+  dtrace("%i, %p, <unused>", dirfd, file);
 
-  stream = fopen(file->name, "r");
+  fd = gd_OpenAt(file->D, dirfd, file->name, O_RDONLY, 0666);
+  if (fd == -1) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  stream = fdopen(fd, "r");
 
   if (stream == NULL) {
     dreturn("%i", -1);
@@ -378,18 +385,18 @@ off64_t _GD_AsciiSize(struct _gd_raw_file* file,
   return n;
 }
 
-int _GD_AsciiTemp(struct _gd_raw_file *file, int method)
+int _GD_AsciiTemp(int dirfd0, int dirfd1, struct _gd_raw_file *file, int method)
 {
   int move_error = 0;
   struct stat stat_buf;
   mode_t mode;
   int fp;
 
-  dtrace("%p, %i", file, method);
+  dtrace("%i, %i, %p, %i", dirfd0, dirfd1, file, method);
 
   switch(method) {
     case GD_TEMP_OPEN:
-      fp = mkstemp(file[1].name);
+      fp = gd_MakeTempFile(file[1].D, dirfd1, file[1].name);
 
       file[1].edata = fdopen(fp, "r+");
 
@@ -409,7 +416,7 @@ int _GD_AsciiTemp(struct _gd_raw_file *file, int method)
       else
         mode = stat_buf.st_mode;
 
-      if (!_GD_Rename(file[1].name, file[0].name)) {
+      if (!gd_RenameAt(file->D, dirfd1, file[1].name, dirfd0, file[0].name)) {
         chmod(file[0].name, mode);
         free(file[1].name);
         file[1].name = NULL;

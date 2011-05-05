@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2010 D. V. Wiebe
+/* Copyright (C) 2008-2011 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -25,11 +25,15 @@
 #include <stdlib.h>
 #endif
 
-void _GD_FreeE(gd_entry_t* entry, int priv)
+#ifdef HAVE_LIBGEN_H
+#include <libgen.h>
+#endif
+
+void _GD_FreeE(DIRFILE *D, gd_entry_t* entry, int priv)
 {
   int i;
 
-  dtrace("%p, %i", entry, priv);
+  dtrace("%p, %p, %i", D, entry, priv);
 
   if (!entry || entry->field_type == GD_NO_ENTRY) {
     dreturnvoid();
@@ -50,7 +54,9 @@ void _GD_FreeE(gd_entry_t* entry, int priv)
       free(entry->in_fields[0]);
       free(entry->EN(linterp,table));
       if (priv) {
-        free(entry->e->u.linterp.table_path);
+        if (entry->e->u.linterp.table_dirfd > 0)
+          _GD_ReleaseDir(D, entry->e->u.linterp.table_dirfd);
+        free(entry->e->u.linterp.table_file);
         free(entry->e->u.linterp.lut);
       }
       break;
@@ -125,7 +131,7 @@ gd_entry_t* gd_free_entry_strings(gd_entry_t* entry) gd_nothrow
 {
   dtrace("%p", entry);
 
-  _GD_FreeE(entry, 0);
+  _GD_FreeE(NULL, entry, 0);
 
   dreturn("%p", entry);
   return entry;
@@ -261,10 +267,10 @@ int _GD_CalculateEntry(DIRFILE* D, gd_entry_t* E)
   return E->e->calculated;
 }
 
-const char* gd_raw_filename(DIRFILE* D, const char* field_code_in) gd_nothrow
+char* gd_raw_filename(DIRFILE* D, const char* field_code_in) gd_nothrow
 {
   int repr;
-  char* field_code;
+  char *field_code, *filename;
   gd_entry_t *E;
 
   dtrace("%p, \"%s\"", D, field_code_in);
@@ -312,8 +318,16 @@ const char* gd_raw_filename(DIRFILE* D, const char* field_code_in) gd_nothrow
     }
   }
 
-  dreturn("%p", E->e->u.raw.file[0].name);
-  return E->e->u.raw.file[0].name;
+  filename = _GD_MakeFullPath(D, D->fragment[E->fragment_index].dirfd,
+      E->e->u.raw.file->name);
+  if (filename == NULL) {
+    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  dreturn("%p", filename);
+  return filename;
 }
 
 int gd_entry(DIRFILE* D, const char* field_code_in, gd_entry_t* entry)

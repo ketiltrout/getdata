@@ -54,7 +54,7 @@ int main(void)
   close(fd);
 
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  path = strdup(gd_raw_filename(D, "data"));
+  path = gd_raw_filename(D, "data");
   error = gd_error(D);
 
   gd_close(D);

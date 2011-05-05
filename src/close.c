@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2010 D. V. Wiebe
+/* Copyright (C) 2008-2011 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -34,11 +34,10 @@ static void _GD_FreeD(DIRFILE* D)
   dtrace("%p", D);
 
   for (i = 0; i < D->n_entries; ++i) 
-    _GD_FreeE(D->entry[i], 1);
+    _GD_FreeE(D, D->entry[i], 1);
 
   for (j = 0; j < D->n_fragment; ++j) {
     free(D->fragment[j].cname);
-    free(D->fragment[j].sname);
     free(D->fragment[j].ename);
     free(D->fragment[j].ref_name);
   }
@@ -59,6 +58,9 @@ static void _GD_FreeD(DIRFILE* D)
   free(D->carray_value_list);
   free(D->fragment);
   free(D->name);
+  for (i = 0; i < D->ndir; ++i)
+    free(D->dir[i].path);
+  free(D->dir);
   free(D);
 
   dreturnvoid();
@@ -89,6 +91,10 @@ static int _GD_ShutdownDirfile(DIRFILE* D, int flush_meta)
     dreturn("%i", 1);
     return -1;
   }
+
+  /* close the directory */
+  for (i = 0; i < (unsigned int)D->ndir; ++i)
+    close(D->dir[i].fd);
 
   _GD_FreeD(D);
 

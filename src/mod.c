@@ -55,7 +55,7 @@ static int _GD_AlterScalar(DIRFILE* D, int alter_literal, gd_type_t type,
   int set_lout = 0;
   int error = 0;
 
-  dtrace("%p, %i, %x, %p, %p, %p, %p, \"%s\", %i, %i", D, alter_literal, type,
+  dtrace("%p, %i, %x, %p, %p, %p, %p, %p, %i, %i", D, alter_literal, type,
       lout, lin, sout, iout, sin, iin, calculated);
 
   if (sin == NULL) {
@@ -292,8 +292,8 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
 
         if (_GD_SetEncodedName(D, E->e->u.raw.file, E->e->u.raw.filebase, 0))
           ; /* error already set */
-        else if (E->e->u.raw.file[0].fp == -1 && (*enc->open)(E->e->u.raw.file,
-              0, 0))
+        else if (E->e->u.raw.file[0].fp == -1 && (*enc->open)(
+              D->fragment[E->fragment_index].dirfd, E->e->u.raw.file, 0, 0))
         {
           _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno,
               NULL);
@@ -312,7 +312,9 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
               1))
         {
           ; /* error already set */
-        } else if ((*enc->temp)(E->e->u.raw.file, GD_TEMP_OPEN))
+        } else if ((*enc->temp)(D->fragment[E->fragment_index].dirfd,
+              D->fragment[E->fragment_index].dirfd, E->e->u.raw.file,
+              GD_TEMP_OPEN))
           _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[1].name, errno,
               NULL);
         else if ((*enc->seek)(E->e->u.raw.file + 1, 0, E->EN(raw,data_type), 1)
@@ -323,7 +325,9 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
         }
 
         if (D->error) {
-          (*enc->temp)(E->e->u.raw.file, GD_TEMP_DESTROY);
+          (*enc->temp)(D->fragment[E->fragment_index].dirfd,
+              D->fragment[E->fragment_index].dirfd, E->e->u.raw.file,
+              GD_TEMP_DESTROY);
           break;
         }
 
@@ -381,7 +385,9 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
 
         /* An error occurred, clean up */
         if (D->error)
-          (*enc->temp)(E->e->u.raw.file, GD_TEMP_DESTROY);
+          (*enc->temp)(D->fragment[E->fragment_index].dirfd,
+              D->fragment[E->fragment_index].dirfd, E->e->u.raw.file,
+              GD_TEMP_DESTROY);
         /* Well, I suppose the copy worked.  Close both files */
         else if ((*enc->close)(E->e->u.raw.file) ||
             (*enc->sync)(E->e->u.raw.file + 1) ||
@@ -390,7 +396,9 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
           _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[1].name, errno,
               NULL);
         /* Move the temporary file over the old file */
-        } else if ((*enc->temp)(E->e->u.raw.file, GD_TEMP_MOVE))
+        } else if ((*enc->temp)(D->fragment[E->fragment_index].dirfd,
+              D->fragment[E->fragment_index].dirfd, E->e->u.raw.file,
+              GD_TEMP_MOVE))
           _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno,
               NULL);
       }
@@ -504,7 +512,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
             N->EN(linterp,table)))
       {
         Q.EN(linterp,table) = strdup(N->EN(linterp,table));
-        Qe.u.linterp.table_path = NULL;
+        Qe.u.linterp.table_file = NULL;
 
         if (Q.EN(linterp,table) == NULL) {
           _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
@@ -512,24 +520,27 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
         }
 
         if (flags) {
-          if (E->e->u.linterp.table_path == NULL)
+          if (E->e->u.linterp.table_file == NULL)
             if (_GD_SetTablePath(D, E, E->e))
               break;
 
-          if (Qe.u.linterp.table_path == NULL)
+          if (Qe.u.linterp.table_file == NULL)
             if (_GD_SetTablePath(D, &Q, &Qe))
               break;
 
-          if (_GD_Rename(E->e->u.linterp.table_path, Qe.u.linterp.table_path)) {
-            _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.linterp.table_path, errno,
-                0);
+          if (gd_RenameAt(D, E->e->u.linterp.table_dirfd,
+                E->e->u.linterp.table_file, Qe.u.linterp.table_dirfd,
+                Qe.u.linterp.table_file))
+          {
+            _GD_ReleaseDir(D, Qe.u.linterp.table_dirfd);
+            _GD_SetError(D, GD_E_RAW_IO, 0, E->EN(linterp,table), errno, 0);
             break;
           }
         }
 
         modified = 1;
         free(E->EN(linterp,table));
-        free(E->e->u.linterp.table_path);
+        free(E->e->u.linterp.table_file);
       }
 
       break;
@@ -833,6 +844,9 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
       if (scalar_free & (1 << i))
         free(E->scalar[i]);
     }
+
+    if (E->field_type == GD_LINTERP_ENTRY && flags)
+      _GD_ReleaseDir(D, Qe.u.linterp.table_dirfd);
 
     memcpy(E->e, &Qe, sizeof(struct _gd_private_entry));
     Q.e = E->e;
@@ -1526,7 +1540,7 @@ int gd_alter_spec(DIRFILE* D, const char* line, int move)
   /* Change the entry */
   ret = _GD_Change(D, N->field, N, move);
 
-  _GD_FreeE(N, 1);
+  _GD_FreeE(D, N, 1);
 
   dreturn("%i", ret);
   return ret;
@@ -1593,7 +1607,7 @@ int gd_malter_spec(DIRFILE* D, const char* line, const char* parent, int move)
   /* Change the entry */
   ret = _GD_Change(D, N->field, N, move);
 
-  _GD_FreeE(N, 1);
+  _GD_FreeE(D, N, 1);
 
   dreturn("%i", ret);
   return ret;

@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2010 D. V. Wiebe
+/* Copyright (C) 2008-2011 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -59,18 +59,26 @@ struct gd_bzdata {
 /* The bzip encoding scheme uses edata as a gd_bzdata pointer.  If a file is
  * open, fp = 0 otherwise fp = -1. */
 
-static struct gd_bzdata *_GD_Bzip2DoOpen(struct _gd_raw_file* file)
+static struct gd_bzdata *_GD_Bzip2DoOpen(int dirfd, struct _gd_raw_file* file)
 {
+  int fd;
   struct gd_bzdata *ptr;
 
-  dtrace("%p", file);
+  dtrace("%i, %p", dirfd, file);
 
   if ((ptr = (struct gd_bzdata *)malloc(sizeof(struct gd_bzdata))) == NULL) {
     dreturn("%p", NULL);
     return NULL;
   }
 
-  if ((ptr->stream = fopen(file->name, "rb")) == NULL) {
+  if ((fd = gd_OpenAt(file->D, dirfd, file->name, O_RDONLY, 0666)) == -1) {
+    free(ptr);
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  if ((ptr->stream = fdopen(fd, "rb")) == NULL) {
+    close(fd);
     free(ptr);
     dreturn("%p", NULL);
     return NULL;
@@ -93,12 +101,12 @@ static struct gd_bzdata *_GD_Bzip2DoOpen(struct _gd_raw_file* file)
   return ptr;
 }
 
-int _GD_Bzip2Open(struct _gd_raw_file* file, int mode __gd_unused,
+int _GD_Bzip2Open(int dirfd, struct _gd_raw_file* file, int mode __gd_unused,
     int creat __gd_unused)
 {
-  dtrace("%p, <unused>, <unused>", file);
+  dtrace("%i, %p, <unused>, <unused>", dirfd, file);
 
-  file->edata = _GD_Bzip2DoOpen(file);
+  file->edata = _GD_Bzip2DoOpen(dirfd, file);
 
   if (file->edata == NULL) {
     dreturn("%i", 1);
@@ -238,14 +246,14 @@ int _GD_Bzip2Close(struct _gd_raw_file *file)
   return 1;
 }
 
-off64_t _GD_Bzip2Size(struct _gd_raw_file *file, gd_type_t data_type)
+off64_t _GD_Bzip2Size(int dirfd, struct _gd_raw_file *file, gd_type_t data_type)
 {
   struct gd_bzdata *ptr;
   off_t n;
 
-  dtrace("%p, %x", file, data_type);
+  dtrace("%i, %p, %x", dirfd, file, data_type);
 
-  ptr = _GD_Bzip2DoOpen(file);
+  ptr = _GD_Bzip2DoOpen(dirfd, file);
 
   if (ptr == NULL) {
     dreturn("%i", -1);

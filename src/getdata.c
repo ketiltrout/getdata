@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 C. Barth Netterfield
- * Copyright (C) 2005-2010 D. V. Wiebe
+ * Copyright (C) 2005-2011 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -304,7 +304,8 @@ static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *E, off64_t s0, size_t ns,
         free(databuffer);
         dreturn("%i", 0);
         return 0;
-      } else if ((*_gd_ef[E->e->u.raw.file[0].encoding].open)(E->e->u.raw.file,
+      } else if ((*_gd_ef[E->e->u.raw.file[0].encoding].open)(
+            D->fragment[E->fragment_index].dirfd, E->e->u.raw.file,
             D->flags & GD_ACCMODE, 0))
       {
         _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno,
