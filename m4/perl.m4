@@ -53,7 +53,8 @@ AC_DEFUN([GD_PERL],
 [
 first_perl=5.8.0
 perl_prog_list="perl perl5 \
-perl5.12 perl5.10 perl5.8 \
+perl5.14 perl5.12 perl5.10 perl5.8 \
+perl5.14.0 \
 perl5.12.3 perl5.12.2 perl5.12.1 perl5.12.0 \
 perl5.10.1 perl5.10.0 \
 perl5.8.9 perl5.8.8 perl5.8.7 perl5.8.6 perl5.8.5 perl5.8.4 perl5.8.3 \
@@ -114,15 +115,18 @@ if test "x${have_perl}" != "xno"; then
   dnl calculate build flags
   GD_PERL_CONFIG([perl_archdir], [archlibexp])
   PERL_CPPFLAGS="-I${perl_archdir}/CORE"
-  GD_PERL_CONFIG([PERL_CFLAGS], [cccdlflags])
-  GD_PERL_CONFIG([PERL_LDFLAGS], [lddlflags])
-
   AC_MSG_CHECKING([Perl includes])
   AC_MSG_RESULT([$PERL_CPPFLAGS])
   AC_SUBST([PERL_CPPFLAGS])
+
+  GD_PERL_CONFIG([PERL_CCCDLFLAGS], [cccdlflags])
+  GD_PERL_CONFIG([PERL_CCFLAGS], [ccflags])
+  PERL_CFLAGS="${PERL_CCCDLFLAGS} ${PERL_CCFLAGS}"
   AC_MSG_CHECKING([Perl compiler flags])
   AC_MSG_RESULT([$PERL_CFLAGS])
   AC_SUBST([PERL_CFLAGS])
+
+  GD_PERL_CONFIG([PERL_LDFLAGS], [lddlflags])
   AC_MSG_CHECKING([Perl linker flags])
   AC_MSG_RESULT([$PERL_LDFLAGS])
   AC_SUBST([PERL_LDFLAGS])

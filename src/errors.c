@@ -82,7 +82,7 @@ static const struct {
   { GD_E_CREAT, GD_E_CREAT_DIR, "Unable to create directory {2}: ", 1 },
   { GD_E_CREAT, GD_E_CREAT_FORMAT, "Unable to create format file {2}: ", 1 },
   { GD_E_CREAT, GD_E_CREAT_EXCL, "Unable to create dirfile {2}: already exists",
-    1 },
+    0 },
   /* GD_E_BAD_CODE: 4 = field code */
   { GD_E_BAD_CODE, 0, "Field not found: {4}", 0 },
   /* GD_E_BAD_TYPE: 1 = data type */

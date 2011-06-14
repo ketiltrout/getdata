@@ -1,3 +1,8 @@
+2011-06-13   D. V. Wiebe <getdata@ketiltrout.net> svn:588
+	* src/errors.c: Don't append strerror to the GD_E_CREAT_EXCL message.
+
+	* m4/perl.m4: Fix perl CFLAGS.
+
 2011-05-05   D. V. Wiebe <getdata@ketiltrout.net> svn:587
 	* src/open.c (_GD_CreateDirfile): Handle missing fdopendir.
 
