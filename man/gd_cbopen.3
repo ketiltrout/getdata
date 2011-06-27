@@ -1,6 +1,6 @@
 .\" gd_cbopen.3.  The gd_cbopen man page.
 .\"
-.\" Copyright (C) 2008, 2009, 2010 D. V. Wiebe
+.\" Copyright (C) 2008, 2009, 2010, 2011 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -77,7 +77,7 @@ bitwise-or'd together:
 Specifies that double precision floating point raw data on disk is, or is not,
 stored in the middle-endian format used by older ARM processors.
 
-These flag are only set the default endianness, and will be overridden when an
+These flag only set the default endianness, and will be overridden when an
 .B /ENDIAN
 directive specifies the byte sex of
 .B RAW
@@ -106,7 +106,7 @@ Specifying both these flags together will cause the library to assume that the
 endianness of the data is opposite to that of the native architecture, whatever
 that might be.
 
-These flag are only set the default endianness, and will be overridden when an
+These flag only set the default endianness, and will be overridden when an
 .B /ENDIAN
 directive specifies the byte sex of
 .B RAW
@@ -332,7 +332,7 @@ mode, actual syntax errors are still reported as such.
 
 In
 .I pedantic
-mode, the parser conforms to one specified Standards Version. This target
+mode, the parser conforms to one specific Standards Version. This target
 version may change any number of times in the course of scanning a single
 format specification.  If invoked using the
 .B GD_PEDANTIC
