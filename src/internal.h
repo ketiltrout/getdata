@@ -30,6 +30,7 @@
 #include <string.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <sys/stat.h>
 
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
@@ -216,6 +217,10 @@ const char* _gd_colsub(void);
 #  else
 #    define ftello64 (off64_t)ftello
 #  endif
+#endif
+
+#ifndef HAVE_LSTAT
+#  define lstat stat
 #endif
 
 #ifdef HAVE__STRTOI64

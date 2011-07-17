@@ -518,9 +518,9 @@ fi
 dnl functions
 AC_CHECK_FUNCS([_commit fchmod _fdopen fdopendir fseeko fseeko64 _fstat \
                 fstatat fstatat64 fsync ftello ftello64 getcwd _getcwd \
-                getdelim gmtime_r _lseeki64 _mkdir nan _open openat _read \
-                renameat _rmdir _snprintf stat64 _stat64 _strtoi64 strtoll \
-                _strtoui64 strtoull _unlink unlinkat _write])
+                getdelim gmtime_r _lseeki64 lstat _mkdir nan _open openat \
+                _read renameat _rmdir _snprintf stat64 _stat64 _strtoi64 \
+                strtoll _strtoui64 strtoull _unlink unlinkat _write])
 if test "x$disable_c99" = "xno"; then
   AC_CHECK_FUNCS([cabs])
 fi

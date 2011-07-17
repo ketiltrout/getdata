@@ -30,6 +30,10 @@
 #include <time.h>
 #endif
 
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+
 /* The MSVCRT gmtime() is threadsafe */
 #ifndef HAVE_GMTIME_R
 struct tm *gmtime_r(const time_t *timep, struct tm *result)
@@ -161,7 +165,7 @@ int strerror_r(int errnum, char *buf, size_t buflen)
   char *ptr;
 
   dtrace("%i, %p, %zu", errnum, buf, buflen);
-  
+
   ptr = strerror(errnum);
   strncpy(buf, ptr, buflen);
 

@@ -155,7 +155,12 @@ static FILE* _GD_CreateDirfile(DIRFILE* D, int dirfd, int dir_error,
       }
 
       /* only delete regular files */
-      if (S_ISREG(statbuf.st_mode) || S_ISLNK(statbuf.st_mode)) {
+      if (S_ISREG(statbuf.st_mode)
+#ifdef S_ISLNK
+          || S_ISLNK(statbuf.st_mode)
+#endif
+          )
+      {
         if (gd_UnlinkAt(D, dirfd, lamb->d_name, 0)) {
           char *name = (char *)malloc(strlen(filedir) + strlen(lamb->d_name)
               + 2);

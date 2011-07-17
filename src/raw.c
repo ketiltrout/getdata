@@ -151,7 +151,9 @@ int _GD_RawTemp(int dirfd0, int dirfd1, struct _gd_raw_file *file, int method)
 
       if (!gd_RenameAt(file->D, dirfd1, file[1].name, dirfd0, file[0].name)) {
         int fd = gd_OpenAt(file->D, dirfd0, file[0].name, O_RDONLY, 0666);
+#ifdef HAVE_FCHMOD
         fchmod(fd, mode);
+#endif
         close(fd);
         free(file[1].name);
         file[1].name = NULL;
