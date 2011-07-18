@@ -46,6 +46,20 @@ else
 fi
 ])
 
+dnl GD_PERL_CHECK_MODULE
+dnl ---------------------------------------------------------------
+dnl Define HAVE_<MODULE_NAME> if the specified encoding exists
+AC_DEFUN([GD_PERL_CHECK_MODULE],
+[
+AC_MSG_CHECKING([for $1])
+if $PERL -M$1 -e 'exit' > /dev/null 2>&1; then
+  AS_TR_SH([HAVE_$1])=yes
+else
+  AS_TR_SH([HAVE_$1])=no
+fi
+AC_MSG_RESULT([${AS_TR_SH([HAVE_$1])}])
+])
+
 dnl GD_PERL
 dnl ---------------------------------------------------------------
 dnl Look for perl5.  Then determine whether we can build XSUBs.
@@ -62,14 +76,12 @@ perl5.8.2 perl5.8.1 perl5.8.0"
 
 dnl --without-perl basically does the same as --disable-perl
 AC_ARG_WITH([perl], AS_HELP_STRING([--with-perl=PATH],
-            [use the Perl interpreter located in PATH.  If this is something
-            unusual, you may also need to specify the location of xsubpp via
-            the XSUBPP variable. [autodetect]]),
+            [use the Perl interpreter located in PATH.  [autodetect]]),
             [
               case "${withval}" in
-                no) have_perl="no" ;;
-                yes) user_perl= ; have_perl= ;;
-                *) user_perl="${withval}"; have_perl= ;;
+                (no) have_perl="no" ;;
+                (yes) user_perl= ; have_perl= ;;
+                (*) user_perl="${withval}"; have_perl= ;;
               esac
             ], [ user_perl=; have_perl= ])
 
@@ -112,36 +124,6 @@ if test "x${have_perl}" != "xno"; then
   GD_PERL_CONFIG([PERL_VERSION], [version])
   AC_MSG_RESULT([$PERL_VERSION])
 
-  dnl calculate build flags
-  GD_PERL_CONFIG([perl_archdir], [archlibexp])
-  PERL_CPPFLAGS="-I${perl_archdir}/CORE"
-  AC_MSG_CHECKING([Perl includes])
-  AC_MSG_RESULT([$PERL_CPPFLAGS])
-  AC_SUBST([PERL_CPPFLAGS])
-
-  GD_PERL_CONFIG([PERL_CCCDLFLAGS], [cccdlflags])
-  GD_PERL_CONFIG([PERL_CCFLAGS], [ccflags])
-  PERL_CFLAGS="${PERL_CCCDLFLAGS} ${PERL_CCFLAGS}"
-  AC_MSG_CHECKING([Perl compiler flags])
-  AC_MSG_RESULT([$PERL_CFLAGS])
-  AC_SUBST([PERL_CFLAGS])
-
-  GD_PERL_CONFIG([PERL_LDFLAGS], [lddlflags])
-  AC_MSG_CHECKING([Perl linker flags])
-  AC_MSG_RESULT([$PERL_LDFLAGS])
-  AC_SUBST([PERL_LDFLAGS])
-
-  dnl header check
-  saved_CPPFLAGS=${CPPFLAGS}
-  CPPFLAGS="${CPPFLAGS} ${PERL_CPPFLAGS}"
-  AC_CHECK_HEADERS([EXTERN.h XSUB.h],,[have_perl="no"])
-  if test "x$have_perl" != "xno"; then
-    AC_CHECK_HEADERS([perl.h],,[have_perl="no"],[
-  #include <EXTERN.h>
-  ])
-  fi
-  CPPFLAGS=${saved_CPPFLAGS}
-
 fi
 
 AC_ARG_WITH([perl-dir], AS_HELP_STRING([--with-perl-dir=PATH],
@@ -149,13 +131,23 @@ AC_ARG_WITH([perl-dir], AS_HELP_STRING([--with-perl-dir=PATH],
 Perl bindings into the default vendor-specific module directory (if present).
 If PATH is the special word `site', install Perl bindings into the default
 site-specific module directory.  [site] ]),
-[
-case "${withval}" in
-vendor|site) perl_inst_type="${withval}" ;;
-no) perl_inst_type="site" ;;
-*) perl_inst_type="local"; local_perl_path="${withval}"
-esac
-], [ perl_inst_type="site" ])
+    [
+    case "${withval}" in
+    (vendor|site) perl_inst_type="${withval}" ;;
+    (no) perl_inst_type="site" ;;
+    (*) perl_inst_type="local"; local_perl_path="${withval}"
+    esac
+    ], [ perl_inst_type="site" ])
+
+if test "x${have_perl}" != "xno"; then
+  GD_PERL_CHECK_MODULE([Math::Complex])
+  GD_PERL_CHECK_MODULE([ExtUtils::MakeMaker])
+  GD_PERL_CHECK_MODULE([Test::Harness])
+fi
+
+if test "$HAVE_MATH__COMPLEX$HAVE_EXTUTILS__MAKEMAKER" != "yesyes"; then
+  have_perl=no
+fi
 
 if test "x${have_perl}" != "xno"; then
 
@@ -183,13 +175,6 @@ if test "x${have_perl}" != "xno"; then
 
   AC_SUBST([perldir])
   AC_MSG_RESULT([$perldir])
-
-  AC_ARG_VAR([XSUBPP],
-      [Command to compile XSUBs into C files, if building the Perl bindings])
-  AC_PATH_PROGS([XSUBPP], [xsubpp], [not found])
-  if test "x$XSUBPP" = "xnot found"; then
-    have_perl="no"
-  fi
 
 fi
 ])

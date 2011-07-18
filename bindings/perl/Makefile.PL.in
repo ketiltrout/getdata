@@ -1,0 +1,16 @@
+use 5.00800;
+use ExtUtils::MakeMaker;
+WriteMakefile(
+  ABSTRACT_FROM => "GetData.pm",
+  AUTHOR => "The GetData Progject <@PACKAGE_BUGREPORT@>",
+  C => [ qw(GetData.c) ],
+  DEFINE => "@DEFS@",
+  FIRST_MAKEFILE => "perl.mk",
+  INC => '-I. -I@top_builddir@/src',
+  LIBS => ['-L@top_builddir@/src/.libs/ -lgetdata'],
+  NAME => "GetData",
+  PM => { "GetData.pm" => "\$(INST_LIBDIR)/GetData.pm" },
+  PREREQ_FATAL => 1,
+  PREREQ_PM => { "Math::Complex" => 1.34 },
+  VERSION_FROM => "GetData.pm",
+);

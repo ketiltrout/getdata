@@ -758,19 +758,6 @@ if test "x$make_perlbindings" = "xyes"; then
   echo "*** Configuring Perl bindings"
   echo
   GD_PERL
-  have_mathcomplex="no"
-  if test "x$have_perl" = "xno"; then
-    make_perlbindings="no"
-  else
-    AC_MSG_CHECKING([for Math::Complex])
-    if $PERL -MMath::Complex -e 'exit' > /dev/null 2>&1; then
-      have_mathcomplex="yes"
-    fi
-    AC_MSG_RESULT([$have_mathcomplex])
-    if test "x$have_mathcomplex" = "xno"; then
-      make_perlbindings="no"
-    fi
-  fi
 fi
 
 dnl external encodings
@@ -811,7 +798,7 @@ AC_CONFIG_FILES([bindings/idl/Makefile])
 AC_CONFIG_FILES([bindings/idl/makedlm.sh])
 AC_CONFIG_FILES([bindings/idl/test/Makefile])
 AC_CONFIG_FILES([bindings/perl/Makefile])
-AC_CONFIG_FILES([bindings/perl/test/Makefile])
+AC_CONFIG_FILES([bindings/perl/Makefile.PL])
 AC_CONFIG_FILES([bindings/python/Makefile])
 AC_CONFIG_FILES([bindings/python/test/Makefile])
 AC_CONFIG_FILES([doc/Makefile])

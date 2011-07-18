@@ -4,6 +4,7 @@
 #undef _BSD_SOURCE
 #undef _POSIX_SOURCE
 #undef _SVID_SOURCE
+#undef VERSION
 #include "../../src/internal.h"
 
 /* Perl 5.8.9 and earlier don't provide hv_fetchs */

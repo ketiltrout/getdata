@@ -113,6 +113,8 @@ This function always returns a valid Dirfile object, even if the call failed;
 the caller should check GetData::error() on the returned dirfile to test for
 success.
 
+=back
+
 =head1 COPYRIGHT
 
 Copyright (C) 2011 D. V. Wiebe

@@ -20,36 +20,8 @@
 #
 AUTOMAKE_OPTIONS = foreign
 
-if CC_WALL
-WALL=-Wall
-endif
-
-if GETDATA_DEBUG
-DEBUG_C = ../../src/debug.c
-endif
-
-SUBDIRS=test
-
-perl_LTLIBRARIES=GetData.la
-perl_SCRIPTS=GetData.pm
-
-BUILT_SOURCES=simple_funcs.xs GetData.pm GetData.c
-AM_CFLAGS=${WALL} ${PERL_CFLAGS}
-AM_CPPFLAGS=${PERL_CPPFLAGS}
-
-GetData_la_LDFLAGS = -module -avoid-version
-GetData_la_LIBADD = ${PERL_LDLFLAGS} ../../src/libgetdata.la
-nodist_GetData_la_SOURCES = GetData.c ${DEBUG_C}
-
-EXTRA_DIST=GetData.xs
-
 simple_funcs.xs: $(srcdir)/simple_funcs.xsin $(srcdir)/simple_funcs.pl
 	$(PERL) simple_funcs.pl $< > $@
-
-funclist.sed: GetData.c
-	$(PERL) -ne 'BEGIN { print "s/\@FUNCLIST@/" }' \
-	-e 'print "$$1 " if /^XS\(XS_GetData_([a-z].*)\);/;' \
-	-e 'END { print "/\n" }' $< > $@
 
 make_parameters.sed: ../make_parameters ../../src/getdata.h
 	  ../make_parameters P > $@
@@ -57,13 +29,24 @@ make_parameters.sed: ../make_parameters ../../src/getdata.h
 ../make_parameters: $(srcdir)/../make_parameters.c
 	  cd .. && ${MAKE} make_parameters
 
-GetData.pm: $(srcdir)/GetData.pm.in make_parameters.sed funclist.sed
+GetData.pm: $(srcdir)/GetData.pm.in make_parameters.sed funclist.pl \
+						GetData.xs simple_funcs.xs
 	rm -f $@
-	$(SED) -f make_parameters.sed $< | $(SED) -f funclist.sed > $@
+	$(SED) -f make_parameters.sed $< | \
+		$(PERL) funclist.pl GetData.xs simple_funcs.xs > $@
 	chmod a-w $@
 
-GetData.c: GetData.xs simple_funcs.xs typemap
-	$(XSUBPP) -typemap $(srcdir)/typemap $< > $@
+all-local: perl.mk
+	$(MAKE) -f perl.mk
 
-clean-local:
-	rm -f $(BUILT_SOURCES) make_parameters.sed funclist.sed
+perl.mk: Makefile.PL GetData.pm GetData.xs simple_funcs.xs typemap
+	perl $<
+
+clean-local: 
+	$(MAKE) -f perl.mk clean
+	rm -f $(BUILT_SOURCES) make_parameters.sed perl.mk.old
+
+test testdb:
+	$(MAKE) -f perl.mk $@
+
+.PHONY: test
