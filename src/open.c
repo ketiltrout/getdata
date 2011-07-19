@@ -46,7 +46,7 @@ static FILE* _GD_CreateDirfile(DIRFILE* D, int dirfd, int dir_error,
   struct stat statbuf;
   DIR* dir;
   struct dirent* lamb;
-  int fd;
+  int fd = -1;
   int format_error = 0;
   FILE* fp = NULL;
 

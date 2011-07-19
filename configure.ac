@@ -104,7 +104,11 @@ if test "x$enable_debug" = "xyes"; then
   AC_DEFINE([GETDATA_DEBUG], [],
             [ Define to enable debugging messages ])
   enable_assert="yes"
+  GETDATA_DEBUG=1
+else
+  GETDATA_DEBUG=0
 fi
+AC_SUBST([GETDATA_DEBUG])
 
 AC_MSG_CHECKING([whether to enable assertions])
 AC_MSG_RESULT([$enable_assert])

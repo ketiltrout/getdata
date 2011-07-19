@@ -20,6 +20,14 @@
 #
 AUTOMAKE_OPTIONS = foreign
 
+if GETDATA_DEBUG
+DEBUG_C = debug.c
+TEST_VERBOSE="TEST_VERBOSE=1"
+debug.c: $(top_srcdir)/src/debug.c
+	echo "#undef VERSION" > $@
+	cat $< >> $@
+endif
+
 simple_funcs.xs: $(srcdir)/simple_funcs.xsin $(srcdir)/simple_funcs.pl
 	$(PERL) simple_funcs.pl $< > $@
 
@@ -36,7 +44,9 @@ GetData.pm: $(srcdir)/GetData.pm.in make_parameters.sed funclist.pl \
 		$(PERL) funclist.pl GetData.xs simple_funcs.xs > $@
 	chmod a-w $@
 
-all-local: perl.mk
+all-local: blib/man3/GetData.3pm
+
+blib/man3/GetData.3pm: perl.mk $(DEBUG_C)
 	$(MAKE) -f perl.mk
 
 perl.mk: Makefile.PL GetData.pm GetData.xs simple_funcs.xs typemap
@@ -44,9 +54,12 @@ perl.mk: Makefile.PL GetData.pm GetData.xs simple_funcs.xs typemap
 
 clean-local: 
 	$(MAKE) -f perl.mk clean
-	rm -f $(BUILT_SOURCES) make_parameters.sed perl.mk.old
+	rm -f $(BUILT_SOURCES) make_parameters.sed perl.mk.old debug.c
+
+check:
+	$(MAKE) test
 
 test testdb:
-	$(MAKE) -f perl.mk $@
+	${DL_LIBRARY_PATH}=${${DL_LIBRARY_PATH}}:../../src/.libs $(MAKE) -f perl.mk $@ ${TEST_VERBOSE}
 
 .PHONY: test
