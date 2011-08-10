@@ -1,3 +1,6 @@
+2011-08-10   D. V. Wiebe <getdata@ketiltrout.net> svn:593
+	* bindings/perl/t/big_test.t: Convert to TAP.
+
 2011-06-13   D. V. Wiebe <getdata@ketiltrout.net> svn:588
 	* src/errors.c: Don't append strerror to the GD_E_CREAT_EXCL message.
 

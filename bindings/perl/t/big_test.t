@@ -22,117 +22,90 @@
 use GetData;
 use Math::Complex;
 use strict;
+use Test::More tests => 1135;
 
 my $ne = 0;
 my ($s, @a, %h);
 
 sub CheckError {
   my $e = $_->error;
-  if ($e != $_[1]) {
-    print "e[$_[0]] = $e, expected $_[1]\n";
-    $ne++;
-  }
+  print "\n";
+  is ($e, $_[1], "e[$_[0]] = $e, expected $_[1]");
+  print "\n";
 }
 
 sub CheckError2 {
   my $e = $_->error;
-  if ($e != $_[2]) {
-    print "e[$_[0],$_[1]] = $e, expected $_[2]\n";
-    $ne++;
-  }
+  print "\n";
+  is ($e, $_[2], "e[$_[0],$_[1]] = $e, expected $_[2]");
+  print "\n";
 }
 
 sub CheckArray {
   my $i;
-  if ($#{$_[1]} != $#_ - 2) {
-    print "a[$_[0]]: ", 1 + $#{$_[1]}, " elements, expected ", $#_ - 1, "\n";
-    $ne++;
-  }
+  print "\n";
+  is ($#{$_[1]}, $#_ - 2,
+    "a[$_[0]]: " . (1 + $#{$_[1]}) . " elements, expected " . ($#_ - 1));
   for $i (0 .. $#_ - 2) {
-    next unless (defined ${$_[1]}[$i] or defined $_[$i + 2]);
-    if (${$_[1]}[$i] != $_[$i + 2]) {
-      print "a($i)[$_[0]] = ${$_[1]}[$i], expected ", $_[$i + 2], "\n";
-      $ne++;
-    }
+    is (${$_[1]}[$i], $_[$i + 2],
+      "a($i)[$_[0]] = ${$_[1]}[$i], expected " . $_[$i + 2]);
   }
+  print "\n";
 }
 
 sub CheckArray2 {
   my $i;
-  if ($#{$_[2]} != $#_ - 3) {
-    print "a[$_[0],$_[1]]: ", 1 + $#{$_[2]}, " elements, expected ", $#_ - 2,
-    "\n";
-    $ne++;
-  }
+  print "\n";
+  is ($#{$_[2]}, $#_ - 3,
+    "a[$_[0],$_[1]]: " . (1 + $#{$_[2]}) . " elements, expected " . ($#_ - 2));
   for $i (0 .. $#_ - 3) {
-    next unless (defined ${$_[2]}[$i] or defined $_[$i + 3]);
-    if (${$_[2]}[$i] != $_[$i + 3]) {
-      print "a($i)[$_[0],$_[1]] = ${$_[2]}[$i], expected ", $_[$i + 3], "\n";
-      $ne++;
-    }
+    is (${$_[2]}[$i], $_[$i + 3], "a($i)[$_[0],$_[1]] = " .
+      ((defined ${$_[2]}[$i]) ? ${$_[2]}[$i] : "undef") . ", expected " .
+      ((defined $_[$i + 3]) ? $_[$i + 3] : "undef") . "\n");
   }
+  print "\n";
 }
 
 sub CheckSArray {
   my $i;
-  if ($#{$_[1]} != $#_ - 2) {
-    print "a[$_[0]]: ", 1 + $#{$_[1]}, " elements, expected ", $#_ - 1, "\n";
-    $ne++;
-  }
+  is ($#{$_[1]}, $#_ - 2,
+    "a[$_[0]]: " . (1 + $#{$_[1]}) . " elements, expected " . ($#_ - 1));
   for $i (0 .. $#_ - 2) {
-    next unless (defined ${$_[1]}[$i] or defined $_[$i + 2]);
-    if (${$_[1]}[$i] ne $_[$i + 2]) {
-      print "n($i)[$_[0]] = \"${$_[1]}[$i]\", expected \"", $_[$i + 2], "\"\n";
-      $ne++;
-    }
+    is (${$_[1]}[$i], $_[$i + 2],
+      "n($i)[$_[0]] = \"${$_[1]}[$i]\", expected \"" . $_[$i + 2] . "\"");
   }
 }
 
 sub CheckSArray2 {
   my $i;
-  if ($#{$_[2]} != $#_ - 3) {
-    print "a[$_[0],$_[1]]: ", 1 + $#{$_[2]}, " elements, expected ", $#_ - 2,
-    "\n";
-    $ne++;
-  }
+  is ($#{$_[2]}, $#_ - 3,
+    "a[$_[0],$_[1]]: " . (1 + $#{$_[2]}) . " elements, expected " . ($#_ - 2));
   for $i (0 .. $#_ - 3) {
-    next unless (defined ${$_[2]}[$i] or defined $_[$i + 3]);
-    if (${$_[2]}[$i] ne $_[$i + 3]) {
-      print "n($i)[$_[0],$_[1]] = \"${$_[2]}[$i]\", expected \"", $_[$i + 3],
-      "\"\n";
-      $ne++;
-    }
+    is (${$_[2]}[$i], $_[$i + 3], "n($i)[$_[0],$_[1]] = " .
+      ((defined ${$_[2]}[$i]) ? "\"" . ${$_[2]}[$i] . "\"" : "undef") .
+      ", expected " .
+      ((defined $_[$i + 3]) ? "\"" . $_[$i + 3] . "\"" : "undef") . "\n");
   }
 }
 
 sub CheckNum {
-  return unless (defined $_[1] or defined $_[2]);
-  if ($_[1] != $_[2]) {
-    print "n[$_[0]] = $_[1], expected $_[2]\n";
-    $ne++;
-  }
+  is ($_[1], $_[2], "n[$_[0]] = " .
+    ((defined $_[1]) ? $_[1] : "undef") . ", expected " .
+    ((defined $_[2]) ? $_[2] : "undef"));
 }
 
 sub CheckNum2 {
-  return unless (defined $_[2] or defined $_[3]);
-  if ($_[2] != $_[3]) {
-    print "n[$_[0],$_[1]] = $_[2], expected $_[3]\n";
-    $ne++;
-  }
+  is ($_[2], $_[3], "n[$_[0],$_[1]] = " .
+    ((defined $_[2]) ? $_[2] : "undef") . ", expected " .
+    ((defined $_[3]) ? $_[3] : "undef"));
 }
 
 sub CheckString {
-  if ($_[1] ne $_[2]) {
-    print "s[$_[0]] = \"$_[1]\", expected \"$_[2]\"\n";
-    $ne++;
-  }
+  is ($_[1], $_[2], "s[$_[0]] = \"$_[1]\", expected \"$_[2]\"");
 }
 
 sub CheckString2 {
-  if ($_[2] ne $_[3]) {
-    print "s[$_[0],$_[1]] = \"$_[2]\", expected \"$_[3]\"\n";
-    $ne++;
-  }
+  is ($_[2], $_[3], "s[$_[0],$_[1]] = \"$_[2]\", expected \"$_[3]\"");
 }
 
 sub CheckOK { &CheckError($_[0], 0) }
@@ -1452,8 +1425,5 @@ CheckSArray2(186, 4, \@a, "This is a string constant.", "another string");
 
 
 
-
 $d = $_ = undef;
 system "rm -rf dirfile";
-
-die "ne = $ne" if ($ne > 0);
