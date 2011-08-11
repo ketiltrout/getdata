@@ -393,13 +393,14 @@ typedef int (*gd_parser_callback_t)(gd_parser_data_t*, void*);
 
 #define GD_ENCODING       0x0F000000 /* mask */
 #define GD_AUTO_ENCODED   0x00000000 /* Encoding scheme unknown */
-#define GD_UNENCODED      0x01000000 /* Dirfile is not encoded */
-#define GD_TEXT_ENCODED   0x02000000 /* Dirfile is text encoded */
-#define GD_SLIM_ENCODED   0x03000000 /* Dirfile is slimlib encoded */
-#define GD_GZIP_ENCODED   0x04000000 /* Dirfile is gzip encoded */
-#define GD_BZIP2_ENCODED  0x05000000 /* Dirfile is bzip2 encoded */
-#define GD_LZMA_ENCODED   0x06000000 /* Dirfile is xz encoded */
-#define GD_ENC_UNSUPPORTED GD_ENCODING /* Dirfile encoding unsupported */
+#define GD_UNENCODED      0x01000000 /* Data are not encoded */
+#define GD_TEXT_ENCODED   0x02000000 /* Data are text encoded */
+#define GD_SLIM_ENCODED   0x03000000 /* Data are slimlib encoded */
+#define GD_GZIP_ENCODED   0x04000000 /* Data are gzip encoded */
+#define GD_BZIP2_ENCODED  0x05000000 /* Data are bzip2 encoded */
+#define GD_LZMA_ENCODED   0x06000000 /* Data are xz encoded */
+#define GD_SIE_ENCODED    0x07000000 /* Data are sample index encoded */
+#define GD_ENC_UNSUPPORTED GD_ENCODING /* Encoding unsupported */
 
 /* delete flags */
 #define GD_DEL_META  0x1

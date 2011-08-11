@@ -307,8 +307,8 @@ char* gd_raw_filename(DIRFILE* D, const char* field_code_in) gd_nothrow
       return NULL;
     }
 
-    if (E->e->u.raw.file[0].encoding == GD_ENC_UNKNOWN) {
-      _GD_SetError(D, GD_E_UNKNOWN_ENCODING, 0, NULL, 0, NULL);
+    if (E->e->u.raw.file[0].subenc == GD_ENC_UNKNOWN) {
+      _GD_SetError(D, GD_E_UNKNOWN_ENCODING, GD_E_UNENC_UNDET, NULL, 0, NULL);
       dreturn("%p", NULL);
       return NULL;
     } else if (_GD_SetEncodedName(D, E->e->u.raw.file, E->e->u.raw.filebase, 0))

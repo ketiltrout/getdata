@@ -42,14 +42,14 @@
 #endif
 
 /* The zlib encoding scheme uses edata as a gzFile object.  If a file is
- * open, fp = 0 otherwise fp = -1. */
+ * open, idata = 0 otherwise idata = -1. */
 
-int _GD_GzipOpen(int dirfd, struct _gd_raw_file* file, int mode __gd_unused,
-    int creat __gd_unused)
+int _GD_GzipOpen(int dirfd, struct _gd_raw_file* file, int swap __gd_unused,
+    int mode __gd_unused, int creat __gd_unused)
 {
   int fd;
 
-  dtrace("%i, %p, <unused>, <unused>", dirfd, file);
+  dtrace("%i, %p, <unused>, <unused>, <unused>", dirfd, file);
 
   fd = gd_OpenAt(file->D, dirfd, file->name, O_RDONLY | O_BINARY, 0666);
 
@@ -61,7 +61,7 @@ int _GD_GzipOpen(int dirfd, struct _gd_raw_file* file, int mode __gd_unused,
   file->edata = gzdopen(fd, "r");
 
   if (file->edata != NULL) {
-    file->fp = 0;
+    file->idata = 0;
     dreturn("%i", 0);
     return 0;
   }
@@ -113,7 +113,7 @@ int _GD_GzipClose(struct _gd_raw_file *file)
 
   ret = gzclose(file->edata);
   if (!ret) {
-    file->fp = -1;
+    file->idata = -1;
     file->edata = NULL;
   }
 
@@ -121,12 +121,13 @@ int _GD_GzipClose(struct _gd_raw_file *file)
   return ret;
 }
 
-off64_t _GD_GzipSize(int dirfd, struct _gd_raw_file *file, gd_type_t data_type)
+off64_t _GD_GzipSize(int dirfd, struct _gd_raw_file *file, gd_type_t data_type,
+    int swap __gd_unused)
 {
   int fd;
   uint32_t size = 0;
 
-  dtrace("%i, %p, %x", file, data_type);
+  dtrace("%i, %p, %x, <unused>", dirfd, file, data_type);
 
   fd = gd_OpenAt(file->D, dirfd, file->name, O_RDONLY | O_BINARY, 0666);
   if (fd < 0) {

@@ -57,7 +57,7 @@ static void _GD_ShiftFragment(DIRFILE* D, off64_t offset, int fragment,
       if (D->entry[i]->fragment_index == fragment &&
           D->entry[i]->field_type == GD_RAW_ENTRY)
       {
-        if (!_GD_Supports(D, D->entry[i], GD_EF_TEMP))
+        if (!_GD_Supports(D, D->entry[i], GD_EF_TMOVE | GD_EF_TUNLINK))
           break;
 
         /* add this raw field to the list */
@@ -74,16 +74,18 @@ static void _GD_ShiftFragment(DIRFILE* D, off64_t offset, int fragment,
      * remove the temporary files */
     if (D->error) {
       for (i = 0; i < n_raw; ++i)
-        if ((*_gd_ef[raw_entry[i]->e->u.raw.file[0].encoding].temp)(
-              D->fragment[fragment].dirfd, D->fragment[fragment].dirfd,
-              raw_entry[i]->e->u.raw.file, GD_TEMP_DESTROY))
+        if ((*_gd_ef[raw_entry[i]->e->u.raw.file[0].subenc].tunlink)(
+              D->fragment[fragment].dirfd, raw_entry[i]->e->u.raw.file + 1))
+        {
           _GD_SetError(D, GD_E_RAW_IO, 0, raw_entry[i]->e->u.raw.file[0].name,
               errno, NULL);
+        }
     } else {
       for (i = 0; i < n_raw; ++i)
-        if ((*_gd_ef[raw_entry[i]->e->u.raw.file[0].encoding].temp)(
+        if ((*_gd_ef[raw_entry[i]->e->u.raw.file[0].subenc].tmove)(
               D->fragment[fragment].dirfd, D->fragment[fragment].dirfd,
-              raw_entry[i]->e->u.raw.file, GD_TEMP_MOVE))
+              raw_entry[i]->e->u.raw.file,
+              _gd_ef[raw_entry[i]->e->u.raw.file[0].subenc].tunlink))
         {
           _GD_SetError(D, GD_E_UNCLEAN_DB, 0,
               D->fragment[D->entry[i]->fragment_index].cname, 0, NULL);
@@ -210,9 +212,9 @@ static off64_t _GD_GetEOF(DIRFILE *D, gd_entry_t* E, const char *parent,
       if (_GD_SetEncodedName(D, E->e->u.raw.file, E->e->u.raw.filebase, 0))
         break;
 
-      ns = (*_gd_ef[E->e->u.raw.file[0].encoding].size)(
+      ns = (*_gd_ef[E->e->u.raw.file[0].subenc].size)(
           D->fragment[E->fragment_index].dirfd, E->e->u.raw.file,
-          E->EN(raw,data_type));
+          E->EN(raw,data_type), _GD_FileSwapBytes(D, E->fragment_index));
 
       if (ns < 0) {
         _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);

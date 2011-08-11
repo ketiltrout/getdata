@@ -293,7 +293,7 @@ static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *E, off64_t s0, size_t ns,
 
   if (ns > 0) {
     /** open the file (and cache the fp) if it hasn't been opened yet. */
-    if (E->e->u.raw.file[0].fp < 0) {
+    if (E->e->u.raw.file[0].idata < 0) {
       if (!_GD_Supports(D, E, GD_EF_OPEN | GD_EF_SEEK | GD_EF_READ)) {
         free(databuffer);
         dreturn("%i", 0);
@@ -304,9 +304,9 @@ static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *E, off64_t s0, size_t ns,
         free(databuffer);
         dreturn("%i", 0);
         return 0;
-      } else if ((*_gd_ef[E->e->u.raw.file[0].encoding].open)(
+      } else if ((*_gd_ef[E->e->u.raw.file[0].subenc].open)(
             D->fragment[E->fragment_index].dirfd, E->e->u.raw.file,
-            D->flags & GD_ACCMODE, 0))
+            _GD_FileSwapBytes(D, E->fragment_index), D->flags & GD_ACCMODE, 0))
       {
         _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno,
             NULL);
@@ -316,7 +316,7 @@ static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *E, off64_t s0, size_t ns,
       }
     }
 
-    if ((*_gd_ef[E->e->u.raw.file[0].encoding].seek)(E->e->u.raw.file, s0,
+    if ((*_gd_ef[E->e->u.raw.file[0].subenc].seek)(E->e->u.raw.file, s0,
           E->EN(raw,data_type), 0) == -1)
     {
       _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
@@ -326,7 +326,7 @@ static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *E, off64_t s0, size_t ns,
     }
 
     samples_read =
-      (*_gd_ef[E->e->u.raw.file[0].encoding].read)(E->e->u.raw.file,
+      (*_gd_ef[E->e->u.raw.file[0].subenc].read)(E->e->u.raw.file,
         databuffer + n_read * E->e->u.raw.size, E->EN(raw,data_type), ns);
 
     if (samples_read == -1) {
@@ -336,7 +336,7 @@ static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *E, off64_t s0, size_t ns,
       return 0;
     }
 
-    if (_gd_ef[E->e->u.raw.file[0].encoding].ecor) {
+    if (_gd_ef[E->e->u.raw.file[0].subenc].ecor) {
       /* convert to/from middle-ended doubles */
       if ((E->EN(raw,data_type) == GD_FLOAT64 ||
             E->EN(raw,data_type) == GD_COMPLEX128) &&

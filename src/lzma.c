@@ -63,7 +63,7 @@ struct gd_lzmadata {
 };
 
 /* The bzip encoding scheme uses edata as a gd_lzmadata pointer.  If a file is
- * open, fp = 0 otherwise fp = -1. */
+ * open, idata = 0 otherwise idata = -1. */
 
 static struct gd_lzmadata *_GD_LzmaDoOpen(int dirfd, struct _gd_raw_file* file)
 {
@@ -116,12 +116,12 @@ static struct gd_lzmadata *_GD_LzmaDoOpen(int dirfd, struct _gd_raw_file* file)
   return ptr;
 }
 
-int _GD_LzmaOpen(int dirfd, struct _gd_raw_file* file, int mode __gd_unused,
-    int creat __gd_unused)
+int _GD_LzmaOpen(int dirfd, struct _gd_raw_file* file, int swap __gd_unused,
+    int mode __gd_unused, int creat __gd_unused)
 {
   struct gd_lzmadata *ptr;
 
-  dtrace("%i, %p, <unused>, <unused>", dirfd, file);
+  dtrace("%i, %p, <unused>, <unused>, <unused>", dirfd, file);
 
   file->edata = ptr = _GD_LzmaDoOpen(dirfd, file);
 
@@ -130,7 +130,7 @@ int _GD_LzmaOpen(int dirfd, struct _gd_raw_file* file, int mode __gd_unused,
     return 1;
   }
 
-  file->fp = 0;
+  file->idata = 0;
   dreturn("%i", 0);
   return 0;
 }
@@ -214,7 +214,7 @@ off64_t _GD_LzmaSeek(struct _gd_raw_file* file, off64_t count,
     ptr->xzerror = lzma_auto_decoder(&ptr->xzfile, 1000000000, 0);
     ptr->xzfile.total_in = GD_LZMA_BUFFER_SIZE;
     if (ptr->xzerror != LZMA_OK) {
-      file->fp = -1;
+      file->idata = -1;
       fclose(ptr->stream);
       dreturn("%i", 1);
       return 1;
@@ -300,7 +300,7 @@ int _GD_LzmaClose(struct _gd_raw_file *file)
   ptr->xzerror = 0;
   lzma_end(&ptr->xzfile);
   if (!fclose(ptr->stream)) {
-    file->fp = -1;
+    file->idata = -1;
     free(file->edata);
     dreturn("%i", 0);
     return 0;
@@ -310,12 +310,13 @@ int _GD_LzmaClose(struct _gd_raw_file *file)
   return 1;
 }
 
-off64_t _GD_LzmaSize(int dirfd, struct _gd_raw_file *file, gd_type_t data_type)
+off64_t _GD_LzmaSize(int dirfd, struct _gd_raw_file *file, gd_type_t data_type,
+    int swap __gd_unused)
 {
   struct gd_lzmadata *ptr;
   off_t n;
 
-  dtrace("%i, %p, %x", dirfd, file, data_type);
+  dtrace("%i, %p, %x, <unused>", dirfd, file, data_type);
 
   ptr = _GD_LzmaDoOpen(dirfd, file);
 

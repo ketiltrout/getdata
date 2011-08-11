@@ -268,6 +268,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
         void *buffer1;
         void *buffer2;
         struct encoding_t *enc;
+        int fd;
 
         if (j & GD_AS_NEED_RECALC)
           if (gd_get_constant(D, Q.scalar[0], GD_UINT16, &Q.EN(raw,spf)))
@@ -283,17 +284,18 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
         else
           _GD_Supports(D, E, GD_EF_OPEN | GD_EF_CLOSE | GD_EF_SEEK |
               GD_EF_READ | GD_EF_WRITE | GD_EF_SYNC | GD_EF_UNLINK |
-              GD_EF_TEMP);
+              GD_EF_TOPEN | GD_EF_TMOVE | GD_EF_TUNLINK);
 
         if (D->error)
           break;
 
-        enc = _gd_ef + E->e->u.raw.file[0].encoding;
+        enc = _gd_ef + E->e->u.raw.file[0].subenc;
 
         if (_GD_SetEncodedName(D, E->e->u.raw.file, E->e->u.raw.filebase, 0))
           ; /* error already set */
-        else if (E->e->u.raw.file[0].fp == -1 && (*enc->open)(
-              D->fragment[E->fragment_index].dirfd, E->e->u.raw.file, 0, 0))
+        else if (E->e->u.raw.file[0].idata == -1 && (*enc->open)(
+              D->fragment[E->fragment_index].dirfd, E->e->u.raw.file,
+              _GD_FileSwapBytes(D, E->fragment_index), 0, 0))
         {
           _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno,
               NULL);
@@ -312,22 +314,27 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
               1))
         {
           ; /* error already set */
-        } else if ((*enc->temp)(D->fragment[E->fragment_index].dirfd,
-              D->fragment[E->fragment_index].dirfd, E->e->u.raw.file,
-              GD_TEMP_OPEN))
+        } else if ((fd = _GD_MakeTempFile(D,
+                D->fragment[E->fragment_index].dirfd, E->e->u.raw.file[1].name))
+            < 0)
+        {
           _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[1].name, errno,
               NULL);
-        else if ((*enc->seek)(E->e->u.raw.file + 1, 0, E->EN(raw,data_type), 1)
-            == -1)
+        } else if ((*enc->topen)(fd, E->e->u.raw.file + 1,
+              _GD_FileSwapBytes(D, E->fragment_index)))
+        {
+          _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[1].name, errno,
+              NULL);
+        } else if ((*enc->seek)(E->e->u.raw.file + 1, 0, E->EN(raw,data_type),
+              1) == -1)
         {
           _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[1].name, errno,
               NULL);
         }
 
         if (D->error) {
-          (*enc->temp)(D->fragment[E->fragment_index].dirfd,
-              D->fragment[E->fragment_index].dirfd, E->e->u.raw.file,
-              GD_TEMP_DESTROY);
+          (*enc->tunlink)(D->fragment[E->fragment_index].dirfd,
+              E->e->u.raw.file + 1);
           break;
         }
 
@@ -385,9 +392,8 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
 
         /* An error occurred, clean up */
         if (D->error)
-          (*enc->temp)(D->fragment[E->fragment_index].dirfd,
-              D->fragment[E->fragment_index].dirfd, E->e->u.raw.file,
-              GD_TEMP_DESTROY);
+          (*enc->tunlink)(D->fragment[E->fragment_index].dirfd,
+              E->e->u.raw.file + 1);
         /* Well, I suppose the copy worked.  Close both files */
         else if ((*enc->close)(E->e->u.raw.file) ||
             (*enc->sync)(E->e->u.raw.file + 1) ||
@@ -396,9 +402,9 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
           _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[1].name, errno,
               NULL);
         /* Move the temporary file over the old file */
-        } else if ((*enc->temp)(D->fragment[E->fragment_index].dirfd,
+        } else if ((*enc->tmove)(D->fragment[E->fragment_index].dirfd,
               D->fragment[E->fragment_index].dirfd, E->e->u.raw.file,
-              GD_TEMP_MOVE))
+              enc->tunlink))
           _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno,
               NULL);
       }

@@ -28,15 +28,16 @@
 #include <errno.h>
 #endif
 
-int _GD_RawOpen(int dirfd, struct _gd_raw_file* file, int mode, int creat)
+int _GD_RawOpen(int dirfd, struct _gd_raw_file* file, int swap __gd_unused,
+    int mode, int creat)
 {
-  dtrace("%i, %p, %i, %i", dirfd, file, mode, creat);
+  dtrace("%i, %p, <unused>, %i, %i", dirfd, file, mode, creat);
 
-  file->fp = gd_OpenAt(file->D, dirfd, file->name, ((mode == GD_RDWR) ? O_RDWR :
-        O_RDONLY) | (creat ? O_CREAT : 0) | O_BINARY, 0666);
+  file->idata = gd_OpenAt(file->D, dirfd, file->name, ((mode == GD_RDWR) ?
+        O_RDWR : O_RDONLY) | (creat ? O_CREAT : 0) | O_BINARY, 0666);
 
-  dreturn("%i", file->fp < 0);
-  return (file->fp < 0);
+  dreturn("%i", file->idata < 0);
+  return (file->idata < 0);
 }
 
 off64_t _GD_RawSeek(struct _gd_raw_file* file, off64_t count,
@@ -46,7 +47,7 @@ off64_t _GD_RawSeek(struct _gd_raw_file* file, off64_t count,
 
   dtrace("%p, %lli, %x, <unused>", file, (long long)count, data_type);
 
-  pos = lseek64(file->fp, count * GD_SIZE(data_type), SEEK_SET);
+  pos = lseek64(file->idata, count * GD_SIZE(data_type), SEEK_SET);
 
   if (pos == -1) {
     dreturn("%i", -1);
@@ -64,7 +65,7 @@ ssize_t _GD_RawRead(struct _gd_raw_file *file, void *ptr, gd_type_t data_type,
 
   dtrace("%p, %p, %x, %zu", file, ptr, data_type, nmemb);
 
-  nread = read(file->fp, ptr, nmemb * GD_SIZE(data_type));
+  nread = read(file->idata, ptr, nmemb * GD_SIZE(data_type));
 
   if (nread >= 0)
     nread /= GD_SIZE(data_type);
@@ -80,7 +81,7 @@ ssize_t _GD_RawWrite(struct _gd_raw_file *file, const void *ptr,
 
   dtrace("%p, %p, %x, %zu", file, ptr, data_type, nmemb);
 
-  nwrote = write(file->fp, ptr, nmemb * GD_SIZE(data_type));
+  nwrote = write(file->idata, ptr, nmemb * GD_SIZE(data_type));
 
   if (nwrote >= 0)
     nwrote /= GD_SIZE(data_type);
@@ -91,7 +92,7 @@ ssize_t _GD_RawWrite(struct _gd_raw_file *file, const void *ptr,
 
 int _GD_RawSync(struct _gd_raw_file *file)
 {
-  return fsync(file->fp);
+  return fsync(file->idata);
 }
 
 int _GD_RawClose(struct _gd_raw_file *file)
@@ -100,19 +101,20 @@ int _GD_RawClose(struct _gd_raw_file *file)
 
   dtrace("%p", file);
 
-  ret = close(file->fp);
+  ret = close(file->idata);
   if (!ret)
-    file->fp = -1;
+    file->idata = -1;
 
   dreturn("%i", ret);
   return ret;
 }
 
-off64_t _GD_RawSize(int dirfd, struct _gd_raw_file *file, gd_type_t data_type)
+off64_t _GD_RawSize(int dirfd, struct _gd_raw_file *file, gd_type_t data_type,
+    int swap __gd_unused)
 {
   gd_stat64_t statbuf;
 
-  dtrace("%i, %p, %x", dirfd, file, data_type);
+  dtrace("%i, %p, %x, <unused>", dirfd, file, data_type);
 
   if (gd_StatAt64(file->D, dirfd, file->name, &statbuf, 0) < 0)  {
     dreturn("%lli", -1LL);
@@ -123,66 +125,34 @@ off64_t _GD_RawSize(int dirfd, struct _gd_raw_file *file, gd_type_t data_type)
   return statbuf.st_size / GD_SIZE(data_type);
 }
 
-int _GD_RawTemp(int dirfd0, int dirfd1, struct _gd_raw_file *file, int method)
+int _GD_RawTOpen(int fd, struct _gd_raw_file *file, int swap __gd_unused)
 {
-  struct stat stat_buf;
-  int move_error = 0;
-  mode_t mode;
+  dtrace("%i, %p, <unused>", fd, file);
 
-  dtrace("%i, %i, %p, %i", dirfd0, dirfd1, file, method);
+  file->idata = fd;
 
-  switch(method) {
-    case GD_TEMP_OPEN:
-      file[1].fp = gd_MakeTempFile(file[1].D, dirfd1, file[1].name);
+  dreturn("%i", 0);
+  return 0;
+}
 
-      if (file[1].fp == -1) {
+int _GD_RawTUnlink(int dirfd, struct _gd_raw_file *file)
+{
+  dtrace("%i, %p", dirfd, file);
+
+  if (file->name != NULL) {
+    if (file->idata >= 0)
+      if (_GD_RawClose(file)) {
         dreturn("%i", -1);
         return -1;
       }
-      break;
-    case GD_TEMP_MOVE:
-      if (file[1].name == NULL)
-        break;
 
-      if (gd_StatAt(file[0].D, dirfd0, file[0].name, &stat_buf, 0))
-        mode = 0644;
-      else
-        mode = stat_buf.st_mode;
+    if (gd_UnlinkAt(file->D, dirfd, file->name, 0)) {
+      dreturn("%i", -1);
+      return -1;
+    }
 
-      if (!gd_RenameAt(file->D, dirfd1, file[1].name, dirfd0, file[0].name)) {
-        int fd = gd_OpenAt(file->D, dirfd0, file[0].name, O_RDONLY, 0666);
-#ifdef HAVE_FCHMOD
-        fchmod(fd, mode);
-#endif
-        close(fd);
-        free(file[1].name);
-        file[1].name = NULL;
-        dreturn("%i", 0);
-        return 0;
-      }
-      /* fallthrough on error */
-    case GD_TEMP_DESTROY:
-      if (file[1].name != NULL) {
-        if (file[1].fp >= 0)
-          if (_GD_RawClose(file + 1)) {
-            dreturn("%i", -1);
-            return -1;
-          }
-
-        if (gd_UnlinkAt(file->D, dirfd1, file[1].name, 0)) {
-          dreturn("%i", -1);
-          return -1;
-        }
-
-        if (method == GD_TEMP_MOVE) {
-          errno = move_error;
-          dreturn("%i", -1);
-          return -1;
-        }
-        free(file[1].name);
-        file[1].name = NULL;
-      }
-      break;
+    free(file->name);
+    file->name = NULL;
   }
 
   dreturn("%i", 0);

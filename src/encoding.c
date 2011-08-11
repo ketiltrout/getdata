@@ -43,113 +43,105 @@ static int framework_initialised = 0;
 #endif
 
 /* encoding schemas */
+#define GD_EF_NULL_SET NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, \
+  &_GD_GenericMove, &_GD_GenericUnlink, NULL, &_GD_GenericTMove, NULL
+#ifdef USE_MODULES
+#define GD_EXT_ENCODING(sc,ex,ec,af,ff) \
+{ sc,ex,ec,af,ff,GD_EF_PROVIDES,GD_EF_NULL_SET }
+#else
+#define GD_EXT_ENCODING(sc,ex,ec,af,ff) { sc,ex,ec,af,ff,0,GD_INT_FUNCS }
+#endif
 struct encoding_t _gd_ef[GD_N_SUBENCODINGS] = {
   { GD_UNENCODED, "", 1, NULL, "none", 0,
-    &_GD_RawOpen, &_GD_RawClose, &_GD_GenericTouch, &_GD_RawSeek,
-    &_GD_RawRead, &_GD_RawSize, &_GD_RawWrite, &_GD_RawSync,
-    &_GD_GenericMove, &_GD_GenericUnlink, &_GD_RawTemp
+    &_GD_RawOpen, &_GD_RawClose, &_GD_GenericTouch, &_GD_RawSeek, &_GD_RawRead,
+    &_GD_RawSize, &_GD_RawWrite, &_GD_RawSync, &_GD_GenericMove,
+    &_GD_GenericUnlink, &_GD_RawTOpen, &_GD_GenericTMove, &_GD_RawTUnlink
   },
-#ifdef USE_MODULES
-  /* Modules are external */
-  { GD_GZIP_ENCODED, ".gz", 1, "Gzip", "gzip",
-# ifdef USE_GZIP
-    GD_EF_OPEN | GD_EF_CLOSE | GD_EF_SEEK | GD_EF_READ | GD_EF_SIZE,
-# else
-    0,
-# endif
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL , NULL, &_GD_GenericMove,
-    &_GD_GenericUnlink, NULL },
-  { GD_BZIP2_ENCODED, ".bz2", 1, "Bzip2", "bzip2",
-# ifdef USE_BZIP2
-    GD_EF_OPEN | GD_EF_CLOSE | GD_EF_SEEK | GD_EF_READ | GD_EF_SIZE,
-# else
-    0,
-# endif
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL , NULL, &_GD_GenericMove,
-    &_GD_GenericUnlink, NULL },
-  { GD_SLIM_ENCODED, ".slm", 1, "Slim", "slim",
-# ifdef USE_SLIM
-    GD_EF_OPEN | GD_EF_CLOSE | GD_EF_SEEK | GD_EF_READ | GD_EF_SIZE,
-# else
-    0,
-# endif
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL , NULL, &_GD_GenericMove,
-    &_GD_GenericUnlink, NULL },
-  { GD_LZMA_ENCODED, ".xz", 1, "Lzma", "lzma",
-# ifdef USE_LZMA
-    GD_EF_OPEN | GD_EF_CLOSE | GD_EF_SEEK | GD_EF_READ | GD_EF_SIZE,
-# else
-    0,
-# endif
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL , NULL, &_GD_GenericMove,
-    &_GD_GenericUnlink, NULL },
-  { GD_LZMA_ENCODED, ".lzma", 1, "Lzma", "lzma",
-# ifdef USE_LZMA
-    GD_EF_OPEN | GD_EF_CLOSE | GD_EF_SEEK | GD_EF_READ | GD_EF_SIZE,
-# else
-    0,
-# endif
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL , NULL, &_GD_GenericMove,
-    &_GD_GenericUnlink, NULL },
+
+#ifdef USE_GZIP
+#define GD_EF_PROVIDES \
+  GD_EF_OPEN | GD_EF_CLOSE | GD_EF_SEEK | GD_EF_READ | GD_EF_SIZE
+#define GD_INT_FUNCS \
+  &_GD_GzipOpen, &_GD_GzipClose, NULL /* TOUCH */, &_GD_GzipSeek, \
+  &_GD_GzipRead, &_GD_GzipSize, NULL /* WRITE */, NULL /* SYNC */, \
+  &_GD_GenericMove, &_GD_GenericUnlink, NULL /* TOPEN */, &_GD_GenericTMove, \
+  NULL /* TUNLINK */
 #else
-  /* Modules are internal */
-  { GD_GZIP_ENCODED, ".gz", 1, NULL, "gzip", 0,
-# ifdef USE_GZIP
-    &_GD_GzipOpen, &_GD_GzipClose, NULL /* TOUCH */,
-    &_GD_GzipSeek, &_GD_GzipRead, &_GD_GzipSize, NULL /* WRITE */,
-    NULL /* SYNC */, &_GD_GenericMove, &_GD_GenericUnlink, NULL /* TEMP */
-# else
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL , NULL, &_GD_GenericMove,
-    &_GD_GenericUnlink, NULL
-# endif
-  },
-  { GD_BZIP2_ENCODED, ".bz2", 1, NULL, "bzip2", 0,
-# ifdef USE_BZIP2
-    &_GD_Bzip2Open, &_GD_Bzip2Close, NULL /* TOUCH */,
-    &_GD_Bzip2Seek, &_GD_Bzip2Read, &_GD_Bzip2Size, NULL /* WRITE */,
-    NULL /* SYNC */, &_GD_GenericMove, &_GD_GenericUnlink, NULL /* TEMP */
-# else
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL , NULL, &_GD_GenericMove,
-    &_GD_GenericUnlink, NULL
-# endif
-  },
-  { GD_SLIM_ENCODED, ".slm", 1, NULL, "slim", 0,
-# ifdef USE_SLIM
-    &_GD_SlimOpen, &_GD_SlimClose, NULL /* TOUCH */,
-    &_GD_SlimSeek, &_GD_SlimRead, &_GD_SlimSize, NULL /* WRITE */,
-    NULL /* SYNC */, &_GD_GenericMove, &_GD_GenericUnlink, NULL /* TEMP */
-# else
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL , NULL, &_GD_GenericMove,
-    &_GD_GenericUnlink, NULL
-# endif
-  },
-  { GD_LZMA_ENCODED, ".xz", 1, NULL, "lzma", 0,
-# ifdef USE_LZMA
-    &_GD_LzmaOpen, &_GD_LzmaClose, NULL /* TOUCH */,
-    &_GD_LzmaSeek, &_GD_LzmaRead, &_GD_LzmaSize, NULL /* WRITE */,
-    NULL /* SYNC */, &_GD_GenericMove, &_GD_GenericUnlink, NULL /* TEMP */
-# else
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL , NULL, &_GD_GenericMove,
-    &_GD_GenericUnlink, NULL
+#define GD_EF_PROVIDES 0
+#define GD_INT_FUNCS GD_EF_NULL_SET
 #endif
-  },
-  { GD_LZMA_ENCODED, ".lzma", 1, NULL, "lzma", 0,
-# ifdef USE_LZMA
-    &_GD_LzmaOpen, &_GD_LzmaClose, NULL /* TOUCH */,
-    &_GD_LzmaSeek, &_GD_LzmaRead, &_GD_LzmaSize, NULL /* WRITE */,
-    NULL /* SYNC */, &_GD_GenericMove, &_GD_GenericUnlink, NULL /* TEMP */
-# else
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL , NULL, &_GD_GenericMove,
-    &_GD_GenericUnlink, NULL
-# endif
-  },
+  GD_EXT_ENCODING(GD_GZIP_ENCODED, ".gz", 1, "Gzip", "gzip"),
+#undef GD_INT_FUNCS
+#undef GD_EF_PROVIDES
+
+
+#ifdef USE_BZIP2
+#define GD_EF_PROVIDES \
+    GD_EF_OPEN | GD_EF_CLOSE | GD_EF_SEEK | GD_EF_READ | GD_EF_SIZE,
+#define GD_INT_FUNCS \
+  &_GD_Bzip2Open, &_GD_Bzip2Close, NULL /* TOUCH */, &_GD_Bzip2Seek, \
+  &_GD_Bzip2Read, &_GD_Bzip2Size, NULL /* WRITE */, NULL /* SYNC */, \
+  &_GD_GenericMove, &_GD_GenericUnlink, NULL /* TOPEN */, &_GD_GenericTMove, \
+  NULL /* TUNLINK */
+#else
+#define GD_INT_FUNCS GD_EF_NULL_SET
+#define GD_EF_PROVIDES 0
 #endif
+  GD_EXT_ENCODING(GD_BZIP2_ENCODED, ".bz2", 1, "Bzip2", "bzip2"),
+#undef GD_INT_FUNCS
+#undef GD_EF_PROVIDES
+
+
+#ifdef USE_SLIM
+#define GD_EF_PROVIDES \
+  GD_EF_OPEN | GD_EF_CLOSE | GD_EF_SEEK | GD_EF_READ | GD_EF_SIZE,
+#define GD_INT_FUNCS \
+  &_GD_SlimOpen, &_GD_SlimClose, NULL /* TOUCH */, &_GD_SlimSeek, \
+  &_GD_SlimRead, &_GD_SlimSize, NULL /* WRITE */, NULL /* SYNC */, \
+  &_GD_GenericMove, &_GD_GenericUnlink, NULL /* TOPEN */, &_GD_GenericTMove, \
+  NULL /* TUNLINK */
+#else
+#define GD_INT_FUNCS GD_EF_NULL_SET
+#define GD_EF_PROVIDES 0
+#endif
+  GD_EXT_ENCODING(GD_SLIM_ENCODED, ".slm", 1, "Slim", "slim"),
+#undef GD_INT_FUNCS
+#undef GD_EF_PROVIDES
+
+
+#ifdef USE_LZMA
+#define GD_EF_PROVIDES \
+    GD_EF_OPEN | GD_EF_CLOSE | GD_EF_SEEK | GD_EF_READ | GD_EF_SIZE,
+#define GD_INT_FUNCS \
+  &_GD_LzmaOpen, &_GD_LzmaClose, NULL /* TOUCH */, &_GD_LzmaSeek, \
+  &_GD_LzmaRead, &_GD_LzmaSize, NULL /* WRITE */, NULL /* SYNC */, \
+  &_GD_GenericMove, &_GD_GenericUnlink, NULL /* TOPEN */, &_GD_GenericTMove, \
+  NULL /* TUNLINK */
+#else
+#define GD_INT_FUNCS GD_EF_NULL_SET
+#define GD_EF_PROVIDES 0
+#endif
+  GD_EXT_ENCODING(GD_LZMA_ENCODED, ".xz", 1, "Lzma", "lzma"),
+  GD_EXT_ENCODING(GD_LZMA_ENCODED, ".lzma", 1, "Lzma", "lzma"),
+#undef GD_INT_FUNCS
+#undef GD_EF_PROVIDES
+
+
   { GD_TEXT_ENCODED, ".txt", 0, NULL, "text", 0,
-    &_GD_AsciiOpen, &_GD_AsciiClose, &_GD_GenericTouch,
-    &_GD_AsciiSeek, &_GD_AsciiRead, &_GD_AsciiSize, &_GD_AsciiWrite,
-    &_GD_AsciiSync, &_GD_GenericMove, &_GD_GenericUnlink, &_GD_AsciiTemp },
+    &_GD_AsciiOpen, &_GD_AsciiClose, &_GD_GenericTouch, &_GD_AsciiSeek,
+    &_GD_AsciiRead, &_GD_AsciiSize, &_GD_AsciiWrite, &_GD_AsciiSync,
+    &_GD_GenericMove, &_GD_GenericUnlink, &_GD_AsciiTOpen, &_GD_GenericTMove,
+    &_GD_AsciiTUnlink },
+
+  { GD_SIE_ENCODED, ".sie", 0, NULL, "sie", 0,
+    &_GD_SampIndOpen, &_GD_SampIndClose, &_GD_GenericTouch, &_GD_SampIndSeek,
+    &_GD_SampIndRead, &_GD_SampIndSize, &_GD_SampIndWrite, &_GD_SampIndSync,
+    &_GD_GenericMove, &_GD_GenericUnlink, &_GD_SampIndTOpen, &_GD_GenericTMove,
+    &_GD_SampIndTUnlink },
+
   { GD_ENC_UNSUPPORTED, "", 0, "", "", 0,
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL },
+    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
+  },
 };
 
 void _GD_InitialiseFramework(void)
@@ -173,7 +165,8 @@ void _GD_InitialiseFramework(void)
 #define _GD_EncodingUnderstood(encoding) \
   ((encoding == GD_UNENCODED || encoding == GD_SLIM_ENCODED || \
     encoding == GD_GZIP_ENCODED || encoding == GD_BZIP2_ENCODED || \
-    encoding == GD_TEXT_ENCODED || encoding == GD_LZMA_ENCODED))
+    encoding == GD_TEXT_ENCODED || encoding == GD_LZMA_ENCODED || \
+    encoding == GD_SIE_ENCODED))
 
 #ifdef USE_MODULES
 static void* _GD_ResolveSymbol(lt_dlhandle lib, struct encoding_t* enc,
@@ -275,8 +268,11 @@ int _GD_MissingFramework(int encoding, unsigned int funcs)
             struct _gd_raw_file*))_GD_ResolveSymbol(lib, _gd_ef + encoding,
             "Unlink");
     if (_gd_ef[encoding].provides & GD_EF_TEMP)
-      _gd_ef[encoding].temp = (int (*)(int, int, struct _gd_raw_file*,
+      _gd_ef[encoding].temp = (int (*)(int, int, struct _gd_raw_file*, int,
             int))_GD_ResolveSymbol(lib, _gd_ef + encoding, "Temp");
+    if (_gd_ef[encoding].provides & GD_EF_TOPEN)
+      _gd_ef[encoding].topen = (gd_ef_topen_t)_GD_ResolveSymbol(lib,
+          _gd_ef + encoding, "TOpen");
 
     /* we tried our best, don't bother trying again */
     _gd_ef[encoding].provides = 0;
@@ -287,16 +283,18 @@ int _GD_MissingFramework(int encoding, unsigned int funcs)
 #endif
 
   ret =
-    (funcs & GD_EF_OPEN   && _gd_ef[encoding].open   == NULL) ||
-    (funcs & GD_EF_CLOSE  && _gd_ef[encoding].close  == NULL) ||
-    (funcs & GD_EF_TOUCH  && _gd_ef[encoding].touch  == NULL) ||
-    (funcs & GD_EF_SEEK   && _gd_ef[encoding].seek   == NULL) ||
-    (funcs & GD_EF_READ   && _gd_ef[encoding].read   == NULL) ||
-    (funcs & GD_EF_SIZE   && _gd_ef[encoding].size   == NULL) ||
-    (funcs & GD_EF_WRITE  && _gd_ef[encoding].write  == NULL) ||
-    (funcs & GD_EF_SYNC   && _gd_ef[encoding].sync   == NULL) ||
-    (funcs & GD_EF_UNLINK && _gd_ef[encoding].unlink == NULL) ||
-    (funcs & GD_EF_TEMP   && _gd_ef[encoding].temp   == NULL);
+    (funcs & GD_EF_OPEN    && _gd_ef[encoding].open    == NULL) ||
+    (funcs & GD_EF_CLOSE   && _gd_ef[encoding].close   == NULL) ||
+    (funcs & GD_EF_TOUCH   && _gd_ef[encoding].touch   == NULL) ||
+    (funcs & GD_EF_SEEK    && _gd_ef[encoding].seek    == NULL) ||
+    (funcs & GD_EF_READ    && _gd_ef[encoding].read    == NULL) ||
+    (funcs & GD_EF_SIZE    && _gd_ef[encoding].size    == NULL) ||
+    (funcs & GD_EF_WRITE   && _gd_ef[encoding].write   == NULL) ||
+    (funcs & GD_EF_SYNC    && _gd_ef[encoding].sync    == NULL) ||
+    (funcs & GD_EF_UNLINK  && _gd_ef[encoding].unlink  == NULL) ||
+    (funcs & GD_EF_TOPEN   && _gd_ef[encoding].topen   == NULL) ||
+    (funcs & GD_EF_TMOVE   && _gd_ef[encoding].tmove   == NULL) ||
+    (funcs & GD_EF_TUNLINK && _gd_ef[encoding].tunlink == NULL);
 
   dreturn("%i", ret);
   return ret;
@@ -322,7 +320,7 @@ static unsigned long _GD_ResolveEncoding(const DIRFILE *D gd_unused_d,
       if (gd_StatAt(D, dirfd, candidate, &statbuf, 0) == 0) 
         if (S_ISREG(statbuf.st_mode)) {
           if (file != NULL)
-            file->encoding = i;
+            file->subenc = i;
           free(candidate);
           dreturn("%08lx", _gd_ef[i].scheme);
           return _gd_ef[i].scheme;
@@ -334,7 +332,7 @@ static unsigned long _GD_ResolveEncoding(const DIRFILE *D gd_unused_d,
   if (scheme != 0 && file != NULL) {
     for (i = 0; _gd_ef[i].scheme != GD_ENC_UNSUPPORTED; i++)
       if (scheme == _gd_ef[i].scheme) {
-        file->encoding = i;
+        file->subenc = i;
         dreturn("0x%08lx", _gd_ef[i].scheme);
         return _gd_ef[i].scheme;;
       }
@@ -357,19 +355,19 @@ int _GD_Supports(DIRFILE* D, gd_entry_t* E, unsigned int funcs)
 
   /* If the encoding scheme is unknown, complain */
   if (D->fragment[E->fragment_index].encoding == GD_AUTO_ENCODED) {
-    _GD_SetError(D, GD_E_UNKNOWN_ENCODING, 0, NULL, 0, NULL);
+    _GD_SetError(D, GD_E_UNKNOWN_ENCODING, GD_E_UNENC_UNDET, NULL, 0, NULL);
     dreturn("%i", 0);
     return 0;
   }
 
   /* Figure out the encoding subtype, if required */
-  if (E->e->u.raw.file[0].encoding == GD_ENC_UNKNOWN)
+  if (E->e->u.raw.file[0].subenc == GD_ENC_UNKNOWN)
     _GD_ResolveEncoding(D, E->e->u.raw.filebase,
         D->fragment[E->fragment_index].encoding,
         D->fragment[E->fragment_index].dirfd, E->e->u.raw.file);
 
   /* check for our function(s) */
-  if (_GD_MissingFramework(E->e->u.raw.file[0].encoding, funcs)) {
+  if (_GD_MissingFramework(E->e->u.raw.file[0].subenc, funcs)) {
     _GD_SetError(D, GD_E_UNSUPPORTED, 0, NULL, 0, NULL);
     dreturn("%i", 0);
     return 0;
@@ -387,7 +385,7 @@ int _GD_SetEncodedName(DIRFILE* D, struct _gd_raw_file* file, const char* base,
   if (file->name == NULL) {
     file->D = D;
     file->name = (char *)malloc(strlen(base) + (temp ? 8 :
-          strlen(_gd_ef[file->encoding].ext) + 1));
+          strlen(_gd_ef[file->subenc].ext) + 1));
     if (file->name == NULL) {
       _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
       dreturn("%i", -1);
@@ -395,7 +393,7 @@ int _GD_SetEncodedName(DIRFILE* D, struct _gd_raw_file* file, const char* base,
     }
 
     strcat(strcpy(file->name, base), temp ? "_XXXXXX" :
-        _gd_ef[file->encoding].ext);
+        _gd_ef[file->subenc].ext);
   }
 
   dreturn("%i (%s)", 0, file->name);
@@ -450,10 +448,10 @@ static void _GD_RecodeFragment(DIRFILE* D, unsigned long encoding, int fragment,
      * remove the temporary files */
     if (D->error) {
       for (i = 0; i < n_raw; ++i)
-        if (_gd_ef[raw_entry[i]->e->u.raw.file[1].encoding].temp != NULL && 
-            (*_gd_ef[raw_entry[i]->e->u.raw.file[1].encoding].temp)(
-              D->fragment[fragment].dirfd, D->fragment[fragment].dirfd,
-              raw_entry[i]->e->u.raw.file, GD_TEMP_DESTROY))
+        if (!_GD_MissingFramework(raw_entry[i]->e->u.raw.file[1].subenc,
+              GD_EF_TUNLINK) && 
+            (*_gd_ef[raw_entry[i]->e->u.raw.file[1].subenc].tunlink)(
+              D->fragment[fragment].dirfd, raw_entry[i]->e->u.raw.file + 1))
         {
           _GD_SetError(D, GD_E_RAW_IO, 0, raw_entry[i]->e->u.raw.file[0].name,
               errno, NULL);
@@ -464,32 +462,32 @@ static void _GD_RecodeFragment(DIRFILE* D, unsigned long encoding, int fragment,
         memcpy(&temp, raw_entry[i]->e->u.raw.file, sizeof(temp));
 
         raw_entry[i]->e->u.raw.file[0].name = NULL;
-        raw_entry[i]->e->u.raw.file[0].encoding =
-          raw_entry[i]->e->u.raw.file[1].encoding;
+        raw_entry[i]->e->u.raw.file[0].subenc =
+          raw_entry[i]->e->u.raw.file[1].subenc;
 
         if (_GD_SetEncodedName(D, raw_entry[i]->e->u.raw.file,
               raw_entry[i]->e->u.raw.filebase, 0))
         {
           raw_entry[i]->e->u.raw.file[0].name = temp.name;
-          raw_entry[i]->e->u.raw.file[0].encoding = temp.encoding;
-        } else if (
-            (*_gd_ef[raw_entry[i]->e->u.raw.file[1].encoding].temp)(
+          raw_entry[i]->e->u.raw.file[0].subenc = temp.subenc;
+        } else if ((*_gd_ef[raw_entry[i]->e->u.raw.file[1].subenc].tmove)(
               D->fragment[fragment].dirfd, D->fragment[fragment].dirfd,
-              raw_entry[i]->e->u.raw.file, GD_TEMP_MOVE))
+              raw_entry[i]->e->u.raw.file,
+              _gd_ef[raw_entry[i]->e->u.raw.file[1].subenc].tunlink))
         {
           _GD_SetError(D, GD_E_UNCLEAN_DB, 0,
               D->fragment[D->entry[i]->fragment_index].cname, 0, NULL);
           D->flags |= GD_INVALID;
           raw_entry[i]->e->u.raw.file[0].name = temp.name;
-          raw_entry[i]->e->u.raw.file[0].encoding = temp.encoding;
-        } else if ((*_gd_ef[temp.encoding].unlink)(D->fragment[fragment].dirfd,
+          raw_entry[i]->e->u.raw.file[0].subenc = temp.subenc;
+        } else if ((*_gd_ef[temp.subenc].unlink)(D->fragment[fragment].dirfd,
               &temp))
         {
           _GD_SetError(D, GD_E_UNCLEAN_DB, 0,
               D->fragment[D->entry[i]->fragment_index].cname, 0, NULL);
           D->flags |= GD_INVALID;
           raw_entry[i]->e->u.raw.file[0].name = temp.name;
-          raw_entry[i]->e->u.raw.file[0].encoding = temp.encoding;
+          raw_entry[i]->e->u.raw.file[0].subenc = temp.subenc;
         } else
           free(temp.name);
       }
@@ -506,8 +504,8 @@ static void _GD_RecodeFragment(DIRFILE* D, unsigned long encoding, int fragment,
           D->entry[i]->field_type == GD_RAW_ENTRY)
       {
         /* close the old file */
-        if (D->entry[i]->e->u.raw.file[0].fp != -1 &&
-            (*_gd_ef[D->entry[i]->e->u.raw.file[0].encoding].close)(
+        if (D->entry[i]->e->u.raw.file[0].idata != -1 &&
+            (*_gd_ef[D->entry[i]->e->u.raw.file[0].subenc].close)(
               D->entry[i]->e->u.raw.file))
         {
           _GD_SetError(D, GD_E_RAW_IO, 0, D->entry[i]->e->u.raw.file[1].name,
@@ -515,7 +513,7 @@ static void _GD_RecodeFragment(DIRFILE* D, unsigned long encoding, int fragment,
           break;
         }
         /* reset encoding subscheme. */
-        D->entry[i]->e->u.raw.file[0].encoding = GD_ENC_UNKNOWN;
+        D->entry[i]->e->u.raw.file[0].subenc = GD_ENC_UNKNOWN;
       }
   }
 
@@ -552,7 +550,7 @@ int gd_alter_encoding(DIRFILE* D, unsigned long encoding, int fragment,
   }
 
   if (!_GD_EncodingUnderstood(encoding)) {
-    _GD_SetError(D, GD_E_UNKNOWN_ENCODING, 0, NULL, 0, NULL);
+    _GD_SetError(D, GD_E_UNKNOWN_ENCODING, GD_E_UNENC_TARGET, NULL, 0, NULL);
     dreturn("%i", -1);
     return -1;
   }
@@ -625,7 +623,7 @@ unsigned long gd_encoding(DIRFILE* D, int fragment) gd_nothrow
  * 2) use mktemp to generate a "unique" file name, and then try to openat it
  *    exclusively; repeat as necessary.
  */
-int gd_MakeTempFile(const DIRFILE *D gd_unused_d, int dirfd, char *template)
+int _GD_MakeTempFile(const DIRFILE *D gd_unused_d, int dirfd, char *template)
 {
   int fd = -1;
   char *tmp = strdup(template);
@@ -655,11 +653,11 @@ int gd_MakeTempFile(const DIRFILE *D gd_unused_d, int dirfd, char *template)
   return fd;
 }
 
-int _GD_GenericTouch(int dirfd, struct _gd_raw_file* file)
+int _GD_GenericTouch(int dirfd, struct _gd_raw_file* file, int swap __gd_unused)
 {
   int fd;
 
-  dtrace("%i, %p", dirfd, file);
+  dtrace("%i, %p, <unused>", dirfd, file);
 
   fd = gd_OpenAt(file->D, dirfd, file->name, O_RDWR | O_CREAT | O_TRUNC
       | O_BINARY, 0666);
@@ -704,6 +702,45 @@ int _GD_GenericMove(int olddirfd, struct _gd_raw_file* file, int newdirfd,
 
   dreturn("%i", r);
   return r;
+}
+
+int _GD_GenericTMove(int dirfd0, int dirfd1, struct _gd_raw_file *file,
+    gd_ef_tunlink_t tunlink)
+{
+#ifdef HAVE_FCHMOD
+  struct stat stat_buf;
+  mode_t mode;
+#endif
+  dtrace("%i, %i, %p, %p", dirfd0, dirfd1, file, tunlink);
+  
+  if (file[1].name == NULL) {
+    dreturn("%i", 0);
+    return 0;
+  }
+
+#ifdef HAVE_FCHMOD
+  if (gd_StatAt(file[0].D, dirfd0, file[0].name, &stat_buf, 0))
+    mode = 0644;
+  else
+    mode = stat_buf.st_mode;
+#endif
+
+  if (gd_RenameAt(file->D, dirfd1, file[1].name, dirfd0, file[0].name)) {
+    int move_errno = errno;
+    (*tunlink)(dirfd1, file + 1);
+    errno = move_errno;
+    dreturn("%i", -1);
+    return -1;
+  }
+
+#ifdef HAVE_FCHMOD
+  int fd = gd_OpenAt(file->D, dirfd0, file[0].name, O_RDONLY, 0666);
+  fchmod(fd, mode);
+  close(fd);
+#endif
+
+  dreturn("%i", 0);
+  return 0;
 }
 /* vim: ts=2 sw=2 et tw=80
 */

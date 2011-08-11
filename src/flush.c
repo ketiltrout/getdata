@@ -51,13 +51,13 @@ void _GD_Flush(DIRFILE* D, gd_entry_t *E)
 
   switch(E->field_type) {
     case GD_RAW_ENTRY:
-      if (E->e->u.raw.file[0].fp >= 0) {
+      if (E->e->u.raw.file[0].idata >= 0) {
         if ((D->flags & GD_ACCMODE) == GD_RDWR &&
-            _gd_ef[E->e->u.raw.file[0].encoding].sync != NULL &&
-            (*_gd_ef[E->e->u.raw.file[0].encoding].sync)(E->e->u.raw.file))
+            _gd_ef[E->e->u.raw.file[0].subenc].sync != NULL &&
+            (*_gd_ef[E->e->u.raw.file[0].subenc].sync)(E->e->u.raw.file))
           _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno,
               NULL);
-        else if ((*_gd_ef[E->e->u.raw.file[0].encoding].close)(
+        else if ((*_gd_ef[E->e->u.raw.file[0].subenc].close)(
               E->e->u.raw.file))
         {
           _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno,
@@ -446,7 +446,7 @@ static void _GD_FlushFragment(DIRFILE* D, int i, int permissive)
     mode = stat_buf.st_mode;
 
   /* open a temporary file */
-  fd = gd_MakeTempFile(D, dirfd, temp_file);
+  fd = _GD_MakeTempFile(D, dirfd, temp_file);
   if (fd == -1) {
     _GD_SetError(D, GD_E_FLUSH, GD_E_FLUSH_MKTMP, NULL, errno, temp_file);
     dreturnvoid();

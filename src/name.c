@@ -181,8 +181,8 @@ int gd_rename(DIRFILE *D, const char *old_code, const char *new_name,
     }
 
     /* Close the old file */
-    if (E->e->u.raw.file->fp != -1 &&
-        (*_gd_ef[E->e->u.raw.file[0].encoding].close)(E->e->u.raw.file))
+    if (E->e->u.raw.file->idata != -1 &&
+        (*_gd_ef[E->e->u.raw.file[0].subenc].close)(E->e->u.raw.file))
     {
       _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
       free(name);
@@ -242,7 +242,7 @@ int gd_rename(DIRFILE *D, const char *old_code, const char *new_name,
         return -1;
       }
 
-      if ((*_gd_ef[E->e->u.raw.file[0].encoding].move)(
+      if ((*_gd_ef[E->e->u.raw.file[0].subenc].move)(
             D->fragment[E->fragment_index].dirfd, E->e->u.raw.file,
             D->fragment[E->fragment_index].dirfd, temp.name))
       {

@@ -74,7 +74,7 @@ static size_t _GD_DoRawOut(DIRFILE *D, gd_entry_t *E, off64_t s0,
     return 0;
   }
 
-  if (_gd_ef[E->e->u.raw.file[0].encoding].ecor) {
+  if (_gd_ef[E->e->u.raw.file[0].subenc].ecor) {
     /* convert to/from middle-ended doubles */
     if ((E->EN(raw,data_type) == GD_FLOAT64 || E->EN(raw,data_type) ==
           GD_COMPLEX128) &&
@@ -100,16 +100,16 @@ static size_t _GD_DoRawOut(DIRFILE *D, gd_entry_t *E, off64_t s0,
   }
   /* write data to file. */
 
-  if (E->e->u.raw.file[0].fp < 0) {
+  if (E->e->u.raw.file[0].idata < 0) {
     /* open file for reading / writing if not already opened */
 
     if (_GD_SetEncodedName(D, E->e->u.raw.file, E->e->u.raw.filebase, 0)) {
       free(databuffer);
       dreturn("%i", 0);
       return 0;
-    } else if ((*_gd_ef[E->e->u.raw.file[0].encoding].open)(
+    } else if ((*_gd_ef[E->e->u.raw.file[0].subenc].open)(
           D->fragment[E->fragment_index].dirfd, E->e->u.raw.file,
-          D->flags & GD_ACCMODE, 1))
+          _GD_FileSwapBytes(D, E->fragment_index), D->flags & GD_ACCMODE, 1))
     {
       _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
       free(databuffer);
@@ -118,7 +118,7 @@ static size_t _GD_DoRawOut(DIRFILE *D, gd_entry_t *E, off64_t s0,
     }
   }
 
-  if ((*_gd_ef[E->e->u.raw.file[0].encoding].seek)(E->e->u.raw.file, s0,
+  if ((*_gd_ef[E->e->u.raw.file[0].subenc].seek)(E->e->u.raw.file, s0,
         E->EN(raw,data_type), 1) == -1)
   {
       _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
@@ -127,7 +127,7 @@ static size_t _GD_DoRawOut(DIRFILE *D, gd_entry_t *E, off64_t s0,
       return 0;
   }
 
-  n_wrote = (*_gd_ef[E->e->u.raw.file[0].encoding].write)(E->e->u.raw.file,
+  n_wrote = (*_gd_ef[E->e->u.raw.file[0].subenc].write)(E->e->u.raw.file,
       databuffer, E->EN(raw,data_type), ns);
 
   free(databuffer);

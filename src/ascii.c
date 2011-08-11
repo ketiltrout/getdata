@@ -31,28 +31,35 @@
 #include <errno.h>
 #endif
 
-/* The ASCII encoding uses file->fp as to indicate the current line and
+/* The ASCII encoding uses file->idata to indicate the current line and
  * file->edata for the stream pointer */
 
-int _GD_AsciiOpen(int dirfd, struct _gd_raw_file* file, int mode, int creat)
+int _GD_AsciiOpen(int dirfd, struct _gd_raw_file* file, int swap __gd_unused,
+    int mode, int creat)
 {
-  int fp;
+  int fd;
 
-  dtrace("%i, %p, %i, %i", dirfd, file, mode, creat);
+  dtrace("%i, %p, <unused>, %i, %i", dirfd, file, mode, creat);
 
-  fp = gd_OpenAt(file->D, dirfd, file->name, ((mode == GD_RDWR) ? O_RDWR :
+  fd = gd_OpenAt(file->D, dirfd, file->name, ((mode == GD_RDWR) ? O_RDWR :
         O_RDONLY) | (creat ? O_CREAT : 0) | O_BINARY, 0666);
 
-  file->edata = fdopen(fp, (mode == GD_RDWR) ? "r+" : "r");
-
-  if (file->edata != NULL) {
-    file->fp = 0;
-    dreturn("%i", 0);
-    return 0;
+  if (fd < 0) {
+    dreturn("%i", -1);
+    return -1;
   }
 
-  dreturn("%i", -1);
-  return -1;
+  file->edata = fdopen(fd, (mode == GD_RDWR) ? "r+" : "r");
+
+  if (file->edata == NULL) {
+    close(fd);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  file->idata = 0;
+  dreturn("%i", 0);
+  return 0;
 }
 
 off64_t _GD_AsciiSeek(struct _gd_raw_file* file, off64_t count,
@@ -62,23 +69,23 @@ off64_t _GD_AsciiSeek(struct _gd_raw_file* file, off64_t count,
 
   dtrace("%p, %lli, <unused>, %i", file, count, pad);
 
-  if (count < file->fp) {
+  if (count < file->idata) {
     rewind((FILE *)file->edata);
-    file->fp = 0;
+    file->idata = 0;
   }
 
-  for (; count > file->fp; ++file->fp)
+  for (; count > file->idata; ++file->idata)
     if (fgets(line, 64, (FILE *)file->edata) == NULL)
       break;
 
-  if (pad && count > file->fp) {
+  if (pad && count > file->idata) {
     strcpy(line, "0\n");
-    for (; count > file->fp; ++file->fp)
+    for (; count > file->idata; ++file->idata)
       fputs(line, (FILE *)file->edata);
   }
 
-  dreturn("%i", file->fp);
-  return file->fp;
+  dreturn("%i", file->idata);
+  return file->idata;
 }
 
 static void _GD_ScanFormat(char* fmt, gd_type_t data_type)
@@ -159,7 +166,7 @@ ssize_t _GD_AsciiRead(struct _gd_raw_file *file, void *ptr, gd_type_t data_type,
           ret = -1;
         break;
       }
-      file->fp++;
+      file->idata++;
     }
   } else {
     for (n = 0; n < nmemb; ++n) {
@@ -189,7 +196,7 @@ ssize_t _GD_AsciiRead(struct _gd_raw_file *file, void *ptr, gd_type_t data_type,
           break;
         }
       }
-      file->fp++;
+      file->idata++;
     }
   }
 
@@ -342,7 +349,7 @@ int _GD_AsciiClose(struct _gd_raw_file* file)
 
   ret = fclose((FILE *)file->edata);
   if (ret != EOF) {
-    file->fp = -1;
+    file->idata = -1;
     dreturn("%i", 0);
     return 0;
   }
@@ -352,7 +359,7 @@ int _GD_AsciiClose(struct _gd_raw_file* file)
 }
 
 off64_t _GD_AsciiSize(int dirfd, struct _gd_raw_file* file,
-    gd_type_t data_type __gd_unused)
+    gd_type_t data_type __gd_unused, int swap __gd_unused)
 {
   FILE* stream;
   char *buffer = NULL;
@@ -360,10 +367,10 @@ off64_t _GD_AsciiSize(int dirfd, struct _gd_raw_file* file,
   off64_t n = 0;
   int fd;
 
-  dtrace("%i, %p, <unused>", dirfd, file);
+  dtrace("%i, %p, <unused>, <unused>", dirfd, file);
 
   fd = gd_OpenAt(file->D, dirfd, file->name, O_RDONLY, 0666);
-  if (fd == -1) {
+  if (fd < 0) {
     dreturn("%i", -1);
     return -1;
   }
@@ -385,68 +392,41 @@ off64_t _GD_AsciiSize(int dirfd, struct _gd_raw_file* file,
   return n;
 }
 
-int _GD_AsciiTemp(int dirfd0, int dirfd1, struct _gd_raw_file *file, int method)
+int _GD_AsciiTOpen(int fd, struct _gd_raw_file *file, int swap __gd_unused)
 {
-  int move_error = 0;
-  struct stat stat_buf;
-  mode_t mode;
-  int fp;
+  dtrace("%i, %p, <unused>", fd, file);
 
-  dtrace("%i, %i, %p, %i", dirfd0, dirfd1, file, method);
+  file->edata = fdopen(fd, "r+");
 
-  switch(method) {
-    case GD_TEMP_OPEN:
-      fp = gd_MakeTempFile(file[1].D, dirfd1, file[1].name);
+  if (file->edata == NULL) {
+    dreturn("%i", -1);
+    return -1;
+  }
 
-      file[1].edata = fdopen(fp, "r+");
+  file->idata = 0;
 
-      if (file[1].edata == NULL) {
+  dreturn("%i", 0);
+  return 0;
+}
+
+int _GD_AsciiTUnlink(int dirfd, struct _gd_raw_file *file)
+{
+  dtrace("%i, %p", dirfd, file);
+
+  if (file->name != NULL) {
+    if (file->idata >= 0)
+      if (_GD_AsciiClose(file)) {
         dreturn("%i", -1);
         return -1;
       }
 
-      file[1].fp = 0;
-      break;
-    case GD_TEMP_MOVE:
-      if (file[1].name == NULL)
-        break;
+    if (gd_UnlinkAt(file->D, dirfd, file->name, 0)) {
+      dreturn("%i", -1);
+      return -1;
+    }
 
-      if (stat(file[0].name, &stat_buf))
-        mode = 0644;
-      else
-        mode = stat_buf.st_mode;
-
-      if (!gd_RenameAt(file->D, dirfd1, file[1].name, dirfd0, file[0].name)) {
-        chmod(file[0].name, mode);
-        free(file[1].name);
-        file[1].name = NULL;
-        dreturn("%i", 0);
-        return 0;
-      }
-      move_error = errno;
-      /* fallthrough on error */
-    case GD_TEMP_DESTROY:
-      if (file[1].name != NULL) {
-        if (file[1].fp >= 0)
-          if (_GD_AsciiClose(file + 1)) {
-            dreturn("%i", -1);
-            return -1;
-          }
-
-        if (unlink(file[1].name)) {
-          dreturn("%i", -1);
-          return -1;
-        }
-
-        if (method == GD_TEMP_MOVE) {
-          errno = move_error;
-          dreturn("%i", -1);
-          return -1;
-        }
-        free(file[1].name);
-        file[1].name = NULL;
-      }
-      break;
+    free(file[1].name);
+    file[1].name = NULL;
   }
 
   dreturn("%i", 0);

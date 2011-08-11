@@ -254,8 +254,8 @@ static gd_entry_t* _GD_ParseRaw(DIRFILE* D, char* in_cols[MAX_IN_COLS],
   memset(E->e, 0, sizeof(struct _gd_private_entry));
 
   E->field_type = GD_RAW_ENTRY;
-  E->e->u.raw.file[0].fp = E->e->u.raw.file[1].fp = -1;
-  E->e->u.raw.file[0].encoding = GD_ENC_UNKNOWN; /* don't know the encoding
+  E->e->u.raw.file[0].idata = E->e->u.raw.file[1].idata = -1;
+  E->e->u.raw.file[0].subenc = GD_ENC_UNKNOWN; /* don't know the encoding
                                                     subscheme yet */
 
   E->field = _GD_ValidateField(NULL, in_cols[0], standards, pedantic, is_dot);
@@ -1321,7 +1321,7 @@ gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, char** in_cols,
             D->fragment[me].cname);
       /* If the encoding scheme is unknown, we can't add the field */
       if (D->fragment[me].encoding == GD_AUTO_ENCODED)
-        _GD_SetError(D, GD_E_UNKNOWN_ENCODING, 0, NULL, 0, NULL);
+        _GD_SetError(D, GD_E_UNKNOWN_ENCODING, GD_E_UNENC_UNDET, NULL, 0, NULL);
       else if (D->fragment[me].encoding == GD_ENC_UNSUPPORTED)
         /* If the encoding scheme is unsupported, we can't add the field */
         _GD_SetError(D, GD_E_UNSUPPORTED, 0, NULL, 0, NULL);
@@ -1329,8 +1329,9 @@ gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, char** in_cols,
         ; /* error already set */
       else if (_GD_SetEncodedName(D, E->e->u.raw.file, E->e->u.raw.filebase, 0))
         ; /* error already set */
-      else if ((*_gd_ef[E->e->u.raw.file[0].encoding].touch)(
-            D->fragment[E->fragment_index].dirfd, E->e->u.raw.file))
+      else if ((*_gd_ef[E->e->u.raw.file[0].subenc].touch)(
+            D->fragment[E->fragment_index].dirfd, E->e->u.raw.file,
+            _GD_FileSwapBytes(D, me)))
         _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
     }
 

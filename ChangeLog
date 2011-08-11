@@ -1,3 +1,46 @@
+2011-08-11   D. V. Wiebe <getdata@ketiltrout.net> svn:594
+	* test/sie_nframes_big.c test/sie_get_big.c test/sie_get_little.c
+	test/sie_nframes_little.c test/sie_move_to.c test/sie_put_little.c
+	test/sie_move_from.c test/sie_put_big.c: Added.
+
+	* configure.ac src/internal.h: Handle missing fstat64, ftruncate64, and byte
+	swapping routines.
+
+	* src/internal.h src/errors.c: Differentiate GD_E_UNKNOWN_ENCODING errors
+	arising from existing, unknown encodings on disk from errors arising from
+	attempts to convert to an unknown encoding.
+
+	* src/endian.c (_GD_FixEndianness): Use standard system byte-swapping
+	routines, where possible, with the assumption that they're not slower than
+	our old implementation.
+
+	* src/encoding.c: Redo the way _gd_ef is initialised to try and make it
+	a little easier to maintain.
+
+	* src/internal.h: In struct _gd_raw_file, rename .fp to .idata and .encoding
+	to .subenc to reduce code obfuscation.
+
+	* src/encoding.c: Added SIE encoding hooks.
+	* src/sie.c: Added.
+
+	* src/internal.h (_GD_FileSwapBytes): Added.
+	* src/internal.h: _gd_ef->open(), ->size(), ->touch(), and ->topen() now take
+	a "swap" parameter, indicating whether bytes are opposite-endian.
+
+	* src/internal.h: Split _gd_ef->temp() into ->topen, ->tmove, and ->tunlink.
+	Also typedef all the framework method prototypes.
+	* src/ascii.c (_GD_AsciiTOpen _GD_AsciiTUnlink) src/raw.c (_GD_RawTOpen
+	_GD_RawTUnlink): Added.
+	* src/ascii.c (_GD_AsciiTemp) src/raw.c (_GD_RawTemp): Deleted.
+	* src/encoding.c (_GD_GenericTMove): Added.
+	* src/endian.c (_GD_ByteSwapFragment) src/encoding.c (_GD_MissingFramework
+	_GD_RecodeFragment) src/move.c (_GD_MogrifyFile) src/flimits.c
+	(_GD_ShiftFragment) src/mod.c (_GD_Change): Replace _gd_ef->temp() calls with
+	t{open|move|unlink} calls.
+
+	* src/move.c (_GD_MogrifyFile) src/mod.c (_GD_Change): Call _GD_MakeTempFile
+	before calling _gd_ef->topen.
+
 2011-08-10   D. V. Wiebe <getdata@ketiltrout.net> svn:593
 	* bindings/perl/t/big_test.t: Convert to TAP.
 

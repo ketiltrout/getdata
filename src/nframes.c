@@ -57,10 +57,11 @@ off64_t gd_nframes64(DIRFILE* D)
     return 0;
   }
 
-  nf = (*_gd_ef[D->reference_field->e->u.raw.file[0].encoding].size)(
+  nf = (*_gd_ef[D->reference_field->e->u.raw.file[0].subenc].size)(
       D->fragment[D->reference_field->fragment_index].dirfd,
       D->reference_field->e->u.raw.file,
-      D->reference_field->EN(raw,data_type));
+      D->reference_field->EN(raw,data_type), _GD_FileSwapBytes(D,
+        D->reference_field->fragment_index));
 
   if (nf < 0) {
     _GD_SetError(D, GD_E_RAW_IO, 0, D->reference_field->e->u.raw.file[0].name,

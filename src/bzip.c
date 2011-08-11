@@ -57,7 +57,7 @@ struct gd_bzdata {
 };
 
 /* The bzip encoding scheme uses edata as a gd_bzdata pointer.  If a file is
- * open, fp = 0 otherwise fp = -1. */
+ * open, idata = 0 otherwise idata = -1. */
 
 static struct gd_bzdata *_GD_Bzip2DoOpen(int dirfd, struct _gd_raw_file* file)
 {
@@ -101,10 +101,10 @@ static struct gd_bzdata *_GD_Bzip2DoOpen(int dirfd, struct _gd_raw_file* file)
   return ptr;
 }
 
-int _GD_Bzip2Open(int dirfd, struct _gd_raw_file* file, int mode __gd_unused,
-    int creat __gd_unused)
+int _GD_Bzip2Open(int dirfd, struct _gd_raw_file* file, int swap __gd_unused,
+    int mode __gd_unused, int creat __gd_unused)
 {
-  dtrace("%i, %p, <unused>, <unused>", dirfd, file);
+  dtrace("%i, %p, <unused>, <unused>, <unused>", dirfd, file);
 
   file->edata = _GD_Bzip2DoOpen(dirfd, file);
 
@@ -113,7 +113,7 @@ int _GD_Bzip2Open(int dirfd, struct _gd_raw_file* file, int mode __gd_unused,
     return 1;
   }
 
-  file->fp = 0;
+  file->idata = 0;
   dreturn("%i", 0);
   return 0;
 }
@@ -236,7 +236,7 @@ int _GD_Bzip2Close(struct _gd_raw_file *file)
   ptr->bzerror = 0;
   BZ2_bzReadClose(&ptr->bzerror, ptr->bzfile);
   if (!fclose(ptr->stream)) {
-    file->fp = -1;
+    file->idata = -1;
     free(file->edata);
     dreturn("%i", 0);
     return 0;
@@ -246,12 +246,13 @@ int _GD_Bzip2Close(struct _gd_raw_file *file)
   return 1;
 }
 
-off64_t _GD_Bzip2Size(int dirfd, struct _gd_raw_file *file, gd_type_t data_type)
+off64_t _GD_Bzip2Size(int dirfd, struct _gd_raw_file *file, gd_type_t data_type,
+    int swap __gd_unused)
 {
   struct gd_bzdata *ptr;
   off_t n;
 
-  dtrace("%i, %p, %x", dirfd, file, data_type);
+  dtrace("%i, %p, %x, <unused>", dirfd, file, data_type);
 
   ptr = _GD_Bzip2DoOpen(dirfd, file);
 

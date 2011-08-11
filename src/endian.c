@@ -70,7 +70,7 @@ static void _GD_ByteSwapFragment(DIRFILE* D, unsigned long byte_sex,
           continue;
 
         /* check subencoding support */
-        if (!_GD_Supports(D, D->entry[i], GD_EF_TEMP))
+        if (!_GD_Supports(D, D->entry[i], GD_EF_TMOVE | GD_EF_TUNLINK))
           break;
 
         /* add this raw field to the list */
@@ -87,16 +87,18 @@ static void _GD_ByteSwapFragment(DIRFILE* D, unsigned long byte_sex,
      * remove the temporary files */
     if (D->error) {
       for (i = 0; i < n_raw; ++i)
-        if ((*_gd_ef[raw_entry[i]->e->u.raw.file[0].encoding].temp)(
-              D->fragment[fragment].dirfd, D->fragment[fragment].dirfd,
-              raw_entry[i]->e->u.raw.file, GD_TEMP_DESTROY))
+        if ((*_gd_ef[raw_entry[i]->e->u.raw.file[0].subenc].tunlink)(
+              D->fragment[fragment].dirfd, raw_entry[i]->e->u.raw.file + 1))
+        {
           _GD_SetError(D, GD_E_RAW_IO, 0, raw_entry[i]->e->u.raw.file[0].name,
               errno, NULL);
+        }
     } else {
       for (i = 0; i < n_raw; ++i)
-        if ((*_gd_ef[raw_entry[i]->e->u.raw.file[0].encoding].temp)(
+        if ((*_gd_ef[raw_entry[i]->e->u.raw.file[0].subenc].tmove)(
               D->fragment[fragment].dirfd, D->fragment[fragment].dirfd,
-              raw_entry[i]->e->u.raw.file, GD_TEMP_MOVE))
+              raw_entry[i]->e->u.raw.file,
+              _gd_ef[raw_entry[i]->e->u.raw.file[0].subenc].tunlink))
         {
           _GD_SetError(D, GD_E_UNCLEAN_DB, 0,
               D->fragment[D->entry[i]->fragment_index].cname, 0, NULL);
@@ -202,24 +204,26 @@ void _GD_ArmEndianise(uint64_t* databuffer, int is_complex, size_t ns)
   dreturnvoid();
 }
 
-void _GD_FixEndianness(char* databuffer, size_t size, size_t ns)
+void _GD_FixEndianness(void* databuffer, size_t size, size_t ns)
 {
-  size_t i, j;
-  char b;
+  size_t i;
 
   dtrace("%p, %zu, %zu", databuffer, size, ns);
 
-  if (size == 1) {
-    dreturnvoid();
-    return;
+  switch (size) {
+    case 2:
+      for (i = 0; i < ns; ++i)
+        ((uint16_t*)databuffer)[i] = gd_swap16(((uint16_t*)databuffer)[i]);
+      break;
+    case 4:
+      for (i = 0; i < ns; ++i)
+        ((uint32_t*)databuffer)[i] = gd_swap32(((uint32_t*)databuffer)[i]);
+      break;
+    case 8:
+      for (i = 0; i < ns; ++i)
+        ((uint64_t*)databuffer)[i] = gd_swap64(((uint64_t*)databuffer)[i]);
+      break;
   }
-
-  for (i = 0; i < ns; ++i)
-    for (j = 0; j < size / 2; ++j) {
-      b = databuffer[size * (i + 1) - j - 1];
-      databuffer[size * (i + 1) - j - 1] = databuffer[size * i + j];
-      databuffer[size * i + j] = b;
-    }
 
   dreturnvoid();
 }

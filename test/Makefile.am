@@ -280,6 +280,9 @@ REPR_TESTS=repr_a repr_float32 repr_float64 repr_i repr_int16 repr_int32 \
 					 repr_real_m repr_real_r repr_uint16 repr_uint32 repr_uint64 \
 					 repr_uint8
 
+SIE_TESTS=sie_get_big sie_get_little sie_move_from sie_move_to sie_nframes_big \
+					sie_nframes_little sie_put_big sie_put_little
+
 SLIM_TESTS=slim_get slim_nframes
 
 SVLIST_TESTS=svlist svlist_invalid svlist_meta svlist_meta_invalid
@@ -316,10 +319,10 @@ TESTS=$(ADD_TESTS)        $(ALTER_TESTS)      $(ASCII_TESTS)      \
 			$(NFRAGMENTS_TESTS) $(NFRAMES_TESTS)    $(NMETA_TESTS)      \
 			$(NVECTORS_TESTS)   $(OPEN_TESTS)       $(PARENT_TESTS)     \
 			$(PARSE_TESTS)      $(PROTECT_TESTS)    $(PUT_TESTS)        \
-			$(REF_TESTS)        $(REPR_TESTS)       $(SLIM_TESTS)       \
-			$(SPF_TESTS)        $(SVLIST_TESTS)     $(TRUNC_TESTS)      \
-			$(UNCLUDE_TESTS)    $(VERSION_TESTS)    $(VLIST_TESTS)      \
-			$(XZ_TESTS)
+			$(REF_TESTS)        $(REPR_TESTS)       $(SIE_TESTS)        \
+			$(SLIM_TESTS)       $(SPF_TESTS)        $(SVLIST_TESTS)     \
+			$(TRUNC_TESTS)      $(UNCLUDE_TESTS)    $(VERSION_TESTS)    \
+			$(VLIST_TESTS)      $(XZ_TESTS)
 
 check_PROGRAMS=$(TESTS)
 

@@ -196,8 +196,8 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
       }
 
       E->EN(raw,data_type) = entry->EN(raw,data_type);
-      E->e->u.raw.file[0].fp = E->e->u.raw.file[1].fp = -1;
-      E->e->u.raw.file[0].encoding = GD_ENC_UNKNOWN;
+      E->e->u.raw.file[0].idata = E->e->u.raw.file[1].idata = -1;
+      E->e->u.raw.file[0].subenc = GD_ENC_UNKNOWN;
 
       if ((E->e->u.raw.filebase = strdup(E->field)) == NULL) {
         _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
@@ -214,8 +214,9 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
         ; /* error already set */
       else if (_GD_SetEncodedName(D, E->e->u.raw.file, E->e->u.raw.filebase, 0))
         ; /* error already set */
-      else if ((*_gd_ef[E->e->u.raw.file[0].encoding].touch)(
-            D->fragment[E->fragment_index].dirfd, E->e->u.raw.file))
+      else if ((*_gd_ef[E->e->u.raw.file[0].subenc].touch)(
+            D->fragment[E->fragment_index].dirfd, E->e->u.raw.file,
+            _GD_FileSwapBytes(D, E->fragment_index)))
         _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno,
             NULL);
       else if (D->fragment[E->fragment_index].ref_name == NULL) {

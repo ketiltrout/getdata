@@ -51,7 +51,7 @@ AC_CONFIG_HEADER([src/config.h])
 dnl Features
 BUINDINGS_BUILT=
 BINDINGS_LEFT=
-ENCODINGS_BUILT=" raw ascii"
+ENCODINGS_BUILT=" raw ascii sie"
 ENCODINGS_LEFT=
 PRIVATE_LIBS=
 
@@ -504,7 +504,7 @@ AC_DEFINE([_POSIX_C_SOURCE], [200809L],
 
 dnl libraries
 echo
-echo "*** Looking for library functions"
+echo "*** Looking for additional libraries"
 echo
 AC_SEARCH_LIBS([ceil],[m])
 
@@ -519,55 +519,16 @@ if test "x${use_modules}" != "xno"; then
   AC_CHECK_HEADERS(pthread.h)
 fi
 
-dnl functions
-AC_CHECK_FUNCS([_commit fchmod _fdopen fdopendir fseeko fseeko64 _fstat \
-                fstatat fstatat64 fsync ftello ftello64 getcwd _getcwd \
-                getdelim gmtime_r _lseeki64 lstat _mkdir nan _open openat \
-                _read renameat _rmdir _snprintf stat64 _stat64 _strtoi64 \
-                strtoll _strtoui64 strtoull _unlink unlinkat _write])
-if test "x$disable_c99" = "xno"; then
-  AC_CHECK_FUNCS([cabs])
-fi
-AC_FUNC_STRERROR_R
-
 dnl headers
 echo
 echo "*** Looking for additional header files"
 echo
-AC_CHECK_HEADERS([direct.h fcntl.h libgen.h stdint.h unistd.h])
+AC_CHECK_HEADERS([byteswap.h direct.h fcntl.h io.h libgen.h \
+                  libkern/OSByteOrder.h stdint.h sys/endian.h unistd.h])
 if test "x$disable_c99" = "xno"; then
 AC_CHECK_HEADERS([complex.h])
 fi
 AC_HEADER_DIRENT
-
-AC_CHECK_HEADERS([io.h])
-
-AC_MSG_CHECKING([whether mkdir accepts two arguments])
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM([
-#if HAVE_SYS_STAT_H
-#include <sys/stat.h>
-#endif
-#if HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#if HAVE_IO_H
-#include <io.h>
-#endif
-], [[
-#ifdef HAVE__MKDIR
-_mkdir("x", 00777);
-#else
-mkdir("x", 00777);
-#endif
-]])],
-[gd_2arg_mkdir=yes],
-[gd_2arg_mkdir=no])
-AC_MSG_RESULT([$gd_2arg_mkdir])
-
-if test $gd_2arg_mkdir = "no"; then
-  AC_DEFINE([MKDIR_NO_MODE], [1],
-            [ Define to 1 if the `mkdir' function takes only one argument.])
-fi dnl`
 
 dnl types
 echo
@@ -692,6 +653,61 @@ DEFINE_gd_int64_t="#define gd_int64_t $gd_int64_t";
 AC_SUBST([DEFINE_gd_int16_t])
 AC_SUBST([DEFINE_gd_uint16_t])
 AC_SUBST([DEFINE_gd_int64_t])
+
+dnl library functions
+echo
+echo "*** Looking for additional library functions"
+echo
+AC_CHECK_FUNCS([_chsize _chsize_s _commit fchmod _fdopen fdopendir fseeko \
+                fseeko64 _fstat fstat64 _fstat64 fstatat fstatat64 fsync \
+                ftello ftello64 ftruncate ftruncate64 getcwd _getcwd getdelim \
+                gmtime_r _lseeki64 lstat _mkdir nan _open openat _read \
+                renameat _rmdir _snprintf stat64 _stat64 _strtoi64 strtoll \
+                _strtoui64 strtoull _unlink unlinkat _write])
+if test "x$disable_c99" = "xno"; then
+  AC_CHECK_FUNCS([cabs])
+fi
+AC_FUNC_STRERROR_R
+
+AC_MSG_CHECKING([whether mkdir accepts two arguments])
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([
+#if HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
+#if HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#if HAVE_IO_H
+#include <io.h>
+#endif
+], [[
+#ifdef HAVE__MKDIR
+_mkdir("x", 00777);
+#else
+mkdir("x", 00777);
+#endif
+]])],
+[gd_2arg_mkdir=yes],
+[gd_2arg_mkdir=no])
+AC_MSG_RESULT([$gd_2arg_mkdir])
+
+if test $gd_2arg_mkdir = "no"; then
+  AC_DEFINE([MKDIR_NO_MODE], [1],
+            [ Define to 1 if the `mkdir' function takes only one argument.])
+fi dnl`
+
+AC_CHECK_DECLS([bswap16, bswap_16, OSSwapInt16],,,
+              [
+#ifdef HAVE_BYTESWAP_H
+#include <byteswap.h>
+#endif
+#ifdef HAVE_SYS_ENDIAN_H
+#include <sys/endian.h>
+#endif
+#ifdef HAVE_LIBKERN_OSBYTEORDER_H
+#include <libkern/OSByteOrder.h>
+#endif
+])
 
 dnl python
 if test "x$make_pybindings" = "xyes"; then

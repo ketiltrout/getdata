@@ -332,7 +332,7 @@ int gd_delete(DIRFILE* D, const char* field_code_in, int flags)
       return -1;
     }
 
-    if ((*_gd_ef[E->e->u.raw.file[0].encoding].unlink)(
+    if ((*_gd_ef[E->e->u.raw.file[0].subenc].unlink)(
           D->fragment[E->fragment_index].dirfd, E->e->u.raw.file))
     {
       _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
@@ -340,8 +340,8 @@ int gd_delete(DIRFILE* D, const char* field_code_in, int flags)
       dreturn("%i", -1);
       return -1;
     }
-  } else if (E->field_type == GD_RAW_ENTRY && E->e->u.raw.file->fp != -1) {
-    if ((*_gd_ef[E->e->u.raw.file[0].encoding].close)(E->e->u.raw.file)) {
+  } else if (E->field_type == GD_RAW_ENTRY && E->e->u.raw.file->idata != -1) {
+    if ((*_gd_ef[E->e->u.raw.file[0].subenc].close)(E->e->u.raw.file)) {
       _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
       free(del_list);
       dreturn("%i", -1);

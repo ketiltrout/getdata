@@ -117,7 +117,10 @@ static const struct {
   { GD_E_UNSUPPORTED, 0, "Operation not supported by current encoding scheme",
     0 },
   /* GD_E_UNKNOWN_ENCODING: (nothing) */
-  { GD_E_UNKNOWN_ENCODING, 0, "Unable to determine encoding scheme", 0 },
+  { GD_E_UNKNOWN_ENCODING, GD_E_UNENC_UNDET,
+    "Unable to determine encoding scheme", 0 },
+  { GD_E_UNKNOWN_ENCODING, GD_E_UNENC_TARGET, "Unknown ouput encoding scheme",
+    0 },
   /* GD_E_BAD_ENTRY: 3 = parameter */
   { GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_TYPE, "Invalid entry type: {3}", 0 },
   { GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_SPF, "Samples per frame out of range: {3}",
