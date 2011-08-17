@@ -237,7 +237,7 @@ ssize_t _GD_SampIndRead(struct _gd_raw_file *file, void *ptr,
   dtrace("%p, %p, 0x%03x, %zu", file, ptr, data_type, nelem);
 
   /* not enough data in the current run */
-  while (f->d[0] - f->p <= nelem - count) {
+  while (f->d[0] - f->p <= (int64_t)(nelem - count)) {
     /* copy what we've got */
     cur = _GD_Duplicate(cur, f->d + 1, GD_SIZE(data_type), f->d[0] - f->p + 1);
     count += f->d[0] - f->p + 1;
@@ -252,7 +252,7 @@ ssize_t _GD_SampIndRead(struct _gd_raw_file *file, void *ptr,
   }
 
   /* copy the remnant */
-  if (f->d[0] - f->p >= nelem - count) {
+  if (f->d[0] - f->p >= (int64_t)(nelem - count)) {
     _GD_Duplicate(cur, f->d + 1, GD_SIZE(data_type), nelem - count);
     f->p += nelem - count;
     count = nelem;
@@ -369,7 +369,7 @@ ssize_t _GD_SampIndWrite(struct _gd_raw_file *file, const void *ptr,
     }
     if (fseek(f->fp, (fr + rout) * size, SEEK_SET) ||
         (fread(buffer, size, nrec - (fr + rout), f->fp)
-         < nrec - (fr + rout)))
+         < (size_t)(nrec - (fr + rout))))
     {
       free(buffer);
       free(p);
@@ -377,7 +377,8 @@ ssize_t _GD_SampIndWrite(struct _gd_raw_file *file, const void *ptr,
       return -1;
     }
     if (fseek(f->fp, (fr + rin) * size, SEEK_SET) ||
-        (fwrite(buffer, size, nrec - (fr + rout), f->fp) < nrec - (fr + rout)))
+        (fwrite(buffer, size, nrec - (fr + rout), f->fp)
+         < (size_t)(nrec - (fr + rout))))
     {
       free(buffer);
       free(p);
@@ -447,7 +448,7 @@ off64_t _GD_SampIndSize(int dirfd, struct _gd_raw_file* file,
   int64_t n;
   const size_t size = sizeof(int64_t) + GD_SIZE(data_type);
 
-  dtrace("%i, %p, 0x%03x, %i", dirfd, file, data_type, size);
+  dtrace("%i, %p, 0x%03x, %i", dirfd, file, data_type, swap);
 
   /* open */
   if (_GD_SampIndDoOpen(dirfd, file, &f, swap, GD_RDONLY, 0)) {

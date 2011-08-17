@@ -280,24 +280,6 @@ struct tm *gmtime_r(const time_t *timep, struct tm *result);
 #define rmdir _rmdir
 #endif
 
-#if HAVE_STAT64
-#  define gd_stat64 stat64
-#elif HAVE__STAT64
-#  define gd_stat64 _stat64
-#else
-#  define gd_stat64 stat
-#endif
-
-#if HAVE_FSTAT64
-#  define gd_fstat64 fstat64
-#elif HAVE__FSTAT64
-#  define gd_fstat64 _fstat64
-#elif HAVE__FSTAT
-#  define gd_fstat64 _fstat
-#else
-#  define gd_fstat64 fstat
-#endif
-
 #if HAVE_STRUCT_STAT64
 typedef struct stat64 gd_stat64_t;
 #elif HAVE_STRUCT__STAT64
@@ -306,6 +288,30 @@ typedef struct _stat64 gd_stat64_t;
 typedef struct __stat64 gd_stat64_t;
 #else
 typedef struct stat gd_stat64_t;
+#define GD_NO_64BIT_STAT
+#endif
+
+#ifdef GD_NO_64BIT_STAT
+# define gd_stat64 stat
+# define gd_fstat64 fstat
+#else
+# if HAVE_STAT64
+#  define gd_stat64 stat64
+# elif HAVE__STAT64
+#  define gd_stat64 _stat64
+# else
+#  define gd_stat64 stat
+# endif
+
+# if HAVE_FSTAT64
+#  define gd_fstat64 fstat64
+# elif HAVE__FSTAT64
+#  define gd_fstat64 _fstat64
+# elif HAVE__FSTAT
+#  define gd_fstat64 _fstat
+# else
+#  define gd_fstat64 fstat
+# endif
 #endif
 
 #ifndef AT_SYMLINK_NOFOLLOW
