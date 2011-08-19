@@ -1,6 +1,6 @@
 .\" gd_rewrite_fragment.3.  The gd_rewrite_fragment man page.
 .\"
-.\" Copyright (C) 2010 D. V. Wiebe
+.\" Copyright (C) 2010, 2011 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_rewrite_fragment 3 "22 March 2011" "Version 0.7.2" "GETDATA"
+.TH gd_rewrite_fragment 3 "19 August 2011" "Version 0.8.0" "GETDATA"
 .SH NAME
 gd_rewrite_fragment \(em re-write a dirfile format specification fragment
 .SH SYNOPSIS
@@ -52,6 +52,9 @@ set to a non-zero error value.  Possible error values are:
 .B GD_E_ACCMODE
 The supplied dirfile was opened in read-only mode.
 .TP
+.B GD_E_ALLOC
+The library was unable to allocate memory.
+.TP
 .B GD_E_BAD_DIRFILE
 The supplied dirfile was invalid.
 .TP
@@ -61,11 +64,6 @@ The supplied fragment index was out of range.
 .B GD_E_FLUSH
 A temporary file could not be opened into which to write the modified metadata,
 or renaming the temporary file over the original fragment failed.
-.TP
-.B GD_E_INTERNAL_ERROR
-An internal error occurred in the library while trying to perform the task.
-This indicates a bug in the library.  Please report the incident to the
-maintainer.
 .PP
 The dirfile error may be retrieved by calling
 .BR gd_error (3).

@@ -540,7 +540,7 @@ static off64_t _GD_GetBOF(DIRFILE *D, gd_entry_t* E, const char *parent,
         _GD_SetError(D, GD_E_DIMENSION, GD_E_DIM_CALLER, NULL, 0, E->field);
       break;
     case GD_NO_ENTRY:
-      _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, E->field);
+      _GD_InternalError(D);
       break;
   }
 
@@ -595,4 +595,3 @@ off_t gd_bof(DIRFILE* D, const char *field_code) gd_nothrow
 }
 /* vim: ts=2 sw=2 et tw=80
 */
-

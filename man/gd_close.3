@@ -1,6 +1,6 @@
 .\" gd_close.3.  The gd_close man page.
 .\"
-.\" Copyright (C) 2008, 2009, 2010 D. V. Wiebe
+.\" Copyright (C) 2008, 2009, 2010, 2011 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_close 3 "20 October 2010" "Version 0.7.0" "GETDATA"
+.TH gd_close 3 "17 August 2011" "Version 0.8.0" "GETDATA"
 .SH NAME
 gd_close, gd_discard \(em close a dirfile and free associated memory.
 .SH SYNOPSIS
@@ -51,9 +51,9 @@ fields are properly terminated, changes to
 data files are still flushed to disk by this function.  If
 .I dirfile
 was opened in read-only mode,
-.BR gd_discard()
+.BR gd_discard ()
 and
-.BR gd_close()
+.BR gd_close ()
 behave identically.
 
 One of these functions should be called on all pointers returned by
@@ -64,7 +64,7 @@ and
 even if the call to those function failed.  After
 .BR gd_close ()
 or
-.BR gd_discard()
+.BR gd_discard ()
 returns successfully, the pointer
 .I dirfile
 should be considered invalid.
@@ -85,6 +85,9 @@ return zero on success.  On error, they do not de-allocate
 and set the dirfile error to a non-zero error value.  Possible error values
 are:
 .TP 8
+.B GD_E_ALLOC
+The library was unable to allocate memory.
+.TP
 .B GD_E_FLUSH
 A temporary file could not be opened into which to write the modified metadata,
 or renaming the temporary file over the original fragment failed.

@@ -1219,7 +1219,7 @@ static gd_entry_t* _GD_ParseString(DIRFILE* D, char *in_cols[MAX_IN_COLS],
   return E;
 }
 
-static int utf8encode(DIRFILE* D, const char* format_file, int linenum,
+static int _GD_UTF8Encode(DIRFILE* D, const char* format_file, int linenum,
     char** op, uint32_t value)
 {
   dtrace("%p, %p, %llx", D, op, (long long)value);
@@ -1545,7 +1545,7 @@ int _GD_Tokenise(DIRFILE *D, const char* instring, char **outstring,
         } else if (acc_mode == ACC_MODE_UTF8 && (n_acc == 7 ||
               accumulator > 0x10FF || !isxdigit(*ip)))
         {
-          if (utf8encode(D, format_file, linenum, &op, accumulator))
+          if (_GD_UTF8Encode(D, format_file, linenum, &op, accumulator))
             break; /* syntax error */
 
           if (!isxdigit(*ip))

@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_error_count 3 "20 April 2011" "Version 0.8.0" "GETDATA"
+.TH gd_error_count 3 "18 August 2011" "Version 0.8.0" "GETDATA"
 .SH NAME
 gd_error_count \(em report the number of errors encountered by the GetData
 library
@@ -37,11 +37,14 @@ Calling this function resets the internal count, so that subsequent calls to
 return the number of errors encountered only since the previous call to this
 function, for the specified DIRFILE.
 
-The errors themselves are not cached by the library.  The
+The errors themselves are not cached by the library.  The error status of
+the 
 .I last
-error encountered by the library for
+library call on
 .I dirfile
-can be obtained by calling
+(which might be
+.BR GD_E_OK ,
+indicating no error) can be obtained by calling
 .BR gd_error (3).
 
 .SH RETURN VALUE

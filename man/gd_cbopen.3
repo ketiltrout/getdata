@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_cbopen 3 "3 November 2010" "Version 0.7.0" "GETDATA"
+.TH gd_cbopen 3 "17 August 2011" "Version 0.8.0" "GETDATA"
 .SH NAME
 gd_cbopen, gd_open \(em open or create a dirfile
 .SH SYNOPSIS
@@ -74,7 +74,7 @@ bitwise-or'd together:
 .TP
 .PD
 .B GD_NOT_ARM_ENDIAN
-Specifies that double precision floating point raw data on disk is, or is not,
+Specifies that double precision floating point raw data on disk are, or are not,
 stored in the middle-endian format used by older ARM processors.
 
 These flag only set the default endianness, and will be overridden when an
@@ -197,7 +197,7 @@ directive.  See the
 section below for full details.
 .TP
 .B GD_PRETTY_PRINT
-When dirfile metadata is flushed to disk (either explicitly via
+When dirfile metadata are flushed to disk (either explicitly via
 .BR gd_metaflush (),\~ gd_rewrite_fragment (),
 or 
 .BR gd_flush ()
@@ -302,9 +302,10 @@ manual page lists the changes between Standards Versions.
 The GetData parser can operate in two modes: a
 .I permissive
 mode, in which much
-non-Standards compliant syntax is allowed, and a
+non-Standards-compliant syntax is allowed, and a
 .I pedantic
-mode, in which the parser adheres strictly to the Standards.  If
+mode, in which the parser adheres strictly to the Standards.  The mode made
+change during the parsing of a dirfile.  If
 .B GD_PEDANTIC
 is passed to
 .BR gd_cbopen (),
@@ -569,11 +570,12 @@ A call to
 .BR gd_cbopen ()
 or
 .BR gd_open ()
-always returns a pointer to a newly allocated DIRFILE object.  The DIRFILE
-object is an opaque structure containing the parsed dirfile metadata.
-If an error occurred, the dirfile error will be set to a non-zero error value.
-The DIRFILE object will also be internally flagged as invalid.  Possible error
-values are:
+always returns a pointer to a newly allocated DIRFILE object, except in
+instances when it is unable to allocate memory for the DIRFILE object itself,
+in which case it will return NULL.  The DIRFILE object is an opaque structure
+containing the parsed dirfile metadata.  If an error occurred, the dirfile
+error will be set to a non-zero error value.  The DIRFILE object will also
+be internally flagged as invalid.  Possible error values are:
 .TP 8
 .B GD_E_ACCMODE
 The library was asked to create or truncate a dirfile opened read-only (i.e.
@@ -611,11 +613,6 @@ were specified.
 A syntax error occurred in the format specification.  See also
 .B The Callback Function
 section above.
-.TP
-.B GD_E_INTERNAL_ERROR
-An internal error occurred in the library while trying to perform the task.
-This indicates a bug in the library.  Please report the incident to the
-GetData developers.
 .TP
 .B GD_E_LINE_TOO_LONG
 The parser encountered a line in the format specification longer than it was

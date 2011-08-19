@@ -1,6 +1,6 @@
 .\" gd_native_type.3.  The gd_native_type man page.
 .\"
-.\" Copyright (C) 2009, 2010 D. V. Wiebe
+.\" Copyright (C) 2009, 2010, 2011 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_native_type 3 "3 November 2010" "Version 0.7.0" "GETDATA"
+.TH gd_native_type 3 "17 August 2011" "Version 0.8.0" "GETDATA"
 .SH NAME
 gd_native_type \(em returns the native data type of a field in a dirfile
 .SH SYNOPSIS
@@ -110,6 +110,9 @@ manual page.  On error, it returns
 and sets the dirfile error to a non-zero error value.  Possible error values
 are:
 .TP 8
+.B GD_E_ALLOC
+The library was unable to allocate memory.
+.TP
 .B GD_E_BAD_CODE
 The field specified by
 .I field_code
@@ -122,14 +125,6 @@ The supplied dirfile was invalid.
 The representation suffix specified in
 .IR field_code ,
 or in one of its input fields, was not recognised.
-.TP
-.B GD_E_BAD_SCALAR
-A non-literal scalar used in the definition of the field or one of its inputs
-was not found, or was not a
-.B CONST
-or
-.B CARRAY
-field.
 .TP
 .B GD_E_DIMENSION
 A scalar field was found where a vector field was expected.

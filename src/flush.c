@@ -432,18 +432,22 @@ static void _GD_FlushFragment(DIRFILE* D, int i, int permissive)
   int pretty = 0;
   size_t max_len = 0;
   unsigned int u;
+#ifdef HAVE_FCHMOD
   mode_t mode;
   struct stat stat_buf;
+#endif
   time_t t;
   int dirfd = D->fragment[i].dirfd;
 
   dtrace("%p, %i, %i", D, i, permissive);
 
+#ifdef HAVE_FCHMOD
   /* get the permissions of the old file */
   if (stat(D->fragment[i].cname, &stat_buf))
     mode = 0644;
   else
     mode = stat_buf.st_mode;
+#endif
 
   /* open a temporary file */
   fd = _GD_MakeTempFile(D, dirfd, temp_file);

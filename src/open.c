@@ -265,8 +265,10 @@ DIRFILE* gd_invalid_dirfile(void) gd_nothrow
   dtracevoid();
 
   D = (DIRFILE *)malloc(sizeof(DIRFILE));
-  memset(D, 0, sizeof(DIRFILE));
-  D->flags = GD_INVALID;
+  if (D) {
+    memset(D, 0, sizeof(DIRFILE));
+    D->flags = GD_INVALID;
+  }
 
   dreturn("%p", D);
   return D;
@@ -293,6 +295,11 @@ DIRFILE* gd_cbopen(const char* filedir, unsigned long flags,
   _GD_InitialiseFramework();
 
   D = (DIRFILE *)malloc(sizeof(DIRFILE));
+  if (D == NULL) {
+    close(dirfd);
+    dreturn("%p", NULL);
+    return NULL;
+  }
   memset(D, 0, sizeof(DIRFILE));
 
   /* clear GD_PERMISSIVE if it was specified along with GD_PEDANTIC */

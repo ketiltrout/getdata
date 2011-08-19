@@ -1,6 +1,6 @@
 .\" gd_flush.3.  The gd_flush man page.
 .\"
-.\" Copyright (C) 2008, 2009, 2010 D. V. Wiebe
+.\" Copyright (C) 2008, 2009, 2010, 2011 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_flush 3 "24 July 2010" "Version 0.7.0" "GETDATA"
+.TH gd_flush 3 "18 August 2011" "Version 0.8.0" "GETDATA"
 .SH NAME
 gd_flush \(em write all pending dirfile changes to disk.
 .SH SYNOPSIS
@@ -54,6 +54,9 @@ be written.
 On success, zero is returned.  On error, -1 is returned and the dirfile error is
 set to a non-zero error value.  Possible error values are:
 .TP 8
+.B GD_E_ALLOC
+The library was unable to allocate memory.
+.TP
 .B GD_E_BAD_CODE
 The field specified by
 .I field_code
@@ -76,6 +79,12 @@ is NULL.
 .TP
 .B GD_E_RAW_IO
 An error occurred while trying to flush or close the field(s).
+.TP
+.B GD_E_RECURSE_LEVEL
+Too many levels of recursion were encountered while trying to resolve
+.IR field_code .
+This usually indicates a circular dependency in field specification in the
+dirfile.
 .PP
 The dirfile error may be retrieved by calling
 .BR gd_error (3).

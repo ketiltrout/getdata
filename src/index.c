@@ -239,6 +239,8 @@ double gd_framenum_subset64(DIRFILE* D, const char* field_code_in,
 
   if (_GD_NativeType(D, entry, repr) & GD_COMPLEX)
     _GD_SetError(D, GD_E_DOMAIN, GD_E_DOMAIN_COMPLEX, NULL, 0, NULL);
+  else if (entry->field_type & GD_SCALAR_ENTRY)
+    _GD_SetError(D, GD_E_DIMENSION, GD_E_DIM_CALLER, NULL, 0, field_code);
 
   if (field_code != field_code_in)
     free(field_code);

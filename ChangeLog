@@ -1,3 +1,27 @@
+2011-08-19   D. V. Wiebe <getdata@ketiltrout.net> svn:596
+	* src/open.c (gd_invalid_dirfile gd_cbopen): If allocating the DIRFILE
+	itself fails, return NULL instead of segfaulting.
+
+	* src/nmeta.c (gd_nmfields_by_type): Throw GD_E_BAD_ENTRY on encountering
+	GD_NO_ENTRY.
+
+	* src/index.c (gd_framenum_subset64): Throw GD_E_DIMENSION if the caller
+	supplies the field code for a scalar.
+
+	* src/errors.c: Added GD_E_BOUNDS and GD_E_LINE_TOO_LONG.
+
+	* src/encoding.c (_GD_ResolveEncoding): Don't segfault on malloc error.
+
+	* src/flimits.c (_GD_GetBOF): Throw GD_INTERNAL_ERROR instead of
+	GD_E_BAD_FIELD_TYPE when encountering GD_NO_ENTRY.
+
+	* src/parse.c (_GD_UTF8Encode): Renamed from utf8encode for consistency.
+
+	* src/sie.c (_GD_SampIndTUnlink) src/include.c (gd_uninclude): Use
+	gd_UnlinkAt instead of bare unlink().
+
+	* man/make_html.pl: Handle multiparagraph .TPs.
+
 2011-08-11   D. V. Wiebe <getdata@ketiltrout.net> svn:595
 	* src/internal.h: In cases where no explicitly 64-bit stat struct can be
 	found, don't bother trying to use explicitly 64-bit stat functions.

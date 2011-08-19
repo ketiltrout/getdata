@@ -1,6 +1,6 @@
 .\" gd_nframes.3.  The gd_nframes man page.
 .\"
-.\" Copyright (C) 2008, 2010 D. V. Wiebe
+.\" Copyright (C) 2008, 2010, 2011 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_nframes 3 "22 July 2010" "Version 0.7.0" "GETDATA"
+.TH gd_nframes 3 "19 August 2011" "Version 0.8.0" "GETDATA"
 .SH NAME
 gd_nframes \(em report the size of a dirfile
 .SH SYNOPSIS
@@ -55,13 +55,15 @@ Upon successful completion,
 returns the number of frames in the dirfile.  On error, it returns zero and sets
 the dirfile error to a non-zero error value.  Possible error values are:
 .TP 8
+.B GD_E_ALLOC
+The library was unable to allocate memory.
+.TP
 .B GD_E_BAD_DIRFILE
 The supplied dirfile was invalid.
 .TP
 .B GD_E_RAW_IO
-An attempt to
-.BR stat (2)
-the file associated with the reference field failed.
+An attempt to determine the (unencoded) size of the data file associated with
+the reference field failed.
 .TP
 .B GD_E_UNKNOWN_ENCODING
 The size of the decoded data file associated with the reference field could not

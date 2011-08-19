@@ -1,6 +1,6 @@
 .\" gd_put_carray_slice.3.  The gd_put_carray_slice man page.
 .\"
-.\" Copyright (C) 2010 D. V. Wiebe
+.\" Copyright (C) 2010, 2011 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_put_carray_slice 3 "3 November 2010" "Version 0.7.0" "GETDATA"
+.TH gd_put_carray_slice 3 "19 August 2011" "Version 0.8.0" "GETDATA"
 .SH NAME
 gd_put_carray gd_put_carray_slice \(em write CARRAY data to a dirfile database
 .SH SYNOPSIS
@@ -131,6 +131,9 @@ The specified
 .I dirfile
 was opened read-only.
 .TP
+.B GD_E_ALLOC
+The library was unable to allocate memory.
+.TP
 .B GD_E_BAD_CODE
 The field specified by
 .I field_code
@@ -169,6 +172,9 @@ A request for data beyond the end of the field was made.
 An internal error occurred in the library while trying to perform the task.
 This indicates a bug in the library.  Please report the incident to the
 maintainer.
+.TP
+.B GD_E_PROTECTED
+The fragment containing the constant was protected from change.
 .PP
 The dirfile error may be retrieved by calling
 .BR gd_error (3).

@@ -1,6 +1,6 @@
 .\" gd_entry.3.  The gd_entry man page.
 .\"
-.\" Copyright (C) 2008, 2009, 2010 D. V. Wiebe
+.\" Copyright (C) 2008, 2009, 2010, 2011 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_entry 3 "3 November 2010" "Version 0.7.0" "GETDATA"
+.TH gd_entry 3 "18 August 2011" "Version 0.8.0" "GETDATA"
 .SH NAME
 gd_entry \(em retrieve a dirfile field's metadata
 .SH SYNOPSIS
@@ -75,6 +75,9 @@ On error, the supplied gd_entry_t buffer is not modified.  In this case,
 returns -1 and sets the dirfile error to a non-zero error value.  Possible
 error values are:
 .TP 8
+.B GD_E_ALLOC
+The library was unable to allocate memory.
+.TP
 .B GD_E_BAD_CODE
 The field specified by
 .I field_code
@@ -410,8 +413,9 @@ The
 .I n_fields
 member indicates the number of input fields.  It will be between one and
 .B GD_MAX_LINCOM
-inclusive, which is defined in getdata.h to the maximum number of input fields
-permitted by a
+inclusive.
+.B GD_MAX_LINCOM
+is defined in getdata.h as the maximum number of input fields permitted by a
 .BR LINCOM .
 .PP
 The
@@ -588,8 +592,9 @@ The
 .I poly_ord
 member indicates the order of the polynomial.  It will be between one and
 .B GD_MAX_POLY_ORD
-inclusive, which is defined in getdata.h to the maximum order of polynomial
-permitted by a
+inclusive.
+.B GD_MAX_POLY_ORD
+is defined in getdata.h as the maximum order of polynomial permitted by a
 .BR POLYNOM .
 .PP
 The

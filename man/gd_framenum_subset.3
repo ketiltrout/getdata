@@ -1,6 +1,6 @@
 .\" gd_framenum_subset.3.  The gd_framenum man page.
 .\"
-.\" Copyright (C) 2009, 2010 D. V. Wiebe
+.\" Copyright (C) 2009, 2010, 2011 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_framenum_subset 3 "23 October 2010" "Version 0.7.0" "GETDATA"
+.TH gd_framenum_subset 3 "18 August 2011" "Version 0.8.0" "GETDATA"
 .SH NAME
 gd_framenum_subset, gd_framenum \(em perform a reverse look-up on a
 monotonic dirfile field
@@ -110,11 +110,6 @@ was not found.
 .B GD_E_BAD_DIRFILE
 The supplied dirfile was invalid.
 .TP
-.B GD_E_BAD_FIELD_TYPE
-The field specified by
-.I field_code
-was not a vector field.
-.TP
 .B GD_E_BAD_REPR
 The representation suffix specified in
 .IR field_code ,
@@ -125,7 +120,10 @@ A scalar field used in the definition of the field was not found, or was not of
 scalar type.
 .TP
 .B GD_E_DIMENSION
-A scalar field was found where a vector field was expected.
+The field specified by
+.I field_code
+was not a vector field.  Or, a scalar field was found where a vector field was
+expected in the definition of the field or one of its inputs.
 .TP
 .B GD_E_DOMAIN
 The specified field was complex valued, or the supplied frame range was too

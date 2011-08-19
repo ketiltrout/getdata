@@ -377,7 +377,7 @@ int gd_uninclude(DIRFILE* D, int fragment_index, int del)
   /* delete the fragments, if requested */
   if (del)
     for (j = 0; j < nf; ++j)
-      unlink(D->fragment[f[j]].cname);
+      gd_UnlinkAt(D, D->fragment[f[j]].dirfd, D->fragment[f[j]].cname, 0);
 
   /* delete fields from the fragment -- memory use is not sufficient to warrant
    * resizing D->entry */

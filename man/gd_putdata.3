@@ -1,6 +1,6 @@
 .\" gd_putdata.3.  The gd_putdata man page.
 .\"
-.\" Copyright (C) 2008, 2009, 2010 D. V. Wiebe
+.\" Copyright (C) 2008, 2009, 2010, 2011 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_putdata 3 "4 November 2010" "Version 0.7.0" "GETDATA"
+.TH gd_putdata 3 "19 August 2011" "Version 0.8.0" "GETDATA"
 .SH NAME
 gd_putdata \(em write data to a dirfile database
 .SH SYNOPSIS
@@ -153,10 +153,9 @@ or
 .B DIVIDE
 type, or
 .B LINCOM
-type with more than one input fields.  In this case,
-.BR gd_putdata ()
-has no knowledge on how to partition the input data.  Alternately, the caller
-may have attempted to write to the implicit INDEX field, which is not possible.
+type with more than one input fields.  In this case, GetData has no knowledge on
+how to partition the input data.  Alternately, the caller may have attempted to
+write to the implicit INDEX field, which is not possible.
 .TP
 .B GD_E_BAD_REPR
 The representation suffix specified in
@@ -170,7 +169,16 @@ An invalid
 was specified.
 .TP
 .B GD_E_DIMENSION
-A scalar field was found where a vector field was expected.
+The field specified by
+.I field_code
+was not a vector field.  The caller should use
+.BR gd_put_carray (3),
+.BR gd_put_constant (3),
+or
+.BR gd_put_string (3)
+instead.  Or, a scalar field was found where a vector field was expected in
+the definition of
+.IR field_code .
 .TP
 .B GD_E_INTERNAL_ERROR
 An internal error occurred in the library while trying to perform the task.

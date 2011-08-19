@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_get_carray_slice 3 "3 November 2010" "Version 0.7.0" "GETDATA"
+.TH gd_get_carray_slice 3 "18 August 2011" "Version 0.8.0" "GETDATA"
 .SH NAME
 gd_get_carray gd_get_carray_slice \(em retrieve CARRAY data from a dirfile
 database
@@ -136,6 +136,9 @@ and
 return zero.  On error, they return -1 and set the dirfile error to a non-zero
 value.  Possible error values are:
 .TP 8
+.B GD_E_ALLOC
+The library was unable to allocate memory.
+.TP
 .B GD_E_BAD_CODE
 The field specified by
 .I field_code

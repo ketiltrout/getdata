@@ -315,17 +315,19 @@ static unsigned long _GD_ResolveEncoding(const DIRFILE *D gd_unused_d,
   for (i = 0; _gd_ef[i].scheme != GD_ENC_UNSUPPORTED; i++) {
     if (scheme == GD_AUTO_ENCODED || scheme == _gd_ef[i].scheme) {
       candidate = (char *)malloc(len + strlen(_gd_ef[i].ext) + 1);
-      strcat(strcpy(candidate, name), _gd_ef[i].ext);
+      if (candidate) {
+        strcat(strcpy(candidate, name), _gd_ef[i].ext);
 
-      if (gd_StatAt(D, dirfd, candidate, &statbuf, 0) == 0) 
-        if (S_ISREG(statbuf.st_mode)) {
-          if (file != NULL)
-            file->subenc = i;
-          free(candidate);
-          dreturn("%08lx", _gd_ef[i].scheme);
-          return _gd_ef[i].scheme;
-        }
-      free(candidate);
+        if (gd_StatAt(D, dirfd, candidate, &statbuf, 0) == 0) 
+          if (S_ISREG(statbuf.st_mode)) {
+            if (file != NULL)
+              file->subenc = i;
+            free(candidate);
+            dreturn("%08lx", _gd_ef[i].scheme);
+            return _gd_ef[i].scheme;
+          }
+        free(candidate);
+      }
     }
   }
 
@@ -712,7 +714,7 @@ int _GD_GenericTMove(int dirfd0, int dirfd1, struct _gd_raw_file *file,
   mode_t mode;
 #endif
   dtrace("%i, %i, %p, %p", dirfd0, dirfd1, file, tunlink);
-  
+
   if (file[1].name == NULL) {
     dreturn("%i", 0);
     return 0;

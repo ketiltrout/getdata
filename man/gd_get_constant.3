@@ -1,6 +1,6 @@
 .\" gd_get_constant.3.  The gd_get_constant man page.
 .\"
-.\" Copyright (C) 2008, 2010 D. V. Wiebe
+.\" Copyright (C) 2008, 2010, 2011 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_get_constant 3 "3 November 2010" "Version 0.7.0" "GETDATA"
+.TH gd_get_constant 3 "17 August 2011" "Version 0.8.0" "GETDATA"
 .SH NAME
 gd_get_constant \(em retrieve a scalar constant from a dirfile database
 .SH SYNOPSIS
@@ -111,6 +111,9 @@ On success,
 returns zero.  On error, it returns -1 and sets the dirfile error to a non-zero
 value.  Possible error values are:
 .TP 8
+.B GD_E_ALLOC
+The library was unable to allocate memory.
+.TP
 .B GD_E_BAD_CODE
 The field specified by
 .I field_code
@@ -134,8 +137,8 @@ instead.
 .TP
 .B GD_E_BAD_REPR
 The representation suffix specified in
-.IR field code ,
-or in one of the field codes it uses for input, was invalid.
+.I field_code 
+was invalid.
 .TP
 .B GD_E_BAD_TYPE
 An invalid

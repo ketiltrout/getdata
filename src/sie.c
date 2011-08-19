@@ -524,7 +524,7 @@ int _GD_SampIndTUnlink(int dirfd, struct _gd_raw_file *file)
         return -1;
       }
 
-    if (unlink(file->name)) {
+    if (gd_UnlinkAt(file->D, dirfd, file->name, 0)) {
       dreturn("%i", -1);
       return -1;
     }

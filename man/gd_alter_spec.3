@@ -1,6 +1,6 @@
 .\" gd_alter_spec.3.  The gd_alter_spec man page.
 .\"
-.\" Copyright (C) 2008, 2010 D. V. Wiebe
+.\" Copyright (C) 2008, 2010, 2011 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_alter_spec 3 "21 July 2010" "Version 0.7.0" "GETDATA"
+.TH gd_alter_spec 3 "17 August 2011" "Version 0.8.0" "GETDATA"
 .SH NAME
 gd_alter_spec, gd_malter_spec \(em modify a field in a dirfile
 .SH SYNOPSIS
@@ -64,7 +64,7 @@ If the modified field is of type
 and the
 .I recode
 argument is non-zero, the look-up table file will be moved if
-.IR entry -> table
+.I line
 specifies a different path, overwriting an existing file with the new
 pathname, if present.  If the field specified by
 .I field_code
@@ -152,6 +152,12 @@ The dirfile error may be retrieved by calling
 A descriptive error string for the last error encountered can be obtained from
 a call to
 .BR gd_error_string (3).
+.SH BUGS
+If a
+.B CARRAY
+field with more than GD_MAX_CARRAY_LENGTH elements is provided, subsequent
+elements will be silently truncated.  GD_MAX_CARRAY_LENGTH is 2**24 on 32-bit
+systems.  It is larger on 64-bit systems.
 .SH SEE ALSO
 .BR gd_alter_bit (3),
 .BR gd_alter_const (3),

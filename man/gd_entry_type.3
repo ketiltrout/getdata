@@ -1,6 +1,6 @@
 .\" gd_entry_type.3.  The gd_entry_type man page.
 .\"
-.\" Copyright (C) 2008, 2009, 2010 D. V. Wiebe
+.\" Copyright (C) 2008, 2009, 2010, 2011 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_entry_type 3 "3 November 2010" "Version 0.7.0" "GETDATA"
+.TH gd_entry_type 3 "18 August 2011" "Version 0.8.0" "GETDATA"
 .SH NAME
 gd_entry_type \(em retrieve the type of a dirfile field
 .SH SYNOPSIS
@@ -58,6 +58,9 @@ returns
 and sets the dirfile error a non-zero error value.  Possible error
 values are:
 .TP 8
+.B GD_E_ALLOC
+The library was unable to allocate memory.
+.TP
 .B GD_E_BAD_DIRFILE
 The supplied dirfile was invalid.
 .TP

@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_invalid_dirfile 3 "20 October 2010" "Version 0.7.0" "GETDATA"
+.TH gd_invalid_dirfile 3 "17 August 2011" "Version 0.8.0" "GETDATA"
 .SH NAME
 gd_invalid_dirfile \(em obtain an pointer to an invalid DIRFILE object
 .SH SYNOPSIS
@@ -63,7 +63,8 @@ is zero (indicating success).
 
 .SH RETURN VALUE
 This function always returns a pointer to a newly allocated, invalid DIRFILE
-object.
+object, except when it is unable to allocate memory for the DIRFILE, in which
+case it returns NULL.
 
 .SH SEE ALSO
 .BR gd_close (3),

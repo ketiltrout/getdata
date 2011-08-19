@@ -1,6 +1,6 @@
 .\" gd_bof.3.  The gd_bof man page.
 .\"
-.\" Copyright (C) 2010 D. V. Wiebe
+.\" Copyright (C) 2010, 2011 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_bof 3 "15 October 2010" "Version 0.7.0" "GETDATA"
+.TH gd_bof 3 "17 August 2011" "Version 0.8.0" "GETDATA"
 .SH NAME
 gd_bof \(em report the start of data in a field
 .SH SYNOPSIS
@@ -67,6 +67,9 @@ returns the sample number of the end-of-field marker for the indicated field.
 On error, it returns -1 and sets the dirfile error to a non-zero error value.
 Possible error values are:
 .TP 8
+.B GD_E_ALLOC
+The library was unable to allocate memory.
+.TP
 .B GD_E_BAD_CODE
 The field specified by
 .I field_code
@@ -87,6 +90,11 @@ of
 or one of its inputs, or else
 .I field_code
 itself specified a scalar field.
+.TP
+.B GD_E_INTERNAL_ERROR
+An internal error occurred in the library while trying to perform the task.
+This indicates a bug in the library.  Please report the incident to the
+GetData developers.
 .TP
 .B GD_E_RECURSE_LEVEL
 Too many levels of recursion were encountered while trying to resolve

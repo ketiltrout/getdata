@@ -110,6 +110,8 @@ unsigned int gd_nmfields_by_type(DIRFILE* D, const char* parent,
     r = P->e->n_meta_const;
   else if (type == GD_CARRAY_ENTRY)
     r = P->e->n_meta_carray;
+  else if (type == GD_NO_ENTRY)
+    _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_TYPE, NULL, type, NULL);
   else
     for (i = 0; i < P->e->n_meta; ++i)
       if (P->e->p.meta_entry[i]->field_type == type)

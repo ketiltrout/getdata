@@ -57,7 +57,9 @@ open F, $f or die $!;
 while(<F>) {
   next if (/^\.\\"/);
   chomp;
-  $_ = ".PP" if ($_ eq "" and not $nf);
+  if ($_ eq "" and not $nf) {
+    $_ = ($dl == 1) ? ".DP" : ".PP";
+  }
   $_ = ".IP" if ($_ =~ /\.in /);
   $_ = ".PP" if ($_ eq ".in");
   s/&/&amp;/g;
@@ -128,6 +130,8 @@ while(<F>) {
     } else {
       $html .= Alternate("<B>", "</B>", "", "", $1) . " ";
     }
+  } elsif (/^\.DP$/) {
+    $html .= "<P>";
   } elsif (/^\.HP$/) {
     if ($dl == 1) { $html .= "</DD></DL>"; $dl = 0; };
     if ($ul == 1) { $html .= "</UL>"; $ul = 0; };

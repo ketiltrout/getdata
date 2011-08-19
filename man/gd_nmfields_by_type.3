@@ -1,6 +1,6 @@
 .\" gd_nmfields_by_type.3.  The gd_nmfields_by_type man page.
 .\"
-.\" Copyright (C) 2008, 2010 D. V. Wiebe
+.\" Copyright (C) 2008, 2010, 2011 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_nmfields_by_type 3 "3 November 2010" "Version 0.7.0" "GETDATA"
+.TH gd_nmfields_by_type 3 "17 August 2011" "Version 0.8.0" "GETDATA"
 .SH NAME
 gd_nmfields_by_type \(em report the number of fields of a given type in a dirfile
 .SH SYNOPSIS
@@ -63,6 +63,11 @@ The supplied parent field code was not found, or referred to a metafield itself.
 .TP
 .B GD_E_BAD_DIRFILE
 The supplied dirfile was invalid.
+.TP
+.B GD_E_BAD_ENTRY
+The
+.I type
+parameter supplied was not one of the symbols listed above.
 .PP
 The dirfile error may be retrieved by calling
 .BR gd_error (3).

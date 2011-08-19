@@ -1,6 +1,6 @@
 .\" gd_include.3.  The gd_include man page.
 .\"
-.\" Copyright (C) 2008, 2009, 2010 D. V. Wiebe
+.\" Copyright (C) 2008, 2009, 2010, 2011 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_include 3 "3 November 2010" "Version 0.7.0" "GETDATA"
+.TH gd_include 3 "17 August 2011" "Version 0.8.0" "GETDATA"
 .SH NAME
 gd_include \(em add a format specification fragment to a dirfile
 .SH SYNOPSIS
@@ -239,18 +239,18 @@ directive in the fragment (see
 .BR dirfile-format (5))
 was not found, or was not a
 .B RAW
-field.
+field.  In this case, the included fragment will still be added to the dirfile,
+but the
+.B /REFERENCE
+directive will be ignored.  See also the
+.B BUGS
+section below.
 .TP
 .B GD_E_CALLBACK
 The registered callback function returned an unrecognised response.
 .TP
 .B GD_E_FORMAT
 A syntax error occurred in the fragment.
-.TP
-.B GD_E_INTERNAL_ERROR
-An internal error occurred in the library while trying to perform the task.
-This indicates a bug in the library.  Please report the incident to the
-maintainer.
 .TP
 .B GD_E_LINE_TOO_LONG
 The parser encountered a line in the format specification longer than it was
@@ -264,19 +264,6 @@ The fragment could not be opened or created.
 .TP
 .B GD_E_PROTECTED
 The metadata of the parent fragment was protected from change.
-.TP
-.B GD_E_REFERENCE
-The included fragment contained a
-.B /REFERENCE
-directive which referred to a non-existent field, or a field that was not of
-type
-.BR RAW .
-In this case, the included fragment will still be added to the dirfile, but
-the
-.B /REFERENCE
-directive will be ignored.  See also the
-.B BUGS
-section below.
 .PP
 The dirfile error may be retrieved by calling
 .BR gd_error (3).
@@ -288,7 +275,7 @@ When finished with it, the DIRFILE object may be de-allocated with a call to
 even if the open failed.
 .SH BUGS
 If this function fails with the error
-.BR GD_E_REFERENCE ,
+.BR GD_E_BAD_REFERENCE ,
 it typically results in no reference field being defined for the dirfile, even
 if the dirfile contains
 .B RAW
