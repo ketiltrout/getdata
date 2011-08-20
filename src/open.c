@@ -365,6 +365,7 @@ DIRFILE* gd_cbopen(const char* filedir, unsigned long flags,
   }
   D->fragment[0].cname = malloc(strlen(filedir) + 8);
   strcat(strcpy(D->fragment[0].cname, filedir), "/format");
+  D->fragment[0].bname = "format";
   D->fragment[0].sname = NULL;
   /* The root format file needs no external name */
   D->fragment[0].ename = NULL;

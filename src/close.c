@@ -37,6 +37,7 @@ static void _GD_FreeD(DIRFILE* D)
     _GD_FreeE(D, D->entry[i], 1);
 
   for (j = 0; j < D->n_fragment; ++j) {
+    free(D->fragment[j].bname);
     free(D->fragment[j].cname);
     free(D->fragment[j].ename);
     free(D->fragment[j].ref_name);

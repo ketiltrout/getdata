@@ -642,7 +642,9 @@ struct gd_fragment_t {
   char* cname;
   /* Subdirectory name */
   const char* sname;
-  /* External name (relative to the parent format file fragment) */
+  /* basename */
+  char *bname; 
+  /* External name (the one that appears in the format file) */
   char* ename;
   int modified;
   int parent;

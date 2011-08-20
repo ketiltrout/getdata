@@ -42,7 +42,7 @@ int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,
   int found = 0;
   int dirfd = -1;
   char *temp_buf1, *temp_buf2;
-  const char *base;
+  char *base;
   void *ptr = NULL;
   FILE* new_fp = NULL;
 
@@ -55,7 +55,13 @@ int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,
     dreturn("%i", -1);
     return -1;
   }
-  base = basename(temp_buf2);
+  base = strdup(basename(temp_buf2));
+  if (base == NULL) {
+    free(temp_buf2);
+    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
 
   /* Open the containing directory */
   dirfd = _GD_GrabDir(D, D->fragment[me].dirfd, ename);
@@ -86,23 +92,22 @@ int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,
   /* If we found the file, we won't reopen it.  Continue parsing. */
   if (found) {
     _GD_ReleaseDir(D, dirfd);
+    free(base);
     free(temp_buf1);
     dreturn("%i", i);
     return i;
   }
 
   /* Try to open the file */
-  temp_buf2 = strdup(temp_buf1);
-  i = gd_OpenAt(D, dirfd, basename(temp_buf2),
-      (((D->flags & GD_ACCMODE) == GD_RDWR) ? O_RDWR : O_RDONLY) |
-      ((*flags & GD_CREAT) ? O_CREAT : 0) |
+  i = gd_OpenAt(D, dirfd, base, (((D->flags & GD_ACCMODE) == GD_RDWR) ? O_RDWR :
+        O_RDONLY) | ((*flags & GD_CREAT) ? O_CREAT : 0) |
       ((*flags & GD_TRUNC) ? O_TRUNC : 0) | ((*flags & GD_EXCL) ? O_EXCL : 0)
       | O_BINARY, 0666);
-  free(temp_buf2);
 
   if (i < 0) {
     _GD_SetError(D, GD_E_OPEN_FRAGMENT, errno, format_file, linenum,
         temp_buf1);
+    free(base);
     free(temp_buf1);
     dreturn("%i", -1);
     return -1;
@@ -113,6 +118,7 @@ int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,
   /* If opening the file failed, set the error code and abort parsing. */
   if (new_fp == NULL) {
     _GD_SetError(D, GD_E_OPEN_FRAGMENT, errno, format_file, linenum, temp_buf1);
+    free(base);
     free(temp_buf1);
     dreturn("%i", -1);
     return -1;
@@ -123,12 +129,14 @@ int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,
   if (ptr == NULL) {
     D->n_fragment--;
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    free(base);
     free(temp_buf1);
     dreturn("%i", -1);
     return -1;
   }
   D->fragment = (struct gd_fragment_t *)ptr;
 
+  D->fragment[D->n_fragment - 1].bname = base;
   D->fragment[D->n_fragment - 1].cname = temp_buf1;
   D->fragment[D->n_fragment - 1].ename = strdup(ename);
   D->fragment[D->n_fragment - 1].modified = 0;
@@ -150,13 +158,13 @@ int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,
 
   if (D->fragment[D->n_fragment - 1].ename == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    D->n_fragment--;
+    free(base);
     dreturn("%i", -1);
     return -1;
   }
 
-  /* extract the subdirectory name - dirname both returns a volatile string
-   * and modifies its argument, ergo strcpy */
-
+  /* extract the subdirectory name */
   D->fragment[D->n_fragment - 1].sname = _GD_DirName(D, dirfd);
 
   *ref_name = _GD_ParseFragment(new_fp, D, D->n_fragment - 1, standards, flags);
@@ -377,7 +385,7 @@ int gd_uninclude(DIRFILE* D, int fragment_index, int del)
   /* delete the fragments, if requested */
   if (del)
     for (j = 0; j < nf; ++j)
-      gd_UnlinkAt(D, D->fragment[f[j]].dirfd, D->fragment[f[j]].cname, 0);
+      gd_UnlinkAt(D, D->fragment[f[j]].dirfd, D->fragment[f[j]].bname, 0);
 
   /* delete fields from the fragment -- memory use is not sufficient to warrant
    * resizing D->entry */
@@ -408,6 +416,7 @@ int gd_uninclude(DIRFILE* D, int fragment_index, int del)
     _GD_ReleaseDir(D, D->fragment[f[j]].dirfd);
     free(D->fragment[f[j]].cname);
     free(D->fragment[f[j]].ename);
+    free(D->fragment[f[j]].bname);
     free(D->fragment[f[j]].ref_name);
 
     memcpy(D->fragment + f[j], D->fragment + D->n_fragment - 1,
