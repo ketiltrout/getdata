@@ -1,3 +1,9 @@
+2011-08-20   D. V. Wiebe <getdata@ketiltrout.net> svn:599
+	* src/open.c (gd_cbopen): Properly initialise bname; also check for malloc
+	errors.
+	* sie/sie.c (_GD_SampIndWrite): Update the current record to reflect the
+	updated position of the file pointer.
+
 2011-08-20   D. V. Wiebe <getdata@ketiltrout.net> svn:597
 	* src/internal.h: Added bname to fragment struct holding the basename of the
 	file.

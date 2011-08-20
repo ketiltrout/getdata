@@ -322,7 +322,7 @@ ssize_t _GD_SampIndWrite(struct _gd_raw_file *file, const void *ptr,
           dreturn("%i", -1);
           return -1;
         }
-        p2 = p;
+        p = p2;
       }
       *cur_end = f->p + i - 1;
       cur_end = (int64_t*)((char*)p + size * rin);
@@ -396,11 +396,18 @@ ssize_t _GD_SampIndWrite(struct _gd_raw_file *file, const void *ptr,
     dreturn("%i", -1);
     return -1;
   }
-  free(p);
 
   /* truncate the file if necessary */
   if (rin < rout)
     gd_truncate(fileno(f->fp), nrec - rout + rin);
+
+  /* update the current record */
+  memcpy(f->d, (char *)p + (rin - 1) * size, size);
+  f->s = f->d[0];
+  f->p = f->d[0] + 1;
+  f->r = fr + rin - 1;
+
+  free(p);
 
   dreturn("%llu", (unsigned long long)nelem);
   return nelem;

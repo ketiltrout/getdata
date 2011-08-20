@@ -364,8 +364,13 @@ DIRFILE* gd_cbopen(const char* filedir, unsigned long flags,
     return D;
   }
   D->fragment[0].cname = malloc(strlen(filedir) + 8);
+  D->fragment[0].bname = strdup("format");
+  if (D->fragment[0].cname == NULL || D->fragment[0].bname == NULL) {
+    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    dreturn("%p", D);
+    return D;
+  }
   strcat(strcpy(D->fragment[0].cname, filedir), "/format");
-  D->fragment[0].bname = "format";
   D->fragment[0].sname = NULL;
   /* The root format file needs no external name */
   D->fragment[0].ename = NULL;
