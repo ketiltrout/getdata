@@ -56,6 +56,7 @@ clean-local:
 	$(MAKE) -f perl.mk clean
 	rm -f $(BUILT_SOURCES) make_parameters.sed perl.mk.old debug.c
 
+if TEST_PERL
 check:
 	$(MAKE) test
 
@@ -63,3 +64,4 @@ test testdb:
 	${DL_LIBRARY_PATH}=${${DL_LIBRARY_PATH}}:../../src/.libs $(MAKE) -f perl.mk $@ ${TEST_VERBOSE}
 
 .PHONY: test
+endif

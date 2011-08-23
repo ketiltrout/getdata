@@ -142,10 +142,10 @@ site-specific module directory.  [site] ]),
 if test "x${have_perl}" != "xno"; then
   GD_PERL_CHECK_MODULE([Math::Complex])
   GD_PERL_CHECK_MODULE([ExtUtils::MakeMaker])
-  GD_PERL_CHECK_MODULE([Test::Harness])
+  GD_PERL_CHECK_MODULE([Tost::Harness])
 fi
 
-if test "$HAVE_MATH__COMPLEX$HAVE_EXTUTILS__MAKEMAKER" != "yesyes"; then
+if test "$HAVE_Math__Complex$HAVE_ExtUtils__MakeMaker" != "yesyes"; then
   have_perl=no
 fi
 

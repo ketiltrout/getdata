@@ -778,7 +778,7 @@ if test "x$make_perlbindings" = "xyes"; then
   echo "*** Configuring Perl bindings"
   echo
   GD_PERL
-  if test "x$have_perl" != "xyes"; then
+  if test "x$have_perl" = "xno"; then
     make_perlbindings=no
   fi
 fi
@@ -862,6 +862,7 @@ AM_CONDITIONAL(MAKE_PERLBINDINGS, [test "x$make_perlbindings" = "xyes"])
 AM_CONDITIONAL(USE_MODULES, [test "x$use_modules" != "xno"])
 AM_CONDITIONAL(TEST_PYTHON, [test "x$NO_DLOPEN_TESTS" = "x0"])
 AM_CONDITIONAL(TEST_IDL, [test "x$NO_DLOPEN_TESTS" = "x0"])
+AM_CONDITIONAL(TEST_PERL, [test "x$HAVE_Test__Harness" = "xyes"])
 AM_CONDITIONAL(HAVE_DIFF, [test "x$DIFF" != "x"])
 AM_CONDITIONAL(GDIDL_EXTERNAL, [false])
 
