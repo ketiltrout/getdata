@@ -34,7 +34,7 @@ int main(void)
   gd_close(D);
 
   CHECKI(error, GD_E_OPEN);
-  CHECKS(string, "Dirfile does not exist: a non_existant dirfile");
+  CHECKSp(string, "Dirfile does not exist");
 
   return r;
 }

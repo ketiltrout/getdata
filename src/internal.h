@@ -47,10 +47,14 @@ typedef int mode_t;
 
 
 #ifdef _MSC_VER
-// missing in sys/stat.h
+/* missing in sys/stat.h */
 #define S_ISREG(m)  (((m) & _S_IFMT) == _S_IFREG)
 #define S_ISDIR(m) (((m) & _S_IFMT) == _S_IFDIR)
-#define snprintf _snprintf
+#endif
+
+/* the open() in the MSVCRT doesn't permit open()ing directories */
+#ifdef __MSVCRT__
+#define GD_NO_DIR_OPEN
 #endif
 
 #ifdef __APPLE__
@@ -209,6 +213,16 @@ const char* _gd_colsub(void);
 #  else
 #    define fseeko64(a,b,c) fseeko(a,(off_t)(b),c)
 #  endif
+#endif
+
+#ifdef HAVE__GETCWD
+# define gd_getcwd _getcwd
+#else
+# define gd_getcwd getcwd
+#endif
+
+#ifdef HAVE__SNPRINTF
+# define snprintf _snprintf
 #endif
 
 #ifndef HAVE_FTELLO64
@@ -410,16 +424,22 @@ ssize_t getdelim(char**, size_t*, int, FILE*);
     (((uint32_t)(x) >> 8)  & 0xff00UL) | \
     ((uint32_t)(x) >> 24))
 #define gd_swap64(x) ( \
-     (((uint64_t)(x) << 56) | \\
-     (((uint64_t)(x) << 40) & 0xff000000000000ULL) | \\
-     (((uint64_t)(x) << 24) & 0xff0000000000ULL) | \\
-     (((uint64_t)(x) << 8)  & 0xff00000000ULL) | \\
-     (((uint64_t)(x) >> 8)  & 0xff000000ULL) | \\
-     (((uint64_t)(x) >> 24) & 0xff0000ULL) | \\
-     (((uint64_t)(x) >> 40) & 0xff00ULL) | \\
-     ((uint64_t)(x)  >> 56))
+     (((uint64_t)(x) << 56) | \
+     (((uint64_t)(x) << 40) & 0xff000000000000ULL) | \
+     (((uint64_t)(x) << 24) & 0xff0000000000ULL) | \
+     (((uint64_t)(x) << 8)  & 0xff00000000ULL) | \
+     (((uint64_t)(x) >> 8)  & 0xff000000ULL) | \
+     (((uint64_t)(x) >> 24) & 0xff0000ULL) | \
+     (((uint64_t)(x) >> 40) & 0xff00ULL) | \
+     ((uint64_t)(x)  >> 56)))
 #endif
 
+/* returns true if s is an absolute path */
+#if defined _WIN32 || defined _WIN64
+# define _GD_AbsPath(s)  ((s)[0] != '\0' && (s)[1] == ':')
+#else
+# define _GD_AbsPath(s)  ((s)[0] == '/')
+#endif
 
 /* maximum number of recursions */
 #define GD_MAX_RECURSE_LEVEL  32
@@ -438,6 +458,7 @@ ssize_t getdelim(char**, size_t*, int, FILE*);
 #define GD_E_CREAT_FORMAT      1
 #define GD_E_CREAT_EXCL        2
 #define GD_E_CREAT_DIR         3
+#define GD_E_CREAT_OPEN        4
 
 /* GD_E_FORMAT suberrors are in getdata.h */
 

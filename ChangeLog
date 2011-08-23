@@ -1,3 +1,41 @@
+2011-08-23   D. V. Wiebe <getdata@ketiltrout.net> svn:600
+	* test/error_error.c: Simplify test.
+	* test/test.h (CHECKSp): Added.
+
+	* src/errors.c src/internal.h: Added GD_E_CREAT_OPEN.
+	* src/open.c (_GD_CreateDirfile): Distinguish GD_E_CREAT_DIR from
+	GD_E_CREAT_OPEN.
+
+	* src/internal.h: When linking to the MSVCRT, define GD_NO_DIR_OPEN to
+	indicate that the MSVCRT's open() prohibits openind directories.  (This is
+	referred to as "the non-POSIX case".
+	* src/open.c (_GD_CreateDirfile): Take dirfile, a malloc'd copy instead of
+	filedir itself.  In the non-POSIX case, this has the full pathname.  Also,
+	handle non-POSIX computation of dirfd.
+	* src/open.c (gd_cbopen): In the non-POSIX case, prepend the CWD to filedir
+	if it's not absolute, and pass that string to _GD_CreateDirfile.  Also need
+	to stat the directory in this case, in lieu of trying to open it.
+	* src/close.c (_GD_ShutdownDirfile): Don't try to close the dirfds in the
+	non-POSIX case.
+	* src/common.c (_GD_DirName): In the non-POSIX case, the dirfd parameter
+	simply contains the index into the dir array, so no need to search.
+	* src/common.c (_GD_GrabDir _GD_ReleaseDir): In the non-POSIX case, don't
+	try to open or close the directory: it just contains the index into dir, so
+	no need to search for it either.
+
+	* src/compat.c (gd_OpenAt): Or flags with O_BINARY for operation on Win32.
+
+	* src/open.c (gd_cbopen): Close dirfd on error.
+
+	* src/bzip.c (_GD_Bzip2Seek): Return -1 on error.
+
+	* src/internal.h (_GD_AbsPath): Added.
+
+	* src/internal.h (gd_swap64): Fix doubled backslashes.
+
+	* configure.ac: Fix perl check to properly exclude the bindings when
+	necessary.
+
 2011-08-20   D. V. Wiebe <getdata@ketiltrout.net> svn:599
 	* src/open.c (gd_cbopen): Properly initialise bname; also check for malloc
 	errors.

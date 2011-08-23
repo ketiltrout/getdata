@@ -93,9 +93,11 @@ static int _GD_ShutdownDirfile(DIRFILE* D, int flush_meta)
     return -1;
   }
 
+#ifndef GD_NO_DIR_OPEN
   /* close the directory */
   for (i = 0; i < (unsigned int)D->ndir; ++i)
     close(D->dir[i].fd);
+#endif
 
   _GD_FreeD(D);
 

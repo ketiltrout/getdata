@@ -135,8 +135,8 @@ off64_t _GD_Bzip2Seek(struct _gd_raw_file* file, off64_t count,
 
     if (ptr->bzfile == NULL || ptr->bzerror != BZ_OK) {
       fclose(ptr->stream);
-      dreturn("%i", 1);
-      return 1;
+      dreturn("%i", -1);
+      return -1;
     }
     ptr->pos = ptr->end = 0;
     ptr->base = ptr->stream_end = 0;

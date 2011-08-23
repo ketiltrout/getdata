@@ -893,15 +893,25 @@ gd_entry_t* _GD_FindFieldAndRepr(DIRFILE* D, const char* field_code_in,
 
 const char *_GD_DirName(const DIRFILE *D, int dirfd)
 {
+#ifndef GD_NO_DIR_OPEN
   unsigned int i;
+#endif
 
   dtrace("%p, %i", D, dirfd);
 
+#ifdef GD_NO_DIR_OPEN
+  /* in the non-POSIX case, dirfd is just the index in the dir list */
+  if (D->ndir > 0) {
+    dreturn("\"%s\"", D->dir[dirfd].path);
+    return D->dir[dirfd].path;
+  }
+#else
   for (i = 0; i < D->ndir; ++i)
     if (dirfd == D->dir[i].fd) {
       dreturn("\"%s\"", D->dir[i].path);
       return D->dir[i].path;
     }
+#endif
 
   /* we only get here in the early stages of opening a dirfile */
   dreturn("%p", D->name);
@@ -937,13 +947,7 @@ int _GD_GrabDir(DIRFILE *D, int dirfd, const char *name)
   unsigned int i;
   char *path, *dir = NULL;
   void *ptr;
-  int abs = (
-#if defined _WIN32 || defined _WIN64
-      name[0] != '\0' && name[1] == ':'
-#else
-      name[0] == '/'
-#endif
-      );
+  int abs = _GD_AbsPath(name);
 
   dtrace("%p, %i, \"%s\"", D, dirfd, name);
 
@@ -989,6 +993,10 @@ int _GD_GrabDir(DIRFILE *D, int dirfd, const char *name)
     return -1;
   }
 
+#ifdef GD_NO_DIR_OPEN
+  D->dir[D->ndir].fd = D->ndir;
+  free(path);
+#else
   if (abs) {
     D->dir[D->ndir].fd = open(dir, O_RDONLY);
   } else {
@@ -1009,6 +1017,7 @@ int _GD_GrabDir(DIRFILE *D, int dirfd, const char *name)
     dreturn("%i", -1);
     return -1;
   }
+#endif
   D->ndir++;
 
   dreturn("%i", D->dir[D->ndir - 1].fd);
@@ -1017,10 +1026,18 @@ int _GD_GrabDir(DIRFILE *D, int dirfd, const char *name)
 
 void _GD_ReleaseDir(DIRFILE *D, int dirfd)
 {
+#ifndef GD_NO_DIR_OPEN
   unsigned int i;
+#endif
 
   dtrace("%p, %i", D, dirfd);
 
+#ifdef GD_NO_DIR_OPEN
+  if (--D->dir[dirfd].rc == 0) {
+    free(D->dir[dirfd].path);
+    D->dir[dirfd] = D->dir[--D->ndir];
+  }
+#else
   for (i = 0; i < D->ndir; ++i)
     if (D->dir[i].fd == dirfd) {
       if (--D->dir[i].rc == 0) {
@@ -1030,6 +1047,7 @@ void _GD_ReleaseDir(DIRFILE *D, int dirfd)
       }
       break;
     }
+#endif
 
   dreturnvoid();
 }

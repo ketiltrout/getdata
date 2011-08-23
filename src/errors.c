@@ -80,6 +80,7 @@ static const struct {
   { GD_E_TRUNC, 0, "Error truncating {2}: ", 1 },
   /* GD_E_CREAT: 1 = suberror, 2 = filename, 3 = errno */
   { GD_E_CREAT, GD_E_CREAT_DIR, "Unable to create directory {2}: ", 1 },
+  { GD_E_CREAT, GD_E_CREAT_OPEN, "Unable to open directory {2}: ", 1 },
   { GD_E_CREAT, GD_E_CREAT_FORMAT, "Unable to create format file {2}: ", 1 },
   { GD_E_CREAT, GD_E_CREAT_EXCL, "Unable to create dirfile {2}: already exists",
     0 },

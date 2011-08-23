@@ -63,7 +63,7 @@ int gd_OpenAt(const DIRFILE *D, int dirfd, const char *name, int flags,
   dtrace("%p, %i, \"%s\", %x, 0%o", D, dirfd, name, flags, mode);
 
   path = _GD_MakeFullPath(D, dirfd, name);
-  ret = open(path, flags, mode);
+  ret = open(path, flags | O_BINARY, mode);
   free(path);
 
   dreturn("%i", ret);
@@ -169,6 +169,7 @@ int strerror_r(int errnum, char *buf, size_t buflen)
   ptr = strerror(errnum);
   strncpy(buf, ptr, buflen);
 
+  dreturn("%i", 0);
   return 0;
 }
 #endif

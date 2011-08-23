@@ -660,7 +660,7 @@ echo "*** Looking for additional library functions"
 echo
 AC_CHECK_FUNCS([_chsize _chsize_s _commit fchmod _fdopen fdopendir fseeko \
                 fseeko64 _fstat fstat64 _fstat64 fstatat fstatat64 fsync \
-                ftello ftello64 ftruncate ftruncate64 getcwd _getcwd getdelim \
+                ftello ftello64 ftruncate ftruncate64 _getcwd getdelim \
                 gmtime_r _lseeki64 lstat _mkdir nan _open openat _read \
                 renameat _rmdir _snprintf stat64 _stat64 _strtoi64 strtoll \
                 _strtoui64 strtoull _unlink unlinkat _write])
@@ -778,6 +778,9 @@ if test "x$make_perlbindings" = "xyes"; then
   echo "*** Configuring Perl bindings"
   echo
   GD_PERL
+  if test "x$have_perl" != "xyes"; then
+    make_perlbindings=no
+  fi
 fi
 
 dnl external encodings
