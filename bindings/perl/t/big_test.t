@@ -27,6 +27,15 @@ use Test::More tests => 1135;
 my $ne = 0;
 my ($s, @a, %h);
 
+sub isn {
+  cmp_ok (
+    (defined $_[0]) ? $_[0] : "undef",
+    (defined $_[0] and defined $_[1]) ? '==' : 'eq',
+    (defined $_[1]) ? $_[1] : "undef", $_[2] . " = " .
+    ((defined $_[0]) ? $_[0] : "undef") . ", expected " .
+    ((defined $_[1]) ? $_[1] : "undef"));
+}
+
 sub CheckError {
   my $e = $_->error;
   print "\n";
@@ -47,8 +56,7 @@ sub CheckArray {
   is ($#{$_[1]}, $#_ - 2,
     "a[$_[0]]: " . (1 + $#{$_[1]}) . " elements, expected " . ($#_ - 1));
   for $i (0 .. $#_ - 2) {
-    is (${$_[1]}[$i], $_[$i + 2],
-      "a($i)[$_[0]] = ${$_[1]}[$i], expected " . $_[$i + 2]);
+    isn (${$_[1]}[$i], $_[$i + 2], "a($i)[$_[0]]");
   }
   print "\n";
 }
@@ -59,9 +67,7 @@ sub CheckArray2 {
   is ($#{$_[2]}, $#_ - 3,
     "a[$_[0],$_[1]]: " . (1 + $#{$_[2]}) . " elements, expected " . ($#_ - 2));
   for $i (0 .. $#_ - 3) {
-    is (${$_[2]}[$i], $_[$i + 3], "a($i)[$_[0],$_[1]] = " .
-      ((defined ${$_[2]}[$i]) ? ${$_[2]}[$i] : "undef") . ", expected " .
-      ((defined $_[$i + 3]) ? $_[$i + 3] : "undef") . "\n");
+    isn (${$_[2]}[$i], $_[$i + 3], "a($i)[$_[0],$_[1]]" );
   }
   print "\n";
 }
@@ -88,17 +94,8 @@ sub CheckSArray2 {
   }
 }
 
-sub CheckNum {
-  is ($_[1], $_[2], "n[$_[0]] = " .
-    ((defined $_[1]) ? $_[1] : "undef") . ", expected " .
-    ((defined $_[2]) ? $_[2] : "undef"));
-}
-
-sub CheckNum2 {
-  is ($_[2], $_[3], "n[$_[0],$_[1]] = " .
-    ((defined $_[2]) ? $_[2] : "undef") . ", expected " .
-    ((defined $_[3]) ? $_[3] : "undef"));
-}
+sub CheckNum { isn ($_[1], $_[2], "n[$_[0]]"); }
+sub CheckNum2 { isn ($_[2], $_[3], "n[$_[0],$_[1]]"); }
 
 sub CheckString {
   is ($_[1], $_[2], "s[$_[0]] = \"$_[1]\", expected \"$_[2]\"");
