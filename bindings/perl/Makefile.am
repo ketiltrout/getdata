@@ -20,6 +20,9 @@
 #
 AUTOMAKE_OPTIONS = foreign
 
+EXTRA_DIST=funclist.pl GetData.xs simple_funcs.pl simple_funcs.xsin typemap \
+					 GetData.pm.in MANIFEST
+
 if GETDATA_DEBUG
 DEBUG_C = debug.c
 TEST_VERBOSE="TEST_VERBOSE=1"
@@ -28,8 +31,14 @@ debug.c: $(top_srcdir)/src/debug.c
 	cat $< >> $@
 endif
 
-simple_funcs.xs: $(srcdir)/simple_funcs.xsin $(srcdir)/simple_funcs.pl
-	$(PERL) simple_funcs.pl $< > $@
+lib:
+	mkdir lib
+
+lib/typemap: $(srcdir)/typemap lib
+	cat $< > $@
+
+lib/simple_funcs.xs: $(srcdir)/simple_funcs.xsin $(srcdir)/simple_funcs.pl lib
+	$(PERL) $(srcdir)/simple_funcs.pl $< > $@
 
 make_parameters.sed: ../make_parameters ../../src/getdata.h
 	  ../make_parameters P > $@
@@ -37,31 +46,36 @@ make_parameters.sed: ../make_parameters ../../src/getdata.h
 ../make_parameters: $(srcdir)/../make_parameters.c
 	  cd .. && ${MAKE} make_parameters
 
-GetData.pm: $(srcdir)/GetData.pm.in make_parameters.sed funclist.pl \
-						GetData.xs simple_funcs.xs
+GetData.pm: $(srcdir)/GetData.pm.in make_parameters.sed $(srcdir)/funclist.pl \
+						$(srcdir)/GetData.xs lib/simple_funcs.xs
 	rm -f $@
 	$(SED) -f make_parameters.sed $< | \
-		$(PERL) funclist.pl GetData.xs simple_funcs.xs > $@
+		$(PERL) $(srcdir)/funclist.pl $(srcdir)/GetData.xs lib/simple_funcs.xs > $@
 	chmod a-w $@
 
-all-local: blib/man3/GetData.3pm
+all-local: blib/arch/auto/GetData/GetData.so
 
-blib/man3/GetData.3pm: perl.mk $(DEBUG_C)
-	$(MAKE) -f perl.mk
+blib/arch/auto/GetData/GetData.so: Build
+	$(PERL) $< build
 
-perl.mk: Makefile.PL GetData.pm GetData.xs simple_funcs.xs typemap
+.PRECIOUS: Build
+Build: Build.PL GetData.pm GetData.xs lib/simple_funcs.xs lib/typemap $(DEBUG_C)
 	perl $<
 
 clean-local: 
-	$(MAKE) -f perl.mk clean
-	rm -f $(BUILT_SOURCES) make_parameters.sed perl.mk.old debug.c
+	rm -rf lib
+	if test -e Build; then \
+		$(PERL) Build clean; \
+	fi
+	rm -f $(BUILT_SOURCES) make_parameters.sed debug.c MYMETA.yml MYMETA.json GetData.pm
+	rm -rf Build _build
 
 if TEST_PERL
 check:
 	$(MAKE) test
 
-test testdb:
-	${DL_LIBRARY_PATH}=${${DL_LIBRARY_PATH}}:../../src/.libs $(MAKE) -f perl.mk $@ ${TEST_VERBOSE}
+test testdb testcover:
+	${DL_LIBRARY_PATH}=${${DL_LIBRARY_PATH}}:../../src/.libs $(PERL) ./Build $@
 
-.PHONY: test
+.PHONY: test testdb testcover
 endif

@@ -64,8 +64,6 @@ sub printfmt {
   }
 }
 
-print "# This code is automatically generated.  Changes made here will be lost.\n\n";
-
 while (<>) {
   chomp;
   until (/\)/) {
