@@ -187,8 +187,7 @@ off_t gd_frameoffset(DIRFILE* D, int fragment) gd_nothrow
   return gd_frameoffset64(D, fragment);
 }
 
-static off64_t _GD_GetEOF(DIRFILE *D, gd_entry_t* E, const char *parent,
-    int *is_index)
+off64_t _GD_GetEOF(DIRFILE *D, gd_entry_t* E, const char *parent, int *is_index)
 {
   off64_t ns = -1, ns1;
   gd_spf_t spf0, spf1;

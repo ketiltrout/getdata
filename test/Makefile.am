@@ -35,6 +35,8 @@ NFRAMES64=nframes64
 NFRAMES_OFF64=nframes_off64
 PUT64=put64
 PUT_OFF64=put_off64
+SEEK64=seek64
+TELL64=tell64
 endif
 
 LDADD=../src/libgetdata.la
@@ -137,11 +139,12 @@ ENCODE_TESTS=encode_alter encode_get encode_move
 
 ENDIAN_TESTS=endian_alter endian_get endian_move
 
-ENTRY_TESTS=entry_bad_code entry_bit entry_bit_scalar entry_invalid \
-						entry_lincom entry_lincom_scalar entry_linterp entry_multiply \
-						entry_phase entry_phase_scalar entry_polynom entry_polynom_scalar \
-						entry_raw entry_raw_scalar entry_raw_scalar_code \
-						entry_raw_scalar_type entry_scalar_repr entry_type
+ENTRY_TESTS=entry_bad_code entry_bit entry_bit_scalar entry_divide \
+						entry_invalid entry_lincom entry_lincom_scalar entry_linterp \
+						entry_multiply entry_phase entry_phase_scalar entry_polynom \
+						entry_polynom_scalar entry_raw entry_raw_scalar \
+						entry_raw_scalar_code entry_raw_scalar_type entry_recip \
+						entry_scalar_repr entry_type
 
 EOF_TESTS=eof eof_index eof_lincom eof_phase
 
@@ -168,13 +171,13 @@ GET_TESTS=${GET64} get_bad_code get_bit get_carray get_carray_len \
 					get_endian_float32_arm get_endian_float32_big \
 					get_endian_float32_little get_endian_float64_arm \
 					get_endian_float64_big get_endian_float64_little get_ff get_float32 \
-					get_float64 get_foffs get_fs get_int8 get_int16 get_int32 get_int64 \
-					get_invalid get_lincom1 get_lincom2 get_lincom3 get_lincom_noin \
-					get_lincom_non get_linterp get_linterp_noin get_linterp_notab \
-					get_linterp_sort get_multiply get_multiply_noin get_nonexistent \
-					get_null $(GET_OFF64) get_phase get_polynom get_polynom_noin \
-					get_recip get_recip_const get_recurse get_sbit get_sf get_ss \
-					get_type get_uint16 get_uint32 get_uint64 get_zero
+					get_float64 get_foffs get_fs get_here get_heres get_int8 get_int16 \
+					get_int32 get_int64 get_invalid get_lincom1 get_lincom2 get_lincom3 \
+					get_lincom_noin get_lincom_non get_linterp get_linterp_noin \
+					get_linterp_notab get_linterp_sort get_multiply get_multiply_noin \
+					get_nonexistent get_null $(GET_OFF64) get_phase get_polynom \
+					get_polynom_noin get_recip get_recip_const get_recurse get_sbit \
+					get_sf get_ss get_type get_uint16 get_uint32 get_uint64 get_zero
 
 GLOBAL_TESTS=global_name global_ref global_ref_empty global_ref_set
 
@@ -264,14 +267,14 @@ PUT_TESTS=${PUT64} put_bad_code put_bit put_bof put_carray put_carray_slice \
 					put_endian_float32_arm put_endian_float32_big \
 					put_endian_float32_little put_endian_float64_arm \
 					put_endian_float64_big put_endian_float64_little put_ff put_float32 \
-					put_float64 put_foffs put_fs put_int8 put_int16 put_int32 put_int64 \
-					put_invalid put_lincom1 put_lincom2 put_lincom_noin put_linterp \
-					put_linterp_noin put_linterp_nomono put_linterp_notab \
-					put_linterp_reverse put_multiply put_null $(PUT_OFF64) \
-					put_phase put_phase_noin put_polynom1 put_polynom2 put_polynom_noin \
-					put_protect put_rdonly put_recip put_recurse put_repr put_rofs \
-					put_sbit put_sf put_ss put_string put_string_protect put_type \
-					put_uint16 put_uint32 put_uint64
+					put_float64 put_foffs put_fs put_here put_heres put_int8 put_int16 \
+					put_int32 put_int64 put_invalid put_lincom1 put_lincom2 \
+					put_lincom_noin put_linterp put_linterp_noin put_linterp_nomono \
+					put_linterp_notab put_linterp_reverse put_multiply put_null \
+					$(PUT_OFF64) put_phase put_phase_noin put_polynom1 put_polynom2 \
+					put_polynom_noin put_protect put_rdonly put_recip put_recurse \
+					put_repr put_rofs put_sbit put_sf put_ss put_string \
+					put_string_protect put_type put_uint16 put_uint32 put_uint64
 
 REF_TESTS=ref ref_none ref_two
 
@@ -279,6 +282,8 @@ REPR_TESTS=repr_a repr_float32 repr_float64 repr_i repr_int16 repr_int32 \
 					 repr_int64 repr_int8 repr_m repr_r repr_real_a repr_real_i \
 					 repr_real_m repr_real_r repr_uint16 repr_uint32 repr_uint64 \
 					 repr_uint8
+
+SEEK_TESTS=$(SEEK64) seek_cur seek_end seek_set
 
 SIE_TESTS=sie_get_big sie_get_little sie_move_from sie_move_to sie_nframes_big \
 					sie_nframes_little sie_put_big sie_put_little
@@ -289,6 +294,8 @@ SVLIST_TESTS=svlist svlist_invalid svlist_meta svlist_meta_invalid
 
 SPF_TESTS=spf spf_divide spf_lincom spf_multiply spf_polynom spf_recip \
 					spf_recurse
+
+TELL_TESTS=tell ${TELL64}
 
 TRUNC_TESTS=trunc trunc_rdonly trunc_rofs
 
@@ -319,10 +326,11 @@ TESTS=$(ADD_TESTS)        $(ALTER_TESTS)      $(ASCII_TESTS)      \
 			$(NFRAGMENTS_TESTS) $(NFRAMES_TESTS)    $(NMETA_TESTS)      \
 			$(NVECTORS_TESTS)   $(OPEN_TESTS)       $(PARENT_TESTS)     \
 			$(PARSE_TESTS)      $(PROTECT_TESTS)    $(PUT_TESTS)        \
-			$(REF_TESTS)        $(REPR_TESTS)       $(SIE_TESTS)        \
-			$(SLIM_TESTS)       $(SPF_TESTS)        $(SVLIST_TESTS)     \
-			$(TRUNC_TESTS)      $(UNCLUDE_TESTS)    $(VERSION_TESTS)    \
-			$(VLIST_TESTS)      $(XZ_TESTS)
+			$(REF_TESTS)        $(REPR_TESTS)       $(SEEK_TESTS)       \
+			$(SIE_TESTS)        $(SLIM_TESTS)       $(SPF_TESTS)        \
+			$(SVLIST_TESTS)     $(TELL_TESTS)       $(TRUNC_TESTS)      \
+			$(UNCLUDE_TESTS)    $(VERSION_TESTS)    $(VLIST_TESTS)      \
+			$(XZ_TESTS)
 
 check_PROGRAMS=$(TESTS)
 

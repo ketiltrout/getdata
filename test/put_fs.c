@@ -60,19 +60,20 @@ int main(void)
   if (stat(data, &buf)) {
     perror("stat");
     r = 1;
-  }
-  CHECKI(buf.st_size, 48 * sizeof(uint8_t));
+  } else {
+    CHECKI(buf.st_size, 48 * sizeof(uint8_t));
 
-  fd = open(data, O_RDONLY | O_BINARY);
-  i = 0;
-  while (read(fd, &d, sizeof(uint8_t))) {
-    if (i < 40 || i > 48) {
-      CHECKUi(i,d,0);
-    } else
-      CHECKUi(i,d,i);
-    i++;
+    fd = open(data, O_RDONLY | O_BINARY);
+    i = 0;
+    while (read(fd, &d, sizeof(uint8_t))) {
+      if (i < 40 || i > 48) {
+        CHECKUi(i,d,0);
+      } else
+        CHECKUi(i,d,i);
+      i++;
+    }
+    close(fd);
   }
-  close(fd);
 
   unlink(data);
   unlink(format);

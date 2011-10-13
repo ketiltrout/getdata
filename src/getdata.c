@@ -293,27 +293,10 @@ static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *E, off64_t s0, size_t ns,
 
   if (ns > 0) {
     /** open the file (and cache the fp) if it hasn't been opened yet. */
-    if (E->e->u.raw.file[0].idata < 0) {
-      if (!_GD_Supports(D, E, GD_EF_OPEN | GD_EF_SEEK | GD_EF_READ)) {
-        free(databuffer);
-        dreturn("%i", 0);
-        return 0;
-      } else if (_GD_SetEncodedName(D, E->e->u.raw.file, E->e->u.raw.filebase,
-            0))
-      {
-        free(databuffer);
-        dreturn("%i", 0);
-        return 0;
-      } else if ((*_gd_ef[E->e->u.raw.file[0].subenc].open)(
-            D->fragment[E->fragment_index].dirfd, E->e->u.raw.file,
-            _GD_FileSwapBytes(D, E->fragment_index), D->flags & GD_ACCMODE, 0))
-      {
-        _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno,
-            NULL);
-        free(databuffer);
-        dreturn("%i", 0);
-        return 0;
-      }
+    if (_GD_InitRawIO(D, E, GD_EF_SEEK | GD_EF_READ, 0)) {
+      free(databuffer);
+      dreturn("%i", 0);
+      return 0;
     }
 
     if ((*_gd_ef[E->e->u.raw.file[0].subenc].seek)(E->e->u.raw.file, s0,
@@ -327,7 +310,7 @@ static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *E, off64_t s0, size_t ns,
 
     samples_read =
       (*_gd_ef[E->e->u.raw.file[0].subenc].read)(E->e->u.raw.file,
-        databuffer + n_read * E->e->u.raw.size, E->EN(raw,data_type), ns);
+          databuffer + n_read * E->e->u.raw.size, E->EN(raw,data_type), ns);
 
     if (samples_read == -1) {
       _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
@@ -348,11 +331,11 @@ static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *E, off64_t s0, size_t ns,
 
       if (D->fragment[E->fragment_index].byte_sex &
 #ifdef WORDS_BIGENDIAN
-             GD_LITTLE_ENDIAN
+          GD_LITTLE_ENDIAN
 #else
-             GD_BIG_ENDIAN
+          GD_BIG_ENDIAN
 #endif
-             )
+         )
       {
         if (E->EN(raw,data_type) & GD_COMPLEX)
           _GD_FixEndianness(databuffer + n_read * E->e->u.raw.size,
@@ -1457,6 +1440,14 @@ size_t _GD_DoField(DIRFILE *D, gd_entry_t *E, int repr, off64_t first_samp,
     return 0;
   }
 
+  if (first_samp == GD_HERE) {
+    first_samp = _GD_GetFilePos(D, E, -1);
+    if (D->error) {
+      dreturn("%i", 0);
+      return 0;
+    }
+  }
+
   /* short circuit for purely real native types */
   if (~ntype & GD_COMPLEX) {
     if (repr == GD_REPR_IMAG) {
@@ -1581,16 +1572,29 @@ size_t gd_getdata64(DIRFILE* D, const char *field_code_in, off64_t first_frame,
     return 0;
   }
 
-  /* get the samples per frame */
-  spf = _GD_GetSPF(D, entry);
+  if (first_frame == GD_HERE || first_samp == GD_HERE) {
+    first_samp = GD_HERE;
+    first_frame = 0;
+  }
 
-  if (D->error) {
+  if (first_frame > 0 || num_frames > 0) {
+    /* get the samples per frame */
+    spf = _GD_GetSPF(D, entry);
+
+    if (D->error) {
+      dreturn("%i", 0);
+      return 0;
+    }
+
+    first_samp += spf * first_frame;
+    num_samp += spf * num_frames;
+  }
+
+  if (first_samp < 0 && (first_samp != GD_HERE || first_frame != 0)) {
+    _GD_SetError(D, GD_E_RANGE, GD_E_OUT_OF_RANGE, NULL, 0, NULL);
     dreturn("%i", 0);
     return 0;
   }
-
-  first_samp += spf * first_frame;
-  num_samp += spf * num_frames;
 
   n_read = _GD_DoField(D, entry, repr, first_samp, num_samp, return_type,
       data_out);

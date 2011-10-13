@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 D. V. Wiebe
+/* Copyright (C) 2011 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -18,70 +18,56 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Attempt to write FLOAT64 */
+/* gd_tell() */
 #include "test.h"
 
-#include <inttypes.h>
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <string.h>
 #include <errno.h>
-#include <math.h>
 
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
   const char *data = "dirfile/data";
-  const char *format_data = "data RAW FLOAT64 8\n";
-  double c[8], d;
-  struct stat buf;
-  int fd, i, n, error, r = 0;
+  const char *format_data = "data RAW UINT8 8\n";
+  unsigned char data_data[256];
+  int fd, e1, e2, r = 0;
+  off64_t n;
   DIRFILE *D;
 
-  memset(c, 0, 8);
   rmdirfile();
   mkdir(filedir, 0777);
 
-  for (i = 0; i < 8; ++i)
-    c[i] = 40 + i;
+  for (fd = 0; fd < 256; ++fd)
+    data_data[fd] = (unsigned char)fd;
 
   fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  D = gd_open(filedir, GD_RDWR | GD_UNENCODED | GD_VERBOSE);
-  n = gd_putdata(D, "data", 5, 0, 1, 0, GD_FLOAT64, c);
-  error = gd_error(D);
+  fd = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
+  write(fd, data_data, 256);
+  close(fd);
+
+  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  gd_getdata(D, "data", 5, 0, 1, 0, GD_NULL, NULL);
+  e1 = gd_error(D);
+  n = gd_tell64(D, "data");
+  e2 = gd_error(D);
 
   gd_close(D);
-
-  if (stat(data, &buf)) {
-    perror("stat");
-    r = 1;
-  } else {
-    CHECKI(buf.st_size, 48 * sizeof(double));
-
-    fd = open(data, O_RDONLY | O_BINARY);
-    i = 0;
-    while (read(fd, &d, sizeof(double))) {
-      if (i < 40 || i > 48) {
-        CHECKFi(i,d,0);
-      } else
-        CHECKFi(i,d,i);
-      i++;
-    }
-    close(fd);
-  }
 
   unlink(data);
   unlink(format);
   rmdir(filedir);
 
-  CHECKI(n,8);
-  CHECKI(error, 0);
+  CHECKI(e1, 0);
+  CHECKI(e2, 0);
+  CHECKI(n, 48);
 
   return r;
 }

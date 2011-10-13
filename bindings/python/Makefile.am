@@ -31,6 +31,7 @@ endif
 SUBDIRS=test
 
 python_LTLIBRARIES = pygetdata.la
+LIBS=
 
 BUILT_SOURCES = pyconstants.c
 AM_CFLAGS = ${WALL} -fno-strict-aliasing

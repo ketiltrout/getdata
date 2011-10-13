@@ -35,7 +35,7 @@ SUBDIRS = . src
 EXTRA_DIST = ChangeLog README.idl
 
 make_parameters$(EXEEXT): $(make_parameters_SOURCES)
-	${BUILDCC} -I../src -o make_parameters$(EXEEXT) $(srcdir)/$(make_parameters_SOURCES)
+	${BUILDCC} $(DEFS) -Isrc -o make_parameters$(EXEEXT) $(srcdir)/$(make_parameters_SOURCES)
 
 clean-local:
 	rm -rf *~ 

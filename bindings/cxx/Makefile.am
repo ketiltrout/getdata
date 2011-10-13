@@ -30,6 +30,7 @@ WEXTRA=-Wextra
 endif
 
 INCLUDES = ${WALL} $(WEXTRA) -I$(top_srcdir)/src
+LIBS=
 
 SUBDIRS=test
 

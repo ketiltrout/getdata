@@ -31,8 +31,7 @@
 #include <errno.h>
 #endif
 
-/* The ASCII encoding uses file->idata to indicate the current line and
- * file->edata for the stream pointer */
+/* The ASCII encoding uses file->edata for the stream pointer */
 
 int _GD_AsciiOpen(int dirfd, struct _gd_raw_file* file, int swap __gd_unused,
     int mode, int creat)
@@ -57,6 +56,7 @@ int _GD_AsciiOpen(int dirfd, struct _gd_raw_file* file, int swap __gd_unused,
     return -1;
   }
 
+  file->pos = 0;
   file->idata = 0;
   dreturn("%i", 0);
   return 0;
@@ -69,23 +69,23 @@ off64_t _GD_AsciiSeek(struct _gd_raw_file* file, off64_t count,
 
   dtrace("%p, %lli, <unused>, %i", file, count, pad);
 
-  if (count < file->idata) {
+  if (count < file->pos) {
     rewind((FILE *)file->edata);
-    file->idata = 0;
+    file->pos = 0;
   }
 
-  for (; count > file->idata; ++file->idata)
+  for (; count > file->pos; ++file->pos)
     if (fgets(line, 64, (FILE *)file->edata) == NULL)
       break;
 
-  if (pad && count > file->idata) {
+  if (pad && count > file->pos) {
     strcpy(line, "0\n");
-    for (; count > file->idata; ++file->idata)
+    for (; count > file->pos; ++file->pos)
       fputs(line, (FILE *)file->edata);
   }
 
-  dreturn("%i", file->idata);
-  return file->idata;
+  dreturn("%lli", (long long)file->pos);
+  return file->pos;
 }
 
 static void _GD_ScanFormat(char* fmt, gd_type_t data_type)
@@ -166,7 +166,7 @@ ssize_t _GD_AsciiRead(struct _gd_raw_file *file, void *ptr, gd_type_t data_type,
           ret = -1;
         break;
       }
-      file->idata++;
+      file->pos++;
     }
   } else {
     for (n = 0; n < nmemb; ++n) {
@@ -196,7 +196,7 @@ ssize_t _GD_AsciiRead(struct _gd_raw_file *file, void *ptr, gd_type_t data_type,
           break;
         }
       }
-      file->idata++;
+      file->pos++;
     }
   }
 
@@ -403,7 +403,7 @@ int _GD_AsciiTOpen(int fd, struct _gd_raw_file *file, int swap __gd_unused)
     return -1;
   }
 
-  file->idata = 0;
+  file->pos = 0;
 
   dreturn("%i", 0);
   return 0;
@@ -414,7 +414,7 @@ int _GD_AsciiTUnlink(int dirfd, struct _gd_raw_file *file)
   dtrace("%i, %p", dirfd, file);
 
   if (file->name != NULL) {
-    if (file->idata >= 0)
+    if (file->pos >= 0)
       if (_GD_AsciiClose(file)) {
         dreturn("%i", -1);
         return -1;

@@ -61,19 +61,20 @@ int main(void)
   if (stat(data, &buf)) {
     perror("stat");
     r = 1;
-  }
-  CHECKI(buf.st_size, 48 * sizeof(float));
+  } else {
+    CHECKI(buf.st_size, 48 * sizeof(float));
 
-  fd = open(data, O_RDONLY | O_BINARY);
-  i = 0;
-  while (read(fd, &d, sizeof(float))) {
-    if (i < 40 || i > 48) {
-      CHECKFi(i,d,0);
-    } else
-      CHECKFi(i,d,i);
-    i++;
+    fd = open(data, O_RDONLY | O_BINARY);
+    i = 0;
+    while (read(fd, &d, sizeof(float))) {
+      if (i < 40 || i > 48) {
+        CHECKFi(i,d,0);
+      } else
+        CHECKFi(i,d,i);
+      i++;
+    }
+    close(fd);
   }
-  close(fd);
 
   unlink(data);
   unlink(format);

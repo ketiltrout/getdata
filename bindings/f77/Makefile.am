@@ -55,6 +55,7 @@ EXTRA_DIST=getdata.f.in getdata.f90.in
 SUBDIRS = test
 
 BUILT_SOURCES=getdata.f $(F95_INC)
+LIBS=
 
 nodist_include_HEADERS=getdata.f $(F95_INC)
 
@@ -65,7 +66,7 @@ libfgetdata_la_LIBADD=../../src/libgetdata.la
 libfgetdata_la_LDFLAGS = -version-info @FGETDATA_VERSION@
 
 nodist_libf95getdata_la_SOURCES=getdata.f90
-libf95getdata_la_LIBADD=libfgetdata.la ../../src/libgetdata.la
+libf95getdata_la_LIBADD=libfgetdata.la
 libf95getdata_la_LDFLAGS = -version-info @F95GETDATA_VERSION@
 
 getdata.mod: getdata.o

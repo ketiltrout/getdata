@@ -165,12 +165,14 @@ static const struct {
     "Cannot delete field {4} used in definiton of field {2}", 0 },
   { GD_E_DELETE, GD_E_DEL_DERIVED,
     "Cannot delete field {4} used as input to field {2}", 0 },
-  /* GD_E_BAD_ENDIANNESS: (nothing) */
-  { GD_E_BAD_ENDIANNESS, 0, "Invalid endianness specified", 0 },
+  /* GD_E_ARGUMENT: (nothing) */
+  { GD_E_ARGUMENT, GD_E_ARG_WHENCE, "Invalid origin specified", 0 },
+  { GD_E_ARGUMENT, GD_E_ARG_ENDIANNESS, "Invalid endianness specified", 0 },
+  { GD_E_ARGUMENT, GD_E_ARG_PROTECTION, "Invalid protection level specified",
+    0 },
+  { GD_E_ARGUMENT, 0, "Bad argument", 0 },
   /* GD_E_CALLBACK: 3 = response */
   { GD_E_CALLBACK, 0, "Unrecognised response from callback function: {3}", 0 },
-  /* GD_E_BAD_PROTECTION: (nothing) */
-  { GD_E_BAD_PROTECTION, 0, "Invalid protection level specified", 0 },
   /* GD_E_UNCLEAN_DB: 3 = fragment */
   { GD_E_UNCLEAN_DB, 0,
     "Unexpected system error processing {3}; database unclean", 0 },
@@ -178,6 +180,7 @@ static const struct {
   { GD_E_DOMAIN, GD_E_DOMAIN_COMPLEX, "Improper domain: complex valued", 0 },
   { GD_E_DOMAIN, GD_E_DOMAIN_EMPTY, "Improper domain: empty set", 0 },
   { GD_E_DOMAIN, GD_E_DOMAIN_ANTITONIC, "Improper domain: not monotonic", 0 },
+  { GD_E_DOMAIN, GD_E_DOMAIN_MULTIPOS, "I/O position mismatch in inputs", 0 },
   /* GD_E_UNCLEAN_DB: 4 = repr */
   { GD_E_BAD_REPR, GD_E_REPR_UNKNOWN, "Unknown field representation: .{4}", 0 },
   { GD_E_BAD_REPR, GD_E_REPR_PUT, "Unable to write to field reprentation: .{4}",

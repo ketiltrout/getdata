@@ -78,26 +78,31 @@ int main(void)
   CHECKI(buf.st_size, 48 * 2 * sizeof(double));
 
   fd = open(data, O_RDONLY | O_BINARY);
-  i = 0;
+  if (fd < 0) {
+    perror("open");
+    r = 1;
+  } else {
+    i = 0;
 #ifdef GD_NO_C99_API
-  while (read(fd, d, 2 * sizeof(double)))
+    while (read(fd, d, 2 * sizeof(double)))
 #else
-  while (read(fd, &d, sizeof(double complex)))
+      while (read(fd, &d, sizeof(double complex)))
 #endif
-  {
-    if (i < 40 || i > 48) {
-      CHECKCi(i,d,zero);
-    } else {
+      {
+        if (i < 40 || i > 48) {
+          CHECKCi(i,d,zero);
+        } else {
 #ifdef GD_NO_C99_API
-      double v[] = {i, i - 40};
+          double v[] = {i, i - 40};
 #else
-      double complex v = i + _Complex_I * (i - 40);
+          double complex v = i + _Complex_I * (i - 40);
 #endif
-      CHECKCi(i,d,v);
-    }
-    i++;
+          CHECKCi(i,d,v);
+        }
+        i++;
+      }
+    close(fd);
   }
-  close(fd);
 
   unlink(data);
   unlink(format);

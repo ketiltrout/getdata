@@ -64,15 +64,20 @@ int main(void)
   CHECKI(buf.st_size, 48 * sizeof(uint8_t));
 
   fd = open(data, O_RDONLY | O_BINARY);
-  i = 0;
-  while (read(fd, &d, sizeof(uint8_t))) {
-    if (i < 40 || i > 48) {
-      CHECKUi(i,d,0);
-    } else
-      CHECKUi(i,d,i);
-    i++;
+  if (fd < 0) {
+    perror("open");
+    r = 1;
+  } else {
+    i = 0;
+    while (read(fd, &d, sizeof(uint8_t))) {
+      if (i < 40 || i > 48) {
+        CHECKUi(i,d,0);
+      } else
+        CHECKUi(i,d,i);
+      i++;
+    }
+    close(fd);
   }
-  close(fd);
 
   unlink(data);
   unlink(format);

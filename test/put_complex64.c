@@ -74,30 +74,31 @@ int main(void)
   if (stat(data, &buf)) {
     perror("stat");
     r = 1;
-  }
-  CHECKI(buf.st_size, 48 * 2 * sizeof(float));
+  } else {
+    CHECKI(buf.st_size, 48 * 2 * sizeof(float));
 
-  fd = open(data, O_RDONLY | O_BINARY);
-  i = 0;
+    fd = open(data, O_RDONLY | O_BINARY);
+    i = 0;
 #ifdef GD_NO_C99_API
-  while (read(fd, d, 2 * sizeof(float)))
+    while (read(fd, d, 2 * sizeof(float)))
 #else
-  while (read(fd, &d, sizeof(float complex)))
+      while (read(fd, &d, sizeof(float complex)))
 #endif
-  {
-    if (i < 40 || i > 48) {
-      CHECKCi(i,d,zero);
-    } else {
+      {
+        if (i < 40 || i > 48) {
+          CHECKCi(i,d,zero);
+        } else {
 #ifdef GD_NO_C99_API
-      float v[] = {i, i - 40};
+          float v[] = {i, i - 40};
 #else
-      float complex v = i + _Complex_I * (i - 40);
+          float complex v = i + _Complex_I * (i - 40);
 #endif
-      CHECKCi(i,d,v);
-    }
-    i++;
+          CHECKCi(i,d,v);
+        }
+        i++;
+      }
+    close(fd);
   }
-  close(fd);
 
   unlink(data);
   unlink(format);

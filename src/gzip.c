@@ -61,6 +61,7 @@ int _GD_GzipOpen(int dirfd, struct _gd_raw_file* file, int swap __gd_unused,
   file->edata = gzdopen(fd, "r");
 
   if (file->edata != NULL) {
+    file->pos = 0;
     file->idata = 0;
     dreturn("%i", 0);
     return 0;
@@ -78,15 +79,23 @@ off64_t _GD_GzipSeek(struct _gd_raw_file* file, off64_t count,
 
   dtrace("%p, %lli, %x, <unused>", file, (long long)count, data_type);
 
+  if (file->pos == count) {
+    dreturn("%lli", (long long)count);
+    return count;
+  }
+
   n = (off64_t)gzseek(file->edata, (off_t)count * GD_SIZE(data_type), SEEK_SET);
 
   if (n == -1) {
     dreturn("%i", -1);
     return -1;
   }
+  
+  n /= GD_SIZE(data_type);
+  file->pos = n;
 
-  dreturn("%lli", (long long)(n / GD_SIZE(data_type)));
-  return n / GD_SIZE(data_type);
+  dreturn("%lli", (long long)n);
+  return n;
 }
 
 ssize_t _GD_GzipRead(struct _gd_raw_file *file, void *ptr, gd_type_t data_type,
@@ -98,8 +107,10 @@ ssize_t _GD_GzipRead(struct _gd_raw_file *file, void *ptr, gd_type_t data_type,
 
   n = gzread(file->edata, ptr, GD_SIZE(data_type) * nmemb);
 
-  if (n >= 0)
+  if (n >= 0) {
     n /= GD_SIZE(data_type);
+    file->pos += n;
+  }
 
   dreturn("%zu", n);
   return n;

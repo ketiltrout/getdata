@@ -497,6 +497,7 @@ ssize_t getdelim(char**, size_t*, int, FILE*);
 #define GD_E_DOMAIN_COMPLEX     1
 #define GD_E_DOMAIN_EMPTY       2
 #define GD_E_DOMAIN_ANTITONIC   3
+#define GD_E_DOMAIN_MULTIPOS    4
 
 #define GD_E_OUT_OF_RANGE       1
 #define GD_E_SINGULAR_RANGE     2
@@ -514,12 +515,17 @@ ssize_t getdelim(char**, size_t*, int, FILE*);
 #define GD_E_VERS_NONE          1
 #define GD_E_VERS_MISSING       2
 
+#define GD_E_ARG_WHENCE         1
+#define GD_E_ARG_ENDIANNESS     2
+#define GD_E_ARG_PROTECTION     3
+
 struct _gd_raw_file {
   char* name;
   int idata;
   void* edata;
   int subenc;
   const DIRFILE *D;
+  off64_t pos;
 };
 
 struct _gd_lut {
@@ -574,6 +580,7 @@ struct _gd_private_entry {
       gd_entry_t** client;
     } scalar;
     char* string;
+    off64_t index_pos;
   } u;
 };
 
@@ -797,6 +804,9 @@ void _GD_FixEndianness(void* databuffer, size_t size, size_t ns);
 void _GD_Flush(DIRFILE* D, gd_entry_t *E);
 void _GD_FlushMeta(DIRFILE* D, int fragment, int force);
 void _GD_FreeE(DIRFILE *D, gd_entry_t* E, int priv);
+off64_t _GD_GetEOF(DIRFILE *D, gd_entry_t* E, const char *parent,
+    int *is_index);
+off64_t _GD_GetFilePos(DIRFILE *D, gd_entry_t *E, off64_t index_pos);
 char *_GD_GetLine(FILE *fp, size_t *n, int* linenum);
 int _GD_GetRepr(DIRFILE*, const char*, char**);
 gd_spf_t _GD_GetSPF(DIRFILE* D, gd_entry_t* E);
@@ -804,6 +814,7 @@ int _GD_GrabDir(DIRFILE *D, int, const char *name);
 int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,
     int linenum, char** ref_name, int me, int* standards, unsigned long *flags);
 void _GD_InitialiseFramework(void);
+int _GD_InitRawIO(DIRFILE *D, gd_entry_t *E, unsigned int funcs, int creat);
 void _GD_InvertData(DIRFILE* D, void* data, gd_type_t return_type,
     double dividend, size_t n_read);
 void _GD_InsertSort(DIRFILE* D, gd_entry_t* E, int u) gd_nothrow;

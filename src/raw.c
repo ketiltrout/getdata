@@ -36,6 +36,8 @@ int _GD_RawOpen(int dirfd, struct _gd_raw_file* file, int swap __gd_unused,
   file->idata = gd_OpenAt(file->D, dirfd, file->name, ((mode == GD_RDWR) ?
         O_RDWR : O_RDONLY) | (creat ? O_CREAT : 0) | O_BINARY, 0666);
 
+  file->pos = 0;
+
   dreturn("%i", file->idata < 0);
   return (file->idata < 0);
 }
@@ -47,12 +49,20 @@ off64_t _GD_RawSeek(struct _gd_raw_file* file, off64_t count,
 
   dtrace("%p, %lli, %x, <unused>", file, (long long)count, data_type);
 
+  /* short circuit */
+  if (file->pos == count) {
+    dreturn("%lli", (long long)count);
+    return count;
+  }
+
   pos = lseek64(file->idata, count * GD_SIZE(data_type), SEEK_SET);
 
   if (pos == -1) {
     dreturn("%i", -1);
     return -1;
   }
+
+  file->pos = count;
 
   dreturn("%lli", (long long)count);
   return count;
@@ -67,8 +77,10 @@ ssize_t _GD_RawRead(struct _gd_raw_file *file, void *ptr, gd_type_t data_type,
 
   nread = read(file->idata, ptr, nmemb * GD_SIZE(data_type));
 
-  if (nread >= 0)
+  if (nread >= 0) {
     nread /= GD_SIZE(data_type);
+    file->pos += nread;
+  }
 
   dreturn("%zi", nread);
   return nread;
@@ -83,8 +95,10 @@ ssize_t _GD_RawWrite(struct _gd_raw_file *file, const void *ptr,
 
   nwrote = write(file->idata, ptr, nmemb * GD_SIZE(data_type));
 
-  if (nwrote >= 0)
+  if (nwrote >= 0) {
     nwrote /= GD_SIZE(data_type);
+    file->pos += nwrote;
+  }
 
   dreturn("%zu", nwrote);
   return nwrote;
@@ -130,6 +144,7 @@ int _GD_RawTOpen(int fd, struct _gd_raw_file *file, int swap __gd_unused)
   dtrace("%i, %p, <unused>", fd, file);
 
   file->idata = fd;
+  file->pos = 0;
 
   dreturn("%i", 0);
   return 0;

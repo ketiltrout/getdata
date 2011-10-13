@@ -142,9 +142,8 @@ extern "C" {
 #define GD_E_BAD_REFERENCE    24
 #define GD_E_PROTECTED        25
 #define GD_E_DELETE           26
-#define GD_E_BAD_ENDIANNESS   27
+#define GD_E_ARGUMENT         27
 #define GD_E_CALLBACK         28
-#define GD_E_BAD_PROTECTION   29
 #define GD_E_UNCLEAN_DB       30
 #define GD_E_DOMAIN           31
 #define GD_E_BAD_REPR         32
@@ -156,7 +155,9 @@ extern "C" {
 #define GD_N_ERROR_CODES      37
 
 /* Deprecated error codes */
-#define GD_E_OPEN_INCLUDE      GD_E_OPEN_FRAGMENT
+#define GD_E_OPEN_INCLUDE     GD_E_OPEN_FRAGMENT
+#define GD_E_BAD_ENDIANNESS   GD_E_ARGUMENT
+#define GD_E_BAD_PROTECTION   GD_E_ARGUMENT
 
 #define GD_MAX_LINCOM 3
 
@@ -197,12 +198,12 @@ extern "C" {
 #define GD_PROTECT_ALL    ( GD_PROTECT_DATA | GD_PROTECT_FORMAT )
 
 /* Standards specifiers */
-#define GD_VERSION_CURRENT  -1
-#define GD_VERSION_LATEST   -2
-#define GD_VERSION_EARLIEST -3
+#define GD_VERSION_CURRENT  (-1)
+#define GD_VERSION_LATEST   (-2)
+#define GD_VERSION_EARLIEST (-3)
 
 /* this MUST be one less than the lowest allowed fragment index */
-#define GD_ALL_FRAGMENTS -1
+#define GD_ALL_FRAGMENTS (-1)
 
 #define GD_SCALAR_ENTRY 0x10
 /* field types */
@@ -230,6 +231,8 @@ typedef enum {
 @DEFINE_gd_int16_t@
 @DEFINE_gd_uint16_t@
 @DEFINE_gd_int64_t@
+
+#define GD_HERE  (-1)
 
 #if ! defined GD_C89_API
 #  include <inttypes.h>
@@ -407,6 +410,12 @@ typedef int (*gd_parser_callback_t)(gd_parser_data_t*, void*);
 #define GD_DEL_DATA  0x2
 #define GD_DEL_DEREF 0x4
 #define GD_DEL_FORCE 0x8
+
+/* seek flags */
+#define GD_SEEK_SET 0x0
+#define GD_SEEK_CUR 0x1
+#define GD_SEEK_END 0x2
+#define GD_SEEK_PAD 0x4
 
 extern int gd_add_bit(DIRFILE *dirfile, const char *field_code,
     const char *in_field, gd_bit_t bitnum, gd_bit_t numbits, int fragment_index)
@@ -840,6 +849,12 @@ gd_nonnull ((1,2));
 
 extern off_t gd_eof(DIRFILE *dirfile, const char *field_code)
   gd_nonnull ((1,2));
+
+extern off_t gd_seek(DIRFILE *dirfile, const char *field_code, off_t frame_num,
+    off_t sample_num, int whence) gd_nonnull ((1,2));
+
+extern off_t gd_tell(DIRFILE *dirfile, const char *field_code) gd_nothrow
+gd_nonnull ((1,2));
 #else
 # ifdef __REDIRECT_NTH
 extern off_t __REDIRECT_NTH (gd_bof, (DIRFILE *dirfile, const char *field_code),
@@ -847,9 +862,13 @@ extern off_t __REDIRECT_NTH (gd_bof, (DIRFILE *dirfile, const char *field_code),
 
 extern off_t __REDIRECT_NTH (gd_frameoffset, (DIRFILE *dirfile, int fragment),
     gd_frameoffset64) gd_nonnull ((1));
+
+extern off_t __REDIRECT_NTH (gd_tell, (DIRFILE *dirfile,
+      const char *field_code), gd_tell64) gd_nonnull ((1,2));
 # else
 #  define gd_bof gd_bof64
 #  define gd_frameoffset gd_frameoffset64
+#  define gd_tell gd_tell64
 # endif
 
 # ifdef __REDIRECT
@@ -874,6 +893,10 @@ extern off_t __REDIRECT (gd_eof, (DIRFILE *dirfile, const char *field_code),
 extern double __REDIRECT (gd_framenum_subset, (DIRFILE *dirfile,
       const char *field_code, double value, off_t field_start, off_t field_end),
     gd_framenum_subset64) gd_nonnull ((1,2));
+
+extern off_t __REDIRECT (gd_seek, (DIRFILE *dirfile, const char *field_code,
+      off_t frame_num, off_t sample_num, int whence), gd_seek64)
+gd_nonnull ((1,2));
 # else
 #  define gd_alter_frameoffset gd_alter_frameoffset64
 #  define gd_getdata gd_getdata64
@@ -881,6 +904,7 @@ extern double __REDIRECT (gd_framenum_subset, (DIRFILE *dirfile,
 #  define gd_nframes gd_nframes64
 #  define gd_eof gd_eof64
 #  define gd_framenum_subset gd_framenum_subset64
+#  define gd_seek gd_seek64
 # endif
 #endif
 
@@ -920,6 +944,12 @@ gd_nonnull ((1,2));
 
 extern gd_off64_t gd_eof64(DIRFILE *dirfile, const char *field_code)
   gd_nonnull ((1,2));
+
+extern off64_t gd_seek64(DIRFILE *dirfile, const char *field_code,
+    off64_t frame_num, off64_t sample_num, int whence) gd_nonnull ((1,2));
+
+extern off64_t gd_tell64(DIRFILE *dirfile, const char *field_code) gd_nothrow
+gd_nonnull ((1,2));
 #endif
 
 

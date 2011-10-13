@@ -130,6 +130,7 @@ int _GD_LzmaOpen(int dirfd, struct _gd_raw_file* file, int swap __gd_unused,
     return 1;
   }
 
+  file->pos = 0;
   file->idata = 0;
   dreturn("%i", 0);
   return 0;
@@ -206,6 +207,12 @@ off64_t _GD_LzmaSeek(struct _gd_raw_file* file, off64_t count,
 
   count *= GD_SIZE(data_type);
 
+  /* the easy case */
+  if (file->pos == count) {
+    dreturn("%lli", (long long)count);
+    return count;
+  }
+
   if (ptr->base > count) {
     /* a backwards seek -- rewind to the beginning */
     lzma_end(&ptr->xzfile);
@@ -239,8 +246,10 @@ off64_t _GD_LzmaSeek(struct _gd_raw_file* file, off64_t count,
   ptr->out_pos = (ptr->stream_end && count >= ptr->base + ptr->end) ?  ptr->end
     : count - ptr->base;
 
-  dreturn("%lli", (long long)((ptr->base + ptr->out_pos) / GD_SIZE(data_type)));
-  return (ptr->base + ptr->out_pos) / GD_SIZE(data_type);
+  file->pos = (ptr->base + ptr->out_pos) / GD_SIZE(data_type);
+
+  dreturn("%lli", (long long)(file->pos));
+  return file->pos;
 }
 
 ssize_t _GD_LzmaRead(struct _gd_raw_file *file, void *data, gd_type_t data_type,
@@ -286,6 +295,8 @@ ssize_t _GD_LzmaRead(struct _gd_raw_file *file, void *data, gd_type_t data_type,
     ptr->out_pos += nbytes;
     nbytes = 0;
   }
+
+  file->pos += nmemb - nbytes / GD_SIZE(data_type);
 
   dreturn("%li", (long)(nmemb - nbytes / GD_SIZE(data_type)));
   return nmemb - nbytes / GD_SIZE(data_type);

@@ -56,14 +56,19 @@ int main(void)
 
   fd = open(data, O_RDONLY | O_BINARY);
   i = 0;
-  while (read(fd, &d, sizeof(uint8_t))) {
-    if (i < 40 || i > 48) {
-      CHECKUi(i,d,0);
-    } else
-      CHECKUi(i,d,i);
-    i++;
+  if (fd >= 0) {
+    while (read(fd, &d, sizeof(uint8_t))) {
+      if (i < 40 || i > 48) {
+        CHECKUi(i,d,0);
+      } else
+        CHECKUi(i,d,i);
+      i++;
+    }
+    close(fd);
+  } else {
+    perror("open");
+    r = 1;
   }
-  close(fd);
 
   unlink(data);
   unlink(format);

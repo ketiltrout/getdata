@@ -78,7 +78,7 @@ int gd_alter_protection(DIRFILE *D, int protection_level, int fragment_index)
       protection_level != GD_PROTECT_DATA &&
       protection_level != GD_PROTECT_ALL)
   {
-    _GD_SetError(D, GD_E_BAD_PROTECTION, 0, NULL, 0, NULL);
+    _GD_SetError(D, GD_E_ARGUMENT, GD_E_ARG_PROTECTION, NULL, 0, NULL);
     dreturn("%i", -1);
     return -1;
   }

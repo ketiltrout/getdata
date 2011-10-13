@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 D. V. Wiebe
+/* Copyright (C) 2009-2011 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -18,10 +18,9 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Attempt to write FLOAT64 */
+/* Try to read POLYNOM entry */
 #include "test.h"
 
-#include <inttypes.h>
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -34,54 +33,35 @@ int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *data = "dirfile/data";
-  const char *format_data = "data RAW FLOAT64 8\n";
-  double c[8], d;
-  struct stat buf;
-  int fd, i, n, error, r = 0;
+  const char *format_data = "data RECIP in 2\n";
+  int fd, n, error, r = 0;
   DIRFILE *D;
+  gd_entry_t E;
 
-  memset(c, 0, 8);
   rmdirfile();
   mkdir(filedir, 0777);
-
-  for (i = 0; i < 8; ++i)
-    c[i] = 40 + i;
 
   fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  D = gd_open(filedir, GD_RDWR | GD_UNENCODED | GD_VERBOSE);
-  n = gd_putdata(D, "data", 5, 0, 1, 0, GD_FLOAT64, c);
+  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+
+  n = gd_entry(D, "data", &E);
   error = gd_error(D);
 
   gd_close(D);
-
-  if (stat(data, &buf)) {
-    perror("stat");
-    r = 1;
-  } else {
-    CHECKI(buf.st_size, 48 * sizeof(double));
-
-    fd = open(data, O_RDONLY | O_BINARY);
-    i = 0;
-    while (read(fd, &d, sizeof(double))) {
-      if (i < 40 || i > 48) {
-        CHECKFi(i,d,0);
-      } else
-        CHECKFi(i,d,i);
-      i++;
-    }
-    close(fd);
-  }
-
-  unlink(data);
   unlink(format);
   rmdir(filedir);
 
-  CHECKI(n,8);
-  CHECKI(error, 0);
+  CHECKI(error, GD_E_OK);
+  CHECKI(n, 0);
+  CHECKS(E.field, "data");
+  CHECKX(E.field_type, GD_RECIP_ENTRY);
+  CHECKI(E.comp_scal, 0);
+  CHECKI(E.EN(recip,dividend), 2);
+  CHECKS(E.in_fields[0], "in");
+  gd_free_entry_strings(&E);
 
   return r;
 }

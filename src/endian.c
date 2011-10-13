@@ -147,7 +147,7 @@ int gd_alter_endianness(DIRFILE* D, unsigned long byte_sex, int fragment,
   }
 
   if (byte_sex != GD_BIG_ENDIAN && byte_sex != GD_LITTLE_ENDIAN) {
-    _GD_SetError(D, GD_E_BAD_ENDIANNESS, 0, NULL, 0, NULL);
+    _GD_SetError(D, GD_E_ARGUMENT, GD_E_ARG_ENDIANNESS, NULL, 0, NULL);
     dreturn("%i", -1);
     return -1;
   }

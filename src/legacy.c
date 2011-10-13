@@ -75,9 +75,9 @@ const char *GD_ERROR_CODES[GD_N_ERROR_CODES] = {
   "Bad REFERENCE field", /* GD_E_BAD_REFERENCE */
   "Operation prohibited by protection level", /* GD_E_PROTECTED */
   NULL, /* GD_E_DELETE */
-  NULL, /* GD_E_BAD_ENDIANNESS */
+  "Bad argument", /* GD_E_ARGUMENT */
   NULL, /* GD_E_CALLBACK */
-  NULL, /* GD_E_BAD_PROTECTION */
+  NULL, /* unused */
   NULL, /* GD_E_UNCLEAN_DB */
   "Improper domain", /* GD_E_DOMAIN */
   "Bad representation", /* GD_E_BAD_REPR */

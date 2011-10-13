@@ -90,6 +90,7 @@ int _GD_SampIndOpen(int dirfd, struct _gd_raw_file *file, int swap, int mode,
     return -1;
   }
 
+  file->pos = -1;
   file->idata = 0;
   dreturn("%i", 0);
   return 0;
@@ -147,6 +148,11 @@ off64_t _GD_SampIndSeek(struct _gd_raw_file *file, off64_t sample,
 
   dtrace("%p, %llx, 0x%03x, %i", file, (long long)sample, data_type, pad);
 
+  if (file->pos == sample) {
+    dreturn("%lli", sample);
+    return sample;
+  }
+
   if (sample < f->p) {
     /* seek backwards -- reading a file backwards doesn't necessarily work
      * that well.  So, let's just rewind to the beginning and try again. */
@@ -181,7 +187,7 @@ off64_t _GD_SampIndSeek(struct _gd_raw_file *file, off64_t sample,
     }
     f->s = sample;
   }
-  f->p = sample;
+  file->pos = f->p = sample;
 
   dreturn("%llx", f->p);
   return (off64_t)(f->p);
@@ -261,6 +267,8 @@ ssize_t _GD_SampIndRead(struct _gd_raw_file *file, void *ptr,
     count += f->d[0] - f->p + 1;
     f->p = f->d[0] + 1;
   }
+
+  file->pos = f->p;
 
   dreturn("%llx", (long long)count);
   return count;
@@ -409,6 +417,7 @@ ssize_t _GD_SampIndWrite(struct _gd_raw_file *file, const void *ptr,
 
   free(p);
 
+  file->pos = f->p;
   dreturn("%llu", (unsigned long long)nelem);
   return nelem;
 }
@@ -512,6 +521,7 @@ int _GD_SampIndTOpen(int fd, struct _gd_raw_file *file, int swap)
   f = (struct gd_siedata*)(file->edata);
   memset(f, 0, sizeof(struct gd_siedata));
   f->r = f->s = f->p = f->d[0] = -1;
+  file->pos = -1;
   f->fp = stream;
   f->swap = swap;
   file->idata = 0;

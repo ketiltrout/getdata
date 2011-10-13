@@ -100,31 +100,19 @@ static size_t _GD_DoRawOut(DIRFILE *D, gd_entry_t *E, off64_t s0,
   }
   /* write data to file. */
 
-  if (E->e->u.raw.file[0].idata < 0) {
-    /* open file for reading / writing if not already opened */
-
-    if (_GD_SetEncodedName(D, E->e->u.raw.file, E->e->u.raw.filebase, 0)) {
-      free(databuffer);
-      dreturn("%i", 0);
-      return 0;
-    } else if ((*_gd_ef[E->e->u.raw.file[0].subenc].open)(
-          D->fragment[E->fragment_index].dirfd, E->e->u.raw.file,
-          _GD_FileSwapBytes(D, E->fragment_index), D->flags & GD_ACCMODE, 1))
-    {
-      _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
-      free(databuffer);
-      dreturn("%i", 0);
-      return 0;
-    }
+  if (_GD_InitRawIO(D, E, 0, 1)) {
+    free(databuffer);
+    dreturn("%i", 0);
+    return 0;
   }
 
   if ((*_gd_ef[E->e->u.raw.file[0].subenc].seek)(E->e->u.raw.file, s0,
         E->EN(raw,data_type), 1) == -1)
   {
-      _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
-      free(databuffer);
-      dreturn("%i", 0);
-      return 0;
+    _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
+    free(databuffer);
+    dreturn("%i", 0);
+    return 0;
   }
 
   n_wrote = (*_gd_ef[E->e->u.raw.file[0].subenc].write)(E->e->u.raw.file,
@@ -603,6 +591,14 @@ size_t _GD_DoFieldOut(DIRFILE *D, gd_entry_t* E, int repr, off64_t first_samp,
     return 0;
   }
 
+  if (first_samp == GD_HERE) {
+    first_samp = _GD_GetFilePos(D, E, -1);
+    if (D->error) {
+      dreturn("%i", 0);
+      return 0;
+    }
+  }
+
   switch (E->field_type) {
     case GD_RAW_ENTRY:
       n_wrote = _GD_DoRawOut(D, E, first_samp, num_samp, data_type, data_in);
@@ -659,7 +655,7 @@ size_t gd_putdata64(DIRFILE* D, const char *field_code_in, off64_t first_frame,
   gd_entry_t *entry;
   char* field_code;
   int repr;
-  gd_spf_t spf;
+  gd_spf_t spf = 0;
 
   dtrace("%p, \"%s\", %lli, %lli, %zu, %zu, 0x%x, %p", D, field_code_in,
       first_frame, first_samp, num_frames, num_samp, data_type, data_in);
@@ -696,16 +692,29 @@ size_t gd_putdata64(DIRFILE* D, const char *field_code_in, off64_t first_frame,
     return 0;
   }
 
-  /* get the samples per frame */
-  spf = _GD_GetSPF(D, entry);
+  if (first_frame == GD_HERE || first_samp == GD_HERE) {
+    first_samp = GD_HERE;
+    first_frame = 0;
+  }
 
-  if (D->error) {
+  if (num_frames > 0 || first_frame > 0) {
+    /* get the samples per frame */
+    spf = _GD_GetSPF(D, entry);
+
+    if (D->error) {
+      dreturn("%i", 0);
+      return 0;
+    }
+
+    first_samp += spf * first_frame;
+    num_samp += spf * num_frames;
+  }
+
+  if (first_samp < 0 && (first_samp != GD_HERE || first_frame != 0)) {
+    _GD_SetError(D, GD_E_RANGE, GD_E_OUT_OF_RANGE, NULL, 0, NULL);
     dreturn("%i", 0);
     return 0;
   }
-
-  first_samp += spf * first_frame;
-  num_samp += spf * num_frames;
 
   n_wrote = _GD_DoFieldOut(D, entry, repr, first_samp, num_samp, data_type,
       data_in);

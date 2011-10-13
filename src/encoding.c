@@ -300,6 +300,38 @@ int _GD_MissingFramework(int encoding, unsigned int funcs)
   return ret;
 }
 
+/* Open a raw file, if necessary, also check for required functions */
+int _GD_InitRawIO(DIRFILE *D, gd_entry_t *E, unsigned int funcs, int creat)
+{
+  dtrace("%p, %p, %x, %i", D, E, funcs, creat);
+
+  if (E->e->u.raw.file[0].idata < 0) {
+    if (!_GD_Supports(D, E, GD_EF_OPEN | funcs)) {
+      dreturn("%i", 1);
+      return 1;
+    } else if (_GD_SetEncodedName(D, E->e->u.raw.file, E->e->u.raw.filebase, 0))
+    {
+      dreturn("%i", 1);
+      return 1;
+    } else if ((*_gd_ef[E->e->u.raw.file[0].subenc].open)(
+          D->fragment[E->fragment_index].dirfd, E->e->u.raw.file,
+          _GD_FileSwapBytes(D, E->fragment_index), D->flags & GD_ACCMODE,
+          creat))
+    {
+      _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno,
+          NULL);
+      dreturn("%i", 1);
+      return 1;
+    }
+  } else if (!_GD_Supports(D, E, funcs)) {
+    dreturn("%i", 1);
+    return 1;
+  }
+
+  dreturn("%i", 0);
+  return 0;
+}
+
 /* Figure out the encoding scheme */
 static unsigned long _GD_ResolveEncoding(const DIRFILE *D gd_unused_d,
     const char* name, unsigned long scheme, int dirfd,

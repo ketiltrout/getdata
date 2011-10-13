@@ -1,3 +1,47 @@
+2011-10-13   D. V. Wiebe <getdata@ketiltrout.net> svn:606
+	* test/entry_divide.c test/entry_recip.c test/get_here.c test/get_heres.c
+	test/put_here.c test/put_heres.c test/seek64.c test/seek_cur.c test/seek_end.c
+	test/seek_set.c test/tell.c test/tell64.c: Added.
+
+	* test/legacy_put.c test/put_complex128.c test/put_complex64.c
+	test/put_float32.c test/put_float64.c test/put_ff.c test/put_foffs.c
+	test/put_fs.c test/put_int16.c test/put_int32.c test/put_int64.c
+	test/put_int8.c test/put_lincom1.c test/put_linterp.c
+	test/put_linterp_reverse.c test/put_off64.c test/put_phase.c
+	test/put_polynom1.c test/put_recip.c test/put_sf.c test/put_ss.c
+	test/put_uint16.c test/put_uint32.c test/put_uint64.c: Don't perform
+	unnecessary tests in the event the data file wasn't created.
+
+	* src/getdata.h.in: Combine GD_E_BAD_ENDIANNESS and GD_E_BAD_PROTECTION into
+	GD_ARGUMENT.  The former are kept as aliases of the new symbol.
+	* src/endian.c (gd_alter_endianness) src/errors.c src/protect.c
+	(gd_alter_protection): Update for GD_E_ARGUMENT.
+
+	* src/internal.h: Add .pos to _gd_raw_file.  Add .u.index_pos to
+	_gd_private_entry.
+	* src/ascii.c (_GD_AsciiOpen _GD_AsciiSeek _GD_AsciiRead _GD_AsciiTOpen
+	_GD_AsciiTUnlink) src/gzip.c (_GD_GzipOpen _GD_GzipSeek _GD_GzipRead)
+	src/lzma.c (_GD_LzmaOpen _GD_LzmaSeek _GD_LzmaRead) src/sie.c
+	(_GD_SampIndOpen _GD_SampIndSeek _GD_SampIndRead _GD_SampIndWrite
+	_GD_SampIndTOpen) src/raw.c (_GD_RawOpen _GD_RawSeek _GD_RawRead
+	_GD_RawWrite _GD_RawTOpen): Track file position.
+
+	* src/encoding.c (_GD_InitRawIO): Added.
+	* src/getdata.c (_GD_DoRaw) src/putdata.c (_GD_DoRawOut): Call _GD_InitRawIO.
+
+	* src/fpos.c: Added.
+	* src/flimits.c (_GD_GetEOF): Publicise.
+	* src/getdata.c (gd_getdata64) src/putdata.c (gd_putdata64): Regularise use of
+	GD_HERE.  Also, only call _GD_GetSPF when necessary.
+	* src/getdata.c (_GD_DoField) src/putdata.c (_GD_DoFieldOut): Resolve
+	instances of GD_HERE.
+
+	* bindings/python/Makefile.am bindings/cxx/Makefile.am
+	bindings/f77/Makefile.am: Remove some unnecessary linking.
+
+	* bindings/idl/package/Makefile.am: Add $(DEFS) to the make_parameters rule
+	to ensure it builds properly.
+
 2011-08-23   D. V. Wiebe <getdata@ketiltrout.net> svn:600
 	* test/error_error.c: Simplify test.
 	* test/test.h (CHECKSp): Added.
