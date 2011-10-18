@@ -1,0 +1,110 @@
+.\" gd_getdata.3.  The gd_getdata man page.
+.\"
+.\" Copyright (C) 2011 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_tell 3 "14 October 2011" "Version 0.8.0" "GETDATA"
+.SH NAME
+gd_tell \(em reposition a dirfile field pointer
+.SH SYNOPSIS
+.B #include <getdata.h>
+.HP
+.nh
+.ad l
+.BI "off_t gd_tell(DIRFILE *" dirfile ", const char *" field_code );
+.hy
+.ad n
+.SH DESCRIPTION
+The
+.BR gd_tell ()
+function reports the current position of the I/O pointer of the field
+.I field_code
+in the dirfile(5) database specified by
+.IR dirfile .
+.P
+Only
+.B RAW
+fields (and the implicit
+.I INDEX
+field) have field pointers associated with them.  Calling
+.BR gd_tell ()
+on a derived field will report the position of the I/O pointer of the derived
+field only if all of it's inputs are positioned the same.  Otherwise, an error
+results.
+
+.SH RETURN VALUE
+Upon successful completion,
+.BR gd_tell ()
+returns the I/O position of the specified field in samples.  On error, it
+returns -1 and set the dirfile error to a non-zero value.  Possible error values
+are:
+.TP 8
+.B GD_E_ALLOC
+The library was unable to allocate memory.
+.TP
+.B GD_E_BAD_CODE
+The field specified by
+.IR field_code ,
+or one of the fields it uses for input, was not found in the database.
+.TP
+.B GD_E_BAD_DIRFILE
+The supplied dirfile was invalid.
+.TP
+.B GD_E_BAD_REPR
+The representation suffix specified in
+.IR field_code ,
+or in one of the field codes it uses for input, was invalid.
+.TP
+.B GD_E_DIMENSION
+The specified field or one of its inputs wasn't of vector type.
+.TP
+.B GD_E_DOMAIN
+The field posision couldn't be determined due to a mismatch in the I/O pointer
+of field reading simultaneously
+from more than one place in an input field.
+.TP
+.B GD_E_INTERNAL_ERROR
+An internal error occurred in the library while trying to perform the task.
+This indicates a bug in the library.  Please report the incident to the
+maintainer.
+.TP
+.B GD_E_RAW_IO
+An error occurred while trying to open or read from a file on disk containing
+a raw field.
+.TP
+.B GD_E_RECURSE_LEVEL
+Too many levels of recursion were encountered while trying to resolve
+.IR field_code .
+This usually indicates a circular dependency in field specification in the
+dirfile.
+.TP
+.B GD_E_UNKNOWN_ENCODING
+The encoding scheme of a RAW field could not be determined.  This may also
+indicate that the binary file associated with the RAW field could not be found.
+.TP
+.B GD_E_UNSUPPORTED
+Reading from dirfiles with the encoding scheme of the specified dirfile is not
+supported by the library.  See
+.BR dirfile-encoding (5)
+for details on dirfile encoding schemes.
+.PP
+The dirfile error may be retrieved by calling
+.BR gd_error (3).
+A descriptive error string for the last error encountered can be obtained from
+a call to
+.BR gd_error_string (3).
+.SH SEE ALSO
+.BR gd_open (3),
+.BR gd_getdata (3),
+.BR gd_putdata (3),
+.BR gd_seek (3).

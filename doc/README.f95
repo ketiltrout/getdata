@@ -514,6 +514,14 @@ unit numbers in place of C's DIRFILE pointers are:
 
 * integer function fgd_invalid_dirfile ()
 
+* integer function fgd_seek (dirfile, field_code, frame_num, sample_num, flags)
+  integer, intent(in) :: dirfile, frame_num, sample_num, flags
+  character (len=*), intent(in): field_code
+
+* integer function fgd_tell (dirfile, field_code)
+  integer, intent(in) :: dirfile
+  character (len=*), intent(in): field_code
+
 
 In order to respect type safety, the gd_getdata and gd_putdata analogues encode
 the data type of their array in their function name, rather than as a parameter.

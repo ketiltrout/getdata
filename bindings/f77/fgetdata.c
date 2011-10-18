@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2010 D. V. Wiebe
+/* Copyright (C) 2008-2011 D. V. Wiebe
  *
  *************************************************************************
  *
@@ -2925,4 +2925,34 @@ void F77_FUNC(gdstdv, GDSTDV) (int *vers, const int *dirfile)
   *vers = gd_dirfile_standards(_GDF_GetDirfile(*dirfile), *vers);
 
   dreturn("%i", *vers);
+}
+
+/* gd_seek wrapper */
+void F77_FUNC(gdseek, GDSEEK) (int* pos, const int* dirfile,
+    const char* field_code, const int* field_code_l, const int* frame_num,
+    const int* sample_num, const int* flags)
+{
+  char *fc = (char *)malloc(*field_code_l + 1);
+  dtrace("%p, %i, %p, %i, %i, %i, 0x%x", pos, *dirfile, field_code,
+      *field_code_l, *frame_num, *sample_num, *flags);
+
+  *pos = (int)gd_seek(_GDF_GetDirfile(*dirfile), _GDF_CString(fc, field_code,
+        *field_code_l), *frame_num, *sample_num, *flags);
+
+  free(fc);
+  dreturn("%i", *pos);
+}
+
+/* gd_tell wrapper */
+void F77_FUNC(gdtell, GDTELL) (int* pos, const int* dirfile,
+    const char* field_code, const int* field_code_l)
+{
+  char *fc = (char *)malloc(*field_code_l + 1);
+  dtrace("%p, %i, %p, %i", pos, *dirfile, field_code, *field_code_l);
+
+  *pos = (int)gd_tell(_GDF_GetDirfile(*dirfile), _GDF_CString(fc, field_code,
+        *field_code_l));
+
+  free(fc);
+  dreturn("%i", *pos);
 }

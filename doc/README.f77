@@ -308,6 +308,31 @@ Subroutines interacting with data
   This subroutine wraps gd_framenum_subset(3), and performs a reverse
   look-up on a field.
 
+* GDSEEK(pos, dirfile_unit, field_code, field_code_len, frame_num, sample_num,
+  flags)
+
+  Output:
+    INTEGER pos
+  Input:
+    INTEGER dirfile_unit, field_code_len, frame_num, sample_num, flags
+    CHARACTER*<field_code_len> field_code
+
+  This subroutine wraps gd_seek(3), and repositions the field pointer of the
+  specified field.  It returns the new value of the field pointer.  The
+  'flags' argument should be one of GDSK_S, GDSK_C, or GDSK_E, optionally
+  bitwise or'd with GDSK_E.
+
+* GDTELL(pos, dirfile_unit, field_code)
+
+  Output:
+    INTEGER pos
+  Input:
+    INTEGER dirfile_unit, field_code_len
+    CHARACTER*<field_code_len> field_code
+
+  This subroutine wraps gd_tell(3), and returns the current value of the field
+  pointer for the specified field.
+
 
 Subroutines interacting with global metadata
 --------------------------------------------
@@ -1789,10 +1814,20 @@ Special version symbols:
   GDSV_L          GD_VERSION_LATEST
   GDSV_E          GD_VERSION_EARLIEST
 
+Seek flags:
+
+  F77 symbol      C symbol
+  ----------      ---------------------
+  GDSK_C          GD_SEEK_CUR
+  GDSK_E          GD_SEEK_END
+  GDSK_P          GD_SEEK_PAD
+  GDSK_S          GD_SEEK_SET
+
 Miscellaneous parameters:
 
   F77 symbol      C symbol
   ----------      -------------------------
   GD_ALL          GD_ALL_FRAGMENTS
   GD_DSV          DIRFILE_STANDARDS_VERSION
+  GD_HER          GD_HERE
   GD_MLL          GD_MAX_LINE_LENGTH

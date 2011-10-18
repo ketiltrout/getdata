@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_putdata 3 "19 August 2011" "Version 0.8.0" "GETDATA"
+.TH gd_putdata 3 "14 October 2011" "Version 0.8.0" "GETDATA"
 .SH NAME
 gd_putdata \(em write data to a dirfile database
 .SH SYNOPSIS
@@ -52,7 +52,9 @@ The
 argument must point to a valid DIRFILE object previously created by a call to
 .BR gd_open (3).
 
-The first sample written will be
+Unless using
+.B GD_HERE 
+(see below), the first sample written will be
 .RS
 .IR first_frame " * " samples_per_frame " + " first_sample
 .RE
@@ -74,6 +76,18 @@ with either
 or
 .IR num_frames " and " first_frames ,
 equal to zero.
+
+Instead of explicitly specifying the origin of the write, the caller may pass
+the special symbol
+.B GD_HERE
+as
+.IR first_frame .
+This will result in the write occurring at the current position of the I/O
+pointer for the field (see
+.BR gd_seek (3)
+for a discussion of I/O pointers).  In this case, the value of
+.I first_sample
+is ignored.
 
 The 
 .I data_type
@@ -117,6 +131,11 @@ in the database.  Type conversion will be performed as necessary to write the
 appropriate type.  The argument
 .I data_in
 must point to a valid memory location of containing all the data to be written.
+
+Upon successful completion, the I/O pointer of the field will be on the sample
+immediately following the last sample written.  On error, the position of the
+I/O pointer is not specified.
+
 .SH RETURN VALUE
 In all cases,
 .BR gd_putdata ()
@@ -180,13 +199,20 @@ instead.  Or, a scalar field was found where a vector field was expected in
 the definition of
 .IR field_code .
 .TP
+.B GD_E_DOMAIN
+An attempt was made to write to a
+.B LINTERP
+field with a look-up table which was not monotonic or not purely real.
+.TP
 .B GD_E_INTERNAL_ERROR
 An internal error occurred in the library while trying to perform the task.
 This indicates a bug in the library.  Please report the incident to the
 maintainer.
 .TP
 .B GD_E_OPEN_LINFILE
-An error occurred while trying to read a LINTERP table from disk.
+An error occurred while trying to read a
+.B LINTERP
+table from disk.
 .TP
 .B GD_E_PROTECTED
 The data of the
@@ -231,4 +257,5 @@ a call to
 .BR gd_getdata (3),
 .BR gd_put_carray (3),
 .BR gd_put_constant (3),
+.BR gd_seek (3),
 .BR gd_spf (3)

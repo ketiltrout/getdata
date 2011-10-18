@@ -118,3 +118,6 @@ off64_t nframes64(DIRFILE *dirfile)
 off64_t bof64(DIRFILE *dirfile, const char* field_code)
 off64_t eof64(DIRFILE *dirfile, const char* field_code)
 int error_count(DIRFILE *dirfile)
+off64_t seek(DIRFILE *dirfile, const char* field_code, off64_t frame_num,
+    off64_t sample_num, int flags=GD_SEEK_SET)
+off64_t tell(DIRFILE *dirfile, const char* field_code)

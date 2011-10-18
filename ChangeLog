@@ -1,3 +1,20 @@
+2011-10-18   D. V. Wiebe <getdata@ketiltrout.net> svn:607
+	* man/gd_seek.3 man/gd_tell.3: Added.
+
+	* src/spf.c (gd_spf): Throw GD_E_DIMENSION on scalar field specified per
+	documentation.
+	* src/fpos.c (gd_tell64 gd_seek64): Ditto.
+
+	* src/putdata.c (_GD_DoFieldOut): Don't return on error from _GD_GetFilePos;
+	a better error will be generated later.
+
+	* bindings/make_parameters.c: Add GD_E_ARGUMENT, GD_SEEK_*, GD_HERE.
+	* bindings/python/pydirfile.c (gdpy_dirfile_seek gdpy_dirfile_tell)
+	bindings/cxx/dirfile.cpp (Dirfile::Seek Dirfile::Tell)
+	bindings/perl/simple_funcs.xsin (seek tell) bindings/f77/fgetdata.c (GDSEEK
+	GDTELL) bindings/f77/getdata.f90.in (fgd_seek fgd_tell)
+	bindings/idl/getdata.c (gdidl_seek gdidl_tell): Added.
+
 2011-10-13   D. V. Wiebe <getdata@ketiltrout.net> svn:606
 	* test/entry_divide.c test/entry_recip.c test/get_here.c test/get_heres.c
 	test/put_here.c test/put_heres.c test/seek64.c test/seek_cur.c test/seek_end.c

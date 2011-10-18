@@ -182,7 +182,10 @@ are available:
     GetData::DataType type, const void *data_in)
 * size_t Dirfile::PutString(const char *field_code, const char *data_in)
 * unsigned int Dirfile::SamplesPerFrame(const char *field_code)
+* off_t Dirfile::Seek(const char *field_code, off_t frame_num, off_t sample_num,
+    int whence)
 * const char **Dirfile::Strings()
+* off_t Dirfile::Tell(const char *field_code)
 * int Dirfile::Validate(const char *field_code)
 * const char **Dirfile::VectorList()
 

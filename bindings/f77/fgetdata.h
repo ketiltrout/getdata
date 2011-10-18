@@ -557,6 +557,13 @@ void F77_FUNC(gdmdca, GDMDCA) (const int *dirfile, const char *parent,
 void F77_FUNC(gdpcas, GDPCAS) (const int *dirfile, const char *field_code,
     const int *field_code_l, const int *start, const int *n,
     const int *data_type, const void *data_in);
+
+void F77_FUNC(gdseek, GDSEEK) (int* pos, const int* dirfile,
+    const char* field_code, const int* field_code_l, const int* frame_num,
+    const int* sample_num, const int* flags);
+
+void F77_FUNC(gdtell, GDTELL) (int* pos, const int* dirfile,
+    const char* field_code, const int* field_code_l);
 #ifdef __cplusplus
 }
 #endif

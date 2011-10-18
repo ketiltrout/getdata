@@ -1236,7 +1236,7 @@ static size_t _GD_DoBit(DIRFILE *D, gd_entry_t *E, int is_signed,
 
   /* extract bits */
   if (is_signed) {
-    uint64_t sign = -1 << (E->EN(bit,numbits) + - 1);
+    uint64_t sign = -1 << (E->EN(bit,numbits) - 1);
     for (i = 0; i < n_read; i++)
       ((int64_t *)tmpbuf)[i] =
         (((((uint64_t *)tmpbuf)[i] >> E->EN(bit,bitnum)) & mask) + sign) ^ sign;

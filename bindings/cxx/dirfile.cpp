@@ -1,4 +1,4 @@
-// Copyright (C) 2008-2010 D. V. Wiebe
+// Copyright (C) 2008-2011 D. V. Wiebe
 //
 ///////////////////////////////////////////////////////////////////////////
 //
@@ -139,7 +139,7 @@ int Dirfile::Error() const
   return gd_error(D);
 }
 
-int Dirfile::ErrorCount()
+int Dirfile::ErrorCount() const
 {
   return gd_error_count(D);
 }
@@ -444,4 +444,15 @@ const char* Dirfile::Name() const
 int Dirfile::Standards(int version) const
 {
   return gd_dirfile_standards(D, version);
+}
+
+off_t Dirfile::Seek(const char* field_code, off_t frame_num,
+    off_t sample_num, int flags) const
+{
+  return gd_seek(D, field_code, frame_num, sample_num, flags);
+}
+
+off_t Dirfile::Tell(const char* field_code) const
+{
+  return gd_tell(D, field_code);
 }

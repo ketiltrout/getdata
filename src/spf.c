@@ -106,7 +106,7 @@ gd_spf_t gd_spf(DIRFILE* D, const char *field_code_in) gd_nothrow
   }
 
   if (entry->field_type & GD_SCALAR_ENTRY)
-    _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
+    _GD_SetError(D, GD_E_DIMENSION, GD_E_DIM_CALLER, NULL, 0, field_code);
   else 
     spf = _GD_GetSPF(D, entry);
 

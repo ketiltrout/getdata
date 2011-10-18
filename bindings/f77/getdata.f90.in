@@ -1,4 +1,4 @@
-! Copyright (C) 2008-2010 D. V. Wiebe
+! Copyright (C) 2008-2011 D. V. Wiebe
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
@@ -2125,5 +2125,22 @@ subroutine fgd_alter_carray (dirfile, field_name, const_type, array_len)
   call gdalca(dirfile, TRIM(field_name), LEN_TRIM(field_name), const_type, &
   array_len)
 end subroutine
+
+function fgd_seek (dirfile, field_name, frame_num, sample_num, flags)
+  integer :: fgd_seek
+  integer, intent(in) :: dirfile, frame_num, sample_num, flags
+  character (len=*), intent(in) :: field_name
+  
+  call gdseek(fgd_seek, dirfile, TRIM(field_name), LEN_TRIM(field_name), &
+  frame_num, sample_num, flags)
+end function
+
+function fgd_tell (dirfile, field_name)
+  integer :: fgd_tell
+  integer, intent(in) :: dirfile
+  character (len=*), intent(in) :: field_name
+  
+  call gdtell(fgd_tell, dirfile, TRIM(field_name), LEN_TRIM(field_name))
+end function
 
 end module

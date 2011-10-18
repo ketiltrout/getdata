@@ -1,4 +1,4 @@
-/* Copyright (C) 2009, 2010 D. V. Wiebe
+/* Copyright (C) 2009-2011 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -2070,6 +2070,61 @@ static int gdpy_dirfile_setstandards(struct gdpy_dirfile_t* self,
   return 0;
 }
 
+static PyObject *gdpy_dirfile_seek(struct gdpy_dirfile_t *self, PyObject *args,
+    PyObject *keys)
+{
+  dtrace("%p, %p, %p", self, args, keys);
+
+  char *keywords[] = { "field_code", "flags", "frame_num", "sample_num", NULL };
+  const char *field_code;
+  long int frame_num = 0, sample_num = 0;
+  int flags;
+  off_t pos;
+
+  if (!PyArg_ParseTupleAndKeywords(args, keys, "si|LL:pygetdata.dirfile.seek",
+        keywords, &field_code, &flags, &frame_num, &sample_num))
+  {
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  pos = gd_seek(self->D, field_code, (off_t)frame_num, (off_t)sample_num,
+      flags);
+
+  PYGD_CHECK_ERROR(self->D, NULL);
+
+  PyObject* pyobj = PyLong_FromLongLong((long long)pos);
+
+  dreturn("%p", pyobj);
+  return pyobj;
+}
+
+static PyObject *gdpy_dirfile_tell(struct gdpy_dirfile_t *self, PyObject *args,
+    PyObject *keys)
+{
+  dtrace("%p, %p, %p", self, args, keys);
+
+  char *keywords[] = { "field_code", NULL };
+  const char *field_code;
+  off_t pos;
+
+  if (!PyArg_ParseTupleAndKeywords(args, keys, "s:pygetdata.dirfile.tell",
+        keywords, &field_code))
+  {
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  pos = gd_tell(self->D, field_code);
+
+  PYGD_CHECK_ERROR(self->D, NULL);
+
+  PyObject* pyobj = PyLong_FromLongLong((long long)pos);
+
+  dreturn("%p", pyobj);
+  return pyobj;
+}
+
 static PyGetSetDef gdpy_dirfile_getset[] = {
   { "error", (getter)gdpy_dirfile_geterror, NULL,
     "The numerical error code encountered by the last call to the GetData\n"
@@ -2080,7 +2135,6 @@ static PyGetSetDef gdpy_dirfile_getset[] = {
     NULL },
   { "error_count", (getter)gdpy_dirfile_geterrorcount, NULL,
     "The number of errors encountered by the GetData library for this\n"
-      /* -----------------------------------------------------------------| */
       "dirfile since the last time this member was accessed.  Note:\n"
       "accessing this member, resets it to zero.  See gd_error_count(3).",
     NULL },
@@ -2239,7 +2293,7 @@ static PyMethodDef gdpy_dirfile_methods[] = {
       "and values, unlike the C API counterpart."
   },
   {"getdata", (PyCFunction)gdpy_dirfile_getdata, METH_VARARGS | METH_KEYWORDS,
-    "gd_getdata(field_code, return_type [, first_frame, first_sample,\n"
+    "getdata(field_code, return_type [, first_frame, first_sample,\n"
       "num_frames, num_samples, as_list])\n\n"
       "Retrieve a data vector from the dirfile.  If NumPy support is\n"
       "present in pygetdata, and 'as_list' is not given or zero, a NumPy\n"
@@ -2252,7 +2306,7 @@ static PyMethodDef gdpy_dirfile_methods[] = {
       "indicated.  For list data it should be (typically) one of:\n"
       "pygetdata.INT, pygetdata.LONG, pygetdata.ULONG, pygetdata.FLOAT, or\n"
       "pygetdata.COMPLEX, although any GetData data type code is permitted.\n"
-      "The 'first_frame' and 'first_samples' parameters indicate first\n"
+      "The 'first_frame' and 'first_sample' parameters indicate first\n"
       "datum to read.  If they are both omitted, data is read from the\n"
       "first sample.  Similarly, 'num_frames' and 'num_samples' indicate\n"
       "the amount of data.  Omitting both of these results in an error.\n"
@@ -2533,6 +2587,15 @@ static PyMethodDef gdpy_dirfile_methods[] = {
       "a RAW field, the file on disk will also be renamed accordingly.\n"
       "See gd_rename(3)."
   },
+  {"seek", (PyCFunction)gdpy_dirfile_seek, METH_VARARGS | METH_KEYWORDS,
+    "seek(field_code, flags [, frame_num, sample_num])\n\n"
+      "Set the field pointer of the field specified by 'field_code'.  The\n"
+      "'frame_num' and 'sample_num' parameters indicate desired position.\n"
+      "If they are both omitted, the field pointer is set to sample zero.\n"
+      "The 'flags' parameter must contain one of pygetdata.SEEK_SET,\n"
+      "pygetdata.SEEK_CUR and pygetdata.SEEK_END, which may be bitwise or'd\n"
+      "with pygetdata.SEEK_PAD.  See gd_seek(3)."
+  },
   {"set_callback", (PyCFunction)gdpy_dirfile_callback,
     METH_VARARGS | METH_KEYWORDS,
     "set_callback(sehandler, extra)\n\n"
@@ -2543,6 +2606,12 @@ static PyMethodDef gdpy_dirfile_methods[] = {
       "'extra' parameter is any object which will be passed to the callback\n"
       "handler, or None, if no such object is needed.  See\n"
       "gd_parser_callback(3)."
+  },
+  {"tell", (PyCFunction)gdpy_dirfile_tell, METH_VARARGS | METH_KEYWORDS,
+    "tell(field_code)\n\n"
+      /* -----------------------------------------------------------------| */
+      "Report the current position of the field pointer of 'field_code'.\n"
+      "See gd_tell(3)."
   },
   {"uninclude", (PyCFunction)gdpy_dirfile_uninclude,
     METH_VARARGS | METH_KEYWORDS,

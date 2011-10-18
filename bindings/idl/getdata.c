@@ -3476,7 +3476,7 @@ IDL_VPTR gdidl_get_bof(int argc, IDL_VPTR argv[], char *argk)
   DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
   const char *field_code = IDL_VarGetString(argv[1]);
 
-  off64_t bof = gd_bof(D, field_code);
+  off64_t bof = gd_bof64(D, field_code);
 
   GDIDL_SET_ERROR(D);
 
@@ -3839,7 +3839,7 @@ IDL_VPTR gdidl_get_eof(int argc, IDL_VPTR argv[], char *argk)
   DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
   const char *field_code = IDL_VarGetString(argv[1]);
 
-  off64_t eof = gd_eof(D, field_code);
+  off64_t eof = gd_eof64(D, field_code);
 
   GDIDL_SET_ERROR(D);
 
@@ -4684,6 +4684,79 @@ IDL_VPTR gdidl_dirfile_standards(int argc, IDL_VPTR argv[], char *argk)
   IDL_KW_FREE;
 
   IDL_VPTR r = IDL_GettmpInt(vers);
+  dreturn("%p", r);
+  return r;
+}
+
+/* @@DLM: F gdidl_seek GD_SEEK 2 2 KEYWORDS */
+IDL_VPTR gdidl_seek(int argc, IDL_VPTR argv[], char *argk)
+{
+  dtraceidl();
+
+  typedef struct {
+    IDL_KW_RESULT_FIRST_FIELD;
+    GDIDL_KW_RESULT_ERROR;
+    off64_t frame_num;
+    off64_t sample_num;
+    int whence;
+    int pad;
+  } KW_RESULT;
+  KW_RESULT kw;
+
+  kw.whence = GD_SEEK_SET;
+  kw.frame_num = kw.sample_num = 0;
+  kw.pad = 0;
+  GDIDL_KW_INIT_ERROR;
+
+  static IDL_KW_PAR kw_pars[] = {
+    GDIDL_KW_PAR_ERROR,
+    GDIDL_KW_PAR_ESTRING,
+    { "FRAME_NUM", IDL_TYP_LONG64, 1, 0, 0, IDL_KW_OFFSETOF(frame_num) },
+    { "SAMPLE_NUM", IDL_TYP_LONG64, 1, 0, 0, IDL_KW_OFFSETOF(sample_num) },
+    { "PAD", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(pad) },
+    { "WHENCE", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(whence) },
+    { NULL }
+  };
+
+  argc = IDL_KWProcessByOffset(argc, argv, argk, kw_pars, NULL, 1, &kw);
+
+  DIRFILE *D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
+  const char* field_code = IDL_VarGetString(argv[1]);
+
+  off64_t pos = gd_seek64(D, field_code, kw.frame_num, kw.sample_num,
+      (kw.whence & (GD_SEEK_SET | GD_SEEK_CUR | GD_SEEK_END)) |
+      (kw.pad ? GD_SEEK_PAD : 0));
+
+  GDIDL_SET_ERROR(D);
+
+  IDL_KW_FREE;
+
+  IDL_VPTR r = IDL_Gettmp();
+  r->type = IDL_TYP_LONG64;
+  r->value.l64 = (IDL_LONG64)pos;
+  dreturn("%p", r);
+  return r;
+}
+
+/* @@DLM: F gdidl_tell GD_TELL 2 2 KEYWORDS */
+IDL_VPTR gdidl_tell(int argc, IDL_VPTR argv[], char *argk)
+{
+  dtraceidl();
+
+  GDIDL_KW_ONLY_ERROR;
+
+  DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
+  const char* field_code = IDL_VarGetString(argv[1]);
+
+  off64_t pos = gd_tell64(D, field_code);
+
+  GDIDL_SET_ERROR(D);
+
+  IDL_KW_FREE;
+
+  IDL_VPTR r = IDL_Gettmp();
+  r->type = IDL_TYP_LONG64;
+  r->value.l64 = (IDL_LONG64)pos;
   dreturn("%p", r);
   return r;
 }

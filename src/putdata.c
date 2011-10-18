@@ -591,13 +591,12 @@ size_t _GD_DoFieldOut(DIRFILE *D, gd_entry_t* E, int repr, off64_t first_samp,
     return 0;
   }
 
-  if (first_samp == GD_HERE) {
+  /* this call will throw GD_E_DOMAIN if a problem arises; however, that only
+   * happens in cases where the field has multiple inputs, which putdata will
+   * reject anyways; so we ignore this error for a more relevant one later
+   */
+  if (first_samp == GD_HERE)
     first_samp = _GD_GetFilePos(D, E, -1);
-    if (D->error) {
-      dreturn("%i", 0);
-      return 0;
-    }
-  }
 
   switch (E->field_type) {
     case GD_RAW_ENTRY:

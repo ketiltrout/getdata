@@ -29,6 +29,22 @@
 #define NO_GETDATA_LEGACY_API
 #include "getdata.h"
 
+/* The type parameter:
+ *   0: error codes
+ *   1: open flags represented as INT in IDL
+ *   2: open flags represented as LONG in IDL
+ *   3: entry types
+ *   4: data types
+ *   5: delete flags (not in IDL)
+ *   6: protection levels
+ *   7: callback actions (not in IDL)
+ *   8: GD_E_FORMAT suberrors (not in IDL)
+ *   9: special version codes not used by pygetdata
+ *  10: special version codes used by pygetdata
+ *  11: gd_seek whence values
+ *  12: gd_seek flags (not in IDL)
+ *  99: miscellaneous constants
+ */
 #define CONSTANT(s,f,t) { "GD_" #s, #s, f, GD_ ## s, t }
 static struct {
   const char* lname; /* Long name */
@@ -46,7 +62,7 @@ static struct {
   CONSTANT(E_BAD_TYPE,       "GD_EBT", 0),
   CONSTANT(E_RAW_IO,         "GD_ERW", 0),
   CONSTANT(E_OPEN_FRAGMENT,  "GD_EOF", 0),
-  CONSTANT(E_OPEN_INCLUDE,   "GD_EOI", 0),
+  CONSTANT(E_OPEN_INCLUDE,   "GD_EOI", 0), /* deprecated */
   CONSTANT(E_INTERNAL_ERROR, "GD_EIE", 0),
   CONSTANT(E_ALLOC,          "GD_EAL", 0),
   CONSTANT(E_RANGE,          "GD_ERA", 0),
@@ -64,9 +80,10 @@ static struct {
   CONSTANT(E_BAD_REFERENCE,  "GD_EBR", 0),
   CONSTANT(E_PROTECTED,      "GD_EPT", 0),
   CONSTANT(E_DELETE,         "GD_EDL", 0),
-  CONSTANT(E_BAD_ENDIANNESS, "GD_EEN", 0),
+  CONSTANT(E_ARGUMENT,       "GD_EAR", 0),
+  CONSTANT(E_BAD_ENDIANNESS, "GD_EEN", 0), /* deprecated */
   CONSTANT(E_CALLBACK,       "GD_ECB", 0),
-  CONSTANT(E_BAD_PROTECTION, "GD_EBP", 0),
+  CONSTANT(E_BAD_PROTECTION, "GD_EBP", 0), /* deprecated */
   CONSTANT(E_UNCLEAN_DB,     "GD_UCL", 0),
   CONSTANT(E_DOMAIN,         "GD_EDO", 0),
   CONSTANT(E_BAD_REPR,       "GD_ERP", 0),
@@ -170,9 +187,15 @@ static struct {
   CONSTANT(VERSION_LATEST,   "GDSV_L", 10),
   CONSTANT(VERSION_EARLIEST, "GDSV_E", 10),
 
-  CONSTANT(MAX_LINE_LENGTH,  "GD_MLL", 11),
-  CONSTANT(ALL_FRAGMENTS,    "GD_ALL", 11),
-  CONSTANT(DIRFILE_STANDARDS_VERSION, "GD_DSV", 11),
+  CONSTANT(SEEK_SET,         "GDSK_S", 11),
+  CONSTANT(SEEK_CUR,         "GDSK_C", 11),
+  CONSTANT(SEEK_END,         "GDSK_E", 11),
+  CONSTANT(SEEK_PAD,         "GDSK_P", 12),
+
+  CONSTANT(MAX_LINE_LENGTH,  "GD_MLL", 99),
+  CONSTANT(ALL_FRAGMENTS,    "GD_ALL", 99),
+  CONSTANT(HERE,             "GD_HER", 99),
+  CONSTANT(DIRFILE_STANDARDS_VERSION, "GD_DSV", 99),
   { NULL }
 };
 
@@ -265,10 +288,17 @@ void Fortran(void)
         parameter(constant_list[j].lname, constant_list[j].fname,
             constant_list[j].value, i);
 
+    printf("\\\n%c Seek flags\\\n", c);
+
+    for (j = 0; constant_list[j].lname != NULL; ++j)
+      if (constant_list[j].type == 11 || constant_list[j].type == 12)
+        parameter(constant_list[j].lname, constant_list[j].fname,
+            constant_list[j].value, i);
+
     printf("\\\n%c Miscellaneous parameters\\\n", c);
 
     for (j = 0; constant_list[j].lname != NULL; ++j)
-      if (constant_list[j].type == 11)
+      if (constant_list[j].type == 99)
         parameter(constant_list[j].lname, constant_list[j].fname,
             constant_list[j].value, i);
 
@@ -316,7 +346,8 @@ void IDL(void)
 
   for (i = 0; constant_list[i].lname != NULL; ++i)
     if ((constant_list[i].type != 1) && (constant_list[i].type != 5) &&
-        (constant_list[i].type != 7) && (constant_list[i].type != 8))
+        (constant_list[i].type != 7) && (constant_list[i].type != 8) &&
+        (constant_list[i].type != 12))
     {
       printf("{ \"%s\", 0, (void*)IDL_TYP_%s }, ", constant_list[i].sname,
           (constant_list[i].type == 2) ? "LONG" : "INT"); 
@@ -336,7 +367,8 @@ void IDL(void)
 
   for (n = i = 0; constant_list[i].lname != NULL; ++i)
     if ((constant_list[i].type != 1) && (constant_list[i].type != 5) &&
-        (constant_list[i].type != 7) && (constant_list[i].type != 8))
+        (constant_list[i].type != 7) && (constant_list[i].type != 8) &&
+        (constant_list[i].type != 12))
     {
       printf("*(IDL_%s*)(data + IDL_StructTagInfoByIndex(gdidl_const_def, %i, "
           "IDL_MSG_LONGJMP, NULL)) = %li;\n", (constant_list[i].type == 2) ?

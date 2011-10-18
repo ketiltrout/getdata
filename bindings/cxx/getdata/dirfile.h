@@ -111,7 +111,7 @@ namespace GetData {
 
       int Error() const;
 
-      int ErrorCount();
+      int ErrorCount() const;
 
       const char *ErrorString();
       const char *ErrorString(size_t n) gd_deprecated;
@@ -205,12 +205,17 @@ namespace GetData {
 
       unsigned int SamplesPerFrame(const char *field_code) const;
 
+      off_t Seek(const char* field_code, off_t frame_num, off_t sample_num,
+          int flags) const;
+
       void SetCallback(gd_parser_callback_t sehandler, void* extra = NULL)
         const;
 
       int Standards(int version = GD_VERSION_CURRENT) const;
 
       const char **Strings() const;
+
+      off_t Tell(const char* field_code) const;
 
       int UnInclude(int fragment_index, int del = 0) const;
 
