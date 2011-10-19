@@ -945,10 +945,10 @@ gd_nonnull ((1,2));
 extern gd_off64_t gd_eof64(DIRFILE *dirfile, const char *field_code)
   gd_nonnull ((1,2));
 
-extern off64_t gd_seek64(DIRFILE *dirfile, const char *field_code,
-    off64_t frame_num, off64_t sample_num, int whence) gd_nonnull ((1,2));
+extern gd_off64_t gd_seek64(DIRFILE *dirfile, const char *field_code,
+    gd_off64_t frame_num, gd_off64_t sample_num, int whence) gd_nonnull ((1,2));
 
-extern off64_t gd_tell64(DIRFILE *dirfile, const char *field_code) gd_nothrow
+extern gd_off64_t gd_tell64(DIRFILE *dirfile, const char *field_code) gd_nothrow
 gd_nonnull ((1,2));
 #endif
 
