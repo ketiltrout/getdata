@@ -171,13 +171,14 @@ GET_TESTS=${GET64} get_bad_code get_bit get_carray get_carray_len \
 					get_endian_float32_arm get_endian_float32_big \
 					get_endian_float32_little get_endian_float64_arm \
 					get_endian_float64_big get_endian_float64_little get_ff get_float32 \
-					get_float64 get_foffs get_fs get_here get_heres get_int8 get_int16 \
-					get_int32 get_int64 get_invalid get_lincom1 get_lincom2 get_lincom3 \
-					get_lincom_noin get_lincom_non get_linterp get_linterp_noin \
-					get_linterp_notab get_linterp_sort get_multiply get_multiply_noin \
-					get_nonexistent get_null $(GET_OFF64) get_phase get_polynom \
-					get_polynom_noin get_recip get_recip_const get_recurse get_sbit \
-					get_sf get_ss get_type get_uint16 get_uint32 get_uint64 get_zero
+					get_float64 get_foffs get_fs get_here get_here_foffs get_heres \
+					get_int8 get_int16 get_int32 get_int64 get_invalid get_lincom1 \
+					get_lincom2 get_lincom3 get_lincom_noin get_lincom_non get_linterp \
+					get_linterp_noin get_linterp_notab get_linterp_sort get_multiply \
+					get_multiply_noin get_nonexistent get_null $(GET_OFF64) get_phase \
+					get_polynom get_polynom_noin get_recip get_recip_const get_recurse \
+					get_sbit get_sf get_ss get_type get_uint16 get_uint32 get_uint64 \
+					get_zero
 
 GLOBAL_TESTS=global_name global_ref global_ref_empty global_ref_set
 
@@ -283,7 +284,7 @@ REPR_TESTS=repr_a repr_float32 repr_float64 repr_i repr_int16 repr_int32 \
 					 repr_real_m repr_real_r repr_uint16 repr_uint32 repr_uint64 \
 					 repr_uint8
 
-SEEK_TESTS=$(SEEK64) seek_cur seek_end seek_set
+SEEK_TESTS=$(SEEK64) seek_cur seek_end seek_foffs seek_set
 
 SIE_TESTS=sie_get_big sie_get_little sie_move_from sie_move_to sie_nframes_big \
 					sie_nframes_little sie_put_big sie_put_little

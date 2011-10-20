@@ -39,10 +39,9 @@
  *   6: protection levels
  *   7: callback actions (not in IDL)
  *   8: GD_E_FORMAT suberrors (not in IDL)
- *   9: special version codes not used by pygetdata
- *  10: special version codes used by pygetdata
- *  11: gd_seek whence values
- *  12: gd_seek flags (not in IDL)
+ *   9: special version codes
+ *  10: gd_seek whence values
+ *  11: gd_seek flags (not in IDL)
  *  99: miscellaneous constants
  */
 #define CONSTANT(s,f,t) { "GD_" #s, #s, f, GD_ ## s, t }
@@ -184,13 +183,13 @@ static struct {
   CONSTANT(E_FORMAT_LITERAL, "GDF_LT", 8),
 
   CONSTANT(VERSION_CURRENT,  "GDSV_C", 9),
-  CONSTANT(VERSION_LATEST,   "GDSV_L", 10),
-  CONSTANT(VERSION_EARLIEST, "GDSV_E", 10),
+  CONSTANT(VERSION_LATEST,   "GDSV_L", 9),
+  CONSTANT(VERSION_EARLIEST, "GDSV_E", 9),
 
-  CONSTANT(SEEK_SET,         "GDSK_S", 11),
-  CONSTANT(SEEK_CUR,         "GDSK_C", 11),
-  CONSTANT(SEEK_END,         "GDSK_E", 11),
-  CONSTANT(SEEK_PAD,         "GDSK_P", 12),
+  CONSTANT(SEEK_SET,         "GDSK_S", 10),
+  CONSTANT(SEEK_CUR,         "GDSK_C", 10),
+  CONSTANT(SEEK_END,         "GDSK_E", 10),
+  CONSTANT(SEEK_PAD,         "GDSK_P", 11),
 
   CONSTANT(MAX_LINE_LENGTH,  "GD_MLL", 99),
   CONSTANT(ALL_FRAGMENTS,    "GD_ALL", 99),
@@ -284,14 +283,14 @@ void Fortran(void)
     printf("\\\n%c Special version codes\\\n", c);
 
     for (j = 0; constant_list[j].lname != NULL; ++j)
-      if (constant_list[j].type == 9 || constant_list[j].type == 10)
+      if (constant_list[j].type == 9)
         parameter(constant_list[j].lname, constant_list[j].fname,
             constant_list[j].value, i);
 
     printf("\\\n%c Seek flags\\\n", c);
 
     for (j = 0; constant_list[j].lname != NULL; ++j)
-      if (constant_list[j].type == 11 || constant_list[j].type == 12)
+      if (constant_list[j].type == 10 || constant_list[j].type == 11)
         parameter(constant_list[j].lname, constant_list[j].fname,
             constant_list[j].value, i);
 
@@ -318,8 +317,7 @@ void Python(void)
       "const struct gdpy_constant_t gdpy_constant_list[] = {\n");
   
   for (i = 0; constant_list[i].lname != NULL; ++i)
-    if (constant_list[i].type != 9)
-      printf("{\"%s\", %s}, ", constant_list[i].sname, constant_list[i].lname);
+    printf("{\"%s\", %s}, ", constant_list[i].sname, constant_list[i].lname);
 
   /* Python numerical type aliases */
   printf(
@@ -347,7 +345,7 @@ void IDL(void)
   for (i = 0; constant_list[i].lname != NULL; ++i)
     if ((constant_list[i].type != 1) && (constant_list[i].type != 5) &&
         (constant_list[i].type != 7) && (constant_list[i].type != 8) &&
-        (constant_list[i].type != 12))
+        (constant_list[i].type != 11))
     {
       printf("{ \"%s\", 0, (void*)IDL_TYP_%s }, ", constant_list[i].sname,
           (constant_list[i].type == 2) ? "LONG" : "INT"); 
@@ -368,7 +366,7 @@ void IDL(void)
   for (n = i = 0; constant_list[i].lname != NULL; ++i)
     if ((constant_list[i].type != 1) && (constant_list[i].type != 5) &&
         (constant_list[i].type != 7) && (constant_list[i].type != 8) &&
-        (constant_list[i].type != 12))
+        (constant_list[i].type != 11))
     {
       printf("*(IDL_%s*)(data + IDL_StructTagInfoByIndex(gdidl_const_def, %i, "
           "IDL_MSG_LONGJMP, NULL)) = %li;\n", (constant_list[i].type == 2) ?

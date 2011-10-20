@@ -40,10 +40,13 @@ C     GDDSCD GDCLBK GDCLOS (although this last one is used)
       PARAMETER (flen = 7)
       INTEGER nfields
       PARAMETER (nfields = 14)
+      INTEGER slen
+      PARAMETER (slen = 26)
 
+      CHARACTER*26 strings(3)
       CHARACTER*7 fields(nfields + 7)
       CHARACTER*7 fn
-      CHARACTER*20 str
+      CHARACTER*26 str
       INTEGER*1 c(8)
       INTEGER*1 datdat(80)
       INTEGER*1 k
@@ -121,7 +124,7 @@ C     0: GDEROR check
       ne = 0
       IF (e .NE. GD_EOP) THEN
         ne = ne + 1
-        WRITE(*, 2001) 0, e
+        WRITE(*, 9001) 0, e
       ENDIF
 
 C     1: GDOPEN check
@@ -130,7 +133,7 @@ C     1: GDOPEN check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2001) 1, e
+        WRITE(*, 9001) 1, e
       ENDIF
 
 C     2: GDGETD check
@@ -139,18 +142,18 @@ C     2: GDGETD check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2001) 2, e
+        WRITE(*, 9001) 2, e
       ENDIF
 
       IF (n .NE. 8) THEN
         ne = ne + 1
-        WRITE(*, 2002) 2, n
+        WRITE(*, 9002) 2, n
       ENDIF
 
       DO 20 i = 1, 8
       IF (c(i) .NE. 40 + i) THEN
         ne = ne + 1
-        WRITE(*, 2004) i, 2, c(i)
+        WRITE(*, 9004) i, 2, c(i)
       ENDIF
    20 CONTINUE
 
@@ -160,12 +163,12 @@ C     3: GDGTCO check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2001) 3, e
+        WRITE(*, 9001) 3, e
       ENDIF
 
       IF (abs(fl - 5.5) .gt. 0.001) THEN
         ne = ne + 1
-        WRITE(*, 2005) 3, fl
+        WRITE(*, 9005) 3, fl
       ENDIF
 
 C     4: GDFDNX check
@@ -174,12 +177,12 @@ C     4: GDFDNX check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2001) 4, e
+        WRITE(*, 9001) 4, e
       ENDIF
 
       IF (i .NE. flen) THEN
         ne = ne + 1
-        WRITE(*, 2002) 4, i
+        WRITE(*, 9002) 4, i
       ENDIF
 
 C     5: GDMFNX check
@@ -188,12 +191,12 @@ C     5: GDMFNX check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2001) 5, e
+        WRITE(*, 9001) 5, e
       ENDIF
 
       IF (i .NE. 6) THEN
         ne = ne + 1
-        WRITE(*, 2002) 5, i
+        WRITE(*, 9002) 5, i
       ENDIF
 
 C     6: GDNFLD check
@@ -202,12 +205,12 @@ C     6: GDNFLD check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2001) 6, e
+        WRITE(*, 9001) 6, e
       ENDIF
 
       IF (n .NE. nfields) THEN
         ne = ne + 1
-        WRITE(*, 2002) 6, n
+        WRITE(*, 9002) 6, n
       ENDIF
 
 C     7: This is a check of (one of many instances of) _GDF_FString
@@ -217,12 +220,12 @@ C     7: This is a check of (one of many instances of) _GDF_FString
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2001) 7, e
+        WRITE(*, 9001) 7, e
       ENDIF
 
       IF (l .NE. 5) THEN
         ne = ne + 1
-        WRITE(*, 2002) 7, l
+        WRITE(*, 9002) 7, l
       ENDIF
 
 C     8: GDFLDN check
@@ -233,17 +236,17 @@ C     8: GDFLDN check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 8, i, e
+        WRITE(*, 9006) 8, i, e
       ENDIF
 
       IF (l .NE. flen) THEN
         ne = ne + 1
-        WRITE(*, 2007) 8, i, l
+        WRITE(*, 9007) 8, i, l
       ENDIF
 
       IF (fn .NE. fields(i)) THEN
         ne = ne + 1
-        WRITE(*, 2008) i, 8, fn
+        WRITE(*, 9008) i, 8, fn
       ENDIF
    80 CONTINUE
 
@@ -253,12 +256,12 @@ C     9: GDNMFD check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2001) 9, e
+        WRITE(*, 9001) 9, e
       ENDIF
 
       IF (n .NE. 3) THEN
         ne = ne + 1
-        WRITE(*, 2002) 9, n
+        WRITE(*, 9002) 9, n
       ENDIF
 
 C     10: GDMFDN check
@@ -272,17 +275,17 @@ C     10: GDMFDN check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 10, i, e
+        WRITE(*, 9006) 10, i, e
       ENDIF
 
       IF (l .NE. flen) THEN
         ne = ne + 1
-        WRITE(*, 2007) 10, i, l
+        WRITE(*, 9007) 10, i, l
       ENDIF
 
       IF (fn .NE. fields(i)) THEN
         ne = ne + 1
-        WRITE(*, 2008) i, 10, fn
+        WRITE(*, 9008) i, 10, fn
       ENDIF
   100 CONTINUE
 
@@ -292,12 +295,12 @@ C     11: GDNFRM check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2001) 11, e
+        WRITE(*, 9001) 11, e
       ENDIF
 
       IF (n .NE. 10) THEN
         ne = ne + 1
-        WRITE(*, 2002) 11, n
+        WRITE(*, 9002) 11, n
       ENDIF
 
 C     12: GDGSPF check
@@ -306,12 +309,12 @@ C     12: GDGSPF check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2001) 12, e
+        WRITE(*, 9001) 12, e
       ENDIF
 
       IF (n .NE. 8) THEN
         ne = ne + 1
-        WRITE(*, 2002) 12, n
+        WRITE(*, 9002) 12, n
       ENDIF
 
 C     13: GDPUTD check
@@ -328,12 +331,12 @@ C     13: GDPUTD check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2001) 13, e
+        WRITE(*, 9001) 13, e
       ENDIF
 
       IF (n .NE. 4) THEN
         ne = ne + 1
-        WRITE(*, 2002) 13, n
+        WRITE(*, 9002) 13, n
       ENDIF
 
       CALL GDGETD(n, d, 'data', 4, 5, 0, 1, 0, GD_I8, c)
@@ -342,17 +345,17 @@ C     13: GDPUTD check
       IF (((i .EQ. 1 .OR. i .GT. 5) .AND. c(i) .NE. 40 + i) .OR.
      +(i .GT. 1 .AND. i .LT. 6) .AND. c(i) .NE. 11 + i) THEN
         ne = ne + 1
-        WRITE(*, 2004) i, 13, c(i)
+        WRITE(*, 9004) i, 13, c(i)
       ENDIF
   130 CONTINUE
 
 C     14: GDESTR check
       CALL GDGETD(n, d, 'x', 1, 5, 0, 1, 0, GD_I8, c)
-      CALL GDESTR(d, str, 20)
+      CALL GDESTR(d, str, slen)
 
       IF (str .NE. 'Field not found: x  ') THEN
         ne = ne + 1
-        WRITE(*, 2009) 14, str
+        WRITE(*, 9009) 14, str
       ENDIF
 
 C     15: GDENTY check
@@ -361,12 +364,12 @@ C     15: GDENTY check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2001) 15, e
+        WRITE(*, 9001) 15, e
       ENDIF
 
       IF (n .NE. GD_RWE) THEN
         ne = ne + 1
-        WRITE(*, 2002) 15, n
+        WRITE(*, 9002) 15, n
       ENDIF
 
 C     16: GDGERW check
@@ -375,22 +378,22 @@ C     16: GDGERW check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2001) 16, e
+        WRITE(*, 9001) 16, e
       ENDIF
 
       IF (n .NE. 0) THEN
         ne = ne + 1
-        WRITE(*, 2007) 16, 1, n
+        WRITE(*, 9007) 16, 1, n
       ENDIF
 
       IF (l .NE. 8) THEN
         ne = ne + 1
-        WRITE(*, 2007) 16, 2, l
+        WRITE(*, 9007) 16, 2, l
       ENDIF
 
       IF (i .NE. GD_I8) THEN
         ne = ne + 1
-        WRITE(*, 2007) 16, 3, i
+        WRITE(*, 9007) 16, 3, i
       ENDIF
 
 C     17: GDGELC check
@@ -401,37 +404,37 @@ C     17: GDGELC check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2001) 17, e
+        WRITE(*, 9001) 17, e
       ENDIF
 
       IF (l .NE. flen) THEN
         ne = ne + 1
-        WRITE(*, 2007) 17, 1, l
+        WRITE(*, 9007) 17, 1, l
       ENDIF
 
       IF (i .NE. 3) THEN
         ne = ne + 1
-        WRITE(*, 2007) 17, 2, i
+        WRITE(*, 9007) 17, 2, i
       ENDIF
 
       IF (n .NE. 0) THEN
         ne = ne + 1
-        WRITE(*, 2007) 17, 3, n
+        WRITE(*, 9007) 17, 3, n
       ENDIF
 
       IF (fields(1) .NE. 'data') THEN
         ne = ne + 1
-        WRITE(*, 2008) 17, 4, fields(1)
+        WRITE(*, 9008) 17, 4, fields(1)
       ENDIF
 
       IF (fields(2) .NE. 'INDEX') THEN
         ne = ne + 1
-        WRITE(*, 2008) 17, 5, fields(2)
+        WRITE(*, 9008) 17, 5, fields(2)
       ENDIF
 
       IF (fields(3) .NE. 'linterp') THEN
         ne = ne + 1
-        WRITE(*, 2008) 17, 6, fields(3)
+        WRITE(*, 9008) 17, 6, fields(3)
       ENDIF
 
       q(1) = 1.1
@@ -443,7 +446,7 @@ C     17: GDGELC check
       DO 170 i=1,6
       IF (abs(p(i) - q(i)) .gt. 0.001) THEN
         ne = ne + 1
-        WRITE(*, 2010) i, 17, p(i)
+        WRITE(*, 9010) i, 17, p(i)
       ENDIF
   170 CONTINUE
 
@@ -455,37 +458,37 @@ C     18: GDGECL check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2001) 18, e
+        WRITE(*, 9001) 18, e
       ENDIF
 
       IF (l .NE. flen) THEN
         ne = ne + 1
-        WRITE(*, 2007) 18, 1, l
+        WRITE(*, 9007) 18, 1, l
       ENDIF
 
       IF (i .NE. 3) THEN
         ne = ne + 1
-        WRITE(*, 2007) 18, 2, i
+        WRITE(*, 9007) 18, 2, i
       ENDIF
 
       IF (n .NE. 0) THEN
         ne = ne + 1
-        WRITE(*, 2007) 18, 3, n
+        WRITE(*, 9007) 18, 3, n
       ENDIF
 
       IF (fields(1) .NE. 'data') THEN
         ne = ne + 1
-        WRITE(*, 2008) 18, 4, fields(1)
+        WRITE(*, 9008) 18, 4, fields(1)
       ENDIF
 
       IF (fields(2) .NE. 'INDEX') THEN
         ne = ne + 1
-        WRITE(*, 2008) 18, 5, fields(2)
+        WRITE(*, 9008) 18, 5, fields(2)
       ENDIF
 
       IF (fields(3) .NE. 'linterp') THEN
         ne = ne + 1
-        WRITE(*, 2008) 18, 6, fields(3)
+        WRITE(*, 9008) 18, 6, fields(3)
       ENDIF
 
       cq(1) = cmplx(1.1, 0.0)
@@ -497,7 +500,7 @@ C     18: GDGECL check
       DO 180 i=1,6
       IF (abs(cp(i) - cq(i)) .gt. 0.001) THEN
         ne = ne + 1
-        WRITE(*, 2011) i, 18, REAL(REAL(cp(i))), REAL(AIMAG(cp(i)))
+        WRITE(*, 9011) i, 18, REAL(REAL(cp(i))), REAL(AIMAG(cp(i)))
       ENDIF
   180 CONTINUE
 
@@ -509,27 +512,27 @@ C     19: GDGEPN check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2001) 19, e
+        WRITE(*, 9001) 19, e
       ENDIF
 
       IF (l .NE. flen) THEN
         ne = ne + 1
-        WRITE(*, 2007) 19, 1, l
+        WRITE(*, 9007) 19, 1, l
       ENDIF
 
       IF (i .NE. 5) THEN
         ne = ne + 1
-        WRITE(*, 2007) 19, 2, i
+        WRITE(*, 9007) 19, 2, i
       ENDIF
 
       IF (n .NE. 0) THEN
         ne = ne + 1
-        WRITE(*, 2007) 19, 3, n
+        WRITE(*, 9007) 19, 3, n
       ENDIF
 
       IF (fn .NE. 'data') THEN
         ne = ne + 1
-        WRITE(*, 2008) 19, 4, fn
+        WRITE(*, 9008) 19, 4, fn
       ENDIF
 
       q(1) = 1.1
@@ -541,7 +544,7 @@ C     19: GDGEPN check
       DO 190 i=1,6
       IF (abs(p(i) - q(i)) .gt. 0.001) THEN
         ne = ne + 1
-        WRITE(*, 2010) i, 19, p(i)
+        WRITE(*, 9010) i, 19, p(i)
       ENDIF
   190 CONTINUE
 
@@ -553,27 +556,27 @@ C     20: GDGECP check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2001) 20, e
+        WRITE(*, 9001) 20, e
       ENDIF
 
       IF (l .NE. flen) THEN
         ne = ne + 1
-        WRITE(*, 2007) 20, 1, l
+        WRITE(*, 9007) 20, 1, l
       ENDIF
 
       IF (i .NE. 5) THEN
         ne = ne + 1
-        WRITE(*, 2007) 20, 2, i
+        WRITE(*, 9007) 20, 2, i
       ENDIF
 
       IF (n .NE. 0) THEN
         ne = ne + 1
-        WRITE(*, 2007) 20, 3, n
+        WRITE(*, 9007) 20, 3, n
       ENDIF
 
       IF (fn .NE. 'data') THEN
         ne = ne + 1
-        WRITE(*, 2008) 20, 4, fn
+        WRITE(*, 9008) 20, 4, fn
       ENDIF
 
       cq(1) = cmplx(1.1, 0.0)
@@ -585,38 +588,38 @@ C     20: GDGECP check
       DO 200 i=1,6
       IF (abs(cp(i) - cq(i)) .gt. 0.001) THEN
         ne = ne + 1
-        WRITE(*, 2011) i, 30, REAL(REAL(cp(i))), REAL(AIMAG(cp(i)))
+        WRITE(*, 9011) i, 30, REAL(REAL(cp(i))), REAL(AIMAG(cp(i)))
       ENDIF
   200 CONTINUE
 
 C     21: GDGELT check
       l = flen
-      CALL GDGELT(fn, l, str, 20, n, d, 'linterp', 7)
+      CALL GDGELT(fn, l, str, slen, n, d, 'linterp', 7)
       CALL GDEROR(e, d)
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2001) 21, e
+        WRITE(*, 9001) 21, e
       ENDIF
 
       IF (l .NE. flen) THEN
         ne = ne + 1
-        WRITE(*, 2007) 21, 1, l
+        WRITE(*, 9007) 21, 1, l
       ENDIF
 
       IF (n .NE. 0) THEN
         ne = ne + 1
-        WRITE(*, 2007) 21, 2, n
+        WRITE(*, 9007) 21, 2, n
       ENDIF
 
       IF (fn .NE. 'data') THEN
         ne = ne + 1
-        WRITE(*, 2008) 21, 3, fn
+        WRITE(*, 9008) 21, 3, fn
       ENDIF
 
       IF (str .NE. '/look/up/file') THEN
         ne = ne + 1
-        WRITE(*, 2008) 21, 4, str
+        WRITE(*, 9008) 21, 4, str
       ENDIF
 
 C     22: GDGEBT check
@@ -626,32 +629,32 @@ C     22: GDGEBT check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2001) 22, e
+        WRITE(*, 9001) 22, e
       ENDIF
 
       IF (l .NE. flen) THEN
         ne = ne + 1
-        WRITE(*, 2007) 22, 1, l
+        WRITE(*, 9007) 22, 1, l
       ENDIF
 
       IF (n .NE. 0) THEN
         ne = ne + 1
-        WRITE(*, 2007) 22, 2, n
+        WRITE(*, 9007) 22, 2, n
       ENDIF
 
       IF (i .NE. 4) THEN
         ne = ne + 1
-        WRITE(*, 2007) 22, 3, i
+        WRITE(*, 9007) 22, 3, i
       ENDIF
 
       IF (m .NE. 3) THEN
         ne = ne + 1
-        WRITE(*, 2007) 22, 4, m
+        WRITE(*, 9007) 22, 4, m
       ENDIF
 
       IF (fn .NE. 'data') THEN
         ne = ne + 1
-        WRITE(*, 2008) 22, 5, fn
+        WRITE(*, 9008) 22, 5, fn
       ENDIF
 
 C     23: GDGESB check
@@ -661,32 +664,32 @@ C     23: GDGESB check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2001) 23, e
+        WRITE(*, 9001) 23, e
       ENDIF
 
       IF (l .NE. flen) THEN
         ne = ne + 1
-        WRITE(*, 2007) 23, 1, l
+        WRITE(*, 9007) 23, 1, l
       ENDIF
 
       IF (n .NE. 0) THEN
         ne = ne + 1
-        WRITE(*, 2007) 23, 2, n
+        WRITE(*, 9007) 23, 2, n
       ENDIF
 
       IF (i .NE. 6) THEN
         ne = ne + 1
-        WRITE(*, 2007) 23, 3, i
+        WRITE(*, 9007) 23, 3, i
       ENDIF
 
       IF (m .NE. 5) THEN
         ne = ne + 1
-        WRITE(*, 2007) 23, 4, m
+        WRITE(*, 9007) 23, 4, m
       ENDIF
 
       IF (fn .NE. 'data') THEN
         ne = ne + 1
-        WRITE(*, 2008) 23, 5, fn
+        WRITE(*, 9008) 23, 5, fn
       ENDIF
 
 C     24: GDGEMT check
@@ -696,27 +699,27 @@ C     24: GDGEMT check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2001) 24, e
+        WRITE(*, 9001) 24, e
       ENDIF
 
       IF (l .NE. flen) THEN
         ne = ne + 1
-        WRITE(*, 2007) 24, 1, l
+        WRITE(*, 9007) 24, 1, l
       ENDIF
 
       IF (n .NE. 0) THEN
         ne = ne + 1
-        WRITE(*, 2007) 24, 2, n
+        WRITE(*, 9007) 24, 2, n
       ENDIF
 
       IF (fields(1) .NE. 'data') THEN
         ne = ne + 1
-        WRITE(*, 2008) 24, 3, fields(1)
+        WRITE(*, 9008) 24, 3, fields(1)
       ENDIF
 
       IF (fields(2) .NE. 'sbit') THEN
         ne = ne + 1
-        WRITE(*, 2008) 24, 4, fields(2)
+        WRITE(*, 9008) 24, 4, fields(2)
       ENDIF
 
 C     25: GDGEPH check
@@ -726,27 +729,27 @@ C     25: GDGEPH check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2001) 25, e
+        WRITE(*, 9001) 25, e
       ENDIF
 
       IF (l .NE. flen) THEN
         ne = ne + 1
-        WRITE(*, 2007) 25, 1, l
+        WRITE(*, 9007) 25, 1, l
       ENDIF
 
       IF (n .NE. 0) THEN
         ne = ne + 1
-        WRITE(*, 2007) 25, 2, n
+        WRITE(*, 9007) 25, 2, n
       ENDIF
 
       IF (i .NE. 11) THEN
         ne = ne + 1
-        WRITE(*, 2007) 25, 3, i
+        WRITE(*, 9007) 25, 3, i
       ENDIF
 
       IF (fn .NE. 'data') THEN
         ne = ne + 1
-        WRITE(*, 2008) 25, 4, fn
+        WRITE(*, 9008) 25, 4, fn
       ENDIF
 
 C     26: GDGECO check
@@ -755,17 +758,17 @@ C     26: GDGECO check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2001) 26, e
+        WRITE(*, 9001) 26, e
       ENDIF
 
       IF (n .NE. 0) THEN
         ne = ne + 1
-        WRITE(*, 2007) 26, 1, n
+        WRITE(*, 9007) 26, 1, n
       ENDIF
 
       IF (i .NE. GD_F64) THEN
         ne = ne + 1
-        WRITE(*, 2007) 26, 2, i
+        WRITE(*, 9007) 26, 2, i
       ENDIF
 
 C     27: GDFRGI check
@@ -774,12 +777,12 @@ C     27: GDFRGI check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2001) 27, e
+        WRITE(*, 9001) 27, e
       ENDIF
 
       IF (n .NE. 0) THEN
         ne = ne + 1
-        WRITE(*, 2002) 27, n
+        WRITE(*, 9002) 27, n
       ENDIF
 
 C     28: GDADRW check
@@ -788,7 +791,7 @@ C     28: GDADRW check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 28, 1, e
+        WRITE(*, 9006) 28, 1, e
       ENDIF
 
       CALL GDGERW(l, i, n, d, 'new1', 4)
@@ -796,22 +799,22 @@ C     28: GDADRW check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 28, 2, e
+        WRITE(*, 9006) 28, 2, e
       ENDIF
 
       IF (n .NE. 0) THEN
         ne = ne + 1
-        WRITE(*, 2007) 28, 3, n
+        WRITE(*, 9007) 28, 3, n
       ENDIF
 
       IF (l .NE. 3) THEN
         ne = ne + 1
-        WRITE(*, 2007) 28, 4, l
+        WRITE(*, 9007) 28, 4, l
       ENDIF
 
       IF (i .NE. GD_F64) THEN
         ne = ne + 1
-        WRITE(*, 2007) 28, 5, i
+        WRITE(*, 9007) 28, 5, i
       ENDIF
 
 C     29: GDADLC check
@@ -821,7 +824,7 @@ C     29: GDADLC check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 29, 1, e
+        WRITE(*, 9006) 29, 1, e
       ENDIF
 
       l = flen
@@ -831,32 +834,32 @@ C     29: GDADLC check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 29, 2, e
+        WRITE(*, 9006) 29, 2, e
       ENDIF
 
       IF (l .NE. flen) THEN
         ne = ne + 1
-        WRITE(*, 2007) 29, 3, l
+        WRITE(*, 9007) 29, 3, l
       ENDIF
 
       IF (i .NE. 2) THEN
         ne = ne + 1
-        WRITE(*, 2007) 29, 4, i
+        WRITE(*, 9007) 29, 4, i
       ENDIF
 
       IF (n .NE. 0) THEN
         ne = ne + 1
-        WRITE(*, 2007) 29, 5, n
+        WRITE(*, 9007) 29, 5, n
       ENDIF
 
       IF (fields(1) .NE. 'in1') THEN
         ne = ne + 1
-        WRITE(*, 2008) 29, 6, fields(1)
+        WRITE(*, 9008) 29, 6, fields(1)
       ENDIF
 
       IF (fields(2) .NE. 'in2') THEN
         ne = ne + 1
-        WRITE(*, 2008) 29, 7, fields(2)
+        WRITE(*, 9008) 29, 7, fields(2)
       ENDIF
 
       q(1) = 9.9
@@ -868,7 +871,7 @@ C     29: GDADLC check
       DO 290 i=1,4
       IF (abs(p(i) - q(i)) .gt. 0.001) THEN
         ne = ne + 1
-        WRITE(*, 2010) i, 29, p(i)
+        WRITE(*, 9010) i, 29, p(i)
       ENDIF
   290 CONTINUE
 
@@ -883,7 +886,7 @@ C     30: GDADCL check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 30, 1, e
+        WRITE(*, 9006) 30, 1, e
       ENDIF
 
       l = flen
@@ -893,32 +896,32 @@ C     30: GDADCL check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2001) 30, e
+        WRITE(*, 9001) 30, e
       ENDIF
 
       IF (l .NE. flen) THEN
         ne = ne + 1
-        WRITE(*, 2007) 30, 1, l
+        WRITE(*, 9007) 30, 1, l
       ENDIF
 
       IF (i .NE. 2) THEN
         ne = ne + 1
-        WRITE(*, 2007) 30, 2, i
+        WRITE(*, 9007) 30, 2, i
       ENDIF
 
       IF (n .NE. 0) THEN
         ne = ne + 1
-        WRITE(*, 2007) 30, 3, n
+        WRITE(*, 9007) 30, 3, n
       ENDIF
 
       IF (fields(1) .NE. 'in1') THEN
         ne = ne + 1
-        WRITE(*, 2008) 30, 4, fields(1)
+        WRITE(*, 9008) 30, 4, fields(1)
       ENDIF
 
       IF (fields(2) .NE. 'in2') THEN
         ne = ne + 1
-        WRITE(*, 2008) 30, 5, fields(2)
+        WRITE(*, 9008) 30, 5, fields(2)
       ENDIF
 
       cq(1) = cmplx(1.1, 1.2)
@@ -928,7 +931,7 @@ C     30: GDADCL check
       DO 300 i=1,4
       IF (abs(cp(i) - cq(i)) .gt. 0.001) THEN
         ne = ne + 1
-        WRITE(*, 2011) i, 30, REAL(REAL(cp(i))), REAL(AIMAG(cp(i)))
+        WRITE(*, 9011) i, 30, REAL(REAL(cp(i))), REAL(AIMAG(cp(i)))
       ENDIF
   300 CONTINUE
 
@@ -939,7 +942,7 @@ C     31: GDADPN check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 31, 1, e
+        WRITE(*, 9006) 31, 1, e
       ENDIF
 
       l = flen
@@ -949,27 +952,27 @@ C     31: GDADPN check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 31, 2, e
+        WRITE(*, 9006) 31, 2, e
       ENDIF
 
       IF (l .NE. flen) THEN
         ne = ne + 1
-        WRITE(*, 2007) 31, 1, l
+        WRITE(*, 9007) 31, 1, l
       ENDIF
 
       IF (i .NE. 3) THEN
         ne = ne + 1
-        WRITE(*, 2007) 31, 2, i
+        WRITE(*, 9007) 31, 2, i
       ENDIF
 
       IF (n .NE. 0) THEN
         ne = ne + 1
-        WRITE(*, 2007) 31, 3, n
+        WRITE(*, 9007) 31, 3, n
       ENDIF
 
       IF (fn .NE. 'in1') THEN
         ne = ne + 1
-        WRITE(*, 2008) 31, 4, fn
+        WRITE(*, 9008) 31, 4, fn
       ENDIF
 
       q(1) = 3d3
@@ -982,7 +985,7 @@ C     31: GDADPN check
       DO 310 i=1,4
       IF (abs(p(i) - q(i)) .gt. 0.001) THEN
         ne = ne + 1
-        WRITE(*, 2010) i, 31, p(i)
+        WRITE(*, 9010) i, 31, p(i)
       ENDIF
   310 CONTINUE
 
@@ -997,7 +1000,7 @@ C     32: GDADCP check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 32, 1, e
+        WRITE(*, 9006) 32, 1, e
       ENDIF
 
       l = flen
@@ -1007,27 +1010,27 @@ C     32: GDADCP check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 32, 2, e
+        WRITE(*, 9006) 32, 2, e
       ENDIF
 
       IF (l .NE. flen) THEN
         ne = ne + 1
-        WRITE(*, 2007) 32, 1, l
+        WRITE(*, 9007) 32, 1, l
       ENDIF
 
       IF (i .NE. 3) THEN
         ne = ne + 1
-        WRITE(*, 2007) 32, 2, i
+        WRITE(*, 9007) 32, 2, i
       ENDIF
 
       IF (n .NE. 0) THEN
         ne = ne + 1
-        WRITE(*, 2007) 32, 3, n
+        WRITE(*, 9007) 32, 3, n
       ENDIF
 
       IF (fn .NE. 'in1') THEN
         ne = ne + 1
-        WRITE(*, 2008) 32, 4, fn
+        WRITE(*, 9008) 32, 4, fn
       ENDIF
 
       cq(1) = cmplx(3.1, 7.0)
@@ -1037,7 +1040,7 @@ C     32: GDADCP check
       DO 320 i=1,4
       IF (abs(cp(i) - cq(i)) .gt. 0.001) THEN
         ne = ne + 1
-        WRITE(*, 2011) i, 32, REAL(REAL(cp(i))), REAL(AIMAG(cp(i)))
+        WRITE(*, 9011) i, 32, REAL(REAL(cp(i))), REAL(AIMAG(cp(i)))
       ENDIF
   320 CONTINUE
 
@@ -1047,36 +1050,36 @@ C     33: GDADLT check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 33, 1, e
+        WRITE(*, 9006) 33, 1, e
       ENDIF
 
       l = flen
-      CALL GDGELT(fn, l, str, 20, n, d, 'new6', 4)
+      CALL GDGELT(fn, l, str, slen, n, d, 'new6', 4)
       CALL GDEROR(e, d)
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 33, 2, e
+        WRITE(*, 9006) 33, 2, e
       ENDIF
 
       IF (l .NE. flen) THEN
         ne = ne + 1
-        WRITE(*, 2007) 33, 1, l
+        WRITE(*, 9007) 33, 1, l
       ENDIF
 
       IF (n .NE. 0) THEN
         ne = ne + 1
-        WRITE(*, 2007) 33, 2, n
+        WRITE(*, 9007) 33, 2, n
       ENDIF
 
       IF (fn .NE. 'in') THEN
         ne = ne + 1
-        WRITE(*, 2008) 33, 3, fn
+        WRITE(*, 9008) 33, 3, fn
       ENDIF
 
       IF (str .NE. './some/table') THEN
         ne = ne + 1
-        WRITE(*, 2008) 33, 4, str
+        WRITE(*, 9008) 33, 4, str
       ENDIF
 
 C     34: GDADBT check
@@ -1085,7 +1088,7 @@ C     34: GDADBT check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 34, 1, e
+        WRITE(*, 9006) 34, 1, e
       ENDIF
 
       l = flen
@@ -1094,32 +1097,32 @@ C     34: GDADBT check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 34, 2, e
+        WRITE(*, 9006) 34, 2, e
       ENDIF
 
       IF (l .NE. flen) THEN
         ne = ne + 1
-        WRITE(*, 2007) 34, 1, l
+        WRITE(*, 9007) 34, 1, l
       ENDIF
 
       IF (n .NE. 0) THEN
         ne = ne + 1
-        WRITE(*, 2007) 34, 2, n
+        WRITE(*, 9007) 34, 2, n
       ENDIF
 
       IF (i .NE. 12) THEN
         ne = ne + 1
-        WRITE(*, 2007) 34, 3, i
+        WRITE(*, 9007) 34, 3, i
       ENDIF
 
       IF (m .NE. 13) THEN
         ne = ne + 1
-        WRITE(*, 2007) 34, 4, m
+        WRITE(*, 9007) 34, 4, m
       ENDIF
 
       IF (fn .NE. 'in') THEN
         ne = ne + 1
-        WRITE(*, 2008) 34, 5, fn
+        WRITE(*, 9008) 34, 5, fn
       ENDIF
 
 C     35: GDADSB check
@@ -1128,7 +1131,7 @@ C     35: GDADSB check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 35, 1, e
+        WRITE(*, 9006) 35, 1, e
       ENDIF
 
       l = flen
@@ -1137,32 +1140,32 @@ C     35: GDADSB check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 35, 2, e
+        WRITE(*, 9006) 35, 2, e
       ENDIF
 
       IF (l .NE. flen) THEN
         ne = ne + 1
-        WRITE(*, 2007) 35, 1, l
+        WRITE(*, 9007) 35, 1, l
       ENDIF
 
       IF (n .NE. 0) THEN
         ne = ne + 1
-        WRITE(*, 2007) 35, 2, n
+        WRITE(*, 9007) 35, 2, n
       ENDIF
 
       IF (i .NE. 12) THEN
         ne = ne + 1
-        WRITE(*, 2007) 35, 3, i
+        WRITE(*, 9007) 35, 3, i
       ENDIF
 
       IF (m .NE. 13) THEN
         ne = ne + 1
-        WRITE(*, 2007) 35, 4, m
+        WRITE(*, 9007) 35, 4, m
       ENDIF
 
       IF (fn .NE. 'in') THEN
         ne = ne + 1
-        WRITE(*, 2008) 35, 5, fn
+        WRITE(*, 9008) 35, 5, fn
       ENDIF
 
 C     36: GDADMT check
@@ -1171,7 +1174,7 @@ C     36: GDADMT check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 36, 1, e
+        WRITE(*, 9006) 36, 1, e
       ENDIF
 
       l = flen
@@ -1180,27 +1183,27 @@ C     36: GDADMT check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 36, 2, e
+        WRITE(*, 9006) 36, 2, e
       ENDIF
 
       IF (l .NE. flen) THEN
         ne = ne + 1
-        WRITE(*, 2007) 36, 1, l
+        WRITE(*, 9007) 36, 1, l
       ENDIF
 
       IF (n .NE. 0) THEN
         ne = ne + 1
-        WRITE(*, 2007) 36, 2, n
+        WRITE(*, 9007) 36, 2, n
       ENDIF
 
       IF (fields(1) .NE. 'in1') THEN
         ne = ne + 1
-        WRITE(*, 2008) 36, 3, fields(1)
+        WRITE(*, 9008) 36, 3, fields(1)
       ENDIF
 
       IF (fields(2) .NE. 'in2') THEN
         ne = ne + 1
-        WRITE(*, 2008) 36, 4, fields(2)
+        WRITE(*, 9008) 36, 4, fields(2)
       ENDIF
 
 C     37: GDADPH check
@@ -1209,7 +1212,7 @@ C     37: GDADPH check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 37, 1, e
+        WRITE(*, 9006) 37, 1, e
       ENDIF
 
       l = flen
@@ -1218,27 +1221,27 @@ C     37: GDADPH check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 37, 2, e
+        WRITE(*, 9006) 37, 2, e
       ENDIF
 
       IF (l .NE. flen) THEN
         ne = ne + 1
-        WRITE(*, 2007) 37, 1, l
+        WRITE(*, 9007) 37, 1, l
       ENDIF
 
       IF (n .NE. 0) THEN
         ne = ne + 1
-        WRITE(*, 2007) 37, 2, n
+        WRITE(*, 9007) 37, 2, n
       ENDIF
 
       IF (i .NE. 22) THEN
         ne = ne + 1
-        WRITE(*, 2007) 37, 3, i
+        WRITE(*, 9007) 37, 3, i
       ENDIF
 
       IF (fn .NE. 'in1') THEN
         ne = ne + 1
-        WRITE(*, 2008) 37, 4, fn
+        WRITE(*, 9008) 37, 4, fn
       ENDIF
 
 C     38: GDADCO check
@@ -1247,7 +1250,7 @@ C     38: GDADCO check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 38, 1, e
+        WRITE(*, 9006) 38, 1, e
       ENDIF
 
       CALL GDGECO(i, n, d, 'new11', 5)
@@ -1255,17 +1258,17 @@ C     38: GDADCO check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 38, 2, e
+        WRITE(*, 9006) 38, 2, e
       ENDIF
 
       IF (n .NE. 0) THEN
         ne = ne + 1
-        WRITE(*, 2007) 38, 1, n
+        WRITE(*, 9007) 38, 1, n
       ENDIF
 
       IF (i .NE. GD_F64) THEN
         ne = ne + 1
-        WRITE(*, 2007) 38, 2, i
+        WRITE(*, 9007) 38, 2, i
       ENDIF
 
       CALL GDGTCO(d, 'new11', 5, GD_F32, fl)
@@ -1273,26 +1276,26 @@ C     38: GDADCO check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 38, 3, e
+        WRITE(*, 9006) 38, 3, e
       ENDIF
 
       IF (abs(fl + 8.1) .gt. 0.001) THEN
         ne = ne + 1
-        WRITE(*, 2005) 38, fl
+        WRITE(*, 9005) 38, fl
       ENDIF
 
 C     39: GDFRGN check
-      CALL GDFRGN(str, 20, d, 0)
+      CALL GDFRGN(str, slen, d, 0)
       CALL GDEROR(e, d)
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2001) 39, e
+        WRITE(*, 9001) 39, e
       ENDIF
 
       IF (str .NE. 'test_dirfile/format') THEN
         ne = ne + 1
-        WRITE(*, 2009), 39, str
+        WRITE(*, 9009), 39, str
       ENDIF
 
 C     40: GDNFRG check
@@ -1301,12 +1304,12 @@ C     40: GDNFRG check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2001) 40, e
+        WRITE(*, 9001) 40, e
       ENDIF
 
       IF (n .NE. 1) THEN
         ne = ne + 1
-        WRITE(*, 2002), 40, n
+        WRITE(*, 9002), 40, n
       ENDIF
 
 C     41: GDINCL check
@@ -1315,7 +1318,7 @@ C     41: GDINCL check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 41, 3, e
+        WRITE(*, 9006) 41, 3, e
       ENDIF
 
       CALL GDGTCO(d, 'const2', 6, GD_I8, c(1))
@@ -1323,12 +1326,12 @@ C     41: GDINCL check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 41, 3, e
+        WRITE(*, 9006) 41, 3, e
       ENDIF
 
       IF (c(1) .NE. -19) THEN
         ne = ne + 1
-        WRITE(*, 2004) 1, 41, c(1)
+        WRITE(*, 9004) 1, 41, c(1)
       ENDIF
 
 C     42: GDNFDT check
@@ -1337,12 +1340,12 @@ C     42: GDNFDT check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2001) 42, e
+        WRITE(*, 9001) 42, e
       ENDIF
 
       IF (n .NE. 3) THEN
         ne = ne + 1
-        WRITE(*, 2002), 42, n
+        WRITE(*, 9002), 42, n
       ENDIF
 
 C     43: GDFDNT check
@@ -1356,17 +1359,17 @@ C     43: GDFDNT check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 43, i, e
+        WRITE(*, 9006) 43, i, e
       ENDIF
 
       IF (l .NE. flen) THEN
         ne = ne + 1
-        WRITE(*, 2007) 43, i, l
+        WRITE(*, 9007) 43, i, l
       ENDIF
 
       IF (fn .NE. fields(i)) THEN
         ne = ne + 1
-        WRITE(*, 2008) i, 43, fn
+        WRITE(*, 9008) i, 43, fn
       ENDIF
   430 CONTINUE
 
@@ -1376,12 +1379,12 @@ C     44: GDNVEC check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2001) 44, e
+        WRITE(*, 9001) 44, e
       ENDIF
 
       IF (n .NE. 21) THEN
         ne = ne + 1
-        WRITE(*, 2002), 44, n
+        WRITE(*, 9002), 44, n
       ENDIF
 
 C     45: GDVECN check
@@ -1413,17 +1416,17 @@ C     45: GDVECN check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 45, i, e
+        WRITE(*, 9006) 45, i, e
       ENDIF
 
       IF (l .NE. flen) THEN
         ne = ne + 1
-        WRITE(*, 2007) 45, i, l
+        WRITE(*, 9007) 45, i, l
       ENDIF
 
       IF (fn .NE. fields(i)) THEN
         ne = ne + 1
-        WRITE(*, 2008) i, 45, fn
+        WRITE(*, 9008) i, 45, fn
       ENDIF
   450 CONTINUE
 
@@ -1434,7 +1437,7 @@ C     46: GDMDLC check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 46, 1, e
+        WRITE(*, 9006) 46, 1, e
       ENDIF
 
       l = flen
@@ -1444,32 +1447,32 @@ C     46: GDMDLC check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 46, 2, e
+        WRITE(*, 9006) 46, 2, e
       ENDIF
 
       IF (l .NE. flen) THEN
         ne = ne + 1
-        WRITE(*, 2007) 46, 3, l
+        WRITE(*, 9007) 46, 3, l
       ENDIF
 
       IF (i .NE. 2) THEN
         ne = ne + 1
-        WRITE(*, 2007) 46, 4, i
+        WRITE(*, 9007) 46, 4, i
       ENDIF
 
       IF (n .NE. 0) THEN
         ne = ne + 1
-        WRITE(*, 2007) 46, 5, n
+        WRITE(*, 9007) 46, 5, n
       ENDIF
 
       IF (fields(1) .NE. 'in1') THEN
         ne = ne + 1
-        WRITE(*, 2008) 46, 6, fields(1)
+        WRITE(*, 9008) 46, 6, fields(1)
       ENDIF
 
       IF (fields(2) .NE. 'in2') THEN
         ne = ne + 1
-        WRITE(*, 2008) 46, 7, fields(2)
+        WRITE(*, 9008) 46, 7, fields(2)
       ENDIF
 
       q(1) = 9.9
@@ -1481,7 +1484,7 @@ C     46: GDMDLC check
       DO 460 i=1,4
       IF (abs(p(i) - q(i)) .gt. 0.001) THEN
         ne = ne + 1
-        WRITE(*, 2010) i, 46, p(i)
+        WRITE(*, 9010) i, 46, p(i)
       ENDIF
   460 CONTINUE
 
@@ -1496,7 +1499,7 @@ C     47: GDMDCL check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 47, 1, e
+        WRITE(*, 9006) 47, 1, e
       ENDIF
 
       l = flen
@@ -1506,32 +1509,32 @@ C     47: GDMDCL check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2001) 47, e
+        WRITE(*, 9001) 47, e
       ENDIF
 
       IF (l .NE. flen) THEN
         ne = ne + 1
-        WRITE(*, 2007) 47, 1, l
+        WRITE(*, 9007) 47, 1, l
       ENDIF
 
       IF (i .NE. 2) THEN
         ne = ne + 1
-        WRITE(*, 2007) 47, 2, i
+        WRITE(*, 9007) 47, 2, i
       ENDIF
 
       IF (n .NE. 0) THEN
         ne = ne + 1
-        WRITE(*, 2007) 47, 3, n
+        WRITE(*, 9007) 47, 3, n
       ENDIF
 
       IF (fields(1) .NE. 'in1') THEN
         ne = ne + 1
-        WRITE(*, 2008) 47, 4, fields(1)
+        WRITE(*, 9008) 47, 4, fields(1)
       ENDIF
 
       IF (fields(2) .NE. 'in2') THEN
         ne = ne + 1
-        WRITE(*, 2008) 47, 5, fields(2)
+        WRITE(*, 9008) 47, 5, fields(2)
       ENDIF
 
       cq(1) = cmplx(1.1, 1.2)
@@ -1541,7 +1544,7 @@ C     47: GDMDCL check
       DO 470 i=1,4
       IF (abs(cp(i) - cq(i)) .gt. 0.001) THEN
         ne = ne + 1
-        WRITE(*, 2011) i, 47, REAL(REAL(cp(i))), REAL(AIMAG(cp(i)))
+        WRITE(*, 9011) i, 47, REAL(REAL(cp(i))), REAL(AIMAG(cp(i)))
       ENDIF
   470 CONTINUE
 
@@ -1552,7 +1555,7 @@ C     48: GDMDPN check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 48, 1, e
+        WRITE(*, 9006) 48, 1, e
       ENDIF
 
       l = flen
@@ -1562,27 +1565,27 @@ C     48: GDMDPN check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 48, 2, e
+        WRITE(*, 9006) 48, 2, e
       ENDIF
 
       IF (l .NE. flen) THEN
         ne = ne + 1
-        WRITE(*, 2007) 48, 1, l
+        WRITE(*, 9007) 48, 1, l
       ENDIF
 
       IF (i .NE. 3) THEN
         ne = ne + 1
-        WRITE(*, 2007) 48, 2, i
+        WRITE(*, 9007) 48, 2, i
       ENDIF
 
       IF (n .NE. 0) THEN
         ne = ne + 1
-        WRITE(*, 2007) 48, 3, n
+        WRITE(*, 9007) 48, 3, n
       ENDIF
 
       IF (fn .NE. 'in1') THEN
         ne = ne + 1
-        WRITE(*, 2008) 48, 4, fn
+        WRITE(*, 9008) 48, 4, fn
       ENDIF
 
       q(1) = 3d3
@@ -1594,7 +1597,7 @@ C     48: GDMDPN check
       DO 480 i=1,4
       IF (abs(p(i) - q(i)) .gt. 0.001) THEN
         ne = ne + 1
-        WRITE(*, 2010) i, 48, p(i)
+        WRITE(*, 9010) i, 48, p(i)
       ENDIF
   480 CONTINUE
 
@@ -1609,7 +1612,7 @@ C     49: GDMDCP check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 49, 1, e
+        WRITE(*, 9006) 49, 1, e
       ENDIF
 
       l = flen
@@ -1619,27 +1622,27 @@ C     49: GDMDCP check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 49, 2, e
+        WRITE(*, 9006) 49, 2, e
       ENDIF
 
       IF (l .NE. flen) THEN
         ne = ne + 1
-        WRITE(*, 2007) 49, 1, l
+        WRITE(*, 9007) 49, 1, l
       ENDIF
 
       IF (i .NE. 3) THEN
         ne = ne + 1
-        WRITE(*, 2007) 49, 2, i
+        WRITE(*, 9007) 49, 2, i
       ENDIF
 
       IF (n .NE. 0) THEN
         ne = ne + 1
-        WRITE(*, 2007) 49, 3, n
+        WRITE(*, 9007) 49, 3, n
       ENDIF
 
       IF (fn .NE. 'in1') THEN
         ne = ne + 1
-        WRITE(*, 2008) 49, 4, fn
+        WRITE(*, 9008) 49, 4, fn
       ENDIF
 
       cq(1) = cmplx(1.1, 0.0)
@@ -1649,7 +1652,7 @@ C     49: GDMDCP check
       DO 490 i=1,4
       IF (abs(cp(i) - cq(i)) .gt. 0.001) THEN
         ne = ne + 1
-        WRITE(*, 2011) i, 49, REAL(REAL(cp(i))), REAL(AIMAG(cp(i)))
+        WRITE(*, 9011) i, 49, REAL(REAL(cp(i))), REAL(AIMAG(cp(i)))
       ENDIF
   490 CONTINUE
 
@@ -1659,36 +1662,36 @@ C     50: GDMDLT check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 50, 1, e
+        WRITE(*, 9006) 50, 1, e
       ENDIF
 
       l = flen
-      CALL GDGELT(fn, l, str, 20, n, d, 'data/mnew6', 10)
+      CALL GDGELT(fn, l, str, slen, n, d, 'data/mnew6', 10)
       CALL GDEROR(e, d)
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 50, 2, e
+        WRITE(*, 9006) 50, 2, e
       ENDIF
 
       IF (l .NE. flen) THEN
         ne = ne + 1
-        WRITE(*, 2007) 50, 1, l
+        WRITE(*, 9007) 50, 1, l
       ENDIF
 
       IF (n .NE. 0) THEN
         ne = ne + 1
-        WRITE(*, 2007) 50, 2, n
+        WRITE(*, 9007) 50, 2, n
       ENDIF
 
       IF (fn .NE. 'in') THEN
         ne = ne + 1
-        WRITE(*, 2008) 50, 3, fn
+        WRITE(*, 9008) 50, 3, fn
       ENDIF
 
       IF (str .NE. './more/table') THEN
         ne = ne + 1
-        WRITE(*, 2008) 50, 4, str
+        WRITE(*, 9008) 50, 4, str
       ENDIF
 
 C     51: GDMDBT check
@@ -1697,7 +1700,7 @@ C     51: GDMDBT check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 51, 1, e
+        WRITE(*, 9006) 51, 1, e
       ENDIF
 
       l = flen
@@ -1706,32 +1709,32 @@ C     51: GDMDBT check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 51, 2, e
+        WRITE(*, 9006) 51, 2, e
       ENDIF
 
       IF (l .NE. flen) THEN
         ne = ne + 1
-        WRITE(*, 2007) 51, 1, l
+        WRITE(*, 9007) 51, 1, l
       ENDIF
 
       IF (n .NE. 0) THEN
         ne = ne + 1
-        WRITE(*, 2007) 51, 2, n
+        WRITE(*, 9007) 51, 2, n
       ENDIF
 
       IF (i .NE. 12) THEN
         ne = ne + 1
-        WRITE(*, 2007) 51, 3, i
+        WRITE(*, 9007) 51, 3, i
       ENDIF
 
       IF (m .NE. 13) THEN
         ne = ne + 1
-        WRITE(*, 2007) 51, 4, m
+        WRITE(*, 9007) 51, 4, m
       ENDIF
 
       IF (fn .NE. 'in') THEN
         ne = ne + 1
-        WRITE(*, 2008) 51, 5, fn
+        WRITE(*, 9008) 51, 5, fn
       ENDIF
 
 C     52: GDMDSB check
@@ -1740,7 +1743,7 @@ C     52: GDMDSB check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 52, 1, e
+        WRITE(*, 9006) 52, 1, e
       ENDIF
 
       l = flen
@@ -1749,32 +1752,32 @@ C     52: GDMDSB check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 52, 2, e
+        WRITE(*, 9006) 52, 2, e
       ENDIF
 
       IF (l .NE. flen) THEN
         ne = ne + 1
-        WRITE(*, 2007) 52, 1, l
+        WRITE(*, 9007) 52, 1, l
       ENDIF
 
       IF (n .NE. 0) THEN
         ne = ne + 1
-        WRITE(*, 2007) 52, 2, n
+        WRITE(*, 9007) 52, 2, n
       ENDIF
 
       IF (i .NE. 12) THEN
         ne = ne + 1
-        WRITE(*, 2007) 52, 3, i
+        WRITE(*, 9007) 52, 3, i
       ENDIF
 
       IF (m .NE. 13) THEN
         ne = ne + 1
-        WRITE(*, 2007) 52, 4, m
+        WRITE(*, 9007) 52, 4, m
       ENDIF
 
       IF (fn .NE. 'in') THEN
         ne = ne + 1
-        WRITE(*, 2008) 52, 5, fn
+        WRITE(*, 9008) 52, 5, fn
       ENDIF
 
 C     53: GDMDMT check
@@ -1783,7 +1786,7 @@ C     53: GDMDMT check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 53, 1, e
+        WRITE(*, 9006) 53, 1, e
       ENDIF
 
       l = flen
@@ -1792,27 +1795,27 @@ C     53: GDMDMT check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 53, 2, e
+        WRITE(*, 9006) 53, 2, e
       ENDIF
 
       IF (l .NE. flen) THEN
         ne = ne + 1
-        WRITE(*, 2007) 53, 1, l
+        WRITE(*, 9007) 53, 1, l
       ENDIF
 
       IF (n .NE. 0) THEN
         ne = ne + 1
-        WRITE(*, 2007) 53, 2, n
+        WRITE(*, 9007) 53, 2, n
       ENDIF
 
       IF (fields(1) .NE. 'in1') THEN
         ne = ne + 1
-        WRITE(*, 2008) 53, 3, fields(1)
+        WRITE(*, 9008) 53, 3, fields(1)
       ENDIF
 
       IF (fields(2) .NE. 'in2') THEN
         ne = ne + 1
-        WRITE(*, 2008) 53, 4, fields(2)
+        WRITE(*, 9008) 53, 4, fields(2)
       ENDIF
 
 C     54: GDMDPH check
@@ -1821,7 +1824,7 @@ C     54: GDMDPH check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 54, 1, e
+        WRITE(*, 9006) 54, 1, e
       ENDIF
 
       l = flen
@@ -1830,27 +1833,27 @@ C     54: GDMDPH check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 54, 2, e
+        WRITE(*, 9006) 54, 2, e
       ENDIF
 
       IF (l .NE. flen) THEN
         ne = ne + 1
-        WRITE(*, 2007) 54, 1, l
+        WRITE(*, 9007) 54, 1, l
       ENDIF
 
       IF (n .NE. 0) THEN
         ne = ne + 1
-        WRITE(*, 2007) 54, 2, n
+        WRITE(*, 9007) 54, 2, n
       ENDIF
 
       IF (i .NE. 22) THEN
         ne = ne + 1
-        WRITE(*, 2007) 54, 3, i
+        WRITE(*, 9007) 54, 3, i
       ENDIF
 
       IF (fn .NE. 'in1') THEN
         ne = ne + 1
-        WRITE(*, 2008) 54, 4, fn
+        WRITE(*, 9008) 54, 4, fn
       ENDIF
 
 C     55: GDMDCO check
@@ -1859,7 +1862,7 @@ C     55: GDMDCO check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 55, 1, e
+        WRITE(*, 9006) 55, 1, e
       ENDIF
 
       CALL GDGECO(i, n, d, 'data/mnew11', 11)
@@ -1867,22 +1870,22 @@ C     55: GDMDCO check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 55, 2, e
+        WRITE(*, 9006) 55, 2, e
       ENDIF
 
       IF (l .NE. flen) THEN
         ne = ne + 1
-        WRITE(*, 2007) 55, 1, l
+        WRITE(*, 9007) 55, 1, l
       ENDIF
 
       IF (n .NE. 0) THEN
         ne = ne + 1
-        WRITE(*, 2007) 55, 2, n
+        WRITE(*, 9007) 55, 2, n
       ENDIF
 
       IF (i .NE. GD_F64) THEN
         ne = ne + 1
-        WRITE(*, 2007) 55, 3, i
+        WRITE(*, 9007) 55, 3, i
       ENDIF
 
       CALL GDGTCO(d, 'data/mnew11', 11, GD_F32, fl)
@@ -1890,31 +1893,31 @@ C     55: GDMDCO check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 55, 3, e
+        WRITE(*, 9006) 55, 3, e
       ENDIF
 
       IF (abs(fl + 8.1) .gt. 0.001) THEN
         ne = ne + 1
-        WRITE(*, 2005) 55, fl
+        WRITE(*, 9005) 55, fl
       ENDIF
 
 C     56: GDGTST check
-      CALL GDGTST(n, d, 'string', 6, 20, str)
+      CALL GDGTST(n, d, 'string', 6, slen, str)
       CALL GDEROR(e, d)
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2001) 56, e
+        WRITE(*, 9001) 56, e
       ENDIF
 
       IF (n .NE. 17) THEN
         ne = ne + 1
-        WRITE(*, 2002) 56, n
+        WRITE(*, 9002) 56, n
       ENDIF
 
       IF (str .NE. "Zaphod Beeblebrox") THEN
         ne = ne + 1
-        WRITE(*, 2009) 56, str
+        WRITE(*, 9009) 56, str
       ENDIF
 
 C     57: GDADST check
@@ -1923,20 +1926,20 @@ C     57: GDADST check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 57, 1, e
+        WRITE(*, 9006) 57, 1, e
       ENDIF
 
-      CALL GDGTST(n, d, 'new12', 5, 20, str)
+      CALL GDGTST(n, d, 'new12', 5, slen, str)
       CALL GDEROR(e, d)
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 57, 2, e
+        WRITE(*, 9006) 57, 2, e
       ENDIF
 
       IF (str .NE. "---string---") THEN
         ne = ne + 1
-        WRITE(*, 2009) 57, str
+        WRITE(*, 9009) 57, str
       ENDIF
 
 C     58: GDMDST check
@@ -1945,20 +1948,20 @@ C     58: GDMDST check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 58, 1, e
+        WRITE(*, 9006) 58, 1, e
       ENDIF
 
-      CALL GDGTST(n, d, 'data/mnew12', 11, 20, str)
+      CALL GDGTST(n, d, 'data/mnew12', 11, slen, str)
       CALL GDEROR(e, d)
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 58, 2, e
+        WRITE(*, 9006) 58, 2, e
       ENDIF
 
       IF (str .NE. "kai su, technon;") THEN
         ne = ne + 1
-        WRITE(*, 2009) 58, str
+        WRITE(*, 9009) 58, str
       ENDIF
 
 C     59: GDADSP check
@@ -1967,20 +1970,20 @@ C     59: GDADSP check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 59, 1, e
+        WRITE(*, 9006) 59, 1, e
       ENDIF
 
-      CALL GDGTST(n, d, 'lorem', 5, 20, str)
+      CALL GDGTST(n, d, 'lorem', 5, slen, str)
       CALL GDEROR(e, d)
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 59, 2, e
+        WRITE(*, 9006) 59, 2, e
       ENDIF
 
       IF (str .NE. "Lorem ipsum") THEN
         ne = ne + 1
-        WRITE(*, 2009) 59, str
+        WRITE(*, 9009) 59, str
       ENDIF
 
 C     60: GDMDSP check
@@ -1989,20 +1992,20 @@ C     60: GDMDSP check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 60, 1, e
+        WRITE(*, 9006) 60, 1, e
       ENDIF
 
-      CALL GDGTST(n, d, 'lorem/ipsum', 11, 20, str)
+      CALL GDGTST(n, d, 'lorem/ipsum', 11, slen, str)
       CALL GDEROR(e, d)
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 60, 2, e
+        WRITE(*, 9006) 60, 2, e
       ENDIF
 
       IF (str .NE. "dolor sit amet.") THEN
         ne = ne + 1
-        WRITE(*, 2009) 60, str
+        WRITE(*, 9009) 60, str
       ENDIF
 
 C     61: GDPTCO check
@@ -2011,7 +2014,7 @@ C     61: GDPTCO check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 61, 1, e
+        WRITE(*, 9006) 61, 1, e
       ENDIF
 
       CALL GDGTCO(d, 'const', 5, GD_F32, fl)
@@ -2019,12 +2022,12 @@ C     61: GDPTCO check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 61, 2, e
+        WRITE(*, 9006) 61, 2, e
       ENDIF
 
       IF (abs(fl - 10) .gt. 0.001) THEN
         ne = ne + 1
-        WRITE(*, 2005) 61, fl
+        WRITE(*, 9005) 61, fl
       ENDIF
 
 C     62: GDPTST check
@@ -2033,25 +2036,25 @@ C     62: GDPTST check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 62, 1, e
+        WRITE(*, 9006) 62, 1, e
       ENDIF
 
       IF (n .NE. 11) THEN
         ne = ne + 1
-        WRITE(*, 2002) 62, n
+        WRITE(*, 9002) 62, n
       ENDIF
 
-      CALL GDGTST(n, d, 'string', 6, 20, str)
+      CALL GDGTST(n, d, 'string', 6, slen, str)
       CALL GDEROR(e, d)
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 62, 2, e
+        WRITE(*, 9006) 62, 2, e
       ENDIF
 
       IF (str .NE. "Arthur Dent") THEN
         ne = ne + 1
-        WRITE(*, 2009) 62, str
+        WRITE(*, 9009) 62, str
       ENDIF
 
 C     63: GDNMFT check
@@ -2060,12 +2063,12 @@ C     63: GDNMFT check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2001) 63, e
+        WRITE(*, 9001) 63, e
       ENDIF
 
       IF (n .NE. 2) THEN
         ne = ne + 1
-        WRITE(*, 2002), 63, n
+        WRITE(*, 9002), 63, n
       ENDIF
 
 C     64: GDMFDT check
@@ -2078,17 +2081,17 @@ C     64: GDMFDT check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 64, i, e
+        WRITE(*, 9006) 64, i, e
       ENDIF
 
       IF (l .NE. flen) THEN
         ne = ne + 1
-        WRITE(*, 2007) 64, i, l
+        WRITE(*, 9007) 64, i, l
       ENDIF
 
       IF (fn .NE. fields(i)) THEN
         ne = ne + 1
-        WRITE(*, 2008) i, 64, fn
+        WRITE(*, 9008) i, 64, fn
       ENDIF
   640 CONTINUE
 
@@ -2098,12 +2101,12 @@ C     65: GDNMVE check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2001) 65, e
+        WRITE(*, 9001) 65, e
       ENDIF
 
       IF (n .NE. 10) THEN
         ne = ne + 1
-        WRITE(*, 2002), 65, n
+        WRITE(*, 9002), 65, n
       ENDIF
 
 C     66: GDMVEN check
@@ -2124,17 +2127,17 @@ C     66: GDMVEN check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 66, i, e
+        WRITE(*, 9006) 66, i, e
       ENDIF
 
       IF (l .NE. flen) THEN
         ne = ne + 1
-        WRITE(*, 2007) 66, i, l
+        WRITE(*, 9007) 66, i, l
       ENDIF
 
       IF (fn .NE. fields(i)) THEN
         ne = ne + 1
-        WRITE(*, 2008) i, 66, fn
+        WRITE(*, 9008) i, 66, fn
       ENDIF
   660 CONTINUE
 
@@ -2144,7 +2147,7 @@ C     67: GDALRW check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 67, 1, e
+        WRITE(*, 9006) 67, 1, e
       ENDIF
 
       CALL GDGERW(l, i, n, d, 'new1', 4)
@@ -2152,22 +2155,22 @@ C     67: GDALRW check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 67, 2, e
+        WRITE(*, 9006) 67, 2, e
       ENDIF
 
       IF (n .NE. 0) THEN
         ne = ne + 1
-        WRITE(*, 2007) 67, 3, n
+        WRITE(*, 9007) 67, 3, n
       ENDIF
 
       IF (l .NE. 4) THEN
         ne = ne + 1
-        WRITE(*, 2007) 67, 4, l
+        WRITE(*, 9007) 67, 4, l
       ENDIF
 
       IF (i .NE. GD_I32) THEN
         ne = ne + 1
-        WRITE(*, 2007) 67, 5, i
+        WRITE(*, 9007) 67, 5, i
       ENDIF
 
 C     68: GDALLC check
@@ -2177,7 +2180,7 @@ C     68: GDALLC check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 68, 1, e
+        WRITE(*, 9006) 68, 1, e
       ENDIF
 
       l = flen
@@ -2187,37 +2190,37 @@ C     68: GDALLC check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 68, 2, e
+        WRITE(*, 9006) 68, 2, e
       ENDIF
 
       IF (l .NE. flen) THEN
         ne = ne + 1
-        WRITE(*, 2007) 68, 3, l
+        WRITE(*, 9007) 68, 3, l
       ENDIF
 
       IF (i .NE. 3) THEN
         ne = ne + 1
-        WRITE(*, 2007) 68, 4, i
+        WRITE(*, 9007) 68, 4, i
       ENDIF
 
       IF (n .NE. 0) THEN
         ne = ne + 1
-        WRITE(*, 2007) 68, 5, n
+        WRITE(*, 9007) 68, 5, n
       ENDIF
 
       IF (fields(1) .NE. 'in4') THEN
         ne = ne + 1
-        WRITE(*, 2008) 68, 6, fields(1)
+        WRITE(*, 9008) 68, 6, fields(1)
       ENDIF
 
       IF (fields(2) .NE. 'in5') THEN
         ne = ne + 1
-        WRITE(*, 2008) 68, 7, fields(2)
+        WRITE(*, 9008) 68, 7, fields(2)
       ENDIF
 
       IF (fields(3) .NE. 'in6') THEN
         ne = ne + 1
-        WRITE(*, 2008) 68, 8, fields(3)
+        WRITE(*, 9008) 68, 8, fields(3)
       ENDIF
 
       q(1) = 9.9d-1
@@ -2229,7 +2232,7 @@ C     68: GDALLC check
       DO 680 i=1,6
       IF (abs(p(i) - q(i)) .gt. 0.001) THEN
         ne = ne + 1
-        WRITE(*, 2010) i, 68, p(i)
+        WRITE(*, 9010) i, 68, p(i)
       ENDIF
   680 CONTINUE
 
@@ -2244,7 +2247,7 @@ C     69: GDALCL check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 69, 1, e
+        WRITE(*, 9006) 69, 1, e
       ENDIF
 
       l = flen
@@ -2254,32 +2257,32 @@ C     69: GDALCL check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2001) 69, e
+        WRITE(*, 9001) 69, e
       ENDIF
 
       IF (l .NE. flen) THEN
         ne = ne + 1
-        WRITE(*, 2007) 69, 1, l
+        WRITE(*, 9007) 69, 1, l
       ENDIF
 
       IF (i .NE. 2) THEN
         ne = ne + 1
-        WRITE(*, 2007) 69, 2, i
+        WRITE(*, 9007) 69, 2, i
       ENDIF
 
       IF (n .NE. 0) THEN
         ne = ne + 1
-        WRITE(*, 2007) 69, 3, n
+        WRITE(*, 9007) 69, 3, n
       ENDIF
 
       IF (fields(1) .NE. 'in4') THEN
         ne = ne + 1
-        WRITE(*, 2008) 69, 4, fields(1)
+        WRITE(*, 9008) 69, 4, fields(1)
       ENDIF
 
       IF (fields(2) .NE. 'in3') THEN
         ne = ne + 1
-        WRITE(*, 2008) 69, 5, fields(2)
+        WRITE(*, 9008) 69, 5, fields(2)
       ENDIF
 
       cq(1) = cmplx(0.1, 0.2)
@@ -2289,7 +2292,7 @@ C     69: GDALCL check
       DO 690 i=1,4
       IF (abs(cp(i) - cq(i)) .gt. 0.001) THEN
         ne = ne + 1
-        WRITE(*, 2011) i, 69, REAL(REAL(cp(i))), REAL(AIMAG(cp(i)))
+        WRITE(*, 9011) i, 69, REAL(REAL(cp(i))), REAL(AIMAG(cp(i)))
       ENDIF
   690 CONTINUE
 
@@ -2300,7 +2303,7 @@ C     70: GDALPN check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 70, 1, e
+        WRITE(*, 9006) 70, 1, e
       ENDIF
 
       l = flen
@@ -2310,33 +2313,33 @@ C     70: GDALPN check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 70, 2, e
+        WRITE(*, 9006) 70, 2, e
       ENDIF
 
       IF (l .NE. flen) THEN
         ne = ne + 1
-        WRITE(*, 2007) 70, 1, l
+        WRITE(*, 9007) 70, 1, l
       ENDIF
 
       IF (i .NE. 4) THEN
         ne = ne + 1
-        WRITE(*, 2007) 70, 2, i
+        WRITE(*, 9007) 70, 2, i
       ENDIF
 
       IF (n .NE. 0) THEN
         ne = ne + 1
-        WRITE(*, 2007) 70, 3, n
+        WRITE(*, 9007) 70, 3, n
       ENDIF
 
       IF (fn .NE. 'in1') THEN
         ne = ne + 1
-        WRITE(*, 2008) 70, 4, fn
+        WRITE(*, 9008) 70, 4, fn
       ENDIF
 
       DO 700 i=1,5
       IF (abs(p(i) - 2d0 - i) .gt. 0.001) THEN
         ne = ne + 1
-        WRITE(*, 2010) i, 70, p(i)
+        WRITE(*, 9010) i, 70, p(i)
       ENDIF
   700 CONTINUE
 
@@ -2351,7 +2354,7 @@ C     71: GDALCP check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 71, 1, e
+        WRITE(*, 9006) 71, 1, e
       ENDIF
 
       l = flen
@@ -2361,27 +2364,27 @@ C     71: GDALCP check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 71, 2, e
+        WRITE(*, 9006) 71, 2, e
       ENDIF
 
       IF (l .NE. flen) THEN
         ne = ne + 1
-        WRITE(*, 2007) 71, 1, l
+        WRITE(*, 9007) 71, 1, l
       ENDIF
 
       IF (i .NE. 3) THEN
         ne = ne + 1
-        WRITE(*, 2007) 71, 2, i
+        WRITE(*, 9007) 71, 2, i
       ENDIF
 
       IF (n .NE. 0) THEN
         ne = ne + 1
-        WRITE(*, 2007) 71, 3, n
+        WRITE(*, 9007) 71, 3, n
       ENDIF
 
       IF (fn .NE. 'in1') THEN
         ne = ne + 1
-        WRITE(*, 2008) 71, 4, fn
+        WRITE(*, 9008) 71, 4, fn
       ENDIF
 
       cq(1) = cmplx(1.1, 5.0)
@@ -2391,7 +2394,7 @@ C     71: GDALCP check
       DO 710 i=1,4
       IF (abs(cp(i) - cq(i)) .gt. 0.001) THEN
         ne = ne + 1
-        WRITE(*, 2011) i, 71, REAL(REAL(cp(i))), REAL(AIMAG(cp(i)))
+        WRITE(*, 9011) i, 71, REAL(REAL(cp(i))), REAL(AIMAG(cp(i)))
       ENDIF
   710 CONTINUE
 
@@ -2401,36 +2404,36 @@ C     72: GDALLT check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 72, 1, e
+        WRITE(*, 9006) 72, 1, e
       ENDIF
 
       l = flen
-      CALL GDGELT(fn, l, str, 20, n, d, 'new6', 4)
+      CALL GDGELT(fn, l, str, slen, n, d, 'new6', 4)
       CALL GDEROR(e, d)
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 72, 2, e
+        WRITE(*, 9006) 72, 2, e
       ENDIF
 
       IF (l .NE. flen) THEN
         ne = ne + 1
-        WRITE(*, 2007) 72, 1, l
+        WRITE(*, 9007) 72, 1, l
       ENDIF
 
       IF (n .NE. 0) THEN
         ne = ne + 1
-        WRITE(*, 2007) 72, 2, n
+        WRITE(*, 9007) 72, 2, n
       ENDIF
 
       IF (fn .NE. 'in3') THEN
         ne = ne + 1
-        WRITE(*, 2008) 72, 3, fn
+        WRITE(*, 9008) 72, 3, fn
       ENDIF
 
       IF (str .NE. './other/table') THEN
         ne = ne + 1
-        WRITE(*, 2008) 72, 4, str
+        WRITE(*, 9008) 72, 4, str
       ENDIF
 
 C     73: GDALBT check
@@ -2439,7 +2442,7 @@ C     73: GDALBT check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 73, 1, e
+        WRITE(*, 9006) 73, 1, e
       ENDIF
 
       l = flen
@@ -2448,32 +2451,32 @@ C     73: GDALBT check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 73, 2, e
+        WRITE(*, 9006) 73, 2, e
       ENDIF
 
       IF (l .NE. flen) THEN
         ne = ne + 1
-        WRITE(*, 2007) 73, 1, l
+        WRITE(*, 9007) 73, 1, l
       ENDIF
 
       IF (n .NE. 0) THEN
         ne = ne + 1
-        WRITE(*, 2007) 73, 2, n
+        WRITE(*, 9007) 73, 2, n
       ENDIF
 
       IF (i .NE. 2) THEN
         ne = ne + 1
-        WRITE(*, 2007) 73, 3, i
+        WRITE(*, 9007) 73, 3, i
       ENDIF
 
       IF (m .NE. 3) THEN
         ne = ne + 1
-        WRITE(*, 2007) 73, 4, m
+        WRITE(*, 9007) 73, 4, m
       ENDIF
 
       IF (fn .NE. 'in3') THEN
         ne = ne + 1
-        WRITE(*, 2008) 73, 5, fn
+        WRITE(*, 9008) 73, 5, fn
       ENDIF
 
 C     74: GDALSB check
@@ -2482,7 +2485,7 @@ C     74: GDALSB check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 74, 1, e
+        WRITE(*, 9006) 74, 1, e
       ENDIF
 
       l = flen
@@ -2491,32 +2494,32 @@ C     74: GDALSB check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 74, 2, e
+        WRITE(*, 9006) 74, 2, e
       ENDIF
 
       IF (l .NE. flen) THEN
         ne = ne + 1
-        WRITE(*, 2007) 74, 1, l
+        WRITE(*, 9007) 74, 1, l
       ENDIF
 
       IF (n .NE. 0) THEN
         ne = ne + 1
-        WRITE(*, 2007) 74, 2, n
+        WRITE(*, 9007) 74, 2, n
       ENDIF
 
       IF (i .NE. 22) THEN
         ne = ne + 1
-        WRITE(*, 2007) 74, 3, i
+        WRITE(*, 9007) 74, 3, i
       ENDIF
 
       IF (m .NE. 1) THEN
         ne = ne + 1
-        WRITE(*, 2007) 74, 4, m
+        WRITE(*, 9007) 74, 4, m
       ENDIF
 
       IF (fn .NE. 'out') THEN
         ne = ne + 1
-        WRITE(*, 2008) 74, 5, fn
+        WRITE(*, 9008) 74, 5, fn
       ENDIF
 
 C     75: GDALMT check
@@ -2525,7 +2528,7 @@ C     75: GDALMT check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 75, 1, e
+        WRITE(*, 9006) 75, 1, e
       ENDIF
 
       l = flen
@@ -2534,27 +2537,27 @@ C     75: GDALMT check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 75, 2, e
+        WRITE(*, 9006) 75, 2, e
       ENDIF
 
       IF (l .NE. flen) THEN
         ne = ne + 1
-        WRITE(*, 2007) 75, 1, l
+        WRITE(*, 9007) 75, 1, l
       ENDIF
 
       IF (n .NE. 0) THEN
         ne = ne + 1
-        WRITE(*, 2007) 75, 2, n
+        WRITE(*, 9007) 75, 2, n
       ENDIF
 
       IF (fields(1) .NE. 'in6') THEN
         ne = ne + 1
-        WRITE(*, 2008) 75, 3, fields(1)
+        WRITE(*, 9008) 75, 3, fields(1)
       ENDIF
 
       IF (fields(2) .NE. 'in4') THEN
         ne = ne + 1
-        WRITE(*, 2008) 75, 4, fields(2)
+        WRITE(*, 9008) 75, 4, fields(2)
       ENDIF
 
 C     76: GDALPH check
@@ -2563,7 +2566,7 @@ C     76: GDALPH check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 76, 1, e
+        WRITE(*, 9006) 76, 1, e
       ENDIF
 
       l = flen
@@ -2572,27 +2575,27 @@ C     76: GDALPH check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 76, 2, e
+        WRITE(*, 9006) 76, 2, e
       ENDIF
 
       IF (l .NE. flen) THEN
         ne = ne + 1
-        WRITE(*, 2007) 76, 1, l
+        WRITE(*, 9007) 76, 1, l
       ENDIF
 
       IF (n .NE. 0) THEN
         ne = ne + 1
-        WRITE(*, 2007) 76, 2, n
+        WRITE(*, 9007) 76, 2, n
       ENDIF
 
       IF (i .NE. 8) THEN
         ne = ne + 1
-        WRITE(*, 2007) 76, 3, i
+        WRITE(*, 9007) 76, 3, i
       ENDIF
 
       IF (fn .NE. 'in2') THEN
         ne = ne + 1
-        WRITE(*, 2008) 76, 4, fn
+        WRITE(*, 9008) 76, 4, fn
       ENDIF
 
 C     77: GDALCO check
@@ -2601,7 +2604,7 @@ C     77: GDALCO check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 77, 1, e
+        WRITE(*, 9006) 77, 1, e
       ENDIF
 
       CALL GDGECO(i, n, d, 'new11', 5)
@@ -2609,22 +2612,22 @@ C     77: GDALCO check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 77, 2, e
+        WRITE(*, 9006) 77, 2, e
       ENDIF
 
       IF (l .NE. flen) THEN
         ne = ne + 1
-        WRITE(*, 2007) 77, 1, l
+        WRITE(*, 9007) 77, 1, l
       ENDIF
 
       IF (n .NE. 0) THEN
         ne = ne + 1
-        WRITE(*, 2007) 77, 2, n
+        WRITE(*, 9007) 77, 2, n
       ENDIF
 
       IF (i .NE. GD_F32) THEN
         ne = ne + 1
-        WRITE(*, 2007) 77, 3, i
+        WRITE(*, 9007) 77, 3, i
       ENDIF
 
       CALL GDGTCO(d, 'new11', 5, GD_F32, fl)
@@ -2632,12 +2635,12 @@ C     77: GDALCO check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 77, 3, e
+        WRITE(*, 9006) 77, 3, e
       ENDIF
 
       IF (abs(fl + 8.1) .gt. 0.001) THEN
         ne = ne + 1
-        WRITE(*, 2005) 77, fl
+        WRITE(*, 9005) 77, fl
       ENDIF
 
 C     78: GDGENC check
@@ -2646,12 +2649,12 @@ C     78: GDGENC check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2001) 78, e
+        WRITE(*, 9001) 78, e
       ENDIF
 
       IF (n .NE. GD_EN) THEN
         ne = ne + 1
-        WRITE(*, 2002) 78, n
+        WRITE(*, 9002) 78, n
       ENDIF
 
 C     79: GDGEND check
@@ -2660,32 +2663,32 @@ C     79: GDGEND check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2001) 79, e
+        WRITE(*, 9001) 79, e
       ENDIF
 
       IF (n .NE. (GD_LE + GD_NA)) THEN
         ne = ne + 1
-        WRITE(*, 2002) 79, n
+        WRITE(*, 9002) 79, n
       ENDIF
 
 C     80: GDNAME check
-      l = 20
+      l = slen
       CALL GDNAME(str, l, d, 0)
       CALL GDEROR(e, d)
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2001) 80, e
+        WRITE(*, 9001) 80, e
       ENDIF
 
-      IF (l .NE. 20) THEN
+      IF (l .NE. slen) THEN
         ne = ne + 1
-        WRITE(*, 2002) 80, l
+        WRITE(*, 9002) 80, l
       ENDIF
 
       IF (str .NE. 'test_dirfile') THEN
         ne = ne + 1
-        WRITE(*, 2009) 80, str
+        WRITE(*, 9009) 80, str
       ENDIF
 
 C     81: GDPFRG check
@@ -2694,12 +2697,12 @@ C     81: GDPFRG check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2001) 81, e
+        WRITE(*, 9001) 81, e
       ENDIF
 
       IF (n .NE. 0) THEN
         ne = ne + 1
-        WRITE(*, 2002) 81, n
+        WRITE(*, 9002) 81, n
       ENDIF
 
 C     82: GDAPRT check
@@ -2708,7 +2711,7 @@ C     82: GDAPRT check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2001) 82, e
+        WRITE(*, 9001) 82, e
       ENDIF
 
 C     83: GDGPRT check
@@ -2717,52 +2720,52 @@ C     83: GDGPRT check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2001) 83, e
+        WRITE(*, 9001) 83, e
       ENDIF
 
       IF (n .NE. GDPR_D) THEN
         ne = ne + 1
-        WRITE(*, 2002) 83, n
+        WRITE(*, 9002) 83, n
       ENDIF
 
 C     84: GDRWFN check
-      l = 20
+      l = slen
       CALL GDRWFN(str, l, d, "data", 4)
       CALL GDEROR(e, d)
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2001) 84, e
+        WRITE(*, 9001) 84, e
       ENDIF
 
-      IF (l .NE. 20) THEN
+      IF (l .NE. slen) THEN
         ne = ne + 1
-        WRITE(*, 2002) 84, l
+        WRITE(*, 9002) 84, l
       ENDIF
 
       IF (str .NE. 'test_dirfile/data') THEN
         ne = ne + 1
-        WRITE(*, 2009) 84, str
+        WRITE(*, 9009) 84, str
       ENDIF
 
 C     85: GDREFE check
-      l = 20
+      l = slen
       CALL GDREFE(str, l, d, "new1", 4)
       CALL GDEROR(e, d)
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2001) 85, e
+        WRITE(*, 9001) 85, e
       ENDIF
 
-      IF (l .NE. 20) THEN
+      IF (l .NE. slen) THEN
         ne = ne + 1
-        WRITE(*, 2002) 85, l
+        WRITE(*, 9002) 85, l
       ENDIF
 
       IF (str .NE. 'new1') THEN
         ne = ne + 1
-        WRITE(*, 2009) 85, str
+        WRITE(*, 9009) 85, str
       ENDIF
 
 C     87: GDAENC check
@@ -2771,7 +2774,7 @@ C     87: GDAENC check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 87, 1, e
+        WRITE(*, 9006) 87, 1, e
       ENDIF
 
       CALL GDGENC(n, d, 1)
@@ -2779,12 +2782,12 @@ C     87: GDAENC check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 87, 2, e
+        WRITE(*, 9006) 87, 2, e
       ENDIF
 
       IF (n .NE. GD_ES) THEN
         ne = ne + 1
-        WRITE(*, 2002) 87, n
+        WRITE(*, 9002) 87, n
       ENDIF
 
 C     88: GDAEND check
@@ -2793,7 +2796,7 @@ C     88: GDAEND check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 88, 1, e
+        WRITE(*, 9006) 88, 1, e
       ENDIF
 
       CALL GDGEND(n, d, 1)
@@ -2801,12 +2804,12 @@ C     88: GDAEND check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 88, 2, e
+        WRITE(*, 9006) 88, 2, e
       ENDIF
 
       IF (n .NE. GD_BE) THEN
         ne = ne + 1
-        WRITE(*, 2002) 88, n
+        WRITE(*, 9002) 88, n
       ENDIF
 
 C     89: GDALSP check
@@ -2815,7 +2818,7 @@ C     89: GDALSP check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 89, 1, e
+        WRITE(*, 9006) 89, 1, e
       ENDIF
 
       l = flen
@@ -2824,27 +2827,27 @@ C     89: GDALSP check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 89, 2, e
+        WRITE(*, 9006) 89, 2, e
       ENDIF
 
       IF (l .NE. flen) THEN
         ne = ne + 1
-        WRITE(*, 2007) 89, 1, l
+        WRITE(*, 9007) 89, 1, l
       ENDIF
 
       IF (n .NE. 0) THEN
         ne = ne + 1
-        WRITE(*, 2007) 89, 2, n
+        WRITE(*, 9007) 89, 2, n
       ENDIF
 
       IF (i .NE. 3) THEN
         ne = ne + 1
-        WRITE(*, 2007) 89, 3, i
+        WRITE(*, 9007) 89, 3, i
       ENDIF
 
       IF (fn .NE. 'in1') THEN
         ne = ne + 1
-        WRITE(*, 2008) 89, 4, fn
+        WRITE(*, 9008) 89, 4, fn
       ENDIF
 
 C     90: GDDELE check
@@ -2853,7 +2856,7 @@ C     90: GDDELE check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 90, 1, e
+        WRITE(*, 9006) 90, 1, e
       ENDIF
 
       l = flen
@@ -2862,7 +2865,7 @@ C     90: GDDELE check
 
       IF (e .NE. GD_EBC) THEN
         ne = ne + 1
-        WRITE(*, 2006) 90, 2, e
+        WRITE(*, 9006) 90, 2, e
       ENDIF
 
 C     91: GDMLSP check
@@ -2871,7 +2874,7 @@ C     91: GDMLSP check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 91, 1, e
+        WRITE(*, 9006) 91, 1, e
       ENDIF
 
       l = flen
@@ -2880,27 +2883,27 @@ C     91: GDMLSP check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 91, 2, e
+        WRITE(*, 9006) 91, 2, e
       ENDIF
 
       IF (l .NE. flen) THEN
         ne = ne + 1
-        WRITE(*, 2007) 91, 1, l
+        WRITE(*, 9007) 91, 1, l
       ENDIF
 
       IF (n .NE. 0) THEN
         ne = ne + 1
-        WRITE(*, 2007) 91, 2, n
+        WRITE(*, 9007) 91, 2, n
       ENDIF
 
       IF (i .NE. 11) THEN
         ne = ne + 1
-        WRITE(*, 2007) 91, 3, i
+        WRITE(*, 9007) 91, 3, i
       ENDIF
 
       IF (fn .NE. 'in4') THEN
         ne = ne + 1
-        WRITE(*, 2008) 91, 4, fn
+        WRITE(*, 9008) 91, 4, fn
       ENDIF
 
 C     92: GDMOVE check
@@ -2909,7 +2912,7 @@ C     92: GDMOVE check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 92, 1, e
+        WRITE(*, 9006) 92, 1, e
       ENDIF
 
       l = flen
@@ -2918,27 +2921,27 @@ C     92: GDMOVE check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 92, 2, e
+        WRITE(*, 9006) 92, 2, e
       ENDIF
 
       IF (l .NE. flen) THEN
         ne = ne + 1
-        WRITE(*, 2007) 92, 1, l
+        WRITE(*, 9007) 92, 1, l
       ENDIF
 
       IF (n .NE. 1) THEN
         ne = ne + 1
-        WRITE(*, 2007) 92, 2, n
+        WRITE(*, 9007) 92, 2, n
       ENDIF
 
       IF (fields(1) .NE. 'in6') THEN
         ne = ne + 1
-        WRITE(*, 2008) 92, 3, fields(1)
+        WRITE(*, 9008) 92, 3, fields(1)
       ENDIF
 
       IF (fields(2) .NE. 'in4') THEN
         ne = ne + 1
-        WRITE(*, 2008) 92, 4, fields(2)
+        WRITE(*, 9008) 92, 4, fields(2)
       ENDIF
 
 C     93: GDRENM check
@@ -2947,7 +2950,7 @@ C     93: GDRENM check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 93, 1, e
+        WRITE(*, 9006) 93, 1, e
       ENDIF
 
       CALL GDGEMT(fields(1), l, fields(2), l, n, d, 'new9', 4)
@@ -2955,7 +2958,7 @@ C     93: GDRENM check
 
       IF (e .NE. GD_EBC) THEN
         ne = ne + 1
-        WRITE(*, 2006) 93, 2, e
+        WRITE(*, 9006) 93, 2, e
       ENDIF
 
       l = flen
@@ -2964,27 +2967,27 @@ C     93: GDRENM check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 93, 3, e
+        WRITE(*, 9006) 93, 3, e
       ENDIF
 
       IF (l .NE. flen) THEN
         ne = ne + 1
-        WRITE(*, 2007) 93, 1, l
+        WRITE(*, 9007) 93, 1, l
       ENDIF
 
       IF (n .NE. 1) THEN
         ne = ne + 1
-        WRITE(*, 2007) 93, 2, n
+        WRITE(*, 9007) 93, 2, n
       ENDIF
 
       IF (fields(1) .NE. 'in6') THEN
         ne = ne + 1
-        WRITE(*, 2008) 93, 3, fields(1)
+        WRITE(*, 9008) 93, 3, fields(1)
       ENDIF
 
       IF (fields(2) .NE. 'in4') THEN
         ne = ne + 1
-        WRITE(*, 2008) 93, 4, fields(2)
+        WRITE(*, 9008) 93, 4, fields(2)
       ENDIF
 
 C     94: GDUINC check
@@ -2993,7 +2996,7 @@ C     94: GDUINC check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 94, 1, e
+        WRITE(*, 9006) 94, 1, e
       ENDIF
 
       CALL GDGEMT(fields(1), l, fields(2), l, n, d, 'newer', 5)
@@ -3001,7 +3004,7 @@ C     94: GDUINC check
 
       IF (e .NE. GD_EBC) THEN
         ne = ne + 1
-        WRITE(*, 2006) 94, 2, e
+        WRITE(*, 9006) 94, 2, e
       ENDIF
 
 C     95: GDGFOF check
@@ -3010,12 +3013,12 @@ C     95: GDGFOF check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2001) 95, e
+        WRITE(*, 9001) 95, e
       ENDIF
 
       IF (n .NE. 0) THEN
         ne = ne + 1
-        WRITE(*, 2002) 95, n
+        WRITE(*, 9002) 95, n
       ENDIF
 
 C     96: GDAFOF check
@@ -3024,7 +3027,7 @@ C     96: GDAFOF check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2001) 96, e
+        WRITE(*, 9001) 96, e
       ENDIF
 
       CALL GDGFOF(n, d, 0)
@@ -3032,12 +3035,12 @@ C     96: GDAFOF check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2001) 96, e
+        WRITE(*, 9001) 96, e
       ENDIF
 
       IF (n .NE. 33) THEN
         ne = ne + 1
-        WRITE(*, 2002) 96, n
+        WRITE(*, 9002) 96, n
       ENDIF
 
 C     97: GDNTYP check
@@ -3046,12 +3049,12 @@ C     97: GDNTYP check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2001) 97, e
+        WRITE(*, 9001) 97, e
       ENDIF
 
       IF (n .NE. GD_I8) THEN
         ne = ne + 1
-        WRITE(*, 2002) 97, n
+        WRITE(*, 9002) 97, n
       ENDIF
 
 C     98: GDCSCL check
@@ -3060,12 +3063,12 @@ C     98: GDCSCL check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2001) 98, e
+        WRITE(*, 9001) 98, e
       ENDIF
 
       IF (n .NE. 1) THEN
         ne = ne + 1
-        WRITE(*, 2002) 98, n
+        WRITE(*, 9002) 98, n
       ENDIF
 
 C     99: GDVLDT check
@@ -3074,28 +3077,28 @@ C     99: GDVLDT check
 
       IF (e .NE. GD_EBC) THEN
         ne = ne + 1
-        WRITE(*, 2001) 99, e
+        WRITE(*, 9001) 99, e
       ENDIF
 
       IF (n .NE. -1) THEN
         ne = ne + 1
-        WRITE(*, 2002) 99, n
+        WRITE(*, 9002) 99, n
       ENDIF
 
 C     100: GDFNUM check
-      l = 20
+      l = slen
       CALL GDREFE(str, l, d, "data", 4)
       CALL GDFNUM(dp, d, 'INDEX', 5, 33.3d0)
       CALL GDEROR(e, d)
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2001) 100, e
+        WRITE(*, 9001) 100, e
       ENDIF
 
       IF (abs(dp - 33.3) .gt. 0.001) THEN
         ne = ne + 1
-        WRITE(*, 2012) 100, dp
+        WRITE(*, 9012) 100, dp
       ENDIF
 
 C     101: GDFNSS check
@@ -3104,32 +3107,32 @@ C     101: GDFNSS check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2001) 101, e
+        WRITE(*, 9001) 101, e
       ENDIF
 
       IF (abs(dp - 37.0375) .gt. 0.001) THEN
         ne = ne + 1
-        WRITE(*, 2012) 101, dp
+        WRITE(*, 9012) 101, dp
       ENDIF
 
 C     138: GDGSCA check
-      l = 20
+      l = slen
       CALL GDGSCA(str, l, n, d, 'lincom', 6, 6)
       CALL GDEROR(e, d)
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2001) 138, e
+        WRITE(*, 9001) 138, e
       ENDIF
 
       IF (n .NE. -1) THEN
         ne = ne + 1
-        WRITE(*, 2002) 138, n
+        WRITE(*, 9002) 138, n
       ENDIF
 
       IF (str .NE. "const") THEN
         ne = ne + 1
-        WRITE(*, 2009) 138, str
+        WRITE(*, 9009) 138, str
       ENDIF
 
 C     139: GDASCA check
@@ -3138,26 +3141,26 @@ C     139: GDASCA check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 139, 1, e
+        WRITE(*, 9006) 139, 1, e
       ENDIF
 
-      l = 20
+      l = slen
       CALL GDGSCA(str, l, n, d, 'lincom', 6, 6)
       CALL GDEROR(e, d)
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 139, 2, e
+        WRITE(*, 9006) 139, 2, e
       ENDIF
 
       IF (n .NE. -1) THEN
         ne = ne + 1
-        WRITE(*, 2002) 139, n
+        WRITE(*, 9002) 139, n
       ENDIF
 
       IF (str .NE. "new11") THEN
         ne = ne + 1
-        WRITE(*, 2009) 139, str
+        WRITE(*, 9009) 139, str
       ENDIF
 
 C     86: GDGEOF check
@@ -3166,12 +3169,12 @@ C     86: GDGEOF check
 
       IF (e. NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2001) 86, e
+        WRITE(*, 9001) 86, e
       ENDIF
 
       IF (n .NE. 344) THEN
         ne = ne + 1
-        WRITE(*, 2002) 86, n
+        WRITE(*, 9002) 86, n
       ENDIF
 
 C     142: GDGBOF check
@@ -3180,12 +3183,12 @@ C     142: GDGBOF check
 
       IF (e. NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2001) 142, e
+        WRITE(*, 9001) 142, e
       ENDIF
 
       IF (n .NE. 264) THEN
         ne = ne + 1
-        WRITE(*, 2002) 142, n
+        WRITE(*, 9002) 142, n
       ENDIF
 
 C     143: GDGEDV check
@@ -3195,27 +3198,27 @@ C     143: GDGEDV check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2001) 143, e
+        WRITE(*, 9001) 143, e
       ENDIF
 
       IF (l .NE. flen) THEN
         ne = ne + 1
-        WRITE(*, 2007) 143, 1, l
+        WRITE(*, 9007) 143, 1, l
       ENDIF
 
       IF (n .NE. 0) THEN
         ne = ne + 1
-        WRITE(*, 2007) 143, 2, n
+        WRITE(*, 9007) 143, 2, n
       ENDIF
 
       IF (fields(1) .NE. 'mult') THEN
         ne = ne + 1
-        WRITE(*, 2008) 143, 3, fields(1)
+        WRITE(*, 9008) 143, 3, fields(1)
       ENDIF
 
       IF (fields(2) .NE. 'bit') THEN
         ne = ne + 1
-        WRITE(*, 2008) 143, 4, fields(2)
+        WRITE(*, 9008) 143, 4, fields(2)
       ENDIF
 
 C     144: GDGERC check
@@ -3225,27 +3228,27 @@ C     144: GDGERC check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2001) 144, e
+        WRITE(*, 9001) 144, e
       ENDIF
 
       IF (l .NE. flen) THEN
         ne = ne + 1
-        WRITE(*, 2007) 144, 1, l
+        WRITE(*, 9007) 144, 1, l
       ENDIF
 
       IF (n .NE. 0) THEN
         ne = ne + 1
-        WRITE(*, 2007) 144, 2, n
+        WRITE(*, 9007) 144, 2, n
       ENDIF
 
       IF (fields(1) .NE. 'div') THEN
         ne = ne + 1
-        WRITE(*, 2008) 144, 3, fields(1)
+        WRITE(*, 9008) 144, 3, fields(1)
       ENDIF
 
       IF (abs(dp - 6.5) .gt. 0.001) THEN
         ne = ne + 1
-        WRITE(*, 2012) 144, dp
+        WRITE(*, 9012) 144, dp
       ENDIF
 
 C     145: GDGECR check
@@ -3255,27 +3258,27 @@ C     145: GDGECR check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2001) 145, e
+        WRITE(*, 9001) 145, e
       ENDIF
 
       IF (l .NE. flen) THEN
         ne = ne + 1
-        WRITE(*, 2007) 145, 1, l
+        WRITE(*, 9007) 145, 1, l
       ENDIF
 
       IF (n .NE. 0) THEN
         ne = ne + 1
-        WRITE(*, 2007) 145, 2, n
+        WRITE(*, 9007) 145, 2, n
       ENDIF
 
       IF (fields(1) .NE. 'div') THEN
         ne = ne + 1
-        WRITE(*, 2008) 145, 3, fields(1)
+        WRITE(*, 9008) 145, 3, fields(1)
       ENDIF
 
       IF (abs(dc - cmplx(6.5, 4.3)) .gt. 0.001) THEN
         ne = ne + 1
-        WRITE(*, 2013) 145, REAL(REAL(dc)), REAL(AIMAG(dc))
+        WRITE(*, 9013) 145, REAL(REAL(dc)), REAL(AIMAG(dc))
       ENDIF
 
 C     146: GDADDV check
@@ -3284,7 +3287,7 @@ C     146: GDADDV check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 146, 1, e
+        WRITE(*, 9006) 146, 1, e
       ENDIF
 
       l = flen
@@ -3293,27 +3296,27 @@ C     146: GDADDV check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 146, 2, e
+        WRITE(*, 9006) 146, 2, e
       ENDIF
 
       IF (l .NE. flen) THEN
         ne = ne + 1
-        WRITE(*, 2007) 146, 1, l
+        WRITE(*, 9007) 146, 1, l
       ENDIF
 
       IF (n .NE. 0) THEN
         ne = ne + 1
-        WRITE(*, 2007) 146, 2, n
+        WRITE(*, 9007) 146, 2, n
       ENDIF
 
       IF (fields(1) .NE. 'in1') THEN
         ne = ne + 1
-        WRITE(*, 2008) 146, 3, fields(1)
+        WRITE(*, 9008) 146, 3, fields(1)
       ENDIF
 
       IF (fields(2) .NE. 'in2') THEN
         ne = ne + 1
-        WRITE(*, 2008) 146, 4, fields(2)
+        WRITE(*, 9008) 146, 4, fields(2)
       ENDIF
 
 C     147: GDADRC check
@@ -3323,7 +3326,7 @@ C     147: GDADRC check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 147, 1, e
+        WRITE(*, 9006) 147, 1, e
       ENDIF
 
       l = flen
@@ -3332,27 +3335,27 @@ C     147: GDADRC check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 147, 2, e
+        WRITE(*, 9006) 147, 2, e
       ENDIF
 
       IF (l .NE. flen) THEN
         ne = ne + 1
-        WRITE(*, 2007) 147, 1, l
+        WRITE(*, 9007) 147, 1, l
       ENDIF
 
       IF (n .NE. 0) THEN
         ne = ne + 1
-        WRITE(*, 2007) 147, 2, n
+        WRITE(*, 9007) 147, 2, n
       ENDIF
 
       IF (fields(1) .NE. 'in1') THEN
         ne = ne + 1
-        WRITE(*, 2008) 147, 3, fields(1)
+        WRITE(*, 9008) 147, 3, fields(1)
       ENDIF
 
       IF (abs(dp - p(1)) .gt. 0.001) THEN
         ne = ne + 1
-        WRITE(*, 2012) 147, dp
+        WRITE(*, 9012) 147, dp
       ENDIF
 
 C     148: GDADCR check
@@ -3362,7 +3365,7 @@ C     148: GDADCR check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 148, 1, e
+        WRITE(*, 9006) 148, 1, e
       ENDIF
 
       l = flen
@@ -3371,27 +3374,27 @@ C     148: GDADCR check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 148, 2, e
+        WRITE(*, 9006) 148, 2, e
       ENDIF
 
       IF (l .NE. flen) THEN
         ne = ne + 1
-        WRITE(*, 2007) 148, 1, l
+        WRITE(*, 9007) 148, 1, l
       ENDIF
 
       IF (n .NE. 0) THEN
         ne = ne + 1
-        WRITE(*, 2007) 148, 2, n
+        WRITE(*, 9007) 148, 2, n
       ENDIF
 
       IF (fields(1) .NE. 'in1') THEN
         ne = ne + 1
-        WRITE(*, 2008) 148, 3, fields(1)
+        WRITE(*, 9008) 148, 3, fields(1)
       ENDIF
 
       IF (abs(dc - cp(1)) .gt. 0.001) THEN
         ne = ne + 1
-        WRITE(*, 2013) 148, dc
+        WRITE(*, 9013) 148, dc
       ENDIF
 
 C     149: GDMDDV check
@@ -3400,7 +3403,7 @@ C     149: GDMDDV check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 149, 1, e
+        WRITE(*, 9006) 149, 1, e
       ENDIF
 
       l = flen
@@ -3409,27 +3412,27 @@ C     149: GDMDDV check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 149, 2, e
+        WRITE(*, 9006) 149, 2, e
       ENDIF
 
       IF (l .NE. flen) THEN
         ne = ne + 1
-        WRITE(*, 2007) 149, 1, l
+        WRITE(*, 9007) 149, 1, l
       ENDIF
 
       IF (n .NE. 0) THEN
         ne = ne + 1
-        WRITE(*, 2007) 149, 2, n
+        WRITE(*, 9007) 149, 2, n
       ENDIF
 
       IF (fields(1) .NE. 'in3') THEN
         ne = ne + 1
-        WRITE(*, 2008) 149, 3, fields(1)
+        WRITE(*, 9008) 149, 3, fields(1)
       ENDIF
 
       IF (fields(2) .NE. 'in4') THEN
         ne = ne + 1
-        WRITE(*, 2008) 149, 4, fields(2)
+        WRITE(*, 9008) 149, 4, fields(2)
       ENDIF
 
 C     150: GDMDRC check
@@ -3439,7 +3442,7 @@ C     150: GDMDRC check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 150, 1, e
+        WRITE(*, 9006) 150, 1, e
       ENDIF
 
       l = flen
@@ -3448,27 +3451,27 @@ C     150: GDMDRC check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 150, 2, e
+        WRITE(*, 9006) 150, 2, e
       ENDIF
 
       IF (l .NE. flen) THEN
         ne = ne + 1
-        WRITE(*, 2007) 150, 1, l
+        WRITE(*, 9007) 150, 1, l
       ENDIF
 
       IF (n .NE. 0) THEN
         ne = ne + 1
-        WRITE(*, 2007) 150, 2, n
+        WRITE(*, 9007) 150, 2, n
       ENDIF
 
       IF (fields(1) .NE. 'in0') THEN
         ne = ne + 1
-        WRITE(*, 2008) 150, 3, fields(1)
+        WRITE(*, 9008) 150, 3, fields(1)
       ENDIF
 
       IF (abs(dp - p(1)) .gt. 0.001) THEN
         ne = ne + 1
-        WRITE(*, 2012) 150, dp
+        WRITE(*, 9012) 150, dp
       ENDIF
 
 C     151: GDADCR check
@@ -3478,7 +3481,7 @@ C     151: GDADCR check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 151, 1, e
+        WRITE(*, 9006) 151, 1, e
       ENDIF
 
       l = flen
@@ -3487,27 +3490,27 @@ C     151: GDADCR check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 151, 2, e
+        WRITE(*, 9006) 151, 2, e
       ENDIF
 
       IF (l .NE. flen) THEN
         ne = ne + 1
-        WRITE(*, 2007) 151, 1, l
+        WRITE(*, 9007) 151, 1, l
       ENDIF
 
       IF (n .NE. 0) THEN
         ne = ne + 1
-        WRITE(*, 2007) 151, 2, n
+        WRITE(*, 9007) 151, 2, n
       ENDIF
 
       IF (fields(1) .NE. 'in3') THEN
         ne = ne + 1
-        WRITE(*, 2008) 151, 3, fields(1)
+        WRITE(*, 9008) 151, 3, fields(1)
       ENDIF
 
       IF (abs(dc - cp(1)) .gt. 0.001) THEN
         ne = ne + 1
-        WRITE(*, 2013) 151, dc
+        WRITE(*, 9013) 151, dc
       ENDIF
 
 C     152: GDALDV check
@@ -3516,7 +3519,7 @@ C     152: GDALDV check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 152, 1, e
+        WRITE(*, 9006) 152, 1, e
       ENDIF
 
       l = flen
@@ -3525,27 +3528,27 @@ C     152: GDALDV check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 152, 2, e
+        WRITE(*, 9006) 152, 2, e
       ENDIF
 
       IF (l .NE. flen) THEN
         ne = ne + 1
-        WRITE(*, 2007) 152, 1, l
+        WRITE(*, 9007) 152, 1, l
       ENDIF
 
       IF (n .NE. 0) THEN
         ne = ne + 1
-        WRITE(*, 2007) 152, 2, n
+        WRITE(*, 9007) 152, 2, n
       ENDIF
 
       IF (fields(1) .NE. 'in6') THEN
         ne = ne + 1
-        WRITE(*, 2008) 152, 3, fields(1)
+        WRITE(*, 9008) 152, 3, fields(1)
       ENDIF
 
       IF (fields(2) .NE. 'in4') THEN
         ne = ne + 1
-        WRITE(*, 2008) 152, 4, fields(2)
+        WRITE(*, 9008) 152, 4, fields(2)
       ENDIF
 
 C     153: GDALRC check
@@ -3555,7 +3558,7 @@ C     153: GDALRC check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 153, 1, e
+        WRITE(*, 9006) 153, 1, e
       ENDIF
 
       l = flen
@@ -3564,27 +3567,27 @@ C     153: GDALRC check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 153, 2, e
+        WRITE(*, 9006) 153, 2, e
       ENDIF
 
       IF (l .NE. flen) THEN
         ne = ne + 1
-        WRITE(*, 2007) 153, 1, l
+        WRITE(*, 9007) 153, 1, l
       ENDIF
 
       IF (n .NE. 0) THEN
         ne = ne + 1
-        WRITE(*, 2007) 153, 2, n
+        WRITE(*, 9007) 153, 2, n
       ENDIF
 
       IF (fields(1) .NE. 'in5') THEN
         ne = ne + 1
-        WRITE(*, 2008) 153, 3, fields(1)
+        WRITE(*, 9008) 153, 3, fields(1)
       ENDIF
 
       IF (abs(dp - p(1)) .gt. 0.001) THEN
         ne = ne + 1
-        WRITE(*, 2012) 153, dp
+        WRITE(*, 9012) 153, dp
       ENDIF
 
 C     154: GDALCR check
@@ -3594,7 +3597,7 @@ C     154: GDALCR check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 154, 1, e
+        WRITE(*, 9006) 154, 1, e
       ENDIF
 
       l = flen
@@ -3603,27 +3606,27 @@ C     154: GDALCR check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 154, 2, e
+        WRITE(*, 9006) 154, 2, e
       ENDIF
 
       IF (l .NE. flen) THEN
         ne = ne + 1
-        WRITE(*, 2007) 154, 1, l
+        WRITE(*, 9007) 154, 1, l
       ENDIF
 
       IF (n .NE. 0) THEN
         ne = ne + 1
-        WRITE(*, 2007) 154, 2, n
+        WRITE(*, 9007) 154, 2, n
       ENDIF
 
       IF (fields(1) .NE. 'in6') THEN
         ne = ne + 1
-        WRITE(*, 2008) 154, 3, fields(1)
+        WRITE(*, 9008) 154, 3, fields(1)
       ENDIF
 
       IF (abs(dc - cp(1)) .gt. 0.001) THEN
         ne = ne + 1
-        WRITE(*, 2013) 154, dc
+        WRITE(*, 9013) 154, dc
       ENDIF
 
 C     155: GDRFRG check
@@ -3632,7 +3635,7 @@ C     155: GDRFRG check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2001), 155, e
+        WRITE(*, 9001), 155, e
       ENDIF
 
 C     156: GDINVD check
@@ -3641,7 +3644,7 @@ C     156: GDINVD check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006), 156, 1, e
+        WRITE(*, 9006), 156, 1, e
       ENDIF
 
       CALL GDNFRG(n, m)
@@ -3649,7 +3652,7 @@ C     156: GDINVD check
 
       IF (e .NE. GD_EBD) THEN
         ne = ne + 1
-        WRITE(*, 2006), 156, 2, e
+        WRITE(*, 9006), 156, 2, e
       ENDIF
 
       CALL GDCLOS(m)
@@ -3661,12 +3664,12 @@ C     157: GDSTDV check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006), 157, 1, e
+        WRITE(*, 9006), 157, 1, e
       ENDIF
 
       IF (n .NE. 8) THEN
         ne = ne + 1
-        WRITE(*, 2002), 157, n
+        WRITE(*, 9002), 157, n
       ENDIF
 
       n = 0
@@ -3675,7 +3678,7 @@ C     157: GDSTDV check
 
       IF (e .NE. GD_EVR) THEN
         ne = ne + 1
-        WRITE(*, 2006), 157, 2, e
+        WRITE(*, 9006), 157, 2, e
       ENDIF
 
 C     158: GDGTCA check
@@ -3684,13 +3687,13 @@ C     158: GDGTCA check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2001) 158, e
+        WRITE(*, 9001) 158, e
       ENDIF
 
       DO 1580 i=1,6
       IF (abs(p(i) - 1.1 * i) .gt. 0.001) THEN
         ne = ne + 1
-        WRITE(*, 2010) 158, i, p(i)
+        WRITE(*, 9010) 158, i, p(i)
       ENDIF
  1580 CONTINUE
 
@@ -3700,13 +3703,13 @@ C     159: GDGCAS check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2001) 159, e
+        WRITE(*, 9001) 159, e
       ENDIF
 
       DO 1590 i=1,2
       IF (abs(p(i) - 2.2 - 1.1 * i) .gt. 0.001) THEN
         ne = ne + 1
-        WRITE(*, 2010) 159, i, p(i)
+        WRITE(*, 9010) 159, i, p(i)
       ENDIF
  1590 CONTINUE
 
@@ -3722,7 +3725,7 @@ C     168: GDPTCA check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 168, 1, e
+        WRITE(*, 9006) 168, 1, e
       ENDIF
 
       CALL GDGTCA(d, 'carray', 6, GD_F64, q)
@@ -3730,13 +3733,13 @@ C     168: GDPTCA check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 168, 2, e
+        WRITE(*, 9006) 168, 2, e
       ENDIF
 
       DO 1680 i=1,6
       IF (abs(q(i) - 10.7 + 1.1 * i) .gt. 0.001) THEN
         ne = ne + 1
-        WRITE(*, 2010) 168, i, p(i)
+        WRITE(*, 9010) 168, i, p(i)
       ENDIF
  1680 CONTINUE
 
@@ -3752,7 +3755,7 @@ C     169: GDGCAS check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2001) 169, 1, e
+        WRITE(*, 9001) 169, 1, e
       ENDIF
 
       CALL GDGTCA(d, 'carray', 6, GD_F64, q)
@@ -3760,19 +3763,19 @@ C     169: GDGCAS check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 169, 2, e
+        WRITE(*, 9006) 169, 2, e
       ENDIF
 
       DO 1690 i=1,6
       IF (i .eq. 3 .or. i .eq. 4) THEN
         IF (abs(q(i) - 5.2 - 0.1 * i) .gt. 0.001) THEN
           ne = ne + 1
-          WRITE(*, 2010) 169, i, p(i)
+          WRITE(*, 9010) 169, i, p(i)
         ENDIF
       ELSE
         IF (abs(q(i) - 10.7 + 1.1 * i) .gt. 0.001) THEN
           ne = ne + 1
-          WRITE(*, 2010) 169, i, p(i)
+          WRITE(*, 9010) 169, i, p(i)
         ENDIF
       ENDIF
  1690 CONTINUE
@@ -3783,12 +3786,12 @@ C     177: GDCALN check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2001) 177, e
+        WRITE(*, 9001) 177, e
       ENDIF
 
       IF (n .NE. 6) THEN
         ne = ne + 1
-        WRITE(*, 2002) 177, n
+        WRITE(*, 9002) 177, n
       ENDIF
 
 C     178: GDGECA check
@@ -3797,22 +3800,22 @@ C     178: GDGECA check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2001) 178, e
+        WRITE(*, 9001) 178, e
       ENDIF
 
       IF (l .NE. 6) THEN
         ne = ne + 1
-        WRITE(*, 2007) 178, 1, l
+        WRITE(*, 9007) 178, 1, l
       ENDIF
 
       IF (n .NE. 0) THEN
         ne = ne + 1
-        WRITE(*, 2007) 178, 2, n
+        WRITE(*, 9007) 178, 2, n
       ENDIF
 
       IF (i .NE. GD_F64) THEN
         ne = ne + 1
-        WRITE(*, 2007) 178, 3, i
+        WRITE(*, 9007) 178, 3, i
       ENDIF
 
 C     179: GDADCA check
@@ -3825,7 +3828,7 @@ C     179: GDADCA check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 179, 1, e
+        WRITE(*, 9006) 179, 1, e
       ENDIF
 
       CALL GDGECA(i, l, n, d, 'new17', 5)
@@ -3833,22 +3836,22 @@ C     179: GDADCA check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 179, 2, e
+        WRITE(*, 9006) 179, 2, e
       ENDIF
 
       IF (n .NE. 0) THEN
         ne = ne + 1
-        WRITE(*, 2007) 179, 1, n
+        WRITE(*, 9007) 179, 1, n
       ENDIF
 
       IF (i .NE. GD_F64) THEN
         ne = ne + 1
-        WRITE(*, 2007) 179, 2, i
+        WRITE(*, 9007) 179, 2, i
       ENDIF
 
       IF (l .NE. 4) THEN
         ne = ne + 1
-        WRITE(*, 2007) 179, 3, l
+        WRITE(*, 9007) 179, 3, l
       ENDIF
 
       CALL GDGTCA(d, 'new17', 5, GD_F64, q)
@@ -3856,13 +3859,13 @@ C     179: GDADCA check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 179, 3, e
+        WRITE(*, 9006) 179, 3, e
       ENDIF
 
       DO 1790 i=1,4
       IF (abs(q(i) + 1.0 - i * 2.2) .gt. 0.001) THEN
         ne = ne + 1
-        WRITE(*, 2005) 179, fl
+        WRITE(*, 9005) 179, fl
       ENDIF
  1790 CONTINUE
 
@@ -3876,7 +3879,7 @@ C     180: GDMDCA check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 180, 1, e
+        WRITE(*, 9006) 180, 1, e
       ENDIF
 
       CALL GDGECA(i, l, n, d, 'data/new17', 10)
@@ -3884,22 +3887,22 @@ C     180: GDMDCA check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 180, 2, e
+        WRITE(*, 9006) 180, 2, e
       ENDIF
 
       IF (n .NE. 0) THEN
         ne = ne + 1
-        WRITE(*, 2007) 180, 1, n
+        WRITE(*, 9007) 180, 1, n
       ENDIF
 
       IF (i .NE. GD_F64) THEN
         ne = ne + 1
-        WRITE(*, 2007) 180, 2, i
+        WRITE(*, 9007) 180, 2, i
       ENDIF
 
       IF (l .NE. 4) THEN
         ne = ne + 1
-        WRITE(*, 2007) 180, 3, l
+        WRITE(*, 9007) 180, 3, l
       ENDIF
 
       CALL GDGTCA(d, 'data/new17', 10, GD_F64, q)
@@ -3907,13 +3910,13 @@ C     180: GDMDCA check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 180, 3, e
+        WRITE(*, 9006) 180, 3, e
       ENDIF
 
       DO 1800 i=1,4
       IF (abs(q(i) - 1.0 - i * 2.2) .gt. 0.001) THEN
         ne = ne + 1
-        WRITE(*, 2005) 180, fl
+        WRITE(*, 9005) 180, fl
       ENDIF
  1800 CONTINUE
 
@@ -3923,7 +3926,7 @@ C     181: GDALCA check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 181, 1, e
+        WRITE(*, 9006) 181, 1, e
       ENDIF
 
       CALL GDGECA(i, l, n, d, 'new17', 5)
@@ -3931,23 +3934,189 @@ C     181: GDALCA check
 
       IF (e .NE. GD_EOK) THEN
         ne = ne + 1
-        WRITE(*, 2006) 181, 2, e
+        WRITE(*, 9006) 181, 2, e
       ENDIF
 
       IF (n .NE. 0) THEN
         ne = ne + 1
-        WRITE(*, 2007) 181, 1, n
+        WRITE(*, 9007) 181, 1, n
       ENDIF
 
       IF (i .NE. GD_F32) THEN
         ne = ne + 1
-        WRITE(*, 2007) 181, 2, i
+        WRITE(*, 9007) 181, 2, i
       ENDIF
 
       IF (l .NE. 3) THEN
         ne = ne + 1
-        WRITE(*, 2007) 181, 3, l
+        WRITE(*, 9007) 181, 3, l
       ENDIF
+
+C     183: GDCONS check
+      p(1) = 10.0
+      p(2) = -8.1
+      CALL GDNFDT(n, d, GD_COE)
+
+      DO 1830 i = 1, n
+      l = flen
+      CALL GDCONS(fl, d, GD_F32, i)
+      CALL GDEROR(e, d)
+
+      IF (e .NE. GD_EOK) THEN
+        ne = ne + 1
+        WRITE(*, 9006) 183, i, e
+      ENDIF
+
+      IF (abs(fl - p(i)) .gt. 0.001) THEN
+        ne = ne + 1
+        WRITE(*, 9014) 183, i, fl
+      ENDIF
+ 1830 CONTINUE
+
+C     191: GDMCOS check
+      p(1) = 3.3
+      p(2) = -8.1
+      CALL GDNMFT(n, d, "data", 4, GD_COE)
+
+      DO 1910 i = 1, n
+      l = flen
+      CALL GDMCOS(fl, d, "data", 4, GD_F32, i)
+      CALL GDEROR(e, d)
+
+      IF (e .NE. GD_EOK) THEN
+        ne = ne + 1
+        WRITE(*, 9006) 191, i, e
+      ENDIF
+
+      IF (abs(fl - p(i)) .gt. 0.001) THEN
+        ne = ne + 1
+        WRITE(*, 9014) 191, i, fl
+      ENDIF
+ 1910 CONTINUE
+
+C     199: GDSTRS check
+      strings(1) = "Lorem ipsum         "
+      strings(2) = "---string---        "
+      strings(3) = "Arthur Dent         "
+      CALL GDNFDT(n, d, GD_STE)
+
+      DO 1990 i = 1, n
+      l = slen
+
+      CALL GDSTRS(str, l, d, i)
+      CALL GDEROR(e, d)
+
+      IF (e .NE. GD_EOK) THEN
+        ne = ne + 1
+        WRITE(*, 9006) 199, i, e
+      ENDIF
+
+      IF (l .NE. slen) THEN
+        ne = ne + 1
+        WRITE(*, 9007) 199, i, l
+      ENDIF
+
+      IF (str .NE. strings(i)) THEN
+        ne = ne + 1
+        WRITE(*, 9008) i, 199, str
+      ENDIF
+ 1990 CONTINUE
+
+C     200: GDMSTS check
+      strings(1) = 'This is a string constant.'
+      strings(2) = 'kai su, technon;          '
+      CALL GDNMFT(n, d, 'data', 4, GD_STE)
+
+      DO 2000 i = 1, n
+      l = slen
+      CALL GDMSTS(str, l, d, "data", 4, i)
+      CALL GDEROR(e, d)
+
+      IF (e .NE. GD_EOK) THEN
+        ne = ne + 1
+        WRITE(*, 9006) 200, i, e
+      ENDIF
+
+      IF (l .NE. slen) THEN
+        ne = ne + 1
+        WRITE(*, 9007) 200, i, l
+      ENDIF
+
+      IF (str .NE. strings(i)) THEN
+        ne = ne + 1
+        WRITE(*, 9008) i, 900, str
+      ENDIF
+ 2000 CONTINUE
+
+C     201: GDSTRX check
+      CALL GDSTRX(i, d)
+      CALL GDEROR(e, d)
+
+      IF (e .NE. GD_EOK) THEN
+        ne = ne + 1
+        WRITE(*, 9001) 201, e
+      ENDIF
+
+      IF (i .NE. 12) THEN
+        ne = ne + 1
+        WRITE(*, 9002) 201, i
+      ENDIF
+
+C     202: GDMSTX check
+      CALL GDMSTX(i, d, 'data', 4)
+      CALL GDEROR(e, d)
+
+      IF (e .NE. GD_EOK) THEN
+        ne = ne + 1
+        WRITE(*, 9001) 202, e
+      ENDIF
+
+      IF (i .NE. slen) THEN
+        ne = ne + 1
+        WRITE(*, 9002) 202, i
+      ENDIF
+
+C     203: GDSEEK check
+      CALL GDSEEK(n, d, 'data', 4, 35, 0, GDSK_S)
+      CALL GDEROR(e, d)
+      CALL GDGETD(m, d, 'data', 4, GD_HER, 0, 1, 0, GD_I8, c)
+
+      IF (e .NE. GD_EOK) THEN
+        ne = ne + 1
+        WRITE(*, 9001) 203, e
+      ENDIF
+
+      IF (n .NE. 280) THEN
+        ne = ne + 1
+        WRITE(*, 9007) 203, 1, n
+      ENDIF
+
+      IF (m .NE. 8) THEN
+        ne = ne + 1
+        WRITE(*, 9007) 203, 2, n
+      ENDIF
+
+      DO 2030 i = 1, 8
+      IF (c(i) .NE. 16 + i) THEN
+        ne = ne + 1
+        WRITE(*, 9004) i, 903, c(i)
+      ENDIF
+ 2030 CONTINUE
+
+C     204: GDTELL check
+      CALL GDTELL(n, d, 'data', 4)
+      CALL GDEROR(e, d)
+
+      IF (e .NE. GD_EOK) THEN
+        ne = ne + 1
+        WRITE(*, 9001) 204, e
+      ENDIF
+
+      IF (n .NE. 288) THEN
+        ne = ne + 1
+        WRITE(*, 9002) 204, n
+      ENDIF
+
 
 
 
@@ -3965,23 +4134,24 @@ C     Cleanup
       CALL SYSTEM ( 'rm -rf ' // fildir )
 
       IF (ne .GT. 0) THEN
-        WRITE(*, 2003) ne
+        WRITE(*, 9003) ne
         CALL EXIT(1)
       ENDIF
 
- 2001 FORMAT('e[', i3, '] = ', i4)
- 2002 FORMAT('n[', i3, '] = ', i4)
- 2003 FORMAT('ne = ', i8)
- 2004 FORMAT('c(', i3, ')[', i3, '] = ', i2)
- 2005 FORMAT('fl[', i3, '] = ', f0.16)
- 2006 FORMAT('e[', i3, ', ', i3, '] = ', i4)
- 2007 FORMAT('n[', i3, ', ', i3, '] = ', i4)
- 2008 FORMAT('fn(', i3, ')[', i3, '] = "', a, '"')
- 2009 FORMAT('s[', i3, '] = "', a, '"')
- 2010 FORMAT('p(', i3, ')[', i3, '] = ', d16.10)
- 2011 FORMAT('p(', i3, ')[', i3, '] = ', d16.10, ';', d16.10)
- 2012 FORMAT('d[', i3, '] = ', d16.10)
- 2013 FORMAT('x[', i3, '] = ', d16.10, ';', d16.10)
+ 9001 FORMAT('e[', i3, '] = ', i4)
+ 9002 FORMAT('n[', i3, '] = ', i4)
+ 9003 FORMAT('ne = ', i8)
+ 9004 FORMAT('c(', i3, ')[', i3, '] = ', i2)
+ 9005 FORMAT('fl[', i3, '] = ', f0.16)
+ 9006 FORMAT('e[', i3, ', ', i3, '] = ', i4)
+ 9007 FORMAT('n[', i3, ', ', i3, '] = ', i4)
+ 9008 FORMAT('fn(', i3, ')[', i3, '] = "', a, '"')
+ 9009 FORMAT('s[', i3, '] = "', a, '"')
+ 9010 FORMAT('p(', i3, ')[', i3, '] = ', d16.10)
+ 9011 FORMAT('p(', i3, ')[', i3, '] = ', d16.10, ';', d16.10)
+ 9012 FORMAT('d[', i3, '] = ', d16.10)
+ 9013 FORMAT('x[', i3, '] = ', d16.10, ';', d16.10)
+ 9014 FORMAT('fl(', i3, ')[', i3, '] = ', f0.16)
 
       STOP
       END 

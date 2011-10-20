@@ -1521,6 +1521,112 @@ CheckSimple2(180,4,ent.data_type,pygetdata.FLOAT64)
 CheckSimple2(180,5,ent.data_type_name,"FLOAT64")
 CheckSimple2(180,6,ent.array_len,2)
 
+# 183: gd_constants (int)
+try:
+  n = d.constants(pygetdata.INT)
+except:
+  CheckOK(183)
+CheckSimple(183,n,[('const', 133), ('new11', 0)])
+
+# 186: gd_constants (long)
+try:
+  n = d.constants(pygetdata.LONG)
+except:
+  CheckOK(186)
+CheckSimple(186,n,[('const', 133L), ('new11', 0L)])
+
+# 188: gd_constants (float)
+try:
+  n = d.constants(pygetdata.FLOAT)
+except:
+  CheckOK(188)
+CheckSimple(188,n,[('const', 133.0), ('new11', 0.0)])
+
+# 190: gd_constants (complex)
+try:
+  n = d.constants(pygetdata.COMPLEX)
+except:
+  CheckOK(190)
+CheckSimple(190,n,[('const', 133.0), ('new11', 0.0)])
+
+# 191: gd_constants (int)
+try:
+  n = d.mconstants("data", pygetdata.INT)
+except:
+  CheckOK(191)
+CheckSimple(191,n,[('mconst', 3), ('mnew11', 0)])
+
+# 194: gd_constants (long)
+try:
+  n = d.mconstants("data", pygetdata.LONG)
+except:
+  CheckOK(194)
+CheckSimple(194,n,[('mconst', 3L), ('mnew11', 0L)])
+
+# 196: gd_constants (float)
+try:
+  n = d.mconstants("data", pygetdata.FLOAT)
+except:
+  CheckOK(196)
+CheckSimple(196,n,[('mconst', 3.3), ('mnew11', 0.)])
+
+# 198: gd_constants (complex)
+try:
+  n = d.mconstants("data", pygetdata.COMPLEX)
+except:
+  CheckOK(198)
+CheckSimple(198,n,[('mconst', 3.3+4.4j), ('mnew11', 0j)])
+
+# 199: gd_strings
+try:
+  n = d.strings()
+except:
+  CheckOK(199)
+CheckSimple(199,n,[('lorem', 'Lorem ipsum'), ('new12', ''), 
+  ('string', 'Arthur Dent')])
+
+# 200: gd_strings
+try:
+  n = d.mstrings("data")
+except:
+  CheckOK(200)
+CheckSimple(200,n,[('mstr', 'This is a string constant.')])
+
+# 203: gd_seek
+try:
+  n = d.seek("data", pygetdata.SEEK_SET, frame_num=35)
+except:
+  CheckOK2(203,0)
+
+try:
+  m = d.getdata("data", pygetdata.INT, first_frame=pygetdata.HERE, num_frames=1)
+except:
+  CheckOK2(203,1)
+CheckSimple2(203,0,n,280)
+CheckSimple2(203,1,len(m),8)
+if (pygetdata.__numpy_supported__):
+  CheckNumpy2(203,2,m,numpy.arange(17,25))
+else:
+  CheckSimple2(203,2,m,range(17,25))
+
+# 204: gd_tell
+try:
+  n = d.tell("data")
+except:
+  CheckOK(204);
+CheckSimple(204,n,288)
+
+
+
+
+
+
+
+
+
+
+# ==========================================================================
+
 d.discard()
 del d
 os.system("rm -rf dirfile")

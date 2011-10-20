@@ -1,6 +1,6 @@
 .\" gd_strings.3.  The gd_strings man page.
 .\"
-.\" Copyright (C) 2008, 2010 D. V. Wiebe
+.\" Copyright (C) 2008, 2010, 2011 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_strings 3 "15 October 2010" "Version 0.7.0" "GETDATA"
+.TH gd_strings 3 "19 October 2011" "Version 0.8.0" "GETDATA"
 .SH NAME
 gd_strings \(em retrieve a list of string values from a dirfile
 .SH SYNOPSIS
@@ -68,9 +68,10 @@ Upon successful completion,
 .BR gd_strings ()
 returns a pointer to an array of strings containing the values of all the
 .B STRING
-fields defined in the dirfile database.  If no strings are defined in the
-database, NULL is returned.  On error it returns NULL and sets the dirfile error
-to a non-zero error value.  Possible error values are:
+fields defined in the dirfile database.  The array is terminated by a NULL
+pointer.  If no strings are defined in the database, an array consisting of only
+the NULL pointer is returned.  On error it returns NULL and sets the dirfile
+error to a non-zero error value.  Possible error values are:
 .TP 8
 .B GD_E_ALLOC
 The library was unable to allocate memory.

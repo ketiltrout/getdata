@@ -25,7 +25,7 @@ EXTRA_DIST=funclist.pl GetData.xs simple_funcs.pl simple_funcs.xsin typemap \
 
 if GETDATA_DEBUG
 DEBUG_C = debug.c
-TEST_VERBOSE="TEST_VERBOSE=1"
+TEST_VERBOSE=verbose=1
 debug.c: $(top_srcdir)/src/debug.c
 	echo "#undef VERSION" > $@
 	cat $< >> $@
@@ -75,7 +75,7 @@ check:
 	$(MAKE) test
 
 test testdb testcover:
-	${DL_LIBRARY_PATH}=${${DL_LIBRARY_PATH}}:../../src/.libs $(PERL) ./Build $@
+	${DL_LIBRARY_PATH}=${${DL_LIBRARY_PATH}}:../../src/.libs $(PERL) ./Build $@ ${TEST_VERBOSE}
 
 .PHONY: test testdb testcover
 endif

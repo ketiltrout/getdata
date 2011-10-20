@@ -182,7 +182,7 @@
 168 F9CIpP gd_put_carray
 169 F9CIpP gd_put_carray_slice (INT8)
 170 .9.... gd_put_carray_slice (INT16)
-171 .9..p. gd_put_carray_slice (INT32)
+171 .9.... gd_put_carray_slice (INT32)
 172 .9..p. gd_put_carray_slice (INT64)
 173 .9.... gd_put_carray_slice (FLOAT32)
 174 .9..p. gd_put_carray_slice (FLOAT64)
@@ -194,7 +194,25 @@
 180 F9.IpP gd_madd_carray
 181 F9CI.P gd_alter_carray
   (test 182 is placed after test 40)
-183 -----P gd_constants
-184 -----P gd_mconstants
-185 -----P gd_strings
-186 -----P gd_mstrings
+183 F9CIpP gd_constants (INT8)
+184 .9.... gd_constants (INT16)
+185 .9.... gd_constants (INT32)
+186 .9..p. gd_constants (INT64)
+187 .9.... gd_constants (FLOAT32)
+188 .9..p. gd_constants (FLOAT64)
+189 .9.... gd_constants (COMPLEX64)
+190 .9..p. gd_constants (COMPLEX128)
+191 F9CIpP gd_mconstants (INT8)
+192 .9.... gd_mconstants (INT16)
+193 .9.... gd_mconstants (INT32)
+194 .9..p. gd_mconstants (INT64)
+195 .9.... gd_mconstants (FLOAT32)
+196 .9..p. gd_mconstants (FLOAT64)
+197 .9.... gd_mconstants (COMPLEX64)
+198 .9..p. gd_mconstants (COMPLEX128)
+199 F9CIpP gd_strings
+200 F9CIpP gd_mstrings
+201 F9.... gd_string_value_max
+202 F9.... gd_mstring_value_max
+203 F9CIp- gd_seek
+204 F9CIp- gd_tell

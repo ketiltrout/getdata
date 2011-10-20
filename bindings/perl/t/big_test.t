@@ -22,7 +22,7 @@
 use GetData;
 use Math::Complex;
 use strict;
-use Test::More tests => 1135;
+use Test::More tests => 1142;
 
 my $ne = 0;
 my ($s, @a, %h);
@@ -40,14 +40,14 @@ sub CheckError {
   my $e = $_->error;
   print "\n";
   is ($e, $_[1], "e[$_[0]] = $e, expected $_[1]");
-  print "\n";
+  print "#";
 }
 
 sub CheckError2 {
   my $e = $_->error;
   print "\n";
   is ($e, $_[2], "e[$_[0],$_[1]] = $e, expected $_[2]");
-  print "\n";
+  print "#";
 }
 
 sub CheckArray {
@@ -58,7 +58,7 @@ sub CheckArray {
   for $i (0 .. $#_ - 2) {
     isn (${$_[1]}[$i], $_[$i + 2], "a($i)[$_[0]]");
   }
-  print "\n";
+  print "#";
 }
 
 sub CheckArray2 {
@@ -69,40 +69,56 @@ sub CheckArray2 {
   for $i (0 .. $#_ - 3) {
     isn (${$_[2]}[$i], $_[$i + 3], "a($i)[$_[0],$_[1]]" );
   }
-  print "\n";
+  print "#";
 }
 
 sub CheckSArray {
   my $i;
+  print "\n";
   is ($#{$_[1]}, $#_ - 2,
     "a[$_[0]]: " . (1 + $#{$_[1]}) . " elements, expected " . ($#_ - 1));
   for $i (0 .. $#_ - 2) {
     is (${$_[1]}[$i], $_[$i + 2],
       "n($i)[$_[0]] = \"${$_[1]}[$i]\", expected \"" . $_[$i + 2] . "\"");
   }
+  print "#";
 }
 
 sub CheckSArray2 {
   my $i;
+  print "\n";
   is ($#{$_[2]}, $#_ - 3,
     "a[$_[0],$_[1]]: " . (1 + $#{$_[2]}) . " elements, expected " . ($#_ - 2));
   for $i (0 .. $#_ - 3) {
     is (${$_[2]}[$i], $_[$i + 3], "n($i)[$_[0],$_[1]] = " .
       ((defined ${$_[2]}[$i]) ? "\"" . ${$_[2]}[$i] . "\"" : "undef") .
       ", expected " .
-      ((defined $_[$i + 3]) ? "\"" . $_[$i + 3] . "\"" : "undef") . "\n");
+      ((defined $_[$i + 3]) ? "\"" . $_[$i + 3] . "\"" : "undef"));
   }
+  print "#";
 }
 
-sub CheckNum { isn ($_[1], $_[2], "n[$_[0]]"); }
-sub CheckNum2 { isn ($_[2], $_[3], "n[$_[0],$_[1]]"); }
+sub CheckNum {
+  print "\n";
+  isn ($_[1], $_[2], "n[$_[0]]");
+  print "#";
+}
+sub CheckNum2 {
+  print "\n";
+  isn ($_[2], $_[3], "n[$_[0],$_[1]]");
+  print "#";
+}
 
 sub CheckString {
+  print "\n";
   is ($_[1], $_[2], "s[$_[0]] = \"$_[1]\", expected \"$_[2]\"");
+  print "#";
 }
 
 sub CheckString2 {
+  print "\n";
   is ($_[2], $_[3], "s[$_[0],$_[1]] = \"$_[2]\", expected \"$_[3]\"");
+  print "#";
 }
 
 sub CheckOK { &CheckError($_[0], 0) }
@@ -1391,32 +1407,47 @@ CheckString2(183, 1, $s, "=!");
 CheckOK2(183, 2);
 CheckArray2(183, 3, \@a, 61, 33.3);
 
-# 184: mconstants
+# 191: mconstants
 $s = $_->mconstants("data", $GetData::UINT8);
-CheckOK2(184, 0);
-CheckString2(184, 1, $s, "\3\011");
+CheckOK2(191, 0);
+CheckString2(191, 1, $s, "\3\011");
 
 @a = $_->mconstants("data", $GetData::FLOAT64);
-CheckOK2(184, 2);
-CheckArray2(184, 3, \@a, 3.3, 9.2);
+CheckOK2(191, 2);
+CheckArray2(191, 3, \@a, 3.3, 9.2);
 
-# 185: strings
+# 199: strings
 $s = $_->strings;
-CheckOK2(185, 1);
-CheckNum2(185, 2, $s, 3);
+CheckOK2(199, 1);
+CheckNum2(199, 2, $s, 3);
 
 @a = $_->strings;
-CheckOK2(185, 3);
-CheckSArray2(185, 4, \@a, "Lorem ipsum", "a string", "Arthur Dent");
+CheckOK2(199, 3);
+CheckSArray2(199, 4, \@a, "Lorem ipsum", "a string", "Arthur Dent");
 
-# 186: mstrings
+# 200: mstrings
 $s = $_->mstrings("data");
-CheckOK2(186, 1);
-CheckNum2(186, 2, $s, 2);
+CheckOK2(200, 1);
+CheckNum2(200, 2, $s, 2);
 
 @a = $_->mstrings("data");
-CheckOK2(186, 3);
-CheckSArray2(186, 4, \@a, "This is a string constant.", "another string");
+CheckOK2(200, 3);
+CheckSArray2(200, 4, \@a, "This is a string constant.", "another string");
+
+# 203: seek
+$s = $_->seek("data", 35, 0, $GetData::SEEK_SET);
+CheckOK2(203, 0);
+CheckNum2(203, 0, $s, 280);
+
+$s = $_->getdata("data", $GetData::HERE, 0, 1, 0, $GetData::INT8);
+CheckOK2(203, 1);
+CheckNum2(203, 1, length($s), 8);
+CheckString2(203, 2, $s, join "", map chr, 17 .. 24);
+
+# 204: tell
+$s = $_->tell("data");
+CheckOK(204);
+CheckNum(204,$s,288);
 
 
 

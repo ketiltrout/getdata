@@ -481,6 +481,79 @@ Subroutines interacting with global metadata
   This subroutine is the replacement for gd_mvector_list(3) and behaves in
   the same manner as GDVECN.
 
+* GDSTRX(string_max, dirfile_unit)
+
+  Output:
+    INTEGER string_max
+  Input:
+    INTEGER dirfile_unit
+
+  This subroutine, which has no direct analogue in the C API, returns the length
+  of the longest STRING field defined in the dirfile.  It takes the dirfile unit
+  number as input and returns the length (in characters) of the longest STRING
+  in the dirfile in string_max.
+ 
+* GDMSTX(string_max, dirfile_unit, parent, parent_len)
+
+  Output:
+    INTEGER string_max
+  Input:
+    INTEGER dirfile_unit, parent_len
+    CHARACTER*<parent_len> parent
+
+  This subroutine, which has no direct analogue in the C API, returns the length
+  of the longest STRING defined in the dirfile for META fields of the supplied
+  parent field.  It returns the length (in characters) of the longest STRING
+  META field for the supplied parent in string_max.
+ 
+* GDCONS(value, dirfile_unit, return_type, field_num)
+
+  Output:
+    CHARACTER*<name_len> name
+    <datatype> value
+  Input:
+    INTEGER dirfile_unit, field_num
+
+  This subroutine is the replacement for gd_constants(3) and behaves in the same
+  manner as GDFLDN.
+
+* GDMCOS(value, dirfile_unit, parent, parent_len, return_type, field_num)
+
+  Output:
+    CHARACTER*<name_len> name
+    <datatype> value
+  Input:
+    INTEGER dirfile_unit, field_num, parent_len
+    CHARACTER*<parent_len> parent
+
+  This subroutine is the replacement for gd_mconstants(3) and behaves in the
+  same manner as GDFLDN.
+
+* GDSTRS(value, value_len, dirfile_unit, field_num)
+
+  Output:
+    CHARACTER*<value_len> value
+  Input/Output:
+    INTEGER value_len
+  Input:
+    INTEGER dirfile_unit, field_num
+
+  This subroutine is the replacement for gd_strings(3) and behaves in the same
+  manner as GDSTRS.
+
+* GDMSTS(value, value_len, dirfile_unit, parent, parent_len, field_num)
+
+  Output:
+    CHARACTER*<value_len> value
+  Input/Output:
+    INTEGER value_len
+  Input:
+    INTEGER dirfile_unit, field_num, parent_len
+    CHARACTER*<parent_len> parent
+
+  This subroutine is the replacement for gd_mstrings(3) and behaves in the same
+  manner as GDFLDN.
+
 * GDNFRM(nframes, dirfile_unit)
 
   Output:

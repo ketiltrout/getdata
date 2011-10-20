@@ -2143,4 +2143,287 @@ function fgd_tell (dirfile, field_name)
   call gdtell(fgd_tell, dirfile, TRIM(field_name), LEN_TRIM(field_name))
 end function
 
+! gd_constants with return_type=GD_INT8
+subroutine fgd_constants_i1 (constants, dirfile)
+  integer*1, dimension(:), intent(out) :: constants
+  integer, intent(in) :: dirfile
+  integer :: nfields, i
+
+  nfields = fgd_nfields_by_type(dirfile, GD_CONST_ENTRY)
+  do i=1,nfields
+    ! call f77 library
+    call gdcons(constants(i), dirfile, GD_INT8, i)
+  end do
+end subroutine
+
+! gd_constants with return_type=GD_INT16
+subroutine fgd_constants_i2 (constants, dirfile)
+  integer*2, dimension(:), intent(out) :: constants
+  integer, intent(in) :: dirfile
+  integer :: nfields, i
+
+  nfields = fgd_nfields_by_type(dirfile, GD_CONST_ENTRY)
+  do i=1,nfields
+    ! call f77 library
+    call gdcons(constants(i), dirfile, GD_INT16, i)
+  end do
+end subroutine
+
+! gd_constants with return_type=GD_INT32
+subroutine fgd_constants_i4 (constants, dirfile)
+  integer*4, dimension(:), intent(out) :: constants
+  integer, intent(in) :: dirfile
+  integer :: nfields, i
+
+  nfields = fgd_nfields_by_type(dirfile, GD_CONST_ENTRY)
+  do i=1,nfields
+    ! call f77 library
+    call gdcons(constants(i), dirfile, GD_INT32, i)
+  end do
+end subroutine
+
+! gd_constants with return_type=GD_INT64
+subroutine fgd_constants_i8 (constants, dirfile)
+  integer*8, dimension(:), intent(out) :: constants
+  integer, intent(in) :: dirfile
+  integer :: nfields, i
+
+  nfields = fgd_nfields_by_type(dirfile, GD_CONST_ENTRY)
+  do i=1,nfields
+    ! call f77 library
+    call gdcons(constants(i), dirfile, GD_INT64, i)
+  end do
+end subroutine
+
+! gd_constants with return_type=GD_FLOAT32
+subroutine fgd_constants_r4 (constants, dirfile)
+  real*4, dimension(:), intent(out) :: constants
+  integer, intent(in) :: dirfile
+  integer :: nfields, i
+
+  nfields = fgd_nfields_by_type(dirfile, GD_CONST_ENTRY)
+  do i=1,nfields
+    ! call f77 library
+    call gdcons(constants(i), dirfile, GD_FLOAT32, i)
+  end do
+end subroutine
+
+! gd_constants with return_type=GD_FLOAT64
+subroutine fgd_constants_r8 (constants, dirfile)
+  real*8, dimension(:), intent(out) :: constants
+  integer, intent(in) :: dirfile
+  integer :: nfields, i
+
+  nfields = fgd_nfields_by_type(dirfile, GD_STRING_ENTRY)
+  do i=1,nfields
+    ! call f77 library
+    call gdcons(constants(i), dirfile, GD_FLOAT64, i)
+  end do
+end subroutine
+
+! gd_constants with return_type=GD_COMPLEX64
+subroutine fgd_constants_c8 (constants, dirfile)
+  complex, dimension(:), intent(out) :: constants
+  integer, intent(in) :: dirfile
+  integer :: nfields, i
+
+  nfields = fgd_nfields_by_type(dirfile, GD_STRING_ENTRY)
+  do i=1,nfields
+    ! call f77 library
+    call gdcons(constants(i), dirfile, GD_COMPLEX64, i)
+  end do
+end subroutine
+
+! gd_constants with return_type=GD_COMPLEX128
+subroutine fgd_constants_c16 (constants, dirfile)
+  double complex, dimension(:), intent(out) :: constants
+  integer, intent(in) :: dirfile
+  integer :: nfields, i
+
+  nfields = fgd_nfields_by_type(dirfile, GD_STRING_ENTRY)
+  do i=1,nfields
+    ! call f77 library
+    call gdcons(constants(i), dirfile, GD_COMPLEX128, i)
+  end do
+end subroutine
+
+! gd_mconstants with return_type=GD_INT8
+subroutine fgd_mconstants_i1 (constants, dirfile, parent)
+  integer*1, dimension(:), intent(out) :: constants
+  integer, intent(in) :: dirfile
+  integer :: nfields, i
+  character (len=*), intent(in) :: parent
+
+  nfields = fgd_nmfields_by_type(dirfile, parent, GD_CONST_ENTRY)
+  do i=1,nfields
+    ! call f77 library
+    call gdmcos(constants(i), dirfile, TRIM(parent), LEN_TRIM(parent), &
+    GD_INT8, i)
+  end do
+end subroutine
+
+! gd_mconstants with return_type=GD_INT16
+subroutine fgd_mconstants_i2 (constants, dirfile, parent)
+  integer*2, dimension(:), intent(out) :: constants
+  integer, intent(in) :: dirfile
+  integer :: nfields, i
+  character (len=*), intent(in) :: parent
+
+  nfields = fgd_nmfields_by_type(dirfile, parent, GD_CONST_ENTRY)
+  do i=1,nfields
+    ! call f77 library
+    call gdmcos(constants(i), dirfile, TRIM(parent), LEN_TRIM(parent), &
+    GD_INT16, i)
+  end do
+end subroutine
+
+! gd_mconstants with return_type=GD_INT32
+subroutine fgd_mconstants_i4 (constants, dirfile, parent)
+  integer*4, dimension(:), intent(out) :: constants
+  integer, intent(in) :: dirfile
+  integer :: nfields, i
+  character (len=*), intent(in) :: parent
+
+  nfields = fgd_nmfields_by_type(dirfile, parent, GD_CONST_ENTRY)
+  do i=1,nfields
+    ! call f77 library
+    call gdmcos(constants(i), dirfile, TRIM(parent), LEN_TRIM(parent), &
+    GD_INT32, i)
+  end do
+end subroutine
+
+! gd_mconstants with return_type=GD_INT64
+subroutine fgd_mconstants_i8 (constants, dirfile, parent)
+  integer*8, dimension(:), intent(out) :: constants
+  integer, intent(in) :: dirfile
+  integer :: nfields, i
+  character (len=*), intent(in) :: parent
+
+  nfields = fgd_nmfields_by_type(dirfile, parent, GD_CONST_ENTRY)
+  do i=1,nfields
+    ! call f77 library
+    call gdmcos(constants(i), dirfile, TRIM(parent), LEN_TRIM(parent), &
+    GD_INT64, i)
+  end do
+end subroutine
+
+! gd_mconstants with return_type=GD_FLOAT32
+subroutine fgd_mconstants_r4 (constants, dirfile, parent)
+  real*4, dimension(:), intent(out) :: constants
+  integer, intent(in) :: dirfile
+  integer :: nfields, i
+  character (len=*), intent(in) :: parent
+
+  nfields = fgd_nmfields_by_type(dirfile, parent, GD_CONST_ENTRY)
+  do i=1,nfields
+    ! call f77 library
+    call gdmcos(constants(i), dirfile, TRIM(parent), LEN_TRIM(parent), &
+    GD_FLOAT32, i)
+  end do
+end subroutine
+
+! gd_mconstants with return_type=GD_FLOAT64
+subroutine fgd_mconstants_r8 (constants, dirfile, parent)
+  real*8, dimension(:), intent(out) :: constants
+  integer, intent(in) :: dirfile
+  integer :: nfields, i
+  character (len=*), intent(in) :: parent
+
+  nfields = fgd_nmfields_by_type(dirfile, parent, GD_CONST_ENTRY)
+  do i=1,nfields
+    ! call f77 library
+    call gdmcos(constants(i), dirfile, TRIM(parent), LEN_TRIM(parent), &
+    GD_FLOAT64, i)
+  end do
+end subroutine
+
+! gd_mconstants with return_type=GD_COMPLEX64
+subroutine fgd_mconstants_c8 (constants, dirfile, parent)
+  complex, dimension(:), intent(out) :: constants
+  integer, intent(in) :: dirfile
+  integer :: nfields, i
+  character (len=*), intent(in) :: parent
+
+  nfields = fgd_nmfields_by_type(dirfile, parent, GD_CONST_ENTRY)
+  do i=1,nfields
+    ! call f77 library
+    call gdmcos(constants(i), dirfile, TRIM(parent), LEN_TRIM(parent), &
+    GD_COMPLEX64, i)
+  end do
+end subroutine
+
+! gd_mconstants with return_type=GD_COMPLEX128
+subroutine fgd_mconstants_c16 (constants, dirfile, parent)
+  double complex, dimension(:), intent(out) :: constants
+  integer, intent(in) :: dirfile
+  integer :: nfields, i
+  character (len=*), intent(in) :: parent
+
+  nfields = fgd_nmfields_by_type(dirfile, parent, GD_CONST_ENTRY)
+  do i=1,nfields
+    ! call f77 library
+    call gdmcos(constants(i), dirfile, TRIM(parent), LEN_TRIM(parent), &
+    GD_COMPLEX128, i)
+  end do
+end subroutine
+
+function fgd_string_value_max (dirfile)
+  integer :: fgd_string_value_max
+  integer, intent(in) :: dirfile
+
+  ! call f77 library
+  call gdstrx(fgd_string_value_max, dirfile)
+end function
+
+subroutine fgd_strings (strings, dirfile, string_len)
+  character(len=*), dimension(:), intent(out) :: strings
+  integer, intent(in) :: dirfile
+  integer, intent(inout) :: string_len
+  integer :: max_len, nfields, i
+
+  ! make sure the string list is large enough
+  max_len = fgd_string_value_max(dirfile)
+
+  if (string_len .lt. max_len) then
+    string_len = max_len
+  else
+    nfields = fgd_nfields_by_type(dirfile, GD_STRING_ENTRY)
+    do i=1,nfields
+      ! call f77 library
+      call gdstrs(strings(i), string_len, dirfile, i)
+    end do
+  end if
+end subroutine
+
+function fgd_mstring_value_max (dirfile, parent)
+  integer :: fgd_mstring_value_max
+  integer, intent(in) :: dirfile
+  character (len=*), intent(in) :: parent
+
+  ! call f77 library
+  call gdmstx(fgd_mstring_value_max, dirfile, TRIM(parent), LEN_TRIM(parent))
+end function
+
+subroutine fgd_mstrings (strings, dirfile, parent, string_len)
+  character(len=*), dimension(:), intent(out) :: strings
+  integer, intent(in) :: dirfile
+  integer, intent(inout) :: string_len
+  integer :: max_len, nfields, i
+  character (len=*), intent(in) :: parent
+
+  ! make sure the field list is large enough
+  max_len = fgd_mstring_value_max(dirfile, parent)
+
+  if (string_len .lt. max_len) then
+    string_len = max_len
+  else
+    nfields = fgd_nmfields_by_type(dirfile, parent, GD_STRING_ENTRY)
+    do i=1,nfields
+      ! call f77 library
+      call gdmsts(strings(i), string_len, dirfile, TRIM(parent), &
+      LEN_TRIM(parent), i)
+    end do
+  end if
+end subroutine
+
 end module

@@ -564,6 +564,24 @@ void F77_FUNC(gdseek, GDSEEK) (int* pos, const int* dirfile,
 
 void F77_FUNC(gdtell, GDTELL) (int* pos, const int* dirfile,
     const char* field_code, const int* field_code_l);
+
+void F77_FUNC(gdcons, GDCONS) (void *value, const int *dirfile,
+    const int *return_type, const int *field_num);
+
+void F77_FUNC(gdmcos, GDMCOS) (void *value, const int *dirfile,
+    const char *parent, const int *parent_l, const int *return_type,
+    const int *field_num);
+
+void F77_FUNC(gdstrs, GDSTRS) (char *value, int *value_l, const int *dirfile,
+    const int *field_num);
+
+void F77_FUNC(gdmsts, GDMSTS) (void *value, int *value_l, const int *dirfile,
+    const char *parent, const int *parent_l, const int *field_num);
+
+void F77_FUNC(gdstrx, GDSTRX) (int *max, const int *dirfile);
+
+void F77_FUNC(gdmstx, GDMSTX) (int *max, const int *dirfile, const char *parent,
+    const int *parent_l);
 #ifdef __cplusplus
 }
 #endif

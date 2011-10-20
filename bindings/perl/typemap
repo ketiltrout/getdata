@@ -2,7 +2,7 @@ TYPEMAP
 # basic C types
 const char ** T_CONST_AVPV
 _Complex double T_COMPLEX
-off64_t T_UV
+off64_t T_IV
 unsigned long int T_UV
 
 # GetData types

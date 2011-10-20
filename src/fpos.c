@@ -44,7 +44,7 @@ off64_t _GD_GetFilePos(DIRFILE *D, gd_entry_t *E, off64_t index_pos)
       /* We must open the file to know its starting offset */
       if (_GD_InitRawIO(D, E, 0, 0))
           break;
-      pos = E->e->u.raw.file[0].pos +
+      pos = E->e->u.raw.file[0].pos + E->EN(raw,spf) *
         D->fragment[E->fragment_index].frame_offset;
       break;
     case GD_LINCOM_ENTRY:
@@ -173,7 +173,18 @@ static int _GD_Seek(DIRFILE *D, gd_entry_t *E, off64_t offset, int pad)
       if (_GD_InitRawIO(D, E, GD_EF_SEEK, pad))
         break;
 
-      if ((*_gd_ef[E->e->u.raw.file[0].subenc].seek)(E->e->u.raw.file, offset,
+      /* The requested offset is before the start of the file, so I guess
+       * pretend we've repositioned it...
+       */
+      if (E->EN(raw,spf) * D->fragment[E->fragment_index].frame_offset >
+          offset) {
+        E->e->u.raw.file[0].pos = offset - E->EN(raw,spf) *
+          D->fragment[E->fragment_index].frame_offset;
+        break;
+      }
+
+      if ((*_gd_ef[E->e->u.raw.file[0].subenc].seek)(E->e->u.raw.file, offset -
+            E->EN(raw,spf) * D->fragment[E->fragment_index].frame_offset,
             E->EN(raw,data_type), pad) == -1)
       {
         _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);

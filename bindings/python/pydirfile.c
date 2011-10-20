@@ -1155,8 +1155,8 @@ static PyObject* gdpy_dirfile_getmstrings(struct gdpy_dirfile_t* self,
   const char** values;
   const char* parent = NULL;
 
-  if (!PyArg_ParseTupleAndKeywords(args, keys,
-        "s:pygetdata.dirfile.mconstants", keywords, &parent))
+  if (!PyArg_ParseTupleAndKeywords(args, keys, "s:pygetdata.dirfile.mstrings",
+        keywords, &parent))
   {
     dreturn("%p", NULL);
     return NULL;
@@ -2077,7 +2077,7 @@ static PyObject *gdpy_dirfile_seek(struct gdpy_dirfile_t *self, PyObject *args,
 
   char *keywords[] = { "field_code", "flags", "frame_num", "sample_num", NULL };
   const char *field_code;
-  long int frame_num = 0, sample_num = 0;
+  PY_LONG_LONG frame_num = 0, sample_num = 0;
   int flags;
   off_t pos;
 

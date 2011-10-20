@@ -1108,6 +1108,38 @@ nume += check_simple2(181, 3, n.fragment, 0)
 nume += check_simple2(181, 4, n.data_type, !GD.FLOAT32)
 nume += check_simple2(181, 5, n.array_len, 3)
 
+;  183: gd_constants
+n = gd_constants(d, type=!GD.FLOAT32)
+nume += check_ok(183, d)
+
+;  191: gd_mconstants
+n = gd_constants(d, parent="data", type=!GD.FLOAT32)
+nume += check_ok(191, d)
+nume += check_simple(191, n, [ 3.3, 0. ])
+
+; 199: gd_strings
+n = gd_strings(d)
+nume += check_ok(199, d)
+nume += check_simple(199, n, [ "Lorem ipsum", "a string", "Arthur Dent" ])
+
+; 200: gd_strings
+n = gd_strings(d, parent="data")
+nume += check_ok(200, d)
+nume += check_simple(200, n, [ "This is a string constant.", "another string" ])
+
+; 203: gd_seek
+n = gd_seek(d, "data", frame_num=35)
+nume += check_ok2(203, 0, d)
+m = gd_getdata(d, "data", type=!GD.INT16, /here, num_frames=1)
+nume += check_ok2(203, 1, d)
+nume += check_simple2(203, 0, n, 280)
+nume += check_simple2(203, 1, m, INDGEN(8) + 17)
+
+; 204: gd_tell
+n = gd_tell(d, "data")
+nume += check_ok(204, d)
+nume += check_simple(204, n, 288)
+
 
 
 

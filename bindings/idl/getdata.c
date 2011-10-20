@@ -3407,13 +3407,14 @@ IDL_VPTR gdidl_getdata(int argc, IDL_VPTR argv[], char *argk)
     IDL_LONG64 first_sample;
     IDL_LONG n_frames;
     IDL_LONG n_samples;
+    int here;
     gd_type_t return_type;
   } KW_RESULT;
   KW_RESULT kw;
 
   IDL_VPTR r;
 
-  kw.first_frame = kw.first_sample = kw.n_frames = kw.n_samples = 0;
+  kw.first_frame = kw.first_sample = kw.n_frames = kw.n_samples = kw.here = 0;
   kw.return_type = GD_FLOAT64;
   GDIDL_KW_INIT_ERROR;
 
@@ -3422,6 +3423,7 @@ IDL_VPTR gdidl_getdata(int argc, IDL_VPTR argv[], char *argk)
     GDIDL_KW_PAR_ESTRING,
     { "FIRST_FRAME", IDL_TYP_LONG64, 1, 0, 0, IDL_KW_OFFSETOF(first_frame) },
     { "FIRST_SAMPLE", IDL_TYP_LONG64, 1, 0, 0, IDL_KW_OFFSETOF(first_sample) },
+    { "HERE", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(here) },
     { "NUM_FRAMES", IDL_TYP_LONG, 1, 0, 0, IDL_KW_OFFSETOF(n_frames) },
     { "NUM_SAMPLES", IDL_TYP_LONG, 1, 0, 0, IDL_KW_OFFSETOF(n_samples) },
     { "TYPE", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(return_type) },
@@ -3437,9 +3439,14 @@ IDL_VPTR gdidl_getdata(int argc, IDL_VPTR argv[], char *argk)
   DIRFILE *D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
   const char* field_code = IDL_VarGetString(argv[1]);
 
+  if (kw.here) {
+    kw.first_frame = GD_HERE;
+    kw.first_sample = 0;
+  }
+
   unsigned int spf = gd_spf(D, field_code);
 
-  if (gd_error(D))
+  if (gd_error(D) || (kw.n_frames == 0 && kw.n_samples == 0))
     r = IDL_GettmpInt(0);
   else {
     void* data = malloc((kw.n_frames * spf + kw.n_samples) *
@@ -3655,8 +3662,6 @@ IDL_VPTR gdidl_get_constants(int argc, IDL_VPTR argv[], char *argk)
 
     r = IDL_ImportArray(1, dim, gdidl_idl_type(kw.const_type), data,
         (IDL_ARRAY_FREE_CB)free, NULL);
-    IDL_ALLTYPES v = gdidl_to_alltypes(kw.const_type, data);
-    IDL_StoreScalar(r, gdidl_idl_type(kw.const_type), &v);
   } else
     IDL_MakeTempVector(IDL_TYP_INT, 0, IDL_ARR_INI_ZERO, &r);
 
@@ -4513,10 +4518,11 @@ void gdidl_putdata(int argc, IDL_VPTR argv[], char *argk)
     GDIDL_KW_RESULT_ERROR;
     IDL_LONG64 first_frame;
     IDL_LONG64 first_sample;
+    int here;
   } KW_RESULT;
   KW_RESULT kw;
 
-  kw.first_frame = kw.first_sample = 0;
+  kw.first_frame = kw.first_sample = kw.here = 0;
   GDIDL_KW_INIT_ERROR;
 
   static IDL_KW_PAR kw_pars[] = {
@@ -4524,6 +4530,7 @@ void gdidl_putdata(int argc, IDL_VPTR argv[], char *argk)
     GDIDL_KW_PAR_ESTRING,
     { "FIRST_FRAME", IDL_TYP_LONG64, 1, 0, 0, IDL_KW_OFFSETOF(first_frame) },
     { "FIRST_SAMPLE", IDL_TYP_LONG64, 1, 0, 0, IDL_KW_OFFSETOF(first_sample) },
+    { "HERE", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(here) },
     { NULL }
   };
 
@@ -4531,6 +4538,11 @@ void gdidl_putdata(int argc, IDL_VPTR argv[], char *argk)
 
   DIRFILE *D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
   const char* field_code = IDL_VarGetString(argv[1]);
+
+  if (kw.here) {
+    kw.first_frame = GD_HERE;
+    kw.first_sample = 0;
+  }
 
   IDL_ENSURE_ARRAY(argv[2]);
   if (argv[2]->value.arr->n_dim != 1)

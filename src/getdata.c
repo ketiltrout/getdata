@@ -288,6 +288,8 @@ static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *E, off64_t s0, size_t ns,
         ns :
         zero_pad);
     ns -= n_read;
+    E->e->u.raw.file[0].pos = s0 + n_read - E->EN(raw,spf) *
+      D->fragment[E->fragment_index].frame_offset;
     s0 = 0;
   }
 

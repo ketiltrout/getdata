@@ -588,25 +588,31 @@ Otherwise, they behave the same as their C counterparts.
   No corresponding fgd_putdata_n function exists, since GD_NULL is not an
   acceptable input data_type for putdata(3).
 
-  Analogously for gd_get_carray_slice, gd_get_constant, gd_put_carray_slice, and
-  gd_put_constant, for which only the _i1 versions are shown here:
+  Analogously for gd_constants, gd_get_carray_slice, gd_get_constant,
+  gd_mconstants, gd_put_carray_slice, and gd_put_constant, for which only the
+  _i1 versions are shown here:
 
+* subroutine fgd_constants_i1(values, dirfile)
+  integer(1), dimension(:), intent(out) :: values
 * subroutine fgd_get_carray_i1 (dirfile, field_code, data_out, start, array_len)
   integer, intent(in) :: dirfile_unit, start, array_len
   character (len=*), intent(in) :: field_code
-  <datatype>, intent(out) :: data_out
+  integer(1), intent(out) :: data_out
 * subroutine fgd_get_constant_i1 (dirfile, field_code, data_out)
   integer, intent(in) :: dirfile_unit
   character (len=*), intent(in) :: field_code
-  <datatype>, intent(out) :: data_out
+  integer(1), intent(out) :: data_out
+* subroutine fgd_constants_i1(values, dirfile, parent)
+  integer(1), dimension(:), intent(out) :: values
+  character (len=*), intent(in) :: parent
 * subroutine fgd_put_carray_i1 (dirfile, field_code, data_in, start, array_len)
   integer, intent(in) :: dirfile_unit, start, array_len
   character (len=*), intent(in) :: field_code
-  <datatype>, intent(in) :: data_in
+  integer(1), intent(in) :: data_in
 * subroutine fgd_put_constant_i1 (dirfile, field_code, data_in)
   integer, intent(in) :: dirfile_unit
   character (len=*), intent(in) :: field_code
-  <datatype>, intent(in) :: data_in
+  integer(1), intent(in) :: data_in
 
   For the carray functions, if len is zero, gd_get_carray(3) or gd_put_carray(3)
   will be called to read or write the whole array.  Otherwise these subroutines
@@ -627,6 +633,19 @@ Other procedures in the Fortran 95 bindings are:
   This function returns the length of the longest field name defined in the
   dirfile for META fields of the supplied parent field.
 
+* integer fgd_string_value_max (dirfile_unit)
+  integer, intent(in) :: dirfile_unit
+
+  This function returns the length of the longest STRING field (excluding /META
+  fields) in the database.
+
+* integer fgd_mstring_value_max (dirfile_unit, parent)
+  integer, intent(in) :: dirfile_unit
+  character (len=*), intent(in) :: parent
+
+  This function returns the length of the longest STRING metafield for the given
+  parent field.
+
 * subroutine fgd_field_list (field_list, dirfile, field_len)
   character (len=<field_len>) dimension(:), intent(out) :: field_list
   integer, intent(in) :: dirfile_unit
@@ -636,8 +655,9 @@ Other procedures in the Fortran 95 bindings are:
   requires a third argument, field_len, which is the longest field name which
   will fit in the supplied field_list array.  If the longest field name in the
   dirfile is longer than field_len, field_len will be set to this value (which
-  is equivalent to the return value of fgd_field_name_max) and field_list
-  will remain untouched.  The character strings returned are Fortran strings.
+  is equivalent to the return value of fgd_field_name_max or
+  fgd_string_value_max) and field_list will remain untouched.  The character
+  strings returned are Fortran strings.
 
   Analogously:
 
@@ -649,25 +669,34 @@ Other procedures in the Fortran 95 bindings are:
   character (len=<field_len>) dimension(:), intent(out) :: field_list
   integer, intent(in) :: dirfile_unit
   integer, intent(inout) :: field_len
+* subroutine fgd_strings (strings, dirfile, string_len)
+  character (len=<string_len>) dimension(:), intent(out) :: string_list
+  integer, intent(in) :: dirfile_unit
+  integer, intent(inout) :: string_len
 
   Also analogously, except that field_len will be equivalent to the return
-  value of fgd_mfield_name_max, if too small:
+  value of fgd_mfield_name_max or fgd_string_value_max, if too small:
 
-* subroutine fgd_mfield_list (field_list, dirfile, field_len)
+* subroutine fgd_mfield_list (field_list, dirfile, parent, field_len)
   character (len=<field_len>) dimension(:), intent(out) :: field_list
   integer, intent(in) :: dirfile_unit
   integer, intent(inout) :: field_len
   character (len=*), intent(in) :: parent
 * subroutine fgd_mfield_list_by_type (field_list, dirfile, entype,
-  field_len)
+  parent, field_len)
   character (len=<field_len>) dimension(:), intent(out) :: field_list
   integer, intent(in) :: dirfile_unit, entype
   integer, intent(inout) :: field_len
   character (len=*), intent(in) :: parent
-* subroutine fgd_mvector_list (field_list, dirfile, field_len)
+* subroutine fgd_mvector_list (field_list, dirfile, parent, field_len)
   character (len=<field_len>) dimension(:), intent(out) :: field_list
   integer, intent(in) :: dirfile_unit
   integer, intent(inout) :: field_len
+  character (len=*), intent(in) :: parent
+* subroutine fgd_mstrings (string_list, dirfile, parent, string_len)
+  character (len=<string_len>) dimension(:), intent(out) :: string_list
+  integer, intent(in) :: dirfile_unit
+  integer, intent(inout) :: string_len
   character (len=*), intent(in) :: parent
 
 * integer function fgd_entry (dirfile_unit, field_code, ent)

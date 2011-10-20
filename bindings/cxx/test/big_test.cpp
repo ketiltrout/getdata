@@ -80,13 +80,14 @@ using namespace GetData;
     ne++; cerr << "d(" << i << ")[" << t << ", " << m << "] = " << (v) << endl; }
 
 #define CHECK_STRING(t,v,g) \
-  if (strcmp((v), (g))) { ne++; cerr << "s[" << t << "] = " << (v) << endl; }
+  if (strcmp((v), (g))) { ne++; cerr << "s[" << t << "] = \"" << (v) << "\"" \
+    << endl; }
 #define CHECK_STRING2(t,m,v,g) \
   if (strcmp((v), (g))) { \
-    ne++; cerr << "s[" << t << ", " << m << "] = " << (v) << endl; }
+    ne++; cerr << "s[" << t << ", " << m << "] = \"" << (v) << "\"" << endl; }
 #define CHECK_STRING_ARRAY(t,m,v,g) \
   for (i = 0; i < m; ++i) if (strcmp((v), (g))) { \
-    ne++; cerr << "s(" << i << ")[" << t << "] = " << (v) << endl; }
+    ne++; cerr << "s(" << i << ")[" << t << "] = \"" << (v) << "\"" << endl; }
 
 #define CHECK_COMPLEX2(t,m,v,g) \
   if (abs((v) - (g)) > 1e-10) { \
@@ -127,9 +128,10 @@ int main(void)
   unsigned char c[8];
   unsigned char data_data[80];
   signed char sc;
-  int n, i, e, ne = 0;
+  int m, n, i, e, ne = 0;
   float fl;
   double dp, p[6], q[6];
+  const double *qp;
   complex<double> cq[6];
   const char **list;
   const char* str;
@@ -156,6 +158,7 @@ int main(void)
     (char*)"linterp", (char*)"mult", (char*)"phase", (char*)"polynom",
     (char*)"recip", (char*)"sbit", (char*)"string", NULL, NULL, NULL, NULL,
     NULL, NULL, NULL};
+  char *strings[3];
 
   // Write the test dirfile
   mkdir(filedir, 0777);
@@ -1310,6 +1313,53 @@ int main(void)
   CHECK_INT2(181,3,ent->ConstType(),Float32);
   CHECK_INT2(181,4,ent->ArrayLen(),12);
   delete ent;
+
+  // 183: gd_constants
+  p[0] = 61.;
+  p[1] = 0.;
+  n = d->NFieldsByType(ConstEntryType);
+  qp = reinterpret_cast<const double *>(d->Constants());
+  CHECK_OK(183);
+  CHECK_DOUBLE_ARRAY(183,0,n,qp[i],p[i]);
+
+  // 184: gd_mconstants
+  p[0] = 3.3;
+  p[1] = 0.;
+  n = d->NMFieldsByType("data", ConstEntryType);
+  qp = reinterpret_cast<const double *>(d->MConstants("data"));
+  CHECK_OK(184);
+  CHECK_DOUBLE_ARRAY(184,0,n,qp[i],p[i]);
+
+  // 199: gd_strings
+  strings[0] = (char *)"Lorem ipsum";
+  strings[1] = (char *)"";
+  strings[2] = (char *)"Arthur Dent";
+  n = d->NFieldsByType(StringEntryType);
+  list = d->Strings();
+  CHECK_OK(199);
+  CHECK_STRING_ARRAY(199,n,list[i],strings[i]);
+
+  // 200: gd_strings
+  strings[0] = (char *)"This is a string constant.";
+  n = d->NMFieldsByType("data", StringEntryType);
+  list = d->MStrings("data");
+  CHECK_OK(200);
+  CHECK_STRING_ARRAY(200,n,list[i],strings[i]);
+
+  // 203: gd_seek
+  n = d->Seek("data", 35, 0, GD_SEEK_SET);
+  CHECK_OK2(203,0);
+  m = d->GetData("data", GD_HERE, 0, 1, 0, UInt8, c);
+  CHECK_OK2(203,1);
+  CHECK_INT2(203,0,n,280);
+  CHECK_INT2(203,1,m,8);
+  CHECK_INT_ARRAY(203,8,c[i],17 + i);
+
+  // 204: gd_tell
+  n = d->Tell("data");
+  CHECK_OK(204);
+  CHECK_INT(204,n,288);
+
 
 
 

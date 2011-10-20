@@ -1,3 +1,31 @@
+2011-10-20   D. V. Wiebe <getdata@ketiltrout.net> svn:609
+	* test/get_here_foffs.c test/seek_foffs.c: Added.
+
+	* src/getdata.c (_GD_DoRaw): Update file->pos after calling FillZero.
+	* src/fpos.c (_GD_GetFilePos): Adjust for SPF.
+	* src/fpos.c (_GD_Seek): If seeking before FRAMEOFFSET, set file->pos < 0.
+
+	* bindings/python/pydirfile.c (gdpy_dirfile_seek): Fix type of frame_num,
+	sample_num.
+
+	* bindings/perl/typemap: off64_t is signed.
+
+	* bindings/f77/fgetdata.c (GDCONS GDMCOS GDSTRS GDMSTS GDSTRX GDMSTX):
+	Added.
+	* bindings/f77/getdata.f90.in (fgd_constants_i1 fgd_constants_i2
+	fgd_constants_i4 fgd_constants_i8 fgd_constants_r4 fgd_constants_r8
+	fgd_constants_c8 fgd_constants_c16 fgd_mconstants_i1 fgd_mconstants_i2
+	fgd_mconstants_i4 fgd_mconstants_i8 fgd_mconstants_r4 fgd_mconstants_r8
+	fgd_mconstants_c8 fgd_mconstants_c16 fgd_string_value_max fgd_strings
+	fgd_mstring_value_max fgd_mstrings): Added.
+
+	* bindings/idl/getdata.c (gdidl_getdata gdidl_putdata): Add /HERE.
+
+	* bindings/python/test/big_test.py bindings/cxx/test/big_test.cpp
+	bindings/perl/t/big_test.t bindings/f77/test/big_test.f
+	bindings/f77/test/big_test95.f90 bindings/idl/test/big_test.pro: Added tests
+	183-204.
+
 2011-10-18   D. V. Wiebe <getdata@ketiltrout.net> svn:607
 	* man/gd_seek.3 man/gd_tell.3: Added.
 
