@@ -101,10 +101,10 @@ static struct gd_bzdata *_GD_Bzip2DoOpen(int dirfd, struct _gd_raw_file* file)
   return ptr;
 }
 
-int _GD_Bzip2Open(int dirfd, struct _gd_raw_file* file, int swap __gd_unused,
-    int mode __gd_unused, int creat __gd_unused)
+int _GD_Bzip2Open(int dirfd, int fd2 __gd_unused, struct _gd_raw_file* file,
+    int swap __gd_unused, unsigned int mode __gd_unused)
 {
-  dtrace("%i, %p, <unused>, <unused>, <unused>", dirfd, file);
+  dtrace("%i, <unused>, %p, <unused>, <unused>", dirfd, file);
 
   file->edata = _GD_Bzip2DoOpen(dirfd, file);
 
@@ -113,17 +113,18 @@ int _GD_Bzip2Open(int dirfd, struct _gd_raw_file* file, int swap __gd_unused,
     return 1;
   }
 
+  file->mode = GD_FILE_READ;
   file->idata = 0;
   dreturn("%i", 0);
   return 0;
 }
 
 off64_t _GD_Bzip2Seek(struct _gd_raw_file* file, off64_t count,
-    gd_type_t data_type, int pad __gd_unused)
+    gd_type_t data_type, unsigned int mode __gd_unused)
 {
   struct gd_bzdata *ptr = (struct gd_bzdata *)file->edata;
 
-  dtrace("%p, %lli, %x, <unused>", file, (long long)count, data_type);
+  dtrace("%p, %lli, 0x%X, <unused>", file, (long long)count, data_type);
 
   count *= GD_SIZE(data_type);
 
@@ -179,7 +180,7 @@ ssize_t _GD_Bzip2Read(struct _gd_raw_file *file, void *data,
   struct gd_bzdata *ptr = (struct gd_bzdata *)file->edata;
   unsigned long long nbytes = nmemb * GD_SIZE(data_type);
 
-  dtrace("%p, %p, %x, %zu", file, data, data_type, nmemb);
+  dtrace("%p, %p, 0x%X, %zu", file, data, data_type, nmemb);
 
   while (nbytes > (unsigned long long)(ptr->end - ptr->pos)) {
     int n;
@@ -235,15 +236,16 @@ int _GD_Bzip2Close(struct _gd_raw_file *file)
 
   ptr->bzerror = 0;
   BZ2_bzReadClose(&ptr->bzerror, ptr->bzfile);
-  if (!fclose(ptr->stream)) {
-    file->idata = -1;
-    free(file->edata);
-    dreturn("%i", 0);
-    return 0;
+  if (fclose(ptr->stream)) {
+    dreturn("%i", 1);
+    return 1;
   }
 
-  dreturn("%i", 1);
-  return 1;
+  file->idata = -1;
+  file->mode = 0;
+  free(file->edata);
+  dreturn("%i", 0);
+  return 0;
 }
 
 off64_t _GD_Bzip2Size(int dirfd, struct _gd_raw_file *file, gd_type_t data_type,
@@ -252,7 +254,7 @@ off64_t _GD_Bzip2Size(int dirfd, struct _gd_raw_file *file, gd_type_t data_type,
   struct gd_bzdata *ptr;
   off_t n;
 
-  dtrace("%i, %p, %x, <unused>", dirfd, file, data_type);
+  dtrace("%i, %p, 0x%X, <unused>", dirfd, file, data_type);
 
   ptr = _GD_Bzip2DoOpen(dirfd, file);
 

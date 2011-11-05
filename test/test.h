@@ -1,5 +1,5 @@
 #define GD_TEST
-#include "../src/internal.h"
+#include "internal.h"
 #include <inttypes.h>
 #include <math.h>
 #include <stdio.h>

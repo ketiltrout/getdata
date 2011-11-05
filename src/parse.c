@@ -46,7 +46,7 @@ static gd_type_t _GD_RawType(const char* type, int standards, int pedantic)
   dtrace("\"%s\", %i, %i", type, standards, pedantic);
 
   /* for backwards compatibility */
-  if (strlen(type) == 1 && (!pedantic || standards < 8)) 
+  if (strlen(type) == 1 && (!pedantic || standards < 8))
     t = _GD_LegacyType(type[0]);
   else if (pedantic && standards < 5)
     t = GD_UNKNOWN;
@@ -85,7 +85,7 @@ static gd_type_t _GD_RawType(const char* type, int standards, int pedantic)
   else if (strcmp(type, "COMPLEX128") == 0)
     t = GD_COMPLEX128;
 
-  dreturn("%x", t);
+  dreturn("0x%X", t);
   return t;
 }
 
@@ -95,7 +95,7 @@ static char* _GD_SetScalar(DIRFILE* D, const char* token, void* data, int type,
     const char* format_file, int line, int *index, int *comp_scal)
 {
   char *ptr = NULL;
-  char *lt; 
+  char *lt;
 
   dtrace("%p, \"%s\", %p, %i, \"%s\", %i, %p, %p", D, token, data, type,
       format_file, line, index, comp_scal);
@@ -104,7 +104,7 @@ static char* _GD_SetScalar(DIRFILE* D, const char* token, void* data, int type,
     /* try to convert to double */
     const char *semicolon;
     double i = 0;
-    double d = strtod(token, &ptr); 
+    double d = strtod(token, &ptr);
 
     /* check for a complex value -- look for the semicolon */
     for (semicolon = token; *semicolon; ++semicolon)
@@ -140,7 +140,7 @@ static char* _GD_SetScalar(DIRFILE* D, const char* token, void* data, int type,
 
       *comp_scal = 1;
     }
-    
+
     if (type == GD_COMPLEX128) {
       *(double *)data = d;
       *((double *)data + 1) = i;
@@ -896,35 +896,35 @@ static gd_entry_t* _GD_ParsePolynom(DIRFILE* D,
 
 gd_type_t _GD_ConstType(DIRFILE *D, gd_type_t type)
 {
-  dtrace("%p, 0x%03x", D, type);
+  dtrace("%p, 0x%X", D, type);
 
   switch (type) {
     case GD_UINT8:
     case GD_UINT16:
     case GD_UINT32:
     case GD_UINT64:
-      dreturn("%i", GD_UINT64);
-      return GD_UINT64; 
+      dreturn("0x%X", GD_UINT64);
+      return GD_UINT64;
     case GD_INT8:
     case GD_INT16:
     case GD_INT32:
     case GD_INT64:
-      dreturn("%x", GD_INT64);
-      return GD_INT64; 
+      dreturn("0x%X", GD_INT64);
+      return GD_INT64;
     case GD_FLOAT32:
     case GD_FLOAT64:
-      dreturn("%x", GD_FLOAT64);
+      dreturn("0x%X", GD_FLOAT64);
       return GD_FLOAT64;
     case GD_COMPLEX64:
     case GD_COMPLEX128:
-      dreturn("%x", GD_COMPLEX128);
-      return GD_COMPLEX128; 
+      dreturn("0x%X", GD_COMPLEX128);
+      return GD_COMPLEX128;
     case GD_NULL:
     case GD_UNKNOWN:
       _GD_InternalError(D);
   }
 
-  dreturn("%x", GD_NULL);
+  dreturn("0x%X", GD_NULL);
   return GD_NULL;
 }
 
@@ -1134,7 +1134,7 @@ static gd_entry_t* _GD_ParseCarray(DIRFILE* D, char* in_cols[MAX_IN_COLS],
       }
     }
 
-    if (n_cols < MAX_IN_COLS) 
+    if (n_cols < MAX_IN_COLS)
       break;
 
     /* get more tokens */
@@ -1325,14 +1325,8 @@ gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, char** in_cols,
       else if (D->fragment[me].encoding == GD_ENC_UNSUPPORTED)
         /* If the encoding scheme is unsupported, we can't add the field */
         _GD_SetError(D, GD_E_UNSUPPORTED, 0, NULL, 0, NULL);
-      else if (!_GD_Supports(D, E, GD_EF_TOUCH))
-        ; /* error already set */
-      else if (_GD_SetEncodedName(D, E->e->u.raw.file, E->e->u.raw.filebase, 0))
-        ; /* error already set */
-      else if ((*_gd_ef[E->e->u.raw.file[0].subenc].touch)(
-            D->fragment[E->fragment_index].dirfd, E->e->u.raw.file,
-            _GD_FileSwapBytes(D, me)))
-        _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
+      else
+        _GD_InitRawIO(D, E, NULL, 0, NULL, 0, GD_FILE_WRITE | GD_FILE_TOUCH, 0);
     }
 
     /* Is this the first raw field ever defined? */
@@ -1414,7 +1408,7 @@ gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, char** in_cols,
       _GD_FreeE(D, E, 1);
       dreturn("%p", NULL);
       return NULL;
-    } 
+    }
 
     /* Initialse the meta counts */
     if (P != NULL) {
@@ -1720,7 +1714,7 @@ static int _GD_ParseDirective(DIRFILE *D, char** in_cols, int n_cols,
         D->fragment[me].byte_sex = GD_BIG_ENDIAN;
       else if (strcmp(in_cols[1], "little") == 0)
         D->fragment[me].byte_sex = GD_LITTLE_ENDIAN;
-      else 
+      else
         _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_ENDIAN,
             D->fragment[me].cname, linenum, NULL);
       if (n_cols > 2 && (!pedantic || *standards >= 8)) {
@@ -1728,7 +1722,7 @@ static int _GD_ParseDirective(DIRFILE *D, char** in_cols, int n_cols,
 #if ! defined(ARM_ENDIAN_DOUBLES)
           D->fragment[me].byte_sex |= GD_ARM_FLAG;
 #endif
-        } else 
+        } else
           _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_ENDIAN,
               D->fragment[me].cname, linenum, NULL);
       }

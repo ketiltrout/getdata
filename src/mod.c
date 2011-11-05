@@ -39,7 +39,7 @@ static unsigned int _gd_max(unsigned int A, unsigned int B)
 #define GD_AS_NEED_RECALC 2
 #define GD_AS_ERROR       4
 #define GD_AS_MODIFIED    8
-/*  sold snew alit 
+/*  sold snew alit
  * 0a N    N0   0     -> do nothing         ()
  * 1  N    N0   1     -> set lout           ()
  * 2  Na   a    01    -> set sout           (free scalar; need recalc)
@@ -55,7 +55,7 @@ static int _GD_AlterScalar(DIRFILE* D, int alter_literal, gd_type_t type,
   int set_lout = 0;
   int error = 0;
 
-  dtrace("%p, %i, %x, %p, %p, %p, %p, %p, %i, %i", D, alter_literal, type,
+  dtrace("%p, %i, 0x%X, %p, %p, %p, %p, %p, %i, %i", D, alter_literal, type,
       lout, lin, sout, iout, sin, iin, calculated);
 
   if (sin == NULL) {
@@ -129,7 +129,7 @@ static void _GD_SPFConvert(DIRFILE* D, void *A, gd_spf_t spfA, void *B,
 {
   size_t i;
 
-  dtrace("%p, %p, %u, %p, %u, 0x%x, %zu", D, A, spfA, B, spfB, type, n);
+  dtrace("%p, %p, %u, %p, %u, 0x%X, %zu", D, A, spfA, B, spfB, type, n);
 
   switch (type) {
     case GD_NULL: /* null read */
@@ -236,7 +236,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
       j = _GD_AlterScalar(D, N->EN(raw,spf) && N->EN(raw,spf) != E->EN(raw,spf),
           GD_UINT16, &Q.EN(raw,spf), &N->EN(raw,spf), Q.scalar, Q.scalar_ind,
           N->scalar[0], N->scalar_ind[0], E->e->calculated);
-      
+
       if (j & GD_AS_ERROR)
         break;
       if (j & GD_AS_FREE_SCALAR)
@@ -268,7 +268,6 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
         void *buffer1;
         void *buffer2;
         struct encoding_t *enc;
-        int fd;
 
         if (j & GD_AS_NEED_RECALC)
           if (gd_get_constant(D, Q.scalar[0], GD_UINT16, &Q.EN(raw,spf)))
@@ -283,24 +282,18 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
               D->fragment[E->fragment_index].cname);
         else
           _GD_Supports(D, E, GD_EF_OPEN | GD_EF_CLOSE | GD_EF_SEEK |
-              GD_EF_READ | GD_EF_WRITE | GD_EF_SYNC | GD_EF_UNLINK |
-              GD_EF_TOPEN | GD_EF_TMOVE | GD_EF_TUNLINK);
+              GD_EF_READ | GD_EF_WRITE | GD_EF_SYNC | GD_EF_UNLINK);
 
         if (D->error)
           break;
 
         enc = _gd_ef + E->e->u.raw.file[0].subenc;
 
-        if (_GD_SetEncodedName(D, E->e->u.raw.file, E->e->u.raw.filebase, 0))
-          ; /* error already set */
-        else if (E->e->u.raw.file[0].idata == -1 && (*enc->open)(
-              D->fragment[E->fragment_index].dirfd, E->e->u.raw.file,
-              _GD_FileSwapBytes(D, E->fragment_index), 0, 0))
-        {
-          _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno,
-              NULL);
-        } else if ((*enc->seek)(E->e->u.raw.file, 0, E->EN(raw,data_type), 1)
-            == -1)
+        /* open the old file */
+        if (_GD_InitRawIO(D, E, NULL, 0, NULL, 0, GD_FILE_READ, 0))
+          break;
+        else if ((*enc->seek)(E->e->u.raw.file, 0, E->EN(raw,data_type),
+              GD_FILE_READ) == -1)
         {
           _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno,
               NULL);
@@ -310,31 +303,16 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
           break;
 
         /* Create a temporary file and open it */
-        if (_GD_SetEncodedName(D, E->e->u.raw.file + 1, E->e->u.raw.filebase,
-              1))
-        {
-          ; /* error already set */
-        } else if ((fd = _GD_MakeTempFile(D,
-                D->fragment[E->fragment_index].dirfd, E->e->u.raw.file[1].name))
-            < 0)
-        {
-          _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[1].name, errno,
-              NULL);
-        } else if ((*enc->topen)(fd, E->e->u.raw.file + 1,
+        if (_GD_InitRawIO(D, E, NULL, -1, enc, 0, GD_FILE_WRITE | GD_FILE_TEMP,
               _GD_FileSwapBytes(D, E->fragment_index)))
+          break;
+        else if ((*enc->seek)(E->e->u.raw.file + 1, 0, E->EN(raw,data_type),
+              GD_FILE_WRITE) == -1)
         {
           _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[1].name, errno,
               NULL);
-        } else if ((*enc->seek)(E->e->u.raw.file + 1, 0, E->EN(raw,data_type),
-              1) == -1)
-        {
-          _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[1].name, errno,
-              NULL);
-        }
-
-        if (D->error) {
-          (*enc->tunlink)(D->fragment[E->fragment_index].dirfd,
-              E->e->u.raw.file + 1);
+          _GD_FiniRawIO(D, E, E->fragment_index, GD_FINIRAW_DISCARD |
+              GD_FINIRAW_CLOTEMP);
           break;
         }
 
@@ -390,23 +368,17 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
         free(buffer1);
         free(buffer2);
 
-        /* An error occurred, clean up */
         if (D->error)
-          (*enc->tunlink)(D->fragment[E->fragment_index].dirfd,
-              E->e->u.raw.file + 1);
-        /* Well, I suppose the copy worked.  Close both files */
-        else if ((*enc->close)(E->e->u.raw.file) ||
-            (*enc->sync)(E->e->u.raw.file + 1) ||
-            (*enc->close)(E->e->u.raw.file + 1))
-        {
-          _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[1].name, errno,
-              NULL);
-        /* Move the temporary file over the old file */
-        } else if ((*enc->tmove)(D->fragment[E->fragment_index].dirfd,
-              D->fragment[E->fragment_index].dirfd, E->e->u.raw.file,
-              enc->tunlink))
-          _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno,
-              NULL);
+          /* An error occurred, delete the temporary file (the old
+           * file can stay open) */
+          _GD_FiniRawIO(D, E, E->fragment_index,
+              GD_FINIRAW_CLOTEMP | GD_FINIRAW_DISCARD);
+        else {
+          /* discard the old file and move the temporary file into place */
+          if (_GD_FiniRawIO(D, E, E->fragment_index, GD_FINIRAW_DISCARD) == 0)
+            _GD_FiniRawIO(D, E, E->fragment_index,
+                GD_FINIRAW_KEEP | GD_FINIRAW_CLOTEMP);
+        }
       }
       memcpy(Qe.u.raw.file, E->e->u.raw.file, sizeof(struct _gd_raw_file));
 
@@ -434,7 +406,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
 
       for (i = 0; i < Q.EN(lincom,n_fields); ++i) {
         if (flags & 0x1)
-          if (E->EN(lincom,n_fields) <= i || (N->in_fields[i] != NULL && 
+          if (E->EN(lincom,n_fields) <= i || (N->in_fields[i] != NULL &&
                 strcmp(E->in_fields[i], N->in_fields[i])))
           {
             if ((Q.in_fields[i] = strdup(N->in_fields[i])) == NULL) {
@@ -676,7 +648,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
       }
 
       break;
-    case GD_POLYNOM_ENTRY: 
+    case GD_POLYNOM_ENTRY:
       if (N->in_fields[0] != NULL && strcmp(E->in_fields[0], N->in_fields[0])) {
         if ((Q.in_fields[0] = strdup(N->in_fields[0])) == NULL) {
           _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
@@ -739,8 +711,8 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
       }
 
       type = _GD_ConstType(D, Q.EN(scalar,const_type));
-      if (Q.EN(scalar,const_type) != E->EN(scalar,const_type)) 
-        modified = 1; 
+      if (Q.EN(scalar,const_type) != E->EN(scalar,const_type))
+        modified = 1;
 
       if (type == _GD_ConstType(D, E->EN(scalar,const_type)))
         Qe.u.scalar.d = E->e->u.scalar.d;
@@ -797,7 +769,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
       if (Q.EN(scalar,const_type) != E->EN(scalar,const_type) ||
           Q.EN(scalar,array_len) != E->EN(scalar,array_len))
       {
-        modified = 1; 
+        modified = 1;
       }
 
       type = _GD_ConstType(D, Q.EN(scalar,const_type));
@@ -899,7 +871,7 @@ int gd_alter_raw(DIRFILE *D, const char *field_code,
   int ret;
   gd_entry_t N;
 
-  dtrace("%p, \"%s\", %u, %x, %i", D, field_code, spf, data_type, move);
+  dtrace("%p, \"%s\", %u, 0x%X, %i", D, field_code, spf, data_type, move);
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -1314,7 +1286,7 @@ int gd_alter_const(DIRFILE* D, const char* field_code, gd_type_t const_type)
   int ret;
   gd_entry_t N;
 
-  dtrace("%p, \"%s\", 0x%x", D, field_code, const_type);
+  dtrace("%p, \"%s\", 0x%X", D, field_code, const_type);
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -1338,7 +1310,7 @@ int gd_alter_carray(DIRFILE* D, const char* field_code, gd_type_t const_type,
   int ret;
   gd_entry_t N;
 
-  dtrace("%p, \"%s\", 0x%x, %zu", D, field_code, const_type, array_len);
+  dtrace("%p, \"%s\", 0x%X, %zu", D, field_code, const_type, array_len);
 
   if (D->flags & GD_INVALID) {
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -1530,7 +1502,7 @@ int gd_alter_spec(DIRFILE* D, const char* line, int move)
   }
 
   /* Let the parser compose the entry */
-  N = _GD_ParseFieldSpec(D, n_cols, in_cols, NULL, "dirfile_alter_spec()", 0, 
+  N = _GD_ParseFieldSpec(D, n_cols, in_cols, NULL, "dirfile_alter_spec()", 0,
       N->fragment_index, standards, 0, GD_PEDANTIC, 0, &outstring, tok_pos);
 
   free(outstring);

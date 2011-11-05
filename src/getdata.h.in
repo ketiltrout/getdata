@@ -30,7 +30,7 @@
  * - defining GD_NO_LEGACY_API will prevent the Legacy API declarations in
  *   getdata_legacy.h from being declared.  If the Legacy API was omitted from
  *   the library when it was built, this symbol does nothing.
- * 
+ *
  * - defining GD_C89_API will prevent declarations herein from
  *   using the C99 keyword `_Complex'.  Affected declarations will instead use a
  *   two-element array of doubles in place of the complex types.  This symbol
@@ -412,10 +412,10 @@ typedef int (*gd_parser_callback_t)(gd_parser_data_t*, void*);
 #define GD_DEL_FORCE 0x8
 
 /* seek flags */
-#define GD_SEEK_SET 0x0
-#define GD_SEEK_CUR 0x1
-#define GD_SEEK_END 0x2
-#define GD_SEEK_PAD 0x4
+#define GD_SEEK_SET   0x0
+#define GD_SEEK_CUR   0x1
+#define GD_SEEK_END   0x2
+#define GD_SEEK_WRITE 0x4
 
 extern int gd_add_bit(DIRFILE *dirfile, const char *field_code,
     const char *in_field, gd_bit_t bitnum, gd_bit_t numbits, int fragment_index)
@@ -818,6 +818,8 @@ extern int gd_rename(DIRFILE *dirfile, const char *old_code,
     const char *new_name, int move_data) gd_nonnull ((1,2,3));
 
 extern int gd_rewrite_fragment(DIRFILE *dirfile, int fragment) gd_nonnull ((1));
+
+extern int gd_sync(DIRFILE *dirfile, const char *field_code) gd_nonnull ((1));
 
 extern int gd_uninclude(DIRFILE *dirfile, int fragment_index,
     int del) gd_nonnull ((1));

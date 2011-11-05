@@ -72,7 +72,7 @@ int main(void)
 
   if (fd >= 0) {
     while (read(fd, &d, sizeof(uint16_t))) {
-      CHECKX(d, i * 8 / 11);
+      CHECKXi(i, d, i * 8 / 11);
       i++;
     }
     close(fd);

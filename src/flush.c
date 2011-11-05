@@ -36,11 +36,11 @@
 
 #define GD_MAX_PRETTY_FIELD_WIDTH 80
 
-void _GD_Flush(DIRFILE* D, gd_entry_t *E)
+void _GD_Flush(DIRFILE* D, gd_entry_t *E, int clo)
 {
   int i;
 
-  dtrace("%p, %p", D, E);
+  dtrace("%p, %p, %i", D, E, clo);
 
   if (++D->recurse_level >= GD_MAX_RECURSE_LEVEL) {
     _GD_SetError(D, GD_E_RECURSE_LEVEL, 0, NULL, 0, E->field);
@@ -51,14 +51,16 @@ void _GD_Flush(DIRFILE* D, gd_entry_t *E)
 
   switch(E->field_type) {
     case GD_RAW_ENTRY:
-      if (E->e->u.raw.file[0].idata >= 0) {
+      if (E->e->u.raw.file[0].idata >= 0 ||
+          ((_gd_ef[E->e->u.raw.file[0].subenc].flags & GD_EF_OOP) &&
+           (E->e->u.raw.file[1].idata >= 0)))
+      {
         if ((D->flags & GD_ACCMODE) == GD_RDWR &&
             _gd_ef[E->e->u.raw.file[0].subenc].sync != NULL &&
             (*_gd_ef[E->e->u.raw.file[0].subenc].sync)(E->e->u.raw.file))
           _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno,
               NULL);
-        else if ((*_gd_ef[E->e->u.raw.file[0].subenc].close)(
-              E->e->u.raw.file))
+        else if (clo && _GD_FiniRawIO(D, E, E->fragment_index, GD_FINIRAW_KEEP))
         {
           _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno,
               NULL);
@@ -67,11 +69,11 @@ void _GD_Flush(DIRFILE* D, gd_entry_t *E)
       break;
     case GD_LINCOM_ENTRY:
       for (i = 2; i < E->EN(lincom,n_fields); ++i)
-        _GD_Flush(D, E->e->entry[i]);
+        _GD_Flush(D, E->e->entry[i], clo);
       /* fallthrough */
     case GD_MULTIPLY_ENTRY:
     case GD_DIVIDE_ENTRY:
-      _GD_Flush(D, E->e->entry[1]);
+      _GD_Flush(D, E->e->entry[1], clo);
       /* fallthrough */
     case GD_LINTERP_ENTRY:
     case GD_BIT_ENTRY:
@@ -79,7 +81,7 @@ void _GD_Flush(DIRFILE* D, gd_entry_t *E)
     case GD_POLYNOM_ENTRY:
     case GD_SBIT_ENTRY:
     case GD_RECIP_ENTRY:
-      _GD_Flush(D, E->e->entry[0]);
+      _GD_Flush(D, E->e->entry[0], clo);
     case GD_CONST_ENTRY:
     case GD_CARRAY_ENTRY:
     case GD_STRING_ENTRY:
@@ -96,7 +98,7 @@ static const char* _GD_TypeName(DIRFILE* D, gd_type_t data_type)
 {
   const char* ptr;
 
-  dtrace("%p, 0x%x", D, data_type);
+  dtrace("%p, 0x%X", D, data_type);
 
   switch(data_type) {
     case GD_UINT8:
@@ -149,7 +151,7 @@ static const char* _GD_OldTypeName(DIRFILE* D, gd_type_t data_type)
 {
   const char* ptr;
 
-  dtrace("%p, 0x%x", D, data_type);
+  dtrace("%p, 0x%X", D, data_type);
 
   switch(data_type) {
     case GD_UINT8:
@@ -589,7 +591,7 @@ static void _GD_FlushFragment(DIRFILE* D, int i, int permissive)
   /* That's all; flush, sync, and close */
   fflush(stream);
   fsync(fd);
-#ifdef HAVE_FCHMOD  
+#ifdef HAVE_FCHMOD
   fchmod(fd, mode);
 #endif
   fclose(stream);
@@ -687,7 +689,7 @@ int gd_rewrite_fragment(DIRFILE* D, int fragment)
   return (D->error == GD_E_OK) ? 0 : -1;
 }
 
-int gd_flush(DIRFILE* D, const char* field_code)
+static int _GD_SyncOrClose(DIRFILE* D, const char* field_code, int clo)
 {
   unsigned int i;
   int repr;
@@ -705,13 +707,13 @@ int gd_flush(DIRFILE* D, const char* field_code)
     if (!D->error)
       for (i = 0; i < D->n_entries; ++i)
         if (D->entry[i]->field_type == GD_RAW_ENTRY)
-          _GD_Flush(D, D->entry[i]);
+          _GD_Flush(D, D->entry[i], clo);
   } else {
     /* discard representation */
     E = _GD_FindFieldAndRepr(D, field_code, &simple_field_code, &repr, NULL, 1);
 
     if (!D->error)
-      _GD_Flush(D, E);
+      _GD_Flush(D, E, clo);
 
     if (field_code != simple_field_code)
       free(simple_field_code);
@@ -719,6 +721,30 @@ int gd_flush(DIRFILE* D, const char* field_code)
 
   dreturn("%i", (D->error == GD_E_OK) ? 0 : -1);
   return (D->error == GD_E_OK) ? 0 : -1;
+}
+
+int gd_sync(DIRFILE *D, const char *field_code)
+{
+  int ret;
+
+  dtrace("%p, \"%s\"", D, field_code);
+
+  ret = _GD_SyncOrClose(D, field_code, 0);
+
+  dreturn("%i", ret);
+  return ret;
+}
+
+int gd_flush(DIRFILE *D, const char *field_code)
+{
+  int ret;
+
+  dtrace("%p, \"%s\"", D, field_code);
+
+  ret = _GD_SyncOrClose(D, field_code, 1);
+
+  dreturn("%i", ret);
+  return ret;
 }
 
 #define GD_VERS_GE_1  0xFFFFFFFFFFFFFFFELU

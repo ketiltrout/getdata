@@ -28,26 +28,36 @@
 #include <errno.h>
 #endif
 
-int _GD_RawOpen(int dirfd, struct _gd_raw_file* file, int swap __gd_unused,
-    int mode, int creat)
+int _GD_RawOpen(int fd, int fd2 __gd_unused, struct _gd_raw_file* file,
+    int swap __gd_unused, unsigned int mode)
 {
-  dtrace("%i, %p, <unused>, %i, %i", dirfd, file, mode, creat);
+  dtrace("%i, <unused>, %p, <unused>, 0x%X", fd, file, mode);
 
-  file->idata = gd_OpenAt(file->D, dirfd, file->name, ((mode == GD_RDWR) ?
-        O_RDWR : O_RDONLY) | (creat ? O_CREAT : 0) | O_BINARY, 0666);
+  if (!(mode & GD_FILE_TEMP)) {
+    if (file->mode & mode) {
+      dreturn("%i", 0);
+      return 0;
+    } else if (file->idata >= 0)
+      close(file->idata);
+
+    file->idata = gd_OpenAt(file->D, fd, file->name, ((mode & GD_FILE_WRITE) ?
+          (O_RDWR | O_CREAT) : O_RDONLY) | O_BINARY, 0666);
+  } else
+    file->idata = fd;
 
   file->pos = 0;
+  file->mode = mode | GD_FILE_READ;
 
   dreturn("%i", file->idata < 0);
   return (file->idata < 0);
 }
 
 off64_t _GD_RawSeek(struct _gd_raw_file* file, off64_t count,
-    gd_type_t data_type, int pad __gd_unused)
+    gd_type_t data_type, unsigned int mode __gd_unused)
 {
   off64_t pos;
 
-  dtrace("%p, %lli, %x, <unused>", file, (long long)count, data_type);
+  dtrace("%p, %lli, 0x%X, <unused>", file, (long long)count, data_type);
 
   /* short circuit */
   if (file->pos == count) {
@@ -73,7 +83,7 @@ ssize_t _GD_RawRead(struct _gd_raw_file *file, void *ptr, gd_type_t data_type,
 {
   ssize_t nread;
 
-  dtrace("%p, %p, %x, %zu", file, ptr, data_type, nmemb);
+  dtrace("%p, %p, 0x%X, %zu", file, ptr, data_type, nmemb);
 
   nread = read(file->idata, ptr, nmemb * GD_SIZE(data_type));
 
@@ -91,7 +101,7 @@ ssize_t _GD_RawWrite(struct _gd_raw_file *file, const void *ptr,
 {
   ssize_t nwrote;
 
-  dtrace("%p, %p, %x, %zu", file, ptr, data_type, nmemb);
+  dtrace("%p, %p, 0x%X, %zu", file, ptr, data_type, nmemb);
 
   nwrote = write(file->idata, ptr, nmemb * GD_SIZE(data_type));
 
@@ -116,8 +126,10 @@ int _GD_RawClose(struct _gd_raw_file *file)
   dtrace("%p", file);
 
   ret = close(file->idata);
-  if (!ret)
+  if (!ret) {
     file->idata = -1;
+    file->mode = 0;
+  }
 
   dreturn("%i", ret);
   return ret;
@@ -128,7 +140,7 @@ off64_t _GD_RawSize(int dirfd, struct _gd_raw_file *file, gd_type_t data_type,
 {
   gd_stat64_t statbuf;
 
-  dtrace("%i, %p, %x, <unused>", dirfd, file, data_type);
+  dtrace("%i, %p, 0x%X, <unused>", dirfd, file, data_type);
 
   if (gd_StatAt64(file->D, dirfd, file->name, &statbuf, 0) < 0)  {
     dreturn("%lli", -1LL);
@@ -137,39 +149,4 @@ off64_t _GD_RawSize(int dirfd, struct _gd_raw_file *file, gd_type_t data_type,
 
   dreturn("%lli", (long long)statbuf.st_size);
   return statbuf.st_size / GD_SIZE(data_type);
-}
-
-int _GD_RawTOpen(int fd, struct _gd_raw_file *file, int swap __gd_unused)
-{
-  dtrace("%i, %p, <unused>", fd, file);
-
-  file->idata = fd;
-  file->pos = 0;
-
-  dreturn("%i", 0);
-  return 0;
-}
-
-int _GD_RawTUnlink(int dirfd, struct _gd_raw_file *file)
-{
-  dtrace("%i, %p", dirfd, file);
-
-  if (file->name != NULL) {
-    if (file->idata >= 0)
-      if (_GD_RawClose(file)) {
-        dreturn("%i", -1);
-        return -1;
-      }
-
-    if (gd_UnlinkAt(file->D, dirfd, file->name, 0)) {
-      dreturn("%i", -1);
-      return -1;
-    }
-
-    free(file->name);
-    file->name = NULL;
-  }
-
-  dreturn("%i", 0);
-  return 0;
 }

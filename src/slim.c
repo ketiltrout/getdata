@@ -39,40 +39,55 @@
 #endif
 
 /* The slim encoding scheme uses edata as a slimfile pointer.  If a file is
- * open, fp = 0 otherwise fp = -1. */
+ * open, idata = 0 otherwise idata = -1. */
 
-int _GD_SlimOpen(int dirfd, struct _gd_raw_file* file, int mode __gd_unused,
-    int creat __gd_unused)
+int _GD_SlimOpen(int dirfd, int fd2 __gd_unused, struct _gd_raw_file* file,
+    int swap __gd_unused, unsigned int mode __gd_unused)
 {
-  char *filepath;
-  dtrace("%i, %p, <unused>, <unused>", dirfd, file);
+  dtrace("%i, <unused>, %p, <unused>, <unused>", dirfd, file);
 
-  /* this is easily broken, but the best we can do for now... */
-  filepath = gd_MakeFullPath(file->D, dirfd, file->name);
-  if (filepath == NULL) {
+  {
+#ifdef HAVE_SLIMDOPEN
+    int fd;
+    fd = gd_OpenAt(file->D, dirfd, file->name, ((mode & GD_FILE_WRITE) ?
+          (O_RDWR | O_CREAT) : O_RDONLY) | O_BINARY, 0666);
+
+    if (fd < 0) {
+      dreturn("%i", 1);
+      return 1;
+    }
+    file->edata = slimdopen(fd, "r");
+#else
+    char *filepath;
+    /* this is easily broken, but the best we can do for now... */
+    filepath = gd_MakeFullPath(file->D, dirfd, file->name);
+    if (filepath == NULL) {
+      dreturn("%i", 1);
+      return 1;
+    }
+
+    file->edata = slimopen(filepath, "r");
+    free(filepath);
+#endif
+  }
+
+  if (file->edata == NULL) {
     dreturn("%i", 1);
     return 1;
   }
 
-  file->edata = slimopen(filepath, "r" /* writing not supported */);
-  free(filepath);
-
-  if (file->edata != NULL) {
-    file->fp = 0;
-    dreturn("%i", 0);
-    return 0;
-  }
-
-  dreturn("%i", 1);
-  return 1;
+  file->mode = GD_RDONLY;
+  file->idata = 0;
+  dreturn("%i", 0);
+  return 0;
 }
 
 off64_t _GD_SlimSeek(struct _gd_raw_file* file, off64_t count,
-    gd_type_t data_type, int pad __gd_unused)
+    gd_type_t data_type, unsigned int mode __gd_unused)
 {
   off64_t n;
 
-  dtrace("%p, %lli, %x, <unused>", file, (long long)count, data_type);
+  dtrace("%p, %lli, 0x%X, <unused>", file, (long long)count, data_type);
 
   n = (off64_t)slimseek((SLIMFILE *)file->edata, (off_t)count *
       GD_SIZE(data_type), SEEK_SET);
@@ -91,7 +106,7 @@ ssize_t _GD_SlimRead(struct _gd_raw_file *file, void *ptr, gd_type_t data_type,
 {
   ssize_t n;
 
-  dtrace("%p, %p, %x, %zu", file, ptr, data_type, nmemb);
+  dtrace("%p, %p, 0x%X, %zu", file, ptr, data_type, nmemb);
 
   n = slimread(ptr, GD_SIZE(data_type), nmemb, (SLIMFILE *)file->edata);
 
@@ -107,20 +122,22 @@ int _GD_SlimClose(struct _gd_raw_file *file)
 
   ret = slimclose((SLIMFILE *)file->edata);
   if (!ret) {
-    file->fp = -1;
+    file->idata = -1;
     file->edata = NULL;
+    file->mode = 0;
   }
 
   dreturn("%i", ret);
   return ret;
 }
 
-off64_t _GD_SlimSize(int dirfd, struct _gd_raw_file *file, gd_type_t data_type)
+off64_t _GD_SlimSize(int dirfd, struct _gd_raw_file *file, gd_type_t data_type,
+    int swap __gd_unused)
 {
   char *filepath;
   off64_t size;
 
-  dtrace("%i, %p, %x", dirfd, file, data_type);
+  dtrace("%i, %p, 0x%X", dirfd, file, data_type);
 
   /* this is easily broken, but the best we can do for now... */
   filepath = gd_MakeFullPath(file->D, dirfd, file->name);
@@ -136,7 +153,7 @@ off64_t _GD_SlimSize(int dirfd, struct _gd_raw_file *file, gd_type_t data_type)
     dreturn("%i", -1);
     return -1;
   }
-  
+
   size /= GD_SIZE(data_type);
 
   dreturn("%lli", (long long)size);

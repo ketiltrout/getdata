@@ -65,13 +65,15 @@ static void _GD_ByteSwapFragment(DIRFILE* D, unsigned long byte_sex,
       if (D->entry[i]->fragment_index == fragment &&
           D->entry[i]->field_type == GD_RAW_ENTRY)
       {
-        /* if the field's data type is one byte long, do nothing */
-        if (D->entry[i]->e->u.raw.size == 1)
-          continue;
-
-        /* check subencoding support */
-        if (!_GD_Supports(D, D->entry[i], GD_EF_TMOVE | GD_EF_TUNLINK))
+        /* determine encoding scheme */
+        if (!_GD_Supports(D, D->entry[i], 0))
           break;
+
+        /* if the field's data type is one byte long, and no in-framework
+         * byte-swapping is required, do nothing */
+        if (D->entry[i]->e->u.raw.size == 1 &&
+            !(_gd_ef[D->entry[i]->e->u.raw.file[0].subenc].flags & GD_EF_SWAP))
+          continue;
 
         /* add this raw field to the list */
         raw_entry[n_raw++] = D->entry[i];
@@ -87,23 +89,12 @@ static void _GD_ByteSwapFragment(DIRFILE* D, unsigned long byte_sex,
      * remove the temporary files */
     if (D->error) {
       for (i = 0; i < n_raw; ++i)
-        if ((*_gd_ef[raw_entry[i]->e->u.raw.file[0].subenc].tunlink)(
-              D->fragment[fragment].dirfd, raw_entry[i]->e->u.raw.file + 1))
-        {
-          _GD_SetError(D, GD_E_RAW_IO, 0, raw_entry[i]->e->u.raw.file[0].name,
-              errno, NULL);
-        }
+        _GD_FiniRawIO(D, raw_entry[i], fragment, GD_FINIRAW_DISCARD |
+            GD_FINIRAW_CLOTEMP);
     } else {
       for (i = 0; i < n_raw; ++i)
-        if ((*_gd_ef[raw_entry[i]->e->u.raw.file[0].subenc].tmove)(
-              D->fragment[fragment].dirfd, D->fragment[fragment].dirfd,
-              raw_entry[i]->e->u.raw.file,
-              _gd_ef[raw_entry[i]->e->u.raw.file[0].subenc].tunlink))
-        {
-          _GD_SetError(D, GD_E_UNCLEAN_DB, 0,
-              D->fragment[D->entry[i]->fragment_index].cname, 0, NULL);
-          D->flags |= GD_INVALID;
-        }
+        _GD_FiniRawIO(D, raw_entry[i], fragment, GD_FINIRAW_KEEP |
+            GD_FINIRAW_CLOTEMP);
     }
 
     free(raw_entry);

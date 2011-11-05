@@ -1,11 +1,8 @@
 * Locking
 * Hashed compressed files
-* Streaming/Appending
 * linterp table path munging [MH]
 * Make webpage suck less
-* Handle RW dirfile on RO data better [JPF]
+
+* Fix VERSION leakage / Fragment encapsulation [MT/CBN]
 * INCLUDE name munging [RW/MT]
-* Fix VERSION leakage [MT]
 * aliasing [MT]
-* Fix REFERENCE spam [MT]
-* Fragment encapsulation [MT/CBN]

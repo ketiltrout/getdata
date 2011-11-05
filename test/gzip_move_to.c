@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 D. V. Wiebe
+/* Copyright (C) 2011 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -18,56 +18,75 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Attempt to write a read-only dirfile */
+/* Attempt to gzip compress a file */
 #include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <string.h>
-#include <errno.h>
 
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *data = "dirfile/data";
-  const char *format_data = "data RAW UINT8 1\n";
-  unsigned char c = 0;
-  int fd, n, error, r = 0;
+  const char *data_gz = "dirfile/data.gz";
+  const char *data_raw = "dirfile/data";
+  const char *format_data = "data RAW UINT8 8\n/ENCODING none\n/ENDIAN little\n";
+  uint8_t data_in[256], d;
   DIRFILE *D;
+  char command[4096];
+  int fd, i, error, r = 0;
+  struct stat buf;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir(filedir, 0777); 
+
+  for (fd = 0; fd < 256; ++fd)
+    data_in[fd] = (unsigned char)fd;
 
   fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  close(open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0555));
+  fd = open(data_raw, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
+  write(fd, data_in, 256);
+  close(fd);
 
-  /* ensure filesystem honours read-onlyness */
-  if ((fd = open(data, O_RDWR)) >= 0 || errno != EACCES) {
-    if (fd >= 0)
-      close(fd);
-    unlink(format);
-    unlink(data);
-    rmdir(filedir);
-    return 77;
-  }
-
-  D = gd_open(filedir, GD_RDWR | GD_UNENCODED);
-  n = gd_putdata(D, "data", 5, 0, 1, 0, GD_UINT8, &c);
-
+  D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
+  gd_alter_encoding(D, GD_GZIP_ENCODED, 0, 1);
   error = gd_error(D);
+
   gd_close(D);
 
-  unlink(data);
+  if (stat(data_gz, &buf)) {
+    perror("stat");
+    r = 1;
+  }
+  CHECKI(stat(data_raw, &buf), -1);
+
+  /* uncompress */
+  snprintf(command, 4096, "%s -f %s > /dev/null", GUNZIP, data_gz);
+  if (gd_system(command)) {
+    r = 1;
+  } else {
+    fd = open(data_raw, O_RDONLY | O_BINARY);
+    if (fd >= 0) {
+      i = 0;
+      while (read(fd, &d, sizeof(uint8_t))) {
+        CHECKIi(i, d, i);
+        i++;
+      }
+      CHECKI(i, 256);
+      close(fd);
+    }
+  }
+
+  unlink(data_raw);
   unlink(format);
   rmdir(filedir);
 
-  CHECKI(n,0);
-  CHECKI(error,GD_E_RAW_IO);
+  CHECKI(error, 0);
+
   return r;
 }

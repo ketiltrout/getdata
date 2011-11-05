@@ -40,23 +40,26 @@ struct gd_siedata {
   int64_t d[3];
 };
 
-static int _GD_SampIndDoOpen(int dirfd, struct _gd_raw_file *file,
-    struct gd_siedata *f, int swap, int mode, int creat)
+static int _GD_SampIndDoOpen(int fdin, struct _gd_raw_file *file,
+    struct gd_siedata *f, int swap, unsigned int mode)
 {
   int fd;
   FILE *stream;
 
-  dtrace("%i, %p, %i, %i, %i", dirfd, file, swap, mode, creat);
+  dtrace("%i, %p, %i, 0x%X", fdin, file, swap, mode);
 
-  fd = gd_OpenAt(file->D, dirfd, file->name, ((mode == GD_RDWR) ? O_RDWR :
-        O_RDONLY) | (creat ? O_CREAT : 0) | O_BINARY, 0666);
-  
-  if (fd < 0) {
-    dreturn("%i", -1);
-    return -1;
-  }
+  if (!(mode & GD_FILE_TEMP)) {
+    fd = gd_OpenAt(file->D, fdin, file->name, ((mode & GD_FILE_WRITE) ?
+          (O_RDWR | O_CREAT) : O_RDONLY) | O_BINARY, 0666);
 
-  stream = fdopen(fd, (mode == GD_RDWR) ? "r+" : "r");
+    if (fd < 0) {
+      dreturn("%i", -1);
+      return -1;
+    }
+  } else
+    fd = fdin;
+
+  stream = fdopen(fd, (mode & GD_FILE_WRITE) ? "r+" : "r");
 
   if (stream == NULL) {
     close(fd);
@@ -68,30 +71,38 @@ static int _GD_SampIndDoOpen(int dirfd, struct _gd_raw_file *file,
   f->r = f->s = f->p = f->d[0] = -1;
   f->fp = stream;
   f->swap = swap;
-  dreturn("%i", 0);
-  return 0;
+  dreturn("%i", fd);
+  return fd;
 }
 
-int _GD_SampIndOpen(int dirfd, struct _gd_raw_file *file, int swap, int mode,
-    int creat)
+int _GD_SampIndOpen(int fd, int fd2 __gd_unused, struct _gd_raw_file *file,
+    int swap, unsigned int mode)
 {
-  dtrace("%i, %p, %i, %i, %i", dirfd, file, swap, mode, creat);
+  dtrace("%i, <unused>, %p, %i, 0x%X", fd, file, swap, mode);
 
-  file->edata = malloc(sizeof(struct gd_siedata));
+  if (file->mode & mode) {
+    dreturn("%i", 0);
+    return 0;
+  } else if (file->edata)
+    fclose(((struct gd_siedata *)(file->edata))->fp);
+  else
+    file->edata = malloc(sizeof(struct gd_siedata));
 
   if (file->edata == NULL) {
     dreturn("%i", -1);
     return -1;
   }
 
-  if (_GD_SampIndDoOpen(dirfd, file, file->edata, swap, mode, creat)) {
+  file->idata = _GD_SampIndDoOpen(fd, file, file->edata, swap, mode);
+
+  if (file->idata < 0) {
     free(file->edata);
     dreturn("%i", -1);
     return -1;
   }
 
+  file->mode = mode;
   file->pos = -1;
-  file->idata = 0;
   dreturn("%i", 0);
   return 0;
 }
@@ -140,13 +151,13 @@ static int _GD_Advance(struct gd_siedata *f, size_t size)
 }
 
 off64_t _GD_SampIndSeek(struct _gd_raw_file *file, off64_t sample,
-    gd_type_t data_type, int pad)
+    gd_type_t data_type, unsigned int mode)
 {
   int r;
   const size_t size = sizeof(int64_t) + GD_SIZE(data_type);
   struct gd_siedata *f = (struct gd_siedata*)(file->edata);
 
-  dtrace("%p, %llx, 0x%03x, %i", file, (long long)sample, data_type, pad);
+  dtrace("%p, %llx, 0x%X, 0x%X", file, (long long)sample, data_type, mode);
 
   if (file->pos == sample) {
     dreturn("%lli", sample);
@@ -171,7 +182,7 @@ off64_t _GD_SampIndSeek(struct _gd_raw_file *file, off64_t sample,
       break;
   }
 
-  if (pad && sample > f->d[0]) {
+  if ((mode & GD_FILE_WRITE) && sample > f->d[0]) {
     double complex p = 0;
     if (memcmp(f->d + 1, &p, GD_SIZE(data_type)) == 0) {
       /* in this case, just increase the current record's end */
@@ -199,33 +210,35 @@ static void *_GD_Duplicate(void *d, void *s, size_t l, int64_t n)
   int64_t i;
   dtrace("%p, %p, %zi, 0x%llx", d, s, l, (long long)n);
 
-  if (l == 1) {
-    memset(d, *(char*)s, (size_t)n);
-    d = (char*)d + n;
-  } else if (l == 2) {
-    uint16_t v = *(uint16_t*)s;
-    uint16_t *p = (uint16_t*)d;
-    for (i = 0; i < n; ++i)
-      *(p++) = v;
-    d = p;
-  } else if (l == 4) {
-    uint32_t v = *(uint32_t*)s;
-    uint32_t *p = (uint32_t*)d;
-    for (i = 0; i < n; ++i)
-      *(p++) = v;
-    d = p;
-  } else if (l == 8) {
-    uint64_t v = *(uint64_t*)s;
-    uint64_t *p = (uint64_t*)d;
-    for (i = 0; i < n; ++i)
-      *(p++) = v;
-    d = p;
-  } else if (l == 16) {
-    double complex v = *(double complex*)s;
-    double complex *p = (double complex*)d;
-    for (i = 0; i < n; ++i)
-      *(p++) = v;
-    d = p;
+  if (n > 0) {
+    if (l == 1) {
+      memset(d, *(char*)s, (size_t)n);
+      d = (char*)d + n;
+    } else if (l == 2) {
+      uint16_t v = *(uint16_t*)s;
+      uint16_t *p = (uint16_t*)d;
+      for (i = 0; i < n; ++i)
+        *(p++) = v;
+      d = p;
+    } else if (l == 4) {
+      uint32_t v = *(uint32_t*)s;
+      uint32_t *p = (uint32_t*)d;
+      for (i = 0; i < n; ++i)
+        *(p++) = v;
+      d = p;
+    } else if (l == 8) {
+      uint64_t v = *(uint64_t*)s;
+      uint64_t *p = (uint64_t*)d;
+      for (i = 0; i < n; ++i)
+        *(p++) = v;
+      d = p;
+    } else if (l == 16) {
+      double complex v = *(double complex*)s;
+      double complex *p = (double complex*)d;
+      for (i = 0; i < n; ++i)
+        *(p++) = v;
+      d = p;
+    }
   }
 
   dreturn("%p", d);
@@ -243,7 +256,7 @@ ssize_t _GD_SampIndRead(struct _gd_raw_file *file, void *ptr,
   dtrace("%p, %p, 0x%03x, %zu", file, ptr, data_type, nelem);
 
   /* not enough data in the current run */
-  while (f->d[0] - f->p <= (int64_t)(nelem - count)) {
+  while (f->d[0] - f->p < (int64_t)(nelem - count)) {
     /* copy what we've got */
     cur = _GD_Duplicate(cur, f->d + 1, GD_SIZE(data_type), f->d[0] - f->p + 1);
     count += f->d[0] - f->p + 1;
@@ -270,7 +283,7 @@ ssize_t _GD_SampIndRead(struct _gd_raw_file *file, void *ptr,
 
   file->pos = f->p;
 
-  dreturn("%llx", (long long)count);
+  dreturn("%lli", (long long)count);
   return count;
 }
 
@@ -447,7 +460,10 @@ int _GD_SampIndClose(struct _gd_raw_file* file)
 
   ret = fclose(f->fp);
   if (ret != EOF) {
+    file->mode = 0;
     file->idata = -1;
+    free(file->edata);
+    file->edata = NULL;
     dreturn("%i", 0);
     return 0;
   }
@@ -467,7 +483,7 @@ off64_t _GD_SampIndSize(int dirfd, struct _gd_raw_file* file,
   dtrace("%i, %p, 0x%03x, %i", dirfd, file, data_type, swap);
 
   /* open */
-  if (_GD_SampIndDoOpen(dirfd, file, &f, swap, GD_RDONLY, 0)) {
+  if (_GD_SampIndDoOpen(dirfd, file, &f, swap, GD_FILE_READ) < 0) {
     dreturn("%i", -1);
     return -1;
   }
@@ -494,62 +510,4 @@ off64_t _GD_SampIndSize(int dirfd, struct _gd_raw_file* file,
 
   dreturn("%llx", (long long unsigned)n);
   return (off64_t)n;
-}
-
-int _GD_SampIndTOpen(int fd, struct _gd_raw_file *file, int swap)
-{
-  FILE *stream;
-  struct gd_siedata *f;
-
-  dtrace("%i, %p, %i", fd, file, swap);
-
-  file->edata = malloc(sizeof(struct gd_siedata));
-  if (file->edata == NULL) {
-    close(fd);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  stream = fdopen(fd, "w+");
-
-  if (stream == NULL) {
-    close(fd);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  f = (struct gd_siedata*)(file->edata);
-  memset(f, 0, sizeof(struct gd_siedata));
-  f->r = f->s = f->p = f->d[0] = -1;
-  file->pos = -1;
-  f->fp = stream;
-  f->swap = swap;
-  file->idata = 0;
-
-  dreturn("%i", 0);
-  return 0;
-}
-
-int _GD_SampIndTUnlink(int dirfd, struct _gd_raw_file *file)
-{
-  dtrace("%i, %p", dirfd, file);
-
-  if (file->name != NULL) {
-    if (file->idata >= 0)
-      if (_GD_SampIndClose(file)) {
-        dreturn("%i", -1);
-        return -1;
-      }
-
-    if (gd_UnlinkAt(file->D, dirfd, file->name, 0)) {
-      dreturn("%i", -1);
-      return -1;
-    }
-
-    free(file->name);
-    file->name = NULL;
-  }
-
-  dreturn("%i", 0);
-  return 0;
 }

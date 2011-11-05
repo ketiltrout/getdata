@@ -66,7 +66,7 @@ ALTER_TESTS=alter_bit_bitnum alter_bit_numbits alter_carray_len \
 						alter_polynom_ord alter_raw_spf alter_raw_type alter_recip \
 						alter_recip_zero alter_spec alter_spec_meta
 
-ASCII_TESTS=ascii_get ascii_get_get ascii_nframes ascii_put
+ASCII_TESTS=ascii_add ascii_get ascii_get_get ascii_nframes ascii_put
 
 BOF_TESTS=bof bof_lincom bof_phase
 
@@ -137,7 +137,7 @@ DFES_TESTS=dfes_bit dfes_divide dfes_lincom dfes_linterp dfes_multiply \
 
 ENCODE_TESTS=encode_alter encode_get encode_move
 
-ENDIAN_TESTS=endian_alter endian_get endian_move
+ENDIAN_TESTS=endian_alter endian_alter_sie endian_get endian_move
 
 ENTRY_TESTS=entry_bad_code entry_bit entry_bit_scalar entry_divide \
 						entry_invalid entry_lincom entry_lincom_scalar entry_linterp \
@@ -177,12 +177,13 @@ GET_TESTS=${GET64} get_bad_code get_bit get_carray get_carray_len \
 					get_linterp_noin get_linterp_notab get_linterp_sort get_multiply \
 					get_multiply_noin get_nonexistent get_null $(GET_OFF64) get_phase \
 					get_polynom get_polynom_noin get_recip get_recip_const get_recurse \
-					get_sbit get_sf get_ss get_type get_uint16 get_uint32 get_uint64 \
-					get_zero
+					get_rofs get_sbit get_sf get_ss get_type get_uint16 get_uint32 \
+					get_uint64 get_zero
 
 GLOBAL_TESTS=global_name global_ref global_ref_empty global_ref_set
 
-GZIP_TESTS=gzip_get gzip_get_get gzip_move_from gzip_nframes
+GZIP_TESTS=gzip_add gzip_get gzip_get_get gzip_get_put gzip_move_from \
+					 gzip_move_to gzip_nframes gzip_put gzip_put_get
 
 HEADER_TESTS=header_complex
 

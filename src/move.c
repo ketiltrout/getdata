@@ -35,7 +35,7 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned long encoding,
   const size_t ns = BUFFER_SIZE / E->e->u.raw.size;
   ssize_t nread, nwrote;
   int subencoding = GD_ENC_UNKNOWN;
-  int i, fd;
+  int i, ef_swap;
   int arm_endianise;
   void *buffer;
 
@@ -80,7 +80,7 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned long encoding,
 
   /* Check output encoding */
   if (_GD_MissingFramework(subencoding, GD_EF_CLOSE | GD_EF_SEEK | GD_EF_WRITE |
-        GD_EF_SYNC | GD_EF_TOPEN | GD_EF_TMOVE | GD_EF_TUNLINK))
+        GD_EF_SYNC))
   {
     _GD_SetError(D, GD_E_UNSUPPORTED, 0, NULL, 0, NULL);
     free(new_filebase);
@@ -100,19 +100,24 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned long encoding,
   enc_in = _gd_ef + E->e->u.raw.file[0].subenc;
 
   /* Need to do the ARM thing? */
-  arm_endianise = (((byte_sex & GD_ARM_FLAG) && enc_out->ecor) ^
-    ((D->fragment[E->fragment_index].byte_sex & GD_ARM_FLAG) && enc_in->ecor))
-    && (E->EN(raw,data_type) == GD_FLOAT64 ||
-        E->EN(raw,data_type) == GD_COMPLEX128);
+  arm_endianise = (((byte_sex & GD_ARM_FLAG) && (enc_out->flags & GD_EF_ECOR)) ^
+      ((D->fragment[E->fragment_index].byte_sex & GD_ARM_FLAG) &&
+       (enc_in->flags & GD_EF_ECOR))) && (E->EN(raw,data_type) == GD_FLOAT64 ||
+       E->EN(raw,data_type) == GD_COMPLEX128);
 
   /* Normalise endiannesses */
 #ifdef WORDS_BIGENDIAN
-  byte_sex = ((byte_sex & GD_LITTLE_ENDIAN) && enc_out->ecor) ^
+  ef_swap = (byte_sex & GD_LITTLE_ENDIAN) ? 1 : 0;
+  byte_sex = ((byte_sex & GD_LITTLE_ENDIAN) &&
+      (enc_out->flags & (GD_EF_ECOR | GD_EF_SWAP))) ^
     ((D->fragment[E->fragment_index].byte_sex & GD_LITTLE_ENDIAN) &&
-     enc_in->ecor);
+     (enc_in->flags & (GD_EF_ECOR | GD_EF_SWAP)));
 #else
-  byte_sex = ((byte_sex & GD_BIG_ENDIAN) && enc_out->ecor) ^
-    ((D->fragment[E->fragment_index].byte_sex & GD_BIG_ENDIAN) && enc_in->ecor);
+  ef_swap = (byte_sex & GD_BIG_ENDIAN) ? 1 : 0;
+  byte_sex = ((byte_sex & GD_BIG_ENDIAN) &&
+      (enc_out->flags & (GD_EF_ECOR | GD_EF_SWAP))) ^
+    ((D->fragment[E->fragment_index].byte_sex & GD_BIG_ENDIAN) &&
+     (enc_in->flags & (GD_EF_ECOR | GD_EF_SWAP)));
 #endif
   /* Now byte_sex is true if endianness conversion is required. */
 
@@ -139,40 +144,21 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned long encoding,
     return -1;
   }
 
-  /* Create the output file and open it. If we're changing encodings, we
-   * could write to the new file directly.  However, we use a temporary file
-   * anyway just to keep things clean. */
-  E->e->u.raw.file[1].subenc = subencoding;
-
-  if (_GD_SetEncodedName(D, E->e->u.raw.file + 1, new_filebase, 1))
-    ; /* error already set */
-  else if ((fd = _GD_MakeTempFile(D, D->fragment[new_fragment].dirfd,
-          E->e->u.raw.file[1].name)) < 0)
-  {
-    _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[1].name, errno, NULL);
-  } else if ((*enc_out->topen)(fd, E->e->u.raw.file + 1,
-        _GD_FileSwapBytes(D, new_fragment)))
-  {
-    _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[1].name, errno, NULL);
-  }
-
-  if (D->error) {
+  /* Open the input file, if necessary */
+  if (_GD_InitRawIO(D, E, NULL, 0, NULL, 0, GD_FILE_READ, 0)) {
     free(new_filebase);
     dreturn("%i", -1);
     return -1;
   }
 
-  /* Open the input file, if necessary */
-  if (_GD_SetEncodedName(D, E->e->u.raw.file, E->e->u.raw.filebase, 0))
-    ; /* error already set */
-  else if (E->e->u.raw.file[0].idata == -1 && (*enc_in->open)(
-        D->fragment[E->fragment_index].dirfd, E->e->u.raw.file,
-        _GD_FileSwapBytes(D, E->fragment_index), 0, 0))
-  {
-    _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
-  }
+  /* Create the output file and open it. If we're changing encodings, we
+   * could write to the new file directly.  However, we use a temporary file
+   * anyway just to keep things clean. */
+  E->e->u.raw.file[1].subenc = subencoding;
 
-  if (D->error) {
+  if (_GD_InitRawIO(D, E, new_filebase, new_fragment, enc_out, 0,
+        GD_FILE_WRITE | GD_FILE_TEMP, ef_swap))
+  {
     free(new_filebase);
     dreturn("%i", -1);
     return -1;
@@ -180,20 +166,22 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned long encoding,
 
   /* Adjust for the change in offset */
   if (offset < 0) { /* new offset is less, pad new file */
-    if ((*enc_in->seek)(E->e->u.raw.file, 0, E->EN(raw,data_type), 1) == -1)
+    if ((*enc_in->seek)(E->e->u.raw.file, 0, E->EN(raw,data_type),
+          GD_FILE_WRITE) == -1)
+    {
       _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
-    else if ((*enc_out->seek)(E->e->u.raw.file + 1, -offset * E->EN(raw,spf),
-          E->EN(raw,data_type), 1) == -1)
+    } else if ((*enc_out->seek)(E->e->u.raw.file + 1, -offset * E->EN(raw,spf),
+          E->EN(raw,data_type), GD_FILE_WRITE) == -1)
     {
       _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[1].name, errno, NULL);
     }
   } else { /* new offset is more, truncate old file */
     if ((*enc_in->seek)(E->e->u.raw.file, offset * E->EN(raw,spf),
-          E->EN(raw,data_type), 0) == -1)
+          E->EN(raw,data_type), GD_FILE_READ) == -1)
     {
       _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
     } else if ((*enc_out->seek)(E->e->u.raw.file + 1, 0, E->EN(raw,data_type),
-          1) == -1)
+          GD_FILE_WRITE) == -1)
     {
       _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[1].name, errno, NULL);
     }
@@ -249,25 +237,21 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned long encoding,
 
   free(buffer);
 
-  /* Close both files */
-  if ((*enc_in->close)(E->e->u.raw.file))
-    _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
-
-  if ((*enc_out->sync)(E->e->u.raw.file + 1) ||
-      (*enc_out->close)(E->e->u.raw.file + 1))
-  {
-    _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[1].name, errno, NULL);
-  }
 
   if (finalise) {
     /* Finalise the conversion: on error delete the temporary file, otherwise
      * copy it over top of the new one. */
-    if (D->error)
-      (*enc_out->tunlink)(D->fragment[new_fragment].dirfd,
-          E->e->u.raw.file + 1);
-    else {
+    if (D->error) {
+      /* An error occurred, delete the temporary file (the old
+       * file can stay open) */
+      _GD_FiniRawIO(D, E, new_fragment, GD_FINIRAW_CLOTEMP
+          | GD_FINIRAW_DISCARD);
+    } else {
       struct _gd_raw_file temp;
       memcpy(&temp, E->e->u.raw.file, sizeof(temp));
+
+      /* discard the old file */
+      _GD_FiniRawIO(D, E, E->fragment_index, GD_FINIRAW_DISCARD);
 
       E->e->u.raw.file[0].name = NULL;
       E->e->u.raw.file[0].subenc = subencoding;
@@ -275,12 +259,9 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned long encoding,
       if (_GD_SetEncodedName(D, E->e->u.raw.file, new_filebase, 0)) {
         E->e->u.raw.file[0].name = temp.name;
         E->e->u.raw.file[0].subenc = temp.subenc;
-      } else if ((*enc_out->tmove)(D->fragment[new_fragment].dirfd,
-            D->fragment[new_fragment].dirfd, E->e->u.raw.file,
-            enc_out->tunlink))
+      } else if (_GD_FiniRawIO(D, E, new_fragment, GD_FINIRAW_KEEP |
+            GD_FINIRAW_CLOTEMP))
       {
-        _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[1].name, errno,
-            NULL);
         E->e->u.raw.file[0].name = temp.name;
         E->e->u.raw.file[0].subenc = temp.subenc;
       } else if ((subencoding != temp.subenc || strcmp(E->e->u.raw.filebase,
@@ -297,8 +278,13 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned long encoding,
         E->e->u.raw.filebase = new_filebase;
       }
     }
-  } else
+  } else {
     free(new_filebase);
+
+    /* Close both files */
+    _GD_FiniRawIO(D, E, E->fragment_index, GD_FINIRAW_DEFER);
+    _GD_FiniRawIO(D, E, new_fragment, GD_FINIRAW_DEFER | GD_FINIRAW_CLOTEMP);
+  }
 
   if (D->error) {
     dreturn("%i", -1);

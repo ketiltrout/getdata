@@ -57,7 +57,8 @@ static void _GD_ShiftFragment(DIRFILE* D, off64_t offset, int fragment,
       if (D->entry[i]->fragment_index == fragment &&
           D->entry[i]->field_type == GD_RAW_ENTRY)
       {
-        if (!_GD_Supports(D, D->entry[i], GD_EF_TMOVE | GD_EF_TUNLINK))
+        /* determine encoding scheme */
+        if (!_GD_Supports(D, D->entry[i], 0))
           break;
 
         /* add this raw field to the list */
@@ -74,23 +75,12 @@ static void _GD_ShiftFragment(DIRFILE* D, off64_t offset, int fragment,
      * remove the temporary files */
     if (D->error) {
       for (i = 0; i < n_raw; ++i)
-        if ((*_gd_ef[raw_entry[i]->e->u.raw.file[0].subenc].tunlink)(
-              D->fragment[fragment].dirfd, raw_entry[i]->e->u.raw.file + 1))
-        {
-          _GD_SetError(D, GD_E_RAW_IO, 0, raw_entry[i]->e->u.raw.file[0].name,
-              errno, NULL);
-        }
+        _GD_FiniRawIO(D, raw_entry[i], fragment, GD_FINIRAW_DISCARD |
+            GD_FINIRAW_CLOTEMP);
     } else {
       for (i = 0; i < n_raw; ++i)
-        if ((*_gd_ef[raw_entry[i]->e->u.raw.file[0].subenc].tmove)(
-              D->fragment[fragment].dirfd, D->fragment[fragment].dirfd,
-              raw_entry[i]->e->u.raw.file,
-              _gd_ef[raw_entry[i]->e->u.raw.file[0].subenc].tunlink))
-        {
-          _GD_SetError(D, GD_E_UNCLEAN_DB, 0,
-              D->fragment[D->entry[i]->fragment_index].cname, 0, NULL);
-          D->flags |= GD_INVALID;
-        }
+        _GD_FiniRawIO(D, raw_entry[i], fragment, GD_FINIRAW_KEEP |
+            GD_FINIRAW_CLOTEMP);
     }
 
     free(raw_entry);

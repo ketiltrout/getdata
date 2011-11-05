@@ -33,41 +33,49 @@
 
 /* The ASCII encoding uses file->edata for the stream pointer */
 
-int _GD_AsciiOpen(int dirfd, struct _gd_raw_file* file, int swap __gd_unused,
-    int mode, int creat)
+int _GD_AsciiOpen(int fd, int fd2 __gd_unused, struct _gd_raw_file* file,
+    int swap __gd_unused, unsigned int mode)
 {
-  int fd;
+  dtrace("%i, <unused>, %p, <unused>, %u", fd, file, mode);
 
-  dtrace("%i, %p, <unused>, %i, %i", dirfd, file, mode, creat);
+  if (!(mode & GD_FILE_TEMP)) {
+    if (file->mode & mode) {
+      dreturn("%i", 0);
+      return 0;
+    } else if (file->edata != NULL)
+      fclose(file->edata);
 
-  fd = gd_OpenAt(file->D, dirfd, file->name, ((mode == GD_RDWR) ? O_RDWR :
-        O_RDONLY) | (creat ? O_CREAT : 0) | O_BINARY, 0666);
+    file->idata = gd_OpenAt(file->D, fd, file->name, ((mode & GD_FILE_WRITE)
+          ? (O_RDWR | O_CREAT) : O_RDONLY) | O_BINARY, 0666);
 
-  if (fd < 0) {
-    dreturn("%i", -1);
-    return -1;
-  }
+    if (file->idata < 0) {
+      dreturn("%i", -1);
+      return -1;
+    }
+  } else
+    file->idata = fd;
 
-  file->edata = fdopen(fd, (mode == GD_RDWR) ? "r+" : "r");
+  file->edata = fdopen(file->idata, (mode & GD_FILE_WRITE) ? "r+" : "r");
 
   if (file->edata == NULL) {
-    close(fd);
+    close(file->idata);
+    file->idata = -1;
     dreturn("%i", -1);
     return -1;
   }
 
+  file->mode = mode | GD_FILE_READ;
   file->pos = 0;
-  file->idata = 0;
   dreturn("%i", 0);
   return 0;
 }
 
 off64_t _GD_AsciiSeek(struct _gd_raw_file* file, off64_t count,
-    gd_type_t data_type __gd_unused, int pad)
+    gd_type_t data_type __gd_unused, unsigned int mode)
 {
   char line[64];
 
-  dtrace("%p, %lli, <unused>, %i", file, count, pad);
+  dtrace("%p, %lli, <unused>, 0x%X", file, count, mode);
 
   if (count < file->pos) {
     rewind((FILE *)file->edata);
@@ -78,7 +86,7 @@ off64_t _GD_AsciiSeek(struct _gd_raw_file* file, off64_t count,
     if (fgets(line, 64, (FILE *)file->edata) == NULL)
       break;
 
-  if (pad && count > file->pos) {
+  if (mode & GD_FILE_WRITE && count > file->pos) {
     strcpy(line, "0\n");
     for (; count > file->pos; ++file->pos)
       fputs(line, (FILE *)file->edata);
@@ -90,7 +98,7 @@ off64_t _GD_AsciiSeek(struct _gd_raw_file* file, off64_t count,
 
 static void _GD_ScanFormat(char* fmt, gd_type_t data_type)
 {
-  dtrace("%p, %x", fmt, data_type);
+  dtrace("%p, 0x%X", fmt, data_type);
 
   switch(data_type) {
     case GD_UINT8:
@@ -151,7 +159,7 @@ ssize_t _GD_AsciiRead(struct _gd_raw_file *file, void *ptr, gd_type_t data_type,
   short int i16;
 #endif
 
-  dtrace("%p, %p, 0x%x, %zu", file, ptr, data_type, nmemb);
+  dtrace("%p, %p, 0x%X, %zu", file, ptr, data_type, nmemb);
 
   _GD_ScanFormat(fmt, data_type);
   if (data_type & GD_COMPLEX) {
@@ -210,7 +218,7 @@ ssize_t _GD_AsciiWrite(struct _gd_raw_file *file, const void *ptr,
   ssize_t ret = 0;
   size_t n = 0;
 
-  dtrace("%p, %p, 0x%x, %zu", file, ptr, data_type, nmemb);
+  dtrace("%p, %p, 0x%X, %zu", file, ptr, data_type, nmemb);
 
   switch(data_type) {
     case GD_UINT8:
@@ -348,14 +356,15 @@ int _GD_AsciiClose(struct _gd_raw_file* file)
   dtrace("%p", file);
 
   ret = fclose((FILE *)file->edata);
-  if (ret != EOF) {
-    file->idata = -1;
-    dreturn("%i", 0);
-    return 0;
+  if (ret == EOF) {
+    dreturn("%i", 1);
+    return 1;
   }
 
-  dreturn("%i", 1);
-  return 1;
+  file->idata = -1;
+  file->mode = 0;
+  dreturn("%i", 0);
+  return 0;
 }
 
 off64_t _GD_AsciiSize(int dirfd, struct _gd_raw_file* file,
@@ -390,45 +399,4 @@ off64_t _GD_AsciiSize(int dirfd, struct _gd_raw_file* file,
 
   dreturn("%lli", n);
   return n;
-}
-
-int _GD_AsciiTOpen(int fd, struct _gd_raw_file *file, int swap __gd_unused)
-{
-  dtrace("%i, %p, <unused>", fd, file);
-
-  file->edata = fdopen(fd, "r+");
-
-  if (file->edata == NULL) {
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  file->pos = 0;
-
-  dreturn("%i", 0);
-  return 0;
-}
-
-int _GD_AsciiTUnlink(int dirfd, struct _gd_raw_file *file)
-{
-  dtrace("%i, %p", dirfd, file);
-
-  if (file->name != NULL) {
-    if (file->pos >= 0)
-      if (_GD_AsciiClose(file)) {
-        dreturn("%i", -1);
-        return -1;
-      }
-
-    if (gd_UnlinkAt(file->D, dirfd, file->name, 0)) {
-      dreturn("%i", -1);
-      return -1;
-    }
-
-    free(file[1].name);
-    file[1].name = NULL;
-  }
-
-  dreturn("%i", 0);
-  return 0;
 }

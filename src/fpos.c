@@ -42,7 +42,8 @@ off64_t _GD_GetFilePos(DIRFILE *D, gd_entry_t *E, off64_t index_pos)
   switch (E->field_type) {
     case GD_RAW_ENTRY:
       /* We must open the file to know its starting offset */
-      if (_GD_InitRawIO(D, E, 0, 0))
+      if (E->e->u.raw.file[0].idata < 0)
+        if (_GD_InitRawIO(D, E, NULL, 0, NULL, 0, GD_FILE_READ, 0))
           break;
       pos = E->e->u.raw.file[0].pos + E->EN(raw,spf) *
         D->fragment[E->fragment_index].frame_offset;
@@ -139,7 +140,7 @@ off64_t gd_tell64(DIRFILE *D, const char *field_code_in)
 
   if (entry->field_type & GD_SCALAR_ENTRY)
     _GD_SetError(D, GD_E_DIMENSION, GD_E_DIM_CALLER, NULL, 0, field_code);
-  else 
+  else
     pos = _GD_GetFilePos(D, entry, -1);
 
   if (field_code != field_code_in)
@@ -154,11 +155,40 @@ off_t gd_tell(DIRFILE *D, const char *field_code)
   return (off_t)gd_tell64(D, field_code);
 }
 
-static int _GD_Seek(DIRFILE *D, gd_entry_t *E, off64_t offset, int pad)
+off64_t _GD_WriteSeek(DIRFILE *D, gd_entry_t *E, off64_t offset,
+    unsigned int mode)
+{
+  off64_t pos;
+
+  dtrace("%p, %p, %lli, 0x%X", D, E, (long long)offset, mode);
+
+  /* in this case we need to close and then re-open the file */
+  if ((offset < E->e->u.raw.file[0].pos) && mode == GD_FILE_WRITE &&
+      (_gd_ef[E->e->u.raw.file[0].subenc].flags & GD_EF_OOP))
+  {
+    if (_GD_FiniRawIO(D, E, E->fragment_index, GD_FINIRAW_KEEP)) {
+      dreturn("%i", -1);
+      return -1;
+    } else if (_GD_InitRawIO(D, E, NULL, 0, NULL, GD_EF_SEEK, GD_FILE_WRITE, 0))
+    {
+      dreturn("%i", -1);
+      return -1;
+    }
+  }
+
+  pos = (*_gd_ef[E->e->u.raw.file[0].subenc].seek)(E->e->u.raw.file, offset,
+      E->EN(raw,data_type), mode);
+
+  dreturn("%lli", (long long)pos);
+  return pos;
+}
+
+static int _GD_Seek(DIRFILE *D, gd_entry_t *E, off64_t offset,
+    unsigned int mode)
 {
   int i;
 
-  dtrace("%p, %p, %lli, %i", D, E, (long long)offset, pad);
+  dtrace("%p, %p, %lli, 0x%X", D, E, (long long)offset, mode);
 
   if (++D->recurse_level >= GD_MAX_RECURSE_LEVEL) {
     _GD_SetError(D, GD_E_RECURSE_LEVEL, 0, NULL, 0, E->field);
@@ -170,7 +200,7 @@ static int _GD_Seek(DIRFILE *D, gd_entry_t *E, off64_t offset, int pad)
   switch (E->field_type) {
     case GD_RAW_ENTRY:
       /* open/create the file, if necessary */
-      if (_GD_InitRawIO(D, E, GD_EF_SEEK, pad))
+      if (_GD_InitRawIO(D, E, NULL, 0, NULL, GD_EF_SEEK, mode, 0))
         break;
 
       /* The requested offset is before the start of the file, so I guess
@@ -183,9 +213,8 @@ static int _GD_Seek(DIRFILE *D, gd_entry_t *E, off64_t offset, int pad)
         break;
       }
 
-      if ((*_gd_ef[E->e->u.raw.file[0].subenc].seek)(E->e->u.raw.file, offset -
-            E->EN(raw,spf) * D->fragment[E->fragment_index].frame_offset,
-            E->EN(raw,data_type), pad) == -1)
+      if (_GD_WriteSeek(D, E, offset - E->EN(raw,spf) *
+            D->fragment[E->fragment_index].frame_offset, mode) == -1)
       {
         _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
       }
@@ -193,7 +222,7 @@ static int _GD_Seek(DIRFILE *D, gd_entry_t *E, off64_t offset, int pad)
     case GD_LINCOM_ENTRY:
       for (i = 0; i < E->EN(lincom,n_fields); ++i)
         if (!_GD_BadInput(D, E, i))
-          _GD_Seek(D, E->e->entry[i], offset, pad);
+          _GD_Seek(D, E->e->entry[i], offset, mode);
         else
           break;
       break;
@@ -201,7 +230,7 @@ static int _GD_Seek(DIRFILE *D, gd_entry_t *E, off64_t offset, int pad)
     case GD_DIVIDE_ENTRY:
       if (_GD_BadInput(D, E, 1))
         break;
-      if (_GD_Seek(D, E->e->entry[1], offset, pad))
+      if (_GD_Seek(D, E->e->entry[1], offset, mode))
         break;
       /* fallthrough */
     case GD_LINTERP_ENTRY:
@@ -210,11 +239,11 @@ static int _GD_Seek(DIRFILE *D, gd_entry_t *E, off64_t offset, int pad)
     case GD_SBIT_ENTRY:
     case GD_RECIP_ENTRY:
       if (!_GD_BadInput(D, E, 0))
-        _GD_Seek(D, E->e->entry[0], offset, pad);
+        _GD_Seek(D, E->e->entry[0], offset, mode);
       break;
     case GD_PHASE_ENTRY:
       if (!_GD_BadInput(D, E, 0))
-        _GD_Seek(D, E->e->entry[0], offset + E->EN(phase,shift), pad);
+        _GD_Seek(D, E->e->entry[0], offset + E->EN(phase,shift), mode);
       break;
     case GD_INDEX_ENTRY:
       E->e->u.index_pos = offset;
@@ -240,10 +269,11 @@ off64_t gd_seek64(DIRFILE *D, const char *field_code_in, off64_t frame_num,
   off64_t pos = 0;
   gd_entry_t* entry;
   char* field_code;
-  int repr, is_index = 0, pad = (whence & GD_SEEK_PAD) ? 1 : 0;
+  int repr, is_index = 0;
+  unsigned int mode = (whence & GD_SEEK_WRITE) ? GD_FILE_WRITE : GD_FILE_READ;
 
-  dtrace("%p, \"%s\", %lli, %lli, %x", D, field_code_in, frame_num, sample_num,
-      whence);
+  dtrace("%p, \"%s\", %lli, %lli, 0x%X", D, field_code_in, frame_num,
+      sample_num, whence);
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -294,7 +324,7 @@ off64_t gd_seek64(DIRFILE *D, const char *field_code_in, off64_t frame_num,
     _GD_SetError(D, GD_E_ARGUMENT, GD_E_ARG_WHENCE, NULL, 0, NULL);
 
   if (!D->error)
-    _GD_Seek(D, entry, sample_num + pos, pad);
+    _GD_Seek(D, entry, sample_num + pos, mode);
 
   if (field_code != field_code_in)
     free(field_code);

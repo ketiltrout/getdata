@@ -33,7 +33,7 @@ static void _GD_FreeD(DIRFILE* D)
 
   dtrace("%p", D);
 
-  for (i = 0; i < D->n_entries; ++i) 
+  for (i = 0; i < D->n_entries; ++i)
     _GD_FreeE(D, D->entry[i], 1);
 
   for (j = 0; j < D->n_fragment; ++j) {
@@ -86,7 +86,7 @@ static int _GD_ShutdownDirfile(DIRFILE* D, int flush_meta)
 
   for(i = 0; i < D->n_entries; ++i)
     if (D->entry[i]->field_type == GD_RAW_ENTRY)
-      _GD_Flush(D, D->entry[i]);
+      _GD_Flush(D, D->entry[i], 1);
 
   if (D->error) {
     dreturn("%i", 1);

@@ -18,11 +18,12 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Attempt to write a read-only dirfile */
+/* Add a RAW field */
 #include "test.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
+#include <stdio.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <string.h>
@@ -32,42 +33,37 @@ int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *data = "dirfile/data";
-  const char *format_data = "data RAW UINT8 1\n";
-  unsigned char c = 0;
-  int fd, n, error, r = 0;
+  const char *data = "dirfile/data.txt";
+  gd_entry_t e;
+  int error, r = 0;
   DIRFILE *D;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE | GD_TEXT_ENCODED);
+  gd_add_raw(D, "data", GD_UINT8, 2, 0);
+  error = gd_error(D);
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
-
-  close(open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0555));
-
-  /* ensure filesystem honours read-onlyness */
-  if ((fd = open(data, O_RDWR)) >= 0 || errno != EACCES) {
-    if (fd >= 0)
-      close(fd);
-    unlink(format);
-    unlink(data);
-    rmdir(filedir);
-    return 77;
+  /* check */
+  gd_entry(D, "data", &e);
+  if (gd_error(D))
+    r = 1;
+  else {
+    CHECKI(e.field_type, GD_RAW_ENTRY);
+    CHECKI(e.fragment_index, 0);
+    CHECKI(e.EN(raw,spf), 2);
+    CHECKI(e.EN(raw,data_type), GD_UINT8);
+    gd_free_entry_strings(&e);
   }
 
-  D = gd_open(filedir, GD_RDWR | GD_UNENCODED);
-  n = gd_putdata(D, "data", 5, 0, 1, 0, GD_UINT8, &c);
-
-  error = gd_error(D);
   gd_close(D);
 
-  unlink(data);
+  if (unlink(data)) {
+    perror("unlink");
+    r = 1;
+  }
   unlink(format);
   rmdir(filedir);
 
-  CHECKI(n,0);
-  CHECKI(error,GD_E_RAW_IO);
+  CHECKI(error, GD_E_OK);
   return r;
 }

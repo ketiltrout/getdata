@@ -92,7 +92,6 @@ static struct gd_lzmadata *_GD_LzmaDoOpen(int dirfd, struct _gd_raw_file* file)
     dreturn("%p", NULL);
     return NULL;
   }
-  dprintf("%p = %s", ptr->stream, file->name);
 
   memset(&ptr->xzfile, 0, sizeof(lzma_stream));
   ptr->xzfile.next_in = ptr->data_in;
@@ -116,12 +115,12 @@ static struct gd_lzmadata *_GD_LzmaDoOpen(int dirfd, struct _gd_raw_file* file)
   return ptr;
 }
 
-int _GD_LzmaOpen(int dirfd, struct _gd_raw_file* file, int swap __gd_unused,
-    int mode __gd_unused, int creat __gd_unused)
+int _GD_LzmaOpen(int dirfd, int fd2 __gd_unused, struct _gd_raw_file* file,
+    int swap __gd_unused, unsigned int mode __gd_unused)
 {
   struct gd_lzmadata *ptr;
 
-  dtrace("%i, %p, <unused>, <unused>, <unused>", dirfd, file);
+  dtrace("%i, <unused>, %p, <unused>, <unused>", dirfd, file);
 
   file->edata = ptr = _GD_LzmaDoOpen(dirfd, file);
 
@@ -130,6 +129,7 @@ int _GD_LzmaOpen(int dirfd, struct _gd_raw_file* file, int swap __gd_unused,
     return 1;
   }
 
+  file->mode = GD_FILE_READ;
   file->pos = 0;
   file->idata = 0;
   dreturn("%i", 0);
@@ -148,8 +148,6 @@ static int _GD_LzmaDecode(struct gd_lzmadata *ptr)
   if (!ptr->input_eof) {
     n = fread(ptr->data_in + ptr->read_in, 1, GD_LZMA_BUFFER_SIZE -
         ptr->read_in, ptr->stream);
-    dprintf("n=%i for %i on %p", n, GD_LZMA_BUFFER_SIZE - ptr->read_in,
-        ptr->stream);
 
     if (n < GD_LZMA_BUFFER_SIZE - ptr->read_in) {
       if (feof(ptr->stream))
@@ -161,12 +159,7 @@ static int _GD_LzmaDecode(struct gd_lzmadata *ptr)
     }
   }
 
-  dprintf("read_in=%i  n=%i", ptr->read_in, n);
   ptr->xzfile.avail_in = ptr->read_in + n;
-  dprintf("avail_in=%zu   total_in=%llu", ptr->xzfile.avail_in,
-      ptr->xzfile.total_in);
-  dprintf("avail_out=%zu  total_out=%llu", ptr->xzfile.avail_out,
-      ptr->xzfile.total_out);
 
   /* no more data to convert -- end of stream reached */
   if (ptr->xzfile.avail_in == 0) {
@@ -177,10 +170,6 @@ static int _GD_LzmaDecode(struct gd_lzmadata *ptr)
 
   /* amount of data = amount already in buffer + amount just now read */
   ptr->xzerror = lzma_code(&ptr->xzfile, LZMA_RUN);
-  dprintf("avail_in=%zu   total_in=%llu", ptr->xzfile.avail_in,
-      ptr->xzfile.total_in);
-  dprintf("avail_out=%zu  total_out=%llu", ptr->xzfile.avail_out,
-      ptr->xzfile.total_out);
 
   if (ptr->xzerror == LZMA_OK || ptr->xzerror == LZMA_STREAM_END) {
     ptr->base += ptr->end;
@@ -199,11 +188,11 @@ static int _GD_LzmaDecode(struct gd_lzmadata *ptr)
 }
 
 off64_t _GD_LzmaSeek(struct _gd_raw_file* file, off64_t count,
-    gd_type_t data_type, int pad __gd_unused)
+    gd_type_t data_type, unsigned int mode __gd_unused)
 {
   struct gd_lzmadata *ptr = (struct gd_lzmadata *)file->edata;
 
-  dtrace("%p, %lli, %x, <unused>", file, (long long)count, data_type);
+  dtrace("%p, %lli, 0x%X, <unused>", file, (long long)count, data_type);
 
   count *= GD_SIZE(data_type);
 
@@ -259,7 +248,7 @@ ssize_t _GD_LzmaRead(struct _gd_raw_file *file, void *data, gd_type_t data_type,
   struct gd_lzmadata *ptr = (struct gd_lzmadata *)file->edata;
   uint64_t nbytes = nmemb * GD_SIZE(data_type);
 
-  dtrace("%p, %p, %x, %zu", file, data, data_type, nmemb);
+  dtrace("%p, %p, 0x%X, %zu", file, data, data_type, nmemb);
 
   /* this loops over chunks of uncompressed data of size data_out until we
    * have as much data as we need in data_out, or until EOF */
@@ -310,15 +299,16 @@ int _GD_LzmaClose(struct _gd_raw_file *file)
 
   ptr->xzerror = 0;
   lzma_end(&ptr->xzfile);
-  if (!fclose(ptr->stream)) {
-    file->idata = -1;
-    free(file->edata);
-    dreturn("%i", 0);
-    return 0;
+  if (fclose(ptr->stream)) {
+    dreturn("%i", 1);
+    return 1;
   }
 
-  dreturn("%i", 1);
-  return 1;
+  file->idata = -1;
+  file->mode = 0;
+  free(file->edata);
+  dreturn("%i", 0);
+  return 0;
 }
 
 off64_t _GD_LzmaSize(int dirfd, struct _gd_raw_file *file, gd_type_t data_type,
@@ -327,7 +317,7 @@ off64_t _GD_LzmaSize(int dirfd, struct _gd_raw_file *file, gd_type_t data_type,
   struct gd_lzmadata *ptr;
   off_t n;
 
-  dtrace("%i, %p, %x, <unused>", dirfd, file, data_type);
+  dtrace("%i, %p, 0x%X, <unused>", dirfd, file, data_type);
 
   ptr = _GD_LzmaDoOpen(dirfd, file);
 

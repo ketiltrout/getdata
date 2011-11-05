@@ -210,16 +210,11 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
       else if (E->EN(raw,data_type) & 0x40 || (E->e->u.raw.size =
             GD_SIZE(E->EN(raw,data_type))) == 0)
         _GD_SetError(D, GD_E_BAD_TYPE, entry->EN(raw,data_type), NULL, 0, NULL);
-      else if (!_GD_Supports(D, E, GD_EF_TOUCH))
-        ; /* error already set */
-      else if (_GD_SetEncodedName(D, E->e->u.raw.file, E->e->u.raw.filebase, 0))
-        ; /* error already set */
-      else if ((*_gd_ef[E->e->u.raw.file[0].subenc].touch)(
-            D->fragment[E->fragment_index].dirfd, E->e->u.raw.file,
-            _GD_FileSwapBytes(D, E->fragment_index)))
-        _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno,
-            NULL);
-      else if (D->fragment[E->fragment_index].ref_name == NULL) {
+      else if (_GD_InitRawIO(D, E, NULL, 0, NULL, 0,
+            GD_FILE_WRITE | GD_FILE_TOUCH, 0))
+      {
+        ;
+      } else if (D->fragment[E->fragment_index].ref_name == NULL) {
         /* This is the first raw field in this fragment */
         new_ref = strdup(E->field);
         if (new_ref == NULL)
@@ -307,13 +302,13 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
       if ((E->in_fields[0] = strdup(entry->in_fields[0])) == NULL)
         _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
       else if (E->EN(bit,numbits) < 1)
-        _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_NUMBITS, NULL, 
+        _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_NUMBITS, NULL,
             entry->EN(bit,numbits), NULL);
       else if (E->EN(bit,bitnum) < 0)
-        _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_BITNUM, NULL, 
+        _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_BITNUM, NULL,
             entry->EN(bit,bitnum), NULL);
       else if (E->EN(bit,bitnum) + E->EN(bit,numbits) - 1 > 63)
-        _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_BITSIZE, NULL, 
+        _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_BITSIZE, NULL,
             E->EN(bit,bitnum) + E->EN(bit,numbits) - 1, NULL);
       copy_scalar[0] = copy_scalar[1] = 1;
       break;
@@ -565,7 +560,7 @@ int gd_madd_spec(DIRFILE* D, const char* line, const char* parent) gd_nothrow
       "dirfile_madd_spec()", 0, D->standards, D->flags & GD_PERMISSIVE);
 
   /* Directive parsing is skipped -- The Field Spec parser will add the field */
-  if (!D->error) 
+  if (!D->error)
     _GD_ParseFieldSpec(D, n_cols, in_cols, E, "dirfile_madd_spec()", 0, me,
         D->standards, 1, GD_PEDANTIC, 1, &outstring, tok_pos);
 
@@ -628,7 +623,7 @@ int gd_add_spec(DIRFILE* D, const char* line, int fragment_index)
 
   /* Directive parsing is skipped -- The Field Spec parser will add the field */
   if (!D->error)
-    _GD_ParseFieldSpec(D, n_cols, in_cols, NULL, "dirfile_add_spec()", 0, 
+    _GD_ParseFieldSpec(D, n_cols, in_cols, NULL, "dirfile_add_spec()", 0,
         fragment_index, D->standards, 1, GD_PEDANTIC, 1, &outstring, tok_pos);
 
   free(outstring);
@@ -669,7 +664,7 @@ int gd_add_raw(DIRFILE* D, const char* field_code, gd_type_t data_type,
   gd_entry_t R;
   int error;
 
-  dtrace("%p, \"%s\", %x, %i, %i", D, field_code, data_type, spf,
+  dtrace("%p, \"%s\", 0x%X, %i, %i", D, field_code, data_type, spf,
       fragment_index);
 
   if (D->flags & GD_INVALID) {/* don't crash */
@@ -1155,7 +1150,7 @@ int gd_add_const(DIRFILE* D, const char* field_code, gd_type_t const_type,
   gd_entry_t C;
   int error;
 
-  dtrace("%p, \"%s\", 0x%x, 0x%x, %p, %i", D, field_code, const_type, data_type,
+  dtrace("%p, \"%s\", 0x%X, 0x%X, %p, %i", D, field_code, const_type, data_type,
       value, fragment_index);
 
   if (D->flags & GD_INVALID) {/* don't crash */
@@ -1197,7 +1192,7 @@ int gd_add_carray(DIRFILE* D, const char* field_code, gd_type_t const_type,
   gd_entry_t C;
   int error;
 
-  dtrace("%p, \"%s\", 0x%x, %zi, 0x%x, %p, %i", D, field_code, const_type,
+  dtrace("%p, \"%s\", 0x%X, %zi, 0x%X, %p, %i", D, field_code, const_type,
       array_len, data_type, values, fragment_index);
 
   if (D->flags & GD_INVALID) {
@@ -1723,7 +1718,7 @@ int gd_madd_const(DIRFILE* D, const char* parent, const char* field_code,
   gd_entry_t *entry;
   gd_entry_t C;
 
-  dtrace("%p, \"%s\", \"%s\", 0x%x, 0x%x, %p", D, parent, field_code,
+  dtrace("%p, \"%s\", \"%s\", 0x%X, 0x%X, %p", D, parent, field_code,
       const_type, data_type, value);
 
   if (D->flags & GD_INVALID) {/* don't crash */
@@ -1774,7 +1769,7 @@ int gd_madd_carray(DIRFILE* D, const char* parent, const char* field_code,
   gd_entry_t *entry;
   gd_entry_t C;
 
-  dtrace("%p, \"%s\", \"%s\", 0x%x, %zi 0x%x, %p", D, parent, field_code,
+  dtrace("%p, \"%s\", \"%s\", 0x%X, %zi 0x%X, %p", D, parent, field_code,
       const_type, array_len, data_type, values);
 
   if (D->flags & GD_INVALID) {/* don't crash */

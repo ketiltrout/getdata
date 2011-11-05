@@ -414,7 +414,7 @@ if test "x${use_modules}" != "xno"; then
   LIBS=$saved_libs
 
   if test "x$have_ltdl" == "xno"; then
-    AC_MSG_ERROR([libltdl is required to build modules.  Please either specify the location of the libltdl library using --with-ldtl-prefix=PREFIX or else disable the building of modules by using --disable-modules.])
+    AC_MSG_ERROR([libltdl is required to build modules.  Please either specify the location of the libltdl library using --with-ldtl=PREFIX or else disable the building of modules by using --disable-modules.])
   fi
 
   if test "x$ltdl_prefix" != "x"; then
@@ -660,7 +660,7 @@ echo "*** Looking for additional library functions"
 echo
 AC_CHECK_FUNCS([_chsize _chsize_s _commit fchmod _fdopen fdopendir fseeko \
                 fseeko64 _fstat fstat64 _fstat64 fstatat fstatat64 fsync \
-                ftello ftello64 ftruncate ftruncate64 _getcwd getdelim \
+                ftello ftello64 ftruncate ftruncate64 getcwd _getcwd getdelim \
                 gmtime_r _lseeki64 lstat _mkdir nan _open openat _read \
                 renameat _rmdir _snprintf stat64 _stat64 _strtoi64 strtoll \
                 _strtoui64 strtoull _unlink unlinkat _write])
@@ -784,8 +784,9 @@ if test "x$make_perlbindings" = "xyes"; then
 fi
 
 dnl external encodings
-GD_CHECK_ENCODING([bzip2],[bz2],[BZ2_bzReadOpen],[bzlib.h],[bzip2],[bunzip2])
-GD_CHECK_ENCODING([slim],[slim],[slimopen],[slimlib.h],[slim slimdata],[unslim],[])
+GD_CHECK_ENCODING([bzip2],[bz2],[BZ2_bzReadOpen],[bzlib.h],[bzip2],[bunzip2],[])
+GD_CHECK_ENCODING([slim],[slim],[slimopen],[slimlib.h], [slim slimdata],
+                  [unslim],[slimdopen])
 GD_CHECK_ENCODING([gzip],[z],[gzopen],[zlib.h],[gzip],[gunzip],[])
 GD_CHECK_ENCODING([lzma],[lzma],[lzma_auto_decoder],[lzma.h],[xz],[],[])
 

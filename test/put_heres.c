@@ -52,7 +52,7 @@ int main(void)
   close(fd);
 
   D = gd_open(filedir, GD_RDWR | GD_UNENCODED | GD_VERBOSE);
-  m = gd_seek(D, "data", 5, 0, GD_SEEK_PAD | GD_SEEK_SET);
+  m = gd_seek(D, "data", 5, 0, GD_SEEK_WRITE | GD_SEEK_SET);
   n = gd_putdata(D, "data", 0, GD_HERE, 0, 8, GD_UINT8, c);
   error = gd_error(D);
 

@@ -4711,13 +4711,13 @@ IDL_VPTR gdidl_seek(int argc, IDL_VPTR argv[], char *argk)
     off64_t frame_num;
     off64_t sample_num;
     int whence;
-    int pad;
+    int write;
   } KW_RESULT;
   KW_RESULT kw;
 
   kw.whence = GD_SEEK_SET;
   kw.frame_num = kw.sample_num = 0;
-  kw.pad = 0;
+  kw.write = 0;
   GDIDL_KW_INIT_ERROR;
 
   static IDL_KW_PAR kw_pars[] = {
@@ -4725,8 +4725,8 @@ IDL_VPTR gdidl_seek(int argc, IDL_VPTR argv[], char *argk)
     GDIDL_KW_PAR_ESTRING,
     { "FRAME_NUM", IDL_TYP_LONG64, 1, 0, 0, IDL_KW_OFFSETOF(frame_num) },
     { "SAMPLE_NUM", IDL_TYP_LONG64, 1, 0, 0, IDL_KW_OFFSETOF(sample_num) },
-    { "PAD", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(pad) },
     { "WHENCE", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(whence) },
+    { "WRITE", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(write) },
     { NULL }
   };
 
@@ -4737,7 +4737,7 @@ IDL_VPTR gdidl_seek(int argc, IDL_VPTR argv[], char *argk)
 
   off64_t pos = gd_seek64(D, field_code, kw.frame_num, kw.sample_num,
       (kw.whence & (GD_SEEK_SET | GD_SEEK_CUR | GD_SEEK_END)) |
-      (kw.pad ? GD_SEEK_PAD : 0));
+      (kw.write ? GD_SEEK_WRITE : 0));
 
   GDIDL_SET_ERROR(D);
 

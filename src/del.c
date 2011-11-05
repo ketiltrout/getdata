@@ -201,7 +201,7 @@ int gd_delete(DIRFILE* D, const char* field_code_in, int flags)
   gd_entry_t *reference = NULL, *E;
   gd_entry_t **del_list;
 
-  dtrace("%p, \"%s\", %x", D, field_code_in, flags);
+  dtrace("%p, \"%s\", 0x%X", D, field_code_in, flags);
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -340,9 +340,8 @@ int gd_delete(DIRFILE* D, const char* field_code_in, int flags)
       dreturn("%i", -1);
       return -1;
     }
-  } else if (E->field_type == GD_RAW_ENTRY && E->e->u.raw.file->idata != -1) {
-    if ((*_gd_ef[E->e->u.raw.file[0].subenc].close)(E->e->u.raw.file)) {
-      _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
+  } else if (E->field_type == GD_RAW_ENTRY && E->e->u.raw.file->idata >= 0) {
+    if (_GD_FiniRawIO(D, E, E->fragment_index, GD_FINIRAW_DISCARD)) {
       free(del_list);
       dreturn("%i", -1);
       return -1;
@@ -450,7 +449,7 @@ int gd_delete(DIRFILE* D, const char* field_code_in, int flags)
     struct _gd_private_entry *Pe = E->e->p.parent->e;
 
     /* search and destroy */
-    for (i = 0; i < Pe->n_meta; ++i) 
+    for (i = 0; i < Pe->n_meta; ++i)
       if (Pe->p.meta_entry[i] == E) {
         Pe->p.meta_entry[i] = Pe->p.meta_entry[Pe->n_meta - 1];
         break;

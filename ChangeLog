@@ -1,3 +1,48 @@
+2011-11-05   D. V. Wiebe <getdata@ketiltrout.net> svn:610
+	* test/gzip_put_get.c test/ascii_add.c test/get_rofs.c test/gzip_move_to.c
+	test/gzip_add.c test/endian_alter_sie.c test/gzip_get_put.c: Added.
+	* test/gzip_put.c: Update.
+
+	* m4/encoding.m4: Add a AC_CHECK_FUNCS call.
+
+	* src/slim.c (_GD_SlimOpen): Update for the (non-existant) slimdopen().
+
+	* src/getdata.h.in: Renamed GD_SEEK_PAD to GD_SEEK_WRITE to better reflect
+	its purpose.
+	* bindings/idl/getdata.c (gdidl_seek): Update keywords for same.
+
+	* src/flush.c (_GD_Flush): Add a third parameter, clo, to distinguish
+	sync from sync-and-close.
+	* src/flush.c (_GD_SyncOrClose): Renamed from gd_flush.
+	* src/flush.c (gd_sync gd_flush): Added.
+
+	* src/internal.h: Added _gd_raw_file.mode.  Replaced encoding_t.ecor with
+	encoding_t.flags;
+	* src/encoding.c: Deleted touch, topen, tmove, tunlink from the encoding
+	framework.  Changed signature of open and seek.
+	* src/encoding.c (_GD_MoveOver): Renamed from _GD_GenericTMove.
+	* src/encoding.c (_GD_FiniRawIO) src/fpos.c (_GD_WriteSeek): Added.
+	* src/gzip.c (_GD_GzipOpen _GD_GzipSeek _GD_GzipClose) src/encoding.c
+	(_GD_InitRawIO): Update for out-of-place writes.
+	* src/endian.c (_GD_ByteSwapFragment) src/name.c (gd_rename) src/flush.c
+	(_GD_Flush) src/encoding.c (_GD_RecodeFragment) src/del.c (gd_delete)
+	src/flimits.c (_GD_ShiftFragment): Use _GD_FiniRawIO to clean up.
+	* src/encoding.c (_GD_GenericTouch) src/ascii.c (_GD_AsciiTOpen
+	_GD_AsciiTUnlink) src/sie.c (_GD_SampIndTOpen _GD_SampIndTUnlink) src/raw.c
+	(_GD_RawTOpen _GD_RawTUnlink): Deleted.
+	* src/move.c (_GD_MogrifyFile) src/mod.c (_GD_Change): Use _GD_FiniRawIO and
+	_GD_InitRawIO.
+	* src/parse.c (_GD_ParseFieldSpec) add.c (_GD_Add): Use _GD_InitRawIO for
+	touch.
+	* src/gzip.c (_GD_GzipOpen) src/ascii.c (_GD_AsciiOpen) src/sie.c
+	(_GD_SampIndDoOpen _GD_SampIndOpen) src/raw.c (_GD_RawOpen): Handle temp file
+	opens.
+	* src/putdata.c (_GD_DoRawOut) src/fpos.c (_GD_Seek): Use _GD_WriteSeek.
+
+	* src/fpos.c (_GD_GetFilePos): Only try to open the file if necessary.
+
+	* src/gzip.c (_GD_GzipWrite _GD_GzipSync): Added.
+
 2011-10-20   D. V. Wiebe <getdata@ketiltrout.net> svn:609
 	* test/get_here_foffs.c test/seek_foffs.c: Added.
 

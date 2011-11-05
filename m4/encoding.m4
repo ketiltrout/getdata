@@ -54,9 +54,14 @@ if test "x$use_[]gd_encoding" = "xyes"; then
   if test "x$gd_encoding[]_prefix" != "x"; then
     LDFLAGS="$LDFLAGS -L$gd_encoding[]_prefix/lib"
   fi
-  AC_CHECK_LIB([$2],[$3],[have_this_lib=yes]
+  AC_CHECK_LIB([$2],[$3],[have_this_lib=yes
+  LIBS="$LIBS -l$2"]
   AC_DEFINE(AS_TR_CPP([HAVE_LIB$2]), 1,
     [Define to 1 if you have the `$2' library (-l$2).]))
+
+ifelse(`x$7', `x',,[
+  AC_CHECK_FUNCS([$7])
+])
   LDFLAGS=$saved_ldflags
   LIBS=$saved_libs
 
@@ -106,7 +111,6 @@ if test "x$path_[]gd_unprogname" != "xnot found"; then
   AC_DEFINE_UNQUOTED(AS_TR_CPP(gd_unprogname), ["$path_]gd_unprogname["],
                      [ Define to the full path to the `]gd_unprogname[' binary ])
 fi
-$7
 ])
 AM_CONDITIONAL(AS_TR_CPP([USE_]gd_encoding), [test "x$use_]gd_encoding[" = "xyes"])
 

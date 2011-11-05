@@ -41,7 +41,11 @@
 
 /* MSVC types */
 #ifdef _MSC_VER
-typedef size_t ssize_t;
+#ifdef _WIN64
+typedef __int64 ssize_t;
+#else
+typedef int ssize_t;
+#endif
 typedef int mode_t;
 #endif
 
@@ -175,12 +179,12 @@ const char* _gd_coladd(void);
 const char* _gd_colsub(void);
 #define dtracevoid() printf("%s %s()\n", _gd_coladd(), __FUNCTION__)
 #define dtrace(fmt, ...) printf("%s %s(" fmt ")\n", _gd_coladd(), \
-    __FUNCTION__, __VA_ARGS__)
+    __FUNCTION__, ##__VA_ARGS__)
 #define dprintf(fmt, ...) printf("%s %s:%i " fmt "\n", _gd_colnil(), \
-    __FUNCTION__, __LINE__, __VA_ARGS__)
+    __FUNCTION__, __LINE__, ##__VA_ARGS__)
 #define dreturnvoid() printf("%s %s = (nil)\n", _gd_colsub(), __FUNCTION__)
 #define dreturn(fmt, ...) printf("%s %s = " fmt "\n", _gd_colsub(), \
-    __FUNCTION__, __VA_ARGS__)
+    __FUNCTION__, ##__VA_ARGS__)
 #define dwatch(fmt, v) printf("%s %s = " fmt "\n", _gd_colnil(), #v, v)
 #else
 #define dtracevoid()
@@ -519,12 +523,19 @@ ssize_t getdelim(char**, size_t*, int, FILE*);
 #define GD_E_ARG_ENDIANNESS     2
 #define GD_E_ARG_PROTECTION     3
 
+#define GD_FILE_READ  0x1
+#define GD_FILE_WRITE 0x2
+#define GD_FILE_RDWR  ( GD_FILE_READ | GD_FILE_WRITE )
+#define GD_FILE_TEMP  0x4
+#define GD_FILE_TOUCH 0x8
+
 struct _gd_raw_file {
   char* name;
   int idata;
   void* edata;
   int subenc;
   const DIRFILE *D;
+  unsigned int mode;
   off64_t pos;
 };
 
@@ -598,7 +609,6 @@ struct _gd_private_entry {
 
 #define GD_EF_OPEN    0x0001
 #define GD_EF_CLOSE   0x0002
-#define GD_EF_TOUCH   0x0004
 #define GD_EF_SEEK    0x0008
 #define GD_EF_READ    0x0010
 #define GD_EF_SIZE    0x0020
@@ -606,9 +616,11 @@ struct _gd_private_entry {
 #define GD_EF_SYNC    0x0080
 #define GD_EF_MOVE    0x0100
 #define GD_EF_UNLINK  0x0200
-#define GD_EF_TOPEN   0x0400
-#define GD_EF_TMOVE   0x0800
-#define GD_EF_TUNLINK 0x1000
+
+#define GD_FINIRAW_KEEP      0x0
+#define GD_FINIRAW_DISCARD   0x1
+#define GD_FINIRAW_DEFER     0x2
+#define GD_FINIRAW_CLOTEMP   0x4
 
 #define BUFFER_SIZE 9000000
 
@@ -626,32 +638,32 @@ typedef off_t off64_t;
 #  define SCREWY_FLOATS
 #endif
 
-typedef off64_t (*gd_ef_seek_t)(struct _gd_raw_file*, off64_t, gd_type_t, int);
+typedef int (*gd_ef_open_t)(int, int, struct _gd_raw_file*, int, unsigned int);
+typedef off64_t (*gd_ef_seek_t)(struct _gd_raw_file*, off64_t, gd_type_t,
+    unsigned int);
 typedef off64_t (*gd_ef_size_t)(int, struct _gd_raw_file*, gd_type_t, int);
 typedef ssize_t (*gd_ef_read_t)(struct _gd_raw_file*, void*, gd_type_t, size_t);
 typedef ssize_t (*gd_ef_write_t)(struct _gd_raw_file*, const void*, gd_type_t,
     size_t);
 typedef int (*gd_ef_close_t)(struct _gd_raw_file*);
 typedef int (*gd_ef_sync_t)(struct _gd_raw_file*);
-typedef int (*gd_ef_tunlink_t)(int, struct _gd_raw_file*);
 typedef int (*gd_ef_unlink_t)(int, struct _gd_raw_file*);
-typedef int (*gd_ef_topen_t)(int, struct _gd_raw_file*, int);
-typedef int (*gd_ef_touch_t)(int, struct _gd_raw_file*, int);
 typedef int (*gd_ef_move_t)(int, struct _gd_raw_file*, int, char*);
-typedef int (*gd_ef_open_t)(int, struct _gd_raw_file*, int, int, int);
-typedef int (*gd_ef_tmove_t)(int, int, struct _gd_raw_file*, gd_ef_tunlink_t);
 
+/* Encoding scheme flags */
+#define GD_EF_ECOR 0x1 /* post-framework byte-sex correction required */
+#define GD_EF_SWAP 0x2 /* in-framework byte-sex metadata correction required */
+#define GD_EF_OOP  0x4 /* writes occur out-of-place */
 /* Encoding schemes */
 extern struct encoding_t {
   unsigned long int scheme;
   const char* ext;
-  int ecor; /* encoding requires byte-sex correction */
+  int flags; /* flags */
   const char* affix;
   const char* ffname;
   unsigned int provides;
   gd_ef_open_t open;
   gd_ef_close_t close;
-  gd_ef_touch_t touch;
   gd_ef_seek_t seek;
   gd_ef_read_t read;
   gd_ef_size_t size;
@@ -659,9 +671,6 @@ extern struct encoding_t {
   gd_ef_sync_t sync;
   gd_ef_move_t move;
   gd_ef_unlink_t unlink;
-  gd_ef_topen_t topen;
-  gd_ef_tmove_t tmove;
-  gd_ef_tunlink_t tunlink;
 } _gd_ef[GD_N_SUBENCODINGS];
 
 /* Format file fragment metadata */
@@ -671,7 +680,7 @@ struct gd_fragment_t {
   /* Subdirectory name */
   const char* sname;
   /* basename */
-  char *bname; 
+  char *bname;
   /* External name (the one that appears in the format file) */
   char* ename;
   int modified;
@@ -801,7 +810,8 @@ void _GD_FixEndianness(void* databuffer, size_t size, size_t ns);
 #else
 #define _GD_FileSwapBytes(D,i) ((D)->fragment[i].byte_sex & GD_BIG_ENDIAN)
 #endif
-void _GD_Flush(DIRFILE* D, gd_entry_t *E);
+int _GD_FiniRawIO(DIRFILE*, gd_entry_t*, int, int);
+void _GD_Flush(DIRFILE* D, gd_entry_t *E, int);
 void _GD_FlushMeta(DIRFILE* D, int fragment, int force);
 void _GD_FreeE(DIRFILE *D, gd_entry_t* E, int priv);
 off64_t _GD_GetEOF(DIRFILE *D, gd_entry_t* E, const char *parent,
@@ -814,7 +824,8 @@ int _GD_GrabDir(DIRFILE *D, int, const char *name);
 int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,
     int linenum, char** ref_name, int me, int* standards, unsigned long *flags);
 void _GD_InitialiseFramework(void);
-int _GD_InitRawIO(DIRFILE *D, gd_entry_t *E, unsigned int funcs, int creat);
+int _GD_InitRawIO(DIRFILE*, gd_entry_t*, const char*, int,
+    const struct encoding_t*, unsigned int, unsigned int, int);
 void _GD_InvertData(DIRFILE* D, void* data, gd_type_t return_type,
     double dividend, size_t n_read);
 void _GD_InsertSort(DIRFILE* D, gd_entry_t* E, int u) gd_nothrow;
@@ -855,17 +866,17 @@ int _GD_Tokenise(DIRFILE *D, const char* instring, char **outstring,
     int standards, int pedantic);
 char* _GD_ValidateField(const gd_entry_t* parent, const char* field_code,
     int standards, int pedantic, int* is_dot);
+off64_t _GD_WriteSeek(DIRFILE *D, gd_entry_t *E, off64_t offset,
+    unsigned int mode);
 
 /* generic I/O methods */
-int _GD_GenericTouch(int, struct _gd_raw_file* file, int);
 int _GD_GenericMove(int, struct _gd_raw_file* file, int, char* new_path);
 int _GD_GenericUnlink(int, struct _gd_raw_file* file);
-int _GD_GenericTMove(int, int, struct _gd_raw_file*, gd_ef_tunlink_t);
 
 /* unencoded I/O methods */
-int _GD_RawOpen(int, struct _gd_raw_file* file, int swap, int mode, int creat);
+int _GD_RawOpen(int, int, struct _gd_raw_file* file, int swap, unsigned int);
 off64_t _GD_RawSeek(struct _gd_raw_file* file, off64_t count,
-    gd_type_t data_type, int pad);
+    gd_type_t data_type, unsigned int);
 ssize_t _GD_RawRead(struct _gd_raw_file* file, void *ptr, gd_type_t data_type,
     size_t nmemb);
 ssize_t _GD_RawWrite(struct _gd_raw_file* file, const void *ptr,
@@ -874,14 +885,11 @@ int _GD_RawSync(struct _gd_raw_file* file);
 int _GD_RawClose(struct _gd_raw_file* file);
 off64_t _GD_RawSize(int, struct _gd_raw_file* file, gd_type_t data_type,
     int swap);
-int _GD_RawTOpen(int, struct _gd_raw_file*, int);
-int _GD_RawTUnlink(int, struct _gd_raw_file*);
 
 /* text I/O methods */
-int _GD_AsciiOpen(int, struct _gd_raw_file* file, int swap, int mode,
-    int creat);
+int _GD_AsciiOpen(int, int, struct _gd_raw_file* file, int swap, unsigned int);
 off64_t _GD_AsciiSeek(struct _gd_raw_file* file, off64_t count,
-    gd_type_t data_type, int pad);
+    gd_type_t data_type, unsigned int);
 ssize_t _GD_AsciiRead(struct _gd_raw_file* file, void *ptr, gd_type_t data_type,
     size_t nmemb);
 ssize_t _GD_AsciiWrite(struct _gd_raw_file* file, const void *ptr,
@@ -891,14 +899,11 @@ int _GD_AsciiSync(struct _gd_raw_file* file);
 int _GD_AsciiClose(struct _gd_raw_file* file);
 off64_t _GD_AsciiSize(int, struct _gd_raw_file* file, gd_type_t data_type,
     int swap);
-int _GD_AsciiTOpen(int, struct _gd_raw_file*, int);
-int _GD_AsciiTUnlink(int, struct _gd_raw_file*);
 
 /* bzip I/O methods */
-int _GD_Bzip2Open(int, struct _gd_raw_file* file, int swap, int mode,
-    int creat);
+int _GD_Bzip2Open(int, int, struct _gd_raw_file* file, int swap, unsigned int);
 off64_t _GD_Bzip2Seek(struct _gd_raw_file* file, off64_t count,
-    gd_type_t data_type, int pad);
+    gd_type_t data_type, unsigned int);
 ssize_t _GD_Bzip2Read(struct _gd_raw_file* file, void *ptr, gd_type_t data_type,
     size_t nmemb);
 int _GD_Bzip2Close(struct _gd_raw_file* file);
@@ -906,19 +911,22 @@ off64_t _GD_Bzip2Size(int, struct _gd_raw_file* file, gd_type_t data_type,
     int swap);
 
 /* gzip I/O methods */
-int _GD_GzipOpen(int, struct _gd_raw_file* file, int swap, int mode, int creat);
+int _GD_GzipOpen(int, int, struct _gd_raw_file* file, int swap, unsigned int);
 off64_t _GD_GzipSeek(struct _gd_raw_file* file, off64_t count,
-    gd_type_t data_type, int pad);
+    gd_type_t data_type, unsigned int);
 ssize_t _GD_GzipRead(struct _gd_raw_file* file, void *ptr, gd_type_t data_type,
     size_t nmemb);
+ssize_t _GD_GzipWrite(struct _gd_raw_file *file, const void *ptr,
+    gd_type_t data_type, size_t nmemb);
+int _GD_GzipSync(struct _gd_raw_file* file);
 int _GD_GzipClose(struct _gd_raw_file* file);
 off64_t _GD_GzipSize(int, struct _gd_raw_file* file, gd_type_t data_type,
     int swap);
 
 /* lzma I/O methods */
-int _GD_LzmaOpen(int, struct _gd_raw_file* file, int swap, int mode, int creat);
+int _GD_LzmaOpen(int, int, struct _gd_raw_file* file, int swap, unsigned int);
 off64_t _GD_LzmaSeek(struct _gd_raw_file* file, off64_t count,
-    gd_type_t data_type, int pad);
+    gd_type_t data_type, unsigned int);
 ssize_t _GD_LzmaRead(struct _gd_raw_file* file, void *ptr, gd_type_t data_type,
     size_t nmemb);
 int _GD_LzmaClose(struct _gd_raw_file* file);
@@ -926,9 +934,9 @@ off64_t _GD_LzmaSize(int, struct _gd_raw_file* file, gd_type_t data_type,
     int swap);
 
 /* slim I/O methods */
-int _GD_SlimOpen(int, struct _gd_raw_file* file, int mode, int creat);
+int _GD_SlimOpen(int, int, struct _gd_raw_file* file, int, unsigned int);
 off64_t _GD_SlimSeek(struct _gd_raw_file* file, off64_t count,
-    gd_type_t data_type, int pad);
+    gd_type_t data_type, unsigned int);
 ssize_t _GD_SlimRead(struct _gd_raw_file* file, void *ptr, gd_type_t data_type,
     size_t nmemb);
 int _GD_SlimClose(struct _gd_raw_file* file);
@@ -936,10 +944,10 @@ off64_t _GD_SlimSize(int, struct _gd_raw_file* file, gd_type_t data_type,
     int swap);
 
 /* SIE I/O methods */
-int _GD_SampIndOpen(int, struct _gd_raw_file* file, int swap, int mode,
-    int creat);
+int _GD_SampIndOpen(int, int, struct _gd_raw_file* file, int swap,
+    unsigned int);
 off64_t _GD_SampIndSeek(struct _gd_raw_file* file, off64_t count,
-    gd_type_t data_type, int pad);
+    gd_type_t data_type, unsigned int);
 ssize_t _GD_SampIndRead(struct _gd_raw_file* file, void *ptr,
     gd_type_t data_type, size_t nmemb);
 ssize_t _GD_SampIndWrite(struct _gd_raw_file* file, const void *ptr,
@@ -948,8 +956,6 @@ int _GD_SampIndSync(struct _gd_raw_file* file);
 int _GD_SampIndClose(struct _gd_raw_file* file);
 off64_t _GD_SampIndSize(int, struct _gd_raw_file* file, gd_type_t data_type,
     int swap);
-int _GD_SampIndTOpen(int, struct _gd_raw_file*, int);
-int _GD_SampIndTUnlink(int, struct _gd_raw_file*);
 
 #ifdef _MSC_VER
 # define _gd_static_inline static

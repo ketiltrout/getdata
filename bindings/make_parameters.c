@@ -189,7 +189,7 @@ static struct {
   CONSTANT(SEEK_SET,         "GDSK_S", 10),
   CONSTANT(SEEK_CUR,         "GDSK_C", 10),
   CONSTANT(SEEK_END,         "GDSK_E", 10),
-  CONSTANT(SEEK_PAD,         "GDSK_P", 11),
+  CONSTANT(SEEK_WRITE,       "GDSK_W", 11),
 
   CONSTANT(MAX_LINE_LENGTH,  "GD_MLL", 99),
   CONSTANT(ALL_FRAGMENTS,    "GD_ALL", 99),

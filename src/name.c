@@ -181,10 +181,7 @@ int gd_rename(DIRFILE *D, const char *old_code, const char *new_name,
     }
 
     /* Close the old file */
-    if (E->e->u.raw.file->idata != -1 &&
-        (*_gd_ef[E->e->u.raw.file[0].subenc].close)(E->e->u.raw.file))
-    {
-      _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
+    if (_GD_FiniRawIO(D, E, E->fragment_index, GD_FINIRAW_KEEP)) {
       free(name);
       free(filebase);
       dreturn("%i", -1);

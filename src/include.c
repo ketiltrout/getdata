@@ -33,7 +33,7 @@
 #include <libgen.h>
 #endif
 
-/* Include a format file fragment -- returns the include index, or 
+/* Include a format file fragment -- returns the include index, or
  * -1 on error */
 int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,
     int linenum, char** ref_name, int me, int* standards, unsigned long *flags)
@@ -179,7 +179,7 @@ int gd_include(DIRFILE* D, const char* file, int fragment_index,
     unsigned long flags)
 {
   int standards = GD_DIRFILE_STANDARDS_VERSION;
-  char* ref_name = NULL; 
+  char* ref_name = NULL;
   int i, new_fragment;
 
   dtrace("%p, \"%s\", %i, %lx", D, file, fragment_index, (unsigned long)flags);
@@ -263,7 +263,7 @@ int gd_include(DIRFILE* D, const char* file, int fragment_index,
       _GD_SetError(D, GD_E_BAD_REFERENCE, GD_E_REFERENCE_TYPE, NULL, 0,
           ref_name);
     else
-      D->reference_field = E; 
+      D->reference_field = E;
   }
   free(ref_name);
 
@@ -293,7 +293,7 @@ static int _GD_CollectFragments(DIRFILE* D, int** f, int fragment, int nf)
         break;
     }
 
-  *f = new_f; 
+  *f = new_f;
 
   dreturn("%i", nf);
   return nf;
@@ -366,7 +366,7 @@ int gd_uninclude(DIRFILE* D, int fragment_index, int del)
     if (D->entry[i]->field_type == GD_RAW_ENTRY &&
         _GD_ContainsFragment(f, nf, D->entry[i]->fragment_index))
     {
-      _GD_Flush(D, D->entry[i]);
+      _GD_Flush(D, D->entry[i], 1);
     }
 
   /* flush the fragment's metadata, if requested */
