@@ -49,6 +49,9 @@ typedef int ssize_t;
 typedef int mode_t;
 #endif
 
+#ifndef HAVE_OFF64_T
+typedef off_t off64_t;
+#endif
 
 #ifdef _MSC_VER
 /* missing in sys/stat.h */
@@ -59,10 +62,6 @@ typedef int mode_t;
 /* the open() in the MSVCRT doesn't permit open()ing directories */
 #ifdef __MSVCRT__
 #define GD_NO_DIR_OPEN
-#endif
-
-#ifdef __APPLE__
-typedef off_t off64_t;
 #endif
 
 #ifdef GD_NO_C99_API
@@ -225,8 +224,10 @@ const char* _gd_colsub(void);
 # define gd_getcwd getcwd
 #endif
 
-#ifdef HAVE__SNPRINTF
-# define snprintf _snprintf
+#ifndef HAVE_SNPRINTF
+# ifdef HAVE__SNPRINTF
+#  define snprintf _snprintf
+# endif
 #endif
 
 #ifndef HAVE_FTELLO64
@@ -270,8 +271,12 @@ const char* _gd_colsub(void);
 struct tm *gmtime_r(const time_t *timep, struct tm *result);
 #endif
 
-#ifdef HAVE__LSEEKI64
-#define lseek64 (off64_t)_lseeki64
+#ifndef HAVE_LSEEK64
+# ifdef HAVE__LSEEKI64
+#  define lseek64 (off64_t)_lseeki64
+# else
+#  define lseek64 (off64_t)lseek
+# endif
 #endif
 
 #ifdef MKDIR_NO_MODE
@@ -623,14 +628,6 @@ struct _gd_private_entry {
 #define GD_FINIRAW_CLOTEMP   0x4
 
 #define BUFFER_SIZE 9000000
-
-#ifndef HAVE_OFF64_T
-# ifndef __APPLE__
-typedef off_t off64_t;
-# endif
-# define lseek64 lseek
-# define stat64 stat
-#endif
 
 /* helper macro */
 #if defined ARM_ENDIAN_FLOATS || \
