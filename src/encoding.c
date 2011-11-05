@@ -43,7 +43,7 @@ static int framework_initialised = 0;
 #endif
 
 /* encoding schemas */
-#define GD_EF_NULL_SET NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, \
+#define GD_EF_NULL_SET NULL, NULL, NULL, NULL, NULL, NULL, NULL, \
   &_GD_GenericMove, &_GD_GenericUnlink
 #ifdef USE_MODULES
 #define GD_EXT_ENCODING(sc,ex,ec,af,ff) \
@@ -76,7 +76,7 @@ struct encoding_t _gd_ef[GD_N_SUBENCODINGS] = {
 
 #ifdef USE_BZIP2
 #define GD_EF_PROVIDES \
-    GD_EF_OPEN | GD_EF_CLOSE | GD_EF_SEEK | GD_EF_READ | GD_EF_SIZE,
+    GD_EF_OPEN | GD_EF_CLOSE | GD_EF_SEEK | GD_EF_READ | GD_EF_SIZE
 #define GD_INT_FUNCS \
   &_GD_Bzip2Open, &_GD_Bzip2Close, &_GD_Bzip2Seek, &_GD_Bzip2Read, \
   &_GD_Bzip2Size, NULL /* WRITE */, NULL /* SYNC */, &_GD_GenericMove, \
@@ -92,7 +92,7 @@ struct encoding_t _gd_ef[GD_N_SUBENCODINGS] = {
 
 #ifdef USE_SLIM
 #define GD_EF_PROVIDES \
-  GD_EF_OPEN | GD_EF_CLOSE | GD_EF_SEEK | GD_EF_READ | GD_EF_SIZE,
+  GD_EF_OPEN | GD_EF_CLOSE | GD_EF_SEEK | GD_EF_READ | GD_EF_SIZE
 #define GD_INT_FUNCS \
   &_GD_SlimOpen, &_GD_SlimClose, &_GD_SlimSeek, &_GD_SlimRead, &_GD_SlimSize, \
   NULL /* WRITE */, NULL /* SYNC */, &_GD_GenericMove, &_GD_GenericUnlink
@@ -107,7 +107,7 @@ struct encoding_t _gd_ef[GD_N_SUBENCODINGS] = {
 
 #ifdef USE_LZMA
 #define GD_EF_PROVIDES \
-    GD_EF_OPEN | GD_EF_CLOSE | GD_EF_SEEK | GD_EF_READ | GD_EF_SIZE,
+    GD_EF_OPEN | GD_EF_CLOSE | GD_EF_SEEK | GD_EF_READ | GD_EF_SIZE
 #define GD_INT_FUNCS \
   &_GD_LzmaOpen, &_GD_LzmaClose, &_GD_LzmaSeek, &_GD_LzmaRead, &_GD_LzmaSize, \
   NULL /* WRITE */, NULL /* SYNC */, &_GD_GenericMove, &_GD_GenericUnlink
@@ -230,37 +230,29 @@ int _GD_MissingFramework(int encoding, unsigned int funcs)
 
     /* Try to resolve the symbols */
     if (_gd_ef[encoding].provides & GD_EF_OPEN)
-      _gd_ef[encoding].open = (int (*)(int, struct _gd_raw_file*, int,
-            int))_GD_ResolveSymbol(lib, _gd_ef + encoding, "Open");
+      _gd_ef[encoding].open = (gd_ef_open_t)_GD_ResolveSymbol(lib,
+          _gd_ef + encoding, "Open");
     if (_gd_ef[encoding].provides & GD_EF_CLOSE)
-      _gd_ef[encoding].close =
-        (int (*)(struct _gd_raw_file*))_GD_ResolveSymbol(lib, _gd_ef + encoding,
-            "Close");
+      _gd_ef[encoding].close = (gd_ef_close_t)_GD_ResolveSymbol(lib,
+          _gd_ef + encoding, "Close");
     if (_gd_ef[encoding].provides & GD_EF_SEEK)
-      _gd_ef[encoding].seek = (off64_t (*)(struct _gd_raw_file*, off64_t,
-            gd_type_t, int))_GD_ResolveSymbol(lib, _gd_ef + encoding, "Seek");
+      _gd_ef[encoding].seek = (gd_ef_seek_t)_GD_ResolveSymbol(lib,
+          _gd_ef + encoding, "Seek");
     if (_gd_ef[encoding].provides & GD_EF_READ)
-      _gd_ef[encoding].read = (ssize_t (*)(struct _gd_raw_file*, void*,
-            gd_type_t, size_t))_GD_ResolveSymbol(lib, _gd_ef + encoding,
-            "Read");
+      _gd_ef[encoding].read = (gd_ef_read_t)_GD_ResolveSymbol(lib,
+          _gd_ef + encoding, "Read");
     if (_gd_ef[encoding].provides & GD_EF_SIZE)
-      _gd_ef[encoding].size = (off64_t (*)(int, struct _gd_raw_file*,
-            gd_type_t))_GD_ResolveSymbol(lib, _gd_ef + encoding, "Size");
+      _gd_ef[encoding].size = (gd_ef_size_t)_GD_ResolveSymbol(lib,
+          _gd_ef + encoding, "Size");
     if (_gd_ef[encoding].provides & GD_EF_WRITE)
-      _gd_ef[encoding].write = (ssize_t (*)(struct _gd_raw_file*, const void*,
-            gd_type_t, size_t))_GD_ResolveSymbol(lib, _gd_ef + encoding,
-            "Write");
+      _gd_ef[encoding].write = (gd_ef_write_t)_GD_ResolveSymbol(lib,
+          _gd_ef + encoding, "Write");
     if (_gd_ef[encoding].provides & GD_EF_SYNC)
-      _gd_ef[encoding].sync =
-        (int (*)(struct _gd_raw_file*))_GD_ResolveSymbol(lib, _gd_ef + encoding,
-            "Sync");
+      _gd_ef[encoding].sync = (gd_ef_sync_t)_GD_ResolveSymbol(lib,
+          _gd_ef + encoding, "Sync");
     if (_gd_ef[encoding].provides & GD_EF_UNLINK)
-      _gd_ef[encoding].unlink = (int (*)(int,
-            struct _gd_raw_file*))_GD_ResolveSymbol(lib, _gd_ef + encoding,
-            "Unlink");
-    if (_gd_ef[encoding].provides & GD_EF_TEMP)
-      _gd_ef[encoding].temp = (int (*)(int, int, struct _gd_raw_file*, int,
-            int))_GD_ResolveSymbol(lib, _gd_ef + encoding, "Temp");
+      _gd_ef[encoding].unlink = (gd_ef_unlink_t)_GD_ResolveSymbol(lib,
+          _gd_ef + encoding, "Unlink");
 
     /* we tried our best, don't bother trying again */
     _gd_ef[encoding].provides = 0;
