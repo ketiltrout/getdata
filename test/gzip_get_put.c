@@ -96,7 +96,7 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  fd = open(data_gz, O_CREAT | O_EXCL | O_WRONLY, 0666);
+  fd = open(data_gz, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
   write(fd, gzdata, 279);
   close(fd);
 

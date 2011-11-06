@@ -19,6 +19,8 @@
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 /* gd_tell() */
+#define _LARGEFILE64_SOURCE 1
+
 #include "test.h"
 
 #include <stdlib.h>

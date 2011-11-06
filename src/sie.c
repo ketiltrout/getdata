@@ -123,24 +123,16 @@ static int _GD_Advance(struct gd_siedata *f, size_t size)
   if (f->swap)
     f->d[0] = gd_swap64(f->d[0]);
 
-  if (ferror(f->fp)) {
-    dreturn("%i", -2);
-    return -2;
-  } else if (n != 1) {
-    /* ignore short reads, resulting from corrupted files .. go back to
-     * the last good record */
-    fseek(f->fp, -n, SEEK_CUR);
-    /* and restore it */
-    memcpy(f->d, p, 3 * sizeof(int64_t));
-    f->s = f->d[0];
-    f->p = f->d[0] + 1;
-    dreturn("%i", -1);
-    return -1;
-  } else if (feof(f->fp)) {
-    f->s = f->d[0];
-    f->p = f->d[0] + 1;
-    dreturn("%i", -1);
-    return -1;
+  if (n != 1) {
+    if (ferror(f->fp)) {
+      dreturn("%i", -2);
+      return -2;
+    } else {
+      f->s = f->d[0];
+      f->p = f->d[0] + 1;
+      dreturn("%i", -1);
+      return -1;
+    }
   }
 
   f->s = f->p = p[0] + 1;
@@ -190,11 +182,14 @@ off64_t _GD_SampIndSeek(struct _gd_raw_file *file, off64_t sample,
       /* back up and update the file */
       fseek(f->fp, -size, SEEK_CUR);
       fwrite(f->d, size, 1, f->fp);
+      /* The MSVCRT's stdio seems to screw up without the following: */
+      fflush(f->fp);
     } else {
       /* add a new record */
       f->d[0] = sample;
       f->d[1] = f->d[2] = 0;
       fwrite(f->d, size, 1, f->fp);
+      fflush(f->fp);
     }
     f->s = sample;
   }

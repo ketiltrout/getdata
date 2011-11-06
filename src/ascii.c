@@ -342,8 +342,10 @@ int _GD_AsciiSync(struct _gd_raw_file *file)
 
   ret = fflush((FILE *)file->edata);
 
+#ifndef __MSVCRT__
   if (!ret)
     ret = fsync(fileno((FILE *)file->edata));
+#endif
 
   dreturn("%i", ret);
   return ret;
