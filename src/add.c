@@ -408,6 +408,7 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
       E->scalar[i] = NULL;
     else {
       E->scalar[i] = strdup(entry->scalar[i]);
+      E->scalar_ind[i] = entry->scalar_ind[i];
       if (E->scalar[i] == NULL)
         _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     }
