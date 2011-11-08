@@ -1,3 +1,11 @@
+2011-11-08   D. V. Wiebe <getdata@ketiltrout.net> svn:614
+	* test/gzip_put_get.c test/gzip_move_to.c test/gzip_add.c
+	test/gzip_get_put.c test/gzip_put.c: Handle TEST_GZIP && !USE_GZIP.
+
+	* src/encoding.c (_GD_FiniRawIO): Don't change error code if already set.
+
+	* src/sie.c (_GD_SampIndSize): Fix descriptor leak.
+
 2011-11-05   D. V. Wiebe <getdata@ketiltrout.net> svn:610
 	* test/gzip_put_get.c test/ascii_add.c test/get_rofs.c test/gzip_move_to.c
 	test/gzip_add.c test/endian_alter_sie.c test/gzip_get_put.c: Added.

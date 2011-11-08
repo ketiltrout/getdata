@@ -503,6 +503,8 @@ off64_t _GD_SampIndSize(int dirfd, struct _gd_raw_file* file,
   if (swap)
     n = gd_swap64(n);
 
+  fclose(f.fp);
+
   dreturn("%llx", (long long unsigned)n);
   return (off64_t)n;
 }

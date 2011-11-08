@@ -82,7 +82,7 @@ int main(void)
   };
   uint8_t b, c[8], d[8];
   char command[4096];
-  int fd, i, m, n, e1, e2, r = 0;
+  int fd, i, m, n, e1, e2, unlink_data, unlink_datagz, r = 0;
   DIRFILE *D;
 
   memset(c, 0, 8);
@@ -100,7 +100,11 @@ int main(void)
   write(fd, gzdata, 279);
   close(fd);
 
+#ifdef USE_GZIP
   D = gd_open(filedir, GD_RDWR | GD_GZIP_ENCODED | GD_VERBOSE);
+#else
+  D = gd_open(filedir, GD_RDWR | GD_GZIP_ENCODED);
+#endif
   n = gd_getdata(D, "data", 5, 0, 1, 0, GD_UINT8, c);
   e1 = gd_error(D);
   m = gd_putdata(D, "data", 5, 0, 1, 0, GD_UINT8, d);
@@ -108,6 +112,7 @@ int main(void)
 
   gd_close(D);
 
+#ifdef USE_GZIP
   /* uncompress */
   snprintf(command, 4096, "%s -f %s > /dev/null", GUNZIP, data);
   if (gd_system(command)) {
@@ -130,15 +135,28 @@ int main(void)
 
   for (i = 0; i < 8; ++i)
     CHECKIi(i, c[i], 40 + i);
+#endif
 
-  unlink(data);
+  unlink_data = unlink(data);
+  unlink_datagz = unlink(data_gz);
   unlink(format);
   rmdir(filedir);
 
+#ifdef USE_GZIP
+  CHECKI(unlink_data, 0);
+  CHECKI(unlink_datagz, -1);
   CHECKI(e1, GD_E_OK);
   CHECKI(e2, GD_E_OK);
   CHECKI(n, 8);
   CHECKI(m, 8);
+#else
+  CHECKI(unlink_data, -1);
+  CHECKI(unlink_datagz, 0);
+  CHECKI(e1, GD_E_UNSUPPORTED);
+  CHECKI(e2, GD_E_UNSUPPORTED);
+  CHECKI(n, 0);
+  CHECKI(m, 0);
+#endif
 
   return r;
 #endif

@@ -38,36 +38,47 @@ int main(void)
   const char *format = "dirfile/format";
   const char *data = "dirfile/data.gz";
   gd_entry_t e;
-  int error, r = 0;
+  int e1, e2, unlink_data, r = 0;
   DIRFILE *D;
 
   rmdirfile();
+#ifdef USE_GZIP
   D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE | GD_GZIP_ENCODED);
+#else
+  D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_GZIP_ENCODED);
+#endif
   gd_add_raw(D, "data", GD_UINT8, 2, 0);
-  error = gd_error(D);
+  e1 = gd_error(D);
 
   /* check */
-  gd_entry(D, "data", &e);
-  if (gd_error(D))
-    r = 1;
-  else {
+  e2 = gd_entry(D, "data", &e);
+#ifdef USE_GZIP
+  CHECKI(e2, 0);
+  if (e2 == 0) {
     CHECKI(e.field_type, GD_RAW_ENTRY);
     CHECKI(e.fragment_index, 0);
     CHECKI(e.EN(raw,spf), 2);
     CHECKI(e.EN(raw,data_type), GD_UINT8);
     gd_free_entry_strings(&e);
   }
+#else
+  CHECKI(e2, -1);
+#endif
 
   gd_close(D);
+  unlink_data = unlink(data);
 
-  if (unlink(data)) {
-    perror("unlink");
-    r = 1;
-  }
+#ifdef USE_GZIP
+  CHECKI(unlink_data, 0);
+  CHECKI(e1, GD_E_OK);
+#else
+  CHECKI(unlink_data, -1);
+  CHECKI(e1, GD_E_UNSUPPORTED);
+#endif
+
   unlink(format);
   rmdir(filedir);
 
-  CHECKI(error, GD_E_OK);
   return r;
 #endif
 }

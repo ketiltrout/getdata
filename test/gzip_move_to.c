@@ -33,10 +33,14 @@ int main(void)
   const char *data_gz = "dirfile/data.gz";
   const char *data_raw = "dirfile/data";
   const char *format_data = "data RAW UINT8 8\n/ENCODING none\n/ENDIAN little\n";
-  uint8_t data_in[256], d;
+  uint8_t data_in[256];
   DIRFILE *D;
+#ifdef USE_GZIP
+  uint8_t d;
   char command[4096];
-  int fd, i, error, r = 0;
+  int i;
+#endif
+  int fd, error, unlink_raw, unlink_gz, r = 0;
   struct stat buf;
 
   rmdirfile();
@@ -53,18 +57,31 @@ int main(void)
   write(fd, data_in, 256);
   close(fd);
 
+#ifdef USE_GZIP
   D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
+#else
+  D = gd_open(filedir, GD_RDWR);
+#endif
   gd_alter_encoding(D, GD_GZIP_ENCODED, 0, 1);
   error = gd_error(D);
 
   gd_close(D);
 
+#ifdef USE_GZIP
   if (stat(data_gz, &buf)) {
     perror("stat");
     r = 1;
   }
   CHECKI(stat(data_raw, &buf), -1);
+#else
+  if (stat(data_raw, &buf)) {
+    perror("stat");
+    r = 1;
+  }
+  CHECKI(stat(data_gz, &buf), -1);
+#endif
 
+#ifdef USE_GZIP
   /* uncompress */
   snprintf(command, 4096, "%s -f %s > /dev/null", GUNZIP, data_gz);
   if (gd_system(command)) {
@@ -81,12 +98,22 @@ int main(void)
       close(fd);
     }
   }
+#endif
 
-  unlink(data_raw);
+  unlink_raw = unlink(data_raw);
+  unlink_gz = unlink(data_gz);
   unlink(format);
   rmdir(filedir);
 
-  CHECKI(error, 0);
+#ifdef USE_GZIP
+  CHECKI(unlink_raw, -1);
+  CHECKI(unlink_gz, 0);
+  CHECKI(error, GD_E_OK);
+#else
+  CHECKI(unlink_raw, 0);
+  CHECKI(unlink_gz, -1);
+  CHECKI(error, GD_E_UNSUPPORTED);
+#endif
 
   return r;
 }

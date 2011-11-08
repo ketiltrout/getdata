@@ -331,8 +331,9 @@ int _GD_FiniRawIO(DIRFILE *D, gd_entry_t *E, int fragment, int flags)
     if ((*_gd_ef[E->e->u.raw.file[clotemp].subenc].close)(E->e->u.raw.file +
           clotemp))
     {
-      _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[clotemp].name, errno,
-          NULL);
+      if (D->error == GD_E_OK)
+        _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[clotemp].name, errno,
+            NULL);
       dreturn("%i", 1);
       return 1;
     }
@@ -352,7 +353,8 @@ int _GD_FiniRawIO(DIRFILE *D, gd_entry_t *E, int fragment, int flags)
       if (gd_UnlinkAt(D, D->fragment[fragment].dirfd, E->e->u.raw.file[1].name,
             0))
       {
-        _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[1].name, errno, NULL);
+        if (D->error == GD_E_OK)
+          _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[1].name, errno, NULL);
         dreturn("%i", -1);
         return -1;
       }
