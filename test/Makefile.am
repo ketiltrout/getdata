@@ -314,8 +314,7 @@ VLIST_TESTS=vlist vlist_invalid vlist_meta vlist_meta_invalid
 
 XZ_TESTS=xz_get xz_nframes
 
-TESTS=$(ADD_TESTS)
-TEeTS=$(ADD_TESTS)        $(ALTER_TESTS)      $(ASCII_TESTS)      \
+TESTS=$(ADD_TESTS)        $(ALTER_TESTS)      $(ASCII_TESTS)      \
 			$(BOF_TESTS)        $(BZIP_TESTS)       $(CLOSE_TESTS)      \
 			$(CONVERT_TESTS)    $(CREAT_TESTS)      $(CVLIST_TESTS)     \
 			$(DEL_TESTS)        $(DFES_TESTS)       $(ENCODE_TESTS)     \
