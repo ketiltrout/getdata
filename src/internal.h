@@ -117,6 +117,41 @@ double cimag(double complex z);
 #endif
 #endif
 
+#ifdef _MSC_VER
+# define _gd_static_inline static
+#else
+# define _gd_static_inline static inline
+#endif
+
+/* unaligned access */
+#ifdef UNALIGNED_ACCESS_OK
+#define gd_get_unaligned64(p) (*(p))
+#define gd_put_unaligned64(v,p) *(p) = (v)
+#else
+#ifdef HAVE_ASM_UNALIGNED_H
+#include <asm/unaligned.h>
+#endif
+#ifdef HAVE_DECL_GET_UNALIGNED
+#define gd_get_unaligned64 get_unaligned
+#else
+_gd_static_inline int64_t gd_get_unaligned64(const void *p)
+{
+  int64_t v;
+  memcpy(&v, p, 8);
+  return v;
+}
+#endif
+#ifdef HAVE_DECL_PUT_UNALIGNED
+#define gd_put_unaligned64 put_unaligned
+#else
+_gd_static_inline int64_t gd_put_unalinged64(int64_t v, void *p)
+{
+  memcpy(p, v, 8);
+  return v;
+}
+#endif
+#endif
+
 /* For FILE */
 #include <stdio.h>
 
@@ -352,6 +387,11 @@ int gd_OpenAt(const DIRFILE*, int, const char*, int, mode_t);
 #ifdef HAVE_FSTATAT
 # define gd_StatAt(d,...) fstatat(__VA_ARGS__)
 #else
+#ifdef HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#else
+struct stat;
+#endif
 int gd_StatAt(const DIRFILE*, int, const char*, struct stat*, int);
 #endif
 
@@ -954,11 +994,6 @@ int _GD_SampIndClose(struct _gd_raw_file* file);
 off64_t _GD_SampIndSize(int, struct _gd_raw_file* file, gd_type_t data_type,
     int swap);
 
-#ifdef _MSC_VER
-# define _gd_static_inline static
-#else
-# define _gd_static_inline static inline
-#endif
 _gd_static_inline int entry_cmp(const void *a, const void *b)
 {
   return strcmp((*(gd_entry_t**)a)->field, (*(gd_entry_t**)b)->field);

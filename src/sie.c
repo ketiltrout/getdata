@@ -340,13 +340,13 @@ ssize_t _GD_SampIndWrite(struct _gd_raw_file *file, const void *ptr,
         }
         p = p2;
       }
-      *cur_end = f->p + i - 1;
+      gd_put_unaligned64(f->p + i - 1, cur_end);
       cur_end = (int64_t*)((char*)p + size * rin);
       cur_datum = cur_end + 1;
       memcpy(cur_datum, ((const char*)ptr) + i * dlen, dlen);
     }
   }
-  *cur_end = f->p + nelem - 1;
+  gd_put_unaligned64(f->p + nelem - 1, cur_end);
   rin++;
 
   /* determine how many records we have to replace */
@@ -356,7 +356,7 @@ ssize_t _GD_SampIndWrite(struct _gd_raw_file *file, const void *ptr,
     rout--;
   }
 
-  while (f->d[0] <= *cur_end) {
+  while (f->d[0] <= gd_get_unaligned64(cur_end)) {
     ++rout;
 
     r = _GD_Advance(f, sizeof(int64_t) + GD_SIZE(data_type));
@@ -370,9 +370,10 @@ ssize_t _GD_SampIndWrite(struct _gd_raw_file *file, const void *ptr,
 
   /* fix the endianness */
   if (f->swap)
-    for (i = 0; i < (size_t)rin; ++i)
-      *((uint64_t*)(((char*)p) + size * i)) =
-        gd_swap64(*((uint64_t*)(((char*)p) + size * i)));
+    for (i = 0; i < (size_t)rin; ++i) {
+      int64_t v = gd_get_unaligned64((int64_t*)(((char*)p) + size * i));
+      gd_put_unaligned64(gd_swap64(v), (int64_t*)(((char*)p) + size * i));
+    }
 
   /* now, do some moving: first, move the trailing records, forward by
    * (rin - rout) records */

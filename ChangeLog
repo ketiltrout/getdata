@@ -1,3 +1,8 @@
+2011-11-10   D. V. Wiebe <getdata@ketiltrout.net> svn:622
+	* configure.ac: Figure out whether unaligned memory access will work.
+	* src/internal.h: Deal with UNALIGNED_ACCESS_OK
+	* src/sie.c (_GD_SampIndWrite): Handle unaligned memory access.
+
 2011-11-08   D. V. Wiebe <getdata@ketiltrout.net> svn:615
 	* test/add_scalar_carray.c: Added.
 

@@ -60,6 +60,7 @@ echo
 
 dnl Build/Host triplets
 AC_CANONICAL_HOST
+AC_CANONICAL_BUILD
 
 dnl Legacy API
 AC_ARG_ENABLE(legacy-api, AS_HELP_STRING([--disable-legacy-api],
@@ -310,6 +311,17 @@ AC_PROG_AWK
 AC_PROG_SED
 AC_CHECK_PROGS([DIFF], [diff], [])
 GD_MSYS_SHELL
+
+AC_MSG_CHECKING([whether ${host} supports fast unaligned memory access])
+case "${host}" in
+  i?86-*-*|powerpc-*-*|x86-64) gd_unaligned_ok=yes;
+  AC_DEFINE([UNALIGNED_ACCESS_OK], [1],
+            [Define to 1 if the platform supports fast unaligned memory access])
+  ;;
+  *) gd_unaligned_ok=no ;;
+esac
+AC_MSG_RESULT([$gd_unaligned_ok])
+
 echo
 echo "*** Checking C compiler characteristics"
 echo
@@ -523,7 +535,7 @@ dnl headers
 echo
 echo "*** Looking for additional header files"
 echo
-AC_CHECK_HEADERS([byteswap.h direct.h fcntl.h io.h libgen.h \
+AC_CHECK_HEADERS([asm/unaligned.h byteswap.h direct.h fcntl.h io.h libgen.h \
                   libkern/OSByteOrder.h stdint.h sys/endian.h unistd.h])
 if test "x$disable_c99" = "xno"; then
 AC_CHECK_HEADERS([complex.h])
@@ -706,6 +718,13 @@ AC_CHECK_DECLS([bswap16, bswap_16, OSSwapInt16],,,
 #endif
 #ifdef HAVE_LIBKERN_OSBYTEORDER_H
 #include <libkern/OSByteOrder.h>
+#endif
+])
+
+AC_CHECK_DECLS([get_unaligned, put_unaligned],,,
+              [
+#ifdef HAVE_ASM_UNALIGNED_H
+#include <asm/unaligned.h>
 #endif
 ])
 
