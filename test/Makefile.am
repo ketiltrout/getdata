@@ -336,6 +336,12 @@ TESTS=$(ADD_TESTS)        $(ALTER_TESTS)      $(ASCII_TESTS)      \
 
 check_PROGRAMS=$(TESTS)
 
+# fast tests
+.PHONY: fastcheck
+fastcheck:
+	touch $(TESTS)
+	${MAKE} check
+
 # valgrind
 valgrind.log: $(TESTS)
 	rm -f $@; \
