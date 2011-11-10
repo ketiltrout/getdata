@@ -80,7 +80,7 @@ int main(void)
     r = 1;
   }
 
-//  unlink(data);
+  unlink(data);
   unlink(format);
   rmdir(filedir);
 
