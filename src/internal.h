@@ -131,7 +131,7 @@ double cimag(double complex z);
 #ifdef HAVE_ASM_UNALIGNED_H
 #include <asm/unaligned.h>
 #endif
-#if defined HAVE_DECL__GET_UNALIGNED && HAVE_DECL_GET_UNALIGNED == 1
+#if defined HAVE_DECL_GET_UNALIGNED && HAVE_DECL_GET_UNALIGNED == 1
 #define gd_get_unaligned64 get_unaligned
 #else
 _gd_static_inline int64_t gd_get_unaligned64(const void *p)
