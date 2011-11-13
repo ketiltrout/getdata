@@ -170,21 +170,16 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned long encoding,
           GD_FILE_WRITE) == -1)
     {
       _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
-    } else if ((*enc_out->seek)(E->e->u.raw.file + 1, -offset * E->EN(raw,spf),
-          E->EN(raw,data_type), GD_FILE_WRITE) == -1)
-    {
-      _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[1].name, errno, NULL);
-    }
+    } else
+      _GD_WriteSeek(D, E, enc_out, -offset * E->EN(raw,spf), GD_FILE_WRITE
+          | GD_FILE_TEMP);
   } else { /* new offset is more, truncate old file */
     if ((*enc_in->seek)(E->e->u.raw.file, offset * E->EN(raw,spf),
           E->EN(raw,data_type), GD_FILE_READ) == -1)
     {
       _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
-    } else if ((*enc_out->seek)(E->e->u.raw.file + 1, 0, E->EN(raw,data_type),
-          GD_FILE_WRITE) == -1)
-    {
-      _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[1].name, errno, NULL);
-    }
+    } else
+      _GD_WriteSeek(D, E, enc_out, 0, GD_FILE_WRITE | GD_FILE_TEMP);
   }
 
   if (D->error) {
@@ -226,8 +221,8 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned long encoding,
         _GD_FixEndianness((char *)buffer, E->e->u.raw.size, nread);
     }
 
-    nwrote = (*enc_out->write)(E->e->u.raw.file + 1, buffer,
-        E->EN(raw,data_type), nread);
+    nwrote = _GD_WriteOut(D, E, enc_out, buffer, E->EN(raw,data_type), nread,
+        1);
 
     if (nwrote < nread) {
       _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[1].name, errno, NULL);

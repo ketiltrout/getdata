@@ -321,14 +321,38 @@ int _GD_FiniRawIO(DIRFILE *D, gd_entry_t *E, int fragment, int flags)
 {
   const int clotemp = (flags & GD_FINIRAW_CLOTEMP) ? 1 : 0;
   const int old_mode = E->e->u.raw.file[0].mode;
+  const int oop_write = ((_gd_ef[E->e->u.raw.file[0].subenc].flags & GD_EF_OOP)
+      && (old_mode & GD_FILE_WRITE)) ? 1 : 0;
   dtrace("%p, %p, %i, 0x%X", D, E, fragment, flags);
 
   if ((E->e->u.raw.file[clotemp].idata >= 0) ||
-      (clotemp == 0 && (_gd_ef[E->e->u.raw.file[0].subenc].flags & GD_EF_OOP) &&
-      (E->e->u.raw.file[1].idata >= 0)))
+      (clotemp == 0 && oop_write && (E->e->u.raw.file[1].idata >= 0)))
   {
+    /* close the secondary file in write mode (but not temp mode) */
+    if (oop_write && E->e->u.raw.file[1].idata >= 0) {
+      if (E->e->u.raw.file[0].idata >= 0) {
+        /* copy the rest of the input to the output */
+        char buffer[GD_BUFFER_SIZE];
+        int n_read, n_wrote;
+
+        do {
+          n_read = (*_gd_ef[E->e->u.raw.file[0].subenc].read)(E->e->u.raw.file,
+              buffer, E->EN(raw,data_type), GD_BUFFER_SIZE);
+          if (n_read > 0)
+            n_wrote = (*_gd_ef[E->e->u.raw.file[0].subenc].write)(
+                E->e->u.raw.file + 1, buffer, E->EN(raw,data_type), n_read);
+        } while (n_read == GD_BUFFER_SIZE);
+      }
+
+      if ((*_gd_ef[E->e->u.raw.file[0].subenc].close)(E->e->u.raw.file + 1)) {
+        dreturn("%i", -1);
+        return -1;
+      }
+    }
+
     /* close the file */
-    if ((*_gd_ef[E->e->u.raw.file[clotemp].subenc].close)(E->e->u.raw.file +
+    if ((E->e->u.raw.file[clotemp].idata >= 0) &&
+      (*_gd_ef[E->e->u.raw.file[clotemp].subenc].close)(E->e->u.raw.file +
           clotemp))
     {
       if (D->error == GD_E_OK)
@@ -345,16 +369,15 @@ int _GD_FiniRawIO(DIRFILE *D, gd_entry_t *E, int fragment, int flags)
   }
 
   /* take care of moving things into place */
-  if ((old_mode == GD_FILE_WRITE && (_gd_ef[E->e->u.raw.file[0].subenc].flags
-          & GD_EF_OOP)) || flags & GD_FINIRAW_CLOTEMP)
-  {
+  if (oop_write || clotemp) {
     if (flags & GD_FINIRAW_DISCARD) {
       /* Throw away the temporary file */
       if (gd_UnlinkAt(D, D->fragment[fragment].dirfd, E->e->u.raw.file[1].name,
             0))
       {
         if (D->error == GD_E_OK)
-          _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[1].name, errno, NULL);
+          _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[1].name, errno,
+              NULL);
         dreturn("%i", -1);
         return -1;
       }
@@ -374,15 +397,47 @@ int _GD_FiniRawIO(DIRFILE *D, gd_entry_t *E, int fragment, int flags)
   return 0;
 }
 
+/* Perform a RAW field write */
+ssize_t _GD_WriteOut(DIRFILE *D, gd_entry_t *E, const struct encoding_t *enc,
+    const void *ptr, gd_type_t type, size_t n, int temp)
+{
+  ssize_t n_wrote;
+
+  dtrace("%p, %p, %p, %p, 0x%X, %zu, %i", D, E, enc, ptr, type, n, temp);
+
+  if (temp)
+    n_wrote = (*enc->write)(E->e->u.raw.file + 1, ptr, type, n);
+  else {
+    if (enc->flags & GD_EF_OOP) {
+      n_wrote = (*enc->write)(E->e->u.raw.file + 1, ptr, type, n);
+
+      if (n_wrote > 0 && E->e->u.raw.file[0].idata >= 0) {
+        /* advance the read pointer by the appropriate amount */
+        if ((*enc->seek)(E->e->u.raw.file, E->e->u.raw.file[0].pos + n_wrote,
+              E->EN(raw,data_type), GD_FILE_READ) < 0)
+        {
+          n_wrote = -1;
+        }
+      }
+    } else 
+      n_wrote = (*enc->write)(E->e->u.raw.file, ptr, type, n);
+  }
+
+  dreturn("%zi", n_wrote);
+  return n_wrote;
+}
+
 /* Open a raw file, if necessary; also check for required functions */
 int _GD_InitRawIO(DIRFILE *D, gd_entry_t *E, const char *filebase,
-    int fragment, const struct encoding_t *new_enc, unsigned int funcs,
+    int fragment, const struct encoding_t *enc, unsigned int funcs,
     unsigned int mode, int swap)
 {
   int temp_fd = -1;
   const int touch = mode & GD_FILE_TOUCH;
+  int oop_write = 0;
+
   dtrace("%p, %p, \"%s\", %i, %p, 0x%X, 0x%X, %i", D, E, filebase, fragment,
-      new_enc, funcs, mode, swap);
+      enc, funcs, mode, swap);
 
   if (mode & (GD_FILE_WRITE | GD_FILE_TOUCH))
     funcs |= GD_EF_WRITE;
@@ -394,17 +449,32 @@ int _GD_InitRawIO(DIRFILE *D, gd_entry_t *E, const char *filebase,
       dreturn("%i", 1);
       return 1;
     }
-  }
 
-  /* close the file, if necessary */
-  if ((E->e->u.raw.file[0].idata >= 0 ||
-        ((_gd_ef[E->e->u.raw.file[0].subenc].flags & GD_EF_OOP) &&
-         (E->e->u.raw.file[1].idata >= 0))) && !(mode & GD_FILE_TEMP) &&
-      (E->e->u.raw.file[0].mode & GD_FILE_RDWR) != (mode & GD_FILE_RDWR))
-  {
-    if (_GD_FiniRawIO(D, E, E->fragment_index, GD_FINIRAW_KEEP)) {
-      dreturn("%i", 1);
-      return 1;
+    enc = _gd_ef + E->e->u.raw.file[0].subenc;
+    oop_write = ((enc->flags & GD_EF_OOP) && mode == GD_FILE_WRITE) ? 1 : 0;
+
+    /* Do nothing, if possible */
+    if (!touch && (((mode & GD_FILE_READ) && (E->e->u.raw.file[0].idata >= 0)
+            && (E->e->u.raw.file[0].mode & GD_FILE_READ))
+          || ((mode & GD_FILE_WRITE) && (E->e->u.raw.file[oop_write].idata >= 0)
+            && (E->e->u.raw.file[0].mode & GD_FILE_WRITE))))
+    {
+      dreturn("%i", 0);
+      return 0;
+    }
+
+    /* close the file, if necessary */
+    if ((E->e->u.raw.file[0].idata >= 0 || ((enc->flags & GD_EF_OOP)
+            && (E->e->u.raw.file[1].idata >= 0)))
+        && ((mode == GD_FILE_READ && (enc->flags & GD_EF_OOP)
+            && (E->e->u.raw.file[0].mode & GD_FILE_WRITE))
+          || (mode == GD_FILE_WRITE
+            && !(E->e->u.raw.file[0].mode & GD_FILE_WRITE))))
+    {
+      if (_GD_FiniRawIO(D, E, E->fragment_index, GD_FINIRAW_KEEP)) {
+        dreturn("%i", 1);
+        return 1;
+      }
     }
   }
 
@@ -423,7 +493,7 @@ int _GD_InitRawIO(DIRFILE *D, gd_entry_t *E, const char *filebase,
             E->e->u.raw.file[1].name)) < 0)
     {
       _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[1].name, errno, NULL);
-    } else if ((*new_enc->open)(temp_fd, -1, E->e->u.raw.file + 1, swap,
+    } else if ((*enc->open)(temp_fd, E->e->u.raw.file + 1, swap,
           GD_FILE_WRITE | GD_FILE_TEMP))
     {
       _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[1].name, errno, NULL);
@@ -433,36 +503,47 @@ int _GD_InitRawIO(DIRFILE *D, gd_entry_t *E, const char *filebase,
       dreturn("%i", 1);
       return 1;
     }
-  } else if (E->e->u.raw.file[0].idata < 0) {
-    /* open a regular file, if necessary */
-    if ((_gd_ef[E->e->u.raw.file[0].subenc].flags & GD_EF_OOP) &&
-        mode == GD_FILE_WRITE)
-    {
-      /* an out-of-place write requires us to open a temporary file and pass
-       * in its fd */
-      if (_GD_SetEncodedName(D, E->e->u.raw.file + 1, filebase, 1))
-      {
-        dreturn("%i", 1);
-        return 1;
-      } else if ((temp_fd = _GD_MakeTempFile(D,
-              D->fragment[E->fragment_index].dirfd, E->e->u.raw.file[1].name))
-          < 0)
-      {
-        dreturn("%i", 1);
-        return 1;
-      }
-    }
+    dreturn("%i", 0);
+    return 0;
+  }
 
-    if (_GD_SetEncodedName(D, E->e->u.raw.file, filebase, 0)) {
+  if (oop_write) {
+    /* an out-of-place write requires us to open a temporary file and pass
+     * in its fd */
+    if (_GD_SetEncodedName(D, E->e->u.raw.file + 1, filebase, 1)) {
       dreturn("%i", 1);
       return 1;
-    } else if ((*_gd_ef[E->e->u.raw.file[0].subenc].open)(
-          D->fragment[E->fragment_index].dirfd, temp_fd, E->e->u.raw.file,
-          _GD_FileSwapBytes(D, E->fragment_index), mode))
+    } else if ((temp_fd = _GD_MakeTempFile(D,
+            D->fragment[E->fragment_index].dirfd, E->e->u.raw.file[1].name))
+          < 0)
     {
+      dreturn("%i", 1);
+      return 1;
+    } else if ((*enc->open)(temp_fd, E->e->u.raw.file + 1, _GD_FileSwapBytes(D,
+            E->fragment_index), GD_FILE_WRITE)) {
       _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
       dreturn("%i", 1);
       return 1;
+    }
+    /* The read file in OOP mode is flagged as RW. */
+    mode = GD_FILE_RDWR;
+  }
+
+  /* open a regular file, if necessary */
+  if (E->e->u.raw.file[0].idata < 0) {
+    if (_GD_SetEncodedName(D, E->e->u.raw.file, filebase, 0)) {
+      dreturn("%i", 1);
+      return 1;
+    } else if ((*enc->open)(D->fragment[E->fragment_index].dirfd,
+          E->e->u.raw.file, _GD_FileSwapBytes(D, E->fragment_index), mode))
+    {
+      /* In oop_write mode, it doesn't matter if the old file doesn't exist */
+      if (!oop_write || errno != ENOENT) {
+        _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
+        dreturn("%i", 1);
+        return 1;
+      }
+      E->e->u.raw.file[0].mode = mode;
     }
   }
 

@@ -1,3 +1,16 @@
+2011-11-13   D. V. Wiebe <getdata@ketiltrout.net> svn:626
+	* src/entry.c (gd_raw_filename): Revert r613 changes.
+	* src/gzip.c: Move OOP code out of gzip layer.
+	* src/encoding.c (_GD_FiniRawIO _GD_InitRawIO) src/fpos.c (_GD_WriteSeek):
+	Handle OOP writes.
+	* src/encoding.c (_GD_WriteOut): Added.
+	* src/mod.c (_GD_Change) src/putdata.c (_GD_DoRawOut): Call _GD_WriteSeek and
+	_GD_WriteOut
+
+	* src/putdata.c (_GD_DoRawOut): Correctly handle write errors.
+
+	* configure.ac: Fix x86_64 host check.
+
 2011-11-10   D. V. Wiebe <getdata@ketiltrout.net> svn:622
 	* configure.ac: Figure out whether unaligned memory access will work.
 	* src/internal.h: Deal with UNALIGNED_ACCESS_OK

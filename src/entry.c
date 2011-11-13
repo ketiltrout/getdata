@@ -318,13 +318,13 @@ char* gd_raw_filename(DIRFILE* D, const char* field_code_in) gd_nothrow
     }
   }
 
-  filename = malloc(strlen(D->name) + strlen(E->e->u.raw.file->name) + 2);
+  filename = _GD_MakeFullPath(D, D->fragment[E->fragment_index].dirfd,
+      E->e->u.raw.file->name);
   if (filename == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     dreturn("%p", NULL);
     return NULL;
   }
-  sprintf(filename, "%s/%s", D->name, E->e->u.raw.file->name);
 
   dreturn("%p", filename);
   return filename;

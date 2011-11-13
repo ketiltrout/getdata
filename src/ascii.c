@@ -33,10 +33,10 @@
 
 /* The ASCII encoding uses file->edata for the stream pointer */
 
-int _GD_AsciiOpen(int fd, int fd2 __gd_unused, struct _gd_raw_file* file,
-    int swap __gd_unused, unsigned int mode)
+int _GD_AsciiOpen(int fd, struct _gd_raw_file* file, int swap __gd_unused,
+    unsigned int mode)
 {
-  dtrace("%i, <unused>, %p, <unused>, %u", fd, file, mode);
+  dtrace("%i, %p, <unused>, %u", fd, file, mode);
 
   if (!(mode & GD_FILE_TEMP)) {
     if (file->mode & mode) {

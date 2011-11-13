@@ -28,10 +28,10 @@
 #include <errno.h>
 #endif
 
-int _GD_RawOpen(int fd, int fd2 __gd_unused, struct _gd_raw_file* file,
-    int swap __gd_unused, unsigned int mode)
+int _GD_RawOpen(int fd, struct _gd_raw_file* file, int swap __gd_unused,
+    unsigned int mode)
 {
-  dtrace("%i, <unused>, %p, <unused>, 0x%X", fd, file, mode);
+  dtrace("%i, %p, <unused>, 0x%X", fd, file, mode);
 
   if (!(mode & GD_FILE_TEMP)) {
     if (file->mode & mode) {

@@ -43,76 +43,33 @@
 #define _GD_GzipSize libgetdatagzip_LTX_GD_GzipSize
 #endif
 
-#if SIZEOF_INT < 4
-#define GD_GZIP_BUFFER_SIZE 32767
-#else
-#define GD_GZIP_BUFFER_SIZE 1000000
-#endif
-
 /* The gzip encoding scheme uses edata as a gzFile object.  If a file is
  * open, idata >= 0 otherwise idata = -1.  Writes occur out-of-place. */
 
-int _GD_GzipOpen(int fd, int fd2, struct _gd_raw_file* file,
-    int swap __gd_unused, unsigned int mode)
+int _GD_GzipOpen(int fd, struct _gd_raw_file* file, int swap __gd_unused,
+    unsigned int mode)
 {
-  dtrace("%i, %i, %p, <unused>, %u", fd, fd2, file, mode);
+  const char *gzmode = "w";
+  dtrace("%i, %p, <unused>, %u", fd, file, mode);
 
-  if (!(mode & GD_FILE_TEMP)) {
-    if (file->idata > 0 && file->mode != mode) {
-      /* need to re-open */
-      _GD_GzipClose(file);
-    } else if (file->idata > 0 && file->mode == mode) {
-      dreturn("%i", 0);
-      return 0;
-    }
+  if (mode & GD_FILE_READ) {
+    file->idata = gd_OpenAt(file->D, fd, file->name, O_RDONLY | O_BINARY, 0666);
 
-    file[0].idata = gd_OpenAt(file->D, fd, file->name, O_RDONLY | O_BINARY,
-        0666);
-
-    if (file[0].idata == -1) {
-      /* if we're in write mode, but the old file doesn't exist, it's not a
-       * problem */
-      if (mode != GD_FILE_WRITE || errno != ENOENT) {
-        dreturn("%i", 1);
-        return 1;
-      }
-      file[0].edata = NULL;
-    } else {
-      /* regardless of mode, in the non-temp situation, file[0] is always
-       * opened read-only
-       */
-      file[0].edata = gzdopen(file[0].idata, "r");
-
-      if (file[0].edata == NULL) {
-        close(file[0].idata);
-        file[0].idata = -1;
-        dreturn("%i", 1);
-        return 1;
-      }
-    }
-
-    /* also open the out-of-place file in write mode */
-    if (mode == GD_FILE_WRITE) {
-      file[1].edata = gzdopen(file[1].idata = fd2, "w");
-      if (file[1].edata == NULL) {
-        close(file[1].idata);
-        if (file[0].idata >= 0)
-          close(file[0].idata);
-        file[1].idata = file[0].idata = -1;
-        dreturn("%i", 1);
-        return 1;
-      }
-    }
-  } else {
-    /* temporary files are always write only */
-    file->edata = gzdopen(file->idata = fd, "w");
-
-    if (file->edata == NULL) {
-      close(file->idata);
-      file->idata = -1;
+    if (file->idata == -1) {
       dreturn("%i", 1);
       return 1;
     }
+    gzmode = "r";
+  } else
+    file->idata = fd;
+
+  file->edata = gzdopen(file->idata, gzmode);
+
+  if (file->edata == NULL) {
+    close(file->idata);
+    file->idata = -1;
+    dreturn("%i", 1);
+    return 1;
   }
 
   file->mode = mode;
@@ -134,37 +91,6 @@ off64_t _GD_GzipSeek(struct _gd_raw_file* file, off64_t count,
   }
 
   count *= GD_SIZE(data_type);
-
-  if (mode == GD_FILE_WRITE && file[0].edata != NULL) {
-    /* read from the old file until we reach the point we're interested in or
-     * run out of data */
-    char buffer[GD_GZIP_BUFFER_SIZE];
-    int n_read, n_wrote;
-
-    while (count > GD_GZIP_BUFFER_SIZE) {
-      n_read = gzread(file[0].edata, buffer, GD_GZIP_BUFFER_SIZE);
-      if (n_read >= 0) {
-        n_wrote = gzwrite(file[1].edata, buffer, n_read);
-        count -= n_wrote;
-        n += n_wrote;
-      } else {
-        dreturn("%i", -1);
-        return -1;
-      }
-    }
-
-    if (count > 0) {
-      n_read = gzread(file[0].edata, buffer, count);
-      if (n_read >= 0) {
-        n_wrote = gzwrite(file[1].edata, buffer, n_read);
-        count -= n_wrote;
-        n += n_wrote;
-      } else {
-        dreturn("%i", -1);
-        return -1;
-      }
-    }
-  }
 
   if (count > 0) {
     n = (off64_t)gzseek(file[(mode == GD_FILE_WRITE) ? 1 : 0].edata,
@@ -214,20 +140,8 @@ ssize_t _GD_GzipWrite(struct _gd_raw_file *file, const void *ptr,
 
   dtrace("%p, %p, 0x%X, %zu", file, ptr, data_type, nmemb);
 
-  if (file->mode & GD_FILE_TEMP) {
-    n = gzwrite(file[0].edata, ptr, GD_SIZE(data_type) * nmemb);
-  } else {
-    n = gzwrite(file[1].edata, ptr, GD_SIZE(data_type) * nmemb);
+  n = gzwrite(file->edata, ptr, GD_SIZE(data_type) * nmemb);
 
-    if (n > 0 && file[0].idata >= 0) {
-      /* advance the read pointer by the appropriate amount */
-      if (gzseek(file[0].edata, (off_t)n, SEEK_CUR) < 0) {
-        gzerror(file[0].edata, &errnum);
-        if (errnum < 0)
-          n = -1;
-      }
-    }
-  }
   if (n >= 0) {
     n /= GD_SIZE(data_type);
     file->pos += n;
@@ -237,7 +151,7 @@ ssize_t _GD_GzipWrite(struct _gd_raw_file *file, const void *ptr,
       n = -1;
   }
 
-  dreturn("%zu", n);
+  dreturn("%zi", n);
   return n;
 }
 
@@ -257,35 +171,10 @@ int _GD_GzipClose(struct _gd_raw_file *file)
 
   dtrace("%p", file);
 
-  /* close the secondary file in write mode (but not temp mode) */
-  if (file->mode == GD_FILE_WRITE) {
-    if (file[0].idata >= 0) {
-      /* copy the rest of the input to the output */
-      char buffer[GD_GZIP_BUFFER_SIZE];
-      int n_read, n_wrote;
-
-      do {
-        n_read = gzread(file[0].edata, buffer, GD_GZIP_BUFFER_SIZE);
-        if (n_read > 0)
-          n_wrote = gzwrite(file[1].edata, buffer, n_read);
-      } while (n_read == GD_GZIP_BUFFER_SIZE);
-    }
-
-    ret = gzclose(file[1].edata);
-    dwatch("%i", ret);
-    if (ret) {
-      dreturn("%i", ret);
-      return ret;
-    }
-    file[1].idata = -1;
-  }
-
-  if (file[0].idata >= 0) {
-    ret = gzclose(file->edata);
-    if (ret) {
-      dreturn("%i", ret);
-      return ret;
-    }
+  ret = gzclose(file->edata);
+  if (ret) {
+    dreturn("%i", ret);
+    return ret;
   }
 
   file->idata = -1;

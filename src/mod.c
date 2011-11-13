@@ -306,11 +306,9 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
         if (_GD_InitRawIO(D, E, NULL, -1, enc, 0, GD_FILE_WRITE | GD_FILE_TEMP,
               _GD_FileSwapBytes(D, E->fragment_index)))
           break;
-        else if ((*enc->seek)(E->e->u.raw.file + 1, 0, E->EN(raw,data_type),
-              GD_FILE_WRITE) == -1)
+        else if (_GD_WriteSeek(D, E, enc, 0, GD_FILE_WRITE | GD_FILE_TEMP)
+            == -1)
         {
-          _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[1].name, errno,
-              NULL);
           _GD_FiniRawIO(D, E, E->fragment_index, GD_FINIRAW_DISCARD |
               GD_FINIRAW_CLOTEMP);
           break;
@@ -355,8 +353,8 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
             buffer2 = ptr;
           }
 
-          nwrote = (*enc->write)(E->e->u.raw.file + 1, buffer1,
-              Q.EN(raw,data_type), ns_out);
+          nwrote = _GD_WriteOut(D, E, enc, buffer1, Q.EN(raw,data_type), ns_out,
+              1);
 
           if (nwrote < ns_out) {
             _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[1].name, errno,

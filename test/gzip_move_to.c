@@ -40,7 +40,7 @@ int main(void)
   char command[4096];
   int i;
 #endif
-  int fd, error, unlink_raw, unlink_gz, r = 0;
+  int fd, error, unlink_raw, r = 0;
   struct stat buf;
 
   rmdirfile();
@@ -65,7 +65,7 @@ int main(void)
   gd_alter_encoding(D, GD_GZIP_ENCODED, 0, 1);
   error = gd_error(D);
 
-  gd_close(D);
+  gd_discard(D);
 
 #ifdef USE_GZIP
   if (stat(data_gz, &buf)) {
@@ -101,17 +101,13 @@ int main(void)
 #endif
 
   unlink_raw = unlink(data_raw);
-  unlink_gz = unlink(data_gz);
   unlink(format);
   rmdir(filedir);
 
+  CHECKI(unlink_raw, 0);
 #ifdef USE_GZIP
-  CHECKI(unlink_raw, -1);
-  CHECKI(unlink_gz, 0);
   CHECKI(error, GD_E_OK);
 #else
-  CHECKI(unlink_raw, 0);
-  CHECKI(unlink_gz, -1);
   CHECKI(error, GD_E_UNSUPPORTED);
 #endif
 

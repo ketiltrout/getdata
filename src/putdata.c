@@ -33,7 +33,7 @@
 static size_t _GD_DoRawOut(DIRFILE *D, gd_entry_t *E, off64_t s0,
     size_t ns, gd_type_t data_type, const void *data_in)
 {
-  size_t n_wrote;
+  ssize_t n_wrote;
   void *databuffer;
 
   /* check protection */
@@ -106,20 +106,27 @@ static size_t _GD_DoRawOut(DIRFILE *D, gd_entry_t *E, off64_t s0,
     return 0;
   }
 
-  if (_GD_WriteSeek(D, E, s0, GD_FILE_WRITE) == -1) {
+  if (_GD_WriteSeek(D, E, _gd_ef + E->e->u.raw.file[0].subenc, s0,
+        GD_FILE_WRITE) == -1)
+  {
     _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
     free(databuffer);
     dreturn("%i", 0);
     return 0;
   }
 
-  n_wrote = (*_gd_ef[E->e->u.raw.file[0].subenc].write)(E->e->u.raw.file,
-      databuffer, E->EN(raw,data_type), ns);
+  n_wrote = _GD_WriteOut(D, E, _gd_ef + E->e->u.raw.file[0].subenc, databuffer,
+      E->EN(raw,data_type), ns, 0);
+
+  if (n_wrote < 0) {
+    _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
+    n_wrote = 0;
+  }
 
   free(databuffer);
 
-  dreturn("%zu", n_wrote);
-  return n_wrote;
+  dreturn("%zi", n_wrote);
+  return (size_t)n_wrote;
 }
 
 static size_t _GD_DoLinterpOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,

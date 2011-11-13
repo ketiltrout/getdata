@@ -101,10 +101,10 @@ static struct gd_bzdata *_GD_Bzip2DoOpen(int dirfd, struct _gd_raw_file* file)
   return ptr;
 }
 
-int _GD_Bzip2Open(int dirfd, int fd2 __gd_unused, struct _gd_raw_file* file,
-    int swap __gd_unused, unsigned int mode __gd_unused)
+int _GD_Bzip2Open(int dirfd, struct _gd_raw_file* file, int swap __gd_unused,
+    unsigned int mode __gd_unused)
 {
-  dtrace("%i, <unused>, %p, <unused>, <unused>", dirfd, file);
+  dtrace("%i, %p, <unused>, <unused>", dirfd, file);
 
   file->edata = _GD_Bzip2DoOpen(dirfd, file);
 

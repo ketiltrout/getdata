@@ -49,7 +49,7 @@ int main(void)
   uint8_t d;
 #endif
   struct stat buf;
-  int fd, i, n, error, stat_data, unlink_data, unlink_datagz, r = 0;
+  int fd, i, n, error, stat_data, unlink_data, r = 0;
   DIRFILE *D;
 
   memset(c, 0, 8);
@@ -71,7 +71,7 @@ int main(void)
   n = gd_putdata(D, "data", 5, 0, 1, 0, GD_UINT8, c);
   error = gd_error(D);
 
-  gd_close(D);
+  gd_discard(D);
 
   stat_data = stat(data_gz, &buf);
 #ifdef USE_GZIP
@@ -105,18 +105,15 @@ int main(void)
   }
 #endif
 
-  unlink_datagz = unlink(data_gz);
   unlink_data = unlink(data);
   unlink(format);
   rmdir(filedir);
 
 #ifdef USE_GZIP
-  CHECKI(unlink_datagz, 0);
-  CHECKI(unlink_data, -1);
+  CHECKI(unlink_data, 0);
   CHECKI(error, GD_E_OK);
   CHECKI(n, 8);
 #else
-  CHECKI(unlink_datagz, -1);
   CHECKI(unlink_data, -1);
   CHECKI(error, GD_E_UNSUPPORTED);
   CHECKI(n, 0);

@@ -124,7 +124,6 @@ const gd_carray_t *gd_mcarrays(DIRFILE* D, const char* parent,
   free(e->carray_value_list);
 
   fl = (gd_carray_t *)malloc(sizeof(gd_carray_t) * (e->n_meta_carray + 1));
-  dwatch("%i", e->n_meta_carray);
 
   if (fl == NULL) {
     dreturn("%p", NULL);

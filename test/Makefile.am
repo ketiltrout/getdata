@@ -359,4 +359,4 @@ getdata-clean-dir:
 
 clean-local:
 	$(MAKE) getdata-clean-dir
-	rm -rf *~ 
+	rm -rf *~

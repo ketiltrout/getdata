@@ -59,8 +59,8 @@ echo "*** Checking GetData configuration"
 echo
 
 dnl Build/Host triplets
-AC_CANONICAL_HOST
 AC_CANONICAL_BUILD
+AC_CANONICAL_HOST
 
 dnl Legacy API
 AC_ARG_ENABLE(legacy-api, AS_HELP_STRING([--disable-legacy-api],
@@ -314,7 +314,7 @@ GD_MSYS_SHELL
 
 AC_MSG_CHECKING([whether ${host} supports fast unaligned memory access])
 case "${host}" in
-  i?86-*-*|powerpc-*-*|x86-64) gd_unaligned_ok=yes;
+  i?86-*-*|powerpc-*-*|x86_64-*-*) gd_unaligned_ok=yes;
   AC_DEFINE([UNALIGNED_ACCESS_OK], [1],
             [Define to 1 if the platform supports fast unaligned memory access])
   ;;
