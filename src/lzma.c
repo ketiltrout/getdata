@@ -115,12 +115,12 @@ static struct gd_lzmadata *_GD_LzmaDoOpen(int dirfd, struct _gd_raw_file* file)
   return ptr;
 }
 
-int _GD_LzmaOpen(int dirfd, int fd2 __gd_unused, struct _gd_raw_file* file,
-    int swap __gd_unused, unsigned int mode __gd_unused)
+int _GD_LzmaOpen(int dirfd, struct _gd_raw_file* file, int swap __gd_unused,
+    unsigned int mode __gd_unused)
 {
   struct gd_lzmadata *ptr;
 
-  dtrace("%i, <unused>, %p, <unused>, <unused>", dirfd, file);
+  dtrace("%i, %p, <unused>, <unused>", dirfd, file);
 
   file->edata = ptr = _GD_LzmaDoOpen(dirfd, file);
 

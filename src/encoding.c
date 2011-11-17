@@ -398,8 +398,9 @@ int _GD_FiniRawIO(DIRFILE *D, gd_entry_t *E, int fragment, int flags)
 }
 
 /* Perform a RAW field write */
-ssize_t _GD_WriteOut(DIRFILE *D, gd_entry_t *E, const struct encoding_t *enc,
-    const void *ptr, gd_type_t type, size_t n, int temp)
+ssize_t _GD_WriteOut(DIRFILE *D gd_unused_d, gd_entry_t *E,
+    const struct encoding_t *enc, const void *ptr, gd_type_t type, size_t n,
+    int temp)
 {
   ssize_t n_wrote;
 
@@ -876,7 +877,7 @@ int _GD_MakeTempFile(const DIRFILE *D gd_unused_d, int dirfd, char *template)
   int fd = -1;
   char *tmp = strdup(template);
 
-  dtrace("%i, \"%s\"", dirfd, template);
+  dtrace("%p, %i, \"%s\"", D, dirfd, template);
 
   if (!tmp) {
     dreturn("%i", -1);

@@ -41,10 +41,10 @@
 /* The slim encoding scheme uses edata as a slimfile pointer.  If a file is
  * open, idata = 0 otherwise idata = -1. */
 
-int _GD_SlimOpen(int dirfd, int fd2 __gd_unused, struct _gd_raw_file* file,
-    int swap __gd_unused, unsigned int mode __gd_unused)
+int _GD_SlimOpen(int dirfd, struct _gd_raw_file* file, int swap __gd_unused,
+    unsigned int mode __gd_unused)
 {
-  dtrace("%i, <unused>, %p, <unused>, <unused>", dirfd, file);
+  dtrace("%i, %p, <unused>, <unused>", dirfd, file);
 
   {
 #ifdef HAVE_SLIMDOPEN

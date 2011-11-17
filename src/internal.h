@@ -383,7 +383,11 @@ typedef struct stat gd_stat64_t;
 #endif
 
 #ifdef HAVE_OPENAT
-# define gd_unused_d __gd_unused
+# ifdef GETDATA_DEBUG
+#  define gd_unused_d /**/
+# else
+#  define gd_unused_d __gd_unused
+# endif
 # define gd_OpenAt(d,...) openat(__VA_ARGS__)
 #else
 # define gd_unused_d /**/
