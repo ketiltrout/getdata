@@ -1,3 +1,7 @@
+2011-12-01   D. V. Wiebe <getdata@ketiltrout.net> svn:628
+	* src/flush.c (_GD_FlushFragment): Write "/PROTECT data" when appropriate.
+	Bug report from Alexandra Rahlin.
+
 2011-11-13   D. V. Wiebe <getdata@ketiltrout.net> svn:626
 	* src/entry.c (gd_raw_filename): Revert r613 changes.
 	* src/gzip.c: Move OOP code out of gzip layer.

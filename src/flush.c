@@ -522,7 +522,7 @@ static void _GD_FlushFragment(DIRFILE* D, int i, int permissive)
       fputs("/PROTECT none\n", stream);
     else if (D->fragment[i].protection == GD_PROTECT_FORMAT)
       fputs("/PROTECT format\n", stream);
-    else if (D->fragment[i].protection == GD_PROTECT_FORMAT)
+    else if (D->fragment[i].protection == GD_PROTECT_DATA)
       fputs("/PROTECT data\n", stream);
     else
       fputs("/PROTECT all\n", stream);
