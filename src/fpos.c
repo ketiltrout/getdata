@@ -20,11 +20,6 @@
  */
 #include "internal.h"
 
-#ifdef STDC_HEADERS
-#include <string.h>
-#include <stdlib.h>
-#endif
-
 off64_t _GD_GetFilePos(DIRFILE *D, gd_entry_t *E, off64_t index_pos)
 {
   int i;

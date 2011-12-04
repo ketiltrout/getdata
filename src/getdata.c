@@ -21,16 +21,6 @@
  */
 #include "internal.h"
 
-#ifdef STDC_HEADERS
-#include <inttypes.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <sys/stat.h>
-#include <math.h>
-#include <stdlib.h>
-#include <string.h>
-#endif
-
 #include "nan.h"
 
 #define EXTRACT_REPR(it,ot,f) \

@@ -20,10 +20,6 @@
  */
 #include "internal.h"
 
-#ifdef STDC_HEADERS
-#include <stdlib.h>
-#endif
-
 int gd_protection(DIRFILE* D, int fragment_index) gd_nothrow
 {
   dtrace("%p, %i", D, fragment_index);

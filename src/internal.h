@@ -27,16 +27,37 @@
 #endif
 
 #include "getdata.h"
-#include <string.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <sys/stat.h>
 
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
+/* library headers */
+#ifdef STDC_HEADERS
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
+#include <errno.h>
+#include <sys/param.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <ctype.h>
+#include <limits.h>
+#include <math.h>
+#include <time.h>
+#endif
+
+#ifdef HAVE_DIRENT_H
+#include <dirent.h>
+#endif
+#ifdef HAVE_INTTYPES_H
+#include <inttypes.h>
+#endif
+#ifdef HAVE_LIBGEN_H
+#include <libgen.h>
 #endif
 #ifdef HAVE_STDINT_H
 #include <stdint.h>
+#endif
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
 #endif
 
 /* MSVC types */
@@ -117,6 +138,21 @@ double cimag(double complex z);
 #endif
 #endif
 
+#ifndef PATH_MAX
+# ifdef _POSIX_PATH_MAX
+#  define PATH_MAX _POSIX_PATH_MAX
+# elif defined MAXPATHLEN
+#  define PATH_MAX MAXPATHLEN
+# else
+/* POSIX says we're supposed to check _pathconf in this case, but it goes on to
+ * say that the PATH_MAX value reported isn't guaranteed to be suitable for
+ * mallocing, so its not clear what they're trying to do there.  The following
+ * will have to do.
+ */
+#  define PATH_MAX 4096
+# endif
+#endif
+
 #if SIZEOF_INT < 4
 #define GD_BUFFER_SIZE 32767
 #else
@@ -157,9 +193,6 @@ _gd_static_inline int64_t gd_put_unalinged64(int64_t v, void *p)
 }
 #endif
 #endif
-
-/* For FILE */
-#include <stdio.h>
 
 /* For the C99 integer types */
 #ifdef HAVE_INTTYPES_H
@@ -261,8 +294,10 @@ const char* _gd_colsub(void);
 
 #ifdef HAVE__GETCWD
 # define gd_getcwd _getcwd
-#else
+#elif defined HAVE_GETCWD
 # define gd_getcwd getcwd
+#else
+# define gd_getcwd(...) (NULL)
 #endif
 
 #ifndef HAVE_SNPRINTF
@@ -279,8 +314,11 @@ const char* _gd_colsub(void);
 #  endif
 #endif
 
-#ifndef HAVE_LSTAT
-#  define lstat stat
+#ifndef HAVE_LSTAT64
+# ifdef HAVE_LSTAT
+#  define lstat64 lstat
+#  define HAVE_LSTAT64
+# endif
 #endif
 
 #ifdef HAVE__STRTOI64
@@ -825,10 +863,11 @@ struct _GD_DIRFILE {
 
 extern const gd_entype_t _gd_entype_index[GD_N_ENTYPES];
 
-void* _GD_Alloc(DIRFILE* D, gd_type_t type, size_t n);
+void *_GD_Alloc(DIRFILE*, gd_type_t, size_t) __attribute_malloc__;
 void _GD_ArmEndianise(uint64_t* databuffer, int is_complex, size_t ns);
 int _GD_BadInput(DIRFILE* D, gd_entry_t* E, int i);
 int _GD_CalculateEntry(DIRFILE* D, gd_entry_t* E);
+char *_GD_CanonicalPath(const char*, const char*);
 void _GD_CInvertData(DIRFILE* D, void* data, gd_type_t return_type,
     GD_DCOMPLEXA(dividend), size_t n_read);
 

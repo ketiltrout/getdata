@@ -20,12 +20,6 @@
  */
 #include "internal.h"
 
-#ifdef STDC_HEADERS
-#include <stdlib.h>
-#include <string.h>
-#include <errno.h>
-#endif
-
 static void _GD_ShiftFragment(DIRFILE* D, off64_t offset, int fragment,
     int move)
 {

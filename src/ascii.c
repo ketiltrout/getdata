@@ -20,17 +20,6 @@
  */
 #include "internal.h"
 
-#ifdef STDC_HEADERS
-#include <stdlib.h>
-#include <inttypes.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <fcntl.h>
-#include <stdio.h>
-#include <string.h>
-#include <errno.h>
-#endif
-
 /* The ASCII encoding uses file->edata for the stream pointer */
 
 int _GD_AsciiOpen(int fd, struct _gd_raw_file* file, int swap __gd_unused,

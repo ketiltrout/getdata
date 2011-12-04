@@ -20,12 +20,6 @@
  */
 #include "internal.h"
 
-#ifdef STDC_HEADERS
-#include <stdlib.h>
-#include <string.h>
-#include <errno.h>
-#endif
-
 static void _GD_ClearDerived(DIRFILE* D, gd_entry_t* E, const gd_entry_t* C,
     int check)
 {

@@ -20,12 +20,6 @@
  */
 #include "internal.h"
 
-#ifdef STDC_HEADERS
-#include <stdlib.h>
-#include <string.h>
-#include <errno.h>
-#endif
-
 /* Check for a valid field name -- returns input on error */
 char* _GD_ValidateField(const gd_entry_t* parent, const char* field_code,
     int standards, int strict, int* is_dot)

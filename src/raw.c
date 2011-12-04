@@ -20,14 +20,6 @@
  */
 #include "internal.h"
 
-#ifdef STDC_HEADERS
-#include <stdlib.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <fcntl.h>
-#include <errno.h>
-#endif
-
 int _GD_RawOpen(int fd, struct _gd_raw_file* file, int swap __gd_unused,
     unsigned int mode)
 {

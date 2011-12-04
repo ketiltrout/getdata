@@ -21,24 +21,6 @@
  */
 #include "internal.h"
 
-#ifdef STDC_HEADERS
-#include <ctype.h>
-#include <math.h>
-#include <errno.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#endif
-
-#ifdef HAVE_DIRENT_H
-#include <dirent.h>
-#endif
-
-#ifdef HAVE_LIBGEN_H
-#include <libgen.h>
-#endif
-
 /* attempt to open or create a new dirfile - set error appropriately */
 static FILE* _GD_CreateDirfile(DIRFILE* D, int dirfd, int dir_error,
     char* dirfile)
@@ -316,20 +298,8 @@ DIRFILE* gd_cbopen(const char* filedir, unsigned long flags,
    * using chdir.
    */
   
-  /* get a full path, if necessary */
-  if (_GD_AbsPath(filedir))
-    dirfile = strdup(filedir);
-  else {
-    dirfile = gd_getcwd(NULL, 0);
-    if (dirfile) {
-      char *ptr = realloc(dirfile, strlen(dirfile) + strlen(filedir) + 2);
-      if (ptr == NULL) {
-        free(dirfile);
-        dirfile = NULL;
-      } else
-        dirfile = strcat(strcat(ptr, "/"), filedir); 
-    }
-  }
+  /* canonicalise the path */
+  dirfile = _GD_CanonicalPath(NULL, filedir);
 
   /* that done, now stat the path to see if it exists (and is a directory) */
   if (dirfile) {
@@ -344,8 +314,14 @@ DIRFILE* gd_cbopen(const char* filedir, unsigned long flags,
   /* quickly, before it goes away, grab the directory (if it exists) */
   dirfd = open(filedir, O_RDONLY);
   dirfd_error = errno;
-  dirfile = strdup(filedir);
+  /* There's a race condition here: someone might change a path element in
+   * filedir after we get dirfd but before we canonicalise the path.  For that
+   * reason, anything requiring a full path must be treated with suspicion.
+   */
+  dirfile = _GD_CanonicalPath(NULL, filedir);
 #endif
+  if (dirfile == NULL)
+    dirfile = strdup(filedir);
 
   _GD_InitialiseFramework();
 
@@ -428,14 +404,13 @@ DIRFILE* gd_cbopen(const char* filedir, unsigned long flags,
     dreturn("%p", D);
     return D;
   }
-  D->fragment[0].cname = malloc(strlen(filedir) + 8);
+  D->fragment[0].cname = _GD_CanonicalPath(dirfile, "format");
   D->fragment[0].bname = strdup("format");
   if (D->fragment[0].cname == NULL || D->fragment[0].bname == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     dreturn("%p", D);
     return D;
   }
-  strcat(strcpy(D->fragment[0].cname, filedir), "/format");
   D->fragment[0].sname = NULL;
   /* The root format file needs no external name */
   D->fragment[0].ename = NULL;

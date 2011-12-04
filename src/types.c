@@ -21,15 +21,6 @@
  */
 #include "internal.h"
 
-#ifdef STDC_HEADERS
-#include <inttypes.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <math.h>
-#include <stdlib.h>
-#include <string.h>
-#endif
-
 #ifdef GD_NO_C99_API
 
 #define TO_COMPLEX(ot,it) \

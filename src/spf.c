@@ -21,11 +21,6 @@
  */
 #include "internal.h"
 
-#ifdef STDC_HEADERS
-#include <string.h>
-#include <stdlib.h>
-#endif
-
 /* _GD_GetSPF: Get samples per frame for field
 */
 gd_spf_t _GD_GetSPF(DIRFILE* D, gd_entry_t* E)

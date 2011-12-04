@@ -64,7 +64,10 @@ int main(void)
   rmdir(filedir);
 
   CHECKI(error, 0);
-  CHECKS(path,"dirfile/data");
+  /* This only checks whether the end of the returned path is what we expect.
+   * This should work, since we can guarantee that both "dirfile" and "data"
+   * aren't symlinks. */
+  CHECKEOS(path,"dirfile/data");
   free(path);
 
   return r;

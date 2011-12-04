@@ -20,15 +20,6 @@
  */
 #include "internal.h"
 
-#ifdef STDC_HEADERS
-#include <string.h>
-#include <stdlib.h>
-#endif
-
-#ifdef HAVE_LIBGEN_H
-#include <libgen.h>
-#endif
-
 void _GD_FreeE(DIRFILE *D, gd_entry_t* entry, int priv)
 {
   int i;

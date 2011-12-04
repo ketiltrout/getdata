@@ -20,16 +20,6 @@
  */
 #include "internal.h"
 
-#ifdef STDC_HEADERS
-#include <stdlib.h>
-#include <string.h>
-#include <errno.h>
-#endif
-
-#ifdef HAVE_LIBGEN_H
-#include <libgen.h>
-#endif
-
 static unsigned int _gd_max(unsigned int A, unsigned int B)
 {
   return (A > B) ? A : B;

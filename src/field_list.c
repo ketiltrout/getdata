@@ -20,10 +20,6 @@
  */
 #include "internal.h"
 
-#ifdef STDC_HEADERS
-#include <stdlib.h>
-#endif
-
 /* zero length lists */
 static const char* zero_list[1] = { NULL };
 static const gd_carray_t zero_carrays[1] = { {0, NULL} };

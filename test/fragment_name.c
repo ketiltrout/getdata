@@ -62,8 +62,11 @@ int main(void)
   unlink(format);
   rmdir(filedir);
 
-  CHECKS(form0,"dirfile/format");
-  CHECKS(form1,"dirfile/format1");
+  /* This only checks whether the end of the returned path is what we expect.
+   * This should work, since we can guarantee that both "dirfile" and "format*"
+   * aren't symlinks. */
+  CHECKEOS(form0,"dirfile/format");
+  CHECKEOS(form1,"dirfile/format1");
   free(form0);
   free(form1);
 

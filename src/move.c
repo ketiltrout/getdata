@@ -20,12 +20,6 @@
  */
 #include "internal.h"
 
-#ifdef STDC_HEADERS
-#include <stdlib.h>
-#include <string.h>
-#include <errno.h>
-#endif
-
 int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned long encoding,
     unsigned long byte_sex, off64_t offset, int finalise, int new_fragment,
     char* new_filebase)

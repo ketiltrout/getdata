@@ -20,20 +20,6 @@
  */
 #include "internal.h"
 
-#ifdef STDC_HEADERS
-#include <stdlib.h>
-#include <string.h>
-#include <errno.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <time.h>
-#include <limits.h>
-#endif
-
-#ifdef HAVE_LIBGEN_H
-#include <libgen.h>
-#endif
-
 #define GD_MAX_PRETTY_FIELD_WIDTH 80
 
 void _GD_Flush(DIRFILE* D, gd_entry_t *E, int clo)

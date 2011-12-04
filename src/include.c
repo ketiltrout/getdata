@@ -20,19 +20,6 @@
  */
 #include "internal.h"
 
-#ifdef STDC_HEADERS
-#include <string.h>
-#include <stdlib.h>
-#include <errno.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#endif
-
-#ifdef HAVE_LIBGEN_H
-#include <libgen.h>
-#endif
-
 /* Include a format file fragment -- returns the include index, or
  * -1 on error */
 int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,

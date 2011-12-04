@@ -20,10 +20,6 @@
  */
 #include "internal.h"
 
-#ifdef STDC_HEADERS
-#include <stdlib.h>
-#endif
-
 const char *gd_fragmentname(DIRFILE* D, int index) gd_nothrow
 {
   dtrace("%p, %i", D, index);

@@ -22,10 +22,6 @@
 #include "internal.h"
 #undef gd_nframes64
 
-#ifdef STDC_HEADERS
-#include <errno.h>
-#endif
-
 off64_t gd_nframes64(DIRFILE* D)
 {
   off64_t nf;

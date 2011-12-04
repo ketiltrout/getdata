@@ -21,17 +21,9 @@
  */
 #include "internal.h"
 
-#ifdef STDC_HEADERS
-#include <inttypes.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <math.h>
-#include <stdlib.h>
-#include <string.h>
-#endif
-
-#ifdef HAVE_LIBGEN_H
-#include <libgen.h>
+/* This is defined on BSD */
+#ifndef MAXSYMLINKS
+#define MAXSYMLINKS 20
 #endif
 
 #ifdef GETDATA_DEBUG
@@ -918,25 +910,284 @@ const char *_GD_DirName(const DIRFILE *D, int dirfd)
   return D->name;
 }
 
+/* This is effectively the POSIX.1 realpath(3) function, but with some
+ * optimisation due to the fact that we know that the front part of the
+ * path (car) has already been canonicalised */
+char *_GD_CanonicalPath(const char *car, const char *cdr)
+{
+  int last_element = 0, loop_count = 0;
+  size_t res_len, res_size, len;
+  char *res = NULL, *ptr, *work, *cur, *end;
+  dtrace("\"%s\", \"%s\"", car, cdr);
+
+  if (car && !_GD_AbsPath(cdr)) {
+    if (car[0] != '/') {
+      /* car is not abosulte -- don't bother trying to do anything fancy */
+      res = malloc(strlen(car) + strlen(cdr) + 2);
+      if (res == NULL) {
+        dreturn("%p", NULL);
+        return NULL;
+      }
+      sprintf(res, "%s/%s", car, cdr);
+      return res;
+    }
+    /* car is nonnull and cdr is not absolute: copy car into res and
+     * cdr into work */
+    res = strdup(car);
+    if (res == NULL) {
+      dreturn("%p", NULL);
+      return NULL;
+    }
+    res_size = (res_len = strlen(car)) + 1;
+
+    cur = work = strdup(cdr);
+    if (work == NULL) {
+      free(res);
+      dreturn("%p", NULL);
+      return NULL;
+    }
+  } else if (cdr[0] == '/') {
+    /* cdr is absolute: make res "/" and copy cdr relative to / into work;
+     * ignore car */
+    res_len = 1;
+    res = (char*)malloc(res_size = PATH_MAX);
+    if (res == NULL) {
+      dreturn("%p", NULL);
+      return NULL;
+    }
+    res[0] = '/';
+    res[1] = '\0';
+
+    if (cdr[0] == '/' && cdr[1] == '\0') {
+      dreturn("\"%s\"", res);
+      return res;
+    }
+
+    cur = work = strdup(cdr + 1);
+    if (work == NULL) {
+      free(res);
+      dreturn("%p", NULL);
+      return NULL;
+    }
+  } else {
+    /* car is not present and cdr is relative: try to get the CWD; and make
+     * work CWD/cdr, relative to / if getcwd returned an absolute path.  If
+     * getcwd fails, just use cdr, and abandon hope of an absolute path.
+     */
+    res = (char*)malloc(res_size = PATH_MAX);
+    work = (char*)malloc(PATH_MAX);
+    if (res == NULL || work == NULL) {
+      free(res);
+      free(res);
+      dreturn("%p", NULL);
+      return NULL;
+    }
+
+    if (gd_getcwd(work, PATH_MAX) == NULL) {
+      /* if getcwd fails, we're stuck with a relative path, oh well. */
+      free(work);
+      cur = work = strdup(cdr);
+      if (work == NULL) {
+        free(res);
+        dreturn("%p", NULL);
+        return NULL;
+      }
+      res[0] = '\0';
+      res_len = 0;
+    } else {
+      if ((len = strlen(work) + 2 + strlen(cdr)) < PATH_MAX) {
+        ptr = (char*)realloc(work, len);
+        if (ptr == NULL) {
+          free(res);
+          free(work);
+          dreturn("%p", NULL);
+          return NULL;
+        }
+        work = ptr;
+      }
+      ptr = work + strlen(work);
+      *(ptr++) = '/';
+      strcpy(ptr, cdr);
+
+      if (work[0] == '/') {
+        res[0] = '/';
+        res[1] = '\0';
+        res_len = 1;
+        cur = work + 1;
+      } else {
+        res[0] = '\0';
+        res_len = 0;
+        cur = work;
+      }
+    }
+  }
+
+  /* now step through work, building up res as appropriate */
+  for (end = cur ; !last_element; cur = end) {
+    /* look for the next '/' or NUL */
+    for (; *end != '\0' && *end != '/'; ++end)
+      ;
+
+    /* end of string */
+    if (*end == '\0' && cur == end)
+      break;
+    else if (*end == '\0')
+      last_element = 1;
+
+    *(end++) = '\0';
+    if (cur[0] == '\0')
+      /* consecutive /s */
+      ;
+    else if (cur[0] == '.' && cur[1] == '\0') {
+      /* discard . */
+      continue;
+    } else if (cur[0] == '.' && cur[1] == '.' && cur[2] == '\0') {
+      /* don't strip the leading '/' */
+      if (res_len > 1) {
+        /* find the last '/', but don't strip the leading '/' */
+        for(ptr = res + res_len - 1; *ptr != '/' && ptr > res + 1; --ptr)
+          ;
+
+        /* strip the .. if possible, otherwise append it */
+        *ptr = '\0';
+        res_len = ptr - res;
+      }
+    } else {
+      /* a path element, copy it to res */
+      len = strlen(cur) + 1;
+      if (res_len + len >= res_size) {
+        ptr = (char*)realloc(res, res_size += (len < 1000) ? 1000 : len);
+        if (ptr == NULL) {
+          free(res);
+          free(work);
+          dreturn("%p", NULL);
+          return NULL;
+        }
+        res = ptr;
+      }
+      if (res_len > 1 && res[res_len - 1] != '/')
+        res[res_len++] = '/';
+      strcpy(res + res_len, cur);
+      res_len += len - 1;
+#if defined HAVE_READLINK && defined HAVE_LSTAT64
+      {
+        gd_stat64_t statbuf;
+
+        /* check if it's a symlink */
+        if (lstat64(res, &statbuf)) {
+          if (errno == ENOENT && *end == '\0') {
+            /* the leaf doesn't exist.  I guess that means we're done. */
+            goto _GD_CanonicalPath_DONE;
+          }
+          perror("lstat64");
+          /* doesn't exist */
+          free(res);
+          free(work);
+          dreturn("%p", NULL);
+          return NULL;
+        }
+
+        if (S_ISLNK(statbuf.st_mode)) {
+          char target[PATH_MAX], *new;
+          ssize_t slen;
+
+          /* check for symlink loop */
+          if (loop_count++ > MAXSYMLINKS) {
+            errno = ELOOP;
+            free(res);
+            free(work);
+            dreturn("%p", NULL);
+            return NULL;
+          }
+
+          /* get the link target */
+          slen = readlink(res, target, PATH_MAX);
+          if (slen == -1) {
+            free(res);
+            free(work);
+            dreturn("%p", NULL);
+            return NULL;
+          }
+
+          /* now we have to start all over again */
+          ptr = target;
+          if (target[0] == '/') {
+            res[1] = '\0';
+            res_len = 1;
+            ptr++;
+            slen--;
+          } else if (res_len > 1) {
+            /* strip the symlink name from res */
+            for (ptr = res + res_len - 1; *ptr != '/'; --ptr)
+              ;
+            *(ptr + 1) = '\0';
+            res_len = res - ptr + 1;
+          }
+
+          /* now make a new work buffer of "target/remaining", asusming
+           * remaining is non-null, otherwise, just use target */
+          if (*end == '\0') {
+            free(work);
+            end = work = strdup(target);
+            if (work == NULL) {
+              free(res);
+              dreturn("%p", NULL);
+              return NULL;
+            }
+          } else {
+            char slash[2] = "/";
+            len = strlen(end) + slen + 2;
+
+            if (*(ptr + slen - 1) == '/') {
+              slash[0] = '\0';
+              len--;
+            }
+
+            new = (char*)malloc(len);
+            if (new == NULL) {
+              free(res);
+              free(work);
+              dreturn("%p", NULL);
+              return NULL;
+            }
+            sprintf(new, "%s%s%s", ptr, slash, end);
+            free(work);
+            end = work = new;
+          }
+        }
+      }
+#endif
+    }
+  }
+
+_GD_CanonicalPath_DONE:
+  free(work);
+
+  /* trim */
+  ptr = realloc(res, res_len + 1);
+  if (ptr)
+    res = ptr;
+
+  dreturn("\"%s\"", res);
+  return res;
+}
+
 char *_GD_MakeFullPath(const DIRFILE *D, int dirfd, const char *name)
 {
   const char *dir;
   char *filepath;
   dtrace("%p, %i, \"%s\"", D, dirfd, name);
 
-  dir = _GD_DirName(D, dirfd);
-  if (dir == NULL) {
-    dreturn("%p", NULL);
-    return NULL;
-  }
+  if (dirfd >= 0) {
+    dir = _GD_DirName(D, dirfd);
+    if (dir == NULL) {
+      dreturn("%p", NULL);
+      return NULL;
+    }
+  } else
+    dir = NULL;
 
-  filepath = (char *)malloc(strlen(dir) + strlen(name) + 2);
-  if (filepath == NULL) {
-    dreturn("%p", NULL);
-    return NULL;
-  }
-
-  strcat(strcat(strcpy(filepath, dir), "/"), name);
+  filepath = _GD_CanonicalPath(dir, name);
 
   dreturn("\"%s\"", filepath);
   return filepath;
@@ -951,10 +1202,7 @@ int _GD_GrabDir(DIRFILE *D, int dirfd, const char *name)
 
   dtrace("%p, %i, \"%s\"", D, dirfd, name);
 
-  if (abs)
-    path = strdup(name);
-  else
-    path = _GD_MakeFullPath(D, dirfd, name);
+  path = _GD_MakeFullPath(D, dirfd, name);
 
   if (path == NULL) {
     _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);

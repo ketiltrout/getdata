@@ -20,12 +20,6 @@
  */
 #include "internal.h"
 
-#ifdef STDC_HEADERS
-#include <stdlib.h>
-#include <errno.h>
-#include <time.h>
-#endif
-
 #ifdef HAVE_SLIMLIB_H
 #include <slimlib.h>
 #endif

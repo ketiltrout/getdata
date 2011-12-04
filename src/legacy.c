@@ -22,11 +22,6 @@
  */
 #include "internal.h"
 
-#ifdef STDC_HEADERS
-#include <stdlib.h>
-#include <string.h>
-#endif
-
 static struct {
   unsigned int n;
   DIRFILE** D;

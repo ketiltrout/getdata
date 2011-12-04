@@ -20,20 +20,6 @@
  */
 #include "internal.h"
 
-#ifdef STDC_HEADERS
-#include <stdlib.h>
-#include <stdio.h>
-#include <fcntl.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <errno.h>
-#include <time.h>
-#endif
-
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-
 /* The MSVCRT gmtime() is threadsafe */
 #ifndef HAVE_GMTIME_R
 struct tm *gmtime_r(const time_t *timep, struct tm *result)
@@ -111,9 +97,11 @@ int gd_StatAt(const DIRFILE* D, int dirfd, const char* name, struct stat* buf,
   dtrace("%p, %i, \"%s\", %p, %x", D, dirfd, name, buf, flags);
 
   path = _GD_MakeFullPath(D, dirfd, name);
+#ifdef HAVE_LSTAT
   if (flags & AT_SYMLINK_NOFOLLOW)
     ret = lstat(path, buf);
   else
+#endif
     ret = stat(path, buf);
   free(path);
 

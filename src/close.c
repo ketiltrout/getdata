@@ -20,10 +20,6 @@
  */
 #include "internal.h"
 
-#ifdef STDC_HEADERS
-#include <stdlib.h>
-#endif
-
 /* _GD_FreeD: free the DIRFILE and its subordinates
 */
 static void _GD_FreeD(DIRFILE* D)

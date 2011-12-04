@@ -22,14 +22,6 @@
  */
 #include "internal.h"
 
-#ifdef STDC_HEADERS
-#include <inttypes.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <string.h>
-#include <stdlib.h>
-#endif
-
 static size_t _GD_DoRawOut(DIRFILE *D, gd_entry_t *E, off64_t s0,
     size_t ns, gd_type_t data_type, const void *data_in)
 {

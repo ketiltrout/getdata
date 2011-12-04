@@ -20,17 +20,6 @@
  */
 #include "internal.h"
 
-#ifdef STDC_HEADERS
-#include <inttypes.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <math.h>
-#include <stdlib.h>
-#include <string.h>
-#endif
-
 #ifdef USE_MODULES
 #ifdef USE_PTHREAD
 #ifdef HAVE_PTHREAD_H

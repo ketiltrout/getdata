@@ -1,3 +1,20 @@
+2011-12-03   D. V. Wiebe <getdata@ketiltrout.net> svn:629
+	* test/test.h (CHECKEOS): Added.
+	* test/file.c test/fragment_name.c: Only check the end of the returned
+	string since we don't know what the full path is.
+
+	* src/internal.h: Define PATH_MAX, if necessary.
+	* src/common.c (_GD_CanonicalPath): Added.
+	* src/open.c (gd_cbopen): Canonicalise filedir.
+	* src/common.c (_GD_MakeFullPath): Canonicalise path.  Handle dirfd < 0.
+	* src/common.c (_GD_GrabDir): Let _GD_MakeFullPath hande canonicalising
+	absolute paths.
+
+	* configure.ac: Check for lstat(3).
+	* src/compat.c (gd_StatAt): Don't use lstat if the platform doesn't have it.
+
+	* src/internal.h: Move library includes into header.
+
 2011-12-01   D. V. Wiebe <getdata@ketiltrout.net> svn:628
 	* src/flush.c (_GD_FlushFragment): Write "/PROTECT data" when appropriate.
 	Bug report from Alexandra Rahlin.

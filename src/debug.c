@@ -20,7 +20,6 @@
  */
 #include "internal.h"
 
-#include <string.h>
 extern char gd_debug_col[GD_COL_SIZE + 1];
 extern int gd_col_count;
 

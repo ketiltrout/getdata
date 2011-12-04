@@ -19,7 +19,6 @@
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "internal.h"
-#include <stdlib.h>
 
 gd_type_t _GD_NativeType(DIRFILE* D, gd_entry_t* E, int repr)
 {

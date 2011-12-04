@@ -20,14 +20,6 @@
  */
 #include "internal.h"
 
-#ifdef STDC_HEADERS
-#include <stdlib.h>
-#include <errno.h>
-#include <time.h>
-#include <stdio.h>
-#include <string.h>
-#endif
-
 #ifdef HAVE_LZMA_H
 #include <lzma.h>
 #endif

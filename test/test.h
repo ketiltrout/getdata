@@ -89,6 +89,8 @@ int gd_system(const char* command)
 #define CHECKSi(n,v)   CHECKi(i,strcmp((n),(v)),n,"\"%s\"","\"%s\"",(n),(v));
 #define CHECKSp(n,v)   CHECK(strncmp((n),(v), sizeof(v) - 1),n,"\"%s\"",\
     "\"%s\"",(n),(v));
+#define CHECKEOS(n,v)  CHECK(strcmp((n) + strlen(n) - sizeof(v) + 1,(v)),n,\
+    "...\"%s\"","\"%s\"",(n) + strlen(n) - sizeof(v) + 1,(v));
 #define CHECKU(n,v)    CHECK((n) != (v),n,"%llu","%llu",\
     (unsigned long long)(n),(unsigned long long)(v))
 #define CHECKUi(i,n,v) CHECKi(i,(n) != (v),n,"%llu","%llu",\

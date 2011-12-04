@@ -20,11 +20,6 @@
  */
 #include "internal.h"
 
-#ifdef STDC_HEADERS
-#include <string.h>
-#include <stdlib.h>
-#endif
-
 /* This is nothing other than what the caller gave us.  Presumably it should
  * be better at keeping track of such things than us, but this is present in
  * the event that it is not. */

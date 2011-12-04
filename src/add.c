@@ -20,16 +20,6 @@
  */
 #include "internal.h"
 
-#ifdef STDC_HEADERS
-#include <stdlib.h>
-#include <string.h>
-#include <errno.h>
-#endif
-
-#ifdef HAVE_LIBGEN_H
-#include <libgen.h>
-#endif
-
 /* add an entry */
 static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
 {
