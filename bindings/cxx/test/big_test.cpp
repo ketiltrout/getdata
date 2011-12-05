@@ -89,6 +89,10 @@ using namespace GetData;
   for (i = 0; i < m; ++i) if (strcmp((v), (g))) { \
     ne++; cerr << "s(" << i << ")[" << t << "] = \"" << (v) << "\"" << endl; }
 
+#define CHECK_EOSTRING(t,v,g) \
+  if (strcmp((v) + strlen(v) - sizeof(g) + 1, (g))) { ne++; cerr << "s[" << t << "] = \"" << (v) << "\"" \
+    << endl; }
+
 #define CHECK_COMPLEX2(t,m,v,g) \
   if (abs((v) - (g)) > 1e-10) { \
     ne++; cerr << "c[" << t << ", " << m << "] = " << (v).real() << ";" \
@@ -587,7 +591,7 @@ int main(void)
   // 39: Fragment check
   frag = d->Fragment(0);
   CHECK_OK(39);
-  CHECK_STRING(39,frag->Name(),__TEST__ "dirfile/format");
+  CHECK_EOSTRING(39,frag->Name(), "dirfile/format");
   delete frag;
 
   // 40: Dirfile::NFragments check
@@ -972,7 +976,7 @@ int main(void)
   // 84: RawEntry::FileName check
   str = rep->FileName();
   CHECK_OK(84);
-  CHECK_STRING(84,str,__TEST__ "dirfile/new1");
+  CHECK_EOSTRING(84,str, "dirfile/new1");
   delete rep;
 
   // 85: Dirfile::Reference check
@@ -984,7 +988,7 @@ int main(void)
   // 135: Dirfile::ReferenceFilename check
   str = d->ReferenceFilename();
   CHECK_OK(135);
-  CHECK_STRING(135,str,__TEST__ "dirfile/new1");
+  CHECK_EOSTRING(135,str, "dirfile/new1");
   
   // 87: Fragment::SetEncoding check
   frag->SetEncoding(SlimEncoding,0);

@@ -374,11 +374,17 @@ void F77_FUNC(gdputd, GDPUTD) (int* n_wrote, const int* dirfile,
     const int* first_sample, const int* num_frames, const int* num_samples,
     const int* data_type, const void* data_in)
 {
+  dtrace("%p, %i, %p, %i, %i, %i, %i, %i, 0x%x, %p", n_wrote, *dirfile,
+      field_code, *field_code_l, *first_frame, *first_sample, *num_frames,
+      *num_samples, *data_type, data_in);
+
   char* out = (char *)malloc(*field_code_l + 1);
   *n_wrote = gd_putdata(_GDF_GetDirfile(*dirfile), _GDF_CString(out, field_code,
         *field_code_l), *first_frame, *first_sample, *num_frames,
       *num_samples, (gd_type_t)*data_type, data_in);
   free(out);
+
+  dreturn("%i", *n_wrote);
 }
 
 /* return the error number */
@@ -1276,8 +1282,10 @@ void F77_FUNC(gdadph, GDADPH) (const int* dirfile, const char* field_code,
 void F77_FUNC(gdfrgn, GDFRGN) (char* filename, int* filename_l,
     const int* dirfile, const int* index)
 {
+  dtrace("%p, %i, %i, %i", filename, *filename_l, *dirfile, *index);
   _GDF_FString(filename, filename_l, gd_fragmentname(_GDF_GetDirfile(*dirfile),
         *index));
+  dreturnvoid();
 }
 
 /* gd_nfragments wrapper */

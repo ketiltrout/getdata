@@ -1,5 +1,6 @@
 import sys
 import os
+import re
 import array
 import pygetdata
 
@@ -21,7 +22,7 @@ def parser_callback(pdata, extra):
     print "linenum =", pdata["linenum"]
     sys.exit(1);
 
-  if (pdata["filename"] != "dirfile/format"):
+  if (re.search("dirfile/format$", pdata["filename"]) == None):
     print "filename =", pdata["filename"]
     sys.exit(1);
 

@@ -1,4 +1,4 @@
-C     Copyright (C) 2009-2010 D. V. Wiebe
+C     Copyright (C) 2009-2011 D. V. Wiebe
 C
 C     CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 C
@@ -25,6 +25,148 @@ C     This very large test checks almost every procedure defined by the
 C     F77 bindings.  Procedures not tested include: GDCOPN GDMFLS GDFLSH
 C     GDDSCD GDCLBK GDCLOS (although this last one is used)
 
+C     Check functions
+      SUBROUTINE CHKERR(NE, T, D, V)
+      INCLUDE "getdata.f"
+      INTEGER NE, T, D, V, E
+      CALL GDEROR(E, D)
+
+      IF (E .NE. V) THEN
+        NE = NE + 1
+        WRITE(*, 9001) T, E, V
+      ENDIF
+ 9001 FORMAT('e[', i3, '] = ', i4, ', expected ', i4)
+      END SUBROUTINE
+
+      SUBROUTINE CHKINT(NE, T, N, V)
+      INTEGER NE, T, N, V
+
+      IF (N .NE. V) THEN
+        NE = NE + 1
+        WRITE(*, 9002) T, N, V
+      ENDIF
+ 9002 FORMAT('n[', i3, '] = ', i4, ', expected ', i4)
+      END SUBROUTINE
+
+      SUBROUTINE CHKER2(NE, T, I, D, V)
+      INCLUDE "getdata.f"
+      INTEGER NE, T, I, D, V, E
+      CALL GDEROR(E, D)
+
+      IF (E .NE. V) THEN
+        NE = NE + 1
+        WRITE(*, 9006) I, T, E, V
+      ENDIF
+ 9006 FORMAT('e(', i3, ')[', i3, '] = ', i4, ', expected ', i4)
+      END SUBROUTINE
+
+      SUBROUTINE CHKIN2(NE, T, I, N, V)
+      INTEGER NE, T, I, N, V
+
+      IF (N .NE. V) THEN
+        NE = NE + 1
+        WRITE(*, 9007) I, T, N, V
+      ENDIF
+ 9007 FORMAT('n(', i3, ')[', i3, '] = ', i4, ', expected ', i4)
+      END SUBROUTINE
+
+      SUBROUTINE CHKST2(NE, T, I, N, V)
+      INTEGER NE, T, I
+      CHARACTER*(*) N, V
+
+      IF (N .NE. V) THEN
+        NE = NE + 1
+        WRITE(*, 9008) I, T, N, V
+      ENDIF
+ 9008 FORMAT('s(', i3, ')[', i3, '] = "', a, '", expected "', a, '"')
+      END SUBROUTINE
+
+      SUBROUTINE CHKSTR(NE, T, N, V)
+      INTEGER NE, T
+      CHARACTER*(*) N, V
+
+      IF (N .NE. V) THEN
+        NE = NE + 1
+        WRITE(*, 9009) T, N, V
+      ENDIF
+ 9009 FORMAT('s[', i3, '] = "', a, '", expected "', a, '"')
+      END SUBROUTINE
+
+      SUBROUTINE CHKDB2(NE, T, I, N, V)
+      INTEGER NE, T, I
+      REAL*8 N, V
+
+      IF (ABS(N - V) .GT. 1E-5) THEN
+        NE = NE + 1
+        WRITE(*, 9010) I, T, N, V
+      ENDIF
+ 9010 FORMAT('d(', i3, ')[', i3, '] = ', d16.10, ', expected ', d16.10)
+      END SUBROUTINE
+
+      SUBROUTINE CHKCP2(NE, T, I, N, V)
+      INTEGER NE, T, I
+      COMPLEX*16 N, V
+
+      IF (ABS(N - V) .GT. 1E-5) THEN
+        NE = NE + 1
+        WRITE(*, 9011) I, T, REAL(REAL(N)), REAL(AIMAG(N)),
+     +REAL(REAL(V)), REAL(AIMAG(V))
+      ENDIF
+ 9011 FORMAT('x(', i3, ')[', i3, '] = ', d16.10, ';', d16.10,
+     +', expected ', d16.10, ';', d16.10)
+      END SUBROUTINE
+
+      SUBROUTINE CHKDBL(NE, T, N, V)
+      INTEGER NE, T
+      REAL*8 N, V
+
+      IF (ABS(N - V) .GT. 1E-5) THEN
+        NE = NE + 1
+        WRITE(*, 9012) T, N, V
+      ENDIF
+ 9012 FORMAT('d[', i3, '] = ', d16.10, ', expected ', d16.10)
+      END SUBROUTINE
+
+      SUBROUTINE CHKCPX(NE, T, N, V)
+      INTEGER NE, T
+      COMPLEX*16 N, V
+
+      IF (ABS(N - V) .GT. 1E-5) THEN
+        NE = NE + 1
+        WRITE(*, 9013) T, REAL(REAL(N)), REAL(AIMAG(N)),
+     +REAL(REAL(V)), REAL(AIMAG(V))
+      ENDIF
+ 9013 FORMAT('x[', i3, '] = ', d16.10, ';', d16.10,
+     +', expected ', d16.10, ';', d16.10)
+      END SUBROUTINE
+
+      SUBROUTINE CHKEOS(NE, T, N, V)
+      INTEGER NE, T, F
+      CHARACTER*(*) N, V
+
+      F = INDEX(N, V)
+      IF (F .EQ. 0) THEN
+        F = 1
+      ENDIF
+
+      CALL CHKSTR(NE, T, N(F:), V)
+      END SUBROUTINE
+
+      SUBROUTINE CHKEOK(NE, T, D)
+      INTEGER NE, T, D
+      INCLUDE "getdata.f"
+      CALL CHKERR(NE, T, D, GD_EOK)
+      END SUBROUTINE
+
+      SUBROUTINE CHKOK2(NE, T, I, D)
+      INTEGER NE, T, I, D
+      INCLUDE "getdata.f"
+      CALL CHKER2(NE, T, I, D, GD_EOK)
+      END SUBROUTINE
+
+
+
+
       PROGRAM BIGTST
       INCLUDE "getdata.f"
 
@@ -42,17 +184,19 @@ C     GDDSCD GDCLBK GDCLOS (although this last one is used)
       PARAMETER (nfields = 14)
       INTEGER slen
       PARAMETER (slen = 26)
+      INTEGER plen
+      PARAMETER (plen = 4096)
 
       CHARACTER*26 strings(3)
       CHARACTER*7 fields(nfields + 7)
       CHARACTER*7 fn
       CHARACTER*26 str
+      CHARACTER*4096 path
       INTEGER*1 c(8)
       INTEGER*1 datdat(80)
       INTEGER*1 k
       INTEGER i
       INTEGER d
-      INTEGER e
       INTEGER m
       INTEGER n
       INTEGER l
@@ -117,152 +261,63 @@ C     Write the test dirfile
       WRITE(1, REC=1) datdat
       CLOSE(1, STATUS='KEEP')
 
+      ne = 0
 C     0: GDEROR check
       CALL GDOPEN(d, "x", 1, GD_RO)
-      CALL GDEROR(e, d)
-
-      ne = 0
-      IF (e .NE. GD_EOP) THEN
-        ne = ne + 1
-        WRITE(*, 9001) 0, e
-      ENDIF
+      CALL CHKERR(ne, 0, d, GD_EOP)
 
 C     1: GDOPEN check
       CALL GDOPEN(d, fildir, 12, GD_RW)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9001) 1, e
-      ENDIF
+      CALL CHKEOK(ne, 1, d)
 
 C     2: GDGETD check
       CALL GDGETD(n, d, 'data', 4, 5, 0, 1, 0, GD_I8, c)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9001) 2, e
-      ENDIF
-
-      IF (n .NE. 8) THEN
-        ne = ne + 1
-        WRITE(*, 9002) 2, n
-      ENDIF
+      CALL CHKEOK(ne, 2, d)
+      CALL CHKINT(ne, 2, n, 8)
 
       DO 20 i = 1, 8
-      IF (c(i) .NE. 40 + i) THEN
-        ne = ne + 1
-        WRITE(*, 9004) i, 2, c(i)
-      ENDIF
+      CALL CHKIN2(ne, 2, i, INT(c(i)), 40 + i)
    20 CONTINUE
 
 C     3: GDGTCO check
       CALL GDGTCO(d, 'const', 5, GD_F32, fl)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9001) 3, e
-      ENDIF
-
-      IF (abs(fl - 5.5) .gt. 0.001) THEN
-        ne = ne + 1
-        WRITE(*, 9005) 3, fl
-      ENDIF
+      CALL CHKEOK(ne, 3, d)
+      CALL CHKDBL(ne, 3, 1d0 * fl, 5.5d0)
 
 C     4: GDFDNX check
       CALL GDFDNX(i, d)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9001) 4, e
-      ENDIF
-
-      IF (i .NE. flen) THEN
-        ne = ne + 1
-        WRITE(*, 9002) 4, i
-      ENDIF
+      CALL CHKEOK(ne, 4, d)
+      CALL CHKINT(ne, 4, i, flen)
 
 C     5: GDMFNX check
       CALL GDMFNX(i, d, 'data', 4)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9001) 5, e
-      ENDIF
-
-      IF (i .NE. 6) THEN
-        ne = ne + 1
-        WRITE(*, 9002) 5, i
-      ENDIF
+      CALL CHKEOK(ne, 5, d)
+      CALL CHKINT(ne, 5, i, 6)
 
 C     6: GDNFLD check
       CALL GDNFLD(n, d)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9001) 6, e
-      ENDIF
-
-      IF (n .NE. nfields) THEN
-        ne = ne + 1
-        WRITE(*, 9002) 6, n
-      ENDIF
+      CALL CHKEOK(ne, 6, d)
+      CALL CHKINT(ne, 6, n, nfields)
 
 C     7: This is a check of (one of many instances of) _GDF_FString
       l = 2
       CALL GDFLDN(fn, l, d, 1)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9001) 7, e
-      ENDIF
-
-      IF (l .NE. 5) THEN
-        ne = ne + 1
-        WRITE(*, 9002) 7, l
-      ENDIF
+      CALL CHKEOK(ne, 7, d)
+      CALL CHKINT(ne, 7, l, 5)
 
 C     8: GDFLDN check
       DO 80 i = 1, n
       l = flen
       CALL GDFLDN(fn, l, d, i)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 8, i, e
-      ENDIF
-
-      IF (l .NE. flen) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 8, i, l
-      ENDIF
-
-      IF (fn .NE. fields(i)) THEN
-        ne = ne + 1
-        WRITE(*, 9008) i, 8, fn
-      ENDIF
+      CALL CHKOK2(ne, 8, i, d)
+      CALL CHKIN2(ne, 8, i, l, flen)
+      CALL CHKST2(ne, 8, i, fn, fields(i))
    80 CONTINUE
 
 C     9: GDNMFD check
       CALL GDNMFD(n, d, 'data', 4)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9001) 9, e
-      ENDIF
-
-      IF (n .NE. 3) THEN
-        ne = ne + 1
-        WRITE(*, 9002) 9, n
-      ENDIF
+      CALL CHKEOK(ne, 9, d)
+      CALL CHKINT(ne, 9, n, 3)
 
 C     10: GDMFDN check
       fields(1) = 'mstr'
@@ -271,51 +326,20 @@ C     10: GDMFDN check
       DO 100 i = 1, n
       l = flen
       CALL GDMFDN(fn, l, d, 'data', 4, i)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 10, i, e
-      ENDIF
-
-      IF (l .NE. flen) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 10, i, l
-      ENDIF
-
-      IF (fn .NE. fields(i)) THEN
-        ne = ne + 1
-        WRITE(*, 9008) i, 10, fn
-      ENDIF
+      CALL CHKOK2(ne, 10, i, d)
+      CALL CHKIN2(ne, 10, i, l, flen)
+      CALL CHKST2(ne, 10, i, fn, fields(i))
   100 CONTINUE
 
 C     11: GDNFRM check
       CALL GDNFRM(n, d)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9001) 11, e
-      ENDIF
-
-      IF (n .NE. 10) THEN
-        ne = ne + 1
-        WRITE(*, 9002) 11, n
-      ENDIF
+      CALL CHKEOK(ne, 11, d)
+      CALL CHKINT(ne, 11, n, 10)
 
 C     12: GDGSPF check
       CALL GDGSPF(n, d, 'data', 4)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9001) 12, e
-      ENDIF
-
-      IF (n .NE. 8) THEN
-        ne = ne + 1
-        WRITE(*, 9002) 12, n
-      ENDIF
+      CALL CHKEOK(ne, 12, d)
+      CALL CHKINT(ne, 12, n, 8)
 
 C     13: GDPUTD check
       c(1) = 13
@@ -327,115 +351,48 @@ C     13: GDPUTD check
       c(7) = 19
       c(8) = 20
       CALL GDPUTD(n, d, 'data', 4, 5, 1, 0, 4, GD_I8, c)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9001) 13, e
-      ENDIF
-
-      IF (n .NE. 4) THEN
-        ne = ne + 1
-        WRITE(*, 9002) 13, n
-      ENDIF
+      CALL CHKEOK(ne, 13, d)
+      CALL CHKINT(ne, 13, n, 4)
 
       CALL GDGETD(n, d, 'data', 4, 5, 0, 1, 0, GD_I8, c)
 
       DO 130 i = 1, 8
-      IF (((i .EQ. 1 .OR. i .GT. 5) .AND. c(i) .NE. 40 + i) .OR.
-     +(i .GT. 1 .AND. i .LT. 6) .AND. c(i) .NE. 11 + i) THEN
-        ne = ne + 1
-        WRITE(*, 9004) i, 13, c(i)
+      IF (i .EQ. 1 .OR. i .GT. 5) THEN
+        n = 40 + i
+      ELSE
+        n = 11 + i
       ENDIF
+      CALL CHKIN2(ne, 13, i, INT(c(i)), n)
   130 CONTINUE
 
 C     14: GDESTR check
       CALL GDGETD(n, d, 'x', 1, 5, 0, 1, 0, GD_I8, c)
       CALL GDESTR(d, str, slen)
-
-      IF (str .NE. 'Field not found: x  ') THEN
-        ne = ne + 1
-        WRITE(*, 9009) 14, str
-      ENDIF
+      CALL CHKSTR(ne, 14, str, 'Field not found: x')
 
 C     15: GDENTY check
       CALL GDENTY(n, d, 'data', 4)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9001) 15, e
-      ENDIF
-
-      IF (n .NE. GD_RWE) THEN
-        ne = ne + 1
-        WRITE(*, 9002) 15, n
-      ENDIF
+      CALL CHKEOK(ne, 15, d)
+      CALL CHKINT(ne, 15, n, GD_RWE)
 
 C     16: GDGERW check
       CALL GDGERW(l, i, n, d, 'data', 4)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9001) 16, e
-      ENDIF
-
-      IF (n .NE. 0) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 16, 1, n
-      ENDIF
-
-      IF (l .NE. 8) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 16, 2, l
-      ENDIF
-
-      IF (i .NE. GD_I8) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 16, 3, i
-      ENDIF
+      CALL CHKEOK(ne, 16, d)
+      CALL CHKIN2(ne, 16, 1, n, 0)
+      CALL CHKIN2(ne, 16, 2, l, 8)
+      CALL CHKIN2(ne, 16, 3, i, GD_I8)
 
 C     17: GDGELC check
       l = flen
       CALL GDGELC(i, fields(1), l, p(1), p(2), fields(2), l, p(3),
      +p(4), fields(3), l, p(5), p(6), n, d, 'lincom', 6)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9001) 17, e
-      ENDIF
-
-      IF (l .NE. flen) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 17, 1, l
-      ENDIF
-
-      IF (i .NE. 3) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 17, 2, i
-      ENDIF
-
-      IF (n .NE. 0) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 17, 3, n
-      ENDIF
-
-      IF (fields(1) .NE. 'data') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 17, 4, fields(1)
-      ENDIF
-
-      IF (fields(2) .NE. 'INDEX') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 17, 5, fields(2)
-      ENDIF
-
-      IF (fields(3) .NE. 'linterp') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 17, 6, fields(3)
-      ENDIF
+      CALL CHKEOK(ne, 17, d)
+      CALL CHKIN2(ne, 17, 1, l, flen)
+      CALL CHKIN2(ne, 17, 2, i, 3)
+      CALL CHKIN2(ne, 17, 3, n, 0)
+      CALL CHKST2(ne, 17, 4, fields(1), 'data')
+      CALL CHKST2(ne, 17, 5, fields(2), 'INDEX')
+      CALL CHKST2(ne, 17, 6, fields(3), 'linterp')
 
       q(1) = 1.1
       q(2) = 2.2
@@ -444,52 +401,20 @@ C     17: GDGELC check
       q(5) = 5.5
       q(6) = 5.5
       DO 170 i=1,6
-      IF (abs(p(i) - q(i)) .gt. 0.001) THEN
-        ne = ne + 1
-        WRITE(*, 9010) i, 17, p(i)
-      ENDIF
+      CALL CHKDB2(ne, 17, i, p(i), q(i))
   170 CONTINUE
 
 C     18: GDGECL check
       l = flen
       CALL GDGECL(i, fields(1), l, cp(1), cp(2), fields(2), l, cp(3),
      +cp(4), fields(3), l, cp(5), cp(6), n, d, 'lincom', 6)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9001) 18, e
-      ENDIF
-
-      IF (l .NE. flen) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 18, 1, l
-      ENDIF
-
-      IF (i .NE. 3) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 18, 2, i
-      ENDIF
-
-      IF (n .NE. 0) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 18, 3, n
-      ENDIF
-
-      IF (fields(1) .NE. 'data') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 18, 4, fields(1)
-      ENDIF
-
-      IF (fields(2) .NE. 'INDEX') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 18, 5, fields(2)
-      ENDIF
-
-      IF (fields(3) .NE. 'linterp') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 18, 6, fields(3)
-      ENDIF
+      CALL CHKEOK(ne, 18, d)
+      CALL CHKIN2(ne, 18, 1, l, flen)
+      CALL CHKIN2(ne, 18, 2, i, 3)
+      CALL CHKIN2(ne, 18, 3, n, 0)
+      CALL CHKST2(ne, 18, 4, fields(1), 'data')
+      CALL CHKST2(ne, 18, 5, fields(2), 'INDEX')
+      CALL CHKST2(ne, 18, 6, fields(3), 'linterp')
 
       cq(1) = cmplx(1.1, 0.0)
       cq(2) = cmplx(2.2, 0.0)
@@ -498,42 +423,18 @@ C     18: GDGECL check
       cq(5) = cmplx(5.5, 0.0)
       cq(6) = cmplx(5.5, 0.0)
       DO 180 i=1,6
-      IF (abs(cp(i) - cq(i)) .gt. 0.001) THEN
-        ne = ne + 1
-        WRITE(*, 9011) i, 18, REAL(REAL(cp(i))), REAL(AIMAG(cp(i)))
-      ENDIF
+      CALL CHKCP2(ne, 18, i, cp(i), cq(i))
   180 CONTINUE
 
 C     19: GDGEPN check
       l = flen
       CALL GDGEPN(i, fn, l, p(1), p(2), p(3), p(4), p(5), p(6),
      +n, d, 'polynom', 7)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9001) 19, e
-      ENDIF
-
-      IF (l .NE. flen) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 19, 1, l
-      ENDIF
-
-      IF (i .NE. 5) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 19, 2, i
-      ENDIF
-
-      IF (n .NE. 0) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 19, 3, n
-      ENDIF
-
-      IF (fn .NE. 'data') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 19, 4, fn
-      ENDIF
+      CALL CHKEOK(ne, 19, d)
+      CALL CHKIN2(ne, 19, 1, l, flen)
+      CALL CHKIN2(ne, 19, 2, i, 5)
+      CALL CHKIN2(ne, 19, 3, n, 0)
+      CALL CHKST2(ne, 19, 4, fn, 'data')
 
       q(1) = 1.1
       q(2) = 2.2
@@ -542,42 +443,18 @@ C     19: GDGEPN check
       q(5) = 5.5
       q(6) = 5.5
       DO 190 i=1,6
-      IF (abs(p(i) - q(i)) .gt. 0.001) THEN
-        ne = ne + 1
-        WRITE(*, 9010) i, 19, p(i)
-      ENDIF
+      CALL CHKDB2(ne, 19, i, p(i), q(i))
   190 CONTINUE
 
 C     20: GDGECP check
       l = flen
       CALL GDGECP(i, fn, l, cp(1), cp(2), cp(3), cp(4), cp(5), cp(6),
      +n, d, 'polynom', 7)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9001) 20, e
-      ENDIF
-
-      IF (l .NE. flen) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 20, 1, l
-      ENDIF
-
-      IF (i .NE. 5) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 20, 2, i
-      ENDIF
-
-      IF (n .NE. 0) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 20, 3, n
-      ENDIF
-
-      IF (fn .NE. 'data') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 20, 4, fn
-      ENDIF
+      CALL CHKEOK(ne, 20, d)
+      CALL CHKIN2(ne, 20, 1, l, flen)
+      CALL CHKIN2(ne, 20, 2, i, 5)
+      CALL CHKIN2(ne, 20, 3, n, 0)
+      CALL CHKST2(ne, 20, 4, fn, 'data')
 
       cq(1) = cmplx(1.1, 0.0)
       cq(2) = cmplx(2.2, 0.0)
@@ -586,281 +463,91 @@ C     20: GDGECP check
       cq(5) = cmplx(5.5, 0.0)
       cq(6) = cmplx(5.5, 0.0)
       DO 200 i=1,6
-      IF (abs(cp(i) - cq(i)) .gt. 0.001) THEN
-        ne = ne + 1
-        WRITE(*, 9011) i, 30, REAL(REAL(cp(i))), REAL(AIMAG(cp(i)))
-      ENDIF
+      CALL CHKCP2(ne, 20, i, cp(i), cq(i))
   200 CONTINUE
 
 C     21: GDGELT check
       l = flen
       CALL GDGELT(fn, l, str, slen, n, d, 'linterp', 7)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9001) 21, e
-      ENDIF
-
-      IF (l .NE. flen) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 21, 1, l
-      ENDIF
-
-      IF (n .NE. 0) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 21, 2, n
-      ENDIF
-
-      IF (fn .NE. 'data') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 21, 3, fn
-      ENDIF
-
-      IF (str .NE. '/look/up/file') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 21, 4, str
-      ENDIF
+      CALL CHKEOK(ne, 21, d)
+      CALL CHKIN2(ne, 21, 1, l, flen)
+      CALL CHKIN2(ne, 22, 2, n, 0)
+      CALL CHKST2(ne, 22, 3, fn, 'data')
+      CALL CHKST2(ne, 22, 4, str, '/look/up/file')
 
 C     22: GDGEBT check
       l = flen
       CALL GDGEBT(fn, l, m, i, n, d, 'bit', 3)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9001) 22, e
-      ENDIF
-
-      IF (l .NE. flen) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 22, 1, l
-      ENDIF
-
-      IF (n .NE. 0) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 22, 2, n
-      ENDIF
-
-      IF (i .NE. 4) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 22, 3, i
-      ENDIF
-
-      IF (m .NE. 3) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 22, 4, m
-      ENDIF
-
-      IF (fn .NE. 'data') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 22, 5, fn
-      ENDIF
+      CALL CHKEOK(ne, 22, d)
+      CALL CHKIN2(ne, 22, 1, l, flen)
+      CALL CHKIN2(ne, 22, 2, n, 0)
+      CALL CHKIN2(ne, 22, 3, i, 4)
+      CALL CHKIN2(ne, 22, 4, m, 3)
+      CALL CHKST2(ne, 22, 5, fn, 'data')
 
 C     23: GDGESB check
       l = flen
       CALL GDGESB(fn, l, m, i, n, d, 'sbit', 4)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9001) 23, e
-      ENDIF
-
-      IF (l .NE. flen) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 23, 1, l
-      ENDIF
-
-      IF (n .NE. 0) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 23, 2, n
-      ENDIF
-
-      IF (i .NE. 6) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 23, 3, i
-      ENDIF
-
-      IF (m .NE. 5) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 23, 4, m
-      ENDIF
-
-      IF (fn .NE. 'data') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 23, 5, fn
-      ENDIF
+      CALL CHKEOK(ne, 23, d)
+      CALL CHKIN2(ne, 23, 1, l, flen)
+      CALL CHKIN2(ne, 23, 2, n, 0)
+      CALL CHKIN2(ne, 23, 3, i, 6)
+      CALL CHKIN2(ne, 23, 4, m, 5)
+      CALL CHKST2(ne, 23, 5, fn, 'data')
 
 C     24: GDGEMT check
       l = flen
       CALL GDGEMT(fields(1), l, fields(2), l, n, d, 'mult', 4)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9001) 24, e
-      ENDIF
-
-      IF (l .NE. flen) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 24, 1, l
-      ENDIF
-
-      IF (n .NE. 0) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 24, 2, n
-      ENDIF
-
-      IF (fields(1) .NE. 'data') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 24, 3, fields(1)
-      ENDIF
-
-      IF (fields(2) .NE. 'sbit') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 24, 4, fields(2)
-      ENDIF
+      CALL CHKEOK(ne, 24, d)
+      CALL CHKIN2(ne, 24, 1, l, flen)
+      CALL CHKIN2(ne, 24, 2, n, 0)
+      CALL CHKST2(ne, 24, 3, fields(1), 'data')
+      CALL CHKST2(ne, 24, 4, fields(2), 'sbit')
 
 C     25: GDGEPH check
       l = flen
       CALL GDGEPH(fn, l, i, n, d, 'phase', 5)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9001) 25, e
-      ENDIF
-
-      IF (l .NE. flen) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 25, 1, l
-      ENDIF
-
-      IF (n .NE. 0) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 25, 2, n
-      ENDIF
-
-      IF (i .NE. 11) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 25, 3, i
-      ENDIF
-
-      IF (fn .NE. 'data') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 25, 4, fn
-      ENDIF
+      CALL CHKEOK(ne, 25, d)
+      CALL CHKIN2(ne, 25, 1, l, flen)
+      CALL CHKIN2(ne, 25, 2, n, 0)
+      CALL CHKIN2(ne, 25, 3, i, 11)
+      CALL CHKST2(ne, 25, 4, fn, 'data')
 
 C     26: GDGECO check
       CALL GDGECO(i, n, d, 'const', 5)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9001) 26, e
-      ENDIF
-
-      IF (n .NE. 0) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 26, 1, n
-      ENDIF
-
-      IF (i .NE. GD_F64) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 26, 2, i
-      ENDIF
+      CALL CHKEOK(ne, 26, d)
+      CALL CHKIN2(ne, 26, 1, n, 0)
+      CALL CHKIN2(ne, 26, 2, i, GD_F64)
 
 C     27: GDFRGI check
       CALL GDFRGI(n, d, 'const', 5)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9001) 27, e
-      ENDIF
-
-      IF (n .NE. 0) THEN
-        ne = ne + 1
-        WRITE(*, 9002) 27, n
-      ENDIF
+      CALL CHKEOK(ne, 27, d)
+      CALL CHKINT(ne, 27, n, 0)
 
 C     28: GDADRW check
       CALL GDADRW(d, 'new1', 4, GD_F64, 3, 0)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 28, 1, e
-      ENDIF
+      CALL CHKOK2(ne, 28, 1, d)
 
       CALL GDGERW(l, i, n, d, 'new1', 4)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 28, 2, e
-      ENDIF
-
-      IF (n .NE. 0) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 28, 3, n
-      ENDIF
-
-      IF (l .NE. 3) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 28, 4, l
-      ENDIF
-
-      IF (i .NE. GD_F64) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 28, 5, i
-      ENDIF
+      CALL CHKOK2(ne, 28, 2, d)
+      CALL CHKIN2(ne, 28, 3, n, 0)
+      CALL CHKIN2(ne, 28, 4, l, 3)
+      CALL CHKIN2(ne, 28, 5, i, GD_F64)
 
 C     29: GDADLC check
       CALL GDADLC(d, 'new2', 4, 2, 'in1', 3, 9.9d0, 8.8d0, 'in2', 3,
      +7.7d0, 6.6d0, '', 0, 0d0, 0d0, 0)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 29, 1, e
-      ENDIF
+      CALL CHKOK2(ne, 29, 1, d)
 
       l = flen
       CALL GDGELC(i, fields(1), l, p(1), p(2), fields(2), l, p(3),
      +p(4), fields(3), l, p(5), p(6), n, d, 'new2', 4)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 29, 2, e
-      ENDIF
-
-      IF (l .NE. flen) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 29, 3, l
-      ENDIF
-
-      IF (i .NE. 2) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 29, 4, i
-      ENDIF
-
-      IF (n .NE. 0) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 29, 5, n
-      ENDIF
-
-      IF (fields(1) .NE. 'in1') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 29, 6, fields(1)
-      ENDIF
-
-      IF (fields(2) .NE. 'in2') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 29, 7, fields(2)
-      ENDIF
+      CALL CHKOK2(ne, 29, 2, d)
+      CALL CHKIN2(ne, 29, 3, l, flen)
+      CALL CHKIN2(ne, 29, 4, i, 2)
+      CALL CHKIN2(ne, 29, 5, n, 0)
+      CALL CHKST2(ne, 29, 6, fields(1), 'in1')
+      CALL CHKST2(ne, 29, 7, fields(2), 'in2')
 
       q(1) = 9.9
       q(2) = 8.8
@@ -869,10 +556,7 @@ C     29: GDADLC check
       q(5) = 5.5
       q(6) = 5.5
       DO 290 i=1,4
-      IF (abs(p(i) - q(i)) .gt. 0.001) THEN
-        ne = ne + 1
-        WRITE(*, 9010) i, 29, p(i)
-      ENDIF
+      CALL CHKDB2(ne, 29, i, p(i), q(i))
   290 CONTINUE
 
 C     30: GDADCL check
@@ -882,98 +566,39 @@ C     30: GDADCL check
       cq(4) = cmplx(1.6, 1.7)
       CALL GDADCL(d, 'new3', 4, 2, 'in1', 3, cq(1), cq(2), 'in2', 3,
      +cq(3), cq(4), '', 0, cq(5), cq(6), 0)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 30, 1, e
-      ENDIF
+      CALL CHKOK2(ne, 30, 1, d)
 
       l = flen
       CALL GDGECL(i, fields(1), l, cp(1), cp(2), fields(2), l, cp(3),
      +cp(4), fields(3), l, cp(5), cp(6), n, d, 'new3', 4)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9001) 30, e
-      ENDIF
-
-      IF (l .NE. flen) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 30, 1, l
-      ENDIF
-
-      IF (i .NE. 2) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 30, 2, i
-      ENDIF
-
-      IF (n .NE. 0) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 30, 3, n
-      ENDIF
-
-      IF (fields(1) .NE. 'in1') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 30, 4, fields(1)
-      ENDIF
-
-      IF (fields(2) .NE. 'in2') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 30, 5, fields(2)
-      ENDIF
+      CALL CHKOK2(ne, 30, 2, d)
+      CALL CHKIN2(ne, 30, 1, l, flen)
+      CALL CHKIN2(ne, 30, 2, i, 2)
+      CALL CHKIN2(ne, 30, 3, n, 0)
+      CALL CHKST2(ne, 30, 4, fields(1), 'in1')
+      CALL CHKST2(ne, 30, 5, fields(2), 'in2')
 
       cq(1) = cmplx(1.1, 1.2)
       cq(2) = cmplx(1.3, 1.4)
       cq(3) = cmplx(1.4, 1.5)
       cq(4) = cmplx(1.6, 1.7)
       DO 300 i=1,4
-      IF (abs(cp(i) - cq(i)) .gt. 0.001) THEN
-        ne = ne + 1
-        WRITE(*, 9011) i, 30, REAL(REAL(cp(i))), REAL(AIMAG(cp(i)))
-      ENDIF
+      CALL CHKCP2(ne, 30, i, cp(i), cq(i))
   300 CONTINUE
 
 C     31: GDADPN check
       CALL GDADPN(d, 'new4', 4, 3, 'in1', 3, 3d3, 4d4, 5d5, 6d6, 0d0,
      +0d0, 0)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 31, 1, e
-      ENDIF
+      CALL CHKOK2(ne, 31, 1, d)
 
       l = flen
       CALL GDGEPN(i, fn, l, p(1), p(2), p(3), p(4), p(5), p(6),
      +n, d, 'new4', 4)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 31, 2, e
-      ENDIF
-
-      IF (l .NE. flen) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 31, 1, l
-      ENDIF
-
-      IF (i .NE. 3) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 31, 2, i
-      ENDIF
-
-      IF (n .NE. 0) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 31, 3, n
-      ENDIF
-
-      IF (fn .NE. 'in1') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 31, 4, fn
-      ENDIF
+      CALL CHKOK2(ne, 31, 2, d)
+      CALL CHKIN2(ne, 31, 1, l, flen)
+      CALL CHKIN2(ne, 31, 2, i, 3)
+      CALL CHKIN2(ne, 31, 3, n, 0)
+      CALL CHKST2(ne, 31, 4, fn, 'in1')
 
       q(1) = 3d3
       q(2) = 4d4
@@ -983,10 +608,7 @@ C     31: GDADPN check
       q(6) = 5.5d0
 
       DO 310 i=1,4
-      IF (abs(p(i) - q(i)) .gt. 0.001) THEN
-        ne = ne + 1
-        WRITE(*, 9010) i, 31, p(i)
-      ENDIF
+      CALL CHKDB2(ne, 31, i, p(i), q(i))
   310 CONTINUE
 
 C     32: GDADCP check
@@ -996,357 +618,125 @@ C     32: GDADCP check
       cq(4) = cmplx(6.3, 4.4)
       CALL GDADCP(d, 'new5', 4, 3, 'in1', 3, cq(1), cq(2), cq(3), cq(4),
      +cq(5), cq(6), 0)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 32, 1, e
-      ENDIF
+      CALL CHKOK2(ne, 32, 1, d)
 
       l = flen
       CALL GDGECP(i, fn, l, cp(1), cp(2), cp(3), cp(4), cp(5), cp(6),
      +n, d, 'new5', 4)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 32, 2, e
-      ENDIF
-
-      IF (l .NE. flen) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 32, 1, l
-      ENDIF
-
-      IF (i .NE. 3) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 32, 2, i
-      ENDIF
-
-      IF (n .NE. 0) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 32, 3, n
-      ENDIF
-
-      IF (fn .NE. 'in1') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 32, 4, fn
-      ENDIF
+      CALL CHKOK2(ne, 32, 2, d)
+      CALL CHKIN2(ne, 32, 1, l, flen)
+      CALL CHKIN2(ne, 32, 2, i, 3)
+      CALL CHKIN2(ne, 32, 3, n, 0)
+      CALL CHKST2(ne, 32, 4, fn, 'in1')
 
       cq(1) = cmplx(3.1, 7.0)
       cq(2) = cmplx(4.2, 8.0)
       cq(3) = cmplx(5.2, 9.0)
       cq(4) = cmplx(6.3, 4.4)
       DO 320 i=1,4
-      IF (abs(cp(i) - cq(i)) .gt. 0.001) THEN
-        ne = ne + 1
-        WRITE(*, 9011) i, 32, REAL(REAL(cp(i))), REAL(AIMAG(cp(i)))
-      ENDIF
+      CALL CHKCP2(ne, 32, i, cp(i), cq(i))
   320 CONTINUE
 
 C     33: GDADLT check
       CALL GDADLT(d, "new6", 4, "in", 2, "./some/table", 12, 0)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 33, 1, e
-      ENDIF
+      CALL CHKOK2(ne, 33, 1, d)
 
       l = flen
       CALL GDGELT(fn, l, str, slen, n, d, 'new6', 4)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 33, 2, e
-      ENDIF
-
-      IF (l .NE. flen) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 33, 1, l
-      ENDIF
-
-      IF (n .NE. 0) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 33, 2, n
-      ENDIF
-
-      IF (fn .NE. 'in') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 33, 3, fn
-      ENDIF
-
-      IF (str .NE. './some/table') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 33, 4, str
-      ENDIF
+      CALL CHKOK2(ne, 33, 2, d)
+      CALL CHKIN2(ne, 33, 1, l, flen)
+      CALL CHKIN2(ne, 33, 2, n, 0)
+      CALL CHKST2(ne, 33, 3, fn, 'in')
+      CALL CHKST2(ne, 33, 4, str, './some/table')
 
 C     34: GDADBT check
       CALL GDADBT(d, "new7", 4, "in", 2, 13, 12, 0)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 34, 1, e
-      ENDIF
+      CALL CHKOK2(ne, 34, 1, d)
 
       l = flen
       CALL GDGEBT(fn, l, m, i, n, d, 'new7', 4)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 34, 2, e
-      ENDIF
-
-      IF (l .NE. flen) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 34, 1, l
-      ENDIF
-
-      IF (n .NE. 0) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 34, 2, n
-      ENDIF
-
-      IF (i .NE. 12) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 34, 3, i
-      ENDIF
-
-      IF (m .NE. 13) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 34, 4, m
-      ENDIF
-
-      IF (fn .NE. 'in') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 34, 5, fn
-      ENDIF
+      CALL CHKOK2(ne, 34, 2, d)
+      CALL CHKIN2(ne, 34, 1, l, flen)
+      CALL CHKIN2(ne, 34, 2, n, 0)
+      CALL CHKIN2(ne, 34, 3, i, 12)
+      CALL CHKIN2(ne, 34, 4, m, 13)
+      CALL CHKST2(ne, 34, 5, fn, 'in')
 
 C     35: GDADSB check
       CALL GDADSB(d, "new8", 4, "in", 2, 13, 12, 0)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 35, 1, e
-      ENDIF
+      CALL CHKOK2(ne, 35, 1, d)
 
       l = flen
       CALL GDGESB(fn, l, m, i, n, d, 'new8', 4)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 35, 2, e
-      ENDIF
-
-      IF (l .NE. flen) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 35, 1, l
-      ENDIF
-
-      IF (n .NE. 0) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 35, 2, n
-      ENDIF
-
-      IF (i .NE. 12) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 35, 3, i
-      ENDIF
-
-      IF (m .NE. 13) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 35, 4, m
-      ENDIF
-
-      IF (fn .NE. 'in') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 35, 5, fn
-      ENDIF
+      CALL CHKOK2(ne, 35, 2, d)
+      CALL CHKIN2(ne, 35, 1, l, flen)
+      CALL CHKIN2(ne, 35, 2, n, 0)
+      CALL CHKIN2(ne, 35, 3, i, 12)
+      CALL CHKIN2(ne, 35, 4, m, 13)
+      CALL CHKST2(ne, 35, 5, fn, 'in')
 
 C     36: GDADMT check
       CALL GDADMT(d, 'new9', 4, 'in1', 3, 'in2', 3, 0)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 36, 1, e
-      ENDIF
+      CALL CHKOK2(ne, 36, 1, d)
 
       l = flen
       CALL GDGEMT(fields(1), l, fields(2), l, n, d, 'new9', 4)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 36, 2, e
-      ENDIF
-
-      IF (l .NE. flen) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 36, 1, l
-      ENDIF
-
-      IF (n .NE. 0) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 36, 2, n
-      ENDIF
-
-      IF (fields(1) .NE. 'in1') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 36, 3, fields(1)
-      ENDIF
-
-      IF (fields(2) .NE. 'in2') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 36, 4, fields(2)
-      ENDIF
+      CALL CHKOK2(ne, 36, 2, d)
+      CALL CHKIN2(ne, 36, 1, l, flen)
+      CALL CHKIN2(ne, 36, 2, n, 0)
+      CALL CHKST2(ne, 36, 3, fields(1), 'in1')
+      CALL CHKST2(ne, 36, 4, fields(2), 'in2')
 
 C     37: GDADPH check
       CALL GDADPH(d, 'new10', 5, 'in1', 3, 22, 0)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 37, 1, e
-      ENDIF
+      CALL CHKOK2(ne, 37, 1, d)
 
       l = flen
       CALL GDGEPH(fn, l, i, n, d, 'new10', 5)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 37, 2, e
-      ENDIF
-
-      IF (l .NE. flen) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 37, 1, l
-      ENDIF
-
-      IF (n .NE. 0) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 37, 2, n
-      ENDIF
-
-      IF (i .NE. 22) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 37, 3, i
-      ENDIF
-
-      IF (fn .NE. 'in1') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 37, 4, fn
-      ENDIF
+      CALL CHKOK2(ne, 37, 2, d)
+      CALL CHKIN2(ne, 37, 1, l, flen)
+      CALL CHKIN2(ne, 37, 2, n, 0)
+      CALL CHKIN2(ne, 37, 3, i, 22)
+      CALL CHKST2(ne, 37, 4, fn, 'in1')
 
 C     38: GDADCO check
       CALL GDADCO(d, 'new11', 5, GD_F64, GD_F32, -8.1, 0)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 38, 1, e
-      ENDIF
+      CALL CHKOK2(ne, 38, 1, d)
 
       CALL GDGECO(i, n, d, 'new11', 5)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 38, 2, e
-      ENDIF
-
-      IF (n .NE. 0) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 38, 1, n
-      ENDIF
-
-      IF (i .NE. GD_F64) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 38, 2, i
-      ENDIF
+      CALL CHKOK2(ne, 38, 2, d)
+      CALL CHKIN2(ne, 38, 1, n, 0)
+      CALL CHKIN2(ne, 38, 2, i, GD_F64)
 
       CALL GDGTCO(d, 'new11', 5, GD_F32, fl)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 38, 3, e
-      ENDIF
-
-      IF (abs(fl + 8.1) .gt. 0.001) THEN
-        ne = ne + 1
-        WRITE(*, 9005) 38, fl
-      ENDIF
+      CALL CHKOK2(ne, 38, 3, d)
+      CALL CHKDBL(ne, 38, 1d0 * fl, -8.1d0)
 
 C     39: GDFRGN check
-      CALL GDFRGN(str, slen, d, 0)
-      CALL GDEROR(e, d)
+      l = plen;
+      CALL GDFRGN(path, l, d, 0)
 
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9001) 39, e
-      ENDIF
-
-      IF (str .NE. 'test_dirfile/format') THEN
-        ne = ne + 1
-        WRITE(*, 9009), 39, str
-      ENDIF
+      CALL CHKEOK(ne, 39, d)
+      CALL CHKINT(ne, 39, l, plen)
+      CALL CHKEOS(ne, 39, path, 'test_dirfile/format')
 
 C     40: GDNFRG check
       CALL GDNFRG(n, d)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9001) 40, e
-      ENDIF
-
-      IF (n .NE. 1) THEN
-        ne = ne + 1
-        WRITE(*, 9002), 40, n
-      ENDIF
+      CALL CHKEOK(ne, 40, d)
+      CALL CHKINT(ne, 40, n, 1)
 
 C     41: GDINCL check
       CALL GDINCL(d, 'form2', 5, 0, 0)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 41, 3, e
-      ENDIF
+      CALL CHKOK2(ne, 41, 1, d)
 
       CALL GDGTCO(d, 'const2', 6, GD_I8, c(1))
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 41, 3, e
-      ENDIF
-
-      IF (c(1) .NE. -19) THEN
-        ne = ne + 1
-        WRITE(*, 9004) 1, 41, c(1)
-      ENDIF
+      CALL CHKOK2(ne, 41, 2, d)
+      CALL CHKINT(ne, 41, INT(c(1)), -19)
 
 C     42: GDNFDT check
       CALL GDNFDT(n, d, GD_LCE)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9001) 42, e
-      ENDIF
-
-      IF (n .NE. 3) THEN
-        ne = ne + 1
-        WRITE(*, 9002), 42, n
-      ENDIF
+      CALL CHKEOK(ne, 42, d)
+      CALL CHKINT(ne, 42, n, 3)
 
 C     43: GDFDNT check
       fields(1) = 'lincom'
@@ -1355,37 +745,15 @@ C     43: GDFDNT check
       DO 430 i = 1, n
       l = flen
       CALL GDFDNT(fn, l, d, GD_LCE, i)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 43, i, e
-      ENDIF
-
-      IF (l .NE. flen) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 43, i, l
-      ENDIF
-
-      IF (fn .NE. fields(i)) THEN
-        ne = ne + 1
-        WRITE(*, 9008) i, 43, fn
-      ENDIF
+      CALL CHKOK2(ne, 43, i, d)
+      CALL CHKIN2(ne, 43, i, l, flen)
+      CALL CHKST2(ne, 43, i, fn, fields(i))
   430 CONTINUE
 
 C     44: GDNVEC check
       CALL GDNVEC(n, d)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9001) 44, e
-      ENDIF
-
-      IF (n .NE. 21) THEN
-        ne = ne + 1
-        WRITE(*, 9002), 44, n
-      ENDIF
+      CALL CHKEOK(ne, 44, d)
+      CALL CHKINT(ne, 44, n, 21)
 
 C     45: GDVECN check
       fields(1) = 'INDEX  '
@@ -1412,68 +780,25 @@ C     45: GDVECN check
       DO 450 i = 1, n
       l = flen
       CALL GDVECN(fn, l, d, i)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 45, i, e
-      ENDIF
-
-      IF (l .NE. flen) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 45, i, l
-      ENDIF
-
-      IF (fn .NE. fields(i)) THEN
-        ne = ne + 1
-        WRITE(*, 9008) i, 45, fn
-      ENDIF
+      CALL CHKOK2(ne, 45, i, d)
+      CALL CHKIN2(ne, 45, i, l, flen)
+      CALL CHKST2(ne, 45, i, fn, fields(i))
   450 CONTINUE
 
 C     46: GDMDLC check
       CALL GDMDLC(d, 'data', 4, 'mnew1', 5, 2, 'in1', 3, 9.9d0, 8.8d0,
      +'in2', 3, 7.7d0, 6.6d0, '', 0, 0d0, 0d0)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 46, 1, e
-      ENDIF
+      CALL CHKOK2(ne, 46, 1, d)
 
       l = flen
       CALL GDGELC(i, fields(1), l, p(1), p(2), fields(2), l, p(3),
      +p(4), fields(3), l, p(5), p(6), n, d, 'data/mnew1', 10)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 46, 2, e
-      ENDIF
-
-      IF (l .NE. flen) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 46, 3, l
-      ENDIF
-
-      IF (i .NE. 2) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 46, 4, i
-      ENDIF
-
-      IF (n .NE. 0) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 46, 5, n
-      ENDIF
-
-      IF (fields(1) .NE. 'in1') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 46, 6, fields(1)
-      ENDIF
-
-      IF (fields(2) .NE. 'in2') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 46, 7, fields(2)
-      ENDIF
+      CALL CHKOK2(ne, 46, 2, d)
+      CALL CHKIN2(ne, 46, 3, l, flen)
+      CALL CHKIN2(ne, 46, 4, i, 2)
+      CALL CHKIN2(ne, 46, 5, n, 0)
+      CALL CHKST2(ne, 46, 6, fields(1), 'in1')
+      CALL CHKST2(ne, 46, 7, fields(2), 'in2')
 
       q(1) = 9.9
       q(2) = 8.8
@@ -1482,10 +807,7 @@ C     46: GDMDLC check
       q(5) = 5.5
       q(6) = 5.5
       DO 460 i=1,4
-      IF (abs(p(i) - q(i)) .gt. 0.001) THEN
-        ne = ne + 1
-        WRITE(*, 9010) i, 46, p(i)
-      ENDIF
+      CALL CHKDB2(ne, 46, i, p(i), q(i))
   460 CONTINUE
 
 C     47: GDMDCL check
@@ -1495,98 +817,39 @@ C     47: GDMDCL check
       cq(4) = cmplx(1.6, 1.7)
       CALL GDMDCL(d, 'data', 4, 'mnew2', 5, 2, 'in1', 3, cq(1), cq(2),
      +'in2', 3, cq(3), cq(4), '', 0, cq(5), cq(6))
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 47, 1, e
-      ENDIF
+      CALL CHKOK2(ne, 47, 1, d)
 
       l = flen
       CALL GDGECL(i, fields(1), l, cp(1), cp(2), fields(2), l, cp(3),
      +cp(4), fields(3), l, cp(5), cp(6), n, d, 'data/mnew2', 10)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9001) 47, e
-      ENDIF
-
-      IF (l .NE. flen) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 47, 1, l
-      ENDIF
-
-      IF (i .NE. 2) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 47, 2, i
-      ENDIF
-
-      IF (n .NE. 0) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 47, 3, n
-      ENDIF
-
-      IF (fields(1) .NE. 'in1') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 47, 4, fields(1)
-      ENDIF
-
-      IF (fields(2) .NE. 'in2') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 47, 5, fields(2)
-      ENDIF
+      CALL CHKOK2(ne, 47, 2, d)
+      CALL CHKIN2(ne, 47, 1, l, flen)
+      CALL CHKIN2(ne, 47, 2, i, 2)
+      CALL CHKIN2(ne, 47, 3, n, 0)
+      CALL CHKST2(ne, 47, 4, fields(1), 'in1')
+      CALL CHKST2(ne, 47, 5, fields(2), 'in2')
 
       cq(1) = cmplx(1.1, 1.2)
       cq(2) = cmplx(1.3, 1.4)
       cq(3) = cmplx(1.4, 1.5)
       cq(4) = cmplx(1.6, 1.7)
       DO 470 i=1,4
-      IF (abs(cp(i) - cq(i)) .gt. 0.001) THEN
-        ne = ne + 1
-        WRITE(*, 9011) i, 47, REAL(REAL(cp(i))), REAL(AIMAG(cp(i)))
-      ENDIF
+      CALL CHKCP2(ne, 47, i, cp(i), cq(i))
   470 CONTINUE
 
 C     48: GDMDPN check
       CALL GDMDPN(d, 'data', 4, 'mnew3', 5, 3, 'in1', 3, 3d3, 4d4, 5d5,
      +6d6, 0d0, 0d0)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 48, 1, e
-      ENDIF
+      CALL CHKOK2(ne, 48, 1, d)
 
       l = flen
       CALL GDGEPN(i, fn, l, p(1), p(2), p(3), p(4), p(5), p(6),
      +n, d, 'data/mnew3', 10)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 48, 2, e
-      ENDIF
-
-      IF (l .NE. flen) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 48, 1, l
-      ENDIF
-
-      IF (i .NE. 3) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 48, 2, i
-      ENDIF
-
-      IF (n .NE. 0) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 48, 3, n
-      ENDIF
-
-      IF (fn .NE. 'in1') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 48, 4, fn
-      ENDIF
+      CALL CHKOK2(ne, 48, 2, d)
+      CALL CHKIN2(ne, 48, 1, l, flen)
+      CALL CHKIN2(ne, 48, 2, i, 3)
+      CALL CHKIN2(ne, 48, 3, n, 0)
+      CALL CHKST2(ne, 48, 4, fn, 'in1')
 
       q(1) = 3d3
       q(2) = 4d4
@@ -1595,10 +858,7 @@ C     48: GDMDPN check
       q(5) = 5.5d0
       q(6) = 5.5d0
       DO 480 i=1,4
-      IF (abs(p(i) - q(i)) .gt. 0.001) THEN
-        ne = ne + 1
-        WRITE(*, 9010) i, 48, p(i)
-      ENDIF
+      CALL CHKDB2(ne, 48, i, p(i), q(i))
   480 CONTINUE
 
 C     49: GDMDCP check
@@ -1608,468 +868,160 @@ C     49: GDMDCP check
       cq(4) = cmplx(3.3, 4.4)
       CALL GDMDCP(d, 'data', 4, 'mnew5', 5, 3, 'in1', 3, cq(1), cq(2),
      +cq(3), cq(4), cq(5), cq(6))
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 49, 1, e
-      ENDIF
+      CALL CHKOK2(ne, 49, 1, d)
 
       l = flen
       CALL GDGECP(i, fn, l, cp(1), cp(2), cp(3), cp(4), cp(5), cp(6),
      +n, d, 'data/mnew5', 10)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 49, 2, e
-      ENDIF
-
-      IF (l .NE. flen) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 49, 1, l
-      ENDIF
-
-      IF (i .NE. 3) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 49, 2, i
-      ENDIF
-
-      IF (n .NE. 0) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 49, 3, n
-      ENDIF
-
-      IF (fn .NE. 'in1') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 49, 4, fn
-      ENDIF
+      CALL CHKOK2(ne, 49, 2, d)
+      CALL CHKIN2(ne, 49, 1, l, flen)
+      CALL CHKIN2(ne, 49, 2, i, 3)
+      CALL CHKIN2(ne, 49, 3, n, 0)
+      CALL CHKST2(ne, 49, 4, fn, 'in1')
 
       cq(1) = cmplx(1.1, 0.0)
       cq(2) = cmplx(2.2, 0.0)
       cq(3) = cmplx(2.2, 0.0)
       cq(4) = cmplx(3.3, 4.4)
       DO 490 i=1,4
-      IF (abs(cp(i) - cq(i)) .gt. 0.001) THEN
-        ne = ne + 1
-        WRITE(*, 9011) i, 49, REAL(REAL(cp(i))), REAL(AIMAG(cp(i)))
-      ENDIF
+      CALL CHKCP2(ne, 49, i, cp(i), cq(i))
   490 CONTINUE
 
 C     50: GDMDLT check
       CALL GDMDLT(d, "data", 4, "mnew6", 5, "in", 2, "./more/table", 12)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 50, 1, e
-      ENDIF
+      CALL CHKOK2(ne, 50, 1, d)
 
       l = flen
       CALL GDGELT(fn, l, str, slen, n, d, 'data/mnew6', 10)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 50, 2, e
-      ENDIF
-
-      IF (l .NE. flen) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 50, 1, l
-      ENDIF
-
-      IF (n .NE. 0) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 50, 2, n
-      ENDIF
-
-      IF (fn .NE. 'in') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 50, 3, fn
-      ENDIF
-
-      IF (str .NE. './more/table') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 50, 4, str
-      ENDIF
+      CALL CHKOK2(ne, 50, 2, d)
+      CALL CHKIN2(ne, 50, 1, l, flen)
+      CALL CHKIN2(ne, 50, 2, n, 0)
+      CALL CHKST2(ne, 50, 3, fn, 'in')
+      CALL CHKST2(ne, 50, 4, str, './more/table')
 
 C     51: GDMDBT check
       CALL GDMDBT(d, "data", 4, "mnew7", 5, "in", 2, 13, 12)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 51, 1, e
-      ENDIF
+      CALL CHKOK2(ne, 51, 1, d)
 
       l = flen
       CALL GDGEBT(fn, l, m, i, n, d, 'data/mnew7', 10)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 51, 2, e
-      ENDIF
-
-      IF (l .NE. flen) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 51, 1, l
-      ENDIF
-
-      IF (n .NE. 0) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 51, 2, n
-      ENDIF
-
-      IF (i .NE. 12) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 51, 3, i
-      ENDIF
-
-      IF (m .NE. 13) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 51, 4, m
-      ENDIF
-
-      IF (fn .NE. 'in') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 51, 5, fn
-      ENDIF
+      CALL CHKOK2(ne, 51, 2, d)
+      CALL CHKIN2(ne, 51, 1, l, flen)
+      CALL CHKIN2(ne, 51, 2, n, 0)
+      CALL CHKIN2(ne, 51, 3, i, 12)
+      CALL CHKIN2(ne, 51, 4, m, 13)
+      CALL CHKST2(ne, 51, 5, fn, 'in')
 
 C     52: GDMDSB check
       CALL GDMDSB(d, "data", 4, "mnew8", 5, "in", 2, 13, 12)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 52, 1, e
-      ENDIF
+      CALL CHKOK2(ne, 52, 1, d)
 
       l = flen
       CALL GDGESB(fn, l, m, i, n, d, 'data/mnew8', 10)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 52, 2, e
-      ENDIF
-
-      IF (l .NE. flen) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 52, 1, l
-      ENDIF
-
-      IF (n .NE. 0) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 52, 2, n
-      ENDIF
-
-      IF (i .NE. 12) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 52, 3, i
-      ENDIF
-
-      IF (m .NE. 13) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 52, 4, m
-      ENDIF
-
-      IF (fn .NE. 'in') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 52, 5, fn
-      ENDIF
+      CALL CHKOK2(ne, 52, 2, d)
+      CALL CHKIN2(ne, 52, 1, l, flen)
+      CALL CHKIN2(ne, 52, 2, n, 0)
+      CALL CHKIN2(ne, 52, 3, i, 12)
+      CALL CHKIN2(ne, 52, 4, m, 13)
+      CALL CHKST2(ne, 52, 5, fn, 'in')
 
 C     53: GDMDMT check
       CALL GDMDMT(d, 'data', 4, 'mnew9', 5, 'in1', 3, 'in2', 3)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 53, 1, e
-      ENDIF
+      CALL CHKOK2(ne, 53, 1, d)
 
       l = flen
       CALL GDGEMT(fields(1), l, fields(2), l, n, d, 'data/mnew9', 10)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 53, 2, e
-      ENDIF
-
-      IF (l .NE. flen) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 53, 1, l
-      ENDIF
-
-      IF (n .NE. 0) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 53, 2, n
-      ENDIF
-
-      IF (fields(1) .NE. 'in1') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 53, 3, fields(1)
-      ENDIF
-
-      IF (fields(2) .NE. 'in2') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 53, 4, fields(2)
-      ENDIF
+      CALL CHKOK2(ne, 53, 2, d)
+      CALL CHKIN2(ne, 53, 1, l, flen)
+      CALL CHKIN2(ne, 53, 2, n, 0)
+      CALL CHKST2(ne, 53, 3, fields(1), 'in1')
+      CALL CHKST2(ne, 53, 4, fields(2), 'in2')
 
 C     54: GDMDPH check
       CALL GDMDPH(d, 'data', 4, 'mnew10', 6, 'in1', 3, 22)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 54, 1, e
-      ENDIF
+      CALL CHKOK2(ne, 54, 1, d)
 
       l = flen
       CALL GDGEPH(fn, l, i, n, d, 'data/mnew10', 11)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 54, 2, e
-      ENDIF
-
-      IF (l .NE. flen) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 54, 1, l
-      ENDIF
-
-      IF (n .NE. 0) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 54, 2, n
-      ENDIF
-
-      IF (i .NE. 22) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 54, 3, i
-      ENDIF
-
-      IF (fn .NE. 'in1') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 54, 4, fn
-      ENDIF
+      CALL CHKOK2(ne, 54, 2, d)
+      CALL CHKIN2(ne, 54, 1, l, flen)
+      CALL CHKIN2(ne, 54, 2, n, 0)
+      CALL CHKIN2(ne, 54, 3, i, 22)
+      CALL CHKST2(ne, 54, 4, fn, 'in1')
 
 C     55: GDMDCO check
       CALL GDMDCO(d, 'data', 4, 'mnew11', 6, GD_F64, GD_F32, -8.1)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 55, 1, e
-      ENDIF
+      CALL CHKOK2(ne, 55, 1, d)
 
       CALL GDGECO(i, n, d, 'data/mnew11', 11)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 55, 2, e
-      ENDIF
-
-      IF (l .NE. flen) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 55, 1, l
-      ENDIF
-
-      IF (n .NE. 0) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 55, 2, n
-      ENDIF
-
-      IF (i .NE. GD_F64) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 55, 3, i
-      ENDIF
+      CALL CHKOK2(ne, 55, 2, d)
+      CALL CHKIN2(ne, 55, 1, l, flen)
+      CALL CHKIN2(ne, 55, 2, n, 0)
+      CALL CHKIN2(ne, 55, 3, i, GD_F64)
 
       CALL GDGTCO(d, 'data/mnew11', 11, GD_F32, fl)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 55, 3, e
-      ENDIF
-
-      IF (abs(fl + 8.1) .gt. 0.001) THEN
-        ne = ne + 1
-        WRITE(*, 9005) 55, fl
-      ENDIF
+      CALL CHKOK2(ne, 55, 3, d)
+      CALL CHKDBL(ne, 55, 1d0 * fl, -8.1d0)
 
 C     56: GDGTST check
       CALL GDGTST(n, d, 'string', 6, slen, str)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9001) 56, e
-      ENDIF
-
-      IF (n .NE. 17) THEN
-        ne = ne + 1
-        WRITE(*, 9002) 56, n
-      ENDIF
-
-      IF (str .NE. "Zaphod Beeblebrox") THEN
-        ne = ne + 1
-        WRITE(*, 9009) 56, str
-      ENDIF
+      CALL CHKEOK(ne, 56, d)
+      CALL CHKINT(ne, 56, n, 17)
+      CALL CHKSTR(ne, 56, str, "Zaphod Beeblebrox")
 
 C     57: GDADST check
       CALL GDADST(d, 'new12', 5, "---string---", 12, 0)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 57, 1, e
-      ENDIF
+      CALL CHKOK2(ne, 57, 1, e)
 
       CALL GDGTST(n, d, 'new12', 5, slen, str)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 57, 2, e
-      ENDIF
-
-      IF (str .NE. "---string---") THEN
-        ne = ne + 1
-        WRITE(*, 9009) 57, str
-      ENDIF
+      CALL CHKOK2(ne, 57, 2, e)
+      CALL CHKSTR(ne, 57, str, "---string---")
 
 C     58: GDMDST check
       CALL GDMDST(d, "data", 4, 'mnew12', 6, "kai su, technon;", 16)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 58, 1, e
-      ENDIF
+      CALL CHKOK2(ne, 58, 1, d)
 
       CALL GDGTST(n, d, 'data/mnew12', 11, slen, str)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 58, 2, e
-      ENDIF
-
-      IF (str .NE. "kai su, technon;") THEN
-        ne = ne + 1
-        WRITE(*, 9009) 58, str
-      ENDIF
+      CALL CHKOK2(ne, 58, 2, d)
+      CALL CHKSTR(ne, 58, str, "kai su, technon;")
 
 C     59: GDADSP check
       CALL GDADSP(d, 'lorem STRING "Lorem ipsum"', 26, 0)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 59, 1, e
-      ENDIF
+      CALL CHKOK2(ne, 59, 1, e)
 
       CALL GDGTST(n, d, 'lorem', 5, slen, str)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 59, 2, e
-      ENDIF
-
-      IF (str .NE. "Lorem ipsum") THEN
-        ne = ne + 1
-        WRITE(*, 9009) 59, str
-      ENDIF
+      CALL CHKOK2(ne, 59, 2, d)
+      CALL CHKSTR(ne, 59, str, "Lorem ipsum")
 
 C     60: GDMDSP check
       CALL GDMDSP(d, 'ipsum STRING "dolor sit amet."', 30, 'lorem', 5)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 60, 1, e
-      ENDIF
+      CALL CHKOK2(ne, 60, 1, d)
 
       CALL GDGTST(n, d, 'lorem/ipsum', 11, slen, str)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 60, 2, e
-      ENDIF
-
-      IF (str .NE. "dolor sit amet.") THEN
-        ne = ne + 1
-        WRITE(*, 9009) 60, str
-      ENDIF
+      CALL CHKOK2(ne, 60, 2, d)
+      CALL CHKSTR(ne, 60, str, "dolor sit amet.")
 
 C     61: GDPTCO check
       CALL GDPTCO(d, 'const', 5, GD_I32, 10)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 61, 1, e
-      ENDIF
+      CALL CHKOK2(ne, 61, 1, d)
 
       CALL GDGTCO(d, 'const', 5, GD_F32, fl)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 61, 2, e
-      ENDIF
-
-      IF (abs(fl - 10) .gt. 0.001) THEN
-        ne = ne + 1
-        WRITE(*, 9005) 61, fl
-      ENDIF
+      CALL CHKOK2(ne, 61, 2, d)
+      CALL CHKDBL(ne, 61, 1d0 * fl, 10.0d0)
 
 C     62: GDPTST check
       CALL GDPTST(n, d, 'string', 6, 11, "Arthur Dent")
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 62, 1, e
-      ENDIF
-
-      IF (n .NE. 11) THEN
-        ne = ne + 1
-        WRITE(*, 9002) 62, n
-      ENDIF
+      CALL CHKOK2(ne, 62, 1, d)
+      CALL CHKINT(ne, 62, n, 11)
 
       CALL GDGTST(n, d, 'string', 6, slen, str)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 62, 2, e
-      ENDIF
-
-      IF (str .NE. "Arthur Dent") THEN
-        ne = ne + 1
-        WRITE(*, 9009) 62, str
-      ENDIF
+      CALL CHKOK2(ne, 62, 2, d)
+      CALL CHKSTR(ne, 62, str, "Arthur Dent")
 
 C     63: GDNMFT check
       CALL GDNMFT(n, d, "data", 4, GD_LCE)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9001) 63, e
-      ENDIF
-
-      IF (n .NE. 2) THEN
-        ne = ne + 1
-        WRITE(*, 9002), 63, n
-      ENDIF
+      CALL CHKEOK(ne, 63, d)
+      CALL CHKINT(ne, 63, n, 2)
 
 C     64: GDMFDT check
       fields(1) = 'mnew1'
@@ -2077,37 +1029,15 @@ C     64: GDMFDT check
       DO 640 i = 1, n
       l = flen
       CALL GDMFDT(fn, l, d, "data", 4, GD_LCE, i)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 64, i, e
-      ENDIF
-
-      IF (l .NE. flen) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 64, i, l
-      ENDIF
-
-      IF (fn .NE. fields(i)) THEN
-        ne = ne + 1
-        WRITE(*, 9008) i, 64, fn
-      ENDIF
+      CALL CHKOK2(ne, 64, i, d)
+      CALL CHKIN2(ne, 64, i, l, flen)
+      CALL CHKST2(ne, 64, i, fn, fields(i))
   640 CONTINUE
 
 C     65: GDNMVE check
       CALL GDNMVE(n, d, "data", 4)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9001) 65, e
-      ENDIF
-
-      IF (n .NE. 10) THEN
-        ne = ne + 1
-        WRITE(*, 9002), 65, n
-      ENDIF
+      CALL CHKEOK(ne, 65, d)
+      CALL CHKINT(ne, 65, n, 10)
 
 C     66: GDMVEN check
       fields(1) = 'mlut  '
@@ -2123,105 +1053,36 @@ C     66: GDMVEN check
       DO 660 i = 1, n
       l = flen
       CALL GDMVEN(fn, l, d, "data", 4, i)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 66, i, e
-      ENDIF
-
-      IF (l .NE. flen) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 66, i, l
-      ENDIF
-
-      IF (fn .NE. fields(i)) THEN
-        ne = ne + 1
-        WRITE(*, 9008) i, 66, fn
-      ENDIF
+      CALL CHKOK2(ne, 66, i, d)
+      CALL CHKIN2(ne, 66, i, l, flen)
+      CALL CHKST2(ne, 66, i, fn, fields(i))
   660 CONTINUE
 
 C     67: GDALRW check
       CALL GDALRW(d, 'new1', 4, GD_I32, 4, 0)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 67, 1, e
-      ENDIF
+      CALL CHKOK2(ne, 67, 1, d)
 
       CALL GDGERW(l, i, n, d, 'new1', 4)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 67, 2, e
-      ENDIF
-
-      IF (n .NE. 0) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 67, 3, n
-      ENDIF
-
-      IF (l .NE. 4) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 67, 4, l
-      ENDIF
-
-      IF (i .NE. GD_I32) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 67, 5, i
-      ENDIF
+      CALL CHKOK2(ne, 67, 2, d)
+      CALL CHKIN2(ne, 67, 3, n, 0)
+      CALL CHKIN2(ne, 67, 4, l, 4)
+      CALL CHKIN2(ne, 67, 5, i, GD_I32)
 
 C     68: GDALLC check
       CALL GDALLC(d, 'new2', 4, 3, 'in4', 3, 9.9d-1, 7.8d0, 'in5', 3,
      +1.1d1, 2.2d-2, 'in6', 3, 1.96d0, 0d0)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 68, 1, e
-      ENDIF
+      CALL CHKOK2(ne, 68, 1, d)
 
       l = flen
       CALL GDGELC(i, fields(1), l, p(1), p(2), fields(2), l, p(3),
      +p(4), fields(3), l, p(5), p(6), n, d, 'new2', 4)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 68, 2, e
-      ENDIF
-
-      IF (l .NE. flen) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 68, 3, l
-      ENDIF
-
-      IF (i .NE. 3) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 68, 4, i
-      ENDIF
-
-      IF (n .NE. 0) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 68, 5, n
-      ENDIF
-
-      IF (fields(1) .NE. 'in4') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 68, 6, fields(1)
-      ENDIF
-
-      IF (fields(2) .NE. 'in5') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 68, 7, fields(2)
-      ENDIF
-
-      IF (fields(3) .NE. 'in6') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 68, 8, fields(3)
-      ENDIF
+      CALL CHKOK2(ne, 68, 2, d)
+      CALL CHKIN2(ne, 68, 3, l, flen)
+      CALL CHKIN2(ne, 68, 4, i, 3)
+      CALL CHKIN2(ne, 68, 5, n, 0)
+      CALL CHKST2(ne, 68, 6, fields(1), 'in4')
+      CALL CHKST2(ne, 68, 7, fields(2), 'in5')
+      CALL CHKST2(ne, 68, 8, fields(3), 'in6')
 
       q(1) = 9.9d-1
       q(2) = 7.8d0
@@ -2230,10 +1091,7 @@ C     68: GDALLC check
       q(5) = 1.96d0
       q(6) = 0d0
       DO 680 i=1,6
-      IF (abs(p(i) - q(i)) .gt. 0.001) THEN
-        ne = ne + 1
-        WRITE(*, 9010) i, 68, p(i)
-      ENDIF
+      CALL CHKDB2(ne, 68, i, p(i), q(i))
   680 CONTINUE
 
 C     69: GDALCL check
@@ -2243,104 +1101,42 @@ C     69: GDALCL check
       cq(4) = cmplx(0.6, 0.7)
       CALL GDALCL(d, 'new3', 4, 2, 'in4', 3, cq(1), cq(2), 'in3', 3,
      +cq(3), cq(4), '', 0, cq(5), cq(6))
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 69, 1, e
-      ENDIF
+      CALL CHKOK2(ne, 69, 1, d)
 
       l = flen
       CALL GDGECL(i, fields(1), l, cp(1), cp(2), fields(2), l, cp(3),
      +cp(4), fields(3), l, cp(5), cp(6), n, d, 'new3', 4)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9001) 69, e
-      ENDIF
-
-      IF (l .NE. flen) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 69, 1, l
-      ENDIF
-
-      IF (i .NE. 2) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 69, 2, i
-      ENDIF
-
-      IF (n .NE. 0) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 69, 3, n
-      ENDIF
-
-      IF (fields(1) .NE. 'in4') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 69, 4, fields(1)
-      ENDIF
-
-      IF (fields(2) .NE. 'in3') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 69, 5, fields(2)
-      ENDIF
+      CALL CHKOK2(ne, 69, 2, d)
+      CALL CHKIN2(ne, 69, 1, l, flen)
+      CALL CHKIN2(ne, 69, 2, i, 2)
+      CALL CHKIN2(ne, 69, 3, n, 0)
+      CALL CHKST2(ne, 69, 4, fields(1), 'in4')
+      CALL CHKST2(ne, 69, 5, fields(2), 'in3')
 
       cq(1) = cmplx(0.1, 0.2)
       cq(2) = cmplx(0.3, 0.4)
       cq(3) = cmplx(0.4, 0.5)
       cq(4) = cmplx(0.6, 0.7)
       DO 690 i=1,4
-      IF (abs(cp(i) - cq(i)) .gt. 0.001) THEN
-        ne = ne + 1
-        WRITE(*, 9011) i, 69, REAL(REAL(cp(i))), REAL(AIMAG(cp(i)))
-      ENDIF
+      CALL CHKCP2(ne, 69, i, cp(i), cq(i))
   690 CONTINUE
 
 C     70: GDALPN check
       CALL GDALPN(d, 'new4', 4, 4, 'in1', 3, 3d0, 4d0, 5d0, 6d0, 7d0,
      +0d0)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 70, 1, e
-      ENDIF
+      CALL CHKOK2(ne, 70, 1, e)
 
       l = flen
       CALL GDGEPN(i, fn, l, p(1), p(2), p(3), p(4), p(5), p(6),
      +n, d, 'new4', 4)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 70, 2, e
-      ENDIF
-
-      IF (l .NE. flen) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 70, 1, l
-      ENDIF
-
-      IF (i .NE. 4) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 70, 2, i
-      ENDIF
-
-      IF (n .NE. 0) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 70, 3, n
-      ENDIF
-
-      IF (fn .NE. 'in1') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 70, 4, fn
-      ENDIF
+      CALL CHKOK2(ne, 70, 2, e)
+      CALL CHKIN2(ne, 70, 1, l, flen)
+      CALL CHKIN2(ne, 70, 2, i, 4)
+      CALL CHKIN2(ne, 70, 3, n, 0)
+      CALL CHKST2(ne, 70, 4, fn, 'in1')
 
       DO 700 i=1,5
-      IF (abs(p(i) - 2d0 - i) .gt. 0.001) THEN
-        ne = ne + 1
-        WRITE(*, 9010) i, 70, p(i)
-      ENDIF
+      CALL CHKDB2(ne, 70, i, p(i), 2d0 + i)
   700 CONTINUE
 
 C     71: GDALCP check
@@ -2350,1367 +1146,473 @@ C     71: GDALCP check
       cq(4) = cmplx(1.3, 2.4)
       CALL GDALCP(d, 'new5', 4, 3, 'in1', 3, cq(1), cq(2), cq(3), cq(4),
      +cq(5), cq(6))
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 71, 1, e
-      ENDIF
+      CALL CHKOK2(ne, 71, 1, d)
 
       l = flen
       CALL GDGECP(i, fn, l, cp(1), cp(2), cp(3), cp(4), cp(5), cp(6),
      +n, d, 'new5', 4)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 71, 2, e
-      ENDIF
-
-      IF (l .NE. flen) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 71, 1, l
-      ENDIF
-
-      IF (i .NE. 3) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 71, 2, i
-      ENDIF
-
-      IF (n .NE. 0) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 71, 3, n
-      ENDIF
-
-      IF (fn .NE. 'in1') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 71, 4, fn
-      ENDIF
+      CALL CHKOK2(ne, 71, 2, d)
+      CALL CHKIN2(ne, 71, 1, l, flen)
+      CALL CHKIN2(ne, 71, 2, i, 3)
+      CALL CHKIN2(ne, 71, 3, n, 0)
+      CALL CHKST2(ne, 71, 4, fn, 'in1')
 
       cq(1) = cmplx(1.1, 5.0)
       cq(2) = cmplx(1.2, 4.0)
       cq(3) = cmplx(1.2, 3.0)
       cq(4) = cmplx(1.3, 2.4)
       DO 710 i=1,4
-      IF (abs(cp(i) - cq(i)) .gt. 0.001) THEN
-        ne = ne + 1
-        WRITE(*, 9011) i, 71, REAL(REAL(cp(i))), REAL(AIMAG(cp(i)))
-      ENDIF
+      CALL CHKCP2(ne, 71, i, cp(i), cq(i))
   710 CONTINUE
 
 C     72: GDALLT check
       CALL GDALLT(d, "new6", 4, "in3", 3, "./other/table", 13, 0)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 72, 1, e
-      ENDIF
+      CALL CHKOK2(ne, 72, 1, d)
 
       l = flen
       CALL GDGELT(fn, l, str, slen, n, d, 'new6', 4)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 72, 2, e
-      ENDIF
-
-      IF (l .NE. flen) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 72, 1, l
-      ENDIF
-
-      IF (n .NE. 0) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 72, 2, n
-      ENDIF
-
-      IF (fn .NE. 'in3') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 72, 3, fn
-      ENDIF
-
-      IF (str .NE. './other/table') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 72, 4, str
-      ENDIF
+      CALL CHKOK2(ne, 72, 2, d)
+      CALL CHKIN2(ne, 72, 1, l, flen)
+      CALL CHKIN2(ne, 72, 2, n, 0)
+      CALL CHKST2(ne, 72, 3, fn, 'in3')
+      CALL CHKST2(ne, 73, 4, str, './other/table')
 
 C     73: GDALBT check
       CALL GDALBT(d, "new7", 4, "in3", 3, 3, 2)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 73, 1, e
-      ENDIF
+      CALL CHKOK2(ne, 73, 1, d)
 
       l = flen
       CALL GDGEBT(fn, l, m, i, n, d, 'new7', 4)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 73, 2, e
-      ENDIF
-
-      IF (l .NE. flen) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 73, 1, l
-      ENDIF
-
-      IF (n .NE. 0) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 73, 2, n
-      ENDIF
-
-      IF (i .NE. 2) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 73, 3, i
-      ENDIF
-
-      IF (m .NE. 3) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 73, 4, m
-      ENDIF
-
-      IF (fn .NE. 'in3') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 73, 5, fn
-      ENDIF
+      CALL CHKOK2(ne, 73, 2, d)
+      CALL CHKIN2(ne, 73, 1, l, flen)
+      CALL CHKIN2(ne, 73, 2, n, 0)
+      CALL CHKIN2(ne, 73, 3, i, 2)
+      CALL CHKIN2(ne, 73, 4, m, 3)
+      CALL CHKST2(ne, 73, 5, fn, 'in3')
 
 C     74: GDALSB check
       CALL GDALSB(d, "new8", 4, "out", 3, 1, 22)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 74, 1, e
-      ENDIF
+      CALL CHKOK2(ne, 74, 1, d)
 
       l = flen
       CALL GDGESB(fn, l, m, i, n, d, 'new8', 4)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 74, 2, e
-      ENDIF
-
-      IF (l .NE. flen) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 74, 1, l
-      ENDIF
-
-      IF (n .NE. 0) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 74, 2, n
-      ENDIF
-
-      IF (i .NE. 22) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 74, 3, i
-      ENDIF
-
-      IF (m .NE. 1) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 74, 4, m
-      ENDIF
-
-      IF (fn .NE. 'out') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 74, 5, fn
-      ENDIF
+      CALL CHKOK2(ne, 74, 2, d)
+      CALL CHKIN2(ne, 74, 1, l, flen)
+      CALL CHKIN2(ne, 74, 2, n, 0)
+      CALL CHKIN2(ne, 74, 3, i, 22)
+      CALL CHKIN2(ne, 74, 4, m, 1)
+      CALL CHKST2(ne, 74, 5, fn, 'out')
 
 C     75: GDALMT check
       CALL GDALMT(d, 'new9', 4, 'in6', 3, 'in4', 3)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 75, 1, e
-      ENDIF
+      CALL CHKOK2(ne, 75, 1, d)
 
       l = flen
       CALL GDGEMT(fields(1), l, fields(2), l, n, d, 'new9', 4)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 75, 2, e
-      ENDIF
-
-      IF (l .NE. flen) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 75, 1, l
-      ENDIF
-
-      IF (n .NE. 0) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 75, 2, n
-      ENDIF
-
-      IF (fields(1) .NE. 'in6') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 75, 3, fields(1)
-      ENDIF
-
-      IF (fields(2) .NE. 'in4') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 75, 4, fields(2)
-      ENDIF
+      CALL CHKOK2(ne, 75, 2, d)
+      CALL CHKIN2(ne, 75, 1, l, flen)
+      CALL CHKIN2(ne, 75, 2, n, 0)
+      CALL CHKST2(ne, 75, 3, fields(1), 'in6')
+      CALL CHKST2(ne, 75, 4, fields(2), 'in4')
 
 C     76: GDALPH check
       CALL GDALPH(d, 'new10', 5, 'in2', 3, 8)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 76, 1, e
-      ENDIF
+      CALL CHKOK2(ne, 76, 1, d)
 
       l = flen
       CALL GDGEPH(fn, l, i, n, d, 'new10', 5)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 76, 2, e
-      ENDIF
-
-      IF (l .NE. flen) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 76, 1, l
-      ENDIF
-
-      IF (n .NE. 0) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 76, 2, n
-      ENDIF
-
-      IF (i .NE. 8) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 76, 3, i
-      ENDIF
-
-      IF (fn .NE. 'in2') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 76, 4, fn
-      ENDIF
+      CALL CHKOK2(ne, 76, 2, d)
+      CALL CHKIN2(ne, 76, 1, l, flen)
+      CALL CHKIN2(ne, 76, 2, n, 0)
+      CALL CHKIN2(ne, 76, 3, i, 8)
+      CALL CHKST2(ne, 76, 4, fn, 'in2')
 
 C     77: GDALCO check
       CALL GDALCO(d, 'new11', 5, GD_F32)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 77, 1, e
-      ENDIF
+      CALL CHKOK2(ne, 77, 2, d)
 
       CALL GDGECO(i, n, d, 'new11', 5)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 77, 2, e
-      ENDIF
-
-      IF (l .NE. flen) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 77, 1, l
-      ENDIF
-
-      IF (n .NE. 0) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 77, 2, n
-      ENDIF
-
-      IF (i .NE. GD_F32) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 77, 3, i
-      ENDIF
+      CALL CHKOK2(ne, 77, 2, d)
+      CALL CHKIN2(ne, 77, 1, l, flen)
+      CALL CHKIN2(ne, 77, 2, n, 0)
+      CALL CHKIN2(ne, 77, 3, i, GD_F32)
 
       CALL GDGTCO(d, 'new11', 5, GD_F32, fl)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 77, 3, e
-      ENDIF
-
-      IF (abs(fl + 8.1) .gt. 0.001) THEN
-        ne = ne + 1
-        WRITE(*, 9005) 77, fl
-      ENDIF
+      CALL CHKOK2(ne, 77, 3, d)
+      CALL CHKDBL(ne, 77, 1d0 * fl, -8.1d0)
 
 C     78: GDGENC check
       CALL GDGENC(n, d, 0)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9001) 78, e
-      ENDIF
-
-      IF (n .NE. GD_EN) THEN
-        ne = ne + 1
-        WRITE(*, 9002) 78, n
-      ENDIF
+      CALL CHKEOK(ne, 78, d)
+      CALL CHKINT(ne, 78, n, GD_EN)
 
 C     79: GDGEND check
       CALL GDGEND(n, d, 0)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9001) 79, e
-      ENDIF
-
-      IF (n .NE. (GD_LE + GD_NA)) THEN
-        ne = ne + 1
-        WRITE(*, 9002) 79, n
-      ENDIF
+      CALL CHKEOK(ne, 79, d)
+      CALL CHKINT(ne, 79, n, GD_LE + GD_NA)
 
 C     80: GDNAME check
       l = slen
       CALL GDNAME(str, l, d, 0)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9001) 80, e
-      ENDIF
-
-      IF (l .NE. slen) THEN
-        ne = ne + 1
-        WRITE(*, 9002) 80, l
-      ENDIF
-
-      IF (str .NE. 'test_dirfile') THEN
-        ne = ne + 1
-        WRITE(*, 9009) 80, str
-      ENDIF
+      CALL CHKEOK(ne, 80, d)
+      CALL CHKINT(ne, 80, l, slen)
+      CALL CHKSTR(ne, 80, str, 'test_dirfile')
 
 C     81: GDPFRG check
       CALL GDPFRG(n, d, 1)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9001) 81, e
-      ENDIF
-
-      IF (n .NE. 0) THEN
-        ne = ne + 1
-        WRITE(*, 9002) 81, n
-      ENDIF
+      CALL CHKEOK(ne, 81, d)
+      CALL CHKINT(ne, 81, n, 0)
 
 C     82: GDAPRT check
       CALL GDAPRT(d, GDPR_D, 1)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9001) 82, e
-      ENDIF
+      CALL CHKEOK(ne, 82, d)
 
 C     83: GDGPRT check
       CALL GDGPRT(n, d, 1)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9001) 83, e
-      ENDIF
-
-      IF (n .NE. GDPR_D) THEN
-        ne = ne + 1
-        WRITE(*, 9002) 83, n
-      ENDIF
+      CALL CHKEOK(ne, 83, d)
+      CALL CHKINT(ne, 83, n, GDPR_D)
 
 C     84: GDRWFN check
-      l = slen
-      CALL GDRWFN(str, l, d, "data", 4)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9001) 84, e
-      ENDIF
-
-      IF (l .NE. slen) THEN
-        ne = ne + 1
-        WRITE(*, 9002) 84, l
-      ENDIF
-
-      IF (str .NE. 'test_dirfile/data') THEN
-        ne = ne + 1
-        WRITE(*, 9009) 84, str
-      ENDIF
+      l = plen
+      CALL GDRWFN(path, l, d, "data", 4)
+      CALL CHKEOK(ne, 84, d)
+      CALL CHKINT(ne, 84, l, plen)
+      CALL CHKEOS(ne, 84, path, 'test_dirfile/data')
 
 C     85: GDREFE check
       l = slen
       CALL GDREFE(str, l, d, "new1", 4)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9001) 85, e
-      ENDIF
-
-      IF (l .NE. slen) THEN
-        ne = ne + 1
-        WRITE(*, 9002) 85, l
-      ENDIF
-
-      IF (str .NE. 'new1') THEN
-        ne = ne + 1
-        WRITE(*, 9009) 85, str
-      ENDIF
+      CALL CHKEOK(ne, 85, d)
+      CALL CHKINT(ne, 85, l, slen)
+      CALL CHKSTR(ne, 85, str, 'new1')
 
 C     87: GDAENC check
       CALL GDAENC(d, GD_ES, 1, 0)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 87, 1, e
-      ENDIF
+      CALL CHKOK2(ne, 87, 1, d)
 
       CALL GDGENC(n, d, 1)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 87, 2, e
-      ENDIF
-
-      IF (n .NE. GD_ES) THEN
-        ne = ne + 1
-        WRITE(*, 9002) 87, n
-      ENDIF
+      CALL CHKOK2(ne, 87, 2, d)
+      CALL CHKINT(ne, 87, n, GD_ES)
 
 C     88: GDAEND check
       CALL GDAEND(d, GD_BE, 1, 0)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 88, 1, e
-      ENDIF
+      CALL CHKOK2(ne, 88, 1, d)
 
       CALL GDGEND(n, d, 1)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 88, 2, e
-      ENDIF
-
-      IF (n .NE. GD_BE) THEN
-        ne = ne + 1
-        WRITE(*, 9002) 88, n
-      ENDIF
+      CALL CHKOK2(ne, 88, 2, d)
+      CALL CHKINT(ne, 88, n, GD_BE)
 
 C     89: GDALSP check
       CALL GDALSP(d, 'new10 PHASE in1 3', 17, 0)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 89, 1, e
-      ENDIF
+      CALL CHKOK2(ne, 89, 1, d)
 
       l = flen
       CALL GDGEPH(fn, l, i, n, d, 'new10', 5)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 89, 2, e
-      ENDIF
-
-      IF (l .NE. flen) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 89, 1, l
-      ENDIF
-
-      IF (n .NE. 0) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 89, 2, n
-      ENDIF
-
-      IF (i .NE. 3) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 89, 3, i
-      ENDIF
-
-      IF (fn .NE. 'in1') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 89, 4, fn
-      ENDIF
+      CALL CHKOK2(ne, 89, 2, d)
+      CALL CHKIN2(ne, 89, 1, l, flen)
+      CALL CHKIN2(ne, 89, 2, n, 0)
+      CALL CHKIN2(ne, 89, 3, i, 3)
+      CALL CHKST2(ne, 89, 4, fn, 'in1')
 
 C     90: GDDELE check
       CALL GDDELE(d, 'new10', 5, 0)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 90, 1, e
-      ENDIF
+      CALL CHKOK2(ne, 90, 1, d)
 
       l = flen
       CALL GDGEPH(fn, l, i, n, d, 'new10', 5)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EBC) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 90, 2, e
-      ENDIF
+      CALL CHKER2(ne, 90, 2, d, GD_EBC)
 
 C     91: GDMLSP check
       CALL GDMLSP(d, 'mnew10 PHASE in4 11', 19, 'data', 4, 0)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 91, 1, e
-      ENDIF
+      CALL CHKOK2(ne, 91, 1, d)
 
       l = flen
       CALL GDGEPH(fn, l, i, n, d, 'data/mnew10', 11)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 91, 2, e
-      ENDIF
-
-      IF (l .NE. flen) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 91, 1, l
-      ENDIF
-
-      IF (n .NE. 0) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 91, 2, n
-      ENDIF
-
-      IF (i .NE. 11) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 91, 3, i
-      ENDIF
-
-      IF (fn .NE. 'in4') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 91, 4, fn
-      ENDIF
+      CALL CHKOK2(ne, 91, 2, d)
+      CALL CHKIN2(ne, 91, 1, l, flen)
+      CALL CHKIN2(ne, 91, 2, n, 0)
+      CALL CHKIN2(ne, 91, 3, i, 11)
+      CALL CHKST2(ne, 91, 4, fn, 'in4')
 
 C     92: GDMOVE check
       CALL GDMOVE(d, 'new9', 4, 1, 0)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 92, 1, e
-      ENDIF
+      CALL CHKOK2(ne, 92, 1, d)
 
       l = flen
       CALL GDGEMT(fields(1), l, fields(2), l, n, d, 'new9', 4)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 92, 2, e
-      ENDIF
-
-      IF (l .NE. flen) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 92, 1, l
-      ENDIF
-
-      IF (n .NE. 1) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 92, 2, n
-      ENDIF
-
-      IF (fields(1) .NE. 'in6') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 92, 3, fields(1)
-      ENDIF
-
-      IF (fields(2) .NE. 'in4') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 92, 4, fields(2)
-      ENDIF
+      CALL CHKOK2(ne, 92, 2, d)
+      CALL CHKIN2(ne, 92, 1, l, flen)
+      CALL CHKIN2(ne, 92, 2, n, 1)
+      CALL CHKST2(ne, 92, 3, fields(1), 'in6')
+      CALL CHKST2(ne, 92, 4, fields(2), 'in4')
 
 C     93: GDRENM check
       CALL GDRENM(d, 'new9', 4, 'newer', 5, 0)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 93, 1, e
-      ENDIF
+      CALL CHKOK2(ne, 93, 1, d)
 
       CALL GDGEMT(fields(1), l, fields(2), l, n, d, 'new9', 4)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EBC) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 93, 2, e
-      ENDIF
+      CALL CHKER2(ne, 93, 2, d, GD_EBC)
 
       l = flen
       CALL GDGEMT(fields(1), l, fields(2), l, n, d, 'newer', 5)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 93, 3, e
-      ENDIF
-
-      IF (l .NE. flen) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 93, 1, l
-      ENDIF
-
-      IF (n .NE. 1) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 93, 2, n
-      ENDIF
-
-      IF (fields(1) .NE. 'in6') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 93, 3, fields(1)
-      ENDIF
-
-      IF (fields(2) .NE. 'in4') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 93, 4, fields(2)
-      ENDIF
+      CALL CHKOK2(ne, 93, 3, d)
+      CALL CHKIN2(ne, 93, 1, l, flen)
+      CALL CHKIN2(ne, 93, 2, n, 1)
+      CALL CHKST2(ne, 93, 3, fields(1), 'in6')
+      CALL CHKST2(ne, 93, 4, fields(2), 'in4')
 
 C     94: GDUINC check
       CALL GDUINC(d, 1, 0)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 94, 1, e
-      ENDIF
+      CALL CHKOK2(ne, 94, 1, d)
 
       CALL GDGEMT(fields(1), l, fields(2), l, n, d, 'newer', 5)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EBC) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 94, 2, e
-      ENDIF
+      CALL CHKER2(ne, 94, 2, d, GD_EBC)
 
 C     95: GDGFOF check
       CALL GDGFOF(n, d, 0)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9001) 95, e
-      ENDIF
-
-      IF (n .NE. 0) THEN
-        ne = ne + 1
-        WRITE(*, 9002) 95, n
-      ENDIF
+      CALL CHKEOK(ne, 95, d)
+      CALL CHKINT(ne, 95, n, 0)
 
 C     96: GDAFOF check
       CALL GDAFOF(d, 33, 0, 0)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9001) 96, e
-      ENDIF
+      CALL CHKOK2(ne, 96, 1, d)
 
       CALL GDGFOF(n, d, 0)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9001) 96, e
-      ENDIF
-
-      IF (n .NE. 33) THEN
-        ne = ne + 1
-        WRITE(*, 9002) 96, n
-      ENDIF
+      CALL CHKOK2(ne, 96, 2, d)
+      CALL CHKINT(ne, 96, n, 33)
 
 C     97: GDNTYP check
       CALL GDNTYP(n, d, 'data', 4)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9001) 97, e
-      ENDIF
-
-      IF (n .NE. GD_I8) THEN
-        ne = ne + 1
-        WRITE(*, 9002) 97, n
-      ENDIF
+      CALL CHKEOK(ne, 97, d)
+      CALL CHKINT(ne, 97, n, GD_I8)
 
 C     98: GDCSCL check
       CALL GDCSCL(n, d, 'polynom', 7)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9001) 98, e
-      ENDIF
-
-      IF (n .NE. 1) THEN
-        ne = ne + 1
-        WRITE(*, 9002) 98, n
-      ENDIF
+      CALL CHKEOK(ne, 98, d)
+      CALL CHKINT(ne, 98, n, 1)
 
 C     99: GDVLDT check
       CALL GDVLDT(n, d, 'new7', 4)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EBC) THEN
-        ne = ne + 1
-        WRITE(*, 9001) 99, e
-      ENDIF
-
-      IF (n .NE. -1) THEN
-        ne = ne + 1
-        WRITE(*, 9002) 99, n
-      ENDIF
+      CALL CHKERR(ne, 99, d, GD_EBC)
+      CALL CHKINT(ne, 99, n, -1)
 
 C     100: GDFNUM check
       l = slen
       CALL GDREFE(str, l, d, "data", 4)
       CALL GDFNUM(dp, d, 'INDEX', 5, 33.3d0)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9001) 100, e
-      ENDIF
-
-      IF (abs(dp - 33.3) .gt. 0.001) THEN
-        ne = ne + 1
-        WRITE(*, 9012) 100, dp
-      ENDIF
+      CALL CHKEOK(ne, 100, d)
+      CALL CHKDBL(ne, 100, dp, 33.3D0)
 
 C     101: GDFNSS check
       CALL GDFNSS(dp, d, 'data', 4, 33.3d0, 6, 0)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9001) 101, e
-      ENDIF
-
-      IF (abs(dp - 37.0375) .gt. 0.001) THEN
-        ne = ne + 1
-        WRITE(*, 9012) 101, dp
-      ENDIF
+      CALL CHKEOK(ne, 101, d)
+      CALL CHKDBL(ne, 101, dp, 37.0375D0)
 
 C     138: GDGSCA check
       l = slen
       CALL GDGSCA(str, l, n, d, 'lincom', 6, 6)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9001) 138, e
-      ENDIF
-
-      IF (n .NE. -1) THEN
-        ne = ne + 1
-        WRITE(*, 9002) 138, n
-      ENDIF
-
-      IF (str .NE. "const") THEN
-        ne = ne + 1
-        WRITE(*, 9009) 138, str
-      ENDIF
+      CALL CHKEOK(ne, 138, d)
+      CALL CHKINT(ne, 138, n, -1)
+      CALL CHKSTR(ne, 138, str, "const")
 
 C     139: GDASCA check
       CALL GDASCA(d, 'lincom', 6, 6, 'new11', 5, -1, 0)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 139, 1, e
-      ENDIF
+      CALL CHKOK2(ne, 139, 1, d)
 
       l = slen
       CALL GDGSCA(str, l, n, d, 'lincom', 6, 6)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 139, 2, e
-      ENDIF
-
-      IF (n .NE. -1) THEN
-        ne = ne + 1
-        WRITE(*, 9002) 139, n
-      ENDIF
-
-      IF (str .NE. "new11") THEN
-        ne = ne + 1
-        WRITE(*, 9009) 139, str
-      ENDIF
+      CALL CHKOK2(ne, 139, 2, d)
+      CALL CHKINT(ne, 139, n, -1)
+      CALL CHKSTR(ne, 139, str, "new11")
 
 C     86: GDGEOF check
       CALL GDGEOF(n, d, 'lincom', 6)
-      CALL GDEROR(e, d)
-
-      IF (e. NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9001) 86, e
-      ENDIF
-
-      IF (n .NE. 344) THEN
-        ne = ne + 1
-        WRITE(*, 9002) 86, n
-      ENDIF
+      CALL CHKEOK(ne, 86, d)
+      CALL CHKINT(ne, 86, n, 344)
 
 C     142: GDGBOF check
       CALL GDGBOF(n, d, 'lincom', 6)
-      CALL GDEROR(e, d)
-
-      IF (e. NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9001) 142, e
-      ENDIF
-
-      IF (n .NE. 264) THEN
-        ne = ne + 1
-        WRITE(*, 9002) 142, n
-      ENDIF
+      CALL CHKEOK(ne, 142, d)
+      CALL CHKINT(ne, 142, n, 264)
 
 C     143: GDGEDV check
       l = flen
       CALL GDGEDV(fields(1), l, fields(2), l, n, d, 'div', 3)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9001) 143, e
-      ENDIF
-
-      IF (l .NE. flen) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 143, 1, l
-      ENDIF
-
-      IF (n .NE. 0) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 143, 2, n
-      ENDIF
-
-      IF (fields(1) .NE. 'mult') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 143, 3, fields(1)
-      ENDIF
-
-      IF (fields(2) .NE. 'bit') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 143, 4, fields(2)
-      ENDIF
+      CALL CHKEOK(ne, 143, d)
+      CALL CHKIN2(ne, 143, 1, l, flen)
+      CALL CHKIN2(ne, 143, 2, n, 0)
+      CALL CHKST2(ne, 143, 3, fields(1), 'mult')
+      CALL CHKST2(ne, 143, 4, fields(2), 'bit')
 
 C     144: GDGERC check
       l = flen
       CALL GDGERC(fields(1), l, dp, n, d, 'recip', 5)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9001) 144, e
-      ENDIF
-
-      IF (l .NE. flen) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 144, 1, l
-      ENDIF
-
-      IF (n .NE. 0) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 144, 2, n
-      ENDIF
-
-      IF (fields(1) .NE. 'div') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 144, 3, fields(1)
-      ENDIF
-
-      IF (abs(dp - 6.5) .gt. 0.001) THEN
-        ne = ne + 1
-        WRITE(*, 9012) 144, dp
-      ENDIF
+      CALL CHKEOK(ne, 144, d)
+      CALL CHKIN2(ne, 144, 1, l, flen)
+      CALL CHKIN2(ne, 144, 2, n, 0)
+      CALL CHKST2(ne, 144, 3, fields(1), 'div')
+      CALL CHKDB2(ne, 144, 4, dp, 6.5D0)
 
 C     145: GDGECR check
       l = flen
       CALL GDGECR(fields(1), l, dc, n, d, 'recip', 5)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9001) 145, e
-      ENDIF
-
-      IF (l .NE. flen) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 145, 1, l
-      ENDIF
-
-      IF (n .NE. 0) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 145, 2, n
-      ENDIF
-
-      IF (fields(1) .NE. 'div') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 145, 3, fields(1)
-      ENDIF
-
-      IF (abs(dc - cmplx(6.5, 4.3)) .gt. 0.001) THEN
-        ne = ne + 1
-        WRITE(*, 9013) 145, REAL(REAL(dc)), REAL(AIMAG(dc))
-      ENDIF
+      CALL CHKEOK(ne, 145, d)
+      CALL CHKIN2(ne, 145, 1, l, flen)
+      CALL CHKIN2(ne, 145, 2, n, 0)
+      CALL CHKST2(ne, 145, 3, fields(1), 'div')
+      CALL CHKCP2(ne, 145, 4, dc, dcmplx(6.5, 4.3))
 
 C     146: GDADDV check
       CALL GDADDV(d, 'new14', 5, 'in1', 3, 'in2', 3, 0)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 146, 1, e
-      ENDIF
+      CALL CHKOK2(ne, 146, 1, d)
 
       l = flen
       CALL GDGEDV(fields(1), l, fields(2), l, n, d, 'new14', 5)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 146, 2, e
-      ENDIF
-
-      IF (l .NE. flen) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 146, 1, l
-      ENDIF
-
-      IF (n .NE. 0) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 146, 2, n
-      ENDIF
-
-      IF (fields(1) .NE. 'in1') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 146, 3, fields(1)
-      ENDIF
-
-      IF (fields(2) .NE. 'in2') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 146, 4, fields(2)
-      ENDIF
+      CALL CHKOK2(ne, 146, 2, d)
+      CALL CHKIN2(ne, 146, 1, l, flen)
+      CALL CHKIN2(ne, 146, 2, n, 0)
+      CALL CHKST2(ne, 146, 3, fields(1), 'in1')
+      CALL CHKST2(ne, 146, 4, fields(2), 'in2')
 
 C     147: GDADRC check
       p(1) = 31.9
       CALL GDADRC(d, 'new15', 5, 'in1', 3, p(1), 0)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 147, 1, e
-      ENDIF
+      CALL CHKOK2(ne, 147, 1, d)
 
       l = flen
       CALL GDGERC(fields(1), l, dp, n, d, 'new15', 5)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 147, 2, e
-      ENDIF
-
-      IF (l .NE. flen) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 147, 1, l
-      ENDIF
-
-      IF (n .NE. 0) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 147, 2, n
-      ENDIF
-
-      IF (fields(1) .NE. 'in1') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 147, 3, fields(1)
-      ENDIF
-
-      IF (abs(dp - p(1)) .gt. 0.001) THEN
-        ne = ne + 1
-        WRITE(*, 9012) 147, dp
-      ENDIF
+      CALL CHKOK2(ne, 147, 2, d)
+      CALL CHKIN2(ne, 147, 1, l, flen)
+      CALL CHKIN2(ne, 147, 2, n, 0)
+      CALL CHKST2(ne, 147, 3, fields(1), 'in1')
+      CALL CHKDB2(ne, 147, 4, dp, p(1))
 
 C     148: GDADCR check
       cp(1) = cmplx(31.9, 38.2)
       CALL GDADCR(d, 'new16', 5, 'in1', 3, cp(1), 0)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 148, 1, e
-      ENDIF
+      CALL CHKOK2(ne, 148, 1, d)
 
       l = flen
       CALL GDGECR(fields(1), l, dc, n, d, 'new16', 5)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 148, 2, e
-      ENDIF
-
-      IF (l .NE. flen) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 148, 1, l
-      ENDIF
-
-      IF (n .NE. 0) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 148, 2, n
-      ENDIF
-
-      IF (fields(1) .NE. 'in1') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 148, 3, fields(1)
-      ENDIF
-
-      IF (abs(dc - cp(1)) .gt. 0.001) THEN
-        ne = ne + 1
-        WRITE(*, 9013) 148, dc
-      ENDIF
+      CALL CHKOK2(ne, 148, 2, d)
+      CALL CHKIN2(ne, 148, 1, l, flen)
+      CALL CHKIN2(ne, 148, 2, n, 0)
+      CALL CHKST2(ne, 148, 3, fields(1), 'in1')
+      CALL CHKCP2(ne, 148, 4, dc, cp(1))
 
 C     149: GDMDDV check
       CALL GDMDDV(d, 'data', 4, 'new14', 5, 'in3', 3, 'in4', 3)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 149, 1, e
-      ENDIF
+      CALL CHKOK2(ne, 149, 1, d)
 
       l = flen
       CALL GDGEDV(fields(1), l, fields(2), l, n, d, 'data/new14', 10)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 149, 2, e
-      ENDIF
-
-      IF (l .NE. flen) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 149, 1, l
-      ENDIF
-
-      IF (n .NE. 0) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 149, 2, n
-      ENDIF
-
-      IF (fields(1) .NE. 'in3') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 149, 3, fields(1)
-      ENDIF
-
-      IF (fields(2) .NE. 'in4') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 149, 4, fields(2)
-      ENDIF
+      CALL CHKOK2(ne, 149, 2, d)
+      CALL CHKIN2(ne, 149, 1, l, flen)
+      CALL CHKIN2(ne, 149, 2, n, 0)
+      CALL CHKST2(ne, 149, 3, fields(1), 'in3')
+      CALL CHKST2(ne, 149, 4, fields(2), 'in4')
 
 C     150: GDMDRC check
       p(1) = 95.5
       CALL GDMDRC(d, 'data', 4, 'new15', 5, 'in0', 3, p(1))
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 150, 1, e
-      ENDIF
+      CALL CHKOK2(ne, 150, 1, d)
 
       l = flen
       CALL GDGERC(fields(1), l, dp, n, d, 'data/new15', 10)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 150, 2, e
-      ENDIF
-
-      IF (l .NE. flen) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 150, 1, l
-      ENDIF
-
-      IF (n .NE. 0) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 150, 2, n
-      ENDIF
-
-      IF (fields(1) .NE. 'in0') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 150, 3, fields(1)
-      ENDIF
-
-      IF (abs(dp - p(1)) .gt. 0.001) THEN
-        ne = ne + 1
-        WRITE(*, 9012) 150, dp
-      ENDIF
+      CALL CHKOK2(ne, 150, 2, d)
+      CALL CHKIN2(ne, 150, 1, l, flen)
+      CALL CHKIN2(ne, 150, 2, n, 0)
+      CALL CHKST2(ne, 150, 3, fields(1), 'in0')
+      CALL CHKDB2(ne, 150, 4, dp, p(1))
 
 C     151: GDADCR check
       cp(1) = cmplx(8.47, 6.22)
       CALL GDMDCR(d,'data', 4,  'new16', 5, 'in3', 3, cp(1))
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 151, 1, e
-      ENDIF
+      CALL CHKOK2(ne, 151, 1, d)
 
       l = flen
       CALL GDGECR(fields(1), l, dc, n, d, 'data/new16', 10)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 151, 2, e
-      ENDIF
-
-      IF (l .NE. flen) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 151, 1, l
-      ENDIF
-
-      IF (n .NE. 0) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 151, 2, n
-      ENDIF
-
-      IF (fields(1) .NE. 'in3') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 151, 3, fields(1)
-      ENDIF
-
-      IF (abs(dc - cp(1)) .gt. 0.001) THEN
-        ne = ne + 1
-        WRITE(*, 9013) 151, dc
-      ENDIF
+      CALL CHKOK2(ne, 151, 2, d)
+      CALL CHKIN2(ne, 151, 1, l, flen)
+      CALL CHKIN2(ne, 151, 2, n, 0)
+      CALL CHKST2(ne, 151, 3, fields(1), 'in3')
+      CALL CHKCP2(ne, 151, 4, dc, cp(1))
 
 C     152: GDALDV check
       CALL GDALDV(d, 'new14', 5, 'in6', 3, 'in4', 3)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 152, 1, e
-      ENDIF
+      CALL CHKOK2(ne, 152, 1, d)
 
       l = flen
       CALL GDGEDV(fields(1), l, fields(2), l, n, d, 'new14', 5)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 152, 2, e
-      ENDIF
-
-      IF (l .NE. flen) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 152, 1, l
-      ENDIF
-
-      IF (n .NE. 0) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 152, 2, n
-      ENDIF
-
-      IF (fields(1) .NE. 'in6') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 152, 3, fields(1)
-      ENDIF
-
-      IF (fields(2) .NE. 'in4') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 152, 4, fields(2)
-      ENDIF
+      CALL CHKOK2(ne, 152, 2, d)
+      CALL CHKIN2(ne, 152, 1, l, flen)
+      CALL CHKIN2(ne, 152, 2, n, 0)
+      CALL CHKST2(ne, 152, 3, fields(1), 'in6')
+      CALL CHKST2(ne, 152, 4, fields(2), 'in4')
 
 C     153: GDALRC check
       p(1) = 0.187
       CALL GDALRC(d, 'new15', 5, 'in5', 3, p(1))
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 153, 1, e
-      ENDIF
+      CALL CHKOK2(ne, 153, 1, d)
 
       l = flen
       CALL GDGERC(fields(1), l, dp, n, d, 'new15', 5)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 153, 2, e
-      ENDIF
-
-      IF (l .NE. flen) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 153, 1, l
-      ENDIF
-
-      IF (n .NE. 0) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 153, 2, n
-      ENDIF
-
-      IF (fields(1) .NE. 'in5') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 153, 3, fields(1)
-      ENDIF
-
-      IF (abs(dp - p(1)) .gt. 0.001) THEN
-        ne = ne + 1
-        WRITE(*, 9012) 153, dp
-      ENDIF
+      CALL CHKOK2(ne, 153, 2, d)
+      CALL CHKIN2(ne, 153, 1, l, flen)
+      CALL CHKIN2(ne, 153, 2, n, 0)
+      CALL CHKST2(ne, 153, 3, fields(1), 'in5')
+      CALL CHKDB2(ne, 153, 4, dp, p(1))
 
 C     154: GDALCR check
       cp(1) = cmplx(4.3, 81.81)
       CALL GDALCR(d, 'new16', 5, 'in6', 3, cp(1))
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 154, 1, e
-      ENDIF
+      CALL CHKOK2(ne, 154, 1, d)
 
       l = flen
       CALL GDGECR(fields(1), l, dc, n, d, 'new16', 5)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 154, 2, e
-      ENDIF
-
-      IF (l .NE. flen) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 154, 1, l
-      ENDIF
-
-      IF (n .NE. 0) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 154, 2, n
-      ENDIF
-
-      IF (fields(1) .NE. 'in6') THEN
-        ne = ne + 1
-        WRITE(*, 9008) 154, 3, fields(1)
-      ENDIF
-
-      IF (abs(dc - cp(1)) .gt. 0.001) THEN
-        ne = ne + 1
-        WRITE(*, 9013) 154, dc
-      ENDIF
+      CALL CHKOK2(ne, 154, 2, d)
+      CALL CHKIN2(ne, 154, 1, l, flen)
+      CALL CHKIN2(ne, 154, 2, n, 0)
+      CALL CHKST2(ne, 154, 3, fields(1), 'in6')
+      CALL CHKCP2(ne, 154, 4, dc, cp(1))
 
 C     155: GDRFRG check
       CALL GDRFRG(d, 0)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9001), 155, e
-      ENDIF
+      CALL CHKEOK(ne, 155, d)
 
 C     156: GDINVD check
       CALL GDINVD(m)
-      CALL GDEROR(e, m)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006), 156, 1, e
-      ENDIF
+      CALL CHKOK2(ne, 156, 1, m)
 
       CALL GDNFRG(n, m)
-      CALL GDEROR(e, m)
-
-      IF (e .NE. GD_EBD) THEN
-        ne = ne + 1
-        WRITE(*, 9006), 156, 2, e
-      ENDIF
+      CALL CHKER2(ne, 156, 2, m, GD_EBD)
 
       CALL GDCLOS(m)
 
 C     157: GDSTDV check
       n = GDSV_C
       CALL GDSTDV(n, d)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006), 157, 1, e
-      ENDIF
-
-      IF (n .NE. 8) THEN
-        ne = ne + 1
-        WRITE(*, 9002), 157, n
-      ENDIF
+      CALL CHKOK2(ne, 157, 1, d)
+      CALL CHKINT(ne, 157, n, 8)
 
       n = 0
       CALL GDSTDV(n, d)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EVR) THEN
-        ne = ne + 1
-        WRITE(*, 9006), 157, 2, e
-      ENDIF
+      CALL CHKER2(ne, 157, 2, d, GD_EVR)
 
 C     158: GDGTCA check
       CALL GDGTCA(d, 'carray', 6, GD_F64, p)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9001) 158, e
-      ENDIF
+      CALL CHKEOK(ne, 158, d)
 
       DO 1580 i=1,6
-      IF (abs(p(i) - 1.1 * i) .gt. 0.001) THEN
-        ne = ne + 1
-        WRITE(*, 9010) 158, i, p(i)
-      ENDIF
+      CALL CHKDB2(ne, 158, i, p(i), 1.1d0 * i)
  1580 CONTINUE
 
 C     159: GDGCAS check
       CALL GDGCAS(d, 'carray', 6, 3, 2, GD_F64, p)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9001) 159, e
-      ENDIF
+      CALL CHKEOK(ne, 159, d)
 
       DO 1590 i=1,2
-      IF (abs(p(i) - 2.2 - 1.1 * i) .gt. 0.001) THEN
-        ne = ne + 1
-        WRITE(*, 9010) 159, i, p(i)
-      ENDIF
+      CALL CHKDB2(ne, 159, i, p(i), 2.2d0 + 1.1 * i)
  1590 CONTINUE
 
 C     168: GDPTCA check
@@ -3721,26 +1623,13 @@ C     168: GDPTCA check
       p(5) = 5.2
       p(6) = 4.1
       CALL GDPTCA(d, 'carray', 6, GD_F64, p)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 168, 1, e
-      ENDIF
+      CALL CHKOK2(ne, 168, 1, d)
 
       CALL GDGTCA(d, 'carray', 6, GD_F64, q)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 168, 2, e
-      ENDIF
+      CALL CHKOK2(ne, 168, 2, d)
 
       DO 1680 i=1,6
-      IF (abs(q(i) - 10.7 + 1.1 * i) .gt. 0.001) THEN
-        ne = ne + 1
-        WRITE(*, 9010) 168, i, p(i)
-      ENDIF
+      CALL CHKDB2(ne, 168, i, q(i), 10.7d0 - 1.1d0 * i)
  1680 CONTINUE
 
 C     169: GDGCAS check
@@ -3751,72 +1640,31 @@ C     169: GDGCAS check
       p(5) = 5.9
       p(6) = 6.0
       CALL GDPCAS(d, 'carray', 6, 3, 2, GD_F64, p)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9001) 169, 1, e
-      ENDIF
+      CALL CHKOK2(ne, 169, 1, d)
 
       CALL GDGTCA(d, 'carray', 6, GD_F64, q)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 169, 2, e
-      ENDIF
+      CALL CHKOK2(ne, 169, 2, d)
 
       DO 1690 i=1,6
       IF (i .eq. 3 .or. i .eq. 4) THEN
-        IF (abs(q(i) - 5.2 - 0.1 * i) .gt. 0.001) THEN
-          ne = ne + 1
-          WRITE(*, 9010) 169, i, p(i)
-        ENDIF
+        dp = 5.2 + 0.1 * i
       ELSE
-        IF (abs(q(i) - 10.7 + 1.1 * i) .gt. 0.001) THEN
-          ne = ne + 1
-          WRITE(*, 9010) 169, i, p(i)
-        ENDIF
+        dp = 10.7 - 1.1 * i
       ENDIF
+      CALL CHKDB2(ne, 169, i, q(i), dp)
  1690 CONTINUE
 
 C     177: GDCALN check
       CALL GDCALN(n, d, 'carray', 6)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9001) 177, e
-      ENDIF
-
-      IF (n .NE. 6) THEN
-        ne = ne + 1
-        WRITE(*, 9002) 177, n
-      ENDIF
+      CALL CHKEOK(ne, 177, d)
+      CALL CHKINT(ne, 177, n, 6)
 
 C     178: GDGECA check
       CALL GDGECA(i, l, n, d, 'carray', 6)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9001) 178, e
-      ENDIF
-
-      IF (l .NE. 6) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 178, 1, l
-      ENDIF
-
-      IF (n .NE. 0) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 178, 2, n
-      ENDIF
-
-      IF (i .NE. GD_F64) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 178, 3, i
-      ENDIF
+      CALL CHKEOK(ne, 178, d)
+      CALL CHKIN2(ne, 178, 1, l, 6)
+      CALL CHKIN2(ne, 178, 2, n, 0)
+      CALL CHKIN2(ne, 178, 3, i, GD_F64)
 
 C     179: GDADCA check
       p(1) = 1.2
@@ -3824,49 +1672,19 @@ C     179: GDADCA check
       p(3) = 5.6
       p(4) = 7.8
       CALL GDADCA(d, 'new17', 5, GD_F64, 4, GD_F64, p, 0)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 179, 1, e
-      ENDIF
+      CALL CHKOK2(ne, 179, 1, d)
 
       CALL GDGECA(i, l, n, d, 'new17', 5)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 179, 2, e
-      ENDIF
-
-      IF (n .NE. 0) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 179, 1, n
-      ENDIF
-
-      IF (i .NE. GD_F64) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 179, 2, i
-      ENDIF
-
-      IF (l .NE. 4) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 179, 3, l
-      ENDIF
+      CALL CHKOK2(ne, 179, 2, d)
+      CALL CHKIN2(ne, 179, 1, n, 0)
+      CALL CHKIN2(ne, 179, 2, i, GD_F64)
+      CALL CHKIN2(ne, 179, 3, l, 4)
 
       CALL GDGTCA(d, 'new17', 5, GD_F64, q)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 179, 3, e
-      ENDIF
+      CALL CHKOK2(ne, 179, 3, d)
 
       DO 1790 i=1,4
-      IF (abs(q(i) + 1.0 - i * 2.2) .gt. 0.001) THEN
-        ne = ne + 1
-        WRITE(*, 9005) 179, fl
-      ENDIF
+      CALL CHKDB2(ne, 179, i, q(i), i * 2.2d0 - 1.0d0)
  1790 CONTINUE
 
 C     180: GDMDCA check
@@ -3875,82 +1693,30 @@ C     180: GDMDCA check
       p(3) = 7.6
       p(4) = 9.8
       CALL GDMDCA(d, 'data', 4, 'new17', 5, GD_F64, 4, GD_F64, p)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 180, 1, e
-      ENDIF
+      CALL CHKOK2(ne, 180, 1, d)
 
       CALL GDGECA(i, l, n, d, 'data/new17', 10)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 180, 2, e
-      ENDIF
-
-      IF (n .NE. 0) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 180, 1, n
-      ENDIF
-
-      IF (i .NE. GD_F64) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 180, 2, i
-      ENDIF
-
-      IF (l .NE. 4) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 180, 3, l
-      ENDIF
+      CALL CHKOK2(ne, 180, 2, d)
+      CALL CHKIN2(ne, 180, 1, n, 0)
+      CALL CHKIN2(ne, 180, 2, i, GD_F64)
+      CALL CHKIN2(ne, 180, 3, l, 4)
 
       CALL GDGTCA(d, 'data/new17', 10, GD_F64, q)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 180, 3, e
-      ENDIF
+      CALL CHKOK2(ne, 180, 3, d)
 
       DO 1800 i=1,4
-      IF (abs(q(i) - 1.0 - i * 2.2) .gt. 0.001) THEN
-        ne = ne + 1
-        WRITE(*, 9005) 180, fl
-      ENDIF
+      CALL CHKDB2(ne, 180, i, q(i), 1.0d0 + i * 2.2d0)
  1800 CONTINUE
 
 C     181: GDALCA check
       CALL GDALCA(d, 'new17', 5, GD_F32, 3)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 181, 1, e
-      ENDIF
+      CALL CHKOK2(ne, 181, 1, d)
 
       CALL GDGECA(i, l, n, d, 'new17', 5)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 181, 2, e
-      ENDIF
-
-      IF (n .NE. 0) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 181, 1, n
-      ENDIF
-
-      IF (i .NE. GD_F32) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 181, 2, i
-      ENDIF
-
-      IF (l .NE. 3) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 181, 3, l
-      ENDIF
+      CALL CHKOK2(ne, 181, 2, d)
+      CALL CHKIN2(ne, 181, 1, n, 0)
+      CALL CHKIN2(ne, 181, 2, i, GD_F32)
+      CALL CHKIN2(ne, 181, 3, l, 3)
 
 C     183: GDCONS check
       p(1) = 10.0
@@ -3960,17 +1726,8 @@ C     183: GDCONS check
       DO 1830 i = 1, n
       l = flen
       CALL GDCONS(fl, d, GD_F32, i)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 183, i, e
-      ENDIF
-
-      IF (abs(fl - p(i)) .gt. 0.001) THEN
-        ne = ne + 1
-        WRITE(*, 9014) 183, i, fl
-      ENDIF
+      CALL CHKOK2(ne, 183, i, d)
+      CALL CHKDB2(ne, 183, i, 1d0 * fl, p(i))
  1830 CONTINUE
 
 C     191: GDMCOS check
@@ -3981,17 +1738,8 @@ C     191: GDMCOS check
       DO 1910 i = 1, n
       l = flen
       CALL GDMCOS(fl, d, "data", 4, GD_F32, i)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 191, i, e
-      ENDIF
-
-      IF (abs(fl - p(i)) .gt. 0.001) THEN
-        ne = ne + 1
-        WRITE(*, 9014) 191, i, fl
-      ENDIF
+      CALL CHKOK2(ne, 191, i, d)
+      CALL CHKDB2(ne, 191, i, 1d0 * fl, p(i))
  1910 CONTINUE
 
 C     199: GDSTRS check
@@ -4004,22 +1752,9 @@ C     199: GDSTRS check
       l = slen
 
       CALL GDSTRS(str, l, d, i)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 199, i, e
-      ENDIF
-
-      IF (l .NE. slen) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 199, i, l
-      ENDIF
-
-      IF (str .NE. strings(i)) THEN
-        ne = ne + 1
-        WRITE(*, 9008) i, 199, str
-      ENDIF
+      CALL CHKOK2(ne, 199, i, d)
+      CALL CHKIN2(ne, 199, i, l, slen)
+      CALL CHKST2(ne, 199, i, str, strings(i))
  1990 CONTINUE
 
 C     200: GDMSTS check
@@ -4030,92 +1765,38 @@ C     200: GDMSTS check
       DO 2000 i = 1, n
       l = slen
       CALL GDMSTS(str, l, d, "data", 4, i)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9006) 200, i, e
-      ENDIF
-
-      IF (l .NE. slen) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 200, i, l
-      ENDIF
-
-      IF (str .NE. strings(i)) THEN
-        ne = ne + 1
-        WRITE(*, 9008) i, 900, str
-      ENDIF
+      CALL CHKOK2(ne, 200, i, d)
+      CALL CHKIN2(ne, 200, i, l, slen)
+      CALL CHKST2(ne, 200, i, str, strings(i))
  2000 CONTINUE
 
 C     201: GDSTRX check
       CALL GDSTRX(i, d)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9001) 201, e
-      ENDIF
-
-      IF (i .NE. 12) THEN
-        ne = ne + 1
-        WRITE(*, 9002) 201, i
-      ENDIF
+      CALL CHKEOK(ne, 201, d)
+      CALL CHKINT(ne, 201, i, 12)
 
 C     202: GDMSTX check
       CALL GDMSTX(i, d, 'data', 4)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9001) 202, e
-      ENDIF
-
-      IF (i .NE. slen) THEN
-        ne = ne + 1
-        WRITE(*, 9002) 202, i
-      ENDIF
+      CALL CHKEOK(ne, 202, d)
+      CALL CHKINT(ne, 202, i, slen)
 
 C     203: GDSEEK check
       CALL GDSEEK(n, d, 'data', 4, 35, 0, GDSK_S)
-      CALL GDEROR(e, d)
+      CALL CHKOK2(ne, 203, 1, d)
+      CALL CHKIN2(ne, 203, 1, n, 280)
+
       CALL GDGETD(m, d, 'data', 4, GD_HER, 0, 1, 0, GD_I8, c)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9001) 203, e
-      ENDIF
-
-      IF (n .NE. 280) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 203, 1, n
-      ENDIF
-
-      IF (m .NE. 8) THEN
-        ne = ne + 1
-        WRITE(*, 9007) 203, 2, n
-      ENDIF
+      CALL CHKOK2(ne, 203, 2, d)
+      CALL CHKIN2(ne, 203, 2, m, 8)
 
       DO 2030 i = 1, 8
-      IF (c(i) .NE. 16 + i) THEN
-        ne = ne + 1
-        WRITE(*, 9004) i, 903, c(i)
-      ENDIF
+      CALL CHKIN2(ne, 203, i, INT(c(i)), 16 + i)
  2030 CONTINUE
 
 C     204: GDTELL check
       CALL GDTELL(n, d, 'data', 4)
-      CALL GDEROR(e, d)
-
-      IF (e .NE. GD_EOK) THEN
-        ne = ne + 1
-        WRITE(*, 9001) 204, e
-      ENDIF
-
-      IF (n .NE. 288) THEN
-        ne = ne + 1
-        WRITE(*, 9002) 204, n
-      ENDIF
+      CALL CHKEOK(ne, 204, d)
+      CALL CHKINT(ne, 204, n, 288)
 
 
 
@@ -4134,24 +1815,11 @@ C     Cleanup
       CALL SYSTEM ( 'rm -rf ' // fildir )
 
       IF (ne .GT. 0) THEN
-        WRITE(*, 9003) ne
+        WRITE(*, 9000) ne
         CALL EXIT(1)
       ENDIF
 
- 9001 FORMAT('e[', i3, '] = ', i4)
- 9002 FORMAT('n[', i3, '] = ', i4)
- 9003 FORMAT('ne = ', i8)
- 9004 FORMAT('c(', i3, ')[', i3, '] = ', i2)
- 9005 FORMAT('fl[', i3, '] = ', f0.16)
- 9006 FORMAT('e[', i3, ', ', i3, '] = ', i4)
- 9007 FORMAT('n[', i3, ', ', i3, '] = ', i4)
- 9008 FORMAT('fn(', i3, ')[', i3, '] = "', a, '"')
- 9009 FORMAT('s[', i3, '] = "', a, '"')
- 9010 FORMAT('p(', i3, ')[', i3, '] = ', d16.10)
- 9011 FORMAT('p(', i3, ')[', i3, '] = ', d16.10, ';', d16.10)
- 9012 FORMAT('d[', i3, '] = ', d16.10)
- 9013 FORMAT('x[', i3, '] = ', d16.10, ';', d16.10)
- 9014 FORMAT('fl(', i3, ')[', i3, '] = ', f0.16)
+ 9000 FORMAT('ne = ', i8)
 
       STOP
       END 

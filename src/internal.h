@@ -28,6 +28,19 @@
 
 #include "getdata.h"
 
+/* OS X 10.6 deprecates lstat64 */
+#ifdef HAVE_AVAILABILITY_H
+#include <Availability.h>
+#endif
+
+#if defined(__MAC_OS_X_VERSION_MIN_REQUIRED) && \
+  (__MAC_OS_X_VERSION_MIN_REQUIRED >= 1060)
+# undef HAVE_LSTAT64
+# ifndef _DARWIN_FEATURE_64_BIT_INODE
+#  define _DARWIN_FEATURE_64_BIT_INODE
+# endif
+#endif
+
 /* library headers */
 #ifdef STDC_HEADERS
 #include <stdlib.h>

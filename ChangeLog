@@ -1,3 +1,17 @@
+2011-12-05   D. V. Wiebe <getdata@ketiltrout.net> svn:630
+	* python/test/callback.pl python/test/big_test.py cxx/test/big_test.cpp
+	f77/test/big_test.f f77/test/big_test95.f90: Fix path checks.
+
+	* f77/test/big_test.f f77/test/big_test95.f90: Use check functions.
+
+	* src/flush.c (_GD_Flush): Don't call sync on a file opened read-only.
+
+	* configure.ac: Look for Availability.h
+	* src/internal.h: Fix lstat64 on OS X 10.6+
+
+	* src/common.c (_GD_CanonicalPath): Don't run past the end of the work
+	buffer.
+
 2011-12-03   D. V. Wiebe <getdata@ketiltrout.net> svn:629
 	* test/test.h (CHECKEOS): Added.
 	* test/file.c test/fragment_name.c: Only check the end of the returned

@@ -929,6 +929,7 @@ char *_GD_CanonicalPath(const char *car, const char *cdr)
         return NULL;
       }
       sprintf(res, "%s/%s", car, cdr);
+      dreturn("%s", res);
       return res;
     }
     /* car is nonnull and cdr is not absolute: copy car into res and
@@ -1033,8 +1034,9 @@ char *_GD_CanonicalPath(const char *car, const char *cdr)
       break;
     else if (*end == '\0')
       last_element = 1;
+    else
+      *(end++) = '\0';
 
-    *(end++) = '\0';
     if (cur[0] == '\0')
       /* consecutive /s */
       ;
@@ -1079,7 +1081,6 @@ char *_GD_CanonicalPath(const char *car, const char *cdr)
             /* the leaf doesn't exist.  I guess that means we're done. */
             goto _GD_CanonicalPath_DONE;
           }
-          perror("lstat64");
           /* doesn't exist */
           free(res);
           free(work);

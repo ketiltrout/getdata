@@ -42,6 +42,7 @@ void _GD_Flush(DIRFILE* D, gd_entry_t *E, int clo)
            (E->e->u.raw.file[1].idata >= 0)))
       {
         if ((D->flags & GD_ACCMODE) == GD_RDWR &&
+            (E->e->u.raw.file[0].mode & GD_FILE_WRITE) &&
             _gd_ef[E->e->u.raw.file[0].subenc].sync != NULL &&
             (*_gd_ef[E->e->u.raw.file[0].subenc].sync)(E->e->u.raw.file))
           _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno,

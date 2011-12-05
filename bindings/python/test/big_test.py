@@ -20,6 +20,7 @@
 
 import sys
 import os
+import re
 import array
 import pygetdata
 
@@ -40,37 +41,43 @@ def CheckException(t,g):
   global ne
   if (sys.exc_type != g):
     ne+=1
-    print "e[", t, "] =", sys.exc_type
+    print "e[", t, "] =", sys.exc_type, "expected", g
 
 def CheckException2(t,m,g):
   global ne
   if (sys.exc_type != g):
     ne+=1
-    print "e[", t, ",", m, "] =", sys.exc_type
+    print "e[", t, ",", m, "] =", sys.exc_type, "expected", g
 
 def CheckNumpy(t,v,g):
   global ne
   if (numpy.any(v - g)):
     ne+=1
-    print "a[", t, "] =", v
+    print "a[", t, "] =", v, "expected", g
 
 def CheckNumpy2(t,m,v,g):
   global ne
   if (numpy.any(v - g)):
     ne+=1
-    print "a[", t, ",", m, "] =", v
+    print "a[", t, ",", m, "] =", v, "expected", g
 
 def CheckSimple(t,v,g):
   global ne
   if (v != g):
     ne+=1
-    print "n[", t, "] =", v
+    print "n[", t, "] =", v, "expected", g
 
 def CheckSimple2(t,m,v,g):
   global ne
   if (v != g):
     ne+=1
-    print "n[", t, ",", m, "] =", v
+    print "n[", t, ",", m, "] =", v, "expected", g
+
+def CheckEOS(t,v,g):
+  global ne
+  if (re.search(g + "$", v) == None):
+    ne+=1
+    print "n[", t, "] =", v, "expected", g
 
 # create the dirfile first
 data=array.array("B",range(1,81))
@@ -616,7 +623,7 @@ try:
   f = d.fragment(0)
 except:
   CheckOK(39)
-CheckSimple(39,f.name,"dirfile/format")
+CheckEOS(39,f.name,"dirfile/format")
 
 # 40: nfragments check
 try:
@@ -1027,7 +1034,7 @@ try:
   n = d.raw_filename("data")
 except:
   CheckOK(84)
-CheckSimple(84,n,"dirfile/data")
+CheckEOS(84,n,"dirfile/data")
 
 # 85: reference check
 try:
