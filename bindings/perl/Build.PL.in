@@ -2,24 +2,19 @@
 
 use Module::Build;
 my $build = Module::Build->new(
-  c_source => '@srcdir@',
   dist_abstract => "Perl bindings to the GetData library",
   dist_author => 'The GetData Project <@PACKAGE_BUGREPORT@>',
   dist_version_from => "GetData.pm",
-  extra_compiler_flags => '@DEFS@',
+  extra_compiler_flags => ['@DEFS@', '-I@top_builddir@/src'],
   extra_linker_flags => ['-L@top_builddir@/src/.libs/', '-lgetdata'],
   include_dirs => '@top_srcdir@/src',
   license => 'lgpl',
   module_name => "GetData",
-  pm_files => {
-    'GetData.pm' => 'lib/GetData.pm',
-  },
+  release_status => "testing",
   requires => {
     perl => '5.6.0',
     'Math::Complex' => '1.34'
   },
-  xs_files => {
-    '@srcdir@/GetData.xs' => 'lib/GetData.xs'
-  }
+  xs_files => { 'lib/GetData.xs' => 'lib/GetData.xs' }
 );
 $build->create_build_script;

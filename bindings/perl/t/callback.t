@@ -9,7 +9,7 @@ sub callback {
   is ($extra, "extra stuff", "\$extra parameter good");
   is ($$pdata{'suberror'}, $GetData::E_FORMAT_BAD_LINE, "suberror good");
   is ($$pdata{'linenum'}, 2, "linenum good");
-  is ($$pdata{'filename'}, "dirfile/format", "filename good");
+  ok ($$pdata{'filename'} =~ m"dirfile/format$", "filename good");
 
   $GetData::SYNTAX_IGNORE
 }

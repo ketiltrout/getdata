@@ -5,7 +5,11 @@
 #undef _POSIX_SOURCE
 #undef _SVID_SOURCE
 #undef VERSION
-#include "../../src/internal.h"
+#include "internal.h"
+
+#ifdef GETDATA_DEBUG
+#include "debug.c"
+#endif
 
 /* Perl 5.8.9 and earlier don't provide hv_fetchs */
 #ifdef hv_fetchs

@@ -404,7 +404,7 @@ nume += check_simple2(125, 5, n.shift, -88)
 ;  39: gd_fragmentname
 n = gd_fragmentname(d, 0)
 nume += check_ok(39, d)
-nume += check_simple(39, n, "test_dirfile/format")
+nume += check_eostring(39, n, "test_dirfile/format")
 
 ;  40: gd_nfragments
 n = gd_nfragments(d)
@@ -817,7 +817,7 @@ nume += check_simple(83, n, !GD.PROTECT_DATA)
 ;  84: gd_raw_filename
 n = gd_raw_filename(d, 'data')
 nume += check_ok(84, d)
-nume += check_simple(84, n, "test_dirfile/data")
+nume += check_eostring(84, n, "test_dirfile/data")
 
 ;  85: gd_reference
 gd_reference, d, "new1"

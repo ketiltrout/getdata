@@ -24,15 +24,18 @@ EXTRA_DIST=funclist.pl GetData.xs simple_funcs.pl simple_funcs.xsin typemap \
 					 GetData.pm.in MANIFEST
 
 if GETDATA_DEBUG
-DEBUG_C = debug.c
+DEBUG_C = lib/debug.c
 TEST_VERBOSE=verbose=1
-debug.c: $(top_srcdir)/src/debug.c
+$(DEBUG_C): $(top_srcdir)/src/debug.c lib
 	echo "#undef VERSION" > $@
 	cat $< >> $@
 endif
 
 lib:
 	mkdir lib
+
+lib/GetData.xs: $(srcdir)/GetData.xs lib
+	cat $< > $@
 
 lib/typemap: $(srcdir)/typemap lib
 	cat $< > $@
@@ -47,10 +50,10 @@ make_parameters.sed: ../make_parameters ../../src/getdata.h
 	  cd .. && ${MAKE} make_parameters
 
 GetData.pm: $(srcdir)/GetData.pm.in make_parameters.sed $(srcdir)/funclist.pl \
-						$(srcdir)/GetData.xs lib/simple_funcs.xs
+	          lib/GetData.xs lib/simple_funcs.xs
 	rm -f $@
 	$(SED) -f make_parameters.sed $< | \
-		$(PERL) $(srcdir)/funclist.pl $(srcdir)/GetData.xs lib/simple_funcs.xs > $@
+		$(PERL) $(srcdir)/funclist.pl lib/GetData.xs lib/simple_funcs.xs > $@
 	chmod a-w $@
 
 all-local: blib/arch/auto/GetData/GetData.so
@@ -59,7 +62,8 @@ blib/arch/auto/GetData/GetData.so: Build
 	$(PERL) $< build
 
 .PRECIOUS: Build
-Build: Build.PL GetData.pm GetData.xs lib/simple_funcs.xs lib/typemap $(DEBUG_C)
+Build: Build.PL GetData.pm lib/GetData.xs lib/simple_funcs.xs lib/typemap \
+	$(DEBUG_C)
 	perl $<
 
 clean-local: 
@@ -67,7 +71,7 @@ clean-local:
 	if test -e Build; then \
 		$(PERL) Build clean; \
 	fi
-	rm -f $(BUILT_SOURCES) make_parameters.sed debug.c MYMETA.yml MYMETA.json GetData.pm
+	rm -f $(BUILT_SOURCES) make_parameters.sed MYMETA.yml MYMETA.json GetData.pm
 	rm -rf Build _build
 
 if TEST_PERL

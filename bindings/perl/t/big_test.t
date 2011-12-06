@@ -79,7 +79,7 @@ sub CheckSArray {
     "a[$_[0]]: " . (1 + $#{$_[1]}) . " elements, expected " . ($#_ - 1));
   for $i (0 .. $#_ - 2) {
     is (${$_[1]}[$i], $_[$i + 2],
-      "n($i)[$_[0]] = \"${$_[1]}[$i]\", expected \"" . $_[$i + 2] . "\"");
+      "s($i)[$_[0]] = \"${$_[1]}[$i]\", expected \"" . $_[$i + 2] . "\"");
   }
   print "#";
 }
@@ -90,7 +90,7 @@ sub CheckSArray2 {
   is ($#{$_[2]}, $#_ - 3,
     "a[$_[0],$_[1]]: " . (1 + $#{$_[2]}) . " elements, expected " . ($#_ - 2));
   for $i (0 .. $#_ - 3) {
-    is (${$_[2]}[$i], $_[$i + 3], "n($i)[$_[0],$_[1]] = " .
+    is (${$_[2]}[$i], $_[$i + 3], "s($i)[$_[0],$_[1]] = " .
       ((defined ${$_[2]}[$i]) ? "\"" . ${$_[2]}[$i] . "\"" : "undef") .
       ", expected " .
       ((defined $_[$i + 3]) ? "\"" . $_[$i + 3] . "\"" : "undef"));
@@ -118,6 +118,24 @@ sub CheckString {
 sub CheckString2 {
   print "\n";
   is ($_[2], $_[3], "s[$_[0],$_[1]] = \"$_[2]\", expected \"$_[3]\"");
+  print "#";
+}
+
+sub CheckEOString {
+  print "\n";
+  ok ($_[1] =~ m#$_[2]$#, "s[$_[0]] = \"$_[1]\", expected \"$_[2]\"");
+  print "#";
+}
+
+sub CheckEOSArray {
+  my $i;
+  print "\n";
+  is ($#{$_[1]}, $#_ - 2,
+    "a[$_[0]]: " . (1 + $#{$_[1]}) . " elements, expected " . ($#_ - 1));
+  for $i (0 .. $#_ - 2) {
+    ok (${$_[1]}[$i] =~ m#$_[$i + 2]$#,
+      "s($i)[$_[0]] = \"${$_[1]}[$i]\", expected \"$_[$i + 2]\"");
+  }
   print "#";
 }
 
@@ -568,7 +586,7 @@ CheckNum2(125, 9, $h{'shift'}, -88);
 # 39: fragment_name
 $s = $_->fragmentname(0);
 CheckOK(39);
-CheckString(39, $s, "dirfile/format");
+CheckEOString(39, $s, "dirfile/format");
 
 # 40: nfragments
 $s = $_->fragments;
@@ -578,7 +596,7 @@ CheckNum(40, $s, 1);
 # 182: fragment list
 @a = $_->fragments;
 CheckOK(182);
-CheckSArray(182, \@a, "dirfile/format");
+CheckEOSArray(182, \@a, "dirfile/format");
 
 # 41: include
 $s = $_->include("form2", 0, 0);
@@ -1043,7 +1061,7 @@ CheckNum(83, $s, $GetData::PROTECT_DATA);
 # 84: raw_filename
 $s = $_->raw_filename("data");
 CheckOK(84);
-CheckString(84, $s, "dirfile/data");
+CheckEOString(84, $s, "dirfile/data");
 
 # 85: reference
 $s = $_->reference("new1");
