@@ -587,6 +587,7 @@ ssize_t getdelim(char**, size_t*, int, FILE*);
 #define GD_E_BAD_ENTRY_BITNUM   6
 #define GD_E_BAD_ENTRY_BITSIZE  7
 #define GD_E_BAD_ENTRY_POLYORD  8
+#define GD_E_BAD_ENTRY_WINDOP   9
 
 #define GD_E_SCALAR_CODE        1
 #define GD_E_SCALAR_TYPE        2
@@ -879,6 +880,14 @@ extern const gd_entype_t _gd_entype_index[GD_N_ENTYPES];
 void *_GD_Alloc(DIRFILE*, gd_type_t, size_t) __attribute_malloc__;
 void _GD_ArmEndianise(uint64_t* databuffer, int is_complex, size_t ns);
 int _GD_BadInput(DIRFILE* D, gd_entry_t* E, int i);
+
+#define _GD_BadWindop(op) \
+  ( \
+   (op != GD_WINDOP_EQ) && (op != GD_WINDOP_GE) && (op != GD_WINDOP_GT) && \
+   (op != GD_WINDOP_LE) && (op != GD_WINDOP_LT) && (op != GD_WINDOP_NE) && \
+   (op != GD_WINDOP_SET) && (op != GD_WINDOP_CLR) \
+  )
+
 int _GD_CalculateEntry(DIRFILE* D, gd_entry_t* E);
 char *_GD_CanonicalPath(const char*, const char*);
 void _GD_CInvertData(DIRFILE* D, void* data, gd_type_t return_type,

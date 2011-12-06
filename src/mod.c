@@ -686,6 +686,65 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
         modified = 1;
 
       break;
+    case GD_WINDOW_ENTRY:
+      if (N->EN(window,windop) == GD_WINDOP_UNK)
+        Q.EN(window,windop) = E->EN(window,windop);
+      else {
+        Q.EN(window,windop) = N->EN(window,windop);
+        modified = 1;
+      }
+
+      switch (Q.EN(window,windop)) {
+        case GD_WINDOP_EQ:
+        case GD_WINDOP_NE:
+          j = _GD_AlterScalar(D, E->EN(window,threshold.i) !=
+              N->EN(window,threshold.i), GD_INT64, &Q.EN(window,threshold.i),
+              &N->EN(window,threshold.i), Q.scalar, Q.scalar_ind, N->scalar[0],
+              N->scalar_ind[0], E->e->calculated);
+          break;
+        case GD_WINDOP_SET:
+        case GD_WINDOP_CLR:
+          j = _GD_AlterScalar(D, E->EN(window,threshold.u) !=
+              N->EN(window,threshold.u), GD_UINT64, &Q.EN(window,threshold.u),
+              &N->EN(window,threshold.u), Q.scalar, Q.scalar_ind, N->scalar[0],
+              N->scalar_ind[0], E->e->calculated);
+          break;
+        default:
+          j = _GD_AlterScalar(D, E->EN(window,threshold.r) !=
+              N->EN(window,threshold.r), GD_FLOAT64, &Q.EN(window,threshold.r),
+              &N->EN(window,threshold.r), Q.scalar, Q.scalar_ind, N->scalar[0],
+              N->scalar_ind[0], E->e->calculated);
+          break;
+      }
+
+      if (j & GD_AS_ERROR)
+        break;
+      if (j & GD_AS_FREE_SCALAR)
+        scalar_free |= 2;
+      if (j & GD_AS_NEED_RECALC)
+        Qe.calculated = 0;
+      if (j & GD_AS_MODIFIED)
+        modified = 1;
+
+      if (N->in_fields[0] != NULL && strcmp(E->in_fields[0], N->in_fields[0])) {
+        if ((Q.in_fields[0] = strdup(N->in_fields[0])) == NULL) {
+          _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+          break;
+        }
+        modified = 1;
+        field_free |= 1;
+      }
+
+      if (N->in_fields[1] != NULL && strcmp(E->in_fields[1], N->in_fields[1])) {
+        if ((Q.in_fields[1] = strdup(N->in_fields[1])) == NULL) {
+          _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+          break;
+        }
+        modified = 1;
+        field_free |= 2;
+      }
+
+      break;
     case GD_CONST_ENTRY:
       Q.EN(scalar,const_type) = (N->EN(scalar,const_type) == GD_NULL) ?
         E->EN(scalar,const_type) : N->EN(scalar,const_type);
@@ -1424,6 +1483,37 @@ int gd_alter_cpolynom(DIRFILE* D, const char* field_code, int poly_ord,
       N.scalar[i] = "";
 
   ret = _GD_Change(D, field_code, &N, flags);
+
+  dreturn("%i", ret);
+  return ret;
+}
+
+int gd_alter_window(DIRFILE* D, const char *field_code, const char *in_field,
+    const char *check_field, gd_windop_t windop, gd_triplet_t threshold)
+gd_nothrow
+{
+  int ret;
+  gd_entry_t N;
+
+  dtrace("%p, \"%s\", \"%s\", \"%s\", %i, {%g,%llx,%lli}", D, field_code,
+      in_field, check_field, windop, threshold.r,
+      (unsigned long long)threshold.u, (long long)threshold.i);
+
+  if (D->flags & GD_INVALID) {
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  N.field_type = GD_WINDOW_ENTRY;
+  N.in_fields[0] = (char *)in_field;
+  N.in_fields[1] = (char *)check_field;
+  N.EN(window,windop) = windop;
+  N.EN(window,threshold) = threshold;
+  N.scalar[0] = NULL;
+  N.e = NULL;
+
+  ret = _GD_Change(D, field_code, &N, 0);
 
   dreturn("%i", ret);
   return ret;

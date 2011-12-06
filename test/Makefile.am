@@ -53,7 +53,8 @@ ADD_TESTS=add add_bit add_bit_bitnum add_bit_bitsize add_bit_invalid \
 					add_protect add_raw add_raw_include add_raw_invalid add_raw_spf \
 					add_raw_type add_rdonly add_recip add_sbit add_scalar \
 					add_scalar_carray add_sort add_spec add_spec_directive \
-					add_spec_invalid add_spec_meta add_string add_type
+					add_spec_invalid add_spec_meta add_string add_type add_window \
+					add_window_op
 
 ALTER_TESTS=alter_bit_bitnum alter_bit_numbits alter_carray_len \
 						alter_carray_type alter_const alter_cpolynom alter_crecip \
@@ -64,7 +65,7 @@ ALTER_TESTS=alter_bit_bitnum alter_bit_numbits alter_carray_len \
 						alter_lincom_slope alter_linterp alter_linterp_move alter_mspec \
 						alter_multiply alter_phase alter_polynom_coeff alter_polynom_input \
 						alter_polynom_ord alter_raw_spf alter_raw_type alter_recip \
-						alter_recip_zero alter_spec alter_spec_meta
+						alter_recip_zero alter_spec alter_spec_meta alter_window
 
 ASCII_TESTS=ascii_add ascii_get ascii_get_get ascii_nframes ascii_put
 
@@ -144,7 +145,7 @@ ENTRY_TESTS=entry_bad_code entry_bit entry_bit_scalar entry_divide \
 						entry_multiply entry_phase entry_phase_scalar entry_polynom \
 						entry_polynom_scalar entry_raw entry_raw_scalar \
 						entry_raw_scalar_code entry_raw_scalar_type entry_recip \
-						entry_scalar_repr entry_type
+						entry_scalar_repr entry_type entry_window entry_window_scalar
 
 EOF_TESTS=eof eof_index eof_lincom eof_phase
 
@@ -178,7 +179,8 @@ GET_TESTS=${GET64} get_bad_code get_bit get_carray get_carray_len \
 					get_multiply_noin get_nonexistent get_null $(GET_OFF64) get_phase \
 					get_polynom get_polynom_noin get_recip get_recip_const get_recurse \
 					get_rofs get_sbit get_sf get_ss get_type get_uint16 get_uint32 \
-					get_uint64 get_zero
+					get_uint64 get_window get_window_clr get_window_ge get_window_gt \
+					get_window_le get_window_lt get_window_ne get_window_set get_zero
 
 GLOBAL_TESTS=global_name global_ref global_ref_empty global_ref_set
 
@@ -205,7 +207,7 @@ MADD_TESTS=madd madd_bit madd_bit_invalid madd_carray madd_clincom madd_const \
 					 madd_lincom_invalid madd_linterp madd_linterp_invalid madd_multiply \
 					 madd_multiply_invalid madd_phase madd_phase_invalid madd_polynom \
 					 madd_recip madd_sbit madd_spec madd_spec_directive \
-					 madd_spec_invalid madd_string
+					 madd_spec_invalid madd_string madd_window
 
 MOVE_TESTS=move move_data_enc_ar move_data_enc_ra move_data_endian \
 					 move_data_foffs move_data_nop move_index move_meta move_protect \
@@ -256,7 +258,8 @@ PARSE_TESTS=parse_badline parse_bit parse_bit4 parse_bit_bitnum \
 						parse_raw_type parse_recip parse_ref parse_ref_nonexistent \
 						parse_sbit parse_sort parse_string parse_string_ncols \
 						parse_string_null parse_version parse_version_include \
-						parse_version_permissive parse_version_slash parse_whitespace
+						parse_version_permissive parse_version_slash parse_whitespace \
+						parse_window parse_window_ncols parse_window_op parse_window_scalar
 
 PROTECT_TESTS=protect_alter protect_get
 
@@ -276,7 +279,8 @@ PUT_TESTS=${PUT64} put_bad_code put_bit put_bof put_carray put_carray_slice \
 					$(PUT_OFF64) put_phase put_phase_noin put_polynom1 put_polynom2 \
 					put_polynom_noin put_protect put_rdonly put_recip put_recurse \
 					put_repr put_rofs put_sbit put_sf put_ss put_string \
-					put_string_protect put_type put_uint16 put_uint32 put_uint64
+					put_string_protect put_type put_uint16 put_uint32 put_uint64 \
+					put_window
 
 REF_TESTS=ref ref_none ref_two
 

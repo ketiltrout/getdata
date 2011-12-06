@@ -660,12 +660,24 @@ elif test $ac_cv_sizeof_long_long_int -eq 8; then
   gd_int64_t="long long int"
 fi
 
-DEFINE_gd_int16_t="#define gd_int16_t $gd_int16_t";
-DEFINE_gd_uint16_t="#define gd_uint16_t $gd_uint16_t";
-DEFINE_gd_int64_t="#define gd_int64_t $gd_int64_t";
+if test $ac_cv_sizeof_unsigned_int -eq 8; then
+  gd_uint64_t="int"
+elif test $ac_cv_sizeof_unsigned_short_int -eq 8; then
+  gd_uint64_t="short int"
+elif test $ac_cv_sizeof_unsigned_long_int -eq 8; then
+  gd_uint64_t="long int"
+elif test $ac_cv_sizeof_unsigned_long_long_int -eq 8; then
+  gd_uint64_t="long long int"
+fi
+
+DEFINE_gd_int16_t="# define gd_int16_t $gd_int16_t";
+DEFINE_gd_uint16_t="# define gd_uint16_t $gd_uint16_t";
+DEFINE_gd_int64_t="# define gd_int64_t $gd_int64_t";
+DEFINE_gd_uint64_t="# define gd_uint64_t $gd_uint64_t";
 AC_SUBST([DEFINE_gd_int16_t])
 AC_SUBST([DEFINE_gd_uint16_t])
 AC_SUBST([DEFINE_gd_int64_t])
+AC_SUBST([DEFINE_gd_uint64_t])
 
 dnl library functions
 echo

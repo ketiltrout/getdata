@@ -821,6 +821,78 @@ static void _GD_CDivideData(DIRFILE *D, void *A, gd_spf_t spfA,
   dreturnvoid();
 }
 
+#define WINDOP(ot,ct,bo,op,tt,z) \
+  for (i = 0; i < n; i++) \
+    if (!((bo(((ct*)B)[i * spfB / spfA])) op threshold.tt)) \
+      ((ot*)A)[i] = (ot)(z)
+
+#define WINDOPC(ot,ct,bo,op,tt,z) \
+  for (i = 0; i < n; i++) \
+    if (!((bo(((ct*)B)[i * spfB / spfA])) op threshold.tt)) \
+      ((ot*)A)[i * 2] = ((ot*)A)[i * 2 + 1] = (ot)(z)
+
+#define WINDOW(t,z) \
+  switch (op) { \
+    case GD_WINDOP_EQ:  WINDOP(t, int64_t, ,==,i,z); break; \
+    case GD_WINDOP_GE:  WINDOP(t,  double, ,>=,r,z); break; \
+    case GD_WINDOP_GT:  WINDOP(t,  double, ,> ,r,z); break; \
+    case GD_WINDOP_LE:  WINDOP(t,  double, ,<=,r,z); break; \
+    case GD_WINDOP_LT:  WINDOP(t,  double, ,< ,r,z); break; \
+    case GD_WINDOP_NE:  WINDOP(t, int64_t, ,!=,i,z); break; \
+    case GD_WINDOP_SET: WINDOP(t,uint64_t, ,& ,u,z); break; \
+    case GD_WINDOP_CLR: WINDOP(t,uint64_t,~,& ,u,z); break; \
+    default: \
+      _GD_InternalError(D); \
+  }
+
+#define WINDOWC(t,z) \
+  switch (op) { \
+    case GD_WINDOP_EQ:  WINDOPC(t, int64_t, ,==,i,z); break; \
+    case GD_WINDOP_GE:  WINDOPC(t,  double, ,>=,r,z); break; \
+    case GD_WINDOP_GT:  WINDOPC(t,  double, ,> ,r,z); break; \
+    case GD_WINDOP_LE:  WINDOPC(t,  double, ,<=,r,z); break; \
+    case GD_WINDOP_LT:  WINDOPC(t,  double, ,< ,r,z); break; \
+    case GD_WINDOP_NE:  WINDOPC(t, int64_t, ,!=,i,z); break; \
+    case GD_WINDOP_SET: WINDOPC(t,uint64_t, ,& ,u,z); break; \
+    case GD_WINDOP_CLR: WINDOPC(t,uint64_t,~,& ,u,z); break; \
+    default: \
+      _GD_InternalError(D); \
+  }
+
+/* WindowData: Zero data in A where the condition is false.  B is unchanged.
+*/
+static void _GD_WindowData(DIRFILE* D, void *A, gd_spf_t spfA, void *B,
+    gd_spf_t spfB, gd_windop_t op, gd_triplet_t threshold, gd_type_t type,
+    size_t n)
+{
+  size_t i;
+  const double NaN = NAN;
+
+  dtrace("%p, %p, %u, %p, %u, 0x%X, %i, {%g,%llx,%lli}, %zu", D, A, spfA, B,
+      spfB, type, op, threshold.r, (unsigned long long)threshold.u,
+      (long long)threshold.i, n);
+
+  switch (type) {
+    case GD_NULL:                            break;
+    case GD_UINT8:      WINDOW( uint8_t,  0) break;
+    case GD_INT8:       WINDOW(  int8_t,  0) break;
+    case GD_UINT16:     WINDOW(uint16_t,  0) break;
+    case GD_INT16:      WINDOW( int16_t,  0) break;
+    case GD_UINT32:     WINDOW(uint32_t,  0) break;
+    case GD_INT32:      WINDOW( int32_t,  0) break;
+    case GD_UINT64:     WINDOW(uint64_t,  0) break;
+    case GD_INT64:      WINDOW( int64_t,  0) break;
+    case GD_FLOAT32:    WINDOW(   float,NaN) break;
+    case GD_FLOAT64:    WINDOW(  double,NaN) break;
+    case GD_COMPLEX64:  WINDOWC(  float,NaN) break;
+    case GD_COMPLEX128: WINDOWC( double,NaN) break;
+    default:            _GD_SetError(D, GD_E_BAD_TYPE, type, NULL, 0, NULL);
+                        break;
+  }
+
+  dreturnvoid();
+}
+
 /* _GD_DoLincom:  Read from a lincom.  Returns number of samples read.
 */
 static size_t _GD_DoLincom(DIRFILE *D, gd_entry_t *E, off64_t first_samp,
@@ -1360,6 +1432,110 @@ static size_t _GD_DoPolynom(DIRFILE *D, gd_entry_t *E, off64_t first_samp,
   return n_read;
 }
 
+/* _GD_DoWindow:  Read from a window.  Returns number of samples read.
+*/
+static size_t _GD_DoWindow(DIRFILE *D, gd_entry_t* E, off64_t first_samp,
+    size_t num_samp, gd_type_t return_type, void *data_out)
+{
+  void *tmpbuf = NULL;
+  gd_spf_t spf1, spf2;
+  size_t n_read, n_read2, num_samp2;
+  off64_t first_samp2;
+  gd_type_t type2;
+
+  dtrace("%p, %p, %lli, %zu, 0x%X, %p", D, E, first_samp, num_samp, return_type,
+      data_out);
+
+  /* Check input fields */
+  if (_GD_BadInput(D, E, 0)) {
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  if (_GD_BadInput(D, E, 1)) {
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  /* find the samples per frame of the input field */
+  spf1 = _GD_GetSPF(D, E->e->entry[0]);
+  if (D->error != GD_E_OK) {
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  /* read the input field and record the number of samples returned */
+  n_read = _GD_DoField(D, E->e->entry[0], E->e->repr[0], first_samp, num_samp,
+      return_type, data_out);
+
+  if (D->error != GD_E_OK) {
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  /* Nothing to window */
+  if (n_read == 0) {
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  /* find the samples per frame of the check field */
+  spf2 = _GD_GetSPF(D, E->e->entry[1]);
+  if (D->error != GD_E_OK) {
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  /* calculate the first sample and number of samples to read of the
+   * check field */
+  num_samp2 = (int)ceil((double)n_read * spf2 / spf1);
+  first_samp2 = first_samp * spf2 / spf1;
+
+  switch(E->EN(window,windop)) {
+    case GD_WINDOP_EQ:
+    case GD_WINDOP_NE:
+      type2 = GD_INT64;
+      break;
+    case GD_WINDOP_SET:
+    case GD_WINDOP_CLR:
+      type2 = GD_UINT64;
+      break;
+    default:
+      type2 = GD_FLOAT64;
+      break;
+  }
+
+  /* Allocate a temporary buffer for the check field */
+  tmpbuf = (double *)_GD_Alloc(D, type2, num_samp2);
+
+  if (D->error != GD_E_OK) {
+    free(tmpbuf);
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  /* read the check field */
+  n_read2 = _GD_DoField(D, E->e->entry[1], E->e->repr[1], first_samp2,
+      num_samp2, type2, tmpbuf);
+
+  if (D->error != GD_E_OK) {
+    free(tmpbuf);
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  if (n_read2 > 0 && n_read2 * spf1 < n_read * spf2)
+    n_read = n_read2 * spf1 / spf2;
+
+  _GD_WindowData(D, data_out, spf1, tmpbuf, spf2, E->EN(window,windop),
+      E->EN(window,threshold), return_type, n_read);
+
+  free(tmpbuf);
+
+  dreturn("%zu", n_read);
+  return n_read;
+}
+
 /* _GD_DoConst:  Read from a const.  Returns number of samples read (ie. 1).
 */
 static size_t _GD_DoConst(DIRFILE *D, const gd_entry_t *E, off64_t first,
@@ -1499,6 +1675,9 @@ size_t _GD_DoField(DIRFILE *D, gd_entry_t *E, int repr, off64_t first_samp,
       break;
     case GD_SBIT_ENTRY:
       n_read = _GD_DoBit(D, E, 1, first_samp, num_samp, return_type, data_out);
+      break;
+    case GD_WINDOW_ENTRY:
+      n_read = _GD_DoWindow(D, E, first_samp, num_samp, return_type, data_out);
       break;
     case GD_CONST_ENTRY:
     case GD_CARRAY_ENTRY:

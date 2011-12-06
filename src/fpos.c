@@ -73,6 +73,7 @@ off64_t _GD_GetFilePos(DIRFILE *D, gd_entry_t *E, off64_t index_pos)
       break;
     case GD_MULTIPLY_ENTRY:
     case GD_DIVIDE_ENTRY:
+    case GD_WINDOW_ENTRY:
       if (_GD_BadInput(D, E, 0) || _GD_BadInput(D, E, 1))
           break;
       pos = _GD_GetFilePos(D, E->e->entry[0], 0);
@@ -268,6 +269,7 @@ static int _GD_Seek(DIRFILE *D, gd_entry_t *E, off64_t offset,
       break;
     case GD_MULTIPLY_ENTRY:
     case GD_DIVIDE_ENTRY:
+    case GD_WINDOW_ENTRY:
       if (_GD_BadInput(D, E, 1))
         break;
       if (_GD_Seek(D, E->e->entry[1], offset, mode))

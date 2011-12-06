@@ -255,6 +255,16 @@ The dirfile error may be retrieved by calling
 A descriptive error string for the last error encountered can be obtained from
 a call to
 .BR gd_error_string (3).
+.SH NOTES
+To save memory,
+.BR gd_getdata ()
+uses the memory pointed to by
+.I data_out
+as scratch space while computing derived fields.  As a result, if an error is
+encountered during the computation, the contents of this memory buffer are
+unspecified, and may have been modified by this call, even though
+.BR gd_getdata ()
+will report zero data returned on error.
 .SH LIMITATIONS
 The
 .B PHASE

@@ -44,7 +44,7 @@ int main(void)
   error = gd_error(D);
 
   /* check */
-  gd_entry(D, "new", &e);
+  gd_entry(D, "new/meta", &e);
   ge_error = gd_error(D);
   CHECKI(ge_error, 0);
   if (!r) {

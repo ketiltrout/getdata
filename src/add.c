@@ -113,6 +113,7 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
       entry->field_type != GD_SBIT_ENTRY &&
       entry->field_type != GD_DIVIDE_ENTRY &&
       entry->field_type != GD_RECIP_ENTRY &&
+      entry->field_type != GD_WINDOW_ENTRY &&
       entry->field_type != GD_CARRAY_ENTRY &&
       entry->field_type != GD_STRING_ENTRY)
   {
@@ -307,6 +308,19 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
 
       if ((E->in_fields[0] = strdup(entry->in_fields[0])) == NULL)
         _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+      copy_scalar[0] = 1;
+      break;
+    case GD_WINDOW_ENTRY:
+      E->EN(window,windop) = entry->EN(window,windop);
+      E->EN(window,threshold) = entry->EN(window,threshold);
+
+      if ((E->in_fields[0] = strdup(entry->in_fields[0])) == NULL)
+        _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+      else if ((E->in_fields[1] = strdup(entry->in_fields[1])) == NULL)
+        _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+      else if (_GD_BadWindop(E->EN(window,windop)))
+        _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_WINDOP, NULL,
+            entry->EN(window,windop), NULL);
       copy_scalar[0] = 1;
       break;
     case GD_CONST_ENTRY:
@@ -1094,6 +1108,38 @@ int gd_add_phase(DIRFILE* D, const char* field_code, const char* in_field,
   return error;
 }
 
+/* add a WINDOW entry */
+int gd_add_window(DIRFILE *D, const char *field_code, const char *in_field,
+    const char *check_field, gd_windop_t windop, gd_triplet_t threshold,
+    int fragment_index) gd_nothrow
+{
+  gd_entry_t E;
+  int error;
+
+  dtrace("%p, \"%s\", \"%s\", \"%s\", %i, {%g,%llx,%lli}, %i", D, field_code,
+      in_field, check_field, windop, threshold.r,
+      (unsigned long long)threshold.u, (long long)threshold.i, fragment_index);
+
+  if (D->flags & GD_INVALID) {/* don't crash */
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  memset(&E, 0, sizeof(gd_entry_t));
+  E.field = (char *)field_code;
+  E.field_type = GD_WINDOW_ENTRY;
+  E.EN(window,threshold) = threshold;
+  E.EN(window,windop) = windop;
+  E.in_fields[0] = (char *)in_field;
+  E.in_fields[1] = (char *)check_field;
+  E.fragment_index = fragment_index;
+  error = _GD_Add(D, &E, NULL);
+
+  dreturn("%i", error);
+  return error;
+}
+
 /* add a STRING entry */
 int gd_add_string(DIRFILE* D, const char* field_code, const char* value,
     int fragment_index) gd_nothrow
@@ -1646,6 +1692,37 @@ int gd_madd_crecip89(DIRFILE* D, const char *parent, const char* field_code,
   _gd_a2c(E.EN(recip,cdividend), cdividend);
   E.comp_scal = 1;
   E.in_fields[0] = (char *)in_field;
+  error = _GD_Add(D, &E, parent);
+
+  dreturn("%i", error);
+  return error;
+}
+
+/* add a META WINDOW entry */
+int gd_madd_window(DIRFILE *D, const char *parent, const char *field_code,
+    const char *in_field, const char *check_field, gd_windop_t windop,
+    gd_triplet_t threshold) gd_nothrow
+{
+  int error;
+  gd_entry_t E;
+
+  dtrace("%p, \"%s\", \"%s\", \"%s\", \"%s\", %i, {%g,%llx,%lli}", D, parent,
+      field_code, in_field, check_field, windop, threshold.r,
+      (unsigned long long)threshold.u, (long long)threshold.i);
+
+  if (D->flags & GD_INVALID) {/* don't crash */
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  memset(&E, 0, sizeof(gd_entry_t));
+  E.field = (char *)field_code;
+  E.field_type = GD_WINDOW_ENTRY;
+  E.EN(window,threshold) = threshold;
+  E.EN(window,windop) = windop;
+  E.in_fields[0] = (char *)in_field;
+  E.in_fields[1] = (char *)check_field;
   error = _GD_Add(D, &E, parent);
 
   dreturn("%i", error);

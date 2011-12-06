@@ -51,10 +51,6 @@ void _GD_FreeE(DIRFILE *D, gd_entry_t* entry, int priv)
         free(entry->e->u.linterp.lut);
       }
       break;
-    case GD_RECIP_ENTRY:
-      free(entry->in_fields[0]);
-      free(entry->scalar[0]);
-      break;
     case GD_DIVIDE_ENTRY:
     case GD_MULTIPLY_ENTRY:
       free(entry->in_fields[1]);
@@ -65,6 +61,7 @@ void _GD_FreeE(DIRFILE *D, gd_entry_t* entry, int priv)
       free(entry->scalar[1]);
       /* fallthrough */
     case GD_PHASE_ENTRY:
+    case GD_RECIP_ENTRY:
       free(entry->scalar[0]);
       free(entry->in_fields[0]);
       break;
@@ -91,6 +88,11 @@ void _GD_FreeE(DIRFILE *D, gd_entry_t* entry, int priv)
         free(entry->e->u.raw.file[0].name);
         free(entry->e->u.raw.file[1].name);
       }
+      break;
+    case GD_WINDOW_ENTRY:
+      free(entry->scalar[0]);
+      free(entry->in_fields[0]);
+      free(entry->in_fields[1]);
       break;
     case GD_INDEX_ENTRY:
     case GD_NO_ENTRY:
@@ -239,6 +241,21 @@ int _GD_CalculateEntry(DIRFILE* D, gd_entry_t* E)
       break;
     case GD_PHASE_ENTRY:
       _GD_GetScalar(D, E, 0, GD_INT64, &E->EN(phase,shift));
+      break;
+    case GD_WINDOW_ENTRY:
+      switch (E->EN(window,windop)) {
+        case GD_WINDOP_EQ:
+        case GD_WINDOP_NE:
+          _GD_GetScalar(D, E, 0, GD_INT64, &E->EN(window,threshold.i));
+          break;
+        case GD_WINDOP_SET:
+        case GD_WINDOP_CLR:
+          _GD_GetScalar(D, E, 0, GD_UINT64, &E->EN(window,threshold.u));
+          break;
+        default:
+          _GD_GetScalar(D, E, 0, GD_FLOAT64, &E->EN(window,threshold.r));
+          break;
+      }
       break;
     case GD_NO_ENTRY:
     case GD_LINTERP_ENTRY:
@@ -409,6 +426,12 @@ int gd_entry(DIRFILE* D, const char* field_code_in, gd_entry_t* entry)
       if (E->scalar[0])
         entry->scalar[0] = strdup(E->scalar[0]);
       break;
+    case GD_WINDOW_ENTRY:
+      entry->in_fields[0] = strdup(E->in_fields[0]);
+      entry->in_fields[1] = strdup(E->in_fields[1]);
+      if (E->scalar[0])
+        entry->scalar[0] = strdup(E->scalar[0]);
+      break;
     case GD_INDEX_ENTRY:
     case GD_CONST_ENTRY:
     case GD_CARRAY_ENTRY:
@@ -522,6 +545,7 @@ int gd_validate(DIRFILE *D, const char *field_code_in) gd_nothrow
       break;
     case GD_DIVIDE_ENTRY:
     case GD_MULTIPLY_ENTRY:
+    case GD_WINDOW_ENTRY:
       _GD_BadInput(D, E, 1);
       /* fallthrough */
     case GD_LINTERP_ENTRY:

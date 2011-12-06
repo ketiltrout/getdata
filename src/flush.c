@@ -60,6 +60,7 @@ void _GD_Flush(DIRFILE* D, gd_entry_t *E, int clo)
       /* fallthrough */
     case GD_MULTIPLY_ENTRY:
     case GD_DIVIDE_ENTRY:
+    case GD_WINDOW_ENTRY:
       _GD_Flush(D, E->e->entry[1], clo);
       /* fallthrough */
     case GD_LINTERP_ENTRY:
@@ -172,6 +173,47 @@ static const char* _GD_OldTypeName(DIRFILE* D, gd_type_t data_type)
   return ptr;
 }
 
+static const char *_GD_WindopName(DIRFILE *D, gd_windop_t op)
+{
+  const char *ptr;
+
+  dtrace("%p, %i", D, op);
+
+  switch(op) {
+    case GD_WINDOP_EQ:
+      ptr = "EQ";
+      break;
+    case GD_WINDOP_GE:
+      ptr = "GE";
+      break;
+    case GD_WINDOP_GT:
+      ptr = "GT";
+      break;
+    case GD_WINDOP_LE:
+      ptr = "LE";
+      break;
+    case GD_WINDOP_LT:
+      ptr = "LT";
+      break;
+    case GD_WINDOP_NE:
+      ptr = "NE";
+      break;
+    case GD_WINDOP_SET:
+      ptr = "SET";
+      break;
+    case GD_WINDOP_CLR:
+      ptr = "CLR";
+      break;
+    default:
+      _GD_InternalError(D);
+      ptr = "";
+      break;
+  }
+
+  dreturn("\"%s\"", ptr);
+  return ptr;
+}
+
 static size_t _GD_StringEscapeise(FILE* stream, const char* in, int permissive,
     int standards)
 {
@@ -231,7 +273,7 @@ static void _GD_PadField(FILE* stream, const char* in, size_t len,
 static void _GD_WriteConst(DIRFILE *D, FILE* stream, int type,
     const void* value, const char* scalar, int index, const char* postamble)
 {
-  dtrace("%p, %p, %i, %p, \"%s\", %i, \"%s\"", D, stream, type, value, scalar,
+  dtrace("%p, %p, 0x%X, %p, \"%s\", %i, \"%s\"", D, stream, type, value, scalar,
       index, postamble);
 
   if (scalar != NULL) {
@@ -241,6 +283,8 @@ static void _GD_WriteConst(DIRFILE *D, FILE* stream, int type,
       fprintf(stream, "%s<%i>%s", scalar, index, postamble);
   } else if (type == GD_UINT16)
     fprintf(stream, "%" PRIu16 "%s", *(uint16_t *)value, postamble);
+  else if (type == GD_UINT64)
+    fprintf(stream, "%" PRIu64 "%s", *(uint64_t *)value, postamble);
   else if (type == GD_INT64)
     fprintf(stream, "%" PRIi64 "%s", *(uint64_t *)value, postamble);
   else if (type == GD_INT16)
@@ -332,10 +376,9 @@ static void _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
           E->in_fields[0]);
       break;
     case GD_RECIP_ENTRY:
-      fprintf(stream, " RECIP%s ", pretty ? "   " : "");
+      fprintf(stream, " RECIP%s %s ", pretty ? "   " : "", E->in_fields[0]);
       _GD_WriteConst(D, stream, GD_COMPLEX128, &E->EN(recip,cdividend),
           E->scalar[0], E->scalar_ind[0], "");
-      fprintf(stream, " %s", E->in_fields[0]);
       break;
     case GD_MULTIPLY_ENTRY:
       fprintf(stream, " MULTIPLY %s %s\n", E->in_fields[0], E->in_fields[1]);
@@ -363,6 +406,27 @@ static void _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
           E->scalar_ind[0], " ");
       _GD_WriteConst(D, stream, GD_INT16, &E->EN(bit,numbits), E->scalar[1],
           E->scalar_ind[1], "\n");
+      break;
+    case GD_WINDOW_ENTRY:
+      fprintf(stream, " WINDOW%s %s %s %s ", pretty ? "  " : "",
+          E->in_fields[0], E->in_fields[1],
+          _GD_WindopName(D, E->EN(window,windop)));
+      switch (E->EN(window,windop)) {
+        case GD_WINDOP_EQ:
+        case GD_WINDOP_NE:
+          _GD_WriteConst(D, stream, GD_INT64, &E->EN(window,threshold.i),
+              E->scalar[0], E->scalar_ind[0], "");
+          break;
+        case GD_WINDOP_SET:
+        case GD_WINDOP_CLR:
+          _GD_WriteConst(D, stream, GD_UINT64, &E->EN(window,threshold.u),
+              E->scalar[0], E->scalar_ind[0], "");
+          break;
+        default:
+          _GD_WriteConst(D, stream, GD_FLOAT64, &E->EN(window,threshold.r),
+              E->scalar[0], E->scalar_ind[0], "");
+          break;
+      }
       break;
     case GD_CONST_ENTRY:
       fprintf(stream, " CONST%s %s ", pretty ? "   " : "", _GD_TypeName(D,
@@ -742,6 +806,7 @@ int gd_flush(DIRFILE *D, const char *field_code)
 #define GD_VERS_GE_6  0xFFFFFFFFFFFFFFC0LU
 #define GD_VERS_GE_7  0xFFFFFFFFFFFFFF80LU
 #define GD_VERS_GE_8  0xFFFFFFFFFFFFFF00LU
+#define GD_VERS_GE_9  0xFFFFFFFFFFFFFE00LU
 
 #define GD_VERS_LE_0  0x0000000000000001LU
 #define GD_VERS_LE_1  0x0000000000000003LU
@@ -752,6 +817,7 @@ int gd_flush(DIRFILE *D, const char *field_code)
 #define GD_VERS_LE_6  0x000000000000007fLU
 #define GD_VERS_LE_7  0x00000000000000ffLU
 #define GD_VERS_LE_8  0x00000000000001ffLU
+#define GD_VERS_LE_9  0x00000000000003ffLU
 
 uint64_t _GD_FindVersion(DIRFILE *D)
 {
@@ -840,6 +906,9 @@ uint64_t _GD_FindVersion(DIRFILE *D)
         {
           D->av &= GD_VERS_GE_5;
         }
+        break;
+      case GD_WINDOW_ENTRY:
+        D->av &= GD_VERS_GE_9;
         break;
       case GD_LINTERP_ENTRY:
       case GD_LINCOM_ENTRY:

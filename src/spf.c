@@ -51,6 +51,7 @@ gd_spf_t _GD_GetSPF(DIRFILE* D, gd_entry_t* E)
     case GD_LINTERP_ENTRY:
     case GD_POLYNOM_ENTRY:
     case GD_SBIT_ENTRY:
+    case GD_WINDOW_ENTRY:
       if (_GD_BadInput(D, E, 0))
         break;
 

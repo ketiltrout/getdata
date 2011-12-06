@@ -80,7 +80,7 @@ int main(void)
     CHECKFi(i,c[i],1. / (40 + i));
 
   CHECKI(v,8);
-  CHECKI(l,8);
+  CHECKI(l,GD_DIRFILE_STANDARDS_VERSION);
   CHECKI(e,8);
 
   return r;

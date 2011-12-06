@@ -40,6 +40,7 @@ static void _GD_ClearDerived(DIRFILE* D, gd_entry_t* E, const gd_entry_t* C,
       break;
     case GD_MULTIPLY_ENTRY:
     case GD_DIVIDE_ENTRY:
+    case GD_WINDOW_ENTRY:
       if (strcmp(E->in_fields[1], C->field) == 0) {
         if (check)
           _GD_SetError(D, GD_E_DELETE, GD_E_DEL_DERIVED, E->field, 0,
@@ -169,6 +170,24 @@ static void _GD_DeReference(DIRFILE* D, gd_entry_t* E, gd_entry_t* C,
       break;
     case GD_PHASE_ENTRY:
       _GD_DeReferenceOne(D, E, C, check, 0, GD_INT64, &E->EN(phase,shift));
+      break;
+    case GD_WINDOW_ENTRY:
+      switch (E->EN(window,windop)) {
+        case GD_WINDOP_EQ:
+        case GD_WINDOP_NE:
+          _GD_DeReferenceOne(D, E, C, check, 0, GD_INT64,
+              &E->EN(window,threshold.i));
+          break;
+        case GD_WINDOP_SET:
+        case GD_WINDOP_CLR:
+          _GD_DeReferenceOne(D, E, C, check, 0, GD_UINT64,
+              &E->EN(window,threshold.u));
+          break;
+        default:
+          _GD_DeReferenceOne(D, E, C, check, 0, GD_FLOAT64,
+              &E->EN(window,threshold.r));
+          break;
+      }
       break;
     case GD_NO_ENTRY:
     case GD_LINTERP_ENTRY:

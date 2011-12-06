@@ -64,18 +64,6 @@ int main(void)
   unlink(format);
   rmdir(filedir);
 
-  if (error) {
-    fprintf(stderr, "error=%i\n", error);
-    r = 1;
-  }
-  if (n != 1) {
-    fprintf(stderr, "n=%i\n", n);
-    r = 1;
-  }
-  if (c != 3) {
-    fprintf(stderr, "c=%i\n", c);
-    r = 1;
-  }
   CHECKI(error, 0);
   CHECKI(n, 1);
   CHECKI(c, 3);

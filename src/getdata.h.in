@@ -50,7 +50,7 @@ extern "C" {
 #endif
 
 /* The most recent standards version supported by this library */
-#define GD_DIRFILE_STANDARDS_VERSION 8
+#define GD_DIRFILE_STANDARDS_VERSION 9
 
 #include <math.h>
 #include <sys/types.h>
@@ -144,6 +144,7 @@ extern "C" {
 #define GD_E_DELETE           26
 #define GD_E_ARGUMENT         27
 #define GD_E_CALLBACK         28
+/* unused                     29 */
 #define GD_E_UNCLEAN_DB       30
 #define GD_E_DOMAIN           31
 #define GD_E_BAD_REPR         32
@@ -184,6 +185,7 @@ extern "C" {
 #define GD_E_FORMAT_LOCATION  17
 #define GD_E_FORMAT_PROTECT   18
 #define GD_E_FORMAT_LITERAL   19
+#define GD_E_FORMAT_WINDOP    20
 
 /* parser callback return values */
 #define GD_SYNTAX_ABORT    0
@@ -220,30 +222,36 @@ typedef enum {
   GD_SBIT_ENTRY     = 0x09,
   GD_DIVIDE_ENTRY   = 0x0A,
   GD_RECIP_ENTRY    = 0x0B,
+  GD_WINDOW_ENTRY   = 0x0C,
   GD_CONST_ENTRY    = GD_SCALAR_ENTRY | 0x00,
   GD_STRING_ENTRY   = GD_SCALAR_ENTRY | 0x01,
   GD_CARRAY_ENTRY   = GD_SCALAR_ENTRY | 0x02
 } gd_entype_t;
 
 /* GD_NO_ENTRY is not part of this count */
-#define GD_N_ENTYPES 14
-
-@DEFINE_gd_int16_t@
-@DEFINE_gd_uint16_t@
-@DEFINE_gd_int64_t@
+#define GD_N_ENTYPES 15
 
 #define GD_HERE  (-1)
 
+/* C data types */
 #if ! defined GD_C89_API
-#  include <inttypes.h>
-#  define GD_DCOMPLEXM(v) double _Complex v
-#  define GD_DCOMPLEXP(v) double _Complex *v
+# include <inttypes.h>
+# define gd_int16_t int16_t
+# define gd_uint16_t uint16_t
+# define gd_int64_t int64_t
+# define gd_uint64_t uint64_t
+# define GD_DCOMPLEXM(v) double _Complex v
+# define GD_DCOMPLEXP(v) double _Complex *v
 typedef int16_t gd_bit_t;
 typedef uint16_t gd_spf_t;
 typedef int64_t gd_shift_t;
 #else
-#  define GD_DCOMPLEXM(v) double v[2]
-#  define GD_DCOMPLEXP(v) double *v
+@DEFINE_gd_int16_t@
+@DEFINE_gd_uint16_t@
+@DEFINE_gd_int64_t@
+@DEFINE_gd_uint64_t@
+# define GD_DCOMPLEXM(v) double v[2]
+# define GD_DCOMPLEXP(v) double *v
 typedef gd_int16_t gd_bit_t;
 typedef gd_uint16_t gd_spf_t;
 typedef gd_int64_t gd_shift_t;
@@ -280,7 +288,26 @@ typedef enum {
 #define GD_FLOAT     GD_FLOAT32
 #define GD_DOUBLE    GD_FLOAT64
 
+
+typedef enum {
+  GD_WINDOP_UNK,
+  GD_WINDOP_EQ,
+  GD_WINDOP_GE,
+  GD_WINDOP_GT,
+  GD_WINDOP_LE,
+  GD_WINDOP_LT,
+  GD_WINDOP_NE,
+  GD_WINDOP_SET,
+  GD_WINDOP_CLR
+} gd_windop_t;
+
 struct _gd_private_entry;
+
+typedef union {
+  gd_int64_t i;
+  gd_uint64_t u;
+  double r;
+} gd_triplet_t;
 
 /* ANSI C does not permit anonymous structs/unions */
 #ifdef GD_C89_API
@@ -328,6 +355,10 @@ struct _gd_unified_entry {
     struct { /* PHASE */
       gd_shift_t shift;
     } GD_ANON(phase);
+    struct { /* WINDOW */
+      gd_windop_t windop;
+      gd_triplet_t threshold;
+    } GD_ANON(window);
     struct { /* CONST */
       gd_type_t const_type;
       size_t array_len;
@@ -486,6 +517,11 @@ extern int gd_add_sbit(DIRFILE *dirfile, const char *field_code,
 extern int gd_add_string(DIRFILE *dirfile, const char *field_code,
     const char *value, int fragment_index) gd_nothrow gd_nonnull((1,2,3));
 
+extern int gd_add_window(DIRFILE *dirfile, const char *field_code,
+    const char *in_field, const char *check_field, gd_windop_t windop,
+    gd_triplet_t threshold, int fragment_index) gd_nothrow
+gd_nonnull ((1,2,3,4));
+
 extern int gd_alter_bit(DIRFILE *dirfile, const char *field_code,
     const char *in_field, gd_bit_t bitnum, gd_bit_t numbits) gd_nothrow
 gd_nonnull((1,2));
@@ -539,6 +575,10 @@ extern int gd_alter_recip(DIRFILE *dirfile, const char *field_code,
 extern int gd_alter_sbit(DIRFILE *dirfile, const char *field_code,
     const char *in_field, gd_bit_t bitnum, gd_bit_t numbits) gd_nothrow
 gd_nonnull((1,2));
+
+extern int gd_alter_window(DIRFILE *dirfile, const char *field_code,
+    const char *in_field, const char *check_field, gd_windop_t windop,
+    gd_triplet_t threshold) gd_nothrow gd_nonnull((1,2));
 
 extern size_t gd_carray_len(DIRFILE *dirfile, const char *field_code) gd_nothrow
 gd_nonnull((1,2));
@@ -677,6 +717,11 @@ extern int gd_madd_spec(DIRFILE *dirfile, const char *line,
 extern int gd_madd_string(DIRFILE *dirfile, const char *parent,
     const char *field_code, const char *value) gd_nothrow
 gd_nonnull ((1,2,3,4));
+
+extern int gd_madd_window(DIRFILE *dirfile, const char *parent,
+    const char *field_code, const char *in_field, const char *check_field,
+    gd_windop_t windop, gd_triplet_t threshold) gd_nothrow
+gd_nonnull ((1,2,3,4,5));
 
 extern int gd_dirfile_standards(DIRFILE *dirfile, int vers) gd_nothrow
 gd_nonnull ((1));

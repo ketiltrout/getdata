@@ -1,3 +1,45 @@
+2011-12-06   D. V. Wiebe <getdata@ketiltrout.net> svn:632
+	* test/get_window_ne.c test/get_window.c test/parse_window_scalar.c
+	test/alter_window.c test/parse_window.c test/madd_window.c
+	test/parse_window_ncols.c test/add_window.c test/put_window.c
+	test/get_window_set.c test/get_window_gt.c test/get_window_ge.c
+	test/parse_window_op.c test/entry_window.c test/entry_window_scalar.c
+	test/add_window_op.c test/get_window_lt.c test/get_window_clr.c
+	test/get_window_le.c: Added.
+
+	* test/madd_phase.c: Fix check.
+
+	* test/version_6.c test/version_7.c test/version_8.c: Update for Version 9.
+
+	* cmake/CMakeLists.txt configure.ac: Define gd_int64_t.
+
+	* src/getdata.h.in: Add GD_WINDOW_ENTRY, gd_windop_t, gd_triplet_t.
+	* src/entry.c (_GD_FreeE _GD_CalculateEntry gd_entry) legacy.c (GetFormat)
+	src/getdata.c (_GD_DoField) src/errors.c src/flush.c (_GD_Flush
+	_GD_FieldSpec) src/native.c (_GD_NativeType) src/spf.c (_GD_GetSPF)
+	src/putdata.c (_GD_DoFieldOut) src/del.c (_GD_ClearDerived _GD_DeReference)
+	src/flimits.c (_GD_GetEOF _GD_GetBOF) src/fpos.c (_GD_GetFilePos _GD_Seek)
+	src/parse.c (_GD_ParseFieldSpec) src/field_list.c src/mod.c (_GD_Change)
+	src/add.c (_GD_Add): Update for WINDOW.
+	* src/legacy.c (CopyWindowEntry) src/getdata.c (_GD_WindowData _GD_DoWindow)
+	src/flush.c (_GD_WindopName) src/parse.c (_GD_WindOp _GD_ParseWindow)
+	src/mod.c (gd_alter_window) src/internal.h (_GD_BadWindop) src/add.c
+	(gd_add_window gd_madd_window): Added.
+	* src/flush.c (_GD_WriteConst): Write GD_UINT64.
+
+	* src/flush.c (_GD_WriteConst): Fix writing of RECIP fields.
+
+	* src/parse.c (_GD_ParseRecip _GD_ParsePhase): Fail if SetScalar fails.
+
+	* src/parse.c (_GD_SetScalar): Don't bother trying to decode an imaginary
+	part before failing if we're not interested in complex numbers.
+
+	* src/parse.c (_GD_SetScalar): Call strto[u]ll with base=0 for Version >= 9 to
+	allow automatic parsing of 0x[hex] and 0[octal] numbers in format files.
+
+	* src/getdata.h.in: Increment GD_DIRFILE_STANDARDS_VERSION.
+	* src/flush.c (_GD_FindVersion): Update for Version 9.
+
 2011-12-05   D. V. Wiebe <getdata@ketiltrout.net> svn:630
 	* python/test/callback.pl python/test/big_test.py cxx/test/big_test.cpp
 	f77/test/big_test.f f77/test/big_test95.f90: Fix path checks.

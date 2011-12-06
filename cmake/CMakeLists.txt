@@ -40,6 +40,7 @@ set(DEFINE_GD_LEGACY_API "/* #undef GD_LEGACY_API */")
 set(DEFINE_gd_int16_t  "#define gd_int16_t short int")
 set(DEFINE_gd_uint16_t "#define gd_uint16_t unsigned short int")
 set(DEFINE_gd_int64_t  "#define gd_int64_t __int64")
+set(DEFINE_gd_uint64_t  "#define gd_int64_t __uint64")
 
 
 

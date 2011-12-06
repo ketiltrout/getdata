@@ -211,12 +211,8 @@ off64_t _GD_GetEOF(DIRFILE *D, gd_entry_t* E, const char *parent, int *is_index)
     case GD_LINTERP_ENTRY:
     case GD_SBIT_ENTRY:
     case GD_POLYNOM_ENTRY:
-      if (_GD_BadInput(D, E, 0))
-        break;
-
-      ns = _GD_GetEOF(D, E->e->entry[0], E->field, is_index);
-      break;
     case GD_RECIP_ENTRY:
+    case GD_WINDOW_ENTRY:
       if (_GD_BadInput(D, E, 0))
         break;
 
@@ -415,6 +411,8 @@ static off64_t _GD_GetBOF(DIRFILE *D, gd_entry_t* E, const char *parent,
     case GD_SBIT_ENTRY:
     case GD_LINTERP_ENTRY:
     case GD_POLYNOM_ENTRY:
+    case GD_RECIP_ENTRY:
+    case GD_WINDOW_ENTRY:
       if (_GD_BadInput(D, E, 0))
         break;
 
@@ -444,12 +442,6 @@ static off64_t _GD_GetBOF(DIRFILE *D, gd_entry_t* E, const char *parent,
           bof = 0;
       }
 
-      break;
-    case GD_RECIP_ENTRY:
-      if (_GD_BadInput(D, E, 0))
-        break;
-
-      bof = _GD_GetBOF(D, E->e->entry[0], E->field, spf, ds);
       break;
     case GD_MULTIPLY_ENTRY:
     case GD_DIVIDE_ENTRY:

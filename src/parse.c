@@ -70,16 +70,57 @@ static gd_type_t _GD_RawType(const char* type, int standards, int pedantic)
   return t;
 }
 
+static gd_windop_t _GD_WindOp(const char *op)
+{
+  gd_windop_t o = GD_WINDOP_UNK;
+  dtrace("\"%s\"", op);
+
+  switch (op[0]) {
+    case 'E':
+      if (op[1] == 'Q')
+        o = GD_WINDOP_EQ;
+      break;
+    case 'L':
+      if (op[1] == 'T')
+        o = GD_WINDOP_LT;
+      else if (op[1] == 'E')
+        o = GD_WINDOP_LE;
+      break;
+    case 'G':
+      if (op[1] == 'T')
+        o = GD_WINDOP_GT;
+      else if (op[1] == 'E')
+        o = GD_WINDOP_GE;
+      break;
+    case 'N':
+      if (op[1] == 'E')
+        o = GD_WINDOP_NE;
+      break;
+    case 'S':
+      if (op[1] == 'E' && op[2] == 'T')
+        o = GD_WINDOP_SET;
+      break;
+    case 'C':
+      if (op[1] == 'L' && op[2] == 'R')
+        o = GD_WINDOP_CLR;
+      break;
+  }
+
+  dreturn("%i", o);
+  return o;
+}
+
 /* Returns a newly malloc'd string containing the scalar field name, or NULL on
  * numeric literal or error */
 static char* _GD_SetScalar(DIRFILE* D, const char* token, void* data, int type,
-    const char* format_file, int line, int *index, int *comp_scal)
+    const char* format_file, int line, int *index, int *comp_scal,
+    int standards, int pedantic)
 {
   char *ptr = NULL;
   char *lt;
 
-  dtrace("%p, \"%s\", %p, %i, \"%s\", %i, %p, %p", D, token, data, type,
-      format_file, line, index, comp_scal);
+  dtrace("%p, \"%s\", %p, 0x%X, \"%s\", %i, %p, %p, %i, %i", D, token, data,
+      type, format_file, line, index, comp_scal, standards, pedantic);
 
   if (type & (GD_COMPLEX | GD_IEEE754)) {
     /* try to convert to double */
@@ -100,19 +141,19 @@ static char* _GD_SetScalar(DIRFILE* D, const char* token, void* data, int type,
 
     /* If there was a semicolon, try to extract the imaginary part */
     if (*semicolon == ';') {
-      i = strtod(semicolon + 1, &ptr);
-
-      /* there were trailing characters in the imaginary part of complex -- this
-       * can't be a valid field name, since ; is prohibited */
-      if (*ptr != '\0') {
+      /* if a complex value is not permitted, complain */
+      if (!(type & GD_COMPLEX)) {
         _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_LITERAL, format_file, line,
             token);
         dreturn("%p", NULL);
         return NULL;
       }
 
-      /* if a complex value is not permitted, complain */
-      if (!(type & GD_COMPLEX)) {
+      i = strtod(semicolon + 1, &ptr);
+
+      /* there were trailing characters in the imaginary part of complex -- this
+       * can't be a valid field name, since ; is prohibited */
+      if (*ptr != '\0') {
         _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_LITERAL, format_file, line,
             token);
         dreturn("%p", NULL);
@@ -136,7 +177,8 @@ static char* _GD_SetScalar(DIRFILE* D, const char* token, void* data, int type,
       _GD_InternalError(D);
   } else if (type & GD_SIGNED) {
     /* try to convert to long long int */
-    long long int lli = gd_strtoll(token, &ptr, 10);
+    long long int lli = gd_strtoll(token, &ptr,
+        (!pedantic || standards >= 9) ? 0 : 10);
 
     /* there were trailing characters in the long long int */
     if (*ptr != '\0') {
@@ -156,7 +198,8 @@ static char* _GD_SetScalar(DIRFILE* D, const char* token, void* data, int type,
       _GD_InternalError(D);
   } else {
     /* try to convert to unsigned long long int */
-    unsigned long long int ulli = gd_strtoull(token, &ptr, 10);
+    unsigned long long int ulli = gd_strtoull(token, &ptr,
+        (!pedantic || standards >= 9) ? 0 : 10);
 
     /* there were trailing characters in the unsigned long long int */
     if (*ptr != '\0') {
@@ -264,7 +307,8 @@ static gd_entry_t* _GD_ParseRaw(DIRFILE* D, char* in_cols[MAX_IN_COLS],
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_TYPE, format_file, line,
         in_cols[2]);
   else if ((E->scalar[0] = _GD_SetScalar(D, in_cols[3], &E->EN(raw,spf),
-          GD_UINT16, format_file, line, E->scalar_ind, NULL)) == NULL)
+          GD_UINT16, format_file, line, E->scalar_ind, NULL, standards,
+          pedantic)) == NULL)
   {
     E->e->calculated = 1;
     if (E->EN(raw,spf) <= 0)
@@ -366,11 +410,13 @@ static gd_entry_t* _GD_ParseLincom(DIRFILE* D, char* in_cols[MAX_IN_COLS],
         _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
 
       E->scalar[i] = _GD_SetScalar(D, in_cols[i * 3 + 4], &E->EN(lincom,cm)[i],
-          GD_COMPLEX128, format_file, line, E->scalar_ind + i, &E->comp_scal);
+          GD_COMPLEX128, format_file, line, E->scalar_ind + i, &E->comp_scal,
+          standards, pedantic);
       E->EN(lincom,m)[i] = creal(E->EN(lincom,cm)[i]);
       E->scalar[i + GD_MAX_LINCOM] = _GD_SetScalar(D, in_cols[i * 3 + 5],
           &E->EN(lincom,cb)[i], GD_COMPLEX128, format_file, line,
-          E->scalar_ind + i + GD_MAX_LINCOM, &E->comp_scal);
+          E->scalar_ind + i + GD_MAX_LINCOM, &E->comp_scal, standards,
+          pedantic);
       E->EN(lincom,b)[i] = creal(E->EN(lincom,cb)[i]);
 
       if (E->scalar[i] != NULL || E->scalar[i + GD_MAX_LINCOM] != NULL)
@@ -575,9 +621,112 @@ static gd_entry_t* _GD_ParseRecip(DIRFILE* D,
   }
 
   E->scalar[0] = _GD_SetScalar(D, in_cols[3], &E->EN(recip,cdividend),
-      GD_COMPLEX128, format_file, line, E->scalar_ind, &E->comp_scal);
+      GD_COMPLEX128, format_file, line, E->scalar_ind, &E->comp_scal, standards,
+      pedantic);
   E->EN(recip,dividend) = creal(E->EN(recip,cdividend));
   E->comp_scal = (cimag(E->EN(recip,cdividend)) == 0) ? 0 : 1;
+
+  if (D->error != GD_E_OK) {
+    _GD_FreeE(D, E, 1);
+    E = NULL;
+  }
+
+  dreturn("%p", E);
+  return E;
+}
+
+/* _GD_ParseWindow: parse WINDOW entry in format file.
+*/
+static gd_entry_t* _GD_ParseWindow(DIRFILE* D, char* in_cols[MAX_IN_COLS],
+    int n_cols, const gd_entry_t* parent, const char* format_file, int line,
+    int standards, int pedantic, int* is_dot)
+{
+  gd_entry_t *E;
+
+  dtrace("%p, %p, %i, %p, \"%s\", %i, %i, %i, %p", D, in_cols, n_cols, parent,
+      format_file, line, standards, pedantic, is_dot);
+
+  if (n_cols < 6) {
+    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_TOK, format_file, line, NULL);
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  E = (gd_entry_t *)malloc(sizeof(gd_entry_t));
+  if (E == NULL) {
+    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    dreturn("%p", NULL);
+    return NULL;
+  }
+  memset(E, 0, sizeof(gd_entry_t));
+
+  E->e = (struct _gd_private_entry *)malloc(sizeof(struct _gd_private_entry));
+  if (E->e == NULL) {
+    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    free(E);
+    dreturn("%p", NULL);
+    return NULL;
+  }
+  memset(E->e, 0, sizeof(struct _gd_private_entry));
+
+  E->field_type = GD_WINDOW_ENTRY;
+  E->in_fields[0] = NULL;
+  E->e->entry[0] = NULL;
+  E->e->calculated = 0;
+
+  E->field = _GD_ValidateField(parent, in_cols[0], standards, pedantic, is_dot);
+  if (E->field == in_cols[0]) {
+    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_NAME, format_file, line,
+        in_cols[0]);
+    E->field = NULL;
+    _GD_FreeE(D, E, 1);
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  E->in_fields[0] = strdup(in_cols[2]);
+  E->in_fields[1] = strdup(in_cols[3]);
+
+  if (E->field == NULL || E->in_fields[0] == NULL || E->in_fields[1] == NULL) {
+    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    _GD_FreeE(D, E, 1);
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  E->EN(window,windop) = _GD_WindOp(in_cols[4]);
+  if (E->EN(window,windop) == GD_WINDOP_UNK) {
+    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_WINDOP, format_file, line,
+        in_cols[4]);
+    _GD_FreeE(D, E, 1);
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  switch (E->EN(window,windop)) {
+    case GD_WINDOP_EQ:
+    case GD_WINDOP_NE:
+      E->scalar[0] = _GD_SetScalar(D, in_cols[5], &E->EN(window,threshold.i),
+          GD_INT64, format_file, line, E->scalar_ind, NULL, standards,
+          pedantic);
+      break;
+    case GD_WINDOP_SET:
+    case GD_WINDOP_CLR:
+      E->scalar[0] = _GD_SetScalar(D, in_cols[5], &E->EN(window,threshold.u),
+          GD_UINT64, format_file, line, E->scalar_ind, NULL, standards,
+          pedantic);
+      break;
+    default:
+      E->scalar[0] = _GD_SetScalar(D, in_cols[5], &E->EN(window,threshold.r),
+          GD_FLOAT64, format_file, line, E->scalar_ind, NULL, standards,
+          pedantic);
+      break;
+  }
+
+  if (D->error != GD_E_OK) {
+    _GD_FreeE(D, E, 1);
+    E = NULL;
+  }
 
   dreturn("%p", E);
   return E;
@@ -702,11 +851,11 @@ static gd_entry_t* _GD_ParseBit(DIRFILE* D, int is_signed,
 
 
   E->scalar[0] = _GD_SetScalar(D, in_cols[3], &E->EN(bit,bitnum), GD_INT16,
-      format_file, line, E->scalar_ind, NULL);
+      format_file, line, E->scalar_ind, NULL, standards, pedantic);
 
   if (n_cols > 4)
     E->scalar[1] = _GD_SetScalar(D, in_cols[4], &E->EN(bit,numbits), GD_INT16,
-        format_file, line, E->scalar_ind + 1, NULL);
+        format_file, line, E->scalar_ind + 1, NULL, standards, pedantic);
   else
     E->EN(bit,numbits) = 1;
 
@@ -786,9 +935,15 @@ static gd_entry_t* _GD_ParsePhase(DIRFILE* D, char* in_cols[MAX_IN_COLS],
   }
 
   if ((E->scalar[0] = _GD_SetScalar(D, in_cols[3], &E->EN(phase,shift),
-          GD_INT64, format_file, line, E->scalar_ind, NULL)) == NULL)
+          GD_INT64, format_file, line, E->scalar_ind, NULL, standards,
+          pedantic)) == NULL)
   {
     E->e->calculated = 1;
+  }
+
+  if (D->error != GD_E_OK) {
+    _GD_FreeE(D, E, 1);
+    E = NULL;
   }
 
   dreturn("%p", E);
@@ -858,7 +1013,8 @@ static gd_entry_t* _GD_ParsePolynom(DIRFILE* D,
     else
       for (i = 0; i <= E->EN(polynom,poly_ord); i++) {
         E->scalar[i] = _GD_SetScalar(D, in_cols[i + 3], &E->EN(polynom,ca)[i],
-            GD_COMPLEX128, format_file, line, E->scalar_ind + i, &E->comp_scal);
+            GD_COMPLEX128, format_file, line, E->scalar_ind + i, &E->comp_scal,
+            standards, pedantic);
         E->EN(polynom,a)[i] = creal(E->EN(polynom,ca)[i]);
 
         if (E->scalar[i] != NULL)
@@ -990,7 +1146,7 @@ static gd_entry_t* _GD_ParseConst(DIRFILE* D, char* in_cols[MAX_IN_COLS],
   }
 
   ptr = _GD_SetScalar(D, in_cols[3], E->e->u.scalar.d, type, format_file, line,
-      &dummy, &dummy);
+      &dummy, &dummy, standards, pedantic);
   if (ptr) {
     free(ptr);
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_LITERAL, format_file, line,
@@ -1102,7 +1258,7 @@ static gd_entry_t* _GD_ParseCarray(DIRFILE* D, char* in_cols[MAX_IN_COLS],
 
     for (c = first; c < n_cols; ++c) {
       ptr = _GD_SetScalar(D, in_cols[c], (char *)data + s * n++, t, format_file,
-          line, &dummy, &dummy);
+          line, &dummy, &dummy, standards, pedantic);
       if (n == GD_MAX_CARRAY_LENGTH)
         break;
 
@@ -1340,6 +1496,9 @@ gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, char** in_cols,
         pedantic, &is_dot);
   else if (strcmp(in_cols[1], "RECIP") == 0 && (!pedantic || standards >= 8))
     E = _GD_ParseRecip(D, in_cols, n_cols, P, format_file, linenum, standards,
+        pedantic, &is_dot);
+  else if (strcmp(in_cols[1], "WINDOW") == 0 && (!pedantic || standards >= 9))
+    E = _GD_ParseWindow(D, in_cols, n_cols, P, format_file, linenum, standards,
         pedantic, &is_dot);
   else if (strcmp(in_cols[1], "CONST") == 0 && (!pedantic || standards >= 6)) {
     E = _GD_ParseConst(D, in_cols, n_cols, P, format_file, linenum, standards,
@@ -1713,7 +1872,8 @@ static int _GD_ParseDirective(DIRFILE *D, char** in_cols, int n_cols,
 #endif
     }
   } else if (strcmp(ptr, "FRAMEOFFSET") == 0 && (!pedantic || *standards >= 1))
-    D->fragment[me].frame_offset = gd_strtoll(in_cols[1], NULL, 10);
+    D->fragment[me].frame_offset = gd_strtoll(in_cols[1], NULL,
+        (!pedantic || *standards >= 9) ? 0 : 10);
   else if (strcmp(ptr, "INCLUDE") == 0 && (!pedantic || *standards >= 3)) {
     unsigned long subflags = D->fragment[me].encoding | D->fragment[me].byte_sex
       | (*flags & (GD_PEDANTIC | GD_PERMISSIVE | GD_FORCE_ENDIAN |

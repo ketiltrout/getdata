@@ -89,6 +89,7 @@ gd_type_t _GD_NativeType(DIRFILE* D, gd_entry_t* E, int repr)
       type = GD_UINT64;
       break;
     case GD_PHASE_ENTRY:
+    case GD_WINDOW_ENTRY:
       if (_GD_BadInput(D, E, 0))
         break;
 

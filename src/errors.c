@@ -70,6 +70,8 @@ static const struct {
     "Bad protection level on line {3} of {2}: {4}", 0 },
   { GD_E_FORMAT, GD_E_FORMAT_LITERAL,
     "Unexpected characters in scalar literal ({4}) on line {3} of {2}", 0 },
+  { GD_E_FORMAT, GD_E_FORMAT_WINDOP,
+    "Unrecognised operator ({4}) on line {3} of {2}", 0 },
   /* GD_E_TRUNC: 1 = suberror, 2 = filename. 3 = errno */
   { GD_E_TRUNC, 0, "Error truncating {2}: ", 1 },
   /* GD_E_CREAT: 1 = suberror, 2 = filename, 3 = errno */
@@ -129,6 +131,8 @@ static const struct {
     "End of bitfield out of range: {3}", 0 },
   { GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_METARAW, "Invalid metafield type: {3}", 0 },
   { GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_POLYORD, "POLYNOM order out of range: {3}",
+    0 },
+  { GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_WINDOP, "Unrecognised WINDOW operator: {3}",
     0 },
   /* GD_E_DUPLICATE: 4 = name */
   { GD_E_DUPLICATE, 0, "Field code already present: {4}", 0 },

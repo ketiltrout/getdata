@@ -351,6 +351,22 @@ static void CopyPhaseEntry(struct PhaseEntryType* P, gd_entry_t* E)
   dreturnvoid();
 }
 
+static void CopyWindowEntry(struct PhaseEntryType* P, gd_entry_t* E)
+{
+  dtrace("%p, %p", P, E);
+
+  if (E == NULL) {
+    dreturnvoid();
+    return;
+  }
+
+  P->field = E->field;
+  P->raw_field = E->in_fields[0];
+  P->shift = 0;
+
+  dreturnvoid();
+}
+
 /* Okay, reconstruct the old FormatType.  This is painful. */
 struct FormatType *GetFormat(const char *filedir, int *error_code) gd_nothrow
 {
@@ -405,6 +421,7 @@ struct FormatType *GetFormat(const char *filedir, int *error_code) gd_nothrow
         Format.n_multiply++;
         break;
       case GD_PHASE_ENTRY:
+      case GD_WINDOW_ENTRY:
         Format.n_phase++;
         break;
       case GD_NO_ENTRY:
@@ -474,6 +491,9 @@ struct FormatType *GetFormat(const char *filedir, int *error_code) gd_nothrow
         break;
       case GD_PHASE_ENTRY:
         CopyPhaseEntry(&Format.phaseEntries[nphase++], D->entry[i]);
+        break;
+      case GD_WINDOW_ENTRY:
+        CopyWindowEntry(&Format.phaseEntries[nphase++], D->entry[i]);
         break;
       case GD_STRING_ENTRY:
       case GD_CONST_ENTRY:

@@ -77,7 +77,7 @@ int main(void)
 
   /* Version 6 is forward compatible with versions 7 and 8 */
   CHECKI(v,6);
-  CHECKI(l,8);
+  CHECKI(l,GD_DIRFILE_STANDARDS_VERSION);
   CHECKI(e,6);
 
   return r;
