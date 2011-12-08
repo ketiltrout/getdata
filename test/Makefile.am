@@ -59,13 +59,14 @@ ADD_TESTS=add add_bit add_bit_bitnum add_bit_bitsize add_bit_invalid \
 ALTER_TESTS=alter_bit_bitnum alter_bit_numbits alter_carray_len \
 						alter_carray_type alter_const alter_cpolynom alter_crecip \
 						alter_crecip89 alter_crecip_zero alter_divide alter_entry \
-						alter_entry_recode alter_entry_scalar2a alter_entry_scalar2n \
-						alter_entry_scalar3 alter_entry_scalar4 alter_lincom_23 \
-						alter_lincom_32 alter_lincom_input alter_lincom_offset \
-						alter_lincom_slope alter_linterp alter_linterp_move alter_mspec \
-						alter_multiply alter_phase alter_polynom_coeff alter_polynom_input \
-						alter_polynom_ord alter_raw_spf alter_raw_type alter_recip \
-						alter_recip_zero alter_spec alter_spec_meta alter_window
+						alter_entry_hidden alter_entry_recode alter_entry_scalar2a \
+						alter_entry_scalar2n alter_entry_scalar3 alter_entry_scalar4 \
+						alter_lincom_23 alter_lincom_32 alter_lincom_input \
+						alter_lincom_offset alter_lincom_slope alter_linterp \
+						alter_linterp_move alter_mspec alter_multiply alter_phase \
+						alter_polynom_coeff alter_polynom_input alter_polynom_ord \
+						alter_raw_spf alter_raw_type alter_recip alter_recip_zero \
+						alter_spec alter_spec_meta alter_window
 
 ASCII_TESTS=ascii_add ascii_get ascii_get_get ascii_nframes ascii_put
 
@@ -73,8 +74,9 @@ BOF_TESTS=bof bof_lincom bof_phase
 
 BZIP_TESTS=bzip_get bzip_get_get bzip_move_from bzip_nframes
 
-CVLIST_TESTS=cvlist cvlist_array cvlist_array_meta cvlist_invalid cvlist_meta \
-						 cvlist_meta_invalid
+CVLIST_TESTS=cvlist cvlist_array cvlist_array_hidden cvlist_array_meta \
+						 cvlist_array_meta_hidden cvlist_hidden cvlist_invalid cvlist_meta \
+						 cvlist_meta_hidden cvlist_meta_invalid
 
 CLOSE_TESTS=close close_bad close_discard close_null
 
@@ -153,8 +155,9 @@ ERROR_TESTS=error error_error error_num error_short
 
 FILE_TESTS=file file_code file_type
 
-FLIST_TESTS=flist flist_invalid flist_meta flist_meta_invalid flist_type \
-						flist_type_invalid flist_type_meta flist_type_meta_invalid
+FLIST_TESTS=flist flist_hidden flist_invalid flist_meta flist_meta_hidden \
+						flist_meta_invalid flist_type flist_type_hidden flist_type_invalid \
+						flist_type_meta flist_type_meta_hidden flist_type_meta_invalid
 
 FLUSH_TESTS=flush flush_all flush_bad_code flush_invalid flush_meta flush_spec
 
@@ -189,6 +192,8 @@ GZIP_TESTS=gzip_add gzip_get gzip_get_get gzip_get_put gzip_move_from \
 
 HEADER_TESTS=header_complex
 
+HIDE_TESTS=hide hide_unhide
+
 INCLUDE_TESTS=include include_accmode include_auto include_cb include_creat \
 							include_ignore include_index include_invalid include_nonexistent \
 							include_pc include_ref include_syntax
@@ -215,18 +220,19 @@ MOVE_TESTS=move move_data_enc_ar move_data_enc_ra move_data_endian \
 
 NAME_TESTS=name name_move
 
-NFIELDS_TESTS=nfields nfields_invalid nfields_type nfields_type_invalid
+NFIELDS_TESTS=nfields nfields_hidden nfields_invalid nfields_type \
+							nfields_type_hidden nfields_type_invalid nfields_vector \
+							nfields_vector_hidden nfields_vector_invalid
 
 NFRAGMENTS_TESTS=nfragments
 
 NFRAMES_TESTS=nframes ${NFRAMES64} nframes_empty nframes_invalid \
 							$(NFRAMES_OFF64) nframes_spf
 
-NMETA_TESTS=nmeta nmeta_invalid nmeta_parent nmeta_type nmeta_type_invalid \
-						nmeta_type_parent nmeta_vectors nmeta_vectors_del \
+NMETA_TESTS=nmeta nmeta_hidden nmeta_invalid nmeta_parent nmeta_type \
+						nmeta_type_hidden nmeta_type_invalid nmeta_type_parent \
+						nmeta_vectors nmeta_vectors_del nmeta_vectors_hidden \
 						nmeta_vectors_invalid nmeta_vectors_parent
-
-NVECTORS_TESTS=nvectors nvectors_invalid
 
 OPEN_TESTS=open open_cb_abort open_cb_cont open_cb_ignore open_cb_invalid \
 					 open_cb_rescan open_eaccess open_nonexistent open_notdirfile
@@ -240,26 +246,29 @@ PARSE_TESTS=parse_badline parse_bit parse_bit4 parse_bit_bitnum \
 						parse_duplicate_ignore parse_endian_bad parse_endian_big \
 						parse_endian_force parse_endian_little parse_endian_slash \
 						parse_eol parse_foffs parse_foffs_include parse_foffs_slash \
-						parse_include parse_include_absolute parse_include_absrel \
+						parse_hidden parse_hidden_field parse_hidden_meta parse_include \
+						parse_include_absolute parse_include_absrel \
 						parse_include_nonexistent parse_include_relabs \
 						parse_include_relrel parse_include_slash parse_index parse_lincom \
 						parse_lincom_ncols1 parse_lincom_ncols2 parse_lincom_nfields \
 						parse_lincom_nofields parse_lincom_non parse_lincom_non_ncols \
 						parse_lincom_scalar parse_linterp parse_linterp_ncols parse_meta \
 						parse_meta_implicit parse_meta_implicit2 parse_meta_index \
-						parse_meta_index2 parse_meta_parent parse_meta_raw parse_multiply \
-						parse_multiply_ncols parse_name parse_name_dot parse_name_ext \
-						parse_name_pedantic parse_ncols parse_phase parse_phase_ncols \
-						parse_phase_scalar parse_polynom parse_polynom_ncols1 \
-						parse_polynom_ncols2 parse_polynom_scalar parse_protect_all \
-						parse_protect_bad parse_protect_data parse_protect_format \
-						parse_protect_none parse_quote parse_quote_mismatch parse_raw \
-						parse_raw_char parse_raw_ncols parse_raw_scalar parse_raw_spf \
-						parse_raw_type parse_recip parse_ref parse_ref_nonexistent \
-						parse_sbit parse_sort parse_string parse_string_ncols \
-						parse_string_null parse_version parse_version_include \
-						parse_version_permissive parse_version_slash parse_whitespace \
-						parse_window parse_window_ncols parse_window_op parse_window_scalar
+						parse_meta_index2 parse_meta_meta parse_meta_parent parse_meta_raw \
+						parse_multiply parse_multiply_ncols parse_name parse_name_dot \
+						parse_name_ext parse_name_pedantic parse_ncols parse_phase \
+						parse_phase_ncols parse_phase_scalar parse_polynom \
+						parse_polynom_ncols1 parse_polynom_ncols2 parse_polynom_scalar \
+						parse_protect_all parse_protect_bad parse_protect_data \
+						parse_protect_format parse_protect_none parse_quote \
+						parse_quote_mismatch parse_raw parse_raw_char parse_raw_ncols \
+						parse_raw_scalar parse_raw_spf parse_raw_type parse_recip \
+						parse_ref parse_ref_nonexistent parse_sbit parse_sort parse_string \
+						parse_string_ncols parse_string_null parse_version \
+						parse_version_89 parse_version_98 parse_version_include \
+						parse_version_permissive parse_version_p8 parse_version_p9 \
+						parse_version_slash parse_whitespace parse_window \
+						parse_window_ncols parse_window_op parse_window_scalar
 
 PROTECT_TESTS=protect_alter protect_get
 
@@ -296,7 +305,8 @@ SIE_TESTS=sie_get_big sie_get_little sie_move_from sie_move_to sie_nframes_big \
 
 SLIM_TESTS=slim_get slim_nframes
 
-SVLIST_TESTS=svlist svlist_invalid svlist_meta svlist_meta_invalid
+SVLIST_TESTS=svlist svlist_hidden svlist_invalid svlist_meta \
+						 svlist_meta_hidden svlist_meta_invalid
 
 SPF_TESTS=spf spf_divide spf_lincom spf_multiply spf_polynom spf_recip \
 					spf_recurse
@@ -314,7 +324,8 @@ VERSION_TESTS=version_0 version_0_write version_1 version_1_write version_2 \
 							version_7_strict version_7_write version_8 version_8_strict \
 							version_8_write
 
-VLIST_TESTS=vlist vlist_invalid vlist_meta vlist_meta_invalid
+VLIST_TESTS=vlist vlist_hidden vlist_invalid vlist_meta vlist_meta_hidden \
+						vlist_meta_invalid
 
 XZ_TESTS=xz_get xz_nframes
 
@@ -326,11 +337,11 @@ TESTS=$(ADD_TESTS)        $(ALTER_TESTS)      $(ASCII_TESTS)      \
 			$(ERROR_TESTS)      $(FILE_TESTS)       $(FLIST_TESTS)      \
 			$(FLUSH_TESTS)      $(FOFFS_TESTS)      $(FRAGMENT_TESTS)   \
 			$(GET_TESTS)        $(GLOBAL_TESTS)     $(GZIP_TESTS)       \
-			$(HEADER_TESTS)     $(INCLUDE_TESTS)    $(INDEX_TESTS)      \
-			$(LEGACY_TESTS)     $(LZMA_TESTS)       $(MADD_TESTS)       \
-			$(MOVE_TESTS)       $(NAME_TESTS)       $(NFIELDS_TESTS)    \
-			$(NFRAGMENTS_TESTS) $(NFRAMES_TESTS)    $(NMETA_TESTS)      \
-			$(NVECTORS_TESTS)   $(OPEN_TESTS)       $(PARENT_TESTS)     \
+			$(HEADER_TESTS)     $(HIDE_TESTS)       $(INCLUDE_TESTS)    \
+			$(INDEX_TESTS)      $(LEGACY_TESTS)     $(LZMA_TESTS)       \
+			$(MADD_TESTS)       $(MOVE_TESTS)       $(NAME_TESTS)       \
+			$(NFIELDS_TESTS)    $(NFRAGMENTS_TESTS) $(NFRAMES_TESTS)    \
+			$(NMETA_TESTS)      $(OPEN_TESTS)       $(PARENT_TESTS)     \
 			$(PARSE_TESTS)      $(PROTECT_TESTS)    $(PUT_TESTS)        \
 			$(REF_TESTS)        $(REPR_TESTS)       $(SEEK_TESTS)       \
 			$(SIE_TESTS)        $(SLIM_TESTS)       $(SPF_TESTS)        \

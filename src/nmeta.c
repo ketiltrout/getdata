@@ -1,4 +1,4 @@
-/* Copyright (C) 2008, 2010 D. V. Wiebe
+/* Copyright (C) 2008, 2010, 2011 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -44,8 +44,8 @@ unsigned int gd_nmfields(DIRFILE* D, const char* parent) gd_nothrow
 
   _GD_ClearError(D);
 
-  dreturn("%u", P->e->n_meta);
-  return P->e->n_meta;
+  dreturn("%u", P->e->n_meta - P->e->n_hidden);
+  return P->e->n_meta - P->e->n_hidden;
 }
 
 unsigned int gd_nmvectors(DIRFILE* D, const char* parent) gd_nothrow
@@ -72,17 +72,20 @@ unsigned int gd_nmvectors(DIRFILE* D, const char* parent) gd_nothrow
 
   _GD_ClearError(D);
 
-  dreturn("%u", P->e->n_meta - P->e->n_meta_string - P->e->n_meta_const -
-      P->e->n_meta_carray);
-  return P->e->n_meta - P->e->n_meta_string - P->e->n_meta_const -
-    P->e->n_meta_carray;
+  dreturn("%u", P->e->n_meta - P->e->n_hidden
+      - P->e->n[_GD_EntryIndex(GD_STRING_ENTRY)]
+      - P->e->n[_GD_EntryIndex(GD_CONST_ENTRY)]
+      - P->e->n[_GD_EntryIndex(GD_CARRAY_ENTRY)]);
+  return P->e->n_meta - P->e->n_hidden
+    - P->e->n[_GD_EntryIndex(GD_STRING_ENTRY)]
+    - P->e->n[_GD_EntryIndex(GD_CONST_ENTRY)]
+    - P->e->n[_GD_EntryIndex(GD_CARRAY_ENTRY)];
 }
 
 unsigned int gd_nmfields_by_type(DIRFILE* D, const char* parent,
     gd_entype_t type) gd_nothrow
 {
-  unsigned int r = 0;
-  int i;
+  const int index = _GD_EntryIndex(type);
   gd_entry_t *P;
 
   dtrace("%p, %i", D, type);
@@ -103,20 +106,12 @@ unsigned int gd_nmfields_by_type(DIRFILE* D, const char* parent,
     return 0;
   }
 
-  _GD_ClearError(D);
-  if (type == GD_STRING_ENTRY)
-    r = P->e->n_meta_string;
-  else if (type == GD_CONST_ENTRY)
-    r = P->e->n_meta_const;
-  else if (type == GD_CARRAY_ENTRY)
-    r = P->e->n_meta_carray;
-  else if (type == GD_NO_ENTRY)
+  if (index == -1) {
     _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_TYPE, NULL, type, NULL);
-  else
-    for (i = 0; i < P->e->n_meta; ++i)
-      if (P->e->p.meta_entry[i]->field_type == type)
-        r++;
+    dreturn("%u", 0);
+    return 0;
+  }
 
-  dreturn("%u", r);
-  return r;
+  dreturn("%u", P->e->n[index]);
+  return P->e->n[index];
 }

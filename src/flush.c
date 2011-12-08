@@ -470,6 +470,9 @@ static void _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
       break;
   }
 
+  if (!D->error && E->hidden && (permissive || D->standards >= 9))
+    fprintf(stream, "/HIDDEN %s\n", E->field);
+
   dreturnvoid();
 }
 
@@ -858,6 +861,9 @@ uint64_t _GD_FindVersion(DIRFILE *D)
   }
 
   for (i = 0; D->av && i < D->n_entries; ++i) {
+    if (D->entry[i]->hidden)
+      D->av &= GD_VERS_GE_9;
+
     switch (D->entry[i]->field_type) {
       case GD_RAW_ENTRY:
         switch (D->entry[i]->EN(raw,data_type)) {

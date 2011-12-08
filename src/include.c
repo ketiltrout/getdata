@@ -26,6 +26,8 @@ int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,
     int linenum, char** ref_name, int me, int* standards, unsigned long *flags)
 {
   int i;
+  int old_standards = *standards;
+  int old_pedantic = *flags & GD_PEDANTIC;
   int found = 0;
   int dirfd = -1;
   char *temp_buf1, *temp_buf2;
@@ -157,6 +159,13 @@ int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,
   *ref_name = _GD_ParseFragment(new_fp, D, D->n_fragment - 1, standards, flags);
 
   fclose(new_fp);
+
+  /* prevent /VERSION leak in DSV >= 9 */
+  if ((old_standards >= 9 && old_pedantic) || *standards >= 9) {
+    *standards = old_standards;
+    if (!old_pedantic)
+      *flags &= ~GD_PEDANTIC;
+  }
 
   dreturn("%i", D->n_fragment - 1);
   return D->n_fragment - 1;
@@ -381,12 +390,7 @@ int gd_uninclude(DIRFILE* D, int fragment_index, int del)
     if (_GD_ContainsFragment(f, nf, D->entry[i]->fragment_index)) {
       if (D->entry[i]->e->n_meta >= 0) {
         D->n_entries--;
-        if (D->entry[i]->field_type == GD_CONST_ENTRY)
-          D->n_const--;
-        else if (D->entry[i]->field_type == GD_CARRAY_ENTRY)
-          D->n_carray--;
-        else if (D->entry[i]->field_type == GD_STRING_ENTRY)
-          D->n_string--;
+        D->n[_GD_EntryIndex(D->entry[i]->field_type)]--;
       } else
         D->n_meta--;
 

@@ -221,6 +221,9 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
   memcpy(&Qe, E->e, sizeof(struct _gd_private_entry));
   memcpy(&Q, E, sizeof(gd_entry_t));
 
+  /* hiddenness isn't changeable with this interface */
+  Q.hidden = E->hidden;
+
   switch(E->field_type) {
     case GD_RAW_ENTRY:
       j = _GD_AlterScalar(D, N->EN(raw,spf) && N->EN(raw,spf) != E->EN(raw,spf),

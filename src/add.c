@@ -163,9 +163,13 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
     return -1;
   }
 
-  /* Set meta indicies */
+  /* Set meta indices */
   if (parent != NULL)
     E->e->n_meta = -1;
+
+  /* Hidden */
+  if (entry->hidden)
+    E->hidden = 1;
 
   /* Validate entry and add auxiliary data */
   switch(entry->field_type)
@@ -464,22 +468,13 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
 
   }
 
-  if (E->field_type == GD_STRING_ENTRY) {
-    if (P)
-      P->e->n_meta_string++;
-    else
-      D->n_string++;
-  } else if (E->field_type == GD_CONST_ENTRY) {
-    if (P)
-      P->e->n_meta_const++;
-    else
-      D->n_const++;
-  } else if (E->field_type == GD_CARRAY_ENTRY) {
-    if (P)
-      P->e->n_meta_carray++;
-    else
-      D->n_carray++;
-  } else if (E->field_type == GD_RAW_ENTRY) {
+  /* increment entry type count */
+  if (P)
+    P->e->n[_GD_EntryIndex(E->field_type)]++;
+  else
+    D->n[_GD_EntryIndex(E->field_type)]++;
+
+  if (E->field_type == GD_RAW_ENTRY) {
     if (new_ref != NULL) {
       /* This is the first raw field in this fragment; propagate it upwards */
       for (i = E->fragment_index; i != -1; i = D->fragment[i].parent) {

@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 D. V. Wiebe
+/* Copyright (C) 2011 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -18,30 +18,44 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Requesting the number of fields from an invalid dirfile should fail cleanly */
+/* Test version leakage */
 #include "test.h"
-
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
 
 int main(void)
 {
   const char *filedir = "dirfile";
-  int error, r = 0;
+  const char *format = "dirfile/format";
+  const char *format1 = "dirfile/format1";
+  const char *data = "dirfile/ar";
+  const char *format_data =
+    "/INCLUDE format1\n"
+    "r.d WINDOW a b EQ 1.\n";
+  const char *format1_data = "/VERSION 9\n";
+  int fd, error, r = 0;
   DIRFILE *D;
-  unsigned int n;
 
   rmdirfile();
-  D = gd_open(filedir, GD_RDONLY);
-  n = gd_nvectors(D);
+  mkdir(filedir, 0777);
+
+  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
+  write(fd, format_data, strlen(format_data));
+  close(fd);
+
+  fd = open(format1, O_CREAT | O_EXCL | O_WRONLY, 0666);
+  write(fd, format1_data, strlen(format1_data));
+  close(fd);
+
+  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
   error = gd_error(D);
+
   gd_close(D);
 
-  CHECKI(n, 0);
-  CHECKI(error, GD_E_BAD_DIRFILE);
+  unlink(data);
+  unlink(format1);
+  unlink(format);
+  rmdir(filedir);
+
+  CHECKI(error,GD_E_OK);
 
   return r;
 }

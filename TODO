@@ -3,6 +3,5 @@
 * linterp table path munging [MH]
 * Make webpage suck less
 
-* Fix VERSION leakage / Fragment encapsulation [MT/CBN]
 * INCLUDE name munging [RW/MT]
 * aliasing [MT]

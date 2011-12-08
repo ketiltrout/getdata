@@ -451,12 +451,8 @@ int gd_delete(DIRFILE* D, const char* field_code_in, int flags)
       D->n_entries -= last - first + 1;
     }
 
-    if (E->field_type == GD_CONST_ENTRY)
-      D->n_const--;
-    else if (E->field_type == GD_CARRAY_ENTRY)
-      D->n_carray--;
-    else if (E->field_type == GD_STRING_ENTRY)
-      D->n_string--;
+    /* Decrement entry type count */
+    D->n[_GD_EntryIndex(E->field_type)]--;
   } else {
     /* If this is a metafield, update its parent's lists */
     struct _gd_private_entry *Pe = E->e->p.parent->e;
@@ -468,13 +464,9 @@ int gd_delete(DIRFILE* D, const char* field_code_in, int flags)
         break;
       }
 
+    /* Decrement entry type counts */
     Pe->n_meta--;
-    if (E->field_type == GD_CONST_ENTRY)
-      Pe->n_meta_const--;
-    else if (E->field_type == GD_CARRAY_ENTRY)
-      Pe->n_meta_carray--;
-    else if (E->field_type == GD_STRING_ENTRY)
-      Pe->n_meta_string--;
+    Pe->n[_GD_EntryIndex(E->field_type)]--;
   }
 
   /* Remove the entry from the list -- we need not worry about the way we've

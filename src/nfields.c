@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2010 D. V. Wiebe
+/* Copyright (C) 2008-2011 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -32,8 +32,8 @@ unsigned int gd_nfields(DIRFILE* D) gd_nothrow
 
   _GD_ClearError(D);
 
-  dreturn("%u", D->n_entries - D->n_meta);
-  return D->n_entries - D->n_meta;
+  dreturn("%u", D->n_entries - D->n_hidden - D->n_meta);
+  return D->n_entries - D->n_hidden - D->n_meta;
 }
 
 unsigned int gd_nvectors(DIRFILE* D) gd_nothrow
@@ -48,14 +48,19 @@ unsigned int gd_nvectors(DIRFILE* D) gd_nothrow
 
   _GD_ClearError(D);
 
-  dreturn("%u", D->n_entries - D->n_meta - D->n_string - D->n_const -
-      D->n_carray);
-  return D->n_entries - D->n_meta - D->n_string - D->n_const - D->n_carray;
+  dreturn("%u", D->n_entries - D->n_hidden - D->n_meta
+      - D->n[_GD_EntryIndex(GD_STRING_ENTRY)]
+      - D->n[_GD_EntryIndex(GD_CONST_ENTRY)]
+      - D->n[_GD_EntryIndex(GD_CARRAY_ENTRY)]);
+  return D->n_entries - D->n_hidden - D->n_meta
+    - D->n[_GD_EntryIndex(GD_STRING_ENTRY)]
+    - D->n[_GD_EntryIndex(GD_CONST_ENTRY)]
+    - D->n[_GD_EntryIndex(GD_CARRAY_ENTRY)];
 }
 
 unsigned int gd_nfields_by_type(DIRFILE* D, gd_entype_t type) gd_nothrow
 {
-  unsigned int i, r = 0;
+  const int index = _GD_EntryIndex(type);
 
   dtrace("%p, %i", D, type);
 
@@ -67,29 +72,12 @@ unsigned int gd_nfields_by_type(DIRFILE* D, gd_entype_t type) gd_nothrow
 
   _GD_ClearError(D);
 
-  switch(type) {
-    case GD_STRING_ENTRY:
-      r = D->n_string;
-      break;
-    case GD_CONST_ENTRY:
-      r = D->n_const;
-      break;
-    case GD_CARRAY_ENTRY:
-      r = D->n_carray;
-      break;
-    case GD_INDEX_ENTRY:
-      r = 1;
-      break;
-    case GD_NO_ENTRY:
+  if (index == -1) {
       _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_TYPE, NULL, type, NULL);
-      break;
-    default:
-      for (i = 0; i < D->n_entries; ++i)
-        if (D->entry[i]->field_type == type && D->entry[i]->e->n_meta != -1)
-          r++;
-      break;
+      dreturn("%u", 0);
+      return 0;
   }
 
-  dreturn("%u", r);
-  return r;
+  dreturn("%u", D->n[index]);
+  return D->n[index];
 }

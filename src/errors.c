@@ -60,8 +60,8 @@ static const struct {
     "Unterminated token on line {3} of {2}", 0 },
   { GD_E_FORMAT, GD_E_FORMAT_METARAW,
     "Invalid metafield type on line {3} of {2}", 0 },
-  { GD_E_FORMAT, GD_E_FORMAT_NO_PARENT,
-    "Meta field defined before parent ({4}) on line {3} of {2}", 0 },
+  { GD_E_FORMAT, GD_E_FORMAT_NO_FIELD,
+    "Field code not found on line {3} of {2}: {4}", 0 },
   { GD_E_FORMAT, GD_E_FORMAT_DUPLICATE,
     "Field code on line {3} of {2} already defined: {4}", 0 },
   { GD_E_FORMAT, GD_E_FORMAT_LOCATION,
@@ -72,6 +72,8 @@ static const struct {
     "Unexpected characters in scalar literal ({4}) on line {3} of {2}", 0 },
   { GD_E_FORMAT, GD_E_FORMAT_WINDOP,
     "Unrecognised operator ({4}) on line {3} of {2}", 0 },
+  { GD_E_FORMAT, GD_E_FORMAT_META_META,
+    "Cannot attach meta field to meta field {4} on line {3} of {2}", 0 },
   /* GD_E_TRUNC: 1 = suberror, 2 = filename. 3 = errno */
   { GD_E_TRUNC, 0, "Error truncating {2}: ", 1 },
   /* GD_E_CREAT: 1 = suberror, 2 = filename, 3 = errno */

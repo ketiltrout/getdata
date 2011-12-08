@@ -180,12 +180,16 @@ extern "C" {
 #define GD_E_FORMAT_BAD_NAME  12
 #define GD_E_FORMAT_UNTERM    13
 #define GD_E_FORMAT_METARAW   14
-#define GD_E_FORMAT_NO_PARENT 15
+#define GD_E_FORMAT_NO_FIELD  15
 #define GD_E_FORMAT_DUPLICATE 16
 #define GD_E_FORMAT_LOCATION  17
 #define GD_E_FORMAT_PROTECT   18
 #define GD_E_FORMAT_LITERAL   19
 #define GD_E_FORMAT_WINDOP    20
+#define GD_E_FORMAT_META_META 21
+
+/* deprecated names */
+#define GD_E_FORMAT_NO_PARENT GD_E_FORMAT_NO_FIELD
 
 /* parser callback return values */
 #define GD_SYNTAX_ABORT    0
@@ -324,6 +328,7 @@ struct _gd_unified_entry {
   int scalar_ind[GD_MAX_POLYORD + 1];
   int fragment_index;
   int comp_scal;
+  int hidden;
   union {
     struct { /* RAW */
       gd_spf_t spf;
@@ -641,6 +646,9 @@ extern int gd_fragment_index(DIRFILE *dirfile,
 extern const char *gd_fragmentname(DIRFILE *dirfile,
     int index) gd_nothrow gd_nonnull ((1));
 
+extern int gd_hide(DIRFILE *dirfile, const char *field_code) gd_nothrow
+gd_nonnull ((1,2));
+
 extern DIRFILE *gd_invalid_dirfile(void) gd_nothrow;
 
 extern int gd_madd(DIRFILE *dirfile, const gd_entry_t *entry,
@@ -795,6 +803,9 @@ extern size_t gd_put_string(DIRFILE *dirfile, const char *field_code,
     const char *data) gd_nothrow gd_nonnull ((1, 2, 3));
 
 extern const char **gd_strings(DIRFILE *dirfile) gd_nothrow gd_nonnull ((1));
+
+extern int gd_unhide(DIRFILE *dirfile, const char *field_code) gd_nothrow
+gd_nonnull ((1,2));
 
 extern int gd_validate(DIRFILE *dirfile, const char *field_code) gd_nothrow
 gd_nonnull((1,2));

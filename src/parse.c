@@ -1412,7 +1412,7 @@ gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, char** in_cols,
         *cptr = '\0';
         P = _GD_FindField(D, in_cols[0], D->entry, D->n_entries, NULL);
         if (P == NULL)
-          _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_NO_PARENT,
+          _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_NO_FIELD,
               D->fragment[me].cname, linenum, in_cols[0]);
         else if (P->fragment_index != me)
           _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_LOCATION,
@@ -1500,24 +1500,16 @@ gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, char** in_cols,
   else if (strcmp(in_cols[1], "WINDOW") == 0 && (!pedantic || standards >= 9))
     E = _GD_ParseWindow(D, in_cols, n_cols, P, format_file, linenum, standards,
         pedantic, &is_dot);
-  else if (strcmp(in_cols[1], "CONST") == 0 && (!pedantic || standards >= 6)) {
+  else if (strcmp(in_cols[1], "CONST") == 0 && (!pedantic || standards >= 6))
     E = _GD_ParseConst(D, in_cols, n_cols, P, format_file, linenum, standards,
         pedantic, &is_dot);
-    if (D->error == GD_E_OK && P == NULL)
-      D->n_const++;
-  } else if (strcmp(in_cols[1], "CARRAY") == 0 && (!pedantic || standards >= 8))
-  {
+  else if (strcmp(in_cols[1], "CARRAY") == 0 && (!pedantic || standards >= 8))
     E = _GD_ParseCarray(D, in_cols, n_cols, P, format_file, linenum, standards,
         pedantic, &is_dot, outstring, tok_pos);
-    if (D->error == GD_E_OK && P == NULL)
-      D->n_carray++;
-  } else if (strcmp(in_cols[1], "STRING") == 0 && (!pedantic || standards >= 6))
-  {
+  else if (strcmp(in_cols[1], "STRING") == 0 && (!pedantic || standards >= 6))
     E = _GD_ParseString(D, in_cols, n_cols, P, format_file, linenum, standards,
         pedantic, &is_dot);
-    if (D->error == GD_E_OK && P == NULL)
-      D->n_string++;
-  } else if (standards <= GD_DIRFILE_STANDARDS_VERSION || pedantic)
+  else if (standards <= GD_DIRFILE_STANDARDS_VERSION || pedantic)
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_LINE, format_file, linenum,
         NULL);
 
@@ -1566,13 +1558,9 @@ gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, char** in_cols,
       P->e->p.meta_entry[P->e->n_meta++] = E;
 
       D->n_meta++;
-      if (E->field_type == GD_CONST_ENTRY)
-        P->e->n_meta_const++;
-      else if (E->field_type == GD_CARRAY_ENTRY)
-        P->e->n_meta_carray++;
-      else if (E->field_type == GD_STRING_ENTRY)
-        P->e->n_meta_string++;
-    }
+      P->e->n[_GD_EntryIndex(E->field_type)]++;
+    } else
+      D->n[_GD_EntryIndex(E->field_type)]++;
 
     /* update the dot list if necessary */
     if (is_dot) {
@@ -1587,7 +1575,7 @@ gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, char** in_cols,
 
   /* return the entry object if we either:
    * - didn't insert the object into the list of fields (ie. we were called
-   *   by [m]alter_spec
+   *   by [m]alter_spec)
    * - found a RAW field (which might be the reference field)
    */
   dreturn("%p", (!insert || (E && E->field_type == GD_RAW_ENTRY)) ? E : NULL);
@@ -1874,24 +1862,50 @@ static int _GD_ParseDirective(DIRFILE *D, char** in_cols, int n_cols,
   } else if (strcmp(ptr, "FRAMEOFFSET") == 0 && (!pedantic || *standards >= 1))
     D->fragment[me].frame_offset = gd_strtoll(in_cols[1], NULL,
         (!pedantic || *standards >= 9) ? 0 : 10);
-  else if (strcmp(ptr, "INCLUDE") == 0 && (!pedantic || *standards >= 3)) {
+  else if (strcmp(ptr, "HIDDEN") == 0 && (!pedantic || *standards >= 9)) {
+    gd_entry_t *E = _GD_FindField(D, in_cols[1], D->entry, D->n_entries, NULL);
+    if (E == NULL)
+      _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_NO_FIELD, D->fragment[me].cname,
+          linenum, in_cols[1]);
+    else if (E->fragment_index != me)
+      _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_LOCATION, D->fragment[me].cname,
+          linenum, in_cols[1]);
+    else {
+      E->hidden = 1;
+
+      /* update counts */
+      if (E->e->n_meta != -1) {
+        D->n[_GD_EntryIndex(E->field_type)]--;
+        D->n_hidden++;
+      } else {
+        gd_entry_t *P = (gd_entry_t*)E->e->p.parent;
+        P->e->n_hidden++;
+        P->e->n[_GD_EntryIndex(E->field_type)]--;
+      }
+    }
+  } else if (strcmp(ptr, "INCLUDE") == 0 && (!pedantic || *standards >= 3)) {
     unsigned long subflags = D->fragment[me].encoding | D->fragment[me].byte_sex
       | (*flags & (GD_PEDANTIC | GD_PERMISSIVE | GD_FORCE_ENDIAN |
             GD_FORCE_ENCODING | GD_IGNORE_DUPS | GD_IGNORE_REFS));
+
     int frag = _GD_Include(D, in_cols[1], D->fragment[me].cname, linenum,
         ref_name, me, standards, &subflags);
+
     if ((pedantic = subflags & GD_PEDANTIC))
       *flags |= GD_PEDANTIC;
     if (frag != -1)
       D->fragment[me].vers |= D->fragment[frag].vers;
   } else if (strcmp(ptr, "META") == 0 && (!pedantic || *standards >= 6)) {
-    const gd_entry_t* P =  _GD_FindField(D, in_cols[1], D->entry, D->n_entries,
+    const gd_entry_t* P = _GD_FindField(D, in_cols[1], D->entry, D->n_entries,
         NULL);
     if (P == NULL)
-      _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_NO_PARENT, D->fragment[me].cname,
+      _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_NO_FIELD, D->fragment[me].cname,
           linenum, in_cols[1]);
     else if (P->fragment_index != me)
       _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_LOCATION, D->fragment[me].cname,
+          linenum, in_cols[1]);
+    else if (P->e->n_meta == -1)
+      _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_META_META, D->fragment[me].cname,
           linenum, in_cols[1]);
     else if (n_cols < 4)
       _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_TOK, D->fragment[me].cname,

@@ -354,6 +354,7 @@ DIRFILE* gd_cbopen(const char* filedir, unsigned long flags,
 
   /* Add the INDEX entry */
   D->n_entries = 1;
+  D->n[_GD_EntryIndex(GD_INDEX_ENTRY)] = 1;
 
   D->entry = (gd_entry_t **)malloc(sizeof(gd_entry_t*));
   if (D->entry)

@@ -1,3 +1,52 @@
+2011-12-08   D. V. Wiebe <getdata@ketiltrout.net> svn:633
+	* test/svlist_hidden.c test/svlist_meta_hidden.c test/hide.c
+	test/flist_hidden.c test/nfields_hidden.c test/parse_version_89.c
+	test/nmeta_type_hidden.c test/parse_version_98.c test/nmeta_vectors_hidden.c
+	test/nmeta_hidden.c test/alter_entry_hidden.c test/parse_version_p8.c
+	test/parse_version_p9.c test/hide_unhide.c test/cvlist_meta_hidden.c
+	test/nfields_type_hidden.c test/vlist_hidden.c test/flist_meta_hidden.c
+	test/vlist_meta_hidden.c test/flist_type_meta_hidden.c
+	test/parse_hidden_meta.c test/cvlist_array_hidden.c test/parse_meta_meta.c
+	test/nfields_vector_hidden.c test/parse_hidden.c test/parse_hidden_field.c
+	test/cvlist_hidden.c test/cvlist_array_meta_hidden.c
+	test/flist_type_hidden.c: Added.
+
+	* test/nfields_vector.c test/nfields_vector_invalid.c: Renamed from nvectors*
+
+	* src/parse.c (_GD_ParseDirective): Parse /HIDDEN directives.
+	* src/entry.c (gd_hide gd_unhide): Added.
+	* src/nmeta.c (gd_nmfields gd_nmvectors gd_nmfields_by_type) src/nfields.c
+	(gd_nfields gd_nvectors gd_nfields_by_type) src/field_list.c (gd_constants
+	gd_carrays gd_strings gd_field_list_by_type gd_vector_list gd_field_list)
+	src/meta_list (gd_mconstants gd_mcarrays gd_mstrings gd_mfield_list_by_type
+	gd_mvector_list gd_mfield_list): Compensate for hidden fields.
+	* src/flush.c (_GD_FieldSpec): Write /HIDDEN directives.
+	* src/flush.c (_GD_FindVersion): Consider hidden entries.
+	* src/mod.c (_GD_Change): Prohibit changing hiddenness via gd_alter_entry().
+
+	* src/parse.c (_GD_ParseDirective): Forbid a metafield code from appearing
+	as a parent in /META directives.
+
+	* src/internal.h: Record the number of each type of field, rather than just
+	for the scalar field types.
+	* src/internal.h (_GD_EntryIndex): Added.
+	* src/open.c (gd_cbopen): Initialise D->n[INDEX_ENTRY].
+	* src/nmeta.c (gd_nmvectors gd_nmfields_by_type) src/nfields.c (gd_nvectors
+	gd_nfields_by_type) src/field_list.c (gd_constants gd_carrays gd_strings
+	gd_field_list_by_type gd_vector_list) src/meta_list.c (gd_mconstants
+	gd_mcarrays gd_mstrings gd_mfield_list_by_type gd_mvector_list): Use type
+	counts.
+	* src/del.c (gd_delete) src/parse.c (_GD_ParseFieldSpec) src/include.c
+	(gd_uninclude) src/add.c (_GD_Add): Update type counts.
+	* src/field_list.c (_gd_entype_index): Deleted.
+
+	* src/include.c (_GD_Include): Remember incoming Standards Version and
+	parser mode, and restore them on exit if the new DSV >=9 or the old mode is
+	pedantic and the old DSV >= 9.  This is an attempt to stave the "version
+	leak" problem experienced in earlier DSVs.
+
+	* src/internal.h: Renamed GD_E_FORMAT_NO_PARENT to GD_E_FORMAT_NO_FIELD.
+
 2011-12-06   D. V. Wiebe <getdata@ketiltrout.net> svn:632
 	* test/get_window_ne.c test/get_window.c test/parse_window_scalar.c
 	test/alter_window.c test/parse_window.c test/madd_window.c

@@ -662,9 +662,8 @@ struct _gd_private_entry {
   int calculated;
 
   int n_meta;
-  int n_meta_string;
-  int n_meta_carray;
-  int n_meta_const;
+  unsigned int n_hidden;
+  unsigned int n[GD_N_ENTYPES];
   union {
     gd_entry_t** meta_entry;
     const gd_entry_t* parent;
@@ -833,9 +832,8 @@ struct _GD_DIRFILE {
 
   /* field counts */
   unsigned int n_entries;
-  unsigned int n_string;
-  unsigned int n_carray;
-  unsigned int n_const;
+  unsigned int n_hidden;
+  unsigned int n[GD_N_ENTYPES];
   unsigned int n_meta;
   unsigned int n_dot;
 
@@ -875,8 +873,6 @@ struct _GD_DIRFILE {
   void* sehandler_extra;
 };
 
-extern const gd_entype_t _gd_entype_index[GD_N_ENTYPES];
-
 void *_GD_Alloc(DIRFILE*, gd_type_t, size_t) __attribute_malloc__;
 void _GD_ArmEndianise(uint64_t* databuffer, int is_complex, size_t ns);
 int _GD_BadInput(DIRFILE* D, gd_entry_t* E, int i);
@@ -903,6 +899,19 @@ void _GD_ConvertType(DIRFILE* D, const void *data_in, gd_type_t in_type,
     void *data_out, gd_type_t out_type, size_t n) gd_nothrow;
 gd_type_t _GD_ConstType(DIRFILE *D, gd_type_t type);
 const char *_GD_DirName(const DIRFILE *D, int dirfd);
+
+#define _GD_EntryIndex(t) \
+  ( \
+    ((t) == GD_RAW_ENTRY)      ?  0 : ((t) == GD_LINCOM_ENTRY)   ?  1 : \
+    ((t) == GD_LINTERP_ENTRY)  ?  2 : ((t) == GD_BIT_ENTRY)      ?  3 : \
+    ((t) == GD_MULTIPLY_ENTRY) ?  4 : ((t) == GD_PHASE_ENTRY)    ?  5 : \
+    ((t) == GD_INDEX_ENTRY)    ?  6 : ((t) == GD_POLYNOM_ENTRY)  ?  7 : \
+    ((t) == GD_SBIT_ENTRY)     ?  8 : ((t) == GD_DIVIDE_ENTRY)   ?  9 : \
+    ((t) == GD_RECIP_ENTRY)    ? 10 : ((t) == GD_WINDOW_ENTRY)   ? 11 : \
+    ((t) == GD_CONST_ENTRY)    ? 12 : ((t) == GD_STRING_ENTRY)   ? 13 : \
+    ((t) == GD_CARRAY_ENTRY)   ? 14 : -1 \
+  )
+
 size_t _GD_DoField(DIRFILE*, gd_entry_t*, int, off64_t, size_t, gd_type_t,
     void*);
 size_t _GD_DoFieldOut(DIRFILE*, gd_entry_t*, int, off64_t, size_t, gd_type_t,

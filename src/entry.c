@@ -506,6 +506,120 @@ int gd_fragment_index(DIRFILE* D, const char* field_code_in) gd_nothrow
   return E->fragment_index;
 }
 
+int gd_hide(DIRFILE *D, const char *field_code_in) gd_nothrow
+{
+  gd_entry_t *E;
+  int repr;
+  char *field_code;
+
+  dtrace("%p, \"%s\"", D, field_code_in);
+
+  if (D->flags & GD_INVALID) {
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  } else if ((D->flags & GD_ACCMODE) != GD_RDWR) {
+    _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  _GD_ClearError(D);
+
+  /* get rid of the representation, if any */
+  E = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1);
+
+  if (D->error) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  if (D->fragment[E->fragment_index].protection & GD_PROTECT_FORMAT) {
+    _GD_SetError(D, GD_E_PROTECTED, GD_E_PROTECTED_FORMAT, NULL, 0,
+        D->fragment[E->fragment_index].cname);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  if (field_code != field_code_in)
+    free(field_code);
+
+  if (!E->hidden) {
+    E->hidden = 1;
+    D->fragment[E->fragment_index].modified = 1;
+    
+    /* update counts */
+    if (E->e->n_meta == -1) {
+      gd_entry_t *P = (gd_entry_t*)E->e->p.parent;
+      P->e->n_hidden++;
+      P->e->n[_GD_EntryIndex(E->field_type)]--;
+    } else {
+      D->n_hidden++;
+      D->n[_GD_EntryIndex(E->field_type)]--;
+    }
+  }
+
+  dreturn("%i", 0);
+  return 0;
+}
+
+int gd_unhide(DIRFILE *D, const char *field_code_in) gd_nothrow
+{
+  gd_entry_t *E;
+  int repr;
+  char *field_code;
+
+  dtrace("%p, \"%s\"", D, field_code_in);
+
+  if (D->flags & GD_INVALID) {
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  } else if ((D->flags & GD_ACCMODE) != GD_RDWR) {
+    _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  _GD_ClearError(D);
+
+  /* get rid of the representation, if any */
+  E = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1);
+
+  if (D->error) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  if (field_code != field_code_in)
+    free(field_code);
+
+  if (D->fragment[E->fragment_index].protection & GD_PROTECT_FORMAT) {
+    _GD_SetError(D, GD_E_PROTECTED, GD_E_PROTECTED_FORMAT, NULL, 0,
+        D->fragment[E->fragment_index].cname);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  if (E->hidden) {
+    E->hidden = 0;
+    D->fragment[E->fragment_index].modified = 1;
+    
+    /* update counts */
+    if (E->e->n_meta == -1) {
+      gd_entry_t *P = (gd_entry_t*)E->e->p.parent;
+      P->e->n_hidden--;
+      P->e->n[_GD_EntryIndex(E->field_type)]++;
+    } else {
+      D->n_hidden--;
+      D->n[_GD_EntryIndex(E->field_type)]++;
+    }
+  }
+
+  dreturn("%i", 0);
+  return 0;
+}
+
 int gd_validate(DIRFILE *D, const char *field_code_in) gd_nothrow
 {
   int i, repr;
