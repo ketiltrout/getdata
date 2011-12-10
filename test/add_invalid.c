@@ -18,14 +18,7 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Getting data from an invalid dirfile should fail cleanly */
 #include "test.h"
-
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
 
 int main(void)
 {
@@ -40,6 +33,7 @@ int main(void)
   E.EN(raw,spf) = 2;
   E.EN(raw,data_type) = GD_UINT8;
 
+  rmdirfile();
   D = gd_open(filedir, GD_RDONLY);
   gd_add(D, &E);
   error = gd_error(D);

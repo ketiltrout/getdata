@@ -134,18 +134,21 @@ static void _GD_GetScalar(DIRFILE* D, gd_entry_t* E, int i, gd_type_t type,
     void* data)
 {
   void *ptr = NULL;
-  gd_entry_t* C;
-  int repr;
-  char* field_code;
+  gd_entry_t* C = NULL;
+  int repr, offset;
+  char* field_code, *munged_code;
   const char* scalar = E->scalar[i];
   int index = E->scalar_ind[i];
 
   dtrace("%p, %p, %i, %i, %p", D, E, i, type, data);
 
   if (scalar != NULL) {
-    C = _GD_FindFieldAndRepr(D, scalar, &field_code, &repr, NULL, 0);
+    munged_code = _GD_MungeCode(D, NULL, E->fragment_index, scalar, &offset);
+    if (munged_code)
+      C = _GD_FindFieldAndRepr(D, munged_code, &field_code, &repr, NULL, 0);
 
     if (D->error) {
+      free(munged_code);
       dreturnvoid();
       return;
     }
@@ -163,12 +166,9 @@ static void _GD_GetScalar(DIRFILE* D, gd_entry_t* E, int i, gd_type_t type,
         E->scalar_ind[i] = -1;
       }
 
-      if ((D->flags & GD_ACCMODE) == GD_RDWR) {
-        ptr = realloc(C->e->u.scalar.client, (C->e->u.scalar.n_client + 1) *
-            sizeof(gd_entry_t*));
-        if (ptr == NULL)
-          _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-      }
+      if ((D->flags & GD_ACCMODE) == GD_RDWR)
+        ptr = _GD_Realloc(D, C->e->u.scalar.client,
+            (C->e->u.scalar.n_client + 1) * sizeof(gd_entry_t*));
 
       _GD_DoField(D, C, repr, index, 1, type, data);
 
@@ -178,8 +178,10 @@ static void _GD_GetScalar(DIRFILE* D, gd_entry_t* E, int i, gd_type_t type,
       }
     }
 
-    if (field_code != scalar)
+    if (field_code != munged_code)
       free(field_code);
+
+    free(munged_code);
   }
 
   dreturnvoid();
@@ -327,12 +329,7 @@ char* gd_raw_filename(DIRFILE* D, const char* field_code_in) gd_nothrow
   }
 
   filename = _GD_MakeFullPath(D, D->fragment[E->fragment_index].dirfd,
-      E->e->u.raw.file->name);
-  if (filename == NULL) {
-    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-    dreturn("%p", NULL);
-    return NULL;
-  }
+      E->e->u.raw.file->name, 1);
 
   dreturn("%p", filename);
   return filename;

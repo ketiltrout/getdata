@@ -356,12 +356,11 @@ DIRFILE* gd_cbopen(const char* filedir, unsigned long flags,
   D->n_entries = 1;
   D->n[_GD_EntryIndex(GD_INDEX_ENTRY)] = 1;
 
-  D->entry = (gd_entry_t **)malloc(sizeof(gd_entry_t*));
+  D->entry = (gd_entry_t **)_GD_Malloc(D, sizeof(gd_entry_t*));
   if (D->entry)
-    D->entry[0] = (gd_entry_t *)malloc(sizeof(gd_entry_t));
+    D->entry[0] = (gd_entry_t *)_GD_Malloc(D, sizeof(gd_entry_t));
 
-  if (D->entry == NULL || D->entry[0] == NULL) {
-    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+  if (D->error) {
     free(dirfile);
 #ifndef GD_NO_DIR_OPEN
     close(dirfd);
@@ -373,10 +372,9 @@ DIRFILE* gd_cbopen(const char* filedir, unsigned long flags,
   memset(D->entry[0], 0, sizeof(gd_entry_t));
   D->entry[0]->field_type = GD_INDEX_ENTRY;
   D->entry[0]->e =
-    (struct _gd_private_entry *)malloc(sizeof(struct _gd_private_entry));
-  D->entry[0]->field = strdup("INDEX");
-  if (D->entry[0]->field == NULL || D->entry[0]->e == NULL) {
-    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    (struct _gd_private_entry *)_GD_Malloc(D, sizeof(struct _gd_private_entry));
+  D->entry[0]->field = _GD_Strdup(D, "INDEX");
+  if (D->error) {
     free(dirfile);
 #ifndef GD_NO_DIR_OPEN
     close(dirfd);
@@ -399,9 +397,9 @@ DIRFILE* gd_cbopen(const char* filedir, unsigned long flags,
   /* Parse the file.  This will take care of any necessary inclusions */
   D->n_fragment = 1;
 
-  D->fragment = (struct gd_fragment_t *)malloc(sizeof(struct gd_fragment_t));
-  if (D->fragment == NULL) {
-    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+  D->fragment = (struct gd_fragment_t *)_GD_Malloc(D,
+      sizeof(struct gd_fragment_t));
+  if (D->error) {
     dreturn("%p", D);
     return D;
   }
@@ -431,6 +429,7 @@ DIRFILE* gd_cbopen(const char* filedir, unsigned long flags,
   D->fragment[0].protection = GD_PROTECT_NONE;
   D->fragment[0].vers = (flags & GD_PEDANTIC) ? GD_DIRFILE_STANDARDS_VERSION :
     0;
+  D->fragment[0].suffix = D->fragment[0].prefix = NULL;
 
   ref_name = _GD_ParseFragment(fp, D, 0, &D->standards, &D->flags);
   fclose(fp);
@@ -458,9 +457,9 @@ DIRFILE* gd_cbopen(const char* filedir, unsigned long flags,
   if (D->error == GD_E_OK)
     D->flags &= ~GD_INVALID;
 
-  /* if GD_PEDANTIC is not set, we don't know which version this conforms to;
-   * try to figure it out. */
-  if (!D->error && !(D->flags & GD_PEDANTIC)) {
+  /* if GD_PEDANTIC is not set or GD_MULTISTANDARD is set, we don't know which
+   * version this conforms to; try to figure it out. */
+  if (!D->error && (!(D->flags & GD_PEDANTIC) || D->flags & GD_MULTISTANDARD)) {
     if (_GD_FindVersion(D)) {
       /* conforms to some standard, use the latest */
       gd_dirfile_standards(D, GD_VERSION_LATEST); /* can't fail */

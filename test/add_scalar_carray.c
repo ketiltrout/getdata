@@ -18,17 +18,7 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Add a dirfile field */
 #include "test.h"
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
-#include <math.h>
 
 int main(void)
 {
@@ -49,6 +39,7 @@ int main(void)
   E.scalar[0 + GD_MAX_LINCOM] = "c";
   E.scalar_ind[0 + GD_MAX_LINCOM] = 3;
 
+  rmdirfile();
   D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
   gd_add_spec(D, "c CARRAY INT64 1 2 3 4", 0);
   gd_add(D, &E);

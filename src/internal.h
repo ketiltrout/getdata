@@ -36,6 +36,7 @@
 #if defined(__MAC_OS_X_VERSION_MIN_REQUIRED) && \
   (__MAC_OS_X_VERSION_MIN_REQUIRED >= 1060)
 # undef HAVE_LSTAT64
+# undef HAVE_STRUCT_STAT64
 # ifndef _DARWIN_FEATURE_64_BIT_INODE
 #  define _DARWIN_FEATURE_64_BIT_INODE
 # endif
@@ -575,6 +576,9 @@ ssize_t getdelim(char**, size_t*, int, FILE*);
 #define GD_E_LINFILE_LENGTH    1
 #define GD_E_LINFILE_OPEN      2
 
+#define GD_E_RECURSE_CODE       1
+#define GD_E_RECURSE_INCLUDE    2
+
 #define GD_E_FIELD_PUT         1
 #define GD_E_FIELD_BAD         2
 #define GD_E_FIELD_MATCH       3
@@ -790,6 +794,9 @@ struct gd_fragment_t {
   char* ref_name;
   off64_t frame_offset;
   uint32_t vers;
+
+  char *prefix;
+  char *suffix;
 };
 
 /* directory metadata */
@@ -800,6 +807,7 @@ struct gd_dir_t {
 };
 
 /* internal flags */
+#define GD_MULTISTANDARD   0x20000000 /* have multiple standards in format */
 #define GD_HAVE_VERSION    0x40000000 /* have computed the version */
 #define GD_INVALID         0x80000000 /* the dirfile is invalid */
 
@@ -873,6 +881,7 @@ struct _GD_DIRFILE {
   void* sehandler_extra;
 };
 
+/* forward declarations */
 void *_GD_Alloc(DIRFILE*, gd_type_t, size_t) __attribute_malloc__;
 void _GD_ArmEndianise(uint64_t* databuffer, int is_complex, size_t ns);
 int _GD_BadInput(DIRFILE* D, gd_entry_t* E, int i);
@@ -916,6 +925,7 @@ size_t _GD_DoField(DIRFILE*, gd_entry_t*, int, off64_t, size_t, gd_type_t,
     void*);
 size_t _GD_DoFieldOut(DIRFILE*, gd_entry_t*, int, off64_t, size_t, gd_type_t,
     const void*);
+int _GD_EntryCmp(const void*, const void*);
 gd_entry_t* _GD_FindField(DIRFILE* D, const char* field_code,
     gd_entry_t** list, unsigned int u, unsigned int *index);
 gd_entry_t* _GD_FindFieldAndRepr(DIRFILE* D, const char* field_code_in,
@@ -938,8 +948,8 @@ char *_GD_GetLine(FILE *fp, size_t *n, int* linenum);
 int _GD_GetRepr(DIRFILE*, const char*, char**);
 gd_spf_t _GD_GetSPF(DIRFILE* D, gd_entry_t* E);
 int _GD_GrabDir(DIRFILE *D, int, const char *name);
-int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,
-    int linenum, char** ref_name, int me, int* standards, unsigned long *flags);
+int _GD_Include(DIRFILE*, const char*, const char*, int, char**, int,
+    const char*, const char*, int*, unsigned long*);
 void _GD_InitialiseFramework(void);
 int _GD_InitRawIO(DIRFILE*, gd_entry_t*, const char*, int,
     const struct encoding_t*, unsigned int, unsigned int, int);
@@ -956,13 +966,15 @@ void _GD_LincomData(DIRFILE* D, int n, void* data1, gd_type_t return_type,
     size_t n_read);
 void _GD_LinterpData(DIRFILE* D, void *data, gd_type_t type, int complex_table,
     const double *data_in, size_t npts, const struct _gd_lut *lut, size_t n_ln);
-#define _GD_MakeFullPath gd_MakeFullPath
-char *_GD_MakeFullPath(const DIRFILE *D, int dirfd, const char *name);
+char *_GD_MakeFullPath(DIRFILE*, int, const char*, int);
+#define _GD_MakeFullPathOnly gd_MakeFullPathOnly
+char *_GD_MakeFullPathOnly(const DIRFILE *D, int dirfd, const char *name);
 int _GD_MakeTempFile(const DIRFILE*, int, char*);
 int _GD_MissingFramework(int encoding, unsigned int funcs);
 int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned long int encoding,
     unsigned long int byte_sex, off64_t offset, int finalise, int new_fragment,
     char* new_filebase);
+char *_GD_MungeCode(DIRFILE*, const gd_entry_t*, int, const char*, int*);
 gd_type_t _GD_NativeType(DIRFILE* D, gd_entry_t* E, int repr);
 gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, char** in_cols,
     const gd_entry_t* P, const char* format_file, int linenum, int me,
@@ -981,8 +993,7 @@ int _GD_Supports(DIRFILE* D, gd_entry_t* E, unsigned int funcs);
 int _GD_Tokenise(DIRFILE *D, const char* instring, char **outstring,
     const char **pos, char** in_cols, const char* format_file, int linenum,
     int standards, int pedantic);
-char* _GD_ValidateField(const gd_entry_t* parent, const char* field_code,
-    int standards, int pedantic, int* is_dot);
+int _GD_ValidateField(const char*, int, int, int, int*);
 off64_t _GD_WriteSeek(DIRFILE*, gd_entry_t*, const struct encoding_t*, off64_t,
     unsigned int mode);
 ssize_t _GD_WriteOut(DIRFILE *D, gd_entry_t *E, const struct encoding_t *enc,
@@ -1076,9 +1087,29 @@ int _GD_SampIndClose(struct _gd_raw_file* file);
 off64_t _GD_SampIndSize(int, struct _gd_raw_file* file, gd_type_t data_type,
     int swap);
 
-_gd_static_inline int entry_cmp(const void *a, const void *b)
+/* allocation boilerplates */
+_gd_static_inline void *_GD_Malloc(DIRFILE *D, size_t size)
 {
-  return strcmp((*(gd_entry_t**)a)->field, (*(gd_entry_t**)b)->field);
+  void *ptr = malloc(size);
+  if (ptr == NULL)
+    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+  return ptr;
+}
+
+_gd_static_inline void *_GD_Realloc(DIRFILE *D, void *old, size_t size)
+{
+  void *ptr = realloc(old, size);
+  if (ptr == NULL)
+    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+  return ptr;
+}
+
+_gd_static_inline char *_GD_Strdup(DIRFILE *D, const char *s)
+{
+  char *ptr = strdup(s);
+  if (ptr == NULL)
+    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+  return ptr;
 }
 
 #ifndef __cplusplus

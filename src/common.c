@@ -31,6 +31,11 @@ int gd_col_count = 0;
 char gd_debug_col[GD_COL_SIZE + 1] = "";
 #endif
 
+int _GD_EntryCmp(const void *a, const void *b)
+{
+  return strcmp((*(gd_entry_t**)a)->field, (*(gd_entry_t**)b)->field);
+}
+
 /* _GD_GetLine: read non-comment line from format file.  The line is newly
  *      malloc'd.  Returns a pointer if successful, NULL if unsuccessful.
  *      The length read is provided in *n.  Increments *linenum as appropriate;
@@ -164,10 +169,7 @@ void* _GD_Alloc(DIRFILE* D, gd_type_t type, size_t n)
     return NULL;
   }
 
-  ptr = malloc(n * GD_SIZE(type));
-
-  if (ptr == NULL)
-    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+  ptr = _GD_Malloc(D, n * GD_SIZE(type));
 
   dreturn("%p", ptr);
   return ptr;
@@ -183,18 +185,16 @@ int _GD_SetTablePath(DIRFILE *D, gd_entry_t *E, struct _gd_private_entry *e)
   e->u.linterp.table_dirfd = _GD_GrabDir(D,
       D->fragment[E->fragment_index].dirfd, E->EN(linterp,table));
 
-  temp_buffer = strdup(E->EN(linterp,table));
+  temp_buffer = _GD_Strdup(D, E->EN(linterp,table));
   if (temp_buffer == NULL) {
     _GD_ReleaseDir(D, e->u.linterp.table_dirfd);
-    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     dreturn("%i", 1);
     return 1;
   }
-  e->u.linterp.table_file = strdup(basename(temp_buffer));
+  e->u.linterp.table_file = _GD_Strdup(D, basename(temp_buffer));
   if (e->u.linterp.table_file == NULL) {
     _GD_ReleaseDir(D, e->u.linterp.table_dirfd);
     free(temp_buffer);
-    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     dreturn("%i", 1);
     return 1;
   }
@@ -269,11 +269,10 @@ void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E)
     return;
   }
 
-  E->e->u.linterp.lut = (struct _gd_lut *)malloc(buf_len *
+  E->e->u.linterp.lut = (struct _gd_lut *)_GD_Malloc(D, buf_len *
       sizeof(struct _gd_lut));
 
   if (E->e->u.linterp.lut == NULL) {
-    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     fclose(fp);
     dreturnvoid();
     return;
@@ -301,12 +300,11 @@ void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E)
     i++;
     if (i >= buf_len) {
       buf_len += 100;
-      ptr = (struct _gd_lut *)realloc(E->e->u.linterp.lut, buf_len *
+      ptr = (struct _gd_lut *)_GD_Realloc(D, E->e->u.linterp.lut, buf_len *
           sizeof(struct _gd_lut));
 
       if (ptr == NULL) {
         free(E->e->u.linterp.lut);
-        _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
         fclose(fp);
         dreturnvoid();
         return;
@@ -327,12 +325,11 @@ void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E)
   }
 
   /* Free unused memory */
-  ptr = (struct _gd_lut *)realloc(E->e->u.linterp.lut, i
+  ptr = (struct _gd_lut *)_GD_Realloc(D, E->e->u.linterp.lut, i
       * sizeof(struct _gd_lut));
 
   if (ptr == NULL) {
     free(E->e->u.linterp.lut);
-    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     fclose(fp);
     dreturnvoid();
     return;
@@ -804,10 +801,8 @@ int _GD_GetRepr(DIRFILE* D, const char* field_code_in, char** field_code)
     }
 
     /* make a copy of the field code without the representation */
-    *field_code = strdup(field_code_in);
-    if (*field_code == NULL) 
-      _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-    else
+    *field_code = _GD_Strdup(D, field_code_in);
+    if (*field_code)
       (*field_code)[field_code_len - 2] = '\0';
   }
 
@@ -818,21 +813,28 @@ int _GD_GetRepr(DIRFILE* D, const char* field_code_in, char** field_code)
 /* Ensure that an input field has been identified (with error checking) */
 int _GD_BadInput(DIRFILE* D, gd_entry_t* E, int i)
 {
-  char* code;
+  char *code, *munged_code;
+  int offset;
 
   dtrace("%p, %p, %i", D, E, i);
 
   if (E->e->entry[i] == NULL) {
-    E->e->entry[i] = _GD_FindFieldAndRepr(D, E->in_fields[i], &code,
-        &E->e->repr[i], NULL, 1);
+    munged_code = _GD_MungeCode(D, NULL, E->fragment_index, E->in_fields[i],
+        &offset);
+    if (munged_code)
+      E->e->entry[i] = _GD_FindFieldAndRepr(D, munged_code, &code,
+          &E->e->repr[i], NULL, 1);
 
     if (D->error) {
+      free(munged_code);
       dreturn("%i", 1);
       return 1;
     }
 
-    if (code != E->in_fields[i])
+    if (code != munged_code)
       free(code);
+
+    free(munged_code);
   }
 
   /* scalar entries not allowed */
@@ -1173,11 +1175,11 @@ _GD_CanonicalPath_DONE:
   return res;
 }
 
-char *_GD_MakeFullPath(const DIRFILE *D, int dirfd, const char *name)
+char *_GD_MakeFullPath(DIRFILE *D, int dirfd, const char *name, int seterr)
 {
   const char *dir;
   char *filepath;
-  dtrace("%p, %i, \"%s\"", D, dirfd, name);
+  dtrace("%p, %i, \"%s\", %i", D, dirfd, name, seterr);
 
   if (dirfd >= 0) {
     dir = _GD_DirName(D, dirfd);
@@ -1189,6 +1191,35 @@ char *_GD_MakeFullPath(const DIRFILE *D, int dirfd, const char *name)
     dir = NULL;
 
   filepath = _GD_CanonicalPath(dir, name);
+
+  if (seterr && filepath == NULL) {
+    if (errno == ENOMEM)
+      _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    else {
+      /* a last ditch attempt */
+      if (dir) {
+        filepath = (char*)_GD_Malloc(D, strlen(dir) + strlen(name) + 2);
+        if (filepath)
+          sprintf(filepath, "%s/%s", dir, name);
+      } else 
+        filepath = _GD_Strdup(D, name);
+    }
+  }
+
+  dreturn("\"%s\"", filepath);
+  return filepath;
+}
+
+char *_GD_MakeFullPathOnly(const DIRFILE *D, int dirfd, const char *name)
+{
+  char *filepath;
+
+  dtrace("%p, %i, \"%s\"", D, dirfd, name);
+
+  /* although we cast away the constness, seterr=0 ensures nothing gets
+   * modified
+   */
+  filepath = _GD_MakeFullPath((DIRFILE*)D, dirfd, name, 0);
 
   dreturn("\"%s\"", filepath);
   return filepath;
@@ -1203,10 +1234,9 @@ int _GD_GrabDir(DIRFILE *D, int dirfd, const char *name)
 
   dtrace("%p, %i, \"%s\"", D, dirfd, name);
 
-  path = _GD_MakeFullPath(D, dirfd, name);
+  path = _GD_MakeFullPath(D, dirfd, name, 1);
 
   if (path == NULL) {
-    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     dreturn("%i", -1);
     return -1;
   }

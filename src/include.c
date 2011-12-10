@@ -20,34 +20,116 @@
  */
 #include "internal.h"
 
-/* Include a format file fragment -- returns the include index, or
+/* Create new affixes given the current affixes and the new parts indicated
+ * on a /INCLUDE line */
+static int _GD_SetFieldAffixes(DIRFILE *D, int me, const char *prefix_in,
+    const char *suffix_in, int standards, int pedantic, const char *format_file,
+    int line, char **prefix, char **suffix)
+{
+  dtrace("%p, %i, \"%s\", \"%s\", %i, %i, \"%s\", %i, %p, %p", D, me, prefix_in,
+      suffix_in, standards, pedantic, format_file, line, prefix, suffix);
+
+  /* suffix first, for some reason */
+  if (suffix_in && suffix_in[0] != '\0') {
+    if (_GD_ValidateField(suffix_in, standards, pedantic, 1, NULL))
+    {
+      _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_NAME, format_file, line,
+          suffix_in);
+      dreturn("%i", 1);
+      return 1;
+    }
+
+    if (D->fragment[me].suffix == NULL)
+      *suffix = _GD_Strdup(D, suffix_in);
+    else {
+      *suffix = _GD_Malloc(D, strlen(D->fragment[me].suffix) +
+          strlen(suffix_in) + 1);
+      if (*suffix)
+        strcat(strcpy(*suffix, suffix_in), D->fragment[me].suffix);
+    }
+  } else if (D->fragment[me].suffix)
+    *suffix = _GD_Strdup(D, D->fragment[me].suffix);
+
+  if (D->error) {
+    dreturn("%i", 1);
+    return 1;
+  }
+
+  /* now the prefix */
+  if (prefix_in && prefix_in[0] != '\0') {
+    if (_GD_ValidateField(prefix_in, standards, pedantic, 1, NULL))
+    {
+      _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_NAME, format_file, line,
+          prefix_in);
+      dreturn("%i", 1);
+      return 1;
+    }
+
+    if (D->fragment[me].prefix == NULL)
+      *prefix = _GD_Strdup(D, prefix_in);
+    else {
+      *prefix = _GD_Malloc(D, strlen(D->fragment[me].prefix) +
+          strlen(prefix_in) + 1);
+      if (*prefix)
+        strcat(strcpy(*prefix, D->fragment[me].prefix), prefix_in);
+    }
+  } else if (D->fragment[me].prefix)
+    *prefix = _GD_Strdup(D, D->fragment[me].prefix);
+
+  dreturn("%i", D->error);
+  return D->error;
+}
+
+/* Include a format file fragment -- returns the mew fragment index, or
  * -1 on error */
 int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,
-    int linenum, char** ref_name, int me, int* standards, unsigned long *flags)
+    int linenum, char** ref_name, int me, const char *prefix_in,
+    const char *suffix_in, int* standards, unsigned long *flags)
 {
   int i;
   int old_standards = *standards;
   int old_pedantic = *flags & GD_PEDANTIC;
-  int found = 0;
   int dirfd = -1;
   char *temp_buf1, *temp_buf2;
-  char *base;
+  char *base, *prefix = NULL, *suffix = NULL;
   void *ptr = NULL;
   FILE* new_fp = NULL;
 
-  dtrace("%p, \"%s\", \"%s\", %p, %i, %i, %p, %p", D, ename, format_file,
-      ref_name, linenum, me, standards, flags);
+  dtrace("%p, \"%s\", \"%s\", %p, %i, %i, \"%s\", \"%s\", %p, %p", D, ename,
+      format_file, ref_name, linenum, me, prefix_in, suffix_in, standards,
+      flags);
 
-  temp_buf2 = strdup(ename);
-  if (temp_buf2 == NULL) {
-    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+  if (++D->recurse_level >= GD_MAX_RECURSE_LEVEL) {
+    _GD_SetError(D, GD_E_RECURSE_LEVEL, GD_E_RECURSE_INCLUDE, format_file,
+        linenum, ename);
+    D->recurse_level--;
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  if (_GD_SetFieldAffixes(D, me, prefix_in, suffix_in, old_standards,
+        old_pedantic, format_file, linenum, &prefix, &suffix))
+  {
+    free(suffix);
+    D->recurse_level--;
     dreturn("%i", -1);
     return -1;
   }
-  base = strdup(basename(temp_buf2));
+
+  temp_buf2 = _GD_Strdup(D, ename);
+  if (temp_buf2 == NULL) {
+    free(prefix);
+    free(suffix);
+    D->recurse_level--;
+    dreturn("%i", -1);
+    return -1;
+  }
+  base = _GD_Strdup(D, basename(temp_buf2));
   if (base == NULL) {
     free(temp_buf2);
-    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    free(prefix);
+    free(suffix);
+    D->recurse_level--;
     dreturn("%i", -1);
     return -1;
   }
@@ -57,34 +139,23 @@ int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,
   if (dirfd == -1 && D->error == GD_E_OK)
     _GD_SetError(D, GD_E_OPEN_FRAGMENT, errno, format_file, linenum, ename);
   if (D->error) {
+    free(temp_buf2);
+    free(prefix);
+    free(suffix);
+    D->recurse_level--;
     dreturn("%i", -1);
     return -1;
   }
 
-  temp_buf1 = _GD_MakeFullPath(D, dirfd, base);
+  temp_buf1 = _GD_MakeFullPath(D, dirfd, base, 1);
   free(temp_buf2);
   if (temp_buf1 == NULL) {
     _GD_ReleaseDir(D, dirfd);
-    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    free(prefix);
+    free(suffix);
+    D->recurse_level--;
     dreturn("%i", -1);
     return -1;
-  }
-
-  /* Run through the include list to see if we've already included this
-   * file */
-  for (i = 0; i < D->n_fragment; ++i)
-    if (strcmp(temp_buf1, D->fragment[i].cname) == 0) {
-      found = 1;
-      break;
-    }
-
-  /* If we found the file, we won't reopen it.  Continue parsing. */
-  if (found) {
-    _GD_ReleaseDir(D, dirfd);
-    free(base);
-    free(temp_buf1);
-    dreturn("%i", i);
-    return i;
   }
 
   /* Try to open the file */
@@ -96,8 +167,11 @@ int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,
   if (i < 0) {
     _GD_SetError(D, GD_E_OPEN_FRAGMENT, errno, format_file, linenum,
         temp_buf1);
+    free(prefix);
+    free(suffix);
     free(base);
     free(temp_buf1);
+    D->recurse_level--;
     dreturn("%i", -1);
     return -1;
   }
@@ -107,19 +181,25 @@ int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,
   /* If opening the file failed, set the error code and abort parsing. */
   if (new_fp == NULL) {
     _GD_SetError(D, GD_E_OPEN_FRAGMENT, errno, format_file, linenum, temp_buf1);
+    free(prefix);
+    free(suffix);
     free(base);
     free(temp_buf1);
+    D->recurse_level--;
     dreturn("%i", -1);
     return -1;
   }
 
   /* If we got here, we managed to open the included file; parse it */
-  ptr = realloc(D->fragment, (++D->n_fragment) * sizeof(struct gd_fragment_t));
+  ptr = _GD_Realloc(D, D->fragment,
+      (++D->n_fragment) * sizeof(struct gd_fragment_t));
   if (ptr == NULL) {
     D->n_fragment--;
-    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    free(prefix);
+    free(suffix);
     free(base);
     free(temp_buf1);
+    D->recurse_level--;
     dreturn("%i", -1);
     return -1;
   }
@@ -127,7 +207,7 @@ int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,
 
   D->fragment[D->n_fragment - 1].bname = base;
   D->fragment[D->n_fragment - 1].cname = temp_buf1;
-  D->fragment[D->n_fragment - 1].ename = strdup(ename);
+  D->fragment[D->n_fragment - 1].ename = _GD_Strdup(D, ename);
   D->fragment[D->n_fragment - 1].modified = 0;
   D->fragment[D->n_fragment - 1].parent = me;
   D->fragment[D->n_fragment - 1].dirfd = dirfd;
@@ -142,13 +222,15 @@ int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,
   D->fragment[D->n_fragment - 1].ref_name = NULL;
   D->fragment[D->n_fragment - 1].frame_offset = D->fragment[me].frame_offset;
   D->fragment[D->n_fragment - 1].protection = GD_PROTECT_NONE;
+  D->fragment[D->n_fragment - 1].prefix = prefix;
+  D->fragment[D->n_fragment - 1].suffix = suffix;
   D->fragment[D->n_fragment - 1].vers =
     (*flags & GD_PEDANTIC) ? 1ULL << *standards : 0;
 
   if (D->fragment[D->n_fragment - 1].ename == NULL) {
-    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     D->n_fragment--;
     free(base);
+    D->recurse_level--;
     dreturn("%i", -1);
     return -1;
   }
@@ -162,11 +244,15 @@ int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,
 
   /* prevent /VERSION leak in DSV >= 9 */
   if ((old_standards >= 9 && old_pedantic) || *standards >= 9) {
-    *standards = old_standards;
+    if (*standards != old_standards) {
+      *standards = old_standards;
+      D->flags |= GD_MULTISTANDARD;
+    }
     if (!old_pedantic)
       *flags &= ~GD_PEDANTIC;
   }
 
+  D->recurse_level--;
   dreturn("%i", D->n_fragment - 1);
   return D->n_fragment - 1;
 }
@@ -222,7 +308,7 @@ int gd_include(DIRFILE* D, const char* file, int fragment_index,
     flags |= D->flags & GD_ENCODING;
 
   new_fragment = _GD_Include(D, file, "dirfile_include()", 0, &ref_name,
-      fragment_index, &standards, &flags);
+      fragment_index, NULL, NULL, &standards, &flags);
 
   if (!D->error) {
     D->fragment[fragment_index].modified = 1;
@@ -274,9 +360,8 @@ static int _GD_CollectFragments(DIRFILE* D, int** f, int fragment, int nf)
 
   dtrace("%p, %p, %i, %i", D, f, fragment, nf);
 
-  new_f = (int *)realloc(*f, sizeof(int) * ++nf);
+  new_f = (int *)_GD_Realloc(D, *f, sizeof(int) * ++nf);
   if (new_f == NULL) {
-    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     dreturn("%i", -1);
     return -1;
   }

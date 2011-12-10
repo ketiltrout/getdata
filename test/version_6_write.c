@@ -20,21 +20,18 @@
  */
 #include "test.h"
 
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <stdio.h>
-#include <string.h>
-#include <errno.h>
-
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *format_data = "/VERSION 6\na\\#r RAW UINT8 8\n";
+  const char *format_data =
+    "/VERSION 6\n"
+    "b\\ c CONST UINT8 8\n"
+    "\"a \\#r\" RAW UINT8 b\\ c\n"
+    "\\x64\\c\\157 PHASE \"a \\#r\" 0\n";
   int fd, e, q, c, r = 0;
   DIRFILE *D;
+  gd_spf_t s;
 
   rmdirfile();
   mkdir(filedir, 0777);
@@ -50,6 +47,7 @@ int main(void)
 
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
   c = gd_dirfile_standards(D, GD_VERSION_CURRENT);
+  s = gd_spf(D, "dco");
   gd_close(D);
 
   unlink(format);
@@ -58,6 +56,7 @@ int main(void)
   CHECKI(e,6);
   CHECKI(q,0);
   CHECKI(c,6);
+  CHECKU(s,8);
 
   return r;
 }

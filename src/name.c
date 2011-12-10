@@ -20,70 +20,117 @@
  */
 #include "internal.h"
 
-/* Check for a valid field name -- returns input on error */
-char* _GD_ValidateField(const gd_entry_t* parent, const char* field_code,
-    int standards, int strict, int* is_dot)
+/* Munge a field code or field name using the prefix and suffix of the current
+ * fragment.  Returns a newly malloc'd munged code, or NULL on error */
+char *_GD_MungeCode(DIRFILE *D, const gd_entry_t *P, int me, const char *code,
+    int *offset)
 {
-  const size_t len = strlen(field_code);
-  size_t i;
-  char* ptr;
+  char *ptr, *slash;
+  size_t len = strlen(code);
+  size_t slen;
+  size_t plen;
 
-  dtrace("%p, \"%s\", %i, %i, %p", parent, field_code, standards, strict,
-      is_dot);
+  dtrace("%p, %p, %i, \"%s\", %p", D, P, me, code, offset);
 
-  if (field_code[0] == '\0' || (strict && ((len > 50 && standards < 5) ||
-          (len > 16 && standards < 3))))
-  {
-    dreturn("%p", field_code);
-    return (char *)field_code;
+  if (P) {
+    plen = strlen(P->field);
+    ptr = (char*)_GD_Malloc(D, len + plen + 2);
+    if (ptr) {
+      strcpy(ptr, P->field);
+      ptr[plen] = '/';
+      strcpy(ptr + plen + 1, code);
+    }
+    *offset = plen + 1;
+  } else {
+    *offset = 0;
+    slen = (D->fragment[me].suffix) ? strlen(D->fragment[me].suffix) : 0;
+    plen = (D->fragment[me].prefix) ? strlen(D->fragment[me].prefix) : 0;
+    ptr = (char*)_GD_Malloc(D, len + slen + plen + 1);
+    if (ptr) {
+      /* look for a /, which could indicate this is a field code, not just a
+       * field name.  If it is just an illegal name with a / in it, mungeing
+       * will fail, but validation will catch the illegal name later anyways.
+       */
+      if ((slash = strchr(code, '/')))
+        len = slash++ - code;
+
+      if (plen > 0)
+        strcpy(ptr, D->fragment[me].prefix);
+
+      strncpy(ptr + plen, code, len + 1);
+
+      if (slen > 0)
+        strcpy(ptr + plen + len, D->fragment[me].suffix);
+
+      if (slash) {
+        ptr[plen + len + slen] = '/';
+        strcpy(ptr + plen + len + slen + 1, slash);
+      }
+    }
   }
 
-  *is_dot = 0;
+  dreturn("\"%s\" (%i)", ptr, *offset);
+  return ptr;
+}
+
+/* Check for a valid field name -- returns 1 on error */
+int _GD_ValidateField(const char* field_code, int standards, int strict,
+    int affix, int* is_dot)
+{
+  const size_t len = strlen(field_code);
+  size_t i, local_dot = 0;
+
+  dtrace("\"%s\", %i, %i, %i, %p", field_code, standards, strict, affix,
+      is_dot);
+
+  if (!affix && (field_code[0] == '\0' || (strict &&
+          ((len > 50 && standards < 5) || (len > 16 && standards < 3)))))
+  {
+    dreturn("%i", 1);
+    return 1;
+  }
+
   for (i = 0; i < len; ++i)
-    if (field_code[i] == '/') {
-      /* fields may never contain '/', regardless of version and strictness */
-      dreturn("%p", field_code);
-      return (char *)field_code;
-    } else if (field_code[i] < 0x20) {
-      dreturn("%p", field_code);
-      return (char *)field_code;
+    if (field_code[i] == '/' || field_code[i] < 0x20) {
+      /* these characters are always forbidden */
+      dreturn("%i", 1);
+      return 1;
     } else if (strict && ((standards >= 5 && (field_code[i] == '<' ||
             field_code[i] == '>' || field_code[i] == ';' ||
             field_code[i] == '|' || field_code[i] == '&')) ||
         (standards == 5 && (field_code[i] == '\\' || field_code[i] == '#'))))
     {
-      dreturn("%p", field_code);
-      return (char *)field_code;
+      /* these characters are sometimes forbidden */
+      dreturn("%i", 1);
+      return 1;
     } else if (field_code[i] == '.') {
-      if (standards >= 6 && strict) {
-        dreturn("%p", field_code);
-        return (char *)field_code;
+      if (affix || (standards >= 6 && strict)) {
+        dreturn("%i", 1);
+        return 1;
       } else
-        *is_dot = 1;
+        local_dot = 1;
     }
 
-  if (strict && standards < 8)
-    if ((strcmp("FRAMEOFFSET", field_code) == 0 && standards >= 1)
-        || (strcmp("ENCODING", field_code) == 0 && standards >= 6)
-        || (strcmp("ENDIAN", field_code) == 0 && standards >= 5)
-        || (strcmp("INCLUDE", field_code) == 0 && standards >= 3)
-        || (strcmp("META", field_code) == 0 && standards >= 6)
-        || (strcmp("VERSION", field_code) == 0 && standards >= 5)
-        || (strcmp("PROTECT", field_code) == 0 && standards >= 6)
-        || (strcmp("REFERENCE", field_code) == 0 && standards >= 6))
-    {
-      dreturn("%p", field_code);
-      return (char *)field_code;
-    }
+  if (!affix) {
+    if (strict && standards < 8)
+      if ((strcmp("FRAMEOFFSET", field_code) == 0 && standards >= 1)
+          || (strcmp("ENCODING", field_code) == 0 && standards >= 6)
+          || (strcmp("ENDIAN", field_code) == 0 && standards >= 5)
+          || (strcmp("INCLUDE", field_code) == 0 && standards >= 3)
+          || (strcmp("META", field_code) == 0 && standards >= 6)
+          || (strcmp("VERSION", field_code) == 0 && standards >= 5)
+          || (strcmp("PROTECT", field_code) == 0 && standards >= 6)
+          || (strcmp("REFERENCE", field_code) == 0 && standards >= 6))
+      {
+        dreturn("%i", 1);
+        return 1;
+      }
 
-  if (parent != NULL) {
-    ptr = (char *)malloc(strlen(parent->field) + strlen(field_code) + 2);
-    sprintf(ptr, "%s/%s", parent->field, field_code);
-  } else
-    ptr = strdup(field_code);
+    *is_dot = local_dot;
+  }
 
-  dreturn("\"%s\"", ptr);
-  return ptr;
+  dreturn("%i", 0);
+  return 0;
 }
 
 int gd_rename(DIRFILE *D, const char *old_code, const char *new_name,
@@ -91,7 +138,7 @@ int gd_rename(DIRFILE *D, const char *old_code, const char *new_name,
 {
   gd_entry_t *E, *Q;
   char* name;
-  int new_dot, old_dot = 0;
+  int offset, new_dot, old_dot = 0;
   unsigned int dot_ind;
 
   dtrace("%p, \"%s\", \"%s\", %i", D, old_code, new_name, move_data);
@@ -137,13 +184,14 @@ int gd_rename(DIRFILE *D, const char *old_code, const char *new_name,
     return -1;
   }
 
-  name = _GD_ValidateField(E->e->p.parent, new_name, D->standards, 1, &new_dot);
-  if (name == new_name) {
-    _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, new_name);
+  name = _GD_MungeCode(D, E->e->p.parent, E->fragment_index, new_name, &offset);
+  if (name == NULL) {
     dreturn("%i", -1);
     return -1;
-  } else if (name == NULL) {
-    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+  }
+
+  if (_GD_ValidateField(name + offset, D->standards, 1, 0, &new_dot)) {
+    _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, new_name);
     dreturn("%i", -1);
     return -1;
   }
@@ -165,10 +213,9 @@ int gd_rename(DIRFILE *D, const char *old_code, const char *new_name,
 
   if (E->field_type == GD_RAW_ENTRY) {
     /* Compose the new filename */
-    char *filebase = strdup(new_name);
+    char *filebase = _GD_Strdup(D, new_name);
 
     if (filebase == NULL) {
-      _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
       free(name);
       dreturn("%i", -1);
       return -1;
@@ -184,11 +231,10 @@ int gd_rename(DIRFILE *D, const char *old_code, const char *new_name,
 
     /* Resize the dot list; this must be done early in case it fails */
     if (new_dot && !old_dot) {
-      gd_entry_t** ptr = (gd_entry_t **)realloc(D->dot_list,
+      gd_entry_t** ptr = (gd_entry_t **)_GD_Realloc(D, D->dot_list,
           sizeof(gd_entry_t*) * (D->n_dot + 1));
 
       if (ptr == NULL) {
-        _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
         free(name);
         dreturn("%i", -1);
         return -1;
@@ -265,9 +311,9 @@ int gd_rename(DIRFILE *D, const char *old_code, const char *new_name,
     D->dot_list[D->n_dot++] = E;
 
   /* re-sort the lists */
-  qsort(D->entry, D->n_entries, sizeof(gd_entry_t*), entry_cmp);
+  qsort(D->entry, D->n_entries, sizeof(gd_entry_t*), _GD_EntryCmp);
   if (new_dot)
-    qsort(D->dot_list, D->n_dot, sizeof(gd_entry_t*), entry_cmp);
+    qsort(D->dot_list, D->n_dot, sizeof(gd_entry_t*), _GD_EntryCmp);
 
   /* Invalidate the field lists */
   D->list_validity = 0;

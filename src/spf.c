@@ -30,7 +30,7 @@ gd_spf_t _GD_GetSPF(DIRFILE* D, gd_entry_t* E)
   dtrace("%p, %p", D, E);
 
   if (++D->recurse_level >= GD_MAX_RECURSE_LEVEL) {
-    _GD_SetError(D, GD_E_RECURSE_LEVEL, 0, NULL, 0, E->field);
+    _GD_SetError(D, GD_E_RECURSE_LEVEL, GD_E_RECURSE_CODE, NULL, 0, E->field);
     dreturn("%u", 0);
     D->recurse_level--;
     return 0;

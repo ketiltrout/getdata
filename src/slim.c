@@ -54,7 +54,7 @@ int _GD_SlimOpen(int dirfd, struct _gd_raw_file* file, int swap __gd_unused,
 #else
     char *filepath;
     /* this is easily broken, but the best we can do for now... */
-    filepath = gd_MakeFullPath(file->D, dirfd, file->name);
+    filepath = gd_MakeFullPathOnly(file->D, dirfd, file->name);
     if (filepath == NULL) {
       dreturn("%i", 1);
       return 1;
@@ -134,7 +134,7 @@ off64_t _GD_SlimSize(int dirfd, struct _gd_raw_file *file, gd_type_t data_type,
   dtrace("%i, %p, 0x%X", dirfd, file, data_type);
 
   /* this is easily broken, but the best we can do for now... */
-  filepath = gd_MakeFullPath(file->D, dirfd, file->name);
+  filepath = gd_MakeFullPathOnly(file->D, dirfd, file->name);
   if (filepath == NULL) {
     dreturn("%i", 1);
     return 1;

@@ -48,7 +48,7 @@ int gd_OpenAt(const DIRFILE *D, int dirfd, const char *name, int flags,
 
   dtrace("%p, %i, \"%s\", %x, 0%o", D, dirfd, name, flags, mode);
 
-  path = _GD_MakeFullPath(D, dirfd, name);
+  path = _GD_MakeFullPathOnly(D, dirfd, name);
   ret = open(path, flags | O_BINARY, mode);
   free(path);
 
@@ -66,7 +66,7 @@ int gd_RenameAt(const DIRFILE *D, int olddirfd, const char *oldname,
 
   dtrace("%p, %i, \"%s\", %i, \"%s\"", D, olddirfd, oldname, newdirfd, newname);
 
-  newpath = _GD_MakeFullPath(D, newdirfd, newname);
+  newpath = _GD_MakeFullPathOnly(D, newdirfd, newname);
 #ifdef __MSVCRT__
   if (unlink(newpath)) {
     if (errno != ENOENT) {
@@ -77,7 +77,7 @@ int gd_RenameAt(const DIRFILE *D, int olddirfd, const char *oldname,
   }
 #endif
 
-  oldpath = _GD_MakeFullPath(D, olddirfd, oldname);
+  oldpath = _GD_MakeFullPathOnly(D, olddirfd, oldname);
   ret = rename(oldpath, newpath);
   free(newpath);
   free(oldpath);
@@ -96,7 +96,7 @@ int gd_StatAt(const DIRFILE* D, int dirfd, const char* name, struct stat* buf,
 
   dtrace("%p, %i, \"%s\", %p, %x", D, dirfd, name, buf, flags);
 
-  path = _GD_MakeFullPath(D, dirfd, name);
+  path = _GD_MakeFullPathOnly(D, dirfd, name);
 #ifdef HAVE_LSTAT
   if (flags & AT_SYMLINK_NOFOLLOW)
     ret = lstat(path, buf);
@@ -119,7 +119,7 @@ int gd_StatAt64(const DIRFILE* D, int dirfd, const char* name, gd_stat64_t* buf,
 
   dtrace("%p, %i, \"%s\", %p, <unused>", D, dirfd, name, buf);
 
-  path = _GD_MakeFullPath(D, dirfd, name);
+  path = _GD_MakeFullPathOnly(D, dirfd, name);
   ret = gd_stat64(path, buf);
   free(path);
 
@@ -137,7 +137,7 @@ int gd_UnlinkAt(const DIRFILE *D, int dirfd, const char *name,
 
   dtrace("%p, %i, \"%s\", <unused>", D, dirfd, name);
 
-  path = _GD_MakeFullPath(D, dirfd, name);
+  path = _GD_MakeFullPathOnly(D, dirfd, name);
   ret = unlink(path);
   free(path);
 

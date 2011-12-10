@@ -18,17 +18,7 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Check the writing of field specs */
 #include "test.h"
-
-#include <stdio.h>
-#include <inttypes.h>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
 
 int main(void)
 {
@@ -49,7 +39,11 @@ int main(void)
     "k PHASE h 3\n",
     "l SBIT a d 2\n",
     "m POLYNOM a 1 c 2 d\n",
-    "n STRING \"a b c \\x01 ÿ\"\n",
+    "n STRING a\\ b\\ c\\ \\x01\\ ÿ\n",
+    "o DIVIDE j k\n",
+    "p RECIP e d\n",
+    "q WINDOW i m EQ c\n",
+    "r CARRAY FLOAT64 1.2 3.4 5.6 7.8\n",
     NULL
   };
 

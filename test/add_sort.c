@@ -18,10 +18,7 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Field sort test for dirfile_add */
 #include "test.h"
-#include <stdio.h>
-#include <stdlib.h>
 
 int r = 0;
 
@@ -58,6 +55,7 @@ int main (void)
   const char *k = "dirfile/k";
   DIRFILE *D;
 
+  rmdirfile();
   D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_EXCL | GD_VERBOSE);
   gd_add_raw(D, "d", GD_FLOAT64, 1, 0);
   gd_add_raw(D, "b", GD_FLOAT64, 2, 0);

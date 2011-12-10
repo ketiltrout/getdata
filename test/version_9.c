@@ -1,4 +1,4 @@
-/* Copyright (C) 2010-2011 D. V. Wiebe
+/* Copyright (C) 2011 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -20,40 +20,30 @@
  */
 #include "test.h"
 
-int cb(gd_parser_data_t *pdata, void *ll)
-{
-  ((int*)ll)[pdata->linenum - 1] = 1;
-  return GD_SYNTAX_IGNORE;
-}
+#include <stdlib.h>
+#include <sys/types.h>
+#include <stdio.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <string.h>
+#include <errno.h>
 
-#define NLINES 13
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
   const char *data = "dirfile/ar";
   const char *format_data =
-    "/VERSION 8\n"
-    "X<r RAW UINT8 8\n"
-    "X.r RAW UINT8 8\n"
-    "X\\#r RAW COMPLEX128 8\n"
-    "Xr POLYNOM INDEX 8 3 1 2\n"
+    "/VERSION 9\n"
     "ar RAW UINT8 8\n"
-    "e RECIP 3. Xr\n"
-    "FRAMEOFFSET 3\n"
-    "FRAMEOFFSET RAW UINT8 3\n"
-    "/FRAMEOFFSET 3\n"
-    "e RECIP ar/c Xr\n"
-    "e DIVIDE ar Xr\n"
-    "ar/c CONST COMPLEX128 3;3\n";
-  uint16_t c[8];
-  int ll[NLINES];
+    "/HIDDEN ar\n"
+    "r WINDOW ar ar LT 0x2C\n";
+  double c[8];
   unsigned char data_data[256];
-  int fd, i, n, error, r = 0;
+  int fd, i, n, error, v, l, e, r = 0;
   DIRFILE *D;
 
-  memset(c, 0, 16);
-  memset(ll, 0, NLINES * sizeof(int));
+  memset(c, 0, 8);
   rmdirfile();
   mkdir(filedir, 0777);
 
@@ -68,9 +58,13 @@ int main(void)
   write(fd, data_data, 256);
   close(fd);
 
-  D = gd_cbopen(filedir, GD_RDONLY | GD_PEDANTIC, cb, ll);
-  n = gd_getdata(D, "ar", 5, 0, 1, 0, GD_UINT16, c);
+  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  n = gd_getdata(D, "r", 5, 0, 1, 0, GD_FLOAT64, c);
   error = gd_error(D);
+
+  v = gd_dirfile_standards(D, GD_VERSION_CURRENT);
+  l = gd_dirfile_standards(D, GD_VERSION_LATEST);
+  e = gd_dirfile_standards(D, GD_VERSION_EARLIEST);
 
   gd_close(D);
 
@@ -79,19 +73,17 @@ int main(void)
   rmdir(filedir);
 
   CHECKI(error,0);
-
-  for (i = 0; i < NLINES; ++i) {
-    if (i == 1 || i == 2 || i == 7 || i == 10 || i == 11) {
-      CHECKIi(i,ll[i], 1);
-    } else {
-      CHECKIi(i,ll[i],0);
-    }
-  }
-
   CHECKI(n,8);
 
-  for (i = 0; i < n; ++i)
-    CHECKUi(i,c[i],16 +i);
+  for (i = 0; i < 8; ++i)
+    if (i >= 4)
+      CHECKNANi(i,c[i]);
+    else
+      CHECKFi(i,c[i],(40 + i));
+
+  CHECKI(v,9);
+  CHECKI(l,GD_DIRFILE_STANDARDS_VERSION);
+  CHECKI(e,9);
 
   return r;
 }

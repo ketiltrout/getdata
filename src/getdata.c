@@ -266,9 +266,8 @@ static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *E, off64_t s0, size_t ns,
   else
     s0 -= E->EN(raw,spf) * D->fragment[E->fragment_index].frame_offset;
 
-  databuffer = (char *)malloc(ns * E->e->u.raw.size);
+  databuffer = (char *)_GD_Malloc(D, ns * E->e->u.raw.size);
   if (databuffer == NULL) {
-    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     dreturn("%i", 0);
     return 0;
   }
@@ -1282,11 +1281,10 @@ static size_t _GD_DoBit(DIRFILE *D, gd_entry_t *E, int is_signed,
   }
 
   if (is_signed)
-    tmpbuf = (int64_t *)malloc(num_samp * sizeof(int64_t));
+    tmpbuf = (int64_t *)_GD_Malloc(D, num_samp * sizeof(int64_t));
   else
-    tmpbuf = (uint64_t *)malloc(num_samp * sizeof(uint64_t));
+    tmpbuf = (uint64_t *)_GD_Malloc(D, num_samp * sizeof(uint64_t));
   if (tmpbuf == NULL) {
-    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     dreturn("%i", 0);
     return 0;
   }
@@ -1588,7 +1586,7 @@ size_t _GD_DoField(DIRFILE *D, gd_entry_t *E, int repr, off64_t first_samp,
       first_samp, num_samp, return_type, data_out);
 
   if (++D->recurse_level >= GD_MAX_RECURSE_LEVEL) {
-    _GD_SetError(D, GD_E_RECURSE_LEVEL, 0, NULL, 0, E->field);
+    _GD_SetError(D, GD_E_RECURSE_LEVEL, GD_E_RECURSE_CODE, NULL, 0, E->field);
     D->recurse_level--;
     dreturn("%i", 0);
     return 0;

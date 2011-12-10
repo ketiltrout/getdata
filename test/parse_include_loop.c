@@ -18,36 +18,38 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
+/* Test include */
 #include "test.h"
+
+#include <stdlib.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <string.h>
+#include <errno.h>
 
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  int error, n, r = 0;
+  const char *format_data = "INCLUDE format\n";
+  int fd, e, r = 0;
   DIRFILE *D;
 
-  gd_entry_t E;
-  E.field =  "new";
-  E.field_type = GD_NO_ENTRY;
-  E.fragment_index = 0;
-  E.EN(raw,spf) = 2;
-  E.EN(raw,data_type) = GD_UINT8;
-
   rmdirfile();
-  D = gd_open(filedir, GD_RDWR | GD_CREAT);
-  gd_add(D, &E);
-  error = gd_error(D);
+  mkdir(filedir, 0777);
 
-  /* check */
-  n = gd_nfields(D);
+  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
+  write(fd, format_data, strlen(format_data));
+  close(fd);
 
+  D = gd_open(filedir, GD_RDONLY);
+  e = gd_error(D);
   gd_close(D);
 
   unlink(format);
   rmdir(filedir);
 
-  CHECKI(n,1);
-  CHECKI(error, GD_E_BAD_ENTRY);
+  CHECKI(e, GD_E_RECURSE_LEVEL);
   return r;
 }

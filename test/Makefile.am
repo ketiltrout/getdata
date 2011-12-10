@@ -180,10 +180,11 @@ GET_TESTS=${GET64} get_bad_code get_bit get_carray get_carray_len \
 					get_lincom2 get_lincom3 get_lincom_noin get_lincom_non get_linterp \
 					get_linterp_noin get_linterp_notab get_linterp_sort get_multiply \
 					get_multiply_noin get_nonexistent get_null $(GET_OFF64) get_phase \
-					get_polynom get_polynom_noin get_recip get_recip_const get_recurse \
-					get_rofs get_sbit get_sf get_ss get_type get_uint16 get_uint32 \
-					get_uint64 get_window get_window_clr get_window_ge get_window_gt \
-					get_window_le get_window_lt get_window_ne get_window_set get_zero
+					get_phase_affix get_polynom get_polynom_noin get_recip \
+					get_recip_const get_recurse get_rofs get_sbit get_sf get_ss get_type \
+					get_uint16 get_uint32 get_uint64 get_window get_window_clr \
+					get_window_ge get_window_gt get_window_le get_window_lt \
+					get_window_ne get_window_set get_zero
 
 GLOBAL_TESTS=global_name global_ref global_ref_empty global_ref_set
 
@@ -247,27 +248,29 @@ PARSE_TESTS=parse_badline parse_bit parse_bit4 parse_bit_bitnum \
 						parse_endian_force parse_endian_little parse_endian_slash \
 						parse_eol parse_foffs parse_foffs_include parse_foffs_slash \
 						parse_hidden parse_hidden_field parse_hidden_meta parse_include \
-						parse_include_absolute parse_include_absrel \
-						parse_include_nonexistent parse_include_relabs \
-						parse_include_relrel parse_include_slash parse_index parse_lincom \
-						parse_lincom_ncols1 parse_lincom_ncols2 parse_lincom_nfields \
-						parse_lincom_nofields parse_lincom_non parse_lincom_non_ncols \
-						parse_lincom_scalar parse_linterp parse_linterp_ncols parse_meta \
-						parse_meta_implicit parse_meta_implicit2 parse_meta_index \
-						parse_meta_index2 parse_meta_meta parse_meta_parent parse_meta_raw \
-						parse_multiply parse_multiply_ncols parse_name parse_name_dot \
-						parse_name_ext parse_name_pedantic parse_ncols parse_phase \
-						parse_phase_ncols parse_phase_scalar parse_polynom \
-						parse_polynom_ncols1 parse_polynom_ncols2 parse_polynom_scalar \
-						parse_protect_all parse_protect_bad parse_protect_data \
-						parse_protect_format parse_protect_none parse_quote \
-						parse_quote_mismatch parse_raw parse_raw_char parse_raw_ncols \
-						parse_raw_scalar parse_raw_spf parse_raw_type parse_recip \
-						parse_ref parse_ref_nonexistent parse_sbit parse_sort parse_string \
-						parse_string_ncols parse_string_null parse_version \
-						parse_version_89 parse_version_98 parse_version_include \
-						parse_version_permissive parse_version_p8 parse_version_p9 \
-						parse_version_slash parse_whitespace parse_window \
+						parse_include_absolute parse_include_absrel parse_include_loop \
+						parse_include_nonexistent parse_include_prefix \
+						parse_include_prefix_dup parse_include_preprefix \
+						parse_include_relabs parse_include_relrel parse_include_slash \
+						parse_include_suffix parse_include_sufsuffix parse_index \
+						parse_lincom parse_lincom_ncols1 parse_lincom_ncols2 \
+						parse_lincom_nfields parse_lincom_nofields parse_lincom_non \
+						parse_lincom_non_ncols parse_lincom_scalar parse_linterp \
+						parse_linterp_ncols parse_meta parse_meta_implicit \
+						parse_meta_implicit2 parse_meta_index parse_meta_index2 \
+						parse_meta_meta parse_meta_parent parse_meta_raw parse_multiply \
+						parse_multiply_ncols parse_name parse_name_dot parse_name_ext \
+						parse_name_pedantic parse_ncols parse_phase parse_phase_ncols \
+						parse_phase_scalar parse_polynom parse_polynom_ncols1 \
+						parse_polynom_ncols2 parse_polynom_scalar parse_protect_all \
+						parse_protect_bad parse_protect_data parse_protect_format \
+						parse_protect_none parse_quote parse_quote_mismatch parse_raw \
+						parse_raw_char parse_raw_ncols parse_raw_scalar parse_raw_spf \
+						parse_raw_type parse_recip parse_ref parse_ref_nonexistent \
+						parse_sbit parse_sort parse_string parse_string_ncols \
+						parse_string_null parse_version parse_version_89 parse_version_98 \
+						parse_version_include parse_version_permissive parse_version_p8 \
+						parse_version_p9 parse_version_slash parse_whitespace parse_window \
 						parse_window_ncols parse_window_op parse_window_scalar
 
 PROTECT_TESTS=protect_alter protect_get
@@ -322,7 +325,7 @@ VERSION_TESTS=version_0 version_0_write version_1 version_1_write version_2 \
 							version_4_write version_5 version_5_strict version_5_write \
 							version_6 version_6_strict version_6_write version_7 \
 							version_7_strict version_7_write version_8 version_8_strict \
-							version_8_write
+							version_8_write version_9 version_9_strict version_9_write
 
 VLIST_TESTS=vlist vlist_hidden vlist_invalid vlist_meta vlist_meta_hidden \
 						vlist_meta_invalid

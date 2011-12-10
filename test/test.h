@@ -51,13 +51,15 @@ int gd_system(const char* command)
 #endif
 
 #define CHECK(e,n,nf,vf,...) \
-  if (e) { r = 1; \
-    fprintf(stderr, #n " = " nf " (expected " vf ")\n", __VA_ARGS__); }
+  do { if (e) { r = 1; \
+    fprintf(stderr, #n " = " nf " (expected " vf ")\n", __VA_ARGS__); } \
+  } while(0)
 
 #define CHECKi(i,e,n,nf,vf,...) \
-  if (e) { r = 1; \
+  do { if (e) { r = 1; \
     fprintf(stderr, #i ":%i " #n " = " nf " (expected " vf ")\n", (int)(i), \
-        __VA_ARGS__); }
+        __VA_ARGS__); } \
+  } while(0)
 
 #ifdef GD_NO_C99_API
 #define CHECKC(n,v)    CHECK(sqrt(((n)[0]-(v)[0])*((n)[0]-(v)[0]) + \
@@ -81,6 +83,8 @@ int gd_system(const char* command)
     (long long)(v))
 #define CHECKIi(i,n,v) CHECKi(i,(long long)(n) != (long long)(v),n,"%lli",\
     "%lli", (long long)(n),(long long)(v))
+#define CHECKNAN(n)    CHECK(!isnan(n),n,"%.15g","%s",(double)(n),"nan")
+#define CHECKNANi(i,n) CHECKi(i,!isnan(n),n,"%.15g","%s",(double)(n),"nan")
 #define CHECKP(n)      CHECK((n) != NULL,n,"%p","%s",n,"NULL")
 #define CHECKPi(i,n)   CHECKi(i,(n) != NULL,n,"%p","%s",n,"NULL")
 #define CHECKPN(n)     CHECK((n) == NULL,n,"%p","%s",n,"non-NULL")

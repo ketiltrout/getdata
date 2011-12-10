@@ -18,17 +18,7 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Add a RAW field */
 #include "test.h"
-
-#include <inttypes.h>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
-#include <stdio.h>
 
 int main(void)
 {
@@ -38,6 +28,7 @@ int main(void)
   int error, r = 0, i;
   DIRFILE *D;
 
+  rmdirfile();
   D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
   gd_add_carray(D, "data", GD_UINT8, 8, GD_UINT8, &val, 0);
   for (i = 0; i < 8; ++i)

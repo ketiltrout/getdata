@@ -18,18 +18,7 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Attempt to read UINT8 */
-#include "../src/config.h"
 #include "test.h"
-
-#include <inttypes.h>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <stdio.h>
-#include <errno.h>
 
 int main(void)
 {
@@ -87,8 +76,8 @@ int main(void)
   CHECKI(n1, 8);
   CHECKI(n2, 8);
   for (i = 0; i < 8; ++i) {
-    CHECKIi(i,c1[i], 40 + i)
-    CHECKIi(i,c2[i], 40 + i)
+    CHECKIi(i,c1[i], 40 + i);
+    CHECKIi(i,c2[i], 40 + i);
   }
 
   return r;

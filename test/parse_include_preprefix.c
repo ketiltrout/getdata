@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 D. V. Wiebe
+/* Copyright (C) 2011 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -24,30 +24,43 @@ int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  int error, n, r = 0;
+  const char *format1 = "dirfile/format1";
+  const char *format2 = "dirfile/format2";
+  const char *format_data = "INCLUDE format1 pre\n";
+  const char *format1_data = "INCLUDE format2 PRE\n";
+  const char *format2_data = "data RAW UINT8 11\n";
+  int fd, r = 0;
   DIRFILE *D;
-
-  gd_entry_t E;
-  E.field =  "new";
-  E.field_type = GD_NO_ENTRY;
-  E.fragment_index = 0;
-  E.EN(raw,spf) = 2;
-  E.EN(raw,data_type) = GD_UINT8;
+  gd_spf_t spf, spf1, spf2;
 
   rmdirfile();
-  D = gd_open(filedir, GD_RDWR | GD_CREAT);
-  gd_add(D, &E);
-  error = gd_error(D);
+  mkdir(filedir, 0777);
 
-  /* check */
-  n = gd_nfields(D);
+  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
+  write(fd, format_data, strlen(format_data));
+  close(fd);
 
+  fd = open(format1, O_CREAT | O_EXCL | O_WRONLY, 0666);
+  write(fd, format1_data, strlen(format1_data));
+  close(fd);
+
+  fd = open(format2, O_CREAT | O_EXCL | O_WRONLY, 0666);
+  write(fd, format2_data, strlen(format2_data));
+  close(fd);
+
+  D = gd_open(filedir, GD_RDONLY);
+  spf = gd_spf(D, "data");
+  spf1 = gd_spf(D, "predata");
+  spf2 = gd_spf(D, "prePREdata");
   gd_close(D);
 
+  unlink(format2);
+  unlink(format1);
   unlink(format);
   rmdir(filedir);
 
-  CHECKI(n,1);
-  CHECKI(error, GD_E_BAD_ENTRY);
+  CHECKU(spf, 0);
+  CHECKU(spf1, 0);
+  CHECKU(spf2, 11);
   return r;
 }

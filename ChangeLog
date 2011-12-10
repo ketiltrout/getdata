@@ -1,3 +1,71 @@
+2011-12-09   D. V. Wiebe <getdata@ketiltrout.net> svn:635
+	* test/parse_include_preprefix.c test/version_9_strict.c test/version_9.c
+	test/parse_include_suffix.c test/parse_include_loop.c test/version_9_write.c
+	test/parse_include_sufsuffix.c test/parse_include_prefix.c
+	test/parse_include_prefix_dup.c test/get_phase_affix.c: Added.
+
+	* test/add_sort.c test/add_scalar_carray.c test/add_code.c test/add_type.c
+	test/add_invalid.c test/put_carray.c test/add_scalar.c test/madd.c
+	test/add_format.c: Remove dirfile before starting.
+
+	* test/version_8_strict.c: Fix initialisation.
+
+	* test/version_6_write.c: Test whitespace in field names.
+
+	* test/test.h: Armour plate macros.
+
+	* src/internal.h: Add prefix and suffix to gd_fragment_t.
+	* src/name.c (_GD_MungeCode) src/flush.c (_GD_DeMungeCode) src/include.c
+	(_GD_SetFieldAffixes): Added.
+	* src/flush.c (_GD_StringEscapeise): Handle null tokens.  Escape spaces
+	rather than assuming the caller will quote the token (which it wasn't
+	doing).
+	* src/entry.c (_GD_GetScalar) src/name.c (gd_rename) src/add.c (_GD_Add)
+	src/commonc. (_GD_BadInput): Munge field code before use.
+	* src/flush.c (_GD_PadField): Demunge field code before writing.
+	* src/flush.c (_GD_WriteConst): Properly demunge and escapeise scalar names.
+	* src/name.c (_GD_ValidateField): This function no longer takes care of
+	malloc'ing.  Modified to return integer true on error.
+	* src/name.c (_GD_FlushFragment): Add prefix and suffix to INCLUDE when
+	present.
+	* src/parse.c (_GD_ParseRaw _GD_ParseLincom _GD_ParseLinterp
+	_GD_ParseMultiply _GD_ParseRecip _GD_ParseLincom _GD_ParseWindow
+	_GD_ParseDivide _GD_ParseBit _GD_ParsePhase _GD_ParsePolynom _GD_ParseConst
+	_GD_ParseCarray _GD_ParseString): Munge field code on parsing.
+	* include.c (_GD_Include): Handle affixes.
+
+	* src/common.c (_GD_EntryCmp): Moved from src/internal.h and deinlined,
+	destatickified.  Given that the only use of this function is to pass it to
+	qsort, making it static inline only ensured that it got replaced once per
+	translation unit that referred to it.
+
+	* include.c (_GD_Include): Replaced the old filename comparison stage with a
+	simple recursion counter.
+
+	* src/parse.c (_GD_Tokenise): Handle token-initial escaped character.
+	Handle "\[ux#]##\...".
+
+	* src/flush.c (_GD_FindVersion): Prefix or suffix implies DSV >= 9.
+
+	* src/parse.c (_GD_SetScalar): Handle bad malloc.
+
+	* src/name.c (_GD_FieldSpec): Properly escapeise input field codes.
+
+	* src/errors.c: Distinguish GD_E_RECURSE_CODE from GD_E_RECURSE_INCLUDE.
+
+	* src/internal.h (_GD_Malloc _GD_Realloc _GD_Strdup): Added.
+	* src/commonc. (_GD_MakeFullPath): Set error if requested.
+	* src/common.c (_GD_MakeFullPathOnly): Added.  This is a wrapper around
+	_GD_MakeFullPath which ensures the DIRFILE is not modified.  Used by the
+	compatibility functions and the slim encoding framework (ie. things that have
+	at best a tenuous connection to the DIRFILE object).
+
+	* src/internal.h: Define GD_MULTISTANDARD.
+	* src/include.c (_GD_Include): Set GD_MULTISTANDARD if moving into/out of 
+	DSV >= 9.
+	* src/open.c (gd_cbopen): If the metadata contain multiple standards, figure
+	out a single one for the whole dirfile.
+
 2011-12-08   D. V. Wiebe <getdata@ketiltrout.net> svn:633
 	* test/svlist_hidden.c test/svlist_meta_hidden.c test/hide.c
 	test/flist_hidden.c test/nfields_hidden.c test/parse_version_89.c

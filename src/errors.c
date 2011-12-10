@@ -86,7 +86,7 @@ static const struct {
   { GD_E_BAD_CODE, 0, "Field not found: {4}", 0 },
   /* GD_E_BAD_TYPE: 1 = data type */
   { GD_E_BAD_TYPE, 0, "Unsupported data type: {1}", 0 },
-  /* GD_E_RAW_IO: 1 = suberror, 2 = filename, 3 = errno */
+  /* GD_E_RAW_IO: 2 = filename, 3 = errno */
   { GD_E_RAW_IO, 0, "Error accessing {2}: ", 1 },
   /* GD_E_OPEN_FRAGMENT: 1 = errno, 2 = format file, 3 = line, 4 = includefile*/
   { GD_E_OPEN_FRAGMENT, 0,
@@ -102,8 +102,11 @@ static const struct {
   /* GD_E_OPEN_LINFILE: 1 = suberror, 2 = errno, 4 = lutfile */
   { GD_E_OPEN_LINFILE, GD_E_LINFILE_LENGTH, "LINTERP table {4} too short", 0 },
   { GD_E_OPEN_LINFILE, 0, "Error opening LINTERP table {4}: ", 2 },
-  /* GD_E_RECURSE_LEVEL: 4 = fieldcode */
-  { GD_E_RECURSE_LEVEL, 0, "Recursion too deep resolving field {4}", 0 },
+  /* GD_E_RECURSE_LEVEL: 2 = file; 3 = line; 4 = name */
+  { GD_E_RECURSE_LEVEL, GD_E_RECURSE_CODE,
+    "Recursion too deep resolving field {4}", 0 },
+  { GD_E_RECURSE_LEVEL, GD_E_RECURSE_INCLUDE,
+    "Recursion too deep including {4} on line {3} of {2}", 0 },
   /* GD_E_BAD_DIRFILE: (nothing) */
   { GD_E_BAD_DIRFILE, 0, "Invalid dirfile", 0 },
   /* GD_E_BAD_FIELD_TYPE: 4 = fieldcode */

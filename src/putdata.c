@@ -191,11 +191,10 @@ static size_t _GD_DoLinterpOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
   }
 
   /* Make the reverse lut */
-  tmp_lut = (struct _gd_lut *)malloc(E->e->u.linterp.table_len *
+  tmp_lut = (struct _gd_lut *)_GD_Malloc(D, E->e->u.linterp.table_len *
       sizeof(struct _gd_lut));
   if (tmp_lut == NULL) {
     free(tmpbuf);
-    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     dreturn("%i", 0);
     return 0;
   }
@@ -543,10 +542,9 @@ static size_t _GD_DoStringOut(DIRFILE* D, gd_entry_t *E, const char *data_in)
     return 0;
   }
 
-  E->e->u.string = strdup(data_in);
+  E->e->u.string = _GD_Strdup(D, data_in);
   if (E->e->u.string == NULL) {
     E->e->u.string = ptr;
-    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     dreturn("%i", 0);
     return 0;
   }
@@ -566,7 +564,7 @@ size_t _GD_DoFieldOut(DIRFILE *D, gd_entry_t* E, int repr, off64_t first_samp,
       data_type, data_in);
 
   if (++D->recurse_level >= GD_MAX_RECURSE_LEVEL) {
-    _GD_SetError(D, GD_E_RECURSE_LEVEL, 0, NULL, 0, E->field);
+    _GD_SetError(D, GD_E_RECURSE_LEVEL, GD_E_RECURSE_CODE, NULL, 0, E->field);
     D->recurse_level--;
     dreturn("%i", 0);
     return 0;

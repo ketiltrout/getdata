@@ -28,7 +28,7 @@ off64_t _GD_GetFilePos(DIRFILE *D, gd_entry_t *E, off64_t index_pos)
   dtrace("%p, %p, %lli", D, E, (long long)index_pos);
 
   if (++D->recurse_level >= GD_MAX_RECURSE_LEVEL) {
-    _GD_SetError(D, GD_E_RECURSE_LEVEL, 0, NULL, 0, E->field);
+    _GD_SetError(D, GD_E_RECURSE_LEVEL, GD_E_RECURSE_CODE, NULL, 0, E->field);
     dreturn("%u", 0);
     D->recurse_level--;
     return 0;
@@ -231,7 +231,7 @@ static int _GD_Seek(DIRFILE *D, gd_entry_t *E, off64_t offset,
   dtrace("%p, %p, %lli, 0x%X", D, E, (long long)offset, mode);
 
   if (++D->recurse_level >= GD_MAX_RECURSE_LEVEL) {
-    _GD_SetError(D, GD_E_RECURSE_LEVEL, 0, NULL, 0, E->field);
+    _GD_SetError(D, GD_E_RECURSE_LEVEL, GD_E_RECURSE_CODE, NULL, 0, E->field);
     D->recurse_level--;
     dreturn("%i", 1);
     return 1;

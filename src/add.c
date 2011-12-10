@@ -24,7 +24,7 @@
 static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
 {
   char *temp_buffer;
-  int i, is_dot;
+  int i, is_dot, offset;
   int copy_scalar[GD_MAX_POLYORD + 1];
   void* new_list;
   void* new_ref = NULL;
@@ -78,14 +78,14 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
       return -1;
     }
 
-    temp_buffer = (char *)malloc(strlen(parent) + strlen(entry->field) + 2);
+    temp_buffer = (char *)_GD_Malloc(D, strlen(parent) + strlen(entry->field)
+        + 2);
     if (temp_buffer)
       strcat(strcat(strcpy(temp_buffer, parent), "/"), entry->field);
   } else
-    temp_buffer = strdup(entry->field);
+    temp_buffer = _GD_Strdup(D, entry->field);
 
   if (temp_buffer == NULL) {
-    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     dreturn("%i", -1);
     return -1;
   }
@@ -124,9 +124,8 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
   }
 
   /* New entry */
-  E = (gd_entry_t *)malloc(sizeof(gd_entry_t));
+  E = (gd_entry_t *)_GD_Malloc(D, sizeof(gd_entry_t));
   if (E == NULL) {
-    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     dreturn("%i", -1);
     return -1;
   }
@@ -136,28 +135,28 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
   else
     E->fragment_index = entry->fragment_index;
 
-  E->e = (struct _gd_private_entry *)malloc(sizeof(struct _gd_private_entry));
+  E->e = (struct _gd_private_entry *)_GD_Malloc(D,
+      sizeof(struct _gd_private_entry));
   if (E->e == NULL) {
-    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     free(E);
     dreturn("%i", -1);
     return -1;
   }
   memset(E->e, 0, sizeof(struct _gd_private_entry));
   E->e->calculated = 0;
-
-  /* Validate field code */
   E->field_type = entry->field_type;
-  E->field = _GD_ValidateField(P, entry->field, D->standards, 1, &is_dot);
 
-  if (E->field == entry->field) {
-    _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, entry->field);
-    E->field = NULL;
+  /* Apply prefix and suffix */
+  E->field = _GD_MungeCode(D, P, entry->fragment_index, entry->field, &offset);
+  if (E->field == NULL) {
     _GD_FreeE(D, E, 1);
     dreturn("%i", -1);
     return -1;
-  } else if (E->field == NULL) {
-    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+  }
+
+  /* Check */
+  if (_GD_ValidateField(E->field + offset, D->standards, 1, 0, &is_dot)) {
+    _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, entry->field);
     _GD_FreeE(D, E, 1);
     dreturn("%i", -1);
     return -1;
@@ -194,10 +193,8 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
       E->e->u.raw.file[0].idata = E->e->u.raw.file[1].idata = -1;
       E->e->u.raw.file[0].subenc = GD_ENC_UNKNOWN;
 
-      if ((E->e->u.raw.filebase = strdup(E->field)) == NULL) {
-        _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+      if ((E->e->u.raw.filebase = _GD_Strdup(D, E->field)) == NULL)
         break;
-      }
 
       if ((E->EN(raw,spf) = entry->EN(raw,spf)) == 0)
         _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_SPF, NULL,
@@ -211,9 +208,7 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
         ;
       } else if (D->fragment[E->fragment_index].ref_name == NULL) {
         /* This is the first raw field in this fragment */
-        new_ref = strdup(E->field);
-        if (new_ref == NULL)
-          _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+        new_ref = _GD_Strdup(D, E->field);
       }
       copy_scalar[0] = 1;
       break;
@@ -250,8 +245,7 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
         }
 
         for (i = 0; i < E->EN(lincom,n_fields); ++i) {
-          if ((E->in_fields[i] = strdup(entry->in_fields[i])) == NULL)
-            _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+          E->in_fields[i] = _GD_Strdup(D, entry->in_fields[i]);
           copy_scalar[i] = copy_scalar[i + GD_MAX_LINCOM] = 1;
         }
       }
@@ -259,24 +253,16 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
     case GD_LINTERP_ENTRY:
       E->e->u.linterp.table_len = -1;
 
-      if ((E->in_fields[0] = strdup(entry->in_fields[0])) == NULL)
-        _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-      else if ((E->EN(linterp,table) = strdup(entry->EN(linterp,table)))
-          == NULL)
-      {
-        _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-      }
+      E->in_fields[0] = _GD_Strdup(D, entry->in_fields[0]);
+      E->EN(linterp,table) = _GD_Strdup(D, entry->EN(linterp,table));
       break;
     case GD_MULTIPLY_ENTRY:
     case GD_DIVIDE_ENTRY:
-      if ((E->in_fields[0] = strdup(entry->in_fields[0])) == NULL)
-        _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-      else if ((E->in_fields[1] = strdup(entry->in_fields[1])) == NULL)
-        _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+      E->in_fields[0] = _GD_Strdup(D, entry->in_fields[0]);
+      E->in_fields[1] = _GD_Strdup(D, entry->in_fields[1]);
       break;
     case GD_RECIP_ENTRY:
-      if ((E->in_fields[0] = strdup(entry->in_fields[0])) == NULL)
-        _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+      E->in_fields[0] = _GD_Strdup(D, entry->in_fields[0]);
 
       copy_scalar[0] = 1;
       if (entry->comp_scal) {
@@ -294,9 +280,8 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
       E->EN(bit,numbits) = entry->EN(bit,numbits);
       E->EN(bit,bitnum) = entry->EN(bit,bitnum);
 
-      if ((E->in_fields[0] = strdup(entry->in_fields[0])) == NULL)
-        _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-      else if (E->EN(bit,numbits) < 1)
+      E->in_fields[0] = _GD_Strdup(D, entry->in_fields[0]);
+      if (E->EN(bit,numbits) < 1)
         _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_NUMBITS, NULL,
             entry->EN(bit,numbits), NULL);
       else if (E->EN(bit,bitnum) < 0)
@@ -310,19 +295,16 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
     case GD_PHASE_ENTRY:
       E->EN(phase,shift) = entry->EN(phase,shift);
 
-      if ((E->in_fields[0] = strdup(entry->in_fields[0])) == NULL)
-        _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+      E->in_fields[0] = _GD_Strdup(D, entry->in_fields[0]);
       copy_scalar[0] = 1;
       break;
     case GD_WINDOW_ENTRY:
       E->EN(window,windop) = entry->EN(window,windop);
       E->EN(window,threshold) = entry->EN(window,threshold);
 
-      if ((E->in_fields[0] = strdup(entry->in_fields[0])) == NULL)
-        _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-      else if ((E->in_fields[1] = strdup(entry->in_fields[1])) == NULL)
-        _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-      else if (_GD_BadWindop(E->EN(window,windop)))
+      E->in_fields[0] = _GD_Strdup(D, entry->in_fields[0]);
+      E->in_fields[1] = _GD_Strdup(D, entry->in_fields[1]);
+      if (_GD_BadWindop(E->EN(window,windop)))
         _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_WINDOP, NULL,
             entry->EN(window,windop), NULL);
       copy_scalar[0] = 1;
@@ -337,10 +319,9 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
         _GD_SetError(D, GD_E_BAD_TYPE, E->EN(scalar,const_type), NULL, 0, NULL);
       } else {
         size_t size = GD_SIZE(_GD_ConstType(D, E->EN(scalar,const_type)));
-        E->e->u.scalar.d = malloc(size);
-        if (!D->error && E->e->u.scalar.d == NULL)
-          _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-        else
+        if (!D->error)
+          E->e->u.scalar.d = _GD_Malloc(D, size);
+        if (E->e->u.scalar.d)
           memset(E->e->u.scalar.d, 0, size);
       }
       break;
@@ -357,17 +338,14 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
       else {
         size_t size = GD_SIZE(_GD_ConstType(D, E->EN(scalar,const_type))) *
           E->EN(scalar,array_len);
-        E->e->u.scalar.d = malloc(size);
-        if (!D->error && E->e->u.scalar.d == NULL)
-          _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-        else
+        if (!D->error)
+          E->e->u.scalar.d = _GD_Malloc(D, size);
+        if (E->e->u.scalar.d)
           memset(E->e->u.scalar.d, 0, size);
       }
       break;
     case GD_STRING_ENTRY:
-      E->e->u.string = strdup("");
-      if (E->e->u.string == NULL)
-        _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+      E->e->u.string = _GD_Strdup(D, "");
       break;
     case GD_POLYNOM_ENTRY:
       E->EN(polynom,poly_ord) = entry->EN(polynom,poly_ord);
@@ -397,8 +375,7 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
           E->comp_scal = 0;
         }
 
-        if ((E->in_fields[0] = strdup(entry->in_fields[0])) == NULL)
-          _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+        E->in_fields[0] = _GD_Strdup(D, entry->in_fields[0]);
       }
 
       for (i = 0; i < E->EN(polynom,poly_ord); ++i)
@@ -415,10 +392,8 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
     if (!copy_scalar[i] || entry->scalar[i] == NULL)
       E->scalar[i] = NULL;
     else {
-      E->scalar[i] = strdup(entry->scalar[i]);
+      E->scalar[i] = _GD_Strdup(D, entry->scalar[i]);
       E->scalar_ind[i] = entry->scalar_ind[i];
-      if (E->scalar[i] == NULL)
-        _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     }
   }
 
@@ -494,7 +469,7 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
   /* add the entry to the dot list, if needed */
   if (is_dot) {
     D->dot_list[D->n_dot++] = E;
-    qsort(D->dot_list, D->n_dot, sizeof(gd_entry_t*), entry_cmp);
+    qsort(D->dot_list, D->n_dot, sizeof(gd_entry_t*), _GD_EntryCmp);
   }
 
   /* add the entry and resort the entry list */
@@ -1748,9 +1723,8 @@ int gd_madd_string(DIRFILE* D, const char* parent,
 
   /* Actually store the string, now */
   if (!error) {
-    buffer = (char *)malloc(strlen(parent) + strlen(field_code) + 2);
+    buffer = (char *)_GD_Malloc(D, strlen(parent) + strlen(field_code) + 2);
     if (buffer == NULL) {
-      _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
       dreturn("%i", -1);
       return -1;
     }
@@ -1798,9 +1772,8 @@ int gd_madd_const(DIRFILE* D, const char* parent, const char* field_code,
 
   /* Actually store the constant, now */
   if (!error) {
-    buffer = (char *)malloc(strlen(parent) + strlen(field_code) + 2);
+    buffer = (char *)_GD_Malloc(D, strlen(parent) + strlen(field_code) + 2);
     if (buffer == NULL) {
-      _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
       dreturn("%i", -1);
       return -1;
     }
@@ -1850,9 +1823,8 @@ int gd_madd_carray(DIRFILE* D, const char* parent, const char* field_code,
 
   /* Actually store the carray, now */
   if (!error) {
-    buffer = (char *)malloc(strlen(parent) + strlen(field_code) + 2);
+    buffer = (char *)_GD_Malloc(D, strlen(parent) + strlen(field_code) + 2);
     if (buffer == NULL) {
-      _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
       dreturn("%i", -1);
       return -1;
     }

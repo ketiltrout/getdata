@@ -18,15 +18,7 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Add a dirfile field with invalid characters */
 #include "test.h"
-
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
 
 int main(void)
 {
@@ -42,6 +34,7 @@ int main(void)
   E.EN(raw,spf) = 2;
   E.EN(raw,data_type) = GD_UINT8;
 
+  rmdirfile();
   D = gd_open(filedir, GD_RDWR | GD_CREAT);
   gd_add(D, &E);
   error = gd_error(D);
