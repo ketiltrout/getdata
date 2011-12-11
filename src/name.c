@@ -200,11 +200,18 @@ int gd_rename(DIRFILE *D, const char *old_code, const char *new_name,
   } else {
     name = _GD_DeMungeCode(D->fragment[E->fragment_index].prefix,
         D->fragment[E->fragment_index].suffix, new_name);
-    if (name == NULL) {
+    if (name == NULL || name[0] == '\0') {
       _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_INVALID, NULL, 0, new_name);
       dreturn("%i", -1);
       return -1;
     }
+    free(name);
+    name = _GD_Strdup(D, new_name);
+  }
+
+  if (D->error) {
+    dreturn("%i", -1);
+    return -1;
   }
 
   /* Duplicate check */
