@@ -37,7 +37,8 @@ unsigned int gd_nmfields(DIRFILE* D, const char* parent) gd_nothrow
   P = _GD_FindField(D, parent, D->entry, D->n_entries, NULL);
 
   if (P == NULL || P->e->n_meta == -1) {
-    _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, parent);
+    _GD_SetError(D, GD_E_BAD_CODE, P ? GD_E_CODE_INVALID : GD_E_CODE_MISSING,
+        NULL, 0, parent);
     dreturn("%u", 0);
     return 0;
   }
@@ -65,7 +66,8 @@ unsigned int gd_nmvectors(DIRFILE* D, const char* parent) gd_nothrow
   P = _GD_FindField(D, parent, D->entry, D->n_entries, NULL);
 
   if (P == NULL || P->e->n_meta == -1) {
-    _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, parent);
+    _GD_SetError(D, GD_E_BAD_CODE, P ? GD_E_CODE_INVALID : GD_E_CODE_MISSING,
+        NULL, 0, parent);
     dreturn("%u", 0);
     return 0;
   }
@@ -101,7 +103,8 @@ unsigned int gd_nmfields_by_type(DIRFILE* D, const char* parent,
   P = _GD_FindField(D, parent, D->entry, D->n_entries, NULL);
 
   if (P == NULL || P->e->n_meta == -1) {
-    _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, parent);
+    _GD_SetError(D, GD_E_BAD_CODE, P ? GD_E_CODE_INVALID : GD_E_CODE_MISSING,
+        NULL, 0, parent);
     dreturn("%u", 0);
     return 0;
   }

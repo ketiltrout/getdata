@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 D. V. Wiebe
+/* Copyright (C) 2011 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -18,37 +18,55 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Add a WINDOW field */
 #include "test.h"
-
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
-#include <stdio.h>
 
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  int error, r = 0;
-  gd_triplet_t threshold;
+  const char *data = "dirfile/data";
+  int error, ge_error, n, r = 0;
+  gd_entry_t e;
   DIRFILE *D;
 
+  gd_entry_t E;
+  memset(&E, 0, sizeof(E));
+  E.field = "data";
+  E.field_type = GD_RAW_ENTRY;
+  E.fragment_index = 0;
+  E.EN(raw,spf) = 2;
+  E.EN(raw,data_type) = GD_UINT8;
+
   rmdirfile();
-  D = gd_open(filedir, GD_RDWR | GD_CREAT);
-  threshold.r = 3.4;
-  gd_add_window(D, "new", "in", "check", (gd_windop_t)-1, threshold, 0);
+  D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
+  gd_add(D, &E);
+  E.field_type = GD_CONST_ENTRY;
+  E.EN(scalar,const_type) = GD_UINT8;
+  E.fragment_index = 99;
+  gd_madd(D, &E, "data");
   error = gd_error(D);
+
+  /* check */
+  n = gd_nfields(D);
+  gd_entry(D, "data/data", &e);
+  ge_error = gd_error(D);
 
   gd_close(D);
 
+  unlink(data);
   unlink(format);
   rmdir(filedir);
 
-  CHECKI(error, GD_E_BAD_ENTRY);
+  CHECKI(error, GD_E_OK);
+  CHECKI(ge_error, 0);
+  CHECKI(n, 2);
+
+  if (!r) {
+    CHECKI(e.field_type, GD_CONST_ENTRY);
+    CHECKI(e.fragment_index, 0);
+    CHECKI(e.EN(scalar,const_type), GD_UINT8);
+    gd_free_entry_strings(&e);
+  }
 
   return r;
 }

@@ -44,7 +44,7 @@ INCLUDES=${WALL} $(WEXTRA) -I$(top_srcdir)/src
 
 EXTRA_DIST=test.h
 
-ADD_TESTS=add add_bit add_bit_bitnum add_bit_bitsize add_bit_invalid \
+ADD_TESTS=add add_affix add_bit add_bit_bitnum add_bit_bitsize add_bit_invalid \
 					add_bit_numbits add_carray add_clincom add_code add_const \
 					add_cpolynom add_crecip add_crecip89 add_divide add_divide_invalid \
 					add_duplicate add_format add_invalid add_lincom add_lincom_invalid \
@@ -53,20 +53,21 @@ ADD_TESTS=add add_bit add_bit_bitnum add_bit_bitsize add_bit_invalid \
 					add_protect add_raw add_raw_include add_raw_invalid add_raw_spf \
 					add_raw_type add_rdonly add_recip add_sbit add_scalar \
 					add_scalar_carray add_sort add_spec add_spec_directive \
-					add_spec_invalid add_spec_meta add_string add_type add_window \
-					add_window_op
+					add_spec_invalid add_spec_meta add_string add_string_affix add_type \
+					add_window add_window_op
 
 ALTER_TESTS=alter_bit_bitnum alter_bit_numbits alter_carray_len \
 						alter_carray_type alter_const alter_cpolynom alter_crecip \
 						alter_crecip89 alter_crecip_zero alter_divide alter_entry \
-						alter_entry_hidden alter_entry_recode alter_entry_scalar2a \
-						alter_entry_scalar2n alter_entry_scalar3 alter_entry_scalar4 \
-						alter_lincom_23 alter_lincom_32 alter_lincom_input \
-						alter_lincom_offset alter_lincom_slope alter_linterp \
-						alter_linterp_move alter_mspec alter_multiply alter_phase \
-						alter_polynom_coeff alter_polynom_input alter_polynom_ord \
-						alter_raw_spf alter_raw_type alter_recip alter_recip_zero \
-						alter_spec alter_spec_meta alter_window
+						alter_entry_affix alter_entry_hidden alter_entry_recode \
+						alter_entry_scalar2a alter_entry_scalar2n alter_entry_scalar3 \
+						alter_entry_scalar4 alter_lincom_23 alter_lincom_32 \
+						alter_lincom_input alter_lincom_offset alter_lincom_slope \
+						alter_linterp alter_linterp_move alter_mspec alter_mspec_affix \
+						alter_multiply alter_phase alter_polynom_coeff alter_polynom_input \
+						alter_polynom_ord alter_raw_spf alter_raw_type alter_recip \
+						alter_recip_zero alter_spec alter_spec_affix alter_spec_meta \
+						alter_window
 
 ASCII_TESTS=ascii_add ascii_get ascii_get_get ascii_nframes ascii_put
 
@@ -208,18 +209,18 @@ endif
 
 LZMA_TESTS=lzma_get lzma_nframes
 
-MADD_TESTS=madd madd_bit madd_bit_invalid madd_carray madd_clincom madd_const \
-					 madd_cpolynom madd_crecip madd_crecip89 madd_divide madd_lincom \
-					 madd_lincom_invalid madd_linterp madd_linterp_invalid madd_multiply \
-					 madd_multiply_invalid madd_phase madd_phase_invalid madd_polynom \
-					 madd_recip madd_sbit madd_spec madd_spec_directive \
-					 madd_spec_invalid madd_string madd_window
+MADD_TESTS=madd madd_affix madd_bit madd_bit_invalid madd_carray madd_clincom \
+					 madd_const madd_cpolynom madd_crecip madd_crecip89 madd_divide \
+					 madd_index madd_lincom madd_lincom_invalid madd_linterp \
+					 madd_linterp_invalid madd_multiply madd_multiply_invalid madd_phase \
+					 madd_phase_invalid madd_polynom madd_recip madd_sbit madd_spec \
+					 madd_spec_directive madd_spec_invalid madd_string madd_window
 
-MOVE_TESTS=move move_data_enc_ar move_data_enc_ra move_data_endian \
-					 move_data_foffs move_data_nop move_index move_meta move_protect \
-					 move_subdir
+MOVE_TESTS=move move_affix move_affix_dup move_data_enc_ar move_data_enc_ra \
+					 move_data_endian move_data_foffs move_data_nop move_index move_meta \
+					 move_protect move_subdir
 
-NAME_TESTS=name name_move
+NAME_TESTS=name name_affix name_affix_bad name_dup name_move
 
 NFIELDS_TESTS=nfields nfields_hidden nfields_invalid nfields_type \
 							nfields_type_hidden nfields_type_invalid nfields_vector \
@@ -256,9 +257,10 @@ PARSE_TESTS=parse_badline parse_bit parse_bit4 parse_bit_bitnum \
 						parse_lincom parse_lincom_ncols1 parse_lincom_ncols2 \
 						parse_lincom_nfields parse_lincom_nofields parse_lincom_non \
 						parse_lincom_non_ncols parse_lincom_scalar parse_linterp \
-						parse_linterp_ncols parse_meta parse_meta_implicit \
-						parse_meta_implicit2 parse_meta_index parse_meta_index2 \
-						parse_meta_meta parse_meta_parent parse_meta_raw parse_multiply \
+						parse_linterp_ncols parse_meta parse_meta_affix \
+						parse_meta_implicit parse_meta_implicit2 parse_meta_implicit_affix \
+						parse_meta_index parse_meta_index2 parse_meta_meta \
+						parse_meta_parent parse_meta_raw parse_multiply \
 						parse_multiply_ncols parse_name parse_name_dot parse_name_ext \
 						parse_name_pedantic parse_ncols parse_phase parse_phase_ncols \
 						parse_phase_scalar parse_polynom parse_polynom_ncols1 \

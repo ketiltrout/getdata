@@ -44,7 +44,6 @@ const void *gd_constants(DIRFILE* D, gd_type_t return_type) gd_nothrow
     return NULL;
   }
 
-  free(D->const_value_list);
   fl = (char *)_GD_Alloc(D, return_type, n);
 
   if (fl == NULL) {
@@ -60,6 +59,7 @@ const void *gd_constants(DIRFILE* D, gd_type_t return_type) gd_nothrow
         break;
   }
 
+  free(D->const_value_list);
   D->const_value_list = fl;
 
   dreturn("%p", D->error ? NULL : D->const_value_list);
@@ -86,18 +86,14 @@ const gd_carray_t *gd_carrays(DIRFILE* D, gd_type_t return_type) gd_nothrow
     return zero_carrays;
   }
 
-  if (D->carray_value_list)
-    for (i = 0; D->carray_value_list[i].n != 0; ++i)
-      free(D->carray_value_list[i].d);
-  free(D->carray_value_list);
-  fl = (gd_carray_t *)malloc(sizeof(gd_carray_t) * (n + 1));
-  memset(fl, 0, sizeof(gd_carray_t) * (n + 1));
+  fl = (gd_carray_t *)_GD_Malloc(D, sizeof(gd_carray_t) * (n + 1));
 
   if (fl == NULL) {
-    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     dreturn("%p", NULL);
     return NULL;
   }
+
+  memset(fl, 0, sizeof(gd_carray_t) * (n + 1));
 
   for (i = n = 0; i < D->n_entries; ++i) {
     if (D->entry[i]->field_type == GD_CARRAY_ENTRY &&
@@ -113,6 +109,10 @@ const gd_carray_t *gd_carrays(DIRFILE* D, gd_type_t return_type) gd_nothrow
   }
   fl[n].n = 0;
 
+  if (D->carray_value_list)
+    for (i = 0; D->carray_value_list[i].n != 0; ++i)
+      free(D->carray_value_list[i].d);
+  free(D->carray_value_list);
   D->carray_value_list = fl;
 
   dreturn("%p", D->error ? NULL : fl);
@@ -145,11 +145,9 @@ const char **gd_strings(DIRFILE* D) gd_nothrow
     return D->string_value_list;
   }
 
-  fl = (char **)realloc((char **)D->string_value_list, sizeof(const char*) *
-      (n + 1));
+  fl = (char **)_GD_Malloc(D, sizeof(const char*) * (n + 1));
 
   if (fl == NULL) {
-    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     dreturn("%p", NULL);
     return NULL;
   }
@@ -161,6 +159,7 @@ const char **gd_strings(DIRFILE* D) gd_nothrow
   }
   fl[n] = NULL;
 
+  free(D->string_value_list);
   D->string_value_list = (const char **)fl;
   D->list_validity |= LIST_VALID_STRING_VALUE;
 
@@ -202,11 +201,9 @@ const char **gd_field_list_by_type(DIRFILE* D, gd_entype_t type) gd_nothrow
     return D->type_list[index];
   }
 
-  fl = (char **)realloc((char **)D->type_list[index],
-      sizeof(const char*) * (n + 1));
+  fl = (char **)_GD_Malloc(D, sizeof(const char*) * (n + 1));
 
   if (fl == NULL) {
-    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     dreturn("%p", NULL);
     return NULL;
   }
@@ -220,6 +217,7 @@ const char **gd_field_list_by_type(DIRFILE* D, gd_entype_t type) gd_nothrow
   }
   fl[n] = NULL;
 
+  free(D->type_list[index]);
   D->type_list[index] = (const char **)fl;
   D->type_list_validity |= 1 << index;
 
@@ -255,10 +253,9 @@ const char **gd_vector_list(DIRFILE* D) gd_nothrow
     return D->vector_list;
   }
 
-  fl = (char **)realloc((char **)D->vector_list, sizeof(const char*) * (n + 1));
+  fl = (char **)_GD_Malloc(D, sizeof(const char*) * (n + 1));
 
   if (fl == NULL) {
-    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     dreturn("%p", NULL);
     return NULL;
   }
@@ -270,6 +267,7 @@ const char **gd_vector_list(DIRFILE* D) gd_nothrow
   }
   fl[n] = NULL;
 
+  free(D->vector_list);
   D->vector_list = (const char **)fl;
   D->list_validity |= LIST_VALID_VECTOR;
 
@@ -303,11 +301,10 @@ const char **gd_field_list(DIRFILE* D) gd_nothrow
     return D->field_list;
   }
 
-  fl = (char **)realloc((char **)D->field_list, sizeof(const char*) *
+  fl = (char **)_GD_Malloc(D, sizeof(const char*) *
       (D->n_entries + 1 - D->n_meta - D->n_hidden));
 
   if (fl == NULL) {
-    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     dreturn("%p", NULL);
     return NULL;
   }
@@ -317,6 +314,7 @@ const char **gd_field_list(DIRFILE* D) gd_nothrow
       fl[n++] = D->entry[i]->field;
   fl[n] = NULL;
 
+  free(D->field_list);
   D->field_list = (const char **)fl;
   D->list_validity |= LIST_VALID_FIELD;
 

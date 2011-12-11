@@ -289,11 +289,10 @@ int gd_delete(DIRFILE* D, const char* field_code_in, int flags)
     free(field_code);
 
   /* gather a list of fields */
-  del_list = (gd_entry_t **)malloc(sizeof(gd_entry_t*) * ((E->e->n_meta == -1) ?
-        1 : 1 + E->e->n_meta));
+  del_list = (gd_entry_t **)_GD_Malloc(D,
+      sizeof(gd_entry_t*) * ((E->e->n_meta == -1) ?  1 : 1 + E->e->n_meta));
 
   if (del_list == NULL) {
-    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     dreturn("%i", -1);
     return -1;
   }
@@ -363,10 +362,9 @@ int gd_delete(DIRFILE* D, const char* field_code_in, int flags)
 
   /* Fix up reference fields */
   if (E->field_type == GD_RAW_ENTRY) {
-    new_ref = (char **)malloc(sizeof(char*) * D->n_fragment);
+    new_ref = (char **)_GD_Malloc(D, sizeof(char*) * D->n_fragment);
     if (new_ref == NULL) {
       free(del_list);
-      _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
       dreturn("%i", -1);
       return -1;
     }
@@ -392,13 +390,12 @@ int gd_delete(DIRFILE* D, const char* field_code_in, int flags)
               }
 
             if (in_scope) {
-              new_ref[i] = strdup(D->entry[j]->field);
+              new_ref[i] = _GD_Strdup(D, D->entry[j]->field);
               if (new_ref == NULL) {
                 for (f = 0; f < i; ++f)
                   free(new_ref[f]);
                 free(new_ref);
                 free(del_list);
-                _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
                 dreturn("%i", -1);
                 return -1;
               }

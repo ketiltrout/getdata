@@ -39,6 +39,9 @@ struct tm *gmtime_r(const time_t *timep, struct tm *result)
 }
 #endif
 
+/* ...at() functions for platforms lacking them.  These are originally Solaris
+ * extensions which have subsequently been included in POSIX.1-2008.
+ */
 #ifndef HAVE_OPENAT
 int gd_OpenAt(const DIRFILE *D, int dirfd, const char *name, int flags,
     mode_t mode)

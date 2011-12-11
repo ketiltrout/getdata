@@ -320,13 +320,10 @@ DIRFILE* gd_cbopen(const char* filedir, unsigned long flags,
    */
   dirfile = _GD_CanonicalPath(NULL, filedir);
 #endif
-  if (dirfile == NULL)
-    dirfile = strdup(filedir);
-
   _GD_InitialiseFramework();
 
   D = (DIRFILE *)malloc(sizeof(DIRFILE));
-  if (D == NULL) {
+  if (dirfile == NULL || D == NULL) {
     free(dirfile);
 #ifndef GD_NO_DIR_OPEN
     close(dirfd);
@@ -403,10 +400,18 @@ DIRFILE* gd_cbopen(const char* filedir, unsigned long flags,
     dreturn("%p", D);
     return D;
   }
+
   D->fragment[0].cname = _GD_CanonicalPath(dirfile, "format");
-  D->fragment[0].bname = strdup("format");
-  if (D->fragment[0].cname == NULL || D->fragment[0].bname == NULL) {
-    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+  if (D->fragment[0].cname == NULL) {
+    if (errno == ENOMEM)
+      _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    else
+      _GD_SetError(D, GD_E_OPEN, GD_E_OPEN_PATH, dirfile, 0, NULL);
+  }
+
+  D->fragment[0].bname = _GD_Strdup(D, "format");
+
+  if (D->error) {
     dreturn("%p", D);
     return D;
   }

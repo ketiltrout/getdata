@@ -138,7 +138,7 @@ int gd_rename(DIRFILE *D, const char *old_code, const char *new_name,
 {
   gd_entry_t *E, *Q;
   char* name;
-  int offset, new_dot, old_dot = 0;
+  int new_dot, old_dot = 0;
   unsigned int dot_ind;
 
   dtrace("%p, \"%s\", \"%s\", %i", D, old_code, new_name, move_data);
@@ -165,7 +165,7 @@ int gd_rename(DIRFILE *D, const char *old_code, const char *new_name,
     E = _GD_FindField(D, old_code, D->entry, D->n_entries, NULL);
 
   if (E == NULL) {
-    _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, old_code);
+    _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, old_code);
     dreturn("%i", -1);
     return -1;
   }
@@ -184,22 +184,34 @@ int gd_rename(DIRFILE *D, const char *old_code, const char *new_name,
     return -1;
   }
 
-  name = _GD_MungeCode(D, E->e->p.parent, E->fragment_index, new_name, &offset);
-  if (name == NULL) {
+  if (_GD_ValidateField(new_name, D->standards, 1, 0, &new_dot)) {
+    _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_INVALID, NULL, 0, new_name);
     dreturn("%i", -1);
     return -1;
   }
 
-  if (_GD_ValidateField(name + offset, D->standards, 1, 0, &new_dot)) {
-    _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, new_name);
-    dreturn("%i", -1);
-    return -1;
+  if (E->e->n_meta == -1) {
+    name = _GD_Malloc(D, strlen(E->e->p.parent->field) + strlen(new_name) + 2);
+    if (name == NULL) {
+      dreturn("%i", -1);
+      return -1;
+    }      
+    sprintf("%s/%s", E->e->p.parent->field, new_name);
+  } else {
+    name = _GD_DeMungeCode(D->fragment[E->fragment_index].prefix,
+        D->fragment[E->fragment_index].suffix, new_name);
+    if (name == NULL) {
+      _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_INVALID, NULL, 0, new_name);
+      dreturn("%i", -1);
+      return -1;
+    }
   }
 
   /* Duplicate check */
   Q = _GD_FindField(D, name, D->entry, D->n_entries, NULL);
 
   if (Q == E) {
+    free(name);
     dreturn("%i", 0);
     return 0;
   }
@@ -302,6 +314,8 @@ int gd_rename(DIRFILE *D, const char *old_code, const char *new_name,
 
   free(E->field);
   E->field = name;
+
+  D->fragment[E->fragment_index].modified = 1;
 
   /* Update the dot list */
   if (old_dot && !new_dot)

@@ -20,8 +20,9 @@
  */
 #include "internal.h"
 
-/* add an entry */
-static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
+/* add an entry - returns the added entry on success. */
+static gd_entry_t *_GD_Add(DIRFILE* D, const gd_entry_t* entry,
+    const char* parent)
 {
   char *temp_buffer;
   int i, is_dot, offset;
@@ -41,53 +42,58 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
   /* check access mode */
   if ((D->flags & GD_ACCMODE) == GD_RDONLY) {
     _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
+    dreturn("%p", NULL);
+    return NULL;
   }
 
   /* check for include index out of range */
-  if (P == NULL && (entry->fragment_index < 0 ||
+  if (parent == NULL && (entry->fragment_index < 0 ||
         entry->fragment_index >= D->n_fragment))
   {
     _GD_SetError(D, GD_E_BAD_INDEX, 0, NULL, entry->fragment_index, NULL);
-    dreturn("%i", -1);
-    return -1;
+    dreturn("%p", NULL);
+    return NULL;
   }
 
   /* check protection */
   if (D->fragment[entry->fragment_index].protection & GD_PROTECT_FORMAT) {
     _GD_SetError(D, GD_E_PROTECTED, GD_E_PROTECTED_FORMAT, NULL, 0,
         D->fragment[entry->fragment_index].cname);
-    dreturn("%i", -1);
-    return -1;
+    dreturn("%p", NULL);
+    return NULL;
   }
 
   /* check parent */
   if (parent != NULL) {
     /* make sure it's not a meta field already */
     if (strchr(parent, '/') != NULL) {
-      _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, parent);
-      dreturn("%i", -1);
-      return -1;
+      _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, parent);
+      dreturn("%p", NULL);
+      return NULL;
     }
 
     P = _GD_FindField(D, parent, D->entry, D->n_entries, NULL);
     if (P == NULL) {
-      _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, parent);
-      dreturn("%i", -1);
-      return -1;
+      _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, parent);
+      dreturn("%p", NULL);
+      return NULL;
     }
 
-    temp_buffer = (char *)_GD_Malloc(D, strlen(parent) + strlen(entry->field)
-        + 2);
-    if (temp_buffer)
-      strcat(strcat(strcpy(temp_buffer, parent), "/"), entry->field);
+    offset = strlen(parent) + 1;
+    temp_buffer = (char *)_GD_Malloc(D, offset + strlen(entry->field) + 1);
+    if (temp_buffer) {
+      strcpy(temp_buffer, parent);
+      temp_buffer[offset - 1] = '/';
+      strcpy(temp_buffer + offset, entry->field);
+    }
   } else
-    temp_buffer = _GD_Strdup(D, entry->field);
+    /* Apply prefix and suffix */
+    temp_buffer = _GD_MungeCode(D, NULL, entry->fragment_index, entry->field,
+        &offset);
 
   if (temp_buffer == NULL) {
-    dreturn("%i", -1);
-    return -1;
+    dreturn("%p", NULL);
+    return NULL;
   }
 
   /* check for duplicate field */
@@ -96,10 +102,9 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
   if (E != NULL) { /* matched */
     _GD_SetError(D, GD_E_DUPLICATE, 0, NULL, 0, temp_buffer);
     free(temp_buffer);
-    dreturn("%i", -1);
-    return -1;
+    dreturn("%p", NULL);
+    return NULL;
   }
-  free(temp_buffer);
 
   /* check for bad field type */
   if (entry->field_type != GD_RAW_ENTRY &&
@@ -119,15 +124,15 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
   {
     _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_TYPE, NULL,
         entry->field_type, NULL);
-    dreturn("%i", -1);
-    return -1;
+    dreturn("%p", NULL);
+    return NULL;
   }
 
   /* New entry */
   E = (gd_entry_t *)_GD_Malloc(D, sizeof(gd_entry_t));
   if (E == NULL) {
-    dreturn("%i", -1);
-    return -1;
+    dreturn("%p", NULL);
+    return NULL;
   }
   memset(E, 0, sizeof(gd_entry_t));
   if (P)
@@ -139,27 +144,21 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
       sizeof(struct _gd_private_entry));
   if (E->e == NULL) {
     free(E);
-    dreturn("%i", -1);
-    return -1;
+    dreturn("%p", NULL);
+    return NULL;
   }
   memset(E->e, 0, sizeof(struct _gd_private_entry));
   E->e->calculated = 0;
   E->field_type = entry->field_type;
 
-  /* Apply prefix and suffix */
-  E->field = _GD_MungeCode(D, P, entry->fragment_index, entry->field, &offset);
-  if (E->field == NULL) {
-    _GD_FreeE(D, E, 1);
-    dreturn("%i", -1);
-    return -1;
-  }
+  E->field = temp_buffer;
 
   /* Check */
   if (_GD_ValidateField(E->field + offset, D->standards, 1, 0, &is_dot)) {
-    _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, entry->field);
+    _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_INVALID, NULL, 0, entry->field);
     _GD_FreeE(D, E, 1);
-    dreturn("%i", -1);
-    return -1;
+    dreturn("%p", NULL);
+    return NULL;
   }
 
   /* Set meta indices */
@@ -185,8 +184,7 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
       if (D->fragment[entry->fragment_index].protection & GD_PROTECT_DATA) {
         _GD_SetError(D, GD_E_PROTECTED, GD_E_PROTECTED_DATA, NULL, 0,
             D->fragment[entry->fragment_index].cname);
-        dreturn("%i", -1);
-        return -1;
+        break;
       }
 
       E->EN(raw,data_type) = entry->EN(raw,data_type);
@@ -400,16 +398,16 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
   if (D->error != GD_E_OK) {
     free(new_ref);
     _GD_FreeE(D, E, 1);
-    dreturn("%i", -1);
-    return -1;
+    dreturn("%p", NULL);
+    return NULL;
   }
 
   new_list = realloc(D->entry, (D->n_entries + 1) * sizeof(gd_entry_t*));
   if (new_list == NULL) {
     free(new_ref);
     _GD_FreeE(D, E, 1);
-    dreturn("%i", -1);
-    return -1;
+    dreturn("%p", NULL);
+    return NULL;
   }
   D->entry = (gd_entry_t **)new_list;
 
@@ -418,8 +416,8 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
     if (new_list == NULL) {
       free(new_ref);
       _GD_FreeE(D, E, 1);
-      dreturn("%i", -1);
-      return -1;
+      dreturn("%p", NULL);
+      return NULL;
     }
     D->dot_list = (gd_entry_t **)new_list;
   }
@@ -430,8 +428,8 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
     if (ptr == NULL) {
       free(new_ref);
       _GD_FreeE(D, E, 1);
-      dreturn("%i", -1);
-      return -1;
+      dreturn("%p", NULL);
+      return NULL;
     }
 
     /* From here on, nothing may fail */
@@ -482,8 +480,8 @@ static int _GD_Add(DIRFILE* D, const gd_entry_t* entry, const char* parent)
   D->list_validity = 0;
   D->type_list_validity = 0;
 
-  dreturn("%i", 0);
-  return 0;
+  dreturn("%p", E);
+  return E;
 }
 
 /* add a META field by parsing a field spec */
@@ -513,9 +511,11 @@ int gd_madd_spec(DIRFILE* D, const char* line, const char* parent) gd_nothrow
 
   _GD_ClearError(D);
 
+  /* Find parent -- we don't do code mungeing here because we don't know
+   * which fragment this is yet.  */
   E = _GD_FindField(D, parent, D->entry, D->n_entries, NULL);
   if (E == NULL) {
-    _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, parent);
+    _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, parent);
     dreturn("%i", -1);
     return -1;
   }
@@ -626,7 +626,7 @@ int gd_add(DIRFILE* D, const gd_entry_t* entry)
     return -1;
   }
 
-  ret = _GD_Add(D, entry, NULL);
+  ret = (_GD_Add(D, entry, NULL) == NULL) ? -1 : 0;
 
   dreturn("%i", ret);
   return ret;
@@ -654,7 +654,7 @@ int gd_add_raw(DIRFILE* D, const char* field_code, gd_type_t data_type,
   R.EN(raw,spf) = spf;
   R.EN(raw,data_type) = data_type;
   R.fragment_index = fragment_index;
-  error = _GD_Add(D, &R, NULL);
+  error = (_GD_Add(D, &R, NULL) == NULL) ? -1 : 0;
 
   dreturn("%i", error);
   return error;
@@ -696,7 +696,7 @@ int gd_add_lincom(DIRFILE* D, const char* field_code, int n_fields,
     L.EN(lincom,m)[i] = m[i];
     L.EN(lincom,b)[i] = b[i];
   }
-  error = _GD_Add(D, &L, NULL);
+  error = (_GD_Add(D, &L, NULL) == NULL) ? -1 : 0;
 
   dreturn("%i", error);
   return error;
@@ -738,7 +738,7 @@ int gd_add_clincom(DIRFILE* D, const char* field_code, int n_fields,
     _gd_ca2c(L.EN(lincom,cm)[i], cm, i);
     _gd_ca2c(L.EN(lincom,cb)[i], cb, i);
   }
-  error = _GD_Add(D, &L, NULL);
+  error = (_GD_Add(D, &L, NULL) == NULL) ? -1 : 0;
 
   dreturn("%i", error);
   return error;
@@ -766,7 +766,7 @@ int gd_add_linterp(DIRFILE* D, const char* field_code, const char* in_field,
   L.in_fields[0] = (char *)in_field;
   L.EN(linterp,table) = (char *)table;
   L.fragment_index = fragment_index;
-  error = _GD_Add(D, &L, NULL);
+  error = (_GD_Add(D, &L, NULL) == NULL) ? -1 : 0;
 
   dreturn("%i", error);
   return error;
@@ -795,7 +795,7 @@ int gd_add_bit(DIRFILE* D, const char* field_code, const char* in_field,
   B.EN(bit,bitnum) = bitnum;
   B.EN(bit,numbits) = numbits;
   B.fragment_index = fragment_index;
-  error = _GD_Add(D, &B, NULL);
+  error = (_GD_Add(D, &B, NULL) == NULL) ? -1 : 0;
 
   dreturn("%i", error);
   return error;
@@ -824,7 +824,7 @@ int gd_add_sbit(DIRFILE* D, const char* field_code, const char* in_field,
   B.EN(bit,bitnum) = bitnum;
   B.EN(bit,numbits) = numbits;
   B.fragment_index = fragment_index;
-  error = _GD_Add(D, &B, NULL);
+  error = (_GD_Add(D, &B, NULL) == NULL) ? -1 : 0;
 
   dreturn("%i", error);
   return error;
@@ -852,7 +852,7 @@ int gd_add_multiply(DIRFILE* D, const char* field_code, const char* in_field1,
   M.in_fields[0] = (char *)in_field1;
   M.in_fields[1] = (char *)in_field2;
   M.fragment_index = fragment_index;
-  error = _GD_Add(D, &M, NULL);
+  error = (_GD_Add(D, &M, NULL) == NULL) ? -1 : 0;
 
   dreturn("%i", error);
   return error;
@@ -880,7 +880,7 @@ int gd_add_divide(DIRFILE* D, const char* field_code, const char* in_field1,
   E.in_fields[0] = (char *)in_field1;
   E.in_fields[1] = (char *)in_field2;
   E.fragment_index = fragment_index;
-  error = _GD_Add(D, &E, NULL);
+  error = (_GD_Add(D, &E, NULL) == NULL) ? -1 : 0;
 
   dreturn("%i", error);
   return error;
@@ -909,7 +909,7 @@ int gd_add_recip(DIRFILE* D, const char* field_code, const char* in_field,
   E.comp_scal = 0;
   E.in_fields[0] = (char *)in_field;
   E.fragment_index = fragment_index;
-  error = _GD_Add(D, &E, NULL);
+  error = (_GD_Add(D, &E, NULL) == NULL) ? -1 : 0;
 
   dreturn("%i", error);
   return error;
@@ -919,6 +919,8 @@ int gd_add_recip(DIRFILE* D, const char* field_code, const char* in_field,
 int gd_add_crecip(DIRFILE* D, const char* field_code, const char* in_field,
     double complex cdividend, int fragment_index) gd_nothrow
 {
+  int error;
+
   dtrace("%p, \"%s\", \"%s\", %g;%g, %i", D, field_code, in_field,
       creal(cdividend), cimag(cdividend), fragment_index);
 
@@ -936,7 +938,7 @@ int gd_add_crecip(DIRFILE* D, const char* field_code, const char* in_field,
   E.comp_scal = 1;
   E.in_fields[0] = (char *)in_field;
   E.fragment_index = fragment_index;
-  int error = _GD_Add(D, &E, NULL);
+  error = (_GD_Add(D, &E, NULL) == NULL) ? -1 : 0;
 
   dreturn("%i", error);
   return error;
@@ -965,7 +967,7 @@ int gd_add_crecip89(DIRFILE* D, const char* field_code, const char* in_field,
   E.comp_scal = 1;
   E.in_fields[0] = (char *)in_field;
   E.fragment_index = fragment_index;
-  error = _GD_Add(D, &E, NULL);
+  error = (_GD_Add(D, &E, NULL) == NULL) ? -1 : 0;
 
   dreturn("%i", error);
   return error;
@@ -1005,7 +1007,7 @@ int gd_add_polynom(DIRFILE* D, const char* field_code, int poly_ord,
   for (i = 0; i <= poly_ord; ++i)
     E.EN(polynom,a)[i] = a[i];
 
-  error = _GD_Add(D, &E, NULL);
+  error = (_GD_Add(D, &E, NULL) == NULL) ? -1 : 0;
 
   dreturn("%i", error);
   return error;
@@ -1044,7 +1046,7 @@ int gd_add_cpolynom(DIRFILE* D, const char* field_code, int poly_ord,
   for (i = 0; i <= poly_ord; ++i)
     _gd_ca2c(E.EN(polynom,ca)[i], ca, i);
 
-  error = _GD_Add(D, &E, NULL);
+  error = (_GD_Add(D, &E, NULL) == NULL) ? -1 : 0;
 
   dreturn("%i", error);
   return error;
@@ -1072,7 +1074,7 @@ int gd_add_phase(DIRFILE* D, const char* field_code, const char* in_field,
   P.in_fields[0] = (char *)in_field;
   P.EN(phase,shift) = shift;
   P.fragment_index = fragment_index;
-  error = _GD_Add(D, &P, NULL);
+  error = (_GD_Add(D, &P, NULL) == NULL) ? -1 : 0;
 
   dreturn("%i", error);
   return error;
@@ -1104,7 +1106,7 @@ int gd_add_window(DIRFILE *D, const char *field_code, const char *in_field,
   E.in_fields[0] = (char *)in_field;
   E.in_fields[1] = (char *)check_field;
   E.fragment_index = fragment_index;
-  error = _GD_Add(D, &E, NULL);
+  error = (_GD_Add(D, &E, NULL) == NULL) ? -1 : 0;
 
   dreturn("%i", error);
   return error;
@@ -1116,7 +1118,6 @@ int gd_add_string(DIRFILE* D, const char* field_code, const char* value,
 {
   gd_entry_t *entry;
   gd_entry_t S;
-  int error;
 
   dtrace("%p, \"%s\", \"%s\", %i", D, field_code, value, fragment_index);
 
@@ -1130,23 +1131,14 @@ int gd_add_string(DIRFILE* D, const char* field_code, const char* value,
   S.field = (char *)field_code;
   S.field_type = GD_STRING_ENTRY;
   S.fragment_index = fragment_index;
-  error = _GD_Add(D, &S, NULL);
+  entry = _GD_Add(D, &S, NULL);
 
   /* Actually store the string, now */
-  if (!error) {
-    entry = _GD_FindField(D, field_code, D->entry, D->n_entries, NULL);
+  if (entry)
+    _GD_DoFieldOut(D, entry, 0, 0, 0, GD_NULL, value);
 
-    if (entry == NULL)
-      _GD_InternalError(D); /* We should be able to find it: we just added it */
-    else
-      _GD_DoFieldOut(D, entry, 0, 0, 0, GD_NULL, value);
-
-    if (D->error)
-      error = -1;
-  }
-
-  dreturn("%i", error);
-  return error;
+  dreturn("%i", D->error ? -1 : 0);
+  return D->error ? -1 : 0;
 }
 
 /* add a CONST entry */
@@ -1155,7 +1147,6 @@ int gd_add_const(DIRFILE* D, const char* field_code, gd_type_t const_type,
 {
   gd_entry_t *entry;
   gd_entry_t C;
-  int error;
 
   dtrace("%p, \"%s\", 0x%X, 0x%X, %p, %i", D, field_code, const_type, data_type,
       value, fragment_index);
@@ -1171,23 +1162,14 @@ int gd_add_const(DIRFILE* D, const char* field_code, gd_type_t const_type,
   C.field_type = GD_CONST_ENTRY;
   C.EN(scalar,const_type) = const_type;
   C.fragment_index = fragment_index;
-  error = _GD_Add(D, &C, NULL);
+  entry = _GD_Add(D, &C, NULL);
 
   /* Actually store the constant, now */
-  if (!error) {
-    entry = _GD_FindField(D, field_code, D->entry, D->n_entries, NULL);
+  if (entry)
+    _GD_DoFieldOut(D, entry, 0, 0, 1, data_type, value);
 
-    if (entry == NULL)
-      _GD_InternalError(D); /* We should be able to find it: we just added it */
-    else
-      _GD_DoFieldOut(D, entry, 0, 0, 1, data_type, value);
-
-    if (D->error)
-      error = -1;
-  }
-
-  dreturn("%i", error);
-  return error;
+  dreturn("%i", D->error ? -1 : 0);
+  return D->error ? -1 : 0;
 }
 
 /* add a CARRAY entry */
@@ -1197,7 +1179,6 @@ int gd_add_carray(DIRFILE* D, const char* field_code, gd_type_t const_type,
 {
   gd_entry_t *entry;
   gd_entry_t C;
-  int error;
 
   dtrace("%p, \"%s\", 0x%X, %zi, 0x%X, %p, %i", D, field_code, const_type,
       array_len, data_type, values, fragment_index);
@@ -1214,23 +1195,14 @@ int gd_add_carray(DIRFILE* D, const char* field_code, gd_type_t const_type,
   C.EN(scalar,const_type) = const_type;
   C.EN(scalar,array_len) = array_len;
   C.fragment_index = fragment_index;
-  error = _GD_Add(D, &C, NULL);
+  entry = _GD_Add(D, &C, NULL);
 
   /* Actually store the carray, now */
-  if (!error) {
-    entry = _GD_FindField(D, field_code, D->entry, D->n_entries, NULL);
+  if (entry)
+    _GD_DoFieldOut(D, entry, 0, 0, array_len, data_type, values);
 
-    if (entry == NULL)
-      _GD_InternalError(D); /* We should be able to find it: we just added it */
-    else
-      _GD_DoFieldOut(D, entry, 0, 0, array_len, data_type, values);
-
-    if (D->error)
-      error = -1;
-  }
-
-  dreturn("%i", error);
-  return error;
+  dreturn("%i", D->error ? -1 : 0);
+  return D->error ? -1 : 0;
 }
 
 int gd_madd(DIRFILE* D, const gd_entry_t* entry, const char* parent) gd_nothrow
@@ -1245,7 +1217,7 @@ int gd_madd(DIRFILE* D, const gd_entry_t* entry, const char* parent) gd_nothrow
     return -1;
   }
 
-  ret = _GD_Add(D, entry, parent);
+  ret = (_GD_Add(D, entry, parent) == NULL) ? -1 : 0;
 
   dreturn("%i", ret);
   return ret;
@@ -1288,7 +1260,7 @@ gd_nothrow
     L.scalar[i] = NULL;
     L.scalar[i + GD_MAX_LINCOM] = NULL;
   }
-  error = _GD_Add(D, &L, parent);
+  error = (_GD_Add(D, &L, parent) == NULL) ? -1 : 0;
 
   dreturn("%i", error);
   return error;
@@ -1331,7 +1303,7 @@ int gd_madd_clincom(DIRFILE* D, const char* parent, const char* field_code,
     L.scalar[i] = NULL;
     L.scalar[i + GD_MAX_LINCOM] = NULL;
   }
-  error = _GD_Add(D, &L, parent);
+  error = (_GD_Add(D, &L, parent) == NULL) ? -1 : 0;
 
   dreturn("%i", error);
   return error;
@@ -1358,7 +1330,7 @@ int gd_madd_linterp(DIRFILE* D, const char* parent,
   L.in_fields[0] = (char *)in_field;
   L.EN(linterp,table) = (char *)table;
   L.fragment_index = 0;
-  error = _GD_Add(D, &L, parent);
+  error = (_GD_Add(D, &L, parent) == NULL) ? -1 : 0;
 
   dreturn("%i", error);
   return error;
@@ -1387,7 +1359,7 @@ int gd_madd_bit(DIRFILE* D, const char* parent, const char* field_code,
   B.EN(bit,numbits) = numbits;
   B.fragment_index = 0;
   B.scalar[0] = B.scalar[1] = NULL;
-  error = _GD_Add(D, &B, parent);
+  error = (_GD_Add(D, &B, parent) == NULL) ? -1 : 0;
 
   dreturn("%i", error);
   return error;
@@ -1416,7 +1388,7 @@ int gd_madd_sbit(DIRFILE* D, const char* parent, const char* field_code,
   B.EN(bit,numbits) = numbits;
   B.fragment_index = 0;
   B.scalar[0] = B.scalar[1] = NULL;
-  error = _GD_Add(D, &B, parent);
+  error = (_GD_Add(D, &B, parent) == NULL) ? -1 : 0;
 
   dreturn("%i", error);
   return error;
@@ -1443,7 +1415,7 @@ int gd_madd_multiply(DIRFILE* D, const char* parent, const char* field_code,
   M.in_fields[0] = (char *)in_field1;
   M.in_fields[1] = (char *)in_field2;
   M.fragment_index = 0;
-  error = _GD_Add(D, &M, parent);
+  error = (_GD_Add(D, &M, parent) == NULL) ? -1 : 0;
 
   dreturn("%i", error);
   return error;
@@ -1471,7 +1443,7 @@ int gd_madd_phase(DIRFILE* D, const char* parent, const char* field_code,
   P.EN(phase,shift) = shift;
   P.fragment_index = 0;
   P.scalar[0] = NULL;
-  error = _GD_Add(D, &P, parent);
+  error = (_GD_Add(D, &P, parent) == NULL) ? -1 : 0;
 
   dreturn("%i", error);
   return error;
@@ -1512,7 +1484,7 @@ int gd_madd_polynom(DIRFILE* D, const char* parent, const char* field_code,
     E.scalar[i] = NULL;
   }
 
-  error = _GD_Add(D, &E, parent);
+  error = (_GD_Add(D, &E, parent) == NULL) ? -1 : 0;
 
   dreturn("%i", error);
   return error;
@@ -1553,7 +1525,7 @@ int gd_madd_cpolynom(DIRFILE* D, const char* parent, const char* field_code,
     E.scalar[i] = NULL;
   }
 
-  error = _GD_Add(D, &E, parent);
+  error = (_GD_Add(D, &E, parent) == NULL) ? -1 : 0;
 
   dreturn("%i", error);
   return error;
@@ -1580,7 +1552,7 @@ int gd_madd_divide(DIRFILE* D, const char *parent, const char* field_code,
   E.field_type = GD_DIVIDE_ENTRY;
   E.in_fields[0] = (char *)in_field1;
   E.in_fields[1] = (char *)in_field2;
-  error = _GD_Add(D, &E, parent);
+  error = (_GD_Add(D, &E, parent) == NULL) ? -1 : 0;
 
   dreturn("%i", error);
   return error;
@@ -1608,7 +1580,7 @@ int gd_madd_recip(DIRFILE* D, const char *parent, const char* field_code,
   E.EN(recip,dividend) = dividend;
   E.comp_scal = 0;
   E.in_fields[0] = (char *)in_field;
-  error = _GD_Add(D, &E, parent);
+  error = (_GD_Add(D, &E, parent) == NULL) ? -1 : 0;
 
   dreturn("%i", error);
   return error;
@@ -1618,6 +1590,8 @@ int gd_madd_recip(DIRFILE* D, const char *parent, const char* field_code,
 int gd_madd_crecip(DIRFILE* D, const char *parent, const char* field_code, const
     char* in_field, double complex cdividend)
 {
+  int error;
+
   dtrace("%p, \"%s\", \"%s\", \"%s\", %g;%g", D, parent, field_code, in_field,
       creal(cdividend), cimag(cdividend));
 
@@ -1634,7 +1608,7 @@ int gd_madd_crecip(DIRFILE* D, const char *parent, const char* field_code, const
   E.EN(recip,cdividend) = cdividend;
   E.comp_scal = 1;
   E.in_fields[0] = (char *)in_field;
-  int error = _GD_Add(D, &E, parent);
+  error = (_GD_Add(D, &E, parent) == NULL) ? -1 : 0;
 
   dreturn("%i", error);
   return error;
@@ -1662,7 +1636,7 @@ int gd_madd_crecip89(DIRFILE* D, const char *parent, const char* field_code,
   _gd_a2c(E.EN(recip,cdividend), cdividend);
   E.comp_scal = 1;
   E.in_fields[0] = (char *)in_field;
-  error = _GD_Add(D, &E, parent);
+  error = (_GD_Add(D, &E, parent) == NULL) ? -1 : 0;
 
   dreturn("%i", error);
   return error;
@@ -1693,7 +1667,7 @@ int gd_madd_window(DIRFILE *D, const char *parent, const char *field_code,
   E.EN(window,windop) = windop;
   E.in_fields[0] = (char *)in_field;
   E.in_fields[1] = (char *)check_field;
-  error = _GD_Add(D, &E, parent);
+  error = (_GD_Add(D, &E, parent) == NULL) ? -1 : 0;
 
   dreturn("%i", error);
   return error;
@@ -1703,8 +1677,6 @@ int gd_madd_window(DIRFILE *D, const char *parent, const char *field_code,
 int gd_madd_string(DIRFILE* D, const char* parent,
     const char* field_code, const char* value) gd_nothrow
 {
-  char *buffer;
-  int error;
   gd_entry_t *entry;
   gd_entry_t S;
 
@@ -1719,39 +1691,20 @@ int gd_madd_string(DIRFILE* D, const char* parent,
   S.field = (char *)field_code;
   S.field_type = GD_STRING_ENTRY;
   S.fragment_index = 0;
-  error = _GD_Add(D, &S, parent);
+  entry = _GD_Add(D, &S, parent);
 
   /* Actually store the string, now */
-  if (!error) {
-    buffer = (char *)_GD_Malloc(D, strlen(parent) + strlen(field_code) + 2);
-    if (buffer == NULL) {
-      dreturn("%i", -1);
-      return -1;
-    }
+  if (entry)
+    _GD_DoFieldOut(D, entry, 0, 0, 0, GD_NULL, value);
 
-    sprintf(buffer, "%s/%s", parent, field_code);
-    entry = _GD_FindField(D, buffer, D->entry, D->n_entries, NULL);
-    free(buffer);
-
-    if (entry == NULL)
-      _GD_InternalError(D); /* We should be able to find it: we just added it */
-    else
-      _GD_DoFieldOut(D, entry, 0, 0, 0, GD_NULL, value);
-
-    if (D->error)
-      error = -1;
-  }
-
-  dreturn("%i", error);
-  return error;
+  dreturn("%i", D->error ? -1 : 0);
+  return D->error ? -1 : 0;
 }
 
 /* add a META CONST entry */
 int gd_madd_const(DIRFILE* D, const char* parent, const char* field_code,
     gd_type_t const_type, gd_type_t data_type, const void* value) gd_nothrow
 {
-  char *buffer;
-  int error;
   gd_entry_t *entry;
   gd_entry_t C;
 
@@ -1768,31 +1721,14 @@ int gd_madd_const(DIRFILE* D, const char* parent, const char* field_code,
   C.field_type = GD_CONST_ENTRY;
   C.EN(scalar,const_type) = const_type;
   C.fragment_index = 0;
-  error = _GD_Add(D, &C, parent);
+  entry = _GD_Add(D, &C, parent);
 
   /* Actually store the constant, now */
-  if (!error) {
-    buffer = (char *)_GD_Malloc(D, strlen(parent) + strlen(field_code) + 2);
-    if (buffer == NULL) {
-      dreturn("%i", -1);
-      return -1;
-    }
+  if (entry)
+    _GD_DoFieldOut(D, entry, 0, 0, 1, data_type, value);
 
-    sprintf(buffer, "%s/%s", parent, field_code);
-    entry = _GD_FindField(D, buffer, D->entry, D->n_entries, NULL);
-    free(buffer);
-
-    if (entry == NULL)
-      _GD_InternalError(D); /* We should be able to find it: we just added it */
-    else
-      _GD_DoFieldOut(D, entry, 0, 0, 1, data_type, value);
-
-    if (D->error)
-      error = -1;
-  }
-
-  dreturn("%i", error);
-  return error;
+  dreturn("%i", D->error ? -1 : 0);
+  return D->error ? -1 : 0;
 }
 
 /* add a META CARRAY entry */
@@ -1800,8 +1736,6 @@ int gd_madd_carray(DIRFILE* D, const char* parent, const char* field_code,
     gd_type_t const_type, size_t array_len, gd_type_t data_type,
     const void* values) gd_nothrow
 {
-  char *buffer;
-  int error;
   gd_entry_t *entry;
   gd_entry_t C;
 
@@ -1819,29 +1753,12 @@ int gd_madd_carray(DIRFILE* D, const char* parent, const char* field_code,
   C.EN(scalar,const_type) = const_type;
   C.EN(scalar,array_len) = array_len;
   C.fragment_index = 0;
-  error = _GD_Add(D, &C, parent);
+  entry = _GD_Add(D, &C, parent);
 
   /* Actually store the carray, now */
-  if (!error) {
-    buffer = (char *)_GD_Malloc(D, strlen(parent) + strlen(field_code) + 2);
-    if (buffer == NULL) {
-      dreturn("%i", -1);
-      return -1;
-    }
+  if (entry)
+    _GD_DoFieldOut(D, entry, 0, 0, array_len, data_type, values);
 
-    sprintf(buffer, "%s/%s", parent, field_code);
-    entry = _GD_FindField(D, buffer, D->entry, D->n_entries, NULL);
-    free(buffer);
-
-    if (entry == NULL)
-      _GD_InternalError(D); /* We should be able to find it: we just added it */
-    else
-      _GD_DoFieldOut(D, entry, 0, 0, array_len, data_type, values);
-
-    if (D->error)
-      error = -1;
-  }
-
-  dreturn("%i", error);
-  return error;
+  dreturn("%i", D->error ? -1 : 0);
+  return D->error ? -1 : 0;
 }

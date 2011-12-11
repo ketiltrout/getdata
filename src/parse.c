@@ -1347,8 +1347,8 @@ gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, char** in_cols,
 {
   gd_entry_t* E = NULL;
   void *ptr;
-  char *cptr;
-  int is_dot = 0;
+  char *cptr, *munged_code;
+  int is_dot = 0, dummy;
   const int pedantic = flags & GD_PEDANTIC;
 
   dtrace("%p, %i, %p, %p, \"%s\", %i, %i, %i, %i, %lx, %i, %p, %p", D, n_cols,
@@ -1360,7 +1360,10 @@ gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, char** in_cols,
     for (cptr = in_cols[0] + 1; *cptr != '\0'; ++cptr)
       if (*cptr == '/') {
         *cptr = '\0';
-        P = _GD_FindField(D, in_cols[0], D->entry, D->n_entries, NULL);
+        munged_code = _GD_MungeCode(D, NULL, me, in_cols[0], &dummy);
+        if (munged_code)
+          P = _GD_FindField(D, munged_code, D->entry, D->n_entries, NULL);
+        free(munged_code);
         if (P == NULL)
           _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_NO_FIELD,
               D->fragment[me].cname, linenum, in_cols[0]);
@@ -1742,8 +1745,10 @@ static int _GD_ParseDirective(DIRFILE *D, char** in_cols, int n_cols,
     char **outstring, const char *tok_pos)
 {
   const char* ptr;
-  int i;
+  char *munged_code;
+  int i, dummy;
   int pedantic = *flags & GD_PEDANTIC;
+  gd_entry_t *E = NULL;
 
   dtrace("%p, %p, %i, %u, %p, %i, %p, %p, %p, %p", D, in_cols, n_cols, me,
       standards, linenum, ref_name, flags, outstring, tok_pos);
@@ -1813,7 +1818,11 @@ static int _GD_ParseDirective(DIRFILE *D, char** in_cols, int n_cols,
     D->fragment[me].frame_offset = gd_strtoll(in_cols[1], NULL,
         (!pedantic || *standards >= 9) ? 0 : 10);
   else if (strcmp(ptr, "HIDDEN") == 0 && (!pedantic || *standards >= 9)) {
-    gd_entry_t *E = _GD_FindField(D, in_cols[1], D->entry, D->n_entries, NULL);
+    munged_code = _GD_MungeCode(D, NULL, me, in_cols[1], &dummy);
+    if (munged_code)
+      E = _GD_FindField(D, munged_code, D->entry, D->n_entries, NULL);
+    free(munged_code);
+
     if (E == NULL)
       _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_NO_FIELD, D->fragment[me].cname,
           linenum, in_cols[1]);
@@ -1847,22 +1856,25 @@ static int _GD_ParseDirective(DIRFILE *D, char** in_cols, int n_cols,
     if (frag != -1)
       D->fragment[me].vers |= D->fragment[frag].vers;
   } else if (strcmp(ptr, "META") == 0 && (!pedantic || *standards >= 6)) {
-    const gd_entry_t* P = _GD_FindField(D, in_cols[1], D->entry, D->n_entries,
-        NULL);
-    if (P == NULL)
+    munged_code = _GD_MungeCode(D, NULL, me, in_cols[1], &dummy);
+    if (munged_code)
+      E = _GD_FindField(D, munged_code, D->entry, D->n_entries, NULL);
+    free(munged_code);
+
+    if (E == NULL)
       _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_NO_FIELD, D->fragment[me].cname,
           linenum, in_cols[1]);
-    else if (P->fragment_index != me)
+    else if (E->fragment_index != me)
       _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_LOCATION, D->fragment[me].cname,
           linenum, in_cols[1]);
-    else if (P->e->n_meta == -1)
+    else if (E->e->n_meta == -1)
       _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_META_META, D->fragment[me].cname,
           linenum, in_cols[1]);
     else if (n_cols < 4)
       _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_TOK, D->fragment[me].cname,
           linenum, NULL);
     else
-      _GD_ParseFieldSpec(D, n_cols - 2, in_cols + 2, P, D->fragment[me].cname,
+      _GD_ParseFieldSpec(D, n_cols - 2, in_cols + 2, E, D->fragment[me].cname,
           linenum, me, *standards, 0, *flags, 1, outstring, tok_pos);
   } else if (strcmp(ptr, "PROTECT") == 0 && (!pedantic || *standards >= 6)) {
     if (strcmp(in_cols[1], "none") == 0)
@@ -1878,7 +1890,7 @@ static int _GD_ParseDirective(DIRFILE *D, char** in_cols, int n_cols,
           linenum, in_cols[1]);
   } else if (strcmp(ptr, "REFERENCE") == 0 && (!pedantic || *standards >= 6)) {
     free(*ref_name);
-    *ref_name = _GD_Strdup(D, in_cols[1]);
+    *ref_name = _GD_MungeCode(D, NULL, me, in_cols[1], &dummy);
   } else if (strcmp(ptr, "VERSION") == 0 && (!pedantic || *standards >= 5)) {
     *standards = atoi(in_cols[1]);
     if (!pedantic && ~(*flags) & GD_PERMISSIVE)

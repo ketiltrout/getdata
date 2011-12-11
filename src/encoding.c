@@ -630,10 +630,9 @@ int _GD_SetEncodedName(DIRFILE* D, struct _gd_raw_file* file, const char* base,
 
   if (file->name == NULL) {
     file->D = D;
-    file->name = (char *)malloc(strlen(base) + (temp ? 8 :
+    file->name = (char *)_GD_Malloc(D, strlen(base) + (temp ? 8 :
           strlen(_gd_ef[file->subenc].ext) + 1));
     if (file->name == NULL) {
-      _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
       dreturn("%i", -1);
       return -1;
     }
@@ -662,11 +661,10 @@ static void _GD_RecodeFragment(DIRFILE* D, unsigned long encoding, int fragment,
   }
 
   if (move && encoding != D->fragment[fragment].encoding) {
-    gd_entry_t **raw_entry = (gd_entry_t **)malloc(sizeof(gd_entry_t*) *
+    gd_entry_t **raw_entry = (gd_entry_t **)_GD_Malloc(D, sizeof(gd_entry_t*) *
         D->n_entries);
 
     if (raw_entry == NULL) {
-      _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
       dreturnvoid();
       return;
     }

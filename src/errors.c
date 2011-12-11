@@ -33,6 +33,7 @@ static const struct {
   { GD_E_OPEN, GD_E_OPEN_NO_ACCESS,
     "Cannot open dirfile {2}: permission denied", 0 },
   { GD_E_OPEN, GD_E_OPEN_NOT_EXIST, "Dirfile does not exist: {2}", 0 },
+  { GD_E_OPEN, GD_E_OPEN_PATH, "Bad path: {2}", 0 },
   /* GD_E_FORMAT: 1 = suberror, 2 = formatfile, 3 = line number, 4 = token */
   { GD_E_FORMAT, GD_E_FORMAT_BAD_TYPE, "Bad data type on line {3} of {2}: {4}",
     0 },
@@ -83,7 +84,8 @@ static const struct {
   { GD_E_CREAT, GD_E_CREAT_EXCL, "Unable to create dirfile {2}: already exists",
     0 },
   /* GD_E_BAD_CODE: 4 = field code */
-  { GD_E_BAD_CODE, 0, "Field not found: {4}", 0 },
+  { GD_E_BAD_CODE, GD_E_CODE_MISSING, "Field not found: {4}", 0 },
+  { GD_E_BAD_CODE, GD_E_CODE_INVALID, "Bad field name: {4}", 0 },
   /* GD_E_BAD_TYPE: 1 = data type */
   { GD_E_BAD_TYPE, 0, "Unsupported data type: {1}", 0 },
   /* GD_E_RAW_IO: 2 = filename, 3 = errno */

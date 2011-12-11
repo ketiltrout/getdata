@@ -876,7 +876,7 @@ gd_entry_t* _GD_FindFieldAndRepr(DIRFILE* D, const char* field_code_in,
     E = _GD_FindField(D, *field_code, D->entry, D->n_entries, index);
 
   if (E == NULL && set) {
-    _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, field_code_in);
+    _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, field_code_in);
     if (field_code_in != *field_code)
       free(*field_code);
   }
@@ -1252,22 +1252,20 @@ int _GD_GrabDir(DIRFILE *D, int dirfd, const char *name)
     }
 
   /* new one */
-  ptr = realloc(D->dir, sizeof(struct gd_dir_t) * (D->ndir + 1));
+  ptr = _GD_Realloc(D, D->dir, sizeof(struct gd_dir_t) * (D->ndir + 1));
 
   if (ptr == NULL) {
     free(path);
-    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     dreturn("%i", -1);
     return -1;
   }
 
   D->dir = ptr;
   D->dir[D->ndir].rc = 1;
-  D->dir[D->ndir].path = strdup(dir);
+  D->dir[D->ndir].path = _GD_Strdup(D, dir);
 
   if (D->dir[D->ndir].path == NULL) {
     free(path);
-    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     dreturn("%i", -1);
     return -1;
   }
@@ -1280,10 +1278,9 @@ int _GD_GrabDir(DIRFILE *D, int dirfd, const char *name)
     D->dir[D->ndir].fd = open(dir, O_RDONLY);
   } else {
     free(path);
-    path = strdup(name);
+    path = _GD_Strdup(D, name);
     if (path == NULL) {
       free(D->dir[D->ndir].path);
-      _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
       dreturn("%i", -1);
       return -1;
     }

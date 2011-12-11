@@ -45,7 +45,8 @@ const void *gd_mconstants(DIRFILE* D, const char* parent,
   P = _GD_FindField(D, parent, D->entry, D->n_entries, NULL);
 
   if (P == NULL || P->e->n_meta == -1) {
-    _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, parent);
+    _GD_SetError(D, GD_E_BAD_CODE, P ? GD_E_CODE_INVALID : GD_E_CODE_MISSING,
+        NULL, 0, parent);
     dreturn("%p", NULL);
     return NULL;
   }
@@ -57,7 +58,6 @@ const void *gd_mconstants(DIRFILE* D, const char* parent,
     return NULL;
   }
 
-  free(e->const_value_list);
   fl = (char *)_GD_Alloc(D, return_type, n);
 
   if (fl == NULL) {
@@ -77,6 +77,7 @@ const void *gd_mconstants(DIRFILE* D, const char* parent,
     }
   }
 
+  free(e->const_value_list);
   e->const_value_list = fl;
 
   dreturn("%p", e->const_value_list);
@@ -104,7 +105,8 @@ const gd_carray_t *gd_mcarrays(DIRFILE* D, const char* parent,
   P = _GD_FindField(D, parent, D->entry, D->n_entries, NULL);
 
   if (P == NULL || P->e->n_meta == -1) {
-    _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, parent);
+    _GD_SetError(D, GD_E_BAD_CODE, P ? GD_E_CODE_INVALID : GD_E_CODE_MISSING,
+        NULL, 0, parent);
     dreturn("%p", NULL);
     return NULL;
   }
@@ -116,12 +118,7 @@ const gd_carray_t *gd_mcarrays(DIRFILE* D, const char* parent,
     return zero_carrays;
   }
 
-  if (e->carray_value_list)
-    for (i = 0; e->carray_value_list[i].n != 0; ++i)
-      free(e->carray_value_list[i].d);
-  free(e->carray_value_list);
-
-  fl = (gd_carray_t *)malloc(sizeof(gd_carray_t) * (n + 1));
+  fl = (gd_carray_t *)_GD_Malloc(D, sizeof(gd_carray_t) * (n + 1));
 
   if (fl == NULL) {
     dreturn("%p", NULL);
@@ -143,6 +140,11 @@ const gd_carray_t *gd_mcarrays(DIRFILE* D, const char* parent,
     }
   }
   fl[n].n = 0;
+
+  if (e->carray_value_list)
+    for (i = 0; e->carray_value_list[i].n != 0; ++i)
+      free(e->carray_value_list[i].d);
+  free(e->carray_value_list);
 
   e->carray_value_list = fl;
 
@@ -170,7 +172,8 @@ const char **gd_mstrings(DIRFILE* D, const char* parent) gd_nothrow
   P = _GD_FindField(D, parent, D->entry, D->n_entries, NULL);
 
   if (P == NULL || P->e->n_meta == -1) {
-    _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, parent);
+    _GD_SetError(D, GD_E_BAD_CODE, P ? GD_E_CODE_INVALID : GD_E_CODE_MISSING,
+        NULL, 0, parent);
     dreturn("%p", NULL);
     return NULL;
   }
@@ -182,11 +185,10 @@ const char **gd_mstrings(DIRFILE* D, const char* parent) gd_nothrow
     return zero_list;
   }
 
-  fl = (char **)realloc((char **)e->string_value_list, sizeof(const char*) *
-      (n + 1));
+  fl = (char **)_GD_Realloc(D, (char **)e->string_value_list,
+      sizeof(const char*) * (n + 1));
 
   if (fl == NULL) {
-    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     dreturn("%p", NULL);
     return NULL;
   }
@@ -229,7 +231,8 @@ const char **gd_mfield_list_by_type(DIRFILE* D, const char* parent,
   P = _GD_FindField(D, parent, D->entry, D->n_entries, NULL);
 
   if (P == NULL || P->e->n_meta == -1) {
-    _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, parent);
+    _GD_SetError(D, GD_E_BAD_CODE, P ? GD_E_CODE_INVALID : GD_E_CODE_MISSING,
+        NULL, 0, parent);
     dreturn("%p", NULL);
     return NULL;
   }
@@ -255,10 +258,10 @@ const char **gd_mfield_list_by_type(DIRFILE* D, const char* parent,
     return NULL;
   }
 
-  fl = (char **)realloc(e->type_list[index], sizeof(const char*) * (n + 1));
+  fl = (char **)_GD_Realloc(D, e->type_list[index],
+      sizeof(const char*) * (n + 1));
 
   if (fl == NULL) {
-    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     dreturn("%p", NULL);
     return NULL;
   }
@@ -294,8 +297,9 @@ const char **gd_mvector_list(DIRFILE* D, const char* parent) gd_nothrow
 
   P = _GD_FindField(D, parent, D->entry, D->n_entries, NULL);
 
-  if (P == NULL) {
-    _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, parent);
+  if (P == NULL || P->e->n_meta == -1) {
+    _GD_SetError(D, GD_E_BAD_CODE, P ? GD_E_CODE_INVALID : GD_E_CODE_MISSING,
+        NULL, 0, parent);
     dreturn("%p", NULL);
     return NULL;
   }
@@ -312,10 +316,10 @@ const char **gd_mvector_list(DIRFILE* D, const char* parent) gd_nothrow
     return zero_list;
   }
 
-  fl = (char **)realloc((char **)e->vector_list, sizeof(const char*) * (n + 1));
+  fl = (char **)_GD_Realloc(D, (char **)e->vector_list,
+      sizeof(const char*) * (n + 1));
 
   if (fl == NULL) {
-    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     dreturn("%p", NULL);
     return NULL;
   }
@@ -354,8 +358,9 @@ const char **gd_mfield_list(DIRFILE* D, const char* parent) gd_nothrow
 
   P = _GD_FindField(D, parent, D->entry, D->n_entries, NULL);
 
-  if (P == NULL) {
-    _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, parent);
+  if (P == NULL || P->e->n_meta == -1) {
+    _GD_SetError(D, GD_E_BAD_CODE, P ? GD_E_CODE_INVALID : GD_E_CODE_MISSING,
+        NULL, 0, parent);
     dreturn("%p", NULL);
     return NULL;
   }
@@ -369,11 +374,10 @@ const char **gd_mfield_list(DIRFILE* D, const char* parent) gd_nothrow
     return zero_list;
   }
 
-  fl = (char **)realloc((char **)e->field_list, sizeof(const char*) *
+  fl = (char **)_GD_Realloc(D, (char **)e->field_list, sizeof(const char*) *
       (e->n_meta + 1 - e->n_hidden));
 
   if (fl == NULL) {
-    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     dreturn("%p", NULL);
     return NULL;
   }

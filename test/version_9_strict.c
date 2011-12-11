@@ -26,7 +26,7 @@ int cb(gd_parser_data_t *pdata, void *ll)
   return GD_SYNTAX_IGNORE;
 }
 
-#define NLINES 13
+#define NLINES 18
 int main(void)
 {
   const char *filedir = "dirfile";
@@ -39,19 +39,25 @@ int main(void)
     "/INCLUDE format1\n" // 1
     "w WINDOW INDEX INDEX SET 0x1\n"; // 2
   const char *format1_data =
-    "\n\n\n\n\n"
-    "/VERSION 9\n" // 5
-    "/INCLUDE format2 A Z\n" // 6
-    "/INCLUDE format2 A.Z\n" // 7
-    "Xr RAW COMPLEX128 0xA\n" // 8
-    "Xy POLYNOM INDEX 8 055 0xAE 2\n" // 9
-    "ar WINDOW AdZ INDEX SET 0x1\n" // 10
-    "AINDEXZ PHASE INDEX 0\n" // 11
-    "/HIDDEN Xy\n"; // 12
+    "\n\n\n"
+    "/VERSION 9\n" // 3
+    "/INCLUDE format2 A Z\n" // 4
+    "/INCLUDE format2 A.Z\n" // 5
+    "Xr RAW COMPLEX128 0xA\n" // 6
+    "Xy POLYNOM INDEX 8 055 0xAE 2\n" // 7
+    "ar WINDOW AdZ INDEX SET 0x1\n" // 8
+    "AINDEXZ PHASE INDEX 0\n" // 9
+    "/HIDDEN Xy\n"; // 10
   const char *format2_data =
     "\n\n\n"
-    "/VERSION 8\n" // 3
-    "d PHASE INDEX 0\n"; // 4
+    "\n\n\n\n\n\n\n\n"
+    "c RAW UINT8 1\n" // 11
+    "/HIDDEN c\n" // 12
+    "/REFERENCE c\n" // 13
+    "/VERSION 8\n" // 14
+    "d PHASE INDEX 0\n" // 15
+    "d/c CONST FLOAT64 1\n" // 16
+    "/META d d CONST FLOAT64 1\n"; // 17
   uint16_t c[8];
   int ll[NLINES];
   unsigned char data_data[256];
@@ -98,7 +104,7 @@ int main(void)
   CHECKI(error,0);
 
   for (i = 0; i < NLINES; ++i) {
-    if (i == 2 || i == 7) {
+    if (i == 2 || i == 5) {
       CHECKIi(i,ll[i], 1);
     } else {
       CHECKIi(i,ll[i],0);

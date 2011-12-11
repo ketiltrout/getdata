@@ -1,4 +1,41 @@
-2011-12-09   D. V. Wiebe <getdata@ketiltrout.net> svn:635
+2011-12-11   D. V. Wiebe <getdata@ketiltrout.net> svn:635
+	* test/add_string_affix.c test/name_affix_bad.c test/move_affix.c
+	test/alter_entry_affix.c test/alter_entry_affix.c test/madd_affix.c
+	test/parse_meta_affix.c test/madd_index.c test/name_affix.c
+	test/alter_mspec_affix.c test/name_dup.c test/parse_meta_implicit_affix.c
+	test/add_affix.c test/alter_spec_affix.c: Added.
+
+	* test/version_9_strict.c test/version_9_write.c: Expanded.
+
+	* src/open.c (gd_cbopen): Set errors for _GD_CanonicalPath.
+
+	* src/errors.c: Distingish missing codes from invalid codes for
+	GD_E_BAD_CODE.
+
+	* src/name.c (gd_rename): Validate the new name first and then DeMunge it
+	if it's not a meta field.
+
+	* src/move.c (gd_move): Compose the new field name by remunging it for the
+	new fragment.  Also compose the new names of all its metafield early, if
+	necessary.
+	
+	* src/parse.c (_GD_ParseFieldSpec _GD_ParseDirective): Munge field codes
+	before lookup.  Also munge the reference field.
+
+	* src/mod.c (gd_alter_spec gd_malter_spec): The parser will end up
+	reapplying affixes to the field name, so undo that.
+
+	* src/add.c (_GD_Add gd_add_string gd_add_const gd_add_const gd_madd_string
+	gd_madd_const gd_madd_carray): _GD_Add() returns the added entry on success.
+	This saves a field lookup in the others.
+
+	* src/add.c (_GD_Add): Munge field name earlier.
+
+	* src/name.c (gd_rename): Flag fragment as modified.
+
+	* src/flush.c (_GD_FieldSpec): Properly write /HIDDEN directives.
+
+2011-12-09   D. V. Wiebe <getdata@ketiltrout.net> svn:634
 	* test/parse_include_preprefix.c test/version_9_strict.c test/version_9.c
 	test/parse_include_suffix.c test/parse_include_loop.c test/version_9_write.c
 	test/parse_include_sufsuffix.c test/parse_include_prefix.c

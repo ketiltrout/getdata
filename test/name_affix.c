@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 D. V. Wiebe
+/* Copyright (C) 2011 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -18,37 +18,46 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Add a WINDOW field */
 #include "test.h"
-
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
-#include <stdio.h>
 
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  int error, r = 0;
-  gd_triplet_t threshold;
+  const char *format1 = "dirfile/format1";
+  const char *format_data = "/INCLUDE format1 A Z\n";
+  const char *format1_data = "data RAW UINT8 8\n";
+  int fd, ret, e1, e2, r = 0;
+  gd_type_t type;
   DIRFILE *D;
 
   rmdirfile();
-  D = gd_open(filedir, GD_RDWR | GD_CREAT);
-  threshold.r = 3.4;
-  gd_add_window(D, "new", "in", "check", (gd_windop_t)-1, threshold, 0);
-  error = gd_error(D);
+  mkdir(filedir, 0777);
+
+  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
+  write(fd, format_data, strlen(format_data));
+  close(fd);
+
+  fd = open(format1, O_CREAT | O_EXCL | O_WRONLY, 0666);
+  write(fd, format1_data, strlen(format1_data));
+  close(fd);
+
+  D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
+  ret = gd_rename(D, "AdataZ", "AzataZ", 0);
+  e1 = gd_error(D);
+  type = gd_entry_type(D, "AzataZ");
+  e2 = gd_error(D);
 
   gd_close(D);
 
   unlink(format);
+  unlink(format1);
   rmdir(filedir);
 
-  CHECKI(error, GD_E_BAD_ENTRY);
+  CHECKI(e1,0);
+  CHECKI(e2,0);
+  CHECKI(ret,0);
+  CHECKI(type,GD_RAW_ENTRY);
 
   return r;
 }

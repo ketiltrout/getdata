@@ -23,8 +23,7 @@
 #define GD_MAX_PRETTY_FIELD_WIDTH 80
 
 /* remove the prefix and suffix from a field code */
-static char *_GD_DeMungeCode(const char *prefix, const char *suffix,
-    const char *code)
+char *_GD_DeMungeCode(const char *prefix, const char *suffix, const char *code)
 {
   size_t i, len, slen;
   char *ptr;
@@ -560,8 +559,12 @@ static void _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
       break;
   }
 
-  if (!D->error && E->hidden && (permissive || D->standards >= 9))
-    fprintf(stream, "/HIDDEN %s\n", E->field);
+  if (!D->error && E->hidden && (permissive || D->standards >= 9)) {
+    fputs("/HIDDEN ", stream);
+    _GD_PadField(stream, D->fragment[me].prefix, D->fragment[me].suffix,
+        E->field, 0, permissive, D->standards);
+    fputc('\n', stream);
+  }
 
   dreturnvoid();
 }

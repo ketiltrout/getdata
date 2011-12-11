@@ -1,4 +1,4 @@
-/* Copyright (C) 2010-2011 D. V. Wiebe
+/* Copyright (C) 2011 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -25,29 +25,14 @@ int main(void)
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
   const char *format1 = "dirfile/format1";
-  const char *format2 = "dirfile/format2";
-  const char *format3 = "dirfile/format3";
-  const char *data = "dirfile/ar";
-  const char *format_data =
-    "/VERSION 8\n"  // 0
-    "/INCLUDE format1\n";
-  const char *format1_data =
-    "\n\n\n\n\n"
-    "/VERSION 9\n" // 5
-    "/INCLUDE format2 A Z\n" // 6
-    "Xr RAW COMPLEX128 0xA\n" // 8
-    "Xy POLYNOM INDEX 8 055 0xAE 2\n" // 9
-    "ar WINDOW AdYZ INDEX SET 0x1\n" // 10
-    "AINDEXYZ PHASE INDEX 0\n" // 11
-    "/HIDDEN Xy\n"; // 12
-  const char *format2_data = "/INCLUDE format3 \"\" Y\n";
-  const char *format3_data = "d PHASE INDEX 0\n/HIDDEN d\n";
-  uint16_t c[8];
+  const char *data = "dirfile/data";
+  const char *format_data = "/INCLUDE format1 A Z\n";
+  const char *format1_data = "data RAW UINT8 1\n";
   unsigned char data_data[256];
-  int fd, i, error, n, v, r = 0;
+  int fd, i, ret, error, r = 0;
+  off64_t n;
   DIRFILE *D;
 
-  memset(c, 0, 16);
   rmdirfile();
   mkdir(filedir, 0777);
 
@@ -62,42 +47,24 @@ int main(void)
   write(fd, format1_data, strlen(format1_data));
   close(fd);
 
-  fd = open(format2, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format2_data, strlen(format2_data));
-  close(fd);
-
-  fd = open(format3, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format3_data, strlen(format3_data));
-  close(fd);
-
   fd = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
   write(fd, data_data, 256);
   close(fd);
 
   D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
-  gd_rewrite_fragment(D, GD_ALL_FRAGMENTS);
+  ret = gd_alter_spec(D, "AdataZ RAW UINT16 4\n", 0);
   error = gd_error(D);
-  gd_close(D);
-
-  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  v = gd_dirfile_standards(D, GD_VERSION_CURRENT);
-  n = gd_getdata(D, "ar", 4, 0, 8, 0, GD_UINT16, c);
+  n = gd_nframes(D);
 
   gd_close(D);
 
   unlink(data);
   unlink(format);
-  unlink(format1);
-  unlink(format2);
-  unlink(format3);
   rmdir(filedir);
 
   CHECKI(error,0);
-  CHECKI(n,8);
-  CHECKI(v,9);
-
-  for (i = 0; i < n; ++i)
-    CHECKUi(i,c[i], (i & 1) ? 4 + i : 0);
+  CHECKI(n,256 / 2 / 4);
+  CHECKI(ret,0);
 
   return r;
 }

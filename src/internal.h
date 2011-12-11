@@ -558,9 +558,12 @@ ssize_t getdelim(char**, size_t*, int, FILE*);
 #define MAX_IN_COLS (3 * GD_MAX_LINCOM + 5) /* for META lincom */
 
 /* Suberror codes */
+/* GD_E_FORMAT suberrors are in getdata.h */
+
 #define GD_E_OPEN_NOT_EXIST    1
 #define GD_E_OPEN_NOT_DIRFILE  2
 #define GD_E_OPEN_NO_ACCESS    3
+#define GD_E_OPEN_PATH         4
 
 #define GD_E_TRUNC_STAT        1
 #define GD_E_TRUNC_UNLINK      2
@@ -571,7 +574,8 @@ ssize_t getdelim(char**, size_t*, int, FILE*);
 #define GD_E_CREAT_DIR         3
 #define GD_E_CREAT_OPEN        4
 
-/* GD_E_FORMAT suberrors are in getdata.h */
+#define GD_E_CODE_MISSING      1
+#define GD_E_CODE_INVALID      2
 
 #define GD_E_LINFILE_LENGTH    1
 #define GD_E_LINFILE_OPEN      2
@@ -907,6 +911,7 @@ void _GD_CLincomData(DIRFILE* D, int n, void* data1, gd_type_t return_type,
 void _GD_ConvertType(DIRFILE* D, const void *data_in, gd_type_t in_type,
     void *data_out, gd_type_t out_type, size_t n) gd_nothrow;
 gd_type_t _GD_ConstType(DIRFILE *D, gd_type_t type);
+char *_GD_DeMungeCode(const char *prefix, const char *suffix, const char *code);
 const char *_GD_DirName(const DIRFILE *D, int dirfd);
 
 #define _GD_EntryIndex(t) \

@@ -44,11 +44,10 @@ static void _GD_ByteSwapFragment(DIRFILE* D, unsigned long byte_sex,
   }
 
   if (move && byte_sex != D->fragment[fragment].byte_sex) {
-    gd_entry_t **raw_entry = (gd_entry_t **)malloc(sizeof(gd_entry_t*) *
+    gd_entry_t **raw_entry = (gd_entry_t **)_GD_Malloc(D, sizeof(gd_entry_t*) *
         D->n_entries);
 
     if (raw_entry == NULL) {
-      _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
       dreturnvoid();
       return;
     }

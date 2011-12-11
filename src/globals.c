@@ -76,7 +76,7 @@ const char *gd_reference(DIRFILE* D, const char* field_code) gd_nothrow
   E = _GD_FindField(D, field_code, D->entry, D->n_entries, NULL);
 
   if (E == NULL) {
-    _GD_SetError(D, GD_E_BAD_CODE, 0, NULL, 0, field_code);
+    _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, field_code);
     dreturn("%p", NULL);
     return NULL;
   }
@@ -95,10 +95,9 @@ const char *gd_reference(DIRFILE* D, const char* field_code) gd_nothrow
     return NULL;
   }
   
-  ptr = strdup(E->field);
+  ptr = _GD_Strdup(D, E->field);
 
   if (ptr == NULL) {
-    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
     dreturn("%p", NULL);
     return NULL;
   }
