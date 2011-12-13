@@ -20,57 +20,115 @@
  */
 #include "internal.h"
 
-/* Munge a field code or field name using the prefix and suffix of the current
- * fragment.  Returns a newly malloc'd munged code, or NULL on error */
-char *_GD_MungeCode(DIRFILE *D, const gd_entry_t *P, int me, const char *code,
-    int *offset)
+/* add/remove/modify the prefix and suffix from a field code */
+char *_GD_MungeCode(DIRFILE *D, const gd_entry_t *P, const char *old_prefix,
+    const char *old_suffix, const char *new_prefix, const char *new_suffix,
+    const char *code, int *offset)
 {
-  char *ptr, *slash;
-  size_t len = strlen(code);
-  size_t slen;
-  size_t plen;
+  size_t len, oplen = 0, oslen = 0, nplen = 0, nslen = 0, plen = 0, mlen = 0;
+  const char *ptr, *slash;
+  char *new_code;
 
-  dtrace("%p, %p, %i, \"%s\", %p", D, P, me, code, offset);
+  dtrace("%p, %p, \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", %p", D, P, old_prefix,
+      old_suffix, new_prefix, new_suffix, code, offset);
 
-  if (P) {
-    plen = strlen(P->field);
-    ptr = (char*)_GD_Malloc(D, len + plen + 2);
-    if (ptr) {
-      strcpy(ptr, P->field);
-      ptr[plen] = '/';
-      strcpy(ptr + plen + 1, code);
-    }
-    *offset = plen + 1;
-  } else {
-    *offset = 0;
-    slen = (D->fragment[me].suffix) ? strlen(D->fragment[me].suffix) : 0;
-    plen = (D->fragment[me].prefix) ? strlen(D->fragment[me].prefix) : 0;
-    ptr = (char*)_GD_Malloc(D, len + slen + plen + 1);
-    if (ptr) {
-      /* look for a /, which could indicate this is a field code, not just a
-       * field name.  If it is just an illegal name with a / in it, mungeing
-       * will fail, but validation will catch the illegal name later anyways.
-       */
-      if ((slash = strchr(code, '/')))
-        len = slash++ - code;
-
-      if (plen > 0)
-        strcpy(ptr, D->fragment[me].prefix);
-
-      strncpy(ptr + plen, code, len + 1);
-
-      if (slen > 0)
-        strcpy(ptr + plen + len, D->fragment[me].suffix);
-
-      if (slash) {
-        ptr[plen + len + slen] = '/';
-        strcpy(ptr + plen + len + slen + 1, slash);
-      }
-    }
+  if (code == NULL) {
+    dreturn("%p", NULL);
+    return NULL;
   }
 
-  dreturn("\"%s\" (%i)", ptr, *offset);
-  return ptr;
+  len = strlen(code);
+
+  /* Verify the old prefix is present */
+  if (old_prefix) {
+    oplen = strlen(old_prefix);
+    if (strncmp(old_prefix, code, oplen)) {
+      /* prefix missing */
+      _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_INVALID, NULL, 0, code);
+      dreturn("%p", NULL);
+      return NULL;
+    }
+    ptr = code + oplen;
+    len -= oplen;
+  } else
+    ptr = code;
+
+  /* look for a /, which could indicate this is a metafield code.  If it is
+   * just an illegal name with a / in it, mungeing will screw up, but
+   * validation will catch the illegal name later anyways.
+   */
+  if ((slash = memchr(ptr, '/', len))) {
+    mlen = len + (ptr - slash);
+    len = slash++ - ptr;
+  }
+
+  /* Verify the suffix is present */
+  if (old_suffix) {
+    oslen = strlen(old_suffix);
+    if (strncmp(old_suffix, ptr + len - oslen, oslen)) {
+      /* suffix missing */
+      _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_INVALID, NULL, 0, code);
+      dreturn("%p", NULL);
+      return NULL;
+    }
+    len -= oslen;
+  }
+
+  if (new_prefix)
+    nplen = strlen(new_prefix);
+
+  if (new_suffix)
+    nslen = strlen(new_suffix);
+
+  if (P)
+    plen = strlen(P->field) + 1;
+
+  if ((new_code = _GD_Malloc(D, plen + nplen + len + nslen + mlen + 1)) == NULL)
+  {
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  if (P) {
+    strcpy(new_code, P->field);
+    new_code[plen - 1] = '/';
+    strcpy(new_code + plen, ptr);
+  } else {
+    if (nplen > 0)
+      strcpy(new_code, new_prefix);
+
+    strncpy(new_code + nplen, ptr, len);
+
+    if (nslen > 0)
+      strcpy(new_code + nplen + len, new_suffix);
+
+    if (slash) {
+      new_code[nplen + len + nslen] = '/';
+      strcpy(new_code + nplen + len + nslen + 1, slash);
+    }
+
+    new_code[nplen + len + nslen + mlen] = '\0';
+  }
+
+  *offset = plen;
+
+  dreturn("\"%s\" (%i)", new_code, *offset);
+  return new_code;
+}
+
+/* Munge a field code or field name using the prefix and suffix of the current
+ * fragment.  Returns a newly malloc'd munged code, or NULL on error */
+char *_GD_MungeFromFrag(DIRFILE *D, const gd_entry_t *P, int me,
+    const char *code, int *offset)
+{
+  char *new_code;
+  dtrace("%p, %p, %i, \"%s\", %p", D, P, me, code, offset);
+
+  new_code = _GD_MungeCode(D, P, NULL, NULL, D->fragment[me].prefix,
+      D->fragment[me].suffix, code, offset);
+
+  dreturn("\"%s\"", new_code);
+  return new_code;
 }
 
 /* Check for a valid field name -- returns 1 on error */
@@ -96,9 +154,9 @@ int _GD_ValidateField(const char* field_code, int standards, int strict,
       dreturn("%i", 1);
       return 1;
     } else if (strict && ((standards >= 5 && (field_code[i] == '<' ||
-            field_code[i] == '>' || field_code[i] == ';' ||
-            field_code[i] == '|' || field_code[i] == '&')) ||
-        (standards == 5 && (field_code[i] == '\\' || field_code[i] == '#'))))
+              field_code[i] == '>' || field_code[i] == ';' ||
+              field_code[i] == '|' || field_code[i] == '&')) ||
+          (standards == 5 && (field_code[i] == '\\' || field_code[i] == '#'))))
     {
       /* these characters are sometimes forbidden */
       dreturn("%i", 1);
@@ -138,7 +196,7 @@ int gd_rename(DIRFILE *D, const char *old_code, const char *new_name,
 {
   gd_entry_t *E, *Q;
   char* name;
-  int new_dot, old_dot = 0;
+  int dummy, new_dot, old_dot = 0;
   unsigned int dot_ind;
 
   dtrace("%p, \"%s\", \"%s\", %i", D, old_code, new_name, move_data);
@@ -198,8 +256,9 @@ int gd_rename(DIRFILE *D, const char *old_code, const char *new_name,
     }      
     sprintf("%s/%s", E->e->p.parent->field, new_name);
   } else {
-    name = _GD_DeMungeCode(D->fragment[E->fragment_index].prefix,
-        D->fragment[E->fragment_index].suffix, new_name);
+    /* Verify prefix and suffix */
+    name = _GD_MungeCode(D, NULL, D->fragment[E->fragment_index].prefix,
+        D->fragment[E->fragment_index].suffix, NULL, NULL, new_name, &dummy);
     if (name == NULL || name[0] == '\0') {
       _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_INVALID, NULL, 0, new_name);
       dreturn("%i", -1);

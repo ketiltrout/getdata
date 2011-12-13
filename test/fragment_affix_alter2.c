@@ -25,10 +25,11 @@ int main(void)
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
   const char *format1 = "dirfile/format1";
-  const char *format_data = "/INCLUDE format1 A Z\n";
-  const char *format1_data = "data RAW UINT8 8\n";
+  const char *format2 = "dirfile/format2";
+  const char *format_data = "B CONST UINT8 1\nINCLUDE format1 A Z\n";
+  const char *format1_data = "/INCLUDE format2 B Y\n";
+  const char *format2_data = "data RAW UINT8 11\n";
   int fd, ret, e1, e2, r = 0;
-  gd_entype_t type;
   DIRFILE *D;
 
   rmdirfile();
@@ -42,22 +43,25 @@ int main(void)
   write(fd, format1_data, strlen(format1_data));
   close(fd);
 
-  D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
-  ret = gd_rename(D, "AdataZ", "AzataZ", 0);
-  e1 = gd_error(D);
-  type = gd_entry_type(D, "AzataZ");
-  e2 = gd_error(D);
+  fd = open(format2, O_CREAT | O_EXCL | O_WRONLY, 0666);
+  write(fd, format2_data, strlen(format2_data));
+  close(fd);
 
+  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  ret = gd_alter_affixes(D, 1, NULL, "C");
+  e1 = gd_error(D);
+  gd_spf(D, "BdataYC");
+  e2 = gd_error(D);
   gd_close(D);
 
-  unlink(format);
+  unlink(format2);
   unlink(format1);
+  unlink(format);
   rmdir(filedir);
 
+  CHECKI(ret,0);
   CHECKI(e1,0);
   CHECKI(e2,0);
-  CHECKI(ret,0);
-  CHECKI(type,GD_RAW_ENTRY);
 
   return r;
 }

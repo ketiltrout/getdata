@@ -911,7 +911,6 @@ void _GD_CLincomData(DIRFILE* D, int n, void* data1, gd_type_t return_type,
 void _GD_ConvertType(DIRFILE* D, const void *data_in, gd_type_t in_type,
     void *data_out, gd_type_t out_type, size_t n) gd_nothrow;
 gd_type_t _GD_ConstType(DIRFILE *D, gd_type_t type);
-char *_GD_DeMungeCode(const char *prefix, const char *suffix, const char *code);
 const char *_GD_DirName(const DIRFILE *D, int dirfd);
 
 #define _GD_EntryIndex(t) \
@@ -979,7 +978,9 @@ int _GD_MissingFramework(int encoding, unsigned int funcs);
 int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned long int encoding,
     unsigned long int byte_sex, off64_t offset, int finalise, int new_fragment,
     char* new_filebase);
-char *_GD_MungeCode(DIRFILE*, const gd_entry_t*, int, const char*, int*);
+char *_GD_MungeCode(DIRFILE*, const gd_entry_t*, const char *, const char*,
+    const char*, const char*, const char*, int*);
+char *_GD_MungeFromFrag(DIRFILE*, const gd_entry_t*, int, const char*, int*);
 gd_type_t _GD_NativeType(DIRFILE* D, gd_entry_t* E, int repr);
 gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, char** in_cols,
     const gd_entry_t* P, const char* format_file, int linenum, int me,
@@ -994,6 +995,7 @@ int _GD_SetEncodedName(DIRFILE* D, struct _gd_raw_file* file, const char* base,
 void _GD_SetError(DIRFILE* D, int error, int suberror, const char* format_file,
     int line, const char* token);
 int _GD_SetTablePath(DIRFILE *D, gd_entry_t *E, struct _gd_private_entry *e);
+int _GD_StrCmpNull(const char *, const char *);
 int _GD_Supports(DIRFILE* D, gd_entry_t* E, unsigned int funcs);
 int _GD_Tokenise(DIRFILE *D, const char* instring, char **outstring,
     const char **pos, char** in_cols, const char* format_file, int linenum,

@@ -22,50 +22,6 @@
 
 #define GD_MAX_PRETTY_FIELD_WIDTH 80
 
-/* remove the prefix and suffix from a field code */
-char *_GD_DeMungeCode(const char *prefix, const char *suffix, const char *code)
-{
-  size_t i, len, slen;
-  char *ptr;
-
-  dtrace("\"%s\", \"%s\", \"%s\"", prefix, suffix, code);
-
-  if (code == NULL) {
-    dreturn("%p", NULL);
-    return NULL;
-  }
-
-  /* Verify the prefix is present */
-  if (prefix) {
-    for (i = 0; prefix[i]; ++i) {
-      if (prefix[i] != code[i]) {
-        /* prefix missing */
-        dreturn("%p", NULL);
-        return NULL;
-      }
-    }
-    ptr = strdup(code + i);
-  } else
-    ptr = strdup(code);
-
-  /* Verify the suffix is present */
-  if (suffix) {
-    len = strlen(ptr);
-    slen = strlen(suffix);
-    for (i = 0; i < slen; ++i) {
-      if (suffix[i] != ptr[len - slen + i]) {
-        /* suffix missing */
-        dreturn("%p", NULL);
-        return NULL;
-      }
-    }
-    ptr[len - slen] = '\0';
-  }
-
-  dreturn("\"%s\"", ptr);
-  return ptr;
-}
-
 void _GD_Flush(DIRFILE* D, gd_entry_t *E, int clo)
 {
   int i;
@@ -306,16 +262,18 @@ static size_t _GD_StringEscapeise(FILE* stream, const char* in, int permissive,
   return len;
 }
 
-static void _GD_PadField(FILE* stream, const char *prefix, const char *suffix,
-    const char* in, size_t len, int permissive, int standards)
+static void _GD_PadField(DIRFILE *D, FILE* stream, const char *prefix,
+    const char *suffix, const char* in, size_t len, int permissive,
+    int standards)
 {
   size_t i;
+  int dummy;
   char *ptr;
 
-  dtrace("%p, \"%s\", \"%s\", \"%s\", %zu, %i, %i", stream, prefix, suffix, in,
-      len, permissive, standards);
+  dtrace("%p, %p, \"%s\", \"%s\", \"%s\", %zu, %i, %i", D, stream, prefix,
+      suffix, in, len, permissive, standards);
 
-  ptr = _GD_DeMungeCode(prefix, suffix, in);
+  ptr = _GD_MungeCode(D, NULL, prefix, suffix, NULL, NULL, in, &dummy);
 
   for (i = _GD_StringEscapeise(stream, ptr, permissive, standards); i < len;
       ++i)
@@ -332,12 +290,13 @@ static void _GD_WriteConst(DIRFILE *D, FILE* stream, int me, int permissive,
     int type, const void* value, const char* scalar, int index,
     const char* postamble)
 {
+  int dummy;
   dtrace("%p, %p, %i, %i, 0x%X, %p, \"%s\", %i, \"%s\"", D, stream, me,
       permissive, type, value, scalar, index, postamble);
 
   if (scalar != NULL) {
-    char *ptr = _GD_DeMungeCode(D->fragment[me].prefix, D->fragment[me].suffix,
-        scalar);
+    char *ptr = _GD_MungeCode(D, NULL, D->fragment[me].prefix,
+        D->fragment[me].suffix, NULL, NULL, scalar, &dummy);
     _GD_StringEscapeise(stream, ptr, permissive, D->standards);
     if (index == -1)
       fprintf(stream, "%s", postamble);
@@ -392,7 +351,7 @@ static void _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
   }
 
   /* field name */
-  _GD_PadField(stream, D->fragment[me].prefix, D->fragment[me].suffix, ptr,
+  _GD_PadField(D, stream, D->fragment[me].prefix, D->fragment[me].suffix, ptr,
       max_len, permissive, D->standards);
 
   switch(E->field_type) {
@@ -561,7 +520,7 @@ static void _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
 
   if (!D->error && E->hidden && (permissive || D->standards >= 9)) {
     fputs("/HIDDEN ", stream);
-    _GD_PadField(stream, D->fragment[me].prefix, D->fragment[me].suffix,
+    _GD_PadField(D, stream, D->fragment[me].prefix, D->fragment[me].suffix,
         E->field, 0, permissive, D->standards);
     fputc('\n', stream);
   }
@@ -577,7 +536,7 @@ static void _GD_FlushFragment(DIRFILE* D, int i, int permissive)
   char temp_file[] = "format_XXXXXX";
   char* ptr;
   struct tm now;
-  int fd;
+  int fd, dummy;
   int pretty = 0;
   size_t max_len = 0;
   unsigned int u;
@@ -712,10 +671,10 @@ static void _GD_FlushFragment(DIRFILE* D, int i, int permissive)
   if (permissive || D->standards >= 3)
     for (j = 0; j < D->n_fragment; ++j)
       if (D->fragment[j].parent == i) {
-        char *prefix = _GD_DeMungeCode(D->fragment[i].prefix, NULL,
-            D->fragment[j].prefix);
-        char *suffix = _GD_DeMungeCode(NULL, D->fragment[i].suffix,
-            D->fragment[j].suffix);
+        char *prefix = _GD_MungeCode(D, NULL, D->fragment[i].prefix, NULL, NULL,
+            NULL, D->fragment[j].prefix, &dummy);
+        char *suffix = _GD_MungeCode(D, NULL, NULL, D->fragment[i].suffix, NULL,
+            NULL, D->fragment[j].suffix, &dummy);
 
         fprintf(stream, "%sINCLUDE ", (D->standards >= 5) ? "/" : "");
         _GD_StringEscapeise(stream, D->fragment[j].ename, permissive,

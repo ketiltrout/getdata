@@ -257,14 +257,15 @@ int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,
   return D->n_fragment - 1;
 }
 
-int gd_include(DIRFILE* D, const char* file, int fragment_index,
-    unsigned long flags)
+int gd_include_affix(DIRFILE* D, const char* file, int fragment_index,
+    const char *prefix, const char *suffix, unsigned long flags)
 {
   int standards = GD_DIRFILE_STANDARDS_VERSION;
   char* ref_name = NULL;
   int i, new_fragment;
 
-  dtrace("%p, \"%s\", %i, %lx", D, file, fragment_index, (unsigned long)flags);
+  dtrace("%p, \"%s\", %i, \"%s\", \"%s\", 0x%lX", D, file, fragment_index,
+      prefix, suffix, flags);
 
   if (~D->flags & GD_HAVE_VERSION)
     _GD_FindVersion(D);
@@ -308,7 +309,7 @@ int gd_include(DIRFILE* D, const char* file, int fragment_index,
     flags |= D->flags & GD_ENCODING;
 
   new_fragment = _GD_Include(D, file, "dirfile_include()", 0, &ref_name,
-      fragment_index, NULL, NULL, &standards, &flags);
+      fragment_index, prefix, suffix, &standards, &flags);
 
   if (!D->error) {
     D->fragment[fragment_index].modified = 1;
@@ -349,6 +350,19 @@ int gd_include(DIRFILE* D, const char* file, int fragment_index,
   }
   free(ref_name);
 
+  dreturn("%i", new_fragment);
+  return new_fragment;
+}
+
+int gd_include(DIRFILE* D, const char* file, int fragment_index,
+    unsigned long flags)
+{
+  int new_fragment;
+
+  dtrace("%p, \"%s\", %i, 0x%lX", D, file, fragment_index, flags);
+
+  new_fragment = gd_include_affix(D, file, fragment_index, NULL, NULL, flags);
+  
   dreturn("%i", new_fragment);
   return new_fragment;
 }

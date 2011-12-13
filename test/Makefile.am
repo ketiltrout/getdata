@@ -164,7 +164,8 @@ FLUSH_TESTS=flush flush_all flush_bad_code flush_invalid flush_meta flush_spec
 
 FOFFS_TESTS=foffs_alter foffs_get foffs_move
 
-FRAGMENT_TESTS=fragment_index fragment_name fragment_name_oor
+FRAGMENT_TESTS=fragment_affix fragment_affix_alter fragment_affix_alter2 \
+							 fragment_affix_dup fragment_index fragment_name fragment_name_oor
 
 GET_TESTS=${GET64} get_bad_code get_bit get_carray get_carray_len \
 					get_carray_slice get_char get_clincom get_complex128 \
@@ -196,9 +197,9 @@ HEADER_TESTS=header_complex
 
 HIDE_TESTS=hide hide_unhide
 
-INCLUDE_TESTS=include include_accmode include_auto include_cb include_creat \
-							include_ignore include_index include_invalid include_nonexistent \
-							include_pc include_ref include_syntax
+INCLUDE_TESTS=include include_accmode include_affix include_auto include_cb \
+							include_creat include_ignore include_index include_invalid \
+							include_nonexistent include_pc include_ref include_syntax
 
 INDEX_TESTS=index index_domain index_range
 

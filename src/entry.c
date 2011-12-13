@@ -143,7 +143,8 @@ static void _GD_GetScalar(DIRFILE* D, gd_entry_t* E, int i, gd_type_t type,
   dtrace("%p, %p, %i, %i, %p", D, E, i, type, data);
 
   if (scalar != NULL) {
-    munged_code = _GD_MungeCode(D, NULL, E->fragment_index, scalar, &offset);
+    munged_code = _GD_MungeFromFrag(D, NULL, E->fragment_index, scalar,
+        &offset);
     if (munged_code)
       C = _GD_FindFieldAndRepr(D, munged_code, &field_code, &repr, NULL, 0);
 

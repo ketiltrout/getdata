@@ -282,7 +282,7 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned long encoding,
   return 0;
 }
 
-static int strcmpnull(const char *s1, const char *s2)
+int _GD_StrCmpNull(const char *s1, const char *s2)
 {
   int r;
 
@@ -369,8 +369,8 @@ int gd_move(DIRFILE* D, const char* field_code, int new_fragment, int move_data)
   }
 
   /* Compose the field's new name */
-  new_filebase = _GD_DeMungeCode(D->fragment[E->fragment_index].prefix,
-      D->fragment[E->fragment_index].suffix, E->field);
+  new_filebase = _GD_MungeCode(D, NULL, D->fragment[E->fragment_index].prefix,
+      D->fragment[E->fragment_index].suffix, NULL, NULL, E->field, &dummy);
   
   if (!new_filebase) {
     _GD_InternalError(D); /* the prefix/suffix wasn't found */
@@ -378,7 +378,7 @@ int gd_move(DIRFILE* D, const char* field_code, int new_fragment, int move_data)
     return -1;
   }
 
-  new_code = _GD_MungeCode(D, NULL, new_fragment, new_filebase, &dummy);
+  new_code = _GD_MungeFromFrag(D, NULL, new_fragment, new_filebase, &dummy);
 
   if (strcmp(new_code, E->field)) {
     /* duplicate check */
@@ -436,7 +436,7 @@ int gd_move(DIRFILE* D, const char* field_code, int new_fragment, int move_data)
        D->fragment[new_fragment].byte_sex ||
        D->fragment[E->fragment_index].frame_offset !=
        D->fragment[new_fragment].frame_offset ||
-       strcmpnull(D->fragment[E->fragment_index].sname,
+       _GD_StrCmpNull(D->fragment[E->fragment_index].sname,
          D->fragment[new_fragment].sname)))
   {
     if (_GD_MogrifyFile(D, E, D->fragment[new_fragment].encoding,

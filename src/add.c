@@ -88,8 +88,8 @@ static gd_entry_t *_GD_Add(DIRFILE* D, const gd_entry_t* entry,
     }
   } else
     /* Apply prefix and suffix */
-    temp_buffer = _GD_MungeCode(D, NULL, entry->fragment_index, entry->field,
-        &offset);
+    temp_buffer = _GD_MungeFromFrag(D, NULL, entry->fragment_index,
+        entry->field, &offset);
 
   if (temp_buffer == NULL) {
     dreturn("%p", NULL);

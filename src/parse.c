@@ -294,7 +294,7 @@ static gd_entry_t* _GD_ParseRaw(DIRFILE* D, char* in_cols[MAX_IN_COLS],
   E->e->u.raw.file[0].subenc = GD_ENC_UNKNOWN; /* don't know the encoding
                                                     subscheme yet */
 
-  E->field = _GD_MungeCode(D, NULL, me, in_cols[0], &offset);
+  E->field = _GD_MungeFromFrag(D, NULL, me, in_cols[0], &offset);
   if (E->field && _GD_ValidateField(E->field + offset, standards, pedantic, 0,
         is_dot))
   {
@@ -368,7 +368,7 @@ static gd_entry_t* _GD_ParseLincom(DIRFILE* D, char* in_cols[MAX_IN_COLS],
 
   E->field_type = GD_LINCOM_ENTRY;
 
-  E->field = _GD_MungeCode(D, parent, me, in_cols[0], &offset);
+  E->field = _GD_MungeFromFrag(D, parent, me, in_cols[0], &offset);
   if (E->field && _GD_ValidateField(E->field + offset, standards, pedantic, 0,
         is_dot))
   {
@@ -469,7 +469,7 @@ static gd_entry_t* _GD_ParseLinterp(DIRFILE* D, char* in_cols[MAX_IN_COLS],
   E->e->calculated = 1;
   E->EN(linterp,table) = NULL;
 
-  E->field = _GD_MungeCode(D, parent, me, in_cols[0], &offset);
+  E->field = _GD_MungeFromFrag(D, parent, me, in_cols[0], &offset);
   if (E->field && _GD_ValidateField(E->field + offset, standards, pedantic, 0,
         is_dot))
   {
@@ -533,7 +533,7 @@ static gd_entry_t* _GD_ParseMultiply(DIRFILE* D, char* in_cols[MAX_IN_COLS],
   E->e->entry[0] = E->e->entry[1] = NULL;
   E->e->calculated = 1;
 
-  E->field = _GD_MungeCode(D, parent, me, in_cols[0], &offset);
+  E->field = _GD_MungeFromFrag(D, parent, me, in_cols[0], &offset);
   if (E->field && _GD_ValidateField(E->field + offset, standards, pedantic, 0,
         is_dot))
   {
@@ -595,7 +595,7 @@ static gd_entry_t* _GD_ParseRecip(DIRFILE* D, char* in_cols[MAX_IN_COLS],
   E->e->entry[0] = NULL;
   E->e->calculated = 0;
 
-  E->field = _GD_MungeCode(D, parent, me, in_cols[0], &offset);
+  E->field = _GD_MungeFromFrag(D, parent, me, in_cols[0], &offset);
   if (E->field && _GD_ValidateField(E->field + offset, standards, pedantic, 0,
         is_dot))
   {
@@ -662,7 +662,7 @@ static gd_entry_t* _GD_ParseWindow(DIRFILE* D, char* in_cols[MAX_IN_COLS],
   E->e->entry[0] = NULL;
   E->e->calculated = 0;
 
-  E->field = _GD_MungeCode(D, parent, me, in_cols[0], &offset);
+  E->field = _GD_MungeFromFrag(D, parent, me, in_cols[0], &offset);
   if (E->field && _GD_ValidateField(E->field + offset, standards, pedantic, 0,
         is_dot))
 {
@@ -753,7 +753,7 @@ static gd_entry_t* _GD_ParseDivide(DIRFILE* D, char* in_cols[MAX_IN_COLS],
   E->e->entry[0] = E->e->entry[1] = NULL;
   E->e->calculated = 0;
 
-  E->field = _GD_MungeCode(D, parent, me, in_cols[0], &offset);
+  E->field = _GD_MungeFromFrag(D, parent, me, in_cols[0], &offset);
   if (E->field && _GD_ValidateField(E->field + offset, standards, pedantic, 0,
         is_dot))
   {
@@ -818,7 +818,7 @@ static gd_entry_t* _GD_ParseBit(DIRFILE* D, int is_signed,
   E->e->entry[0] = NULL;
   E->e->calculated = 1;
 
-  E->field = _GD_MungeCode(D, parent, me, in_cols[0], &offset);
+  E->field = _GD_MungeFromFrag(D, parent, me, in_cols[0], &offset);
   if (E->field && _GD_ValidateField(E->field + offset, standards, pedantic, 0,
         is_dot))
   {
@@ -896,7 +896,7 @@ static gd_entry_t* _GD_ParsePhase(DIRFILE* D, char* in_cols[MAX_IN_COLS],
   E->in_fields[0] = NULL;
   E->e->entry[0] = NULL;
 
-  E->field = _GD_MungeCode(D, parent, me, in_cols[0], &offset);
+  E->field = _GD_MungeFromFrag(D, parent, me, in_cols[0], &offset);
   if (E->field && _GD_ValidateField(E->field + offset, standards, pedantic, 0,
         is_dot))
   {
@@ -960,7 +960,7 @@ static gd_entry_t* _GD_ParsePolynom(DIRFILE* D, char* in_cols[MAX_IN_COLS],
   memset(E->e, 0, sizeof(struct _gd_private_entry));
 
   E->field_type = GD_POLYNOM_ENTRY;
-  E->field = _GD_MungeCode(D, parent, me, in_cols[0], &offset);
+  E->field = _GD_MungeFromFrag(D, parent, me, in_cols[0], &offset);
   if (E->field && _GD_ValidateField(E->field + offset, standards, pedantic, 0,
         is_dot))
   {
@@ -1073,7 +1073,7 @@ static gd_entry_t* _GD_ParseConst(DIRFILE* D, char* in_cols[MAX_IN_COLS],
   E->field_type = GD_CONST_ENTRY;
   E->e->calculated = 1;
 
-  E->field = _GD_MungeCode(D, parent, me, in_cols[0], &offset);
+  E->field = _GD_MungeFromFrag(D, parent, me, in_cols[0], &offset);
   if (E->field && _GD_ValidateField(E->field + offset, standards, pedantic, 0,
         is_dot))
   {
@@ -1165,7 +1165,7 @@ static gd_entry_t* _GD_ParseCarray(DIRFILE* D, char* in_cols[MAX_IN_COLS],
   E->field_type = GD_CARRAY_ENTRY;
   E->e->calculated = 1;
 
-  E->field = _GD_MungeCode(D, parent, me, in_cols[0], &offset);
+  E->field = _GD_MungeFromFrag(D, parent, me, in_cols[0], &offset);
   if (E->field && _GD_ValidateField(E->field + offset, standards, pedantic, 0,
         is_dot))
   {
@@ -1289,7 +1289,7 @@ static gd_entry_t* _GD_ParseString(DIRFILE* D, char *in_cols[MAX_IN_COLS],
   E->e->u.string = _GD_Strdup(D, in_cols[2]);
   E->e->calculated = 1;
 
-  E->field = _GD_MungeCode(D, parent, me, in_cols[0], &offset);
+  E->field = _GD_MungeFromFrag(D, parent, me, in_cols[0], &offset);
   if (E->field && _GD_ValidateField(E->field + offset, standards, pedantic, 0,
         is_dot))
   {
@@ -1360,7 +1360,7 @@ gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, char** in_cols,
     for (cptr = in_cols[0] + 1; *cptr != '\0'; ++cptr)
       if (*cptr == '/') {
         *cptr = '\0';
-        munged_code = _GD_MungeCode(D, NULL, me, in_cols[0], &dummy);
+        munged_code = _GD_MungeFromFrag(D, NULL, me, in_cols[0], &dummy);
         if (munged_code)
           P = _GD_FindField(D, munged_code, D->entry, D->n_entries, NULL);
         free(munged_code);
@@ -1818,7 +1818,7 @@ static int _GD_ParseDirective(DIRFILE *D, char** in_cols, int n_cols,
     D->fragment[me].frame_offset = gd_strtoll(in_cols[1], NULL,
         (!pedantic || *standards >= 9) ? 0 : 10);
   else if (strcmp(ptr, "HIDDEN") == 0 && (!pedantic || *standards >= 9)) {
-    munged_code = _GD_MungeCode(D, NULL, me, in_cols[1], &dummy);
+    munged_code = _GD_MungeFromFrag(D, NULL, me, in_cols[1], &dummy);
     if (munged_code)
       E = _GD_FindField(D, munged_code, D->entry, D->n_entries, NULL);
     free(munged_code);
@@ -1856,7 +1856,7 @@ static int _GD_ParseDirective(DIRFILE *D, char** in_cols, int n_cols,
     if (frag != -1)
       D->fragment[me].vers |= D->fragment[frag].vers;
   } else if (strcmp(ptr, "META") == 0 && (!pedantic || *standards >= 6)) {
-    munged_code = _GD_MungeCode(D, NULL, me, in_cols[1], &dummy);
+    munged_code = _GD_MungeFromFrag(D, NULL, me, in_cols[1], &dummy);
     if (munged_code)
       E = _GD_FindField(D, munged_code, D->entry, D->n_entries, NULL);
     free(munged_code);
@@ -1890,7 +1890,7 @@ static int _GD_ParseDirective(DIRFILE *D, char** in_cols, int n_cols,
           linenum, in_cols[1]);
   } else if (strcmp(ptr, "REFERENCE") == 0 && (!pedantic || *standards >= 6)) {
     free(*ref_name);
-    *ref_name = _GD_MungeCode(D, NULL, me, in_cols[1], &dummy);
+    *ref_name = _GD_MungeFromFrag(D, NULL, me, in_cols[1], &dummy);
   } else if (strcmp(ptr, "VERSION") == 0 && (!pedantic || *standards >= 5)) {
     *standards = atoi(in_cols[1]);
     if (!pedantic && ~(*flags) & GD_PERMISSIVE)

@@ -819,7 +819,7 @@ int _GD_BadInput(DIRFILE* D, gd_entry_t* E, int i)
   dtrace("%p, %p, %i", D, E, i);
 
   if (E->e->entry[i] == NULL) {
-    munged_code = _GD_MungeCode(D, NULL, E->fragment_index, E->in_fields[i],
+    munged_code = _GD_MungeFromFrag(D, NULL, E->fragment_index, E->in_fields[i],
         &offset);
     if (munged_code)
       E->e->entry[i] = _GD_FindFieldAndRepr(D, munged_code, &code,

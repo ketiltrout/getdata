@@ -1,3 +1,21 @@
+2011-12-13   D. V. Wiebe <getdata@ketiltrout.net> svn:637
+	* test/fragment_affix_alter2.c test/fragment_affix_alter.c
+	test/fragment_affix_dup.c test/fragment_affix.c test/include_affix.c: Added.
+
+	* src/move.c (_GD_StrCmpNull): Renamed from strcmpnull and de-statickified.
+
+	* src/name.c (_GD_MungeFromFrag): Added.
+	* src/name.c (_GD_MungeCode): Converted into a swiss army munger handling
+	both enmunging and demunging.  Most old, simple, uses of this function now
+	call _GD_MungeFromFrag (which calls this) instead.
+	* src/flush.c (_GD_DeMungeCode): Deleted in favour of the new _GD_MungeCode.
+
+	* src/fragment.c (gd_fragment_affixes _GD_CheckAffixes _GD_ChangeAffixes
+	gd_alter_affixes): Added.
+
+	* src/include.c (gd_include_affix): Renamed from gd_include.
+	* src/include.c (gd_include): Added.
+
 2011-12-11   D. V. Wiebe <getdata@ketiltrout.net> svn:635
 	* test/add_string_affix.c test/name_affix_bad.c test/move_affix.c
 	test/alter_entry_affix.c test/alter_entry_affix.c test/madd_affix.c

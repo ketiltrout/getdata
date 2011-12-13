@@ -29,7 +29,7 @@ int main(void)
   const char *format_data = "/INCLUDE format1 A Z\n";
   const char *format1_data = "data RAW UINT8 1\n";
   unsigned char data_data[256];
-  int fd, i, ret, error, r = 0;
+  int fd, ret, error, r = 0;
   off64_t n;
   DIRFILE *D;
 

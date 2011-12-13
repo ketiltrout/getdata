@@ -25,10 +25,10 @@ int main(void)
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
   const char *format1 = "dirfile/format1";
-  const char *format_data = "/INCLUDE format1 A Z\n";
-  const char *format1_data = "data RAW UINT8 8\n";
-  int fd, ret, e1, e2, r = 0;
-  gd_entype_t type;
+  const char *format_data = "#\n";
+  const char *format1_data = "data RAW UINT8 11\n";
+  int fd, error, r = 0;
+  gd_spf_t spf;
   DIRFILE *D;
 
   rmdirfile();
@@ -43,21 +43,17 @@ int main(void)
   close(fd);
 
   D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
-  ret = gd_rename(D, "AdataZ", "AzataZ", 0);
-  e1 = gd_error(D);
-  type = gd_entry_type(D, "AzataZ");
-  e2 = gd_error(D);
-
+  gd_include_affix(D, "format1", 0, "A", "Z", 0);
+  error = gd_error(D);
+  spf = gd_spf(D, "AdataZ");
   gd_close(D);
 
-  unlink(format);
   unlink(format1);
+  unlink(format);
   rmdir(filedir);
 
-  CHECKI(e1,0);
-  CHECKI(e2,0);
-  CHECKI(ret,0);
-  CHECKI(type,GD_RAW_ENTRY);
+  CHECKI(error, 0);
+  CHECKU(spf, 11);
 
   return r;
 }
