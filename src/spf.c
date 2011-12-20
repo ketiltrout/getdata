@@ -39,8 +39,9 @@ gd_spf_t _GD_GetSPF(DIRFILE* D, gd_entry_t* E)
   switch(E->field_type) {
     case GD_RAW_ENTRY:
       if (!E->e->calculated)
-        _GD_CalculateEntry(D, E);
-      spf = E->EN(raw,spf);
+        _GD_CalculateEntry(D, E, 1);
+      if (!D->error)
+        spf = E->EN(raw,spf);
       break;
     case GD_LINCOM_ENTRY:
     case GD_MULTIPLY_ENTRY:
@@ -52,7 +53,7 @@ gd_spf_t _GD_GetSPF(DIRFILE* D, gd_entry_t* E)
     case GD_POLYNOM_ENTRY:
     case GD_SBIT_ENTRY:
     case GD_WINDOW_ENTRY:
-      if (_GD_BadInput(D, E, 0))
+      if (_GD_BadInput(D, E, 0, 1))
         break;
 
       spf = _GD_GetSPF(D, E->e->entry[0]);
@@ -94,7 +95,8 @@ gd_spf_t gd_spf(DIRFILE* D, const char *field_code_in) gd_nothrow
   /* the representation is unimportant: it doesn't change the SPF of the field,
    * yet we have to run the field code through here to potentially remove it
    */
-  entry = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1);
+  entry = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1,
+      1);
 
   if (D->error) {
     dreturn("%u", 0);

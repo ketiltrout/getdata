@@ -18,18 +18,8 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Attempt to read UINT8 */
 #include "../src/config.h"
 #include "test.h"
-
-#include <inttypes.h>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <stdio.h>
-#include <errno.h>
 
 int main(void)
 {
@@ -44,7 +34,10 @@ int main(void)
   uint16_t c[8];
   char command[4096];
   uint16_t data_data[256];
-  int fd, i, n, error, r = 0;
+#ifdef USE_LZMA
+  int i;
+#endif
+  int fd, n, error, r = 0;
   DIRFILE *D;
 
   memset(c, 0, 8);

@@ -38,7 +38,8 @@ int gd_get_constant(DIRFILE* D, const char *field_code_in,
 
   _GD_ClearError(D);
 
-  entry = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1);
+  entry = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1,
+      1);
     
   if (D->error) {
     dreturn("%i", -1);
@@ -81,7 +82,8 @@ gd_nothrow
 
   _GD_ClearError(D);
 
-  entry = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1);
+  entry = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1,
+      1);
     
   if (D->error) {
     dreturn("%i", -1);
@@ -124,7 +126,8 @@ int gd_get_carray(DIRFILE *D, const char *field_code_in, gd_type_t return_type,
 
   _GD_ClearError(D);
 
-  entry = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1);
+  entry = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1,
+      1);
     
   if (D->error) {
     dreturn("%i", -1);
@@ -165,7 +168,8 @@ size_t gd_carray_len(DIRFILE *D, const char *field_code_in) gd_nothrow
 
   _GD_ClearError(D);
 
-  entry = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1);
+  entry = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1,
+      1);
     
   if (D->error) {
     dreturn("%i", 0);
@@ -212,7 +216,8 @@ int gd_put_constant(DIRFILE* D, const char *field_code_in, gd_type_t data_type,
 
   _GD_ClearError(D);
 
-  entry = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1);
+  entry = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1,
+      1);
 
   if (D->error) {
     dreturn("%i", -1);
@@ -271,7 +276,8 @@ gd_nothrow
 
   _GD_ClearError(D);
 
-  entry = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1);
+  entry = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1,
+      1);
 
   if (D->error) {
     dreturn("%i", -1);
@@ -330,7 +336,8 @@ int gd_put_carray(DIRFILE* D, const char *field_code_in, gd_type_t data_type,
 
   _GD_ClearError(D);
 
-  entry = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1);
+  entry = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1,
+      1);
 
   if (D->error) {
     dreturn("%i", -1);

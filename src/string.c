@@ -37,7 +37,7 @@ size_t gd_get_string(DIRFILE* D, const char *field_code, size_t len,
 
   _GD_ClearError(D);
 
-  entry = _GD_FindField(D, field_code, D->entry, D->n_entries, NULL);
+  entry = _GD_FindField(D, field_code, D->entry, D->n_entries, 1, NULL);
     
   if (entry == NULL)
     _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, field_code);
@@ -73,7 +73,7 @@ size_t gd_put_string(DIRFILE* D, const char *field_code, const char *data_in)
 
   _GD_ClearError(D);
 
-  entry = _GD_FindField(D, field_code, D->entry, D->n_entries, NULL);
+  entry = _GD_FindField(D, field_code, D->entry, D->n_entries, 1, NULL);
 
   if (entry == NULL)
     _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, field_code);

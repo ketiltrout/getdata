@@ -100,6 +100,7 @@ void _GD_FreeE(DIRFILE *D, gd_entry_t* entry, int priv)
   }
 
   if (priv) {
+    free(entry->e->alias_list);
     free(entry->e->field_list);
     free(entry->e->vector_list);
     free(entry->e->string_value_list);
@@ -130,8 +131,8 @@ gd_entry_t* gd_free_entry_strings(gd_entry_t* entry) gd_nothrow
   return entry;
 }
 
-static void _GD_GetScalar(DIRFILE* D, gd_entry_t* E, int i, gd_type_t type,
-    void* data)
+static void _GD_GetScalar(DIRFILE *D, gd_entry_t *E, int i, gd_type_t type,
+    void *data, int err)
 {
   void *ptr = NULL;
   gd_entry_t* C = NULL;
@@ -140,13 +141,13 @@ static void _GD_GetScalar(DIRFILE* D, gd_entry_t* E, int i, gd_type_t type,
   const char* scalar = E->scalar[i];
   int index = E->scalar_ind[i];
 
-  dtrace("%p, %p, %i, %i, %p", D, E, i, type, data);
+  dtrace("%p, %p, %i, %i, %p, %i", D, E, i, type, data, err);
 
   if (scalar != NULL) {
     munged_code = _GD_MungeFromFrag(D, NULL, E->fragment_index, scalar,
         &offset);
     if (munged_code)
-      C = _GD_FindFieldAndRepr(D, munged_code, &field_code, &repr, NULL, 0);
+      C = _GD_FindFieldAndRepr(D, munged_code, &field_code, &repr, NULL, 0, 1);
 
     if (D->error) {
       free(munged_code);
@@ -154,14 +155,17 @@ static void _GD_GetScalar(DIRFILE* D, gd_entry_t* E, int i, gd_type_t type,
       return;
     }
 
-    if (C == NULL)
-      _GD_SetError(D, GD_E_BAD_SCALAR, GD_E_SCALAR_CODE, E->field, 0,
-          field_code);
-    else if (C->field_type != GD_CONST_ENTRY &&
-        C->field_type != GD_CARRAY_ENTRY) 
-      _GD_SetError(D, GD_E_BAD_SCALAR, GD_E_SCALAR_TYPE, E->field, 0,
-          field_code);
-    else {
+    if (C == NULL) {
+      if (err)
+        _GD_SetError(D, GD_E_BAD_SCALAR, GD_E_SCALAR_CODE, E->field, 0,
+            field_code);
+    } else if (C->field_type != GD_CONST_ENTRY &&
+        C->field_type != GD_CARRAY_ENTRY)
+    {
+      if (err)
+        _GD_SetError(D, GD_E_BAD_SCALAR, GD_E_SCALAR_TYPE, E->field, 0,
+            field_code);
+    } else {
       if (C->field_type == GD_CONST_ENTRY) {
         index = 0;
         E->scalar_ind[i] = -1;
@@ -171,7 +175,9 @@ static void _GD_GetScalar(DIRFILE* D, gd_entry_t* E, int i, gd_type_t type,
         ptr = _GD_Realloc(D, C->e->u.scalar.client,
             (C->e->u.scalar.n_client + 1) * sizeof(gd_entry_t*));
 
-      _GD_DoField(D, C, repr, index, 1, type, data);
+      /* err = 0 means we're only interested in initialising the client list */
+      if (err)
+        _GD_DoField(D, C, repr, index, 1, type, data);
 
       if (ptr) {
         C->e->u.scalar.client = (gd_entry_t **)ptr;
@@ -189,20 +195,20 @@ static void _GD_GetScalar(DIRFILE* D, gd_entry_t* E, int i, gd_type_t type,
 }
 
 /* resolve non-literal scalars */
-int _GD_CalculateEntry(DIRFILE* D, gd_entry_t* E)
+int _GD_CalculateEntry(DIRFILE *D, gd_entry_t *E, int err)
 {
   int i;
 
-  dtrace("%p, %p", D, E);
+  dtrace("%p, %p, %i", D, E, err);
 
   switch(E->field_type) {
     case GD_RAW_ENTRY:
-      _GD_GetScalar(D, E, 0, GD_UINT16, &E->EN(raw,spf));
+      _GD_GetScalar(D, E, 0, GD_UINT16, &E->EN(raw,spf), err);
       break;
     case GD_POLYNOM_ENTRY:
       E->comp_scal = 0;
       for (i = 0; i <= E->EN(polynom,poly_ord); ++i) {
-        _GD_GetScalar(D, E, i, GD_COMPLEX128, &E->EN(polynom,ca)[i]);
+        _GD_GetScalar(D, E, i, GD_COMPLEX128, &E->EN(polynom,ca)[i], err);
         E->EN(polynom,a)[i] = creal(E->EN(polynom,ca)[i]);
 
         if (cimag(E->EN(polynom,ca)[i]))
@@ -215,14 +221,14 @@ int _GD_CalculateEntry(DIRFILE* D, gd_entry_t* E)
     case GD_LINCOM_ENTRY:
       E->comp_scal = 0;
       for (i = 0; i < E->EN(lincom,n_fields); ++i) {
-        _GD_GetScalar(D, E, i, GD_COMPLEX128, &E->EN(lincom,cm)[i]);
+        _GD_GetScalar(D, E, i, GD_COMPLEX128, &E->EN(lincom,cm)[i], err);
         E->EN(lincom,m)[i] = creal(E->EN(lincom,cm)[i]);
 
         if (cimag(E->EN(lincom,cm)[i]))
           E->comp_scal = 1;
 
         _GD_GetScalar(D, E, i + GD_MAX_LINCOM, GD_COMPLEX128,
-            &E->EN(lincom,cb)[i]);
+            &E->EN(lincom,cb)[i], err);
         E->EN(lincom,b)[i] = creal(E->EN(lincom,cb)[i]);
 
         if (cimag(E->EN(lincom,cb)[i]))
@@ -233,30 +239,30 @@ int _GD_CalculateEntry(DIRFILE* D, gd_entry_t* E)
       }
       break;
     case GD_RECIP_ENTRY:
-      _GD_GetScalar(D, E, 0, GD_COMPLEX128, &E->EN(recip,cdividend));
+      _GD_GetScalar(D, E, 0, GD_COMPLEX128, &E->EN(recip,cdividend), err);
       E->EN(recip,dividend) = creal(E->EN(recip,cdividend));
       E->comp_scal = (cimag(E->EN(recip,cdividend)) == 0) ? 0 : 1;
       break;
     case GD_BIT_ENTRY:
     case GD_SBIT_ENTRY:
-      _GD_GetScalar(D, E, 0, GD_INT16, &E->EN(bit,bitnum));
-      _GD_GetScalar(D, E, 1, GD_INT16, &E->EN(bit,numbits));
+      _GD_GetScalar(D, E, 0, GD_INT16, &E->EN(bit,bitnum), err);
+      _GD_GetScalar(D, E, 1, GD_INT16, &E->EN(bit,numbits), err);
       break;
     case GD_PHASE_ENTRY:
-      _GD_GetScalar(D, E, 0, GD_INT64, &E->EN(phase,shift));
+      _GD_GetScalar(D, E, 0, GD_INT64, &E->EN(phase,shift), err);
       break;
     case GD_WINDOW_ENTRY:
       switch (E->EN(window,windop)) {
         case GD_WINDOP_EQ:
         case GD_WINDOP_NE:
-          _GD_GetScalar(D, E, 0, GD_INT64, &E->EN(window,threshold.i));
+          _GD_GetScalar(D, E, 0, GD_INT64, &E->EN(window,threshold.i), err);
           break;
         case GD_WINDOP_SET:
         case GD_WINDOP_CLR:
-          _GD_GetScalar(D, E, 0, GD_UINT64, &E->EN(window,threshold.u));
+          _GD_GetScalar(D, E, 0, GD_UINT64, &E->EN(window,threshold.u), err);
           break;
         default:
-          _GD_GetScalar(D, E, 0, GD_FLOAT64, &E->EN(window,threshold.r));
+          _GD_GetScalar(D, E, 0, GD_FLOAT64, &E->EN(window,threshold.r), err);
           break;
       }
       break;
@@ -295,7 +301,7 @@ char* gd_raw_filename(DIRFILE* D, const char* field_code_in) gd_nothrow
   }
 
   /* Check field */
-  E = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1);
+  E = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1, 1);
 
   if (D->error) {
     dreturn("%p", NULL);
@@ -354,7 +360,7 @@ int gd_entry(DIRFILE* D, const char* field_code_in, gd_entry_t* entry)
   _GD_ClearError(D);
 
   /* get rid of the represenation, if any */
-  E = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1);
+  E = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1, 1);
 
   if (D->error) {
     dreturn("%i", -1);
@@ -366,7 +372,7 @@ int gd_entry(DIRFILE* D, const char* field_code_in, gd_entry_t* entry)
 
   /* Calculate the entry, if necessary */
   if (!E->e->calculated)
-    _GD_CalculateEntry(D, E);
+    _GD_CalculateEntry(D, E, 1);
 
   if (D->error) {
     dreturn("%i", -1);
@@ -442,6 +448,121 @@ int gd_entry(DIRFILE* D, const char* field_code_in, gd_entry_t* entry)
   return 0;
 }
 
+const char *gd_alias_target(DIRFILE *D, const char *field_code) gd_nothrow
+{
+  gd_entry_t *E;
+
+  dtrace("%p, \"%s\"", D, field_code);
+
+  if (D->flags & GD_INVALID) {
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  E = _GD_FindField(D, field_code, D->entry, D->n_entries, 0, NULL);
+
+  if (E == NULL) {
+    _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, field_code);
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  if (E->field_type != GD_ALIAS_ENTRY) {
+    _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  dreturn("\"%s\"", E->in_fields[0]);
+  return E->in_fields[0];
+}
+
+const char **gd_aliases(DIRFILE *D, const char *field_code) gd_nothrow
+{
+  gd_entry_t *E;
+  int n, j = 1;
+  unsigned u;
+
+  dtrace("%p, \"%s\"", D, field_code);
+
+  if (D->flags & GD_INVALID) {
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  n = gd_naliases(D, field_code) + 1;
+
+  if (D->error) {
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  E = _GD_FindField(D, field_code, D->entry, D->n_entries, 1, NULL);
+
+  if (E == NULL) {
+    _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, field_code);
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  E->e->alias_list = _GD_Realloc(D, E->e->alias_list, sizeof(const char *) * n);
+
+  if (D->error) {
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  E->e->alias_list[0] = E->field;
+
+  for (u = 0; u < D->n_entries; ++u)
+    if (D->entry[u]->field_type == GD_ALIAS_ENTRY &&
+        D->entry[u]->e->entry[0] == E)
+    {
+      E->e->alias_list[j++] = D->entry[u]->field;
+    }
+
+  /* terminate */
+  E->e->alias_list[j] = NULL;
+
+  dreturn("%p", E->e->alias_list);
+  return E->e->alias_list;
+}
+
+int gd_naliases(DIRFILE *D, const char *field_code) gd_nothrow
+{
+  gd_entry_t *E;
+  int n = 1;
+  unsigned u;
+
+  dtrace("%p, \"%s\"", D, field_code);
+
+  if (D->flags & GD_INVALID) {
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  E = _GD_FindField(D, field_code, D->entry, D->n_entries, 1, NULL);
+
+  if (E == NULL) {
+    _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, field_code);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  for (u = 0; u < D->n_entries; ++u)
+    if (D->entry[u]->field_type == GD_ALIAS_ENTRY &&
+        D->entry[u]->e->entry[0] == E)
+    {
+      n++;
+    }
+
+  dreturn("%i", n);
+  return n;
+}
+
 gd_entype_t gd_entry_type(DIRFILE* D, const char* field_code_in) gd_nothrow
 {
   gd_entry_t* E;
@@ -459,7 +580,7 @@ gd_entype_t gd_entry_type(DIRFILE* D, const char* field_code_in) gd_nothrow
   _GD_ClearError(D);
 
   /* get rid of the represenation, if any */
-  E = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1);
+  E = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1, 1);
 
   if (D->error) {
     dreturn("%i", GD_NO_ENTRY);
@@ -473,13 +594,11 @@ gd_entype_t gd_entry_type(DIRFILE* D, const char* field_code_in) gd_nothrow
   return E->field_type;
 }
 
-int gd_fragment_index(DIRFILE* D, const char* field_code_in) gd_nothrow
+int gd_fragment_index(DIRFILE *D, const char *field_code) gd_nothrow
 {
-  gd_entry_t* E;
-  char* field_code;
-  int repr;
+  gd_entry_t *E;
 
-  dtrace("%p, \"%s\"", D, field_code_in);
+  dtrace("%p, \"%s\"", D, field_code);
 
   if (D->flags & GD_INVALID) {
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -489,28 +608,23 @@ int gd_fragment_index(DIRFILE* D, const char* field_code_in) gd_nothrow
 
   _GD_ClearError(D);
 
-  /* get rid of the represenation, if any */
-  E = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1);
+  E = _GD_FindField(D, field_code, D->entry, D->n_entries, 0, NULL);
 
-  if (D->error) {
+  if (E == NULL) {
+    _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, field_code);
     dreturn("%i", -1);
     return -1;
   }
-
-  if (field_code != field_code_in)
-    free(field_code);
 
   dreturn("%i", E->fragment_index);
   return E->fragment_index;
 }
 
-int gd_hide(DIRFILE *D, const char *field_code_in) gd_nothrow
+int gd_hide(DIRFILE *D, const char *field_code) gd_nothrow
 {
   gd_entry_t *E;
-  int repr;
-  char *field_code;
 
-  dtrace("%p, \"%s\"", D, field_code_in);
+  dtrace("%p, \"%s\"", D, field_code);
 
   if (D->flags & GD_INVALID) {
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -524,10 +638,10 @@ int gd_hide(DIRFILE *D, const char *field_code_in) gd_nothrow
 
   _GD_ClearError(D);
 
-  /* get rid of the representation, if any */
-  E = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1);
+  E = _GD_FindField(D, field_code, D->entry, D->n_entries, 0, NULL);
 
   if (D->error) {
+    _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, field_code);
     dreturn("%i", -1);
     return -1;
   }
@@ -538,9 +652,6 @@ int gd_hide(DIRFILE *D, const char *field_code_in) gd_nothrow
     dreturn("%i", -1);
     return -1;
   }
-
-  if (field_code != field_code_in)
-    free(field_code);
 
   if (!E->hidden) {
     E->hidden = 1;
@@ -561,13 +672,37 @@ int gd_hide(DIRFILE *D, const char *field_code_in) gd_nothrow
   return 0;
 }
 
-int gd_unhide(DIRFILE *D, const char *field_code_in) gd_nothrow
+int gd_hidden(DIRFILE *D, const char *field_code) gd_nothrow
 {
   gd_entry_t *E;
-  int repr;
-  char *field_code;
 
-  dtrace("%p, \"%s\"", D, field_code_in);
+  dtrace("%p, \"%s\"", D, field_code);
+
+  if (D->flags & GD_INVALID) {
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  _GD_ClearError(D);
+
+  E = _GD_FindField(D, field_code, D->entry, D->n_entries, 0, NULL);
+
+  if (D->error) {
+    _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, field_code);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  dreturn("%i", E->hidden);
+  return E->hidden;
+}
+
+int gd_unhide(DIRFILE *D, const char *field_code) gd_nothrow
+{
+  gd_entry_t *E;
+
+  dtrace("%p, \"%s\"", D, field_code);
 
   if (D->flags & GD_INVALID) {
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -581,16 +716,13 @@ int gd_unhide(DIRFILE *D, const char *field_code_in) gd_nothrow
 
   _GD_ClearError(D);
 
-  /* get rid of the representation, if any */
-  E = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1);
+  E = _GD_FindField(D, field_code, D->entry, D->n_entries, 0, NULL);
 
   if (D->error) {
+    _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, field_code);
     dreturn("%i", -1);
     return -1;
   }
-
-  if (field_code != field_code_in)
-    free(field_code);
 
   if (D->fragment[E->fragment_index].protection & GD_PROTECT_FORMAT) {
     _GD_SetError(D, GD_E_PROTECTED, GD_E_PROTECTED_FORMAT, NULL, 0,
@@ -635,7 +767,7 @@ int gd_validate(DIRFILE *D, const char *field_code_in) gd_nothrow
   _GD_ClearError(D);
 
   /* get rid of the representation, if any */
-  E = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1);
+  E = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1, 1);
 
   if (D->error) {
     dreturn("%i", -1);
@@ -647,18 +779,18 @@ int gd_validate(DIRFILE *D, const char *field_code_in) gd_nothrow
 
   /* calculate scalars */
   if (!E->e->calculated)
-    _GD_CalculateEntry(D, E);
+    _GD_CalculateEntry(D, E, 1);
 
   /* check input fields */
   switch (E->field_type) {
     case GD_LINCOM_ENTRY:
       for (i = 0; i < E->EN(lincom,n_fields); ++i)
-        _GD_BadInput(D, E, i);
+        _GD_BadInput(D, E, i, 1);
       break;
     case GD_DIVIDE_ENTRY:
     case GD_MULTIPLY_ENTRY:
     case GD_WINDOW_ENTRY:
-      _GD_BadInput(D, E, 1);
+      _GD_BadInput(D, E, 1, 1);
       /* fallthrough */
     case GD_LINTERP_ENTRY:
     case GD_BIT_ENTRY:
@@ -666,7 +798,7 @@ int gd_validate(DIRFILE *D, const char *field_code_in) gd_nothrow
     case GD_POLYNOM_ENTRY:
     case GD_SBIT_ENTRY:
     case GD_RECIP_ENTRY:
-      _GD_BadInput(D, E, 0);
+      _GD_BadInput(D, E, 0, 1);
       /* Fallthrough */
     case GD_RAW_ENTRY:
     case GD_CONST_ENTRY:

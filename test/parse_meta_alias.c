@@ -18,7 +18,7 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Test gd_nfragments */
+/* Parser check */
 #include "test.h"
 
 #include <stdlib.h>
@@ -32,10 +32,11 @@ int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *format1 = "dirfile/format1";
-  const char *format_data = "INCLUDE format1\n";
-  const char *format1_data = "data RAW UINT8 11\n";
-  int fd, nfragments, r = 0;
+  const char *format_data =
+    "parent RAW UINT8 1\n"
+    "/ALIAS alias parent\n"
+    "META alias child CONST UINT8 1\n";
+  int fd, error, r = 0;
   DIRFILE *D;
 
   rmdirfile();
@@ -45,19 +46,13 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  fd = open(format1, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format1_data, strlen(format1_data));
-  close(fd);
-
-  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  nfragments = gd_nfragments(D);
+  D = gd_open(filedir, GD_RDONLY);
+  error = gd_error(D);
   gd_close(D);
 
-  unlink(format1);
   unlink(format);
   rmdir(filedir);
 
-  CHECKI(nfragments, 2);
-
+  CHECKI(error,GD_E_FORMAT);
   return r;
 }

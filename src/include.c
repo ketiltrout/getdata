@@ -82,9 +82,9 @@ static int _GD_SetFieldAffixes(DIRFILE *D, int me, const char *prefix_in,
 
 /* Include a format file fragment -- returns the mew fragment index, or
  * -1 on error */
-int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,
-    int linenum, char** ref_name, int me, const char *prefix_in,
-    const char *suffix_in, int* standards, unsigned long *flags)
+int _GD_Include(DIRFILE *D, const char *ename, const char *format_file,
+    int linenum, char **ref_name, int me, const char *prefix_in,
+    const char *suffix_in, int *standards, unsigned long *flags, int resolve)
 {
   int i;
   int old_standards = *standards;
@@ -95,9 +95,9 @@ int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,
   void *ptr = NULL;
   FILE* new_fp = NULL;
 
-  dtrace("%p, \"%s\", \"%s\", %p, %i, %i, \"%s\", \"%s\", %p, %p", D, ename,
+  dtrace("%p, \"%s\", \"%s\", %p, %i, %i, \"%s\", \"%s\", %p, %p, %i", D, ename,
       format_file, ref_name, linenum, me, prefix_in, suffix_in, standards,
-      flags);
+      flags, resolve);
 
   if (++D->recurse_level >= GD_MAX_RECURSE_LEVEL) {
     _GD_SetError(D, GD_E_RECURSE_LEVEL, GD_E_RECURSE_INCLUDE, format_file,
@@ -238,7 +238,8 @@ int _GD_Include(DIRFILE* D, const char* ename, const char* format_file,
   /* extract the subdirectory name */
   D->fragment[D->n_fragment - 1].sname = _GD_DirName(D, dirfd);
 
-  *ref_name = _GD_ParseFragment(new_fp, D, D->n_fragment - 1, standards, flags);
+  *ref_name = _GD_ParseFragment(new_fp, D, D->n_fragment - 1, standards, flags,
+      resolve);
 
   fclose(new_fp);
 
@@ -309,7 +310,7 @@ int gd_include_affix(DIRFILE* D, const char* file, int fragment_index,
     flags |= D->flags & GD_ENCODING;
 
   new_fragment = _GD_Include(D, file, "dirfile_include()", 0, &ref_name,
-      fragment_index, prefix, suffix, &standards, &flags);
+      fragment_index, prefix, suffix, &standards, &flags, 1);
 
   if (!D->error) {
     D->fragment[fragment_index].modified = 1;
@@ -333,7 +334,7 @@ int gd_include_affix(DIRFILE* D, const char* file, int fragment_index,
 
   /* Honour the reference directive, if not prohibited by the caller */
   if (ref_name != NULL && ~flags & GD_IGNORE_REFS) {
-    gd_entry_t *E = _GD_FindField(D, ref_name, D->entry, D->n_entries, NULL);
+    gd_entry_t *E = _GD_FindField(D, ref_name, D->entry, D->n_entries, 1, NULL);
 
     /* FIXME: These errors are problematic, since they'll cause the call to
      * fail, even though the new fragment has been integrated into the DIRFILE.

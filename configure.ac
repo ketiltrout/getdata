@@ -536,7 +536,8 @@ echo
 echo "*** Looking for additional header files"
 echo
 AC_CHECK_HEADERS([asm/unaligned.h Availability.h byteswap.h direct.h fcntl.h \
-                  io.h libgen.h libkern/OSByteOrder.h stdint.h sys/endian.h \
+                  inttypes.h io.h libgen.h libkern/OSByteOrder.h stdint.h \
+                  sys/endian.h sys/file.h sys/param.h sys/stat.h sys/types.h \
                   unistd.h])
 if test "x$disable_c99" = "xno"; then
 AC_CHECK_HEADERS([complex.h])

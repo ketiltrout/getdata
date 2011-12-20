@@ -31,10 +31,10 @@
  *   getdata_legacy.h from being declared.  If the Legacy API was omitted from
  *   the library when it was built, this symbol does nothing.
  *
- * - defining GD_C89_API will prevent declarations herein from
- *   using the C99 keyword `_Complex'.  Affected declarations will instead use a
- *   two-element array of doubles in place of the complex types.  This symbol
- *   permits including these declarations using a non-C99 conforming compiler.
+ * - defining GD_C89_API will prevent declarations herein from using the C99
+ *   keyword `_Complex'.  Affected declarations will instead use a two-element
+ *   array of doubles in place of the complex types.  This symbol permits
+ *   including these declarations using a non-C99 conforming compiler.
  *
  * - defining GD_FUNCTION_ALIASES will result in a number of function aliases
  *   which map the version 0.7 function names to the names used in GetData-0.6.
@@ -187,6 +187,7 @@ extern "C" {
 #define GD_E_FORMAT_LITERAL   19
 #define GD_E_FORMAT_WINDOP    20
 #define GD_E_FORMAT_META_META 21
+#define GD_E_FORMAT_ALIAS     22
 
 /* deprecated names */
 #define GD_E_FORMAT_NO_PARENT GD_E_FORMAT_NO_FIELD
@@ -447,11 +448,19 @@ typedef int (*gd_parser_callback_t)(gd_parser_data_t*, void*);
 #define GD_DEL_DEREF 0x4
 #define GD_DEL_FORCE 0x8
 
+/* move flags */
+#define GD_REN_DATA  0x1
+#define GD_REN_UPDB  0x2
+
 /* seek flags */
 #define GD_SEEK_SET   0x0
 #define GD_SEEK_CUR   0x1
 #define GD_SEEK_END   0x2
 #define GD_SEEK_WRITE 0x4
+
+extern int gd_add_alias(DIRFILE *dirfile, const char *alias_name,
+    const char *target_code, int fragment_index) gd_nothrow
+gd_nonnull ((1,2,3));
 
 extern int gd_add_bit(DIRFILE *dirfile, const char *field_code,
     const char *in_field, gd_bit_t bitnum, gd_bit_t numbits, int fragment_index)
@@ -527,6 +536,12 @@ extern int gd_add_window(DIRFILE *dirfile, const char *field_code,
     gd_triplet_t threshold, int fragment_index) gd_nothrow
 gd_nonnull ((1,2,3,4));
 
+extern const char *gd_alias_target(DIRFILE *dirfile,
+    const char *field_code) gd_nothrow gd_nonnull ((1,2));
+
+extern const char **gd_aliases(DIRFILE *dirfile,
+    const char *field_code) gd_nothrow gd_nonnull ((1,2));
+
 extern int gd_alter_affixes(DIRFILE *dirfile, int index, const char *prefix,
         const char *suffix) gd_nothrow gd_nonnull ((1));
 
@@ -591,6 +606,9 @@ extern int gd_alter_window(DIRFILE *dirfile, const char *field_code,
 extern size_t gd_carray_len(DIRFILE *dirfile, const char *field_code) gd_nothrow
 gd_nonnull((1,2));
 
+extern int gd_delete_alias(DIRFILE *dirfile, const char *field_code,
+    unsigned int flags) gd_nothrow gd_nonnull ((1,2));
+
 extern int gd_get_carray(DIRFILE *dirfile, const char *field_code,
     gd_type_t return_type, void *data_out) gd_nothrow gd_nonnull((1,2));
 
@@ -644,13 +662,16 @@ extern const char **gd_field_list_by_type(DIRFILE *dirfile,
     gd_entype_t type) gd_nothrow gd_nonnull ((1));
 
 extern int gd_fragment_affixes(DIRFILE *dirfile, int index, char **prefix,
-    char **suffix) gd_nonnull ((1,3,4)) gd_nothrow;
+    char **suffix) gd_nothrow gd_nonnull ((1,3,4));
 
 extern int gd_fragment_index(DIRFILE *dirfile,
     const char *field_code) gd_nothrow gd_nonnull ((1));
 
 extern const char *gd_fragmentname(DIRFILE *dirfile,
     int index) gd_nothrow gd_nonnull ((1));
+
+extern int gd_hidden(DIRFILE *dirfile, const char *field_code) gd_nothrow
+gd_nonnull ((1,2));
 
 extern int gd_hide(DIRFILE *dirfile, const char *field_code) gd_nothrow
 gd_nonnull ((1,2));
@@ -659,6 +680,10 @@ extern DIRFILE *gd_invalid_dirfile(void) gd_nothrow;
 
 extern int gd_madd(DIRFILE *dirfile, const gd_entry_t *entry,
     const char *parent) gd_nothrow gd_nonnull ((1,2,3));
+
+extern int gd_madd_alias(DIRFILE *dirfile, const char *parent,
+    const char *alias_name, const char *target_code) gd_nothrow
+gd_nonnull ((1,2,3,4));
 
 extern int gd_madd_bit(DIRFILE *dirfile, const char *parent,
     const char *field_code, const char *in_field, gd_bit_t bitnum,
@@ -752,6 +777,9 @@ extern const char **gd_mfield_list(DIRFILE *dirfile,
 extern const char **gd_mfield_list_by_type(DIRFILE *dirfile,
     const char *parent, gd_entype_t type) gd_nothrow gd_nonnull((1,2));
 
+extern int gd_move_alias(DIRFILE *dirfile, const char *field_code,
+    int new_fragment) gd_nothrow gd_nonnull ((1,2));
+
 extern const char **gd_mstrings(DIRFILE *dirfile, const char *parent) gd_nothrow
 gd_nonnull((1,2));
 
@@ -759,6 +787,9 @@ extern const char **gd_mvector_list(DIRFILE *dirfile,
     const char *parent) gd_nothrow gd_nonnull((1,2));
 
 extern const char *gd_dirfilename(DIRFILE *dirfile) gd_nothrow gd_nonnull ((1));
+
+extern int gd_naliases(DIRFILE *dirfile, const char *field_code) gd_nothrow
+gd_nonnull ((1,2));
 
 extern gd_type_t gd_native_type(DIRFILE *dirfile,
     const char *field_code) gd_nothrow gd_nonnull ((1,2));
@@ -798,6 +829,9 @@ extern char *gd_raw_filename(DIRFILE *dirfile,
 
 extern const char *gd_reference(DIRFILE *dirfile,
     const char *field_code) gd_nothrow gd_nonnull ((1));
+
+extern int gd_rename_alias(DIRFILE *dirfile, const char *old_code,
+    const char *new_name) gd_nothrow gd_nonnull ((1,2,3));
 
 extern gd_spf_t gd_spf(DIRFILE *dirfile, const char *field_code) gd_nothrow
 gd_nonnull ((1, 2));
@@ -853,7 +887,7 @@ extern DIRFILE *gd_cbopen(const char *dirfilename, unsigned long int flags,
 extern int gd_close(DIRFILE *dirfile);
 
 extern int gd_delete(DIRFILE *dirfile, const char *field_code,
-    int flags) gd_nonnull ((1,2));
+    unsigned int flags) gd_nonnull ((1,2));
 
 extern int gd_discard(DIRFILE *dirfile);
 
@@ -881,7 +915,7 @@ extern DIRFILE *gd_open(const char *dirfilename,
     unsigned long int flags) gd_nonnull ((1));
 
 extern int gd_rename(DIRFILE *dirfile, const char *old_code,
-    const char *new_name, int move_data) gd_nonnull ((1,2,3));
+    const char *new_name, unsigned flags) gd_nonnull ((1,2,3));
 
 extern int gd_rewrite_fragment(DIRFILE *dirfile, int fragment) gd_nonnull ((1));
 

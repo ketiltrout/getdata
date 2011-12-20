@@ -40,7 +40,7 @@ gd_type_t _GD_NativeType(DIRFILE* D, gd_entry_t* E, int repr)
       break;
     case GD_LINCOM_ENTRY:
       if (!E->e->calculated)
-        _GD_CalculateEntry(D, E);
+        _GD_CalculateEntry(D, E, 1);
 
       if (E->comp_scal) {
         type = GD_COMPLEX128;
@@ -48,7 +48,7 @@ gd_type_t _GD_NativeType(DIRFILE* D, gd_entry_t* E, int repr)
       }
 
       for (i = 0; i < E->EN(lincom,n_fields); ++i) {
-        if (_GD_BadInput(D, E, i))
+        if (_GD_BadInput(D, E, i, 1))
           break;
 
         if (_GD_NativeType(D, E->e->entry[i], E->e->repr[i]) & GD_COMPLEX) {
@@ -70,7 +70,7 @@ gd_type_t _GD_NativeType(DIRFILE* D, gd_entry_t* E, int repr)
       break;
     case GD_MULTIPLY_ENTRY:
     case GD_DIVIDE_ENTRY:
-      if (_GD_BadInput(D, E, 0) || _GD_BadInput(D, E, 1))
+      if (_GD_BadInput(D, E, 0, 1) || _GD_BadInput(D, E, 1, 1))
         break;
 
       type = (_GD_NativeType(D, E->e->entry[0], E->e->repr[0]) & GD_COMPLEX
@@ -78,7 +78,7 @@ gd_type_t _GD_NativeType(DIRFILE* D, gd_entry_t* E, int repr)
         ? GD_COMPLEX128 : GD_FLOAT64;
       break;
     case GD_RECIP_ENTRY:
-      if (_GD_BadInput(D, E, 0))
+      if (_GD_BadInput(D, E, 0, 1))
         break;
 
       type = ((_GD_NativeType(D, E->e->entry[0], E->e->repr[0]) & GD_COMPLEX)
@@ -90,21 +90,21 @@ gd_type_t _GD_NativeType(DIRFILE* D, gd_entry_t* E, int repr)
       break;
     case GD_PHASE_ENTRY:
     case GD_WINDOW_ENTRY:
-      if (_GD_BadInput(D, E, 0))
+      if (_GD_BadInput(D, E, 0, 1))
         break;
 
       type = _GD_NativeType(D, E->e->entry[0], E->e->repr[0]);
       break;
     case GD_POLYNOM_ENTRY:
       if (!E->e->calculated)
-        _GD_CalculateEntry(D, E);
+        _GD_CalculateEntry(D, E, 1);
 
       if (E->comp_scal) {
         type = GD_COMPLEX128;
         break;
       }
 
-      if (_GD_BadInput(D, E, 0))
+      if (_GD_BadInput(D, E, 0, 1))
         break;
 
       type = (_GD_NativeType(D, E->e->entry[0], E->e->repr[0]) & GD_COMPLEX) ?
@@ -160,7 +160,8 @@ gd_type_t gd_native_type(DIRFILE* D, const char* field_code_in) gd_nothrow
 
   _GD_ClearError(D);
 
-  entry = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1);
+  entry = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1,
+      1);
 
   if (D->error) {
     dreturn("0x%x", GD_UNKNOWN);

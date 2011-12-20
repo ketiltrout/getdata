@@ -73,7 +73,7 @@ const char *gd_reference(DIRFILE* D, const char* field_code) gd_nothrow
   }
 
   /* Check field */
-  E = _GD_FindField(D, field_code, D->entry, D->n_entries, NULL);
+  E = _GD_FindField(D, field_code, D->entry, D->n_entries, 1, NULL);
 
   if (E == NULL) {
     _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, field_code);

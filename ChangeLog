@@ -1,3 +1,61 @@
+2011-12-20   D. V. Wiebe <getdata@ketiltrout.net> svn:638
+	* src/entry.c (_GD_GetScalar _GD_CalculateEntry) src/common.c (_GD_GetRepr
+	_GD_BadInput _GD_FindFieldAndRepr: Optionally prohibit setting errors (for
+	use by the post-rename update stuff).
+	* src/errors.c: Added GD_E_FORMAT_ALIAS, GD_E_DEL_ALIAS.
+	* src/flush.c (_GD_FieldSpec): Write aliases.  Also tweaked to allow slashed
+	metafield specification with DSV7.
+	* src/del.c (_GD_ClearDerived): Handle aliases.
+	* src/parse.c (_GD_CheckParent _GD_ParseAlias _GD_ResolveAlias
+	_GD_UpdateAliases) src/add.c (_GD_AddAlias gd_add_alias gd_madd_alias): Added.
+	* src/parse.c (_GD_ParseFieldSpec): Call _GD_CheckParent.
+	* src/parse.c (_GD_ParseDirective): Use a switch to reduce the number of
+	strcmps done.  Handle /ALIAS.
+	* src/parse.c (_GD_ParseFragment): Optionally call _GD_UpdateAliases to
+	resolve aliases.
+	* src/add.c (_GD_Add gd_madd_spec gd_add_spec): Update aliases after addition.
+
+	* src/common.c (_GD_FindField): Optionally dealias names.
+
+	* src/del.c (_GD_Delete): Renamed from gd_delete().
+	* src/del.c (gd_delete gd_delete_alias): Added.
+
+	* src/name.c (_GD_UpdateScalar _GD_InvalidateConst _GD_UpdateInField
+	_GD_InvalidateVect): Added.
+	* src/name.c (_GD_Rename): Renamed from gd_rename().  Handle cleaning up
+	after the rename.
+
+	* src/move.c (_GD_Move): Renamed from gd_move().
+
+	* src/name.c (_GD_ValidateField): Permit is_dot = NULL.
+
+	* src/entry.c (gd_alias_target gd_aliases gd_naliases gd_hidden) src/move.c
+	(gd_move gd_move_alias) src/name.c (gd_rename gd_rename_alias): Added.
+
+	* src/alias.c (gd_fragment_index gd_hide gd_unhide): Call _GD_FindField
+	instead of _GD_FindFieldAndRepr to avoid resolving aliases.  As a side effect,
+	these function will no long ignore representation suffices.
+
+	* src/flush.c (_GD_StringEscapeise): Handle writing slashed meta-fields.
+
+	* src/spf.c (_GD_GetSPF): Ensure return is zero on error.
+
+	* test/alias_num_missing.c alias_target_missing.c spf_alias_missing.c
+	alias_list.c del_derived_after.c madd_spec_resolv.c parse_alias_meta.c
+	entry_type_alias.c spf_alias.c name_after_const.c parse_malias_dup.c
+	add_alias.c alias_target.c alias_list_alias.c add_resolv.c spf_alias_meta.c
+	move_alias.c name_after.c parse_meta_jump.c parse_alias_missing.c
+	name_update_const.c madd_alias.c parse_alias_dup.c fragment_index_alias.c
+	add_spec_resolv.c alias_target_alias.c name_update.c hide_hidden.c
+	alias_num_alias.c parse_malias.c parse_alias_code.c parse_alias.c
+	alias_num.c parse_meta_malias.c parse_meta_alias.c alias_list_missing.c:
+	Added.
+
+	* test/fragment_parent.c: Renamed from test/parent.c.
+	* test/fragment_num.c: Renamed from test/nfragments.c.
+
+	* test/version_9_write.c: Update.
+
 2011-12-13   D. V. Wiebe <getdata@ketiltrout.net> svn:637
 	* test/fragment_affix_alter2.c test/fragment_affix_alter.c
 	test/fragment_affix_dup.c test/fragment_affix.c test/include_affix.c: Added.

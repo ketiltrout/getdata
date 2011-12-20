@@ -139,7 +139,7 @@ const char **gd_strings(DIRFILE* D) gd_nothrow
     return zero_list;
   }
 
-  if (D->list_validity & LIST_VALID_STRING_VALUE) {
+  if (D->list_validity & GD_LIST_VALID_STRING_VALUE) {
     /* list already made */
     dreturn("%p", D->string_value_list);
     return D->string_value_list;
@@ -161,7 +161,7 @@ const char **gd_strings(DIRFILE* D) gd_nothrow
 
   free(D->string_value_list);
   D->string_value_list = (const char **)fl;
-  D->list_validity |= LIST_VALID_STRING_VALUE;
+  D->list_validity |= GD_LIST_VALID_STRING_VALUE;
 
   dreturn("%p", D->string_value_list);
   return D->string_value_list;
@@ -247,7 +247,7 @@ const char **gd_vector_list(DIRFILE* D) gd_nothrow
     return zero_list;
   }
 
-  if (D->list_validity & LIST_VALID_VECTOR) {
+  if (D->list_validity & GD_LIST_VALID_VECTOR) {
     /* list already made */
     dreturn("%p", D->vector_list);
     return D->vector_list;
@@ -269,7 +269,7 @@ const char **gd_vector_list(DIRFILE* D) gd_nothrow
 
   free(D->vector_list);
   D->vector_list = (const char **)fl;
-  D->list_validity |= LIST_VALID_VECTOR;
+  D->list_validity |= GD_LIST_VALID_VECTOR;
 
   dreturn("%p", D->vector_list);
   return D->vector_list;
@@ -295,7 +295,7 @@ const char **gd_field_list(DIRFILE* D) gd_nothrow
     return zero_list;
   }
 
-  if (D->list_validity & LIST_VALID_FIELD) {
+  if (D->list_validity & GD_LIST_VALID_FIELD) {
     /* list already made */
     dreturn("%p (old)", D->field_list);
     return D->field_list;
@@ -316,7 +316,7 @@ const char **gd_field_list(DIRFILE* D) gd_nothrow
 
   free(D->field_list);
   D->field_list = (const char **)fl;
-  D->list_validity |= LIST_VALID_FIELD;
+  D->list_validity |= GD_LIST_VALID_FIELD;
 
   dreturn("%p", D->field_list);
   return D->field_list;

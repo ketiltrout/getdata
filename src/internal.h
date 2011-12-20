@@ -43,21 +43,33 @@
 #endif
 
 /* library headers */
+#ifdef HAVE_SYS_FILE_H
+#include <sys/file.h>
+#endif
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
+#ifdef HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+
 #ifdef STDC_HEADERS
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 #include <errno.h>
-#include <sys/param.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
 #include <ctype.h>
 #include <limits.h>
 #include <math.h>
 #include <time.h>
 #endif
 
+#ifdef HAVE_FCNTL_H
+#include <fcntl.h>
+#endif
 #ifdef HAVE_DIRENT_H
 #include <dirent.h>
 #endif
@@ -159,9 +171,9 @@ double cimag(double complex z);
 #  define PATH_MAX MAXPATHLEN
 # else
 /* POSIX says we're supposed to check _pathconf in this case, but it goes on to
- * say that the PATH_MAX value reported isn't guaranteed to be suitable for
- * mallocing, so its not clear what they're trying to do there.  The following
- * will have to do.
+ * say that the PATH_MAX value reported by _pathconf isn't guaranteed to be
+ * suitable for mallocing, so its not clear what they're trying to do there.
+ * The following will have to do.
  */
 #  define PATH_MAX 4096
 # endif
@@ -360,7 +372,6 @@ const char* _gd_colsub(void);
 #endif
 
 #ifndef HAVE_GMTIME_R
-#include <time.h>
 struct tm *gmtime_r(const time_t *timep, struct tm *result);
 #endif
 
@@ -449,9 +460,7 @@ int gd_OpenAt(const DIRFILE*, int, const char*, int, mode_t);
 #ifdef HAVE_FSTATAT
 # define gd_StatAt(d,...) fstatat(__VA_ARGS__)
 #else
-#ifdef HAVE_SYS_STAT_H
-#include <sys/stat.h>
-#else
+#ifndef HAVE_SYS_STAT_H
 struct stat;
 #endif
 int gd_StatAt(const DIRFILE*, int, const char*, struct stat*, int);
@@ -609,6 +618,7 @@ ssize_t getdelim(char**, size_t*, int, FILE*);
 #define GD_E_DEL_META           1
 #define GD_E_DEL_CONST          2
 #define GD_E_DEL_DERIVED        3
+#define GD_E_DEL_ALIAS          4
 
 #define GD_E_REPR_UNKNOWN       1
 #define GD_E_REPR_PUT           2
@@ -678,6 +688,7 @@ struct _gd_private_entry {
   } p;
 
   /* field lists */
+  const char **alias_list;
   const char** field_list;
   const char** vector_list;
   char** type_list[GD_N_ENTYPES];
@@ -704,8 +715,8 @@ struct _gd_private_entry {
       int n_client;
       gd_entry_t** client;
     } scalar;
-    char* string;
-    off64_t index_pos;
+    char *string; /* STRING */
+    off64_t index_pos; /* INDEX */
   } u;
 };
 
@@ -815,9 +826,12 @@ struct gd_dir_t {
 #define GD_HAVE_VERSION    0x40000000 /* have computed the version */
 #define GD_INVALID         0x80000000 /* the dirfile is invalid */
 
-#define LIST_VALID_FIELD        0x01
-#define LIST_VALID_VECTOR       0x02
-#define LIST_VALID_STRING_VALUE 0x04
+/* aliases */
+#define GD_ALIAS_ENTRY ((gd_entype_t)-1)
+
+#define GD_LIST_VALID_FIELD        0x01
+#define GD_LIST_VALID_VECTOR       0x02
+#define GD_LIST_VALID_STRING_VALUE 0x04
 
 #define GD_REPR_NONE 0
 #define GD_REPR_REAL 'r'
@@ -887,8 +901,8 @@ struct _GD_DIRFILE {
 
 /* forward declarations */
 void *_GD_Alloc(DIRFILE*, gd_type_t, size_t) __attribute_malloc__;
-void _GD_ArmEndianise(uint64_t* databuffer, int is_complex, size_t ns);
-int _GD_BadInput(DIRFILE* D, gd_entry_t* E, int i);
+void _GD_ArmEndianise(uint64_t*, int, size_t);
+int _GD_BadInput(DIRFILE*, gd_entry_t*, int, int);
 
 #define _GD_BadWindop(op) \
   ( \
@@ -897,7 +911,7 @@ int _GD_BadInput(DIRFILE* D, gd_entry_t* E, int i);
    (op != GD_WINDOP_SET) && (op != GD_WINDOP_CLR) \
   )
 
-int _GD_CalculateEntry(DIRFILE* D, gd_entry_t* E);
+int _GD_CalculateEntry(DIRFILE*, gd_entry_t*, int);
 char *_GD_CanonicalPath(const char*, const char*);
 void _GD_CInvertData(DIRFILE* D, void* data, gd_type_t return_type,
     GD_DCOMPLEXA(dividend), size_t n_read);
@@ -930,10 +944,10 @@ size_t _GD_DoField(DIRFILE*, gd_entry_t*, int, off64_t, size_t, gd_type_t,
 size_t _GD_DoFieldOut(DIRFILE*, gd_entry_t*, int, off64_t, size_t, gd_type_t,
     const void*);
 int _GD_EntryCmp(const void*, const void*);
-gd_entry_t* _GD_FindField(DIRFILE* D, const char* field_code,
-    gd_entry_t** list, unsigned int u, unsigned int *index);
-gd_entry_t* _GD_FindFieldAndRepr(DIRFILE* D, const char* field_code_in,
-    char** field_code, int* repr, unsigned int *index, int set);
+gd_entry_t *_GD_FindField(const DIRFILE*, const char*, gd_entry_t**,
+    unsigned int, int, unsigned int*);
+gd_entry_t *_GD_FindFieldAndRepr(DIRFILE*, const char*, char**, int*,
+    unsigned int*, int, int);
 uint64_t _GD_FindVersion(DIRFILE *D);
 void _GD_FixEndianness(void* databuffer, size_t size, size_t ns);
 #ifdef WORDS_BIGENDIAN
@@ -949,11 +963,11 @@ off64_t _GD_GetEOF(DIRFILE *D, gd_entry_t* E, const char *parent,
     int *is_index);
 off64_t _GD_GetFilePos(DIRFILE *D, gd_entry_t *E, off64_t index_pos);
 char *_GD_GetLine(FILE *fp, size_t *n, int* linenum);
-int _GD_GetRepr(DIRFILE*, const char*, char**);
-gd_spf_t _GD_GetSPF(DIRFILE* D, gd_entry_t* E);
-int _GD_GrabDir(DIRFILE *D, int, const char *name);
+int _GD_GetRepr(DIRFILE*, const char*, char**, int);
+gd_spf_t _GD_GetSPF(DIRFILE*, gd_entry_t*);
+int _GD_GrabDir(DIRFILE*, int, const char*);
 int _GD_Include(DIRFILE*, const char*, const char*, int, char**, int,
-    const char*, const char*, int*, unsigned long*);
+    const char*, const char*, int*, unsigned long*, int);
 void _GD_InitialiseFramework(void);
 int _GD_InitRawIO(DIRFILE*, gd_entry_t*, const char*, int,
     const struct encoding_t*, unsigned int, unsigned int, int);
@@ -986,8 +1000,7 @@ gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, char** in_cols,
     const gd_entry_t* P, const char* format_file, int linenum, int me,
     int standards, int creat, unsigned long flags, int insert, char **outstring,
     const char *tok_pos);
-char* _GD_ParseFragment(FILE* fp, DIRFILE *D, int me, int* standards,
-    unsigned long int *flags);
+char *_GD_ParseFragment(FILE*, DIRFILE*, int, int*, unsigned long int*, int);
 void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E);
 void _GD_ReleaseDir(DIRFILE *D, int dirfd);
 int _GD_SetEncodedName(DIRFILE* D, struct _gd_raw_file* file, const char* base,
@@ -1000,6 +1013,7 @@ int _GD_Supports(DIRFILE* D, gd_entry_t* E, unsigned int funcs);
 int _GD_Tokenise(DIRFILE *D, const char* instring, char **outstring,
     const char **pos, char** in_cols, const char* format_file, int linenum,
     int standards, int pedantic);
+void _GD_UpdateAliases(DIRFILE*);
 int _GD_ValidateField(const char*, int, int, int, int*);
 off64_t _GD_WriteSeek(DIRFILE*, gd_entry_t*, const struct encoding_t*, off64_t,
     unsigned int mode);

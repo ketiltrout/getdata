@@ -214,8 +214,8 @@ static const char *_GD_WindopName(DIRFILE *D, gd_windop_t op)
   return ptr;
 }
 
-static size_t _GD_StringEscapeise(FILE* stream, const char* in, int permissive,
-    int standards)
+static size_t _GD_StringEscapeise(FILE *stream, const char *in, int meta,
+    int permissive, int standards)
 {
   const char* HexDigit = "0123456789ABCDEF";
   size_t len = 0;
@@ -224,7 +224,7 @@ static size_t _GD_StringEscapeise(FILE* stream, const char* in, int permissive,
 
   if (in == NULL || in[0] == '\0') {
     fputs("\"\"", stream);
-    dreturn("%zu", 2);
+    dreturn("%i", 2);
     return 2;
   }
 
@@ -252,7 +252,9 @@ static size_t _GD_StringEscapeise(FILE* stream, const char* in, int permissive,
       fputc(HexDigit[*in >> 8], stream);
       fputc(HexDigit[*in & 0xF], stream);
       len += 4;
-    } else {
+    } else if (meta && *in == '/')
+      break;
+    else {
       fputc(*in, stream);
       len++;
     }
@@ -275,7 +277,7 @@ static void _GD_PadField(DIRFILE *D, FILE* stream, const char *prefix,
 
   ptr = _GD_MungeCode(D, NULL, prefix, suffix, NULL, NULL, in, &dummy);
 
-  for (i = _GD_StringEscapeise(stream, ptr, permissive, standards); i < len;
+  for (i = _GD_StringEscapeise(stream, ptr, 0, permissive, standards); i < len;
       ++i)
   {
     fputc(' ', stream);
@@ -297,7 +299,7 @@ static void _GD_WriteConst(DIRFILE *D, FILE* stream, int me, int permissive,
   if (scalar != NULL) {
     char *ptr = _GD_MungeCode(D, NULL, D->fragment[me].prefix,
         D->fragment[me].suffix, NULL, NULL, scalar, &dummy);
-    _GD_StringEscapeise(stream, ptr, permissive, D->standards);
+    _GD_StringEscapeise(stream, ptr, 0, permissive, D->standards);
     if (index == -1)
       fprintf(stream, "%s", postamble);
     else
@@ -339,15 +341,28 @@ static void _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
     return;
   }
 
+  /* aliases */
+  if (E->field_type == GD_ALIAS_ENTRY) {
+    fputs("/ALIAS ", stream);
+    _GD_PadField(D, stream, D->fragment[me].prefix, D->fragment[me].suffix,
+        E->field, 0, permissive, D->standards);
+    fputc(' ', stream);
+    _GD_PadField(D, stream, D->fragment[me].prefix, D->fragment[me].suffix,
+        E->e->entry[1] ? E->e->entry[1]->field : E->in_fields[0], 0, permissive,
+        D->standards);
+    fputc('\n', stream);
+    dreturnvoid();
+    return;
+  }
+
   ptr = E->field;
 
-  /* From Standards Version 8 and on, just use Barth-style */
-  if (meta && D->standards < 8) {
+  /* From Standards Version 7 and on, just use Barth-style */
+  if (meta && D->standards < 7) {
     fputs("META ", stream);
-    for (; *ptr != '/'; ++ptr)
-      fputc(*ptr, stream);
+    _GD_StringEscapeise(stream, ptr, 1, permissive, D->standards);
     fputc(' ', stream);
-    ++ptr;
+    ptr = strchr(E->field, '/') + 1;
   }
 
   /* field name */
@@ -367,7 +382,8 @@ static void _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
           E->EN(lincom,n_fields));
       for (i = 0; i < E->EN(lincom,n_fields); ++i) {
         fputc(' ', stream);
-        _GD_StringEscapeise(stream, E->in_fields[i], permissive, D->standards);
+        _GD_StringEscapeise(stream, E->in_fields[i], 0, permissive,
+            D->standards);
         fputc(' ', stream);
         if (E->comp_scal) {
           _GD_WriteConst(D, stream, me, permissive, GD_COMPLEX128,
@@ -387,15 +403,15 @@ static void _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
       break;
     case GD_LINTERP_ENTRY:
       fprintf(stream, " LINTERP%s ", pretty ? " " : "");
-      _GD_StringEscapeise(stream, E->in_fields[0], permissive, D->standards);
+      _GD_StringEscapeise(stream, E->in_fields[0], 0, permissive, D->standards);
       fputc(' ', stream);
-      _GD_StringEscapeise(stream, E->EN(linterp,table), permissive,
+      _GD_StringEscapeise(stream, E->EN(linterp,table), 0, permissive,
           D->standards);
       fputc('\n', stream);
       break;
     case GD_BIT_ENTRY:
       fprintf(stream, " BIT%s ", pretty ? "     " : "");
-      _GD_StringEscapeise(stream, E->in_fields[0], permissive, D->standards);
+      _GD_StringEscapeise(stream, E->in_fields[0], 0, permissive, D->standards);
       fputc(' ', stream);
       _GD_WriteConst(D, stream, me, permissive, GD_INT16, &E->EN(bit,bitnum),
           E->scalar[0], E->scalar_ind[0], " ");
@@ -404,35 +420,35 @@ static void _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
       break;
     case GD_DIVIDE_ENTRY:
       fprintf(stream, " DIVIDE%s ", pretty ? "  " : "");
-      _GD_StringEscapeise(stream, E->in_fields[0], permissive, D->standards);
+      _GD_StringEscapeise(stream, E->in_fields[0], 0, permissive, D->standards);
       fputc(' ', stream);
-      _GD_StringEscapeise(stream, E->in_fields[1], permissive, D->standards);
+      _GD_StringEscapeise(stream, E->in_fields[1], 0, permissive, D->standards);
       fputc('\n', stream);
       break;
     case GD_RECIP_ENTRY:
       fprintf(stream, " RECIP%s ", pretty ? "   " : "");
-      _GD_StringEscapeise(stream, E->in_fields[0], permissive, D->standards);
+      _GD_StringEscapeise(stream, E->in_fields[0], 0, permissive, D->standards);
       fputc(' ', stream);
       _GD_WriteConst(D, stream, me, permissive, GD_COMPLEX128,
           &E->EN(recip,cdividend), E->scalar[0], E->scalar_ind[0], "\n");
       break;
     case GD_MULTIPLY_ENTRY:
       fputs(" MULTIPLY ", stream);
-      _GD_StringEscapeise(stream, E->in_fields[0], permissive, D->standards);
+      _GD_StringEscapeise(stream, E->in_fields[0], 0, permissive, D->standards);
       fputc(' ', stream);
-      _GD_StringEscapeise(stream, E->in_fields[1], permissive, D->standards);
+      _GD_StringEscapeise(stream, E->in_fields[1], 0, permissive, D->standards);
       fputc('\n', stream);
       break;
     case GD_PHASE_ENTRY:
       fprintf(stream, " PHASE%s ", pretty ? "   " : "");
-      _GD_StringEscapeise(stream, E->in_fields[0], permissive, D->standards);
+      _GD_StringEscapeise(stream, E->in_fields[0], 0, permissive, D->standards);
       fputc(' ', stream);
       _GD_WriteConst(D, stream, me, permissive, GD_INT64, &E->EN(phase,shift),
           E->scalar[0], E->scalar_ind[0], "\n");
       break;
     case GD_POLYNOM_ENTRY:
       fprintf(stream, " POLYNOM%s ", pretty ? " " : "");
-      _GD_StringEscapeise(stream, E->in_fields[0], permissive, D->standards);
+      _GD_StringEscapeise(stream, E->in_fields[0], 0, permissive, D->standards);
       fputc(' ', stream);
       for (i = 0; i <= E->EN(polynom,poly_ord); ++i)
         if (E->comp_scal)
@@ -446,7 +462,7 @@ static void _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
       break;
     case GD_SBIT_ENTRY:
       fprintf(stream, " SBIT%s ", pretty ? "    " : "");
-      _GD_StringEscapeise(stream, E->in_fields[0], permissive, D->standards);
+      _GD_StringEscapeise(stream, E->in_fields[0], 0, permissive, D->standards);
       fputc(' ', stream);
       _GD_WriteConst(D, stream, me, permissive, GD_INT16, &E->EN(bit,bitnum),
           E->scalar[0], E->scalar_ind[0], " ");
@@ -455,9 +471,9 @@ static void _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
       break;
     case GD_WINDOW_ENTRY:
       fprintf(stream, " WINDOW%s ", pretty ? "  " : "");
-      _GD_StringEscapeise(stream, E->in_fields[0], permissive, D->standards);
+      _GD_StringEscapeise(stream, E->in_fields[0], 0, permissive, D->standards);
       fputc(' ', stream);
-      _GD_StringEscapeise(stream, E->in_fields[1], permissive, D->standards);
+      _GD_StringEscapeise(stream, E->in_fields[1], 0, permissive, D->standards);
       fprintf(stream, " %s ", _GD_WindopName(D, E->EN(window,windop)));
       switch (E->EN(window,windop)) {
         case GD_WINDOP_EQ:
@@ -509,7 +525,7 @@ static void _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
       break;
     case GD_STRING_ENTRY:
       fprintf(stream, " STRING%s ", pretty ? "  " : "");
-      _GD_StringEscapeise(stream, E->e->u.string, permissive, D->standards);
+      _GD_StringEscapeise(stream, E->e->u.string, 0, permissive, D->standards);
       fputc('\n', stream);
       break;
     case GD_INDEX_ENTRY:
@@ -677,17 +693,17 @@ static void _GD_FlushFragment(DIRFILE* D, int i, int permissive)
             NULL, D->fragment[j].suffix, &dummy);
 
         fprintf(stream, "%sINCLUDE ", (D->standards >= 5) ? "/" : "");
-        _GD_StringEscapeise(stream, D->fragment[j].ename, permissive,
+        _GD_StringEscapeise(stream, D->fragment[j].ename, 0, permissive,
             D->standards);
         if (prefix || suffix) {
           fputc(' ', stream);
-          _GD_StringEscapeise(stream, prefix, permissive, D->standards);
+          _GD_StringEscapeise(stream, prefix, 0, permissive, D->standards);
           free(prefix);
         }
 
         if (suffix) {
           fputc(' ', stream);
-          _GD_StringEscapeise(stream, suffix, permissive, D->standards);
+          _GD_StringEscapeise(stream, suffix, 0, permissive, D->standards);
           free(suffix);
         }
         fputc('\n', stream);
@@ -708,7 +724,7 @@ static void _GD_FlushFragment(DIRFILE* D, int i, int permissive)
   if (permissive || D->standards >= 6)
     if (D->fragment[i].ref_name != NULL) {
       fputs("/REFERENCE ", stream);
-      _GD_StringEscapeise(stream, D->fragment[i].ref_name, permissive,
+      _GD_StringEscapeise(stream, D->fragment[i].ref_name, 0, permissive,
           D->standards);
       fputc('\n', stream);
     }
@@ -834,7 +850,8 @@ static int _GD_SyncOrClose(DIRFILE* D, const char* field_code, int clo)
           _GD_Flush(D, D->entry[i], clo);
   } else {
     /* discard representation */
-    E = _GD_FindFieldAndRepr(D, field_code, &simple_field_code, &repr, NULL, 1);
+    E = _GD_FindFieldAndRepr(D, field_code, &simple_field_code, &repr, NULL, 1,
+        1);
 
     if (!D->error)
       _GD_Flush(D, E, clo);

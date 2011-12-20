@@ -96,13 +96,16 @@ gd_type_t _GD_LegacyType(char c)
 }
 
 /* Binary search to find the field */
-gd_entry_t* _GD_FindField(DIRFILE* D, const char* field_code,
-    gd_entry_t** list, unsigned int u, unsigned int *index)
+gd_entry_t *_GD_FindField(const DIRFILE *D, const char *field_code,
+    gd_entry_t **list, unsigned int u, int dealias, unsigned int *index)
 {
   int c;
+  char *ptr;
+  gd_entry_t *E = NULL;
   unsigned int i, l = 0;
+  const unsigned int ou = u;
 
-  dtrace("%p, \"%s\", %p, %u, %p", D, field_code, list, u, index);
+  dtrace("%p, \"%s\", %p, %u, %i, %p", D, field_code, list, u, dealias, index);
 
   /* handle FILEFRAM */
   if (D->standards < 6 && (D->flags & GD_PEDANTIC) &&
@@ -117,19 +120,48 @@ gd_entry_t* _GD_FindField(DIRFILE* D, const char* field_code,
     else if (c > 0)
       l = i + 1;
     else {
-      if (index != NULL) 
+      E = list[i];
+      if (dealias && E && E->field_type == GD_ALIAS_ENTRY)
+        E = E->e->entry[0];
+
+      if (index != NULL)
         *index = i;
 
-      dreturn("%p", list[i]);
-      return list[i];
+      dreturn("%p", E);
+      return E;
     }
   }
 
-  if (index != NULL) 
+  if (index != NULL)
     *index = u;
 
-  dreturn("%p", NULL);
-  return NULL;
+  /* not found perhaps it's an subfield of an aliased field? */
+  if ((ptr = strchr(field_code, '/'))) {
+    char *new_code = strdup(field_code);
+    if (new_code) {
+      new_code[ptr - field_code] = '\0';
+      E = _GD_FindField(D, new_code, list, ou, 0, NULL);
+      free(new_code);
+
+      if (E && E->field_type == GD_ALIAS_ENTRY && E->e->entry[0]) {
+        size_t plen = strlen(E->e->entry[0]->field);
+        new_code = malloc(plen + strlen(ptr));
+        if (new_code) {
+          strcpy(new_code, E->e->entry[0]->field);
+          new_code[plen] = '/';
+          strcpy(new_code + plen + 1, ptr + 1);
+
+          E = _GD_FindField(D, new_code, list, ou, 1, NULL);
+
+          free(new_code);
+        }
+      } else
+        E = NULL;
+    }
+  }
+
+  dreturn("%p", E);
+  return E;
 }
 
 /* Insertion sort the entry list */
@@ -770,12 +802,13 @@ void _GD_CInvertData(DIRFILE* D, void* data, gd_type_t return_type,
   dreturnvoid();
 }
 
-int _GD_GetRepr(DIRFILE* D, const char* field_code_in, char** field_code)
+int _GD_GetRepr(DIRFILE *D, const char *field_code_in, char **field_code,
+    int err)
 {
   int repr = GD_REPR_NONE;
   const int field_code_len = strlen(field_code_in);
 
-  dtrace("%p, \"%s\", %p", D, field_code_in, field_code);
+  dtrace("%p, \"%s\", %p, %i", D, field_code_in, field_code, err);
 
   *field_code = (char *)field_code_in;
   /* find the representation, if any */
@@ -794,8 +827,9 @@ int _GD_GetRepr(DIRFILE* D, const char* field_code_in, char** field_code)
         repr = GD_REPR_ARG;
         break;
       default:
-        _GD_SetError(D, GD_E_BAD_REPR, GD_E_REPR_UNKNOWN, NULL, 0,
-            field_code_in + field_code_len - 1);
+        if (err)
+          _GD_SetError(D, GD_E_BAD_REPR, GD_E_REPR_UNKNOWN, NULL, 0,
+              field_code_in + field_code_len - 1);
         dreturn("%i", 0);
         return 0;
     }
@@ -811,21 +845,21 @@ int _GD_GetRepr(DIRFILE* D, const char* field_code_in, char** field_code)
 }
 
 /* Ensure that an input field has been identified (with error checking) */
-int _GD_BadInput(DIRFILE* D, gd_entry_t* E, int i)
+int _GD_BadInput(DIRFILE *D, gd_entry_t *E, int i, int err)
 {
   char *code, *munged_code;
   int offset;
 
-  dtrace("%p, %p, %i", D, E, i);
+  dtrace("%p, %p, %i, %i", D, E, i, err);
 
   if (E->e->entry[i] == NULL) {
     munged_code = _GD_MungeFromFrag(D, NULL, E->fragment_index, E->in_fields[i],
         &offset);
     if (munged_code)
       E->e->entry[i] = _GD_FindFieldAndRepr(D, munged_code, &code,
-          &E->e->repr[i], NULL, 1);
+          &E->e->repr[i], NULL, 1, err);
 
-    if (D->error) {
+    if (E->e->entry[i] == NULL) {
       free(munged_code);
       dreturn("%i", 1);
       return 1;
@@ -850,18 +884,19 @@ int _GD_BadInput(DIRFILE* D, gd_entry_t* E, int i)
 }
 
 /* Find the entry and the representation */
-gd_entry_t* _GD_FindFieldAndRepr(DIRFILE* D, const char* field_code_in,
-    char** field_code, int* repr, unsigned int *index, int set)
+gd_entry_t *_GD_FindFieldAndRepr(DIRFILE *D, const char *field_code_in,
+    char **field_code, int *repr, unsigned int *index, int set, int err)
 {
-  gd_entry_t* E = NULL;
+  gd_entry_t *E = NULL;
 
-  dtrace("%p, \"%s\", %p, %p, %p, %i", D, field_code_in, field_code, repr,
-      index, set);
+  dtrace("%p, \"%s\", %p, %p, %p, %i, %i", D, field_code_in, field_code, repr,
+      index, set, err);
 
-  E = _GD_FindField(D, field_code_in, D->dot_list, D->n_dot, NULL);
+  if (D->n_dot > 0)
+    E = _GD_FindField(D, field_code_in, D->dot_list, D->n_dot, 1, NULL);
 
   if (E == NULL) {
-    *repr = _GD_GetRepr(D, field_code_in, field_code);
+    *repr = _GD_GetRepr(D, field_code_in, field_code, err);
 
     if (D->error) {
       dreturn("%p", NULL);
@@ -873,10 +908,11 @@ gd_entry_t* _GD_FindFieldAndRepr(DIRFILE* D, const char* field_code_in,
   }
 
   if (E == NULL || index != NULL)
-    E = _GD_FindField(D, *field_code, D->entry, D->n_entries, index);
+    E = _GD_FindField(D, *field_code, D->entry, D->n_entries, 1, index);
 
   if (E == NULL && set) {
-    _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, field_code_in);
+    if (err)
+      _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, field_code_in);
     if (field_code_in != *field_code)
       free(*field_code);
   }

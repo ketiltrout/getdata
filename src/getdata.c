@@ -910,7 +910,7 @@ static size_t _GD_DoLincom(DIRFILE *D, gd_entry_t *E, off64_t first_samp,
 
   /* input field checks */
   for (i = 0; i < E->EN(lincom,n_fields); ++i) {
-    if (_GD_BadInput(D, E, i)) {
+    if (_GD_BadInput(D, E, i, 1)) {
       dreturn("%i", 0);
       return 0;
     }
@@ -1042,12 +1042,12 @@ static size_t _GD_DoMultiply(DIRFILE *D, gd_entry_t* E, off64_t first_samp,
       data_out);
 
   /* Check input fields */
-  if (_GD_BadInput(D, E, 0)) {
+  if (_GD_BadInput(D, E, 0, 1)) {
     dreturn("%i", 0);
     return 0;
   }
 
-  if (_GD_BadInput(D, E, 1)) {
+  if (_GD_BadInput(D, E, 1, 1)) {
     dreturn("%i", 0);
     return 0;
   }
@@ -1136,7 +1136,7 @@ static size_t _GD_DoRecip(DIRFILE *D, gd_entry_t* E, off64_t first_samp,
       data_out);
 
   /* Check input fields */
-  if (_GD_BadInput(D, E, 0)) {
+  if (_GD_BadInput(D, E, 0, 1)) {
     dreturn("%i", 0);
     return 0;
   }
@@ -1181,7 +1181,7 @@ static size_t _GD_DoDivide(DIRFILE *D, gd_entry_t* E, off64_t first_samp,
       data_out);
 
   /* Check input fields */
-  if (_GD_BadInput(D, E, 0) || _GD_BadInput(D, E, 1)) {
+  if (_GD_BadInput(D, E, 0, 1) || _GD_BadInput(D, E, 1, 1)) {
     dreturn("%i", 0);
     return 0;
   }
@@ -1275,7 +1275,7 @@ static size_t _GD_DoBit(DIRFILE *D, gd_entry_t *E, int is_signed,
   dtrace("%p, %p, %i, %lli, %zu, 0x%X, %p", D, E, is_signed, first_samp,
       num_samp, return_type, data_out);
 
-  if (_GD_BadInput(D, E, 0)) {
+  if (_GD_BadInput(D, E, 0, 1)) {
     dreturn("%i", 0);
     return 0;
   }
@@ -1327,7 +1327,7 @@ static size_t _GD_DoPhase(DIRFILE *D, gd_entry_t *E, off64_t first_samp,
   dtrace("%p, %p, %lli, %zu, 0x%X, %p", D, E, first_samp, num_samp, return_type,
       data_out);
 
-  if (_GD_BadInput(D, E, 0)) {
+  if (_GD_BadInput(D, E, 0, 1)) {
     dreturn("%i", 0);
     return 0;
   }
@@ -1358,7 +1358,7 @@ static size_t _GD_DoLinterp(DIRFILE *D, gd_entry_t* E, off64_t first_samp,
     }
   }
 
-  if (_GD_BadInput(D, E, 0)) {
+  if (_GD_BadInput(D, E, 0, 1)) {
     dreturn("%i", 0);
     return 0;
   }
@@ -1399,7 +1399,7 @@ static size_t _GD_DoPolynom(DIRFILE *D, gd_entry_t *E, off64_t first_samp,
   dtrace("%p, %p, %lli, %zu, 0x%X, %p", D, E, first_samp, num_samp, return_type,
       data_out);
 
-  if (_GD_BadInput(D, E, 0)) {
+  if (_GD_BadInput(D, E, 0, 1)) {
     dreturn("%i", 0);
     return 0;
   }
@@ -1445,12 +1445,12 @@ static size_t _GD_DoWindow(DIRFILE *D, gd_entry_t* E, off64_t first_samp,
       data_out);
 
   /* Check input fields */
-  if (_GD_BadInput(D, E, 0)) {
+  if (_GD_BadInput(D, E, 0, 1)) {
     dreturn("%i", 0);
     return 0;
   }
 
-  if (_GD_BadInput(D, E, 1)) {
+  if (_GD_BadInput(D, E, 1, 1)) {
     dreturn("%i", 0);
     return 0;
   }
@@ -1593,7 +1593,7 @@ size_t _GD_DoField(DIRFILE *D, gd_entry_t *E, int repr, off64_t first_samp,
   }
 
   if (!E->e->calculated)
-    _GD_CalculateEntry(D, E);
+    _GD_CalculateEntry(D, E, 1);
 
   if (D->error) {
     dreturn("%i", 0);
@@ -1725,7 +1725,8 @@ size_t gd_getdata64(DIRFILE* D, const char *field_code_in, off64_t first_frame,
 
   _GD_ClearError(D);
 
-  entry = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1);
+  entry = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1,
+      1);
 
   if (D->error) {
     dreturn("%i", 0);

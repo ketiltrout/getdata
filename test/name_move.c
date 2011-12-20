@@ -18,16 +18,7 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Attempt to rename a field */
 #include "test.h"
-
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
-#include <stdio.h>
 
 int main(void)
 {
@@ -58,7 +49,7 @@ int main(void)
   close(fd);
 
   D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
-  ret = gd_rename(D, "data", "zata", 1);
+  ret = gd_rename(D, "data", "zata", GD_REN_DATA);
   error = gd_error(D);
   fl = gd_field_list(D);
 

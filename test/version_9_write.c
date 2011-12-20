@@ -23,25 +23,34 @@
 int main(void)
 {
   const char *filedir = "dirfile";
-  const char *format = "dirfile/format";
-  const char *format1 = "dirfile/format1";
-  const char *format2 = "dirfile/format2";
-  const char *format3 = "dirfile/format3";
+  const char *format[] = {
+    "dirfile/format",
+    "dirfile/format1",
+    "dirfile/format2",
+    "dirfile/format3",
+    "dirfile/format4"
+  };
   const char *data = "dirfile/ar";
-  const char *format_data =
-    "/VERSION 8\n"  // 0
-    "/INCLUDE format1\n";
-  const char *format1_data =
+  const char *format_data[] = {
+    "/VERSION 8\n"
+      "/INCLUDE format1\n",
     "\n\n\n\n\n"
-    "/VERSION 9\n" // 5
-    "/INCLUDE format2 A Z\n" // 6
-    "Xr RAW COMPLEX128 0xA\n" // 8
-    "Xy POLYNOM INDEX 8 055 0xAE 2\n" // 9
-    "ar WINDOW AdYZ INDEX SET 0x1\n" // 10
-    "AINDEXYZ PHASE INDEX 0\n" // 11
-    "/HIDDEN Xy\n"; // 12
-  const char *format2_data = "/INCLUDE format3 \"\" Y\n";
-  const char *format3_data = "d PHASE INDEX 0\n/HIDDEN d\n";
+      "/VERSION 9\n"
+      "Xr RAW COMPLEX128 0xA\n"
+      "Xy POLYNOM INDEX 8 055 0xAE 2\n"
+      "ar WINDOW d INDEX SET 0x1\n"
+      "/ALIAS BINDEX INDEX\n"
+      "/ALIAS AINDEXYZ BINDEX\n"
+      "/INCLUDE format2 A Z\n"
+      "/ALIAS m AdYZ\n"
+      "/INCLUDE format4\n"
+      "/ALIAS z n\n"
+      "/ALIAS d z\n"
+      "/HIDDEN Xy\n",
+    "/INCLUDE format3 \"\" Y\n",
+    "/ALIAS d INDEX\n/HIDDEN d\n",
+    "/ALIAS n m\n"
+  };
   uint16_t c[8];
   unsigned char data_data[256];
   int fd, i, error, n, v, r = 0;
@@ -54,21 +63,11 @@ int main(void)
   for (fd = 0; fd < 256; ++fd)
     data_data[fd] = (unsigned char)fd;
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
-
-  fd = open(format1, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format1_data, strlen(format1_data));
-  close(fd);
-
-  fd = open(format2, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format2_data, strlen(format2_data));
-  close(fd);
-
-  fd = open(format3, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format3_data, strlen(format3_data));
-  close(fd);
+  for (i = 0; i < 5; ++i) {
+    fd = open(format[i], O_CREAT | O_EXCL | O_WRONLY, 0666);
+    write(fd, format_data[i], strlen(format_data[i]));
+    close(fd);
+  }
 
   fd = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
   write(fd, data_data, 256);
@@ -86,10 +85,8 @@ int main(void)
   gd_close(D);
 
   unlink(data);
-  unlink(format);
-  unlink(format1);
-  unlink(format2);
-  unlink(format3);
+  for (i = 0; i < 5; ++i)
+    unlink(format[i]);
   rmdir(filedir);
 
   CHECKI(error,0);

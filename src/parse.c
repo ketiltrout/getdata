@@ -1338,6 +1338,45 @@ static int _GD_UTF8Encode(DIRFILE* D, const char* format_file, int linenum,
   return 0;
 }
 
+/* _GD_CheckParent: look for a slashed field name and, if found, see if the
+ * parent exists in the current fragment.  Returns parent entry on success.
+ */
+static gd_entry_t *_GD_CheckParent(DIRFILE *D, char **name, int me, int linenum)
+{
+  int dummy;
+  char *cptr, *munged_code;
+  gd_entry_t *P = NULL;
+
+  dtrace("%p, \"%s\", %i, %i", D, *name, me, linenum);
+
+  for (cptr = *name + 1; *cptr != '\0'; ++cptr)
+    if (*cptr == '/') {
+      *cptr = '\0';
+      munged_code = _GD_MungeFromFrag(D, NULL, me, *name, &dummy);
+      if (munged_code) {
+        P = _GD_FindField(D, munged_code, D->entry, D->n_entries, 0, NULL);
+        free(munged_code);
+      }
+      if (P == NULL)
+        _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_NO_FIELD,
+            D->fragment[me].cname, linenum, *name);
+      else if (P->field_type == GD_ALIAS_ENTRY)
+        _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_ALIAS, D->fragment[me].cname,
+            linenum, *name);
+      else if (P->fragment_index != me)
+        _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_LOCATION,
+            D->fragment[me].cname, linenum, *name);
+      else {
+        /* point name to the metafield name */
+        *name = cptr + 1;
+      }
+      break;
+    }
+
+  dreturn("%p", D->error ? NULL : P);
+  return D->error ? NULL : P;
+}
+
 /* _GD_ParseFieldSpec: Parse a format file line fragment containing a field
  * specification */
 gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, char** in_cols,
@@ -1347,8 +1386,7 @@ gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, char** in_cols,
 {
   gd_entry_t* E = NULL;
   void *ptr;
-  char *cptr, *munged_code;
-  int is_dot = 0, dummy;
+  int is_dot = 0;
   const int pedantic = flags & GD_PEDANTIC;
 
   dtrace("%p, %i, %p, %p, \"%s\", %i, %i, %i, %i, %lx, %i, %p, %p", D, n_cols,
@@ -1356,32 +1394,19 @@ gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, char** in_cols,
       outstring, tok_pos);
 
   /* Check for barth-style metafield definition */
-  if (P == NULL && (!pedantic || standards >= 7))
-    for (cptr = in_cols[0] + 1; *cptr != '\0'; ++cptr)
-      if (*cptr == '/') {
-        *cptr = '\0';
-        munged_code = _GD_MungeFromFrag(D, NULL, me, in_cols[0], &dummy);
-        if (munged_code)
-          P = _GD_FindField(D, munged_code, D->entry, D->n_entries, NULL);
-        free(munged_code);
-        if (P == NULL)
-          _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_NO_FIELD,
-              D->fragment[me].cname, linenum, in_cols[0]);
-        else if (P->fragment_index != me)
-          _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_LOCATION,
-              D->fragment[me].cname, linenum, in_cols[0]);
-        else if (n_cols < 2)
-          _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_TOK, D->fragment[me].cname,
-              linenum, NULL);
-        else {
-          /* point in_cols[0] to the metafield name */
-          in_cols[0] = cptr + 1;
-          E = _GD_ParseFieldSpec(D, n_cols, in_cols, P, D->fragment[me].cname,
-              linenum, me, standards, creat, flags, insert, outstring, tok_pos);
-        }
-        dreturn("%p", (!insert) ? E : NULL);
-        return (!insert) ? E : NULL;
-      }
+  if (P == NULL && (!pedantic || standards >= 7)) {
+    P = _GD_CheckParent(D, in_cols + 0, me, linenum);
+    if (P) {
+      if (n_cols < 2)
+        _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_TOK, D->fragment[me].cname,
+            linenum, NULL);
+      else
+        E = _GD_ParseFieldSpec(D, n_cols, in_cols, P, D->fragment[me].cname,
+            linenum, me, standards, creat, flags, insert, outstring, tok_pos);
+      dreturn("%p", (!insert) ? E : NULL);
+      return (!insert) ? E : NULL;
+    }
+  }
 
   ptr = _GD_Realloc(D, D->entry, (D->n_entries + 1) * sizeof(gd_entry_t*));
   if (ptr == NULL) {
@@ -1477,14 +1502,11 @@ gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, char** in_cols,
   if (insert && D->error == GD_E_OK && E != NULL) {
     /* the Format file fragment index */
     unsigned int u;
-    gd_entry_t *Q;
 
     E->fragment_index = me;
 
     /* Check for duplicate */
-    Q = _GD_FindField(D, E->field, D->entry, D->n_entries, &u);
-
-    if (Q) {
+    if (_GD_FindField(D, E->field, D->entry, D->n_entries, 0, &u)) {
       if (~flags & GD_IGNORE_DUPS)
         _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_DUPLICATE, format_file,
             linenum, E->field);
@@ -1501,6 +1523,7 @@ gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, char** in_cols,
       ptr = _GD_Realloc(D, P->e->p.meta_entry, (P->e->n_meta + 1) *
           sizeof(gd_entry_t*));
       if (ptr == NULL) {
+        _GD_FreeE(D, E, 1);
         dreturn ("%p", NULL);
         return NULL;
       }
@@ -1737,6 +1760,108 @@ int _GD_Tokenise(DIRFILE *D, const char* instring, char **outstring,
   return n_cols;
 }
 
+/* _GD_ParseAlias: set up an alias
+ */
+static void _GD_ParseAlias(DIRFILE *D, char **name, const char *target, int me,
+    int line, int standards, int pedantic, int ignore_dups)
+{
+  gd_entry_t **new_meta_list = NULL;
+  gd_entry_t *E, *P = NULL;
+  unsigned int u;
+  int offset;
+  void *ptr;
+
+  dtrace("%p, \"%s\", \"%s\", %i, %i, %i, %i, %i", D, *name, target, me, line,
+      standards, pedantic, ignore_dups);
+
+  P = _GD_CheckParent(D, name, me, line);
+  if (D->error) {
+    dreturnvoid();
+    return;
+  }
+
+  ptr = _GD_Realloc(D, D->entry, (D->n_entries + 1) * sizeof(gd_entry_t*));
+  if (ptr == NULL) {
+    dreturnvoid();
+    return;
+  }
+  D->entry = (gd_entry_t **)ptr;
+
+  E = (gd_entry_t *)_GD_Malloc(D, sizeof(gd_entry_t));
+  if (E == NULL) {
+    dreturnvoid();
+    return;
+  }
+  memset(E, 0, sizeof(gd_entry_t));
+
+  E->e = (struct _gd_private_entry *)_GD_Malloc(D,
+      sizeof(struct _gd_private_entry));
+  if (E->e == NULL) {
+    free(E);
+    dreturnvoid();
+    return;
+  }
+  memset(E->e, 0, sizeof(struct _gd_private_entry));
+
+  E->field_type = GD_ALIAS_ENTRY;
+  E->fragment_index = me;
+  E->in_fields[0] = _GD_Strdup(D, target);
+
+  E->field = _GD_MungeFromFrag(D, P, me, *name, &offset);
+  if (E->field && _GD_ValidateField(E->field + offset, standards, pedantic, 0,
+        NULL))
+  {
+    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_NAME, D->fragment[me].cname,
+        line, *name);
+  }
+
+  if (D->error != GD_E_OK) {
+    _GD_FreeE(D, E, 1);
+    dreturnvoid();
+    return;
+  }
+
+  /* Check for duplicate */
+  if (_GD_FindField(D, E->field, D->entry, D->n_entries, 0, &u)) {
+    if (!ignore_dups)
+      _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_DUPLICATE, D->fragment[me].cname,
+          line, E->field);
+    _GD_FreeE(D, E, 1);
+    dreturnvoid();
+    return;
+  }
+
+  /* Allocate where necessary */
+  if (P) {
+    new_meta_list = (gd_entry_t **)_GD_Realloc(D, P->e->p.meta_entry,
+        (P->e->n_meta + 1) * sizeof(gd_entry_t*));
+    if (new_meta_list == NULL) {
+      _GD_FreeE(D, E, 1);
+      dreturnvoid();
+      return;
+    }
+  }
+
+  /* Nothing from here on may fail */
+
+  /* Initialse the meta counts */
+  if (P) {
+    E->e->n_meta = -1;
+    E->e->p.parent = P;
+    /* there is no need to sort this list */
+    P->e->p.meta_entry = new_meta_list;
+    P->e->p.meta_entry[P->e->n_meta++] = E;
+
+    D->n_meta++;
+  }
+
+  /* sort */
+  _GD_InsertSort(D, E, u);
+  D->n_entries++;
+
+  dreturnvoid();
+}
+
 /* _GD_ParseDirective: Actually parse a single format file line.
  *       Returns 1 if a match was made.
  */
@@ -1746,7 +1871,7 @@ static int _GD_ParseDirective(DIRFILE *D, char** in_cols, int n_cols,
 {
   const char* ptr;
   char *munged_code;
-  int i, dummy;
+  int i, dummy, matched = 0;
   int pedantic = *flags & GD_PEDANTIC;
   gd_entry_t *E = NULL;
 
@@ -1782,136 +1907,247 @@ static int _GD_ParseDirective(DIRFILE *D, char** in_cols, int n_cols,
       return 0;
     }
 
-  if (strcmp(ptr, "ENCODING") == 0 && (!pedantic || *standards >= 6)) {
-    if (!(*flags & GD_FORCE_ENCODING)) {
-      D->fragment[me].encoding = GD_ENC_UNSUPPORTED;
-      for (i = 0; i < GD_N_SUBENCODINGS - 1; ++i)
-        if (strcmp(in_cols[1], _gd_ef[i].ffname) == 0) {
-          D->fragment[me].encoding = _gd_ef[i].scheme;
+  switch(ptr[0]) {
+    case 'A':
+      if (strcmp(ptr, "ALIAS") == 0 && (!pedantic || *standards >= 9)) {
+        matched = 1;
+        if (n_cols < 3) {
+          _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_TOK, D->fragment[me].cname,
+              linenum, NULL);
           break;
         }
-    }
-  } else if (strcmp(ptr, "ENDIAN") == 0 && (!pedantic || *standards >= 5)) {
-    if (!(*flags & GD_FORCE_ENDIAN)) {
-      if (strcmp(in_cols[1], "big") == 0)
-        D->fragment[me].byte_sex = GD_BIG_ENDIAN;
-      else if (strcmp(in_cols[1], "little") == 0)
-        D->fragment[me].byte_sex = GD_LITTLE_ENDIAN;
-      else
-        _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_ENDIAN,
+
+        _GD_ParseAlias(D, in_cols + 1, in_cols[2], me, linenum, *standards,
+            pedantic, *flags & GD_IGNORE_DUPS);
+      }
+      break;
+    case 'E':
+      if (strcmp(ptr, "ENCODING") == 0 && (!pedantic || *standards >= 6)) {
+        matched = 1;
+        if (!(*flags & GD_FORCE_ENCODING)) {
+          D->fragment[me].encoding = GD_ENC_UNSUPPORTED;
+          for (i = 0; i < GD_N_SUBENCODINGS - 1; ++i)
+            if (strcmp(in_cols[1], _gd_ef[i].ffname) == 0) {
+              D->fragment[me].encoding = _gd_ef[i].scheme;
+              break;
+            }
+        }
+      } else if (strcmp(ptr, "ENDIAN") == 0 && (!pedantic || *standards >= 5)) {
+        matched = 1;
+        if (!(*flags & GD_FORCE_ENDIAN)) {
+          if (strcmp(in_cols[1], "big") == 0)
+            D->fragment[me].byte_sex = GD_BIG_ENDIAN;
+          else if (strcmp(in_cols[1], "little") == 0)
+            D->fragment[me].byte_sex = GD_LITTLE_ENDIAN;
+          else
+            _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_ENDIAN,
             D->fragment[me].cname, linenum, NULL);
-      if (n_cols > 2 && (!pedantic || *standards >= 8)) {
-        if (strcmp(in_cols[2], "arm") == 0) {
+          if (n_cols > 2 && (!pedantic || *standards >= 8)) {
+            if (strcmp(in_cols[2], "arm") == 0) {
 #if ! defined(ARM_ENDIAN_DOUBLES)
-          D->fragment[me].byte_sex |= GD_ARM_FLAG;
+              D->fragment[me].byte_sex |= GD_ARM_FLAG;
 #endif
-        } else
-          _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_ENDIAN,
-              D->fragment[me].cname, linenum, NULL);
-      }
+            } else
+              _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_ENDIAN,
+                  D->fragment[me].cname, linenum, NULL);
+          }
 #ifdef ARM_ENDIAN_DOUBLES
-      else
-        D->fragment[me].byte_sex |= GD_ARM_FLAG;
+          else
+            D->fragment[me].byte_sex |= GD_ARM_FLAG;
 #endif
-    }
-  } else if (strcmp(ptr, "FRAMEOFFSET") == 0 && (!pedantic || *standards >= 1))
-    D->fragment[me].frame_offset = gd_strtoll(in_cols[1], NULL,
-        (!pedantic || *standards >= 9) ? 0 : 10);
-  else if (strcmp(ptr, "HIDDEN") == 0 && (!pedantic || *standards >= 9)) {
-    munged_code = _GD_MungeFromFrag(D, NULL, me, in_cols[1], &dummy);
-    if (munged_code)
-      E = _GD_FindField(D, munged_code, D->entry, D->n_entries, NULL);
-    free(munged_code);
-
-    if (E == NULL)
-      _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_NO_FIELD, D->fragment[me].cname,
-          linenum, in_cols[1]);
-    else if (E->fragment_index != me)
-      _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_LOCATION, D->fragment[me].cname,
-          linenum, in_cols[1]);
-    else {
-      E->hidden = 1;
-
-      /* update counts */
-      if (E->e->n_meta != -1) {
-        D->n[_GD_EntryIndex(E->field_type)]--;
-        D->n_hidden++;
-      } else {
-        gd_entry_t *P = (gd_entry_t*)E->e->p.parent;
-        P->e->n_hidden++;
-        P->e->n[_GD_EntryIndex(E->field_type)]--;
+        }
       }
-    }
-  } else if (strcmp(ptr, "INCLUDE") == 0 && (!pedantic || *standards >= 3)) {
-    unsigned long subflags = D->fragment[me].encoding | D->fragment[me].byte_sex
-      | (*flags & (GD_PEDANTIC | GD_PERMISSIVE | GD_FORCE_ENDIAN |
-            GD_FORCE_ENCODING | GD_IGNORE_DUPS | GD_IGNORE_REFS));
+      break;
+    case 'F':
+      if (strcmp(ptr, "FRAMEOFFSET") == 0 && (!pedantic || *standards >= 1)) {
+        matched = 1;
+        D->fragment[me].frame_offset = gd_strtoll(in_cols[1], NULL,
+            (!pedantic || *standards >= 9) ? 0 : 10);
+      }
+      break;
+    case 'H':
+      if (strcmp(ptr, "HIDDEN") == 0 && (!pedantic || *standards >= 9)) {
+        matched = 1;
+        munged_code = _GD_MungeFromFrag(D, NULL, me, in_cols[1], &dummy);
+        if (munged_code)
+          E = _GD_FindField(D, munged_code, D->entry, D->n_entries, 0, NULL);
+        free(munged_code);
 
-    int frag = _GD_Include(D, in_cols[1], D->fragment[me].cname, linenum,
-        ref_name, me, (n_cols > 2) ? in_cols[2] : NULL,
-        (n_cols > 3) ? in_cols[3] : NULL, standards, &subflags);
+        if (E == NULL)
+          _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_NO_FIELD,
+              D->fragment[me].cname, linenum, in_cols[1]);
+        else if (E->fragment_index != me)
+          _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_LOCATION,
+              D->fragment[me].cname, linenum, in_cols[1]);
+        else {
+          E->hidden = 1;
 
-    if ((pedantic = subflags & GD_PEDANTIC))
-      *flags |= GD_PEDANTIC;
-    if (frag != -1)
-      D->fragment[me].vers |= D->fragment[frag].vers;
-  } else if (strcmp(ptr, "META") == 0 && (!pedantic || *standards >= 6)) {
-    munged_code = _GD_MungeFromFrag(D, NULL, me, in_cols[1], &dummy);
-    if (munged_code)
-      E = _GD_FindField(D, munged_code, D->entry, D->n_entries, NULL);
-    free(munged_code);
+          /* update counts */
+          if (E->e->n_meta != -1) {
+            D->n[_GD_EntryIndex(E->field_type)]--;
+            D->n_hidden++;
+          } else {
+            gd_entry_t *P = (gd_entry_t*)E->e->p.parent;
+            P->e->n_hidden++;
+            P->e->n[_GD_EntryIndex(E->field_type)]--;
+          }
+        }
+      }
+      break;
+    case 'I':
+      if (strcmp(ptr, "INCLUDE") == 0 && (!pedantic || *standards >= 3)) {
+        matched = 1;
+        unsigned long subflags = D->fragment[me].encoding
+          | D->fragment[me].byte_sex | (*flags & (GD_PEDANTIC | GD_PERMISSIVE
+                | GD_FORCE_ENDIAN | GD_FORCE_ENCODING | GD_IGNORE_DUPS
+                | GD_IGNORE_REFS));
 
-    if (E == NULL)
-      _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_NO_FIELD, D->fragment[me].cname,
-          linenum, in_cols[1]);
-    else if (E->fragment_index != me)
-      _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_LOCATION, D->fragment[me].cname,
-          linenum, in_cols[1]);
-    else if (E->e->n_meta == -1)
-      _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_META_META, D->fragment[me].cname,
-          linenum, in_cols[1]);
-    else if (n_cols < 4)
-      _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_TOK, D->fragment[me].cname,
-          linenum, NULL);
-    else
-      _GD_ParseFieldSpec(D, n_cols - 2, in_cols + 2, E, D->fragment[me].cname,
-          linenum, me, *standards, 0, *flags, 1, outstring, tok_pos);
-  } else if (strcmp(ptr, "PROTECT") == 0 && (!pedantic || *standards >= 6)) {
-    if (strcmp(in_cols[1], "none") == 0)
-      D->fragment[me].protection = GD_PROTECT_NONE;
-    else if (strcmp(in_cols[1], "format") == 0)
-      D->fragment[me].protection = GD_PROTECT_FORMAT;
-    else if (strcmp(in_cols[1], "data") == 0)
-      D->fragment[me].protection = GD_PROTECT_DATA;
-    else if (strcmp(in_cols[1], "all") == 0)
-      D->fragment[me].protection = GD_PROTECT_ALL;
-    else
-      _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_PROTECT, D->fragment[me].cname,
-          linenum, in_cols[1]);
-  } else if (strcmp(ptr, "REFERENCE") == 0 && (!pedantic || *standards >= 6)) {
-    free(*ref_name);
-    *ref_name = _GD_MungeFromFrag(D, NULL, me, in_cols[1], &dummy);
-  } else if (strcmp(ptr, "VERSION") == 0 && (!pedantic || *standards >= 5)) {
-    *standards = atoi(in_cols[1]);
-    if (!pedantic && ~(*flags) & GD_PERMISSIVE)
-      *flags |= (pedantic = GD_PEDANTIC);
-    if (pedantic)
-      D->fragment[me].vers |= 1ULL << *standards;
-  } else {
-    dreturn("%i", 0);
-    return 0;
+        int frag = _GD_Include(D, in_cols[1], D->fragment[me].cname, linenum,
+            ref_name, me, (n_cols > 2) ? in_cols[2] : NULL,
+            (n_cols > 3) ? in_cols[3] : NULL, standards, &subflags, 0);
+
+        if ((pedantic = subflags & GD_PEDANTIC))
+          *flags |= GD_PEDANTIC;
+        if (frag != -1)
+          D->fragment[me].vers |= D->fragment[frag].vers;
+      }
+      break;
+    case 'M':
+      if (strcmp(ptr, "META") == 0 && (!pedantic || *standards >= 6)) {
+        matched = 1;
+        munged_code = _GD_MungeFromFrag(D, NULL, me, in_cols[1], &dummy);
+        if (munged_code) {
+          E = _GD_FindField(D, munged_code, D->entry, D->n_entries, 0, NULL);
+          free(munged_code);
+        }
+
+        if (E == NULL)
+          _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_NO_FIELD,
+              D->fragment[me].cname, linenum, in_cols[1]);
+        else if (E->field_type == GD_ALIAS_ENTRY)
+          _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_ALIAS, D->fragment[me].cname,
+              linenum, in_cols[1]);
+        else if (E->fragment_index != me)
+          _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_LOCATION,
+              D->fragment[me].cname, linenum, in_cols[1]);
+        else if (E->e->n_meta == -1)
+          _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_META_META,
+              D->fragment[me].cname, linenum, in_cols[1]);
+        else if (n_cols < 4)
+          _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_TOK, D->fragment[me].cname,
+              linenum, NULL);
+        else
+          _GD_ParseFieldSpec(D, n_cols - 2, in_cols + 2, E,
+              D->fragment[me].cname, linenum, me, *standards, 0, *flags, 1,
+              outstring, tok_pos);
+      }
+      break;
+    case 'P':
+      if (strcmp(ptr, "PROTECT") == 0 && (!pedantic || *standards >= 6)) {
+        matched = 1;
+        if (strcmp(in_cols[1], "none") == 0)
+          D->fragment[me].protection = GD_PROTECT_NONE;
+        else if (strcmp(in_cols[1], "format") == 0)
+          D->fragment[me].protection = GD_PROTECT_FORMAT;
+        else if (strcmp(in_cols[1], "data") == 0)
+          D->fragment[me].protection = GD_PROTECT_DATA;
+        else if (strcmp(in_cols[1], "all") == 0)
+          D->fragment[me].protection = GD_PROTECT_ALL;
+        else
+          _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_PROTECT,
+              D->fragment[me].cname, linenum, in_cols[1]);
+      }
+      break;
+    case 'R':
+      if (strcmp(ptr, "REFERENCE") == 0 && (!pedantic || *standards >= 6)) {
+        matched = 1;
+        free(*ref_name);
+        *ref_name = _GD_MungeFromFrag(D, NULL, me, in_cols[1], &dummy);
+      }
+      break;
+    case 'V':
+      if (strcmp(ptr, "VERSION") == 0 && (!pedantic || *standards >= 5)) {
+        matched = 1;
+        *standards = atoi(in_cols[1]);
+        if (!pedantic && ~(*flags) & GD_PERMISSIVE)
+          *flags |= (pedantic = GD_PEDANTIC);
+        if (pedantic)
+          D->fragment[me].vers |= 1ULL << *standards;
+      }
+      break;
   }
 
-  dreturn("%i", 1);
-  return 1;
+  dreturn("%i", matched);
+  return matched;
+}
+
+/* Resolve and record an alias, taking care of loops */
+static gd_entry_t *_GD_ResolveAlias(DIRFILE *D, gd_entry_t *E)
+{
+  gd_entry_t *T = NULL;
+  char *munged_code;
+  int dummy;
+
+  dtrace("%p, %p", D, E);
+
+  if (++D->recurse_level >= GD_MAX_RECURSE_LEVEL) {
+    _GD_SetError(D, GD_E_RECURSE_LEVEL, GD_E_RECURSE_CODE, NULL, 0, E->field);
+    D->recurse_level--;
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  /* Find the target */
+  munged_code = _GD_MungeFromFrag(D, NULL, E->fragment_index, E->in_fields[0],
+      &dummy);
+  if (munged_code) {
+    T = _GD_FindField(D, munged_code, D->entry, D->n_entries, 0, NULL);
+    free(munged_code);
+  }
+
+  /* Aliases store the ulitmate target in entry[0] and the direct link
+   * in entry[1].
+   */
+  E->e->entry[0] = E->e->entry[1] = T;
+  if (T) {
+
+    if (T->field_type == GD_ALIAS_ENTRY) {
+      if (T->e->entry[0])
+        T = T->e->entry[0];
+      else
+        T = _GD_ResolveAlias(D, T);
+    }
+
+    E->e->entry[0] = T;
+  }
+
+  D->recurse_level--;
+  dreturn("%p", D->error ? NULL : E->e->entry[0]);
+  return D->error ? NULL : E->e->entry[0];
+}
+
+void _GD_UpdateAliases(DIRFILE *D)
+{
+  unsigned u;
+
+  dtrace("%p", D);
+
+  for (u = 0; u < D->n_entries; ++u)
+    if (D->entry[u]->field_type == GD_ALIAS_ENTRY &&
+        D->entry[u]->e->entry[1] == NULL)
+    {
+      _GD_ResolveAlias(D, D->entry[u]);
+    }
+
+  dreturnvoid();
 }
 
 /* _GD_ParseFragment: Parse each line of the fragment.
  *
  *       Returns NULL unless this fragment contains a REFERENCE directive.
  */
-char* _GD_ParseFragment(FILE* fp, DIRFILE *D, int me, int* standards,
-    unsigned long *flags)
+char *_GD_ParseFragment(FILE *fp, DIRFILE *D, int me, int *standards,
+    unsigned long *flags, int resolve)
 {
   char *instring = NULL;
   char *outstring = NULL;
@@ -1932,7 +2168,7 @@ char* _GD_ParseFragment(FILE* fp, DIRFILE *D, int me, int* standards,
   int saved_line = 0;
   char* saved_token = NULL;
 
-  dtrace("%p, %p, %i, %p, %p", fp, D, me, standards, flags);
+  dtrace("%p, %p, %i, %p, %p, %i", fp, D, me, standards, flags, resolve);
 
   /* start parsing */
   while (rescan || (instring = _GD_GetLine(fp, &n, &linenum))) {
@@ -2034,6 +2270,10 @@ char* _GD_ParseFragment(FILE* fp, DIRFILE *D, int me, int* standards,
     else if (first_raw != NULL)
       D->fragment[me].ref_name = _GD_Strdup(D, first_raw->field);
   }
+
+  /* resolve aliases, if requested */
+  if (resolve && !D->error)
+    _GD_UpdateAliases(D);
 
   dreturn("%p", ref_name);
   return ref_name;

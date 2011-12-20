@@ -28,7 +28,7 @@ int main(void)
     "/VERSION 6\n"
     "b\\ c CONST UINT8 8\n"
     "\"a \\#r\" RAW UINT8 b\\ c\n"
-    "\\x64\\c\\157 PHASE \"a \\#r\" 0\n";
+    "/META \"a \\#r\" \\x64\\c\\157 PHASE \"a \\#r\" 0\n";
   int fd, e, q, c, r = 0;
   DIRFILE *D;
   gd_spf_t s;
@@ -47,7 +47,7 @@ int main(void)
 
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
   c = gd_dirfile_standards(D, GD_VERSION_CURRENT);
-  s = gd_spf(D, "dco");
+  s = gd_spf(D, "a #r/dco");
   gd_close(D);
 
   unlink(format);

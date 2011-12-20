@@ -225,7 +225,8 @@ double gd_framenum_subset64(DIRFILE* D, const char* field_code_in,
 
   _GD_ClearError(D);
 
-  entry = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1);
+  entry = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1,
+      1);
 
   if (D->error) {
     dreturn("%g", frame);

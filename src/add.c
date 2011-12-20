@@ -65,16 +65,16 @@ static gd_entry_t *_GD_Add(DIRFILE* D, const gd_entry_t* entry,
 
   /* check parent */
   if (parent != NULL) {
-    /* make sure it's not a meta field already */
-    if (strchr(parent, '/') != NULL) {
+    P = _GD_FindField(D, parent, D->entry, D->n_entries, 1, NULL);
+    if (P == NULL) {
       _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, parent);
       dreturn("%p", NULL);
       return NULL;
     }
 
-    P = _GD_FindField(D, parent, D->entry, D->n_entries, NULL);
-    if (P == NULL) {
-      _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, parent);
+    /* make sure it's not a meta field already */
+    if (P->e->n_meta == -1) {
+      _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_INVALID, NULL, 0, parent);
       dreturn("%p", NULL);
       return NULL;
     }
@@ -97,9 +97,7 @@ static gd_entry_t *_GD_Add(DIRFILE* D, const gd_entry_t* entry,
   }
 
   /* check for duplicate field */
-  E = _GD_FindField(D, temp_buffer, D->entry, D->n_entries, &u);
-
-  if (E != NULL) { /* matched */
+  if (_GD_FindField(D, temp_buffer, D->entry, D->n_entries, 1, &u)) {
     _GD_SetError(D, GD_E_DUPLICATE, 0, NULL, 0, temp_buffer);
     free(temp_buffer);
     dreturn("%p", NULL);
@@ -480,6 +478,9 @@ static gd_entry_t *_GD_Add(DIRFILE* D, const gd_entry_t* entry,
   D->list_validity = 0;
   D->type_list_validity = 0;
 
+  /* Update aliases */
+  _GD_UpdateAliases(D);
+
   dreturn("%p", E);
   return E;
 }
@@ -513,7 +514,7 @@ int gd_madd_spec(DIRFILE* D, const char* line, const char* parent) gd_nothrow
 
   /* Find parent -- we don't do code mungeing here because we don't know
    * which fragment this is yet.  */
-  E = _GD_FindField(D, parent, D->entry, D->n_entries, NULL);
+  E = _GD_FindField(D, parent, D->entry, D->n_entries, 1, NULL);
   if (E == NULL) {
     _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, parent);
     dreturn("%i", -1);
@@ -545,6 +546,9 @@ int gd_madd_spec(DIRFILE* D, const char* line, const char* parent) gd_nothrow
     dreturn("%i", -1); /* parser threw an error */
     return -1;
   }
+
+  /* Update aliases */
+  _GD_UpdateAliases(D);
 
   D->fragment[me].modified = 1;
   D->flags &= ~GD_HAVE_VERSION;
@@ -607,6 +611,9 @@ int gd_add_spec(DIRFILE* D, const char* line, int fragment_index)
     dreturn("%i", -1); /* parser threw an error */
     return -1;
   }
+
+  /* Update aliases */
+  _GD_UpdateAliases(D);
 
   D->fragment[fragment_index].modified = 1;
   D->flags &= ~GD_HAVE_VERSION;
@@ -1761,4 +1768,160 @@ int gd_madd_carray(DIRFILE* D, const char* parent, const char* field_code,
 
   dreturn("%i", D->error ? -1 : 0);
   return D->error ? -1 : 0;
+}
+
+/* add an alias */
+static int _GD_AddAlias(DIRFILE *D, const char *parent, const char *field_code,
+    const char *target, int fragment_index)
+{
+  unsigned u;
+  int offset;
+  char *munged_code;
+  gd_entry_t *E, *P = NULL;
+  dtrace("%p, \"%s\", \"%s\", \"%s\", %i", D, parent, field_code, target,
+      fragment_index);
+
+  /* Early checks */
+  if (D->flags & GD_INVALID)
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+  else if ((D->flags & GD_ACCMODE) == GD_RDONLY)
+    _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
+  else if (fragment_index < 0 || fragment_index >= D->n_fragment)
+    _GD_SetError(D, GD_E_BAD_INDEX, 0, NULL, fragment_index, NULL);
+  else if (D->fragment[fragment_index].protection & GD_PROTECT_FORMAT)
+    _GD_SetError(D, GD_E_PROTECTED, GD_E_PROTECTED_FORMAT, NULL, 0,
+        D->fragment[fragment_index].cname);
+
+  if (D->error) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  _GD_ClearError(D);
+
+  if (parent != NULL) {
+    /* look for parent */
+    P = _GD_FindField(D, parent, D->entry, D->n_entries, 1, NULL);
+    if (P == NULL) {
+      _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, parent);
+      dreturn("%i", -1);
+      return -1;
+    }
+    fragment_index = P->fragment_index;
+
+    /* make sure it's not a meta field already */
+    if (P->e->n_meta == -1) {
+      _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_INVALID, NULL, 0, parent);
+      dreturn("%i", -1);
+      return -1;
+    }
+
+    offset = strlen(parent) + 1;
+    munged_code = (char *)_GD_Malloc(D, offset + strlen(field_code) + 1);
+    if (munged_code) {
+      strcpy(munged_code, parent);
+      munged_code[offset - 1] = '/';
+      strcpy(munged_code + offset, field_code);
+    }
+  } else
+    /* Apply prefix and suffix */
+    munged_code = _GD_MungeFromFrag(D, NULL, fragment_index, field_code,
+        &offset);
+
+  if (D->error) {
+    free(munged_code);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  /* check alias name */
+  if (munged_code && _GD_ValidateField(munged_code + offset, D->standards, 1, 0,
+        NULL))
+  {
+    _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_INVALID, NULL, 0, field_code);
+  } else if (_GD_FindField(D, munged_code, D->entry, D->n_entries, 1, &u))
+    _GD_SetError(D, GD_E_DUPLICATE, 0, NULL, 0, munged_code);
+
+  if (D->error) {
+    free(munged_code);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  /* create and store */
+  E = (gd_entry_t *)_GD_Malloc(D, sizeof(gd_entry_t));
+  if (E == NULL) {
+    dreturn("%i", -1);
+    return -1;
+  }
+  memset(E, 0, sizeof(gd_entry_t));
+  E->e = (struct _gd_private_entry *)_GD_Malloc(D,
+      sizeof(struct _gd_private_entry));
+  if (E->e == NULL) {
+    free(E);
+    dreturn("%i", -1);
+    return -1;
+  }
+  memset(E->e, 0, sizeof(struct _gd_private_entry));
+
+  E->field = munged_code;
+  E->fragment_index = fragment_index;
+  E->in_fields[0] = _GD_Strdup(D, target);
+  E->field_type = GD_ALIAS_ENTRY;
+  E->e->calculated = 1;
+
+  if (D->error) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  /* add the entry and resort the entry list */
+  _GD_InsertSort(D, E, u);
+  D->n_entries++;
+  D->fragment[fragment_index].modified = 1;
+  D->flags &= ~GD_HAVE_VERSION;
+
+  /* Invalidate the field lists */
+  D->list_validity = 0;
+  D->type_list_validity = 0;
+
+  /* Update aliases */
+  _GD_UpdateAliases(D);
+
+  dreturn("%i", 0);
+  return 0;
+}
+
+int gd_add_alias(DIRFILE *D, const char *alias_name, const char *target_code,
+    int fragment_index) gd_nothrow
+{
+  int ret;
+
+  dtrace("%p, \"%s\", \"%s\", %i", D, alias_name, target_code, fragment_index);
+
+  if (D->flags & GD_INVALID) {
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  _GD_ClearError(D);
+
+  ret = _GD_AddAlias(D, NULL, alias_name, target_code, fragment_index);
+
+  dreturn("%i", ret);
+  return ret;
+}
+
+int gd_madd_alias(DIRFILE *D, const char *parent, const char *alias_name,
+    const char *target_code) gd_nothrow
+{
+  int ret;
+
+  dtrace("%p, \"%s\", \"%s\", \"%s\"", D, parent, alias_name, target_code);
+
+  ret = _GD_AddAlias(D, parent, alias_name, target_code, 0);
+
+  dreturn("%i", ret);
+  return ret;
 }

@@ -212,14 +212,14 @@ off64_t _GD_GetEOF(DIRFILE *D, gd_entry_t* E, const char *parent, int *is_index)
     case GD_POLYNOM_ENTRY:
     case GD_RECIP_ENTRY:
     case GD_WINDOW_ENTRY:
-      if (_GD_BadInput(D, E, 0))
+      if (_GD_BadInput(D, E, 0, 1))
         break;
 
       ns = _GD_GetEOF(D, E->e->entry[0], E->field, is_index);
       break;
     case GD_DIVIDE_ENTRY:
     case GD_MULTIPLY_ENTRY:
-      if (_GD_BadInput(D, E, 0) || _GD_BadInput(D, E, 1))
+      if (_GD_BadInput(D, E, 0, 1) || _GD_BadInput(D, E, 1, 1))
         break;
 
       ns = _GD_GetEOF(D, E->e->entry[0], E->field, is_index);
@@ -257,7 +257,7 @@ off64_t _GD_GetEOF(DIRFILE *D, gd_entry_t* E, const char *parent, int *is_index)
       }
       break;
     case GD_LINCOM_ENTRY:
-      if (_GD_BadInput(D, E, 0))
+      if (_GD_BadInput(D, E, 0, 1))
         break;
 
       ns = _GD_GetEOF(D, E->e->entry[0], E->field, is_index);
@@ -278,7 +278,7 @@ off64_t _GD_GetEOF(DIRFILE *D, gd_entry_t* E, const char *parent, int *is_index)
       }
 
       for (i = 1; i < E->EN(lincom,n_fields); ++i) {
-        if (_GD_BadInput(D, E, i)) {
+        if (_GD_BadInput(D, E, i, 1)) {
           ns = -1;
           break;
         }
@@ -307,7 +307,7 @@ off64_t _GD_GetEOF(DIRFILE *D, gd_entry_t* E, const char *parent, int *is_index)
       }
       break;
     case GD_PHASE_ENTRY:
-      if (_GD_BadInput(D, E, 0))
+      if (_GD_BadInput(D, E, 0, 1))
         break;
 
       ns = _GD_GetEOF(D, E->e->entry[0], E->field, is_index);
@@ -358,7 +358,8 @@ off64_t gd_eof64(DIRFILE* D, const char *field_code_in)
     return -1;
   }
 
-  entry = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1);
+  entry = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1,
+      1);
 
   if (D->error) {
     dreturn("%i", -1);
@@ -412,13 +413,13 @@ static off64_t _GD_GetBOF(DIRFILE *D, gd_entry_t* E, const char *parent,
     case GD_POLYNOM_ENTRY:
     case GD_RECIP_ENTRY:
     case GD_WINDOW_ENTRY:
-      if (_GD_BadInput(D, E, 0))
+      if (_GD_BadInput(D, E, 0, 1))
         break;
 
       bof = _GD_GetBOF(D, E->e->entry[0], E->field, spf, ds);
       break;
     case GD_PHASE_ENTRY:
-      if (_GD_BadInput(D, E, 0))
+      if (_GD_BadInput(D, E, 0, 1))
         break;
 
       bof = _GD_GetBOF(D, E->e->entry[0], E->field, spf, ds);
@@ -444,7 +445,7 @@ static off64_t _GD_GetBOF(DIRFILE *D, gd_entry_t* E, const char *parent,
       break;
     case GD_MULTIPLY_ENTRY:
     case GD_DIVIDE_ENTRY:
-      if (_GD_BadInput(D, E, 0) || _GD_BadInput(D, E, 1))
+      if (_GD_BadInput(D, E, 0, 1) || _GD_BadInput(D, E, 1, 1))
         break;
 
       bof = _GD_GetBOF(D, E->e->entry[0], E->field, spf, ds);
@@ -469,7 +470,7 @@ static off64_t _GD_GetBOF(DIRFILE *D, gd_entry_t* E, const char *parent,
       }
       break;
     case GD_LINCOM_ENTRY:
-      if (_GD_BadInput(D, E, 0))
+      if (_GD_BadInput(D, E, 0, 1))
         break;
 
       bof = _GD_GetBOF(D, E->e->entry[0], E->field, spf, ds);
@@ -480,7 +481,7 @@ static off64_t _GD_GetBOF(DIRFILE *D, gd_entry_t* E, const char *parent,
       }
 
       for (i = 1; i < E->EN(lincom,n_fields); ++i) {
-        if (_GD_BadInput(D, E, i)) {
+        if (_GD_BadInput(D, E, i, 1)) {
           bof = -1;
           break;
         }
@@ -543,7 +544,8 @@ off64_t gd_bof64(DIRFILE* D, const char *field_code_in) gd_nothrow
     return -1;
   }
 
-  entry = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1);
+  entry = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1,
+      1);
 
   if (D->error) {
     dreturn("%i", -1);

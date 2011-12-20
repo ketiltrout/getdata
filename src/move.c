@@ -309,51 +309,17 @@ int _GD_StrCmpNull(const char *s1, const char *s2)
   return r;
 }
 
-int gd_move(DIRFILE* D, const char* field_code, int new_fragment, int move_data)
+int _GD_Move(DIRFILE *D, gd_entry_t *E, int new_fragment, int move_data)
 {
-  gd_entry_t *E, *Q;
   char *new_filebase, *new_code;
   char **new_meta = NULL;
   int i, dummy;
 
-  dtrace("%p, \"%s\", %i, %i", D, field_code, new_fragment, move_data);
-
-  if (D->flags & GD_INVALID) {/* don't crash */
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
+  dtrace("%p, %p, %i, %i", D, E, new_fragment, move_data);
 
   /* check access mode */
   if ((D->flags & GD_ACCMODE) == GD_RDONLY) {
     _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  if (new_fragment < 0 || new_fragment >= D->n_fragment) {
-    _GD_SetError(D, GD_E_BAD_INDEX, 0, NULL, new_fragment, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  _GD_ClearError(D);
-
-  E = _GD_FindField(D, field_code, D->entry, D->n_entries, NULL);
-
-  if (E == NULL) {
-    _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, field_code);
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  if (E->fragment_index == new_fragment) {
-    dreturn("%i", 0);
-    return 0;
-  }
-
-  if (E->field_type == GD_INDEX_ENTRY) {
-    _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, "INDEX");
     dreturn("%i", -1);
     return -1;
   }
@@ -382,9 +348,7 @@ int gd_move(DIRFILE* D, const char* field_code, int new_fragment, int move_data)
 
   if (strcmp(new_code, E->field)) {
     /* duplicate check */
-    Q = _GD_FindField(D, new_code, D->entry, D->n_entries, NULL);
-
-    if (Q) {
+    if (_GD_FindField(D, new_code, D->entry, D->n_entries, 1, NULL)) {
       _GD_SetError(D, GD_E_DUPLICATE, 0, NULL, 0, new_code);
       free(new_filebase);
       dreturn("%i", -1);
@@ -483,4 +447,93 @@ int gd_move(DIRFILE* D, const char* field_code, int new_fragment, int move_data)
 
   dreturn("%i", 0);
   return 0;
+}
+
+int gd_move(DIRFILE *D, const char *field_code, int new_fragment, int move_data)
+{
+  gd_entry_t *E;
+  int ret;
+
+  dtrace("%p, \"%s\", %i, %i", D, field_code, new_fragment, move_data);
+
+  if (D->flags & GD_INVALID) {
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  _GD_ClearError(D);
+
+  E = _GD_FindField(D, field_code, D->entry, D->n_entries, 1, NULL);
+
+  if (E == NULL) {
+    _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, field_code);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  if (E->field_type == GD_INDEX_ENTRY) {
+    _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, "INDEX");
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  if (new_fragment < 0 || new_fragment >= D->n_fragment) {
+    _GD_SetError(D, GD_E_BAD_INDEX, 0, NULL, new_fragment, NULL);
+    dreturn("%i", -1);
+    return -1;
+  } else if (E->fragment_index == new_fragment) {
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  ret = _GD_Move(D, E, new_fragment, move_data);
+
+  dreturn("%i", ret);
+  return ret;
+}
+
+int gd_move_alias(DIRFILE *D, const char *field_code, int new_fragment)
+  gd_nothrow
+{
+  gd_entry_t *E;
+  int ret;
+
+  dtrace("%p, \"%s\", %i", D, field_code, new_fragment);
+
+  if (D->flags & GD_INVALID) {
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  _GD_ClearError(D);
+
+  E = _GD_FindField(D, field_code, D->entry, D->n_entries, 0, NULL);
+
+  if (E == NULL) {
+    _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, field_code);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  if (E->field_type != GD_ALIAS_ENTRY) {
+    _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  if (new_fragment < 0 || new_fragment >= D->n_fragment) {
+    _GD_SetError(D, GD_E_BAD_INDEX, 0, NULL, new_fragment, NULL);
+    dreturn("%i", -1);
+    return -1;
+  } else if (E->fragment_index == new_fragment) {
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  ret = _GD_Move(D, E, new_fragment, 0);
+
+  dreturn("%i", ret);
+  return ret;
 }

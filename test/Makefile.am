@@ -44,17 +44,21 @@ INCLUDES=${WALL} $(WEXTRA) -I$(top_srcdir)/src
 
 EXTRA_DIST=test.h
 
-ADD_TESTS=add add_affix add_bit add_bit_bitnum add_bit_bitsize add_bit_invalid \
-					add_bit_numbits add_carray add_clincom add_code add_const \
-					add_cpolynom add_crecip add_crecip89 add_divide add_divide_invalid \
-					add_duplicate add_format add_invalid add_lincom add_lincom_invalid \
-					add_lincom_nfields add_linterp add_linterp_invalid add_multiply \
-					add_multiply_invalid add_phase add_phase_invalid add_polynom \
-					add_protect add_raw add_raw_include add_raw_invalid add_raw_spf \
-					add_raw_type add_rdonly add_recip add_sbit add_scalar \
-					add_scalar_carray add_sort add_spec add_spec_directive \
-					add_spec_invalid add_spec_meta add_string add_string_affix add_type \
-					add_window add_window_op
+ADD_TESTS=add add_affix add_alias add_bit add_bit_bitnum add_bit_bitsize \
+					add_bit_invalid add_bit_numbits add_carray add_clincom add_code \
+					add_const add_cpolynom add_crecip add_crecip89 add_divide \
+					add_divide_invalid add_duplicate add_format add_invalid add_lincom \
+					add_lincom_invalid add_lincom_nfields add_linterp \
+					add_linterp_invalid add_multiply add_multiply_invalid add_phase \
+					add_phase_invalid add_polynom add_protect add_raw add_raw_include \
+					add_raw_invalid add_raw_spf add_raw_type add_rdonly add_recip \
+					add_resolv add_sbit add_scalar add_scalar_carray add_sort add_spec \
+					add_spec_directive add_spec_invalid add_spec_meta add_spec_resolv \
+					add_string add_string_affix add_type add_window add_window_op
+
+ALIAS_TESTS=alias_list alias_list_alias alias_list_missing alias_num \
+						alias_num_alias alias_num_missing alias_target alias_target_alias \
+						alias_target_missing
 
 ALTER_TESTS=alter_bit_bitnum alter_bit_numbits alter_carray_len \
 						alter_carray_type alter_const alter_cpolynom alter_crecip \
@@ -133,8 +137,8 @@ CONVERT_TESTS=convert_complex128_complex64 convert_complex128_float64 \
 CREAT_TESTS=creat creat_excl creat_rdonly
 
 DEL_TESTS=del del_carray del_carray_deref del_const del_const_deref \
-					del_const_force del_data del_derived del_derived_force del_meta \
-					del_meta_force
+					del_const_force del_data del_derived del_derived_after \
+					del_derived_force del_meta del_meta_force
 
 DFES_TESTS=dfes_bit dfes_divide dfes_lincom dfes_linterp dfes_multiply \
 					 dfes_null dfes_phase dfes_raw dfes_recip dfes_zero
@@ -148,7 +152,8 @@ ENTRY_TESTS=entry_bad_code entry_bit entry_bit_scalar entry_divide \
 						entry_multiply entry_phase entry_phase_scalar entry_polynom \
 						entry_polynom_scalar entry_raw entry_raw_scalar \
 						entry_raw_scalar_code entry_raw_scalar_type entry_recip \
-						entry_scalar_repr entry_type entry_window entry_window_scalar
+						entry_scalar_repr entry_type entry_type_alias \
+						entry_window entry_window_scalar
 
 EOF_TESTS=eof eof_index eof_lincom eof_phase
 
@@ -165,7 +170,8 @@ FLUSH_TESTS=flush flush_all flush_bad_code flush_invalid flush_meta flush_spec
 FOFFS_TESTS=foffs_alter foffs_get foffs_move
 
 FRAGMENT_TESTS=fragment_affix fragment_affix_alter fragment_affix_alter2 \
-							 fragment_affix_dup fragment_index fragment_name fragment_name_oor
+							 fragment_affix_dup fragment_index fragment_index_alias \
+							 fragment_name fragment_name_oor fragment_num fragment_parent
 
 GET_TESTS=${GET64} get_bad_code get_bit get_carray get_carray_len \
 					get_carray_slice get_char get_clincom get_complex128 \
@@ -195,7 +201,7 @@ GZIP_TESTS=gzip_add gzip_get gzip_get_get gzip_get_put gzip_move_from \
 
 HEADER_TESTS=header_complex
 
-HIDE_TESTS=hide hide_unhide
+HIDE_TESTS=hide hide_hidden hide_unhide
 
 INCLUDE_TESTS=include include_accmode include_affix include_auto include_cb \
 							include_creat include_ignore include_index include_invalid \
@@ -210,24 +216,24 @@ endif
 
 LZMA_TESTS=lzma_get lzma_nframes
 
-MADD_TESTS=madd madd_affix madd_bit madd_bit_invalid madd_carray madd_clincom \
-					 madd_const madd_cpolynom madd_crecip madd_crecip89 madd_divide \
-					 madd_index madd_lincom madd_lincom_invalid madd_linterp \
+MADD_TESTS=madd madd_affix madd_alias madd_bit madd_bit_invalid madd_carray \
+					 madd_clincom madd_const madd_cpolynom madd_crecip madd_crecip89 \
+					 madd_divide madd_index madd_lincom madd_lincom_invalid madd_linterp \
 					 madd_linterp_invalid madd_multiply madd_multiply_invalid madd_phase \
 					 madd_phase_invalid madd_polynom madd_recip madd_sbit madd_spec \
-					 madd_spec_directive madd_spec_invalid madd_string madd_window
+					 madd_spec_directive madd_spec_invalid madd_spec_resolv madd_string \
+					 madd_window
 
-MOVE_TESTS=move move_affix move_affix_dup move_data_enc_ar move_data_enc_ra \
-					 move_data_endian move_data_foffs move_data_nop move_index move_meta \
-					 move_protect move_subdir
+MOVE_TESTS=move move_affix move_affix_dup move_alias move_data_enc_ar \
+					 move_data_enc_ra move_data_endian move_data_foffs move_data_nop \
+					 move_index move_meta move_protect move_subdir
 
-NAME_TESTS=name name_affix name_affix_bad name_dup name_move
+NAME_TESTS=name name_affix name_affix_bad name_after name_after_const name_dup \
+					 name_move name_update name_update_const
 
 NFIELDS_TESTS=nfields nfields_hidden nfields_invalid nfields_type \
 							nfields_type_hidden nfields_type_invalid nfields_vector \
 							nfields_vector_hidden nfields_vector_invalid
-
-NFRAGMENTS_TESTS=nfragments
 
 NFRAMES_TESTS=nframes ${NFRAMES64} nframes_empty nframes_invalid \
 							$(NFRAMES_OFF64) nframes_spf
@@ -240,12 +246,11 @@ NMETA_TESTS=nmeta nmeta_hidden nmeta_invalid nmeta_parent nmeta_type \
 OPEN_TESTS=open open_cb_abort open_cb_cont open_cb_ignore open_cb_invalid \
 					 open_cb_rescan open_eaccess open_nonexistent open_notdirfile
 
-PARENT_TESTS=parent
-
-PARSE_TESTS=parse_badline parse_bit parse_bit4 parse_bit_bitnum \
-						parse_bit_bitsize parse_bit_ncols parse_bit_numbits \
-						parse_bit_scalar parse_carray parse_carray_long parse_const \
-						parse_const_ncols parse_divide parse_duplicate \
+PARSE_TESTS=parse_alias parse_alias_code parse_alias_dup parse_alias_meta \
+						parse_alias_missing parse_badline parse_bit parse_bit4 \
+						parse_bit_bitnum parse_bit_bitsize parse_bit_ncols \
+						parse_bit_numbits parse_bit_scalar parse_carray parse_carray_long \
+						parse_const parse_const_ncols parse_divide parse_duplicate \
 						parse_duplicate_ignore parse_endian_bad parse_endian_big \
 						parse_endian_force parse_endian_little parse_endian_slash \
 						parse_eol parse_foffs parse_foffs_include parse_foffs_slash \
@@ -258,22 +263,24 @@ PARSE_TESTS=parse_badline parse_bit parse_bit4 parse_bit_bitnum \
 						parse_lincom parse_lincom_ncols1 parse_lincom_ncols2 \
 						parse_lincom_nfields parse_lincom_nofields parse_lincom_non \
 						parse_lincom_non_ncols parse_lincom_scalar parse_linterp \
-						parse_linterp_ncols parse_meta parse_meta_affix \
-						parse_meta_implicit parse_meta_implicit2 parse_meta_implicit_affix \
-						parse_meta_index parse_meta_index2 parse_meta_meta \
-						parse_meta_parent parse_meta_raw parse_multiply \
-						parse_multiply_ncols parse_name parse_name_dot parse_name_ext \
-						parse_name_pedantic parse_ncols parse_phase parse_phase_ncols \
-						parse_phase_scalar parse_polynom parse_polynom_ncols1 \
-						parse_polynom_ncols2 parse_polynom_scalar parse_protect_all \
-						parse_protect_bad parse_protect_data parse_protect_format \
-						parse_protect_none parse_quote parse_quote_mismatch parse_raw \
-						parse_raw_char parse_raw_ncols parse_raw_scalar parse_raw_spf \
-						parse_raw_type parse_recip parse_ref parse_ref_nonexistent \
-						parse_sbit parse_sort parse_string parse_string_ncols \
-						parse_string_null parse_version parse_version_89 parse_version_98 \
-						parse_version_include parse_version_permissive parse_version_p8 \
-						parse_version_p9 parse_version_slash parse_whitespace parse_window \
+						parse_linterp_ncols parse_malias parse_malias_dup \
+						parse_meta parse_meta_affix parse_meta_alias parse_meta_implicit \
+						parse_meta_implicit2 parse_meta_implicit_affix parse_meta_index \
+						parse_meta_index2 parse_meta_jump parse_meta_malias \
+						parse_meta_meta parse_meta_parent parse_meta_raw \
+						parse_multiply parse_multiply_ncols parse_name parse_name_dot \
+						parse_name_ext parse_name_pedantic parse_ncols parse_phase \
+						parse_phase_ncols parse_phase_scalar parse_polynom \
+						parse_polynom_ncols1 parse_polynom_ncols2 parse_polynom_scalar \
+						parse_protect_all parse_protect_bad parse_protect_data \
+						parse_protect_format parse_protect_none parse_quote \
+						parse_quote_mismatch parse_raw parse_raw_char parse_raw_ncols \
+						parse_raw_scalar parse_raw_spf parse_raw_type parse_recip \
+						parse_ref parse_ref_nonexistent parse_sbit parse_sort parse_string \
+						parse_string_ncols parse_string_null parse_version \
+						parse_version_89 parse_version_98 parse_version_include \
+						parse_version_permissive parse_version_p8 parse_version_p9 \
+						parse_version_slash parse_whitespace parse_window \
 						parse_window_ncols parse_window_op parse_window_scalar
 
 PROTECT_TESTS=protect_alter protect_get
@@ -314,8 +321,9 @@ SLIM_TESTS=slim_get slim_nframes
 SVLIST_TESTS=svlist svlist_hidden svlist_invalid svlist_meta \
 						 svlist_meta_hidden svlist_meta_invalid
 
-SPF_TESTS=spf spf_divide spf_lincom spf_multiply spf_polynom spf_recip \
-					spf_recurse
+SPF_TESTS=spf spf_alias spf_alias_missing spf_alias_meta \
+					spf_divide spf_lincom spf_multiply \
+					spf_polynom spf_recip spf_recurse
 
 TELL_TESTS=tell ${TELL64}
 
@@ -335,25 +343,20 @@ VLIST_TESTS=vlist vlist_hidden vlist_invalid vlist_meta vlist_meta_hidden \
 
 XZ_TESTS=xz_get xz_nframes
 
-TESTS=$(ADD_TESTS)        $(ALTER_TESTS)      $(ASCII_TESTS)      \
-			$(BOF_TESTS)        $(BZIP_TESTS)       $(CLOSE_TESTS)      \
-			$(CONVERT_TESTS)    $(CREAT_TESTS)      $(CVLIST_TESTS)     \
-			$(DEL_TESTS)        $(DFES_TESTS)       $(ENCODE_TESTS)     \
-			$(ENDIAN_TESTS)     $(ENTRY_TESTS)      $(EOF_TESTS)        \
-			$(ERROR_TESTS)      $(FILE_TESTS)       $(FLIST_TESTS)      \
-			$(FLUSH_TESTS)      $(FOFFS_TESTS)      $(FRAGMENT_TESTS)   \
-			$(GET_TESTS)        $(GLOBAL_TESTS)     $(GZIP_TESTS)       \
-			$(HEADER_TESTS)     $(HIDE_TESTS)       $(INCLUDE_TESTS)    \
-			$(INDEX_TESTS)      $(LEGACY_TESTS)     $(LZMA_TESTS)       \
-			$(MADD_TESTS)       $(MOVE_TESTS)       $(NAME_TESTS)       \
-			$(NFIELDS_TESTS)    $(NFRAGMENTS_TESTS) $(NFRAMES_TESTS)    \
-			$(NMETA_TESTS)      $(OPEN_TESTS)       $(PARENT_TESTS)     \
-			$(PARSE_TESTS)      $(PROTECT_TESTS)    $(PUT_TESTS)        \
-			$(REF_TESTS)        $(REPR_TESTS)       $(SEEK_TESTS)       \
-			$(SIE_TESTS)        $(SLIM_TESTS)       $(SPF_TESTS)        \
-			$(SVLIST_TESTS)     $(TELL_TESTS)       $(TRUNC_TESTS)      \
-			$(UNCLUDE_TESTS)    $(VERSION_TESTS)    $(VLIST_TESTS)      \
-			$(XZ_TESTS)
+TESTS=$(ADD_TESTS)      $(ALIAS_TESTS)    $(ALTER_TESTS)    $(ASCII_TESTS)    \
+			$(BOF_TESTS)      $(BZIP_TESTS)     $(CLOSE_TESTS)    $(CONVERT_TESTS)  \
+			$(CREAT_TESTS)    $(CVLIST_TESTS)   $(DEL_TESTS)      $(DFES_TESTS)     \
+			$(ENCODE_TESTS)   $(ENDIAN_TESTS)   $(ENTRY_TESTS)    $(EOF_TESTS)      \
+			$(ERROR_TESTS)    $(FILE_TESTS)     $(FLIST_TESTS)    $(FLUSH_TESTS)    \
+			$(FOFFS_TESTS)    $(FRAGMENT_TESTS) $(GET_TESTS)      $(GLOBAL_TESTS)   \
+			$(GZIP_TESTS)     $(HEADER_TESTS)   $(HIDE_TESTS)     $(INCLUDE_TESTS)  \
+			$(INDEX_TESTS)    $(LEGACY_TESTS)   $(LZMA_TESTS)     $(MADD_TESTS)     \
+			$(MOVE_TESTS)     $(NAME_TESTS)     $(NFIELDS_TESTS)  $(NFRAMES_TESTS)  \
+			$(NMETA_TESTS)    $(OPEN_TESTS)     $(PARSE_TESTS)    $(PROTECT_TESTS)  \
+			$(PUT_TESTS)      $(REF_TESTS)      $(REPR_TESTS)     $(SEEK_TESTS)     \
+			$(SIE_TESTS)      $(SLIM_TESTS)     $(SPF_TESTS)      $(SVLIST_TESTS)   \
+			$(TELL_TESTS)     $(TRUNC_TESTS)    $(UNCLUDE_TESTS)  $(VERSION_TESTS)  \
+			$(VLIST_TESTS)    $(XZ_TESTS)
 
 check_PROGRAMS=$(TESTS)
 

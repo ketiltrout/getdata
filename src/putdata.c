@@ -132,7 +132,7 @@ static size_t _GD_DoLinterpOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
   dtrace("%p, %p, %lli, %zu, 0x%X, %p", D, E, first_samp, num_samp, data_type,
       data_in);
 
-  if (_GD_BadInput(D, E, 0)) {
+  if (_GD_BadInput(D, E, 0, 1)) {
     dreturn("%i", 0);
     return 0;
   }
@@ -241,7 +241,7 @@ static size_t _GD_DoLincomOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
     return 0;
   }
 
-  if (_GD_BadInput(D, E, 0)) {
+  if (_GD_BadInput(D, E, 0, 1)) {
     dreturn("%i", 0);
     return 0;
   }
@@ -310,7 +310,7 @@ static size_t _GD_DoBitOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
   dtrace("%p, %p, %lli, %zu, 0x%X, %p", D, E, first_samp, num_samp, data_type,
       data_in);
 
-  if (_GD_BadInput(D, E, 0)) {
+  if (_GD_BadInput(D, E, 0, 1)) {
     dreturn("%i", 0);
     return 0;
   }
@@ -364,7 +364,7 @@ static size_t _GD_DoPhaseOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
   dtrace("%p, %p, %lli, %zu, 0x%X, %p", D, E, first_samp, num_samp, data_type,
       data_in);
 
-  if (_GD_BadInput(D, E, 0)) {
+  if (_GD_BadInput(D, E, 0, 1)) {
     dreturn("%i", 0);
     return 0;
   }
@@ -386,7 +386,7 @@ static size_t _GD_DoRecipOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
   dtrace("%p, %p, %lli, %zu, 0x%X, %p", D, E, first_samp, num_samp, data_type,
       data_in);
 
-  if (_GD_BadInput(D, E, 0)) {
+  if (_GD_BadInput(D, E, 0, 1)) {
     dreturn("%i", 0);
     return 0;
   }
@@ -439,7 +439,7 @@ static size_t _GD_DoPolynomOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
     return 0;
   }
 
-  if (_GD_BadInput(D, E, 0)) {
+  if (_GD_BadInput(D, E, 0, 1)) {
     dreturn("%i", 0);
     return 0;
   }
@@ -571,7 +571,7 @@ size_t _GD_DoFieldOut(DIRFILE *D, gd_entry_t* E, int repr, off64_t first_samp,
   }
 
   if (!E->e->calculated)
-    _GD_CalculateEntry(D, E);
+    _GD_CalculateEntry(D, E, 1);
 
   if (D->error) {
     dreturn("%i", 0);
@@ -669,7 +669,8 @@ size_t gd_putdata64(DIRFILE* D, const char *field_code_in, off64_t first_frame,
 
   _GD_ClearError(D);
 
-  entry = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1);
+  entry = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1,
+      1);
 
   if (D->error) {
     dreturn("%i", 0);

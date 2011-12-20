@@ -75,6 +75,8 @@ static const struct {
     "Unrecognised operator ({4}) on line {3} of {2}", 0 },
   { GD_E_FORMAT, GD_E_FORMAT_META_META,
     "Cannot attach meta field to meta field {4} on line {3} of {2}", 0 },
+  { GD_E_FORMAT, GD_E_FORMAT_ALIAS,
+    "Cannot use alias {4} as parent to a meta field on line {3} of {2}", 0 },
   /* GD_E_TRUNC: 1 = suberror, 2 = filename. 3 = errno */
   { GD_E_TRUNC, 0, "Error truncating {2}: ", 1 },
   /* GD_E_CREAT: 1 = suberror, 2 = filename, 3 = errno */
@@ -149,7 +151,7 @@ static const struct {
   { GD_E_DIMENSION, GD_E_DIM_CALLER,
     "Vector field expected, but scalar field given: {4}", 0 },
   /* GD_E_BAD_INDEX: 3 = index */
-  { GD_E_BAD_INDEX, 0, "Invalid format file index: {3}", 0 },
+  { GD_E_BAD_INDEX, 0, "Invalid fragment index: {3}", 0 },
   /* GD_E_BAD_SCALAR: 2 = parent field, 4 = scalar field */
   { GD_E_BAD_SCALAR, GD_E_SCALAR_CODE,
     "Scalar field {4} not found in definition of {2}", 0 },
@@ -170,6 +172,7 @@ static const struct {
     "Cannot delete field {4} used in definiton of field {2}", 0 },
   { GD_E_DELETE, GD_E_DEL_DERIVED,
     "Cannot delete field {4} used as input to field {2}", 0 },
+  { GD_E_DELETE, GD_E_DEL_ALIAS, "Cannot delete field {4} with aliases", 0 },
   /* GD_E_ARGUMENT: (nothing) */
   { GD_E_ARGUMENT, GD_E_ARG_WHENCE, "Invalid origin specified", 0 },
   { GD_E_ARGUMENT, GD_E_ARG_ENDIANNESS, "Invalid endianness specified", 0 },

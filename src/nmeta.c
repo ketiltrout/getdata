@@ -34,7 +34,7 @@ unsigned int gd_nmfields(DIRFILE* D, const char* parent) gd_nothrow
 
   _GD_ClearError(D);
 
-  P = _GD_FindField(D, parent, D->entry, D->n_entries, NULL);
+  P = _GD_FindField(D, parent, D->entry, D->n_entries, 1, NULL);
 
   if (P == NULL || P->e->n_meta == -1) {
     _GD_SetError(D, GD_E_BAD_CODE, P ? GD_E_CODE_INVALID : GD_E_CODE_MISSING,
@@ -63,7 +63,7 @@ unsigned int gd_nmvectors(DIRFILE* D, const char* parent) gd_nothrow
 
   _GD_ClearError(D);
 
-  P = _GD_FindField(D, parent, D->entry, D->n_entries, NULL);
+  P = _GD_FindField(D, parent, D->entry, D->n_entries, 1, NULL);
 
   if (P == NULL || P->e->n_meta == -1) {
     _GD_SetError(D, GD_E_BAD_CODE, P ? GD_E_CODE_INVALID : GD_E_CODE_MISSING,
@@ -100,7 +100,7 @@ unsigned int gd_nmfields_by_type(DIRFILE* D, const char* parent,
 
   _GD_ClearError(D);
 
-  P = _GD_FindField(D, parent, D->entry, D->n_entries, NULL);
+  P = _GD_FindField(D, parent, D->entry, D->n_entries, 1, NULL);
 
   if (P == NULL || P->e->n_meta == -1) {
     _GD_SetError(D, GD_E_BAD_CODE, P ? GD_E_CODE_INVALID : GD_E_CODE_MISSING,

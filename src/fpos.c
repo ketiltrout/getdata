@@ -44,13 +44,13 @@ off64_t _GD_GetFilePos(DIRFILE *D, gd_entry_t *E, off64_t index_pos)
         D->fragment[E->fragment_index].frame_offset;
       break;
     case GD_LINCOM_ENTRY:
-      if (_GD_BadInput(D, E, 0))
+      if (_GD_BadInput(D, E, 0, 1))
         break;
 
       pos = _GD_GetFilePos(D, E->e->entry[0], -1);
       if (!D->error)
         for (i = 1; i < E->EN(lincom,n_fields); ++i) {
-          if (_GD_BadInput(D, E, i)) {
+          if (_GD_BadInput(D, E, i, 1)) {
             pos = -1;
             break;
           }
@@ -67,14 +67,14 @@ off64_t _GD_GetFilePos(DIRFILE *D, gd_entry_t *E, off64_t index_pos)
     case GD_POLYNOM_ENTRY:
     case GD_SBIT_ENTRY:
     case GD_RECIP_ENTRY:
-      if (_GD_BadInput(D, E, 0))
+      if (_GD_BadInput(D, E, 0, 1))
           break;
       pos = _GD_GetFilePos(D, E->e->entry[0], -1);
       break;
     case GD_MULTIPLY_ENTRY:
     case GD_DIVIDE_ENTRY:
     case GD_WINDOW_ENTRY:
-      if (_GD_BadInput(D, E, 0) || _GD_BadInput(D, E, 1))
+      if (_GD_BadInput(D, E, 0, 1) || _GD_BadInput(D, E, 1, 1))
           break;
       pos = _GD_GetFilePos(D, E->e->entry[0], 0);
       pos2 = _GD_GetFilePos(D, E->e->entry[0], pos);
@@ -84,7 +84,7 @@ off64_t _GD_GetFilePos(DIRFILE *D, gd_entry_t *E, off64_t index_pos)
       }
       break;
     case GD_PHASE_ENTRY:
-      if (_GD_BadInput(D, E, 0))
+      if (_GD_BadInput(D, E, 0, 1))
         break;
       pos = _GD_GetFilePos(D, E->e->entry[0], -1);
       if (pos >= 0)
@@ -127,7 +127,8 @@ off64_t gd_tell64(DIRFILE *D, const char *field_code_in)
 
   _GD_ClearError(D);
 
-  entry = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1);
+  entry = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1,
+      1);
 
   if (D->error) {
     dreturn("%u", 0);
@@ -262,7 +263,7 @@ static int _GD_Seek(DIRFILE *D, gd_entry_t *E, off64_t offset,
       break;
     case GD_LINCOM_ENTRY:
       for (i = 0; i < E->EN(lincom,n_fields); ++i)
-        if (!_GD_BadInput(D, E, i))
+        if (!_GD_BadInput(D, E, i, 1))
           _GD_Seek(D, E->e->entry[i], offset, mode);
         else
           break;
@@ -270,7 +271,7 @@ static int _GD_Seek(DIRFILE *D, gd_entry_t *E, off64_t offset,
     case GD_MULTIPLY_ENTRY:
     case GD_DIVIDE_ENTRY:
     case GD_WINDOW_ENTRY:
-      if (_GD_BadInput(D, E, 1))
+      if (_GD_BadInput(D, E, 1, 1))
         break;
       if (_GD_Seek(D, E->e->entry[1], offset, mode))
         break;
@@ -280,11 +281,11 @@ static int _GD_Seek(DIRFILE *D, gd_entry_t *E, off64_t offset,
     case GD_POLYNOM_ENTRY:
     case GD_SBIT_ENTRY:
     case GD_RECIP_ENTRY:
-      if (!_GD_BadInput(D, E, 0))
+      if (!_GD_BadInput(D, E, 0, 1))
         _GD_Seek(D, E->e->entry[0], offset, mode);
       break;
     case GD_PHASE_ENTRY:
-      if (!_GD_BadInput(D, E, 0))
+      if (!_GD_BadInput(D, E, 0, 1))
         _GD_Seek(D, E->e->entry[0], offset + E->EN(phase,shift), mode);
       break;
     case GD_INDEX_ENTRY:
@@ -325,7 +326,8 @@ off64_t gd_seek64(DIRFILE *D, const char *field_code_in, off64_t frame_num,
 
   _GD_ClearError(D);
 
-  entry = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1);
+  entry = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1,
+      1);
 
   if (D->error) {
     dreturn("%u", -1);

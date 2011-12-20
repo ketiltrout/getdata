@@ -436,7 +436,7 @@ DIRFILE* gd_cbopen(const char* filedir, unsigned long flags,
     0;
   D->fragment[0].suffix = D->fragment[0].prefix = NULL;
 
-  ref_name = _GD_ParseFragment(fp, D, 0, &D->standards, &D->flags);
+  ref_name = _GD_ParseFragment(fp, D, 0, &D->standards, &D->flags, 1);
   fclose(fp);
 
   if (D->error != GD_E_OK) {
@@ -446,7 +446,7 @@ DIRFILE* gd_cbopen(const char* filedir, unsigned long flags,
 
   /* Find the reference field */
   if (ref_name != NULL) {
-    E = _GD_FindField(D, ref_name, D->entry, D->n_entries, NULL);
+    E = _GD_FindField(D, ref_name, D->entry, D->n_entries, 1, NULL);
     if (E == NULL)
       _GD_SetError(D, GD_E_BAD_REFERENCE, GD_E_REFERENCE_CODE, NULL, 0,
           ref_name);

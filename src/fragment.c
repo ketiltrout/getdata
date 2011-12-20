@@ -139,11 +139,11 @@ static char **_GD_CheckAffixes(DIRFILE *D, int i, const char *prefix,
 
         /* look for a duplicate and validate */
         if (new_codes[nn - 1] && _GD_FindField(D, new_codes[nn - 1], D->entry,
-              D->n_entries, (unsigned int*)&dummy))
+              D->n_entries, 1, NULL))
         {
           _GD_SetError(D, GD_E_DUPLICATE, 0, NULL, 0, new_codes[nn - 1]);
         } else if (_GD_ValidateField(new_codes[nn - 1], D->standards, 1, 0,
-              &dummy))
+              NULL))
         {
           _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_INVALID, NULL, 0,
               new_codes[nn - 1]);

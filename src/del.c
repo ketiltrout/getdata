@@ -71,6 +71,14 @@ static void _GD_ClearDerived(DIRFILE* D, gd_entry_t* E, const gd_entry_t* C,
     case GD_CARRAY_ENTRY:
     case GD_STRING_ENTRY:
       break;
+    default:
+      if (E->field_type == GD_ALIAS_ENTRY)
+        if (E->e->entry[0] == C) {
+          if (check)
+            _GD_SetError(D, GD_E_DELETE, GD_E_DEL_ALIAS, E->field, 0, C->field);
+          else
+            E->e->entry[0] = NULL;
+        }
   }
 
   dreturnvoid();
@@ -85,7 +93,7 @@ static int _GD_DeReferenceOne(DIRFILE* D, gd_entry_t* E, gd_entry_t* C,
   dtrace("%p, %p, %p, %i, %i, 0x%03x, %p", D, E, C, check, i, type, data);
 
   if (E->scalar[i] != NULL) {
-    repr = _GD_GetRepr(D, E->scalar[i], &field_code);
+    repr = _GD_GetRepr(D, E->scalar[i], &field_code, 1);
 
     if (D->error) {
       dreturn("%i", 1);
@@ -203,24 +211,17 @@ static void _GD_DeReference(DIRFILE* D, gd_entry_t* E, gd_entry_t* C,
   dreturnvoid();
 }
 
-int gd_delete(DIRFILE* D, const char* field_code_in, int flags)
+static int _GD_Delete(DIRFILE *D, gd_entry_t *E, unsigned int index,
+    unsigned int flags)
 {
-  unsigned int index;
   unsigned int first, last = 0;
-  int n_del, i, repr, len;
+  int n_del, i, len;
   unsigned int j;
-  char *field_code;
   char **new_ref = NULL;
-  gd_entry_t *reference = NULL, *E;
+  gd_entry_t *reference = NULL;
   gd_entry_t **del_list;
 
-  dtrace("%p, \"%s\", 0x%X", D, field_code_in, flags);
-
-  if (D->flags & GD_INVALID) {/* don't crash */
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
+  dtrace("%p, %p, %u, 0x%X", D, E, index, flags);
 
   if ((D->flags & GD_ACCMODE) != GD_RDWR) {
     _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
@@ -228,16 +229,7 @@ int gd_delete(DIRFILE* D, const char* field_code_in, int flags)
     return -1;
   }
 
-  _GD_ClearError(D);
-
-  E = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, &index, 1);
-
-  if (D->error) {
-    dreturn("%i", -1);
-    return -1;
-  }
-
-  len = strlen(field_code);
+  len = strlen(E->field);
 
   /* check protection */
   if (D->fragment[E->fragment_index].protection & GD_PROTECT_FORMAT) {
@@ -250,18 +242,16 @@ int gd_delete(DIRFILE* D, const char* field_code_in, int flags)
   /* If this field has metafields, and we weren't asked to delete those too,
    * complain */
   if (E->e->n_meta > 0 && ~flags & GD_DEL_META) {
-    _GD_SetError(D, GD_E_DELETE, GD_E_DEL_META, NULL, 0, field_code);
+    _GD_SetError(D, GD_E_DELETE, GD_E_DEL_META, NULL, 0, E->field);
     dreturn("%i", -1);
     return -1;
   } else if (E->e->n_meta > 0) {
     /* find one of the meta fields -- it's not true that metafields are
      * necessarily sorted directly after their parent */
     if (_GD_FindField(D, E->e->p.meta_entry[0]->field, D->entry, D->n_entries,
-          &first) == NULL)
+          0, &first) == NULL)
     {
       _GD_InternalError(D);
-      if (field_code != field_code_in)
-        free(field_code);
       dreturn("%i", -1);
       return -1;
     }
@@ -271,26 +261,23 @@ int gd_delete(DIRFILE* D, const char* field_code_in, int flags)
      * search linearly in both directions until we find something that isn't a
      * meta field of our parent */
     while (first > 0)
-      if (strncmp(D->entry[first - 1]->field, field_code, len) == 0 &&
+      if (strncmp(D->entry[first - 1]->field, E->field, len) == 0 &&
           D->entry[first - 1]->field[len] == '/')
         first--;
       else
         break;
 
     while (last < D->n_entries - 1)
-      if (strncmp(D->entry[last + 1]->field, field_code, len) == 0 &&
+      if (strncmp(D->entry[last + 1]->field, E->field, len) == 0 &&
           D->entry[last + 1]->field[len] == '/')
         last++;
       else
         break;
   }
 
-  if (field_code != field_code_in)
-    free(field_code);
-
   /* gather a list of fields */
-  del_list = (gd_entry_t **)_GD_Malloc(D,
-      sizeof(gd_entry_t*) * ((E->e->n_meta == -1) ?  1 : 1 + E->e->n_meta));
+  del_list = (gd_entry_t **)_GD_Malloc(D, sizeof(gd_entry_t*) *
+        (((E->e->n_meta == -1) ?  0 : E->e->n_meta) + 1));
 
   if (del_list == NULL) {
     dreturn("%i", -1);
@@ -311,7 +298,7 @@ int gd_delete(DIRFILE* D, const char* field_code_in, int flags)
               del_list[i]->field_type == GD_CARRAY_ENTRY) &&
             ~flags & GD_DEL_DEREF)
           _GD_DeReference(D, D->entry[j], del_list[i], 1);
-        else if (~del_list[i]->field_type & GD_SCALAR_ENTRY)
+        else if (del_list[i]->field_type != GD_STRING_ENTRY)
           _GD_ClearDerived(D, D->entry[j], del_list[i], 1);
 
         if (D->error) {
@@ -391,7 +378,7 @@ int gd_delete(DIRFILE* D, const char* field_code_in, int flags)
 
             if (in_scope) {
               new_ref[i] = _GD_Strdup(D, D->entry[j]->field);
-              if (new_ref == NULL) {
+              if (new_ref[i] == NULL) {
                 for (f = 0; f < i; ++f)
                   free(new_ref[f]);
                 free(new_ref);
@@ -430,7 +417,7 @@ int gd_delete(DIRFILE* D, const char* field_code_in, int flags)
       if ((del_list[i]->field_type == GD_CONST_ENTRY ||
             del_list[i]->field_type == GD_CARRAY_ENTRY) && flags & GD_DEL_DEREF)
         _GD_DeReference(D, D->entry[j], del_list[i], 0);
-      else if (~del_list[i]->field_type & GD_SCALAR_ENTRY)
+      else if (del_list[i]->field_type != GD_STRING_ENTRY)
         _GD_ClearDerived(D, D->entry[j], del_list[i], 0);
 
   free(del_list);
@@ -469,6 +456,7 @@ int gd_delete(DIRFILE* D, const char* field_code_in, int flags)
   /* Remove the entry from the list -- we need not worry about the way we've
    * already modified D->entry, since E is guaranteed to be before the stuff
    * we've already removed */
+  D->fragment[E->fragment_index].modified = 1;
   _GD_FreeE(D, E, 1);
 
   memmove(D->entry + index, D->entry + index + 1,
@@ -481,4 +469,75 @@ int gd_delete(DIRFILE* D, const char* field_code_in, int flags)
 
   dreturn("%i", 0);
   return 0;
+}
+
+int gd_delete(DIRFILE *D, const char *field_code_in, unsigned int flags)
+{
+  unsigned index;
+  int repr, ret;
+  char *field_code;
+  gd_entry_t *E;
+
+  dtrace("%p, \"%s\", 0x%X", D, field_code_in, flags);
+
+  if (D->flags & GD_INVALID) {/* don't crash */
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  _GD_ClearError(D);
+
+  E = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, &index, 1, 1);
+
+  if (field_code != field_code_in)
+    free(field_code);
+
+  if (D->error) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  ret = _GD_Delete(D, E, index, flags);
+
+  dreturn("%i", ret);
+  return ret;
+}
+
+
+int gd_delete_alias(DIRFILE *D, const char *field_code, unsigned int flags)
+  gd_nothrow
+{
+  unsigned index;
+  int ret;
+  gd_entry_t *E;
+
+  dtrace("%p, \"%s\", 0x%X", D, field_code, flags);
+
+  if (D->flags & GD_INVALID) {
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  _GD_ClearError(D);
+
+  E = _GD_FindField(D, field_code, D->entry, D->n_entries, 0, &index);
+
+  if (!E) {
+    _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, field_code);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  if (E->field_type != GD_ALIAS_ENTRY) {
+    _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  ret = _GD_Delete(D, E, index, flags);
+
+  dreturn("%i", ret);
+  return ret;
 }
