@@ -48,9 +48,9 @@ int main(void)
   close(fd);
 
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  ret = gd_alter_affixes(D, 1, NULL, "C");
+  ret = gd_alter_affixes(D, 1, NULL, "");
   e1 = gd_error(D);
-  gd_spf(D, "BdataYC");
+  gd_spf(D, "ABdataY");
   e2 = gd_error(D);
   gd_close(D);
 

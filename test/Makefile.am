@@ -338,8 +338,8 @@ VERSION_TESTS=version_0 version_0_write version_1 version_1_write version_2 \
 							version_7_strict version_7_write version_8 version_8_strict \
 							version_8_write version_9 version_9_strict version_9_write
 
-VLIST_TESTS=vlist vlist_hidden vlist_invalid vlist_meta vlist_meta_hidden \
-						vlist_meta_invalid
+VLIST_TESTS=vlist vlist_alias vlist_hidden vlist_invalid vlist_meta \
+						vlist_meta_hidden vlist_meta_invalid
 
 XZ_TESTS=xz_get xz_nframes
 

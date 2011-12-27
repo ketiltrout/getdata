@@ -1,4 +1,4 @@
-/* Copyright (C) 2009, 2010 D. V. Wiebe
+/* Copyright (C) 2009-2011 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -35,7 +35,7 @@ static const char* gdpy_entry_type_names[] =
   "SBIT_ENTRY",     /* 0x09 */
   "DIVIDE_ENTRY",   /* 0x0A */
   "RECIP_ENTRY",    /* 0x0B */
-  NULL,             /* 0x0C - unused */
+  "WINDOW_ENTRY",   /* 0x0C */
   NULL,             /* 0x0D - unused */
   NULL,             /* 0x0E - unused */
   NULL,             /* 0x0F - unused */
@@ -97,14 +97,22 @@ static void gdpy_set_scalar_from_pyobj(PyObject* pyobj, gd_type_t type,
     *scalar = NULL;
     if (type == GD_INT64)
       *(int64_t*)data = (int64_t)PyLong_AsLongLong(pyobj);
-    else if (type & GD_COMPLEX128)
+    else if (type == GD_COMPLEX128)
       *(double complex*)data = gdpy_as_complex(pyobj);
-    else if (type & GD_FLOAT64)
+    else if (type == GD_FLOAT64)
       *(double*)data = PyFloat_AsDouble(pyobj);
-    else if (type & GD_INT16)
-      *(int16_t*)data = PyLong_AsUnsignedLong(pyobj);
-    else if (type & GD_UINT16)
+    else if (type == GD_INT16)
+      *(int16_t*)data = PyLong_AsLong(pyobj);
+    else if (type == GD_UINT16)
       *(uint16_t*)data = PyLong_AsUnsignedLong(pyobj);
+    else if (type == GD_UINT64) {
+      if (PyLong_Check(pyobj))
+        *(uint64_t*)data = PyLong_AsUnsignedLongLong(pyobj);
+      else
+        *(uint64_t*)data = PyInt_AsUnsignedLongLongMask(pyobj);
+    } else
+        PyErr_Format(PyExc_RuntimeError,
+              "unexpected field type (%x) inside %s", type, __func__);
   }
 
   dreturnvoid();
@@ -145,6 +153,9 @@ static void gdpy_set_entry_from_tuple(gd_entry_t *E, PyObject* tuple,
       break;
     case GD_LINCOM_ENTRY:
       min = 3;
+      break;
+    case GD_WINDOW_ENTRY:
+      min = 4;
       break;
     default:
       PyErr_Format(PyExc_TypeError, "%s: unrecognised field type", name);
@@ -374,6 +385,49 @@ static void gdpy_set_entry_from_tuple(gd_entry_t *E, PyObject* tuple,
         }
       }
       break;
+    case GD_WINDOW_ENTRY:
+      E->in_fields[0] = gdpy_dup_pystring(PyTuple_GetItem(tuple, 0));
+
+      if (PyErr_Occurred()) {
+        dreturnvoid();
+        return;
+      }
+
+      E->in_fields[1] = gdpy_dup_pystring(PyTuple_GetItem(tuple, 1));
+
+      if (PyErr_Occurred()) {
+        dreturnvoid();
+        return;
+      }
+
+      E->windop = (gd_windop_t)PyInt_AsLong(PyTuple_GetItem(tuple, 2));
+      if (GDPY_INVALID_OP(E->windop))
+        PyErr_SetString(PyExc_ValueError,
+            "'pygetdata.entry' invalid window operation");
+
+      obj = PyTuple_GetItem(tuple, 3);
+      switch (E->windop) {
+        case GD_WINDOP_EQ:
+        case GD_WINDOP_NE:
+          gdpy_set_scalar_from_pyobj(obj, GD_INT64, &E->scalar[0],
+              &E->threshold.i);
+          break;
+        case GD_WINDOP_SET:
+        case GD_WINDOP_CLR:
+          gdpy_set_scalar_from_pyobj(obj, GD_UINT64, &E->scalar[0],
+              &E->threshold.u);
+          break;
+        default:
+          gdpy_set_scalar_from_pyobj(obj, GD_FLOAT64, &E->scalar[0],
+              &E->threshold.r);
+          break;
+      }
+
+      if (PyErr_Occurred()) {
+        dreturnvoid();
+        return;
+      }
+      break;
     case GD_CARRAY_ENTRY:
       E->array_len = (size_t)PyLong_AsUnsignedLong(PyTuple_GetItem(tuple, 1));
       /* fallthrough */
@@ -397,7 +451,7 @@ static void gdpy_set_entry_from_dict(gd_entry_t *E, PyObject* parms,
   dtrace("%p, %p, \"%s\"", E, parms, name);
 
   PyObject* tuple = Py_None;
-  const char* key[3];
+  const char* key[4];
   int i, size = 0;
 
   /* convert the dictionary to a tuple */
@@ -412,6 +466,8 @@ static void gdpy_set_entry_from_dict(gd_entry_t *E, PyObject* parms,
    * DIVIDE:   in_field1, in_field2        = 2
    * RECIP:    in_field, dividend          = 2
    * POLYNOM:  in_field, a                 = 2
+   * POLYNOM:  in_field, a                 = 2
+   * WINDOW:   in_field1, in_field2, op, thresh = 4
    * CONST:    type                        = 1
    * CARRAY:   type, array_len             = 2
    * STRING:   (none)                      = 0
@@ -466,6 +522,13 @@ static void gdpy_set_entry_from_dict(gd_entry_t *E, PyObject* parms,
       key[0] = "in_field";
       key[1] = "a";
       size = 2;
+      break;
+    case GD_WINDOW_ENTRY:
+      key[0] = "in_field1";
+      key[1] = "in_field2";
+      key[2] = "windop";
+      key[3] = "threshold";
+      size = 4;
       break;
     case GD_CARRAY_ENTRY:
       key[0] = "type";
@@ -678,6 +741,7 @@ static PyObject* gdpy_entry_getinfields(struct gdpy_entry_t* self,
       break;
     case GD_MULTIPLY_ENTRY:
     case GD_DIVIDE_ENTRY:
+    case GD_WINDOW_ENTRY:
       tuple = Py_BuildValue("(ss)", self->E->in_fields[0],
           self->E->in_fields[1]);
       break;
@@ -741,6 +805,7 @@ static int gdpy_entry_setinfields(struct gdpy_entry_t* self, PyObject *value,
     case GD_POLYNOM_ENTRY:
     case GD_SBIT_ENTRY:
     case GD_RECIP_ENTRY:
+    case GD_WINDOW_ENTRY:
       if (!PyTuple_Check(value))
         s[0] = gdpy_dup_pystring(value);
       else {
@@ -1266,8 +1331,8 @@ static int gdpy_entry_settable(struct gdpy_entry_t* self, PyObject *value,
       return -1;
     }
 
-    free(self->E->field);
-    self->E->field = s;
+    free(self->E->table);
+    self->E->table = s;
   } else {
     PyErr_Format(PyExc_AttributeError, "'pygetdata.entry' "
         "attribute 'table' not available for entry type %s",
@@ -1741,6 +1806,24 @@ static PyObject* gdpy_entry_getparms(struct gdpy_entry_t* self, void* closure)
           break;
       }
       break;
+    case GD_WINDOW_ENTRY:
+      switch (self->E->windop) {
+        case GD_WINDOP_EQ:
+        case GD_WINDOP_NE:
+          tuple = Py_BuildValue("(ssiI)", self->E->in_fields[0],
+              self->E->in_fields[1], self->E->windop, self->E->threshold.i);
+          break;
+        case GD_WINDOP_SET:
+        case GD_WINDOP_CLR:
+          tuple = Py_BuildValue("(ssiU)", self->E->in_fields[0],
+              self->E->in_fields[1], self->E->windop, self->E->threshold.u);
+          break;
+        default:
+          tuple = Py_BuildValue("(ssid)", self->E->in_fields[0],
+              self->E->in_fields[1], self->E->windop, self->E->threshold.r);
+          break;
+      }
+      break;
     case GD_BIT_ENTRY:
     case GD_SBIT_ENTRY:
       tuple = Py_BuildValue("(sii)", self->E->in_fields[0],
@@ -1781,6 +1864,126 @@ static int gdpy_entry_setparms(struct gdpy_entry_t* self, PyObject *value,
 
   gd_free_entry_strings(self->E);
   memcpy(self->E, &E, sizeof(gd_entry_t));
+
+  dreturn("%i", 0);
+  return 0;
+}
+
+static PyObject* gdpy_entry_getwindop(struct gdpy_entry_t* self, void* closure)
+{
+  PyObject* obj = NULL;
+
+  dtrace("%p, %p", self, closure);
+
+  if (self->E->field_type == GD_WINDOW_ENTRY)
+    obj = PyInt_FromLong(self->E->windop);
+  else
+    PyErr_Format(PyExc_AttributeError, "'pygetdata.entry' "
+        "attribute 'windop' not available for entry type %s",
+        gdpy_entry_type_names[self->E->field_type]); 
+
+  dreturn("%p", obj);
+  return obj;
+}
+
+static int gdpy_entry_setwindop(struct gdpy_entry_t* self, PyObject *value,
+    void *closure)
+{
+  dtrace("%p, %p, %p", self, value, closure);
+
+  if (self->E->field_type != GD_WINDOW_ENTRY) {
+    PyErr_Format(PyExc_AttributeError, "'pygetdata.entry' "
+        "attribute 'windop' not available for entry type %s",
+        gdpy_entry_type_names[self->E->field_type]); 
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  int t = PyInt_AsLong(value);
+  if (PyErr_Occurred()) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  /* The C library is significantly more lax about this. (It just checks a few
+   * key bits) */
+  if (GDPY_INVALID_OP(t)) {
+    PyErr_SetString(PyExc_ValueError, "'pygetdata.entry' invalid data type");
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  self->E->windop = (gd_windop_t)t;
+
+  dreturn("%i", 0);
+  return 0;
+}
+
+static PyObject* gdpy_entry_getthreshold(struct gdpy_entry_t* self,
+    void* closure)
+{
+  PyObject* obj = NULL;
+
+  dtrace("%p, %p", self, closure);
+
+  if (self->E->field_type == GD_WINDOW_ENTRY) {
+    switch (self->E->windop) {
+      case GD_WINDOP_EQ:
+      case GD_WINDOP_NE:
+        obj = PyLong_FromLongLong((long long)self->E->threshold.i);
+        break;
+      case GD_WINDOP_SET:
+      case GD_WINDOP_CLR:
+        obj = PyLong_FromUnsignedLongLong(
+            (unsigned long long)self->E->threshold.u);
+        break;
+      default:
+        obj = PyFloat_FromDouble(self->E->threshold.r);
+        break;
+    }
+  } else
+    PyErr_Format(PyExc_AttributeError, "'pygetdata.entry' "
+        "attribute 'threshold' not available for entry type %s",
+        gdpy_entry_type_names[self->E->field_type]); 
+
+  dreturn("%p", obj);
+  return obj;
+}
+
+static int gdpy_entry_setthreshold(struct gdpy_entry_t* self, PyObject *value,
+    void *closure)
+{
+  gd_triplet_t t;
+  dtrace("%p, %p, %p", self, value, closure);
+
+  if (self->E->field_type != GD_WINDOW_ENTRY) {
+    PyErr_Format(PyExc_AttributeError, "'pygetdata.entry' "
+        "attribute 'threshold' not available for entry type %s",
+        gdpy_entry_type_names[self->E->field_type]); 
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  switch (self->E->windop) {
+    case GD_WINDOP_EQ:
+    case GD_WINDOP_NE:
+      t.i = PyLong_AsLongLong(value);
+      break;
+    case GD_WINDOP_SET:
+    case GD_WINDOP_CLR:
+      t.u = PyLong_AsUnsignedLongLong(value);
+      break;
+    default:
+      t.r = PyFloat_AsDouble(value);
+      break;
+  }
+
+  if (PyErr_Occurred()) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  self->E->threshold = t;
 
   dreturn("%i", 0);
   return 0;
@@ -1833,7 +2036,6 @@ static PyGetSetDef gdpy_entry_getset[] = {
     NULL },
   { "dividend", (getter)gdpy_entry_getdividend, (setter)gdpy_entry_setdividend,
     "The dividend of a RECIP field.  If this is specified using a CONST\n"
-      /* -----------------------------------------------------------------| */
       "scalar field, this will be the field code of that field, otherwise,\n"
       "it will be the number itself.",
     NULL },
@@ -1922,6 +2124,15 @@ static PyGetSetDef gdpy_entry_getset[] = {
   { "table", (getter)gdpy_entry_gettable, (setter)gdpy_entry_settable,
     "The pathname of the look-up table of a LINTERP field.",
     NULL },
+  { "windop", (getter)gdpy_entry_getwindop, (setter)gdpy_entry_setwindop,
+    "The operation of a WINDOW field.",
+    NULL },
+  { "threshold", (getter)gdpy_entry_getthreshold,
+    (setter)gdpy_entry_setthreshold,
+      /* -----------------------------------------------------------------| */
+    "The threshold of a WINDOW field.  The numerical type depends on the\n"
+      "operation of the field.\n",
+    NULL },
   { NULL }
 };
 
@@ -1956,7 +2167,6 @@ static PyGetSetDef gdpy_entry_getset[] = {
 "                    more than three elements, the remainder will be\n"\
 "                    ignored.\n"\
 "    'm', 'b':     the scale factors and offset terms of the LINCOM.\n"\
-/* ---------------------------------------------------------------------| */\
 "                    These are also tuples and should have the same\n"\
 "                    number of elements as 'in_fields'.  Data can be any\n"\
 "                    mix of numeric types and, to specify CONST scalars,\n"\
@@ -1989,7 +2199,17 @@ static PyGetSetDef gdpy_entry_getset[] = {
 "  RECIP:        (in_field, dividend)\n"\
 "    'in_field':   a string containing the input field code.\n"\
 "    'dividend':   a number or CONST field code specifying the dividend\n"\
-"                    of the RECIP.\n\n"\
+"                    of the RECIP.\n"\
+"  WINDOW:       (in_field1, in_fields2, windop, threshold)\n"\
+"    'in_field1':  a string containing the input field code.\n"\
+"    'in_field2':  a string containing the check field code.\n"\
+"    'windop':     the window operation.  Should be one of the windop\n"\
+"                    symbols: pygetdata.WINDOP_EQ, pygetdata.WINDOP_NE,\n"\
+"                    &c.\n"\
+"    'threshold':  a scalar containing the threshold value.  The type of\n"\
+"                    this value depends on the window operation used.\n"\
+"\n"\
+/* ---------------------------------------------------------------------| */\
 "If a dictionary, the keys of 'parameters' should be the names of the\n"\
 "tuple parameters listed above (e.g. 'type' and 'spf' for a RAW field),\n"\
 "and the values the same as their tuple counterparts.\n\n"\

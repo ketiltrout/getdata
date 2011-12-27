@@ -32,8 +32,8 @@ format  = "test_dirfile/format"
 form2   = "test_dirfile/form2"
 data    = "test_dirfile/data"
 
-flen    = 7
-nfields = 14
+flen    = 11
+nfields = 16
 nume    = 0
 
 spawn, "rm -rf " + filedir
@@ -41,8 +41,8 @@ file_mkdir, filedir
 
 datadata = bindgen(80) + 1
 
-fields = [ 'INDEX', 'bit', 'carray', 'const', 'data', 'div', 'lincom', $
-  'linterp', 'mult', 'phase', 'polynom', 'recip', 'sbit', 'string' ]
+fields = [ 'INDEX', 'alias', 'bit', 'carray', 'const', 'data', 'div', 'lincom',$
+  'linterp', 'mult', 'phase', 'polynom', 'recip', 'sbit', 'string', 'window' ]
 
 ; Write the test dirfile
 openw,1,format
@@ -62,6 +62,8 @@ printf,1,'mult MULTIPLY data sbit'
 printf,1,'div DIVIDE mult bit'
 printf,1,'recip RECIP div 6.5;4.3'
 printf,1,'phase PHASE data 11'
+printf,1,'window WINDOW linterp mult LT 4.1'
+printf,1,'/ALIAS alias data'
 printf,1,'string STRING "Zaphod Beeblebrox"'
 close,1
 
@@ -432,14 +434,14 @@ nume += check_simple(43, n, [ "lincom", "new2"  ])
 ;  44: gd_nvectors check
 n = gd_nvectors(d)
 nume += check_ok(44, d)
-nume += check_simple(44, n, 20)
+nume += check_simple(44, n, 22)
 
 ;  45: gd_vector_list check
 n = gd_vector_list(d)
 nume += check_ok(45, d)
-nume += check_simple(45, n, [ 'INDEX', 'bit', 'data', 'div', 'lincom', $
+nume += check_simple(45, n, [ 'INDEX', 'alias', 'bit', 'data', 'div', 'lincom',$
   'linterp', 'mult', 'new1', 'new10', 'new13', 'new2', 'new4', 'new6', 'new7', $
-  'new8', 'new9', 'phase', 'polynom', 'recip', 'sbit' ])
+  'new8', 'new9', 'phase', 'polynom', 'recip', 'sbit', 'window' ])
 
 ;  46: gd_madd_lincom
 gd_add_lincom, d, "mnew2", "in1", 9.9D, 8.8D, "in2", 7.7D, 6.6D, $
@@ -1018,7 +1020,7 @@ gd_close, m
 ;  157: gd_dirfile_standards
 n = gd_dirfile_standards(d, /CURRENT)
 nume += check_ok2(157, 1, d)
-nume += check_simple(157, n, 8)
+nume += check_simple(157, n, 9)
 n = gd_dirfile_standards(d, 0)
 nume += check_error2(157, 2, d, !GD.E_BAD_VERSION)
 
@@ -1139,6 +1141,154 @@ nume += check_simple2(203, 1, m, INDGEN(8) + 17)
 n = gd_tell(d, "data")
 nume += check_ok(204, d)
 nume += check_simple(204, n, 288)
+
+; 205: gd_hide check
+gd_hide, d, 'data'
+nume += check_ok(205, d)
+
+; 206: gd_hidden check
+n = gd_hidden(d, 'data')
+nume += check_ok2(206, 1, d)
+nume += check_simple2(206, 1, n, 1)
+
+n = gd_hidden(d, 'lincom')
+nume += check_ok2(206, 2, d)
+nume += check_simple2(206, 2, n, 0)
+
+; 207: gd_unhide check
+gd_unhide, d, 'data'
+nume += check_ok2(206, 1, d)
+n = gd_hidden(d, 'data')
+nume += check_ok2(206, 2, d)
+nume += check_simple(206, n, 0)
+
+; 208: gd_sync check
+gd_flush, d, field_code='data', /noclose
+nume += check_ok(208, d)
+
+; 209: gd_flush check
+gd_flush, d, field_code='data'
+nume += check_ok(209, d)
+
+; 210: gd_metaflush check
+gd_metaflush, d
+nume += check_ok(210, d)
+
+; 211: gd_entry (WINDOW) check
+n = gd_entry(d, 'window')
+nume += check_ok(211, d)
+nume += check_simple2(211, 1, n.field_type, !GD.WINDOW_ENTRY)
+nume += check_simple2(211, 2, n.fragment, 0)
+nume += check_simple2(211, 3, n.windop, !GD.WINDOP_LT)
+nume += check_simple2(211, 4, n.in_fields, [ 'linterp' ])
+nume += check_simple2(211, 5, n.check, 'mult')
+nume += check_simple2(211, 6, n.rthreshold, 4.1D0)
+
+; 212: gd_add_window check
+gd_add_window, d, 'new18', 'in1', 'in2', /NE, threshold=32, fragment=0
+nume += check_ok2(212, 1, d)
+
+n = gd_entry(d, 'new18')
+nume += check_ok2(212, 2, d)
+nume += check_simple2(212, 1, n.field_type, !GD.WINDOW_ENTRY)
+nume += check_simple2(212, 2, n.fragment, 0)
+nume += check_simple2(212, 3, n.windop, !GD.WINDOP_NE)
+nume += check_simple2(212, 4, n.in_fields, [ 'in1' ])
+nume += check_simple2(212, 5, n.check, 'in2')
+nume += check_simple2(212, 6, n.ithreshold, 32)
+
+; 214: gd_madd_window check
+gd_add_window, d, parent='data', 'mnew18', 'in2', 'in3', /SET, threshold=128
+nume += check_ok2(214, 1, d)
+
+n = gd_entry(d, 'data/mnew18')
+nume += check_ok2(214, 2, d)
+nume += check_simple2(214, 1, n.field_type, !GD.WINDOW_ENTRY)
+nume += check_simple2(214, 2, n.fragment, 0)
+nume += check_simple2(214, 3, n.windop, !GD.WINDOP_SET)
+nume += check_simple2(214, 4, n.in_fields, [ 'in2' ])
+nume += check_simple2(214, 5, n.check, 'in3')
+nume += check_simple2(214, 6, n.uthreshold, 128)
+
+; 217: gd_alter_window check
+gd_alter_window, d, 'new18', in_field='in3', check='in4', /GE, threshold=32e3
+nume += check_ok2(217, 1, d)
+
+n = gd_entry(d, 'new18')
+nume += check_ok2(217, 2, d)
+nume += check_simple2(217, 1, n.field_type, !GD.WINDOW_ENTRY)
+nume += check_simple2(217, 2, n.fragment, 0)
+nume += check_simple2(217, 3, n.windop, !GD.WINDOP_GE)
+nume += check_simple2(217, 4, n.in_fields, [ 'in3' ])
+nume += check_simple2(217, 5, n.check, 'in4')
+nume += check_simple2(217, 6, n.rthreshold, 32d3)
+
+; 218: gd_alias_target check
+str = gd_alias_target(d, 'alias')
+nume += check_ok(218, d)
+nume += check_simple(218, str, 'data')
+
+; 219: gd_add_alias check
+gd_add_alias, d, 'new20', 'data', fragment=0
+nume += check_ok2(219, 1, d)
+
+str = gd_alias_target(d, 'new20')
+nume += check_ok2(219, 2, d)
+nume += check_simple(219, str, 'data')
+
+; 220: gd_madd_alias check
+gd_add_alias, d, parent='data', 'mnew20', 'data'
+nume += check_ok2(220, 1, d)
+
+str = gd_alias_target(d, 'data/mnew20')
+nume += check_ok2(220, 2, d)
+nume += check_simple(220, str, 'data')
+
+; 221: gd_naliases check
+n = gd_naliases(d, 'data')
+nume += check_ok(221, d)
+nume += check_simple(221, n, 4)
+
+; 222: gd_alias check
+n = gd_aliases(d, 'data')
+nume += check_ok(222, d)
+nume += check_simple(222, n, [ 'data', 'alias', 'data/mnew20', 'new20' ])
+
+; 223: gd_include_affix check
+gd_include, d, 'format1', prefix='A', suffix='Z', /CREAT, /EXCL
+nume += check_ok(223, d)
+
+; 224: GDMOVA check
+gd_move, d, 'new20', 1, /ALIAS
+nume += check_ok2(224, 1, d)
+
+n = gd_fragment_index(d, 'Anew20Z')
+nume += check_ok2(224, 2, d)
+nume += check_simple(224, n, 1)
+
+; 225: gd_delete_alias check
+gd_delete, d, 'Anew20Z', /ALIAS
+nume += check_ok2(225, 1, d)
+
+n = gd_fragment_index(d, 'Anew20Z')
+nume += check_error2(225, 2, d, !GD.E_BAD_CODE)
+nume += check_simple(225, n, -1)
+
+; 226: gd_fragment_affixes check
+n = gd_fragment_affixes(d, fragment=1)
+nume += check_ok(226, d)
+nume += check_simple(226, n, [ "A", "Z" ])
+
+; 227: gd_alter_affixes check
+gd_alter_affixes, d, fragment=1, prefix='B', suffix=''
+nume += check_ok2(227, 1, d)
+
+n = gd_fragment_affixes(d, fragment=1)
+nume += check_ok2(227, 2, d)
+nume += check_simple(227, n, [ "B", "" ])
+
+ 
+
 
 
 

@@ -1,4 +1,4 @@
-// Copyright (C) 2008, 2010 D. V. Wiebe
+// Copyright (C) 2008, 2010, 2011 D. V. Wiebe
 //
 ///////////////////////////////////////////////////////////////////////////
 //
@@ -18,19 +18,14 @@
 // along with GetData; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 //
-#ifdef HAVE_CONFIG_H
-#include "../../src/config.h"
-#endif
-#undef GETDATA_LEGACY_API
-#include "getdata/dirfile.h"
-
-#include <stdlib.h>
-#include <cstring>
+#include "internal.h"
 
 using namespace GetData;
 
 Fragment::Fragment(const GetData::Dirfile *dirfile, int index)
 {
+  dtrace("%p, %i", dirfile, index);
+
   D = dirfile;
 
   ind = index;
@@ -40,11 +35,15 @@ Fragment::Fragment(const GetData::Dirfile *dirfile, int index)
   prot = gd_protection(D->D, index);
   name = gd_fragmentname(D->D, index);
   parent = (index == 0) ? -1 : gd_parent_fragment(D->D, index);
+  gd_fragment_affixes(D->D, index, &prefix, &suffix);
+
+  dreturnvoid();
 }
 
 Fragment::~Fragment()
 {
-  ;
+  free(prefix);
+  free(suffix);
 }
 
 int Fragment::ReWrite() const
@@ -89,5 +88,27 @@ int Fragment::SetProtection(int protection_level)
   if (!ret)
     prot = protection_level;
 
+  return ret;
+}
+
+int Fragment::SetPrefix(const char* new_prefix)
+{
+  int ret = gd_alter_affixes(D->D, ind, new_prefix, suffix);
+
+  free(prefix);
+  free(suffix);
+  if (!ret)
+    ret = gd_fragment_affixes(D->D, ind, &prefix, &suffix);
+  return ret;
+}
+
+int Fragment::SetSuffix(const char* new_suffix)
+{
+  int ret = gd_alter_affixes(D->D, ind, prefix, new_suffix);
+
+  free(prefix);
+  free(suffix);
+  if (!ret)
+    ret = gd_fragment_affixes(D->D, ind, &prefix, &suffix);
   return ret;
 }

@@ -18,25 +18,13 @@
 // along with GetData; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 //
-#ifdef HAVE_CONFIG_H
-#include "../../src/config.h"
-#endif
-#undef GETDATA_LEGACY_API
-#include "getdata/dirfile.h"
-
-#include <stdlib.h>
-
-#ifdef _MSC_VER
-#define __gd_unused 
-#else
-#define __gd_unused __attribute__ (( unused ))
-#endif
-using namespace GetData;
+#include "internal.h"
 
 Dirfile::Dirfile()
 {
   D = gd_invalid_dirfile();
   error_string = NULL;
+  reference_name = NULL;
 }
 
 Dirfile::Dirfile(const char* filedir, unsigned long flags,
@@ -44,18 +32,20 @@ Dirfile::Dirfile(const char* filedir, unsigned long flags,
 {
   D = gd_cbopen(filedir, flags, sehandler, extra);
   error_string = NULL;
+  reference_name = NULL;
 }
 
 Dirfile::Dirfile(DIRFILE* dirfile)
 {
   D = dirfile;
   error_string = NULL;
+  reference_name = NULL;
 }
 
 Dirfile::~Dirfile()
 {
-  if (error_string != NULL)
-    free(error_string);
+  free(error_string);
+  free(reference_name);
 
   gd_close(D);
 }
@@ -117,6 +107,8 @@ Entry *Dirfile::Entry(const char* field_code) const
       return new GetData::StringEntry(this, field_code);
     case IndexEntryType:
       return new GetData::IndexEntry(this, field_code);
+    case WindowEntryType:
+      return new GetData::WindowEntry(this, field_code);
     case NoEntryType:
       break;
   }
@@ -350,14 +342,16 @@ int Dirfile::NFragments() const
   return gd_nfragments(D);
 }
 
-const char* Dirfile::ReferenceFilename() const
+const char* Dirfile::ReferenceFilename()
 {
   const char* ref = gd_reference(D, NULL);
 
   if (ref == NULL)
     return NULL;
 
-  return gd_raw_filename(D, ref);
+  free(reference_name);
+  reference_name = gd_raw_filename(D, ref);
+  return reference_name;
 }
 
 int Dirfile::Discard()
@@ -455,4 +449,67 @@ off_t Dirfile::Seek(const char* field_code, off_t frame_num,
 off_t Dirfile::Tell(const char* field_code) const
 {
   return gd_tell(D, field_code);
+}
+
+int Dirfile::AddAlias(const char* field_code, const char* target,
+    int fragment_index) const
+{
+  return gd_add_alias(D, field_code, target, fragment_index);
+}
+
+const char** Dirfile::Aliases(const char* field_code) const
+{
+  return gd_aliases(D, field_code);
+}
+
+const char* Dirfile::AliasTarget(const char* field_code) const
+{
+  return gd_alias_target(D, field_code);
+}
+
+int Dirfile::DeleteAlias(const char* field_code, int flags) const
+{
+  return gd_delete_alias(D, field_code, flags);
+}
+
+int Dirfile::Hide(const char* field_code) const
+{
+  return gd_hide(D, field_code);
+}
+
+int Dirfile::Hidden(const char* field_code) const
+{
+  return gd_hidden(D, field_code);
+}
+
+int Dirfile::IncludeAffix(const char *file, int fragment_index,
+    const char* prefix, const char* suffix, unsigned long flags) const
+{
+  return gd_include_affix(D, file, fragment_index, prefix, suffix, flags);
+}
+
+int Dirfile::MAddAlias(const char* parent, const char* name, const char* target)
+  const
+{
+  return gd_madd_alias(D, parent, name, target);
+}
+
+int Dirfile::MoveAlias(const char* field_code, int new_fragment) const
+{
+  return gd_move_alias(D, field_code, new_fragment);
+}
+
+int Dirfile::NAliases(const char* field_code) const
+{
+  return gd_naliases(D, field_code);
+}
+
+int Dirfile::Sync(const char* field_code) const
+{
+  return gd_sync(D, field_code);
+}
+
+int Dirfile::UnHide(const char* field_code) const
+{
+  return gd_unhide(D, field_code);
 }

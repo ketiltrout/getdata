@@ -273,18 +273,18 @@ _gd_static_inline int64_t gd_put_unalinged64(int64_t v, void *p)
 /* debugging macros */
 #ifdef GETDATA_DEBUG
 #define GD_COL_SIZE 100
-const char* _gd_colnil(void);
-const char* _gd_coladd(void);
-const char* _gd_colsub(void);
-#define dtracevoid() printf("%s %s()\n", _gd_coladd(), __FUNCTION__)
-#define dtrace(fmt, ...) printf("%s %s(" fmt ")\n", _gd_coladd(), \
+const char* gd_colnil(void);
+const char* gd_coladd(void);
+const char* gd_colsub(void);
+#define dtracevoid() printf("%s %s()\n", gd_coladd(), __FUNCTION__)
+#define dtrace(fmt, ...) printf("%s %s(" fmt ")\n", gd_coladd(), \
     __FUNCTION__, ##__VA_ARGS__)
-#define dprintf(fmt, ...) printf("%s %s:%i " fmt "\n", _gd_colnil(), \
+#define dprintf(fmt, ...) printf("%s %s:%i " fmt "\n", gd_colnil(), \
     __FUNCTION__, __LINE__, ##__VA_ARGS__)
-#define dreturnvoid() printf("%s %s = (nil)\n", _gd_colsub(), __FUNCTION__)
-#define dreturn(fmt, ...) printf("%s %s = " fmt "\n", _gd_colsub(), \
+#define dreturnvoid() printf("%s %s = (nil)\n", gd_colsub(), __FUNCTION__)
+#define dreturn(fmt, ...) printf("%s %s = " fmt "\n", gd_colsub(), \
     __FUNCTION__, ##__VA_ARGS__)
-#define dwatch(fmt, v) printf("%s %s = " fmt "\n", _gd_colnil(), #v, v)
+#define dwatch(fmt, v) printf("%s %s = " fmt "\n", gd_colnil(), #v, v)
 #else
 #define dtracevoid()
 #define dtrace(...)
@@ -984,6 +984,7 @@ void _GD_LincomData(DIRFILE* D, int n, void* data1, gd_type_t return_type,
     size_t n_read);
 void _GD_LinterpData(DIRFILE* D, void *data, gd_type_t type, int complex_table,
     const double *data_in, size_t npts, const struct _gd_lut *lut, size_t n_ln);
+int _GD_ListEntry(gd_entry_t*, int, int, gd_entype_t);
 char *_GD_MakeFullPath(DIRFILE*, int, const char*, int);
 #define _GD_MakeFullPathOnly gd_MakeFullPathOnly
 char *_GD_MakeFullPathOnly(const DIRFILE *D, int dirfd, const char *name);

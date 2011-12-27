@@ -27,7 +27,6 @@ int main(void)
   const char *data = "dirfile/data";
   int error, i, n, r = 0;
   DIRFILE *D;
-  const char *target;
 
   rmdirfile();
 
@@ -39,6 +38,7 @@ int main(void)
 
   /* check */
   target = gd_alias_target(D, "alias");
+  CHECKS(target, "data");
   i = gd_fragment_index(D, "alias");
   n = gd_naliases(D, "alias");
 
@@ -49,7 +49,6 @@ int main(void)
   rmdir(filedir);
 
   CHECKI(error, GD_E_OK);
-  CHECKS(target, "data");
   CHECKI(i, 0);
   CHECKI(n, 2);
 

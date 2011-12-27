@@ -22,7 +22,7 @@
 use GetData;
 use Math::Complex;
 use strict;
-use Test::More tests => 1142;
+use Test::More tests => 1223;
 
 my $ne = 0;
 my ($s, @a, %h);
@@ -142,9 +142,9 @@ sub CheckEOSArray {
 sub CheckOK { &CheckError($_[0], 0) }
 sub CheckOK2 { &CheckError2(@_, 0) }
 
-my $nfields = 14;
-my @fields = (qw(INDEX bit carray const data div lincom linterp mult phase
-polynom recip sbit string));
+my $nfields = 16;
+my @fields = (qw(INDEX alias bit carray const data div lincom linterp mult phase
+polynom recip sbit string window));
 
 #create the dirfile
 system "rm -rf dirfile" if (-e "dirfile" and not -d "dirfile");
@@ -171,6 +171,8 @@ mult MULTIPLY data sbit
 div DIVIDE mult bit
 recip RECIP div 6.5;4.3
 phase PHASE data 11
+window WINDOW linterp mult LT 4.1
+ALIAS alias data
 string STRING \"Zaphod Beeblebrox\"
 EOF
   or die;
@@ -620,13 +622,14 @@ CheckSArray(43, \@a, qw(lincom new3));
 # 44: nvectors
 $s = $_->vector_list;
 CheckOK(44);
-CheckNum(44, $s, 20);
+CheckNum(44, $s, 22);
 
 # 45: vector_list
 @a = $_->vector_list;
 CheckOK(45);
-CheckSArray(45, \@a, qw(INDEX bit data div lincom linterp mult new1 new10),
-  qw(new13 new3 new4 new6 new7 new8 new9 phase polynom recip sbit));
+CheckSArray(45, \@a, qw(INDEX alias bit data div lincom linterp mult new1),
+  qw(new10 new13 new3 new4 new6 new7 new8 new9 phase polynom recip sbit),
+  qw(window));
 
 #47: madd_lincom check
 $s = $_->madd_lincom("data", "mnew2", 2, [ qw(in1 in2) ], [ 9.9+8.8*i, 7.7 ],
@@ -1466,6 +1469,150 @@ CheckString2(203, 2, $s, join "", map chr, 17 .. 24);
 $s = $_->tell("data");
 CheckOK(204);
 CheckNum(204,$s,288);
+
+# 205: gd_hide check
+$s = $_->hide('data');
+CheckOK(205);
+
+# 206: gd_hidden check
+$s = $_->hidden('data');
+CheckOK2(206, 1);
+CheckNum2(206, 1, $s, 1);
+
+$s = $_->hidden('lincom');
+CheckOK2(206, 2);
+CheckNum2(206, 2, $s, 0);
+
+# 207: gd_unhide check
+$s = $_->unhide('data');
+CheckOK2(206, 1);
+$s = $_->hidden('data');
+CheckOK2(206, 2);
+CheckNum(206, $s, 0);
+
+# 208: gd_sync check
+$s = $_->sync('data');
+CheckOK(208);
+
+# 209: gd_flush check
+$s = $_->flush('data');
+CheckOK(209);
+
+# 210: gd_metaflush check
+$s = $_->metaflush();
+CheckOK(210);
+
+# 211: gd_entry (WINDOW) check
+%h = $_->entry('window');
+CheckOK(211);
+CheckNum2(211, 1, $h{"field_type"}, $GetData::WINDOW_ENTRY);
+CheckNum2(211, 2, $h{"fragment_index"}, 0);
+CheckNum2(211, 3, $h{"windop"}, $GetData::WINDOP_LT);
+CheckSArray2(211, 4, $h{"in_fields"}, 'linterp', 'mult');
+CheckNum2(211, 5, $h{"threshold"}, 4.1);
+
+# 212: gd_add_window check
+$s = $_->add_window('new18', 'in1', 'in2', $GetData::WINDOP_NE, 32, 0);
+CheckOK2(212, 1);
+
+%h = $_->entry('new18');
+CheckOK2(212, 2);
+CheckNum2(212, 1, $h{"field_type"}, $GetData::WINDOW_ENTRY);
+CheckNum2(212, 2, $h{"fragment_index"}, 0);
+CheckNum2(212, 3, $h{"windop"}, $GetData::WINDOP_NE);
+CheckSArray2(212, 4, $h{"in_fields"}, 'in1', 'in2');
+CheckNum2(212, 5, $h{"threshold"}, 32);
+
+# 214: gd_madd_window check
+$s = $_->madd_window('data', 'mnew18', 'in2', 'in3', $GetData::WINDOP_SET, 128);
+CheckOK2(214, 1);
+
+%h = $_->entry('data/mnew18');
+CheckOK2(214, 2);
+CheckNum2(214, 1, $h{"field_type"}, $GetData::WINDOW_ENTRY);
+CheckNum2(214, 2, $h{"fragment_index"}, 0);
+CheckNum2(214, 3, $h{"windop"}, $GetData::WINDOP_SET);
+CheckSArray2(214, 4, $h{"in_fields"}, 'in2', 'in3');
+CheckNum2(214, 5, $h{"threshold"}, 128);
+
+# 217: gd_alter_window check
+$s = $_->alter_window('new18', 'in3', 'in4', $GetData::WINDOP_GE, 32e3);
+CheckOK2(217, 1);
+
+%h = $_->entry('new18');
+CheckOK2(217, 2);
+CheckNum2(217, 1, $h{"field_type"}, $GetData::WINDOW_ENTRY);
+CheckNum2(217, 2, $h{"fragment_index"}, 0);
+CheckNum2(217, 3, $h{"windop"}, $GetData::WINDOP_GE);
+CheckSArray2(217, 4, $h{"in_fields"}, 'in3', 'in4');
+CheckNum2(217, 5, $h{"threshold"}, 32e3);
+
+# 218: gd_alias_target check
+$s = $_->alias_target('alias');
+CheckOK(218);
+CheckString(218, $s, 'data');
+
+# 219: gd_add_alias check
+$s = $_->add_alias('new20', 'data', 0);
+CheckOK2(219, 1);
+
+$s = $_->alias_target('new20');
+CheckOK2(219, 2);
+CheckString(219, $s, 'data');
+
+# 220: gd_madd_alias check
+$s = $_->madd_alias('data', 'mnew20', 'data');
+CheckOK2(220, 1);
+
+$s = $_->alias_target('data/mnew20');
+CheckOK2(220, 2);
+CheckString(220, $s, 'data');
+
+# 221: gd_naliases check
+$s = $_->aliases('data');
+CheckOK(221);
+CheckNum(221, $s, 4);
+
+# 222: gd_aliases check
+@a = $_->aliases('data');
+CheckOK(222);
+CheckSArray(222, \@a, "data", "alias", "data/mnew20", "new20");
+
+# 223: gd_include_affix check
+$s = $_->include_affix('format1', 0, 'A', 'Z', $GetData::CREAT | $GetData::EXCL);
+CheckOK(223);
+
+# 224: GDMOVA check
+$s = $_->move_alias('new20', 1);
+CheckOK2(224, 1);
+
+$s = $_->fragment_index('Anew20Z');
+CheckOK2(224, 2);
+CheckNum(224, $s, 1);
+
+# 225: gd_delete_alias check
+$s = $_->delete_alias('Anew20Z', 0);
+CheckOK2(225, 1);
+
+$_->fragment_index('Anew20Z');
+CheckError2(225, 2, $GetData::E_BAD_CODE);
+
+# 226: gd_fragment_affixes check
+@a = $_->fragment_affixes(1);
+CheckOK(226);
+CheckSArray(226, \@a, "A", "Z");
+
+# 227: gd_alter_affixes check
+$s = $_->alter_affixes(1, 'B', '');
+CheckOK2(227, 1);
+
+@a = $_->fragment_affixes(1);
+CheckOK2(227, 2);
+CheckSArray(227, \@a, "B", "");
+
+ 
+
+
 
 
 

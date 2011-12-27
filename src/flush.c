@@ -836,7 +836,7 @@ static int _GD_SyncOrClose(DIRFILE* D, const char* field_code, int clo)
   char *simple_field_code;
   gd_entry_t *E;
 
-  dtrace("%p, \"%s\"", D, field_code);
+  dtrace("%p, \"%s\", %i", D, field_code, clo);
 
   _GD_ClearError(D);
 

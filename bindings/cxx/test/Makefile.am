@@ -28,7 +28,7 @@ if CXX_WEXTRA
 WEXTRA=-Wextra
 endif
 
-INCLUDES = ${WALL} $(WEXTRA) -I$(srcdir)/.. -I$(top_srcdir)/src -D__TEST__=\"$@\"
+INCLUDES = ${WALL} $(WEXTRA) -I$(srcdir)/.. -I$(top_srcdir)/src
 LDADD=../libgetdata++.la
 TESTS=big_test
 

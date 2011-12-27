@@ -211,9 +211,16 @@ int gd_alter_affixes(DIRFILE *D, int index, const char *prefix,
     return -1;
   }
 
+  /* affixes to keep */
+  if (!prefix)
+    prefix = D->fragment[index].prefix;
+
+  if (!suffix)
+    suffix = D->fragment[index].suffix;
+
   /* nothing to do */
-  if (_GD_StrCmpNull(prefix, D->fragment[index].prefix) == 0 &&
-      _GD_StrCmpNull(suffix, D->fragment[index].suffix) == 0)
+  if (strcmp(prefix, D->fragment[index].prefix) == 0 &&
+      strcmp(suffix, D->fragment[index].suffix) == 0)
   {
     dreturn("%i", 0);
     return 0;

@@ -192,8 +192,8 @@ program big_test
   character (len=*), parameter :: frmat = 'test95_dirfile/format'
   character (len=*), parameter :: frm2 = 'test95_dirfile/form2'
   character (len=*), parameter :: dat = 'test95_dirfile/data'
-  integer, parameter :: flen = 7
-  integer, parameter :: nfields = 14
+  integer, parameter :: flen = 11
+  integer, parameter :: nfields = 16
   integer, parameter :: slen = 26
 
   character (len=slen), dimension(3) :: strings
@@ -227,10 +227,11 @@ program big_test
   call system ( 'rm -rf ' // fildir )
   call system ( 'mkdir ' // fildir )
 
-  fields =(/ 'INDEX  ', 'bit    ', 'carray ', 'const  ', 'data   ', 'div    ', &
-  'lincom ', 'linterp', 'mult   ', 'phase  ', 'polynom', 'recip  ', 'sbit   ', &
-  'string ', '       ', '       ', '       ', '       ', '       ', '       ', &
-  '       ', '       ' /)
+  fields = (/    'INDEX      ', 'alias      ', 'bit        ', 'carray     ', &
+  'const      ', 'data       ', 'div        ', 'lincom     ', 'linterp    ', &
+  'mult       ', 'phase      ', 'polynom    ', 'recip      ', 'sbit       ', &
+  'string     ', 'window     ', '           ', '           ', '           ', &
+  '           ', '           ', '           ', '           ', '           ' /)
 
   open(1, file=frmat, status='new')
   write(1, *) '/ENDIAN little'
@@ -249,6 +250,8 @@ program big_test
   write(1, *) 'phase PHASE data 11'
   write(1, *) 'div DIVIDE mult bit'
   write(1, *) 'recip RECIP div 6.5;4.3'
+  write(1, *) 'window WINDOW linterp mult LT 4.1'
+  write(1, *) '/ALIAS alias data'
   write(1, *) 'string STRING "Zaphod Beeblebrox"'
   close(1, status='keep')
 
@@ -266,6 +269,7 @@ program big_test
 ! fgd_error check
   d = fgd_open('x', GD_RDONLY)
   call check_err(ne, 0, d, GD_E_OPEN)
+  call fgd_discard(d)
 
 ! 1: fgd_open check
   d = fgd_open(fildir, GD_RDWR)
@@ -395,7 +399,7 @@ program big_test
 ! 4: fgd_field_name_max check
   i = fgd_field_name_max(d)
   call check_ok(ne, 4, d)
-  call check_int(ne, 4, i, flen)
+  call check_int(ne, 4, i, 7)
 
 ! 5: fgd_mfield_name_max check
   i = fgd_mfield_name_max(d, 'data')
@@ -922,13 +926,14 @@ program big_test
 ! 44: fgd_nvectors check
   n = fgd_nvectors(d)
   call check_ok(ne, 44, d)
-  call check_int(ne, 44, n, 22)
+  call check_int(ne, 44, n, 24)
 
 ! 45: fgd_vector_list check
-  fields =(/ 'INDEX  ', 'bit    ', 'data   ', 'div    ', 'lincom ', 'linterp', &
-  'mult   ', 'new1   ', 'new10  ', 'new13  ', 'new2   ', 'new3   ', 'new4   ', &
-  'new5   ', 'new6   ', 'new7   ', 'new8   ', 'new9   ', 'phase  ', 'polynom', &
-  'recip  ', 'sbit   ' /)
+  fields = (/    'INDEX      ', 'alias      ', 'bit        ', 'data       ', &
+  'div        ', 'lincom     ', 'linterp    ', 'mult       ', 'new1       ', &
+  'new10      ', 'new13      ', 'new2       ', 'new3       ', 'new4       ', &
+  'new5       ', 'new6       ', 'new7       ', 'new8       ', 'new9       ', &
+  'phase      ', 'polynom    ', 'recip      ', 'sbit       ', 'window     ' /)
   l = flen
   call fgd_vector_list(flist, d, l)
   call check_ok(ne, 45, d)
@@ -1254,10 +1259,11 @@ program big_test
   call check_int(ne, 65, n, 11)
 
 ! 66: fgd_mvector_list check
-  fields =(/ 'mlut  ', 'mnew1 ', 'mnew2 ', 'mnew3 ', 'mnew5 ', 'mnew6 ', &
-  'mnew7 ', 'mnew8 ', 'mnew9 ', 'mnew10', 'mnew4 ', '      ', '      ', &
-  '      ', '      ', '      ', '      ', '      ', '      ', '      ', &
-  '      ', '      ' /)
+  fields = (/    'mlut       ', 'mnew1      ', 'mnew2      ', 'mnew3      ', &
+  'mnew5      ', 'mnew6      ', 'mnew7      ', 'mnew8      ', 'mnew9      ', &
+  'mnew10     ', 'mnew4      ', '           ', '           ', '           ', &
+  '           ', '           ', '           ', '           ', '           ', &
+  '           ', '           ', '           ', '           ', '           ' /)
   l = flen
   call fgd_mvector_list(flist, d, "data", l)
   call check_ok2(ne, 66, i, d)
@@ -1736,7 +1742,7 @@ program big_test
 ! 157: fgd_dirfile_standards
   n = fgd_dirfile_standards(d, GD_VERSION_CURRENT)
   call check_ok2(ne, 157, 1, d)
-  call check_int(ne, 157, n, 8)
+  call check_int(ne, 157, n, 9)
 
   n = fgd_dirfile_standards(d, 0)
   call check_err2(ne, 157, 2, d, GD_E_BAD_VERSION)
@@ -2224,6 +2230,203 @@ program big_test
   n = fgd_tell(d, 'data')
   call check_ok(ne, 204, d)
   call check_int(ne, 204, n, 288)
+
+! 205: fgd_hide check
+  call fgd_hide(d, 'data')
+  call check_ok(ne, 205, d)
+
+! 206: fgd_hidden check
+  n = fgd_hidden(d, 'data')
+  call check_ok2(ne, 206, 1, d)
+  call check_int2(ne, 206, 1, n, 1)
+
+  n = fgd_hidden(d, 'lincom')
+  call check_ok2(ne, 206, 2, d)
+  call check_int2(ne, 206, 2, n, 0)
+
+! 207: fgd_unhide check
+  call fgd_unhide(d, 'data')
+  call check_ok2(ne, 206, 1, d)
+  n = fgd_hidden(d, 'data')
+  call check_ok2(ne, 206, 2, d)
+  call check_int(ne, 206, n, 0)
+
+! 208: fgd_sync check
+  call fgd_sync(d, 'data')
+  call check_ok(ne, 208, d)
+
+! 209: fgd_flush check
+  call fgd_flush(d, 'data')
+  call check_ok(ne, 209, d)
+
+! 210: fgd_metaflush check
+  call fgd_metaflush(d)
+  call check_ok(ne, 210, d)
+
+! 211: fgd_entry (WINDOW) check
+  n = fgd_entry(d, 'window', ent)
+  call check_ok(ne, 211, d)
+  call check_int2(ne, 211, 1, n, GD_WINDOW_ENTRY)
+  call check_int2(ne, 211, 2, ent%fragment_index, 0)
+  call check_int2(ne, 211, 3, ent%windop, GD_WINDOP_LT)
+  call check_str2(ne, 211, 4, ent%field(1), 'linterp')
+  call check_str2(ne, 211, 5, ent%field(2), 'mult')
+  call check_dbl2(ne, 211, 6, ent%rthreshold, 4.1D0)
+
+! 212: fgd_add_window_i check
+  call fgd_add_window_i(d, 'new18', 'in1', 'in2', GD_WINDOP_NE, 32, 0)
+  call check_ok2(ne, 212, 1, d)
+
+  n = fgd_entry(d, 'new18', ent)
+  call check_ok2(ne, 212, 2, d)
+  call check_int2(ne, 212, 1, n, GD_WINDOW_ENTRY)
+  call check_int2(ne, 212, 2, ent%fragment_index, 0)
+  call check_int2(ne, 212, 3, ent%windop, GD_WINDOP_NE)
+  call check_str2(ne, 212, 4, ent%field(1), 'in1')
+  call check_str2(ne, 212, 5, ent%field(2), 'in2')
+  call check_int2(ne, 212, 6, ent%ithreshold, 32)
+
+! 213: fgd_add_window_r check
+  call fgd_add_window_r(d, 'new19', 'in5', 'in4', GD_WINDOP_LE, 1d-4, 0)
+  call check_ok2(ne, 213, 1, d)
+
+  n = fgd_entry(d, 'new19', ent)
+  call check_ok2(ne, 213, 2, d)
+  call check_int2(ne, 213, 1, n, GD_WINDOW_ENTRY)
+  call check_int2(ne, 213, 2, ent%fragment_index, 0)
+  call check_int2(ne, 213, 3, ent%windop, GD_WINDOP_LE)
+  call check_str2(ne, 213, 4, ent%field(1), 'in5')
+  call check_str2(ne, 213, 5, ent%field(2), 'in4')
+  call check_dbl2(ne, 213, 6, ent%rthreshold, 1d-4)
+
+! 214: fgd_madd_window_i check
+  call fgd_madd_window_i(d, 'data', 'mnew18', 'in2', 'in3', GD_WINDOP_SET, &
+  128)
+  call check_ok2(ne, 214, 1, d)
+
+  n = fgd_entry(d, 'data/mnew18', ent)
+  call check_ok2(ne, 214, 2, d)
+  call check_int2(ne, 214, 1, n, GD_WINDOW_ENTRY)
+  call check_int2(ne, 214, 2, ent%fragment_index, 0)
+  call check_int2(ne, 214, 3, ent%windop, GD_WINDOP_SET)
+  call check_str2(ne, 214, 4, ent%field(1), 'in2')
+  call check_str2(ne, 214, 5, ent%field(2), 'in3')
+  call check_int2(ne, 214, 6, ent%ithreshold, 128)
+
+! 215: fgd_madd_window_r check
+  call fgd_madd_window_r(d, 'data', 'mnew19', 'in4', 'in1', GD_WINDOP_GT, &
+  0d0)
+  call check_ok2(ne, 215, 1, d)
+
+  n = fgd_entry(d, 'data/mnew19', ent)
+  call check_ok2(ne, 215, 2, d)
+  call check_int2(ne, 215, 1, n, GD_WINDOW_ENTRY)
+  call check_int2(ne, 215, 2, ent%fragment_index, 0)
+  call check_int2(ne, 215, 3, ent%windop, GD_WINDOP_GT)
+  call check_str2(ne, 215, 4, ent%field(1), 'in4')
+  call check_str2(ne, 215, 5, ent%field(2), 'in1')
+  call check_dbl2(ne, 215, 6, ent%rthreshold, 0d0)
+
+! 216: fgd_alter_window_i check
+  call fgd_alter_window_i(d, 'new19', 'in3', 'in5', GD_WINDOP_CLR, 32)
+  call check_ok2(ne, 216, 1, d)
+
+  n = fgd_entry(d, 'new19', ent)
+  call check_ok2(ne, 216, 2, d)
+  call check_int2(ne, 216, 1, n, GD_WINDOW_ENTRY)
+  call check_int2(ne, 216, 2, ent%fragment_index, 0)
+  call check_int2(ne, 216, 3, ent%windop, GD_WINDOP_CLR)
+  call check_str2(ne, 216, 4, ent%field(1), 'in3')
+  call check_str2(ne, 216, 5, ent%field(2), 'in5')
+  call check_int2(ne, 216, 6, ent%ithreshold, 32)
+
+! 217: fgd_alter_window_r check
+  call fgd_alter_window_r(d, 'new18', 'in3', 'in4', GD_WINDOP_GE, 32d3)
+  call check_ok2(ne, 217, 1, d)
+
+  n = fgd_entry(d, 'new18', ent)
+  call check_ok2(ne, 217, 2, d)
+  call check_int2(ne, 217, 1, n, GD_WINDOW_ENTRY)
+  call check_int2(ne, 217, 2, ent%fragment_index, 0)
+  call check_int2(ne, 217, 3, ent%windop, GD_WINDOP_GE)
+  call check_str2(ne, 217, 4, ent%field(1), 'in3')
+  call check_str2(ne, 217, 5, ent%field(2), 'in4')
+  call check_dbl2(ne, 217, 6, ent%rthreshold, 32d3)
+
+! 218: fgd_alias_target check
+  str = fgd_alias_target(d, 'alias')
+  call check_ok(ne, 218, d)
+  call check_str(ne, 218, str, 'data')
+
+! 219: fgd_add_alias check
+  call fgd_add_alias(d, 'new20', 'data', 0)
+  call check_ok2(ne, 219, 1, d)
+
+  str = fgd_alias_target(d, 'new20')
+  call check_ok2(ne, 219, 2, d)
+  call check_str(ne, 219, str, 'data')
+
+! 220: fgd_madd_alias check
+  call fgd_madd_alias(d, 'data', 'mnew20', 'data')
+  call check_ok2(ne, 220, 1, d)
+
+  str = fgd_alias_target(d, 'data/mnew20')
+  call check_ok2(ne, 220, 2, d)
+  call check_str(ne, 220, str, 'data')
+
+! 221: fgd_naliases check
+  n = fgd_naliases(d, 'data')
+  call check_ok(ne, 221, d)
+  call check_int(ne, 221, n, 4)
+
+! 222: GDALSS check
+  fields(1) = 'data'
+  fields(2) = 'alias'
+  fields(3) = 'data/mnew20'
+  fields(4) = 'new20'
+  l = flen
+  call fgd_aliases(flist, d, 'data', l)
+  call check_ok(ne, 222, d)
+  call check_int(ne, 222, l, flen)
+
+  do i = 1, n
+  call check_str2(ne, 222, i, flist(i), fields(i))
+  end do
+
+! 223: fgd_include_affix check
+  call fgd_include_affix(d, 'format1', 0, 'A', 'Z', GD_CREAT + GD_EXCL)
+  call check_ok(ne, 223, d)
+
+! 224: GDMOVA check
+  call fgd_move_alias(d, 'new20', 1)
+  call check_ok2(ne, 224, 1, d)
+
+  n = fgd_fragment_index(d, 'Anew20Z')
+  call check_ok2(ne, 224, 2, d)
+  call check_int(ne, 224, n, 1)
+
+! 225: fgd_delete_alias check
+  call fgd_delete_alias(d, 'Anew20Z', 0)
+  call check_ok2(ne, 225, 1, d)
+
+  n = fgd_fragment_index(d, 'Anew20Z')
+  call check_err2(ne, 225, 2, d, GD_E_BAD_CODE)
+  call check_int(ne, 225, n, -1)
+
+! 226: fgd_fragment_affixes check
+  call fgd_fragment_affixes(fields(1), fields(2), d, 1)
+  call check_ok(ne, 226, d)
+  call check_str2(ne, 226, 1, fields(1), 'A')
+  call check_str2(ne, 226, 2, fields(2), 'Z')
+
+! 227: fgd_alter_affixes check
+  call fgd_alter_affixes(d, 1, 'B', '')
+  call check_ok2(ne, 227, 1, d)
+
+  call fgd_fragment_affixes(fields(1), fields(2), d, 1)
+  call check_ok2(ne, 227, 2, d)
+  call check_str2(ne, 227, 3, fields(1), 'B')
+  call check_str2(ne, 227, 3, fields(2), '')
 
  
 

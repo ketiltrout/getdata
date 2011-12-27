@@ -24,6 +24,45 @@
 static const char* zero_list[1] = { NULL };
 static const gd_carray_t zero_carrays[1] = { {0, NULL} };
 
+/* returns true if E a member of the given list */
+int _GD_ListEntry(gd_entry_t *E, int meta, int vector, gd_entype_t type)
+{
+  dtrace("%p, %i, %i, 0x%X", E, meta, vector, type);
+
+  /* aliases */
+  if (E->field_type == GD_ALIAS_ENTRY) {
+    int ret = 0;
+    if (E->e->entry[0])
+      ret = _GD_ListEntry(E->e->entry[0], meta, vector, type);
+    dreturn("%i", ret);
+    return ret;
+  }
+
+  /* check hidden */
+  if (E->hidden) {
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  /* check meta */
+  if (!meta && E->e->n_meta == -1) {
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  /* vector/type check */
+  if (vector && (E->field_type & GD_SCALAR_ENTRY)) {
+    dreturn("%i", 0);
+    return 0;
+  } else if (type && E->field_type != type) {
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  dreturn("%i", 1);
+  return 1;
+}
+
 const void *gd_constants(DIRFILE* D, gd_type_t return_type) gd_nothrow
 {
   unsigned int i, n;
@@ -52,8 +91,7 @@ const void *gd_constants(DIRFILE* D, gd_type_t return_type) gd_nothrow
   }
 
   for (i = n = 0; i < D->n_entries; ++i) {
-    if (D->entry[i]->field_type == GD_CONST_ENTRY &&
-        D->entry[i]->e->n_meta != -1 && !D->entry[i]->hidden)
+    if (_GD_ListEntry(D->entry[i], 0, 0, GD_CONST_ENTRY))
       if (_GD_DoField(D, D->entry[i], 0, 0, 1, return_type,
             fl + n++ * GD_SIZE(return_type)) != 1)
         break;
@@ -96,9 +134,7 @@ const gd_carray_t *gd_carrays(DIRFILE* D, gd_type_t return_type) gd_nothrow
   memset(fl, 0, sizeof(gd_carray_t) * (n + 1));
 
   for (i = n = 0; i < D->n_entries; ++i) {
-    if (D->entry[i]->field_type == GD_CARRAY_ENTRY &&
-        D->entry[i]->e->n_meta != -1 && !D->entry[i]->hidden)
-    {
+    if (_GD_ListEntry(D->entry[i], 0, 0, GD_CARRAY_ENTRY)) {
       fl[n].n = D->entry[i]->EN(scalar,array_len);
       fl[n].d = _GD_Alloc(D, return_type, fl[n].n);
       if (D->error || _GD_DoField(D, D->entry[i], 0, 0, fl[n].n, return_type,
@@ -153,8 +189,7 @@ const char **gd_strings(DIRFILE* D) gd_nothrow
   }
 
   for (i = n = 0; i < D->n_entries; ++i) {
-    if (D->entry[i]->field_type == GD_STRING_ENTRY &&
-        D->entry[i]->e->n_meta != -1 && !D->entry[i]->hidden)
+    if (_GD_ListEntry(D->entry[i], 0, 0, GD_STRING_ENTRY))
       fl[n++] = D->entry[i]->e->u.string;
   }
   fl[n] = NULL;
@@ -209,11 +244,8 @@ const char **gd_field_list_by_type(DIRFILE* D, gd_entype_t type) gd_nothrow
   }
 
   for (i = n = 0; i < D->n_entries; ++i) {
-    if (D->entry[i]->field_type == type && D->entry[i]->e->n_meta != -1 &&
-        !D->entry[i]->hidden)
-    {
+    if (_GD_ListEntry(D->entry[i], 0, 0, type))
       fl[n++] = D->entry[i]->field;
-    }
   }
   fl[n] = NULL;
 
@@ -260,11 +292,9 @@ const char **gd_vector_list(DIRFILE* D) gd_nothrow
     return NULL;
   }
 
-  for (i = n = 0; i < D->n_entries; ++i) {
-    if (!(D->entry[i]->field_type & GD_SCALAR_ENTRY) &&
-        D->entry[i]->e->n_meta != -1 && !D->entry[i]->hidden)
+  for (i = n = 0; i < D->n_entries; ++i)
+    if (_GD_ListEntry(D->entry[i], 0, 1, 0))
       fl[n++] = D->entry[i]->field;
-  }
   fl[n] = NULL;
 
   free(D->vector_list);
@@ -310,7 +340,7 @@ const char **gd_field_list(DIRFILE* D) gd_nothrow
   }
 
   for (i = n = 0; i < D->n_entries; ++i)
-    if (D->entry[i]->e->n_meta != -1 && !D->entry[i]->hidden)
+    if (_GD_ListEntry(D->entry[i], 0, 0, 0))
       fl[n++] = D->entry[i]->field;
   fl[n] = NULL;
 

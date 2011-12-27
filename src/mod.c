@@ -96,6 +96,8 @@ static int _GD_AlterScalar(DIRFILE* D, int alter_literal, gd_type_t type,
       *(int16_t *)lout = *(int16_t *)lin;
     else if (type == GD_UINT16)
       *(uint16_t *)lout = *(uint16_t *)lin;
+    else if (type == GD_UINT64)
+      *(uint64_t *)lout = *(uint64_t *)lin;
     else
       _GD_InternalError(D);
   }
@@ -817,6 +819,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
         dreturn("%i", -1);
         return -1;
       }
+      memset(Qe.u.scalar.d, 0, GD_SIZE(type) * Q.EN(scalar,array_len));
 
       /* copy via type conversion, if array_len has increased, trailing elements
        * are uninitialised. */
@@ -919,6 +922,7 @@ int gd_alter_raw(DIRFILE *D, const char *field_code,
 
   _GD_ClearError(D);
 
+  memset(&N, 0, sizeof(gd_entry_t));
   N.field_type = GD_RAW_ENTRY;
   N.EN(raw,spf) = spf;
   N.EN(raw,data_type) = data_type;
@@ -949,6 +953,7 @@ int gd_alter_lincom(DIRFILE* D, const char* field_code, int n_fields,
 
   _GD_ClearError(D);
 
+  memset(&N, 0, sizeof(gd_entry_t));
   N.field_type = GD_LINCOM_ENTRY;
   N.comp_scal = 0;
   if (n_fields > GD_MAX_LINCOM || n_fields < 0) {
@@ -1018,6 +1023,7 @@ int gd_alter_clincom(DIRFILE* D, const char* field_code, int n_fields,
 
   _GD_ClearError(D);
 
+  memset(&N, 0, sizeof(gd_entry_t));
   N.field_type = GD_LINCOM_ENTRY;
   N.comp_scal = 1;
   if (n_fields > GD_MAX_LINCOM || n_fields < 0) {
@@ -1083,6 +1089,7 @@ int gd_alter_linterp(DIRFILE* D, const char* field_code, const char* in_field,
     return -1;
   }
 
+  memset(&N, 0, sizeof(gd_entry_t));
   N.field_type = GD_LINTERP_ENTRY;
   N.in_fields[0] = (char *)in_field;
   N.EN(linterp,table) = (char *)table;
@@ -1109,6 +1116,7 @@ int gd_alter_bit(DIRFILE* D, const char* field_code, const char* in_field,
     return -1;
   }
 
+  memset(&N, 0, sizeof(gd_entry_t));
   N.field_type = GD_BIT_ENTRY;
   N.in_fields[0] = (char *)in_field;
   N.EN(bit,bitnum) = bitnum;
@@ -1138,6 +1146,7 @@ int gd_alter_sbit(DIRFILE* D, const char* field_code, const char* in_field,
     return -1;
   }
 
+  memset(&N, 0, sizeof(gd_entry_t));
   N.field_type = GD_SBIT_ENTRY;
   N.in_fields[0] = (char *)in_field;
   N.EN(bit,bitnum) = bitnum;
@@ -1166,6 +1175,7 @@ int gd_alter_recip(DIRFILE* D, const char* field_code, const char* in_field,
     return -1;
   }
 
+  memset(&N, 0, sizeof(gd_entry_t));
   N.field_type = GD_RECIP_ENTRY;
   N.in_fields[0] = (char *)in_field;
   N.scalar[0] = (dividend == 0) ? (char *)"" : NULL;
@@ -1195,6 +1205,7 @@ int gd_alter_crecip(DIRFILE* D, const char* field_code, const char* in_field,
     return -1;
   }
 
+  memset(&N, 0, sizeof(gd_entry_t));
   N.field_type = GD_RECIP_ENTRY;
   N.in_fields[0] = (char *)in_field;
   N.scalar[0] = (cdividend == 0) ? "" : NULL;
@@ -1225,6 +1236,7 @@ int gd_alter_crecip89(DIRFILE* D, const char* field_code, const char* in_field,
     return -1;
   }
 
+  memset(&N, 0, sizeof(gd_entry_t));
   N.field_type = GD_RECIP_ENTRY;
   N.in_fields[0] = (char *)in_field;
   if (cdividend == NULL) {
@@ -1258,6 +1270,7 @@ int gd_alter_divide(DIRFILE* D, const char* field_code, const char* in_field1,
     return -1;
   }
 
+  memset(&N, 0, sizeof(gd_entry_t));
   N.field_type = GD_DIVIDE_ENTRY;
   N.in_fields[0] = (char *)in_field1;
   N.in_fields[1] = (char *)in_field2;
@@ -1283,6 +1296,7 @@ int gd_alter_multiply(DIRFILE* D, const char* field_code, const char* in_field1,
     return -1;
   }
 
+  memset(&N, 0, sizeof(gd_entry_t));
   N.field_type = GD_MULTIPLY_ENTRY;
   N.in_fields[0] = (char *)in_field1;
   N.in_fields[1] = (char *)in_field2;
@@ -1308,6 +1322,7 @@ int gd_alter_phase(DIRFILE* D, const char* field_code, const char* in_field,
     return -1;
   }
 
+  memset(&N, 0, sizeof(gd_entry_t));
   N.field_type = GD_PHASE_ENTRY;
   N.in_fields[0] = (char *)in_field;
   N.EN(phase,shift) = shift;
@@ -1334,6 +1349,7 @@ int gd_alter_const(DIRFILE* D, const char* field_code, gd_type_t const_type)
     return -1;
   }
 
+  memset(&N, 0, sizeof(gd_entry_t));
   N.field_type = GD_CONST_ENTRY;
   N.EN(scalar,const_type) = const_type;
   N.e = NULL;
@@ -1358,6 +1374,7 @@ int gd_alter_carray(DIRFILE* D, const char* field_code, gd_type_t const_type,
     return -1;
   }
 
+  memset(&N, 0, sizeof(gd_entry_t));
   N.field_type = GD_CARRAY_ENTRY;
   N.EN(scalar,const_type) = const_type;
   N.EN(scalar,array_len) = array_len;
@@ -1386,6 +1403,7 @@ int gd_alter_polynom(DIRFILE* D, const char* field_code, int poly_ord,
 
   _GD_ClearError(D);
 
+  memset(&N, 0, sizeof(gd_entry_t));
   N.field_type = GD_POLYNOM_ENTRY;
   N.comp_scal = 0;
   if (poly_ord > GD_MAX_POLYORD || poly_ord < 0) {
@@ -1443,6 +1461,7 @@ int gd_alter_cpolynom(DIRFILE* D, const char* field_code, int poly_ord,
 
   _GD_ClearError(D);
 
+  memset(&N, 0, sizeof(gd_entry_t));
   N.field_type = GD_POLYNOM_ENTRY;
   N.comp_scal = 1;
   if (poly_ord > GD_MAX_POLYORD || poly_ord < 0) {
@@ -1500,6 +1519,7 @@ gd_nothrow
     return -1;
   }
 
+  memset(&N, 0, sizeof(gd_entry_t));
   N.field_type = GD_WINDOW_ENTRY;
   N.in_fields[0] = (char *)in_field;
   N.in_fields[1] = (char *)check_field;

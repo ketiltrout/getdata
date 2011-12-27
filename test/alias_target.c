@@ -39,10 +39,10 @@ int main(void)
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
 
   t = gd_alias_target(D, "alias");
+  CHECKS(t, "target");
   e = gd_error(D);
 
   CHECKI(e, GD_E_OK);
-  CHECKS(t, "target");
 
   gd_close(D);
   unlink(format);

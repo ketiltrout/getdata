@@ -427,7 +427,8 @@ IDL_VPTR gdidl_make_idl_entry(const gd_entry_t* E)
   if (E->field_type == GD_BIT_ENTRY || E->field_type == GD_LINTERP_ENTRY
       || E->field_type == GD_MULTIPLY_ENTRY || E->field_type == GD_PHASE_ENTRY
       || E->field_type == GD_SBIT_ENTRY || E->field_type == GD_POLYNOM_ENTRY
-      || E->field_type == GD_DIVIDE_ENTRY || E->field_type == GD_RECIP_ENTRY)
+      || E->field_type == GD_DIVIDE_ENTRY || E->field_type == GD_RECIP_ENTRY
+      || E->field_type == GD_WINDOW_ENTRY)
   {
     IDL_StrStore((IDL_STRING*)(data + IDL_StructTagInfoByName(gdidl_entry_def,
             "IN_FIELDS", IDL_MSG_LONGJMP, NULL)), E->in_fields[0]);
@@ -555,6 +556,35 @@ IDL_VPTR gdidl_make_idl_entry(const gd_entry_t* E)
         memcpy(data + IDL_StructTagInfoByName(gdidl_entry_def, "A",
               IDL_MSG_LONGJMP, NULL), E->a,
             (E->poly_ord + 1) * sizeof(double));
+      break;
+    case GD_WINDOW_ENTRY:
+      *(IDL_INT*)(data + IDL_StructTagInfoByName(gdidl_entry_def,
+            "WINDOP", IDL_MSG_LONGJMP, NULL)) = E->windop;
+      IDL_StrStore((IDL_STRING*)(data + IDL_StructTagInfoByName(gdidl_entry_def,
+              "CHECK", IDL_MSG_LONGJMP, NULL)), E->in_fields[1]);
+
+      switch (E->windop) {
+        case GD_WINDOP_EQ:
+        case GD_WINDOP_NE:
+          *(IDL_LONG64*)(data + IDL_StructTagInfoByName(gdidl_entry_def,
+                "ITHRESHOLD", IDL_MSG_LONGJMP, NULL)) = E->threshold.i;
+          break;
+        case GD_WINDOP_SET:
+        case GD_WINDOP_CLR:
+          *(IDL_ULONG*)(data + IDL_StructTagInfoByName(gdidl_entry_def,
+                "UTHRESHOLD", IDL_MSG_LONGJMP, NULL)) = E->threshold.u;
+          break;
+        default:
+          *(double*)(data + IDL_StructTagInfoByName(gdidl_entry_def,
+                "RTHRESHOLD", IDL_MSG_LONGJMP, NULL)) = E->threshold.r;
+          break;
+      }
+
+      IDL_StrStore((IDL_STRING*)(data + IDL_StructTagInfoByName(gdidl_entry_def,
+              "SCALAR", IDL_MSG_LONGJMP, NULL)), E->scalar[0]);
+      ((int16_t*)(data + IDL_StructTagInfoByName(gdidl_entry_def,
+          "SCALAR_IND", IDL_MSG_LONGJMP, NULL)))[0] = (int16_t)E->scalar_ind[0];
+
       break;
     case GD_CARRAY_ENTRY:
       *(IDL_INT*)(data + IDL_StructTagInfoByName(gdidl_entry_def, "ARRAY_LEN",
@@ -752,7 +782,7 @@ void gdidl_read_idl_entry(gd_entry_t *E, IDL_VPTR v, int alter)
       o = IDL_StructTagInfoByName(v->value.s.sdef, "TABLE", action, &d);
       if (o != -1) {
         IDL_ENSURE_STRING(d);
-        E->field = IDL_STRING_STR((IDL_STRING*)(data + o));
+        E->table = IDL_STRING_STR((IDL_STRING*)(data + o));
       }
       break;
     case GD_BIT_ENTRY:
@@ -867,6 +897,53 @@ void gdidl_read_idl_entry(gd_entry_t *E, IDL_VPTR v, int alter)
         }
       }
       break;
+    case GD_WINDOW_ENTRY:
+      o = IDL_StructTagInfoByName(v->value.s.sdef, "CHECK", action, &d);
+      if (o != -1) {
+        IDL_ENSURE_STRING(d);
+        E->in_fields[1] = IDL_STRING_STR((IDL_STRING*)(data + o));
+      }
+
+      o = IDL_StructTagInfoByName(v->value.s.sdef, "WINDOP", action, &d);
+      if (o != -1) {
+        if (d->type != IDL_TYP_INT)
+          idl_abort("GD_ENTRY element WINDOP must be of type INT");
+        E->windop = *(int16_t*)(data + o);
+      } else
+        E->windop = GD_WINDOP_UNK;
+
+      switch (E->windop) {
+        case GD_WINDOP_EQ:
+        case GD_WINDOP_NE:
+          o = IDL_StructTagInfoByName(v->value.s.sdef, "ITHRESHOLD", action,
+              &d);
+          if (o != -1) {
+            if (d->type != IDL_TYP_LONG)
+              idl_abort("GD_ENTRY element ITHRESHOLD must be of type LONG");
+            E->threshold.i = *(IDL_LONG*)(data + o);
+          }
+          break;
+        case GD_WINDOP_SET:
+        case GD_WINDOP_CLR:
+          o = IDL_StructTagInfoByName(v->value.s.sdef, "UTHRESHOLD", action,
+              &d);
+          if (o != -1) {
+            if (d->type != IDL_TYP_ULONG)
+              idl_abort("GD_ENTRY element UTHRESHOLD must be of type ULONG");
+            E->threshold.u = *(IDL_ULONG*)(data + o);
+          }
+          break;
+        default:
+          o = IDL_StructTagInfoByName(v->value.s.sdef, "RTHRESHOLD", action,
+              &d);
+          if (o != -1) {
+            if (d->type != IDL_TYP_DOUBLE)
+              idl_abort("GD_ENTRY element RTHRESHOLD must be of type DOUBLE");
+            E->threshold.u = *(double*)(data + o);
+          }
+          break;
+      }
+      break;
     case GD_CARRAY_ENTRY:
       o = IDL_StructTagInfoByName(v->value.s.sdef, "ARRAY_LEN", action, &d);
       if (o != -1) {
@@ -975,7 +1052,6 @@ IDL_VPTR gdidl_dirfilename(int argc, IDL_VPTR argv[], char *argk)
 }
 
 /* @@DLM: P gdidl_add GD_ADD 2 2 KEYWORDS */
-/* @@DLM: P gdidl_add GD_MADD 2 2 KEYWORDS */
 void gdidl_add(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
@@ -1021,7 +1097,6 @@ void gdidl_add(int argc, IDL_VPTR argv[], char *argk)
 }
 
 /* @@DLM: P gdidl_add_bit GD_ADD_BIT 3 3 KEYWORDS */
-/* @@DLM: P gdidl_add_bit GD_MADD_BIT 3 3 KEYWORDS */
 void gdidl_add_bit(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
@@ -1074,7 +1149,6 @@ void gdidl_add_bit(int argc, IDL_VPTR argv[], char *argk)
 }
 
 /* @@DLM: P gdidl_add_const GD_ADD_CONST 2 2 KEYWORDS */
-/* @@DLM: P gdidl_add_const GD_MADD_CONST 2 2 KEYWORDS */
 void gdidl_add_const(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
@@ -1135,7 +1209,6 @@ void gdidl_add_const(int argc, IDL_VPTR argv[], char *argk)
 }
 
 /* @@DLM: P gdidl_add_carray GD_ADD_CARRAY 2 2 KEYWORDS */
-/* @@DLM: P gdidl_add_carray GD_MADD_CARRAY 2 2 KEYWORDS */
 void gdidl_add_carray(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
@@ -1208,9 +1281,6 @@ void gdidl_add_carray(int argc, IDL_VPTR argv[], char *argk)
 }
 
 /* @@DLM: P gdidl_add_lincom GD_ADD_LINCOM 5 11 KEYWORDS */
-/* @@DLM: P gdidl_add_lincom GD_ADD_CLINCOM 5 11 KEYWORDS */
-/* @@DLM: P gdidl_add_lincom GD_MADD_CLINCOM 5 11 KEYWORDS */
-/* @@DLM: P gdidl_add_lincom GD_MADD_LINCOM 5 11 KEYWORDS */
 void gdidl_add_lincom(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
@@ -1291,7 +1361,6 @@ void gdidl_add_lincom(int argc, IDL_VPTR argv[], char *argk)
 }
 
 /* @@DLM: P gdidl_add_linterp GD_ADD_LINTERP 4 4 KEYWORDS */
-/* @@DLM: P gdidl_add_linterp GD_MADD_LINTERP 4 4 KEYWORDS */
 void gdidl_add_linterp(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
@@ -1339,7 +1408,6 @@ void gdidl_add_linterp(int argc, IDL_VPTR argv[], char *argk)
 }
 
 /* @@DLM: P gdidl_add_multiply GD_ADD_MULTIPLY 4 4 KEYWORDS */
-/* @@DLM: P gdidl_add_multiply GD_MADD_MULTIPLY 4 4 KEYWORDS */
 void gdidl_add_multiply(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
@@ -1387,7 +1455,6 @@ void gdidl_add_multiply(int argc, IDL_VPTR argv[], char *argk)
 }
 
 /* @@DLM: P gdidl_add_divide GD_ADD_DIVIDE 4 4 KEYWORDS */
-/* @@DLM: P gdidl_add_divide GD_MADD_DIVIDE 4 4 KEYWORDS */
 void gdidl_add_divide(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
@@ -1435,9 +1502,6 @@ void gdidl_add_divide(int argc, IDL_VPTR argv[], char *argk)
 }
 
 /* @@DLM: P gdidl_add_recip GD_ADD_RECIP 3 3 KEYWORDS */
-/* @@DLM: P gdidl_add_recip GD_ADD_CRECIP 3 3 KEYWORDS */
-/* @@DLM: P gdidl_add_recip GD_MADD_RECIP 3 3 KEYWORDS */
-/* @@DLM: P gdidl_add_recip GD_MADD_CRECIP 3 3 KEYWORDS */
 void gdidl_add_recip(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
@@ -1508,7 +1572,6 @@ void gdidl_add_recip(int argc, IDL_VPTR argv[], char *argk)
 }
 
 /* @@DLM: P gdidl_add_phase GD_ADD_PHASE 4 4 KEYWORDS */
-/* @@DLM: P gdidl_add_phase GD_MADD_PHASE 4 4 KEYWORDS */
 void gdidl_add_phase(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
@@ -1556,9 +1619,6 @@ void gdidl_add_phase(int argc, IDL_VPTR argv[], char *argk)
 }
 
 /* @@DLM: P gdidl_add_polynom GD_ADD_POLYNOM 4 9 KEYWORDS */
-/* @@DLM: P gdidl_add_polynom GD_ADD_CPOLYNOM 4 8 KEYWORDS */
-/* @@DLM: P gdidl_add_polynom GD_MADD_CPOLYNOM 4 9 KEYWORDS */
-/* @@DLM: P gdidl_add_polynom GD_MADD_POLYNOM 4 9 KEYWORDS */
 void gdidl_add_polynom(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
@@ -1727,7 +1787,6 @@ void gdidl_add_raw(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 /* @@DLM: P gdidl_add_sbit GD_ADD_SBIT 3 3 KEYWORDS */
-/* @@DLM: P gdidl_add_sbit GD_MADD_SBIT 3 3 KEYWORDS */
 void gdidl_add_sbit(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
@@ -1780,7 +1839,6 @@ void gdidl_add_sbit(int argc, IDL_VPTR argv[], char *argk)
 }
 
 /* @@DLM: P gdidl_add_spec GD_ADD_SPEC 2 2 KEYWORDS */
-/* @@DLM: P gdidl_add_spec GD_MADD_SPEC 2 2 KEYWORDS */
 void gdidl_add_spec(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
@@ -1826,7 +1884,6 @@ void gdidl_add_spec(int argc, IDL_VPTR argv[], char *argk)
 }
 
 /* @@DLM: P gdidl_add_string GD_ADD_STRING 2 2 KEYWORDS */
-/* @@DLM: P gdidl_add_string GD_MADD_STRING 2 2 KEYWORDS */
 void gdidl_add_string(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
@@ -2197,7 +2254,6 @@ void gdidl_alter_frameoffset(int argc, IDL_VPTR argv[], char *argk)
 }
 
 /* @@DLM: P gdidl_alter_lincom GD_ALTER_LINCOM 2 2 KEYWORDS */
-/* @@DLM: P gdidl_alter_lincom GD_ALTER_CLINCOM 2 2 KEYWORDS */
 void gdidl_alter_lincom(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
@@ -2489,7 +2545,6 @@ void gdidl_alter_divide(int argc, IDL_VPTR argv[], char *argk)
 }
 
 /* @@DLM: P gdidl_alter_recip GD_ALTER_RECIP 2 2 KEYWORDS */
-/* @@DLM: P gdidl_alter_recip GD_ALTER_CRECIP 2 2 KEYWORDS */
 void gdidl_alter_recip(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
@@ -2598,7 +2653,6 @@ void gdidl_alter_phase(int argc, IDL_VPTR argv[], char *argk)
 }
 
 /* @@DLM: P gdidl_alter_polynom GD_ALTER_POLYNOM 2 2 KEYWORDS */
-/* @@DLM: P gdidl_alter_polynom GD_ALTER_CPOLYNOM 2 2 KEYWORDS */
 void gdidl_alter_polynom(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
@@ -2780,7 +2834,6 @@ void gdidl_alter_sbit(int argc, IDL_VPTR argv[], char *argk)
 }
 
 /* @@DLM: P gdidl_alter_spec GD_ALTER_SPEC 2 2 KEYWORDS */
-/* @@DLM: P gdidl_alter_spec GD_MALTER_SPEC 2 2 KEYWORDS */
 void gdidl_alter_spec(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
@@ -2891,16 +2944,18 @@ void gdidl_delete(int argc, IDL_VPTR argv[], char *argk)
   typedef struct {
     IDL_KW_RESULT_FIRST_FIELD;
     GDIDL_KW_RESULT_ERROR;
+    int alias;
     int data;
     int deref;
     int force;
   } KW_RESULT;
   KW_RESULT kw;
 
-  kw.data = kw.deref = kw.force = 0;
+  kw.alias = kw.data = kw.deref = kw.force = 0;
   GDIDL_KW_INIT_ERROR;
 
   static IDL_KW_PAR kw_pars[] = {
+    { "ALIAS", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(alias) },
     { "DEL_DATA", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(data) },
     { "DEREF", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(deref) },
     GDIDL_KW_PAR_ERROR,
@@ -2914,8 +2969,12 @@ void gdidl_delete(int argc, IDL_VPTR argv[], char *argk)
   DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
   const char* field_code = IDL_VarGetString(argv[1]);
 
-  gd_delete(D, field_code, (kw.data ? GD_DEL_DATA : 0) |
-      (kw.deref ? GD_DEL_DEREF : 0) | (kw.force) ? GD_DEL_FORCE : 0);
+  if (kw.alias)
+    gd_delete_alias(D, field_code, (kw.deref ? GD_DEL_DEREF : 0) | 
+        (kw.force) ? GD_DEL_FORCE : 0);
+  else
+    gd_delete(D, field_code, (kw.data ? GD_DEL_DATA : 0) |
+        (kw.deref ? GD_DEL_DEREF : 0) | (kw.force) ? GD_DEL_FORCE : 0);
 
   GDIDL_SET_ERROR(D);
 
@@ -2934,6 +2993,7 @@ void gdidl_flush(int argc, IDL_VPTR argv[], char *argk)
     GDIDL_KW_RESULT_ERROR;
     IDL_STRING field_code;
     int field_code_x;
+    int noclose;
   } KW_RESULT;
   KW_RESULT kw;
 
@@ -2941,12 +3001,14 @@ void gdidl_flush(int argc, IDL_VPTR argv[], char *argk)
 
   GDIDL_KW_INIT_ERROR;
   kw.field_code_x = 0;
+  kw.noclose = 0;
 
   static IDL_KW_PAR kw_pars[] = {
     GDIDL_KW_PAR_ERROR,
     GDIDL_KW_PAR_ESTRING,
     { "FIELD_CODE", IDL_TYP_STRING, 1, 0, IDL_KW_OFFSETOF(field_code_x),
       IDL_KW_OFFSETOF(field_code) },
+    { "NOCLOSE", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(noclose) },
     { NULL }
   };
 
@@ -2957,7 +3019,10 @@ void gdidl_flush(int argc, IDL_VPTR argv[], char *argk)
   if (kw.field_code_x)
     field_code = IDL_STRING_STR(&kw.field_code);
 
-  gd_flush(D, field_code);
+  if (kw.noclose)
+    gd_sync(D, field_code);
+  else
+    gd_flush(D, field_code);
 
   GDIDL_SET_ERROR(D);
 
@@ -2971,6 +3036,8 @@ void gdidl_include(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
+  char *prefix = NULL;
+  char *suffix = NULL;
   typedef struct {
     IDL_KW_RESULT_FIRST_FIELD;
     GDIDL_KW_RESULT_ERROR;
@@ -2992,11 +3059,16 @@ void gdidl_include(int argc, IDL_VPTR argv[], char *argk)
     IDL_VPTR index;
     int fragment_index;
     int index_x;
+    IDL_STRING prefix;
+    int prefix_x;
+    IDL_STRING suffix;
+    int suffix_x;
   } KW_RESULT;
   KW_RESULT kw;
   kw.big_end = kw.creat = kw.excl = kw.force_enc = kw.force_end =
     kw.ignore_dups = kw.ignore_refs = kw.little_end = kw.pedantic = kw.trunc =
-    kw.enc_x = kw.index_x = kw.fragment_index = kw.arm_end = kw.not_arm_end = 0;
+    kw.enc_x = kw.index_x = kw.fragment_index = kw.arm_end = kw.not_arm_end =
+    kw.prefix_x = kw.suffix_x = 0;
   GDIDL_KW_INIT_ERROR;
 
   static IDL_KW_PAR kw_pars[] = {
@@ -3020,6 +3092,10 @@ void gdidl_include(int argc, IDL_VPTR argv[], char *argk)
     { "NOT_ARM_ENDIAN", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(not_arm_end) },
     { "PEDANTIC", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(pedantic) },
     { "PERMISSIVE", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(permissive) },
+    { "PREFIX", IDL_TYP_STRING, 1, 0, IDL_KW_OFFSETOF(prefix_x),
+      IDL_KW_OFFSETOF(prefix) },
+    { "SUFFIX", IDL_TYP_STRING, 1, 0, IDL_KW_OFFSETOF(suffix_x),
+      IDL_KW_OFFSETOF(suffix) },
     { "TRUNC", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(trunc) },
     { NULL }
   };
@@ -3047,7 +3123,14 @@ void gdidl_include(int argc, IDL_VPTR argv[], char *argk)
   if (kw.enc_x)
     flags |= gdidl_convert_encoding(kw.enc);
 
-  int index = (int16_t)gd_include(D, file, kw.fragment_index, flags);
+  if (kw.prefix_x)
+    prefix = IDL_STRING_STR(&kw.prefix);
+
+  if (kw.suffix_x)
+    suffix = IDL_STRING_STR(&kw.suffix);
+
+  int index = (int16_t)gd_include_affix(D, file, kw.fragment_index, prefix,
+      suffix, flags);
 
   if (kw.index_x) {
     IDL_ALLTYPES v;
@@ -3130,13 +3213,15 @@ void gdidl_move(int argc, IDL_VPTR argv[], char *argk)
     IDL_KW_RESULT_FIRST_FIELD;
     GDIDL_KW_RESULT_ERROR;
     int move_data;
+    int alias;
   } KW_RESULT;
   KW_RESULT kw;
 
-  kw.move_data = 0;
+  kw.move_data = kw.alias = 0;
   GDIDL_KW_INIT_ERROR;
 
   static IDL_KW_PAR kw_pars[] = {
+    { "ALIAS", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(alias) },
     GDIDL_KW_PAR_ERROR,
     GDIDL_KW_PAR_ESTRING,
     { "MOVE_DATA", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(move_data) },
@@ -3148,7 +3233,10 @@ void gdidl_move(int argc, IDL_VPTR argv[], char *argk)
   DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
   const char* field_code = IDL_VarGetString(argv[1]);
 
-  gd_move(D, field_code, IDL_LongScalar(argv[2]), kw.move_data);
+  if (kw.alias)
+    gd_move_alias(D, field_code, IDL_LongScalar(argv[2]));
+  else
+    gd_move(D, field_code, IDL_LongScalar(argv[2]), kw.move_data);
 
   GDIDL_SET_ERROR(D);
 
@@ -3310,17 +3398,19 @@ void gdidl_rename(int argc, IDL_VPTR argv[], char *argk)
   typedef struct {
     IDL_KW_RESULT_FIRST_FIELD;
     GDIDL_KW_RESULT_ERROR;
+    int updatedb;
     int move_data;
   } KW_RESULT;
   KW_RESULT kw;
 
-  kw.move_data = 0;
+  kw.move_data = kw.updatedb = 0;
   GDIDL_KW_INIT_ERROR;
 
   static IDL_KW_PAR kw_pars[] = {
     GDIDL_KW_PAR_ERROR,
     GDIDL_KW_PAR_ESTRING,
     { "MOVE_DATA", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(move_data) },
+    { "UPDATEDB", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(updatedb) },
     { NULL }
   };
 
@@ -3330,7 +3420,8 @@ void gdidl_rename(int argc, IDL_VPTR argv[], char *argk)
   const char* field_code = IDL_VarGetString(argv[1]);
   const char* new_code = IDL_VarGetString(argv[2]);
 
-  gd_rename(D, field_code, new_code, kw.move_data);
+  gd_rename(D, field_code, new_code, (kw.move_data ? GD_REN_DATA : 0) |
+      (kw.move_data ? GD_REN_UPDB : 0));
 
   GDIDL_SET_ERROR(D);
 
@@ -3607,7 +3698,6 @@ IDL_VPTR gdidl_get_carray(int argc, IDL_VPTR argv[], char *argk)
 }
 
 /* @@DLM: F gdidl_get_constants GD_CONSTANTS 1 1 KEYWORDS */
-/* @@DLM: F gdidl_get_constants GD_MCONSTANTS 1 1 KEYWORDS */
 IDL_VPTR gdidl_get_constants(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
@@ -3858,9 +3948,6 @@ IDL_VPTR gdidl_get_eof(int argc, IDL_VPTR argv[], char *argk)
 }
 
 /* @@DLM: F gdidl_get_field_list GD_FIELD_LIST 1 1 KEYWORDS */
-/* @@DLM: F gdidl_get_field_list GD_FIELD_LIST_BY_TYPE 1 1 KEYWORDS */
-/* @@DLM: F gdidl_get_field_list GD_MFIELD_LIST 1 1 KEYWORDS */
-/* @@DLM: F gdidl_get_field_list GD_MFIELD_LIST_BY_TYPE 1 1 KEYWORDS */
 IDL_VPTR gdidl_get_field_list(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
@@ -3974,7 +4061,6 @@ IDL_VPTR gdidl_get_fragmentname(int argc, IDL_VPTR argv[], char *argk)
 }
 
 /* @@DLM: F gdidl_get_framenum GD_FRAMENUM 3 3 KEYWORDS */
-/* @@DLM: F gdidl_get_framenum GD_FRAMENUM_SUBSET 3 3 KEYWORDS */
 IDL_VPTR gdidl_get_framenum(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
@@ -4080,9 +4166,6 @@ IDL_VPTR gdidl_get_native_type(int argc, IDL_VPTR argv[], char *argk)
 }
 
 /* @@DLM: F gdidl_get_nfields GD_NFIELDS 1 1 KEYWORDS */
-/* @@DLM: F gdidl_get_nfields GD_NFIELDS_BY_TYPE 1 1 KEYWORDS */
-/* @@DLM: F gdidl_get_nfields GD_NMFIELDS 1 1 KEYWORDS */
-/* @@DLM: F gdidl_get_nfields GD_NMFIELDS_BY_TYPE 1 1 KEYWORDS */
 IDL_VPTR gdidl_get_nfields(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
@@ -4183,7 +4266,6 @@ IDL_VPTR gdidl_get_nframes(int argc, IDL_VPTR argv[], char *argk)
   return r;
 }
 
-/* @@DLM: F gdidl_get_nvectors GD_NMVECTORS 1 1 KEYWORDS */
 /* @@DLM: F gdidl_get_nvectors GD_NVECTORS 1 1 KEYWORDS */
 IDL_VPTR gdidl_get_nvectors(int argc, IDL_VPTR argv[], char *argk)
 {
@@ -4392,7 +4474,6 @@ IDL_VPTR gdidl_get_string(int argc, IDL_VPTR argv[], char *argk)
 }
 
 /* @@DLM: F gdidl_get_strings GD_STRINGS 1 1 KEYWORDS */
-/* @@DLM: F gdidl_get_strings GD_MSTRINGS 1 1 KEYWORDS */
 IDL_VPTR gdidl_get_strings(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
@@ -4451,7 +4532,6 @@ IDL_VPTR gdidl_get_strings(int argc, IDL_VPTR argv[], char *argk)
 }
 
 /* @@DLM: F gdidl_get_vector_list GD_VECTOR_LIST 1 1 KEYWORDS */
-/* @@DLM: F gdidl_get_vector_list GD_MVECTOR_LIST 1 1 KEYWORDS */
 IDL_VPTR gdidl_get_vector_list(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
@@ -4773,6 +4853,542 @@ IDL_VPTR gdidl_tell(int argc, IDL_VPTR argv[], char *argk)
   return r;
 }
 
+/* @@DLM: F gdidl_hidden GD_HIDDEN 2 2 KEYWORDS */
+IDL_VPTR gdidl_hidden(int argc, IDL_VPTR argv[], char *argk)
+{
+  dtraceidl();
+
+  GDIDL_KW_ONLY_ERROR;
+
+  DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
+  const char* field_code = IDL_VarGetString(argv[1]);
+
+  int hidden = gd_hidden(D, field_code);
+
+  GDIDL_SET_ERROR(D);
+
+  IDL_KW_FREE;
+
+  IDL_VPTR r = IDL_GettmpInt(hidden);
+  dreturn("%p", r);
+  return r;
+}
+
+/* @@DLM: P gdidl_hide GD_HIDE 2 2 KEYWORDS */
+void gdidl_hide(int argc, IDL_VPTR argv[], char *argk)
+{
+  dtraceidl();
+
+  GDIDL_KW_ONLY_ERROR;
+
+  DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
+  const char* field_code = IDL_VarGetString(argv[1]);
+
+  gd_hide(D, field_code);
+
+  GDIDL_SET_ERROR(D);
+
+  IDL_KW_FREE;
+
+  dreturnvoid();
+}
+
+/* @@DLM: P gdidl_unhide GD_UNHIDE 2 2 KEYWORDS */
+void gdidl_unhide(int argc, IDL_VPTR argv[], char *argk)
+{
+  dtraceidl();
+
+  GDIDL_KW_ONLY_ERROR;
+
+  DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
+  const char* field_code = IDL_VarGetString(argv[1]);
+
+  gd_unhide(D, field_code);
+
+  GDIDL_SET_ERROR(D);
+
+  IDL_KW_FREE;
+
+  dreturnvoid();
+}
+
+/* @@DLM: P gdidl_add_window GD_ADD_WINDOW 5 5 KEYWORDS */
+void gdidl_add_window(int argc, IDL_VPTR argv[], char *argk)
+{
+  dtraceidl();
+
+  gd_windop_t windop;
+  gd_triplet_t threshold;
+  int nop = 0;
+  typedef struct {
+    IDL_KW_RESULT_FIRST_FIELD;
+    GDIDL_KW_RESULT_ERROR;
+    IDL_STRING parent;
+    int eq, ne, le, lt, gt, ge, set, clr;
+    int parent_x;
+    int fragment_index;
+  } KW_RESULT;
+  KW_RESULT kw;
+
+  GDIDL_KW_INIT_ERROR;
+  kw.eq = kw.ne = kw.le = kw.lt = kw.gt = kw.ge = kw.set = kw.clr = 0;
+
+  static IDL_KW_PAR kw_pars[] = {
+    { "CLR", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(clr) },
+    { "EQ", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(eq) },
+    GDIDL_KW_PAR_ERROR,
+    GDIDL_KW_PAR_ESTRING,
+    { "FRAGMENT", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(fragment_index) },
+    { "GE", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(ge) },
+    { "GT", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(gt) },
+    { "LE", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(le) },
+    { "LT", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(lt) },
+    { "NE", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(ne) },
+    { "PARENT", IDL_TYP_STRING, 1, 0, IDL_KW_OFFSETOF(parent_x),
+      IDL_KW_OFFSETOF(parent) },
+    { "SET", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(set) },
+    { NULL }
+  };
+
+  IDL_KWProcessByOffset(argc, argv, argk, kw_pars, NULL, 1, &kw);
+
+  DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
+  const char* field_code = IDL_VarGetString(argv[1]);
+  const char* in_field = IDL_VarGetString(argv[2]);
+  const char* check = IDL_VarGetString(argv[3]);
+
+  /* check operator */
+  if (kw.eq) {
+    windop = GD_WINDOP_EQ;
+    nop++;
+  }
+  if (kw.ne) {
+    windop = GD_WINDOP_NE;
+    nop++;
+  }
+  if (kw.le) {
+    windop = GD_WINDOP_LE;
+    nop++;
+  }
+  if (kw.lt) {
+    windop = GD_WINDOP_LT;
+    nop++;
+  }
+  if (kw.ge) {
+    windop = GD_WINDOP_GE;
+    nop++;
+  }
+  if (kw.gt) {
+    windop = GD_WINDOP_GT;
+    nop++;
+  }
+  if (kw.set) {
+    windop = GD_WINDOP_SET;
+    nop++;
+  }
+  if (kw.clr) {
+    windop = GD_WINDOP_CLR;
+    nop++;
+  }
+
+  if (nop > 1)
+    idl_kw_abort("Multiple operations specified");
+  else if (nop == 0)
+    idl_kw_abort("No operation specified");
+
+  switch (windop) {
+    case GD_WINDOP_EQ:
+    case GD_WINDOP_NE:
+      threshold.i = IDL_Long64Scalar(argv[4]);
+      break;
+    case GD_WINDOP_SET:
+    case GD_WINDOP_CLR:
+      threshold.u = IDL_ULong64Scalar(argv[4]);
+      break;
+    default:
+      threshold.r = IDL_DoubleScalar(argv[4]);
+      break;
+  }
+
+  if (kw.parent_x) {
+    const char* parent = IDL_STRING_STR(&kw.parent);
+    gd_madd_window(D, parent, field_code, in_field, check, windop, threshold);
+  } else
+    gd_add_window(D, field_code, in_field, check, windop, threshold,
+        kw.fragment_index);
+
+  GDIDL_SET_ERROR(D);
+
+  IDL_KW_FREE;
+
+  dreturnvoid();
+}
+
+/* @@DLM: P gdidl_alter_window GD_ALTER_WINDOW 2 2 KEYWORDS */
+void gdidl_alter_window(int argc, IDL_VPTR argv[], char *argk)
+{
+  dtraceidl();
+
+  int nop = 0;
+  const char* in_field = NULL;
+  const char* check = NULL;
+  gd_triplet_t threshold;
+  gd_windop_t windop = GD_WINDOP_UNK;
+
+  typedef struct {
+    IDL_KW_RESULT_FIRST_FIELD;
+    GDIDL_KW_RESULT_ERROR;
+    IDL_VPTR threshold;
+    int eq, ne, le, lt, gt, ge, set, clr;
+    int threshold_x;
+    IDL_STRING in_field;
+    int in_field_x;
+    IDL_STRING check;
+    int check_x;
+  } KW_RESULT;
+  KW_RESULT kw;
+
+  threshold.r = 0;
+  kw.check_x = kw.in_field_x = kw.threshold_x = 0;
+  kw.eq = kw.ne = kw.le = kw.lt = kw.gt = kw.ge = kw.set = kw.clr = 0;
+  GDIDL_KW_INIT_ERROR;
+
+  static IDL_KW_PAR kw_pars[] = {
+    { "CHECK", IDL_TYP_STRING, 1, 0, IDL_KW_OFFSETOF(check_x),
+      IDL_KW_OFFSETOF(check) },
+    { "CLR", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(clr) },
+    { "EQ", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(eq) },
+    GDIDL_KW_PAR_ERROR,
+    GDIDL_KW_PAR_ESTRING,
+    { "GE", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(ge) },
+    { "GT", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(gt) },
+    { "IN_FIELD", IDL_TYP_STRING, 1, 0, IDL_KW_OFFSETOF(in_field_x),
+      IDL_KW_OFFSETOF(in_field) },
+    { "LE", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(le) },
+    { "LT", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(lt) },
+    { "NE", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(ne) },
+    { "SET", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(set) },
+    { "THRESHOLD", 0, 1, IDL_KW_VIN, IDL_KW_OFFSETOF(threshold_x),
+      IDL_KW_OFFSETOF(threshold) },
+    { NULL }
+  };
+
+  IDL_KWProcessByOffset(argc, argv, argk, kw_pars, NULL, 1, &kw);
+
+  DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
+  const char* field_code = IDL_VarGetString(argv[1]);
+
+  /* count operators */
+  if (kw.eq) {
+    windop = GD_WINDOP_EQ;
+    nop++;
+  }
+  if (kw.ne) {
+    windop = GD_WINDOP_NE;
+    nop++;
+  }
+  if (kw.le) {
+    windop = GD_WINDOP_LE;
+    nop++;
+  }
+  if (kw.lt) {
+    windop = GD_WINDOP_LT;
+    nop++;
+  }
+  if (kw.ge) {
+    windop = GD_WINDOP_GE;
+    nop++;
+  }
+  if (kw.gt) {
+    windop = GD_WINDOP_GT;
+    nop++;
+  }
+  if (kw.set) {
+    windop = GD_WINDOP_SET;
+    nop++;
+  }
+  if (kw.clr) {
+    windop = GD_WINDOP_CLR;
+    nop++;
+  }
+
+  if (nop > 1)
+    idl_kw_abort("Multiple operations specified");
+
+  /* Need the current windop and/or threshold */
+  if (nop == 0 || !kw.threshold_x) {
+    gd_entry_t E;
+    gd_entry(D, field_code, &E);
+    gd_free_entry_strings(&E);
+    if (gd_error(D)) {
+      GDIDL_SET_ERROR(D);
+
+      IDL_KW_FREE;
+
+      dreturnvoid();
+      return;
+    }
+    if (nop == 0)
+      windop = E.windop;
+    if (!kw.threshold_x)
+      threshold = E.threshold;
+  }
+
+  if (kw.in_field_x)
+    in_field = IDL_STRING_STR(&kw.in_field);
+
+  if (kw.check_x)
+    check = IDL_STRING_STR(&kw.check);
+
+  if (kw.threshold_x) {
+    switch (windop) {
+      case GD_WINDOP_EQ:
+      case GD_WINDOP_NE:
+        threshold.i = IDL_Long64Scalar(kw.threshold);
+        break;
+      case GD_WINDOP_SET:
+      case GD_WINDOP_CLR:
+        threshold.u = IDL_ULong64Scalar(kw.threshold);
+        break;
+      default:
+        threshold.r = IDL_DoubleScalar(kw.threshold);
+        break;
+    }
+  }
+
+  gd_alter_window(D, field_code, in_field, check, windop, threshold);
+
+  GDIDL_SET_ERROR(D);
+
+  IDL_KW_FREE;
+
+  dreturnvoid();
+}
+
+/* @@DLM: F gdidl_naliases GD_NALIASES 2 2 KEYWORDS */
+IDL_VPTR gdidl_naliases(int argc, IDL_VPTR argv[], char *argk)
+{
+  dtraceidl();
+
+  int nalias;
+
+  GDIDL_KW_ONLY_ERROR;
+
+  DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
+  const char* field_code = IDL_VarGetString(argv[1]);
+
+  nalias = gd_naliases(D, field_code);
+
+  GDIDL_SET_ERROR(D);
+
+  IDL_KW_FREE;
+
+  IDL_VPTR r = IDL_GettmpLong(nalias);
+  dreturn("%p", r);
+  return r;
+}
+
+/* @@DLM: F gdidl_alias_target GD_ALIAS_TARGET 2 2 KEYWORDS */
+IDL_VPTR gdidl_alias_target(int argc, IDL_VPTR argv[], char *argk)
+{
+  dtraceidl();
+
+  GDIDL_KW_ONLY_ERROR;
+
+  DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
+  const char* field_code = IDL_VarGetString(argv[1]);
+
+  const char* name = gd_alias_target(D, field_code);
+
+  GDIDL_SET_ERROR(D);
+
+  IDL_KW_FREE;
+
+  IDL_VPTR r = IDL_StrToSTRING((char*)name);
+  dreturn("%p", r);
+  return r;
+}
+
+/* @@DLM: F gdidl_aliases GD_ALIASES 2 2 KEYWORDS */
+IDL_VPTR gdidl_aliases(int argc, IDL_VPTR argv[], char *argk)
+{
+  dtraceidl();
+
+  int i;
+  unsigned int nalias;
+  const char** list;
+
+  GDIDL_KW_ONLY_ERROR;
+
+  IDL_KWProcessByOffset(argc, argv, argk, kw_pars, NULL, 1, &kw);
+
+  DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
+  const char* field_code = IDL_VarGetString(argv[1]);
+
+  nalias = gd_naliases(D, field_code);
+  list = gd_aliases(D, field_code);
+
+  GDIDL_SET_ERROR(D);
+
+  IDL_KW_FREE;
+
+  IDL_VPTR r;
+
+  IDL_STRING *data = (IDL_STRING*)IDL_MakeTempVector(IDL_TYP_STRING, nalias,
+      IDL_ARR_INI_ZERO, &r);
+  for (i = 0; i < nalias; ++i)
+    IDL_StrStore(data + i, (char*)list[i]);
+
+  dreturn("%p", r);
+  return r;
+}
+
+/* @@DLM: P gdidl_add_alias GD_ADD_ALIAS 3 3 KEYWORDS */
+void gdidl_add_alias(int argc, IDL_VPTR argv[], char *argk)
+{
+  dtraceidl();
+
+  typedef struct {
+    IDL_KW_RESULT_FIRST_FIELD;
+    GDIDL_KW_RESULT_ERROR;
+    int fragment_index;
+    IDL_STRING parent;
+    int parent_x;
+  } KW_RESULT;
+  KW_RESULT kw;
+
+  GDIDL_KW_INIT_ERROR;
+  kw.fragment_index = 0;
+  kw.parent_x = 0;
+
+  static IDL_KW_PAR kw_pars[] = {
+    GDIDL_KW_PAR_ERROR,
+    GDIDL_KW_PAR_ESTRING,
+    { "FRAGMENT", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(fragment_index) },
+    { "PARENT", IDL_TYP_STRING, 1, 0, IDL_KW_OFFSETOF(parent_x),
+      IDL_KW_OFFSETOF(parent) },
+    { NULL }
+  };
+
+  IDL_KWProcessByOffset(argc, argv, argk, kw_pars, NULL, 1, &kw);
+
+  DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
+  const char* field_code = IDL_VarGetString(argv[1]);
+  const char* target = IDL_VarGetString(argv[2]);
+
+  if (kw.parent_x) {
+    const char* parent = IDL_STRING_STR(&kw.parent);
+    gd_madd_alias(D, parent, field_code, target);
+  } else
+    gd_add_alias(D, field_code, target, kw.fragment_index);
+
+  GDIDL_SET_ERROR(D);
+
+  IDL_KW_FREE;
+
+  dreturnvoid();
+}
+
+/* @@DLM: P gdidl_alter_affixes GD_ALTER_AFFIXES 1 1 KEYWORDS */
+void gdidl_alter_affixes(int argc, IDL_VPTR argv[], char *argk)
+{
+  dtraceidl();
+
+  char *prefix = NULL;
+  char *suffix = NULL;
+  typedef struct {
+    IDL_KW_RESULT_FIRST_FIELD;
+    GDIDL_KW_RESULT_ERROR;
+    int fragment_index;
+    IDL_STRING prefix;
+    int prefix_x;
+    IDL_STRING suffix;
+    int suffix_x;
+  } KW_RESULT;
+  KW_RESULT kw;
+
+  GDIDL_KW_INIT_ERROR;
+  kw.fragment_index = kw.prefix_x = kw.suffix_x = 0;
+
+  static IDL_KW_PAR kw_pars[] = {
+    GDIDL_KW_PAR_ERROR,
+    GDIDL_KW_PAR_ESTRING,
+    { "FRAGMENT", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(fragment_index) },
+    { "PREFIX", IDL_TYP_STRING, 1, 0, IDL_KW_OFFSETOF(prefix_x),
+      IDL_KW_OFFSETOF(prefix) },
+    { "SUFFIX", IDL_TYP_STRING, 1, 0, IDL_KW_OFFSETOF(suffix_x),
+      IDL_KW_OFFSETOF(suffix) },
+    { NULL }
+  };
+
+  IDL_KWProcessByOffset(argc, argv, argk, kw_pars, NULL, 1, &kw);
+
+  DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
+
+  if (kw.prefix_x)
+    prefix = IDL_STRING_STR(&kw.prefix);
+
+  if (kw.suffix_x)
+    suffix = IDL_STRING_STR(&kw.suffix);
+
+  gd_alter_affixes(D, kw.fragment_index, prefix, suffix);
+
+  GDIDL_SET_ERROR(D);
+
+  IDL_KW_FREE;
+
+  dreturnvoid();
+}
+
+/* @@DLM: F gdidl_fragment_affixes GD_FRAGMENT_AFFIXES 1 1 KEYWORDS */
+IDL_VPTR gdidl_fragment_affixes(int argc, IDL_VPTR argv[], char *argk)
+{
+  dtraceidl();
+
+  char *prefix;
+  char *suffix;
+  typedef struct {
+    IDL_KW_RESULT_FIRST_FIELD;
+    GDIDL_KW_RESULT_ERROR;
+    int fragment_index;
+  } KW_RESULT;
+  KW_RESULT kw;
+
+  GDIDL_KW_INIT_ERROR;
+  kw.fragment_index = 0;
+
+  static IDL_KW_PAR kw_pars[] = {
+    GDIDL_KW_PAR_ERROR,
+    GDIDL_KW_PAR_ESTRING,
+    { "FRAGMENT", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(fragment_index) },
+    { NULL }
+  };
+
+  IDL_KWProcessByOffset(argc, argv, argk, kw_pars, NULL, 1, &kw);
+
+  DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
+
+  gd_fragment_affixes(D, kw.fragment_index, &prefix, &suffix);
+
+  GDIDL_SET_ERROR(D);
+
+  IDL_KW_FREE;
+
+  IDL_VPTR r;
+
+  IDL_STRING *data = (IDL_STRING*)IDL_MakeTempVector(IDL_TYP_STRING, 2,
+      IDL_ARR_INI_ZERO, &r);
+  IDL_StrStore(data, prefix);
+  IDL_StrStore(data + 1, suffix);
+
+  free(prefix);
+  free(suffix);
+
+  dreturn("%p", r);
+  return r;
+}
+
+
 
 
 /**** Module initialisation ****/
@@ -4783,7 +5399,7 @@ extern int gdidl_n_procs;
 extern IDL_SYSFUN_DEF2 gdidl_funcs[];
 extern int gdidl_n_funcs;
 
-/* These are defined in the automatically gnerated constants.c */
+/* These are defined in the automatically generated constants.c */
 extern IDL_STRUCT_TAG_DEF gdidl_constants[];
 /* @@DLM: F gdidl_generate_constants GETDATA_CONSTANTS 0 0 */
 extern IDL_VPTR gdidl_generate_constants(int argc, IDL_VPTR argv[], char *argk);
@@ -4803,6 +5419,7 @@ static IDL_STRUCT_TAG_DEF gdidl_entry[] = {
   { "B",          lincom_dims, (void*)IDL_TYP_DOUBLE }, /* LINCOM */
   { "CB",         lincom_dims, (void*)IDL_TYP_DCOMPLEX }, /* LINCOM */
   { "BITNUM",     0, (void*)IDL_TYP_INT }, /* (S)BIT */
+  { "CHECK",      0, (void*)IDL_TYP_STRING }, /* WINDOW */
   { "COMP_SCAL",  0, (void*)IDL_TYP_INT }, /* LINCOM / POLYNOM */
   { "DATA_TYPE",  0, (void*)IDL_TYP_INT }, /* RAW / CONST / CARRAY */
   { "DIVIDEND",   0, (void*)IDL_TYP_DOUBLE }, /* RECIP */
@@ -4817,6 +5434,10 @@ static IDL_STRUCT_TAG_DEF gdidl_entry[] = {
   { "SHIFT",      0, (void*)IDL_TYP_LONG }, /* PHASE */
   { "SPF",        0, (void*)IDL_TYP_UINT }, /* RAW */
   { "TABLE",      0, (void*)IDL_TYP_STRING }, /* LINTERP */
+  { "UTHRESHOLD", 0, (void*)IDL_TYP_ULONG }, /* WINDOW */
+  { "ITHRESHOLD", 0, (void*)IDL_TYP_LONG }, /* WINDOW */
+  { "RTHRESHOLD", 0, (void*)IDL_TYP_DOUBLE }, /* WINDOW */
+  { "WINDOP",     0, (void*)IDL_TYP_INT }, /* WINDOW */
   { NULL }
 };
 

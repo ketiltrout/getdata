@@ -68,13 +68,10 @@ const void *gd_mconstants(DIRFILE* D, const char* parent,
   /* DoField will implicitly choose GD_REPR_AUTO for complex data being returned
    * as purely real */
   for (i = n = 0; i < e->n_meta; ++i) {
-    if (e->p.meta_entry[i]->field_type == GD_CONST_ENTRY &&
-        !e->p.meta_entry[i]->hidden)
-    {
+    if (_GD_ListEntry(e->p.meta_entry[i], 1, 0, GD_CONST_ENTRY))
       if (_GD_DoField(D, e->p.meta_entry[i], 0, 0, 1, return_type,
             fl + n++ * GD_SIZE(return_type)) != 1)
         break;
-    }
   }
 
   free(e->const_value_list);
@@ -128,9 +125,7 @@ const gd_carray_t *gd_mcarrays(DIRFILE* D, const char* parent,
   /* DoField will implicitly choose GD_REPR_AUTO for complex data being returned
    * as purely real */
   for (i = n = 0; i < e->n_meta; ++i) {
-    if (e->p.meta_entry[i]->field_type == GD_CARRAY_ENTRY &&
-        !e->p.meta_entry[i]->hidden)
-    {
+    if (_GD_ListEntry(e->p.meta_entry[i], 1, 0, GD_CARRAY_ENTRY)) {
       fl[n].n = e->p.meta_entry[i]->EN(scalar,array_len);
       fl[n].d = _GD_Alloc(D, return_type, fl[n].n);
       if (D->error || _GD_DoField(D, e->p.meta_entry[i], 0, 0, fl[n].n,
@@ -194,11 +189,8 @@ const char **gd_mstrings(DIRFILE* D, const char* parent) gd_nothrow
   }
 
   for (i = n = 0; i < e->n_meta; ++i)
-    if (e->p.meta_entry[i]->field_type == GD_STRING_ENTRY &&
-      !e->p.meta_entry[i]->hidden)
-    {
+    if (_GD_ListEntry(e->p.meta_entry[i], 1, 0, GD_STRING_ENTRY))
       fl[n++] = e->p.meta_entry[i]->e->u.string;
-    }
   fl[n] = NULL;
 
   e->string_value_list = (const char **)fl;
@@ -267,7 +259,7 @@ const char **gd_mfield_list_by_type(DIRFILE* D, const char* parent,
   }
 
   for (i = n = 0; i < e->n_meta; ++i)
-    if (e->p.meta_entry[i]->field_type == type && !e->p.meta_entry[i]->hidden)
+    if (_GD_ListEntry(e->p.meta_entry[i], 1, 0, type))
       fl[n++] = e->p.meta_entry[i]->field + offs;
   fl[n] = NULL;
 
@@ -325,11 +317,8 @@ const char **gd_mvector_list(DIRFILE* D, const char* parent) gd_nothrow
   }
 
   for (i = n = 0; i < e->n_meta; ++i)
-    if (!(e->p.meta_entry[i]->field_type & GD_SCALAR_ENTRY) &&
-        !e->p.meta_entry[i]->hidden)
-    {
+    if (_GD_ListEntry(e->p.meta_entry[i], 1, 1, 0))
       fl[n++] = e->p.meta_entry[i]->field + offs;
-    }
   fl[n] = NULL;
 
   e->vector_list = (const char **)fl;
@@ -383,7 +372,7 @@ const char **gd_mfield_list(DIRFILE* D, const char* parent) gd_nothrow
   }
 
   for (i = n = 0; i < e->n_meta; ++i)
-    if (!e->p.meta_entry[i]->hidden)
+    if (_GD_ListEntry(e->p.meta_entry[i], 1, 0, 0))
       fl[n++] = e->p.meta_entry[i]->field + offs;
   fl[n] = NULL;
 

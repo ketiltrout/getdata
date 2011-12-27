@@ -24,11 +24,7 @@ EXTRA_DIST=funclist.pl GetData.xs simple_funcs.pl simple_funcs.xsin typemap \
 					 GetData.pm.in MANIFEST
 
 if GETDATA_DEBUG
-DEBUG_C = lib/debug.c
 TEST_VERBOSE=verbose=1
-$(DEBUG_C): $(top_srcdir)/src/debug.c lib
-	echo "#undef VERSION" > $@
-	cat $< >> $@
 endif
 
 lib:
@@ -62,8 +58,7 @@ blib/arch/auto/GetData/GetData.so: Build
 	$(PERL) $< build
 
 .PRECIOUS: Build
-Build: Build.PL GetData.pm lib/GetData.xs lib/simple_funcs.xs lib/typemap \
-	$(DEBUG_C)
+Build: Build.PL GetData.pm lib/GetData.xs lib/simple_funcs.xs lib/typemap
 	perl $<
 
 clean-local: 

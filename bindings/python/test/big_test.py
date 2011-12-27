@@ -89,10 +89,10 @@ file.close()
 
 ne = 0
 
-fields = ["INDEX", "bit", "carray", "const", "data", "div", "lincom",
-"linterp", "mult", "phase", "polynom", "recip", "sbit", "string"]
+fields = ["INDEX", "alias", "bit", "carray", "const", "data", "div", "lincom",
+"linterp", "mult", "phase", "polynom", "recip", "sbit", "string", "window"]
 
-nfields = 14
+nfields = 16
 file=open("dirfile/format", 'w')
 file.write(
     "/ENDIAN little\n"
@@ -111,6 +111,8 @@ file.write(
     "div DIVIDE mult bit\n"
     "recip RECIP div 6.5;4.3\n"
     "phase PHASE data 11\n"
+    "window WINDOW linterp mult LT 4.1\n"
+    "/ALIAS alias data\n"
     "string STRING \"Zaphod Beeblebrox\"\n"
     )
 file.close()
@@ -664,16 +666,16 @@ try:
   n = d.nvectors()
 except:
   CheckOK(44)
-CheckSimple(44,n,19)
+CheckSimple(44,n,21)
 
 # 45: field_list check
 try:
   n = d.vector_list()
 except:
   CheckOK(45)
-CheckSimple(45,n,['INDEX', 'bit', 'data', 'div', 'lincom', 'linterp', 'mult',
-  'new1', 'new10', 'new2', 'new4', 'new6', 'new7', 'new8', 'new9', 'phase',
-  'polynom', 'recip', 'sbit'])
+CheckSimple(45,n,['INDEX', 'alias', 'bit', 'data', 'div', 'lincom', 'linterp',
+  'mult', 'new1', 'new10', 'new2', 'new4', 'new6', 'new7', 'new8', 'new9',
+  'phase', 'polynom', 'recip', 'sbit', 'window'])
 
 # 46: add / entry (lincom) check
 ent = pygetdata.entry(pygetdata.LINCOM_ENTRY, "mnew1", 0,
@@ -1316,7 +1318,7 @@ try:
   n = d.standards;
 except:
   CheckOK2(157,1);
-CheckSimple(157,n,8)
+CheckSimple(157,n,9)
 
 try:
   d.standards = 0;
@@ -1622,6 +1624,222 @@ try:
 except:
   CheckOK(204);
 CheckSimple(204,n,288)
+
+# 205: gd_hide check
+try:
+  d.hide('data')
+except:
+  CheckOK(205)
+
+# 206: gd_hidden check
+try:
+  n = d.hidden('data')
+except:
+  CheckOK2(206, 1)
+CheckSimple2(206, 1, n, 1)
+
+try:
+  n = d.hidden('lincom')
+except:
+  CheckOK2(206, 2)
+CheckSimple2(206, 2, n, 0)
+
+# 207: gd_unhide check
+try:
+  d.unhide('data')
+except:
+  CheckOK2(206, 1)
+
+try:
+  n = d.hidden('data')
+except:
+  CheckOK2(206, 2)
+CheckSimple(206, n, 0)
+
+# 208: gd_sync check
+try:
+  d.sync('data')
+except:
+  CheckOK(208)
+
+# 209: gd_flush check
+try:
+  d.flush('data')
+except:
+  CheckOK(209)
+
+# 210: gd_metaflush check
+try:
+  d.metaflush()
+except:
+  CheckOK(210)
+
+# 211: gd_entry (WINDOW) check
+try:
+  ent = d.entry('window')
+except:
+  CheckOK(211)
+CheckSimple2(211, 1, ent.field_type, pygetdata.WINDOW_ENTRY)
+CheckSimple2(211, 2, ent.fragment, 0)
+CheckSimple2(211, 3, ent.windop, pygetdata.WINDOP_LT)
+CheckSimple2(212, 4, ent.in_fields, ( 'linterp', 'mult' ))
+CheckSimple2(211, 5, ent.threshold, 4.1)
+
+# 212: gd_add_window check
+ent = pygetdata.entry(pygetdata.WINDOW_ENTRY, "new18", 0,
+    ("in1", "in2", pygetdata.WINDOP_NE, 32))
+try:
+  d.add(ent)
+except:
+  CheckOK2(212, 1)
+
+try:
+  ent = d.entry('new18')
+except:
+  CheckOK2(212, 2)
+CheckSimple2(212, 1, ent.field_type, pygetdata.WINDOW_ENTRY)
+CheckSimple2(212, 2, ent.fragment, 0)
+CheckSimple2(212, 3, ent.windop, pygetdata.WINDOP_NE)
+CheckSimple2(212, 4, ent.in_fields, ( 'in1', 'in2' ))
+CheckSimple2(212, 5, ent.threshold, 32)
+
+# 214: gd_madd_window check
+ent = pygetdata.entry(pygetdata.WINDOW_ENTRY, "mnew18", 0,
+    ("in2", "in3", pygetdata.WINDOP_SET, 128))
+try:
+  d.madd(ent, "data")
+except:
+  CheckOK2(214, 1)
+
+try:
+  ent = d.entry('data/mnew18')
+except:
+  CheckOK2(214, 2)
+CheckSimple2(214, 1, ent.field_type, pygetdata.WINDOW_ENTRY)
+CheckSimple2(214, 2, ent.fragment, 0)
+CheckSimple2(214, 3, ent.windop, pygetdata.WINDOP_SET)
+CheckSimple2(214, 4, ent.in_fields, ( 'in2', 'in3' ))
+CheckSimple2(214, 5, ent.threshold, 128)
+
+# 217: gd_alter_window check
+ent = pygetdata.entry(pygetdata.WINDOW_ENTRY, "new18", 0, { "threshold": 32e3,
+  "in_field1": "in3", "in_field2": "in4", "windop": pygetdata.WINDOP_GE })
+try:
+  d.alter('new18', ent)
+except:
+  CheckOK2(217, 1)
+
+try:
+  ent = d.entry('new18')
+except:
+  CheckOK2(217, 2)
+CheckSimple2(217, 1, ent.field_type, pygetdata.WINDOW_ENTRY)
+CheckSimple2(217, 2, ent.fragment, 0)
+CheckSimple2(217, 3, ent.windop, pygetdata.WINDOP_GE)
+CheckSimple2(216, 4, ent.in_fields, ( 'in3', 'in4' ))
+CheckSimple2(217, 6, ent.threshold, 32e3)
+
+# 218: gd_alias_target check
+try:
+  str = d.alias_target('alias')
+except:
+  CheckOK(218)
+CheckSimple(218, str, 'data')
+
+# 219: gd_add_alias check
+try:
+  d.add_alias('new20', 'data', 0)
+except:
+  CheckOK2(219, 1)
+
+try:
+  str = d.alias_target('new20')
+except:
+  CheckOK2(219, 2)
+CheckSimple(219, str, 'data')
+
+# 220: gd_madd_alias check
+try:
+  d.madd_alias('data', 'mnew20', 'data')
+except:
+  CheckOK2(220, 1)
+
+try:
+  str = d.alias_target('data/mnew20')
+except:
+  CheckOK2(220, 2)
+CheckSimple(220, str, 'data')
+
+# 221: gd_naliases check
+try:
+  n = d.naliases('data')
+except:
+  CheckOK(221)
+CheckSimple(221, n, 4)
+
+# 222: gd_aliases check
+try:
+  n = d.aliases('data')
+except:
+  CheckOK(222)
+CheckSimple(222, n, [ 'data', 'alias', 'data/mnew20', 'new20' ])
+
+# 223: gd_include_affix check
+try:
+  d.include('format1', 0, prefix='A', suffix='Z',
+      flags=pygetdata.CREAT | pygetdata.EXCL)
+except:
+  CheckOK(223)
+
+# 224: GDMOVA check
+try:
+  d.move_alias('new20', 1)
+except:
+  CheckOK2(224, 1)
+
+try:
+  n = d.fragment_index('Anew20Z')
+except:
+  CheckOK2(224, 2)
+CheckSimple(224, n, 1)
+
+# 225: gd_delete_alias check
+try:
+  d.delete_alias('Anew20Z', 0)
+except:
+  CheckOK2(225, 1)
+
+try:
+  n = d.fragment_index('Anew20Z')
+except:
+  CheckException2(255, 2, pygetdata.BadCodeError)
+
+# 226: gd_fragment_affixes check
+try:
+  n = d.fragment(1).prefix
+  m = d.fragment(1).suffix
+except:
+  CheckOK(226)
+CheckSimple2(226, 1, n, "A")
+CheckSimple2(226, 2, m, "Z")
+
+# 227: gd_alter_affixes check
+try:
+  d.fragment(1).prefix = "B"
+  d.fragment(1).suffix = ""
+except:
+  CheckOK2(227, 1)
+
+try:
+  n = d.fragment(1).prefix
+  m = d.fragment(1).suffix
+except:
+  CheckOK2(227, 2)
+CheckSimple2(227, 1, n, "B")
+CheckSimple2(227, 2, m, "")
+
+ 
+
 
 
 

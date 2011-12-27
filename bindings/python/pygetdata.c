@@ -1,4 +1,4 @@
-/* Copyright (C) 2009, 2010 D. V. Wiebe
+/* Copyright (C) 2009-2011 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -31,7 +31,7 @@ static const char *gdpy_exception_list[GD_N_ERROR_CODES] = {
   "BadType",
   "RawIO",
   "OpenFragment",
-  "InternalError",
+  "Internal",
   "Alloc",
   "Range",
   "OpenLinfile",
@@ -49,14 +49,16 @@ static const char *gdpy_exception_list[GD_N_ERROR_CODES] = {
   "BadReference",
   "Protected",
   "Deletion",
-  "BadEndianess",
+  "BadArgument",
   "Callback",
-  "BadProtection",
+  NULL, /* unused */
   "UncleanDatabase",
   "Domain",
   "BadRepr",
   "BadVersion",
-  "Flush"
+  "Flush",
+  "Bounds",
+  "LineTooLong"
 };
 PyObject *gdpy_exceptions[GD_N_ERROR_CODES];
 
@@ -608,10 +610,13 @@ PyMODINIT_FUNC initpygetdata(void)
   PyModule_AddObject(mod, "DirfileError", GdPy_DirfileError);
 
   for (i = 1; i < GD_N_ERROR_CODES; ++i) {
-    char name[40];
-    sprintf(name, "pygetdata.%sError", gdpy_exception_list[i]);
-    gdpy_exceptions[i] = PyErr_NewException(name, GdPy_DirfileError, NULL);
-    Py_INCREF(gdpy_exceptions[i]);
-    PyModule_AddObject(mod, name + 10, gdpy_exceptions[i]);
+    if (gdpy_exception_list[i]) {
+      char name[40];
+      sprintf(name, "pygetdata.%sError", gdpy_exception_list[i]);
+      gdpy_exceptions[i] = PyErr_NewException(name, GdPy_DirfileError, NULL);
+      Py_INCREF(gdpy_exceptions[i]);
+      PyModule_AddObject(mod, name + 10, gdpy_exceptions[i]);
+    } else
+      gdpy_exceptions[i] = GdPy_DirfileError;
   }
 }

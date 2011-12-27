@@ -68,7 +68,19 @@ namespace GetData {
     StringEntryType   = GD_STRING_ENTRY,
     IndexEntryType    = GD_INDEX_ENTRY,
     DivideEntryType   = GD_DIVIDE_ENTRY,
-    RecipEntryType    = GD_RECIP_ENTRY
+    RecipEntryType    = GD_RECIP_ENTRY,
+    WindowEntryType   = GD_WINDOW_ENTRY
+  };
+
+  enum WindOpType {
+    WindOpEq = GD_WINDOP_EQ,
+    WindOpNe = GD_WINDOP_NE,
+    WindOpGe = GD_WINDOP_GE,
+    WindOpGt = GD_WINDOP_GT,
+    WindOpLe = GD_WINDOP_LE,
+    WindOpLt = GD_WINDOP_LT,
+    WindOpSet = GD_WINDOP_SET,
+    WindOpClr = GD_WINDOP_CLR
   };
 
   class Entry {
@@ -207,6 +219,22 @@ namespace GetData {
           std::complex<double>(E.u.recip.cdividend[0], E.u.recip.cdividend[1]) :
           0;
       };
+
+      /* WINDOW methods */
+      virtual const char *Check() const {
+        return (E.field_type == GD_WINDOW_ENTRY) ? E.in_fields[1] : 0;
+      };
+
+      virtual WindOpType WindOp() const {
+        return (E.field_type == GD_WINDOW_ENTRY) ? (WindOpType)E.u.window.windop
+          : (WindOpType)0;
+      }
+
+      virtual gd_triplet_t Threshold() const {
+        gd_triplet_t zero;
+        zero.r = 0;
+        return (E.field_type == GD_WINDOW_ENTRY) ? E.u.window.threshold : zero;
+      }
 
       void SetName(const char* name);
 

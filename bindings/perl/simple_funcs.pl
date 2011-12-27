@@ -23,6 +23,7 @@ sub printmunge {
   return "(long long)$n" if ($t eq "off64_t" or $t eq "gd_shift_t");
   return "creal($n), cimag($n)" if ($t eq "_Complex double" or
     $t eq "gdpu_complex");
+  return "$n.r, $n.u, $n.i" if ($t eq "gd_triplet_t");
   return $n;
 }
 
@@ -38,7 +39,8 @@ sub printfmt {
     return "%g;%g";
   } elsif ($_ eq "double") {
     return "%g";
-  } elsif ($_ eq "gd_bit_t" or $_ eq "gdpu_bitnum_t" or $_ eq "gdpu_numbits_t")
+  } elsif ($_ eq "gd_bit_t" or $_ eq "gdpu_bitnum_t" or $_ eq "gdpu_numbits_t"
+      or $_ eq "gd_windop_t")
   {
     return "%i";
   } elsif ($_ eq "gd_entype_t") {
@@ -59,6 +61,8 @@ sub printfmt {
     return "%u";
   } elsif ($_ eq "unsigned long int") {
     return "%lu";
+  } elsif ($_ eq "gd_triplet_t") {
+    return "{%g,%llX,%lli}";
   } else {
     die $_;
   }

@@ -39,6 +39,7 @@ int main(void)
 
   /* check */
   target = gd_alias_target(D, "data/alias");
+  CHECKS(target, "data");
   i = gd_fragment_index(D, "data/alias");
   n = gd_naliases(D, "data/alias");
 
@@ -49,7 +50,6 @@ int main(void)
   rmdir(filedir);
 
   CHECKI(error, GD_E_OK);
-  CHECKS(target, "data");
   CHECKI(i, 0);
   CHECKI(n, 2);
 

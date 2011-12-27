@@ -21,7 +21,7 @@ If the GetData IDL bindings have been found, you should see among the output
 something similar to:
 
   *** GETDATA - IDL GetData bindings (not loaded)
-      Version: 0.7.0, Build Date: Sat Oct 23 00:00:00 UTC 2010, Source: The GetData Project <getdata-devel@lists.sourceforge.net>
+      Version: 0.8.0, Build Date: Sat Oct 23 00:00:00 UTC 2010, Source: The GetData Project <getdata-devel@lists.sourceforge.net>
       Path: /usr/local/rsi/idl/bin/bin.linux.x86/idl_getdata.so
 
 The DLM will be automatically loaded by the interpreter the first time a IDL
@@ -75,8 +75,8 @@ refer to an open dirfile object.  Space is available in the DLM for only 1023
 dirfile units.  If an application attempts to open more than 1023 dirfiles
 simultaneously, the DLM will emit an error message and immediately return to the
 interpreter.  Passing an invalid dirfile unit number to a procedure which
-requires one as input (other than GD_CLOSE, which will simply ignore it)
-will result in the call failing with error code !GD.E_BAD_DIRFILE.
+requires one as input (other than GD_CLOSE and GD_DISCARD, which will simply
+ignore it) will result in the call failing with error code !GD.E_BAD_DIRFILE.
 
 IDL supports all GetData data types with the exception of INT8.  Attempting to
 return data as INT8 will result in an error.
@@ -129,6 +129,10 @@ is essentially equivalent and is defined as:
   SHIFT        LONG
   SPF          UINT
   TABLE        STRING
+  UTHRESHOLD   ULONG
+  ITHRESHOLD   LONG
+  RTHRESHOLD   DOUBLE
+  WINDOP       INTEGER
 
 The DATA_TYPE member is used for both RAW and CONST fields.  (The gd_entry_t
 object has a 'const_type' member for the CONST fields instead.)  For details on
@@ -155,8 +159,13 @@ PROCEDURE GD_ADD, dirfile_unit, entry, PARENT=parent
   'entry' input should be a GD_ENTRY structure.  If the keyword parameter
   PARENT is given, the field will be added as a metafield under the given parent
   field, otherwise the field will be added to the fragment index indicated in
-  the 'entry' structure.  This procedure may also be called as GD_MADD with
-  no change in functionality.  See gd_add(3) and gd_madd(3).
+  the 'entry' structure.  See gd_add(3) and gd_madd(3).
+
+PROCEDURE GD_ADD_ALIAS, dirfile_unit, field_code, target, FRAGMENT=fragment,
+  PARENT=parent
+
+  This procedure adds an alias called 'field_code' pointing to 'target' to
+  the fragment indicated by 'fragment'.  See gd_add_alias(3).
 
 PROCEDURE GD_ADD_BIT, dirfile_unit, field_name, in_field, BITNUM=bitnum,
   FRAGMENT=fragment, NUMBITS=numbits, PARENT=parent
@@ -166,9 +175,7 @@ PROCEDURE GD_ADD_BIT, dirfile_unit, field_name, in_field, BITNUM=bitnum,
   defaults to zero and numbits to one.  If PARENT is given, this field is
   added as a metafield under the given parent field.  Otherwise, the field is
   added to the fragment indexed by FRAGMENT, or the primary format file if
-  FRAGMENT is not given either.  This procedure may also be called as
-  GD_MADD_BIT with no change in functionality.  See gd_add_bit(3) and
-  gd_madd_bit(3).
+  FRAGMENT is not given either.  See gd_add_bit(3) and gd_madd_bit(3).
 
 PROCEDURE GD_ADD_CARRAY, dirfile_unit, field_name, FRAGMENT=fragment,
   LENGTH=length, PARENT=parent, TYPE=type, VALUE=value
@@ -180,9 +187,8 @@ PROCEDURE GD_ADD_CARRAY, dirfile_unit, field_name, FRAGMENT=fragment,
   given, LENGTH must be specified, and the field will be initialised to all
   zeros.  If PARENT is given, this field is added as a metafield under the
   given parent field.  Otherwise, the field is added to the fragment indexed by
-  FRAGMENT, or the primary format file if FRAGMENT is not given either.  This
-  procedure may also be called as GD_MADD_CARRAY with no change in
-  functionality.  See gd_add_carray(3) and gd_madd_carray(3).
+  FRAGMENT, or the primary format file if FRAGMENT is not given either.  See
+  gd_add_carray(3) and gd_madd_carray(3).
 
 PROCEDURE GD_ADD_CONST, dirfile_unit, field_name, FRAGMENT=fragment,
   PARENT=parent, TYPE=type, VALUE=value
@@ -193,8 +199,7 @@ PROCEDURE GD_ADD_CONST, dirfile_unit, field_name, FRAGMENT=fragment,
   which defaults to zero.  If PARENT is given, this field is added as a
   metafield under the given parent field.  Otherwise, the field is added to the
   fragment indexed by FRAGMENT, or the primary format file if FRAGMENT is not
-  given either.  This procedure may also be called as GD_MADD_CONST with no
-  change in functionality.  See gd_add_const(3) and gd_madd_const(3).
+  given either.  See gd_add_const(3) and gd_madd_const(3).
 
 PROCEDURE GD_ADD_DIVIDE, dirfile_unit, field_name, in_field1, in_field2,
   FRAGMENT=fragment, PARENT=parent
@@ -203,9 +208,8 @@ PROCEDURE GD_ADD_DIVIDE, dirfile_unit, field_name, in_field1, in_field2,
   The input vector fields are given by 'in_field1' and 'in_field2'.  If PARENT
   is given, this field is added as a metafield under the given parent field.
   Otherwise, the field is added to the fragment indexed by FRAGMENT, or the
-  primary format file if FRAGMENT is not given either.  This procedure may also
-  be called as GD_MADD_DIVIDE without change in functionality.  See
-  gd_add_divide(3) and gd_madd_divide(3).
+  primary format file if FRAGMENT is not given either.  See gd_add_divide(3)
+  and gd_madd_divide(3).
 
 PROCEDURE GD_ADD_LINCOM, dirfile_unit, field_name, in_field1, m1, b1,
   [in_field2, m2, b2, [in_field3, m3, b3,]] FRAGMENT=fragment, PARENT=parent
@@ -215,9 +219,7 @@ PROCEDURE GD_ADD_LINCOM, dirfile_unit, field_name, in_field1, m1, b1,
   passed to the function.  The scale factors and offset terms may be real or
   complex valued.  If PARENT is given, this field is added as a metafield under
   the given parent field.  Otherwise, the field is added to the fragment indexed
-  by FRAGMENT, or the primary format file if FRAGMENT is not given either.  This
-  procedure may also be called as GD_ADD_CLINCOM, GD_MADD_LINCOM, or
-  GD_MADD_CLINCOM without change in functionality.  See
+  by FRAGMENT, or the primary format file if FRAGMENT is not given either.  See
   gd_add_lincom(3), gd_add_clincom(3), gd_madd_lincom(3), and
   gd_madd_clincom(3). 
 
@@ -229,9 +231,7 @@ PROCEDURE GD_ADD_LINTERP, dirfile_unit, field_name, in_field, table,
   table is 'table'.  If PARENT is given, this field is added as a metafield
   under the given parent field.  Otherwise, the field is added to the fragment
   indexed by FRAGMENT, or the primary format file if FRAGMENT is not given
-  either.  This procedure may also be called as GD_MADD_LINTERP without
-  change in functionality.  See gd_add_linterp(3) and
-  gd_madd_linterp(3).
+  either.  See gd_add_linterp(3) and gd_madd_linterp(3).
 
 PROCEDURE GD_ADD_MULTIPLY, dirfile_unit, field_name, in_field1, in_field2,
   FRAGMENT=fragment, PARENT=parent
@@ -240,8 +240,7 @@ PROCEDURE GD_ADD_MULTIPLY, dirfile_unit, field_name, in_field1, in_field2,
   dirfile.  The input vector fields are given by 'in_field1' and 'in_field2'.
   If PARENT is given, this field is added as a metafield under the given parent
   field.  Otherwise, the field is added to the fragment indexed by FRAGMENT, or
-  the primary format file if FRAGMENT is not given either.  This procedure may
-  also be called as GD_MADD_MULTIPLY without change in functionality.  See
+  the primary format file if FRAGMENT is not given either.  See
   gd_add_multiply(3) and gd_madd_multiply(3).
 
 PROCEDURE GD_ADD_PHASE, dirfile_unit, field_name, in_field, shift,
@@ -251,9 +250,8 @@ PROCEDURE GD_ADD_PHASE, dirfile_unit, field_name, in_field, shift,
   The input vector field is given by 'in_field' and the shift by 'shift'.  If
   PARENT is given, this field is added as a metafield under the given parent
   field.  Otherwise, the field is added to the fragment indexed by FRAGMENT, or
-  the primary format file if FRAGMENT is not given either.  This procedure may
-  also be called as GD_MADD_PHASE without change in functionality.  See
-  gd_add_phase(3) and gd_madd_phase(3).
+  the primary format file if FRAGMENT is not given either.  See gd_add_phase(3)
+  and gd_madd_phase(3).
 
 PROCEDURE GD_ADD_POLYNOM, dirfile_unit, field_name, in_field, a0, [a1, [a2,
   [a3, [a4, [a5,]]]]], FRAGMENT=fragment, PARENT=parent
@@ -265,10 +263,8 @@ PROCEDURE GD_ADD_POLYNOM, dirfile_unit, field_name, in_field, a0, [a1, [a2,
   containing the co-efficients, otherwise each a<i> should be one co-efficient.
   If PARENT is given, this field is added as a metafield under the given parent
   field.  Otherwise, the field is added to the fragment indexed by FRAGMENT, or
-  the primary format file if FRAGMENT is not given either.  This procedure may
-  also be called as GD_MADD_CPOLYNOM, GD_MADD_POLYNOM, or GD_MADD_CPOLYNOM
-  without change in functionality.  See gd_add_polynom(3) and
-  gd_madd_polynom(3).
+  the primary format file if FRAGMENT is not given either.  See
+  gd_add_polynom(3) and gd_madd_polynom(3).
 
 PROCEDURE GD_ADD_RAW, dirfile_unit, field_name data_type, FRAGMENT=fragment,
   SPF=spf
@@ -288,9 +284,8 @@ PROCEDURE GD_ADD_RECIP, dirfile_unit, field_name, in_field, DIVIDEND=dividend,
   defaults to one.  If PARENT is given, this field is added as a metafield under
   the given parent field.  Otherwise, the field is added to the fragment
   indexed by FRAGMENT, or the primary format file if FRAGMENT is not given
-  either.  This procedure may also be called as GD_ADD_CRECIP, GD_MADD_RECIP, or
-  GD_MADD_CRECIP with no change in functionality.  See gd_add_recip(3),
-  gd_add_crecip(3), gd_madd_recip(3), gd_madd_crecip(3).
+  either.  See gd_add_recip(3), gd_add_crecip(3), gd_madd_recip(3),
+  gd_madd_crecip(3).
 
 PROCEDURE GD_ADD_SBIT, dirfile_unit, field_name, in_field, BITNUM=bitnum,
   FRAGMENT=fragment, NUMBITS=numbits, PARENT=parent
@@ -300,18 +295,15 @@ PROCEDURE GD_ADD_SBIT, dirfile_unit, field_name, in_field, BITNUM=bitnum,
   defaults to zero and numbits to one.  If PARENT is given, this field is
   added as a metafield under the given parent field.  Otherwise, the field is
   added to the fragment indexed by FRAGMENT, or the primary format file if
-  FRAGMENT is not given either.  This procedure may also be called as
-  GD_MADD_SBIT with no change in functionality.  See gd_add_sbit(3)
-  and gd_madd_sbit(3).
+  FRAGMENT is not given either.  See gd_add_sbit(3) and gd_madd_sbit(3).
 
 PROCEDURE GD_ADD_SPEC, dirfile_unit, line, FRAGMENT=fragment, PARENT=parent
 
   This procedure adds a field described by the field specification line 'line'
   to the dirfile.  If PARENT is given, this field is added as a metafield under
   the given parent field.  Otherwise, the field is added to the fragment indexed
-  by FRAGMENT, or the primary format file if FRAGMENT is not given either.  This
-  procedure may also be called as GD_MADD_SPEC with no change in
-  functionality.  See gd_add_spec(3) and gd_madd_spec(3).
+  by FRAGMENT, or the primary format file if FRAGMENT is not given either.  See
+  gd_add_spec(3) and gd_madd_spec(3).
 
 PROCEDURE GD_ADD_STRING, dirfile_unit, field_name, FRAGMENT=fragment,
   PARENT=parent, VALUE=value
@@ -321,9 +313,36 @@ PROCEDURE GD_ADD_STRING, dirfile_unit, field_name, FRAGMENT=fragment,
   to the empty string.  If PARENT is given, this field is added as a metafield
   under the given parent field.  Otherwise, the field is added to the fragment
   indexed by FRAGMENT, or the primary format file if FRAGMENT is not given
-  either.  This procedure may also be called as GD_MADD_STRING with no
-  change in functionality.  See gd_add_string(3) and
-  gd_madd_string(3).
+  either.  See gd_add_string(3) and gd_madd_string(3).
+
+PROCEDURE GD_ADD_WINDOW, dirfile_unit, field_name, in_field, check_field,
+  threshold, /CLR, /EQ, /GE, /GT, /LE, /LT, /NE, /SET, FRAGMENT=fragment,
+  PARENT=parent
+
+  This procedure adds a WINDOW field with the name 'field_name' to the dirfile.
+  The input vector field is given by 'in_field' and the check field is given by
+  'check_field.  The window operation is specified by one of the optional
+  parameters, CLR, EQ, GE, &c.  If PARENT is given, this field is added as a
+  metafield under the given parent field.  Otherwise, the field is added to the
+  fragment indexed by FRAGMENT, or the primary format file if FRAGMENT is not
+  given either.  See gd_add_window(3), and gd_madd_window(3).
+
+FUNCTION GD_ALIASES(dirfile_unit, field_code)
+
+  This function returns a list of aliases of 'field_code' (including field_code)
+  itself.  See gd_aliases(3).
+
+FUNCTION GD_ALIAS_TARGET(dirfile_unit, field_code)
+
+  This procedure returns the target pointed to by the alias 'field_code'.  See
+  gd_alias_target(3).
+
+PROCEDURE GD_ALTER_AFFIXES(dirfile_unit, FRAGMENT=fragment, PREFIX=prefix,
+  SUFFIX=suffix)
+
+  This procedure modifies the prefix and/or suffix of the fragment index
+  specified by FRAGMENT.  Zero is assumed if FRAGMENT is not specified.  See
+  gd_alter_affixes(3).
 
 PROCEDURE GD_ALTER_BIT, dirfile_unit, field_code, BITNUM=bitnum,
   IN_FIELD=in_field, NUMBITS=numbits
@@ -400,9 +419,7 @@ PROCEDURE GD_ALTER_LINCOM, dirfile_unit, field_code, B=b,
   (which may be simultaneously updated).  The numeric parameters may be either
   real or complex valued.  If N_FIELDS specifies more fields than the field
   currently has, but B, IN_FIELDS, or M are not specified, the new values will
-  contain uninitialised data.  This procedure may also be called
-  GD_ALTER_CLINCOM without change of functionality.  See
-  gd_alter_lincom(3) and gd_alter_clincom(3).
+  contain uninitialised data.  See gd_alter_lincom(3) and gd_alter_clincom(3).
 
 PROCEDURE GD_ALTER_LINTERP, dirfile_unit, field_code, IN_FIELD=in_field,
   /RENAME_TABLE, TABLE=table
@@ -455,8 +472,7 @@ PROCEDURE GD_ALTER_RECIP, dirfile_unit, field_code, DIVIDEND=dividend,
 
   This procedure modifies the metadata of the RECIP field specified by
   'field_code', updating only those field parameters specified as keyword
-  parameters.  This procedure may also be called GD_ALTER_CRECIP without change
-  in functionality.  See gd_alter_recip(3) and gd_alter_crecip(3).
+  parameters.  See gd_alter_recip(3) and gd_alter_crecip(3).
 
 PROCEDURE GD_ALTER_SBIT, dirfile_unit, field_code, BITNUM=bitnum,
   IN_FIELD=in_field, NUMBITS=numbits
@@ -471,9 +487,14 @@ PROCEDURE GD_ALTER_SPEC, dirfile_unit, line, PARENT=parent, /RECODE
   specification line 'line' to conform to the specification.  If /RECODE is
   given, data on disk is update, if applicable, to correspond with changes made
   to the field metadata.  If PARENT is given, the field is assumed to be a
-  metafield under the given parent.  This procedure may also be called as
-  GD_MALTER_SPEC without change in functionality.  See
-  gd_alter_spec(3) and gd_malter_spec(3).
+  metafield under the given parent.  See gd_alter_spec(3) and gd_malter_spec(3).
+
+PROCEDURE GD_ALTER_WINDOW, dirfile_unit, field_code, CHECK=check, /CLR, /EQ,
+  /GE, /GT, IN_FIELD=in_field, /LE, /LT, /NE, /SET, THRESHOLD=threshold
+
+  This procedure modifies the metadata of the WINDOW field specified by
+  'field_code', updating only those field parameters specified as keyword
+  parameters.  See gd_alter_window(3).
 
 FUNCTION GD_BOF(dirfile_unit, field_code)
 
@@ -500,14 +521,14 @@ FUNCTION GD_CONSTANTS(dirfile_unit, PARENT=parent, TYPE=type)
   values are returned as double precision data, even if they are stored as
   complex values.  If PARENT is given, the value of CONST metafields defined
   for the given parent field will be returned, otherwise all non-meta CONST
-  fields will be returned.  This function may be called as GD_MCONSTANTS
-  without change in functionality.  See gd_constants(3) and gd_mconstants(3).
+  fields will be returned.  See gd_constants(3) and gd_mconstants(3).
 
-PROCEDURE GD_DELETE, dirfile_unit, field_code, /DEL_DATA, /DEREF, /FORCE
+PROCEDURE GD_DELETE, dirfile_unit, field_code, /DEL_DATA, /DEREF, /FORCE, /ALIAS
 
   This procedure delete the field specified by 'field_code' from the database.
-  The meanings of the three keyword flags are discussed in the gd_delete
-  manual page.  See gd_delete(3).
+  If /ALIAS is specified, the alias 'field_code' is deleted instead.  The
+  meanings of the three other keyword flags are discussed in the gd_delete(3)
+  manual page.  See gd_delete(3) and gd_delete_alias(3).
 
 FUNCTION GD_DIRFILENAME(dirfile_unit)
 
@@ -576,16 +597,22 @@ FUNCTION GD_FIELD_LIST(dirfile_unit, PARENT=parent, TYPE=type)
   is given, a list of metafields for the given parent will be returned.  If TYPE
   is given, which should be one of the !GD.*_ENTRY constants, only fields of the
   given type will be returned.  If neither PARENT, nor TYPE, are given, all
-  fields are returned.  This function may also be called as
-  GD_FIELD_LIST_BY_TYPE, GD_MFIELD_LIST, or GD_MFIELD_LIST_BY_TYPE, without
-  change in functionality.  See gd_field_list(3), gd_field_list_by_type(3),
-  gd_mfield_list(3), and gd_mfield_list_by_type(3).
+  fields are returned.  The list returned includes aliases but not hidden
+  fields.  See gd_field_list(3), gd_field_list_by_type(3), gd_mfield_list(3),
+  and gd_mfield_list_by_type(3).
 
-PROCEDURE GD_FLUSH, dirfile_unit, FIELD_CODE=field_code
+PROCEDURE GD_FLUSH, dirfile_unit, FIELD_CODE=field_code, /NOCLOSE
 
   This procedure flushes pending data writes to disk.  If FIELD_CODE is given,
   only writes for the given field are flushed to disk.  Otherwise, all fields
-  and metadata changes are flushed to disk.  see gd_flush(3).
+  and metadata changes are flushed to disk.  Unless /NOCLOSE is specified, the
+  files are also closed after being flushed.  See gd_flush(3) and gd_sync(3).
+
+FUNCTION GD_FRAGMENT_AFFIXES(dirfile_unit, FRAGMENT=fragment)
+
+  This function returns a two element array of the field code prefix and suffix
+  of the fragment specified by FRAGMENT.  Zero is assumed if FRAGMENT is not
+  specified.  See gd_fragment_affixes(3).
 
 FUNCTION GD_FRAGMENT_INDEX(dirfile_unit, field_code)
 
@@ -604,9 +631,8 @@ FUNCTION GD_FRAMENUM(dirfile_unit, field_code, value, FIELD_START=field_start,
   'field_code'.  It returns the fractional frame number where the field has the
   value given by 'value'.  The search is performed between the frame limits
   FRAME_START and FRAME_END.  If FRAME_START is omitted, the beginning of the
-  frame is used; if FRAME_END is omitted, the end of frame is used.  This
-  function may also be called as GD_FRAMENUM_SUBSET without change in
-  functionality.  See gd_framenum(3) and gd_framenum_subset(3).
+  frame is used; if FRAME_END is omitted, the end of frame is used.  See
+  gd_framenum(3) and gd_framenum_subset(3).
 
 FUNCTION GD_FRAMEOFFSET(dirfile_unit, FRAGMENT=fragment_index)
 
@@ -648,10 +674,20 @@ FUNCTION GD_GET_STRING(dirfile_unit, field_code)
   This function returns the value of a STRING field specified by 'field_code'.
   See gd_get_string(3).
 
+FUNCTION GD_HIDDEN(dirfile_unit, field_code)
+
+  This function returns one if the field or alias specified by 'field_code' is
+  hidden, or zero if it is not.  On error it returns -1.  See gd_hidden(3).
+
+PROCEDURE GD_HIDE, dirfile_unit, field_code
+
+  This procedure hides the field or alias specified by 'field_code'.  See
+  gd_hide(3).
+
 PROCEDURE GD_INCLUDE, dirfile_unit, fragment_name, /ARM_ENDIAN, /BIG_ENDIAN,
   /CREAT, ENCODING=encoding, /EXCL, /FORCE_ENCODING, /FORCE_ENDIANNESS,
   FRAGMENT=fragment, INDEX=index, /IGNORE_DUPS, /IGNORE_REFS, /LITTLE_ENDIAN,
-  /NOT_ARM_ENDIAN, /PEDANTIC, /PERMISSIVE, /TRUNC
+  /NOT_ARM_ENDIAN, /PEDANTIC, /PERMISSIVE, PREFIX=prefix, SUFFIX=suffix, /TRUNC
 
   This procedure adds the format file fragment specified by 'fragment_name' to
   the format file indexed by FRAGMENT, or else the primary format file, if
@@ -660,7 +696,7 @@ PROCEDURE GD_INCLUDE, dirfile_unit, fragment_name, /ARM_ENDIAN, /BIG_ENDIAN,
   string indicating the encoding type: 'BZIP2', 'GZIP', 'LZMA', 'SLIM', 'TEXT',
   'NONE', or else a numeric encoding type: !GD.BZIP2_ENCODED, &c.  The meaning
   of the remaining keyword flags is discussed in the gd_include manual page.
-  See gd_include(3).
+  See gd_include(3) and gd_include_affix(3).
  
 FUNCTION GD_INVALID_DIRFILE()
 
@@ -672,12 +708,18 @@ PROCEDURE GD_METAFLUSH, dirfile_unit
   This procedure flushes pending metadata changes to the dirfile to disk.  See
   gd_metaflush(3).
 
-PROCEDURE GD_MOVE, dirfile_unit, field_code, new_fragment, /MOVE_DATA
+PROCEDURE GD_MOVE, dirfile_unit, field_code, new_fragment, /ALIAS, /MOVE_DATA
 
   This procedure moves the field specified by 'field_code' to the new format
-  file fragment indexed by 'new_fragment'.  If MOVE_DATA is specified, and
+  file fragment indexed by 'new_fragment'.  If ALIAS is specified, the alias
+  'field_code' is moved instead.  Otherwise, if MOVE_DATA is specified, and
   'field_code' specifies a RAW file, the data file on disk will also be moved,
-  if necessary.  See gd_move(3).
+  if necessary.  See gd_move(3) and gd_move_alias(3).
+
+FUNCTION GD_NALIASES(dirfile_unit, field_code)
+
+  This function returns the number of aliases of 'field_code' (including
+  field_code itself).  See gd_naliases(3).
 
 FUNCTION GD_NATIVE_TYPE(dirfile_unit, field_code)
 
@@ -691,9 +733,8 @@ FUNCTION GD_NFIELDS(dirfile_unit, PARENT=parent, TYPE=type)
   is given, the number metafields for the given parent will be returned.  If
   TYPE is given, which should be one of the !GD.*_ENTRY constants, only fields
   of the given type will be counted.  If neither PARENT, nor TYPE, are given,
-  the total number of fields in the database will be returned.  This function
-  may also be called as GD_NFIELDS_BY_TYPE, GD_NMFIELDS, or
-  GD_NMFIELDS_BY_TYPE, without change in functionality.  See gd_nfields(3),
+  the total number of fields in the database will be returned.  The returned
+  count includes aliases but not hidden fields.  See gd_nfields(3),
   gd_nfields_by_type(3), gd_nmfields(3), and gd_nmfields_by_type(3).
 
 FUNCTION GD_NFRAGMENTS(dirfile_unit)
@@ -711,8 +752,7 @@ FUNCTION GD_NVECTORS(dirfile_unit, PARENT=parent)
   This function returns the number of vector type fields defined by the dirfile.
   If PARENT is given, the number vector type metafields for the given parent
   will be returned.  Otherwise, the total number of vector fields in the
-  database will be returned.  This function may also be called as GD_NMVECTORS,
-  without change in functionality.  See gd_nvectors(3) and gd_nmvectors(3).
+  database will be returned.  See gd_nvectors(3) and gd_nmvectors(3).
 
 FUNCTION GD_OPEN(dirfilename, /ARM_ENDIAN, /BIG_ENDIAN, /CREAT,
   ENCODING=encoding, /EXCL, /FORCE_ENCODING, /FORCE_ENDIANNESS, /IGNORE_DUPS,
@@ -780,11 +820,13 @@ FUNCTION GD_REFERENCE(dirfile_unit)
   This function returns the name of the RAW field used as the reference field
   for the dirfile.  See gd_reference(3).
 
-PROCEDURE GD_RENAME, dirfile_unit, field_code, new_name, /MOVE_DATA
+PROCEDURE GD_RENAME, dirfile_unit, field_code, new_name, /MOVE_DATA, /UPDATEDB
 
   This function renames the field specified by 'field_code' to 'new_name'.  If
   MOVE_DATA is specified, and the field is a RAW field, the data file on disk
-  is renamed as well.  See gd_rename(3).
+  is renamed as well.  If UPDATEDB is specified, fields whose definition depends
+  on this field are also updated to reflect the change in name.  See
+  gd_rename(3).
 
 FUNCTION GD_SPF(dirfile_unit, field_code)
 
@@ -796,8 +838,12 @@ FUNCTION GD_STRINGS(dirfile_unit, PARENT=parent, TYPE=type)
   This function returns the value of all STRING fields in the dirfile.  If
   PARENT is given, the value of STRING metafields defined for the given parent
   field will be returned, otherwise all non-meta STRING fields will be returned.
-  This function may be called as GD_MSTRINGS without change in functionality.
   See gd_strings(3) and gd_mstrings(3).
+
+PROCEDURE GD_UNHIDE, dirfile_unit, field_code
+
+  This procedure unhides the field or alias specified by 'field_code'.  See
+  gd_unhide(3).
 
 PROCEDURE GD_UNINCLUDE, dirfile_unit, fragment_index, /DELETE
 
@@ -815,7 +861,5 @@ FUNCTION GD_VECTOR_LIST(dirfile_unit, PARENT=parent)
 
   This function returns a list of vector type fields defined by the dirfile.  If
   PARENT is given, a list of vector metafields for the given parent will be
-  returned.  Otherwise all non-meta vector fields will be returned.  This
-  function may also be called as GD_MVECTOR_LIST, without change in
-  functionality.  See gd_vector_list(3) and gd_mvector_list(3).
-
+  returned.  Otherwise all non-meta vector fields will be returned.  See
+  gd_vector_list(3) and gd_mvector_list(3).

@@ -68,9 +68,13 @@ namespace GetData {
 
       int Parent() const { return parent; }
 
+      const char *Prefix() { return prefix; };
+
       int Protection() const { return prot; }
 
       int ReWrite() const;
+
+      const char *Suffix() { return suffix; };
 
       int SetEncoding(EncodingScheme encoding, int recode = 0);
 
@@ -78,7 +82,11 @@ namespace GetData {
 
       int SetFrameOffset(off_t offset, int recode = 0);
 
+      int SetPrefix(const char *preix);
+
       int SetProtection(int protection_level);
+
+      int SetSuffix(const char *suffix);
 
     protected:
       Fragment(const Dirfile *dirfile, int index);
@@ -90,6 +98,8 @@ namespace GetData {
       int prot;
       off_t off;
       const char* name;
+      char* prefix;
+      char* suffix;
       int parent;
   };
 }

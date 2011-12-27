@@ -400,7 +400,7 @@ static gd_entry_t *_GD_Add(DIRFILE* D, const gd_entry_t* entry,
     return NULL;
   }
 
-  new_list = realloc(D->entry, (D->n_entries + 1) * sizeof(gd_entry_t*));
+  new_list = _GD_Realloc(D, D->entry, (D->n_entries + 1) * sizeof(gd_entry_t*));
   if (new_list == NULL) {
     free(new_ref);
     _GD_FreeE(D, E, 1);
@@ -410,7 +410,8 @@ static gd_entry_t *_GD_Add(DIRFILE* D, const gd_entry_t* entry,
   D->entry = (gd_entry_t **)new_list;
 
   if (is_dot) {
-    new_list = realloc(D->dot_list, (D->n_dot + 1) * sizeof(gd_entry_t*));
+    new_list = _GD_Realloc(D, D->dot_list, (D->n_dot + 1) *
+        sizeof(gd_entry_t*));
     if (new_list == NULL) {
       free(new_ref);
       _GD_FreeE(D, E, 1);
@@ -421,7 +422,7 @@ static gd_entry_t *_GD_Add(DIRFILE* D, const gd_entry_t* entry,
   }
 
   if (P) {
-    void *ptr = realloc(P->e->p.meta_entry, (P->e->n_meta + 1) *
+    void *ptr = _GD_Realloc(D, P->e->p.meta_entry, (P->e->n_meta + 1) *
         sizeof(gd_entry_t*));
     if (ptr == NULL) {
       free(new_ref);
@@ -1254,6 +1255,7 @@ gd_nothrow
     return -1;
   }
 
+  memset(&L, 0, sizeof(gd_entry_t));
   L.field = (char *)field_code;
   L.field_type = GD_LINCOM_ENTRY;
   L.EN(lincom,n_fields) = n_fields;
@@ -1297,6 +1299,7 @@ int gd_madd_clincom(DIRFILE* D, const char* parent, const char* field_code,
     return -1;
   }
 
+  memset(&L, 0, sizeof(gd_entry_t));
   L.field = (char *)field_code;
   L.field_type = GD_LINCOM_ENTRY;
   L.EN(lincom,n_fields) = n_fields;
@@ -1332,6 +1335,7 @@ int gd_madd_linterp(DIRFILE* D, const char* parent,
     return -1;
   }
 
+  memset(&L, 0, sizeof(gd_entry_t));
   L.field = (char *)field_code;
   L.field_type = GD_LINTERP_ENTRY;
   L.in_fields[0] = (char *)in_field;
@@ -1359,6 +1363,7 @@ int gd_madd_bit(DIRFILE* D, const char* parent, const char* field_code,
     return -1;
   }
 
+  memset(&B, 0, sizeof(gd_entry_t));
   B.field = (char *)field_code;
   B.field_type = GD_BIT_ENTRY;
   B.in_fields[0] = (char *)in_field;
@@ -1388,6 +1393,7 @@ int gd_madd_sbit(DIRFILE* D, const char* parent, const char* field_code,
     return -1;
   }
 
+  memset(&B, 0, sizeof(gd_entry_t));
   B.field = (char *)field_code;
   B.field_type = GD_SBIT_ENTRY;
   B.in_fields[0] = (char *)in_field;
@@ -1417,6 +1423,7 @@ int gd_madd_multiply(DIRFILE* D, const char* parent, const char* field_code,
     return -1;
   }
 
+  memset(&M, 0, sizeof(gd_entry_t));
   M.field = (char *)field_code;
   M.field_type = GD_MULTIPLY_ENTRY;
   M.in_fields[0] = (char *)in_field1;
@@ -1444,6 +1451,7 @@ int gd_madd_phase(DIRFILE* D, const char* parent, const char* field_code,
     return -1;
   }
 
+  memset(&P, 0, sizeof(gd_entry_t));
   P.field = (char *)field_code;
   P.field_type = GD_PHASE_ENTRY;
   P.in_fields[0] = (char *)in_field;
@@ -1479,6 +1487,7 @@ int gd_madd_polynom(DIRFILE* D, const char* parent, const char* field_code,
     return -1;
   }
 
+  memset(&E, 0, sizeof(gd_entry_t));
   E.field = (char *)field_code;
   E.field_type = GD_POLYNOM_ENTRY;
   E.EN(polynom,poly_ord) = poly_ord;
@@ -1520,6 +1529,7 @@ int gd_madd_cpolynom(DIRFILE* D, const char* parent, const char* field_code,
     return -1;
   }
 
+  memset(&E, 0, sizeof(gd_entry_t));
   E.field = (char *)field_code;
   E.field_type = GD_POLYNOM_ENTRY;
   E.EN(polynom,poly_ord) = poly_ord;
@@ -1695,6 +1705,7 @@ int gd_madd_string(DIRFILE* D, const char* parent,
     return -1;
   }
 
+  memset(&S, 0, sizeof(gd_entry_t));
   S.field = (char *)field_code;
   S.field_type = GD_STRING_ENTRY;
   S.fragment_index = 0;
@@ -1724,6 +1735,7 @@ int gd_madd_const(DIRFILE* D, const char* parent, const char* field_code,
     return -1;
   }
 
+  memset(&C, 0, sizeof(gd_entry_t));
   C.field = (char *)field_code;
   C.field_type = GD_CONST_ENTRY;
   C.EN(scalar,const_type) = const_type;
@@ -1755,6 +1767,7 @@ int gd_madd_carray(DIRFILE* D, const char* parent, const char* field_code,
     return -1;
   }
 
+  memset(&C, 0, sizeof(gd_entry_t));
   C.field = (char *)field_code;
   C.field_type = GD_CARRAY_ENTRY;
   C.EN(scalar,const_type) = const_type;
@@ -1777,6 +1790,7 @@ static int _GD_AddAlias(DIRFILE *D, const char *parent, const char *field_code,
   unsigned u;
   int offset;
   char *munged_code;
+  void *ptr;
   gd_entry_t *E, *P = NULL;
   dtrace("%p, \"%s\", \"%s\", \"%s\", %i", D, parent, field_code, target,
       fragment_index);
@@ -1847,6 +1861,14 @@ static int _GD_AddAlias(DIRFILE *D, const char *parent, const char *field_code,
     dreturn("%i", -1);
     return -1;
   }
+
+  ptr = _GD_Realloc(D, D->entry, (D->n_entries + 1) * sizeof(gd_entry_t*));
+  if (ptr == NULL) {
+    free(munged_code);
+    dreturn("%i", -1);
+    return -1;
+  }
+  D->entry = (gd_entry_t **)ptr;
 
   /* create and store */
   E = (gd_entry_t *)_GD_Malloc(D, sizeof(gd_entry_t));

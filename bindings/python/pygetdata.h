@@ -51,6 +51,12 @@
 #define GDPY_FLOAT_AS_DOUBLE    (GDPY_FLOAT     | GDPY_IEEE754)
 #define GDPY_COMPLEX_AS_COMPLEX (GDPY_PYCOMPLEX | GDPY_COMPLEX)
 
+#define GDPY_INVALID_OP(t) ( \
+    t != GD_WINDOP_EQ && t != GD_WINDOP_NE && \
+    t != GD_WINDOP_GE && t != GD_WINDOP_GT && \
+    t != GD_WINDOP_LE && t != GD_WINDOP_LT && \
+    t != GD_WINDOP_SET && t != GD_WINDOP_CLR )
+
 #define GDPY_INVALID_TYPE(t) ( \
     t != GD_UINT8     && t != GD_INT8    && \
     t != GD_UINT16    && t != GD_INT16   && \

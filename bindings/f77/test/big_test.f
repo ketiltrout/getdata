@@ -8,12 +8,12 @@ C     GetData is free software; you can redistribute it and/or modify it under
 C     the terms of the GNU Lesser General Public License as published by the
 C     Free Software Foundation; either version 2.1 of the License, or (at your
 C     option) any later version.
-C    
+C
 C     GetData is distributed in the hope that it will be useful, but WITHOUT
 C     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
 C     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 C     License for more details.
-C    
+C
 C     You should have received a copy of the GNU Lesser General Public License
 C     along with GetData; if not, write to the Free Software Foundation, Inc.,
 C     51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -22,8 +22,8 @@ C
 C     General test
 C
 C     This very large test checks almost every procedure defined by the
-C     F77 bindings.  Procedures not tested include: GDCOPN GDMFLS GDFLSH
-C     GDDSCD GDCLBK GDCLOS (although this last one is used)
+C     F77 bindings.  Procedures not tested include: GDCOPN GDMFLS GDCLOS
+C     GDCLBK GDDSCD (although this last one is used)
 
 C     Check functions
       SUBROUTINE CHKERR(NE, T, D, V)
@@ -179,17 +179,17 @@ C     Check functions
       CHARACTER*17 dat
       PARAMETER (dat = 'test_dirfile/data')
       INTEGER flen
-      PARAMETER (flen = 7)
+      PARAMETER (flen = 11)
       INTEGER nfields
-      PARAMETER (nfields = 14)
+      PARAMETER (nfields = 16)
       INTEGER slen
       PARAMETER (slen = 26)
       INTEGER plen
       PARAMETER (plen = 4096)
 
       CHARACTER*26 strings(3)
-      CHARACTER*7 fields(nfields + 7)
-      CHARACTER*7 fn
+      CHARACTER*11 fields(nfields + 8)
+      CHARACTER*11 fn
       CHARACTER*26 str
       CHARACTER*4096 path
       INTEGER*1 c(8)
@@ -200,6 +200,7 @@ C     Check functions
       INTEGER m
       INTEGER n
       INTEGER l
+      INTEGER j
       INTEGER ne
       REAL fl
       REAL*8 dp
@@ -215,19 +216,21 @@ C     Check functions
    10 CONTINUE
 
       fields(1) = 'INDEX  '
-      fields(2) = 'bit    '
-      fields(3) = 'carray '
-      fields(4) = 'const  '
-      fields(5) = 'data   '
-      fields(6) = 'div    '
-      fields(7) = 'lincom '
-      fields(8) = 'linterp'
-      fields(9) = 'mult   '
-      fields(10) = 'phase  '
-      fields(11) = 'polynom'
-      fields(12) = 'recip  '
-      fields(13) = 'sbit   '
-      fields(14) = 'string '
+      fields(2) = 'alias  '
+      fields(3) = 'bit    '
+      fields(4) = 'carray '
+      fields(5) = 'const  '
+      fields(6) = 'data   '
+      fields(7) = 'div    '
+      fields(8) = 'lincom '
+      fields(9) = 'linterp'
+      fields(10) = 'mult   '
+      fields(11) = 'phase  '
+      fields(12) = 'polynom'
+      fields(13) = 'recip  '
+      fields(14) = 'sbit   '
+      fields(15) = 'string '
+      fields(16) = 'window '
 
 C     Write the test dirfile
       OPEN(1, FILE=frmat, STATUS='NEW')
@@ -249,6 +252,8 @@ C     Write the test dirfile
       WRITE(1, *) 'phase PHASE data 11'
       WRITE(1, *) 'div DIVIDE mult bit'
       WRITE(1, *) 'recip RECIP div 6.5;4.3'
+      WRITE(1, *) 'window WINDOW linterp mult LT 4.1'
+      WRITE(1, *) '/ALIAS alias data'
       WRITE(1, *) 'string STRING "Zaphod Beeblebrox"'
       CLOSE(1, STATUS='KEEP')
 
@@ -287,7 +292,7 @@ C     3: GDGTCO check
 C     4: GDFDNX check
       CALL GDFDNX(i, d)
       CALL CHKEOK(ne, 4, d)
-      CALL CHKINT(ne, 4, i, flen)
+      CALL CHKINT(ne, 4, i, 7)
 
 C     5: GDMFNX check
       CALL GDMFNX(i, d, 'data', 4)
@@ -471,9 +476,9 @@ C     21: GDGELT check
       CALL GDGELT(fn, l, str, slen, n, d, 'linterp', 7)
       CALL CHKEOK(ne, 21, d)
       CALL CHKIN2(ne, 21, 1, l, flen)
-      CALL CHKIN2(ne, 22, 2, n, 0)
-      CALL CHKST2(ne, 22, 3, fn, 'data')
-      CALL CHKST2(ne, 22, 4, str, '/look/up/file')
+      CALL CHKIN2(ne, 21, 2, n, 0)
+      CALL CHKST2(ne, 21, 3, fn, 'data')
+      CALL CHKST2(ne, 21, 4, str, '/look/up/file')
 
 C     22: GDGEBT check
       l = flen
@@ -753,30 +758,32 @@ C     43: GDFDNT check
 C     44: GDNVEC check
       CALL GDNVEC(n, d)
       CALL CHKEOK(ne, 44, d)
-      CALL CHKINT(ne, 44, n, 21)
+      CALL CHKINT(ne, 44, n, 23)
 
 C     45: GDVECN check
       fields(1) = 'INDEX  '
-      fields(2) = 'bit    '
-      fields(3) = 'data   '
-      fields(4) = 'div    '
-      fields(5) = 'lincom '
-      fields(6) = 'linterp'
-      fields(7) = 'mult   '
-      fields(8) = 'new1   '
-      fields(9) = 'new10  '
-      fields(10) = 'new2   '
-      fields(11) = 'new3   '
-      fields(12) = 'new4   '
-      fields(13) = 'new5   '
-      fields(14) = 'new6   '
-      fields(15) = 'new7   '
-      fields(16) = 'new8   '
-      fields(17) = 'new9   '
-      fields(18) = 'phase  '
-      fields(19) = 'polynom'
-      fields(20) = 'recip  '
-      fields(21) = 'sbit   '
+      fields(2) = 'alias  '
+      fields(3) = 'bit    '
+      fields(4) = 'data   '
+      fields(5) = 'div    '
+      fields(6) = 'lincom '
+      fields(7) = 'linterp'
+      fields(8) = 'mult   '
+      fields(9) = 'new1   '
+      fields(10) = 'new10  '
+      fields(11) = 'new2   '
+      fields(12) = 'new3   '
+      fields(13) = 'new4   '
+      fields(14) = 'new5   '
+      fields(15) = 'new6   '
+      fields(16) = 'new7   '
+      fields(17) = 'new8   '
+      fields(18) = 'new9   '
+      fields(19) = 'phase  '
+      fields(20) = 'polynom'
+      fields(21) = 'recip  '
+      fields(22) = 'sbit   '
+      fields(23) = 'window '
       DO 450 i = 1, n
       l = flen
       CALL GDVECN(fn, l, d, i)
@@ -971,10 +978,10 @@ C     56: GDGTST check
 
 C     57: GDADST check
       CALL GDADST(d, 'new12', 5, "---string---", 12, 0)
-      CALL CHKOK2(ne, 57, 1, e)
+      CALL CHKOK2(ne, 57, 1, d)
 
       CALL GDGTST(n, d, 'new12', 5, slen, str)
-      CALL CHKOK2(ne, 57, 2, e)
+      CALL CHKOK2(ne, 57, 2, d)
       CALL CHKSTR(ne, 57, str, "---string---")
 
 C     58: GDMDST check
@@ -987,7 +994,7 @@ C     58: GDMDST check
 
 C     59: GDADSP check
       CALL GDADSP(d, 'lorem STRING "Lorem ipsum"', 26, 0)
-      CALL CHKOK2(ne, 59, 1, e)
+      CALL CHKOK2(ne, 59, 1, d)
 
       CALL GDGTST(n, d, 'lorem', 5, slen, str)
       CALL CHKOK2(ne, 59, 2, d)
@@ -1124,12 +1131,12 @@ C     69: GDALCL check
 C     70: GDALPN check
       CALL GDALPN(d, 'new4', 4, 4, 'in1', 3, 3d0, 4d0, 5d0, 6d0, 7d0,
      +0d0)
-      CALL CHKOK2(ne, 70, 1, e)
+      CALL CHKOK2(ne, 70, 1, d)
 
       l = flen
       CALL GDGEPN(i, fn, l, p(1), p(2), p(3), p(4), p(5), p(6),
      +n, d, 'new4', 4)
-      CALL CHKOK2(ne, 70, 2, e)
+      CALL CHKOK2(ne, 70, 2, d)
       CALL CHKIN2(ne, 70, 1, l, flen)
       CALL CHKIN2(ne, 70, 2, i, 4)
       CALL CHKIN2(ne, 70, 3, n, 0)
@@ -1593,7 +1600,7 @@ C     157: GDSTDV check
       n = GDSV_C
       CALL GDSTDV(n, d)
       CALL CHKOK2(ne, 157, 1, d)
-      CALL CHKINT(ne, 157, n, 8)
+      CALL CHKINT(ne, 157, n, 9)
 
       n = 0
       CALL GDSTDV(n, d)
@@ -1798,6 +1805,191 @@ C     204: GDTELL check
       CALL CHKEOK(ne, 204, d)
       CALL CHKINT(ne, 204, n, 288)
 
+C     205: GDHIDE check
+      CALL GDHIDE(d, 'data', 4)
+      CALL CHKEOK(ne, 205, d)
+
+C     206: GDHIDN check
+      CALL GDHIDN(n, d, 'data', 4)
+      CALL CHKOK2(ne, 206, 1, d)
+      CALL CHKIN2(ne, 206, 1, n, 1)
+
+      CALL GDHIDN(n,d, 'lincom', 6)
+      CALL CHKOK2(ne, 206, 2, d)
+      CALL CHKIN2(ne, 206, 2, n, 0)
+
+C     207: GDUHID check
+      CALL GDUHID(d, 'data', 4)
+      CALL CHKOK2(ne, 206, 1, d)
+      CALL GDHIDN(n, d, 'data', 4)
+      CALL CHKOK2(ne, 206, 2, d)
+      CALL CHKINT(ne, 206, n, 0)
+
+C     208: GDSYNC check
+      CALL GDSYNC(d, 'data', 4)
+      CALL CHKEOK(ne, 208, d)
+
+C     209: GDFLSH check
+      CALL GDFLSH(d, 'data', 4)
+      CALL CHKEOK(ne, 209, d)
+
+C     210: GDMFLS check
+      CALL GDMFLS(d)
+      CALL CHKEOK(ne, 210, d)
+
+C     211: GDGEWD check
+      l = flen
+      i = flen
+      CALL GDGEWD(fields(1), i, fields(2), l, m, j, dp, n, d, 'window',
+     +6)
+      CALL CHKEOK(ne, 211, d)
+      CALL CHKIN2(ne, 211, 1, i, flen)
+      CALL CHKIN2(ne, 211, 2, l, flen)
+      CALL CHKIN2(ne, 211, 3, n, 0)
+      CALL CHKIN2(ne, 211, 4, m, GDW_LT)
+      CALL CHKST2(ne, 211, 5, fields(1), 'linterp')
+      CALL CHKST2(ne, 211, 6, fields(2), 'mult')
+      CALL CHKDB2(ne, 211, 7, dp, 4.1D0)
+
+C     212: GDADWD check
+      CALL GDADWD(d, 'new18', 5, 'in1', 3, 'in2', 3, GDW_NE, 32, 0)
+      CALL CHKOK2(ne, 212, 1, d)
+
+      l = flen
+      i = flen
+      CALL GDGEWD(fields(1), i, fields(2), l, m, j, dp, n, d, 'new18',
+     +6)
+      CALL CHKOK2(ne, 212, 2, d)
+      CALL CHKIN2(ne, 212, 1, i, flen)
+      CALL CHKIN2(ne, 212, 2, l, flen)
+      CALL CHKIN2(ne, 212, 3, n, 0)
+      CALL CHKIN2(ne, 212, 4, m, GDW_NE)
+      CALL CHKST2(ne, 212, 5, fields(1), 'in1')
+      CALL CHKST2(ne, 212, 6, fields(2), 'in2')
+      CALL CHKIN2(ne, 212, 7, j, 32)
+
+C     214: GDMDWD check
+      CALL GDMDWD(d, 'data', 4, 'mnew18', 6, 'in2', 3, 'in3', 3, GDW_ST,
+     +128, 0)
+      CALL CHKOK2(ne, 214, 1, d)
+
+      l = flen
+      i = flen
+      CALL GDGEWD(fields(1), i, fields(2), l, m, j, dp, n, d,
+     +'data/mnew18', 11)
+      CALL CHKOK2(ne, 214, 2, d)
+      CALL CHKIN2(ne, 214, 1, i, flen)
+      CALL CHKIN2(ne, 214, 2, l, flen)
+      CALL CHKIN2(ne, 214, 3, n, 0)
+      CALL CHKIN2(ne, 214, 4, m, GDW_ST)
+      CALL CHKST2(ne, 214, 5, fields(1), 'in2')
+      CALL CHKST2(ne, 214, 6, fields(2), 'in3')
+      CALL CHKIN2(ne, 214, 7, j, 128)
+
+C     217: GDALWD check
+      CALL GDALWD(d, 'new18', 5, 'in3', 3, 'in4', 3, GDW_GE, 32d3)
+      CALL CHKOK2(ne, 217, 1, d)
+
+      l = flen
+      i = flen
+      CALL GDGEWD(fields(1), i, fields(2), l, m, j, dp, n, d, 'new18',
+     +6)
+      CALL CHKOK2(ne, 217, 2, d)
+      CALL CHKIN2(ne, 217, 1, i, flen)
+      CALL CHKIN2(ne, 217, 2, l, flen)
+      CALL CHKIN2(ne, 217, 3, n, 0)
+      CALL CHKIN2(ne, 217, 4, m, GDW_GE)
+      CALL CHKST2(ne, 217, 5, fields(1), 'in3')
+      CALL CHKST2(ne, 217, 6, fields(2), 'in4')
+      CALL CHKIN2(ne, 217, 7, dp, 32d3)
+
+C     218: GDATRG check
+      l = flen
+      CALL GDATRG(fields(1), l, d, 'alias', 5)
+      CALL CHKEOK(ne, 218, d)
+      CALL CHKIN2(ne, 218, 1, l, flen)
+      CALL CHKST2(ne, 218, 2, fields(1), 'data')
+
+C     219: GDADAL check
+      CALL GDADAL(d, 'new20', 5, 'data', 4, 0)
+      CALL CHKOK2(ne, 219, 1, d)
+
+      l = flen
+      CALL GDATRG(fields(1), l, d, 'new20', 5)
+      CALL CHKOK2(ne, 219, 2, d)
+      CALL CHKIN2(ne, 219, 1, l, flen)
+      CALL CHKST2(ne, 219, 2, fields(1), 'data')
+
+C     220: GDMDAL check
+      CALL GDMDAL(d, 'data', 4, 'mnew20', 6, 'data', 4)
+      CALL CHKOK2(ne, 220, 1, d)
+
+      l = flen
+      CALL GDATRG(fields(1), l, d, 'data/mnew20', 11)
+      CALL CHKOK2(ne, 220, 2, d)
+      CALL CHKIN2(ne, 220, 1, l, flen)
+      CALL CHKST2(ne, 220, 2, fields(1), 'data')
+
+C     221: GDNALS check
+      CALL GDNALS(n, d, 'data', 4)
+      CALL CHKEOK(ne, 221, d)
+      CALL CHKINT(ne, 221, n, 4)
+
+C     222: GDALSS check
+      fields(1) = 'data'
+      fields(2) = 'alias'
+      fields(3) = 'data/mnew20'
+      fields(4) = 'new20'
+      DO 2220 i = 1, n
+      l = flen
+      CALL GDALSS(fn, l, d, 'data', 4, i)
+      CALL CHKOK2(ne, 222, i, d)
+      CALL CHKIN2(ne, 222, i, l, flen)
+      CALL CHKST2(ne, 222, i, fn, fields(i))
+ 2220 CONTINUE
+
+C     223: GDINCA check
+      CALL GDINCA(d, 'format1', 7, 0, 'A', 1, 'Z', 1, GD_CR + GD_EX)
+      CALL CHKEOK(ne, 223, d)
+
+C     224: GDMOVA check
+      CALL GDMOVA(d, 'new20', 5, 1)
+      CALL CHKOK2(ne, 224, 1, d)
+
+      CALL GDFRGI(n, d, 'Anew20Z', 7)
+      CALL CHKOK2(ne, 224, 2, d)
+      CALL CHKINT(ne, 224, n, 1)
+
+C     225: GDDELA check
+      CALL GDDELA(d, 'Anew20Z', 7, 0)
+      CALL CHKOK2(ne, 225, 1, d)
+
+      CALL GDFRGI(n, d, 'Anew20Z', 7)
+      CALL CHKER2(ne, 225, 2, d, GD_EBC)
+      CALL CHKINT(ne, 225, n, -1)
+
+C     226: GDFRAF check
+      l = flen
+      n = flen
+      CALL GDFRAF(fields(1), l, fields(2), n, d, 1)
+      CALL CHKEOK(ne, 226, d)
+      CALL CHKIN2(ne, 226, 1, l, flen)
+      CALL CHKIN2(ne, 226, 2, n, flen)
+      CALL CHKST2(ne, 226, 3, fields(1), 'A')
+      CALL CHKST2(ne, 226, 4, fields(2), 'Z')
+
+C     227: GDAAFX check
+      CALL GDAAFX(d, 1, 'B', 1, '', 0)
+      CALL CHKOK2(ne, 227, 1, d)
+
+      l = flen
+      n = flen
+      CALL GDFRAF(fields(1), l, fields(2), n, d, 1)
+      CALL CHKOK2(ne, 227, 2, d)
+      CALL CHKIN2(ne, 227, 1, l, flen)
+      CALL CHKIN2(ne, 227, 2, n, flen)
+      CALL CHKST2(ne, 227, 3, fields(1), 'B')
+      CALL CHKST2(ne, 227, 3, fields(2), '')
 
 
 
@@ -1822,4 +2014,4 @@ C     Cleanup
  9000 FORMAT('ne = ', i8)
 
       STOP
-      END 
+      END

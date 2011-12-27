@@ -1,4 +1,4 @@
-// Copyright (C) 2008-2010 D. V. Wiebe
+// Copyright (C) 2008-2011 D. V. Wiebe
 //
 ///////////////////////////////////////////////////////////////////////////
 //
@@ -18,15 +18,7 @@
 // along with GetData; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 //
-#ifdef HAVE_CONFIG_H
-#include "../../src/config.h"
-#endif
-#undef GETDATA_LEGACY_API
-#include "getdata/dirfile.h"
-
-#include <cstring>
-#include <stdlib.h>
-#include <stdint.h>
+#include "internal.h"
 
 using namespace GetData;
 
@@ -38,6 +30,11 @@ RawEntry::RawEntry(const char* field_code, DataType data_type, gd_spf_t spf,
   E.u.raw.spf = spf;
   E.u.raw.data_type = (gd_type_t)data_type;
   E.fragment_index = fragment_index;
+}
+
+RawEntry::~RawEntry()
+{
+  free(filename);
 }
 
 int RawEntry::SetSamplesPerFrame(gd_spf_t spf, int recode)
@@ -78,5 +75,7 @@ int RawEntry::SetType(DataType type, int recode)
 
 const char* RawEntry::FileName()
 {
-  return gd_raw_filename(D->D, E.field);
+  free(filename);
+  filename = gd_raw_filename(D->D, E.field);
+  return filename;
 }

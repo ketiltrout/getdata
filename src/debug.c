@@ -23,24 +23,24 @@
 extern char gd_debug_col[GD_COL_SIZE + 1];
 extern int gd_col_count;
 
-const char* _gd_colnil(void) {
+const char* gd_colnil(void) {
   return gd_debug_col;
 }
 
-const char* _gd_coladd(void)
+const char* gd_coladd(void)
 {
   if (gd_col_count < GD_COL_SIZE) {
     gd_debug_col[gd_col_count++] = ':';
     gd_debug_col[gd_col_count] = '\0';
   }
 
-  return _gd_colnil();
+  return gd_colnil();
 }
 
-const char* _gd_colsub(void)
+const char* gd_colsub(void)
 {
   static char buffer[GD_COL_SIZE + 1];
-  strcpy(buffer, _gd_colnil());
+  strcpy(buffer, gd_colnil());
 
   if (gd_col_count > 0)
     gd_debug_col[--gd_col_count] = '\0';

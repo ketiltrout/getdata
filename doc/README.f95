@@ -42,10 +42,6 @@ unit numbers in place of C's DIRFILE pointers are:
   character (len=*), intent(in) :: dirfilename
   integer, intent(in) :: flags
 
-* integer function fgd_carray_len (dirfile_unit, field_code)
-  integer, intent(in) :: dirfile
-  character (len=*), intent(in) :: field_code
-
 * integer function fgd_cbopen (dirfilename, flags, sehandler)
   character (len=*), intent (in) :: dirfilename
   integer, intent (in) :: flags
@@ -67,7 +63,12 @@ unit numbers in place of C's DIRFILE pointers are:
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: field_code
 
-  (If field_code is the empty string, the entire dirfile will be flushed.)
+* subroutine fgd_sync (dirfile, field_code)
+  integer, intent(in) :: dirfile
+  character (len=*), intent(in) :: field_code
+
+  (For both fgd_flush and fgd_sync, If field_code is the empty string, the
+  operation will be peformed on the entire dirfile.)
 
 * subroutine fgd_metaflush (dirfile_unit)
   integer, intent(in) :: dirfile
@@ -137,6 +138,19 @@ unit numbers in place of C's DIRFILE pointers are:
 * subroutine fgd_include (dirfile, inc_file, flags)
   integer, intent(in) :: dirfile, fragment_index, flags
   character (len=*), intent(in) :: inc_file
+
+* subroutine fgd_include_affix (dirfile, fragmentname, fragment_index, prefix,
+  suffix, flags)
+  integer, intent(in) :: dirfile, fragment_index, flags
+  character (len=*), intent(in) :: fragmentname, prefix, suffix
+
+* integer function fgd_carray_len (dirfile_unit, field_code)
+  integer, intent(in) :: dirfile
+  character (len=*), intent(in) :: field_code
+
+* subroutine fgd_add_alias (dirfile, field_code, targ, fragment_index)
+  integer, intent(in) :: dirfile, fragment_index
+  character(len=*), intent(in) :: field_code, targ
 
 * subroutine fgd_add_bit (dirfile, field_name, in_field, bitnum, numbits,
   fragment_index)
@@ -235,6 +249,21 @@ unit numbers in place of C's DIRFILE pointers are:
   the value of the string.  Use the gd_put_string procedures after creating the
   field).
 
+* subroutine fgd_add_window_i (dirfile, field_code, in_field, check_field,
+  windop, threshold, fragment_index)
+  character(len=*), intent(in) :: field_code, in_field, check_field
+  integer, intent(in) :: dirfile, windop, threshold, fragment_index
+
+* subroutine fgd_add_window_r (dirfile, field_code, in_field, check_field, &
+  windop, threshold, fragment_index)
+  character(len=*), intent(in) :: field_code, in_field, check_field
+  integer, intent(in) :: dirfile, windop, fragment_index
+  double precision, intent(in) :: threshold
+
+* subroutine fgd_madd_alias (dirfile, parent, field_code, targ)
+  integer, intent(in) :: dirfile
+  character(len=*), intent(in) :: parent, field_code, targ
+
 * subroutine fgd_madd_bit (dirfile, parent, field_name, in_field, bitnum,
   numbits)
   integer, intent(in) :: dirfile, bitnum, numbits
@@ -325,11 +354,22 @@ unit numbers in place of C's DIRFILE pointers are:
   set the value of the string.  Use the gd_put_string procedures after creating
   the field).
 
+* subroutine fgd_madd_window_i (dirfile, parent, field_code, in_field,
+  check_field, windop, threshold)
+  character(len=*), intent(in) :: parent, field_code, in_field, check_field
+  integer, intent(in) :: dirfile, windop, threshold
+
+* subroutine fgd_madd_window_r (dirfile, parent, field_code, in_field,
+  check_field, windop, threshold)
+  character(len=*), intent(in) :: parent, field_code, in_field, check_field
+  integer, intent(in) :: dirfile, windop
+  double precision, intent(in) :: threshold
+
+
 * character (len=GD_FIELD_LEN) function fgd_reference (dirfile)
   integer, intent(in) :: dirfile
 
-* character (len=GD_FIELD_LEN)  function fgd_reference (dirfile, &
-  field_code)
+* character (len=GD_FIELD_LEN)  function fgd_reference (dirfile, field_code)
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: field_code
 
@@ -364,8 +404,16 @@ unit numbers in place of C's DIRFILE pointers are:
 * integer function fgd_protection (dirfile, fragment)
   integer, intent(in) :: dirfile, fragment
 
-* subroutine fgd_protect (dirfile, protection_level, fragment)
+* subroutine fgd_alter_protection (dirfile, protection_level, fragment)
   integer, intent(in) :: dirfile, protection_level, fragment
+
+* subroutine fgd_fragment_affixes (prefix, suffix, dirfile, fragment_index)
+  character(len=*), intent(out) :: prefix, suffix
+  integer, intent(in) :: dirfile, fragment_index
+
+* subroutine fgd_alter_affixes (dirfile, fragment_index, prefix, suffix)
+  integer, intent(in) :: dirfile, fragment_index
+  character(len=*), intent(in) :: prefix, suffix
 
 * integer function fgd_native_type (dirfile, field_code)
   integer integer(in) :: dirfile
@@ -384,6 +432,10 @@ unit numbers in place of C's DIRFILE pointers are:
 
 * subroutine fgd_move (dirfile, field_code, new_fragment, move_data)
   integer, intent(in) :: dirfile, new_fragment, move_data
+  character (len=*), intent(in) :: field_code
+
+* subroutine fgd_move_alias (dirfile, field_code, new_fragment)
+  integer, intent(in) :: dirfile, new_fragment
   character (len=*), intent(in) :: field_code
 
 * subroutine fgd_alter_bit (dirfile, field_name, in_field, bitnum, numbits)
@@ -456,6 +508,17 @@ unit numbers in place of C's DIRFILE pointers are:
   integer, intent(in) :: dirfile, bitnum, numbits
   character (len=*), intent(in) :: field_name, in_field
 
+* subroutine fgd_alter_window_i (dirfile, field_name, in_field, check_field,
+  windop, threshold)
+  integer, intent(in) :: dirfile, windop, threshold
+  character (len=*), intent(in) :: field_name, in_field, check_field
+
+* subroutine fgd_alter_window_r (dirfile, field_name, in_field, check_field,
+  windop, threshold)
+  integer, intent(in) :: dirfile, windop
+  character (len=*), intent(in) :: field_name, in_field, check_field
+  double precision, intent(in) :: threshold
+
 * subroutine fgd_alter_spec (dirfile, spec, recode)
   integer, intent(in) :: dirfile, recode
   character (len=*), intent(in) :: spec
@@ -469,6 +532,10 @@ unit numbers in place of C's DIRFILE pointers are:
   character (len=*), intent(in) :: field_code, new_name
 
 * subroutine fgd_delete (dirfile, field_code, flags)
+  integer, intent(in) :: dirfile, flags
+  character (len=*), intent(in) :: field_code
+
+* subroutine fgd_delete_alias (dirfile, field_code, flags)
   integer, intent(in) :: dirfile, flags
   character (len=*), intent(in) :: field_code
 
@@ -521,6 +588,28 @@ unit numbers in place of C's DIRFILE pointers are:
 * integer function fgd_tell (dirfile, field_code)
   integer, intent(in) :: dirfile
   character (len=*), intent(in): field_code
+
+* character (len=GD_MAX_LINE_LENGTH) function fgd_alias_target (dirfile,
+  field_code)
+  integer, intent(in) :: dirfile
+  character(len=*), intent(in) :: field_code
+
+* integer function fgd_naliases (dirfile, field_code)
+  integer, intent(in) :: dirfile
+  character(len=*), intent(in) :: field_code
+
+* integer function fgd_hidden (dirfile, field_code)
+  integer, intent(in) :: dirfile
+  character (len=*), intent(in) :: field_code
+
+* subroutine fgd_hide (dirfile, field_code)
+  integer, intent(in) :: dirfile
+  character (len=*), intent(in) :: field_code
+
+* subroutine fgd_unhide (dirfile, field_code)
+  integer, intent(in) :: dirfile
+  character (len=*), intent(in) :: field_code
+
 
 
 In order to respect type safety, the gd_getdata and gd_putdata analogues encode
@@ -646,6 +735,13 @@ Other procedures in the Fortran 95 bindings are:
   This function returns the length of the longest STRING metafield for the given
   parent field.
 
+* integer fgd_alias_max (dirfile, field_code)
+  integer, intent(in) :: dirfile
+  character(len=*), intent(in) :: field_code
+
+  This function returns the length of the longest alias for the given
+  field_code.
+
 * subroutine fgd_field_list (field_list, dirfile, field_len)
   character (len=<field_len>) dimension(:), intent(out) :: field_list
   integer, intent(in) :: dirfile_unit
@@ -673,6 +769,11 @@ Other procedures in the Fortran 95 bindings are:
   character (len=<string_len>) dimension(:), intent(out) :: string_list
   integer, intent(in) :: dirfile_unit
   integer, intent(inout) :: string_len
+* subroutine fgd_aliases (aliases, dirfile, field_code, alias_len)
+  character(len=<alias_len> dimension(:), intent(out) :: aliases
+  integer, intent(in) :: dirfile
+  character(len=*), intent(in) :: field_code
+  integer, intent(inout) :: alias_len
 
   Also analogously, except that field_len will be equivalent to the return
   value of fgd_mfield_name_max or fgd_string_value_max, if too small:
@@ -711,13 +812,14 @@ Other procedures in the Fortran 95 bindings are:
 
   type gd_entry
     integer :: field_type, n_fields, spf, data_type, bitnum, numbits, shift
-    integer :: fragment_index, comp_scal, poly_ord, array_len
+    integer :: fragment_index, comp_scal, poly_ord, array_len, windop
+    integer :: ithreshold
     character (len=GD_FIELD_LEN), dimension(3) :: field
     character (len=GD_FIELD_LEN), dimension(6) :: scalar
     integer, dimension(6) :: scalar_ind
     double precision, dimension(3) :: m, b
     double precision, dimension(6) :: a
-    double precision :: dividend
+    double precision :: dividend, rthreshold
     double complex, dimension(3) :: cm, cb
     double complex, dimension(6) :: ca
     double complex :: cdividend
@@ -726,22 +828,26 @@ Other procedures in the Fortran 95 bindings are:
   where GD_FIELD_LEN is a constant parameter equal to 4096.  Character strings
   are all stored in field(:) according to the following table:
 
-    TYPES              FIELD(1)    FIELD(2)    FIELD(3)
-    -----------------  ----------  ----------  ----------
-    RAW                 --          --          --
+    TYPES               FIELD(1)    FIELD(2)    FIELD(3)
+    ------------------  ----------  ----------  ----------
+    RAW                  --          --          --
 
-    LINCOM             infield[0]  infield[1]  infield[2]
+    LINCOM              infield[0]  infield[1]  infield[2]
 
-    LINTERP            infield[0]  table        --
+    LINTERP             infield[0]  table        --
 
     BIT / SBIT /
-    PHASE / RECIP /    infield[0]   --          --
+    PHASE / RECIP /     infield[0]   --          --
     POLYNOM
 
-    MULTIPLY / DIVIDE  infield[0]  infield[1]   --
+    MULTIPLY / DIVIDE / infield[0]  infield[1]   --
+    WINDOW
+
 
   Furthermore, data_type does double duty as the data_type parameter for RAW
-  fields, and the const_type parameter for CONST and CARRAY fields.
+  fields, and the const_type parameter for CONST and CARRAY fields.  For WINDOW
+  fields, only one of ithreshold and rthreshold will be set, according to the
+  windop parameter.
 
 * subroutine fgd_add (dirfile_unit, field_code, ent)
   integer, intent(in) :: dirfile_unit

@@ -35,13 +35,14 @@
  *   2: open flags represented as LONG in IDL
  *   3: entry types
  *   4: data types
- *   5: delete flags (not in IDL)
+ *   5: delete/rename flags (not in IDL)
  *   6: protection levels
  *   7: callback actions (not in IDL)
  *   8: GD_E_FORMAT suberrors (not in IDL)
  *   9: special version codes
  *  10: gd_seek whence values
  *  11: gd_seek flags (not in IDL)
+ *  12: window operations
  *  99: miscellaneous constants
  */
 #define CONSTANT(s,f,t) { "GD_" #s, #s, f, GD_ ## s, t }
@@ -71,6 +72,7 @@ static struct {
   CONSTANT(E_BAD_FIELD_TYPE, "GD_EBF", 0),
   CONSTANT(E_ACCMODE,        "GD_EAC", 0),
   CONSTANT(E_UNSUPPORTED,    "GD_UNS", 0),
+  CONSTANT(E_UNKNOWN_ENCODING,"GD_EUE",0),
   CONSTANT(E_BAD_ENTRY,      "GD_EBE", 0),
   CONSTANT(E_DUPLICATE,      "GD_EDU", 0),
   CONSTANT(E_DIMENSION,      "GD_EDM", 0),
@@ -129,6 +131,7 @@ static struct {
   CONSTANT(SBIT_ENTRY,       "GD_SBE", 3),
   CONSTANT(DIVIDE_ENTRY,     "GD_DVE", 3),
   CONSTANT(RECIP_ENTRY,      "GD_RCE", 3),
+  CONSTANT(WINDOW_ENTRY,     "GD_WDE", 3),
   CONSTANT(CONST_ENTRY,      "GD_COE", 3),
   CONSTANT(CARRAY_ENTRY,     "GD_CAE", 3),
   CONSTANT(STRING_ENTRY,     "GD_STE", 3),
@@ -151,6 +154,8 @@ static struct {
   CONSTANT(DEL_DATA,         "GDD_DT", 5),
   CONSTANT(DEL_DEREF,        "GDD_DR", 5),
   CONSTANT(DEL_FORCE,        "GDD_FO", 5),
+  CONSTANT(REN_DATA,         "GDR_DT", 5),
+  CONSTANT(REN_UPDB,         "GDR_UP", 5),
 
   CONSTANT(PROTECT_NONE,     "GDPR_N", 6),
   CONSTANT(PROTECT_FORMAT,   "GDPR_F", 6),
@@ -181,6 +186,9 @@ static struct {
   CONSTANT(E_FORMAT_LOCATION,"GDF_LO", 8),
   CONSTANT(E_FORMAT_PROTECT, "GDF_PR", 8),
   CONSTANT(E_FORMAT_LITERAL, "GDF_LT", 8),
+  CONSTANT(E_FORMAT_WINDOP,  "GDF_WO", 8),
+  CONSTANT(E_FORMAT_META_META,"GDF_MM", 8),
+  CONSTANT(E_FORMAT_ALIAS,   "GDF_AL", 8),
 
   CONSTANT(VERSION_CURRENT,  "GDSV_C", 9),
   CONSTANT(VERSION_LATEST,   "GDSV_L", 9),
@@ -190,6 +198,16 @@ static struct {
   CONSTANT(SEEK_CUR,         "GDSK_C", 10),
   CONSTANT(SEEK_END,         "GDSK_E", 10),
   CONSTANT(SEEK_WRITE,       "GDSK_W", 11),
+
+  CONSTANT(WINDOP_UNK,       "GDW_UN", 12),
+  CONSTANT(WINDOP_EQ,        "GDW_EQ", 12),
+  CONSTANT(WINDOP_GE,        "GDW_GE", 12),
+  CONSTANT(WINDOP_GT,        "GDW_GT", 12),
+  CONSTANT(WINDOP_LE,        "GDW_LE", 12),
+  CONSTANT(WINDOP_LT,        "GDW_LT", 12),
+  CONSTANT(WINDOP_NE,        "GDW_NE", 12),
+  CONSTANT(WINDOP_SET,       "GDW_ST", 12),
+  CONSTANT(WINDOP_CLR,       "GDW_CL", 12),
 
   CONSTANT(MAX_LINE_LENGTH,  "GD_MLL", 99),
   CONSTANT(ALL_FRAGMENTS,    "GD_ALL", 99),
@@ -291,6 +309,13 @@ void Fortran(void)
 
     for (j = 0; constant_list[j].lname != NULL; ++j)
       if (constant_list[j].type == 10 || constant_list[j].type == 11)
+        parameter(constant_list[j].lname, constant_list[j].fname,
+            constant_list[j].value, i);
+
+    printf("\\\n%c Window operations\\\n", c);
+
+    for (j = 0; constant_list[j].lname != NULL; ++j)
+      if (constant_list[j].type == 12)
         parameter(constant_list[j].lname, constant_list[j].fname,
             constant_list[j].value, i);
 

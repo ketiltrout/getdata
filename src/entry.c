@@ -97,6 +97,9 @@ void _GD_FreeE(DIRFILE *D, gd_entry_t* entry, int priv)
     case GD_INDEX_ENTRY:
     case GD_NO_ENTRY:
       break;
+    default:
+      if (entry->field_type == GD_ALIAS_ENTRY)
+        free(entry->in_fields[0]);
   }
 
   if (priv) {

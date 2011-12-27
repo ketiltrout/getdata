@@ -1,4 +1,4 @@
-// Copyright (C) 2008-2010 D. V. Wiebe
+// Copyright (C) 2008-2011 D. V. Wiebe
 //
 ///////////////////////////////////////////////////////////////////////////
 //
@@ -18,14 +18,7 @@
 // along with GetData; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 //
-#ifdef HAVE_CONFIG_H
-#include "../../src/config.h"
-#endif
-#undef GETDATA_LEGACY_API
-#include "getdata/dirfile.h"
-
-#include <stdlib.h>
-#include <cstring>
+#include "internal.h"
 
 using namespace GetData;
 
@@ -154,6 +147,7 @@ static inline int scalar_ok(const gd_entry_t &E, int index)
     case GD_RAW_ENTRY:
     case GD_PHASE_ENTRY:
     case GD_RECIP_ENTRY:
+    case GD_WINDOW_ENTRY:
       if (index >= 1)
         return 0;
       break;

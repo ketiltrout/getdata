@@ -315,6 +315,24 @@ static void gdp_to_entry(gd_entry_t *E, SV *sv, const char *pkg,
       GDP_EHASH_FETCH_CMP("cdividend", cdividend);
       gdp_fetch_scalars(E, (HV*)sv, 1, pkg, func);
       break;
+    case GD_WINDOW_ENTRY:
+      GDP_EHASH_FETCH_PV("in_field", in_fields[0]);
+      gdp_fetch_in_fields(E->in_fields, sv, 2, pkg, func);
+      GDP_EHASH_FETCH_IV("windop", windop, gd_windop_t);
+      switch(E->windop) {
+        case GD_WINDOP_EQ:
+        case GD_WINDOP_NE:
+          GDP_EHASH_FETCH_IV("threshold", threshold.i, int64_t);
+          break;
+        case GD_WINDOP_SET:
+        case GD_WINDOP_CLR:
+          GDP_EHASH_FETCH_UV("threshold", threshold.u, uint64_t);
+          break;
+        default:
+          GDP_EHASH_FETCH_NV("threshold", threshold.r);
+          break;
+      }
+      break;
     case GD_RAW_ENTRY:
       GDP_EHASH_FETCH_UV("spf", spf, gd_spf_t);
       GDP_EHASH_FETCH_UV("data_type", data_type, gd_type_t);
@@ -1081,6 +1099,7 @@ entry(dirfile, field_code)
       GDP_PUSHuv(E.field_type);
       GDP_PUSHpvn("fragment_index");
       GDP_PUSHuv(E.fragment_index);
+      dwatch("%i", E.field_type);
       switch (E.field_type) {
         case GD_BIT_ENTRY:
         case GD_SBIT_ENTRY:
@@ -1151,6 +1170,26 @@ entry(dirfile, field_code)
           GDP_PUSHpvn("data_type");
           GDP_PUSHuv(E.data_type);
           sp = gdp_store_scalars(sp, &E, 1);
+          break;
+        case GD_WINDOW_ENTRY:
+          GDP_PUSHpvn("in_fields");
+          GDP_PUSHrvavpv(E.in_fields, 2);
+          GDP_PUSHpvn("windop");
+          GDP_PUSHiv(E.windop);
+          GDP_PUSHpvn("threshold");
+          switch(E.windop) {
+            case GD_WINDOP_EQ:
+            case GD_WINDOP_NE:
+              GDP_PUSHiv(E.threshold.i);
+              break;
+            case GD_WINDOP_SET:
+            case GD_WINDOP_CLR:
+              GDP_PUSHuv(E.threshold.u);
+              break;
+            default:
+              GDP_PUSHnv(E.threshold.r);
+              break;
+          }
           break;
         case GD_INDEX_ENTRY:
         case GD_STRING_ENTRY:
@@ -1858,6 +1897,58 @@ fragments(dirfile)
         GDP_PUSHpvz(gd_fragmentname(dirfile, i));
     } else
       GDP_PUSHuv(nf);
+
+    dreturnvoid();
+
+void
+aliases(dirfile, field_code)
+  DIRFILE * dirfile
+  const char * field_code
+  PREINIT:
+    GDP_DIRFILE_ALIAS;
+  ALIAS:
+    GetData::Dirfile::aliases = 1
+  PPCODE:
+    dtrace("%p, \"%s\"; %i", dirfile, field_code, (int)GIMME_V);
+
+    /* in array context, return the field list, otherwise return naliases */
+    if (GIMME_V == G_ARRAY) {
+      int i;
+      const char **fl = gd_aliases(dirfile, field_code);
+
+      GDP_UNDEF_ON_ERROR();
+
+      for (i = 0; fl[i]; ++i)
+        GDP_PUSHpvz(fl[i]);
+    } else {
+      unsigned int nf = gd_naliases(dirfile, field_code);
+
+      GDP_UNDEF_ON_ERROR();
+
+      GDP_PUSHuv(nf);
+    }
+
+    dreturnvoid();
+
+void
+fragment_affixes(dirfile, fragment_index)
+  DIRFILE * dirfile
+  int fragment_index
+  PREINIT:
+    char *prefix;
+    char *suffix;
+    GDP_DIRFILE_ALIAS;
+  ALIAS:
+    GetData::Dirfile::fragment_affixes = 1
+  PPCODE:
+    dtrace("%p, %i", dirfile, fragment_index);
+
+    gd_fragment_affixes(dirfile, fragment_index, &prefix, &suffix);
+
+    GDP_UNDEF_ON_ERROR();
+
+    GDP_PUSHpvz(prefix);
+    GDP_PUSHpvz(suffix);
 
     dreturnvoid();
 

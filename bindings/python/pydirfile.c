@@ -885,18 +885,45 @@ static PyObject* gdpy_dirfile_flush(struct gdpy_dirfile_t* self,
   return Py_None;
 }
 
+static PyObject* gdpy_dirfile_sync(struct gdpy_dirfile_t* self,
+    PyObject* args, PyObject* keys)
+{
+  dtrace("%p, %p, %p", self, args, keys);
+
+  char* keywords[] = { "field_code", NULL };
+  const char* field_code = NULL;
+
+  if (!PyArg_ParseTupleAndKeywords(args, keys, "|s:pygetdata.dirfile.sync",
+        keywords, &field_code))
+  {
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  gd_sync(self->D, field_code);
+
+  PYGD_CHECK_ERROR(self->D, NULL);
+
+  Py_INCREF(Py_None);
+  dreturn("%p", Py_None);
+  return Py_None;
+}
+
 static PyObject* gdpy_dirfile_include(struct gdpy_dirfile_t* self,
     PyObject* args, PyObject* keys)
 {
   dtrace("%p, %p, %p", self, args, keys);
 
-  char* keywords[] = { "file", "fragment_index", "flags", NULL };
+  char* keywords[] = { "file", "fragment_index", "flags", "prefix", "suffix",
+    NULL };
   const char* file = NULL;
   int fragment_index = 0;
   unsigned int flags = 0;
+  char *prefix = NULL, *suffix = NULL;
 
-  if (!PyArg_ParseTupleAndKeywords(args, keys, "s|ii:pygetdata.dirfile.include",
-        keywords, &file, &fragment_index, &flags))
+  if (!PyArg_ParseTupleAndKeywords(args, keys,
+        "s|iiss:pygetdata.dirfile.include", keywords, &file, &fragment_index,
+        &flags, &prefix, &suffix))
   {
     dreturn("%p", NULL);
     return NULL;
@@ -904,7 +931,8 @@ static PyObject* gdpy_dirfile_include(struct gdpy_dirfile_t* self,
 
   self->callback_exception = 0;
 
-  long index = gd_include(self->D, file, fragment_index, flags);
+  long index = gd_include_affix(self->D, file, fragment_index, prefix, suffix,
+      flags);
 
   if (self->callback_exception) {
     dreturn("%p", NULL);
@@ -2015,18 +2043,18 @@ static PyObject* gdpy_dirfile_rename(struct gdpy_dirfile_t* self,
 {
   dtrace("%p, %p, %p", self, args, keys);
 
-  char* keywords[] = { "old_code", "new_name", "move_data", NULL };
+  char* keywords[] = { "old_code", "new_name", "flags", NULL };
   const char* old_code;
   const char* new_name;
-  int move_data = 0;
+  unsigned flags = 0;
 
-  if (!PyArg_ParseTupleAndKeywords(args, keys, "ss|i:pygetdata.dirfile.move",
-        keywords, &old_code, &new_name, &move_data)) {
+  if (!PyArg_ParseTupleAndKeywords(args, keys, "ss|I:pygetdata.dirfile.rename",
+        keywords, &old_code, &new_name, &flags)) {
     dreturn ("%p", NULL);
     return NULL;
   }
 
-  gd_rename(self->D, old_code, new_name, move_data);
+  gd_rename(self->D, old_code, new_name, flags);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
@@ -2123,6 +2151,261 @@ static PyObject *gdpy_dirfile_tell(struct gdpy_dirfile_t *self, PyObject *args,
 
   dreturn("%p", pyobj);
   return pyobj;
+}
+
+static PyObject* gdpy_dirfile_hide(struct gdpy_dirfile_t* self,
+    PyObject* args, PyObject* keys)
+{
+  dtrace("%p, %p, %p", self, args, keys);
+
+  char* keywords[] = { "field_code", NULL };
+  const char* field_code;
+
+  if (!PyArg_ParseTupleAndKeywords(args, keys,
+        "s:pygetdata.dirfile.hide", keywords, &field_code))
+  {
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  gd_hide(self->D, field_code);
+
+  PYGD_CHECK_ERROR(self->D, NULL);
+
+  Py_INCREF(Py_None);
+  dreturn("%p", Py_None);
+  return Py_None;
+}
+
+static PyObject* gdpy_dirfile_unhide(struct gdpy_dirfile_t* self,
+    PyObject* args, PyObject* keys)
+{
+  dtrace("%p, %p, %p", self, args, keys);
+
+  char* keywords[] = { "field_code", NULL };
+  const char* field_code;
+
+  if (!PyArg_ParseTupleAndKeywords(args, keys,
+        "s:pygetdata.dirfile.unhide", keywords, &field_code))
+  {
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  gd_unhide(self->D, field_code);
+
+  PYGD_CHECK_ERROR(self->D, NULL);
+
+  Py_INCREF(Py_None);
+  dreturn("%p", Py_None);
+  return Py_None;
+}
+
+static PyObject* gdpy_dirfile_naliases(struct gdpy_dirfile_t* self,
+    PyObject* args, PyObject* keys)
+{
+  dtrace("%p, %p, %p", self, args, keys);
+
+  char* keywords[] = { "field_code", NULL };
+  const char* field_code;
+
+  if (!PyArg_ParseTupleAndKeywords(args, keys,
+        "s:pygetdata.dirfile.naliases", keywords, &field_code))
+  {
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  long naliases = gd_naliases(self->D, field_code);
+
+  PYGD_CHECK_ERROR(self->D, NULL);
+
+  PyObject* obj = PyInt_FromLong(naliases);
+
+  dreturn("%p", obj);
+  return obj;
+}
+
+static PyObject* gdpy_dirfile_aliastarget(struct gdpy_dirfile_t* self,
+    PyObject* args, PyObject* keys)
+{
+  dtrace("%p, %p, %p", self, args, keys);
+
+  char* keywords[] = { "field_code", NULL };
+  const char* field_code;
+
+  if (!PyArg_ParseTupleAndKeywords(args, keys,
+        "s:pygetdata.dirfile.alias_target", keywords, &field_code))
+  {
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  const char *target = gd_alias_target(self->D, field_code);
+
+  PYGD_CHECK_ERROR(self->D, NULL);
+
+  PyObject* obj = PyString_FromString(target);
+
+  dreturn("%p", obj);
+  return obj;
+}
+
+static PyObject* gdpy_dirfile_hidden(struct gdpy_dirfile_t* self,
+    PyObject* args, PyObject* keys)
+{
+  dtrace("%p, %p, %p", self, args, keys);
+
+  char* keywords[] = { "field_code", NULL };
+  const char* field_code;
+
+  if (!PyArg_ParseTupleAndKeywords(args, keys,
+        "s:pygetdata.dirfile.hidden", keywords, &field_code))
+  {
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  long hidden = gd_hidden(self->D, field_code);
+
+  PYGD_CHECK_ERROR(self->D, NULL);
+
+  PyObject* obj = PyInt_FromLong(hidden);
+
+  dreturn("%p", obj);
+  return obj;
+}
+
+static PyObject* gdpy_dirfile_movealias(struct gdpy_dirfile_t* self,
+    PyObject* args, PyObject* keys)
+{
+  dtrace("%p, %p, %p", self, args, keys);
+
+  char* keywords[] = { "field_code", "new_fragment", NULL };
+  const char* field_code;
+  int new_fragment;
+
+  if (!PyArg_ParseTupleAndKeywords(args, keys,
+        "si:pygetdata.dirfile.move_alias", keywords, &field_code,
+        &new_fragment))
+  {
+    dreturn ("%p", NULL);
+    return NULL;
+  }
+
+  gd_move_alias(self->D, field_code, new_fragment);
+
+  PYGD_CHECK_ERROR(self->D, NULL);
+
+  Py_INCREF(Py_None);
+  dreturn("%p", Py_None);
+  return Py_None;
+}
+
+static PyObject* gdpy_dirfile_deletealias(struct gdpy_dirfile_t* self,
+    void* args, void* keys)
+{
+  dtrace("%p, %p, %p", self, args, keys);
+
+  char* keywords[] = {"field_code", "flags", NULL};
+  const char* field_code;
+  unsigned flags = 0;
+
+  if (!PyArg_ParseTupleAndKeywords(args, keys,
+        "s|I:pygetdata.dirfile.delete", keywords, &field_code, &flags))
+  {
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  gd_delete_alias(self->D, field_code, flags);
+
+  PYGD_CHECK_ERROR(self->D, NULL);
+
+  Py_INCREF(Py_None);
+  dreturn("%p", Py_None);
+  return Py_None;
+}
+
+static PyObject* gdpy_dirfile_aliaslist(struct gdpy_dirfile_t* self,
+    void* args, void* keys)
+{
+  dtrace("%p, %p, %p", self, args, keys);
+
+  const char **fields;
+  char* keywords[] = { "field_code", NULL };
+  int i;
+  const char *field_code;
+
+  if (!PyArg_ParseTupleAndKeywords(args, keys,
+        "s:pygetdata.dirfile.alias_list", keywords, &field_code))
+  {
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  fields = gd_aliases(self->D, field_code);
+
+  PYGD_CHECK_ERROR(self->D, NULL);
+
+  PyObject* pylist = PyList_New(0);
+
+  for (i = 0; fields[i] != NULL; ++i)
+    PyList_Append(pylist, PyString_FromString(fields[i]));
+
+  dreturn("%p", pylist);
+  return pylist;
+}
+
+static PyObject* gdpy_dirfile_addalias(struct gdpy_dirfile_t* self,
+    void *args, void *keys)
+{
+  dtrace("%p, %p, %p", self, args, keys);
+
+  char *keywords[] = { "field_code", "target", "fragment_index", NULL };
+  const char *field_code, *target;
+  int fragment_index = 0;
+
+  if (!PyArg_ParseTupleAndKeywords(args, keys,
+        "ss|i:pygetdata.dirfile.add_alias", keywords, &field_code, &target, 
+        &fragment_index))
+  {
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  gd_add_alias(self->D, field_code, target, fragment_index);
+
+  PYGD_CHECK_ERROR(self->D, NULL);
+
+  Py_INCREF(Py_None);
+  dreturn("%p", Py_None);
+  return Py_None;
+}
+
+static PyObject* gdpy_dirfile_maddalias(struct gdpy_dirfile_t* self,
+    void *args, void *keys)
+{
+  dtrace("%p, %p, %p", self, args, keys);
+
+  char *keywords[] = { "parent", "field_code", "target", NULL };
+  const char *field_code, *target, *parent;
+
+  if (!PyArg_ParseTupleAndKeywords(args, keys,
+        "sss:pygetdata.dirfile.add_alias", keywords, &parent, &field_code,
+        &target))
+  {
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  gd_madd_alias(self->D, parent, field_code, target);
+
+  PYGD_CHECK_ERROR(self->D, NULL);
+
+  Py_INCREF(Py_None);
+  dreturn("%p", Py_None);
+  return Py_None;
 }
 
 static PyGetSetDef gdpy_dirfile_getset[] = {
@@ -2357,6 +2640,15 @@ static PyMethodDef gdpy_dirfile_methods[] = {
       "search begins at the first sample.  If 'end' is omitted, the search\n"
       "ends at the last sample.  See gd_framenum_subset(3)."
   },
+  {"hidden", (PyCFunction)gdpy_dirfile_hidden, METH_VARARGS | METH_KEYWORDS,
+    "hidden(field_code)\n\n"
+      "Returns true if field_code (alias or real field) is hidden  See \n"
+      "gd_hidden(3)."
+  },
+  {"hide", (PyCFunction)gdpy_dirfile_hide, METH_VARARGS | METH_KEYWORDS,
+    "hide(field_code)\n\n"
+      "Sets the hidden flag on the specified field.  See gd_hide(3)."
+  },
   {"mcarrays", (PyCFunction)gdpy_dirfile_mcarrays, METH_VARARGS | METH_KEYWORDS,
     "mcarrays(parent, return_type [, as_list])\n\n"
       "Retrieve all CARRAY metafields, and their values, for the parent\n"
@@ -2408,7 +2700,7 @@ static PyMethodDef gdpy_dirfile_methods[] = {
     METH_VARARGS | METH_KEYWORDS,
     "mvector_list(parent)\n\n"
       "Retrieve a list of all vector type metafields (that is: BIT, DIVIDE,\n"
-      "LINCOM, LINTERP, MULTIPLY, PHASE, POLYNOM, RECIP, and SBIT\n"
+      "LINCOM, LINTERP, MULTIPLY, PHASE, POLYNOM, RECIP, SBIT, and WINDOW\n"
       "metafields) for the parent field 'parent'.  See gd_mvector_list(3)."
   },
   {"native_type", (PyCFunction)gdpy_dirfile_getnativetype,
@@ -2453,14 +2745,14 @@ static PyMethodDef gdpy_dirfile_methods[] = {
     METH_VARARGS | METH_KEYWORDS,
     "nmvectors(parent)\n\n"
       "Return the number of vector type metafields (that is: BIT, DIVIDE,\n"
-      "LINCOM, LINTERP, MULTIPLY, PHASE, POLYNOM, RECIP, and SBIT\n"
+      "LINCOM, LINTERP, MULTIPLY, PHASE, POLYNOM, RECIP, SBIT, and WINDOW\n"
       "metafields) for the parent field 'parent'.  See gd_nmvectors(3)."
   },
   {"nvectors", (PyCFunction)gdpy_dirfile_getnvectors, METH_NOARGS,
     "nvectors()\n\n"
       "Return the number of vector type fields (that is: BIT, DIVIDE,\n"
-      "INDEX, LINCOM, LINTERP, MULTIPLY, PHASE, POLYNOM, RAW, RECIP, and\n"
-      "SBIT fields) defined in the database.  See gd_nvectors(3)."
+      "INDEX, LINCOM, LINTERP, MULTIPLY, PHASE, POLYNOM, RAW, RECIP, SBIT,\n"
+      "and WINDOW fields) defined in the database.  See gd_nvectors(3)."
   },
   {"raw_filename", (PyCFunction)gdpy_dirfile_getrawfilename,
     METH_VARARGS | METH_KEYWORDS,
@@ -2489,17 +2781,21 @@ static PyMethodDef gdpy_dirfile_methods[] = {
   { "vector_list", (PyCFunction)gdpy_dirfile_getvectorlist, METH_NOARGS,
     "vector_list()\n\n"
       "Retrieve a list of all vector type fields (that is: BIT, DIVIDE,\n"
-      "INDEX, LINCOM, LINTERP, MULTIPLY, PHASE, POLYNOM, RAW, RECIP, and\n"
-      "SBIT metafields) defined in the database.  See gd_vector_list(3)."
+      "INDEX, LINCOM, LINTERP, MULTIPLY, PHASE, POLYNOM, RAW, RECIP, SBIT,\n"
+      "and WINDOW metafields) defined in the database.  See\n"
+      "gd_vector_list(3)."
   },
   {"include", (PyCFunction)gdpy_dirfile_include, METH_VARARGS | METH_KEYWORDS,
-    "include(filename [, fragment_index, flags])\n\n"
+    "include(filename [, fragment_index, flags, prefix, suffix])\n\n"
       "Add (and possibly create) a new format file fragment specified by\n"
       "'filename' to the database, as an include in the existing fragment\n"
       "indexed by 'fragment_index'.  If 'fragment_index' is not given,\n"
-      "zero is assumed (ie. the primary format file).  If flags is given,\n"
+      "zero is assumed (ie. the primary format file).  If 'flags' is given,\n"
+      /* -----------------------------------------------------------------| */
       "it should be a bitwise or'd collection of flags listed in the\n"
-      "gd_include manual page.  See gd_include(3)."
+      "gd_include manual page.  If 'prefix' or 'suffix' are given, they\n"
+      "will be applied to the field codes defined in the file.  See\n"
+      "gd_include_affix(3)."
   },
   {"madd", (PyCFunction)gdpy_dirfile_madd, METH_VARARGS | METH_KEYWORDS,
     "madd(entry, parent)\n\n"
@@ -2581,11 +2877,10 @@ static PyMethodDef gdpy_dirfile_methods[] = {
       "'field_code'.  See gd_put_string(3)."
   },
   {"rename", (PyCFunction)gdpy_dirfile_rename, METH_VARARGS | METH_KEYWORDS,
-    "rename(old_code, new_name [, move_data])\n\n"
+    "rename(old_code, new_name [, flags])\n\n"
       "Change the name of the field specified by 'old_code' to 'new_name'.\n"
-      "If 'move_data' is given and is non-zero, and if 'old_code' specifies\n"
-      "a RAW field, the file on disk will also be renamed accordingly.\n"
-      "See gd_rename(3)."
+      "If 'flags' is given and is non-zero, it should be a bitwise or'd\n"
+      "collection of the pygetdat.REN_* symbols.  See gd_rename(3)."
   },
   {"seek", (PyCFunction)gdpy_dirfile_seek, METH_VARARGS | METH_KEYWORDS,
     "seek(field_code, flags [, frame_num, sample_num])\n\n"
@@ -2609,9 +2904,12 @@ static PyMethodDef gdpy_dirfile_methods[] = {
   },
   {"tell", (PyCFunction)gdpy_dirfile_tell, METH_VARARGS | METH_KEYWORDS,
     "tell(field_code)\n\n"
-      /* -----------------------------------------------------------------| */
       "Report the current position of the field pointer of 'field_code'.\n"
       "See gd_tell(3)."
+  },
+  {"unhide", (PyCFunction)gdpy_dirfile_unhide, METH_VARARGS | METH_KEYWORDS,
+    "unhide(field_code)\n\n"
+      "Clears the hidden flag on the specified field.  See gd_unhide(3)."
   },
   {"uninclude", (PyCFunction)gdpy_dirfile_uninclude,
     METH_VARARGS | METH_KEYWORDS,
@@ -2626,6 +2924,57 @@ static PyMethodDef gdpy_dirfile_methods[] = {
       "Check whether the field specified by 'field_code' is valid for\n"
       "reading and writing.  Throws an error if it is not.  See\n"
       "gd_validate(3)."
+  },
+  {"sync", (PyCFunction)gdpy_dirfile_sync, METH_VARARGS | METH_KEYWORDS,
+    "sync([field_code])\n\n"
+      "This is similar to using Flush, but without closing the affected\n"
+      "files.  See gd_sync(3)."
+  },
+  {"naliases", (PyCFunction)gdpy_dirfile_naliases, METH_VARARGS | METH_KEYWORDS,
+    "naliases(field_code)\n\n"
+      "This function returns the number of aliases defined for the specified\n"
+      "field.  If field_code is valid, this will be at least one.  See\n"
+      "gd_naliases(3)."
+  },
+  {"move_alias", (PyCFunction)gdpy_dirfile_movealias,
+    METH_VARARGS | METH_KEYWORDS,
+    "move_alias(field_code, new_fragment)\n\n"
+      "This moves the alias specified by 'field_code' to the fragment\n"
+      "indexed by 'new_fragment'.  See gd_move_alias(3)."
+  },
+  {"delete_alias", (PyCFunction)gdpy_dirfile_deletealias,
+    METH_VARARGS | METH_KEYWORDS,
+    "delete_alias(field_code[, flags])\n\n"
+      "Delete the alias 'field_code' from the database.  If 'flags' is\n"
+      "omitted, it is assumed to be zero.  Otherwise, 'flags' should be a\n"
+      "bitwise or'd collection of the pygetdata.DEL_* symbols, whose\n"
+      "meanings are described in the gd_delete manual page.  See\n"
+      "gd_delete_alias(3)."
+  },
+  {"alias_target", (PyCFunction)gdpy_dirfile_aliastarget,
+    METH_VARARGS | METH_KEYWORDS,
+    "alias_target(field_code)\n\n"
+      "Returns the target of the alias specified by 'field_code'.\n"
+      "See gd_alias_target(3)."
+  },
+  {"aliases", (PyCFunction)gdpy_dirfile_aliaslist, METH_VARARGS | METH_KEYWORDS,
+    "aliases(field_code)\n\n"
+      "Returns a list of aliases for 'field_code'.  If successful, the\n"
+      "list returned will always contain at least one entry, field_code\n"
+      "itself.  See gd_alias_list(3)."
+  },
+  {"add_alias", (PyCFunction)gdpy_dirfile_addalias,
+    METH_VARARGS | METH_KEYWORDS,
+    "add_alias(field_code, target [, fragment_index])\n\n"
+      "Adds a new alias called 'field_code' pointing to 'target' to the\n"
+      "fragment indexed by 'fragment_index', which defaults to 0 if not\n"
+      "given.  See gd_add_alias(3)."
+  },
+  {"madd_alias", (PyCFunction)gdpy_dirfile_maddalias,
+    METH_VARARGS | METH_KEYWORDS,
+    "add_alias(parent, field_code, target)\n\n"
+      "Adds a new alias called 'field_code' pointing to 'target' as a\n"
+      "metalias under 'parent'.  See gd_madd_alias(3)."
   },
   { NULL, NULL, 0, NULL }
 };

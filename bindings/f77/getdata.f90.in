@@ -29,13 +29,13 @@ integer, parameter :: GD_FIELD_LEN=@GD_MAX_LINE_LENGTH@
 
 type gd_entry
   integer :: field_type, n_fields, spf, data_type, bitnum, numbits, shift
-  integer :: fragment_index, comp_scal, poly_ord, array_len
+  integer :: fragment_index, comp_scal, poly_ord, array_len, windop, ithreshold
   character (len=GD_FIELD_LEN), dimension(3) :: field
   character (len=GD_FIELD_LEN), dimension(6) :: scalar
   integer, dimension(6) :: scalar_ind
   double precision, dimension(3) :: m, b
   double precision, dimension(6) :: a
-  double precision :: dividend
+  double precision :: dividend, rthreshold
   double complex, dimension(3) :: cm, cb
   double complex, dimension(6) :: ca
   double complex :: cdividend
@@ -893,6 +893,15 @@ function fgd_entry (dirfile, field_code, ent)
     len1 = GD_FIELD_LEN
     call gdgsca(ent%scalar(1), len1, ent%scalar_ind(1), dirfile, &
     TRIM(field_code), LEN_TRIM(field_code), 1)
+  else if (fgd_entry .EQ. GD_WINDOW_ENTRY) then
+    ! window
+    call gdgewd(ent%field(1), len1, ent%field(2), len2, ent%windop, &
+    ent%ithreshold, ent%rthreshold, ent%fragment_index, dirfile, &
+    TRIM(field_code), LEN_TRIM(field_code))
+
+    len1 = GD_FIELD_LEN
+    call gdgsca(ent%scalar(1), len1, ent%scalar_ind(1), dirfile, &
+    TRIM(field_code), LEN_TRIM(field_code), 1)
   else if (fgd_entry .EQ. GD_CONST_ENTRY) then
     !const
     call gdgeco(ent%data_type, ent%fragment_index, dirfile, TRIM(field_code), &
@@ -996,6 +1005,18 @@ subroutine fgd_add (dirfile, field_code, ent)
       call gdadrc(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
       TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), ent%cdividend, &
       ent%fragment_index)
+    end if
+  else if (ent%field_type .EQ. GD_WINDOW_ENTRY) then
+    if ((ent%windop .EQ. GD_WINDOP_EQ) .OR. (ent%windop .EQ. GD_WINDOP_NE) &
+    .OR. (ent%windop .EQ. GD_WINDOP_SET) .OR. (ent%windop .EQ. GD_WINDOP_CLR)) &
+    then
+      call gdadwd(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+      TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), TRIM(ent%field(2)), &
+      LEN_TRIM(ent%field(2)), ent%windop, ent%ithreshold, ent%fragment_index)
+    else
+      call gdadwd(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+      TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), TRIM(ent%field(2)), &
+      LEN_TRIM(ent%field(2)), ent%windop, ent%rthreshold, ent%fragment_index)
     end if
   else if (ent%field_type .EQ. GD_CONST_ENTRY) then
     call gdadco(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
@@ -1223,6 +1244,20 @@ subroutine fgd_madd (dirfile, parent, field_code, ent)
   else if (ent%field_type .EQ. GD_PHASE_ENTRY) then
     call gdmdph(dirfile, TRIM(parent), LEN_TRIM(parent), TRIM(field_code), &
     LEN_TRIM(field_code), TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), ent%shift)
+  else if (ent%field_type .EQ. GD_WINDOW_ENTRY) then
+    if ((ent%windop .EQ. GD_WINDOP_EQ) .OR. (ent%windop .EQ. GD_WINDOP_NE) &
+    .OR. (ent%windop .EQ. GD_WINDOP_SET) .OR. (ent%windop .EQ. GD_WINDOP_CLR)) &
+    then
+      call gdmdwd(dirfile, TRIM(parent), LEN_TRIM(parent), TRIM(field_code), &
+      LEN_TRIM(field_code), TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), &
+      TRIM(ent%field(2)), LEN_TRIM(ent%field(2)), ent%windop, ent%ithreshold, &
+      ent%fragment_index)
+    else
+      call gdmdwd(dirfile, TRIM(parent), LEN_TRIM(parent), TRIM(field_code), &
+      LEN_TRIM(field_code), TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), &
+      TRIM(ent%field(2)), LEN_TRIM(ent%field(2)), ent%windop, ent%rthreshold, &
+      ent%fragment_index)
+    end if
   else if (ent%field_type .EQ. GD_CONST_ENTRY) then
     call gdmdco(dirfile, TRIM(parent), LEN_TRIM(parent), TRIM(field_code), &
     LEN_TRIM(field_code), ent%data_type, GD_INT32, zero)
@@ -1591,6 +1626,18 @@ subroutine fgd_alter_entry (dirfile, field_code, ent, recode)
     else
       call gdalrc(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
       TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), ent%a(1), ent%dividend)
+    end if
+  else if (ent%field_type .EQ. GD_WINDOW_ENTRY) then
+    if ((ent%windop .EQ. GD_WINDOP_EQ) .OR. (ent%windop .EQ. GD_WINDOP_NE) &
+    .OR. (ent%windop .EQ. GD_WINDOP_SET) .OR. (ent%windop .EQ. GD_WINDOP_CLR)) &
+    then
+      call gdalwd(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+      TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), TRIM(ent%field(2)), &
+      LEN_TRIM(ent%field(2)), ent%windop, ent%ithreshold, ent%fragment_index)
+    else
+      call gdalwd(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+      TRIM(ent%field(1)), LEN_TRIM(ent%field(1)), TRIM(ent%field(2)), &
+      LEN_TRIM(ent%field(2)), ent%windop, ent%rthreshold, ent%fragment_index)
     end if
   else if (ent%field_type .EQ. GD_CONST_ENTRY) then
     call gdalco(dirfile, TRIM(field_code), LEN_TRIM(field_code), ent%data_type)
@@ -2425,5 +2472,250 @@ subroutine fgd_mstrings (strings, dirfile, parent, string_len)
     end do
   end if
 end subroutine
+
+subroutine fgd_add_alias (dirfile, field_code, targ, fragment_index)
+  integer, intent(in) :: dirfile, fragment_index
+  character(len=*), intent(in) :: field_code, targ
+
+  call gdadal(dirfile, TRIM(field_code), LEN_TRIM(field_code), TRIM(targ), &
+  LEN_TRIM(targ), fragment_index)
+end subroutine
+
+subroutine fgd_add_window_i (dirfile, field_code, in_field, check_field, &
+  windop, threshold, fragment_index)
+  character(len=*), intent(in) :: field_code, in_field, check_field
+  integer, intent(in) :: dirfile, windop, threshold, fragment_index
+
+  ! convert to double precision, if necessary
+  if (windop .NE. GD_WINDOP_EQ .AND. windop .NE. GD_WINDOP_NE .AND. &
+  windop .NE. GD_WINDOP_SET .AND. windop .NE. GD_WINDOP_CLR) then
+    call gdadwd(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+    TRIM(in_field), LEN_TRIM(in_field), TRIM(check_field), &
+    LEN_TRIM(check_field), windop, threshold, 1d0 * fragment_index)
+  else
+    call gdadwd(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+    TRIM(in_field), LEN_TRIM(in_field), TRIM(check_field), &
+    LEN_TRIM(check_field), windop, threshold, fragment_index)
+  end if
+end subroutine
+
+subroutine fgd_add_window_r (dirfile, field_code, in_field, check_field, &
+  windop, threshold, fragment_index)
+  character(len=*), intent(in) :: field_code, in_field, check_field
+  integer, intent(in) :: dirfile, windop, fragment_index
+  double precision, intent(in) :: threshold
+
+  ! convert to integer, if necessary
+  if (windop .NE. GD_WINDOP_EQ .AND. windop .NE. GD_WINDOP_NE .AND. &
+  windop .NE. GD_WINDOP_SET .AND. windop .NE. GD_WINDOP_CLR) then
+    call gdadwd(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+    TRIM(in_field), LEN_TRIM(in_field), TRIM(check_field), &
+    LEN_TRIM(check_field), windop, threshold, fragment_index)
+  else
+    call gdadwd(dirfile, TRIM(field_code), LEN_TRIM(field_code), &
+    TRIM(in_field), LEN_TRIM(in_field), TRIM(check_field), &
+    LEN_TRIM(check_field), windop, threshold, INT(fragment_index))
+  end if
+end subroutine
+
+subroutine fgd_madd_window_i (dirfile, parent, field_code, in_field, &
+  check_field, windop, threshold)
+  character(len=*), intent(in) :: parent, field_code, in_field, check_field
+  integer, intent(in) :: dirfile, windop, threshold
+
+  ! convert to double precision, if necessary
+  if (windop .NE. GD_WINDOP_EQ .AND. windop .NE. GD_WINDOP_NE .AND. &
+  windop .NE. GD_WINDOP_SET .AND. windop .NE. GD_WINDOP_CLR) then
+    call gdmdwd(dirfile, TRIM(parent), LEN_TRIM(parent), TRIM(field_code), &
+    LEN_TRIM(field_code), TRIM(in_field), LEN_TRIM(in_field), &
+    TRIM(check_field), LEN_TRIM(check_field), windop, 1d0 * threshold)
+  else
+    call gdmdwd(dirfile, TRIM(parent), LEN_TRIM(parent), TRIM(field_code), &
+    LEN_TRIM(field_code), TRIM(in_field), LEN_TRIM(in_field), &
+    TRIM(check_field), LEN_TRIM(check_field), windop, threshold)
+  end if
+end subroutine
+
+subroutine fgd_madd_window_r (dirfile, parent, field_code, in_field, &
+  check_field, windop, threshold)
+  character(len=*), intent(in) :: parent, field_code, in_field, check_field
+  integer, intent(in) :: dirfile, windop
+  double precision, intent(in) :: threshold
+
+  ! convert to integer, if necessary
+  if (windop .NE. GD_WINDOP_EQ .AND. windop .NE. GD_WINDOP_NE .AND. &
+  windop .NE. GD_WINDOP_SET .AND. windop .NE. GD_WINDOP_CLR) then
+    call gdmdwd(dirfile, TRIM(parent), LEN_TRIM(parent), TRIM(field_code), &
+    LEN_TRIM(field_code), TRIM(in_field), LEN_TRIM(in_field), &
+    TRIM(check_field), LEN_TRIM(check_field), windop, threshold)
+  else
+    call gdmdwd(dirfile, TRIM(parent), LEN_TRIM(parent), TRIM(field_code), &
+    LEN_TRIM(field_code), TRIM(in_field), LEN_TRIM(in_field), &
+    TRIM(check_field), LEN_TRIM(check_field), windop, INT(threshold))
+  end if
+end subroutine
+
+function fgd_alias_target (dirfile, field_code)
+  character (len=GD_MAX_LINE_LENGTH) :: fgd_alias_target
+  integer, intent(in) :: dirfile
+  character(len=*), intent(in) :: field_code
+  integer :: l = GD_MAX_LINE_LENGTH
+
+  call gdatrg(fgd_alias_target, l, dirfile, TRIM(field_code), &
+  LEN_TRIM(field_code))
+end function
+
+function fgd_naliases (dirfile, field_code)
+  integer :: fgd_naliases
+  integer, intent(in) :: dirfile
+  character(len=*), intent(in) :: field_code
+
+  call gdnals(fgd_naliases, dirfile, TRIM(field_code), LEN_TRIM(field_code))
+end function
+
+function fgd_alias_max (dirfile, field_code)
+  integer :: fgd_alias_max
+  integer, intent(in) :: dirfile
+  character(len=*), intent(in) :: field_code
+
+  call gdalsx(fgd_alias_max, dirfile, TRIM(field_code), LEN_TRIM(field_code))
+end function
+
+subroutine fgd_aliases (aliases, dirfile, field_code, alias_len)
+  character(len=*), dimension(:), intent(out) :: aliases
+  integer, intent(in) :: dirfile
+  character(len=*), intent(in) :: field_code
+  integer, intent(inout) :: alias_len
+  integer :: max_len, nalias, i
+
+  ! make sure the field list is large enough
+  max_len = fgd_alias_max(dirfile, field_code)
+
+  if (alias_len .lt. max_len) then
+    alias_len = max_len
+  else
+    nalias = fgd_naliases(dirfile, field_code)
+    do i=1,nalias
+      call gdalss(aliases(i), alias_len, dirfile, TRIM(field_code), &
+      LEN_TRIM(field_code), i)
+    end do
+  end if
+end subroutine
+
+subroutine fgd_alter_affixes (dirfile, fragment_index, prefix, suffix)
+  integer, intent(in) :: dirfile, fragment_index
+  character(len=*), intent(in) :: prefix, suffix
+
+  call gdaafx(dirfile, fragment_index, TRIM(prefix), LEN_TRIM(prefix), &
+  TRIM(suffix), LEN_TRIM(suffix))
+end subroutine
+
+subroutine fgd_alter_window_i (dirfile, field_name, in_field, check_field, &
+windop, threshold)
+  integer, intent(in) :: dirfile, windop, threshold
+  character (len=*), intent(in) :: field_name, in_field, check_field
+
+  ! convert to double precision, if necessary
+  if (windop .NE. GD_WINDOP_EQ .AND. windop .NE. GD_WINDOP_NE .AND. &
+  windop .NE. GD_WINDOP_SET .AND. windop .NE. GD_WINDOP_CLR) then
+    call gdalwd(dirfile, TRIM(field_name), LEN_TRIM(field_name), &
+    TRIM(in_field), LEN_TRIM(in_field), TRIM(check_field), &
+    LEN_TRIM(check_field), windop, 1d0 * threshold)
+  else
+    call gdalwd(dirfile, TRIM(field_name), LEN_TRIM(field_name), &
+    TRIM(in_field), LEN_TRIM(in_field), TRIM(check_field), &
+    LEN_TRIM(check_field), windop, threshold)
+  end if
+end subroutine
+
+subroutine fgd_alter_window_r (dirfile, field_name, in_field, check_field, &
+windop, threshold)
+  integer, intent(in) :: dirfile, windop
+  character (len=*), intent(in) :: field_name, in_field, check_field
+  double precision, intent(in) :: threshold
+
+  ! convert to integer, if necessary
+  if (windop .NE. GD_WINDOP_EQ .AND. windop .NE. GD_WINDOP_NE .AND. &
+  windop .NE. GD_WINDOP_SET .AND. windop .NE. GD_WINDOP_CLR) then
+    call gdalwd(dirfile, TRIM(field_name), LEN_TRIM(field_name), &
+    TRIM(in_field), LEN_TRIM(in_field), TRIM(check_field), &
+    LEN_TRIM(check_field), windop, threshold)
+  else
+    call gdalwd(dirfile, TRIM(field_name), LEN_TRIM(field_name), &
+    TRIM(in_field), LEN_TRIM(in_field), TRIM(check_field), &
+    LEN_TRIM(check_field), windop, INT(threshold))
+  end if
+end subroutine
+
+subroutine fgd_delete_alias (dirfile, field_code, flags)
+  integer, intent(in) :: dirfile, flags
+  character (len=*), intent(in) :: field_code
+
+  call gddela(dirfile, TRIM(field_code), LEN_TRIM(field_code), flags)
+end subroutine
+
+function fgd_hidden (dirfile, field_code)
+  integer :: fgd_hidden
+  integer, intent(in) :: dirfile
+  character (len=*), intent(in) :: field_code
+
+  call gdhidn(fgd_hidden, dirfile, TRIM(field_code), LEN_TRIM(field_code))
+end function
+
+subroutine fgd_hide (dirfile, field_code)
+  integer, intent(in) :: dirfile
+  character (len=*), intent(in) :: field_code
+
+  call gdhide(dirfile, TRIM(field_code), LEN_TRIM(field_code))
+end subroutine
+
+subroutine fgd_unhide (dirfile, field_code)
+  integer, intent(in) :: dirfile
+  character (len=*), intent(in) :: field_code
+
+  call gduhid(dirfile, TRIM(field_code), LEN_TRIM(field_code))
+end subroutine
+
+subroutine fgd_madd_alias (dirfile, parent, field_code, targ)
+  integer, intent(in) :: dirfile
+  character(len=*), intent(in) :: parent, field_code, targ
+
+  call gdmdal(dirfile, TRIM(parent), LEN_TRIM(parent), TRIM(field_code), &
+  LEN_TRIM(field_code), TRIM(targ), LEN_TRIM(targ))
+end subroutine
+
+subroutine fgd_move_alias (dirfile, field_code, new_fragment)
+  integer, intent(in) :: dirfile, new_fragment
+  character (len=*), intent(in) :: field_code
+
+  call gdmova (dirfile, TRIM(field_code), LEN_TRIM(field_code), new_fragment)
+end subroutine
+
+subroutine fgd_include_affix (dirfile, fragmentname, fragment_index, prefix, &
+suffix, flags)
+  integer, intent(in) :: dirfile, fragment_index, flags
+  character (len=*), intent(in) :: fragmentname, prefix, suffix
+
+  call gdinca(dirfile, TRIM(fragmentname), LEN_TRIM(fragmentname), &
+  fragment_index, TRIM(prefix), LEN_TRIM(prefix), TRIM(suffix), &
+  LEN_TRIM(suffix), flags)
+end subroutine
+
+subroutine fgd_sync (dirfile, field_code)
+  integer, intent(in) :: dirfile
+  character (len=*), intent(in) :: field_code
+
+  call gdsync(dirfile, TRIM(field_code), LEN_TRIM(field_code))
+end subroutine
+
+subroutine fgd_fragment_affixes (prefix, suffix, dirfile, fragment_index)
+  character(len=*), intent(out) :: prefix, suffix
+  integer, intent(in) :: dirfile, fragment_index
+  integer :: len1 = GD_FIELD_LEN
+  integer :: len2 = GD_FIELD_LEN
+
+  call gdfraf(prefix, len1, suffix, len2, dirfile, fragment_index)
+end subroutine
+  
 
 end module

@@ -32,10 +32,15 @@ namespace GetData {
     friend class Dirfile;
 
     public:
-      RawEntry() : Entry() { E.field_type = GD_RAW_ENTRY; };
+      RawEntry() : Entry() {
+        E.field_type = GD_RAW_ENTRY;
+        filename = NULL;
+      };
 
       RawEntry(const char* field_code, DataType data_type, gd_spf_t spf,
           int fragment_index = 0);
+
+      virtual ~RawEntry();
 
       virtual gd_spf_t SamplesPerFrame() const { return E.u.raw.spf; };
 
@@ -52,7 +57,9 @@ namespace GetData {
 
     private:
       RawEntry(const GetData::Dirfile *dirfile, const char* field_code) :
-        Entry(dirfile, field_code) { };
+        Entry(dirfile, field_code) { filename = NULL; };
+
+      char *filename;
   };
 }
 

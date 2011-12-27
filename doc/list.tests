@@ -216,3 +216,26 @@
 202 F9.... gd_mstring_value_max
 203 F9CIp- gd_seek
 204 F9CIp- gd_tell
+205 F9CIpP gd_hide
+206 F9CIpP gd_hidden
+207 F9CIpP gd_unhide
+208 F9CIpP gd_sync
+209 F9CIpP gd_flush
+210 F9CIpP gd_metaflush
+211 F9CIpP gd_entry (WINDOW)
+212 F9CIpP gd_add_window (INT64)
+213 .9.... gd_add_window (FLOAT64)
+214 F9CIpP gd_madd_wndow (INT64)
+215 .9.... gd_madd_wndow (FLOAT64)
+216 .9.... gd_alter_window (INT64)
+217 F9CIpP gd_alter_window (FLOAT64)
+218 F9CIpP gd_alias_target
+219 F9CIpP gd_add_alias
+220 F9CIpP gd_madd_alias
+221 F9CIpP gd_naliases
+222 F9CIpP gd_aliases
+223 F9CIpP gd_include_affix
+224 F9CIpP gd_move_alias
+225 F9CIpP gd_delete_alias
+226 F9CIpP gd_fragment_affixes
+227 F9CIpP gd_alter_affixes

@@ -51,6 +51,7 @@
 #include <getdata/multiplyentry.h>
 #include <getdata/divideentry.h>
 #include <getdata/recipentry.h>
+#include <getdata/windowentry.h>
 
 namespace GetData {
   
@@ -69,6 +70,7 @@ namespace GetData {
     friend class RecipEntry;
     friend class PhaseEntry;
     friend class PolynomEntry;
+    friend class WindowEntry;
     friend class ConstEntry;
     friend class CarrayEntry;
     friend class StringEntry;
@@ -87,7 +89,14 @@ namespace GetData {
 
       int Add(GetData::Entry &entry) const;
 
+      int AddAlias(const char *field_code, const char *target,
+          int fragment_index = 0) const;
+
       int AddSpec(const char *spec, int fragment_index = 0) const;
+
+      const char** Aliases(const char* field_code) const;
+
+      const char* AliasTarget(const char* field_code) const;
 
       int AlterSpec(const char* spec, int recode = 0) const;
 
@@ -102,6 +111,8 @@ namespace GetData {
       const void *Constants(DataType type = Float64) const;
 
       int Delete(const char* field_code, int flags = 0) const;
+
+      int DeleteAlias(const char* field_code, int flags = 0) const;
 
       int Discard();
 
@@ -142,10 +153,21 @@ namespace GetData {
       size_t GetString(const char *field_code, size_t len, char *data_out)
         const;
 
+      int Hide(const char* field_code) const;
+
+      int Hidden(const char* field_code) const;
+
       int Include(const char *file, int fragment_index = 0,
           unsigned long flags = 0) const;
 
+      int IncludeAffix(const char *file, int fragment_index = 0,
+          const char* prefix = NULL, const char* suffix = NULL,
+          unsigned long flags = 0) const;
+
       int MAdd(GetData::Entry &entry, const char *parent) const;
+
+      int MAddAlias(const char* parent, const char* name, const char* target)
+        const;
 
       int MAddSpec(const char *spec, const char *parent) const;
 
@@ -165,7 +187,11 @@ namespace GetData {
 
       const char **MStrings(const char *parent) const;
 
+      int MoveAlias(const char* field_code, int new_fragment) const;
+
       const char **MVectorList(const char *parent) const;
+
+      int NAliases(const char* field_code) const;
 
       unsigned int NFields() const;
 
@@ -201,7 +227,7 @@ namespace GetData {
 
       GetData::RawEntry *Reference(const char* field_code = NULL) const;
 
-      const char *ReferenceFilename() const;
+      const char *ReferenceFilename();
 
       unsigned int SamplesPerFrame(const char *field_code) const;
 
@@ -215,7 +241,11 @@ namespace GetData {
 
       const char **Strings() const;
 
+      int Sync(const char *field_code = NULL) const;
+
       off_t Tell(const char* field_code) const;
+
+      int UnHide(const char* field_code) const;
 
       int UnInclude(int fragment_index, int del = 0) const;
 
@@ -227,6 +257,7 @@ namespace GetData {
       DIRFILE* D; 
 
       char *error_string;
+      char *reference_name;
   };
 }
 

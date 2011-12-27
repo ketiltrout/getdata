@@ -13,6 +13,8 @@ gd_entype_t T_UV
 gd_shift_t T_IV
 gd_spf_t T_UV
 gd_type_t T_UV
+gd_windop_t T_IV
+gd_triplet_t T_TRIPLET
 
 # GetData Perl pseudotypes
 gdp_complex_in * T_COMPLEXIN
@@ -105,6 +107,21 @@ T_COMPLEX_ZERO
     $var = 0;
   else
     $var = gdp_cmp_to_c99($arg, NULL, gdp_package, \"${func_name}\");
+T_TRIPLET
+  { switch (windop) {
+    case GD_WINDOP_EQ:
+    case GD_WINDOP_NE:
+      $var.i = (int64_t)SvIV($arg);
+      break;
+    case GD_WINDOP_SET:
+    case GD_WINDOP_CLR:
+      $var.u = (uint64_t)SvUV($arg);
+      break;
+    default:
+      $var.r = SvNV($arg);
+      break;
+  }}
+
  
 
 OUTPUT

@@ -1,4 +1,4 @@
-/* Copyright (C) 2009, 2010 D. V. Wiebe
+/* Copyright (C) 2009-2011 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -277,6 +277,92 @@ static int gdpy_fragment_setprotection(struct gdpy_fragment_t* self,
   return 0;
 }
 
+static PyObject* gdpy_fragment_getprefix(struct gdpy_fragment_t* self,
+    void* closure)
+{
+  char *prefix, *suffix;
+  
+  dtrace("%p, %p", self, closure);
+
+  gd_fragment_affixes(self->dirfile->D, self->n, &prefix, &suffix);
+
+  PYGD_CHECK_ERROR(self->dirfile->D, NULL);
+
+  if (prefix == NULL) {
+    Py_INCREF(Py_None);
+    dreturn("%p", Py_None);
+    return Py_None;
+  }
+
+  PyObject* obj = PyString_FromString(prefix);
+
+  dreturn("%p", obj);
+  return obj;
+}
+
+static int gdpy_fragment_setprefix(struct gdpy_fragment_t* self,
+    PyObject *value, void *closure)
+{
+  dtrace("%p, %p, %p", self, value, closure);
+
+  const char *prefix = PyString_AsString(value);
+
+  if (PyErr_Occurred()) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  gd_alter_affixes(self->dirfile->D, self->n, prefix, NULL);
+
+  PYGD_CHECK_ERROR(self->dirfile->D, -1);
+
+  dreturn("%i", 0);
+  return 0;
+}
+
+static PyObject* gdpy_fragment_getsuffix(struct gdpy_fragment_t* self,
+    void* closure)
+{
+  char *prefix, *suffix;
+  
+  dtrace("%p, %p", self, closure);
+
+  gd_fragment_affixes(self->dirfile->D, self->n, &prefix, &suffix);
+
+  PYGD_CHECK_ERROR(self->dirfile->D, NULL);
+
+  if (suffix == NULL) {
+    Py_INCREF(Py_None);
+    dreturn("%p", Py_None);
+    return Py_None;
+  }
+
+  PyObject* obj = PyString_FromString(suffix);
+
+  dreturn("%p", obj);
+  return obj;
+}
+
+static int gdpy_fragment_setsuffix(struct gdpy_fragment_t* self,
+    PyObject *value, void *closure)
+{
+  dtrace("%p, %p, %p", self, value, closure);
+
+  const char *suffix = PyString_AsString(value);
+
+  if (PyErr_Occurred()) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  gd_alter_affixes(self->dirfile->D, self->n, NULL, suffix);
+
+  PYGD_CHECK_ERROR(self->dirfile->D, -1);
+
+  dreturn("%i", 0);
+  return 0;
+}
+
 static PyGetSetDef gdpy_fragment_getset[] = {
   { "encoding", (getter)gdpy_fragment_getencoding, NULL,
     "The encoding scheme of this fragment.  This will be one of the\n"
@@ -308,12 +394,20 @@ static PyGetSetDef gdpy_fragment_getset[] = {
       "cannot be changed.  To move a format file fragment to a different\n"
       "parent fragment, use dirfile.uninclude() and dirfile.include().",
     NULL },
+  { "prefix", (getter)gdpy_fragment_getprefix, (setter)gdpy_fragment_setprefix,
+    "The prefix applied to all fields defined in this fragment and\n"
+      "subfragments.  See gd_fragment_affixes(3).",
+    NULL },
   { "protection", (getter)gdpy_fragment_getprotection,
     (setter)gdpy_fragment_setprotection,
     "The (advisory) protection level of this fragment.  This will be one\n"
       "the pygetdata.PROTECT_* symbols.  The protection level of this\n"
       "fragment can be changed by assigning to this attribute.  See\n"
       "gd_protection(3) and gd_alter_protection(3).",
+    NULL },
+  { "suffix", (getter)gdpy_fragment_getsuffix, (setter)gdpy_fragment_setsuffix,
+    "The suffix applied to all fields defined in this fragment and\n"
+      "subfragments.  See gd_fragment_affixes(3).",
     NULL },
   { NULL }
 };

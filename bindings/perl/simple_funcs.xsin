@@ -104,7 +104,7 @@ int malter_spec(DIRFILE *dirfile, const char *line, const char *parent,
     int recode=0)
 int metaflush(DIRFILE *dirfile)
 int move(DIRFILE *dirfile, const char *field_code, int new_fragment,
-    int move_data=0)
+    unsigned int flags=0)
 int rename(DIRFILE *dirfile, const char *old_code, const char *new_name,
     int move_data=0)
 int rewrite_fragment(DIRFILE *dirfile, int fragment)
@@ -121,3 +121,26 @@ int error_count(DIRFILE *dirfile)
 off64_t seek(DIRFILE *dirfile, const char* field_code, off64_t frame_num,
     off64_t sample_num, int flags=GD_SEEK_SET)
 off64_t tell(DIRFILE *dirfile, const char* field_code)
+int hide(DIRFILE *dirfile, const char *field_code)
+int hidden(DIRFILE *dirfile, const char *field_code)
+int unhide(DIRFILE *dirfile, const char *field_code)
+int sync(DIRFILE *dirfile, const char *field_code)
+int move_alias(DIRFILE *dirfile, const char *field_code, int new_fragment)
+int delete_alias(DIRFILE *dirfile, const char *field_code, unsigned int flags=0)
+const char *alias_target(DIRFILE *dirfile, const char *field_code)
+int add_alias(DIRFILE *dirfile, const char *field_code, const char *target,
+    int fragment_index=0)
+int madd_alias(DIRFILE *dirfile, const char *parent, const char *field_code,
+    const char *target)
+int add_window(DIRFILE *dirfile, const char *field_code, const char *in_field,
+    const char *check_field, gd_windop_t windop, gd_triplet_t threshold,
+    int fragment_index)
+int madd_window(DIRFILE *dirfile, const char *parent, const char *field_code,
+    const char *in_field, const char *check_field, gd_windop_t windop,
+    gd_triplet_t threshold)
+int alter_window(DIRFILE *dirfile, const char *field_code, const char *in_field,
+    const char *check_field, gd_windop_t windop, gd_triplet_t threshold)
+int include_affix(DIRFILE *dirfile, const char *file, int fragment_index,
+    const char *prefix, const char *suffix, unsigned long int flags)
+int alter_affixes(DIRFILE *dirfile, int index, const char *prefix,
+    const char *suffix)

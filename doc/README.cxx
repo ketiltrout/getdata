@@ -2,9 +2,81 @@ C++ BINDINGS FOR GETDATA
 ========================
 
 This README describes the C++ bindings for the GetData library.  These bindings
-consist of a several C++ classes in the `GetData' namespace.  Header files
-defining these classes are installed into the ${includedir}/getdata directory.
-The following classes are available:
+consist of a several C++ classes in the `GetData' namespace, plus a few
+associated named constants.  Header files defining these data types are
+installed into the ${includedir}/getdata directory.  The classes defined in
+the GetData namespace are: Dirfile, Entry, Fragment, plus an additional Entry
+subclass for each field type (i.e. RawEntry, LincomEntry, &c.)
+
+CONSTANTS
+=========
+
+Because the C++ headers include the C API header getdata.h, all named constants
+defined in the C API may also be used in the C++ API without change in meaning.
+
+In addition to the classes documented below, the C++ bindings define the
+following enumerated constants.  These are re-encapsulations of various C API
+named constants permitting better type safety in C++.  In all cases, the
+corresponding C API constant can be used in place of the C++ named constant,
+with an appropriate type-cast (so that, e.g., (GetData::DataType)GD_NULL can
+be used in place of GetData::Null).
+
+The GetData data types (defined in getdata/entry.h):
+
+  enum DataType {
+    Null      = GD_NULL,      Unknown    = GD_UNKNOWN,
+    UInt8     = GD_UINT8,     Int8       = GD_INT8,
+    UInt16    = GD_UINT16,    Int16      = GD_INT16,
+    UInt32    = GD_UINT32,    Int32      = GD_INT32,
+    UInt64    = GD_UINT64,    Int64      = GD_INT64,
+    Float32   = GD_FLOAT32,   Float64    = GD_FLOAT64,
+    Complex64 = GD_COMPLEX64, Complex128 = GD_COMPLEX128
+  };
+
+The GetData entry types (defined in getdata/entry.h):
+
+  enum EntryType {
+    NoEntryType       = GD_NO_ENTRY,
+    RawEntryType      = GD_RAW_ENTRY,
+    LincomEntryType   = GD_LINCOM_ENTRY,
+    LinterpEntryType  = GD_LINTERP_ENTRY,
+    BitEntryType      = GD_BIT_ENTRY,
+    MultiplyEntryType = GD_MULTIPLY_ENTRY,
+    PhaseEntryType    = GD_PHASE_ENTRY,
+    SBitEntryType     = GD_SBIT_ENTRY,
+    PolynomEntryType  = GD_POLYNOM_ENTRY,
+    ConstEntryType    = GD_CONST_ENTRY,
+    CarrayEntryType   = GD_CARRAY_ENTRY,
+    StringEntryType   = GD_STRING_ENTRY,
+    IndexEntryType    = GD_INDEX_ENTRY,
+    DivideEntryType   = GD_DIVIDE_ENTRY,
+    RecipEntryType    = GD_RECIP_ENTRY,
+    WindowEntryType   = GD_WINDOW_ENTRY
+  };
+
+The GetData window operations (defined in getdata/entry.h):
+
+  enum WindOpType {
+    WindOpEq = GD_WINDOP_EQ,
+    WindOpNe = GD_WINDOP_NE,
+    WindOpGe = GD_WINDOP_GE,
+    WindOpGt = GD_WINDOP_GT,
+    WindOpLe = GD_WINDOP_LE,
+    WindOpLt = GD_WINDOP_LT,
+    WindOpSet = GD_WINDOP_SET,
+    WindOpClr = GD_WINDOP_CLR
+  };
+
+The GetData encoding schemes (defined in getdata/fragment.h):
+
+  enum EncodingScheme {
+    AutoEncoding  = GD_AUTO_ENCODED, RawEncoding   = GD_UNENCODED,
+    TextEncoding  = GD_TEXT_ENCODED, SlimEncoding  = GD_SLIM_ENCODED,
+    GzipEncoding  = GD_GZIP_ENCODED, Bzip2Encoding = GD_BZIP2_ENCODED,
+    UnsupportedEncoding = GD_ENC_UNSUPPORTED
+  };
+
+
 
 DIRFILE CLASS
 =============
@@ -133,12 +205,17 @@ are available:
   retained.
 
 * int Dirfile::Add(const Entry &entry)
-* int Dirfile::AddSpec(const char *spec, int format_file = 0)
+* int Dirfile::AddAlias(const char* field_code, const char* target,
+    int fragment_index = 0)
+* int Dirfile::AddSpec(const char *spec, int fragment_index = 0)
+* const char** Dirfile::Aliases(const char* field_code)
+* const char* Dirfile::AliasTarget(const char* field_code)
 * int Dirfile::AlterSpec(const char *line, int recode = 0)
 * const gd_carray_t *Dirfile::Carrays(GetData::DataType type = Float64)
 * const size_t Dirfile::CarrayLen(const char *field_code)
 * const void *Dirfile::Constants(GetData::DataType type = Float64)
-* int Delete(const char *field_code, int flags = 0)
+* int Dirfile::Delete(const char *field_code, int flags = 0)
+* int Dirfile::DeleteAlias(const char* field_code, int flags = 0)
 * const char **Dirfile::FieldList()
 * const char **Dirfile::FieldListByType(GetData::EntryType type)
 * int Dirfile::Flush(const char *field_code = NULL)
@@ -151,8 +228,15 @@ are available:
     off_t first_sample, size_t num_frames, size_t num_samples,
     GetData::DataType type, void *data_out)
 * size_t Dirfile::GetString(const char *field_code, size_t len, char *data_out)
-* int Include(const char *file, int format_file, unsigned int flags)
+* int Dirfile::Hidden(const char* field_code)
+* int Dirfile::Hide(const char* field_code)
+* int Dirfile::Include(const char *file, int fragment_index, unsigned int flags)
+* int Dirfile::IncludeAffix(const char *file, int fragment_index = 0,
+    const char* prefix = NULL, const char* suffix = NULL,
+    unsigned long flags = 0)
 * int Dirfile::MAdd(const Entry &entry, const char *parent)
+* int Dirfile::MAddAlias(const char* parent, const char* name,
+    const char* target)
 * int Dirfile::MAddSpec(const char *spec, const char *parent)
 * int Dirfile::MAlterSpec(const char *line, const char *parent)
 * const gd_carray_t *Dirfile::MCarrays(GetData::DataType type = Float64)
@@ -161,8 +245,10 @@ are available:
 * const char **Dirfile::MFieldListByType(const char *parent,
     * GetData::EntryType type)
 * int Dirfile::MetaFlush()
+* int Dirfile::MoveAlias(const char* field_code, int new_fragment)
 * const char **Dirfile::MStrings(const char *parent)
 * const char **Dirfile::MVectorList(const char *parent)
+* int Dirfile::NAliases(const char* field_code)
 * DataType Dirfile::NativeType(const char *field_code)
 * unsigned int Dirfile::NFields()
 * unsigned int Dirfile::NFieldsByType(GetData::EntryType type)
@@ -185,28 +271,18 @@ are available:
 * off_t Dirfile::Seek(const char *field_code, off_t frame_num, off_t sample_num,
     int whence)
 * const char **Dirfile::Strings()
+* int Dirfile::Sync(const char* field_code = NULL)
 * off_t Dirfile::Tell(const char *field_code)
+* int Dirfile::UnHide(const char* field_code)
 * int Dirfile::Validate(const char *field_code)
 * const char **Dirfile::VectorList()
 
   These methods call the corresponding function from the C API on the C DIRFILE
-  object associated with the C++ object.  Arguments of type GetData::DataType
-  should be one of:
+  object associated with the C++ object.  For allowed values for arguments of
+  type GetData::DataType or GetData::EntryType, see the CONSTANTS section above.
 
-    Null, Unknown, UInt8, Int8, UInt16, Int16, UInt32, Int32, UInt64, Int64,
-    Float32, Float64, Complex64, Complex128
-
-  which are aliases for the gd_type_t values GD_NULL, GD_UNKNOWN, GD_UINT8, &c.
-  Arguments of type GetData::EntryType should be one of 
-
-    NoEntryType, BitEntryType, CarrayEntry, ConstEntryType, DivideEntryType,
-    IndexEntryType, LincomEntryType, LinterpEntryType, MultiplyEntryType,
-    PhaseEntryType, PolynomEntryType, RawEntryType, RecipEntryType,
-    SBitEntryType, StringEntryType
-
-  which are aliases for the gd_entype_t values GD_NO_ENTRY, GD_RAW_ENTRY, &c.
-  Note that the arguments to AddSpec are opposite of the corresponding function
-  in add_spec.
+  Note that the arguments to AddSpec are opposite to that of the corresponding
+  function add_spec(3) in the C API.
 
 
 FRAGMENT CLASS
@@ -229,21 +305,19 @@ be incorrect, and all pre-existing Fragment objects should be destroyed.
 * int Fragment::Index()
 
   These methods return the specified information on the associated fragment.
-  Variables of type EncodingScheme will be one of
-  
-    AutoEncoding, RawEncoding, TextEncoding, SlimEncoding, GzipEncoding,
-    Bzip2Encoding, UnsupportedEncoding
-
-  which are aliases for GD_AUTO_ENCODED, GD_UNENCODED, GD_TEXT_ENCODED, &c.
+  For allowed values for arguments of type EncodingScheme, see the CONSTANTS
+  section above.
 
 * int SetEncoding(EncodingScheme encoding, int recode = 0)
 * int SetEndianness(unsigned long byte_sex, int recode = 0)
 * int SetFrameOffset(off_t offset, int recode = 0)
+* int SetPrefix(const char *prefix)
 * int SetProtection(int protection_level)
+* int SetSuffix(const char *suffix)
 
   These methods set the specified information on the associated fragment by
   calling gd_alter_encoding(3), gd_alter_endianness(3), gd_alter_frameoffset(3),
-  or gd_protect(3) as appropriate.
+  gd_protect(3), or gd_alter_affixes(3) as appropriate.
 
 
 ENTRY CLASS
@@ -316,6 +390,9 @@ The following methods are available:
 * virtual DataType Entry::ConstType()
 * virtual size_t Entry::ArrayLen()
 * virtual const char *Entry::Table()
+* virtual const char *Entry::Check()
+* virtual WindOpType Entry::WindOp()
+* virtual gd_triplet_t Entry::Threshold()
 
   These methods will return the corresponding member of the gd_entry_t object.
   Only methods reasonable to be queried for the given field type will return
@@ -329,7 +406,7 @@ The following methods are available:
 * virtual double Entry::Coefficient(int index = 0)
 * virtual std::complex<double> Entry::CCoefficient(int index = 0)
 * virtual const char *Entry::Scalar(int index = 0)
-* virtual int Entry::ScalaIndexr(int index = 0)
+* virtual int Entry::ScalaIndex(int index = 0)
 
   These methods will return an element from the gd_entry_t members in_fields[],
   m[], or b[], indexed by the supplied parameter.  Attempts to access elements
@@ -356,7 +433,7 @@ Defined in getdata/rawentry.h
   This creates a new RAW entry object with default parameters.
 
 * RawEntry::RawEntry(const char *field_code, DataType data_type,
-    unsigned int spf, int format_file = 0)
+    unsigned int spf, int fragment_index = 0)
 
 * const char *RawEntry::FileName()
 
@@ -390,10 +467,10 @@ Defined in getdata/lincomentry.h
   This creates a new LINCOM entry object with default parameters.
 
 * LincomEntry::LincomEntry(const char *field_code, int n_fields,
-    const char **in_fields, double *m, double *b, int format_file = 0)
+    const char **in_fields, double *m, double *b, int fragment_index = 0)
 * LincomEntry::LincomEntry(const char *field_code, int n_fields,
     const char **in_fields, std::complex<double> *m, std::complex<double> *b,
-    int format_file = 0)
+    int fragment_index = 0)
 
 * virtual const char *LincomEntry::Input(int index = 0)
 * virtual int LincomEntry::ComplexScalars()
@@ -439,7 +516,7 @@ Defined in getdata/linterpentry.h
   This creates a new LINTERP entry object with default parameters.
 
 * LinterpEntry::LinterpEntry(const char *field_code, const char *in_field,
-    const char *table, int format_file = 0)
+    const char *table, int fragment_index = 0)
 
 * virtual const char *Entry::Input()
 * virtual const char *LinterpEntry::Table()
@@ -466,9 +543,9 @@ Defined in getdata/bitentry.h and getdata/sbitentry.h
   These creates a new BIT or SBIT entry object with default parameters.
 
 * BitEntry::BitEntry(const char *field_code, const char *in_field, int bitnum,
-    int numbits = 1, int format_file = 0)
+    int numbits = 1, int fragment_index = 0)
 * SBitEntry::SBitEntry(const char *field_code, const char *in_field, int bitnum,
-    int numbits = 1, int format_file = 0)
+    int numbits = 1, int fragment_index = 0)
 
 * virtual const char *Input(int __gd_unused index = 0)
 * virtual int FirstBit()
@@ -498,7 +575,7 @@ Defined in getdata/multiplyentry.h
   This creates a new MULTIPLY entry object with default parameters.
 
 * MultiplyEntry::MultiplyEntry(const char *field_code, const char *in_field1,
-    const char *in_field2, int format_file = 0)
+    const char *in_field2, int fragment_index = 0)
 
 * virtual const char *MultiplyEntry::Input(int index = 0)
 
@@ -521,7 +598,7 @@ Defined in getdata/phaseentry.h
   This creates a new PHASE entry object with default parameters.
 
 * PhaseEntry::PhaseEntry(const char *field_code, const char *in_field,
-    int shift, int format_file = 0)
+    int shift, int fragment_index = 0)
 
 * virtual const char *PhaseEntry::Input()
 * virtual long int PhaseEntry::Shift()
@@ -547,9 +624,9 @@ Defined in getdata/lincomentry.h
   This creates a new LINCOM entry object with default parameters.
 
 * PolynomEntry::PolynomEntry(const char *field_code, int poly_ord,
-    const char *in_field, double *a, int format_file = 0)
+    const char *in_field, double *a, int fragment_index = 0)
 * PolynomEntry::PolynomEntry(const char *field_code, int poly_ord,
-    const char *in_field, std::complex<double> *a int format_file = 0)
+    const char *in_field, std::complex<double> *a int fragment_index = 0)
 
 * virtual const char *PolynomEntry::Input(int index = 0)
 * virtual int PolynomEntry::ComplexScalars()
@@ -590,7 +667,7 @@ Defined in getdata/divideentry.h
   This creates a new DIVIDE entry object with default parameters.
 
 * DivideEntry::DivideEntry(const char *field_code, const char *in_field1,
-    const char *in_field2, int format_file = 0)
+    const char *in_field2, int fragment_index = 0)
 
 * virtual const char *DivideEntry::Input(int index = 0)
 
@@ -613,7 +690,7 @@ Defined in getdata/recipentry.h
   This creates a new RECIP entry object with default parameters.
 
 * RecipEntry::RecipEntry(const char *field_code, const char *in_field1,
-    const char *in_field2, int format_file = 0)
+    const char *in_field2, int fragment_index = 0)
 
 * virtual const char *RecipEntry::Input()
 * virtual int RecipEntry::ComplexScalars()
@@ -626,14 +703,46 @@ Defined in getdata/recipentry.h
   field parameter.
 
 * int RecipEntry::SetInput(const char *field)
-* virtual std::complex<double> CDividend()
-* int SetInput(const char* field)
-* int SetDividend(double coeff)
-* int SetDividend(const char* coeff)
-* int SetDividend(std::complex<double> coeff)
+* int RecipEntry::SetDividend(double coeff)
+* int RecipEntry::SetDividend(const char* coeff)
+* int RecipEntry::SetDividend(std::complex<double> coeff)
 
-  This function will change the specified input field with the given index,
-  which should be zero or one.
+  These functions will change the specified input field or the field dividend
+  to the the value or field code supplied.
+
+
+WindowEntry Class
+-------------------
+
+Defined in getdata/windowentry.h
+
+* WindowEntry::WindowEntry()
+  
+  This creates a new WINDOW entry object with default parameters.
+
+* WindowEntry::WindowEntry(const char *field_code, const char *in_field,
+    const char *check_field, int fragment_index = 0)
+
+* virtual const char *WindowEntry::Input()
+* virtual const char *WindowEntry::Check()
+* virtual const char *WindowEntry::Scalar()
+* virtual int WindowEntry::ScalarIndex()
+* virtual WindOpType WindowEntry::WindOp()
+* virtual gd_triplet_t WindowEntry::Threshold()
+
+  These methods, re-implemented from the Entry class, return the corresponding
+  field parameter.
+
+* int WindowEntry::SetInput(const char *field)
+* int WindowEntry::SetCheck(const char *field)
+* int WindowEntry::SetWindOp(WindOpType coeff)
+* int WindowEntry::SetThreshold(gd_triplet_t threshold)
+* int WindowEntry::SetThreshold(const char *threhsold)
+
+  These functions will change the specified input field, check field, or the
+  window operation or threshold to the the value or field code supplied.  For
+  allowed values of variables of type WindOpType, see the CONSTANTS section
+  above.
 
 
 CarraytEntry Class
@@ -646,7 +755,7 @@ Defined in getdata/constentry.h
   This creates a new CONST entry object with default parameters.
 
 * CarraytEntry::CarraytEntry(const char *field_code, DataType type,
-    int format_file = 0)
+    int fragment_index = 0)
 
 * virtual DataType CarraytEntry::ConstType()
 * virtual size_t Carray::ArrayLen()
@@ -671,7 +780,7 @@ Defined in getdata/constentry.h
   This creates a new CONST entry object with default parameters.
 
 * ConstEntry::ConstEntry(const char *field_code, DataType type,
-    int format_file = 0)
+    int fragment_index = 0)
 
 * virtual DataType ConstEntry::ConstType()
 
@@ -693,7 +802,7 @@ Defined in getdata/stringentry.h
   
   This creates a new STRING entry object with default parameters.
 
-* StringEntry::StringEntry(const char *field_code, int format_file = 0)
+* StringEntry::StringEntry(const char *field_code, int fragment_index = 0)
 
 
 IndexEntry Class

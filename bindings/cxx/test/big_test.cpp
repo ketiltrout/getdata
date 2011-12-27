@@ -60,6 +60,13 @@ using namespace GetData;
 #define CHECK_NONNULL(t,v) \
   if ((v) == NULL) { ne++; cerr << "p[" << t << "] = " << (v) << endl; }
 
+#define CHECK_NULL(t,v) \
+  if ((v) != NULL) { ne++; cerr << "p[" << t << "] = " << (v) << endl; }
+
+#define CHECK_NULL2(t,n,v) \
+  if ((v) != NULL) { \
+    ne++; cerr << "n[" << t << ", " << n << "] = " << (v) << endl; }
+
 #define CHECK_INT(t,v,g) \
   if ((v) != (g)) { ne++; cerr << "n[" << t << "] = " << (v) << endl; }
 #define CHECK_INT2(t,n,v,g) \
@@ -104,11 +111,12 @@ using namespace GetData;
 
 int main(void)
 {
-  const char* filedir = __TEST__ "dirfile";
-  const char* format = __TEST__ "dirfile/format";
-  const char* form2 = __TEST__ "dirfile/form2";
-  const char* new1 = __TEST__ "dirfile/new1";
-  const char* data = __TEST__ "dirfile/data";
+  const char* filedir = "dirfile";
+  const char* format = "dirfile/format";
+  const char* format1 = "dirfile/format1";
+  const char* form2 = "dirfile/form2";
+  const char* new1 = "dirfile/new1";
+  const char* data = "dirfile/data";
   const char* format_data =
     "/ENDIAN little\n"
     "data RAW INT8 8\n"
@@ -126,9 +134,11 @@ int main(void)
     "div DIVIDE mult bit\n"
     "recip RECIP div 6.5;4.3\n"
     "phase PHASE data 11\n"
+    "window WINDOW linterp mult LT 4.1\n"
+    "/ALIAS alias data\n"
     "string STRING \"Zaphod Beeblebrox\"\n";
   const char* form2_data = "const2 CONST INT8 -19\n";
-  const int nfields = 14;
+  const int nfields = 16;
   unsigned char c[8];
   unsigned char data_data[80];
   signed char sc;
@@ -155,13 +165,15 @@ int main(void)
   ConstEntry cent, *cep;
   CarrayEntry aent, *aep;
   StringEntry gent;
+  WindowEntry went, *wep;
   Fragment *frag;
+  gd_triplet_t thresh;
 
-  char* fields[nfields + 7] = {(char*)"INDEX", (char*)"bit", (char*)"carray",
-    (char*)"const", (char*)"data", (char*)"div", (char*)"lincom",
-    (char*)"linterp", (char*)"mult", (char*)"phase", (char*)"polynom",
-    (char*)"recip", (char*)"sbit", (char*)"string", NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL};
+  char* fields[nfields + 7] = {(char*)"INDEX", (char*)"alias", (char*)"bit",
+    (char*)"carray", (char*)"const", (char*)"data", (char*)"div",
+    (char*)"lincom", (char*)"linterp", (char*)"mult", (char*)"phase",
+    (char*)"polynom", (char*)"recip", (char*)"sbit", (char*)"string",
+    (char*)"window", NULL, NULL, NULL, NULL, NULL, NULL, NULL};
   char *strings[3];
 
   // Write the test dirfile
@@ -623,30 +635,32 @@ int main(void)
   // 44: Dirfile::NVectors check
   n = d->NVectors();
   CHECK_OK(44);
-  CHECK_INT(44,n,21);
+  CHECK_INT(44,n,23);
 
   // 45: Dirfile::VectorList check
   fields[0] = (char*)"INDEX";
-  fields[1] = (char*)"bit";
-  fields[2] = (char*)"data";
-  fields[3] = (char*)"div";
-  fields[4] = (char*)"lincom";
-  fields[5] = (char*)"linterp";
-  fields[6] = (char*)"mult";
-  fields[7] = (char*)"new1";
-  fields[8] = (char*)"new10";
-  fields[9] = (char*)"new2";
-  fields[10] = (char*)"new3";
-  fields[11] = (char*)"new4";
-  fields[12] = (char*)"new5";
-  fields[13] = (char*)"new6";
-  fields[14] = (char*)"new7";
-  fields[15] = (char*)"new8";
-  fields[16] = (char*)"new9";
-  fields[17] = (char*)"phase";
-  fields[18] = (char*)"polynom";
-  fields[19] = (char*)"recip";
-  fields[20] = (char*)"sbit";
+  fields[1] = (char*)"alias";
+  fields[2] = (char*)"bit";
+  fields[3] = (char*)"data";
+  fields[4] = (char*)"div";
+  fields[5] = (char*)"lincom";
+  fields[6] = (char*)"linterp";
+  fields[7] = (char*)"mult";
+  fields[8] = (char*)"new1";
+  fields[9] = (char*)"new10";
+  fields[10] = (char*)"new2";
+  fields[11] = (char*)"new3";
+  fields[12] = (char*)"new4";
+  fields[13] = (char*)"new5";
+  fields[14] = (char*)"new6";
+  fields[15] = (char*)"new7";
+  fields[16] = (char*)"new8";
+  fields[17] = (char*)"new9";
+  fields[18] = (char*)"phase";
+  fields[19] = (char*)"polynom";
+  fields[20] = (char*)"recip";
+  fields[21] = (char*)"sbit";
+  fields[22] = (char*)"window";
   list = d->VectorList();
   CHECK_OK(45);
   CHECK_STRING_ARRAY(45,n,list[i],fields[i]);
@@ -956,7 +970,7 @@ int main(void)
   // 80: Dirfile::Name check
   str = d->Name();
   CHECK_OK(80);
-  CHECK_STRING(80,str,__TEST__ "dirfile");
+  CHECK_STRING(80,str,"dirfile");
 
   // 81: Fragment::Parent check
   frag = d->Fragment(1);
@@ -1222,7 +1236,7 @@ int main(void)
   // 157: Dirfile::Standards check
   n = d->Standards();
   CHECK_OK2(157,1);
-  CHECK_INT(157,n,8);
+  CHECK_INT(157,n,9);
   d->Standards(0);
   CHECK_ERROR2(157,2,GD_E_BAD_VERSION);
 
@@ -1364,6 +1378,185 @@ int main(void)
   CHECK_OK(204);
   CHECK_INT(204,n,288);
 
+  // 205: gd_hide check
+  n = d->Hide("data");
+  CHECK_OK(205);
+
+  // 206: gd_hidden check
+  n = d->Hidden("data");
+  CHECK_OK2(206, 1);
+  CHECK_INT2(206, 1, n, 1);
+
+  n = d->Hidden("lincom");
+  CHECK_OK2(206, 2);
+  CHECK_INT2(206, 2, n, 0);
+
+  // 207: gd_unhide check
+  n = d->UnHide("data");
+  CHECK_OK2(206, 1);
+  n = d->Hidden("data");
+  CHECK_OK2(206, 2);
+  CHECK_INT2(206, 2, n, 0);
+
+  // 208: gd_sync check
+  d->Sync("data");
+  CHECK_OK(208);
+
+  // 209: gd_flush check
+  d->Flush("data");
+  CHECK_OK(209);
+
+  // 210: gd_metaflush check
+  d->MetaFlush();
+  CHECK_OK(210);
+
+  // 211: gd_entry (WINDOW) check
+  ent = d->Entry("window");
+  CHECK_OK(211);
+  CHECK_INT2(211, 1, ent->Type(), WindowEntryType);
+  CHECK_INT2(211, 2, ent->FragmentIndex(), 0);
+  CHECK_INT2(211, 3, ent->WindOp(), WindOpLt);
+  CHECK_STRING2(211, 4, ent->Input(), "linterp");
+  CHECK_STRING2(211, 5, ent->Check(), "mult");
+  CHECK_DOUBLE2(211, 6, ent->Threshold().r, 4.1);
+  delete ent;
+
+  // 212: Dirfile::Add / WindowEntry check
+  went.SetName("new18");
+  went.SetFragmentIndex(0);
+  went.SetInput("in1");
+  went.SetCheck("in2");
+  went.SetWindOp(WindOpNe);
+  thresh.i = 32;
+  went.SetThreshold(thresh);
+  d->Add(went);
+  CHECK_OK2(212, 1);
+
+  ent = d->Entry("new18");
+  CHECK_OK2(212, 2);
+  CHECK_INT2(212, 1, ent->Type(), WindowEntryType);
+  CHECK_INT2(212, 2, ent->FragmentIndex(), 0);
+  CHECK_INT2(212, 3, ent->WindOp(), WindOpNe);
+  CHECK_STRING2(212, 4, ent->Input(), "in1");
+  CHECK_STRING2(212, 5, ent->Check(), "in2");
+  CHECK_INT2(212, 6, ent->Threshold().i, 32);
+  delete ent;
+
+  // 214: gd_madd_window_i check
+  went.Dissociate();
+  went.SetName("mnew18");
+  went.SetInput("in2");
+  went.SetCheck("in3");
+  went.SetWindOp(WindOpSet);
+  thresh.u = 128;
+  went.SetThreshold(thresh);
+  d->MAdd(went, "data");
+  CHECK_OK2(214, 1);
+
+  ent = d->Entry("data/mnew18");
+  CHECK_OK2(214, 2);
+  CHECK_INT2(214, 1, ent->Type(), WindowEntryType);
+  CHECK_INT2(214, 2, ent->FragmentIndex(), 0);
+  CHECK_INT2(214, 3, ent->WindOp(), WindOpSet);
+  CHECK_STRING2(214, 4, ent->Input(), "in2");
+  CHECK_STRING2(214, 5, ent->Check(), "in3");
+  CHECK_INT2(214, 6, ent->Threshold().u, 128);
+  delete ent;
+
+  // 217: gd_alter_window_r check
+  wep = reinterpret_cast<WindowEntry*>(d->Entry("new18"));
+  wep->SetInput("in3");
+  wep->SetCheck("in4");
+  wep->SetWindOp(WindOpGe);
+  thresh.r = 32e3;
+  wep->SetThreshold(thresh);
+  CHECK_OK2(217, 1);
+  delete wep;
+
+  ent = d->Entry("new18");
+  CHECK_OK2(217, 2);
+  CHECK_INT2(217, 1, ent->Type(), WindowEntryType);
+  CHECK_INT2(217, 2, ent->FragmentIndex(), 0);
+  CHECK_INT2(217, 3, ent->WindOp(), WindOpGe);
+  CHECK_STRING2(217, 4, ent->Input(), "in3");
+  CHECK_STRING2(217, 5, ent->Check(), "in4");
+  CHECK_DOUBLE2(217, 6, ent->Threshold().r, 32e3);
+  delete ent;
+
+  // 218: gd_alias_target check
+  str = d->AliasTarget("alias");
+  CHECK_OK(218);
+  CHECK_STRING(218, str, "data");
+
+  // 219: gd_add_alias check
+  d->AddAlias("new20", "data", 0);
+  CHECK_OK2(219, 1);
+
+  str = d->AliasTarget("new20");
+  CHECK_OK2(219, 2);
+  CHECK_STRING(219, str, "data");
+
+  // 220: gd_madd_alias check
+  d->MAddAlias("data", "mnew20", "data");
+  CHECK_OK2(220, 1);
+
+  str = d->AliasTarget("data/mnew20");
+  CHECK_OK2(220, 2);
+  CHECK_STRING(220, str, "data");
+
+  // 221: gd_naliases check
+  n = d->NAliases("data");
+  CHECK_OK(221);
+  CHECK_INT(221, n, 4);
+
+  // 222: gd_aliases check
+  fields[1] = (char*)"data";
+  fields[2] = (char*)"alias";
+  fields[3] = (char*)"data/mnew20";
+  fields[4] = (char*)"new20";
+  list = d->Aliases("data");
+  CHECK_OK(222);
+  CHECK_STRING_ARRAY(222,i,list[i],fields[i]);
+
+  // 223: gd_include_affix check
+  d->IncludeAffix("format1", 0, "A", "Z", GD_CREAT | GD_EXCL);
+  CHECK_OK(223);
+
+  // 224: gd_move_alias check
+  d->MoveAlias("new20", 1);
+  CHECK_OK2(224, 1);
+
+  n = d->FragmentIndex("Anew20Z");
+  CHECK_OK2(224, 2);
+  CHECK_INT(224, n, 1);
+
+  // 225: gd_delete_alias check
+  d->DeleteAlias("Anew20Z", 0);
+  CHECK_OK2(225, 1);
+
+  n = d->FragmentIndex("Anew20Z");
+  CHECK_ERROR2(225, 2, GD_E_BAD_CODE);
+  CHECK_INT(225, n, -1);
+
+  // 226: gd_fragment_affixes check
+  frag = d->Fragment(1);
+
+  CHECK_STRING2(226, 1, frag->Prefix(), "A");
+  CHECK_STRING2(226, 2, frag->Suffix(), "Z");
+
+  // 227: gd_alter_affixes check
+  frag->SetPrefix("B");
+  CHECK_OK2(227, 1);
+  frag->SetSuffix("C");
+  CHECK_OK2(227, 2);
+
+  CHECK_STRING2(227, 3, frag->Prefix(), "B");
+  CHECK_STRING2(227, 3, frag->Suffix(), "C");
+  delete frag;
+
+
+
+
 
 
 
@@ -1373,6 +1566,7 @@ int main(void)
   unlink(data);
   unlink(new1);
   unlink(format);
+  unlink(format1);
   unlink(form2);
   rmdir(filedir);
 

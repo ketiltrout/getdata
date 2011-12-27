@@ -572,7 +572,7 @@ int gd_rename(DIRFILE *D, const char *old_code, const char *new_name,
   gd_entry_t *E = NULL;
   int ret, i, nl = 0, old_dot = 0;
   size_t len;
-  unsigned dot_ind;
+  unsigned dot_ind = 0;
   char **code_list = NULL;
 
   dtrace("%p, \"%s\", \"%s\", 0x%X", D, old_code, new_name, flags);
