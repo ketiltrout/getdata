@@ -32,8 +32,8 @@ static int framework_initialised = 0;
 #endif
 
 /* encoding schemas */
-#define GD_EF_NULL_SET NULL, NULL, NULL, NULL, NULL, NULL, NULL, \
-  &_GD_GenericMove, &_GD_GenericUnlink
+#define GD_EF_NULL_SET &_GD_GenericName, NULL, NULL, NULL, NULL, NULL, \
+  NULL, NULL, &_GD_GenericMove, &_GD_GenericUnlink
 #ifdef USE_MODULES
 #define GD_EXT_ENCODING(sc,ex,ec,af,ff) \
 { sc,ex,ec,af,ff,GD_EF_PROVIDES,GD_EF_NULL_SET }
@@ -42,8 +42,9 @@ static int framework_initialised = 0;
 #endif
 struct encoding_t _gd_ef[GD_N_SUBENCODINGS] = {
   { GD_UNENCODED, "", GD_EF_ECOR, NULL, "none", 0,
-    &_GD_RawOpen, &_GD_RawClose, &_GD_RawSeek, &_GD_RawRead, &_GD_RawSize,
-    &_GD_RawWrite, &_GD_RawSync, &_GD_GenericMove, &_GD_GenericUnlink
+    &_GD_GenericName, &_GD_RawOpen, &_GD_RawClose, &_GD_RawSeek, &_GD_RawRead,
+    &_GD_RawSize, &_GD_RawWrite, &_GD_RawSync, &_GD_GenericMove,
+    &_GD_GenericUnlink
   },
 
 #ifdef USE_GZIP
@@ -51,8 +52,9 @@ struct encoding_t _gd_ef[GD_N_SUBENCODINGS] = {
   GD_EF_OPEN | GD_EF_CLOSE | GD_EF_SEEK | GD_EF_READ | GD_EF_SIZE | \
   GD_EF_WRITE | GD_EF_SYNC
 #define GD_INT_FUNCS \
-  &_GD_GzipOpen, &_GD_GzipClose, &_GD_GzipSeek, &_GD_GzipRead, &_GD_GzipSize, \
-  &_GD_GzipWrite, &_GD_GzipSync, &_GD_GenericMove, &_GD_GenericUnlink
+  &_GD_GenericName, &_GD_GzipOpen, &_GD_GzipClose, &_GD_GzipSeek, \
+  &_GD_GzipRead, &_GD_GzipSize, &_GD_GzipWrite, &_GD_GzipSync, \
+  &_GD_GenericMove, &_GD_GenericUnlink
 #else
 #define GD_EF_PROVIDES 0
 #define GD_INT_FUNCS GD_EF_NULL_SET
@@ -67,9 +69,9 @@ struct encoding_t _gd_ef[GD_N_SUBENCODINGS] = {
 #define GD_EF_PROVIDES \
     GD_EF_OPEN | GD_EF_CLOSE | GD_EF_SEEK | GD_EF_READ | GD_EF_SIZE
 #define GD_INT_FUNCS \
-  &_GD_Bzip2Open, &_GD_Bzip2Close, &_GD_Bzip2Seek, &_GD_Bzip2Read, \
-  &_GD_Bzip2Size, NULL /* WRITE */, NULL /* SYNC */, &_GD_GenericMove, \
-  &_GD_GenericUnlink
+  &_GD_GenericName, &_GD_Bzip2Open, &_GD_Bzip2Close, &_GD_Bzip2Seek, \
+  &_GD_Bzip2Read, &_GD_Bzip2Size, NULL /* WRITE */, NULL /* SYNC */, \
+  &_GD_GenericMove, &_GD_GenericUnlink
 #else
 #define GD_INT_FUNCS GD_EF_NULL_SET
 #define GD_EF_PROVIDES 0
@@ -83,8 +85,9 @@ struct encoding_t _gd_ef[GD_N_SUBENCODINGS] = {
 #define GD_EF_PROVIDES \
   GD_EF_OPEN | GD_EF_CLOSE | GD_EF_SEEK | GD_EF_READ | GD_EF_SIZE
 #define GD_INT_FUNCS \
-  &_GD_SlimOpen, &_GD_SlimClose, &_GD_SlimSeek, &_GD_SlimRead, &_GD_SlimSize, \
-  NULL /* WRITE */, NULL /* SYNC */, &_GD_GenericMove, &_GD_GenericUnlink
+  &_GD_GenericName, &_GD_SlimOpen, &_GD_SlimClose, &_GD_SlimSeek, \
+  &_GD_SlimRead, &_GD_SlimSize, NULL /* WRITE */, NULL /* SYNC */, \
+  &_GD_GenericMove, &_GD_GenericUnlink
 #else
 #define GD_INT_FUNCS GD_EF_NULL_SET
 #define GD_EF_PROVIDES 0
@@ -98,8 +101,9 @@ struct encoding_t _gd_ef[GD_N_SUBENCODINGS] = {
 #define GD_EF_PROVIDES \
     GD_EF_OPEN | GD_EF_CLOSE | GD_EF_SEEK | GD_EF_READ | GD_EF_SIZE
 #define GD_INT_FUNCS \
-  &_GD_LzmaOpen, &_GD_LzmaClose, &_GD_LzmaSeek, &_GD_LzmaRead, &_GD_LzmaSize, \
-  NULL /* WRITE */, NULL /* SYNC */, &_GD_GenericMove, &_GD_GenericUnlink
+  &_GD_GenericName, &_GD_LzmaOpen, &_GD_LzmaClose, &_GD_LzmaSeek, \
+  &_GD_LzmaRead, &_GD_LzmaSize, NULL /* WRITE */, NULL /* SYNC */, \
+  &_GD_GenericMove, &_GD_GenericUnlink
 #else
 #define GD_INT_FUNCS GD_EF_NULL_SET
 #define GD_EF_PROVIDES 0
@@ -111,19 +115,36 @@ struct encoding_t _gd_ef[GD_N_SUBENCODINGS] = {
 
 
   { GD_TEXT_ENCODED, ".txt", 0, NULL, "text", 0,
-    &_GD_AsciiOpen, &_GD_AsciiClose, &_GD_AsciiSeek, &_GD_AsciiRead,
-    &_GD_AsciiSize, &_GD_AsciiWrite, &_GD_AsciiSync, &_GD_GenericMove,
-    &_GD_GenericUnlink
+    &_GD_GenericName, &_GD_AsciiOpen, &_GD_AsciiClose, &_GD_AsciiSeek,
+    &_GD_AsciiRead, &_GD_AsciiSize, &_GD_AsciiWrite, &_GD_AsciiSync,
+    &_GD_GenericMove, &_GD_GenericUnlink
   },
 
   { GD_SIE_ENCODED, ".sie", GD_EF_ECOR | GD_EF_SWAP, NULL, "sie", 0,
-    &_GD_SampIndOpen, &_GD_SampIndClose, &_GD_SampIndSeek, &_GD_SampIndRead,
-    &_GD_SampIndSize, &_GD_SampIndWrite, &_GD_SampIndSync, &_GD_GenericMove,
-    &_GD_GenericUnlink
+    &_GD_GenericName, &_GD_SampIndOpen, &_GD_SampIndClose, &_GD_SampIndSeek,
+    &_GD_SampIndRead, &_GD_SampIndSize, &_GD_SampIndWrite, &_GD_SampIndSync,
+    &_GD_GenericMove, &_GD_GenericUnlink
   },
 
+
+#ifdef USE_ZZIP
+#define GD_EF_PROVIDES \
+    GD_EF_NAME | GD_EF_OPEN | GD_EF_CLOSE | GD_EF_SEEK | GD_EF_READ | GD_EF_SIZE
+#define GD_INT_FUNCS \
+  &_GD_ZzipName, &_GD_ZzipOpen, &_GD_ZzipClose, &_GD_ZzipSeek, &_GD_ZzipRead, \
+  &_GD_ZzipSize, NULL /* WRITE */, NULL /* SYNC */, &_GD_GenericMove, \
+  &_GD_GenericUnlink
+#else
+#define GD_INT_FUNCS GD_EF_NULL_SET
+#define GD_EF_PROVIDES 0
+#endif
+  GD_EXT_ENCODING(GD_ZZIP_ENCODED, NULL, GD_EF_ECOR, "Zzip", "zzip"),
+#undef GD_INT_FUNCS
+#undef GD_EF_PROVIDES
+
+
   { GD_ENC_UNSUPPORTED, "", 0, "", "", 0,
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
+    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
   },
 };
 
@@ -218,6 +239,9 @@ int _GD_MissingFramework(int encoding, unsigned int funcs)
     free(library);
 
     /* Try to resolve the symbols */
+    if (_gd_ef[encoding].provides & GD_EF_NAME)
+      _gd_ef[encoding].name = (gd_ef_name_t)_GD_ResolveSymbol(lib,
+          _gd_ef + encoding, "Name");
     if (_gd_ef[encoding].provides & GD_EF_OPEN)
       _gd_ef[encoding].open = (gd_ef_open_t)_GD_ResolveSymbol(lib,
           _gd_ef + encoding, "Open");
@@ -252,6 +276,7 @@ int _GD_MissingFramework(int encoding, unsigned int funcs)
 #endif
 
   ret =
+    (funcs & GD_EF_NAME    && _gd_ef[encoding].name    == NULL) ||
     (funcs & GD_EF_OPEN    && _gd_ef[encoding].open    == NULL) ||
     (funcs & GD_EF_CLOSE   && _gd_ef[encoding].close   == NULL) ||
     (funcs & GD_EF_SEEK    && _gd_ef[encoding].seek    == NULL) ||
@@ -435,7 +460,7 @@ int _GD_InitRawIO(DIRFILE *D, gd_entry_t *E, const char *filebase,
   mode &= ~GD_FILE_TOUCH;
 
   if (!(mode & GD_FILE_TEMP)) {
-    if (!_GD_Supports(D, E, GD_EF_OPEN | funcs)) {
+    if (!_GD_Supports(D, E, GD_EF_NAME | GD_EF_OPEN | funcs)) {
       dreturn("%i", 1);
       return 1;
     }
@@ -476,8 +501,7 @@ int _GD_InitRawIO(DIRFILE *D, gd_entry_t *E, const char *filebase,
 
   if (mode & GD_FILE_TEMP) {
     /* create temporary file in file[1] */
-    if (_GD_SetEncodedName(D, E->e->u.raw.file + 1, filebase, 1))
-    {
+    if ((*enc->name)(D, E->e->u.raw.file + 1, filebase, 1, 0)) {
       ; /* error already set */
     } else if ((temp_fd = _GD_MakeTempFile(D, D->fragment[fragment].dirfd,
             E->e->u.raw.file[1].name)) < 0)
@@ -500,7 +524,7 @@ int _GD_InitRawIO(DIRFILE *D, gd_entry_t *E, const char *filebase,
   if (oop_write) {
     /* an out-of-place write requires us to open a temporary file and pass
      * in its fd */
-    if (_GD_SetEncodedName(D, E->e->u.raw.file + 1, filebase, 1)) {
+    if ((*enc->name)(D, E->e->u.raw.file + 1, filebase, 1, 0)) {
       dreturn("%i", 1);
       return 1;
     } else if ((temp_fd = _GD_MakeTempFile(D,
@@ -521,7 +545,7 @@ int _GD_InitRawIO(DIRFILE *D, gd_entry_t *E, const char *filebase,
 
   /* open a regular file, if necessary */
   if (E->e->u.raw.file[0].idata < 0) {
-    if (_GD_SetEncodedName(D, E->e->u.raw.file, filebase, 0)) {
+    if ((*enc->name)(D, E->e->u.raw.file, filebase, 0, 0)) {
       dreturn("%i", 1);
       return 1;
     } else if ((*enc->open)(D->fragment[E->fragment_index].dirfd,
@@ -545,9 +569,8 @@ int _GD_InitRawIO(DIRFILE *D, gd_entry_t *E, const char *filebase,
 }
 
 /* Figure out the encoding scheme */
-static unsigned long _GD_ResolveEncoding(const DIRFILE *D gd_unused_d,
-    const char* name, unsigned long scheme, int dirfd,
-    struct _gd_raw_file *file)
+static unsigned long _GD_ResolveEncoding(DIRFILE *D, const char* name,
+    unsigned long scheme, int dirfd, struct _gd_raw_file *file)
 {
   char *candidate;
   int i;
@@ -558,20 +581,32 @@ static unsigned long _GD_ResolveEncoding(const DIRFILE *D gd_unused_d,
 
   for (i = 0; _gd_ef[i].scheme != GD_ENC_UNSUPPORTED; i++) {
     if (scheme == GD_AUTO_ENCODED || scheme == _gd_ef[i].scheme) {
-      candidate = (char *)malloc(len + strlen(_gd_ef[i].ext) + 1);
-      if (candidate) {
-        strcat(strcpy(candidate, name), _gd_ef[i].ext);
+      if (_gd_ef[i].ext) {
+        candidate = (char *)malloc(len + strlen(_gd_ef[i].ext) + 1);
+        if (!candidate)
+          continue;
 
-        if (gd_StatAt(D, dirfd, candidate, &statbuf, 0) == 0)
-          if (S_ISREG(statbuf.st_mode)) {
-            if (file != NULL)
-              file->subenc = i;
-            free(candidate);
-            dreturn("%08lx", _gd_ef[i].scheme);
-            return _gd_ef[i].scheme;
-          }
-        free(candidate);
+        strcat(strcpy(candidate, name), _gd_ef[i].ext);
+      } else {
+        if (_GD_MissingFramework(i, GD_EF_NAME))
+          continue;
+
+        if ((*_gd_ef[i].name)(D, file, name, 0, 1))
+          continue;
+
+        candidate = file->name;
+        file->name = NULL;
       }
+
+      if (gd_StatAt(D, dirfd, candidate, &statbuf, 0) == 0)
+        if (S_ISREG(statbuf.st_mode)) {
+          if (file != NULL)
+            file->subenc = i;
+          free(candidate);
+          dreturn("%08lx", _gd_ef[i].scheme);
+          return _gd_ef[i].scheme;
+        }
+      free(candidate);
     }
   }
 
@@ -623,10 +658,10 @@ int _GD_Supports(DIRFILE* D, gd_entry_t* E, unsigned int funcs)
   return 1;
 }
 
-int _GD_SetEncodedName(DIRFILE* D, struct _gd_raw_file* file, const char* base,
-    int temp)
+int _GD_GenericName(DIRFILE* D, struct _gd_raw_file* file, const char* base,
+    int temp, int resolv __gd_unused)
 {
-  dtrace("%p, %p, \"%s\", %i", D, file, base, temp);
+  dtrace("%p, %p, \"%s\", %i, <unused>", D, file, base, temp);
 
   if (file->name == NULL) {
     file->D = D;
@@ -706,8 +741,8 @@ static void _GD_RecodeFragment(DIRFILE* D, unsigned long encoding, int fragment,
         /* discard the old file */
         _GD_FiniRawIO(D, raw_entry[i], fragment, GD_FINIRAW_DISCARD);
 
-        if (_GD_SetEncodedName(D, raw_entry[i]->e->u.raw.file,
-              raw_entry[i]->e->u.raw.filebase, 0))
+        if ((*_gd_ef[temp.subenc].name)(D, raw_entry[i]->e->u.raw.file,
+              raw_entry[i]->e->u.raw.filebase, 0, 0))
         {
           raw_entry[i]->e->u.raw.file[0].name = temp.name;
           raw_entry[i]->e->u.raw.file[0].subenc = temp.subenc;

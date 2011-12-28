@@ -22,48 +22,67 @@
 
 int main(void)
 {
+#ifndef TEST_ZZIP
+  return 77;
+#else
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *format1 = "dirfile/format1";
-  const char *format_data = "B CONST UINT8 1\nINCLUDE format1 A Z\n";
-  const char *format1_data = "data RAW UINT8 11\n";
-  char *prefix;
-  char *suffix;
-  int fd, ret, e1, e2, e3, r = 0;
+  const char *data = "dirfile/data";
+  const char *rawzip = "dirfile/raw.zip";
+  const char *format_data = "data RAW UINT16 8\n";
+  uint16_t c[8];
+  char command[4096];
+  uint16_t data_data[256];
+  int fd, n, error, i, r = 0;
   DIRFILE *D;
 
+  memset(c, 0, 8);
   rmdirfile();
   mkdir(filedir, 0777);
+
+  for (fd = 0; fd < 256; ++fd)
+    data_data[fd] = (unsigned char)fd;
 
   fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  fd = open(format1, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format1_data, strlen(format1_data));
+  fd = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
+  write(fd, data_data, 256 * sizeof(uint16_t));
   close(fd);
 
+  /* compress */
+  chdir(filedir);
+  snprintf(command, 4096, "%s raw data > /dev/null", ZIP);
+  if (gd_system(command))
+    return 1;
+  chdir("..");
+  unlink(data);
+
+#ifdef USE_ZZIP
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  ret = gd_alter_affixes(D, 1, "C", NULL);
-  e1 = gd_error(D);
-  gd_fragment_affixes(D, 1, &prefix, &suffix);
-  e2 = gd_error(D);
-  gd_spf(D, "CdataZ");
-  e3 = gd_error(D);
+#else
+  D = gd_open(filedir, GD_RDONLY);
+#endif
+  n = gd_getdata(D, "data", 5, 0, 1, 0, GD_UINT16, c);
+  error = gd_error(D);
+
   gd_close(D);
 
-  unlink(format1);
+  unlink(rawzip);
   unlink(format);
   rmdir(filedir);
 
-  CHECKS(prefix,"C");
-  CHECKS(suffix,"Z");
-  CHECKI(ret,0);
-  CHECKI(e1,0);
-  CHECKI(e2,0);
-  CHECKI(e3,0);
-  free(prefix);
-  free(suffix);
+#ifdef USE_ZZIP
+  CHECKI(error, 0);
+  CHECKI(n, 8);
+  for (i = 0; i < 8; ++i)
+    CHECKIi(i,c[i], 40 + i);
+#else
+  CHECKI(error, GD_E_UNSUPPORTED);
+  CHECKI(n,0);
+#endif
 
   return r;
+#endif
 }

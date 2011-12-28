@@ -82,8 +82,8 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned long encoding,
   }
 
   /* input encoding check */
-  if (!_GD_Supports(D, E, GD_EF_OPEN | GD_EF_CLOSE | GD_EF_SEEK | GD_EF_READ
-        | GD_EF_UNLINK))
+  if (!_GD_Supports(D, E, GD_EF_NAME | GD_EF_OPEN | GD_EF_CLOSE | GD_EF_SEEK |
+        GD_EF_READ | GD_EF_UNLINK))
   {
     free(new_filebase);
     dreturn("%i", -1);
@@ -243,7 +243,9 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned long encoding,
       E->e->u.raw.file[0].name = NULL;
       E->e->u.raw.file[0].subenc = subencoding;
 
-      if (_GD_SetEncodedName(D, E->e->u.raw.file, new_filebase, 0)) {
+      if ((*_gd_ef[E->e->u.raw.file[0].subenc].name)(D, E->e->u.raw.file,
+            new_filebase, 0, 0))
+      {
         E->e->u.raw.file[0].name = temp.name;
         E->e->u.raw.file[0].subenc = temp.subenc;
       } else if (_GD_FiniRawIO(D, E, new_fragment, GD_FINIRAW_KEEP |

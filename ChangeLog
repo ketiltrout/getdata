@@ -1,3 +1,18 @@
+2011-12-29   D. V. Wiebe <getdata@ketiltrout.net> svn:640
+	* configure.ac: zzip encoding check.
+	* src/getdata.h.in src/internal.h: GD_ZZIP_ENCODED / GD_ENC_ZZIP; Added name
+	to encoding_t.
+	* src/zzip.c: Added.
+	* src/encoding.c: Add Zzip encoding; gd_ef_name_t.
+	* src/encoding.c (_GD_GenericName): Renamed from _GD_SetEncodedName and
+	pushed down into the encoding framework.
+	* src/encoding.c (_GD_MissingFramework): Handle GD_EF_NAME.
+	* src/encoding.c (_GD_ResolveEncoding): Handle external name functions.
+	* src/entry.c (gd_raw_filename) src/encoding.c (_GD_InitRawIO
+	_GD_RecodeFragment) src/move.c (_GD_MogrifyFile) src/name.c (_GD_Rename)
+	src/del.c (_GD_Delete) src/flimits.c (_GD_GetEOF): Call _gd_ef->name.
+	* test/zzip_get.c test/zzip_get_get.c test/zzip_nframes.c: Added.
+
 2011-12-27   D. V. Wiebe <getdata@ketiltrout.net> svn:639
 	* src/add.c (gd_madd_lincom gd_madd_clincom gd_madd_linterp gd_madd_bit
 	gd_madd_sbit gd_madd_multiply gd_madd_phase gd_madd_polynom gd_madd_cpolynom

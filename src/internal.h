@@ -728,12 +728,14 @@ struct _gd_private_entry {
 #define GD_ENC_LZMA_RAW   5
 #define GD_ENC_XZ_RAW     6
 #define GD_ENC_SIE        7
-#define GD_ENC_UNKNOWN    8
+#define GD_ENC_ZZIP       8
+#define GD_ENC_UNKNOWN    9
 
 #define GD_N_SUBENCODINGS (GD_ENC_UNKNOWN + 1)
 
-#define GD_EF_OPEN    0x0001
-#define GD_EF_CLOSE   0x0002
+#define GD_EF_NAME    0x0001
+#define GD_EF_OPEN    0x0002
+#define GD_EF_CLOSE   0x0004
 #define GD_EF_SEEK    0x0008
 #define GD_EF_READ    0x0010
 #define GD_EF_SIZE    0x0020
@@ -755,6 +757,8 @@ struct _gd_private_entry {
 #  define SCREWY_FLOATS
 #endif
 
+typedef int (*gd_ef_name_t)(DIRFILE *D, struct _gd_raw_file*, const char*, int,
+    int);
 typedef int (*gd_ef_open_t)(int, struct _gd_raw_file*, int, unsigned int);
 typedef off64_t (*gd_ef_seek_t)(struct _gd_raw_file*, off64_t, gd_type_t,
     unsigned int);
@@ -779,6 +783,7 @@ extern struct encoding_t {
   const char* affix;
   const char* ffname;
   unsigned int provides;
+  gd_ef_name_t name;
   gd_ef_open_t open;
   gd_ef_close_t close;
   gd_ef_seek_t seek;
@@ -959,6 +964,7 @@ int _GD_FiniRawIO(DIRFILE*, gd_entry_t*, int, int);
 void _GD_Flush(DIRFILE* D, gd_entry_t *E, int);
 void _GD_FlushMeta(DIRFILE* D, int fragment, int force);
 void _GD_FreeE(DIRFILE *D, gd_entry_t* E, int priv);
+int _GD_GenericName(DIRFILE*, struct _gd_raw_file*, const char*, int, int);
 off64_t _GD_GetEOF(DIRFILE *D, gd_entry_t* E, const char *parent,
     int *is_index);
 off64_t _GD_GetFilePos(DIRFILE *D, gd_entry_t *E, off64_t index_pos);
@@ -1004,8 +1010,6 @@ gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, char** in_cols,
 char *_GD_ParseFragment(FILE*, DIRFILE*, int, int*, unsigned long int*, int);
 void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E);
 void _GD_ReleaseDir(DIRFILE *D, int dirfd);
-int _GD_SetEncodedName(DIRFILE* D, struct _gd_raw_file* file, const char* base,
-    int temp);
 void _GD_SetError(DIRFILE* D, int error, int suberror, const char* format_file,
     int line, const char* token);
 int _GD_SetTablePath(DIRFILE *D, gd_entry_t *E, struct _gd_private_entry *e);
@@ -1107,6 +1111,16 @@ ssize_t _GD_SampIndWrite(struct _gd_raw_file* file, const void *ptr,
 int _GD_SampIndSync(struct _gd_raw_file* file);
 int _GD_SampIndClose(struct _gd_raw_file* file);
 off64_t _GD_SampIndSize(int, struct _gd_raw_file* file, gd_type_t data_type,
+    int swap);
+
+/* zzip I/O methods */
+int _GD_ZzipOpen(int, struct _gd_raw_file* file, int swap, unsigned int);
+off64_t _GD_ZzipSeek(struct _gd_raw_file* file, off64_t count,
+    gd_type_t data_type, unsigned int);
+ssize_t _GD_ZzipRead(struct _gd_raw_file* file, void *ptr, gd_type_t data_type,
+    size_t nmemb);
+int _GD_ZzipClose(struct _gd_raw_file* file);
+off64_t _GD_ZzipSize(int, struct _gd_raw_file* file, gd_type_t data_type,
     int swap);
 
 /* allocation boilerplates */

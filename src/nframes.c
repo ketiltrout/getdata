@@ -41,13 +41,14 @@ off64_t gd_nframes64(DIRFILE* D)
     return 0;
   }
 
-  if (!_GD_Supports(D, D->reference_field, GD_EF_SIZE)) {
+  if (!_GD_Supports(D, D->reference_field, GD_EF_NAME | GD_EF_SIZE)) {
     dreturn("%i", 0);
     return 0;
   }
 
-  if (_GD_SetEncodedName(D, D->reference_field->e->u.raw.file,
-        D->reference_field->e->u.raw.filebase, 0))
+  if ((*_gd_ef[D->reference_field->e->u.raw.file[0].subenc].name)(D,
+        D->reference_field->e->u.raw.file,
+        D->reference_field->e->u.raw.filebase, 0, 0))
   {
     dreturn("%i", 0);
     return 0;

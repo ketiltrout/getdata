@@ -8,14 +8,15 @@ standards.
 Ted Kisner <tskisner.public@gmail.com> wrote the PutData library
 (libdirfile).
 
-Matthew Truch <matt@truch.net> wrote the dirfile2ascii conversion utility.
-He also provides alpha-testing, bug fixes, and maintains the Fedora packages.
-
 Eli Fidler <eli@staikos.net> ported PutData to this version of the GetData
 library.
 
 Joseph Fowler <jfowler@princeton.edu> provided code which was adapted to
 create the slimlib encoding support.
+
+Adam D Hincks <adam.hincks@utoronto.ca> provided code whic was adapted to
+create the zzip encoding support.  The original zzip encoding (ZIRFILE) was
+developed by Mike Nolta <nolta@cita.utoronto.ca>.
 
 Peter Kümmel <syntheticpp@gmx.net> ported GetData to MSVC.
 
@@ -23,6 +24,8 @@ George Staikos <staikos@kde.org> maintained the GetData library as part of
 kst.
 
 Adam Treat <treat@kde.org> wrote the code for the PHASE field type.
+
+Matthew Truch <matt@truch.net> wrote the dirfile2ascii conversion utility.
 
 Andrew Walker <arwalker@sumusltd.com> maintained the GetData library as
 part of kst.

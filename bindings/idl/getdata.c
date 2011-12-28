@@ -1009,6 +1009,10 @@ unsigned long gdidl_convert_encoding(IDL_VPTR idl_enc)
       encoding = GD_LZMA_ENCODED;
     else if (strcasecmp(enc, "SLIM"))
       encoding = GD_SLIM_ENCODED;
+    else if (strcasecmp(enc, "SIE"))
+      encoding = GD_SIE_ENCODED;
+    else if (strcasecmp(enc, "ZZIP"))
+      encoding = GD_ZZIP_ENCODED;
     else if (strcasecmp(enc, "TEXT"))
       encoding = GD_TEXT_ENCODED;
     else if (strcasecmp(enc, "NONE"))

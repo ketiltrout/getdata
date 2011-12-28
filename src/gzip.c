@@ -41,7 +41,7 @@ int _GD_GzipOpen(int fd, struct _gd_raw_file* file, int swap __gd_unused,
     unsigned int mode)
 {
   const char *gzmode = "w";
-  dtrace("%i, %p, <unused>, %u", fd, file, mode);
+  dtrace("%i, %p, <unused>, 0x%X", fd, file, mode);
 
   if (mode & GD_FILE_READ) {
     file->idata = gd_OpenAt(file->D, fd, file->name, O_RDONLY | O_BINARY, 0666);

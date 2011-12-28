@@ -823,6 +823,7 @@ GD_CHECK_ENCODING([slim],[slim],[slimopen],[slimlib.h], [slim slimdata],
                   [unslim],[slimdopen])
 GD_CHECK_ENCODING([gzip],[z],[gzopen],[zlib.h],[gzip],[gunzip],[])
 GD_CHECK_ENCODING([lzma],[lzma],[lzma_auto_decoder],[lzma.h],[xz],[],[])
+GD_CHECK_ENCODING([zzip],[zzip],[zzip_open],[zzip/lib.h],[zip],[unzip],[])
 
 if test ! -z "${LIBS}"; then
   PRIVATE_LIBS="${LIBS} ${PRIVATE_LIBS}"

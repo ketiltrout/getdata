@@ -322,7 +322,7 @@ char* gd_raw_filename(DIRFILE* D, const char* field_code_in) gd_nothrow
 
   if (E->e->u.raw.file[0].name == NULL) {
     /* ensure encoding sybtype is known */
-    if (!_GD_Supports(D, E, 0)) {
+    if (!_GD_Supports(D, E, GD_EF_NAME)) {
       dreturn("%p", NULL);
       return NULL;
     }
@@ -331,7 +331,8 @@ char* gd_raw_filename(DIRFILE* D, const char* field_code_in) gd_nothrow
       _GD_SetError(D, GD_E_UNKNOWN_ENCODING, GD_E_UNENC_UNDET, NULL, 0, NULL);
       dreturn("%p", NULL);
       return NULL;
-    } else if (_GD_SetEncodedName(D, E->e->u.raw.file, E->e->u.raw.filebase, 0))
+    } else if ((*_gd_ef[E->e->u.raw.file[0].subenc].name)(D, E->e->u.raw.file,
+          E->e->u.raw.filebase, 0, 0))
     {
       dreturn("%p", NULL);
       return NULL;

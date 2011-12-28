@@ -497,7 +497,7 @@ static int _GD_Rename(DIRFILE *D, gd_entry_t *E, const char *new_name,
         return -1;
       }
 
-      if (!_GD_Supports(D, E, GD_EF_MOVE)) {
+      if (!_GD_Supports(D, E, GD_EF_NAME | GD_EF_MOVE)) {
         free(name);
         free(filebase);
         dreturn("%i", -1);
@@ -506,14 +506,16 @@ static int _GD_Rename(DIRFILE *D, gd_entry_t *E, const char *new_name,
 
       memcpy(&temp, E->e->u.raw.file, sizeof(struct _gd_raw_file));
       temp.name = NULL;
-      if (_GD_SetEncodedName(D, &temp, filebase, 0)) {
+      if ((*_gd_ef[temp.subenc].name)(D, &temp, filebase, 0, 0)) {
         free(name);
         free(filebase);
         dreturn("%i", -1);
         return -1;
       }
 
-      if (_GD_SetEncodedName(D, E->e->u.raw.file, E->e->u.raw.filebase, 0)) {
+      if ((*_gd_ef[temp.subenc].name)(D, E->e->u.raw.file, E->e->u.raw.filebase,
+            0, 0))
+      {
         free(name);
         free(filebase);
         dreturn("%i", -1);

@@ -319,13 +319,15 @@ static int _GD_Delete(DIRFILE *D, gd_entry_t *E, unsigned int index,
       return -1;
     }
 
-    if (!_GD_Supports(D, E, GD_EF_UNLINK)) {
+    if (!_GD_Supports(D, E, GD_EF_NAME | GD_EF_UNLINK)) {
       free(del_list);
       dreturn("%i", -1);
       return -1;
     }
 
-    if (_GD_SetEncodedName(D, E->e->u.raw.file, E->e->u.raw.filebase, 0)) {
+    if ((*_gd_ef[E->e->u.raw.file[0].subenc].name)(D, E->e->u.raw.file,
+          E->e->u.raw.filebase, 0, 0))
+    {
       free(del_list);
       dreturn("%i", -1);
       return -1;

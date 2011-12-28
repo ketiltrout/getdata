@@ -188,11 +188,14 @@ off64_t _GD_GetEOF(DIRFILE *D, gd_entry_t* E, const char *parent, int *is_index)
   *is_index = 0;
   switch (E->field_type) {
     case GD_RAW_ENTRY:
-      if (!_GD_Supports(D, E, GD_EF_SIZE))
+      if (!_GD_Supports(D, E, GD_EF_NAME | GD_EF_SIZE))
         break;
 
-      if (_GD_SetEncodedName(D, E->e->u.raw.file, E->e->u.raw.filebase, 0))
+      if ((*_gd_ef[E->e->u.raw.file[0].subenc].name)(D, E->e->u.raw.file,
+            E->e->u.raw.filebase, 0, 0))
+      {
         break;
+      }
 
       ns = (*_gd_ef[E->e->u.raw.file[0].subenc].size)(
           D->fragment[E->fragment_index].dirfd, E->e->u.raw.file,

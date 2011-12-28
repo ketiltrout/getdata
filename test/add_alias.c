@@ -25,6 +25,7 @@ int main(void)
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
   const char *data = "dirfile/data";
+  const char *target;
   int error, i, n, r = 0;
   DIRFILE *D;
 

@@ -343,6 +343,8 @@ VLIST_TESTS=vlist vlist_alias vlist_hidden vlist_invalid vlist_meta \
 
 XZ_TESTS=xz_get xz_nframes
 
+ZZIP_TESTS=zzip_get zzip_get_get zzip_nframes
+
 TESTS=$(ADD_TESTS)      $(ALIAS_TESTS)    $(ALTER_TESTS)    $(ASCII_TESTS)    \
 			$(BOF_TESTS)      $(BZIP_TESTS)     $(CLOSE_TESTS)    $(CONVERT_TESTS)  \
 			$(CREAT_TESTS)    $(CVLIST_TESTS)   $(DEL_TESTS)      $(DFES_TESTS)     \
@@ -356,7 +358,7 @@ TESTS=$(ADD_TESTS)      $(ALIAS_TESTS)    $(ALTER_TESTS)    $(ASCII_TESTS)    \
 			$(PUT_TESTS)      $(REF_TESTS)      $(REPR_TESTS)     $(SEEK_TESTS)     \
 			$(SIE_TESTS)      $(SLIM_TESTS)     $(SPF_TESTS)      $(SVLIST_TESTS)   \
 			$(TELL_TESTS)     $(TRUNC_TESTS)    $(UNCLUDE_TESTS)  $(VERSION_TESTS)  \
-			$(VLIST_TESTS)    $(XZ_TESTS)
+			$(VLIST_TESTS)    $(XZ_TESTS)       $(ZZIP_TESTS)
 
 check_PROGRAMS=$(TESTS)
 
