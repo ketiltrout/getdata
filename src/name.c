@@ -506,15 +506,18 @@ static int _GD_Rename(DIRFILE *D, gd_entry_t *E, const char *new_name,
 
       memcpy(&temp, E->e->u.raw.file, sizeof(struct _gd_raw_file));
       temp.name = NULL;
-      if ((*_gd_ef[temp.subenc].name)(D, &temp, filebase, 0, 0)) {
+      if ((*_gd_ef[temp.subenc].name)(D,
+            D->fragment[E->fragment_index].enc_data, &temp, filebase, 0, 0))
+      {
         free(name);
         free(filebase);
         dreturn("%i", -1);
         return -1;
       }
 
-      if ((*_gd_ef[temp.subenc].name)(D, E->e->u.raw.file, E->e->u.raw.filebase,
-            0, 0))
+      if ((*_gd_ef[temp.subenc].name)(D,
+            D->fragment[E->fragment_index].enc_data, E->e->u.raw.file,
+            E->e->u.raw.filebase, 0, 0))
       {
         free(name);
         free(filebase);

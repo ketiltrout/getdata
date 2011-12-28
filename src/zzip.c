@@ -35,29 +35,46 @@
 
 /* The zzip encoding scheme looks just like the regular ol' C IO. */
 
-int _GD_ZzipName(DIRFILE* D, struct _gd_raw_file* file, const char* base,
-    int temp __gd_unused, int resolv)
+int _GD_ZzipName(DIRFILE* D, const char *enc_data, struct _gd_raw_file* file,
+    const char* base, int temp __gd_unused, int resolv)
 {
-  dtrace("%p, %p, \"%s\", <unused>, %i", D, file, base, resolv);
+  size_t enc_len;
+
+  dtrace("%p, \"%s\", %p, \"%s\", <unused>, %i", D, enc_data, file, base,
+      resolv);
+
+  if (enc_data == NULL)
+    enc_data = "raw";
+
+  enc_len = strlen(enc_data);
   
   if (resolv) {
     free(file->name);
-    file->name = strdup("raw.zip");
-    dreturn("%i", (file->name == NULL) ? -1 : 0);
-    return (file->name == NULL) ? -1 : 0;
+    file->name = (char*)malloc(enc_len + 5);
+    if (file->name == NULL) {
+      dreturn("%i", -1);
+      return -1;
+    }
+
+    strcpy(file->name, enc_data);
+    strcpy(file->name + enc_len, ".zip");
+
+    dreturn("%i (%s)", 0, file->name);
+    return 0;
   }
 
   if (file->name == NULL) {
     file->D = D;
-    file->name = (char *)malloc(strlen(base) + 5);
+    file->name = (char *)malloc(strlen(base) + strlen(enc_data) + 2);
     if (file->name == NULL) {
       _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
       dreturn("%i", -1);
       return -1;
     }
 
-    strcpy(file->name, "raw/");
-    strcpy(file->name + 4, base);
+    strcpy(file->name, enc_data);
+    file->name[enc_len] = '/';
+    strcpy(file->name + enc_len + 1, base);
   }
 
   dreturn("%i (%s)", 0, file->name);

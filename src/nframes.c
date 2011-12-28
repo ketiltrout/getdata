@@ -47,6 +47,7 @@ off64_t gd_nframes64(DIRFILE* D)
   }
 
   if ((*_gd_ef[D->reference_field->e->u.raw.file[0].subenc].name)(D,
+        D->fragment[D->reference_field->fragment_index].enc_data,
         D->reference_field->e->u.raw.file,
         D->reference_field->e->u.raw.filebase, 0, 0))
   {

@@ -208,6 +208,7 @@ int _GD_Include(DIRFILE *D, const char *ename, const char *format_file,
   D->fragment[D->n_fragment - 1].bname = base;
   D->fragment[D->n_fragment - 1].cname = temp_buf1;
   D->fragment[D->n_fragment - 1].ename = _GD_Strdup(D, ename);
+  D->fragment[D->n_fragment - 1].enc_data = NULL;
   D->fragment[D->n_fragment - 1].modified = 0;
   D->fragment[D->n_fragment - 1].parent = me;
   D->fragment[D->n_fragment - 1].dirfd = dirfd;

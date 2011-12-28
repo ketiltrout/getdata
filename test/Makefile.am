@@ -343,7 +343,7 @@ VLIST_TESTS=vlist vlist_alias vlist_hidden vlist_invalid vlist_meta \
 
 XZ_TESTS=xz_get xz_nframes
 
-ZZIP_TESTS=zzip_get zzip_get_get zzip_nframes
+ZZIP_TESTS=zzip_data zzip_get zzip_get_get zzip_nframes
 
 TESTS=$(ADD_TESTS)      $(ALIAS_TESTS)    $(ALTER_TESTS)    $(ASCII_TESTS)    \
 			$(BOF_TESTS)      $(BZIP_TESTS)     $(CLOSE_TESTS)    $(CONVERT_TESTS)  \

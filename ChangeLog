@@ -1,4 +1,13 @@
 2011-12-29   D. V. Wiebe <getdata@ketiltrout.net> svn:640
+	* src/internal.h src/encoding.c (_GD_GenericName): Added fragment->enc_data.
+	Pass enc_data to gd_ef->name.  Flag encodings that use enc_data with
+	GD_EF_EDAT.
+	* src/parse.c (_GD_ParseDirective): Allow an optional second parameter to
+	/ENCODING of encoding-specific data.
+	* src/entry.c (_GD_ResolveEncoding): Pass in enc_data.
+	* src/zzip.c (_GD_ZzipName): Use enc_data to specify archive name.
+
+2011-12-29   D. V. Wiebe <getdata@ketiltrout.net> svn:640
 	* configure.ac: zzip encoding check.
 	* src/getdata.h.in src/internal.h: GD_ZZIP_ENCODED / GD_ENC_ZZIP; Added name
 	to encoding_t.

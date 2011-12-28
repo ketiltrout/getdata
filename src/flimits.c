@@ -191,7 +191,8 @@ off64_t _GD_GetEOF(DIRFILE *D, gd_entry_t* E, const char *parent, int *is_index)
       if (!_GD_Supports(D, E, GD_EF_NAME | GD_EF_SIZE))
         break;
 
-      if ((*_gd_ef[E->e->u.raw.file[0].subenc].name)(D, E->e->u.raw.file,
+      if ((*_gd_ef[E->e->u.raw.file[0].subenc].name)(D,
+            D->fragment[E->fragment_index].enc_data, E->e->u.raw.file,
             E->e->u.raw.filebase, 0, 0))
       {
         break;

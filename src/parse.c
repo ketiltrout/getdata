@@ -1929,6 +1929,11 @@ static int _GD_ParseDirective(DIRFILE *D, char** in_cols, int n_cols,
           for (i = 0; i < GD_N_SUBENCODINGS - 1; ++i)
             if (strcmp(in_cols[1], _gd_ef[i].ffname) == 0) {
               D->fragment[me].encoding = _gd_ef[i].scheme;
+              free(D->fragment[me].enc_data);
+              if (n_cols > 2 && _gd_ef[i].flags & GD_EF_EDAT)
+                D->fragment[me].enc_data = _GD_Strdup(D, in_cols[2]);
+              else
+                D->fragment[me].enc_data = NULL;
               break;
             }
         }

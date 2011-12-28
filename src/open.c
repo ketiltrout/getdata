@@ -418,6 +418,7 @@ DIRFILE* gd_cbopen(const char* filedir, unsigned long flags,
   D->fragment[0].sname = NULL;
   /* The root format file needs no external name */
   D->fragment[0].ename = NULL;
+  D->fragment[0].enc_data = NULL;
   D->fragment[0].modified = 0;
   D->fragment[0].parent = -1;
   D->fragment[0].dirfd = D->dir[0].fd;

@@ -757,8 +757,8 @@ struct _gd_private_entry {
 #  define SCREWY_FLOATS
 #endif
 
-typedef int (*gd_ef_name_t)(DIRFILE *D, struct _gd_raw_file*, const char*, int,
-    int);
+typedef int (*gd_ef_name_t)(DIRFILE *D, const char *, struct _gd_raw_file*,
+    const char*, int, int);
 typedef int (*gd_ef_open_t)(int, struct _gd_raw_file*, int, unsigned int);
 typedef off64_t (*gd_ef_seek_t)(struct _gd_raw_file*, off64_t, gd_type_t,
     unsigned int);
@@ -775,6 +775,7 @@ typedef int (*gd_ef_move_t)(int, struct _gd_raw_file*, int, char*);
 #define GD_EF_ECOR 0x1 /* post-framework byte-sex correction required */
 #define GD_EF_SWAP 0x2 /* in-framework byte-sex metadata correction required */
 #define GD_EF_OOP  0x4 /* writes occur out-of-place */
+#define GD_EF_EDAT 0x8 /* The /ENCODING datum is used */
 /* Encoding schemes */
 extern struct encoding_t {
   unsigned long int scheme;
@@ -805,6 +806,7 @@ struct gd_fragment_t {
   char *bname;
   /* External name (the one that appears in the format file) */
   char* ename;
+  void *enc_data;
   int modified;
   int parent;
   int dirfd;
@@ -964,7 +966,6 @@ int _GD_FiniRawIO(DIRFILE*, gd_entry_t*, int, int);
 void _GD_Flush(DIRFILE* D, gd_entry_t *E, int);
 void _GD_FlushMeta(DIRFILE* D, int fragment, int force);
 void _GD_FreeE(DIRFILE *D, gd_entry_t* E, int priv);
-int _GD_GenericName(DIRFILE*, struct _gd_raw_file*, const char*, int, int);
 off64_t _GD_GetEOF(DIRFILE *D, gd_entry_t* E, const char *parent,
     int *is_index);
 off64_t _GD_GetFilePos(DIRFILE *D, gd_entry_t *E, off64_t index_pos);
@@ -1027,6 +1028,8 @@ ssize_t _GD_WriteOut(DIRFILE *D, gd_entry_t *E, const struct encoding_t *enc,
 
 /* generic I/O methods */
 int _GD_GenericMove(int, struct _gd_raw_file* file, int, char* new_path);
+int _GD_GenericName(DIRFILE*, const char *, struct _gd_raw_file*, const char*,
+    int, int);
 int _GD_GenericUnlink(int, struct _gd_raw_file* file);
 
 /* unencoded I/O methods */

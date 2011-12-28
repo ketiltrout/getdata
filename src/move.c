@@ -243,7 +243,8 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned long encoding,
       E->e->u.raw.file[0].name = NULL;
       E->e->u.raw.file[0].subenc = subencoding;
 
-      if ((*_gd_ef[E->e->u.raw.file[0].subenc].name)(D, E->e->u.raw.file,
+      if ((*_gd_ef[E->e->u.raw.file[0].subenc].name)(D,
+            D->fragment[E->fragment_index].enc_data, E->e->u.raw.file,
             new_filebase, 0, 0))
       {
         E->e->u.raw.file[0].name = temp.name;
