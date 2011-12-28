@@ -1,4 +1,4 @@
-2011-12-29   D. V. Wiebe <getdata@ketiltrout.net> svn:640
+2011-12-29   D. V. Wiebe <getdata@ketiltrout.net> svn:641
 	* src/internal.h src/encoding.c (_GD_GenericName): Added fragment->enc_data.
 	Pass enc_data to gd_ef->name.  Flag encodings that use enc_data with
 	GD_EF_EDAT.
