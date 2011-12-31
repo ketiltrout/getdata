@@ -1791,7 +1791,7 @@ try:
 except:
   CheckOK(223)
 
-# 224: GDMOVA check
+# 224: gd_move_alias check
 try:
   d.move_alias('new20', 1)
 except:

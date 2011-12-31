@@ -1117,6 +1117,8 @@ off64_t _GD_SampIndSize(int, struct _gd_raw_file* file, gd_type_t data_type,
     int swap);
 
 /* zzip I/O methods */
+int _GD_ZzipName(DIRFILE*, const char*, struct _gd_raw_file*, const char*, int,
+    int);
 int _GD_ZzipOpen(int, struct _gd_raw_file* file, int swap, unsigned int);
 off64_t _GD_ZzipSeek(struct _gd_raw_file* file, off64_t count,
     gd_type_t data_type, unsigned int);

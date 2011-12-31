@@ -79,7 +79,7 @@ int main(void)
   for (i = 0; i < 8; ++i)
     CHECKIi(i,c[i], 40 + i);
 #else
-  CHECKI(error, GD_E_UNSUPPORTED);
+  CHECKI(error, GD_E_UNKNOWN_ENCODING);
   CHECKI(n,0);
 #endif
 

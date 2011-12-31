@@ -85,7 +85,7 @@ int main(void)
   CHECKI(error, 0);
   CHECKI(n, 256);
 #else
-  CHECKI(error, GD_E_UNSUPPORTED);
+  CHECKI(error, GD_E_UNKNOWN_ENCODING);
   CHECKI(n, 0);
 #endif
 

@@ -557,6 +557,7 @@ static void gdpy_set_entry_from_dict(gd_entry_t *E, PyObject* parms,
         return;
       }
 
+      Py_INCREF(o);
       PyTuple_SET_ITEM(tuple, i, o);
     }
   }
@@ -805,7 +806,6 @@ static int gdpy_entry_setinfields(struct gdpy_entry_t* self, PyObject *value,
     case GD_POLYNOM_ENTRY:
     case GD_SBIT_ENTRY:
     case GD_RECIP_ENTRY:
-    case GD_WINDOW_ENTRY:
       if (!PyTuple_Check(value))
         s[0] = gdpy_dup_pystring(value);
       else {
@@ -828,6 +828,7 @@ static int gdpy_entry_setinfields(struct gdpy_entry_t* self, PyObject *value,
       break;
     case GD_MULTIPLY_ENTRY:
     case GD_DIVIDE_ENTRY:
+    case GD_WINDOW_ENTRY:
       if (!PyTuple_Check(value)) {
         PyErr_SetString(PyExc_TypeError, "'pygetdata.entry' "
             "attribute 'in_fields' must be a tuple");
