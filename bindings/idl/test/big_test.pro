@@ -1185,7 +1185,7 @@ nume += check_simple2(211, 5, n.check, 'mult')
 nume += check_simple2(211, 6, n.rthreshold, 4.1D0)
 
 ; 212: gd_add_window check
-gd_add_window, d, 'new18', 'in1', 'in2', /NE, threshold=32, fragment=0
+gd_add_window, d, 'new18', 'in1', 'in2', /NE, 32, fragment=0
 nume += check_ok2(212, 1, d)
 
 n = gd_entry(d, 'new18')
@@ -1198,7 +1198,7 @@ nume += check_simple2(212, 5, n.check, 'in2')
 nume += check_simple2(212, 6, n.ithreshold, 32)
 
 ; 214: gd_madd_window check
-gd_add_window, d, parent='data', 'mnew18', 'in2', 'in3', /SET, threshold=128
+gd_add_window, d, parent='data', 'mnew18', 'in2', 'in3', /SET, 128
 nume += check_ok2(214, 1, d)
 
 n = gd_entry(d, 'data/mnew18')
