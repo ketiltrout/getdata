@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 C. Barth Netterfield
  * Copyright (C) 2003-2005 Theodore Kisner
- * Copyright (C) 2005-2011 D. V. Wiebe
+ * Copyright (C) 2005-2012 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -351,18 +351,38 @@ static void CopyPhaseEntry(struct PhaseEntryType* P, gd_entry_t* E)
   dreturnvoid();
 }
 
-static void CopyWindowEntry(struct PhaseEntryType* P, gd_entry_t* E)
+static void CopyWindowEntry(struct MPlexEntryType* M, gd_entry_t* E)
 {
-  dtrace("%p, %p", P, E);
+  dtrace("%p, %p", M, E);
 
   if (E == NULL) {
     dreturnvoid();
     return;
   }
 
-  P->field = E->field;
-  P->raw_field = E->in_fields[0];
-  P->shift = 0;
+  M->field = E->field;
+  M->data_field = E->in_fields[0];
+  M->cnt_field = E->in_fields[1];
+  M->i = (int)E->windop;
+  M->max_i = (int)E->threshold.i;
+
+  dreturnvoid();
+}
+
+static void CopyMplexEntry(struct MPlexEntryType* M, gd_entry_t* E)
+{
+  dtrace("%p, %p", M, E);
+
+  if (E == NULL) {
+    dreturnvoid();
+    return;
+  }
+
+  M->field = E->field;
+  M->data_field = E->in_fields[0];
+  M->cnt_field = E->in_fields[1];
+  M->i = (int)E->count_val;
+  M->max_i = (int)E->count_max;
 
   dreturnvoid();
 }
@@ -378,6 +398,7 @@ struct FormatType *GetFormat(const char *filedir, int *error_code) gd_nothrow
   int nmultiply = 0;
   int nbit = 0;
   int nphase = 0;
+  int nmplex = 0;
   DIRFILE *D;
 
   dtrace("\"%s\", %p", filedir, error_code);
@@ -421,8 +442,11 @@ struct FormatType *GetFormat(const char *filedir, int *error_code) gd_nothrow
         Format.n_multiply++;
         break;
       case GD_PHASE_ENTRY:
-      case GD_WINDOW_ENTRY:
         Format.n_phase++;
+        break;
+      case GD_WINDOW_ENTRY:
+      case GD_MPLEX_ENTRY:
+        Format.n_mplex++;
         break;
       case GD_NO_ENTRY:
       case GD_CONST_ENTRY:
@@ -493,7 +517,10 @@ struct FormatType *GetFormat(const char *filedir, int *error_code) gd_nothrow
         CopyPhaseEntry(&Format.phaseEntries[nphase++], D->entry[i]);
         break;
       case GD_WINDOW_ENTRY:
-        CopyWindowEntry(&Format.phaseEntries[nphase++], D->entry[i]);
+        CopyWindowEntry(&Format.mplexEntries[nmplex++], D->entry[i]);
+        break;
+      case GD_MPLEX_ENTRY:
+        CopyMplexEntry(&Format.mplexEntries[nmplex++], D->entry[i]);
         break;
       case GD_STRING_ENTRY:
       case GD_CONST_ENTRY:

@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 D. V. Wiebe
+/* Copyright (C) 2008-2012 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -61,6 +61,7 @@ void _GD_Flush(DIRFILE* D, gd_entry_t *E, int clo)
     case GD_MULTIPLY_ENTRY:
     case GD_DIVIDE_ENTRY:
     case GD_WINDOW_ENTRY:
+    case GD_MPLEX_ENTRY:
       _GD_Flush(D, E->e->entry[1], clo);
       /* fallthrough */
     case GD_LINTERP_ENTRY:
@@ -491,6 +492,18 @@ static void _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
               &E->EN(window,threshold.r), E->scalar[0], E->scalar_ind[0], "\n");
           break;
       }
+      break;
+    case GD_MPLEX_ENTRY:
+      fprintf(stream, " MPLEX%s ", pretty ? "   " : "");
+      /* NB: these are backwards! */
+      _GD_StringEscapeise(stream, E->in_fields[1], 0, permissive, D->standards);
+      fputc(' ', stream);
+      _GD_StringEscapeise(stream, E->in_fields[0], 0, permissive, D->standards);
+      fputc(' ', stream);
+      _GD_WriteConst(D, stream, me, permissive, GD_INT64,
+          &E->EN(mplex,count_val), E->scalar[0], E->scalar_ind[0], " ");
+      _GD_WriteConst(D, stream, me, permissive, GD_INT64,
+          &E->EN(mplex,count_max), E->scalar[1], E->scalar_ind[1], "\n");
       break;
     case GD_CONST_ENTRY:
       fprintf(stream, " CONST%s %s ", pretty ? "   " : "", _GD_TypeName(D,
@@ -1003,6 +1016,7 @@ uint64_t _GD_FindVersion(DIRFILE *D)
           }
           break;
         case GD_WINDOW_ENTRY:
+        case GD_MPLEX_ENTRY:
           D->av &= GD_VERS_GE_9;
           break;
         case GD_LINTERP_ENTRY:

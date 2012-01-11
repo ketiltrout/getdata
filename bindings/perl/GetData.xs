@@ -1,3 +1,24 @@
+/* Copyright (C) 2011-2012 D. V. Wiebe
+ *
+ **************************************************************************
+ *
+ * This file is part of the GetData project.
+ *
+ * GetData is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License as published by the
+ * Free Software Foundation; either version 2.1 of the License, or (at your
+ * option) any later version.
+ *
+ * GetData is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with GetData; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ */
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
@@ -316,7 +337,6 @@ static void gdp_to_entry(gd_entry_t *E, SV *sv, const char *pkg,
       gdp_fetch_scalars(E, (HV*)sv, 1, pkg, func);
       break;
     case GD_WINDOW_ENTRY:
-      GDP_EHASH_FETCH_PV("in_field", in_fields[0]);
       gdp_fetch_in_fields(E->in_fields, sv, 2, pkg, func);
       GDP_EHASH_FETCH_IV("windop", windop, gd_windop_t);
       switch(E->windop) {
@@ -332,6 +352,13 @@ static void gdp_to_entry(gd_entry_t *E, SV *sv, const char *pkg,
           GDP_EHASH_FETCH_NV("threshold", threshold.r);
           break;
       }
+      gdp_fetch_scalars(E, (HV*)sv, 1, pkg, func);
+      break;
+    case GD_MPLEX_ENTRY:
+      gdp_fetch_in_fields(E->in_fields, sv, 2, pkg, func);
+      GDP_EHASH_FETCH_UV("count_val", count_val, gd_count_t);
+      GDP_EHASH_FETCH_UV("count_max", count_max, gd_count_t);
+      gdp_fetch_scalars(E, (HV*)sv, 0x3, pkg, func);
       break;
     case GD_RAW_ENTRY:
       GDP_EHASH_FETCH_UV("spf", spf, gd_spf_t);
@@ -1190,6 +1217,16 @@ entry(dirfile, field_code)
               GDP_PUSHnv(E.threshold.r);
               break;
           }
+          sp = gdp_store_scalars(sp, &E, 1);
+          break;
+        case GD_MPLEX_ENTRY:
+          GDP_PUSHpvn("in_fields");
+          GDP_PUSHrvavpv(E.in_fields, 2);
+          GDP_PUSHpvn("count_val");
+          GDP_PUSHuv(E.count_val);
+          GDP_PUSHpvn("count_max");
+          GDP_PUSHuv(E.count_max);
+          sp = gdp_store_scalars(sp, &E, 0x3);
           break;
         case GD_INDEX_ENTRY:
         case GD_STRING_ENTRY:

@@ -1,4 +1,4 @@
-/* Copyright (C) 2009-2011 D. V. Wiebe
+/* Copyright (C) 2009-2012 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -90,6 +90,7 @@ gd_type_t _GD_NativeType(DIRFILE* D, gd_entry_t* E, int repr)
       break;
     case GD_PHASE_ENTRY:
     case GD_WINDOW_ENTRY:
+    case GD_MPLEX_ENTRY:
       if (_GD_BadInput(D, E, 0, 1))
         break;
 

@@ -1,4 +1,4 @@
-/* Copyright (C) 2008, 2009 D. V. Wiebe
+/* Copyright (C) 2008-2012 D. V. Wiebe
  *
  *************************************************************************
  *
@@ -582,6 +582,86 @@ void F77_FUNC(gdstrx, GDSTRX) (int *max, const int *dirfile);
 
 void F77_FUNC(gdmstx, GDMSTX) (int *max, const int *dirfile, const char *parent,
     const int *parent_l);
+
+void F77_FUNC(gdadwd, GDADWD) (const int *dirfile, const char *field_code,
+    const int *field_code_l, const char *in_field, const int *in_field_l,
+    const char *check_field, const int *check_field_l, const int *windop,
+    const void *threshold, const int *fragment_index);
+
+void F77_FUNC(gdmdwd, GDMDWD) (const int *dirfile, const char *parent,
+    const int *parent_l, const char *field_code, const int *field_code_l, 
+    const char *in_field, const int *in_field_l, const char *check_field,
+    const int *check_field_l, const int *windop, const void *threshold);
+
+void F77_FUNC(gdalwd, GDALWD) (const int *dirfile, const char *field_code,
+    const int *field_code_l, const char *in_field, const int *in_field_l,
+    const char *check_field, const int *check_field_l, const int *windop,
+    const void *threshold);
+
+void F77_FUNC(gdadmx, GDADMX) (const int *dirfile, const char *field_code,
+    const int *field_code_l, const char *in_field, const int *in_field_l,
+    const char *count_field, const int *count_field_l, const int *val,
+    const int *max, const int *fragment_index);
+
+void F77_FUNC(gdmdmx, GDMDMX) (const int *dirfile, const char *parent,
+    const int *parent_l, const char *field_code, const int *field_code_l, 
+    const char *in_field, const int *in_field_l, const char *count_field,
+    const int *count_field_l, const int *val, const int *max);
+
+void F77_FUNC(gdalmx, GDALMX) (const int *dirfile, const char *field_code,
+    const int *field_code_l, const char *in_field, const int *in_field_l,
+    const char *count_field, const int *count_field_l, const int *val,
+    const int *max);
+
+void F77_FUNC(gdsync, GDSYNC) (const int* dirfile, const char* field_code,
+    const int* field_code_l);
+
+void F77_FUNC(gdinca, GDINCA) (const int* dirfile, const char* file,
+    const int* file_l, const int* fragment_index, const char* prefix,
+    const int* prefix_l, const char* suffix, const int* suffix_l,
+    const int* flags);
+
+void F77_FUNC(gdmova, GDMOVA) (const int *dirfile, const char *field_code,
+    const int *field_code_l, const int *new_fragment);
+
+void F77_FUNC(gdmdal, GDMDAL) (const int *dirfile, const char *parent,
+    const int *parent_l, const char *field_code, const int *field_code_l,
+    const char *target, const int *target_l);
+
+void F77_FUNC(gduhid, GDUHID) (const int *dirfile, const char *field_code,
+    const int *field_code_l);
+
+void F77_FUNC(gdhide, GDHIDE) (const int *dirfile, const char *field_code,
+    const int *field_code_l);
+
+void F77_FUNC(gdhidn, GDHIDN) (int *result, const int *dirfile,
+    const char *field_code, const int *field_code_l);
+
+void F77_FUNC(gdfraf, GDFRAF) (char *prefix, int *prefix_l, char *suffix,
+    int *suffix_l, const int *dirfile, const int *index);
+
+void F77_FUNC(gddela, GDDELA) (const int *dirfile, const char *field_code,
+    const int *field_code_l, const int *flags);
+
+void F77_FUNC(gdaafx, GDAAFX) (const int *dirfile, const int *index,
+    const char *prefix, const int *prefix_l, const char *suffix,
+    const int *suffix_l);
+
+void F77_FUNC(gdalss, GDALSS) (char *alias, int *alias_l, const int *dirfile,
+    const char *field_code, const int *field_code_l, const int *num);
+
+void F77_FUNC(gdnals, GDNALS) (int *nalias, const int *dirfile,
+    const char *field_code, const int *field_code_l);
+
+void F77_FUNC(gdalsx, GDALSX) (int* max, const int* dirfile,
+    const char *field_code, const int *field_code_l);
+
+void F77_FUNC(gdatrg, GDATRG) (char *target, int *target_l, const int *dirfile, 
+    const char *field_code, const int *field_code_l);
+
+void F77_FUNC(gdadal, GDADAL) (const int *dirfile, const char *field_code,
+    const int *field_code_l, const char *target, const int *target_l,
+    const int *fragment_index);
 #ifdef __cplusplus
 }
 #endif

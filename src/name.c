@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 D. V. Wiebe
+/* Copyright (C) 2008-2012 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -268,6 +268,7 @@ static char **_GD_InvalidateConst(DIRFILE *D, const gd_entry_t *E, char **list,
         break;
       case GD_BIT_ENTRY:
       case GD_SBIT_ENTRY:
+      case GD_MPLEX_ENTRY:
         list = _GD_UpdateScalar(D, E->e->u.scalar.client[j], E, list, len, 1,
             pass, nl);
         /* Fallthrough */
@@ -354,6 +355,7 @@ static char **_GD_InvalidateVect(DIRFILE *D, const gd_entry_t *E, char **list,
         case GD_MULTIPLY_ENTRY:
         case GD_DIVIDE_ENTRY:
         case GD_WINDOW_ENTRY:
+        case GD_MPLEX_ENTRY:
           list = _GD_UpdateInField(D, D->entry[u], E, list, len, 1, pass, nl);
           /* Fallthrough */
         case GD_LINTERP_ENTRY:

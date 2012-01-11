@@ -239,3 +239,7 @@
 225 F9CIpP gd_delete_alias
 226 F9CIpP gd_fragment_affixes
 227 F9CIpP gd_alter_affixes
+228 F9CIpP gd_entry (MPLEX)
+229 F9CIpP gd_add_mplex
+230 F9CIpP gd_madd_mplex
+231 F9CIpP gd_alter_mplex

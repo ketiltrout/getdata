@@ -1,4 +1,4 @@
-! Copyright (C) 2009-2011 D. V. Wiebe
+! Copyright (C) 2009-2012 D. V. Wiebe
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
@@ -193,7 +193,7 @@ program big_test
   character (len=*), parameter :: frm2 = 'test95_dirfile/form2'
   character (len=*), parameter :: dat = 'test95_dirfile/data'
   integer, parameter :: flen = 11
-  integer, parameter :: nfields = 16
+  integer, parameter :: nfields = 17
   integer, parameter :: slen = 26
 
   character (len=slen), dimension(3) :: strings
@@ -229,9 +229,10 @@ program big_test
 
   fields = (/    'INDEX      ', 'alias      ', 'bit        ', 'carray     ', &
   'const      ', 'data       ', 'div        ', 'lincom     ', 'linterp    ', &
-  'mult       ', 'phase      ', 'polynom    ', 'recip      ', 'sbit       ', &
-  'string     ', 'window     ', '           ', '           ', '           ', &
-  '           ', '           ', '           ', '           ', '           ' /)
+  'mplex      ', 'mult       ', 'phase      ', 'polynom    ', 'recip      ', &
+  'sbit       ', 'string     ', 'window     ', '           ', '           ', &
+  '           ', '           ', '           ', '           ', '           ', &
+  '           ' /)
 
   open(1, file=frmat, status='new')
   write(1, *) '/ENDIAN little'
@@ -246,6 +247,7 @@ program big_test
   write(1, *) 'polynom POLYNOM data 1.1 2.2 2.2 3.3;4.4 const const'
   write(1, *) 'bit BIT data 3 4'
   write(1, *) 'sbit SBIT data 5 6'
+  write(1, *) 'mplex MPLEX sbit data 1 10'
   write(1, *) 'mult MULTIPLY data sbit'
   write(1, *) 'phase PHASE data 11'
   write(1, *) 'div DIVIDE mult bit'
@@ -926,14 +928,15 @@ program big_test
 ! 44: fgd_nvectors check
   n = fgd_nvectors(d)
   call check_ok(ne, 44, d)
-  call check_int(ne, 44, n, 24)
+  call check_int(ne, 44, n, 25)
 
 ! 45: fgd_vector_list check
   fields = (/    'INDEX      ', 'alias      ', 'bit        ', 'data       ', &
-  'div        ', 'lincom     ', 'linterp    ', 'mult       ', 'new1       ', &
-  'new10      ', 'new13      ', 'new2       ', 'new3       ', 'new4       ', &
-  'new5       ', 'new6       ', 'new7       ', 'new8       ', 'new9       ', &
-  'phase      ', 'polynom    ', 'recip      ', 'sbit       ', 'window     ' /)
+  'div        ', 'lincom     ', 'linterp    ', 'mplex      ', 'mult       ', &
+  'new1       ', 'new10      ', 'new13      ', 'new2       ', 'new3       ', &
+  'new4       ', 'new5       ', 'new6       ', 'new7       ', 'new8       ', &
+  'new9       ', 'phase      ', 'polynom    ', 'recip      ', 'sbit       ', &
+  'window     ' /)
   l = flen
   call fgd_vector_list(flist, d, l)
   call check_ok(ne, 45, d)
@@ -1263,7 +1266,8 @@ program big_test
   'mnew5      ', 'mnew6      ', 'mnew7      ', 'mnew8      ', 'mnew9      ', &
   'mnew10     ', 'mnew4      ', '           ', '           ', '           ', &
   '           ', '           ', '           ', '           ', '           ', &
-  '           ', '           ', '           ', '           ', '           ' /)
+  '           ', '           ', '           ', '           ', '           ', &
+  '           ' /)
   l = flen
   call fgd_mvector_list(flist, d, "data", l)
   call check_ok2(ne, 66, i, d)
@@ -2427,6 +2431,55 @@ program big_test
   call check_ok2(ne, 227, 2, d)
   call check_str2(ne, 227, 3, fields(1), 'B')
   call check_str2(ne, 227, 3, fields(2), '')
+
+! 228: fgd_entry (MPLEX) check
+  n = fgd_entry(d, 'mplex', ent)
+  call check_ok(ne, 228, d)
+  call check_int2(ne, 228, 1, n, GD_MPLEX_ENTRY)
+  call check_int2(ne, 228, 2, ent%fragment_index, 0)
+  call check_int2(ne, 228, 3, ent%count_val, 1)
+  call check_str2(ne, 228, 4, ent%field(1), 'data')
+  call check_str2(ne, 228, 5, ent%field(2), 'sbit')
+  call check_int2(ne, 228, 6, ent%count_max, 10)
+
+! 229: fgd_add_mplex check
+  call fgd_add_mplex(d, 'new21', 'in1', 'in2', 5, 6, 0)
+  call check_ok2(ne, 229, 1, d)
+
+  n = fgd_entry(d, 'new21', ent)
+  call check_ok2(ne, 229, 2, d)
+  call check_int2(ne, 229, 1, n, GD_MPLEX_ENTRY)
+  call check_int2(ne, 229, 2, ent%fragment_index, 0)
+  call check_int2(ne, 229, 3, ent%count_val, 5)
+  call check_str2(ne, 229, 4, ent%field(1), 'in1')
+  call check_str2(ne, 229, 5, ent%field(2), 'in2')
+  call check_int2(ne, 229, 6, ent%count_max, 6)
+
+! 230: fgd_madd_mplex check
+  call fgd_madd_mplex(d, 'data', 'mnew21', 'in2', 'in3', 0, 12)
+  call check_ok2(ne, 230, 1, d)
+
+  n = fgd_entry(d, 'data/mnew21', ent)
+  call check_ok2(ne, 230, 2, d)
+  call check_int2(ne, 230, 1, n, GD_MPLEX_ENTRY)
+  call check_int2(ne, 230, 2, ent%fragment_index, 0)
+  call check_int2(ne, 230, 3, ent%count_val, 0)
+  call check_str2(ne, 230, 4, ent%field(1), 'in2')
+  call check_str2(ne, 230, 5, ent%field(2), 'in3')
+  call check_int2(ne, 230, 6, ent%count_max, 12)
+
+! 231: fgd_alter_mplex check
+  call fgd_alter_mplex(d, 'new21', 'in3', 'in4', GD_COUNT_MAX, 7)
+  call check_ok2(ne, 231, 1, d)
+
+  n = fgd_entry(d, 'new21', ent)
+  call check_ok2(ne, 231, 2, d)
+  call check_int2(ne, 231, 1, n, GD_MPLEX_ENTRY)
+  call check_int2(ne, 231, 2, ent%fragment_index, 0)
+  call check_int2(ne, 231, 3, ent%count_val, 5)
+  call check_str2(ne, 231, 4, ent%field(1), 'in3')
+  call check_str2(ne, 231, 5, ent%field(2), 'in4')
+  call check_dbl2(ne, 231, 6, ent%count_max, 7)
 
  
 

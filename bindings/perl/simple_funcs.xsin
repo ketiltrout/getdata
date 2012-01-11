@@ -144,3 +144,11 @@ int include_affix(DIRFILE *dirfile, const char *file, int fragment_index,
     const char *prefix, const char *suffix, unsigned long int flags)
 int alter_affixes(DIRFILE *dirfile, int index, const char *prefix,
     const char *suffix)
+int add_mplex(DIRFILE *dirfile, const char *field_code, const char *in_field,
+    const char *count_field, gd_count_t count_val, gd_count_t count_max,
+    int fragment_index)
+int alter_mplex(DIRFILE *dirfile, const char *field_code, const char *in_field,
+    const char *count_field, gd_count_t count_val, gd_count_t count_max)
+int madd_mplex(DIRFILE *dirfile, const char *parent, const char *field_code,
+    const char *in_field, const char *count_field, gd_count_t count_val,
+    gd_count_t count_max)

@@ -1364,5 +1364,30 @@ void _GD_ReleaseDir(DIRFILE *D, int dirfd)
   dreturnvoid();
 }
 
+/* allocation boilerplates */
+void *_GD_Malloc(DIRFILE *D, size_t size)
+{
+  void *ptr = malloc(size);
+  if (ptr == NULL)
+    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+  return ptr;
+}
+
+void *_GD_Realloc(DIRFILE *D, void *old, size_t size)
+{
+  void *ptr = realloc(old, size);
+  if (ptr == NULL)
+    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+  return ptr;
+}
+
+char *_GD_Strdup(DIRFILE *D, const char *s)
+{
+  char *ptr = strdup(s);
+  if (ptr == NULL)
+    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+  return ptr;
+}
+
 /* vim: ts=2 sw=2 et tw=80
 */

@@ -1,4 +1,4 @@
-// Copyright (C) 2008-2010 D. V. Wiebe
+// Copyright (C) 2008-2012 D. V. Wiebe
 //
 ///////////////////////////////////////////////////////////////////////////
 //
@@ -48,6 +48,7 @@
 #include <getdata/constentry.h>
 #include <getdata/carrayentry.h>
 #include <getdata/stringentry.h>
+#include <getdata/mplexentry.h>
 #include <getdata/multiplyentry.h>
 #include <getdata/divideentry.h>
 #include <getdata/recipentry.h>
@@ -71,6 +72,7 @@ namespace GetData {
     friend class PhaseEntry;
     friend class PolynomEntry;
     friend class WindowEntry;
+    friend class MplexEntry;
     friend class ConstEntry;
     friend class CarrayEntry;
     friend class StringEntry;

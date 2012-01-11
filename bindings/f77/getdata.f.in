@@ -1,4 +1,4 @@
-C     Copyright (C) 2008-2011 D. V. Wiebe
+C     Copyright (C) 2008-2012 D. V. Wiebe
 C
 C     CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 C
@@ -49,6 +49,8 @@ C     Corresponding to gd_add_linterp(3)
       EXTERNAL GDADLT
 C     Corresponding to gd_add_multiply(3)
       EXTERNAL GDADMT
+C     Corresponding to gd_add_mplex(3)
+      EXTERNAL GDADMX
 C     Corresponding to gd_add_phase(3)
       EXTERNAL GDADPH
 C     Corresponding to gd_add_polynom(3)
@@ -91,6 +93,8 @@ C     Correpsonding to gd_alter_linterp(3)
       EXTERNAL GDALLT
 C     Correpsonding to gd_alter_multiply(3)
       EXTERNAL GDALMT
+C     Corresponding to gd_alter_mplex(3)
+      EXTERNAL GDALMX
 C     Correpsonding to gd_alter_phase(3)
       EXTERNAL GDALPH
 C     Correpsonding to gd_alter_polynom(3)
@@ -249,6 +253,8 @@ C     Corresponding to gd_madd_linterp(3)
       EXTERNAL GDMDLT
 C     Corresponding to gd_madd_multiply(3)
       EXTERNAL GDMDMT
+C     Corresponding to gd_madd_mplex(3)
+      EXTERNAL GDMDMX
 C     Corresponding to gd_madd_phase(3)
       EXTERNAL GDMDPH
 C     Corresponding to gd_madd_polynom(3)

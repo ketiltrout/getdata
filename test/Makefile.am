@@ -49,12 +49,13 @@ ADD_TESTS=add add_affix add_alias add_bit add_bit_bitnum add_bit_bitsize \
 					add_const add_cpolynom add_crecip add_crecip89 add_divide \
 					add_divide_invalid add_duplicate add_format add_invalid add_lincom \
 					add_lincom_invalid add_lincom_nfields add_linterp \
-					add_linterp_invalid add_multiply add_multiply_invalid add_phase \
-					add_phase_invalid add_polynom add_protect add_raw add_raw_include \
-					add_raw_invalid add_raw_spf add_raw_type add_rdonly add_recip \
-					add_resolv add_sbit add_scalar add_scalar_carray add_sort add_spec \
-					add_spec_directive add_spec_invalid add_spec_meta add_spec_resolv \
-					add_string add_string_affix add_type add_window add_window_op
+					add_linterp_invalid add_mplex add_mplex_val add_multiply \
+					add_multiply_invalid add_phase add_phase_invalid add_polynom \
+					add_protect add_raw add_raw_include add_raw_invalid add_raw_spf \
+					add_raw_type add_rdonly add_recip add_resolv add_sbit add_scalar \
+					add_scalar_carray add_sort add_spec add_spec_directive \
+					add_spec_invalid add_spec_meta add_spec_resolv add_string \
+					add_string_affix add_type add_window add_window_op
 
 ALIAS_TESTS=alias_list alias_list_alias alias_list_missing alias_num \
 						alias_num_alias alias_num_missing alias_target alias_target_alias \
@@ -67,11 +68,11 @@ ALTER_TESTS=alter_bit_bitnum alter_bit_numbits alter_carray_len \
 						alter_entry_scalar2a alter_entry_scalar2n alter_entry_scalar3 \
 						alter_entry_scalar4 alter_lincom_23 alter_lincom_32 \
 						alter_lincom_input alter_lincom_offset alter_lincom_slope \
-						alter_linterp alter_linterp_move alter_mspec alter_mspec_affix \
-						alter_multiply alter_phase alter_polynom_coeff alter_polynom_input \
-						alter_polynom_ord alter_raw_spf alter_raw_type alter_recip \
-						alter_recip_zero alter_spec alter_spec_affix alter_spec_meta \
-						alter_window
+						alter_linterp alter_linterp_move alter_mplex alter_mspec \
+						alter_mspec_affix alter_multiply alter_phase alter_polynom_coeff \
+						alter_polynom_input alter_polynom_ord alter_raw_spf alter_raw_type \
+						alter_recip alter_recip_zero alter_spec alter_spec_affix \
+						alter_spec_meta alter_window
 
 ASCII_TESTS=ascii_add ascii_get ascii_get_get ascii_nframes ascii_put
 
@@ -149,10 +150,10 @@ ENDIAN_TESTS=endian_alter endian_alter_sie endian_get endian_move
 
 ENTRY_TESTS=entry_bad_code entry_bit entry_bit_scalar entry_divide \
 						entry_invalid entry_lincom entry_lincom_scalar entry_linterp \
-						entry_multiply entry_phase entry_phase_scalar entry_polynom \
-						entry_polynom_scalar entry_raw entry_raw_scalar \
-						entry_raw_scalar_code entry_raw_scalar_type entry_recip \
-						entry_scalar_repr entry_type entry_type_alias \
+						entry_mplex entry_mplex_scalar entry_multiply entry_phase \
+						entry_phase_scalar entry_polynom entry_polynom_scalar entry_raw \
+						entry_raw_scalar entry_raw_scalar_code entry_raw_scalar_type \
+						entry_recip entry_scalar_repr entry_type entry_type_alias \
 						entry_window entry_window_scalar
 
 EOF_TESTS=eof eof_index eof_lincom eof_phase
@@ -186,13 +187,13 @@ GET_TESTS=${GET64} get_bad_code get_bit get_carray get_carray_len \
 					get_float64 get_foffs get_fs get_here get_here_foffs get_heres \
 					get_int8 get_int16 get_int32 get_int64 get_invalid get_lincom1 \
 					get_lincom2 get_lincom3 get_lincom_noin get_lincom_non get_linterp \
-					get_linterp_noin get_linterp_notab get_linterp_sort get_multiply \
-					get_multiply_noin get_nonexistent get_null $(GET_OFF64) get_phase \
-					get_phase_affix get_polynom get_polynom_noin get_recip \
-					get_recip_const get_recurse get_rofs get_sbit get_sf get_ss get_type \
-					get_uint16 get_uint32 get_uint64 get_window get_window_clr \
-					get_window_ge get_window_gt get_window_le get_window_lt \
-					get_window_ne get_window_set get_zero
+					get_linterp_noin get_linterp_notab get_linterp_sort get_mplex \
+					get_mplex_lb get_multiply get_multiply_noin get_nonexistent get_null \
+					$(GET_OFF64) get_phase get_phase_affix get_polynom get_polynom_noin \
+					get_recip get_recip_const get_recurse get_rofs get_sbit get_sf \
+					get_ss get_type get_uint16 get_uint32 get_uint64 get_window \
+					get_window_clr get_window_ge get_window_gt get_window_le \
+					get_window_lt get_window_ne get_window_set get_zero
 
 GLOBAL_TESTS=global_name global_ref global_ref_empty global_ref_set
 
@@ -219,10 +220,10 @@ LZMA_TESTS=lzma_get lzma_nframes
 MADD_TESTS=madd madd_affix madd_alias madd_bit madd_bit_invalid madd_carray \
 					 madd_clincom madd_const madd_cpolynom madd_crecip madd_crecip89 \
 					 madd_divide madd_index madd_lincom madd_lincom_invalid madd_linterp \
-					 madd_linterp_invalid madd_multiply madd_multiply_invalid madd_phase \
-					 madd_phase_invalid madd_polynom madd_recip madd_sbit madd_spec \
-					 madd_spec_directive madd_spec_invalid madd_spec_resolv madd_string \
-					 madd_window
+					 madd_linterp_invalid madd_mplex madd_multiply madd_multiply_invalid \
+					 madd_phase madd_phase_invalid madd_polynom madd_recip madd_sbit \
+					 madd_spec madd_spec_directive madd_spec_invalid madd_spec_resolv \
+					 madd_string madd_window
 
 MOVE_TESTS=move move_affix move_affix_dup move_alias move_data_enc_ar \
 					 move_data_enc_ra move_data_endian move_data_foffs move_data_nop \
@@ -268,6 +269,7 @@ PARSE_TESTS=parse_alias parse_alias_code parse_alias_dup parse_alias_meta \
 						parse_meta_implicit2 parse_meta_implicit_affix parse_meta_index \
 						parse_meta_index2 parse_meta_jump parse_meta_malias \
 						parse_meta_meta parse_meta_parent parse_meta_raw \
+						parse_mplex parse_mplex_ncols parse_mplex_scalar \
 						parse_multiply parse_multiply_ncols parse_name parse_name_dot \
 						parse_name_ext parse_name_pedantic parse_ncols parse_phase \
 						parse_phase_ncols parse_phase_scalar parse_polynom \
@@ -297,10 +299,10 @@ PUT_TESTS=${PUT64} put_bad_code put_bit put_bof put_carray put_carray_slice \
 					put_float64 put_foffs put_fs put_here put_heres put_int8 put_int16 \
 					put_int32 put_int64 put_invalid put_lincom1 put_lincom2 \
 					put_lincom_noin put_linterp put_linterp_noin put_linterp_nomono \
-					put_linterp_notab put_linterp_reverse put_multiply put_null \
-					$(PUT_OFF64) put_phase put_phase_noin put_polynom1 put_polynom2 \
-					put_polynom_noin put_protect put_rdonly put_recip put_recurse \
-					put_repr put_rofs put_sbit put_sf put_ss put_string \
+					put_linterp_notab put_linterp_reverse put_mplex put_multiply \
+					put_null $(PUT_OFF64) put_phase put_phase_noin put_polynom1 \
+					put_polynom2 put_polynom_noin put_protect put_rdonly put_recip \
+					put_recurse put_repr put_rofs put_sbit put_sf put_ss put_string \
 					put_string_protect put_type put_uint16 put_uint32 put_uint64 \
 					put_window
 

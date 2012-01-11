@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 C. Barth Netterfield
- * Copyright (C) 2005-2011 D. V. Wiebe
+ * Copyright (C) 2005-2012 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -184,6 +184,10 @@ double cimag(double complex z);
 #else
 #define GD_BUFFER_SIZE 1000000
 #endif
+
+/* the lookback length (in mplex counter revolutions) to search for the previous
+ * mplex value */
+#define GD_MPLEX_LOOKBACK 10
 
 #ifdef _MSC_VER
 # define _gd_static_inline static
@@ -596,15 +600,17 @@ ssize_t getdelim(char**, size_t*, int, FILE*);
 #define GD_E_FIELD_BAD         2
 #define GD_E_FIELD_MATCH       3
 
-#define GD_E_BAD_ENTRY_TYPE     1
-#define GD_E_BAD_ENTRY_METARAW  2
-#define GD_E_BAD_ENTRY_SPF      3
-#define GD_E_BAD_ENTRY_NFIELDS  4
-#define GD_E_BAD_ENTRY_NUMBITS  5
-#define GD_E_BAD_ENTRY_BITNUM   6
-#define GD_E_BAD_ENTRY_BITSIZE  7
-#define GD_E_BAD_ENTRY_POLYORD  8
-#define GD_E_BAD_ENTRY_WINDOP   9
+#define GD_E_ENTRY_TYPE      1
+#define GD_E_ENTRY_METARAW   2
+#define GD_E_ENTRY_SPF       3
+#define GD_E_ENTRY_NFIELDS   4
+#define GD_E_ENTRY_NUMBITS   5
+#define GD_E_ENTRY_BITNUM    6
+#define GD_E_ENTRY_BITSIZE   7
+#define GD_E_ENTRY_POLYORD   8
+#define GD_E_ENTRY_WINDOP    9
+#define GD_E_ENTRY_CNTVAL   10
+#define GD_E_ENTRY_CNTMAX   11
 
 #define GD_E_SCALAR_CODE        1
 #define GD_E_SCALAR_TYPE        2
@@ -715,6 +721,11 @@ struct _gd_private_entry {
       int n_client;
       gd_entry_t** client;
     } scalar;
+    struct { /* MPLEX */
+      gd_type_t type;
+      off64_t sample;
+      char d[16];
+    } mplex;
     char *string; /* STRING */
     off64_t index_pos; /* INDEX */
   } u;
@@ -942,8 +953,8 @@ const char *_GD_DirName(const DIRFILE *D, int dirfd);
     ((t) == GD_INDEX_ENTRY)    ?  6 : ((t) == GD_POLYNOM_ENTRY)  ?  7 : \
     ((t) == GD_SBIT_ENTRY)     ?  8 : ((t) == GD_DIVIDE_ENTRY)   ?  9 : \
     ((t) == GD_RECIP_ENTRY)    ? 10 : ((t) == GD_WINDOW_ENTRY)   ? 11 : \
-    ((t) == GD_CONST_ENTRY)    ? 12 : ((t) == GD_STRING_ENTRY)   ? 13 : \
-    ((t) == GD_CARRAY_ENTRY)   ? 14 : -1 \
+    ((t) == GD_MPLEX_ENTRY)    ? 12 : ((t) == GD_CONST_ENTRY)    ? 13 : \
+    ((t) == GD_CARRAY_ENTRY)   ? 14 : ((t) == GD_STRING_ENTRY)   ? 15 : -1 \
   )
 
 size_t _GD_DoField(DIRFILE*, gd_entry_t*, int, off64_t, size_t, gd_type_t,
@@ -965,7 +976,7 @@ void _GD_FixEndianness(void* databuffer, size_t size, size_t ns);
 int _GD_FiniRawIO(DIRFILE*, gd_entry_t*, int, int);
 void _GD_Flush(DIRFILE* D, gd_entry_t *E, int);
 void _GD_FlushMeta(DIRFILE* D, int fragment, int force);
-void _GD_FreeE(DIRFILE *D, gd_entry_t* E, int priv);
+void _GD_FreeE(DIRFILE*, gd_entry_t*, int);
 off64_t _GD_GetEOF(DIRFILE *D, gd_entry_t* E, const char *parent,
     int *is_index);
 off64_t _GD_GetFilePos(DIRFILE *D, gd_entry_t *E, off64_t index_pos);
@@ -996,6 +1007,7 @@ char *_GD_MakeFullPath(DIRFILE*, int, const char*, int);
 #define _GD_MakeFullPathOnly gd_MakeFullPathOnly
 char *_GD_MakeFullPathOnly(const DIRFILE *D, int dirfd, const char *name);
 int _GD_MakeTempFile(const DIRFILE*, int, char*);
+void *_GD_Malloc(DIRFILE *D, size_t size);
 int _GD_MissingFramework(int encoding, unsigned int funcs);
 int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned long int encoding,
     unsigned long int byte_sex, off64_t offset, int finalise, int new_fragment,
@@ -1010,11 +1022,14 @@ gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, char** in_cols,
     const char *tok_pos);
 char *_GD_ParseFragment(FILE*, DIRFILE*, int, int*, unsigned long int*, int);
 void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E);
+void *_GD_Realloc(DIRFILE *D, void *old, size_t size);
 void _GD_ReleaseDir(DIRFILE *D, int dirfd);
+int _GD_Seek(DIRFILE *D, gd_entry_t *E, off64_t offset, unsigned int mode);
 void _GD_SetError(DIRFILE* D, int error, int suberror, const char* format_file,
     int line, const char* token);
 int _GD_SetTablePath(DIRFILE *D, gd_entry_t *E, struct _gd_private_entry *e);
 int _GD_StrCmpNull(const char *, const char *);
+char *_GD_Strdup(DIRFILE *D, const char *s);
 int _GD_Supports(DIRFILE* D, gd_entry_t* E, unsigned int funcs);
 int _GD_Tokenise(DIRFILE *D, const char* instring, char **outstring,
     const char **pos, char** in_cols, const char* format_file, int linenum,
@@ -1127,31 +1142,6 @@ ssize_t _GD_ZzipRead(struct _gd_raw_file* file, void *ptr, gd_type_t data_type,
 int _GD_ZzipClose(struct _gd_raw_file* file);
 off64_t _GD_ZzipSize(int, struct _gd_raw_file* file, gd_type_t data_type,
     int swap);
-
-/* allocation boilerplates */
-_gd_static_inline void *_GD_Malloc(DIRFILE *D, size_t size)
-{
-  void *ptr = malloc(size);
-  if (ptr == NULL)
-    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-  return ptr;
-}
-
-_gd_static_inline void *_GD_Realloc(DIRFILE *D, void *old, size_t size)
-{
-  void *ptr = realloc(old, size);
-  if (ptr == NULL)
-    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-  return ptr;
-}
-
-_gd_static_inline char *_GD_Strdup(DIRFILE *D, const char *s)
-{
-  char *ptr = strdup(s);
-  if (ptr == NULL)
-    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-  return ptr;
-}
 
 #ifndef __cplusplus
 # undef gd_nothrow

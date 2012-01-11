@@ -1,4 +1,4 @@
-// Copyright (C) 2008-2011 D. V. Wiebe
+// Copyright (C) 2008-2012 D. V. Wiebe
 //
 ///////////////////////////////////////////////////////////////////////////
 //
@@ -109,6 +109,8 @@ Entry *Dirfile::Entry(const char* field_code) const
       return new GetData::IndexEntry(this, field_code);
     case WindowEntryType:
       return new GetData::WindowEntry(this, field_code);
+    case MplexEntryType:
+      return new GetData::MplexEntry(this, field_code);
     case NoEntryType:
       break;
   }

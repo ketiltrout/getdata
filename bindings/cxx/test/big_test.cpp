@@ -1,4 +1,4 @@
-// Copyright (C) 2009-2010 D. V. Wiebe
+// Copyright (C) 2009-2012 D. V. Wiebe
 //
 ///////////////////////////////////////////////////////////////////////////
 //
@@ -130,6 +130,7 @@ int main(void)
     "polynom POLYNOM data 1.1 2.2 2.2 3.3;4.4 const const\n"
     "bit BIT data 3 4\n"
     "sbit SBIT data 5 6\n"
+    "mplex MPLEX sbit data 1 10\n"
     "mult MULTIPLY data sbit\n"
     "div DIVIDE mult bit\n"
     "recip RECIP div 6.5;4.3\n"
@@ -138,7 +139,7 @@ int main(void)
     "/ALIAS alias data\n"
     "string STRING \"Zaphod Beeblebrox\"\n";
   const char* form2_data = "const2 CONST INT8 -19\n";
-  const int nfields = 16;
+  const int nfields = 17;
   unsigned char c[8];
   unsigned char data_data[80];
   signed char sc;
@@ -166,14 +167,15 @@ int main(void)
   CarrayEntry aent, *aep;
   StringEntry gent;
   WindowEntry went, *wep;
+  MplexEntry xent, *xep;
   Fragment *frag;
   gd_triplet_t thresh;
 
   char* fields[nfields + 7] = {(char*)"INDEX", (char*)"alias", (char*)"bit",
     (char*)"carray", (char*)"const", (char*)"data", (char*)"div",
-    (char*)"lincom", (char*)"linterp", (char*)"mult", (char*)"phase",
-    (char*)"polynom", (char*)"recip", (char*)"sbit", (char*)"string",
-    (char*)"window", NULL, NULL, NULL, NULL, NULL, NULL, NULL};
+    (char*)"lincom", (char*)"linterp", (char*)"mplex", (char*)"mult",
+    (char*)"phase", (char*)"polynom", (char*)"recip", (char*)"sbit",
+    (char*)"string", (char*)"window", NULL, NULL, NULL, NULL, NULL, NULL, NULL};
   char *strings[3];
 
   // Write the test dirfile
@@ -635,7 +637,7 @@ int main(void)
   // 44: Dirfile::NVectors check
   n = d->NVectors();
   CHECK_OK(44);
-  CHECK_INT(44,n,23);
+  CHECK_INT(44,n,24);
 
   // 45: Dirfile::VectorList check
   fields[0] = (char*)"INDEX";
@@ -645,22 +647,23 @@ int main(void)
   fields[4] = (char*)"div";
   fields[5] = (char*)"lincom";
   fields[6] = (char*)"linterp";
-  fields[7] = (char*)"mult";
-  fields[8] = (char*)"new1";
-  fields[9] = (char*)"new10";
-  fields[10] = (char*)"new2";
-  fields[11] = (char*)"new3";
-  fields[12] = (char*)"new4";
-  fields[13] = (char*)"new5";
-  fields[14] = (char*)"new6";
-  fields[15] = (char*)"new7";
-  fields[16] = (char*)"new8";
-  fields[17] = (char*)"new9";
-  fields[18] = (char*)"phase";
-  fields[19] = (char*)"polynom";
-  fields[20] = (char*)"recip";
-  fields[21] = (char*)"sbit";
-  fields[22] = (char*)"window";
+  fields[7] = (char*)"mplex";
+  fields[8] = (char*)"mult";
+  fields[9] = (char*)"new1";
+  fields[10] = (char*)"new10";
+  fields[11] = (char*)"new2";
+  fields[12] = (char*)"new3";
+  fields[13] = (char*)"new4";
+  fields[14] = (char*)"new5";
+  fields[15] = (char*)"new6";
+  fields[16] = (char*)"new7";
+  fields[17] = (char*)"new8";
+  fields[18] = (char*)"new9";
+  fields[19] = (char*)"phase";
+  fields[20] = (char*)"polynom";
+  fields[21] = (char*)"recip";
+  fields[22] = (char*)"sbit";
+  fields[23] = (char*)"window";
   list = d->VectorList();
   CHECK_OK(45);
   CHECK_STRING_ARRAY(45,n,list[i],fields[i]);
@@ -1416,16 +1419,16 @@ int main(void)
   CHECK_INT2(211, 1, ent->Type(), WindowEntryType);
   CHECK_INT2(211, 2, ent->FragmentIndex(), 0);
   CHECK_INT2(211, 3, ent->WindOp(), WindOpLt);
-  CHECK_STRING2(211, 4, ent->Input(), "linterp");
-  CHECK_STRING2(211, 5, ent->Check(), "mult");
+  CHECK_STRING2(211, 4, ent->Input(0), "linterp");
+  CHECK_STRING2(211, 5, ent->Input(1), "mult");
   CHECK_DOUBLE2(211, 6, ent->Threshold().r, 4.1);
   delete ent;
 
   // 212: Dirfile::Add / WindowEntry check
   went.SetName("new18");
   went.SetFragmentIndex(0);
-  went.SetInput("in1");
-  went.SetCheck("in2");
+  went.SetInput("in1", 0);
+  went.SetInput("in2", 1);
   went.SetWindOp(WindOpNe);
   thresh.i = 32;
   went.SetThreshold(thresh);
@@ -1437,16 +1440,16 @@ int main(void)
   CHECK_INT2(212, 1, ent->Type(), WindowEntryType);
   CHECK_INT2(212, 2, ent->FragmentIndex(), 0);
   CHECK_INT2(212, 3, ent->WindOp(), WindOpNe);
-  CHECK_STRING2(212, 4, ent->Input(), "in1");
-  CHECK_STRING2(212, 5, ent->Check(), "in2");
+  CHECK_STRING2(212, 4, ent->Input(0), "in1");
+  CHECK_STRING2(212, 5, ent->Input(1), "in2");
   CHECK_INT2(212, 6, ent->Threshold().i, 32);
   delete ent;
 
   // 214: gd_madd_window_i check
   went.Dissociate();
   went.SetName("mnew18");
-  went.SetInput("in2");
-  went.SetCheck("in3");
+  went.SetInput("in2", 0);
+  went.SetInput("in3", 1);
   went.SetWindOp(WindOpSet);
   thresh.u = 128;
   went.SetThreshold(thresh);
@@ -1458,15 +1461,15 @@ int main(void)
   CHECK_INT2(214, 1, ent->Type(), WindowEntryType);
   CHECK_INT2(214, 2, ent->FragmentIndex(), 0);
   CHECK_INT2(214, 3, ent->WindOp(), WindOpSet);
-  CHECK_STRING2(214, 4, ent->Input(), "in2");
-  CHECK_STRING2(214, 5, ent->Check(), "in3");
+  CHECK_STRING2(214, 4, ent->Input(0), "in2");
+  CHECK_STRING2(214, 5, ent->Input(1), "in3");
   CHECK_INT2(214, 6, ent->Threshold().u, 128);
   delete ent;
 
   // 217: gd_alter_window_r check
   wep = reinterpret_cast<WindowEntry*>(d->Entry("new18"));
-  wep->SetInput("in3");
-  wep->SetCheck("in4");
+  wep->SetInput("in3", 0);
+  wep->SetInput("in4", 1);
   wep->SetWindOp(WindOpGe);
   thresh.r = 32e3;
   wep->SetThreshold(thresh);
@@ -1478,8 +1481,8 @@ int main(void)
   CHECK_INT2(217, 1, ent->Type(), WindowEntryType);
   CHECK_INT2(217, 2, ent->FragmentIndex(), 0);
   CHECK_INT2(217, 3, ent->WindOp(), WindOpGe);
-  CHECK_STRING2(217, 4, ent->Input(), "in3");
-  CHECK_STRING2(217, 5, ent->Check(), "in4");
+  CHECK_STRING2(217, 4, ent->Input(0), "in3");
+  CHECK_STRING2(217, 5, ent->Input(1), "in4");
   CHECK_DOUBLE2(217, 6, ent->Threshold().r, 32e3);
   delete ent;
 
@@ -1553,6 +1556,76 @@ int main(void)
   CHECK_STRING2(227, 3, frag->Prefix(), "B");
   CHECK_STRING2(227, 3, frag->Suffix(), "C");
   delete frag;
+
+  // 228: gd_entry (MPLEX) check
+  ent = d->Entry("mplex");
+  CHECK_OK(228);
+  CHECK_INT2(228, 1, ent->Type(), MplexEntryType);
+  CHECK_INT2(228, 2, ent->FragmentIndex(), 0);
+  CHECK_INT2(228, 3, ent->CountVal(), 1);
+  CHECK_STRING2(228, 4, ent->Input(0), "data");
+  CHECK_STRING2(228, 5, ent->Input(1), "sbit");
+  CHECK_INT2(228, 6, ent->CountMax(), 10);
+  delete ent;
+
+  // 229: Dirfile::Add / MplexEntry check
+  xent.SetName("new21");
+  xent.SetFragmentIndex(0);
+  xent.SetInput("in1", 0);
+  xent.SetInput("in2", 1);
+  xent.SetCountVal(5);
+  xent.SetCountMax(6);
+  d->Add(xent);
+  CHECK_OK2(229, 1);
+
+  ent = d->Entry("new21");
+  CHECK_OK2(229, 2);
+  CHECK_INT2(229, 1, ent->Type(), MplexEntryType);
+  CHECK_INT2(229, 2, ent->FragmentIndex(), 0);
+  CHECK_INT2(229, 3, ent->CountVal(), 5);
+  CHECK_STRING2(229, 4, ent->Input(0), "in1");
+  CHECK_STRING2(229, 5, ent->Input(1), "in2");
+  CHECK_INT2(229, 6, ent->CountMax(), 6);
+  delete ent;
+
+  // 230: gd_madd_mplex check
+  xent.Dissociate();
+  xent.SetName("mnew21");
+  xent.SetInput("in2", 0);
+  xent.SetInput("in3", 1);
+  xent.SetCountVal((gd_count_t)0);
+  xent.SetCountMax(12);
+  d->MAdd(xent, "data");
+  CHECK_OK2(230, 1);
+
+  ent = d->Entry("data/mnew21");
+  CHECK_OK2(230, 2);
+  CHECK_INT2(230, 1, ent->Type(), MplexEntryType);
+  CHECK_INT2(230, 2, ent->FragmentIndex(), 0);
+  CHECK_INT2(230, 3, ent->CountVal(), 0);
+  CHECK_STRING2(230, 4, ent->Input(0), "in2");
+  CHECK_STRING2(230, 5, ent->Input(1), "in3");
+  CHECK_INT2(230, 6, ent->CountMax(), 12);
+  delete ent;
+
+  // 231: gd_alter_mplex check
+  xep = reinterpret_cast<MplexEntry*>(d->Entry("new21"));
+  xep->SetInput("in3", 0);
+  xep->SetInput("in4", 1);
+  xep->SetCountVal(3);
+  xep->SetCountMax(7);
+  CHECK_OK2(231, 1);
+  delete xep;
+
+  ent = d->Entry("new21");
+  CHECK_OK2(231, 2);
+  CHECK_INT2(231, 1, ent->Type(), MplexEntryType);
+  CHECK_INT2(231, 2, ent->FragmentIndex(), 0);
+  CHECK_INT2(231, 3, ent->CountVal(), 3);
+  CHECK_STRING2(231, 4, ent->Input(0), "in3");
+  CHECK_STRING2(231, 5, ent->Input(1), "in4");
+  CHECK_INT2(231, 6, ent->CountMax(), 7);
+  delete ent;
 
 
 

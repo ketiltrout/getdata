@@ -1,4 +1,4 @@
-/* Copyright (C) 2011 D. V. Wiebe
+/* Copyright (C) 2011-2012 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -74,6 +74,7 @@ off64_t _GD_GetFilePos(DIRFILE *D, gd_entry_t *E, off64_t index_pos)
     case GD_MULTIPLY_ENTRY:
     case GD_DIVIDE_ENTRY:
     case GD_WINDOW_ENTRY:
+    case GD_MPLEX_ENTRY:
       if (_GD_BadInput(D, E, 0, 1) || _GD_BadInput(D, E, 1, 1))
           break;
       pos = _GD_GetFilePos(D, E->e->entry[0], 0);
@@ -224,8 +225,7 @@ off64_t _GD_WriteSeek(DIRFILE *D, gd_entry_t *E, const struct encoding_t *enc,
   return pos;
 }
 
-static int _GD_Seek(DIRFILE *D, gd_entry_t *E, off64_t offset,
-    unsigned int mode)
+int _GD_Seek(DIRFILE *D, gd_entry_t *E, off64_t offset, unsigned int mode)
 {
   int i;
 
@@ -271,6 +271,7 @@ static int _GD_Seek(DIRFILE *D, gd_entry_t *E, off64_t offset,
     case GD_MULTIPLY_ENTRY:
     case GD_DIVIDE_ENTRY:
     case GD_WINDOW_ENTRY:
+    case GD_MPLEX_ENTRY:
       if (_GD_BadInput(D, E, 1, 1))
         break;
       if (_GD_Seek(D, E->e->entry[1], offset, mode))

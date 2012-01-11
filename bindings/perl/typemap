@@ -8,13 +8,14 @@ unsigned long int T_UV
 # GetData types
 DIRFILE * T_DIRFILE
 gd_bit_t T_IV
+gd_count_t T_UV
 gd_entry_t T_ENTRY
 gd_entype_t T_UV
 gd_shift_t T_IV
 gd_spf_t T_UV
+gd_triplet_t T_TRIPLET
 gd_type_t T_UV
 gd_windop_t T_IV
-gd_triplet_t T_TRIPLET
 
 # GetData Perl pseudotypes
 gdp_complex_in * T_COMPLEXIN

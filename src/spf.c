@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 C. Barth Netterfield
- * Copyright (C) 2005-2011 D. V. Wiebe
+ * Copyright (C) 2005-2012 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -23,7 +23,7 @@
 
 /* _GD_GetSPF: Get samples per frame for field
 */
-gd_spf_t _GD_GetSPF(DIRFILE* D, gd_entry_t* E)
+gd_spf_t _GD_GetSPF(DIRFILE *D, gd_entry_t *E)
 {
   gd_spf_t spf = 0;
 
@@ -53,6 +53,7 @@ gd_spf_t _GD_GetSPF(DIRFILE* D, gd_entry_t* E)
     case GD_POLYNOM_ENTRY:
     case GD_SBIT_ENTRY:
     case GD_WINDOW_ENTRY:
+    case GD_MPLEX_ENTRY:
       if (_GD_BadInput(D, E, 0, 1))
         break;
 

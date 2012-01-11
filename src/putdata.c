@@ -1,6 +1,6 @@
 /* Copyright (C) 2003-2005 C. Barth Netterfield
  * Copyright (C) 2003-2005 Theodore Kisner
- * Copyright (C) 2005-2011 D. V. Wiebe
+ * Copyright (C) 2005-2012 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -502,6 +502,124 @@ static size_t _GD_DoPolynomOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
   return n_wrote;
 }
 
+#define MPLEX(t) \
+  for (i = 0; i < n; i++) \
+    if (B[i] == val) \
+      ((t*)A)[i] = ((t*)C)[i];
+
+#define MPLEXC(t) \
+  do { \
+    for (i = 0; i < n; i++) \
+      if (B[i] == val) { \
+        ((t*)A)[i * 2] = ((t*)C)[i * 2]; \
+        ((t*)A)[i * 2 + 1] = ((t*)C)[i * 2 + 1]; \
+      } \
+  } while (0)
+
+static void _GD_MplexOutData(DIRFILE *D, void *A, gd_spf_t spfA,
+    const uint16_t *B, gd_spf_t spfB, const void *C, gd_type_t type,
+    gd_count_t val, size_t n)
+{
+  size_t i;
+
+  dtrace("%p, %p, %u, %p, %u, %p, 0x%X %i, %zu", D, A, spfA, B, spfB, C, type,
+      val, n);
+
+  switch (type) {
+    case GD_NULL:                        break;
+    case GD_UINT8:      MPLEX( uint8_t); break;
+    case GD_INT8:       MPLEX(  int8_t); break;
+    case GD_UINT16:     MPLEX(uint16_t); break;
+    case GD_INT16:      MPLEX( int16_t); break;
+    case GD_UINT32:     MPLEX(uint32_t); break;
+    case GD_INT32:      MPLEX( int32_t); break;
+    case GD_UINT64:     MPLEX(uint64_t); break;
+    case GD_INT64:      MPLEX( int64_t); break;
+    case GD_FLOAT32:    MPLEX(   float); break;
+    case GD_FLOAT64:    MPLEX(  double); break;
+    case GD_COMPLEX64:  MPLEXC(  float); break;
+    case GD_COMPLEX128: MPLEXC( double); break;
+    default:            _GD_SetError(D, GD_E_BAD_TYPE, type, NULL, 0, NULL);
+                        break;
+  }
+
+  dreturnvoid();
+}
+
+static size_t _GD_DoMplexOut(DIRFILE *D, gd_entry_t *E, off64_t first_samp,
+    size_t num_samp, gd_type_t data_type, const void *data_in)
+{
+  size_t n_wrote = 0, num_samp2;
+  void *tmpbuf;
+  uint16_t *cntbuf;
+  off64_t first_samp2;
+  gd_spf_t spf1, spf2;
+
+  dtrace("%p, %p, %lli, %zu, 0x%X, %p", D, E, first_samp, num_samp, data_type,
+      data_in);
+
+  if (_GD_BadInput(D, E, 0, 1)) {
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  if (_GD_BadInput(D, E, 1, 1)) {
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  /* read the data to be modified */
+  spf1 = _GD_GetSPF(D, E->e->entry[0]);
+  spf2 = _GD_GetSPF(D, E->e->entry[1]);
+
+  if (D->error) {
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  num_samp2 = (int)ceil((double)num_samp * spf2 / spf1);
+  first_samp2 = first_samp * spf2 / spf1;
+
+  tmpbuf = _GD_Alloc(D, data_type, num_samp);
+  cntbuf = _GD_Alloc(D, GD_UINT16, num_samp2);
+
+  if (tmpbuf == NULL || cntbuf == NULL) {
+    free(tmpbuf);
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  memset(tmpbuf, 0, num_samp * GD_SIZE(data_type));
+  memset(cntbuf, 0, num_samp2 * GD_SIZE(GD_UINT16));
+
+  _GD_DoField(D, E->e->entry[0], E->e->repr[0], first_samp, num_samp, data_type,
+      tmpbuf);
+
+  _GD_DoField(D, E->e->entry[1], E->e->repr[1], first_samp2, num_samp2,
+      GD_UINT16, cntbuf);
+
+  if (D->error != GD_E_OK) {
+    free(cntbuf);
+    free(tmpbuf);
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  /* enmultiplex the data */
+  _GD_MplexOutData(D, tmpbuf, spf1, cntbuf, spf2, data_in, data_type,
+      E->EN(mplex,count_val), num_samp);
+  free(cntbuf);
+
+  /* and write it. */
+  if (!D->error)
+    n_wrote = _GD_DoFieldOut(D, E->e->entry[0], E->e->repr[0], first_samp,
+        num_samp, data_type, tmpbuf);
+  free(tmpbuf);
+
+  dreturn("%zu", n_wrote);
+  return n_wrote;
+}
+
 static size_t _GD_DoConstOut(DIRFILE* D, gd_entry_t *E, off64_t first,
     size_t len, gd_type_t data_type, const void *data_in)
 {
@@ -607,6 +725,9 @@ size_t _GD_DoFieldOut(DIRFILE *D, gd_entry_t* E, int repr, off64_t first_samp,
     case GD_BIT_ENTRY:
     case GD_SBIT_ENTRY:
       n_wrote = _GD_DoBitOut(D, E, first_samp, num_samp, data_type, data_in);
+      break;
+    case GD_MPLEX_ENTRY:
+      n_wrote = _GD_DoMplexOut(D, E, first_samp, num_samp, data_type, data_in);
       break;
     case GD_MULTIPLY_ENTRY:
     case GD_DIVIDE_ENTRY:

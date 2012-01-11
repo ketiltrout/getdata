@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 D. V. Wiebe
+/* Copyright (C) 2008-2012 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -21,17 +21,17 @@
 #include "internal.h"
 
 /* add an entry - returns the added entry on success. */
-static gd_entry_t *_GD_Add(DIRFILE* D, const gd_entry_t* entry,
-    const char* parent)
+static gd_entry_t *_GD_Add(DIRFILE *D, const gd_entry_t *entry,
+    const char *parent)
 {
   char *temp_buffer;
   int i, is_dot, offset;
   int copy_scalar[GD_MAX_POLYORD + 1];
-  void* new_list;
-  void* new_ref = NULL;
+  void *new_list;
+  void *new_ref = NULL;
   unsigned int u;
-  gd_entry_t* E;
-  gd_entry_t* P = NULL;
+  gd_entry_t *E;
+  gd_entry_t *P = NULL;
 
   dtrace("%p, %p, \"%s\"", D, entry, parent);
 
@@ -117,11 +117,12 @@ static gd_entry_t *_GD_Add(DIRFILE* D, const gd_entry_t* entry,
       entry->field_type != GD_DIVIDE_ENTRY &&
       entry->field_type != GD_RECIP_ENTRY &&
       entry->field_type != GD_WINDOW_ENTRY &&
+      entry->field_type != GD_MPLEX_ENTRY &&
       entry->field_type != GD_CARRAY_ENTRY &&
       entry->field_type != GD_STRING_ENTRY)
   {
-    _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_TYPE, NULL,
-        entry->field_type, NULL);
+    _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_ENTRY_TYPE, NULL, entry->field_type,
+        NULL);
     dreturn("%p", NULL);
     return NULL;
   }
@@ -173,7 +174,7 @@ static gd_entry_t *_GD_Add(DIRFILE* D, const gd_entry_t* entry,
     case GD_RAW_ENTRY:
       /* no METARAW fields allowed */
       if (parent != NULL) {
-        _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_METARAW, NULL,
+        _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_ENTRY_METARAW, NULL,
             entry->field_type, NULL);
         break;
       }
@@ -193,7 +194,7 @@ static gd_entry_t *_GD_Add(DIRFILE* D, const gd_entry_t* entry,
         break;
 
       if ((E->EN(raw,spf) = entry->EN(raw,spf)) == 0)
-        _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_SPF, NULL,
+        _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_ENTRY_SPF, NULL,
             entry->EN(raw,spf), NULL);
       else if (E->EN(raw,data_type) & 0x40 || (E->e->u.raw.size =
             GD_SIZE(E->EN(raw,data_type))) == 0)
@@ -212,7 +213,7 @@ static gd_entry_t *_GD_Add(DIRFILE* D, const gd_entry_t* entry,
       E->EN(lincom,n_fields) = entry->EN(lincom,n_fields);
 
       if (E->EN(lincom,n_fields) < 1 || E->EN(lincom,n_fields) > GD_MAX_LINCOM)
-        _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_NFIELDS, NULL,
+        _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_ENTRY_NFIELDS, NULL,
             E->EN(lincom,n_fields), NULL);
       else {
         if (entry->comp_scal) {
@@ -278,13 +279,13 @@ static gd_entry_t *_GD_Add(DIRFILE* D, const gd_entry_t* entry,
 
       E->in_fields[0] = _GD_Strdup(D, entry->in_fields[0]);
       if (E->EN(bit,numbits) < 1)
-        _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_NUMBITS, NULL,
+        _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_ENTRY_NUMBITS, NULL,
             entry->EN(bit,numbits), NULL);
       else if (E->EN(bit,bitnum) < 0)
-        _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_BITNUM, NULL,
+        _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_ENTRY_BITNUM, NULL,
             entry->EN(bit,bitnum), NULL);
       else if (E->EN(bit,bitnum) + E->EN(bit,numbits) - 1 > 63)
-        _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_BITSIZE, NULL,
+        _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_ENTRY_BITSIZE, NULL,
             E->EN(bit,bitnum) + E->EN(bit,numbits) - 1, NULL);
       copy_scalar[0] = copy_scalar[1] = 1;
       break;
@@ -301,9 +302,24 @@ static gd_entry_t *_GD_Add(DIRFILE* D, const gd_entry_t* entry,
       E->in_fields[0] = _GD_Strdup(D, entry->in_fields[0]);
       E->in_fields[1] = _GD_Strdup(D, entry->in_fields[1]);
       if (_GD_BadWindop(E->EN(window,windop)))
-        _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_WINDOP, NULL,
+        _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_ENTRY_WINDOP, NULL,
             entry->EN(window,windop), NULL);
       copy_scalar[0] = 1;
+      break;
+    case GD_MPLEX_ENTRY:
+      E->EN(mplex,count_val) = entry->EN(mplex,count_val);
+      E->EN(mplex,count_max) = entry->EN(mplex,count_max);
+      E->in_fields[0] = _GD_Strdup(D, entry->in_fields[0]);
+      E->in_fields[1] = _GD_Strdup(D, entry->in_fields[1]);
+      E->e->u.mplex.type = GD_NULL;
+
+      if (entry->EN(mplex,count_max) < 1)
+        _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_ENTRY_CNTMAX, NULL,
+            entry->EN(mplex,count_max), NULL);
+      else if (entry->EN(mplex,count_val) >= entry->EN(mplex,count_max))
+        _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_ENTRY_CNTVAL, NULL,
+            entry->EN(mplex,count_val), NULL);
+      copy_scalar[0] = copy_scalar[1] = 1;
       break;
     case GD_CONST_ENTRY:
       E->EN(scalar,const_type) = entry->EN(scalar,const_type);
@@ -349,7 +365,7 @@ static gd_entry_t *_GD_Add(DIRFILE* D, const gd_entry_t* entry,
       if (E->EN(polynom,poly_ord) < 1 || E->EN(polynom,poly_ord) >
           GD_MAX_POLYORD)
       {
-        _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_NFIELDS, NULL,
+        _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_ENTRY_NFIELDS, NULL,
             E->EN(polynom,poly_ord), NULL);
       }
       else {
@@ -686,8 +702,7 @@ int gd_add_lincom(DIRFILE* D, const char* field_code, int n_fields,
   }
 
   if (n_fields < 1 || n_fields > GD_MAX_LINCOM) {
-    _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_NFIELDS, NULL, n_fields,
-        NULL);
+    _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_ENTRY_NFIELDS, NULL, n_fields, NULL);
     dreturn("%i", -1);
     return -1;
   }
@@ -728,8 +743,7 @@ int gd_add_clincom(DIRFILE* D, const char* field_code, int n_fields,
   }
 
   if (n_fields < 1 || n_fields > GD_MAX_LINCOM) {
-    _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_NFIELDS, NULL, n_fields,
-        NULL);
+    _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_ENTRY_NFIELDS, NULL, n_fields, NULL);
     dreturn("%i", -1);
     return -1;
   }
@@ -998,8 +1012,7 @@ int gd_add_polynom(DIRFILE* D, const char* field_code, int poly_ord,
   }
 
   if (poly_ord < 1 || poly_ord > GD_MAX_LINCOM) {
-    _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_POLYORD, NULL, poly_ord,
-        NULL);
+    _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_ENTRY_POLYORD, NULL, poly_ord, NULL);
     dreturn("%i", -1);
     return -1;
   }
@@ -1037,8 +1050,7 @@ int gd_add_cpolynom(DIRFILE* D, const char* field_code, int poly_ord,
   }
 
   if (poly_ord < 1 || poly_ord > GD_MAX_LINCOM) {
-    _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_POLYORD, NULL, poly_ord,
-        NULL);
+    _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_ENTRY_POLYORD, NULL, poly_ord, NULL);
     dreturn("%i", -1);
     return -1;
   }
@@ -1113,6 +1125,37 @@ int gd_add_window(DIRFILE *D, const char *field_code, const char *in_field,
   E.EN(window,windop) = windop;
   E.in_fields[0] = (char *)in_field;
   E.in_fields[1] = (char *)check_field;
+  E.fragment_index = fragment_index;
+  error = (_GD_Add(D, &E, NULL) == NULL) ? -1 : 0;
+
+  dreturn("%i", error);
+  return error;
+}
+
+/* add a MPLEX entry */
+int gd_add_mplex(DIRFILE *D, const char *field_code, const char *in_field,
+    const char *count_field, gd_count_t count_val, gd_count_t count_max,
+    int fragment_index) gd_nothrow
+{
+  gd_entry_t E;
+  int error;
+
+  dtrace("%p, \"%s\", \"%s\", \"%s\", %i, %i, %i", D, field_code, in_field,
+      count_field, count_val, count_max, fragment_index);
+
+  if (D->flags & GD_INVALID) {/* don't crash */
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  memset(&E, 0, sizeof(gd_entry_t));
+  E.field = (char *)field_code;
+  E.field_type = GD_MPLEX_ENTRY;
+  E.EN(mplex,count_val) = count_val;
+  E.EN(mplex,count_max) = count_max;
+  E.in_fields[0] = (char *)in_field;
+  E.in_fields[1] = (char *)count_field;
   E.fragment_index = fragment_index;
   error = (_GD_Add(D, &E, NULL) == NULL) ? -1 : 0;
 
@@ -1249,8 +1292,7 @@ gd_nothrow
   }
 
   if (n_fields < 1 || n_fields > GD_MAX_LINCOM) {
-    _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_NFIELDS, NULL, n_fields,
-        NULL);
+    _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_ENTRY_NFIELDS, NULL, n_fields, NULL);
     dreturn("%i", -1);
     return -1;
   }
@@ -1293,8 +1335,7 @@ int gd_madd_clincom(DIRFILE* D, const char* parent, const char* field_code,
   }
 
   if (n_fields < 1 || n_fields > GD_MAX_LINCOM) {
-    _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_NFIELDS, NULL, n_fields,
-        NULL);
+    _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_ENTRY_NFIELDS, NULL, n_fields, NULL);
     dreturn("%i", -1);
     return -1;
   }
@@ -1481,8 +1522,7 @@ int gd_madd_polynom(DIRFILE* D, const char* parent, const char* field_code,
   }
 
   if (poly_ord < 1 || poly_ord > GD_MAX_POLYORD) {
-    _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_POLYORD, NULL, poly_ord,
-        NULL);
+    _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_ENTRY_POLYORD, NULL, poly_ord, NULL);
     dreturn("%i", -1);
     return -1;
   }
@@ -1523,8 +1563,7 @@ int gd_madd_cpolynom(DIRFILE* D, const char* parent, const char* field_code,
   }
 
   if (poly_ord < 1 || poly_ord > GD_MAX_POLYORD) {
-    _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_POLYORD, NULL, poly_ord,
-        NULL);
+    _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_ENTRY_POLYORD, NULL, poly_ord, NULL);
     dreturn("%i", -1);
     return -1;
   }
@@ -1684,6 +1723,36 @@ int gd_madd_window(DIRFILE *D, const char *parent, const char *field_code,
   E.EN(window,windop) = windop;
   E.in_fields[0] = (char *)in_field;
   E.in_fields[1] = (char *)check_field;
+  error = (_GD_Add(D, &E, parent) == NULL) ? -1 : 0;
+
+  dreturn("%i", error);
+  return error;
+}
+
+/* add a META MPLEX entry */
+int gd_madd_mplex(DIRFILE *D, const char *parent, const char *field_code,
+    const char *in_field, const char *count_field, gd_count_t count_val,
+    gd_count_t count_max) gd_nothrow
+{
+  int error;
+  gd_entry_t E;
+
+  dtrace("%p, \"%s\", \"%s\", \"%s\", \"%s\", %i, %i", D, parent, field_code,
+      in_field, count_field, count_val, count_max);
+
+  if (D->flags & GD_INVALID) {/* don't crash */
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  memset(&E, 0, sizeof(gd_entry_t));
+  E.field = (char *)field_code;
+  E.field_type = GD_MPLEX_ENTRY;
+  E.EN(mplex,count_val) = count_val;
+  E.EN(mplex,count_max) = count_max;
+  E.in_fields[0] = (char *)in_field;
+  E.in_fields[1] = (char *)count_field;
   error = (_GD_Add(D, &E, parent) == NULL) ? -1 : 0;
 
   dreturn("%i", error);

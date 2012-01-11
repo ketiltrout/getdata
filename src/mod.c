@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 D. V. Wiebe
+/* Copyright (C) 2008-2012 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -382,7 +382,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
       Q.EN(lincom,n_fields) = (N->EN(lincom,n_fields) == 0) ?
         E->EN(lincom,n_fields) : N->EN(lincom,n_fields);
       if (Q.EN(lincom,n_fields) < 1 || Q.EN(lincom,n_fields) > GD_MAX_LINCOM) {
-        _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_NFIELDS, NULL,
+        _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_ENTRY_NFIELDS, NULL,
             E->EN(lincom,n_fields), NULL);
         break;
       }
@@ -717,6 +717,52 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
       if (j & GD_AS_ERROR)
         break;
       if (j & GD_AS_FREE_SCALAR)
+        scalar_free |= 1;
+      if (j & GD_AS_NEED_RECALC)
+        Qe.calculated = 0;
+      if (j & GD_AS_MODIFIED)
+        modified = 1;
+
+      if (N->in_fields[0] != NULL && strcmp(E->in_fields[0], N->in_fields[0])) {
+        if ((Q.in_fields[0] = _GD_Strdup(D, N->in_fields[0])) == NULL)
+          break;
+
+        modified = 1;
+        field_free |= 1;
+      }
+
+      if (N->in_fields[1] != NULL && strcmp(E->in_fields[1], N->in_fields[1])) {
+        if ((Q.in_fields[1] = _GD_Strdup(D, N->in_fields[1])) == NULL)
+          break;
+
+        modified = 1;
+        field_free |= 2;
+      }
+
+      break;
+    case GD_MPLEX_ENTRY:
+      j = _GD_AlterScalar(D, N->EN(mplex,count_max) != 0 &&
+          E->EN(mplex,count_max) != N->EN(mplex,count_max), GD_INT16,
+          &Q.EN(mplex,count_max), &N->EN(mplex,count_max), Q.scalar,
+          Q.scalar_ind, N->scalar[0], N->scalar_ind[0], E->e->calculated);
+
+      if (j & GD_AS_ERROR)
+        break;
+      if (j & GD_AS_FREE_SCALAR)
+        scalar_free |= 1;
+      if (j & GD_AS_NEED_RECALC)
+        Qe.calculated = 0;
+      if (j & GD_AS_MODIFIED)
+        modified = 1;
+
+      j = _GD_AlterScalar(D, N->EN(mplex,count_val) != GD_COUNT_MAX &&
+          E->EN(mplex,count_val) != N->EN(mplex,count_val), GD_INT16,
+          &Q.EN(mplex,count_val), &N->EN(mplex,count_val), Q.scalar,
+          Q.scalar_ind, N->scalar[1], N->scalar_ind[1], E->e->calculated);
+
+      if (j & GD_AS_ERROR)
+        break;
+      if (j & GD_AS_FREE_SCALAR)
         scalar_free |= 2;
       if (j & GD_AS_NEED_RECALC)
         Qe.calculated = 0;
@@ -957,8 +1003,7 @@ int gd_alter_lincom(DIRFILE* D, const char* field_code, int n_fields,
   N.field_type = GD_LINCOM_ENTRY;
   N.comp_scal = 0;
   if (n_fields > GD_MAX_LINCOM || n_fields < 0) {
-    _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_NFIELDS, NULL, n_fields,
-        NULL);
+    _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_ENTRY_NFIELDS, NULL, n_fields, NULL);
     dreturn("%i", -1);
     return -1;
   } else if (n_fields != 0)
@@ -1027,8 +1072,7 @@ int gd_alter_clincom(DIRFILE* D, const char* field_code, int n_fields,
   N.field_type = GD_LINCOM_ENTRY;
   N.comp_scal = 1;
   if (n_fields > GD_MAX_LINCOM || n_fields < 0) {
-    _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_NFIELDS, NULL, n_fields,
-        NULL);
+    _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_ENTRY_NFIELDS, NULL, n_fields, NULL);
     dreturn("%i", -1);
     return -1;
   } else if (n_fields != 0)
@@ -1407,8 +1451,7 @@ int gd_alter_polynom(DIRFILE* D, const char* field_code, int poly_ord,
   N.field_type = GD_POLYNOM_ENTRY;
   N.comp_scal = 0;
   if (poly_ord > GD_MAX_POLYORD || poly_ord < 0) {
-    _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_POLYORD, NULL, poly_ord,
-        NULL);
+    _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_ENTRY_POLYORD, NULL, poly_ord, NULL);
     dreturn("%i", -1);
     return -1;
   } else if (poly_ord != 0)
@@ -1465,8 +1508,7 @@ int gd_alter_cpolynom(DIRFILE* D, const char* field_code, int poly_ord,
   N.field_type = GD_POLYNOM_ENTRY;
   N.comp_scal = 1;
   if (poly_ord > GD_MAX_POLYORD || poly_ord < 0) {
-    _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_POLYORD, NULL, poly_ord,
-        NULL);
+    _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_ENTRY_POLYORD, NULL, poly_ord, NULL);
     dreturn("%i", -1);
     return -1;
   } else if (poly_ord != 0)
@@ -1525,6 +1567,37 @@ gd_nothrow
   N.in_fields[1] = (char *)check_field;
   N.EN(window,windop) = windop;
   N.EN(window,threshold) = threshold;
+  N.scalar[0] = NULL;
+  N.e = NULL;
+
+  ret = _GD_Change(D, field_code, &N, 0);
+
+  dreturn("%i", ret);
+  return ret;
+}
+
+int gd_alter_mplex(DIRFILE* D, const char *field_code, const char *in_field,
+    const char *count_field, gd_count_t count_val, gd_count_t count_max)
+gd_nothrow
+{
+  int ret;
+  gd_entry_t N;
+
+  dtrace("%p, \"%s\", \"%s\", \"%s\", %i, %i", D, field_code, in_field,
+      count_field, count_val, count_max);
+
+  if (D->flags & GD_INVALID) {
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  memset(&N, 0, sizeof(gd_entry_t));
+  N.field_type = GD_MPLEX_ENTRY;
+  N.in_fields[0] = (char *)in_field;
+  N.in_fields[1] = (char *)count_field;
+  N.EN(mplex,count_val) = count_val;
+  N.EN(mplex,count_max) = count_max;
   N.scalar[0] = NULL;
   N.e = NULL;
 

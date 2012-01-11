@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 C. Barth Netterfield
- * Copyright (C) 2005-2011 D. V. Wiebe
+ * Copyright (C) 2005-2012 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -861,7 +861,7 @@ static void _GD_CDivideData(DIRFILE *D, void *A, gd_spf_t spfA,
 /* WindowData: Zero data in A where the condition is false.  B is unchanged.
 */
 static void _GD_WindowData(DIRFILE* D, void *A, gd_spf_t spfA, void *B,
-    gd_spf_t spfB, gd_windop_t op, gd_triplet_t threshold, gd_type_t type,
+    gd_spf_t spfB, gd_type_t type, gd_windop_t op, gd_triplet_t threshold,
     size_t n)
 {
   size_t i;
@@ -885,6 +885,62 @@ static void _GD_WindowData(DIRFILE* D, void *A, gd_spf_t spfA, void *B,
     case GD_FLOAT64:    WINDOW(  double,NaN) break;
     case GD_COMPLEX64:  WINDOWC(  float,NaN) break;
     case GD_COMPLEX128: WINDOWC( double,NaN) break;
+    default:            _GD_SetError(D, GD_E_BAD_TYPE, type, NULL, 0, NULL);
+                        break;
+  }
+
+  dreturnvoid();
+}
+
+#define MPLEX(t) \
+  do { \
+    t last = *(t*)start; \
+    for (i = 0; i < n; i++) \
+      if (B[i * spfB / spfA] == val) \
+        last = ((t*)A)[i]; \
+      else \
+        ((t*)A)[i] = last; \
+  } while(0)
+
+#define MPLEXC(t) \
+  do { \
+    t rlast, ilast; \
+    rlast = *(t*)start; \
+    ilast = ((t*)start)[1]; \
+    for (i = 0; i < n; i++) \
+      if (B[i * spfB / spfA] == val) { \
+        rlast = ((t*)A)[i * 2]; \
+        ilast = ((t*)A)[i * 2 + 1]; \
+      } else { \
+        ((t*)A)[i * 2] = rlast; \
+        ((t*)A)[i * 2 + 1] = ilast; \
+      } \
+  } while(0)
+
+/* demultiplex data */
+static void _GD_MplexData(DIRFILE *D, void *A, gd_spf_t spfA,
+    const uint16_t *B, gd_spf_t spfB, gd_type_t type, gd_count_t val,
+    void *start, size_t n)
+{
+  size_t i;
+
+  dtrace("%p, %p, %u, %p, %u, 0x%X, %i, %p, %zu", D, A, spfA, B, spfB, type,
+      val, start, n);
+
+  switch (type) {
+    case GD_NULL:                        break;
+    case GD_UINT8:      MPLEX( uint8_t); break;
+    case GD_INT8:       MPLEX(  int8_t); break;
+    case GD_UINT16:     MPLEX(uint16_t); break;
+    case GD_INT16:      MPLEX( int16_t); break;
+    case GD_UINT32:     MPLEX(uint32_t); break;
+    case GD_INT32:      MPLEX( int32_t); break;
+    case GD_UINT64:     MPLEX(uint64_t); break;
+    case GD_INT64:      MPLEX( int64_t); break;
+    case GD_FLOAT32:    MPLEX(   float); break;
+    case GD_FLOAT64:    MPLEX(  double); break;
+    case GD_COMPLEX64:  MPLEXC(  float); break;
+    case GD_COMPLEX128: MPLEXC( double); break;
     default:            _GD_SetError(D, GD_E_BAD_TYPE, type, NULL, 0, NULL);
                         break;
   }
@@ -1504,7 +1560,7 @@ static size_t _GD_DoWindow(DIRFILE *D, gd_entry_t* E, off64_t first_samp,
   }
 
   /* Allocate a temporary buffer for the check field */
-  tmpbuf = (double *)_GD_Alloc(D, type2, num_samp2);
+  tmpbuf = _GD_Alloc(D, type2, num_samp2);
 
   if (D->error != GD_E_OK) {
     free(tmpbuf);
@@ -1525,8 +1581,173 @@ static size_t _GD_DoWindow(DIRFILE *D, gd_entry_t* E, off64_t first_samp,
   if (n_read2 > 0 && n_read2 * spf1 < n_read * spf2)
     n_read = n_read2 * spf1 / spf2;
 
-  _GD_WindowData(D, data_out, spf1, tmpbuf, spf2, E->EN(window,windop),
-      E->EN(window,threshold), return_type, n_read);
+  _GD_WindowData(D, data_out, spf1, tmpbuf, spf2, return_type,
+      E->EN(window,windop), E->EN(window,threshold), n_read);
+
+  free(tmpbuf);
+
+  dreturn("%zu", n_read);
+  return n_read;
+}
+
+/* _GD_DoMplex:  Read from an mplex.  Returns number of samples read.
+*/
+static size_t _GD_DoMplex(DIRFILE *D, gd_entry_t *E, off64_t first_samp,
+    size_t num_samp, gd_type_t return_type, void *data_out)
+{
+  char start[16];
+  uint16_t *tmpbuf = NULL;
+  gd_spf_t spf1, spf2;
+  size_t n_read, n_read2, num_samp2;
+  const size_t size = GD_SIZE(return_type);
+  off64_t first_samp2;
+
+  dtrace("%p, %p, %lli, %zu, 0x%X, %p", D, E, first_samp, num_samp, return_type,
+      data_out);
+
+  /* Check input fields */
+  if (_GD_BadInput(D, E, 0, 1)) {
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  if (_GD_BadInput(D, E, 1, 1)) {
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  /* find the samples per frame of the input field */
+  spf1 = _GD_GetSPF(D, E->e->entry[0]);
+  if (D->error != GD_E_OK) {
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  /* set the start value */
+  _GD_FillZero(start, return_type, 1);
+
+  /* read the input field and record the number of samples returned */
+  n_read = _GD_DoField(D, E->e->entry[0], E->e->repr[0], first_samp, num_samp,
+      return_type, data_out);
+
+  if (D->error != GD_E_OK) {
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  /* Nothing to mplex */
+  if (n_read == 0) {
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  /* find the samples per frame of the count field -- it's probably weird if
+   * this isn't the same, but who am I to judge?  (It's extra weird if it's
+   * larger.) */
+  spf2 = _GD_GetSPF(D, E->e->entry[1]);
+  if (D->error != GD_E_OK) {
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  /* calculate the first sample and number of samples to read of the
+   * count field */
+  num_samp2 = (int)ceil((double)n_read * spf2 / spf1);
+  first_samp2 = first_samp * spf2 / spf1;
+
+  /* Allocate a temporary buffer for the count field */
+  tmpbuf = (uint16_t*)_GD_Alloc(D, GD_UINT16, num_samp2);
+
+  if (D->error != GD_E_OK) {
+    free(tmpbuf);
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  /* read the count field */
+  n_read2 = _GD_DoField(D, E->e->entry[1], E->e->repr[1], first_samp2,
+      num_samp2, GD_UINT16, tmpbuf);
+
+  if (D->error != GD_E_OK) {
+    free(tmpbuf);
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  /* Check whether we've saved the last sample */
+  if (return_type == E->e->u.mplex.type && first_samp == E->e->u.mplex.sample)
+    memcpy(start, E->e->u.mplex.d, size);
+  /* Otherwise, check whether the caller was lucky/clever */
+  else if (tmpbuf[0] != E->EN(mplex,count_val)) {
+    /* It wasn't -- do a look-back to find the start value.  On a, say, gzipped
+     * field this is expensive since it involves a rewind.  Hmm... */
+    size_t lb_num = GD_MPLEX_LOOKBACK * E->EN(mplex,count_max);
+    off64_t lb_sample = -1, lb_first = first_samp2 - lb_num;
+
+    if (lb_first < 0) {
+      lb_num += lb_first;
+      lb_first = 0;
+    }
+
+    if (lb_num > 0) {
+      size_t i, n_read3;
+      uint16_t *tmpbuf2 = (uint16_t*)_GD_Alloc(D, GD_UINT16, lb_num);
+      if (D->error) {
+        free(tmpbuf);
+        dreturn("%i", 0);
+        return 0;
+      }
+
+      n_read3 = _GD_DoField(D, E->e->entry[1], E->e->repr[1], lb_first, lb_num,
+          GD_UINT16, tmpbuf2);
+
+      if (D->error) {
+        free(tmpbuf2);
+        free(tmpbuf);
+        dreturn("%i", 0);
+        return 0;
+      }
+
+      /* find the sample */
+      i = n_read3 - 1;
+      do {
+        if (tmpbuf2[i] == E->EN(mplex,count_val)) {
+          lb_sample = lb_first + i;
+          break;
+        }
+      } while (i-- != 0);
+      free(tmpbuf2);
+    }
+
+    /* read the value of the start, if found */
+    if (lb_sample >= 0) {
+      _GD_DoField(D, E->e->entry[0], E->e->repr[0], lb_sample * spf1 / spf2, 1,
+          return_type, start);
+
+      if (D->error) {
+        free(tmpbuf);
+        dreturn("%i", 0);
+        return 0;
+      }
+    }
+
+    /* now go and put the I/O pointers back where they belong, sigh */
+    _GD_Seek(D, E->e->entry[0], first_samp + n_read, GD_SEEK_SET);
+    _GD_Seek(D, E->e->entry[1], first_samp2 + n_read2, GD_SEEK_SET);
+  }
+
+  if (n_read2 > 0 && n_read2 * spf1 < n_read * spf2)
+    n_read = n_read2 * spf1 / spf2;
+
+  _GD_MplexData(D, data_out, spf1, tmpbuf, spf2, return_type,
+      E->EN(mplex,count_val),  start, n_read);
+
+  /* Cache the last sample read */
+  if (n_read > 0) {
+    E->e->u.mplex.type = return_type;
+    E->e->u.mplex.sample = first_samp + n_read;
+    memcpy(E->e->u.mplex.d, (char*)data_out + size * (n_read - 1), size);
+  }
 
   free(tmpbuf);
 
@@ -1676,6 +1897,9 @@ size_t _GD_DoField(DIRFILE *D, gd_entry_t *E, int repr, off64_t first_samp,
       break;
     case GD_WINDOW_ENTRY:
       n_read = _GD_DoWindow(D, E, first_samp, num_samp, return_type, data_out);
+      break;
+    case GD_MPLEX_ENTRY:
+      n_read = _GD_DoMplex(D, E, first_samp, num_samp, return_type, data_out);
       break;
     case GD_CONST_ENTRY:
     case GD_CARRAY_ENTRY:

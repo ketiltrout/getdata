@@ -1,4 +1,4 @@
-/* Copyright (C) 2008, 2010, 2011 D. V. Wiebe
+/* Copyright (C) 2008, 2010-2012 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -110,7 +110,7 @@ unsigned int gd_nmfields_by_type(DIRFILE* D, const char* parent,
   }
 
   if (index == -1) {
-    _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_TYPE, NULL, type, NULL);
+    _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_ENTRY_TYPE, NULL, type, NULL);
     dreturn("%u", 0);
     return 0;
   }

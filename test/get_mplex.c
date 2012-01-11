@@ -1,4 +1,4 @@
-/* Copyright (C) 2011 D. V. Wiebe
+/* Copyright (C) 2012 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -24,37 +24,53 @@ int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  int error, r = 0;
-  gd_entry_t e;
-  gd_triplet_t threshold;
+  const char *data = "dirfile/data";
+  const char *count = "dirfile/count";
+  const char *format_data =
+    "mplex MPLEX count data 1 3\n"
+    "count RAW UINT8 8\n"
+    "data RAW UINT8 8\n";
+  unsigned char c[8];
+  unsigned char data_data[256];
+  int fd, n, i, error, r = 0;
   DIRFILE *D;
 
   rmdirfile();
-  D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
-  threshold.r = 3.4;
-  gd_add_window(D, "new", "in", "check", GD_WINDOP_GE, threshold, 0);
-  error = gd_error(D);
+  mkdir(filedir, 0777);
 
-  /* check */
-  gd_entry(D, "new", &e);
-  if (gd_error(D))
-    r = 1;
-  else {
-    CHECKI(e.field_type, GD_WINDOW_ENTRY);
-    CHECKS(e.in_fields[0], "in");
-    CHECKS(e.in_fields[1], "check");
-    CHECKI(e.fragment_index, 0);
-    CHECKI(e.EN(window,windop), GD_WINDOP_GE);
-    CHECKF(e.EN(window,threshold.r), 3.4);
-    gd_free_entry_strings(&e);
-  }
+  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
+  write(fd, format_data, strlen(format_data));
+  close(fd);
+
+  for (fd = 0; fd < 256; ++fd)
+    data_data[fd] = (unsigned char)fd;
+
+  fd = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
+  write(fd, data_data, 256);
+  close(fd);
+
+  for (fd = 0; fd < 256; ++fd)
+    data_data[fd] %= 3;
+
+  fd = open(count, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
+  write(fd, data_data, 256);
+  close(fd);
+
+  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  n = gd_getdata(D, "mplex", 5, 0, 1, 0, GD_UINT8, &c);
+  error = gd_error(D);
 
   gd_close(D);
 
+  unlink(count);
+  unlink(data);
   unlink(format);
   rmdir(filedir);
 
-  CHECKI(error, GD_E_OK);
+  CHECKI(error, 0);
+  CHECKI(n, 8);
+  for (i = 0; i < 8; ++i)
+    CHECKIi(i, c[i], 40 + 3 * (i / 3));
 
   return r;
 }

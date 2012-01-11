@@ -1,4 +1,4 @@
-/* Copyright (C) 2011 D. V. Wiebe
+/* Copyright (C) 2012 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -24,37 +24,24 @@ int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  int error, r = 0;
-  gd_entry_t e;
-  gd_triplet_t threshold;
+  const char *format_data = "data MPLEX in1 in2 a b\n";
+  int fd, error, r = 0;
   DIRFILE *D;
 
   rmdirfile();
-  D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
-  threshold.r = 3.4;
-  gd_add_window(D, "new", "in", "check", GD_WINDOP_GE, threshold, 0);
+  mkdir(filedir, 0777);
+
+  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
+  write(fd, format_data, strlen(format_data));
+  close(fd);
+
+  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
   error = gd_error(D);
-
-  /* check */
-  gd_entry(D, "new", &e);
-  if (gd_error(D))
-    r = 1;
-  else {
-    CHECKI(e.field_type, GD_WINDOW_ENTRY);
-    CHECKS(e.in_fields[0], "in");
-    CHECKS(e.in_fields[1], "check");
-    CHECKI(e.fragment_index, 0);
-    CHECKI(e.EN(window,windop), GD_WINDOP_GE);
-    CHECKF(e.EN(window,threshold.r), 3.4);
-    gd_free_entry_strings(&e);
-  }
-
   gd_close(D);
 
   unlink(format);
   rmdir(filedir);
 
-  CHECKI(error, GD_E_OK);
-
+  CHECKI(error,GD_E_OK);
   return r;
 }

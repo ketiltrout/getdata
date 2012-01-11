@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 C. Barth Netterfield
  * Copyright (C) 2003-2005 Theodore Kisner
- * Copyright (C) 2005-2011 D. V. Wiebe
+ * Copyright (C) 2005-2012 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -188,6 +188,7 @@ extern "C" {
 #define GD_E_FORMAT_WINDOP    20
 #define GD_E_FORMAT_META_META 21
 #define GD_E_FORMAT_ALIAS     22
+#define GD_E_FORMAT_MPLEXVAL  23
 
 /* deprecated names */
 #define GD_E_FORMAT_NO_PARENT GD_E_FORMAT_NO_FIELD
@@ -228,13 +229,14 @@ typedef enum {
   GD_DIVIDE_ENTRY   = 0x0A,
   GD_RECIP_ENTRY    = 0x0B,
   GD_WINDOW_ENTRY   = 0x0C,
+  GD_MPLEX_ENTRY    = 0x0D,
   GD_CONST_ENTRY    = GD_SCALAR_ENTRY | 0x00,
   GD_STRING_ENTRY   = GD_SCALAR_ENTRY | 0x01,
   GD_CARRAY_ENTRY   = GD_SCALAR_ENTRY | 0x02
 } gd_entype_t;
 
 /* GD_NO_ENTRY is not part of this count */
-#define GD_N_ENTYPES 15
+#define GD_N_ENTYPES 16
 
 #define GD_HERE  (-1)
 
@@ -250,6 +252,7 @@ typedef enum {
 typedef int16_t gd_bit_t;
 typedef uint16_t gd_spf_t;
 typedef int64_t gd_shift_t;
+typedef uint16_t gd_count_t;
 #else
 @DEFINE_gd_int16_t@
 @DEFINE_gd_uint16_t@
@@ -260,7 +263,10 @@ typedef int64_t gd_shift_t;
 typedef gd_int16_t gd_bit_t;
 typedef gd_uint16_t gd_spf_t;
 typedef gd_int64_t gd_shift_t;
+typedef gd_uint16_t gd_count_t;
 #endif
+/* the maximum allowed number of counter steps for MPLEX entries */
+#define GD_COUNT_MAX 65535
 
 /* Data types -- No valid type may set 0x40 */
 #define GD_SIZE8     0x001
@@ -365,6 +371,10 @@ struct _gd_unified_entry {
       gd_windop_t windop;
       gd_triplet_t threshold;
     } GD_ANON(window);
+    struct { /* MPLEX */
+      gd_count_t count_val;
+      gd_count_t count_max;
+    } GD_ANON(mplex);
     struct { /* CONST */
       gd_type_t const_type;
       size_t array_len;
@@ -509,6 +519,10 @@ extern int gd_add_linterp(DIRFILE *dirfile, const char *field_code,
     const char *in_field, const char *table, int fragment_index) gd_nothrow
 gd_nonnull ((1,2,3,4));
 
+extern int gd_add_mplex(DIRFILE *dirfile, const char *field_code,
+    const char *in_field, const char *count_field, gd_count_t count_val,
+    gd_count_t count_max, int fragment_index) gd_nothrow gd_nonnull ((1,2,3,4));
+
 extern int gd_add_multiply(DIRFILE *dirfile, const char *field_code,
     const char *in_field1, const char *in_field2, int fragment_index)
 gd_nothrow gd_nonnull ((1,2,3,4));
@@ -582,6 +596,10 @@ extern int gd_alter_divide(DIRFILE *dirfile, const char *field_code,
 extern int gd_alter_lincom(DIRFILE *dirfile, const char *field_code,
     int n_fields, const char **in_fields, const double *m, const double *b)
 gd_nothrow gd_nonnull((1,2));
+
+extern int gd_alter_mplex(DIRFILE *dirfile, const char *field_code,
+    const char *in_field, const char *count_field, gd_count_t count_val,
+    gd_count_t count_max) gd_nothrow gd_nonnull((1,2));
 
 extern int gd_alter_multiply(DIRFILE *dirfile, const char *field_code,
     const char *in_field1, const char *in_field2) gd_nothrow gd_nonnull((1,2));
@@ -730,6 +748,11 @@ extern int gd_madd_lincom(DIRFILE *dirfile, const char *parent,
 extern int gd_madd_linterp(DIRFILE *dirfile, const char *parent,
     const char *field_code, const char *in_field, const char *table)
 gd_nothrow gd_nonnull ((1,2,3,4,5));
+
+extern int gd_madd_mplex(DIRFILE *dirfile, const char *parent,
+    const char *field_code, const char *in_field, const char *count_field,
+    gd_count_t count_val, gd_count_t count_max) gd_nothrow
+gd_nonnull ((1,2,3,4,5));
 
 extern int gd_madd_multiply(DIRFILE *dirfile, const char *parent,
     const char *field_code, const char *in_field1, const char *in_field2)

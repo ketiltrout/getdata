@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 D. V. Wiebe
+/* Copyright (C) 2008-2012 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -58,8 +58,10 @@ void _GD_FreeE(DIRFILE *D, gd_entry_t* entry, int priv)
       break;
     case GD_BIT_ENTRY:
     case GD_SBIT_ENTRY:
+      free(entry->scalar[0]);
       free(entry->scalar[1]);
-      /* fallthrough */
+      free(entry->in_fields[0]);
+      break;
     case GD_PHASE_ENTRY:
     case GD_RECIP_ENTRY:
       free(entry->scalar[0]);
@@ -91,6 +93,12 @@ void _GD_FreeE(DIRFILE *D, gd_entry_t* entry, int priv)
       break;
     case GD_WINDOW_ENTRY:
       free(entry->scalar[0]);
+      free(entry->in_fields[0]);
+      free(entry->in_fields[1]);
+      break;
+    case GD_MPLEX_ENTRY:
+      free(entry->scalar[0]);
+      free(entry->scalar[1]);
       free(entry->in_fields[0]);
       free(entry->in_fields[1]);
       break;
@@ -269,6 +277,10 @@ int _GD_CalculateEntry(DIRFILE *D, gd_entry_t *E, int err)
           break;
       }
       break;
+    case GD_MPLEX_ENTRY:
+      _GD_GetScalar(D, E, 0, GD_UINT16, &E->EN(mplex,count_val), err);
+      _GD_GetScalar(D, E, 1, GD_UINT16, &E->EN(mplex,count_max), err);
+      break;
     case GD_NO_ENTRY:
     case GD_LINTERP_ENTRY:
     case GD_MULTIPLY_ENTRY:
@@ -440,6 +452,14 @@ int gd_entry(DIRFILE* D, const char* field_code_in, gd_entry_t* entry)
       entry->in_fields[1] = strdup(E->in_fields[1]);
       if (E->scalar[0])
         entry->scalar[0] = strdup(E->scalar[0]);
+      break;
+    case GD_MPLEX_ENTRY:
+      entry->in_fields[0] = strdup(E->in_fields[0]);
+      entry->in_fields[1] = strdup(E->in_fields[1]);
+      if (E->scalar[0])
+        entry->scalar[0] = strdup(E->scalar[0]);
+      if (E->scalar[1])
+        entry->scalar[1] = strdup(E->scalar[1]);
       break;
     case GD_INDEX_ENTRY:
     case GD_CONST_ENTRY:
@@ -795,6 +815,7 @@ int gd_validate(DIRFILE *D, const char *field_code_in) gd_nothrow
     case GD_DIVIDE_ENTRY:
     case GD_MULTIPLY_ENTRY:
     case GD_WINDOW_ENTRY:
+    case GD_MPLEX_ENTRY:
       _GD_BadInput(D, E, 1, 1);
       /* fallthrough */
     case GD_LINTERP_ENTRY:

@@ -1,4 +1,4 @@
-C     Copyright (C) 2009-2011 D. V. Wiebe
+C     Copyright (C) 2009-2012 D. V. Wiebe
 C
 C     CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 C
@@ -181,7 +181,7 @@ C     Check functions
       INTEGER flen
       PARAMETER (flen = 11)
       INTEGER nfields
-      PARAMETER (nfields = 16)
+      PARAMETER (nfields = 17)
       INTEGER slen
       PARAMETER (slen = 26)
       INTEGER plen
@@ -224,13 +224,14 @@ C     Check functions
       fields(7) = 'div    '
       fields(8) = 'lincom '
       fields(9) = 'linterp'
-      fields(10) = 'mult   '
-      fields(11) = 'phase  '
-      fields(12) = 'polynom'
-      fields(13) = 'recip  '
-      fields(14) = 'sbit   '
-      fields(15) = 'string '
-      fields(16) = 'window '
+      fields(10) = 'mplex  '
+      fields(11) = 'mult   '
+      fields(12) = 'phase  '
+      fields(13) = 'polynom'
+      fields(14) = 'recip  '
+      fields(15) = 'sbit   '
+      fields(16) = 'string '
+      fields(17) = 'window '
 
 C     Write the test dirfile
       OPEN(1, FILE=frmat, STATUS='NEW')
@@ -248,6 +249,7 @@ C     Write the test dirfile
      + const const'
       WRITE(1, *) 'bit BIT data 3 4'
       WRITE(1, *) 'sbit SBIT data 5 6'
+      WRITE(1, *) 'mplex MPLEX sbit data 1 10'
       WRITE(1, *) 'mult MULTIPLY data sbit'
       WRITE(1, *) 'phase PHASE data 11'
       WRITE(1, *) 'div DIVIDE mult bit'
@@ -758,7 +760,7 @@ C     43: GDFDNT check
 C     44: GDNVEC check
       CALL GDNVEC(n, d)
       CALL CHKEOK(ne, 44, d)
-      CALL CHKINT(ne, 44, n, 23)
+      CALL CHKINT(ne, 44, n, 24)
 
 C     45: GDVECN check
       fields(1) = 'INDEX  '
@@ -768,22 +770,23 @@ C     45: GDVECN check
       fields(5) = 'div    '
       fields(6) = 'lincom '
       fields(7) = 'linterp'
-      fields(8) = 'mult   '
-      fields(9) = 'new1   '
-      fields(10) = 'new10  '
-      fields(11) = 'new2   '
-      fields(12) = 'new3   '
-      fields(13) = 'new4   '
-      fields(14) = 'new5   '
-      fields(15) = 'new6   '
-      fields(16) = 'new7   '
-      fields(17) = 'new8   '
-      fields(18) = 'new9   '
-      fields(19) = 'phase  '
-      fields(20) = 'polynom'
-      fields(21) = 'recip  '
-      fields(22) = 'sbit   '
-      fields(23) = 'window '
+      fields(8) = 'mplex  '
+      fields(9) = 'mult   '
+      fields(10) = 'new1   '
+      fields(11) = 'new10  '
+      fields(12) = 'new2   '
+      fields(13) = 'new3   '
+      fields(14) = 'new4   '
+      fields(15) = 'new5   '
+      fields(16) = 'new6   '
+      fields(17) = 'new7   '
+      fields(18) = 'new8   '
+      fields(19) = 'new9   '
+      fields(20) = 'phase  '
+      fields(21) = 'polynom'
+      fields(22) = 'recip  '
+      fields(23) = 'sbit   '
+      fields(24) = 'window '
       DO 450 i = 1, n
       l = flen
       CALL GDVECN(fn, l, d, i)
@@ -1990,6 +1993,68 @@ C     227: GDAAFX check
       CALL CHKIN2(ne, 227, 2, n, flen)
       CALL CHKST2(ne, 227, 3, fields(1), 'B')
       CALL CHKST2(ne, 227, 3, fields(2), '')
+
+C     228: GDGEMX check
+      l = flen
+      i = flen
+      CALL GDGEMX(fields(1), i, fields(2), l, m, j, n, d, 'mplex', 5)
+      CALL CHKEOK(ne, 228, d)
+      CALL CHKIN2(ne, 228, 1, i, flen)
+      CALL CHKIN2(ne, 228, 2, l, flen)
+      CALL CHKIN2(ne, 228, 3, n, 0)
+      CALL CHKIN2(ne, 228, 4, m, 1)
+      CALL CHKST2(ne, 228, 5, fields(1), 'data')
+      CALL CHKST2(ne, 228, 6, fields(2), 'sbit')
+      CALL CHKDB2(ne, 228, 7, j, 10)
+
+C     229: GDADMX check
+      CALL GDADMX(d, 'new21', 5, 'in1', 3, 'in2', 3, 5, 6, 0)
+      CALL CHKOK2(ne, 229, 1, d)
+
+      l = flen
+      i = flen
+      CALL GDGEMX(fields(1), i, fields(2), l, m, j, n, d, 'new21', 6)
+      CALL CHKOK2(ne, 229, 2, d)
+      CALL CHKIN2(ne, 229, 1, i, flen)
+      CALL CHKIN2(ne, 229, 2, l, flen)
+      CALL CHKIN2(ne, 229, 3, n, 0)
+      CALL CHKIN2(ne, 229, 4, m, 5)
+      CALL CHKST2(ne, 229, 5, fields(1), 'in1')
+      CALL CHKST2(ne, 229, 6, fields(2), 'in2')
+      CALL CHKIN2(ne, 229, 7, j, 6)
+
+C     230: GDMDMX check
+      CALL GDMDMX(d, 'data', 4, 'mnew21', 6, 'in2', 3, 'in3', 3, 0, 12)
+      CALL CHKOK2(ne, 230, 1, d)
+
+      l = flen
+      i = flen
+      CALL GDGEMX(fields(1), i, fields(2), l, m, j, n, d, 'data/mnew21',
+     +11)
+      CALL CHKOK2(ne, 230, 2, d)
+      CALL CHKIN2(ne, 230, 1, i, flen)
+      CALL CHKIN2(ne, 230, 2, l, flen)
+      CALL CHKIN2(ne, 230, 3, n, 0)
+      CALL CHKIN2(ne, 230, 4, m, 0)
+      CALL CHKST2(ne, 230, 5, fields(1), 'in2')
+      CALL CHKST2(ne, 230, 6, fields(2), 'in3')
+      CALL CHKIN2(ne, 230, 7, j, 12)
+
+C     231: GDALMX check
+      CALL GDALMX(d, 'new21', 5, 'in3', 3, 'in4', 3, GD_CMX, 7)
+      CALL CHKOK2(ne, 231, 1, d)
+
+      l = flen
+      i = flen
+      CALL GDGEMX(fields(1), i, fields(2), l, m, j, n, d, 'new21', 6)
+      CALL CHKOK2(ne, 231, 2, d)
+      CALL CHKIN2(ne, 231, 1, i, flen)
+      CALL CHKIN2(ne, 231, 2, l, flen)
+      CALL CHKIN2(ne, 231, 3, n, 0)
+      CALL CHKIN2(ne, 231, 4, m, 5)
+      CALL CHKST2(ne, 231, 5, fields(1), 'in3')
+      CALL CHKST2(ne, 231, 6, fields(2), 'in4')
+      CALL CHKIN2(ne, 231, 7, j, 7)
 
 
 

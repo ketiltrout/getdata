@@ -1,3 +1,24 @@
+#!/usr/bin/perl -w
+# Copyright (C) 2011-2012 D. V. Wiebe
+#
+##########################################################################
+#
+# This file is part of the GetData project.
+#
+# GetData is free software; you can redistribute it and/or modify it under
+# the terms of the GNU Lesser General Public License as published by the
+# Free Software Foundation; either version 2.1 of the License, or (at your
+# option) any later version.
+#
+# GetData is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
+# License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with GetData; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+#
 use strict;
 use warnings;
 
@@ -47,7 +68,7 @@ sub printfmt {
     return "%02x";
   } elsif ($_ eq "gd_shift_t" or $_ eq "gdpu_shift_t") {
     return "%lli";
-  } elsif ($_ eq "gd_spf_t" or $_ eq "gdpu_spf_t") {
+  } elsif ($_ eq "gd_spf_t" or $_ eq "gdpu_spf_t" or $_ eq "gd_count_t") {
     return "%u";
   } elsif ($_ eq "gd_type_t" or $_ eq "gdpu_type_t") {
     return "%03x";

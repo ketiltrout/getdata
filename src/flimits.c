@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 D. V. Wiebe
+/* Copyright (C) 2008-2012 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -215,7 +215,6 @@ off64_t _GD_GetEOF(DIRFILE *D, gd_entry_t* E, const char *parent, int *is_index)
     case GD_SBIT_ENTRY:
     case GD_POLYNOM_ENTRY:
     case GD_RECIP_ENTRY:
-    case GD_WINDOW_ENTRY:
       if (_GD_BadInput(D, E, 0, 1))
         break;
 
@@ -223,6 +222,8 @@ off64_t _GD_GetEOF(DIRFILE *D, gd_entry_t* E, const char *parent, int *is_index)
       break;
     case GD_DIVIDE_ENTRY:
     case GD_MULTIPLY_ENTRY:
+    case GD_WINDOW_ENTRY:
+    case GD_MPLEX_ENTRY:
       if (_GD_BadInput(D, E, 0, 1) || _GD_BadInput(D, E, 1, 1))
         break;
 
@@ -416,7 +417,6 @@ static off64_t _GD_GetBOF(DIRFILE *D, gd_entry_t* E, const char *parent,
     case GD_LINTERP_ENTRY:
     case GD_POLYNOM_ENTRY:
     case GD_RECIP_ENTRY:
-    case GD_WINDOW_ENTRY:
       if (_GD_BadInput(D, E, 0, 1))
         break;
 
@@ -449,6 +449,8 @@ static off64_t _GD_GetBOF(DIRFILE *D, gd_entry_t* E, const char *parent,
       break;
     case GD_MULTIPLY_ENTRY:
     case GD_DIVIDE_ENTRY:
+    case GD_WINDOW_ENTRY:
+    case GD_MPLEX_ENTRY:
       if (_GD_BadInput(D, E, 0, 1) || _GD_BadInput(D, E, 1, 1))
         break;
 

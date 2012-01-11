@@ -1,4 +1,4 @@
-# Copyright (C) 2009-2010 D. V. Wiebe
+# Copyright (C) 2009-2012 D. V. Wiebe
 #
 ##########################################################################
 #
@@ -90,9 +90,10 @@ file.close()
 ne = 0
 
 fields = ["INDEX", "alias", "bit", "carray", "const", "data", "div", "lincom",
-"linterp", "mult", "phase", "polynom", "recip", "sbit", "string", "window"]
+"linterp", "mplex", "mult", "phase", "polynom", "recip", "sbit", "string",
+"window"]
 
-nfields = 16
+nfields = 17
 file=open("dirfile/format", 'w')
 file.write(
     "/ENDIAN little\n"
@@ -107,6 +108,7 @@ file.write(
     "polynom POLYNOM data 1.1 2.2 2.2 3.3;4.4 const const\n"
     "bit BIT data 3 4\n"
     "sbit SBIT data 5 6\n"
+    "mplex MPLEX sbit data 1 10\n"
     "mult MULTIPLY data sbit\n"
     "div DIVIDE mult bit\n"
     "recip RECIP div 6.5;4.3\n"
@@ -666,7 +668,7 @@ try:
   n = d.nvectors()
 except:
   CheckOK(44)
-CheckSimple(44,n,21)
+CheckSimple(44,n,22)
 
 # 45: field_list check
 try:
@@ -674,8 +676,8 @@ try:
 except:
   CheckOK(45)
 CheckSimple(45,n,['INDEX', 'alias', 'bit', 'data', 'div', 'lincom', 'linterp',
-  'mult', 'new1', 'new10', 'new2', 'new4', 'new6', 'new7', 'new8', 'new9',
-  'phase', 'polynom', 'recip', 'sbit', 'window'])
+  'mplex', 'mult', 'new1', 'new10', 'new2', 'new4', 'new6', 'new7', 'new8',
+  'new9', 'phase', 'polynom', 'recip', 'sbit', 'window'])
 
 # 46: add / entry (lincom) check
 ent = pygetdata.entry(pygetdata.LINCOM_ENTRY, "mnew1", 0,
@@ -1682,10 +1684,10 @@ except:
 CheckSimple2(211, 1, ent.field_type, pygetdata.WINDOW_ENTRY)
 CheckSimple2(211, 2, ent.fragment, 0)
 CheckSimple2(211, 3, ent.windop, pygetdata.WINDOP_LT)
-CheckSimple2(212, 4, ent.in_fields, ( 'linterp', 'mult' ))
+CheckSimple2(211, 4, ent.in_fields, ( 'linterp', 'mult' ))
 CheckSimple2(211, 5, ent.threshold, 4.1)
 
-# 212: gd_add_window check
+# 212: gd_add_mplex check
 ent = pygetdata.entry(pygetdata.WINDOW_ENTRY, "new18", 0,
     ("in1", "in2", pygetdata.WINDOP_NE, 32))
 try:
@@ -1703,7 +1705,7 @@ CheckSimple2(212, 3, ent.windop, pygetdata.WINDOP_NE)
 CheckSimple2(212, 4, ent.in_fields, ( 'in1', 'in2' ))
 CheckSimple2(212, 5, ent.threshold, 32)
 
-# 214: gd_madd_window check
+# 214: gd_madd_mplex check
 ent = pygetdata.entry(pygetdata.WINDOW_ENTRY, "mnew18", 0,
     ("in2", "in3", pygetdata.WINDOP_SET, 128))
 try:
@@ -1721,7 +1723,7 @@ CheckSimple2(214, 3, ent.windop, pygetdata.WINDOP_SET)
 CheckSimple2(214, 4, ent.in_fields, ( 'in2', 'in3' ))
 CheckSimple2(214, 5, ent.threshold, 128)
 
-# 217: gd_alter_window check
+# 217: gd_alter_mplex check
 ent = pygetdata.entry(pygetdata.WINDOW_ENTRY, "new18", 0, { "threshold": 32e3,
   "in_field1": "in3", "in_field2": "in4", "windop": pygetdata.WINDOP_GE })
 try:
@@ -1736,8 +1738,8 @@ except:
 CheckSimple2(217, 1, ent.field_type, pygetdata.WINDOW_ENTRY)
 CheckSimple2(217, 2, ent.fragment, 0)
 CheckSimple2(217, 3, ent.windop, pygetdata.WINDOP_GE)
-CheckSimple2(216, 4, ent.in_fields, ( 'in3', 'in4' ))
-CheckSimple2(217, 6, ent.threshold, 32e3)
+CheckSimple2(217, 4, ent.in_fields, ( 'in3', 'in4' ))
+CheckSimple2(217, 5, ent.threshold, 32e3)
 
 # 218: gd_alias_target check
 try:
@@ -1837,6 +1839,69 @@ except:
   CheckOK2(227, 2)
 CheckSimple2(227, 1, n, "B")
 CheckSimple2(227, 2, m, "")
+
+# 228: gd_entry (MPLEX) check
+try:
+  ent = d.entry('mplex')
+except:
+  CheckOK(228)
+CheckSimple2(228, 1, ent.field_type, pygetdata.MPLEX_ENTRY)
+CheckSimple2(228, 2, ent.fragment, 0)
+CheckSimple2(228, 3, ent.count_val, 1)
+CheckSimple2(228, 4, ent.in_fields, ( 'data', 'sbit' ))
+CheckSimple2(228, 5, ent.count_max, 10)
+
+# 229: gd_add_mplex check
+ent = pygetdata.entry(pygetdata.MPLEX_ENTRY, "new21", 0, ("in1", "in2", 5, 6))
+try:
+  d.add(ent)
+except:
+  CheckOK2(229, 1)
+
+try:
+  ent = d.entry('new21')
+except:
+  CheckOK2(229, 2)
+CheckSimple2(229, 1, ent.field_type, pygetdata.MPLEX_ENTRY)
+CheckSimple2(229, 2, ent.fragment, 0)
+CheckSimple2(229, 3, ent.count_val, 5)
+CheckSimple2(229, 4, ent.in_fields, ( 'in1', 'in2' ))
+CheckSimple2(229, 5, ent.count_max, 6)
+
+# 230: gd_madd_mplex check
+ent = pygetdata.entry(pygetdata.MPLEX_ENTRY, "mnew21", 0, ("in2", "in3", 0, 12))
+try:
+  d.madd(ent, "data")
+except:
+  CheckOK2(230, 1)
+
+try:
+  ent = d.entry('data/mnew21')
+except:
+  CheckOK2(230, 2)
+CheckSimple2(230, 1, ent.field_type, pygetdata.MPLEX_ENTRY)
+CheckSimple2(230, 2, ent.fragment, 0)
+CheckSimple2(230, 3, ent.count_val, 0)
+CheckSimple2(230, 4, ent.in_fields, ( 'in2', 'in3' ))
+CheckSimple2(230, 5, ent.count_max, 12)
+
+# 231: gd_alter_mplex check
+ent = pygetdata.entry(pygetdata.MPLEX_ENTRY, "new21", 0, { "count_val": 3,
+  "in_field1": "in3", "in_field2": "in4", "count_max": 7 })
+try:
+  d.alter('new21', ent)
+except:
+  CheckOK2(231, 1)
+
+try:
+  ent = d.entry('new21')
+except:
+  CheckOK2(231, 2)
+CheckSimple2(231, 1, ent.field_type, pygetdata.MPLEX_ENTRY)
+CheckSimple2(231, 2, ent.fragment, 0)
+CheckSimple2(231, 3, ent.count_val, 3)
+CheckSimple2(231, 4, ent.in_fields, ( 'in3', 'in4' ))
+CheckSimple2(231, 5, ent.count_max, 7)
 
  
 

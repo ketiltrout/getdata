@@ -1,4 +1,4 @@
-// Copyright (C) 2008-2010 D. V. Wiebe
+// Copyright (C) 2008-2012 D. V. Wiebe
 //
 ///////////////////////////////////////////////////////////////////////////
 //
@@ -69,7 +69,8 @@ namespace GetData {
     IndexEntryType    = GD_INDEX_ENTRY,
     DivideEntryType   = GD_DIVIDE_ENTRY,
     RecipEntryType    = GD_RECIP_ENTRY,
-    WindowEntryType   = GD_WINDOW_ENTRY
+    WindowEntryType   = GD_WINDOW_ENTRY,
+    MplexEntryType    = GD_MPLEX_ENTRY
   };
 
   enum WindOpType {
@@ -221,10 +222,6 @@ namespace GetData {
       };
 
       /* WINDOW methods */
-      virtual const char *Check() const {
-        return (E.field_type == GD_WINDOW_ENTRY) ? E.in_fields[1] : 0;
-      };
-
       virtual WindOpType WindOp() const {
         return (E.field_type == GD_WINDOW_ENTRY) ? (WindOpType)E.u.window.windop
           : (WindOpType)0;
@@ -236,6 +233,16 @@ namespace GetData {
         return (E.field_type == GD_WINDOW_ENTRY) ? E.u.window.threshold : zero;
       }
 
+      /* MPLEX methods */
+      virtual gd_count_t CountVal() const {
+        return (E.field_type == GD_MPLEX_ENTRY) ? E.u.mplex.count_val : 0;
+      }
+
+      virtual gd_count_t CountMax() const {
+        return (E.field_type == GD_MPLEX_ENTRY) ? E.u.mplex.count_max : 0;
+      }
+
+      /* Set methods */
       void SetName(const char* name);
 
       void SetFragmentIndex(int fragment_index);

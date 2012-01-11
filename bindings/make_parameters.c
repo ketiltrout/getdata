@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 D. V. Wiebe
+/* Copyright (C) 2008-2012 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -133,6 +133,7 @@ static struct {
   CONSTANT(DIVIDE_ENTRY,     "GD_DVE", 3),
   CONSTANT(RECIP_ENTRY,      "GD_RCE", 3),
   CONSTANT(WINDOW_ENTRY,     "GD_WDE", 3),
+  CONSTANT(MPLEX_ENTRY,      "GD_MXE", 3),
   CONSTANT(CONST_ENTRY,      "GD_COE", 3),
   CONSTANT(CARRAY_ENTRY,     "GD_CAE", 3),
   CONSTANT(STRING_ENTRY,     "GD_STE", 3),
@@ -190,6 +191,7 @@ static struct {
   CONSTANT(E_FORMAT_WINDOP,  "GDF_WO", 8),
   CONSTANT(E_FORMAT_META_META,"GDF_MM", 8),
   CONSTANT(E_FORMAT_ALIAS,   "GDF_AL", 8),
+  CONSTANT(E_FORMAT_MPLEXVAL,"GDF_MV", 8),
 
   CONSTANT(VERSION_CURRENT,  "GDSV_C", 9),
   CONSTANT(VERSION_LATEST,   "GDSV_L", 9),
@@ -210,10 +212,11 @@ static struct {
   CONSTANT(WINDOP_SET,       "GDW_ST", 12),
   CONSTANT(WINDOP_CLR,       "GDW_CL", 12),
 
-  CONSTANT(MAX_LINE_LENGTH,  "GD_MLL", 99),
   CONSTANT(ALL_FRAGMENTS,    "GD_ALL", 99),
-  CONSTANT(HERE,             "GD_HER", 99),
+  CONSTANT(COUNT_MAX,        "GD_CMX", 99),
   CONSTANT(DIRFILE_STANDARDS_VERSION, "GD_DSV", 99),
+  CONSTANT(HERE,             "GD_HER", 99),
+  CONSTANT(MAX_LINE_LENGTH,  "GD_MLL", 99),
   { NULL }
 };
 

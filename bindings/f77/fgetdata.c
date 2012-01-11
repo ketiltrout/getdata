@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 D. V. Wiebe
+/* Copyright (C) 2008-2012 D. V. Wiebe
  *
  *************************************************************************
  *
@@ -853,6 +853,7 @@ void F77_FUNC(gdgewd, GDGEWD) (char *in_field, int *in_field_l,
   else {
     _GDF_FString(in_field, in_field_l, E.in_fields[0]);
     _GDF_FString(check_field, check_field_l, E.in_fields[1]);
+    *windop = E.EN(window,windop);
     switch (E.EN(window,windop)) {
       case GD_WINDOP_EQ:
       case GD_WINDOP_NE:
@@ -870,7 +871,37 @@ void F77_FUNC(gdgewd, GDGEWD) (char *in_field, int *in_field_l,
     gd_free_entry_strings(&E);
   }
 
-  *windop = E.EN(window,windop);
+  free(fc);
+
+  dreturnvoid();
+}
+
+/* gd_entry wrapper for MPLEX */
+void F77_FUNC(gdgemx, GDGEMX) (char *in_field, int *in_field_l,
+    char *count_field, int *count_field_l, int *val, int *max,
+    int *fragment_index, const int *dirfile, const char *field_code,
+    const int *field_code_l)
+{
+  char *fc;
+  gd_entry_t E;
+
+  dtrace("%p, %i, %p, %i, %p, %p, %p, %i, %p, %i", in_field, *in_field_l,
+      count_field, *count_field_l, val, max, fragment_index, *dirfile,
+      field_code, *field_code_l);
+
+  fc = (char *)malloc(*field_code_l + 1);
+
+  if (gd_entry(_GDF_GetDirfile(*dirfile), _GDF_CString(fc, field_code,
+          *field_code_l), &E) || E.field_type != GD_MPLEX_ENTRY)
+    *in_field_l = 0;
+  else {
+    _GDF_FString(in_field, in_field_l, E.in_fields[0]);
+    _GDF_FString(count_field, count_field_l, E.in_fields[1]);
+    *val = E.EN(mplex,count_val);
+    *max = E.EN(mplex,count_max);
+    *fragment_index = E.fragment_index;
+    gd_free_entry_strings(&E);
+  }
 
   free(fc);
 
@@ -2934,6 +2965,7 @@ void F77_FUNC(gdgsca, GDGSCA) (char* scalar, int* scalar_l, int *scalar_index,
         break;
       case GD_BIT_ENTRY:
       case GD_SBIT_ENTRY:
+      case GD_MPLEX_ENTRY:
         if (*index > 2)
           ok = 0;
         break;
@@ -3005,6 +3037,7 @@ void F77_FUNC(gdasca, GDASCA) (const int *dirfile, const char *field_code,
       break;
     case GD_BIT_ENTRY:
     case GD_SBIT_ENTRY:
+    case GD_MPLEX_ENTRY:
       if (*index > 2)
         ok = 0;
       break;
@@ -3309,6 +3342,60 @@ void F77_FUNC(gdmdwd, GDMDWD) (const int *dirfile, const char *parent,
   dreturnvoid();
 }
 
+/* gd_add_mplex wrapper */
+void F77_FUNC(gdadmx, GDADMX) (const int *dirfile, const char *field_code,
+    const int *field_code_l, const char *in_field, const int *in_field_l,
+    const char *count_field, const int *count_field_l, const int *val,
+    const int *max, const int *fragment_index)
+{
+  dtrace("%i, %p, %i, %p, %i, %p, %i, %i, %i, %i", *dirfile, field_code,
+      *field_code_l, in_field, *in_field_l, count_field, *count_field_l,
+      *val, *max, *fragment_index);
+
+  char *in = (char *)malloc(*in_field_l + 1);
+  char *cf = (char *)malloc(*count_field_l + 1);
+  char *fc = (char *)malloc(*field_code_l + 1);
+
+  gd_add_mplex(_GDF_GetDirfile(*dirfile), _GDF_CString(fc, field_code,
+        *field_code_l), _GDF_CString(in, in_field, *in_field_l),
+      _GDF_CString(cf, count_field, *count_field_l), *val, *max,
+      *fragment_index);
+
+  free(fc);
+  free(cf);
+  free(in);
+
+  dreturnvoid();
+}
+
+/* gd_madd_mplex wrapper */
+void F77_FUNC(gdmdmx, GDMDMX) (const int *dirfile, const char *parent,
+    const int *parent_l, const char *field_code, const int *field_code_l, 
+    const char *in_field, const int *in_field_l, const char *count_field,
+    const int *count_field_l, const int *val, const int *max)
+{
+  dtrace("%i, %p, %i, %p, %i, %p, %i, %p, %i, %i, %i", *dirfile, parent,
+      *parent_l, field_code, *field_code_l, in_field, *in_field_l, count_field,
+      *count_field_l, *val, *max);
+
+  char *in = (char *)malloc(*in_field_l + 1);
+  char *cf = (char *)malloc(*count_field_l + 1);
+  char *fc = (char *)malloc(*field_code_l + 1);
+  char *pa = (char *)malloc(*parent_l + 1);
+
+  gd_madd_mplex(_GDF_GetDirfile(*dirfile), _GDF_CString(pa, parent, *parent_l),
+      _GDF_CString(fc, field_code, *field_code_l), _GDF_CString(in, in_field,
+        *in_field_l), _GDF_CString(cf, count_field, *count_field_l), *val,
+      *max);
+
+  free(pa);
+  free(fc);
+  free(cf);
+  free(in);
+
+  dreturnvoid();
+}
+
 /* gd_alias_target */
 void F77_FUNC(gdatrg, GDATRG) (char *target, int *target_l, const int *dirfile, 
     const char *field_code, const int *field_code_l)
@@ -3454,7 +3541,31 @@ void F77_FUNC(gdalwd, GDALWD) (const int *dirfile, const char *field_code,
   dreturnvoid();
 }
 
-/* gd_delete_aliases */
+/* gd_alter_mplex */
+void F77_FUNC(gdalmx, GDALMX) (const int *dirfile, const char *field_code,
+    const int *field_code_l, const char *in_field, const int *in_field_l,
+    const char *count_field, const int *count_field_l, const int *val,
+    const int *max)
+{
+  dtrace("%i, %p, %i, %p, %i, %p, %i, %i, %i", *dirfile, field_code,
+      *field_code_l, in_field, *in_field_l, count_field, *count_field_l,
+      *val, *max);
+
+  char *fc = (char *)malloc(*field_code_l + 1);
+  char *in = (char *)malloc(*in_field_l + 1);
+  char *cf = (char *)malloc(*count_field_l + 1);
+
+  gd_alter_mplex(_GDF_GetDirfile(*dirfile), _GDF_CString(fc, field_code,
+        *field_code_l), _GDF_CString(in, in_field, *in_field_l),
+      _GDF_CString(cf, count_field, *count_field_l), *val, *max);
+
+  free(cf);
+  free(in);
+  free(fc);
+  dreturnvoid();
+}
+
+/* gd_delete_alias */
 void F77_FUNC(gddela, GDDELA) (const int *dirfile, const char *field_code,
     const int *field_code_l, const int *flags)
 {

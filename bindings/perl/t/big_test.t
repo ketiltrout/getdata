@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# Copyright (C) 2011 D. V. Wiebe
+# Copyright (C) 2011-2012 D. V. Wiebe
 # 
 ##########################################################################
 # 
@@ -22,7 +22,7 @@
 use GetData;
 use Math::Complex;
 use strict;
-use Test::More tests => 1223;
+use Test::More tests => 1260;
 
 my $ne = 0;
 my ($s, @a, %h);
@@ -142,9 +142,9 @@ sub CheckEOSArray {
 sub CheckOK { &CheckError($_[0], 0) }
 sub CheckOK2 { &CheckError2(@_, 0) }
 
-my $nfields = 16;
-my @fields = (qw(INDEX alias bit carray const data div lincom linterp mult phase
-polynom recip sbit string window));
+my $nfields = 17;
+my @fields = (qw(INDEX alias bit carray const data div lincom linterp mplex mult
+  phase polynom recip sbit string window));
 
 #create the dirfile
 system "rm -rf dirfile" if (-e "dirfile" and not -d "dirfile");
@@ -167,6 +167,7 @@ linterp LINTERP data /look/up/file
 polynom POLYNOM data 1.1 2.2 2.2 3.3;4.4 const const
 bit BIT data 3 4
 sbit SBIT data 5 6
+mplex MPLEX sbit data 1 10
 mult MULTIPLY data sbit
 div DIVIDE mult bit
 recip RECIP div 6.5;4.3
@@ -622,13 +623,13 @@ CheckSArray(43, \@a, qw(lincom new3));
 # 44: nvectors
 $s = $_->vector_list;
 CheckOK(44);
-CheckNum(44, $s, 22);
+CheckNum(44, $s, 23);
 
 # 45: vector_list
 @a = $_->vector_list;
 CheckOK(45);
-CheckSArray(45, \@a, qw(INDEX alias bit data div lincom linterp mult new1),
-  qw(new10 new13 new3 new4 new6 new7 new8 new9 phase polynom recip sbit),
+CheckSArray(45, \@a, qw(INDEX alias bit data div lincom linterp mplex mult),
+  qw(new1 new10 new13 new3 new4 new6 new7 new8 new9 phase polynom recip sbit),
   qw(window));
 
 #47: madd_lincom check
@@ -1609,6 +1610,51 @@ CheckOK2(227, 1);
 @a = $_->fragment_affixes(1);
 CheckOK2(227, 2);
 CheckSArray(227, \@a, "B", "");
+
+# 228: gd_entry (MPLEX) check
+%h = $_->entry('mplex');
+CheckOK(228);
+CheckNum2(228, 1, $h{"field_type"}, $GetData::MPLEX_ENTRY);
+CheckNum2(228, 2, $h{"fragment_index"}, 0);
+CheckNum2(228, 3, $h{"count_val"}, 1);
+CheckSArray2(228, 4, $h{"in_fields"}, 'data', 'sbit');
+CheckNum2(228, 5, $h{"count_max"}, 10);
+
+# 229: gd_add_mplex check
+$s = $_->add_mplex('new21', 'in1', 'in2', 5, 6, 0);
+CheckOK2(229, 1);
+
+%h = $_->entry('new21');
+CheckOK2(229, 2);
+CheckNum2(229, 1, $h{"field_type"}, $GetData::MPLEX_ENTRY);
+CheckNum2(229, 2, $h{"fragment_index"}, 0);
+CheckNum2(229, 3, $h{"count_val"}, 5);
+CheckSArray2(229, 4, $h{"in_fields"}, 'in1', 'in2');
+CheckNum2(229, 5, $h{"count_max"}, 6);
+
+# 230: gd_madd_mplex check
+$s = $_->madd_mplex('data', 'mnew21', 'in2', 'in3', 0, 12);
+CheckOK2(230, 1);
+
+%h = $_->entry('data/mnew21');
+CheckOK2(230, 2);
+CheckNum2(230, 1, $h{"field_type"}, $GetData::MPLEX_ENTRY);
+CheckNum2(230, 2, $h{"fragment_index"}, 0);
+CheckNum2(230, 3, $h{"count_val"}, 0);
+CheckSArray2(230, 4, $h{"in_fields"}, 'in2', 'in3');
+CheckNum2(230, 5, $h{"count_max"}, 12);
+
+# 231: gd_alter_mplex check
+$s = $_->alter_mplex('new21', 'in3', 'in4', $GetData::COUNT_MAX, 7);
+CheckOK2(231, 1);
+
+%h = $_->entry('new21');
+CheckOK2(231, 2);
+CheckNum2(231, 1, $h{"field_type"}, $GetData::MPLEX_ENTRY);
+CheckNum2(231, 2, $h{"fragment_index"}, 0);
+CheckNum2(231, 3, $h{"count_val"}, 5);
+CheckSArray2(231, 4, $h{"in_fields"}, 'in3', 'in4');
+CheckNum2(231, 5, $h{"count_max"}, 7);
 
  
 

@@ -84,7 +84,7 @@ struct FormatType {
   int n_linterp;
   struct MultiplyEntryType *multiplyEntries;
   int n_multiply;
-  struct MplexEntryType *mplexEntries;
+  struct MPlexEntryType *mplexEntries;
   int n_mplex;
   struct BitEntryType *bitEntries;
   int n_bit;

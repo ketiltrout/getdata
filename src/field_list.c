@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 D. V. Wiebe
+/* Copyright (C) 2008-2012 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -27,16 +27,7 @@ static const gd_carray_t zero_carrays[1] = { {0, NULL} };
 /* returns true if E a member of the given list */
 int _GD_ListEntry(gd_entry_t *E, int meta, int vector, gd_entype_t type)
 {
-  dtrace("%p, %i, %i, 0x%X", E, meta, vector, type);
-
-  /* aliases */
-  if (E->field_type == GD_ALIAS_ENTRY) {
-    int ret = 0;
-    if (E->e->entry[0])
-      ret = _GD_ListEntry(E->e->entry[0], meta, vector, type);
-    dreturn("%i", ret);
-    return ret;
-  }
+  dtrace("%p{%s}, %i, %i, 0x%X", E, E->field, meta, vector, type);
 
   /* check hidden */
   if (E->hidden) {
@@ -48,6 +39,15 @@ int _GD_ListEntry(gd_entry_t *E, int meta, int vector, gd_entype_t type)
   if (!meta && E->e->n_meta == -1) {
     dreturn("%i", 0);
     return 0;
+  }
+
+  /* aliases */
+  if (E->field_type == GD_ALIAS_ENTRY) {
+    int ret = 0;
+    if (E->e->entry[0])
+      ret = _GD_ListEntry(E->e->entry[0], meta, vector, type);
+    dreturn("%i", ret);
+    return ret;
   }
 
   /* vector/type check */

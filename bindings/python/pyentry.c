@@ -1,4 +1,4 @@
-/* Copyright (C) 2009-2011 D. V. Wiebe
+/* Copyright (C) 2009-2012 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -36,7 +36,7 @@ static const char* gdpy_entry_type_names[] =
   "DIVIDE_ENTRY",   /* 0x0A */
   "RECIP_ENTRY",    /* 0x0B */
   "WINDOW_ENTRY",   /* 0x0C */
-  NULL,             /* 0x0D - unused */
+  "MPLEX_ENTRY",    /* 0x0D */
   NULL,             /* 0x0E - unused */
   NULL,             /* 0x0F - unused */
   "CONST_ENTRY",    /* 0x10 */
@@ -90,6 +90,7 @@ static void gdpy_set_scalar_from_pyobj(PyObject* pyobj, gd_type_t type,
     char** scalar, void* data)
 {
   dtrace("%p, %x, %p, %p", pyobj, type, scalar, data);
+  /* FIXME */
 
   if (PyString_Check(pyobj))
     *scalar = gdpy_dup_pystring(pyobj);
@@ -155,6 +156,7 @@ static void gdpy_set_entry_from_tuple(gd_entry_t *E, PyObject* tuple,
       min = 3;
       break;
     case GD_WINDOW_ENTRY:
+    case GD_MPLEX_ENTRY:
       min = 4;
       break;
     default:
@@ -428,6 +430,27 @@ static void gdpy_set_entry_from_tuple(gd_entry_t *E, PyObject* tuple,
         return;
       }
       break;
+    case GD_MPLEX_ENTRY:
+      E->in_fields[0] = gdpy_dup_pystring(PyTuple_GetItem(tuple, 0));
+
+      if (PyErr_Occurred()) {
+        dreturnvoid();
+        return;
+      }
+
+      E->in_fields[1] = gdpy_dup_pystring(PyTuple_GetItem(tuple, 1));
+
+      if (PyErr_Occurred()) {
+        dreturnvoid();
+        return;
+      }
+
+      gdpy_set_scalar_from_pyobj(PyTuple_GetItem(tuple, 2), GD_UINT16,
+          &E->scalar[0], &E->count_val);
+
+      gdpy_set_scalar_from_pyobj(PyTuple_GetItem(tuple, 3), GD_UINT16,
+          &E->scalar[1], &E->count_max);
+      break;
     case GD_CARRAY_ENTRY:
       E->array_len = (size_t)PyLong_AsUnsignedLong(PyTuple_GetItem(tuple, 1));
       /* fallthrough */
@@ -466,8 +489,8 @@ static void gdpy_set_entry_from_dict(gd_entry_t *E, PyObject* parms,
    * DIVIDE:   in_field1, in_field2        = 2
    * RECIP:    in_field, dividend          = 2
    * POLYNOM:  in_field, a                 = 2
-   * POLYNOM:  in_field, a                 = 2
    * WINDOW:   in_field1, in_field2, op, thresh = 4
+   * MPLEX:    in_field1, in_field2, val, max = 4
    * CONST:    type                        = 1
    * CARRAY:   type, array_len             = 2
    * STRING:   (none)                      = 0
@@ -528,6 +551,13 @@ static void gdpy_set_entry_from_dict(gd_entry_t *E, PyObject* parms,
       key[1] = "in_field2";
       key[2] = "windop";
       key[3] = "threshold";
+      size = 4;
+      break;
+    case GD_MPLEX_ENTRY:
+      key[0] = "in_field1";
+      key[1] = "in_field2";
+      key[2] = "count_val";
+      key[3] = "count_max";
       size = 4;
       break;
     case GD_CARRAY_ENTRY:
@@ -743,6 +773,7 @@ static PyObject* gdpy_entry_getinfields(struct gdpy_entry_t* self,
     case GD_MULTIPLY_ENTRY:
     case GD_DIVIDE_ENTRY:
     case GD_WINDOW_ENTRY:
+    case GD_MPLEX_ENTRY:
       tuple = Py_BuildValue("(ss)", self->E->in_fields[0],
           self->E->in_fields[1]);
       break;
@@ -829,6 +860,7 @@ static int gdpy_entry_setinfields(struct gdpy_entry_t* self, PyObject *value,
     case GD_MULTIPLY_ENTRY:
     case GD_DIVIDE_ENTRY:
     case GD_WINDOW_ENTRY:
+    case GD_MPLEX_ENTRY:
       if (!PyTuple_Check(value)) {
         PyErr_SetString(PyExc_TypeError, "'pygetdata.entry' "
             "attribute 'in_fields' must be a tuple");
@@ -1573,6 +1605,110 @@ static int gdpy_entry_setshift(struct gdpy_entry_t* self, PyObject *value,
   return 0;
 }
 
+static PyObject* gdpy_entry_getcountval(struct gdpy_entry_t* self,
+    void* closure)
+{
+  PyObject* obj = NULL;
+
+  dtrace("%p, %p", self, closure);
+
+  if (self->E->field_type == GD_MPLEX_ENTRY) {
+    if (self->E->scalar[0] == NULL)
+      obj = PyInt_FromLong(self->E->count_val);
+    else
+      obj = PyString_FromString(self->E->scalar[0]);
+  } else
+    PyErr_Format(PyExc_AttributeError, "'pygetdata.entry' "
+        "attribute 'count_val' not available for entry type %s",
+        gdpy_entry_type_names[self->E->field_type]); 
+
+  dreturn("%p", obj);
+  return obj;
+}
+
+static int gdpy_entry_setcountval(struct gdpy_entry_t* self, PyObject *value,
+    void *closure)
+{
+  gd_count_t count_val;
+  char *scalar;
+
+  dtrace("%p, %p, %p", self, value, closure);
+
+  if (self->E->field_type != GD_MPLEX_ENTRY) {
+    PyErr_Format(PyExc_AttributeError, "'pygetdata.entry' "
+        "attribute 'count_val' not available for entry type %s",
+        gdpy_entry_type_names[self->E->field_type]); 
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  gdpy_set_scalar_from_pyobj(value, GD_UINT16, &scalar, &count_val);
+
+  if (PyErr_Occurred()) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  self->E->count_val = count_val;
+  free(self->E->scalar[0]);
+  self->E->scalar[0] = scalar;
+
+  dreturn("%i", 0);
+  return 0;
+}
+
+static PyObject* gdpy_entry_getcountmax(struct gdpy_entry_t* self,
+    void* closure)
+{
+  PyObject* obj = NULL;
+
+  dtrace("%p, %p", self, closure);
+
+  if (self->E->field_type == GD_MPLEX_ENTRY) {
+    if (self->E->scalar[0] == NULL)
+      obj = PyInt_FromLong(self->E->count_max);
+    else
+      obj = PyString_FromString(self->E->scalar[0]);
+  } else
+    PyErr_Format(PyExc_AttributeError, "'pygetdata.entry' "
+        "attribute 'count_max' not available for entry type %s",
+        gdpy_entry_type_names[self->E->field_type]); 
+
+  dreturn("%p", obj);
+  return obj;
+}
+
+static int gdpy_entry_setcountmax(struct gdpy_entry_t* self, PyObject *value,
+    void *closure)
+{
+  gd_count_t count_max;
+  char *scalar;
+
+  dtrace("%p, %p, %p", self, value, closure);
+
+  if (self->E->field_type != GD_MPLEX_ENTRY) {
+    PyErr_Format(PyExc_AttributeError, "'pygetdata.entry' "
+        "attribute 'count_max' not available for entry type %s",
+        gdpy_entry_type_names[self->E->field_type]); 
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  gdpy_set_scalar_from_pyobj(value, GD_UINT16, &scalar, &count_max);
+
+  if (PyErr_Occurred()) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  self->E->count_max = count_max;
+  free(self->E->scalar[1]);
+  self->E->scalar[1] = scalar;
+
+  dreturn("%i", 0);
+  return 0;
+}
+
 static PyObject* gdpy_entry_geta(struct gdpy_entry_t* self, void* closure)
 {
   int i;
@@ -1811,13 +1947,15 @@ static PyObject* gdpy_entry_getparms(struct gdpy_entry_t* self, void* closure)
       switch (self->E->windop) {
         case GD_WINDOP_EQ:
         case GD_WINDOP_NE:
-          tuple = Py_BuildValue("(ssiI)", self->E->in_fields[0],
-              self->E->in_fields[1], self->E->windop, self->E->threshold.i);
+          tuple = Py_BuildValue("(ssiL)", self->E->in_fields[0],
+              self->E->in_fields[1], self->E->windop,
+              (long long)self->E->threshold.i);
           break;
         case GD_WINDOP_SET:
         case GD_WINDOP_CLR:
-          tuple = Py_BuildValue("(ssiU)", self->E->in_fields[0],
-              self->E->in_fields[1], self->E->windop, self->E->threshold.u);
+          tuple = Py_BuildValue("(ssiK)", self->E->in_fields[0],
+              self->E->in_fields[1], self->E->windop,
+              (unsigned long long)self->E->threshold.u);
           break;
         default:
           tuple = Py_BuildValue("(ssid)", self->E->in_fields[0],
@@ -1829,6 +1967,11 @@ static PyObject* gdpy_entry_getparms(struct gdpy_entry_t* self, void* closure)
     case GD_SBIT_ENTRY:
       tuple = Py_BuildValue("(sii)", self->E->in_fields[0],
           self->E->bitnum, self->E->numbits);
+      break;
+    case GD_MPLEX_ENTRY:
+      tuple = Py_BuildValue("(ssII)", self->E->in_fields[0],
+          self->E->in_fields[1], (unsigned int)self->E->count_val,
+          (unsigned int)self->E->count_max);
       break;
   }
 
@@ -1906,8 +2049,6 @@ static int gdpy_entry_setwindop(struct gdpy_entry_t* self, PyObject *value,
     return -1;
   }
 
-  /* The C library is significantly more lax about this. (It just checks a few
-   * key bits) */
   if (GDPY_INVALID_OP(t)) {
     PyErr_SetString(PyExc_ValueError, "'pygetdata.entry' invalid data type");
     dreturn("%i", -1);
@@ -2024,6 +2165,17 @@ static PyGetSetDef gdpy_entry_getset[] = {
   { "const_type", (getter)gdpy_entry_getdatatype,
     (setter)gdpy_entry_setdatatype, "An alias for the data_type attribute.",
     NULL },
+  { "count_max", (getter)gdpy_entry_getcountmax, (setter)gdpy_entry_setcountmax,
+    "The maximum value of the counter of a MPLEX field.  If this is\n"
+      "specified using a CONST scalar field, this will be the field code of\n"
+      "that field, otherwise, it will be the number itself.",
+    NULL },
+  { "count_val", (getter)gdpy_entry_getcountval, (setter)gdpy_entry_setcountval,
+    "The target value of the counter of a MPLEX field.  If this is\n"
+      /* ------ handy ruler ----------------------------------------------| */
+      "specified using a CONST scalar field, this will be the field code of\n"
+      "that field, otherwise, it will be the number itself.",
+    NULL },
   { "data_type", (getter)gdpy_entry_getdatatype, (setter)gdpy_entry_setdatatype,
     "A numeric code indicating the underlying data type of a CONST or RAW\n"
       "field.  It should be one of the data type symbols: pygetdata.UINT8,\n"
@@ -2130,7 +2282,6 @@ static PyGetSetDef gdpy_entry_getset[] = {
     NULL },
   { "threshold", (getter)gdpy_entry_getthreshold,
     (setter)gdpy_entry_setthreshold,
-      /* -----------------------------------------------------------------| */
     "The threshold of a WINDOW field.  The numerical type depends on the\n"
       "operation of the field.\n",
     NULL },

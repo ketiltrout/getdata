@@ -1,4 +1,4 @@
-// Copyright (C) 2008-2011 D. V. Wiebe
+// Copyright (C) 2008-2012 D. V. Wiebe
 //
 ///////////////////////////////////////////////////////////////////////////
 //
@@ -46,6 +46,11 @@ int Entry::CheckIndex(gd_entype_t field_type, int n_fields, int index)
 
   switch (field_type) {
     case GD_RAW_ENTRY:
+    case GD_INDEX_ENTRY:
+    case GD_CONST_ENTRY:
+    case GD_CARRAY_ENTRY:
+    case GD_STRING_ENTRY:
+    case GD_NO_ENTRY:
       return 0;
     case GD_LINCOM_ENTRY:
       if (index > n_fields)
@@ -53,9 +58,16 @@ int Entry::CheckIndex(gd_entype_t field_type, int n_fields, int index)
       break;
     case GD_MULTIPLY_ENTRY:
     case GD_DIVIDE_ENTRY:
+    case GD_WINDOW_ENTRY:
+    case GD_MPLEX_ENTRY:
       if (index > 2)
         return 0;
-    default:
+    case GD_LINTERP_ENTRY:
+    case GD_BIT_ENTRY:
+    case GD_PHASE_ENTRY:
+    case GD_POLYNOM_ENTRY:
+    case GD_SBIT_ENTRY:
+    case GD_RECIP_ENTRY:
       if (index > 1)
         return 0;
   }
@@ -141,6 +153,7 @@ static inline int scalar_ok(const gd_entry_t &E, int index)
       break;
     case GD_BIT_ENTRY:
     case GD_SBIT_ENTRY:
+    case GD_MPLEX_ENTRY:
       if (index >= 2)
         return 0;
       break;

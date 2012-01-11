@@ -1,4 +1,4 @@
-/* Copyright (C) 2009-2011 D. V. Wiebe
+/* Copyright (C) 2009-2012 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -2700,8 +2700,10 @@ static PyMethodDef gdpy_dirfile_methods[] = {
     METH_VARARGS | METH_KEYWORDS,
     "mvector_list(parent)\n\n"
       "Retrieve a list of all vector type metafields (that is: BIT, DIVIDE,\n"
-      "LINCOM, LINTERP, MULTIPLY, PHASE, POLYNOM, RECIP, SBIT, and WINDOW\n"
-      "metafields) for the parent field 'parent'.  See gd_mvector_list(3)."
+      /* ------- handy ruler ---------------------------------------------| */
+      "LINCOM, LINTERP, MPLEX, MULTIPLY, PHASE, POLYNOM, RECIP, SBIT, and\n"
+      "WINDOW metafields) for the parent field 'parent'.  See\n"
+      "gd_mvector_list(3)."
   },
   {"native_type", (PyCFunction)gdpy_dirfile_getnativetype,
     METH_VARARGS | METH_KEYWORDS,
@@ -2745,14 +2747,16 @@ static PyMethodDef gdpy_dirfile_methods[] = {
     METH_VARARGS | METH_KEYWORDS,
     "nmvectors(parent)\n\n"
       "Return the number of vector type metafields (that is: BIT, DIVIDE,\n"
-      "LINCOM, LINTERP, MULTIPLY, PHASE, POLYNOM, RECIP, SBIT, and WINDOW\n"
-      "metafields) for the parent field 'parent'.  See gd_nmvectors(3)."
+      "LINCOM, LINTERP, MPLEX, MULTIPLY, PHASE, POLYNOM, RECIP, SBIT, and\n"
+      "WINDOW metafields) for the parent field 'parent'.  See\n"
+      "gd_nmvectors(3)."
   },
   {"nvectors", (PyCFunction)gdpy_dirfile_getnvectors, METH_NOARGS,
     "nvectors()\n\n"
       "Return the number of vector type fields (that is: BIT, DIVIDE,\n"
-      "INDEX, LINCOM, LINTERP, MULTIPLY, PHASE, POLYNOM, RAW, RECIP, SBIT,\n"
-      "and WINDOW fields) defined in the database.  See gd_nvectors(3)."
+      "INDEX, LINCOM, LINTERP, MPLEX, MULTIPLY, PHASE, POLYNOM, RAW, RECIP,\n"
+      "SBIT, and WINDOW fields) defined in the database.  See\n"
+      "gd_nvectors(3)."
   },
   {"raw_filename", (PyCFunction)gdpy_dirfile_getrawfilename,
     METH_VARARGS | METH_KEYWORDS,
@@ -2781,8 +2785,8 @@ static PyMethodDef gdpy_dirfile_methods[] = {
   { "vector_list", (PyCFunction)gdpy_dirfile_getvectorlist, METH_NOARGS,
     "vector_list()\n\n"
       "Retrieve a list of all vector type fields (that is: BIT, DIVIDE,\n"
-      "INDEX, LINCOM, LINTERP, MULTIPLY, PHASE, POLYNOM, RAW, RECIP, SBIT,\n"
-      "and WINDOW metafields) defined in the database.  See\n"
+      "INDEX, LINCOM, LINTERP, MPLEX, MULTIPLY, PHASE, POLYNOM, RAW, RECIP,\n"
+      "SBIT, and WINDOW metafields) defined in the database.  See\n"
       "gd_vector_list(3)."
   },
   {"include", (PyCFunction)gdpy_dirfile_include, METH_VARARGS | METH_KEYWORDS,
@@ -2791,7 +2795,6 @@ static PyMethodDef gdpy_dirfile_methods[] = {
       "'filename' to the database, as an include in the existing fragment\n"
       "indexed by 'fragment_index'.  If 'fragment_index' is not given,\n"
       "zero is assumed (ie. the primary format file).  If 'flags' is given,\n"
-      /* -----------------------------------------------------------------| */
       "it should be a bitwise or'd collection of flags listed in the\n"
       "gd_include manual page.  If 'prefix' or 'suffix' are given, they\n"
       "will be applied to the field codes defined in the file.  See\n"

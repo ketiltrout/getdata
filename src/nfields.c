@@ -73,7 +73,7 @@ unsigned int gd_nfields_by_type(DIRFILE* D, gd_entype_t type) gd_nothrow
   _GD_ClearError(D);
 
   if (index == -1) {
-      _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_BAD_ENTRY_TYPE, NULL, type, NULL);
+      _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_ENTRY_TYPE, NULL, type, NULL);
       dreturn("%u", 0);
       return 0;
   }

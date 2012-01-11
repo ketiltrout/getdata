@@ -1,4 +1,4 @@
-; Copyright (C) 2009-2010 D. V. Wiebe
+; Copyright (C) 2009-2012 D. V. Wiebe
 ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
@@ -33,7 +33,7 @@ form2   = "test_dirfile/form2"
 data    = "test_dirfile/data"
 
 flen    = 11
-nfields = 16
+nfields = 17
 nume    = 0
 
 spawn, "rm -rf " + filedir
@@ -42,7 +42,8 @@ file_mkdir, filedir
 datadata = bindgen(80) + 1
 
 fields = [ 'INDEX', 'alias', 'bit', 'carray', 'const', 'data', 'div', 'lincom',$
-  'linterp', 'mult', 'phase', 'polynom', 'recip', 'sbit', 'string', 'window' ]
+  'linterp', 'mplex', 'mult', 'phase', 'polynom', 'recip', 'sbit', 'string',$
+  'window' ]
 
 ; Write the test dirfile
 openw,1,format
@@ -58,6 +59,7 @@ printf,1,'linterp LINTERP data /look/up/file'
 printf,1,'polynom POLYNOM data 1.1 2.2 2.2 3.3;4.4 const const'
 printf,1,'bit BIT data 3 4'
 printf,1,'sbit SBIT data 5 6'
+printf,1,'mplex MPLEX sbit data 1 10'
 printf,1,'mult MULTIPLY data sbit'
 printf,1,'div DIVIDE mult bit'
 printf,1,'recip RECIP div 6.5;4.3'
@@ -434,14 +436,14 @@ nume += check_simple(43, n, [ "lincom", "new2"  ])
 ;  44: gd_nvectors check
 n = gd_nvectors(d)
 nume += check_ok(44, d)
-nume += check_simple(44, n, 22)
+nume += check_simple(44, n, 23)
 
 ;  45: gd_vector_list check
 n = gd_vector_list(d)
 nume += check_ok(45, d)
 nume += check_simple(45, n, [ 'INDEX', 'alias', 'bit', 'data', 'div', 'lincom',$
-  'linterp', 'mult', 'new1', 'new10', 'new13', 'new2', 'new4', 'new6', 'new7', $
-  'new8', 'new9', 'phase', 'polynom', 'recip', 'sbit', 'window' ])
+  'linterp', 'mplex', 'mult', 'new1', 'new10', 'new13', 'new2', 'new4', 'new6',$
+  'new7', 'new8', 'new9', 'phase', 'polynom', 'recip', 'sbit', 'window' ])
 
 ;  46: gd_madd_lincom
 gd_add_lincom, d, "mnew2", "in1", 9.9D, 8.8D, "in2", 7.7D, 6.6D, $
@@ -1180,8 +1182,7 @@ nume += check_ok(211, d)
 nume += check_simple2(211, 1, n.field_type, !GD.WINDOW_ENTRY)
 nume += check_simple2(211, 2, n.fragment, 0)
 nume += check_simple2(211, 3, n.windop, !GD.WINDOP_LT)
-nume += check_simple2(211, 4, n.in_fields, [ 'linterp' ])
-nume += check_simple2(211, 5, n.check, 'mult')
+nume += check_simple2(211, 4, n.in_fields, [ 'linterp', 'mult' ])
 nume += check_simple2(211, 6, n.rthreshold, 4.1D0)
 
 ; 212: gd_add_window check
@@ -1193,8 +1194,7 @@ nume += check_ok2(212, 2, d)
 nume += check_simple2(212, 1, n.field_type, !GD.WINDOW_ENTRY)
 nume += check_simple2(212, 2, n.fragment, 0)
 nume += check_simple2(212, 3, n.windop, !GD.WINDOP_NE)
-nume += check_simple2(212, 4, n.in_fields, [ 'in1' ])
-nume += check_simple2(212, 5, n.check, 'in2')
+nume += check_simple2(212, 4, n.in_fields, [ 'in1', 'in2' ])
 nume += check_simple2(212, 6, n.ithreshold, 32)
 
 ; 214: gd_madd_window check
@@ -1206,12 +1206,12 @@ nume += check_ok2(214, 2, d)
 nume += check_simple2(214, 1, n.field_type, !GD.WINDOW_ENTRY)
 nume += check_simple2(214, 2, n.fragment, 0)
 nume += check_simple2(214, 3, n.windop, !GD.WINDOP_SET)
-nume += check_simple2(214, 4, n.in_fields, [ 'in2' ])
-nume += check_simple2(214, 5, n.check, 'in3')
+nume += check_simple2(214, 4, n.in_fields, [ 'in2', 'in3' ])
 nume += check_simple2(214, 6, n.uthreshold, 128)
 
 ; 217: gd_alter_window check
-gd_alter_window, d, 'new18', in_field='in3', check='in4', /GE, threshold=32e3
+gd_alter_window, d, 'new18', in_field1='in3', in_field2='in4', /GE, $
+  threshold=32e3
 nume += check_ok2(217, 1, d)
 
 n = gd_entry(d, 'new18')
@@ -1219,8 +1219,7 @@ nume += check_ok2(217, 2, d)
 nume += check_simple2(217, 1, n.field_type, !GD.WINDOW_ENTRY)
 nume += check_simple2(217, 2, n.fragment, 0)
 nume += check_simple2(217, 3, n.windop, !GD.WINDOP_GE)
-nume += check_simple2(217, 4, n.in_fields, [ 'in3' ])
-nume += check_simple2(217, 5, n.check, 'in4')
+nume += check_simple2(217, 4, n.in_fields, [ 'in3', 'in4' ])
 nume += check_simple2(217, 6, n.rthreshold, 32d3)
 
 ; 218: gd_alias_target check
@@ -1286,6 +1285,52 @@ nume += check_ok2(227, 1, d)
 n = gd_fragment_affixes(d, fragment=1)
 nume += check_ok2(227, 2, d)
 nume += check_simple(227, n, [ "B", "" ])
+
+; 228: gd_entry (MPLEX) check
+n = gd_entry(d, 'mplex')
+nume += check_ok(228, d)
+nume += check_simple2(228, 1, n.field_type, !GD.MPLEX_ENTRY)
+nume += check_simple2(228, 2, n.fragment, 0)
+nume += check_simple2(228, 3, n.count_val, 1)
+nume += check_simple2(228, 4, n.in_fields, [ 'data', 'sbit' ])
+nume += check_simple2(228, 5, n.count_max, 10)
+
+; 229: gd_add_mplex check
+gd_add_mplex, d, 'new21', 'in1', 'in2', 5, 6
+nume += check_ok2(229, 1, d)
+
+n = gd_entry(d, 'new21')
+nume += check_ok2(229, 2, d)
+nume += check_simple2(229, 1, n.field_type, !GD.MPLEX_ENTRY)
+nume += check_simple2(229, 2, n.fragment, 0)
+nume += check_simple2(229, 3, n.count_val, 5)
+nume += check_simple2(229, 4, n.in_fields, [ 'in1', 'in2' ])
+nume += check_simple2(229, 5, n.count_max, 6)
+
+; 230: gd_madd_mplex check
+gd_add_mplex, d, parent='data', 'mnew21', 'in2', 'in3', 0, 12
+nume += check_ok2(230, 1, d)
+
+n = gd_entry(d, 'data/mnew21')
+nume += check_ok2(230, 2, d)
+nume += check_simple2(230, 1, n.field_type, !GD.MPLEX_ENTRY)
+nume += check_simple2(230, 2, n.fragment, 0)
+nume += check_simple2(230, 3, n.count_val, 0)
+nume += check_simple2(230, 4, n.in_fields, [ 'in2', 'in3' ])
+nume += check_simple2(230, 5, n.count_max, 12)
+
+; 231: gd_alter_mplex check
+gd_alter_mplex, d, 'new21', in_field1='in3', in_field2='in4', count_val=2, $
+  count_max=7
+nume += check_ok2(231, 1, d)
+
+n = gd_entry(d, 'new21')
+nume += check_ok2(231, 2, d)
+nume += check_simple2(231, 1, n.field_type, !GD.MPLEX_ENTRY)
+nume += check_simple2(231, 2, n.fragment, 0)
+nume += check_simple2(231, 3, n.count_val, 2)
+nume += check_simple2(231, 4, n.in_fields, [ 'in3', 'in4' ])
+nume += check_simple2(231, 5, n.count_max, 7)
 
  
 

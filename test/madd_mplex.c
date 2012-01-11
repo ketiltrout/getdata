@@ -1,4 +1,4 @@
-/* Copyright (C) 2011 D. V. Wiebe
+/* Copyright (C) 2012 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -32,20 +32,21 @@ int main(void)
   rmdirfile();
   D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
   threshold.r = 3.4;
-  gd_add_window(D, "new", "in", "check", GD_WINDOP_GE, threshold, 0);
+  gd_add_mplex(D, "new", "in", "count", 3, 4, 0);
+  gd_madd_mplex(D, "new", "meta", "in", "count", 5, 6);
   error = gd_error(D);
 
   /* check */
-  gd_entry(D, "new", &e);
+  gd_entry(D, "new/meta", &e);
   if (gd_error(D))
     r = 1;
   else {
-    CHECKI(e.field_type, GD_WINDOW_ENTRY);
+    CHECKI(e.field_type, GD_MPLEX_ENTRY);
     CHECKS(e.in_fields[0], "in");
-    CHECKS(e.in_fields[1], "check");
+    CHECKS(e.in_fields[1], "count");
     CHECKI(e.fragment_index, 0);
-    CHECKI(e.EN(window,windop), GD_WINDOP_GE);
-    CHECKF(e.EN(window,threshold.r), 3.4);
+    CHECKI(e.EN(mplex,count_val), 5);
+    CHECKF(e.EN(mplex,count_max), 6);
     gd_free_entry_strings(&e);
   }
 

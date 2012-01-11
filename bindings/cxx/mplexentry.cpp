@@ -1,4 +1,4 @@
-// Copyright (C) 2011-2012 D. V. Wiebe
+// Copyright (C) 2012 D. V. Wiebe
 //
 ///////////////////////////////////////////////////////////////////////////
 //
@@ -20,27 +20,26 @@
 //
 #include "internal.h"
 
-WindowEntry::WindowEntry(const char* field_code, const char* in_field,
-    const char* check, WindOpType windop, gd_triplet_t threshold,
+MplexEntry::MplexEntry(const char* field_code, const char* in_field,
+    const char* count, gd_count_t count_val, gd_count_t count_max,
     int fragment_index) : Entry()
 {
-  dtrace("\"%s\", \"%s\", \"%s\", %i, {%g,%llx,%lli}, %i", field_code,
-      in_field, check, (unsigned)windop, threshold.r,
-      (unsigned long long)threshold.u, (long long)threshold.i, fragment_index);
+  dtrace("\"%s\", \"%s\", \"%s\", %i, %i, %i", field_code,
+      in_field, count, count_val, count_max, fragment_index);
 
   E.field = strdup(field_code);
-  E.field_type = GD_WINDOW_ENTRY;
+  E.field_type = GD_MPLEX_ENTRY;
   E.in_fields[0] = strdup(in_field);
-  E.in_fields[1] = strdup(check);
-  E.scalar[0] = 0;
-  E.u.window.windop = (gd_windop_t)windop;
-  E.u.window.threshold = threshold;
+  E.in_fields[1] = strdup(count);
+  E.scalar[0] = E.scalar[1] = 0;
+  E.u.mplex.count_val = count_val;
+  E.u.mplex.count_max = count_max;
   E.fragment_index = fragment_index;
 
   dreturnvoid();
 }
 
-int WindowEntry::SetInput(const char* field, int index)
+int MplexEntry::SetInput(const char* field, int index)
 {
   if (index < 0 || index > 1)
     return -1;
@@ -59,13 +58,13 @@ int WindowEntry::SetInput(const char* field, int index)
   return 0;
 }
 
-int WindowEntry::SetWindOp(WindOpType windop)
+int MplexEntry::SetCountVal(gd_count_t count_val)
 {
   int ret = 0;
 
-  dtrace("0x%X", (unsigned)windop);
+  dtrace("%u", count_val);
 
-  E.u.window.windop = (gd_windop_t)windop;
+  E.u.mplex.count_val = count_val;
 
   if (D != NULL)
     ret = gd_alter_entry(D->D, E.field, &E, 0);
@@ -74,13 +73,13 @@ int WindowEntry::SetWindOp(WindOpType windop)
   return ret;
 }
 
-int WindowEntry::SetThreshold(gd_triplet_t threshold)
+int MplexEntry::SetCountMax(gd_count_t count_max)
 {
   int ret = 0;
 
-  dtrace("{%g,%llX,%lli}", threshold.r, threshold.u, threshold.i);
+  dtrace("%u", count_max);
 
-  E.u.window.threshold = threshold;
+  E.u.mplex.count_max = count_max;
 
   if (D != NULL)
     ret = gd_alter_entry(D->D, E.field, &E, 0);
@@ -89,35 +88,38 @@ int WindowEntry::SetThreshold(gd_triplet_t threshold)
   return ret;
 }
 
-int WindowEntry::SetThreshold(const char *threshold)
+int MplexEntry::SetCountVal(const char *count_val)
 {
   int r = 0;
 
-  dtrace("\"%s\"", threshold);
+  dtrace("\"%s\"", count_val);
 
-  SetScalar(0, threshold);
+  SetScalar(0, count_val);
 
   if (D != NULL) {
     r = gd_alter_entry(D->D, E.field, &E, 0);
 
-    if (!r) {
-      switch(E.u.window.windop) {
-        case GD_WINDOP_EQ:
-        case GD_WINDOP_NE:
-          r = gd_get_constant(D->D, threshold, GD_INT64,
-              &E.u.window.threshold.i);
-          break;
-        case GD_WINDOP_SET:
-        case GD_WINDOP_CLR:
-          r = gd_get_constant(D->D, threshold, GD_UINT64,
-              &E.u.window.threshold.u);
-          break;
-        default:
-          r = gd_get_constant(D->D, threshold, GD_FLOAT64,
-              &E.u.window.threshold.r);
-          break;
-      }
-    }
+    if (!r)
+      r = gd_get_constant(D->D, count_val, GD_UINT16, &E.u.mplex.count_val);
+  }
+  
+  dreturn("%i", r);
+  return r;
+}
+
+int MplexEntry::SetCountMax(const char *count_max)
+{
+  int r = 0;
+
+  dtrace("\"%s\"", count_max);
+
+  SetScalar(1, count_max);
+
+  if (D != NULL) {
+    r = gd_alter_entry(D->D, E.field, &E, 0);
+
+    if (!r)
+      r = gd_get_constant(D->D, count_max, GD_UINT16, &E.u.mplex.count_max);
   }
   
   dreturn("%i", r);

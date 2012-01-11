@@ -1,3 +1,70 @@
+2012-01-11   D. V. Wiebe <getdata@ketiltrout.net> svn:644
+	* src/getdata.h.in: Added GD_MPLEX_ENTRY.  Updated gd_entry_t.  Defined
+	GD_COUNT_MAX.
+
+	* src/legacy.c (CopyMplexEntry) src/getdata.c (_GD_MplexData _GD_DoMplex)
+	src/putdata.c (_GD_MplexOutData _GD_DoMplexOut) src/parse.c (_GD_ParseMplex)
+	src/add.c (gd_add_mplex gd_madd_mplex) src/mod.c (gd_alter_mplex): Added.
+	* src/internal.h: Define GD_MPLEX_LOOKBACK
+
+	* src/entry.c (_GD_FreeE _GD_CalculateEntry gd_entry gd_validate)
+	src/flush.c (_GD_Flush _GD_FieldSpec _GD_FindVersion) src/fpos.c
+	(_GD_GetFilePos _GD_WriteSeek) src/legacy.c (GetFormat) src/getdata.c
+	(_GD_DoField) src/name.c (_GD_InvalidateConst _GD_InvalidateVect)
+	src/native.c (_GD_NativeType) src/putdata.c (_GD_DoFieldOut) src/del.c
+	(_GD_ClearDerived _GD_DeReference) src/flimits.c (_GD_GetEOF _GD_GetBOF)
+	src/parse.c (_GD_ParseFieldSpec) src/add.c (_GD_Add) src/spf.c (_GD_GetSPF)
+	src/mod.c (_GD_Change): Handle MPLEX.
+
+	* src/fpos.c (_GD_Seek): De-statickify.
+	* src/legacy.c (CopyWindowEntry): Report as MPLEX.
+	* src/getdata_legacy.h: Fix mplex list in FormatType.
+
+	* src/errors.c: Rename GD_E_BAD_ENTRY_* suberrors to GD_E_ENTRY_* for
+	brevity.  Added GD_E_FORMAT_MPLEXVAL, GD_E_ENTRY_CNTVAL, GD_E_ENTRY_CNTMAX.
+
+	* src/field_list.c (_GD_ListEntry): Move the alias check down so that hidden
+	and meta alias are handled properly.
+
+	* internal.h src/common.c (_GD_Malloc _GD_Realloc _GD_Strdup): Moved from
+	internal.h.
+
+	* bindings/make_parameters.c: Define MPLEX_ENTRY, E_FORMAT_MPLEXVAL,
+	COUNT_MAX.
+	* bindings/cxx/mplexentry.cpp bindings/cxx/getdata/mplexentry.h: Added.
+	* bindings/python/pyentry.c (gdpy_entry_getcountval gdpy_entry_setcountval
+	gdpy_entry_getcountmax gdpy_entry_setcountmax) bindings/cxx/getdata/entry.h
+	(Entry::CountVal Entry::CountMax) bindings/f77/getdata.f90.in (fgd_add_mplex
+	fgd_madd_mplex fgd_alter_mplex) bindings/f77/fgetdata.c (GDGEMX GDADMX
+	GDMDMX GDALMX) bindings/idl/getdata.c (gdidl_add_mplex gdidl_alter_mplex):
+	Added.
+
+	* bindings/python/pyentry.c (gdpy_set_entry_from_tuple
+	gdpy_set_entry_from_dict gdpy_entry_getinfields gdpy_entry_setinfields
+	gdpy_entry_getparms) bindings/cxx/entry.cpp (CheckIndex scalar_ok)
+	bindings/cxx/dirfile.cpp (Dirfile::Entry) bindings/cxx/getdata/dirfile.h
+	bindings/perl/GetData.xs (gdp_to_entry entry) bindings/f77/getdata.f90.in
+	(fgd_entry fgd_add fgd_madd) bindings/f77/fgetdata.c (GDASCA GDMDWD)
+	bindings/idl/getdata.c (gdidl_make_idl_entry gdidl_read_idl_entry): MPLEX
+	bindings.
+
+	* bindings/perl/simple_funcs.xsin: Add add_mplex, alter_mplex, madd_mplex.
+	* bindings/perl/simple_funcs.pl: Handle gd_count_t.
+
+	* bindings/python/test/big_test.py bindings/cxx/test/big_test.cpp
+	bindings/perl/t/big_test.t bindings/f77/test/big_test.f
+	bindings/f77/test/big_test95.f90 bindings/idl/test/big_test.pro: Add tests
+	228-231.
+
+	* bindings/cxx/windowentry.cpp bindings/cxx/getdata/windowentry.h
+	bindings/idl/getdata.c (gdidl_alter_window): Get rid of
+	Check stuff: just use Input, for consistency.
+
+	* test/add_mplex.c test/add_mplex_val.c test/alter_mplex.c
+	test/entry_mplex.c test/entry_mplex_scalar.c test/get_mplex.c
+	test/get_mplex_lb.c test/madd_mplex.c test/parse_mplex.c
+	test/parse_mplex_ncols.c test/parse_mplex_scalar.c test/put_mplex.c: Added.
+
 2011-12-31   D. V. Wiebe <getdata@ketiltrout.net> svn:643
 	* bindings/python/pyentry.c (gdpy_set_entry_from_dict): Add missing INCREF.
 

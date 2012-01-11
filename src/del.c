@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 D. V. Wiebe
+/* Copyright (C) 2008-2012 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -41,6 +41,7 @@ static void _GD_ClearDerived(DIRFILE* D, gd_entry_t* E, const gd_entry_t* C,
     case GD_MULTIPLY_ENTRY:
     case GD_DIVIDE_ENTRY:
     case GD_WINDOW_ENTRY:
+    case GD_MPLEX_ENTRY:
       if (strcmp(E->in_fields[1], C->field) == 0) {
         if (check)
           _GD_SetError(D, GD_E_DELETE, GD_E_DEL_DERIVED, E->field, 0,
@@ -196,6 +197,10 @@ static void _GD_DeReference(DIRFILE* D, gd_entry_t* E, gd_entry_t* C,
               &E->EN(window,threshold.r));
           break;
       }
+      break;
+    case GD_MPLEX_ENTRY:
+      _GD_DeReferenceOne(D, E, C, check, 0, GD_UINT16, &E->EN(mplex,count_val));
+      _GD_DeReferenceOne(D, E, C, check, 1, GD_UINT16, &E->EN(mplex,count_max));
       break;
     case GD_NO_ENTRY:
     case GD_LINTERP_ENTRY:

@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 C. Barth Netterfield
- * Copyright (C) 2005-2011 D. V. Wiebe
+ * Copyright (C) 2005-2012 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -658,14 +658,11 @@ static gd_entry_t* _GD_ParseWindow(DIRFILE* D, char* in_cols[MAX_IN_COLS],
   memset(E->e, 0, sizeof(struct _gd_private_entry));
 
   E->field_type = GD_WINDOW_ENTRY;
-  E->in_fields[0] = NULL;
-  E->e->entry[0] = NULL;
-  E->e->calculated = 0;
 
   E->field = _GD_MungeFromFrag(D, parent, me, in_cols[0], &offset);
   if (E->field && _GD_ValidateField(E->field + offset, standards, pedantic, 0,
         is_dot))
-{
+  {
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_NAME, format_file, line,
         in_cols[0]);
     _GD_FreeE(D, E, 1);
@@ -703,6 +700,80 @@ static gd_entry_t* _GD_ParseWindow(DIRFILE* D, char* in_cols[MAX_IN_COLS],
           GD_FLOAT64, format_file, line, E->scalar_ind, NULL, standards,
           pedantic);
       break;
+  }
+
+  if (D->error != GD_E_OK) {
+    _GD_FreeE(D, E, 1);
+    E = NULL;
+  }
+
+  dreturn("%p", E);
+  return E;
+}
+
+/* _GD_ParseMplex: parse WINDOW entry in format file.
+*/
+static gd_entry_t* _GD_ParseMplex(DIRFILE* D, char* in_cols[MAX_IN_COLS],
+    int n_cols, const gd_entry_t* parent, const char* format_file, int line,
+    int me, int standards, int pedantic, int* is_dot)
+{
+  gd_entry_t *E;
+  int offset;
+
+  dtrace("%p, %p, %i, %p, \"%s\", %i, %i, %i, %i, %p", D, in_cols, n_cols,
+      parent, format_file, line, me, standards, pedantic, is_dot);
+
+  if (n_cols < 6) {
+    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_TOK, format_file, line, NULL);
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  E = (gd_entry_t *)_GD_Malloc(D, sizeof(gd_entry_t));
+  if (E == NULL) {
+    dreturn("%p", NULL);
+    return NULL;
+  }
+  memset(E, 0, sizeof(gd_entry_t));
+
+  E->e = (struct _gd_private_entry *)_GD_Malloc(D,
+      sizeof(struct _gd_private_entry));
+  if (E->e == NULL) {
+    free(E);
+    dreturn("%p", NULL);
+    return NULL;
+  }
+  memset(E->e, 0, sizeof(struct _gd_private_entry));
+
+  E->field_type = GD_MPLEX_ENTRY;
+
+  E->field = _GD_MungeFromFrag(D, parent, me, in_cols[0], &offset);
+  if (E->field && _GD_ValidateField(E->field + offset, standards, pedantic, 0,
+        is_dot))
+  {
+    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_NAME, format_file, line,
+        in_cols[0]);
+    _GD_FreeE(D, E, 1);
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  /* These are backwards! */
+  E->in_fields[0] = _GD_Strdup(D, in_cols[3]);
+  E->in_fields[1] = _GD_Strdup(D, in_cols[2]);
+
+  E->scalar[0] = _GD_SetScalar(D, in_cols[4], &E->EN(mplex,count_val),
+      GD_UINT16, format_file, line, E->scalar_ind, NULL, standards, pedantic);
+
+  E->scalar[1] = _GD_SetScalar(D, in_cols[5], &E->EN(mplex,count_max),
+      GD_UINT16, format_file, line, E->scalar_ind + 1, NULL, standards,
+      pedantic);
+
+  if (E->scalar[0] == NULL && E->scalar[1] == NULL &&
+      E->EN(mplex,count_val) >= E->EN(mplex,count_max))
+  {
+    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_MPLEXVAL, format_file, line,
+        in_cols[4]);
   }
 
   if (D->error != GD_E_OK) {
@@ -1476,6 +1547,9 @@ gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, char** in_cols,
         standards, pedantic, &is_dot);
   else if (strcmp(in_cols[1], "WINDOW") == 0 && (!pedantic || standards >= 9))
     E = _GD_ParseWindow(D, in_cols, n_cols, P, format_file, linenum, me,
+        standards, pedantic, &is_dot);
+  else if (strcmp(in_cols[1], "MPLEX") == 0 && (!pedantic || standards >= 9))
+    E = _GD_ParseMplex(D, in_cols, n_cols, P, format_file, linenum, me,
         standards, pedantic, &is_dot);
   else if (strcmp(in_cols[1], "CONST") == 0 && (!pedantic || standards >= 6))
     E = _GD_ParseConst(D, in_cols, n_cols, P, format_file, linenum, me,

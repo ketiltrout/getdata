@@ -1,4 +1,4 @@
-// Copyright (C) 2011-2012 D. V. Wiebe
+// Copyright (C) 2012 D. V. Wiebe
 //
 ///////////////////////////////////////////////////////////////////////////
 //
@@ -19,8 +19,8 @@
 // 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 //
 
-#ifndef GETDATA_WINDOWENTRY_H
-#define GETDATA_WINDOWENTRY_H
+#ifndef GETDATA_MPLEXENTRY_H
+#define GETDATA_MPLEXENTRY_H
 
 #include <getdata/entry.h>
 
@@ -28,14 +28,14 @@ namespace GetData {
 
   class Dirfile;
 
-  class WindowEntry : public Entry {
+  class MplexEntry : public Entry {
     friend class Dirfile;
 
     public:
-      WindowEntry() : Entry() { E.field_type = GD_WINDOW_ENTRY; };
+      MplexEntry() : Entry() { E.field_type = GD_MPLEX_ENTRY; };
 
-      WindowEntry(const char* field_code, const char* in_field,
-          const char *check_Field, WindOpType windop, gd_triplet_t threshold,
+      MplexEntry(const char* field_code, const char* in_field,
+          const char *check_Field, gd_count_t count_val, gd_count_t count_max,
           int fragment_index = 0);
 
       virtual const char *Input(int index = 0) const {
@@ -46,19 +46,18 @@ namespace GetData {
 
       virtual int ScalarIndex() const { return E.scalar_ind[0]; };
 
-      virtual WindOpType WindOp() const {
-        return (WindOpType)E.u.window.windop;
-      };
+      virtual gd_count_t CountVal() const { return E.u.mplex.count_val; };
 
-      virtual gd_triplet_t Threshold() const { return E.u.window.threshold; };
+      virtual gd_count_t CountMax() const { return E.u.mplex.count_max; };
 
       int SetInput(const char* field, int index);
-      virtual int SetWindOp(WindOpType windop);
-      virtual int SetThreshold(gd_triplet_t threshold);
-      virtual int SetThreshold(const char* threshold);
+      virtual int SetCountVal(gd_count_t count_val);
+      virtual int SetCountVal(const char* threshold);
+      virtual int SetCountMax(gd_count_t count_max);
+      virtual int SetCountMax(const char* threshold);
 
     private:
-      WindowEntry(const GetData::Dirfile *dirfile, const char* field_code) :
+      MplexEntry(const GetData::Dirfile *dirfile, const char* field_code) :
         Entry(dirfile, field_code) { };
   };
 }
