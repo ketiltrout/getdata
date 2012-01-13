@@ -95,8 +95,8 @@ off64_t _GD_SlimSeek(struct _gd_raw_file* file, off64_t count,
   return n;
 }
 
-ssize_t _GD_SlimRead(struct _gd_raw_file *file, void *ptr, gd_type_t data_type,
-    size_t nmemb)
+ssize_t _GD_SlimRead(struct _gd_raw_file *restrict file, void *restrict ptr,
+    gd_type_t data_type, size_t nmemb)
 {
   ssize_t n;
 

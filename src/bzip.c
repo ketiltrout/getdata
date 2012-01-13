@@ -165,7 +165,7 @@ off64_t _GD_Bzip2Seek(struct _gd_raw_file* file, off64_t count,
   return (ptr->base + ptr->pos) / GD_SIZE(data_type);
 }
 
-ssize_t _GD_Bzip2Read(struct _gd_raw_file *file, void *data,
+ssize_t _GD_Bzip2Read(struct _gd_raw_file *restrict file, void *restrict data,
     gd_type_t data_type, size_t nmemb)
 {
   char* output = (char*)data;

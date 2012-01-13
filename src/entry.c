@@ -20,7 +20,7 @@
  */
 #include "internal.h"
 
-void _GD_FreeE(DIRFILE *D, gd_entry_t* entry, int priv)
+void _GD_FreeE(DIRFILE *restrict D, gd_entry_t *restrict entry, int priv)
 {
   int i;
 
@@ -142,8 +142,8 @@ gd_entry_t* gd_free_entry_strings(gd_entry_t* entry) gd_nothrow
   return entry;
 }
 
-static void _GD_GetScalar(DIRFILE *D, gd_entry_t *E, int i, gd_type_t type,
-    void *data, int err)
+static void _GD_GetScalar(DIRFILE *restrict D, gd_entry_t *restrict E, int i,
+    gd_type_t type, void *restrict data, int err)
 {
   void *ptr = NULL;
   gd_entry_t* C = NULL;
@@ -206,7 +206,7 @@ static void _GD_GetScalar(DIRFILE *D, gd_entry_t *E, int i, gd_type_t type,
 }
 
 /* resolve non-literal scalars */
-int _GD_CalculateEntry(DIRFILE *D, gd_entry_t *E, int err)
+int _GD_CalculateEntry(DIRFILE *restrict D, gd_entry_t *restrict E, int err)
 {
   int i;
 

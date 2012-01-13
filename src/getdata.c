@@ -99,8 +99,8 @@
 #endif
 
 
-static void _GD_ExtractRepr(DIRFILE* D, const void* cdata, gd_type_t in_type,
-    void* rdata, gd_type_t type, size_t n, int repr)
+static void _GD_ExtractRepr(DIRFILE *restrict D, const void *restrict cdata,
+    gd_type_t in_type, void *restrict rdata, gd_type_t type, size_t n, int repr)
 {
   size_t i;
 
@@ -250,8 +250,8 @@ static int _GD_FillZero(void *databuffer, gd_type_t type, size_t nz)
 
 /* _GD_DoRaw:  Read from a raw.  Returns number of samples read.
 */
-static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *E, off64_t s0, size_t ns,
-    gd_type_t return_type, void *data_out)
+static size_t _GD_DoRaw(DIRFILE *restrict D, gd_entry_t *restrict E, off64_t s0,
+    size_t ns, gd_type_t return_type, void *restrict data_out)
 {
   size_t n_read = 0;
   ssize_t samples_read;
@@ -407,8 +407,8 @@ static size_t _GD_DoRaw(DIRFILE *D, gd_entry_t *E, off64_t s0, size_t ns,
 /* _GD_PolynomData: Compute data = Sum(i=0..n; data**i * a[i]), for scalar a,
  * and integer 2 <= n < GD_MAX_POLYORD
  */
-static void _GD_PolynomData(DIRFILE* D, void *data, gd_type_t type, size_t npts,
-    int n, double* a)
+static void _GD_PolynomData(DIRFILE *restrict D, void *restrict data,
+    gd_type_t type, size_t npts, int n, const double *restrict a)
 {
   size_t i;
 
@@ -594,8 +594,8 @@ static void _GD_PolynomData(DIRFILE* D, void *data, gd_type_t type, size_t npts,
 /* _GD_CPolynomData: Compute data = Sum(i=0..n; data**i * a[i]), for complex
  * scalar a, and integer 2 <= n < GD_MAX_POLYORD
  */
-static void _GD_CPolynomData(DIRFILE* D, void *data, gd_type_t type,
-    size_t npts, int n, GD_DCOMPLEXV(a))
+static void _GD_CPolynomData(DIRFILE *restrict D, void *restrict data,
+    gd_type_t type, size_t npts, int n, GD_DCOMPLEXV(a))
 {
   size_t i;
 
@@ -644,8 +644,8 @@ static void _GD_CPolynomData(DIRFILE* D, void *data, gd_type_t type,
 
 /* MultiplyData: Multiply A by B.  B is unchanged.
 */
-static void _GD_MultiplyData(DIRFILE* D, void *A, gd_spf_t spfA, double *B,
-    gd_spf_t spfB, gd_type_t type, size_t n)
+static void _GD_MultiplyData(DIRFILE *restrict D, void *restrict A,
+    gd_spf_t spfA, double *B, gd_spf_t spfB, gd_type_t type, size_t n)
 {
   size_t i;
 
@@ -695,8 +695,8 @@ static void _GD_MultiplyData(DIRFILE* D, void *A, gd_spf_t spfA, double *B,
 
 /* CMultiplyData: Multiply A by B.  B is complex.
 */
-static void _GD_CMultiplyData(DIRFILE* D, void *A, gd_spf_t spfA,
-    GD_DCOMPLEXP(B), gd_spf_t spfB, gd_type_t type, size_t n)
+static void _GD_CMultiplyData(DIRFILE *restrict D, void *restrict A,
+    gd_spf_t spfA, GD_DCOMPLEXP(B), gd_spf_t spfB, gd_type_t type, size_t n)
 {
   size_t i;
 
@@ -740,8 +740,8 @@ static void _GD_CMultiplyData(DIRFILE* D, void *A, gd_spf_t spfA,
 
 /* DivideData: Divide B by A.  B is unchanged.
 */
-static void _GD_DivideData(DIRFILE *D, void *A, gd_spf_t spfA, double *B,
-    gd_spf_t spfB, gd_type_t type, size_t n)
+static void _GD_DivideData(DIRFILE *restrict D, void *restrict A, gd_spf_t spfA,
+    double *restrict B, gd_spf_t spfB, gd_type_t type, size_t n)
 {
   size_t i;
 
@@ -792,8 +792,8 @@ static void _GD_DivideData(DIRFILE *D, void *A, gd_spf_t spfA, double *B,
 
 /* CDivideData: Divide A by B.  B is complex.
 */
-static void _GD_CDivideData(DIRFILE *D, void *A, gd_spf_t spfA,
-    GD_DCOMPLEXP(B), gd_spf_t spfB, gd_type_t type, size_t n)
+static void _GD_CDivideData(DIRFILE *restrict D, void *restrict A,
+    gd_spf_t spfA, GD_DCOMPLEXP(B), gd_spf_t spfB, gd_type_t type, size_t n)
 {
   size_t i;
 
@@ -860,9 +860,9 @@ static void _GD_CDivideData(DIRFILE *D, void *A, gd_spf_t spfA,
 
 /* WindowData: Zero data in A where the condition is false.  B is unchanged.
 */
-static void _GD_WindowData(DIRFILE* D, void *A, gd_spf_t spfA, void *B,
-    gd_spf_t spfB, gd_type_t type, gd_windop_t op, gd_triplet_t threshold,
-    size_t n)
+static void _GD_WindowData(DIRFILE *restrict D, void *restrict A, gd_spf_t spfA,
+    void *restrict B, gd_spf_t spfB, gd_type_t type, gd_windop_t op,
+    gd_triplet_t threshold, size_t n)
 {
   size_t i;
   const double NaN = NAN;
@@ -918,9 +918,9 @@ static void _GD_WindowData(DIRFILE* D, void *A, gd_spf_t spfA, void *B,
   } while(0)
 
 /* demultiplex data */
-static void _GD_MplexData(DIRFILE *D, void *A, gd_spf_t spfA,
-    const uint16_t *B, gd_spf_t spfB, gd_type_t type, gd_count_t val,
-    void *start, size_t n)
+static void _GD_MplexData(DIRFILE *restrict D, void *restrict A, gd_spf_t spfA,
+    const uint16_t *restrict B, gd_spf_t spfB, gd_type_t type, gd_count_t val,
+    void *restrict start, size_t n)
 {
   size_t i;
 
@@ -950,8 +950,9 @@ static void _GD_MplexData(DIRFILE *D, void *A, gd_spf_t spfA,
 
 /* _GD_DoLincom:  Read from a lincom.  Returns number of samples read.
 */
-static size_t _GD_DoLincom(DIRFILE *D, gd_entry_t *E, off64_t first_samp,
-    size_t num_samp, gd_type_t return_type, void *data_out)
+static size_t _GD_DoLincom(DIRFILE *restrict D, gd_entry_t *restrict E,
+    off64_t first_samp, size_t num_samp, gd_type_t return_type,
+    void *restrict data_out)
 {
   gd_spf_t spf[GD_MAX_LINCOM];
   size_t n_read;
@@ -1085,8 +1086,9 @@ static size_t _GD_DoLincom(DIRFILE *D, gd_entry_t *E, off64_t first_samp,
 
 /* _GD_DoMultiply:  Read from a multiply.  Returns number of samples read.
 */
-static size_t _GD_DoMultiply(DIRFILE *D, gd_entry_t* E, off64_t first_samp,
-    size_t num_samp, gd_type_t return_type, void *data_out)
+static size_t _GD_DoMultiply(DIRFILE *restrict D, gd_entry_t *restrict E,
+    off64_t first_samp, size_t num_samp, gd_type_t return_type,
+    void *restrict data_out)
 {
   void *tmpbuf = NULL;
   gd_spf_t spf1, spf2;
@@ -1183,8 +1185,9 @@ static size_t _GD_DoMultiply(DIRFILE *D, gd_entry_t* E, off64_t first_samp,
 
 /* _GD_DoRecip:  Read from a recip.  Returns number of samples read.
 */
-static size_t _GD_DoRecip(DIRFILE *D, gd_entry_t* E, off64_t first_samp,
-    size_t num_samp, gd_type_t return_type, void *data_out)
+static size_t _GD_DoRecip(DIRFILE *restrict D, gd_entry_t *restrict E,
+    off64_t first_samp, size_t num_samp, gd_type_t return_type,
+    void *restrict data_out)
 {
   size_t n_read;
 
@@ -1224,8 +1227,9 @@ static size_t _GD_DoRecip(DIRFILE *D, gd_entry_t* E, off64_t first_samp,
 
 /* _GD_DoDivide:  Read from a divide.  Returns number of samples read.
 */
-static size_t _GD_DoDivide(DIRFILE *D, gd_entry_t* E, off64_t first_samp,
-    size_t num_samp, gd_type_t return_type, void *data_out)
+static size_t _GD_DoDivide(DIRFILE *restrict D, gd_entry_t *restrict E,
+    off64_t first_samp, size_t num_samp, gd_type_t return_type,
+    void *restrict data_out)
 {
   void *tmpbuf = NULL;
   gd_spf_t spf1, spf2;
@@ -1319,8 +1323,9 @@ static size_t _GD_DoDivide(DIRFILE *D, gd_entry_t* E, off64_t first_samp,
 /* _GD_DoBit:  Read from a bitfield.  Returns number of samples read.
  *             This is used by both BIT and SBIT (is_signed distinguishes)
  */
-static size_t _GD_DoBit(DIRFILE *D, gd_entry_t *E, int is_signed,
-    off64_t first_samp, size_t num_samp, gd_type_t return_type, void *data_out)
+static size_t _GD_DoBit(DIRFILE *restrict D, gd_entry_t *restrict E,
+    int is_signed, off64_t first_samp, size_t num_samp, gd_type_t return_type,
+    void *restrict data_out)
 {
   void *tmpbuf;
   size_t i;
@@ -1375,8 +1380,9 @@ static size_t _GD_DoBit(DIRFILE *D, gd_entry_t *E, int is_signed,
 
 /* _GD_DoPhase:  Read from a phase.  Returns number of samples read.
 */
-static size_t _GD_DoPhase(DIRFILE *D, gd_entry_t *E, off64_t first_samp,
-    size_t num_samp, gd_type_t return_type, void *data_out)
+static size_t _GD_DoPhase(DIRFILE *restrict D, gd_entry_t *restrict E,
+    off64_t first_samp, size_t num_samp, gd_type_t return_type,
+    void *restrict data_out)
 {
   size_t n_read;
 
@@ -1397,8 +1403,9 @@ static size_t _GD_DoPhase(DIRFILE *D, gd_entry_t *E, off64_t first_samp,
 
 /* _GD_DoLinterp:  Read from a linterp.  Returns number of samples read.
 */
-static size_t _GD_DoLinterp(DIRFILE *D, gd_entry_t* E, off64_t first_samp,
-    size_t num_samp, gd_type_t return_type, void *data_out)
+static size_t _GD_DoLinterp(DIRFILE *restrict D, gd_entry_t *restrict E,
+    off64_t first_samp, size_t num_samp, gd_type_t return_type,
+    void *restrict data_out)
 {
   size_t n_read = 0;
   double* data_in;
@@ -1447,8 +1454,9 @@ static size_t _GD_DoLinterp(DIRFILE *D, gd_entry_t* E, off64_t first_samp,
 
 /* _GD_DoPolynom:  Read from a polynom.  Returns number of samples read.
 */
-static size_t _GD_DoPolynom(DIRFILE *D, gd_entry_t *E, off64_t first_samp,
-    size_t num_samp, gd_type_t return_type, void *data_out)
+static size_t _GD_DoPolynom(DIRFILE *restrict D, gd_entry_t *restrict E,
+    off64_t first_samp, size_t num_samp, gd_type_t return_type,
+    void *restrict data_out)
 {
   size_t n_read;
 
@@ -1488,8 +1496,9 @@ static size_t _GD_DoPolynom(DIRFILE *D, gd_entry_t *E, off64_t first_samp,
 
 /* _GD_DoWindow:  Read from a window.  Returns number of samples read.
 */
-static size_t _GD_DoWindow(DIRFILE *D, gd_entry_t* E, off64_t first_samp,
-    size_t num_samp, gd_type_t return_type, void *data_out)
+static size_t _GD_DoWindow(DIRFILE *restrict D, gd_entry_t *restrict E,
+    off64_t first_samp, size_t num_samp, gd_type_t return_type,
+    void *restrict data_out)
 {
   void *tmpbuf = NULL;
   gd_spf_t spf1, spf2;
@@ -1592,8 +1601,9 @@ static size_t _GD_DoWindow(DIRFILE *D, gd_entry_t* E, off64_t first_samp,
 
 /* _GD_DoMplex:  Read from an mplex.  Returns number of samples read.
 */
-static size_t _GD_DoMplex(DIRFILE *D, gd_entry_t *E, off64_t first_samp,
-    size_t num_samp, gd_type_t return_type, void *data_out)
+static size_t _GD_DoMplex(DIRFILE *restrict D, gd_entry_t *restrict E,
+    off64_t first_samp, size_t num_samp, gd_type_t return_type,
+    void *restrict data_out)
 {
   char start[16];
   uint16_t *tmpbuf = NULL;
@@ -1757,8 +1767,8 @@ static size_t _GD_DoMplex(DIRFILE *D, gd_entry_t *E, off64_t first_samp,
 
 /* _GD_DoConst:  Read from a const.  Returns number of samples read (ie. 1).
 */
-static size_t _GD_DoConst(DIRFILE *D, const gd_entry_t *E, off64_t first,
-    size_t len, gd_type_t return_type, void *data_out)
+static size_t _GD_DoConst(DIRFILE *restrict D, const gd_entry_t *restrict E,
+    off64_t first, size_t len, gd_type_t return_type, void *restrict data_out)
 {
   gd_type_t type;
 
@@ -1781,7 +1791,8 @@ static size_t _GD_DoConst(DIRFILE *D, const gd_entry_t *E, off64_t first,
 /* _GD_DoString:  Read from a string.  Returns number of samples read (ie. the
  * length of the string plus 1).
  */
-static size_t _GD_DoString(gd_entry_t *E, size_t num_samp, char *data_out)
+static size_t _GD_DoString(gd_entry_t *restrict E, size_t num_samp,
+    char *restrict data_out)
 {
   dtrace("%p, %zu, %p", E, num_samp, data_out);
 
@@ -1794,8 +1805,9 @@ static size_t _GD_DoString(gd_entry_t *E, size_t num_samp, char *data_out)
 
 /* _GD_DoField: Locate the field in the database and read it.
 */
-size_t _GD_DoField(DIRFILE *D, gd_entry_t *E, int repr, off64_t first_samp,
-    size_t num_samp, gd_type_t return_type, void *data_out)
+size_t _GD_DoField(DIRFILE *restrict D, gd_entry_t *restrict E, int repr,
+    off64_t first_samp, size_t num_samp, gd_type_t return_type,
+    void *restrict data_out)
 {
   size_t n_read = 0;
   gd_type_t ntype;

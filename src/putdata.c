@@ -22,8 +22,8 @@
  */
 #include "internal.h"
 
-static size_t _GD_DoRawOut(DIRFILE *D, gd_entry_t *E, off64_t s0,
-    size_t ns, gd_type_t data_type, const void *data_in)
+static size_t _GD_DoRawOut(DIRFILE *restrict D, gd_entry_t *restrict E,
+    off64_t s0, size_t ns, gd_type_t data_type, const void *restrict data_in)
 {
   ssize_t n_wrote;
   void *databuffer;
@@ -121,8 +121,9 @@ static size_t _GD_DoRawOut(DIRFILE *D, gd_entry_t *E, off64_t s0,
   return (size_t)n_wrote;
 }
 
-static size_t _GD_DoLinterpOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
-    size_t num_samp, gd_type_t data_type, const void *data_in)
+static size_t _GD_DoLinterpOut(DIRFILE *restrict D, gd_entry_t *restrict E,
+    off64_t first_samp, size_t num_samp, gd_type_t data_type,
+    const void *restrict data_in)
 {
   size_t n_wrote;
   int dir = -1, i;
@@ -223,8 +224,9 @@ static size_t _GD_DoLinterpOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
   return n_wrote;
 }
 
-static size_t _GD_DoLincomOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
-    size_t num_samp, gd_type_t data_type, const void *data_in)
+static size_t _GD_DoLincomOut(DIRFILE *restrict D, gd_entry_t *restrict E,
+    off64_t first_samp, size_t num_samp, gd_type_t data_type,
+    const void *restrict data_in)
 {
   size_t n_wrote;
   void* tmpbuf;
@@ -298,8 +300,9 @@ static size_t _GD_DoLincomOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
   return n_wrote;
 }
 
-static size_t _GD_DoBitOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
-    size_t num_samp, gd_type_t data_type, const void *data_in)
+static size_t _GD_DoBitOut(DIRFILE *restrict D, gd_entry_t *restrict E,
+    off64_t first_samp, size_t num_samp, gd_type_t data_type,
+    const void *restrict data_in)
 {
   uint64_t *tmpbuf;
   uint64_t *readbuf;
@@ -356,8 +359,9 @@ static size_t _GD_DoBitOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
   return n_wrote;
 }
 
-static size_t _GD_DoPhaseOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
-    size_t num_samp, gd_type_t data_type, const void *data_in)
+static size_t _GD_DoPhaseOut(DIRFILE *restrict D, gd_entry_t *restrict E,
+    off64_t first_samp, size_t num_samp, gd_type_t data_type,
+    const void *restrict data_in)
 {
   size_t n_wrote;
 
@@ -377,8 +381,9 @@ static size_t _GD_DoPhaseOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
   return n_wrote;
 }
 
-static size_t _GD_DoRecipOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
-    size_t num_samp, gd_type_t data_type, const void *data_in)
+static size_t _GD_DoRecipOut(DIRFILE *restrict D, gd_entry_t *restrict E,
+    off64_t first_samp, size_t num_samp, gd_type_t data_type,
+    const void *restrict data_in)
 {
   size_t n_wrote;
   void* tmpbuf;
@@ -422,8 +427,9 @@ static size_t _GD_DoRecipOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
   return n_wrote;
 }
 
-static size_t _GD_DoPolynomOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
-    size_t num_samp, gd_type_t data_type, const void *data_in)
+static size_t _GD_DoPolynomOut(DIRFILE *restrict D, gd_entry_t *restrict E,
+    off64_t first_samp, size_t num_samp, gd_type_t data_type,
+    const void *restrict data_in)
 {
   size_t n_wrote;
   void* tmpbuf;
@@ -516,9 +522,9 @@ static size_t _GD_DoPolynomOut(DIRFILE* D, gd_entry_t *E, off64_t first_samp,
       } \
   } while (0)
 
-static void _GD_MplexOutData(DIRFILE *D, void *A, gd_spf_t spfA,
-    const uint16_t *B, gd_spf_t spfB, const void *C, gd_type_t type,
-    gd_count_t val, size_t n)
+static void _GD_MplexOutData(DIRFILE *restrict D, void *restrict A,
+    gd_spf_t spfA, const uint16_t *restrict B, gd_spf_t spfB,
+    const void *restrict C, gd_type_t type, gd_count_t val, size_t n)
 {
   size_t i;
 
@@ -546,8 +552,9 @@ static void _GD_MplexOutData(DIRFILE *D, void *A, gd_spf_t spfA,
   dreturnvoid();
 }
 
-static size_t _GD_DoMplexOut(DIRFILE *D, gd_entry_t *E, off64_t first_samp,
-    size_t num_samp, gd_type_t data_type, const void *data_in)
+static size_t _GD_DoMplexOut(DIRFILE *restrict D, gd_entry_t *restrict E,
+    off64_t first_samp, size_t num_samp, gd_type_t data_type,
+    const void *restrict data_in)
 {
   size_t n_wrote = 0, num_samp2;
   void *tmpbuf;
@@ -620,8 +627,9 @@ static size_t _GD_DoMplexOut(DIRFILE *D, gd_entry_t *E, off64_t first_samp,
   return n_wrote;
 }
 
-static size_t _GD_DoConstOut(DIRFILE* D, gd_entry_t *E, off64_t first,
-    size_t len, gd_type_t data_type, const void *data_in)
+static size_t _GD_DoConstOut(DIRFILE *restrict D, gd_entry_t *restrict E,
+    off64_t first, size_t len, gd_type_t data_type,
+    const void *restrict data_in)
 {
   dtrace("%p, %p, %lli, %zu, 0x%X, %p", D, E, first, len, data_type, data_in);
 
@@ -646,7 +654,8 @@ static size_t _GD_DoConstOut(DIRFILE* D, gd_entry_t *E, off64_t first,
   return 1;
 }
 
-static size_t _GD_DoStringOut(DIRFILE* D, gd_entry_t *E, const char *data_in)
+static size_t _GD_DoStringOut(DIRFILE *restrict D, gd_entry_t *restrict E,
+    const char *data_in)
 {
   char* ptr = E->e->u.string;
 
@@ -673,8 +682,9 @@ static size_t _GD_DoStringOut(DIRFILE* D, gd_entry_t *E, const char *data_in)
   return strlen(E->e->u.string) + 1;
 }
 
-size_t _GD_DoFieldOut(DIRFILE *D, gd_entry_t* E, int repr, off64_t first_samp,
-    size_t num_samp, gd_type_t data_type, const void *data_in)
+size_t _GD_DoFieldOut(DIRFILE *restrict D, gd_entry_t *restrict E, int repr,
+    off64_t first_samp, size_t num_samp, gd_type_t data_type,
+    const void *restrict data_in)
 {
   size_t n_wrote = 0;
 

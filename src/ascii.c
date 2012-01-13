@@ -138,8 +138,8 @@ static void _GD_ScanFormat(char* fmt, gd_type_t data_type)
   dreturn("[\"%s\"]", fmt);
 }
 
-ssize_t _GD_AsciiRead(struct _gd_raw_file *file, void *ptr, gd_type_t data_type,
-    size_t nmemb)
+ssize_t _GD_AsciiRead(struct _gd_raw_file *restrict file, void *restrict ptr,
+    gd_type_t data_type, size_t nmemb)
 {
   char fmt[50];
   size_t n = 0;
@@ -201,8 +201,8 @@ ssize_t _GD_AsciiRead(struct _gd_raw_file *file, void *ptr, gd_type_t data_type,
   return (ret) ? ret : (ssize_t)n;
 }
 
-ssize_t _GD_AsciiWrite(struct _gd_raw_file *file, const void *ptr,
-    gd_type_t data_type, size_t nmemb)
+ssize_t _GD_AsciiWrite(struct _gd_raw_file *restrict file,
+    const void *restrict ptr, gd_type_t data_type, size_t nmemb)
 {
   ssize_t ret = 0;
   size_t n = 0;

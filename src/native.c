@@ -20,7 +20,7 @@
  */
 #include "internal.h"
 
-gd_type_t _GD_NativeType(DIRFILE* D, gd_entry_t* E, int repr)
+gd_type_t _GD_NativeType(DIRFILE *restrict D, gd_entry_t *restrict E, int repr)
 {
   gd_type_t type = GD_UNKNOWN;
   int i;

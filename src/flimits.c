@@ -170,7 +170,8 @@ off_t gd_frameoffset(DIRFILE* D, int fragment) gd_nothrow
   return gd_frameoffset64(D, fragment);
 }
 
-off64_t _GD_GetEOF(DIRFILE *D, gd_entry_t* E, const char *parent, int *is_index)
+off64_t _GD_GetEOF(DIRFILE *restrict D, const gd_entry_t *restrict E,
+    const char *restrict parent, int *restrict is_index)
 {
   off64_t ns = -1, ns1;
   gd_spf_t spf0, spf1;
@@ -389,8 +390,8 @@ off_t gd_eof(DIRFILE* D, const char *field_code)
   return (off_t)gd_eof64(D, field_code);
 }
 
-static off64_t _GD_GetBOF(DIRFILE *D, gd_entry_t* E, const char *parent,
-    gd_spf_t *spf, long long *ds)
+static off64_t _GD_GetBOF(DIRFILE *restrict D, const gd_entry_t *restrict E,
+    const char *restrict parent, gd_spf_t *restrict spf, long long *restrict ds)
 {
   off64_t bof = -1, bof1;
   gd_spf_t spf1;

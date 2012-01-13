@@ -40,7 +40,7 @@ int _GD_EntryCmp(const void *a, const void *b)
  *      malloc'd.  Returns a pointer if successful, NULL if unsuccessful.
  *      The length read is provided in *n.  Increments *linenum as appropriate;
  */
-char *_GD_GetLine(FILE *fp, size_t *n, int* linenum)
+char *_GD_GetLine(FILE *restrict fp, size_t *restrict n, int *restrict linenum)
 {
   ssize_t len;
 
@@ -96,8 +96,9 @@ gd_type_t _GD_LegacyType(char c)
 }
 
 /* Binary search to find the field */
-gd_entry_t *_GD_FindField(const DIRFILE *D, const char *field_code,
-    gd_entry_t **list, unsigned int u, int dealias, unsigned int *index)
+gd_entry_t *_GD_FindField(const DIRFILE *restrict D,
+    const char *restrict field_code, gd_entry_t *const *list, unsigned int u,
+    int dealias, unsigned int *restrict index)
 {
   int c;
   char *ptr;
@@ -165,7 +166,8 @@ gd_entry_t *_GD_FindField(const DIRFILE *D, const char *field_code,
 }
 
 /* Insertion sort the entry list */
-void _GD_InsertSort(DIRFILE* D, gd_entry_t* E, int u) gd_nothrow
+void _GD_InsertSort(DIRFILE *restrict D, gd_entry_t *restrict E, int u)
+  gd_nothrow
 {
   dtrace("%p, %p, %i", D, E, u);
 
@@ -208,7 +210,8 @@ void* _GD_Alloc(DIRFILE* D, gd_type_t type, size_t n)
 }
 
 /* compute LUT table path -- this is used by _GD_Change, so e may not be E->e */
-int _GD_SetTablePath(DIRFILE *D, gd_entry_t *E, struct _gd_private_entry *e)
+int _GD_SetTablePath(DIRFILE *restrict D, const gd_entry_t *restrict E,
+    struct _gd_private_entry *restrict e)
 {
   char *temp_buffer;
 
@@ -245,7 +248,7 @@ static int lutcmp(const void* a, const void* b)
 
 /* _GD_ReadLinterpFile: Read in the linterp data for this field
 */
-void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E)
+void _GD_ReadLinterpFile(DIRFILE *restrict D, gd_entry_t *restrict E)
 {
   FILE *fp;
   struct _gd_lut *ptr;
@@ -469,8 +472,9 @@ static size_t _GD_GetIndex(double x, const struct _gd_lut *lut, size_t idx,
 
 /* _GD_LinterpData: calibrate data using lookup table lut
 */
-void _GD_LinterpData(DIRFILE* D, void *data, gd_type_t type, int complex_table,
-    const double *data_in, size_t npts, const struct _gd_lut *lut, size_t n_ln)
+void _GD_LinterpData(DIRFILE *restrict D, void *restrict data, gd_type_t type,
+    int complex_table, const double *restrict data_in, size_t npts,
+    const struct _gd_lut *restrict lut, size_t n_ln)
 {
   int idx = 0;
   size_t i;
@@ -563,9 +567,10 @@ void _GD_LinterpData(DIRFILE* D, void *data, gd_type_t type, int complex_table,
   }
 
 /* Compute a lincom, all at once */
-void _GD_LincomData(DIRFILE* D, int n, void* data1, gd_type_t return_type,
-    double *data2, double *data3, double* m, double *b, gd_spf_t *spf,
-    size_t n_read)
+void _GD_LincomData(DIRFILE *restrict D, int n, void *restrict data1,
+    gd_type_t return_type, const double *restrict data2,
+    const double *restrict data3, const double *restrict m,
+    const double *restrict b, const gd_spf_t *restrict spf, size_t n_read)
 {
   size_t i;
 
@@ -671,9 +676,10 @@ void _GD_LincomData(DIRFILE* D, int n, void* data1, gd_type_t return_type,
 #endif
 
 /* Compute a complex valued lincom, all at once */
-void _GD_CLincomData(DIRFILE* D, int n, void* data1, gd_type_t return_type,
-    GD_DCOMPLEXP(data2), GD_DCOMPLEXP(data3), GD_DCOMPLEXV(m), GD_DCOMPLEXV(b),
-    gd_spf_t *spf, size_t n_read)
+void _GD_CLincomData(DIRFILE *restrict D, int n, void *restrict data1,
+    gd_type_t return_type, const GD_DCOMPLEXP_t restrict data2,
+    const GD_DCOMPLEXP_t restrict data3, GD_DCOMPLEXV(m), GD_DCOMPLEXV(b),
+    const gd_spf_t *restrict spf, size_t n_read)
 {
   size_t i;
 
@@ -718,8 +724,8 @@ void _GD_CLincomData(DIRFILE* D, int n, void* data1, gd_type_t return_type,
                            ((t *)data)[i] = (t)(dividend / ((t *)data)[i])
 
 /* Invert a vector */
-void _GD_InvertData(DIRFILE* D, void* data, gd_type_t return_type,
-    double dividend, size_t n_read)
+void _GD_InvertData(DIRFILE *restrict D, void *restrict data,
+    gd_type_t return_type, double dividend, size_t n_read)
 {
   size_t i;
 
@@ -774,8 +780,8 @@ void _GD_InvertData(DIRFILE* D, void* data, gd_type_t return_type,
 #endif
 
 /* Invert a vector */
-void _GD_CInvertData(DIRFILE* D, void* data, gd_type_t return_type,
-    GD_DCOMPLEXA(dividend), size_t n_read)
+void _GD_CInvertData(DIRFILE *restrict D, void *restrict data,
+    gd_type_t return_type, GD_DCOMPLEXA(dividend), size_t n_read)
 {
   size_t i;
 
@@ -802,8 +808,8 @@ void _GD_CInvertData(DIRFILE* D, void* data, gd_type_t return_type,
   dreturnvoid();
 }
 
-int _GD_GetRepr(DIRFILE *D, const char *field_code_in, char **field_code,
-    int err)
+int _GD_GetRepr(DIRFILE *restrict D, const char *restrict field_code_in,
+    char **restrict field_code, int err)
 {
   int repr = GD_REPR_NONE;
   const int field_code_len = strlen(field_code_in);
@@ -845,7 +851,7 @@ int _GD_GetRepr(DIRFILE *D, const char *field_code_in, char **field_code,
 }
 
 /* Ensure that an input field has been identified (with error checking) */
-int _GD_BadInput(DIRFILE *D, gd_entry_t *E, int i, int err)
+int _GD_BadInput(DIRFILE *D, const gd_entry_t *E, int i, int err)
 {
   char *code, *munged_code;
   int offset;
@@ -884,8 +890,9 @@ int _GD_BadInput(DIRFILE *D, gd_entry_t *E, int i, int err)
 }
 
 /* Find the entry and the representation */
-gd_entry_t *_GD_FindFieldAndRepr(DIRFILE *D, const char *field_code_in,
-    char **field_code, int *repr, unsigned int *index, int set, int err)
+gd_entry_t *_GD_FindFieldAndRepr(DIRFILE *restrict D,
+    const char *restrict field_code_in, char **restrict field_code,
+    int *restrict repr, unsigned int *restrict index, int set, int err)
 {
   gd_entry_t *E = NULL;
 
@@ -1373,7 +1380,7 @@ void *_GD_Malloc(DIRFILE *D, size_t size)
   return ptr;
 }
 
-void *_GD_Realloc(DIRFILE *D, void *old, size_t size)
+void *_GD_Realloc(DIRFILE *restrict D, void *restrict old, size_t size)
 {
   void *ptr = realloc(old, size);
   if (ptr == NULL)

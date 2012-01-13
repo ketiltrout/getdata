@@ -114,7 +114,7 @@ typedef off_t off64_t;
 #ifdef GD_NO_C99_API
 #  define GD_DCOMPLEXP_t double *
 #  define GD_DCOMPLEXA(v) double v[2]
-#  define GD_DCOMPLEXV(v) double v[][2]
+#  define GD_DCOMPLEXV(v) double v[restrict][2]
 #  define cabs(z)  sqrt((z)[0] * (z)[0] + (z)[1] * (z)[1])
 #  define carg(z)  atan2((z)[1], (z)[0])
 #  define creal(z) ((z)[0])
@@ -136,7 +136,7 @@ typedef off_t off64_t;
 #else
 #  define GD_DCOMPLEXP_t double _Complex *
 #  define GD_DCOMPLEXA(v) double _Complex v
-#  define GD_DCOMPLEXV(v) double _Complex* v
+#  define GD_DCOMPLEXV(v) double _Complex *restrict v
 #  define _gd_a2c(a,b) a = *((double complex*)(b))
 #  define _gd_c2c(a,b) a = b
 #  define _gd_c2cp(a,b) *a = b
@@ -920,7 +920,7 @@ struct _GD_DIRFILE {
 /* forward declarations */
 void *_GD_Alloc(DIRFILE*, gd_type_t, size_t) __attribute_malloc__;
 void _GD_ArmEndianise(uint64_t*, int, size_t);
-int _GD_BadInput(DIRFILE*, gd_entry_t*, int, int);
+int _GD_BadInput(DIRFILE *, const gd_entry_t *, int, int);
 
 #define _GD_BadWindop(op) \
   ( \
@@ -929,19 +929,19 @@ int _GD_BadInput(DIRFILE*, gd_entry_t*, int, int);
    (op != GD_WINDOP_SET) && (op != GD_WINDOP_CLR) \
   )
 
-int _GD_CalculateEntry(DIRFILE*, gd_entry_t*, int);
-char *_GD_CanonicalPath(const char*, const char*);
-void _GD_CInvertData(DIRFILE* D, void* data, gd_type_t return_type,
-    GD_DCOMPLEXA(dividend), size_t n_read);
+int _GD_CalculateEntry(DIRFILE *restrict, gd_entry_t *restrict, int);
+char *_GD_CanonicalPath(const char *restrict, const char *restrict);
+void _GD_CInvertData(DIRFILE *restrict, void *restrict, gd_type_t return_type,
+    GD_DCOMPLEXA(dividend), size_t);
 
 /* _GD_ClearError: Everything's A-OK; clear the last error. */
 #define _GD_ClearError(D) (D)->error = 0
 
-void _GD_CLincomData(DIRFILE* D, int n, void* data1, gd_type_t return_type,
-    GD_DCOMPLEXP(data2), GD_DCOMPLEXP(data3), GD_DCOMPLEXV(m), GD_DCOMPLEXV(b),
-    gd_spf_t *spf, size_t n_read);
-void _GD_ConvertType(DIRFILE* D, const void *data_in, gd_type_t in_type,
-    void *data_out, gd_type_t out_type, size_t n) gd_nothrow;
+void _GD_CLincomData(DIRFILE *restrict, int, void *restrict, gd_type_t,
+    const GD_DCOMPLEXP_t restrict, const GD_DCOMPLEXP_t restrict,
+    GD_DCOMPLEXV(m), GD_DCOMPLEXV(b), const gd_spf_t *restrict, size_t);
+void _GD_ConvertType(DIRFILE *restrict, const void *restrict, gd_type_t,
+    void *restrict, gd_type_t, size_t) gd_nothrow;
 gd_type_t _GD_ConstType(DIRFILE *D, gd_type_t type);
 const char *_GD_DirName(const DIRFILE *D, int dirfd);
 
@@ -957,15 +957,15 @@ const char *_GD_DirName(const DIRFILE *D, int dirfd);
     ((t) == GD_CARRAY_ENTRY)   ? 14 : ((t) == GD_STRING_ENTRY)   ? 15 : -1 \
   )
 
-size_t _GD_DoField(DIRFILE*, gd_entry_t*, int, off64_t, size_t, gd_type_t,
-    void*);
-size_t _GD_DoFieldOut(DIRFILE*, gd_entry_t*, int, off64_t, size_t, gd_type_t,
-    const void*);
+size_t _GD_DoField(DIRFILE *restrict, gd_entry_t *restrict, int, off64_t,
+    size_t, gd_type_t, void *restrict);
+size_t _GD_DoFieldOut(DIRFILE *restrict, gd_entry_t *restrict, int, off64_t,
+    size_t, gd_type_t, const void *restrict);
 int _GD_EntryCmp(const void*, const void*);
-gd_entry_t *_GD_FindField(const DIRFILE*, const char*, gd_entry_t**,
-    unsigned int, int, unsigned int*);
-gd_entry_t *_GD_FindFieldAndRepr(DIRFILE*, const char*, char**, int*,
-    unsigned int*, int, int);
+gd_entry_t *_GD_FindField(const DIRFILE *restrict, const char *restrict,
+    gd_entry_t *const *, unsigned int, int, unsigned int *restrict);
+gd_entry_t *_GD_FindFieldAndRepr(DIRFILE *restrict, const char *restrict,
+    char **restrict, int *restrict, unsigned int *restrict, int, int);
 uint64_t _GD_FindVersion(DIRFILE *D);
 void _GD_FixEndianness(void* databuffer, size_t size, size_t ns);
 #ifdef WORDS_BIGENDIAN
@@ -973,88 +973,93 @@ void _GD_FixEndianness(void* databuffer, size_t size, size_t ns);
 #else
 #define _GD_FileSwapBytes(D,i) ((D)->fragment[i].byte_sex & GD_BIG_ENDIAN)
 #endif
-int _GD_FiniRawIO(DIRFILE*, gd_entry_t*, int, int);
-void _GD_Flush(DIRFILE* D, gd_entry_t *E, int);
+int _GD_FiniRawIO(DIRFILE*, const gd_entry_t*, int, int);
+void _GD_Flush(DIRFILE *restrict, gd_entry_t *restrict, int);
 void _GD_FlushMeta(DIRFILE* D, int fragment, int force);
-void _GD_FreeE(DIRFILE*, gd_entry_t*, int);
-off64_t _GD_GetEOF(DIRFILE *D, gd_entry_t* E, const char *parent,
-    int *is_index);
-off64_t _GD_GetFilePos(DIRFILE *D, gd_entry_t *E, off64_t index_pos);
-char *_GD_GetLine(FILE *fp, size_t *n, int* linenum);
-int _GD_GetRepr(DIRFILE*, const char*, char**, int);
-gd_spf_t _GD_GetSPF(DIRFILE*, gd_entry_t*);
-int _GD_GrabDir(DIRFILE*, int, const char*);
-int _GD_Include(DIRFILE*, const char*, const char*, int, char**, int,
-    const char*, const char*, int*, unsigned long*, int);
+void _GD_FreeE(DIRFILE *restrict, gd_entry_t *restrict, int);
+off64_t _GD_GetEOF(DIRFILE *restrict, const gd_entry_t *restrict,
+    const char *restrict, int *restrict);
+off64_t _GD_GetFilePos(DIRFILE *restrict, gd_entry_t *restrict, off64_t);
+char *_GD_GetLine(FILE *restrict, size_t *restrict, int *restrict);
+int _GD_GetRepr(DIRFILE *restrict, const char *restrict,
+    char **restrict, int);
+gd_spf_t _GD_GetSPF(DIRFILE*, const gd_entry_t*);
+int _GD_GrabDir(DIRFILE*, int, const char *restrict);
+int _GD_Include(DIRFILE*, const char *restrict, const char *restrict, int,
+    char **restrict, int, const char *restrict, const char *restrict,
+    int *restrict, unsigned long *restrict, int);
 void _GD_InitialiseFramework(void);
-int _GD_InitRawIO(DIRFILE*, gd_entry_t*, const char*, int,
+int _GD_InitRawIO(DIRFILE*, const gd_entry_t*, const char*, int,
     const struct encoding_t*, unsigned int, unsigned int, int);
-void _GD_InvertData(DIRFILE* D, void* data, gd_type_t return_type,
+void _GD_InvertData(DIRFILE *restrict, void *restrict, gd_type_t return_type,
     double dividend, size_t n_read);
-void _GD_InsertSort(DIRFILE* D, gd_entry_t* E, int u) gd_nothrow;
+void _GD_InsertSort(DIRFILE *restrict, gd_entry_t *restrict, int u) gd_nothrow;
 
 #define _GD_InternalError(D) \
   _GD_SetError(D, GD_E_INTERNAL_ERROR, 0, __FILE__, __LINE__, NULL)
 
 gd_type_t _GD_LegacyType(char c);
-void _GD_LincomData(DIRFILE* D, int n, void* data1, gd_type_t return_type,
-    double *data2, double *data3, double* m, double *b, gd_spf_t *spf,
-    size_t n_read);
-void _GD_LinterpData(DIRFILE* D, void *data, gd_type_t type, int complex_table,
-    const double *data_in, size_t npts, const struct _gd_lut *lut, size_t n_ln);
-int _GD_ListEntry(gd_entry_t*, int, int, gd_entype_t);
-char *_GD_MakeFullPath(DIRFILE*, int, const char*, int);
+void _GD_LincomData(DIRFILE *restrict, int n, void *restrict,
+    gd_type_t return_type, const double *restrict, const double *restrict,
+    const double *restrict, const double *restrict, const gd_spf_t *restrict,
+    size_t);
+void _GD_LinterpData(DIRFILE *restrict, void *restrict, gd_type_t, int,
+    const double *restrict, size_t, const struct _gd_lut *restrict, size_t);
+int _GD_ListEntry(const gd_entry_t*, int, int, gd_entype_t);
+char *_GD_MakeFullPath(DIRFILE *restrict, int, const char *restrict, int);
 #define _GD_MakeFullPathOnly gd_MakeFullPathOnly
 char *_GD_MakeFullPathOnly(const DIRFILE *D, int dirfd, const char *name);
 int _GD_MakeTempFile(const DIRFILE*, int, char*);
 void *_GD_Malloc(DIRFILE *D, size_t size);
 int _GD_MissingFramework(int encoding, unsigned int funcs);
-int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned long int encoding,
-    unsigned long int byte_sex, off64_t offset, int finalise, int new_fragment,
-    char* new_filebase);
-char *_GD_MungeCode(DIRFILE*, const gd_entry_t*, const char *, const char*,
-    const char*, const char*, const char*, int*);
-char *_GD_MungeFromFrag(DIRFILE*, const gd_entry_t*, int, const char*, int*);
-gd_type_t _GD_NativeType(DIRFILE* D, gd_entry_t* E, int repr);
-gd_entry_t* _GD_ParseFieldSpec(DIRFILE* D, int n_cols, char** in_cols,
-    const gd_entry_t* P, const char* format_file, int linenum, int me,
-    int standards, int creat, unsigned long flags, int insert, char **outstring,
-    const char *tok_pos);
-char *_GD_ParseFragment(FILE*, DIRFILE*, int, int*, unsigned long int*, int);
-void _GD_ReadLinterpFile(DIRFILE* D, gd_entry_t *E);
-void *_GD_Realloc(DIRFILE *D, void *old, size_t size);
+int _GD_MogrifyFile(DIRFILE *restrict, gd_entry_t *restrict, unsigned long int,
+    unsigned long int, off64_t, int, int, char *restrict);
+char *_GD_MungeCode(DIRFILE *restrict, const gd_entry_t *restrict,
+    const char *restrict, const char *restrict, const char *restrict,
+    const char *restrict, const char *restrict, int *restrict);
+char *_GD_MungeFromFrag(DIRFILE *restrict, const gd_entry_t *restrict, int,
+    const char *restrict, int *restrict);
+gd_type_t _GD_NativeType(DIRFILE *restrict, gd_entry_t *restrict, int);
+gd_entry_t *_GD_ParseFieldSpec(DIRFILE *restrict, int, char**,
+    const gd_entry_t *restrict, const char *restrict, int, int, int, int,
+    unsigned long, int, char**, const char*);
+char *_GD_ParseFragment(FILE *restrict, DIRFILE *restrict, int, int *restrict,
+    unsigned long int *restrict, int);
+void _GD_ReadLinterpFile(DIRFILE *restrict, gd_entry_t *restrict);
+void *_GD_Realloc(DIRFILE *restrict, void *restrict, size_t size);
 void _GD_ReleaseDir(DIRFILE *D, int dirfd);
-int _GD_Seek(DIRFILE *D, gd_entry_t *E, off64_t offset, unsigned int mode);
-void _GD_SetError(DIRFILE* D, int error, int suberror, const char* format_file,
-    int line, const char* token);
-int _GD_SetTablePath(DIRFILE *D, gd_entry_t *E, struct _gd_private_entry *e);
-int _GD_StrCmpNull(const char *, const char *);
-char *_GD_Strdup(DIRFILE *D, const char *s);
-int _GD_Supports(DIRFILE* D, gd_entry_t* E, unsigned int funcs);
-int _GD_Tokenise(DIRFILE *D, const char* instring, char **outstring,
-    const char **pos, char** in_cols, const char* format_file, int linenum,
-    int standards, int pedantic);
+int _GD_Seek(DIRFILE *restrict, gd_entry_t *restrict, off64_t offset,
+    unsigned int mode);
+void _GD_SetError(DIRFILE*, int, int, const char*, int, const char*);
+int _GD_SetTablePath(DIRFILE *restrict, const gd_entry_t *restrict,
+    struct _gd_private_entry *restrict);
+int _GD_StrCmpNull(const char *restrict, const char *restrict);
+char *_GD_Strdup(DIRFILE *restrict, const char *restrict);
+int _GD_Supports(DIRFILE *, const gd_entry_t*, unsigned int funcs);
+int _GD_Tokenise(DIRFILE *restrict, const char *restrict, char **,
+    const char **, char **, const char *restrict, int linenum, int standards,
+    int pedantic);
 void _GD_UpdateAliases(DIRFILE*);
 int _GD_ValidateField(const char*, int, int, int, int*);
-off64_t _GD_WriteSeek(DIRFILE*, gd_entry_t*, const struct encoding_t*, off64_t,
-    unsigned int mode);
-ssize_t _GD_WriteOut(DIRFILE *D, gd_entry_t *E, const struct encoding_t *enc,
-    const void *buf, gd_type_t type, size_t n, int temp);
+off64_t _GD_WriteSeek(DIRFILE *restrict, gd_entry_t *restrict,
+    const struct encoding_t *restrict, off64_t, unsigned int mode);
+ssize_t _GD_WriteOut(DIRFILE*, const gd_entry_t*, const struct encoding_t*,
+    const void*, gd_type_t, size_t, int);
 
 /* generic I/O methods */
-int _GD_GenericMove(int, struct _gd_raw_file* file, int, char* new_path);
-int _GD_GenericName(DIRFILE*, const char *, struct _gd_raw_file*, const char*,
-    int, int);
+int _GD_GenericMove(int, struct _gd_raw_file *restrict, int, char *restrict);
+int _GD_GenericName(DIRFILE *restrict, const char *restrict,
+    struct _gd_raw_file *restrict, const char *restrict, int, int);
 int _GD_GenericUnlink(int, struct _gd_raw_file* file);
 
 /* unencoded I/O methods */
 int _GD_RawOpen(int, struct _gd_raw_file* file, int swap, unsigned int);
 off64_t _GD_RawSeek(struct _gd_raw_file* file, off64_t count,
     gd_type_t data_type, unsigned int);
-ssize_t _GD_RawRead(struct _gd_raw_file* file, void *ptr, gd_type_t data_type,
-    size_t nmemb);
-ssize_t _GD_RawWrite(struct _gd_raw_file* file, const void *ptr,
-    gd_type_t data_type, size_t nmemb);
+ssize_t _GD_RawRead(struct _gd_raw_file *restrict, void *restrict, gd_type_t,
+    size_t);
+ssize_t _GD_RawWrite(struct _gd_raw_file *restrict, const void *restrict,
+    gd_type_t, size_t);
 int _GD_RawSync(struct _gd_raw_file* file);
 int _GD_RawClose(struct _gd_raw_file* file);
 off64_t _GD_RawSize(int, struct _gd_raw_file* file, gd_type_t data_type,
@@ -1064,11 +1069,10 @@ off64_t _GD_RawSize(int, struct _gd_raw_file* file, gd_type_t data_type,
 int _GD_AsciiOpen(int, struct _gd_raw_file* file, int swap, unsigned int);
 off64_t _GD_AsciiSeek(struct _gd_raw_file* file, off64_t count,
     gd_type_t data_type, unsigned int);
-ssize_t _GD_AsciiRead(struct _gd_raw_file* file, void *ptr, gd_type_t data_type,
-    size_t nmemb);
-ssize_t _GD_AsciiWrite(struct _gd_raw_file* file, const void *ptr,
-    gd_type_t data_type,
-    size_t nmemb);
+ssize_t _GD_AsciiRead(struct _gd_raw_file *restrict, void *restrict, gd_type_t,
+    size_t);
+ssize_t _GD_AsciiWrite(struct _gd_raw_file *restrict, const void *restrict,
+    gd_type_t, size_t);
 int _GD_AsciiSync(struct _gd_raw_file* file);
 int _GD_AsciiClose(struct _gd_raw_file* file);
 off64_t _GD_AsciiSize(int, struct _gd_raw_file* file, gd_type_t data_type,
@@ -1078,8 +1082,8 @@ off64_t _GD_AsciiSize(int, struct _gd_raw_file* file, gd_type_t data_type,
 int _GD_Bzip2Open(int, struct _gd_raw_file* file, int swap, unsigned int);
 off64_t _GD_Bzip2Seek(struct _gd_raw_file* file, off64_t count,
     gd_type_t data_type, unsigned int);
-ssize_t _GD_Bzip2Read(struct _gd_raw_file* file, void *ptr, gd_type_t data_type,
-    size_t nmemb);
+ssize_t _GD_Bzip2Read(struct _gd_raw_file *restrict, void *restrict, gd_type_t,
+    size_t);
 int _GD_Bzip2Close(struct _gd_raw_file* file);
 off64_t _GD_Bzip2Size(int, struct _gd_raw_file* file, gd_type_t data_type,
     int swap);
@@ -1088,10 +1092,10 @@ off64_t _GD_Bzip2Size(int, struct _gd_raw_file* file, gd_type_t data_type,
 int _GD_GzipOpen(int, struct _gd_raw_file* file, int swap, unsigned int);
 off64_t _GD_GzipSeek(struct _gd_raw_file* file, off64_t count,
     gd_type_t data_type, unsigned int);
-ssize_t _GD_GzipRead(struct _gd_raw_file* file, void *ptr, gd_type_t data_type,
-    size_t nmemb);
-ssize_t _GD_GzipWrite(struct _gd_raw_file *file, const void *ptr,
-    gd_type_t data_type, size_t nmemb);
+ssize_t _GD_GzipRead(struct _gd_raw_file *restrict, void *restrict, gd_type_t,
+    size_t);
+ssize_t _GD_GzipWrite(struct _gd_raw_file *restrict, const void *restrict,
+    gd_type_t, size_t);
 int _GD_GzipSync(struct _gd_raw_file* file);
 int _GD_GzipClose(struct _gd_raw_file* file);
 off64_t _GD_GzipSize(int, struct _gd_raw_file* file, gd_type_t data_type,
@@ -1101,8 +1105,8 @@ off64_t _GD_GzipSize(int, struct _gd_raw_file* file, gd_type_t data_type,
 int _GD_LzmaOpen(int, struct _gd_raw_file* file, int swap, unsigned int);
 off64_t _GD_LzmaSeek(struct _gd_raw_file* file, off64_t count,
     gd_type_t data_type, unsigned int);
-ssize_t _GD_LzmaRead(struct _gd_raw_file* file, void *ptr, gd_type_t data_type,
-    size_t nmemb);
+ssize_t _GD_LzmaRead(struct _gd_raw_file *restrict, void *restrict, gd_type_t,
+    size_t);
 int _GD_LzmaClose(struct _gd_raw_file* file);
 off64_t _GD_LzmaSize(int, struct _gd_raw_file* file, gd_type_t data_type,
     int swap);
@@ -1111,8 +1115,8 @@ off64_t _GD_LzmaSize(int, struct _gd_raw_file* file, gd_type_t data_type,
 int _GD_SlimOpen(int, struct _gd_raw_file* file, int, unsigned int);
 off64_t _GD_SlimSeek(struct _gd_raw_file* file, off64_t count,
     gd_type_t data_type, unsigned int);
-ssize_t _GD_SlimRead(struct _gd_raw_file* file, void *ptr, gd_type_t data_type,
-    size_t nmemb);
+ssize_t _GD_SlimRead(struct _gd_raw_file *restrict, void *restrict, gd_type_t,
+    size_t);
 int _GD_SlimClose(struct _gd_raw_file* file);
 off64_t _GD_SlimSize(int, struct _gd_raw_file* file, gd_type_t data_type,
     int swap);
@@ -1122,23 +1126,23 @@ int _GD_SampIndOpen(int, struct _gd_raw_file* file, int swap,
     unsigned int);
 off64_t _GD_SampIndSeek(struct _gd_raw_file* file, off64_t count,
     gd_type_t data_type, unsigned int);
-ssize_t _GD_SampIndRead(struct _gd_raw_file* file, void *ptr,
-    gd_type_t data_type, size_t nmemb);
-ssize_t _GD_SampIndWrite(struct _gd_raw_file* file, const void *ptr,
-    gd_type_t data_type, size_t nmemb);
+ssize_t _GD_SampIndRead(struct _gd_raw_file *restrict, void *restrict,
+    gd_type_t, size_t);
+ssize_t _GD_SampIndWrite(struct _gd_raw_file *restrict, const void *restrict,
+    gd_type_t, size_t);
 int _GD_SampIndSync(struct _gd_raw_file* file);
 int _GD_SampIndClose(struct _gd_raw_file* file);
 off64_t _GD_SampIndSize(int, struct _gd_raw_file* file, gd_type_t data_type,
     int swap);
 
 /* zzip I/O methods */
-int _GD_ZzipName(DIRFILE*, const char*, struct _gd_raw_file*, const char*, int,
-    int);
+int _GD_ZzipName(DIRFILE *restrict, const char *restrict,
+    struct _gd_raw_file *restrict, const char *restrict, int, int);
 int _GD_ZzipOpen(int, struct _gd_raw_file* file, int swap, unsigned int);
 off64_t _GD_ZzipSeek(struct _gd_raw_file* file, off64_t count,
     gd_type_t data_type, unsigned int);
-ssize_t _GD_ZzipRead(struct _gd_raw_file* file, void *ptr, gd_type_t data_type,
-    size_t nmemb);
+ssize_t _GD_ZzipRead(struct _gd_raw_file *restrict, void *restrict, gd_type_t,
+    size_t);
 int _GD_ZzipClose(struct _gd_raw_file* file);
 off64_t _GD_ZzipSize(int, struct _gd_raw_file* file, gd_type_t data_type,
     int swap);

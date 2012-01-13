@@ -35,8 +35,9 @@
 
 /* The zzip encoding scheme looks just like the regular ol' C IO. */
 
-int _GD_ZzipName(DIRFILE* D, const char *enc_data, struct _gd_raw_file* file,
-    const char* base, int temp __gd_unused, int resolv)
+int _GD_ZzipName(DIRFILE *restrict D, const char *restrict enc_data,
+    struct _gd_raw_file *restrict file, const char *restrict base,
+    int temp __gd_unused, int resolv)
 {
   size_t enc_len;
 
@@ -138,7 +139,7 @@ off64_t _GD_ZzipSeek(struct _gd_raw_file* file, off64_t count,
   return n;
 }
 
-ssize_t _GD_ZzipRead(struct _gd_raw_file *file, void *data,
+ssize_t _GD_ZzipRead(struct _gd_raw_file *restrict file, void *restrict data,
     gd_type_t data_type, size_t nmemb)
 {
   ssize_t n;

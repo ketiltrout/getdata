@@ -22,7 +22,7 @@
 
 /* The MSVCRT gmtime() is threadsafe */
 #ifndef HAVE_GMTIME_R
-struct tm *gmtime_r(const time_t *timep, struct tm *result)
+struct tm *gmtime_r(const time_t *restrict timep, struct tm *restrict result)
 {
   struct tm *ptr;
 

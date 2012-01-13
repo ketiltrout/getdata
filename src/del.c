@@ -20,8 +20,8 @@
  */
 #include "internal.h"
 
-static void _GD_ClearDerived(DIRFILE* D, gd_entry_t* E, const gd_entry_t* C,
-    int check)
+static void _GD_ClearDerived(DIRFILE *restrict D, gd_entry_t *restrict E,
+    const gd_entry_t *restrict C, int check)
 {
   int i;
 
@@ -85,8 +85,9 @@ static void _GD_ClearDerived(DIRFILE* D, gd_entry_t* E, const gd_entry_t* C,
   dreturnvoid();
 }
 
-static int _GD_DeReferenceOne(DIRFILE* D, gd_entry_t* E, gd_entry_t* C,
-    int check, int i, gd_type_t type, void *data)
+static int _GD_DeReferenceOne(DIRFILE *restrict D, gd_entry_t *restrict E,
+    gd_entry_t *restrict C, int check, int i, gd_type_t type,
+    void *restrict data)
 {
   int repr;
   char *field_code;
@@ -125,8 +126,8 @@ static int _GD_DeReferenceOne(DIRFILE* D, gd_entry_t* E, gd_entry_t* C,
   return 0;
 }
 
-static void _GD_DeReference(DIRFILE* D, gd_entry_t* E, gd_entry_t* C,
-    int check)
+static void _GD_DeReference(DIRFILE *restrict D, gd_entry_t *restrict E,
+    gd_entry_t *restrict C, int check)
 {
   int i;
 
@@ -216,8 +217,8 @@ static void _GD_DeReference(DIRFILE* D, gd_entry_t* E, gd_entry_t* C,
   dreturnvoid();
 }
 
-static int _GD_Delete(DIRFILE *D, gd_entry_t *E, unsigned int index,
-    unsigned int flags)
+static int _GD_Delete(DIRFILE *restrict D, gd_entry_t *restrict E,
+    unsigned int index, unsigned int flags)
 {
   unsigned int first, last = 0;
   int n_del, i, len;

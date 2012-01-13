@@ -57,8 +57,9 @@
 
 /* _GD_ConvertType: copy data to output buffer while converting type.
 */
-void _GD_ConvertType(DIRFILE* D, const void *data_in, gd_type_t in_type,
-    void *data_out, gd_type_t out_type, size_t n) gd_nothrow
+void _GD_ConvertType(DIRFILE *restrict D, const void *restrict data_in,
+    gd_type_t in_type, void *restrict data_out, gd_type_t out_type, size_t n)
+gd_nothrow
 {
   size_t i;
 

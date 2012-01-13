@@ -22,8 +22,8 @@
 #include "internal.h"
 
 /* attempt to open or create a new dirfile - set error appropriately */
-static FILE* _GD_CreateDirfile(DIRFILE* D, int dirfd, int dir_error,
-    char* dirfile)
+static FILE *_GD_CreateDirfile(DIRFILE *restrict D, int dirfd, int dir_error,
+    char *restrict dirfile)
 {
   struct stat statbuf;
   DIR* dir;

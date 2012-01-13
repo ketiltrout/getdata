@@ -189,7 +189,8 @@ off64_t _GD_SampIndSeek(struct _gd_raw_file *file, off64_t sample,
 }
 
 /* store n copies of s, which is of length l, in d */
-static void *_GD_Duplicate(void *d, void *s, size_t l, int64_t n)
+static void *_GD_Duplicate(void *restrict d, const void *restrict s, size_t l,
+    int64_t n)
 {
   int64_t i;
   dtrace("%p, %p, %zi, 0x%llx", d, s, l, (long long)n);
@@ -229,7 +230,7 @@ static void *_GD_Duplicate(void *d, void *s, size_t l, int64_t n)
   return d;
 }
 
-ssize_t _GD_SampIndRead(struct _gd_raw_file *file, void *ptr,
+ssize_t _GD_SampIndRead(struct _gd_raw_file *restrict file, void *restrict ptr,
     gd_type_t data_type, size_t nelem)
 {
   int r;
@@ -286,7 +287,8 @@ static ssize_t _GD_GetNRec(struct gd_siedata *f, size_t size)
   return (ssize_t)(statbuf.st_size / size);
 }
 
-ssize_t _GD_SampIndWrite(struct _gd_raw_file *file, const void *ptr,
+ssize_t _GD_SampIndWrite(struct _gd_raw_file *restrict file,
+    const void *restrict ptr,
     gd_type_t data_type, size_t nelem)
 {
   ssize_t nrec;

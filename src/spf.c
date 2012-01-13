@@ -23,7 +23,7 @@
 
 /* _GD_GetSPF: Get samples per frame for field
 */
-gd_spf_t _GD_GetSPF(DIRFILE *D, gd_entry_t *E)
+gd_spf_t _GD_GetSPF(DIRFILE *D, const gd_entry_t *E)
 {
   gd_spf_t spf = 0;
 

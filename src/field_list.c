@@ -25,7 +25,7 @@ static const char* zero_list[1] = { NULL };
 static const gd_carray_t zero_carrays[1] = { {0, NULL} };
 
 /* returns true if E a member of the given list */
-int _GD_ListEntry(gd_entry_t *E, int meta, int vector, gd_entype_t type)
+int _GD_ListEntry(const gd_entry_t *E, int meta, int vector, gd_entype_t type)
 {
   dtrace("%p{%s}, %i, %i, 0x%X", E, E->field, meta, vector, type);
 

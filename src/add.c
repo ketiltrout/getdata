@@ -21,8 +21,8 @@
 #include "internal.h"
 
 /* add an entry - returns the added entry on success. */
-static gd_entry_t *_GD_Add(DIRFILE *D, const gd_entry_t *entry,
-    const char *parent)
+static gd_entry_t *_GD_Add(DIRFILE *restrict D,
+    const gd_entry_t *restrict entry, const char *restrict parent)
 {
   char *temp_buffer;
   int i, is_dot, offset;
@@ -1853,8 +1853,9 @@ int gd_madd_carray(DIRFILE* D, const char* parent, const char* field_code,
 }
 
 /* add an alias */
-static int _GD_AddAlias(DIRFILE *D, const char *parent, const char *field_code,
-    const char *target, int fragment_index)
+static int _GD_AddAlias(DIRFILE *restrict D, const char *restrict parent,
+    const char *restrict field_code, const char *restrict target,
+    int fragment_index)
 {
   unsigned u;
   int offset;

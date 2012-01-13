@@ -174,8 +174,8 @@ void _GD_InitialiseFramework(void)
     encoding == GD_SIE_ENCODED))
 
 #ifdef USE_MODULES
-static void* _GD_ResolveSymbol(lt_dlhandle lib, struct encoding_t* enc,
-    const char* name)
+static void *_GD_ResolveSymbol(lt_dlhandle lib, struct encoding_t *restrict enc,
+    const char *restrict name)
 {
   void* func;
   char symbol[100];
@@ -291,7 +291,8 @@ int _GD_MissingFramework(int encoding, unsigned int funcs)
   return ret;
 }
 
-static int _GD_MoveOver(DIRFILE *D, int fragment, struct _gd_raw_file *file)
+static int _GD_MoveOver(DIRFILE *restrict D, int fragment,
+    struct _gd_raw_file *restrict file)
 {
   const int dirfd = D->fragment[fragment].dirfd;
 #ifdef HAVE_FCHMOD
@@ -332,7 +333,7 @@ static int _GD_MoveOver(DIRFILE *D, int fragment, struct _gd_raw_file *file)
 
 /* Close a raw file, taking care of cleaning-up out-of-place writes, and
  * discarding temporary files */
-int _GD_FiniRawIO(DIRFILE *D, gd_entry_t *E, int fragment, int flags)
+int _GD_FiniRawIO(DIRFILE *D, const gd_entry_t *E, int fragment, int flags)
 {
   const int clotemp = (flags & GD_FINIRAW_CLOTEMP) ? 1 : 0;
   const int old_mode = E->e->u.raw.file[0].mode;
@@ -413,7 +414,7 @@ int _GD_FiniRawIO(DIRFILE *D, gd_entry_t *E, int fragment, int flags)
 }
 
 /* Perform a RAW field write */
-ssize_t _GD_WriteOut(DIRFILE *D gd_unused_d, gd_entry_t *E,
+ssize_t _GD_WriteOut(DIRFILE *D gd_unused_d, const gd_entry_t *E,
     const struct encoding_t *enc, const void *ptr, gd_type_t type, size_t n,
     int temp)
 {
@@ -444,7 +445,7 @@ ssize_t _GD_WriteOut(DIRFILE *D gd_unused_d, gd_entry_t *E,
 }
 
 /* Open a raw file, if necessary; also check for required functions */
-int _GD_InitRawIO(DIRFILE *D, gd_entry_t *E, const char *filebase,
+int _GD_InitRawIO(DIRFILE *D, const gd_entry_t *E, const char *filebase,
     int fragment, const struct encoding_t *enc, unsigned int funcs,
     unsigned int mode, int swap)
 {
@@ -576,9 +577,9 @@ int _GD_InitRawIO(DIRFILE *D, gd_entry_t *E, const char *filebase,
 }
 
 /* Figure out the encoding scheme */
-static unsigned long _GD_ResolveEncoding(DIRFILE *D, const char* name,
-    const char *enc_data, unsigned long scheme, int dirfd,
-    struct _gd_raw_file *file)
+static unsigned long _GD_ResolveEncoding(DIRFILE *restrict D,
+    const char *restrict name, const char *restrict enc_data,
+    unsigned long scheme, int dirfd, struct _gd_raw_file *restrict file)
 {
   char *candidate;
   int i;
@@ -632,7 +633,7 @@ static unsigned long _GD_ResolveEncoding(DIRFILE *D, const char* name,
   return GD_AUTO_ENCODED;
 }
 
-int _GD_Supports(DIRFILE* D, gd_entry_t* E, unsigned int funcs)
+int _GD_Supports(DIRFILE *D, const gd_entry_t *E, unsigned int funcs)
 {
   dtrace("%p, %p, 0x%X", D, E, funcs);
 
@@ -669,8 +670,9 @@ int _GD_Supports(DIRFILE* D, gd_entry_t* E, unsigned int funcs)
   return 1;
 }
 
-int _GD_GenericName(DIRFILE* D, const char *enc_data __gd_unused,
-    struct _gd_raw_file* file, const char* base, int temp,
+int _GD_GenericName(DIRFILE *restrict D,
+    const char *restrict enc_data __gd_unused,
+    struct _gd_raw_file *restrict file, const char *restrict base, int temp,
     int resolv __gd_unused)
 {
   dtrace("%p, <unused>, %p, \"%s\", %i, <unused>", D, file, base, temp);
@@ -953,8 +955,8 @@ int _GD_GenericUnlink(int dirfd, struct _gd_raw_file* file)
   return r;
 }
 
-int _GD_GenericMove(int olddirfd, struct _gd_raw_file* file, int newdirfd,
-    char* new_path)
+int _GD_GenericMove(int olddirfd, struct _gd_raw_file *restrict file,
+    int newdirfd, char *restrict new_path)
 {
   int r, rename_errno;
 

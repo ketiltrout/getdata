@@ -70,8 +70,8 @@ off64_t _GD_RawSeek(struct _gd_raw_file* file, off64_t count,
   return count;
 }
 
-ssize_t _GD_RawRead(struct _gd_raw_file *file, void *ptr, gd_type_t data_type,
-    size_t nmemb)
+ssize_t _GD_RawRead(struct _gd_raw_file *restrict file, void *restrict ptr,
+    gd_type_t data_type, size_t nmemb)
 {
   ssize_t nread;
 
@@ -88,8 +88,8 @@ ssize_t _GD_RawRead(struct _gd_raw_file *file, void *ptr, gd_type_t data_type,
   return nread;
 }
 
-ssize_t _GD_RawWrite(struct _gd_raw_file *file, const void *ptr,
-    gd_type_t data_type, size_t nmemb)
+ssize_t _GD_RawWrite(struct _gd_raw_file *restrict file,
+    const void *restrict ptr, gd_type_t data_type, size_t nmemb)
 {
   ssize_t nwrote;
 
