@@ -462,6 +462,7 @@ echo
 echo "*** Checking additional compiler characteristics"
 echo
 AC_C_INLINE
+AC_C_RESTRICT
 GD_PROG_CC_WALL
 GD_PROG_CC_WEXTRA
 
