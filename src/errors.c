@@ -79,6 +79,10 @@ static const struct {
     "Cannot use alias {4} as parent to a meta field on line {3} of {2}", 0 },
   { GD_E_FORMAT, GD_E_FORMAT_MPLEXVAL,
     "Count value ({4}) exceeds maximum on line {3} of {2}", 0 },
+  { GD_E_FORMAT, GD_E_FORMAT_RAWFORM,
+    "/RAWFORM prohibited without preceding /ENCODING on line {3} of {2}", 0},
+  { GD_E_FORMAT, GD_E_FORMAT_LATEENC,
+    "/ENCODING prohibited after /RAWFORM on line {3} of {2}", 0},
   /* GD_E_TRUNC: 1 = suberror, 2 = filename. 3 = errno */
   { GD_E_TRUNC, 0, "Error truncating {2}: ", 1 },
   /* GD_E_CREAT: 1 = suberror, 2 = filename, 3 = errno */
@@ -180,6 +184,11 @@ static const struct {
   { GD_E_ARGUMENT, 0, "Bad argument", 0 },
   /* GD_E_CALLBACK: 3 = response */
   { GD_E_CALLBACK, 0, "Unrecognised response from callback function: {3}", 0 },
+  /* GD_E_ENCDATA: 2 = field, 3 = item number */
+  { GD_E_ENCDATA, GD_E_ENCDATA_GLOBAL,
+    "Invalid or missing global encoding metadatum #{3} accessing {2}", 0},
+  { GD_E_ENCDATA, GD_E_ENCDATA_FIELD,
+    "Invalid or missing field encoding metadatum #{3} accessing {2}", 0},
   /* GD_E_UNCLEAN_DB: 3 = fragment */
   { GD_E_UNCLEAN_DB, 0,
     "Unexpected system error processing {3}; database unclean", 0 },

@@ -654,6 +654,10 @@ ssize_t getdelim(char**, size_t*, int, FILE*);
 #define GD_E_ARG_ENDIANNESS     2
 #define GD_E_ARG_PROTECTION     3
 
+#define GD_E_ENCDATA_GLOBAL     1
+#define GD_E_ENCDATA_FIELD      2
+
+/* IO operation flags */
 #define GD_FILE_READ  0x1
 #define GD_FILE_WRITE 0x2
 #define GD_FILE_RDWR  ( GD_FILE_READ | GD_FILE_WRITE )
@@ -706,6 +710,8 @@ struct _gd_private_entry {
     struct { /* RAW */
       char* filebase;
       size_t size;
+      unsigned int n_rawform;
+      char **rawform; /* encoding specific raw formatting data */
       struct _gd_raw_file file[2]; /* encoding framework data */
     } raw;
     struct { /* LINTERP */
@@ -740,7 +746,8 @@ struct _gd_private_entry {
 #define GD_ENC_XZ_RAW     6
 #define GD_ENC_SIE        7
 #define GD_ENC_ZZIP       8
-#define GD_ENC_UNKNOWN    9
+#define GD_ENC_FRAME      9
+#define GD_ENC_UNKNOWN   10
 
 #define GD_N_SUBENCODINGS (GD_ENC_UNKNOWN + 1)
 
@@ -768,8 +775,9 @@ struct _gd_private_entry {
 #  define SCREWY_FLOATS
 #endif
 
-typedef int (*gd_ef_name_t)(DIRFILE *D, const char *, struct _gd_raw_file*,
-    const char*, int, int);
+typedef int (*gd_ef_name_t)(DIRFILE *D, unsigned int, char *const *,
+    unsigned int, char *const *, struct _gd_raw_file*, const char*, gd_type_t,
+    gd_spf_t, int, int);
 typedef int (*gd_ef_open_t)(int, struct _gd_raw_file*, int, unsigned int);
 typedef off64_t (*gd_ef_seek_t)(struct _gd_raw_file*, off64_t, gd_type_t,
     unsigned int);
@@ -786,12 +794,13 @@ typedef int (*gd_ef_move_t)(int, struct _gd_raw_file*, int, char*);
 #define GD_EF_ECOR 0x1 /* post-framework byte-sex correction required */
 #define GD_EF_SWAP 0x2 /* in-framework byte-sex metadata correction required */
 #define GD_EF_OOP  0x4 /* writes occur out-of-place */
-#define GD_EF_EDAT 0x8 /* The /ENCODING datum is used */
 /* Encoding schemes */
 extern struct encoding_t {
   unsigned long int scheme;
   const char* ext;
-  int flags; /* flags */
+  unsigned int flags; /* flags */
+  unsigned int gtok; /* number of global tokens (at the end of /ENCODING) */
+  unsigned int ftok; /* number of field tokens (apeparing in /RAWFORM) */
   const char* affix;
   const char* ffname;
   unsigned int provides;
@@ -817,7 +826,10 @@ struct gd_fragment_t {
   char *bname;
   /* External name (the one that appears in the format file) */
   char* ename;
-  void *enc_data;
+
+  unsigned int n_encdata;
+  char **encdata; /* encoding specific data (from the format file) */
+
   int modified;
   int parent;
   int dirfd;
@@ -983,7 +995,7 @@ off64_t _GD_GetFilePos(DIRFILE *restrict, gd_entry_t *restrict, off64_t);
 char *_GD_GetLine(FILE *restrict, size_t *restrict, int *restrict);
 int _GD_GetRepr(DIRFILE *restrict, const char *restrict,
     char **restrict, int);
-gd_spf_t _GD_GetSPF(DIRFILE*, const gd_entry_t*);
+gd_spf_t _GD_GetSPF(DIRFILE *restrict, gd_entry_t *restrict);
 int _GD_GrabDir(DIRFILE*, int, const char *restrict);
 int _GD_Include(DIRFILE*, const char *restrict, const char *restrict, int,
     char **restrict, int, const char *restrict, const char *restrict,
@@ -1048,8 +1060,9 @@ ssize_t _GD_WriteOut(DIRFILE*, const gd_entry_t*, const struct encoding_t*,
 
 /* generic I/O methods */
 int _GD_GenericMove(int, struct _gd_raw_file *restrict, int, char *restrict);
-int _GD_GenericName(DIRFILE *restrict, const char *restrict,
-    struct _gd_raw_file *restrict, const char *restrict, int, int);
+int _GD_GenericName(DIRFILE *restrict, unsigned int, char *const *restrict,
+    unsigned int, char *const *restrict, struct _gd_raw_file *restrict,
+    const char *restrict, gd_type_t, gd_spf_t, int, int);
 int _GD_GenericUnlink(int, struct _gd_raw_file* file);
 
 /* unencoded I/O methods */
@@ -1086,6 +1099,19 @@ ssize_t _GD_Bzip2Read(struct _gd_raw_file *restrict, void *restrict, gd_type_t,
     size_t);
 int _GD_Bzip2Close(struct _gd_raw_file* file);
 off64_t _GD_Bzip2Size(int, struct _gd_raw_file* file, gd_type_t data_type,
+    int swap);
+
+/* frame I/O methods */
+int _GD_FrameName(DIRFILE *restrict, unsigned int, char *const *restrict,
+    unsigned int, char *const *restrict, struct _gd_raw_file *restrict,
+    const char *restrict, gd_type_t, gd_spf_t, int, int);
+int _GD_FrameOpen(int, struct _gd_raw_file* file, int swap, unsigned int);
+off64_t _GD_FrameSeek(struct _gd_raw_file* file, off64_t count,
+    gd_type_t data_type, unsigned int);
+ssize_t _GD_FrameRead(struct _gd_raw_file *restrict, void *restrict, gd_type_t,
+    size_t);
+int _GD_FrameClose(struct _gd_raw_file* file);
+off64_t _GD_FrameSize(int, struct _gd_raw_file* file, gd_type_t data_type,
     int swap);
 
 /* gzip I/O methods */
@@ -1136,8 +1162,9 @@ off64_t _GD_SampIndSize(int, struct _gd_raw_file* file, gd_type_t data_type,
     int swap);
 
 /* zzip I/O methods */
-int _GD_ZzipName(DIRFILE *restrict, const char *restrict,
-    struct _gd_raw_file *restrict, const char *restrict, int, int);
+int _GD_ZzipName(DIRFILE *restrict, unsigned int, char *const *restrict,
+    unsigned int, char *const *restrict, struct _gd_raw_file *restrict,
+    const char *restrict, gd_type_t, gd_spf_t, int, int);
 int _GD_ZzipOpen(int, struct _gd_raw_file* file, int swap, unsigned int);
 off64_t _GD_ZzipSeek(struct _gd_raw_file* file, off64_t count,
     gd_type_t data_type, unsigned int);

@@ -111,6 +111,12 @@ void _GD_FreeE(DIRFILE *restrict D, gd_entry_t *restrict entry, int priv)
   }
 
   if (priv) {
+    if (entry->field_type == GD_RAW_ENTRY) {
+      unsigned int u;
+      for (u = 0; u < entry->e->u.raw.n_rawform; ++u)
+        free(entry->e->u.raw.rawform[u]);
+      free(entry->e->u.raw.rawform);
+    }
     free(entry->e->alias_list);
     free(entry->e->field_list);
     free(entry->e->vector_list);
@@ -344,8 +350,10 @@ char* gd_raw_filename(DIRFILE* D, const char* field_code_in) gd_nothrow
       dreturn("%p", NULL);
       return NULL;
     } else if ((*_gd_ef[E->e->u.raw.file[0].subenc].name)(D,
-          D->fragment[E->fragment_index].enc_data, E->e->u.raw.file,
-          E->e->u.raw.filebase, 0, 0))
+          D->fragment[E->fragment_index].n_encdata,
+          D->fragment[E->fragment_index].encdata, E->e->u.raw.n_rawform,
+          E->e->u.raw.rawform, E->e->u.raw.file, E->e->u.raw.filebase,
+          E->EN(raw,data_type), E->EN(raw,spf), 0, 0))
     {
       dreturn("%p", NULL);
       return NULL;

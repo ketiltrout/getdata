@@ -330,6 +330,7 @@ static void _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
     int me, int meta, size_t max_len, int pretty, int permissive)
 {
   int i;
+  unsigned int j;
   size_t z;
   char *ptr;
 
@@ -551,6 +552,18 @@ static void _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
     fputs("/HIDDEN ", stream);
     _GD_PadField(D, stream, D->fragment[me].prefix, D->fragment[me].suffix,
         E->field, 0, permissive, D->standards);
+    fputc('\n', stream);
+  }
+
+  if (!D->error && E->field_type == GD_RAW_ENTRY && E->e->u.raw.n_rawform > 0) {
+    fputs("/RAWFORM ", stream);
+    _GD_PadField(D, stream, D->fragment[me].prefix, D->fragment[me].suffix,
+        E->field, 0, permissive, D->standards);
+    for (j = 0; j < E->e->u.raw.n_rawform; ++j) {
+      fputc(' ', stream);
+      _GD_StringEscapeise(stream, E->e->u.raw.rawform[j], 0, permissive,
+          D->standards);
+    }
     fputc('\n', stream);
   }
 

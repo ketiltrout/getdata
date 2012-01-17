@@ -33,7 +33,9 @@ static void _GD_FreeD(DIRFILE* D)
     _GD_FreeE(D, D->entry[i], 1);
 
   for (j = 0; j < D->n_fragment; ++j) {
-    free(D->fragment[j].enc_data);
+    for (i = 0; i < D->fragment[j].n_encdata; ++i)
+      free(D->fragment[j].encdata[i]);
+    free(D->fragment[j].encdata);
     free(D->fragment[j].prefix);
     free(D->fragment[j].suffix);
     free(D->fragment[j].bname);

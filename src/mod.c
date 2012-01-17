@@ -369,10 +369,16 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
           _GD_FiniRawIO(D, E, E->fragment_index,
               GD_FINIRAW_CLOTEMP | GD_FINIRAW_DISCARD);
         else {
+          unsigned int u;
           /* discard the old file and move the temporary file into place */
           if (_GD_FiniRawIO(D, E, E->fragment_index, GD_FINIRAW_DISCARD) == 0)
             _GD_FiniRawIO(D, E, E->fragment_index,
                 GD_FINIRAW_KEEP | GD_FINIRAW_CLOTEMP);
+
+          /* delete the old raw form -- no writeable encoding has these */
+          for (u = 0; u < E->e->u.raw.n_rawform; ++u)
+            free(E->e->u.raw.rawform[u]);
+          free(E->e->u.raw.rawform);
         }
       }
       memcpy(Qe.u.raw.file, E->e->u.raw.file, sizeof(struct _gd_raw_file));

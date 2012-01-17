@@ -144,7 +144,7 @@ extern "C" {
 #define GD_E_DELETE           26
 #define GD_E_ARGUMENT         27
 #define GD_E_CALLBACK         28
-/* unused                     29 */
+#define GD_E_ENCDATA          29
 #define GD_E_UNCLEAN_DB       30
 #define GD_E_DOMAIN           31
 #define GD_E_BAD_REPR         32
@@ -189,6 +189,8 @@ extern "C" {
 #define GD_E_FORMAT_META_META 21
 #define GD_E_FORMAT_ALIAS     22
 #define GD_E_FORMAT_MPLEXVAL  23
+#define GD_E_FORMAT_RAWFORM   24
+#define GD_E_FORMAT_LATEENC   25
 
 /* deprecated names */
 #define GD_E_FORMAT_NO_PARENT GD_E_FORMAT_NO_FIELD
@@ -450,7 +452,8 @@ typedef int (*gd_parser_callback_t)(gd_parser_data_t*, void*);
 #define GD_BZIP2_ENCODED  0x05000000 /* Data are bzip2 encoded */
 #define GD_LZMA_ENCODED   0x06000000 /* Data are xz encoded */
 #define GD_SIE_ENCODED    0x07000000 /* Data are sample index encoded */
-#define GD_ZZIP_ENCODED   0x08000000 /* Data are zzip encoded */
+#define GD_FRAME_ENCODED  0x08000000 /* Data are frame encoded */
+#define GD_ZZIP_ENCODED   0x09000000 /* Data are zzip encoded */
 #define GD_ENC_UNSUPPORTED GD_ENCODING /* Encoding unsupported */
 
 /* delete flags */

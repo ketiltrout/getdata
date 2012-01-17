@@ -1955,7 +1955,8 @@ static void _GD_ParseAlias(DIRFILE *restrict D, char **restrict name,
  */
 static int _GD_ParseDirective(DIRFILE *restrict D, char **in_cols, int n_cols,
     int me, int *restrict standards, int linenum, char **restrict ref_name,
-    unsigned long *restrict flags, char **outstring, const char *tok_pos)
+    unsigned long *restrict flags, int *restrict rawform, char **outstring,
+    const char *tok_pos)
 {
   const char* ptr;
   char *munged_code;
@@ -1963,8 +1964,8 @@ static int _GD_ParseDirective(DIRFILE *restrict D, char **in_cols, int n_cols,
   int pedantic = *flags & GD_PEDANTIC;
   gd_entry_t *E = NULL;
 
-  dtrace("%p, %p, %i, %u, %p, %i, %p, %p, %p, %p", D, in_cols, n_cols, me,
-      standards, linenum, ref_name, flags, outstring, tok_pos);
+  dtrace("%p, %p, %i, %u, %p, %i, %p, %p, %p, %p, %p", D, in_cols, n_cols, me,
+      standards, linenum, ref_name, flags, rawform, outstring, tok_pos);
 
   /* Starting with Standards Version 8, the forward slash is required. */
   if (*standards >= 8 && pedantic && in_cols[0][0] != '/') {
@@ -2013,15 +2014,50 @@ static int _GD_ParseDirective(DIRFILE *restrict D, char **in_cols, int n_cols,
       if (strcmp(ptr, "ENCODING") == 0 && (!pedantic || *standards >= 6)) {
         matched = 1;
         if (!(*flags & GD_FORCE_ENCODING)) {
+          if (*rawform) {
+            _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_LATEENC,
+                D->fragment[me].cname, linenum, NULL);
+            break;
+          }
           D->fragment[me].encoding = GD_ENC_UNSUPPORTED;
           for (i = 0; i < GD_N_SUBENCODINGS - 1; ++i)
             if (strcmp(in_cols[1], _gd_ef[i].ffname) == 0) {
+              unsigned int j;
               D->fragment[me].encoding = _gd_ef[i].scheme;
-              free(D->fragment[me].enc_data);
-              if (n_cols > 2 && _gd_ef[i].flags & GD_EF_EDAT)
-                D->fragment[me].enc_data = _GD_Strdup(D, in_cols[2]);
-              else
-                D->fragment[me].enc_data = NULL;
+
+              /* free any old encoding data recorded */
+              for (j = 0; j < D->fragment[me].n_encdata; ++j)
+                free(D->fragment[me].encdata[j]);
+              free(D->fragment[me].encdata);
+
+              /* record the new encoding data */
+              if (n_cols > 2 && _gd_ef[i].gtok > 0) {
+                unsigned int n = ((unsigned int)n_cols - 2 < _gd_ef[i].gtok) ?
+                  (unsigned int)n_cols - 2 : _gd_ef[i].gtok;
+                D->fragment[me].encdata = _GD_Malloc(D, sizeof(char*) * n);
+
+                if (D->error) {
+                  D->fragment[me].n_encdata = 0;
+                  break;
+                }
+
+                memset(D->fragment[me].encdata, 0, sizeof(char*) * n);
+
+                for (j = 0; j < n; ++j)
+                  D->fragment[me].encdata[j] = _GD_Strdup(D, in_cols[j + 2]);
+
+                if (D->error) {
+                  for (j = 0; j < n; ++j)
+                    free(D->fragment[me].encdata[j]);
+                  free(D->fragment[me].encdata);
+                  D->fragment[me].encdata = NULL;
+                  n = 0;
+                }
+                D->fragment[me].n_encdata = (unsigned int)n;
+              } else {
+                D->fragment[me].n_encdata = 0;
+                D->fragment[me].encdata = NULL;
+              }
               break;
             }
         }
@@ -2034,7 +2070,7 @@ static int _GD_ParseDirective(DIRFILE *restrict D, char **in_cols, int n_cols,
             D->fragment[me].byte_sex = GD_LITTLE_ENDIAN;
           else
             _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_ENDIAN,
-            D->fragment[me].cname, linenum, NULL);
+                D->fragment[me].cname, linenum, NULL);
           if (n_cols > 2 && (!pedantic || *standards >= 8)) {
             if (strcmp(in_cols[2], "arm") == 0) {
 #if ! defined(ARM_ENDIAN_DOUBLES)
@@ -2152,7 +2188,74 @@ static int _GD_ParseDirective(DIRFILE *restrict D, char **in_cols, int n_cols,
       }
       break;
     case 'R':
-      if (strcmp(ptr, "REFERENCE") == 0 && (!pedantic || *standards >= 6)) {
+      if (strcmp(ptr, "RAWFORM") == 0 && (!pedantic || *standards >= 9)) {
+        unsigned int j, n = n_cols - 2;
+
+        matched = 1;
+        /* Must specify encoding before /RAWFORM */
+        if (D->fragment[me].encoding == GD_AUTO_ENCODED) {
+          _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_RAWFORM,
+              D->fragment[me].cname, linenum, in_cols[1]);
+          break;
+        } else if (n_cols < 2) {
+          _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_TOK, D->fragment[me].cname,
+              linenum, NULL);
+          break;
+        }
+        
+        munged_code = _GD_MungeFromFrag(D, NULL, me, in_cols[1], &dummy);
+        if (munged_code)
+          E = _GD_FindField(D, munged_code, D->entry, D->n_entries, 0, NULL);
+        free(munged_code);
+
+        if (E == NULL) {
+          _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_NO_FIELD,
+              D->fragment[me].cname, linenum, in_cols[1]);
+          break;
+        } else if (E->fragment_index != me) {
+          _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_LOCATION,
+              D->fragment[me].cname, linenum, in_cols[1]);
+          break;
+        } else if (E->e->u.raw.n_rawform > 0) {
+          /* ignore a RAWFORM if we've already seen one for this field */
+          *rawform = 1;
+          break;
+        }
+        *rawform = 1;
+
+        for (i = 0; i < GD_N_SUBENCODINGS - 1; ++i)
+          if (D->fragment[me].encoding == _gd_ef[i].scheme)
+            break;
+
+        /* This shouldn't happen? */
+        if (i == GD_N_SUBENCODINGS) {
+          _GD_InternalError(D);
+          break;
+        }
+
+        if (n > _gd_ef[i].ftok)
+          n = _gd_ef[i].ftok;
+
+        if (n == 0)
+          break;
+
+        E->e->u.raw.n_rawform = n;
+        E->e->u.raw.rawform = _GD_Malloc(D, sizeof(char*) * n);
+        if (D->error)
+          break;
+        memset(E->e->u.raw.rawform, 0, sizeof(char*) * n);
+
+        for (j = 0; j < n; ++j)
+          E->e->u.raw.rawform[j] = _GD_Strdup(D, in_cols[i + 2]);
+
+        if (D->error) {
+          for (j = 0; j < n; ++j)
+            free(E->e->u.raw.rawform[j]);
+          free(E->e->u.raw.rawform);
+        }
+      } else if (strcmp(ptr, "REFERENCE") == 0 && (!pedantic ||
+            *standards >= 6))
+      {
         matched = 1;
         free(*ref_name);
         *ref_name = _GD_MungeFromFrag(D, NULL, me, in_cols[1], &dummy);
@@ -2249,6 +2352,7 @@ char *_GD_ParseFragment(FILE *restrict fp, DIRFILE *restrict D, int me,
   char* ref_name = NULL;
   int n_cols;
   size_t n;
+  int rawform = 0;
   int match = 0;
   int rescan = 0;
   int se_action = GD_SYNTAX_ABORT;
@@ -2278,7 +2382,7 @@ char *_GD_ParseFragment(FILE *restrict fp, DIRFILE *restrict D, int me,
 
     if (D->error == GD_E_OK)
       match = _GD_ParseDirective(D, in_cols, n_cols, me, standards, linenum,
-          &ref_name, flags, &outstring, tok_pos);
+          &ref_name, flags, &rawform, &outstring, tok_pos);
 
     if (D->error == GD_E_OK && !match)
       first_raw = _GD_ParseFieldSpec(D, n_cols, in_cols, NULL,

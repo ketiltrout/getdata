@@ -51,7 +51,7 @@ AC_CONFIG_HEADER([src/config.h])
 dnl Features
 BUINDINGS_BUILT=
 BINDINGS_LEFT=
-ENCODINGS_BUILT=" raw ascii sie"
+ENCODINGS_BUILT=" raw ascii frame sie"
 ENCODINGS_LEFT=
 PRIVATE_LIBS=
 

@@ -35,13 +35,14 @@ static int framework_initialised = 0;
 #define GD_EF_NULL_SET &_GD_GenericName, NULL, NULL, NULL, NULL, NULL, \
   NULL, NULL, &_GD_GenericMove, &_GD_GenericUnlink
 #ifdef USE_MODULES
-#define GD_EXT_ENCODING(sc,ex,ec,af,ff) \
-{ sc,ex,ec,af,ff,GD_EF_PROVIDES,GD_EF_NULL_SET }
+#define GD_EXT_ENCODING(sc,ex,fl,gt,ft,af,ff) \
+{ sc,ex,fl,gt,ft,af,ff,GD_EF_PROVIDES,GD_EF_NULL_SET }
 #else
-#define GD_EXT_ENCODING(sc,ex,ec,af,ff) { sc,ex,ec,af,ff,0,GD_INT_FUNCS }
+#define GD_EXT_ENCODING(sc,ex,fl,gt,ft,af,ff) \
+{ sc,ex,fl,gt,ft,af,ff,0,GD_INT_FUNCS }
 #endif
 struct encoding_t _gd_ef[GD_N_SUBENCODINGS] = {
-  { GD_UNENCODED, "", GD_EF_ECOR, NULL, "none", 0,
+  { GD_UNENCODED, "", GD_EF_ECOR, 0, 0, NULL, "none", 0,
     &_GD_GenericName, &_GD_RawOpen, &_GD_RawClose, &_GD_RawSeek, &_GD_RawRead,
     &_GD_RawSize, &_GD_RawWrite, &_GD_RawSync, &_GD_GenericMove,
     &_GD_GenericUnlink
@@ -59,7 +60,7 @@ struct encoding_t _gd_ef[GD_N_SUBENCODINGS] = {
 #define GD_EF_PROVIDES 0
 #define GD_INT_FUNCS GD_EF_NULL_SET
 #endif
-  GD_EXT_ENCODING(GD_GZIP_ENCODED, ".gz", GD_EF_ECOR | GD_EF_OOP, "Gzip",
+  GD_EXT_ENCODING(GD_GZIP_ENCODED, ".gz", GD_EF_ECOR | GD_EF_OOP, 0, 0, "Gzip",
       "gzip"),
 #undef GD_INT_FUNCS
 #undef GD_EF_PROVIDES
@@ -76,7 +77,7 @@ struct encoding_t _gd_ef[GD_N_SUBENCODINGS] = {
 #define GD_INT_FUNCS GD_EF_NULL_SET
 #define GD_EF_PROVIDES 0
 #endif
-  GD_EXT_ENCODING(GD_BZIP2_ENCODED, ".bz2", GD_EF_ECOR, "Bzip2", "bzip2"),
+  GD_EXT_ENCODING(GD_BZIP2_ENCODED, ".bz2", GD_EF_ECOR, 0, 0, "Bzip2", "bzip2"),
 #undef GD_INT_FUNCS
 #undef GD_EF_PROVIDES
 
@@ -92,7 +93,7 @@ struct encoding_t _gd_ef[GD_N_SUBENCODINGS] = {
 #define GD_INT_FUNCS GD_EF_NULL_SET
 #define GD_EF_PROVIDES 0
 #endif
-  GD_EXT_ENCODING(GD_SLIM_ENCODED, ".slm", GD_EF_ECOR, "Slim", "slim"),
+  GD_EXT_ENCODING(GD_SLIM_ENCODED, ".slm", GD_EF_ECOR, 0, 0, "Slim", "slim"),
 #undef GD_INT_FUNCS
 #undef GD_EF_PROVIDES
 
@@ -108,24 +109,23 @@ struct encoding_t _gd_ef[GD_N_SUBENCODINGS] = {
 #define GD_INT_FUNCS GD_EF_NULL_SET
 #define GD_EF_PROVIDES 0
 #endif
-  GD_EXT_ENCODING(GD_LZMA_ENCODED, ".xz", GD_EF_ECOR, "Lzma", "lzma"),
-  GD_EXT_ENCODING(GD_LZMA_ENCODED, ".lzma", GD_EF_ECOR, "Lzma", "lzma"),
+  GD_EXT_ENCODING(GD_LZMA_ENCODED, ".xz", GD_EF_ECOR, 0, 0, "Lzma", "lzma"),
+  GD_EXT_ENCODING(GD_LZMA_ENCODED, ".lzma", GD_EF_ECOR, 0, 0, "Lzma", "lzma"),
 #undef GD_INT_FUNCS
 #undef GD_EF_PROVIDES
 
 
-  { GD_TEXT_ENCODED, ".txt", 0, NULL, "text", 0,
+  { GD_TEXT_ENCODED, ".txt", 0, 0, 0,  NULL, "text", 0,
     &_GD_GenericName, &_GD_AsciiOpen, &_GD_AsciiClose, &_GD_AsciiSeek,
     &_GD_AsciiRead, &_GD_AsciiSize, &_GD_AsciiWrite, &_GD_AsciiSync,
     &_GD_GenericMove, &_GD_GenericUnlink
   },
 
-  { GD_SIE_ENCODED, ".sie", GD_EF_ECOR | GD_EF_SWAP, NULL, "sie", 0,
+  { GD_SIE_ENCODED, ".sie", GD_EF_ECOR | GD_EF_SWAP, 0, 0, NULL, "sie", 0,
     &_GD_GenericName, &_GD_SampIndOpen, &_GD_SampIndClose, &_GD_SampIndSeek,
     &_GD_SampIndRead, &_GD_SampIndSize, &_GD_SampIndWrite, &_GD_SampIndSync,
     &_GD_GenericMove, &_GD_GenericUnlink
   },
-
 
 #ifdef USE_ZZIP
 #define GD_EF_PROVIDES \
@@ -138,13 +138,17 @@ struct encoding_t _gd_ef[GD_N_SUBENCODINGS] = {
 #define GD_INT_FUNCS GD_EF_NULL_SET
 #define GD_EF_PROVIDES 0
 #endif
-  GD_EXT_ENCODING(GD_ZZIP_ENCODED, NULL, GD_EF_ECOR | GD_EF_EDAT, "Zzip",
-      "zzip"),
+  GD_EXT_ENCODING(GD_ZZIP_ENCODED, NULL, GD_EF_ECOR, 1, 0, "Zzip", "zzip"),
 #undef GD_INT_FUNCS
 #undef GD_EF_PROVIDES
 
+  { GD_FRAME_ENCODED, NULL, GD_EF_ECOR, 3, 2, NULL, "frame", 0,
+    &_GD_FrameName, &_GD_FrameOpen, &_GD_FrameClose, &_GD_FrameSeek,
+    &_GD_FrameRead, &_GD_FrameSize, NULL /* WRITE */, NULL /* SYNC */,
+    NULL /* MOVE */, NULL /* UNLINK */
+  },
 
-  { GD_ENC_UNSUPPORTED, "", 0, "", "", 0,
+  { GD_ENC_UNSUPPORTED, "", 0, 0, 0, "", "", 0,
     NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
   },
 };
@@ -503,8 +507,10 @@ int _GD_InitRawIO(DIRFILE *D, const gd_entry_t *E, const char *filebase,
 
   if (mode & GD_FILE_TEMP) {
     /* create temporary file in file[1] */
-    if ((*enc->name)(D, D->fragment[E->fragment_index].enc_data,
-          E->e->u.raw.file + 1, filebase, 1, 0))
+    if ((*enc->name)(D, D->fragment[E->fragment_index].n_encdata,
+          D->fragment[E->fragment_index].encdata, E->e->u.raw.n_rawform,
+          E->e->u.raw.rawform, E->e->u.raw.file + 1, filebase,
+          E->EN(raw,data_type), E->EN(raw,spf), 1, 0))
     {
       ; /* error already set */
     } else if ((temp_fd = _GD_MakeTempFile(D, D->fragment[fragment].dirfd,
@@ -528,8 +534,10 @@ int _GD_InitRawIO(DIRFILE *D, const gd_entry_t *E, const char *filebase,
   if (oop_write) {
     /* an out-of-place write requires us to open a temporary file and pass
      * in its fd */
-    if ((*enc->name)(D, D->fragment[E->fragment_index].enc_data,
-          E->e->u.raw.file + 1, filebase, 1, 0))
+    if ((*enc->name)(D, D->fragment[E->fragment_index].n_encdata,
+          D->fragment[E->fragment_index].encdata, E->e->u.raw.n_rawform,
+          E->e->u.raw.rawform, E->e->u.raw.file + 1, filebase,
+          E->EN(raw,data_type), E->EN(raw,spf), 1, 0))
     {
       dreturn("%i", 1);
       return 1;
@@ -551,8 +559,10 @@ int _GD_InitRawIO(DIRFILE *D, const gd_entry_t *E, const char *filebase,
 
   /* open a regular file, if necessary */
   if (E->e->u.raw.file[0].idata < 0) {
-    if ((*enc->name)(D, D->fragment[E->fragment_index].enc_data,
-          E->e->u.raw.file, filebase, 0, 0))
+    if ((*enc->name)(D, D->fragment[E->fragment_index].n_encdata,
+          D->fragment[E->fragment_index].encdata, E->e->u.raw.n_rawform,
+          E->e->u.raw.rawform, E->e->u.raw.file, filebase, E->EN(raw,data_type),
+          E->EN(raw,spf), 0, 0))
     {
       dreturn("%i", 1);
       return 1;
@@ -578,16 +588,15 @@ int _GD_InitRawIO(DIRFILE *D, const gd_entry_t *E, const char *filebase,
 
 /* Figure out the encoding scheme */
 static unsigned long _GD_ResolveEncoding(DIRFILE *restrict D,
-    const char *restrict name, const char *restrict enc_data,
-    unsigned long scheme, int dirfd, struct _gd_raw_file *restrict file)
+    const char *restrict name, unsigned long scheme, int dirfd,
+    gd_type_t type, gd_spf_t spf, struct _gd_raw_file *restrict file)
 {
   char *candidate;
   int i;
   const size_t len = strlen(name);
   struct stat statbuf;
 
-  dtrace("%p, \"%s\", \"%s\", 0x%08lx, %i, %p", D, name, enc_data, scheme,
-      dirfd, file);
+  dtrace("%p, \"%s\", 0x%08lx, %i, %p", D, name, scheme, dirfd, file);
 
   for (i = 0; _gd_ef[i].scheme != GD_ENC_UNSUPPORTED; i++) {
     if (scheme == GD_AUTO_ENCODED || scheme == _gd_ef[i].scheme) {
@@ -601,8 +610,10 @@ static unsigned long _GD_ResolveEncoding(DIRFILE *restrict D,
         if (_GD_MissingFramework(i, GD_EF_NAME))
           continue;
 
-        if ((*_gd_ef[i].name)(D, enc_data, file, name, 0, 1))
+        if ((*_gd_ef[i].name)(D, 0, NULL, 0, NULL, file, name, type, spf, 0, 1))
+        {
           continue;
+        }
 
         candidate = file->name;
         file->name = NULL;
@@ -640,9 +651,9 @@ int _GD_Supports(DIRFILE *D, const gd_entry_t *E, unsigned int funcs)
   /* Figure out the dirfile encoding type, if required */
   if (D->fragment[E->fragment_index].encoding == GD_AUTO_ENCODED) {
     D->fragment[E->fragment_index].encoding =
-      _GD_ResolveEncoding(D, E->e->u.raw.filebase,
-          D->fragment[E->fragment_index].enc_data, GD_AUTO_ENCODED,
-          D->fragment[E->fragment_index].dirfd, E->e->u.raw.file);
+      _GD_ResolveEncoding(D, E->e->u.raw.filebase, GD_AUTO_ENCODED,
+          D->fragment[E->fragment_index].dirfd, E->EN(raw,data_type),
+          E->EN(raw,spf), E->e->u.raw.file);
   }
 
   /* If the encoding scheme is unknown, complain */
@@ -655,9 +666,9 @@ int _GD_Supports(DIRFILE *D, const gd_entry_t *E, unsigned int funcs)
   /* Figure out the encoding subtype, if required */
   if (E->e->u.raw.file[0].subenc == GD_ENC_UNKNOWN)
     _GD_ResolveEncoding(D, E->e->u.raw.filebase,
-        D->fragment[E->fragment_index].enc_data,
         D->fragment[E->fragment_index].encoding,
-        D->fragment[E->fragment_index].dirfd, E->e->u.raw.file);
+        D->fragment[E->fragment_index].dirfd, E->EN(raw,data_type), 
+        E->EN(raw,spf), E->e->u.raw.file);
 
   /* check for our function(s) */
   if (_GD_MissingFramework(E->e->u.raw.file[0].subenc, funcs)) {
@@ -670,12 +681,16 @@ int _GD_Supports(DIRFILE *D, const gd_entry_t *E, unsigned int funcs)
   return 1;
 }
 
-int _GD_GenericName(DIRFILE *restrict D,
-    const char *restrict enc_data __gd_unused,
-    struct _gd_raw_file *restrict file, const char *restrict base, int temp,
+int _GD_GenericName(DIRFILE *restrict D, unsigned int n_encdata __gd_unused,
+    char *const *restrict encdata __gd_unused,
+    unsigned int n_rawform __gd_unused,
+    char *const *restrict rawform __gd_unused,
+    struct _gd_raw_file *restrict file, const char *restrict base,
+    gd_type_t type __gd_unused, gd_spf_t spf __gd_unused, int temp,
     int resolv __gd_unused)
 {
-  dtrace("%p, <unused>, %p, \"%s\", %i, <unused>", D, file, base, temp);
+  dtrace("%p, <unused>, <unused>, <unsued>, <unused>, %p, \"%s\", <unused>,"
+      " <unused>, %i, <unused>", D, file, base, temp);
 
   if (file->name == NULL) {
     file->D = D;
@@ -757,9 +772,11 @@ static void _GD_RecodeFragment(DIRFILE* D, unsigned long encoding, int fragment,
         _GD_FiniRawIO(D, raw_entry[i], fragment, GD_FINIRAW_DISCARD);
 
         if ((*_gd_ef[temp.subenc].name)(D,
-              D->fragment[raw_entry[i]->fragment_index].enc_data,
-              raw_entry[i]->e->u.raw.file, raw_entry[i]->e->u.raw.filebase, 0,
-              0))
+              D->fragment[raw_entry[i]->fragment_index].n_encdata,
+              D->fragment[raw_entry[i]->fragment_index].encdata,
+              raw_entry[i]->e->u.raw.n_rawform, raw_entry[i]->e->u.raw.rawform,
+              raw_entry[i]->e->u.raw.file, raw_entry[i]->e->u.raw.filebase, 
+              raw_entry[i]->EN(raw,data_type), raw_entry[i]->EN(raw,spf), 0, 0))
         {
           raw_entry[i]->e->u.raw.file[0].name = temp.name;
           raw_entry[i]->e->u.raw.file[0].subenc = temp.subenc;
@@ -805,8 +822,13 @@ static void _GD_RecodeFragment(DIRFILE* D, unsigned long encoding, int fragment,
       }
   }
 
-  free(D->fragment[fragment].enc_data);
-  D->fragment[fragment].enc_data = NULL;
+  /* No writable encoding supports encoding data (for now?) */
+  for (i = 0; i < D->fragment[fragment].n_encdata; ++i)
+    free(D->fragment[fragment].encdata[i]);
+  free(D->fragment[fragment].encdata);
+  D->fragment[fragment].n_encdata = 0;
+  D->fragment[fragment].encdata = NULL;
+
   D->fragment[fragment].encoding = encoding;
   D->fragment[fragment].modified = 1;
   D->flags &= ~GD_HAVE_VERSION;
@@ -889,10 +911,10 @@ unsigned long gd_encoding(DIRFILE* D, int fragment) gd_nothrow
       if (D->entry[i]->fragment_index == fragment &&
           D->entry[i]->field_type == GD_RAW_ENTRY)
       {
-        D->fragment[fragment].encoding =
-          _GD_ResolveEncoding(D, D->entry[i]->e->u.raw.filebase,
-              D->fragment[fragment].enc_data, GD_AUTO_ENCODED,
-              D->fragment[fragment].dirfd, D->entry[i]->e->u.raw.file);
+        D->fragment[fragment].encoding = _GD_ResolveEncoding(D,
+            D->entry[i]->e->u.raw.filebase, GD_AUTO_ENCODED,
+            D->fragment[fragment].dirfd, D->entry[i]->EN(raw,data_type),
+            D->entry[i]->EN(raw,spf), D->entry[i]->e->u.raw.file);
 
         if (D->fragment[fragment].encoding != GD_AUTO_ENCODED)
           break;

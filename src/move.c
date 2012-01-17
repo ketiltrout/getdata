@@ -234,6 +234,7 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned long encoding,
       _GD_FiniRawIO(D, E, new_fragment, GD_FINIRAW_CLOTEMP
           | GD_FINIRAW_DISCARD);
     } else {
+      unsigned int u;
       struct _gd_raw_file temp;
       memcpy(&temp, E->e->u.raw.file, sizeof(temp));
 
@@ -244,8 +245,9 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned long encoding,
       E->e->u.raw.file[0].subenc = subencoding;
 
       if ((*_gd_ef[E->e->u.raw.file[0].subenc].name)(D,
-            D->fragment[E->fragment_index].enc_data, E->e->u.raw.file,
-            new_filebase, 0, 0))
+            D->fragment[E->fragment_index].n_encdata,
+            D->fragment[E->fragment_index].encdata, E->e->u.raw.n_rawform,
+            E->e->u.raw.rawform, E->e->u.raw.file, new_filebase, 0, 0))
       {
         E->e->u.raw.file[0].name = temp.name;
         E->e->u.raw.file[0].subenc = temp.subenc;
@@ -267,6 +269,13 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned long encoding,
         free(E->e->u.raw.filebase);
         E->e->u.raw.filebase = new_filebase;
       }
+
+      /* delete the old raw form -- no writeable encoding has these */
+      for (u = 0; u < E->e->u.raw.n_rawform; ++u)
+        free(E->e->u.raw.rawform[u]);
+      free(E->e->u.raw.rawform);
+      E->e->u.raw.n_rawform = 0;
+      E->e->u.raw.rawform = NULL;
     }
   } else {
     free(new_filebase);
