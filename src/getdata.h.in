@@ -451,6 +451,7 @@ typedef int (*gd_parser_callback_t)(gd_parser_data_t*, void*);
 #define GD_LZMA_ENCODED   0x06000000 /* Data are xz encoded */
 #define GD_SIE_ENCODED    0x07000000 /* Data are sample index encoded */
 #define GD_ZZIP_ENCODED   0x08000000 /* Data are zzip encoded */
+#define GD_ZZSLIM_ENCODED 0x09000000 /* Data are zzslim encoded */
 #define GD_ENC_UNSUPPORTED GD_ENCODING /* Encoding unsupported */
 
 /* delete flags */

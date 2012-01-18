@@ -955,7 +955,7 @@ const char *_GD_DirName(const DIRFILE *D, int dirfd)
   return D->name;
 }
 
-/* This is effectively the POSIX.1 realpath(3) function, but with some
+/* This is mostly the POSIX.1 realpath(3) function, but with some
  * optimisation due to the fact that we know that the front part of the
  * path (car) has already been canonicalised */
 char *_GD_CanonicalPath(const char *car, const char *cdr)
@@ -1122,11 +1122,30 @@ char *_GD_CanonicalPath(const char *car, const char *cdr)
 
         /* check if it's a symlink */
         if (lstat64(res, &statbuf)) {
-          if (errno == ENOENT && *end == '\0') {
-            /* the leaf doesn't exist.  I guess that means we're done. */
+          if (errno == ENOENT) {
+            /* the thing doesn't exist.  I guess that means we're done;
+             * copy the rest of the work buffer onto the resul and call it a
+             * day. */
+            dwatch("%s", res);
+            if (*end) {
+              len = strlen(end) + 1;
+              if (res_len + len >= res_size) {
+                ptr = (char*)realloc(res, res_size += len);
+                if (ptr == NULL) {
+                  free(res);
+                  free(work);
+                  dreturn("%p", NULL);
+                  return NULL;
+                }
+                res = ptr;
+              }
+              res[res_len++] = '/';
+              strcpy(res + res_len, end);
+              res_len += len - 1;
+            }
             goto _GD_CanonicalPath_DONE;
           }
-          /* doesn't exist */
+          /* lstat error */
           free(res);
           free(work);
           dreturn("%p", NULL);

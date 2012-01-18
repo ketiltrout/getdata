@@ -73,6 +73,15 @@ ZZIP_C=zzip.c
 endif
 endif
 
+if USE_ZZSLIM
+if USE_MODULES
+LIBGETDATAZZSLIM_LA=libgetdatazzslim.la
+DLOPEN_LIBGETDATAZZSLIM_LA=-dlopen libgetdatazzslim.la
+else
+ZZSLIM_C=zzslim.c
+endif
+endif
+
 if USE_MODULES
 EXPORT_DYNAMIC=-export-dynamic
 DGETDATA_MODULEDIR=-DGETDATA_MODULEDIR="\"$(moduledir)\""
@@ -81,6 +90,7 @@ EXTERNAL_CPPFLAGS=$(SLIM_CPPFLAGS) $(GZIP_CPPFLAGS) $(BZIP2_CPPFLAGS) \
 									$(LZMA_CPPFLAGS) $(ZZIP_CPPFLAGS)
 EXTERNAL_LDFLAGS=$(SLIM_LDFLAGS) $(GZIP_LDFLAGS) $(BZIP2_LDFLAGS) \
 								 $(LZMA_LDFLAGS) $(ZZIP_LDFLAGS)
+EXTERNAL_LIBS=$(SLIM_LIBS) $(GZIP_LIBS) $(BZIP2_LIBS) $(LZMA_LIBS) $(ZZIP_LIBS)
 endif
 
 if INCLUDE_LEGACY_API
@@ -112,7 +122,7 @@ pkgconfig_DATA = getdata.pc
 lib_LTLIBRARIES = libgetdata.la
 module_LTLIBRARIES = ${LIBGETDATASLIM_LA} ${LIBGETDATAGZIP_LA} \
 									${LIBGETDATABZIP2_LA} ${LIBGETDATALZMA_LA} \
-									${LIBGETDATAZZIP_LA}
+									${LIBGETDATAZZIP_LA} ${LIBGETDATAZZSLIM_LA}
 libgetdata_la_SOURCES = add.c ascii.c ${BZIP2_C} close.c common.c compat.c \
 												constant.c ${DEBUG_C} del.c encoding.c endian.c \
 												entry.c errors.c field_list.c flimits.c flush.c fpos.c \
@@ -120,41 +130,48 @@ libgetdata_la_SOURCES = add.c ascii.c ${BZIP2_C} close.c common.c compat.c \
 												include.c ${LEGACY_C} ${LZMA_C} meta_list.c mod.c \
 												move.c name.c native.c nfields.c nframes.c nmeta.c \
 												open.c parse.c protect.c putdata.c raw.c sie.c \
-												${SLIM_C} spf.c string.c types.c ${ZZIP_C} \
+												${SLIM_C} spf.c string.c types.c ${ZZIP_C} ${ZZSLIM_C} \
 												${GETDATA_LEGACY_H} internal.h nan.h
 libgetdata_la_LDFLAGS = $(EXPORT_DYNAMIC) -export-symbols-regex '^[^_]' \
 												-version-info \
 												${GETDATA_IFACE_VERSION}:${GETDATA_IMPL_REVISION}:${GETDATA_IFACE_AGE} \
-												$(EXTERNAL_LDFLAGS)
+												$(EXTERNAL_LDFLAGS) $(EXTERNAL_LIBS)
 libgetdata_la_LIBADD = $(LIBLTDL) $(DLOPEN_LIBGETDATASLIM_LA) \
-											 $(DLOPEN_LIBGETDATAGZIP_LA) \
+											 $(DLOPEN_LIBGETDATAGZIP_LA) 
 											 $(DLOPEN_LIBGETDATABZIP2_LA) \
-											 $(DLOPEN_LIBGETDATALZMA_LA) \
-											 $(DLOPEN_LIBGETDATAZZIP_LA)
+											 $(DLOPEN_LIBGETDATALZMA_LA) $(DLOPEN_LIBGETDATAZZIP_LA) \
+											 $(DLOPEN_LIBGETDATAZZSLIM_LA)
 
 libgetdataslim_la_SOURCES = slim.c
 libgetdataslim_la_LDFLAGS = $(SLIM_LDFLAGS) -release $(PACKAGE_VERSION) \
-														-module
+														-module $(SLIM_LIBS)
 libgetdataslim_la_CPPFLAGS = $(AM_CPPFLAGS) $(SLIM_CPPFLAGS)
 
 libgetdatagzip_la_SOURCES = gzip.c
-libgetdatagzip_la_LDFLAGS = $(GZIP_LDFLAGS) -release $(PACKAGE_VERSION) -module
+libgetdatagzip_la_LDFLAGS = $(GZIP_LDFLAGS) -release $(PACKAGE_VERSION) \
+														-module $(GZIP_LIBS)
 libgetdatagzip_la_CPPFLAGS = $(AM_CPPFLAGS) $(GZIP_CPPFLAGS)
 
 libgetdatabzip2_la_SOURCES = bzip.c
 libgetdatabzip2_la_LDFLAGS = $(BZIP2_LDFLAGS) -release $(PACKAGE_VERSION) \
-														 -module
+														 -module $(BZIP2_LIBS)
 libgetdatabzip2_la_CPPFLAGS = $(AM_CPPFLAGS) $(BZIP2_CPPFLAGS)
 
 libgetdatalzma_la_SOURCES = lzma.c
 libgetdatalzma_la_LDFLAGS = $(LZMA_LDFLAGS) -release $(PACKAGE_VERSION) \
-														 -module
+														 -module $(LZMA_LIBS)
 libgetdatalzma_la_CPPFLAGS = $(AM_CPPFLAGS) $(LZMA_CPPFLAGS)
 
 libgetdatazzip_la_SOURCES = zzip.c
 libgetdatazzip_la_LDFLAGS = $(ZZIP_LDFLAGS) -release $(PACKAGE_VERSION) \
-														 -module
+														 -module $(ZZIP_LIBS)
 libgetdatazzip_la_CPPFLAGS = $(AM_CPPFLAGS) $(ZZIP_CPPFLAGS)
+
+libgetdatazzslim_la_SOURCES = zzslim.c
+libgetdatazzslim_la_LDFLAGS = $(SLIM_LDFLAGS) $(ZZIP_LDFLAGS) \
+														-release $(PACKAGE_VERSION) -module \
+														$(SLIM_LIBS) $(ZZIP_LIBS)
+libgetdatazzslim_la_CPPFLAGS = $(AM_CPPFLAGS) $(SLIM_CPPFLAGS) $(ZZIP_CPPFLAGS)
 
 clean-local:
 	rm -rf *~ getdata.pc

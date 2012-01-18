@@ -1,3 +1,21 @@
+2012-01-18   D. V. Wiebe <getdata@ketiltrout.net> svn:650
+	* src/getdata.h.in src/internal.h: Define GD_ENC_ZZSLIM GD_ZZSLIM_ENCODED.
+	* src/zzslim.c: Added.
+	* src/encoding.c: In the initialisation of _gd_ef, differentiate things
+	that are willing to use the Generic functions from those that aren't.  Added
+	zzslim.
+
+	* src/common.c (_GD_CanonicalPath): Don't truncate on ENOENT.
+
+	* src/slim.c (_GD_SlimOpen): The slimdopen in slimlib-2.6.5 doesn't interact
+	well with slim's own zzip support, so let's ignore it for now.
+
+	* bindings/make_parameters.c: Convert F77 encoding parameters to the form
+	GDE_xx.
+
+	* configure.ac: zzslim tests.  Always look for a C++ compiler.
+	* m4/encoding.m4: Separate LIBS from LDFLAGS; fix some underquoting.
+
 2012-01-11   D. V. Wiebe <getdata@ketiltrout.net> svn:644
 	* src/getdata.h.in: Added GD_MPLEX_ENTRY.  Updated gd_entry_t.  Defined
 	GD_COUNT_MAX.

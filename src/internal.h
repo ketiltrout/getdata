@@ -740,7 +740,8 @@ struct _gd_private_entry {
 #define GD_ENC_XZ_RAW     6
 #define GD_ENC_SIE        7
 #define GD_ENC_ZZIP       8
-#define GD_ENC_UNKNOWN    9
+#define GD_ENC_ZZSLIM     9
+#define GD_ENC_UNKNOWN   10
 
 #define GD_N_SUBENCODINGS (GD_ENC_UNKNOWN + 1)
 
@@ -1145,6 +1146,18 @@ ssize_t _GD_ZzipRead(struct _gd_raw_file *restrict, void *restrict, gd_type_t,
     size_t);
 int _GD_ZzipClose(struct _gd_raw_file* file);
 off64_t _GD_ZzipSize(int, struct _gd_raw_file* file, gd_type_t data_type,
+    int swap);
+
+/* zzslim I/O methods */
+int _GD_ZzslimName(DIRFILE *restrict, const char *restrict,
+    struct _gd_raw_file *restrict, const char *restrict, int, int);
+int _GD_ZzslimOpen(int, struct _gd_raw_file* file, int swap, unsigned int);
+off64_t _GD_ZzslimSeek(struct _gd_raw_file* file, off64_t count,
+    gd_type_t data_type, unsigned int);
+ssize_t _GD_ZzslimRead(struct _gd_raw_file *restrict, void *restrict, gd_type_t,
+    size_t);
+int _GD_ZzslimClose(struct _gd_raw_file* file);
+off64_t _GD_ZzslimSize(int, struct _gd_raw_file* file, gd_type_t data_type,
     int swap);
 
 #ifndef __cplusplus

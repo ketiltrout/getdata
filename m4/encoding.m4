@@ -77,13 +77,15 @@ fi
 dnl cleanup
 AS_TR_CPP(gd_encoding[_CPPFLAGS])=
 AS_TR_CPP(gd_encoding[_LDFLAGS])=
+AS_TR_CPP(gd_encoding[_LIBS])=
 if test "x$have_this_header" = "xyes" -a "x$have_this_lib" = "xyes"; then
   if test "x$gd_encoding[]_prefix" = "x"; then
-    AS_TR_CPP(gd_encoding[_LDFLAGS])="-l$2"
+    AS_TR_CPP(gd_encoding[_LIBS])="-l$2"
     AS_TR_CPP(gd_encoding[_SEARCHPATH])="$PATH"
   else 
     AS_TR_CPP(gd_encoding[_CPPFLAGS])="-I$gd_encoding[]_prefix/include"
-    AS_TR_CPP(gd_encoding[_LDFLAGS])="-L$gd_encoding[]_prefix/lib -l$2"
+    AS_TR_CPP(gd_encoding[_LDFLAGS])="-L$gd_encoding[]_prefix/lib"
+    AS_TR_CPP(gd_encoding[_LIBS])="-l$2"
     AS_TR_CPP(gd_encoding[_SEARCHPATH])="$gd_encoding[]_prefix/bin:$PATH"
   fi
   AC_DEFINE(AS_TR_CPP([USE_]gd_encoding), [], [ Define to enable ]gd_encoding[ support ])
@@ -93,9 +95,10 @@ else
 fi
 AC_SUBST(AS_TR_CPP(gd_encoding[_CPPFLAGS]))
 AC_SUBST(AS_TR_CPP(gd_encoding[_LDFLAGS]))
+AC_SUBST(AS_TR_CPP(gd_encoding[_LIBS]))
 
 dnl executables needed for tests
-m4_define(gd_progname, regexp([$5 ], [^\([^ ]*\) ], [\1]))
+m4_define([gd_progname], regexp([$5 ], [^\([^ ]*\) ], [\1]))
 AC_PATH_PROGS([path_]gd_progname, [$5], [not found], [$AS_TR_CPP(gd_encoding[_SEARCHPATH])])
 
 if test "x$path_[]gd_progname" != "xnot found"; then
@@ -104,7 +107,7 @@ if test "x$path_[]gd_progname" != "xnot found"; then
 fi
 
 ifelse(`x$6', `x',,[
-m4_define(gd_unprogname, regexp([$6 ], [^\([^ ]*\) ], [\1]))
+m4_define([gd_unprogname], regexp([$6 ], [^\([^ ]*\) ], [\1]))
 AC_PATH_PROGS([path_]gd_unprogname, [$6], [not found], [$AS_TR_CPP(gd_encoding[_SEARCHPATH])])
 
 if test "x$path_[]gd_unprogname" != "xnot found"; then
@@ -126,9 +129,9 @@ if test "x$use_[]gd_encoding" != "xno"; then
   else
     ENCODINGS_BUILT="${ENCODINGS_BUILT} gd_encoding";
     if test -z "$PRIVATE_LIBS"; then
-      PRIVATE_LIBS="[$]AS_TR_CPP(gd_encoding[_LDFLAGS])"
+      PRIVATE_LIBS="[$]AS_TR_CPP(gd_encoding[_LDFLAGS]) [$]AS_TR_CPP(gd_encoding[_LIBS])"
     else
-      PRIVATE_LIBS="$PRIVATE_LIBS [$]AS_TR_CPP(gd_encoding[_LDFLAGS])"
+      PRIVATE_LIBS="[$]AS_TR_CPP(gd_encoding[_LDFLAGS]) $PRIVATE_LIBS [$]AS_TR_CPP(gd_encoding[_LIBS])"
     fi
   fi
 else

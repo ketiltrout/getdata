@@ -345,16 +345,13 @@ AC_SUBST([DEFINE_GD_NO_C99_API])
 
 AC_HEADER_STDC
 AM_PROG_AS
-if test "x$make_cxxbindings" != "xno"; then
-  echo
-  echo "*** Checking C++ compiler characteristics"
-  echo
-  AC_PROG_CXX
-  AC_PROG_CXX_C_O
-else
-  am__fastdepCXX_TRUE=
-  am__fastdepCXX_FALSE='#'
-fi
+
+echo
+echo "*** Checking C++ compiler characteristics"
+echo
+AC_PROG_CXX
+AC_PROG_CXX_C_O
+
 if test "x$make_f77bindings" != "xno"; then
   echo
   echo "*** Checking Fortran 77 compiler characteristics"
@@ -466,7 +463,7 @@ AC_C_RESTRICT
 GD_PROG_CC_WALL
 GD_PROG_CC_WEXTRA
 
-if test "x$make_c++bindings" != "xno"; then
+if test "x$make_cxxbindings" != "xno"; then
   GD_PROG_CXX_WALL
   GD_PROG_CXX_WEXTRA
 fi
@@ -820,11 +817,94 @@ fi
 
 dnl external encodings
 GD_CHECK_ENCODING([bzip2],[bz2],[BZ2_bzReadOpen],[bzlib.h],[bzip2],[bunzip2],[])
-GD_CHECK_ENCODING([slim],[slim],[slimopen],[slimlib.h], [slim slimdata],
-                  [unslim],[slimdopen])
 GD_CHECK_ENCODING([gzip],[z],[gzopen],[zlib.h],[gzip],[gunzip],[])
 GD_CHECK_ENCODING([lzma],[lzma],[lzma_auto_decoder],[lzma.h],[xz],[],[])
+GD_CHECK_ENCODING([slim],[slim],[slimopen],[slimlib.h], [slim slimdata],
+                  [unslim],[slimdopen])
 GD_CHECK_ENCODING([zzip],[zzip],[zzip_open],[zzip/lib.h],[zip],[unzip],[])
+
+dnl zzslim hackery -- there's no easy way to check whether slim supports zzip
+AC_ARG_ENABLE(zzslim, AS_HELP_STRING([--enable-zzslim],
+              [skip probing for zzslim required features and enable the zzslim
+               encoding.  The default is to autodetect support.  Note: zzslim
+               encoding support requires both slim and zzip encoding support.]),
+              [
+               case "${enableval}" in
+                 no) zzslim_override="no" ;;
+                 *) zzslim_override="yes" ;;
+               esac
+              ], [ zzslim_override="auto" ])
+m4_divert_once([HELP_ENABLE], AS_HELP_STRING([--disable-zzslim],
+            [disable zzslim encodings support]))
+
+echo
+echo "*** Configuring zzslim support "
+echo
+if test $zzslim_override = "no"; then
+  AC_MSG_CHECKING([for zzslim support])
+  AC_MSG_RESULT([no (forced)])
+  use_zzslim=no
+else
+  AC_MSG_CHECKING([for slim support])
+  AC_MSG_RESULT([$use_slim])
+  AC_MSG_CHECKING([for zzip support])
+  AC_MSG_RESULT([$use_zzip])
+  if test "$use_slim$use_zzip" == "yesyes"; then
+    if test $zzslim_override = "yes"; then
+      AC_MSG_CHECKING([for zzslim support])
+      AC_MSG_RESULT([yes (forced)])
+      use_zzslim=yes
+    elif test "x$CXX" = "x"; then
+      AC_MSG_CHECKING([for zzslim support])
+      AC_MSG_RESULT([no (no C++ compiler available for configure test)])
+      use_zzslim=no
+    else
+      dnl try linking to the slim library to see if it contains the unprototyped
+      dnl   ibitstream::ibitstream(ZZIP_FILE *file, int buffersize)
+      dnl given that this function isn't public, this is probably easily broken
+      AC_MSG_CHECKING([whether -lslim contains zzip capability])
+      AC_LANG_PUSH([C++])
+      saved_ldflags=$LDFLAGS
+      saved_libs=$LIBS
+      LDFLAGS="$SLIM_LDFLAGS $LDFLAGS"
+      LIBS="$SLIM_LIBS $LIBS"
+      AC_LINK_IFELSE([AC_LANG_PROGRAM(
+                      [[
+                       struct zzip_file;
+                       typedef struct zzip_file ZZIP_FILE;
+                       class ibitstream {
+                       public:
+                       ibitstream(ZZIP_FILE *file, int buffersize);
+                     };
+                     ]],
+                     [[
+                      ZZIP_FILE *file;
+                      ibitstream foo(file, 0);
+                      ]]
+                     )], [slim_zzip="yes"], [slim_zzip="no"])
+      AC_MSG_RESULT([$slim_zzip])
+      LDFLAGS=$saved_ldflags
+      LIBS=$saved_libs
+      AC_LANG_POP
+
+      use_zzslim=$slim_zzip
+    fi
+  else
+    use_zzslim="no"
+  fi
+fi
+
+dnl add to summary and private lib list
+if test "x$use_zzslim" != "xno"; then
+  AC_DEFINE([USE_ZZSLIM], [], [ Define to enable zzslim support ])
+  if test "x$use_modules" != "xno"; then
+    ENCODINGS_MODS="${ENCODINGS_MODS} zzslim";
+  else
+    ENCODINGS_BUILT="${ENCODINGS_BUILT} zzslim";
+  fi
+else
+  ENCODINGS_LEFT="${ENCODINGS_LEFT} zzslim";
+fi
 
 if test ! -z "${LIBS}"; then
   PRIVATE_LIBS="${LIBS} ${PRIVATE_LIBS}"
@@ -901,7 +981,9 @@ AM_CONDITIONAL(TEST_PYTHON, [test "x$NO_DLOPEN_TESTS" = "x0"])
 AM_CONDITIONAL(TEST_IDL, [test "x$NO_DLOPEN_TESTS" = "x0"])
 AM_CONDITIONAL(TEST_PERL, [test "x$HAVE_Test__Harness" = "xyes"])
 AM_CONDITIONAL(HAVE_DIFF, [test "x$DIFF" != "x"])
+AM_CONDITIONAL(USE_ZZSLIM, [test "x$use_zzslim" = "xyes"])
 AM_CONDITIONAL(GDIDL_EXTERNAL, [false])
+
 
 dnl we do this here to avoid screwing up other tests
 LDFLAGS="${LDFLAGS}${NO_UNDEFINED}"

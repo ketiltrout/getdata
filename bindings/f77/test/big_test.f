@@ -1254,7 +1254,7 @@ C     77: GDALCO check
 C     78: GDGENC check
       CALL GDGENC(n, d, 0)
       CALL CHKEOK(ne, 78, d)
-      CALL CHKINT(ne, 78, n, GD_EN)
+      CALL CHKINT(ne, 78, n, GDE_UN)
 
 C     79: GDGEND check
       CALL GDGEND(n, d, 0)
@@ -1297,12 +1297,12 @@ C     85: GDREFE check
       CALL CHKSTR(ne, 85, str, 'new1')
 
 C     87: GDAENC check
-      CALL GDAENC(d, GD_ES, 1, 0)
+      CALL GDAENC(d, GDE_TX, 1, 0)
       CALL CHKOK2(ne, 87, 1, d)
 
       CALL GDGENC(n, d, 1)
       CALL CHKOK2(ne, 87, 2, d)
-      CALL CHKINT(ne, 87, n, GD_ES)
+      CALL CHKINT(ne, 87, n, GDE_TX)
 
 C     88: GDAEND check
       CALL GDAEND(d, GD_BE, 1, 0)

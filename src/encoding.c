@@ -32,13 +32,19 @@ static int framework_initialised = 0;
 #endif
 
 /* encoding schemas */
-#define GD_EF_NULL_SET &_GD_GenericName, NULL, NULL, NULL, NULL, NULL, \
+#define GD_EF_NULL_SET NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, \
+  NULL
+#define GD_EF_GENERIC_SET &_GD_GenericName, NULL, NULL, NULL, NULL, NULL, \
   NULL, NULL, &_GD_GenericMove, &_GD_GenericUnlink
 #ifdef USE_MODULES
-#define GD_EXT_ENCODING(sc,ex,ec,af,ff) \
+#define GD_EXT_ENCODING_NULL(sc,ex,ec,af,ff) \
 { sc,ex,ec,af,ff,GD_EF_PROVIDES,GD_EF_NULL_SET }
+#define GD_EXT_ENCODING_GEN(sc,ex,ec,af,ff) \
+{ sc,ex,ec,af,ff,GD_EF_PROVIDES,GD_EF_GENERIC_SET }
 #else
 #define GD_EXT_ENCODING(sc,ex,ec,af,ff) { sc,ex,ec,af,ff,0,GD_INT_FUNCS }
+#define GD_EXT_ENCODING_NULL GD_EXT_ENCODING
+#define GD_EXT_ENCODING_GEN GD_EXT_ENCODING
 #endif
 struct encoding_t _gd_ef[GD_N_SUBENCODINGS] = {
   { GD_UNENCODED, "", GD_EF_ECOR, NULL, "none", 0,
@@ -59,7 +65,7 @@ struct encoding_t _gd_ef[GD_N_SUBENCODINGS] = {
 #define GD_EF_PROVIDES 0
 #define GD_INT_FUNCS GD_EF_NULL_SET
 #endif
-  GD_EXT_ENCODING(GD_GZIP_ENCODED, ".gz", GD_EF_ECOR | GD_EF_OOP, "Gzip",
+  GD_EXT_ENCODING_GEN(GD_GZIP_ENCODED, ".gz", GD_EF_ECOR | GD_EF_OOP, "Gzip",
       "gzip"),
 #undef GD_INT_FUNCS
 #undef GD_EF_PROVIDES
@@ -76,7 +82,7 @@ struct encoding_t _gd_ef[GD_N_SUBENCODINGS] = {
 #define GD_INT_FUNCS GD_EF_NULL_SET
 #define GD_EF_PROVIDES 0
 #endif
-  GD_EXT_ENCODING(GD_BZIP2_ENCODED, ".bz2", GD_EF_ECOR, "Bzip2", "bzip2"),
+  GD_EXT_ENCODING_GEN(GD_BZIP2_ENCODED, ".bz2", GD_EF_ECOR, "Bzip2", "bzip2"),
 #undef GD_INT_FUNCS
 #undef GD_EF_PROVIDES
 
@@ -92,7 +98,7 @@ struct encoding_t _gd_ef[GD_N_SUBENCODINGS] = {
 #define GD_INT_FUNCS GD_EF_NULL_SET
 #define GD_EF_PROVIDES 0
 #endif
-  GD_EXT_ENCODING(GD_SLIM_ENCODED, ".slm", GD_EF_ECOR, "Slim", "slim"),
+  GD_EXT_ENCODING_GEN(GD_SLIM_ENCODED, ".slm", GD_EF_ECOR, "Slim", "slim"),
 #undef GD_INT_FUNCS
 #undef GD_EF_PROVIDES
 
@@ -108,8 +114,8 @@ struct encoding_t _gd_ef[GD_N_SUBENCODINGS] = {
 #define GD_INT_FUNCS GD_EF_NULL_SET
 #define GD_EF_PROVIDES 0
 #endif
-  GD_EXT_ENCODING(GD_LZMA_ENCODED, ".xz", GD_EF_ECOR, "Lzma", "lzma"),
-  GD_EXT_ENCODING(GD_LZMA_ENCODED, ".lzma", GD_EF_ECOR, "Lzma", "lzma"),
+  GD_EXT_ENCODING_GEN(GD_LZMA_ENCODED, ".xz", GD_EF_ECOR, "Lzma", "lzma"),
+  GD_EXT_ENCODING_GEN(GD_LZMA_ENCODED, ".lzma", GD_EF_ECOR, "Lzma", "lzma"),
 #undef GD_INT_FUNCS
 #undef GD_EF_PROVIDES
 
@@ -132,21 +138,38 @@ struct encoding_t _gd_ef[GD_N_SUBENCODINGS] = {
     GD_EF_NAME | GD_EF_OPEN | GD_EF_CLOSE | GD_EF_SEEK | GD_EF_READ | GD_EF_SIZE
 #define GD_INT_FUNCS \
   &_GD_ZzipName, &_GD_ZzipOpen, &_GD_ZzipClose, &_GD_ZzipSeek, &_GD_ZzipRead, \
-  &_GD_ZzipSize, NULL /* WRITE */, NULL /* SYNC */, &_GD_GenericMove, \
-  &_GD_GenericUnlink
+  &_GD_ZzipSize, NULL /* WRITE */, NULL /* SYNC */, NULL /* MOVE */, \
+  NULL /* UNLINK */
 #else
-#define GD_INT_FUNCS GD_EF_NULL_SET
+#define GD_INT_FUNCS NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
 #define GD_EF_PROVIDES 0
 #endif
-  GD_EXT_ENCODING(GD_ZZIP_ENCODED, NULL, GD_EF_ECOR | GD_EF_EDAT, "Zzip",
+  GD_EXT_ENCODING_NULL(GD_ZZIP_ENCODED, NULL, GD_EF_ECOR | GD_EF_EDAT, "Zzip",
       "zzip"),
 #undef GD_INT_FUNCS
 #undef GD_EF_PROVIDES
 
 
-  { GD_ENC_UNSUPPORTED, "", 0, "", "", 0,
+#ifdef USE_ZZSLIM
+#define GD_EF_PROVIDES \
+    GD_EF_NAME | GD_EF_OPEN | GD_EF_CLOSE | GD_EF_SEEK | GD_EF_READ | GD_EF_SIZE
+#define GD_INT_FUNCS \
+  &_GD_ZzslimName, &_GD_ZzslimOpen, &_GD_ZzslimClose, &_GD_ZzslimSeek, \
+  &_GD_ZzslimRead, &_GD_ZzslimSize, NULL /* WRITE */, NULL /* SYNC */, \
+  NULL /* MOVE */, NULL /* UNLINK */
+#else
+#define GD_INT_FUNCS NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
+#define GD_EF_PROVIDES 0
+#endif
+  GD_EXT_ENCODING_NULL(GD_ZZSLIM_ENCODED, NULL, GD_EF_ECOR | GD_EF_EDAT,
+      "Zzslim", "zzslim"),
+#undef GD_INT_FUNCS
+#undef GD_EF_PROVIDES
+
+
+  { GD_ENC_UNSUPPORTED, NULL, 0, "", "", 0,
     NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
-  },
+  }
 };
 
 void _GD_InitialiseFramework(void)
