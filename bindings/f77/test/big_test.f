@@ -1861,7 +1861,7 @@ C     212: GDADWD check
       l = flen
       i = flen
       CALL GDGEWD(fields(1), i, fields(2), l, m, j, dp, n, d, 'new18',
-     +6)
+     +5)
       CALL CHKOK2(ne, 212, 2, d)
       CALL CHKIN2(ne, 212, 1, i, flen)
       CALL CHKIN2(ne, 212, 2, l, flen)
@@ -1896,7 +1896,7 @@ C     217: GDALWD check
       l = flen
       i = flen
       CALL GDGEWD(fields(1), i, fields(2), l, m, j, dp, n, d, 'new18',
-     +6)
+     +5)
       CALL CHKOK2(ne, 217, 2, d)
       CALL CHKIN2(ne, 217, 1, i, flen)
       CALL CHKIN2(ne, 217, 2, l, flen)
@@ -1904,7 +1904,7 @@ C     217: GDALWD check
       CALL CHKIN2(ne, 217, 4, m, GDW_GE)
       CALL CHKST2(ne, 217, 5, fields(1), 'in3')
       CALL CHKST2(ne, 217, 6, fields(2), 'in4')
-      CALL CHKIN2(ne, 217, 7, dp, 32d3)
+      CALL CHKDB2(ne, 217, 7, dp, 32d3)
 
 C     218: GDATRG check
       l = flen
@@ -2005,7 +2005,7 @@ C     228: GDGEMX check
       CALL CHKIN2(ne, 228, 4, m, 1)
       CALL CHKST2(ne, 228, 5, fields(1), 'data')
       CALL CHKST2(ne, 228, 6, fields(2), 'sbit')
-      CALL CHKDB2(ne, 228, 7, j, 10)
+      CALL CHKIN2(ne, 228, 7, j, 10)
 
 C     229: GDADMX check
       CALL GDADMX(d, 'new21', 5, 'in1', 3, 'in2', 3, 5, 6, 0)
@@ -2013,7 +2013,7 @@ C     229: GDADMX check
 
       l = flen
       i = flen
-      CALL GDGEMX(fields(1), i, fields(2), l, m, j, n, d, 'new21', 6)
+      CALL GDGEMX(fields(1), i, fields(2), l, m, j, n, d, 'new21', 5)
       CALL CHKOK2(ne, 229, 2, d)
       CALL CHKIN2(ne, 229, 1, i, flen)
       CALL CHKIN2(ne, 229, 2, l, flen)
@@ -2046,7 +2046,7 @@ C     231: GDALMX check
 
       l = flen
       i = flen
-      CALL GDGEMX(fields(1), i, fields(2), l, m, j, n, d, 'new21', 6)
+      CALL GDGEMX(fields(1), i, fields(2), l, m, j, n, d, 'new21', 5)
       CALL CHKOK2(ne, 231, 2, d)
       CALL CHKIN2(ne, 231, 1, i, flen)
       CALL CHKIN2(ne, 231, 2, l, flen)
