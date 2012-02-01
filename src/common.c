@@ -146,7 +146,7 @@ gd_entry_t *_GD_FindField(const DIRFILE *restrict D,
 
       if (E && E->field_type == GD_ALIAS_ENTRY && E->e->entry[0]) {
         size_t plen = strlen(E->e->entry[0]->field);
-        new_code = malloc(plen + strlen(ptr));
+        new_code = malloc(plen + strlen(ptr) + 2);
         if (new_code) {
           strcpy(new_code, E->e->entry[0]->field);
           new_code[plen] = '/';
@@ -951,7 +951,7 @@ const char *_GD_DirName(const DIRFILE *D, int dirfd)
 #endif
 
   /* we only get here in the early stages of opening a dirfile */
-  dreturn("%p", D->name);
+  dreturn("\"%s\"", D->name);
   return D->name;
 }
 
@@ -960,20 +960,23 @@ const char *_GD_DirName(const DIRFILE *D, int dirfd)
  * path (car) has already been canonicalised */
 char *_GD_CanonicalPath(const char *car, const char *cdr)
 {
-  int last_element = 0, loop_count = 0;
-  size_t res_len, res_size, len;
+  int last_element = 0;
+#if defined HAVE_READLINK && defined HAVE_LSTAT64
+  int loop_count = 0;
+#endif
+  size_t res_len, res_root, res_size, len;
   char *res = NULL, *ptr, *work, *cur, *end;
   dtrace("\"%s\", \"%s\"", car, cdr);
 
   if (car && !_GD_AbsPath(cdr)) {
-    if (car[0] != '/') {
+    if (!_GD_AbsPath(car)) {
       /* car is not abosulte -- don't bother trying to do anything fancy */
       res = malloc(strlen(car) + strlen(cdr) + 2);
       if (res == NULL) {
         dreturn("%p", NULL);
         return NULL;
       }
-      sprintf(res, "%s/%s", car, cdr);
+      sprintf(res, "%s%c%s", car, GD_DIRSEP, cdr);
       dreturn("%s", res);
       return res;
     }
@@ -985,6 +988,7 @@ char *_GD_CanonicalPath(const char *car, const char *cdr)
       return NULL;
     }
     res_size = (res_len = strlen(car)) + 1;
+    res_root = _GD_RootLen(res);
 
     cur = work = strdup(cdr);
     if (work == NULL) {
@@ -992,24 +996,23 @@ char *_GD_CanonicalPath(const char *car, const char *cdr)
       dreturn("%p", NULL);
       return NULL;
     }
-  } else if (cdr[0] == '/') {
+  } else if (_GD_AbsPath(cdr)) {
     /* cdr is absolute: make res "/" and copy cdr relative to / into work;
      * ignore car */
-    res_len = 1;
     res = (char*)malloc(res_size = PATH_MAX);
     if (res == NULL) {
       dreturn("%p", NULL);
       return NULL;
     }
-    res[0] = '/';
-    res[1] = '\0';
+    _GD_Root(res, cdr, res_root);
+    res_len = res_root;
 
-    if (cdr[0] == '/' && cdr[1] == '\0') {
+    if (cdr[res_len] == '\0') {
       dreturn("\"%s\"", res);
       return res;
     }
 
-    cur = work = strdup(cdr + 1);
+    cur = work = strdup(cdr + res_len);
     if (work == NULL) {
       free(res);
       dreturn("%p", NULL);
@@ -1039,7 +1042,7 @@ char *_GD_CanonicalPath(const char *car, const char *cdr)
         return NULL;
       }
       res[0] = '\0';
-      res_len = 0;
+      res_root = res_len = 0;
     } else {
       if ((len = strlen(work) + 2 + strlen(cdr)) < PATH_MAX) {
         ptr = (char*)realloc(work, len);
@@ -1052,17 +1055,16 @@ char *_GD_CanonicalPath(const char *car, const char *cdr)
         work = ptr;
       }
       ptr = work + strlen(work);
-      *(ptr++) = '/';
+      *(ptr++) = GD_DIRSEP;
       strcpy(ptr, cdr);
 
-      if (work[0] == '/') {
-        res[0] = '/';
-        res[1] = '\0';
-        res_len = 1;
-        cur = work + 1;
+      if (_GD_AbsPath(work)) {
+        _GD_Root(res, work, res_root);
+        res_len = res_root;
+        cur = work + res_len;
       } else {
         res[0] = '\0';
-        res_len = 0;
+        res_root = res_len = 0;
         cur = work;
       }
     }
@@ -1070,8 +1072,8 @@ char *_GD_CanonicalPath(const char *car, const char *cdr)
 
   /* now step through work, building up res as appropriate */
   for (end = cur ; !last_element; cur = end) {
-    /* look for the next '/' or NUL */
-    for (; *end != '\0' && *end != '/'; ++end)
+    /* look for the next GD_DIRSEP or NUL */
+    for (; *end != '\0' && *end != GD_DIRSEP; ++end)
       ;
 
     /* end of string */
@@ -1089,10 +1091,11 @@ char *_GD_CanonicalPath(const char *car, const char *cdr)
       /* discard . */
       continue;
     } else if (cur[0] == '.' && cur[1] == '.' && cur[2] == '\0') {
-      /* don't strip the leading '/' */
-      if (res_len > 1) {
-        /* find the last '/', but don't strip the leading '/' */
-        for(ptr = res + res_len - 1; *ptr != '/' && ptr > res + 1; --ptr)
+      /* don't strip the leading GD_DIRSEP */
+      if (res_len > res_root) {
+        /* find the last GD_DIRSEP, but don't strip the leading GD_DIRSEP */
+        for(ptr = res + res_len - 1; *ptr != GD_DIRSEP && ptr > res + res_root;
+            --ptr)
           ;
 
         /* strip the .. if possible, otherwise append it */
@@ -1112,8 +1115,8 @@ char *_GD_CanonicalPath(const char *car, const char *cdr)
         }
         res = ptr;
       }
-      if (res_len > 1 && res[res_len - 1] != '/')
-        res[res_len++] = '/';
+      if (res_len > 1 && res[res_len - 1] != GD_DIRSEP)
+        res[res_len++] = GD_DIRSEP;
       strcpy(res + res_len, cur);
       res_len += len - 1;
 #if defined HAVE_READLINK && defined HAVE_LSTAT64
@@ -1139,7 +1142,7 @@ char *_GD_CanonicalPath(const char *car, const char *cdr)
                 }
                 res = ptr;
               }
-              res[res_len++] = '/';
+              res[res_len++] = GD_DIRSEP;
               strcpy(res + res_len, end);
               res_len += len - 1;
             }
@@ -1176,14 +1179,14 @@ char *_GD_CanonicalPath(const char *car, const char *cdr)
 
           /* now we have to start all over again */
           ptr = target;
-          if (target[0] == '/') {
-            res[1] = '\0';
-            res_len = 1;
-            ptr++;
-            slen--;
+          if (_GD_AbsPath(target)) {
+            _GD_Root(res, target[0]);
+            res_len = GD_ABSPATH_LEN;
+            ptr += GD_ABSPATH_LEN;
+            slen -= GD_ABSPATH_LEN;
           } else if (res_len > 1) {
             /* strip the symlink name from res */
-            for (ptr = res + res_len - 1; *ptr != '/'; --ptr)
+            for (ptr = res + res_len - 1; *ptr != GD_DIRSEP; --ptr)
               ;
             *(ptr + 1) = '\0';
             res_len = res - ptr + 1;
@@ -1200,10 +1203,10 @@ char *_GD_CanonicalPath(const char *car, const char *cdr)
               return NULL;
             }
           } else {
-            char slash[2] = "/";
+            char slash[2] = { GD_DIRSEP, 0 };
             len = strlen(end) + slen + 2;
 
-            if (*(ptr + slen - 1) == '/') {
+            if (*(ptr + slen - 1) == GD_DIRSEP) {
               slash[0] = '\0';
               len--;
             }
@@ -1225,7 +1228,9 @@ char *_GD_CanonicalPath(const char *car, const char *cdr)
     }
   }
 
+#if defined HAVE_READLINK && defined HAVE_LSTAT64
 _GD_CanonicalPath_DONE:
+#endif
   free(work);
 
   /* trim */
@@ -1262,7 +1267,7 @@ char *_GD_MakeFullPath(DIRFILE *D, int dirfd, const char *name, int seterr)
       if (dir) {
         filepath = (char*)_GD_Malloc(D, strlen(dir) + strlen(name) + 2);
         if (filepath)
-          sprintf(filepath, "%s/%s", dir, name);
+          sprintf(filepath, "%s%c%s", dir, GD_DIRSEP, name);
       } else 
         filepath = _GD_Strdup(D, name);
     }
@@ -1292,7 +1297,6 @@ int _GD_GrabDir(DIRFILE *D, int dirfd, const char *name)
   unsigned int i;
   char *path, *dir = NULL;
   void *ptr;
-  int abs = _GD_AbsPath(name);
 
   dtrace("%p, %i, \"%s\"", D, dirfd, name);
 
@@ -1336,7 +1340,7 @@ int _GD_GrabDir(DIRFILE *D, int dirfd, const char *name)
   D->dir[D->ndir].fd = D->ndir;
   free(path);
 #else
-  if (abs) {
+  if (_GD_AbsPath(name)) {
     D->dir[D->ndir].fd = open(dir, O_RDONLY);
   } else {
     free(path);

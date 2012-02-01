@@ -32,6 +32,7 @@
 #include <unistd.h>
 #include <iostream>
 #include <math.h>
+#include <stdio.h>
 
 #if MKDIR_NO_MODE
 #ifdef HAVE__MKDIR
@@ -97,8 +98,8 @@ using namespace GetData;
     ne++; cerr << "s(" << i << ")[" << t << "] = \"" << (v) << "\"" << endl; }
 
 #define CHECK_EOSTRING(t,v,g) \
-  if (strcmp((v) + strlen(v) - sizeof(g) + 1, (g))) { ne++; cerr << "s[" << t << "] = \"" << (v) << "\"" \
-    << endl; }
+  if (strcmp((v) + strlen(v) - strlen(g), (g))) { ne++; cerr << "s[" << t << "] = \"" << (v) << \
+    "\", expected ...\"" << g << "\"" << endl; }
 
 #define CHECK_COMPLEX2(t,m,v,g) \
   if (abs((v) - (g)) > 1e-10) { \
@@ -605,7 +606,8 @@ int main(void)
   // 39: Fragment check
   frag = d->Fragment(0);
   CHECK_OK(39);
-  CHECK_EOSTRING(39,frag->Name(), "dirfile/format");
+  sprintf(buf, "dirfile%cformat", GD_DIRSEP);
+  CHECK_EOSTRING(39,frag->Name(), buf);
   delete frag;
 
   // 40: Dirfile::NFragments check
@@ -993,7 +995,8 @@ int main(void)
   // 84: RawEntry::FileName check
   str = rep->FileName();
   CHECK_OK(84);
-  CHECK_EOSTRING(84,str, "dirfile/new1");
+  sprintf(buf, "dirfile%cnew1", GD_DIRSEP);
+  CHECK_EOSTRING(84,str, buf);
   delete rep;
 
   // 85: Dirfile::Reference check
@@ -1005,7 +1008,7 @@ int main(void)
   // 135: Dirfile::ReferenceFilename check
   str = d->ReferenceFilename();
   CHECK_OK(135);
-  CHECK_EOSTRING(135,str, "dirfile/new1");
+  CHECK_EOSTRING(135,str, buf);
   
   // 87: Fragment::SetEncoding check
   frag->SetEncoding(SlimEncoding,0);

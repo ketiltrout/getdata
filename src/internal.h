@@ -558,11 +558,40 @@ ssize_t getdelim(char**, size_t*, int, FILE*);
      ((uint64_t)(x)  >> 56)))
 #endif
 
-/* returns true if s is an absolute path */
+/* path malarkey */
 #if defined _WIN32 || defined _WIN64
-# define _GD_AbsPath(s)  ((s)[0] != '\0' && (s)[1] == ':')
+# define _GD_AbsPath(s)  ((s)[0] == '/' || (s)[0] == GD_DIRSEP || \
+                                  ((s)[0] != '\0' && (s)[1] == ':'))
+# define _GD_Root(s,d,l) \
+  do { \
+    if ((d)[0] == '/' || (d)[0] == GD_DIRSEP) { \
+      (s)[0] = (d)[0]; \
+      l = 1; \
+      if ((d)[1] == '/' || (d)[1] == GD_DIRSEP) { \
+        (s)[1] = (d)[1]; \
+        l = 2; \
+      } \
+    } else { \
+      (s)[0] = (d)[0]; \
+      (s)[1] = ':'; \
+      (s)[2] = '\\'; \
+      (s)[3] = '\0'; \
+      l = 3; \
+    } \
+  } while (0)
+# define _GD_RootLen(d) ( \
+    ((d)[0] == '/' || (d)[0] == GD_DIRSEP) ? \
+    ((d)[1] == '/' || (d)[1] == GD_DIRSEP) ? 2 : 1 : 3 \
+    )
 #else
 # define _GD_AbsPath(s)  ((s)[0] == '/')
+# define _GD_Root(s,d,l) \
+  do { \
+    (s)[0] = '/'; \
+    (s)[1] = '\0'; \
+    l = 1; \
+  } while (0)
+# define _GD_RootLen(d) 1
 #endif
 
 /* maximum number of recursions */
@@ -984,7 +1013,7 @@ off64_t _GD_GetFilePos(DIRFILE *restrict, gd_entry_t *restrict, off64_t);
 char *_GD_GetLine(FILE *restrict, size_t *restrict, int *restrict);
 int _GD_GetRepr(DIRFILE *restrict, const char *restrict,
     char **restrict, int);
-gd_spf_t _GD_GetSPF(DIRFILE*, const gd_entry_t*);
+gd_spf_t _GD_GetSPF(DIRFILE*, gd_entry_t*);
 int _GD_GrabDir(DIRFILE*, int, const char *restrict);
 int _GD_Include(DIRFILE*, const char *restrict, const char *restrict, int,
     char **restrict, int, const char *restrict, const char *restrict,

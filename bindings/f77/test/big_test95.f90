@@ -188,6 +188,7 @@ end subroutine
 
 program big_test
   use getdata
+  include "test_getdata.f"
   character (len=*), parameter :: fildir = 'test95_dirfile'
   character (len=*), parameter :: frmat = 'test95_dirfile/format'
   character (len=*), parameter :: frm2 = 'test95_dirfile/form2'
@@ -892,7 +893,7 @@ program big_test
 ! 39: fgd_fragmentname check
   str = fgd_fragmentname(d, 0)
   call check_ok(ne, 39, d)
-  call check_eos(ne, 39, str, 'test95_dirfile/format')
+  call check_eos(ne, 39, str, 'test95_dirfile'//DIRSEP//'format')
 
 ! 40: fgd_nfragments check
   n = fgd_nfragments(d)
@@ -1482,7 +1483,7 @@ program big_test
 ! 84: fgd_raw_filename check
   str = fgd_raw_filename(d, "data")
   call check_ok(ne, 84, d)
-  call check_eos(ne, 84, str, 'test95_dirfile/data')
+  call check_eos(ne, 84, str, 'test95_dirfile'//DIRSEP//'data')
 
 ! 85: fgd_reference check
   str = fgd_reference(d, "new1")

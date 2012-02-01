@@ -40,6 +40,8 @@ if MAKE_F95BINDINGS
 F95TESTS=big_test95
 endif
 
+BUILT_SOUCES = test_getdata.f
+
 FFLAGS += -I.. $(F77_WALL) $(F77_WEXTRA) $(F77_ASSUME)
 FCFLAGS += -I.. $(F77_WALL) $(FC_WEXTRA) $(FC_ASSUME)
 F95LDADD=../libf95getdata.la $(F77LDADD)

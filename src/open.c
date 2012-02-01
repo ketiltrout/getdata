@@ -57,7 +57,7 @@ static FILE *_GD_CreateDirfile(DIRFILE *restrict D, int dirfd, int dir_error,
   /* unable to read the format file */
   if (format_error == EACCES || dir_error == EACCES) {
     char *format_file = (char *)malloc(strlen(dirfile) + 8);
-    strcat(strcpy(format_file, dirfile), "/format");
+    sprintf(format_file, "%s%cformat", dirfile, GD_DIRSEP);
     _GD_SetError(D, GD_E_OPEN, GD_E_OPEN_NO_ACCESS, format_file, 0, NULL);
     free(dirfile);
     free(format_file);
@@ -289,7 +289,7 @@ DIRFILE* gd_cbopen(const char* filedir, unsigned long flags,
   gd_stat64_t statbuf;
 #endif
 
-  dtrace("\"%s\", 0x%lx, %p, %p", filedir, (unsigned long)flags, sehandler,
+  dtrace("\"%s\", 0x%lX, %p, %p", filedir, (unsigned long)flags, sehandler,
       extra);
 
 #ifdef GD_NO_DIR_OPEN
@@ -337,17 +337,11 @@ DIRFILE* gd_cbopen(const char* filedir, unsigned long flags,
   if (flags & GD_PERMISSIVE && flags & GD_PEDANTIC)
     flags &= ~GD_PERMISSIVE;
 
-  D->name = strdup(filedir);
+  D->name = dirfile; /* temporarily store canonicalised path here */
   D->flags = (flags | GD_INVALID) & ~GD_IGNORE_REFS;
   D->sehandler = sehandler;
   D->sehandler_extra = extra;
   D->standards = GD_DIRFILE_STANDARDS_VERSION;
-
-  if (D->name == NULL || dirfile == NULL) {
-    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
-    dreturn("%p", D);
-    return D;
-  }
 
   /* Add the INDEX entry */
   D->n_entries = 1;
@@ -389,6 +383,16 @@ DIRFILE* gd_cbopen(const char* filedir, unsigned long flags,
 #endif
     dreturn("%p", D);
     return D; /* errors have already been set */
+  }
+
+  /* remember back when we temporarily stored the canonicalised path here?
+   * We're over that.  Remember the dirfile's name.  */
+  D->name = strdup(filedir);
+
+  if (D->name == NULL) {
+    _GD_SetError(D, GD_E_ALLOC, 0, NULL, 0, NULL);
+    dreturn("%p", D);
+    return D;
   }
 
   /* Parse the file.  This will take care of any necessary inclusions */
@@ -484,7 +488,7 @@ DIRFILE* gd_open(const char* filedir, unsigned long flags)
 {
   DIRFILE *D;
 
-  dtrace("\"%s\", 0x%lx", filedir, (unsigned long)flags);
+  dtrace("\"%s\", 0x%lX", filedir, (unsigned long)flags);
 
   D = gd_cbopen(filedir, flags, NULL, NULL);
 

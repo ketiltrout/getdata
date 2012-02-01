@@ -322,6 +322,17 @@ case "${host}" in
 esac
 AC_MSG_RESULT([$gd_unaligned_ok])
 
+AC_MSG_CHECKING([the directory separator])
+case "${host}" in
+  *-*-djgpp|*-*-mingw32) GD_FDIRSEP=\\; GD_DIRSEP=\\\\ ;;
+  *) GD_FDIRSEP=/; GD_DIRSEP=/ ;;
+esac
+AC_SUBST([GD_FDIRSEP])
+AC_SUBST([GD_DIRSEP])
+AC_DEFINE_UNQUOTED([GD_DIRSEP], ['$GD_DIRSEP'],
+                   [ The separator between directory elements ])
+AC_MSG_RESULT([$GD_FDIRSEP])
+
 echo
 echo "*** Checking C compiler characteristics"
 echo
@@ -934,6 +945,7 @@ AC_CONFIG_FILES([bindings/cxx/Makefile])
 AC_CONFIG_FILES([bindings/cxx/test/Makefile])
 AC_CONFIG_FILES([bindings/f77/Makefile])
 AC_CONFIG_FILES([bindings/f77/test/Makefile])
+AC_CONFIG_FILES([bindings/f77/test/test_getdata.f])
 AC_CONFIG_FILES([bindings/idl/Makefile])
 AC_CONFIG_FILES([bindings/idl/makedlm.sh])
 AC_CONFIG_FILES([bindings/idl/test/Makefile])

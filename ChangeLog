@@ -1,3 +1,21 @@
+2012-02-01   D. V. Wiebe <getdata@ketiltrout.net> svn:652
+	* configure.ac: Figure out the directory separator (ie. '/' on POSIX).
+	
+	* src/open.c (_GD_CreateDirfile): Handle DIRSEP.
+	* src/internal.h (_GD_Root): Added.
+	* src/common.c (_GD_CanonicalPath): Handle WIN32/DOS paths.
+
+	* src/open.c (gd_cbopen): Temporarily store the full path in D->name so that
+	_GD_CreateDirfile can use it when needed.
+
+	* src/spf.c (_GD_GetSPF): De const-ify E.
+
+	* src/common.c (_GD_FindField): Fix buffer length calculation.
+
+	* test/file.c test/fragment_name.c bindings/cxx/test/big_test.cpp
+	bindings/f77/test/big_test.f bindings/f77/test/big_test95.f90: Handle DIRSEP.
+	* bindings/f77/test/test_getdata.f.in: Added.
+
 2012-01-18   D. V. Wiebe <getdata@ketiltrout.net> svn:650
 	* src/getdata.h.in src/internal.h: Define GD_ENC_ZZSLIM GD_ZZSLIM_ENCODED.
 	* src/zzslim.c: Added.

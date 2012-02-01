@@ -169,6 +169,7 @@ C     Check functions
 
       PROGRAM BIGTST
       INCLUDE "getdata.f"
+      INCLUDE "test_getdata.f"
 
       CHARACTER*12 fildir
       PARAMETER (fildir = 'test_dirfile')
@@ -725,7 +726,7 @@ C     39: GDFRGN check
 
       CALL CHKEOK(ne, 39, d)
       CALL CHKINT(ne, 39, l, plen)
-      CALL CHKEOS(ne, 39, path, 'test_dirfile/format')
+      CALL CHKEOS(ne, 39, path, 'test_dirfile'//DIRSEP//'format')
 
 C     40: GDNFRG check
       CALL GDNFRG(n, d)
@@ -1287,7 +1288,7 @@ C     84: GDRWFN check
       CALL GDRWFN(path, l, d, "data", 4)
       CALL CHKEOK(ne, 84, d)
       CALL CHKINT(ne, 84, l, plen)
-      CALL CHKEOS(ne, 84, path, 'test_dirfile/data')
+      CALL CHKEOS(ne, 84, path, 'test_dirfile'//DIRSEP//'data')
 
 C     85: GDREFE check
       l = slen

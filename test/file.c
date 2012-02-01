@@ -67,7 +67,11 @@ int main(void)
   /* This only checks whether the end of the returned path is what we expect.
    * This should work, since we can guarantee that both "dirfile" and "data"
    * aren't symlinks. */
+#if GD_DIRSEP == '/'
   CHECKEOS(path,"dirfile/data");
+#else
+  CHECKEOS(path,"dirfile\\data");
+#endif
   free(path);
 
   return r;
