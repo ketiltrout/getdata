@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 C. Barth Netterfield
- * Copyright (C) 2005-2011 D. V. Wiebe
+ * Copyright (C) 2005-2012 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -1180,11 +1180,11 @@ char *_GD_CanonicalPath(const char *car, const char *cdr)
           /* now we have to start all over again */
           ptr = target;
           if (_GD_AbsPath(target)) {
-            _GD_Root(res, target[0]);
-            res_len = GD_ABSPATH_LEN;
-            ptr += GD_ABSPATH_LEN;
-            slen -= GD_ABSPATH_LEN;
-          } else if (res_len > 1) {
+            _GD_Root(res, target, res_root);
+            res_len = res_root;
+            ptr += res_root;
+            slen -= res_root;
+          } else if (res_len > res_root) {
             /* strip the symlink name from res */
             for (ptr = res + res_len - 1; *ptr != GD_DIRSEP; --ptr)
               ;

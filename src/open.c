@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 C. Barth Netterfield
- * Copyright (C) 2005-2011 D. V. Wiebe
+ * Copyright (C) 2005-2012 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -381,6 +381,7 @@ DIRFILE* gd_cbopen(const char* filedir, unsigned long flags,
 #ifndef GD_NO_DIR_OPEN
     close(dirfd);
 #endif
+    D->name = NULL; /* so a subsequent gd_discard() doesn't go awry. */
     dreturn("%p", D);
     return D; /* errors have already been set */
   }

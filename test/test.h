@@ -34,7 +34,7 @@ int gd_system(const char* command)
 #ifdef _MSC_VER
 #define rmdirfile() system("rmdir /q/s dirfile");
 #else
-#define rmdirfile() system("rm -rf dirfile");
+#define rmdirfile() chmod("dirfile", 0755); system("rm -rf dirfile");
 #endif
 
 /* path munging for WIN32/64 */
