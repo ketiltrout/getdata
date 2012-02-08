@@ -1129,7 +1129,6 @@ char *_GD_CanonicalPath(const char *car, const char *cdr)
             /* the thing doesn't exist.  I guess that means we're done;
              * copy the rest of the work buffer onto the resul and call it a
              * day. */
-            dwatch("%s", res);
             if (*end) {
               len = strlen(end) + 1;
               if (res_len + len >= res_size) {
