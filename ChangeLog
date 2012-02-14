@@ -1,3 +1,6 @@
+2012-02-14   D. V. Wiebe <getdata@ketiltrout.net> svn:654
+	* src/putdata.c (gd_putdata): Return early if num_samp == 0.
+
 2012-02-01   D. V. Wiebe <getdata@ketiltrout.net> svn:652
 	* configure.ac: Figure out the directory separator (ie. '/' on POSIX).
 	

@@ -843,6 +843,12 @@ size_t gd_putdata64(DIRFILE* D, const char *field_code_in, off64_t first_frame,
     return 0;
   }
 
+  /* the easy case */
+  if (num_samp == 0) {
+    dreturn("%u", 0);
+    return 0;
+  }
+ 
   n_wrote = _GD_DoFieldOut(D, entry, repr, first_samp, num_samp, data_type,
       data_in);
 

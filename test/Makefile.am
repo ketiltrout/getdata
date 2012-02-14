@@ -304,7 +304,7 @@ PUT_TESTS=${PUT64} put_bad_code put_bit put_bof put_carray put_carray_slice \
 					put_polynom2 put_polynom_noin put_protect put_rdonly put_recip \
 					put_recurse put_repr put_rofs put_sbit put_sf put_ss put_string \
 					put_string_protect put_type put_uint16 put_uint32 put_uint64 \
-					put_window
+					put_window put_zero
 
 REF_TESTS=ref ref_none ref_two
 
