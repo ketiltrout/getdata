@@ -972,7 +972,7 @@ static size_t _GD_DoLincom(DIRFILE *restrict D, gd_entry_t *restrict E,
       return 0;
     }
 
-    spf[i] = _GD_GetSPF(D, E->e->entry[0]);
+    spf[i] = _GD_GetSPF(D, E->e->entry[i]);
     if (D->error != GD_E_OK) {
       dreturn("%i", 0);
       return 0;

@@ -29,7 +29,7 @@ static FILE *_GD_CreateDirfile(DIRFILE *restrict D, int dirfd, int dir_error,
   DIR* dir;
   struct dirent* lamb;
   int fd = -1;
-  int format_error = 0;
+  int format_error = 0, format_trunc = 0;
   FILE* fp = NULL;
 
   dtrace("%p, %i, %i, \"%s\"", D, dirfd, dir_error, dirfile);
@@ -154,7 +154,10 @@ static FILE *_GD_CreateDirfile(DIRFILE *restrict D, int dirfd, int dir_error,
 #endif
           )
       {
-        if (gd_UnlinkAt(D, dirfd, lamb->d_name, 0)) {
+        /* don't delete the format file; we'll truncate it later */
+        if (strcmp(lamb->d_name, "format") == 0) {
+          format_trunc = 1;
+        } else if (gd_UnlinkAt(D, dirfd, lamb->d_name, 0)) {
           char *name = (char *)malloc(strlen(dirfile) + strlen(lamb->d_name)
               + 2);
           strcat(strcat(strcpy(name, dirfile), "/"), lamb->d_name);
@@ -205,9 +208,9 @@ static FILE *_GD_CreateDirfile(DIRFILE *restrict D, int dirfd, int dir_error,
 #endif
     }
 
-    /* create a new, empty format file */
-    if ((fd = gd_OpenAt(D, dirfd, "format", O_CREAT | O_EXCL | O_BINARY, 0666))
-        < 0)
+    /* create a new, empty format file, or else truncate it */
+    if ((fd = gd_OpenAt(D, dirfd, "format", O_RDWR | O_CREAT | O_BINARY |
+            (format_trunc ? O_TRUNC : O_EXCL), 0666)) < 0)
     {
       char *format_file = (char *)malloc(strlen(dirfile) + 8);
       strcat(strcpy(format_file, dirfile), "/format");

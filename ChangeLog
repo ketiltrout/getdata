@@ -1,5 +1,14 @@
-2012-02-14   D. V. Wiebe <getdata@ketiltrout.net> svn:654
+2012-02-16   D. V. Wiebe <getdata@ketiltrout.net> svn:658
+	* src/getdata.c (_GD_DoLincom): Get the correct SPFs.
+	* test/get_lincom_spf.c: Added.
+
+	* src/open.c (_GD_CreateDirfile): When truncating, don't delete and then
+	recreate the format file; just truncate it.  (This helps kst not get
+	confused when monitoring a dirfile which gets truncated.)
+
+2012-02-14   D. V. Wiebe <getdata@ketiltrout.net> svn:656,657
 	* src/putdata.c (gd_putdata): Return early if num_samp == 0.
+	* test/put_zero.c: Added.
 
 2012-02-01   D. V. Wiebe <getdata@ketiltrout.net> svn:652
 	* configure.ac: Figure out the directory separator (ie. '/' on POSIX).
