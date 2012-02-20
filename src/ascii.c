@@ -44,7 +44,7 @@ int _GD_AsciiOpen(int fd, struct _gd_raw_file* file, int swap __gd_unused,
   } else
     file->idata = fd;
 
-  file->edata = fdopen(file->idata, (mode & GD_FILE_WRITE) ? "r+" : "r");
+  file->edata = fdopen(file->idata, (mode & GD_FILE_WRITE) ? "rb+" : "rb");
 
   if (file->edata == NULL) {
     close(file->idata);
@@ -375,7 +375,7 @@ off64_t _GD_AsciiSize(int dirfd, struct _gd_raw_file* file,
     return -1;
   }
 
-  stream = fdopen(fd, "r");
+  stream = fdopen(fd, "rb");
 
   if (stream == NULL) {
     dreturn("%i", -1);

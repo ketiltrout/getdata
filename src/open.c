@@ -227,7 +227,7 @@ static FILE *_GD_CreateDirfile(DIRFILE *restrict D, int dirfd, int dir_error,
   }
 
   /* associate a stream with the format file */
-  if ((fp = fdopen(fd, "r")) == NULL) {
+  if ((fp = fdopen(fd, "rb")) == NULL) {
     char *format_file = (char *)malloc(strlen(dirfile) + 8);
     strcat(strcpy(format_file, dirfile), "/format");
     _GD_SetError(D, GD_E_CREAT, GD_E_CREAT_FORMAT, format_file, errno, NULL);

@@ -48,7 +48,7 @@ static int _GD_SampIndDoOpen(int fdin, struct _gd_raw_file *file,
   } else
     fd = fdin;
 
-  stream = fdopen(fd, (mode & GD_FILE_WRITE) ? "r+" : "r");
+  stream = fdopen(fd, (mode & GD_FILE_WRITE) ? "rb+" : "rb");
 
   if (stream == NULL) {
     close(fd);

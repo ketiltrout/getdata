@@ -511,14 +511,14 @@ static size_t _GD_DoPolynomOut(DIRFILE *restrict D, gd_entry_t *restrict E,
 #define MPLEX(t) \
   for (i = 0; i < n; i++) \
     if (B[i] == val) \
-      ((t*)A)[i] = ((t*)C)[i];
+      ((t*)A)[i] = ((t*)C)[i * spfB / spfA];
 
 #define MPLEXC(t) \
   do { \
     for (i = 0; i < n; i++) \
       if (B[i] == val) { \
-        ((t*)A)[i * 2] = ((t*)C)[i * 2]; \
-        ((t*)A)[i * 2 + 1] = ((t*)C)[i * 2 + 1]; \
+        ((t*)A)[i * 2] = ((t*)C)[i * spfB / spfA]; \
+        ((t*)A)[i * 2 + 1] = ((t*)C)[i * spfB / spfA + 1]; \
       } \
   } while (0)
 

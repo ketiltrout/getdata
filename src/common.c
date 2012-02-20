@@ -277,7 +277,7 @@ void _GD_ReadLinterpFile(DIRFILE *restrict D, gd_entry_t *restrict E)
     return;
   }
 
-  fp = fdopen(fd, "r");
+  fp = fdopen(fd, "rb");
   if (fp == NULL) {
     _GD_SetError(D, GD_E_OPEN_LINFILE, GD_E_LINFILE_OPEN, NULL, 0,
         E->EN(linterp,table));

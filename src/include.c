@@ -176,7 +176,7 @@ int _GD_Include(DIRFILE *D, const char *ename, const char *format_file,
     return -1;
   }
 
-  new_fp = fdopen(i, ((D->flags & GD_ACCMODE) == GD_RDWR) ? "r+" : "r");
+  new_fp = fdopen(i, ((D->flags & GD_ACCMODE) == GD_RDWR) ? "rb+" : "rb");
 
   /* If opening the file failed, set the error code and abort parsing. */
   if (new_fp == NULL) {

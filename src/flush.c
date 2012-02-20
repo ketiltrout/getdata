@@ -593,7 +593,7 @@ static void _GD_FlushFragment(DIRFILE* D, int i, int permissive)
     dreturnvoid();
     return;
   }
-  stream = fdopen(fd, "w+");
+  stream = fdopen(fd, "wb+");
   if (stream == NULL) {
     _GD_SetError(D, GD_E_FLUSH, GD_E_FLUSH_OPEN, NULL, errno, temp_file);
     dreturnvoid();

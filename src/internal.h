@@ -303,9 +303,6 @@ const char* gd_colsub(void);
 #endif
 #ifndef O_TEXT
 #define O_TEXT 0
-#define FOPEN_TEXT
-#else
-#define FOPEN_TEXT "t"
 #endif
 
 /* The Microsoft CRT appears to treat %hh as %h */
