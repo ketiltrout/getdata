@@ -515,3 +515,8 @@ int Dirfile::UnHide(const char* field_code) const
 {
   return gd_unhide(D, field_code);
 }
+
+char *Dirfile::Tokenise(const char *string)
+{
+  return gd_tokenise(D, string);
+}

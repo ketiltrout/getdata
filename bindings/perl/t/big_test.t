@@ -1,10 +1,10 @@
 #!/usr/bin/perl -w
 # Copyright (C) 2011-2012 D. V. Wiebe
-# 
+#
 ##########################################################################
-# 
+#
 # This file is part of the GetData project.
-# 
+#
 # GetData is free software; you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the
 # Free Software Foundation; either version 2.1 of the License, or (at your
@@ -22,7 +22,7 @@
 use GetData;
 use Math::Complex;
 use strict;
-use Test::More tests => 1260;
+use Test::More tests => 1265;
 
 my $ne = 0;
 my ($s, @a, %h);
@@ -461,7 +461,7 @@ CheckNum2(30, 11, $h{'n_fields'}, 2);
 CheckSArray2(30, 12, $h{'scalar'}, undef, undef, undef, undef, undef);
 CheckArray2(30, 13, $h{'scalar_ind'}, undef, undef, undef, undef, undef);
 
-# 31: add_polynom 
+# 31: add_polynom
 $s = $_->add_polynom("new4", 3, "in1", [ 3.9, 4.8, 5.7, 6.6 ], 0);
 CheckOK2(31, 1);
 CheckNum2(31, 2, $s, 0);
@@ -650,7 +650,7 @@ CheckNum2(47, 11, $h{'n_fields'}, 2);
 CheckSArray2(47, 12, $h{'scalar'}, undef, undef, undef, undef, undef);
 CheckArray2(47, 13, $h{'scalar_ind'}, undef, undef, undef, undef, undef);
 
-# 48: madd_polynom 
+# 48: madd_polynom
 $s = $_->madd_polynom("data", "mnew3", 3, "in1", [ 3.9, 4.8, 5.7, 6.6 ]);
 CheckOK2(48, 1);
 CheckNum2(48, 2, $s, 0);
@@ -760,7 +760,7 @@ $s = $_->madd({
     field_type     => $GetData::PHASE_ENTRY,
     fragment_index => 0,
     in_field       => "data",
-    shift          => 2 
+    shift          => 2
   }, "data");
 CheckOK2(126,1);
 CheckNum2(126, 2, $s, 0);
@@ -911,7 +911,7 @@ CheckNum2(69, 11, $h{'n_fields'}, 2);
 CheckSArray2(69, 12, $h{'scalar'}, undef, undef, undef, undef, undef);
 CheckArray2(69, 13, $h{'scalar_ind'}, undef, undef, undef, undef, undef);
 
-# 71: alter_polynom 
+# 71: alter_polynom
 $s = $_->alter_polynom("new4", 4, undef, [ 1*i, 2*i, 3*i, 4*i, 5*i ]);
 CheckOK2(71, 1);
 CheckNum2(71, 2, $s, 0);
@@ -1656,7 +1656,11 @@ CheckNum2(231, 3, $h{"count_val"}, 5);
 CheckSArray2(231, 4, $h{"in_fields"}, 'in3', 'in4');
 CheckNum2(231, 5, $h{"count_max"}, 7);
 
- 
+# 232: gd_tokenise check
+@a = $_->tokenise('"test1 test2" test3\ test4 test5');
+CheckOK(232);
+CheckSArray(232, \@a, "test1 test2", "test3 test4", "test5");
+
 
 
 

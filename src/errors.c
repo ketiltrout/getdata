@@ -177,6 +177,7 @@ static const struct {
   { GD_E_ARGUMENT, GD_E_ARG_ENDIANNESS, "Invalid endianness specified", 0 },
   { GD_E_ARGUMENT, GD_E_ARG_PROTECTION, "Invalid protection level specified",
     0 },
+  { GD_E_ARGUMENT, GD_E_ARG_NODATA, "No data", 0 },
   { GD_E_ARGUMENT, 0, "Bad argument", 0 },
   /* GD_E_CALLBACK: 3 = response */
   { GD_E_CALLBACK, 0, "Unrecognised response from callback function: {3}", 0 },

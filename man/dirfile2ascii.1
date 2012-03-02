@@ -1,6 +1,6 @@
 .\" dirfile2ascii.1.  The dirfile2ascii man page.
 .\"
-.\" Copyright (C) 2010 D. V. Wiebe
+.\" Copyright (C) 2010, 2012 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH dirfile2ascii 1 "30 November 2010" "Version 0.7.1" "GETDATA"
+.TH dirfile2ascii 1 "21 February 2012" "Version 0.8.0" "GETDATA"
 .SH NAME
 dirfile2ascii \(em output dirfile database vectors as ASCII text
 .SH SYNOPSIS
@@ -129,7 +129,6 @@ data is read as 64-bit unsigned integers.
 No native support for printing complex data is provided.  This may be worked
 around by using dirfile(5) representation suffixes.  For example, the command
 .IP
-$
 .B dirfile2ascii
 .I DIRFILE
 .IB FIELD .r
@@ -139,6 +138,26 @@ will print the real and imaginary parts of the complex valued field
 .I FIELD
 in the first and second columns, respectively.
 
+.SH AUTHOR
+
+dirfile2ascii was written by Matthew Truch and D. V. Wiebe.
+
+.SH REPORTING BUGS
+
+Please send reports of bugs to getdata\-devel@lists.sourceforge.net
+
+The GetData home page: <http://getdata.sourceforge.net/>
+
+.SH COPYRIGHT
+
+Copyright \(co 2010 Matthew Truch.
+
+dirfile2ascii is licenced under the GNU LPGL version 2.1 or later.
+
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+
 .SH SEE ALSO
+.BR defile (1),
 .BR dirfile (5),
 .BR printf (3)

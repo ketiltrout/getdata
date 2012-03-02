@@ -679,6 +679,7 @@ ssize_t getdelim(char**, size_t*, int, FILE*);
 #define GD_E_ARG_WHENCE         1
 #define GD_E_ARG_ENDIANNESS     2
 #define GD_E_ARG_PROTECTION     3
+#define GD_E_ARG_NODATA         4
 
 #define GD_FILE_READ  0x1
 #define GD_FILE_WRITE 0x2
@@ -901,6 +902,9 @@ struct _GD_DIRFILE {
   int standards;
   int n_error;
 
+  /* for the public tokeniser */
+  const char *tok_pos;
+
   /* field counts */
   unsigned int n_entries;
   unsigned int n_hidden;
@@ -958,6 +962,8 @@ int _GD_BadInput(DIRFILE *, const gd_entry_t *, int, int);
 
 int _GD_CalculateEntry(DIRFILE *restrict, gd_entry_t *restrict, int);
 char *_GD_CanonicalPath(const char *restrict, const char *restrict);
+gd_entry_t *_GD_CheckParent(DIRFILE *restrict D, char **restrict name, int me,
+    int linenum);
 void _GD_CInvertData(DIRFILE *restrict, void *restrict, gd_type_t return_type,
     GD_DCOMPLEXA(dividend), size_t);
 
@@ -1064,8 +1070,8 @@ int _GD_StrCmpNull(const char *restrict, const char *restrict);
 char *_GD_Strdup(DIRFILE *restrict, const char *restrict);
 int _GD_Supports(DIRFILE *, const gd_entry_t*, unsigned int funcs);
 int _GD_Tokenise(DIRFILE *restrict, const char *restrict, char **,
-    const char **, char **, const char *restrict, int linenum, int standards,
-    int pedantic);
+    const char **, int, char **, const char *restrict, int linenum,
+    int standards, int pedantic);
 void _GD_UpdateAliases(DIRFILE*);
 int _GD_ValidateField(const char*, int, int, int, int*);
 off64_t _GD_WriteSeek(DIRFILE *restrict, gd_entry_t *restrict,

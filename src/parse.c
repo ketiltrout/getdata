@@ -1313,8 +1313,8 @@ static gd_entry_t *_GD_ParseCarray(DIRFILE *restrict D,
 
     /* get more tokens */
     free(*outstring);
-    n_cols = _GD_Tokenise(D, tok_pos, outstring, &tok_pos, in_cols, format_file,
-        line, standards, pedantic);
+    n_cols = _GD_Tokenise(D, tok_pos, outstring, &tok_pos, MAX_IN_COLS, in_cols,
+        format_file, line, standards, pedantic);
     if (n_cols == 0 || D->error)
       break;
     first = 0;
@@ -1422,10 +1422,12 @@ static int _GD_UTF8Encode(DIRFILE *restrict D, const char *restrict format_file,
 }
 
 /* _GD_CheckParent: look for a slashed field name and, if found, see if the
- * parent exists in the current fragment.  Returns parent entry on success.
+ * parent exists in the current fragment.  Returns parent entry on success,
+ * and points *name to the metaname part.  me == -1 implies we're not in the
+ * parser, but called from _GD_Add.
  */
-static gd_entry_t *_GD_CheckParent(DIRFILE *restrict D, char **restrict name,
-    int me, int linenum)
+gd_entry_t *_GD_CheckParent(DIRFILE *restrict D, char **restrict name, int me,
+    int linenum)
 {
   int dummy;
   char *cptr, *munged_code;
@@ -1436,29 +1438,45 @@ static gd_entry_t *_GD_CheckParent(DIRFILE *restrict D, char **restrict name,
   for (cptr = *name + 1; *cptr != '\0'; ++cptr)
     if (*cptr == '/') {
       *cptr = '\0';
-      munged_code = _GD_MungeFromFrag(D, NULL, me, *name, &dummy);
+      if (me == -1)
+        munged_code = strdup(*name);
+      else
+        munged_code = _GD_MungeFromFrag(D, NULL, me, *name, &dummy);
       if (munged_code) {
         P = _GD_FindField(D, munged_code, D->entry, D->n_entries, 0, NULL);
         free(munged_code);
       }
-      if (P == NULL)
+      if (P == NULL) {
+        if (me == -1) {
+          *cptr = '/'; /* undo field munging; _GD_Add will conclude this is
+                          a field with an illegal '/' */
+          dreturn("%p", NULL);
+          return NULL;
+        }
         _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_NO_FIELD,
             D->fragment[me].cname, linenum, *name);
-      else if (P->field_type == GD_ALIAS_ENTRY)
-        _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_ALIAS, D->fragment[me].cname,
-            linenum, *name);
-      else if (P->fragment_index != me)
+      } else if (P->field_type == GD_ALIAS_ENTRY) {
+        if (me == -1)
+          P = P->e->entry[0]; /* just de-alias */
+        else
+          _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_ALIAS, D->fragment[me].cname,
+              linenum, *name);
+      } else if (P->fragment_index != me && me != -1)
         _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_LOCATION,
             D->fragment[me].cname, linenum, *name);
-      else {
-        /* point name to the metafield name */
-        *name = cptr + 1;
+
+      if (D->error) {
+        dreturn("%p", NULL);
+        return NULL;
       }
+
+      /* point name to the metafield name */
+      *name = cptr + 1;
       break;
     }
 
-  dreturn("%p", D->error ? NULL : P);
-  return D->error ? NULL : P;
+  dreturn("%p", P);
+  return P;
 }
 
 /* _GD_ParseFieldSpec: Parse a format file line fragment containing a field
@@ -1649,7 +1667,7 @@ gd_entry_t *_GD_ParseFieldSpec(DIRFILE *restrict D, int n_cols, char **in_cols,
 #define ACC_MODE_HEX   2
 #define ACC_MODE_UTF8  3
 int _GD_Tokenise(DIRFILE *restrict D, const char *restrict instring,
-    char **outstring, const char **pos, char **in_cols,
+    char **outstring, const char **pos, int tok_want, char **in_cols,
     const char *restrict format_file, int linenum, int standards, int pedantic)
 {
   const char* ip;
@@ -1662,8 +1680,9 @@ int _GD_Tokenise(DIRFILE *restrict D, const char *restrict instring,
   int n_acc = 0;
   int acc_mode = ACC_MODE_NONE;
 
-  dtrace("%p, \"%s\", %p, %p, %p, \"%s\", %i, %i, %i", D, instring, outstring,
-      pos, in_cols, format_file, linenum, standards, pedantic);
+  dtrace("%p, \"%s\", %p, %p, %i, %p, \"%s\", %i, %i, %i", D, instring,
+      outstring, pos, tok_want, in_cols, format_file, linenum, standards,
+      pedantic);
 
   op = *outstring = _GD_Strdup(D, instring);
   if (op == NULL) {
@@ -1676,7 +1695,7 @@ int _GD_Tokenise(DIRFILE *restrict D, const char *restrict instring,
   for (ip = instring; *ip != '\0'; ++ip) {
     if (escaped_char) {
       if (ws) {
-        if (n_cols >= MAX_IN_COLS)
+        if (n_cols >= tok_want)
           break; /* Ignore trailing data on the line */
         in_cols[n_cols++] = op;
         ws = 0;
@@ -1807,7 +1826,7 @@ int _GD_Tokenise(DIRFILE *restrict D, const char *restrict instring,
       else if (*ip == '"' && (!pedantic || standards >= 6)) {
         if ((quotated = !quotated)) {
           if (ws) {
-            if (n_cols >= MAX_IN_COLS)
+            if (n_cols >= tok_want)
               break; /* Ignore trailing data on the line */
             in_cols[n_cols++] = op;
             ws = 0;
@@ -1825,7 +1844,7 @@ int _GD_Tokenise(DIRFILE *restrict D, const char *restrict instring,
         break;
       } else {
         if (ws) {
-          if (n_cols >= MAX_IN_COLS)
+          if (n_cols >= tok_want)
             break; /* Ignore trailing data on the line */
           in_cols[n_cols++] = op;
           ws = 0;
@@ -2265,8 +2284,9 @@ char *_GD_ParseFragment(FILE *restrict fp, DIRFILE *restrict D, int me,
   /* start parsing */
   while (rescan || (instring = _GD_GetLine(fp, &n, &linenum))) {
     rescan = 0;
-    n_cols = _GD_Tokenise(D, instring, &outstring, &tok_pos, in_cols,
-        D->fragment[me].cname, linenum, *standards, *flags & GD_PEDANTIC);
+    n_cols = _GD_Tokenise(D, instring, &outstring, &tok_pos, MAX_IN_COLS,
+        in_cols, D->fragment[me].cname, linenum, *standards,
+        *flags & GD_PEDANTIC);
 
     if (n_cols == 0) {/* a blank line */
       free(outstring);
@@ -2369,6 +2389,46 @@ char *_GD_ParseFragment(FILE *restrict fp, DIRFILE *restrict D, int me,
 
   dreturn("%p", ref_name);
   return ref_name;
+}
+
+/* public access to the GetData tokeniser */
+char *gd_tokenise(DIRFILE *D, const char *string) gd_nothrow
+{
+  char *outstring, *in_col;
+  int n_cols;
+
+  dtrace("%p, \"%s\"", D, string);
+
+  if (D->flags & GD_INVALID) {
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  _GD_ClearError(D);
+
+  if (string)
+    D->tok_pos = string;
+  else if (D->tok_pos == NULL) {
+    _GD_SetError(D, GD_E_ARGUMENT, GD_E_ARG_NODATA, NULL, 0, NULL);
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  /* tokenise! */
+  n_cols = _GD_Tokenise(D, D->tok_pos, &outstring, &D->tok_pos, 1, &in_col,
+      "gd_tokenise()", 0, D->standards, D->flags & GD_PERMISSIVE);
+
+  if (D->error || n_cols < 1) {
+    D->tok_pos = NULL;
+    free(outstring);
+    outstring = NULL;
+  }
+
+  /* in_col invariably points to outstring, so just let the caller worry about
+   * cleaning up.  Ha! */
+  dreturn("\"%s\"", outstring);
+  return outstring;
 }
 /* vim: ts=2 sw=2 et tw=80
 */

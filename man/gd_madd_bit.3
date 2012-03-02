@@ -1,6 +1,6 @@
 .\" gd_madd_bit.3.  The gd_madd_bit man page.
 .\"
-.\" Copyright (C) 2008, 2009, 2010 D. V. Wiebe
+.\" Copyright (C) 2008, 2009, 2010, 2012 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_madd_bit 3 "3 November 2010" "Version 0.7.0" "GETDATA"
+.TH gd_madd_bit 3 "1 March 2012" "Version 0.8.0" "GETDATA"
 .SH NAME
 gd_madd_bit, gd_madd_carray, gd_madd_clincom, gd_madd_const, gd_madd_cpolynom,
 gd_madd_crecip, gd_madd_divide, gd_madd_lincom, gd_madd_linterp,
@@ -167,13 +167,16 @@ fields must be added with
 .BR gd_madd (3)
 or
 .BR gd_madd_spec (3).
+See
+.BR gd_add_bit (3),
+&c. for an alternate way of adding metafields with explicit parameters.
 
 See
 .B NOTES
 below for information on using
-.BR gd_madd_clincom ()
+.BR gd_madd_clincom "(), " gd_madd_cpolynom (),
 and 
-.BR gd_madd_cpolynom ()
+.BR gd_madd_crecip ()
 in the C89 GetData API.
 
 .SH RETURN VALUE

@@ -39,6 +39,12 @@
 static DIRFILE* f77dirfiles[GDF_N_DIRFILES];
 static int f77dirfiles_initialised = 0;
 
+/* casting data pointers to function pointers is prohibited in C.  This
+ * container is used to get around that */
+static struct _GDF_callback_container {
+  _GDF_callback_t func;
+} f77callbacks[GDF_N_DIRFILES];
+
 /* initialise the f77dirfiles array */
 static void _GDF_InitDirfiles(void)
 {
@@ -102,6 +108,7 @@ static int _GDF_SetDirfile(DIRFILE* D)
   for (i = 1; i < GDF_N_DIRFILES; ++i)
     if (f77dirfiles[i] == NULL) {
       f77dirfiles[i] = D;
+      f77callbacks[i].func = NULL;
       dreturn("%i", i);
       return i;
     }
@@ -182,17 +189,19 @@ static int _GDF_FString(char* dest, int *dlen, const char* src)
 /* callback wrapper */
 static int _GDF_Callback(gd_parser_data_t* pdata, void* f77_callback)
 {
+  struct _GDF_callback_container *c =
+    (struct _GDF_callback_container*)f77_callback;
+
   int unit;
   int r = GD_SYNTAX_ABORT;
 
   dtrace("%p, %p", pdata, f77_callback);
 
-  if (f77_callback != NULL) {
+  if (c != NULL && c->func != NULL) {
     unit = _GDF_SetDirfile((DIRFILE*)pdata->dirfile);
 
-    (*(void(*)(int*, const int*, const int*, char*, const int*,
-               const char*))f77_callback)(&r, &unit, &pdata->suberror,
-             pdata->line, &pdata->linenum, pdata->filename);
+    (c->func)(&r, &unit, &pdata->suberror, pdata->line, &pdata->linenum,
+        pdata->filename);
 
     pdata->line[GD_MAX_LINE_LENGTH - 1] = '\0';
 
@@ -2262,30 +2271,65 @@ void F77_FUNC(gddscd, GDDSCD) (const int* dirfile)
 
 /* gd_cbopen wrapper */
 void F77_FUNC(gdcopn, GDCOPN) (int* dirfile, const char* dirfilename,
-    const int* dirfilename_l, const int* flags, const void* callback)
+    const int* dirfilename_l, const int* flags, const _GDF_callback_t callback)
 {
+  const struct _GDF_callback_container temp = { callback };
+  DIRFILE *D;
   char *out;
 
   dtrace("%p, %p, %i, %x, %p", dirfile, dirfilename, *dirfilename_l, *flags,
       callback);
 
   out = (char *)malloc(*dirfilename_l + 1);
+  _GDF_CString(out, dirfilename, *dirfilename_l);
 
-  *dirfile = _GDF_SetDirfile(gd_cbopen(_GDF_CString(out, dirfilename,
-          *dirfilename_l), *flags, (callback == 0) ? NULL : _GDF_Callback,
-        (callback == 0) ? NULL : (void*)callback));
+  D = gd_cbopen(out, *flags, _GDF_Callback, (void*)&temp);
+  *dirfile = _GDF_SetDirfile(D);
+
+  /* save the callback */
+  f77callbacks[*dirfile].func = callback;
+  /* and tell getdata its new location */
+  gd_parser_callback(D, _GDF_Callback, f77callbacks + *dirfile);
 
   free(out);
   dreturn("%i", *dirfile);
 }
 
 /* gd_parser_callback wrapper */
-void F77_FUNC(gdclbk, GDCLBK) (const int* dirfile, const void* callback)
+void F77_FUNC(gdclbk, GDCLBK) (const int* dirfile,
+    const _GDF_callback_t callback)
 {
   dtrace("%i, %p", *dirfile, callback);
 
-  gd_parser_callback(_GDF_GetDirfile(*dirfile), (callback == 0) ? NULL
-      : _GDF_Callback, (callback == 0) ?  NULL : (void*)callback);
+  /* ensure *dirfile is sane */
+  if (*dirfile < 0 || *dirfile >= GDF_N_DIRFILES) {
+    dreturnvoid();
+    return;
+  }
+
+  /* we only have to modify GetData's callback pointer if f77callbacks is
+   * NULL for this dirfile (inidicating no previous callback); otherwise, just
+   * update the saved callback pointer */
+  if (f77callbacks[*dirfile].func == NULL) {
+    f77callbacks[*dirfile].func = callback;
+    gd_parser_callback(_GDF_GetDirfile(*dirfile), _GDF_Callback,
+        f77callbacks + *dirfile);
+  } else
+    f77callbacks[*dirfile].func = callback;
+
+  dreturnvoid();
+}
+
+/* deregister a callback function (ie. gd_parser_callback(..., NULL) */
+void F77_FUNC(gdnocb, GDNOCB) (const int* dirfile)
+{
+  dtrace("%i", *dirfile);
+
+  /* ensure *dirfile is sane */
+  if (*dirfile >= 0 && *dirfile < GDF_N_DIRFILES) {
+    f77callbacks[*dirfile].func = NULL;
+    gd_parser_callback(_GDF_GetDirfile(*dirfile), NULL, NULL);
+  }
 
   dreturnvoid();
 }
@@ -3410,10 +3454,7 @@ void F77_FUNC(gdatrg, GDATRG) (char *target, int *target_l, const int *dirfile,
   targ = gd_alias_target(_GDF_GetDirfile(*dirfile), _GDF_CString(fc, field_code,
         *field_code_l));
 
-  if (targ)
-    _GDF_FString(target, target_l, targ);
-  else
-    *target_l = 0;
+  _GDF_FString(target, target_l, targ);
 
   free(fc);
 
@@ -3689,12 +3730,12 @@ void F77_FUNC(gdinca, GDINCA) (const int* dirfile, const char* file,
     const int* prefix_l, const char* suffix, const int* suffix_l,
     const int* flags)
 {
-  dtrace("%i, %p, %i, %i, %p, %i, %p, %i, %i", *dirfile, file, *file_l,
-      *fragment_index, prefix, *prefix_l, suffix, *suffix_l, *flags);
-
   char* fi = (char *)malloc(*file_l + 1);
   char* px = (char *)malloc(*prefix_l + 1);
   char* sx = (char *)malloc(*suffix_l + 1);
+
+  dtrace("%i, %p, %i, %i, %p, %i, %p, %i, %i", *dirfile, file, *file_l,
+      *fragment_index, prefix, *prefix_l, suffix, *suffix_l, *flags);
 
   gd_include_affix(_GDF_GetDirfile(*dirfile), _GDF_CString(fi, file, *file_l),
       *fragment_index, _GDF_CString(px, prefix, *prefix_l), _GDF_CString(sx,
@@ -3722,4 +3763,30 @@ void F77_FUNC(gdsync, GDSYNC) (const int* dirfile, const char* field_code,
   }
 
   dreturnvoid();
+}
+
+void F77_FUNC(gdtoke, GDTOKE) (char *toke, int *toke_l, const int *dirfile,
+    const char *string, const int *string_l, const int *n)
+{
+  char *token, *st;
+  DIRFILE *D;
+  int i;
+
+  dtrace("%p, %p, %i, %p, %i, %i", toke, toke_l, *dirfile, string, *string_l,
+      *n);
+
+  D = _GDF_GetDirfile(*dirfile);
+  st = (char *)malloc(*string_l + 1);
+  _GDF_CString(st, string, *string_l);
+
+  token = gd_tokenise(D, st);
+  for (i = 1; i < *n; ++i) {
+    free(token);
+    token = gd_tokenise(D, NULL);
+  }
+
+  _GDF_FString(toke, toke_l, token);
+  free(token);
+
+  dreturn("%i", *toke_l);
 }

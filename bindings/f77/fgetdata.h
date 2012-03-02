@@ -44,6 +44,9 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+typedef void(*_GDF_callback_t)(int*, const int*, const int*, char*, const int*,
+               const char*);
+
 /* Forward declarations to keep icc happy */
 void F77_FUNC(gdopen, GDOPEN) (int* dirfile, const char* dirfilename,
     const int* dirfilename_l, const int* flags);
@@ -304,9 +307,10 @@ void F77_FUNC(gdmven, GDMVEN) (char* name, int* name_l, const int* dirfile,
 void F77_FUNC(gddscd, GDDSCD) (const int* dirfile);
 
 void F77_FUNC(gdcopn, GDCOPN) (int* dirfile, const char* dirfilename,
-    const int* dirfilename_l, const int* flags, const void* callback);
+    const int* dirfilename_l, const int* flags, const _GDF_callback_t callback);
 
-void F77_FUNC(gdclbk, GDCLBK) (const int* dirfile, const void* callback);
+void F77_FUNC(gdclbk, GDCLBK) (const int* dirfile,
+    const _GDF_callback_t callback);
 
 void F77_FUNC(gdalbt, GDALBT) (const int* dirfile, const char* field_code,
     const int* field_code_l, const char* in_field, const int* in_field_l,
@@ -662,6 +666,8 @@ void F77_FUNC(gdatrg, GDATRG) (char *target, int *target_l, const int *dirfile,
 void F77_FUNC(gdadal, GDADAL) (const int *dirfile, const char *field_code,
     const int *field_code_l, const char *target, const int *target_l,
     const int *fragment_index);
+
+void F77_FUNC(gdnocb, GDNOCB) (const int* dirfile);
 #ifdef __cplusplus
 }
 #endif

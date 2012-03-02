@@ -79,21 +79,56 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
       return NULL;
     }
 
+    /* make name */
     offset = strlen(parent) + 1;
     temp_buffer = (char *)_GD_Malloc(D, offset + strlen(entry->field) + 1);
-    if (temp_buffer) {
-      strcpy(temp_buffer, parent);
-      temp_buffer[offset - 1] = '/';
-      strcpy(temp_buffer + offset, entry->field);
+
+    if (temp_buffer == NULL) {
+      dreturn("%p", NULL);
+      return NULL;
     }
-  } else
+
+    strcpy(temp_buffer, parent);
+    temp_buffer[offset - 1] = '/';
+    strcpy(temp_buffer + offset, entry->field);
+  } else {
+    char *ptr;
     /* Apply prefix and suffix */
-    temp_buffer = _GD_MungeFromFrag(D, NULL, entry->fragment_index,
+    temp_buffer = ptr = _GD_MungeFromFrag(D, NULL, entry->fragment_index,
         entry->field, &offset);
 
-  if (temp_buffer == NULL) {
-    dreturn("%p", NULL);
-    return NULL;
+    if (temp_buffer == NULL) {
+      dreturn("%p", NULL);
+      return NULL;
+    }
+
+    /* look for a Barth-style meta field.  We do this after mungification
+     * to ensure that the parent field ends up with the right prefix and
+     * suffix */
+    P = _GD_CheckParent(D, &ptr, -1, 0);
+
+    if (D->error) {
+      free(temp_buffer);
+      dreturn("%p", NULL);
+      return NULL;
+    }
+
+    if (P) {
+      /* make the new name -- this may be different because P may have been
+       * dealiased */
+      offset = strlen(P->field) + 1;
+      char *temp2 = _GD_Malloc(D, offset + strlen(ptr) + 1);
+      if (temp2 == NULL) {
+        free(temp_buffer);
+        dreturn("%p", NULL);
+        return NULL;
+      }
+
+      dwatch("%s", ptr);
+      sprintf(temp2, "%s/%s", P->field, ptr);
+      free(temp_buffer);
+      temp_buffer = temp2;
+    }
   }
 
   /* check for duplicate field */
@@ -161,7 +196,7 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
   }
 
   /* Set meta indices */
-  if (parent != NULL)
+  if (P != NULL)
     E->e->n_meta = -1;
 
   /* Hidden */
@@ -173,7 +208,7 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
   {
     case GD_RAW_ENTRY:
       /* no METARAW fields allowed */
-      if (parent != NULL) {
+      if (P != NULL) {
         _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_ENTRY_METARAW, NULL,
             entry->field_type, NULL);
         break;
@@ -549,7 +584,7 @@ int gd_madd_spec(DIRFILE* D, const char* line, const char* parent) gd_nothrow
   }
 
   /* start parsing */
-  n_cols = _GD_Tokenise(D, line, &outstring, &tok_pos, in_cols,
+  n_cols = _GD_Tokenise(D, line, &outstring, &tok_pos, MAX_IN_COLS, in_cols,
       "dirfile_madd_spec()", 0, D->standards, D->flags & GD_PERMISSIVE);
 
   /* Directive parsing is skipped -- The Field Spec parser will add the field */
@@ -614,7 +649,7 @@ int gd_add_spec(DIRFILE* D, const char* line, int fragment_index)
   _GD_ClearError(D);
 
   /* start parsing */
-  n_cols = _GD_Tokenise(D, line, &outstring, &tok_pos, in_cols,
+  n_cols = _GD_Tokenise(D, line, &outstring, &tok_pos, MAX_IN_COLS, in_cols,
       "dirfile_add_spec()", 0, D->standards, D->flags & GD_PERMISSIVE);
 
   /* Directive parsing is skipped -- The Field Spec parser will add the field */

@@ -308,6 +308,8 @@ C     Corresponding to gd_nmfields_by_type(3)
       EXTERNAL GDNMFT
 C     Corresponding to gd_nmvectors(3)
       EXTERNAL GDNMVE
+C     Deregister a callback function (ie. gd_parser_callback(..., NULL))
+      EXTERNAL GDNOCB
 C     Corresponding to gd_native_type(3)
       EXTERNAL GDNTYP
 C     Corresponding to gd_nvectors(3)

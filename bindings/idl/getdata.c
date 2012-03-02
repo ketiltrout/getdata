@@ -5539,6 +5539,51 @@ IDL_VPTR gdidl_fragment_affixes(int argc, IDL_VPTR argv[], char *argk)
   return r;
 }
 
+/* @@DLM: F gdidl_tokenise GD_TOKENISE 1 1 KEYWORDS */
+IDL_VPTR gdidl_tokenise(int argc, IDL_VPTR argv[], char *argk)
+{
+  dtraceidl();
+
+  const char *string = NULL;
+  char *token;
+  typedef struct {
+    IDL_KW_RESULT_FIRST_FIELD;
+    GDIDL_KW_RESULT_ERROR;
+    IDL_STRING string;
+    int string_x;
+  } KW_RESULT;
+  KW_RESULT kw;
+
+  GDIDL_KW_INIT_ERROR;
+  kw.string_x = 0;
+
+  static IDL_KW_PAR kw_pars[] = {
+    GDIDL_KW_PAR_ERROR,
+    GDIDL_KW_PAR_ESTRING,
+    { "STRING", IDL_TYP_STRING, 1, 0, IDL_KW_OFFSETOF(string_x),
+      IDL_KW_OFFSETOF(string) },
+    { NULL }
+  };
+
+  IDL_KWProcessByOffset(argc, argv, argk, kw_pars, NULL, 1, &kw);
+
+  DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
+
+  if (kw.string_x)
+    string = IDL_STRING_STR(&kw.string);
+
+  token = gd_tokenise(D, string);
+
+  GDIDL_SET_ERROR(D);
+
+  IDL_KW_FREE;
+
+  IDL_VPTR r = IDL_StrToSTRING(token);
+  free(token);
+  dreturn("%p", r);
+  return r;
+}
+
 
 
 

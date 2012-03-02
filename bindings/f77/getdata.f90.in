@@ -2734,13 +2734,13 @@ subroutine fgd_sync (dirfile, field_code)
   call gdsync(dirfile, TRIM(field_code), LEN_TRIM(field_code))
 end subroutine
 
-subroutine fgd_fragment_affixes (prefix, suffix, dirfile, fragment_index)
+subroutine fgd_fragment_affixes (prefix, pl, suffix, sl, dirfile, &
+fragment_index)
   character(len=*), intent(out) :: prefix, suffix
   integer, intent(in) :: dirfile, fragment_index
-  integer :: len1 = GD_FIELD_LEN
-  integer :: len2 = GD_FIELD_LEN
+  integer, intent(inout) :: pl, sl
 
-  call gdfraf(prefix, len1, suffix, len2, dirfile, fragment_index)
+  call gdfraf(prefix, pl, suffix, sl, dirfile, fragment_index)
 end subroutine
   
 subroutine fgd_add_mplex (dirfile, field_code, in_field, count_field, &
@@ -2771,6 +2771,15 @@ subroutine fgd_alter_mplex (dirfile, field_name, in_field, count_field, &
   call gdalmx(dirfile, TRIM(field_name), LEN_TRIM(field_name), TRIM(in_field), &
   LEN_TRIM(in_field), TRIM(count_field), LEN_TRIM(count_field), count_val, &
   count_max)
+end subroutine
+
+subroutine fgd_tokenise (token, l, dirfile, string, n)
+  character (len=*), intent(out) :: token
+  integer, intent(inout) :: l
+  integer, intent(in) :: dirfile, n
+  character (len=*), intent(in) :: string
+
+  call gdtoke(token, l, dirfile, TRIM(string), LEN_TRIM(string), n)
 end subroutine
 
 end module

@@ -247,6 +247,8 @@ namespace GetData {
 
       off_t Tell(const char* field_code) const;
 
+      char *Tokenise(const char *string = NULL);
+
       int UnHide(const char* field_code) const;
 
       int UnInclude(int fragment_index, int del = 0) const;

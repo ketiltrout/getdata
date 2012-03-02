@@ -1,3 +1,38 @@
+2012-03-02   D. V. Wiebe <getdata@ketiltrout.net> svn:664
+	* src/errors.c: Added GD_E_ARGUMENT:GD_E_ARG_NODATA.
+	* src/parse.c (_GD_Tokenise): Take number of columns to return.
+	* src/parse.c (gd_tokenise): Added.
+	* src/internal.h: Added _GD_DIRFILE->tok_pos.
+
+	* src/parse.c (_GD_CheckParent): Destatickify, and modify for use by
+	_GD_Add.
+	* src/add.c (_GD_Add): Call _GD_CheckParent to automatically allow
+	parent/meta style metafield addition via gd_add[_<whatever>]().
+
+	* bindings/python/pydirfile.c (gdpy_dirfile_tokenise)
+	bindings/cxx/dirfile.cpp (Dirfile::Tokenise) bindings/perl/GetData.xs
+	(tokenise) bindings/f77/getdata.f90.in (fgd_tokenise)
+	bindings/f77/fgetdata.c (GDTOKE) bindings/idl/getdata.c (gdidl_tokenise):
+	Added.
+
+	* bindings/python/test/big_test.py bindings/cxx/test/big_test.cpp
+	bindings/perl/t/big_test.t bindings/f77/test/big_test.f
+	bindings/f77/test/big_test95.f90 bindings/idl/test/big_test.pro: Add test
+	#232.
+
+	* bindings/f77/getdata.f90.in (fgd_fragment_affixes): Fix GDFRAF call.
+
+	* bindings/f77/fgetdata.c (_GDF_SetDirfile _GDF_Callback GDCOPN GDCLBK):
+	Don't cast between data and code pointers.  Encapsulate the F77 callback
+	function in a container.
+	* bindings/f77/fgetdata.c (GDNOCB): Added.
+	* bindings/f77/test/gdcopn.f: Add GDCLBK and GDNOCB tests.
+
+	* test/ascii_get.c test/ascii_put.c test/ascii_get_get.c
+	test/ascii_nframes.c: Delete FOPEN_TEXT.
+
+	* test/add_meta.c test/add_meta_alias.c: Added.
+
 2012-02-16   D. V. Wiebe <getdata@ketiltrout.net> svn:658
 	* src/getdata.c (_GD_DoLincom): Get the correct SPFs.
 	* test/get_lincom_spf.c: Added.

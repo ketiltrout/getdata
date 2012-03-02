@@ -721,7 +721,7 @@ C     38: GDADCO check
       CALL CHKDBL(ne, 38, 1d0 * fl, -8.1d0)
 
 C     39: GDFRGN check
-      l = plen;
+      l = plen
       CALL GDFRGN(path, l, d, 0)
 
       CALL CHKEOK(ne, 39, d)
@@ -2057,6 +2057,18 @@ C     231: GDALMX check
       CALL CHKST2(ne, 231, 6, fields(2), 'in4')
       CALL CHKIN2(ne, 231, 7, j, 7)
 
+C     232: GDTOKE check
+      l = slen
+      CALL GDTOKE(str, l, d, '"test1 test2" test3\ test4 test5', 32, 1)
+      CALL CHKOK2(ne, 232, 1, d)
+      CALL CHKIN2(ne, 232, 2, l, slen)
+      CALL CHKST2(ne, 232, 3, str, 'test1 test2')
+
+      l = slen
+      CALL GDTOKE(str, l, d, '"test1 test2" test3\ test4 test5', 32, 2)
+      CALL CHKOK2(ne, 232, 4, d)
+      CALL CHKIN2(ne, 232, 5, l, slen)
+      CALL CHKST2(ne, 232, 6, str, 'test3 test4')
 
 
 

@@ -1,6 +1,6 @@
 .\" gd_add.3.  The gd_add man page.
 .\"
-.\" Copyright (C) 2008, 2009, 2010 D. V. Wiebe
+.\" Copyright (C) 2008, 2009, 2010, 2012 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_add 3 "30 November 2010" "Version 0.7.1" "GETDATA"
+.TH gd_add 3 "1 March 2012" "Version 0.8.0" "GETDATA"
 .SH NAME
 gd_add, gd_madd \(em add a field to a dirfile
 .SH SYNOPSIS
@@ -30,7 +30,7 @@ gd_add, gd_madd \(em add a field to a dirfile
 .SH DESCRIPTION
 The
 .BR gd_add ()
-function adds the field described by 
+function adds the field described by
 .I entry
 to the dirfile specified by
 .IR dirfile .
@@ -58,16 +58,22 @@ specifies a
 .B STRING
 field, the field data will be set to the empty string.
 
-When adding a metafield, the
-.IR entry -> field
-member should contain just the metafield's name, not the fully formed
-.IB <parent-field> / <meta-field>
-field code.  Also,
+A metafield may be added either by calling
 .BR gd_madd ()
-ignores the value of
-.IR entry -> fragment_index ,
-and instead adds the new meta field to the same format specification fragment in
-which the parent field is defined.
+with
+.IR entry -> field
+containing only the metafield's name, or else by calling
+.BR gd_add ()
+with the fully formed
+.IB <parent-field> / <meta-field>
+field code in
+.IR entry -> field .
+Regardless of which interface is used, when adding a metafield the value of
+.IR entry -> fragment_index
+is ignored and GetData will add the new metafield to the same format
+specification fragment in which the parent field is defined.  If the specified
+parent field name is an alias, the canonical name of the field will be
+substituted.
 
 Fields added with this interface may contain either literal parameters or
 parameters based on scalar fields.  If an element of the
@@ -128,7 +134,7 @@ entry, or the
 .IR entry -> const_type
 parameter provided with a
 .B CONST
-or 
+or
 .B CARRAY
 entry, was invalid.
 .TP
@@ -140,7 +146,7 @@ parameter provided with a
 entry was greater than GD_MAX_CARRAY_LENGTH.
 .TP
 .B GD_E_DUPLICATE
-The field name provided in 
+The field name provided in
 .IR entry -> field
 duplicated that of an already existing field.
 .TP

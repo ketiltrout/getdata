@@ -869,6 +869,9 @@ extern size_t gd_put_string(DIRFILE *dirfile, const char *field_code,
 
 extern const char **gd_strings(DIRFILE *dirfile) gd_nothrow gd_nonnull ((1));
 
+extern char *gd_tokenise(DIRFILE *D, const char *string) gd_nothrow
+gd_nonnull ((1));
+
 extern int gd_unhide(DIRFILE *dirfile, const char *field_code) gd_nothrow
 gd_nonnull ((1,2));
 

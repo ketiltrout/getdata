@@ -2408,6 +2408,31 @@ static PyObject* gdpy_dirfile_maddalias(struct gdpy_dirfile_t* self,
   return Py_None;
 }
 
+static PyObject *gdpy_dirfile_tokenise(struct gdpy_dirfile_t *self,
+    void *args, void *keys)
+{
+  dtrace("%p, %p, %p", self, args, keys);
+
+  char *token;
+  char *keywords[] = { "string", NULL };
+  const char *string = NULL;
+
+  if (!PyArg_ParseTupleAndKeywords(args, keys, "|s:pygetdata.dirfile.tokenise",
+        keywords, &string))
+  {
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  token = gd_tokenise(self->D, string);
+
+  PyObject* pyobj = PyString_FromString(token);
+  free(token);
+
+  dreturn("%p", pyobj);
+  return pyobj;
+}
+
 static PyGetSetDef gdpy_dirfile_getset[] = {
   { "error", (getter)gdpy_dirfile_geterror, NULL,
     "The numerical error code encountered by the last call to the GetData\n"
@@ -2700,7 +2725,6 @@ static PyMethodDef gdpy_dirfile_methods[] = {
     METH_VARARGS | METH_KEYWORDS,
     "mvector_list(parent)\n\n"
       "Retrieve a list of all vector type metafields (that is: BIT, DIVIDE,\n"
-      /* ------- handy ruler ---------------------------------------------| */
       "LINCOM, LINTERP, MPLEX, MULTIPLY, PHASE, POLYNOM, RECIP, SBIT, and\n"
       "WINDOW metafields) for the parent field 'parent'.  See\n"
       "gd_mvector_list(3)."
@@ -2978,6 +3002,15 @@ static PyMethodDef gdpy_dirfile_methods[] = {
     "add_alias(parent, field_code, target)\n\n"
       "Adds a new alias called 'field_code' pointing to 'target' as a\n"
       "metalias under 'parent'.  See gd_madd_alias(3)."
+  },
+  {"tokenise", (PyCFunction)gdpy_dirfile_tokenise, METH_VARARGS | METH_KEYWORDS,
+    "tokenise([string])\n\n"
+      /* ------- handy ruler ---------------------------------------------| */
+      "If 'string' is given, runs the GetData tokeniser on 'string' and\n"
+      "returns the first token.  If 'string' is not given, returns\n"
+      "subsequent tokens (one per call) of the last string that was\n"
+      "provided.  Note: an error will result if the string being parsed\n"
+      "goes out of scope.  See gd_tokenise(3)."
   },
   { NULL, NULL, 0, NULL }
 };

@@ -49,11 +49,11 @@ ADD_TESTS=add add_affix add_alias add_bit add_bit_bitnum add_bit_bitsize \
 					add_const add_cpolynom add_crecip add_crecip89 add_divide \
 					add_divide_invalid add_duplicate add_format add_invalid add_lincom \
 					add_lincom_invalid add_lincom_nfields add_linterp \
-					add_linterp_invalid add_mplex add_mplex_val add_multiply \
-					add_multiply_invalid add_phase add_phase_invalid add_polynom \
-					add_protect add_raw add_raw_include add_raw_invalid add_raw_spf \
-					add_raw_type add_rdonly add_recip add_resolv add_sbit add_scalar \
-					add_scalar_carray add_sort add_spec add_spec_directive \
+					add_linterp_invalid add_meta add_meta_alias add_mplex add_mplex_val \
+					add_multiply add_multiply_invalid add_phase add_phase_invalid \
+					add_polynom add_protect add_raw add_raw_include add_raw_invalid \
+					add_raw_spf add_raw_type add_rdonly add_recip add_resolv add_sbit \
+					add_scalar add_scalar_carray add_sort add_spec add_spec_directive \
 					add_spec_invalid add_spec_meta add_spec_resolv add_string \
 					add_string_affix add_type add_window add_window_op
 

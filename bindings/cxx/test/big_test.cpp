@@ -1630,6 +1630,16 @@ int main(void)
   CHECK_INT2(231, 6, ent->CountMax(), 7);
   delete ent;
 
+  // 232: gd_tokenise
+  str = d->Tokenise("\"test1 test2\" test3\\ test4");
+  CHECK_OK2(232, 1);
+  CHECK_STRING2(232, 2, str, "test1 test2");
+
+  str = d->Tokenise();
+  CHECK_OK2(232, 3);
+  CHECK_STRING2(232, 4, str, "test3 test4");
+
+
 
 
 

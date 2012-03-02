@@ -188,6 +188,7 @@ end subroutine
 
 program big_test
   use getdata
+  implicit none
   include "test_getdata.f"
   character (len=*), parameter :: fildir = 'test95_dirfile'
   character (len=*), parameter :: frmat = 'test95_dirfile/format'
@@ -627,8 +628,8 @@ program big_test
   cq(5) = dcmplx(5.5, 0.0)
   cq(6) = dcmplx(5.5, 0.0)
   DO i=1,3
-  call check_dbl2(ne, 18, i * 2 - 1, ent%cm(i), cq(i * 2 - 1))
-  call check_dbl2(ne, 18, i * 2, ent%cb(i), cq(i * 2))
+  call check_cpx2(ne, 18, i * 2 - 1, ent%cm(i), cq(i * 2 - 1))
+  call check_cpx2(ne, 18, i * 2, ent%cb(i), cq(i * 2))
   end do
 
 ! 20: fgd_entry (polynom) check
@@ -1736,13 +1737,13 @@ program big_test
   call check_ok(ne, 155, d)
 
 ! 156: fgd_invalid_dirfile check
-  m = fgd_invalid_dirfile()
-  call check_ok2(ne, 98, 1, m)
+  l = fgd_invalid_dirfile()
+  call check_ok2(ne, 98, 1, l)
 
-  n = fgd_nfragments(m)
-  call check_err2(ne, 98, 2, m, GD_E_BAD_DIRFILE)
+  n = fgd_nfragments(l)
+  call check_err2(ne, 98, 2, l, GD_E_BAD_DIRFILE)
 
-  call fgd_close(m)
+  call fgd_close(l)
 
 ! 157: fgd_dirfile_standards
   n = fgd_dirfile_standards(d, GD_VERSION_CURRENT)
@@ -1789,7 +1790,7 @@ program big_test
   call check_ok(ne, 162, d)
 
   do i=1,2
-    call check_int2(ne, 162, i, ci8(i), i + 2)
+    call check_int2(ne, 162, i, int(ci8(i)), i + 2)
   end do
 
 ! 163: gd_get_carray_slice (FLOAT32)
@@ -2000,7 +2001,7 @@ program big_test
   call check_ok2(ne, 179, 3, d)
 
   do i=1,4
-  call check_dbl2(ne, 179, i, 1d0 * cr4(i), 0.)
+  call check_dbl2(ne, 179, i, 1d0 * cr4(i), 0d0)
   end do
 
 ! 180: gd_madd_carray
@@ -2018,7 +2019,7 @@ program big_test
   call check_ok2(ne, 180, 3, d)
 
   do i=1,4
-  call check_dbl2(ne, 180, i, 1d0 * cr4(i), 0.)
+  call check_dbl2(ne, 180, i, 1d0 * cr4(i), 0d0)
   end do
 
 ! 181: gd_alter_carray
@@ -2036,7 +2037,7 @@ program big_test
   call check_ok2(ne, 181, 3, d)
 
   do i=1,4
-  call check_dbl2(ne, 181, i, 1d0 * cr4(i), 0.)
+  call check_dbl2(ne, 181, i, 1d0 * cr4(i), 0d0)
   end do
 
 ! 183: fgd_constants_i1 check
@@ -2047,7 +2048,7 @@ program big_test
   call check_ok(ne, 183, d)
 
   do i = 1, n
-  call check_int2(ne, 183, i, int(ci1(i)), iq(i))
+  call check_int2(ne, 183, i, int(ci1(i)), int(iq(i)))
   end do
 
 ! 184: fgd_constants_i2 check
@@ -2056,7 +2057,7 @@ program big_test
   call check_ok(ne, 184, d)
 
   do i = 1, n
-  call check_int2(ne, 184, i, int(ci2(i)), iq(i))
+  call check_int2(ne, 184, i, int(ci2(i)), int(iq(i)))
   end do
 
 ! 185: fgd_constants_i4 check
@@ -2064,7 +2065,7 @@ program big_test
   call check_ok(ne, 185, d)
 
   do i = 1, n
-  call check_int2(ne, 185, i, ci4(i), iq(i))
+  call check_int2(ne, 185, i, ci4(i), int(iq(i)))
   end do
 
 ! 186: fgd_constants_i8 check
@@ -2072,7 +2073,7 @@ program big_test
   call check_ok(ne, 186, d)
 
   do i = 1, n
-  call check_int2(ne, 186, i, ci8(i), iq(i))
+  call check_int2(ne, 186, i, int(ci8(i)), int(iq(i)))
   end do
 
 ! 187: fgd_constants_r4 check
@@ -2120,7 +2121,7 @@ program big_test
   call check_ok(ne, 191, d)
 
   do i = 1, n
-  call check_int2(ne, 191, i, int(ci1(i)), iq(i))
+  call check_int2(ne, 191, i, int(ci1(i)), int(iq(i)))
   end do
 
 ! 192: fgd_mconstants_i2 check
@@ -2128,7 +2129,7 @@ program big_test
   call check_ok(ne, 192, d)
 
   do i = 1, n
-  call check_int2(ne, 192, i, int(ci2(i)), iq(i))
+  call check_int2(ne, 192, i, int(ci2(i)), int(iq(i)))
   end do
 
 ! 193: fgd_mconstants_i4 check
@@ -2136,7 +2137,7 @@ program big_test
   call check_ok(ne, 193, d)
 
   do i = 1, n
-  call check_int2(ne, 193, i, ci4(i), iq(i))
+  call check_int2(ne, 193, i, ci4(i), int(iq(i)))
   end do
 
 ! 194: fgd_mconstants_i8 check
@@ -2144,7 +2145,7 @@ program big_test
   call check_ok(ne, 194, d)
 
   do i = 1, n
-  call check_int2(ne, 194, i, ci8(i), iq(i))
+  call check_int2(ne, 194, i, int(ci8(i)), int(iq(i)))
   end do
 
 ! 195: fgd_mconstants_r4 check
@@ -2224,8 +2225,8 @@ program big_test
   call check_ok(ne, 203, d)
   call check_int2(ne, 203, 1, n, 280)
 
-  m = fgd_getdata_r8(d, 'data', GD_HERE, 0, 1, 0, cr8)
-  call check_int2(ne, 203, 2, m, 8)
+  n = fgd_getdata_r8(d, 'data', GD_HERE, 0, 1, 0, cr8)
+  call check_int2(ne, 203, 2, n, 8)
 
   do i=1,8
   call check_dbl2(ne, 203, i, cr8(i), 16d0 + i)
@@ -2419,19 +2420,27 @@ program big_test
   call check_int(ne, 225, n, -1)
 
 ! 226: fgd_fragment_affixes check
-  call fgd_fragment_affixes(fields(1), fields(2), d, 1)
+  l = flen
+  n = flen
+  call fgd_fragment_affixes(fields(1), l, fields(2), n, d, 1)
   call check_ok(ne, 226, d)
-  call check_str2(ne, 226, 1, fields(1), 'A')
-  call check_str2(ne, 226, 2, fields(2), 'Z')
+  call check_int2(ne, 226, 1, l, flen)
+  call check_str2(ne, 226, 2, fields(1), 'A')
+  call check_int2(ne, 226, 3, n, flen)
+  call check_str2(ne, 226, 4, fields(2), 'Z')
 
 ! 227: fgd_alter_affixes check
   call fgd_alter_affixes(d, 1, 'B', '')
   call check_ok2(ne, 227, 1, d)
 
-  call fgd_fragment_affixes(fields(1), fields(2), d, 1)
+  l = flen
+  n = flen
+  call fgd_fragment_affixes(fields(1), l, fields(2), n, d, 1)
   call check_ok2(ne, 227, 2, d)
-  call check_str2(ne, 227, 3, fields(1), 'B')
-  call check_str2(ne, 227, 3, fields(2), '')
+  call check_int2(ne, 226, 3, l, flen)
+  call check_str2(ne, 227, 4, fields(1), 'B')
+  call check_int2(ne, 226, 5, n, flen)
+  call check_str2(ne, 227, 6, fields(2), '')
 
 ! 228: fgd_entry (MPLEX) check
   n = fgd_entry(d, 'mplex', ent)
@@ -2480,7 +2489,20 @@ program big_test
   call check_int2(ne, 231, 3, ent%count_val, 5)
   call check_str2(ne, 231, 4, ent%field(1), 'in3')
   call check_str2(ne, 231, 5, ent%field(2), 'in4')
-  call check_dbl2(ne, 231, 6, ent%count_max, 7)
+  call check_int2(ne, 231, 6, ent%count_max, 7)
+
+! 232: fgd_tokenise check
+  l = slen
+  call fgd_tokenise(str, l, d, '"test1 test2" test3\ test4 test5', 1)
+  call check_ok2(ne, 232, 1, d)
+  call check_int2(ne, 232, 2, l, slen)
+  call check_str2(ne, 232, 3, str, 'test1 test2')
+
+  l = slen
+  call fgd_tokenise(str, l, d, '"test1 test2" test3\ test4 test5', 2)
+  call check_ok2(ne, 232, 4, d)
+  call check_int2(ne, 232, 5, l, slen)
+  call check_str2(ne, 232, 6, str, 'test3 test4')
 
  
 

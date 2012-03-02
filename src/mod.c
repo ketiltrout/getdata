@@ -1640,7 +1640,7 @@ int gd_alter_spec(DIRFILE* D, const char* line, int move)
     standards = D->standards;
 
   /* start parsing */
-  n_cols = _GD_Tokenise(D, line, &outstring, &tok_pos, in_cols,
+  n_cols = _GD_Tokenise(D, line, &outstring, &tok_pos, MAX_IN_COLS, in_cols,
       "dirfile_alter_spec()", 0, standards, D->flags & GD_PERMISSIVE);
 
   if (D->error) {
@@ -1740,7 +1740,7 @@ int gd_malter_spec(DIRFILE* D, const char* line, const char* parent, int move)
     standards = D->standards;
 
   /* start parsing */
-  n_cols = _GD_Tokenise(D, line, &outstring, &tok_pos, in_cols,
+  n_cols = _GD_Tokenise(D, line, &outstring, &tok_pos, MAX_IN_COLS, in_cols,
       "dirfile_malter_spec()", 0, standards, D->flags & GD_PERMISSIVE);
 
   if (!D->error) {

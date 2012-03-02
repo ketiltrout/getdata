@@ -1903,6 +1903,18 @@ CheckSimple2(231, 3, ent.count_val, 3)
 CheckSimple2(231, 4, ent.in_fields, ( 'in3', 'in4' ))
 CheckSimple2(231, 5, ent.count_max, 7)
 
+# 232: gd_tokenise check
+try:
+  str = d.tokenise("\"test1 test2\" test3\ test4");
+except:
+  CheckOK2(232, 1)
+CheckSimple2(232, 2, str, "test1 test2")
+
+try:
+  str = d.tokenise()
+except:
+  CheckOK2(232, 3)
+CheckSimple2(232, 4, str, "test3 test4")
  
 
 

@@ -279,7 +279,7 @@ static void gdp_to_entry(gd_entry_t *E, SV *sv, const char *pkg,
   while (SvROK(sv))
     sv = SvRV(sv);
 
-  if (SvTYPE(sv) != SVt_PVHV) 
+  if (SvTYPE(sv) != SVt_PVHV)
     croak("%s::%s() - Entry must be hash", pkg, func);
 
   GDP_EHASH_FETCH_UV("field_type", field_type, gd_entype_t);
@@ -435,7 +435,7 @@ static void gdp_convert_from_perl(void *dest, SV *src, gd_type_t type,
     case GD_UNKNOWN:
       ;
   }
-  
+
   dreturnvoid();
 }
 
@@ -460,7 +460,7 @@ static struct gdp_din gdp_convert_data(SV *d, I32 items, I32 ax, size_t idx,
       func);
 
   /* argument grokking goes thus (in order!):
-   * if d == undef, the remaining arguments are taken to be data 
+   * if d == undef, the remaining arguments are taken to be data
    * if d == reference to an array, the array is taken to be data, and
    *            remaining arguments ignored
    * if there is exactly one argument after d, d is taken as a type code
@@ -487,7 +487,7 @@ static struct gdp_din gdp_convert_data(SV *d, I32 items, I32 ax, size_t idx,
   if (din.arg_type == GDP_DATA_IN_LIST) {
     din.nsamp = items - idx;
     din.type = gdp_get_type(&ST(idx), pkg, func);
-  } else if (din.arg_type == GDP_DATA_IN_REF) { 
+  } else if (din.arg_type == GDP_DATA_IN_REF) {
     if (SvTYPE((SV*)av) != SVt_PVAV)
       croak("%s::%s() - Expected array reference, but found some other "
           "type of object", pkg, func);
@@ -812,7 +812,7 @@ static void * gdp_unpack(SV **sp, const void *data, size_t n, gd_type_t type)
   AV *av = NULL;
 
   if (!sp) {
-    av = newAV();  
+    av = newAV();
     av_extend(av, n - 1);
   }
 
@@ -1699,7 +1699,7 @@ put_carray(dirfile, field_code, d, ...)
     GetData::Dirfile::put_carray = 1
   CODE:
     dtrace("%p, \"%s\", %p, ...[%li]", dirfile, field_code, d, (long)items - 3);
-    
+
     din = gdp_convert_data(d, items, ax, 2, gdp_package, "put_carray");
 
     RETVAL = gd_put_carray(dirfile, field_code, din.type, din.data_in);
@@ -1727,7 +1727,7 @@ put_carray_slice(dirfile, field_code, start, d, ...)
   CODE:
     dtrace("%p, \"%s\", %lli, %p, ...[%li]", dirfile, field_code,
         (long long)start, d, (long)items - 4);
-    
+
     din = gdp_convert_data(d, items, ax, 3, gdp_package, "put_carray");
 
     RETVAL = gd_put_carray_slice(dirfile, field_code, start, din.nsamp,
@@ -1757,7 +1757,7 @@ add_carray(dirfile, field_code, const_type, fragment_index, d, ...)
   CODE:
     dtrace("%p, \"%s\", %03x, %i, %p, ...[%li]", dirfile, field_code,
         const_type, fragment_index, d, (long)items - 5);
-    
+
     din = gdp_convert_data(d, items, ax, 4, gdp_package, "put_carray");
 
     RETVAL = gd_add_carray(dirfile, field_code, const_type, din.nsamp,
@@ -1787,7 +1787,7 @@ madd_carray(dirfile, parent, field_code, const_type, d, ...)
   CODE:
     dtrace("%p, \"%s\", \"%s\", %03x, %p, ...[%li]", dirfile, parent,
         field_code, const_type, d, (long)items - 5);
-    
+
     din = gdp_convert_data(d, items, ax, 4, gdp_package, "put_carray");
 
     RETVAL = gd_madd_carray(dirfile, parent, field_code, const_type, din.nsamp,
@@ -1989,5 +1989,29 @@ fragment_affixes(dirfile, fragment_index)
 
     dreturnvoid();
 
+void
+tokenise(dirfile, string)
+  DIRFILE * dirfile
+  const char * string
+  PREINIT:
+    int i;
+    char *token;
+    GDP_DIRFILE_ALIAS;
+  ALIAS:
+    GetData::Dirfile::tokenise = 1
+  PPCODE:
+    dtrace("%p, \"%s\"", dirfile, string);
+
+    /* return an array of all the parsed tokens */
+    for (token = gd_tokenise(dirfile, string); token;
+      token = gd_tokenise(dirfile, NULL))
+    {
+      GDP_UNDEF_ON_ERROR();
+
+      GDP_PUSHpvz(token);
+      free(token);
+    }
+
+    dreturnvoid();
 
 INCLUDE: simple_funcs.xs

@@ -48,7 +48,7 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  stream = fopen(data, "w" FOPEN_TEXT);
+  stream = fopen(data, "w");
   for (i = 0; i < 256; ++i)
     fprintf(stream, "%i\n", i);
   fclose(stream);
