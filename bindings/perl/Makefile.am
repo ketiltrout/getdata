@@ -30,13 +30,15 @@ endif
 lib:
 	mkdir lib
 
-lib/GetData.xs: $(srcdir)/GetData.xs lib
+lib/GetData.xs: $(srcdir)/GetData.xs
+	$(MAKE) lib
 	cat $< > $@
 
-lib/typemap: $(srcdir)/typemap lib
+lib/typemap: $(srcdir)/typemap
+	$(MAKE) lib
 	cat $< > $@
 
-lib/simple_funcs.xs: $(srcdir)/simple_funcs.xsin $(srcdir)/simple_funcs.pl lib
+lib/simple_funcs.xs: $(srcdir)/simple_funcs.xsin $(srcdir)/simple_funcs.pl
 	$(PERL) $(srcdir)/simple_funcs.pl $< > $@
 
 make_parameters.sed: ../make_parameters ../../src/getdata.h
@@ -52,9 +54,9 @@ GetData.pm: $(srcdir)/GetData.pm.in make_parameters.sed $(srcdir)/funclist.pl \
 		$(PERL) $(srcdir)/funclist.pl lib/GetData.xs lib/simple_funcs.xs > $@
 	chmod a-w $@
 
-all-local: blib/arch/auto/GetData/GetData.so
+all-local: lib blib/arch/auto/GetData/GetData.bs
 
-blib/arch/auto/GetData/GetData.so: Build
+blib/arch/auto/GetData/GetData.bs: Build
 	$(PERL) $< build
 
 .PRECIOUS: Build
