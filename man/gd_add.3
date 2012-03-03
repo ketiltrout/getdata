@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_add 3 "1 March 2012" "Version 0.8.0" "GETDATA"
+.TH gd_add 3 "2 March 2012" "Version 0.8.0" "GETDATA"
 .SH NAME
 gd_add, gd_madd \(em add a field to a dirfile
 .SH SYNOPSIS
@@ -106,7 +106,8 @@ The library was unable to allocate memory.
 .B GD_E_BAD_CODE
 The field name provided in
 .IR entry -> field
-contained invalid characters. Alternately, the
+contained invalid characters or did not contain the affected fragment's prefix
+or suffix. Alternately, the
 .I parent
 field code was not found, or was already a metafield.
 .TP

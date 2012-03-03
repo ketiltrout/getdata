@@ -1,3 +1,14 @@
+2012-03-03   D. V. Wiebe <getdata@ketiltrout.net> svn:???
+	* src/getdata.h.in bindings/make_parameters.c: Added GD_TRUNCSUB open flag.
+	* src/open.c (_GD_TruncDir): Added.
+	* src/open.c (_GD_CreateDirfile): Call _GD_TruncDir.
+	* test/trunc_dir.c test/trunc_truncsub.c: Added.
+
+	* src/fragment.c (gd_alter_affixes): Handle GD_E_ACCMODE and GD_E_PROTECTED
+	errors.
+
+	* bindings/f77/fgetdata.c (GDDELA): Correct call to gd_delete_alias.
+
 2012-03-02   D. V. Wiebe <getdata@ketiltrout.net> svn:664
 	* src/errors.c: Added GD_E_ARGUMENT:GD_E_ARG_NODATA.
 	* src/parse.c (_GD_Tokenise): Take number of columns to return.

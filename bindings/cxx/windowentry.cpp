@@ -78,7 +78,8 @@ int WindowEntry::SetThreshold(gd_triplet_t threshold)
 {
   int ret = 0;
 
-  dtrace("{%g,%llX,%lli}", threshold.r, threshold.u, threshold.i);
+  dtrace("{%g,%llX,%lli}", threshold.r, (unsigned long long)threshold.u,
+      (long long)threshold.i);
 
   E.u.window.threshold = threshold;
 

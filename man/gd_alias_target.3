@@ -1,0 +1,80 @@
+.\" gd_alias_target.3.  The gd_alias_target man page.
+.\"
+.\" Copyright (C) 2012 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_alias_target 3 "1 January 2012" "Version 0.8.0" "GETDATA"
+.SH NAME
+gd_alias_target \(em return the target of an alias defined in a dirfile database
+.SH SYNOPSIS
+.B #include <getdata.h>
+.HP
+.nh
+.ad l
+.BI "const char *gd_alias(DIRFILE *" dirfile ", const char *" alias_name );
+.hy
+.ad n
+.SH DESCRIPTION
+The
+.BR gd_alias_target ()
+function queries a dirfile(5) database specified by
+.I dirfile
+and returns the target field code of the alias specified by
+.IR alias_name .
+
+The
+.I dirfile
+argument must point to a valid DIRFILE object previously created by a call to
+.BR gd_open (3).
+
+Note: the target may itself be the an alias, which will have its own target.  To
+obtain the canonical name of the field ultimately referenced by
+.IR alias_name ,
+pass it to
+.BR gd_entry (3)
+and inspect the
+.I field
+member of the gd_entry_t structure returned.
+
+.SH RETURN VALUE
+Upon successful completion,
+.BR gd_alias_target ()
+returns a pointer to a read-only character string containing the name of the
+target of the specified alias.  On error,
+.BR gd_alias_target ()
+returns NULL and sets the dirfile error a non-zero error value.  Possible error
+values are:
+.TP 8
+.B GD_E_BAD_CODE
+The name
+.I alias_name
+was not found in the dirfile.
+.B GD_E_BAD_DIRFILE
+The supplied dirfile was invalid.
+.TP
+.B GD_E_BAD_FIELD_TYPE
+The entry specified by
+.I alias_name
+was not an alias.
+.PP
+The dirfile error may be retrieved by calling
+.BR gd_error (3).
+A descriptive error string for the last error encountered can be obtained from
+a call to
+.BR gd_error_string (3).
+
+.SH SEE ALSO
+.BR gd_aliases (3),
+.BR gd_entry (3),
+.BR gd_open (3),
+.BR dirfile (5)

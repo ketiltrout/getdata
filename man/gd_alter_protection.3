@@ -1,6 +1,6 @@
 .\" gd_alter_protection.3.  The gd_alter_protection man page.
 .\"
-.\" Copyright (C) 2008, 2010 D. V. Wiebe
+.\" Copyright (C) 2008, 2010, 2012 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_alter_protection 3 "21 July 2010" "Version 0.7.0" "GETDATA"
+.TH gd_alter_protection 3 "1 January 2012" "Version 0.8.0" "GETDATA"
 .SH NAME
 gd_alter_protection \(em modify the protection level of a dirfile fragment
 .SH SYNOPSIS
@@ -71,6 +71,11 @@ error value.  Possible error values are:
 .TP 8
 .B GD_E_ACCMODE
 The specified dirfile was opened read-only.
+.TP
+.B GD_E_ARGUMENT
+The supplied
+.I protection_level
+was invalid.
 .TP
 .B GD_E_BAD_DIRFILE
 The supplied dirfile was invalid.

@@ -330,7 +330,7 @@ SPF_TESTS=spf spf_alias spf_alias_missing spf_alias_meta \
 
 TELL_TESTS=tell ${TELL64}
 
-TRUNC_TESTS=trunc trunc_rdonly trunc_rofs
+TRUNC_TESTS=trunc trunc_dir trunc_rdonly trunc_rofs trunc_truncsub
 
 UNCLUDE_TESTS=unclude unclude_del unclude_move
 

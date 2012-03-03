@@ -2,7 +2,7 @@
 .\"
 .\" @configure_input@
 .\"
-.\" Copyright (C) 2008, 2010 D. V. Wiebe
+.\" Copyright (C) 2008, 2010, 2012 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -15,7 +15,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_alter_endianness 3 "21 October 2010" "Version 0.7.0" "GETDATA"
+.TH gd_alter_endianness 3 "1 January 2012" "Version 0.8.0" "GETDATA"
 .SH NAME
 gd_alter_endianness \(em modify the byte sex of fields in a dirfile
 .SH SYNOPSIS
@@ -98,6 +98,11 @@ The specified dirfile was opened read-only.
 .TP
 .B GD_E_ALLOC
 The library was unable to allocate memory.
+.TP
+.B GD_E_ARGUMENT
+The supplied
+.I byte_sex
+was invalid.
 .TP
 .B GD_E_BAD_DIRFILE
 The supplied dirfile was invalid.

@@ -110,6 +110,7 @@ static struct {
   CONSTANT(ARM_ENDIAN,       "GD_AE",  2),
   CONSTANT(NOT_ARM_ENDIAN,   "GD_NA",  2),
   CONSTANT(PERMISSIVE,       "GD_PM",  1),
+  CONSTANT(TRUNCSUB,         "GD_TS",  1),
 
   CONSTANT(AUTO_ENCODED,     "GDE_AU", 1),
   CONSTANT(BZIP2_ENCODED,    "GDE_BZ", 2),

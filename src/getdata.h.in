@@ -440,6 +440,7 @@ typedef int (*gd_parser_callback_t)(gd_parser_data_t*, void*);
 #endif
 
 #define GD_PERMISSIVE     0x00004000 /* be permissive */
+#define GD_TRUNCSUB       0x00008000 /* truncate subdirfiles */
 
 #define GD_ENCODING       0x0F000000 /* mask */
 #define GD_AUTO_ENCODED   0x00000000 /* Encoding scheme unknown */

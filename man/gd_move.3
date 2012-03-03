@@ -1,6 +1,6 @@
 .\" gd_move.3.  The gd_move man page.
 .\"
-.\" Copyright (C) 2008, 2009, 2010 D. V. Wiebe
+.\" Copyright (C) 2008, 2009, 2010, 2012 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,9 +13,9 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_move 3 "21 July 2010" "Version 0.7.0" "GETDATA"
+.TH gd_move 3 "1 January 2012" "Version 0.8.0" "GETDATA"
 .SH NAME
-gd_move \(em move a dirfile field between format specification fragments
+gd_move, gd_move_alias \(em move a dirfile entry between format specification fragments
 .SH SYNOPSIS
 .B #include <getdata.h>
 .HP
@@ -23,6 +23,9 @@ gd_move \(em move a dirfile field between format specification fragments
 .ad l
 .BI "int gd_move(DIRFILE *" dirfile ", const char"
 .BI * field_code ", int " new_fragment ", int " move_data );
+.HR
+.BI "int gd_move_alias(DIRFILE *" dirfile ", const char"
+.BI * alias_name ", int " new_fragment );
 .hy
 .ad n
 .SH DESCRIPTION
@@ -33,15 +36,28 @@ function transfers the field specified by
 which should not have a representation suffix, defined in the dirfile
 specified by
 .IR dirfile
-from it's current format specification fragment to the fragment index by
+from it's current format specification fragment to the fragment indexed by
 .IR new_fragment .
 If the field is already defined in the fragment index by
 .IR new_fragment ,
 this function does nothing.
 
+The
+.BR gd_move_alias ()
+function behaves similarly, but moves the alias named
+.I alias_name
+to the new fragment.  (Passing
+.I alias_name
+to
+.BR gd_move ()
+as
+.I field_code
+will result in the field ultimately pointed to be the alias being moved, and
+not the alias itself.)
+
 If the flag
 .I move_data
-is non-zero, and
+is one, and
 .I field_code
 specifies a
 .B RAW

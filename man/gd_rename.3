@@ -1,6 +1,6 @@
 .\" gd_rename.3.  The gd_rename man page.
 .\"
-.\" Copyright (C) 2008, 2009, 2010, 2011 D. V. Wiebe
+.\" Copyright (C) 2008, 2009, 2010, 2011, 2012 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_rename 3 "19 August 2011" "Version 0.8.0" "GETDATA"
+.TH gd_rename 3 "1 January 2012" "Version 0.8.0" "GETDATA"
 .SH NAME
 gd_rename \(em change the name of a dirfile field
 .SH SYNOPSIS
@@ -22,7 +22,7 @@ gd_rename \(em change the name of a dirfile field
 .nh
 .ad l
 .BI "int gd_rename(DIRFILE *" dirfile ", const char"
-.BI * old_code ", const char *" new_name ", int " move_data );
+.BI * old_code ", const char *" new_name ", unsigned " flags );
 .hy
 .ad n
 .SH DESCRIPTION

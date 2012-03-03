@@ -83,6 +83,10 @@ gd_add_string
 .HP
 .BI "int gd_add_string(DIRFILE *" dirfile ", const char *" field_name ,
 .BI "const char *" value ", int " fragment_index );
+.HP
+.BI "int gd_add_window(DIRFILE *" dirfile ", const char *" field_name ,
+.BI "const char *" in_field ", const char *" check_field ", gd_windop_t"
+.IB windop ", gd_triplet_t " threshold );
 .hy
 .ad n
 .SH DESCRIPTION
@@ -206,7 +210,8 @@ The library was unable to allocate memory.
 .B GD_E_BAD_CODE
 The
 .IR field_name
-argument contained invalid characters.
+argument contained invalid characters or did not contain the affected fragment's
+prefix or suffix.
 .TP
 .B GD_E_BAD_DIRFILE
 The supplied dirfile was invalid.

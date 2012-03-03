@@ -1,6 +1,6 @@
 .\" gd_fragment_index.3.  The gd_fragment_index man page.
 .\"
-.\" Copyright (C) 2008, 2009, 2010, 2011 D. V. Wiebe
+.\" Copyright (C) 2008, 2009, 2010, 2011, 2012 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_fragment_index 3 "18 August 2011" "Version 0.8.0" "GETDATA"
+.TH gd_fragment_index 3 "1 January 2012" "Version 0.8.0" "GETDATA"
 .SH NAME
 gd_fragment_index \(em retrieve the fragment containing a dirfile field
 .SH SYNOPSIS
@@ -22,7 +22,7 @@ gd_fragment_index \(em retrieve the fragment containing a dirfile field
 .nh
 .ad l
 .BI "int gd_fragment_index(const DIRFILE *" dirfile ", const char"
-.BI * field_code );
+.BI * entry_name );
 .hy
 .ad n
 .SH DESCRIPTION
@@ -30,11 +30,16 @@ The
 .BR gd_fragment_index ()
 function queries a dirfile(5) database specified by
 .I dirfile
-and returns the index number of the fragment defining the field specified by
-.IR field_code .
-If
-.I field_code
-contains a representation suffix, it will be ignored.
+and returns the index number of the fragment defining the field or alias
+specified by
+.IR entry_name ,
+which may not contain a representation suffix.
+
+This is one of the few GetData functions which does not resolve aliases:
+supplying the name of an alias as
+.I entry_name
+will return the index of the fragment containing the alias itself and not that
+of its target.
 .SH RETURN VALUE
 Upon successful completion,
 .BR gd_fragment_index ()
@@ -47,17 +52,12 @@ values are:
 The library was unable to allocate memory.
 .TP
 .B GD_E_BAD_CODE
-The field specified by
-.I field_code
+The entry specified by
+.I entry_name
 was not found in the database.
 .TP
 .B GD_E_BAD_DIRFILE
 The supplied dirfile was invalid.
-.TP
-.B GD_E_BAD_REPR
-The representation suffix specified in
-.I field_code
-was not recognised.
 .PP
 The dirfile error may be retrieved by calling
 .BR gd_error (3).

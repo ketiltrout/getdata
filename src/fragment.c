@@ -211,6 +211,19 @@ int gd_alter_affixes(DIRFILE *D, int index, const char *prefix,
     return -1;
   }
 
+  if ((D->flags & GD_ACCMODE) == GD_RDONLY) {
+    _GD_SetError(D, GD_E_ACCMODE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  if (D->fragment[D->fragment[index].parent].protection & GD_PROTECT_FORMAT) {
+    _GD_SetError(D, GD_E_PROTECTED, GD_E_PROTECTED_FORMAT, NULL, 0,
+        D->fragment[D->fragment[index].parent].cname);
+    dreturn("%i", -1);
+    return -1;
+  }
+
   /* affixes to keep */
   if (!prefix)
     prefix = D->fragment[index].prefix;

@@ -1,6 +1,6 @@
 .\" gd_alter_bit.3.  The gd_alter_bit man page.
 .\"
-.\" Copyright (C) 2008, 2009, 2010 D. V. Wiebe
+.\" Copyright (C) 2008, 2009, 2010, 2012 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_alter_bit 3 "3 November 2010" "Version 0.7.0" "GETDATA"
+.TH gd_alter_bit 3 "1 January 2012" "Version 0.8.0" "GETDATA"
 .SH NAME
 gd_alter_bit, gd_alter_carray, gd_alter_clincom, gd_alter_const,
 gd_alter_cpolynom, gd_alter_crecip, gd_alter_divide, gd_alter_lincom,
@@ -71,6 +71,10 @@ gd_alter_raw, gd_alter_recip, gd_alter_sbit
 .HP
 .BI "int gd_alter_sbit(DIRFILE *" dirfile ", const char *" field_code ,
 .BI "const char *" in_field ", gd_bit_t " bitnum ", gd_bit_t " numbits );
+.HP
+.BI "int gd_alter_window(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "const char *" in_field ", const char *" check_field ,
+.BI "gd_windop_t " windop ", gd_triplet_t " threshold );
 .hy
 .ad n
 .SH DESCRIPTION
@@ -130,8 +134,7 @@ and
 .BR gd_alter_cpolynom ()
 take an array of length
 .I poly_ord
-+ 1
-containing the polynomial co-efficients
++ 1 containing the polynomial co-efficients
 .RI ( a " or " ca ).
 
 Some field parameters have special values which indicate no change should be
@@ -148,6 +151,10 @@ is -1, or if
 .IR data_type ", or " const_type
 are equal to
 .BR GD_NULL , 
+or if
+.I windop
+is
+.BR GD_WINDOP_UNK ,
 these parameters will not be modified.
 
 All field parameters introduced with this interface must contain literal

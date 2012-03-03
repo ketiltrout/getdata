@@ -1,4 +1,4 @@
-/* Copyright (C) 2011 D. V. Wiebe
+/* Copyright (C) 2008-2011 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -18,50 +18,53 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
+/* Truncating a dirfile should succeed cleanly */
 #include "test.h"
+
+#include <stdlib.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <string.h>
+#include <errno.h>
 
 int main(void)
 {
   const char *filedir = "dirfile";
+  const char *subdir = "dirfile/sub";
   const char *format = "dirfile/format";
-  const char *format1 = "dirfile/format1";
-  const char *format2 = "dirfile/format2";
-  const char *format_data = "B CONST UINT8 1\nINCLUDE format1 A Z\n";
-  const char *format1_data = "/INCLUDE format2 B Y\n";
-  const char *format2_data = "data RAW UINT8 11\n";
-  int fd, ret, e1, e2, r = 0;
+  const char *data = "dirfile/data";
+  int fd, error, unlink_data, rmdir_sub, stat_format, r = 0;
+  struct stat buf;
   DIRFILE *D;
 
   rmdirfile();
   mkdir(filedir, 0777);
+  mkdir(subdir, 0777);
 
   fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data, strlen(format_data));
+  write(fd, format, strlen(format));
   close(fd);
 
-  fd = open(format1, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format1_data, strlen(format1_data));
-  close(fd);
+  close(open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666));
 
-  fd = open(format2, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format2_data, strlen(format2_data));
-  close(fd);
-
-  D = gd_open(filedir, GD_RDWR);
-  ret = gd_alter_affixes(D, 1, NULL, "");
-  e1 = gd_error(D);
-  gd_spf(D, "ABdataY");
-  e2 = gd_error(D);
+  D = gd_open(filedir, GD_RDWR | GD_TRUNC | GD_VERBOSE);
+  error = gd_error(D);
   gd_close(D);
 
-  unlink(format2);
-  unlink(format1);
+  unlink_data = unlink(data);
+  CHECKI(unlink_data, -1);
+
+  stat_format = stat(format, &buf);
+  CHECKI(stat_format, 0);
+  CHECK((buf.st_size > 0),buf.st_size,"%lli","%s",(long long)buf.st_size,"> 0");
+
+  rmdir_sub = rmdir(subdir);
+  CHECKI(rmdir_sub, 0);
+
   unlink(format);
   rmdir(filedir);
 
-  CHECKI(ret,0);
-  CHECKI(e1,0);
-  CHECKI(e2,0);
-
+  CHECKI(error,GD_E_OK);
   return r;
 }

@@ -21,13 +21,135 @@
  */
 #include "internal.h"
 
+/* crawl the directory, and delete everything */
+static int _GD_TruncDir(DIRFILE *D, int dirfd, const char *dirfile, int root)
+{
+  int format_trunc = 0;
+  DIR* dir;
+  struct dirent* lamb;
+  struct stat statbuf;
+
+  dtrace("%p, %i, \"%s\", %i", D, dirfd, dirfile, root);
+
+#if defined(HAVE_FDOPENDIR) && !defined(GD_NO_DIR_OPEN)
+  /* only need to duplicate the fd of the root directory; otherwise this
+   * function will close the fd */
+  if (root && (fd = dup(dirfd)) == -1) {
+    _GD_SetError(D, GD_E_TRUNC, GD_E_TRUNC_DIR, dirfile, errno, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+  dir = fdopendir(fd);
+#else
+  dir = opendir(dirfile);
+#endif
+
+  if (dir == NULL) {
+    _GD_SetError(D, GD_E_TRUNC, GD_E_TRUNC_DIR, dirfile, errno, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  while ((lamb = readdir(dir)) != NULL) {
+    if (lamb->d_name[0] == '.' && lamb->d_name[1] == '\0') {
+      continue; /* skip current dir */
+    } else if (lamb->d_name[0] == '.' && lamb->d_name[1] == '.' &&
+        lamb->d_name[2] == '\0')
+    {
+      continue; /* skip parent dir */
+    } else {
+      char *name = (char *)malloc(strlen(dirfile) + strlen(lamb->d_name) + 2);
+      sprintf(name, "%s%c%s", dirfile, GD_DIRSEP, lamb->d_name);
+      if (
+#if defined(HAVE_FSTATAT) && !defined(GD_NO_DIR_OPEN)
+        fstatat(dirfd, lamb->d_name, &statbuf, AT_SYMLINK_NOFOLLOW)
+#elif HAVE_LSTAT
+        lstat(name, &statbuf)
+#else
+        stat(name, &statbuf)
+#endif
+        )
+      {
+        _GD_SetError(D, GD_E_TRUNC, GD_E_TRUNC_STAT, name, errno, NULL);
+        free(name);
+        closedir(dir);
+        dreturn("%i", -1);
+        return -1;
+      }
+      free(name);
+    }
+
+    /* check file type */
+    switch (statbuf.st_mode & S_IFMT) {
+      case S_IFREG:
+      case S_IFBLK:
+      case S_IFIFO:
+      case S_IFCHR:
+      case S_IFLNK:
+        if (root && strcmp(lamb->d_name, "format") == 0) {
+          /* don't delete the format file; we'll truncate it later */
+          format_trunc = 1;
+        } else if (gd_UnlinkAt(D, dirfd, lamb->d_name, 0)) {
+          char *name = (char *)malloc(strlen(dirfile) + strlen(lamb->d_name)
+              + 2);
+          sprintf(name, "%s%c%s", dirfile, GD_DIRSEP, lamb->d_name);
+          _GD_SetError(D, GD_E_TRUNC, GD_E_TRUNC_UNLINK, name, errno, NULL);
+          free(name);
+          closedir(dir);
+          dreturn("%i", -1);
+          return -1;
+        }
+        break;
+      case S_IFDIR:
+        /* descend into subdir if requested */
+        if (D->flags & GD_TRUNCSUB) {
+          int subdirfd;
+          char *subdir = (char *)malloc(strlen(dirfile) + strlen(lamb->d_name)
+              + 2);
+          sprintf(subdir, "%s%c%s", dirfile, GD_DIRSEP, lamb->d_name);
+#ifdef GD_NO_DIR_OPEN
+          subdirfd = 0; /* unused */
+#else
+          if ((
+#ifdef HAVE_OPENAT
+                subdirfd = openat(dirfd, lamb->d_name, O_RDONLY)
+#else
+                subdirfd = open(subdir, O_RDONLY)
+#endif
+              ) < 0)
+          {
+            _GD_SetError(D, GD_E_TRUNC, GD_E_TRUNC_STAT, subdir, errno, NULL);
+            free(subdir);
+            dreturn("%i", -1);
+            return -1;
+          }
+#endif
+          /* descend -- this will close subdirfd */
+          _GD_TruncDir(D, subdirfd, subdir, 0);
+          free(subdir);
+
+          /* delete */
+#ifdef HAVE_UNLINKAT___
+          unlinkat(dirfd, lamb->d_name, /* AT_...? */);
+#else
+          rmdir(subdir);
+#endif
+        }
+    }
+  }
+
+  closedir(dir);
+  dreturn("%i", format_trunc);
+  return format_trunc;
+}
+
 /* attempt to open or create a new dirfile - set error appropriately */
 static FILE *_GD_CreateDirfile(DIRFILE *restrict D, int dirfd, int dir_error,
     char *restrict dirfile)
 {
+#ifndef GD_NO_DIR_OPEN
   struct stat statbuf;
-  DIR* dir;
-  struct dirent* lamb;
+#endif
   int fd = -1;
   int format_error = 0, format_trunc = 0;
   FILE* fp = NULL;
@@ -103,7 +225,6 @@ static FILE *_GD_CreateDirfile(DIRFILE *restrict D, int dirfd, int dir_error,
    * (specifically, we haven't bothered to see if the format file is parsable)
    * could be problematic if users use GD_TRUNC cavalierly. */
   if (D->flags & GD_TRUNC && !format_error) {
-    /* This file isn't going to be around much longer */
     close(fd);
 
     /* can't truncate a read-only dirfile */
@@ -114,64 +235,12 @@ static FILE *_GD_CreateDirfile(DIRFILE *restrict D, int dirfd, int dir_error,
       return NULL;
     }
 
-#ifdef HAVE_FDOPENDIR
-    /* crawl the directory, and delete everything */
-    if ((fd = dup(dirfd)) == -1) {
-      _GD_SetError(D, GD_E_TRUNC, GD_E_TRUNC_DIR, dirfile, errno, NULL);
+    format_trunc = _GD_TruncDir(D, dirfd, dirfile, 1);
+    if (format_trunc < 0) {
       free(dirfile);
       dreturn("%p", NULL);
       return NULL;
     }
-    dir = fdopendir(fd);
-#else
-    dir = opendir(dirfile);
-#endif
-
-    if (dir == NULL) {
-      _GD_SetError(D, GD_E_TRUNC, GD_E_TRUNC_DIR, dirfile, errno, NULL);
-      free(dirfile);
-      dreturn("%p", NULL);
-      return NULL;
-    }
-
-    while ((lamb = readdir(dir)) != NULL) {
-      if (gd_StatAt(D, dirfd, lamb->d_name, &statbuf, AT_SYMLINK_NOFOLLOW)) {
-        char *name = (char *)malloc(strlen(dirfile) + strlen(lamb->d_name) + 2);
-        strcat(strcat(strcpy(name, dirfile), "/"), lamb->d_name);
-
-        _GD_SetError(D, GD_E_TRUNC, GD_E_TRUNC_STAT, name, errno, NULL);
-        free(dirfile);
-        free(name);
-        closedir(dir);
-        dreturn("%p", NULL);
-        return NULL;
-      }
-
-      /* only delete regular files */
-      if (S_ISREG(statbuf.st_mode)
-#ifdef S_ISLNK
-          || S_ISLNK(statbuf.st_mode)
-#endif
-          )
-      {
-        /* don't delete the format file; we'll truncate it later */
-        if (strcmp(lamb->d_name, "format") == 0) {
-          format_trunc = 1;
-        } else if (gd_UnlinkAt(D, dirfd, lamb->d_name, 0)) {
-          char *name = (char *)malloc(strlen(dirfile) + strlen(lamb->d_name)
-              + 2);
-          strcat(strcat(strcpy(name, dirfile), "/"), lamb->d_name);
-          _GD_SetError(D, GD_E_TRUNC, GD_E_TRUNC_UNLINK, name, errno, NULL);
-          free(dirfile);
-          free(name);
-          closedir(dir);
-          dreturn("%p", NULL);
-          return NULL;
-        }
-      }
-    }
-
-    closedir(dir);
   }
 
   /* Create, if needed */
@@ -300,7 +369,7 @@ DIRFILE* gd_cbopen(const char* filedir, unsigned long flags,
    * so get the current directory, so that we're protected against the caller
    * using chdir.
    */
-  
+
   /* canonicalise the path */
   dirfile = _GD_CanonicalPath(NULL, filedir);
 
@@ -463,7 +532,7 @@ DIRFILE* gd_cbopen(const char* filedir, unsigned long flags,
       _GD_SetError(D, GD_E_BAD_REFERENCE, GD_E_REFERENCE_TYPE, NULL, 0,
           ref_name);
     else
-      D->reference_field = E; 
+      D->reference_field = E;
     free(ref_name);
   }
 

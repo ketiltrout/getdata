@@ -3615,7 +3615,7 @@ void F77_FUNC(gddela, GDDELA) (const int *dirfile, const char *field_code,
   char *fc = (char *)malloc(*field_code_l + 1);
 
   gd_delete_alias(_GDF_GetDirfile(*dirfile), _GDF_CString(fc, field_code,
-        *field_code_l), (unsigned)flags);
+        *field_code_l), (unsigned int)*flags);
 
   free(fc);
   dreturnvoid();

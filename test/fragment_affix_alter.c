@@ -43,7 +43,7 @@ int main(void)
   write(fd, format1_data, strlen(format1_data));
   close(fd);
 
-  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
+  D = gd_open(filedir, GD_RDWR);
   ret = gd_alter_affixes(D, 1, "C", NULL);
   e1 = gd_error(D);
   gd_fragment_affixes(D, 1, &prefix, &suffix);
