@@ -20,6 +20,53 @@
  */
 #include "internal.h"
 
+static gd_entry_t *_GD_FixName(DIRFILE *restrict D, char **restrict buffer,
+    const char *name, int frag, int *restrict offset)
+{
+  gd_entry_t *P;
+  char *ptr;
+
+  dtrace("%p, %p, \"%s\", %i, %p", D, buffer, name, frag, offset);
+
+  /* Apply prefix and suffix */
+  *buffer = ptr = _GD_MungeFromFrag(D, NULL, frag, name, offset);
+
+  if (ptr == NULL) {
+    free(ptr);
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  P = _GD_CheckParent(D, &ptr, -1, 0);
+
+  if (D->error) {
+    free(*buffer);
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  if (P) {
+    char *temp2;
+    /* make the new name -- this may be different because P may have been
+     * dealiased */
+
+    *offset = strlen(P->field) + 1;
+    temp2 = _GD_Malloc(D, *offset + strlen(ptr) + 1);
+    if (temp2 == NULL) {
+      free(*buffer);
+      dreturn("%p", NULL);
+      return NULL;
+    }
+
+    sprintf(temp2, "%s/%s", P->field, ptr);
+    free(*buffer);
+    *buffer = temp2;
+  }
+
+  dreturn("%p [\"%s\", %i]", P, *buffer, *offset);
+  return P;
+}
+
 /* add an entry - returns the added entry on success. */
 static gd_entry_t *_GD_Add(DIRFILE *restrict D,
     const gd_entry_t *restrict entry, const char *restrict parent)
@@ -92,42 +139,14 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
     temp_buffer[offset - 1] = '/';
     strcpy(temp_buffer + offset, entry->field);
   } else {
-    char *ptr;
-    /* Apply prefix and suffix */
-    temp_buffer = ptr = _GD_MungeFromFrag(D, NULL, entry->fragment_index,
-        entry->field, &offset);
-
-    if (temp_buffer == NULL) {
-      dreturn("%p", NULL);
-      return NULL;
-    }
-
-    /* look for a Barth-style meta field.  We do this after mungification
-     * to ensure that the parent field ends up with the right prefix and
-     * suffix */
-    P = _GD_CheckParent(D, &ptr, -1, 0);
+    /* this will munge the name and take care of detecting Barth-style metafield
+     * definitions */
+    P = _GD_FixName(D, &temp_buffer, entry->field, entry->fragment_index,
+        &offset);
 
     if (D->error) {
-      free(temp_buffer);
       dreturn("%p", NULL);
       return NULL;
-    }
-
-    if (P) {
-      /* make the new name -- this may be different because P may have been
-       * dealiased */
-      offset = strlen(P->field) + 1;
-      char *temp2 = _GD_Malloc(D, offset + strlen(ptr) + 1);
-      if (temp2 == NULL) {
-        free(temp_buffer);
-        dreturn("%p", NULL);
-        return NULL;
-      }
-
-      dwatch("%s", ptr);
-      sprintf(temp2, "%s/%s", P->field, ptr);
-      free(temp_buffer);
-      temp_buffer = temp2;
     }
   }
 
@@ -1943,9 +1962,9 @@ static int _GD_AddAlias(DIRFILE *restrict D, const char *restrict parent,
       strcpy(munged_code + offset, field_code);
     }
   } else
-    /* Apply prefix and suffix */
-    munged_code = _GD_MungeFromFrag(D, NULL, fragment_index, field_code,
-        &offset);
+    /* this will munge the name and take care of detecting Barth-style metafield
+     * definitions */
+    P = _GD_FixName(D, &munged_code, field_code, fragment_index, &offset);
 
   if (D->error) {
     free(munged_code);

@@ -61,6 +61,8 @@ int gd_system(const char* command)
         __VA_ARGS__); } \
   } while(0)
 
+#define strcmpn(n,v) (((n) == NULL) ? 1 : strcmp((n),(v)))
+
 #ifdef GD_NO_C99_API
 #define CHECKC(n,v)    CHECK(sqrt(((n)[0]-(v)[0])*((n)[0]-(v)[0]) + \
       (((n)[1]-(v)[1])*((n)[1]-(v)[1])))>1e-10,n,"%.15g;%.15g","%.15g;%.15g",\
@@ -89,8 +91,8 @@ int gd_system(const char* command)
 #define CHECKPi(i,n)   CHECKi(i,(n) != NULL,n,"%p","%s",n,"NULL")
 #define CHECKPN(n)     CHECK((n) == NULL,n,"%p","%s",n,"non-NULL")
 #define CHECKPNi(i,n)  CHECKi(i,(n) == NULL,n,"%p","%s",n,"non-NULL")
-#define CHECKS(n,v)    CHECK(strcmp((n),(v)),n,"\"%s\"","\"%s\"",(n),(v));
-#define CHECKSi(n,v)   CHECKi(i,strcmp((n),(v)),n,"\"%s\"","\"%s\"",(n),(v));
+#define CHECKS(n,v)    CHECK(strcmpn((n),(v)),n,"\"%s\"","\"%s\"",(n),(v));
+#define CHECKSi(n,v)   CHECKi(i,strcmpn((n),(v)),n,"\"%s\"","\"%s\"",(n),(v));
 #define CHECKSp(n,v)   CHECK(strncmp((n),(v), sizeof(v) - 1),n,"\"%s\"",\
     "\"%s\"",(n),(v));
 #define CHECKEOS(n,v)  CHECK(strcmp((n) + strlen(n) - sizeof(v) + 1,(v)),n,\

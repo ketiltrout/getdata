@@ -100,7 +100,7 @@ int gd_StatAt(const DIRFILE* D, int dirfd, const char* name, struct stat* buf,
   dtrace("%p, %i, \"%s\", %p, %x", D, dirfd, name, buf, flags);
 
   path = _GD_MakeFullPathOnly(D, dirfd, name);
-#ifdef HAVE_LSTAT
+#if defined(HAVE_LSTAT) && defined(AT_SYMLINK_NOFOLLOW)
   if (flags & AT_SYMLINK_NOFOLLOW)
     ret = lstat(path, buf);
   else

@@ -234,7 +234,7 @@ void _GD_SetError(DIRFILE* D, int error, int suberror,
 
   if (D->flags & GD_VERBOSE) {
     char *error_string = gd_error_string(D, NULL, 0);
-    fprintf(stderr, PACKAGE_NAME ": %s\n", error_string);
+    fprintf(stderr, "libgetdata: %s\n", error_string);
     free(error_string);
   }
 

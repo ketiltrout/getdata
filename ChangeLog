@@ -1,4 +1,16 @@
-2012-03-03   D. V. Wiebe <getdata@ketiltrout.net> svn:???
+2012-03-06   D. V. Wiebe <getdata@ketiltrout.net> svn:667
+	* src/errors.c: Change prefix on verbose output to "libgetdata".
+
+	* src/add.c (_GD_FixName): Added.
+	* src/add.c (_GD_Add _GD_AddAlias): Call _GD_FixName.
+	* test/add_alias_meta.c: Added.
+
+	* src/open.c (_GD_TruncDir): Fix subdirectory truncation.
+	* src/internal.h: Remove conditional defition of AT_SYMLINK_NOFOLLOW.
+	* src/compat.c (gd_StatAt): Check for definition of AT_SYMLINK_NOFOLLOW
+	before use.
+
+2012-03-03   D. V. Wiebe <getdata@ketiltrout.net> svn:665
 	* src/getdata.h.in bindings/make_parameters.c: Added GD_TRUNCSUB open flag.
 	* src/open.c (_GD_TruncDir): Added.
 	* src/open.c (_GD_CreateDirfile): Call _GD_TruncDir.

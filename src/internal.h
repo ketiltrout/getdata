@@ -442,10 +442,6 @@ typedef struct stat gd_stat64_t;
 # endif
 #endif
 
-#ifndef AT_SYMLINK_NOFOLLOW
-#define AT_SYMLINK_NOFOLLOW 0x100
-#endif
-
 #ifdef HAVE_OPENAT
 # ifdef GETDATA_DEBUG
 #  define gd_unused_d /**/
