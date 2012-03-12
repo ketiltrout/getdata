@@ -141,7 +141,7 @@ off64_t _GD_SampIndSeek(struct _gd_raw_file *file, off64_t sample,
   dtrace("%p, %llx, 0x%X, 0x%X", file, (long long)sample, data_type, mode);
 
   if (file->pos == sample) {
-    dreturn("%lli", sample);
+    dreturn("%lli", (long long)sample);
     return sample;
   }
 
@@ -184,7 +184,7 @@ off64_t _GD_SampIndSeek(struct _gd_raw_file *file, off64_t sample,
   }
   file->pos = f->p = sample;
 
-  dreturn("%llx", f->p);
+  dreturn("%" PRIi64 , f->p);
   return (off64_t)(f->p);
 }
 
@@ -283,7 +283,7 @@ static ssize_t _GD_GetNRec(struct gd_siedata *f, size_t size)
     return -1;
   }
 
-  dreturn("%llx", statbuf.st_size / size);
+  dreturn("%zi", (ssize_t)(statbuf.st_size / size));
   return (ssize_t)(statbuf.st_size / size);
 }
 
@@ -407,7 +407,10 @@ ssize_t _GD_SampIndWrite(struct _gd_raw_file *restrict file,
 
   /* truncate the file if necessary */
   if (rin < rout)
-    gd_truncate(fileno(f->fp), nrec - rout + rin);
+    if (gd_truncate(fileno(f->fp), nrec - rout + rin)) {
+      dreturn("%i", -1);
+      return -1;
+    }
 
   /* update the current record */
   memcpy(f->d, (char *)p + (rin - 1) * size, size);

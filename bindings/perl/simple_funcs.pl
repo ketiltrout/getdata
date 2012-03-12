@@ -41,10 +41,13 @@ sub printmunge {
   my ($t, $n) = @$_;
 
   return "&$n" if ($t =~ /&$/);
-  return "(long long)$n" if ($t eq "off64_t" or $t eq "gd_shift_t");
+  return "(long long)$n" if ($t eq "off64_t" or $t eq "gd_shift_t" or
+    $t eq "gdpu_shift_t" or $t eq "int64_t");
+  return "(unsigned long long)$n" if ($t eq "uint64_t");
   return "creal($n), cimag($n)" if ($t eq "_Complex double" or
     $t eq "gdpu_complex");
-  return "$n.r, $n.u, $n.i" if ($t eq "gd_triplet_t");
+  return "$n.r, (unsigned long long)$n.u, (long long)$n.i"
+  if ($t eq "gd_triplet_t");
   return $n;
 }
 

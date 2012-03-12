@@ -159,7 +159,7 @@ static void _GD_FillFileFrame(void *dataout, gd_type_t rtype, off64_t s0,
 {
   size_t i;
 
-  dtrace("%p, 0x%X, %lli, %zu", dataout, rtype, s0, n);
+  dtrace("%p, 0x%X, %lli, %zu", dataout, rtype, (long long)s0, n);
 
   switch (rtype) {
     case GD_INT8:
@@ -258,7 +258,8 @@ static size_t _GD_DoRaw(DIRFILE *restrict D, gd_entry_t *restrict E, off64_t s0,
   char *databuffer;
   size_t zero_pad = 0;
 
-  dtrace("%p, %p, %lli, %zu, 0x%X, %p)", D, E, s0, ns, return_type, data_out);
+  dtrace("%p, %p, %lli, %zu, 0x%X, %p)", D, E, (long long)s0, ns, return_type,
+      data_out);
 
   if (s0 < E->EN(raw,spf) * D->fragment[E->fragment_index].frame_offset)
     zero_pad = E->EN(raw,spf) * D->fragment[E->fragment_index].frame_offset -
@@ -962,8 +963,8 @@ static size_t _GD_DoLincom(DIRFILE *restrict D, gd_entry_t *restrict E,
   const gd_type_t ntype = (return_type & GD_COMPLEX) ? GD_COMPLEX128
     : GD_FLOAT64;
 
-  dtrace("%p, %p, %lli, %zu, 0x%X, %p", D, E, first_samp, num_samp, return_type,
-      data_out);
+  dtrace("%p, %p, %lli, %zu, 0x%X, %p", D, E, (long long)first_samp, num_samp,
+      return_type, data_out);
 
   /* input field checks */
   for (i = 0; i < E->EN(lincom,n_fields); ++i) {
@@ -1096,8 +1097,8 @@ static size_t _GD_DoMultiply(DIRFILE *restrict D, gd_entry_t *restrict E,
   off64_t first_samp2;
   gd_type_t type2;
 
-  dtrace("%p, %p, %lli, %zu, 0x%X, %p", D, E, first_samp, num_samp, return_type,
-      data_out);
+  dtrace("%p, %p, %lli, %zu, 0x%X, %p", D, E, (long long)first_samp, num_samp,
+      return_type, data_out);
 
   /* Check input fields */
   if (_GD_BadInput(D, E, 0, 1)) {
@@ -1191,8 +1192,8 @@ static size_t _GD_DoRecip(DIRFILE *restrict D, gd_entry_t *restrict E,
 {
   size_t n_read;
 
-  dtrace("%p, %p, %lli, %zu, 0x%X, %p", D, E, first_samp, num_samp, return_type,
-      data_out);
+  dtrace("%p, %p, %lli, %zu, 0x%X, %p", D, E, (long long)first_samp, num_samp,
+      return_type, data_out);
 
   /* Check input fields */
   if (_GD_BadInput(D, E, 0, 1)) {
@@ -1237,8 +1238,8 @@ static size_t _GD_DoDivide(DIRFILE *restrict D, gd_entry_t *restrict E,
   off64_t first_samp2;
   gd_type_t type2;
 
-  dtrace("%p, %p, %lli, %zu, 0x%X, %p", D, E, first_samp, num_samp, return_type,
-      data_out);
+  dtrace("%p, %p, %lli, %zu, 0x%X, %p", D, E, (long long)first_samp, num_samp,
+      return_type, data_out);
 
   /* Check input fields */
   if (_GD_BadInput(D, E, 0, 1) || _GD_BadInput(D, E, 1, 1)) {
@@ -1333,8 +1334,8 @@ static size_t _GD_DoBit(DIRFILE *restrict D, gd_entry_t *restrict E,
   const uint64_t mask = (E->EN(bit,numbits) == 64) ? 0xffffffffffffffffULL :
     ((uint64_t)1 << E->EN(bit,numbits)) - 1;
 
-  dtrace("%p, %p, %i, %lli, %zu, 0x%X, %p", D, E, is_signed, first_samp,
-      num_samp, return_type, data_out);
+  dtrace("%p, %p, %i, %lli, %zu, 0x%X, %p", D, E, is_signed,
+      (long long)first_samp, num_samp, return_type, data_out);
 
   if (_GD_BadInput(D, E, 0, 1)) {
     dreturn("%i", 0);
@@ -1386,8 +1387,8 @@ static size_t _GD_DoPhase(DIRFILE *restrict D, gd_entry_t *restrict E,
 {
   size_t n_read;
 
-  dtrace("%p, %p, %lli, %zu, 0x%X, %p", D, E, first_samp, num_samp, return_type,
-      data_out);
+  dtrace("%p, %p, %lli, %zu, 0x%X, %p", D, E, (long long)first_samp, num_samp,
+      return_type, data_out);
 
   if (_GD_BadInput(D, E, 0, 1)) {
     dreturn("%i", 0);
@@ -1410,8 +1411,8 @@ static size_t _GD_DoLinterp(DIRFILE *restrict D, gd_entry_t *restrict E,
   size_t n_read = 0;
   double* data_in;
 
-  dtrace("%p, %p, %lli, %zu, 0x%X, %p", D, E, first_samp, num_samp, return_type,
-      data_out);
+  dtrace("%p, %p, %lli, %zu, 0x%X, %p", D, E, (long long)first_samp, num_samp,
+      return_type, data_out);
 
   if (E->e->u.linterp.table_len < 0) {
     _GD_ReadLinterpFile(D, E);
@@ -1460,8 +1461,8 @@ static size_t _GD_DoPolynom(DIRFILE *restrict D, gd_entry_t *restrict E,
 {
   size_t n_read;
 
-  dtrace("%p, %p, %lli, %zu, 0x%X, %p", D, E, first_samp, num_samp, return_type,
-      data_out);
+  dtrace("%p, %p, %lli, %zu, 0x%X, %p", D, E, (long long)first_samp, num_samp,
+      return_type, data_out);
 
   if (_GD_BadInput(D, E, 0, 1)) {
     dreturn("%i", 0);
@@ -1506,8 +1507,8 @@ static size_t _GD_DoWindow(DIRFILE *restrict D, gd_entry_t *restrict E,
   off64_t first_samp2;
   gd_type_t type2;
 
-  dtrace("%p, %p, %lli, %zu, 0x%X, %p", D, E, first_samp, num_samp, return_type,
-      data_out);
+  dtrace("%p, %p, %lli, %zu, 0x%X, %p", D, E, (long long)first_samp, num_samp,
+      return_type, data_out);
 
   /* Check input fields */
   if (_GD_BadInput(D, E, 0, 1)) {
@@ -1612,8 +1613,8 @@ static size_t _GD_DoMplex(DIRFILE *restrict D, gd_entry_t *restrict E,
   const size_t size = GD_SIZE(return_type);
   off64_t first_samp2;
 
-  dtrace("%p, %p, %lli, %zu, 0x%X, %p", D, E, first_samp, num_samp, return_type,
-      data_out);
+  dtrace("%p, %p, %lli, %zu, 0x%X, %p", D, E, (long long)first_samp, num_samp,
+      return_type, data_out);
 
   /* Check input fields */
   if (_GD_BadInput(D, E, 0, 1)) {
@@ -1772,8 +1773,8 @@ static size_t _GD_DoConst(DIRFILE *restrict D, const gd_entry_t *restrict E,
 {
   gd_type_t type;
 
-  dtrace("%p, %p, %lli, %zu, 0x%X, %p", D, E, first, len, return_type,
-      data_out);
+  dtrace("%p, %p, %lli, %zu, 0x%X, %p", D, E, (long long)first, len,
+      return_type, data_out);
 
   type = _GD_ConstType(D, E->EN(scalar,const_type));
   _GD_ConvertType(D, (char *)E->e->u.scalar.d + first * GD_SIZE(type), type,
@@ -1816,7 +1817,7 @@ size_t _GD_DoField(DIRFILE *restrict D, gd_entry_t *restrict E, int repr,
   int out_of_place = 0;
 
   dtrace("%p, %p(%s), %i, %lli, %zu, 0x%X, %p", D, E, E->field, repr,
-      first_samp, num_samp, return_type, data_out);
+      (long long)first_samp, num_samp, return_type, data_out);
 
   if (++D->recurse_level >= GD_MAX_RECURSE_LEVEL) {
     _GD_SetError(D, GD_E_RECURSE_LEVEL, GD_E_RECURSE_CODE, NULL, 0, E->field);
@@ -1951,7 +1952,8 @@ size_t gd_getdata64(DIRFILE* D, const char *field_code_in, off64_t first_frame,
   gd_spf_t spf;
 
   dtrace("%p, \"%s\", %lli, %lli, %zu, %zu, 0x%X, %p", D, field_code_in,
-      first_frame, first_samp, num_frames, num_samp, return_type, data_out);
+      (long long)first_frame, (long long)first_samp, num_frames, num_samp,
+      return_type, data_out);
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);

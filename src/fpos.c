@@ -316,8 +316,8 @@ off64_t gd_seek64(DIRFILE *D, const char *field_code_in, off64_t frame_num,
   int repr, is_index = 0;
   unsigned int mode = (whence & GD_SEEK_WRITE) ? GD_FILE_WRITE : GD_FILE_READ;
 
-  dtrace("%p, \"%s\", %lli, %lli, 0x%X", D, field_code_in, frame_num,
-      sample_num, whence);
+  dtrace("%p, \"%s\", %lli, %lli, 0x%X", D, field_code_in, (long long)frame_num,
+      (long long)sample_num, whence);
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);

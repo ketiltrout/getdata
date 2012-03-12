@@ -64,7 +64,7 @@ off64_t _GD_AsciiSeek(struct _gd_raw_file* file, off64_t count,
 {
   char line[64];
 
-  dtrace("%p, %lli, <unused>, 0x%X", file, count, mode);
+  dtrace("%p, %lli, <unused>, 0x%X", file, (long long)count, mode);
 
   if (count < file->pos) {
     rewind((FILE *)file->edata);
@@ -388,6 +388,6 @@ off64_t _GD_AsciiSize(int dirfd, struct _gd_raw_file* file,
 
   fclose(stream);
 
-  dreturn("%lli", n);
+  dreturn("%lli", (long long)n);
   return n;
 }

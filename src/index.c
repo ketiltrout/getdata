@@ -29,7 +29,7 @@ static double _GD_Extrapolate(DIRFILE *D, gd_entry_t *E, int repr, double value,
   double sample = NAN;
   double data[2];
 
-  dtrace("%p, %p, %i, %g, %lli, %i", D, E, repr, value, limit, eof);
+  dtrace("%p, %p, %i, %g, %lli, %i", D, E, repr, value, (long long)limit, eof);
 
   /* load data */
   n = _GD_DoField(D, E, repr, limit - eof, 2, GD_FLOAT64, data);
@@ -60,8 +60,8 @@ static double _GD_GetIndex(DIRFILE* D, gd_entry_t *E, int repr, double value,
   double low_v, high_v, field_start_v, c_v;
   size_t n;
 
-  dtrace("%p, %p, %i, %g, %lli, %lli", D, E, repr, value, field_start,
-      field_end);
+  dtrace("%p, %p, %i, %g, %lli, %lli", D, E, repr, value,
+      (long long)field_start, (long long)field_end);
 
   /* find the end-points */
   n = _GD_DoField(D, E, repr, field_start, 1, GD_FLOAT64, &low_v);
@@ -214,8 +214,8 @@ double gd_framenum_subset64(DIRFILE* D, const char* field_code_in,
   int repr = GD_REPR_NONE;
   gd_spf_t spf;
 
-  dtrace("%p, \"%s\", %g, %lli, %lli", D, field_code_in, value, field_start,
-      field_end);
+  dtrace("%p, \"%s\", %g, %lli, %lli", D, field_code_in, value,
+      (long long)field_start, (long long)field_end);
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);

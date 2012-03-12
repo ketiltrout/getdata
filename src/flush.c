@@ -1065,7 +1065,7 @@ uint64_t _GD_FindVersion(DIRFILE *D)
   }
 
   D->flags |= GD_HAVE_VERSION;
-  dreturn("0x%04llx", D->av);
+  dreturn("0x%04" PRIx64, D->av);
   return D->av;
 }
 
