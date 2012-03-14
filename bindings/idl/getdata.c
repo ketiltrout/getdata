@@ -3040,6 +3040,7 @@ void gdidl_flush(int argc, IDL_VPTR argv[], char *argk)
     IDL_STRING field_code;
     int field_code_x;
     int noclose;
+    int nosync;
   } KW_RESULT;
   KW_RESULT kw;
 
@@ -3047,7 +3048,7 @@ void gdidl_flush(int argc, IDL_VPTR argv[], char *argk)
 
   GDIDL_KW_INIT_ERROR;
   kw.field_code_x = 0;
-  kw.noclose = 0;
+  kw.noclose = kw.nosync = 0;
 
   static IDL_KW_PAR kw_pars[] = {
     GDIDL_KW_PAR_ERROR,
@@ -3055,7 +3056,7 @@ void gdidl_flush(int argc, IDL_VPTR argv[], char *argk)
     { "FIELD_CODE", IDL_TYP_STRING, 1, 0, IDL_KW_OFFSETOF(field_code_x),
       IDL_KW_OFFSETOF(field_code) },
     { "NOCLOSE", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(noclose) },
-    { "NOSYNC", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(noclose) },
+    { "NOSYNC", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(nosync) },
     { NULL }
   };
 
