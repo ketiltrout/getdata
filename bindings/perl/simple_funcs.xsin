@@ -152,3 +152,4 @@ int alter_mplex(DIRFILE *dirfile, const char *field_code, const char *in_field,
 int madd_mplex(DIRFILE *dirfile, const char *parent, const char *field_code,
     const char *in_field, const char *count_field, gd_count_t count_val,
     gd_count_t count_max)
+int raw_close(DIRFILE *dirfile, const char *field_code)

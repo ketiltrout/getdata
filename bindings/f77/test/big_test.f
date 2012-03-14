@@ -2070,6 +2070,10 @@ C     232: GDTOKE check
       CALL CHKIN2(ne, 232, 5, l, slen)
       CALL CHKST2(ne, 232, 6, str, 'test3 test4')
 
+C     233: GDRCLO check
+      CALL GDRCLO(d, 'data', 4)
+      CALL CHKEOK(ne, 233, d)
+
 
 
 

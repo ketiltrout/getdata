@@ -1,7 +1,24 @@
 # @configure_input@
 
 use Module::Build;
-my $build = Module::Build->new(
+
+# divert up_to_date to allow consideration of simple_funcs.xs... is there an
+# easier way to do this?
+my $class = Module::Build->subclass(
+  class => "GetData::Build",
+  code => <<'SUBCLASS' );
+
+sub up_to_date {
+  my ($self, $source, $derived) = @_;
+
+  if ($source eq "lib/GetData.xs") {
+    return 0 if (not $self->up_to_date("lib/simple_funcs.xs", $derived));
+  }
+  return $self->SUPER::up_to_date($source, $derived);
+}
+SUBCLASS
+
+my $build = $class->new(
   dist_abstract => "Perl bindings to the GetData library",
   dist_author => 'The GetData Project <@PACKAGE_BUGREPORT@>',
   dist_version_from => "GetData.pm",

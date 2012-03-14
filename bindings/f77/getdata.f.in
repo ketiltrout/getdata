@@ -328,6 +328,8 @@ C     Corresponding to gd_put_string(3)
       EXTERNAL GDPTST
 C     Corresponding to gd_putdata(3)
       EXTERNAL GDPUTD
+C     Corresponding to gd_raw_close(3)
+      EXTERNAL GDRCLO
 C     Corresponding to gd_reference(3)
       EXTERNAL GDREFE
 C     Correpsonding to gd_rename(3)

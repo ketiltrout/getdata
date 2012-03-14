@@ -511,6 +511,11 @@ int Dirfile::Sync(const char* field_code) const
   return gd_sync(D, field_code);
 }
 
+int Dirfile::RawClose(const char* field_code) const
+{
+  return gd_raw_close(D, field_code);
+}
+
 int Dirfile::UnHide(const char* field_code) const
 {
   return gd_unhide(D, field_code);

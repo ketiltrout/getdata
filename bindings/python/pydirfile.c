@@ -909,6 +909,30 @@ static PyObject* gdpy_dirfile_sync(struct gdpy_dirfile_t* self,
   return Py_None;
 }
 
+static PyObject* gdpy_dirfile_raw_close(struct gdpy_dirfile_t* self,
+    PyObject* args, PyObject* keys)
+{
+  dtrace("%p, %p, %p", self, args, keys);
+
+  char* keywords[] = { "field_code", NULL };
+  const char* field_code = NULL;
+
+  if (!PyArg_ParseTupleAndKeywords(args, keys, "|s:pygetdata.dirfile.raw_close",
+        keywords, &field_code))
+  {
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  gd_raw_close(self->D, field_code);
+
+  PYGD_CHECK_ERROR(self->D, NULL);
+
+  Py_INCREF(Py_None);
+  dreturn("%p", Py_None);
+  return Py_None;
+}
+
 static PyObject* gdpy_dirfile_include(struct gdpy_dirfile_t* self,
     PyObject* args, PyObject* keys)
 {
@@ -2532,10 +2556,8 @@ static PyMethodDef gdpy_dirfile_methods[] = {
   },
   {"flush", (PyCFunction)gdpy_dirfile_flush, METH_VARARGS | METH_KEYWORDS,
     "flush([field_code])\n\n"
-      "Flush pending writes to the specified field to disk.  This does\n"
-      "not flush pending metadata changes.  For that, use metaflush.\n"
-      "However, if field_code is omitted, all data *and* metadata will be\n"
-      "written to disk.  See gd_flush(3)."
+      "Equivalent to sync([field_code]) && raw_close([field_code]).\n"
+      "See gd_flush(3)."
   },
   {"bof", (PyCFunction)gdpy_dirfile_getbof, METH_VARARGS | METH_KEYWORDS,
     "bof(field_code)\n\n"
@@ -2954,8 +2976,18 @@ static PyMethodDef gdpy_dirfile_methods[] = {
   },
   {"sync", (PyCFunction)gdpy_dirfile_sync, METH_VARARGS | METH_KEYWORDS,
     "sync([field_code])\n\n"
-      "This is similar to using Flush, but without closing the affected\n"
-      "files.  See gd_sync(3)."
+      "Flush pending writes to the specified field to disk.  This does\n"
+      "not flush pending metadata changes.  For that, use metaflush.\n"
+      "However, if field_code is omitted, all data *and* metadata will be\n"
+      "written to disk.  See gd_sync(3)."
+  },
+  {"raw_close", (PyCFunction)gdpy_dirfile_raw_close,
+    METH_VARARGS | METH_KEYWORDS,
+    "raw_close([field_code])\n\n"
+      "Close any open raw data files associated with field_code, freeing\n"
+      /* ------- handy ruler ---------------------------------------------| */
+      "resources which may be used for other purposes.  If field_code is\n"
+      "omitted, all open raw data files are closed.  See gd_raw_close(3)."
   },
   {"naliases", (PyCFunction)gdpy_dirfile_naliases, METH_VARARGS | METH_KEYWORDS,
     "naliases(field_code)\n\n"
@@ -3005,7 +3037,6 @@ static PyMethodDef gdpy_dirfile_methods[] = {
   },
   {"tokenise", (PyCFunction)gdpy_dirfile_tokenise, METH_VARARGS | METH_KEYWORDS,
     "tokenise([string])\n\n"
-      /* ------- handy ruler ---------------------------------------------| */
       "If 'string' is given, runs the GetData tokeniser on 'string' and\n"
       "returns the first token.  If 'string' is not given, returns\n"
       "subsequent tokens (one per call) of the last string that was\n"

@@ -244,3 +244,4 @@
 230 F9CIpP gd_madd_mplex
 231 F9CIpP gd_alter_mplex
 232 F9CIpP gd_tokenise
+233 F9CIpP gd_raw_close

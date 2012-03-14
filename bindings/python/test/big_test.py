@@ -1915,6 +1915,13 @@ try:
 except:
   CheckOK2(232, 3)
 CheckSimple2(232, 4, str, "test3 test4")
+
+# 233: gd_raw_close check
+try:
+  d.raw_close('data')
+except:
+  CheckOK(233)
+
  
 
 

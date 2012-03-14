@@ -943,6 +943,9 @@ extern int gd_move(DIRFILE *dirfile, const char *field_code, int new_fragment,
 extern DIRFILE *gd_open(const char *dirfilename,
     unsigned long int flags) gd_nonnull ((1));
 
+extern int gd_raw_close(DIRFILE *dirfile,
+    const char *field_code) gd_nonnull ((1));
+
 extern int gd_rename(DIRFILE *dirfile, const char *old_code,
     const char *new_name, unsigned flags) gd_nonnull ((1,2,3));
 

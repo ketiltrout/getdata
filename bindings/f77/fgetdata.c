@@ -3765,6 +3765,24 @@ void F77_FUNC(gdsync, GDSYNC) (const int* dirfile, const char* field_code,
   dreturnvoid();
 }
 
+/* gd_raw_close wrapper */
+void F77_FUNC(gdrclo, GDRCLO) (const int* dirfile, const char* field_code,
+    const int* field_code_l)
+{
+  dtrace("%i, %p, %i", *dirfile, field_code, *field_code_l);
+
+  if (field_code_l == 0)
+    gd_sync(_GDF_GetDirfile(*dirfile), NULL);
+  else {
+    char *out = (char *)malloc(*field_code_l + 1);
+    gd_raw_close(_GDF_GetDirfile(*dirfile), _GDF_CString(out, field_code,
+          *field_code_l));
+    free(out);
+  }
+
+  dreturnvoid();
+}
+
 void F77_FUNC(gdtoke, GDTOKE) (char *toke, int *toke_l, const int *dirfile,
     const char *string, const int *string_l, const int *n)
 {

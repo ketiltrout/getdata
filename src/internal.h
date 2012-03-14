@@ -1003,7 +1003,7 @@ void _GD_FixEndianness(void* databuffer, size_t size, size_t ns);
 #define _GD_FileSwapBytes(D,i) ((D)->fragment[i].byte_sex & GD_BIG_ENDIAN)
 #endif
 int _GD_FiniRawIO(DIRFILE*, const gd_entry_t*, int, int);
-void _GD_Flush(DIRFILE *restrict, gd_entry_t *restrict, int);
+void _GD_Flush(DIRFILE *restrict, gd_entry_t *restrict, int, int);
 void _GD_FlushMeta(DIRFILE* D, int fragment, int force);
 void _GD_FreeE(DIRFILE *restrict, gd_entry_t *restrict, int);
 off64_t _GD_GetEOF(DIRFILE *restrict, const gd_entry_t *restrict,

@@ -22,11 +22,11 @@
 
 #define GD_MAX_PRETTY_FIELD_WIDTH 80
 
-void _GD_Flush(DIRFILE* D, gd_entry_t *E, int clo)
+void _GD_Flush(DIRFILE *D, gd_entry_t *E, int syn, int clo)
 {
   int i;
 
-  dtrace("%p, %p, %i", D, E, clo);
+  dtrace("%p, %p, %i, %i", D, E, syn, clo);
 
   if (++D->recurse_level >= GD_MAX_RECURSE_LEVEL) {
     _GD_SetError(D, GD_E_RECURSE_LEVEL, GD_E_RECURSE_CODE, NULL, 0, E->field);
@@ -41,13 +41,15 @@ void _GD_Flush(DIRFILE* D, gd_entry_t *E, int clo)
           ((_gd_ef[E->e->u.raw.file[0].subenc].flags & GD_EF_OOP) &&
            (E->e->u.raw.file[1].idata >= 0)))
       {
-        if ((D->flags & GD_ACCMODE) == GD_RDWR &&
+        if (syn && (D->flags & GD_ACCMODE) == GD_RDWR &&
             (E->e->u.raw.file[0].mode & GD_FILE_WRITE) &&
             _gd_ef[E->e->u.raw.file[0].subenc].sync != NULL &&
             (*_gd_ef[E->e->u.raw.file[0].subenc].sync)(E->e->u.raw.file))
+        {
           _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno,
               NULL);
-        else if (clo && _GD_FiniRawIO(D, E, E->fragment_index, GD_FINIRAW_KEEP))
+        } else if (clo && _GD_FiniRawIO(D, E, E->fragment_index,
+              GD_FINIRAW_KEEP))
         {
           _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno,
               NULL);
@@ -56,13 +58,13 @@ void _GD_Flush(DIRFILE* D, gd_entry_t *E, int clo)
       break;
     case GD_LINCOM_ENTRY:
       for (i = 2; i < E->EN(lincom,n_fields); ++i)
-        _GD_Flush(D, E->e->entry[i], clo);
+        _GD_Flush(D, E->e->entry[i], syn, clo);
       /* fallthrough */
     case GD_MULTIPLY_ENTRY:
     case GD_DIVIDE_ENTRY:
     case GD_WINDOW_ENTRY:
     case GD_MPLEX_ENTRY:
-      _GD_Flush(D, E->e->entry[1], clo);
+      _GD_Flush(D, E->e->entry[1], syn, clo);
       /* fallthrough */
     case GD_LINTERP_ENTRY:
     case GD_BIT_ENTRY:
@@ -70,7 +72,7 @@ void _GD_Flush(DIRFILE* D, gd_entry_t *E, int clo)
     case GD_POLYNOM_ENTRY:
     case GD_SBIT_ENTRY:
     case GD_RECIP_ENTRY:
-      _GD_Flush(D, E->e->entry[0], clo);
+      _GD_Flush(D, E->e->entry[0], syn, clo);
     case GD_CONST_ENTRY:
     case GD_CARRAY_ENTRY:
     case GD_STRING_ENTRY:
@@ -688,8 +690,14 @@ static void _GD_FlushFragment(DIRFILE* D, int i, int permissive)
       case GD_TEXT_ENCODED:
         fputs("/ENCODING text\n", stream);
         break;
+      case GD_SIE_ENCODED:
+        fputs("/ENCODING sie\n", stream);
+        break;
       case 0:
         break;
+      case GD_ZZIP_ENCODED:
+      case GD_ZZSLIM_ENCODED:
+        /* XXX do something here ... ? */
       default:
         fprintf(stream, "/ENCODING unknown # (%lx)\n", D->fragment[i].encoding);
         break;
@@ -842,14 +850,14 @@ int gd_rewrite_fragment(DIRFILE* D, int fragment)
   return (D->error == GD_E_OK) ? 0 : -1;
 }
 
-static int _GD_SyncOrClose(DIRFILE* D, const char* field_code, int clo)
+static int _GD_SyncOrClose(DIRFILE* D, const char* field_code, int syn, int clo)
 {
   unsigned int i;
   int repr;
   char *simple_field_code;
   gd_entry_t *E;
 
-  dtrace("%p, \"%s\", %i", D, field_code, clo);
+  dtrace("%p, \"%s\", %i, %i", D, field_code, syn, clo);
 
   _GD_ClearError(D);
 
@@ -860,14 +868,14 @@ static int _GD_SyncOrClose(DIRFILE* D, const char* field_code, int clo)
     if (!D->error)
       for (i = 0; i < D->n_entries; ++i)
         if (D->entry[i]->field_type == GD_RAW_ENTRY)
-          _GD_Flush(D, D->entry[i], clo);
+          _GD_Flush(D, D->entry[i], syn, clo);
   } else {
     /* discard representation */
     E = _GD_FindFieldAndRepr(D, field_code, &simple_field_code, &repr, NULL, 1,
         1);
 
     if (!D->error)
-      _GD_Flush(D, E, clo);
+      _GD_Flush(D, E, syn, clo);
 
     if (field_code != simple_field_code)
       free(simple_field_code);
@@ -883,7 +891,19 @@ int gd_sync(DIRFILE *D, const char *field_code)
 
   dtrace("%p, \"%s\"", D, field_code);
 
-  ret = _GD_SyncOrClose(D, field_code, 0);
+  ret = _GD_SyncOrClose(D, field_code, 1, 0);
+
+  dreturn("%i", ret);
+  return ret;
+}
+
+int gd_raw_close(DIRFILE *D, const char *field_code)
+{
+  int ret;
+
+  dtrace("%p, \"%s\"", D, field_code);
+
+  ret = _GD_SyncOrClose(D, field_code, 0, 1);
 
   dreturn("%i", ret);
   return ret;
@@ -895,7 +915,7 @@ int gd_flush(DIRFILE *D, const char *field_code)
 
   dtrace("%p, \"%s\"", D, field_code);
 
-  ret = _GD_SyncOrClose(D, field_code, 1);
+  ret = _GD_SyncOrClose(D, field_code, 1, 1);
 
   dreturn("%i", ret);
   return ret;

@@ -1639,6 +1639,10 @@ int main(void)
   CHECK_OK2(232, 3);
   CHECK_STRING2(232, 4, str, "test3 test4");
 
+  // 233: gd_raw_close check
+  d->RawClose("data");
+  CHECK_OK(233);
+
 
 
 

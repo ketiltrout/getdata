@@ -91,7 +91,7 @@ int _GD_SampIndOpen(int fd, struct _gd_raw_file *file, int swap,
   }
 
   file->mode = mode;
-  file->pos = -1;
+  file->pos = 0;
   dreturn("%i", 0);
   return 0;
 }
@@ -140,7 +140,7 @@ off64_t _GD_SampIndSeek(struct _gd_raw_file *file, off64_t sample,
 
   dtrace("%p, %llx, 0x%X, 0x%X", file, (long long)sample, data_type, mode);
 
-  if (file->pos == sample) {
+  if (file->pos == sample && f->p >= 0) {
     dreturn("%lli", (long long)sample);
     return sample;
   }

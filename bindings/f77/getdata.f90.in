@@ -2734,6 +2734,13 @@ subroutine fgd_sync (dirfile, field_code)
   call gdsync(dirfile, TRIM(field_code), LEN_TRIM(field_code))
 end subroutine
 
+subroutine fgd_raw_close (dirfile, field_code)
+  integer, intent(in) :: dirfile
+  character (len=*), intent(in) :: field_code
+
+  call gdrclo(dirfile, TRIM(field_code), LEN_TRIM(field_code))
+end subroutine
+
 subroutine fgd_fragment_affixes (prefix, pl, suffix, sl, dirfile, &
 fragment_index)
   character(len=*), intent(out) :: prefix, suffix

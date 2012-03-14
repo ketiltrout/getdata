@@ -1341,6 +1341,10 @@ str = gd_tokenise(d)
 nume += check_ok2(232, 3 ,d)
 nume += check_simple2(232, 4, str, "test3 test4")
 
+; 233: gd_raw_close check
+gd_flush, d, field_code='data', /nosync
+nume += check_ok(233, d)
+
  
 
 

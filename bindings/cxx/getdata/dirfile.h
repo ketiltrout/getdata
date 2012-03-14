@@ -227,6 +227,8 @@ namespace GetData {
 
       size_t PutString(const char *field_code, const char *data_in) const;
 
+      int RawClose(const char *field_code = NULL) const;
+
       GetData::RawEntry *Reference(const char* field_code = NULL) const;
 
       const char *ReferenceFilename();

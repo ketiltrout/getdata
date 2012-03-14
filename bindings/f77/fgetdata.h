@@ -620,6 +620,9 @@ void F77_FUNC(gdalmx, GDALMX) (const int *dirfile, const char *field_code,
 void F77_FUNC(gdsync, GDSYNC) (const int* dirfile, const char* field_code,
     const int* field_code_l);
 
+void F77_FUNC(gdrclo, GDRCLO) (const int* dirfile, const char* field_code,
+    const int* field_code_l);
+
 void F77_FUNC(gdinca, GDINCA) (const int* dirfile, const char* file,
     const int* file_l, const int* fragment_index, const char* prefix,
     const int* prefix_l, const char* suffix, const int* suffix_l,

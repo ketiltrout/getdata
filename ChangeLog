@@ -1,3 +1,28 @@
+2012-03-14   D. V. Wiebe <getdata@ketiltrout.net> svn:671
+	* src/flush.c (_GD_FlushFragment): Write SIE encoding directives.
+
+	* src/sie.c (_GD_SampIndOpen): Initialise file->pos to 0 to avoid issues
+	with _GD_GetFilePos.
+	* src/sie.c (_GD_SampIndSeek): Don't short circuit if no record is loaded.
+
+	* src/flush.c (_GD_Flush _GD_SyncOrClose): Make syncing optional with a new
+	parameter (syn).
+	* src/flush.c (gd_raw_close): Added.
+	* src/clsoe.c (_GD_ShutdownDirfile) src/include.c (gd_uninclude): Don't
+	sync, just close raw files.
+
+	* bindings/python/pydirfile.c (gdpy_dirfile_raw_close)
+	bindings/cxx/dirfile.cpp (Dirfile::RawClose) bindings/perl/simple_funcs.xsin
+	(raw_close) bindings/f77/fgetdata.c (GDRCLO) bindings/f77/getdata.f90.in
+	(fgd_raw_close): Added.
+	* bindings/idl/getdata.c (gdidl_flush): Add /NOSYNC.
+	* bindings/python/test/big_test.py bindings/cxx/test/big_test.cpp
+	bindings/perl/t/big_test.t bindings/f77/test/big_test.f
+	bindings/f77/test/big_test95.f90: Added test 233.
+
+	* bindings/perl/Build.PL.in: subclass Module::Build to properly handle
+	simple_funcs.xs dependency tracking.
+
 2012-03-06   D. V. Wiebe <getdata@ketiltrout.net> svn:667
 	* src/errors.c: Change prefix on verbose output to "libgetdata".
 

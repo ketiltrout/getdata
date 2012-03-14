@@ -22,7 +22,7 @@
 use GetData;
 use Math::Complex;
 use strict;
-use Test::More tests => 1265;
+use Test::More tests => 1266;
 
 my $ne = 0;
 my ($s, @a, %h);
@@ -1660,6 +1660,11 @@ CheckNum2(231, 5, $h{"count_max"}, 7);
 @a = $_->tokenise('"test1 test2" test3\ test4 test5');
 CheckOK(232);
 CheckSArray(232, \@a, "test1 test2", "test3 test4", "test5");
+
+# 233: gd_raw_close check
+$s = $_->raw_close('data');
+CheckOK(233);
+
 
 
 

@@ -3055,6 +3055,7 @@ void gdidl_flush(int argc, IDL_VPTR argv[], char *argk)
     { "FIELD_CODE", IDL_TYP_STRING, 1, 0, IDL_KW_OFFSETOF(field_code_x),
       IDL_KW_OFFSETOF(field_code) },
     { "NOCLOSE", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(noclose) },
+    { "NOSYNC", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(noclose) },
     { NULL }
   };
 
@@ -3065,8 +3066,12 @@ void gdidl_flush(int argc, IDL_VPTR argv[], char *argk)
   if (kw.field_code_x)
     field_code = IDL_STRING_STR(&kw.field_code);
 
-  if (kw.noclose)
+  if (kw.noclose && kw.nosync)
+    idl_kw_abort("nothing to do");
+  else if (kw.noclose)
     gd_sync(D, field_code);
+  else if (kw.nosync)
+    gd_raw_close(D, field_code);
   else
     gd_flush(D, field_code);
 

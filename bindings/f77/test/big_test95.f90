@@ -2504,6 +2504,10 @@ program big_test
   call check_int2(ne, 232, 5, l, slen)
   call check_str2(ne, 232, 6, str, 'test3 test4')
 
+! 233: fgd_raw_close check
+  call fgd_raw_close(d, 'data')
+  call check_ok(ne, 233, d)
+
  
 
 
