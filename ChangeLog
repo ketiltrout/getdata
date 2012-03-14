@@ -1,3 +1,6 @@
+2012-03-14   D. V. Wiebe <getdata@ketiltrout.net> svn:673
+	* src/open.c (gd_cbopen): Handle failure of _GD_CanonicalPath better.
+
 2012-03-14   D. V. Wiebe <getdata@ketiltrout.net> svn:671
 	* src/flush.c (_GD_FlushFragment): Write SIE encoding directives.
 

@@ -407,7 +407,7 @@ DIRFILE* gd_cbopen(const char* filedir, unsigned long flags,
   _GD_InitialiseFramework();
 
   D = (DIRFILE *)malloc(sizeof(DIRFILE));
-  if (dirfile == NULL || D == NULL) {
+  if (D == NULL) {
     free(dirfile);
 #ifndef GD_NO_DIR_OPEN
     close(dirfd);
@@ -426,6 +426,15 @@ DIRFILE* gd_cbopen(const char* filedir, unsigned long flags,
   D->sehandler = sehandler;
   D->sehandler_extra = extra;
   D->standards = GD_DIRFILE_STANDARDS_VERSION;
+
+  if (dirfile == NULL) {
+    _GD_SetError(D, GD_E_RAW_IO, 0, filedir, errno, NULL);
+#ifndef GD_NO_DIR_OPEN
+    close(dirfd);
+#endif
+    dreturn("%p", D);
+    return D;
+  }
 
   /* Add the INDEX entry */
   D->n_entries = 1;
