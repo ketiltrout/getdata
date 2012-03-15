@@ -23,7 +23,7 @@
 #define GETDATA_INTERNAL_H
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include "gd_config.h"
 #endif
 
 #include "getdata.h"

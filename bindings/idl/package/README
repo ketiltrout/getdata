@@ -79,7 +79,7 @@ will display a brief help message summarising available options.
 PREREQUISITES
 =============
 
-These bindings require GetData 0.7 or newer to build, as well as an IDL
+These bindings require GetData 0.8 or newer to build, as well as an IDL
 interpreter verison 5.5 or later.  No other external libraries are required,
 save for the C Standard Library.
 

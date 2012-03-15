@@ -19,7 +19,6 @@
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 /* Retrieving the number of frames should succeed cleanly */
-#include "../src/config.h"
 #include "test.h"
 
 #include <stdlib.h>

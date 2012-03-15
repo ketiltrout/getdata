@@ -19,7 +19,7 @@
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include "gd_config.h"
 #endif
 
 #include <stdlib.h>

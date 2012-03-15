@@ -1,4 +1,4 @@
-# Copyright (C) 2011 D. V. Wiebe
+# Copyright (C) 2011, 2012 D. V. Wiebe
 #
 ##########################################################################
 #
@@ -21,48 +21,60 @@
 AUTOMAKE_OPTIONS = foreign
 
 EXTRA_DIST=funclist.pl GetData.xs simple_funcs.pl simple_funcs.xsin typemap \
-					 GetData.pm.in MANIFEST
+					 GetData.pm.in MANIFEST.in test
 
 if GETDATA_DEBUG
 TEST_VERBOSE=verbose=1
 endif
 
+PERL_TESTS=t/big_test.t t/callback.t
+
+t:
+	mkdir t
+
+t/%.t: test/%.t t
+	cat $< > $@
+
 lib:
 	mkdir lib
 
-lib/GetData.xs: $(srcdir)/GetData.xs
+lib/GetData.xs: GetData.xs
 	$(MAKE) lib
-	cat $< > $@
+	cat $(srcdir)/GetData.xs > $@
 
-lib/typemap: $(srcdir)/typemap
+lib/typemap: typemap
 	$(MAKE) lib
-	cat $< > $@
+	cat $(srcdir)/typemap > $@
 
-lib/simple_funcs.xs: $(srcdir)/simple_funcs.xsin $(srcdir)/simple_funcs.pl
-	$(PERL) $(srcdir)/simple_funcs.pl $< > $@
+lib/simple_funcs.xs: simple_funcs.xsin simple_funcs.pl
+	$(PERL) $(srcdir)/simple_funcs.pl $(srcdir)/simple_funcs.xsin > $@
+
+MANIFEST: MANIFEST.in
+	cat $(srcdir)/MANIFEST.in > $@
 
 make_parameters.sed: ../make_parameters ../../src/getdata.h
 	  ../make_parameters P > $@
 
-../make_parameters: $(srcdir)/../make_parameters.c
+../make_parameters: ../make_parameters.c
 	  cd .. && ${MAKE} make_parameters
 
-GetData.pm: $(srcdir)/GetData.pm.in make_parameters.sed $(srcdir)/funclist.pl \
-	          lib/GetData.xs lib/simple_funcs.xs
+GetData.pm: GetData.pm.in make_parameters.sed funclist.pl lib/GetData.xs \
+	lib/simple_funcs.xs
 	rm -f $@
-	$(SED) -f make_parameters.sed $< | \
+	$(SED) -f make_parameters.sed $(srcdir)/GetData.pm.in | \
 		$(PERL) $(srcdir)/funclist.pl lib/GetData.xs lib/simple_funcs.xs > $@
 	chmod a-w $@
 
 all-local: lib blib/arch/auto/GetData/GetData.bs
 
 blib/arch/auto/GetData/GetData.bs: Build
-	$(PERL) $< build
+	$(PERL) Build build
 	touch $@
 
 .PRECIOUS: Build
-Build: Build.PL GetData.pm lib/GetData.xs lib/simple_funcs.xs lib/typemap
-	perl $<
+Build: Build.PL GetData.pm lib/GetData.xs lib/simple_funcs.xs lib/typemap \
+	MANIFEST
+	$(PERL) Build.PL
 
 clean-local: 
 	rm -rf lib
@@ -70,14 +82,14 @@ clean-local:
 		$(PERL) Build clean; \
 	fi
 	rm -f $(BUILT_SOURCES) make_parameters.sed MYMETA.yml MYMETA.json GetData.pm
-	rm -rf Build _build
+	rm -rf Build _build MANIFEST t
 
 if TEST_PERL
-check:
-	$(MAKE) test
+check: $(PERL_TESTS)
+	${DL_LIBRARY_PATH}=${${DL_LIBRARY_PATH}}:../../src/.libs $(PERL) ./Build test ${TEST_VERBOSE}
 
-test testdb testcover:
+testdb testcover: $(PERL_TESTS)
 	${DL_LIBRARY_PATH}=${${DL_LIBRARY_PATH}}:../../src/.libs $(PERL) ./Build $@ ${TEST_VERBOSE}
 
-.PHONY: test testdb testcover
+.PHONY: check testdb testcover
 endif

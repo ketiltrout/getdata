@@ -21,11 +21,7 @@
 #ifndef FGETDATA_H
 #define FGETDATA_H
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "../../src/internal.h"
+#include "internal.h"
 
 /* If F77_FUNC isn't defined, we have no knowledge of the F77 mangling scheme */
 #ifndef F77_FUNC

@@ -29,7 +29,7 @@
 #undef _SVID_SOURCE
 
 #ifdef HAVE_CONFIG_H
-# include "config.h"
+# include "gd_config.h"
 #endif
 
 #ifdef GDIDL_EXTERNAL

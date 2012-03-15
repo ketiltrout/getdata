@@ -1,6 +1,6 @@
 .\" gd_flush.3.  The gd_flush man page.
 .\"
-.\" Copyright (C) 2008, 2009, 2010, 2011 D. V. Wiebe
+.\" Copyright (C) 2008, 2009, 2010, 2011, 2012 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,21 +13,27 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_flush 3 "18 August 2011" "Version 0.8.0" "GETDATA"
+.TH gd_flush 3 "15 March 2012" "Version 0.8.0" "GETDATA"
 .SH NAME
-gd_flush \(em write all pending dirfile changes to disk.
+gd_flush gd_raw_close gd_sync \(em write all pending dirfile changes to disk or
+close open raw fields
 .SH SYNOPSIS
 .B #include <getdata.h>
 .HP
 .nh
 .ad l
+.HP
 .BI "int gd_flush(DIRFILE *" dirfile ", const char *" field_code );
+.HP
+.BI "int gd_raw_close(DIRFILE *" dirfile ", const char *" field_code );
+.HP
+.BI "int gd_sync(DIRFILE *" dirfile ", const char *" field_code );
 .hy
 .ad n
 .SH DESCRIPTION
 The
-.BR gd_flush ()
-function flushes and closes all file handles associated with
+.BR gd_sync ()
+function flushes all pending writes to disk of raw data files associated with
 .IR field_code ,
 or its input(s), in the dirfile specified by
 .IR dirfile .
@@ -38,21 +44,33 @@ if
 .I field_code
 is NULL, all fields in
 .I dirfile
-will be flushed and closed.  In this special case, modified metadata will
-also be flushed to disk as if
+will be flushed.  In this special case, modified metadata will also be flushed
+to disk as if
 .BR gd_metaflush (3)
-had been called.
+had been called.  If the dirfile has been opened read-only, this function does
+nothing.  Additionally, some encoding schemes may implement this as a NOP.
 .PP
-Metadata is written to disk using the current Standards Version as stored in the
-.I dirfile
-object.  See
-.BR gd_dirfile_standards (3)
-to change or report the current Standards Version.  If the dirfile metadata
-conforms to no known Standards Version, a Standards non-compliant fragment will
-be written.
+The
+.BR gd_raw_close ()
+function closes any raw data files which GetData has opened associated with
+.IR field_code ,
+or its input(s).  Again, if
+.I field_code
+is NULL, all open data files are closed.
+.PP
+Calling
+.BR gd_flush ()
+is essentially equivalent to calling first
+.BR gd_sync ()
+and then
+.BR gd_raw_close ()
+(ie. it does both tasks), although, if
+.I field_code
+is NULL, the order of operations if may be different than making the two explict
+calls.
 .SH RETURN VALUE
-On success, zero is returned.  On error, -1 is returned and the dirfile error is
-set to a non-zero error value.  Possible error values are:
+On success, these functions return zero.  On error, -1 is returned and the
+dirfile error is set to a non-zero error value.  Possible error values are:
 .TP 8
 .B GD_E_ALLOC
 The library was unable to allocate memory.
@@ -71,6 +89,8 @@ The representation suffix specified in
 was not recognised.
 .TP
 .B GD_E_FLUSH
+(Not
+.BR gd_raw_close ().)
 A temporary file could not be opened into which to write the modified metadata,
 or renaming the temporary file over the original fragment failed.  Only returned
 when

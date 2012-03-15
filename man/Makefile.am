@@ -56,6 +56,7 @@ dist_man_MANS = checkdirfile.1 dirfile2ascii.1 gd_add.3 gd_add_alias.3 \
 								dirfile.5 dirfile-encoding.5 dirfile-format.5 \
 								$(LFS_transitional_mans)
 
+# these are real_file:alias
 MAN3ALIASES=gd_add_bit.3:gd_add_carray.3 gd_add_bit.3:gd_add_clincom.3 \
 	gd_add_bit.3:gd_add_const.3 gd_add_bit.3:gd_add_cpolynom.3 \
 	gd_add_bit.3:gd_add_crecip.3 gd_add_bit.3:gd_add_divide.3 \
@@ -83,7 +84,8 @@ MAN3ALIASES=gd_add_bit.3:gd_add_carray.3 gd_add_bit.3:gd_add_clincom.3 \
 	gd_alter_spec.3:gd_malter_spec.3 gd_framenum_subset.3:gd_framenum.3 \
 	gd_get_carray_slice.3:gd_get_carray.3 gd_put_carray_slice.3:gd_put_carray.3 \
 	gd_delete.3:gd_delete_alias.3 gd_hide.3:gd_unhide.3 \
-	gd_add_alias.3:gd_madd_alias.3 $(MAN3ALIASES64)
+	gd_add_alias.3:gd_madd_alias.3 gd_flush.3:gd_sync.3 \
+	gd_flush.3:gd_raw_close.3 $(MAN3ALIASES64)
 
 #man conversion
 HTMLMANS=$(addsuffix .html,$(nodist_man_MANS)) \

@@ -1,0 +1,129 @@
+.\" gd_desync.3.  The gd_desync man page.
+.\"
+.\" Copyright (C) 2012 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_desync 3 "15 March 2012" "Version 0.8.0" "GETDATA"
+.SH NAME
+gd_desync \(em check for a change of metadata on disk
+.SH SYNOPSIS
+.B #include <getdata.h>
+.HP
+.nh
+.ad l
+.BI "int gd_desync(DIRFILE *" dirfile ", unsigned int " flags );
+.hy
+.ad n
+.SH DESCRIPTION
+The
+.BR gd_desync ()
+function reports whether the metadata of the loaded
+.I dirfile
+has become desynchronised from the format specification fragments on disk, due
+to a third party modifying the Dirfile metadata on disk after GetData opened
+it.  If
+.I dirfile
+has become desynchronised, this function can, optionally, reload the dirfile.
+
+The
+.I flags
+argument influences how the function works.  It should be zero, or else one
+or more of the following flags, bitwise or'd together:
+.TP 8
+.B GD_DESYNC_PATHCHECK
+Ignore GetData's internal directory cache, and use the format specification
+fragments' full path when checking for modifications.  This flag is of
+particular importance when the
+.I dirfilename
+passed to
+.BR gd_cbopen (3),
+or directory paths used in included fragments, contain symbolic links: with this
+flag, these symbolic links will be re-evaluated.  Without it, the target of
+the symbolic links in effect when the dirfile was first opened will be
+considered instead.
+.TP
+.B GD_DESYNC_REOPEN
+If this flag is specified, and
+.BR gd_desync ()
+detects desynchronisation, the Dirfile will be re-opened in place using the
+exiting
+.I dirfile
+pointer.  In this case, upon a positive result from this function, the caller
+must discard all cached information about the dirfile, even the assumption that
+.I dirfile
+has been succesfully opened.
+
+Re-opening the dirfile is equivalent to calling
+.BR gd_close (3),
+and then
+.BR gd_cbopen (3)
+with the same arguments used when originally creating
+.IR dirfile ,
+except that the
+.I dirfile
+pointer doesn't change its value.  As a result, this function may invoke the
+registered parser callback function (see
+.BR gd_cbopen (3)
+and
+.BR gd_parser_callback (3)).
+.SH RETURN VALUE
+On successful deletion, zero is returned if the loaded dirfile has not
+desynchronised, or 1 if it has.  On error, -1 is returned, regardless of
+desynchronisation and the dirfile error is set to a non-zero error value.
+Possible error values are:
+.TP 8
+.B GD_E_ALLOC
+The library was unable to allocate memory.
+.TP
+.B GD_E_BAD_DIRFILE
+The supplied dirfile was invalid.
+.TP
+.B GD_E_RAW_IO
+An error occurred while trying to obtain the modification time of a fragment.
+.PP
+Additionally, if
+.B GD_DESYNC_REOPEN
+is used, this function may fail for any of the reasons listed in the
+.BR gd_close (3)
+and
+.BR gd_cbopen (3)
+manual pages.
+.PP
+The dirfile error may be retrieved by calling
+.BR gd_error (3).
+A descriptive error string for the last error encountered can be obtained from
+a call to
+.BR gd_error_string (3).
+.SH LIMITATIONS
+The current implementation uses file modification times as reported by
+.BR stat (2)
+to detect changes.  These times have a granularity of, at best, one second.  As
+a result, desynchronisation will not be detected in the case when a fragment is
+modified, then GetData reads it, then the fragment is modified again, all within
+one second.  The caller may wish to perform its own monitoring using the
+pathnames returned by
+.BR gd_fragmentname (3).
+.PP
+On systems lacking a POSIX.1-2008 conformant
+.BR fstatat (2)
+(q.v.), this function may always operate as if
+.B GD_DESYNC_PATHCHECK
+had been specified, regarless of the actual
+.IR flags .
+.SH SEE ALSO
+.BR fstatat (2),
+.BR gd_cbopen (3),
+.BR gd_close (3),
+.BR gd_error (3),
+.BR gd_error_string (3),
+.BR gd_parser_callback (3)

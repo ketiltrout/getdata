@@ -1,4 +1,4 @@
-/* Copyright (C) 2009-2011 D. V. Wiebe
+/* Copyright (C) 2012 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -20,69 +20,49 @@
  */
 #include "test.h"
 
+#include <stdlib.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <string.h>
+
 int main(void)
 {
-#ifndef TEST_LZMA
-  return 77;
-#else
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *data = "dirfile/data";
-  const char *xzdata = "dirfile/data.xz";
-  const char *format_data = "data RAW UINT16 8\n";
-  uint16_t c[8];
-  char command[4096];
-  uint16_t data_data[256];
-#ifdef USE_LZMA
-  int i;
-#endif
-  int fd, n, error, r = 0;
+  const char *format_data = "bad format\n";
+  int e1, e2, e3, n1, n2, fd, r = 0;
   DIRFILE *D;
 
-  memset(c, 0, 8);
   rmdirfile();
   mkdir(filedir, 0777);
+  close(open(format, O_CREAT | O_EXCL | O_WRONLY, 0666));
 
-  for (fd = 0; fd < 256; ++fd)
-    data_data[fd] = (unsigned char)fd;
+  D = gd_open(filedir, GD_RDONLY);
+  e1 = gd_error(D);
+  
+  /* ensure mtime ticks over */
+  sleep(1);
 
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
+  /* modify the format file */
+  fd = open(format, O_CREAT | O_TRUNC | O_WRONLY, 0666);
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  fd = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
-  write(fd, data_data, 256 * sizeof(uint16_t));
-  close(fd);
-
-  /* compress */
-  snprintf(command, 4096, "%s -f %s > /dev/null", XZ, data);
-  if (gd_system(command))
-    return 1;
-
-#ifdef USE_LZMA
-  D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-#else
-  D = gd_open(filedir, GD_RDONLY);
-#endif
-  n = gd_getdata(D, "data", 5, 0, 1, 0, GD_UINT16, c);
-  error = gd_error(D);
+  n1 = gd_desync(D, GD_DESYNC_REOPEN);
+  e2 = gd_error(D);
+  n2 = gd_validate(D, "data");
+  e3 = gd_error(D);
 
   gd_close(D);
 
-  unlink(xzdata);
   unlink(format);
   rmdir(filedir);
 
-#ifdef USE_LZMA
-  CHECKI(error,0);
-  CHECKI(n,8);
-  for (i = 0; i < 8; ++i)
-    CHECKUi(i,c[i],40 + i);
-#else
-  CHECKI(error,GD_E_UNSUPPORTED);
-  CHECKI(n,0);
-#endif
-
+  CHECKI(e1, GD_E_OK);
+  CHECKI(e2, GD_E_FORMAT);
+  CHECKI(e3, GD_E_BAD_DIRFILE);
+  CHECKI(n1, -1);
+  CHECKI(n2, -1);
   return r;
-#endif
 }

@@ -1,4 +1,4 @@
-dnl Copyright (C) 2008-2011 D. V. Wiebe
+dnl Copyright (C) 2008-2012 D. V. Wiebe
 dnl
 dnl llllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll
 dnl
@@ -39,7 +39,7 @@ AC_ARG_VAR([BUILDCC],
 
 AC_CONFIG_AUX_DIR([.])
 AC_CONFIG_SRCDIR([src/getdata.c])
-AC_CONFIG_HEADER([src/config.h])
+AC_CONFIG_HEADER([src/gd_config.h])
 
 dnl Features
 echo "*** Checking GetData configuration"
@@ -126,7 +126,7 @@ dnl libraries
 echo
 echo "*** Looking for getdata"
 echo
-PKG_CHECK_MODULES([GETDATA], [getdata >= 0.7.0])
+PKG_CHECK_MODULES([GETDATA], [getdata >= 0.8.0])
 
 dnl headers
 echo

@@ -1,4 +1,4 @@
-/* Copyright (C) 2008,2010,2011 D. V. Wiebe
+/* Copyright (C) 2008, 2010, 2011, 2012 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -378,8 +378,16 @@ int gd_desync(DIRFILE *D, unsigned int flags)
     gd_parser_callback_t sehandler = D->sehandler;
     void *extra = D->sehandler_extra;
     unsigned long int flags = D->open_flags;
+    int dirfd = -1;
 
-    int dirfd = (flags & GD_DESYNC_PATHCHECK) ? -1 : D->fragment[0].dirfd;
+    if (!(flags & GD_DESYNC_PATHCHECK)) {
+      dirfd = dup(D->fragment[0].dirfd);
+      if (dirfd == -1) {
+        _GD_SetError(D, GD_E_RAW_IO, 0, D->name, errno, NULL);
+        dreturn("%i", -1);
+        return -1;
+      }
+    }
 
     D->name = NULL; /* so FreeD doesn't delete it */
     if (_GD_ShutdownDirfile(D, 0, 1)) {

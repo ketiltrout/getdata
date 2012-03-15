@@ -46,7 +46,7 @@ AC_SUBST(FGETDATA_VERSION, [fgetdata_version])
 AC_SUBST(F95GETDATA_VERSION, [f95getdata_version])
 
 AC_CONFIG_SRCDIR([src/getdata.c])
-AC_CONFIG_HEADER([src/config.h])
+AC_CONFIG_HEADER([src/gd_config.h])
 
 dnl Features
 BUINDINGS_BUILT=

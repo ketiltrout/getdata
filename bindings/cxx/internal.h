@@ -19,7 +19,7 @@
 // 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 //
 #ifdef HAVE_CONFIG_H
-#include "../../src/config.h"
+#include "gd_config.h"
 #endif
 #undef GETDATA_LEGACY_API
 #include "getdata/dirfile.h"

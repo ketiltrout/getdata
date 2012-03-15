@@ -19,9 +19,6 @@
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 /* Attempt to write UINT8 */
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
 #include "test.h"
 
 #include <inttypes.h>

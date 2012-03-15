@@ -1,4 +1,4 @@
-# Copyright (C) 2008-2010 D. V. Wiebe
+# Copyright (C) 2008-2010, 2012 D. V. Wiebe
 #
 ##########################################################################
 #
@@ -42,8 +42,8 @@ endif
 
 BUILT_SOUCES = test_getdata.f
 
-FFLAGS += -I.. $(F77_WALL) $(F77_WEXTRA) $(F77_ASSUME)
-FCFLAGS += -I.. $(F77_WALL) $(FC_WEXTRA) $(FC_ASSUME)
+FFLAGS += -I. -I.. $(F77_WALL) $(F77_WEXTRA) $(F77_ASSUME)
+FCFLAGS += -I. -I.. $(F77_WALL) $(FC_WEXTRA) $(FC_ASSUME)
 F95LDADD=../libf95getdata.la $(F77LDADD)
 F77LDADD=../libfgetdata.la
 AM_LDFLAGS = -L..

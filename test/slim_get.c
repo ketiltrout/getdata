@@ -19,7 +19,6 @@
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 /* Attempt to read UINT8 */
-#include "../src/config.h"
 #include "test.h"
 
 #include <inttypes.h>

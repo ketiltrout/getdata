@@ -1,6 +1,6 @@
 .\" gd_metaflush.3.  The gd_metaflush man page.
 .\"
-.\" Copyright (C) 2008, 2010, 2011 D. V. Wiebe
+.\" Copyright (C) 2008, 2010, 2011, 2012 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_metaflush 3 "19 August 2011" "Version 0.8.0" "GETDATA"
+.TH gd_metaflush 3 "15 March 2012" "Version 0.8.0" "GETDATA"
 .SH NAME
 gd_metaflush \(em write modified dirfile metadata to disk
 .SH SYNOPSIS
@@ -30,7 +30,7 @@ The
 function flushes all pending metadata changes in the dirfile specified by
 .I dirfile 
 to disk.  This is accomplished by re-writing the format specification fragments
-containing modified metadata overwriting the existing files.  Format file
+containing modified metadata, overwriting the existing files.  Format file
 fragments which are unchanged are not touched.
 .PP
 Metadata is written to disk using the current Standards Version as stored in the
@@ -42,7 +42,7 @@ conforms to no known Standards Version, a Standards non-compliant fragment will
 be written.
 .PP
 This function flushes only metadata.  To flush the field data as well, call
-.BR gd_flush (3)
+.BR gd_sync (3)
 instead.
 .SH RETURN VALUE
 On success, zero is returned.  On error, -1 is returned and the dirfile error is
@@ -77,5 +77,5 @@ directive.  A work-around is to upgrade to Standards Version 5 or later.
 .BR gd_dirfile_standards (3),
 .BR gd_error (3),
 .BR gd_error_string (3),
-.BR gd_flush (3),
-.BR gd_rewrite_fragment (3)
+.BR gd_rewrite_fragment (3),
+.BR gd_sync (3)

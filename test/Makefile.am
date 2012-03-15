@@ -144,7 +144,7 @@ DEL_TESTS=del del_carray del_carray_deref del_const del_const_deref \
 DFES_TESTS=dfes_bit dfes_divide dfes_lincom dfes_linterp dfes_multiply \
 					 dfes_null dfes_phase dfes_raw dfes_recip dfes_zero
 
-DESYNC_TESTS=desync desync_flush
+DESYNC_TESTS=desync desync_flush desync_reopen desync_reopen_inv
 
 ENCODE_TESTS=encode_alter encode_get encode_move
 
