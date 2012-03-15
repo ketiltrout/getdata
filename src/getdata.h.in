@@ -471,6 +471,10 @@ typedef int (*gd_parser_callback_t)(gd_parser_data_t*, void*);
 #define GD_SEEK_END   0x2
 #define GD_SEEK_WRITE 0x4
 
+/* desync flags */
+#define GD_DESYNC_PATHCHECK 0x1
+#define GD_DESYNC_REOPEN    0x2
+
 extern int gd_add_alias(DIRFILE *dirfile, const char *alias_name,
     const char *target_code, int fragment_index) gd_nothrow
 gd_nonnull ((1,2,3));
@@ -917,6 +921,8 @@ extern int gd_close(DIRFILE *dirfile);
 
 extern int gd_delete(DIRFILE *dirfile, const char *field_code,
     unsigned int flags) gd_nonnull ((1,2));
+
+extern int gd_desync(DIRFILE *dirfile, unsigned int flags);
 
 extern int gd_discard(DIRFILE *dirfile);
 

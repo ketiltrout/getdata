@@ -3808,3 +3808,13 @@ void F77_FUNC(gdtoke, GDTOKE) (char *toke, int *toke_l, const int *dirfile,
 
   dreturn("%i", *toke_l);
 }
+
+void F77_FUNC(gddsyn, GDDSYN) (int *desync, const int *dirfile,
+    const int *flags)
+{
+  dtrace("%p, %i, %i", desync, *dirfile, *flags);
+
+  *desync = gd_desync(_GDF_GetDirfile(*dirfile), *flags);
+
+  dreturn("%i", *desync);
+}

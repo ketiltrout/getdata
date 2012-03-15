@@ -79,6 +79,9 @@
 #ifdef HAVE_LIBGEN_H
 #include <libgen.h>
 #endif
+#ifdef HAVE_STDDEF_H
+#include <stddef.h>
+#endif
 #ifdef HAVE_STDINT_H
 #include <stdint.h>
 #endif
@@ -346,6 +349,16 @@ const char* gd_colsub(void);
 #  define lstat64 lstat
 #  define HAVE_LSTAT64
 # endif
+#endif
+
+#if !defined(HAVE_DECL_OFFSETOF) || !  HAVE_DECL_OFFSETOF
+#define offsetof(t,m) ((size_t)((char*)&(((t)*)0)->(m) - (char*)0))
+#endif
+
+#ifdef HAVE_READDIR_R
+# define gd_readdir readdir_r
+#else
+int gd_readdir(DIR *dirp, struct dirent *entry, struct dirent **result);
 #endif
 
 #ifdef HAVE__STRTOI64
@@ -836,7 +849,7 @@ struct gd_fragment_t {
   /* Canonical name (full path) */
   char* cname;
   /* Subdirectory name */
-  const char* sname;
+  char* sname;
   /* basename */
   char *bname;
   /* External name (the one that appears in the format file) */
@@ -845,6 +858,7 @@ struct gd_fragment_t {
   int modified;
   int parent;
   int dirfd;
+  time_t mtime;
   unsigned long int encoding;
   unsigned long int byte_sex;
   int protection;
@@ -894,6 +908,7 @@ struct _GD_DIRFILE {
 
   /* global data */
   unsigned long int flags;
+  unsigned long int open_flags; /* the original flags (used in gd_desynced) */
   uint64_t av;
   int standards;
   int n_error;
@@ -915,7 +930,7 @@ struct _GD_DIRFILE {
   /* the reference field */
   gd_entry_t* reference_field;
 
-  /* directory name */
+  /* directory name (this is just whatever was passed to gd_open() */
   char* name;
 
   /* directory list */
@@ -1049,6 +1064,8 @@ char *_GD_MungeCode(DIRFILE *restrict, const gd_entry_t *restrict,
 char *_GD_MungeFromFrag(DIRFILE *restrict, const gd_entry_t *restrict, int,
     const char *restrict, int *restrict);
 gd_type_t _GD_NativeType(DIRFILE *restrict, gd_entry_t *restrict, int);
+DIRFILE *_GD_Open(DIRFILE*, int, const char*, unsigned long,
+    gd_parser_callback_t, void*);
 gd_entry_t *_GD_ParseFieldSpec(DIRFILE *restrict, int, char**,
     const gd_entry_t *restrict, const char *restrict, int, int, int, int,
     unsigned long, int, char**, const char*);
@@ -1062,6 +1079,7 @@ int _GD_Seek(DIRFILE *restrict, gd_entry_t *restrict, off64_t offset,
 void _GD_SetError(DIRFILE*, int, int, const char*, int, const char*);
 int _GD_SetTablePath(DIRFILE *restrict, const gd_entry_t *restrict,
     struct _gd_private_entry *restrict);
+int _GD_ShutdownDirfile(DIRFILE*, int, int);
 int _GD_StrCmpNull(const char *restrict, const char *restrict);
 char *_GD_Strdup(DIRFILE *restrict, const char *restrict);
 int _GD_Supports(DIRFILE *, const gd_entry_t*, unsigned int funcs);

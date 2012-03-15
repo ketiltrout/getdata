@@ -525,3 +525,17 @@ char *Dirfile::Tokenise(const char *string)
 {
   return gd_tokenise(D, string);
 }
+
+int Dirfile::DeSync(unsigned int flags)
+{
+  int desync = gd_desync(D, flags);
+  if (desync && flags & GD_DESYNC_REOPEN) {
+    free(error_string);
+    free(reference_name);
+
+    error_string = NULL;
+    reference_name = NULL;
+  }
+
+  return desync;
+}

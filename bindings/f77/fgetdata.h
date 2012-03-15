@@ -671,6 +671,9 @@ void F77_FUNC(gdadal, GDADAL) (const int *dirfile, const char *field_code,
     const int *fragment_index);
 
 void F77_FUNC(gdnocb, GDNOCB) (const int* dirfile);
+
+void F77_FUNC(gddsyn, GDDSYN) (int *desync, const int *dirfile,
+    const int *flags);
 #ifdef __cplusplus
 }
 #endif

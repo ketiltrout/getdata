@@ -48,67 +48,77 @@
 using namespace std;
 using namespace GetData;
 
-#define CHECK_ERRORb(d,t,g) \
-  e = d->Error(); if (e != (g)) { ne++; cerr << "e[" << t << "] = " << e << endl; }
-#define CHECK_ERROR2b(d,t,n,g) \
-  e = d->Error(); if (e != (g)) { \
-    ne++; cerr << "e[" << t << ", " << n << "] = " << e << endl; }
-#define CHECK_ERROR(t,g) CHECK_ERRORb(d,t,g)
-#define CHECK_ERROR2(t,n,g) CHECK_ERROR2b(d,t,n,g)
+static int ne = 0;
+
+template <class T> static void CheckT(char c, int i, int t, int n, T v, T g,
+    int r)
+{
+  if (r) {
+    ne++;
+    cerr << c;
+    if (i != -1)
+      cerr << "(" << i << ")";
+    cerr << "[" << t;
+    if (n != -1)
+      cerr << ", " << n;
+    cerr << "] = " << v << " (expected " << g << ")" << endl;
+  }
+}
+
+static void CheckError(const Dirfile *d, int t, int n, int g)
+{
+  int e = d->Error();
+  CheckT<int>('e', -1, t, n, e, g, e != g);
+}
+
+static void CheckInt(int i, int t, int n, int v, int g)
+{
+  CheckT<int>('n', i, t, n, v, g, v != g);
+}
+
+template <class T> static void CheckFloat(char c, int i, int t, int n, T v, T g)
+{
+  CheckT<T>(c, i, t, n, v, g, (abs((v) - (g)) > 1e-10));
+}
+#define CHECK_ERROR(t,g) CheckError(d,t,-1,g)
+#define CHECK_ERROR2(t,n,g) CheckError(d,t,n,g)
 #define CHECK_OK(t) CHECK_ERROR(t,GD_E_OK)
 #define CHECK_OK2(t,n) CHECK_ERROR2(t,n,GD_E_OK)
 
-#define CHECK_NONNULL(t,v) \
-  if ((v) == NULL) { ne++; cerr << "p[" << t << "] = " << (v) << endl; }
+#define CHECK_NONNULL(t,v) CheckT<const void*>('p', -1, t, -1, v, NULL, !(v))
 
-#define CHECK_NULL(t,v) \
-  if ((v) != NULL) { ne++; cerr << "p[" << t << "] = " << (v) << endl; }
+#define CHECK_NULL(t,v) CheckT<const void*>('p', -1, t, -1, v, NULL, v)
+#define CHECK_NULL2(t,n,v) CheckT<const void*>('p', -1, t, n, v, NULL, v)
 
-#define CHECK_NULL2(t,n,v) \
-  if ((v) != NULL) { \
-    ne++; cerr << "n[" << t << ", " << n << "] = " << (v) << endl; }
+#define CHECK_INT(t,v,g) CheckInt(-1, t, -1, v, g)
+#define CHECK_INT2(t,n,v,g) CheckInt(-1, t, n, v, g)
 
-#define CHECK_INT(t,v,g) \
-  if ((v) != (g)) { ne++; cerr << "n[" << t << "] = " << (v) << endl; }
-#define CHECK_INT2(t,n,v,g) \
-  if ((v) != (g)) { \
-    ne++; cerr << "n[" << t << ", " << n << "] = " << (v) << endl; }
 #define CHECK_INT_ARRAY(t,m,v,g) \
-  for (i = 0; i < m; ++i) if ((v) != (g)) { \
-    ne++; cerr << "n(" << i << ")[" << t << "] = " << (int)v << endl; }
+  for (i = 0; i < m; ++i) CheckInt(i, t, -1, v, g)
 
-#define CHECK_DOUBLE(t,v,g) \
-  if (fabs((v) - (g)) > 1e-10) { \
-    ne++; cerr << "d[" << t << "] = " << (v) << endl; }
-#define CHECK_DOUBLE2(t,m,v,g) \
-  if (fabs((v) - (g)) > 1e-10) { \
-    ne++; cerr << "d[" << t << ", " << m << "] = " << (v) << endl; }
-#define CHECK_DOUBLE_ARRAY(t,m,n,v,g) \
-  for (i = 0; i < n; ++i) if (fabs((v) - (g)) > 1e-10) { \
-    ne++; cerr << "d(" << i << ")[" << t << ", " << m << "] = " << (v) << endl; }
+#define CHECK_DOUBLE(t,v,g) CheckFloat<double>('d', -1, t, -1, v, g)
+#define CHECK_DOUBLE2(t,n,v,g) CheckFloat<double>('d', -1, t, n, v, g)
+
+#define CHECK_DOUBLE_ARRAY(t,n,m,v,g) \
+  for (i = 0; i < m; ++i) CheckFloat<double>('d', i, t, n, v, g)
 
 #define CHECK_STRING(t,v,g) \
-  if (strcmp((v), (g))) { ne++; cerr << "s[" << t << "] = \"" << (v) << "\"" \
-    << endl; }
-#define CHECK_STRING2(t,m,v,g) \
-  if (strcmp((v), (g))) { \
-    ne++; cerr << "s[" << t << ", " << m << "] = \"" << (v) << "\"" << endl; }
+  CheckT<const char*>('s', -1, t, -1, v, g, (strcmp((v), (g))))
+#define CHECK_STRING2(t,n,v,g) \
+  CheckT<const char*>('s', -1, t, n, v, g, (strcmp((v), (g))))
+
 #define CHECK_STRING_ARRAY(t,m,v,g) \
-  for (i = 0; i < m; ++i) if (strcmp((v), (g))) { \
-    ne++; cerr << "s(" << i << ")[" << t << "] = \"" << (v) << "\"" << endl; }
+  for (i = 0; i < m; ++i) \
+CheckT<const char*>('s', i, t, -1, v, g, (strcmp((v), (g))))
 
 #define CHECK_EOSTRING(t,v,g) \
-  if (strcmp((v) + strlen(v) - strlen(g), (g))) { ne++; cerr << "s[" << t << "] = \"" << (v) << \
-    "\", expected ...\"" << g << "\"" << endl; }
+  CheckT<const char*>('S', -1, t, -1, v, g, \
+      (strcmp((v) + strlen(v) - strlen(g), (g))))
 
-#define CHECK_COMPLEX2(t,m,v,g) \
-  if (abs((v) - (g)) > 1e-10) { \
-    ne++; cerr << "c[" << t << ", " << m << "] = " << (v).real() << ";" \
-    << (v).imag() << endl; }
+#define CHECK_COMPLEX2(t,n,v,g) \
+  CheckFloat<complex<double> >('c', -1, t, n, v, g)
 #define CHECK_COMPLEX_ARRAY(t,m,v,g) \
-  for (i = 0; i < m; ++i) if (abs((v) - (g)) > 1e-10) { \
-    ne++; cerr << "c(" << i << ")[" << t << "] = " << v.real() \
-    << ";" << v.imag() << endl; }
+  for (i = 0; i < m; ++i) CheckFloat<complex<double> >('c', i, t, -1, v, g)
 
 int main(void)
 {
@@ -144,7 +154,7 @@ int main(void)
   unsigned char c[8];
   unsigned char data_data[80];
   signed char sc;
-  int m, n, i, e, ne = 0;
+  int m, n, i;
   float fl;
   double dp, p[6], q[6];
   const double *qp;
@@ -1234,9 +1244,9 @@ int main(void)
   
   // 156: Invalid Dirfile check
   Dirfile *id = new Dirfile();
-  CHECK_ERROR2b(id,156,1,GD_E_OK);
+  CheckError(id,156,1,GD_E_OK);
   id->NFragments();
-  CHECK_ERROR2b(id,156,2,GD_E_BAD_DIRFILE);
+  CheckError(id,156,2,GD_E_BAD_DIRFILE);
   delete id;
 
   // 157: Dirfile::Standards check
@@ -1642,6 +1652,11 @@ int main(void)
   // 233: gd_raw_close check
   d->RawClose("data");
   CHECK_OK(233);
+
+  // 234: gd_desync check
+  n = d->DeSync();
+  CHECK_OK(234);
+  CHECK_INT(234, n, 0);
 
 
 

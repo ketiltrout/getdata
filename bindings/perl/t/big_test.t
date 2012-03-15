@@ -22,7 +22,7 @@
 use GetData;
 use Math::Complex;
 use strict;
-use Test::More tests => 1266;
+use Test::More tests => 1268;
 
 my $ne = 0;
 my ($s, @a, %h);
@@ -1664,6 +1664,11 @@ CheckSArray(232, \@a, "test1 test2", "test3 test4", "test5");
 # 233: gd_raw_close check
 $s = $_->raw_close('data');
 CheckOK(233);
+
+# 234: gd_desync
+$s = $_->desync(0);
+CheckOK(234);
+CheckNum(234, $s, 0);
 
 
 

@@ -2508,6 +2508,11 @@ program big_test
   call fgd_raw_close(d, 'data')
   call check_ok(ne, 233, d)
 
+! 234: fgd_desync check
+  n = fgd_desync(d, 0)
+  call check_ok(ne, 234, d)
+  call check_int(ne, 234, n, 0)
+
  
 
 

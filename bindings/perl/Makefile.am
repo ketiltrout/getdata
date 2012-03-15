@@ -58,6 +58,7 @@ all-local: lib blib/arch/auto/GetData/GetData.bs
 
 blib/arch/auto/GetData/GetData.bs: Build
 	$(PERL) $< build
+	touch $@
 
 .PRECIOUS: Build
 Build: Build.PL GetData.pm lib/GetData.xs lib/simple_funcs.xs lib/typemap

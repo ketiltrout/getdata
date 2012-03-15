@@ -144,6 +144,8 @@ DEL_TESTS=del del_carray del_carray_deref del_const del_const_deref \
 DFES_TESTS=dfes_bit dfes_divide dfes_lincom dfes_linterp dfes_multiply \
 					 dfes_null dfes_phase dfes_raw dfes_recip dfes_zero
 
+DESYNC_TESTS=desync desync_flush
+
 ENCODE_TESTS=encode_alter encode_get encode_move
 
 ENDIAN_TESTS=endian_alter endian_alter_sie endian_get endian_move
@@ -353,17 +355,18 @@ ZZSLIM_TESTS=zzslim_get zzslim_nframes
 TESTS=$(ADD_TESTS)      $(ALIAS_TESTS)    $(ALTER_TESTS)    $(ASCII_TESTS)    \
 			$(BOF_TESTS)      $(BZIP_TESTS)     $(CLOSE_TESTS)    $(CONVERT_TESTS)  \
 			$(CREAT_TESTS)    $(CVLIST_TESTS)   $(DEL_TESTS)      $(DFES_TESTS)     \
-			$(ENCODE_TESTS)   $(ENDIAN_TESTS)   $(ENTRY_TESTS)    $(EOF_TESTS)      \
-			$(ERROR_TESTS)    $(FILE_TESTS)     $(FLIST_TESTS)    $(FLUSH_TESTS)    \
-			$(FOFFS_TESTS)    $(FRAGMENT_TESTS) $(GET_TESTS)      $(GLOBAL_TESTS)   \
-			$(GZIP_TESTS)     $(HEADER_TESTS)   $(HIDE_TESTS)     $(INCLUDE_TESTS)  \
-			$(INDEX_TESTS)    $(LEGACY_TESTS)   $(LZMA_TESTS)     $(MADD_TESTS)     \
-			$(MOVE_TESTS)     $(NAME_TESTS)     $(NFIELDS_TESTS)  $(NFRAMES_TESTS)  \
-			$(NMETA_TESTS)    $(OPEN_TESTS)     $(PARSE_TESTS)    $(PROTECT_TESTS)  \
-			$(PUT_TESTS)      $(REF_TESTS)      $(REPR_TESTS)     $(SEEK_TESTS)     \
-			$(SIE_TESTS)      $(SLIM_TESTS)     $(SPF_TESTS)      $(SVLIST_TESTS)   \
-			$(TELL_TESTS)     $(TRUNC_TESTS)    $(UNCLUDE_TESTS)  $(VERSION_TESTS)  \
-			$(VLIST_TESTS)    $(XZ_TESTS)       $(ZZIP_TESTS)     $(ZZSLIM_TESTS)
+			$(DESYNC_TESTS)   $(ENCODE_TESTS)   $(ENDIAN_TESTS)   $(ENTRY_TESTS)    \
+			$(EOF_TESTS)      $(ERROR_TESTS)    $(FILE_TESTS)     $(FLIST_TESTS)    \
+			$(FLUSH_TESTS)    $(FOFFS_TESTS)    $(FRAGMENT_TESTS) $(GET_TESTS)      \
+			$(GLOBAL_TESTS)   $(GZIP_TESTS)     $(HEADER_TESTS)   $(HIDE_TESTS)     \
+			$(INCLUDE_TESTS)  $(INDEX_TESTS)    $(LEGACY_TESTS)   $(LZMA_TESTS)     \
+			$(MADD_TESTS)     $(MOVE_TESTS)     $(NAME_TESTS)     $(NFIELDS_TESTS)  \
+			$(NFRAMES_TESTS)  $(NMETA_TESTS)    $(OPEN_TESTS)     $(PARSE_TESTS)    \
+			$(PROTECT_TESTS)  $(PUT_TESTS)      $(REF_TESTS)      $(REPR_TESTS)     \
+			$(SEEK_TESTS)     $(SIE_TESTS)      $(SLIM_TESTS)     $(SPF_TESTS)      \
+			$(SVLIST_TESTS)   $(TELL_TESTS)     $(TRUNC_TESTS)    $(UNCLUDE_TESTS)  \
+			$(VERSION_TESTS)  $(VLIST_TESTS)    $(XZ_TESTS)       $(ZZIP_TESTS)     \
+			$(ZZSLIM_TESTS)
 
 check_PROGRAMS=$(TESTS)
 

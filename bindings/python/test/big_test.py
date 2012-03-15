@@ -1922,6 +1922,12 @@ try:
 except:
   CheckOK(233)
 
+try:
+  n = d.desync()
+except:
+  CheckOK(234)
+CheckSimple(234, n, 0)
+
  
 
 

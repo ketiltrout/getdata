@@ -1,4 +1,44 @@
-2012-03-14   D. V. Wiebe <getdata@ketiltrout.net> svn:673
+2012-03-15   D. V. Wiebe <getdata@ketiltrout.net> svn:675
+	* src/internal.h: Add fragment->mtime, dirfile->open_flags.  Deconst
+	fragment->sname.
+	* src/close.c (_GD_FreeD _GD_ShutdownDirfile): Add new parameter
+	(keep_dirfile) to prohibit deallocating the dirfile struct itself.
+	De-staticked _GD_ShutdownDirfile.
+	* src/include.c (_GD_Include): Compute the path relative to the parent of
+	fragment and store it in fragment->sname.  Store mtime.
+	* src/close.c (_GD_FreeD): Free fragment->sname.
+	* src/flush.c (_GD_FlushFragment): Remove unnecessary strdup: we already
+	cache the basename.  Update mtime.
+	* src/open.c (_GD_CreateDirfile): Return mtime.
+	* src/open.c (_GD_Open): Renamed from gd_cbopen; optionally take an existing
+	dirfd and DIRFILE pointer.  Fix the dirfd/dirfile race condition by
+	canonicalising dirfile first.
+	* src/fragment.c (gd_desync) src/open.c (gd_cbopen): Added.
+	* src/getdata.h.in: Added GD_DESYNC_PATHCHECK GD_DESYNC_REOPEN.
+	* test/desync.c test/desync_flush.c: Added.
+
+	* src/internal.h (offsetof): Added.
+	* src/compat.c (gd_readdir): Added.
+	* src/open.c (_GD_TruncDir): Use a thread-safe readdir where possible.
+
+	* src/include.c (gd_include_affix): Don't call do stuff before validating
+	the dirfile.
+
+	* bindings/make_parameters.c: Add desync flags.
+	* bindings/python/pydirfile.c (gdpy_dirfile_desync) bindings/cxx/dirfile.cpp
+	(Dirfile::DeSync) bindings/perl/simple_funcs.xsin (desync)
+	bindings/f77/getdata.f90.in (fgd_desync) bindings/f77/fgetdata.c (GDDSYN)
+	bindings/idl/getdata.c (gdidl_desync): Added.
+	* bindings/python/test/big_test.py bindings/cxx/test/big_test.cpp
+	bindings/perl/t/big_test.t bindings/f77/test/big_test.f
+	bindings/f77/test/big_test95.f90 bindings/idl/test/big_test.pro: Added test
+	234.
+
+	* bindings/cxx/test/big_test.cpp: Functionise to reduce compilation work.
+
+	* bindings/perl/Makefile.am: Tweak yet some more.
+
+2012-03-14   D. V. Wiebe <getdata@ketiltrout.net> svn:674
 	* src/open.c (gd_cbopen): Handle failure of _GD_CanonicalPath better.
 
 2012-03-14   D. V. Wiebe <getdata@ketiltrout.net> svn:671

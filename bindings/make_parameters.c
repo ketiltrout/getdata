@@ -43,6 +43,7 @@
  *  10: gd_seek whence values
  *  11: gd_seek flags (not in IDL)
  *  12: window operations
+ *  13: desynced flags (not in IDL)
  *  99: miscellaneous constants
  */
 #define CONSTANT(s,f,t) { "GD_" #s, #s, f, GD_ ## s, t }
@@ -214,6 +215,9 @@ static struct {
   CONSTANT(WINDOP_SET,       "GDW_ST", 12),
   CONSTANT(WINDOP_CLR,       "GDW_CL", 12),
 
+  CONSTANT(DESYNC_PATHCHECK, "GDDS_P", 13),
+  CONSTANT(DESYNC_REOPEN,    "GDDS_O", 13),
+
   CONSTANT(ALL_FRAGMENTS,    "GD_ALL", 99),
   CONSTANT(COUNT_MAX,        "GD_CMX", 99),
   CONSTANT(DIRFILE_STANDARDS_VERSION, "GD_DSV", 99),
@@ -325,6 +329,13 @@ void Fortran(void)
         parameter(constant_list[j].lname, constant_list[j].fname,
             constant_list[j].value, i);
 
+    printf("\\\n%c Desync flags\\\n", c);
+
+    for (j = 0; constant_list[j].lname != NULL; ++j)
+      if (constant_list[j].type == 13)
+        parameter(constant_list[j].lname, constant_list[j].fname,
+            constant_list[j].value, i);
+
     printf("\\\n%c Miscellaneous parameters\\\n", c);
 
     for (j = 0; constant_list[j].lname != NULL; ++j)
@@ -376,7 +387,7 @@ void IDL(void)
   for (i = 0; constant_list[i].lname != NULL; ++i)
     if ((constant_list[i].type != 1) && (constant_list[i].type != 5) &&
         (constant_list[i].type != 7) && (constant_list[i].type != 8) &&
-        (constant_list[i].type != 11))
+        (constant_list[i].type != 11) && (constant_list[i].type != 13))
     {
       printf("{ \"%s\", 0, (void*)IDL_TYP_%s }, ", constant_list[i].sname,
           (constant_list[i].type == 2) ? "LONG" : "INT"); 
@@ -397,7 +408,7 @@ void IDL(void)
   for (n = i = 0; constant_list[i].lname != NULL; ++i)
     if ((constant_list[i].type != 1) && (constant_list[i].type != 5) &&
         (constant_list[i].type != 7) && (constant_list[i].type != 8) &&
-        (constant_list[i].type != 11))
+        (constant_list[i].type != 11) && (constant_list[i].type != 13))
     {
       printf("*(IDL_%s*)(data + IDL_StructTagInfoByIndex(gdidl_const_def, %i, "
           "IDL_MSG_LONGJMP, NULL)) = %li;\n", (constant_list[i].type == 2) ?

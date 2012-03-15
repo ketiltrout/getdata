@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 D. V. Wiebe
+/* Copyright (C) 2008-2012 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -22,12 +22,12 @@
 
 /* _GD_FreeD: free the DIRFILE and its subordinates
 */
-static void _GD_FreeD(DIRFILE* D)
+static void _GD_FreeD(DIRFILE *D, int keep_dirfile)
 {
   unsigned int i;
   int j;
 
-  dtrace("%p", D);
+  dtrace("%p, %i", D, keep_dirfile);
 
   for (i = 0; i < D->n_entries; ++i)
     _GD_FreeE(D, D->entry[i], 1);
@@ -39,6 +39,7 @@ static void _GD_FreeD(DIRFILE* D)
     free(D->fragment[j].bname);
     free(D->fragment[j].cname);
     free(D->fragment[j].ename);
+    free(D->fragment[j].sname);
     free(D->fragment[j].ref_name);
   }
 
@@ -61,16 +62,18 @@ static void _GD_FreeD(DIRFILE* D)
   for (i = 0; i < D->ndir; ++i)
     free(D->dir[i].path);
   free(D->dir);
-  free(D);
+
+  if (!keep_dirfile)
+    free(D);
 
   dreturnvoid();
 }
 
-static int _GD_ShutdownDirfile(DIRFILE* D, int flush_meta)
+int _GD_ShutdownDirfile(DIRFILE* D, int flush_meta, int keep_dirfile)
 {
   unsigned int i;
 
-  dtrace("%p, %i", D, flush_meta);
+  dtrace("%p, %i, %i", D, flush_meta, keep_dirfile);
 
   if (D == NULL) {
     dreturn("%i", 0);
@@ -98,7 +101,7 @@ static int _GD_ShutdownDirfile(DIRFILE* D, int flush_meta)
     close(D->dir[i].fd);
 #endif
 
-  _GD_FreeD(D);
+  _GD_FreeD(D, keep_dirfile);
 
   dreturn("%i", 0);
   return 0;
@@ -110,7 +113,7 @@ int gd_close(DIRFILE *D)
 
   dtrace("%p", D);
 
-  ret = _GD_ShutdownDirfile(D, 1);
+  ret = _GD_ShutdownDirfile(D, 1, 0);
 
   dreturn("%i", ret);
   return ret;
@@ -122,7 +125,7 @@ int gd_discard(DIRFILE* D)
 
   dtrace("%p", D);
 
-  ret = _GD_ShutdownDirfile(D, 0);
+  ret = _GD_ShutdownDirfile(D, 0, 0);
 
   dreturn("%i", ret);
   return ret;

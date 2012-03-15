@@ -2789,4 +2789,11 @@ subroutine fgd_tokenise (token, l, dirfile, string, n)
   call gdtoke(token, l, dirfile, TRIM(string), LEN_TRIM(string), n)
 end subroutine
 
+function fgd_desync (dirfile, flags)
+  integer :: fgd_desync
+  integer, intent(in) :: dirfile, flags
+
+  call gddsyn(fgd_desync, dirfile, flags)
+end function
+
 end module

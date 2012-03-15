@@ -26,9 +26,11 @@ static int _GD_TruncDir(DIRFILE *D, int dirfd, const char *dirfile, int root)
 {
   int format_trunc = 0;
   DIR* dir;
-  struct dirent* lamb;
+  struct dirent *lamb, *result;
   struct stat statbuf;
-  int fd = dirfd;
+  int fd = dirfd, ret;
+  size_t dirent_len = offsetof(struct dirent, d_name);
+  size_t dirfile_len = strlen(dirfile);
 
   dtrace("%p, %i, \"%s\", %i", D, dirfd, dirfile, root);
 
@@ -41,8 +43,24 @@ static int _GD_TruncDir(DIRFILE *D, int dirfd, const char *dirfile, int root)
     return -1;
   }
   dir = fdopendir(fd);
+
+#ifdef HAVE_FPATHCONF
+  dirent_len += fpathconf(fd, _PC_NAME_MAX) + 1;
+#elif defined HAVE_PATHCONF
+  dirent_len += pathconf(dirfile, _PC_NAME_MAX) + 1;
+#else
+  dirent_len += FILENAME_MAX;
+#endif
+
 #else
   dir = opendir(dirfile);
+
+#ifdef HAVE_PATHCONF
+  dirent_len += pathconf(dirfile, _PC_NAME_MAX) + 1;
+#else
+  dirent_len += FILENAME_MAX;
+#endif
+
 #endif
 
   if (dir == NULL) {
@@ -51,19 +69,32 @@ static int _GD_TruncDir(DIRFILE *D, int dirfd, const char *dirfile, int root)
     return -1;
   }
 
-  while ((lamb = readdir(dir)) != NULL) {
-    char *name = (char *)malloc(strlen(dirfile) + strlen(lamb->d_name) + 2);
-    sprintf(name, "%s%c%s", dirfile, GD_DIRSEP, lamb->d_name);
-    if (lamb->d_name[0] == '.' && lamb->d_name[1] == '\0') {
-      free(name);
+  if ((lamb = _GD_Malloc(D, dirent_len)) == NULL) {
+    closedir(dir);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  ret = gd_readdir(dir, lamb, &result);
+  for (; result; ret = gd_readdir(dir, lamb, &result)) {
+    char *name;
+    if (lamb->d_name[0] == '.' && lamb->d_name[1] == '\0')
       continue; /* skip current dir */
-    } else if (lamb->d_name[0] == '.' && lamb->d_name[1] == '.' &&
+    else if (lamb->d_name[0] == '.' && lamb->d_name[1] == '.' &&
         lamb->d_name[2] == '\0')
     {
-      free(name);
       continue; /* skip parent dir */
-    } else {
-      if (
+    }
+
+    name = (char *)_GD_Malloc(D, dirfile_len + strlen(lamb->d_name) + 2);
+    if (name == NULL) {
+      free(lamb);
+      closedir(dir);
+      dreturn("%i", -1);
+      return -1;
+    }
+    sprintf(name, "%s%c%s", dirfile, GD_DIRSEP, lamb->d_name);
+    if (
 #if defined(HAVE_FSTATAT) && !defined(GD_NO_DIR_OPEN)
         fstatat(dirfd, lamb->d_name, &statbuf, AT_SYMLINK_NOFOLLOW)
 #elif HAVE_LSTAT
@@ -71,14 +102,13 @@ static int _GD_TruncDir(DIRFILE *D, int dirfd, const char *dirfile, int root)
 #else
         stat(name, &statbuf)
 #endif
-        )
-      {
-        _GD_SetError(D, GD_E_TRUNC, GD_E_TRUNC_STAT, name, errno, NULL);
-        free(name);
-        closedir(dir);
-        dreturn("%i", -1);
-        return -1;
-      }
+       )
+    {
+      _GD_SetError(D, GD_E_TRUNC, GD_E_TRUNC_STAT, name, errno, NULL);
+      free(name);
+      closedir(dir);
+      dreturn("%i", -1);
+      return -1;
     }
 
     /* check file type */
@@ -100,6 +130,7 @@ static int _GD_TruncDir(DIRFILE *D, int dirfd, const char *dirfile, int root)
             )
         {
           _GD_SetError(D, GD_E_TRUNC, GD_E_TRUNC_UNLINK, name, errno, NULL);
+          free(lamb);
           free(name);
           closedir(dir);
           dreturn("%i", -1);
@@ -122,6 +153,7 @@ static int _GD_TruncDir(DIRFILE *D, int dirfd, const char *dirfile, int root)
               ) < 0)
           {
             _GD_SetError(D, GD_E_TRUNC, GD_E_TRUNC_STAT, name, errno, NULL);
+            free(lamb);
             closedir(dir);
             free(name);
             dreturn("%i", -1);
@@ -140,6 +172,7 @@ static int _GD_TruncDir(DIRFILE *D, int dirfd, const char *dirfile, int root)
 #endif
           ) {
             _GD_SetError(D, GD_E_TRUNC, GD_E_TRUNC_UNLINK, name, errno, NULL);
+            free(lamb);
             free(name);
             closedir(dir);
             dreturn("%i", -1);
@@ -149,15 +182,23 @@ static int _GD_TruncDir(DIRFILE *D, int dirfd, const char *dirfile, int root)
     }
     free(name);
   }
+  free(lamb);
 
   closedir(dir);
+
+  if (ret) {
+    _GD_SetError(D, GD_E_TRUNC, GD_E_TRUNC_DIR, dirfile, errno, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
   dreturn("%i", format_trunc);
   return format_trunc;
 }
 
 /* attempt to open or create a new dirfile - set error appropriately */
 static FILE *_GD_CreateDirfile(DIRFILE *restrict D, int dirfd, int dir_error,
-    char *restrict dirfile)
+    char *restrict dirfile, time_t *mtime)
 {
 #ifndef GD_NO_DIR_OPEN
   struct stat statbuf;
@@ -166,7 +207,7 @@ static FILE *_GD_CreateDirfile(DIRFILE *restrict D, int dirfd, int dir_error,
   int format_error = 0, format_trunc = 0;
   FILE* fp = NULL;
 
-  dtrace("%p, %i, %i, \"%s\"", D, dirfd, dir_error, dirfile);
+  dtrace("%p, %i, %i, \"%s\", %p", D, dirfd, dir_error, dirfile, mtime);
 
   /* naively try to open the format file */
   if (dirfd < 0)
@@ -326,6 +367,10 @@ static FILE *_GD_CreateDirfile(DIRFILE *restrict D, int dirfd, int dir_error,
   D->dir[0].path = dirfile;
   D->ndir = 1;
 
+  /* get the mtime */
+  if (fstat(fd, &statbuf) == 0)
+    *mtime = statbuf.st_mtime;
+
   dreturn("%p", fp);
   return fp;
 }
@@ -357,35 +402,31 @@ DIRFILE* gd_invalid_dirfile(void) gd_nothrow
   return D;
 }
 
-/* dirfile_cbopen: open (or, perhaps, create) and parse the specified dirfile
+/* _GD_Open: open (or, perhaps, create) and parse the specified dirfile
 */
-DIRFILE* gd_cbopen(const char* filedir, unsigned long flags,
-    gd_parser_callback_t sehandler, void* extra)
+DIRFILE *_GD_Open(DIRFILE *D, int dirfd, const char *filedir,
+    unsigned long flags, gd_parser_callback_t sehandler, void *extra)
 {
   FILE *fp;
   char *ref_name;
   char *dirfile;
-  DIRFILE* D;
   gd_entry_t* E;
-  int dirfd = -1, dirfd_error = 0;
+  int dirfd_error = 0;
+  time_t mtime = 0;
 
 #ifdef GD_NO_DIR_OPEN
   gd_stat64_t statbuf;
 #endif
 
-  dtrace("\"%s\", 0x%lX, %p, %p", filedir, (unsigned long)flags, sehandler,
-      extra);
+  dtrace("%p, %i, \"%s\", 0x%lX, %p, %p", D, dirfd, filedir,
+      (unsigned long)flags, sehandler, extra);
 
-#ifdef GD_NO_DIR_OPEN
-  /* if we can't cache directory descriptors, we just have to remember paths,
-   * so get the current directory, so that we're protected against the caller
-   * using chdir.
-   */
-
-  /* canonicalise the path */
+  /* canonicalise the path to protect us against the caller chdir'ing away */
   dirfile = _GD_CanonicalPath(NULL, filedir);
 
-  /* that done, now stat the path to see if it exists (and is a directory) */
+#ifdef GD_NO_DIR_OPEN
+  /* if we can't cache directory descriptors, we just have to remember paths.
+   * so stat the path to see if it exists (and is a directory) */
   if (dirfile) {
     if (gd_stat64(dirfile, &statbuf))
       dirfd_error = errno;
@@ -396,17 +437,14 @@ DIRFILE* gd_cbopen(const char* filedir, unsigned long flags,
   }
 #else
   /* quickly, before it goes away, grab the directory (if it exists) */
-  dirfd = open(filedir, O_RDONLY);
+  if (dirfd == -1)
+    dirfd = open(dirfile, O_RDONLY);
   dirfd_error = errno;
-  /* There's a race condition here: someone might change a path element in
-   * filedir after we get dirfd but before we canonicalise the path.  For that
-   * reason, anything requiring a full path must be treated with suspicion.
-   */
-  dirfile = _GD_CanonicalPath(NULL, filedir);
 #endif
   _GD_InitialiseFramework();
 
-  D = (DIRFILE *)malloc(sizeof(DIRFILE));
+  if (D == NULL)
+    D = (DIRFILE *)malloc(sizeof(DIRFILE));
   if (D == NULL) {
     free(dirfile);
 #ifndef GD_NO_DIR_OPEN
@@ -417,6 +455,8 @@ DIRFILE* gd_cbopen(const char* filedir, unsigned long flags,
   }
   memset(D, 0, sizeof(DIRFILE));
 
+  /* user specified flags (used if we're forced to re-open) */
+  D->open_flags = flags;
   /* clear GD_PERMISSIVE if it was specified along with GD_PEDANTIC */
   if (flags & GD_PERMISSIVE && flags & GD_PEDANTIC)
     flags &= ~GD_PERMISSIVE;
@@ -470,7 +510,8 @@ DIRFILE* gd_cbopen(const char* filedir, unsigned long flags,
   D->entry[0]->e->calculated = 1;
 
   /* open the format file (or create it) */
-  if ((fp = _GD_CreateDirfile(D, dirfd, dirfd_error, dirfile)) == NULL) {
+  if ((fp = _GD_CreateDirfile(D, dirfd, dirfd_error, dirfile, &mtime)) == NULL)
+  {
 #ifndef GD_NO_DIR_OPEN
     close(dirfd);
 #endif
@@ -530,6 +571,7 @@ DIRFILE* gd_cbopen(const char* filedir, unsigned long flags,
       ) | (D->flags & GD_ARM_FLAG);
   D->fragment[0].ref_name = NULL;
   D->fragment[0].frame_offset = 0;
+  D->fragment[0].mtime = mtime;
   D->fragment[0].protection = GD_PROTECT_NONE;
   D->fragment[0].vers = (flags & GD_PEDANTIC) ? GD_DIRFILE_STANDARDS_VERSION :
     0;
@@ -578,13 +620,27 @@ DIRFILE* gd_cbopen(const char* filedir, unsigned long flags,
   return D;
 }
 
+DIRFILE *gd_cbopen(const char* filedir, unsigned long flags,
+    gd_parser_callback_t sehandler, void* extra)
+{
+  DIRFILE *D;
+
+  dtrace("\"%s\", 0x%lX, %p, %p", filedir, (unsigned long)flags, sehandler,
+      extra);
+
+  D = _GD_Open(NULL, -1, filedir, flags, sehandler, extra);
+
+  dreturn("%p", D);
+  return D;
+}
+
 DIRFILE* gd_open(const char* filedir, unsigned long flags)
 {
   DIRFILE *D;
 
   dtrace("\"%s\", 0x%lX", filedir, (unsigned long)flags);
 
-  D = gd_cbopen(filedir, flags, NULL, NULL);
+  D = _GD_Open(NULL, -1, filedir, flags, NULL, NULL);
 
   dreturn("%p", D);
   return D;

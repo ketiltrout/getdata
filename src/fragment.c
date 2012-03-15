@@ -300,3 +300,99 @@ int gd_parent_fragment(DIRFILE* D, int fragment_index) gd_nothrow
   dreturn("%i", D->fragment[fragment_index].parent);
   return D->fragment[fragment_index].parent;
 }
+
+/* returns non-zero if the metadata has changed on disk since the dirfile was
+ * opened and, optionally, re-opens the dirfile.
+ */
+int gd_desync(DIRFILE *D, unsigned int flags)
+{
+  int changed = 0, i;
+  struct stat statbuf;
+
+  dtrace("%p, 0x%x", D, flags);
+
+  /* if we can't open directories, we're stuck with the full path method */
+#ifdef GD_NO_DIR_OPEN
+  flags |= GD_DESYNC_PATHCECK;
+#endif
+
+  _GD_ClearError(D);
+
+  if (D->flags & GD_INVALID) {
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  for (i = 0; i < D->n_fragment; ++i) {
+    if (flags & GD_DESYNC_PATHCHECK) {
+      /* stat the file via it's path relative to the original filedir */
+      char *buffer;
+      if (D->fragment[i].sname) {
+        buffer = _GD_Malloc(D, strlen(D->name) +
+            strlen(D->fragment[i].bname) + strlen(D->fragment[i].sname) + 3);
+        if (buffer == NULL) {
+          dreturn("%i", -1);
+          return -1;
+        }
+        sprintf(buffer, "%s%c%s%c%s", D->name, GD_DIRSEP, D->fragment[i].sname,
+            GD_DIRSEP, D->fragment[i].bname);
+      } else {
+        buffer = _GD_Malloc(D, strlen(D->name) + strlen(D->fragment[i].bname) +
+            2);
+        if (buffer == NULL) {
+          dreturn("%i", -1);
+          return -1;
+        }
+        sprintf(buffer, "%s%c%s", D->name, GD_DIRSEP, D->fragment[i].bname);
+      }
+      if (stat(buffer, &statbuf)) {
+        _GD_SetError(D, GD_E_RAW_IO, 0, buffer, errno, NULL);
+        free(buffer);
+        dreturn("%i", -1);
+        return -1;
+      }
+      free(buffer);
+    } else
+      /* stat the file based on it's name and our cached dirfd */
+      if (gd_StatAt(D, D->fragment[i].dirfd, D->fragment[i].bname, &statbuf, 0))
+      {
+        _GD_SetError(D, GD_E_RAW_IO, 0, D->fragment[i].cname, errno, NULL);
+        dreturn("%i", -1);
+        return -1;
+      }
+
+    if (statbuf.st_mtime != D->fragment[i].mtime) {
+      changed = 1;
+      break;
+    }
+  }
+
+  if (changed && flags & GD_DESYNC_REOPEN) {
+    /* reopening is easy: just delete everything and start again.  In the
+     * non-PATHCHECK case, we also have to cache the dirfd to the root directory
+     */
+
+    /* remember how we were called */
+    char *name = D->name;
+    gd_parser_callback_t sehandler = D->sehandler;
+    void *extra = D->sehandler_extra;
+    unsigned long int flags = D->open_flags;
+
+    int dirfd = (flags & GD_DESYNC_PATHCHECK) ? -1 : D->fragment[0].dirfd;
+
+    D->name = NULL; /* so FreeD doesn't delete it */
+    if (_GD_ShutdownDirfile(D, 0, 1)) {
+      D->name = name;
+      dreturn("%i", -1);
+      return -1;
+    }
+    _GD_Open(D, dirfd, name, flags, sehandler, extra);
+
+    if (D->error)
+      changed = -1;
+  }
+
+  dreturn("%i", changed);
+  return changed;
+}

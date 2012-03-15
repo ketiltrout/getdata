@@ -280,3 +280,30 @@ ssize_t getdelim(char **lineptr, size_t *n, int delim, FILE *stream)
   return count;
 }
 #endif
+
+/* emulate readdir_r(3) with non-threadsafe readdir(3) */
+#ifndef HAVE_READDIR_R
+int gd_readdir(DIR *dirp, struct dirent *entry, struct dirent **result)
+{
+  struct dirent *local_entry;
+
+  dtrace("%p, %p, %p", dirp, entry, result);
+
+  errno = 0;
+  local_entry = readdir(dirp);
+  if (local_entry == NULL) {
+    *result = NULL;
+    if (errno) {
+      dreturn("%i", errno);
+      return errno;
+    }
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  *result = entry;
+  memcpy(entry, local_entry, sizeof(struct dirent));
+  dreturn("%i", 0);
+  return 0;
+}
+#endif

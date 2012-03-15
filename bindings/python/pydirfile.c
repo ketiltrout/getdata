@@ -2457,6 +2457,29 @@ static PyObject *gdpy_dirfile_tokenise(struct gdpy_dirfile_t *self,
   return pyobj;
 }
 
+static PyObject *gdpy_dirfile_desync(struct gdpy_dirfile_t *self,
+    void *args, void *keys)
+{
+  dtrace("%p, %p, %p", self, args, keys);
+
+  int ret;
+  char *keywords[] = { "flags", NULL };
+  unsigned int flags = 0;
+
+  if (!PyArg_ParseTupleAndKeywords(args, keys, "|I:pygetdata.dirfile.desync",
+        keywords, &flags))
+  {
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  ret = gd_desync(self->D, flags);
+
+  PyObject* pyobj = PyInt_FromLong((long)ret);
+  dreturn("%p", pyobj);
+  return pyobj;
+}
+
 static PyGetSetDef gdpy_dirfile_getset[] = {
   { "error", (getter)gdpy_dirfile_geterror, NULL,
     "The numerical error code encountered by the last call to the GetData\n"
@@ -2985,7 +3008,6 @@ static PyMethodDef gdpy_dirfile_methods[] = {
     METH_VARARGS | METH_KEYWORDS,
     "raw_close([field_code])\n\n"
       "Close any open raw data files associated with field_code, freeing\n"
-      /* ------- handy ruler ---------------------------------------------| */
       "resources which may be used for other purposes.  If field_code is\n"
       "omitted, all open raw data files are closed.  See gd_raw_close(3)."
   },
@@ -3042,6 +3064,14 @@ static PyMethodDef gdpy_dirfile_methods[] = {
       "subsequent tokens (one per call) of the last string that was\n"
       "provided.  Note: an error will result if the string being parsed\n"
       "goes out of scope.  See gd_tokenise(3)."
+  },
+  {"desync", (PyCFunction)gdpy_dirfile_desync, METH_VARARGS | METH_KEYWORDS,
+    "desync([flags])\n\n"
+      "Returns non-zero if the metadata on disk has changed since the\n"
+      "dirfile was opened, and optionally automatically reloads it.  If\n"
+      "given, flags should be a bitwise or'd  collection of the\n"
+      "pygetdata.DESYNC_... flags.  See gd_desync(3)."
+      /* ------- handy ruler ---------------------------------------------| */
   },
   { NULL, NULL, 0, NULL }
 };

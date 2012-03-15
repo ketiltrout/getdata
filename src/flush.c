@@ -573,8 +573,8 @@ static void _GD_FlushFragment(DIRFILE* D, int i, int permissive)
   unsigned int u;
 #ifdef HAVE_FCHMOD
   mode_t mode;
-  struct stat stat_buf;
 #endif
+  struct stat stat_buf;
   time_t t;
   int dirfd = D->fragment[i].dirfd;
 
@@ -760,23 +760,21 @@ static void _GD_FlushFragment(DIRFILE* D, int i, int permissive)
 
   /* If no error was encountered, move the temporary file over the
    * old format file, otherwise abort */
-  ptr = _GD_Strdup(D, D->fragment[i].cname);
-  if (ptr == NULL) {
-    dreturnvoid();
-    return;
-  }
 
   /* Only assume we've synced the file if the rename succeeds */
   if (D->error != GD_E_OK)
     gd_UnlinkAt(D, dirfd, temp_file, 0);
-  else if (gd_RenameAt(D, dirfd, temp_file, dirfd, basename(ptr))) {
+  else if (gd_RenameAt(D, dirfd, temp_file, dirfd, D->fragment[i].bname)) {
     _GD_SetError(D, GD_E_FLUSH, GD_E_FLUSH_RENAME, NULL, errno,
         D->fragment[i].cname);
     gd_UnlinkAt(D, dirfd, temp_file, 0);
   } else
     D->fragment[i].modified = 0;
 
-  free(ptr);
+  /* update mtime, if successful */
+  if (!D->error && gd_StatAt(D, dirfd, D->fragment[i].bname, &stat_buf, 0) == 0)
+    D->fragment[i].mtime = stat_buf.st_mtime;
+
   dreturnvoid();
 }
 

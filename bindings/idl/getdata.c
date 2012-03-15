@@ -5590,7 +5590,47 @@ IDL_VPTR gdidl_tokenise(int argc, IDL_VPTR argv[], char *argk)
   return r;
 }
 
+/* @@DLM: F gdidl_desync GD_DESYNC 1 1 KEYWORDS */
+IDL_VPTR gdidl_desync(int argc, IDL_VPTR argv[], char *argk)
+{
+  dtraceidl();
 
+  int ret;
+  typedef struct {
+    IDL_KW_RESULT_FIRST_FIELD;
+    GDIDL_KW_RESULT_ERROR;
+    int pathcheck;
+    int reopen;
+  } KW_RESULT;
+  KW_RESULT kw;
+
+  GDIDL_KW_INIT_ERROR;
+  kw.pathcheck = kw.reopen = 0;
+
+  static IDL_KW_PAR kw_pars[] = {
+    GDIDL_KW_PAR_ERROR,
+    GDIDL_KW_PAR_ESTRING,
+    { "PATHCHECK", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(pathcheck) },
+    { "REOPEN", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(reopen) },
+    { NULL }
+  };
+
+  IDL_KWProcessByOffset(argc, argv, argk, kw_pars, NULL, 1, &kw);
+
+  DIRFILE *D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
+
+  ret = gd_desync(D, (kw.pathcheck ? GD_DESYNC_PATHCHECK : 0) |
+      (kw.reopen ? GD_DESYNC_REOPEN : 0));
+
+  GDIDL_SET_ERROR(D);
+
+  IDL_KW_FREE;
+
+
+  IDL_VPTR r = IDL_GettmpInt(ret);
+  dreturn("%p", r);
+  return r;
+}
 
 
 /**** Module initialisation ****/

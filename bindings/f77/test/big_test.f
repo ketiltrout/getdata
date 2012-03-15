@@ -2074,6 +2074,11 @@ C     233: GDRCLO check
       CALL GDRCLO(d, 'data', 4)
       CALL CHKEOK(ne, 233, d)
 
+C     234: GDDSYN check
+      CALL GDDSYN(n, d, 0)
+      CALL CHKEOK(ne, 234, d)
+      CALL CHKINT(ne, 234, n, 0)
+
 
 
 
