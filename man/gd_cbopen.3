@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_cbopen 3 "1 January 2012" "Version 0.8.0" "GETDATA"
+.TH gd_cbopen 3 "17 March 2012" "Version 0.8.0" "GETDATA"
 .SH NAME
 gd_cbopen, gd_open \(em open or create a dirfile
 .SH SYNOPSIS
@@ -623,7 +623,10 @@ The registered callback function,
 returned an unrecognised response.
 .TP
 .B GD_E_CREAT
-The library was unable to create the dirfile, or the dirfile exists and both
+The library was unable to create the dirfile.
+.TP
+.B GD_E_EXISTS
+The dirfile already exists and both
 .BR GD_CREAT " and " GD_EXCL
 were specified.
 .TP

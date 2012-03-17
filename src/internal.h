@@ -618,9 +618,8 @@ ssize_t getdelim(char**, size_t*, int, FILE*);
 #define GD_E_TRUNC_DIR         3
 
 #define GD_E_CREAT_FORMAT      1
-#define GD_E_CREAT_EXCL        2
-#define GD_E_CREAT_DIR         3
-#define GD_E_CREAT_OPEN        4
+#define GD_E_CREAT_DIR         2
+#define GD_E_CREAT_OPEN        3
 
 #define GD_E_CODE_MISSING      1
 #define GD_E_CODE_INVALID      2

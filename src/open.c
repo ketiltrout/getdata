@@ -260,7 +260,7 @@ static FILE *_GD_CreateDirfile(DIRFILE *restrict D, int dirfd, int dir_error,
 
   /* It does exist, but we were asked to exclusively create it */
   if (!format_error && (D->flags & GD_CREAT) && (D->flags & GD_EXCL)) {
-    _GD_SetError(D, GD_E_CREAT, GD_E_CREAT_EXCL, dirfile, 0, NULL);
+    _GD_SetError(D, GD_E_EXISTS, 0, NULL, 0, NULL);
     free(dirfile);
     close(fd);
     dreturn("%p", NULL);

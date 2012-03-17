@@ -85,8 +85,6 @@ static const struct {
   { GD_E_CREAT, GD_E_CREAT_DIR, "Unable to create directory {2}: ", 1 },
   { GD_E_CREAT, GD_E_CREAT_OPEN, "Unable to open directory {2}: ", 1 },
   { GD_E_CREAT, GD_E_CREAT_FORMAT, "Unable to create format file {2}: ", 1 },
-  { GD_E_CREAT, GD_E_CREAT_EXCL, "Unable to create dirfile {2}: already exists",
-    0 },
   /* GD_E_BAD_CODE: 4 = field code */
   { GD_E_BAD_CODE, GD_E_CODE_MISSING, "Field not found: {4}", 0 },
   { GD_E_BAD_CODE, GD_E_CODE_INVALID, "Bad field name: {4}", 0 },
@@ -181,6 +179,8 @@ static const struct {
   { GD_E_ARGUMENT, 0, "Bad argument", 0 },
   /* GD_E_CALLBACK: 3 = response */
   { GD_E_CALLBACK, 0, "Unrecognised response from callback function: {3}", 0 },
+  /* GD_E_ExISTS: (nothing) */
+  { GD_E_EXISTS, 0, "Dirfile exists", 0 },
   /* GD_E_UNCLEAN_DB: 3 = fragment */
   { GD_E_UNCLEAN_DB, 0,
     "Unexpected system error processing {3}; database unclean", 0 },

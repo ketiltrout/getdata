@@ -144,7 +144,7 @@ extern "C" {
 #define GD_E_DELETE           26
 #define GD_E_ARGUMENT         27
 #define GD_E_CALLBACK         28
-/* unused                     29 */
+#define GD_E_EXISTS           29
 #define GD_E_UNCLEAN_DB       30
 #define GD_E_DOMAIN           31
 #define GD_E_BAD_REPR         32

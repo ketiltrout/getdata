@@ -63,7 +63,6 @@ static struct {
   CONSTANT(E_BAD_TYPE,       "GD_EBT", 0),
   CONSTANT(E_RAW_IO,         "GD_ERW", 0),
   CONSTANT(E_OPEN_FRAGMENT,  "GD_EOF", 0),
-  CONSTANT(E_OPEN_INCLUDE,   "GD_EOI", 0), /* deprecated */
   CONSTANT(E_INTERNAL_ERROR, "GD_EIE", 0),
   CONSTANT(E_ALLOC,          "GD_EAL", 0),
   CONSTANT(E_RANGE,          "GD_ERA", 0),
@@ -83,9 +82,8 @@ static struct {
   CONSTANT(E_PROTECTED,      "GD_EPT", 0),
   CONSTANT(E_DELETE,         "GD_EDL", 0),
   CONSTANT(E_ARGUMENT,       "GD_EAR", 0),
-  CONSTANT(E_BAD_ENDIANNESS, "GD_EEN", 0), /* deprecated */
   CONSTANT(E_CALLBACK,       "GD_ECB", 0),
-  CONSTANT(E_BAD_PROTECTION, "GD_EBP", 0), /* deprecated */
+  CONSTANT(E_EXISTS,         "GD_EEX", 0),
   CONSTANT(E_UNCLEAN_DB,     "GD_UCL", 0),
   CONSTANT(E_DOMAIN,         "GD_EDO", 0),
   CONSTANT(E_BAD_REPR,       "GD_ERP", 0),
@@ -93,6 +91,10 @@ static struct {
   CONSTANT(E_FLUSH,          "GD_EFL", 0),
   CONSTANT(E_BOUNDS,         "GD_EBO", 0),
   CONSTANT(E_LINE_TOO_LONG,  "GD_ETL", 0),
+
+  CONSTANT(E_OPEN_INCLUDE,   "GD_EOI", 0), /* deprecated */
+  CONSTANT(E_BAD_ENDIANNESS, "GD_EEN", 0), /* deprecated */
+  CONSTANT(E_BAD_PROTECTION, "GD_EBP", 0), /* deprecated */
 
   CONSTANT(RDONLY,           "GD_RO",  1),
   CONSTANT(RDWR,             "GD_RW",  1),

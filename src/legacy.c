@@ -72,7 +72,7 @@ const char *GD_ERROR_CODES[GD_N_ERROR_CODES] = {
   NULL, /* GD_E_DELETE */
   "Bad argument", /* GD_E_ARGUMENT */
   NULL, /* GD_E_CALLBACK */
-  NULL, /* unused */
+  NULL, /* GD_E_EXISTS */
   NULL, /* GD_E_UNCLEAN_DB */
   "Improper domain", /* GD_E_DOMAIN */
   "Bad representation", /* GD_E_BAD_REPR */

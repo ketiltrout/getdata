@@ -1,3 +1,8 @@
+2012-03-16   D. V. Wiebe <getdata@ketiltrout.net> svn:678
+	* src/errors.c src/getdata.h.in: Add GD_E_EXISTS
+	* src/open.c (_GD_CreateDirfile): Replace GD_E_CREAT:GD_E_CREAT_EXCL with
+	GD_E_EXISTS.
+
 2012-03-16   D. V. Wiebe <getdata@ketiltrout.net> svn:676
 	* configure.ac bindings/idl/package/configure.ac src/include.h
 	bindings/make_parameters.c bindings/cxx/internal.h bindings/idl/getdata.c
