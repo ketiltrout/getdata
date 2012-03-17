@@ -45,7 +45,7 @@ int main(void)
   unlink(format);
   rmdir(filedir);
 
-  CHECKI(error, GD_E_CREAT);
+  CHECKI(error, GD_E_EXISTS);
 
   return r;
 }
