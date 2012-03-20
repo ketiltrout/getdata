@@ -5648,8 +5648,8 @@ IDL_VPTR gdidl_flags(int argc, IDL_VPTR argv[], char *argk)
   unsigned long flags, set = 0, reset = 0;
   typedef struct {
     IDL_KW_RESULT_FIRST_FIELD;
-    GDIDL_KW_RESULT_ERRROR;
-    int pretty, verbose;
+    GDIDL_KW_RESULT_ERROR;
+    short int pretty, verbose;
   } KW_RESULT;
   KW_RESULT kw;
 
@@ -5659,8 +5659,8 @@ IDL_VPTR gdidl_flags(int argc, IDL_VPTR argv[], char *argk)
   static IDL_KW_PAR kw_pars[] = {
     GDIDL_KW_PAR_ERROR,
     GDIDL_KW_PAR_ESTRING,
-    { "PRETTY_PRINT", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(pathcheck) },
-    { "VERBOSE", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(pathcheck) },
+    { "PRETTY_PRINT", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(pretty) },
+    { "VERBOSE", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(verbose) },
     { NULL }
   };
 
@@ -5704,7 +5704,7 @@ void gdidl_verbose_prefix(int argc, IDL_VPTR argv[], char *argk)
   KW_RESULT kw;
 
   GDIDL_KW_INIT_ERROR;
-  kw.fragment_index = kw.prefix_x = kw.suffix_x = 0;
+  kw.prefix_x = 0;
 
   static IDL_KW_PAR kw_pars[] = {
     GDIDL_KW_PAR_ERROR,
