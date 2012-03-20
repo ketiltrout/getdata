@@ -246,3 +246,5 @@
 232 F9CIpP gd_tokenise
 233 F9CIpP gd_raw_close
 234 F9CIpP gd_desync
+235 F9CIpP gd_flags
+236 F9CIpP gd_verbose_prefix

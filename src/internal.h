@@ -827,7 +827,7 @@ typedef int (*gd_ef_move_t)(int, struct _gd_raw_file*, int, char*);
 extern struct encoding_t {
   unsigned long int scheme;
   const char* ext;
-  int flags; /* flags */
+  unsigned int flags; /* flags */
   const char* affix;
   const char* ffname;
   unsigned int provides;
@@ -904,6 +904,7 @@ struct _GD_DIRFILE {
   char* error_string;
   char* error_file;
   int error_line;
+  char *error_prefix;
 
   /* global data */
   unsigned long int flags;

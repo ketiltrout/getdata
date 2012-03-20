@@ -1922,12 +1922,30 @@ try:
 except:
   CheckOK(233)
 
+# 234: gd_desync check
 try:
   n = d.desync()
 except:
   CheckOK(234)
 CheckSimple(234, n, 0)
 
+# 235: gd_flags check
+try:
+  d.flags = pygetdata.PRETTY_PRINT
+except:
+  CheckOK2(235,1)
+
+try:
+  CheckSimple(235, d.flags, pygetdata.PRETTY_PRINT)
+except:
+  CheckOK2(235,2)
+
+# 236: gd_verbose_prefix check
+try:
+  n = d.verbose_prefix("big_test: ")
+except:
+  CheckOK(236)
+CheckSimple(236, n, None)
  
 
 

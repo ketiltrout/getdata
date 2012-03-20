@@ -2416,7 +2416,7 @@ static PyObject* gdpy_dirfile_maddalias(struct gdpy_dirfile_t* self,
   const char *field_code, *target, *parent;
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
-        "sss:pygetdata.dirfile.add_alias", keywords, &parent, &field_code,
+        "sss:pygetdata.dirfile.madd_alias", keywords, &parent, &field_code,
         &target))
   {
     dreturn("%p", NULL);
@@ -2480,6 +2480,64 @@ static PyObject *gdpy_dirfile_desync(struct gdpy_dirfile_t *self,
   return pyobj;
 }
 
+static PyObject* gdpy_dirfile_getflags(struct gdpy_dirfile_t *self,
+    void* closure)
+{
+  dtrace("%p, %p", self, closure);
+
+  unsigned long flags = gd_flags(self->D, 0, 0);
+
+  PYGD_CHECK_ERROR(self->D, NULL);
+
+  PyObject *pyobj = PyLong_FromUnsignedLong(flags);
+  dreturn("%p", pyobj);
+  return pyobj;
+}
+
+static int gdpy_dirfile_setflags(struct gdpy_dirfile_t *self,
+    PyObject *value, void *closure)
+{
+  dtrace("%p, %p, %p", self, value, closure);
+
+  unsigned long new_flags = (int)PyLong_AsUnsignedLong(value);
+
+  if (PyErr_Occurred()) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  gd_flags(self->D, new_flags, ~new_flags);
+
+  PYGD_CHECK_ERROR(self->D, -1);
+
+  dreturn("%i", 0);
+  return 0;
+}
+
+static PyObject* gdpy_dirfile_verbose_prefix(struct gdpy_dirfile_t* self,
+    void *args, void *keys)
+{
+  dtrace("%p, %p, %p", self, args, keys);
+
+  char *keywords[] = { "prefix", NULL };
+  const char *prefix = NULL;
+
+  if (!PyArg_ParseTupleAndKeywords(args, keys,
+        "|s:pygetdata.dirfile.verbose_prefix", keywords, &prefix))
+  {
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  gd_verbose_prefix(self->D, prefix);
+
+  PYGD_CHECK_ERROR(self->D, NULL);
+
+  Py_INCREF(Py_None);
+  dreturn("%p", Py_None);
+  return Py_None;
+}
+
 static PyGetSetDef gdpy_dirfile_getset[] = {
   { "error", (getter)gdpy_dirfile_geterror, NULL,
     "The numerical error code encountered by the last call to the GetData\n"
@@ -2497,6 +2555,10 @@ static PyGetSetDef gdpy_dirfile_getset[] = {
     "A human-readable description of the last error encountered by the\n"
       "GetData library for this dirfile.  See gd_error_string(3).",
     NULL },
+  { "flags", (getter)gdpy_dirfile_getflags, (setter)gdpy_dirfile_setflags,
+    "The operational flags of the open dirfile.  This contains a subset\n"
+      "of the dirfile creation flags specified when the object was\n"
+      "instantiated.  See gd_flags(3).", NULL },
   { "name", (getter)gdpy_dirfile_getname, NULL,
     "The name of the Dirfile.  See gd_dirfilename(3).",
     NULL },
@@ -3071,7 +3133,12 @@ static PyMethodDef gdpy_dirfile_methods[] = {
       "dirfile was opened, and optionally automatically reloads it.  If\n"
       "given, flags should be a bitwise or'd  collection of the\n"
       "pygetdata.DESYNC_... flags.  See gd_desync(3)."
+  },
+  {"verbose_prefix", (PyCFunction)gdpy_dirfile_verbose_prefix,
+    METH_VARARGS | METH_KEYWORDS, "verbose_prefix([prefix])\n\n"
+      "Set the verbose prefix to prefix (if given) or else remove the\n"
       /* ------- handy ruler ---------------------------------------------| */
+      "previously defined prefix.  See gd_verbose_prefix (3)."
   },
   { NULL, NULL, 0, NULL }
 };

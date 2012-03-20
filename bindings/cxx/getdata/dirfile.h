@@ -131,6 +131,8 @@ namespace GetData {
       const char *ErrorString();
       const char *ErrorString(size_t n) gd_deprecated;
 
+      unsigned long Flags(unsigned long set = 0, unsigned long reset = 0);
+
       const char **FieldList() const;
 
       const char **FieldListByType(EntryType type) const;
@@ -258,6 +260,8 @@ namespace GetData {
       int UnInclude(int fragment_index, int del = 0) const;
 
       int Validate(const char* field_code) const;
+
+      void VerbosePrefix(const char *prefix = NULL) const;
 
       const char **VectorList() const;
 

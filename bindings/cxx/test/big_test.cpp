@@ -1658,6 +1658,15 @@ int main(void)
   CHECK_OK(234);
   CHECK_INT(234, n, 0);
 
+  // 235: gd_flags check
+  n = d->Flags(GD_PRETTY_PRINT, 0);
+  CHECK_OK(235);
+  CHECK_INT(235, n, GD_PRETTY_PRINT);
+
+  // 236: gd_verbose_prefix
+  d->VerbosePrefix("big_test: ");
+  CHECK_OK(236);
+
 
 
 

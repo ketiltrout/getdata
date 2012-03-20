@@ -670,6 +670,12 @@ void F77_FUNC(gdnocb, GDNOCB) (const int* dirfile);
 
 void F77_FUNC(gddsyn, GDDSYN) (int *desync, const int *dirfile,
     const int *flags);
+
+void F77_FUNC(gdflag, GDFLAG) (int *flags, const int *dirfile, const int *set,
+    const int *reset);
+
+void F77_FUNC(gdvbpx, GDVBPX) (const int *dirfile, const char *prefix,
+    const int *prefix_l);
 #ifdef __cplusplus
 }
 #endif

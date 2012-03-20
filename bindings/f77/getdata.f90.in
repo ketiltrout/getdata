@@ -2796,4 +2796,18 @@ function fgd_desync (dirfile, flags)
   call gddsyn(fgd_desync, dirfile, flags)
 end function
 
+function fgd_flags (dirfile, set, reset)
+  integer :: fgd_flags
+  integer, intent(in) :: dirfile, set, reset
+
+  call gdflag(fgd_flags, dirfile, set, reset)
+end function
+
+subroutine fgd_verbose_prefix(dirfile, prefix)
+  integer, intent(in) :: dirfile
+  character (len=*), intent(in) :: prefix
+
+  call gdvbpx(dirfile, TRIM(prefix), LEN_TRIM(prefix))
+end subroutine
+
 end module

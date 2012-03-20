@@ -421,6 +421,8 @@ DIRFILE *_GD_Open(DIRFILE *D, int dirfd, const char *filedir,
   dtrace("%p, %i, \"%s\", 0x%lX, %p, %p", D, dirfd, filedir,
       (unsigned long)flags, sehandler, extra);
 
+  errno = 0;
+
   /* canonicalise the path to protect us against the caller chdir'ing away */
   dirfile = _GD_CanonicalPath(NULL, filedir);
 

@@ -31,7 +31,7 @@
 
 /* The type parameter:
  *   0: error codes
- *   1: open flags represented as INT in IDL
+ *   1: open flags not in IDL
  *   2: open flags represented as LONG in IDL
  *   3: entry types
  *   4: data types
@@ -106,10 +106,10 @@ static struct {
   CONSTANT(TRUNC,            "GD_TR",  1),
   CONSTANT(PEDANTIC,         "GD_PE",  1),
   CONSTANT(FORCE_ENCODING,   "GD_FC",  1),
-  CONSTANT(VERBOSE,          "GD_VB",  1),
+  CONSTANT(VERBOSE,          "GD_VB",  2),
   CONSTANT(IGNORE_DUPS,      "GD_ID",  1),
   CONSTANT(IGNORE_REFS,      "GD_IR",  1),
-  CONSTANT(PRETTY_PRINT,     "GD_PP",  1),
+  CONSTANT(PRETTY_PRINT,     "GD_PP",  2),
   CONSTANT(ARM_ENDIAN,       "GD_AE",  2),
   CONSTANT(NOT_ARM_ENDIAN,   "GD_NA",  2),
   CONSTANT(PERMISSIVE,       "GD_PM",  1),

@@ -151,6 +151,8 @@ C     Corresponding to gd_field_list_by_type(3) (sort of)
       EXTERNAL GDFDNT
 C     Returns the maximum field name length
       EXTERNAL GDFDNX
+C     Corresponding to gd_flags(3)
+      EXTERNAL GDFLAG
 C     Corresponding to gd_field_list(3) (sort of)
       EXTERNAL GDFLDN
 C     Corresponding to gd_flush(3)
@@ -356,6 +358,8 @@ C     Corresponding to gd_unhide(3)
       EXTERNAL GDUHID
 C     Corresponding to gd_uninclude(3)
       EXTERNAL GDUINC
+C     Corresponding to gd_verbose_prefix(3)
+      EXTERNAL GDVBPX
 C     Corresponding to gd_vector_list(3) (sort of)
       EXTERNAL GDVECN
 C     Corresponding to gd_validate(3)

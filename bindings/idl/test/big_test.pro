@@ -1352,6 +1352,14 @@ n = gd_desync(d)
 nume += check_ok(234, d)
 nume += check_simple(234, n, 0)
 
+; 235: gd_flags check
+n = gd_flags(d, /PRETTY_PRINT)
+nume += check_ok(235, d)
+nume += check_simple(235, n, !GD_PRETTY_PRINT)
+
+; 236: gd_verbose_prefix
+gd_verbose_prefix, d, "big_test"
+nume += check_ok(236, d)
  
 
 

@@ -615,7 +615,7 @@ static void _GD_FlushFragment(DIRFILE* D, int i, int permissive)
         t += l;
         n++;
       }
-    max_len = 2 * t / n;
+    max_len = (n == 0) ? 0: 2 * t / n;
     if (max_len > m)
       max_len = m;
     if (max_len > GD_MAX_PRETTY_FIELD_WIDTH)

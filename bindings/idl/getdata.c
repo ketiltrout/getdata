@@ -3315,11 +3315,14 @@ IDL_VPTR gdidl_open(int argc, IDL_VPTR argv[], char *argk)
     int force_enc;
     int force_end;
     int ignore_dups;
+    int ignore_refs;
     int little_end;
     int not_arm_end;
     int pedantic;
     int permissive;
+    int pretty_print;
     int trunc;
+    int truncsub;
     int verbose;
     int enc_x;
     IDL_VPTR enc;
@@ -3327,7 +3330,8 @@ IDL_VPTR gdidl_open(int argc, IDL_VPTR argv[], char *argk)
   KW_RESULT kw;
   kw.rdwr = kw.big_end = kw.creat = kw.excl = kw.force_enc = kw.force_end =
     kw.ignore_dups = kw.little_end = kw.pedantic = kw.trunc = kw.verbose =
-    kw.enc_x = kw.arm_end = kw.not_arm_end = 0;
+    kw.enc_x = kw.arm_end = kw.not_arm_end = kw.pretty_print = kw.truncsub =
+    kw.ignore_refs = 0;
   GDIDL_KW_INIT_ERROR;
 
   static IDL_KW_PAR kw_pars[] = {
@@ -3343,12 +3347,15 @@ IDL_VPTR gdidl_open(int argc, IDL_VPTR argv[], char *argk)
     { "FORCE_ENCODING", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(force_enc) },
     { "FORCE_ENDIANNESS", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(force_end) },
     { "IGNORE_DUPS", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(ignore_dups) },
+    { "IGNORE_REFS", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(ignore_refs) },
     { "LITTLE_ENDIAN", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(little_end) },
     { "NOT_ARM_ENDIAN", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(not_arm_end) },
     { "PEDANTIC", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(pedantic) },
     { "PERMISSIVE", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(permissive) },
+    { "PRETTY_PRINT", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(pretty_print) },
     { "RDWR", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(rdwr) },
     { "TRUNC", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(trunc) },
+    { "TRUNCSUB", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(truncsub) },
     { "VERBOSE", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(verbose) },
     { NULL }
   };
@@ -3363,10 +3370,12 @@ IDL_VPTR gdidl_open(int argc, IDL_VPTR argv[], char *argk)
     | (kw.force_enc ? GD_FORCE_ENCODING : 0)
     | (kw.force_end ? GD_FORCE_ENDIAN : 0)
     | (kw.ignore_dups ? GD_IGNORE_DUPS : 0)
+    | (kw.ignore_refs ? GD_IGNORE_REFS : 0)
     | (kw.little_end ? GD_LITTLE_ENDIAN : 0)
     | (kw.not_arm_end ? GD_NOT_ARM_ENDIAN : 0)
     | (kw.pedantic ? GD_PEDANTIC : 0) | (kw.permissive ? GD_PERMISSIVE : 0)
-    | (kw.trunc ? GD_TRUNC : 0) | (kw.verbose ? GD_VERBOSE : 0);
+    | (kw.pretty_print ? GD_PRETTY_PRINT : 0) | (kw.trunc ? GD_TRUNC : 0)
+    | (kw.truncsub ? GD_TRUNCSUB : 0) | (kw.verbose ? GD_VERBOSE : 0);
 
   if (kw.enc_x)
     flags |= gdidl_convert_encoding(kw.enc);
@@ -5626,10 +5635,99 @@ IDL_VPTR gdidl_desync(int argc, IDL_VPTR argv[], char *argk)
 
   IDL_KW_FREE;
 
-
   IDL_VPTR r = IDL_GettmpInt(ret);
   dreturn("%p", r);
   return r;
+}
+
+/* @@DLM: F gdidl_flags GD_FLAGS 1 1 KEYWORDS */
+IDL_VPTR gdidl_flags(int argc, IDL_VPTR argv[], char *argk)
+{
+  dtraceidl();
+
+  unsigned long flags, set = 0, reset = 0;
+  typedef struct {
+    IDL_KW_RESULT_FIRST_FIELD;
+    GDIDL_KW_RESULT_ERRROR;
+    int pretty, verbose;
+  } KW_RESULT;
+  KW_RESULT kw;
+
+  GDIDL_KW_INIT_ERROR;
+  kw.pretty = kw.verbose = -1;
+
+  static IDL_KW_PAR kw_pars[] = {
+    GDIDL_KW_PAR_ERROR,
+    GDIDL_KW_PAR_ESTRING,
+    { "PRETTY_PRINT", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(pathcheck) },
+    { "VERBOSE", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(pathcheck) },
+    { NULL }
+  };
+
+  IDL_KWProcessByOffset(argc, argv, argk, kw_pars, NULL, 1, &kw);
+
+  if (kw.pretty == 1)
+    set |= GD_PRETTY_PRINT;
+  else if (kw.pretty == 0)
+    reset |= GD_PRETTY_PRINT;
+
+  if (kw.verbose == 1)
+    set |= GD_VERBOSE;
+  else if (kw.verbose == 0)
+    reset |= GD_VERBOSE;
+
+  DIRFILE *D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
+
+  flags = gd_flags(D, set, reset);
+
+  GDIDL_SET_ERROR(D);
+
+  IDL_KW_FREE;
+
+  IDL_VPTR r = IDL_GettmpLong(flags);
+  dreturn("%p", r);
+  return r;
+}
+
+/* @@DLM: P gdidl_verbose_prefix GD_VERBOSE_PREFIX 1 1 KEYWORDS */
+void gdidl_verbose_prefix(int argc, IDL_VPTR argv[], char *argk)
+{
+  dtraceidl();
+
+  char *prefix = NULL;
+  typedef struct {
+    IDL_KW_RESULT_FIRST_FIELD;
+    GDIDL_KW_RESULT_ERROR;
+    IDL_STRING prefix;
+    int prefix_x;
+  } KW_RESULT;
+  KW_RESULT kw;
+
+  GDIDL_KW_INIT_ERROR;
+  kw.fragment_index = kw.prefix_x = kw.suffix_x = 0;
+
+  static IDL_KW_PAR kw_pars[] = {
+    GDIDL_KW_PAR_ERROR,
+    GDIDL_KW_PAR_ESTRING,
+    { "PREFIX", IDL_TYP_STRING, 1, 0, IDL_KW_OFFSETOF(prefix_x),
+      IDL_KW_OFFSETOF(prefix) },
+    { NULL }
+  };
+
+  IDL_KWProcessByOffset(argc, argv, argk, kw_pars, NULL, 1, &kw);
+
+  DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
+
+  if (kw.prefix_x)
+    prefix = IDL_STRING_STR(&kw.prefix);
+
+  gd_verbose_prefix(D, prefix);
+
+  GDIDL_SET_ERROR(D);
+
+  IDL_KW_FREE;
+
+  dreturnvoid();
 }
 
 

@@ -539,3 +539,13 @@ int Dirfile::DeSync(unsigned int flags)
 
   return desync;
 }
+
+unsigned long Dirfile::Flags(unsigned long set, unsigned long reset)
+{
+  return gd_flags(D, set, reset);
+}
+
+void Dirfile::VerbosePrefix(const char *prefix) const
+{
+  gd_verbose_prefix(D, prefix);
+}

@@ -154,3 +154,6 @@ int madd_mplex(DIRFILE *dirfile, const char *parent, const char *field_code,
     gd_count_t count_max)
 int raw_close(DIRFILE *dirfile, const char *field_code)
 int desync(DIRFILE *dirfile, unsigned int flags)
+unsigned long int flags(DIRFILE *dirfile, unsigned long int set,
+    unsigned long int reset)
+int verbose_prefix(DIRFILE *dirfile, const char *prefix)

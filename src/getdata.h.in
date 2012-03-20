@@ -686,6 +686,9 @@ extern const char **gd_field_list(DIRFILE *dirfile) gd_nothrow gd_nonnull ((1));
 extern const char **gd_field_list_by_type(DIRFILE *dirfile,
     gd_entype_t type) gd_nothrow gd_nonnull ((1));
 
+extern unsigned long gd_flags(DIRFILE *D, unsigned long set,
+    unsigned long resest) gd_nothrow gd_nonnull ((1));
+
 extern int gd_fragment_affixes(DIRFILE *dirfile, int index, char **prefix,
     char **suffix) gd_nothrow gd_nonnull ((1,3,4));
 
@@ -882,6 +885,9 @@ gd_nonnull ((1,2));
 
 extern int gd_validate(DIRFILE *dirfile, const char *field_code) gd_nothrow
 gd_nonnull((1,2));
+
+extern int gd_verbose_prefix(DIRFILE *D, const char *prefix) gd_nothrow
+gd_nonnull ((1,2));
 
 extern const char **gd_vector_list(DIRFILE *dirfile) gd_nothrow gd_nonnull((1));
 

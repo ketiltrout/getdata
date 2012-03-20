@@ -2513,6 +2513,15 @@ program big_test
   call check_ok(ne, 234, d)
   call check_int(ne, 234, n, 0)
 
+! 235: fgd_flags check
+  n = fgd_flags(d, GD_PRETTY_PRINT, 0)
+  call check_ok(ne, 235, d)
+  call check_int(ne, 235, n, GD_PRETTY_PRINT)
+
+! 236: fgd_verbose_prefix check
+  call fgd_verbose_prefix(d, "big_test95")
+  call check_ok(ne, 236, d)
+
  
 
 

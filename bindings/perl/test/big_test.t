@@ -22,7 +22,7 @@
 use GetData;
 use Math::Complex;
 use strict;
-use Test::More tests => 1268;
+use Test::More tests => 1272;
 
 my $ne = 0;
 my ($s, @a, %h);
@@ -1669,6 +1669,16 @@ CheckOK(233);
 $s = $_->desync(0);
 CheckOK(234);
 CheckNum(234, $s, 0);
+
+#235: gd_flags
+$s = $_->flags($GetData::PRETTY_PRINT, 0);
+CheckOK(235);
+CheckNum(235, $s, $GetData::PRETTY_PRINT);
+
+#236: gd_verbose_prefix
+$s = $_->verbose_prefix("big_test: ");
+CheckOK(236);
+CheckNum(236, $s, 0);
 
 
 

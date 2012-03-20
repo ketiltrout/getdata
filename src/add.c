@@ -63,7 +63,7 @@ static gd_entry_t *_GD_FixName(DIRFILE *restrict D, char **restrict buffer,
     *buffer = temp2;
   }
 
-  dreturn("%p [\"%s\", %i]", P, *buffer, *offset);
+  dreturn("%p (\"%s\", %i)", P, *buffer, *offset);
   return P;
 }
 

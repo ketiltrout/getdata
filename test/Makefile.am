@@ -160,7 +160,8 @@ ENTRY_TESTS=entry_bad_code entry_bit entry_bit_scalar entry_divide \
 
 EOF_TESTS=eof eof_index eof_lincom eof_phase
 
-ERROR_TESTS=error error_error error_num error_short
+ERROR_TESTS=error error_error error_num error_short error_verbose \
+						error_verbose_prefix
 
 FILE_TESTS=file file_code file_type
 
@@ -198,7 +199,7 @@ GET_TESTS=${GET64} get_bad_code get_bit get_carray get_carray_len \
 					get_window_ge get_window_gt get_window_le get_window_lt \
 					get_window_ne get_window_set get_zero
 
-GLOBAL_TESTS=global_name global_ref global_ref_empty global_ref_set
+GLOBAL_TESTS=global_flags global_name global_ref global_ref_empty global_ref_set
 
 GZIP_TESTS=gzip_add gzip_get gzip_get_get gzip_get_put gzip_move_from \
 					 gzip_move_to gzip_nframes gzip_put gzip_put_get

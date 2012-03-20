@@ -112,3 +112,56 @@ const char *gd_reference(DIRFILE* D, const char* field_code) gd_nothrow
   dreturn("\"%s\"", D->reference_field->field);
   return D->reference_field->field;
 }
+
+/* the mask of allowed flags */
+#define GD_FLAG_MASK ( GD_VERBOSE | GD_PRETTY_PRINT)
+unsigned long gd_flags(DIRFILE *D, unsigned long set, unsigned long reset)
+  gd_nothrow
+{
+  dtrace("%p, 0x%X, 0x%X", D, set, reset);
+
+  if (D->flags & GD_INVALID) {
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%p", 0);
+    return 0;
+  }
+
+  _GD_ClearError(D);
+
+  set &= GD_FLAG_MASK;
+  reset &= GD_FLAG_MASK;
+
+  D->flags = (D->flags | set) & ~(D->flags & reset);
+  D->open_flags = (D->open_flags | set) & ~(D->open_flags & reset);
+
+  dreturn("0x%X", D->flags & GD_FLAG_MASK);
+  return D->flags & GD_FLAG_MASK;
+}
+
+int gd_verbose_prefix(DIRFILE *D, const char *prefix)
+{
+  char *ptr = NULL;
+  dtrace("%p, \"%s\"", D, prefix);
+
+  if (D->flags & GD_INVALID) {
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%p", 0);
+    return 0;
+  }
+
+  _GD_ClearError(D);
+
+  if (prefix) {
+    ptr = _GD_Strdup(D, prefix);
+    if (D->error) {
+      dreturn("%p", -1);
+      return -1;
+    }
+  }
+
+  free(D->error_prefix);
+  D->error_prefix = ptr;
+
+  dreturn("%i", 0);
+  return 0;
+}

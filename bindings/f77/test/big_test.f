@@ -2079,6 +2079,15 @@ C     234: GDDSYN check
       CALL CHKEOK(ne, 234, d)
       CALL CHKINT(ne, 234, n, 0)
 
+C     235: GDFLAG check
+      CALL GDFLAG(n, d, GD_PP, 0)
+      CALL CHKEOK(ne, 235, d)
+      CALL CHKINT(ne, 235, n, GD_PP)
+
+C     236: GDVBPX check
+      CALL GDVBPX(d, "big_test", 8)
+      CALL CHKEOK(ne, 236, d)
+
 
 
 

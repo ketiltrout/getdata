@@ -1,3 +1,32 @@
+2012-03-16   D. V. Wiebe <getdata@ketiltrout.net> svn:680
+	* src/globals.c (gd_flags gd_verbose_prefix): Added.
+	* src/errors.c (_GD_SetError): Print verbose prefix, if present.
+
+	* make_parameters.c: Promote GD_VERBOSE and GD_PRETTY_PRINT.
+	* bindings/cxx/dirfile.cpp (Dirfile::Flags Dirfile::VerbosePrefix)
+	bindings/python/pydirfile.c (gdpy_dirfile_getflags gdpy_dirfile_setflags
+	gdpy_dirfile_verbose_prefix) bindings/perl/simple_funcs.xsin (flags
+	verbose_prefix) bindings/f77/fgetdata.c (GDFLAG GDVBPX)
+	bindings/f77/getdata.f90.in (fgd_flags fgd_verbose_prefix)
+	bindings/idl/getdata.c (gdidl_flags gdidl_verbose_prefix): Added.
+	* bindings/python/test/big_test.py bindings/cxx/test/big_test.cpp
+	bindings/perl/test/big_test.t bindings/f77/test/big_test.f
+	bindings/f77/test/big_test95.f90 bindings/idl/test/big_test.pro: Add tests
+	235, 236.
+
+	* src/open.c (_GD_Open): Reset errno to prevent spurious error messages.
+
+	* src/flush.c (_GD_FlushFragment): Avoid FPE.
+
+	* test/global_flags.c test/error_verbose.c test/error_verbose_prefix.c:
+	Added. 
+
+	* bindings/idl/getdata.c (gdidl_open): Add missing IGNORE_REFS,
+	PRETTY_PRINT, TRUNCSUB.
+
+	* bindings/f77/fgetdata.c (_GDF_CString): Take care of the malloc'ing rather
+	than forcing the caller to do it.
+
 2012-03-16   D. V. Wiebe <getdata@ketiltrout.net> svn:678
 	* src/errors.c src/getdata.h.in: Add GD_E_EXISTS
 	* src/open.c (_GD_CreateDirfile): Replace GD_E_CREAT:GD_E_CREAT_EXCL with
