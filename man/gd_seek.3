@@ -1,6 +1,6 @@
 .\" gd_getdata.3.  The gd_getdata man page.
 .\"
-.\" Copyright (C) 2011 D. V. Wiebe
+.\" Copyright (C) 2011, 2012 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_seek 3 "14 October 2011" "Version 0.8.0" "GETDATA"
+.TH gd_seek 3 "21 March 2012" "Version 0.8.0" "GETDATA"
 .SH NAME
 gd_seek \(em reposition a dirfile field pointer
 .SH SYNOPSIS
@@ -51,24 +51,24 @@ field pointer, and the location of the end-of-field marker (see
 In addition to one of the symbols above, the
 .I flags
 parameter may also, optionally, be bitwise or'd with
-.BR GD_SEEK_PAD ,
+.BR GD_SEEK_WRITE ,
 which will result in the field being padded (with zero for integer types or a
 IEEE-754 conforming not-a-number otherwise) in the event of seeking past the
 end-of-field marker.  Note: for some data encodings, the padding may be deferred
 until a write occurs.  The result of calling
 .BR gd_seek ()
 with
-.BR GD_SEEK_PAD ,
+.BR GD_SEEK_WRITE ,
 but without a subsequent call to
 .BR gd_putdata (3),
 is encoding specific, and may not actually advance the end of field.  Attempting
 to seek past the end-of-field marker without specifying
-.B GD_SEEK_PAD
+.B GD_SEEK_WRITE
 is also encoding specific: in some encodings the field pointer will be moved
 past the end-of-field marker, while in others, it will result in an error.
 
 In general,
-.B GD_SEEK_PAD
+.B GD_SEEK_WRITE
 should be used on
 .BR gd_seek ()
 calls before a write via
@@ -76,13 +76,13 @@ calls before a write via
 while calls before a read via
 .BR gd_getdata (3)
 should omit the
-.B GD_SEEK_PAD
+.B GD_SEEK_WRITE
 flag.  So the following:
 .IP
 .nh
 .ad l
 .BI "gd_seek(" dirfile ", " field_code ", " a ", " b ,
-.B GD_SEEK_SET | GD_SEEK_PAD);
+.B GD_SEEK_SET | GD_SEEK_WRITE);
 .br
 .BI "gd_putdata(" dirfile ", "field_code ", GD_HERE, 0, " c ", " d ", " type ,
 .IB data );
