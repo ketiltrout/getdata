@@ -288,8 +288,7 @@ static ssize_t _GD_GetNRec(struct gd_siedata *f, size_t size)
 }
 
 ssize_t _GD_SampIndWrite(struct _gd_raw_file *restrict file,
-    const void *restrict ptr,
-    gd_type_t data_type, size_t nelem)
+    const void *restrict ptr, gd_type_t data_type, size_t nelem)
 {
   ssize_t nrec;
   void *p;
@@ -406,11 +405,12 @@ ssize_t _GD_SampIndWrite(struct _gd_raw_file *restrict file,
   }
 
   /* truncate the file if necessary */
-  if (rin < rout)
-    if (gd_truncate(fileno(f->fp), nrec - rout + rin)) {
+  if (rin < rout) {
+    if (gd_truncate(fileno(f->fp), (nrec - rout + rin) * size)) {
       dreturn("%i", -1);
       return -1;
     }
+  }
 
   /* update the current record */
   memcpy(f->d, (char *)p + (rin - 1) * size, size);

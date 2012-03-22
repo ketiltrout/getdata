@@ -118,11 +118,11 @@ const char *gd_reference(DIRFILE* D, const char* field_code) gd_nothrow
 unsigned long gd_flags(DIRFILE *D, unsigned long set, unsigned long reset)
   gd_nothrow
 {
-  dtrace("%p, 0x%X, 0x%X", D, set, reset);
+  dtrace("%p, 0x%lX, 0x%lX", D, set, reset);
 
   if (D->flags & GD_INVALID) {
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%p", 0);
+    dreturn("0x%X", 0);
     return 0;
   }
 
@@ -134,7 +134,7 @@ unsigned long gd_flags(DIRFILE *D, unsigned long set, unsigned long reset)
   D->flags = (D->flags | set) & ~(D->flags & reset);
   D->open_flags = (D->open_flags | set) & ~(D->open_flags & reset);
 
-  dreturn("0x%X", D->flags & GD_FLAG_MASK);
+  dreturn("0x%lX", D->flags & GD_FLAG_MASK);
   return D->flags & GD_FLAG_MASK;
 }
 
@@ -145,8 +145,8 @@ int gd_verbose_prefix(DIRFILE *D, const char *prefix)
 
   if (D->flags & GD_INVALID) {
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%p", 0);
-    return 0;
+    dreturn("%i", -1);
+    return -1;
   }
 
   _GD_ClearError(D);
@@ -154,7 +154,7 @@ int gd_verbose_prefix(DIRFILE *D, const char *prefix)
   if (prefix) {
     ptr = _GD_Strdup(D, prefix);
     if (D->error) {
-      dreturn("%p", -1);
+      dreturn("%i", -1);
       return -1;
     }
   }

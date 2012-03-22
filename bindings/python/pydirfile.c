@@ -575,6 +575,7 @@ static PyObject* gdpy_dirfile_getdata(struct gdpy_dirfile_t* self,
   const char* field_code;
   PY_LONG_LONG first_frame = 0, first_sample = 0;
   PyObject *num_frames_obj = NULL, *num_samples_obj = NULL;
+  PyObject *return_type_obj = NULL;
   long int num_frames = 0, num_samples = 0;
   int as_list = 0;
   gd_type_t return_type;
@@ -585,20 +586,30 @@ static PyObject* gdpy_dirfile_getdata(struct gdpy_dirfile_t* self,
 #endif
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
-        "si|LLOOi:pygetdata.dirfile.getdata", keywords, &field_code,
-        &return_type, &first_frame, &first_sample, &num_frames_obj,
+        "s|OLLOOi:pygetdata.dirfile.getdata", keywords, &field_code,
+        &return_type_obj, &first_frame, &first_sample, &num_frames_obj,
         &num_samples_obj, &as_list))
   {
     dreturn("%p", NULL);
     return NULL;
   }
-
-  /* sanity check */
-  if (num_frames_obj == NULL && num_samples_obj == NULL) {
-      PyErr_SetString(PyExc_ValueError, "pygetdata.dirfile.gd_getdata(): at "
-          "least one of num_frames and num_samples must be specified");
+  
+  /* get return type */
+  if (return_type_obj) {
+    return_type = (gd_type_t)PyInt_AsLong(return_type_obj);
+    if (PyErr_Occurred()) {
       dreturn("%p", NULL);
       return NULL;
+    }
+  } else {
+    return_type = gd_native_type(self->D, field_code);
+    PYGD_CHECK_ERROR(self->D, NULL);
+  }
+
+  /* get num frames/samples */
+  if (num_frames_obj == NULL && num_samples_obj == NULL) {
+    num_frames = gd_nframes(self->D);
+    PYGD_CHECK_ERROR(self->D, NULL);
   }
 
   if (num_frames_obj) {
@@ -2708,7 +2719,7 @@ static PyMethodDef gdpy_dirfile_methods[] = {
       "and values, unlike the C API counterpart."
   },
   {"getdata", (PyCFunction)gdpy_dirfile_getdata, METH_VARARGS | METH_KEYWORDS,
-    "getdata(field_code, return_type [, first_frame, first_sample,\n"
+    "getdata(field_code [, return_type, first_frame, first_sample,\n"
       "num_frames, num_samples, as_list])\n\n"
       "Retrieve a data vector from the dirfile.  If NumPy support is\n"
       "present in pygetdata, and 'as_list' is not given or zero, a NumPy\n"
@@ -2721,12 +2732,16 @@ static PyMethodDef gdpy_dirfile_methods[] = {
       "indicated.  For list data it should be (typically) one of:\n"
       "pygetdata.INT, pygetdata.LONG, pygetdata.ULONG, pygetdata.FLOAT, or\n"
       "pygetdata.COMPLEX, although any GetData data type code is permitted.\n"
+      "If omitted, the return type defaults to the native type of the field\n"
+      "(see dirfile.native_type()).\n\n"
+      /* ------- handy ruler ---------------------------------------------| */
       "The 'first_frame' and 'first_sample' parameters indicate first\n"
       "datum to read.  If they are both omitted, data is read from the\n"
       "first sample.  Similarly, 'num_frames' and 'num_samples' indicate\n"
-      "the amount of data.  Omitting both of these results in an error.\n"
-      "Fewer samples than requested may be returned without causing an\n"
-      "error.  See gd_getdata(3)."
+      "the amount of data.  Omitting both is equivalent to setting\n"
+      "'num_frames' to dirfile.nframes (ie. all available data).  Fewer\n"
+      "samples than requested may be returned without causing an error.\n"
+      "See gd_getdata(3)."
   },
   { "entry", (PyCFunction)gdpy_dirfile_getentry,
     METH_VARARGS | METH_KEYWORDS,
@@ -3137,7 +3152,6 @@ static PyMethodDef gdpy_dirfile_methods[] = {
   {"verbose_prefix", (PyCFunction)gdpy_dirfile_verbose_prefix,
     METH_VARARGS | METH_KEYWORDS, "verbose_prefix([prefix])\n\n"
       "Set the verbose prefix to prefix (if given) or else remove the\n"
-      /* ------- handy ruler ---------------------------------------------| */
       "previously defined prefix.  See gd_verbose_prefix (3)."
   },
   { NULL, NULL, 0, NULL }

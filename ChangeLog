@@ -1,3 +1,9 @@
+2012-03-22   D. V. Wiebe <getdata@ketiltrout.net> svn:683
+	* src/sie.c (_GD_SampIndWrite): Fix file size calculation during truncation.
+
+	* bindings/python/pydirfile.c (gdpy_dirfile_getdata): Make return_type and
+	num_<foo> optional.
+
 2012-03-16   D. V. Wiebe <getdata@ketiltrout.net> svn:680
 	* src/globals.c (gd_flags gd_verbose_prefix): Added.
 	* src/errors.c (_GD_SetError): Print verbose prefix, if present.
