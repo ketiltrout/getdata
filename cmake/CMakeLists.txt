@@ -25,26 +25,29 @@ endmacro()
 #TODO add configure
 add_definitions(
 	-DPACKAGE_NAME=\"GetData\"
-	-DPACKAGE_VERSION=\"0.7.2\"
+	-DPACKAGE_VERSION=\"0.8.0\"
 	-DPACKAGE_BUGREPORT=\"getdata-devel@lists.sourceforge.net\")
 
 
-## Substitutions needed to build getdata.h
-# build in ANSI C mode
-set(DEFINE_GD_NO_C99_API "#define GD_NO_C99_API")
+
  
 # kst2 doesn't need the legacy API
 set(DEFINE_GD_LEGACY_API "/* #undef GD_LEGACY_API */")
 
 # MSVCRT integer types
-set(DEFINE_gd_int16_t  "#define gd_int16_t short int")
-set(DEFINE_gd_uint16_t "#define gd_uint16_t unsigned short int")
-set(DEFINE_gd_int64_t  "#define gd_int64_t __int64")
-set(DEFINE_gd_uint64_t  "#define gd_int64_t __uint64")
 
 
 
 if(MSVC)
+	## Substitutions needed to build getdata.h
+	# build in ANSI C mode
+	set(DEFINE_GD_NO_C99_API "#define GD_NO_C99_API")
+
+	set(DEFINE_gd_int16_t  "#define gd_int16_t  short int")
+	set(DEFINE_gd_uint16_t "#define gd_uint16_t unsigned short int")
+	set(DEFINE_gd_int64_t  "#define gd_int64_t  __int64")
+	set(DEFINE_gd_uint64_t "#define gd_uint64_t __uint64")
+
 	add_definitions(-D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_WARNINGS)
 	add_definitions(
 		-D__MSVCRT__
@@ -75,6 +78,11 @@ if(MSVC)
 endif()
 
 if(MINGW)
+	set(DEFINE_gd_int16_t  "#define gd_int16_t  __int16")
+	set(DEFINE_gd_uint16_t "#define gd_uint16_t unsigned __int16")
+	set(DEFINE_gd_int64_t  "#define gd_int64_t  __int64")
+	set(DEFINE_gd_uint64_t "#define gd_uint64_t unsigned __int64")
+
 	add_definitions(
 			-D__MSVCRT__
 			-D__MSVCRT_VERSION__=0x0601
@@ -94,10 +102,18 @@ if(MINGW)
 			-DHAVE_STRUCT___STAT64
 			-DHAVE__GETCWD
 			-DMKDIR_NO_MODE
+			-DHAVE_SYS_FILE_H
+			-DHAVE_SYS_STAT_H
+			-DHAVE_DIRENT_H
+			-DS_IFLNK=0xa000
+			-DHAVE_DECL_OFFSETOF
+			-DHAVE__CHSIZE
+			-DGD_DIRSEP=0x53
 			)
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu99")
 endif()
 
-set(GD_ENABLE_C99_API 0)
+
 configure_file(${GD_DIR}/src/getdata.h.in ${CMAKE_BINARY_DIR}/getdata.h @ONLY)
 
 include_directories(${GD_DIR}/src ${CMAKE_CURRENT_BINARY_DIR})

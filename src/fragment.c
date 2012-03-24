@@ -313,7 +313,7 @@ int gd_desync(DIRFILE *D, unsigned int flags)
 
   /* if we can't open directories, we're stuck with the full path method */
 #ifdef GD_NO_DIR_OPEN
-  flags |= GD_DESYNC_PATHCECK;
+  flags |= GD_DESYNC_PATHCHECK;
 #endif
 
   _GD_ClearError(D);

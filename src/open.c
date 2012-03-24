@@ -367,9 +367,11 @@ static FILE *_GD_CreateDirfile(DIRFILE *restrict D, int dirfd, int dir_error,
   D->dir[0].path = dirfile;
   D->ndir = 1;
 
+#ifndef GD_NO_DIR_OPEN
   /* get the mtime */
   if (fstat(fd, &statbuf) == 0)
     *mtime = statbuf.st_mtime;
+#endif
 
   dreturn("%p", fp);
   return fp;

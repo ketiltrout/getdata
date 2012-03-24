@@ -6,6 +6,8 @@ set(files_ignored
 	${GD_DIR}/src/lzma.c
 	${GD_DIR}/src/legacy.c
 	${GD_DIR}/src/slim.c
+	${GD_DIR}/src/zzslim.c
+	${GD_DIR}/src/zzip.c
 	)
 
 GD_FILES(gd src)

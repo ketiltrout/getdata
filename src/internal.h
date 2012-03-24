@@ -60,6 +60,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <stddef.h>
 #include <errno.h>
 #include <ctype.h>
 #include <limits.h>
