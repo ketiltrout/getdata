@@ -52,8 +52,8 @@ int main(void)
   CHECKI(n, 0);
   CHECKS(E.field, "data");
   CHECKX(E.field_type, GD_MPLEX_ENTRY);
-  CHECKS(E.in_fields[0], "in2");
-  CHECKS(E.in_fields[1], "in1");
+  CHECKS(E.in_fields[0], "in1");
+  CHECKS(E.in_fields[1], "in2");
   CHECKS(E.scalar[0], "a");
   CHECKS(E.scalar[1], "b");
   CHECKI(E.scalar_ind[0], -1);

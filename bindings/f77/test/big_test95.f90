@@ -249,7 +249,7 @@ program big_test
   write(1, *) 'polynom POLYNOM data 1.1 2.2 2.2 3.3;4.4 const const'
   write(1, *) 'bit BIT data 3 4'
   write(1, *) 'sbit SBIT data 5 6'
-  write(1, *) 'mplex MPLEX sbit data 1 10'
+  write(1, *) 'mplex MPLEX data sbit 1 10'
   write(1, *) 'mult MULTIPLY data sbit'
   write(1, *) 'phase PHASE data 11'
   write(1, *) 'div DIVIDE mult bit'

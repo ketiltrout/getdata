@@ -27,7 +27,7 @@ int main(void)
   const char *data = "dirfile/data";
   const char *count = "dirfile/count";
   const char *format_data =
-    "mplex MPLEX count data 2 3\n"
+    "mplex MPLEX data count 2 3\n"
     "count RAW UINT8 8\n"
     "data RAW UINT8 8\n";
   unsigned char c[8];

@@ -1,3 +1,14 @@
+2012-03-28   D. V. Wiebe <getdata@ketiltrout.net> svn:691
+	* src/flush.c (_GD_FieldSpec) src/parse.c (_GD_ParseMplex): Swap order of
+	fields in MPLEX specification.
+
+	* bindings/python/test/big_test.py bindings/cxx/test/big_test.cpp
+	bindings/perl/test/big_test.t bindings/f77/test/big_test.f
+	bindings/f77/test/big_test95.f90 bindings/idl/test/big_test.pro
+	test/entry_mplex_scalar.c test/get_mplex.c test/alter_mplex.c
+	test/put_mplex.c  test/get_mplex_lb.ctest/entry_mplex.c: Update for
+	Standards change.
+
 2012-03-28   D. V. Wiebe <getdata@ketiltrout.net> svn:690
 	* m4/compiler.m4 (GD_C_RESTRICT_ARRAY): Fix test program.
 	* bindings/idl/getdata.c (gdidl_alter_mplex): Fix uninitialised variable.

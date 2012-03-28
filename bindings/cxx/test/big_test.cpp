@@ -141,7 +141,7 @@ int main(void)
     "polynom POLYNOM data 1.1 2.2 2.2 3.3;4.4 const const\n"
     "bit BIT data 3 4\n"
     "sbit SBIT data 5 6\n"
-    "mplex MPLEX sbit data 1 10\n"
+    "mplex MPLEX data sbit 1 10\n"
     "mult MULTIPLY data sbit\n"
     "div DIVIDE mult bit\n"
     "recip RECIP div 6.5;4.3\n"

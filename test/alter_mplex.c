@@ -29,7 +29,7 @@ int main(void)
   const char *format_data =
     "count RAW UINT8 8\n"
     "data RAW UINT8 8\n"
-    "mplex MPLEX count data 1 3\n";
+    "mplex MPLEX data count 1 3\n";
   unsigned char data_data[256];
   unsigned char c[8];
   gd_triplet_t threshold;

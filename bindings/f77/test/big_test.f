@@ -250,7 +250,7 @@ C     Write the test dirfile
      + const const'
       WRITE(1, *) 'bit BIT data 3 4'
       WRITE(1, *) 'sbit SBIT data 5 6'
-      WRITE(1, *) 'mplex MPLEX sbit data 1 10'
+      WRITE(1, *) 'mplex MPLEX data sbit 1 10'
       WRITE(1, *) 'mult MULTIPLY data sbit'
       WRITE(1, *) 'phase PHASE data 11'
       WRITE(1, *) 'div DIVIDE mult bit'

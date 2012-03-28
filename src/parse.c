@@ -765,9 +765,8 @@ static gd_entry_t *_GD_ParseMplex(DIRFILE *restrict D,
     return NULL;
   }
 
-  /* These are backwards! */
-  E->in_fields[0] = _GD_Strdup(D, in_cols[3]);
-  E->in_fields[1] = _GD_Strdup(D, in_cols[2]);
+  E->in_fields[0] = _GD_Strdup(D, in_cols[2]);
+  E->in_fields[1] = _GD_Strdup(D, in_cols[3]);
 
   E->scalar[0] = _GD_SetScalar(D, in_cols[4], &E->EN(mplex,count_val),
       GD_UINT16, format_file, line, E->scalar_ind, NULL, standards, pedantic);

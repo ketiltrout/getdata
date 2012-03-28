@@ -167,7 +167,7 @@ linterp LINTERP data /look/up/file
 polynom POLYNOM data 1.1 2.2 2.2 3.3;4.4 const const
 bit BIT data 3 4
 sbit SBIT data 5 6
-mplex MPLEX sbit data 1 10
+mplex MPLEX data sbit 1 10
 mult MULTIPLY data sbit
 div DIVIDE mult bit
 recip RECIP div 6.5;4.3

@@ -497,10 +497,9 @@ static void _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
       break;
     case GD_MPLEX_ENTRY:
       fprintf(stream, " MPLEX%s ", pretty ? "   " : "");
-      /* NB: these are backwards! */
-      _GD_StringEscapeise(stream, E->in_fields[1], 0, permissive, D->standards);
-      fputc(' ', stream);
       _GD_StringEscapeise(stream, E->in_fields[0], 0, permissive, D->standards);
+      fputc(' ', stream);
+      _GD_StringEscapeise(stream, E->in_fields[1], 0, permissive, D->standards);
       fputc(' ', stream);
       _GD_WriteConst(D, stream, me, permissive, GD_INT64,
           &E->EN(mplex,count_val), E->scalar[0], E->scalar_ind[0], " ");
