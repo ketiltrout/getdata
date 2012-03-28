@@ -5294,7 +5294,7 @@ void gdidl_alter_mplex(int argc, IDL_VPTR argv[], char *argk)
   } KW_RESULT;
   KW_RESULT kw;
 
-  kw.in_field1_x = kw.in_field2_x;
+  kw.in_field1_x = kw.in_field2_x = 0;
   kw.val = GD_COUNT_MAX;
   kw.max = 0;
   GDIDL_KW_INIT_ERROR;

@@ -258,10 +258,10 @@ dnl Check whether "<type> *restrict foo[]" is allowed.
 AC_DEFUN([GD_C_RESTRICT_ARRAY],[
 dnl do nothing if restrict hasn't been found
 if ! test "x$ac_cv_c_restrict" = "xno"; then
-AC_CACHE_CHECK([whether restrict can be applied to pointer arrays],
+AC_CACHE_CHECK([whether restrict can be applied to pointer array arguments],
 [gd_cv_c_restrict_array],[
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM([
-    int foo (int *restrict bar[3]) { return bar[2]; }
+    int *foo (int *restrict bar@<:@3@:>@) { return bar@<:@2@:>@; }
 ], [])],
 [gd_cv_c_restrict_array="yes"],[gd_cv_c_restrict_array="no"])
 ])

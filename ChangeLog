@@ -1,3 +1,7 @@
+2012-03-28   D. V. Wiebe <getdata@ketiltrout.net> svn:690
+	* m4/compiler.m4 (GD_C_RESTRICT_ARRAY): Fix test program.
+	* bindings/idl/getdata.c (gdidl_alter_mplex): Fix uninitialised variable.
+
 2012-03-28   D. V. Wiebe <getdata@ketiltrout.net> svn:689
 	* m4/compiler.m4 (GD_C_RESTRICT_ARRAY): Added.
 	* src/parse.c src/internal.h: Work around deficiencies in the GCC-3.4 C99
