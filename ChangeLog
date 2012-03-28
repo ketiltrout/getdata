@@ -1,3 +1,8 @@
+2012-03-28   D. V. Wiebe <getdata@ketiltrout.net> svn:689
+	* m4/compiler.m4 (GD_C_RESTRICT_ARRAY): Added.
+	* src/parse.c src/internal.h: Work around deficiencies in the GCC-3.4 C99
+	compliance.
+
 2012-03-22   D. V. Wiebe <getdata@ketiltrout.net> svn:683
 	* src/sie.c (_GD_SampIndWrite): Fix file size calculation during truncation.
 

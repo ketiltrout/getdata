@@ -471,6 +471,7 @@ echo "*** Checking additional compiler characteristics"
 echo
 AC_C_INLINE
 AC_C_RESTRICT
+GD_C_RESTRICT_ARRAY
 GD_PROG_CC_WALL
 GD_PROG_CC_WEXTRA
 
@@ -517,9 +518,10 @@ if test "$gd_msvcrt" = "yes"; then
 fi
 
 dnl Declare a few feature test macros
-AC_DEFINE([_BSD_SOURCE], [], [ Expose BSD-derived definitions ])
-AC_DEFINE([_SVID_SOURCE], [], [ Expose System V-derived definitions ])
-AC_DEFINE([_POSIX_SOURCE], [], [ Expose POSIX.1-1990 conforming definitions ])
+AC_DEFINE([_GNU_SOURCE], [1], [ Expose GNU extensions ])
+AC_DEFINE([_BSD_SOURCE], [1], [ Expose BSD-derived definitions ])
+AC_DEFINE([_SVID_SOURCE], [1], [ Expose System V-derived definitions ])
+AC_DEFINE([_POSIX_SOURCE], [1], [ Expose POSIX.1-1990 conforming definitions ])
 AC_DEFINE([_POSIX_C_SOURCE], [200809L],
           [ Expose POSIX:2008 conforming definitions ])
 

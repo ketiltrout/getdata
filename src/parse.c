@@ -251,7 +251,7 @@ carray_check:
 /* _GD_ParseRaw: parse a RAW entry in the format file
 */
 static gd_entry_t *_GD_ParseRaw(DIRFILE *restrict D,
-    char *restrict in_cols[MAX_IN_COLS], int n_cols,
+    char *gd_restrict_arr in_cols[MAX_IN_COLS], int n_cols,
     const gd_entry_t *restrict parent, const char *restrict format_file,
     int line, int me, int standards, int pedantic, int *restrict is_dot)
 {
@@ -335,7 +335,7 @@ static gd_entry_t *_GD_ParseRaw(DIRFILE *restrict D,
 /* _GD_ParseLincom: parse a LINCOM entry in the format file.
 */
 static gd_entry_t *_GD_ParseLincom(DIRFILE *restrict D,
-    char *restrict in_cols[MAX_IN_COLS], int n_cols,
+    char *gd_restrict_arr in_cols[MAX_IN_COLS], int n_cols,
     const gd_entry_t *restrict parent, const char *restrict format_file,
     int line, int me, int standards, int pedantic, int *restrict is_dot)
 {
@@ -434,7 +434,7 @@ static gd_entry_t *_GD_ParseLincom(DIRFILE *restrict D,
 /* _GD_ParseLinterp: parse a LINTERP entry in the format file.
 */
 static gd_entry_t *_GD_ParseLinterp(DIRFILE *restrict D,
-    char *restrict in_cols[MAX_IN_COLS], int n_cols,
+    char *gd_restrict_arr in_cols[MAX_IN_COLS], int n_cols,
     const gd_entry_t *restrict parent, const char *restrict format_file,
     int line, int me, int standards, int pedantic, int *restrict is_dot)
 {
@@ -500,7 +500,7 @@ static gd_entry_t *_GD_ParseLinterp(DIRFILE *restrict D,
 /* _GD_ParseMultiply: parse MULTIPLY entry in format file.
 */
 static gd_entry_t *_GD_ParseMultiply(DIRFILE *restrict D,
-    char *restrict in_cols[MAX_IN_COLS], int n_cols,
+    char *gd_restrict_arr in_cols[MAX_IN_COLS], int n_cols,
     const gd_entry_t *restrict parent, const char *restrict format_file,
     int line, int me, int standards, int pedantic, int *restrict is_dot)
 {
@@ -563,7 +563,7 @@ static gd_entry_t *_GD_ParseMultiply(DIRFILE *restrict D,
 /* _GD_ParseRecip: parse RECIP entry in format file.
 */
 static gd_entry_t *_GD_ParseRecip(DIRFILE *restrict D,
-    char *restrict in_cols[MAX_IN_COLS], int n_cols,
+    char *gd_restrict_arr in_cols[MAX_IN_COLS], int n_cols,
     const gd_entry_t *restrict parent, const char *restrict format_file,
     int line, int me, int standards, int pedantic, int *restrict is_dot)
 {
@@ -631,7 +631,7 @@ static gd_entry_t *_GD_ParseRecip(DIRFILE *restrict D,
 /* _GD_ParseWindow: parse WINDOW entry in format file.
 */
 static gd_entry_t *_GD_ParseWindow(DIRFILE *restrict D,
-    char *restrict in_cols[MAX_IN_COLS], int n_cols,
+    char *gd_restrict_arr in_cols[MAX_IN_COLS], int n_cols,
     const gd_entry_t *restrict parent, const char *restrict format_file,
     int line, int me, int standards, int pedantic, int *restrict is_dot)
 {
@@ -720,7 +720,7 @@ static gd_entry_t *_GD_ParseWindow(DIRFILE *restrict D,
 /* _GD_ParseMplex: parse MPLEX entry in format file.
 */
 static gd_entry_t *_GD_ParseMplex(DIRFILE *restrict D,
-    char *restrict in_cols[MAX_IN_COLS], int n_cols,
+    char *gd_restrict_arr in_cols[MAX_IN_COLS], int n_cols,
     const gd_entry_t *restrict parent, const char *restrict format_file,
     int line, int me, int standards, int pedantic, int *restrict is_dot)
 {
@@ -795,7 +795,7 @@ static gd_entry_t *_GD_ParseMplex(DIRFILE *restrict D,
 /* _GD_ParseDivide: parse DIVIDE entry in format file.
 */
 static gd_entry_t *_GD_ParseDivide(DIRFILE *restrict D,
-    char *restrict in_cols[MAX_IN_COLS], int n_cols,
+    char *gd_restrict_arr in_cols[MAX_IN_COLS], int n_cols,
     const gd_entry_t *restrict parent, const char *restrict format_file,
     int line, int me, int standards, int pedantic, int *restrict is_dot)
 {
@@ -859,7 +859,7 @@ static gd_entry_t *_GD_ParseDivide(DIRFILE *restrict D,
 /* _GD_ParseBit: parse BIT entry in format file.
 */
 static gd_entry_t *_GD_ParseBit(DIRFILE *restrict D, int is_signed,
-    char *restrict in_cols[MAX_IN_COLS], int n_cols,
+    char *gd_restrict_arr in_cols[MAX_IN_COLS], int n_cols,
     const gd_entry_t *restrict parent, const char *restrict format_file,
     int line, int me, int standards, int pedantic, int *restrict is_dot)
 {
@@ -940,7 +940,7 @@ static gd_entry_t *_GD_ParseBit(DIRFILE *restrict D, int is_signed,
 /* _GD_ParsePhase: parse PHASE entry in formats file.
 */
 static gd_entry_t *_GD_ParsePhase(DIRFILE *restrict D,
-    char *restrict in_cols[MAX_IN_COLS], int n_cols,
+    char *gd_restrict_arr in_cols[MAX_IN_COLS], int n_cols,
     const gd_entry_t *restrict parent, const char *restrict format_file,
     int line, int me, int standards, int pedantic, int *restrict is_dot)
 {
@@ -1008,7 +1008,7 @@ static gd_entry_t *_GD_ParsePhase(DIRFILE *restrict D,
 /* _GD_ParsePolynom: parse a POLYNOM in the format file.
 */
 static gd_entry_t *_GD_ParsePolynom(DIRFILE *restrict D,
-    char *restrict in_cols[MAX_IN_COLS], int n_cols,
+    char *gd_restrict_arr in_cols[MAX_IN_COLS], int n_cols,
     const gd_entry_t *restrict parent, const char *restrict format_file,
     int line, int me, int standards, int pedantic, int *restrict is_dot)
 {
@@ -1118,7 +1118,7 @@ gd_type_t _GD_ConstType(DIRFILE *D, gd_type_t type)
 /* _GD_ParseConst: parse CONST entry in formats file.
 */
 static gd_entry_t *_GD_ParseConst(DIRFILE *restrict D,
-    char *restrict in_cols[MAX_IN_COLS], int n_cols,
+    char *gd_restrict_arr in_cols[MAX_IN_COLS], int n_cols,
     const gd_entry_t *restrict parent, const char *restrict format_file,
     int line, int me, int standards, int pedantic, int *restrict is_dot)
 {
@@ -1336,7 +1336,7 @@ static gd_entry_t *_GD_ParseCarray(DIRFILE *restrict D,
 /* _GD_ParseString: parse STRING entry in formats file.
 */
 static gd_entry_t *_GD_ParseString(DIRFILE *restrict D,
-    char *restrict in_cols[MAX_IN_COLS], int n_cols,
+    char *gd_restrict_arr in_cols[MAX_IN_COLS], int n_cols,
     const gd_entry_t *restrict parent, const char *restrict format_file,
     int line, int me, int standards, int pedantic, int *restrict is_dot)
 {

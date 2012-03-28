@@ -168,6 +168,12 @@ double cimag(double complex z);
 #endif
 #endif
 
+#ifdef GD_RESTRICT_ARRAY_OK
+#define gd_restrict_arr restrict
+#else
+#define gd_restrict_arr
+#endif
+
 #ifndef PATH_MAX
 # ifdef _POSIX_PATH_MAX
 #  define PATH_MAX _POSIX_PATH_MAX

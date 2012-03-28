@@ -251,3 +251,24 @@ AC_DEFINE(AS_TR_CPP([HAVE_$1]), [1],
 [ Define to 1 if you have the type `$1' ])
 fi
 ])
+
+dnl GD_C_RESTRICT_ARRAY
+dnl -----------------------------------------------------------
+dnl Check whether "<type> *restrict foo[]" is allowed.
+AC_DEFUN([GD_C_RESTRICT_ARRAY],[
+dnl do nothing if restrict hasn't been found
+if ! test "x$ac_cv_c_restrict" = "xno"; then
+AC_CACHE_CHECK([whether restrict can be applied to pointer arrays],
+[gd_cv_c_restrict_array],[
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([
+    int foo (int *restrict bar[3]) { return bar[2]; }
+], [])],
+[gd_cv_c_restrict_array="yes"],[gd_cv_c_restrict_array="no"])
+])
+fi
+
+if test "x$gd_cv_c_restrict_array" = "xyes"; then
+AC_DEFINE([GD_RESTRICT_ARRAY_OK], [1],
+[Define to 1 if restrict can used on pointer arrays])
+fi
+])
