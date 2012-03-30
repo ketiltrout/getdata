@@ -28,6 +28,10 @@ if F77_WALL
 F77_WALL=-Wall
 endif
 
+if F77_FNO_BACKSLASH
+F77_FNO_BACKSLASH=-fno-backslash
+endif
+
 if INTEL_F77_COMPILER
 F77_ASSUME=-assume byterecl
 endif
@@ -42,7 +46,7 @@ endif
 
 BUILT_SOUCES = test_getdata.f
 
-FFLAGS += -I. -I.. $(F77_WALL) $(F77_WEXTRA) $(F77_ASSUME)
+FFLAGS += -I. -I.. $(F77_WALL) $(F77_WEXTRA) $(F77_ASSUME) $(F77_FNO_BACKSLASH)
 FCFLAGS += -I. -I.. $(F77_WALL) $(FC_WEXTRA) $(FC_ASSUME)
 F95LDADD=../libf95getdata.la $(F77LDADD)
 F77LDADD=../libfgetdata.la

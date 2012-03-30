@@ -483,6 +483,7 @@ fi
 if test "x$make_f77bindings" != "xno"; then
   GD_PROG_F77_WALL
   GD_PROG_F77_WEXTRA
+  GD_PROG_F77_FNO_BACKSLASH
   GD_LANG_F77_COMPILER_INTEL
 fi
 
@@ -986,6 +987,8 @@ AM_CONDITIONAL(FC_WALL, [test "x$gd_cv_prog_fc_wall" == "xyes"])
 AM_CONDITIONAL(CC_WEXTRA, [test "x$gd_cv_prog_cc_wextra" == "xyes"])
 AM_CONDITIONAL(CXX_WEXTRA, [test "x$gd_cv_prog_cxx_wextra" == "xyes"])
 AM_CONDITIONAL(F77_WEXTRA, [test "x$gd_cv_prog_f77_wextra" == "xyes"])
+AM_CONDITIONAL(F77_FNO_BACKSLASH,
+               [test "x$gd_cv_prog_f77_fno_backslash" == "xyes"])
 AM_CONDITIONAL(FC_WEXTRA, [test "x$gd_cv_prog_fc_wextra" == "xyes"])
 AM_CONDITIONAL(INTEL_F77_COMPILER,
                [test "x$gd_cv_f77_compiler_intel" == "xyes"])
