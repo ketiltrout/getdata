@@ -37,6 +37,12 @@ int gd_system(const char* command)
 #define rmdirfile() chmod("dirfile", 0755); system("rm -rf dirfile");
 #endif
 
+/* sleep for WIN32/64 */
+#if defined _WIN32 || defined _WIN64
+#include <windows.h>
+#define sleep(x) Sleep(1000 * (x))
+#endif
+
 /* path munging for WIN32/64 */
 #if defined _WIN32 || defined _WIN64
 #define gd_pathwrite(x,y) do { \

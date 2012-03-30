@@ -117,7 +117,9 @@ static int _GD_TruncDir(DIRFILE *D, int dirfd, const char *dirfile, int root)
       case S_IFBLK:
       case S_IFIFO:
       case S_IFCHR:
+#ifdef S_IFLNK
       case S_IFLNK:
+#endif
         if (root && strcmp(lamb->d_name, "format") == 0) {
           /* don't delete the format file; we'll truncate it later */
           format_trunc = 1;
