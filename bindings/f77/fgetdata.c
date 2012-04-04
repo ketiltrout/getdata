@@ -146,12 +146,12 @@ static gd_triplet_t _GDF_SetTriplet(gd_windop_t op, const void *data)
   switch(op) {
     case GD_WINDOP_EQ:
     case GD_WINDOP_NE:
-      t.i = *(int*)data;
+      t.i = *(int32_t*)data;
       dreturn("%lli", (long long)t.i);
       break;
     case GD_WINDOP_SET:
     case GD_WINDOP_CLR:
-      t.u = *(int*)data;
+      t.u = *(int32_t*)data;
       dreturn("%llu", (unsigned long long)t.u);
       break;
     default:
@@ -164,7 +164,7 @@ static gd_triplet_t _GDF_SetTriplet(gd_windop_t op, const void *data)
 }
 
 /* create a Fortran space padded string */
-static int _GDF_FString(char* dest, int *dlen, const char* src)
+static int _GDF_FString(char *dest, int32_t *dlen, const char *src)
 {
   int i, slen;
 
@@ -194,7 +194,7 @@ static int _GDF_FString(char* dest, int *dlen, const char* src)
 }
 
 /* callback wrapper */
-static int _GDF_Callback(gd_parser_data_t* pdata, void* f77_callback)
+static int _GDF_Callback(gd_parser_data_t* pdata, void *f77_callback)
 {
   struct _GDF_callback_container *c =
     (struct _GDF_callback_container*)f77_callback;
@@ -220,8 +220,8 @@ static int _GDF_Callback(gd_parser_data_t* pdata, void* f77_callback)
 }
 
 /* gd_open wrapper */
-void F77_FUNC(gdopen, GDOPEN) (int* dirfile, const char* dirfilename,
-    const int* dirfilename_l, const int* flags)
+void F77_FUNC(gdopen, GDOPEN) (int32_t *dirfile, const char *dirfilename,
+    const int32_t *dirfilename_l, const int32_t *flags)
 {
   char *out;
 
@@ -236,7 +236,7 @@ void F77_FUNC(gdopen, GDOPEN) (int* dirfile, const char* dirfilename,
 }
 
 /* gd_close wrapper */
-void F77_FUNC(gdclos, GDCLOS) (const int* dirfile)
+void F77_FUNC(gdclos, GDCLOS) (const int32_t *dirfile)
 {
   dtrace("%i", *dirfile);
 
@@ -250,8 +250,8 @@ void F77_FUNC(gdclos, GDCLOS) (const int* dirfile)
 }
 
 /* gd_flush wrapper */
-void F77_FUNC(gdflsh, GDFLSH) (const int* dirfile, const char* field_code,
-    const int* field_code_l)
+void F77_FUNC(gdflsh, GDFLSH) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l)
 {
   dtrace("%i, %p, %i", *dirfile, field_code, *field_code_l);
 
@@ -268,11 +268,11 @@ void F77_FUNC(gdflsh, GDFLSH) (const int* dirfile, const char* field_code,
 }
 
 /* gd_getdata wrapper */
-void F77_FUNC(gdgetd, GDGETD) (int* n_read, const int* dirfile,
-    const char* field_code, const int* field_code_l,
-    const int* first_frame, const int* first_sample,
-    const int* num_frames, const int* num_samples, const int* return_type,
-    void* data_out)
+void F77_FUNC(gdgetd, GDGETD) (int32_t *n_read, const int32_t *dirfile,
+    const char *field_code, const int32_t *field_code_l,
+    const int32_t *first_frame, const int32_t *first_sample,
+    const int32_t *num_frames, const int32_t *num_samples,
+    const int32_t *return_type, void *data_out)
 {
   char *out;
 
@@ -289,7 +289,7 @@ void F77_FUNC(gdgetd, GDGETD) (int* n_read, const int* dirfile,
 }
 
 /* Return the maximum field name length */
-void F77_FUNC(gdfdnx, GDFDNX) (int* max, const int* dirfile)
+void F77_FUNC(gdfdnx, GDFDNX) (int32_t *max, const int32_t *dirfile)
 {
   const char **fl;
   size_t len = 0;
@@ -314,8 +314,8 @@ void F77_FUNC(gdfdnx, GDFDNX) (int* max, const int* dirfile)
 }
 
 /* Return the maximum field name length for a meta list */
-void F77_FUNC(gdmfnx, GDMFNX) (int* max, const int* dirfile, const char* parent,
-    const int* parent_l)
+void F77_FUNC(gdmfnx, GDMFNX) (int32_t *max, const int32_t *dirfile,
+    const char *parent, const int32_t *parent_l)
 {
   const char **fl;
   unsigned int i, nfields;
@@ -343,8 +343,8 @@ void F77_FUNC(gdmfnx, GDMFNX) (int* max, const int* dirfile, const char* parent,
 }
 
 /* gd_field_list wrapper -- this only returns one field name */
-void F77_FUNC(gdfldn, GDFLDN) (char* name, int* name_l, const int* dirfile,
-    const int* field_num)
+void F77_FUNC(gdfldn, GDFLDN) (char *name, int32_t *name_l,
+    const int32_t *dirfile, const int32_t *field_num)
 {
   const char** fl;
   DIRFILE* D;
@@ -365,8 +365,9 @@ void F77_FUNC(gdfldn, GDFLDN) (char* name, int* name_l, const int* dirfile,
 }
 
 /* gd_mfield_list wrapper -- this only returns one field name */
-void F77_FUNC(gdmfdn, GDMFDN) (char* name, int* name_l, const int* dirfile,
-    const char* parent, const int* parent_l, const int* field_num)
+void F77_FUNC(gdmfdn, GDMFDN) (char *name, int32_t *name_l,
+    const int32_t *dirfile, const char *parent, const int32_t *parent_l,
+    const int32_t *field_num)
 {
   const char** fl;
   unsigned int nfields;
@@ -391,16 +392,16 @@ void F77_FUNC(gdmfdn, GDMFDN) (char* name, int* name_l, const int* dirfile,
 }
 
 /* gd_nfields wrapper */
-void F77_FUNC(gdnfld, GDNFLD) (int* nfields, const int* dirfile)
+void F77_FUNC(gdnfld, GDNFLD) (int32_t *nfields, const int32_t *dirfile)
 {
   *nfields = gd_nfields(_GDF_GetDirfile(*dirfile));
 }
 
 /* gd_bof wrapper */
-void F77_FUNC(gdgbof, GDGBOF) (int* bof, const int* dirfile,
-    const char* field_code, const int* field_code_l)
+void F77_FUNC(gdgbof, GDGBOF) (int32_t *bof, const int32_t *dirfile,
+    const char *field_code, const int32_t *field_code_l)
 {
-  char* fc;
+  char *fc;
   dtrace("%p, %i, %p, %i", bof, *dirfile, field_code, *field_code_l);
 
   *bof = gd_bof(_GDF_GetDirfile(*dirfile), _GDF_CString(&fc, field_code,
@@ -411,8 +412,8 @@ void F77_FUNC(gdgbof, GDGBOF) (int* bof, const int* dirfile,
 }
 
 /* gd_eof wrapper */
-void F77_FUNC(gdgeof, GDGEOF) (int* eof, const int* dirfile,
-    const char* field_code, const int* field_code_l)
+void F77_FUNC(gdgeof, GDGEOF) (int32_t *eof, const int32_t *dirfile,
+    const char *field_code, const int32_t *field_code_l)
 {
   char *fc;
   dtrace("%p, %i, %p, %i", eof, *dirfile, field_code, *field_code_l);
@@ -425,16 +426,16 @@ void F77_FUNC(gdgeof, GDGEOF) (int* eof, const int* dirfile,
 }
 
 /* gd_nframes wrapper */
-void F77_FUNC(gdnfrm, GDNFRM) (int* nframes, const int* dirfile)
+void F77_FUNC(gdnfrm, GDNFRM) (int32_t *nframes, const int32_t *dirfile)
 {
   *nframes = gd_nframes(_GDF_GetDirfile(*dirfile));
 }
 
 /* gd_spf wrapper */
-void F77_FUNC(gdgspf, GDGSPF) (int* spf, const int* dirfile,
-    const char* field_code, const int* field_code_l)
+void F77_FUNC(gdgspf, GDGSPF) (int32_t *spf, const int32_t *dirfile,
+    const char *field_code, const int32_t *field_code_l)
 {
-  char* out;
+  char *out;
   dtrace("%p, %i, %p, %i", spf, *dirfile, field_code, *field_code_l);
 
   *spf = gd_spf(_GDF_GetDirfile(*dirfile),
@@ -444,10 +445,11 @@ void F77_FUNC(gdgspf, GDGSPF) (int* spf, const int* dirfile,
 }
 
 /* gd_putdata wrapper */
-void F77_FUNC(gdputd, GDPUTD) (int* n_wrote, const int* dirfile,
-    const char* field_code, const int* field_code_l, const int* first_frame,
-    const int* first_sample, const int* num_frames, const int* num_samples,
-    const int* data_type, const void* data_in)
+void F77_FUNC(gdputd, GDPUTD) (int32_t *n_wrote, const int32_t *dirfile,
+    const char *field_code, const int32_t *field_code_l,
+    const int32_t *first_frame, const int32_t *first_sample,
+    const int32_t *num_frames, const int32_t *num_samples,
+    const int32_t *data_type, const void *data_in)
 {
   char *out;
   dtrace("%p, %i, %p, %i, %i, %i, %i, %i, 0x%x, %p", n_wrote, *dirfile,
@@ -463,7 +465,7 @@ void F77_FUNC(gdputd, GDPUTD) (int* n_wrote, const int* dirfile,
 }
 
 /* return the error number */
-void F77_FUNC(gderor, GDEROR) (int* error, const int* dirfile)
+void F77_FUNC(gderor, GDEROR) (int32_t *error, const int32_t *dirfile)
 {
   dtrace("%p, %i", error, *dirfile);
 
@@ -473,7 +475,7 @@ void F77_FUNC(gderor, GDEROR) (int* error, const int* dirfile)
 }
 
 /* gd_error_count wrapper */
-void F77_FUNC(gdecnt, GDECNT) (int* error_count, const int* dirfile)
+void F77_FUNC(gdecnt, GDECNT) (int32_t *error_count, const int32_t *dirfile)
 {
   dtrace("%p, %i", error_count, *dirfile);
 
@@ -483,7 +485,8 @@ void F77_FUNC(gdecnt, GDECNT) (int* error_count, const int* dirfile)
 }
 
 /* gd_error_string wrapper */
-void F77_FUNC(gdestr, GDESTR) (const int* dirfile, char* buffer, const int* len)
+void F77_FUNC(gdestr, GDESTR) (const int32_t *dirfile, char *buffer,
+    const int32_t *len)
 {
   int i;
   gd_error_string(_GDF_GetDirfile(*dirfile), buffer, *len);
@@ -497,8 +500,8 @@ void F77_FUNC(gdestr, GDESTR) (const int* dirfile, char* buffer, const int* len)
 }
 
 /* gd_entry_type wrapper */
-void F77_FUNC(gdenty, GDENTY) (int* type, const int* dirfile,
-    const char* field_code, const int* field_code_l)
+void F77_FUNC(gdenty, GDENTY) (int32_t *type, const int32_t *dirfile,
+    const char *field_code, const int32_t *field_code_l)
 {
   char *fc;
 
@@ -513,8 +516,9 @@ void F77_FUNC(gdenty, GDENTY) (int* type, const int* dirfile,
 }
 
 /* gd_entry wrapper for RAW */
-void F77_FUNC(gdgerw, GDGERW) (int* spf, int* dtype, int* fragment_index,
-    const int* dirfile, const char* field_code, const int* field_code_l)
+void F77_FUNC(gdgerw, GDGERW) (int32_t *spf, int32_t *dtype,
+    int32_t *fragment_index, const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l)
 {
   char *out;
   gd_entry_t E;
@@ -538,12 +542,12 @@ void F77_FUNC(gdgerw, GDGERW) (int* spf, int* dtype, int* fragment_index,
 }
 
 /* gd_entry wrapper for LINCOM */
-void F77_FUNC(gdgelc, GDGELC) (int* nfields,
-    char* infield1, int* infield1_l, double* m1, double* b1,
-    char* infield2, int* infield2_l, double* m2, double* b2,
-    char* infield3, int* infield3_l, double* m3, double* b3,
-    int* fragment_index, const int* dirfile, const char* field_code,
-    const int* field_code_l)
+void F77_FUNC(gdgelc, GDGELC) (int32_t *nfields,
+    char *infield1, int32_t *infield1_l, double *m1, double *b1,
+    char *infield2, int32_t *infield2_l, double *m2, double *b2,
+    char *infield3, int32_t *infield3_l, double *m3, double *b3,
+    int32_t *fragment_index, const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l)
 {
   char *out;
   gd_entry_t E;
@@ -583,12 +587,12 @@ void F77_FUNC(gdgelc, GDGELC) (int* nfields,
   dreturnvoid();
 }
 
-void F77_FUNC(gdgecl, GDGECL) (int* nfields,
-    char* infield1, int* infield1_l, GD_DCOMPLEXP(m1), GD_DCOMPLEXP(b1),
-    char* infield2, int* infield2_l, GD_DCOMPLEXP(m2), GD_DCOMPLEXP(b2),
-    char* infield3, int* infield3_l, GD_DCOMPLEXP(m3), GD_DCOMPLEXP(b3),
-    int* fragment_index, const int* dirfile, const char* field_code,
-    const int* field_code_l)
+void F77_FUNC(gdgecl, GDGECL) (int32_t *nfields,
+    char *infield1, int32_t *infield1_l, GD_DCOMPLEXP(m1), GD_DCOMPLEXP(b1),
+    char *infield2, int32_t *infield2_l, GD_DCOMPLEXP(m2), GD_DCOMPLEXP(b2),
+    char *infield3, int32_t *infield3_l, GD_DCOMPLEXP(m3), GD_DCOMPLEXP(b3),
+    int32_t *fragment_index, const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l)
 {
   char *fc;
   gd_entry_t E;
@@ -632,10 +636,10 @@ void F77_FUNC(gdgecl, GDGECL) (int* nfields,
 }
 
 /* gd_entry wrapper for POLYNOM */
-void F77_FUNC(gdgepn, GDGEPN) (int* poly_ord, char* infield, int* infield_l,
-    double* a0, double* a1, double* a2, double* a3, double* a4, double* a5,
-    int* fragment_index, const int* dirfile, const char* field_code,
-    const int* field_code_l)
+void F77_FUNC(gdgepn, GDGEPN) (int32_t *poly_ord, char *infield,
+    int32_t *infield_l, double *a0, double *a1, double *a2, double *a3,
+    double *a4, double *a5, int32_t *fragment_index, const int32_t *dirfile,
+    const char *field_code, const int32_t *field_code_l)
 {
   char *out;
   gd_entry_t E;
@@ -673,11 +677,11 @@ void F77_FUNC(gdgepn, GDGEPN) (int* poly_ord, char* infield, int* infield_l,
   dreturnvoid();
 }
 
-void F77_FUNC(gdgecp, GDGECP) (int* poly_ord, char* infield, int* infield_l,
-    GD_DCOMPLEXP(a0), GD_DCOMPLEXP(a1), GD_DCOMPLEXP(a2),
+void F77_FUNC(gdgecp, GDGECP) (int32_t *poly_ord, char *infield,
+    int32_t *infield_l, GD_DCOMPLEXP(a0), GD_DCOMPLEXP(a1), GD_DCOMPLEXP(a2),
     GD_DCOMPLEXP(a3), GD_DCOMPLEXP(a4), GD_DCOMPLEXP(a5),
-    int* fragment_index, const int* dirfile, const char* field_code,
-    const int* field_code_l)
+    int32_t *fragment_index, const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l)
 {
   char *out;
   gd_entry_t E;
@@ -717,9 +721,9 @@ void F77_FUNC(gdgecp, GDGECP) (int* poly_ord, char* infield, int* infield_l,
 }
 
 /* gd_entry wrapper for LINTERP */
-void F77_FUNC(gdgelt, GDGELT) (char* in_field, int* in_field_l, char* table,
-    int* table_l, int* fragment_index, const int* dirfile,
-    const char* field_code, const int* field_code_l)
+void F77_FUNC(gdgelt, GDGELT) (char *in_field, int32_t *in_field_l, char *table,
+    int32_t *table_l, int32_t *fragment_index, const int32_t *dirfile,
+    const char *field_code, const int32_t *field_code_l)
 {
   char *out;
   gd_entry_t E;
@@ -742,9 +746,9 @@ void F77_FUNC(gdgelt, GDGELT) (char* in_field, int* in_field_l, char* table,
 }
 
 /* gd_entry wrapper for BIT */
-void F77_FUNC(gdgebt, GDGEBT) (char* in_field, int* in_field_l, int* bitnum,
-    int* numbits, int* fragment_index, const int* dirfile,
-    const char* field_code, const int* field_code_l)
+void F77_FUNC(gdgebt, GDGEBT) (char *in_field, int32_t *in_field_l,
+    int32_t *bitnum, int32_t *numbits, int32_t *fragment_index,
+    const int32_t *dirfile, const char *field_code, const int32_t *field_code_l)
 {
   char *out;
   gd_entry_t E;
@@ -768,9 +772,9 @@ void F77_FUNC(gdgebt, GDGEBT) (char* in_field, int* in_field_l, int* bitnum,
 }
 
 /* gd_entry wrapper for SBIT */
-void F77_FUNC(gdgesb, GDGESB) (char* in_field, int* in_field_l, int* bitnum,
-    int* numbits, int* fragment_index, const int* dirfile,
-    const char* field_code, const int* field_code_l)
+void F77_FUNC(gdgesb, GDGESB) (char *in_field, int32_t *in_field_l,
+    int32_t *bitnum, int32_t *numbits, int32_t *fragment_index,
+    const int32_t *dirfile, const char *field_code, const int32_t *field_code_l)
 {
   char *out;
   gd_entry_t E;
@@ -794,9 +798,9 @@ void F77_FUNC(gdgesb, GDGESB) (char* in_field, int* in_field_l, int* bitnum,
 }
 
 /* gd_entry wrapper for MULTIPLY */
-void F77_FUNC(gdgemt, GDGEMT) (char* in_field1, int* in_field1_l,
-    char* in_field2, int* in_field2_l, int* fragment_index, const int* dirfile,
-    const char* field_code, const int* field_code_l)
+void F77_FUNC(gdgemt, GDGEMT) (char *in_field1, int32_t *in_field1_l,
+    char *in_field2, int32_t *in_field2_l, int32_t *fragment_index,
+    const int32_t *dirfile, const char *field_code, const int32_t *field_code_l)
 {
   char *out;
   gd_entry_t E;
@@ -820,9 +824,9 @@ void F77_FUNC(gdgemt, GDGEMT) (char* in_field1, int* in_field1_l,
 }
 
 /* gd_entry wrapper for DIVIDE */
-void F77_FUNC(gdgedv, GDGEDV) (char* in_field1, int* in_field1_l,
-    char* in_field2, int* in_field2_l, int* fragment_index, const int* dirfile,
-    const char* field_code, const int* field_code_l)
+void F77_FUNC(gdgedv, GDGEDV) (char *in_field1, int32_t *in_field1_l,
+    char *in_field2, int32_t *in_field2_l, int32_t *fragment_index,
+    const int32_t *dirfile, const char *field_code, const int32_t *field_code_l)
 {
   char *out;
   gd_entry_t E;
@@ -847,10 +851,10 @@ void F77_FUNC(gdgedv, GDGEDV) (char* in_field1, int* in_field1_l,
 }
 
 /* gd_entry wrapper for WINDOW */
-void F77_FUNC(gdgewd, GDGEWD) (char *in_field, int *in_field_l,
-    char *check_field, int *check_field_l, int *windop, int *ithreshold,
-    double *rthreshold, int *fragment_index, const int *dirfile,
-    const char *field_code, const int *field_code_l)
+void F77_FUNC(gdgewd, GDGEWD) (char *in_field, int32_t *in_field_l,
+    char *check_field, int32_t *check_field_l, int32_t *windop,
+    int32_t *ithreshold, double *rthreshold, int32_t *fragment_index,
+    const int32_t *dirfile, const char *field_code, const int32_t *field_code_l)
 {
   char *fc;
   gd_entry_t E;
@@ -889,10 +893,10 @@ void F77_FUNC(gdgewd, GDGEWD) (char *in_field, int *in_field_l,
 }
 
 /* gd_entry wrapper for MPLEX */
-void F77_FUNC(gdgemx, GDGEMX) (char *in_field, int *in_field_l,
-    char *count_field, int *count_field_l, int *val, int *max,
-    int *fragment_index, const int *dirfile, const char *field_code,
-    const int *field_code_l)
+void F77_FUNC(gdgemx, GDGEMX) (char *in_field, int32_t *in_field_l,
+    char *count_field, int32_t *count_field_l, int32_t *val, int32_t *max,
+    int32_t *fragment_index, const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l)
 {
   char *fc;
   gd_entry_t E;
@@ -919,9 +923,9 @@ void F77_FUNC(gdgemx, GDGEMX) (char *in_field, int *in_field_l,
 }
 
 /* gd_entry wrapper for RECIP */
-void F77_FUNC(gdgerc, GDGERC) (char* in_field, int* in_field_l,
-    double* dividend, int* fragment_index, const int* dirfile,
-    const char* field_code, const int* field_code_l)
+void F77_FUNC(gdgerc, GDGERC) (char *in_field, int32_t *in_field_l,
+    double *dividend, int32_t *fragment_index, const int32_t *dirfile,
+    const char *field_code, const int32_t *field_code_l)
 {
   char *out;
   gd_entry_t E;
@@ -944,9 +948,9 @@ void F77_FUNC(gdgerc, GDGERC) (char* in_field, int* in_field_l,
   dreturnvoid();
 }
 
-void F77_FUNC(gdgecr, GDGECR) (char* in_field, int* in_field_l,
-    GD_DCOMPLEXP(cdividend), int* fragment_index, const int* dirfile,
-    const char* field_code, const int* field_code_l)
+void F77_FUNC(gdgecr, GDGECR) (char *in_field, int32_t *in_field_l,
+    GD_DCOMPLEXP(cdividend), int32_t *fragment_index, const int32_t *dirfile,
+    const char *field_code, const int32_t *field_code_l)
 {
   char *out;
   gd_entry_t E;
@@ -970,9 +974,9 @@ void F77_FUNC(gdgecr, GDGECR) (char* in_field, int* in_field_l,
 }
 
 /* gd_entry wrapper for PHASE */
-void F77_FUNC(gdgeph, GDGEPH) (char* in_field, int* in_field_l, int* shift,
-    int* fragment_index, const int* dirfile, const char* field_code,
-    const int* field_code_l)
+void F77_FUNC(gdgeph, GDGEPH) (char *in_field, int32_t *in_field_l,
+    int32_t *shift, int32_t *fragment_index, const int32_t *dirfile,
+    const char *field_code, const int32_t *field_code_l)
 {
   char *out;
   gd_entry_t E;
@@ -995,8 +999,8 @@ void F77_FUNC(gdgeph, GDGEPH) (char* in_field, int* in_field_l, int* shift,
 }
 
 /* gd_entry wrapper for CONST */
-void F77_FUNC(gdgeco, GDGECO) (int* data_type, int* fragment_index,
-    const int* dirfile, const char* field_code, const int* field_code_l)
+void F77_FUNC(gdgeco, GDGECO) (int32_t *data_type, int32_t *fragment_index,
+    const int32_t *dirfile, const char *field_code, const int32_t *field_code_l)
 {
   char *out;
   gd_entry_t E;
@@ -1018,9 +1022,9 @@ void F77_FUNC(gdgeco, GDGECO) (int* data_type, int* fragment_index,
 }
 
 /* gd_entry wrapper for CARRAY */
-void F77_FUNC(gdgeca, GDGECA) (int* data_type, int *array_len,
-    int* fragment_index, const int* dirfile, const char* field_code,
-    const int* field_code_l)
+void F77_FUNC(gdgeca, GDGECA) (int32_t *data_type, int32_t *array_len,
+    int32_t *fragment_index, const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l)
 {
   char *out;
   gd_entry_t E;
@@ -1043,8 +1047,8 @@ void F77_FUNC(gdgeca, GDGECA) (int* data_type, int *array_len,
 }
 
 /* gd_fragment_index wrapper */
-void F77_FUNC(gdfrgi, GDFRGI) (int* fragment_index, const int* dirfile,
-    const char* field_code, const int* field_code_l)
+void F77_FUNC(gdfrgi, GDFRGI) (int32_t *fragment_index, const int32_t *dirfile,
+    const char *field_code, const int32_t *field_code_l)
 {
   char *fc;
   dtrace("%p, %i, %p, %i", fragment_index, *dirfile, field_code,
@@ -1059,9 +1063,9 @@ void F77_FUNC(gdfrgi, GDFRGI) (int* fragment_index, const int* dirfile,
 }
 
 /* gd_add_raw wrapper */
-void F77_FUNC(gdadrw, GDADRW) (const int* dirfile, const char* field_code,
-    const int* field_code_l, const int* data_type, const int* spf,
-    const int* fragment_index)
+void F77_FUNC(gdadrw, GDADRW) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const int32_t *data_type, const int32_t *spf,
+    const int32_t *fragment_index)
 {
   char *out;
 
@@ -1076,15 +1080,15 @@ void F77_FUNC(gdadrw, GDADRW) (const int* dirfile, const char* field_code,
 }
 
 /* gd_add_lincom wrapper */
-void F77_FUNC(gdadlc, GDADLC) (const int* dirfile, const char* field_code,
-    const int* field_code_l, const int* n_fields, const char* in_field1,
-    const int* in_field1_l, const double* m1, const double* b1,
-    const char* in_field2, const int* in_field2_l, const double* m2,
-    const double* b2, const char* in_field3, const int* in_field3_l,
-    const double* m3, const double* b3, const int* fragment_index)
+void F77_FUNC(gdadlc, GDADLC) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const int32_t *n_fields, const char *in_field1,
+    const int32_t *in_field1_l, const double *m1, const double *b1,
+    const char *in_field2, const int32_t *in_field2_l, const double *m2,
+    const double *b2, const char *in_field3, const int32_t *in_field3_l,
+    const double *m3, const double *b3, const int32_t *fragment_index)
 {
   char *fc;
-  char* in_fields[3] = {NULL, NULL, NULL};
+  char *in_fields[3] = {NULL, NULL, NULL};
   double m[3] = {0, 0, 0};
   double b[3] = {0, 0, 0};
   const int nf = *n_fields;
@@ -1121,16 +1125,16 @@ void F77_FUNC(gdadlc, GDADLC) (const int* dirfile, const char* field_code,
   dreturnvoid();
 }
 
-void F77_FUNC(gdadcl, GDADCL) (const int* dirfile, const char* field_code,
-    const int* field_code_l, const int* n_fields, const char* in_field1,
-    const int* in_field1_l, const GD_DCOMPLEXP(m1), const GD_DCOMPLEXP(b1),
-    const char* in_field2, const int* in_field2_l, const GD_DCOMPLEXP(m2),
-    const GD_DCOMPLEXP(b2), const char* in_field3, const int* in_field3_l,
+void F77_FUNC(gdadcl, GDADCL) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const int32_t *n_fields, const char *in_field1,
+    const int32_t *in_field1_l, const GD_DCOMPLEXP(m1), const GD_DCOMPLEXP(b1),
+    const char *in_field2, const int32_t *in_field2_l, const GD_DCOMPLEXP(m2),
+    const GD_DCOMPLEXP(b2), const char *in_field3, const int32_t *in_field3_l,
     const GD_DCOMPLEXP(m3), const GD_DCOMPLEXP(b3),
-    const int* fragment_index)
+    const int32_t *fragment_index)
 {
   char *fc;
-  char* in_fields[3] = {NULL, NULL, NULL};
+  char *in_fields[3] = {NULL, NULL, NULL};
 #ifdef GD_NO_C99_API
   double cm[6] = {0, 0, 0, 0, 0, 0};
   double cb[6] = {0, 0, 0, 0, 0, 0};
@@ -1173,11 +1177,11 @@ void F77_FUNC(gdadcl, GDADCL) (const int* dirfile, const char* field_code,
 }
 
 /* gd_add_polynom wrapper */
-void F77_FUNC(gdadpn, GDADPN) (const int* dirfile, const char* field_code,
-    const int* field_code_l, const int* poly_ord, const char* in_field,
-    const int* in_field_l, const double* a0, const double* a1, const double* a2,
-    const double* a3, const double* a4, const double* a5,
-    const int* fragment_index)
+void F77_FUNC(gdadpn, GDADPN) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const int32_t *poly_ord, const char *in_field,
+    const int32_t *in_field_l, const double *a0, const double *a1,
+    const double *a2, const double *a3, const double *a4, const double *a5,
+    const int32_t *fragment_index)
 {
   char *fc, *inf;
   double a[6] = {0, 0, 0, 0, 0, 0};
@@ -1209,12 +1213,12 @@ void F77_FUNC(gdadpn, GDADPN) (const int* dirfile, const char* field_code,
   dreturnvoid();
 }
 
-void F77_FUNC(gdadcp, GDADCP) (const int* dirfile, const char* field_code,
-    const int* field_code_l, const int* poly_ord, const char* in_field,
-    const int* in_field_l, const GD_DCOMPLEXP(a0), const GD_DCOMPLEXP(a1),
+void F77_FUNC(gdadcp, GDADCP) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const int32_t *poly_ord, const char *in_field,
+    const int32_t *in_field_l, const GD_DCOMPLEXP(a0), const GD_DCOMPLEXP(a1),
     const GD_DCOMPLEXP(a2), const GD_DCOMPLEXP(a3),
     const GD_DCOMPLEXP(a4), const GD_DCOMPLEXP(a5),
-    const int* fragment_index)
+    const int32_t *fragment_index)
 {
   char *fc, *inf;
 #ifdef GD_NO_C99_API
@@ -1251,9 +1255,10 @@ void F77_FUNC(gdadcp, GDADCP) (const int* dirfile, const char* field_code,
 }
 
 /* gd_add_linterp wrapper */
-void F77_FUNC(gdadlt, GDADLT) (const int* dirfile, const char* field_code,
-    const int* field_code_l, const char* in_field, const int* in_field_l,
-    const char* table, const int* table_l, const int* fragment_index)
+void F77_FUNC(gdadlt, GDADLT) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const char *in_field,
+    const int32_t *in_field_l, const char *table, const int32_t *table_l,
+    const int32_t *fragment_index)
 {
   char *fc, *in, *tab;
 
@@ -1270,9 +1275,10 @@ void F77_FUNC(gdadlt, GDADLT) (const int* dirfile, const char* field_code,
 }
 
 /* gd_add_bit wrapper */
-void F77_FUNC(gdadbt, GDADBT) (const int* dirfile, const char* field_code,
-    const int* field_code_l, const char* in_field, const int* in_field_l,
-    const int* bitnum, const int* numbits, const int* fragment_index)
+void F77_FUNC(gdadbt, GDADBT) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const char *in_field,
+    const int32_t *in_field_l, const int32_t *bitnum, const int32_t *numbits,
+    const int32_t *fragment_index)
 {
   char *fc, *in;
 
@@ -1288,9 +1294,10 @@ void F77_FUNC(gdadbt, GDADBT) (const int* dirfile, const char* field_code,
 }
 
 /* gd_add_sbit wrapper */
-void F77_FUNC(gdadsb, GDADSB) (const int* dirfile, const char* field_code,
-    const int* field_code_l, const char* in_field, const int* in_field_l,
-    const int* bitnum, const int* numbits, const int* fragment_index)
+void F77_FUNC(gdadsb, GDADSB) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const char *in_field,
+    const int32_t *in_field_l, const int32_t *bitnum, const int32_t *numbits,
+    const int32_t *fragment_index)
 {
   char *fc, *in;
 
@@ -1306,9 +1313,10 @@ void F77_FUNC(gdadsb, GDADSB) (const int* dirfile, const char* field_code,
 }
 
 /* gd_add_multiply wrapper */
-void F77_FUNC(gdadmt, GDADMT) (const int* dirfile, const char* field_code,
-    const int* field_code_l, const char* in_field1, const int* in_field1_l,
-    const char* in_field2, const int* in_field2_l, const int* fragment_index)
+void F77_FUNC(gdadmt, GDADMT) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const char *in_field1,
+    const int32_t *in_field1_l, const char *in_field2,
+    const int32_t *in_field2_l, const int32_t *fragment_index)
 {
   char *fc, *in1, *in2;
 
@@ -1326,9 +1334,10 @@ void F77_FUNC(gdadmt, GDADMT) (const int* dirfile, const char* field_code,
 }
 
 /* gd_add_divide wrapper */
-void F77_FUNC(gdaddv, GDADDV) (const int* dirfile, const char* field_code,
-    const int* field_code_l, const char* in_field1, const int* in_field1_l,
-    const char* in_field2, const int* in_field2_l, const int* fragment_index)
+void F77_FUNC(gdaddv, GDADDV) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const char *in_field1,
+    const int32_t *in_field1_l, const char *in_field2,
+    const int32_t *in_field2_l, const int32_t *fragment_index)
 {
   char *fc, *in1, *in2;
 
@@ -1347,9 +1356,10 @@ void F77_FUNC(gdaddv, GDADDV) (const int* dirfile, const char* field_code,
 }
 
 /* gd_add_recip wrapper */
-void F77_FUNC(gdadrc, GDADRC) (const int* dirfile, const char* field_code,
-    const int* field_code_l, const char* in_field, const int* in_field_l,
-    const double* dividend, const int* fragment_index)
+void F77_FUNC(gdadrc, GDADRC) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const char *in_field,
+    const int32_t *in_field_l, const double *dividend,
+    const int32_t *fragment_index)
 {
   char *fc, *in;
 
@@ -1366,9 +1376,10 @@ void F77_FUNC(gdadrc, GDADRC) (const int* dirfile, const char* field_code,
   dreturnvoid();
 }
 
-void F77_FUNC(gdadcr, GDADCR) (const int* dirfile, const char* field_code,
-    const int* field_code_l, const char* in_field, const int* in_field_l,
-    const GD_DCOMPLEXP(cdividend), const int* fragment_index)
+void F77_FUNC(gdadcr, GDADCR) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const char *in_field,
+    const int32_t *in_field_l, const GD_DCOMPLEXP(cdividend),
+    const int32_t *fragment_index)
 {
   char *fc, *in;
 
@@ -1393,9 +1404,10 @@ void F77_FUNC(gdadcr, GDADCR) (const int* dirfile, const char* field_code,
 }
 
 /* gd_add_phase wrapper */
-void F77_FUNC(gdadph, GDADPH) (const int* dirfile, const char* field_code,
-    const int* field_code_l, const char* in_field, const int* in_field_l,
-    const int* shift, const int* fragment_index)
+void F77_FUNC(gdadph, GDADPH) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const char *in_field,
+    const int32_t *in_field_l, const int32_t *shift,
+    const int32_t *fragment_index)
 {
   char *fc, *in;
 
@@ -1412,8 +1424,8 @@ void F77_FUNC(gdadph, GDADPH) (const int* dirfile, const char* field_code,
 }
 
 /* gd_fragmentname wrapper */
-void F77_FUNC(gdfrgn, GDFRGN) (char* filename, int* filename_l,
-    const int* dirfile, const int* index)
+void F77_FUNC(gdfrgn, GDFRGN) (char *filename, int32_t *filename_l,
+    const int32_t *dirfile, const int32_t *index)
 {
   dtrace("%p, %i, %i, %i", filename, *filename_l, *dirfile, *index);
   _GDF_FString(filename, filename_l, gd_fragmentname(_GDF_GetDirfile(*dirfile),
@@ -1422,13 +1434,13 @@ void F77_FUNC(gdfrgn, GDFRGN) (char* filename, int* filename_l,
 }
 
 /* gd_nfragments wrapper */
-void F77_FUNC(gdnfrg, GDNFRG) (int* nformats, const int* dirfile)
+void F77_FUNC(gdnfrg, GDNFRG) (int32_t *nformats, const int32_t *dirfile)
 {
   *nformats = gd_nfragments(_GDF_GetDirfile(*dirfile));
 }
 
 /* gd_metaflush wrapper */
-void F77_FUNC(gdmfls, GDMFLS) (const int* dirfile)
+void F77_FUNC(gdmfls, GDMFLS) (const int32_t *dirfile)
 {
   dtrace("%i", *dirfile);
 
@@ -1438,7 +1450,7 @@ void F77_FUNC(gdmfls, GDMFLS) (const int* dirfile)
 }
 
 /* gd_rewrite_fragment wrapper */
-void F77_FUNC(gdrfrg, GDRFRG) (const int* dirfile, const int* fragment)
+void F77_FUNC(gdrfrg, GDRFRG) (const int32_t *dirfile, const int32_t *fragment)
 {
   dtrace("%i, %i", *dirfile, *fragment);
 
@@ -1448,8 +1460,8 @@ void F77_FUNC(gdrfrg, GDRFRG) (const int* dirfile, const int* fragment)
 }
 
 /* gd_include wrapper */
-void F77_FUNC(gdincl, GDINCL) (const int* dirfile, const char* file,
-    const int* file_l, const int* fragment_index, const int* flags)
+void F77_FUNC(gdincl, GDINCL) (const int32_t *dirfile, const char *file,
+    const int32_t *file_l, const int32_t *fragment_index, const int32_t *flags)
 {
   char *fi;
 
@@ -1464,8 +1476,8 @@ void F77_FUNC(gdincl, GDINCL) (const int* dirfile, const char* file,
 }
 
 /* gd_nfield_by_type wrapper */
-void F77_FUNC(gdnfdt, GDNFDT) (int* nfields, const int* dirfile,
-    const int* type)
+void F77_FUNC(gdnfdt, GDNFDT) (int32_t *nfields, const int32_t *dirfile,
+    const int32_t *type)
 {
   dtrace("%p, %i, 0x%x", nfields, *dirfile, *type);
 
@@ -1475,14 +1487,14 @@ void F77_FUNC(gdnfdt, GDNFDT) (int* nfields, const int* dirfile,
 }
 
 /* gd_nvectors wrapper */
-void F77_FUNC(gdnvec, GDNVEC) (int* nvectors, const int* dirfile)
+void F77_FUNC(gdnvec, GDNVEC) (int32_t *nvectors, const int32_t *dirfile)
 {
   *nvectors = gd_nvectors(_GDF_GetDirfile(*dirfile));
 }
 
 /* gd_field_list_by_type wrapper -- this only returns one field name */
-void F77_FUNC(gdfdnt, GDFDNT) (char* name, int* name_l, const int* dirfile,
-    const int* type, const int* field_num)
+void F77_FUNC(gdfdnt, GDFDNT) (char *name, int32_t *name_l,
+    const int32_t *dirfile, const int32_t *type, const int32_t *field_num)
 {
   const char** fl;
   DIRFILE* D;
@@ -1503,8 +1515,8 @@ void F77_FUNC(gdfdnt, GDFDNT) (char* name, int* name_l, const int* dirfile,
 }
 
 /* gd_vector_list wrapper -- this only returns one field name */
-void F77_FUNC(gdvecn, GDVECN) (char* name, int* name_l, const int* dirfile,
-    const int* field_num)
+void F77_FUNC(gdvecn, GDVECN) (char *name, int32_t *name_l,
+    const int32_t *dirfile, const int32_t *field_num)
 {
   const char** fl;
   DIRFILE *D;
@@ -1525,9 +1537,9 @@ void F77_FUNC(gdvecn, GDVECN) (char* name, int* name_l, const int* dirfile,
 }
 
 /* gd_mfield_list_by_type wrapper -- this only returns one field name */
-void F77_FUNC(gdmfdt, GDMFDT) (char* name, int* name_l, const int* dirfile,
-    const char* parent, const int* parent_l, const int* type,
-    const int* field_num)
+void F77_FUNC(gdmfdt, GDMFDT) (char *name, int32_t *name_l,
+    const int32_t *dirfile, const char *parent, const int32_t *parent_l,
+    const int32_t *type, const int32_t *field_num)
 {
   const char **fl;
   unsigned int nfields;
@@ -1552,13 +1564,14 @@ void F77_FUNC(gdmfdt, GDMFDT) (char* name, int* name_l, const int* dirfile,
 }
 
 /* gd_mvector_list wrapper -- this only returns one field name */
-void F77_FUNC(gdmven, GDMVEN) (char* name, int* name_l, const int* dirfile,
-    const char* parent, const int* parent_l, const int* field_num)
+void F77_FUNC(gdmven, GDMVEN) (char *name, int32_t *name_l,
+    const int32_t *dirfile, const char *parent, const int32_t *parent_l,
+    const int32_t *field_num)
 {
   const char** fl;
   unsigned int nfields;
   DIRFILE* D;
-  char* pa;
+  char *pa;
 
   dtrace("%p, %p, %i, %i", name, name_l, *dirfile, *field_num);
 
@@ -1577,16 +1590,16 @@ void F77_FUNC(gdmven, GDMVEN) (char* name, int* name_l, const int* dirfile,
 }
 
 /* gd_madd_lincom wrapper */
-void F77_FUNC(gdmdlc, GDMDLC) (const int* dirfile, const char* parent,
-    const int* parent_l, const char* field_code, const int* field_code_l,
-    const int* n_fields, const char* in_field1, const int* in_field1_l,
-    const double* m1, const double* b1, const char* in_field2,
-    const int* in_field2_l, const double* m2, const double* b2,
-    const char* in_field3, const int* in_field3_l, const double* m3,
-    const double* b3)
+void F77_FUNC(gdmdlc, GDMDLC) (const int32_t *dirfile, const char *parent,
+    const int32_t *parent_l, const char *field_code,
+    const int32_t *field_code_l, const int32_t *n_fields, const char *in_field1,
+    const int32_t *in_field1_l, const double *m1, const double *b1,
+    const char *in_field2, const int32_t *in_field2_l, const double *m2,
+    const double *b2, const char *in_field3, const int32_t *in_field3_l,
+    const double *m3, const double *b3)
 {
   char *pa, *fc;
-  char* in_fields[3] = {NULL, NULL, NULL};
+  char *in_fields[3] = {NULL, NULL, NULL};
   double m[3] = {0, 0, 0};
   double b[3] = {0, 0, 0};
   const int nf = *n_fields;
@@ -1625,16 +1638,16 @@ void F77_FUNC(gdmdlc, GDMDLC) (const int* dirfile, const char* parent,
   dreturnvoid();
 }
 
-void F77_FUNC(gdmdcl, GDMDCL) (const int* dirfile, const char* parent,
-    const int* parent_l, const char* field_code, const int* field_code_l,
-    const int* n_fields, const char* in_field1, const int* in_field1_l,
-    const GD_DCOMPLEXP(m1), const GD_DCOMPLEXP(b1), const char* in_field2,
-    const int* in_field2_l, const GD_DCOMPLEXP(m2), const GD_DCOMPLEXP(b2),
-    const char* in_field3, const int* in_field3_l, const GD_DCOMPLEXP(m3),
-    const GD_DCOMPLEXP(b3))
+void F77_FUNC(gdmdcl, GDMDCL) (const int32_t *dirfile, const char *parent,
+    const int32_t *parent_l, const char *field_code,
+    const int32_t *field_code_l, const int32_t *n_fields, const char *in_field1,
+    const int32_t *in_field1_l, const GD_DCOMPLEXP(m1), const GD_DCOMPLEXP(b1),
+    const char *in_field2, const int32_t *in_field2_l, const GD_DCOMPLEXP(m2),
+    const GD_DCOMPLEXP(b2), const char *in_field3, const int32_t *in_field3_l,
+    const GD_DCOMPLEXP(m3), const GD_DCOMPLEXP(b3))
 {
   char *pa, *fc;
-  char* in_fields[3] = {NULL, NULL, NULL};
+  char *in_fields[3] = {NULL, NULL, NULL};
 #ifdef GD_NO_C99_API
   double cm[6] = {0, 0, 0, 0, 0, 0};
   double cb[6] = {0, 0, 0, 0, 0, 0};
@@ -1679,11 +1692,11 @@ void F77_FUNC(gdmdcl, GDMDCL) (const int* dirfile, const char* parent,
 }
 
 /* gd_madd_polynom wrapper */
-void F77_FUNC(gdmdpn, GDMDPN) (const int* dirfile, const char* parent,
-    const int* parent_l, const char* field_code, const int* field_code_l,
-    const int* poly_ord, const char* in_field, const int* in_field_l,
-    const double* a0, const double* a1, const double* a2, const double* a3,
-    const double* a4, const double* a5)
+void F77_FUNC(gdmdpn, GDMDPN) (const int32_t *dirfile, const char *parent,
+    const int32_t *parent_l, const char *field_code,
+    const int32_t *field_code_l, const int32_t *poly_ord, const char *in_field,
+    const int32_t *in_field_l, const double *a0, const double *a1,
+    const double *a2, const double *a3, const double *a4, const double *a5)
 {
   char *pa, *fc, *inf;
   double a[6] = {0, 0, 0, 0, 0, 0};
@@ -1717,10 +1730,10 @@ void F77_FUNC(gdmdpn, GDMDPN) (const int* dirfile, const char* parent,
   dreturnvoid();
 }
 
-void F77_FUNC(gdmdcp, GDMDCP) (const int* dirfile, const char* parent,
-    const int* parent_l, const char* field_code, const int* field_code_l,
-    const int* poly_ord, const char* in_field, const int* in_field_l,
-    const GD_DCOMPLEXP(a0), const GD_DCOMPLEXP(a1),
+void F77_FUNC(gdmdcp, GDMDCP) (const int32_t *dirfile, const char *parent,
+    const int32_t *parent_l, const char *field_code,
+    const int32_t *field_code_l, const int32_t *poly_ord, const char *in_field,
+    const int32_t *in_field_l, const GD_DCOMPLEXP(a0), const GD_DCOMPLEXP(a1),
     const GD_DCOMPLEXP(a2), const GD_DCOMPLEXP(a3),
     const GD_DCOMPLEXP(a4), const GD_DCOMPLEXP(a5))
 {
@@ -1763,10 +1776,10 @@ void F77_FUNC(gdmdcp, GDMDCP) (const int* dirfile, const char* parent,
 }
 
 /* gd_madd_linterp wrapper */
-void F77_FUNC(gdmdlt, GDMDLT) (const int* dirfile, const char* parent,
-    const int* parent_l, const char* field_code, const int* field_code_l,
-    const char* in_field, const int* in_field_l, const char* table,
-    const int* table_l)
+void F77_FUNC(gdmdlt, GDMDLT) (const int32_t *dirfile, const char *parent,
+    const int32_t *parent_l, const char *field_code,
+    const int32_t *field_code_l, const char *in_field,
+    const int32_t *in_field_l, const char *table, const int32_t *table_l)
 {
   char *pa, *fc, *in, *tab;
 
@@ -1785,10 +1798,10 @@ void F77_FUNC(gdmdlt, GDMDLT) (const int* dirfile, const char* parent,
 }
 
 /* gd_madd_bit wrapper */
-void F77_FUNC(gdmdbt, GDMDBT) (const int* dirfile, const char* parent,
-    const int* parent_l, const char* field_code, const int* field_code_l,
-    const char* in_field, const int* in_field_l, const int* bitnum,
-    const int* numbits)
+void F77_FUNC(gdmdbt, GDMDBT) (const int32_t *dirfile, const char *parent,
+    const int32_t *parent_l, const char *field_code,
+    const int32_t *field_code_l, const char *in_field,
+    const int32_t *in_field_l, const int32_t *bitnum, const int32_t *numbits)
 {
   char *pa, *fc, *in;
 
@@ -1805,10 +1818,10 @@ void F77_FUNC(gdmdbt, GDMDBT) (const int* dirfile, const char* parent,
 }
 
 /* gd_madd_sbit wrapper */
-void F77_FUNC(gdmdsb, GDMDSB) (const int* dirfile, const char* parent,
-    const int* parent_l, const char* field_code, const int* field_code_l,
-    const char* in_field, const int* in_field_l, const int* bitnum,
-    const int* numbits)
+void F77_FUNC(gdmdsb, GDMDSB) (const int32_t *dirfile, const char *parent,
+    const int32_t *parent_l, const char *field_code,
+    const int32_t *field_code_l, const char *in_field,
+    const int32_t *in_field_l, const int32_t *bitnum, const int32_t *numbits)
 {
   char *pa, *fc, *in;
 
@@ -1825,10 +1838,11 @@ void F77_FUNC(gdmdsb, GDMDSB) (const int* dirfile, const char* parent,
 }
 
 /* gd_madd_multiply wrapper */
-void F77_FUNC(gdmdmt, GDMDMT) (const int* dirfile, const char* parent,
-    const int* parent_l, const char* field_code, const int* field_code_l,
-    const char* in_field1, const int* in_field1_l, const char* in_field2,
-    const int* in_field2_l)
+void F77_FUNC(gdmdmt, GDMDMT) (const int32_t *dirfile, const char *parent,
+    const int32_t *parent_l, const char *field_code,
+    const int32_t *field_code_l, const char *in_field1,
+    const int32_t *in_field1_l, const char *in_field2,
+    const int32_t *in_field2_l)
 {
   char *pa, *fc, *in1, *in2;
 
@@ -1849,10 +1863,11 @@ void F77_FUNC(gdmdmt, GDMDMT) (const int* dirfile, const char* parent,
 }
 
 /* gd_madd_divide wrapper */
-void F77_FUNC(gdmddv, GDMDDV) (const int* dirfile, const char* parent,
-    const int* parent_l, const char* field_code, const int* field_code_l,
-    const char* in_field1, const int* in_field1_l, const char* in_field2,
-    const int* in_field2_l)
+void F77_FUNC(gdmddv, GDMDDV) (const int32_t *dirfile, const char *parent,
+    const int32_t *parent_l, const char *field_code,
+    const int32_t *field_code_l, const char *in_field1,
+    const int32_t *in_field1_l, const char *in_field2,
+    const int32_t *in_field2_l)
 {
   char *pa, *fc, *in1, *in2;
 
@@ -1874,9 +1889,10 @@ void F77_FUNC(gdmddv, GDMDDV) (const int* dirfile, const char* parent,
 }
 
 /* gd_madd_recip wrapper */
-void F77_FUNC(gdmdrc, GDMDRC) (const int* dirfile, const char* parent,
-    const int* parent_l, const char* field_code, const int* field_code_l,
-    const char* in_field, const int* in_field_l, const double* dividend)
+void F77_FUNC(gdmdrc, GDMDRC) (const int32_t *dirfile, const char *parent,
+    const int32_t *parent_l, const char *field_code,
+    const int32_t *field_code_l, const char *in_field,
+    const int32_t *in_field_l, const double *dividend)
 {
   char *pa, *fc, *in1;
 
@@ -1894,10 +1910,10 @@ void F77_FUNC(gdmdrc, GDMDRC) (const int* dirfile, const char* parent,
   dreturnvoid();
 }
 
-void F77_FUNC(gdmdcr, GDMDCR) (const int* dirfile, const char* parent,
-    const int* parent_l, const char* field_code, const int* field_code_l,
-    const char* in_field, const int* in_field_l,
-    const GD_DCOMPLEXP(cdividend))
+void F77_FUNC(gdmdcr, GDMDCR) (const int32_t *dirfile, const char *parent,
+    const int32_t *parent_l, const char *field_code,
+    const int32_t *field_code_l, const char *in_field,
+    const int32_t *in_field_l, const GD_DCOMPLEXP(cdividend))
 {
   char *pa, *fc, *in1;
 
@@ -1923,9 +1939,10 @@ void F77_FUNC(gdmdcr, GDMDCR) (const int* dirfile, const char* parent,
 }
 
 /* gd_madd_phase wrapper */
-void F77_FUNC(gdmdph, GDMDPH) (const int* dirfile, const char* parent,
-    const int* parent_l, const char* field_code, const int* field_code_l,
-    const char* in_field, const int* in_field_l, const int* shift)
+void F77_FUNC(gdmdph, GDMDPH) (const int32_t *dirfile, const char *parent,
+    const int32_t *parent_l, const char *field_code,
+    const int32_t *field_code_l, const char *in_field,
+    const int32_t *in_field_l, const int32_t *shift)
 {
   char *pa, *fc, *in;
 
@@ -1943,9 +1960,9 @@ void F77_FUNC(gdmdph, GDMDPH) (const int* dirfile, const char* parent,
 }
 
 /* gd_add_const wrapper */
-void F77_FUNC(gdadco, GDADCO) (const int* dirfile, const char* field_code,
-    const int* field_code_l, const int* const_type, const int* data_type,
-    const void* value, const int* fragment_index)
+void F77_FUNC(gdadco, GDADCO) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const int32_t *const_type,
+    const int32_t *data_type, const void *value, const int32_t *fragment_index)
 {
   char *fc;
 
@@ -1961,9 +1978,10 @@ void F77_FUNC(gdadco, GDADCO) (const int* dirfile, const char* field_code,
 }
 
 /* gd_madd_const wrapper */
-void F77_FUNC(gdmdco, GDMDCO) (const int* dirfile, const char* parent,
-    const int* parent_l, const char* field_code, const int* field_code_l,
-    const int* const_type, const int* data_type, const void* value)
+void F77_FUNC(gdmdco, GDMDCO) (const int32_t *dirfile, const char *parent,
+    const int32_t *parent_l, const char *field_code,
+    const int32_t *field_code_l, const int32_t *const_type,
+    const int32_t *data_type, const void *value)
 {
   char *pa, *fc;
 
@@ -1980,9 +1998,9 @@ void F77_FUNC(gdmdco, GDMDCO) (const int* dirfile, const char* parent,
 }
 
 /* gd_add_carray wrapper */
-void F77_FUNC(gdadca, GDADCA) (const int *dirfile, const char *field_code,
-    const int *field_code_l, const int *const_type, int *array_len,
-    const int *data_type, const void *value, const int *fragment_index)
+void F77_FUNC(gdadca, GDADCA) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const int32_t *const_type, int32_t *array_len,
+    const int32_t *data_type, const void *value, const int32_t *fragment_index)
 {
   char *fc;
 
@@ -1999,10 +2017,10 @@ void F77_FUNC(gdadca, GDADCA) (const int *dirfile, const char *field_code,
 }
 
 /* gd_madd_carray wrapper */
-void F77_FUNC(gdmdca, GDMDCA) (const int *dirfile, const char *parent,
-    const int *parent_l, const char *field_code, const int *field_code_l,
-    const int *const_type, const int *array_len, const int *data_type,
-    const void *value)
+void F77_FUNC(gdmdca, GDMDCA) (const int32_t *dirfile, const char *parent,
+    const int32_t *parent_l, const char *field_code,
+    const int32_t *field_code_l, const int32_t *const_type,
+    const int32_t *array_len, const int32_t *data_type, const void *value)
 {
   char *pa, *fc;
 
@@ -2019,9 +2037,9 @@ void F77_FUNC(gdmdca, GDMDCA) (const int *dirfile, const char *parent,
 }
 
 /* gd_add_string wrapper */
-void F77_FUNC(gdadst, GDADST) (const int* dirfile, const char* field_code,
-    const int* field_code_l, const char* value, const int* value_l,
-    const int* fragment_index)
+void F77_FUNC(gdadst, GDADST) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const char *value, const int32_t *value_l,
+    const int32_t *fragment_index)
 {
   char *fc, *va;
 
@@ -2037,9 +2055,9 @@ void F77_FUNC(gdadst, GDADST) (const int* dirfile, const char* field_code,
 }
 
 /* gd_madd_string wrapper */
-void F77_FUNC(gdmdst, GDMDST) (const int* dirfile, const char* parent,
-    const int* parent_l, const char* field_code, const int* field_code_l,
-    const char* value, const int* value_l)
+void F77_FUNC(gdmdst, GDMDST) (const int32_t *dirfile, const char *parent,
+    const int32_t *parent_l, const char *field_code,
+    const int32_t *field_code_l, const char *value, const int32_t *value_l)
 {
   char *pa, *fc, *va;
 
@@ -2057,8 +2075,8 @@ void F77_FUNC(gdmdst, GDMDST) (const int* dirfile, const char* parent,
 }
 
 /* gd_add_spec wrapper */
-void F77_FUNC(gdadsp, GDADSP) (const int* dirfile, const char* spec,
-    const int* spec_l, const int* fragment_index)
+void F77_FUNC(gdadsp, GDADSP) (const int32_t *dirfile, const char *spec,
+    const int32_t *spec_l, const int32_t *fragment_index)
 {
   char *sp;
 
@@ -2072,8 +2090,8 @@ void F77_FUNC(gdadsp, GDADSP) (const int* dirfile, const char* spec,
 }
 
 /* gd_madd_spec wrapper */
-void F77_FUNC(gdmdsp, GDMDSP) (const int* dirfile, const char* spec,
-    const int* spec_l, const char *parent, const int* parent_l)
+void F77_FUNC(gdmdsp, GDMDSP) (const int32_t *dirfile, const char *spec,
+    const int32_t *spec_l, const char *parent, const int32_t *parent_l)
 {
   char *pa, *sp;
 
@@ -2089,8 +2107,8 @@ void F77_FUNC(gdmdsp, GDMDSP) (const int* dirfile, const char* spec,
 }
 
 /* gd_get_constant wrapper */
-void F77_FUNC(gdgtco, GDGTCO) (const int *dirfile, const char *field_code,
-    const int *field_code_l, const int *return_type, void *data_out)
+void F77_FUNC(gdgtco, GDGTCO) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const int32_t *return_type, void *data_out)
 {
   char *fc;
 
@@ -2105,8 +2123,8 @@ void F77_FUNC(gdgtco, GDGTCO) (const int *dirfile, const char *field_code,
 }
 
 /* gd_get_carray wrapper */
-void F77_FUNC(gdgtca, GDGTCA) (const int *dirfile, const char *field_code,
-    const int *field_code_l, const int *return_type, void *data_out)
+void F77_FUNC(gdgtca, GDGTCA) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const int32_t *return_type, void *data_out)
 {
   char *fc;
 
@@ -2121,9 +2139,9 @@ void F77_FUNC(gdgtca, GDGTCA) (const int *dirfile, const char *field_code,
 }
 
 /* gd_get_carray_slice wrapper */
-void F77_FUNC(gdgcas, GDGCAS) (const int *dirfile, const char *field_code,
-    const int *field_code_l, const int *start, const int *n,
-    const int *return_type, void *data_out)
+void F77_FUNC(gdgcas, GDGCAS) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const int32_t *start, const int32_t *n,
+    const int32_t *return_type, void *data_out)
 {
   char *fc;
 
@@ -2139,8 +2157,8 @@ void F77_FUNC(gdgcas, GDGCAS) (const int *dirfile, const char *field_code,
 }
 
 /* gd_carray_len wrapper */
-void F77_FUNC(gdcaln, GDCALN) (int *len, const int *dirfile,
-    const char *field_code, const int *field_code_l)
+void F77_FUNC(gdcaln, GDCALN) (int32_t *len, const int32_t *dirfile,
+    const char *field_code, const int32_t *field_code_l)
 {
   char *fc;
 
@@ -2154,8 +2172,8 @@ void F77_FUNC(gdcaln, GDCALN) (int *len, const int *dirfile,
 }
 
 /* gd_get_string wrapper */
-void F77_FUNC(gdgtst, GDGTST) (int *size, const int *dirfile,
-    const char *field_code, const int *field_code_l, const int *len,
+void F77_FUNC(gdgtst, GDGTST) (int32_t *size, const int32_t *dirfile,
+    const char *field_code, const int32_t *field_code_l, const int32_t *len,
     char *data_out)
 {
   char *fc, *out;
@@ -2177,8 +2195,8 @@ void F77_FUNC(gdgtst, GDGTST) (int *size, const int *dirfile,
 }
 
 /* gd_put_constant wrapper */
-void F77_FUNC(gdptco, GDPTCO) (const int *dirfile, const char *field_code,
-    const int *field_code_l, const int *data_type, const void *data_in)
+void F77_FUNC(gdptco, GDPTCO) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const int32_t *data_type, const void *data_in)
 {
   char *fc;
 
@@ -2193,8 +2211,8 @@ void F77_FUNC(gdptco, GDPTCO) (const int *dirfile, const char *field_code,
 }
 
 /* gd_put_carray wrapper */
-void F77_FUNC(gdptca, GDPTCA) (const int *dirfile, const char *field_code,
-    const int *field_code_l, const int *data_type, const void *data_in)
+void F77_FUNC(gdptca, GDPTCA) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const int32_t *data_type, const void *data_in)
 {
   char *fc;
 
@@ -2209,9 +2227,9 @@ void F77_FUNC(gdptca, GDPTCA) (const int *dirfile, const char *field_code,
 }
 
 /* gd_put_carray_slice wrapper */
-void F77_FUNC(gdpcas, GDPCAS) (const int *dirfile, const char *field_code,
-    const int *field_code_l, const int *start, const int *n,
-    const int *data_type, const void *data_in)
+void F77_FUNC(gdpcas, GDPCAS) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const int32_t *start, const int32_t *n,
+    const int32_t *data_type, const void *data_in)
 {
   char *fc;
 
@@ -2226,9 +2244,9 @@ void F77_FUNC(gdpcas, GDPCAS) (const int *dirfile, const char *field_code,
 }
 
 /* gd_put_string wrapper */
-void F77_FUNC(gdptst, GDPTST) (int* n_wrote, const int* dirfile,
-    const char* field_code, const int* field_code_l, const int* len,
-    const char* data_in)
+void F77_FUNC(gdptst, GDPTST) (int32_t *n_wrote, const int32_t *dirfile,
+    const char *field_code, const int32_t *field_code_l, const int32_t *len,
+    const char *data_in)
 {
   char *fc, *in;
   dtrace("%p, %i, %p, %i, %i, %p", n_wrote, *dirfile, field_code, *field_code_l,
@@ -2242,10 +2260,10 @@ void F77_FUNC(gdptst, GDPTST) (int* n_wrote, const int* dirfile,
 }
 
 /* gd_nmfields wrapper */
-void F77_FUNC(gdnmfd, GDNMFD) (int* nfields, const int* dirfile,
-    const char* parent, const int* parent_l)
+void F77_FUNC(gdnmfd, GDNMFD) (int32_t *nfields, const int32_t *dirfile,
+    const char *parent, const int32_t *parent_l)
 {
-  char* pa;
+  char *pa;
   dtrace("%p, %i, %p, %i", nfields, *dirfile, parent, *parent_l);
 
   *nfields = gd_nmfields(_GDF_GetDirfile(*dirfile), _GDF_CString(&pa, parent,
@@ -2255,8 +2273,8 @@ void F77_FUNC(gdnmfd, GDNMFD) (int* nfields, const int* dirfile,
 }
 
 /* gd_nmfields_by_type wrapper */
-void F77_FUNC(gdnmft, GDNMFT) (int* nfields, const int* dirfile,
-    const char* parent, const int* parent_l, const int* type)
+void F77_FUNC(gdnmft, GDNMFT) (int32_t *nfields, const int32_t *dirfile,
+    const char *parent, const int32_t *parent_l, const int32_t *type)
 {
   char *pa;
   dtrace("%p, %i, %p, %i, 0x%x", nfields, *dirfile, parent, *parent_l, *type);
@@ -2269,8 +2287,8 @@ void F77_FUNC(gdnmft, GDNMFT) (int* nfields, const int* dirfile,
 }
 
 /* gd_nmvectors wrapper */
-void F77_FUNC(gdnmve, GDNMVE) (int* nvectors, const int* dirfile,
-    const char* parent, const int* parent_l)
+void F77_FUNC(gdnmve, GDNMVE) (int32_t *nvectors, const int32_t *dirfile,
+    const char *parent, const int32_t *parent_l)
 {
   char *pa;
 
@@ -2284,7 +2302,7 @@ void F77_FUNC(gdnmve, GDNMVE) (int* nvectors, const int* dirfile,
 }
 
 /* gd_discard wrapper */
-void F77_FUNC(gddscd, GDDSCD) (const int* dirfile)
+void F77_FUNC(gddscd, GDDSCD) (const int32_t *dirfile)
 {
   dtrace("%i", *dirfile);
 
@@ -2298,8 +2316,9 @@ void F77_FUNC(gddscd, GDDSCD) (const int* dirfile)
 }
 
 /* gd_cbopen wrapper */
-void F77_FUNC(gdcopn, GDCOPN) (int* dirfile, const char* dirfilename,
-    const int* dirfilename_l, const int* flags, const _GDF_callback_t callback)
+void F77_FUNC(gdcopn, GDCOPN) (int32_t *dirfile, const char *dirfilename,
+    const int32_t *dirfilename_l, const int32_t *flags,
+    const _GDF_callback_t callback)
 {
   const struct _GDF_callback_container temp = { callback };
   DIRFILE *D;
@@ -2323,7 +2342,7 @@ void F77_FUNC(gdcopn, GDCOPN) (int* dirfile, const char* dirfilename,
 }
 
 /* gd_parser_callback wrapper */
-void F77_FUNC(gdclbk, GDCLBK) (const int* dirfile,
+void F77_FUNC(gdclbk, GDCLBK) (const int32_t *dirfile,
     const _GDF_callback_t callback)
 {
   dtrace("%i, %p", *dirfile, callback);
@@ -2348,7 +2367,7 @@ void F77_FUNC(gdclbk, GDCLBK) (const int* dirfile,
 }
 
 /* deregister a callback function (ie. gd_parser_callback(..., NULL) */
-void F77_FUNC(gdnocb, GDNOCB) (const int* dirfile)
+void F77_FUNC(gdnocb, GDNOCB) (const int32_t *dirfile)
 {
   dtrace("%i", *dirfile);
 
@@ -2362,9 +2381,9 @@ void F77_FUNC(gdnocb, GDNOCB) (const int* dirfile)
 }
 
 /* gd_alter_bit wrapper */
-void F77_FUNC(gdalbt, GDALBT) (const int* dirfile, const char* field_code,
-    const int* field_code_l, const char* in_field, const int* in_field_l,
-    int* bitnum, int* numbits)
+void F77_FUNC(gdalbt, GDALBT) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const char *in_field,
+    const int32_t *in_field_l, const int32_t *bitnum, const int32_t *numbits)
 {
   char *fc, *in;
 
@@ -2381,9 +2400,9 @@ void F77_FUNC(gdalbt, GDALBT) (const int* dirfile, const char* field_code,
 }
 
 /* gd_alter_sbit wrapper */
-void F77_FUNC(gdalsb, GDALSB) (const int* dirfile, const char* field_code,
-    const int* field_code_l, const char* in_field, const int* in_field_l,
-    int* bitnum, int* numbits)
+void F77_FUNC(gdalsb, GDALSB) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const char *in_field,
+    const int32_t *in_field_l, const int32_t *bitnum, const int32_t *numbits)
 {
   char *fc, *in;
 
@@ -2400,8 +2419,8 @@ void F77_FUNC(gdalsb, GDALSB) (const int* dirfile, const char* field_code,
 }
 
 /* gd_alter_const wrapper */
-void F77_FUNC(gdalco, GDALCO) (const int* dirfile, const char* field_code,
-    const int* field_code_l, const int* const_type)
+void F77_FUNC(gdalco, GDALCO) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const int32_t *const_type)
 {
   char *fc;
 
@@ -2415,8 +2434,9 @@ void F77_FUNC(gdalco, GDALCO) (const int* dirfile, const char* field_code,
 }
 
 /* gd_alter_carray wrapper */
-void F77_FUNC(gdalca, GDALCA) (const int* dirfile, const char* field_code,
-    const int* field_code_l, const int* const_type, const int *array_len)
+void F77_FUNC(gdalca, GDALCA) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const int32_t *const_type,
+    const int32_t *array_len)
 {
   char *fc;
 
@@ -2431,15 +2451,15 @@ void F77_FUNC(gdalca, GDALCA) (const int* dirfile, const char* field_code,
 }
 
 /* gd_alter_lincom wrapper */
-void F77_FUNC(gdallc, GDALLC) (const int* dirfile, const char* field_code,
-    const int* field_code_l, const int* n_fields, const char* in_field1,
-    const int* in_field1_l, const double* m1, const double* b1,
-    const char* in_field2, const int* in_field2_l, const double* m2,
-    const double* b2, const char* in_field3, const int* in_field3_l,
-    const double* m3, const double* b3)
+void F77_FUNC(gdallc, GDALLC) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const int32_t *n_fields, const char *in_field1,
+    const int32_t *in_field1_l, const double *m1, const double *b1,
+    const char *in_field2, const int32_t *in_field2_l, const double *m2,
+    const double *b2, const char *in_field3, const int32_t *in_field3_l,
+    const double *m3, const double *b3)
 {
-  char* fc = (char *)malloc(*field_code_l + 1);
-  char* in_fields[3] = {NULL, NULL, NULL};
+  char *fc = (char *)malloc(*field_code_l + 1);
+  char *in_fields[3] = {NULL, NULL, NULL};
   double m[3] = {0, 0, 0};
   double b[3] = {0, 0, 0};
   const int nf = *n_fields;
@@ -2477,15 +2497,15 @@ void F77_FUNC(gdallc, GDALLC) (const int* dirfile, const char* field_code,
 }
 
 /* gd_alter_clincom wrapper */
-void F77_FUNC(gdalcl, GDALCL) (const int* dirfile, const char* field_code,
-    const int* field_code_l, const int* n_fields, const char* in_field1,
-    const int* in_field1_l, const GD_DCOMPLEXP(m1), const GD_DCOMPLEXP(b1),
-    const char* in_field2, const int* in_field2_l, const GD_DCOMPLEXP(m2),
-    const GD_DCOMPLEXP(b2), const char* in_field3, const int* in_field3_l,
+void F77_FUNC(gdalcl, GDALCL) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const int32_t *n_fields, const char *in_field1,
+    const int32_t *in_field1_l, const GD_DCOMPLEXP(m1), const GD_DCOMPLEXP(b1),
+    const char *in_field2, const int32_t *in_field2_l, const GD_DCOMPLEXP(m2),
+    const GD_DCOMPLEXP(b2), const char *in_field3, const int32_t *in_field3_l,
     const GD_DCOMPLEXP(m3), const GD_DCOMPLEXP(b3))
 {
   char *fc;
-  char* in_fields[3] = {NULL, NULL, NULL};
+  char *in_fields[3] = {NULL, NULL, NULL};
 #ifdef GD_NO_C99_API
   double cm[6] = {0, 0, 0, 0, 0, 0};
   double cb[6] = {0, 0, 0, 0, 0, 0};
@@ -2527,17 +2547,18 @@ void F77_FUNC(gdalcl, GDALCL) (const int* dirfile, const char* field_code,
 }
 
 /* gd_alter_polynom wrapper */
-void F77_FUNC(gdalpn, GDALPN) (const int* dirfile, const char* field_code,
-    const int* field_code_l, const int* poly_ord, const char* in_field,
-    const int* in_field_l, const double* a0, const double* a1, const double* a2,
-    const double* a3, const double* a4, const double* a5)
+void F77_FUNC(gdalpn, GDALPN) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const int32_t *poly_ord, const char *in_field,
+    const int32_t *in_field_l, const double *a0, const double *a1,
+    const double *a2, const double *a3, const double *a4, const double *a5)
 {
-  char* fc, *inf;
+  char *fc, *inf;
   double a[6] = {0, 0, 0, 0, 0, 0};
   const int po = (*poly_ord > 5) ? 5 : *poly_ord;
 
   dtrace("%i, %p, %i, %i, %p, %i, %g, %g, %p, %p, %p, %p", *dirfile, field_code,
-      *field_code_l, *poly_ord, in_field, *in_field_l, *a0, *a1, a2, a3, a4, a5);
+      *field_code_l, *poly_ord, in_field, *in_field_l, *a0, *a1, a2, a3, a4,
+      a5);
 
   _GDF_CString(&inf, in_field, *in_field_l);
 
@@ -2563,13 +2584,13 @@ void F77_FUNC(gdalpn, GDALPN) (const int* dirfile, const char* field_code,
 }
 
 /* gd_alter_cpolynom wrapper */
-void F77_FUNC(gdalcp, GDALCP) (const int* dirfile, const char* field_code,
-    const int* field_code_l, const int* poly_ord, const char* in_field,
-    const int* in_field_l, const GD_DCOMPLEXP(a0), const GD_DCOMPLEXP(a1),
+void F77_FUNC(gdalcp, GDALCP) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const int32_t *poly_ord, const char *in_field,
+    const int32_t *in_field_l, const GD_DCOMPLEXP(a0), const GD_DCOMPLEXP(a1),
     const GD_DCOMPLEXP(a2), const GD_DCOMPLEXP(a3),
     const GD_DCOMPLEXP(a4), const GD_DCOMPLEXP(a5))
 {
-  char* fc, *inf;
+  char *fc, *inf;
 #ifdef GD_NO_C99_API
   double ca[12] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 #else
@@ -2604,9 +2625,10 @@ void F77_FUNC(gdalcp, GDALCP) (const int* dirfile, const char* field_code,
 }
 
 /* gd_alter_multiply wrapper */
-void F77_FUNC(gdalmt, GDALMT) (const int* dirfile, const char* field_code,
-    const int* field_code_l, const char* in_field1, const int* in_field1_l,
-    const char* in_field2, const int* in_field2_l)
+void F77_FUNC(gdalmt, GDALMT) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const char *in_field1,
+    const int32_t *in_field1_l, const char *in_field2,
+    const int32_t *in_field2_l)
 {
   char *fc, *in1, *in2;
 
@@ -2624,9 +2646,10 @@ void F77_FUNC(gdalmt, GDALMT) (const int* dirfile, const char* field_code,
 }
 
 /* gd_alter_divide wrapper */
-void F77_FUNC(gdaldv, GDALDV) (const int* dirfile, const char* field_code,
-    const int* field_code_l, const char* in_field1, const int* in_field1_l,
-    const char* in_field2, const int* in_field2_l)
+void F77_FUNC(gdaldv, GDALDV) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const char *in_field1,
+    const int32_t *in_field1_l, const char *in_field2,
+    const int32_t *in_field2_l)
 {
   char *fc, *in1, *in2;
 
@@ -2645,9 +2668,9 @@ void F77_FUNC(gdaldv, GDALDV) (const int* dirfile, const char* field_code,
 }
 
 /* gd_alter_recip wrapper */
-void F77_FUNC(gdalrc, GDALRC) (const int* dirfile, const char* field_code,
-    const int* field_code_l, const char* in_field1, const int* in_field1_l,
-    const double* dividend)
+void F77_FUNC(gdalrc, GDALRC) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const char *in_field1,
+    const int32_t *in_field1_l, const double *dividend)
 {
   char *fc, *in1;
 
@@ -2664,9 +2687,9 @@ void F77_FUNC(gdalrc, GDALRC) (const int* dirfile, const char* field_code,
   dreturnvoid();
 }
 
-void F77_FUNC(gdalcr, GDALCR) (const int* dirfile, const char* field_code,
-    const int* field_code_l, const char* in_field1, const int* in_field1_l,
-    const GD_DCOMPLEXP(cdividend))
+void F77_FUNC(gdalcr, GDALCR) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const char *in_field1,
+    const int32_t *in_field1_l, const GD_DCOMPLEXP(cdividend))
 {
   char *fc, *in1;
 
@@ -2690,9 +2713,9 @@ void F77_FUNC(gdalcr, GDALCR) (const int* dirfile, const char* field_code,
 }
 
 /* gd_alter_phase wrapper */
-void F77_FUNC(gdalph, GDALPH) (const int* dirfile, const char* field_code,
-    const int* field_code_l, const char* in_field, const int* in_field_l,
-    const int* shift)
+void F77_FUNC(gdalph, GDALPH) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const char *in_field,
+    const int32_t *in_field_l, const int32_t *shift)
 {
   char *fc, *in;
 
@@ -2708,50 +2731,51 @@ void F77_FUNC(gdalph, GDALPH) (const int* dirfile, const char* field_code,
 }
 
 /* gd_encoding wrapper */
-void F77_FUNC(gdgenc, GDGENC) (int* encoding, const int* dirfile,
-    const int* fragment)
+void F77_FUNC(gdgenc, GDGENC) (int32_t *encoding, const int32_t *dirfile,
+    const int32_t *fragment)
 {
   *encoding = gd_encoding(_GDF_GetDirfile(*dirfile), *fragment);
 }
 
 /* gd_endianness wrapper */
-void F77_FUNC(gdgend, GDGEND) (int* endianness, const int* dirfile,
-    const int* fragment)
+void F77_FUNC(gdgend, GDGEND) (int32_t *endianness, const int32_t *dirfile,
+    const int32_t *fragment)
 {
   *endianness = gd_endianness(_GDF_GetDirfile(*dirfile), *fragment);
 }
 
 /* dirfilename wrapper */
-void F77_FUNC(gdname, GDNAME) (char* name, int* name_l, const int* dirfile)
+void F77_FUNC(gdname, GDNAME) (char *name, int32_t *name_l,
+    const int32_t *dirfile)
 {
-  const char* dn = gd_dirfilename(_GDF_GetDirfile(*dirfile));
+  const char *dn = gd_dirfilename(_GDF_GetDirfile(*dirfile));
   _GDF_FString(name, name_l, dn);
 }
 
 /* gd_parent_fragment wrapper */
-void F77_FUNC(gdpfrg, GDPFRG) (int* parent, const int* dirfile,
-    const int* fragment)
+void F77_FUNC(gdpfrg, GDPFRG) (int32_t *parent, const int32_t *dirfile,
+    const int32_t *fragment)
 {
   *parent = gd_parent_fragment(_GDF_GetDirfile(*dirfile), *fragment);
 }
 
 /* gd_alter_protection wrapper */
-void F77_FUNC(gdaprt, GDAPRT) (const int* dirfile, const int* protection_level,
-    const int* fragment)
+void F77_FUNC(gdaprt, GDAPRT) (const int32_t *dirfile,
+    const int32_t *protection_level, const int32_t *fragment)
 {
   gd_alter_protection(_GDF_GetDirfile(*dirfile), *protection_level, *fragment);
 }
 
 /* gd_protection wrapper */
-void F77_FUNC(gdgprt, GDGPRT) (int* protection_level, const int* dirfile,
-    const int* fragment)
+void F77_FUNC(gdgprt, GDGPRT) (int32_t *protection_level,
+    const int32_t *dirfile, const int32_t *fragment)
 {
   *protection_level = gd_protection(_GDF_GetDirfile(*dirfile), *fragment);
 }
 
 /* gd_raw_filename wrapper */
-void F77_FUNC(gdrwfn, GDRWFN) (char* name, int* name_l, const int* dirfile,
-    const char* field_code, const int* field_code_l)
+void F77_FUNC(gdrwfn, GDRWFN) (char *name, int32_t *name_l,
+    const int32_t *dirfile, const char *field_code, const int32_t *field_code_l)
 {
   char *fc, *fn;
 
@@ -2770,8 +2794,8 @@ void F77_FUNC(gdrwfn, GDRWFN) (char* name, int* name_l, const int* dirfile,
 }
 
 /* gd_reference wrapper */
-void F77_FUNC(gdrefe, GDREFE) (char* name, int* name_l, const int* dirfile,
-    const char* field_code, const int *field_code_l)
+void F77_FUNC(gdrefe, GDREFE) (char *name, int32_t *name_l,
+    const int32_t *dirfile, const char *field_code, const int32_t *field_code_l)
 {
   char *fc;
   const char *ref;
@@ -2789,25 +2813,26 @@ void F77_FUNC(gdrefe, GDREFE) (char* name, int* name_l, const int* dirfile,
 }
 
 /* gd_alter_encoding wrapper */
-void F77_FUNC(gdaenc, GDAENC) (const int* dirfile, const int* encoding,
-    const int* fragment, const int* recode)
+void F77_FUNC(gdaenc, GDAENC) (const int32_t *dirfile, const int32_t *encoding,
+    const int32_t *fragment, const int32_t *recode)
 {
   gd_alter_encoding(_GDF_GetDirfile(*dirfile), *encoding, *fragment,
       *recode);
 }
 
 /* gd_alter_endianness wrapper */
-void F77_FUNC(gdaend, GDAEND) (const int* dirfile, const int* endianness,
-    const int* fragment, const int* recode)
+void F77_FUNC(gdaend, GDAEND) (const int32_t *dirfile,
+    const int32_t *endianness, const int32_t *fragment, const int32_t *recode)
 {
   gd_alter_endianness(_GDF_GetDirfile(*dirfile), *endianness, *fragment,
       *recode);
 }
 
 /* gd_alter_linterp wrapper */
-void F77_FUNC(gdallt, GDALLT) (const int* dirfile, const char* field_code,
-    const int* field_code_l, const char* in_field, const int* in_field_l,
-    const char* table, const int* table_l, const int* recode)
+void F77_FUNC(gdallt, GDALLT) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const char *in_field,
+    const int32_t *in_field_l, const char *table, const int32_t *table_l,
+    const int32_t *recode)
 {
   char *fc, *in, *tab;
 
@@ -2824,9 +2849,9 @@ void F77_FUNC(gdallt, GDALLT) (const int* dirfile, const char* field_code,
 }
 
 /* gd_alter_raw wrapper */
-void F77_FUNC(gdalrw, GDALRW) (const int* dirfile, const char* field_code,
-    const int* field_code_l, const int* data_type, const int* spf,
-    const int* recode)
+void F77_FUNC(gdalrw, GDALRW) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const int32_t *data_type, const int32_t *spf,
+    const int32_t *recode)
 {
   char *out;
 
@@ -2840,10 +2865,10 @@ void F77_FUNC(gdalrw, GDALRW) (const int* dirfile, const char* field_code,
 }
 
 /* gd_alter_spec wrapper */
-void F77_FUNC(gdalsp, GDALSP) (const int* dirfile, const char* spec,
-    const int* spec_l, const int* move)
+void F77_FUNC(gdalsp, GDALSP) (const int32_t *dirfile, const char *spec,
+    const int32_t *spec_l, const int32_t *move)
 {
-  char* sp;
+  char *sp;
 
   dtrace("%i, %p, %i, %i", *dirfile, spec, *spec_l, *move);
 
@@ -2855,8 +2880,8 @@ void F77_FUNC(gdalsp, GDALSP) (const int* dirfile, const char* spec,
 }
 
 /* gd_delete wrapper */
-void F77_FUNC(gddele, GDDELE) (const int* dirfile, const char* field_code,
-    const int* field_code_l, const int* flags)
+void F77_FUNC(gddele, GDDELE) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const int32_t *flags)
 {
   char *fc;
 
@@ -2870,9 +2895,9 @@ void F77_FUNC(gddele, GDDELE) (const int* dirfile, const char* field_code,
 }
 
 /* gd_malter_spec wrapper */
-void F77_FUNC(gdmlsp, GDMLSP) (const int* dirfile, const char* spec,
-    const int* spec_l, const char* parent, const int* parent_l,
-    const int* move)
+void F77_FUNC(gdmlsp, GDMLSP) (const int32_t *dirfile, const char *spec,
+    const int32_t *spec_l, const char *parent, const int32_t *parent_l,
+    const int32_t *move)
 {
   char *sp, *pa;
 
@@ -2888,10 +2913,11 @@ void F77_FUNC(gdmlsp, GDMLSP) (const int* dirfile, const char* spec,
 }
 
 /* gd_move wrapper */
-void F77_FUNC(gdmove, GDMOVE) (const int* dirfile, const char* field_code,
-    const int* field_code_l, const int* new_fragment, const int* move_data)
+void F77_FUNC(gdmove, GDMOVE) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const int32_t *new_fragment,
+    const int32_t *move_data)
 {
-  char* fc;
+  char *fc;
 
   dtrace("%i, %p, %i, %i, %i", *dirfile, field_code, *field_code_l,
       *new_fragment, *move_data);
@@ -2904,9 +2930,9 @@ void F77_FUNC(gdmove, GDMOVE) (const int* dirfile, const char* field_code,
 }
 
 /* gd_rename wrapper */
-void F77_FUNC(gdrenm, GDRENM) (const int* dirfile, const char* field_code,
-    const int* field_code_l, const char* new_name, const int* new_name_l,
-    const int* move_data)
+void F77_FUNC(gdrenm, GDRENM) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const char *new_name,
+    const int32_t *new_name_l, const int32_t *move_data)
 {
   char *fc, *nn;
 
@@ -2922,30 +2948,30 @@ void F77_FUNC(gdrenm, GDRENM) (const int* dirfile, const char* field_code,
 }
 
 /* gd_uninclude wrapper */
-void F77_FUNC(gduinc, GDUINC) (const int* dirfile, const int* fragment,
-    const int* del)
+void F77_FUNC(gduinc, GDUINC) (const int32_t *dirfile, const int32_t *fragment,
+    const int32_t *del)
 {
   gd_uninclude(_GDF_GetDirfile(*dirfile), *fragment, *del);
 }
 
 /* gd_alter_frameoffset wrapper */
-void F77_FUNC(gdafof, GDAFOF) (const int* dirfile, const int* offset,
-    const int* fragment, const int* recode)
+void F77_FUNC(gdafof, GDAFOF) (const int32_t *dirfile, const int32_t *offset,
+    const int32_t *fragment, const int32_t *recode)
 {
   gd_alter_frameoffset(_GDF_GetDirfile(*dirfile), *offset, *fragment,
       *recode);
 }
 
 /* gd_frameoffset wrapper */
-void F77_FUNC(gdgfof, GDGFOF) (int* offset, const int* dirfile,
-    const int* fragment)
+void F77_FUNC(gdgfof, GDGFOF) (int32_t *offset, const int32_t *dirfile,
+    const int32_t *fragment)
 {
   *offset = gd_frameoffset(_GDF_GetDirfile(*dirfile), *fragment);
 }
 
 /* gd_native_type wrapper */
-void F77_FUNC(gdntyp, GDNTYP) (int* type, const int* dirfile,
-    const char* field_code, const int* field_code_l)
+void F77_FUNC(gdntyp, GDNTYP) (int32_t *type, const int32_t *dirfile,
+    const char *field_code, const int32_t *field_code_l)
 {
   char *fc;
 
@@ -2959,8 +2985,8 @@ void F77_FUNC(gdntyp, GDNTYP) (int* type, const int* dirfile,
 }
 
 /* returns the value of the comp_scal member */
-void F77_FUNC(gdcscl, GDCSCL) (int *comp_scal, const int *dirfile,
-    const char *field_code, const int *field_code_l)
+void F77_FUNC(gdcscl, GDCSCL) (int32_t *comp_scal, const int32_t *dirfile,
+    const char *field_code, const int32_t *field_code_l)
 {
   char *fc;
   gd_entry_t E;
@@ -2985,8 +3011,8 @@ void F77_FUNC(gdcscl, GDCSCL) (int *comp_scal, const int *dirfile,
 }
 
 /* gd_validate wrapper */
-void F77_FUNC(gdvldt, GDVLDT) (int *valid, const int *dirfile,
-    const char *field_code, const int *field_code_l)
+void F77_FUNC(gdvldt, GDVLDT) (int32_t *valid, const int32_t *dirfile,
+    const char *field_code, const int32_t *field_code_l)
 {
   char *fc;
 
@@ -3000,8 +3026,8 @@ void F77_FUNC(gdvldt, GDVLDT) (int *valid, const int *dirfile,
 }
 
 /* gd_framenum wrapper */
-void F77_FUNC(gdfnum, GDFNUM) (double *framenum, const int *dirfile,
-    const char *field_code, const int *field_code_l, const double *value)
+void F77_FUNC(gdfnum, GDFNUM) (double *framenum, const int32_t *dirfile,
+    const char *field_code, const int32_t *field_code_l, const double *value)
 {
   char *fc;
 
@@ -3016,9 +3042,9 @@ void F77_FUNC(gdfnum, GDFNUM) (double *framenum, const int *dirfile,
 }
 
 /* gd_framenum_subset wrapper */
-void F77_FUNC(gdfnss, GDFNSS) (double *framenum, const int *dirfile,
-    const char *field_code, const int *field_code_l, const double *value,
-    const int *start, const int *end)
+void F77_FUNC(gdfnss, GDFNSS) (double *framenum, const int32_t *dirfile,
+    const char *field_code, const int32_t *field_code_l, const double *value,
+    const int32_t *start, const int32_t *end)
 {
   char *fc;
 
@@ -3034,9 +3060,9 @@ void F77_FUNC(gdfnss, GDFNSS) (double *framenum, const int *dirfile,
 }
 
 /* retrieve a scalar parameter */
-void F77_FUNC(gdgsca, GDGSCA) (char* scalar, int* scalar_l, int *scalar_index,
-    const int* dirfile, const char* field_code, const int *field_code_l,
-    const int* index)
+void F77_FUNC(gdgsca, GDGSCA) (char *scalar, int32_t *scalar_l,
+    int32_t *scalar_index, const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const int32_t *index)
 {
   char *fc;
   int ok = 0;
@@ -3104,9 +3130,9 @@ void F77_FUNC(gdgsca, GDGSCA) (char* scalar, int* scalar_l, int *scalar_index,
 }
 
 /* set a scalar parameter */
-void F77_FUNC(gdasca, GDASCA) (const int *dirfile, const char *field_code,
-    const int *field_code_l, const int *index, const char *scalar,
-    const int *scalar_l, int *scalar_index, int *recode)
+void F77_FUNC(gdasca, GDASCA) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const int32_t *index, const char *scalar,
+    const int32_t *scalar_l, int32_t *scalar_index, int32_t *recode)
 {
   int ok = 1;
   char *fc;
@@ -3179,7 +3205,7 @@ void F77_FUNC(gdasca, GDASCA) (const int *dirfile, const char *field_code,
 }
 
 /* gd_invalid_dirfile wrapper */
-void F77_FUNC(gdinvd, GDINVD) (int *dirfile)
+void F77_FUNC(gdinvd, GDINVD) (int32_t *dirfile)
 {
   dtrace("%p", dirfile);
 
@@ -3189,7 +3215,7 @@ void F77_FUNC(gdinvd, GDINVD) (int *dirfile)
 }
 
 /* gd_dirfile_standards wrapper */
-void F77_FUNC(gdstdv, GDSTDV) (int *vers, const int *dirfile)
+void F77_FUNC(gdstdv, GDSTDV) (int32_t *vers, const int32_t *dirfile)
 {
   dtrace("%p, %i", vers, *dirfile);
 
@@ -3199,9 +3225,9 @@ void F77_FUNC(gdstdv, GDSTDV) (int *vers, const int *dirfile)
 }
 
 /* gd_seek wrapper */
-void F77_FUNC(gdseek, GDSEEK) (int* pos, const int* dirfile,
-    const char* field_code, const int* field_code_l, const int* frame_num,
-    const int* sample_num, const int* flags)
+void F77_FUNC(gdseek, GDSEEK) (int32_t *pos, const int32_t *dirfile,
+    const char *field_code, const int32_t *field_code_l,
+    const int32_t *frame_num, const int32_t *sample_num, const int32_t *flags)
 {
   char *fc;
   dtrace("%p, %i, %p, %i, %i, %i, 0x%x", pos, *dirfile, field_code,
@@ -3215,8 +3241,8 @@ void F77_FUNC(gdseek, GDSEEK) (int* pos, const int* dirfile,
 }
 
 /* gd_tell wrapper */
-void F77_FUNC(gdtell, GDTELL) (int* pos, const int* dirfile,
-    const char* field_code, const int* field_code_l)
+void F77_FUNC(gdtell, GDTELL) (int32_t *pos, const int32_t *dirfile,
+    const char *field_code, const int32_t *field_code_l)
 {
   char *fc;
   dtrace("%p, %i, %p, %i", pos, *dirfile, field_code, *field_code_l);
@@ -3229,8 +3255,8 @@ void F77_FUNC(gdtell, GDTELL) (int* pos, const int* dirfile,
 }
 
 /* gd_constants wrapper -- this only returns one value */
-void F77_FUNC(gdcons, GDCONS) (void *value, const int *dirfile,
-    const int *return_type, const int *field_num)
+void F77_FUNC(gdcons, GDCONS) (void *value, const int32_t *dirfile,
+    const int32_t *return_type, const int32_t *field_num)
 {
   const void *v;
 
@@ -3249,9 +3275,9 @@ void F77_FUNC(gdcons, GDCONS) (void *value, const int *dirfile,
 }
 
 /* gd_mconstants wrapper -- this only returns one value */
-void F77_FUNC(gdmcos, GDMCOS) (void *value, const int *dirfile,
-    const char *parent, const int *parent_l, const int *return_type,
-    const int *field_num)
+void F77_FUNC(gdmcos, GDMCOS) (void *value, const int32_t *dirfile,
+    const char *parent, const int32_t *parent_l, const int32_t *return_type,
+    const int32_t *field_num)
 {
   const void *v;
   DIRFILE *D;
@@ -3277,8 +3303,8 @@ void F77_FUNC(gdmcos, GDMCOS) (void *value, const int *dirfile,
 }
 
 /* gd_strings wrapper -- this only returns one value */
-void F77_FUNC(gdstrs, GDSTRS) (char *value, int *value_l, const int *dirfile,
-    const int *field_num)
+void F77_FUNC(gdstrs, GDSTRS) (char *value, int32_t *value_l,
+    const int32_t *dirfile, const int32_t *field_num)
 {
   const char **v;
 
@@ -3297,8 +3323,9 @@ void F77_FUNC(gdstrs, GDSTRS) (char *value, int *value_l, const int *dirfile,
 }
 
 /* gd_mstrings wrapper -- this only returns one value */
-void F77_FUNC(gdmsts, GDMSTS) (void *value, int *value_l, const int *dirfile,
-    const char *parent, const int *parent_l, const int *field_num)
+void F77_FUNC(gdmsts, GDMSTS) (void *value, int32_t *value_l,
+    const int32_t *dirfile, const char *parent, const int32_t *parent_l,
+    const int32_t *field_num)
 {
   const char **v;
   char *pa;
@@ -3323,7 +3350,7 @@ void F77_FUNC(gdmsts, GDMSTS) (void *value, int *value_l, const int *dirfile,
 }
 
 /* Return the maximum string value length */
-void F77_FUNC(gdstrx, GDSTRX) (int *max, const int *dirfile)
+void F77_FUNC(gdstrx, GDSTRX) (int32_t *max, const int32_t *dirfile)
 {
   dtrace("%p, %i", max, *dirfile);
 
@@ -3346,8 +3373,8 @@ void F77_FUNC(gdstrx, GDSTRX) (int *max, const int *dirfile)
 }
 
 /* Return the maximum meta string value length */
-void F77_FUNC(gdmstx, GDMSTX) (int *max, const int *dirfile, const char *parent,
-    const int *parent_l)
+void F77_FUNC(gdmstx, GDMSTX) (int32_t *max, const int32_t *dirfile,
+    const char *parent, const int32_t *parent_l)
 {
   const char **v;
   size_t len = 0;
@@ -3377,9 +3404,9 @@ void F77_FUNC(gdmstx, GDMSTX) (int *max, const int *dirfile, const char *parent,
 }
 
 /* gd_add_alias wrapper */
-void F77_FUNC(gdadal, GDADAL) (const int *dirfile, const char *field_code,
-    const int *field_code_l, const char *target, const int *target_l,
-    const int *fragment_index)
+void F77_FUNC(gdadal, GDADAL) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const char *target, const int32_t *target_l,
+    const int32_t *fragment_index)
 {
   char *tg, *fc;
 
@@ -3396,10 +3423,11 @@ void F77_FUNC(gdadal, GDADAL) (const int *dirfile, const char *field_code,
 }
 
 /* gd_add_window wrapper */
-void F77_FUNC(gdadwd, GDADWD) (const int *dirfile, const char *field_code,
-    const int *field_code_l, const char *in_field, const int *in_field_l,
-    const char *check_field, const int *check_field_l, const int *windop,
-    const void *threshold, const int *fragment_index)
+void F77_FUNC(gdadwd, GDADWD) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const char *in_field,
+    const int32_t *in_field_l, const char *check_field,
+    const int32_t *check_field_l, const int32_t *windop, const void *threshold,
+    const int32_t *fragment_index)
 {
   char *in, *cf, *fc;
   gd_triplet_t t;
@@ -3423,10 +3451,11 @@ void F77_FUNC(gdadwd, GDADWD) (const int *dirfile, const char *field_code,
 }
 
 /* gd_madd_window wrapper */
-void F77_FUNC(gdmdwd, GDMDWD) (const int *dirfile, const char *parent,
-    const int *parent_l, const char *field_code, const int *field_code_l, 
-    const char *in_field, const int *in_field_l, const char *check_field,
-    const int *check_field_l, const int *windop, const void *threshold)
+void F77_FUNC(gdmdwd, GDMDWD) (const int32_t *dirfile, const char *parent,
+    const int32_t *parent_l, const char *field_code,
+    const int32_t *field_code_l, const char *in_field,
+    const int32_t *in_field_l, const char *check_field,
+    const int32_t *check_field_l, const int32_t *windop, const void *threshold)
 {
   char *in, *cf, *fc, *pa;
   gd_triplet_t t;
@@ -3451,10 +3480,11 @@ void F77_FUNC(gdmdwd, GDMDWD) (const int *dirfile, const char *parent,
 }
 
 /* gd_add_mplex wrapper */
-void F77_FUNC(gdadmx, GDADMX) (const int *dirfile, const char *field_code,
-    const int *field_code_l, const char *in_field, const int *in_field_l,
-    const char *count_field, const int *count_field_l, const int *val,
-    const int *max, const int *fragment_index)
+void F77_FUNC(gdadmx, GDADMX) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const char *in_field,
+    const int32_t *in_field_l, const char *count_field,
+    const int32_t *count_field_l, const int32_t *val, const int32_t *max,
+    const int32_t *fragment_index)
 {
   char *in, *cf, *fc;
 
@@ -3475,10 +3505,11 @@ void F77_FUNC(gdadmx, GDADMX) (const int *dirfile, const char *field_code,
 }
 
 /* gd_madd_mplex wrapper */
-void F77_FUNC(gdmdmx, GDMDMX) (const int *dirfile, const char *parent,
-    const int *parent_l, const char *field_code, const int *field_code_l, 
-    const char *in_field, const int *in_field_l, const char *count_field,
-    const int *count_field_l, const int *val, const int *max)
+void F77_FUNC(gdmdmx, GDMDMX) (const int32_t *dirfile, const char *parent,
+    const int32_t *parent_l, const char *field_code,
+    const int32_t *field_code_l, const char *in_field,
+    const int32_t *in_field_l, const char *count_field,
+    const int32_t *count_field_l, const int32_t *val, const int32_t *max)
 {
   char *in, *cf, *fc, *pa;
 
@@ -3500,8 +3531,8 @@ void F77_FUNC(gdmdmx, GDMDMX) (const int *dirfile, const char *parent,
 }
 
 /* gd_alias_target */
-void F77_FUNC(gdatrg, GDATRG) (char *target, int *target_l, const int *dirfile, 
-    const char *field_code, const int *field_code_l)
+void F77_FUNC(gdatrg, GDATRG) (char *target, int32_t *target_l,
+    const int32_t *dirfile, const char *field_code, const int32_t *field_code_l)
 {
   const char *targ;
   char *fc;
@@ -3520,8 +3551,8 @@ void F77_FUNC(gdatrg, GDATRG) (char *target, int *target_l, const int *dirfile,
 }
 
 /* Return the maximum alias length */
-void F77_FUNC(gdalsx, GDALSX) (int* max, const int* dirfile,
-    const char *field_code, const int *field_code_l)
+void F77_FUNC(gdalsx, GDALSX) (int32_t *max, const int32_t *dirfile,
+    const char *field_code, const int32_t *field_code_l)
 {
   const char **al;
   size_t len = 0;
@@ -3549,8 +3580,8 @@ void F77_FUNC(gdalsx, GDALSX) (int* max, const int* dirfile,
 }
 
 /* gd_naliases */
-void F77_FUNC(gdnals, GDNALS) (int *nalias, const int *dirfile,
-    const char *field_code, const int *field_code_l)
+void F77_FUNC(gdnals, GDNALS) (int32_t *nalias, const int32_t *dirfile,
+    const char *field_code, const int32_t *field_code_l)
 {
   char *fc;
 
@@ -3565,8 +3596,9 @@ void F77_FUNC(gdnals, GDNALS) (int *nalias, const int *dirfile,
 
 
 /* gd_aliases -- this only returns one alias */
-void F77_FUNC(gdalss, GDALSS) (char *alias, int *alias_l, const int *dirfile,
-    const char *field_code, const int *field_code_l, const int *num)
+void F77_FUNC(gdalss, GDALSS) (char *alias, int32_t *alias_l,
+    const int32_t *dirfile, const char *field_code, const int32_t *field_code_l,
+    const int32_t *num)
 {
   const char **al;
   char *fc;
@@ -3591,9 +3623,9 @@ void F77_FUNC(gdalss, GDALSS) (char *alias, int *alias_l, const int *dirfile,
 }
 
 /* gd_alter_affixes */
-void F77_FUNC(gdaafx, GDAAFX) (const int *dirfile, const int *index,
-    const char *prefix, const int *prefix_l, const char *suffix,
-    const int *suffix_l)
+void F77_FUNC(gdaafx, GDAAFX) (const int32_t *dirfile, const int32_t *index,
+    const char *prefix, const int32_t *prefix_l, const char *suffix,
+    const int32_t *suffix_l)
 {
   char *px, *sx;
 
@@ -3610,10 +3642,10 @@ void F77_FUNC(gdaafx, GDAAFX) (const int *dirfile, const int *index,
 }
 
 /* gd_alter_window */
-void F77_FUNC(gdalwd, GDALWD) (const int *dirfile, const char *field_code,
-    const int *field_code_l, const char *in_field, const int *in_field_l,
-    const char *check_field, const int *check_field_l, const int *windop,
-    const void *threshold)
+void F77_FUNC(gdalwd, GDALWD) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const char *in_field,
+    const int32_t *in_field_l, const char *check_field,
+    const int32_t *check_field_l, const int32_t *windop, const void *threshold)
 {
   char *fc, *in, *cf;
   gd_triplet_t t;
@@ -3635,10 +3667,10 @@ void F77_FUNC(gdalwd, GDALWD) (const int *dirfile, const char *field_code,
 }
 
 /* gd_alter_mplex */
-void F77_FUNC(gdalmx, GDALMX) (const int *dirfile, const char *field_code,
-    const int *field_code_l, const char *in_field, const int *in_field_l,
-    const char *count_field, const int *count_field_l, const int *val,
-    const int *max)
+void F77_FUNC(gdalmx, GDALMX) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const char *in_field,
+    const int32_t *in_field_l, const char *count_field,
+    const int32_t *count_field_l, const int32_t *val, const int32_t *max)
 {
   char *fc, *in, *cf;
 
@@ -3657,8 +3689,8 @@ void F77_FUNC(gdalmx, GDALMX) (const int *dirfile, const char *field_code,
 }
 
 /* gd_delete_alias */
-void F77_FUNC(gddela, GDDELA) (const int *dirfile, const char *field_code,
-    const int *field_code_l, const int *flags)
+void F77_FUNC(gddela, GDDELA) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const int32_t *flags)
 {
   char *fc;
 
@@ -3672,8 +3704,8 @@ void F77_FUNC(gddela, GDDELA) (const int *dirfile, const char *field_code,
 }
 
 /* gd_fragment_affixes */
-void F77_FUNC(gdfraf, GDFRAF) (char *prefix, int *prefix_l, char *suffix,
-    int *suffix_l, const int *dirfile, const int *index)
+void F77_FUNC(gdfraf, GDFRAF) (char *prefix, int32_t *prefix_l, char *suffix,
+    int32_t *suffix_l, const int32_t *dirfile, const int32_t *index)
 {
   char *px, *sx;
 
@@ -3692,8 +3724,8 @@ void F77_FUNC(gdfraf, GDFRAF) (char *prefix, int *prefix_l, char *suffix,
 }
 
 /* gd_hidden */
-void F77_FUNC(gdhidn, GDHIDN) (int *result, const int *dirfile,
-    const char *field_code, const int *field_code_l)
+void F77_FUNC(gdhidn, GDHIDN) (int32_t *result, const int32_t *dirfile,
+    const char *field_code, const int32_t *field_code_l)
 {
   char *fc;
 
@@ -3707,8 +3739,8 @@ void F77_FUNC(gdhidn, GDHIDN) (int *result, const int *dirfile,
 }
 
 /* gd_hide */
-void F77_FUNC(gdhide, GDHIDE) (const int *dirfile, const char *field_code,
-    const int *field_code_l)
+void F77_FUNC(gdhide, GDHIDE) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l)
 {
   char *fc;
 
@@ -3722,8 +3754,8 @@ void F77_FUNC(gdhide, GDHIDE) (const int *dirfile, const char *field_code,
 }
 
 /* gd_unhide */
-void F77_FUNC(gduhid, GDUHID) (const int *dirfile, const char *field_code,
-    const int *field_code_l)
+void F77_FUNC(gduhid, GDUHID) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l)
 {
   char *fc;
 
@@ -3737,9 +3769,9 @@ void F77_FUNC(gduhid, GDUHID) (const int *dirfile, const char *field_code,
 }
 
 /* gd_madd_alias wrapper */
-void F77_FUNC(gdmdal, GDMDAL) (const int *dirfile, const char *parent,
-    const int *parent_l, const char *field_code, const int *field_code_l,
-    const char *target, const int *target_l)
+void F77_FUNC(gdmdal, GDMDAL) (const int32_t *dirfile, const char *parent,
+    const int32_t *parent_l, const char *field_code,
+    const int32_t *field_code_l, const char *target, const int32_t *target_l)
 {
   char *pa, *tg, *fc;
 
@@ -3758,8 +3790,8 @@ void F77_FUNC(gdmdal, GDMDAL) (const int *dirfile, const char *parent,
 }
 
 /* gd_move_alias wrapper */
-void F77_FUNC(gdmova, GDMOVA) (const int *dirfile, const char *field_code,
-    const int *field_code_l, const int *new_fragment)
+void F77_FUNC(gdmova, GDMOVA) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l, const int32_t *new_fragment)
 {
   char *fc;
 
@@ -3773,10 +3805,10 @@ void F77_FUNC(gdmova, GDMOVA) (const int *dirfile, const char *field_code,
 }
 
 /* gd_include_affix wrapper */
-void F77_FUNC(gdinca, GDINCA) (const int* dirfile, const char* file,
-    const int* file_l, const int* fragment_index, const char* prefix,
-    const int* prefix_l, const char* suffix, const int* suffix_l,
-    const int* flags)
+void F77_FUNC(gdinca, GDINCA) (const int32_t *dirfile, const char *file,
+    const int32_t *file_l, const int32_t *fragment_index, const char *prefix,
+    const int32_t *prefix_l, const char *suffix, const int32_t *suffix_l,
+    const int32_t *flags)
 {
   char *fi, *px, *sx;
 
@@ -3794,8 +3826,8 @@ void F77_FUNC(gdinca, GDINCA) (const int* dirfile, const char* file,
 }
 
 /* gd_sync wrapper */
-void F77_FUNC(gdsync, GDSYNC) (const int* dirfile, const char* field_code,
-    const int* field_code_l)
+void F77_FUNC(gdsync, GDSYNC) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l)
 {
   dtrace("%i, %p, %i", *dirfile, field_code, *field_code_l);
 
@@ -3812,8 +3844,8 @@ void F77_FUNC(gdsync, GDSYNC) (const int* dirfile, const char* field_code,
 }
 
 /* gd_raw_close wrapper */
-void F77_FUNC(gdrclo, GDRCLO) (const int* dirfile, const char* field_code,
-    const int* field_code_l)
+void F77_FUNC(gdrclo, GDRCLO) (const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l)
 {
   dtrace("%i, %p, %i", *dirfile, field_code, *field_code_l);
 
@@ -3830,8 +3862,9 @@ void F77_FUNC(gdrclo, GDRCLO) (const int* dirfile, const char* field_code,
 }
 
 /* gd_tokenise wrapper */
-void F77_FUNC(gdtoke, GDTOKE) (char *toke, int *toke_l, const int *dirfile,
-    const char *string, const int *string_l, const int *n)
+void F77_FUNC(gdtoke, GDTOKE) (char *toke, int32_t *toke_l,
+    const int32_t *dirfile, const char *string, const int32_t *string_l,
+    const int32_t *n)
 {
   char *token, *st;
   DIRFILE *D;
@@ -3857,8 +3890,8 @@ void F77_FUNC(gdtoke, GDTOKE) (char *toke, int *toke_l, const int *dirfile,
 }
 
 /* gd_desync wrapper */
-void F77_FUNC(gddsyn, GDDSYN) (int *desync, const int *dirfile,
-    const int *flags)
+void F77_FUNC(gddsyn, GDDSYN) (int32_t *desync, const int32_t *dirfile,
+    const int32_t *flags)
 {
   dtrace("%p, %i, %i", desync, *dirfile, *flags);
 
@@ -3868,8 +3901,9 @@ void F77_FUNC(gddsyn, GDDSYN) (int *desync, const int *dirfile,
 }
 
 /* gd_flags wrapper */
-void F77_FUNC(gdflag, GDFLAG) (int *flags, const int *dirfile, const int *set,
-    const int *reset)
+void F77_FUNC(gdflag, GDFLAG) (int32_t *flags, const int32_t *dirfile,
+    const int32_t *set,
+    const int32_t *reset)
 {
   dtrace("%p, %i, 0x%X, 0x%X", flags, *dirfile, *set, *reset);
 
@@ -3879,8 +3913,8 @@ void F77_FUNC(gdflag, GDFLAG) (int *flags, const int *dirfile, const int *set,
 }
 
 /* gd_verbose_prefix wrapper */
-void F77_FUNC(gdvbpx, GDVBPX) (const int *dirfile, const char *prefix,
-    const int *prefix_l)
+void F77_FUNC(gdvbpx, GDVBPX) (const int32_t *dirfile, const char *prefix,
+    const int32_t *prefix_l)
 {
   char *px;
 
@@ -3894,7 +3928,7 @@ void F77_FUNC(gdvbpx, GDVBPX) (const int *dirfile, const char *prefix,
 }
 
 /* gd_mplex_lookback wrapper */
-void F77_FUNC(gdmxlb, GDMXLB) (const int *dirfile, const int *lookback)
+void F77_FUNC(gdmxlb, GDMXLB) (const int32_t *dirfile, const int32_t *lookback)
 {
   dtrace("%i, %i", *dirfile, *lookback);
 
@@ -3904,8 +3938,9 @@ void F77_FUNC(gdmxlb, GDMXLB) (const int *dirfile, const int *lookback)
 }
 
 /* gd_nentries wrapper */
-void F77_FUNC(gdnent, GDNENT) (int *nentries, const int *dirfile,
-    const char *parent, const int *parent_l, const int *type, const int *flags)
+void F77_FUNC(gdnent, GDNENT) (int32_t *nentries, const int32_t *dirfile,
+    const char *parent, const int32_t *parent_l, const int32_t *type,
+    const int32_t *flags)
 {
   char *pa;
 
@@ -3920,8 +3955,9 @@ void F77_FUNC(gdnent, GDNENT) (int *nentries, const int *dirfile,
 }
 
 /* Return the maximum field name length */
-void F77_FUNC(gdentx, GDENTX) (int* max, const int* dirfile, const char *parent,
-    const int *parent_l, const int *type, const int *flags)
+void F77_FUNC(gdentx, GDENTX) (int32_t *max, const int32_t *dirfile,
+    const char *parent, const int32_t *parent_l, const int32_t *type,
+    const int32_t *flags)
 {
   const char **el;
   char *pa;
@@ -3952,9 +3988,9 @@ void F77_FUNC(gdentx, GDENTX) (int* max, const int* dirfile, const char *parent,
 }
 
 /* gd_entry_list wrapper -- this only returns one entry name */
-void F77_FUNC(gdentn, GDENTN) (char *name, int *name_l, const int *dirfile,
-    const char *parent, const int *parent_l, const int *type, const int *flags,
-    const int *field_num)
+void F77_FUNC(gdentn, GDENTN) (char *name, int32_t *name_l,
+    const int32_t *dirfile, const char *parent, const int32_t *parent_l,
+    const int32_t *type, const int32_t *flags, const int32_t *field_num)
 {
   const char** el;
   char *pa;
