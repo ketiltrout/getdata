@@ -1,0 +1,132 @@
+.\" gd_mplex_lookback.3.  The gd_mplex_lookback man page.
+.\"
+.\" Copyright (C) 2012 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_mplex_lookback 3 "1 April 2012" "Version 0.8.0" "GETDATA"
+.SH NAME
+gd_mplex_lookback \(em set the GetData lookback length for MPLEX fields.
+.SH SYNOPSIS
+.B #include <getdata.h>
+.HP
+.nh
+.ad l
+.BI "int gd_mplex_lookback(DIRFILE *" dirfile ", int " lookback );
+.hy
+.ad n
+.SH DESCRIPTION
+The
+.BR gd_mplex_lookback ()
+function controls how far GetData searches backwards for the initial value of
+a field when reading a
+.B MPLEX
+field from the dirfile(5) database specified by
+.IR dirfile .
+
+If the first sample returned of a
+.B MPLEX
+field does not contain the value of the field, GetData must search the field
+backwards to find the last time the field was updated, in order to propagate
+that value into the initial portion of the returned data.  (See
+.BR gd_getdata (3)
+for further discussion on the data returned for a
+.B MPLEX
+field).
+
+This function sets the amount of data GetData searches before giving up
+according to the value of
+.IR lookback .
+If
+.I lookback
+is zero, this search is disabled completely, and the start of the returned data
+will be padded (with zero or IEEE-754-conformant not-a-number) unless the first
+sample returned happens to contain the value of the field.  If
+.I lookback
+is the special symbol
+.BR GD_LOOKBACK_ALL ,
+GetData will exhaustively search all available data before the returned portion
+for an initial value.
+
+Otherwise,
+.I lookback
+should be a positive number specifying the number of
+.I MPLEX cycles
+to search.  Each MPLEX field has its own MPLEX cycle length, measured in samples
+of the index field, which is defined as follows:
+.IP \(bu
+if the
+.B MPLEX
+field in question specifies an optional
+.I max
+positive parameter (see the MPLEX definition in dirfile-format(5)), its MPLEX
+cycle length is that many samples;
+.IP \(bu
+if the
+.B MPLEX
+field's
+.I count
+is at least five, its MPLEX cycle length is twice as many samples as that value;
+.IP \(bu
+otherwise, the MPLEX cylce length is ten samples.
+.PP
+So, given the following MPLEX definitions:
+.IP
+field1 \fBMPLEX\fR data_field index_field 7 12
+.br
+field2 \fBMPLEX\fR data_field index_field 2 6
+.br
+field3 \fBMPLEX\fR data_field index_field 7
+.br
+field4 \fBMPLEX\fR data_field index_field 2
+.PP
+.I field1
+has a cycle length of 12 samples,
+.I field2
+6 samples (both the value of their
+.I max
+parameters),
+.I field3
+14 samples (twice it's
+.IR count ),
+and
+.I field4
+10 samples (the default value, since its
+.I count
+is less than five).
+.PP
+The initial value of the MPLEX lookback is ten cycles.  This value is provided
+in getdata.h as
+.BR GD_DEFAULT_LOOKBACK .
+
+
+.SH RETURN VALUE
+On success,
+.BR gd_mplex_lookback ()
+returns zero; on error it returns -1 and sets the dirfile error to a non-zero
+value.  Possible error values are:
+
+.TP
+.B GD_E_BAD_DIRFILE
+The supplied dirfile was invalid.
+.PP
+The dirfile error may be retrieved by calling
+.BR gd_error (3).
+A descriptive error string for the last error encountered can be obtained from a
+call to
+.BR gd_error_string (3).
+.SH SEE ALSO
+.BR dirfile (5),
+.BR dirfile-format (5),
+.BR gd_error (3),
+.BR gd_error_string (3),
+.BR gd_getdata (3).

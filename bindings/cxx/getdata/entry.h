@@ -123,7 +123,7 @@ namespace GetData {
       virtual int ScalarIndex(int index = 0) const;
 
       /* RAW methods */
-      virtual gd_spf_t SamplesPerFrame() const {
+      virtual unsigned int SamplesPerFrame() const {
         return (E.field_type == GD_RAW_ENTRY) ? E.u.raw.spf : 0;
       };
 
@@ -169,11 +169,11 @@ namespace GetData {
       };
 
       /* (S)BIT methods */
-      virtual gd_bit_t FirstBit() const {
+      virtual int FirstBit() const {
         return (E.field_type == GD_BIT_ENTRY) ? E.u.bit.bitnum : -1;
       };
 
-      virtual gd_bit_t NumBits() const {
+      virtual int NumBits() const {
         return (E.field_type == GD_BIT_ENTRY) ? E.u.bit.numbits : -1;
       };
 
@@ -234,11 +234,11 @@ namespace GetData {
       }
 
       /* MPLEX methods */
-      virtual gd_count_t CountVal() const {
+      virtual int CountVal() const {
         return (E.field_type == GD_MPLEX_ENTRY) ? E.u.mplex.count_val : 0;
       }
 
-      virtual gd_count_t CountMax() const {
+      virtual int CountMax() const {
         return (E.field_type == GD_MPLEX_ENTRY) ? E.u.mplex.count_max : 0;
       }
 

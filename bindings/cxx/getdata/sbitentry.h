@@ -34,19 +34,19 @@ namespace GetData {
     public:
       SBitEntry() : Entry() { E.field_type = GD_SBIT_ENTRY; };
 
-      SBitEntry(const char* field_code, const char* in_field, gd_bit_t bitnum,
-          gd_bit_t numbits = 1, int fragment_index = 0);
+      SBitEntry(const char* field_code, const char* in_field, int bitnum,
+          int numbits = 1, int fragment_index = 0);
 
       virtual const char *Input() const { return E.in_fields[0]; };
 
-      virtual gd_bit_t FirstBit() const { return E.u.bit.bitnum; };
+      virtual int FirstBit() const { return E.u.bit.bitnum; };
 
-      virtual gd_bit_t NumBits() const { return E.u.bit.numbits; };
+      virtual int NumBits() const { return E.u.bit.numbits; };
 
       int SetInput(const char* field);
-      int SetFirstBit(gd_bit_t first_bit);
+      int SetFirstBit(int first_bit);
       int SetFirstBit(const char* first_bit);
-      int SetNumBits(gd_bit_t num_bits);
+      int SetNumBits(int num_bits);
       int SetNumBits(const char* num_bits);
 
       virtual const char *Scalar(int index = 0) const;

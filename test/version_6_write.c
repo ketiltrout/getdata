@@ -31,7 +31,7 @@ int main(void)
     "/META \"a \\#r\" \\x64\\c\\157 PHASE \"a \\#r\" 0\n";
   int fd, e, q, c, r = 0;
   DIRFILE *D;
-  gd_spf_t s;
+  unsigned int s;
 
   rmdirfile();
   mkdir(filedir, 0777);

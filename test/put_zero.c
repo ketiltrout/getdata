@@ -33,8 +33,7 @@ int main(void)
   const char *format = "dirfile/format";
   const char *data = "dirfile/data";
   const char *format_data = "data RAW UINT16 8\n";
-  struct stat buf;
-  int fd, i, n, error, r = 0;
+  int fd, n, error, r = 0;
   DIRFILE *D;
 
   rmdirfile();

@@ -472,6 +472,7 @@ DIRFILE *_GD_Open(DIRFILE *D, int dirfd, const char *filedir,
   D->sehandler = sehandler;
   D->sehandler_extra = extra;
   D->standards = GD_DIRFILE_STANDARDS_VERSION;
+  D->lookback = GD_DEFAULT_LOOKBACK;
 
   if (dirfile == NULL) {
     _GD_SetError(D, GD_E_RAW_IO, 0, filedir, errno, NULL);
@@ -484,7 +485,6 @@ DIRFILE *_GD_Open(DIRFILE *D, int dirfd, const char *filedir,
 
   /* Add the INDEX entry */
   D->n_entries = 1;
-  D->n[_GD_EntryIndex(GD_INDEX_ENTRY)] = 1;
 
   D->entry = (gd_entry_t **)_GD_Malloc(D, sizeof(gd_entry_t*));
   if (D->entry)

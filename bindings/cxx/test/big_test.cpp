@@ -182,11 +182,12 @@ int main(void)
   Fragment *frag;
   gd_triplet_t thresh;
 
-  char* fields[nfields + 7] = {(char*)"INDEX", (char*)"alias", (char*)"bit",
+  char* fields[nfields + 9] = {(char*)"INDEX", (char*)"alias", (char*)"bit",
     (char*)"carray", (char*)"const", (char*)"data", (char*)"div",
     (char*)"lincom", (char*)"linterp", (char*)"mplex", (char*)"mult",
     (char*)"phase", (char*)"polynom", (char*)"recip", (char*)"sbit",
-    (char*)"string", (char*)"window", NULL, NULL, NULL, NULL, NULL, NULL, NULL};
+    (char*)"string", (char*)"window", NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+    NULL, NULL};
   char *strings[3];
 
   // Write the test dirfile
@@ -1606,7 +1607,7 @@ int main(void)
   xent.SetName("mnew21");
   xent.SetInput("in2", 0);
   xent.SetInput("in3", 1);
-  xent.SetCountVal((gd_count_t)0);
+  xent.SetCountVal(0);
   xent.SetCountMax(12);
   d->MAdd(xent, "data");
   CHECK_OK2(230, 1);
@@ -1641,11 +1642,11 @@ int main(void)
   delete ent;
 
   // 232: gd_tokenise
-  str = d->Tokenise("\"test1 test2\" test3\\ test4");
+  str = d->StrTok("\"test1 test2\" test3\\ test4");
   CHECK_OK2(232, 1);
   CHECK_STRING2(232, 2, str, "test1 test2");
 
-  str = d->Tokenise();
+  str = d->StrTok();
   CHECK_OK2(232, 3);
   CHECK_STRING2(232, 4, str, "test3 test4");
 
@@ -1667,6 +1668,52 @@ int main(void)
   d->VerbosePrefix("big_test: ");
   CHECK_OK(236);
 
+  // 237: gd_nentries
+  n = d->NEntries("data", GD_SCALAR_ENTRIES,
+      GD_ENTRIES_HIDDEN | GD_ENTRIES_NOALIAS);
+  CHECK_OK2(237, 1);
+  CHECK_INT2(237, 1, n, 2);
+  n = d->NEntries(NULL, GD_VECTOR_ENTRIES,
+      GD_ENTRIES_HIDDEN | GD_ENTRIES_NOALIAS);
+  CHECK_OK2(237, 2);
+  CHECK_INT2(237, 2, n, 26);
+
+  // 239: gd_entry_list
+  fields[0] = (char*)"INDEX";
+  fields[1] = (char*)"bit";
+  fields[2] = (char*)"data";
+  fields[3] = (char*)"div";
+  fields[4] = (char*)"lincom";
+  fields[5] = (char*)"linterp";
+  fields[6] = (char*)"mplex";
+  fields[7] = (char*)"mult";
+  fields[8] = (char*)"new1";
+  fields[9] = (char*)"new14";
+  fields[10] = (char*)"new15";
+  fields[11] = (char*)"new16";
+  fields[12] = (char*)"new18";
+  fields[13] = (char*)"new2";
+  fields[14] = (char*)"new21";
+  fields[15] = (char*)"new3";
+  fields[16] = (char*)"new4";
+  fields[17] = (char*)"new5";
+  fields[18] = (char*)"new6";
+  fields[19] = (char*)"new7";
+  fields[20] = (char*)"new8";
+  fields[21] = (char*)"phase";
+  fields[22] = (char*)"polynom";
+  fields[23] = (char*)"recip";
+  fields[24] = (char*)"sbit";
+  fields[25] = (char*)"window";
+  list = d->EntryList(NULL, GD_VECTOR_ENTRIES,
+      GD_ENTRIES_HIDDEN | GD_ENTRIES_NOALIAS);
+  CHECK_OK(239);
+  CHECK_STRING_ARRAY(239,n,list[i],fields[i]);
+
+  // 240: gd_mplex_lookback
+  n = d->MplexLookback(GD_LOOKBACK_ALL);
+  CHECK_OK(240);
+  CHECK_INT(240, n, 0);
 
 
 

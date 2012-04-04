@@ -146,6 +146,8 @@ DFES_TESTS=dfes_bit dfes_divide dfes_lincom dfes_linterp dfes_multiply \
 
 DESYNC_TESTS=desync desync_flush desync_reopen desync_reopen_inv
 
+ELIST_TESTS=elist_alias elist_hidden elist_scalar
+
 ENCODE_TESTS=encode_alter encode_get encode_move
 
 ENDIAN_TESTS=endian_alter endian_alter_sie endian_get endian_move
@@ -190,14 +192,14 @@ GET_TESTS=${GET64} get_bad_code get_bit get_carray get_carray_len \
 					get_float64 get_foffs get_fs get_here get_here_foffs get_heres \
 					get_int8 get_int16 get_int32 get_int64 get_invalid get_lincom1 \
 					get_lincom2 get_lincom3 get_lincom_noin get_lincom_non \
-					get_lincom_spf get_linterp get_linterp_noin get_linterp_notab \
-					get_linterp_sort get_mplex get_mplex_lb get_multiply \
-					get_multiply_noin get_nonexistent get_null $(GET_OFF64) get_phase \
-					get_phase_affix get_polynom get_polynom_noin get_recip \
-					get_recip_const get_recurse get_rofs get_sbit get_sf get_ss get_type \
-					get_uint16 get_uint32 get_uint64 get_window get_window_clr \
-					get_window_ge get_window_gt get_window_le get_window_lt \
-					get_window_ne get_window_set get_zero
+					get_lincom_null get_lincom_spf get_linterp get_linterp_noin \
+					get_linterp_notab get_linterp_sort get_mplex get_mplex_lb \
+					get_mplex_lball get_mplex_nolb get_multiply get_multiply_noin \
+					get_nonexistent get_null $(GET_OFF64) get_phase get_phase_affix \
+					get_polynom get_polynom_noin get_recip get_recip_const get_recurse \
+					get_rofs get_sbit get_sf get_ss get_type get_uint16 get_uint32 \
+					get_uint64 get_window get_window_clr get_window_ge get_window_gt \
+					get_window_le get_window_lt get_window_ne get_window_set get_zero
 
 GLOBAL_TESTS=global_flags global_name global_ref global_ref_empty global_ref_set
 
@@ -236,6 +238,8 @@ MOVE_TESTS=move move_affix move_affix_dup move_alias move_data_enc_ar \
 NAME_TESTS=name name_affix name_affix_bad name_after name_after_const name_dup \
 					 name_move name_update name_update_const
 
+NENTRIES_TESTS=nentries_alias nentries_hidden nentries_scalar
+
 NFIELDS_TESTS=nfields nfields_hidden nfields_invalid nfields_type \
 							nfields_type_hidden nfields_type_invalid nfields_vector \
 							nfields_vector_hidden nfields_vector_invalid
@@ -269,11 +273,11 @@ PARSE_TESTS=parse_alias parse_alias_code parse_alias_dup parse_alias_meta \
 						parse_lincom_nfields parse_lincom_nofields parse_lincom_non \
 						parse_lincom_non_ncols parse_lincom_scalar parse_linterp \
 						parse_linterp_ncols parse_malias parse_malias_dup \
-						parse_meta parse_meta_affix parse_meta_alias parse_meta_implicit \
-						parse_meta_implicit2 parse_meta_implicit_affix parse_meta_index \
-						parse_meta_index2 parse_meta_jump parse_meta_malias \
-						parse_meta_meta parse_meta_parent parse_meta_raw \
-						parse_mplex parse_mplex_ncols parse_mplex_scalar \
+						parse_malias_meta parse_meta parse_meta_affix parse_meta_alias \
+						parse_meta_implicit parse_meta_implicit2 parse_meta_implicit_affix \
+						parse_meta_index parse_meta_index2 parse_meta_jump \
+						parse_meta_malias parse_meta_meta parse_meta_parent parse_meta_raw \
+						parse_mplex parse_mplex_ncols parse_mplex_nomax parse_mplex_scalar \
 						parse_multiply parse_multiply_ncols parse_name parse_name_dot \
 						parse_name_ext parse_name_pedantic parse_ncols parse_phase \
 						parse_phase_ncols parse_phase_scalar parse_polynom \
@@ -356,18 +360,18 @@ ZZSLIM_TESTS=zzslim_get zzslim_nframes
 TESTS=$(ADD_TESTS)      $(ALIAS_TESTS)    $(ALTER_TESTS)    $(ASCII_TESTS)    \
 			$(BOF_TESTS)      $(BZIP_TESTS)     $(CLOSE_TESTS)    $(CONVERT_TESTS)  \
 			$(CREAT_TESTS)    $(CVLIST_TESTS)   $(DEL_TESTS)      $(DFES_TESTS)     \
-			$(DESYNC_TESTS)   $(ENCODE_TESTS)   $(ENDIAN_TESTS)   $(ENTRY_TESTS)    \
-			$(EOF_TESTS)      $(ERROR_TESTS)    $(FILE_TESTS)     $(FLIST_TESTS)    \
-			$(FLUSH_TESTS)    $(FOFFS_TESTS)    $(FRAGMENT_TESTS) $(GET_TESTS)      \
-			$(GLOBAL_TESTS)   $(GZIP_TESTS)     $(HEADER_TESTS)   $(HIDE_TESTS)     \
-			$(INCLUDE_TESTS)  $(INDEX_TESTS)    $(LEGACY_TESTS)   $(LZMA_TESTS)     \
-			$(MADD_TESTS)     $(MOVE_TESTS)     $(NAME_TESTS)     $(NFIELDS_TESTS)  \
-			$(NFRAMES_TESTS)  $(NMETA_TESTS)    $(OPEN_TESTS)     $(PARSE_TESTS)    \
-			$(PROTECT_TESTS)  $(PUT_TESTS)      $(REF_TESTS)      $(REPR_TESTS)     \
-			$(SEEK_TESTS)     $(SIE_TESTS)      $(SLIM_TESTS)     $(SPF_TESTS)      \
-			$(SVLIST_TESTS)   $(TELL_TESTS)     $(TRUNC_TESTS)    $(UNCLUDE_TESTS)  \
-			$(VERSION_TESTS)  $(VLIST_TESTS)    $(XZ_TESTS)       $(ZZIP_TESTS)     \
-			$(ZZSLIM_TESTS)
+			$(DESYNC_TESTS)   $(ELIST_TESTS)    $(ENCODE_TESTS)   $(ENDIAN_TESTS)   \
+			$(ENTRY_TESTS)    $(EOF_TESTS)      $(ERROR_TESTS)    $(FILE_TESTS)     \
+			$(FLIST_TESTS)    $(FLUSH_TESTS)    $(FOFFS_TESTS)    $(FRAGMENT_TESTS) \
+			$(GET_TESTS)      $(GLOBAL_TESTS)   $(GZIP_TESTS)     $(HEADER_TESTS)   \
+			$(HIDE_TESTS)     $(INCLUDE_TESTS)  $(INDEX_TESTS)    $(LEGACY_TESTS)   \
+			$(LZMA_TESTS)     $(MADD_TESTS)     $(MOVE_TESTS)     $(NAME_TESTS)     \
+			$(NENTRIES_TESTS) $(NFIELDS_TESTS)  $(NFRAMES_TESTS)  $(NMETA_TESTS)    \
+			$(OPEN_TESTS)     $(PARSE_TESTS)    $(PROTECT_TESTS)  $(PUT_TESTS)      \
+			$(REF_TESTS)      $(REPR_TESTS)     $(SEEK_TESTS)     $(SIE_TESTS)      \
+			$(SLIM_TESTS)     $(SPF_TESTS)      $(SVLIST_TESTS)   $(TELL_TESTS)     \
+			$(TRUNC_TESTS)    $(UNCLUDE_TESTS)  $(VERSION_TESTS)  $(VLIST_TESTS)    \
+			$(XZ_TESTS)       $(ZZIP_TESTS)     $(ZZSLIM_TESTS)
 
 check_PROGRAMS=$(TESTS)
 

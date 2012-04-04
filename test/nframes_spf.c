@@ -57,7 +57,7 @@ int main(void)
 
   for (i = 1; i < (int)len + 1; ++i) {
     DIRFILE *D;
-    gd_spf_t spf;
+    unsigned int spf;
     size_t n;
 
     write_format(format, i);

@@ -1,4 +1,4 @@
-/* Copyright (C) 2009, 2010 D. V. Wiebe
+/* Copyright (C) 2009, 2010, 2012 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -92,9 +92,11 @@ extern const struct gdpy_constant_t {
 
 struct gdpy_dirfile_t {
   PyObject_HEAD
-  DIRFILE* D;
-  PyObject* callback_data;
-  PyObject* callback;
+  DIRFILE *D;
+  int mplex_lookback;
+  char *verbose_prefix;
+  PyObject *callback_data;
+  PyObject *callback;
   int callback_exception;
 };
 

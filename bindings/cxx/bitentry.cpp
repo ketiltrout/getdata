@@ -21,7 +21,7 @@
 #include "internal.h"
 
 BitEntry::BitEntry(const char* field_code, const char* in_field,
-    gd_bit_t bitnum, gd_bit_t numbits, int fragment_index) : Entry()
+    int bitnum, int numbits, int fragment_index) : Entry()
 {
   E.field = strdup(field_code);
   E.field_type = GD_BIT_ENTRY;
@@ -47,7 +47,7 @@ int BitEntry::SetInput(const char* field)
   return 0;
 }
 
-int BitEntry::SetFirstBit(gd_bit_t first_bit)
+int BitEntry::SetFirstBit(int first_bit)
 {
   E.u.bit.bitnum = first_bit;
 
@@ -57,7 +57,7 @@ int BitEntry::SetFirstBit(gd_bit_t first_bit)
   return 0;
 }
 
-int BitEntry::SetNumBits(gd_bit_t num_bits)
+int BitEntry::SetNumBits(int num_bits)
 {
   E.u.bit.numbits = num_bits;
 

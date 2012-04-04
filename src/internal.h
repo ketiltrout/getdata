@@ -189,15 +189,27 @@ double cimag(double complex z);
 # endif
 #endif
 
+/* gd_type_t type for native integers */
+#ifndef SIZEOF_INT
+#define SIZEOF_INT (sizeof(int))
+#endif
+
+#ifndef SIZEOF_UNSIGNED_INT
+#define SIZEOF_UNSIGNED_INT (sizeof(unsigned int))
+#endif
+
+#define GD_INT_TYPE (SIZEOF_INT | GD_SIGNED)
+#define GD_UINT_TYPE (SIZEOF_UNSIGNED_INT)
+
+/* default buffer size */
 #if SIZEOF_INT < 4
 #define GD_BUFFER_SIZE 32767
 #else
 #define GD_BUFFER_SIZE 1000000
 #endif
 
-/* the lookback length (in mplex counter revolutions) to search for the previous
- * mplex value */
-#define GD_MPLEX_LOOKBACK 10
+/* the default mplex cycle length */
+#define GD_MPLEX_CYCLE 10
 
 #ifdef _MSC_VER
 # define _gd_static_inline static
@@ -248,9 +260,9 @@ _gd_static_inline int64_t gd_put_unalinged64(int64_t v, void *p)
 
 #define GD_ARM_FLAG (GD_ARM_ENDIAN | GD_NOT_ARM_ENDIAN)
 
-/* Type conventions:
+/* Internal type conventions:
  *
- *  - samples per frame is always gd_spf_t (aka uin16_t)
+ *  - samples per frame is always unsigned int
  *  - variables holding offsets or file sizes should be of type off64_t (which
  *    may be simply off_t, depending on local LFS support)
  *  - variables holding object sizes or counts of items read or written should
@@ -696,11 +708,17 @@ ssize_t getdelim(char**, size_t*, int, FILE*);
 #define GD_E_ARG_PROTECTION     3
 #define GD_E_ARG_NODATA         4
 
+/* I/O flags */
 #define GD_FILE_READ  0x1
 #define GD_FILE_WRITE 0x2
 #define GD_FILE_RDWR  ( GD_FILE_READ | GD_FILE_WRITE )
 #define GD_FILE_TEMP  0x4
 #define GD_FILE_TOUCH 0x8
+
+/* lists */
+#define GD_N_ENTRY_LISTS (GD_N_ENTYPES + 3)
+
+#define GD_LIST_VALID_STRING_VALUE 0x01
 
 struct _gd_raw_file {
   char* name;
@@ -728,8 +746,6 @@ struct _gd_private_entry {
   int calculated;
 
   int n_meta;
-  unsigned int n_hidden;
-  unsigned int n[GD_N_ENTYPES];
   union {
     gd_entry_t** meta_entry;
     const gd_entry_t* parent;
@@ -737,12 +753,13 @@ struct _gd_private_entry {
 
   /* field lists */
   const char **alias_list;
-  const char** field_list;
-  const char** vector_list;
-  char** type_list[GD_N_ENTYPES];
+  const char **entry_list[GD_N_ENTRY_LISTS];
+  unsigned int entry_list_flags[GD_N_ENTRY_LISTS];
   const char** string_value_list;
-  void* const_value_list;
+  void *const_value_list;
   gd_carray_t *carray_value_list;
+  uint32_t value_list_validity;
+  uint32_t entry_list_validity;
 
   union {
     struct { /* RAW */
@@ -891,10 +908,7 @@ struct gd_dir_t {
 /* aliases */
 #define GD_ALIAS_ENTRY ((gd_entype_t)-1)
 
-#define GD_LIST_VALID_FIELD        0x01
-#define GD_LIST_VALID_VECTOR       0x02
-#define GD_LIST_VALID_STRING_VALUE 0x04
-
+/* representation suffixes */
 #define GD_REPR_NONE 0
 #define GD_REPR_REAL 'r'
 #define GD_REPR_IMAG 'i'
@@ -919,15 +933,13 @@ struct _GD_DIRFILE {
   uint64_t av;
   int standards;
   int n_error;
+  int lookback;
 
   /* for the public tokeniser */
   const char *tok_pos;
 
   /* field counts */
   unsigned int n_entries;
-  unsigned int n_hidden;
-  unsigned int n[GD_N_ENTYPES];
-  unsigned int n_meta;
   unsigned int n_dot;
 
   /* field array */
@@ -952,14 +964,13 @@ struct _GD_DIRFILE {
   int n_fragment;
 
   /* field lists */
-  const char** field_list;
-  const char** vector_list;
-  const char** type_list[GD_N_ENTYPES];
-  const char** string_value_list;
-  void* const_value_list;
+  const char **entry_list[GD_N_ENTRY_LISTS];
+  unsigned int entry_list_flags[GD_N_ENTRY_LISTS];
+  const char **string_value_list;
+  void *const_value_list;
   gd_carray_t *carray_value_list;
-  int list_validity;
-  int type_list_validity;
+  uint32_t value_list_validity;
+  uint32_t entry_list_validity;
 
   /* syntax error callback */
   gd_parser_callback_t sehandler;
@@ -990,24 +1001,11 @@ void _GD_CInvertData(DIRFILE *restrict, void *restrict, gd_type_t return_type,
 
 void _GD_CLincomData(DIRFILE *restrict, int, void *restrict, gd_type_t,
     const GD_DCOMPLEXP_t restrict, const GD_DCOMPLEXP_t restrict,
-    GD_DCOMPLEXV(m), GD_DCOMPLEXV(b), const gd_spf_t *restrict, size_t);
+    GD_DCOMPLEXV(m), GD_DCOMPLEXV(b), const unsigned int *restrict, size_t);
 void _GD_ConvertType(DIRFILE *restrict, const void *restrict, gd_type_t,
     void *restrict, gd_type_t, size_t) gd_nothrow;
 gd_type_t _GD_ConstType(DIRFILE *D, gd_type_t type);
 const char *_GD_DirName(const DIRFILE *D, int dirfd);
-
-#define _GD_EntryIndex(t) \
-  ( \
-    ((t) == GD_RAW_ENTRY)      ?  0 : ((t) == GD_LINCOM_ENTRY)   ?  1 : \
-    ((t) == GD_LINTERP_ENTRY)  ?  2 : ((t) == GD_BIT_ENTRY)      ?  3 : \
-    ((t) == GD_MULTIPLY_ENTRY) ?  4 : ((t) == GD_PHASE_ENTRY)    ?  5 : \
-    ((t) == GD_INDEX_ENTRY)    ?  6 : ((t) == GD_POLYNOM_ENTRY)  ?  7 : \
-    ((t) == GD_SBIT_ENTRY)     ?  8 : ((t) == GD_DIVIDE_ENTRY)   ?  9 : \
-    ((t) == GD_RECIP_ENTRY)    ? 10 : ((t) == GD_WINDOW_ENTRY)   ? 11 : \
-    ((t) == GD_MPLEX_ENTRY)    ? 12 : ((t) == GD_CONST_ENTRY)    ? 13 : \
-    ((t) == GD_CARRAY_ENTRY)   ? 14 : ((t) == GD_STRING_ENTRY)   ? 15 : -1 \
-  )
-
 size_t _GD_DoField(DIRFILE *restrict, gd_entry_t *restrict, int, off64_t,
     size_t, gd_type_t, void *restrict);
 size_t _GD_DoFieldOut(DIRFILE *restrict, gd_entry_t *restrict, int, off64_t,
@@ -1034,7 +1032,7 @@ off64_t _GD_GetFilePos(DIRFILE *restrict, gd_entry_t *restrict, off64_t);
 char *_GD_GetLine(FILE *restrict, size_t *restrict, int *restrict);
 int _GD_GetRepr(DIRFILE *restrict, const char *restrict,
     char **restrict, int);
-gd_spf_t _GD_GetSPF(DIRFILE*, gd_entry_t*);
+unsigned int _GD_GetSPF(DIRFILE*, gd_entry_t*);
 int _GD_GrabDir(DIRFILE*, int, const char *restrict);
 int _GD_Include(DIRFILE*, const char *restrict, const char *restrict, int,
     char **restrict, int, const char *restrict, const char *restrict,
@@ -1049,14 +1047,16 @@ void _GD_InsertSort(DIRFILE *restrict, gd_entry_t *restrict, int u) gd_nothrow;
 #define _GD_InternalError(D) \
   _GD_SetError(D, GD_E_INTERNAL_ERROR, 0, __FILE__, __LINE__, NULL)
 
+int _GD_InvalidEntype(gd_entype_t t);
 gd_type_t _GD_LegacyType(char c);
 void _GD_LincomData(DIRFILE *restrict, int n, void *restrict,
     gd_type_t return_type, const double *restrict, const double *restrict,
-    const double *restrict, const double *restrict, const gd_spf_t *restrict,
-    size_t);
+    const double *restrict, const double *restrict,
+    const unsigned int *restrict, size_t);
 void _GD_LinterpData(DIRFILE *restrict, void *restrict, gd_type_t, int,
     const double *restrict, size_t, const struct _gd_lut *restrict, size_t);
-int _GD_ListEntry(const gd_entry_t*, int, int, gd_entype_t);
+int _GD_ListEntry(const gd_entry_t *E, int meta, int hidden, int noalias,
+    unsigned int special, gd_entype_t type);
 char *_GD_MakeFullPath(DIRFILE *restrict, int, const char *restrict, int);
 #define _GD_MakeFullPathOnly gd_MakeFullPathOnly
 char *_GD_MakeFullPathOnly(const DIRFILE *D, int dirfd, const char *name);
@@ -1071,6 +1071,8 @@ char *_GD_MungeCode(DIRFILE *restrict, const gd_entry_t *restrict,
 char *_GD_MungeFromFrag(DIRFILE *restrict, const gd_entry_t *restrict, int,
     const char *restrict, int *restrict);
 gd_type_t _GD_NativeType(DIRFILE *restrict, gd_entry_t *restrict, int);
+unsigned int _GD_NEntries(DIRFILE *D, struct _gd_private_entry *p,
+    unsigned int type, unsigned int flags);
 DIRFILE *_GD_Open(DIRFILE*, int, const char*, unsigned long,
     gd_parser_callback_t, void*);
 gd_entry_t *_GD_ParseFieldSpec(DIRFILE *restrict, int, char**,

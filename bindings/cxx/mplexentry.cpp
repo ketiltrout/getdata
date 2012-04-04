@@ -21,7 +21,7 @@
 #include "internal.h"
 
 MplexEntry::MplexEntry(const char* field_code, const char* in_field,
-    const char* count, gd_count_t count_val, gd_count_t count_max,
+    const char* count, int count_val, int count_max,
     int fragment_index) : Entry()
 {
   dtrace("\"%s\", \"%s\", \"%s\", %i, %i, %i", field_code,
@@ -58,7 +58,7 @@ int MplexEntry::SetInput(const char* field, int index)
   return 0;
 }
 
-int MplexEntry::SetCountVal(gd_count_t count_val)
+int MplexEntry::SetCountVal(int count_val)
 {
   int ret = 0;
 
@@ -73,7 +73,7 @@ int MplexEntry::SetCountVal(gd_count_t count_val)
   return ret;
 }
 
-int MplexEntry::SetCountMax(gd_count_t count_max)
+int MplexEntry::SetCountMax(int count_max)
 {
   int ret = 0;
 

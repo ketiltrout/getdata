@@ -37,17 +37,17 @@ namespace GetData {
         filename = NULL;
       };
 
-      RawEntry(const char* field_code, DataType data_type, gd_spf_t spf,
+      RawEntry(const char* field_code, DataType data_type, unsigned int spf,
           int fragment_index = 0);
 
       virtual ~RawEntry();
 
-      virtual gd_spf_t SamplesPerFrame() const { return E.u.raw.spf; };
+      virtual unsigned int SamplesPerFrame() const { return E.u.raw.spf; };
 
       virtual DataType RawType() const { return (DataType)E.u.raw.data_type; };
 
       const char* FileName();
-      int SetSamplesPerFrame(gd_spf_t spf, int recode = 0);
+      int SetSamplesPerFrame(unsigned int spf, int recode = 0);
       int SetSamplesPerFrame(const char *spf, int recode = 0);
       int SetType(DataType type, int recode = 0);
 

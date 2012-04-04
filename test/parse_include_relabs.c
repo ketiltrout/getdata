@@ -48,7 +48,7 @@ int main(void)
   char *ptr, *cwd = NULL;
   int fd, r = 0;
   DIRFILE *D;
-  gd_spf_t spf;
+  unsigned int spf;
 
   rmdirfile();
   mkdir(filedir, 0777);

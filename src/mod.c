@@ -96,6 +96,12 @@ static int _GD_AlterScalar(DIRFILE* D, int alter_literal, gd_type_t type,
       *(int16_t *)lout = *(int16_t *)lin;
     else if (type == GD_UINT16)
       *(uint16_t *)lout = *(uint16_t *)lin;
+    else if (type == GD_INT32)
+      *(int32_t *)lout = *(int32_t *)lin;
+    else if (type == GD_UINT32)
+      *(uint32_t *)lout = *(uint32_t *)lin;
+    else if (type == GD_INT64)
+      *(int64_t *)lout = *(int64_t *)lin;
     else if (type == GD_UINT64)
       *(uint64_t *)lout = *(uint64_t *)lin;
     else
@@ -113,8 +119,8 @@ static int _GD_AlterScalar(DIRFILE* D, int alter_literal, gd_type_t type,
  * _GD_Change.  NB: Don't precompute (spfB / spfA) here: the order of operations
  * is important to get proper integer trucation.
  */
-static void _GD_SPFConvert(DIRFILE* D, void *A, gd_spf_t spfA, void *B,
-    gd_spf_t spfB, gd_type_t type, size_t n)
+static void _GD_SPFConvert(DIRFILE* D, void *A, unsigned int spfA, void *B,
+    unsigned int spfB, gd_type_t type, size_t n)
 {
   size_t i;
 
@@ -516,9 +522,9 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
     case GD_BIT_ENTRY:
     case GD_SBIT_ENTRY:
       j = _GD_AlterScalar(D, N->EN(bit,numbits) >= 1 && E->EN(bit,numbits) !=
-          N->EN(bit,numbits), GD_INT16, &Q.EN(bit,numbits), &N->EN(bit,numbits),
-          Q.scalar + 1, Q.scalar_ind + 1, N->scalar[1], N->scalar_ind[1],
-          E->e->calculated);
+          N->EN(bit,numbits), GD_INT_TYPE, &Q.EN(bit,numbits),
+          &N->EN(bit,numbits), Q.scalar + 1, Q.scalar_ind + 1, N->scalar[1],
+          N->scalar_ind[1], E->e->calculated);
 
       if (j & GD_AS_ERROR)
         break;
@@ -530,7 +536,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
         modified = 1;
 
       j = _GD_AlterScalar(D, N->EN(bit,bitnum) >= 0 && E->EN(bit,bitnum) !=
-          N->EN(bit,bitnum), GD_INT16, &Q.EN(bit,bitnum), &N->EN(bit,bitnum),
+          N->EN(bit,bitnum), GD_INT_TYPE, &Q.EN(bit,bitnum), &N->EN(bit,bitnum),
           Q.scalar, Q.scalar_ind, N->scalar[0], N->scalar_ind[0],
           E->e->calculated);
 
@@ -741,8 +747,8 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
 
       break;
     case GD_MPLEX_ENTRY:
-      j = _GD_AlterScalar(D, N->EN(mplex,count_max) != 0 &&
-          E->EN(mplex,count_max) != N->EN(mplex,count_max), GD_INT16,
+      j = _GD_AlterScalar(D, N->EN(mplex,count_max) != -1 &&
+          E->EN(mplex,count_max) != N->EN(mplex,count_max), GD_INT_TYPE,
           &Q.EN(mplex,count_max), &N->EN(mplex,count_max), Q.scalar,
           Q.scalar_ind, N->scalar[0], N->scalar_ind[0], E->e->calculated);
 
@@ -755,8 +761,8 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
       if (j & GD_AS_MODIFIED)
         modified = 1;
 
-      j = _GD_AlterScalar(D, N->EN(mplex,count_val) != GD_COUNT_MAX &&
-          E->EN(mplex,count_val) != N->EN(mplex,count_val), GD_INT16,
+      j = _GD_AlterScalar(D, N->EN(mplex,count_val) != -1 &&
+          E->EN(mplex,count_val) != N->EN(mplex,count_val), GD_INT_TYPE,
           &Q.EN(mplex,count_val), &N->EN(mplex,count_val), Q.scalar,
           Q.scalar_ind, N->scalar[1], N->scalar_ind[1], E->e->calculated);
 
@@ -953,7 +959,7 @@ int gd_alter_entry(DIRFILE* D, const char* field_code,
 }
 
 int gd_alter_raw(DIRFILE *D, const char *field_code,
-    gd_type_t data_type, gd_spf_t spf, int move)
+    gd_type_t data_type, unsigned int spf, int move)
 {
   int ret;
   gd_entry_t N;
@@ -1146,7 +1152,7 @@ int gd_alter_linterp(DIRFILE* D, const char* field_code, const char* in_field,
 }
 
 int gd_alter_bit(DIRFILE* D, const char* field_code, const char* in_field,
-    gd_bit_t bitnum, gd_bit_t numbits) gd_nothrow
+    int bitnum, int numbits) gd_nothrow
 {
   int ret;
   gd_entry_t N;
@@ -1176,7 +1182,7 @@ int gd_alter_bit(DIRFILE* D, const char* field_code, const char* in_field,
 }
 
 int gd_alter_sbit(DIRFILE* D, const char* field_code, const char* in_field,
-    gd_bit_t bitnum, gd_bit_t numbits) gd_nothrow
+    int bitnum, int numbits) gd_nothrow
 {
   int ret;
   gd_entry_t N;
@@ -1577,7 +1583,7 @@ gd_nothrow
 }
 
 int gd_alter_mplex(DIRFILE* D, const char *field_code, const char *in_field,
-    const char *count_field, gd_count_t count_val, gd_count_t count_max)
+    const char *count_field, int count_val, int count_max)
 gd_nothrow
 {
   int ret;

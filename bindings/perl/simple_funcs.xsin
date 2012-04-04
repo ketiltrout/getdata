@@ -1,5 +1,5 @@
 int add_bit(DIRFILE *dirfile, const char *field_code, const char *in_field,
-    gd_bit_t bitnum, gd_bit_t numbits, int fragment_index=0)
+    int bitnum, int numbits, int fragment_index=0)
 int add_clincom:add_lincom(DIRFILE *dirfile, const char *field_code,
     int n_fields, const char **in_fields, gdp_complex_in *cm,
     gdp_complex_in *cb, int fragment_index=0)
@@ -17,7 +17,7 @@ int add_multiply(DIRFILE *dirfile, const char *field_code,
 int add_phase(DIRFILE *dirfile, const char *field_code, const char *in_field,
     gd_shift_t shift, int fragment_index=0)
 int add_sbit(DIRFILE *dirfile, const char *field_code, const char *in_field,
-    gd_bit_t bitnum, gd_bit_t numbits, int fragment_index=0)
+    int bitnum, int numbits, int fragment_index=0)
 int add_string(DIRFILE *dirfile, const char *field_code, const char *value,
     int fragment_index=0)
 int alter_bit(DIRFILE *dirfile, const char *field_code,
@@ -46,7 +46,7 @@ int fragment_index(DIRFILE *dirfile, const char *field_code)
 const char *fragmentname(DIRFILE *dirfile, int index)
 int madd(DIRFILE *dirfile, gd_entry_t &entry, const char *parent)
 int madd_bit(DIRFILE *dirfile, const char *parent, const char *field_code,
-    const char *in_field, gd_bit_t bitnum, gd_bit_t numbits)
+    const char *in_field, int bitnum, int numbits)
 int madd_clincom:madd_lincom(DIRFILE *dirfile, const char *parent,
     const char *field_code, int n_fields, const char **in_fields,
     gdp_complex_in *cm, gdp_complex_in *cb)
@@ -64,7 +64,7 @@ int madd_multiply(DIRFILE *dirfile, const char *parent, const char *field_code,
 int madd_phase(DIRFILE *dirfile, const char *parent, const char *field_code,
     const char *in_field, gd_shift_t shift)
 int madd_sbit(DIRFILE *dirfile, const char *parent, const char *field_code,
-    const char *in_field, gd_bit_t bitnum, gd_bit_t numbits)
+    const char *in_field, int bitnum, int numbits)
 int madd_spec(DIRFILE *dirfile, const char *line, const char *parent)
 int madd_string(DIRFILE *dirfile, const char *parent, const char *field_code,
     const char *value)
@@ -76,12 +76,12 @@ int alter_protection(DIRFILE *dirfile, int protection_level, int fragment_index)
 int protection(DIRFILE *dirfile, int fragment_index)
 const char *raw_filename(DIRFILE *dirfile, const char *field_code)
 const char *reference(DIRFILE *dirfile, const char *field_code=NULL)
-gd_spf_t spf(DIRFILE *dirfile, const char *field_code)
+unsigned int spf(DIRFILE *dirfile, const char *field_code)
 size_t put_string(DIRFILE *dirfile, const char *field_code, const char *data)
 int validate(DIRFILE *dirfile, const char *field_code)
 int add(DIRFILE *dirfile, gd_entry_t &entry)
 int add_raw(DIRFILE *dirfile, const char *field_code, gd_type_t data_type,
-    gd_spf_t spf, int fragment_index=0)
+    unsigned int spf, int fragment_index=0)
 int add_spec(DIRFILE *dirfile, const char *line, int fragment_index=0)
 int alter_const(DIRFILE *dirfile, const char *field_code,
     gdpu_type_t const_type=GD_NULL);
@@ -145,15 +145,15 @@ int include_affix(DIRFILE *dirfile, const char *file, int fragment_index,
 int alter_affixes(DIRFILE *dirfile, int index, const char *prefix,
     const char *suffix)
 int add_mplex(DIRFILE *dirfile, const char *field_code, const char *in_field,
-    const char *count_field, gd_count_t count_val, gd_count_t count_max,
-    int fragment_index)
+    const char *count_field, int count_val, int count_max, int fragment_index)
 int alter_mplex(DIRFILE *dirfile, const char *field_code, const char *in_field,
-    const char *count_field, gd_count_t count_val, gd_count_t count_max)
+    const char *count_field, int count_val, int count_max)
 int madd_mplex(DIRFILE *dirfile, const char *parent, const char *field_code,
-    const char *in_field, const char *count_field, gd_count_t count_val,
-    gd_count_t count_max)
+    const char *in_field, const char *count_field, int count_val,
+    int count_max)
 int raw_close(DIRFILE *dirfile, const char *field_code)
 int desync(DIRFILE *dirfile, unsigned int flags)
 unsigned long int flags(DIRFILE *dirfile, unsigned long int set,
     unsigned long int reset)
 int verbose_prefix(DIRFILE *dirfile, const char *prefix)
+int mplex_lookback(DIRFILE *dirfile, int lookback)

@@ -1,4 +1,4 @@
-/* Copyright (C) 2009-2011 D. V. Wiebe
+/* Copyright (C) 2009-2012 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -212,7 +212,7 @@ double gd_framenum_subset64(DIRFILE* D, const char* field_code_in,
   gd_entry_t* entry;
   char* field_code;
   int repr = GD_REPR_NONE;
-  gd_spf_t spf;
+  unsigned int spf;
 
   dtrace("%p, \"%s\", %g, %lli, %lli", D, field_code_in, value,
       (long long)field_start, (long long)field_end);
@@ -235,7 +235,7 @@ double gd_framenum_subset64(DIRFILE* D, const char* field_code_in,
 
   if (_GD_NativeType(D, entry, repr) & GD_COMPLEX)
     _GD_SetError(D, GD_E_DOMAIN, GD_E_DOMAIN_COMPLEX, NULL, 0, NULL);
-  else if (entry->field_type & GD_SCALAR_ENTRY)
+  else if (entry->field_type & GD_SCALAR_ENTRY_BIT)
     _GD_SetError(D, GD_E_DIMENSION, GD_E_DIM_CALLER, NULL, 0, field_code);
 
   if (field_code != field_code_in)

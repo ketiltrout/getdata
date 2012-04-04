@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 D. V. Wiebe
+/* Copyright (C) 2008-2012 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -372,14 +372,27 @@ int _GD_FiniRawIO(DIRFILE *D, const gd_entry_t *E, int fragment, int flags)
       if (E->e->u.raw.file[0].idata >= 0) {
         /* copy the rest of the input to the output */
         char buffer[GD_BUFFER_SIZE];
-        int n_read, n_wrote;
+        int n_read, n_wrote, n_to_write;
 
         do {
-          n_read = (*_gd_ef[E->e->u.raw.file[0].subenc].read)(E->e->u.raw.file,
-              buffer, E->EN(raw,data_type), GD_BUFFER_SIZE);
-          if (n_read > 0)
+          n_to_write = n_read = (*_gd_ef[E->e->u.raw.file[0].subenc].read)(
+              E->e->u.raw.file, buffer, E->EN(raw,data_type), GD_BUFFER_SIZE);
+          if (n_read < 0) {
+            _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno,
+                NULL);
+            dreturn("%i", -1);
+            return -1;
+          } else while (n_to_write > 0) {
             n_wrote = (*_gd_ef[E->e->u.raw.file[0].subenc].write)(
-                E->e->u.raw.file + 1, buffer, E->EN(raw,data_type), n_read);
+                E->e->u.raw.file + 1, buffer, E->EN(raw,data_type), n_to_write);
+            if (n_wrote < 0) {
+              _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno,
+                  NULL);
+              dreturn("%i", -1);
+              return -1;
+            }
+            n_to_write -= n_wrote;
+          }
         } while (n_read == GD_BUFFER_SIZE);
       }
 

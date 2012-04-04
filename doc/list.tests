@@ -248,3 +248,7 @@
 234 F9CIpP gd_desync
 235 F9CIpP gd_flags
 236 F9CIpP gd_verbose_prefix
+237 F9CIpP gd_nentries
+238 F9.... fgd_entry_name_max
+239 F9CIpP gd_entry_list
+240 F9CIpP gd_mplex_lookback

@@ -35,7 +35,7 @@ int main(void)
     "in2 RAW UINT8 13\n"
     "div RECIP in2 3.\n";
   int fd, r = 0;
-  gd_spf_t spf;
+  unsigned int spf;
   DIRFILE *D;
 
   rmdirfile();

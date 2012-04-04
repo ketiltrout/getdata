@@ -170,13 +170,13 @@ static int _GDF_FString(char* dest, int *dlen, const char* src)
 
   dtrace("%p, %i, \"%s\"", dest, *dlen, src);
 
-  slen = strlen(src);
-
   if (src == NULL) {
     *dlen = 0;
     dreturn("%i", -1);
     return -1;
   }
+
+  slen = strlen(src);
 
   if (slen <= *dlen) {
     for (i = 0; i < slen; ++i)
@@ -301,7 +301,7 @@ void F77_FUNC(gdfdnx, GDFDNX) (int* max, const int* dirfile)
   D = _GDF_GetDirfile(*dirfile);
   nfields = gd_nfields(D);
 
-  if (!D->error) {
+  if (!gd_error(D)) {
     fl = gd_field_list(D);
 
     for (i = 0; i < nfields; ++i)
@@ -328,7 +328,7 @@ void F77_FUNC(gdmfnx, GDMFNX) (int* max, const int* dirfile, const char* parent,
   _GDF_CString(&pa, parent, *parent_l);
   nfields = gd_nmfields(D, pa);
 
-  if (!D->error) {
+  if (!gd_error(D)) {
     fl = gd_mfield_list(D, pa);
 
     for (i = 0; i < nfields; ++i)
@@ -355,7 +355,7 @@ void F77_FUNC(gdfldn, GDFLDN) (char* name, int* name_l, const int* dirfile,
   D = _GDF_GetDirfile(*dirfile);
   nfields = gd_nfields(D);
 
-  if (!D->error && *field_num > 0 && *field_num <= (int)nfields) {
+  if (!gd_error(D) && *field_num > 0 && *field_num <= (int)nfields) {
     fl = gd_field_list(D);
     _GDF_FString(name, name_l, fl[*field_num - 1]);
   } else
@@ -379,7 +379,7 @@ void F77_FUNC(gdmfdn, GDMFDN) (char* name, int* name_l, const int* dirfile,
   _GDF_CString(&pa, parent, *parent_l);
   nfields = gd_nmfields(D, pa);
 
-  if (!D->error && *field_num > 0 && *field_num <= (int)nfields) {
+  if (!gd_error(D) && *field_num > 0 && *field_num <= (int)nfields) {
     fl = gd_mfield_list(D, pa);
     _GDF_FString(name, name_l, fl[*field_num - 1]);
   } else
@@ -1069,7 +1069,7 @@ void F77_FUNC(gdadrw, GDADRW) (const int* dirfile, const char* field_code,
       *data_type, *spf, *fragment_index);
 
   gd_add_raw(_GDF_GetDirfile(*dirfile), _GDF_CString(&out, field_code,
-        *field_code_l), (gd_type_t)(*data_type), (gd_spf_t)*spf,
+        *field_code_l), (gd_type_t)(*data_type), (unsigned int)*spf,
       *fragment_index);
   free(out);
   dreturnvoid();
@@ -1281,7 +1281,7 @@ void F77_FUNC(gdadbt, GDADBT) (const int* dirfile, const char* field_code,
 
   gd_add_bit(_GDF_GetDirfile(*dirfile), _GDF_CString(&fc, field_code,
         *field_code_l), _GDF_CString(&in, in_field, *in_field_l),
-      (gd_bit_t)*bitnum, (gd_bit_t)*numbits, *fragment_index);
+      *bitnum, *numbits, *fragment_index);
   free(fc);
   free(in);
   dreturnvoid();
@@ -1299,7 +1299,7 @@ void F77_FUNC(gdadsb, GDADSB) (const int* dirfile, const char* field_code,
 
   gd_add_sbit(_GDF_GetDirfile(*dirfile), _GDF_CString(&fc, field_code,
         *field_code_l), _GDF_CString(&in, in_field, *in_field_l),
-      (gd_bit_t)*bitnum, (gd_bit_t)*numbits, *fragment_index);
+      *bitnum, *numbits, *fragment_index);
   free(fc);
   free(in);
   dreturnvoid();
@@ -1493,7 +1493,7 @@ void F77_FUNC(gdfdnt, GDFDNT) (char* name, int* name_l, const int* dirfile,
   D = _GDF_GetDirfile(*dirfile);
   nfields = gd_nfields_by_type(D, (gd_entype_t)*type);
 
-  if (!D->error && *field_num > 0 && *field_num <= (int)nfields) {
+  if (!gd_error(D) && *field_num > 0 && *field_num <= (int)nfields) {
     fl = gd_field_list_by_type(D, (gd_entype_t)*type);
     _GDF_FString(name, name_l, fl[*field_num - 1]);
   } else
@@ -1515,7 +1515,7 @@ void F77_FUNC(gdvecn, GDVECN) (char* name, int* name_l, const int* dirfile,
   D = _GDF_GetDirfile(*dirfile);
   nfields = gd_nvectors(D);
 
-  if (!D->error && *field_num > 0 && *field_num <= (int)nfields) {
+  if (!gd_error(D) && *field_num > 0 && *field_num <= (int)nfields) {
     fl = gd_vector_list(D);
     _GDF_FString(name, name_l, fl[*field_num - 1]);
   } else
@@ -1541,7 +1541,7 @@ void F77_FUNC(gdmfdt, GDMFDT) (char* name, int* name_l, const int* dirfile,
   _GDF_CString(&pa, parent, *parent_l);
 
   nfields = gd_nmfields_by_type(D, pa, (gd_entype_t)*type);
-  if (!D->error && *field_num > 0 && *field_num <= (int)nfields) {
+  if (!gd_error(D) && *field_num > 0 && *field_num <= (int)nfields) {
     fl = gd_mfield_list_by_type(D, pa, (gd_entype_t)*type);
     _GDF_FString(name, name_l, fl[*field_num - 1]);
   } else
@@ -1566,7 +1566,7 @@ void F77_FUNC(gdmven, GDMVEN) (char* name, int* name_l, const int* dirfile,
   _GDF_CString(&pa, parent, *parent_l);
 
   nfields = gd_nmvectors(D, pa);
-  if (!D->error && *field_num > 0 && *field_num <= (int)nfields) {
+  if (!gd_error(D) && *field_num > 0 && *field_num <= (int)nfields) {
     fl = gd_mvector_list(D, pa);
     _GDF_FString(name, name_l, fl[*field_num - 1]);
   } else
@@ -1797,8 +1797,7 @@ void F77_FUNC(gdmdbt, GDMDBT) (const int* dirfile, const char* parent,
 
   gd_madd_bit(_GDF_GetDirfile(*dirfile), _GDF_CString(&pa, parent,
         *parent_l), _GDF_CString(&fc, field_code, *field_code_l),
-      _GDF_CString(&in, in_field, *in_field_l), (gd_bit_t)*bitnum,
-      (gd_bit_t)*numbits);
+      _GDF_CString(&in, in_field, *in_field_l), *bitnum, *numbits);
   free(pa);
   free(fc);
   free(in);
@@ -1818,8 +1817,7 @@ void F77_FUNC(gdmdsb, GDMDSB) (const int* dirfile, const char* parent,
 
   gd_madd_sbit(_GDF_GetDirfile(*dirfile), _GDF_CString(&pa, parent,
         *parent_l), _GDF_CString(&fc, field_code, *field_code_l),
-      _GDF_CString(&in, in_field, *in_field_l), (gd_bit_t)*bitnum,
-      (gd_bit_t)*numbits);
+      _GDF_CString(&in, in_field, *in_field_l), *bitnum, *numbits);
   free(pa);
   free(fc);
   free(in);
@@ -2374,8 +2372,8 @@ void F77_FUNC(gdalbt, GDALBT) (const int* dirfile, const char* field_code,
       in_field, *in_field_l, *bitnum, *numbits);
 
   gd_alter_bit(_GDF_GetDirfile(*dirfile), _GDF_CString(&fc, field_code,
-        *field_code_l), _GDF_CString(&in, in_field, *in_field_l),
-      (gd_bit_t)*bitnum, (gd_bit_t)*numbits);
+        *field_code_l), _GDF_CString(&in, in_field, *in_field_l), *bitnum,
+      *numbits);
 
   free(fc);
   free(in);
@@ -2393,8 +2391,8 @@ void F77_FUNC(gdalsb, GDALSB) (const int* dirfile, const char* field_code,
       in_field, *in_field_l, *bitnum, *numbits);
 
   gd_alter_sbit(_GDF_GetDirfile(*dirfile), _GDF_CString(&fc, field_code,
-        *field_code_l), _GDF_CString(&in, in_field, *in_field_l),
-      (gd_bit_t)*bitnum, (gd_bit_t)*numbits);
+        *field_code_l), _GDF_CString(&in, in_field, *in_field_l), *bitnum,
+      *numbits);
 
   free(fc);
   free(in);
@@ -2836,7 +2834,7 @@ void F77_FUNC(gdalrw, GDALRW) (const int* dirfile, const char* field_code,
       *data_type, *spf, *recode);
 
   gd_alter_raw(_GDF_GetDirfile(*dirfile), _GDF_CString(&out, field_code,
-        *field_code_l), (gd_type_t)(*data_type), (gd_spf_t)*spf, *recode);
+        *field_code_l), (gd_type_t)(*data_type), (unsigned int)*spf, *recode);
   free(out);
   dreturnvoid();
 }
@@ -3241,9 +3239,9 @@ void F77_FUNC(gdcons, GDCONS) (void *value, const int *dirfile,
   DIRFILE *D = _GDF_GetDirfile(*dirfile);
   unsigned int nfields = gd_nfields_by_type(D, GD_CONST_ENTRY);
 
-  if (!D->error && (*field_num > 0) && (*field_num <= (int)nfields)) {
+  if (!gd_error(D) && (*field_num > 0) && (*field_num <= (int)nfields)) {
     v = gd_constants(D, (gd_type_t)*return_type);
-    if (!D->error)
+    if (!gd_error(D))
       memcpy(value, (char*)v + (*field_num - 1) * GD_SIZE(*return_type),
           GD_SIZE(*return_type));
   }
@@ -3267,9 +3265,9 @@ void F77_FUNC(gdmcos, GDMCOS) (void *value, const int *dirfile,
   _GDF_CString(&pa, parent, *parent_l);
   nfields = gd_nmfields_by_type(D, pa, GD_CONST_ENTRY);
 
-  if (!D->error && (*field_num > 0) && (*field_num <= (int)nfields)) {
+  if (!gd_error(D) && (*field_num > 0) && (*field_num <= (int)nfields)) {
     v = gd_mconstants(D, pa, (gd_type_t)*return_type);
-    if (!D->error)
+    if (!gd_error(D))
       memcpy(value, (char*)v + (*field_num - 1) * GD_SIZE(*return_type),
           GD_SIZE(*return_type));
   }
@@ -3289,9 +3287,9 @@ void F77_FUNC(gdstrs, GDSTRS) (char *value, int *value_l, const int *dirfile,
   DIRFILE *D = _GDF_GetDirfile(*dirfile);
   unsigned int nfields = gd_nfields_by_type(D, GD_STRING_ENTRY);
 
-  if (!D->error && (*field_num > 0) && (*field_num <= (int)nfields)) {
+  if (!gd_error(D) && (*field_num > 0) && (*field_num <= (int)nfields)) {
     v = gd_strings(D);
-    _GDF_FString(value, value_l, D->error ? "" : v[*field_num - 1]);
+    _GDF_FString(value, value_l, gd_error(D) ? "" : v[*field_num - 1]);
   } else
     *value_l = 0;
 
@@ -3314,9 +3312,9 @@ void F77_FUNC(gdmsts, GDMSTS) (void *value, int *value_l, const int *dirfile,
   _GDF_CString(&pa, parent, *parent_l);
   nfields = gd_nmfields_by_type(D, pa, GD_STRING_ENTRY);
 
-  if (!D->error && (*field_num > 0) && (*field_num <= (int)nfields)) {
+  if (!gd_error(D) && (*field_num > 0) && (*field_num <= (int)nfields)) {
     v = gd_mstrings(D, pa);
-    _GDF_FString(value, value_l, D->error ? "" : v[*field_num - 1]);
+    _GDF_FString(value, value_l, gd_error(D) ? "" : v[*field_num - 1]);
   } else
     *value_l = 0;
 
@@ -3334,7 +3332,7 @@ void F77_FUNC(gdstrx, GDSTRX) (int *max, const int *dirfile)
   DIRFILE *D = _GDF_GetDirfile(*dirfile);
   unsigned int i, nfields = gd_nfields_by_type(D, GD_STRING_ENTRY);
 
-  if (!D->error) {
+  if (!gd_error(D)) {
     v = gd_strings(D);
 
     for (i = 0; i < nfields; ++i)
@@ -3363,7 +3361,7 @@ void F77_FUNC(gdmstx, GDMSTX) (int *max, const int *dirfile, const char *parent,
   _GDF_CString(&pa, parent, *parent_l);
   nfields = gd_nmfields_by_type(D, pa, GD_STRING_ENTRY);
 
-  if (!D->error) {
+  if (!gd_error(D)) {
     v = gd_mstrings(D, pa);
 
     for (i = 0; i < nfields; ++i)
@@ -3537,7 +3535,7 @@ void F77_FUNC(gdalsx, GDALSX) (int* max, const int* dirfile,
 
   nalias = gd_naliases(D, fc);
 
-  if (!D->error) {
+  if (!gd_error(D)) {
     al = gd_aliases(D, fc);
 
     for (i = 0; i < nalias; ++i)
@@ -3582,7 +3580,7 @@ void F77_FUNC(gdalss, GDALSS) (char *alias, int *alias_l, const int *dirfile,
 
   nalias = gd_naliases(D, fc);
 
-  if (!D->error && *num > 0 && *num <= (int)nalias) {
+  if (!gd_error(D) && *num > 0 && *num <= (int)nalias) {
     al = gd_aliases(D, fc);
     _GDF_FString(alias, alias_l, al[*num - 1]);
   } else 
@@ -3845,10 +3843,10 @@ void F77_FUNC(gdtoke, GDTOKE) (char *toke, int *toke_l, const int *dirfile,
   D = _GDF_GetDirfile(*dirfile);
   _GDF_CString(&st, string, *string_l);
 
-  token = gd_tokenise(D, st);
+  token = gd_strtok(D, st);
   for (i = 1; i < *n; ++i) {
     free(token);
-    token = gd_tokenise(D, NULL);
+    token = gd_strtok(D, NULL);
   }
   free(st);
 
@@ -3893,4 +3891,91 @@ void F77_FUNC(gdvbpx, GDVBPX) (const int *dirfile, const char *prefix,
   free(px);
 
   dreturnvoid();
+}
+
+/* gd_mplex_lookback wrapper */
+void F77_FUNC(gdmxlb, GDMXLB) (const int *dirfile, const int *lookback)
+{
+  dtrace("%i, %i", *dirfile, *lookback);
+
+  gd_mplex_lookback(_GDF_GetDirfile(*dirfile), *lookback);
+
+  dreturnvoid();
+}
+
+/* gd_nentries wrapper */
+void F77_FUNC(gdnent, GDNENT) (int *nentries, const int *dirfile,
+    const char *parent, const int *parent_l, const int *type, const int *flags)
+{
+  char *pa;
+
+  dtrace("%p, %i, %p, %i, 0x%X, 0x%X", nentries, *dirfile, parent, *parent_l,
+      *type, *flags);
+
+  *nentries = gd_nentries(_GDF_GetDirfile(*dirfile), _GDF_CString(&pa, parent,
+        *parent_l), (unsigned int)*type, (unsigned int)*flags);
+
+  free(pa);
+  dreturn("%i", *nentries);
+}
+
+/* Return the maximum field name length */
+void F77_FUNC(gdentx, GDENTX) (int* max, const int* dirfile, const char *parent,
+    const int *parent_l, const int *type, const int *flags)
+{
+  const char **el;
+  char *pa;
+  size_t len = 0;
+  DIRFILE* D;
+  unsigned int i, nentries;
+  const unsigned int utype = (unsigned int)*type;
+  const unsigned int uflags = (unsigned int)*flags;
+
+  dtrace("%p, %i, %p, %i, 0x%X, 0x%X", max, *dirfile, parent, *parent_l, utype,
+      uflags);
+
+  D = _GDF_GetDirfile(*dirfile);
+  _GDF_CString(&pa, parent, *parent_l);
+  nentries = gd_nentries(D, pa, utype, uflags);
+
+  if (!gd_error(D)) {
+    el = gd_entry_list(D, pa, utype, uflags);
+
+    for (i = 0; i < nentries; ++i)
+      if (strlen(el[i]) > len)
+        len = strlen(el[i]);
+  }
+
+  *max = len;
+  free(pa);
+  dreturn("%i", *max);
+}
+
+/* gd_entry_list wrapper -- this only returns one entry name */
+void F77_FUNC(gdentn, GDENTN) (char *name, int *name_l, const int *dirfile,
+    const char *parent, const int *parent_l, const int *type, const int *flags,
+    const int *field_num)
+{
+  const char** el;
+  char *pa;
+  DIRFILE* D;
+  unsigned int nentries;
+  const unsigned int utype = (unsigned int)*type;
+  const unsigned int uflags = (unsigned int)*flags;
+
+  dtrace("%p, %p, %i, %p, %i, 0x%X, 0x%X, %i", name, name_l, *dirfile, parent,
+      *parent_l, utype, uflags, *field_num);
+
+  D = _GDF_GetDirfile(*dirfile);
+  _GDF_CString(&pa, parent, *parent_l);
+  nentries = gd_nentries(D, pa, utype, uflags);
+
+  if (!gd_error(D) && *field_num > 0 && *field_num <= (int)nentries) {
+    el = gd_entry_list(D, pa, utype, uflags);
+    _GDF_FString(name, name_l, el[*field_num - 1]);
+  } else
+    *name_l = 0;
+
+  free(pa);
+  dreturn("%i", *name_l);
 }

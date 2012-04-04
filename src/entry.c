@@ -112,11 +112,9 @@ void _GD_FreeE(DIRFILE *restrict D, gd_entry_t *restrict entry, int priv)
 
   if (priv) {
     free(entry->e->alias_list);
-    free(entry->e->field_list);
-    free(entry->e->vector_list);
+    for (i = 0; i < GD_N_ENTRY_LISTS; ++i)
+      free(entry->e->entry_list[i]);
     free(entry->e->string_value_list);
-    for (i = 0; i < GD_N_ENTYPES; ++i)
-      free(entry->e->type_list[i]);
     free(entry->e->const_value_list);
     if (entry->e->carray_value_list)
       for (i = 0; entry->e->carray_value_list[i].n != 0; ++i)
@@ -256,8 +254,8 @@ int _GD_CalculateEntry(DIRFILE *restrict D, gd_entry_t *restrict E, int err)
       break;
     case GD_BIT_ENTRY:
     case GD_SBIT_ENTRY:
-      _GD_GetScalar(D, E, 0, GD_INT16, &E->EN(bit,bitnum), err);
-      _GD_GetScalar(D, E, 1, GD_INT16, &E->EN(bit,numbits), err);
+      _GD_GetScalar(D, E, 0, GD_INT_TYPE, &E->EN(bit,bitnum), err);
+      _GD_GetScalar(D, E, 1, GD_INT_TYPE, &E->EN(bit,numbits), err);
       break;
     case GD_PHASE_ENTRY:
       _GD_GetScalar(D, E, 0, GD_INT64, &E->EN(phase,shift), err);
@@ -278,8 +276,8 @@ int _GD_CalculateEntry(DIRFILE *restrict D, gd_entry_t *restrict E, int err)
       }
       break;
     case GD_MPLEX_ENTRY:
-      _GD_GetScalar(D, E, 0, GD_UINT16, &E->EN(mplex,count_val), err);
-      _GD_GetScalar(D, E, 1, GD_UINT16, &E->EN(mplex,count_max), err);
+      _GD_GetScalar(D, E, 0, GD_INT_TYPE, &E->EN(mplex,count_val), err);
+      _GD_GetScalar(D, E, 1, GD_INT_TYPE, &E->EN(mplex,count_max), err);
       break;
     case GD_NO_ENTRY:
     case GD_LINTERP_ENTRY:
@@ -681,16 +679,6 @@ int gd_hide(DIRFILE *D, const char *field_code) gd_nothrow
   if (!E->hidden) {
     E->hidden = 1;
     D->fragment[E->fragment_index].modified = 1;
-    
-    /* update counts */
-    if (E->e->n_meta == -1) {
-      gd_entry_t *P = (gd_entry_t*)E->e->p.parent;
-      P->e->n_hidden++;
-      P->e->n[_GD_EntryIndex(E->field_type)]--;
-    } else {
-      D->n_hidden++;
-      D->n[_GD_EntryIndex(E->field_type)]--;
-    }
   }
 
   dreturn("%i", 0);
@@ -759,16 +747,6 @@ int gd_unhide(DIRFILE *D, const char *field_code) gd_nothrow
   if (E->hidden) {
     E->hidden = 0;
     D->fragment[E->fragment_index].modified = 1;
-    
-    /* update counts */
-    if (E->e->n_meta == -1) {
-      gd_entry_t *P = (gd_entry_t*)E->e->p.parent;
-      P->e->n_hidden--;
-      P->e->n[_GD_EntryIndex(E->field_type)]++;
-    } else {
-      D->n_hidden--;
-      D->n[_GD_EntryIndex(E->field_type)]++;
-    }
   }
 
   dreturn("%i", 0);

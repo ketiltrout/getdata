@@ -22,7 +22,7 @@
 use GetData;
 use Math::Complex;
 use strict;
-use Test::More tests => 1272;
+use Test::More tests => 1304;
 
 my $ne = 0;
 my ($s, @a, %h);
@@ -1645,7 +1645,7 @@ CheckSArray2(230, 4, $h{"in_fields"}, 'in2', 'in3');
 CheckNum2(230, 5, $h{"count_max"}, 12);
 
 # 231: gd_alter_mplex check
-$s = $_->alter_mplex('new21', 'in3', 'in4', $GetData::COUNT_MAX, 7);
+$s = $_->alter_mplex('new21', 'in3', 'in4', -1, 7);
 CheckOK2(231, 1);
 
 %h = $_->entry('new21');
@@ -1656,8 +1656,8 @@ CheckNum2(231, 3, $h{"count_val"}, 5);
 CheckSArray2(231, 4, $h{"in_fields"}, 'in3', 'in4');
 CheckNum2(231, 5, $h{"count_max"}, 7);
 
-# 232: gd_tokenise check
-@a = $_->tokenise('"test1 test2" test3\ test4 test5');
+# 232: gd_strtok check
+@a = $_->strtok('"test1 test2" test3\ test4 test5');
 CheckOK(232);
 CheckSArray(232, \@a, "test1 test2", "test3 test4", "test5");
 
@@ -1670,16 +1670,38 @@ $s = $_->desync(0);
 CheckOK(234);
 CheckNum(234, $s, 0);
 
-#235: gd_flags
+# 235: gd_flags
 $s = $_->flags($GetData::PRETTY_PRINT, 0);
 CheckOK(235);
 CheckNum(235, $s, $GetData::PRETTY_PRINT);
 
-#236: gd_verbose_prefix
+# 236: gd_verbose_prefix
 $s = $_->verbose_prefix("big_test: ");
 CheckOK(236);
 CheckNum(236, $s, 0);
 
+# 237: gd_nentries
+$s = $_->entry_list("data", $GetData::SCALAR_ENTRIES,
+  $GetData::ENTRIES_HIDDEN | $GetData::ENTRIES_NOALIAS);
+CheckOK2(237, 1);
+CheckNum2(237, 1, $s, 5);
+$s = $_->entry_list(undef, $GetData::VECTOR_ENTRIES,
+  $GetData::ENTRIES_HIDDEN | $GetData::ENTRIES_NOALIAS);
+CheckOK2(237, 2);
+CheckNum2(237, 2, $s, 24);
+
+# 239: gd_entry_list
+@a = $_->entry_list(undef, $GetData::VECTOR_ENTRIES,
+  $GetData::ENTRIES_HIDDEN | $GetData::ENTRIES_NOALIAS);
+CheckOK(239);
+CheckSArray(239, \@a, qw(INDEX bit data div lincom linterp mplex mult new1 new13
+new14 new16 new18 new21 new3 new4 new6 new7 new8 phase polynom recip sbit
+window));
+
+# 240: gd_mplex_lookback
+$s = $_->mplex_lookback($GetData::LOOKBACK_ALL);
+CheckOK(240);
+CheckNum(240, $s, 0);
 
 
 

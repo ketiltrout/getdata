@@ -1,4 +1,4 @@
-/* Copyright (C) 2009-2011 D. V. Wiebe
+/* Copyright (C) 2009-2012 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -51,7 +51,7 @@ static const char *gdpy_exception_list[GD_N_ERROR_CODES] = {
   "Deletion",
   "BadArgument",
   "Callback",
-  NULL, /* unused */
+  "Exists",
   "UncleanDatabase",
   "Domain",
   "BadRepr",

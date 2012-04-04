@@ -173,10 +173,11 @@ static void _GD_DeReference(DIRFILE *restrict D, gd_entry_t *restrict E,
       break;
     case GD_BIT_ENTRY:
     case GD_SBIT_ENTRY:
-      if (_GD_DeReferenceOne(D, E, C, check, 0, GD_INT16, &E->EN(bit,bitnum)))
+      if (_GD_DeReferenceOne(D, E, C, check, 0, GD_INT_TYPE,
+            &E->EN(bit,bitnum)))
         break;
 
-      _GD_DeReferenceOne(D, E, C, check, 1, GD_INT16, &E->EN(bit,numbits));
+      _GD_DeReferenceOne(D, E, C, check, 1, GD_INT_TYPE, &E->EN(bit,numbits));
       break;
     case GD_PHASE_ENTRY:
       _GD_DeReferenceOne(D, E, C, check, 0, GD_INT64, &E->EN(phase,shift));
@@ -200,8 +201,10 @@ static void _GD_DeReference(DIRFILE *restrict D, gd_entry_t *restrict E,
       }
       break;
     case GD_MPLEX_ENTRY:
-      _GD_DeReferenceOne(D, E, C, check, 0, GD_UINT16, &E->EN(mplex,count_val));
-      _GD_DeReferenceOne(D, E, C, check, 1, GD_UINT16, &E->EN(mplex,count_max));
+      _GD_DeReferenceOne(D, E, C, check, 0, GD_INT_TYPE,
+          &E->EN(mplex,count_val));
+      _GD_DeReferenceOne(D, E, C, check, 1, GD_INT_TYPE,
+          &E->EN(mplex,count_max));
       break;
     case GD_NO_ENTRY:
     case GD_LINTERP_ENTRY:
@@ -440,12 +443,12 @@ static int _GD_Delete(DIRFILE *restrict D, gd_entry_t *restrict E,
 
       memmove(D->entry + first, D->entry + last + 1,
           sizeof(gd_entry_t*) * (D->n_entries - last - 1));
-      D->n_meta -= last - first + 1;
       D->n_entries -= last - first + 1;
     }
 
-    /* Decrement entry type count */
-    D->n[_GD_EntryIndex(E->field_type)]--;
+    /* Invalidate the field lists */
+    D->entry_list_validity = 0;
+    D->value_list_validity = 0;
   } else {
     /* If this is a metafield, update its parent's lists */
     struct _gd_private_entry *Pe = E->e->p.parent->e;
@@ -457,9 +460,12 @@ static int _GD_Delete(DIRFILE *restrict D, gd_entry_t *restrict E,
         break;
       }
 
-    /* Decrement entry type counts */
+    /* Decrement entry count */
     Pe->n_meta--;
-    Pe->n[_GD_EntryIndex(E->field_type)]--;
+
+    /* Invalidate the field lists */
+    Pe->entry_list_validity = 0;
+    Pe->value_list_validity = 0;
   }
 
   /* Remove the entry from the list -- we need not worry about the way we've
@@ -471,10 +477,6 @@ static int _GD_Delete(DIRFILE *restrict D, gd_entry_t *restrict E,
   memmove(D->entry + index, D->entry + index + 1,
       sizeof(gd_entry_t *) * (D->n_entries - index - 1));
   D->n_entries--;
-
-  /* Invalidate the field lists */
-  D->list_validity = 0;
-  D->type_list_validity = 0;
 
   dreturn("%i", 0);
   return 0;

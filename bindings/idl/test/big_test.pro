@@ -1334,12 +1334,12 @@ nume += check_simple2(231, 3, n.count_val, 2)
 nume += check_simple2(231, 4, n.in_fields, [ 'in3', 'in4' ])
 nume += check_simple2(231, 5, n.count_max, 7)
 
-; 232: gd_tokenise check
-str = gd_tokenise(d, STRING='"test1 test2" test3\ test4')
+; 232: gd_strtok check
+str = gd_strtok(d, STRING='"test1 test2" test3\ test4')
 nume += check_ok2(232, 1 ,d)
 nume += check_simple2(232, 2, str, "test1 test2")
 
-str = gd_tokenise(d)
+str = gd_strtok(d)
 nume += check_ok2(232, 3 ,d)
 nume += check_simple2(232, 4, str, "test3 test4")
 
@@ -1360,7 +1360,26 @@ nume += check_simple(235, n, !GD.PRETTY_PRINT)
 ; 236: gd_verbose_prefix
 gd_verbose_prefix, d, prefix="big_test"
 nume += check_ok(236, d)
+
+; 237: gd_nentries check
+n = gd_nentries(d, parent="data", /SCALARS, /HIDDEN, /NOALIAS)
+nume += check_ok2(237, 1, d)
+nume += check_simple2(237, 1, n, 5)
+n = gd_nentries(d, /VECTORS, /HIDDEN, /NOALIAS)
+nume += check_ok2(237, 2, d)
+nume += check_simple2(237, 2, n, 24)
  
+; 239: gd_entry_list check
+n = gd_entry_list(d, /VECTORS, /HIDDEN, /NOALIAS)
+nume += check_ok(239, d)
+nume += check_simple(239, n, ["INDEX", "bit", "data", "div", "lincom", $
+  "linterp", "mplex", "mult", "new1", "new13", "new14", "new16", "new18", $
+  "new2", "new21", "new4", "new6", "new7", "new8", "phase", "polynom", $
+  "recip", "sbit", "window"])
+
+; 239: gd_mplex_lookback check
+gd_mplex_lookback, d, /ALL
+nume += check_ok(240, d)
 
 
 

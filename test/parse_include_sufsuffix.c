@@ -31,7 +31,7 @@ int main(void)
   const char *format2_data = "data RAW UINT8 11\n";
   int fd, r = 0;
   DIRFILE *D;
-  gd_spf_t spf, spf1, spf2;
+  unsigned int spf, spf1, spf2;
 
   rmdirfile();
   mkdir(filedir, 0777);

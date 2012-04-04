@@ -28,6 +28,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <limits.h>
 #include <stdint.h>
 #include <inttypes.h>
 #include <getopt.h>
@@ -47,7 +48,7 @@ struct field
 {
   char *name;
   int type;
-  gd_spf_t spf;
+  unsigned int spf;
   union {
     double *dbl;
     int64_t *i64;
@@ -159,9 +160,9 @@ int main (int argc, char **argv)
   size_t nf = 0;
   off64_t ff = 0;
   size_t n_want;
-  gd_spf_t j;
-  gd_spf_t max_spf = 0;
-  gd_spf_t min_spf = UINT16_MAX;
+  unsigned int j;
+  unsigned int max_spf = 0;
+  unsigned int min_spf = INT_MAX;
   int c, i;
   int numfields = 0;
   struct field fields[BUF_LEN];
@@ -481,10 +482,10 @@ int main (int argc, char **argv)
           /*                 val= y0 +  diff  *     slope       */
           /* Note that if max_spfs isn't a multiple of all spfs then some of  */
           /* the data will only be approximated (except at frame boundaries). */
-          gd_spf_t prev_samp, next_samp, offset;
+          unsigned int prev_samp, next_samp, offset;
           double slope, diff, val;
 
-          prev_samp = (gd_spf_t)floor((double)j * (double)fields[i].spf /
+          prev_samp = (unsigned int)floor((double)j * (double)fields[i].spf /
               (double)max_spf);
           next_samp = prev_samp + 1;
           diff = ((double)prev_samp + (double)(j % (max_spf / fields[i].spf)) /

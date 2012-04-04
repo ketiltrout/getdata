@@ -1,6 +1,6 @@
 .\" gd_native_type.3.  The gd_native_type man page.
 .\"
-.\" Copyright (C) 2009, 2010, 2011 D. V. Wiebe
+.\" Copyright (C) 2009, 2010, 2011, 2012 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_native_type 3 "17 August 2011" "Version 0.8.0" "GETDATA"
+.TH gd_native_type 3 "17 August 2012" "Version 0.8.0" "GETDATA"
 .SH NAME
 gd_native_type \(em returns the native data type of a field in a dirfile
 .SH SYNOPSIS
@@ -40,48 +40,51 @@ argument must point to a valid DIRFILE object previously created by a call to
 
 The native data type of a field of a given entry type is calculated as:
 .TP
-.BR BIT \~or\~ INDEX \~Entry:
+.BR BIT " or " INDEX " Entry:"
 .BR GD_UINT64 ;
 .TP
-.BR CONST \~or\~ CARRAY \~Entry:
+.BR CONST " or " CARRAY " Entry:"
 the data type of the field;
 .TP
-.BR LINCOM \~or\~ POLYNOM \~Entry:
+.BR LINCOM " or " POLYNOM " Entry:"
 if any of the scalar parameters is complex valued, or if the native data type of
 any of the input fields is complex valued:
 .BR GD_COMPLEX128 ,
 otherwise:
 .BR GD_FLOAT64 ;
 .TP
-.BR LINTERP \~Entry:
+.BR LINTERP " Entry:"
 if the look-up table is complex valued:
 .BR GD_COMPLEX128 ,
 otherwise:
 .BR GD_FLOAT64 ;
 .TP
-.BR MULTIPLY \~or\~ DIVIDE \~Entry:
+.BR MPLEX " or " WINDOW " Entry:"
+the native data type of the data field;
+.TP
+.BR MULTIPLY " or " DIVIDE " Entry:"
 if either input field is complex valued:
 .BR GD_COMPLEX128 ,
 otherwise:
 .BR GD_FLOAT64 ;
 .BR 
 .TP
-.BR PHASE \~Entry:
+.BR PHASE " Entry:"
 the native data type of the input field;
 .TP
-.BR RAW \~Entry:
+.BR RAW " Entry:"
 the data type of the raw data on disk;
 .TP
-.BR RECIP \~Entry:
+.BR RECIP " Entry:"
 if the dividend or the native data type of the input field is complex valued:
 .BR GD_COMPLEX128 ,
 otherwise:
 .BR GD_FLOAT64 ;
 .TP
-.BR SBIT \~Entry:
+.BR SBIT " Entry:"
 .BR GD_INT64 ;
 .TP
-.BR STRING \~Entry:
+.BR STRING " Entry:"
 .BR GD_NULL .
 .PP
 Furthermore, if the supplied
@@ -98,8 +101,9 @@ the symbols:
 .IP
 .nh
 .ad l
-.BR GD_NULL ,\~ GD_UINT8 ,\~ GD_INT8 ,\~ GD_UINT16 ,\~ GD_INT16 ,\~ GD_UINT32 ,
-.BR GD_INT32 ,\~ GD_FLOAT32 ,\~ GD_FLOAT64 ,\~ GD_COMPLEX64 ,\~ GD_COMPLEX128 .
+.BR GD_NULL ", " GD_UINT8 ", " GD_INT8 ", " GD_UINT16 ", " GD_INT16 ,
+.BR GD_UINT32 ", " GD_INT32 ", " GD_FLOAT32 ", " GD_FLOAT64 ", " GD_COMPLEX64 ,
+.BR GD_COMPLEX128 .
 .ad n
 .hy
 .PP

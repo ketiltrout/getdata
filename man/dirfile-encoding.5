@@ -1,6 +1,6 @@
 .\" dirfile-encoding.5.  The dirfile-encoding man page.
 .\"
-.\" Copyright (C) 2008, 2009, 2010 D. V. Wiebe
+.\" Copyright (C) 2008, 2009, 2010, 2012 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH dirfile-encoding 5 "4 August 2010" "Standards Version 8" "DATA FORMATS"
+.TH dirfile-encoding 5 "1 April 2012" "Standards Version 9" "DATA FORMATS"
 .SH NAME
 dirfile-encoding \(em dirfile database encoding schemes
 .SH DESCRIPTION
@@ -28,7 +28,7 @@ form.  This is accomplished by
 .I encoding
 the binary file into the alternate form.  A common use-case for encoding a
 binary file is to compress it to save disk space.  Only data is modified by an
-encoding scheme.  Database metadata is unaffected.
+encoding scheme.  Database metadata is never encoded.
 
 Support for encoding schemes is optional.  An implementation need not support
 any particular encoding scheme, or may only support certain operations with it,
@@ -56,11 +56,11 @@ The GetData library provides an encoding framework which abstracts binary file
 I/O, allowing for generic support for a wide variety of encoding schemes.
 Functions which may make use of the encoding framework are:
 .IP
-.BR gd_add (3),\~ gd_add_raw (3),\~ gd_add_spec (3),
-.BR gd_alter_encoding (3),\~ gd_alter_endianness (3),
-.BR gd_alter_frameoffset (3),\~ gd_alter_entry (3),
-.BR gd_alter_raw (3),\~ gd_alter_spec (3),\~ gd_getdata (3),
-.BR gd_move (3),\~ gd_nframes (3),\~ gd_putdata (3),
+.BR gd_add "(3), " gd_add_raw "(3), " gd_add_spec (3),
+.BR gd_alter_encoding "(3), " gd_alter_endianness (3),
+.BR gd_alter_frameoffset "(3), " gd_alter_entry (3),
+.BR gd_alter_raw "(3), " gd_alter_spec "(3), " gd_getdata (3),
+.BR gd_move "(3), " gd_nframes "(3), " gd_putdata (3),
 and
 .BR gd_rename (3).
 .P
@@ -83,7 +83,7 @@ field has multiple data files with different, supported file extensions which
 could legitimately be associated with it, the encoding scheme discovered by
 GetData is not well defined.
 
-In addition to raw (unencoded) data, GetData supports five other encoding
+In addition to raw (unencoded) data, GetData supports eight other encoding
 schemes:
 .I text
 encoding,
@@ -92,28 +92,25 @@ encoding,
 .I gzip
 encoding,
 .I lzma
-encoding, and
+encoding, 
+.I sie
+(sample-index encoding),
 .I slim
+encoding,
+.I zzip
+encoding, and
+.I zzslim
 encoding, all discussed below.
-
-.SS Text Encoding
-
-The Text Encoding is unique among GetData encoding schemes in that it requires
-no external library.  As a result, all builds of the library contain full
-support for this encoding.  It is meant to serve as a reference encoding and
-example of the encoding framework for work on other encoding schemes.
-
-The Text Encoding replaces the binary data files with 7-bit ASCII files
-containing a decimal text encoding of the data, one sample per line.  All
-operations are supported by the Text Encoding.  The file extension of the
-Text Encoding is
-.BR .txt .
+.PP
+The text encoding and the sample-index encoding are implemented by GetData
+natively and need no external library.  As a result, they are always present in
+the library.
 
 .SS BZip2 Encoding
 
-The BZip2 Encoding compresses raw binary files using the Burrows-Wheeler block
-sorting text compression algorithm and Huffman coding, as implemented in the
-bzip2 format.  GetData's BZip2 Encoding scheme is implemented through the the
+The BZip2 Encoding reads compressed raw binary files using the Burrows-Wheeler
+block sorting text compression algorithm and Huffman coding, as implemented in
+the bzip2 format.  GetData's BZip2 Encoding scheme is implemented through the
 .I bzip2 compression library
 written by Julian Seward.  GetData's BZip2 Encoding framework currently lacks
 write capabilities; as a result the BZip2 Encoding does not support functions
@@ -133,24 +130,26 @@ The GZip Encoding compresses raw binary files using Lempel-Ziv coding (LZ77) as
 implemented in the gzip format.  GetData's GZip Encoding scheme is implemented
 through the the
 .I zlib compression library
-written by Jean-loup Gailly and Mark Adler.  GetData's GZip Encoding framework
-currently lacks write capabilities; as a result the GZip Encoding does not
-support functions which modify binary data.
+written by Jean-loup Gailly and Mark Adler. All operations are supported by the
+GZip Encoding.  Writes to GZip encoded data occur out-of-place; that is: writing
+GZip Encoded data requires making a copy of the whole binary data file.  A side
+effect of this is that concurrently reading a GZip Encoded Dirfile which is
+being written to usually doesn't work.
 
 To speed the operation of
 .BR get_nframes (3),
 the GZip Encoding takes the uncompressed size of the file the gzip footer, which
-contains the file's uncompressed size in bytes, modulo 2^32.  As a result, using
-a field with an (uncompressed) binary file size larger than 4\~GiB as the
+contains the file's uncompressed size in bytes, modulo 2**32.  As a result,
+using a field with an (uncompressed) binary file size larger than 4\~GiB as the
 reference field will result in the wrong number of frames being reported.
 The file extension of the GZip Encoding is
 .BR .gz .
 
 .SS LZMA Encoding
 
-The LZMA Encoding compresses raw binary files using the Lempel-Ziv Markov Chain
-Algorithm (LZMA) as implemented in the xz container format.  GetData's LZMA
-Encoding scheme is implemented through the
+The LZMA Encoding reads compressed raw binary files using the Lempel-Ziv Markov
+Chain Algorithm (LZMA) as implemented in the xz container format.  GetData's
+LZMA Encoding scheme is implemented through the
 .IR "lzma library" ,
 part of the
 .I XZ Utils
@@ -168,19 +167,92 @@ The file extension of the LZMA Encoding is
 or
 .BR .lzma .
 
+.SS Sample-Index Encoding
+
+The Sample-Index Encoding (SIE) compresses raw binary data by replacing runs of
+repeated data, similar to run-length encoding.  SIE files contain binary records
+consisting of a 64-bit sample number followed by a datum (the size and format of
+which is determined by the RAW field's data type in the format metadata).  The
+sample number indicates the last sample of the field which has the specified
+value.  The first sample with the value is the sample immediately following the
+data in the previous record, or sample number zero, for the first record.
+Sample numbers are relative to any
+.B /FRAMEOFFSET
+specified in the Dirfile metadata.  All operations are supported by the
+Sample-Index Encoding.  The file extension of the Sample-Index Encoding is
+.BR .sie .
+
 .SS Slim Encoding
 
-The Slim Encoding compresses raw binary files using the slimlib compression
-library written by Joseph Fowler.  The slimlib library was developed at
-Princeton University to compress dirfile-like data.  GetData's Slim Encoding
+The Slim Encoding reads compressed raw binary files using the slimlib
+compression library written by Joseph Fowler.  The slimlib library was developed
+at Princeton University to compress dirfile-like data.  GetData's Slim Encoding
 framework currently lacks write capabilities; as a result, the Slim Encoding
 does not support function which modify binary files.  The file extension of the
 Slim Encoding is
 .BR .slm .
 
+.SS Text Encoding
+
+The Text Encoding replaces the binary data files with 7-bit ASCII files
+containing a decimal text encoding of the data, one sample per line.  All
+operations are supported by the Text Encoding.  The file extension of the
+Text Encoding is
+.BR .txt .
+
+.SS ZZip Encoding
+
+The ZZip Encoding reads compressed raw binary files using the DEFLATE algorithm
+as implemented in the PKWARE ZIP archive container format.  GetData's ZZip
+Encoding scheme is implemented through the
+.I zzip library
+written by Tomi Ollila and Guido Draheim.  The ZZip Encoding framework
+currently lacks write capabilities; as a result the ZZip Encoding does not
+support functions which modify binary data.
+.PP
+Unlike most encoding schemes, the ZZip encoding merges all binary data files
+defined in a given fragment into a single ZIP archive.  The name of this
+archive is
+.I raw.zip
+by default, but a different name may be specified using the second parameter to
+the 
+.B /ENCODING
+directive.  For example,
+.IP
+.B /ENCODING zzip
+archive
+.PP
+indicates that the ZIP archive is called
+.IR archive.zip .
+The file extension of the ZZip Encoding is
+.BR .zip .
+
+.SS ZZSlim Encoding
+
+The ZZSlim Encoding is a convolution of the Slim Encoding and the ZZip Encoding.
+To create ZZSlim Encoded files, first the raw data are compressed using the
+slim library, and then these slim-compressed files are archived (and comrpessed
+again) into a ZIP archive.  As with the ZZip Encoding, the ZIP archive is
+.I raw.zip
+by default, but a different name may be specified with the
+.B /ENCODING
+directive.
+.PP
+Notably, since the archives have the same name as ZZip Encoded data, automatic
+encodind detection on ZZSlim Encoded data always fails: they are incorrectly
+identified as simply ZZip Encoded.  As a result, an
+.B /ENCODING
+directive in the format file or else a
+.B GD_ZZSLIM_ENCODED
+flag passed to
+.BR gd_open (3)
+is required to read ZZSlim encoded data.  The file extension of the ZZSlim
+Encoding is
+.BR zip .
+
 .SH AUTHOR
 
-This manual page was by D. V. Wiebe
+This manual page was written by D. V. Wiebe
 .nh
 <dvw@ketiltrout.net>.
 .hy 1
@@ -190,4 +262,5 @@ This manual page was by D. V. Wiebe
 .BR dirfile\-format (5),
 .BR bzip2 (1),
 .BR gzip (1),
+.BR xz (1),
 .BR zlib (3).

@@ -730,7 +730,7 @@ static gd_entry_t *_GD_ParseMplex(DIRFILE *restrict D,
   dtrace("%p, %p, %i, %p, \"%s\", %i, %i, %i, %i, %p", D, in_cols, n_cols,
       parent, format_file, line, me, standards, pedantic, is_dot);
 
-  if (n_cols < 6) {
+  if (n_cols < 5) {
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_TOK, format_file, line, NULL);
     dreturn("%p", NULL);
     return NULL;
@@ -771,12 +771,20 @@ static gd_entry_t *_GD_ParseMplex(DIRFILE *restrict D,
   E->scalar[0] = _GD_SetScalar(D, in_cols[4], &E->EN(mplex,count_val),
       GD_UINT16, format_file, line, E->scalar_ind, NULL, standards, pedantic);
 
-  E->scalar[1] = _GD_SetScalar(D, in_cols[5], &E->EN(mplex,count_max),
-      GD_UINT16, format_file, line, E->scalar_ind + 1, NULL, standards,
-      pedantic);
+  /* the count max, if present */
+  if (n_cols > 5) {
+    E->scalar[1] = _GD_SetScalar(D, in_cols[5], &E->EN(mplex,count_max),
+        GD_UINT16, format_file, line, E->scalar_ind + 1, NULL, standards,
+        pedantic);
+    if (E->EN(mplex,count_max) < 0)
+      _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_MPLEXVAL, format_file, line,
+        in_cols[5]);
+  }
 
   if (E->scalar[0] == NULL && E->scalar[1] == NULL &&
-      E->EN(mplex,count_val) >= E->EN(mplex,count_max))
+      (E->EN(mplex,count_val) < 0 ||
+       (E->EN(mplex,count_max) > 0 &&
+        E->EN(mplex,count_val) >= E->EN(mplex,count_max))))
   {
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_MPLEXVAL, format_file, line,
         in_cols[4]);
@@ -908,12 +916,13 @@ static gd_entry_t *_GD_ParseBit(DIRFILE *restrict D, int is_signed,
   }
 
   E->in_fields[0] = _GD_Strdup(D, in_cols[2]);
-  E->scalar[0] = _GD_SetScalar(D, in_cols[3], &E->EN(bit,bitnum), GD_INT16,
+  E->scalar[0] = _GD_SetScalar(D, in_cols[3], &E->EN(bit,bitnum), GD_INT_TYPE,
       format_file, line, E->scalar_ind, NULL, standards, pedantic);
 
   if (n_cols > 4)
-    E->scalar[1] = _GD_SetScalar(D, in_cols[4], &E->EN(bit,numbits), GD_INT16,
-        format_file, line, E->scalar_ind + 1, NULL, standards, pedantic);
+    E->scalar[1] = _GD_SetScalar(D, in_cols[4], &E->EN(bit,numbits),
+        GD_INT_TYPE, format_file, line, E->scalar_ind + 1, NULL, standards,
+        pedantic);
   else
     E->EN(bit,numbits) = 1;
 
@@ -1633,11 +1642,7 @@ gd_entry_t *_GD_ParseFieldSpec(DIRFILE *restrict D, int n_cols, char **in_cols,
       }
       P->e->p.meta_entry = (gd_entry_t **)ptr;
       P->e->p.meta_entry[P->e->n_meta++] = E;
-
-      D->n_meta++;
-      P->e->n[_GD_EntryIndex(E->field_type)]++;
-    } else
-      D->n[_GD_EntryIndex(E->field_type)]++;
+    }
 
     /* update the dot list if necessary */
     if (is_dot) {
@@ -1957,8 +1962,6 @@ static void _GD_ParseAlias(DIRFILE *restrict D, char **restrict name,
     /* there is no need to sort this list */
     P->e->p.meta_entry = new_meta_list;
     P->e->p.meta_entry[P->e->n_meta++] = E;
-
-    D->n_meta++;
   }
 
   /* sort */
@@ -2090,19 +2093,8 @@ static int _GD_ParseDirective(DIRFILE *restrict D, char **in_cols, int n_cols,
         else if (E->fragment_index != me)
           _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_LOCATION,
               D->fragment[me].cname, linenum, in_cols[1]);
-        else {
+        else
           E->hidden = 1;
-
-          /* update counts */
-          if (E->e->n_meta != -1) {
-            D->n[_GD_EntryIndex(E->field_type)]--;
-            D->n_hidden++;
-          } else {
-            gd_entry_t *P = (gd_entry_t*)E->e->p.parent;
-            P->e->n_hidden++;
-            P->e->n[_GD_EntryIndex(E->field_type)]--;
-          }
-        }
       }
       break;
     case 'I':
@@ -2391,7 +2383,7 @@ char *_GD_ParseFragment(FILE *restrict fp, DIRFILE *restrict D, int me,
 }
 
 /* public access to the GetData tokeniser */
-char *gd_tokenise(DIRFILE *D, const char *string) gd_nothrow
+char *gd_strtok(DIRFILE *D, const char *string) gd_nothrow
 {
   char *outstring, *in_col;
   int n_cols;
@@ -2416,7 +2408,7 @@ char *gd_tokenise(DIRFILE *D, const char *string) gd_nothrow
 
   /* tokenise! */
   n_cols = _GD_Tokenise(D, D->tok_pos, &outstring, &D->tok_pos, 1, &in_col,
-      "gd_tokenise()", 0, D->standards, D->flags & GD_PERMISSIVE);
+      "gd_strtok()", 0, D->standards, D->flags & GD_PERMISSIVE);
 
   if (D->error || n_cols < 1) {
     D->tok_pos = NULL;

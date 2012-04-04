@@ -47,10 +47,8 @@ static void _GD_FreeD(DIRFILE *D, int keep_dirfile)
   free(D->dot_list);
   free(D->error_string);
   free(D->error_file);
-  free(D->field_list);
-  free(D->vector_list);
-  for (j = 0; j < GD_N_ENTYPES; ++j)
-    free(D->type_list[j]);
+  for (j = 0; j < GD_N_ENTRY_LISTS; ++j)
+    free(D->entry_list[j]);
   free(D->string_value_list);
   free(D->const_value_list);
   if (D->carray_value_list)

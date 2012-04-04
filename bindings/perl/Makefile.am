@@ -55,7 +55,7 @@ MANIFEST: MANIFEST.in
 make_parameters.sed: ../make_parameters ../../src/getdata.h
 	  ../make_parameters P > $@
 
-../make_parameters: ../make_parameters.c
+../make_parameters: ../make_parameters.c ../../src/gd_config.h
 	  cd .. && ${MAKE} make_parameters
 
 GetData.pm: GetData.pm.in make_parameters.sed funclist.pl lib/GetData.xs \

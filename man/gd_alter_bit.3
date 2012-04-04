@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_alter_bit 3 "1 January 2012" "Version 0.8.0" "GETDATA"
+.TH gd_alter_bit 3 "1 April 2012" "Version 0.8.0" "GETDATA"
 .SH NAME
 gd_alter_bit, gd_alter_carray, gd_alter_clincom, gd_alter_const,
 gd_alter_cpolynom, gd_alter_crecip, gd_alter_divide, gd_alter_lincom,
@@ -26,7 +26,7 @@ gd_alter_raw, gd_alter_recip, gd_alter_sbit
 .nh
 .ad l
 .BI "int gd_alter_bit(DIRFILE *" dirfile ", const char *" field_code ,
-.BI "const char *" in_field ", gd_bit_t " bitnum ", gd_bit_t " numbits );
+.BI "const char *" in_field ", int " bitnum ", int " numbits );
 .HP
 .BI "int gd_alter_carray(DIRFILE *" dirfile ", const char *" field_code ,
 .BI "gd_type_t " const_type ", size_t " array_len );
@@ -54,6 +54,10 @@ gd_alter_raw, gd_alter_recip, gd_alter_sbit
 .BI "int gd_alter_linterp(DIRFILE *" dirfile ", const char *" field_code ,
 .BI "const char *" in_field ", const char *" table ", int " rename_table );
 .HP
+.BI "int gd_alter_mplex(DIRFILE *" dirfile ", const char *" field_name ,
+.BI "const char *" in_field ", const char *" count_field ,
+.BI "int " count_val ", int " count_max );
+.HP
 .BI "int gd_alter_multiply(DIRFILE *" dirfile ", const char *" field_code ,
 .BI "const char *" in_field1 ", const char *" in_field2 );
 .HP
@@ -64,13 +68,13 @@ gd_alter_raw, gd_alter_recip, gd_alter_sbit
 .BI "int " poly_ord ", const char *" in_field ", const double *" ca );
 .HP
 .BI "int gd_alter_raw(DIRFILE *" dirfile ", const char *" field_code ,
-.BI "gd_type_t " data_type ", gd_spf_t " spf ", int " recode );
+.BI "gd_type_t " data_type ", unsigned int " spf ", int " recode );
 .HP
 .BI "int gd_alter_recip(DIRFILE *" dirfile ", const char *" field_code ,
 .BI "const char *" in_field ", double " dividend );
 .HP
 .BI "int gd_alter_sbit(DIRFILE *" dirfile ", const char *" field_code ,
-.BI "const char *" in_field ", gd_bit_t " bitnum ", gd_bit_t " numbits );
+.BI "const char *" in_field ", int " bitnum ", int " numbits );
 .HP
 .BI "int gd_alter_window(DIRFILE *" dirfile ", const char *" field_code ,
 .BI "const char *" in_field ", const char *" check_field ,
@@ -93,12 +97,30 @@ types of other arguments may be obtained from the
 and
 .BR dirfile-format (5)
 manual pages.  The
-.B gd_bit_t
-type is a signed 16-bit integer type.  The
 .B gd_shift_t
 type is a signed 64-bit integer type.  The
-.B gd_spf_t
-type is an unsigned 16-bit integer type.
+.B gd_triplet_t
+type is defined as:
+.PP
+.in +4n
+.nf
+.fam C
+typedef union {
+  gd_int64_t i;
+  gd_uint64_t u;
+  double r;
+} gd_triplet_t;
+.fam
+.fi
+.in
+.PP
+Which element of this
+.B gd_triplet_t
+union to set depends on the operator selected for the
+.B WINDOW
+field.  See
+.BR gd_entry (3)
+for details.
 
 The
 .BR gd_alter_clincom ()
@@ -138,25 +160,26 @@ take an array of length
 .RI ( a " or " ca ).
 
 Some field parameters have special values which indicate no change should be
-made to the parameter.  Specifically, if any of the string parameters or 
-.IR m ,\~ b ", or " a
-.RI ( cm ,\~ cb ", or " ca )
-are NULL, the old values will be retained.  Similarly, if
-.IR spf ,\~ n_fields ,\~ numbits ,\~ cdividend ,
+made to the parameter.  These special values are:
+.TP
+.B NULL\fR:
+any of the string parameters, also 
+.IR m ", " b ", " a ", " cm ", " cb ", or " ca ;
+.TP
+.B 0\fR:
+.IR spf ", " n_fields ", " numbits ", " cdividend ", " dividend ,
 or
-.I dividend
-is zero, or if
-.IR bitnum
-is -1, or if
-.IR data_type ", or " const_type
-are equal to
-.BR GD_NULL , 
-or if
-.I windop
-is
-.BR GD_WINDOP_UNK ,
-these parameters will not be modified.
-
+.IR threshold ;
+.TP
+.B -1\fR:
+.IR bitnum ", " count_val ", or " count_max ;
+.TP
+.B GD_NULL\fR:
+.IR data_type " or " const_type ;
+.TP
+.B GD_WINDOP_UNK\fR:
+.IR windop .
+.PP
 All field parameters introduced with this interface must contain literal
 parameters.  Field parameters which are scalar fields cannot be introduced with
 these functions.  To do that, use
@@ -181,7 +204,7 @@ field will be re-encoded to reflect the new field parameters.
 See
 .B NOTES
 below for information on using
-.BR gd_alter_clincom (),\~ gd_alter_crecip (),
+.BR gd_alter_clincom "(), " gd_alter_crecip (),
 and 
 .BR gd_alter_cpolynom ()
 in the C89 GetData API.
@@ -253,7 +276,7 @@ a call to
 
 .SH NOTES
 The C89 GetData API provides different prototypes for
-.BR gd_alter_clincom (),\~ gd_alter_cpolynom (),
+.BR gd_alter_clincom "(), " gd_alter_cpolynom (),
 and
 .BR gd_alter_crecip ():
 .PP
@@ -277,7 +300,7 @@ and
 .ad n
 .PP
 In this case, the array pointers passed as
-.IR cm ,\~ cb
+.IR cm ", " cb
 or
 .IR ca
 should have twice as many (purely real) elements, consisting of alternating

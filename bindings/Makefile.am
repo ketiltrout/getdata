@@ -45,7 +45,7 @@ endif
 noinst_PROGRAMS=make_parameters
 
 make_parameters_SOURCES = make_parameters.c
-nodist_make_parameters_SOURCES = ../src/getdata.h
+nodist_make_parameters_SOURCES = ../src/getdata.h ../src/gd_config.h
 
 SUBDIRS = . ${F77_SUBDIR} ${CXX_SUBDIR} ${PY_SUBDIR} ${IDL_SUBDIR} \
 					${PERL_SUBDIR}

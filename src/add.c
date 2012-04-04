@@ -20,6 +20,23 @@
  */
 #include "internal.h"
 
+int _GD_InvalidEntype(gd_entype_t t) {
+  dtrace("0x%X", t);
+
+  if (t != GD_RAW_ENTRY && t != GD_LINCOM_ENTRY && t != GD_LINTERP_ENTRY &&
+      t != GD_BIT_ENTRY && t != GD_MULTIPLY_ENTRY && t != GD_PHASE_ENTRY &&
+      t != GD_CONST_ENTRY && t != GD_POLYNOM_ENTRY && t != GD_SBIT_ENTRY &&
+      t != GD_DIVIDE_ENTRY && t != GD_RECIP_ENTRY && t != GD_WINDOW_ENTRY &&
+      t != GD_MPLEX_ENTRY && t != GD_CARRAY_ENTRY && t != GD_STRING_ENTRY)
+  {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  dreturn("%i", 0);
+  return 0;
+}
+
 static gd_entry_t *_GD_FixName(DIRFILE *restrict D, char **restrict buffer,
     const char *name, int frag, int *restrict offset)
 {
@@ -159,22 +176,7 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
   }
 
   /* check for bad field type */
-  if (entry->field_type != GD_RAW_ENTRY &&
-      entry->field_type != GD_LINCOM_ENTRY &&
-      entry->field_type != GD_LINTERP_ENTRY &&
-      entry->field_type != GD_BIT_ENTRY &&
-      entry->field_type != GD_MULTIPLY_ENTRY &&
-      entry->field_type != GD_PHASE_ENTRY &&
-      entry->field_type != GD_CONST_ENTRY &&
-      entry->field_type != GD_POLYNOM_ENTRY &&
-      entry->field_type != GD_SBIT_ENTRY &&
-      entry->field_type != GD_DIVIDE_ENTRY &&
-      entry->field_type != GD_RECIP_ENTRY &&
-      entry->field_type != GD_WINDOW_ENTRY &&
-      entry->field_type != GD_MPLEX_ENTRY &&
-      entry->field_type != GD_CARRAY_ENTRY &&
-      entry->field_type != GD_STRING_ENTRY)
-  {
+  if (_GD_InvalidEntype(entry->field_type)) {
     _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_ENTRY_TYPE, NULL, entry->field_type,
         NULL);
     dreturn("%p", NULL);
@@ -367,12 +369,15 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
       E->in_fields[1] = _GD_Strdup(D, entry->in_fields[1]);
       E->e->u.mplex.type = GD_NULL;
 
-      if (entry->EN(mplex,count_max) < 1)
+      if (entry->EN(mplex,count_max) < 0)
         _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_ENTRY_CNTMAX, NULL,
             entry->EN(mplex,count_max), NULL);
-      else if (entry->EN(mplex,count_val) >= entry->EN(mplex,count_max))
+      else if (entry->EN(mplex,count_max) > 0 &&
+          entry->EN(mplex,count_val) >= entry->EN(mplex,count_max))
+      {
         _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_ENTRY_CNTVAL, NULL,
             entry->EN(mplex,count_val), NULL);
+      }
       copy_scalar[0] = copy_scalar[1] = 1;
       break;
     case GD_CONST_ENTRY:
@@ -506,15 +511,15 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
     P->e->p.meta_entry = (gd_entry_t **)ptr;
     P->e->p.meta_entry[P->e->n_meta] = E;
     P->e->n_meta++;
-    D->n_meta++;
 
+    P->e->value_list_validity = 0;
+    P->e->entry_list_validity = 0;
+  } else {
+    /* Invalidate the field lists */
+    D->value_list_validity = 0;
+    D->entry_list_validity = 0;
   }
 
-  /* increment entry type count */
-  if (P)
-    P->e->n[_GD_EntryIndex(E->field_type)]++;
-  else
-    D->n[_GD_EntryIndex(E->field_type)]++;
 
   if (E->field_type == GD_RAW_ENTRY) {
     if (new_ref != NULL) {
@@ -544,10 +549,6 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
   D->n_entries++;
   D->fragment[E->fragment_index].modified = 1;
   D->flags &= ~GD_HAVE_VERSION;
-
-  /* Invalidate the field lists */
-  D->list_validity = 0;
-  D->type_list_validity = 0;
 
   /* Update aliases */
   _GD_UpdateAliases(D);
@@ -712,7 +713,7 @@ int gd_add(DIRFILE* D, const gd_entry_t* entry)
 
 /* add a RAW entry */
 int gd_add_raw(DIRFILE* D, const char* field_code, gd_type_t data_type,
-    gd_spf_t spf, int fragment_index)
+    unsigned int spf, int fragment_index)
 {
   gd_entry_t R;
   int error;
@@ -850,7 +851,7 @@ int gd_add_linterp(DIRFILE* D, const char* field_code, const char* in_field,
 
 /* add a BIT entry */
 int gd_add_bit(DIRFILE* D, const char* field_code, const char* in_field,
-    gd_bit_t bitnum, gd_bit_t numbits, int fragment_index) gd_nothrow
+    int bitnum, int numbits, int fragment_index) gd_nothrow
 {
   gd_entry_t B;
   int error;
@@ -879,7 +880,7 @@ int gd_add_bit(DIRFILE* D, const char* field_code, const char* in_field,
 
 /* add a SBIT entry */
 int gd_add_sbit(DIRFILE* D, const char* field_code, const char* in_field,
-    gd_bit_t bitnum, gd_bit_t numbits, int fragment_index) gd_nothrow
+    int bitnum, int numbits, int fragment_index) gd_nothrow
 {
   gd_entry_t B;
   int error;
@@ -1188,8 +1189,8 @@ int gd_add_window(DIRFILE *D, const char *field_code, const char *in_field,
 
 /* add a MPLEX entry */
 int gd_add_mplex(DIRFILE *D, const char *field_code, const char *in_field,
-    const char *count_field, gd_count_t count_val, gd_count_t count_max,
-    int fragment_index) gd_nothrow
+    const char *count_field, int count_val, int count_max, int fragment_index)
+gd_nothrow
 {
   gd_entry_t E;
   int error;
@@ -1444,7 +1445,7 @@ int gd_madd_linterp(DIRFILE* D, const char* parent,
 
 /* add a META BIT entry */
 int gd_madd_bit(DIRFILE* D, const char* parent, const char* field_code,
-    const char* in_field, gd_bit_t bitnum, gd_bit_t numbits) gd_nothrow
+    const char* in_field, int bitnum, int numbits) gd_nothrow
 {
   gd_entry_t B;
   int error;
@@ -1474,7 +1475,7 @@ int gd_madd_bit(DIRFILE* D, const char* parent, const char* field_code,
 
 /* add a META SBIT entry */
 int gd_madd_sbit(DIRFILE* D, const char* parent, const char* field_code,
-    const char* in_field, gd_bit_t bitnum, gd_bit_t numbits) gd_nothrow
+    const char* in_field, int bitnum, int numbits) gd_nothrow
 {
   gd_entry_t B;
   int error;
@@ -1785,8 +1786,8 @@ int gd_madd_window(DIRFILE *D, const char *parent, const char *field_code,
 
 /* add a META MPLEX entry */
 int gd_madd_mplex(DIRFILE *D, const char *parent, const char *field_code,
-    const char *in_field, const char *count_field, gd_count_t count_val,
-    gd_count_t count_max) gd_nothrow
+    const char *in_field, const char *count_field, int count_val, int count_max)
+gd_nothrow
 {
   int error;
   gd_entry_t E;
@@ -2028,8 +2029,14 @@ static int _GD_AddAlias(DIRFILE *restrict D, const char *restrict parent,
   D->flags &= ~GD_HAVE_VERSION;
 
   /* Invalidate the field lists */
-  D->list_validity = 0;
-  D->type_list_validity = 0;
+  if (P) {
+    P->e->value_list_validity = 0;
+    P->e->entry_list_validity = 0;
+  } else {
+    D->value_list_validity = 0;
+    D->entry_list_validity = 0;
+  }
+
 
   /* Update aliases */
   _GD_UpdateAliases(D);

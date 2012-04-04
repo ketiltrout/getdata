@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_add_bit 3 "1 March 2012" "Version 0.
+.TH gd_add_bit 3 "1 April 2012" "Version 0.8.0" "GETDATA"
 .SH NAME
 gd_add_bit, gd_add_carray gd_add_clincom, gd_add_const, gd_add_cpolynom,
 gd_add_crecip, gd_add_divide, gd_add_lincom, gd_add_linterp, gd_add_multiply,
@@ -26,7 +26,7 @@ gd_add_string
 .nh
 .ad l
 .BI "int gd_add_bit(DIRFILE *" dirfile ", const char *" field_name ,
-.BI "const char *" in_field ", gd_bit_t " bitnum ", gd_bit_t " numbits ,
+.BI "const char *" in_field ", int " bitnum ", int " numbits ,
 .BI "int " fragment_index );
 .HP
 .BI "int gd_add_carray(DIRFILE *" dirfile ", const char *" field_name ,
@@ -43,7 +43,7 @@ gd_add_string
 .HP
 .BI "int gd_add_cpolynom(DIRFILE *" dirfile ", const char *" field_name ,
 .BI "int " poly_ord ", const char *" in_fields ", const double complex *" ca ,
-.BI int " fragment_index );
+.BI "int " fragment_index );
 .HP
 .BI "int gd_add_crecip(DIRFILE *" dirfile ", const char *" field_name ,
 .BI "const char *" in_field ", double complex " cdividend ,
@@ -60,6 +60,10 @@ gd_add_string
 .BI "int gd_add_linterp(DIRFILE *" dirfile ", const char *" field_name ,
 .BI "const char *" in_field ", const char *" table ", int " fragment_index );
 .HP
+.BI "int gd_add_mplex(DIRFILE *" dirfile ", const char *" field_name ,
+.BI "const char *" in_field ", const char *" count_field ,
+.BI "int " count_val ", int " count_max ", int " fragment_index );
+.HP
 .BI "int gd_add_multiply(DIRFILE *" dirfile ", const char *" field_name ,
 .BI "const char *" in_field1 ", const char *" in_field2 ,
 .BI "int " fragment_index );
@@ -72,13 +76,13 @@ gd_add_string
 .BI int " fragment_index );
 .HP
 .BI "int gd_add_raw(DIRFILE *" dirfile ", const char *" field_name ,
-.BI "gd_type_t " data_type ", gd_spf_t " spf ", int " fragment_index );
+.BI "gd_type_t " data_type ", unsigned int " spf ", int " fragment_index );
 .HP
 .BI "int gd_add_recip(DIRFILE *" dirfile ", const char *" field_name ,
 .BI "const char *" in_field ", double " dividend ", int " fragment_index );
 .HP
 .BI "int gd_add_sbit(DIRFILE *" dirfile ", const char *" field_name ,
-.BI "const char *" in_field ", gd_bit_t " bitnum ", gd_bit_t " numbits ,
+.BI "const char *" in_field ", int " bitnum ", int " numbits ,
 .BI "int " fragment_index );
 .HP
 .BI "int gd_add_string(DIRFILE *" dirfile ", const char *" field_name ,
@@ -86,7 +90,7 @@ gd_add_string
 .HP
 .BI "int gd_add_window(DIRFILE *" dirfile ", const char *" field_name ,
 .BI "const char *" in_field ", const char *" check_field ", gd_windop_t"
-.IB windop ", gd_triplet_t " threshold );
+.IB windop ", gd_triplet_t " threshold ", int " fragment_index );
 .hy
 .ad n
 .SH DESCRIPTION
@@ -143,7 +147,8 @@ containing the polynomial co-efficients
 .RI ( a " or " ca ).
 
 The
-.BR gd_add_string (),\~ gd_add_carry (),
+.BR gd_add_string (),
+.BR gd_add_carry (),
 and
 .BR gd_add_const ()
 functions add the field and set the value of the field to
@@ -160,13 +165,31 @@ specifies the data type of the value pointed to by
 .IR value .
 
 The
-.B gd_bit_t
-type is a signed 16-bit integer type.  The
 .B gd_shift_t
 type is a signed 64-bit integer type.  The
-.B gd_spf_t
-type is an unsigned 16-bit integer type.
-
+.B gd_triplet_t
+type is defined as:
+.PP
+.in +4n
+.nf
+.fam C
+typedef union {
+  gd_int64_t i;
+  gd_uint64_t u;
+  double r;
+} gd_triplet_t;
+.fam
+.fi
+.in
+.PP
+Which element of this
+.B gd_triplet_t
+union to set depends on the operator selected for the
+.B WINDOW
+field.  See
+.BR gd_entry (3)
+for details.
+.PP
 A metafield may be added to the dirfile either by calling these functions with
 .I field_name
 containing the fully formed
@@ -192,7 +215,7 @@ or
 See
 .B NOTES
 below for information on using
-.BR gd_add_clincom (),\~ gd_add_cpolynom (),
+.BR gd_add_clincom ()", " gd_add_cpolynom (),
 and
 .BR gd_add_crecip ()
 in the C89 GetData API.
@@ -288,7 +311,7 @@ won't overrun the line when flushed to disk.  On a 32-bit system, this number
 is 2**24.  It is larger on a 64-bit system.
 
 The C89 GetData API provides different prototypes for
-.BR gd_add_clincom (),\~ gd_add_cpolynom (),
+.BR gd_add_clincom ()", " gd_add_cpolynom (),
 and
 .BR gd_add_crecip ():
 .PP
@@ -314,7 +337,7 @@ and
 .ad n
 .PP
 In this case, the array pointers passed as
-.IR cm ,\~ cb
+.IR cm ", " cb
 or
 .IR ca
 should have twice as many (purely real) elements, consisting of alternating
@@ -333,6 +356,7 @@ parameter becomes a double precision array of length two.
 .SH SEE ALSO
 .BR gd_add (3),
 .BR gd_add_spec (3),
+.BR gd_entry (3),
 .BR gd_error (3),
 .BR gd_error_string (3),
 .BR gd_madd_bit (3),
@@ -341,12 +365,14 @@ parameter becomes a double precision array of length two.
 .BR gd_madd_divide (3),
 .BR gd_madd_lincom (3),
 .BR gd_madd_linterp (3),
+.BR gd_madd_mplex (3),
 .BR gd_madd_multiply (3),
 .BR gd_madd_phase (3),
 .BR gd_madd_polynom (3),
 .BR gd_madd_recip (3),
 .BR gd_madd_sbit (3),
 .BR gd_madd_string (3),
+.BR gd_madd_window (3),
 .BR gd_metaflush (3),
 .BR gd_open (3),
 .BR dirfile-format (5)

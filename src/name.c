@@ -566,8 +566,13 @@ static int _GD_Rename(DIRFILE *D, gd_entry_t *E, const char *new_name,
     qsort(D->dot_list, D->n_dot, sizeof(gd_entry_t*), _GD_EntryCmp);
 
   /* Invalidate the field lists */
-  D->list_validity = 0;
-  D->type_list_validity = 0;
+  if (E->e->n_meta == -1) {
+    E->e->p.parent->e->value_list_validity = 0;
+    E->e->p.parent->e->entry_list_validity = 0;
+  } else {
+    D->value_list_validity = 0;
+    D->entry_list_validity = 0;
+  }
 
   dreturn("%i", 0);
   return 0;

@@ -1018,7 +1018,7 @@ static PyObject* gdpy_entry_getspf(struct gdpy_entry_t* self, void* closure)
 static int gdpy_entry_setspf(struct gdpy_entry_t* self, PyObject *value,
     void *closure)
 {
-  gd_spf_t spf;
+  unsigned int spf;
   char *scalar;
 
   dtrace("%p, %p, %p", self, value, closure);
@@ -1424,7 +1424,7 @@ static int gdpy_entry_setbitnum(struct gdpy_entry_t* self, PyObject *value,
     return -1;
   }
 
-  self->E->bitnum = (gd_bit_t)bitnum;
+  self->E->bitnum = bitnum;
   free(self->E->scalar[0]);
   self->E->scalar[0] = scalar;
 
@@ -1479,7 +1479,7 @@ static int gdpy_entry_setnumbits(struct gdpy_entry_t* self, PyObject *value,
     return -1;
   }
 
-  self->E->numbits = (gd_bit_t)numbits;
+  self->E->numbits = numbits;
   free(self->E->scalar[1]);
   self->E->scalar[1] = scalar;
 
@@ -1629,7 +1629,7 @@ static PyObject* gdpy_entry_getcountval(struct gdpy_entry_t* self,
 static int gdpy_entry_setcountval(struct gdpy_entry_t* self, PyObject *value,
     void *closure)
 {
-  gd_count_t count_val;
+  int count_val;
   char *scalar;
 
   dtrace("%p, %p, %p", self, value, closure);
@@ -1681,7 +1681,7 @@ static PyObject* gdpy_entry_getcountmax(struct gdpy_entry_t* self,
 static int gdpy_entry_setcountmax(struct gdpy_entry_t* self, PyObject *value,
     void *closure)
 {
-  gd_count_t count_max;
+  int count_max;
   char *scalar;
 
   dtrace("%p, %p, %p", self, value, closure);

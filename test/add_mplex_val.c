@@ -25,13 +25,10 @@ int main(void)
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
   int error, r = 0;
-  gd_entry_t e;
-  gd_triplet_t threshold;
   DIRFILE *D;
 
   rmdirfile();
   D = gd_open(filedir, GD_RDWR | GD_CREAT);
-  threshold.r = 3.4;
   gd_add_mplex(D, "new", "in", "count", 4, 3, 0);
   error = gd_error(D);
 

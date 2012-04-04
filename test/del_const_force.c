@@ -37,7 +37,7 @@ int main(void)
     "raw RAW UINT8 data\n";
   int fd, ret, error1, error2, r = 0;
   DIRFILE *D;
-  gd_spf_t spf;
+  unsigned int spf;
 
   rmdirfile();
   mkdir(filedir, 0777);

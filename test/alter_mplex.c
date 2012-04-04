@@ -32,7 +32,6 @@ int main(void)
     "mplex MPLEX data count 1 3\n";
   unsigned char data_data[256];
   unsigned char c[8];
-  gd_triplet_t threshold;
   int fd, i, ret, error, n, r = 0;
   DIRFILE *D;
 
@@ -58,8 +57,7 @@ int main(void)
   close(fd);
 
   D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
-  threshold.r = 43;
-  ret = gd_alter_mplex(D, "mplex", NULL, NULL, 2, 0);
+  ret = gd_alter_mplex(D, "mplex", NULL, NULL, 2, -1);
   error = gd_error(D);
   n = gd_getdata(D, "mplex", 5, 0, 1, 0, GD_UINT8, c);
 

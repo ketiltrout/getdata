@@ -10,10 +10,13 @@ New in version 0.7.3:
 
   * BUG FIX: Passing a zero dividend to alter_crecip() and alter_recip() now
     results in the dividend not changing, per documentation.
+
   * BUG FIX: GetData wasn't properly computing the module directory, causing
     encodings using external modules to fail with GD_E_UNSUPPORTED.
+
   * BUG FIX: Metafield records are now properly stored in the format file for
     Standards Version 8.
+
   * BUG FIX: gd_raw_filename() wasn't clearing the Dirfile error before
     operation, resulting in it failing erroneously in certain situations.
 
@@ -30,10 +33,13 @@ New in version 0.7.2:
   * If built with modules, the plugin shared objects will now be installed in
     a separate directory (by default "${libdir}/getdata", but see the
     --with-module-dir option in ./configure).
+
   * BUG FIX: When using modules, a missing plugin no longer results in a lock up
     the second time an attempt is made to find it.
+
   * BUG FIX: GetData now properly processes /INCLUDE directives with absolute
     paths, as the documentation insists it should.
+
   * BUG FIX: gd_add()ing the first raw field in a dirfile to a subfragment no
     longer results in memory corruption when calling gd_close().
 
@@ -55,8 +61,10 @@ New in version 0.7.1:
 
   * BUG FIX: When the parser fails in a gd_include() call, the internal list of
     conformant Standards Versions for the loaded dirfile is no longer corrupted.
+
   * BUG FIX Performing two consecutive reads of the same field in an ASCII
     encoded datasources no longer confuses GetData.
+
   * BUG FIX: Numerous memory leaks have been patched (mostly pin-holes, although
     there are a few, rare but egregious ones).
 
@@ -64,9 +72,11 @@ New in version 0.7.1:
 
   * The value(s) of a CONST or CARRAY field added with gd_[m]add() is now
     guaranteed to be zero; previously, it was unspecified.
+
   * BUG FIX: Specifying both GD_VERBOSE and GD_IGNORE_DUPS no longer results in
     spurious "Field code already defined" messages when duplicate fields are
     encountered.
+
   * BUG FIX: Calling gd_delete on a metafield no longer results in a segfault.
 
   Bindings Changes:
@@ -80,9 +90,11 @@ New in version 0.7.1:
   * dirfile2ascii now pads reads past the end-of-field.  The value used to
     pad may be specified with '-z', and defaults to 0/NaN.  Previously, the
     value of uninitialized memory was output.
+
   * BUG FIX: dirfile2ascii now does what the user intends when presented with
     cart-before-horse arguments, ie. "dirfile2ascii -e field DIRFILE".
     Previously this resulted in confusion.
+
   * BUG FIX: dirfile2ascii now accepts field conversion '-u', which was
     documented but overlooked in the argument parser.
 
@@ -96,16 +108,20 @@ New in version 0.7.0:
     types: DIVIDE, which computes X/Y for vectors X and Y, RECIP, which computes
     A/X for vector X and scalar A, and CARRAY, which is an array of CONST
     scalars.  A few other changes are listed below.
+
   * Like CONST fields, CARRAY elements can be used as parametersin the
     definition of other fields.  Syntax is 'field<n>', where 'field' is the
     field name and 'n' the element index in the CARRAY (and the angle brackets
     are literal angle brackets).  If the '<n>' is omitted, the first element
     (numbered 0) is assumed.
+
   * Slashes on reserved words are now mandatory, allowing fields with reserved
     words as names.
+
   * The long-deprecated single character data type codes have been removed from
     Standards Version 8.  (They are still accepted by GetData, which handles
     all previous Standards Versions as well.)
+
   * The /ENDIAN directive now takes an optional second parameter.  The only
     allowed value for this second token is "arm", which indicates that double
     precision floating point data (including double precision complex data) are
@@ -118,9 +134,11 @@ New in version 0.7.0:
     Win32 using MinGW.  In the case of MinGW, this includes linking against the
     Microsoft C Runtime, which isn't POSIX compliant.  Users should excercise
     caution when writing to dirfiles in this case.
+
   * GetData can now be used on ARM processors.  As a side-effect, GetData can
     now read and write the middle-ended floating point format used by older ARM
     processors (on any processor, via endianness conversion).
+
   * Some changes have been made to the parser.  It now operates in one of two
     modes: pedantic mode, which adheres strictly to one particular Dirfile
     Standards Version, and permissive mode (the default) which is more
@@ -128,51 +146,64 @@ New in version 0.7.0:
     switch the parser from permissive to pedantic mode unless told not to (see
     GD_PERMISSIVE below), and will change the particular Standards Version to
     which pedantic mode is adhering.
+
   * As a result of the previous change, the Standards compliance of the parser
     in strict mode has been greatly increased.  This affects allowed characters
     in field names, and field name lengths.  The existance or lack thereof of
     the implicit FILEFRAM field (an alias for INDEX) is also affected.
+
   * Since Standards Versions 4 and earlier were never codified, we've made some
     assumptions as to their behaviour in certain undocumented situtations.  Most
     noticably, they still prohibit ASCII control codes (bytes < 0x20) and '/'
     in field names.  We also assume these dirfiles have native byte sex, even
     though some early GetData behaviour implied only little-ended data was
     acceptable.
+
   * Every Dirfile object now records its current Standards Version, which
     affects functions such as gd_add_spec().  The Version will start out as the
     value of the last /VERSION directive encountered by the parser, or else the
     latest compliant Standards Version.  It can be changed (see below).
+
   * When writing metadata to disk, fragments will be written according to the
     current Standards Version of the dirfile object, rather than always using
     the latest version, as before.
+
   * The C library now sports an "ANSI C" mode, which allows compilation of
     GetData without a C99-compliant compiler.  Some functionality may be lost,
     most prominently, but unsurprisingly, the default (C99) API.
+
   * The artificial maximum line length of 4096 bytes for format metadata has
     been removed.  The maximum line length is now 2**31 bytes on 32-bit systems,
     and more on 64-bit systems.  This also has the side-effect of removing the
     same length limit which had been applied to field names.
+
   * LINTERP tables are no longer required to be sorted.  The library will
     sort them, if needed.  As a side-effect of this, tables are no longer read
     twice when loading, leading to potential speed-up.
 
+
   * BUG FIX: The library wasn't properly checking that the second and higher
     input fields in LINCOM and MULTIPLY fields were, in fact, vectors, leading
     to possible segfaults.
+
   * BUG FIX: A memory leak associated with modifying LINCOM metadata has been
     fixed.
+
   * BUG FIX: Using a complex valued vector as the second input field in a
     MULTIPLY wouldn't result in the field being internally flagged as complex,
     leading to loss of the imaginary part in certain situtaitons.
+
   * BUG FIX: Trying to write to a LINTERP via a table which isn't monotonic now
     results in error.  Previously, this was allowed, with arbitrary data stored
     to disk.
+
   * BUG FIX: On encountering a line longer than it was prepared to deal with,
     the parser used to get very confused, potentially resulting in bizarre
     behaviour.  On the off chance such a line is encountered, GetData will now
     raise GD_E_LINE_TOO_LONG in these cases. (And, since the maxmium line
-    length has been increased to at least 2**31 bytes, this should only occur
-    in pathological situations.)
+    length has been increased to at least 2**31 characters, this should only
+    occur in pathological situations.)
+
   * BUG FIX: Deleting a metafield was not being communicated to its parent,
     resulting in differing opinions within the library as to the deleted field's
     exsitence.
@@ -184,6 +215,7 @@ New in version 0.7.0:
     performed.  All public functions, and data types now begin with 'gd_'.  All
     public preprocessor macros now begin with 'GD_'.  Symbol renaming has
     occurred in the following manner:
+
     - functions which started with 'put' simply prefix 'gd_' to their name.  So
       put_constant() becomes gd_put_constant().
     - functions which started with 'get' replace 'get' with 'gd', except those
@@ -196,54 +228,71 @@ New in version 0.7.0:
     - macros which started with 'GETDATA_' now start with 'GD_'.  Those that
       started with 'NO_GETDATA_' now start with 'GD_NO_'.  So GETDATA_LEGACY_API
       becomes GD_LEGACY_API and NO_GETDATA_LEGACY_API becomes GD_NO_LEGACY_API.
+
   * The above renaming rules result in one gd_ namespace clash.  As a result,
     get_reference() has been removed completely.  Calls will have to be
     changed to use gd_reference(), formerly dirfile_reference().
+
   * Furthermore, the function dirfile_protect() is now gd_alter_protection() to
     match the naming of other fragment metadata altering functions.
+
   * To ease transition to the new namespace, defining GD_FUNCTION_ALIASES before
     including getdata.h will create a bunch of preprocessor macros which map the
     old names to the new.
+
   * The meaning of the GD_PEDANTIC flag to gd_[cb]open() has changed.  It now
     forces the parser to start off in pedantic mode (see above), following the
     latest Standards Version, rather than the default permissive mode.  This is
     a subtle change, and in most cases the effects of GD_PEDANTIC will be the
     same as they were before.
+
   * A new dirfile flag, GD_PERMISSIVE, has been added.  Passing this to
     gd_[cb]open() will prohibit the parser from switching into pedantic mode
     when it encounters a /VERSION directive.  This flag is needed to read
     dirfiles which claim to adhere to the Standards via a /VERSION directive,
     but contain invalid syntax nonetheless.
+
   * The current Standards Version of an open dirfile can be set or queried by
     calling the new function gd_dirfile_standards().  NB: this only affects the
     open dirfile, not the metadata stored on disk.
+
   * A new function, gd_rewrite_fragment() will force GetData to write the
     specified fragment to disk, even if no metadata in the fragment has changed.
+
   * Two new functions, gd_bof() and gd_eof() can be used to find the sample
     number of the beginning- or end-of-field for a given field.  Notably, these
     can be used to calculate the amount of raw data on disk for a given field.
+
   * The new gd_invalid_dirfile() function will return a newly created, invalid
     dirfile.  Primarily useful to callers as a "null dirfile" placeholder.
+
   * GD_E_OPEN_INCLUDE has been renamed to GD_E_OPEN_FRAGMENT, but the former
     symbol remains as an alias.
+
   * Two new bitflags to gd_cbopen and gd_open: GD_ARM_ENDIAN and
     GD_NOT_ARM_ENDIAN allow specifying the default ordering of double precision
     data.  These flags may also be used with gd_alter_endianness() and will be
     returned by gd_endianness().  On all platforms except for middle-endian
     ARMs, GD_NOT_ARM_ENDIAN equals zero and may be omitted.
+
   * Where gd_flush() and gd_metaflush() in the past raised GD_E_OPEN_INCLUDE
     on I/O error, they now raise the new GD_FLUSH.
+
   * All functions now raise GD_E_DIMENSION when encountering a scalar field
     when expecting a vector.  In the past, the error value returned was
     different for different functions.
+
   * getdata.h now wraps itself in an extern "C" block if included by a C++
     compiler.
+
   * If passed a NULL pointer, gd_error_string() will return a newly malloc'd
     buffer long enough to hold the entire string.  It should be free'd by the
     caller.
+
   * The parser data passed to the callback function now includes the length of
     the buffer.  The parser also permits the callback to assign a new pointer to
     the 'line' element of the parser data if the buffer passed in is too small.
+
   * gd_metaflush() now fails and raises GD_E_ACCMODE if called on a read-only
     dirfile.  (Previously it would successfully do nothing.)
 
@@ -255,39 +304,56 @@ New in version 0.7.0:
   * BUG FIX: In previous versions, attempting to access an invalid dirfile
     (anything that would cause gd_open to fail) resulted in leaked memory.  This
     leak has been plugged.
+
   * BUG FIX: A segfault involving the reporting of POLYNOM fields has been fixed
     in GetFormat().
 
   Bindings
 
   * Bindings for the functionality introduced into 0.7.0 have been added.
+
   * F77: GDPROT has been renamed GDAPRT to mirror the renaming of
     gd_alter_protection().
+
   * F77: GDGTCO and GDPTCO no longer return an indicator of success.
+
   * F77: The signatues of GDGSCA and GDASCA have changed to return/take the
     scalar index as well.
+
   * F95: For consistency sake, the Fortran 95 bindings have undergone the same
     renaming so they have the same name as their C counterparts.  All functions
     are now preceded by 'fgd_'.
+
   * F95: The fgd_get_constant_* and fgd_put_constant_* procedures are now
     subroutines, not functions.
+
   * C++: Const member functions are now flagged as such.
+
   * C++: The len parameter to Dirfile::ErrorString is now ignored.
+
   * C++: dirfiles are now opened read-only by default.
+
   * IDL: The IDL bindings have also followed suit in the great renaming.  The
     exception to this is GETDATA_CONSTANTS(), which is not renamed.
+
   * IDL: Various constants defined in getdata.h but not used by the IDL bindings
     have been removed from the structure returned by GETDATA_CONSTANTS().
-  * Pyhon: dirfile.getdata() now raises ValueError if neither num_frames nor
+
+  * Python: dirfile.getdata() now raises ValueError if neither num_frames nor
     num_samples are specified.  In the past, it would happily return nothing
     in this case.
+
   * Python: dirfiles are now opened read-only by default.
 
+
   * C++ BUG FIX: Entry::Scalar() no longer rejects valid values of index. 
+
   * IDL BUG FIX: A memory impropriety involving keyword arguments.  This bug
     manifested by rejecting valid keyword arguments on 64-bit systems, but may
     have had other, subtle effects on 32-bit systems as well.
+
   * Python BUG FIX: A non-literal phase shift is now properly reported.
+
   * Python BUG FIX: Calling Dirfile.discard() or Dirfile.close() no longer
     results in a segfault.
 
@@ -295,9 +361,11 @@ New in version 0.7.0:
 
   * The --disable-checkdirfile option has been removed from ./configure.  It
     is now always installed.
+
   * A utility, dirfile2ascii, is now installed alongside checkdirfile.  This
     utility converts all or part of a dirfile into ASCII text.  dirfile2ascii
     was written by Matthew Truch.
+
   * The thoroughness of the checks done by checkdirfile have increased.  It now
     reports format syntax errors, Dirfile Standards compliance, problems with
     field definitions (such as missing input fields), and the size of the
@@ -339,6 +407,7 @@ New in version 0.6.1:
 
   * C++ BUG FIX: Several bugs preventing compilation of the C++ test-suite under
     Fedora 13 have been fixed.
+
   * IDL BUG FIX: Several segfaults in the IDL bindings have been eradicated.
 
   Miscellaneous
@@ -361,14 +430,19 @@ New in version 0.6.0:
   * GetData now support Dirfile Standards Version 7.  Standards Version 7 adds
     complex data types, a signed bitfield (SBIT), a polynomial derived field
     (POLYNOM), and other features detailed below.
+
   * Metafields can now be specified using a normal format specification line and
     their full (slashed) field code.
+
   * Field codes can now contain a "representation suffix", which allows
     specifying a complex norm used to convert complex valued data into purely
     real data.
+
   * The n_fields parameter in a LINCOM specification is now optional.
+
   * A new encoding scheme which supports LZMA compressed data using the .xz
     container format has been added.
+
   * Look-up tables may contain a complex y-value.  This prohibits writing to
     the associated LINTERP field.
 
@@ -377,37 +451,51 @@ New in version 0.6.0:
   * The field parameters spf (RAW), bitnum and numbits (BIT and SBIT) are now
     restricted to 16-bit numbers, which should be more than enough.  The public
     API uses gd_spf_t and gd_bit_t for these quantities.
+
   * The shift field parameter is now a 64-bit integer type, called gd_shift_t.
+
   * The dirfile flags, including encoding and endianness symbols are now
     explicitly long ints.  Previously these quantities mixed long int with int
     arbitrarily.  This affects the public API.
+
   * The parser callback has received a new, API breaking signature, which should
     hopefully reduce the amount of API breakage in the future.  It is also now
     possible for the caller to pass data through GetData to the callback, if
     desired.
+
   * Computation of derived fields can now handle complex valued inputs, and
     computation will occur in the complex plane when required.
+
   * The computation of LINCOM fields has been re-written and is now ~20% faster
     for LINCOMs with 2 or 3 input fields.  (No change for LINCOMs of 1 field.)
+
   * A new open flag, GD_PRETTY_PRINT, tells the library to attempt to write a
     nicer looking format file.  What this specifically means, isn't part of the
     public API and shouldn't be relied on in portable code.
+
   * BUG FIX: dirfile_madd_spec() and dirfile_add_spec() didn't properly flag
     the fragments they modified as dirty, leading to possible loss of metadata.
+
   * BUG FIX: calling get_nframes on a bzip2 encoded dirfile would report the
     wrong dirfile length.
+
   * BUG FIX: LINTERP tables are now closed after loading, resolving a file
     descriptor leak of great age (ie. pre-0.3.0).
+
   * BUG FIX: When re-writing a format file fragment containing fields with
     CONST scalar field parameters, GetData no longer replaces the CONST field
     codes in the field specification lines with the value of the CONST field.
+
   * BUG FIX: when moving a field with dirfile_move(), the fragment index in
     the entry objects of metafields defined for the field were not updated.
     (The metafields were placed in the correct fragment when the metadata was
     flushed to disk, despite this.)
+
   * BUG FIX: Calling getdata() or putdata() on 64-bit architectures in certain
     situations involving a non-zero frameoffset no longer results in bizarrity.
+
   * BUG FIX: A memory leak associated with RAW field metadata has been fixed.
+
   * BUG FIX: 64-bit integer literals in the format file are no longer truncated
     to double precision when read.
 
@@ -416,39 +504,52 @@ New in version 0.6.0:
   * This release breaks ABI compatibility and, to a lesser extent, API
     compatibility.  The SOVERSION of the library has been incremented
     accordingly.
+
   * A C-89 API will be declared by getdata.h if GETDATA_C89_API is defined
     before inclusion.  If this symbol is not defined, the C API defined will
     include C-99 conforming complex types, and getdata.h will include complex.h
     if `complex' has not been defined before inclusion.
+
   * Due to the new, simple way of specifying META fields in Standards Version 7,
     dirfile_add_spec() and dirfile_alter_spec() can be used to modify
     metafields. dirfile_madd_spec() and dirfile_malter_spec() remain as well.
+
   * An array containing the CONST scalar field codes used when non-literal
     parameters are used in the specification of various different fields has
     been added to the gd_entry_t object.  As a side-effect of this,
     dirfile_add(), dirfile_alter_entry(), and dirfile_madd() can be used to
     manipulate non-literal field parameters.
+
   * A function, get_native_type(), now exists which returns the underlying data
     type of a specified field code.
+
   * A function, get_framenum(), is now available to perform a "reverse look-up"
     on a field: given a data value, it reports the frame number where the field
     has that value.  The field must be monotonic.
+
   * A function, dirfile_validate(), now exists which can be used to check the
     validity of a field code before use.
+
   * Two new error codes have been added: GD_E_DOMAIN, potentially returned by
     get_framenum(), and GD_E_BAD_REPR, indicating an unrecognised representation
     suffix, or an attempt to write to a representation.
+
   * A new syntax error suberror code has been added: GD_E_FORMAT_LITERAL, which
     indicates a syntax error in a complex literal number.
+
   * BUG FIX: On success, dirfilename(), dirfile_reference(), and get_reference()
     didn't change the error code to GD_E_OK, resulting in spurious error codes
     from these functions.
+
   * BUG FIX: dirfile_madd_string() and dirfile_madd_const() now don't fail
     erroneously by reporting GD_E_BAD_CODE.
+
   * BUG FIX: error strings relating to GD_E_DELETE error codes now report the
     proper error information.
+
   * BUG FIX: the list returned by get_mstrings() is now properly NULL
     terminated.
+
   * BUG FIX: the entry->table member now reports the proper path to the LUT.
     (That is, the path stored in the format file.)  Previously it incorrectly
     reported a path relative to the base dirfile directory.
@@ -463,45 +564,67 @@ New in version 0.6.0:
 
   * Bindings for Python and the Interactive Data Language (IDL) have been
     added.
+
   * Bindings for the functionality introduced into 0.6.0 have been added.
+
   * C++: The missing bindings for dirfilename(), get_nvectors(), and
     get_fragment_index() have been added.
+
   * C++: Empty entry class constructors have been added which allow delayed
     specification of field metadata.
+
   * C++: The dirfile.h header now includes all other C++ headers, and is now
     the only header required to be included in applications.  (The other headers
     can still be included, with no ill effects.)
+
   * All bindings have a much expanded test suite, which has resulted in the
     discovery of many bugs (subsequently fixed).
+
   * F77: The callback function is now dirfile-specific, as it is in the C API.
+
   * C++ BUG FIX: Entry class constructors now properly set the field name for
     metafields.
+
   * C++ BUG FIX: Fragment::SetEncoding() now actually does what it advertises,
     instead of doing nothing.
+
   * C++ BUG FIX: The recode argument to various functions is now optional and
     defaults to zero, as the documentation already indicated.
+
   * C++ BUG FIX: dirfile_close() was not being called by the Dirifle destructor.
+
   * F77 BUG FIX: a NULL C string returned from the C API now returns an empty
     string, rather than causing a segfault.
+
   * F77 BUG FIX: attempting to call another F77 function before calling GDCOPN
     or GDOPEN no longer results in a segfault.
+
   * F77 BUG FIX: passing an out-of-range dirfile unit no longer results in
     undefined behaviour.
+
   * F77 BUG FIX: the last character of a string returned by the bindings is no
     longer deleted.
+
   * F77 BUG FIX: string lengths now report the correct length.
+
   * F77 BUG FIX: passing dirfile unit 0 to GDCLOS or GDDSCD no longer corrupts
     the bindings.
+
   * F77 BUG FIX: GDFLDN no longer accepts indices less than one.
+
   * F77 BUG FIX: GDESTR now space pads its output string, rather than filling
     the remainder of the string with garbage.
+
   * F77 BUG FIX: The get_entry() bindings, GDGExx no longer segfault on dirfile
     error.
+
   * F77 BUG FIX: GDGTST and GDPTST now report the FORTRAN string length, which
     is one less than the C API would report, due to the lack of a terminating
     null.
+
   * F95 BUG FIX: Attempting to retrieve a PHASE entry with fget_entry() now
     works.
+
   * F95 BUG FIX: Several routines which were named fdrifile_<foo> are now
     properly spelled.
 
@@ -528,12 +651,16 @@ New in version 0.5.0:
     be built into stand-alone library modules which will be loaded, as needed,
     at runtime.  GetData will fail gracefully if modules are missing.  See the
     README for full details.
+
   * BUG FIX: Writing metadata to disc now preserves the permissions of the
     format file fragments which are changed.
+
   * BUG FIX: Format files without a line feed character at the end of the file
     no longer cause the parser to segfault.
+
   * BUG FIX: putdata() now reports the correct number of samples written for
     ASCII encoded files.
+
   * BUG FIX: GetData no longer inserts unnecessary "/./" elements into the paths
     it reports.
 
@@ -546,10 +673,14 @@ New in version 0.5.0:
     to either correct the syntax error, or else tell GetData whether to ignore
     the line or not.  The callback function may be later modified by calling
     dirfile_parser_callback.
+
   * A fragment may be removed from a dirfile by calling dirfile_uninclude.
+
   * The pathname of the dirfile may be retrieved by calling dirfilename.
+
   * The reference field for the dirfile may be set or retrieved by calling
     dirfile_reference.
+
   * Fragment metadata may be queried or modified by calling:
 
       - get_encoding, dirfile_alter_encoding
@@ -564,13 +695,19 @@ New in version 0.5.0:
         dirfile_malter_spec
   
   * A field may be moved to a different format file fragment using dirfile_move.
+
   * A field may be renamed by using dirfile_rename.
+
   * A field may be removed from the dirfile by calling dirfile_delete.
+
   * The type or fragment index of a field may be retrieved by calling
     get_entry_type or get_fragment_index, respectively.
+
   * The pathname of a raw field may be obtained from a call to get_raw_filename.
+
   * A DIRFILE may be deallocated without saving modified metadata by calling
     dirfile_discard.
+
   * A new flag, GD_IGNORE_DUPS, may be passed to dirfile_open to tell the
     parser to ignore duplicate field specifications in the format files.  This
     is really only useful identically duplicate specifications, since there is
@@ -581,8 +718,10 @@ New in version 0.5.0:
 
   * All functions in the Fortran 77 bindings have been completely renamed from
     GDFxxx to GDxxxx to provide a larger namespace for our use.
+
   * Fortran 77, Fortran 95, and C++ bindings have been updated for the latest
     API changes.
+
   * BUG FIX: Fortran 77 functions which return character strings no longer
     corrupt memory as a side-effect of operation.  This also affected the
     Fortran 95 bindings.
@@ -601,8 +740,10 @@ New in version 0.4.2:
 
   * BUG FIX: The default protection level of format file fragments is now
     properly set to "none".  Reported by Brendan Crill.
+
   * BUG FIX: getdata() now reports the correct number of samples read for slim
     and ASCII encoded files.  Reported by Adam Hincks.
+
   * BUG FIX: A segmentation fault only encountered when reading slim encoded
     data has been fixed in dirfile_flush().
 
@@ -626,14 +767,17 @@ New in version 0.4.1:
 
   * BUG FIX: Adding an ASCII encoded RAW field no longer creates an empty,
     unencoded binary file.
+
   * BUG FIX: A few minor memory leaks have been patched.  Most of these
     were the result of insufficient clean up in dirfile_close().
+
   * As an exception to the Standards, the full stop character '.' is once
     again permitted in field names.  This is required by BLAST.  Instead,
     field names are prohibited from ending with the known encoding extensions.
     The Standards still prohibit the full stop character in field names, and the
     GD_PEDANTIC flag will disable this exception.  Furthermore, fields may not
     be added via GetData which contain a full stop character.
+
   * Some minor speed improvements have been made to the format file parser
     resulting in a ~30% decrease in parsing time.
 
@@ -646,15 +790,19 @@ New in version 0.4.0:
   * GetData now supports Dirfile Standards Version 6.  Standards Version 6 adds
     numerical (CONST) and string (STRING) scalar fields to the dirfile, as well
     as other features outlined below.
+
   * CONST names can now appear as parameters in field specifications in certain
     places in lieu of a literal number.
+
   * The tokeniser has been re-written.  Any sequence of non-NUL bytes can now
     form a valid token.  Field codes may not have ASCII control characters
     or the "reserved characters" &, /, ;, <, >, |, . but may contain any other
     characters (including whitespace).
+
   * Subordinate fields may now be attached to fields.  These subfields are
     defined with the META directive, and referenced in most cases as
     "<parent-field>/<subfield>".
+
   * Binary files in dirfiles may now be "encoded".  In addition to raw
     (unencoded) files, two encodings are currently supported:
 
@@ -663,16 +811,20 @@ New in version 0.4.0:
 
     Encoding schemes are fragment-local, although they are inherited from parent
     fragments.
+
   * Endianness is now also fragment-local, meaning different endiannesses can
     co-exist in the same dirfile (so long as the fields are defined in different
     format file fragments), and GetData will do the Right Thing.
+
   * "FILEFRAM" is no-longer supported as an alias for "INDEX".  This affects
     GetData's implementation of all Standards Versions.  Code that made use of
     FILEFRAM will have to be updated to use INDEX instead.
+
   * The reference field, previously the first RAW field in the format file,
     may now be specified using the REFERENCE directive.  The reference field
     is the field that is looked at when get_nframes() is called.  This is
     important to programs like kst which support streaming dirfiles.
+
   * Portions (or all) of a dirfile's data and metadata can be protected from
     change by specifying the PROTECT directive.  This protection is "advisory",
     ie. while GetData will respect it in all cases, don't count on the PROTECT
@@ -682,12 +834,15 @@ New in version 0.4.0:
 
   * INDEX is now a normal field.  It appears in the count/list functions.
     Attempts to write to INDEX will fail.
+
   * The GD_E_EMPTY error code has been removed: it is no longer an error to
     query a dirfile containing no RAW fields.
+
   * The presence of two fields in the dirfile with the same name is now
     detected, and will cause a syntax error when parsing the format file.
     Previously, such things were allowed, but only one of the synonym fields
     could ever be queried. (Which field was returned was arbitrary.)
+
   * Field code look-ups for input fields are now cached, which should result
     in slightly better performance from the library.
 
@@ -701,28 +856,36 @@ New in version 0.4.0:
 
   * Whole other format file fragments may also be added to the dirfile by
     calling dirfile_include().
+
   * A function is now present (dirfile_metaflush()) to flush metadata changes to
     disk (by re-writing format file fragments).  dirfile_flush() and
     dirfile_close() will also flush metadata, if needed.
+
   * STRING and CONST values can be retrieved/set by calling (get,put)_string()
     and (get,put)_constant().  (get,put)data() are only for vector type fields.
+
   * META fields can be queried/set like normal fields using the get/put
     functions and their full (slashed) field code.
+
   * In addition to get_nfields() and get_field_list(), there are now
     corresponding functions that provide lists/counts of vectors
     (get_vector_list()/get_nvectors()), particular field types
     (get_field_list_by_type()/get_nfields_by_type()), as well as functions
     that provide lists of string values (get_string_values()) and constant
     values (get_const_values()).
+
   * Analogous functions for the add, list, and counting functions exist for
     META fields, as well.
+
   * Extra flags have been added to dirfile_open() to permit indicating the
     encoding type, if not specified in the dirfile itself.
+
   * DIRFILE struct members and gd_entry_t private members are now completely
     hidden from the public interface.  Where previously callers could query
     dirfile->error to check for an error, they must now call get_error(dirfile).
     This change was made to reduce unintentional ABI breakage when modifying
     internal library properties.
+
   * GD_VERBOSE has been added to the list of available dirfile_open() flags.
     If this flag is specified, GetData will write errors to stderr as
     encountered.
@@ -732,6 +895,7 @@ New in version 0.4.0:
   * Error codes which cannot be returned by the legacy API might not have a
     corresponding string in GD_ERROR_CODES[].  Instead, these entries will
     simply be the NULL pointer.
+
   * No facilities exist in the legacy API to set or query CONST or STRING
     fields.  However, META fields of vector type can be queried/set using
     GetData() and PutData(), as in the new API.
@@ -764,10 +928,12 @@ New in version 0.3.0:
 
   * GetData now supports Dirfile Standards Version 5 which includes support
     for signed 8-bit, and signed and unsigned 64-bit integer types.
+
   * As part of Standards Version 5, the restriction on field name length has
     been removed.  (The filesystem will impose an effective limit on RAW fields
     of a few hundred characters, and format file lines are limited to several
     thousand, limiting derived field names.)
+
   * The library can now convert between big and little endiannesses.  An
     optional directive, ENDIAN, added in Standards Version 5, is available to
     specify the byte-sex of a dirfile.
@@ -778,8 +944,11 @@ New in version 0.3.0:
     support in the old interface.  The old interface (referred to as the "legacy
     API") is still supported, but doesn't fully implement Dirfile Standards
     Version 5.  See the README for full details.
+
   * putdata now respects FRAMEOFFSET.
+
   * putdata can now write to PHASE fields, and multi-bit BIT fields.
+
   * Some error codes have been renamed, and others removed or added, in order to
     regularise error codes between getdata and putdata in the sundry versions.
     Furthermore, the underlying values of some of these codes have changed
@@ -805,7 +974,9 @@ New in version 0.3.0:
   Legacy API Changes
 
   * The legacy API has been marked deprecated.
+
   * Error codes have changed per the description above.
+
   * Only the public members of FormatType are now initialised by GetFormat.
 
   Bindings

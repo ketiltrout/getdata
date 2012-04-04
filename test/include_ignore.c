@@ -38,7 +38,7 @@ int main(void)
   const char *format1_data = "data RAW UINT8 11\nREFERENCE data\n";
   int fd, error1, error2, r = 0;
   char *reference;
-  gd_spf_t spf;
+  unsigned int spf;
   DIRFILE *D;
 
   rmdirfile();

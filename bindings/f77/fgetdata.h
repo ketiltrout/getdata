@@ -676,6 +676,18 @@ void F77_FUNC(gdflag, GDFLAG) (int *flags, const int *dirfile, const int *set,
 
 void F77_FUNC(gdvbpx, GDVBPX) (const int *dirfile, const char *prefix,
     const int *prefix_l);
+
+void F77_FUNC(gdmxlb, GDMXLB) (const int *dirfile, const int *lookback);
+
+void F77_FUNC(gdnent, GDNENT) (int *nentries, const int *dirfile,
+    const char *parent, const int *parent_l, const int *type, const int *flags);
+
+void F77_FUNC(gdentx, GDENTX) (int* max, const int* dirfile, const char *parent,
+    const int *parent_l, const int *type, const int *flags);
+
+void F77_FUNC(gdentn, GDENTN) (char *name, int *name_l, const int *dirfile,
+    const char *parent, const int *parent_l, const int *type, const int *flags,
+    const int *field_num);
 #ifdef __cplusplus
 }
 #endif

@@ -36,7 +36,7 @@ int main(void)
   const char *format_data = "data CONST UINT8 13\n"
     "raw RAW UINT8 data\n";
   int fd, ret, error, r = 0;
-  gd_spf_t spf;
+  unsigned int spf;
   DIRFILE *D;
 
   rmdirfile();

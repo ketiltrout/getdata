@@ -63,7 +63,7 @@ sub printfmt {
     return "%g;%g";
   } elsif ($_ eq "double") {
     return "%g";
-  } elsif ($_ eq "gd_bit_t" or $_ eq "gdpu_bitnum_t" or $_ eq "gdpu_numbits_t"
+  } elsif ($_ eq "gdpu_bitnum_t" or $_ eq "gdpu_numbits_t"
       or $_ eq "gd_windop_t")
   {
     return "%i";
@@ -71,7 +71,7 @@ sub printfmt {
     return "%02x";
   } elsif ($_ eq "gd_shift_t" or $_ eq "gdpu_shift_t") {
     return "%lli";
-  } elsif ($_ eq "gd_spf_t" or $_ eq "gdpu_spf_t" or $_ eq "gd_count_t") {
+  } elsif ($_ eq "gdpu_spf_t") {
     return "%u";
   } elsif ($_ eq "gd_type_t" or $_ eq "gdpu_type_t") {
     return "%03x";

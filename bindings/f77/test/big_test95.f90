@@ -200,8 +200,8 @@ program big_test
 
   character (len=slen), dimension(3) :: strings
   character (len=slen), dimension(3) :: st
-  character (len=flen), dimension(nfields + 8) :: fields
-  character (len=flen), dimension(nfields + 8) :: flist
+  character (len=flen), dimension(nfields + 11) :: fields
+  character (len=flen), dimension(nfields + 11) :: flist
   character (len=GD_FIELD_LEN) :: str
   integer(1), dimension(80) :: datadata
   integer :: i, d, n, l, ne
@@ -234,7 +234,7 @@ program big_test
   'mplex      ', 'mult       ', 'phase      ', 'polynom    ', 'recip      ', &
   'sbit       ', 'string     ', 'window     ', '           ', '           ', &
   '           ', '           ', '           ', '           ', '           ', &
-  '           ' /)
+  '           ', '           ', '           ', '           ' /)
 
   open(1, file=frmat, status='new')
   write(1, *) '/ENDIAN little'
@@ -938,7 +938,7 @@ program big_test
   'new1       ', 'new10      ', 'new13      ', 'new2       ', 'new3       ', &
   'new4       ', 'new5       ', 'new6       ', 'new7       ', 'new8       ', &
   'new9       ', 'phase      ', 'polynom    ', 'recip      ', 'sbit       ', &
-  'window     ' /)
+  'window     ', '           ', '           ', '           ' /)
   l = flen
   call fgd_vector_list(flist, d, l)
   call check_ok(ne, 45, d)
@@ -1269,7 +1269,7 @@ program big_test
   'mnew10     ', 'mnew4      ', '           ', '           ', '           ', &
   '           ', '           ', '           ', '           ', '           ', &
   '           ', '           ', '           ', '           ', '           ', &
-  '           ' /)
+  '           ', '           ', '           ', '           ' /)
   l = flen
   call fgd_mvector_list(flist, d, "data", l)
   call check_ok2(ne, 66, i, d)
@@ -2479,7 +2479,7 @@ program big_test
   call check_int2(ne, 230, 6, ent%count_max, 12)
 
 ! 231: fgd_alter_mplex check
-  call fgd_alter_mplex(d, 'new21', 'in3', 'in4', GD_COUNT_MAX, 7)
+  call fgd_alter_mplex(d, 'new21', 'in3', 'in4', -1, 7)
   call check_ok2(ne, 231, 1, d)
 
   n = fgd_entry(d, 'new21', ent)
@@ -2491,15 +2491,15 @@ program big_test
   call check_str2(ne, 231, 5, ent%field(2), 'in4')
   call check_int2(ne, 231, 6, ent%count_max, 7)
 
-! 232: fgd_tokenise check
+! 232: fgd_strtok check
   l = slen
-  call fgd_tokenise(str, l, d, '"test1 test2" test3\ test4 test5', 1)
+  call fgd_strtok(str, l, d, '"test1 test2" test3\ test4 test5', 1)
   call check_ok2(ne, 232, 1, d)
   call check_int2(ne, 232, 2, l, slen)
   call check_str2(ne, 232, 3, str, 'test1 test2')
 
   l = slen
-  call fgd_tokenise(str, l, d, '"test1 test2" test3\ test4 test5', 2)
+  call fgd_strtok(str, l, d, '"test1 test2" test3\ test4 test5', 2)
   call check_ok2(ne, 232, 4, d)
   call check_int2(ne, 232, 5, l, slen)
   call check_str2(ne, 232, 6, str, 'test3 test4')
@@ -2521,6 +2521,44 @@ program big_test
 ! 236: fgd_verbose_prefix check
   call fgd_verbose_prefix(d, "big_test95")
   call check_ok(ne, 236, d)
+
+! 237: fgd_nentries check
+  n = fgd_nentries(d, "data", GD_SCALAR_ENTRIES, IOR(GD_ENTRIES_HIDDEN, &
+  GD_ENTRIES_NOALIAS))
+  call check_ok2(ne, 237, 1, d)
+  call check_int2(ne, 237, 1, n, 5)
+  n = fgd_nentries(d, "", GD_VECTOR_ENTRIES, IOR(GD_ENTRIES_HIDDEN, &
+  GD_ENTRIES_NOALIAS))
+  call check_ok2(ne, 237, 2, d)
+  call check_int2(ne, 237, 2, n, 28)
+
+! 238: fgd_field_name_max check
+  i = fgd_entry_name_max(d, "", GD_VECTOR_ENTRIES, IOR(GD_ENTRIES_HIDDEN, &
+    GD_ENTRIES_NOALIAS))
+  call check_ok(ne, 238, d)
+  call check_int(ne, 238, i, 7)
+
+! 239: fgd_field_list check
+  fields = (/    'INDEX      ', 'bit        ', 'data       ', 'div        ', &
+  'lincom     ', 'linterp    ', 'mplex      ', 'mult       ', 'new1       ', &
+  'new13      ', 'new14      ', 'new15      ', 'new16      ', 'new18      ', &
+  'new19      ', 'new2       ', 'new21      ', 'new3       ', 'new4       ', &
+  'new5       ', 'new6       ', 'new7       ', 'new8       ', 'phase      ', &
+  'polynom    ', 'recip      ', 'sbit       ', 'window     ' /)
+  l = flen
+  call fgd_entry_list(flist, d, "", GD_VECTOR_ENTRIES, IOR(GD_ENTRIES_HIDDEN, &
+      GD_ENTRIES_NOALIAS), l)
+  call check_ok(ne, 239, d)
+  call check_int(ne, 239, l, flen)
+
+  do i = 1, n
+  call check_str2(ne, 239, i, flist(i), fields(i))
+  end do
+
+! 240: fgd_mplex_lookback check
+  call fgd_mplex_lookback(d, GD_LOOKBACK_ALL)
+  call check_ok(ne, 240, d)
+
 
  
 

@@ -1,6 +1,6 @@
 .\" gd_getdata.3.  The gd_getdata man page.
 .\"
-.\" Copyright (C) 2008, 2009, 2010, 2011 D. V. Wiebe
+.\" Copyright (C) 2008, 2009, 2010, 2011, 2012 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_getdata 3 "14 October 2011" "Version 0.8.0" "GETDATA"
+.TH gd_getdata 3 "1 April 2012" "Version 0.8.0" "GETDATA"
 .SH NAME
 gd_getdata \(em retrieve data from a dirfile database
 .SH SYNOPSIS
@@ -65,17 +65,17 @@ requested.
 Unless using
 .B GD_HERE 
 (see below), the first sample returned will be
-.RS
+.IP
 .IR first_frame " * " samples_per_frame " + " first_sample
-.RE
+.PP
 as measured from the start of the dirfile, where
 .I samples_per_frame
 is the number of samples per frame as returned by
 .BR gd_spf (3).
 The number of samples fetched is, similarly,
-.RS
+.IP
 .IR num_frames " * " samples_per_frame " + " num_samples .
-.RE
+.PP
 Although calling
 .BR gd_getdata ()
 using both samples and frames is possible, the function is typically called
@@ -93,7 +93,7 @@ as
 This will result in the read occurring at the current position of the I/O
 pointer for the field (see
 .BR gd_seek (3)
-for a discussion of I/O pointers).  In this case, the value of
+for a discussion of field I/O pointers).  In this case, the value of
 .I first_sample
 is ignored.
 
@@ -156,7 +156,90 @@ be returned.
 
 Upon successful completion, the I/O pointer of the field will be on the sample
 immediately following the last sample returned.  On error, the position of the
-I/O pointer is not specified.
+I/O pointer is not specified, and may not even be well defined.
+
+.SS Behaviour While Reading Specific Field Types
+
+.TP
+.BR PHASE :
+A forward-shifted
+.B PHASE
+field will always encounter the end-of-field marker before its input field does.
+This has ramifications when reading
+streaming data
+with
+.BR gd_getdata ()
+and using
+.BR gd_nframes (3)
+to gauge field lengths (that is: a
+forward-shifted
+.B PHASE
+field always has less data in it than
+.BR gd_nframes (3)
+implies that it does).  As with any other field,
+.BR gd_getdata ()
+will return a short count whenever a read from a
+.B PHASE
+field encounters the end-of-field marker.
+
+Backward-shifted
+.B PHASE
+fields do not suffer from this problem, since
+.BR gd_getdata ()
+pads reads past the beginning-of-field marker with NaN or zero as appropriate.
+Database creators who wish to use the
+.B PHASE
+field type with streaming data are encouraged to work around this limitation
+by only using backward-shifted 
+.B PHASE
+fields, by writing
+.B RAW
+data at the maximal frame lag, and then back-shifting all data which should have
+been written earlier.  Another possible work-around is to write
+systematically less data to the reference
+.B RAW
+field in proportion to the maximal forward phase shift.  This method will work
+with applications which respect the database size reported by
+.BR gd_nframes (3)
+resulting in these applications effectively ignoring all frames past the frame
+containing the maximally forward-shifted
+.B PHASE
+field's end-of-field marker.
+
+.TP
+.BR MPLEX :
+Reading an
+.B MPLEX
+field typically requires GetData to read data before the range returned in order
+to determine the value of the first sample returned.  This can become expensive
+if the encoding of the underlying RAW data does not support seeking backwards
+(which is true of most compression encodings).  How much preceding data GetData
+searches for the initial value of the returned data can be adjusted, or the
+lookback disabled completely, using
+.BR gd_mplex_lookback (3).
+If the initial value of the field is not found in the data searched, GetData
+will fill the returned vector, up to the next available sample of the
+mulitplexed field, with zero for integer return types, or IEEE-754-conforming
+NaN (not-a-number) for floating point return types, as it does when providing
+data before the beginning-of-field.
+
+GetData caches the value of the last sample from every
+.B MPLEX
+it reads so that a subsequent read of the field starting from the following
+sample (either through an expicit starting sample given by the caller or else
+implicitly using
+.BR GD_HERE )
+will not need to scan the field backwards.  This cache is invalidated if a
+different return type is used, or if an intervening operation moves the field's
+I/O pointer.
+
+.TP
+.BR WINDOW :
+The samples of a
+.B WINDOW
+for which the field conditional is false will be filled with either zero for
+integer return types, or IEEE-754-conforming NaN (not-a-number) for floating
+point return types.
 
 .SH RETURN VALUE
 In all cases,
@@ -264,50 +347,7 @@ as scratch space while computing derived fields.  As a result, if an error is
 encountered during the computation, the contents of this memory buffer are
 unspecified, and may have been modified by this call, even though
 .BR gd_getdata ()
-will report zero data returned on error.
-.SH LIMITATIONS
-The
-.B PHASE
-field type is poorly defined, since a forward-shifted
-.B PHASE
-field will always encounter the end-of-field marker before its input field does.
-This has ramifications when using
-.BR gd_getdata ()
-with streaming data.  The Dirfile
-Standards make tacit admission to this problem by indicating the results of
-reading a
-.B PHASE
-field beyond the beginning- or end-of-field is "implementation dependent" (see
-.BR dirfile-format (5)).
-As with any other field,
-.BR gd_getdata ()
-will return a short count whenever a read from a
-.B PHASE
-field encounters the end-of-field marker.
-
-Backward-shifted
-.B PHASE
-fields do not suffer from this problem, since
-.BR gd_getdata ()
-pads reads past the beginning-of-field marker with NaN or zero as appropriate.
-Database creators who wish to use the
-.B PHASE
-field type with streaming data are encouraged to work around this limitation
-by only using backward-shifted 
-.B PHASE
-fields, by writing
-.B RAW
-data at the maximal time lag, and then back-shifting all data which should have
-been written earlier.  Another possible work-around is to write
-systematically less data to the first
-.B RAW
-field in proportion to the maximal forward phase shift.  This method will work
-with applications which respect the database size reported by
-.BR gd_nframes (3)
-resulting in these applications effectively ignoring all frames past the frame
-containing the maximally forward-shifted
-.B PHASE
-field's end-of-field marker.
+will report zero samples returned on error.
 
 .SH SEE ALSO
 .BR dirfile (5),
@@ -316,6 +356,7 @@ field's end-of-field marker.
 .BR gd_get_constant (3),
 .BR gd_error (3),
 .BR gd_error_string (3),
+.BR gd_mplex_lookback (3),
 .BR gd_nframes (3),
 .BR gd_seek (3),
 .BR gd_spf (3),

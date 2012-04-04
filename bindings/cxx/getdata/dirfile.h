@@ -122,6 +122,9 @@ namespace GetData {
 
       GetData::Entry* Entry(const char *field_code) const;
 
+      const char **EntryList(const char *parent = NULL, unsigned int type = 0,
+          unsigned int flags = 0) const;
+
       off_t EoF(const char *field_code) const;
 
       int Error() const;
@@ -191,6 +194,8 @@ namespace GetData {
 
       const char **MFieldListByType(const char *parent, EntryType type) const;
 
+      int MplexLookback(int lookback) const;
+
       const char **MStrings(const char *parent) const;
 
       int MoveAlias(const char* field_code, int new_fragment) const;
@@ -198,6 +203,9 @@ namespace GetData {
       const char **MVectorList(const char *parent) const;
 
       int NAliases(const char* field_code) const;
+
+      unsigned int NEntries(const char *parent = NULL, unsigned int type = 0,
+          unsigned int flags = 0) const;
 
       unsigned int NFields() const;
 
@@ -253,7 +261,7 @@ namespace GetData {
 
       off_t Tell(const char* field_code) const;
 
-      char *Tokenise(const char *string = NULL);
+      char *StrTok(const char *string = NULL);
 
       int UnHide(const char* field_code) const;
 
@@ -261,7 +269,7 @@ namespace GetData {
 
       int Validate(const char* field_code) const;
 
-      void VerbosePrefix(const char *prefix = NULL) const;
+      int VerbosePrefix(const char *prefix = NULL) const;
 
       const char **VectorList() const;
 

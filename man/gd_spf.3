@@ -1,6 +1,6 @@
 .\" gd_spf.3.  The gd_spf man page.
 .\"
-.\" Copyright (C) 2008, 2009, 2010, 2011 D. V. Wiebe
+.\" Copyright (C) 2008, 2009, 2010, 2011, 2012 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_spf 3 "19 August 2011" "Version 0.8.0" "GETDATA"
+.TH gd_spf 3 "1 April 2012" "Version 0.8.0" "GETDATA"
 .SH NAME
 gd_spf \(em returns the samples per frame for a field in a
 dirfile
@@ -22,7 +22,7 @@ dirfile
 .HP
 .nh
 .ad l
-.BI "gd_spf_t gd_spf(DIRFILE *" dirfile ", const char *" field_code );
+.BI "unsigned int gd_spf(DIRFILE *" dirfile ", const char *" field_code );
 .hy
 .ad n
 .SH DESCRIPTION
@@ -34,9 +34,7 @@ and returns the number of samples per frame for the field
 .IR field_code .
 If
 .I field_code
-contains a valid representation suffix, it will be ignored.  The
-.IR gd_spf_t
-type is an unsigned 16-bit integer type.
+contains a valid representation suffix, it will be ignored.
 
 The 
 .I dirfile

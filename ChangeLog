@@ -1,3 +1,133 @@
+2012-04-01   D. V. Wiebe <getdata@ketiltrout.net> svn:694
+	* src/getdata.h.in: Deprecate gd_bit_t and gd_spf_t.  Remove gd_count_t.
+	* src/getdata.h.in bindings/make_parameters.c: Remove GD_COUNT_MAX.
+	* cmake/CMakeLists.txt: Remove DEFINE_gd_int16_t and DEFINE_gd_uint16_t.
+	* src/internal.h: Calculate GD_INT_TYPE and GD_UINT_TYPE.
+
+	* src/entry.c (_GD_CalculateEntry) src/flush.c (_GD_FieldSpec) src/getdata.c
+	(_GD_DoMplex) src/putdata.c (_GD_DoMplexOut gd_putdata64) src/del.c
+	(_GD_DeReference) src/parse.c (_GD_ParseMplex _GD_ParseBit) src/mod.c
+	(_GD_Change): Use GD_INT_TYPE when dealing with bitnum, numbits, count_max,
+	and count_val.
+	* src/add.c (gd_add_bit gd_add_sbit gd_add_mplex gd_madd_bit gd_madd_sbit
+	gd_madd_mplex) src/mod.c (gd_alter_bit gd_alter_sbit gd_alter_mplex)
+	bindings/python/pyentry.c (gdpy_entry_setnumbits gdpy_entry_setbitnum
+	gdpy_entry_setcountval gdpy_entry_setcountmax) bindings/cxx/mplexentry.cpp
+	(MplexEntry::MplexEntry MplexEntry::SetCountVal MplexEntry::SetCountMax)
+	bindings/cxx/sbitentry.cpp (SBitEntry::SBitEntry SBitEntry::SetFirstBit
+	SBitEntry::SetNumBits) bindings/cxx/test/big_test.cpp
+	bindings/cxx/bitentry.cpp (BitEntry::BitEntry BitEntry::SetFirstBit
+	BitEntry::SetNumBits) bindings/cxx/getdata/bitentry.h (FirstBit NumBits)
+	bindings/cxx/getdata/entry.h (FirstBit NumBits CountVal CountMax)
+	bindings/cxx/getdata/mplexentry.h (CountVal CountMax)
+	bindings/cxx/getdata/sbitentry.h (FirstBit NumBits) bindings/perl/GetData.xs
+	bindings/perl/typemap bindings/perl/simple_funcs.pl bindings/f77/fgetdata.c
+	(GDADBT GDADSB GDMDBT GDMDSB GDALBT GDALSB) bindings/idl/getdata.c
+	(gdidl_make_idl_entry gdidl_read_idl_entry gdidl_add_mplex gdidl_alter_mplex):
+	gd_bit_t, gd_count_t -> int.
+	* src/fpos.c (_GD_Seek) src/getdata.c (_GD_MultiplyData _GD_CMultiplyData
+	_GD_DivideData _GD_CDivideData _GD_WindowData _GD_CDivideData _GD_MplexData
+	_GD_DoLincom _GD_DoMultiply _GD_DoDivide _GD_DoWindow _GD_DoMplex
+	gd_getdata64) src/putdata.c (_GD_MplexOutData gd_putdata64) src/flimits.c
+	(_GD_GetEOF _GD_GetBOF gd_bof64) src/common.c (_GD_LinterpData
+	_GD_LincomData) src/add.c (gd_add_raw) src/spf.c (_GD_GetSPF gd_spf)
+	src/mod.c (_GD_SPFConvert) src/mod.c (gd_alter_entry) src/index.c
+	(gd_framenum_subset64) bindings/python/pyentry.c (gdpy_entry_setspf)
+	bindings/python/pydirfile.c (gdpy_dirfile_getdata) bindings/cxx/rawentry.cpp
+	(RawEntry::RawEntry RawEntry::SetSamplesPerFrame)
+	bindings/cxx/getdata/rawentry.h (SamplesPerFrame) bindings/perl/GetData.xs
+	bindings/perl/typemap bindings/perl/simple_funcs.pl bindings/f77/fgetdata.c
+	(GDADRW GDALRW) util/dirfile2ascii.c: gd_spf_t -> unsigned int.
+	* src/flush.c (_GD_WriteConst) src/mod.c (_GD_AlterScalar): Add missing
+	integer types.
+
+	* src/parse.c (_GD_ParseMplex): Make count_max optional.
+	* src/getdata.c (_GD_DoMplex) src/add.c (_GD_Add): Handle count_max == 0.
+
+	* src/getdata.h.in: Mark GD_FLOAT and GD_DOUBLE as deprecated.
+
+	* src/encoding.c (_GD_FiniRawIO): Handle short writes and IO errors.
+
+	* src/getdata.c (_GD_DoMplex): use D->lookback to determine how far to
+	search backwards.  Also, read data in chunks of size GD_BUFFER_SIZE.
+	* src/open.c (_GD_Open): Initialise D->lookback.
+	* src/globals.c (gd_mplex_lookback): Added.
+	* bindings/cxx/dirfile.cpp (Dirfile::MplexLookback)
+	bindings/perl/simple_funcs.xsin (mplex_lookback) bindings/f77/getdata.f90.in
+	(fgd_mplex_lookback) bindings/f77/fgetdata.c (GDMXLB) bindings/idl/getdata.c
+	(gdidl_mplex_lookback): Added.
+
+	* src/parse.c (gd_strtok): Renamed from gd_tokenise to avoid regional
+	spelling variations.  Bindings renamed accordingly (except for the F77
+	bindings).
+
+	* bindings/python/pygetdata.c: Add GD_E_EXISTS exception.
+
+	* bindings/python/pydirfile.h: Add mplex_lookback and verbose_prefix to
+	gdpy_constant_t.
+	* bindings/python/pydirfile.c (gdpy_dirfile_delete): Delete verbose_prefix.
+	* bindings/python/pydirfile.c (gdpy_dirfile_create): Initialise
+	mplex_lookback and verbose_prefix.
+	* bindings/python/pydirfile.c (gdpy_dirfile_verbose_prefix): Deleted.
+	* bindings/python/pydirfile.c (gdpy_dirfile_getverboseprefix
+	gdpy_dirfile_setverboseprefix gdpy_dirfile_getmplexlookback
+	gdpy_dirfile_setmplexlookback): Added.
+
+	* bindings/Makefile.am: add src/gd_config.h to the prerequisites of
+	make_parameters.
+
+	* src/flush.c (_GD_FlushFragment): Write /ENCODING for zzip and zzslim.
+
+	* src/meta_list.c: Merged into src/field_list.c
+	* src/nmeta.c: Merged into src/nfields.c
+
+	* src/add.c (_GD_InvalidEntype): Added.
+	* src/internal.h: Add entry_list and entry_list_flags to DIRFILE and
+	private_entry.
+	* src/internal.h (_GD_EntryIndex): Deleted.
+	* src/field_list.c (_GD_EntryIndex _GD_EntryList gd_entry_list): Added.
+	* src/field_list.c (_GD_ListEntry): Handle GD_ENTRIES_... flags.
+	* src/field_list.c (gd_field_list_by_type gd_vector_list gd_field_list
+	gd_mfield_list_by_type gd_mfield_list): Reimplement via gd_entry_list().
+
+	* src/nfields.c (_GD_NEntries gd_nentries): Added.
+	* src/nfields.c (gd_nfields gd_nvectors gd_nfields_by_type gd_nmfields
+	gd_nmvectors gd_nmfields_by_type): Reimplement via gd_nentries().
+
+	* src/field_list.c (gd_constants gd_carrays gd_strings gd_mconstants
+	gd_mcarrays gd_mstrings): Call _GD_NEntries for counts.
+
+	* src/entry.c (gd_hide gd_unhide) src/del.c (_GD_Delete) src/include.c
+	(gd_uninclude) src/add.c (_GD_Add): Delete count updates.
+
+	* src/name.c (_GD_Rename) src/del.c (_GD_Delete) src/include.c
+	(gd_uninclude) src/add.c (_GD_Add _GD_AddAlias): Invalidate metafield lists
+	too.
+	
+	* src/entry.c (_GD_FreeE) src/close.c (_GD_FreeD): Delete entry_lists.
+
+	* src/globals.c (gd_flags): Don't check GD_INVALID.
+
+	* bindings/python/pydirfile.c (gdpy_dirfile_nentries
+	gdpy_dirfile_entrylist) bindings/perl/GetData.xs (entry_list)
+	bindings/cxx/dirfile.cpp (Dirfile::NEntries Dirfile::EntryList)
+	bindings/f77/getdata.f90.in (fgd_nentries fgd_entry_name_max fgd_entry_list)
+	bindings/f77/fgetdata.c (GDNENT GDENTX GDENTN): Added.
+	* bindings/idl/getdata.c (gdidl_get_field_list gdidl_get_nfields)): Convert to
+	bindings for gd_entry_list and gd_nentries.
+
+	* bindings/python/test/big_test.py bindings/cxx/test/big_test.cpp
+	bindings/perl/test/big_test.t bindings/f77/test/big_test.f
+	bindings/f77/test/big_test95.f90 bindings/idl/test/big_test.pro: Add tests
+	237 through 240.
+
+	* test/elist_alias.c test/elist_hidden.c test/elist_scalar.c
+	test/get_lincom_null.c test/get_mplex_lball.c test/get_mplex_nolb.c
+	test/nentries_alias.c test/nentries_hidden.c test/nentries_scalar.c
+	test/parse_malias_meta.c test/parse_mplex_nomax.c: Added.
+
+	* man/: Updated.
+
 2012-03-28   D. V. Wiebe <getdata@ketiltrout.net> svn:691
 	* src/flush.c (_GD_FieldSpec) src/parse.c (_GD_ParseMplex): Swap order of
 	fields in MPLEX specification.
@@ -208,7 +338,7 @@
 	recreate the format file; just truncate it.  (This helps kst not get
 	confused when monitoring a dirfile which gets truncated.)
 
-2012-02-14   D. V. Wiebe <getdata@ketiltrout.net> svn:656,657
+2012-02-14   D. V. Wiebe <getdata@ketiltrout.net> svn:656 svn:657
 	* src/putdata.c (gd_putdata): Return early if num_samp == 0.
 	* test/put_zero.c: Added.
 
@@ -4375,7 +4505,7 @@
 	* src/common.c (_GD_GetEntry): Removed FILEFRAM as an alias for INDEX per
 	discussion with Barth.
 
-2008-10-10   D. V. Wiebe <getdata@ketiltrout.net>  svn:129
+2008-10-10   D. V. Wiebe <getdata@ketiltrout.net>  svn:128 svn:129
 	* src/entry.c (_GD_FreeE): Renamed from dirfile_free_entry_strings (for
 	which a new boilerplate function has been created).  Separated cleaning up
 	internal and externally created entries.  Internally, the library now
@@ -4400,7 +4530,7 @@
 	encoding specific *touch() function.
 	* src/raw.c (_GD_RawTouch): Added.  (Also used for the ASCII encoding).
 
-	* src/meta_list.c: Fixed all functions to get them working.
+	* src/meta_list.c: Added (META version of field_list.c)
 	* src/field_list.c: Call _GD_ClearError in all public functions.
 	* src/nmeta.c: Added (META version of nfields.c)
 

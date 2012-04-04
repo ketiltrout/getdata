@@ -18,8 +18,6 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Test gd_fragmentname */
-#define _SVID_SOURCE
 #include "test.h"
 
 #include <stdlib.h>

@@ -524,8 +524,8 @@ static size_t _GD_DoPolynomOut(DIRFILE *restrict D, gd_entry_t *restrict E,
   } while (0)
 
 static void _GD_MplexOutData(DIRFILE *restrict D, void *restrict A,
-    gd_spf_t spfA, const uint16_t *restrict B, gd_spf_t spfB,
-    const void *restrict C, gd_type_t type, gd_count_t val, size_t n)
+    unsigned int spfA, const int *restrict B, unsigned int spfB,
+    const void *restrict C, gd_type_t type, int val, size_t n)
 {
   size_t i;
 
@@ -559,9 +559,9 @@ static size_t _GD_DoMplexOut(DIRFILE *restrict D, gd_entry_t *restrict E,
 {
   size_t n_wrote = 0, num_samp2;
   void *tmpbuf;
-  uint16_t *cntbuf;
+  int *cntbuf;
   off64_t first_samp2;
-  gd_spf_t spf1, spf2;
+  unsigned int spf1, spf2;
 
   dtrace("%p, %p, %lli, %zu, 0x%X, %p", D, E, (long long)first_samp, num_samp,
       data_type, data_in);
@@ -589,7 +589,7 @@ static size_t _GD_DoMplexOut(DIRFILE *restrict D, gd_entry_t *restrict E,
   first_samp2 = first_samp * spf2 / spf1;
 
   tmpbuf = _GD_Alloc(D, data_type, num_samp);
-  cntbuf = _GD_Alloc(D, GD_UINT16, num_samp2);
+  cntbuf = _GD_Alloc(D, GD_INT_TYPE, num_samp2);
 
   if (tmpbuf == NULL || cntbuf == NULL) {
     free(tmpbuf);
@@ -598,13 +598,13 @@ static size_t _GD_DoMplexOut(DIRFILE *restrict D, gd_entry_t *restrict E,
   }
 
   memset(tmpbuf, 0, num_samp * GD_SIZE(data_type));
-  memset(cntbuf, 0, num_samp2 * GD_SIZE(GD_UINT16));
+  memset(cntbuf, 0, num_samp2 * GD_SIZE(GD_INT_TYPE));
 
   _GD_DoField(D, E->e->entry[0], E->e->repr[0], first_samp, num_samp, data_type,
       tmpbuf);
 
   _GD_DoField(D, E->e->entry[1], E->e->repr[1], first_samp2, num_samp2,
-      GD_UINT16, cntbuf);
+      GD_INT_TYPE, cntbuf);
 
   if (D->error != GD_E_OK) {
     free(cntbuf);
@@ -783,7 +783,7 @@ size_t gd_putdata64(DIRFILE* D, const char *field_code_in, off64_t first_frame,
   gd_entry_t *entry;
   char* field_code;
   int repr;
-  gd_spf_t spf = 0;
+  unsigned int spf = 0;
 
   dtrace("%p, \"%s\", %lli, %lli, %zu, %zu, 0x%X, %p", D, field_code_in,
       (long long)first_frame, (long long)first_samp, num_frames, num_samp,
@@ -811,7 +811,7 @@ size_t gd_putdata64(DIRFILE* D, const char *field_code_in, off64_t first_frame,
     return 0;
   }
 
-  if (entry->field_type & GD_SCALAR_ENTRY)
+  if (entry->field_type & GD_SCALAR_ENTRY_BIT)
     _GD_SetError(D, GD_E_DIMENSION, GD_E_DIM_CALLER, NULL, 0, field_code);
 
   if (field_code != field_code_in)

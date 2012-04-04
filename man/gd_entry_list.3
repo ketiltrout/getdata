@@ -1,0 +1,200 @@
+.\" gd_entry_list.3.  The gd_entry_list man page.
+.\"
+.\" Copyright (C) 2012 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_entry_list 3 "1 April 2012" "Version 0.8.0" "GETDATA"
+.SH NAME
+gd_entry_list, gd_field_list, gd_field_list_by_type gd_mfield_list, gd_mfield_list_by_type,
+gd_mvector_list, gd_vector_list \(em list field entries in a dirfile
+.SH SYNOPSIS
+.B #include <getdata.h>
+.HP
+.nh
+.ad l
+.BI "const char **gd_entry_list(DIRFILE *" dirfile ", const char *" parent ,
+.BI "unsigned int " type ", unsigned int " flags );
+.HP
+.BI "const char **gd_field_list(DIRFILE *" dirfile );
+.HP
+.BI "const char **gd_field_list_by_type(DIRFILE *" dirfile ", gd_entype_t " type );
+.HP
+.BI "const char **gd_mfield_list(DIRFILE *" dirfile ", const char *" parent );
+.HP
+.BI "const char **gd_mfield_list_by_type(DIRFILE *" dirfile ,
+.BI "const char *" parent ", gd_entype_t " type );
+.HP
+.BI "const char **gd_mvector_list(DIRFILE *" dirfile ", const char *" parent );
+.HP
+.BI "const char **gd_vector_list(DIRFILE *" dirfile );
+.hy
+.ad n
+.SH DESCRIPTION
+The
+.BR gd_entry_list ()
+function queries a dirfile(5) database specified by
+.I dirfile
+and returns a list of names of field entries satisfiying the supplied criteria.
+If
+.I parent
+is non-NULL, metafields under the field specified by
+.I parent
+are considered; otherwise, top-level fields are considered, and metafields
+ignored.
+
+The
+.I type
+argument should be one of the following symbols indicating an explicit entry
+type to list:
+.IP
+.nh
+.ad l
+.BR GD_BIT_ENTRY ", " GD_CARRAY_ENTRY ", " GD_CONST_ENTRY ", " GD_DIVIDE_ENTRY ,
+.BR GD_INDEX_ENTRY ", " GD_LINCOM_ENTRY ", " GD_LINTERP_ENTRY ,
+.BR GD_MPLEX_ENTRY ", " GD_MULTIPLY_ENTRY ", " GD_PHASE_ENTRY ,
+.BR GD_POLYNOM_ENTRY ", " GD_RAW_ENTRY ", " GD_RECIP_ENTRY ,
+.BR GD_SBIT_ENTRY ", " GD_STRING_ENTRY ", " GD_WINDOW_ENTRY .
+.ad n
+.hy
+.PP
+.RB ( GD_INDEX_ENTRY
+is a special field type for the implicit
+.I INDEX
+field) or else one of the following special symbols:
+.TP
+.B GD_ALL_ENTRIES \fR(= 0)
+Count entries of all types.
+.TP
+.B GD_SCALAR_ENTRIES
+Count only scalar field types
+.RB ( CONST ", " CARRAY ", " STRING ).
+.TP
+.B GD_VECTOR_ENTRIES
+Count only vector field types (all field types except the scalar field types
+listed above).
+.PP
+The
+.I flags
+argument should be zero or more of the following flags, bitwise or'd together:
+.TP
+.B GD_ENTRIES_HIDDEN
+Include hidden entries (see
+.BR gd_hidden (3))
+in the list: normally hidden entries are skipped;
+.TP
+.B GD_ENTRIES_NOALIAS
+Exclude aliases from the list: normally aliases are considered the same as
+their target (that is: if a field satisfies the criteria, both its canonical
+name and all its aliases will appear in the list).
+.PP
+The array returned will be de-allocated by a call to
+.BR gd_close (3)
+and should not be de-allocated by the caller.  The list returned should not be
+assumed to be in any particular order.  The array is terminated by a NULL
+pointer.  The number of strings in the array can be obtained from an equivalent
+call to
+.BR gd_nentries (3).
+
+The caller may not modify any strings in the array, or the array itself.  Doing
+so may cause database corruption.  The pointer returned is guaranteed to be
+valid at least until
+.BR gd_entry_list ()
+is called again on the same DIRFILE object, or until the array is de-allocated
+by a call to
+.BR gd_close (3).
+(Although the data may have become obsolete, if metadata have been modified in
+the interrim.)
+.SS Special Cases
+The call
+.RS
+.BI gd_field_list( dirfile );
+.RE
+is equivalent to
+.RS
+.BI gd_entry_list( dirfile ", NULL, GD_ALL_ENTRIES, 0);
+.RE
+.PP
+The call
+.RS
+.BI gd_field_list_by_type( dirfile ", " type );
+.RE
+is equivalent to
+.RS
+.BI gd_entry_list( dirfile ", NULL, " type ", 0);"
+.RE
+.PP
+The call
+.RS
+.BI gd_mfield_list( dirfile ", " parent );
+.RE
+is equivalent to
+.RS
+.BI gd_entry_list( dirfile ", " parent ", GD_ALL_ENTRIES, 0);"
+.RE
+.PP
+The call
+.RS
+.BI gd_mfield_list_by_type( dirfile ", " parent ", " type );
+.RE
+is equivalent to
+.RS
+.BI gd_entry_list( dirfile ", " parent ", " type ", 0);"
+.RE
+.PP
+The call
+.RS
+.BI gd_mvector_list( dirfile ", " parent );
+.RE
+is equivalent to
+.RS
+.BI gd_entry_list( dirfile ", " parent ", GD_VECTOR_ENTRIES, 0);"
+.RE
+.PP
+The call
+.RS
+.BI gd_vector_list( dirfile );
+.RE
+is equivalent to
+.RS
+.BI gd_entry_list( dirfile ", NULL, GD_VECTOR_ENTRIES, 0);"
+.RE
+
+.SH RETURN VALUE
+Upon successful completion, these functions returns a pointer to an array of
+strings containing the names of all the entries in the database satisfying the
+supplied criteria.  On error, they return zero and sets
+the dirfile error to a non-zero error value.  Possible error values are:
+.TP 8
+.B GD_E_BAD_CODE
+The supplied parent field code was not found, or referred to a metafield itself.
+.TP
+.B GD_E_BAD_DIRFILE
+The supplied dirfile was invalid.
+.TP
+.B GD_E_BAD_ENTRY
+The
+.I type
+parameter supplied was not one of the symbols listed above.
+.PP
+The dirfile error may be retrieved by calling
+.BR gd_error (3).
+A descriptive error string for the last error encountered can be obtained from
+a call to
+.BR gd_error_string (3).
+.SH SEE ALSO
+.BR dirfile (5),
+.BR gd_open (3),
+.BR gd_error (3),
+.BR gd_error_string (3),
+.BR gd_hidden (3),
+.BR gd_nentries (3)

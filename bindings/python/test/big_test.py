@@ -1301,7 +1301,7 @@ except:
 
 # 156: invalid dirfile check
 try:
-  m = pygetdata.dirfile(None);
+  m = pygetdata.dirfile(None)
 except:
   CheckOK2(156,1)
 
@@ -1311,19 +1311,19 @@ except:
   CheckException2(156,2,pygetdata.BadDirfileError)
 
 try:
-  m.discard();
+  m.discard()
 except:
-  pass;
+  pass
 
 # 157: standards version
 try:
-  n = d.standards;
+  n = d.standards
 except:
-  CheckOK2(157,1);
+  CheckOK2(157,1)
 CheckSimple(157,n,9)
 
 try:
-  d.standards = 0;
+  d.standards = 0
 except:
   CheckException2(157,2,pygetdata.BadVersionError)
 
@@ -1624,7 +1624,7 @@ else:
 try:
   n = d.tell("data")
 except:
-  CheckOK(204);
+  CheckOK(204)
 CheckSimple(204,n,288)
 
 # 205: gd_hide check
@@ -1903,15 +1903,15 @@ CheckSimple2(231, 3, ent.count_val, 3)
 CheckSimple2(231, 4, ent.in_fields, ( 'in3', 'in4' ))
 CheckSimple2(231, 5, ent.count_max, 7)
 
-# 232: gd_tokenise check
+# 232: gd_strtok check
 try:
-  str = d.tokenise("\"test1 test2\" test3\ test4");
+  str = d.strtok("\"test1 test2\" test3\ test4")
 except:
   CheckOK2(232, 1)
 CheckSimple2(232, 2, str, "test1 test2")
 
 try:
-  str = d.tokenise()
+  str = d.strtok()
 except:
   CheckOK2(232, 3)
 CheckSimple2(232, 4, str, "test3 test4")
@@ -1942,11 +1942,53 @@ except:
 
 # 236: gd_verbose_prefix check
 try:
-  n = d.verbose_prefix("big_test: ")
+  CheckSimple(236, d.verbose_prefix, None)
 except:
-  CheckOK(236)
-CheckSimple(236, n, None)
- 
+  CheckOK2(236, 1)
+
+try:
+  d.verbose_prefix = "big_test: "
+except:
+  CheckOK2(236, 2)
+CheckSimple(236, d.verbose_prefix, "big_test: ")
+
+# 237: gd_nentries check
+try:
+  n = d.nentries("data", pygetdata.SCALAR_ENTRIES,
+      pygetdata.ENTRIES_HIDDEN | pygetdata.ENTRIES_NOALIAS)
+except:
+  CheckOK2(237, 1)
+CheckSimple2(237, 1, n, 4)
+try:
+  n = d.nentries(type = pygetdata.VECTOR_ENTRIES,
+      flags = pygetdata.ENTRIES_HIDDEN | pygetdata.ENTRIES_NOALIAS)
+except:
+  CheckOK2(237, 2)
+CheckSimple2(237, 2, n, 23)
+
+# 239: gd_entry_list check
+try:
+  n = d.entry_list(type = pygetdata.VECTOR_ENTRIES,
+      flags = pygetdata.ENTRIES_HIDDEN | pygetdata.ENTRIES_NOALIAS)
+except:
+  CheckOK(239)
+CheckSimple(239,n, ['INDEX', 'bit', 'data', 'div', 'lincom', 'linterp',
+  'mplex', 'mult', 'new1', 'new14', 'new16', 'new18', 'new2', 'new21', 'new4',
+  'new6', 'new7', 'new8', 'phase', 'polynom', 'recip', 'sbit', 'window'])
+
+# 240: gd_mplex_lookback check
+try:
+  d.mplex_lookback = pygetdata.LOOKBACK_ALL
+except:
+  CheckOK(240, 1)
+
+try:
+  n = d.mplex_lookback
+except:
+  CheckOK2(240, 2)
+CheckSimple(240, n, pygetdata.LOOKBACK_ALL)
+
+
 
 
 

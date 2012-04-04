@@ -646,7 +646,7 @@ static void _GD_CPolynomData(DIRFILE *restrict D, void *restrict data,
 /* MultiplyData: Multiply A by B.  B is unchanged.
 */
 static void _GD_MultiplyData(DIRFILE *restrict D, void *restrict A,
-    gd_spf_t spfA, double *B, gd_spf_t spfB, gd_type_t type, size_t n)
+    unsigned int spfA, double *B, unsigned int spfB, gd_type_t type, size_t n)
 {
   size_t i;
 
@@ -697,7 +697,8 @@ static void _GD_MultiplyData(DIRFILE *restrict D, void *restrict A,
 /* CMultiplyData: Multiply A by B.  B is complex.
 */
 static void _GD_CMultiplyData(DIRFILE *restrict D, void *restrict A,
-    gd_spf_t spfA, GD_DCOMPLEXP(B), gd_spf_t spfB, gd_type_t type, size_t n)
+    unsigned int spfA, GD_DCOMPLEXP(B), unsigned int spfB, gd_type_t type,
+    size_t n)
 {
   size_t i;
 
@@ -741,8 +742,9 @@ static void _GD_CMultiplyData(DIRFILE *restrict D, void *restrict A,
 
 /* DivideData: Divide B by A.  B is unchanged.
 */
-static void _GD_DivideData(DIRFILE *restrict D, void *restrict A, gd_spf_t spfA,
-    double *restrict B, gd_spf_t spfB, gd_type_t type, size_t n)
+static void _GD_DivideData(DIRFILE *restrict D, void *restrict A,
+    unsigned int spfA, double *restrict B, unsigned int spfB, gd_type_t type,
+    size_t n)
 {
   size_t i;
 
@@ -794,7 +796,8 @@ static void _GD_DivideData(DIRFILE *restrict D, void *restrict A, gd_spf_t spfA,
 /* CDivideData: Divide A by B.  B is complex.
 */
 static void _GD_CDivideData(DIRFILE *restrict D, void *restrict A,
-    gd_spf_t spfA, GD_DCOMPLEXP(B), gd_spf_t spfB, gd_type_t type, size_t n)
+    unsigned int spfA, GD_DCOMPLEXP(B), unsigned int spfB, gd_type_t type,
+    size_t n)
 {
   size_t i;
 
@@ -861,9 +864,9 @@ static void _GD_CDivideData(DIRFILE *restrict D, void *restrict A,
 
 /* WindowData: Zero data in A where the condition is false.  B is unchanged.
 */
-static void _GD_WindowData(DIRFILE *restrict D, void *restrict A, gd_spf_t spfA,
-    void *restrict B, gd_spf_t spfB, gd_type_t type, gd_windop_t op,
-    gd_triplet_t threshold, size_t n)
+static void _GD_WindowData(DIRFILE *restrict D, void *restrict A,
+    unsigned int spfA, void *restrict B, unsigned int spfB, gd_type_t type,
+    gd_windop_t op, gd_triplet_t threshold, size_t n)
 {
   size_t i;
   const double NaN = NAN;
@@ -896,11 +899,12 @@ static void _GD_WindowData(DIRFILE *restrict D, void *restrict A, gd_spf_t spfA,
 #define MPLEX(t) \
   do { \
     t last = *(t*)start; \
-    for (i = 0; i < n; i++) \
+    for (i = 0; i < n; i++) {\
       if (B[i * spfB / spfA] == val) \
         last = ((t*)A)[i]; \
       else \
         ((t*)A)[i] = last; \
+    } \
   } while(0)
 
 #define MPLEXC(t) \
@@ -919,9 +923,9 @@ static void _GD_WindowData(DIRFILE *restrict D, void *restrict A, gd_spf_t spfA,
   } while(0)
 
 /* demultiplex data */
-static void _GD_MplexData(DIRFILE *restrict D, void *restrict A, gd_spf_t spfA,
-    const uint16_t *restrict B, gd_spf_t spfB, gd_type_t type, gd_count_t val,
-    void *restrict start, size_t n)
+static void _GD_MplexData(DIRFILE *restrict D, void *restrict A,
+    unsigned int spfA, const int *restrict B, unsigned int spfB, gd_type_t type,
+    int val, void *restrict start, size_t n)
 {
   size_t i;
 
@@ -955,7 +959,7 @@ static size_t _GD_DoLincom(DIRFILE *restrict D, gd_entry_t *restrict E,
     off64_t first_samp, size_t num_samp, gd_type_t return_type,
     void *restrict data_out)
 {
-  gd_spf_t spf[GD_MAX_LINCOM];
+  unsigned int spf[GD_MAX_LINCOM];
   size_t n_read;
   int i;
   void *tmpbuf2 = NULL;
@@ -1092,7 +1096,7 @@ static size_t _GD_DoMultiply(DIRFILE *restrict D, gd_entry_t *restrict E,
     void *restrict data_out)
 {
   void *tmpbuf = NULL;
-  gd_spf_t spf1, spf2;
+  unsigned int spf1, spf2;
   size_t n_read, n_read2, num_samp2;
   off64_t first_samp2;
   gd_type_t type2;
@@ -1233,7 +1237,7 @@ static size_t _GD_DoDivide(DIRFILE *restrict D, gd_entry_t *restrict E,
     void *restrict data_out)
 {
   void *tmpbuf = NULL;
-  gd_spf_t spf1, spf2;
+  unsigned int spf1, spf2;
   size_t n_read, n_read2, num_samp2;
   off64_t first_samp2;
   gd_type_t type2;
@@ -1502,7 +1506,7 @@ static size_t _GD_DoWindow(DIRFILE *restrict D, gd_entry_t *restrict E,
     void *restrict data_out)
 {
   void *tmpbuf = NULL;
-  gd_spf_t spf1, spf2;
+  unsigned int spf1, spf2;
   size_t n_read, n_read2, num_samp2;
   off64_t first_samp2;
   gd_type_t type2;
@@ -1607,8 +1611,8 @@ static size_t _GD_DoMplex(DIRFILE *restrict D, gd_entry_t *restrict E,
     void *restrict data_out)
 {
   char start[16];
-  uint16_t *tmpbuf = NULL;
-  gd_spf_t spf1, spf2;
+  int *tmpbuf = NULL;
+  unsigned int spf1, spf2;
   size_t n_read, n_read2, num_samp2;
   const size_t size = GD_SIZE(return_type);
   off64_t first_samp2;
@@ -1667,7 +1671,7 @@ static size_t _GD_DoMplex(DIRFILE *restrict D, gd_entry_t *restrict E,
   first_samp2 = first_samp * spf2 / spf1;
 
   /* Allocate a temporary buffer for the count field */
-  tmpbuf = (uint16_t*)_GD_Alloc(D, GD_UINT16, num_samp2);
+  tmpbuf = (int*)_GD_Alloc(D, GD_INT_TYPE, num_samp2);
 
   if (D->error != GD_E_OK) {
     free(tmpbuf);
@@ -1677,7 +1681,7 @@ static size_t _GD_DoMplex(DIRFILE *restrict D, gd_entry_t *restrict E,
 
   /* read the count field */
   n_read2 = _GD_DoField(D, E->e->entry[1], E->e->repr[1], first_samp2,
-      num_samp2, GD_UINT16, tmpbuf);
+      num_samp2, GD_INT_TYPE, tmpbuf);
 
   if (D->error != GD_E_OK) {
     free(tmpbuf);
@@ -1689,28 +1693,46 @@ static size_t _GD_DoMplex(DIRFILE *restrict D, gd_entry_t *restrict E,
   if (return_type == E->e->u.mplex.type && first_samp == E->e->u.mplex.sample)
     memcpy(start, E->e->u.mplex.d, size);
   /* Otherwise, check whether the caller was lucky/clever */
-  else if (tmpbuf[0] != E->EN(mplex,count_val)) {
+  else if (tmpbuf[0] != E->EN(mplex,count_val) && D->lookback) {
     /* It wasn't -- do a look-back to find the start value.  On a, say, gzipped
      * field this is expensive since it involves a rewind.  Hmm... */
-    size_t lb_num = GD_MPLEX_LOOKBACK * E->EN(mplex,count_max);
-    off64_t lb_sample = -1, lb_first = first_samp2 - lb_num;
+    size_t lb_cycle = E->EN(mplex,count_max);
+    off64_t chunk_start = first_samp2, lb_start, lb_sample = -1;
 
-    if (lb_first < 0) {
-      lb_num += lb_first;
-      lb_first = 0;
+    /* if count_max is zero, use a count_max of GD_MPLEX_CYCLE or
+     * 2 * count_val, whichever is larger */
+    if (lb_cycle == 0) {
+      if (E->EN(mplex,count_val) * 2 > GD_MPLEX_CYCLE)
+        lb_cycle = 2 * E->EN(mplex,count_val);
+      else
+        lb_cycle = GD_MPLEX_CYCLE;
     }
 
-    if (lb_num > 0) {
-      size_t i, n_read3;
-      uint16_t *tmpbuf2 = (uint16_t*)_GD_Alloc(D, GD_UINT16, lb_num);
+    /* the first sample we're willing to consider */
+    lb_start = (D->lookback == GD_LOOKBACK_ALL) ? 0 :
+      first_samp2 - D->lookback * lb_cycle;
+    if (lb_start < 0)
+      lb_start = 0;
+
+    do {
+      /* the size of the next chunk */
+      size_t i, n_read3, chunk_size = chunk_start - lb_start;
+      int *tmpbuf2;
+      if (chunk_size > GD_BUFFER_SIZE)
+        chunk_size = GD_BUFFER_SIZE;
+
+      /* the start of the next chunk */
+      chunk_start -= chunk_size;
+
+      tmpbuf2 = (int*)_GD_Alloc(D, GD_INT_TYPE, chunk_size);
       if (D->error) {
         free(tmpbuf);
         dreturn("%i", 0);
         return 0;
       }
 
-      n_read3 = _GD_DoField(D, E->e->entry[1], E->e->repr[1], lb_first, lb_num,
-          GD_UINT16, tmpbuf2);
+      n_read3 = _GD_DoField(D, E->e->entry[1], E->e->repr[1], chunk_start,
+          chunk_size, GD_INT_TYPE, tmpbuf2);
 
       if (D->error) {
         free(tmpbuf2);
@@ -1723,12 +1745,13 @@ static size_t _GD_DoMplex(DIRFILE *restrict D, gd_entry_t *restrict E,
       i = n_read3 - 1;
       do {
         if (tmpbuf2[i] == E->EN(mplex,count_val)) {
-          lb_sample = lb_first + i;
+          lb_sample = chunk_start + i;
           break;
         }
       } while (i-- != 0);
       free(tmpbuf2);
-    }
+      /* stop if we're at the start of the lookback or we found the value */
+    } while (lb_sample == -1 && chunk_start > lb_start);
 
     /* read the value of the start, if found */
     if (lb_sample >= 0) {
@@ -1949,7 +1972,7 @@ size_t gd_getdata64(DIRFILE* D, const char *field_code_in, off64_t first_frame,
   gd_entry_t* entry;
   char* field_code;
   int repr;
-  gd_spf_t spf;
+  unsigned int spf;
 
   dtrace("%p, \"%s\", %lli, %lli, %zu, %zu, 0x%X, %p", D, field_code_in,
       (long long)first_frame, (long long)first_samp, num_frames, num_samp,
@@ -1971,7 +1994,7 @@ size_t gd_getdata64(DIRFILE* D, const char *field_code_in, off64_t first_frame,
     return 0;
   }
 
-  if (entry->field_type & GD_SCALAR_ENTRY)
+  if (entry->field_type & GD_SCALAR_ENTRY_BIT)
     _GD_SetError(D, GD_E_DIMENSION, GD_E_DIM_CALLER, NULL, 0, field_code);
 
   if (field_code != field_code_in)

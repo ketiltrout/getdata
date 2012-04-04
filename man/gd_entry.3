@@ -172,7 +172,8 @@ have unspecified results.
 .SS Scalar Parameter Members
 A gd_entry_t describing any field type which permits non-literal scalar field
 parameters
-.RB ( BIT ", " LINCOM ", " PHASE ", " POLYNOM ", " RECIP ", " RAW ", or " SBIT )
+.RB ( BIT ", " LINCOM ", " MPLEX ", " PHASE ", " POLYNOM ", " RECIP ", " RAW ,
+.BR SBIT ", or " WINDOW )
 will also provide:
 .PP
 .in +4n
@@ -191,7 +192,7 @@ typedef struct {
 .in
 .PP
 Only certain elements of these arrays will be initialised:
-.IP \(bu 4
+.IP \(bu
 For
 .B BIT
 and
@@ -201,7 +202,7 @@ fields, the first element corresponds to
 and the second to
 .IR numbits .
 The remainder are uninitialised.
-.IP \(bu 4
+.IP \(bu
 For
 .B LINCOM
 fields, the first
@@ -221,13 +222,21 @@ arrays between the element corresponding to
 .IR cm [ n_fields
 - 1] and the element corresponding to
 .IR cb [0].
-.IP \(bu 4
+.IP \(bu
+For
+.B MPLEX
+fields, the first element corresponds to
+.I count_val
+and the second to
+.IR count_max .
+The remainder are uninitialised.
+.IP \(bu
 For
 .B PHASE
 fields, the first element corresponds to
 .IR shift .
 The remainder are uninitialised.
-.IP \(bu 4
+.IP \(bu
 For
 .B POLYNOM
 fields, these arrays correspond with the co-efficients
@@ -235,17 +244,23 @@ fields, these arrays correspond with the co-efficients
 Only the first
 .I poly_ord
 + 1 elements are initialised.
-.IP \(bu 4
+.IP \(bu
 For
 .B RECIP
 fields, the first element corresponds to
 .IR cdividend .
 The remainder are uninitialised.
-.IP \(bu 4
+.IP \(bu
 For
 .B RAW
 fields, the first element corresponds to
 .IR spf .
+The remainder are uninitialised.
+.IP \(bu
+For
+.B WINDOW
+fields, the first element corresponds to
+.IR threshold .
 The remainder are uninitialised.
 .PP
 The
@@ -281,8 +296,8 @@ typedef struct {
   ...
 
   const char *in_fields[1];     /* input field code */
-  gd_bit_t    bitnum;           /* first bit */
-  gd_bit_t    numbits;          /* bit length */
+  int         bitnum;           /* first bit */
+  int         numbits;          /* bit length */
 
   ...
 } gd_entry_t;
@@ -297,10 +312,8 @@ member is an array of length one containing the input field code.
 The
 .I bitnum
 member indicates the number of the first bit (counted from zero) extracted from
-the input.  The
-.I gd_bit_t
-type is a signed 16-bit integer type.  If this value was specified as a
-scalar field code, this will be the numerical value of that field, and
+the input.  If this value was specified as a scalar field code, this will be
+the numerical value of that field, and
 .IR scalar [0]
 will contain the field code itself, otherwise
 .IR scalar [0]
@@ -504,6 +517,44 @@ The
 .I in_fields
 member is an array of length one containing the input field code.
 
+.SS MPLEX Members
+A gd_entry_t describing a
+.B MPLEX
+entry, will also provide:
+.PP
+.in +4n
+.nf
+.fam C
+typedef struct {
+  ...
+
+  const char    *in_fields[2];  /* input field codes */
+  int           count_val;      /* value of the multiplex index */
+  int           count_max;      /* maximum of the multiplex index */
+
+  ...
+} gd_entry_t;
+.fam
+.fi
+.in
+.PP
+The
+.I in_fields
+member contains the field codes of the input field (element 0) and the multiplex
+index field (element 1).
+.PP
+The
+.I count_val
+member is the value of the multiplex index field when the output field is stored
+in the input field.
+.PP
+The
+.I count_max
+member is the maximum value of the multiplex index, or zero, if this is not
+specified.  This is only used to determine how far to look back for a starting
+value for the output field; see
+.BR gd_mplex_lookback (3).
+
 .SS MULTIPLY and DIVIDE Members
 A gd_entry_t describing a
 .B MULTIPLY
@@ -692,7 +743,7 @@ entry, will also provide:
 typedef struct {
   ...
 
-  gd_spf_t      spf;          /* samples per frame on disk */
+  unsigned int  spf;          /* samples per frame on disk */
   gd_type_t     data_type;    /* data type on disk */
 
   ...
@@ -703,10 +754,9 @@ typedef struct {
 .PP
 The
 .I spf
-member contains the samples per frame of the binary data on disk.  The
-.I gd_spf_t
-type is an unsigned 16-bit integer type.  If this value was specified as a
-scalar field code, this will be the numerical value of that field, and
+member contains the samples per frame of the binary data on disk.  If this value
+was specified as a scalar field code, this will be the numerical value of that
+field, and
 .IR scalar [0]
 will contain the field code itself, otherwise
 .IR scalar [0]
@@ -725,6 +775,114 @@ A gd_entry_t describing a
 .B STRING
 entry provides no additional data.
 
+.SS WINDOW Members
+A gd_entry_t describing a
+.B WINDOW
+entry, will also provide:
+.PP
+.in +4n
+.nf
+.fam C
+typedef struct {
+  ...
+
+  const char    *in_fields[2];  /* input field codes */
+  gd_windop_t   windop;         /* comparison operator */
+  gd_triplet_t  threshold;      /* the value compared against */
+
+  ...
+} gd_entry_t;
+.fam
+.fi
+.in
+.PP
+The
+.I in_fields
+member contains the field codes of the input field (element 0) and the check
+field (element 1).
+.PP
+The
+.I windop
+member equals one of the following symbols, indicating the particular comarison
+performed on the check field:
+.TP
+.B GD_WINDOP_EQ
+data are extraced when the check field equals
+.IR threshold ;
+.TP
+.B GD_WINDOP_GE
+data are extraced when the check field is greater than or equal to
+.IR threshold ;
+.TP
+.B GD_WINDOP_GT
+data are extraced when the check field is strictly greater than
+.IR threshold ;
+.TP
+.B GD_WINDOP_LE
+data are extraced when the check field is less than or equal to
+.IR threshold ;
+.TP
+.B GD_WINDOP_LT
+data are extraced when the check field is strictly less than
+.IR threshold ;
+.TP
+.B GD_WINDOP_NE
+data are extraced when the check field is not equal to
+.IR threshold ;
+.TP
+.B GD_WINDOP_SET
+data are extraced when at least one bit in
+.I threshold 
+is also set in the check field;
+.TP
+.B GD_WINDOP_CLR
+data are extraced when at least one bit in
+.I threshold 
+is not set in the check field.
+.PP
+The
+.I threshold
+is the value against the check field is compared.  The
+.B gd_triplet_t
+type is defined as:
+.PP
+.in +4n
+.nf
+.fam C
+typedef union {
+  gd_int64_t i;
+  gd_uint64_t u;
+  double r;
+} gd_triplet_t;
+.fam
+.fi
+.in
+.PP
+The particular element of the union to use depends on the value of
+.I windop:
+.IP \(bu
+For
+.B GD_WINDOP_EQ
+and
+.BR GD_WINDOP_NE ,
+the signed integer element,
+.IB threshold . i
+is set;
+.IP \(bu
+For
+.B GD_WINDOP_SET
+and
+.BR GD_WINDOP_CLR ,
+the unsigned integer element,
+.IB threshold . u
+is set;
+.IP \(bu
+For all other values of
+.IR windop ,
+the floating point element,
+.IB threshold . r
+is set.
+
 .SH NOTES
 When using the C89 GetData API (by defining
 .B GD_C89_API
@@ -737,24 +895,28 @@ center tab(|);
 cbscbs
 rlrl.
 C99 API|C89 API
-gd_spf_t|spf|gd_spf_t|u.raw.spf
-gd_type_t|data_type|gd_type_t|u.raw.data_type
+int|bitnum|int|u.bit.bitnum
+int|numbits|int|u.bit.numbits
 int|n_fields|int|u.lincom.n_fields
 double complex|cm[3]|double|u.lincom.cm[3][2]
 double|m[3]|double|u.lincom.m[3]
 double complex|cb[3]|double|u.lincom.cb[3][2]
 double|b[3]|double|u.lincom.b[3]
+const char*|table|const char*|u.linterp.table
+int|count_val|int|u.mplex.count_val
+int|count_max|int|u.mplex.count_max
+gd_shift_t|shift|gd_shift_t|u.phase.shift
 int|poly_ord|int|u.polynom.poly_ord
 double complex|ca[3]|double|u.polynom.ca[3][2]
 double|a[3]|double|u.polynom.a[3]
-const char*|table|const char*|u.linterp.table
-gd_bit_t|bitnum|gd_bit_t|u.bit.bitnum
-gd_bit_t|numbits|gd_bit_t|u.bit.numbits
-gd_shift_t|shift|gd_shift_t|u.phase.shift
+unsigned int|spf|unsigned int|u.raw.spf
+gd_type_t|data_type|gd_type_t|u.raw.data_type
 double complex|cdividend|double|u.recip.cdividend[2]
 double|dividend|double|u.recip.dividend
 gd_type_t|const_type|gd_type_t|u.scalar.const_type
 size_t|array_len|size_t|u.scalar.array_len
+gd_windop_t|count_val|gd_windop_t|u.window.windop
+gd_triplet_t|count_max|gd_triplet_t|u.window.threshold
 .TE
 .PP
 In the case of complex valued data in the C89 API, the first element of the
@@ -768,6 +930,7 @@ element is the imaginary part.
 .BR gd_error (3),
 .BR gd_error_string (3),
 .BR gd_field_list (3),
+.BR gd_mplex_lookback (3),
 .BR gd_fragmentname (3),
 .BR gd_getdata (3),
 .BR gd_raw_filename (3)

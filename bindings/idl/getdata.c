@@ -590,9 +590,9 @@ IDL_VPTR gdidl_make_idl_entry(const gd_entry_t* E)
       IDL_StrStore((IDL_STRING*)(data + IDL_StructTagInfoByName(gdidl_entry_def,
               "IN_FIELDS", IDL_MSG_LONGJMP, NULL)) + 1, E->in_fields[1]);
 
-      *(IDL_UINT*)(data + IDL_StructTagInfoByName(gdidl_entry_def,
+      *(IDL_INT*)(data + IDL_StructTagInfoByName(gdidl_entry_def,
             "COUNT_VAL", IDL_MSG_LONGJMP, NULL)) = E->count_val;
-      *(IDL_UINT*)(data + IDL_StructTagInfoByName(gdidl_entry_def,
+      *(IDL_INT*)(data + IDL_StructTagInfoByName(gdidl_entry_def,
             "COUNT_MAX", IDL_MSG_LONGJMP, NULL)) = E->count_max;
 
       IDL_StrStore((IDL_STRING*)(data + IDL_StructTagInfoByName(gdidl_entry_def,
@@ -971,16 +971,16 @@ void gdidl_read_idl_entry(gd_entry_t *E, IDL_VPTR v, int alter)
 
       o = IDL_StructTagInfoByName(v->value.s.sdef, "COUNT_VAL", action, &d);
       if (o != -1) {
-        if (d->type != IDL_TYP_UINT)
-          idl_abort("GD_ENTRY element COUNT_VAL must be of type UINT");
+        if (d->type != IDL_TYP_INT)
+          idl_abort("GD_ENTRY element COUNT_VAL must be of type INT");
         E->bitnum = *(int16_t*)(data + o);
       } else
         E->bitnum = -1;
 
       o = IDL_StructTagInfoByName(v->value.s.sdef, "COUNT_MAX", action, &d);
       if (o != -1) {
-        if (d->type != IDL_TYP_UINT)
-          idl_abort("GD_ENTRY element COUNT_MAX must be of type UINT");
+        if (d->type != IDL_TYP_INT)
+          idl_abort("GD_ENTRY element COUNT_MAX must be of type INT");
         E->numbits = *(int16_t*)(data + o);
       }
 
@@ -4008,36 +4008,42 @@ IDL_VPTR gdidl_get_eof(int argc, IDL_VPTR argv[], char *argk)
   return r;
 }
 
+/* @@DLM: F gdidl_get_field_list GD_ENTRY_LIST 1 1 KEYWORDS */
+/* the following alias is needed for backwards compatibility */
 /* @@DLM: F gdidl_get_field_list GD_FIELD_LIST 1 1 KEYWORDS */
 IDL_VPTR gdidl_get_field_list(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
-  int i;
-  unsigned int nfields;
-  const char** list;
+  unsigned int i, nentries, flags = 0;
+  const char **list;
+  const char *parent = NULL;
 
   typedef struct {
     IDL_KW_RESULT_FIRST_FIELD;
     GDIDL_KW_RESULT_ERROR;
-    gd_type_t type;
-    int type_x;
+    unsigned int type;
     IDL_STRING parent;
     int parent_x;
+    int hidden, noalias, scalars, vectors;
   } KW_RESULT;
   KW_RESULT kw;
 
   GDIDL_KW_INIT_ERROR;
-  kw.type = kw.type_x = 0;
+  kw.type = 0;
+  kw.hidden = kw.noalias = kw.scalars = kw.vectors = 0;
   kw.parent_x = 0;
 
   static IDL_KW_PAR kw_pars[] = {
     GDIDL_KW_PAR_ERROR,
     GDIDL_KW_PAR_ESTRING,
+    { "HIDDEN", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(hidden) },
+    { "NOALIAS", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(noalias) },
     { "PARENT", IDL_TYP_STRING, 1, 0, IDL_KW_OFFSETOF(parent_x),
       IDL_KW_OFFSETOF(parent) },
-    { "TYPE", IDL_TYP_INT, 1, 0, IDL_KW_OFFSETOF(type_x),
-      IDL_KW_OFFSETOF(type) },
+    { "SCALARS", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(scalars) },
+    { "TYPE", IDL_TYP_UINT, 1, 0, 0, IDL_KW_OFFSETOF(type) },
+    { "VECTORS", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(vectors) },
     { NULL }
   };
 
@@ -4045,24 +4051,23 @@ IDL_VPTR gdidl_get_field_list(int argc, IDL_VPTR argv[], char *argk)
 
   DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
 
-  if (kw.parent_x) {
-    const char* parent = IDL_STRING_STR(&kw.parent);
-    if (kw.type_x) {
-      nfields = gd_nmfields_by_type(D, parent, kw.type);
-      list = gd_mfield_list_by_type(D, parent, kw.type);
-    } else {
-      nfields = gd_nmfields(D, parent);
-      list = gd_mfield_list(D, parent);
-    }
-  } else {
-    if (kw.type_x) {
-      nfields = gd_nfields_by_type(D, kw.type);
-      list = gd_field_list_by_type(D, kw.type);
-    } else {
-      nfields = gd_nfields(D);
-      list = gd_field_list(D);
-    }
+  if (kw.parent_x)
+    parent = IDL_STRING_STR(&kw.parent);
+
+  if (kw.hidden)
+    flags |= GD_ENTRIES_HIDDEN;
+  if (kw.noalias)
+    flags |= GD_ENTRIES_NOALIAS;
+
+  if (kw.type == 0) {
+    if (kw.vectors)
+      kw.type = GD_VECTOR_ENTRIES;
+    else if (kw.scalars)
+      kw.type = GD_SCALAR_ENTRIES;
   }
+
+  nentries = gd_nentries(D, parent, kw.type, flags);
+  list = gd_entry_list(D, parent, kw.type, flags);
 
   GDIDL_SET_ERROR(D);
 
@@ -4070,9 +4075,9 @@ IDL_VPTR gdidl_get_field_list(int argc, IDL_VPTR argv[], char *argk)
 
   IDL_VPTR r;
 
-  IDL_STRING *data = (IDL_STRING*)IDL_MakeTempVector(IDL_TYP_STRING, nfields,
+  IDL_STRING *data = (IDL_STRING*)IDL_MakeTempVector(IDL_TYP_STRING, nentries,
       IDL_ARR_INI_ZERO, &r);
-  for (i = 0; i < nfields; ++i)
+  for (i = 0; i < nentries; ++i)
     IDL_StrStore(data + i, (char*)list[i]);
 
   dreturn("%p", r);
@@ -4226,34 +4231,41 @@ IDL_VPTR gdidl_get_native_type(int argc, IDL_VPTR argv[], char *argk)
   return r;
 }
 
+/* @@DLM: F gdidl_get_nfields GD_NENTRIES 1 1 KEYWORDS */
+/* the following alias is needed for backwards compatibility */
 /* @@DLM: F gdidl_get_nfields GD_NFIELDS 1 1 KEYWORDS */
 IDL_VPTR gdidl_get_nfields(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
-  unsigned int nfields;
+  unsigned int nentries, flags = 0;
+  const char *parent = NULL;
 
   typedef struct {
     IDL_KW_RESULT_FIRST_FIELD;
     GDIDL_KW_RESULT_ERROR;
-    gd_type_t type;
-    int type_x;
+    unsigned int type;
     IDL_STRING parent;
     int parent_x;
+    int hidden, noalias, scalars, vectors;
   } KW_RESULT;
   KW_RESULT kw;
 
   GDIDL_KW_INIT_ERROR;
-  kw.type = kw.type_x = 0;
+  kw.type = 0;
+  kw.hidden = kw.noalias = kw.scalars = kw.vectors = 0;
   kw.parent_x = 0;
 
   static IDL_KW_PAR kw_pars[] = {
     GDIDL_KW_PAR_ERROR,
     GDIDL_KW_PAR_ESTRING,
+    { "HIDDEN", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(hidden) },
+    { "NOALIAS", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(noalias) },
     { "PARENT", IDL_TYP_STRING, 1, 0, IDL_KW_OFFSETOF(parent_x),
       IDL_KW_OFFSETOF(parent) },
-    { "TYPE", IDL_TYP_INT, 1, 0, IDL_KW_OFFSETOF(type_x),
-      IDL_KW_OFFSETOF(type) },
+    { "SCALARS", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(scalars) },
+    { "TYPE", IDL_TYP_UINT, 1, 0, 0, IDL_KW_OFFSETOF(type) },
+    { "VECTORS", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(vectors) },
     { NULL }
   };
 
@@ -4261,24 +4273,28 @@ IDL_VPTR gdidl_get_nfields(int argc, IDL_VPTR argv[], char *argk)
 
   DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
 
-  if (kw.parent_x) {
-    const char* parent = IDL_STRING_STR(&kw.parent);
-    if (kw.type_x) 
-      nfields = gd_nmfields_by_type(D, parent, kw.type);
-    else 
-      nfields = gd_nmfields(D, parent);
-  } else {
-    if (kw.type_x) 
-      nfields = gd_nfields_by_type(D, kw.type);
-    else 
-      nfields = gd_nfields(D);
+  if (kw.parent_x)
+    parent = IDL_STRING_STR(&kw.parent);
+
+  if (kw.hidden)
+    flags |= GD_ENTRIES_HIDDEN;
+  if (kw.noalias)
+    flags |= GD_ENTRIES_NOALIAS;
+
+  if (kw.type == 0) {
+    if (kw.vectors)
+      kw.type = GD_VECTOR_ENTRIES;
+    else if (kw.scalars)
+      kw.type = GD_SCALAR_ENTRIES;
   }
+
+  nentries = gd_nentries(D, parent, kw.type, flags);
 
   GDIDL_SET_ERROR(D);
 
   IDL_KW_FREE;
 
-  IDL_VPTR r = IDL_GettmpLong(nfields);
+  IDL_VPTR r = IDL_GettmpLong(nentries);
   dreturn("%p", r);
   return r;
 }
@@ -5118,8 +5134,8 @@ void gdidl_add_mplex(int argc, IDL_VPTR argv[], char *argk)
   const char* field_code = IDL_VarGetString(argv[1]);
   const char* in_field = IDL_VarGetString(argv[2]);
   const char* count = IDL_VarGetString(argv[3]);
-  gd_count_t val = IDL_LongScalar(argv[4]);
-  gd_count_t max = IDL_LongScalar(argv[5]);
+  int val = IDL_LongScalar(argv[4]);
+  int max = IDL_LongScalar(argv[5]);
 
   if (kw.parent_x) {
     const char* parent = IDL_STRING_STR(&kw.parent);
@@ -5286,7 +5302,7 @@ void gdidl_alter_mplex(int argc, IDL_VPTR argv[], char *argk)
   typedef struct {
     IDL_KW_RESULT_FIRST_FIELD;
     GDIDL_KW_RESULT_ERROR;
-    unsigned int val, max;
+    int val, max;
     IDL_STRING in_field1;
     int in_field1_x;
     IDL_STRING in_field2;
@@ -5295,13 +5311,13 @@ void gdidl_alter_mplex(int argc, IDL_VPTR argv[], char *argk)
   KW_RESULT kw;
 
   kw.in_field1_x = kw.in_field2_x = 0;
-  kw.val = GD_COUNT_MAX;
-  kw.max = 0;
+  kw.val = -1;
+  kw.max = -1;
   GDIDL_KW_INIT_ERROR;
 
   static IDL_KW_PAR kw_pars[] = {
-    { "COUNT_MAX", IDL_TYP_UINT, 1, 0, 0, IDL_KW_OFFSETOF(max) },
-    { "COUNT_VAL", IDL_TYP_UINT, 1, 0, 0, IDL_KW_OFFSETOF(val) },
+    { "COUNT_MAX", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(max) },
+    { "COUNT_VAL", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(val) },
     GDIDL_KW_PAR_ERROR,
     GDIDL_KW_PAR_ESTRING,
     { "IN_FIELD1", IDL_TYP_STRING, 1, 0, IDL_KW_OFFSETOF(in_field1_x),
@@ -5554,8 +5570,8 @@ IDL_VPTR gdidl_fragment_affixes(int argc, IDL_VPTR argv[], char *argk)
   return r;
 }
 
-/* @@DLM: F gdidl_tokenise GD_TOKENISE 1 1 KEYWORDS */
-IDL_VPTR gdidl_tokenise(int argc, IDL_VPTR argv[], char *argk)
+/* @@DLM: F gdidl_strtok GD_STRTOK 1 1 KEYWORDS */
+IDL_VPTR gdidl_strtok(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
 
@@ -5587,7 +5603,7 @@ IDL_VPTR gdidl_tokenise(int argc, IDL_VPTR argv[], char *argk)
   if (kw.string_x)
     string = IDL_STRING_STR(&kw.string);
 
-  token = gd_tokenise(D, string);
+  token = gd_strtok(D, string);
 
   GDIDL_SET_ERROR(D);
 
@@ -5730,6 +5746,48 @@ void gdidl_verbose_prefix(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
+/* @@DLM: P gdidl_mplex_lookback GD_MPLEX_LOOKBACK 1 2 KEYWORDS */
+void gdidl_mplex_lookback(int argc, IDL_VPTR argv[], char *argk)
+{
+  dtraceidl();
+
+  int lookback = GD_DEFAULT_LOOKBACK;
+
+  typedef struct {
+    IDL_KW_RESULT_FIRST_FIELD;
+    GDIDL_KW_RESULT_ERROR;
+    int all;
+  } KW_RESULT;
+  KW_RESULT kw;
+
+  GDIDL_KW_INIT_ERROR;
+  kw.all = 0;
+
+  static IDL_KW_PAR kw_pars[] = {
+    { "ALL", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(all) },
+    GDIDL_KW_PAR_ERROR,
+    GDIDL_KW_PAR_ESTRING,
+    { NULL }
+  };
+
+  IDL_KWProcessByOffset(argc, argv, argk, kw_pars, NULL, 1, &kw);
+
+  if (kw.all)
+    lookback = GD_LOOKBACK_ALL;
+  else if (argc > 1)
+    lookback = IDL_LongScalar(argv[1]);
+
+  DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
+
+  gd_mplex_lookback(D, lookback);
+
+  GDIDL_SET_ERROR(D);
+
+  IDL_KW_FREE;
+
+  dreturnvoid();
+}
+
 
 /**** Module initialisation ****/
 
@@ -5760,8 +5818,8 @@ static IDL_STRUCT_TAG_DEF gdidl_entry[] = {
   { "CB",         lincom_dims, (void*)IDL_TYP_DCOMPLEX }, /* LINCOM */
   { "BITNUM",     0, (void*)IDL_TYP_INT }, /* (S)BIT */
   { "COMP_SCAL",  0, (void*)IDL_TYP_INT }, /* LINCOM / POLYNOM */
-  { "COUNT_MAX",  0, (void*)IDL_TYP_UINT }, /* MPLEX */
-  { "COUNT_VAL",  0, (void*)IDL_TYP_UINT }, /* MPLEX */
+  { "COUNT_MAX",  0, (void*)IDL_TYP_INT }, /* MPLEX */
+  { "COUNT_VAL",  0, (void*)IDL_TYP_INT }, /* MPLEX */
   { "DATA_TYPE",  0, (void*)IDL_TYP_INT }, /* RAW / CONST / CARRAY */
   { "DIVIDEND",   0, (void*)IDL_TYP_DOUBLE }, /* RECIP */
   { "CDIVIDEND",  0, (void*)IDL_TYP_DCOMPLEX }, /* RECIP */

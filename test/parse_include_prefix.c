@@ -29,7 +29,7 @@ int main(void)
   const char *format1_data = "data RAW UINT8 11\n";
   int fd, r = 0;
   DIRFILE *D;
-  gd_spf_t spf, spfaff;
+  unsigned int spf, spfaff;
 
   rmdirfile();
   mkdir(filedir, 0777);

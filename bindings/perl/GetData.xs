@@ -52,10 +52,10 @@
 /* fake data types to simplify our typemap */
 typedef complex double gdp_complex_in;
 typedef _Complex double gdpu_complex;
-typedef gd_bit_t gdpu_bitnum_t;
-typedef gd_bit_t gdpu_numbits_t;
+typedef int gdpu_bitnum_t;
+typedef int gdpu_numbits_t;
 typedef gd_shift_t gdpu_shift_t;
-typedef gd_spf_t gdpu_spf_t;
+typedef unsigned int gdpu_spf_t;
 typedef gd_type_t gdpu_type_t;
 typedef int gdpu_int;
 typedef const char gdpu_char;
@@ -290,8 +290,8 @@ static void gdp_to_entry(gd_entry_t *E, SV *sv, const char *pkg,
     case GD_BIT_ENTRY:
     case GD_SBIT_ENTRY:
       GDP_EHASH_FETCH_PV("in_field", in_fields[0]);
-      GDP_EHASH_FETCH_UV("bitnum", bitnum, gd_bit_t);
-      GDP_EHASH_FETCH_UV("numbits", bitnum, gd_bit_t);
+      GDP_EHASH_FETCH_UV("bitnum", bitnum, int);
+      GDP_EHASH_FETCH_UV("numbits", bitnum, int);
       gdp_fetch_scalars(E, (HV*)sv, 0x3, pkg, func);
       break;
     case GD_CARRAY_ENTRY:
@@ -356,12 +356,12 @@ static void gdp_to_entry(gd_entry_t *E, SV *sv, const char *pkg,
       break;
     case GD_MPLEX_ENTRY:
       gdp_fetch_in_fields(E->in_fields, sv, 2, pkg, func);
-      GDP_EHASH_FETCH_UV("count_val", count_val, gd_count_t);
-      GDP_EHASH_FETCH_UV("count_max", count_max, gd_count_t);
+      GDP_EHASH_FETCH_UV("count_val", count_val, int);
+      GDP_EHASH_FETCH_UV("count_max", count_max, int);
       gdp_fetch_scalars(E, (HV*)sv, 0x3, pkg, func);
       break;
     case GD_RAW_ENTRY:
-      GDP_EHASH_FETCH_UV("spf", spf, gd_spf_t);
+      GDP_EHASH_FETCH_UV("spf", spf, unsigned int);
       GDP_EHASH_FETCH_UV("data_type", data_type, gd_type_t);
       gdp_fetch_scalars(E, (HV*)sv, 1, pkg, func);
       break;
@@ -1416,7 +1416,7 @@ getdata(dirfile, field_code, first_frame, first_samp, num_frames, num_samp, retu
   gd_type_t return_type
   PREINIT:
     void *data_out = NULL;
-    gd_spf_t spf = 1;
+    unsigned int spf = 1;
     GDP_DIRFILE_ALIAS;
   ALIAS:
     GetData::Dirfile::getdata = 1
@@ -1503,6 +1503,39 @@ field_list_by_type(dirfile, type)
       GDP_UNDEF_ON_ERROR();
 
       GDP_PUSHuv(nf);
+    }
+
+    dreturnvoid();
+
+void
+entry_list(dirfile, parent, type, flags)
+    DIRFILE * dirfile
+    gdpu_char * parent
+    gdpu_type_t type
+    gdpu_type_t flags
+  PREINIT:
+    GDP_DIRFILE_ALIAS;
+  ALIAS:
+    GetData::Dirfile::entry_list = 1
+  PPCODE:
+    dtrace("%p, \"%s\", %u, %u; %i", dirfile, parent, type, flags,
+      (int)GIMME_V);
+
+    /* in array context, return the field list, otherwise return nfields */
+    if (GIMME_V == G_ARRAY) {
+      int i;
+      const char **el = gd_entry_list(dirfile, parent, type, flags);
+
+      GDP_UNDEF_ON_ERROR();
+
+      for (i = 0; el[i]; ++i)
+        GDP_PUSHpvz(el[i]);
+    } else {
+      unsigned int ne = gd_nentries(dirfile, parent, type, flags);
+
+      GDP_UNDEF_ON_ERROR();
+
+      GDP_PUSHuv(ne);
     }
 
     dreturnvoid();
@@ -1990,7 +2023,7 @@ fragment_affixes(dirfile, fragment_index)
     dreturnvoid();
 
 void
-tokenise(dirfile, string)
+strtok(dirfile, string)
   DIRFILE * dirfile
   const char * string
   PREINIT:
@@ -1998,13 +2031,13 @@ tokenise(dirfile, string)
     char *token;
     GDP_DIRFILE_ALIAS;
   ALIAS:
-    GetData::Dirfile::tokenise = 1
+    GetData::Dirfile::strtok = 1
   PPCODE:
     dtrace("%p, \"%s\"", dirfile, string);
 
     /* return an array of all the parsed tokens */
-    for (token = gd_tokenise(dirfile, string); token;
-      token = gd_tokenise(dirfile, NULL))
+    for (token = gd_strtok(dirfile, string); token;
+      token = gd_strtok(dirfile, NULL))
     {
       GDP_UNDEF_ON_ERROR();
 

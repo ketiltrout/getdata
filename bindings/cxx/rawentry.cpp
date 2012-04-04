@@ -22,7 +22,7 @@
 
 using namespace GetData;
 
-RawEntry::RawEntry(const char* field_code, DataType data_type, gd_spf_t spf,
+RawEntry::RawEntry(const char* field_code, DataType data_type, unsigned int spf,
       int fragment_index) : Entry()
 {
   E.field = strdup(field_code);
@@ -37,7 +37,7 @@ RawEntry::~RawEntry()
   free(filename);
 }
 
-int RawEntry::SetSamplesPerFrame(gd_spf_t spf, int recode)
+int RawEntry::SetSamplesPerFrame(unsigned int spf, int recode)
 {
   E.u.raw.spf = spf;
 

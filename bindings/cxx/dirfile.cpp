@@ -521,9 +521,9 @@ int Dirfile::UnHide(const char* field_code) const
   return gd_unhide(D, field_code);
 }
 
-char *Dirfile::Tokenise(const char *string)
+char *Dirfile::StrTok(const char *string)
 {
-  return gd_tokenise(D, string);
+  return gd_strtok(D, string);
 }
 
 int Dirfile::DeSync(unsigned int flags)
@@ -545,7 +545,24 @@ unsigned long Dirfile::Flags(unsigned long set, unsigned long reset)
   return gd_flags(D, set, reset);
 }
 
-void Dirfile::VerbosePrefix(const char *prefix) const
+int Dirfile::VerbosePrefix(const char *prefix) const
 {
-  gd_verbose_prefix(D, prefix);
+  return gd_verbose_prefix(D, prefix);
+}
+
+int Dirfile::MplexLookback(int lookback) const
+{
+  return gd_mplex_lookback(D, lookback);
+}
+
+unsigned int Dirfile::NEntries(const char *parent, unsigned int type,
+    unsigned int flags) const
+{
+  return gd_nentries(D, parent, type, flags);
+}
+
+const char** Dirfile::EntryList(const char *parent, unsigned int type,
+        unsigned int flags) const
+{
+  return gd_entry_list(D, parent, type, flags);
 }

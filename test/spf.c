@@ -34,7 +34,7 @@ int main(void)
   const char *format = "dirfile/format";
   const char *format_data = "data RAW UINT8 11\n";
   int fd, error, r = 0;
-  gd_spf_t spf;
+  unsigned int spf;
   DIRFILE *D;
 
   rmdirfile();

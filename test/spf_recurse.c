@@ -36,7 +36,7 @@ int main(void)
     "in1 RAW UINT8 11\n"
     "lincom LINCOM 2 lincom 1 0 in1 1 0\n";
   int fd, error, r = 0;
-  gd_spf_t spf;
+  unsigned int spf;
   DIRFILE *D;
 
   rmdirfile();

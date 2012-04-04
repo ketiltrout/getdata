@@ -538,11 +538,8 @@ int gd_uninclude(DIRFILE* D, int fragment_index, int del)
   old_count = D->n_entries;
   for (i = o = 0; i < old_count; ++i)
     if (_GD_ContainsFragment(f, nf, D->entry[i]->fragment_index)) {
-      if (D->entry[i]->e->n_meta >= 0) {
+      if (D->entry[i]->e->n_meta >= 0)
         D->n_entries--;
-        D->n[_GD_EntryIndex(D->entry[i]->field_type)]--;
-      } else
-        D->n_meta--;
 
       _GD_FreeE(D, D->entry[i], 1);
     } else
@@ -576,11 +573,13 @@ int gd_uninclude(DIRFILE* D, int fragment_index, int del)
     D->entry[i]->e->calculated = 0;
     for (j = 0; j < GD_MAX_LINCOM; ++j)
       D->entry[i]->e->entry[j] = NULL;
+    D->entry[i]->e->value_list_validity = 0;
+    D->entry[i]->e->entry_list_validity = 0;
   }
 
   /* Invalidate the field lists */
-  D->list_validity = 0;
-  D->type_list_validity = 0;
+  D->value_list_validity = 0;
+  D->entry_list_validity = 0;
 
   free(f);
 

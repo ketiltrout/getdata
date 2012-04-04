@@ -28,7 +28,7 @@ int main(void)
   const char *format_data =
     "data RAW UINT8 1\n"
     "data/cata CONST UINT8 1\n"
-    "/ALIAS eata data/cata\n";
+    "/ALIAS data/eata data\n";
   int fd, error, r = 0;
   DIRFILE *D;
 

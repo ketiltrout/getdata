@@ -189,7 +189,7 @@ C     Check functions
       PARAMETER (plen = 4096)
 
       CHARACTER*26 strings(3)
-      CHARACTER*11 fields(nfields + 8)
+      CHARACTER*11 fields(nfields + 9)
       CHARACTER*11 fn
       CHARACTER*26 str
       CHARACTER*4096 path
@@ -2042,7 +2042,7 @@ C     230: GDMDMX check
       CALL CHKIN2(ne, 230, 7, j, 12)
 
 C     231: GDALMX check
-      CALL GDALMX(d, 'new21', 5, 'in3', 3, 'in4', 3, GD_CMX, 7)
+      CALL GDALMX(d, 'new21', 5, 'in3', 3, 'in4', 3, -1, 7)
       CALL CHKOK2(ne, 231, 1, d)
 
       l = flen
@@ -2087,6 +2087,58 @@ C     235: GDFLAG check
 C     236: GDVBPX check
       CALL GDVBPX(d, "big_test", 8)
       CALL CHKEOK(ne, 236, d)
+
+C     237: GDNENT check
+      CALL GDNENT(n, d, "data", 4, GDEN_S, GDEN_H + GDEN_N)
+      CALL CHKOK2(ne, 237, 1, d)
+      CALL CHKIN2(ne, 237, 1, n, 5)
+      CALL GDNENT(n, d, "", -1, GDEN_V, GDEN_H + GDEN_N)
+      CALL CHKOK2(ne, 237, 2, d)
+      CALL CHKIN2(ne, 237, 2, n, 26)
+
+C     238: GDENTX check
+      CALL GDENTX(l, d, "", -1, GDEN_V, GDEN_H + GDEN_N)
+      CALL CHKEOK(ne, 238, d)
+      CALL CHKINT(ne, 238, l, 7)
+
+C     239: GDENTN check
+      fields(1)  = "INDEX"
+      fields(2)  = "bit"
+      fields(3)  = "data"
+      fields(4)  = "div"
+      fields(5)  = "lincom"
+      fields(6)  = "linterp"
+      fields(7)  = "mplex"
+      fields(8)  = "mult"
+      fields(9)  = "new1"
+      fields(10) = "new14"
+      fields(11) = "new15"
+      fields(12) = "new16"
+      fields(13) = "new18"
+      fields(14) = "new2"
+      fields(15) = "new21"
+      fields(16) = "new3"
+      fields(17) = "new4"
+      fields(18) = "new5"
+      fields(19) = "new6"
+      fields(20) = "new7"
+      fields(21) = "new8"
+      fields(22) = "phase"
+      fields(23) = "polynom"
+      fields(24) = "recip"
+      fields(25) = "sbit"
+      fields(26) = "window"
+      DO 2390 i = 1, n
+      l = flen
+      CALL GDENTN(fn, l, d, "", -1, GDEN_V, GDEN_H + GDEN_N, i)
+      CALL CHKOK2(ne, 239, i, d)
+      CALL CHKIN2(ne, 239, i, l, flen)
+      CALL CHKST2(ne, 239, i, fn, fields(i))
+ 2390 CONTINUE
+
+C     240: GDMXLB check
+      CALL GDMXLB(d, GDLB_A)
+      CALL CHKEOK(ne, 240, d)
 
 
 

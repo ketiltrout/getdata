@@ -1,0 +1,93 @@
+.\" gd_flags.3.  The gd_flags man page.
+.\"
+.\" Copyright (C) 2012 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_flags 3 "1 April 2012" "Version 0.8.0" "GETDATA"
+.SH NAME
+gd_flags \(em alter GetData operational flags
+.SH SYNOPSIS
+.B #include <getdata.h>
+.HP
+.nh
+.ad l
+.BI "unsigned long gd_flags(DIRFILE *" dirfile ", unsigned long " set ,
+.BI "unsigned long " reset );
+.hy
+.ad n
+.SH DESCRIPTION
+The
+.BR gd_flags ()
+function modifies the operational flags of the dirfile(5) database specified by
+.IR dirfile ,
+and returns the new value of the flags register.
+
+The flags which may be queried or modified with this interface are a subset of
+the open flags (see
+.BR gd_cbopen (3)).
+These are:
+.TP
+.B GD_PRETTY_PRINT
+When dirfile metadata are flushed to disk (either explicitly via
+.BR gd_metaflush "(3), " gd_rewrite_fragment (3),
+or 
+.BR gd_flush (3)
+or implicitly by closing the dirfile), an attempt will be made to create a
+nicer looking format specification (from a human-readable standpoint).  What
+this explicitly means is not part of the API, and any particular behaviour
+should not be relied on.  If the dirfile has been opened read-only, this flag is
+ignored.
+.TP
+.B GD_VERBOSE
+Specifies that whenever an error is triggered by the library when working
+on this dirfile, the corresponding error string, which can be retrieved by
+calling 
+.BR gd_error_string (3),
+should be written on the caller's standard error stream
+.RB ( stderr (3))
+by GetData.  The error string may be prefixed by a string specified by the
+caller; see
+.BR gd_verbose_prefix (3).
+Without this flag, GetData writes nothing to standard error.  (GetData never
+writes to standard output.)
+.PP
+Flags which appear only in
+.I set
+will be turned on (enabled); flags which appear only in
+.I reset
+will be turned off (disabled); flags which appear in both
+.I set
+and
+.I reset
+will be toggled.  Flags which appear in neither of these are left unchanged.
+Accordingly, to simply query the current flags, both
+.I set
+and
+.I reset
+should be zero, and to explicitly specify all the flags, ignoring their old
+values, the new flags register should be given in
+.IR set ,
+and it's bitwise complement in
+.IR reset .
+
+.SH RETURN VALUE
+The
+.BR gd_flags ()
+function returns a bitwise or'd collection those of the above flags which are
+enabled after performing the modifications specified (if any).  This function
+does not fail.
+.SH SEE ALSO
+.BR dirfile (5),
+.BR gd_cbopen (3),
+.BR gd_verbose_prefix (3),
+.BR stderr (3).

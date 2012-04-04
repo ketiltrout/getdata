@@ -21,6 +21,7 @@
 #include "test.h"
 
 #include <stdlib.h>
+#include <sys/wait.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <fcntl.h>
@@ -69,7 +70,7 @@ int main(void)
 
   CHECKI(error, GD_E_OPEN);
 
-  wait(&status, 0);
+  wait(&status);
   if (status)
     r = 1;
 

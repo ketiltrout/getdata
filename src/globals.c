@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2010 D. V. Wiebe
+/* Copyright (C) 2008-2012 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -120,12 +120,6 @@ unsigned long gd_flags(DIRFILE *D, unsigned long set, unsigned long reset)
 {
   dtrace("%p, 0x%lX, 0x%lX", D, set, reset);
 
-  if (D->flags & GD_INVALID) {
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("0x%X", 0);
-    return 0;
-  }
-
   _GD_ClearError(D);
 
   set &= GD_FLAG_MASK;
@@ -161,6 +155,24 @@ int gd_verbose_prefix(DIRFILE *D, const char *prefix)
 
   free(D->error_prefix);
   D->error_prefix = ptr;
+
+  dreturn("%i", 0);
+  return 0;
+}
+
+int gd_mplex_lookback(DIRFILE *D, int lookback)
+{
+  dtrace("%p, %i", D, lookback);
+
+  if (D->flags & GD_INVALID) {
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  _GD_ClearError(D);
+
+  D->lookback = lookback;
 
   dreturn("%i", 0);
   return 0;

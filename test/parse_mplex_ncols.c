@@ -24,7 +24,7 @@ int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *format_data = "data MPLEX in1 in2 1\n";
+  const char *format_data = "data MPLEX in1 in2\n";
   int fd, error, r = 0;
   DIRFILE *D;
 

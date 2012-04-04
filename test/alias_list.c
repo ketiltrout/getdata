@@ -56,7 +56,7 @@ int main(void)
   if (!r)
     for (i = 0; al[i]; ++i) {
       CHECKUi(i, al[i][1], 0);
-      x[al[i][0]]++;
+      x[(int)(al[i][0])]++;
     }
 
   CHECKI(i, 6);

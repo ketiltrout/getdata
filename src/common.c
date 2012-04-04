@@ -570,7 +570,7 @@ void _GD_LinterpData(DIRFILE *restrict D, void *restrict data, gd_type_t type,
 void _GD_LincomData(DIRFILE *restrict D, int n, void *restrict data1,
     gd_type_t return_type, const double *restrict data2,
     const double *restrict data3, const double *restrict m,
-    const double *restrict b, const gd_spf_t *restrict spf, size_t n_read)
+    const double *restrict b, const unsigned int *restrict spf, size_t n_read)
 {
   size_t i;
 
@@ -679,7 +679,7 @@ void _GD_LincomData(DIRFILE *restrict D, int n, void *restrict data1,
 void _GD_CLincomData(DIRFILE *restrict D, int n, void *restrict data1,
     gd_type_t return_type, const GD_DCOMPLEXP_t restrict data2,
     const GD_DCOMPLEXP_t restrict data3, GD_DCOMPLEXV(m), GD_DCOMPLEXV(b),
-    const gd_spf_t *restrict spf, size_t n_read)
+    const unsigned int *restrict spf, size_t n_read)
 {
   size_t i;
 
@@ -878,7 +878,7 @@ int _GD_BadInput(DIRFILE *D, const gd_entry_t *E, int i, int err)
   }
 
   /* scalar entries not allowed */
-  if (E->e->entry[i]->field_type & GD_SCALAR_ENTRY) {
+  if (E->e->entry[i]->field_type & GD_SCALAR_ENTRY_BIT) {
     _GD_SetError(D, GD_E_DIMENSION, GD_E_DIM_FORMAT, E->field, 0,
         E->e->entry[i]->field);
     dreturn("%i", 1);

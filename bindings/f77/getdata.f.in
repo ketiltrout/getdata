@@ -141,6 +141,10 @@ C     Corresponding to gd_desync(3)
       EXTERNAL GDDSYN
 C     Corresponding to gd_error_count(3)
       EXTERNAL GDECNT
+C     Corresponding to gd_entry_list(3) (sort of)
+      EXTERNAL GDENTN
+C     Returns the maximum entry name length
+      EXTERNAL GDENTX
 C     Corresponding to gd_entry_type(3)
       EXTERNAL GDENTY
 C     Corresponding to gd_error(3)
@@ -294,10 +298,14 @@ C     field
       EXTERNAL GDMSTX
 C     Corresponding to gd_mvector_list(3) (sort of)
       EXTERNAL GDMVEN
+C     Corresponding to gd_mplex_lookback(3)
+      EXTERNAL GDMXLB
 C     Corresponding to gd_naliases(3)
       EXTERNAL GDNALS
 C     Corresponding to gd_dirfilename(3)
       EXTERNAL GDNAME
+C     Corresponding to gd_nentries(3)
+      EXTERNAL GDNENT
 C     Corresponding to gd_nfields_by_type(3)
       EXTERNAL GDNFDT
 C     Corresponding to gd_nfields(3)

@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_cbopen 3 "17 March 2012" "Version 0.8.0" "GETDATA"
+.TH gd_cbopen 3 "1 April 2012" "Version 0.8.0" "GETDATA"
 .SH NAME
 gd_cbopen, gd_open \(em open or create a dirfile
 .SH SYNOPSIS
@@ -163,7 +163,7 @@ directives (see
 .BR dirfile-format (5))
 found in the dirfile format specification should be ignored.  All raw data will
 be assumed to have the byte sex indicated through the presence or absence of the
-.BR GD_ARM_ENDIAN ,\~ GD_BIG_ENDIAN ,\~ GD_LITTLE_ENDIAN ,
+.BR GD_ARM_ENDIAN ", " GD_BIG_ENDIAN ", " GD_LITTLE_ENDIAN ,
 and
 .B GD_NOT_ARM_ENDIAN
 flags.
@@ -198,9 +198,9 @@ section below for full details.
 .TP
 .B GD_PRETTY_PRINT
 When dirfile metadata are flushed to disk (either explicitly via
-.BR gd_metaflush (),\~ gd_rewrite_fragment (),
+.BR gd_metaflush "(3), " gd_rewrite_fragment (3),
 or 
-.BR gd_flush ()
+.BR gd_flush (3)
 or implicitly by closing the dirfile), an attempt will be made to create a
 nicer looking format specification (from a human-readable standpoint).  What
 this explicitly means is not part of the API, and any particular behaviour
@@ -222,23 +222,42 @@ containing a regular file called
 .BR format ,
 regardless of the content or form of that file.
 
-Truncation occurs by deleting every regular file in the specified directory,
-whether the files were referred to by the dirfile before truncation or not.
-Accordingly, this flag should be used with caution.  Subdirectories are
-left untouched.  Notably, this operation does not consider the presence of
-subdirfiles declared by
-.B INCLUDE
+Truncation occurs by deleting every regular file and symlink in the specified
+directory, whether the files were referred to by the dirfile before truncation
+or not.  Accordingly, this flag should be used with caution.  Unless
+.B GD_TRUNCSUB
+is also specified, subdirectories are left untouched.  Notably, this operation
+does not consider directories used in
+.B /INCLUDE
 directives.  If the dirfile does not exist, this flag is ignored.
+.TP
+.B GD_TRUNCSUB
+If specified along with
+.BR GD_TRUNC ,
+truncation will descend into subdirectories, deleting all regular files and
+symlinks recursively.  It does not descend into directories pointed to by
+symbolic links: in these cases, just the symlink iself is deleted.  If specified
+without an accompanying
+.BR GD_TRUNC ,
+this flag is ignored.
 .TP
 .B GD_VERBOSE
 Specifies that whenever an error is triggered by the library when working
 on this dirfile, the corresponding error string, which can be retrieved by
 calling 
 .BR gd_error_string (3),
-should be written on standard error by the library.  Without this flag,
-GetData writes nothing to standard error.  (GetData never writes to standard
-output.)
-
+should be written on the caller's standard error stream
+.RB ( stderr (3))
+by GetData.  The error string may be prefixed by a string specified by the
+caller; see
+.BR gd_verbose_prefix (3).
+Without this flag, GetData writes nothing to standard error.  (GetData never
+writes to standard output.)
+.PP
+Those flags which affect the operation of the library beyond this call itself
+may be modified later using the
+.BR gd_flags (3)
+function.
 .PP
 The
 .I flags
@@ -292,12 +311,22 @@ Specifies that raw data files are encoded as text files containing one data
 sample per line.  
 .TP
 .B GD_UNENCODED
-Specifies that raw data files are not encoded, but written verbatim to disk.
+Specifies that raw data files are not encoded, but written as simply binary data
+to disk.
 .TP
 .B GD_ZZIP_ENCODED
 Specifies that raw data files are compressed using the DEFLATE algorithm.  All
 raw data files for a given fragment are collected together and stored in a PKZIP
 archive called raw.zip.
+.TP
+.B GD_ZZSLIM_ENCODED
+Specifies that raw data files are compressed using a combinations of compression
+schemes: first files are slim-compressed, as with the
+.B GD_SLIM_ENCODED
+scheme, and then they are collected together and compressed (again) into a PKZIP
+archive called raw.zip, as in the
+.B GD_ZZIP_ENCODED
+scheme.
 
 .SS Standards Compliance
 The latest Dirfile Standards Version which this release of GetData understands
@@ -497,7 +526,7 @@ The number of bits of a BIT field was out-of-range.
 .TP
 .B GD_E_FORMAT_PROTECT
 The protection level specified by a
-.B PROTECT
+.B /PROTECT
 directive was unrecognised.
 .TP
 .B GD_E_FORMAT_RES_NAME
@@ -512,13 +541,25 @@ The last token of the line was unterminated.
 .TP
 .B GD_E_FORMAT_WINDOP
 The operation in a WINDOW field was not recognised.
+.TP
+.B GD_E_FORMAT_META_META
+A
+.B /META
+directive used a metafield for the parent field for the definition.
+.TP
+.B GD_E_FORMAT_ALIAS
+A metafield specification uses an alias for the parent field.
+.TP
+.B GD_E_FORMAT_MPLEXVAL
+A MPLEX specification has a negative count_max or count_val, or else had
+a positive count_max, and count_val was larger than it.
 .PP
 .IR pdata -> filename
 and
 .IR pdata -> linenum
 members contains the pathname of the fragment and line number where the syntax
 error was encountered.  The first line in a fragment is line one.
-
+.PP
 The
 .IR pdata -> line
 member contains a copy of the line containing the syntax error.  This line may
@@ -668,7 +709,7 @@ even if the open failed.
 .SH BUGS
 When working with dirfiles conforming to Standards Versions 4 and earlier
 (before the introduction of the
-.B ENDIAN
+.B /ENDIAN
 directive), GetData assumes the dirfile has native byte sex, even though,
 officially, these early Standards stipulated data to be little-endian.  This is
 necessary since, in the absence of an explicit
@@ -701,6 +742,8 @@ specification parsing will fail gloriously on an EBCDIC platform.
 .BR gd_discard (3),
 .BR gd_error (3),
 .BR gd_error_string (3),
+.BR gd_flags (3),
 .BR gd_getdata (3),
 .BR gd_include (3),
-.BR gd_parser_callback (3)
+.BR gd_parser_callback (3),
+.BR gd_verbose_prefix (3)

@@ -36,7 +36,7 @@ int main(void)
     "in RAW UINT8 11\n"
     "polynom POLYNOM in 1 2 1 3\n";
   int fd, r = 0;
-  gd_spf_t spf;
+  unsigned int spf;
   DIRFILE *D;
 
   rmdirfile();

@@ -190,7 +190,7 @@ extern "C" {
 #define GD_E_FORMAT_ALIAS     22
 #define GD_E_FORMAT_MPLEXVAL  23
 
-/* deprecated names */
+/* deprecated syntax suberrors */
 #define GD_E_FORMAT_NO_PARENT GD_E_FORMAT_NO_FIELD
 
 /* parser callback return values */
@@ -213,7 +213,8 @@ extern "C" {
 /* this MUST be one less than the lowest allowed fragment index */
 #define GD_ALL_FRAGMENTS (-1)
 
-#define GD_SCALAR_ENTRY 0x10
+#define GD_SCALAR_ENTRY_BIT  0x10
+#define GD_SPECIAL_ENTRY_BIT 0x20
 /* field types */
 typedef enum {
   GD_NO_ENTRY       = 0x00,
@@ -230,43 +231,49 @@ typedef enum {
   GD_RECIP_ENTRY    = 0x0B,
   GD_WINDOW_ENTRY   = 0x0C,
   GD_MPLEX_ENTRY    = 0x0D,
-  GD_CONST_ENTRY    = GD_SCALAR_ENTRY | 0x00,
-  GD_STRING_ENTRY   = GD_SCALAR_ENTRY | 0x01,
-  GD_CARRAY_ENTRY   = GD_SCALAR_ENTRY | 0x02
+  GD_CONST_ENTRY    = GD_SCALAR_ENTRY_BIT | 0x00,
+  GD_STRING_ENTRY   = GD_SCALAR_ENTRY_BIT | 0x01,
+  GD_CARRAY_ENTRY   = GD_SCALAR_ENTRY_BIT | 0x02
 } gd_entype_t;
 
 /* GD_NO_ENTRY is not part of this count */
 #define GD_N_ENTYPES 16
 
+/* Special types for gd_nentries(3) and gd_entry_list(3) */
+#define GD_ALL_ENTRIES    0
+#define GD_VECTOR_ENTRIES (GD_SPECIAL_ENTRY_BIT | 0x01)
+#define GD_SCALAR_ENTRIES (GD_SPECIAL_ENTRY_BIT | 0x02)
+
+/* gd_nentries(3) and gd_entry_list(3) flags */
+#define GD_ENTRIES_HIDDEN  0x1
+#define GD_ENTRIES_NOALIAS 0x2
+
+/* the current location of the I/O pointer */
 #define GD_HERE  (-1)
+
+/* MPLEX lookback defines */
+#define GD_DEFAULT_LOOKBACK 10
+#define GD_LOOKBACK_ALL (-1)
 
 /* C data types */
 #if ! defined GD_C89_API
 # include <inttypes.h>
-# define gd_int16_t int16_t
-# define gd_uint16_t uint16_t
 # define gd_int64_t int64_t
 # define gd_uint64_t uint64_t
 # define GD_DCOMPLEXM(v) double _Complex v
 # define GD_DCOMPLEXP(v) double _Complex *v
-typedef int16_t gd_bit_t;
-typedef uint16_t gd_spf_t;
 typedef int64_t gd_shift_t;
-typedef uint16_t gd_count_t;
 #else
-@DEFINE_gd_int16_t@
-@DEFINE_gd_uint16_t@
 @DEFINE_gd_int64_t@
 @DEFINE_gd_uint64_t@
 # define GD_DCOMPLEXM(v) double v[2]
 # define GD_DCOMPLEXP(v) double *v
-typedef gd_int16_t gd_bit_t;
-typedef gd_uint16_t gd_spf_t;
 typedef gd_int64_t gd_shift_t;
-typedef gd_uint16_t gd_count_t;
 #endif
-/* the maximum allowed number of counter steps for MPLEX entries */
-#define GD_COUNT_MAX 65535
+
+/* Deprecated types */
+typedef int gd_bit_t;
+typedef unsigned int gd_spf_t;
 
 /* Data types -- No valid type may set 0x40 */
 #define GD_SIZE8     0x001
@@ -296,6 +303,7 @@ typedef enum {
   GD_COMPLEX64  = GD_SIZE64  | GD_COMPLEX,
   GD_COMPLEX128 = GD_SIZE128 | GD_COMPLEX
 } gd_type_t;
+/* deprecated type aliases */
 #define GD_FLOAT     GD_FLOAT32
 #define GD_DOUBLE    GD_FLOAT64
 
@@ -338,7 +346,7 @@ struct _gd_unified_entry {
   int hidden;
   union {
     struct { /* RAW */
-      gd_spf_t spf;
+      unsigned int spf;
       gd_type_t data_type;
     } GD_ANON(raw);
     struct { /* LINCOM */
@@ -349,8 +357,8 @@ struct _gd_unified_entry {
       GD_DCOMPLEXM(cb[GD_MAX_LINCOM]);
     } GD_ANON(lincom);
     struct { /* BIT and SBIT */
-      gd_bit_t bitnum;
-      gd_bit_t numbits;
+      int bitnum;
+      int numbits;
     } GD_ANON(bit);
     struct { /* POLYNOM */
       int poly_ord;
@@ -372,8 +380,8 @@ struct _gd_unified_entry {
       gd_triplet_t threshold;
     } GD_ANON(window);
     struct { /* MPLEX */
-      gd_count_t count_val;
-      gd_count_t count_max;
+      int count_val;
+      int count_max;
     } GD_ANON(mplex);
     struct { /* CONST */
       gd_type_t const_type;
@@ -440,7 +448,7 @@ typedef int (*gd_parser_callback_t)(gd_parser_data_t*, void*);
 #endif
 
 #define GD_PERMISSIVE     0x00004000 /* be permissive */
-#define GD_TRUNCSUB       0x00008000 /* truncate subdirfiles */
+#define GD_TRUNCSUB       0x00008000 /* truncate subdirectories */
 
 #define GD_ENCODING       0x0F000000 /* mask */
 #define GD_AUTO_ENCODED   0x00000000 /* Encoding scheme unknown */
@@ -480,7 +488,7 @@ extern int gd_add_alias(DIRFILE *dirfile, const char *alias_name,
 gd_nonnull ((1,2,3));
 
 extern int gd_add_bit(DIRFILE *dirfile, const char *field_code,
-    const char *in_field, gd_bit_t bitnum, gd_bit_t numbits, int fragment_index)
+    const char *in_field, int bitnum, int numbits, int fragment_index)
 gd_nothrow gd_nonnull ((1,2,3));
 
 extern int gd_add_clincom(DIRFILE *dirfile, const char *field_code,
@@ -526,8 +534,8 @@ extern int gd_add_linterp(DIRFILE *dirfile, const char *field_code,
 gd_nonnull ((1,2,3,4));
 
 extern int gd_add_mplex(DIRFILE *dirfile, const char *field_code,
-    const char *in_field, const char *count_field, gd_count_t count_val,
-    gd_count_t count_max, int fragment_index) gd_nothrow gd_nonnull ((1,2,3,4));
+    const char *in_field, const char *count_field, int count_val, int count_max,
+    int fragment_index) gd_nothrow gd_nonnull ((1,2,3,4));
 
 extern int gd_add_multiply(DIRFILE *dirfile, const char *field_code,
     const char *in_field1, const char *in_field2, int fragment_index)
@@ -546,7 +554,7 @@ extern int gd_add_recip(DIRFILE *dirfile, const char *field_code,
 gd_nonnull ((1,2,3));
 
 extern int gd_add_sbit(DIRFILE *dirfile, const char *field_code,
-    const char *in_field, gd_bit_t bitnum, gd_bit_t numbits,
+    const char *in_field, int bitnum, int numbits,
     int fragment_index) gd_nothrow gd_nonnull ((1,2,3));
 
 extern int gd_add_string(DIRFILE *dirfile, const char *field_code,
@@ -567,7 +575,7 @@ extern int gd_alter_affixes(DIRFILE *dirfile, int index, const char *prefix,
         const char *suffix) gd_nothrow gd_nonnull ((1));
 
 extern int gd_alter_bit(DIRFILE *dirfile, const char *field_code,
-    const char *in_field, gd_bit_t bitnum, gd_bit_t numbits) gd_nothrow
+    const char *in_field, int bitnum, int numbits) gd_nothrow
 gd_nonnull((1,2));
 
 extern int gd_alter_carray(DIRFILE *dirfile, const char *field_code,
@@ -604,8 +612,8 @@ extern int gd_alter_lincom(DIRFILE *dirfile, const char *field_code,
 gd_nothrow gd_nonnull((1,2));
 
 extern int gd_alter_mplex(DIRFILE *dirfile, const char *field_code,
-    const char *in_field, const char *count_field, gd_count_t count_val,
-    gd_count_t count_max) gd_nothrow gd_nonnull((1,2));
+    const char *in_field, const char *count_field, int count_val,
+    int count_max) gd_nothrow gd_nonnull((1,2));
 
 extern int gd_alter_multiply(DIRFILE *dirfile, const char *field_code,
     const char *in_field1, const char *in_field2) gd_nothrow gd_nonnull((1,2));
@@ -621,7 +629,7 @@ extern int gd_alter_recip(DIRFILE *dirfile, const char *field_code,
     const char *in_field, double cdividend) gd_nothrow gd_nonnull((1,2));
 
 extern int gd_alter_sbit(DIRFILE *dirfile, const char *field_code,
-    const char *in_field, gd_bit_t bitnum, gd_bit_t numbits) gd_nothrow
+    const char *in_field, int bitnum, int numbits) gd_nothrow
 gd_nonnull((1,2));
 
 extern int gd_alter_window(DIRFILE *dirfile, const char *field_code,
@@ -671,6 +679,9 @@ extern unsigned long int gd_endianness(DIRFILE *dirfile,
 extern int gd_entry(DIRFILE *dirfile, const char *field_code,
     gd_entry_t *entry) gd_nothrow gd_nonnull ((1, 2));
 
+extern const char **gd_entry_list(DIRFILE* D, const char *parent,
+    unsigned int type, unsigned int flags) gd_nothrow gd_nonnull ((1));
+
 extern gd_entype_t gd_entry_type(DIRFILE *dirfile,
     const char *field_code) gd_nothrow gd_nonnull ((1));
 
@@ -714,8 +725,8 @@ extern int gd_madd_alias(DIRFILE *dirfile, const char *parent,
 gd_nonnull ((1,2,3,4));
 
 extern int gd_madd_bit(DIRFILE *dirfile, const char *parent,
-    const char *field_code, const char *in_field, gd_bit_t bitnum,
-    gd_bit_t numbits) gd_nothrow gd_nonnull ((1,2,3,4));
+    const char *field_code, const char *in_field, int bitnum,
+    int numbits) gd_nothrow gd_nonnull ((1,2,3,4));
 
 extern int gd_madd_carray(DIRFILE *dirfile, const char *parent,
     const char *field_code, gd_type_t const_type, size_t array_len,
@@ -760,7 +771,7 @@ gd_nothrow gd_nonnull ((1,2,3,4,5));
 
 extern int gd_madd_mplex(DIRFILE *dirfile, const char *parent,
     const char *field_code, const char *in_field, const char *count_field,
-    gd_count_t count_val, gd_count_t count_max) gd_nothrow
+    int count_val, int count_max) gd_nothrow
 gd_nonnull ((1,2,3,4,5));
 
 extern int gd_madd_multiply(DIRFILE *dirfile, const char *parent,
@@ -780,8 +791,8 @@ extern int gd_madd_recip(DIRFILE *dirfile, const char *parent,
 gd_nonnull ((1,2,3,4));
 
 extern int gd_madd_sbit(DIRFILE *dirfile, const char *parent,
-    const char *field_code, const char *in_field, gd_bit_t bitnum,
-    gd_bit_t numbits) gd_nothrow gd_nonnull ((1,2,3,4));
+    const char *field_code, const char *in_field, int bitnum,
+    int numbits) gd_nothrow gd_nonnull ((1,2,3,4));
 
 extern int gd_madd_spec(DIRFILE *dirfile, const char *line,
     const char *parent) gd_nothrow gd_nonnull ((1,2,3));
@@ -813,6 +824,8 @@ extern const char **gd_mfield_list_by_type(DIRFILE *dirfile,
 extern int gd_move_alias(DIRFILE *dirfile, const char *field_code,
     int new_fragment) gd_nothrow gd_nonnull ((1,2));
 
+extern int gd_mplex_lookback(DIRFILE *dirfile, int lookback);
+
 extern const char **gd_mstrings(DIRFILE *dirfile, const char *parent) gd_nothrow
 gd_nonnull((1,2));
 
@@ -826,6 +839,9 @@ gd_nonnull ((1,2));
 
 extern gd_type_t gd_native_type(DIRFILE *dirfile,
     const char *field_code) gd_nothrow gd_nonnull ((1,2));
+
+extern unsigned int gd_nentries(DIRFILE *D, const char *parent,
+    unsigned int type, unsigned int flags) gd_nothrow gd_nonnull ((1));
 
 extern unsigned int gd_nfields(DIRFILE *dirfile) gd_nothrow gd_nonnull ((1));
 
@@ -866,7 +882,7 @@ extern const char *gd_reference(DIRFILE *dirfile,
 extern int gd_rename_alias(DIRFILE *dirfile, const char *old_code,
     const char *new_name) gd_nothrow gd_nonnull ((1,2,3));
 
-extern gd_spf_t gd_spf(DIRFILE *dirfile, const char *field_code) gd_nothrow
+extern unsigned int gd_spf(DIRFILE *dirfile, const char *field_code) gd_nothrow
 gd_nonnull ((1, 2));
 
 extern size_t gd_get_string(DIRFILE *dirfile, const char *field_code,
@@ -877,7 +893,7 @@ extern size_t gd_put_string(DIRFILE *dirfile, const char *field_code,
 
 extern const char **gd_strings(DIRFILE *dirfile) gd_nothrow gd_nonnull ((1));
 
-extern char *gd_tokenise(DIRFILE *D, const char *string) gd_nothrow
+extern char *gd_strtok(DIRFILE *D, const char *string) gd_nothrow
 gd_nonnull ((1));
 
 extern int gd_unhide(DIRFILE *dirfile, const char *field_code) gd_nothrow
@@ -897,7 +913,8 @@ extern const char **gd_vector_list(DIRFILE *dirfile) gd_nothrow gd_nonnull((1));
 extern int gd_add(DIRFILE *dirfile, const gd_entry_t *entry) gd_nonnull((1,2));
 
 extern int gd_add_raw(DIRFILE *dirfile, const char *field_code,
-    gd_type_t data_type, gd_spf_t spf, int fragment_index) gd_nonnull((1,2));
+    gd_type_t data_type, unsigned int spf,
+    int fragment_index) gd_nonnull((1,2));
 
 extern int gd_add_spec(DIRFILE *dirfile, const char *line,
     int fragment_index) gd_nonnull ((1,2));
@@ -915,7 +932,7 @@ extern int gd_alter_linterp(DIRFILE *dirfile, const char *field_code,
     const char *in_field, const char *table, int recode) gd_nonnull ((1,2));
 
 extern int gd_alter_raw(DIRFILE *dirfile, const char *field_code,
-    gd_type_t data_type, gd_spf_t spf, int recode) gd_nonnull ((1,2));
+    gd_type_t data_type, unsigned int spf, int recode) gd_nonnull ((1,2));
 
 extern int gd_alter_spec(DIRFILE *dirfile, const char *line,
     int recode) gd_nonnull ((1,2));

@@ -23,9 +23,9 @@
 
 /* _GD_GetSPF: Get samples per frame for field
 */
-gd_spf_t _GD_GetSPF(DIRFILE *D, gd_entry_t *E)
+unsigned int _GD_GetSPF(DIRFILE *D, gd_entry_t *E)
 {
-  gd_spf_t spf = 0;
+  unsigned int spf = 0;
 
   dtrace("%p, %p", D, E);
 
@@ -76,9 +76,9 @@ gd_spf_t _GD_GetSPF(DIRFILE *D, gd_entry_t *E)
 
 /* Get the number of samples for each frame for the given field
 */
-gd_spf_t gd_spf(DIRFILE* D, const char *field_code_in) gd_nothrow
+unsigned int gd_spf(DIRFILE* D, const char *field_code_in) gd_nothrow
 {
-  gd_spf_t spf = 0;
+  unsigned int spf = 0;
   gd_entry_t* entry;
   char* field_code;
   int repr;
@@ -104,7 +104,7 @@ gd_spf_t gd_spf(DIRFILE* D, const char *field_code_in) gd_nothrow
     return 0;
   }
 
-  if (entry->field_type & GD_SCALAR_ENTRY)
+  if (entry->field_type & GD_SCALAR_ENTRY_BIT)
     _GD_SetError(D, GD_E_DIMENSION, GD_E_DIM_CALLER, NULL, 0, field_code);
   else 
     spf = _GD_GetSPF(D, entry);

@@ -23,7 +23,7 @@
 using namespace GetData;
 
 SBitEntry::SBitEntry(const char* field_code, const char* in_field,
-    gd_bit_t bitnum, gd_bit_t numbits, int fragment_index) : Entry()
+    int bitnum, int numbits, int fragment_index) : Entry()
 {
   E.field = strdup(field_code);
   E.field_type = GD_BIT_ENTRY;
@@ -49,7 +49,7 @@ int SBitEntry::SetInput(const char* field)
   return 0;
 }
 
-int SBitEntry::SetFirstBit(gd_bit_t first_bit)
+int SBitEntry::SetFirstBit(int first_bit)
 {
   E.u.bit.bitnum = first_bit;
 
@@ -59,7 +59,7 @@ int SBitEntry::SetFirstBit(gd_bit_t first_bit)
   return 0;
 }
 
-int SBitEntry::SetNumBits(gd_bit_t num_bits)
+int SBitEntry::SetNumBits(int num_bits)
 {
   E.u.bit.numbits = num_bits;
 

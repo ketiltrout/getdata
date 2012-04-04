@@ -37,7 +37,7 @@ int main(void)
     "in2 RAW UINT8 13\n"
     "lincom MULTIPLY in1 in2\n";
   int fd, r = 0;
-  gd_spf_t spf;
+  unsigned int spf;
   DIRFILE *D;
 
   rmdirfile();

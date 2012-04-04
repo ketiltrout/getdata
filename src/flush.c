@@ -308,12 +308,17 @@ static void _GD_WriteConst(DIRFILE *D, FILE* stream, int me, int permissive,
     else
       fprintf(stream, "<%i>%s", index, postamble);
     free(ptr);
-  } else if (type == GD_UINT16)
-    fprintf(stream, "%" PRIu16 "%s", *(uint16_t *)value, postamble);
+  }
   else if (type == GD_UINT64)
     fprintf(stream, "%" PRIu64 "%s", *(uint64_t *)value, postamble);
   else if (type == GD_INT64)
-    fprintf(stream, "%" PRIi64 "%s", *(uint64_t *)value, postamble);
+    fprintf(stream, "%" PRIi64 "%s", *(int64_t *)value, postamble);
+  else if (type == GD_UINT32)
+    fprintf(stream, "%" PRIu32 "%s", *(uint32_t *)value, postamble);
+  else if (type == GD_INT32)
+    fprintf(stream, "%" PRIi32 "%s", *(int32_t *)value, postamble);
+  else if (type == GD_UINT16)
+    fprintf(stream, "%" PRIu16 "%s", *(uint16_t *)value, postamble);
   else if (type == GD_INT16)
     fprintf(stream, "%" PRIi16 "%s", *(int16_t *)value, postamble);
   else if (type == GD_FLOAT64)
@@ -416,10 +421,10 @@ static void _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
       fprintf(stream, " BIT%s ", pretty ? "     " : "");
       _GD_StringEscapeise(stream, E->in_fields[0], 0, permissive, D->standards);
       fputc(' ', stream);
-      _GD_WriteConst(D, stream, me, permissive, GD_INT16, &E->EN(bit,bitnum),
+      _GD_WriteConst(D, stream, me, permissive, GD_INT_TYPE, &E->EN(bit,bitnum),
           E->scalar[0], E->scalar_ind[0], " ");
-      _GD_WriteConst(D, stream, me, permissive, GD_INT16, &E->EN(bit,numbits),
-          E->scalar[1], E->scalar_ind[1], "\n");
+      _GD_WriteConst(D, stream, me, permissive, GD_INT_TYPE,
+          &E->EN(bit,numbits), E->scalar[1], E->scalar_ind[1], "\n");
       break;
     case GD_DIVIDE_ENTRY:
       fprintf(stream, " DIVIDE%s ", pretty ? "  " : "");
@@ -467,10 +472,10 @@ static void _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
       fprintf(stream, " SBIT%s ", pretty ? "    " : "");
       _GD_StringEscapeise(stream, E->in_fields[0], 0, permissive, D->standards);
       fputc(' ', stream);
-      _GD_WriteConst(D, stream, me, permissive, GD_INT16, &E->EN(bit,bitnum),
+      _GD_WriteConst(D, stream, me, permissive, GD_INT_TYPE, &E->EN(bit,bitnum),
           E->scalar[0], E->scalar_ind[0], " ");
-      _GD_WriteConst(D, stream, me, permissive, GD_INT16, &E->EN(bit,numbits),
-          E->scalar[1], E->scalar_ind[1], "\n");
+      _GD_WriteConst(D, stream, me, permissive, GD_INT_TYPE,
+          &E->EN(bit,numbits), E->scalar[1], E->scalar_ind[1], "\n");
       break;
     case GD_WINDOW_ENTRY:
       fprintf(stream, " WINDOW%s ", pretty ? "  " : "");
@@ -501,10 +506,14 @@ static void _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
       fputc(' ', stream);
       _GD_StringEscapeise(stream, E->in_fields[1], 0, permissive, D->standards);
       fputc(' ', stream);
-      _GD_WriteConst(D, stream, me, permissive, GD_INT64,
-          &E->EN(mplex,count_val), E->scalar[0], E->scalar_ind[0], " ");
-      _GD_WriteConst(D, stream, me, permissive, GD_INT64,
-          &E->EN(mplex,count_max), E->scalar[1], E->scalar_ind[1], "\n");
+      _GD_WriteConst(D, stream, me, permissive, GD_INT_TYPE,
+          &E->EN(mplex,count_val), E->scalar[0], E->scalar_ind[0], "");
+      if (E->EN(mplex,count_max) > 0 || E->scalar[1]) {
+        fputc(' ', stream);
+        _GD_WriteConst(D, stream, me, permissive, GD_INT_TYPE,
+            &E->EN(mplex,count_max), E->scalar[1], E->scalar_ind[1], "\n");
+      } else
+        fputc('\n', stream);
       break;
     case GD_CONST_ENTRY:
       fprintf(stream, " CONST%s %s ", pretty ? "   " : "", _GD_TypeName(D,
@@ -692,11 +701,22 @@ static void _GD_FlushFragment(DIRFILE* D, int i, int permissive)
       case GD_SIE_ENCODED:
         fputs("/ENCODING sie\n", stream);
         break;
-      case 0:
-        break;
       case GD_ZZIP_ENCODED:
+        if (D->fragment[i].enc_data)
+          fprintf(stream, "/ENCODING zzip %s\n",
+              (char*)D->fragment[i].enc_data);
+        else
+          fputs("/ENCODING zzip\n", stream);
+        break;
       case GD_ZZSLIM_ENCODED:
-        /* XXX do something here ... ? */
+        if (D->fragment[i].enc_data)
+          fprintf(stream, "/ENCODING zzslim %s\n",
+              (char*)D->fragment[i].enc_data);
+        else
+          fputs("/ENCODING zzslim\n", stream);
+        break;
+      case GD_AUTO_ENCODED: /* an unresolved, auto-encoded fragment */
+        break;
       default:
         fprintf(stream, "/ENCODING unknown # (%lx)\n", D->fragment[i].encoding);
         break;

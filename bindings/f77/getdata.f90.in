@@ -2780,7 +2780,7 @@ subroutine fgd_alter_mplex (dirfile, field_name, in_field, count_field, &
   count_max)
 end subroutine
 
-subroutine fgd_tokenise (token, l, dirfile, string, n)
+subroutine fgd_strtok (token, l, dirfile, string, n)
   character (len=*), intent(out) :: token
   integer, intent(inout) :: l
   integer, intent(in) :: dirfile, n
@@ -2808,6 +2808,64 @@ subroutine fgd_verbose_prefix(dirfile, prefix)
   character (len=*), intent(in) :: prefix
 
   call gdvbpx(dirfile, TRIM(prefix), LEN_TRIM(prefix))
+end subroutine
+
+subroutine fgd_mplex_lookback(dirfile, lookback)
+  integer, intent(in) :: dirfile, lookback
+
+  call gdmxlb(dirfile, lookback)
+end subroutine
+
+function fgd_nentries (dirfile, parent, entype, flags)
+  integer :: fgd_nentries
+  integer, intent(in) :: dirfile, entype, flags
+  character (len=*), intent(in) :: parent
+  integer :: parent_l
+
+  parent_l = LEN_TRIM(parent)
+  if (parent_l .EQ. 0) parent_l = -1
+
+  ! call f77 library
+  call gdnent(fgd_nentries, dirfile, TRIM(parent), parent_l, entype, flags)
+end function
+
+function fgd_entry_name_max (dirfile, parent, entype, flags)
+  integer :: fgd_entry_name_max
+  integer, intent(in) :: dirfile, entype, flags
+  character (len=*), intent(in) :: parent
+  integer :: parent_l
+
+  parent_l = LEN_TRIM(parent)
+  if (parent_l .EQ. 0) parent_l = -1
+
+  ! call f77 library
+  call gdentx(fgd_entry_name_max, dirfile, TRIM(parent), parent_l, entype, &
+  flags)
+end function
+
+subroutine fgd_entry_list (entry_list, dirfile, parent, entype, flags, &
+entry_len)
+  character(len=*), dimension(:), intent(out) :: entry_list
+  integer, intent(in) :: dirfile, entype, flags
+  integer, intent(inout) :: entry_len
+  character (len=*), intent(in) :: parent
+  integer :: max_len, nentries, i, parent_l
+
+  ! make sure the entry list is large enough
+  max_len = fgd_entry_name_max(dirfile, parent, entype, flags)
+  parent_l = LEN_TRIM(parent)
+  if (parent_l .EQ. 0) parent_l = -1
+
+  if (entry_len .lt. max_len) then
+    entry_len = max_len
+  else
+    nentries = fgd_nentries(dirfile, parent, entype, flags)
+    do i=1,nentries
+      ! call f77 library
+      call gdentn(entry_list(i), entry_len, dirfile, TRIM(parent), parent_l, &
+      entype, flags, i)
+    end do
+  end if
 end subroutine
 
 end module

@@ -174,7 +174,7 @@ off64_t _GD_GetEOF(DIRFILE *restrict D, const gd_entry_t *restrict E,
     const char *restrict parent, int *restrict is_index)
 {
   off64_t ns = -1, ns1;
-  gd_spf_t spf0, spf1;
+  unsigned int spf0, spf1;
   int i, is_index1;
 
   dtrace("%p, %p, \"%s\", %p", D, E, parent, is_index);
@@ -391,10 +391,11 @@ off_t gd_eof(DIRFILE* D, const char *field_code)
 }
 
 static off64_t _GD_GetBOF(DIRFILE *restrict D, const gd_entry_t *restrict E,
-    const char *restrict parent, gd_spf_t *restrict spf, long long *restrict ds)
+    const char *restrict parent, unsigned int *restrict spf,
+    long long *restrict ds)
 {
   off64_t bof = -1, bof1;
-  gd_spf_t spf1;
+  unsigned int spf1;
   long long ds1;
   int i;
 
@@ -538,7 +539,7 @@ off64_t gd_bof64(DIRFILE* D, const char *field_code_in) gd_nothrow
   gd_entry_t *entry;
   int repr;
   char *field_code;
-  gd_spf_t spf;
+  unsigned int spf;
   long long ds;
 
   dtrace("%p, \"%s\"", D, field_code_in);

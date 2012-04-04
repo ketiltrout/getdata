@@ -35,7 +35,7 @@ namespace GetData {
       MplexEntry() : Entry() { E.field_type = GD_MPLEX_ENTRY; };
 
       MplexEntry(const char* field_code, const char* in_field,
-          const char *check_Field, gd_count_t count_val, gd_count_t count_max,
+          const char *check_Field, int count_val, int count_max,
           int fragment_index = 0);
 
       virtual const char *Input(int index = 0) const {
@@ -46,14 +46,14 @@ namespace GetData {
 
       virtual int ScalarIndex() const { return E.scalar_ind[0]; };
 
-      virtual gd_count_t CountVal() const { return E.u.mplex.count_val; };
+      virtual int CountVal() const { return E.u.mplex.count_val; };
 
-      virtual gd_count_t CountMax() const { return E.u.mplex.count_max; };
+      virtual int CountMax() const { return E.u.mplex.count_max; };
 
       int SetInput(const char* field, int index);
-      virtual int SetCountVal(gd_count_t count_val);
+      virtual int SetCountVal(int count_val);
       virtual int SetCountVal(const char* threshold);
-      virtual int SetCountMax(gd_count_t count_max);
+      virtual int SetCountMax(int count_max);
       virtual int SetCountMax(const char* threshold);
 
     private:

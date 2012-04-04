@@ -22,7 +22,7 @@
 
 int r = 0;
 
-void CheckSPF(DIRFILE *D, const char *f, int v)
+void CheckSPF(DIRFILE *D, const char *f, unsigned int v)
 {
   gd_entry_t e;
 

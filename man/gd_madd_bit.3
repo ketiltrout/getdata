@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_madd_bit 3 "1 March 2012" "Version 0.8.0" "GETDATA"
+.TH gd_madd_bit 3 "1 April 2012" "Version 0.8.0" "GETDATA"
 .SH NAME
 gd_madd_bit, gd_madd_carray, gd_madd_clincom, gd_madd_const, gd_madd_cpolynom,
 gd_madd_crecip, gd_madd_divide, gd_madd_lincom, gd_madd_linterp,
@@ -27,7 +27,7 @@ gd_madd_string
 .ad l
 .BI "int gd_madd_bit(DIRFILE *" dirfile ,
 .BI "const char *" parent ", const char *" field_name ,
-.BI "const char *" in_field ", gd_bit_t " bitnum ", gd_bit_t " numbits );
+.BI "const char *" in_field ", int " bitnum ", int " numbits );
 .HP
 .BI "int gd_madd_carray(DIRFILE *" dirfile ,
 .BI "const char *" parent ", const char *" field_name ,
@@ -62,6 +62,11 @@ gd_madd_string
 .BI "const char *" parent ", const char *" field_name ,
 .BI "const char *" in_field ", const char *" table );
 .HP
+.BI "int gd_madd_mplex(DIRFILE *" dirfile ,
+.BI "const char *" parent ", const char *" field_name ,
+.BI "const char *" in_field ", const char *" count_field ,
+.BI "int " count_val ", int " count_max );
+.HP
 .BI "int gd_madd_multiply(DIRFILE *" dirfile ,
 .BI "const char *" parent ", const char *" field_name ,
 .BI " const char *" in_field1 ", const char *" in_field2 );
@@ -80,16 +85,19 @@ gd_madd_string
 .HP
 .BI "int gd_madd_sbit(DIRFILE *" dirfile ,
 .BI "const char *" parent ", const char *" field_name ,
-.BI "const char *" in_field ", gd_bit_t " bitnum ", gd_bit_t " numbits );
+.BI "const char *" in_field ", int " bitnum ", int " numbits );
 .HP
 .BI "int gd_madd_string(DIRFILE *" dirfile ", const char *" parent ,
 .BI "const char *" field_name ", const char *" value );
+.HP
+.BI "int gd_madd_window(DIRFILE *" dirfile ,
+.BI "const char *" parent ", const char *" field_name ,
+.BI "const char *" in_field ", const char *" check_field ", gd_windop_t"
+.IB windop ", gd_triplet_t " threshold );
 .hy
 .ad n
 .SH DESCRIPTION
-These functions provide alternatives to using the
-.BR gd_madd ()
-function to add a new metafield of the indicated type under the parent field
+These functions add a new metafield of the indicated type under the parent field
 given by
 .I parent
 in the dirfile specified by
@@ -156,11 +164,31 @@ specifies the data type of the value pointed to by
 .IR value .
 
 The
-.B gd_bit_t
-type is a signed 16-bit integer type.  The
 .B gd_shift_t
-type is a signed 64-bit integer type.
-
+type is a signed 64-bit integer type.  The
+.B gd_triplet_t
+type is defined as:
+.PP
+.in +4n
+.nf
+.fam C
+typedef union {
+  gd_int64_t i;
+  gd_uint64_t u;
+  double r;
+} gd_triplet_t;
+.fam
+.fi
+.in
+.PP
+Which element of this
+.B gd_triplet_t
+union to set depends on the operator selected for the
+.B WINDOW
+field.  See
+.BR gd_entry (3)
+for details.
+.PP
 All fields added with this interface must contain numerical parameters.  Fields
 with scalar fields as parameters cannot be added with these functions.  Those
 fields must be added with
@@ -272,15 +300,21 @@ parameter becomes a double precision array of length two.
 .SH SEE ALSO
 .BR gd_add_bit (3),
 .BR gd_add_const (3),
+.BR gd_add_divide (3),
 .BR gd_add_lincom (3),
 .BR gd_add_linterp (3),
+.BR gd_add_mplex (3),
 .BR gd_add_multiply (3),
 .BR gd_add_phase (3),
+.BR gd_add_polynom (3),
+.BR gd_add_recip (3),
 .BR gd_add_string (3),
+.BR gd_add_windop (3),
+.BR gd_entry (3),
+.BR gd_error (3),
+.BR gd_error_string (3),
 .BR gd_madd (3),
 .BR gd_madd_spec (3),
 .BR gd_metaflush (3),
 .BR gd_open (3),
-.BR gd_error (3),
-.BR gd_error_string (3),
 .BR dirfile-format (5)

@@ -39,7 +39,7 @@ int main(void)
   int fd, error1, error2, r = 0;
   const char *ptr;
   char *reference;
-  gd_spf_t spf;
+  unsigned int spf;
   DIRFILE *D;
 
   rmdirfile();

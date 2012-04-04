@@ -21,6 +21,7 @@
 #include "test.h"
 
 #include <stdlib.h>
+#include <sys/wait.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <fcntl.h>
@@ -80,7 +81,7 @@ int main(void)
   CHECKI(e1, 0);
   CHECKI(e2, GD_E_BAD_CODE);
 
-  wait(&status, 0);
+  wait(&status);
   if (status)
     r = 1;
 

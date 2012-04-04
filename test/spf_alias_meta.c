@@ -29,7 +29,7 @@ int main(void)
     "data/sub PHASE data 0\n"
     "/ALIAS alias data\n";
   int fd, error, r = 0;
-  gd_spf_t spf;
+  unsigned int spf;
   DIRFILE *D;
 
   rmdirfile();

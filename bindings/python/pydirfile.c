@@ -120,6 +120,7 @@ static void gdpy_dirfile_delete(struct gdpy_dirfile_t* self)
   dtrace("%p", self);
 
   gd_close(self->D);
+  free(self->verbose_prefix);
 
   dreturnvoid();
 }
@@ -133,6 +134,8 @@ static PyObject* gdpy_dirfile_create(PyTypeObject *type, PyObject *args,
 
   if (self) {
     self->D = NULL;
+    self->mplex_lookback = 10;
+    self->verbose_prefix = NULL;
     self->callback = NULL;
     self->callback_data = NULL;
   }
@@ -579,7 +582,7 @@ static PyObject* gdpy_dirfile_getdata(struct gdpy_dirfile_t* self,
   long int num_frames = 0, num_samples = 0;
   int as_list = 0;
   gd_type_t return_type;
-  gd_spf_t spf = 1;
+  unsigned int spf = 1;
   PyObject* pylist = NULL;
 #ifdef USE_NUMPY
   npy_intp dims[] = { 0 };
@@ -2443,7 +2446,7 @@ static PyObject* gdpy_dirfile_maddalias(struct gdpy_dirfile_t* self,
   return Py_None;
 }
 
-static PyObject *gdpy_dirfile_tokenise(struct gdpy_dirfile_t *self,
+static PyObject *gdpy_dirfile_strtok(struct gdpy_dirfile_t *self,
     void *args, void *keys)
 {
   dtrace("%p, %p, %p", self, args, keys);
@@ -2452,14 +2455,14 @@ static PyObject *gdpy_dirfile_tokenise(struct gdpy_dirfile_t *self,
   char *keywords[] = { "string", NULL };
   const char *string = NULL;
 
-  if (!PyArg_ParseTupleAndKeywords(args, keys, "|s:pygetdata.dirfile.tokenise",
+  if (!PyArg_ParseTupleAndKeywords(args, keys, "|s:pygetdata.dirfile.strtok",
         keywords, &string))
   {
     dreturn("%p", NULL);
     return NULL;
   }
 
-  token = gd_tokenise(self->D, string);
+  token = gd_strtok(self->D, string);
 
   PyObject* pyobj = PyString_FromString(token);
   free(token);
@@ -2525,28 +2528,133 @@ static int gdpy_dirfile_setflags(struct gdpy_dirfile_t *self,
   return 0;
 }
 
-static PyObject* gdpy_dirfile_verbose_prefix(struct gdpy_dirfile_t* self,
-    void *args, void *keys)
+static PyObject* gdpy_dirfile_getverboseprefix(struct gdpy_dirfile_t *self,
+    void* closure)
+{
+  dtrace("%p, %p", self, closure);
+
+  if (self->verbose_prefix == NULL) {
+    Py_INCREF(Py_None);
+    dreturn("%p", Py_None);
+    return Py_None;
+  }
+
+  PyObject* pyobj = PyString_FromString(self->verbose_prefix);
+  dreturn("%p", pyobj);
+  return pyobj;
+}
+
+static int gdpy_dirfile_setverboseprefix(struct gdpy_dirfile_t* self,
+    PyObject *value, void *closure)
+{
+  dtrace("%p, %p, %p", self, value, closure);
+
+  free(self->verbose_prefix);
+  if (value == Py_None)
+    self->verbose_prefix = NULL;
+  else {
+    char *string = PyString_AsString(value);
+    if (string == NULL) {
+      dreturn("%i", -1);
+      return -1;
+    }
+    self->verbose_prefix = strdup(string);
+  }
+
+  gd_verbose_prefix(self->D, self->verbose_prefix);
+
+  PYGD_CHECK_ERROR(self->D, -1);
+
+  dreturn("%i", 0);
+  return 0;
+}
+
+static PyObject* gdpy_dirfile_getmplexlookback(struct gdpy_dirfile_t *self,
+    void* closure)
+{
+  dtrace("%p, %p", self, closure);
+
+  PyObject* pyobj = PyInt_FromLong(self->mplex_lookback);
+  dreturn("%p", pyobj);
+  return pyobj;
+}
+
+static int gdpy_dirfile_setmplexlookback(struct gdpy_dirfile_t* self,
+    PyObject *value, void *closure)
+{
+  dtrace("%p, %p, %p", self, value, closure);
+  int lookback = (int)PyInt_AsLong(value);
+
+  if (PyErr_Occurred()) {
+    dreturn("%i", -1);
+    return -1;
+  }
+
+  self->mplex_lookback = lookback;
+
+  gd_mplex_lookback(self->D, lookback);
+
+  PYGD_CHECK_ERROR(self->D, -1);
+
+  dreturn("%i", 0);
+  return 0;
+}
+
+static PyObject* gdpy_dirfile_nentries(struct gdpy_dirfile_t* self,
+    PyObject* args, PyObject* keys)
 {
   dtrace("%p, %p, %p", self, args, keys);
 
-  char *keywords[] = { "prefix", NULL };
-  const char *prefix = NULL;
+  char* keywords[] = { "parent", "type", "flags", NULL };
+  unsigned int nentries, type = 0, flags = 0;
+  const char *parent = NULL;
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
-        "|s:pygetdata.dirfile.verbose_prefix", keywords, &prefix))
+        "|sII:pygetdata.dirfile.nentries", keywords, &parent, &type, &flags))
   {
     dreturn("%p", NULL);
     return NULL;
   }
 
-  gd_verbose_prefix(self->D, prefix);
+  nentries = gd_nentries(self->D, parent, type, flags);
 
   PYGD_CHECK_ERROR(self->D, NULL);
 
-  Py_INCREF(Py_None);
-  dreturn("%p", Py_None);
-  return Py_None;
+  PyObject* pyobj = PyInt_FromLong((long)nentries);
+
+  dreturn("%p", pyobj);
+  return pyobj;
+}
+
+static PyObject* gdpy_dirfile_entrylist(struct gdpy_dirfile_t* self,
+    void* args, void* keys)
+{
+  dtrace("%p, %p, %p", self, args, keys);
+
+  const char **entries;
+  char* keywords[] = { "parent", "type", "flags", NULL };
+  int i;
+  unsigned int type = 0, flags = 0;
+  const char *parent = NULL;
+
+  if (!PyArg_ParseTupleAndKeywords(args, keys,
+        "|sII:pygetdata.dirfile.entry_list", keywords, &parent, &type, &flags))
+  {
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  entries = gd_entry_list(self->D, parent, type, flags);
+
+  PYGD_CHECK_ERROR(self->D, NULL);
+
+  PyObject* pylist = PyList_New(0);
+
+  for (i = 0; entries[i] != NULL; ++i)
+    PyList_Append(pylist, PyString_FromString(entries[i]));
+
+  dreturn("%p", pylist);
+  return pylist;
 }
 
 static PyGetSetDef gdpy_dirfile_getset[] = {
@@ -2591,6 +2699,20 @@ static PyGetSetDef gdpy_dirfile_getset[] = {
       "same effect as passing the corresponding C API symbols to\n"
       "gd_dirfile_standards(3), q.v.",
     NULL },
+  {"verbose_prefix", (getter)gdpy_dirfile_getverboseprefix,
+    (setter)gdpy_dirfile_setverboseprefix,
+      "If opened with pygetdata::VERBOSE, a string prefixed to error\n"
+        "messages printed by the library, or None, if no prefix is\n"
+        "defined.  See gd_verbose_prefix(3)."
+  },
+  {"mplex_lookback", (getter)gdpy_dirfile_getmplexlookback,
+    (setter)gdpy_dirfile_setmplexlookback,
+      "The number of MPLEX cycles to search before the requested start of\n"
+        "the returned data when reading data from a MPLEX field.  Set\n"
+        "to zero to disable lookback, or to -1 to make the lookback\n"
+        "unlimited.  See gd_mplex_lookback(3) for the definition of a\n"
+        "\"MPLEX cycle\"."
+  },
   { NULL }
 };
 
@@ -2734,7 +2856,6 @@ static PyMethodDef gdpy_dirfile_methods[] = {
       "pygetdata.COMPLEX, although any GetData data type code is permitted.\n"
       "If omitted, the return type defaults to the native type of the field\n"
       "(see dirfile.native_type()).\n\n"
-      /* ------- handy ruler ---------------------------------------------| */
       "The 'first_frame' and 'first_sample' parameters indicate first\n"
       "datum to read.  If they are both omitted, data is read from the\n"
       "first sample.  Similarly, 'num_frames' and 'num_samples' indicate\n"
@@ -2868,6 +2989,18 @@ static PyMethodDef gdpy_dirfile_methods[] = {
       "data type: 'UINT8', 'INT8', &c.  The native_type method behaves\n"
       "identically, but returns a numeric data type code.  See\n"
       "gd_native_type(3)."
+  },
+  {"nentries", (PyCFunction)gdpy_dirfile_nentries, METH_VARARGS | METH_KEYWORDS,
+    "nentries([parent, type, flags])\n\n"
+      "Return a count of entries in the database.  If 'parent' is given,\n"
+      "metafields under 'parent' will be considered, otherwise top-level\n"
+      "fields are counted.  If given, 'type' should be either one of the\n"
+      /* ------- handy ruler ---------------------------------------------| */
+      "the pygetdata.*_ENTRY symbols, or else one of the special\n"
+      "pygetdata.*_ENTRIES symbols; if not given, 'type' defaults to\n"
+      "pygetdata.ALL_ENTRIES.  If given 'flags' should be a bitwise or'd\n"
+      "collection of zero or more of the pygetdata.ENTRIES_* flags.\n"
+      "See gd_nentries(3)."
   },
   {"nfields", (PyCFunction)gdpy_dirfile_getnfields,
     METH_VARARGS | METH_KEYWORDS,
@@ -3134,13 +3267,13 @@ static PyMethodDef gdpy_dirfile_methods[] = {
       "Adds a new alias called 'field_code' pointing to 'target' as a\n"
       "metalias under 'parent'.  See gd_madd_alias(3)."
   },
-  {"tokenise", (PyCFunction)gdpy_dirfile_tokenise, METH_VARARGS | METH_KEYWORDS,
-    "tokenise([string])\n\n"
+  {"strtok", (PyCFunction)gdpy_dirfile_strtok, METH_VARARGS | METH_KEYWORDS,
+    "strtok([string])\n\n"
       "If 'string' is given, runs the GetData tokeniser on 'string' and\n"
       "returns the first token.  If 'string' is not given, returns\n"
       "subsequent tokens (one per call) of the last string that was\n"
       "provided.  Note: an error will result if the string being parsed\n"
-      "goes out of scope.  See gd_tokenise(3)."
+      "goes out of scope.  See gd_strtok(3)."
   },
   {"desync", (PyCFunction)gdpy_dirfile_desync, METH_VARARGS | METH_KEYWORDS,
     "desync([flags])\n\n"
@@ -3149,10 +3282,17 @@ static PyMethodDef gdpy_dirfile_methods[] = {
       "given, flags should be a bitwise or'd  collection of the\n"
       "pygetdata.DESYNC_... flags.  See gd_desync(3)."
   },
-  {"verbose_prefix", (PyCFunction)gdpy_dirfile_verbose_prefix,
-    METH_VARARGS | METH_KEYWORDS, "verbose_prefix([prefix])\n\n"
-      "Set the verbose prefix to prefix (if given) or else remove the\n"
-      "previously defined prefix.  See gd_verbose_prefix (3)."
+  {"entry_list", (PyCFunction)gdpy_dirfile_entrylist,
+    METH_VARARGS | METH_KEYWORDS,
+    "entry_list([parent, type, flags])\n\n"
+      "Return a list of entry names in the database.  If 'parent' is\n"
+      "given metafields under 'parent' will be considered, otherwise\n"
+      "top-level entries are returned.  If given, 'type' should be either\n"
+      "one of the the pygetdata.*_ENTRY symbols, or else one of the\n"
+      "special pygetdata.*_ENTRIES symbols; if not given, 'type' defaults\n"
+      "to pygetdata.ALL_ENTRIES.  If given 'flags' should be a bitwise\n"
+      "or'd collection of zero or more of the pygetdata.ENTRIES_* flags.\n"
+      "See gd_entry_list(3)."
   },
   { NULL, NULL, 0, NULL }
 };
