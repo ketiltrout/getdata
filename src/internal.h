@@ -75,6 +75,9 @@
 #include <dirent.h>
 #endif
 #ifdef HAVE_INTTYPES_H
+#ifndef __STDC_FORMAT_MACROS
+#define __STDC_FORMAT_MACROS
+#endif
 #include <inttypes.h>
 #endif
 #ifdef HAVE_LIBGEN_H
@@ -118,7 +121,7 @@ typedef off_t off64_t;
 #ifdef GD_NO_C99_API
 #  define GD_DCOMPLEXP_t double *
 #  define GD_DCOMPLEXA(v) double v[2]
-#  define GD_DCOMPLEXV(v) double v[restrict][2]
+#  define GD_DCOMPLEXV(v) double v[][2]
 #  define cabs(z)  sqrt((z)[0] * (z)[0] + (z)[1] * (z)[1])
 #  define carg(z)  atan2((z)[1], (z)[0])
 #  define creal(z) ((z)[0])
@@ -198,8 +201,8 @@ double cimag(double complex z);
 #define SIZEOF_UNSIGNED_INT (sizeof(unsigned int))
 #endif
 
-#define GD_INT_TYPE (SIZEOF_INT | GD_SIGNED)
-#define GD_UINT_TYPE (SIZEOF_UNSIGNED_INT)
+#define GD_INT_TYPE ((gd_type_t)(SIZEOF_INT | GD_SIGNED))
+#define GD_UINT_TYPE ((gd_type_t)(SIZEOF_UNSIGNED_INT))
 
 /* default buffer size */
 #if SIZEOF_INT < 4
@@ -375,9 +378,9 @@ const char* gd_colsub(void);
 #endif
 
 #ifdef HAVE_READDIR_R
-# define gd_readdir readdir_r
+# define _GD_ReadDir readdir_r
 #else
-int gd_readdir(DIR *dirp, struct dirent *entry, struct dirent **result);
+int _GD_ReadDir(DIR *dirp, struct dirent *entry, struct dirent **result);
 #endif
 
 #ifdef HAVE__STRTOI64
@@ -925,10 +928,11 @@ struct _GD_DIRFILE {
   char* error_string;
   char* error_file;
   int error_line;
-  char *error_prefix;
 
   /* global data */
   unsigned long int flags;
+
+  char *error_prefix;
   unsigned long int open_flags; /* the original flags (used in gd_desynced) */
   uint64_t av;
   int standards;

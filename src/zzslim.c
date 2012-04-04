@@ -73,6 +73,7 @@ int _GD_ZzslimName(DIRFILE *restrict D, const char *restrict enc_data,
   dreturn("%i (%s)", 0, file->name);
   return 0;
 }
+
 int _GD_ZzslimOpen(int dirfd, struct _gd_raw_file* file, int swap __gd_unused,
     unsigned int mode __gd_unused)
 {

@@ -283,7 +283,7 @@ ssize_t getdelim(char **lineptr, size_t *n, int delim, FILE *stream)
 
 /* emulate readdir_r(3) with non-threadsafe readdir(3) */
 #ifndef HAVE_READDIR_R
-int gd_readdir(DIR *dirp, struct dirent *entry, struct dirent **result)
+int _GD_ReadDir(DIR *dirp, struct dirent *entry, struct dirent **result)
 {
   struct dirent *local_entry;
 

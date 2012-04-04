@@ -193,8 +193,8 @@ off64_t _GD_GetEOF(DIRFILE *restrict D, const gd_entry_t *restrict E,
         break;
 
       if ((*_gd_ef[E->e->u.raw.file[0].subenc].name)(D,
-            D->fragment[E->fragment_index].enc_data, E->e->u.raw.file,
-            E->e->u.raw.filebase, 0, 0))
+            (const char*)D->fragment[E->fragment_index].enc_data,
+            E->e->u.raw.file, E->e->u.raw.filebase, 0, 0))
       {
         break;
       }

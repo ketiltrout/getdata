@@ -40,9 +40,9 @@ dist_man_MANS = checkdirfile.1 dirfile2ascii.1 gd_add.3 gd_add_alias.3 \
 								gd_fragment_index.3 gd_fragmentname.3 gd_framenum_subset.3 \
 								gd_frameoffset.3 gd_free_entry_strings.3 gd_get_carray_slice.3 \
 								gd_get_constant.3 gd_get_string.3 gd_getdata.3 gd_hidden.3 \
-								gd_hide.3 gd_include.3 gd_invalid_dirfile.3 gd_madd_bit.3 \
-								gd_mcarrays.3 gd_mconstants.3 gd_metaflush.3 gd_move.3 \
-								gd_mplex_lookback.3 gd_mstrings.3 gd_naliases.3 \
+								gd_hide.3 gd_include_affix.3 gd_invalid_dirfile.3 \
+								gd_madd_bit.3 gd_mcarrays.3 gd_mconstants.3 gd_metaflush.3 \
+								gd_move.3 gd_mplex_lookback.3 gd_mstrings.3 gd_naliases.3 \
 								gd_native_type.3 gd_nentries.3 gd_nfragments.3 gd_nframes.3 \
 								gd_parent_fragment.3 gd_parser_callback.3 gd_protection.3 \
 								gd_put_carray_slice.3 gd_put_constant.3 gd_put_string.3 \
@@ -74,6 +74,7 @@ MAN3ALIASES=gd_add_bit.3:gd_add_carray.3 gd_add_bit.3:gd_add_clincom.3 \
 	gd_add_spec.3:gd_madd_spec.3 \
 	gd_cbopen.3:gd_open.3 \
 	gd_close.3:gd_discard.3 \
+	gd_include_affix.3:gd_include.3 \
 	gd_alter_bit.3:gd_alter_carray.3 gd_alter_bit.3:gd_alter_clincom.3 \
 	gd_alter_bit.3:gd_alter_const.3 gd_alter_bit.3:gd_alter_cpolynom.3 \
 	gd_alter_bit.3:gd_alter_crecip.3 gd_alter_bit.3:gd_alter_divide.3 \
@@ -87,6 +88,8 @@ MAN3ALIASES=gd_add_bit.3:gd_add_carray.3 gd_add_bit.3:gd_add_clincom.3 \
 	gd_get_carray_slice.3:gd_get_carray.3 \
 	gd_put_carray_slice.3:gd_put_carray.3 \
 	gd_delete.3:gd_delete_alias.3 \
+	gd_rename.3:gd_rename_alias.3 \
+	gd_move.3:gd_move_alias.3 \
 	gd_hide.3:gd_unhide.3 \
 	gd_add_alias.3:gd_madd_alias.3 \
 	gd_flush.3:gd_sync.3 gd_flush.3:gd_raw_close.3 \

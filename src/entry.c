@@ -342,8 +342,8 @@ char* gd_raw_filename(DIRFILE* D, const char* field_code_in) gd_nothrow
       dreturn("%p", NULL);
       return NULL;
     } else if ((*_gd_ef[E->e->u.raw.file[0].subenc].name)(D,
-          D->fragment[E->fragment_index].enc_data, E->e->u.raw.file,
-          E->e->u.raw.filebase, 0, 0))
+          (const char*)D->fragment[E->fragment_index].enc_data,
+          E->e->u.raw.file, E->e->u.raw.filebase, 0, 0))
     {
       dreturn("%p", NULL);
       return NULL;
@@ -530,7 +530,8 @@ const char **gd_aliases(DIRFILE *D, const char *field_code) gd_nothrow
     return NULL;
   }
 
-  E->e->alias_list = _GD_Realloc(D, E->e->alias_list, sizeof(const char *) * n);
+  E->e->alias_list = (const char**)_GD_Realloc(D, E->e->alias_list,
+      sizeof(const char *) * n);
 
   if (D->error) {
     dreturn("%p", NULL);

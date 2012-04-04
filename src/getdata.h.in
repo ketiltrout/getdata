@@ -307,7 +307,7 @@ typedef enum {
 #define GD_FLOAT     GD_FLOAT32
 #define GD_DOUBLE    GD_FLOAT64
 
-
+/* Window operations */
 typedef enum {
   GD_WINDOP_UNK,
   GD_WINDOP_EQ,
@@ -824,7 +824,8 @@ extern const char **gd_mfield_list_by_type(DIRFILE *dirfile,
 extern int gd_move_alias(DIRFILE *dirfile, const char *field_code,
     int new_fragment) gd_nothrow gd_nonnull ((1,2));
 
-extern int gd_mplex_lookback(DIRFILE *dirfile, int lookback);
+extern int gd_mplex_lookback(DIRFILE *dirfile, int lookback) gd_nothrow
+gd_nonnull((1));
 
 extern const char **gd_mstrings(DIRFILE *dirfile, const char *parent) gd_nothrow
 gd_nonnull((1,2));

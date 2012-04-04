@@ -526,9 +526,16 @@ ease forward compatibility.  Syntax is:
 The /VERSION directive has
 .IR "immediate scope" :
 its effect is immediate, and it applies only to metadata below it, including
-and propagating downwards to sub-fragments after the directive.  Its effect
-also propagates upwards back to the parent fragment, and affect subsequent
-metadata.  It appeared in Standards Version 5.
+and propagating downwards to sub-fragments after the directive.
+.PP
+In Standards Version 8 and earlier, its effect also propagates upwards back to
+the parent fragment, and affect subsequent metadata.  Starting with Standards
+Version 9, this no longer happens.  As a result, a /VERSION directive which
+indicates a version of 9 or later never propagates upwards; additionally,
+/VERSION directives found in subfragments included in a Version 9 or later
+fragment aren't propagated upwards into that fragment, regardless of the
+Version of the subfragments.  The /VERSION directive appeared in Standards
+Version 5.
 .RE
 
 .SH FIELD SPECIFICATION LINES

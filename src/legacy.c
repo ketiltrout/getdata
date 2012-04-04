@@ -363,8 +363,8 @@ static void CopyWindowEntry(struct MPlexEntryType* M, gd_entry_t* E)
   M->field = E->field;
   M->data_field = E->in_fields[0];
   M->cnt_field = E->in_fields[1];
-  M->i = (int)E->windop;
-  M->max_i = (int)E->threshold.i;
+  M->i = (int)E->EN(window,windop);
+  M->max_i = (int)E->EN(window,threshold.i);
 
   dreturnvoid();
 }
@@ -381,8 +381,8 @@ static void CopyMplexEntry(struct MPlexEntryType* M, gd_entry_t* E)
   M->field = E->field;
   M->data_field = E->in_fields[0];
   M->cnt_field = E->in_fields[1];
-  M->i = (int)E->count_val;
-  M->max_i = (int)E->count_max;
+  M->i = (int)E->EN(mplex,count_val);
+  M->max_i = (int)E->EN(mplex,count_max);
 
   dreturnvoid();
 }

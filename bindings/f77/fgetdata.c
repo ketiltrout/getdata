@@ -3341,7 +3341,8 @@ void F77_FUNC(gdmsts, GDMSTS) (void *value, int32_t *value_l,
 
   if (!gd_error(D) && (*field_num > 0) && (*field_num <= (int)nfields)) {
     v = gd_mstrings(D, pa);
-    _GDF_FString(value, value_l, gd_error(D) ? "" : v[*field_num - 1]);
+    _GDF_FString((char*)value, value_l,
+        gd_error(D) ? "" : ((char**)v)[*field_num - 1]);
   } else
     *value_l = 0;
 
@@ -3436,11 +3437,11 @@ void F77_FUNC(gdadwd, GDADWD) (const int32_t *dirfile, const char *field_code,
       *field_code_l, in_field, *in_field_l, check_field, *check_field_l,
       *windop, threshold, *fragment_index);
 
-  t = _GDF_SetTriplet(*windop, threshold);
+  t = _GDF_SetTriplet((gd_windop_t)*windop, threshold);
 
   gd_add_window(_GDF_GetDirfile(*dirfile), _GDF_CString(&fc, field_code,
         *field_code_l), _GDF_CString(&in, in_field, *in_field_l),
-      _GDF_CString(&cf, check_field, *check_field_l), *windop, t,
+      _GDF_CString(&cf, check_field, *check_field_l), (gd_windop_t)*windop, t,
       *fragment_index);
 
   free(fc);
@@ -3464,12 +3465,12 @@ void F77_FUNC(gdmdwd, GDMDWD) (const int32_t *dirfile, const char *parent,
       *parent_l, field_code, *field_code_l, in_field, *in_field_l, check_field,
       *check_field_l, *windop, threshold);
 
-  t = _GDF_SetTriplet(*windop, threshold);
+  t = _GDF_SetTriplet((gd_windop_t)*windop, threshold);
 
   gd_madd_window(_GDF_GetDirfile(*dirfile), _GDF_CString(&pa, parent,
         *parent_l), _GDF_CString(&fc, field_code, *field_code_l),
       _GDF_CString(&in, in_field, *in_field_l), _GDF_CString(&cf, check_field,
-        *check_field_l), *windop, t);
+        *check_field_l), (gd_windop_t)*windop, t);
 
   free(pa);
   free(fc);
@@ -3654,11 +3655,11 @@ void F77_FUNC(gdalwd, GDALWD) (const int32_t *dirfile, const char *field_code,
       *field_code_l, in_field, *in_field_l, check_field, *check_field_l,
       *windop, threshold);
 
-  t = _GDF_SetTriplet(*windop, threshold);
+  t = _GDF_SetTriplet((gd_windop_t)*windop, threshold);
 
   gd_alter_window(_GDF_GetDirfile(*dirfile), _GDF_CString(&fc, field_code,
         *field_code_l), _GDF_CString(&in, in_field, *in_field_l),
-      _GDF_CString(&cf, check_field, *check_field_l), *windop, t);
+      _GDF_CString(&cf, check_field, *check_field_l), (gd_windop_t)*windop, t);
 
   free(cf);
   free(in);

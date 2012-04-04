@@ -89,7 +89,7 @@ static char **_GD_CheckAffixes(DIRFILE *D, int i, const char *prefix,
 
   dtrace("%p, %i, \"%s\", \"%s\", %p, %p", D, i, prefix, suffix, new_codes, n);
 
-  ptr = _GD_Realloc(D, codes, sizeof(char*) * (nn + 2));
+  ptr = (char**)_GD_Realloc(D, codes, sizeof(char*) * (nn + 2));
   if (!ptr) {
     dreturn("%p (%i)", codes, *n);
     return codes;
@@ -130,7 +130,7 @@ static char **_GD_CheckAffixes(DIRFILE *D, int i, const char *prefix,
   /* Check for namespace clashes in our files */
   for (u = 0; u < D->n_entries; ++u)
     if (D->entry[u]->fragment_index == i && D->entry[u]->e->n_meta != -1) {
-      ptr = _GD_Realloc(D, new_codes, sizeof(char*) * ++nn);
+      ptr = (char**)_GD_Realloc(D, new_codes, sizeof(char*) * ++nn);
       if (ptr) {
         new_codes = ptr;
         /* remunge the code */
@@ -329,7 +329,7 @@ int gd_desync(DIRFILE *D, unsigned int flags)
       /* stat the file via it's path relative to the original filedir */
       char *buffer;
       if (D->fragment[i].sname) {
-        buffer = _GD_Malloc(D, strlen(D->name) +
+        buffer = (char*)_GD_Malloc(D, strlen(D->name) +
             strlen(D->fragment[i].bname) + strlen(D->fragment[i].sname) + 3);
         if (buffer == NULL) {
           dreturn("%i", -1);
@@ -338,8 +338,8 @@ int gd_desync(DIRFILE *D, unsigned int flags)
         sprintf(buffer, "%s%c%s%c%s", D->name, GD_DIRSEP, D->fragment[i].sname,
             GD_DIRSEP, D->fragment[i].bname);
       } else {
-        buffer = _GD_Malloc(D, strlen(D->name) + strlen(D->fragment[i].bname) +
-            2);
+        buffer = (char*)_GD_Malloc(D, strlen(D->name) +
+            strlen(D->fragment[i].bname) + 2);
         if (buffer == NULL) {
           dreturn("%i", -1);
           return -1;

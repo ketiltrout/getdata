@@ -32,7 +32,7 @@ int _GD_AsciiOpen(int fd, struct _gd_raw_file* file, int swap __gd_unused,
       dreturn("%i", 0);
       return 0;
     } else if (file->edata != NULL)
-      fclose(file->edata);
+      fclose((FILE*)file->edata);
 
     file->idata = gd_OpenAt(file->D, fd, file->name, ((mode & GD_FILE_WRITE)
           ? (O_RDWR | O_CREAT) : O_RDONLY) | O_BINARY, 0666);

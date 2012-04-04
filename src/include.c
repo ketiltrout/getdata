@@ -42,7 +42,7 @@ static int _GD_SetFieldAffixes(DIRFILE *D, int me, const char *prefix_in,
     if (D->fragment[me].suffix == NULL)
       *suffix = _GD_Strdup(D, suffix_in);
     else {
-      *suffix = _GD_Malloc(D, strlen(D->fragment[me].suffix) +
+      *suffix = (char*)_GD_Malloc(D, strlen(D->fragment[me].suffix) +
           strlen(suffix_in) + 1);
       if (*suffix)
         strcat(strcpy(*suffix, suffix_in), D->fragment[me].suffix);
@@ -68,7 +68,7 @@ static int _GD_SetFieldAffixes(DIRFILE *D, int me, const char *prefix_in,
     if (D->fragment[me].prefix == NULL)
       *prefix = _GD_Strdup(D, prefix_in);
     else {
-      *prefix = _GD_Malloc(D, strlen(D->fragment[me].prefix) +
+      *prefix = (char*)_GD_Malloc(D, strlen(D->fragment[me].prefix) +
           strlen(prefix_in) + 1);
       if (*prefix)
         strcat(strcpy(*prefix, D->fragment[me].prefix), prefix_in);
@@ -267,7 +267,7 @@ int _GD_Include(DIRFILE *D, const char *ename, const char *format_file,
   } else if (D->fragment[me].sname && _GD_AbsPath(sname)) {
     /* have both a relative dirname and the parent's sname; squish them
      * together */
-    D->fragment[D->n_fragment - 1].sname = _GD_Malloc(D, strlen(sname) +
+    D->fragment[D->n_fragment - 1].sname = (char*)_GD_Malloc(D, strlen(sname) +
         strlen(D->fragment[me].sname) + 2);
     if (D->fragment[D->n_fragment - 1].sname)
       sprintf(D->fragment[D->n_fragment - 1].sname, "%s%c%s",

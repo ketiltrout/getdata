@@ -1,6 +1,6 @@
-.\" gd_include.3.  The gd_include man page.
+.\" gd_include_affix.3.  The gd_include_affix man page.
 .\"
-.\" Copyright (C) 2008, 2009, 2010, 2011 D. V. Wiebe
+.\" Copyright (C) 2008, 2009, 2010, 2011, 2012 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,30 +13,36 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_include 3 "17 August 2011" "Version 0.8.0" "GETDATA"
+.TH gd_include_affix 3 "4 April 2012" "Version 0.8.0" "GETDATA"
 .SH NAME
-gd_include \(em add a format specification fragment to a dirfile
+gd_include_affix, gd_include \(em add a format specification fragment to a
+dirfile
 .SH SYNOPSIS
 .B #include <getdata.h>
 .HP
 .nh
 .ad l
+.BI "int gd_include_affix(DIRFILE *" dirfile ", const char *" include_file ,
+.BI "int " parent_fragment ", const char *" prefix , "const char *" suffix ,
+.BI "unsigned long " flags );
+.HP
 .BI "int gd_include(DIRFILE *" dirfile ", const char *" include_file ,
 .BI "int " parent_fragment ", unsigned long " flags );
 .hy
 .ad n
 .SH DESCRIPTION
 The
-.BR gd_include ()
-adds the format specification fragment given by the path
+.BR gd_include_affix ()
+function adds the format specification fragment given by the path
 .I include_file
-to the specified dirfile, possibly creating the fragment.  This occurs as if,
-in the existing fragment indexed
+to the specified dirfile, possibly creating the fragment, using the affixes
+specified.  This occurs as if, in the existing fragment indexed
 by
 .IR parent_fragment ,
 the following directive were present:
 .IP
-.BI "/INCLUDE " <include_file>
+.B /INCLUDE
+.I <include_file> <prefix> <suffix>
 .PP
 (see
 .BR dirfile-format (5)).
@@ -47,6 +53,21 @@ or added later with
 .BR gd_parser_callback (3),
 this callback function will be called if a syntax error is encountered while
 parsing the included fragment.
+
+Passing NULL as
+.I prefix
+or
+.I suffix
+is the same as using the empty string (ie. the corresponding affix is empty).
+The function
+.BR gd_include ()
+is equivalent to calling
+.BR gd_include_affix ()
+with both
+.I prefix
+and
+.I suffix
+equal to NULL.
 
 The 
 .I flags
@@ -173,7 +194,7 @@ itself, unless
 is also specified.  If none of these symbols is present,
 .B GD_AUTO_ENCODED
 is assumed, unless the
-.BR gd_include ()
+.BR gd_include_affix ()
 call results in creation or truncation of the fragment.  In that case,
 .B GD_UNENCODED
 is assumed.  See
@@ -185,7 +206,7 @@ Specifies that the encoding type is not known in advance, but should be detected
 by the GetData library.  Detection is accomplished by searching for raw data
 files with extensions appropriate to the encoding scheme.  This method will
 notably fail if the the library is called via
-.BR putdata (3)
+.BR gd_putdata (3)
 to create a previously non-existent raw field unless a read is first
 successfully performed on the dirfile.  Once the library has determined the
 encoding scheme for the first time, it remembers it for subsequent calls.
@@ -203,6 +224,10 @@ as implemented in the gzip format.
 Specifies that raw data files are compressed using the Lempel-Ziv Markov Chain
 Algorithm (LZMA) as implemented in the xz container format.
 .TP
+.B GD_SIE_ENCODED
+Specified that raw data files are sample-index encoded, similar to run-length
+encoding, suitable for data that change rarely.
+.TP
 .B GD_SLIM_ENCODED
 Specifies that raw data files are compressed using the slimlib library.
 .TP
@@ -212,13 +237,25 @@ sample per line.
 .TP
 .B GD_UNENCODED
 Specifies that raw data files are not encoded, but written verbatim to disk.
+.TP
+.B GD_ZZIP_ENCODED
+Specifies that raw data files are compressed using the DEFLATE algorithm.  All
+raw data files for a given fragment are collected together and stored in a PKZIP
+archive called raw.zip.
+.TP
+.B GD_ZZSLIM_ENCODED
+Specifies that raw data files are compressed using a combinations of compression
+schemes: first files are slim-compressed, as with the
+.B GD_SLIM_ENCODED
+scheme, and then they are collected together and compressed (again) into a PKZIP
+archive called raw.zip, as in the
+.B GD_ZZIP_ENCODED
+scheme.
 
 .SH RETURN VALUE
-On success,
-.BR gd_include ()
-returns the format specification index of the newly added fragment.  On error,
--1 is returned and the dirfile error is set to a non-zero error value.  Possible
-error values are:
+On success, these functions return the format specification index of the newly
+added fragment.  On error, -1 is returned and the dirfile error is set to a
+non-zero error value.  Possible error values are:
 .TP 8
 .B GD_E_ACCMODE
 The supplied dirfile was opened in read-only mode.
@@ -270,9 +307,7 @@ The dirfile error may be retrieved by calling
 A descriptive error string for the last error encountered can be obtained from
 a call to
 .BR gd_error_string (3).
-When finished with it, the DIRFILE object may be de-allocated with a call to
-.BR gd_close (3),
-even if the open failed.
+
 .SH BUGS
 If this function fails with the error
 .BR GD_E_BAD_REFERENCE ,
@@ -287,13 +322,14 @@ with
 in this case.
 .SH SEE ALSO
 .BR gd_open (3),
-.BR gd_parser_callback (3),
-.BR gd_reference (3),
-.BR gd_uninclude (3),
+.BR gd_alter_affixes (3),
 .BR gd_error (3),
 .BR gd_error_string (3),
 .BR gd_fragmentname (3),
 .BR gd_nfragments (3),
+.BR gd_parser_callback (3),
+.BR gd_reference (3),
+.BR gd_uninclude (3),
 .BR dirfile (5),
 .BR dirfile-encoding (5),
 .BR dirfile-format (5)

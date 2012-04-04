@@ -335,8 +335,8 @@ static int _GD_Delete(DIRFILE *restrict D, gd_entry_t *restrict E,
     }
 
     if ((*_gd_ef[E->e->u.raw.file[0].subenc].name)(D,
-          D->fragment[E->fragment_index].enc_data, E->e->u.raw.file,
-          E->e->u.raw.filebase, 0, 0))
+          (const char*)D->fragment[E->fragment_index].enc_data,
+          E->e->u.raw.file, E->e->u.raw.filebase, 0, 0))
     {
       free(del_list);
       dreturn("%i", -1);

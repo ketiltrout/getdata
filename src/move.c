@@ -244,8 +244,8 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned long encoding,
       E->e->u.raw.file[0].subenc = subencoding;
 
       if ((*_gd_ef[E->e->u.raw.file[0].subenc].name)(D,
-            D->fragment[E->fragment_index].enc_data, E->e->u.raw.file,
-            new_filebase, 0, 0))
+            (const char*)D->fragment[E->fragment_index].enc_data,
+            E->e->u.raw.file, new_filebase, 0, 0))
       {
         E->e->u.raw.file[0].name = temp.name;
         E->e->u.raw.file[0].subenc = temp.subenc;
@@ -363,7 +363,7 @@ int _GD_Move(DIRFILE *D, gd_entry_t *E, int new_fragment, int move_data)
     if (E->e->n_meta > 0) {
       int nlen = strlen(new_code);
       int olen = strlen(E->field);
-      new_meta = _GD_Malloc(D, sizeof(char *) * E->e->n_meta);
+      new_meta = (char**)_GD_Malloc(D, sizeof(char *) * E->e->n_meta);
       if (!new_meta) {
         free(new_filebase);
         free(new_code);
@@ -373,7 +373,7 @@ int _GD_Move(DIRFILE *D, gd_entry_t *E, int new_fragment, int move_data)
 
       memset(new_meta, 0, sizeof(char *) * E->e->n_meta);
       for (i = 0; i < E->e->n_meta; ++i) {
-        new_meta[i] = _GD_Malloc(D,
+        new_meta[i] = (char*)_GD_Malloc(D,
             strlen(E->e->p.meta_entry[i]->field) + nlen - olen + 1);
         if (new_meta[i] == NULL)
           break;

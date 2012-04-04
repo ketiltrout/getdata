@@ -82,7 +82,8 @@ int _GD_SampIndOpen(int fd, struct _gd_raw_file *file, int swap,
     return -1;
   }
 
-  file->idata = _GD_SampIndDoOpen(fd, file, file->edata, swap, mode);
+  file->idata = _GD_SampIndDoOpen(fd, file, (struct gd_siedata*)file->edata,
+      swap, mode);
 
   if (file->idata < 0) {
     free(file->edata);
@@ -164,7 +165,8 @@ off64_t _GD_SampIndSeek(struct _gd_raw_file *file, off64_t sample,
   }
 
   if ((mode & GD_FILE_WRITE) && sample > f->d[0]) {
-    double complex p = 0;
+    GD_DCOMPLEXM(p);
+    _gd_l2c(p, 0, 0);
     if (memcmp(f->d + 1, &p, GD_SIZE(data_type)) == 0) {
       /* in this case, just increase the current record's end */
       f->d[0] = sample;
@@ -218,10 +220,21 @@ static void *_GD_Duplicate(void *restrict d, const void *restrict s, size_t l,
         *(p++) = v;
       d = p;
     } else if (l == 16) {
+#ifndef GD_NO_C99_API
       double complex v = *(double complex*)s;
       double complex *p = (double complex*)d;
       for (i = 0; i < n; ++i)
         *(p++) = v;
+#else
+      double v[2];
+      double *p = (double *)d;
+      v[0] = ((double*)s)[0];
+      v[1] = ((double*)s)[1];
+      for (i = 0; i < n; ++i) {
+        *(p++) = v[0];
+        *(p++) = v[1];
+      }
+#endif
       d = p;
     }
   }

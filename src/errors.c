@@ -349,7 +349,7 @@ char* gd_error_string(const DIRFILE* D, char* buffer, size_t buflen) gd_nothrow
   return buffer;
 }
 
-int gd_error_count(DIRFILE *D)
+int gd_error_count(DIRFILE *D) gd_nothrow
 {
   int count;
 

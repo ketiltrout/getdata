@@ -1756,8 +1756,11 @@ int gd_malter_spec(DIRFILE* D, const char* line, const char* parent, int move)
 
     /* The parse will have re-applied the prefix and suffix, undo that */
     free(N->field);
-    if ((N->field = _GD_Malloc(D, strlen(parent) + strlen(in_cols[0]) + 2)))
+    if ((N->field = (char*)_GD_Malloc(D, strlen(parent) + strlen(in_cols[0]) +
+            2)))
+    {
       sprintf(N->field, "%s/%s", parent, in_cols[0]);
+    }
   }
 
   free(outstring);

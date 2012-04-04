@@ -132,7 +132,7 @@ unsigned long gd_flags(DIRFILE *D, unsigned long set, unsigned long reset)
   return D->flags & GD_FLAG_MASK;
 }
 
-int gd_verbose_prefix(DIRFILE *D, const char *prefix)
+int gd_verbose_prefix(DIRFILE *D, const char *prefix) gd_nothrow
 {
   char *ptr = NULL;
   dtrace("%p, \"%s\"", D, prefix);
@@ -160,7 +160,7 @@ int gd_verbose_prefix(DIRFILE *D, const char *prefix)
   return 0;
 }
 
-int gd_mplex_lookback(DIRFILE *D, int lookback)
+int gd_mplex_lookback(DIRFILE *D, int lookback) gd_nothrow
 {
   dtrace("%p, %i", D, lookback);
 

@@ -69,14 +69,14 @@ static int _GD_TruncDir(DIRFILE *D, int dirfd, const char *dirfile, int root)
     return -1;
   }
 
-  if ((lamb = _GD_Malloc(D, dirent_len)) == NULL) {
+  if ((lamb = (struct dirent*)_GD_Malloc(D, dirent_len)) == NULL) {
     closedir(dir);
     dreturn("%i", -1);
     return -1;
   }
 
-  ret = gd_readdir(dir, lamb, &result);
-  for (; result; ret = gd_readdir(dir, lamb, &result)) {
+  ret = _GD_ReadDir(dir, lamb, &result);
+  for (; result; ret = _GD_ReadDir(dir, lamb, &result)) {
     char *name;
     if (lamb->d_name[0] == '.' && lamb->d_name[1] == '\0')
       continue; /* skip current dir */

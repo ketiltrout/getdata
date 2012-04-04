@@ -68,7 +68,7 @@ static gd_entry_t *_GD_FixName(DIRFILE *restrict D, char **restrict buffer,
      * dealiased */
 
     *offset = strlen(P->field) + 1;
-    temp2 = _GD_Malloc(D, *offset + strlen(ptr) + 1);
+    temp2 = (char*)_GD_Malloc(D, *offset + strlen(ptr) + 1);
     if (temp2 == NULL) {
       free(*buffer);
       dreturn("%p", NULL);
@@ -526,7 +526,7 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
       /* This is the first raw field in this fragment; propagate it upwards */
       for (i = E->fragment_index; i != -1; i = D->fragment[i].parent) {
         if (D->fragment[i].ref_name == NULL) {
-          D->fragment[i].ref_name = strdup(new_ref);
+          D->fragment[i].ref_name = (char *)strdup((const char*)new_ref);
           D->fragment[i].modified = 1;
         } else
           break;

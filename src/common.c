@@ -137,7 +137,7 @@ gd_entry_t *_GD_FindField(const DIRFILE *restrict D,
     *index = u;
 
   /* not found perhaps it's an subfield of an aliased field? */
-  if ((ptr = strchr(field_code, '/'))) {
+  if ((ptr = (char*)strchr(field_code, '/'))) {
     char *new_code = strdup(field_code);
     if (new_code) {
       new_code[ptr - field_code] = '\0';
@@ -146,7 +146,7 @@ gd_entry_t *_GD_FindField(const DIRFILE *restrict D,
 
       if (E && E->field_type == GD_ALIAS_ENTRY && E->e->entry[0]) {
         size_t plen = strlen(E->e->entry[0]->field);
-        new_code = malloc(plen + strlen(ptr) + 2);
+        new_code = (char*)malloc(plen + strlen(ptr) + 2);
         if (new_code) {
           strcpy(new_code, E->e->entry[0]->field);
           new_code[plen] = '/';
@@ -971,7 +971,7 @@ char *_GD_CanonicalPath(const char *car, const char *cdr)
   if (car && !_GD_AbsPath(cdr)) {
     if (!_GD_AbsPath(car)) {
       /* car is not abosulte -- don't bother trying to do anything fancy */
-      res = malloc(strlen(car) + strlen(cdr) + 2);
+      res = (char*)malloc(strlen(car) + strlen(cdr) + 2);
       if (res == NULL) {
         dreturn("%p", NULL);
         return NULL;
@@ -1155,7 +1155,7 @@ char *_GD_CanonicalPath(const char *car, const char *cdr)
         }
 
         if (S_ISLNK(statbuf.st_mode)) {
-          char target[PATH_MAX], *new;
+          char target[PATH_MAX];
           ssize_t slen;
 
           /* check for symlink loop */
@@ -1202,7 +1202,7 @@ char *_GD_CanonicalPath(const char *car, const char *cdr)
               return NULL;
             }
           } else {
-            char slash[2] = { GD_DIRSEP, 0 };
+            char *new_work, slash[2] = { GD_DIRSEP, 0 };
             len = strlen(end) + slen + 2;
 
             if (*(ptr + slen - 1) == GD_DIRSEP) {
@@ -1210,16 +1210,16 @@ char *_GD_CanonicalPath(const char *car, const char *cdr)
               len--;
             }
 
-            new = (char*)malloc(len);
-            if (new == NULL) {
+            new_work = (char*)malloc(len);
+            if (new_work == NULL) {
               free(res);
               free(work);
               dreturn("%p", NULL);
               return NULL;
             }
-            sprintf(new, "%s%s%s", ptr, slash, end);
+            sprintf(new_work, "%s%s%s", ptr, slash, end);
             free(work);
-            end = work = new;
+            end = work = new_work;
           }
         }
       }
@@ -1233,7 +1233,7 @@ _GD_CanonicalPath_DONE:
   free(work);
 
   /* trim */
-  ptr = realloc(res, res_len + 1);
+  ptr = (char*)realloc(res, res_len + 1);
   if (ptr)
     res = ptr;
 
@@ -1325,7 +1325,7 @@ int _GD_GrabDir(DIRFILE *D, int dirfd, const char *name)
     return -1;
   }
 
-  D->dir = ptr;
+  D->dir = (struct gd_dir_t*)ptr;
   D->dir[D->ndir].rc = 1;
   D->dir[D->ndir].path = _GD_Strdup(D, dir);
 

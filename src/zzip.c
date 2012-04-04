@@ -98,7 +98,7 @@ int _GD_ZzipOpen(int dirfd, struct _gd_raw_file* file, int swap __gd_unused,
   }
 
   len = strlen(ptr1);
-  ptr2 = realloc(ptr1, len + strlen(file->name) + 2);
+  ptr2 = (char*)realloc(ptr1, len + strlen(file->name) + 2);
   if (ptr2 == NULL) {
     dreturn("%i", 1);
     return 1;
@@ -129,7 +129,7 @@ off64_t _GD_ZzipSeek(struct _gd_raw_file* file, off64_t count,
 
   dtrace("%p, %lli, 0x%X, <unused>", file, (long long)count, data_type);
 
-  n = file->pos = (off64_t)zzip_seek(file->edata,
+  n = file->pos = (off64_t)zzip_seek((ZZIP_FILE*)file->edata,
       (off_t)(count * GD_SIZE(data_type)), SEEK_SET);
 
   if (n >= 0)
@@ -146,7 +146,7 @@ ssize_t _GD_ZzipRead(struct _gd_raw_file *restrict file, void *restrict data,
 
   dtrace("%p, %p, 0x%X, %zu", file, data, data_type, nmemb);
 
-  n = zzip_read(file->edata, data, GD_SIZE(data_type) * nmemb);
+  n = zzip_read((ZZIP_FILE*)file->edata, data, GD_SIZE(data_type) * nmemb);
 
   if (n >= 0)
     n /= GD_SIZE(data_type);
@@ -161,7 +161,7 @@ int _GD_ZzipClose(struct _gd_raw_file *file)
 
   dtrace("%p", file);
 
-  ret = zzip_close(file->edata);
+  ret = zzip_close((ZZIP_FILE*)file->edata);
 
   if (!ret) {
     file->idata = -1;
@@ -190,7 +190,7 @@ off64_t _GD_ZzipSize(int dirfd, struct _gd_raw_file *file, gd_type_t data_type,
   }
 
   len = strlen(ptr1);
-  ptr2 = realloc(ptr1, len + strlen(file->name) + 2);
+  ptr2 = (char*)realloc(ptr1, len + strlen(file->name) + 2);
   if (ptr2 == NULL) {
     dreturn("%i", 1);
     return 1;

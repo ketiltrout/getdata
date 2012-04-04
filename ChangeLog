@@ -1,3 +1,6 @@
+2012-04-01   D. V. Wiebe <getdata@ketiltrout.net> svn:696
+	* src/compat.c (_GD_ReadDir): Renamed from gd_readdir().
+
 2012-04-01   D. V. Wiebe <getdata@ketiltrout.net> svn:694
 	* src/getdata.h.in: Deprecate gd_bit_t and gd_spf_t.  Remove gd_count_t.
 	* src/getdata.h.in bindings/make_parameters.c: Remove GD_COUNT_MAX.

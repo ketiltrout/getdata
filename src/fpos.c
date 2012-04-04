@@ -111,7 +111,7 @@ off64_t _GD_GetFilePos(DIRFILE *D, gd_entry_t *E, off64_t index_pos)
 
 /* Get the current I/O position of the given field
 */
-off64_t gd_tell64(DIRFILE *D, const char *field_code_in)
+off64_t gd_tell64(DIRFILE *D, const char *field_code_in) gd_nothrow
 {
   off64_t pos = -1;
   gd_entry_t* entry;
@@ -148,7 +148,7 @@ off64_t gd_tell64(DIRFILE *D, const char *field_code_in)
   return pos;
 }
 
-off_t gd_tell(DIRFILE *D, const char *field_code)
+off_t gd_tell(DIRFILE *D, const char *field_code) gd_nothrow
 {
   return (off_t)gd_tell64(D, field_code);
 }

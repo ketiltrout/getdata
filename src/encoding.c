@@ -539,7 +539,7 @@ int _GD_InitRawIO(DIRFILE *D, const gd_entry_t *E, const char *filebase,
 
   if (mode & GD_FILE_TEMP) {
     /* create temporary file in file[1] */
-    if ((*enc->name)(D, D->fragment[E->fragment_index].enc_data,
+    if ((*enc->name)(D, (const char*)D->fragment[E->fragment_index].enc_data,
           E->e->u.raw.file + 1, filebase, 1, 0))
     {
       ; /* error already set */
@@ -564,7 +564,7 @@ int _GD_InitRawIO(DIRFILE *D, const gd_entry_t *E, const char *filebase,
   if (oop_write) {
     /* an out-of-place write requires us to open a temporary file and pass
      * in its fd */
-    if ((*enc->name)(D, D->fragment[E->fragment_index].enc_data,
+    if ((*enc->name)(D, (const char*)D->fragment[E->fragment_index].enc_data,
           E->e->u.raw.file + 1, filebase, 1, 0))
     {
       dreturn("%i", 1);
@@ -587,7 +587,7 @@ int _GD_InitRawIO(DIRFILE *D, const gd_entry_t *E, const char *filebase,
 
   /* open a regular file, if necessary */
   if (E->e->u.raw.file[0].idata < 0) {
-    if ((*enc->name)(D, D->fragment[E->fragment_index].enc_data,
+    if ((*enc->name)(D, (const char*)D->fragment[E->fragment_index].enc_data,
           E->e->u.raw.file, filebase, 0, 0))
     {
       dreturn("%i", 1);
@@ -677,7 +677,7 @@ int _GD_Supports(DIRFILE *D, const gd_entry_t *E, unsigned int funcs)
   if (D->fragment[E->fragment_index].encoding == GD_AUTO_ENCODED) {
     D->fragment[E->fragment_index].encoding =
       _GD_ResolveEncoding(D, E->e->u.raw.filebase,
-          D->fragment[E->fragment_index].enc_data, GD_AUTO_ENCODED,
+          (const char*)D->fragment[E->fragment_index].enc_data, GD_AUTO_ENCODED,
           D->fragment[E->fragment_index].dirfd, E->e->u.raw.file);
   }
 
@@ -691,7 +691,7 @@ int _GD_Supports(DIRFILE *D, const gd_entry_t *E, unsigned int funcs)
   /* Figure out the encoding subtype, if required */
   if (E->e->u.raw.file[0].subenc == GD_ENC_UNKNOWN)
     _GD_ResolveEncoding(D, E->e->u.raw.filebase,
-        D->fragment[E->fragment_index].enc_data,
+        (const char*)D->fragment[E->fragment_index].enc_data,
         D->fragment[E->fragment_index].encoding,
         D->fragment[E->fragment_index].dirfd, E->e->u.raw.file);
 
@@ -793,7 +793,7 @@ static void _GD_RecodeFragment(DIRFILE* D, unsigned long encoding, int fragment,
         _GD_FiniRawIO(D, raw_entry[i], fragment, GD_FINIRAW_DISCARD);
 
         if ((*_gd_ef[temp.subenc].name)(D,
-              D->fragment[raw_entry[i]->fragment_index].enc_data,
+              (const char*)D->fragment[raw_entry[i]->fragment_index].enc_data,
               raw_entry[i]->e->u.raw.file, raw_entry[i]->e->u.raw.filebase, 0,
               0))
         {
@@ -927,7 +927,7 @@ unsigned long gd_encoding(DIRFILE* D, int fragment) gd_nothrow
       {
         D->fragment[fragment].encoding =
           _GD_ResolveEncoding(D, D->entry[i]->e->u.raw.filebase,
-              D->fragment[fragment].enc_data, GD_AUTO_ENCODED,
+              (const char*)D->fragment[fragment].enc_data, GD_AUTO_ENCODED,
               D->fragment[fragment].dirfd, D->entry[i]->e->u.raw.file);
 
         if (D->fragment[fragment].encoding != GD_AUTO_ENCODED)
@@ -949,12 +949,12 @@ unsigned long gd_encoding(DIRFILE* D, int fragment) gd_nothrow
  * 2) use mktemp to generate a "unique" file name, and then try to openat it
  *    exclusively; repeat as necessary.
  */
-int _GD_MakeTempFile(const DIRFILE *D gd_unused_d, int dirfd, char *template)
+int _GD_MakeTempFile(const DIRFILE *D gd_unused_d, int dirfd, char *tmpl)
 {
   int fd = -1;
-  char *tmp = strdup(template);
+  char *tmp = strdup(tmpl);
 
-  dtrace("%p, %i, \"%s\"", D, dirfd, template);
+  dtrace("%p, %i, \"%s\"", D, dirfd, tmpl);
 
   if (!tmp) {
     dreturn("%i", -1);
@@ -962,15 +962,15 @@ int _GD_MakeTempFile(const DIRFILE *D gd_unused_d, int dirfd, char *template)
   }
 
   do {
-    strcpy(template, tmp);
-    mktemp(template);
-    if (template[0] == 0) {
+    strcpy(tmpl, tmp);
+    mktemp(tmpl);
+    if (tmpl[0] == 0) {
       free(tmp);
       dreturn("%i", -1);
       return -1;
     }
 
-    fd = gd_OpenAt(D, dirfd, template, O_RDWR | O_CREAT | O_EXCL, 0666);
+    fd = gd_OpenAt(D, dirfd, tmpl, O_RDWR | O_CREAT | O_EXCL, 0666);
   } while (errno == EEXIST);
 
   free(tmp);

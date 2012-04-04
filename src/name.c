@@ -57,7 +57,7 @@ char *_GD_MungeCode(DIRFILE *D, const gd_entry_t *P, const char *old_prefix,
    * just an illegal name with a / in it, mungeing will screw up, but
    * validation will catch the illegal name later anyways.
    */
-  if ((slash = memchr(ptr, '/', len))) {
+  if ((slash = (char*)memchr(ptr, '/', len))) {
     mlen = len + (ptr - slash);
     len = slash++ - ptr;
   }
@@ -83,7 +83,8 @@ char *_GD_MungeCode(DIRFILE *D, const gd_entry_t *P, const char *old_prefix,
   if (P)
     plen = strlen(P->field) + 1;
 
-  if ((new_code = _GD_Malloc(D, plen + nplen + len + nslen + mlen + 1)) == NULL)
+  if ((new_code = (char*)_GD_Malloc(D, plen + nplen + len + nslen + mlen + 1))
+      == NULL)
   {
     dreturn("%p", NULL);
     return NULL;
@@ -209,13 +210,15 @@ static char **_GD_UpdateScalar(DIRFILE *D, gd_entry_t *T, const gd_entry_t *E,
   dtrace("%p, %p, %p, %p, %zu, %i, %i, %i", D, T, E, list, len, n, pass, *nl);
 
   if (pass & GD_UPDI) {
-    if ((ptr = _GD_Realloc(D, list, sizeof(char *) * (*nl + 1))) == NULL) {
+    if ((ptr = (char**)_GD_Realloc(D, list, sizeof(char *) * (*nl + 1)))
+        == NULL)
+    {
       *nl = -1;
       dreturn("%p", list);
       return list;
     }
     list = ptr;
-    list[(*nl)++] = _GD_Malloc(D, len + 3);
+    list[(*nl)++] = (char*)_GD_Malloc(D, len + 3);
   } else if (pass == 2) {
     D->fragment[T->fragment_index].modified = 1;
     free(T->scalar[n]);
@@ -254,7 +257,7 @@ static char **_GD_InvalidateConst(DIRFILE *D, const gd_entry_t *E, char **list,
 
     switch (E->e->u.scalar.client[j]->field_type) {
       case GD_LINCOM_ENTRY:
-        for (i = 0; i < E->e->u.scalar.client[j]->n_fields; ++i) {
+        for (i = 0; i < E->e->u.scalar.client[j]->EN(lincom,n_fields); ++i) {
           list = _GD_UpdateScalar(D, E->e->u.scalar.client[j], E, list, len, i,
               pass, nl);
           list = _GD_UpdateScalar(D, E->e->u.scalar.client[j], E, list, len,
@@ -262,7 +265,7 @@ static char **_GD_InvalidateConst(DIRFILE *D, const gd_entry_t *E, char **list,
         }
         break;
       case GD_POLYNOM_ENTRY:
-        for (i = 0; i <= E->e->u.scalar.client[j]->poly_ord; ++i)
+        for (i = 0; i <= E->e->u.scalar.client[j]->EN(polynom,poly_ord); ++i)
           list = _GD_UpdateScalar(D, E->e->u.scalar.client[j], E, list, len, i,
               pass, nl);
         break;
@@ -316,13 +319,15 @@ static char **_GD_UpdateInField(DIRFILE *D, gd_entry_t *T, const gd_entry_t *E,
   if (pass == 0)
     T->e->entry[n] = NULL;
   else if (pass == 1) {
-    if ((ptr = _GD_Realloc(D, list, sizeof(char *) * (*nl + 1))) == NULL) {
+    if ((ptr = (char**)_GD_Realloc(D, list, sizeof(char *) * (*nl + 1)))
+        == NULL)
+    {
       *nl = -1;
       dreturn("%p", list);
       return list;
     }
     list = ptr;
-    list[(*nl)++] = _GD_Malloc(D, len + 3);
+    list[(*nl)++] = (char*)_GD_Malloc(D, len + 3);
   } else if (pass == 2) {
     D->fragment[T->fragment_index].modified = 1;
     free(T->in_fields[n]);
@@ -414,12 +419,13 @@ static int _GD_Rename(DIRFILE *D, gd_entry_t *E, const char *new_name,
   }
 
   if (E->e->n_meta == -1) {
-    name = _GD_Malloc(D, strlen(E->e->p.parent->field) + strlen(new_name) + 2);
+    name = (char*)_GD_Malloc(D, strlen(E->e->p.parent->field) + strlen(new_name)
+        + 2);
     if (name == NULL) {
       dreturn("%i", -1);
       return -1;
     }      
-    sprintf("%s/%s", E->e->p.parent->field, new_name);
+    sprintf(name, "%s/%s", E->e->p.parent->field, new_name);
   } else {
     /* Verify prefix and suffix */
     name = _GD_MungeCode(D, NULL, D->fragment[E->fragment_index].prefix,
@@ -509,7 +515,8 @@ static int _GD_Rename(DIRFILE *D, gd_entry_t *E, const char *new_name,
       memcpy(&temp, E->e->u.raw.file, sizeof(struct _gd_raw_file));
       temp.name = NULL;
       if ((*_gd_ef[temp.subenc].name)(D,
-            D->fragment[E->fragment_index].enc_data, &temp, filebase, 0, 0))
+            (const char*)D->fragment[E->fragment_index].enc_data, &temp,
+            filebase, 0, 0))
       {
         free(name);
         free(filebase);
@@ -518,8 +525,8 @@ static int _GD_Rename(DIRFILE *D, gd_entry_t *E, const char *new_name,
       }
 
       if ((*_gd_ef[temp.subenc].name)(D,
-            D->fragment[E->fragment_index].enc_data, E->e->u.raw.file,
-            E->e->u.raw.filebase, 0, 0))
+            (const char*)D->fragment[E->fragment_index].enc_data,
+            E->e->u.raw.file, E->e->u.raw.filebase, 0, 0))
       {
         free(name);
         free(filebase);

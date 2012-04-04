@@ -589,7 +589,7 @@ static size_t _GD_DoMplexOut(DIRFILE *restrict D, gd_entry_t *restrict E,
   first_samp2 = first_samp * spf2 / spf1;
 
   tmpbuf = _GD_Alloc(D, data_type, num_samp);
-  cntbuf = _GD_Alloc(D, GD_INT_TYPE, num_samp2);
+  cntbuf = (int*)_GD_Alloc(D, GD_INT_TYPE, num_samp2);
 
   if (tmpbuf == NULL || cntbuf == NULL) {
     free(tmpbuf);

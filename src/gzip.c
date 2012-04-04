@@ -84,7 +84,7 @@ off64_t _GD_GzipSeek(struct _gd_raw_file* file, off64_t count,
   count *= GD_SIZE(data_type);
 
   if (count > 0) {
-    n = (off64_t)gzseek(file[(mode == GD_FILE_WRITE) ? 1 : 0].edata,
+    n = (off64_t)gzseek((gzFile)file[(mode == GD_FILE_WRITE) ? 1 : 0].edata,
         (off_t)count, SEEK_SET);
 
     if (n == -1) {
@@ -108,13 +108,13 @@ ssize_t _GD_GzipRead(struct _gd_raw_file *file, void *ptr, gd_type_t data_type,
 
   dtrace("%p, %p, 0x%X, %zu", file, ptr, data_type, nmemb);
 
-  n = gzread(file->edata, ptr, GD_SIZE(data_type) * nmemb);
+  n = gzread((gzFile)file->edata, ptr, GD_SIZE(data_type) * nmemb);
 
   if (n >= 0) {
     n /= GD_SIZE(data_type);
     file->pos += n;
   } else {
-    gzerror(file->edata, &errnum);
+    gzerror((gzFile)file->edata, &errnum);
     if (errnum < 0)
       n = -1;
   }
@@ -131,13 +131,13 @@ ssize_t _GD_GzipWrite(struct _gd_raw_file *file, const void *ptr,
 
   dtrace("%p, %p, 0x%X, %zu", file, ptr, data_type, nmemb);
 
-  n = gzwrite(file->edata, ptr, GD_SIZE(data_type) * nmemb);
+  n = gzwrite((gzFile)file->edata, ptr, GD_SIZE(data_type) * nmemb);
 
   if (n >= 0) {
     n /= GD_SIZE(data_type);
     file->pos += n;
   } else {
-    gzerror(file[1].edata, &errnum);
+    gzerror((gzFile)file[1].edata, &errnum);
     if (errnum < 0)
       n = -1;
   }
@@ -162,7 +162,7 @@ int _GD_GzipClose(struct _gd_raw_file *file)
 
   dtrace("%p", file);
 
-  ret = gzclose(file->edata);
+  ret = gzclose((gzFile)file->edata);
   if (ret) {
     dreturn("%i", ret);
     return ret;
