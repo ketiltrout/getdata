@@ -24,33 +24,35 @@
 /* crawl the directory, and delete everything */
 static int _GD_TruncDir(DIRFILE *D, int dirfd, const char *dirfile, int root)
 {
-  int format_trunc = 0;
+  int ret, format_trunc = 0;
   DIR* dir;
   struct dirent *lamb, *result;
   struct stat statbuf;
-  int fd = dirfd, ret;
   size_t dirent_len = offsetof(struct dirent, d_name);
   size_t dirfile_len = strlen(dirfile);
 
   dtrace("%p, %i, \"%s\", %i", D, dirfd, dirfile, root);
 
 #if defined(HAVE_FDOPENDIR) && !defined(GD_NO_DIR_OPEN)
-  /* only need to duplicate the fd of the root directory; otherwise this
-   * function will close the fd */
-  if (root && (fd = dup(dirfd)) == -1) {
-    _GD_SetError(D, GD_E_TRUNC, GD_E_TRUNC_DIR, dirfile, errno, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
-  dir = fdopendir(fd);
+  {
+    int fd = dirfd;
+    /* only need to duplicate the fd of the root directory; otherwise this
+     * function will close the fd */
+    if (root && (fd = dup(dirfd)) == -1) {
+      _GD_SetError(D, GD_E_TRUNC, GD_E_TRUNC_DIR, dirfile, errno, NULL);
+      dreturn("%i", -1);
+      return -1;
+    }
+    dir = fdopendir(fd);
 
 #ifdef HAVE_FPATHCONF
-  dirent_len += fpathconf(fd, _PC_NAME_MAX) + 1;
+    dirent_len += fpathconf(fd, _PC_NAME_MAX) + 1;
 #elif defined HAVE_PATHCONF
-  dirent_len += pathconf(dirfile, _PC_NAME_MAX) + 1;
+    dirent_len += pathconf(dirfile, _PC_NAME_MAX) + 1;
 #else
-  dirent_len += FILENAME_MAX;
+    dirent_len += FILENAME_MAX;
 #endif
+  }
 
 #else
   dir = opendir(dirfile);
@@ -172,7 +174,7 @@ static int _GD_TruncDir(DIRFILE *D, int dirfd, const char *dirfile, int root)
 #else
               rmdir(name)
 #endif
-          ) {
+             ) {
             _GD_SetError(D, GD_E_TRUNC, GD_E_TRUNC_UNLINK, name, errno, NULL);
             free(lamb);
             free(name);
