@@ -112,7 +112,8 @@ New in version 0.8.0a:
     metadata on open.
 
   * BUG FIX: GetData no longer omits the input field to a RECIP when writing
-    metadata to disk.
+    metadata to disk.  Nor does it forget to put newlines after RECIP or DIVIDE
+    field specifications.
 
   * BUG FIX: GetData no longer assumes all fields have the same number of
     samples-per-frame when computing a LINCOM.
