@@ -1175,6 +1175,7 @@ char *_GD_CanonicalPath(const char *car, const char *cdr)
             dreturn("%p", NULL);
             return NULL;
           }
+          target[slen] = 0;
 
           /* now we have to start all over again */
           ptr = target;
@@ -1185,10 +1186,11 @@ char *_GD_CanonicalPath(const char *car, const char *cdr)
             slen -= res_root;
           } else if (res_len > res_root) {
             /* strip the symlink name from res */
-            for (ptr = res + res_len - 1; *ptr != GD_DIRSEP; --ptr)
+            char *rptr;
+            for (rptr = res + res_len - 1; *rptr != GD_DIRSEP; --rptr)
               ;
-            *(ptr + 1) = '\0';
-            res_len = res - ptr + 1;
+            *(rptr + 1) = '\0';
+            res_len = res - rptr + 1;
           }
 
           /* now make a new work buffer of "target/remaining", asusming

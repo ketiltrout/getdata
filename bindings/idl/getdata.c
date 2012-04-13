@@ -1053,10 +1053,12 @@ unsigned long gdidl_convert_encoding(IDL_VPTR idl_enc)
       encoding = GD_SLIM_ENCODED;
     else if (strcasecmp(enc, "SIE"))
       encoding = GD_SIE_ENCODED;
-    else if (strcasecmp(enc, "ZZIP"))
-      encoding = GD_ZZIP_ENCODED;
     else if (strcasecmp(enc, "TEXT"))
       encoding = GD_TEXT_ENCODED;
+    else if (strcasecmp(enc, "ZZIP"))
+      encoding = GD_ZZIP_ENCODED;
+    else if (strcasecmp(enc, "ZZSLIM"))
+      encoding = GD_ZZSLIM_ENCODED;
     else if (strcasecmp(enc, "NONE"))
       encoding = GD_UNENCODED;
     else if (strcasecmp(enc, "RAW"))
@@ -3559,23 +3561,25 @@ IDL_VPTR gdidl_getdata(int argc, IDL_VPTR argv[], char *argk)
     IDL_LONG64 first_sample;
     IDL_LONG n_frames;
     IDL_LONG n_samples;
-    int here;
+    int first_frame_x, first_sample_x;
     gd_type_t return_type;
   } KW_RESULT;
   KW_RESULT kw;
 
   IDL_VPTR r;
 
-  kw.first_frame = kw.first_sample = kw.n_frames = kw.n_samples = kw.here = 0;
+  kw.first_frame = kw.first_sample = kw.n_frames = kw.n_samples = 0;
+  kw.first_frame_x = kw.first_sample_x = 0;
   kw.return_type = GD_FLOAT64;
   GDIDL_KW_INIT_ERROR;
 
   static IDL_KW_PAR kw_pars[] = {
     GDIDL_KW_PAR_ERROR,
     GDIDL_KW_PAR_ESTRING,
-    { "FIRST_FRAME", IDL_TYP_LONG64, 1, 0, 0, IDL_KW_OFFSETOF(first_frame) },
-    { "FIRST_SAMPLE", IDL_TYP_LONG64, 1, 0, 0, IDL_KW_OFFSETOF(first_sample) },
-    { "HERE", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(here) },
+    { "FIRST_FRAME", IDL_TYP_LONG64, 1, 0, IDL_KW_OFFSETOF(first_frame_x),
+      IDL_KW_OFFSETOF(first_frame) },
+    { "FIRST_SAMPLE", IDL_TYP_LONG64, 1, 0, IDL_KW_OFFSETOF(first_sample_x),
+      IDL_KW_OFFSETOF(first_sample) },
     { "NUM_FRAMES", IDL_TYP_LONG, 1, 0, 0, IDL_KW_OFFSETOF(n_frames) },
     { "NUM_SAMPLES", IDL_TYP_LONG, 1, 0, 0, IDL_KW_OFFSETOF(n_samples) },
     { "TYPE", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(return_type) },
@@ -3591,7 +3595,7 @@ IDL_VPTR gdidl_getdata(int argc, IDL_VPTR argv[], char *argk)
   DIRFILE *D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
   const char* field_code = IDL_VarGetString(argv[1]);
 
-  if (kw.here) {
+  if (kw.first_frame_x == 0 && kw.first_sample_x == 0) {
     kw.first_frame = GD_HERE;
     kw.first_sample = 0;
   }
@@ -4675,19 +4679,20 @@ void gdidl_putdata(int argc, IDL_VPTR argv[], char *argk)
     GDIDL_KW_RESULT_ERROR;
     IDL_LONG64 first_frame;
     IDL_LONG64 first_sample;
-    int here;
+    int first_frame_x, first_sample_x;
   } KW_RESULT;
   KW_RESULT kw;
 
-  kw.first_frame = kw.first_sample = kw.here = 0;
+  kw.first_frame = kw.first_sample = kw.first_frame_x = kw.first_sample_x = 0;
   GDIDL_KW_INIT_ERROR;
 
   static IDL_KW_PAR kw_pars[] = {
     GDIDL_KW_PAR_ERROR,
     GDIDL_KW_PAR_ESTRING,
-    { "FIRST_FRAME", IDL_TYP_LONG64, 1, 0, 0, IDL_KW_OFFSETOF(first_frame) },
-    { "FIRST_SAMPLE", IDL_TYP_LONG64, 1, 0, 0, IDL_KW_OFFSETOF(first_sample) },
-    { "HERE", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(here) },
+    { "FIRST_FRAME", IDL_TYP_LONG64, 1, 0, IDL_KW_OFFSETOF(first_sample_x),
+      IDL_KW_OFFSETOF(first_frame) },
+    { "FIRST_SAMPLE", IDL_TYP_LONG64, 1, 0, IDL_KW_OFFSETOF(first_sample_x),
+      IDL_KW_OFFSETOF(first_sample) },
     { NULL }
   };
 
@@ -4696,7 +4701,7 @@ void gdidl_putdata(int argc, IDL_VPTR argv[], char *argk)
   DIRFILE *D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
   const char* field_code = IDL_VarGetString(argv[1]);
 
-  if (kw.here) {
+  if (kw.first_frame_x == 0 && kw.first_sample_x == 0) {
     kw.first_frame = GD_HERE;
     kw.first_sample = 0;
   }
@@ -5102,7 +5107,7 @@ void gdidl_add_window(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
-/* @@DLM: P gdidl_add_mplex GD_ADD_MPLEX 6 6 KEYWORDS */
+/* @@DLM: P gdidl_add_mplex GD_ADD_MPLEX 5 5 KEYWORDS */
 void gdidl_add_mplex(int argc, IDL_VPTR argv[], char *argk)
 {
   dtraceidl();
@@ -5113,16 +5118,18 @@ void gdidl_add_mplex(int argc, IDL_VPTR argv[], char *argk)
     IDL_STRING parent;
     int parent_x;
     int fragment_index;
+    int max;
   } KW_RESULT;
   KW_RESULT kw;
 
   GDIDL_KW_INIT_ERROR;
-  kw.fragment_index = kw.parent_x = 0;
+  kw.fragment_index = kw.parent_x = kw.max = 0;
 
   static IDL_KW_PAR kw_pars[] = {
     GDIDL_KW_PAR_ERROR,
     GDIDL_KW_PAR_ESTRING,
     { "FRAGMENT", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(fragment_index) },
+    { "MAX", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(max) },
     { "PARENT", IDL_TYP_STRING, 1, 0, IDL_KW_OFFSETOF(parent_x),
       IDL_KW_OFFSETOF(parent) },
     { NULL }
@@ -5135,13 +5142,13 @@ void gdidl_add_mplex(int argc, IDL_VPTR argv[], char *argk)
   const char* in_field = IDL_VarGetString(argv[2]);
   const char* count = IDL_VarGetString(argv[3]);
   int val = IDL_LongScalar(argv[4]);
-  int max = IDL_LongScalar(argv[5]);
 
   if (kw.parent_x) {
     const char* parent = IDL_STRING_STR(&kw.parent);
-    gd_madd_mplex(D, parent, field_code, in_field, count, val, max);
+    gd_madd_mplex(D, parent, field_code, in_field, count, val, kw.max);
   } else
-    gd_add_mplex(D, field_code, in_field, count, val, max, kw.fragment_index);
+    gd_add_mplex(D, field_code, in_field, count, val, kw.max,
+        kw.fragment_index);
 
   GDIDL_SET_ERROR(D);
 
@@ -5180,16 +5187,16 @@ void gdidl_alter_window(int argc, IDL_VPTR argv[], char *argk)
   GDIDL_KW_INIT_ERROR;
 
   static IDL_KW_PAR kw_pars[] = {
+    { "CHECK_FIELD", IDL_TYP_STRING, 1, 0, IDL_KW_OFFSETOF(check_x),
+      IDL_KW_OFFSETOF(check) },
     { "CLR", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(clr) },
     { "EQ", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(eq) },
     GDIDL_KW_PAR_ERROR,
     GDIDL_KW_PAR_ESTRING,
     { "GE", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(ge) },
     { "GT", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(gt) },
-    { "IN_FIELD1", IDL_TYP_STRING, 1, 0, IDL_KW_OFFSETOF(in_field_x),
+    { "IN_FIELD", IDL_TYP_STRING, 1, 0, IDL_KW_OFFSETOF(in_field_x),
       IDL_KW_OFFSETOF(in_field) },
-    { "IN_FIELD2", IDL_TYP_STRING, 1, 0, IDL_KW_OFFSETOF(check_x),
-      IDL_KW_OFFSETOF(check) },
     { "LE", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(le) },
     { "LT", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(lt) },
     { "NE", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(ne) },
@@ -5316,14 +5323,14 @@ void gdidl_alter_mplex(int argc, IDL_VPTR argv[], char *argk)
   GDIDL_KW_INIT_ERROR;
 
   static IDL_KW_PAR kw_pars[] = {
+    { "COUNT_FIELD", IDL_TYP_STRING, 1, 0, IDL_KW_OFFSETOF(in_field2_x),
+      IDL_KW_OFFSETOF(in_field2) },
     { "COUNT_MAX", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(max) },
     { "COUNT_VAL", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(val) },
     GDIDL_KW_PAR_ERROR,
     GDIDL_KW_PAR_ESTRING,
-    { "IN_FIELD1", IDL_TYP_STRING, 1, 0, IDL_KW_OFFSETOF(in_field1_x),
+    { "IN_FIELD", IDL_TYP_STRING, 1, 0, IDL_KW_OFFSETOF(in_field1_x),
       IDL_KW_OFFSETOF(in_field1) },
-    { "IN_FIELD2", IDL_TYP_STRING, 1, 0, IDL_KW_OFFSETOF(in_field2_x),
-      IDL_KW_OFFSETOF(in_field2) },
     { NULL }
   };
 

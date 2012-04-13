@@ -2780,13 +2780,13 @@ subroutine fgd_alter_mplex (dirfile, field_name, in_field, count_field, &
   count_max)
 end subroutine
 
-subroutine fgd_strtok (token, l, dirfile, string, n)
+subroutine fgd_strtok (token, l, dirfile, string)
   character (len=*), intent(out) :: token
   integer, intent(inout) :: l
-  integer, intent(in) :: dirfile, n
+  integer, intent(in) :: dirfile
   character (len=*), intent(in) :: string
 
-  call gdtoke(token, l, dirfile, TRIM(string), LEN_TRIM(string), n)
+  call gdtoke(token, l, dirfile, TRIM(string), LEN_TRIM(string))
 end subroutine
 
 function fgd_desync (dirfile, flags)

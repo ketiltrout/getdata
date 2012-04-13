@@ -56,8 +56,19 @@ unit numbers in place of C's DIRFILE pointers are:
 * subroutine fgd_close (dirfile_unit)
   integer, intent(in) :: dirfile
 
+* subroutine fgd_desync (dirfile_unit, flags)
+  integer :: fgd_desync
+  integer, intent(in) :: dirfile, flags
+
 * subroutine fgd_discard (dirfile_unit)
   integer, intent(in) :: dirfile
+
+* subroutine fgd_verbose_prefix(dirfile, prefix)
+  integer, intent(in) :: dirfile
+  character (len=*), intent(in) :: prefix
+
+* subroutine fgd_mplex_lookback(dirfile, lookback)
+  integer, intent(in) :: dirfile, lookback
 
 * subroutine fgd_flush (dirfile_unit, field_code)
   integer, intent(in) :: dirfile
@@ -67,8 +78,12 @@ unit numbers in place of C's DIRFILE pointers are:
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: field_code
 
-  (For both fgd_flush and fgd_sync, If field_code is the empty string, the
-  operation will be peformed on the entire dirfile.)
+* subroutine fgd_raw_close (dirfile, field_code)
+  integer, intent(in) :: dirfile
+  character (len=*), intent(in) :: field_code
+
+  (For fgd_flush, fgd_sync and fgd_raw_close, if field_code is the empty string,
+  the operation will be peformed on the entire dirfile.)
 
 * subroutine fgd_metaflush (dirfile_unit)
   integer, intent(in) :: dirfile
@@ -76,6 +91,12 @@ unit numbers in place of C's DIRFILE pointers are:
 * character (len=GD_MAX_LINE_LENGTH) function fgd_fragmentname(dirfile_unit,
   ind)
   integer, intent(in) :: dirfile_unit, ind
+
+* function fgd_nentries (dirfile, parent, entype, flags)
+  integer :: fgd_nentries
+  integer, intent(in) :: dirfile, entype, flags
+  character (len=*), intent(in) :: parent
+  integer :: parent_l
 
 * integer function fgd_nfields (dirfile_unit)
   integer, intent(in) :: dirfile_unit
@@ -209,6 +230,11 @@ unit numbers in place of C's DIRFILE pointers are:
   integer, intent(in) :: dirfile, fragment_index
   character (len=*), intent(in) :: field_name, in_field, table
 
+* subroutine fgd_add_mplex (dirfile, field_code, in_field, count_field,
+  count_val, count_max, fragment_index)
+  character(len=*), intent(in) :: field_code, in_field, count_field
+  integer, intent(in) :: dirfile, count_val, count_max, fragment_index
+
 * subroutine fgd_add_multiply (dirfile, field_name, in_field1, in_field2,
   fragment_index)
   integer, intent(in) :: dirfile, fragment_index
@@ -326,6 +352,11 @@ unit numbers in place of C's DIRFILE pointers are:
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: field_name, in_field, table, parent
 
+* subroutine fgd_madd_mplex (dirfile, parent, field_code, in_field, count_field,
+  count_val, count_max)
+  character(len=*), intent(in) :: parent, field_code, in_field, count_field
+  integer, intent(in) :: dirfile, count_val, count_max
+
 * subroutine fgd_madd_phase (dirfile, parent, field_name, in_field, phase)
   integer, intent(in) :: dirfile, phase
   character (len=*), intent(in) :: field_name, in_field, parent
@@ -364,7 +395,6 @@ unit numbers in place of C's DIRFILE pointers are:
   character(len=*), intent(in) :: parent, field_code, in_field, check_field
   integer, intent(in) :: dirfile, windop
   double precision, intent(in) :: threshold
-
 
 * character (len=GD_FIELD_LEN) function fgd_reference (dirfile)
   integer, intent(in) :: dirfile
@@ -481,6 +511,11 @@ unit numbers in place of C's DIRFILE pointers are:
   integer, intent(in) :: dirfile, move
   character (len=*), intent(in) :: field_name, in_field, table
 
+* subroutine fgd_alter_mplex (dirfile, field_name, in_field, count_field,
+  count_val, count_max)
+  integer, intent(in) :: dirfile, count_val, count_max
+  character (len=*), intent(in) :: field_name, in_field, count_field
+
 * subroutine fgd_alter_multiply (dirfile, field_name, in_field1, in_field2)
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: field_name, in_field1, in_field2
@@ -585,6 +620,15 @@ unit numbers in place of C's DIRFILE pointers are:
   integer, intent(in) :: dirfile, frame_num, sample_num, flags
   character (len=*), intent(in): field_code
 
+* subroutine fgd_strtok (token, token_len, dirfile, string)
+  character (len=*), intent(out) :: token
+  integer, intent(inout) :: token_len
+  integer, intent(in) :: dirfile
+  character (len=*), intent(in) :: string
+
+  (If passed the empty string, the next token of the previous string is
+  returned.)
+
 * integer function fgd_tell (dirfile, field_code)
   integer, intent(in) :: dirfile
   character (len=*), intent(in): field_code
@@ -609,7 +653,6 @@ unit numbers in place of C's DIRFILE pointers are:
 * subroutine fgd_unhide (dirfile, field_code)
   integer, intent(in) :: dirfile
   character (len=*), intent(in) :: field_code
-
 
 
 In order to respect type safety, the gd_getdata and gd_putdata analogues encode
@@ -691,7 +734,7 @@ Otherwise, they behave the same as their C counterparts.
   integer, intent(in) :: dirfile_unit
   character (len=*), intent(in) :: field_code
   integer(1), intent(out) :: data_out
-* subroutine fgd_constants_i1(values, dirfile, parent)
+* subroutine fgd_mconstants_i1(values, dirfile, parent)
   integer(1), dimension(:), intent(out) :: values
   character (len=*), intent(in) :: parent
 * subroutine fgd_put_carray_i1 (dirfile, field_code, data_in, start, array_len)
@@ -708,6 +751,16 @@ Otherwise, they behave the same as their C counterparts.
   will call gd_get_carray_slice(3) or gd_put_carray_slice(3).
 
 Other procedures in the Fortran 95 bindings are:
+
+function fgd_entry_name_max (dirfile, parent, entype, flags)
+  integer :: fgd_entry_name_max
+  integer, intent(in) :: dirfile, entype, flags
+  character (len=*), intent(in) :: parent
+  integer :: parent_l
+
+  This function returns the length of the longest entry name defined in the
+  dirfile satisfying the given criteria.  The parameters are the same as they
+  are for fgd_nentries.
 
 * integer fgd_field_name_max (dirfile_unit)
   integer, intent(in) :: dirfile_unit
@@ -742,21 +795,27 @@ Other procedures in the Fortran 95 bindings are:
   This function returns the length of the longest alias for the given
   field_code.
 
+* subroutine fgd_entry_list (entry_list, dirfile, parent, entype, flags,
+  entry_len)
+  character(len=*), dimension(:), intent(out) :: entry_list
+  integer, intent(in) :: dirfile, entype, flags
+  integer, intent(inout) :: entry_len
+  character (len=*), intent(in) :: parent
+  integer :: max_len, nentries, i, parent_l
+
+  This subroutine behaves analogously to gd_entry_list(3), except that it
+  requires an additional argument, entry_len, which is the longest entry name
+  which will fit in the supplied entry_list array.  If the longest entry name in
+  the dirfile is longer than entry_len, entry_len will be set to this value
+  (which is equivalent to the return value of fgd_entry_name_max) and entry_list
+  will remain untouched.
+
+  Analogously:
+
 * subroutine fgd_field_list (field_list, dirfile, field_len)
   character (len=<field_len>) dimension(:), intent(out) :: field_list
   integer, intent(in) :: dirfile_unit
   integer, intent(inout) :: field_len
-
-  This subroutine behaves analogously to gd_get_field_list(3), except that it
-  requires a third argument, field_len, which is the longest field name which
-  will fit in the supplied field_list array.  If the longest field name in the
-  dirfile is longer than field_len, field_len will be set to this value (which
-  is equivalent to the return value of fgd_field_name_max or
-  fgd_string_value_max) and field_list will remain untouched.  The character
-  strings returned are Fortran strings.
-
-  Analogously:
-
 * subroutine fgd_field_list_by_type (field_list, dirfile, entype, field_len)
   character (len=<field_len>) dimension(:), intent(out) :: field_list
   integer, intent(in) :: dirfile_unit, entype
@@ -806,14 +865,14 @@ Other procedures in the Fortran 95 bindings are:
   type(gd_entry), intent(out) :: ent
 
   This fills ent with the metadata for field_code obtained by calling
-  gd_get_entry(3).  It returns the field type, or GD_NO_ENTRY if an error
-  occurred in the gd_get_entry() call.  The gd_entry type is defined in the
+  gd_entry(3).  It returns the field type, or GD_NO_ENTRY if an error
+  occurred in the gd_entry() call.  The gd_entry type is defined in the
   getdata module to be:
 
   type gd_entry
     integer :: field_type, n_fields, spf, data_type, bitnum, numbits, shift
     integer :: fragment_index, comp_scal, poly_ord, array_len, windop
-    integer :: ithreshold
+    integer :: ithreshold, count_val, count_max
     character (len=GD_FIELD_LEN), dimension(3) :: field
     character (len=GD_FIELD_LEN), dimension(6) :: scalar
     integer, dimension(6) :: scalar_ind

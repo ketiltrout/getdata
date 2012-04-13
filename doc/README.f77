@@ -2,8 +2,8 @@ FORTRAN 77 BINDINGS FOR GETDATA
 ===============================
 
 This README describes the Fortran 77 bindings for the GetData library.  These
-bindings consist of a Fortran compatibility library `libfgetdata' (written in
-C) and a Fortran 77 source file `getdata.f' which defines useful Fortran
+bindings consist of a Fortran compatibility library, 'libfgetdata' (written in
+C) and a Fortran 77 source file, 'getdata.f' which defines useful Fortran
 parameters and declares the external subroutines.
 
 These bindings are designed to comply to the Fortran 77 standards.  As a result,
@@ -31,7 +31,7 @@ Fortran program to define these constants.
 
 All integer type parameters passed to the compatibility library are of type
 INTEGER (i.e. the native size of the platform).  As a result, largefile support
-will not be available in the Fortran 77 bindings on a 32-bit system.
+are not be available in the Fortran 77 bindings.
 
 All character string arguments require also an integer indicating the size of
 the character buffer.  In cases where the bindings return a string value, the
@@ -91,6 +91,26 @@ Subroutines interacting with the database
   GDINCA.  Use GDCLBK to change the callback function before calling GDINCL or
   GDINCA, if required.
 
+* GDCLBK(dirfile_unit, callback)
+
+  Input:
+    INTEGER dirfile_unit
+    EXTERNAL callback
+
+  This wraps gd_parser_callback(3), setting the registered parser callback to
+  the subroutine given.  The signature of this subroutine is given above under
+  GDCOPN.  Unlike the C interface, this function cannot be used to remove a
+  registered callback; use GDNOCB for that.
+
+* GDNOCB(dirfile_unit)
+
+  Input:
+    INTEGER dirfile_unit
+
+  This calls gd_parser_callback(3) to deregister a previous parser callback
+  associated with the specified dirfile.  If it had none, this procedure does
+  nothing.
+
 * GDINVD(dirfile_unit)
 
   Output:
@@ -136,6 +156,16 @@ Subroutines interacting with the database
   synced, and field_code will be ignored.  Otherwise the field named by
   field_code will be synced.
 
+* GDRCLO(dirfile_unit, field_code, field_code_len)
+
+  Input:
+    INTEGER dirfile_unit, field_code_len
+    CHARACTER*<field_code_len> field_code
+
+  This wraps gd_raw_close(3).  If field_code_len is zero, the entire dirfile
+  will be closed, and field_code will be ignored.  Otherwise the field named by
+  field_code will be closed.
+
 * GDMFLS(dirfile_unit)
 
   Input:
@@ -144,6 +174,51 @@ Subroutines interacting with the database
   This subroutine wraps gd_metaflush(3), and will cause metadata changes to be
   written to disk.
 
+* GDDSYN(desync, dirfile_unit, flags)
+
+  Output:
+    INTEGER desync
+  Input:
+    INTEGER dirfile_unit, flags
+
+  This wraps gd_desync(3), and sets desync to a non-zero value if the loaded
+  dirfile has become desynchronised from the metadata on disk and will,
+  optionally, reload the dirfile.
+
+* GDFLAG(flags, dirfile_unit, set, reset)
+
+  Output:
+    INTEGER flags
+  Input:
+    INTEGER dirfile_unit, set, reset
+
+  This wraps gd_flags(3).  The value of the flags after modification are
+  returned in flags.
+
+* GDTOKE(token, token_len, dirfile_unit, string, string_len)
+
+  Output:
+    CHARACTER*<token_len> token
+  Input/Output:
+    INTEGER token_len
+  Input:
+    INTEGER dirfile_unit, string_len
+    CHARACTER*<string_len> string
+
+  This wraps gd_strtok(3).  If string_len <= 0, the next token of the previously
+  supplied string is returned in token (ie. NULL is passed to gd_strtok(3)),
+  otherwise, the first token from string is returned, and the string is cached
+  by GetData.  If the output token is longer than the supplied token_len, the
+  actual length of the token is returned in token_len and token is unmodified.
+
+* GDVBPX(dirfile_unit, prefix, prefix_len
+
+  Input:
+    INTEGER dirfile_unit, prefix_len
+    CHARACTER*<prefix_len> prefix
+
+  This wraps gd_verbose_prefix(3).  To remove a prefix, set prefix_len to
+  zero, in which case prefix itself is ignored.
 
 Subroutines interacting with data
 ---------------------------------
@@ -344,40 +419,40 @@ Subroutines interacting with data
   This subroutine wraps gd_tell(3), and returns the current value of the field
   pointer for the specified field.
 
+* GDMXLB(dirfile_unit, lookback)
+
+  Input:
+    INTEGER dirfile_unit, lookback
+
+  This wraps gd_mplex_lookback(3).
+
 
 Subroutines interacting with global metadata
 --------------------------------------------
 
+* GDNENT(nentries dirfile_unit, parent, parent_len, type, flags)
+
+  Output:
+    INTEGER nentries
+  Input:
+    INTEGER dirfile_unit, parent_len, type, flags
+    CHARACTER*<parent_len> parent
+ 
+  This wraps gd_nentries(3).  It returns the number of entries in the dirfile
+  satisfying the supplied criteria.  If parent_len is zero, parent itself is
+  ignored, and top-level entries are considered.  Otherwise, meta-entries
+  under parent are considered.
+
 * GDNFLD(nfields, dirfile_unit)
-
-  Output:
-    INTEGER nframes
-  Input:
-    INTEGER dirfile_unit
-
-  This wraps gd_nfields(3).  It takes the dirfile unit number as input and
-  returns the number of fields in the dirfile in nfields.
-
 * GDNFDT(nfields, dirfile_unit, type)
-
-  Output:
-    INTEGER nframes
-  Input:
-    INTEGER dirfile_unit, type
-
-  This wraps gd_nfields_by_type(3).  It takes the dirfile unit number, and
-  type specifier as input and returns the number of fields of the specified type
-  in the dirfile in nfields.
-
 * GDNVEC(nvectors, dirfile_unit)
+* GDNMFD(nfields, dirfile, parent, parent_l)
+* GDNMFT(nfields, dirfile, parent, parent_l, type)
+* GDNMVE(nvectors, dirfile, parent, parent_l)
 
-  Output:
-    INTEGER nvectors
-  Input:
-    INTEGER dirfile_unit
-
-  This wraps gd_nvectors(3).  It takes the dirfile unit number as input and
-  returns the number of vector fields in the dirfile in nfields.
+  These procedures wrap, respectively, gd_nfields(3), gd_nfields_by_type(3),
+  gd_nvectors(3), gd_nmfields(3), gd_nmfields_by_type(3), and gd_nmvectors(3),
+  and are all special cases of GDNENT.
 
 * GDNALS(nfields, dirfile_unit, field_code, field_code_len)
 
@@ -390,118 +465,57 @@ Subroutines interacting with global metadata
   This wraps gd_naliases(3).  It returns the number of aliases of field_code
   (including field_code itself).
 
-* GDNMFD(nfields, dirfile, parent, parent_l)
-* GDNMFT(nfields, dirfile, parent, parent_l, type)
-* GDNMVE(nvectors, dirfile, parent, parent_l)
-
-  These subroutine wrap gd_nmfields(3), gd_nmfields_by_type(3), and
-  gd_nmvectors(3).  They behave analogously to GDNFLD, GDNFDT, and GDNVEC.
-
-* GDFDNX(field_max, dirfile_unit)
+* GDENTX(entry_max, dirfile_unit, parent, parent_len, type, flags)
 
   Output:
-    INTEGER field_max
+    INTEGER entry_max
   Input:
-    INTEGER dirfile_unit
-
-  This subroutine, which has no direct analogue in the C API, returns the
-  length of the longest field name defined in the dirfile.  It takes the
-  dirfile unit number as input and returns the length (in characters) of
-  the longest field name in the dirfile in field_max.
+    INTEGER dirfile_unit, parent_len, type, flags
+    CHARACTER*<parent_len> parent
  
+  This subroutine, which has no direct analogue in the C API, returns the
+  length of the longest entry name defined in the dirfile.  It returns
+  the length (in characters) of the longest entry name in the dirfile in
+  entry_max which satisfies the given criteria.  If parent_len is zero,
+  parent itself is ignored, and top-level entries are considered.
+  Otherwise, meta-entries under parent are considered.
+ 
+* GDFDNX(field_max, dirfile_unit)
 * GDMFNX(field_max, dirfile_unit, parent, parent_len)
 
-  Output:
-    INTEGER field_max
-  Input:
-    INTEGER dirfile_unit, parent_len
-    CHARACTER*<parent_len> parent
-
-  This subroutine, which has no direct analogue in the C API, returns the
-  length of the longest field name defined in the dirfile for META fields of the
-  supplied parent field.  It returns the length (in characters) of the longest
-  META field name for the supplied parent in field_max.
+  These subroutines are special cases of GDENTX, with type and flags both
+  equal to zero, and, in the case of GDFDNX, parent_len also zero.
  
-* GDFLDN(name, name_len, dirfile_unit, field_num)
+* GDENTN(name, name_len, dirfile_unit, parent, parent_len, type, flags,
+  entry_num)
 
   Output:
     CHARACTER*<name_len> name
   Input/Output:
     INTEGER name_len
   Input:
-    INTEGER dirfile_unit, field_num
+    INTEGER dirfile_unit, parent_len, type, flags, entry_num
+    CHARACTER*<parent_len> parent
 
-  This subroutine is the replacement for gd_field_list(3).  It returns in
-  name a Fortran 77 string containing the field name of the field indexed by
-  field_num (which is should be a number between 1 and the output of GDNFLD).
+  This subroutine is the replacement for gd_entry_list(3).  It returns in
+  name a Fortran 77 string containing the entry name of the entry indexed by
+  entry_num (which is should be a number between 1 and the output of GDNENT).
   If the name of the field is longer than name_len, it will return the actual
   length of the field in name_len and not modify the name argument.  If
-  field_num is out of range, name_len will be set to zero, and name will not be
+  entry_num is out of range, name_len will be set to zero, and name will not be
   modified.
 
+* GDFLDN(name, name_len, dirfile_unit, field_num)
 * GDFDNT(name, name_len, dirfile_unit, type, field_num)
-  
-  Output:
-    CHARACTER*<name_len> name
-  Input/Output:
-    INTEGER name_len
-  Input:
-    INTEGER dirfile_unit, field_num, type
-
-  This subroutine is the replacement for gd_field_list_by_type(3) and
-  behaves in the same manner as GDFLDN.  Type should be one of the parameters
-  defined in getdata.f (see below).
-    
 * GDVECN(name, name_len, dirfile_unit, field_num)
-
-  Output:
-    CHARACTER*<name_len> name
-  Input/Output:
-    INTEGER name_len
-  Input:
-    INTEGER dirfile_unit, field_num
-
-  This subroutine is the replacement for gd_vector_list(3) and behaves in
-  the same manner as GDFLDN.
-
 * GDMFDN(name, name_len, dirfile_unit, parent, parent_len, field_num)
-
-  Output:
-    CHARACTER*<name_len> name
-  Input/Output:
-    INTEGER name_len
-  Input:
-    INTEGER dirfile_unit, field_num, parent_len
-    CHARACTER*<parent_len> parent
-
-  This subroutine is the replacement for gd_mfield_list(3) and behaves in
-  the same manner as GDFLDN.
-
 * GDMFDT(name, name_len, dirfile_unit, parent, parent_len, type, field_num)
-  
-  Output:
-    CHARACTER*<name_len> name
-  Input/Output:
-    INTEGER name_len
-  Input:
-    INTEGER dirfile_unit, field_num, parent_len, type
-    CHARACTER*<parent_len> parent
-
-  This subroutine is the replacement for gd_mfield_list_by_type(3) and
-  behaves in the same manner as GDFDNT.
-    
 * GDMVEN(name, name_len, dirfile_unit, parent, parent_len, field_num)
 
-  Output:
-    CHARACTER*<name_len> name
-  Input/Output:
-    INTEGER name_len
-  Input:
-    INTEGER dirfile_unit, field_num, parent_len
-    CHARACTER*<parent_len> parent
-
-  This subroutine is the replacement for gd_mvector_list(3) and behaves in
-  the same manner as GDVECN.
+  These subroutines are replacements for, respectively, gd_field_list(3),
+  gd_field_list_by_type(3), gd_vector_list(3), gd_mfield_list(3),
+  gd_mfield_list_by_type(3), and gd_mvector_list(3), and are all special cases
+  of GDENTN.
 
 * GDALSS(name, name_len, dirfile_unit, field_code, field_code_len, field_num)
 
@@ -1060,7 +1074,7 @@ Subroutines interacting with field metadata
     CHARACTER*<field_code_len> field_code
 
   This subroutine returns metadata describing a PHASE field.  If field_code
-  is not found, or the field specified is not of PHASE type, shift will
+  is not found, or the field specified is not of PHASE type, infield_len will
   be set to zero.  In this case the value of the remaining data is unspecified.
 
 * GDGEPN(poly_ord, infield, infield_len, a0, a1, a2, a3, a4, a5, fragment_index,
@@ -1099,15 +1113,14 @@ Subroutines interacting with field metadata
   unspecified.
 
 * GDGEWD(infield, infield_len, checkfield, checkfield_len, windop, ithreshold,
-  rthreshold, fragment_index, dirfile_unit, field_code,
-  field_code_len)
+  rthreshold, fragment_index, dirfile_unit, field_code, field_code_len)
 
   Output:
     INTEGER windop, ithreshold, fragment_index
     CHARACTER*<infield_len> infield
     CHARACTER*<checkfield_len> checkfield
   Input/Output:
-    INTEGER infield_len, check_field_len
+    INTEGER infield_len, checkfield_len
   Input:
     INTEGER dirfile_unit, field_code_len
     CHARACTER*<field_code_len> field_code
@@ -1118,6 +1131,23 @@ Subroutines interacting with field metadata
   rthreshold will be updated.  If field_code is not found, or the field
   specified is not of POLYNOM type, infield_len will be set to zero.  In this
   case the value of the remaining data is unspecified.
+
+* GDGEMX(infield, infield_len, countfield, countfield_len, countval, countmax,
+  fragment_index, dirfile_unit, field_code, field_code_len)
+
+  Output:
+    INTEGER countval, countmax, fragment_index
+    CHARACTER*<infield_len> infield
+    CHARACTER*<countfield_len> countfield
+  Input/Output:
+    INTEGER infield_len, countfield_len
+  Input:
+    INTEGER dirfile_unit, field_code_len
+    CHARACTER*<field_code_len> field_code
+
+  This subroutine returns metadata describing a MPLEX field.  If field_code
+  is not found, or the field specified is not of MPLEX type, infield_len will
+  be set to zero.  In this case the value of the remaining data is unspecified.
 
 * GDGECA(const_type, array_len, fragment_index, dirfile_unit, field_code,
   field_code_len)
@@ -1417,17 +1447,30 @@ Subroutines interacting with field metadata
   check_field, check_field_len, windop, threshold)
 
   Input:
-    INTEGER dirfile_unit, field_code_len, in_field_len
+    INTEGER dirfile_unit, field_code_len, in_field_len, check_field_len, windop
     CHARACTER*<field_code_len> field_code
     CHARACTER*<in_field_len> in_field
-    CHARACTER*<checkn_field_len> check_field
+    CHARACTER*<check_field_len> check_field
     INTEGER threshold
       or
     DOUBLE PRECISION threshold
 
   This subroutine wraps gd_alter_windop(3), and modifies the specified field
   metadata.  If windop is one of GDW_EQ, GDW_NE, GDW_ST, or GDW_CL, threshold
-  should be of type integer, otherwise it will be double precision.
+  should be of type integer, otherwise it should be double precision.
+
+* GDALMX(dirfile_unit, field_code, field_code_len, infield, infield_len,
+  countfield, countfield_len, countval, countmax)
+
+  Input:
+    INTEGER dirfile_unit, field_code_len, infield_len, countfile_len, countval
+    INTEGER countmax
+    CHARACTER*<field_code_len> field_code
+    CHARACTER*<infield_len> infield
+    CHARACTER*<countfield_len> countfield
+
+  This subroutine wraps gd_alter_mplex(3), and modifies the specified field
+  metadata.
 
 * GDALCA(dirfile_unit, field_code, field_code_len, const_type, array_len)
 
@@ -1774,7 +1817,7 @@ Subroutines which add or delete fields and aliases
     CHARACTER*<in_field_len> in_field
 
   This subroutine adds a PHASE field with the supplied parameters to the
-  specified format file fragment of the dirfile.
+  specified fragment of the dirfile.
 
 * GDADWD(dirfile_unit, field_code, field_code_len, in_field, in_field_len,
   check_field, check_field_len, windop, threshold, fragment_index)
@@ -1792,6 +1835,19 @@ Subroutines which add or delete fields and aliases
     specified fragment of the dirfile.  If windop is one of GDW_EQ, GDW_NE,
     GDW_ST, or GDW_CL, threshold should be an integer; otherwise, threshold
     should be of type double precision.
+
+* GDADMX(dirfile_unit, field_code, field_code_len, infield, infield_len,
+  countfield, countfield_len, countval, countmax, fragment_index)
+
+  Input:
+    INTEGER dirfile_unit, field_code_len, infield_len, countfile_len, countval
+    INTEGER countmax, fragment_index
+    CHARACTER*<field_code_len> field_code
+    CHARACTER*<infield_len> infield
+    CHARACTER*<countfield_len> countfield
+
+  This subroutine adds a MPLEX field with the supplied parameters to the
+  specified fragment of the dirfile.
 
 * GDADCA(dirfile_unit, field_code, field_code_len, const_type, array_len,
   data_type, data, fragment_index)
@@ -1882,6 +1938,8 @@ Subroutines which add or delete fields and aliases
   in_field_len, bitnum, numbits)
 * GDMDWD(dirfile_unit, parent, field_code, field_code_len, in_field,
   in_field_len, check_field, check_field_len, windop, threshold)
+* GDMDMX(dirfile_unit, parent, field_code, field_code_len, in_field,
+  in_field_len, count_field, count_field_len, count_val, count_max)
 * GDMDCA(dirfile_unit, parent, parent_len, field_code, field_code_len,
   const_type, array_len, data_type, data)
 * GDMDCO(dirfile_unit, parent, parent_len, field_code, field_code_len,
@@ -1924,6 +1982,7 @@ Error codes (returned by GDEROR):
   GD_EDO          GD_E_DOMAIN
   GD_EDU          GD_E_DUPLICATE
   GD_EEN          GD_E_BAD_ENDIANNESS  Deprecated; kept as an alias for GD_EAR.
+  GD_EEX          GD_E_EXISTS
   GD_EFL          GD_E_FLUSH
   GD_EFO          GD_E_FORMAT
   GD_EIE          GD_E_INTERNAL_ERROR
@@ -1943,34 +2002,44 @@ Error codes (returned by GDEROR):
   GD_UCL          GD_E_UNCLEAN_DB
   GD_UNS          GD_E_UNSUPPORTED
 
-Dirfile flags (required by GDOPEN, GDCOPN, GDINCL, and GDINCA):
+Dirfile flags (required by GDOPEN, GDCOPN, GDINCL, GDINCA, and GDFLAG):
 
   F77 symbol      C symbol          Notes
   ----------      ----------------- --------------------------------------
   GD_RO           GD_RDONLY         The flags argument passed to GDOPEN
   GD_RW           GD_RDWR           must contain at least GD_RO or GD_RW
-  GD_CR           GD_CREAT
-  GD_EX           GD_EXCL
-  GD_TR           GD_TRUNC
+
   GD_AE           GD_ARM_ENDIAN
   GD_BE           GD_BIG_ENDIAN
-  GD_LE           GD_LITTLE_ENDIAN
-  GD_NA           GD_NOT_ARM_ENDIAN
+  GD_CR           GD_CREAT
+  GD_EX           GD_EXCL
   GD_FC           GD_FORCE_ENCODING
   GD_FE           GD_FORCE_ENDIAN
-  GD_PE           GD_PEDANTIC
-  GD_PM           GD_PERMISSIVE
-  GD_VB           GD_VERBOSE
   GD_ID           GD_IGNORE_DUPS
   GD_IR           GD_IGNORE_REFS
+  GD_LE           GD_LITTLE_ENDIAN
+  GD_NA           GD_NOT_ARM_ENDIAN
+  GD_PE           GD_PEDANTIC
+  GD_PM           GD_PERMISSIVE
   GD_PP           GD_PRETTY_PRINT
-  GD_EA           GD_AUTO_ENCODED
-  GD_EN           GD_UNENCODED
-  GD_ET           GD_TEXT_ENCODED
-  GD_ES           GD_SLIM_ENCODED
-  GD_EG           GD_GZIP_ENCODED
-  GD_EB           GD_BZIP2_ENCODED
-  GD_EL           GD_LZMA_ENCODED
+  GD_TR           GD_TRUNC
+  GD_TS           GD_TRUNCSUB
+  GD_VB           GD_VERBOSE
+
+Encoding types:
+
+  F77 symbol      C symbol          Notes
+  ----------      ----------------- --------------------------------------
+  GDE_AU          GD_AUTO_ENCODED
+  GDE_BZ          GD_BZIP2_ENCODED
+  GDE_GZ          GD_GZIP_ENCODED
+  GDE_LZ          GD_LZMA_ENCODED
+  GDE_SL          GD_SLIM_ENCODED
+  GDE_SI          GD_SIE_ENCODED
+  GDE_TX          GD_TEXT_ENCODED
+  GDE_UN          GD_UNENCODED
+  GDE_ZS          GD_ZZSLIM_ENCODED
+  GDE_ZZ          GD_ZZIP_ENCODED
 
 Entry types (required by GDFLDT):
 
@@ -1989,6 +2058,7 @@ Entry types (required by GDFLDT):
   GD_DVE          GD_DIVIDE_ENTRY
   GD_RCE          GD_RECIP_ENTRY
   GD_WDE          GD_WINDOW_ENTRY
+  GD_MXE          GD_MPLEX_ENTRY
   GD_COE          GD_CONST_ENTRY
   GD_CAE          GD_CARRAY_ENTRY
   GD_STE          GD_STRING_ENTRY
@@ -2063,6 +2133,7 @@ Syntax suberrors (provided to the registered callback function, see GDCOPN):
   GDF_LT          GD_E_FORMAT_LITERAL
   GDF_MM          GD_E_FORMAT_META_META
   GDF_MR          GD_E_FORMAT_METARAW
+  GDF_MV          GD_E_FORMAT_MPLEXVAL
   GDF_NA          GD_E_FORMAT_BAD_NAME
   GDF_NB          GD_E_FORMAT_NUMBITS
   GDF_NF          GD_E_FORMAT_N_FIELDS
@@ -2106,6 +2177,20 @@ WINDOW entry operations:
   GDW_NE          GD_WINDOP_NE
   GDW_ST          GD_WINDOP_SET
   GDW_UN          GD_WINDOP_UNK
+
+Desync flags:
+
+  F77 symbol      C symbol
+  ----------      ---------------------
+  GDDS_P          GD_DESYNC_PATHCHECK
+  GDDS_O          GD_DESYNC_REOPEN
+
+MPLEX lookback parameters:
+
+  F77 symbol      C symbol
+  ----------      ---------------------
+  GDLB_A          GD_LOOKBACK_ALL
+  GDLB_D          GD_DEFAULT_LOOKBACK
 
 Miscellaneous parameters:
 

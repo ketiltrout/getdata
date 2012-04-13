@@ -3862,26 +3862,20 @@ void F77_FUNC(gdrclo, GDRCLO) (const int32_t *dirfile, const char *field_code,
   dreturnvoid();
 }
 
-/* gd_tokenise wrapper */
+/* gd_strtok wrapper */
 void F77_FUNC(gdtoke, GDTOKE) (char *toke, int32_t *toke_l,
-    const int32_t *dirfile, const char *string, const int32_t *string_l,
-    const int32_t *n)
+    const int32_t *dirfile, const char *string, const int32_t *string_l)
 {
-  char *token, *st;
+  char *token, *st = NULL;
   DIRFILE *D;
-  int i;
 
-  dtrace("%p, %p, %i, %p, %i, %i", toke, toke_l, *dirfile, string, *string_l,
-      *n);
+  dtrace("%p, %p, %i, %p, %i", toke, toke_l, *dirfile, string, *string_l);
 
   D = _GDF_GetDirfile(*dirfile);
-  _GDF_CString(&st, string, *string_l);
+  if (*string_l > 0)
+    _GDF_CString(&st, string, *string_l);
 
   token = gd_strtok(D, st);
-  for (i = 1; i < *n; ++i) {
-    free(token);
-    token = gd_strtok(D, NULL);
-  }
   free(st);
 
   _GDF_FString(toke, toke_l, token);

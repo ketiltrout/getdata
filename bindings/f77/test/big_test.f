@@ -2059,13 +2059,13 @@ C     231: GDALMX check
 
 C     232: GDTOKE check
       l = slen
-      CALL GDTOKE(str, l, d, '"test1 test2" test3\ test4 test5', 32, 1)
+      CALL GDTOKE(str, l, d, '"test1 test2" test3\ test4 test5', 32)
       CALL CHKOK2(ne, 232, 1, d)
       CALL CHKIN2(ne, 232, 2, l, slen)
       CALL CHKST2(ne, 232, 3, str, 'test1 test2')
 
       l = slen
-      CALL GDTOKE(str, l, d, '"test1 test2" test3\ test4 test5', 32, 2)
+      CALL GDTOKE(str, l, d, '', -1)
       CALL CHKOK2(ne, 232, 4, d)
       CALL CHKIN2(ne, 232, 5, l, slen)
       CALL CHKST2(ne, 232, 6, str, 'test3 test4')

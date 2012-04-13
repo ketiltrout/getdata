@@ -194,8 +194,9 @@ New in version 0.8.0a:
     but don't really care what it was.
 
   * Reading MPLEX fields can result in inefficiencies due to GetData having to
-    look backwards for the first value of the derived field.  A new function,
-    gd_mplex_lookback(), can be used to alter how much lookback is done.
+    look backwards for the first value of the part of the derived field
+    requested.  A new function, gd_mplex_lookback(), can be used to alter how
+    much lookback is done, if any.
 
   * The "move_data" flag in gd_rename() has been replaced with a generic "flags"
     parameter.  Two rename flags are defined: GD_REN_DATA, which recovers the
@@ -242,10 +243,57 @@ New in version 0.8.0a:
 
   Bindings Changes:
 
+  * F77: Due to small namespace issues, the encoding parameters (corresponding
+    to the GD_...ENCODED symbols in the C API) have all been renamed.  They
+    are now of the form GDE_xx.
+
   * Python: The return_type, num_fields, and num_samples parameters to
     dirfile.getdata() are now optional.  The return_type defautls to
     pygetdata.FLOAT, and if neither num_fields nor num_samples are given, all
     frames (ie. the value of dirfile.nframes) are returned.
+
+  * IDL: A number of undocumented, unnecessary function aliases have been
+    removed. They should be replaced with their canonical names, without change
+    in use:
+
+        Alias                   Replacement
+        ----------------------  ----------------
+        GD_ADD_CLINCOM          GD_ADD_LINCOM
+        GD_ADD_CPOLYNOM         GD_ADD_POLYNOM
+        GD_ADD_CRECIP           GD_ADD_RECIP
+        GD_ALTER_CLINCOM        GD_ALTER_LINCOM
+        GD_ALTER_CPOLYNOM       GD_ALTER_POLYNOM
+        GD_ALTER_CRECIP         GD_ALTER_RECIP
+        GD_FIELD_LIST_BY_TYPE   GD_ENTRY_LIST
+        GD_FRAMENUM_SUBSET      GD_FRAMENUM
+        GD_MADD                 GD_ADD
+        GD_MADD_BIT             GD_ADD_BIT
+        GD_MADD_CARRAY          GD_ADD_CARRAY
+        GD_MADD_CLINCOM         GD_ADD_LINCOM
+        GD_MADD_CPOLYNOM        GD_ADD_POLYNOM
+        GD_MADD_CRECIP          GD_ADD_RECIP
+        GD_MADD_DIVIDE          GD_ADD_DIVIDE
+        GD_MADD_LINCOM          GD_ADD_LINCOM
+        GD_MADD_LINTERP         GD_ADD_LINTERP
+        GD_MADD_MULTIPLY        GD_ADD_MULTIPLY
+        GD_MADD_PHASE           GD_ADD_PHASE
+        GD_MADD_POLYNOM         GD_ADD_POLYNOM
+        GD_MADD_RECIP           GD_ADD_RECIP
+        GD_MADD_SBIT            GD_ADD_SBIT
+        GD_MADD_STRING          GD_ADD_STRING
+        GD_MALTER_SPEC          GD_ALTER_SPEC
+        GD_MCONSTANTS           GD_CONSTANTS
+        GD_MFIELD_LIST          GD_ENTRY_LIST
+        GD_MFIELD_LIST_BY_TYPE  GD_ENTRY_LIST
+        GD_MSTRINGS             GD_STRINGS
+        GD_MVECTOR_LIST         GD_VECTOR_LIST
+        GD_NFIELDS_BY_TYPE      GD_NENTRIES
+        GD_NMFIELDS             GD_NENTRIES
+        GD_NMFIELDS_BY_TYPE     GD_NENTRIES
+        GD_NMVECTORS            GD_NVECTORS
+
+  * BUG FIX: All bindings now provide a named constant corresponding to the C
+    API error GD_E_UNKNOWN_ENCODING, which was overlooked in previous releases.
 
   * IDL BUG FIX: The missing /IGNORE_REFS and /PRETTY_PRINT are now available in
     gd_open.

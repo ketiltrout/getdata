@@ -1,3 +1,19 @@
+2012-04-13   D. V. Wiebe <getdata@ketiltrout.net> svn:699
+	* src/common.c (_GD_CanonicalPath): Terminate and don't clobber string
+	from realpath().
+
+	* bindings/make_parameters.c: Add GD_SIE_ENCODED.
+
+	* bindings/cxx/getdata/fragment.h: Update encodings.
+
+	* bindings/f77/fgetdata.c (GDTOKE) bindings/f77/getdata.f90.in (fgd_strtok):
+	Drop the 'n' parameter: just do what the C API does.
+
+	* bindings/idl/getdata.c (gdidl_getdata gdidl_putdata): Drop /HERE: just use
+	the absense of FIRST_FRAME and FIRST_SAMPLE.
+
+	* bindings/idl/getdata.c (gdidl_add_mplex): Make the MAX parameter optional.
+
 2012-04-01   D. V. Wiebe <getdata@ketiltrout.net> svn:696
 	* src/compat.c (_GD_ReadDir): Renamed from gd_readdir().
 

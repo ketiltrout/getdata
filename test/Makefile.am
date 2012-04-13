@@ -252,8 +252,9 @@ NMETA_TESTS=nmeta nmeta_hidden nmeta_invalid nmeta_parent nmeta_type \
 						nmeta_vectors nmeta_vectors_del nmeta_vectors_hidden \
 						nmeta_vectors_invalid nmeta_vectors_parent
 
-OPEN_TESTS=open open_cb_abort open_cb_cont open_cb_ignore open_cb_invalid \
-					 open_cb_rescan open_eaccess open_nonexistent open_notdirfile
+OPEN_TESTS=open open_abs open_cb_abort open_cb_cont open_cb_ignore \
+					 open_cb_invalid open_cb_rescan open_eaccess open_nonexistent \
+					 open_notdirfile
 
 PARSE_TESTS=parse_alias parse_alias_code parse_alias_dup parse_alias_meta \
 						parse_alias_missing parse_badline parse_bit parse_bit4 \

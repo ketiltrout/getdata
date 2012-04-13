@@ -20,4 +20,4 @@ from the system shell, or
 >>> import pygetdata
 >>> help(pygetdata)
 
-from within the Python interpereter after the bindings have been installed.
+from within the Python interpereter, after the bindings have been installed.

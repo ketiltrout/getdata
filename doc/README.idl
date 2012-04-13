@@ -21,7 +21,7 @@ If the GetData IDL bindings have been found, you should see among the output
 something similar to:
 
   *** GETDATA - IDL GetData bindings (not loaded)
-      Version: 0.8.0, Build Date: Sat Oct 23 00:00:00 UTC 2010, Source: The GetData Project <getdata-devel@lists.sourceforge.net>
+      Version: 0.8.0, Build Date: Thu Apr 12 00:00:00 UTC 2012, Source: The GetData Project <getdata-devel@lists.sourceforge.net>
       Path: /usr/local/rsi/idl/bin/bin.linux.x86/idl_getdata.so
 
 The DLM will be automatically loaded by the interpreter the first time a IDL
@@ -86,7 +86,7 @@ GD_ERROR_STRING, and GD_INVALID_DIRFILE, all IDL GetData functions and
 procedures may take two optional keyword parameters which deal with error
 reporting:
 
-  ERROR:   a variable in which the dirfile error number resulting from this
+  ERROR:   a variable into which the dirfile error number resulting from this
            call will be stored.  It will be the !GD.E_* error code corresponding
            to the C API error code.  On success this will be !GD.E_OK (= 0).  If
            this parameter is not specified, the dirfile error can still be
@@ -105,34 +105,37 @@ The GD_ENTRY Structure
 The GD_ENTRY structure is used in place of the C API's gd_entry_t data type.  It
 is essentially equivalent and is defined as:
 
+** Structure GD_ENTRY, 30 tags, length=512, data length=502:
   FIELD        STRING
-  FIELD_TYPE   INTEGER
-  FRAGMENT     INTEGER
+  FIELD_TYPE   INT
+  FRAGMENT     INT
   IN_FIELDS    STRING     Array[3]
   A            DOUBLE     Array[6]
   CA           DCOMPLEX   Array[6]
-  ARRAY_LEN    INTEGER
+  ARRAY_LEN    INT
   B            DOUBLE     Array[3]
   CB           DCOMPLEX   Array[3]
-  BITNUM       INTEGER
-  COMP_SCAL    INTEGER
-  DATA_TYPE    INTEGER
+  BITNUM       INT
+  COMP_SCAL    INT
+  COUNT_MAX    INT
+  COUNT_VAL    INT
+  DATA_TYPE    INT
   DIVIDEND     DOUBLE
   CDIVIDEND    DCOMPLEX
   M            DOUBLE     Array[3]
   CM           DCOMPLEX   Array[3]
-  N_FIELDS     INTEGER
-  NUMBITS      INTEGER
-  POLY_ORD     INTEGER
+  N_FIELDS     INT
+  NUMBITS      INT
+  POLY_ORD     INT
   SCALAR       STRING     Array[6]
-  SCALAR_IND   INTEGER    Array[6]
+  SCALAR_IND   INT        Array[6]
   SHIFT        LONG
   SPF          UINT
   TABLE        STRING
   UTHRESHOLD   ULONG
   ITHRESHOLD   LONG
   RTHRESHOLD   DOUBLE
-  WINDOP       INTEGER
+  WINDOP       INT
 
 The DATA_TYPE member is used for both RAW and CONST fields.  (The gd_entry_t
 object has a 'const_type' member for the CONST fields instead.)  For details on
@@ -233,6 +236,17 @@ PROCEDURE GD_ADD_LINTERP, dirfile_unit, field_name, in_field, table,
   indexed by FRAGMENT, or the primary format file if FRAGMENT is not given
   either.  See gd_add_linterp(3) and gd_madd_linterp(3).
 
+PROCEDURE GD_ADD_MPLEX, dirfile_unit, field_name, in_field, count_field,
+  value, FRAGMENT=fragment, MAX=max, PARENT=parent
+
+  This procedure adds a MPLEX field with the name 'field_name' to the dirfile.
+  The input vector is 'in_field', the multiplex index vector is 'count_field',
+  the value of the multiplex index is 'value' and the maximum value is 'max',
+  if specified.  If PARENT is given, this field is added as a metafield under
+  the given parent field.  Otherwise, the field is added to the fragment indexed
+  by FRAGMENT, or the primary format file if FRAGMENT is not given either.  See
+  gd_add_mplex(3) and gd_madd_mplex(3).
+
 PROCEDURE GD_ADD_MULTIPLY, dirfile_unit, field_name, in_field1, in_field2,
   FRAGMENT=fragment, PARENT=parent
 
@@ -254,7 +268,7 @@ PROCEDURE GD_ADD_PHASE, dirfile_unit, field_name, in_field, shift,
   and gd_madd_phase(3).
 
 PROCEDURE GD_ADD_POLYNOM, dirfile_unit, field_name, in_field, a0, [a1, [a2,
-  [a3, [a4, [a5,]]]]], FRAGMENT=fragment, PARENT=parent
+  [a3, [a4, [a5,]]]]] FRAGMENT=fragment, PARENT=parent
 
   This procedure adds a POLYNOM field with the name 'field_name' to the dirfile.
   The input vector field is given by 'in_field' and the shift by the remaining
@@ -430,6 +444,13 @@ PROCEDURE GD_ALTER_LINTERP, dirfile_unit, field_code, IN_FIELD=in_field,
   file containing the look up table will be renamed to reflect changes to the
   field metadata.  See gd_alter_linterp(3).
 
+PROCEDURE GD_ALTER_MPLEX, dirfile_unit, field_code, COUNT_FIELD=count_field,
+  COUNT_MAX=count_max, COUNT_VAL=count_val, IN_FIELD=in_field
+
+  This procedure modifies the metadata of the MPLEX field specified by
+  'field_code', updating only those field parameters specified as keyword
+  parameters.  See gd_alter_mplex(3).
+
 PROCEDURE GD_ALTER_MULTIPLY, dirfile_unit, field_code, IN_FIELD1=in_field1,
   IN_FIELD2=in_field2
 
@@ -489,8 +510,9 @@ PROCEDURE GD_ALTER_SPEC, dirfile_unit, line, PARENT=parent, /RECODE
   to the field metadata.  If PARENT is given, the field is assumed to be a
   metafield under the given parent.  See gd_alter_spec(3) and gd_malter_spec(3).
 
-PROCEDURE GD_ALTER_WINDOW, dirfile_unit, field_code, CHECK=check, /CLR, /EQ,
-  /GE, /GT, IN_FIELD=in_field, /LE, /LT, /NE, /SET, THRESHOLD=threshold
+PROCEDURE GD_ALTER_WINDOW, dirfile_unit, field_code, CHECK_FIELD=check_field,
+  /CLR, /EQ, /GE, /GT, IN_FIELD=in_field, /LE, /LT, /NE, /SET,
+  THRESHOLD=threshold
 
   This procedure modifies the metadata of the WINDOW field specified by
   'field_code', updating only those field parameters specified as keyword
@@ -530,12 +552,22 @@ PROCEDURE GD_DELETE, dirfile_unit, field_code, /DEL_DATA, /DEREF, /FORCE, /ALIAS
   meanings of the three other keyword flags are discussed in the gd_delete(3)
   manual page.  See gd_delete(3) and gd_delete_alias(3).
 
+FUNCTION GD_DESYNC(dirfile_unit, /PATHCHECK, /REOPEN)
+
+  This function returns non-zero if the loaded dirfile has become desynchronised
+  from the metadata on disk (due to a third party modifying the dirfile on
+  disk).  If /PATHCHECK is specified, the metadata on disk will be probed via
+  the full canonicalised pathnames to the fragment files, otherwise the
+  dirfile's cached directory descriptors will be used.  If /REOPEN is given,
+  the dirfile will be rescanned and updated if a change is discovered.  See
+  gd_desync(3).
+
 FUNCTION GD_DIRFILENAME(dirfile_unit)
 
   This function returns the name of the dirfile specified by 'dirfile_unit'.
   See dirfilename(3).
 
-FUNCTION GD_DIRFILE_STANDARDS(dirfile_unit, [version], /LATEST, /EARLIEST)
+FUNCTION GD_DIRFILE_STANDARDS(dirfile_unit, [version,] /LATEST, /EARLIEST)
 
   This function returns the current Standards Version of the loaded dirfile,
   optionally setting it first.  If more than one of version, LATEST or
@@ -558,6 +590,17 @@ FUNCTION GD_ENTRY(dirfile_unit, field_code)
 
   This function returns a GD_ENTRY structure containing the field metadata for
   the field specified by 'field_code'.  See gd_entry(3).
+
+FUNCTION GD_ENTRY_LIST(dirfile_unit, /HIDDEN, /NOALIAS, PARENT=parent, /SCALARS,
+    TYPE=type, /VECTORS)
+
+  This function returns a list of entry names defined by the dirfile.  If PARENT
+  is given, a list of metafields for the given parent will be returned otherwise
+  top-level fields are considered.  If TYPE is given, which should be one of the
+  !GD.*_ENTRY constants, only fields of the given type will be returned.  If
+  /SCALARS or /VECTORS is specified, the TYPE parameter is ignored if it is also
+  given.  The list returned includes aliases, unless /NOALIAS is specified, but
+  not hidden fields, unless /HIDDEN is specified.  See gd_entry_list(3).
 
 FUNCTION GD_ENTRY_TYPE(dirfile_unit, field_code)
 
@@ -591,22 +634,28 @@ FUNCTION GD_ERROR_STRING(dirfile_unit)
   does not take the normal ERROR and ESTRING keyword parameters.  See
   gd_error_string(3).
 
-FUNCTION GD_FIELD_LIST(dirfile_unit, PARENT=parent, TYPE=type)
+FUNCTION GD_FIELD_LIST(dirfile_unit, /HIDDEN, /NOALIAS, PARENT=parent, /SCALARS,
+    TYPE=type, /VECTORS)
 
-  This function returns a list of field names defined by the dirfile.  If PARENT
-  is given, a list of metafields for the given parent will be returned.  If TYPE
-  is given, which should be one of the !GD.*_ENTRY constants, only fields of the
-  given type will be returned.  If neither PARENT, nor TYPE, are given, all
-  fields are returned.  The list returned includes aliases but not hidden
-  fields.  See gd_field_list(3), gd_field_list_by_type(3), gd_mfield_list(3),
-  and gd_mfield_list_by_type(3).
+  An alias for GD_ENTRY_LIST (q.v.) kept for backwards compatibility.
 
-PROCEDURE GD_FLUSH, dirfile_unit, FIELD_CODE=field_code, /NOCLOSE
+FUNCTION GD_FLAGS(dirfile_unit, PRETTY_PRINT=pretty_print, VERBOSE=verbose)
+
+  This function modifies the operational flags of the dirfile.  If a keyword
+  parameter is zero, the corresponding flag will be cleared; if a keyword
+  parameter is one, the corresponding flag will be set; otherwise, the flag is
+  unchanged.  The function returns the value of the flags register after
+  modification.  See gd_flags(3).
+
+PROCEDURE GD_FLUSH, dirfile_unit, FIELD_CODE=field_code, /NOCLOSE, /NOSYNC
 
   This procedure flushes pending data writes to disk.  If FIELD_CODE is given,
   only writes for the given field are flushed to disk.  Otherwise, all fields
-  and metadata changes are flushed to disk.  Unless /NOCLOSE is specified, the
-  files are also closed after being flushed.  See gd_flush(3) and gd_sync(3).
+  and metadata changes are flushed to disk.  In normal operation, first the
+  raw data is flushed (synced) and then the raw data files are closed.
+  Specifying /NOSYNC will skip the flushing; specifying /NOCLOSE will skip the
+  closing.  Specifiying both will result in an error (since the function is left
+  with nothing to do.)  See gd_flush(3), gd_sync(3) and gd_raw_close(3).
 
 FUNCTION GD_FRAGMENT_AFFIXES(dirfile_unit, FRAGMENT=fragment)
 
@@ -647,10 +696,11 @@ FUNCTION GD_GETDATA(dirfile_unit, field_code, FIRST_FRAME=first_frame,
   returns a list of data, of the type given by TYPE, which should be one of the
   data type constants: !GD.UINT8, !GD.UINT16, &c.  If TYPE is omitted, this
   function returns double precision data, even if originally complex valued.
-  The first sample read is given by FIRST_FRAME and/or FIRST_SAMPLE.  The
-  number of samples requested is given by NUM_FRAMES and/or NUM_SAMPLES.  Fewer
-  samples than requested may be returned, without causing an error, if the end
-  of the field is encountered.  See getdata(3).
+  The first sample read is given by FIRST_FRAME and/or FIRST_SAMPLE.  If neither
+  of these are given, reading occurs at the current position.  The number of
+  samples requested is given by NUM_FRAMES and/or NUM_SAMPLES.  Fewer samples
+  than requested may be returned, without causing an error, if the end of the
+  field is encountered.  See getdata(3).
 
 FUNCTION GD_GET_CARRAY(dirfile_unit, field_code, TYPE=type)
 
@@ -716,6 +766,12 @@ PROCEDURE GD_MOVE, dirfile_unit, field_code, new_fragment, /ALIAS, /MOVE_DATA
   'field_code' specifies a RAW file, the data file on disk will also be moved,
   if necessary.  See gd_move(3) and gd_move_alias(3).
 
+PROCEDURE GD_MPLEX_LOOKBACK dirfile_unit, [lookback,] /ALL
+
+  This procedure sets the MPLEX lookback length to the value given, if supplied,
+  or to the maximum value, if /ALL is given, or else to the default value if
+  neither is provided.  See gd_mplex_lookback(3).
+
 FUNCTION GD_NALIASES(dirfile_unit, field_code)
 
   This function returns the number of aliases of 'field_code' (including
@@ -727,15 +783,23 @@ FUNCTION GD_NATIVE_TYPE(dirfile_unit, field_code)
   The return value will be one of the data type constants: !GD.UINT8, !GD.INT8,
   &c.  See gd_native_type(3).
 
-FUNCTION GD_NFIELDS(dirfile_unit, PARENT=parent, TYPE=type)
+FUNCTION GD_NENTRIES(dirfile_unit, /HIDDEN, /NOALIAS, PARENT=parent, /SCALARS,
+    TYPE=type, /VECTORS)
 
-  This function returns the number of fields defined by the dirfile.  If PARENT
-  is given, the number metafields for the given parent will be returned.  If
-  TYPE is given, which should be one of the !GD.*_ENTRY constants, only fields
-  of the given type will be counted.  If neither PARENT, nor TYPE, are given,
-  the total number of fields in the database will be returned.  The returned
-  count includes aliases but not hidden fields.  See gd_nfields(3),
-  gd_nfields_by_type(3), gd_nmfields(3), and gd_nmfields_by_type(3).
+  This function returns the number of entries in the dirfile satisfying the
+  given criteria.  If PARENT is given, the number of metafields for the given
+  parent will be returned otherwise top-level fields are considered.  If TYPE is
+  given, which should be one of the !GD.*_ENTRY constants, only fields of the
+  given type will be counted.  If /SCALARS or /VECTORS is specified, the TYPE
+  parameter is ignored if it is also given.  The number returned includes
+  aliases, unless /NOALIAS is specified, but not hidden fields, unless /HIDDEN
+  is specified.  See gd_nentries(3).
+
+
+FUNCTION GD_NFIELDS(dirfile_unit, /HIDDEN, /NOALIAS, PARENT=parent, /SCALARS,
+    TYPE=type, /VECTORS)
+
+  An alias for GD_NENTRIES (q.v.) kept for backwards compatibility.
 
 FUNCTION GD_NFRAGMENTS(dirfile_unit)
 
@@ -756,16 +820,16 @@ FUNCTION GD_NVECTORS(dirfile_unit, PARENT=parent)
 
 FUNCTION GD_OPEN(dirfilename, /ARM_ENDIAN, /BIG_ENDIAN, /CREAT,
   ENCODING=encoding, /EXCL, /FORCE_ENCODING, /FORCE_ENDIANNESS, /IGNORE_DUPS,
-  /LITTLE_ENDIAN, /NOT_ARM_ENDIAN, /PEDANTIC, /PERMISSIVE, /RDWR, /TRUNC,
-  /VERBOSE)
+  /IGNORE_REFS, /LITTLE_ENDIAN, /NOT_ARM_ENDIAN, /PEDANTIC, /PERMISSIVE,
+  /PRETTY_PRINT, /RDWR, /TRUNC, /TRUNCSUB, /VERBOSE)
 
   This function opens the dirfile specified by 'dirfilename', returning the
   dirfile unit number which can be subsequently used to refer to it.  If
   specified, ENCODING should either be a string indicating the encoding type:
-  'BZIP2', 'GZIP', 'LZMA', 'SLIM', 'TEXT',   'NONE', or else a numeric
-  encoding type: !GD.BZIP2_ENCODED, &c.  The meaning of the other keyword flags
-  is explained in the gd_open manual page.  A parser callback function
-  cannot be used by the IDL GetData bindings.  See gd_open(3).
+  'BZIP2', 'GZIP', 'LZMA', 'SIE', 'SLIM', 'TEXT', 'ZZIP', 'ZZSLIM', 'NONE', or
+  else a numeric encoding type: !GD.BZIP2_ENCODED, &c.  The meaning of the other
+  keyword flags is explained in the gd_open(3) manual page.  A parser callback
+  function cannot be used by the IDL GetData bindings.  See gd_open(3).
 
 FUNCTION GD_PARENT_FRAGMENT(dirfile_unit, fragment_index)
 
@@ -792,7 +856,7 @@ PROCEDURE GD_PUTDATA, dirfile_unit, field_code, data, FIRST_FRAME=first_frame,
   This procedure writes data in the numerical vector 'data' to the field
   specified by 'field_code'.  The keywords FIRST_FRAME and/or FIRST_SAMPLE
   indicate the first sample written.  If neither of these are specified, the
-  data is written from the beginning of the frame.  See putdata(3).
+  data is written at the current position.  See putdata(3).
 
 PROCEDURE GD_PUT_CARRAY, dirfile_unit, field_code, value, START=start
 
@@ -828,6 +892,15 @@ PROCEDURE GD_RENAME, dirfile_unit, field_code, new_name, /MOVE_DATA, /UPDATEDB
   on this field are also updated to reflect the change in name.  See
   gd_rename(3).
 
+FUNCTION GD_SEEK(dirfile_unit, field_code, FRAME_NUM=frame_num,
+  SAMPLE_NUM=sample_num, WHENCE=whence, /WRITE)
+
+  This function sets the current I/O position of the field specified by
+  'field_code' to the position given by FRAME_NUM and SAMPLE_NUM (which both
+  default to zero).  WHENCE should be one of the !GD.SEEK_* symbols.  If the
+  next operation on the field is a write (via GD_PUTDATA), the /WRITE flag
+  should also be specified.  See gd_seek(3).
+
 FUNCTION GD_SPF(dirfile_unit, field_code)
 
   This function returns the number of samples per frame of the field specified
@@ -839,6 +912,17 @@ FUNCTION GD_STRINGS(dirfile_unit, PARENT=parent, TYPE=type)
   PARENT is given, the value of STRING metafields defined for the given parent
   field will be returned, otherwise all non-meta STRING fields will be returned.
   See gd_strings(3) and gd_mstrings(3).
+
+FUNCTION GD_STRTOK(dirfile_unit, STRING=string)
+
+  If STRING is given, this function returns the first token of the string.
+  Otherwise, it returns the next token of a string provided to a previous call.
+  See gd_strtok(3).
+
+FUNCTION GD_TELL(dirfile_unit, field_code)
+  
+  This function returns the current I/O position of the specified field.  See
+  gd_tell(3).
 
 PROCEDURE GD_UNHIDE, dirfile_unit, field_code
 
@@ -856,6 +940,11 @@ FUNCTION GD_VALIDATE(dirfile_unit, field_code)
   This function checks whether 'field_code' is valid for reading and writing.
   If it is this function returns zero.  Otherwise it returns non-zero.  See
   gd_validate(3).
+
+PROCEDURE GD_VERBOSE_PREFIX, dirfile_unit, PREFIX=prefix)
+
+  This procedure sets the dirfile verbose prefix to PREFIX, if given, or else
+  removes it.  See gd_verbose_prefix(3).
 
 FUNCTION GD_VECTOR_LIST(dirfile_unit, PARENT=parent)
 

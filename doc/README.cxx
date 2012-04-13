@@ -51,7 +51,8 @@ The GetData entry types (defined in getdata/entry.h):
     IndexEntryType    = GD_INDEX_ENTRY,
     DivideEntryType   = GD_DIVIDE_ENTRY,
     RecipEntryType    = GD_RECIP_ENTRY,
-    WindowEntryType   = GD_WINDOW_ENTRY
+    WindowEntryType   = GD_WINDOW_ENTRY,
+    MPlexEntryType    = GD_MPLEX_ENTRY
   };
 
 The GetData window operations (defined in getdata/entry.h):
@@ -73,7 +74,8 @@ The GetData encoding schemes (defined in getdata/fragment.h):
     AutoEncoding  = GD_AUTO_ENCODED, RawEncoding   = GD_UNENCODED,
     TextEncoding  = GD_TEXT_ENCODED, SlimEncoding  = GD_SLIM_ENCODED,
     GzipEncoding  = GD_GZIP_ENCODED, Bzip2Encoding = GD_BZIP2_ENCODED,
-    UnsupportedEncoding = GD_ENC_UNSUPPORTED
+    SieEncoding   = GD_SIE_ENCODED,  ZzipEncoding  = GD_ZZIP_ENOCDED,
+    ZzslimEncoding = GD_ZZSLIM_ENCODED, UnsupportedEncoding = GD_ENC_UNSUPPORTED
   };
 
 
@@ -126,7 +128,7 @@ are available:
 
   The ErrorCount method calls gd_error_count(3) to return the number of errors
   encountered by the GetData library on this Dirfile object since this method
-  was last called (or, the first time, since the object was created)..
+  was last called (or, the first time, since the object was created).
 
 * const char *Dirfile::ErrorString()
 * const char *Dirfile::ErrorString(size_t len)
@@ -216,8 +218,11 @@ are available:
 * const void *Dirfile::Constants(GetData::DataType type = Float64)
 * int Dirfile::Delete(const char *field_code, int flags = 0)
 * int Dirfile::DeleteAlias(const char* field_code, int flags = 0)
+* const char **Dirfile::EntryList(const char *parent = NULL,
+    unsigned int type = 0, unsigned int flags = 0)
 * const char **Dirfile::FieldList()
 * const char **Dirfile::FieldListByType(GetData::EntryType type)
+* unsigned long Dirfile::Flags(unsigned long set = 0, unsigned long reset = 0)
 * int Dirfile::Flush(const char *field_code = NULL)
 * const char *Dirfile::FormatFilename(int index)
 * int Dirfile::GetCarray(const char *field_code, GetData::DataType type,
@@ -241,15 +246,18 @@ are available:
 * int Dirfile::MAlterSpec(const char *line, const char *parent)
 * const gd_carray_t *Dirfile::MCarrays(GetData::DataType type = Float64)
 * const void *Dirfile::MConstants(const char *parent, GetData::DataType type)
+* int Dirfile::MetaFlush()
 * const char **Dirfile::MFieldList(const char *parent)
 * const char **Dirfile::MFieldListByType(const char *parent,
-    * GetData::EntryType type)
-* int Dirfile::MetaFlush()
+    GetData::EntryType type)
+* int MplexLookback(int lookback)
 * int Dirfile::MoveAlias(const char* field_code, int new_fragment)
 * const char **Dirfile::MStrings(const char *parent)
 * const char **Dirfile::MVectorList(const char *parent)
 * int Dirfile::NAliases(const char* field_code)
 * DataType Dirfile::NativeType(const char *field_code)
+* unsigned int Dirfile::NEntries(const char *parent = NULL,
+    unsigned int type = 0, unsigned int flags = 0)
 * unsigned int Dirfile::NFields()
 * unsigned int Dirfile::NFieldsByType(GetData::EntryType type)
 * off_t Dirfile::NFrames()
@@ -267,15 +275,18 @@ are available:
     off_t first_sample, size_t num_frames, size_t num_samples,
     GetData::DataType type, const void *data_in)
 * size_t Dirfile::PutString(const char *field_code, const char *data_in)
+* int RawClose(const char *field_code = NULL)
 * unsigned int Dirfile::SamplesPerFrame(const char *field_code)
 * off_t Dirfile::Seek(const char *field_code, off_t frame_num, off_t sample_num,
     int whence)
 * const char **Dirfile::Strings()
+* char *StrTok(const char *string = NULL)
 * int Dirfile::Sync(const char* field_code = NULL)
 * off_t Dirfile::Tell(const char *field_code)
 * int Dirfile::UnHide(const char* field_code)
 * int Dirfile::Validate(const char *field_code)
 * const char **Dirfile::VectorList()
+* int VerbosePrefix(const char *prefix = NULL)
 
   These methods call the corresponding function from the C API on the C DIRFILE
   object associated with the C++ object.  For allowed values for arguments of
@@ -350,12 +361,8 @@ The following methods are available:
 
 * EntryType Entry::Type()
 
-  This will return the field type of the Entry's field.  This will be one of:
-
-    NoEntryType, BitEntryType, ConstEntryType, DivideEntryType, IndexEntryType,
-    LincomEntryType, LinterpEntryType, MultiplyEntryType, PhaseEntryType,
-    PolynomEntryType, RawEntryType, RecipEntryType, SBitEntryType,
-    StringEntryType
+  This will return the field type of the Entry's field.  This will be one of the
+  Entry types listed above in the CONSTANTS section.
 
 * int Entry::SetFragmentIndex(int fragment_index)
 * int Entry::Move(int new_fragment, int move_data = 0)
@@ -390,9 +397,10 @@ The following methods are available:
 * virtual DataType Entry::ConstType()
 * virtual size_t Entry::ArrayLen()
 * virtual const char *Entry::Table()
-* virtual const char *Entry::Check()
 * virtual WindOpType Entry::WindOp()
 * virtual gd_triplet_t Entry::Threshold()
+* virtual int Entry::CountVal()
+* virtual int Entry::CountMax()
 
   These methods will return the corresponding member of the gd_entry_t object.
   Only methods reasonable to be queried for the given field type will return
@@ -723,8 +731,7 @@ Defined in getdata/windowentry.h
 * WindowEntry::WindowEntry(const char *field_code, const char *in_field,
     const char *check_field, int fragment_index = 0)
 
-* virtual const char *WindowEntry::Input()
-* virtual const char *WindowEntry::Check()
+* virtual const char *WindowEntry::Input(int index = 0)
 * virtual const char *WindowEntry::Scalar()
 * virtual int WindowEntry::ScalarIndex()
 * virtual WindOpType WindowEntry::WindOp()
@@ -733,8 +740,7 @@ Defined in getdata/windowentry.h
   These methods, re-implemented from the Entry class, return the corresponding
   field parameter.
 
-* int WindowEntry::SetInput(const char *field)
-* int WindowEntry::SetCheck(const char *field)
+* int WindowEntry::SetInput(const char *field, int index)
 * int WindowEntry::SetWindOp(WindOpType coeff)
 * int WindowEntry::SetThreshold(gd_triplet_t threshold)
 * int WindowEntry::SetThreshold(const char *threhsold)
@@ -743,6 +749,38 @@ Defined in getdata/windowentry.h
   window operation or threshold to the the value or field code supplied.  For
   allowed values of variables of type WindOpType, see the CONSTANTS section
   above.
+
+
+MplexEntry Class
+-------------------
+
+Defined in getdata/mplex.h
+
+* Mplex::MplexEntry()
+  
+  This creates a new MPLEX entry object with default parameters.
+
+* MplexEntry::MplexEntry(const char *field_code, const char *in_field,
+    const char *check_field, int fragment_index = 0)
+
+* virtual const char *MplexEntry::Input(int index = 0)
+* virtual const char *MplexEntry::Scalar()
+* virtual int MplexEntry::ScalarIndex()
+* virtual int MplexEntry::CountVal()
+* virtual int MplexEntry::CountMax()
+
+  These methods, re-implemented from the Entry class, return the corresponding
+  field parameter.
+
+* int MplexEntry::SetInput(const char *field, int index)
+* int MplexEntry::SetWindOp(WindOpType coeff)
+* int MplexEntry::SetCountVal(int count_val)
+* int MplexEntry::SetCountVal(const char *count_val)
+* int MplexEntry::SetCountMax(int count_max)
+* int MplexEntry::SetCountMax(const char *count_max)
+
+  These functions will change the specified input field, check field, or the
+  count value or max to the value or field code supplied.
 
 
 CarraytEntry Class

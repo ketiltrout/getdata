@@ -362,6 +362,8 @@ C     Corresponding to gd_sync(3)
       EXTERNAL GDSYNC
 C     Corresponding to gd_tell(3)
       EXTERNAL GDTELL
+C     Corresponding to gd_strtok(3)
+      EXTERNAL GDTOKE
 C     Corresponding to gd_unhide(3)
       EXTERNAL GDUHID
 C     Corresponding to gd_uninclude(3)

@@ -2493,13 +2493,13 @@ program big_test
 
 ! 232: fgd_strtok check
   l = slen
-  call fgd_strtok(str, l, d, '"test1 test2" test3\ test4 test5', 1)
+  call fgd_strtok(str, l, d, '"test1 test2" test3\ test4 test5')
   call check_ok2(ne, 232, 1, d)
   call check_int2(ne, 232, 2, l, slen)
   call check_str2(ne, 232, 3, str, 'test1 test2')
 
   l = slen
-  call fgd_strtok(str, l, d, '"test1 test2" test3\ test4 test5', 2)
+  call fgd_strtok(str, l, d, '')
   call check_ok2(ne, 232, 4, d)
   call check_int2(ne, 232, 5, l, slen)
   call check_str2(ne, 232, 6, str, 'test3 test4')

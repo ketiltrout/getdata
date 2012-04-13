@@ -1136,7 +1136,7 @@ nume += check_simple(200, n, [ "This is a string constant.", "another string" ])
 ; 203: gd_seek
 n = gd_seek(d, "data", frame_num=35)
 nume += check_ok2(203, 0, d)
-m = gd_getdata(d, "data", type=!GD.INT16, /here, num_frames=1)
+m = gd_getdata(d, "data", type=!GD.INT16, num_frames=1)
 nume += check_ok2(203, 1, d)
 nume += check_simple2(203, 0, n, 280)
 nume += check_simple2(203, 1, m, INDGEN(8) + 17)
@@ -1298,7 +1298,7 @@ nume += check_simple2(228, 4, n.in_fields, [ 'data', 'sbit' ])
 nume += check_simple2(228, 5, n.count_max, 10)
 
 ; 229: gd_add_mplex check
-gd_add_mplex, d, 'new21', 'in1', 'in2', 5, 6
+gd_add_mplex, d, 'new21', 'in1', 'in2', 5, max=6
 nume += check_ok2(229, 1, d)
 
 n = gd_entry(d, 'new21')
@@ -1310,7 +1310,7 @@ nume += check_simple2(229, 4, n.in_fields, [ 'in1', 'in2' ])
 nume += check_simple2(229, 5, n.count_max, 6)
 
 ; 230: gd_madd_mplex check
-gd_add_mplex, d, parent='data', 'mnew21', 'in2', 'in3', 0, 12
+gd_add_mplex, d, parent='data', 'mnew21', 'in2', 'in3', 0, max=12
 nume += check_ok2(230, 1, d)
 
 n = gd_entry(d, 'data/mnew21')

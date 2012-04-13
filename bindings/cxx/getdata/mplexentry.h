@@ -52,9 +52,9 @@ namespace GetData {
 
       int SetInput(const char* field, int index);
       virtual int SetCountVal(int count_val);
-      virtual int SetCountVal(const char* threshold);
+      virtual int SetCountVal(const char* count_val);
       virtual int SetCountMax(int count_max);
-      virtual int SetCountMax(const char* threshold);
+      virtual int SetCountMax(const char* count_max);
 
     private:
       MplexEntry(const GetData::Dirfile *dirfile, const char* field_code) :

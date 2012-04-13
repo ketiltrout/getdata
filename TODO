@@ -2,3 +2,4 @@
 * Hashed compressed files
 * linterp table path munging [MH]
 * Make webpage suck less
+* Fused multiply-add [CBN]
