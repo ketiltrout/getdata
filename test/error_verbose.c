@@ -21,7 +21,9 @@
 #include "test.h"
 
 #include <stdlib.h>
+#ifdef HAVE_SYS_WAIT_H
 #include <sys/wait.h>
+#endif
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <fcntl.h>
