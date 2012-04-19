@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_rename 3 "4 April 2012" "Version 0.8.0" "GETDATA"
+.TH gd_rename 3 "19 April 2012" "Version 0.8.0" "GETDATA"
 .SH NAME
 gd_rename, gd_rename_alias \(em change the name of a dirfile field or alias
 .SH SYNOPSIS
@@ -24,8 +24,8 @@ gd_rename, gd_rename_alias \(em change the name of a dirfile field or alias
 .BI "int gd_rename(DIRFILE *" dirfile ", const char"
 .BI * old_code ", const char *" new_name ", unsigned int " flags );
 .HP
-.BI "int gd_rename_alias(DIRFILE *" dirfile ", const char *" alias_name ,
-.BI "unsigned int " flags );
+.BI "int gd_rename_alias(DIRFILE *" dirfile ", const char *" old_code ,
+.BI "const char *" new_name );
 .hy
 .ad n
 .SH DESCRIPTION
@@ -49,7 +49,7 @@ instead.  (This function is needed, since passing
 to
 .BR gd_rename ()
 as
-.I field_code
+.I old_code
 would have resulted in the field pointed to by the alias being renamed instead.)
 
 When renaming a metafield, the metafield should be specified in
@@ -58,22 +58,27 @@ by its full (slashed) field code, while
 .I new_name
 should only contain the new name (without slash).
 
-If the flag
-.I move_data
-is non-zero, and
+The
+.I flags
+parameter should be zero or more of the following flags, bitwise or'd together:
+.TP
+.B GD_REN_DATA
+if
 .I old_code
 specifies a
 .B RAW
 field, the binary file associated with the field will be renamed as well.
-If
-.I move_data
-is zero, no changes will be made to the binary file.  If
+Without this flag, no changes are made to the binary file.  If
 .I field_code
 specifies a field of type other than
 .BR RAW ,
-the
-.I move_data
-flag is ignored.
+this flag is ignored.
+.TP
+.B GD_REN_UPDB
+Rename the field in any other field specifications which use this field as an
+input (either as a vector input field to a derived field, or else as a scalar
+field parameter).  Without this flag, fields which depend on the old name of
+this field are left unmodified.
 
 .SH RETURN VALUE
 On success,
@@ -101,12 +106,12 @@ An attempt was made to rename the immutable
 field.
 .TP
 .B GD_E_DUPLICATE
-The new name specified is already in use by another field.
+The new name specified is already in use by another entry.
 .TP
 .B GD_E_PROTECTED
-The metadata of the format specification fragment containing the field was
+The metadata of the format specification fragment containing the entry was
 protected from change, or the binary data of the fragments was protected from
-change and binary file translation was requested.
+change and a binary file move was requested.
 .TP
 .B GD_E_RAW_IO
 An I/O error occurred while attempting to rename the binary file.

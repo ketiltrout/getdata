@@ -80,8 +80,8 @@ make_parameters.sed.in: ../make_parameters ../../src/getdata.h
 
 make_parameters.sed: make_parameters.stamp
 	@if test ! -f $@; then \
-		rm -f $<; \
-		$(MAKE) $<; \
+		rm -f make_parameters.stamp; \
+		$(MAKE) make_parameters.stamp; \
 		fi
 
 if HAVE_DIFF
@@ -106,10 +106,10 @@ endif
 
 getdata.f: $(srcdir)/getdata.f.in make_parameters.sed
 	rm -f $@
-	$(SED) -f make_parameters.sed $< > $@
+	$(SED) -f make_parameters.sed $(srcdir)/getdata.f.in > $@
 	chmod a-w $@
 
 getdata.f90: $(srcdir)/getdata.f90.in make_parameters.sed
 	rm -f $@
-	$(SED) -f make_parameters.sed $< > $@
+	$(SED) -f make_parameters.sed $(srcdir)/getdata.f90.in > $@
 	chmod a-w $@

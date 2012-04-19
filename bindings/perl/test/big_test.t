@@ -333,12 +333,12 @@ CheckArray2(18, 12, $h{'scalar_ind'}, undef, undef, -1, undef, undef, -1);
 %h = $_->entry("polynom");
 CheckOK(20);
 CheckSArray2(20, 1, [ sort keys %h ], qw(a field field_type),
-  qw(fragment_index in_field poly_ord scalar scalar_ind));
+  qw(fragment_index in_fields poly_ord scalar scalar_ind));
 CheckArray2(20, 2, $h{'a'}, 1.1, 2.2, 2.2, 3.3+4.4*i, 5.5, 5.5);
 CheckString2(20, 4, $h{'field'}, "polynom");
 CheckNum2(20, 5, $h{'field_type'}, $GetData::POLYNOM_ENTRY);
 CheckNum2(20, 6, $h{'fragment_index'}, 0);
-CheckString2(20, 7, $h{'in_field'}, "data");
+CheckString2(20, 7, $h{'in_fields'}, "data");
 CheckNum2(20, 8, $h{'poly_ord'}, 5);
 CheckSArray2(20, 9, $h{'scalar'}, undef, undef, undef, undef, "const", "const");
 CheckArray2(20, 10, $h{'scalar_ind'}, undef, undef, undef, undef, -1, -1);
@@ -347,23 +347,23 @@ CheckArray2(20, 10, $h{'scalar_ind'}, undef, undef, undef, undef, -1, -1);
 %h = $_->entry("linterp");
 CheckOK(21);
 CheckSArray2(21, 0, [ sort keys %h ], qw(field field_type fragment_index),
-  qw(in_field table));
+  qw(in_fields table));
 CheckString2(21, 1, $h{'field'}, "linterp");
 CheckNum2(21, 2, $h{'field_type'}, $GetData::LINTERP_ENTRY);
 CheckNum2(21, 3, $h{'fragment_index'}, 0);
-CheckString2(21, 4, $h{'in_field'}, "data");
+CheckString2(21, 4, $h{'in_fields'}, "data");
 CheckString2(21, 5, $h{'table'}, "/look/up/file");
 
 # 22: get_entry check
 %h = $_->entry("bit");
 CheckOK(22);
 CheckSArray2(22, 0, [ sort keys %h ], qw(bitnum field field_type),
-  qw(fragment_index in_field numbits scalar scalar_ind));
+  qw(fragment_index in_fields numbits scalar scalar_ind));
 CheckNum2(22, 1, $h{'bitnum'}, 3);
 CheckString2(22, 2, $h{'field'}, "bit");
 CheckNum2(22, 3, $h{'field_type'}, $GetData::BIT_ENTRY);
 CheckNum2(22, 4, $h{'fragment_index'}, 0);
-CheckString2(22, 5, $h{'in_field'}, "data");
+CheckString2(22, 5, $h{'in_fields'}, "data");
 CheckNum2(22, 6, $h{'numbits'}, 4);
 CheckSArray2(22, 7, $h{'scalar'}, undef, undef);
 CheckArray2(22, 8, $h{'scalar_ind'}, undef, undef);
@@ -372,12 +372,12 @@ CheckArray2(22, 8, $h{'scalar_ind'}, undef, undef);
 %h = $_->entry("sbit");
 CheckOK(23);
 CheckSArray2(23, 0, [ sort keys %h ], qw(bitnum field field_type),
-  qw(fragment_index in_field numbits scalar scalar_ind));
+  qw(fragment_index in_fields numbits scalar scalar_ind));
 CheckNum2(23, 1, $h{'bitnum'}, 5);
 CheckString2(23, 2, $h{'field'}, "sbit");
 CheckNum2(23, 3, $h{'field_type'}, $GetData::SBIT_ENTRY);
 CheckNum2(23, 4, $h{'fragment_index'}, 0);
-CheckString2(23, 5, $h{'in_field'}, "data");
+CheckString2(23, 5, $h{'in_fields'}, "data");
 CheckNum2(23, 6, $h{'numbits'}, 6);
 CheckSArray2(23, 7, $h{'scalar'}, undef, undef);
 CheckArray2(23, 8, $h{'scalar_ind'}, undef, undef);
@@ -396,11 +396,11 @@ CheckSArray2(24, 4, $h{'in_fields'}, qw(data sbit));
 %h = $_->entry("phase");
 CheckOK(25);
 CheckSArray2(25, 0, [ sort keys %h ], qw(field field_type fragment_index),
-  qw(in_field scalar scalar_ind shift));
+  qw(in_fields scalar scalar_ind shift));
 CheckString2(25, 1, $h{'field'}, "phase");
 CheckNum2(25, 2, $h{'field_type'}, $GetData::PHASE_ENTRY);
 CheckNum2(25, 3, $h{'fragment_index'}, 0);
-CheckString2(25, 4, $h{'in_field'}, "data");
+CheckString2(25, 4, $h{'in_fields'}, "data");
 CheckSArray2(25, 5, $h{'scalar'}, undef);
 CheckArray2(25, 6, $h{'scalar_ind'}, undef);
 CheckNum2(25, 7, $h{'shift'}, 11);
@@ -472,7 +472,7 @@ CheckArray2(31, 4, $h{'a'}, 3.9, 4.8, 5.7, 6.6);
 CheckString2(31, 7, $h{'field'}, "new4");
 CheckNum2(31, 8, $h{'field_type'}, $GetData::POLYNOM_ENTRY);
 CheckNum2(31, 9, $h{'fragment_index'}, 0);
-CheckString2(31, 10, $h{'in_field'}, "in1");
+CheckString2(31, 10, $h{'in_fields'}, "in1");
 CheckNum2(31, 11, $h{'poly_ord'}, 3);
 CheckSArray2(31, 12, $h{'scalar'}, undef, undef, undef, undef);
 CheckArray2(31, 13, $h{'scalar_ind'}, undef, undef, undef, undef);
@@ -487,7 +487,7 @@ CheckOK2(33, 2);
 CheckString2(33, 3, $h{'field'}, "new6");
 CheckNum2(33, 4, $h{'field_type'}, $GetData::LINTERP_ENTRY);
 CheckNum2(33, 5, $h{'fragment_index'}, 0);
-CheckString2(33, 6, $h{'in_field'}, "in");
+CheckString2(33, 6, $h{'in_fields'}, "in");
 CheckString2(33, 7, $h{'table'}, "./some/table");
 
 # 34: add_bit
@@ -501,7 +501,7 @@ CheckNum2(34, 3, $h{'bitnum'}, 11);
 CheckString2(34, 4, $h{'field'}, "new7");
 CheckNum2(34, 5, $h{'field_type'}, $GetData::BIT_ENTRY);
 CheckNum2(34, 6, $h{'fragment_index'}, 0);
-CheckString2(34, 7, $h{'in_field'}, "in1");
+CheckString2(34, 7, $h{'in_fields'}, "in1");
 CheckNum2(34, 8, $h{'numbits'}, 22);
 CheckSArray2(34, 9, $h{'scalar'}, undef, undef);
 CheckArray2(34, 10, $h{'scalar_ind'}, undef, undef);
@@ -517,7 +517,7 @@ CheckNum2(35, 3, $h{'bitnum'}, 5);
 CheckString2(35, 4, $h{'field'}, "new8");
 CheckNum2(35, 5, $h{'field_type'}, $GetData::SBIT_ENTRY);
 CheckNum2(35, 6, $h{'fragment_index'}, 0);
-CheckString2(35, 7, $h{'in_field'}, "in2");
+CheckString2(35, 7, $h{'in_fields'}, "in2");
 CheckNum2(35, 8, $h{'numbits'}, 10);
 CheckSArray2(35, 9, $h{'scalar'}, undef, undef);
 CheckArray2(35, 10, $h{'scalar_ind'}, undef, undef);
@@ -544,7 +544,7 @@ CheckOK2(37, 2);
 CheckString2(37, 3, $h{'field'}, "new10");
 CheckNum2(37, 4, $h{'field_type'}, $GetData::PHASE_ENTRY);
 CheckNum2(37, 5, $h{'fragment_index'}, 0);
-CheckString2(37, 6, $h{'in_field'}, "in6");
+CheckString2(37, 6, $h{'in_fields'}, "in6");
 CheckSArray2(37, 7, $h{'scalar'}, undef);
 CheckArray2(37, 8, $h{'scalar_ind'}, undef);
 CheckNum2(37, 9, $h{'shift'}, 42);
@@ -570,7 +570,7 @@ $s = $_->add({
     field          => "new13",
     field_type     => $GetData::PHASE_ENTRY,
     fragment_index => 0,
-    in_field       => "new9",
+    in_fields      => "new9",
     shift          => -88
   });
 CheckOK2(125,1);
@@ -581,7 +581,7 @@ CheckOK2(125, 2);
 CheckString2(125, 3, $h{'field'}, "new13");
 CheckNum2(125, 4, $h{'field_type'}, $GetData::PHASE_ENTRY);
 CheckNum2(125, 5, $h{'fragment_index'}, 0);
-CheckString2(125, 6, $h{'in_field'}, "new9");
+CheckString2(125, 6, $h{'in_fields'}, "new9");
 CheckSArray2(125, 7, $h{'scalar'}, undef);
 CheckArray2(125, 8, $h{'scalar_ind'}, undef);
 CheckNum2(125, 9, $h{'shift'}, -88);
@@ -661,7 +661,7 @@ CheckArray2(48, 4, $h{'a'}, 3.9, 4.8, 5.7, 6.6);
 CheckString2(48, 7, $h{'field'}, "data/mnew3");
 CheckNum2(48, 8, $h{'field_type'}, $GetData::POLYNOM_ENTRY);
 CheckNum2(48, 9, $h{'fragment_index'}, 0);
-CheckString2(48, 10, $h{'in_field'}, "in1");
+CheckString2(48, 10, $h{'in_fields'}, "in1");
 CheckNum2(48, 11, $h{'poly_ord'}, 3);
 CheckSArray2(48, 12, $h{'scalar'}, undef, undef, undef, undef);
 CheckArray2(48, 13, $h{'scalar_ind'}, undef, undef, undef, undef);
@@ -676,7 +676,7 @@ CheckOK2(50, 2);
 CheckString2(50, 3, $h{'field'}, "data/mnew6");
 CheckNum2(50, 4, $h{'field_type'}, $GetData::LINTERP_ENTRY);
 CheckNum2(50, 5, $h{'fragment_index'}, 0);
-CheckString2(50, 6, $h{'in_field'}, "in");
+CheckString2(50, 6, $h{'in_fields'}, "in");
 CheckString2(50, 7, $h{'table'}, "./more/table");
 
 # 51: madd_bit
@@ -690,7 +690,7 @@ CheckNum2(51, 3, $h{'bitnum'}, 3);
 CheckString2(51, 4, $h{'field'}, "data/mnew7");
 CheckNum2(51, 5, $h{'field_type'}, $GetData::BIT_ENTRY);
 CheckNum2(51, 6, $h{'fragment_index'}, 0);
-CheckString2(51, 7, $h{'in_field'}, "in1");
+CheckString2(51, 7, $h{'in_fields'}, "in1");
 CheckNum2(51, 8, $h{'numbits'}, 2);
 CheckSArray2(51, 9, $h{'scalar'}, undef, undef);
 CheckArray2(51, 10, $h{'scalar_ind'}, undef, undef);
@@ -706,7 +706,7 @@ CheckNum2(52, 3, $h{'bitnum'}, 4);
 CheckString2(52, 4, $h{'field'}, "data/mnew8");
 CheckNum2(52, 5, $h{'field_type'}, $GetData::SBIT_ENTRY);
 CheckNum2(52, 6, $h{'fragment_index'}, 0);
-CheckString2(52, 7, $h{'in_field'}, "in2");
+CheckString2(52, 7, $h{'in_fields'}, "in2");
 CheckNum2(52, 8, $h{'numbits'}, 5);
 CheckSArray2(52, 9, $h{'scalar'}, undef, undef);
 CheckArray2(52, 10, $h{'scalar_ind'}, undef, undef);
@@ -733,7 +733,7 @@ CheckOK2(54, 2);
 CheckString2(54, 3, $h{'field'}, "data/mnew10");
 CheckNum2(54, 4, $h{'field_type'}, $GetData::PHASE_ENTRY);
 CheckNum2(54, 5, $h{'fragment_index'}, 0);
-CheckString2(54, 6, $h{'in_field'}, "in6");
+CheckString2(54, 6, $h{'in_fields'}, "in6");
 CheckSArray2(54, 7, $h{'scalar'}, undef);
 CheckArray2(54, 8, $h{'scalar_ind'}, undef);
 CheckNum2(54, 9, $h{'shift'}, 44);
@@ -759,7 +759,7 @@ $s = $_->madd({
     field          => "mnew13",
     field_type     => $GetData::PHASE_ENTRY,
     fragment_index => 0,
-    in_field       => "data",
+    in_fields      => "data",
     shift          => 2
   }, "data");
 CheckOK2(126,1);
@@ -770,7 +770,7 @@ CheckOK2(126, 2);
 CheckString2(126, 3, $h{'field'}, "data/mnew13");
 CheckNum2(126, 4, $h{'field_type'}, $GetData::PHASE_ENTRY);
 CheckNum2(126, 5, $h{'fragment_index'}, 0);
-CheckString2(126, 6, $h{'in_field'}, "data");
+CheckString2(126, 6, $h{'in_fields'}, "data");
 CheckSArray2(126, 7, $h{'scalar'}, undef);
 CheckArray2(126, 8, $h{'scalar_ind'}, undef);
 CheckNum2(126, 9, $h{'shift'}, 2);
@@ -922,7 +922,7 @@ CheckArray2(71, 4, $h{'a'}, 1*i, 2*i, 3*i, 4*i, 5*i);
 CheckString2(71, 7, $h{'field'}, "new4");
 CheckNum2(71, 8, $h{'field_type'}, $GetData::POLYNOM_ENTRY);
 CheckNum2(71, 9, $h{'fragment_index'}, 0);
-CheckString2(71, 10, $h{'in_field'}, "in1");
+CheckString2(71, 10, $h{'in_fields'}, "in1");
 CheckNum2(71, 11, $h{'poly_ord'}, 4);
 CheckSArray2(71, 12, $h{'scalar'}, undef, undef, undef, undef, undef);
 CheckArray2(71, 13, $h{'scalar_ind'}, undef, undef, undef, undef, undef);
@@ -937,7 +937,7 @@ CheckOK2(72, 2);
 CheckString2(72, 3, $h{'field'}, "new6");
 CheckNum2(72, 4, $h{'field_type'}, $GetData::LINTERP_ENTRY);
 CheckNum2(72, 5, $h{'fragment_index'}, 0);
-CheckString2(72, 6, $h{'in_field'}, "in");
+CheckString2(72, 6, $h{'in_fields'}, "in");
 CheckString2(72, 7, $h{'table'}, "./other/table");
 
 # 73: alter_bit
@@ -951,7 +951,7 @@ CheckNum2(73, 3, $h{'bitnum'}, 11);
 CheckString2(73, 4, $h{'field'}, "new7");
 CheckNum2(73, 5, $h{'field_type'}, $GetData::BIT_ENTRY);
 CheckNum2(73, 6, $h{'fragment_index'}, 0);
-CheckString2(73, 7, $h{'in_field'}, "in3");
+CheckString2(73, 7, $h{'in_fields'}, "in3");
 CheckNum2(73, 8, $h{'numbits'}, 8);
 CheckSArray2(73, 9, $h{'scalar'}, undef, undef);
 CheckArray2(73, 10, $h{'scalar_ind'}, undef, undef);
@@ -967,7 +967,7 @@ CheckNum2(74, 3, $h{'bitnum'}, 5);
 CheckString2(74, 4, $h{'field'}, "new8");
 CheckNum2(74, 5, $h{'field_type'}, $GetData::SBIT_ENTRY);
 CheckNum2(74, 6, $h{'fragment_index'}, 0);
-CheckString2(74, 7, $h{'in_field'}, "in1");
+CheckString2(74, 7, $h{'in_fields'}, "in1");
 CheckNum2(74, 8, $h{'numbits'}, 10);
 CheckSArray2(74, 9, $h{'scalar'}, undef, undef);
 CheckArray2(74, 10, $h{'scalar_ind'}, undef, undef);
@@ -994,7 +994,7 @@ CheckOK2(76, 2);
 CheckString2(76, 3, $h{'field'}, "new10");
 CheckNum2(76, 4, $h{'field_type'}, $GetData::PHASE_ENTRY);
 CheckNum2(76, 5, $h{'fragment_index'}, 0);
-CheckString2(76, 6, $h{'in_field'}, "in6");
+CheckString2(76, 6, $h{'in_fields'}, "in6");
 CheckSArray2(76, 7, $h{'scalar'}, undef);
 CheckArray2(76, 8, $h{'scalar_ind'}, undef);
 CheckNum2(76, 9, $h{'shift'}, -3);
@@ -1016,7 +1016,7 @@ $s = $_->alter_entry("new13", {
     field          => undef,
     field_type     => $GetData::PHASE_ENTRY,
     fragment_index => 0,
-    in_field       => "new3",
+    in_fields      => "new3",
     shift          => -2
   });
 CheckOK2(141,1);
@@ -1027,7 +1027,7 @@ CheckOK2(141, 2);
 CheckString2(141, 3, $h{'field'}, "new13");
 CheckNum2(141, 4, $h{'field_type'}, $GetData::PHASE_ENTRY);
 CheckNum2(141, 5, $h{'fragment_index'}, 0);
-CheckString2(141, 6, $h{'in_field'}, "new3");
+CheckString2(141, 6, $h{'in_fields'}, "new3");
 CheckSArray2(141, 7, $h{'scalar'}, undef);
 CheckArray2(141, 8, $h{'scalar_ind'}, undef);
 CheckNum2(141, 9, $h{'shift'}, -2);
@@ -1100,7 +1100,7 @@ CheckOK2(89, 2);
 CheckString2(89, 3, $h{'field'}, "new10");
 CheckNum2(89, 4, $h{'field_type'}, $GetData::PHASE_ENTRY);
 CheckNum2(89, 5, $h{'fragment_index'}, 0);
-CheckString2(89, 6, $h{'in_field'}, "in");
+CheckString2(89, 6, $h{'in_fields'}, "in");
 CheckSArray2(89, 7, $h{'scalar'}, "const");
 CheckArray2(89, 8, $h{'scalar_ind'}, -1);
 CheckNum2(89, 9, $h{'shift'}, 61);
@@ -1124,7 +1124,7 @@ CheckOK2(91, 2);
 CheckString2(91, 3, $h{'field'}, "data/mnew10");
 CheckNum2(91, 4, $h{'field_type'}, $GetData::PHASE_ENTRY);
 CheckNum2(91, 5, $h{'fragment_index'}, 0);
-CheckString2(91, 6, $h{'in_field'}, "in4");
+CheckString2(91, 6, $h{'in_fields'}, "in4");
 CheckSArray2(91, 7, $h{'scalar'}, undef);
 CheckArray2(91, 8, $h{'scalar_ind'}, undef);
 CheckNum2(91, 9, $h{'shift'}, 11);
@@ -1217,12 +1217,12 @@ CheckSArray2(143, 4, $h{'in_fields'}, qw(mult bit));
 %h = $_->entry("recip");
 CheckOK(145);
 CheckSArray2(145, 1, [ sort keys %h ], qw(dividend field field_type),
-  qw(fragment_index in_field scalar scalar_ind));
+  qw(fragment_index in_fields scalar scalar_ind));
 CheckNum2(145, 2, $h{'dividend'}, 6.5 + 4.3 * i);
 CheckString2(145, 3, $h{'field'}, "recip");
 CheckNum2(145, 4, $h{'field_type'}, $GetData::RECIP_ENTRY);
 CheckNum2(145, 5, $h{'fragment_index'}, 0);
-CheckString2(145, 6, $h{'in_field'}, "div");
+CheckString2(145, 6, $h{'in_fields'}, "div");
 CheckSArray2(145, 7, $h{'scalar'}, undef);
 CheckArray2(145, 8, $h{'scalar_ind'}, undef);
 
@@ -1249,7 +1249,7 @@ CheckNum2(148, 2, $h{'dividend'}, 33.3 + 44.4 * i);
 CheckString2(148, 3, $h{'field'}, "new16");
 CheckNum2(148, 4, $h{'field_type'}, $GetData::RECIP_ENTRY);
 CheckNum2(148, 5, $h{'fragment_index'}, 0);
-CheckString2(148, 6, $h{'in_field'}, "in2");
+CheckString2(148, 6, $h{'in_fields'}, "in2");
 CheckSArray2(148, 7, $h{'scalar'}, undef);
 CheckArray2(148, 8, $h{'scalar_ind'}, undef);
 
@@ -1276,7 +1276,7 @@ CheckNum2(151, 2, $h{'dividend'}, 1);
 CheckString2(151, 3, $h{'field'}, "data/mnew16");
 CheckNum2(151, 4, $h{'field_type'}, $GetData::RECIP_ENTRY);
 CheckNum2(151, 5, $h{'fragment_index'}, 0);
-CheckString2(151, 6, $h{'in_field'}, "in2");
+CheckString2(151, 6, $h{'in_fields'}, "in2");
 CheckSArray2(151, 7, $h{'scalar'}, undef);
 CheckArray2(151, 8, $h{'scalar_ind'}, undef);
 
@@ -1303,7 +1303,7 @@ CheckNum2(151, 2, $h{'dividend'}, 33.3 + 44.4 * i);
 CheckString2(151, 3, $h{'field'}, "new16");
 CheckNum2(151, 4, $h{'field_type'}, $GetData::RECIP_ENTRY);
 CheckNum2(151, 5, $h{'fragment_index'}, 0);
-CheckString2(151, 6, $h{'in_field'}, "in6");
+CheckString2(151, 6, $h{'in_fields'}, "in6");
 CheckSArray2(151, 7, $h{'scalar'}, undef);
 CheckArray2(151, 8, $h{'scalar_ind'}, undef);
 
@@ -1580,7 +1580,7 @@ CheckOK(222);
 CheckSArray(222, \@a, "data", "alias", "data/mnew20", "new20");
 
 # 223: gd_include_affix check
-$s = $_->include_affix('format1', 0, 'A', 'Z', $GetData::CREAT | $GetData::EXCL);
+$s = $_->include('format1', 0, $GetData::CREAT | $GetData::EXCL, 'A', 'Z');
 CheckOK(223);
 
 # 224: GDMOVA check

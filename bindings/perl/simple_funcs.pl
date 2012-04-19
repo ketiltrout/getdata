@@ -71,7 +71,7 @@ sub printfmt {
     return "%02x";
   } elsif ($_ eq "gd_shift_t" or $_ eq "gdpu_shift_t") {
     return "%lli";
-  } elsif ($_ eq "gdpu_spf_t") {
+  } elsif ($_ eq "gdpu_uint_t") {
     return "%u";
   } elsif ($_ eq "gd_type_t" or $_ eq "gdpu_type_t") {
     return "%03x";
@@ -88,7 +88,7 @@ sub printfmt {
   } elsif ($_ eq "gd_triplet_t") {
     return "{%g,%llX,%lli}";
   } else {
-    die $_;
+    die "Can't format \"$_\"";
   }
 }
 

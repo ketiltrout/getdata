@@ -21,7 +21,7 @@
 AUTOMAKE_OPTIONS = foreign
 
 EXTRA_DIST=funclist.pl GetData.xs simple_funcs.pl simple_funcs.xsin typemap \
-					 GetData.pm.in MANIFEST.in test
+					 GetData.pm.in MANIFEST.in test/*.t
 
 if GETDATA_DEBUG
 TEST_VERBOSE=verbose=1

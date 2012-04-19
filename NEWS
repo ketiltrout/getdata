@@ -100,12 +100,12 @@ New in version 0.8.0a:
 
   * BUG FIX: In previous versions, renaming a field with gd_rename() wouldn't
     update or invalidate the cache of fields which depended on the old name,
-    leading to surprising results.  It will now either invalidate these fields
+    leading to surprising results.  It will now either invalidate these fields'
     metadata caches or else change the name in those definitions as well.
 
   * BUG FIX: The invalid syntax "/META parent/child granchild ..." is now
-    properly rejected by the metadata parser.  Previously it half-worked,
-    resulting in segfault in gd_close().
+    properly rejected by the parser.  Previously it half-worked, resulting in
+    a segfault in gd_close().
 
   * BUG FIX: Several syntax errors encountered in PHASE and RECIP field
     specifications weren't being reported by the parser, leading to corrupted
@@ -115,8 +115,8 @@ New in version 0.8.0a:
     metadata to disk.  Nor does it forget to put newlines after RECIP or DIVIDE
     field specifications.
 
-  * BUG FIX: GetData no longer assumes all fields have the same number of
-    samples-per-frame when computing a LINCOM.
+  * BUG FIX: GetData no longer assumes all LINCOM input fields have the same
+    number of samples per frame.
 
   * BUG FIX: Writing an empty fragment with GD_PRETTY_PRINT turned on no longer
     results in a floating-point exception.
@@ -137,6 +137,12 @@ New in version 0.8.0a:
 
   * BUG FIX: CARRAY indices provided to gd_add() in the entry.scalar_ind member
     are no longer ignored.  Reported by S. J. Benton.
+
+  * BUG FIX: When adding a metafield with gd_(m)add(), GetData no longer checks
+    the protection of the fragment indexed by entry->fragment_index.  Instead it
+    ignores entry->fragment_index completely (as the documentation indicates it
+    should) and checks the protection of the fragment containing the parent
+    field.
 
   API Changes:
 

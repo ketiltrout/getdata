@@ -395,7 +395,7 @@ check-local: check-TESTS
 	$(MAKE) getdata-clean-dir
 
 getdata-clean-dir:
-	rm -rvf dirfile
+	rm -rf dirfile
 
 clean-local:
 	$(MAKE) getdata-clean-dir

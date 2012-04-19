@@ -55,7 +55,7 @@ typedef _Complex double gdpu_complex;
 typedef int gdpu_bitnum_t;
 typedef int gdpu_numbits_t;
 typedef gd_shift_t gdpu_shift_t;
-typedef unsigned int gdpu_spf_t;
+typedef unsigned int gdpu_uint_t;
 typedef gd_type_t gdpu_type_t;
 typedef int gdpu_int;
 typedef const char gdpu_char;
@@ -289,7 +289,7 @@ static void gdp_to_entry(gd_entry_t *E, SV *sv, const char *pkg,
   switch (E->field_type) {
     case GD_BIT_ENTRY:
     case GD_SBIT_ENTRY:
-      GDP_EHASH_FETCH_PV("in_field", in_fields[0]);
+      GDP_EHASH_FETCH_PV("in_fields", in_fields[0]);
       GDP_EHASH_FETCH_UV("bitnum", bitnum, int);
       GDP_EHASH_FETCH_UV("numbits", bitnum, int);
       gdp_fetch_scalars(E, (HV*)sv, 0x3, pkg, func);
@@ -310,7 +310,7 @@ static void gdp_to_entry(gd_entry_t *E, SV *sv, const char *pkg,
       gdp_fetch_scalars(E, (HV*)sv, ((1 << n) - 1) * 9, pkg, func);
       break;
     case GD_LINTERP_ENTRY:
-      GDP_EHASH_FETCH_PV("in_field", in_fields[0]);
+      GDP_EHASH_FETCH_PV("in_fields", in_fields[0]);
       GDP_EHASH_FETCH_PV("table", table);
       break;
     case GD_MULTIPLY_ENTRY:
@@ -318,12 +318,12 @@ static void gdp_to_entry(gd_entry_t *E, SV *sv, const char *pkg,
       gdp_fetch_in_fields(E->in_fields, sv, 2, pkg, func);
       break;
     case GD_PHASE_ENTRY:
-      GDP_EHASH_FETCH_PV("in_field", in_fields[0]);
+      GDP_EHASH_FETCH_PV("in_fields", in_fields[0]);
       GDP_EHASH_FETCH_IV("shift", shift, gd_shift_t);
       gdp_fetch_scalars(E, (HV*)sv, 1, pkg, func);
       break;
     case GD_POLYNOM_ENTRY:
-      GDP_EHASH_FETCH_PV("in_field", in_fields[0]);
+      GDP_EHASH_FETCH_PV("in_fields", in_fields[0]);
       GDP_EHASH_FETCH_IV("poly_ord", poly_ord, int);
       n = (E->poly_ord > GD_MAX_POLYORD) ? GD_MAX_POLYORD : E->poly_ord;
       E->comp_scal = 1;
@@ -331,7 +331,7 @@ static void gdp_to_entry(gd_entry_t *E, SV *sv, const char *pkg,
       gdp_fetch_scalars(E, (HV*)sv, (1 << (n + 1)) - 1, pkg, func);
       break;
     case GD_RECIP_ENTRY:
-      GDP_EHASH_FETCH_PV("in_field", in_fields[0]);
+      GDP_EHASH_FETCH_PV("in_fields", in_fields[0]);
       E->comp_scal = 1;
       GDP_EHASH_FETCH_CMP("cdividend", cdividend);
       gdp_fetch_scalars(E, (HV*)sv, 1, pkg, func);
@@ -1130,7 +1130,7 @@ entry(dirfile, field_code)
       switch (E.field_type) {
         case GD_BIT_ENTRY:
         case GD_SBIT_ENTRY:
-          GDP_PUSHpvn("in_field");
+          GDP_PUSHpvn("in_fields");
           GDP_PUSHpvz(E.in_fields[0]);
           GDP_PUSHpvn("bitnum");
           GDP_PUSHuv(E.bitnum);
@@ -1158,7 +1158,7 @@ entry(dirfile, field_code)
           sp = gdp_store_scalars(sp, &E, ((1 << E.n_fields) - 1) * 9);
           break;
         case GD_LINTERP_ENTRY:
-          GDP_PUSHpvn("in_field");
+          GDP_PUSHpvn("in_fields");
           GDP_PUSHpvz(E.in_fields[0]);
           GDP_PUSHpvn("table");
           GDP_PUSHpvz(E.table);
@@ -1169,7 +1169,7 @@ entry(dirfile, field_code)
           GDP_PUSHrvavpv(E.in_fields, 2);
           break;
         case GD_PHASE_ENTRY:
-          GDP_PUSHpvn("in_field");
+          GDP_PUSHpvn("in_fields");
           GDP_PUSHpvz(E.in_fields[0]);
           GDP_PUSHpvn("shift");
           GDP_PUSHiv(E.shift);
@@ -1178,14 +1178,14 @@ entry(dirfile, field_code)
         case GD_POLYNOM_ENTRY:
           GDP_PUSHpvn("poly_ord");
           GDP_PUSHiv(E.poly_ord);
-          GDP_PUSHpvn("in_field");
+          GDP_PUSHpvn("in_fields");
           GDP_PUSHpvz(E.in_fields[0]);
           GDP_PUSHpvn("a");
           GDP_PUSHrvavcmp(E.ca, E.poly_ord + 1);
           sp = gdp_store_scalars(sp, &E, (1 << (E.poly_ord + 1)) - 1);
           break;
         case GD_RECIP_ENTRY:
-          GDP_PUSHpvn("in_field");
+          GDP_PUSHpvn("in_fields");
           GDP_PUSHpvz(E.in_fields[0]);
           GDP_PUSHpvn("dividend");
           GDP_PUSHcmp(E.cdividend);
@@ -1263,31 +1263,37 @@ error_string(dirfile)
     dreturn("%p", RETVAL);
 
 AV *
-mcarrays(dirfile, parent, return_type, unpacked=0)
+mcarrays(dirfile, parent, return_type)
   DIRFILE * dirfile
   const char * parent;
   gd_type_t return_type
-  IV unpacked
   PREINIT:
     const gd_carray_t *data_out = NULL;
     GDP_DIRFILE_ALIAS;
   ALIAS:
     GetData::Dirfile::mcarrays = 1
-  CODE:
-    dtrace("%p, %03x, %i", dirfile, return_type, (int)unpacked);
+  PPCODE:
+    dtrace("%p, %03x; %i", dirfile, return_type, (int)GIMME_V);
     I32 i, len = (I32)gd_nmfields_by_type(dirfile, parent, GD_CARRAY_ENTRY);
     data_out = gd_mcarrays(dirfile, parent, return_type);
 
     GDP_UNDEF_ON_ERROR();
 
-    RETVAL = newAV();
-    for (i = 0; i < len; ++i)
-    av_store(RETVAL, i, newSVpvn(data_out[i].d,
-          data_out[i].n * GD_SIZE(return_type)));
-  OUTPUT:
-    RETVAL
-  CLEANUP:
-    dreturn("%p", RETVAL);
+    /* in array context, return an array of arrays of unpacked data.
+     * Otherwise, return a reference to an array of packed data. */
+    if (GIMME_V == G_ARRAY)
+      for (i = 0; i < len; ++i)
+        XPUSHs(sv_2mortal(newRV_noinc((SV *)gdp_unpack(NULL, data_out[i].d,
+                  data_out[i].n, return_type))));
+    else {
+      AV *av = newAV();
+      for (i = 0; i < len; ++i)
+        av_store(av, i, newSVpvn(data_out[i].d,
+              data_out[i].n * GD_SIZE(return_type)));
+      XPUSHs(sv_2mortal(newRV_noinc((SV*)av)));
+    }
+
+    dreturnvoid();
 
 void
 mconstants(dirfile, parent, return_type)
@@ -1512,7 +1518,7 @@ entry_list(dirfile, parent, type, flags)
     DIRFILE * dirfile
     gdpu_char * parent
     gdpu_type_t type
-    gdpu_type_t flags
+    gdpu_uint_t flags
   PREINIT:
     GDP_DIRFILE_ALIAS;
   ALIAS:
@@ -2046,5 +2052,28 @@ strtok(dirfile, string)
     }
 
     dreturnvoid();
+
+int
+include(dirfile, file, fragment_index, flags, prefix=NULL, suffix=NULL)
+	DIRFILE * dirfile
+	const char * file
+	int fragment_index
+	unsigned long int flags
+	gdpu_char * prefix
+	gdpu_char * suffix
+	PREINIT:
+		GDP_DIRFILE_ALIAS;
+	ALIAS:
+		GetData::Dirfile::include = 1
+	CODE:
+		dtrace("%p, \"%s\", %i, %lu, \"%s\", \"%s\"", dirfile, file, fragment_index,
+        flags, prefix, suffix);
+		RETVAL = gd_include_affix(dirfile, file, fragment_index, prefix, suffix,
+        flags);
+		GDP_UNDEF_ON_ERROR();
+	OUTPUT:
+		RETVAL
+	CLEANUP:
+		dreturn("%i", RETVAL);
 
 INCLUDE: simple_funcs.xs

@@ -119,14 +119,6 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
     return NULL;
   }
 
-  /* check protection */
-  if (D->fragment[entry->fragment_index].protection & GD_PROTECT_FORMAT) {
-    _GD_SetError(D, GD_E_PROTECTED, GD_E_PROTECTED_FORMAT, NULL, 0,
-        D->fragment[entry->fragment_index].cname);
-    dreturn("%p", NULL);
-    return NULL;
-  }
-
   /* check parent */
   if (parent != NULL) {
     P = _GD_FindField(D, parent, D->entry, D->n_entries, 1, NULL);
@@ -194,6 +186,15 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
     E->fragment_index = P->fragment_index;
   else
     E->fragment_index = entry->fragment_index;
+
+  /* check protection */
+  if (D->fragment[E->fragment_index].protection & GD_PROTECT_FORMAT) {
+    _GD_SetError(D, GD_E_PROTECTED, GD_E_PROTECTED_FORMAT, NULL, 0,
+        D->fragment[E->fragment_index].cname);
+    free(E);
+    dreturn("%p", NULL);
+    return NULL;
+  }
 
   E->e = (struct _gd_private_entry *)_GD_Malloc(D,
       sizeof(struct _gd_private_entry));

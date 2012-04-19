@@ -1,3 +1,31 @@
+2012-04-19   D. V. Wiebe <getdata@ketiltrout.net> svn:701
+	* src/add.c (_GD_Add): Don't check protection level before figuring out the
+	fragment index.
+
+	* bindings/perl/GetData.xs bindings/perl/typemap
+	bindings/perl/simple_funcs.pl: gdpu_spf_t -> gdpu_uint_t.
+
+	* bindings/perl/GetData.xs (gdp_to_entry entry): Use "in_fields" everywhere
+	to be consistent with the C API.
+
+	* bindings/perl/GetData.xs (mcarrays): Remove unpacked.  Use GIMME_V
+	instead.
+
+	* bindings/perl/simple_funcs.xsin (reference alter_phase add_window
+	alter_window alter_affixes add_mplex alter_mplex desync flags
+	verbose_prefix): Fix parameter defaults and types.
+
+	* bindings/perl/Build.PL.in: Install GetData.pm
+
+	* bindings/perl/simple_funcs.xsin (include include_affex): Deleted.
+	* bindings/perl/GetData.xs (include): Added.
+
+	* doc/README.perl: Added.
+	* bindings/perl/GetData.pm.in: POD.
+
+	* bindings/cxx/test/Makefile.am bindings/f77/Makefile.am test/Makefile.am
+	test/error_verbose.c test/error_verbose_prefix.c: Remove GNUisms.
+
 2012-04-13   D. V. Wiebe <getdata@ketiltrout.net> svn:699
 	* src/common.c (_GD_CanonicalPath): Terminate and don't clobber string
 	from realpath().

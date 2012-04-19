@@ -37,7 +37,7 @@ int main(void)
   const char *filedir = "dirfile";
   const char *fifo = "dirfile/fifo";
   const char *format = "dirfile/format";
-  int e1, e2, r = 0, status, old_stderr;
+  int e1, e2, r = 0, status;
   FILE *stream;
   pid_t pid;
   DIRFILE *D;
@@ -57,8 +57,7 @@ int main(void)
     return r;
   }
 
-  /* save the old stderr and retarget */
-  old_stderr = dup(2);
+  /* retarget stderr */
   freopen(fifo, "w", stderr);
 
   D = gd_open(filedir, GD_RDONLY);
@@ -73,8 +72,7 @@ int main(void)
   fflush(stderr);
 
   /* restore stderr */
-  fclose(stderr);
-  stderr = fdopen(old_stderr, "w");
+  freopen("/dev/stderr", "w", stderr);
 
   unlink(fifo);
   unlink(format);

@@ -27,6 +27,7 @@ my $build = $class->new(
   include_dirs => '@top_srcdir@/src',
   license => 'lgpl',
   module_name => "GetData",
+  pm_files => { 'GetData.pm' => 'lib/GetData.pm' },
   release_status => "testing",
   requires => {
     perl => '5.6.0',

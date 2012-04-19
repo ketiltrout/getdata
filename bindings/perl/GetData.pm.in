@@ -29,10 +29,10 @@ require XSLoader;
 require Math::Complex;
 
 our @ISA = qw(Exporter);
-our %EXPORT_TAGS = ( 'all' => [ qw(VERSION @FUNCLIST@ @PARAMLIST@) ],
-'constants' => [ qw(VERSION @PARAMLIST@) ], 'functions' => [ qw(@FUNCLIST@) ]);
+our %EXPORT_TAGS = ('all' => [qw(VERSION @FUNCLIST@ @PARAMLIST@)],
+'constants' => [qw(VERSION @PARAMLIST@)], 'functions' => [qw(@FUNCLIST@)]);
 
-our @EXPORT_OK = ( @{$EXPORT_TAGS{'all'}} );
+our @EXPORT_OK = (@{$EXPORT_TAGS{'all'}});
 our @EXPORT = qw();
 
 @PARAMETERS@
@@ -54,8 +54,8 @@ GetData - Perl bindings to the GetData library for Dirfile access
 
   # the following calls are equivalent
   my $data = GetData::getdata($DIRFILE, "field", 5, 0, 1,
-                              GetData::UINT8);
-  my $data = $DIRFILE->getdata("field", 5, 0, 1, GetData::UINT8);
+                              $GetData::UINT8);
+  my $data = $DIRFILE->getdata("field", 5, 0, 1, $GetData::UINT8);
 
 =head1 DESCRIPTION
 
@@ -65,59 +65,1162 @@ methods.  All C functions and constants are replicated in the GetData package.
 These methods have the same name as their C counterparts, excluding the C
 namespace prefix `gd_' (or `GD_', for C preprocessor constants).
 
-The dirfile lvalue returned by GetData::cbopen or GetData::cbopen is a
-simplistic object.  Any GetData method which takes a dirfile as a parameter,
-may instead be called as method of the dirfile object itself.  (See the
-synopsis above for an example.)  Dirfile metadata entries (which are C structs
-of type gd_entry_t) are represented as simple hashes.
+The dirfile lvalue returned by GetData::open is a simplistic object.  Any
+GetData method which takes a dirfile as a parameter, may instead be called as
+method of the dirfile object itself.  (See the synopsis above for an example.)
+Dirfile metadata entries (which are C structs of type gd_entry_t) are
+represented as simple hashes.
 
 By default, GetData does not export any symbols.  All symbols in the GetData
 package may be exported with:
 
   use GetData "all";
 
-but this is discouraged, as it will overwrite useful things like &open.
+but this is discouraged, as it will overwrite useful things like &CORE::open.
 
-=head1 METHODS
+Throughout the module, complex data are generally represented as
+C<Math::Complex> objects, but may be simplified to ordinary floating point
+numbers if the imaginary part is zero.
 
-=over
+=head1 CONSTANTS
 
-=item cbopen ( DIRFILENAME, FLAGS, SEHANDLER, EXTRA )
+The module defines a large number of symbolic constants used by the API which
+mirror the constants defined in the C API.  The "constants" tag may be used to
+export just the constants from the module, if desired.  Some genericly useful
+sets of constants are discussed below.  Other constants are discussed in the
+method descriptions where they are used.
 
-Create or open a Dirfile database called DIRFILENAME.  FLAGS should be either
-$GetData::RDONLY (for read-only access) or $GetData::RDWR (for read-write
-access), optionally bitwise or'd with any of the flags listed in the
-gd_cbopen(3) manual page.
+=head2 Data Types
 
-SEHANDLER is a Perl callback function which will be executed whenever a syntax
-error is encountered.  It may be undef, if no callback is desired (but see the
-open() method in that case).  If called, SEHANDLER will be passed two arguments.
-The first is a reference to a hash containing the parser data.  The second is
-the EXTRA object passed to cbopen().  SEHANDLER is called in scalar context,
-and should return either:
+GetData knows the following data types:
 
 =over
 
-=item * an integer, one of the $GetData::SYNTAX_... constants; or
+=item $GetData::NULL
 
-=item * a string containing the corrected line, in which case
-$GetData::SYNTAX_RESCAN is assumed; or,
+the null data type, which returns no data.
 
-=item * a reference to a list consisting of an integer, one of the
-$GetData::SYNTAX_...  constants, and then, optionally, a string containing the
-corrected line.
+=item $GetData::UINT8
+
+unsigned 8-bit integer
+
+=item $GetData::INT8
+
+signed (two's complement) 8-bit integer
+
+=item $GetData::UINT16
+
+unsigned 16-bit integer
+
+=item $GetData::INT16
+
+signed (two's complement) 16-bit integer
+
+=item $GetData::UINT32
+
+unsigned 32-bit integer
+
+=item $GetData::INT32
+
+signed (two's complement) 32-bit integer
+
+=item $GetData::UINT64
+
+unsigned 64-bit integer
+
+=item $GetData::INT64
+
+signed (two's complement) 64-bit integer
+
+=item $GetData::FLOAT32
+
+IEEE-754 standard 32-bit single precision floating point number
+
+=item $GetData::FLOAT64
+
+IEEE-754 standard 64-bit double precision floating point number
+
+=item $GetData::COMPLEX64
+
+FORTRAN and C99 conformant 64-bit single precision floating point complex number
+
+=item $GetData::COMPLEX128
+
+FORTRAN and C99 conformant 128-bit double precision floating point complex
+number
+
+=back
+
+=head2 Encoding Types
+
+The following encoding types are known by GetData:
+
+=over
+
+$GetData::BZIP2_ENCODED,
+$GetData::GZIP_ENCODED,
+$GetData::LZMA_ENCODED,
+$GetData::SIE_ENCODED,
+$GetData::SLIM_ENCODED,
+$GetData::TEXT_ENCODED,
+$GetData::ZZIP_ENCODED,
+$GetData::ZZSLIM_ENCODED,
+$GetData::UNENCODED.
+
+=back
+
+Details of these encoding types are given in the dirfile-format(5) manual page.
+
+=head2 Entry Types
+
+The following symbols are used to indicate entry types:
+
+=over
+
+$GetData::NO_ENTRY,
+$GetData::BIT_ENTRY,
+$GetData::CARRAY_ENTRY,
+$GetData::CONST_ENTRY,
+$GetData::DIVIDE_ENTRY,
+$GetData::INDEX_ENTRY,
+$GetData::LINCOM_ENTRY,
+$GetData::LINTERP_ENTRY,
+$GetData::MPLEX_ENTRY,
+$GetData::MULTIPLY_ENTRY,
+$GetData::PHASE_ENTRY,
+$GetData::POLYNOM_ENTRY,
+$GetData::RAW_ENTRY,
+$GetData::RECIP_ENTRY,
+$GetData::SBIT_ENTRY,
+$GetData::STRING_ENTRY,
+$GetData::WINDOW_ENTRY
+
+=back
+
+Of these, C<$GetData::NO_ENTRY> is used to flag invalid entry types and
+C<$GetData::INDEX_ENTRY> is used only for the implicit B<INDEX> field.  See
+gd_entry(3) and dirfile-format(5) for details of the other entry types.
+
+=head2 WINDOW Operators
+
+The following symbols are used to indicate WINDOW operators:
+
+=over
+
+$GetData::WINDOP_EQ,
+$GetData::WINDOP_GE,
+$GetData::WINDOP_GT,
+$GetData::WINDOP_LE,
+$GetData::WINDOP_LT,
+$GetData::WINDOP_NE,
+$GetData::WINDOP_CLR,
+$GetData::WINDOP_SET.
+
+=back
+
+=head1 INPUT DATA
+
+Functions which take sets of data as input (L<add_carray>, L<madd_carray>,
+L<put_carray>, L<put_carray_slice>, and L<putdata>) accept data in a number of
+ways.  The arguments specifying the data always appear at the end of the
+argument list.  They are represented as C<{DATA...}> in the method descriptions
+below.  Input data arguments are parsed as follows.
+
+=over
+
+=item 1.
+
+If the first data argument is undef, then it is ignored and all subsequent
+arguments are taken as data:
+
+    $dirfile->putdata("field_code", $first_frame, $first_sample,
+                      undef, @data)
+
+or
+
+    $dirfile->putdata("field_code", $first_frame, $first_sample,
+                      undef, $data[0], $data[1], $data[2], ...)
+
+=item 2.
+
+Otherwise, if the first data argument is a reference to an array, the array is
+taken as data (and any further arguments are ignored):
+
+    $dirfile->putdata("field_code", $first_frame, $first_sample,
+                      \@data)
+
+=item 3.
+
+Otherwise, if only two arguments make up the data argument list, and the second
+is a reference to an array, the first is taken as a type code specifing the
+conversion type, and the second is taken as the data:
+
+    $dirfile->putdata("field_code", $first_frame, $first_sample,
+                      $GetData::UINT8, @data)
+
+=item 4.
+
+Otherwise, if only two arguments make up the data argument list, and the second
+is not a reference to an array, the first is, again, taken as a type code, and
+the second is assumed to be a packed string containing the data in a format
+appropriate for the type code specified:
+
+    $packed_data = pack("C", @data)
+    $dirfile->putdata("field_code", $first_frame, $first_sample,
+                      $GetData::UINT8, $packed_data)
+
+=item 5.
+
+Otherwise, finally, the data argument list elements are simply taken as data
+themselves:
+
+    $dirfile->putdata("field_code", $first_frame, $first_sample,
+                      @data)
+
+or
+
+    $dirfile->putdata("field_code", $first_frame, $first_sample,
+                      $data[0], $data[1], $data[2], ...)
+
+
+=back
+
+GetData internally converts the Perl data into a format readably by the C API.
+In cases 3 and 4 above, the type the data is converted into is specified
+explicitly in the call.  In the other cases, GetData must guess an appropriate
+C type into which to convert the data.  It does so by looking at the first
+data value:
+
+=over
+
+=item *
+
+if the value is a C<Math::Complex> object, the data are converted to double
+precision complex data (C<COMPLEX128>)
+
+=item *
+
+if the value is an integer, the data are converted to a 64-bit signed integer
+(C<INT64>)
+
+=item *
+
+otherwise, the data are converted to a double precision float (C<FLOAT64>).
+
+=back
+
+Of the above methods, the first is only necessary when the data array has only
+two elements, and so would be mistaken for method four if specified without the
+initial undef.  Furthermore, the fourth method is typically the most efficient,
+since the packed data scalar can often be used as the input to the C API without
+need for type conversion.
+
+=head1 ENTRY HASHES
+
+The replacement for the C<gd_entry_t> object of the C API is a simple hash.  The
+key names are the same as the names of the C<gd_entry_t> members.  (See
+gd_entry(3) for details).
+
+In entry hashes returned by GetData, only those keys appropriate for the entry
+type specified will be present.  Entry hashes passed to GetData from the caller
+may have other keys than those required by the entry type.  They will be
+ignored.
+
+The value associated with the C<field_type> key will be one of the symbols
+listed under L</"Entry Types"> above.  For entry types which have (potentially)
+more than one input field (DIVIDE, LINCOM, MPLEX, MULTIPLY, WINDOW), the value
+associated with the C<"in_fields"> key will be a list of strings, regardless of
+how many elements it has; other entry types which provide C<"in_fields"> will be
+a scalar, even though the key name is still plural.
+
+Elements of the C<scalar> array which are undef indicate literal parameters
+(equivalent to C<NULL> in the C<gd_entry_t>'s C<scalar> member).  Similarly,
+undef is used in C<scalar_ind> where the C API uses -1, to indicate CONST
+fields, instead of CARRAYs.
+
+=head1 DIRFILE CREATION METHODS
+
+=over
+
+=item open ($DIRFILENAME, $FLAGS, $SEHANDLER=undef, $EXTRA=undef)
+
+Create or open a Dirfile database called C<$DIRFILENAME>.  C<$FLAGS> should be
+either C<$GetData::RDONLY> (for read-only access) or C<$GetData::RDWR> (for
+read-write access), optionally bitwise or'd with any of the following flags:
+
+=over
+
+$GetData::ARM_ENDIAN,
+$GetData::BIG_ENDIAN,
+$GetData::CREAT,
+$GetData::EXCL,
+$GetData::FORCE_ENCODING,
+$GetData::FORCE_ENDIAN,
+$GetData::IGNORE_DUPS,
+$GetData::IGNORE_REFS,
+$GetData::LITTLE_ENDIAN,
+$GetData::NOT_ARM_ENDIAN,
+$GetData::PEDANTIC,
+$GetData::PERMISSIVE,
+$GetData::PRETTY_PRINT,
+$GetData::TRUNC,
+$GetData::TRUNCSUB,
+$GetData::VERBOSE,
+
+=back
+
+and at most one of the encoding symbols listed above in the L</"Encoding Types">
+section or else C<$GetData::AUTO_ENCODED> indicating that GetData should attempt
+to automatically determine the encoding.  The meaning of the dirfile flags
+may be found in the gd_cbopen(3) manual page.
+
+$SEHANDLER is a Perl callback function which will be executed whenever a syntax
+error is encountered.  It may be undef, if no callback is desired.  When
+called, C<$SEHANDLER> will be passed two arguments.  The first is a reference to
+a hash containing the parser data.  The second is the C<$EXTRA> scalar passed to
+this method.  C<$SEHANDLER> is called in scalar context, and should return
+either:
+
+=over
+
+=item *
+
+an integer, one of the symbolic constants:
+
+=over
+
+$GetData::SYNTAX_ABORT,
+$GetData::SYNTAX_CONTINUE,
+$GetData::SYNTAX_IGNORE,
+$GetData::SYNTAX_RESCAN;
+
+=back
+
+(see gd_cbopen(3) for their meaning), or
+
+=item *
+
+a string containing the corrected line, in which case C<$GetData::SYNTAX_RESCAN>
+is assumed; or,
+
+=item *
+
+a reference to a list consisting of an integer, one of the
+C<$GetData::SYNTAX_...> constants listed above, and then, optionally, a string
+containing the corrected line.
 
 =back
 
 This function always returns a valid Dirfile object, even if the call failed;
-the caller should check GetData::error() on the returned dirfile to test for
+the caller should use the returned dirfile's L<error>() method to test for
 success.
+
+=item invalid_dirfile ()
+
+This function always returns a newly created, but invalid, Dirfile object.
+Unlike an invalid dirfile created (either accidentally or purposefully) using
+L<open>(), the dirfile returned by this function always has a zero error code.
+See gd_invalid_dirfile(3).
 
 =back
 
+=head1 DIRFILE OBJECT METHODS
+
+The following methods all operate on a dirfile object returned by one of the
+above methods and can either be called as:
+
+  $GetData::method($dirfile, ...)
+
+or else, as
+
+  $dirfile->method(...)
+
+without change in operation.
+
+=head2 List of Methods
+
+=over
+
+=item $dirfile->add_carray ($FIELD_NAME, $DATA_TYPE, $FRAGMENT_INDEX,
+{DATA...})
+
+Adds a new CARRAY field called C<$FIELD_NAME> to the metadata fragment indexed
+by C<$FRAGMENT_INDEX>.  The storage type of the CARRAY is given by
+C<$DATA_TYPE>, which should be one of the symbols listed above under
+L</"Data Types">.  The value of the CARRAY is then set to the data given in
+the C<{DATA...}> argument list, which also determines its length.  See the
+L</"Input Data"> section above for details on the allowed forms of C<{DATA...}>.
+See gd_add_carray(3).
+
+=item $dirfile->add_const ($FIELD_NAME, $DATA_TYPE, [$VALUE, $FRAGMENT_INDEX])
+
+Adds a new CONST field called C<$FIELD_NAME> to the metadata fragment indexed
+by C<$FRAGMENT_INDEX>, or to the primary format file if omitted.  The
+C<$DATA_TYPE> argument indicates the storage type, which should be one of the
+symbols listed above under L</"Data Types">.  If given, the value of the field
+is set to C<$VALUE>, otherwise the field will be initialised to zero.  See
+gd_add_const(3).
+
+=item $dirfile->aliases ($FIELD_CODE)
+
+In scalar context, returns the number of aliases of C<$FIELD_CODE>.  In list
+context, returns an array of alias names for C<$FIELD_CODE>.  See gd_naliases(3)
+and gd_aliases(3).
+
+=item $dirfile->carrays ($RETURN_TYPE)
+
+Returns the value of all carrays (excluding metafields) in the dirfile after
+converting them to the return type C<$RETURN_TYPE>, which should be one of the
+symbols listed under L</"Data Types"> above.  If called in scalar context,
+returns a reference to an array of packed string data.  If called in list
+context, returns an array of arrays of unpacked data.  See gd_carrays(3).
+
+=item $dirfile->close ()
+
+Closes the dirfile, writing changes to disk.  Upon successful completion, the
+dirfile object will be invalidated, prohibiting further operation on it.  A
+dirfile which is destroyed by garbage collection is discarded (see L</"discard">
+below).  This function should be called if metadata need to be written to disk
+before the object goes out of scope.  See gd_close(3).
+
+=item $dirfile->constants ($RETURN_TYPE)
+
+Returns the value of all constants (excluding metafields) in the dirfile after
+converting them to the return type C<$RETURN_TYPE>, which should be one of the
+symbols listed under L</"Data Types"> above.  If called in scalar context,
+returns a packed string containing the data.  If called in list context, the
+data will be unpacked and returned as an array.  See gd_constants(3).
+
+=item $dirfile->discard ()
+
+Closes the dirfile, ignoring changes to metadata, but writing changed data to
+disk.  Upon successful completion, the dirfile object will be invalidated,
+prohibiting further operation on it.  This function is called automatically by
+the dirfile destructor, and need not be called explicitly.  To save the metadata
+on close, use L</close>.  See gd_discard(3).
+
+=item $dirfile->entry ($FIELD_CODE)
+
+If called in scalar context, returns the entry type of C<$FIELD_CODE>, one
+of the symbols listed above under L</"Entry Types">.  In array context, returns
+a hash describing the indicated field.  See gd_entry_type(3) and gd_entry(3).
+
+=item $dirfile->entry_list ($PARENT, $TYPE, $FLAGS)
+
+In scalar context, returns the number of entries matching the supplied criteria.
+In list context, returns an array of the names of the entries.  If C<$PARENT>
+is undef, top-level entries are considered, otherwise meta entries under
+C<$PARENT> are considered.  If C<$TYPE> is one of the entry types listed above
+under L</"Entry Types">, only entries of that type are considered.  Alternatley,
+C<$TYPE> may be one of:
+
+=over
+
+$GetData::ALL_ENTRIES,
+$GetData::SCALAR_ENTRIES,
+$GetData::VECTOR_ENTRIES.
+
+=back
+
+Setting C<$TYPE> to undef is equivalent to setting it to
+C<$GetData::ALL_ENTRIES>.  If not undef, which is treated as zero, C<$FLAGS>
+should be zero or more of the following flags:
+
+=over
+
+$GetData::ENTRIES_HIDDEN,
+$GetData::ENTRIES_NOALIAS.
+
+=back
+
+See gd_nentries(3) and gd_entry_list(3) for the meaning of these symbols.
+
+=item $dirfile->error ()
+
+Returns the error code of the last operation on this dirfile.  See gd_error(3).
+
+=item $dirfile->error_string ()
+
+Returns a string describing the error encountered (if any) by the last operation
+on this dirfile.  See gd_error_string(3).
+
+=item $dirfile->field_list ()
+
+Equivalent to: C<$dirfile-E<gt>entry_list(undef, undef, undef)>.
+
+=item $dirfile->field_list_by_type ($TYPE)
+
+Equivalent to: C<$dirfile-E<gt>entry_list(undef, $TYPE, undef)>.
+
+=item $dirfile->fragment_affixes ($FRAGMENT_INDEX)
+
+Returns an array containing the prefix (first) and suffix (second) of the
+fragment indexed by C<$FRAGMENT_INDEX>.  See gd_fragment_affixes(3).
+
+=item $dirfile->fragments ()
+
+In scalar context, returns the number of metadata fragments in the dirfile.
+In list context, returns an array of pathnames to the fragments on disk, in the
+order that they're indexed.  See gd_nfragments(3) and gd_fragmentname(3).
+
+=item $dirfile->get_carray ($FIELD_CODE, $RETURN_TYPE)
+
+Returns the value of the CARRAY named C<$FIELD_CODE> after converting its
+elements to the return type C<$RETURN_TYPE>, which should be one of the symbols
+listed under L</"Data Types"> above.  If called in scalar context, returns a
+packed string containing the data.  If called in list context, the data will be
+unpacked and returned as an array.  See gd_get_carray(3).
+
+=item $dirfile->get_carray_slice ($FIELD_CODE, $START, $LEN, $RETURN_TYPE)
+
+Returns the value of a portion of the CARRAY named C<$FIELD_CODE> after
+converting its elements to the return type C<$RETURN_TYPE>, which should be one
+of the symbols listed under L</"Data Types"> above.  The first element returned
+is given by C<$START>, and the number of elements by C<$LEN>.  If called in
+scalar context, returns a packed string containing the data.  If called in list
+context, the data will be unpacked and returned as an array.  Less data than
+requested may be returned, if insufficient data exists.  See
+gd_get_carray_slice(3).
+
+=item $dirfile->get_constant ($FIELD_CODE, $RETURN_TYPE)
+
+Returns the value of the CONST named C<$FIELD_CODE> after converting it to the
+return type C<$RETURN_TYPE>, which should be one of the symbols listed under
+L</"Data Types"> above.  See gd_get_constant(3).
+
+=item $dirfile->getdata ($FIELD_CODE, $FIRST_FRAME, $FIRST_SAMP, $NUM_FRAMES,
+$NUM_SAMP, $RETURN_TYPE)
+
+Returns data from the field specified by C<$FIELD_CODE> after converting them
+to the return type C<$RETURN_TYPE>, which should be one of the symbols listed
+under L</"Data Types"> above.  The first sample returned is C<$FIRST_SAMP>
+samples after the start of C<$FIRST_FRAME> and the amount of data returned is
+L<$NUM_FRAMES> frames plus L<$NUM_SAMP> samples.  If called in scalar context
+returns a string of packed data.  If called in array context, the data will be
+unpacked and returned as an array.  Complex data are returned as
+C<Math::Complex> objects.  See gd_getdata(3).
+
+=item $dirfile->get_string ($FIELD_CODE)
+
+Returns the value of the STRING named C<$FIELD_CODE>.  See gd_get_string(3).
+
+=item $dirfile->include ($FILE, $PARENT_FRAGMENT, $FLAGS, [$PREFIX, $SUFFIX])
+
+Includes the fragment metadata file C<$FILE> under the fragment indexed by
+C<$PARENT_FRAGMENT>.  C<$FLAGS> should be a bitwise or'd collection of zero or
+more of the following flags:
+
+=over
+
+$GetData::BIG_ENDIAN,
+$GetData::CREAT,
+$GetData::EXCL,
+$GetData::FORCE_ENCODING,
+$GetData::FORCE_ENDIAN,
+$GetData::IGNORE_DUPS,
+$GetData::IGNORE_REFS,
+$GetData::LITTLE_ENDIAN,
+$GetData::PEDANTIC,
+$GetData::TRUNC,
+
+=back
+
+and at most one of the encoding symbols listed above in the L</"Encoding Types">
+section or else C<$GetData::AUTO_ENCODED> indicating that GetData should attempt
+to automatically determine the encoding.  If C<$PREFIX> or C<$SUFFIX> are
+omitted or undef, the added fragment will contain no such affix.  See
+gd_include_affix(3).
+
+=item $dirfile->madd_carray ($PARENT, $FIELD_NAME, $DATA_TYPE, {DATA...})
+
+Adds a new CARRAY metafield called C<$FIELD_NAME> under the parent field
+C<$PARENT>.  The storage type of the CARRAY is given by C<$DATA_TYPE>, which
+should be one of the symbols listed above under L</"Data Types">.  The value of
+the CARRAY is then set to the data given in the C<{DATA...}> argument list,
+which also determines its length.  See the L</"Input Data"> section above for
+details on the allowed forms of C<{DATA...}>.  See gd_madd_carray(3).
+
+=item $dirfile->madd_const ($PARENT, $FIELD_NAME, $DATA_TYPE, [$VALUE])
+
+Adds a new CONST metafield called C<$FIELD_NAME> under the field C<$PARENT>.
+The C<$DATA_TYPE> argument indicates the storage type, which should be one of
+the symbols listed above under L</"Data Types">.  If given, the value of the
+field is set to C<$VALUE>, otherwise the field will be initialised to zero.
+See gd_madd_const(3).
+
+=item $dirfile->mcarrays ($PARENT, $RETURN_TYPE)
+
+Behaves analogously to L<carrays>() (I<q.v.>), but returns CARRAYs which are
+metafields under the parent specified by C<$PARENT>.
+
+=item $dirfile->mconstants ($PARENT, $RETURN_TYPE)
+
+Behaves analogously to L<constants>() (I<q.v.>), but returns CONSTs which are
+metafields under the parent specified by C<$PARENT>.
+
+=item $dirfile->mfield_list ($PARENT)
+
+Equivalent to C<$dirfile-E<gt>entry_list($PARENT, undef, undef)>.
+
+=item $dirfile->mfield_list_by_type ($PARENT, $TYPE)
+
+Equivalent to C<$dirfile-E<gt>entry_list($PARENT, $TYPE, undef)>.
+
+=item $dirfile->mstrings ($PARENT)
+
+Behaves analogously to L<strings>() (I<q.v.>), but returns STRINGs which are
+metafields under the parent specified by C<$PARENT>.
+
+=item $dirfile->mvector_list ($PARENT)
+
+Equivalent to:
+  $dirfile-E<gt>entry_list($PARENT, $GetData::VECTOR_ENTRIES, undef).
+
+=item $dirfile->parser_callback ($SEHANDLER, $EXTRA=undef)
+
+Sets the registered parser callback function for the dirfile to C<$SEHANDLER>,
+or to nothing if undef, and updates the C<$EXTRA> parameter.  See
+gd_parser_callback(3).
+
+=item $dirfile->put_carray ($FIELD_CODE, {DATA...})
+
+Sets the value of the CARRAY named C<$FIELD_CODE> to the values contained in
+the C<{DATA...}> argument list.  See the L</"Input Data"> section above for
+details on the allowed forms of C<{DATA...}>.  See gd_put_carray(3).
+
+=item $dirfile->put_carray_slice ($FIELD_CODE, $START, {DATA...})
+
+Sets a value of the portion of the CARRAY named C<$FIELD_CODE> beginning with
+element numbered C<$START> to the values contained in the C<{DATA...}> argument
+list.  See the L</"Input Data"> section above for details on the allowed forms
+of C<{DATA...}>.  See gd_put_carray_slice(3).
+
+=item $dirfile->put_constant ($FIELD_CODE, $DATUM)
+
+Sets the value of the CONST field C<$FIELD_CODE> to the value C<$DATUM>.  See
+gd_put_constant(3).
+
+=item $dirfile->putdata ($FIELD_CODE, $FIRST_FRAME, $FIRST_SAMPLE, {DATA...})
+
+Sets a portion of the vector given by C<$FIELD_CODE> to the values contained in
+the C<{DATA...}> argument list.  The first sample written is C<$FIRST_SAMPLE>
+samples after the start of C<$FIRST_FRAME>.  See the L</"Input Data"> section
+above for details on the allowed forms of C<{DATA...}>.  See gd_putdata(3).
+
+=item $dirfile->strings ()
+
+In scalar context, returns the number of STRING fields.  In list context,
+returns an array of strings containing the values of all the STRING fields.
+See gd_strings(3).
+
+=item $dirfile->strtok ($STRING)
+
+Tokenises C<$STRING>, returning an array of tokens.  See gd_strtok(3).
+
+=item $dirfile->vector_list ()
+
+Equivalent to:
+  $dirfile-E<gt>entry_list(undef, $GetData::VECTOR_ENTRIES, undef).
+
+=back
+
+=head2 Other Methods
+
+For the most part, following methods behave identically to their C API
+counterpart.  See the corresponding C API manual page for details.  Different
+behaviour, if any, is indicated.
+
+=over
+
+=item $dirfile->add ($ENTRY)
+
+C<$ENTRY> should be a reference to an entry hash; see L</"ENTRY HASHES"> above.
+
+=item $dirfile->add_alias ($FIELD_CODE, $TARGET, [$FRAGMENT_INDEX])
+
+C<$FRAGMENT_INDEX> = 0 is assumed if not specified.
+
+=item $dirfile->add_bit ($FIELD_CODE, $IN_FIELD, $BITNUM, $NUMBITS,
+[$FRAGMENT_INDEX])
+
+C<$FRAGMENT_INDEX> = 0 is assumed if not specified.
+
+=item $dirfile->add_divide ($FIELD_CODE, $IN_FIELD1, $IN_FIELD2,
+[$FRAGMENT_INDEX])
+
+C<$FRAGMENT_INDEX> = 0 is assumed if not specified.
+
+=item $dirfile->add_lincom ($FIELD_CODE, $N_FIELDS, $IN_FIELDS, $M, $B,
+[$FRAGMENT_INDEX])
+
+C<$IN_FIELDS>, C<$M>, and C<$B> should be references to arrays of the
+appropriate length.  The elements of C<$M> and C<$B> may be of any numerical
+type, including C<Math::Complex>.  C<$FRAGMENT_INDEX> = 0 is assumed if not
+specified.
+
+=item $dirfile->add_linterp ($FIELD_CODE, $IN_FIELD, $TABLE, [$FRAGMENT_INDEX])
+
+C<$FRAGMENT_INDEX> = 0 is assumed if not specified.
+
+=item $dirfile->add_mplex ($FIELD_CODE, $IN_FIELD, $COUNT_FIELD, $COUNT_VAL,
+$COUNT_MAX, [$FRAGMENT_INDEX])
+
+C<$FRAGMENT_INDEX> = 0 is assumed if not specified.
+
+=item $dirfile->add_multiply ($FIELD_CODE, $IN_FIELD1, $IN_FIELD2,
+[$FRAGMENT_INDEX])
+
+C<$FRAGMENT_INDEX> = 0 is assumed if not specified.
+
+=item $dirfile->add_phase ($FIELD_CODE, $IN_FIELD, $SHIFT, [$FRAGMENT_INDEX])
+
+C<$FRAGMENT_INDEX> = 0 is assumed if not specified.
+
+=item $dirfile->add_polynom ($FIELD_CODE, $POLY_ORD, $IN_FIELD, $A,
+[$FRAGMENT_INDEX])
+
+C<$A> should be a reference to an array of numbers (of any numerical type,
+including C<Math::Complex>) of the appropriate length.  C<$FRAGMENT_INDEX> = 0
+is assumed if not specified.
+
+=item $dirfile->add_raw ($FIELD_CODE, $DATA_TYPE, $SPF, [$FRAGMENT_INDEX])
+
+C<$DATA_TYPE> should be one of the symbols listed under L</"Data Types"> above.
+C<$FRAGMENT_INDEX> = 0 is assumed if not specified.
+
+=item $dirfile->add_recip ($FIELD_CODE, $IN_FIELD, $DIVIDEND, [$FRAGMENT_INDEX])
+
+C<$DIVIDEND> may be of any numerical type, including C<Math::Complex>.
+C<$FRAGMENT_INDEX> = 0 is assumed if not specified.
+
+=item $dirfile->add_sbit ($FIELD_CODE, $IN_FIELD, $BITNUM, $NUMBITS,
+[$FRAGMENT_INDEX])
+
+C<$FRAGMENT_INDEX> = 0 is assumed if not specified.
+
+=item $dirfile->add_spec ($LINE, [$FRAGMENT_INDEX])
+
+C<$FRAGMENT_INDEX> = 0 is assumed if not specified.
+
+=item $dirfile->add_string ($FIELD_CODE, $VALUE, [$FRAGMENT_INDEX])
+
+C<$FRAGMENT_INDEX> = 0 is assumed if not specified.
+
+=item $dirfile->add_window ($FIELD_CODE, $IN_FIELD, $CHECK_FIELD, $WINDOP,
+$THRESHOLD, [$FRAGMENT_INDEX])
+
+C<$WINDOP> should be one of the symbols listed under L</WINDOW Operators> above.
+C<$FRAGMENT_INDEX> = 0 is assumed if not specified.
+
+=item $dirfile->alias_target ($FIELD_CODE)
+
+Z<>
+
+=item $dirfile->alter_affixes ($FRAGMENT_INDEX, $PREFIX, [$SUFFIX])
+
+If C<$PREFIX> or C<$SUFFIX> are undef, or if C<$SUFFIX> is omitted, that
+affix is not changed.
+
+=item $dirfile->alter_bit ($FIELD_CODE, [$IN_FIELD, $BITNUM, $NUMBITS])
+
+Arguments not given or set to undef are not changed.
+Additionally, if C<$BITNUM == -1>, or C<$NUMBITS == 0>, that parameter is not
+changed.
+
+=item $dirfile->alter_carray ($FIELD_CODE, $CONST_TYPE, $ARRAY_LEN)
+
+C<$CONST_TYPE> should be one of the symbols listed under L</"Data Types"> above.
+
+=item $dirfile->alter_const ($FIELD_CODE, [$CONST_TYPE])
+
+If C<$CONST_TYPE> is omitted, or equal to C<$GetData::NULL>, it is not changed;
+otherwise, it should be one of the symbols listed under L</"Data Types"> above.
+
+=item $dirfile->alter_divide ($FIELD_CODE, [$IN_FIELD1, $IN_FIELD2])
+
+Arguments not given or set to undef are not changed.
+
+=item $dirfile->alter_encoding ($ENCODING, [$FRAGMENT_INDEX, $RECODE])
+
+Both C<$FRAGMENT_INDEX> and C<$RECODE> default to 0 if not given.
+
+=item $dirfile->alter_endianness ($BYTE_SEX, [$FRAGMENT_INDEX, $RECODE])
+
+Both C<$FRAGMENT_INDEX> and C<$RECODE> default to 0 if not given.
+
+=item $dirfile->alter_entry ($FIELD_CODE, $ENTRY, [$RECODE])
+
+C<$ENTRY> should be a reference to an entry hash; see L</"ENTRY HASHES"> above.
+If not given, C<$RECODE> defaults to 0.
+
+=item $dirfile->alter_frameoffset ($OFFSET, [$FRAGMENT_INDEX, $RECODE])
+
+Both C<$FRAGMENT_INDEX> and C<$RECODE> default to 0 if not given.
+
+=item $dirfile->alter_lincom ($FIELD_CODE, [$N_FIELDS, $IN_FIELDS, $M, $B])
+
+Arguments not given or set to undef are not changed.
+If given, C<$IN_FIELDS>, C<$M>, and C<$B> should be references to arrays of the
+appropriate length.
+
+=item $dirfile->alter_linterp ($FIELD_CODE, [$IN_FIELD, $TABLE, $RENAME_TABLE])
+
+Arguments not given or set to undef are not changed.
+If not given, C<$RENAME_TABLE> defaults to 0.
+
+=item $dirfile->alter_mplex ($FIELD_CODE, [$IN_FIELD, $COUNT_FIELD, $COUNT_VAL,
+$COUNT_MAX])
+
+Arguments not given or set to undef are not changed.
+Additionally, if C<$COUNT_VAL> or C<$COUNT_MAX> are -1, that parameter is not
+chaged.
+
+=item $dirfile->alter_multiply ($FIELD_CODE, [$IN_FIELD1, $IN_FIELD2])
+
+Arguments not given or set to undef are not changed.
+
+=item $dirfile->alter_phase ($FIELD_CODE, $IN_FIELD, $SHIFT)
+
+If C<$IN_FIELD == undef>, it is not changed.
+
+=item $dirfile->alter_polynom ($FIELD_CODE, [$POLY_ORD, $IN_FIELD, $A])
+
+Arguments not given or set to undef are not changed.
+Additionally, if C<$POLY_ORD == 0>, it is not changed.
+
+=item $dirfile->alter_protection ($PROTECTION_LEVEL, $FRAGMENT_INDEX)
+
+Z<>
+
+=item $dirfile->alter_raw ($FIELD_CODE, [$DATA_TYPE, $SPF, $RECODE])
+
+Arguments not given or set to undef are not changed.
+Additionally, if C<$DATA_TYPE == $GetData::NULL> or C<$SPF == 0>, that parameter
+is not changed.
+If not given, C<$RECODE> defaults to 0.
+
+=item $dirfile->alter_recip ($FIELD_CODE, [$IN_FIELD, $DIVIDEND])
+
+Arguments not given or set to undef are not changed.
+Additionally, if C<$DIVIDEND == 0>, it is not changed.
+C<$DIVIDEND> may be of any numerical type, including C<Math::Complex>.
+
+=item $dirfile->alter_sbit ($FIELD_CODE, [$IN_FIELD, $BITNUM, $NUMBITS])
+
+Arguments not given or set to undef are not changed.
+Additionally, if C<$BITNUM == -1>, or C<$NUMBITS == 0>, that parameter is not
+changed.
+
+=item $dirfile->alter_spec ($LINE, [$RECODE])
+
+If not given, C<$RECODE> defaults to 0.
+
+=item $dirfile->alter_window ($FIELD_CODE, $IN_FIELD, $CHECK_FIELD, $WINDOP,
+$THRESHOLD)
+
+If C<$IN_FIELD> or C<$CHECK_FIELD> are undef, or if C<$WINDOP ==
+$GetData::WINDOP_UNK>, that paremeter is not changed. Otherwise,
+C<$WINDOP> should be one of the symbols listed under L</WINDOW Operators> above.
+
+=item $dirfile->bof ($FIELD_CODE)
+
+Z<>
+
+=item $dirfile->carray_len ($FIELD_CODE)
+
+Z<>
+
+=item $dirfile->delete ($FIELD_CODE, [$FLAGS])
+
+If not given, C<$FLAGS> defaults to 0.  Otherwise, it should be a bitwise or'd
+collection of zero or more of the following flags:
+
+=over
+
+$GetData::DEL_DATA,
+$GetData::DEL_DEREF,
+$GetData::DEL_FORCE,
+$GetData::DEL_META.
+
+=back
+
+=item $dirfile->delete_alias ($FIELD_CODE, [$FLAGS])
+
+If not given, C<$FLAGS> defaults to 0; otherwise, see the description of
+L</delete> above for valid values.
+
+=item $dirfile->desync ([$FLAGS])
+
+If omitted, C<$FLAGS> defaults to zero.  Otherwise, it should be zero or more
+of the following flags bitwise or'd together:
+
+=over
+
+$GetData::DESYNC_PATHCHECK,
+$GetData::DESYNC_REOPEN.
+
+=back
+
+=item $dirfile->dirfilename ()
+
+Z<>
+
+=item $dirfile->dirfile_standards ([$VERSION])
+
+In addition to a simple integer verison number, C<$VERSION> may be one of the
+symbols
+
+=over
+
+$GetData::VERSION_CURRENT,
+$GetData::VERSION_EARLIEST,
+$GetData::VERSION_LATEST.
+
+=back
+
+If not given, C<$GetData::VERSION_CURRENT> is assumed.
+
+=item $dirfile->encoding ($FRAGMENT_INDEX)
+
+Z<>
+
+=item $dirfile->endianness ($FRAGMENT_INDEX)
+
+Z<>
+
+=item $dirfile->eof ($FIELD_CODE)
+
+Z<>
+
+=item $dirfile->error_count ()
+
+Z<>
+
+=item $dirfile->flags ([$SET, $RESET])
+
+If omitted, C<$SET> and C<$RESET> default to 0.  Otherwise, they should be
+zero or more of the following flags, bitwise or'd together:
+
+=over
+
+$GetData::PRETTY_PRINT,
+$GetData::VERBOSE.
+
+=back
+
+=item $dirfile->flush ($FIELD_CODE)
+
+Z<>
+
+=item $dirfile->fragment_index ($FIELD_CODE)
+
+Z<>
+
+=item $dirfile->fragmentname ($FRAGMENT_INDEX)
+
+Z<>
+
+=item $dirfile->frameoffset ($FRAGMENT_INDEX)
+
+Z<>
+
+=item $dirfile->framenum ($FIELD_CODE, $VALUE, [$START, $END])
+
+C<$START> and C<$END> default to 0 if not given.
+
+=item $dirfile->hidden ($FIELD_CODE)
+
+Z<>
+
+=item $dirfile->hide ($FIELD_CODE)
+
+Z<>
+
+=item $dirfile->madd ($ENTRY, $PARENT)
+
+C<$ENTRY> should be a reference to an entry hash; see L</"ENTRY HASHES"> above.
+
+=item $dirfile->madd_alias ($PARENT, $FIELD_CODE, $TARGET)
+
+Z<>
+
+=item $dirfile->madd_bit ($PARENT, $FIELD_CODE, $IN_FIELD, $BITNUM, $NUMBITS)
+
+Z<>
+
+=item $dirfile->madd_divide ($PARENT, $FIELD_CODE, $IN_FIELD1, $IN_FIELD2)
+
+Z<>
+
+=item $dirfile->madd_lincom ($PARENT, $FIELD_CODE, $N_FIELDS, $IN_FIELDS, $M,
+$B)
+
+C<$IN_FIELDS>, C<$M>, and C<$B> should be references to arrays of the
+appropriate length.  The elements of C<$M> and C<$B> may be of any numerical
+type, including C<Math::Complex>.
+
+=item $dirfile->madd_linterp ($PARENT, $FIELD_CODE, $IN_FIELD, $TABLE)
+
+Z<>
+
+=item $dirfile->madd_mplex ($PARENT, $FIELD_CODE, $IN_FIELD, $COUNT_FIELD,
+$COUNT_VAL, $COUNT_MAX)
+
+Z<>
+
+=item $dirfile->madd_multiply ($PARENT, $FIELD_CODE, $IN_FIELD1, $IN_FIELD2)
+
+Z<>
+
+=item $dirfile->madd_phase ($PARENT, $FIELD_CODE, $IN_FIELD, $SHIFT)
+
+Z<>
+
+=item $dirfile->madd_polynom ($PARENT, $FIELD_CODE, $POLY_ORD, $IN_FIELD, $A)
+
+C<$A> should be a reference to an array of numbers (of any numerical type,
+including C<Math::Complex>) of the appropriate length.
+
+=item $dirfile->madd_recip ($PARENT, $FIELD_CODE, $IN_FIELD, $DIVIDEND)
+
+C<$DIVIDEND> may be of any numerical type, including C<Math::Complex>.
+
+=item $dirfile->madd_sbit ($PARENT, $FIELD_CODE, $IN_FIELD, $BITNUM, $NUMBITS)
+
+Z<>
+
+=item $dirfile->madd_spec ($LINE, $PARENT)
+
+Z<>
+
+=item $dirfile->madd_string ($PARENT, $FIELD_CODE, $VALUE)
+
+Z<>
+
+=item $dirfile->madd_window ($PARENT, $FIELD_CODE, $IN_FIELD, $CHECK_FIELD,
+$WINDOP, $THRESHOLD)
+
+C<$WINDOP> should be one of the symbols listed under L</WINDOW Operators> above.
+
+=item $dirfile->malter_spec ($LINE, $PARENT, [$RECODE])
+
+If not given, C<$RECODE> defaults to 0.
+
+=item $dirfile->metaflush ()
+
+Z<>
+
+=item $dirfile->move ($FIELD_CODE, $NEW_FRAGMENT, [$MOVE_DATA])
+
+If not given, C<$MOVE_DATA> defaults to 0.
+
+=item $dirfile->move_alias ($FIELD_CODE, $NEW_FRAGMENT)
+
+Z<>
+
+=item $dirfile->mplex_lookback ($LOOKBACK)
+
+Z<>
+
+=item $dirfile->native_type ($FIELD_CODE)
+
+The returned value will be one of the symbols listed above under
+L</"Data Types">.
+
+=item $dirfile->nframes ()
+
+Z<>
+
+=item $dirfile->parent_fragment ($FRAGMENT_INDEX)
+
+Z<>
+
+=item $dirfile->protection ($FRAGMENT_INDEX)
+
+Z<>
+
+=item $dirfile->put_string ($FIELD_CODE, $STRING)
+
+Z<>
+
+=item $dirfile->raw_close ($FIELD_CODE)
+
+Z<>
+
+=item $dirfile->raw_filename ($FIELD_CODE)
+
+Z<>
+
+=item $dirfile->reference ([$FIELD_CODE])
+
+If C<$FIELD_CODE> is not given or undef, this function simply reports the
+current reference field.
+
+=item $dirfile->rename ($OLD_CODE, $NEW_NAME, [$FLAGS])
+
+If not given, C<$FLAGS> defaults to 0.  Otherwise, it should be a bitwise or'd
+collection of zero or more of the following flags:
+
+=over
+
+$GetData::REN_DATA,
+$GetData::REN_UPDB.
+
+=back
+
+=item $dirfile->rewrite_fragment ($FRAGMENT_INDEX)
+
+Z<>
+
+=item $dirfile->seek ($FIELD_CODE, $FRAME_NUM, $SAMPLE_NUM, [$FLAGS])
+
+If not given, C<$FLAGS> defaults to C<$GetData::SEEK_SET>.  Otherwise, it should
+be one of:
+
+=over
+
+$GetData::SEEK_CUR,
+$GetData::SEEK_END,
+$GetData::SEEK_SET.
+
+=back
+
+Furthermore, this value should be bitwise or'd with C<$GetData::SEEK_WRITE> if
+the next operation on the field is a write (via L</putdata>).
+
+=item $dirfile->spf ($FIELD_CODE)
+
+Z<>
+
+=item $dirfile->sync ($FIELD_CODE)
+
+Z<>
+
+=item $dirfile->tell ($FIELD_CODE)
+
+Z<>
+
+=item $dirfile->unhide ($FIELD_CODE)
+
+Z<>
+
+=item $dirfile->uninclude ($FRAGMENT_INDEX, [$DEL])
+
+If not given, C<$DEL> defaults to 0.
+
+=item $dirfile->validate ($FIELD_CODE)
+
+Z<>
+
+=item $dirfile->verbose_prefix ([$PREFIX])
+
+If C<$PREFIX> is omitted or undef, the prefix is removed.
+
+=back 
+
 =head1 COPYRIGHT
 
-Copyright (C) 2011 D. V. Wiebe
+Copyright (C) 2012 D. V. Wiebe
 
 GetData is free software; you can redistribute it and/or modify it under the
 terms of the GNU Lesser General Public License as published by the Free Software
@@ -127,6 +1230,10 @@ version.
 GetData is distributed in the hope that it will be useful, but without any
 warranty; without even the implied warranty of merchantability or fitness for
 a particular purpose. See the GNU Lesser General Public License for more
-details. 
+details.
+
+=head1 SEE ALSO
+
+Math::Complex(3), dirfile(5)
 
 =cut

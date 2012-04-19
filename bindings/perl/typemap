@@ -21,7 +21,7 @@ gdpu_char * T_PV_NULL
 gdpu_int T_IV_ZERO
 gdpu_numbits_t T_IV_ZERO
 gdpu_shift_t T_IV_ZERO
-gdpu_spf_t T_UV_ZERO
+gdpu_uint_t T_UV_ZERO
 gdpu_type_t T_UV_ZERO
 gdpu_complex T_COMPLEX_ZERO
 

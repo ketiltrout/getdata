@@ -35,7 +35,7 @@ int main(void)
   return 77; /* skip */
 #else
   const char *fifo = "./dirfile";
-  int error, r = 0, status, old_stderr;
+  int error, r = 0, status;
   FILE *stream;
   pid_t pid;
   DIRFILE *D;
@@ -53,8 +53,7 @@ int main(void)
     return r;
   }
 
-  /* save the old stderr and retarget */
-  old_stderr = dup(2);
+  /* retarget stderr */
   freopen(fifo, "w", stderr);
 
   D = gd_open("", GD_RDONLY | GD_VERBOSE);
@@ -65,8 +64,7 @@ int main(void)
   fflush(stderr);
 
   /* restore stderr */
-  fclose(stderr);
-  stderr = fdopen(old_stderr, "w");
+  freopen("/dev/stderr", "w", stderr);
 
   unlink(fifo);
 

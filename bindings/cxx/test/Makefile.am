@@ -41,7 +41,7 @@ check-local: check-TESTS
 	$(MAKE) getdata-clean-dirs
 
 getdata-clean-dirs:
-	rm -rvf *odirfile
+	rm -rf *odirfile
 
 clean-local:
 	$(MAKE) getdata-clean-dirs

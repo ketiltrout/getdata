@@ -36,7 +36,7 @@ int alter_divide(DIRFILE *dirfile, const char *field_code,
 int alter_multiply(DIRFILE *dirfile, const char *field_code,
     gdpu_char *in_field1=NULL, gdpu_char *in_field2=NULL)
 int alter_phase(DIRFILE *dirfile, const char *field_code,
-    gdpu_char *in_field=NULL, gdpu_shift_t shift=0)
+    gdpu_char *in_field, gdpu_shift_t shift)
 int alter_sbit(DIRFILE *dirfile, const char *field_code,
     gdpu_char *in_field=NULL, gdpu_bitnum_t bitnum=-1, gdpu_numbits_t numbits=0)
 size_t carray_len(DIRFILE *dirfile, const char *field_code)
@@ -75,7 +75,7 @@ int parent_fragment(DIRFILE *dirfile, int fragment_index)
 int alter_protection(DIRFILE *dirfile, int protection_level, int fragment_index)
 int protection(DIRFILE *dirfile, int fragment_index)
 const char *raw_filename(DIRFILE *dirfile, const char *field_code)
-const char *reference(DIRFILE *dirfile, const char *field_code=NULL)
+const char *reference(DIRFILE *dirfile, gdpu_char *field_code=NULL)
 unsigned int spf(DIRFILE *dirfile, const char *field_code)
 size_t put_string(DIRFILE *dirfile, const char *field_code, const char *data)
 int validate(DIRFILE *dirfile, const char *field_code)
@@ -94,12 +94,10 @@ int alter_entry(DIRFILE *dirfile, const char *field_code, gd_entry_t &entry,
 int alter_linterp(DIRFILE *dirfile, const char *field_code,
     gdpu_char *in_field=NULL, gdpu_char *table=NULL, int recode=0)
 int alter_raw(DIRFILE *dirfile, const char *field_code,
-    gdpu_type_t data_type=GD_NULL, gdpu_spf_t spf=0, int recode=0)
+    gdpu_type_t data_type=GD_NULL, gdpu_uint_t spf=0, int recode=0)
 int alter_spec(DIRFILE *dirfile, const char *line, int recode=0)
 int delete(DIRFILE *dirfile, const char *field_code, int flags=0)
 int flush(DIRFILE *dirfile, const char *field_code)
-int include(DIRFILE *dirfile, const char *file, int fragment_index,
-    unsigned long int flags)
 int malter_spec(DIRFILE *dirfile, const char *line, const char *parent,
     int recode=0)
 int metaflush(DIRFILE *dirfile)
@@ -134,26 +132,25 @@ int madd_alias(DIRFILE *dirfile, const char *parent, const char *field_code,
     const char *target)
 int add_window(DIRFILE *dirfile, const char *field_code, const char *in_field,
     const char *check_field, gd_windop_t windop, gd_triplet_t threshold,
-    int fragment_index)
+    int fragment_index=0)
 int madd_window(DIRFILE *dirfile, const char *parent, const char *field_code,
     const char *in_field, const char *check_field, gd_windop_t windop,
     gd_triplet_t threshold)
-int alter_window(DIRFILE *dirfile, const char *field_code, const char *in_field,
-    const char *check_field, gd_windop_t windop, gd_triplet_t threshold)
-int include_affix(DIRFILE *dirfile, const char *file, int fragment_index,
-    const char *prefix, const char *suffix, unsigned long int flags)
-int alter_affixes(DIRFILE *dirfile, int index, const char *prefix,
-    const char *suffix)
+int alter_window(DIRFILE *dirfile, const char *field_code, gdpu_char *in_field,
+    gdpu_char *check_field, gd_windop_t windop, gd_triplet_t threshold)
+int alter_affixes(DIRFILE *dirfile, int index, gdpu_char *prefix,
+    gdpu_char *suffix=NULL)
 int add_mplex(DIRFILE *dirfile, const char *field_code, const char *in_field,
-    const char *count_field, int count_val, int count_max, int fragment_index)
-int alter_mplex(DIRFILE *dirfile, const char *field_code, const char *in_field,
-    const char *count_field, int count_val, int count_max)
+    const char *count_field, int count_val, int count_max, int fragment_index=0)
+int alter_mplex(DIRFILE *dirfile, const char *field_code,
+    gdpu_char *in_field=NULL, gdpu_char *count_field=NULL, int count_val=-1,
+    int count_max=-1)
 int madd_mplex(DIRFILE *dirfile, const char *parent, const char *field_code,
     const char *in_field, const char *count_field, int count_val,
     int count_max)
 int raw_close(DIRFILE *dirfile, const char *field_code)
-int desync(DIRFILE *dirfile, unsigned int flags)
-unsigned long int flags(DIRFILE *dirfile, unsigned long int set,
-    unsigned long int reset)
-int verbose_prefix(DIRFILE *dirfile, const char *prefix)
+int desync(DIRFILE *dirfile, unsigned int flags=0)
+unsigned long int flags(DIRFILE *dirfile, unsigned long int set=0,
+    unsigned long int reset=0)
+int verbose_prefix(DIRFILE *dirfile, gdpu_char *prefix=NULL)
 int mplex_lookback(DIRFILE *dirfile, int lookback)
