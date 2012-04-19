@@ -1212,7 +1212,7 @@ nume += check_simple2(214, 4, n.in_fields, [ 'in2', 'in3' ])
 nume += check_simple2(214, 6, n.uthreshold, 128)
 
 ; 217: gd_alter_window check
-gd_alter_window, d, 'new18', in_field1='in3', in_field2='in4', /GE, $
+gd_alter_window, d, 'new18', in_field='in3', check_field='in4', /GE, $
   threshold=32e3
 nume += check_ok2(217, 1, d)
 
@@ -1322,7 +1322,7 @@ nume += check_simple2(230, 4, n.in_fields, [ 'in2', 'in3' ])
 nume += check_simple2(230, 5, n.count_max, 12)
 
 ; 231: gd_alter_mplex check
-gd_alter_mplex, d, 'new21', in_field1='in3', in_field2='in4', count_val=2, $
+gd_alter_mplex, d, 'new21', in_field='in3', count_field='in4', count_val=2, $
   count_max=7
 nume += check_ok2(231, 1, d)
 
