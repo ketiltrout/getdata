@@ -21,13 +21,21 @@
 AUTOMAKE_OPTIONS = foreign
 
 EXTRA_DIST=funclist.pl GetData.xs simple_funcs.pl simple_funcs.xsin typemap \
-					 GetData.pm.in MANIFEST.in test/*.t
+					 GetData.pm.in MANIFEST.in test/big_test.t test/callback.t
 
 if GETDATA_DEBUG
 TEST_VERBOSE=verbose=1
 endif
 
 PERL_TESTS=t/big_test.t t/callback.t
+
+man3dir=${perlmandir}
+nodist_man3_MANS=blib/libdoc/GetData.3
+
+nodist_perl_SCRIPTS=blib/lib/GetData.pm
+
+perlautogetdatadir=${perldir}/auto/GetData
+nodist_perlautogetdata_SCRIPTS=blib/arch/auto/GetData/GetData.bs blib/arch/auto/GetData/GetData.so
 
 t:
 	mkdir t
@@ -38,15 +46,13 @@ t/%.t: test/%.t t
 lib:
 	mkdir lib
 
-lib/GetData.xs: GetData.xs
-	$(MAKE) lib
+lib/GetData.xs: lib GetData.xs
 	cat $(srcdir)/GetData.xs > $@
 
-lib/typemap: typemap
-	$(MAKE) lib
+lib/typemap: lib typemap
 	cat $(srcdir)/typemap > $@
 
-lib/simple_funcs.xs: simple_funcs.xsin simple_funcs.pl
+lib/simple_funcs.xs: lib simple_funcs.xsin simple_funcs.pl
 	$(PERL) $(srcdir)/simple_funcs.pl $(srcdir)/simple_funcs.xsin > $@
 
 MANIFEST: MANIFEST.in
@@ -65,10 +71,18 @@ GetData.pm: GetData.pm.in make_parameters.sed funclist.pl lib/GetData.xs \
 		$(PERL) $(srcdir)/funclist.pl lib/GetData.xs lib/simple_funcs.xs > $@
 	chmod a-w $@
 
-all-local: lib blib/arch/auto/GetData/GetData.bs
-
-blib/arch/auto/GetData/GetData.bs: Build
+blib/arch/auto/GetData/GetData.bs: Build lib/GetData.xs lib/simple_funcs.xs \
+	lib/typemap
 	$(PERL) Build build
+	touch $@
+
+blib/arch/auto/GetData/GetData.so: blib/arch/auto/GetData/GetData.bs
+	touch $@
+
+blib/lib/GetData.pm: blib/arch/auto/GetData/GetData.bs
+	touch $@
+
+blib/libdoc/GetData.3: blib/arch/auto/GetData/GetData.bs
 	touch $@
 
 .PRECIOUS: Build
@@ -77,12 +91,15 @@ Build: Build.PL GetData.pm lib/GetData.xs lib/simple_funcs.xs lib/typemap \
 	$(PERL) Build.PL
 
 clean-local: 
-	rm -rf lib
+	rm -rf lib blib
 	if test -e Build; then \
 		$(PERL) Build clean; \
 	fi
 	rm -f $(BUILT_SOURCES) make_parameters.sed MYMETA.yml MYMETA.json GetData.pm
 	rm -rf Build _build MANIFEST t
+
+uninstall-hook:
+	rmdir $(DESTDIR)${perlautogetdatadir}
 
 if TEST_PERL
 check: $(PERL_TESTS)

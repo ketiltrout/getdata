@@ -35,6 +35,7 @@ clean-local:
 	gpg -abo $@ $<
 
 DISTCHECK_CONFIGURE_FLAGS = --with-idl-dlm-dir="$$dc_install_base/idl" \
+														--with-perl-dir="$$dc_install_base/perl" \
 														--with-python-module-dir="$$dc_install_base/python"
 
 # idl-only package

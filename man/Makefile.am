@@ -68,7 +68,7 @@ MAN3ALIASES=gd_add_bit.3:gd_add_carray.3 gd_add_bit.3:gd_add_clincom.3 \
 	gd_madd_bit.3:gd_madd_lincom.3 gd_madd_bit.3:gd_madd_linterp.3 \
 	gd_madd_bit.3:gd_madd_mplex.3 gd_madd_bit.3:gd_madd_multiply.3 \
 	gd_madd_bit.3:gd_madd_phase.3 gd_madd_bit.3:gd_madd_polynom.3 \
-	d_madd_bit.3:gd_madd_recip.3 gd_madd_bit.3:gd_madd_sbit.3 \
+	gd_madd_bit.3:gd_madd_recip.3 gd_madd_bit.3:gd_madd_sbit.3 \
 	gd_madd_bit.3:gd_madd_string.3 gd_madd_bit.3:gd_madd_window.3 \
 	gd_add.3:gd_madd.3 \
 	gd_add_spec.3:gd_madd_spec.3 \

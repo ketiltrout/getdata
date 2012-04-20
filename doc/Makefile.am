@@ -1,4 +1,4 @@
-# Copyright (C) 2008 D. V. Wiebe
+# Copyright (C) 2008, 2012 D. V. Wiebe
 #
 ##########################################################################
 #
@@ -36,12 +36,16 @@ if MAKE_IDLBINDINGS
 READMEIDL=README.idl
 endif
 
+if MAKE_PERLBINDINGS
+READMEPERL=README.perl
+endif
+
 if MAKE_PYBINDINGS
 READMEPYTHON=README.python
 endif
 
 dist_doc_DATA = ${READMECXX} ${READMEF77} ${READMEF95} ${READMEIDL} \
-								${READMEPYTHON} unclean_database_recovery.txt
+								${READMEPERL} ${READMEPYTHON} unclean_database_recovery.txt
 
 clean-local:
 	rm -rf *~

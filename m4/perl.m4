@@ -176,5 +176,9 @@ if test "x${have_perl}" != "xno"; then
   AC_SUBST([perldir])
   AC_MSG_RESULT([$perldir])
 
+  AC_MSG_CHECKING([Perl man directory])
+  AC_SUBST([perlmandir])
+  AC_MSG_RESULT([$perlmandir])
+
 fi
 ])
