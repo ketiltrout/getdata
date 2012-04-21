@@ -1711,9 +1711,8 @@ int main(void)
   CHECK_STRING_ARRAY(239,n,list[i],fields[i]);
 
   // 240: gd_mplex_lookback
-  n = d->MplexLookback(GD_LOOKBACK_ALL);
+  d->MplexLookback(GD_LOOKBACK_ALL);
   CHECK_OK(240);
-  CHECK_INT(240, n, 0);
 
 
 

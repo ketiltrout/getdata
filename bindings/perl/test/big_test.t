@@ -22,7 +22,7 @@
 use GetData;
 use Math::Complex;
 use strict;
-use Test::More tests => 1304;
+use Test::More tests => 1303;
 
 my $ne = 0;
 my ($s, @a, %h);
@@ -1699,9 +1699,8 @@ new14 new16 new18 new21 new3 new4 new6 new7 new8 phase polynom recip sbit
 window));
 
 # 240: gd_mplex_lookback
-$s = $_->mplex_lookback($GetData::LOOKBACK_ALL);
+$_->mplex_lookback($GetData::LOOKBACK_ALL);
 CheckOK(240);
-CheckNum(240, $s, 0);
 
 
 
