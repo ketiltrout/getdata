@@ -105,7 +105,7 @@ MAN3ALIASES=gd_add_bit.3:gd_add_carray.3 gd_add_bit.3:gd_add_clincom.3 \
 HTMLMANS=$(addsuffix .html,$(nodist_man_MANS)) \
 				 $(addsuffix .html,$(dist_man_MANS))
 
-%.html: %
+%.html: % make_html.pl
 	./make_html.pl $< > $@
 
 htmlman: $(HTMLMANS)

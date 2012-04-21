@@ -118,7 +118,7 @@ which modify binary data.
 
 GetData caches an uncompressed megabyte of data at a time to speed access times.
 A call to
-.BR get_nframes (3)
+.BR gd_nframes (3)
 requires decompression of the entire binary file to determine its uncompressed
 size, and may take some time to complete.
 The file extension of the BZip2 Encoding is
@@ -137,7 +137,7 @@ effect of this is that concurrently reading a GZip Encoded Dirfile which is
 being written to usually doesn't work.
 
 To speed the operation of
-.BR get_nframes (3),
+.BR gd_nframes (3),
 the GZip Encoding takes the uncompressed size of the file the gzip footer, which
 contains the file's uncompressed size in bytes, modulo 2**32.  As a result,
 using a field with an (uncompressed) binary file size larger than 4\~GiB as the
@@ -159,7 +159,7 @@ Encoding does not support functions which modify binary data.
 
 As with the BZip2 Encoding, GetData caches an uncompressed megabyte of data at a
 time to speed access times.  A call to
-.BR get_nframes (3)
+.BR gd_nframes (3)
 requires decompression of the entire binary file to determine its uncompressed
 size, and may take some time to complete.
 The file extension of the LZMA Encoding is
@@ -248,7 +248,7 @@ flag passed to
 .BR gd_open (3)
 is required to read ZZSlim encoded data.  The file extension of the ZZSlim
 Encoding is
-.BR zip .
+.BR .zip .
 
 .SH AUTHOR
 

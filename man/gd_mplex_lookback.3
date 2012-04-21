@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_mplex_lookback 3 "1 April 2012" "Version 0.8.0" "GETDATA"
+.TH gd_mplex_lookback 3 "21 April 2012" "Version 0.8.0" "GETDATA"
 .SH NAME
 gd_mplex_lookback \(em set the GetData lookback length for MPLEX fields.
 .SH SYNOPSIS
@@ -21,7 +21,7 @@ gd_mplex_lookback \(em set the GetData lookback length for MPLEX fields.
 .HP
 .nh
 .ad l
-.BI "int gd_mplex_lookback(DIRFILE *" dirfile ", int " lookback );
+.BI "void gd_mplex_lookback(DIRFILE *" dirfile ", int " lookback );
 .hy
 .ad n
 .SH DESCRIPTION
@@ -61,23 +61,29 @@ Otherwise,
 .I lookback
 should be a positive number specifying the number of
 .I MPLEX cycles
-to search.  Each MPLEX field has its own MPLEX cycle length, measured in samples
-of the index field, which is defined as follows:
+to search.  Each
+.B MPLEX
+field has its own
+.B MPLEX
+cycle length, measured in samples of the index field, which is defined as
+follows:
 .IP \(bu
 if the
 .B MPLEX
 field in question specifies an optional
-.I max
+.I count_max
 positive parameter (see the MPLEX definition in dirfile-format(5)), its MPLEX
 cycle length is that many samples;
 .IP \(bu
 if the
 .B MPLEX
 field's
-.I count
+.I count_val
 is at least five, its MPLEX cycle length is twice as many samples as that value;
 .IP \(bu
-otherwise, the MPLEX cylce length is ten samples.
+otherwise, the
+.B MPLEX
+cylce length is ten samples.
 .PP
 So, given the following MPLEX definitions:
 .IP
@@ -90,43 +96,26 @@ field3 \fBMPLEX\fR data_field index_field 7
 field4 \fBMPLEX\fR data_field index_field 2
 .PP
 .I field1
-has a cycle length of 12 samples,
+has a cycle length of 12 samples and
 .I field2
-6 samples (both the value of their
-.I max
-parameters),
+a cycle length of 6 samples (both the value of their
+.I count_max
+parameters);
 .I field3
-14 samples (twice it's
-.IR count ),
+has a cycle length of 14 samples (twice it's
+.IR count_val ),
 and
 .I field4
-10 samples (the default value, since its
-.I count
+has a cycle length of 10 samples (the default value, since its
+.I count_val
 is less than five).
 .PP
 The initial value of the MPLEX lookback is ten cycles.  This value is provided
 in getdata.h as
 .BR GD_DEFAULT_LOOKBACK .
 
-
-.SH RETURN VALUE
-On success,
-.BR gd_mplex_lookback ()
-returns zero; on error it returns -1 and sets the dirfile error to a non-zero
-value.  Possible error values are:
-
-.TP
-.B GD_E_BAD_DIRFILE
-The supplied dirfile was invalid.
-.PP
-The dirfile error may be retrieved by calling
-.BR gd_error (3).
-A descriptive error string for the last error encountered can be obtained from a
-call to
-.BR gd_error_string (3).
+This function always succeeds and returns no value.
 .SH SEE ALSO
 .BR dirfile (5),
 .BR dirfile-format (5),
-.BR gd_error (3),
-.BR gd_error_string (3),
 .BR gd_getdata (3).

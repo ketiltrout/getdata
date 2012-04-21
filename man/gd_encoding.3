@@ -1,6 +1,6 @@
 .\" gd_encoding.3.  The gd_encoding man page.
 .\"
-.\" Copyright (C) 2008, 2009, 2010 D. V. Wiebe
+.\" Copyright (C) 2008, 2009, 2010, 2012 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_encoding 3 "15 July 2010" "Version 0.7.0" "GETDATA"
+.TH gd_encoding 3 "21 April 2012" "Version 0.8.0" "GETDATA"
 .SH NAME
 gd_encoding \(em report the binary encoding of data in a dirfile
 .SH SYNOPSIS
@@ -47,19 +47,26 @@ following symbols:
 .IP
 .nh
 .ad l
-.BR GD_UNENCODED ,\~ GD_TEXT_ENCODED ,\~ GD_SLIM_ENCODED ,\~
-.BR GD_GZIP_ENCODED ,\~ GD_BZIP2_ENCODED ,\~ GD_LZMA_ENCODED ,\~
+.BR GD_UNENCODED ,
+.BR GD_BZIP2_ENCODED ,
+.BR GD_GZIP_ENCODED ,
+.BR GD_LZMA_ENCODED ,
+.BR GD_SIE_ENCODED ,
+.BR GD_SLIM_ENCODED ,
+.BR GD_TEXT_ENCODED ,
+.BR GD_ZZIP_ENCODED ,
+.BR GD_ZZSLIM_ENCODED ,
 .BR GD_ENC_UNSUPPORTED .
 .ad n
 .hy
 .PP
-See
-.BR gd_cbopen (3)
-and dirfile-encoding(5) for the meanings of these symbols and details on the
-supported encoding schemes.  If the encoding scheme specified in the dirfile
+If the encoding scheme specified in the dirfile
 metadata is unknown to GetData,
 .B GD_ENC_UNSUPPORTED
-will be returned.
+will be returned.  See
+.BR gd_cbopen (3)
+and dirfile-encoding(5) for the meanings of the other symbols and details on the
+supported encoding schemes.
 .PP
 On error, it returns zero and sets the dirfile error to a non-zero error value. 
 Possible error values are:

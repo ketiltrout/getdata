@@ -250,7 +250,7 @@ are available:
 * const char **Dirfile::MFieldList(const char *parent)
 * const char **Dirfile::MFieldListByType(const char *parent,
     GetData::EntryType type)
-* int MplexLookback(int lookback)
+* void MplexLookback(int lookback)
 * int Dirfile::MoveAlias(const char* field_code, int new_fragment)
 * const char **Dirfile::MStrings(const char *parent)
 * const char **Dirfile::MVectorList(const char *parent)

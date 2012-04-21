@@ -208,11 +208,12 @@ alias is another name for the target's own target.  Just as there is no
 requriement that the input fields of a derived field exist
 .RI ( q.v. ),
 it is not an error for the target of an alias to not exist.  Syntax is:
-.RS
 .IP
+.RS
 .B /ALIAS
 .I <name> <target>
-.PP
+.RE
+.IP
 A metafield alias may defined by using the
 .IR <parent-field> / <alias-name>
 syntax for
@@ -222,10 +223,11 @@ in the /ALIAS directive.  No restriction is placed on
 specifically, a metafield alias may target a top-level field, or a metafield
 of with a different parent; conversely, a top-level alias may target a
 metafield.
-.PP
+.IP
 A metafield alias may never appear as the parent part of a metafield field code,
 even if it refers to a top-level field.  That is, given the valid format:
 .IP
+.RS
 field1 \fBRAW UINT8\fR 1
 .br
 field1/meta \fBCONST FLOAT64\fR 0.0
@@ -233,7 +235,8 @@ field1/meta \fBCONST FLOAT64\fR 0.0
 field2 \fBRAW UINT8\fR 1
 .br
 \fB/ALIAS\fR field2/alias field1
-.PP
+.RE
+.IP
 The metafield
 .I field1/meta
 may not be referred to as
@@ -242,10 +245,9 @@ even though
 .I field2/alias
 is a valid field code referring to
 .IR field1 .
-.PP
+.IP
 The /ALIAS directive has no scope: it is processed immediately.  It appeared in
 Standards Version 9.
-.RE
 .TP
 .B /ENCODING
 The /ENCODING directive specifies the encoding scheme used to encode binary
@@ -1032,10 +1034,10 @@ UINT32
 .IR i ", " S
 INT32
 .TP
-.IR f
+.I f
 FLOAT32
 .TP
-.IR d
+.I d
 FLOAT64
 .RE
 
@@ -1140,50 +1142,50 @@ is compared, and
 is one of the following tokens indicating the particular comparison performed:
 .RS
 .TP
-.B EQ
+.I EQ
 data are extracted where
 .IR check ,
 converted to a 64-bit signed integer, equals
 .IR threshold ,
 .TP
-.B GE
+.I GE
 data are extracted where
 .IR check ,
 converted to a 64-bit floating-point number, is greater than or equal to
 .IR threshold ,
 .TP
-.B GT
+.I GT
 data are extracted where
 .IR check ,
 converted to a 64-bit floating-point number, is strictly greater than
 .IR threshold ,
 .TP
-.B LE
+.I LE
 data are extracted where
 .IR check ,
 converted to a 64-bit floating-point number, is less than or equal to
 .IR threshold ,
 .TP
-.B LT
+.I LT
 data are extracted where
 .IR check ,
 converted to a 64-bit floating-point number, is strictly less than
 .IR threshold ,
 .TP
-.B NE
+.I NE
 data are extracted where
 .IR check ,
 converted to a 64-bit signed integer, is not equal to
 .IR threshold ,
 .TP
-.B SET
+.I SET
 data are extracted where at least one bit set in
 .IR threshold
 is also set in
 .IR check ,
 when converted to a 64-bit unsigned integer,
 .TP
-.B CLR
+.I CLR
 data are extracted where at least one bit set in
 .IR threshold
 is not set in
@@ -1293,7 +1295,7 @@ real (floating point) numbers separated by a semicolon
 .RB ( ; )
 with no intervening whitespace.  So, for example, the tokens
 .IP
-1;0 0;1 4;0 0;5 9.313e2;74.1
+1;0 \t 0;1 \t 4;0 \t 0;5 \t 9.313e2;74.1
 .PP
 represent, respectively, the real unit, the imaginary unit, the real number
 four, the imaginary number

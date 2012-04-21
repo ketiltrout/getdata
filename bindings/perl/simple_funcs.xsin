@@ -153,4 +153,4 @@ int desync(DIRFILE *dirfile, unsigned int flags=0)
 unsigned long int flags(DIRFILE *dirfile, unsigned long int set=0,
     unsigned long int reset=0)
 int verbose_prefix(DIRFILE *dirfile, gdpu_char *prefix=NULL)
-int mplex_lookback(DIRFILE *dirfile, int lookback)
+void mplex_lookback(DIRFILE *dirfile, int lookback)

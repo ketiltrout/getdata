@@ -194,7 +194,7 @@ namespace GetData {
 
       const char **MFieldListByType(const char *parent, EntryType type) const;
 
-      int MplexLookback(int lookback) const;
+      void MplexLookback(int lookback) const;
 
       const char **MStrings(const char *parent) const;
 

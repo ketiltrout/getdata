@@ -160,20 +160,13 @@ int gd_verbose_prefix(DIRFILE *D, const char *prefix) gd_nothrow
   return 0;
 }
 
-int gd_mplex_lookback(DIRFILE *D, int lookback) gd_nothrow
+void gd_mplex_lookback(DIRFILE *D, int lookback) gd_nothrow
 {
   dtrace("%p, %i", D, lookback);
-
-  if (D->flags & GD_INVALID) {
-    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
-    dreturn("%i", -1);
-    return -1;
-  }
 
   _GD_ClearError(D);
 
   D->lookback = lookback;
 
-  dreturn("%i", 0);
-  return 0;
+  dreturnvoid();
 }

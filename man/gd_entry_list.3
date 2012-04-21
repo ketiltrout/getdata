@@ -101,8 +101,8 @@ The array returned will be de-allocated by a call to
 .BR gd_close (3)
 and should not be de-allocated by the caller.  The list returned should not be
 assumed to be in any particular order.  The array is terminated by a NULL
-pointer.  The number of strings in the array can be obtained from an equivalent
-call to
+pointer.  The number of elements in the array, excluding the terminating NULL,
+can be obtained from an equivalent call to
 .BR gd_nentries (3).
 
 The caller may not modify any strings in the array, or the array itself.  Doing
@@ -119,6 +119,7 @@ The call
 .RS
 .BI gd_field_list( dirfile );
 .RE
+.PP
 is equivalent to
 .RS
 .BI gd_entry_list( dirfile ", NULL, GD_ALL_ENTRIES, 0);
@@ -128,6 +129,7 @@ The call
 .RS
 .BI gd_field_list_by_type( dirfile ", " type );
 .RE
+.PP
 is equivalent to
 .RS
 .BI gd_entry_list( dirfile ", NULL, " type ", 0);"
@@ -137,6 +139,7 @@ The call
 .RS
 .BI gd_mfield_list( dirfile ", " parent );
 .RE
+.PP
 is equivalent to
 .RS
 .BI gd_entry_list( dirfile ", " parent ", GD_ALL_ENTRIES, 0);"
@@ -146,6 +149,7 @@ The call
 .RS
 .BI gd_mfield_list_by_type( dirfile ", " parent ", " type );
 .RE
+.PP
 is equivalent to
 .RS
 .BI gd_entry_list( dirfile ", " parent ", " type ", 0);"
@@ -155,6 +159,7 @@ The call
 .RS
 .BI gd_mvector_list( dirfile ", " parent );
 .RE
+.PP
 is equivalent to
 .RS
 .BI gd_entry_list( dirfile ", " parent ", GD_VECTOR_ENTRIES, 0);"
@@ -164,6 +169,7 @@ The call
 .RS
 .BI gd_vector_list( dirfile );
 .RE
+.PP
 is equivalent to
 .RS
 .BI gd_entry_list( dirfile ", NULL, GD_VECTOR_ENTRIES, 0);"

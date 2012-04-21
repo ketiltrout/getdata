@@ -1,6 +1,6 @@
 .\" gd_entry.3.  The gd_entry man page.
 .\"
-.\" Copyright (C) 2008, 2009, 2010, 2011 D. V. Wiebe
+.\" Copyright (C) 2008, 2009, 2010, 2011, 2012 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_entry 3 "18 August 2011" "Version 0.8.0" "GETDATA"
+.TH gd_entry 3 "21 April 2012" "Version 0.8.0" "GETDATA"
 .SH NAME
 gd_entry \(em retrieve a dirfile field's metadata
 .SH SYNOPSIS
@@ -134,17 +134,29 @@ to one of the following symbols:
 .IP
 .nh
 .ad l
-.BR GD_BIT_ENTRY ", " GD_CARRAY_ENTRY ", " GD_CONST_ENTRY ", " GD_DIVIDE_ENTRY ,
-.BR GD_INDEX_ENTRY ", " GD_LINCOM_ENTRY ", " GD_LINTERP_ENTRY ,
-.BR GD_MULTIPLY_ENTRY ", " GD_PHASE_ENTRY ", " GD_POLYNOM_ENTRY ,
-.BR GD_RAW_ENTRY ", " GD_RECIP_ENTRY ", " GD_SBIT_ENTRY ", " GD_STRING_ENTRY .
+.BR GD_BIT_ENTRY ,
+.BR GD_CARRAY_ENTRY ,
+.BR GD_CONST_ENTRY ,
+.BR GD_DIVIDE_ENTRY ,
+.BR GD_INDEX_ENTRY ,
+.BR GD_LINCOM_ENTRY ,
+.BR GD_LINTERP_ENTRY ,
+.BR GD_MPLEX_ENTRY ,
+.BR GD_MULTIPLY_ENTRY ,
+.BR GD_PHASE_ENTRY ,
+.BR GD_POLYNOM_ENTRY ,
+.BR GD_RAW_ENTRY ,
+.BR GD_RECIP_ENTRY ,
+.BR GD_SBIT_ENTRY ,
+.BR GD_STRING_ENTRY ,
+.BR GD_WINDOW_ENTRY .
 .ad n
 .hy
 .PP
 .B GD_INDEX_ENTRY
 is a special field type used only for the implicit
 .I INDEX
-field.  The meaning of the other symbols should be self-explanatory.
+field.  The other entry types are explained in detail in dirfile-format(5).
 .PP
 The 
 .I fragment_index

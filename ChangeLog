@@ -1,3 +1,10 @@
+2012-04-21   D. V. Wiebe <getdata@ketiltrout.net> svn:705
+	* man/make_html.pl: Improvements. 
+
+	* src/globals.c (gd_mplex_lookback): Always succeed; return void.
+
+	* bindings/perl/simple_funcs.pl: Handle returning void.
+
 2012-04-19   D. V. Wiebe <getdata@ketiltrout.net> svn:701
 	* src/add.c (_GD_Add): Don't check protection level before figuring out the
 	fragment index.

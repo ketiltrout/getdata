@@ -69,8 +69,8 @@ argument should include one of the
 (read-write), and may also contain zero or more of the following flags,
 bitwise-or'd together:
 .PP
-.B GD_ARM_ENDIAN
 .PD 0
+.B GD_ARM_ENDIAN
 .TP
 .PD
 .B GD_NOT_ARM_ENDIAN
@@ -91,8 +91,8 @@ on all but middle-ended ARM systems)
 indicates the native behaviour of the platform.  That symbol will equal zero,
 and may be omitted.
 .PP
-.B GD_BIG_ENDIAN
 .PD 0
+.B GD_BIG_ENDIAN
 .TP
 .PD
 .B GD_LITTLE_ENDIAN
@@ -139,9 +139,10 @@ Ensure that this call creates a dirfile: when specified along with
 .BR GD_CREAT ,
 the call will fail if the dirfile specified by
 .I dirfilename
-already exists.  Behaviour of this flag is undefined if
+already exists.  If
 .B GD_CREAT
-is not specified.  This flag suffers from all the limitations of the
+is not specified, this flag is ignored.  This flag suffers from all the
+limitations of the
 .B O_EXCL
 flag as indicated in
 .BR open (2).
@@ -512,6 +513,10 @@ An attempt was made to use a metafield as the parent to a new metafield.
 .B GD_E_FORMAT_METARAW
 An attempt was made to add a RAW metafield.
 .TP
+.B GD_E_FORMAT_MPLEXVAL
+A MPLEX specification has a negative count_max or count_val, or else had
+a positive count_max, and count_val was larger than it.
+.TP
 .B GD_E_FORMAT_N_FIELDS
 The number of fields of a LINCOM field was out-of-range.
 .TP
@@ -541,18 +546,6 @@ The last token of the line was unterminated.
 .TP
 .B GD_E_FORMAT_WINDOP
 The operation in a WINDOW field was not recognised.
-.TP
-.B GD_E_FORMAT_META_META
-A
-.B /META
-directive used a metafield for the parent field for the definition.
-.TP
-.B GD_E_FORMAT_ALIAS
-A metafield specification uses an alias for the parent field.
-.TP
-.B GD_E_FORMAT_MPLEXVAL
-A MPLEX specification has a negative count_max or count_val, or else had
-a positive count_max, and count_val was larger than it.
 .PP
 .IR pdata -> filename
 and

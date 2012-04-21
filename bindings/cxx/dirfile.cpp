@@ -550,9 +550,9 @@ int Dirfile::VerbosePrefix(const char *prefix) const
   return gd_verbose_prefix(D, prefix);
 }
 
-int Dirfile::MplexLookback(int lookback) const
+void Dirfile::MplexLookback(int lookback) const
 {
-  return gd_mplex_lookback(D, lookback);
+  gd_mplex_lookback(D, lookback);
 }
 
 unsigned int Dirfile::NEntries(const char *parent, unsigned int type,

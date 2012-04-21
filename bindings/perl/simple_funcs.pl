@@ -135,10 +135,24 @@ while (<>) {
 
   print "\tCODE:\n\t\tdtrace(\"", join(", ", map(printfmt($_), @argtype));
   print "\", ", join(", ", map(printmunge($_), @arg)), ");\n";
-  print "\t\tRETVAL = ";
+
+  print "\t\t";
+  if ($ret ne "void") {
+    print "RETVAL = ";
+  }
   print (($lfs) ? "gdp64(gd_$func)" : "gd_$func");
-  print "($arglist);\n\t\tGDP_UNDEF_ON_ERROR();\n\tOUTPUT:\n";
-  print "\t\tRETVAL\n\tCLEANUP:\n", map(printcleanup($_), @arg);
-  print "\t\tdreturn(\"", &printfmt($ret), "\", ";
-  print &printmunge([$ret, "RETVAL"]), ");\n\n";
+  print "($arglist);\n";
+
+  if ($ret ne "void") {
+    print "\t\tGDP_UNDEF_ON_ERROR();\n";
+    print "\tOUTPUT:\n\t\tRETVAL\n";
+  }
+
+  print "\tCLEANUP:\n", map(printcleanup($_), @arg);
+  if ($ret eq "void") {
+    print "\t\tdreturnvoid();\n\n";
+  } else {
+    print "\t\tdreturn(\"", &printfmt($ret), "\", ";
+    print &printmunge([$ret, "RETVAL"]), ");\n\n";
+  }
 }

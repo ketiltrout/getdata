@@ -134,7 +134,7 @@ static PyObject* gdpy_dirfile_create(PyTypeObject *type, PyObject *args,
 
   if (self) {
     self->D = NULL;
-    self->mplex_lookback = 10;
+    self->mplex_lookback = GD_DEFAULT_LOOKBACK;
     self->verbose_prefix = NULL;
     self->callback = NULL;
     self->callback_data = NULL;

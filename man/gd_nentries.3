@@ -104,6 +104,7 @@ The call
 .RS
 .BI gd_nfields( dirfile );
 .RE
+.PP
 is equivalent to
 .RS
 .BI gd_nentries( dirfile ", NULL, GD_ALL_ENTRIES, 0);
@@ -113,6 +114,7 @@ The call
 .RS
 .BI gd_nfields_by_type( dirfile ", " type );
 .RE
+.PP
 is equivalent to
 .RS
 .BI gd_nentries( dirfile ", NULL, " type ", 0);"
@@ -122,6 +124,7 @@ The call
 .RS
 .BI gd_nmfields( dirfile ", " parent );
 .RE
+.PP
 is equivalent to
 .RS
 .BI gd_nentries( dirfile ", " parent ", GD_ALL_ENTRIES, 0);"
@@ -131,6 +134,7 @@ The call
 .RS
 .BI gd_nmfields_by_type( dirfile ", " parent ", " type );
 .RE
+.PP
 is equivalent to
 .RS
 .BI gd_nentries( dirfile ", " parent ", " type ", 0);"
@@ -140,6 +144,7 @@ The call
 .RS
 .BI gd_nmvectors( dirfile ", " parent );
 .RE
+.PP
 is equivalent to
 .RS
 .BI gd_nentries( dirfile ", " parent ", GD_VECTOR_ENTRIES, 0);"
@@ -149,6 +154,7 @@ The call
 .RS
 .BI gd_nvectors( dirfile );
 .RE
+.PP
 is equivalent to
 .RS
 .BI gd_nentries( dirfile ", NULL, GD_VECTOR_ENTRIES, 0);"

@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_include_affix 3 "4 April 2012" "Version 0.8.0" "GETDATA"
+.TH gd_include_affix 3 "21 April 2012" "Version 0.8.0" "GETDATA"
 .SH NAME
 gd_include_affix, gd_include \(em add a format specification fragment to a
 dirfile
@@ -71,19 +71,51 @@ equal to NULL.
 
 The 
 .I flags
-argument should be a bitwise-or'd collection of the following flags, or zero
-if no flags are desired:
+argument should be a bitwise-or'd collection of zero or more of the following
+flags:
+.PP
+.PD 0
+.B GD_ARM_ENDIAN
 .TP
-.B GD_BIG_ENDIAN
-Specifies that raw data on disk is stored as big-endian data (most significant
-byte first).  Specifying this flag along with the contradictory
-.BR GD_LITTLE_ENDIAN 
-will cause the library to assume that the endianness of the data is opposite to
-that of the native architecture.
+.PD
+.B GD_NOT_ARM_ENDIAN
+Specifies that double precision floating point raw data on disk are, or are not,
+stored in the middle-endian format used by older ARM processors.
 
-This flag is ignored completely if an
-.B ENDIAN
-directive occurs in the fragment, unless
+These flag only set the default endianness, and will be overridden when an
+.B /ENDIAN
+directive specifies the byte sex of
+.B RAW
+fields, unless
+.B GD_FORCE_ENDIAN
+is also specified.
+
+On every platform, one of these flags
+.RB ( GD_NOT_ARM_ENDIAN
+on all but middle-ended ARM systems)
+indicates the native behaviour of the platform.  That symbol will equal zero,
+and may be omitted.
+.PP
+.PD 0
+.B GD_BIG_ENDIAN
+.TP
+.PD
+.B GD_LITTLE_ENDIAN
+Specifies the default byte sex of raw data stored on disk to be either
+big-endian (most significant byte first) or little-endian (least significant
+byte first).  Omitting both flags indicates the default should be the native
+endianness of the platform.
+
+Unlike the ARM endianness flags above, neither of these symbols is ever zero.
+Specifying both these flags together will cause the library to assume that the
+endianness of the data is opposite to that of the native architecture, whatever
+that might be.
+
+These flag only set the default endianness, and will be overridden when an
+.B /ENDIAN
+directive specifies the byte sex of
+.B RAW
+fields, unless
 .B GD_FORCE_ENDIAN
 is also specified.
 .TP
@@ -99,16 +131,17 @@ Ensure that this call creates a new fragment: when specified along with
 .BR GD_CREAT ,
 the call will fail if the file specified by
 .I include_file
-already exists.  Behaviour of this flag is undefined if
+already exists.  If
 .B GD_CREAT
-is not specified.  This flag suffers from all the limitations of the
+is not specified, this flag is ignord.  This flag suffers from all the
+limitations of the
 .B O_EXCL
 flag as indicated in
 .BR open (2).
 .TP
 .B GD_FORCE_ENCODING
 Specifies that
-.B ENCODING
+.B /ENCODING
 directives (see
 .BR dirfile-format (5))
 found in the fragment should be ignored.  The encoding scheme
@@ -118,7 +151,7 @@ will be used instead (see below).
 .TP
 .B GD_FORCE_ENDIAN
 Specifies that
-.B ENDIAN
+.B /ENDIAN
 directives (see
 .BR dirfile-format (5))
 found in the fragment should be ignored.  When specified with one of
@@ -154,19 +187,6 @@ directives in the included fragment will be ignored.  Otherwise, a
 directive in the included fragment will replace the current reference field in
 the dirfile.
 .TP
-.B GD_LITTLE_ENDIAN
-Specifies that raw data on disk is stored as little-endian data (least
-significant byte first).  Specifying this flag along with the contradictory
-.BR GD_BIG_ENDIAN 
-will cause the library to assume that the endianness of the data is opposite to
-that of the native architecture.
-
-This flag is ignored completely if an
-.B ENDIAN
-directive occurs in the fragment, unless
-.B GD_FORCE_ENDIAN
-is also specified.
-.TP
 .B GD_PEDANTIC
 Specifies that unrecognised lines found during the parsing of the fragment
 should always cause a fatal error.  Without this flag, if a
@@ -193,9 +213,8 @@ itself, unless
 .B GD_FORCE_ENCODED
 is also specified.  If none of these symbols is present,
 .B GD_AUTO_ENCODED
-is assumed, unless the
-.BR gd_include_affix ()
-call results in creation or truncation of the fragment.  In that case,
+is assumed, unless this call results in creation or truncation of the fragment. 
+In that case,
 .B GD_UNENCODED
 is assumed.  See
 .BR dirfile-encoding (5)

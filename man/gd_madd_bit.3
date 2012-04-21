@@ -259,7 +259,6 @@ The C89 GetData API provides different prototypes for
 and
 .BR gd_madd_crecip ():
 .PP
-.nf
 .B #define GD_C89_API
 .B #include <getdata.h>
 .HP
@@ -275,10 +274,9 @@ and
 .HP
 .BI "int gd_madd_crecip(DIRFILE *" dirfile ", const char *" parent ,
 .BI "const char *" field_name ", const char *" in_field ,
-.BI "double " cdividend "[2], int " fragment_index );
+.BI "double " cdividend\fR[2] ", int " fragment_index );
 .hy
 .ad n
-.fi
 .PP
 In this case, the array pointers passed as
 .IR cm ", " cb
