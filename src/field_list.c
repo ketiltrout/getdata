@@ -117,11 +117,11 @@ int _GD_ListEntry(const gd_entry_t *E, int meta, int hidden, int noalias,
 
   /* aliases */
   if (E->field_type == GD_ALIAS_ENTRY) {
+    int ret = 0;
     if (noalias) {
       dreturn("%i (alias)", 0);
       return 0;
     }
-    int ret = 0;
     if (E->e->entry[0])
       ret = _GD_ListEntry(E->e->entry[0], meta, hidden, 0, special, type);
     dreturn("%i", ret);

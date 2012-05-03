@@ -44,7 +44,7 @@ if(MSVC)
 	set(DEFINE_GD_NO_C99_API "#define GD_NO_C99_API")
 
 	set(DEFINE_gd_int64_t  "#define gd_int64_t  __int64")
-	set(DEFINE_gd_uint64_t "#define gd_uint64_t __uint64")
+	set(DEFINE_gd_uint64_t "#define gd_uint64_t unsigned __int64")
 
 	add_definitions(-D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_WARNINGS)
 	add_definitions(
@@ -52,17 +52,23 @@ if(MSVC)
 		-D_USE_MATH_DEFINES
 		-DHAVE_DIRENT_H
 		-DHAVE_DIRECT_H
+    -DHAVE_FCNTL_H
 		-DHAVE_LIBGEN_H
 		-DSTDC_HEADERS
 		-DHAVE_INTTYPES_H
 		-DHAVE_IO_H
 		-DHAVE_STDINT_H
+    -DHAVE_SYS_STAT_H
 		-DHAVE__STAT64
 		-DHAVE_STRUCT__STAT64
 		-DHAVE__COMMIT
 		-DHAVE__STRTOI64
 		-DHAVE__STRTOUI64
 		-DHAVE__GETCWD
+    -DGD_DIRSEP='\\\\'
+    -Drestrict=
+    -DSIZEOF_INT=4
+    -DSIZEOF_UNSIGNED_INT=4
 		)
 	set(CMAKE_DEBUG_POSTFIX d)
 	

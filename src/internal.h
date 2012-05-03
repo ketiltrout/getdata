@@ -116,6 +116,12 @@ typedef off_t off64_t;
 /* the open() in the MSVCRT doesn't permit open()ing directories */
 #ifdef __MSVCRT__
 #define GD_NO_DIR_OPEN
+/* rename open() flags */
+#define O_RDWR _O_RDWR
+#define O_RDONLY _O_RDONLY
+#define O_CREAT _O_CREAT
+#define O_EXCL _O_EXCL
+#define O_TRUNC _O_TRUNC
 #endif
 
 #ifdef GD_NO_C99_API
@@ -374,7 +380,7 @@ const char* gd_colsub(void);
 #endif
 
 #if !defined(HAVE_DECL_OFFSETOF) || !  HAVE_DECL_OFFSETOF
-#define offsetof(t,m) ((size_t)((char*)&(((t)*)0)->(m) - (char*)0))
+#define offsetof(t,m) ((size_t)(((char*)&((t*)0)->m) - (char*)0))
 #endif
 
 #ifdef HAVE_READDIR_R

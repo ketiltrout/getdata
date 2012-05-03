@@ -116,9 +116,15 @@ static int _GD_TruncDir(DIRFILE *D, int dirfd, const char *dirfile, int root)
     /* check file type */
     switch (statbuf.st_mode & S_IFMT) {
       case S_IFREG:
+#ifdef S_IFBLK
       case S_IFBLK:
+#endif
+#ifdef S_IFIFO
       case S_IFIFO:
+#endif
+#ifdef S_IFCHR
       case S_IFCHR:
+#endif
 #ifdef S_IFLNK
       case S_IFLNK:
 #endif

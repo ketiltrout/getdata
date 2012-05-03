@@ -334,8 +334,9 @@ ssize_t _GD_SampIndWrite(struct _gd_raw_file *restrict file,
   for (i = 0; i < nelem; ++i) {
     if (memcmp(((const char*)ptr) + i * dlen, cur_datum, dlen)) {
       if (++rin == plen) {
+        void *p2;
         plen += 10;
-        void *p2 = realloc(p, plen * size);
+        p2 = realloc(p, plen * size);
         if (p2 == NULL) {
           free(p);
           dreturn("%i", -1);

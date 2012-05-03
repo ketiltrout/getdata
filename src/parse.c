@@ -2099,13 +2099,14 @@ static int _GD_ParseDirective(DIRFILE *restrict D, char **in_cols, int n_cols,
       break;
     case 'I':
       if (strcmp(ptr, "INCLUDE") == 0 && (!pedantic || *standards >= 3)) {
-        matched = 1;
+        int frag;
         unsigned long subflags = D->fragment[me].encoding
           | D->fragment[me].byte_sex | (*flags & (GD_PEDANTIC | GD_PERMISSIVE
                 | GD_FORCE_ENDIAN | GD_FORCE_ENCODING | GD_IGNORE_DUPS
                 | GD_IGNORE_REFS));
+        matched = 1;
 
-        int frag = _GD_Include(D, in_cols[1], D->fragment[me].cname, linenum,
+        frag = _GD_Include(D, in_cols[1], D->fragment[me].cname, linenum,
             ref_name, me, (n_cols > 2) ? in_cols[2] : NULL,
             (n_cols > 3) ? in_cols[3] : NULL, standards, &subflags, 0);
 
