@@ -30,7 +30,7 @@ endif
 PERL_TESTS=t/big_test.t t/callback.t
 
 man3dir=${perlmandir}
-nodist_man3_MANS=blib/libdoc/GetData.3
+nodist_man3_MANS=blib/libdoc/GetData.$(PERL_MAN3EXT)
 
 nodist_perl_SCRIPTS=blib/lib/GetData.pm
 
@@ -71,19 +71,10 @@ GetData.pm: GetData.pm.in make_parameters.sed funclist.pl lib/GetData.xs \
 		$(PERL) $(srcdir)/funclist.pl lib/GetData.xs lib/simple_funcs.xs > $@
 	chmod a-w $@
 
-blib/arch/auto/GetData/GetData.bs: Build lib/GetData.xs lib/simple_funcs.xs \
-	lib/typemap
+blib/arch/auto/GetData/GetData.bs blib/arch/auto/GetData/GetData.so \
+	blib/lib/GetData.pm blib/libdoc/GetData.$(PERL_MAN3EXT): Build \
+	lib/GetData.xs lib/simple_funcs.xs lib/typemap
 	$(PERL) Build build
-	touch $@
-
-blib/arch/auto/GetData/GetData.so: blib/arch/auto/GetData/GetData.bs
-	touch $@
-
-blib/lib/GetData.pm: blib/arch/auto/GetData/GetData.bs
-	touch $@
-
-blib/libdoc/GetData.3: blib/arch/auto/GetData/GetData.bs
-	touch $@
 
 .PRECIOUS: Build
 Build: Build.PL GetData.pm lib/GetData.xs lib/simple_funcs.xs lib/typemap \

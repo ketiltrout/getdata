@@ -46,9 +46,20 @@ else
 fi
 ])
 
+dnl GD_PERL_MAN3EXT
+dnl ---------------------------------------------------------------
+dnl Define PERL_MAN3EXT to the section 3 manual extension used by Module::Build
+AC_DEFUN([GD_PERL_MAN3EXT],
+[
+AC_MSG_CHECKING([for the section 3 manual page extension])
+PERL_MAN3EXT=`$PERL -MModule::Build -e 'print Module::Build->new(module_name=>"conftest",dist_version=>0)->config('man3ext');'`
+AC_MSG_RESULT([.$PERL_MAN3EXT])
+AC_SUBST([PERL_MAN3EXT])
+])
+
 dnl GD_PERL_CHECK_MODULE
 dnl ---------------------------------------------------------------
-dnl Define HAVE_<MODULE_NAME> if the specified encoding exists
+dnl Define HAVE_<MODULE_NAME> if the specified module exists
 AC_DEFUN([GD_PERL_CHECK_MODULE],
 [
 AC_MSG_CHECKING([for $1])
@@ -180,5 +191,6 @@ if test "x${have_perl}" != "xno"; then
   AC_SUBST([perlmandir])
   AC_MSG_RESULT([$perlmandir])
 
+  GD_PERL_MAN3EXT
 fi
 ])
