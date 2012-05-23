@@ -31,7 +31,7 @@
 
 int main(void)
 {
-#if !defined HAVE_MKFIFO || !defined HAVE_WORKING_FORK
+#if !defined HAVE_MKFIFO || !defined HAVE_WORKING_FORK || defined __CYGWIN__
   return 77; /* skip */
 #else
   const char *filedir = "dirfile";
