@@ -4,20 +4,11 @@ THE GETDATA PROJECT
 The GetData Project is the reference implementation of the Dirfile Standards.
 The Dirfile database format is designed to provide a fast, simple format for
 storing and reading binary time-ordered data.  The Dirfile Standards are
-described in detail in three Unix manual pages distributed with this package:
-dirfile(5), dirfile-format(5) and dirfile-encoding(5), which may be read before
-installation by running:
+described in detail in three manual pages distributed with this package:
 
-  $ man man/dirfile.5
-  $ man man/dirfile-format.5
-  $ man man/dirfile-encoding.5
-
-from the top GetData Project directory (the directory containing this README
-file).  After installation, they can be read with the standard man command:
-
-  $ man dirfile
-  $ man dirfile-format
-  $ man dirfile-encoding
+  man/dirfile.5.html
+  man/dirfile-format.5.html
+  man/dirfile-encoding.5.html
 
 More information on the GetData Project and the Dirfile database format may be
 found on the World Wide Web:
@@ -98,30 +89,44 @@ dirfile-format(5) man page.
 BUILDING THE LIBRARY
 ====================
 
-This package may be built using Kitware's CMake build system.  Consult the CMake 
+This package may be built using Kitware's CMake build system.  Consult the CMake
 documentation for generic instructions on using CMake.  A brief summary follows.
-This package supports building GetData using either Microsoft's Visual C++ compiler
-or else the free MinGW compiler, both which produce native Win32 binaries.
+This package supports building GetData using either Microsoft's Visual C++
+compiler or else the free MinGW compiler, both which produce native Win32
+binaries.
 
-Best practice is to build out of source. Call CMake in the build folder and
-point it to the 'cmake' folder within the GetData source. For instance,
-to create a project file for Microsoft Visual Studio 10 execute:
+Best practice is to build outside the source tree. Call CMake in the build
+folder and point it to the 'cmake' folder within the GetData source. For
+instance, to create a project file for Microsoft Visual Studio 10 execute:
 
-  cmake -G"Visual Studio 10" ..\getdata-0.7\cmake
+  cmake -G"Visual Studio 10" ..\getdata-0.8\cmake
 
 Then build the project as usual.
 
-The GetData test suit could be ebabled by setting the GD_TEST variable:
+This package comes with a few utility programs in the util subdirectory.  They
+can be optionally built by setting the GD_UTIL variable:
 
-  cmake . -DGD_TEST=1
+  cmake <path> -DGD_UTIL=1
+
+The GetData test suit can be ebabled by setting the GD_TEST variable:
+
+  cmake <path> -DGD_TEST=1
 
 In Visual Studio run the test by building the 'RUN_TESTS'. Using mingw
 or nmake run the tests by calling ctest.
 
-The install path could be set via the variable CMAKE_INSTALL_PREFIX.
+Verbose debugging output can be turned on by setting the GD_DEBUG variable:
+
+  cmake <path> -DGD_DEBUG=1
+
+These debugging messages are typically only useful to people debugging GetData
+itself. For release builds of GetData it should usually be left off, as they may
+have a negative performance impact.
+
+The install path can be set via the variable CMAKE_INSTALL_PREFIX.
 By default it installs to <build-dir>/INSTALLED.
 
-The file cmake/FindGetData.cmake could be used in projects managed by
+The file cmake/FindGetData.cmake may be used in projects managed by
 CMake and which have to search for a GetData installation.
 
 

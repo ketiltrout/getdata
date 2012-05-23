@@ -207,7 +207,7 @@ static char **_GD_UpdateScalar(DIRFILE *D, gd_entry_t *T, const gd_entry_t *E,
     char **list, size_t len, int n, int pass, int *nl)
 {
   char **ptr;
-  dtrace("%p, %p, %p, %p, %zu, %i, %i, %i", D, T, E, list, len, n, pass, *nl);
+  dtrace("%p, %p, %p, %p, %" PRNsize_t ", %i, %i, %i", D, T, E, list, len, n, pass, *nl);
 
   if (pass & GD_UPDI) {
     if ((ptr = (char**)_GD_Realloc(D, list, sizeof(char *) * (*nl + 1)))
@@ -241,7 +241,7 @@ static char **_GD_InvalidateConst(DIRFILE *D, const gd_entry_t *E, char **list,
   int i, j;
   unsigned u;
 
-  dtrace("%p, %p, %p, %zu, %i, %p", D, E, list, len, pass, nl);
+  dtrace("%p, %p, %p, %" PRNsize_t ", %i, %p", D, E, list, len, pass, nl);
 
   if (pass & GD_UPDI)
     for (u = 0; u < D->n_entries; ++u)
@@ -306,7 +306,7 @@ static char **_GD_UpdateInField(DIRFILE *D, gd_entry_t *T, const gd_entry_t *E,
     char **list, size_t len, int n, int pass, int *nl)
 {
   char **ptr;
-  dtrace("%p, %p, %p, %p, %zu, %i, %i, %i", D, T, E, list, len, n, pass, *nl);
+  dtrace("%p, %p, %p, %p, %" PRNsize_t ", %i, %i, %i", D, T, E, list, len, n, pass, *nl);
 
   if (pass != 0 && T->e->entry[n] == NULL)
     _GD_BadInput(D, T, n, 0);
@@ -349,7 +349,7 @@ static char **_GD_InvalidateVect(DIRFILE *D, const gd_entry_t *E, char **list,
 {
   unsigned u;
 
-  dtrace("%p, %p, %p, %zu, %i, %p", D, E, list, len, pass, nl);
+  dtrace("%p, %p, %p, %" PRNsize_t ", %i, %p", D, E, list, len, pass, nl);
 
   for (u = 0; u < D->n_entries; ++u) {
     if (D->entry[u] != E)

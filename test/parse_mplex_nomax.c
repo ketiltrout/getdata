@@ -46,7 +46,7 @@ int main(void)
 
   CHECKI(e1,0);
   CHECKI(e2,0);
-  CHECKI(E.count_max,0);
-  CHECKI(E.count_val,6);
+  CHECKI(E.EN(mplex,count_max),0);
+  CHECKI(E.EN(mplex,count_val),6);
   return r;
 }

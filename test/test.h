@@ -31,6 +31,14 @@
 #include <direct.h>
 #endif
 
+#ifdef HAVE_FLOAT_H
+#include <float.h>
+#endif
+
+#ifdef HAVE__ISNAN
+#define isnan _isnan
+#endif
+
 /* System call kludge for Win32 */
 #if defined __MSVCRT__ && defined MSYS_SHELL
 #include <process.h>

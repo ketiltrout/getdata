@@ -35,13 +35,15 @@ int main(void)
   const char *format = "dirfile/format";
   int error, ge_error, r = 0;
   gd_entry_t e;
+  gd_triplet_t thresh;
   DIRFILE *D;
 
   rmdirfile();
   D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
-  gd_add_window(D, "new", "in", "check", GD_WINDOP_GT, (gd_triplet_t)0.1, 0);
-  gd_madd_window(D, "new", "meta", "in", "check", GD_WINDOP_CLR,
-      (gd_triplet_t)(uint64_t)0x1F000);
+  thresh.r = 0.1;
+  gd_add_window(D, "new", "in", "check", GD_WINDOP_GT, thresh, 0);
+  thresh.u = 0x1F000;
+  gd_madd_window(D, "new", "meta", "in", "check", GD_WINDOP_CLR, thresh);
   error = gd_error(D);
 
   /* check */

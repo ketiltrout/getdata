@@ -1287,8 +1287,8 @@ int gd_add_carray(DIRFILE* D, const char* field_code, gd_type_t const_type,
   gd_entry_t *entry;
   gd_entry_t C;
 
-  dtrace("%p, \"%s\", 0x%X, %zi, 0x%X, %p, %i", D, field_code, const_type,
-      array_len, data_type, values, fragment_index);
+  dtrace("%p, \"%s\", 0x%X, %" PRNsize_t ", 0x%X, %p, %i", D, field_code,
+      const_type, array_len, data_type, values, fragment_index);
 
   if (D->flags & GD_INVALID) {
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -1883,8 +1883,8 @@ int gd_madd_carray(DIRFILE* D, const char* parent, const char* field_code,
   gd_entry_t *entry;
   gd_entry_t C;
 
-  dtrace("%p, \"%s\", \"%s\", 0x%X, %zi 0x%X, %p", D, parent, field_code,
-      const_type, array_len, data_type, values);
+  dtrace("%p, \"%s\", \"%s\", 0x%X, %" PRNsize_t ", 0x%X, %p", D, parent,
+      field_code, const_type, array_len, data_type, values);
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);

@@ -1,4 +1,4 @@
-/* Copyright (C) 2010, 2011 D. V. Wiebe
+/* Copyright (C) 2010, 2011, 2012 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -155,7 +155,7 @@ int strerror_r(int errnum, char *buf, size_t buflen)
 {
   char *ptr;
 
-  dtrace("%i, %p, %zu", errnum, buf, buflen);
+  dtrace("%i, %p, %" PRNsize_t, errnum, buf, buflen);
 
   ptr = strerror(errnum);
   strncpy(buf, ptr, buflen);
@@ -184,7 +184,7 @@ ssize_t getdelim(char **lineptr, size_t *n, int delim, FILE *stream)
   if (*lineptr == NULL || *n == 0) {
     *lineptr = (char *)malloc(*n = 100);
     if (*lineptr == NULL) {
-      dreturn("%i)", -1);
+      dreturn("%i", -1);
       return -1;
     }
   }
@@ -198,7 +198,7 @@ ssize_t getdelim(char **lineptr, size_t *n, int delim, FILE *stream)
 
   if (nread == 0) {
     /* this is an error or EOF with no data read */
-    dreturn("%i)", -1);
+    dreturn("%i", -1);
     return -1;
   }
 
@@ -281,6 +281,21 @@ ssize_t getdelim(char **lineptr, size_t *n, int delim, FILE *stream)
 }
 #endif
 
+#ifndef HAVE_BASENAME
+char *basename(char *path)
+{
+  char *last_elem, *ptr;
+
+  last_elem = path;
+
+  for (ptr = path; *ptr; ++ptr)
+    if ((*ptr == '/' || *ptr == GD_DIRSEP) && *(ptr + 1))
+      last_elem = ptr + 1;
+
+  return last_elem;
+}
+#endif
+
 /* emulate readdir_r(3) with non-threadsafe readdir(3) */
 #ifndef HAVE_READDIR_R
 int _GD_ReadDir(DIR *dirp, struct dirent *entry, struct dirent **result)
@@ -305,5 +320,133 @@ int _GD_ReadDir(DIR *dirp, struct dirent *entry, struct dirent **result)
   memcpy(entry, local_entry, sizeof(struct dirent));
   dreturn("%i", 0);
   return 0;
+}
+#endif
+
+/* the MSVCRT's strtod isn't POSIX compliant */
+#ifdef __MSVCRT__
+double gd_strtod(const char *nptr, char **endptr)
+{
+  const char *ptr = nptr;
+  double r;
+  long int li;
+  int sign = 0;
+
+  dtrace("\"%s\", %p", nptr, endptr);
+
+  /* the basic problem here is that MSVCRT's strtod() doesn't properly covert
+   * octal or hexadecimal numbers, nor does it do the special values "INF" and
+   * "NAN.   So, we have to check for those first.  For the first two, we then
+   * run it through strtol instead (which does do octal and hex fine in the
+   * MSVCRT) and then cast back to double.  For the other two we're on our own.
+   */
+
+  /* skip sign */
+  if (*ptr == '+' || *ptr == '-') {
+    if (ptr == '-')
+      sign = 0x80;
+    ptr++;
+  }
+
+  /* check for octal "0[0-7]..." or hex ("0[Xx][0-9A-Fa-f]...") */
+  if (*ptr == '0') {
+    switch (*(ptr + 1)) {
+      case '0':
+      case '1':
+      case '2':
+      case '3':
+      case '4':
+      case '5':
+      case '6':
+      case '7':
+      case 'x':
+      case 'X':
+        li = strtol(nptr, endptr, 0);
+        dreturn("%li", li);
+        return (double)li;
+    }
+  } else if ((*ptr | 0x20) == 'n') {
+    if (((*(ptr + 1) | 0x20) == 'a') && ((*(ptr + 2) | 0x20) == 'n')) {
+      /* an IEEE-754 double-precision quiet NaN:
+       *
+       * 1111 1111 1111 1111 1111 1111 1111 1111
+       * 1111 1111 1111 1111 1111 1111 1111 1111
+       * = 0xFFFFFFFFFFFFFFFF
+       *
+       * (a signalling NaN doesn't set the MSB of the mantissa)
+       *
+       * There are several of these; this one is nice because it's byte-sex
+       * independent, unlike INF below.
+       */
+      const union {
+        unsigned char x[8];
+        double d;
+      } nan_punning = {{ 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF }};
+
+      if (endptr) {
+        *endptr = ptr += 3;
+        /* a NaN may end with something in parentheses */
+        if (*ptr == '(') {
+          while (*++ptr) {
+            if (*ptr == ')') {
+              *endptr = ptr + 1;
+              break;
+            }
+          }
+        }
+      }
+
+      /* return NaN */
+      dreturn("%g (%c)", nan_punning.d, endptr ? **endptr : '-');
+      errno = 0;
+      return nan_punning.d;
+    }
+  } else if ((*ptr | 0x20) == 'i') {
+    if (((*(ptr + 1) | 0x20) == 'n') && ((*(ptr + 2) | 0x20) == 'f')) {
+      /* an IEEE-754 double-precision infinity (s is the sign bit):
+       *
+       * s111 1111 1111 1000 0000 0000 0000 0000
+       * 0000 0000 0000 0000 0000 0000 0000 0000
+       * = 0x7FF0000000000000 (+INF), or
+       *   0xFFF0000000000000 (-INF)
+       */
+      const union {
+        unsigned char x[8];
+        double d;
+      } inf_punning = {{
+#ifdef ARM_ENDIAN_DOUBLES
+        0x00, 0x00, 0xF0, 0x7F | sign, 0x00, 0x00, 0x00, 0x00
+#elif defined(FLOATS_BIGENDIAN)
+          0x7F | sign, 0xF0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+#else
+          0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xF0, 0x7F | sign
+#endif
+      }};
+
+      if (endptr) {
+        *endptr = ptr += 3;
+        /* INF may also be INFINITY, disregarding case */
+        if (
+            ((*ptr | 0x20) == 'i') &&
+            ((*(ptr + 1) | 0x20) == 'n') &&
+            ((*(ptr + 2) | 0x20) == 'i') &&
+            ((*(ptr + 3) | 0x20) == 't') &&
+            ((*(ptr + 4) | 0x20) == 'y'))
+        {
+          *endptr += 5;
+        }
+      }
+
+      /* return signed infinity */
+      dreturn("%g (%c)", inf_punning.d, endptr ? **endptr : '-');
+      errno = 0;
+      return inf_punning.d;
+    }
+  }
+
+  /* otherwise, just run strtod */
+  r = strtod(nptr, endptr);
+  dreturn("%g (%c)", r, endptr ? **endptr : '-');
+  return r;
 }
 #endif

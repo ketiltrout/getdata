@@ -144,7 +144,7 @@ ssize_t _GD_ZzipRead(struct _gd_raw_file *restrict file, void *restrict data,
 {
   ssize_t n;
 
-  dtrace("%p, %p, 0x%X, %zu", file, data, data_type, nmemb);
+  dtrace("%p, %p, 0x%X, %" PRNsize_t, file, data, data_type, nmemb);
 
   n = zzip_read((ZZIP_FILE*)file->edata, data, GD_SIZE(data_type) * nmemb);
 

@@ -75,7 +75,7 @@ ssize_t _GD_RawRead(struct _gd_raw_file *restrict file, void *restrict ptr,
 {
   ssize_t nread;
 
-  dtrace("%p, %p, 0x%X, %zu", file, ptr, data_type, nmemb);
+  dtrace("%p, %p, 0x%X, %" PRNsize_t, file, ptr, data_type, nmemb);
 
   nread = read(file->idata, ptr, nmemb * GD_SIZE(data_type));
 
@@ -84,7 +84,7 @@ ssize_t _GD_RawRead(struct _gd_raw_file *restrict file, void *restrict ptr,
     file->pos += nread;
   }
 
-  dreturn("%zi", nread);
+  dreturn("%" PRNssize_t, nread);
   return nread;
 }
 
@@ -93,7 +93,7 @@ ssize_t _GD_RawWrite(struct _gd_raw_file *restrict file,
 {
   ssize_t nwrote;
 
-  dtrace("%p, %p, 0x%X, %zu", file, ptr, data_type, nmemb);
+  dtrace("%p, %p, 0x%X, %" PRNsize_t, file, ptr, data_type, nmemb);
 
   nwrote = write(file->idata, ptr, nmemb * GD_SIZE(data_type));
 
@@ -102,7 +102,7 @@ ssize_t _GD_RawWrite(struct _gd_raw_file *restrict file,
     file->pos += nwrote;
   }
 
-  dreturn("%zu", nwrote);
+  dreturn("%" PRNsize_t, nwrote);
   return nwrote;
 }
 

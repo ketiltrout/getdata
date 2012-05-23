@@ -1,4 +1,4 @@
-/* Copyright (C) 2010 D. V. Wiebe
+/* Copyright (C) 2010, 2012 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -27,7 +27,7 @@
 # if HAVE_NAN
 #  define NAN nan("")
 # else
-#  define NAN strtod("NAN", NULL)
+#  define NAN gd_strtod("NAN", NULL)
 # endif
 #endif
 

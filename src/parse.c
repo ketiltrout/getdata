@@ -126,7 +126,7 @@ static char *_GD_SetScalar(DIRFILE *restrict D, const char *restrict token,
     /* try to convert to double */
     const char *semicolon;
     double i = 0;
-    double d = strtod(token, &ptr);
+    double d = gd_strtod(token, &ptr);
 
     /* check for a complex value -- look for the semicolon */
     for (semicolon = token; *semicolon; ++semicolon)
@@ -153,7 +153,7 @@ static char *_GD_SetScalar(DIRFILE *restrict D, const char *restrict token,
         return NULL;
       }
 
-      i = strtod(semicolon + 1, &ptr);
+      i = gd_strtod(semicolon + 1, &ptr);
 
       /* there were trailing characters in the imaginary part of complex -- this
        * can't be a valid field name, since ; is prohibited */

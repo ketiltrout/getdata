@@ -82,7 +82,7 @@ windist: $(DISTFILES)
 		mkdir $(distdir)/man && \
 		cp ../man/*[35].html $(distdir)/man && \
 		cp -r bindings/cxx $(distdir)/bindings && \
-		cp -r cmake src test $(distdir) && \
+		cp -r cmake util src test $(distdir) && \
 		$(SED) cmake/CMakeLists.txt \
 		-e 's/-DPACKAGE_VERSION=\\".*\\"/-DPACKAGE_VERSION=\\"$(PACKAGE_VERSION)\\"/' \
 		> $(distdir)/cmake/CMakeLists.txt && \

@@ -69,7 +69,7 @@ int main(void)
 #ifdef USE_SLIM
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
 #else
-  * D = gd_open(filedir, GD_RDONLY);
+  D = gd_open(filedir, GD_RDONLY);
 #endif
   n = gd_nframes(D);
   error = gd_error(D);

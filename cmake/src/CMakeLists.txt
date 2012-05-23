@@ -1,7 +1,6 @@
 
 set(files_ignored
 	${GD_DIR}/src/bzip.c
-	${GD_DIR}/src/debug.c
 	${GD_DIR}/src/gzip.c
 	${GD_DIR}/src/lzma.c
 	${GD_DIR}/src/legacy.c
@@ -24,6 +23,14 @@ if(MSVC)
 	add_definitions(-DGD_C89_API)
 endif()
 
+if(GD_DEBUG)
+  add_definitions(-DGETDATA_DEBUG)
+else()
+  set(files_ignored
+    ${files_ignored}
+    ${GD_DIR}/src/debug.c
+    )
+endif()
 
 list(REMOVE_ITEM gd_sources ${files_ignored})
 

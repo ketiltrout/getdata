@@ -74,7 +74,7 @@ int main(void)
   if (e3 == 0) {
     CHECKI(e.field_type, GD_CONST_ENTRY);
     CHECKI(e.fragment_index, 1);
-    CHECKI(e.EN(const,const_type), GD_UINT8);
+    CHECKI(e.EN(scalar,const_type), GD_UINT8);
     gd_free_entry_strings(&e);
   }
 

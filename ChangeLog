@@ -1,3 +1,34 @@
+2012-05-22   D. V. Wiebe <getdata@ketiltrout.net> svn:706
+	* cmake/CMakeLists.txt: Update definitons.  Support GD_UTIL.
+	* cmake/test/CMakeLists.txt: Update the list of excluded tests.
+	* cmake/src/CMakeLists.txt: Support GD_DEBUG and conditionally build debug.c.
+	* cmake/bindings/cxx/CMakeLists.txt: Support GD_TEST.
+	* cmake/util/CMakeLists.txt cmake/bindings/cxx/test/CMakeLists.txt: Added.
+
+	* src/internal.h: Define PRNsize_t and PRNssize_t to get around printf()s
+	which don't recognise the "z" length modifier.  Changed everywhere.  Handle
+	basename, offsetof, strtod.
+
+	* src/compat.c (basename gd_strtod): Added.
+	* src/parse.c (_GD_SetScalar) src/nan.h: Call gd_strtod.
+
+	* README.win: Update.
+
+	* bindings/cxx/test/big_test.cpp: Tweak includes to allow compilation with
+	MSVC.
+
+	* bindings/cxx/getdata/entry.h bindings/cxx/getdata/fragment.h: Include
+	dirfile.h.
+
+	* test/include_cb.c test/madd_window.c test/open_cb_cont.c
+	test/open_cb_invalid.c test/include_pc.c test/test.h test/open_cb_rescan.c
+	test/open_cb_abort.c test/open_cb_ignore.c: Tweak for compilation with MSVC.
+
+	* test/add_meta_alias.c test/madd_affix.c test/parse_mplex_nomax.c
+	test/add_meta.c: Fix gd_entry_t access.
+
+	* util/checkdirfile.c: Preprocessor fixes for compilation with MSVC.
+
 2012-04-21   D. V. Wiebe <getdata@ketiltrout.net> svn:706
 	GetData-0.8.0rc1:
 

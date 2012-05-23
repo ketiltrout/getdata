@@ -106,7 +106,7 @@ ssize_t _GD_GzipRead(struct _gd_raw_file *file, void *ptr, gd_type_t data_type,
   ssize_t n;
   int errnum;
 
-  dtrace("%p, %p, 0x%X, %zu", file, ptr, data_type, nmemb);
+  dtrace("%p, %p, 0x%X, %" PRNsize_t, file, ptr, data_type, nmemb);
 
   n = gzread((gzFile)file->edata, ptr, GD_SIZE(data_type) * nmemb);
 
@@ -119,7 +119,7 @@ ssize_t _GD_GzipRead(struct _gd_raw_file *file, void *ptr, gd_type_t data_type,
       n = -1;
   }
 
-  dreturn("%zu", n);
+  dreturn("%" PRNsize_t, n);
   return n;
 }
 
@@ -129,7 +129,7 @@ ssize_t _GD_GzipWrite(struct _gd_raw_file *file, const void *ptr,
   ssize_t n;
   int errnum;
 
-  dtrace("%p, %p, 0x%X, %zu", file, ptr, data_type, nmemb);
+  dtrace("%p, %p, 0x%X, %" PRNsize_t, file, ptr, data_type, nmemb);
 
   n = gzwrite((gzFile)file->edata, ptr, GD_SIZE(data_type) * nmemb);
 
@@ -142,7 +142,7 @@ ssize_t _GD_GzipWrite(struct _gd_raw_file *file, const void *ptr,
       n = -1;
   }
 
-  dreturn("%zi", n);
+  dreturn("%" PRNssize_t, n);
   return n;
 }
 

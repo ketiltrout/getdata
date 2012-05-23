@@ -240,7 +240,7 @@ ssize_t _GD_LzmaRead(struct _gd_raw_file *file, void *data, gd_type_t data_type,
   struct gd_lzmadata *ptr = (struct gd_lzmadata *)file->edata;
   uint64_t nbytes = nmemb * GD_SIZE(data_type);
 
-  dtrace("%p, %p, 0x%X, %zu", file, data, data_type, nmemb);
+  dtrace("%p, %p, 0x%X, %" PRNsize_t, file, data, data_type, nmemb);
 
   /* this loops over chunks of uncompressed data of size data_out until we
    * have as much data as we need in data_out, or until EOF */

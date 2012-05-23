@@ -15,3 +15,7 @@ add_library(${GD_CXX} STATIC ${h_headers} ${s_sources})
 
 install(FILES ${h_headers} DESTINATION include/getdata)
 install(TARGETS ${GD_CXX} DESTINATION lib)
+
+if (GD_TEST)
+  add_subdirectory(test)
+endif()

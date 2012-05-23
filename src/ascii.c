@@ -148,7 +148,7 @@ ssize_t _GD_AsciiRead(struct _gd_raw_file *restrict file, void *restrict ptr,
   short int i16;
 #endif
 
-  dtrace("%p, %p, 0x%X, %zu", file, ptr, data_type, nmemb);
+  dtrace("%p, %p, 0x%X, %" PRNsize_t, file, ptr, data_type, nmemb);
 
   _GD_ScanFormat(fmt, data_type);
   if (data_type & GD_COMPLEX) {
@@ -207,7 +207,7 @@ ssize_t _GD_AsciiWrite(struct _gd_raw_file *restrict file,
   ssize_t ret = 0;
   size_t n = 0;
 
-  dtrace("%p, %p, 0x%X, %zu", file, ptr, data_type, nmemb);
+  dtrace("%p, %p, 0x%X, %" PRNsize_t, file, ptr, data_type, nmemb);
 
   switch(data_type) {
     case GD_UINT8:

@@ -456,7 +456,7 @@ ssize_t _GD_WriteOut(DIRFILE *D gd_unused_d, const gd_entry_t *E,
 {
   ssize_t n_wrote;
 
-  dtrace("%p, %p, %p, %p, 0x%X, %zu, %i", D, E, enc, ptr, type, n, temp);
+  dtrace("%p, %p, %p, %p, 0x%X, %" PRNsize_t ", %i", D, E, enc, ptr, type, n, temp);
 
   if (temp)
     n_wrote = (*enc->write)(E->e->u.raw.file + 1, ptr, type, n);
@@ -476,7 +476,7 @@ ssize_t _GD_WriteOut(DIRFILE *D gd_unused_d, const gd_entry_t *E,
       n_wrote = (*enc->write)(E->e->u.raw.file, ptr, type, n);
   }
 
-  dreturn("%zi", n_wrote);
+  dreturn("%" PRNssize_t, n_wrote);
   return n_wrote;
 }
 

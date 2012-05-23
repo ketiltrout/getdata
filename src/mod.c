@@ -124,7 +124,7 @@ static void _GD_SPFConvert(DIRFILE* D, void *A, unsigned int spfA, void *B,
 {
   size_t i;
 
-  dtrace("%p, %p, %u, %p, %u, 0x%X, %zu", D, A, spfA, B, spfB, type, n);
+  dtrace("%p, %p, %u, %p, %u, 0x%X, %" PRNsize_t, D, A, spfA, B, spfB, type, n);
 
   switch (type) {
     case GD_NULL: /* null read */
@@ -1416,7 +1416,7 @@ int gd_alter_carray(DIRFILE* D, const char* field_code, gd_type_t const_type,
   int ret;
   gd_entry_t N;
 
-  dtrace("%p, \"%s\", 0x%X, %zu", D, field_code, const_type, array_len);
+  dtrace("%p, \"%s\", 0x%X, %" PRNsize_t, D, field_code, const_type, array_len);
 
   if (D->flags & GD_INVALID) {
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);

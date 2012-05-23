@@ -87,11 +87,11 @@ ssize_t _GD_SlimRead(struct _gd_raw_file *restrict file, void *restrict ptr,
 {
   ssize_t n;
 
-  dtrace("%p, %p, 0x%X, %zu", file, ptr, data_type, nmemb);
+  dtrace("%p, %p, 0x%X, %" PRNsize_t, file, ptr, data_type, nmemb);
 
   n = slimread(ptr, GD_SIZE(data_type), nmemb, (SLIMFILE *)file->edata);
 
-  dreturn("%zu", n);
+  dreturn("%" PRNsize_t, n);
   return n;
 }
 

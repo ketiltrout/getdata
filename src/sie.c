@@ -103,7 +103,7 @@ static int _GD_Advance(struct gd_siedata *f, size_t size)
 {
   int64_t p[3];
   size_t n;
-  dtrace("%p, %zi", f, size);
+  dtrace("%p, %" PRNsize_t, f, size);
 
   /* save the current record */
   memcpy(p, f->d, 3 * sizeof(int64_t));
@@ -195,7 +195,7 @@ static void *_GD_Duplicate(void *restrict d, const void *restrict s, size_t l,
     int64_t n)
 {
   int64_t i;
-  dtrace("%p, %p, %zi, 0x%llx", d, s, l, (long long)n);
+  dtrace("%p, %p, %" PRNsize_t ", 0x%llx", d, s, l, (long long)n);
 
   if (n > 0) {
     if (l == 1) {
@@ -251,7 +251,7 @@ ssize_t _GD_SampIndRead(struct _gd_raw_file *restrict file, void *restrict ptr,
   struct gd_siedata *f = (struct gd_siedata*)(file->edata);
   void *cur = ptr;
 
-  dtrace("%p, %p, 0x%03x, %zu", file, ptr, data_type, nelem);
+  dtrace("%p, %p, 0x%03x, %" PRNsize_t, file, ptr, data_type, nelem);
 
   /* not enough data in the current run */
   while (f->d[0] - f->p < (int64_t)(nelem - count)) {
@@ -289,14 +289,14 @@ ssize_t _GD_SampIndRead(struct _gd_raw_file *restrict file, void *restrict ptr,
 static ssize_t _GD_GetNRec(struct gd_siedata *f, size_t size)
 {
   gd_stat64_t statbuf;
-  dtrace("%p, %zi", f, size);
+  dtrace("%p, %" PRNsize_t, f, size);
 
   if (gd_fstat64(fileno(f->fp), &statbuf)) {
     dreturn("%i", -1);
     return -1;
   }
 
-  dreturn("%zi", (ssize_t)(statbuf.st_size / size));
+  dreturn("%" PRNssize_t, (ssize_t)(statbuf.st_size / size));
   return (ssize_t)(statbuf.st_size / size);
 }
 
@@ -314,7 +314,7 @@ ssize_t _GD_SampIndWrite(struct _gd_raw_file *restrict file,
   struct gd_siedata *f = (struct gd_siedata*)(file->edata);
   const size_t dlen = GD_SIZE(data_type);
   const size_t size = sizeof(int64_t) + dlen;
-  dtrace("%p, %p, 0x%03x, %zi", file, ptr, data_type, nelem);
+  dtrace("%p, %p, 0x%03x, %" PRNsize_t, file, ptr, data_type, nelem);
 
   if ((nrec = _GD_GetNRec(f, size)) < 0) {
     dreturn("%i", -1);

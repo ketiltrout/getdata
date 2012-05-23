@@ -22,22 +22,8 @@
 #ifndef GETDATA_FRAGMENT_H
 #define GETDATA_FRAGMENT_H
 
-#ifndef _FILE_OFFSET_BITS
-# define _FILE_OFFSET_BITS 64
-#endif
-
-#ifndef GD_NO_LEGACY_API
-# define GD_NO_LEGACY_API
-#endif
-#ifndef GD_C89_API
-# define GD_C89_API
-#endif
-
-extern "C" {
-#include <getdata.h>
-}
+#include <getdata/dirfile.h>
 #include <sys/types.h>
-
 
 namespace GetData {
 

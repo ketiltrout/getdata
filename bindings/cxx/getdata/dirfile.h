@@ -22,6 +22,10 @@
 #ifndef GETDATA_DIRFILE_H
 #define GETDATA_DIRFILE_H
 
+#ifndef _FILE_OFFSET_BITS
+# define _FILE_OFFSET_BITS 64
+#endif
+
 // We don't want the legacy API since its symbols clash with us.
 #ifndef GD_NO_LEGACY_API
 # define GD_NO_LEGACY_API

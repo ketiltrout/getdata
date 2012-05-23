@@ -548,9 +548,9 @@ echo
 echo "*** Looking for additional header files"
 echo
 AC_CHECK_HEADERS([asm/unaligned.h Availability.h byteswap.h direct.h fcntl.h \
-                  inttypes.h io.h libgen.h libkern/OSByteOrder.h stddef.h \
-                  stdint.h sys/endian.h sys/file.h sys/param.h sys/stat.h \
-                  sys/types.h sys/wait.h unistd.h])
+                  float.h inttypes.h io.h libgen.h libkern/OSByteOrder.h \
+                  stddef.h stdint.h sys/endian.h sys/file.h sys/param.h \
+                  sys/stat.h sys/types.h sys/wait.h unistd.h])
 if test "x$disable_c99" = "xno"; then
 AC_CHECK_HEADERS([complex.h])
 fi
@@ -696,13 +696,14 @@ dnl library functions
 echo
 echo "*** Looking for additional library functions"
 echo
-AC_CHECK_FUNCS([_chsize _chsize_s _commit fchmod _fdopen fdopendir fpathconf \
-                fseeko fseeko64 _fstat fstat64 _fstat64 fstatat fstatat64 \
-                fsync ftello ftello64 ftruncate ftruncate64 getcwd _getcwd \
-                getdelim gmtime_r lseek64 _lseeki64 lstat lstat64 _mkdir \
-                mkfifo nan _open openat pathconf _read readdir_r readlink \
-                renameat _rmdir snprintf _snprintf stat64 _stat64 _strtoi64 \
-                strtoll _strtoui64 strtoull _unlink unlinkat _write])
+AC_CHECK_FUNCS([basename _chsize _chsize_s _commit fchmod _fdopen fdopendir \
+                fpathconf fseeko fseeko64 _fstat fstat64 _fstat64 fstatat \
+                fstatat64 fsync ftello ftello64 ftruncate ftruncate64 getcwd \
+                _getcwd getdelim gmtime_r _isnan lseek64 _lseeki64 lstat \
+                lstat64 _mkdir mkfifo nan _open openat pathconf _read \
+                readdir_r readlink renameat _rmdir snprintf _snprintf stat64 \
+                _stat64 _strtoi64 strtoll _strtoui64 strtoull _unlink unlinkat \
+                _write])
 if test "x$disable_c99" = "xno"; then
   AC_CHECK_FUNCS([cabs])
 fi
@@ -746,13 +747,6 @@ AC_CHECK_DECLS([bswap16, bswap_16, OSSwapInt16],,,
 #endif
 #ifdef HAVE_LIBKERN_OSBYTEORDER_H
 #include <libkern/OSByteOrder.h>
-#endif
-])
-
-AC_CHECK_DECLS([offsetof],,,
-               [
-#ifdef HAVE_STDDEF_H
-#include <stddef.h>
 #endif
 ])
 

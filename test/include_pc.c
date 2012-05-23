@@ -30,8 +30,7 @@
 #include <stdio.h>
 
 int saw_callback = 0;
-int callback(gd_parser_data_t *pdata __attribute__ (( unused )),
-    void *extra __attribute__ (( unused )))
+int callback(gd_parser_data_t *pdata __gd_unused, void *extra __gd_unused)
 {
   saw_callback++;
 

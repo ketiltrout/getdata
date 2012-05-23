@@ -1,4 +1,4 @@
-/* Copyright (C) 2007-2010 D. V. Wiebe
+/* Copyright (C) 2007-2010, 2012 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -20,10 +20,20 @@
 #include "gd_config.h"
 #endif
 
+#ifndef HAVE_SNPRINTF
+#ifdef HAVE__SNPRINTF
+#define snprintf _snprintf
+#endif
+#endif
+
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 #include "getdata.h"
+
+#ifndef PACKAGE_STRING
+#define PACKAGE_STRING PACKAGE_NAME " " PACKAGE_VERSION
+#endif
 
 static int callback(gd_parser_data_t *pdata, void* ne)
 {

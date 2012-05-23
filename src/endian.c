@@ -192,7 +192,7 @@ void _GD_FixEndianness(void* databuffer, size_t size, size_t ns)
 {
   size_t i;
 
-  dtrace("%p, %zu, %zu", databuffer, size, ns);
+  dtrace("%p, %zu, %" PRNsize_t, databuffer, size, ns);
 
   switch (size) {
     case 2:

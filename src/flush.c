@@ -233,7 +233,7 @@ static size_t _GD_StringEscapeise(FILE *stream, const char *in, int meta,
 
   if (!permissive && standards < 6) {
     fputs(in, stream);
-    dreturn("%zu", strlen(in));
+    dreturn("%" PRNsize_t, strlen(in));
     return strlen(in);
   }
 
@@ -263,7 +263,7 @@ static size_t _GD_StringEscapeise(FILE *stream, const char *in, int meta,
     }
   }
 
-  dreturn("%zu", len);
+  dreturn("%" PRNsize_t, len);
   return len;
 }
 
@@ -275,7 +275,7 @@ static void _GD_PadField(DIRFILE *D, FILE* stream, const char *prefix,
   int dummy;
   char *ptr;
 
-  dtrace("%p, %p, \"%s\", \"%s\", \"%s\", %zu, %i, %i", D, stream, prefix,
+  dtrace("%p, %p, \"%s\", \"%s\", \"%s\", %" PRNsize_t ", %i, %i", D, stream, prefix,
       suffix, in, len, permissive, standards);
 
   ptr = _GD_MungeCode(D, NULL, prefix, suffix, NULL, NULL, in, &dummy);
@@ -340,8 +340,8 @@ static void _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
   size_t z;
   char *ptr;
 
-  dtrace("%p, %p, %p, %i, %i, %zi, %i, %i", D, stream, E, me, meta, max_len,
-      pretty, permissive);
+  dtrace("%p, %p, %p, %i, %i, %" PRNsize_t ", %i, %i", D, stream, E, me, meta,
+      max_len, pretty, permissive);
 
   /* INDEX is implicit, and it is an error to define it in the format file */
   if (E->field_type == GD_INDEX_ENTRY) {

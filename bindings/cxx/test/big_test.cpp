@@ -24,15 +24,25 @@
 #undef GETDATA_LEGACY_API
 
 #include "getdata/dirfile.h"
+#include "internal.h"
+
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <fcntl.h>
 #include <string.h>
 #include <errno.h>
-#include <unistd.h>
 #include <iostream>
 #include <math.h>
+#include <stdlib.h>
 #include <stdio.h>
+
+#ifdef HAVE_DIRECT_H
+#include <direct.h>
+#endif
+
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 
 #if MKDIR_NO_MODE
 #ifdef HAVE__MKDIR

@@ -42,7 +42,7 @@ int main(void)
   E.field = "data";
   E.field_type = GD_CONST_ENTRY;
   E.fragment_index = 0;
-  E.EN(raw,const_type) = GD_UINT8;
+  E.EN(scalar,const_type) = GD_UINT8;
 
   D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
   gd_add(D, &E);
@@ -58,7 +58,7 @@ int main(void)
   else {
     CHECKI(e.field_type, GD_CONST_ENTRY);
     CHECKI(e.fragment_index, 0);
-    CHECKI(e.EN(raw,const_type), GD_UINT8);
+    CHECKI(e.EN(scalar,const_type), GD_UINT8);
     gd_free_entry_strings(&e);
   }
 

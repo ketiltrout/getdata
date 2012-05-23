@@ -97,10 +97,17 @@
 #ifdef _MSC_VER
 #ifdef _WIN64
 typedef __int64 ssize_t;
+#define PRNssize_t "li"
+#define PRNsize_t  "lu"
 #else
 typedef int ssize_t;
+#define PRNssize_t "i"
+#define PRNsize_t  "u"
 #endif
 typedef int mode_t;
+#else
+#define PRNssize_t "zi"
+#define PRNsize_t  "zu"
 #endif
 
 #ifndef HAVE_OFF64_T
@@ -364,6 +371,10 @@ const char* gd_colsub(void);
 # endif
 #endif
 
+#ifndef HAVE_BASENAME
+char *basename(char *path);
+#endif
+
 #ifndef HAVE_FTELLO64
 #  ifndef HAVE_FTELLO
 #    define ftello64 (off64_t)ftell
@@ -379,7 +390,7 @@ const char* gd_colsub(void);
 # endif
 #endif
 
-#if !defined(HAVE_DECL_OFFSETOF) || !  HAVE_DECL_OFFSETOF
+#ifndef offsetof
 #define offsetof(t,m) ((size_t)(((char*)&((t*)0)->m) - (char*)0))
 #endif
 
@@ -403,6 +414,13 @@ int _GD_ReadDir(DIR *dirp, struct dirent *entry, struct dirent **result);
 #  define gd_strtoull strtoull
 #else
 #  define gd_strtoull strtoul
+#endif
+
+/* the MSVCRT's strtod is not POSIX compliant */
+#ifdef __MSVCRT__
+double gd_strtod(const char *nptr, char **endptr);
+#else
+#define gd_strtod strtod
 #endif
 
 #if defined __MSVCRT__ && defined HAVE__FDOPEN

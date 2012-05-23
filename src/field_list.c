@@ -158,7 +158,7 @@ static const char **_GD_EntryList(DIRFILE *D, struct _gd_private_entry *p,
   const int hidden = (flags & GD_ENTRIES_HIDDEN);
   const int noalias = (flags & GD_ENTRIES_NOALIAS);
 
-  dtrace("%p, %p, %zu, 0x%X, 0x%X", D, p, offs, type, flags);
+  dtrace("%p, %p, %" PRNsize_t ", 0x%X, 0x%X", D, p, offs, type, flags);
 
   if (D->flags & GD_INVALID) {
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);

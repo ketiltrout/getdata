@@ -27,7 +27,7 @@ size_t gd_get_string(DIRFILE* D, const char *field_code, size_t len,
   size_t n_read = 0;
   gd_entry_t *entry;
 
-  dtrace("%p, \"%s\", %zu, %p", D, field_code, len, data_out);
+  dtrace("%p, \"%s\", %" PRNsize_t ", %p", D, field_code, len, data_out);
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -46,7 +46,7 @@ size_t gd_get_string(DIRFILE* D, const char *field_code, size_t len,
   else
     n_read = _GD_DoField(D, entry, 0, 0, len, GD_NULL, data_out);
 
-  dreturn("%zu", n_read);
+  dreturn("%" PRNsize_t, n_read);
   return n_read;
 }
 
@@ -82,7 +82,7 @@ size_t gd_put_string(DIRFILE* D, const char *field_code, const char *data_in)
   else 
     n_wrote = _GD_DoFieldOut(D, entry, 0, 0, 0, GD_NULL, data_in);
 
-  dreturn("%zu", n_wrote);
+  dreturn("%" PRNsize_t, n_wrote);
   return n_wrote;
 }
 /* vim: ts=2 sw=2 et tw=80

@@ -59,7 +59,7 @@ char *_GD_GetLine(FILE *restrict fp, size_t *restrict n, int *restrict linenum)
 
 
   if (len != -1) {
-    dreturn("\"%s\" (%zu)", line, *n);
+    dreturn("\"%s\" (%" PRNsize_t ")", line, *n);
     return line; /* a line was read */
   }
 
@@ -185,7 +185,7 @@ void* _GD_Alloc(DIRFILE* D, gd_type_t type, size_t n)
 {
   void* ptr = NULL;
 
-  dtrace("%p, 0x%x, %zu", D, type, n);
+  dtrace("%p, 0x%x, %" PRNsize_t, D, type, n);
   if (n == 0) {
     _GD_InternalError(D);
     dreturn("%p", NULL);
@@ -387,7 +387,7 @@ void _GD_ReadLinterpFile(DIRFILE *restrict D, gd_entry_t *restrict E)
 static size_t _GD_GetIndex(double x, const struct _gd_lut *lut, size_t idx,
     size_t n)
 {
-  dtrace("%g, %p, %zu, %zu", x, lut, idx, n);
+  dtrace("%g, %p, %" PRNsize_t ", %" PRNsize_t, x, lut, idx, n);
 
   /* Just linearly search - we're probably right to start    */
   /* increment until we are bigger */
@@ -398,7 +398,7 @@ static size_t _GD_GetIndex(double x, const struct _gd_lut *lut, size_t idx,
   while ((idx > 0) && (x < lut[idx].x))
     idx--;
 
-  dreturn("%zu", idx);
+  dreturn("%" PRNsize_t, idx);
   return idx;
 }
 
@@ -480,7 +480,7 @@ void _GD_LinterpData(DIRFILE *restrict D, void *restrict data, gd_type_t type,
   size_t i;
   double x;
 
-  dtrace("%p, %p, 0x%x, %i, %p, %zu, %p, %zu", D, data, type, complex_table,
+  dtrace("%p, %p, 0x%x, %i, %p, %" PRNsize_t ", %p, %" PRNsize_t, D, data, type, complex_table,
       data_in, npts, lut, n_ln);
 
   switch (type) {
@@ -574,7 +574,7 @@ void _GD_LincomData(DIRFILE *restrict D, int n, void *restrict data1,
 {
   size_t i;
 
-  dtrace("%p, %i, %p, 0x%x, %p, %p, %p, %p, %p, %zu", D, n, data1, return_type,
+  dtrace("%p, %i, %p, 0x%x, %p, %p, %p, %p, %p, %" PRNsize_t, D, n, data1, return_type,
       data2, data3, m, b, spf, n_read);
 
   switch(return_type) {
@@ -683,7 +683,7 @@ void _GD_CLincomData(DIRFILE *restrict D, int n, void *restrict data1,
 {
   size_t i;
 
-  dtrace("%p, %i, %p, 0x%x, %p, %p, %p, %p, %p, %zu", D, n, data1, return_type,
+  dtrace("%p, %i, %p, 0x%x, %p, %p, %p, %p, %p, %" PRNsize_t, D, n, data1, return_type,
       data2, data3, m, b, spf, n_read);
 
   switch(return_type) {
@@ -729,7 +729,7 @@ void _GD_InvertData(DIRFILE *restrict D, void *restrict data,
 {
   size_t i;
 
-  dtrace("%p, %p, 0x%x, %g, %zu", D, data, return_type, dividend, n_read);
+  dtrace("%p, %p, 0x%x, %g, %" PRNsize_t, D, data, return_type, dividend, n_read);
 
   switch(return_type) {
     case GD_NULL:                         break;
@@ -785,7 +785,7 @@ void _GD_CInvertData(DIRFILE *restrict D, void *restrict data,
 {
   size_t i;
 
-  dtrace("%p, %p, 0x%x, %g;%g, %zu", D, data, return_type, creal(dividend),
+  dtrace("%p, %p, 0x%x, %g;%g, %" PRNsize_t, D, data, return_type, creal(dividend),
       cimag(dividend), n_read);
 
   switch(return_type) {
