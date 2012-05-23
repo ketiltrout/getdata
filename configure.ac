@@ -699,7 +699,7 @@ echo
 AC_CHECK_FUNCS([basename _chsize _chsize_s _commit fchmod _fdopen fdopendir \
                 fpathconf fseeko fseeko64 _fstat fstat64 _fstat64 fstatat \
                 fstatat64 fsync ftello ftello64 ftruncate ftruncate64 getcwd \
-                _getcwd getdelim gmtime_r _isnan lseek64 _lseeki64 lstat \
+                _getcwd getdelim gmtime_r isnan _isnan lseek64 _lseeki64 lstat \
                 lstat64 _mkdir mkfifo nan _open openat pathconf _read \
                 readdir_r readlink renameat _rmdir snprintf _snprintf stat64 \
                 _stat64 _strtoi64 strtoll _strtoui64 strtoull _unlink unlinkat \

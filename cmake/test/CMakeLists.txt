@@ -20,7 +20,6 @@ set(tests_ignored
 if(MSVC)
   set(tests_ignored 
     ${tests_ignored}
-    desync desync_flush desync_reopen desync_reopen_inv
     error_verbose error_verbose_prefix
     get64 get_uint64 get_endian64 get_int64 get_off64
     nframes64

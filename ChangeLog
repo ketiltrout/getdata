@@ -1,4 +1,13 @@
-2012-05-22   D. V. Wiebe <getdata@ketiltrout.net> svn:706
+2012-05-23   D. V. Wiebe <getdata@ketiltrout.net> svn:710
+	* test/test.h: Don't redefine isnan if it's okay as-is.
+
+	* src/open.c (_GD_CreateDirfile): Don't unnecessarily disable mtime
+	acquisition.
+	* cmake/test/CMakeLists.txt: enable desync checks.
+
+	* src/compat.c (gd_strtod): Fix sign check.
+
+2012-05-22   D. V. Wiebe <getdata@ketiltrout.net> svn:709
 	* cmake/CMakeLists.txt: Update definitons.  Support GD_UTIL.
 	* cmake/test/CMakeLists.txt: Update the list of excluded tests.
 	* cmake/src/CMakeLists.txt: Support GD_DEBUG and conditionally build debug.c.

@@ -210,9 +210,7 @@ static int _GD_TruncDir(DIRFILE *D, int dirfd, const char *dirfile, int root)
 static FILE *_GD_CreateDirfile(DIRFILE *restrict D, int dirfd, int dir_error,
     char *restrict dirfile, time_t *mtime)
 {
-#ifndef GD_NO_DIR_OPEN
   struct stat statbuf;
-#endif
   int fd = -1;
   int format_error = 0, format_trunc = 0;
   FILE* fp = NULL;
@@ -377,11 +375,9 @@ static FILE *_GD_CreateDirfile(DIRFILE *restrict D, int dirfd, int dir_error,
   D->dir[0].path = dirfile;
   D->ndir = 1;
 
-#ifndef GD_NO_DIR_OPEN
   /* get the mtime */
   if (fstat(fd, &statbuf) == 0)
     *mtime = statbuf.st_mtime;
-#endif
 
   dreturn("%p", fp);
   return fp;

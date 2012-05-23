@@ -35,7 +35,7 @@
 #include <float.h>
 #endif
 
-#ifdef HAVE__ISNAN
+#if defined HAVE__ISNAN && ! defined HAVE_ISNAN
 #define isnan _isnan
 #endif
 

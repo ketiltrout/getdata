@@ -343,7 +343,7 @@ double gd_strtod(const char *nptr, char **endptr)
 
   /* skip sign */
   if (*ptr == '+' || *ptr == '-') {
-    if (ptr == '-')
+    if (*ptr == '-')
       sign = 0x80;
     ptr++;
   }
