@@ -42,6 +42,7 @@ if(MSVC)
   # MSVCRT integer types
   set(DEFINE_gd_int64_t  "#define gd_int64_t  __int64")
   set(DEFINE_gd_uint64_t "#define gd_uint64_t unsigned __int64")
+  set(DEFINE_gd_off64_t "#define gd_off64_t __int64")
 
   add_definitions(-D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_WARNINGS)
   add_definitions(
@@ -91,33 +92,76 @@ if(MINGW)
   set(DEFINE_gd_uint16_t "#define gd_uint16_t unsigned __int16")
   set(DEFINE_gd_int64_t  "#define gd_int64_t  __int64")
   set(DEFINE_gd_uint64_t "#define gd_uint64_t unsigned __int64")
+  set(DEFINE_gd_off64_t "#define gd_off64_t off64_t")
 
   add_definitions(
-    -D__MSVCRT__
     -D__MSVCRT_VERSION__=0x0601
-    -DSTDC_HEADERS
-    -DHAVE_IO_H
-    -DHAVE_STDINT_H
+    -DGD_DIRSEP='\\\\'
+    -DGD_RESTRICT_ARRAY_OK=1
+    -DHAVE_BASENAME
+    -DHAVE_CABS
     -DHAVE_COMPLEX_H
-    -DHAVE_OFF64_T
-    -DHAVE_LIBGEN_H
-    -DHAVE_STRTOLL
-    -DHAVE_DIRENT_H
     -DHAVE_DIRECT_H
+    -DHAVE_DIRENT_H
+    -DHAVE_FCNTL_H
+    -DHAVE_FLOAT_H
+    -DHAVE_FSEEKO64
+    -DHAVE_FTELLO64
+    -DHAVE_FTRUNCATE
+    -DHAVE_GETCWD
+    -DHAVE_INTTYPES_H
+    -DHAVE_IO_H
+    -DHAVE_ISNAN
+    -DHAVE_LIBGEN_H
+    -DHAVE_LSEEK64
+    -DHAVE_MEMORY_H
+    -DHAVE_NAN
+    -DHAVE_OFF64_T
+    -DHAVE_SNPRINTF
+    -DHAVE_SSIZE_T
+    -DHAVE_STDDEF_H
+    -DHAVE_STDINT_H
+    -DHAVE_STDLIB_H
+    -DHAVE_STRINGS_H
+    -DHAVE_STRING_H
+    -DHAVE_STRTOLL
+    -DHAVE_STRTOULL
+    -DHAVE_STRUCT___STAT64
+    -DHAVE_SYS_FILE_H
+    -DHAVE_SYS_PARAM_H
+    -DHAVE_SYS_STAT_H
+    -DHAVE_SYS_TYPES_H
+    -DHAVE_UNISTD_H
+    -DHAVE__CHSIZE
     -DHAVE__COMMIT
+    -DHAVE__COMPLEX_DOUBLE
+    -DHAVE__COMPLEX_FLOAT
+    -DHAVE__FDOPEN
+    -DHAVE__FSTAT
+    -DHAVE__FSTAT64
+    -DHAVE__GETCWD
+    -DHAVE__ISNAN
+    -DHAVE__LSEEKI64
+    -DHAVE__MKDIR
+    -DHAVE__OPEN
+    -DHAVE__READ
+    -DHAVE__RMDIR
+    -DHAVE__SNPRINTF
     -DHAVE__STAT64
     -DHAVE__STRTOI64
     -DHAVE__STRTOUI64
-    -DHAVE_STRUCT___STAT64
-    -DHAVE__GETCWD
+    -DHAVE__UNLINK
+    -DHAVE__WRITE
     -DMKDIR_NO_MODE
-    -DHAVE_SYS_FILE_H
-    -DHAVE_SYS_STAT_H
-    -DHAVE_DIRENT_H
-    -DS_IFLNK=0xa000
-    -DHAVE_DECL_OFFSETOF
-    -DHAVE__CHSIZE
-    -DGD_DIRSEP=0x53
+    -DSIZEOF_INT=4
+    -DSIZEOF_UNSIGNED_INT=4
+    -DSTDC_HEADERS
+    -D_BSD_SOURCE=1
+    -D_GNU_SOURCE=1
+    -D_POSIX_C_SOURCE=1200809L
+    -D_POSIX_SOURCE=1
+    -D_SVID_SOURCE=0
+    -Drestrict=__restrict
     )
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu99")
 endif()

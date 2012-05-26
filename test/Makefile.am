@@ -225,7 +225,7 @@ MOVE_TESTS=move move_affix move_affix_dup move_alias move_data_enc_ar \
 					 move_index move_meta move_protect move_subdir
 
 NAME_TESTS=name name_affix name_affix_bad name_after name_after_const name_dup \
-					 name_move name_update name_update_const
+					 name_move name_updb name_updb_const
 
 NENTRIES_TESTS=nentries_alias nentries_hidden nentries_scalar
 

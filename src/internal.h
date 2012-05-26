@@ -112,7 +112,7 @@ typedef int mode_t;
 #endif
 
 #ifndef HAVE_OFF64_T
-typedef off_t off64_t;
+typedef gd_off64_t off64_t;
 #endif
 
 #ifdef _MSC_VER

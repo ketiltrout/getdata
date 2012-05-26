@@ -46,7 +46,7 @@ int main(void)
   const char *format = "dirfile/format";
   const char *data = "dirfile/data";
   char format_data[1000];
-  uint64_t c = 0x0203000000040001LLU, d = 0;
+  uint64_t c = 0x0203000000040001, d = 0;
   const int big_endian = BigEndian();
   int fd, n, error, r = 0;
   DIRFILE *D;
@@ -76,7 +76,7 @@ int main(void)
   unlink(format);
   rmdir(filedir);
 
-  CHECKX(d,0x0100040000000302LLU);
+  CHECKX(d,0x0100040000000302);
   CHECKI(n,1);
   CHECKI(error,0);
 

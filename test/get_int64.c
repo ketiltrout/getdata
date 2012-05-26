@@ -45,7 +45,7 @@ int main(void)
   mkdir(filedir, 0777);
 
   for (fd = 0; fd < 64; ++fd)
-    data_data[fd] = fd * (0x0200000000000001LLU) * (2 * (fd % 2) - 1);
+    data_data[fd] = fd * (0x0200000000000001) * (2 * (fd % 2) - 1);
 
   fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
   write(fd, format_data, strlen(format_data));
@@ -63,7 +63,7 @@ int main(void)
   CHECKI(n, 8);
 
   for (i = 0; i < 8; ++i)
-    CHECKIi(i,c[i], (0x5000000000000028LL + i * 0x0200000000000001LL)
+    CHECKIi(i,c[i], (0x5000000000000028 + i * 0x0200000000000001)
         * (2 * (i % 2) - 1));
 
   gd_close(D);

@@ -59,7 +59,7 @@ int main(void)
       ? "little" : "big");
 
   for (fd = 0; fd < 128; ++fd)
-    data_data[fd] = fd * (0x020100000201LLU);
+    data_data[fd] = fd * (0x020100000201);
 
   fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
   write(fd, format_data, strlen(format_data));
@@ -81,7 +81,7 @@ int main(void)
 
   CHECKI(error, 0);
   CHECKI(n, 1);
-  CHECKX(c, 0x50a0000050a0000LLU);
+  CHECKX(c, 0x50a0000050a0000);
 
   return r;
 }

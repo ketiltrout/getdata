@@ -21,23 +21,15 @@ if(MSVC)
   set(tests_ignored 
     ${tests_ignored}
     error_verbose error_verbose_prefix
-    get64 get_uint64 get_endian64 get_int64 get_off64
-    nframes64
-    put64 put_endian64 put_off64
-    seek64
-    tell64
+    get_off64 put_off64
     )
 endif()
 
 if(MINGW)
   set(tests_ignored
     ${tests_ignored}
-    add_crecip89 
-    alter_crecip89
-    endian_alter endian_get endian_move
-    header_complex
-    madd_crecip89
-    move_data_endian
+    error_verbose error_verbose_prefix
+    get_off64 put_off64
     )
 endif()
 
@@ -45,7 +37,7 @@ foreach(_item ${tests_ignored})
   list(REMOVE_ITEM gd_sources ${GD_DIR}/test/${_item}.c)
 endforeach()
 
-#set(gd_sources ${GD_DIR}/test/parse_include_relabs.c)
+#set(gd_sources ${GD_DIR}/test/sie_get_little.c)
 
 foreach(_test ${gd_sources})
   get_filename_component(testname ${_test} NAME_WE)
