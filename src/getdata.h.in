@@ -36,6 +36,15 @@
  *   array of doubles in place of the complex types.  This symbol permits
  *   including these declarations using a non-C99 conforming compiler.
  *
+ * - defining GD_64BIT_API will expose the declaration of versions of funtions
+ *   using an explicitly 64-bit off_t type, regardless of the actual size of
+ *   off_t itself.  These functions have "64" appended to their name (e.g.
+ *   gd_getdata64()).  It will also define th gd_off64_t type, which is used in
+ *   these exposed definitions as a replacement for off_t.  This symbol is
+ *   automatically defined if _LARGEFILE64_SOURCE has been defined before
+ *   including this file, and may also be defined on certain platforms where
+ *   off_t is 64-bits.
+ *
  * - defining GD_FUNCTION_ALIASES will result in a number of function aliases
  *   which map the version 0.7 function names to the names used in GetData-0.6.
  *   This feature is provided only to ease transistion, and will be removed in
@@ -1075,13 +1084,14 @@ gd_nonnull ((1,2));
 /* if required, declare the LFS transitional extension */
 #if defined _LARGEFILE64_SOURCE || (defined _FILE_OFFSET_BITS && \
     _FILE_OFFSET_BITS == 64) || (defined __CYGWIN__) || (defined __APPLE__)
-
-#if (defined _FILE_OFFSET_BITS && _FILE_OFFSET_BITS == 64) || \
-                                    (defined __APPLE__) || (defined __CYGWIN__)
-#define gd_off64_t off_t
-#else
-#define gd_off64_t off64_t
+#if ! defined GD_64BIT_API
+#define GD_64BIT_API
 #endif
+#endif
+
+#ifdef GD_64BIT_API
+@DEFINE_gd_off64_t@
+
 extern int gd_alter_frameoffset64(DIRFILE *dirfile, gd_off64_t offset,
     int fragment, int recode) gd_nonnull ((1));
 

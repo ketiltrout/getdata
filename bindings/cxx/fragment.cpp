@@ -31,7 +31,7 @@ Fragment::Fragment(const GetData::Dirfile *dirfile, int index)
   ind = index;
   enc = (GetData::EncodingScheme)gd_encoding(D->D, index);
   end = gd_endianness(D->D, index);
-  off = gd_frameoffset(D->D, index);
+  off = (off_t)gd_frameoffset64(D->D, index);
   prot = gd_protection(D->D, index);
   name = gd_fragmentname(D->D, index);
   parent = (index == 0) ? -1 : gd_parent_fragment(D->D, index);
@@ -73,7 +73,7 @@ int Fragment::SetEndianness(unsigned long byte_sex, int recode)
 
 int Fragment::SetFrameOffset(off_t offset, int recode)
 {
-  int ret = gd_alter_frameoffset(D->D, offset, ind, recode);
+  int ret = gd_alter_frameoffset64(D->D, (gd_off64_t)offset, ind, recode);
 
   if (!ret)
     off = offset;

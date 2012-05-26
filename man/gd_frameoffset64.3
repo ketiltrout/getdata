@@ -13,47 +13,51 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_frameoffset64 3 "16 July 2010" "Version 0.7.0" "GETDATA"
+.TH gd_frameoffset64 3 "25 May 2012" "Version 0.8.0" "GETDATA"
 .SH NAME
 gd_frameoffset64, gd_alter_frameoffset64 \(em report or change the frame
 offset of fields in a dirfile, with largefile support
 .SH SYNOPSIS
-.B #define _LARGEFILE64_SOURCE
+.B #define GD_64BIT_API
 
 .B #include <getdata.h>
 .HP
 .nh
 .ad l
-.BI "off64_t gd_frameoffset(DIRFILE *" dirfile ", int " fragment_index );
+.BI "gd_off64_t gd_frameoffset(DIRFILE *" dirfile ", int " fragment_index );
 .HP
-.BI "int gd_alter_frameoffset64(DIRFILE *" dirfile ", off64_t " offset ,
+.BI "int gd_alter_frameoffset64(DIRFILE *" dirfile ", gd_off64_t " offset ,
 .BI "int " fragment_index ", int " move );
 .hy
 .ad n
 .SH DESCRIPTION
-These version of
+These versions of
 .BR gd_frameoffset (3)
 and
 .BR gd_alter_frameoffset (3)
-use a 64-bit offset type, even if
-.I off_t
-is a 32-bit type.  They are only available if the caller defines
-.I _LARGEFILE64_SOURCE 
+use a 64-bit offset type
+.RB ( gd_off64_t ),
+where one is available, regardless of the size of
+.BR off_t .
+They are only available if one defines
+.IR GD_64BIT_API
+or
+.IR _LARGEFILE64_SOURCE
 before including getdata.h.
 
 If
 .I off_t
-is a 64-bit type (i.e. if
+is a 64-bit type (possibly because
 .I _FILE_OFFSET_BITS
-is defined to be 64), these function will be called
-.BR gd_frameoffset ()
+has been defined to 64), these functions will the same as
+.BR gd_framenum_subset (3)
 and
-.BR gd_alter_frameoffset ().
+.BR gd_alter_frameoffset (3).
 Otherwise,
-.BR gd_frameoffset ()
+.BR gd_framenum_subset (3)
 and
-.BR gd_alter_frameoffset ()
-will be versions of these functions which use a 32-bit
+.BR gd_alter_frameoffset (3)
+will be versions of these function which use a 32-bit
 .IR off_t .
 .SH SEE ALSO
 .BR gd_alter_frameoffset (3),

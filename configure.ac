@@ -620,17 +620,6 @@ GD_CHECK_LFS_TYPE([off64_t],[
 #endif
 ])
 
-if test "x$gd_cv_c_need_lfs_defined" = "xyes"; then
-  AC_DEFINE([_LARGEFILE64_SOURCE], [1],
-            [ Additional functionality from LFS for large files. ])
-fi
-
-if test "x$gd_cv_type_off64_t" = "xyes"; then
-  dnl Assume we have the entire LFS defined transitional API
-  AC_DEFINE([HAVE_OFF64_T], [1],
-            [ Define to 1 if the system has the type `off64_t'. ]) dnl `
-fi
-
 dnl integer sizes
 AC_CHECK_SIZEOF([short int])
 AC_CHECK_SIZEOF([int])
@@ -683,14 +672,31 @@ elif test $ac_cv_sizeof_unsigned_long_long_int -eq 8; then
   gd_uint64_t="long long int"
 fi
 
+if test "x$gd_cv_type_off64_t" = "xyes"; then
+  dnl Assume we have the entire LFS defined transitional API
+  AC_DEFINE([HAVE_OFF64_T], [1],
+            [ Define to 1 if the system has the type `off64_t'. ]) dnl `
+  define_lf64s="#ifndef _LARGEFILE64_SOURCE
+#define _LARGEFILE64_SOURCE
+#endif
+"
+  gd_off64_t="off64_t"
+elif test $ac_cv_sizeof_off_t -eq 8;then
+  gd_off64_t="off64_t"
+else
+  gd_off64_t=$gd_int64_t
+fi
+
 DEFINE_gd_int16_t="# define gd_int16_t $gd_int16_t";
 DEFINE_gd_uint16_t="# define gd_uint16_t $gd_uint16_t";
 DEFINE_gd_int64_t="# define gd_int64_t $gd_int64_t";
 DEFINE_gd_uint64_t="# define gd_uint64_t $gd_uint64_t";
+DEFINE_gd_off64_t="$define_lf64s# define gd_off64_t $gd_off64_t";
 AC_SUBST([DEFINE_gd_int16_t])
 AC_SUBST([DEFINE_gd_uint16_t])
 AC_SUBST([DEFINE_gd_int64_t])
 AC_SUBST([DEFINE_gd_uint64_t])
+AC_SUBST([DEFINE_gd_off64_t])
 
 dnl library functions
 echo
@@ -987,7 +993,6 @@ AM_CONDITIONAL(FC_WEXTRA, [test "x$gd_cv_prog_fc_wextra" == "xyes"])
 AM_CONDITIONAL(INTEL_F77_COMPILER,
                [test "x$gd_cv_f77_compiler_intel" == "xyes"])
 AM_CONDITIONAL(INTEL_FC_COMPILER, [test "x$gd_cv_fc_compiler_intel" == "xyes"])
-AM_CONDITIONAL(LFS_TRANSITIONAL_API, [test "x$gd_cv_type_off64_t" = "xyes"])
 AM_CONDITIONAL(INCLUDE_LEGACY_API, [test "x$include_legacy_api" != "xno"])
 AM_CONDITIONAL(MAKE_CXXBINDINGS, [test "x$make_cxxbindings" = "xyes"])
 AM_CONDITIONAL(MAKE_F77BINDINGS, [test "x$make_f77bindings" != "xno"])
@@ -1066,16 +1071,9 @@ if test "x$enable_debug$enable_assert" = "xnoyes"; then
   enable_debug="assert only"
 fi
 
-if test "x$gd_cv_type_off64_t" = "xyes"; then
-  lfs_transitional_api="yes"
-else
-  lfs_transitional_api="no"
-fi
-
 echo
 echo "Configuration summary: "
 echo "  ANSI C compatibility mode:     ${disable_c99}"
-echo "  LFS transitional API:          ${lfs_transitional_api}"
 echo "  Legacy API:                    ${include_legacy_api}"
 echo "  Verbose debugging:             ${enable_debug}"
 echo "  Use modules:                   ${use_modules}"

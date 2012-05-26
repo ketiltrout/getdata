@@ -104,8 +104,8 @@ static void _GD_ExtractRepr(DIRFILE *restrict D, const void *restrict cdata,
 {
   size_t i;
 
-  dtrace("%p, %p, 0x%X, %p, 0x%X, %" PRNsize_t ", %i", D, cdata, in_type, rdata, type, n,
-      repr);
+  dtrace("%p, %p, 0x%X, %p, 0x%X, %" PRNsize_t ", %i", D, cdata, in_type, rdata,
+      type, n, repr);
 
   switch (type) {
     case GD_UINT8:      EXTRACT_REPRS(       uint8_t); break;
@@ -258,8 +258,8 @@ static size_t _GD_DoRaw(DIRFILE *restrict D, gd_entry_t *restrict E, off64_t s0,
   char *databuffer;
   size_t zero_pad = 0;
 
-  dtrace("%p, %p, %lli, %" PRNsize_t ", 0x%X, %p)", D, E, (long long)s0, ns, return_type,
-      data_out);
+  dtrace("%p, %p, %lli, %" PRNsize_t ", 0x%X, %p)", D, E, (long long)s0, ns,
+      return_type, data_out);
 
   if (s0 < E->EN(raw,spf) * D->fragment[E->fragment_index].frame_offset)
     zero_pad = E->EN(raw,spf) * D->fragment[E->fragment_index].frame_offset -
@@ -871,8 +871,8 @@ static void _GD_WindowData(DIRFILE *restrict D, void *restrict A,
   size_t i;
   const double NaN = NAN;
 
-  dtrace("%p, %p, %u, %p, %u, 0x%X, %i, {%g,%llx,%lli}, %" PRNsize_t, D, A, spfA, B,
-      spfB, type, op, threshold.r, (unsigned long long)threshold.u,
+  dtrace("%p, %p, %u, %p, %u, 0x%X, %i, {%g,%llx,%lli}, %" PRNsize_t, D, A,
+      spfA, B, spfB, type, op, threshold.r, (unsigned long long)threshold.u,
       (long long)threshold.i, n);
 
   switch (type) {
@@ -929,8 +929,8 @@ static void _GD_MplexData(DIRFILE *restrict D, void *restrict A,
 {
   size_t i;
 
-  dtrace("%p, %p, %u, %p, %u, 0x%X, %i, %p, %" PRNsize_t, D, A, spfA, B, spfB, type,
-      val, start, n);
+  dtrace("%p, %p, %u, %p, %u, 0x%X, %i, %p, %" PRNsize_t, D, A, spfA, B, spfB,
+      type, val, start, n);
 
   switch (type) {
     case GD_NULL:                        break;
@@ -967,8 +967,8 @@ static size_t _GD_DoLincom(DIRFILE *restrict D, gd_entry_t *restrict E,
   const gd_type_t ntype = (return_type & GD_COMPLEX) ? GD_COMPLEX128
     : GD_FLOAT64;
 
-  dtrace("%p, %p, %lli, %" PRNsize_t ", 0x%X, %p", D, E, (long long)first_samp, num_samp,
-      return_type, data_out);
+  dtrace("%p, %p, %lli, %" PRNsize_t ", 0x%X, %p", D, E, (long long)first_samp,
+      num_samp, return_type, data_out);
 
   /* input field checks */
   for (i = 0; i < E->EN(lincom,n_fields); ++i) {
@@ -1101,8 +1101,8 @@ static size_t _GD_DoMultiply(DIRFILE *restrict D, gd_entry_t *restrict E,
   off64_t first_samp2;
   gd_type_t type2;
 
-  dtrace("%p, %p, %lli, %" PRNsize_t ", 0x%X, %p", D, E, (long long)first_samp, num_samp,
-      return_type, data_out);
+  dtrace("%p, %p, %lli, %" PRNsize_t ", 0x%X, %p", D, E, (long long)first_samp,
+      num_samp, return_type, data_out);
 
   /* Check input fields */
   if (_GD_BadInput(D, E, 0, 1)) {
@@ -1196,8 +1196,8 @@ static size_t _GD_DoRecip(DIRFILE *restrict D, gd_entry_t *restrict E,
 {
   size_t n_read;
 
-  dtrace("%p, %p, %lli, %" PRNsize_t ", 0x%X, %p", D, E, (long long)first_samp, num_samp,
-      return_type, data_out);
+  dtrace("%p, %p, %lli, %" PRNsize_t ", 0x%X, %p", D, E, (long long)first_samp,
+      num_samp, return_type, data_out);
 
   /* Check input fields */
   if (_GD_BadInput(D, E, 0, 1)) {
@@ -1242,8 +1242,8 @@ static size_t _GD_DoDivide(DIRFILE *restrict D, gd_entry_t *restrict E,
   off64_t first_samp2;
   gd_type_t type2;
 
-  dtrace("%p, %p, %lli, %" PRNsize_t ", 0x%X, %p", D, E, (long long)first_samp, num_samp,
-      return_type, data_out);
+  dtrace("%p, %p, %lli, %" PRNsize_t ", 0x%X, %p", D, E, (long long)first_samp,
+      num_samp, return_type, data_out);
 
   /* Check input fields */
   if (_GD_BadInput(D, E, 0, 1) || _GD_BadInput(D, E, 1, 1)) {
@@ -1391,8 +1391,8 @@ static size_t _GD_DoPhase(DIRFILE *restrict D, gd_entry_t *restrict E,
 {
   size_t n_read;
 
-  dtrace("%p, %p, %lli, %" PRNsize_t ", 0x%X, %p", D, E, (long long)first_samp, num_samp,
-      return_type, data_out);
+  dtrace("%p, %p, %lli, %" PRNsize_t ", 0x%X, %p", D, E, (long long)first_samp,
+      num_samp, return_type, data_out);
 
   if (_GD_BadInput(D, E, 0, 1)) {
     dreturn("%i", 0);
@@ -1415,8 +1415,8 @@ static size_t _GD_DoLinterp(DIRFILE *restrict D, gd_entry_t *restrict E,
   size_t n_read = 0;
   double* data_in;
 
-  dtrace("%p, %p, %lli, %" PRNsize_t ", 0x%X, %p", D, E, (long long)first_samp, num_samp,
-      return_type, data_out);
+  dtrace("%p, %p, %lli, %" PRNsize_t ", 0x%X, %p", D, E, (long long)first_samp,
+      num_samp, return_type, data_out);
 
   if (E->e->u.linterp.table_len < 0) {
     _GD_ReadLinterpFile(D, E);
@@ -1465,8 +1465,8 @@ static size_t _GD_DoPolynom(DIRFILE *restrict D, gd_entry_t *restrict E,
 {
   size_t n_read;
 
-  dtrace("%p, %p, %lli, %" PRNsize_t ", 0x%X, %p", D, E, (long long)first_samp, num_samp,
-      return_type, data_out);
+  dtrace("%p, %p, %lli, %" PRNsize_t ", 0x%X, %p", D, E, (long long)first_samp,
+      num_samp, return_type, data_out);
 
   if (_GD_BadInput(D, E, 0, 1)) {
     dreturn("%i", 0);
@@ -1511,8 +1511,8 @@ static size_t _GD_DoWindow(DIRFILE *restrict D, gd_entry_t *restrict E,
   off64_t first_samp2;
   gd_type_t type2;
 
-  dtrace("%p, %p, %lli, %" PRNsize_t ", 0x%X, %p", D, E, (long long)first_samp, num_samp,
-      return_type, data_out);
+  dtrace("%p, %p, %lli, %" PRNsize_t ", 0x%X, %p", D, E, (long long)first_samp,
+      num_samp, return_type, data_out);
 
   /* Check input fields */
   if (_GD_BadInput(D, E, 0, 1)) {
@@ -1617,8 +1617,8 @@ static size_t _GD_DoMplex(DIRFILE *restrict D, gd_entry_t *restrict E,
   const size_t size = GD_SIZE(return_type);
   off64_t first_samp2;
 
-  dtrace("%p, %p, %lli, %" PRNsize_t ", 0x%X, %p", D, E, (long long)first_samp, num_samp,
-      return_type, data_out);
+  dtrace("%p, %p, %lli, %" PRNsize_t ", 0x%X, %p", D, E, (long long)first_samp,
+      num_samp, return_type, data_out);
 
   /* Check input fields */
   if (_GD_BadInput(D, E, 0, 1)) {
@@ -1974,9 +1974,9 @@ size_t gd_getdata64(DIRFILE* D, const char *field_code_in, off64_t first_frame,
   int repr;
   unsigned int spf;
 
-  dtrace("%p, \"%s\", %lli, %lli, %" PRNsize_t ", %" PRNsize_t ", 0x%X, %p", D, field_code_in,
-      (long long)first_frame, (long long)first_samp, num_frames, num_samp,
-      return_type, data_out);
+  dtrace("%p, \"%s\", %lli, %lli, %" PRNsize_t ", %" PRNsize_t ", 0x%X, %p", D,
+      field_code_in, (long long)first_frame, (long long)first_samp, num_frames,
+      num_samp, return_type, data_out);
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);

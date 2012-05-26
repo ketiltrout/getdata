@@ -22,16 +22,17 @@
 #ifndef GETDATA_DIRFILE_H
 #define GETDATA_DIRFILE_H
 
-#ifndef _FILE_OFFSET_BITS
-# define _FILE_OFFSET_BITS 64
+// Enable the explicit 64-bit API (gd_getdata64() &c.)
+#ifndef GD_64BIT_API
+# define GD_64BIT_API
 #endif
 
-// We don't want the legacy API since its symbols clash with us.
+// Disable the legacy API since its symbols clash with us.
 #ifndef GD_NO_LEGACY_API
 # define GD_NO_LEGACY_API
 #endif
 
-// We use the C89 API since C++ compilers aren't required to support the
+// Use the C89 API since C++ compilers aren't required to support the
 // C99 _Complex keyword
 #ifndef GD_C89_API
 # define GD_C89_API

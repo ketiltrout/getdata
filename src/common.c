@@ -480,8 +480,8 @@ void _GD_LinterpData(DIRFILE *restrict D, void *restrict data, gd_type_t type,
   size_t i;
   double x;
 
-  dtrace("%p, %p, 0x%x, %i, %p, %" PRNsize_t ", %p, %" PRNsize_t, D, data, type, complex_table,
-      data_in, npts, lut, n_ln);
+  dtrace("%p, %p, 0x%x, %i, %p, %" PRNsize_t ", %p, %" PRNsize_t, D, data, type,
+      complex_table, data_in, npts, lut, n_ln);
 
   switch (type) {
     case GD_NULL:                          break;
@@ -574,8 +574,8 @@ void _GD_LincomData(DIRFILE *restrict D, int n, void *restrict data1,
 {
   size_t i;
 
-  dtrace("%p, %i, %p, 0x%x, %p, %p, %p, %p, %p, %" PRNsize_t, D, n, data1, return_type,
-      data2, data3, m, b, spf, n_read);
+  dtrace("%p, %i, %p, 0x%x, %p, %p, %p, %p, %p, %" PRNsize_t, D, n, data1,
+      return_type, data2, data3, m, b, spf, n_read);
 
   switch(return_type) {
     case GD_NULL:                         break;
@@ -683,8 +683,8 @@ void _GD_CLincomData(DIRFILE *restrict D, int n, void *restrict data1,
 {
   size_t i;
 
-  dtrace("%p, %i, %p, 0x%x, %p, %p, %p, %p, %p, %" PRNsize_t, D, n, data1, return_type,
-      data2, data3, m, b, spf, n_read);
+  dtrace("%p, %i, %p, 0x%x, %p, %p, %p, %p, %p, %" PRNsize_t, D, n, data1,
+      return_type, data2, data3, m, b, spf, n_read);
 
   switch(return_type) {
     case GD_NULL:                         break;
@@ -729,7 +729,8 @@ void _GD_InvertData(DIRFILE *restrict D, void *restrict data,
 {
   size_t i;
 
-  dtrace("%p, %p, 0x%x, %g, %" PRNsize_t, D, data, return_type, dividend, n_read);
+  dtrace("%p, %p, 0x%x, %g, %" PRNsize_t, D, data, return_type, dividend,
+      n_read);
 
   switch(return_type) {
     case GD_NULL:                         break;
@@ -785,8 +786,8 @@ void _GD_CInvertData(DIRFILE *restrict D, void *restrict data,
 {
   size_t i;
 
-  dtrace("%p, %p, 0x%x, %g;%g, %" PRNsize_t, D, data, return_type, creal(dividend),
-      cimag(dividend), n_read);
+  dtrace("%p, %p, 0x%x, %g;%g, %" PRNsize_t, D, data, return_type,
+      creal(dividend), cimag(dividend), n_read);
 
   switch(return_type) {
     case GD_NULL:                         break;

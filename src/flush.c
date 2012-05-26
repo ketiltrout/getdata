@@ -275,8 +275,8 @@ static void _GD_PadField(DIRFILE *D, FILE* stream, const char *prefix,
   int dummy;
   char *ptr;
 
-  dtrace("%p, %p, \"%s\", \"%s\", \"%s\", %" PRNsize_t ", %i, %i", D, stream, prefix,
-      suffix, in, len, permissive, standards);
+  dtrace("%p, %p, \"%s\", \"%s\", \"%s\", %" PRNsize_t ", %i, %i", D, stream,
+      prefix, suffix, in, len, permissive, standards);
 
   ptr = _GD_MungeCode(D, NULL, prefix, suffix, NULL, NULL, in, &dummy);
 

@@ -259,17 +259,17 @@ const char** Dirfile::MVectorList(const char *parent) const
 
 off_t Dirfile::NFrames() const
 {
-  return gd_nframes(D);
+  return (off_t)gd_nframes64(D);
 }
 
 off_t Dirfile::EoF(const char *field_code) const
 {
-  return gd_eof(D, field_code);
+  return (off_t)gd_eof64(D, field_code);
 }
 
 off_t Dirfile::BoF(const char *field_code) const
 {
-  return gd_bof(D, field_code);
+  return (off_t)gd_bof64(D, field_code);
 }
 
 int Dirfile::GetCarray(const char *field_code, DataType type, void *data_out,
@@ -292,8 +292,9 @@ size_t Dirfile::GetData(const char* field_code, off_t first_frame,
     off_t first_sample, size_t num_frames, size_t num_samples,
     DataType type, void* data_out) const
 {
-  return gd_getdata(D, field_code, first_frame, first_sample, num_frames,
-      num_samples, (gd_type_t)type, data_out);
+  return gd_getdata64(D, field_code, (gd_off64_t)first_frame,
+      (gd_off64_t)first_sample, num_frames, num_samples, (gd_type_t)type,
+      data_out);
 }
 
 size_t Dirfile::GetString(const char *field_code, size_t len, char* data_out)
@@ -322,8 +323,9 @@ size_t Dirfile::PutData(const char* field_code, off_t first_frame,
     off_t first_sample, size_t num_frames, size_t num_samples,
     DataType type, const void* data_in) const
 {
-  return gd_putdata(D, field_code, first_frame, first_sample, num_frames,
-      num_samples, (gd_type_t)type, data_in);
+  return gd_putdata64(D, field_code, (gd_off64_t)first_frame,
+      (gd_off64_t)first_sample, num_frames, num_samples, (gd_type_t)type,
+      data_in);
 }
 
 size_t Dirfile::PutString(const char *field_code, const char* data_in) const
@@ -424,7 +426,8 @@ int Dirfile::Validate(const char* field_code) const
 double Dirfile::FrameNum(const char* field_code, double value,
     off_t frame_start, off_t frame_end) const
 {
-  return gd_framenum_subset(D, field_code, value, frame_start, frame_end);
+  return gd_framenum_subset64(D, field_code, value, (gd_off64_t)frame_start,
+      (gd_off64_t)frame_end);
 }
 
 int Dirfile::FragmentIndex(const char* field_code) const
@@ -445,12 +448,13 @@ int Dirfile::Standards(int version) const
 off_t Dirfile::Seek(const char* field_code, off_t frame_num,
     off_t sample_num, int flags) const
 {
-  return gd_seek(D, field_code, frame_num, sample_num, flags);
+  return (off_t)gd_seek64(D, field_code, (gd_off64_t)frame_num,
+      (gd_off64_t)sample_num, flags);
 }
 
 off_t Dirfile::Tell(const char* field_code) const
 {
-  return gd_tell(D, field_code);
+  return (off_t)gd_tell64(D, field_code);
 }
 
 int Dirfile::AddAlias(const char* field_code, const char* target,

@@ -37,22 +37,23 @@ nodist_perl_SCRIPTS=blib/lib/GetData.pm
 perlautogetdatadir=${perldir}/auto/GetData
 nodist_perlautogetdata_SCRIPTS=blib/arch/auto/GetData/GetData.bs blib/arch/auto/GetData/GetData.so
 
-t:
-	mkdir t
+t lib:
+	mkdir $@
 
-t/%.t: test/%.t t
+t/%.t: test/%.t
+	$(MAKE) t
 	cat $< > $@
 
-lib:
-	mkdir lib
-
-lib/GetData.xs: lib GetData.xs
+lib/GetData.xs: GetData.xs
+	$(MAKE) lib
 	cat $(srcdir)/GetData.xs > $@
 
-lib/typemap: lib typemap
+lib/typemap: typemap
+	$(MAKE) lib
 	cat $(srcdir)/typemap > $@
 
-lib/simple_funcs.xs: lib simple_funcs.xsin simple_funcs.pl
+lib/simple_funcs.xs: simple_funcs.xsin simple_funcs.pl
+	$(MAKE) lib
 	$(PERL) $(srcdir)/simple_funcs.pl $(srcdir)/simple_funcs.xsin > $@
 
 MANIFEST: MANIFEST.in
@@ -75,6 +76,7 @@ blib/arch/auto/GetData/GetData.bs blib/arch/auto/GetData/GetData.so \
 	blib/lib/GetData.pm blib/libdoc/GetData.$(PERL_MAN3EXT): Build \
 	lib/GetData.xs lib/simple_funcs.xs lib/typemap
 	$(PERL) Build build
+	touch $@
 
 .PRECIOUS: Build
 Build: Build.PL GetData.pm lib/GetData.xs lib/simple_funcs.xs lib/typemap \

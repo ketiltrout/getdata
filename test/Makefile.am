@@ -28,17 +28,6 @@ if CC_WEXTRA
 WEXTRA=-Wextra
 endif
 
-if LFS_TRANSITIONAL_API
-GET64=get64
-GET_OFF64=get_off64
-NFRAMES64=nframes64
-NFRAMES_OFF64=nframes_off64
-PUT64=put64
-PUT_OFF64=put_off64
-SEEK64=seek64
-TELL64=tell64
-endif
-
 LDADD=../src/libgetdata.la
 INCLUDES=${WALL} $(WEXTRA) -I$(top_srcdir)/src
 
@@ -179,7 +168,7 @@ FRAGMENT_TESTS=fragment_affix fragment_affix_alter fragment_affix_alter2 \
 							 fragment_affix_dup fragment_index fragment_index_alias \
 							 fragment_name fragment_name_oor fragment_num fragment_parent
 
-GET_TESTS=${GET64} get_bad_code get_bit get_carray get_carray_len \
+GET_TESTS=get64 get_bad_code get_bit get_carray get_carray_len \
 					get_carray_slice get_char get_clincom get_complex128 \
 					get_complex64 get_const get_const_complex get_const_repr \
 					get_cpolynom get_divide get_endian8 get_endian16 get_endian32 \
@@ -195,7 +184,7 @@ GET_TESTS=${GET64} get_bad_code get_bit get_carray get_carray_len \
 					get_lincom_null get_lincom_spf get_linterp get_linterp_noin \
 					get_linterp_notab get_linterp_sort get_mplex get_mplex_lb \
 					get_mplex_lball get_mplex_nolb get_multiply get_multiply_noin \
-					get_nonexistent get_null $(GET_OFF64) get_phase get_phase_affix \
+					get_nonexistent get_null get_off64 get_phase get_phase_affix \
 					get_polynom get_polynom_noin get_recip get_recip_const get_recurse \
 					get_rofs get_sbit get_sf get_ss get_type get_uint16 get_uint32 \
 					get_uint64 get_window get_window_clr get_window_ge get_window_gt \
@@ -244,8 +233,8 @@ NFIELDS_TESTS=nfields nfields_hidden nfields_invalid nfields_type \
 							nfields_type_hidden nfields_type_invalid nfields_vector \
 							nfields_vector_hidden nfields_vector_invalid
 
-NFRAMES_TESTS=nframes ${NFRAMES64} nframes_empty nframes_invalid \
-							$(NFRAMES_OFF64) nframes_spf
+NFRAMES_TESTS=nframes nframes64 nframes_empty nframes_invalid \
+							nframes_off64 nframes_spf
 
 NMETA_TESTS=nmeta nmeta_hidden nmeta_invalid nmeta_parent nmeta_type \
 						nmeta_type_hidden nmeta_type_invalid nmeta_type_parent \
@@ -296,7 +285,7 @@ PARSE_TESTS=parse_alias parse_alias_code parse_alias_dup parse_alias_meta \
 
 PROTECT_TESTS=protect_alter protect_get
 
-PUT_TESTS=${PUT64} put_bad_code put_bit put_bof put_carray put_carray_slice \
+PUT_TESTS=put64 put_bad_code put_bit put_bof put_carray put_carray_slice \
 					put_char put_complex128 put_complex64 put_const put_const_protect \
 					put_divide put_endian8 put_endian16 put_endian32 put_endian64 \
 					put_endian_complex128_arm put_endian_complex128_big \
@@ -309,7 +298,7 @@ PUT_TESTS=${PUT64} put_bad_code put_bit put_bof put_carray put_carray_slice \
 					put_int32 put_int64 put_invalid put_lincom1 put_lincom2 \
 					put_lincom_noin put_linterp put_linterp_noin put_linterp_nomono \
 					put_linterp_notab put_linterp_reverse put_mplex put_multiply \
-					put_null $(PUT_OFF64) put_phase put_phase_noin put_polynom1 \
+					put_null put_off64 put_phase put_phase_noin put_polynom1 \
 					put_polynom2 put_polynom_noin put_protect put_rdonly put_recip \
 					put_recurse put_repr put_rofs put_sbit put_sf put_ss put_string \
 					put_string_protect put_type put_uint16 put_uint32 put_uint64 \
@@ -322,7 +311,7 @@ REPR_TESTS=repr_a repr_float32 repr_float64 repr_i repr_int16 repr_int32 \
 					 repr_real_m repr_real_r repr_uint16 repr_uint32 repr_uint64 \
 					 repr_uint8
 
-SEEK_TESTS=$(SEEK64) seek_cur seek_end seek_foffs seek_set
+SEEK_TESTS=seek64 seek_cur seek_end seek_foffs seek_set
 
 SIE_TESTS=sie_get_big sie_get_little sie_move_from sie_move_to sie_nframes_big \
 					sie_nframes_little sie_put_big sie_put_little
@@ -336,7 +325,7 @@ SPF_TESTS=spf spf_alias spf_alias_missing spf_alias_meta \
 					spf_divide spf_lincom spf_multiply \
 					spf_polynom spf_recip spf_recurse
 
-TELL_TESTS=tell ${TELL64}
+TELL_TESTS=tell tell64
 
 TRUNC_TESTS=trunc trunc_dir trunc_rdonly trunc_rofs trunc_truncsub
 

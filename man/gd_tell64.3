@@ -1,6 +1,6 @@
-.\" gd_framenum_subset64.3.  The gd_framenum_subset64 man page.
+.\" gd_tell64.3.  The gd_tell64 man page.
 .\"
-.\" Copyright (C) 2008, 2010, 2012 D. V. Wiebe
+.\" Copyright (C) 2012 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,10 +13,9 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_framenum_subset64 3 "25 May 2012" "Version 0.8.0" "GETDATA"
+.TH gd_tell64 3 "25 May 2012" "Version 0.8.0" "GETDATA"
 .SH NAME
-gd_framenum_subset64 \(em perform a reverse look-up on a monotonic dirfile
-field, with largefile support.
+gd_tell64 \(em retrieve data from a dirfile database, with largefile support
 .SH SYNOPSIS
 .B #define GD_64BIT_API
 
@@ -24,14 +23,12 @@ field, with largefile support.
 .HP
 .nh
 .ad l
-.BI "double gd_framenum_subset64(DIRFILE *" dirfile ,
-.BI "const char *" field_code ", double " value ", gd_off64_t " field_start ,
-.BI "gd_off64_t " field_end );
+.BI "gd_off64_t gd_tell64(DIRFILE *" dirfile ", const char *" field_code );
 .hy
 .ad n
 .SH DESCRIPTION
 This version of
-.BR gd_framenum_subset (3)
+.BR gd_tell (3)
 uses a 64-bit offset type
 .RB ( gd_off64_t ),
 where one is available, regardless of the size of
@@ -47,11 +44,11 @@ If
 is a 64-bit type (possibly because
 .I _FILE_OFFSET_BITS
 has been defined to 64), this function will the same as
-.BR gd_framenum_subset (3).
+.BR gd_tell (3).
 Otherwise,
-.BR gd_framenum_subset (3)
+.BR gd_tell (3)
 will be a version of this function which uses a 32-bit
 .IR off_t .
 .SH SEE ALSO
-.BR gd_framenum_subset (3),
+.BR gd_tell (3),
 .BR feature_test_macros (7)

@@ -259,8 +259,8 @@ gd_nothrow
   int repr;
   char* field_code;
 
-  dtrace("%p, \"%s\", %i, %" PRNsize_t ", 0x%x, %p", D, field_code_in, first, n, data_type,
-      data_in);
+  dtrace("%p, \"%s\", %i, %" PRNsize_t ", 0x%x, %p", D, field_code_in, first, n,
+      data_type, data_in);
 
   if (D->flags & GD_INVALID) {
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);

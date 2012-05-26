@@ -1,6 +1,6 @@
 .\" gd_putdata64.3.  The gd_putdata64 man page.
 .\"
-.\" Copyright (C) 2008, 2010 D. V. Wiebe
+.\" Copyright (C) 2008, 2010, 2012 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,36 +13,43 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_putdata64 3 "25 May 2010" "Version 0.7.0" "GETDATA"
+.TH gd_putdata64 3 "25 May 2012" "Version 0.8.0" "GETDATA"
 .SH NAME
-gd_putdata64 \(em write data to a dirfile database with largefile support
+gd_putdata64 \(em write data to a dirfile database, with largefile support
 .SH SYNOPSIS
-.B #define _LARGEFILE64_SOURCE
+.B #define GD_64BIT_API
 
 .B #include <getdata.h>
 .HP
 .nh
 .ad l
-.BI "size_t gd_putdata64(DIRFILE *" dirfile ", const char *" field_code ", off64_t"
-.IB first_frame ", off64_t " first_sample ", size_t " num_frames ", size_t"
-.IB num_samples ", gd_type_t " data_type ", const void *" data_out );
+.BI "size_t gd_putdata64(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "gd_off64_t " first_frame ", gd_off64_t " first_sample ", size_t 
+.IB num_frames ", size_t " num_samples ", gd_type_t " data_type ,
+.BI "const void *" data_out );
 .hy
 .ad n
 .SH DESCRIPTION
 This version of
 .BR gd_putdata (3)
-uses a 64-bit offset type, even if
-.I off_t
-is a 32-bit type.  It is only available if one defines
-.IR _LARGEFILE64_SOURCE .
+uses a 64-bit offset type
+.RB ( gd_off64_t ),
+where one is available, regardless of the size of
+.BR off_t .
+It is only available if one defines
+.IR GD_64BIT_API
+or
+.IR _LARGEFILE64_SOURCE
+before including getdata.h.
+
 If
 .I off_t
-is a 64-bit type (i.e. if
+is a 64-bit type (possibly because
 .I _FILE_OFFSET_BITS
-is defined to be 64), this function will be called
-.BR gd_putdata ().
+has been defined to 64), this function will the same as
+.BR gd_putdata (3).
 Otherwise,
-.BR gd_putdata ()
+.BR gd_putdata (3)
 will be a version of this function which uses a 32-bit
 .IR off_t .
 .SH SEE ALSO

@@ -26,6 +26,7 @@
 #include "gd_config.h"
 #endif
 
+#define GD_64BIT_API
 #include "getdata.h"
 
 /* OS X 10.6 deprecates lstat64 */

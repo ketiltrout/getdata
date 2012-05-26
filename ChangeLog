@@ -1,3 +1,20 @@
+2012-05-25   D. V. Wiebe <getdata@ketiltrout.net> svn:712
+	* bindings/cxx/fragment.cpp (Fragment::Fragment Fragment::SetEndianness)
+	bindings/cxx/dirfile.cpp (Dirfile::NFrames Dirfile::EoF Dirfile::BoF
+	Dirfile::GetData Dirfile::PutData Dirfile::FrameNum Dirfile::Seek
+	Dirfile::Tell): Call the 64-bit API.
+
+	* src/getdata.h.in: Support GD_64BIT_API and use configure to define
+	gd_off64_t.
+	* src/internal.h bindings/cxx/getdata/dirfile.h: Define GD_64BIT_API before
+	including getdata.h.
+
+	* test/Makefile.am man/Makefile.am: Remove LFS_TRANSITIONAL_API (always
+	enabled).
+
+	* confihure.ac: Figure out a suitable type for gd_off64_t.  Remove
+	LFS_TRANSITIONAL_API conditional.
+
 2012-05-23   D. V. Wiebe <getdata@ketiltrout.net> svn:710
 	* test/test.h: Don't redefine isnan if it's okay as-is.
 
