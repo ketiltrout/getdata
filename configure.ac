@@ -682,7 +682,7 @@ if test "x$gd_cv_type_off64_t" = "xyes"; then
 "
   gd_off64_t="off64_t"
 elif test $ac_cv_sizeof_off_t -eq 8;then
-  gd_off64_t="off64_t"
+  gd_off64_t="off_t"
 else
   gd_off64_t=$gd_int64_t
 fi
