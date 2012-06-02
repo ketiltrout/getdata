@@ -38,7 +38,7 @@ perlautogetdatadir=${perldir}/auto/GetData
 nodist_perlautogetdata_SCRIPTS=blib/arch/auto/GetData/GetData.bs blib/arch/auto/GetData/GetData.so
 
 t lib:
-	mkdir $@
+	mkdir -p $@
 
 t/%.t: test/%.t
 	$(MAKE) t
@@ -73,8 +73,9 @@ GetData.pm: GetData.pm.in make_parameters.sed funclist.pl lib/GetData.xs \
 	chmod a-w $@
 
 blib/arch/auto/GetData/GetData.bs blib/arch/auto/GetData/GetData.so \
-	blib/lib/GetData.pm blib/libdoc/GetData.$(PERL_MAN3EXT): Build \
-	lib/GetData.xs lib/simple_funcs.xs lib/typemap
+	blib/lib/GetData.pm blib/libdoc/GetData.$(PERL_MAN3EXT): build.stamp
+	
+build.stamp: Build lib/GetData.xs lib/simple_funcs.xs lib/typemap
 	$(PERL) Build build
 	touch $@
 
@@ -89,7 +90,7 @@ clean-local:
 		$(PERL) Build clean; \
 	fi
 	rm -f $(BUILT_SOURCES) make_parameters.sed MYMETA.yml MYMETA.json GetData.pm
-	rm -rf Build _build MANIFEST t
+	rm -rf Build _build MANIFEST t build.stamp
 
 uninstall-hook:
 	rmdir $(DESTDIR)${perlautogetdatadir}
