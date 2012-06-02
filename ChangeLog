@@ -1,3 +1,6 @@
+2012-05-25   D. V. Wiebe <getdata@ketiltrout.net> svn:717
+	* src/internal.h (_GD_AbsPath): Allow s == NULL.
+
 2012-05-25   D. V. Wiebe <getdata@ketiltrout.net> svn:712
 	* bindings/cxx/fragment.cpp (Fragment::Fragment Fragment::SetEndianness)
 	bindings/cxx/dirfile.cpp (Dirfile::NFrames Dirfile::EoF Dirfile::BoF

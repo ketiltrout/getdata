@@ -411,7 +411,7 @@ AC_SUBST([LIBTOOL_DEPS])
 
 case "${host}" in
   *-pc-mingw*|*-pc-cygwin*)
-  NO_UNDEFINED=" -no-undefined --enable-auto-import";
+  NO_UNDEFINED=" -no-undefined -enable-auto-import";
   NO_DLOPEN_TESTS=1 ;;
   *) NO_DLOPEN_TESTS=0 ;;
 esac
