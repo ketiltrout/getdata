@@ -107,7 +107,7 @@ namespace GetData {
 
       int AlterSpec(const char* spec, int recode = 0) const;
 
-      off_t BoF(const char *field_code) const;
+      gd_off64_t BoF(const char *field_code) const;
 
       size_t CarrayLen(const char *field_code) const;
 
@@ -130,7 +130,7 @@ namespace GetData {
       const char **EntryList(const char *parent = NULL, unsigned int type = 0,
           unsigned int flags = 0) const;
 
-      off_t EoF(const char *field_code) const;
+      gd_off64_t EoF(const char *field_code) const;
 
       int Error() const;
 
@@ -152,7 +152,7 @@ namespace GetData {
       int FragmentIndex(const char* field_code) const;
 
       double FrameNum(const char* field_code, double value,
-          off_t frame_start = 0, off_t frame_end = 0) const;
+          gd_off64_t frame_start = 0, gd_off64_t frame_end = 0) const;
 
       int GetCarray(const char *field_code, DataType type, void *data_out,
           unsigned int start = 0, size_t len = 0) const;
@@ -160,8 +160,8 @@ namespace GetData {
       int GetConstant(const char *field_code, DataType type, void *data_out)
         const;
 
-      size_t GetData(const char *field_code, off_t first_frame,
-          off_t first_sample, size_t num_frames, size_t num_samples,
+      size_t GetData(const char *field_code, gd_off64_t first_frame,
+          gd_off64_t first_sample, size_t num_frames, size_t num_samples,
           DataType type, void* data_out) const;
 
       size_t GetString(const char *field_code, size_t len, char *data_out)
@@ -228,7 +228,7 @@ namespace GetData {
 
       int NFragments() const;
 
-      off_t NFrames() const;
+      gd_off64_t NFrames() const;
 
       unsigned int NVectors() const;
 
@@ -238,8 +238,8 @@ namespace GetData {
       int PutConstant(const char *field_code, DataType type,
           const void *data_in) const;
 
-      size_t PutData(const char *field_code, off_t first_frame,
-          off_t first_sample, size_t num_frames, size_t num_samples,
+      size_t PutData(const char *field_code, gd_off64_t first_frame,
+          gd_off64_t first_sample, size_t num_frames, size_t num_samples,
           DataType type, const void* data_in) const;
 
       size_t PutString(const char *field_code, const char *data_in) const;
@@ -252,8 +252,8 @@ namespace GetData {
 
       unsigned int SamplesPerFrame(const char *field_code) const;
 
-      off_t Seek(const char* field_code, off_t frame_num, off_t sample_num,
-          int flags) const;
+      gd_off64_t Seek(const char* field_code, gd_off64_t frame_num,
+          gd_off64_t sample_num, int flags) const;
 
       void SetCallback(gd_parser_callback_t sehandler, void* extra = NULL)
         const;
@@ -264,7 +264,7 @@ namespace GetData {
 
       int Sync(const char *field_code = NULL) const;
 
-      off_t Tell(const char* field_code) const;
+      gd_off64_t Tell(const char* field_code) const;
 
       char *StrTok(const char *string = NULL);
 

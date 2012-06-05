@@ -47,7 +47,7 @@ namespace GetData {
 
       unsigned long Endianness() const { return end; };
 
-      off_t FrameOffset() const { return (off_t)off; };
+      gd_off64_t FrameOffset() const { return off; };
 
       int Index() const { return ind; }
 
@@ -67,7 +67,7 @@ namespace GetData {
 
       int SetEndianness(unsigned long byte_sex, int recode = 0);
 
-      int SetFrameOffset(off_t offset, int recode = 0);
+      int SetFrameOffset(gd_off64_t offset, int recode = 0);
 
       int SetPrefix(const char *preix);
 
@@ -83,7 +83,7 @@ namespace GetData {
       unsigned long end;
       int ind;
       int prot;
-      off_t off;
+      gd_off64_t off;
       const char* name;
       char* prefix;
       char* suffix;
