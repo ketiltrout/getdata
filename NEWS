@@ -1,4 +1,4 @@
-New in version 0.8.0rc1:
+New in version 0.8.0rc2:
 
   Dirfile Changes
 
@@ -252,6 +252,11 @@ New in version 0.8.0rc1:
   * F77: Due to small namespace issues, the encoding parameters (corresponding
     to the GD_...ENCODED symbols in the C API) have all been renamed.  They
     are now of the form GDE_xx.
+
+  * C++: The bindings now make use of the explicitly-64-bit offset type
+    gd_off64_t defined in getdata.h.  Previously, the bindings tried to force
+    off_t to be 64-bit through preprocessor shenanigans, which led, in certain
+    cases, to linking problems down the road when used by third parties.
 
   * Python: The return_type, num_fields, and num_samples parameters to
     dirfile.getdata() are now optional.  The return_type defautls to

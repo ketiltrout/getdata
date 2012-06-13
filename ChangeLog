@@ -1,4 +1,12 @@
-2012-05-25   D. V. Wiebe <getdata@ketiltrout.net> svn:717
+2012-06-13   D. V. Wiebe <getdata@ketiltrout.net> svn:721
+	GetData-0.8.0rc2.
+
+2012-06-04   D. V. Wiebe <getdata@ketiltrout.net> svn:720
+	* bindings/cxx/dirfile.cpp bindings/cxx/fragment.cpp
+	bindings/cxx/getdata/dirfile.h bindings/cxx/getdata/fragment.h: off_t
+	-> gd_off64_t.
+
+2012-06-02   D. V. Wiebe <getdata@ketiltrout.net> svn:717
 	* src/internal.h (_GD_AbsPath): Allow s == NULL.
 
 2012-05-25   D. V. Wiebe <getdata@ketiltrout.net> svn:712
