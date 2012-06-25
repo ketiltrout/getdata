@@ -1003,7 +1003,7 @@ uint64_t _GD_FindVersion(DIRFILE *D)
     if (D->entry[i]->hidden)
       D->av &= GD_VERS_GE_9;
     else
-      switch (D->entry[i]->field_type) {
+      switch ((int)D->entry[i]->field_type) {
         case GD_RAW_ENTRY:
           switch (D->entry[i]->EN(raw,data_type)) {
             case GD_COMPLEX128:
@@ -1052,6 +1052,7 @@ uint64_t _GD_FindVersion(DIRFILE *D)
             D->av &= GD_VERS_GE_5;
           }
           break;
+        case GD_ALIAS_ENTRY:
         case GD_WINDOW_ENTRY:
         case GD_MPLEX_ENTRY:
           D->av &= GD_VERS_GE_9;

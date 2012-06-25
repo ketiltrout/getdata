@@ -202,7 +202,8 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-  printf("  Found %llu frames.\n", (unsigned long long)n);
+  printf("  Found %llu %s.\n", (unsigned long long)n,
+        n == 1 ? "frame" : "frames");
 
   gd_close(dirfile);
   return 0;
