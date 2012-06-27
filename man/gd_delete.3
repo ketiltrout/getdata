@@ -65,7 +65,8 @@ field, also delete the binary data file associated with it.  If
 specified a
 .B RAW
 field and this flag is not specified, the field will still be deleted but the
-binary file will be left untouched.
+binary file will be left untouched.  Ignored by
+.BR gd_delete_alias ().
 .TP
 .B GD_DEL_DEREF
 If the field to be deleted is a
@@ -87,7 +88,8 @@ If the field to be deleted has metafields attached to it, attempt to delete
 those, too.  If the field has metafields and this flag is not specified, the
 call will fail with the
 .B GD_E_DELETE
-error.
+error.  Ignored by
+.BR gd_delete_alias ().
 .SH RETURN VALUE
 On successful deletion, zero is returned.  On error, -1 is returned and the
 dirfile error is set to a non-zero error value.  Possible error values are:

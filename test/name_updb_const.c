@@ -1,4 +1,4 @@
-/* Copyright (C) 2011 D. V. Wiebe
+/* Copyright (C) 2011-2012 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -25,12 +25,14 @@ int main(void)
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
   const char *format_data = 
-    "early RAW UINT8 c<1>\n"
-    "late RAW UINT8 c<0>\n"
-    "c CARRAY UINT8 2 3\n";
-  int fd, e1, e2, e3, r = 0;
-  unsigned s2, s3;
+    "early RAW UINT8 c\n"
+    "late RAW UINT8 c\n"
+    "/ALIAS b c\n"
+    "c CONST UINT8 2\n";
+  int fd, e1, e2, e3, e4, r = 0;
+  char *s1, *s2, *s3;
   DIRFILE *D;
+  gd_entry_t E;
 
   rmdirfile();
   mkdir(filedir, 0777);
@@ -39,14 +41,28 @@ int main(void)
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
+  D = gd_open(filedir, GD_RDWR);
   gd_validate(D, "early");
   gd_rename(D, "c", "d", GD_REN_UPDB);
   e1 = gd_error(D);
-  s2 = gd_spf(D, "early");
+  gd_spf(D, "early");
   e2 = gd_error(D);
-  s3 = gd_spf(D, "late");
+  gd_spf(D, "late");
   e3 = gd_error(D);
+
+  gd_entry(D, "early", &E);
+  s1 = E.scalar[0];
+  E.scalar[0] = NULL;
+  gd_free_entry_strings(&E);
+
+  gd_entry(D, "late", &E);
+  s2 = E.scalar[0];
+  E.scalar[0] = NULL;
+  gd_free_entry_strings(&E);
+
+  gd_entry(D, "b", &E);
+  e4 = gd_error(D);
+  s3 = strdup(gd_alias_target(D, "b"));
 
   gd_discard(D);
 
@@ -56,8 +72,10 @@ int main(void)
   CHECKI(e1,0);
   CHECKI(e2,0);
   CHECKI(e3,0);
-  CHECKU(s2,3);
-  CHECKU(s3,2);
+  CHECKI(e4,0);
+  CHECKS(s1, "d");
+  CHECKS(s2, "d");
+  CHECKS(s3, "d");
 
   return r;
 }

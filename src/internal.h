@@ -1124,7 +1124,7 @@ int _GD_Supports(DIRFILE *, const gd_entry_t*, unsigned int funcs);
 int _GD_Tokenise(DIRFILE *restrict, const char *restrict, char **,
     const char **, int, char **, const char *restrict, int linenum,
     int standards, int pedantic);
-void _GD_UpdateAliases(DIRFILE*);
+void _GD_UpdateAliases(DIRFILE*, int);
 int _GD_ValidateField(const char*, int, int, int, int*);
 off64_t _GD_WriteSeek(DIRFILE *restrict, gd_entry_t *restrict,
     const struct encoding_t *restrict, off64_t, unsigned int mode);

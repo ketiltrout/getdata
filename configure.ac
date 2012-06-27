@@ -312,6 +312,9 @@ AC_PROG_SED
 AC_CHECK_PROGS([DIFF], [diff], [])
 GD_MSYS_SHELL
 
+echo
+echo "*** Checking host environment"
+echo
 AC_MSG_CHECKING([whether ${host} supports fast unaligned memory access])
 case "${host}" in
   i?86-*-*|powerpc-*-*|x86_64-*-*) gd_unaligned_ok=yes;
@@ -965,6 +968,9 @@ AC_CONFIG_FILES([bindings/perl/Build.PL])
 AC_CONFIG_FILES([bindings/python/Makefile])
 AC_CONFIG_FILES([bindings/python/test/Makefile])
 AC_CONFIG_FILES([doc/Makefile])
+if test "x$make_perlbindings" != "xno"; then
+AC_CONFIG_FILES([doc/README.perl])
+fi
 AC_CONFIG_FILES([man/Makefile])
 AC_CONFIG_FILES([man/gd_alter_encoding.3])
 AC_CONFIG_FILES([man/gd_alter_endianness.3])

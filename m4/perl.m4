@@ -52,7 +52,7 @@ dnl Define PERL_MAN3EXT to the section 3 manual extension used by Module::Build
 AC_DEFUN([GD_PERL_MAN3EXT],
 [
 AC_MSG_CHECKING([for the section 3 manual page extension])
-PERL_MAN3EXT=`$PERL -MModule::Build -e 'print Module::Build->new(module_name=>"conftest",dist_version=>0)->config('man3ext');'`
+PERL_MAN3EXT=`$PERL -MModule::Build -e 'print "\n>>GD ", Module::Build->new(module_name=>"conftest",dist_version=>0)->config('man3ext'), " GD<<";' | $AWK '/>>GD .* GD<</ { print @S|@2 }'`
 AC_MSG_RESULT([.$PERL_MAN3EXT])
 AC_SUBST([PERL_MAN3EXT])
 ])

@@ -551,8 +551,8 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
   D->fragment[E->fragment_index].modified = 1;
   D->flags &= ~GD_HAVE_VERSION;
 
-  /* Update aliases */
-  _GD_UpdateAliases(D);
+  /* Update aliases - no reason to do a reset: all we did was add a field */
+  _GD_UpdateAliases(D, 0);
 
   dreturn("%p", E);
   return E;
@@ -621,7 +621,7 @@ int gd_madd_spec(DIRFILE* D, const char* line, const char* parent) gd_nothrow
   }
 
   /* Update aliases */
-  _GD_UpdateAliases(D);
+  _GD_UpdateAliases(D, 0);
 
   D->fragment[me].modified = 1;
   D->flags &= ~GD_HAVE_VERSION;
@@ -686,7 +686,7 @@ int gd_add_spec(DIRFILE* D, const char* line, int fragment_index)
   }
 
   /* Update aliases */
-  _GD_UpdateAliases(D);
+  _GD_UpdateAliases(D, 0);
 
   D->fragment[fragment_index].modified = 1;
   D->flags &= ~GD_HAVE_VERSION;
@@ -2040,7 +2040,7 @@ static int _GD_AddAlias(DIRFILE *restrict D, const char *restrict parent,
 
 
   /* Update aliases */
-  _GD_UpdateAliases(D);
+  _GD_UpdateAliases(D, 0);
 
   dreturn("%i", 0);
   return 0;

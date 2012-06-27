@@ -84,7 +84,6 @@ MAN3ALIASES=gd_add_bit.3:gd_add_carray.3 gd_add_bit.3:gd_add_clincom.3 \
 	gd_get_carray_slice.3:gd_get_carray.3 \
 	gd_put_carray_slice.3:gd_put_carray.3 \
 	gd_delete.3:gd_delete_alias.3 \
-	gd_rename.3:gd_rename_alias.3 \
 	gd_move.3:gd_move_alias.3 \
 	gd_hide.3:gd_unhide.3 \
 	gd_add_alias.3:gd_madd_alias.3 \
@@ -98,8 +97,8 @@ MAN3ALIASES=gd_add_bit.3:gd_add_carray.3 gd_add_bit.3:gd_add_clincom.3 \
 	gd_frameoffset64.3:gd_alter_frameoffset64.3
 
 #man conversion
-HTMLMANS=$(addsuffix .html,$(nodist_man_MANS)) \
-				 $(addsuffix .html,$(dist_man_MANS))
+HTMLMANS=$(addsuffix .html,${nodist_man_MANS}) \
+				 $(addsuffix .html,${dist_man_MANS})
 
 %.html: % make_html.pl
 	./make_html.pl $< > $@

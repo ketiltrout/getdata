@@ -205,8 +205,7 @@ directive, but are in most other ways indistinguishable from the target's
 original, canonical name.  Aliases may be chained (that is, the target name
 appearing in an /ALIAS directive may itself be an alias).  In this case, the new
 alias is another name for the target's own target.  Just as there is no
-requriement that the input fields of a derived field exist
-.RI ( q.v. ),
+requriement that the input fields of a derived field exist,
 it is not an error for the target of an alias to not exist.  Syntax is:
 .IP
 .RS
@@ -214,12 +213,12 @@ it is not an error for the target of an alias to not exist.  Syntax is:
 .I <name> <target>
 .RE
 .IP
-A metafield alias may defined by using the
+A metafield alias may defined using the
 .IR <parent-field> / <alias-name>
 syntax for
 .I name
 in the /ALIAS directive.  No restriction is placed on
-.IR target ,
+.IR target ;
 specifically, a metafield alias may target a top-level field, or a metafield
 of with a different parent; conversely, a top-level alias may target a
 metafield.
@@ -237,7 +236,7 @@ field2 \fBRAW UINT8\fR 1
 \fB/ALIAS\fR field2/alias field1
 .RE
 .IP
-The metafield
+the metafield
 .I field1/meta
 may not be referred to as
 .IR field2/alias/meta ,
@@ -294,7 +293,7 @@ dependent.  Syntax is:
 The
 .I enc-datum
 token provides additional data for certain encoding schemes; see
-.BR dirfile-format (5)
+.BR dirfile-encoding (5)
 for details.  The form of enc-datum is not specified.
 .PP
 The /ENCODING directive has
@@ -531,7 +530,7 @@ its effect is immediate, and it applies only to metadata below it, including
 and propagating downwards to sub-fragments after the directive.
 .PP
 In Standards Version 8 and earlier, its effect also propagates upwards back to
-the parent fragment, and affect subsequent metadata.  Starting with Standards
+the parent fragment, and affects subsequent metadata.  Starting with Standards
 Version 9, this no longer happens.  As a result, a /VERSION directive which
 indicates a version of 9 or later never propagates upwards; additionally,
 /VERSION directives found in subfragments included in a Version 9 or later
@@ -831,15 +830,8 @@ must hold.  Both
 .I count
 and
 .I max
-are non-negative integers, either or both may be literal numbers, or else
-the field code of a
-.B CONST
-or
-.B CARRAY
-field type containing their values.
+are non-negative integers.
 .PP
-The resultant field has the same sample rate as
-.IR input .
 At every sample
 .IR n ,
 the derived field is computed as:
@@ -1199,8 +1191,6 @@ depends on the operatior, and follows the interpretation of
 .IR check .
 It may never be complex valued.
 .PP
-The derived field has the same sample rate as
-.IR input .
 Outside the region extracted, the value of the derived field is implementation
 dependent.
 .PP

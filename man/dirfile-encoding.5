@@ -231,7 +231,7 @@ The file extension of the ZZip Encoding is
 
 The ZZSlim Encoding is a convolution of the Slim Encoding and the ZZip Encoding.
 To create ZZSlim Encoded files, first the raw data are compressed using the
-slim library, and then these slim-compressed files are archived (and comrpessed
+slim library, and then these slim-compressed files are archived (and compressed
 again) into a ZIP archive.  As with the ZZip Encoding, the ZIP archive is
 .I raw.zip
 by default, but a different name may be specified with the
@@ -239,7 +239,7 @@ by default, but a different name may be specified with the
 directive.
 .PP
 Notably, since the archives have the same name as ZZip Encoded data, automatic
-encodind detection on ZZSlim Encoded data always fails: they are incorrectly
+encoding detection on ZZSlim Encoded data always fails: they are incorrectly
 identified as simply ZZip Encoded.  As a result, an
 .B /ENCODING
 directive in the format file or else a

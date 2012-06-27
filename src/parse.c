@@ -2229,11 +2229,16 @@ static gd_entry_t *_GD_ResolveAlias(DIRFILE *restrict D, gd_entry_t *restrict E)
   return D->error ? NULL : E->e->entry[0];
 }
 
-void _GD_UpdateAliases(DIRFILE *D)
+void _GD_UpdateAliases(DIRFILE *D, int reset)
 {
   unsigned u;
 
-  dtrace("%p", D);
+  dtrace("%p, %i", D, reset);
+
+  if (reset)
+    for (u = 0; u < D->n_entries; ++u)
+      if (D->entry[u]->field_type == GD_ALIAS_ENTRY)
+        D->entry[u]->e->entry[0] = D->entry[u]->e->entry[1] = NULL;
 
   for (u = 0; u < D->n_entries; ++u)
     if (D->entry[u]->field_type == GD_ALIAS_ENTRY &&
@@ -2377,7 +2382,7 @@ char *_GD_ParseFragment(FILE *restrict fp, DIRFILE *restrict D, int me,
 
   /* resolve aliases, if requested */
   if (resolve && !D->error)
-    _GD_UpdateAliases(D);
+    _GD_UpdateAliases(D, 0);
 
   dreturn("%p", ref_name);
   return ref_name;

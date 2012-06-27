@@ -285,7 +285,7 @@ or
 
 =back
 
-GetData internally converts the Perl data into a format readably by the C API.
+GetData internally converts the Perl data into a format readable by the C API.
 In cases 3 and 4 above, the type the data is converted into is specified
 explicitly in the call.  In the other cases, GetData must guess an appropriate
 C type into which to convert the data.  It does so by looking at the first
@@ -411,9 +411,9 @@ containing the corrected line.
 
 =back
 
-This function always returns a valid Dirfile object, even if the call failed;
+This function always returns a Dirfile object, even if the call failed;
 the caller should use the returned dirfile's L<error>() method to test for
-success.
+success.  On error, the returned object will be flagged as invalid.
 
 =item invalid_dirfile ()
 

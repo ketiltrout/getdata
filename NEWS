@@ -11,7 +11,11 @@ New in version 0.8.0rc2:
     can't be used as a parent when defining metafields, but are otherwise
     indistinguishable from a field's original ("canonical") name.
 
-  * The /VERSION directive now has fragment scope, which should
+  * The /VERSION directive now has fragment scope, which should alleviate some
+    of the problems associated with "version leakage" found in previous
+    versions.  Previous versions are unchanged, but a "/VERSION 9" directive
+    will not propagate back up into a parent fragment, nor will any /VERSION
+    directive be propagated back up into a Version 9 fragment.
 
   * Fields may be "hidden" using the /HIDDEN directive.  The Standards don't say
     what a "hidden" field does, but GetData will, by default, exclude them from
@@ -175,15 +179,14 @@ New in version 0.8.0rc2:
     of an alias is retrned by gd_alias_target(); a list of aliases of a field,
     or their number, is returned by gd_aliases() and gd_naliases().
 
-  * In addition to the special symbol GD_HERE which may be passed to
-    gd_getdata() and gd_putdata(), the "current location" of fields may be
-    queried with gd_tell() and moved with gd_seek().
-
   * Because GetData considers aliases and canonical names to be
     indistinguishable, passing an alias name to most functions will result in
     the function operating on target field.  To manipulate aliases themselves,
-    the API has the new interfaces gd_move_alias(), gd_delete_alias(), and
-    gd_rename_alias().
+    the API has the new interfaces gd_move_alias() and gd_delete_alias().
+
+  * In addition to the special symbol GD_HERE which may be passed to
+    gd_getdata() and gd_putdata(), the "current location" of fields may be
+    queried with gd_tell() and moved with gd_seek().
 
   * The typedefs gd_bit_t and gd_spf_t have been deprecated.  They are replaced
     with 'int' and 'unsigned int' respectively.  For backwards compatibility,

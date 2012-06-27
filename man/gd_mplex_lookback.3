@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_mplex_lookback 3 "21 April 2012" "Version 0.8.0" "GETDATA"
+.TH gd_mplex_lookback 3 "20 June 2012" "Version 0.8.0" "GETDATA"
 .SH NAME
 gd_mplex_lookback \(em set the GetData lookback length for MPLEX fields.
 .SH SYNOPSIS
@@ -35,7 +35,8 @@ field from the dirfile(5) database specified by
 
 If the first sample returned of a
 .B MPLEX
-field does not contain the value of the field, GetData must search the field
+field does not contain the value of the field, because the index field does not
+take on the specified multiplex index value, GetData must search the field
 backwards to find the last time the field was updated, in order to propagate
 that value into the initial portion of the returned data.  (See
 .BR gd_getdata (3)
@@ -63,10 +64,8 @@ should be a positive number specifying the number of
 .I MPLEX cycles
 to search.  Each
 .B MPLEX
-field has its own
-.B MPLEX
-cycle length, measured in samples of the index field, which is defined as
-follows:
+field has its own MPLEX cycle length, measured in samples of the index field,
+which is defined as follows:
 .IP \(bu
 if the
 .B MPLEX
@@ -75,7 +74,7 @@ field in question specifies an optional
 positive parameter (see the MPLEX definition in dirfile-format(5)), its MPLEX
 cycle length is that many samples;
 .IP \(bu
-if the
+otherwise, if the
 .B MPLEX
 field's
 .I count_val

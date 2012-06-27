@@ -132,7 +132,7 @@ while(<F>) {
   s/ /&nbsp;/g if ($nf and not /^\./);
 
   # sugar
-  s/\*\*([0-9]*)/<sup>$1<\/sup>/;
+  s/\*\*([0-9]+)/<sup>$1<\/sup>/;
 
   if ($table) {
     if (/center tab/) {
@@ -366,7 +366,8 @@ $html .= "</BODY></HTML>";
 $html =~  s/ \* / &times; /g;
 $html =~ s/\\~/ /g;
 $html =~ s/(<B>(gd_\w*?)<\/B>\(3\))/<A HREF="$2.3.html">$1<\/A>/g;
-$html =~ s/((?:<B>)?(dirfile[-a-z]*)(?:<\/B>)?\(5\))/<A HREF="$2.5.html">$1<\/A>/g;
+$html =~ s/(<B>(dirfile[-a-z]*)<\/B>\(5\))/<A HREF="$2.5.html">$1<\/A>/g;
+$html =~ s/([^>])(dirfile[-a-z]*)<\/B>\(5\)/$1<A HREF="$2.5.html">$2<\/A>/g;
 
 $html =~ s/\\e/\\/g;
 

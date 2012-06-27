@@ -1,3 +1,17 @@
+2012-06-27   D. V. Wiebe <getdata@ketiltrout.net> svn:724
+	* src/name.c (_GD_UpdateScalar _GD_InvalidateConst _GD_UpdateInField
+	_GD_InvalidateVect): Handle aliases.
+	* src/name.c (gd_rename): Don't dereference aliases.
+	* src/name.c (gd_rename_alias): Deleted.
+	* test/name.c test/name_updb_const.c test/name_updb.c: Updated.
+	* test/name_updb_const_alias.c test/name_move_alias.c test/name_alias.c
+	test/name_updb_alias.c: Added.
+	* test/name_after_const.c test/name_after.c: Deleted.
+
+	* src/parse.c (_GD_ResolveAlias): Reset aliases if requested.
+
+	* man/make_html.pl: Don't eat "**" in synopses.
+
 2012-06-25   D. V. Wiebe <getdata@ketiltrout.net> svn:723
 	* src/flush.c (_GD_FindVersion): ALIAS means >= 9.
 

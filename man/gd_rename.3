@@ -13,9 +13,9 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_rename 3 "19 April 2012" "Version 0.8.0" "GETDATA"
+.TH gd_rename 3 "27 June 2012" "Version 0.8.0" "GETDATA"
 .SH NAME
-gd_rename, gd_rename_alias \(em change the name of a dirfile field or alias
+gd_rename \(em change the name of a dirfile field or alias
 .SH SYNOPSIS
 .B #include <getdata.h>
 .HP
@@ -23,15 +23,12 @@ gd_rename, gd_rename_alias \(em change the name of a dirfile field or alias
 .ad l
 .BI "int gd_rename(DIRFILE *" dirfile ", const char"
 .BI * old_code ", const char *" new_name ", unsigned int " flags );
-.HP
-.BI "int gd_rename_alias(DIRFILE *" dirfile ", const char *" old_code ,
-.BI "const char *" new_name );
 .hy
 .ad n
 .SH DESCRIPTION
 The
 .BR gd_rename ()
-function changes the name of the field specified by
+function changes the name of the field or alias specified by
 .IR old_code ,
 which should not contain a representation suffix, defined in the dirfile
 specified by
@@ -39,18 +36,6 @@ specified by
 to
 .IR new_name .
 If the new name is the same as the old name, this function does nothing.
-
-The
-.BR gd_rename_alias ()
-function behaves similarly, but renames the alias specified by
-.I alias_name
-instead.  (This function is needed, since passing
-.I alias_name
-to
-.BR gd_rename ()
-as
-.I old_code
-would have resulted in the field pointed to by the alias being renamed instead.)
 
 When renaming a metafield, the metafield should be specified in
 .I old_code

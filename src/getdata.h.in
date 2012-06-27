@@ -889,9 +889,6 @@ extern char *gd_raw_filename(DIRFILE *dirfile,
 extern const char *gd_reference(DIRFILE *dirfile,
     const char *field_code) gd_nothrow gd_nonnull ((1));
 
-extern int gd_rename_alias(DIRFILE *dirfile, const char *old_code,
-    const char *new_name) gd_nothrow gd_nonnull ((1,2,3));
-
 extern unsigned int gd_spf(DIRFILE *dirfile, const char *field_code) gd_nothrow
 gd_nonnull ((1, 2));
 
