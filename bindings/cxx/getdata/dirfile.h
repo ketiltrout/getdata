@@ -127,7 +127,7 @@ namespace GetData {
 
       GetData::Entry* Entry(const char *field_code) const;
 
-      const char **EntryList(const char *parent = NULL, unsigned int type = 0,
+      const char **EntryList(const char *parent = NULL, int type = 0,
           unsigned int flags = 0) const;
 
       gd_off64_t EoF(const char *field_code) const;
@@ -209,7 +209,7 @@ namespace GetData {
 
       int NAliases(const char* field_code) const;
 
-      unsigned int NEntries(const char *parent = NULL, unsigned int type = 0,
+      unsigned int NEntries(const char *parent = NULL, int type = 0,
           unsigned int flags = 0) const;
 
       unsigned int NFields() const;

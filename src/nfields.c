@@ -20,12 +20,12 @@
  */
 #include "internal.h"
 
-unsigned int _GD_NEntries(DIRFILE *D, struct _gd_private_entry *p,
-    unsigned int type, unsigned int flags)
+unsigned int _GD_NEntries(DIRFILE *D, struct _gd_private_entry *p, int type,
+    unsigned int flags)
 {
   int i;
   unsigned int u, n = 0;
-  const unsigned int special = (type & GD_SPECIAL_ENTRY_BIT) ? type : 0;
+  const int special = (type & GD_SPECIAL_ENTRY_BIT) ? type : 0;
   const gd_entype_t ctype = (type & GD_SPECIAL_ENTRY_BIT) ? GD_NO_ENTRY :
     (gd_entype_t)type;
   const int hidden = (flags & GD_ENTRIES_HIDDEN);
@@ -54,7 +54,7 @@ unsigned int _GD_NEntries(DIRFILE *D, struct _gd_private_entry *p,
   return n;
 }
 
-unsigned int gd_nentries(DIRFILE *D, const char *parent, unsigned int type,
+unsigned int gd_nentries(DIRFILE *D, const char *parent, int type,
     unsigned int flags) gd_nothrow
 {
   unsigned int n;

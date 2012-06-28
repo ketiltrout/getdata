@@ -555,14 +555,14 @@ void Dirfile::MplexLookback(int lookback) const
   gd_mplex_lookback(D, lookback);
 }
 
-unsigned int Dirfile::NEntries(const char *parent, unsigned int type,
-    unsigned int flags) const
+unsigned int Dirfile::NEntries(const char *parent, int type, unsigned int flags)
+  const
 {
   return gd_nentries(D, parent, type, flags);
 }
 
-const char** Dirfile::EntryList(const char *parent, unsigned int type,
-        unsigned int flags) const
+const char** Dirfile::EntryList(const char *parent, int type,
+    unsigned int flags) const
 {
   return gd_entry_list(D, parent, type, flags);
 }

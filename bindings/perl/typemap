@@ -11,7 +11,7 @@ gd_entry_t T_ENTRY
 gd_entype_t T_UV
 gd_shift_t T_IV
 gd_triplet_t T_TRIPLET
-gd_type_t T_UV
+gd_type_t T_IV
 gd_windop_t T_IV
 
 # GetData Perl pseudotypes
@@ -22,7 +22,7 @@ gdpu_int T_IV_ZERO
 gdpu_numbits_t T_IV_ZERO
 gdpu_shift_t T_IV_ZERO
 gdpu_uint_t T_UV_ZERO
-gdpu_type_t T_UV_ZERO
+gdpu_type_t T_IV_ZERO
 gdpu_complex T_COMPLEX_ZERO
 
 

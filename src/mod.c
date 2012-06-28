@@ -894,6 +894,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
       /* INDEX may not be modified */
       _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
     case GD_NO_ENTRY:
+    case GD_ALIAS_ENTRY:
     case GD_STRING_ENTRY:
       break;
   }

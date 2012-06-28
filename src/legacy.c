@@ -449,6 +449,7 @@ struct FormatType *GetFormat(const char *filedir, int *error_code) gd_nothrow
         Format.n_mplex++;
         break;
       case GD_NO_ENTRY:
+      case GD_ALIAS_ENTRY:
       case GD_CONST_ENTRY:
       case GD_CARRAY_ENTRY:
       case GD_INDEX_ENTRY:
@@ -526,6 +527,7 @@ struct FormatType *GetFormat(const char *filedir, int *error_code) gd_nothrow
       case GD_CONST_ENTRY:
       case GD_CARRAY_ENTRY:
       case GD_INDEX_ENTRY:
+      case GD_ALIAS_ENTRY:
       case GD_NO_ENTRY:
         break;
     }

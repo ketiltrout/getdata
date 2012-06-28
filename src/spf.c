@@ -65,6 +65,7 @@ unsigned int _GD_GetSPF(DIRFILE *D, gd_entry_t *E)
     case GD_CONST_ENTRY:
     case GD_CARRAY_ENTRY:
     case GD_STRING_ENTRY:
+    case GD_ALIAS_ENTRY:
     case GD_NO_ENTRY:
       _GD_InternalError(D);
   }

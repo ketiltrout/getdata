@@ -135,7 +135,7 @@ DFES_TESTS=dfes_bit dfes_divide dfes_lincom dfes_linterp dfes_multiply \
 
 DESYNC_TESTS=desync desync_flush desync_reopen desync_reopen_inv
 
-ELIST_TESTS=elist_alias elist_hidden elist_scalar
+ELIST_TESTS=elist_alias elist_hidden elist_noalias elist_scalar
 
 ENCODE_TESTS=encode_alter encode_get encode_move
 
@@ -228,7 +228,7 @@ NAME_TESTS=name name_affix name_affix_bad name_alias name_dup name_move \
 					 name_move_alias name_updb name_updb_alias name_updb_const \
 					 name_updb_const_alias
 
-NENTRIES_TESTS=nentries_alias nentries_hidden nentries_scalar
+NENTRIES_TESTS=nentries_alias nentries_hidden nentries_noalias nentries_scalar
 
 NFIELDS_TESTS=nfields nfields_hidden nfields_invalid nfields_type \
 							nfields_type_hidden nfields_type_invalid nfields_vector \

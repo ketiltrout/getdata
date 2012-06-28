@@ -123,6 +123,7 @@ gd_type_t _GD_NativeType(DIRFILE *restrict D, gd_entry_t *restrict E, int repr)
       type = GD_NULL;
       break;
     case GD_NO_ENTRY:
+    case GD_ALIAS_ENTRY:
       _GD_InternalError(D);
   }
 

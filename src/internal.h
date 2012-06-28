@@ -743,8 +743,8 @@ ssize_t getdelim(char**, size_t*, int, FILE*);
 #define GD_FILE_TEMP  0x4
 #define GD_FILE_TOUCH 0x8
 
-/* lists */
-#define GD_N_ENTRY_LISTS (GD_N_ENTYPES + 3)
+/* lists -- all the entry types plus alias, scalar, vector, all */
+#define GD_N_ENTRY_LISTS (GD_N_ENTYPES + 4)
 
 #define GD_LIST_VALID_STRING_VALUE 0x01
 
@@ -933,9 +933,6 @@ struct gd_dir_t {
 #define GD_HAVE_VERSION    0x40000000 /* have computed the version */
 #define GD_INVALID         0x80000000 /* the dirfile is invalid */
 
-/* aliases */
-#define GD_ALIAS_ENTRY ((gd_entype_t)-1)
-
 /* representation suffixes */
 #define GD_REPR_NONE 0
 #define GD_REPR_REAL 'r'
@@ -1085,7 +1082,7 @@ void _GD_LincomData(DIRFILE *restrict, int n, void *restrict,
 void _GD_LinterpData(DIRFILE *restrict, void *restrict, gd_type_t, int,
     const double *restrict, size_t, const struct _gd_lut *restrict, size_t);
 int _GD_ListEntry(const gd_entry_t *E, int meta, int hidden, int noalias,
-    unsigned int special, gd_entype_t type);
+    int special, gd_entype_t type);
 char *_GD_MakeFullPath(DIRFILE *restrict, int, const char *restrict, int);
 #define _GD_MakeFullPathOnly gd_MakeFullPathOnly
 char *_GD_MakeFullPathOnly(const DIRFILE *D, int dirfd, const char *name);
@@ -1100,8 +1097,8 @@ char *_GD_MungeCode(DIRFILE *restrict, const gd_entry_t *restrict,
 char *_GD_MungeFromFrag(DIRFILE *restrict, const gd_entry_t *restrict, int,
     const char *restrict, int *restrict);
 gd_type_t _GD_NativeType(DIRFILE *restrict, gd_entry_t *restrict, int);
-unsigned int _GD_NEntries(DIRFILE *D, struct _gd_private_entry *p,
-    unsigned int type, unsigned int flags);
+unsigned int _GD_NEntries(DIRFILE*, struct _gd_private_entry*, int,
+    unsigned int);
 DIRFILE *_GD_Open(DIRFILE*, int, const char*, unsigned long,
     gd_parser_callback_t, void*);
 gd_entry_t *_GD_ParseFieldSpec(DIRFILE *restrict, int, char**,

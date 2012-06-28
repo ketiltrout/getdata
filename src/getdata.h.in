@@ -242,16 +242,20 @@ typedef enum {
   GD_MPLEX_ENTRY    = 0x0D,
   GD_CONST_ENTRY    = GD_SCALAR_ENTRY_BIT | 0x00,
   GD_STRING_ENTRY   = GD_SCALAR_ENTRY_BIT | 0x01,
-  GD_CARRAY_ENTRY   = GD_SCALAR_ENTRY_BIT | 0x02
+  GD_CARRAY_ENTRY   = GD_SCALAR_ENTRY_BIT | 0x02,
+
+  /* not a real entry type, but it's convenient to put this here */
+  GD_ALIAS_ENTRY    =   -1
 } gd_entype_t;
 
-/* GD_NO_ENTRY is not part of this count */
+/* GD_NO_ENTRY and GD_ALIAS_ENTRY are not part of this count */
 #define GD_N_ENTYPES 16
 
 /* Special types for gd_nentries(3) and gd_entry_list(3) */
 #define GD_ALL_ENTRIES    0
 #define GD_VECTOR_ENTRIES (GD_SPECIAL_ENTRY_BIT | 0x01)
 #define GD_SCALAR_ENTRIES (GD_SPECIAL_ENTRY_BIT | 0x02)
+#define GD_ALIAS_ENTRIES  GD_ALIAS_ENTRY
 
 /* gd_nentries(3) and gd_entry_list(3) flags */
 #define GD_ENTRIES_HIDDEN  0x1
@@ -688,8 +692,8 @@ extern unsigned long int gd_endianness(DIRFILE *dirfile,
 extern int gd_entry(DIRFILE *dirfile, const char *field_code,
     gd_entry_t *entry) gd_nothrow gd_nonnull ((1, 2));
 
-extern const char **gd_entry_list(DIRFILE* D, const char *parent,
-    unsigned int type, unsigned int flags) gd_nothrow gd_nonnull ((1));
+extern const char **gd_entry_list(DIRFILE* D, const char *parent, int type,
+    unsigned int flags) gd_nothrow gd_nonnull ((1));
 
 extern gd_entype_t gd_entry_type(DIRFILE *dirfile,
     const char *field_code) gd_nothrow gd_nonnull ((1));
@@ -850,8 +854,8 @@ gd_nonnull ((1,2));
 extern gd_type_t gd_native_type(DIRFILE *dirfile,
     const char *field_code) gd_nothrow gd_nonnull ((1,2));
 
-extern unsigned int gd_nentries(DIRFILE *D, const char *parent,
-    unsigned int type, unsigned int flags) gd_nothrow gd_nonnull ((1));
+extern unsigned int gd_nentries(DIRFILE *D, const char *parent, int type,
+    unsigned int flags) gd_nothrow gd_nonnull ((1));
 
 extern unsigned int gd_nfields(DIRFILE *dirfile) gd_nothrow gd_nonnull ((1));
 

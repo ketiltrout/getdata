@@ -613,6 +613,7 @@ IDL_VPTR gdidl_make_idl_entry(const gd_entry_t* E)
             IDL_MSG_LONGJMP, NULL)) = E->const_type;
       break;
     case GD_NO_ENTRY:
+    case GD_ALIAS_ENTRY:
     case GD_INDEX_ENTRY:
     case GD_STRING_ENTRY:
       break;
@@ -1005,6 +1006,7 @@ void gdidl_read_idl_entry(gd_entry_t *E, IDL_VPTR v, int alter)
         E->const_type = GD_NULL;
       break;
     case GD_NO_ENTRY:
+    case GD_ALIAS_ENTRY:
     case GD_INDEX_ENTRY:
     case GD_STRING_ENTRY:
       break;
@@ -4026,19 +4028,20 @@ IDL_VPTR gdidl_get_field_list(int argc, IDL_VPTR argv[], char *argk)
   typedef struct {
     IDL_KW_RESULT_FIRST_FIELD;
     GDIDL_KW_RESULT_ERROR;
-    unsigned int type;
+    int type;
     IDL_STRING parent;
     int parent_x;
-    int hidden, noalias, scalars, vectors;
+    int hidden, noalias, scalars, vectors, aliases;
   } KW_RESULT;
   KW_RESULT kw;
 
   GDIDL_KW_INIT_ERROR;
   kw.type = 0;
-  kw.hidden = kw.noalias = kw.scalars = kw.vectors = 0;
+  kw.hidden = kw.noalias = kw.scalars = kw.vectors = kw.aliases = 0;
   kw.parent_x = 0;
 
   static IDL_KW_PAR kw_pars[] = {
+    { "ALIASES", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(aliases) },
     GDIDL_KW_PAR_ERROR,
     GDIDL_KW_PAR_ESTRING,
     { "HIDDEN", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(hidden) },
@@ -4068,6 +4071,8 @@ IDL_VPTR gdidl_get_field_list(int argc, IDL_VPTR argv[], char *argk)
       kw.type = GD_VECTOR_ENTRIES;
     else if (kw.scalars)
       kw.type = GD_SCALAR_ENTRIES;
+    else if (kw.aliases)
+      kw.type = GD_ALIAS_ENTRIES;
   }
 
   nentries = gd_nentries(D, parent, kw.type, flags);
@@ -4248,19 +4253,20 @@ IDL_VPTR gdidl_get_nfields(int argc, IDL_VPTR argv[], char *argk)
   typedef struct {
     IDL_KW_RESULT_FIRST_FIELD;
     GDIDL_KW_RESULT_ERROR;
-    unsigned int type;
+    int type;
     IDL_STRING parent;
     int parent_x;
-    int hidden, noalias, scalars, vectors;
+    int aliases, hidden, noalias, scalars, vectors;
   } KW_RESULT;
   KW_RESULT kw;
 
   GDIDL_KW_INIT_ERROR;
   kw.type = 0;
-  kw.hidden = kw.noalias = kw.scalars = kw.vectors = 0;
+  kw.hidden = kw.noalias = kw.scalars = kw.vectors = kw.aliases = 0;
   kw.parent_x = 0;
 
   static IDL_KW_PAR kw_pars[] = {
+    { "ALIASES", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(aliases) },
     GDIDL_KW_PAR_ERROR,
     GDIDL_KW_PAR_ESTRING,
     { "HIDDEN", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(hidden) },
@@ -4290,6 +4296,8 @@ IDL_VPTR gdidl_get_nfields(int argc, IDL_VPTR argv[], char *argk)
       kw.type = GD_VECTOR_ENTRIES;
     else if (kw.scalars)
       kw.type = GD_SCALAR_ENTRIES;
+    else if (kw.aliases)
+      kw.type = GD_ALIAS_ENTRIES;
   }
 
   nentries = gd_nentries(D, parent, kw.type, flags);

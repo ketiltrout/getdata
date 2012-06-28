@@ -287,6 +287,7 @@ int _GD_CalculateEntry(DIRFILE *restrict D, gd_entry_t *restrict E, int err)
     case GD_CONST_ENTRY:
     case GD_CARRAY_ENTRY:
     case GD_INDEX_ENTRY:
+    case GD_ALIAS_ENTRY:
       break;
   }
 
@@ -464,6 +465,7 @@ int gd_entry(DIRFILE* D, const char* field_code_in, gd_entry_t* entry)
     case GD_CARRAY_ENTRY:
     case GD_STRING_ENTRY:
     case GD_NO_ENTRY:
+    case GD_ALIAS_ENTRY:
       break;
   }
 
@@ -811,6 +813,7 @@ int gd_validate(DIRFILE *D, const char *field_code_in) gd_nothrow
     case GD_STRING_ENTRY:
     case GD_INDEX_ENTRY:
     case GD_NO_ENTRY:
+    case GD_ALIAS_ENTRY:
       break;
   }
 

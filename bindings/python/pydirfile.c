@@ -2606,11 +2606,12 @@ static PyObject* gdpy_dirfile_nentries(struct gdpy_dirfile_t* self,
   dtrace("%p, %p, %p", self, args, keys);
 
   char* keywords[] = { "parent", "type", "flags", NULL };
-  unsigned int nentries, type = 0, flags = 0;
+  unsigned int nentries, flags = 0;
+  int type = 0;
   const char *parent = NULL;
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
-        "|sII:pygetdata.dirfile.nentries", keywords, &parent, &type, &flags))
+        "|siI:pygetdata.dirfile.nentries", keywords, &parent, &type, &flags))
   {
     dreturn("%p", NULL);
     return NULL;
@@ -2633,12 +2634,12 @@ static PyObject* gdpy_dirfile_entrylist(struct gdpy_dirfile_t* self,
 
   const char **entries;
   char* keywords[] = { "parent", "type", "flags", NULL };
-  int i;
-  unsigned int type = 0, flags = 0;
+  int i, type = 0;
+  unsigned int flags = 0;
   const char *parent = NULL;
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
-        "|sII:pygetdata.dirfile.entry_list", keywords, &parent, &type, &flags))
+        "|siI:pygetdata.dirfile.entry_list", keywords, &parent, &type, &flags))
   {
     dreturn("%p", NULL);
     return NULL;

@@ -3082,6 +3082,7 @@ void F77_FUNC(gdgsca, GDGSCA) (char *scalar, int32_t *scalar_l,
     ok = 1;
     switch (E.field_type) {
       case GD_NO_ENTRY:
+      case GD_ALIAS_ENTRY:
       case GD_LINTERP_ENTRY:
       case GD_MULTIPLY_ENTRY:
       case GD_DIVIDE_ENTRY:
@@ -3153,6 +3154,7 @@ void F77_FUNC(gdasca, GDASCA) (const int32_t *dirfile, const char *field_code,
 
   switch (E.field_type) {
     case GD_NO_ENTRY:
+    case GD_ALIAS_ENTRY:
     case GD_LINTERP_ENTRY:
     case GD_MULTIPLY_ENTRY:
     case GD_DIVIDE_ENTRY:

@@ -453,6 +453,7 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
       for (i = 0; i < E->EN(polynom,poly_ord); ++i)
         copy_scalar[i] = 1;
       break;
+    case GD_ALIAS_ENTRY:
     case GD_INDEX_ENTRY:
     case GD_NO_ENTRY:
       _GD_InternalError(D); /* We've already verrified field_type is valid */

@@ -1180,7 +1180,7 @@ char *_GD_CanonicalPath(const char *car, const char *cdr)
 
           /* now we have to start all over again */
           ptr = target;
-          if (_GD_AbsPath(target)) {
+          if (_GD_AbsPath(ptr)) {
             _GD_Root(res, target, res_root);
             res_len = res_root;
             ptr += res_root;

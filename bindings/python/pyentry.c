@@ -460,6 +460,7 @@ static void gdpy_set_entry_from_tuple(gd_entry_t *E, PyObject* tuple,
         PyErr_SetString(PyExc_ValueError,
             "'pygetdata.entry' invalid data type");
     case GD_NO_ENTRY:
+    case GD_ALIAS_ENTRY:
     case GD_STRING_ENTRY:
     case GD_INDEX_ENTRY:
       break;
@@ -571,6 +572,7 @@ static void gdpy_set_entry_from_dict(gd_entry_t *E, PyObject* parms,
       break;
     case GD_STRING_ENTRY:
     case GD_NO_ENTRY:
+    case GD_ALIAS_ENTRY:
     case GD_INDEX_ENTRY:
       break;
   }
@@ -778,6 +780,7 @@ static PyObject* gdpy_entry_getinfields(struct gdpy_entry_t* self,
           self->E->in_fields[1]);
       break;
     case GD_NO_ENTRY:
+    case GD_ALIAS_ENTRY:
     case GD_RAW_ENTRY:
     case GD_INDEX_ENTRY:
     case GD_CONST_ENTRY:
@@ -889,6 +892,7 @@ static int gdpy_entry_setinfields(struct gdpy_entry_t* self, PyObject *value,
       }
       break;
     case GD_NO_ENTRY:
+    case GD_ALIAS_ENTRY:
     case GD_RAW_ENTRY:
     case GD_INDEX_ENTRY:
     case GD_CONST_ENTRY:
@@ -1855,6 +1859,7 @@ static PyObject* gdpy_entry_getparms(struct gdpy_entry_t* self, void* closure)
   switch (self->E->field_type)
   {
     case GD_NO_ENTRY:
+    case GD_ALIAS_ENTRY:
     case GD_INDEX_ENTRY:
     case GD_STRING_ENTRY:
       tuple = Py_BuildValue("()");

@@ -84,8 +84,11 @@ _gd_static_inline int _GD_EntryIndex(unsigned int t)
     case GD_SCALAR_ENTRIES:
       i = 17;
       break;
-    case GD_ALL_ENTRIES:
+    case GD_ALIAS_ENTRY:
       i = 18;
+      break;
+    case GD_ALL_ENTRIES:
+      i = 19;
       break;
     default:
       i = -1;
@@ -98,9 +101,9 @@ _gd_static_inline int _GD_EntryIndex(unsigned int t)
 
 /* returns true if E a member of the given list */
 int _GD_ListEntry(const gd_entry_t *E, int meta, int hidden, int noalias,
-    unsigned int special, gd_entype_t type)
+    int special, gd_entype_t type)
 {
-  dtrace("%p{%s}, %i, %i, %i, %u, 0x%X", E, E->field, meta, hidden, noalias,
+  dtrace("%p{%s}, %i, %i, %i, %i, 0x%X", E, E->field, meta, hidden, noalias,
       special, type);
 
   /* check hidden */
@@ -118,10 +121,18 @@ int _GD_ListEntry(const gd_entry_t *E, int meta, int hidden, int noalias,
   /* aliases */
   if (E->field_type == GD_ALIAS_ENTRY) {
     int ret = 0;
+
     if (noalias) {
       dreturn("%i (alias)", 0);
       return 0;
     }
+
+    /* that's right: GD_ALIAS_ENTRY + noalias gets you what you deserve */
+    if (special == GD_ALIAS_ENTRIES) {
+      dreturn("%i (aliases)", 1);
+      return 1;
+    }
+      
     if (E->e->entry[0])
       ret = _GD_ListEntry(E->e->entry[0], meta, hidden, 0, special, type);
     dreturn("%i", ret);
@@ -137,6 +148,9 @@ int _GD_ListEntry(const gd_entry_t *E, int meta, int hidden, int noalias,
   {
     dreturn("%i (scalar)", 0);
     return 0;
+  } else if (special == GD_ALIAS_ENTRIES) { /* we weeded out aliases earlier */
+    dreturn("%i (aliases)", 0);
+    return 0;
   } else if (type && E->field_type != type) {
     dreturn("%i (type)", 0);
     return 0;
@@ -147,12 +161,12 @@ int _GD_ListEntry(const gd_entry_t *E, int meta, int hidden, int noalias,
 }
 
 static const char **_GD_EntryList(DIRFILE *D, struct _gd_private_entry *p,
-    size_t offs, unsigned int type, unsigned int flags) gd_nothrow
+    size_t offs, int type, unsigned int flags) gd_nothrow
 {
   char** el;
   int i, index;
   unsigned int u, n = 0;
-  const unsigned int special = (type & GD_SPECIAL_ENTRY_BIT) ? type : 0;
+  const int special = (type & GD_SPECIAL_ENTRY_BIT) ? type : 0;
   const gd_entype_t ctype = (type & GD_SPECIAL_ENTRY_BIT) ? GD_NO_ENTRY :
     (gd_entype_t)type;
   const int hidden = (flags & GD_ENTRIES_HIDDEN);
@@ -236,14 +250,14 @@ static const char **_GD_EntryList(DIRFILE *D, struct _gd_private_entry *p,
   return (const char **)el;
 }
 
-const char **gd_entry_list(DIRFILE* D, const char *parent, unsigned int type,
+const char **gd_entry_list(DIRFILE* D, const char *parent, int type,
     unsigned int flags) gd_nothrow
 {
   const char **el;
   size_t offs = 0;
   struct _gd_private_entry *p = NULL;
 
-  dtrace("%p, \"%s\", %u, %u", D, parent, type, flags);
+  dtrace("%p, \"%s\", %i, %u", D, parent, type, flags);
 
   if (D->flags & GD_INVALID) {
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);

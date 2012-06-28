@@ -764,6 +764,7 @@ size_t _GD_DoFieldOut(DIRFILE *restrict D, gd_entry_t *restrict E, int repr,
     case GD_STRING_ENTRY:
       n_wrote = _GD_DoStringOut(D, E, (const char *)data_in);
       break;
+    case GD_ALIAS_ENTRY:
     case GD_NO_ENTRY:
       _GD_InternalError(D);
       break;

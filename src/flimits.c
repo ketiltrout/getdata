@@ -339,6 +339,9 @@ off64_t _GD_GetEOF(DIRFILE *restrict D, const gd_entry_t *restrict E,
     case GD_NO_ENTRY:
       _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, E->field);
       break;
+    case GD_ALIAS_ENTRY:
+      _GD_InternalError(D);
+      break;
   }
 
   D->recurse_level--;
@@ -523,6 +526,7 @@ static off64_t _GD_GetBOF(DIRFILE *restrict D, const gd_entry_t *restrict E,
         _GD_SetError(D, GD_E_DIMENSION, GD_E_DIM_CALLER, NULL, 0, E->field);
       break;
     case GD_NO_ENTRY:
+    case GD_ALIAS_ENTRY:
       _GD_InternalError(D);
       break;
   }

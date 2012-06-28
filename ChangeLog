@@ -1,3 +1,23 @@
+2012-06-28   D. V. Wiebe <getdata@ketiltrout.net> svn:725,726
+	* util/checkdirfile.c: Find and report dangling aliases.
+
+	* bindings/python/pydirfile.c (gdpy_dirfile_nentries gdpy_dirfile_entrylist)
+	bindings/cxx/dirfile.cpp (Dirfile::NEntries Dirfile::EntryList)
+	bindings/perl/GetData.xs (entry_list) : Fix signedness of "type".
+	* bindings/idl/getdata.c (gdidl_get_field_list gdidl_get_nfields): Deal with
+	/ALIASES.
+	* bindings/make_parameters.c: Add GD_ALIAS_ENTRIES.
+
+	* test/nentries_noalias.c test/elist_noalias.c: Renamed from ..._alias.c.
+	* test/nentries_alias.c test/elist_alias.c: Added.
+
+	* src/internal.h getdata.h.in: Move GD_ALIAS_ENTRY to public header.
+	* src/getdata.h.in: Define GD_ALIAS_ENTRIES.
+	* src/field_list.c (_GD_EntryIndex _GD_ListEntry) src/nfields.c
+	(_GD_NEntries): Handle GD_ALIAS_ENTRIES.
+
+	* src/common.c (_GD_CanonicalPath): Sidestep GCC warning.
+
 2012-06-27   D. V. Wiebe <getdata@ketiltrout.net> svn:724
 	* src/name.c (_GD_UpdateScalar _GD_InvalidateConst _GD_UpdateInField
 	_GD_InvalidateVect): Handle aliases.

@@ -1944,6 +1944,7 @@ size_t _GD_DoField(DIRFILE *restrict D, gd_entry_t *restrict E, int repr,
     case GD_STRING_ENTRY:
       n_read = _GD_DoString(E, num_samp, (char *)data_out);
       break;
+    case GD_ALIAS_ENTRY:
     case GD_NO_ENTRY:
       /* Can't get here */
       _GD_InternalError(D);

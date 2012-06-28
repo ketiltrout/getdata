@@ -1517,14 +1517,14 @@ void
 entry_list(dirfile, parent, type, flags)
     DIRFILE * dirfile
     gdpu_char * parent
-    gdpu_type_t type
+    gdpu_int    type
     gdpu_uint_t flags
   PREINIT:
     GDP_DIRFILE_ALIAS;
   ALIAS:
     GetData::Dirfile::entry_list = 1
   PPCODE:
-    dtrace("%p, \"%s\", %u, %u; %i", dirfile, parent, type, flags,
+    dtrace("%p, \"%s\", %i, %u; %i", dirfile, parent, type, flags,
       (int)GIMME_V);
 
     /* in array context, return the field list, otherwise return nfields */

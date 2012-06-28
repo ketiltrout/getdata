@@ -53,7 +53,7 @@ int main(int argc, char* argv[])
   char getdata_error[2048];
   off_t n;
   int ne = 0;
-  unsigned int nfields;
+  unsigned int nfields = 0;
   const char **flist, **mflist;
 
   if (argc < 2 || !strcmp(argv[1], "--version") || !strcmp(argv[1], "--help")) {
@@ -163,14 +163,17 @@ int main(int argc, char* argv[])
   /* Check the validity of each field defined */
   ne = 0;
   puts("\nChecking fields...");
-  flist = gd_field_list(dirfile);
+  flist = gd_entry_list(dirfile, NULL, 0, GD_ENTRIES_HIDDEN |
+      GD_ENTRIES_NOALIAS);
   for (i = 0; flist[i] != NULL; ++i) {
     if (gd_validate(dirfile, flist[i])) {
       printf("  getdata error checking %s: %s\n", flist[i],
           gd_error_string(dirfile, getdata_error, 2048));
       ne++;
     }
-    mflist = gd_mfield_list(dirfile, flist[i]);
+    nfields++;
+    mflist = gd_entry_list(dirfile, flist[i], 0, GD_ENTRIES_HIDDEN | 
+        GD_ENTRIES_NOALIAS);
     for (j = 0; mflist[j] != NULL; ++j) {
       char code[GD_MAX_LINE_LENGTH];
       snprintf(code, GD_MAX_LINE_LENGTH, "%s/%s", flist[i], mflist[j]);
@@ -179,17 +182,50 @@ int main(int argc, char* argv[])
             gd_error_string(dirfile, getdata_error, 2048));
         ne++;
       }
+      nfields++;
+    }
+
+    mflist = gd_entry_list(dirfile, flist[i], GD_ALIAS_ENTRIES,
+        GD_ENTRIES_HIDDEN);
+    for (j = 0; mflist[j] != NULL; ++j) {
+      char code[GD_MAX_LINE_LENGTH];
+      snprintf(code, GD_MAX_LINE_LENGTH, "%s/%s", flist[i], mflist[j]);
+      if (gd_entry_type(dirfile, code) == GD_NO_ENTRY) {
+        if (gd_error(dirfile) == GD_E_BAD_CODE) {
+          printf("  dangling alias %s pointing to non-existent %s\n", code,
+              gd_alias_target(dirfile, code));
+        } else {
+          printf("  getdata error checking alias %s: %s\n", code,
+              gd_error_string(dirfile, getdata_error, 2048));
+        }
+        ne++;
+      }
+      nfields++;
     }
   }
 
-  nfields = gd_nfields(dirfile);
+  /* look for dangling aliases */
+  flist = gd_entry_list(dirfile, NULL, GD_ALIAS_ENTRIES, GD_ENTRIES_HIDDEN);
+  for (i = 0; flist[i] != NULL; ++i) {
+    if (gd_entry_type(dirfile, flist[i]) == GD_NO_ENTRY) {
+      if (gd_error(dirfile) == GD_E_BAD_CODE) {
+        printf("  dangling alias %s pointing to non-existent %s\n", flist[i],
+            gd_alias_target(dirfile, flist[i]));
+      } else {
+        printf("  getdata error checking alias %s: %s\n", flist[i],
+            gd_error_string(dirfile, getdata_error, 2048));
+      }
+      ne++;
+    }
+    nfields++;
+  }
 
   if (ne > 0)
     printf("  Found %i problems in %u %s.\n", ne, nfields,
-        nfields > 1 ? "fields" : "field");
+        nfields > 1 ? "entries" : "entry");
   else
     printf("  No problems found in %u %s.\n", nfields,
-        nfields > 1 ? "fields" : "field");
+        nfields > 1 ? "entries" : "entry");
 
   /* try to retrieve the number of frames in the dirfile */
   puts("\nChecking frames...");
