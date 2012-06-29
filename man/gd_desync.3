@@ -64,7 +64,7 @@ must discard all cached information about the dirfile, even the assumption that
 has been succesfully opened.
 
 Re-opening the dirfile is equivalent to calling
-.BR gd_close (3),
+.BR gd_discard (3),
 and then
 .BR gd_cbopen (3)
 with the same arguments used when originally creating
@@ -94,7 +94,7 @@ An error occurred while trying to obtain the modification time of a fragment.
 Additionally, if
 .B GD_DESYNC_REOPEN
 is used, this function may fail for any of the reasons listed in the
-.BR gd_close (3)
+.BR gd_discard (3)
 and
 .BR gd_cbopen (3)
 manual pages.
@@ -123,7 +123,7 @@ had been specified, regarless of the actual
 .SH SEE ALSO
 .BR fstatat (2),
 .BR gd_cbopen (3),
-.BR gd_close (3),
+.BR gd_discard (3),
 .BR gd_error (3),
 .BR gd_error_string (3),
 .BR gd_parser_callback (3)

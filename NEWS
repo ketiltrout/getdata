@@ -253,6 +253,9 @@ New in version 0.8.0rc2:
 
   Bindings Changes:
 
+  * Bindings for Perl5 have been added.  Perl is not well suited to numerical
+    analysis, and the bindings may be inefficient.
+
   * F77: Due to small namespace issues, the encoding parameters (corresponding
     to the GD_...ENCODED symbols in the C API) have all been renamed.  They
     are now of the form GDE_xx.
