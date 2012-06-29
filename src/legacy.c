@@ -76,7 +76,7 @@ const char *GD_ERROR_CODES[GD_N_ERROR_CODES] = {
   NULL, /* GD_E_UNCLEAN_DB */
   "Improper domain", /* GD_E_DOMAIN */
   "Bad representation", /* GD_E_BAD_REPR */
-  NULL, /* GD_E_BAD_VERSION */
+  NULL, /* unused */
   NULL, /* GD_E_FLUSH */
   NULL, /* GD_E_BOUNDS */
   "Line too long", /* GD_E_LINE_TOO_LONG */

@@ -1328,7 +1328,7 @@ CheckOK2(157, 1);
 CheckNum2(157, 2, $s, $GetData::DIRFILE_STANDARDS_VERSION);
 
 $s = $_->dirfile_standards(0);
-CheckError2(157, 3, $GetData::E_BAD_VERSION);
+CheckError2(157, 3, $GetData::E_ARGUMENT);
 CheckNum2(157, 4, $s, undef);
 
 # 158: get_carray

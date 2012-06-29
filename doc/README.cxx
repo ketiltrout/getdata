@@ -218,8 +218,8 @@ are available:
 * const void *Dirfile::Constants(GetData::DataType type = Float64)
 * int Dirfile::Delete(const char *field_code, int flags = 0)
 * int Dirfile::DeleteAlias(const char* field_code, int flags = 0)
-* const char **Dirfile::EntryList(const char *parent = NULL,
-    unsigned int type = 0, unsigned int flags = 0)
+* const char **Dirfile::EntryList(const char *parent = NULL, int type = 0,
+    unsigned int flags = 0)
 * const char **Dirfile::FieldList()
 * const char **Dirfile::FieldListByType(GetData::EntryType type)
 * unsigned long Dirfile::Flags(unsigned long set = 0, unsigned long reset = 0)
@@ -256,8 +256,8 @@ are available:
 * const char **Dirfile::MVectorList(const char *parent)
 * int Dirfile::NAliases(const char* field_code)
 * DataType Dirfile::NativeType(const char *field_code)
-* unsigned int Dirfile::NEntries(const char *parent = NULL,
-    unsigned int type = 0, unsigned int flags = 0)
+* unsigned int Dirfile::NEntries(const char *parent = NULL, int type = 0,
+    unsigned int flags = 0)
 * unsigned int Dirfile::NFields()
 * unsigned int Dirfile::NFieldsByType(GetData::EntryType type)
 * off_t Dirfile::NFrames()

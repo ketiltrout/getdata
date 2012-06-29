@@ -1751,7 +1751,7 @@ program big_test
   call check_int(ne, 157, n, 9)
 
   n = fgd_dirfile_standards(d, 0)
-  call check_err2(ne, 157, 2, d, GD_E_BAD_VERSION)
+  call check_err2(ne, 157, 2, d, GD_E_ARGUMENT)
 
 ! 158: gd_get_carray_slice (INT8)
   call fgd_get_carray_i1(d, "carray", 0, 0, ci1)

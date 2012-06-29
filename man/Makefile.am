@@ -44,9 +44,9 @@ dist_man_MANS = checkdirfile.1 dirfile2ascii.1 gd_add.3 gd_add_alias.3 \
 								gd_protection.3 gd_put_carray_slice.3 gd_put_constant.3 \
 								gd_put_string.3 gd_putdata.3 gd_putdata64.3 gd_raw_filename.3 \
 								gd_reference.3 gd_rename.3 gd_rewrite_fragment.3 gd_seek.3 \
-								gd_seek64.3 gd_spf.3 gd_strings.3 gd_tell.3 gd_tell64.3 \
-								gd_uninclude.3 gd_validate.3 gd_verbose_prefix.3 dirfile.5 \
-								dirfile-encoding.5 dirfile-format.5
+								gd_seek64.3 gd_spf.3 gd_strings.3 gd_strtok.3 gd_tell.3 \
+								gd_tell64.3 gd_uninclude.3 gd_validate.3 gd_verbose_prefix.3 \
+								dirfile.5 dirfile-encoding.5 dirfile-format.5
 
 # these are real_file:alias
 MAN3ALIASES=gd_add_bit.3:gd_add_carray.3 gd_add_bit.3:gd_add_clincom.3 \

@@ -1,3 +1,7 @@
+2012-06-29   D. V. Wiebe <getdata@ketiltrout.net> svn:728
+	* src/getdata.h.in src/internal.h src/errors.c: Merge GD_E_BAD_VERSION into
+	GD_E_ARGUMENT.
+
 2012-06-28   D. V. Wiebe <getdata@ketiltrout.net> svn:725,726
 	* util/checkdirfile.c: Find and report dangling aliases.
 

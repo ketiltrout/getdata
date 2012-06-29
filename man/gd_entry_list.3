@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_entry_list 3 "1 April 2012" "Version 0.8.0" "GETDATA"
+.TH gd_entry_list 3 "28 June 2012" "Version 0.8.0" "GETDATA"
 .SH NAME
 gd_entry_list, gd_field_list, gd_field_list_by_type gd_mfield_list, gd_mfield_list_by_type,
 gd_mvector_list, gd_vector_list \(em list field entries in a dirfile
@@ -73,14 +73,18 @@ is a special field type for the implicit
 field) or else one of the following special symbols:
 .TP
 .B GD_ALL_ENTRIES \fR(= 0)
-Count entries of all types.
+List entries of all types.
+.TP
+.B GD_ALIAS_ENTRIES
+List only aliases.  This is the only way to get a list including aliases which
+do not point to valid field codes.
 .TP
 .B GD_SCALAR_ENTRIES
-Count only scalar field types
+List only scalar field types
 .RB ( CONST ", " CARRAY ", " STRING ).
 .TP
 .B GD_VECTOR_ENTRIES
-Count only vector field types (all field types except the scalar field types
+List only vector field types (all field types except the scalar field types
 listed above).
 .PP
 The

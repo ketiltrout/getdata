@@ -89,7 +89,6 @@ static struct {
   CONSTANT(E_UNCLEAN_DB,     "GD_UCL", 0),
   CONSTANT(E_DOMAIN,         "GD_EDO", 0),
   CONSTANT(E_BAD_REPR,       "GD_ERP", 0),
-  CONSTANT(E_BAD_VERSION,    "GD_EVR", 0),
   CONSTANT(E_FLUSH,          "GD_EFL", 0),
   CONSTANT(E_BOUNDS,         "GD_EBO", 0),
   CONSTANT(E_LINE_TOO_LONG,  "GD_ETL", 0),
@@ -97,6 +96,7 @@ static struct {
   CONSTANT(E_OPEN_INCLUDE,   "GD_EOI", 0), /* deprecated */
   CONSTANT(E_BAD_ENDIANNESS, "GD_EEN", 0), /* deprecated */
   CONSTANT(E_BAD_PROTECTION, "GD_EBP", 0), /* deprecated */
+  CONSTANT(E_BAD_VERSION,    "GD_EVR", 0), /* deprecated */
 
   CONSTANT(RDONLY,           "GD_RO",  1),
   CONSTANT(RDWR,             "GD_RW",  1),

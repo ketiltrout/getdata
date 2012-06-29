@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_nentries 3 "1 April 2012" "Version 0.8.0" "GETDATA"
+.TH gd_nentries 3 "28 June 2012" "Version 0.8.0" "GETDATA"
 .SH NAME
 gd_nentries, gd_nfields, gd_nfields_by_type gd_nmfields, gd_nmfields_by_type,
 gd_nmvectors, gd_nvectors \(em count field entries in a dirfile
@@ -74,6 +74,10 @@ field) or else one of the following special symbols:
 .TP
 .B GD_ALL_ENTRIES \fR(= 0)
 Count entries of all types.
+.TP
+.B GD_ALIAS_ENTRIES
+Count only aliases.  This is the only way to get a count including aliases which
+do not point to valid field codes.
 .TP
 .B GD_SCALAR_ENTRIES
 Count only scalar field types

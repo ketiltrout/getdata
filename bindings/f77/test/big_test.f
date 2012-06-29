@@ -1608,7 +1608,7 @@ C     157: GDSTDV check
 
       n = 0
       CALL GDSTDV(n, d)
-      CALL CHKER2(ne, 157, 2, d, GD_EVR)
+      CALL CHKER2(ne, 157, 2, d, GD_EAR)
 
 C     158: GDGTCA check
       CALL GDGTCA(d, 'carray', 6, GD_F64, p)

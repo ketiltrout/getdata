@@ -1325,7 +1325,7 @@ CheckSimple(157,n,9)
 try:
   d.standards = 0
 except:
-  CheckException2(157,2,pygetdata.BadVersionError)
+  CheckException2(157,2,pygetdata.ArgumentError)
 
 # 158: gd_get_carray
 try:

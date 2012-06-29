@@ -591,16 +591,17 @@ FUNCTION GD_ENTRY(dirfile_unit, field_code)
   This function returns a GD_ENTRY structure containing the field metadata for
   the field specified by 'field_code'.  See gd_entry(3).
 
-FUNCTION GD_ENTRY_LIST(dirfile_unit, /HIDDEN, /NOALIAS, PARENT=parent, /SCALARS,
-    TYPE=type, /VECTORS)
+FUNCTION GD_ENTRY_LIST(dirfile_unit, /ALIASES, /HIDDEN, /NOALIAS, PARENT=parent,
+    /SCALARS, TYPE=type, /VECTORS)
 
   This function returns a list of entry names defined by the dirfile.  If PARENT
   is given, a list of metafields for the given parent will be returned otherwise
   top-level fields are considered.  If TYPE is given, which should be one of the
   !GD.*_ENTRY constants, only fields of the given type will be returned.  If
-  /SCALARS or /VECTORS is specified, the TYPE parameter is ignored if it is also
-  given.  The list returned includes aliases, unless /NOALIAS is specified, but
-  not hidden fields, unless /HIDDEN is specified.  See gd_entry_list(3).
+  /ALIASES, /SCALARS or /VECTORS is specified, the TYPE parameter is ignored if
+  it is also given.  The list returned includes aliases, unless /NOALIAS is
+  specified, but not hidden fields, unless /HIDDEN is specified.  See
+  gd_entry_list(3).
 
 FUNCTION GD_ENTRY_TYPE(dirfile_unit, field_code)
 
@@ -783,18 +784,17 @@ FUNCTION GD_NATIVE_TYPE(dirfile_unit, field_code)
   The return value will be one of the data type constants: !GD.UINT8, !GD.INT8,
   &c.  See gd_native_type(3).
 
-FUNCTION GD_NENTRIES(dirfile_unit, /HIDDEN, /NOALIAS, PARENT=parent, /SCALARS,
-    TYPE=type, /VECTORS)
+FUNCTION GD_NENTRIES(dirfile_unit, /ALIAS, /HIDDEN, /NOALIAS, PARENT=parent,
+    /SCALARS, TYPE=type, /VECTORS)
 
   This function returns the number of entries in the dirfile satisfying the
   given criteria.  If PARENT is given, the number of metafields for the given
   parent will be returned otherwise top-level fields are considered.  If TYPE is
   given, which should be one of the !GD.*_ENTRY constants, only fields of the
-  given type will be counted.  If /SCALARS or /VECTORS is specified, the TYPE
-  parameter is ignored if it is also given.  The number returned includes
-  aliases, unless /NOALIAS is specified, but not hidden fields, unless /HIDDEN
-  is specified.  See gd_nentries(3).
-
+  given type will be counted.  If /ALIASES, /SCALARS or /VECTORS is specified,
+  the TYPE parameter is ignored if it is also given.  The number returned
+  includes aliases, unless /NOALIAS is specified, but not hidden fields, unless
+  /HIDDEN is specified.  See gd_nentries(3).
 
 FUNCTION GD_NFIELDS(dirfile_unit, /HIDDEN, /NOALIAS, PARENT=parent, /SCALARS,
     TYPE=type, /VECTORS)

@@ -1,6 +1,6 @@
 .\" gd_dirfile_standards.3.  The gd_dirfile_standards man page.
 .\"
-.\" Copyright (C) 2010 D. V. Wiebe
+.\" Copyright (C) 2010, 2012 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_dirfile_standards 3 "15 October 2010" "Version 0.7.0" "GETDATA"
+.TH gd_dirfile_standards 3 "29 June 2012" "Version 0.8.0" "GETDATA"
 .SH NAME
 gd_dirfile_standards \(em change or report the current Dirfile Standards Version
 for a DirFile
@@ -93,12 +93,12 @@ inclusive.  On error, -1 is returned and the dirfile error is set to a non-zero
 error value, and the current Standards Version is not changed.  Possible error
 values are:
 .TP 8
-.B GD_E_BAD_DIRFILE
-The supplied dirfile was invalid.
-.TP
-.B GD_E_BAD_VERSION
+.B GD_E_ARGUMENT
 The loaded dirfile did not conform to the specified version.  Or the dirfile
 conforms to no known Standards Version.
+.TP
+.B GD_E_BAD_DIRFILE
+The supplied dirfile was invalid.
 .PP
 The dirfile error may be retrieved by calling
 .BR gd_error (3).

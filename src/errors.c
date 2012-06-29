@@ -176,6 +176,10 @@ static const struct {
   { GD_E_ARGUMENT, GD_E_ARG_PROTECTION, "Invalid protection level specified",
     0 },
   { GD_E_ARGUMENT, GD_E_ARG_NODATA, "No data", 0 },
+  { GD_E_ARGUMENT, GD_E_ARG_NO_VERS, "Dirfile conforms to no Standards Version",
+    0 },
+  { GD_E_ARGUMENT, GD_E_ARG_BAD_VERS,
+    "Dirfile does not conform to specified Standards Version", 0 },
   { GD_E_ARGUMENT, 0, "Bad argument", 0 },
   /* GD_E_CALLBACK: 3 = response */
   { GD_E_CALLBACK, 0, "Unrecognised response from callback function: {3}", 0 },
@@ -193,11 +197,6 @@ static const struct {
   { GD_E_BAD_REPR, GD_E_REPR_UNKNOWN, "Unknown field representation: .{4}", 0 },
   { GD_E_BAD_REPR, GD_E_REPR_PUT, "Unable to write to field reprentation: .{4}",
     0 },
-  /* GD_E_BAD_VERSION 3 = version */
-  { GD_E_BAD_VERSION, GD_E_VERS_NONE,
-    "Dirfile conforms to no Standards Version", 0 },
-  { GD_E_BAD_VERSION, GD_E_VERS_MISSING,
-    "Dirfile does not conform to Standards Version {3}", 0 },
   /* GD_E_FLUSH: 3 = suberror, 4 = filename */
   { GD_E_FLUSH, GD_E_FLUSH_MKTMP, "I/O error creating temporary file: ", 1 },
   { GD_E_FLUSH, GD_E_FLUSH_OPEN, "I/O error opening temporary file: ", 1 },

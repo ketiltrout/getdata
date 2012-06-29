@@ -1265,7 +1265,7 @@ int main(void)
   CHECK_OK2(157,1);
   CHECK_INT(157,n,9);
   d->Standards(0);
-  CHECK_ERROR2(157,2,GD_E_BAD_VERSION);
+  CHECK_ERROR2(157,2,GD_E_ARGUMENT);
 
   // 158 gd_get_carray
   n = d->GetCarray("carray", Float64, p);

@@ -1998,7 +1998,7 @@ Error codes (returned by GDEROR):
   GD_ETL          GD_E_LINE_TOO_LONG
   GD_ETR          GD_E_TRUNC
   GD_EUE          GD_E_UNKNOWN_ENCODING
-  GD_EVR          GD_E_BAD_VERSION
+  GD_EVR          GD_E_BAD_VERSION    Deprecated; kept as an alias for GD_EAR.
   GD_UCL          GD_E_UNCLEAN_DB
   GD_UNS          GD_E_UNSUPPORTED
 

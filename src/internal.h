@@ -728,13 +728,13 @@ ssize_t getdelim(char**, size_t*, int, FILE*);
 #define GD_E_UNENC_UNDET        1
 #define GD_E_UNENC_TARGET       2
 
-#define GD_E_VERS_NONE          1
-#define GD_E_VERS_MISSING       2
-
 #define GD_E_ARG_WHENCE         1
 #define GD_E_ARG_ENDIANNESS     2
 #define GD_E_ARG_PROTECTION     3
 #define GD_E_ARG_NODATA         4
+#define GD_E_ARG_NO_VERS        5
+#define GD_E_ARG_BAD_VERS       6
+
 
 /* I/O flags */
 #define GD_FILE_READ  0x1

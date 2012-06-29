@@ -157,7 +157,7 @@ extern "C" {
 #define GD_E_UNCLEAN_DB       30
 #define GD_E_DOMAIN           31
 #define GD_E_BAD_REPR         32
-#define GD_E_BAD_VERSION      33
+/* unused                     33 */
 #define GD_E_FLUSH            34
 #define GD_E_BOUNDS           35
 #define GD_E_LINE_TOO_LONG    36
@@ -168,6 +168,7 @@ extern "C" {
 #define GD_E_OPEN_INCLUDE     GD_E_OPEN_FRAGMENT
 #define GD_E_BAD_ENDIANNESS   GD_E_ARGUMENT
 #define GD_E_BAD_PROTECTION   GD_E_ARGUMENT
+#define GD_E_BAD_VERSION      GD_E_ARGUMENT
 
 #define GD_MAX_LINCOM 3
 

@@ -1026,7 +1026,7 @@ n = gd_dirfile_standards(d, /CURRENT)
 nume += check_ok2(157, 1, d)
 nume += check_simple(157, n, 9)
 n = gd_dirfile_standards(d, 0)
-nume += check_error2(157, 2, d, !GD.E_BAD_VERSION)
+nume += check_error2(157, 2, d, !GD.E_ARGUMENT)
 
 ;  158: gd_get_carray
 n = gd_get_carray(d, "carray", type=!GD.FLOAT32)

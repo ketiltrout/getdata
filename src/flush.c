@@ -1167,8 +1167,8 @@ int gd_dirfile_standards(DIRFILE *D, int vers) gd_nothrow
   if (vers < 0 || vers > GD_DIRFILE_STANDARDS_VERSION ||
       ~D->av & (1ULL << vers))
   {
-    _GD_SetError(D, GD_E_BAD_VERSION, (D->av == 0) ? GD_E_VERS_NONE :
-        GD_E_VERS_MISSING, NULL, vers, NULL);
+    _GD_SetError(D, GD_E_ARGUMENT, (D->av == 0) ? GD_E_ARG_NO_VERS :
+        GD_E_ARG_BAD_VERS, NULL, vers, NULL);
     dreturn("%i", -1);
     return -1;
   }

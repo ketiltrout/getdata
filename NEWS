@@ -227,13 +227,14 @@ New in version 0.8.0rc2:
   * A prefix to the automatic error messages printed by GetData when using the
     GD_VERBOSE flag may be specified with gd_verbose_prefix().
 
-  * When requesting the exclusive creation of a new dirfile with (O_CREAT |
-    O_EXCL) GetData will now return the new error GD_E_EXISTS if the dirfile
+  * When requesting the exclusive creation of a new dirfile with (GD_CREAT |
+    GD_EXCL) GetData will now return the new error GD_E_EXISTS if the dirfile
     already exists.  Previously it would return GD_E_CREAT in this situation.
 
-  * The error codes GD_E_BAD_ENDIANNESS and GD_E_BAD_PROTECTION have been
-    combined into a more generic error code: GD_E_ARGUMENT.  The old symbols are
-    retained for backwards compatibility.
+  * The error codes GD_E_BAD_ENDIANNESS, GD_E_BAD_PROTECTION, and
+    GD_E_BAD_VERSION have been combined into a more generic error code:
+    GD_E_ARGUMENT.  The old symbols are retained for backwards compatibility but
+    have been marked deprecated.
 
   * C89 API: Passing NULL to gd_alter_crecip() for cdividend is now treated as
     if it were passed zero (ie. it indicates no change for cdividend).
