@@ -366,10 +366,6 @@ static char **_GD_InvalidateConst(DIRFILE *D, const gd_entry_t *E,
       }
     }
 
-  /* gotta update those aliases ... */
-  for (u = 0; u < D->n_entries; ++u)
-    if (D->entry[u] != E && D->entry[u]->field_type == GD_ALIAS_ENTRY)
-
   dreturn("%p", list);
   return list;
 }

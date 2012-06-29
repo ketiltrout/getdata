@@ -728,6 +728,22 @@ void F77_FUNC(gdentx, GDENTX) (int32_t *max, const int32_t *dirfile,
 void F77_FUNC(gdentn, GDENTN) (char *name, int32_t *name_l,
     const int32_t *dirfile, const char *parent, const int32_t *parent_l,
     const int32_t *type, const int32_t *flags, const int32_t *field_num);
+
+void F77_FUNC(gdgewd, GDGEWD) (char *in_field, int32_t *in_field_l,
+    char *check_field, int32_t *check_field_l, int32_t *windop,
+    int32_t *ithreshold, double *rthreshold, int32_t *fragment_index,
+    const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l);
+
+void F77_FUNC(gdecnt, GDECNT) (int32_t *error_count, const int32_t *dirfile);
+
+void F77_FUNC(gdtoke, GDTOKE) (char *toke, int32_t *toke_l,
+    const int32_t *dirfile, const char *string, const int32_t *string_l);
+
+void F77_FUNC(gdgemx, GDGEMX) (char *in_field, int32_t *in_field_l,
+    char *count_field, int32_t *count_field_l, int32_t *val, int32_t *max,
+    int32_t *fragment_index, const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l);
 #ifdef __cplusplus
 }
 #endif

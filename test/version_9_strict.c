@@ -35,29 +35,29 @@ int main(void)
   const char *format2 = "dirfile/format2";
   const char *data = "dirfile/ar";
   const char *format_data =
-    "/VERSION 8\n"  // 0
-    "/INCLUDE format1\n" // 1
-    "w WINDOW INDEX INDEX SET 0x1\n"; // 2
+    "/VERSION 8\n"  /* 0 */
+    "/INCLUDE format1\n" /* 1 */
+    "w WINDOW INDEX INDEX SET 0x1\n"; /* 2 */
   const char *format1_data =
     "\n\n\n"
-    "/VERSION 9\n" // 3
-    "/INCLUDE format2 A Z\n" // 4
-    "/INCLUDE format2 A.Z\n" // 5
-    "Xr RAW COMPLEX128 0xA\n" // 6
-    "Xy POLYNOM INDEX 8 055 0xAE 2\n" // 7
-    "ar WINDOW AdZ INDEX SET 0x1\n" // 8
-    "AINDEXZ PHASE INDEX 0\n" // 9
-    "/HIDDEN Xy\n"; // 10
+    "/VERSION 9\n" /* 3 */
+    "/INCLUDE format2 A Z\n" /* 4 */
+    "/INCLUDE format2 A.Z\n" /* 5 */
+    "Xr RAW COMPLEX128 0xA\n" /* 6 */
+    "Xy POLYNOM INDEX 8 055 0xAE 2\n" /* 7 */
+    "ar WINDOW AdZ INDEX SET 0x1\n" /* 8 */
+    "AINDEXZ PHASE INDEX 0\n" /* 9 */
+    "/HIDDEN Xy\n"; /* 10 */
   const char *format2_data =
     "\n\n\n"
     "\n\n\n\n\n\n\n\n"
-    "c RAW UINT8 1\n" // 11
-    "/HIDDEN c\n" // 12
-    "/REFERENCE c\n" // 13
-    "/VERSION 8\n" // 14
-    "d PHASE INDEX 0\n" // 15
-    "d/c CONST FLOAT64 1\n" // 16
-    "/META d d CONST FLOAT64 1\n"; // 17
+    "c RAW UINT8 1\n" /* 11 */
+    "/HIDDEN c\n" /* 12 */
+    "/REFERENCE c\n" /* 13 */
+    "/VERSION 8\n" /* 14 */
+    "d PHASE INDEX 0\n" /* 15 */
+    "d/c CONST FLOAT64 1\n" /* 16 */
+    "/META d d CONST FLOAT64 1\n"; /* 17 */
   uint16_t c[8];
   int ll[NLINES];
   unsigned char data_data[256];
