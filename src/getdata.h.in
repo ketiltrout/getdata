@@ -1092,7 +1092,13 @@ gd_nonnull ((1,2));
 #endif
 
 #ifdef GD_64BIT_API
-@DEFINE_gd_off64_t@
+#ifdef __off64_t_defined
+typedef __off64_t gd_off64_t;
+#elif (defined _FILE_OFFSET_BITS && _FILE_OFFSET_BITS == 64)
+typedef off_t gd_off64_t;
+#else
+typedef gd_int64_t gd_off64_t;
+#endif
 
 extern int gd_alter_frameoffset64(DIRFILE *dirfile, gd_off64_t offset,
     int fragment, int recode) gd_nonnull ((1));

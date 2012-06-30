@@ -679,27 +679,16 @@ if test "x$gd_cv_type_off64_t" = "xyes"; then
   dnl Assume we have the entire LFS defined transitional API
   AC_DEFINE([HAVE_OFF64_T], [1],
             [ Define to 1 if the system has the type `off64_t'. ]) dnl `
-  define_lf64s="#ifndef _LARGEFILE64_SOURCE
-#define _LARGEFILE64_SOURCE
-#endif
-"
-  gd_off64_t="off64_t"
-elif test $ac_cv_sizeof_off_t -eq 8;then
-  gd_off64_t="off_t"
-else
-  gd_off64_t=$gd_int64_t
 fi
 
 DEFINE_gd_int16_t="# define gd_int16_t $gd_int16_t";
 DEFINE_gd_uint16_t="# define gd_uint16_t $gd_uint16_t";
 DEFINE_gd_int64_t="# define gd_int64_t $gd_int64_t";
 DEFINE_gd_uint64_t="# define gd_uint64_t $gd_uint64_t";
-DEFINE_gd_off64_t="$define_lf64s# define gd_off64_t $gd_off64_t";
 AC_SUBST([DEFINE_gd_int16_t])
 AC_SUBST([DEFINE_gd_uint16_t])
 AC_SUBST([DEFINE_gd_int64_t])
 AC_SUBST([DEFINE_gd_uint64_t])
-AC_SUBST([DEFINE_gd_off64_t])
 
 dnl library functions
 echo

@@ -1,3 +1,9 @@
+2012-06-30   D. V. Wiebe <getdata@ketiltrout.net> svn:732
+	* src/getdata.h.in configure.ac cmake/CMakeLists.txt: Fix definition of
+	gd_off64_t.
+
+	* bindings/perl/Build.PL.in: make getdata.h a dependency of lib/GetData.xs.
+
 2012-06-29   D. V. Wiebe <getdata@ketiltrout.net> svn:728
 	* src/getdata.h.in src/internal.h src/errors.c: Merge GD_E_BAD_VERSION into
 	GD_E_ARGUMENT.

@@ -13,6 +13,8 @@ sub up_to_date {
 
   if ($source eq "lib/GetData.xs") {
     return 0 if (not $self->up_to_date("lib/simple_funcs.xs", $derived));
+    return 0 if (not $self->up_to_date("@top_builddir@/src/getdata.h",
+      $derived));
   }
   return $self->SUPER::up_to_date($source, $derived);
 }

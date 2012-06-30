@@ -57,6 +57,7 @@ This package provides:
     - Fortran 95 (libf95getdata)
     - Python (pygetdata)
     - the Interactive Data Language (IDL; idl_getdata)
+    - Perl (GetData.pm)
 
 Documentation for the various bindings, if present, can be found in files
 named `README.<language>' in the doc/ directory.  The C interface is described

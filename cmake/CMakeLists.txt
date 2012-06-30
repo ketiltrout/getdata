@@ -42,7 +42,6 @@ if(MSVC)
   # MSVCRT integer types
   set(DEFINE_gd_int64_t  "#define gd_int64_t  __int64")
   set(DEFINE_gd_uint64_t "#define gd_uint64_t unsigned __int64")
-  set(DEFINE_gd_off64_t "#define gd_off64_t __int64")
 
   add_definitions(-D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_WARNINGS)
   add_definitions(
