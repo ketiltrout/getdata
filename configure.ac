@@ -666,13 +666,13 @@ elif test $ac_cv_sizeof_long_long_int -eq 8; then
 fi
 
 if test $ac_cv_sizeof_unsigned_int -eq 8; then
-  gd_uint64_t="int"
+  gd_uint64_t="unsigned int"
 elif test $ac_cv_sizeof_unsigned_short_int -eq 8; then
-  gd_uint64_t="short int"
+  gd_uint64_t="unsigned short int"
 elif test $ac_cv_sizeof_unsigned_long_int -eq 8; then
-  gd_uint64_t="long int"
+  gd_uint64_t="unsigned long int"
 elif test $ac_cv_sizeof_unsigned_long_long_int -eq 8; then
-  gd_uint64_t="long long int"
+  gd_uint64_t="unsigned long long int"
 fi
 
 if test "x$gd_cv_type_off64_t" = "xyes"; then
