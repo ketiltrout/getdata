@@ -1127,7 +1127,7 @@ Subroutines interacting with field metadata
 
   This subroutine returns metadata describing a WINDOW field.  Only one of
   ithreshold and rthreshold is ever updated.  If the returned windop is one of
-  GDW_EQ, GDW_NE, GDW_ST, or GDW_CL, ithreshold will be updated, otherwhise,
+  GDW_EQ, GDW_NE, GDW_ST, or GDW_CL, ithreshold will be updated, otherwise,
   rthreshold will be updated.  If field_code is not found, or the field
   specified is not of POLYNOM type, infield_len will be set to zero.  In this
   case the value of the remaining data is unspecified.
@@ -1546,16 +1546,16 @@ Subroutines interacting with field metadata
   new fragment given.
 
 * GDRENM(dirfile_unit, field_code, field_code_len, new_name, new_name_len,
-  move_data)
+  flags)
 
   Input:
-    INTEGER dirfile_unit, field_code_len, new_name_len, move_data
+    INTEGER dirfile_unit, field_code_len, new_name_len, flags
     CHARACTER*<field_code_len> field_code
     CHARACTER*<new_name_len> new_name
 
-  This subroutine wraps gd_rename(3), and changes the name of a field.  If
-  move_data is non-zero, and the field is a RAW field, the binary file
-  associated with the field will also be renamed.
+  This subroutine wraps gd_rename(3), and changes the name of a field.  The
+  flags parameter should be zero or more of the GDR_xx parameters, bitwise or'd
+  together.
 
 * GDNTYP(ntype, dirfile_unit, field_code, field_code_len)
 
@@ -1610,7 +1610,7 @@ Subroutines interacting with field metadata
   This subroutine modifies the element indexed by index of the scalar array
   member of the gd_entry_t object associated with the specified field code.  If
   index is too large for the specified field, nothing happens.  The array is
-  indexed starting from one.  If scalar indicates a CONST field, sclaar_index
+  indexed starting from one.  If scalar indicates a CONST field, scalar_index
   is ignored.
 
 
@@ -1641,7 +1641,7 @@ Subroutines which add or delete fields and aliases
   fragment_index)
 
   Input:
-    INTEGER dirfile_unti, field_code_len, targ_len, fragment_index
+    INTEGER dirfile_unit, field_code_len, targ_len, fragment_index
     CHARACTER*<field_code_len> field_code
     CHARACTER*<targ_len> targ
 
@@ -2098,7 +2098,7 @@ Rename flags (requred by GDRENM):
   F77 symbol      C symbol
   ----------      -----------------
   GDR_DT          GD_REN_DATA
-  GDR_UP          GD_REN_UPDATEDB
+  GDR_UP          GD_REN_UPDB
 
 Protection levels (returned by GDGPRT and required by GDAPRT):
 

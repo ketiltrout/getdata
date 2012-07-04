@@ -655,7 +655,7 @@ PROCEDURE GD_FLUSH, dirfile_unit, FIELD_CODE=field_code, /NOCLOSE, /NOSYNC
   and metadata changes are flushed to disk.  In normal operation, first the
   raw data is flushed (synced) and then the raw data files are closed.
   Specifying /NOSYNC will skip the flushing; specifying /NOCLOSE will skip the
-  closing.  Specifiying both will result in an error (since the function is left
+  closing.  Specifying both will result in an error (since the function is left
   with nothing to do.)  See gd_flush(3), gd_sync(3) and gd_raw_close(3).
 
 FUNCTION GD_FRAGMENT_AFFIXES(dirfile_unit, FRAGMENT=fragment)

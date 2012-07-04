@@ -83,7 +83,7 @@ unit numbers in place of C's DIRFILE pointers are:
   character (len=*), intent(in) :: field_code
 
   (For fgd_flush, fgd_sync and fgd_raw_close, if field_code is the empty string,
-  the operation will be peformed on the entire dirfile.)
+  the operation will be performed on the entire dirfile.)
 
 * subroutine fgd_metaflush (dirfile_unit)
   integer, intent(in) :: dirfile
@@ -562,8 +562,8 @@ unit numbers in place of C's DIRFILE pointers are:
   integer, intent(in) :: dirfile, recode
   character (len=*), intent(in) :: parent, spec
 
-* subroutine fgd_rename (dirfile, field_code, new_name, move_data)
-  integer, intent(in) :: dirfile, move_data
+* subroutine fgd_rename (dirfile, field_code, new_name, flags)
+  integer, intent(in) :: dirfile, flags
   character (len=*), intent(in) :: field_code, new_name
 
 * subroutine fgd_delete (dirfile, field_code, flags)
@@ -718,7 +718,7 @@ Otherwise, they behave the same as their C counterparts.
   <datatype>, dimension(:), intent(in) :: data_in
 
   No corresponding fgd_putdata_n function exists, since GD_NULL is not an
-  acceptable input data_type for putdata(3).
+  acceptable input data_type for gd_putdata(3).
 
   Analogously for gd_constants, gd_get_carray_slice, gd_get_constant,
   gd_mconstants, gd_put_carray_slice, and gd_put_constant, for which only the

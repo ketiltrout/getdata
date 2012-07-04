@@ -48,4 +48,4 @@ dist_doc_DATA = ${READMECXX} ${READMEF77} ${READMEF95} ${READMEIDL} \
 								${READMEPERL} ${READMEPYTHON} unclean_database_recovery.txt
 
 clean-local:
-	rm -rf *~
+	rm -rf *~ README.perl

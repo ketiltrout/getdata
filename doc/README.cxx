@@ -74,7 +74,7 @@ The GetData encoding schemes (defined in getdata/fragment.h):
     AutoEncoding  = GD_AUTO_ENCODED, RawEncoding   = GD_UNENCODED,
     TextEncoding  = GD_TEXT_ENCODED, SlimEncoding  = GD_SLIM_ENCODED,
     GzipEncoding  = GD_GZIP_ENCODED, Bzip2Encoding = GD_BZIP2_ENCODED,
-    SieEncoding   = GD_SIE_ENCODED,  ZzipEncoding  = GD_ZZIP_ENOCDED,
+    SieEncoding   = GD_SIE_ENCODED,  ZzipEncoding  = GD_ZZIP_ENCODED,
     ZzslimEncoding = GD_ZZSLIM_ENCODED, UnsupportedEncoding = GD_ENC_UNSUPPORTED
   };
 
