@@ -1,3 +1,9 @@
+2012-06-30   D. V. Wiebe <getdata@ketiltrout.net> svn:734
+	* src/constant.c (gd_get_carray_slice gd_get_carray gd_carray_len
+	gd_put_carray_slice gd_put_carray): Handle both CONST and CARRAY.
+	* src/constant.c (gd_get_constant gd_put_constant): Just call the
+	corresponding carray_slice function.
+
 2012-06-30   D. V. Wiebe <getdata@ketiltrout.net> svn:732
 	* src/getdata.h.in configure.ac cmake/CMakeLists.txt: Fix definition of
 	gd_off64_t.

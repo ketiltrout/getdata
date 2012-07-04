@@ -67,25 +67,22 @@ A full list of features new to this release of GetData may be found in the
 file called `NEWS'.
 
 
-DIRFILE STANDARDS VERSION 8
+DIRFILE STANDARDS VERSION 9
 ===========================
 
-The 0.7.0 release of the GetData Library (October 2010), was released in
-conjunction with a new version of the Dirfile Standards, known as Standards
-Version 8.
+The 0.8.0 release of the GetData Library (July 2012) is the first release to
+provide suuport the latest version of the Dirfile Standards, known as Standards
+Version 9.
 
-Standards Version 8 introduces the following:
-  * Two new field types: DIVIDE, the quotient of two input vector fields,
-    and RECIP, the reciprocal of a vector field.
-  * Support for middle-endian ARM double-precision floating point data.
-  * Furthermore, several deprecated features have been removed.  The old single
-    character type names are no longer accepted, and directives now require an
-    initial forward slash.  (NB: these features are only removed from Standards
-    Version 8; GetData, which understands all Standards Versions, still can work
-    with these features.)
+Standards Version 9 introduces the following:
+  * Two new field types: MPLEX and WINDOW, both meant to deal with extracting a
+    subset of their input.
+  * Field name munging via /INCLUDEs, aliases, and "hidden" names.
+  * Support for zzip-compressed dirfiles, as well as simple compression via an
+    in-built scheme called Sample Index Encoding.
 
-This is the first update to the Dirfile Standards since Standards Version 7
-(October 2009).  A full history of the Dirfile Standards can be found in the
+This is the first update to the Dirfile Standards since Standards Version 8
+(November 2010).  A full history of the Dirfile Standards can be found in the
 dirfile-format(5) man page.
 
 
@@ -132,9 +129,10 @@ various data encodings (typically compression schemes).  These are:
 
 - the slim compression library by Joseph Fowler;
 - the zlib library by Jean-loup Gailly and Mark Adler;
-- the bzip2 compression library by Julian Seward; and,
+- the bzip2 compression library by Julian Seward;
 - the lzma library, part of the XZ Utils suite by Lasse Collin, Ville Koskinen,
-  and Igor Pavlov.
+  and Igor Pavlov; and,
+- the zzip library by Tomi Ollila and Guido Draheim.
 
 If these libraries are not found by configure, GetData will lack support for
 the associated encoding scheme and fail gracefully if encountering dirfiles so
@@ -145,10 +143,10 @@ USING THE LIBRARY
 =================
 
 To use the library in C programs, the header file getdata.h should be included.
-This file declares both the new and legacy APIs.  Programs linking to static
-versions of the GetData library need to be linked against the C Standard Math
-Library, in addition to GetData itself, plus any other libraries required for
-encodings supported by the library, e.g. using `-lgetdata -lm
+This file declares all the various APIs provided by th library.  Programs
+linking to static versions of the GetData library need to be linked against the
+C Standard Math Library, in addition to GetData itself, plus any other libraries
+required for encodings supported by the library, e.g. using `-lgetdata -lm
 <other-libraries>'.
 
 The various small programs in the `util' subdirectory of the package provide

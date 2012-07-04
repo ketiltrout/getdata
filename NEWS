@@ -2,245 +2,254 @@ New in version 0.8.0rc2:
 
   Dirfile Changes
 
-  * Dirfile Standards Version 9 has been released.  It adds two new field types:
-    MPLEX, which allows multiplexing multiple low-rate channels in one high-rate
-    one, and WINDOW, which extracts a portion of a field based on the value of
-    a second field.  More changes are listed below.
+  * Dirfile Standards Version 9 has been released.  It adds two new field
+    types: MPLEX, which allows multiplexing multiple low-rate channels in
+    one high-rate one, and WINDOW, which extracts a portion of a field
+    based on the value of a second field.  More changes are listed below.
 
-  * Alternate field names may be defined using the /ALIAS directive.  Aliases
-    can't be used as a parent when defining metafields, but are otherwise
-    indistinguishable from a field's original ("canonical") name.
+  * Alternate field names may be defined using the /ALIAS directive.
+    Aliases can't be used as a parent when defining metafields, but are
+    otherwise indistinguishable from a field's original ("canonical") name.
 
-  * The /VERSION directive now has fragment scope, which should alleviate some
-    of the problems associated with "version leakage" found in previous
-    versions.  Previous versions are unchanged, but a "/VERSION 9" directive
-    will not propagate back up into a parent fragment, nor will any /VERSION
-    directive be propagated back up into a Version 9 fragment.
+  * The /VERSION directive now has fragment scope, which should alleviate
+    some of the problems associated with "version leakage" found in
+    previous versions.  Previous versions are unchanged, but a "/VERSION 9"
+    directive will not propagate back up into a parent fragment, nor will
+    any /VERSION directive be propagated back up into a Version 9 fragment.
 
-  * Fields may be "hidden" using the /HIDDEN directive.  The Standards don't say
-    what a "hidden" field does, but GetData will, by default, exclude them from
-    the count and list functions.
+  * Fields may be "hidden" using the /HIDDEN directive.  The Standards
+    don't say what a "hidden" field does, but GetData will, by default,
+    exclude them from the count and list functions.
 
-  * Literal integers in the format may now be specified in octal (using 0####)
-    or hexidecimal (using 0x##### or 0X#####) in addition to decimal.
+  * Literal integers in the format may now be specified in octal (using
+    0####) or hexidecimal (using 0x##### or 0X#####) in addition to
+    decimal.
 
-  * Effects of the /VERSION directive no longer propagate upwards to parent
-    fragments.  This makes subdirfile encapsulation easier and fixes the
-    "Version Leak" problem reported with earlier Standards.  The effect of this
-    is twofold: "/VERSION 9" never propagates upwards, but neither do the
-    Versions specified in subfragments included in a Version 9 fragment (even if
-    they are earlier Versions).
+  * The /INCLUDE directive can take two additional, optional parameters
+    which specify a prefix and/or suffix used to modify the entry names of
+    the fields defined in the included fragment.  (The intent of this is to
+    permit the inclusion of multiple subdirfiles which define the same set
+    of fields, by modifying their field names.)
 
-  * The /INCLUDE directive can take two additional, optional parameters which
-    specify a prefix and/or suffix used to modify the entry names of the fields
-    defined in the included fragment.  (The intent of this is to permit the
-    inclusion of multiple subdirfiles which define the same set of fields, by
-    modifying their field names.)
+  * Three new encoding schemes are available.  The first is the Sample-
+    Index Encoding (SIE), similar to run-length encoding, useful for
+    compressing data which changes very rarely varying data.  Like the
+    ASCII encoding, GetData implements it internally, so it's always
+    available.  The other two schemes (zzip and zzslim) are based around
+    the ZZip library, an access library for PKWARE ZIP files.  These are
+    unusual in that they store all raw data in the same ZIP archive.
 
-  * Three new encoding schemes are available.  The first is the Sample-Index
-    Encoding (SIE), similar to run-length encoding, useful for compressing data
-    which changes very rarely varying data.  Like the ASCII encoding, GetData
-    implements it internally, so it's always available.  The other two schemes
-    (zzip and zzslim) are based around the ZZip library, an access library for
-    PKWARE ZIP files.  These are unusual in that they store all raw data in the
-    same ZIP archive.
+  * The /ENCODING directive takes an optional second token.  The zzip and
+    zzslim encoding schemes optionally use this token to specify the name
+    of the combined ZIP archive.
 
-  * The /ENCODING directive takes an optional second token.  The zzip and zzslim
-    encoding schemes optionally use this token to specify the name of the
-    combined ZIP archive.
-
-  * The data type names FLOAT (an alias for FLOAT32) and DOUBLE (an alias for
-    FLOAT64) have been deprecated.
+  * The data type names FLOAT (an alias for FLOAT32) and DOUBLE (an alias
+    for FLOAT64) have been deprecated.
 
   Library Changes:
 
-  * On POSIX systems, GetData now caches the dirfile directory (and any other
-    necessary subdirectories).  This guards against third-parties renaming the
-    directory while GetData is interested in it.
+  * On POSIX systems, GetData now caches the dirfile directory (and any
+    other necessary subdirectories).  This guards against third-parties
+    renaming the directory while GetData is interested in it.
 
-  * GetData is, in general, more careful about pathname management.  At least
-    on POSIX systems, it will now try to canonicalise all paths it comes across,
-    including resolving symlinks.  As a result, GetData no longer becomes
-    befuddled by a caller who opens a Dirfile with a relative pathname and then
-    calls chdir(2).  Functions like gd_fragmentname() and gd_raw_filename() now
-    return canonicalised paths.
+  * GetData is, in general, more careful about pathname management.  At
+    least on POSIX systems, it will now try to canonicalise all paths it
+    comes across, including resolving symlinks.  As a result, GetData no
+    longer becomes befuddled by a caller who opens a Dirfile with a
+    relative pathname and then calls chdir(2).  Functions like
+    gd_fragmentname() and gd_raw_filename() now return canonicalised paths.
 
   * The library no longer forces a sync of all raw data on close.  The sync
-    causes a flush of filesystem buffers, which is usually unnecessary overhead,
-    and degredatious to efficient disk I/O.  Use an explicit gd_sync() or
-    gd_flush() before closing to recover the old behaviour, if desired.
+    causes a flush of filesystem buffers, which is usually unnecessary
+    overhead, and degredatious to efficient disk I/O.  Use an explicit
+    gd_sync() or gd_flush() before closing to recover the old behaviour, if
+    desired.
 
   * The error messages output by GetData with GD_VERBOSE turned on now has
-    "libgetdata: " prefixed to it.  A further prefix may be specified by the
-    caller.
+    "libgetdata: " prefixed to it.  A further prefix may be specified by
+    the caller.
 
-  * When truncating a dirfile, the primary format file is no longer deleted and
-    then recreated.  Instead, it is simply truncated in-place.  This change
-    means that a Dirfile which is undergoing truncation always appears (to
-    GetData, at least) to be a valid Dirfile, which can be useful if it is being
-    concurrently read.
+  * When truncating a dirfile, the primary format file is no longer deleted
+    and then recreated.  Instead, it is simply truncated in-place.  This
+    change means that a Dirfile which is undergoing truncation always
+    appears (to GetData, at least) to be a valid Dirfile, which can be
+    useful if it is being concurrently read.
 
-  * Write support for gzip-encoded data has been added.  Writes occur out of
-    place, which means sufficient space on the filesystem is needed for a second
-    copy of every field being written.  Writing to a gzip compressed field
-    requires uncompressing the portion of the field before the write of the
-    existing file, recompressing it to the temporary file, then writing the new
-    data to the temporary file.  A subsequent write at a later position, will
-    continue to write to the compressed file, but a subsequent write to an
-    earlier position requires coping all remaining data from the old file to the
-    temporary file, finalising it, moving it over top of the old file, and then
-    starting afresh with a new temporary file.  As a result, it's not very fast,
-    and likely should be avoided for non-sequential writes.
+  * Write support for gzip-encoded data has been added.  Writes occur out
+    of place, which means sufficient space on the filesystem is needed for
+    a second copy of every field being written.  Writing to a gzip
+    compressed field requires uncompressing the portion of the field before
+    the write of the existing file, recompressing it to the temporary file,
+    then writing the new data to the temporary file.  A subsequent write at
+    a later position, will continue to write to the compressed file, but a
+    subsequent write to an earlier position requires coping all remaining
+    data from the old file to the temporary file, finalising it, moving it
+    over top of the old file, and then starting afresh with a new temporary
+    file.  As a result, it's not very fast, and likely should be avoided
+    for non-sequential writes.
 
-  * Raw data files are now only opened for writing if writing is going to occur.
-    In particular, this means that opening a dirfile with GD_RDWR will still
-    work even if you don't have write access to it, so long as you don't try
-    writing to it.
+  * Raw data files are now only opened for writing if writing is going to
+    occur.  In particular, this means that opening a dirfile with GD_RDWR
+    will still work even if you don't have write access to it, so long as
+    you don't try writing to it.
 
-  * GetData now tracks a "current location" for all RAW files, and allows reads
-    and writes to occur at the "current location" (via the special symbol
-    GD_HERE).  For some derived fields the idea of a "current location" doesn't
-    make sense, and won't work.
+  * GetData now tracks a "current location" for all RAW files, and allows
+    reads and writes to occur at the "current location" (via the special
+    symbol GD_HERE).  For some derived fields the idea of a "current
+    location" doesn't make sense, and this won't work.
 
-  * BUG FIX: In previous versions, renaming a field with gd_rename() wouldn't
-    update or invalidate the cache of fields which depended on the old name,
-    leading to surprising results.  It will now either invalidate these fields'
-    metadata caches or else change the name in those definitions as well.
+  * BUG FIX: In previous versions, renaming a field with gd_rename()
+    wouldn't update or invalidate the cache of fields which depended on the
+    old name, leading to surprising results.  It will now either invalidate
+    these fields' metadata caches or else change the name in those
+    definitions as well.
 
   * BUG FIX: The invalid syntax "/META parent/child granchild ..." is now
-    properly rejected by the parser.  Previously it half-worked, resulting in
-    a segfault in gd_close().
+    properly rejected by the parser.  Previously it half-worked, resulting
+    in a segfault in gd_close().
 
   * BUG FIX: Several syntax errors encountered in PHASE and RECIP field
-    specifications weren't being reported by the parser, leading to corrupted
-    metadata on open.
+    specifications weren't being reported by the parser, leading to
+    corrupted metadata on open.
 
-  * BUG FIX: GetData no longer omits the input field to a RECIP when writing
-    metadata to disk.  Nor does it forget to put newlines after RECIP or DIVIDE
-    field specifications.
+  * BUG FIX: GetData no longer omits the input field to a RECIP when
+    writing metadata to disk.  Nor does it forget to put newlines after
+    RECIP or DIVIDE field specifications.
 
-  * BUG FIX: GetData no longer assumes all LINCOM input fields have the same
-    number of samples per frame.
+  * BUG FIX: GetData no longer assumes all LINCOM input fields have the
+    same number of samples per frame.
 
-  * BUG FIX: Writing an empty fragment with GD_PRETTY_PRINT turned on no longer
-    results in a floating-point exception.
+  * BUG FIX: Writing an empty fragment with GD_PRETTY_PRINT turned on no
+    longer results in a floating-point exception.
 
-  * BUG FIX: Renaming a field now properly flags the fragment which contains it
-    as dirty, which will ensure the rename is writen to disk when the metadata
-    are next flushed.
+  * BUG FIX: Renaming a field now properly flags the fragment which
+    contains it as dirty, which will ensure the rename is writen to disk
+    when the metadata are next flushed.
 
-  * BUG FIX: Whitespace within tokens is now properly escaped when metadata is
-    flushed to disk.
+  * BUG FIX: Whitespace within tokens is now properly escaped when metadata
+    is flushed to disk.
 
   * BUG FIX: The parser no longer gets tripped up by two character escape
     sequences in a row, nor by an escape sequence at the start of a token.
 
-  * BUG FIX: "/PROTECT data" directives are now being written when they should
-    be.  Previously, they were dropped completely.  Reported by Alexandra
-    Rahlin.
+  * BUG FIX: "/PROTECT data" directives are now being written when they
+    should be.  Previously, they were dropped completely.  Reported by
+    Alexandra Rahlin.
 
-  * BUG FIX: CARRAY indices provided to gd_add() in the entry.scalar_ind member
-    are no longer ignored.  Reported by S. J. Benton.
+  * BUG FIX: CARRAY indices provided to gd_add() in the entry.scalar_ind
+    member are no longer ignored.  Reported by S. J. Benton.
 
-  * BUG FIX: When adding a metafield with gd_(m)add(), GetData no longer checks
-    the protection of the fragment indexed by entry->fragment_index.  Instead it
-    ignores entry->fragment_index completely (as the documentation indicates it
-    should) and checks the protection of the fragment containing the parent
-    field.
+  * BUG FIX: When adding a metafield with gd_(m)add(), GetData no longer
+    checks the protection of the fragment indexed by entry->fragment_index.
+    Instead it ignores entry->fragment_index completely (as the
+    documentation indicates it should) and checks the protection of the
+    fragment containing the parent field.
 
   API Changes:
 
-  * Functions which add fields (gd_add(), gd_add_<type>(), &c.) can now be used
-    to add metafields by using their full "parent/name" field code.  The old,
-    explicit metafield adding routines (gd_madd(), &c.) are still available.
+  * Functions which add fields (gd_add(), gd_add_<type>(), &c.) can now be
+    used to add metafields by using their full "parent/name" field code.
+    The old, explicit metafield adding routines (gd_madd(), &c.) are still
+    available.
 
-  * As with their corresponding names in the Standards, the gd_type_t symbols
-    GD_FLOAT and GD_DOUBLE are now deprecated.  Use GD_FLOAT32 and GD_FLOAT64 as
-    appropriate.
+  * As with their corresponding names in the Standards, the gd_type_t
+    symbols GD_FLOAT and GD_DOUBLE are now deprecated.  Use GD_FLOAT32 and
+    GD_FLOAT64 as appropriate.
 
   * A new open flag, GD_TRUNCSUB, will cause GD_TRUNC to descend into
-    subdirectories of a directory it is truncating.  If not specified along with
-    GD_TRUNC, it does nothing.
+    subdirectories of a directory it is truncating.  If not specified along
+    with GD_TRUNC, it does nothing.
 
-  * New public functions gd_nentries() and gd_entry_list() provide a generic
-    interface to the field counting and list functionality.  The other functions
-    (gd_nfields(), gd_nfields_by_type(), &c. and gd_field_list(),
-    gd_field_list_by_type(), &c. are now simply special cases of these two
-    functions.
+  * New public functions gd_nentries() and gd_entry_list() provide a
+    generic interface to the field counting and list functionality.  The
+    other functions (gd_nfields(), gd_nfields_by_type(), &c. and
+    gd_field_list(), gd_field_list_by_type(), &c.) are now simply special
+    cases of these two functions.
 
-  * The "hiddenness" of a field name may be queried with gd_hidden(), set with
-    gd_hide() and cleared with gd_unhide().
+  * The "hiddenness" of a field name may be queried with gd_hidden(), set
+    with gd_hide() and cleared with gd_unhide().
 
   * /INCLUDE affixes may be queried with gd_fragment_affixes() and added,
-    modified or deleted with gd_alter_affixes().  A new fragment can be added to
-    the dirfile with affixes using gd_include_affix().
+    modified or deleted with gd_alter_affixes().  A new fragment can be
+    added to the dirfile with affixes using gd_include_affix().
 
-  * New aliases may be added with gd_add_alias() or gd_madd_alais.  The target
-    of an alias is retrned by gd_alias_target(); a list of aliases of a field,
-    or their number, is returned by gd_aliases() and gd_naliases().
+  * New aliases may be added with gd_add_alias() or gd_madd_alais.  The
+    target of an alias is retrned by gd_alias_target(); a list of aliases
+    of a field, or their number, is returned by gd_aliases() and
+    gd_naliases().
 
   * Because GetData considers aliases and canonical names to be
-    indistinguishable, passing an alias name to most functions will result in
-    the function operating on target field.  To manipulate aliases themselves,
-    the API has the new interfaces gd_move_alias() and gd_delete_alias().
+    indistinguishable, passing an alias name to most functions will result
+    in the function operating on target field.  To manipulate aliases
+    themselves, the API has the new interfaces gd_move_alias() and
+    gd_delete_alias().
 
   * In addition to the special symbol GD_HERE which may be passed to
     gd_getdata() and gd_putdata(), the "current location" of fields may be
     queried with gd_tell() and moved with gd_seek().
 
-  * The typedefs gd_bit_t and gd_spf_t have been deprecated.  They are replaced
-    with 'int' and 'unsigned int' respectively.  For backwards compatibility,
-    the typedefs (with their new types) are still declared in getdata.h, but the
-    API no longer makes use of them.
+  * The typedefs gd_bit_t and gd_spf_t have been deprecated.  They are
+    replaced with 'int' and 'unsigned int' respectively.  For backwards
+    compatibility, the typedefs (with their new types) are still declared
+    in getdata.h, but the API no longer makes use of them.
 
-  * GetData's tokeniser has been exposed to the public API via the gd_strtok()
-    function, which works similar to strtok(3), and returns successive tokens of
-    a string given it.
+  * GetData's tokeniser has been exposed to the public API via the
+    gd_strtok() function, which works similar to strtok(3), and returns
+    successive tokens of a string given it.
 
   * A new function gd_error_count() returns the number of GetData errors
-    encountered on a Dirfile since it was last called (or since the Dirfile was
-    opened).  This is useful for programs that care whether *something* failed,
-    but don't really care what it was.
+    encountered on a Dirfile since it was last called (or since the Dirfile
+    was opened).  This is useful for programs that care whether *something*
+    failed, but don't really care what it was.
 
-  * Reading MPLEX fields can result in inefficiencies due to GetData having to
-    look backwards for the first value of the part of the derived field
-    requested.  A new function, gd_mplex_lookback(), can be used to alter how
-    much lookback is done, if any.
+  * Reading MPLEX fields can result in inefficiencies due to GetData having
+    to look backwards for the first value of the part of the derived field
+    requested.  A new function, gd_mplex_lookback(), can be used to alter
+    how much lookback is done, if any.
 
-  * The "move_data" flag in gd_rename() has been replaced with a generic "flags"
-    parameter.  Two rename flags are defined: GD_REN_DATA, which recovers the
-    old behaviour of move_data, and GD_REN_UBDB which will cause references to
-    the renamed field to be renamed also in derived fields which refer to it.
-    Without GD_REN_UBDB, these definitions are left unchagned.
+  * The "move_data" flag in gd_rename() has been replaced with a generic
+    "flags" parameter.  Two rename flags are defined: GD_REN_DATA, which
+    recovers the old behaviour of move_data, and GD_REN_UBDB which will
+    cause references to the renamed field to be renamed also in derived
+    fields which refer to it.  Without GD_REN_UBDB, these definitions are
+    left unchagned.
 
-  * Flags which affect the long-term operation of GetData may be modified after
-    open using gd_flags().  Currently these flags are just GD_VERBOSE and
-    GD_PRETTY_PRTNT.
+  * Flags which affect the long-term operation of GetData may be modified
+    after open using gd_flags().  Currently these flags are just GD_VERBOSE
+    and GD_PRETTY_PRTNT.
 
-  * The gd_flush() function, which both syncs and closes RAW files, has been
-    broken up into its two parts with two new functions: gd_sync(), which just
-    syncs and gd_raw_close(), which just closes.  gd_flush() still does both.
+  * The gd_flush() function, which both syncs and closes RAW files, has
+    been broken up into its two parts with two new functions: gd_sync(),
+    which just syncs and gd_raw_close(), which just closes.  gd_flush()
+    still does both.
 
-  * Using the new gd_desync() function will cause GetData to determine whether
-    the Dirfile metadata on disk has changed since the Dirfile was opened.
+  * Using the new gd_desync() function will cause GetData to determine
+    whether the Dirfile metadata on disk has changed since the Dirfile was
+    opened.
 
-  * A prefix to the automatic error messages printed by GetData when using the
-    GD_VERBOSE flag may be specified with gd_verbose_prefix().
+  * A prefix to the automatic error messages printed by GetData when using
+    the GD_VERBOSE flag may be specified with gd_verbose_prefix().
 
-  * When requesting the exclusive creation of a new dirfile with (GD_CREAT |
-    GD_EXCL) GetData will now return the new error GD_E_EXISTS if the dirfile
-    already exists.  Previously it would return GD_E_CREAT in this situation.
+  * When requesting the exclusive creation of a new dirfile with (GD_CREAT
+    | GD_EXCL) GetData will now return the new error GD_E_EXISTS if the
+    dirfile already exists.  Previously it would return GD_E_CREAT in this
+    situation.
 
   * The error codes GD_E_BAD_ENDIANNESS, GD_E_BAD_PROTECTION, and
     GD_E_BAD_VERSION have been combined into a more generic error code:
-    GD_E_ARGUMENT.  The old symbols are retained for backwards compatibility but
-    have been marked deprecated.
+    GD_E_ARGUMENT.  The old symbols are retained for backwards
+    compatibility but have been marked deprecated.
 
-  * C89 API: Passing NULL to gd_alter_crecip() for cdividend is now treated as
-    if it were passed zero (ie. it indicates no change for cdividend).
+  * CONST and CARRAY handling has been combined somewhat.  When passed to
+    {get,put}_carray[_slice]() or gd_carray_len(), CONSTs behave like
+    length-one CARRAYs.  Similarly, {get,put}_constant() will operate on
+    the first element of a CARRAY, as if it were a CONST field.
 
-  * BUG FIX: calling gd_putdata() with num_frames and num_samples both zero no
-    longer confuses GetData: instead it simply does nothing.
+  * C89 API: Passing NULL to gd_alter_crecip() for cdividend is now treated
+    as if it were passed zero (ie. it indicates no change for cdividend).
+
+  * BUG FIX: calling gd_putdata() with num_frames and num_samples both zero
+    no longer confuses GetData: instead it simply does nothing.
 
   * BUG FIX: gd_spf() now returns GD_E_DIMENSION when passed a scalar field
     code, as the documentation says it should.  Previously it returned
@@ -248,31 +257,32 @@ New in version 0.8.0rc2:
 
   Legacy API Changes:
 
-  * The never-used n_mplex/mplexEntries part of the FormatType now has a use:
-    both MPLEX and WINDOW entries are reported there.
+  * The never-used n_mplex/mplexEntries part of the FormatType now has a
+    use: both MPLEX and WINDOW entries are reported there.
 
   Bindings Changes:
 
-  * Bindings for Perl5 have been added.  Perl is not well suited to numerical
-    analysis, and the bindings may be inefficient.
+  * Bindings for Perl5 have been added.  Perl is not well suited to
+    numerical analysis, and the bindings may be inefficient.
 
-  * F77: Due to small namespace issues, the encoding parameters (corresponding
-    to the GD_...ENCODED symbols in the C API) have all been renamed.  They
-    are now of the form GDE_xx.
+  * F77: Due to small namespace issues, the encoding parameters
+    (corresponding to the GD_...ENCODED symbols in the C API) have all been
+    renamed.  They are now of the form GDE_xx.
 
   * C++: The bindings now make use of the explicitly-64-bit offset type
-    gd_off64_t defined in getdata.h.  Previously, the bindings tried to force
-    off_t to be 64-bit through preprocessor shenanigans, which led, in certain
-    cases, to linking problems down the road when used by third parties.
+    gd_off64_t defined in getdata.h.  Previously, the bindings tried to
+    force off_t to be 64-bit through preprocessor shenanigans, which led,
+    in certain cases, to linking problems down the road when used by third
+    parties.
 
   * Python: The return_type, num_fields, and num_samples parameters to
     dirfile.getdata() are now optional.  The return_type defautls to
-    pygetdata.FLOAT, and if neither num_fields nor num_samples are given, all
-    frames (ie. the value of dirfile.nframes) are returned.
+    pygetdata.FLOAT, and if neither num_fields nor num_samples are given,
+    all frames (ie. the value of dirfile.nframes) are returned.
 
   * IDL: A number of undocumented, unnecessary function aliases have been
-    removed. They should be replaced with their canonical names, without change
-    in use:
+    removed. They should be replaced with their canonical names, without
+    change in use:
 
         Alias                   Replacement
         ----------------------  ----------------
@@ -310,11 +320,12 @@ New in version 0.8.0rc2:
         GD_NMFIELDS_BY_TYPE     GD_NENTRIES
         GD_NMVECTORS            GD_NVECTORS
 
-  * BUG FIX: All bindings now provide a named constant corresponding to the C
-    API error GD_E_UNKNOWN_ENCODING, which was overlooked in previous releases.
+  * BUG FIX: All bindings now provide a named constant corresponding to the
+    C API error GD_E_UNKNOWN_ENCODING, which was overlooked in previous
+    releases.
 
-  * IDL BUG FIX: The missing /IGNORE_REFS and /PRETTY_PRINT are now available in
-    gd_open.
+  * IDL BUG FIX: The missing /IGNORE_REFS and /PRETTY_PRINT are now
+    available in gd_open.
 
 |==============================================================================|
 

@@ -1,6 +1,6 @@
 .\" gd_put_carray_slice.3.  The gd_put_carray_slice man page.
 .\"
-.\" Copyright (C) 2010, 2011 D. V. Wiebe
+.\" Copyright (C) 2010, 2011, 2012 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,9 +13,10 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_put_carray_slice 3 "19 August 2011" "Version 0.8.0" "GETDATA"
+.TH gd_put_carray_slice 3 "4 July 2012" "Version 0.8.0" "GETDATA"
 .SH NAME
-gd_put_carray, gd_put_carray_slice \(em write CARRAY data to a dirfile database
+gd_put_carray, gd_put_carray_slice, gd_put_constant \(em write CONST or CARRAY
+data to a dirfile database
 .SH SYNOPSIS
 .B #include <getdata.h>
 .HP
@@ -26,6 +27,9 @@ gd_put_carray, gd_put_carray_slice \(em write CARRAY data to a dirfile database
 .BI "const void *" data_in );
 .HP
 .BI "int gd_put_carray(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "gd_type_t " data_type ", const void *" data_in );
+.HP
+.BI "int gd_put_constant(DIRFILE *" dirfile ", const char *" field_code ,
 .BI "gd_type_t " data_type ", const void *" data_in );
 .hy
 .ad n
@@ -47,10 +51,26 @@ given by
 .IR start ,
 and the number of elements stored is given by
 .IR len .
+
 The
 .BR gd_put_carray ()
-function behaves similarly, except the whole scalar array is written.  These
-interface cannot write to field representations.
+function behaves similarly, except the whole scalar array is written, as if
+.BR gd_put_carray_slice ()
+were called with
+.I start
+equal zero and
+.I len
+equal to the value returned by
+.BR gd_carray_len (3).
+The
+.BR gd_put_constant ()
+function is equivalent to calling
+.BR gd_put_carray_slice ()
+with
+.I start
+equal to zero and
+.I len
+equal to one.  None of these interfaces can write to field representations.
 
 The argument
 .I data_in
@@ -61,7 +81,7 @@ may be obtained by calling
 .BR gd_carray_len (3).
 Unlike
 .BR gd_putdata (3),
-writing data past the end of the field is not permitted.  To add data to the
+writing data past the end of the field is not permitted.  To add data to a
 .BR CARRAY ,
 first increase its length by calling
 .BR gd_alter_carray (3),
@@ -111,10 +131,9 @@ C99-conformant 64-bit single precision complex number
 C99-conformant 128-bit double precision complex number
 .RE
 
-The type of the input data need not be the same as the
-.B CARRAY
-storage type.  Type conversion will be performed as necessary to return the
-requested type.  The 
+The type of the input data need not be the same as the storage type of the
+field.  Type conversion will be performed as necessary to return the requested
+type.  The 
 .I dirfile
 argument must point to a valid DIRFILE object previously created by a call to
 .BR gd_open (3).
@@ -147,7 +166,9 @@ was supplied.
 .B GD_E_BAD_FIELD_TYPE
 The supplied
 .I field_code
-referred to a field of a type other than 
+was not a
+.B CONST
+nor a
 .BR CARRAY .
 The caller should use
 .BR gd_putdata (3),

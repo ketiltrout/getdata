@@ -1,6 +1,6 @@
 .\" gd_get_carray_slice.3.  The gd_get_carray_slice man page.
 .\"
-.\" Copyright (C) 2010 D. V. Wiebe
+.\" Copyright (C) 2010, 2011, 2012 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,10 +13,9 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_get_carray_slice 3 "18 August 2011" "Version 0.8.0" "GETDATA"
+.TH gd_get_carray_slice 3 "4 July 2012" "Version 0.8.0" "GETDATA"
 .SH NAME
-gd_get_carray, gd_get_carray_slice \(em retrieve CARRAY data from a dirfile
-database
+gd_get_carray, gd_get_carray_slice, gd_get_constant \(em retrieve CONST or\CARRAY data from a dirfile database
 .SH SYNOPSIS
 .B #include <getdata.h>
 .HP
@@ -28,6 +27,9 @@ database
 .HP
 .BI "int gd_get_carray(DIRFILE *" dirfile ", const char *" field_code ,
 .BI "gd_type_t " return_type ", void *" data_out );
+.HP
+.BI "int gd_get_constant(DIRFILE *" dirfile ", const char *" field_code ,
+.BI "gd_type_t " return_type ", void *" data_out );
 .hy
 .ad n
 .SH DESCRIPTION
@@ -36,6 +38,8 @@ The
 function queries a dirfile(5) database specified by
 .I dirfile
 for the
+.B CONST
+or
 .B CARRAY
 scalar array
 .IR field_code ,
@@ -48,9 +52,26 @@ The first element of the field stored is given by
 .IR start ,
 and the number of elements stored is given by
 .IR len .
+
 The
 .BR gd_get_carray ()
-function behaves similarly, except it returns the entire field.
+function behaves similarly, except it returns the entire field, as if
+.BR gd_get_carray_slice ()
+were called with
+.I start
+equal to zero and
+.I len
+equal to the value returned by
+.BR gd_carray_len (3).
+The
+.BR gd_get_constant ()
+function is equivalent to calling
+.BR gd_get_carray_slice ()
+with
+.I start
+equal to zero and
+.I len
+equal to one.
 
 The 
 .I dirfile
@@ -69,8 +90,7 @@ Unlike
 calling
 .BR gd_get_carray_slice ()
 never results in a short read; attempting to read past the end of the
-.B CARRAY
-will result in an error, and no data will be returned.
+field will result in an error, and no data will be returned.
 
 The 
 .I return_type
@@ -152,11 +172,12 @@ was supplied.
 .B GD_E_BAD_FIELD_TYPE
 The supplied
 .I field_code
-referred to a field of a type other than 
+was not a
+.BR CONST
+nor
 .BR CARRAY .
 The caller should use
-.BR gd_getdata (3),
-.BR gd_get_constant (3),
+.BR gd_getdata (3)
 or
 .BR gd_get_string (3)
 instead.
