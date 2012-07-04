@@ -162,7 +162,7 @@ used as a field name).
 
 Standards Version 5 and earlier do not recognise the character escape sequences,
 nor allow quoting of tokens. As a result, they prohibit both whitespace and the
-comment delimileter from being used in tokens. 
+comment delimiter from being used in tokens. 
 
 .SH DIRECTIVES
 
@@ -205,7 +205,7 @@ directive, but are in most other ways indistinguishable from the target's
 original, canonical name.  Aliases may be chained (that is, the target name
 appearing in an /ALIAS directive may itself be an alias).  In this case, the new
 alias is another name for the target's own target.  Just as there is no
-requriement that the input fields of a derived field exist,
+requirement that the input fields of a derived field exist,
 it is not an error for the target of an alias to not exist.  Syntax is:
 .IP
 .RS
@@ -612,7 +612,7 @@ since they derive their value from one or more input fields.
 Five of these derived fields
 .RB ( DIVIDE ", " LINCOM ", " MPLEX ", " MULTIPLY ", and " WINDOW )
 may have more than one input field.  In situations where these input fields
-have differeing sample rates, the sample rate of the derived field is the same
+have differing sample rates, the sample rate of the derived field is the same
 as the sample rate of the first (left-most) input field specified.  Furthermore,
 the input fields are synchronised by aligning them on frame boundaries, assuming
 equally-spaced sampling throughout a frame, and using the last sample of each
@@ -1187,7 +1187,7 @@ when converted to a 64-bit unsigned integer,
 .PP
 The storage type of
 .I threshold
-depends on the operatior, and follows the interpretation of
+depends on the operator, and follows the interpretation of
 .IR check .
 It may never be complex valued.
 .PP
