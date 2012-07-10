@@ -1,3 +1,9 @@
+2012-07-10   D. V. Wiebe <getdata@ketiltrout.net> svn:740
+	* src/common.c (_GD_CanonicalPath): Fix pointer arithmetic
+
+	* src/compat.c (gd_strtod): Drop octal (not in POSIX); handle hex floating
+	point; don't zero errno.
+
 2012-07-04   D. V. Wiebe <getdata@ketiltrout.net> svn:737
 	GetData-0.8.0 released.
 

@@ -146,7 +146,7 @@ ENTRY_TESTS=entry_bad_code entry_bit entry_bit_scalar entry_divide \
 						entry_mplex entry_mplex_scalar entry_multiply entry_phase \
 						entry_phase_scalar entry_polynom entry_polynom_scalar entry_raw \
 						entry_raw_scalar entry_raw_scalar_code entry_raw_scalar_type \
-						entry_recip entry_scalar_repr entry_type entry_type_alias \
+						entry_scalar_repr entry_recip entry_type entry_type_alias \
 						entry_window entry_window_scalar
 
 EOF_TESTS=eof eof_index eof_lincom eof_phase
@@ -250,11 +250,12 @@ PARSE_TESTS=parse_alias parse_alias_code parse_alias_dup parse_alias_meta \
 						parse_alias_missing parse_badline parse_bit parse_bit4 \
 						parse_bit_bitnum parse_bit_bitsize parse_bit_ncols \
 						parse_bit_numbits parse_bit_scalar parse_carray parse_carray_long \
-						parse_const parse_const_ncols parse_divide parse_duplicate \
-						parse_duplicate_ignore parse_endian_bad parse_endian_big \
-						parse_endian_force parse_endian_little parse_endian_slash \
-						parse_eol parse_foffs parse_foffs_include parse_foffs_slash \
-						parse_hidden parse_hidden_field parse_hidden_meta parse_include \
+						parse_const parse_const_complex parse_const_ncols parse_divide \
+						parse_double parse_duplicate parse_duplicate_ignore \
+						parse_endian_bad parse_endian_big parse_endian_force \
+						parse_endian_little parse_endian_slash parse_eol parse_foffs \
+						parse_foffs_include parse_foffs_slash parse_hidden \
+						parse_hidden_field parse_hidden_meta parse_include \
 						parse_include_absolute parse_include_absrel parse_include_loop \
 						parse_include_nonexistent parse_include_prefix \
 						parse_include_prefix_dup parse_include_preprefix \

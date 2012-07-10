@@ -1191,7 +1191,7 @@ char *_GD_CanonicalPath(const char *car, const char *cdr)
             for (rptr = res + res_len - 1; *rptr != GD_DIRSEP; --rptr)
               ;
             *(rptr + 1) = '\0';
-            res_len = res - rptr + 1;
+            res_len = (rptr - res) + 1;
           }
 
           /* now make a new work buffer of "target/remaining", asusming

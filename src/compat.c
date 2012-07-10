@@ -328,17 +328,13 @@ int _GD_ReadDir(DIR *dirp, struct dirent *entry, struct dirent **result)
 double gd_strtod(const char *nptr, char **endptr)
 {
   const char *ptr = nptr;
-  double r;
-  long int li;
+  double r = 0;
   int sign = 0;
 
   dtrace("\"%s\", %p", nptr, endptr);
 
   /* the basic problem here is that MSVCRT's strtod() doesn't properly covert
-   * octal or hexadecimal numbers, nor does it do the special values "INF" and
-   * "NAN.   So, we have to check for those first.  For the first two, we then
-   * run it through strtol instead (which does do octal and hex fine in the
-   * MSVCRT) and then cast back to double.  For the other two we're on our own.
+   * hexadecimal numbers, nor does it do the special values "INF" and "NAN".
    */
 
   /* skip sign */
@@ -348,23 +344,47 @@ double gd_strtod(const char *nptr, char **endptr)
     ptr++;
   }
 
-  /* check for octal "0[0-7]..." or hex ("0[Xx][0-9A-Fa-f]...") */
-  if (*ptr == '0') {
-    switch (*(ptr + 1)) {
-      case '0':
-      case '1':
-      case '2':
-      case '3':
-      case '4':
-      case '5':
-      case '6':
-      case '7':
-      case 'x':
-      case 'X':
-        li = strtol(nptr, endptr, 0);
-        dreturn("%li", li);
-        return (double)li;
+  /* check for hex, either integer or floating point */
+  if (*ptr == '0' && (*(ptr + 1) | 0x20) == 'x') {
+    double fact = 1.;
+    /* we store the mantissa in r */
+    for (ptr += 2; *ptr; ++ptr) {
+      if ((*ptr >= '0' && *ptr <= '9') ||
+          ((*ptr | 0x20) >= 'a' && (*ptr | 0x20) <= 'f'))
+      {
+        if (fact == 1.)
+          r *= 16;
+        else if (fact == 0.)
+          fact = 1./16;
+        else
+          fact /= 16;
+
+        if (*ptr >= '0' && *ptr <= '9')
+          r += fact * (*ptr - '0');
+        else
+          r += fact * ((*ptr | 0x20) - 'a' + 10);
+      } else if (*ptr == '.' && fact == 1.)
+        fact = 0.;
+      else if ((*ptr | 0x20) == 'p') {
+        /* use strtol to get exponent, which is in decimal */
+        long exp = strtol(ptr + 1, endptr, 10);
+        r *= pow(2., exp);
+
+        /* to avoid setting it again */
+        endptr = NULL;
+        break;
+      } else
+        break;
     }
+
+    if (endptr)
+      *endptr = (char*)ptr;
+
+    if (sign)
+      r = -r;
+
+    dreturn("%g (%c)", r, endptr ? **endptr : '-');
+    return r;
   } else if ((*ptr | 0x20) == 'n') {
     if (((*(ptr + 1) | 0x20) == 'a') && ((*(ptr + 2) | 0x20) == 'n')) {
       /* an IEEE-754 double-precision quiet NaN:
@@ -384,12 +404,12 @@ double gd_strtod(const char *nptr, char **endptr)
       } nan_punning = {{ 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF }};
 
       if (endptr) {
-        *endptr = ptr += 3;
+        *endptr = (char*)(ptr += 3);
         /* a NaN may end with something in parentheses */
         if (*ptr == '(') {
           while (*++ptr) {
             if (*ptr == ')') {
-              *endptr = ptr + 1;
+              *endptr = (char*)(ptr + 1);
               break;
             }
           }
@@ -398,7 +418,6 @@ double gd_strtod(const char *nptr, char **endptr)
 
       /* return NaN */
       dreturn("%g (%c)", nan_punning.d, endptr ? **endptr : '-');
-      errno = 0;
       return nan_punning.d;
     }
   } else if ((*ptr | 0x20) == 'i') {
@@ -424,7 +443,7 @@ double gd_strtod(const char *nptr, char **endptr)
       }};
 
       if (endptr) {
-        *endptr = ptr += 3;
+        *endptr = (char*)(ptr += 3);
         /* INF may also be INFINITY, disregarding case */
         if (
             ((*ptr | 0x20) == 'i') &&
@@ -439,7 +458,6 @@ double gd_strtod(const char *nptr, char **endptr)
 
       /* return signed infinity */
       dreturn("%g (%c)", inf_punning.d, endptr ? **endptr : '-');
-      errno = 0;
       return inf_punning.d;
     }
   }
