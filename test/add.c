@@ -39,9 +39,9 @@ int main(void)
   gd_entry_t E, e;
 
   rmdirfile();
+  memset(&E, 0, sizeof(E));
   E.field = "data";
   E.field_type = GD_RAW_ENTRY;
-  E.fragment_index = 0;
   E.EN(raw,spf) = 2;
   E.EN(raw,data_type) = GD_UINT8;
   E.scalar[0] = NULL;

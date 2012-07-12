@@ -149,7 +149,7 @@ int _GD_Include(DIRFILE *D, const char *ename, const char *format_file,
     return -1;
   }
   sname = _GD_Strdup(D, dirname(temp_buf2));
-  if (base == NULL) {
+  if (sname == NULL) {
     free(temp_buf2);
     free(base);
     free(prefix);
@@ -167,6 +167,7 @@ int _GD_Include(DIRFILE *D, const char *ename, const char *format_file,
   if (D->error) {
     free(prefix);
     free(suffix);
+    free(sname);
     D->recurse_level--;
     dreturn("%i", -1);
     return -1;
@@ -177,6 +178,7 @@ int _GD_Include(DIRFILE *D, const char *ename, const char *format_file,
     _GD_ReleaseDir(D, dirfd);
     free(prefix);
     free(suffix);
+    free(sname);
     D->recurse_level--;
     dreturn("%i", -1);
     return -1;
@@ -194,6 +196,7 @@ int _GD_Include(DIRFILE *D, const char *ename, const char *format_file,
     free(prefix);
     free(suffix);
     free(base);
+    free(sname);
     free(temp_buf1);
     D->recurse_level--;
     dreturn("%i", -1);
@@ -208,6 +211,7 @@ int _GD_Include(DIRFILE *D, const char *ename, const char *format_file,
     free(prefix);
     free(suffix);
     free(base);
+    free(sname);
     free(temp_buf1);
     D->recurse_level--;
     dreturn("%i", -1);
@@ -227,6 +231,7 @@ int _GD_Include(DIRFILE *D, const char *ename, const char *format_file,
     free(prefix);
     free(suffix);
     free(base);
+    free(sname);
     free(temp_buf1);
     D->recurse_level--;
     dreturn("%i", -1);

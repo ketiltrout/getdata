@@ -2458,7 +2458,7 @@ void F77_FUNC(gdallc, GDALLC) (const int32_t *dirfile, const char *field_code,
     const double *b2, const char *in_field3, const int32_t *in_field3_l,
     const double *m3, const double *b3)
 {
-  char *fc = (char *)malloc(*field_code_l + 1);
+  char *fc = NULL;
   char *in_fields[3] = {NULL, NULL, NULL};
   double m[3] = {0, 0, 0};
   double b[3] = {0, 0, 0};

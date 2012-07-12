@@ -34,6 +34,7 @@ int main(void)
   rmdirfile();
   mkdir(filedir, 0777);
 
+  memset(&E, 0, sizeof(E));
   E.field = "data";
   E.field_type = GD_RAW_ENTRY;
   E.fragment_index = 1;

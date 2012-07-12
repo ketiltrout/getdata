@@ -378,7 +378,7 @@ valgrind.log: $(TESTS)
 	rm -f $@; \
 		for x in $^; do ( \
 		echo $$x:; \
-		sed -e 's/exec "/exec valgrind --leak-check=full --track-origins=yes --track-fds=yes "/' $$x | sh; \
+		sed -e 's/exec "/exec valgrind --leak-check=full --track-origins=yes --track-fds=yes --suppressions=valgrind.suppressions "/' $$x | sh; \
 		echo $$x = $$? ); done &> $@;
 
 # clean up after the tests

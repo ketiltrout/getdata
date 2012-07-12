@@ -114,11 +114,14 @@ static char **_GD_CheckAffixes(DIRFILE *D, int i, const char *prefix,
       char *subsuffix = _GD_MungeCode(D, NULL, NULL, D->fragment[i].suffix,
           NULL, suffix, D->fragment[j].suffix, &dummy);
       if (D->error) {
+        free(subprefix);
         dreturn("%p (%i)", new_codes, *n);
         return new_codes;
       }
 
       new_codes = _GD_CheckAffixes(D, j, subprefix, subsuffix, new_codes, n);
+      free(subprefix);
+      free(subsuffix);
       nn = *n;
 
       if (D->error) {
@@ -396,6 +399,7 @@ int gd_desync(DIRFILE *D, unsigned int flags)
       return -1;
     }
     _GD_Open(D, dirfd, name, flags, sehandler, extra);
+    free(name);
 
     if (D->error)
       changed = -1;

@@ -1,3 +1,20 @@
+2012-07-12   D. V. Wiebe <getdata@ketiltrout.net> svn:743
+	* bindings/f77/fgetdata.c (GDALLC): Delete unnecessary malloc.
+	* src/fragment.c (_GD_CheckAffixes): Free subaffixes on error.
+	* src/fragment.c (gd_desync): Free old name after reopen.
+	* src/include.c (_GD_Include): Free sname on error.
+	* src/add.c (_GD_Add): Free temp_buffer on error.
+	* src/close.c (_GD_FreeD): Free tok_base and error_prefix.
+	* src/move.c (_GD_Move): Free new_code on error.
+	* src/parse.c (gd_strtok): Cache the string per documentation.
+
+	* test/valgrind.suppressions: Added.
+	* bindings/cxx/test/big_test.cpp test/add_affix.c test/add_meta_alias.c
+	test/add_scalar_carray.c test/name_updb_alias.c test/name_updb_const.c
+	test/name_updb_const_alias.c test/name_alias.c test/name_updb.c
+	test/madd_affix.c test/add_meta.c test/add_scalar.c test/name.c test/add.c
+	test/parse_mplex_nomax.c: Deal with memory.
+
 2012-07-10   D. V. Wiebe <getdata@ketiltrout.net> svn:740
 	* src/common.c (_GD_CanonicalPath): Fix pointer arithmetic
 

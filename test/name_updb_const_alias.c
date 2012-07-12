@@ -64,6 +64,7 @@ int main(void)
   gd_entry(D, "b", &E);
   e4 = gd_error(D);
   s3 = strdup(gd_alias_target(D, "b"));
+  gd_free_entry_strings(&E);
 
   gd_discard(D);
 
@@ -77,6 +78,10 @@ int main(void)
   CHECKS(s1, "d");
   CHECKS(s2, "d");
   CHECKS(s3, "d");
+
+  free(s1);
+  free(s2);
+  free(s3);
 
   return r;
 }

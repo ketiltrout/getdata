@@ -39,6 +39,7 @@ int main(void)
   gd_entry_t E, e;
 
   rmdirfile();
+  memset(&E, 0, sizeof(E));
   E.field = "data";
   E.field_type = GD_CONST_ENTRY;
   E.fragment_index = 0;

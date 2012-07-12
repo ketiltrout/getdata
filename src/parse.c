@@ -2404,20 +2404,26 @@ char *gd_strtok(DIRFILE *D, const char *string) gd_nothrow
 
   _GD_ClearError(D);
 
-  if (string)
-    D->tok_pos = string;
-  else if (D->tok_pos == NULL) {
+  if (string) {
+    free(D->tok_base);
+    D->tok_pos = D->tok_base = _GD_Strdup(D, string);
+    if (D->error) {
+      dreturn("%p", NULL);
+      return NULL;
+    }
+  } else if (D->tok_pos == NULL) {
     _GD_SetError(D, GD_E_ARGUMENT, GD_E_ARG_NODATA, NULL, 0, NULL);
     dreturn("%p", NULL);
     return NULL;
   }
 
   /* tokenise! */
-  n_cols = _GD_Tokenise(D, D->tok_pos, &outstring, &D->tok_pos, 1, &in_col,
-      "gd_strtok()", 0, D->standards, D->flags & GD_PERMISSIVE);
+  n_cols = _GD_Tokenise(D, D->tok_pos, &outstring, (const char **)&D->tok_pos,
+      1, &in_col, "gd_strtok()", 0, D->standards, D->flags & GD_PERMISSIVE);
 
   if (D->error || n_cols < 1) {
-    D->tok_pos = NULL;
+    free(D->tok_base);
+    D->tok_pos = D->tok_base = NULL;
     free(outstring);
     outstring = NULL;
   }

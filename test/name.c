@@ -119,10 +119,15 @@ int main(void)
   CHECKS(s2, "data");
   CHECKS(s3, "data");
 
+  free(s1);
+  free(s2);
+  free(s3);
   free(field_list[0]);
   free(field_list[1]);
   free(field_list[2]);
   free(field_list[3]);
+  free(field_list[4]);
+  free(field_list[5]);
 
   return r;
 }

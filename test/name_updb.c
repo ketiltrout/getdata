@@ -63,6 +63,7 @@ int main(void)
   gd_entry(D, "bata", &E);
   e4 = gd_error(D);
   s3 = strdup(gd_alias_target(D, "bata"));
+  gd_free_entry_strings(&E);
 
   gd_discard(D);
 
@@ -76,6 +77,10 @@ int main(void)
   CHECKS(s1, "zata");
   CHECKS(s2, "zata");
   CHECKS(s3, "zata");
+
+  free(s1);
+  free(s2);
+  free(s3);
 
   return r;
 }

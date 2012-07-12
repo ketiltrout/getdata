@@ -354,6 +354,7 @@ int _GD_Move(DIRFILE *D, gd_entry_t *E, int new_fragment, int move_data)
     if (_GD_FindField(D, new_code, D->entry, D->n_entries, 1, NULL)) {
       _GD_SetError(D, GD_E_DUPLICATE, 0, NULL, 0, new_code);
       free(new_filebase);
+      free(new_code);
       dreturn("%i", -1);
       return -1;
     }

@@ -171,6 +171,7 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
   if (_GD_InvalidEntype(entry->field_type)) {
     _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_ENTRY_TYPE, NULL, entry->field_type,
         NULL);
+    free(temp_buffer);
     dreturn("%p", NULL);
     return NULL;
   }
@@ -192,6 +193,7 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
     _GD_SetError(D, GD_E_PROTECTED, GD_E_PROTECTED_FORMAT, NULL, 0,
         D->fragment[E->fragment_index].cname);
     free(E);
+    free(temp_buffer);
     dreturn("%p", NULL);
     return NULL;
   }
@@ -200,6 +202,7 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
       sizeof(struct _gd_private_entry));
   if (E->e == NULL) {
     free(E);
+    free(temp_buffer);
     dreturn("%p", NULL);
     return NULL;
   }

@@ -171,6 +171,7 @@ int main(void)
   complex<double> cq[6];
   const char **list;
   const char* str;
+  char* tok;
   char buf[GD_MAX_LINE_LENGTH];
   Dirfile *d;
   Entry *ent;
@@ -1652,13 +1653,15 @@ int main(void)
   delete ent;
 
   // 232: gd_tokenise
-  str = d->StrTok("\"test1 test2\" test3\\ test4");
+  tok = d->StrTok("\"test1 test2\" test3\\ test4");
   CHECK_OK2(232, 1);
-  CHECK_STRING2(232, 2, str, "test1 test2");
+  CHECK_STRING2(232, 2, tok, "test1 test2");
+  free(tok);
 
-  str = d->StrTok();
+  tok = d->StrTok();
   CHECK_OK2(232, 3);
-  CHECK_STRING2(232, 4, str, "test3 test4");
+  CHECK_STRING2(232, 4, tok, "test3 test4");
+  free(tok);
 
   // 233: gd_raw_close check
   d->RawClose("data");

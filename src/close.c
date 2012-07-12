@@ -44,7 +44,9 @@ static void _GD_FreeD(DIRFILE *D, int keep_dirfile)
   }
 
   free(D->entry);
+  free(D->tok_base);
   free(D->dot_list);
+  free(D->error_prefix);
   free(D->error_string);
   free(D->error_file);
   for (j = 0; j < GD_N_ENTRY_LISTS; ++j)

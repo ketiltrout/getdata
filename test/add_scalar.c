@@ -28,6 +28,7 @@ int main(void)
   DIRFILE *D;
 
   gd_entry_t E, e;
+  memset(&E, 0, sizeof(E));
   E.field = "data";
   E.field_type = GD_LINCOM_ENTRY;
   E.fragment_index = 0;

@@ -962,6 +962,7 @@ struct _GD_DIRFILE {
   int lookback;
 
   /* for the public tokeniser */
+  char *tok_base;
   const char *tok_pos;
 
   /* field counts */

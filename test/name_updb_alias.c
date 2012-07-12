@@ -82,10 +82,12 @@ int main(void)
   gd_entry(D, "aata", &E);
   e5 = gd_error(D);
   s5 = strdup(gd_alias_target(D, "aata"));
+  gd_free_entry_strings(&E);
 
   gd_entry(D, "bata", &E);
   e6 = gd_error(D);
   s6 = strdup(gd_alias_target(D, "bata"));
+  gd_free_entry_strings(&E);
 
   gd_discard(D);
 
@@ -105,6 +107,13 @@ int main(void)
   CHECKS(s4, "zata");
   CHECKS(s5, "cata");
   CHECKS(s6, "zata");
+
+  free(s1);
+  free(s2);
+  free(s3);
+  free(s4);
+  free(s5);
+  free(s6);
 
   return r;
 }

@@ -40,6 +40,7 @@ int main(void)
   e1 = gd_error(D);
   e2 = gd_entry(D, "data", &E);
   gd_close(D);
+  gd_free_entry_strings(&E);
 
   unlink(format);
   rmdir(filedir);
