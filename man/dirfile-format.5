@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH dirfile\-format 5 "1 April 2012" "Standards Version 9" "DATA FORMATS"
+.TH dirfile\-format 5 "12 July 2012" "Standards Version 9" "DATA FORMATS"
 .SH NAME
 dirfile\-format \(em the dirfile database format specification file
 .SH DESCRIPTION
@@ -1270,16 +1270,6 @@ For example, a
 field whose field code consists solely of digits can never be used as a
 parameter in a field specification line.
 
-Starting in Standards Version 9, in additional to decimal notation, literal
-integer parameters may be specified as hexadecimal numbers, by prefixing the
-number with
-.B 0x
-or
-.BR 0X ,
-or as octal numbers, by prefixing the number with
-.BR 0 .
-Both uppercase and lowercase hexadecimal digits may be used.
-
 Starting in Standards Version 7, literal complex number is specified as two
 real (floating point) numbers separated by a semicolon
 .RB ( ; )
@@ -1311,6 +1301,50 @@ specification:
 1 0
 .I im
 0;1 0
+.PP
+Starting in Standards Version 9, in additional to decimal notation, literal
+integer parameters may be specified as hexadecimal numbers, by prefixing the
+number (after an optional
+.RB ' + '
+or
+.RB ' - '
+sign) with
+.B 0x
+or
+.BR 0X ,
+or as octal numbers, by prefixing the number with
+.BR 0 ,
+as described in
+.BR strtol (3).
+Similarly, floating point literal numbers (both purely real ones and
+components of complex literals) may be specified in hexadecimal by prefixing
+them with
+.B 0x
+or
+.BR 0X ,
+and using
+.B p
+or
+.B P
+as the binary exponent prefix, as described in the C99 standard.  Both uppercase
+and lowercase hexadecimal digits may be used.  In cases where a literal
+floating point number may apear, the tokens
+.B INF
+or
+.BR INFINITY ,
+optionally preceded by a
+.RB ' + '
+or
+.RB ' - '
+sign, and
+.BR NAN ,
+optionally immediately followed by
+.RB ' ( ',
+then a sequence of characters, then
+.RB ' ) ',
+and all disregarding case, will be interpreted as the special floating point
+values explained in
+.BR strtod (3).
 
 .SS Field Codes
 When specifying the input to a field, either as a scalar parameter, or as an
@@ -1345,7 +1379,9 @@ This representation indicates the angle (in radians) between the positive real
 axis and the value (ie. the complex argument).  The argument is in the range
 [-pi, pi], and a branch cut exists along the negative real axis.  At the branch
 cut, -pi is returned if the imaginary part is -0, and pi is returned if the
-imaginary part is +0.  If z=0, zero is returned.
+imaginary part is +0.  If
+.IR z =0,
+zero is returned.
 .TP
 .B .i
 This representation indicates the projection of the value onto the imaginary
