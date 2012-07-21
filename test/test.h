@@ -26,11 +26,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-/* for MSVCRT _getcwd */
-#ifdef HAVE_DIRECT_H
-#include <direct.h>
-#endif
-
 #ifdef HAVE_FLOAT_H
 #include <float.h>
 #endif
@@ -59,7 +54,7 @@ int gd_system(const char* command)
 #endif
 
 /* rm for MSVC */
-#ifdef _MSC_VER
+#ifdef _WIN32
 #define rmdirfile() system("rmdir /q/s dirfile");
 #else
 #define rmdirfile() chmod("dirfile", 0755); system("rm -rf dirfile");
