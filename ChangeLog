@@ -1,3 +1,33 @@
+2012-07-26   D. V. Wiebe <getdata@ketiltrout.net> svn:749
+	* src/parse.c (_GD_SetScalar _GD_ParseLincom _GD_ParseLinterp
+	_GD_ParseMultiply _GD_ParseRecip _GD_ParseWindow _GD_ParseMplex
+	_GD_ParseDivide _GD_ParseBit _GD_ParsePhase _GD_ParsePolynom
+	_GD_ParseAlias): Store munged input fields.
+	* src/entry.c (_GD_GetScalar) src/common.c (_GD_BadInput) src/parse.c
+	(_GD_ResolveAlias): Don't (re-)munge field codes.
+
+	* src/name.c (_GD_MungeCode): Take an additional parameter, err_ok,
+	indicating whether missing affixes indicate an internal error or not.
+
+	* src/mod.c (_GD_AlterInField) src/name.c (_GD_CheckCodeAffixes): Added.
+	* src/mod.c (_GD_AlterScalar) src/add.c (_GD_FixName _GD_Add _GD_AddAlias):
+	Call _GD_CheckCodeAffixes.
+	* src/mod.c (_GD_Change): Call _GD_AlterInField to modify in_fields.
+
+	* src/flush.c (_GD_WriteFieldCode): Added.
+	* src/flush.c (_GD_PadField _GD_WriteConst _GD_FieldSpec): Call
+	_GD_WriteFieldCode.
+
+	* test/get_affix.c test/add_alias_affix.c test/add_alias_affix.c
+	test/add_spec_affix.c test/madd_alias_affix.c test/alter_lincom_affix.c
+	test/add_lincom_affix.c test/alter_scalar_affix.c: Added.
+
+	* test/add_string_affix.c test/madd_affix.c test/add_affix.c: Update for new
+	affix semantics.
+
+	* src/mod.c (gd_alter_entry) src/add.c (gd_madd_alias): Clear error when
+	starting.
+
 2012-07-12   D. V. Wiebe <getdata@ketiltrout.net> svn:743
 	* bindings/f77/fgetdata.c (GDALLC): Delete unnecessary malloc.
 	* src/fragment.c (_GD_CheckAffixes): Free subaffixes on error.

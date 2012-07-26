@@ -1,4 +1,4 @@
-/* Copyright (C) 2011 D. V. Wiebe
+/* Copyright (C) 2011-2012 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -26,21 +26,13 @@ int main(void)
   const char *format = "dirfile/format";
   const char *format1 = "dirfile/format1";
   const char *data = "dirfile/data";
-  const char *format_data = "/INCLUDE format1 A Z\n";
-  int fd, e1, e2, r = 0;
+  const char *format_data = "AconstZ CONST UINT8 3\n/INCLUDE format1 A Z\n";
+  int n, fd, e1, e2, e3, e4, e5, r = 0;
   DIRFILE *D;
   gd_entry_t E, e;
 
   rmdirfile();
   mkdir(filedir, 0777);
-
-  memset(&E, 0, sizeof(E));
-  E.field = "data";
-  E.field_type = GD_RAW_ENTRY;
-  E.fragment_index = 1;
-  E.EN(raw,spf) = 2;
-  E.EN(raw,data_type) = GD_UINT8;
-  E.scalar[0] = NULL;
 
   fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
   write(fd, format_data, strlen(format_data));
@@ -48,14 +40,48 @@ int main(void)
 
   close(open(format1, O_CREAT | O_EXCL | O_WRONLY, 0666));
 
-  D = gd_open(filedir, GD_RDWR | GD_UNENCODED | GD_VERBOSE);
+  D = gd_open(filedir, GD_RDWR | GD_UNENCODED);
+
+  memset(&E, 0, sizeof(E));
+  E.field = "Adata1Z";
+  E.field_type = GD_RAW_ENTRY;
+  E.fragment_index = 1;
+  E.EN(raw,spf) = 2;
+  E.EN(raw,data_type) = GD_UINT8;
+  E.scalar[0] = NULL;
+
   gd_add(D, &E);
   e1 = gd_error(D);
 
-  /* check */
-  gd_entry(D, "AdataZ", &e);
+  memset(&E, 0, sizeof(E));
+  E.field = "Adata2Z";
+  E.field_type = GD_RAW_ENTRY;
+  E.fragment_index = 1;
+  E.EN(raw,spf) = 2;
+  E.EN(raw,data_type) = GD_UINT8;
+  E.scalar[0] = "const";
+
+  gd_add(D, &E);
   e2 = gd_error(D);
-  gd_close(D);
+
+  memset(&E, 0, sizeof(E));
+  E.field = "Adata3Z";
+  E.field_type = GD_RAW_ENTRY;
+  E.fragment_index = 1;
+  E.EN(raw,spf) = 2;
+  E.EN(raw,data_type) = GD_UINT8;
+  E.scalar[0] = "AconstZ";
+
+  gd_add(D, &E);
+  e3 = gd_error(D);
+
+  /* check */
+  gd_entry(D, "Adata1Z", &e);
+  e4 = gd_error(D);
+  n = gd_spf(D, "Adata3Z");
+  e5 = gd_error(D);
+
+  gd_discard(D);
 
   unlink(data);
   unlink(format);
@@ -63,15 +89,17 @@ int main(void)
   rmdir(filedir);
 
   CHECKI(e1, GD_E_OK);
-  CHECKI(e2, GD_E_OK);
-  if (e2 == 0) {
-    CHECKI(e.field_type, GD_RAW_ENTRY);
-    CHECKI(e.fragment_index, 1);
-    CHECKI(e.EN(raw,spf), 2);
-    CHECKI(e.EN(raw,data_type), GD_UINT8);
-    CHECKP(e.scalar[0]);
-    gd_free_entry_strings(&e);
-  }
+  CHECKI(e2, GD_E_BAD_CODE);
+  CHECKI(e3, GD_E_OK);
+  CHECKI(e4, GD_E_OK);
+  CHECKI(e5, GD_E_OK);
+  CHECKI(n, 3);
+  CHECKI(e.field_type, GD_RAW_ENTRY);
+  CHECKI(e.fragment_index, 1);
+  CHECKI(e.EN(raw,spf), 2);
+  CHECKI(e.EN(raw,data_type), GD_UINT8);
+  CHECKP(e.scalar[0]);
+  gd_free_entry_strings(&e);
 
   return r;
 }

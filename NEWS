@@ -1,6 +1,41 @@
+New in version 0.8.1:
+
+  Library Changes:
+
+  * BUG FIX: A segfault when negotiating symbolic links in file paths, typically
+    manifesting in gd_open calls, has been fixed.
+
+  * BUG FIX: gd_strtok now saves a copy of the string passed to it, as the
+    documentation suggests it should.  Previously it cached the pointer itself.
+
+  * BUG FIX: A number of minor memory leaks, mostly occurring when the library
+    encounters an error, have been fixed.
+
+  * WIN32 BUG FIX: On Windows, the parser can now properly handle hexadecimal
+    floating point.
+
+  API Changes:
+
+  * How the API deals with field code affixes has changed.  Input vector and
+    scalar fields are reported by gd_entry(), &c. now include their prefix and
+    suffix, if any, which should remove the need to do manual affix bookkeeping
+    when reading metadata.  The other side to this change is that when modifying
+    metdata (gd_add(), gd_alter_entry(), &c.), supplied field codes must also
+    contain the appropriate suffixes.
+
+  * BUG FIX: gd_alter_entry() and gd_madd_alias() weren't clearing the Dirfile
+    error before operation, resulting in them failing erroneously in certain
+    situations.
+
+  Bindings Changes:
+
+  * F77 BUG FIX: A memory leak has been fixed in GDALLC.
+
+|==============================================================================|
+
 New in version 0.8.0:
 
-  Dirfile Changes
+  Dirfile Changes:
 
   * Dirfile Standards Version 9 has been released.  It adds two new field
     types: MPLEX, which allows multiplexing multiple low-rate channels in

@@ -113,11 +113,13 @@ static gd_windop_t _GD_WindOp(const char *op)
 /* Returns a newly malloc'd string containing the scalar field name, or NULL on
  * numeric literal or error */
 static char *_GD_SetScalar(DIRFILE *restrict D, const char *restrict token,
-    void *restrict data, int type, const char *restrict format_file, int line,
-    int *restrict index, int *restrict comp_scal, int standards, int pedantic)
+    void *restrict data, int type, int me, const char *restrict format_file,
+    int line, int *restrict index, int *restrict comp_scal, int standards,
+    int pedantic)
 {
   char *ptr = NULL;
   char *lt;
+  int dummy;
 
   dtrace("%p, \"%s\", %p, 0x%X, \"%s\", %i, %p, %p, %i, %i", D, token, data,
       type, format_file, line, index, comp_scal, standards, pedantic);
@@ -186,7 +188,7 @@ static char *_GD_SetScalar(DIRFILE *restrict D, const char *restrict token,
 
     /* there were trailing characters in the long long int */
     if (*ptr != '\0') {
-      ptr = _GD_Strdup(D, token);
+      ptr = _GD_MungeFromFrag(D, NULL, me, token, &dummy);
       if (D->error) {
         dreturn("%p", NULL);
         return NULL;
@@ -211,7 +213,7 @@ static char *_GD_SetScalar(DIRFILE *restrict D, const char *restrict token,
 
     /* there were trailing characters in the unsigned long long int */
     if (*ptr != '\0') {
-      ptr = _GD_Strdup(D, token);
+      ptr = _GD_MungeFromFrag(D, NULL, me, token, &dummy);
       if (D->error) {
         dreturn("%p", NULL);
         return NULL;
@@ -314,7 +316,7 @@ static gd_entry_t *_GD_ParseRaw(DIRFILE *restrict D,
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_TYPE, format_file, line,
         in_cols[2]);
   else if ((E->scalar[0] = _GD_SetScalar(D, in_cols[3], &E->EN(raw,spf),
-          GD_UINT16, format_file, line, E->scalar_ind, NULL, standards,
+          GD_UINT16, me, format_file, line, E->scalar_ind, NULL, standards,
           pedantic)) == NULL)
   {
     E->e->calculated = 1;
@@ -407,13 +409,14 @@ static gd_entry_t *_GD_ParseLincom(DIRFILE *restrict D,
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_N_TOK, format_file, line, NULL);
   else
     for (i = 0; i < E->EN(lincom,n_fields); i++) {
-      E->in_fields[i] = _GD_Strdup(D, in_cols[i * 3 + 3]);
+      E->in_fields[i] = _GD_MungeFromFrag(D, NULL, me, in_cols[i * 3 + 3],
+          &offset);
       E->scalar[i] = _GD_SetScalar(D, in_cols[i * 3 + 4], &E->EN(lincom,cm)[i],
-          GD_COMPLEX128, format_file, line, E->scalar_ind + i, &E->comp_scal,
-          standards, pedantic);
+          GD_COMPLEX128, me, format_file, line, E->scalar_ind + i,
+          &E->comp_scal, standards, pedantic);
       E->EN(lincom,m)[i] = creal(E->EN(lincom,cm)[i]);
       E->scalar[i + GD_MAX_LINCOM] = _GD_SetScalar(D, in_cols[i * 3 + 5],
-          &E->EN(lincom,cb)[i], GD_COMPLEX128, format_file, line,
+          &E->EN(lincom,cb)[i], GD_COMPLEX128, me, format_file, line,
           E->scalar_ind + i + GD_MAX_LINCOM, &E->comp_scal, standards,
           pedantic);
       E->EN(lincom,b)[i] = creal(E->EN(lincom,cb)[i]);
@@ -483,7 +486,7 @@ static gd_entry_t *_GD_ParseLinterp(DIRFILE *restrict D,
     return NULL;
   }
 
-  E->in_fields[0] = _GD_Strdup(D, in_cols[2]);
+  E->in_fields[0] = _GD_MungeFromFrag(D, NULL, me, in_cols[2], &offset);
   E->e->u.linterp.table_len = -1; /* linterp file not read yet */
 
   E->EN(linterp,table) = _GD_Strdup(D, in_cols[3]);
@@ -548,8 +551,8 @@ static gd_entry_t *_GD_ParseMultiply(DIRFILE *restrict D,
     return NULL;
   }
 
-  E->in_fields[0] = _GD_Strdup(D, in_cols[2]);
-  E->in_fields[1] = _GD_Strdup(D, in_cols[3]);
+  E->in_fields[0] = _GD_MungeFromFrag(D, NULL, me, in_cols[2], &offset);
+  E->in_fields[1] = _GD_MungeFromFrag(D, NULL, me, in_cols[3], &offset);
 
   if (D->error) {
     _GD_FreeE(D, E, 1);
@@ -611,11 +614,11 @@ static gd_entry_t *_GD_ParseRecip(DIRFILE *restrict D,
     return NULL;
   }
 
-  E->in_fields[0] = _GD_Strdup(D, in_cols[2]);
+  E->in_fields[0] = _GD_MungeFromFrag(D, NULL, me, in_cols[2], &offset);
 
   E->scalar[0] = _GD_SetScalar(D, in_cols[3], &E->EN(recip,cdividend),
-      GD_COMPLEX128, format_file, line, E->scalar_ind, &E->comp_scal, standards,
-      pedantic);
+      GD_COMPLEX128, me, format_file, line, E->scalar_ind, &E->comp_scal,
+      standards, pedantic);
   E->EN(recip,dividend) = creal(E->EN(recip,cdividend));
   E->comp_scal = (cimag(E->EN(recip,cdividend)) == 0) ? 0 : 1;
 
@@ -676,8 +679,8 @@ static gd_entry_t *_GD_ParseWindow(DIRFILE *restrict D,
     return NULL;
   }
 
-  E->in_fields[0] = _GD_Strdup(D, in_cols[2]);
-  E->in_fields[1] = _GD_Strdup(D, in_cols[3]);
+  E->in_fields[0] = _GD_MungeFromFrag(D, NULL, me, in_cols[2], &offset);
+  E->in_fields[1] = _GD_MungeFromFrag(D, NULL, me, in_cols[3], &offset);
 
   E->EN(window,windop) = _GD_WindOp(in_cols[4]);
   if (E->EN(window,windop) == GD_WINDOP_UNK) {
@@ -692,18 +695,18 @@ static gd_entry_t *_GD_ParseWindow(DIRFILE *restrict D,
     case GD_WINDOP_EQ:
     case GD_WINDOP_NE:
       E->scalar[0] = _GD_SetScalar(D, in_cols[5], &E->EN(window,threshold.i),
-          GD_INT64, format_file, line, E->scalar_ind, NULL, standards,
+          GD_INT64, me, format_file, line, E->scalar_ind, NULL, standards,
           pedantic);
       break;
     case GD_WINDOP_SET:
     case GD_WINDOP_CLR:
       E->scalar[0] = _GD_SetScalar(D, in_cols[5], &E->EN(window,threshold.u),
-          GD_UINT64, format_file, line, E->scalar_ind, NULL, standards,
+          GD_UINT64, me, format_file, line, E->scalar_ind, NULL, standards,
           pedantic);
       break;
     default:
       E->scalar[0] = _GD_SetScalar(D, in_cols[5], &E->EN(window,threshold.r),
-          GD_FLOAT64, format_file, line, E->scalar_ind, NULL, standards,
+          GD_FLOAT64, me, format_file, line, E->scalar_ind, NULL, standards,
           pedantic);
       break;
   }
@@ -765,16 +768,17 @@ static gd_entry_t *_GD_ParseMplex(DIRFILE *restrict D,
     return NULL;
   }
 
-  E->in_fields[0] = _GD_Strdup(D, in_cols[2]);
-  E->in_fields[1] = _GD_Strdup(D, in_cols[3]);
+  E->in_fields[0] = _GD_MungeFromFrag(D, NULL, me, in_cols[2], &offset);
+  E->in_fields[1] = _GD_MungeFromFrag(D, NULL, me, in_cols[3], &offset);
 
   E->scalar[0] = _GD_SetScalar(D, in_cols[4], &E->EN(mplex,count_val),
-      GD_UINT16, format_file, line, E->scalar_ind, NULL, standards, pedantic);
+      GD_UINT16, me, format_file, line, E->scalar_ind, NULL, standards,
+      pedantic);
 
   /* the count max, if present */
   if (n_cols > 5) {
     E->scalar[1] = _GD_SetScalar(D, in_cols[5], &E->EN(mplex,count_max),
-        GD_UINT16, format_file, line, E->scalar_ind + 1, NULL, standards,
+        GD_UINT16, me, format_file, line, E->scalar_ind + 1, NULL, standards,
         pedantic);
     if (E->EN(mplex,count_max) < 0)
       _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_MPLEXVAL, format_file, line,
@@ -850,8 +854,8 @@ static gd_entry_t *_GD_ParseDivide(DIRFILE *restrict D,
     return NULL;
   }
 
-  E->in_fields[0] = _GD_Strdup(D, in_cols[2]);
-  E->in_fields[1] = _GD_Strdup(D, in_cols[3]);
+  E->in_fields[0] = _GD_MungeFromFrag(D, NULL, me, in_cols[2], &offset);
+  E->in_fields[1] = _GD_MungeFromFrag(D, NULL, me, in_cols[3], &offset);
 
   if (D->error) {
     _GD_FreeE(D, E, 1);
@@ -915,13 +919,13 @@ static gd_entry_t *_GD_ParseBit(DIRFILE *restrict D, int is_signed,
     return NULL;
   }
 
-  E->in_fields[0] = _GD_Strdup(D, in_cols[2]);
+  E->in_fields[0] = _GD_MungeFromFrag(D, NULL, me, in_cols[2], &offset);
   E->scalar[0] = _GD_SetScalar(D, in_cols[3], &E->EN(bit,bitnum), GD_INT_TYPE,
-      format_file, line, E->scalar_ind, NULL, standards, pedantic);
+      me, format_file, line, E->scalar_ind, NULL, standards, pedantic);
 
   if (n_cols > 4)
     E->scalar[1] = _GD_SetScalar(D, in_cols[4], &E->EN(bit,numbits),
-        GD_INT_TYPE, format_file, line, E->scalar_ind + 1, NULL, standards,
+        GD_INT_TYPE, me, format_file, line, E->scalar_ind + 1, NULL, standards,
         pedantic);
   else
     E->EN(bit,numbits) = 1;
@@ -995,10 +999,10 @@ static gd_entry_t *_GD_ParsePhase(DIRFILE *restrict D,
     return NULL;
   }
 
-  E->in_fields[0] = _GD_Strdup(D, in_cols[2]); /* field */
+  E->in_fields[0] = _GD_MungeFromFrag(D, NULL, me, in_cols[2], &offset);
 
   if ((E->scalar[0] = _GD_SetScalar(D, in_cols[3], &E->EN(phase,shift),
-          GD_INT64, format_file, line, E->scalar_ind, NULL, standards,
+          GD_INT64, me, format_file, line, E->scalar_ind, NULL, standards,
           pedantic)) == NULL)
   {
     E->e->calculated = 1;
@@ -1068,11 +1072,11 @@ static gd_entry_t *_GD_ParsePolynom(DIRFILE *restrict D,
 
   E->e->calculated = 1;
 
-  E->in_fields[0] = _GD_Strdup(D, in_cols[2]);
+  E->in_fields[0] = _GD_MungeFromFrag(D, NULL, me, in_cols[2], &offset);
 
   for (i = 0; i <= E->EN(polynom,poly_ord); i++) {
     E->scalar[i] = _GD_SetScalar(D, in_cols[i + 3], &E->EN(polynom,ca)[i],
-        GD_COMPLEX128, format_file, line, E->scalar_ind + i, &E->comp_scal,
+        GD_COMPLEX128, me, format_file, line, E->scalar_ind + i, &E->comp_scal,
         standards, pedantic);
     E->EN(polynom,a)[i] = creal(E->EN(polynom,ca)[i]);
 
@@ -1195,8 +1199,8 @@ static gd_entry_t *_GD_ParseConst(DIRFILE *restrict D,
     return NULL;
   }
 
-  ptr = _GD_SetScalar(D, in_cols[3], E->e->u.scalar.d, type, format_file, line,
-      &offset, &offset, standards, pedantic);
+  ptr = _GD_SetScalar(D, in_cols[3], E->e->u.scalar.d, type, me, format_file,
+      line, &offset, &offset, standards, pedantic);
   if (ptr) {
     free(ptr);
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_LITERAL, format_file, line,
@@ -1302,8 +1306,8 @@ static gd_entry_t *_GD_ParseCarray(DIRFILE *restrict D,
     }
 
     for (c = first; c < n_cols; ++c) {
-      ptr = _GD_SetScalar(D, in_cols[c], (char *)data + s * n++, t, format_file,
-          line, &offset, &offset, standards, pedantic);
+      ptr = _GD_SetScalar(D, in_cols[c], (char *)data + s * n++, t, me,
+          format_file, line, &offset, &offset, standards, pedantic);
       if (n == GD_MAX_CARRAY_LENGTH)
         break;
 
@@ -1916,7 +1920,7 @@ static void _GD_ParseAlias(DIRFILE *restrict D, char **restrict name,
 
   E->field_type = GD_ALIAS_ENTRY;
   E->fragment_index = me;
-  E->in_fields[0] = _GD_Strdup(D, target);
+  E->in_fields[0] = _GD_MungeFromFrag(D, NULL, me, target, &offset);
 
   E->field = _GD_MungeFromFrag(D, P, me, *name, &offset);
   if (E->field && _GD_ValidateField(E->field + offset, standards, pedantic, 0,
@@ -2189,8 +2193,6 @@ static int _GD_ParseDirective(DIRFILE *restrict D, char **in_cols, int n_cols,
 static gd_entry_t *_GD_ResolveAlias(DIRFILE *restrict D, gd_entry_t *restrict E)
 {
   gd_entry_t *T = NULL;
-  char *munged_code;
-  int dummy;
 
   dtrace("%p, %p", D, E);
 
@@ -2202,12 +2204,7 @@ static gd_entry_t *_GD_ResolveAlias(DIRFILE *restrict D, gd_entry_t *restrict E)
   }
 
   /* Find the target */
-  munged_code = _GD_MungeFromFrag(D, NULL, E->fragment_index, E->in_fields[0],
-      &dummy);
-  if (munged_code) {
-    T = _GD_FindField(D, munged_code, D->entry, D->n_entries, 0, NULL);
-    free(munged_code);
-  }
+  T = _GD_FindField(D, E->in_fields[0], D->entry, D->n_entries, 0, NULL);
 
   /* Aliases store the ulitmate target in entry[0] and the direct link
    * in entry[1].

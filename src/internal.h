@@ -1027,6 +1027,8 @@ int _GD_CalculateEntry(DIRFILE *restrict, gd_entry_t *restrict, int);
 char *_GD_CanonicalPath(const char *restrict, const char *restrict);
 gd_entry_t *_GD_CheckParent(DIRFILE *restrict D, char **restrict name, int me,
     int linenum);
+int _GD_CheckCodeAffixes(DIRFILE *D, const gd_entry_t *P,
+    const char *field_code, int fragment);
 void _GD_CInvertData(DIRFILE *restrict, void *restrict, gd_type_t return_type,
     GD_DCOMPLEXA(dividend), size_t);
 
@@ -1101,7 +1103,7 @@ int _GD_MogrifyFile(DIRFILE *restrict, gd_entry_t *restrict, unsigned long int,
     unsigned long int, off64_t, int, int, char *restrict);
 char *_GD_MungeCode(DIRFILE *restrict, const gd_entry_t *restrict,
     const char *restrict, const char *restrict, const char *restrict,
-    const char *restrict, const char *restrict, int *restrict);
+    const char *restrict, const char *restrict, int *restrict, int);
 char *_GD_MungeFromFrag(DIRFILE *restrict, const gd_entry_t *restrict, int,
     const char *restrict, int *restrict);
 gd_type_t _GD_NativeType(DIRFILE *restrict, gd_entry_t *restrict, int);

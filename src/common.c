@@ -854,28 +854,21 @@ int _GD_GetRepr(DIRFILE *restrict D, const char *restrict field_code_in,
 /* Ensure that an input field has been identified (with error checking) */
 int _GD_BadInput(DIRFILE *D, const gd_entry_t *E, int i, int err)
 {
-  char *code, *munged_code;
-  int offset;
+  char *code;
 
   dtrace("%p, %p, %i, %i", D, E, i, err);
 
   if (E->e->entry[i] == NULL) {
-    munged_code = _GD_MungeFromFrag(D, NULL, E->fragment_index, E->in_fields[i],
-        &offset);
-    if (munged_code)
-      E->e->entry[i] = _GD_FindFieldAndRepr(D, munged_code, &code,
-          &E->e->repr[i], NULL, 1, err);
+    E->e->entry[i] = _GD_FindFieldAndRepr(D, E->in_fields[i], &code,
+        &E->e->repr[i], NULL, 1, err);
 
     if (E->e->entry[i] == NULL) {
-      free(munged_code);
       dreturn("%i", 1);
       return 1;
     }
 
-    if (code != munged_code)
+    if (code != E->in_fields[i])
       free(code);
-
-    free(munged_code);
   }
 
   /* scalar entries not allowed */

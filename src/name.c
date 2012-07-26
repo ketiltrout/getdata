@@ -23,14 +23,14 @@
 /* add/remove/modify the prefix and suffix from a field code */
 char *_GD_MungeCode(DIRFILE *D, const gd_entry_t *P, const char *old_prefix,
     const char *old_suffix, const char *new_prefix, const char *new_suffix,
-    const char *code, int *offset)
+    const char *code, int *offset, int err_ok)
 {
   size_t len, oplen = 0, oslen = 0, nplen = 0, nslen = 0, plen = 0, mlen = 0;
   const char *ptr, *slash;
   char *new_code;
 
-  dtrace("%p, %p, \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", %p", D, P, old_prefix,
-      old_suffix, new_prefix, new_suffix, code, offset);
+  dtrace("%p, %p, \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", %p, %i", D, P,
+      old_prefix, old_suffix, new_prefix, new_suffix, code, offset, err_ok);
 
   if (code == NULL) {
     dreturn("%p", NULL);
@@ -44,7 +44,10 @@ char *_GD_MungeCode(DIRFILE *D, const gd_entry_t *P, const char *old_prefix,
     oplen = strlen(old_prefix);
     if (strncmp(old_prefix, code, oplen)) {
       /* prefix missing */
-      _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_INVALID, NULL, 0, code);
+      if (err_ok)
+        _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_INVALID, NULL, 0, code);
+      else
+        _GD_InternalError(D);
       dreturn("%p", NULL);
       return NULL;
     }
@@ -67,7 +70,10 @@ char *_GD_MungeCode(DIRFILE *D, const gd_entry_t *P, const char *old_prefix,
     oslen = strlen(old_suffix);
     if (strncmp(old_suffix, ptr + len - oslen, oslen)) {
       /* suffix missing */
-      _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_INVALID, NULL, 0, code);
+      if (err_ok)
+        _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_INVALID, NULL, 0, code);
+      else
+        _GD_InternalError(D);
       dreturn("%p", NULL);
       return NULL;
     }
@@ -117,7 +123,7 @@ char *_GD_MungeCode(DIRFILE *D, const gd_entry_t *P, const char *old_prefix,
   return new_code;
 }
 
-/* Munge a field code or field name using the prefix and suffix of the current
+/* Munge a field code or field name using the prefix and suffix of the given
  * fragment.  Returns a newly malloc'd munged code, or NULL on error */
 char *_GD_MungeFromFrag(DIRFILE *D, const gd_entry_t *P, int me,
     const char *code, int *offset)
@@ -126,10 +132,30 @@ char *_GD_MungeFromFrag(DIRFILE *D, const gd_entry_t *P, int me,
   dtrace("%p, %p, %i, \"%s\", %p", D, P, me, code, offset);
 
   new_code = _GD_MungeCode(D, P, NULL, NULL, D->fragment[me].prefix,
-      D->fragment[me].suffix, code, offset);
+      D->fragment[me].suffix, code, offset, 1);
 
   dreturn("\"%s\"", new_code);
   return new_code;
+}
+
+/* Return non-zero if the a field codes doesn't contain the correct affixes. */
+int _GD_CheckCodeAffixes(DIRFILE *D, const gd_entry_t *P,
+    const char *field_code, int fragment)
+{
+  int dummy;
+
+  dtrace("%p, %p, \"%s\", %i", D, P, field_code, fragment);
+
+  if (field_code == NULL) {
+    dreturn("%i", 0);
+    return 0;
+  }
+
+  free(_GD_MungeCode(D, P, D->fragment[fragment].prefix,
+        D->fragment[fragment].suffix, NULL, NULL, field_code, &dummy, 1));
+
+  dreturn("%i", D->error);
+  return D->error;
 }
 
 /* Check for a valid field name -- returns 1 on error */
@@ -459,7 +485,7 @@ static int _GD_Rename(DIRFILE *D, gd_entry_t *E, const char *new_name,
   } else {
     /* Verify prefix and suffix */
     name = _GD_MungeCode(D, NULL, D->fragment[E->fragment_index].prefix,
-        D->fragment[E->fragment_index].suffix, NULL, NULL, new_name, &dummy);
+        D->fragment[E->fragment_index].suffix, NULL, NULL, new_name, &dummy, 1);
     if (name == NULL || name[0] == '\0') {
       _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_INVALID, NULL, 0, new_name);
       dreturn("%i", -1);

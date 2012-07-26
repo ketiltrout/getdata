@@ -145,21 +145,17 @@ static void _GD_GetScalar(DIRFILE *restrict D, gd_entry_t *restrict E, int i,
 {
   void *ptr = NULL;
   gd_entry_t* C = NULL;
-  int repr, offset;
-  char* field_code, *munged_code;
+  int repr;
+  char* field_code;
   const char* scalar = E->scalar[i];
   int index = E->scalar_ind[i];
 
   dtrace("%p, %p, %i, %i, %p, %i", D, E, i, type, data, err);
 
   if (scalar != NULL) {
-    munged_code = _GD_MungeFromFrag(D, NULL, E->fragment_index, scalar,
-        &offset);
-    if (munged_code)
-      C = _GD_FindFieldAndRepr(D, munged_code, &field_code, &repr, NULL, 0, 1);
+    C = _GD_FindFieldAndRepr(D, scalar, &field_code, &repr, NULL, 0, 1);
 
     if (D->error) {
-      free(munged_code);
       dreturnvoid();
       return;
     }
@@ -194,10 +190,8 @@ static void _GD_GetScalar(DIRFILE *restrict D, gd_entry_t *restrict E, int i,
       }
     }
 
-    if (field_code != munged_code)
+    if (field_code != scalar)
       free(field_code);
-
-    free(munged_code);
   }
 
   dreturnvoid();

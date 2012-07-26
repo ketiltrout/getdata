@@ -339,7 +339,7 @@ int _GD_Move(DIRFILE *D, gd_entry_t *E, int new_fragment, int move_data)
 
   /* Compose the field's new name */
   new_filebase = _GD_MungeCode(D, NULL, D->fragment[E->fragment_index].prefix,
-      D->fragment[E->fragment_index].suffix, NULL, NULL, E->field, &dummy);
+      D->fragment[E->fragment_index].suffix, NULL, NULL, E->field, &dummy, 0);
   
   if (!new_filebase) {
     _GD_InternalError(D); /* the prefix/suffix wasn't found */

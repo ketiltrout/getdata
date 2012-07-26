@@ -110,9 +110,9 @@ static char **_GD_CheckAffixes(DIRFILE *D, int i, const char *prefix,
   for (j = 0; j < D->n_fragment; ++j)
     if (D->fragment[j].parent == i) {
       char *subprefix = _GD_MungeCode(D, NULL, D->fragment[i].prefix, NULL,
-          prefix, NULL, D->fragment[j].prefix, &dummy);
+          prefix, NULL, D->fragment[j].prefix, &dummy, 1);
       char *subsuffix = _GD_MungeCode(D, NULL, NULL, D->fragment[i].suffix,
-          NULL, suffix, D->fragment[j].suffix, &dummy);
+          NULL, suffix, D->fragment[j].suffix, &dummy, 1);
       if (D->error) {
         free(subprefix);
         dreturn("%p (%i)", new_codes, *n);
@@ -138,7 +138,8 @@ static char **_GD_CheckAffixes(DIRFILE *D, int i, const char *prefix,
         new_codes = ptr;
         /* remunge the code */
         new_codes[nn - 1] = _GD_MungeCode(D, NULL, D->fragment[i].prefix,
-            D->fragment[i].suffix, prefix, suffix, D->entry[u]->field, &dummy);
+            D->fragment[i].suffix, prefix, suffix, D->entry[u]->field, &dummy,
+            0);
 
         /* look for a duplicate and validate */
         if (new_codes[nn - 1] && _GD_FindField(D, new_codes[nn - 1], D->entry,

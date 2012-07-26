@@ -1126,7 +1126,6 @@ entry(dirfile, field_code)
       GDP_PUSHuv(E.field_type);
       GDP_PUSHpvn("fragment_index");
       GDP_PUSHuv(E.fragment_index);
-      dwatch("%i", E.field_type);
       switch (E.field_type) {
         case GD_BIT_ENTRY:
         case GD_SBIT_ENTRY:

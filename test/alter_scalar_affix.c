@@ -1,4 +1,4 @@
-/* Copyright (C) 2011 D. V. Wiebe
+/* Copyright (C) 2012 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -20,6 +20,14 @@
  */
 #include "test.h"
 
+#include <stdlib.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <string.h>
+#include <errno.h>
+#include <stdio.h>
+
 int main(void)
 {
   const char *filedir = "dirfile";
@@ -27,36 +35,57 @@ int main(void)
   const char *format1 = "dirfile/format1";
   const char *data = "dirfile/data";
   const char *format_data = "/INCLUDE format1 A Z\n";
-  int fd, e1, e2, r = 0;
-  char val[1000];
+  const char *format1_data = "data RAW UINT8 8\nconst CONST INT64 11\n";
+  unsigned char data_data[256];
+  int fd, e1, e2, n, r = 0;
   DIRFILE *D;
+  gd_entry_t E;
 
   rmdirfile();
   mkdir(filedir, 0777);
+
+  for (fd = 0; fd < 256; ++fd)
+    data_data[fd] = (unsigned char)fd;
 
   fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
   write(fd, format_data, strlen(format_data));
   close(fd);
 
-  close(open(format1, O_CREAT | O_EXCL | O_WRONLY, 0666));
+  fd = open(format1, O_CREAT | O_EXCL | O_WRONLY, 0666);
+  write(fd, format1_data, strlen(format1_data));
+  close(fd);
 
-  D = gd_open(filedir, GD_RDWR | GD_UNENCODED | GD_VERBOSE);
-  gd_add_string(D, "AdataZ", "A string.", 1);
+  fd = open(data, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
+  write(fd, data_data, 256);
+  close(fd);
+
+  D = gd_open(filedir, GD_RDWR);
+  gd_entry(D, "AdataZ", &E);
+  E.scalar[0] = "const";
+  gd_alter_entry(D, "AdataZ", &E, 0);
   e1 = gd_error(D);
 
-  /* check */
-  gd_get_string(D, "AdataZ", 1000, val);
+  E.scalar[0] = "AconstZ";
+  gd_alter_entry(D, "AdataZ", &E, 0);
   e2 = gd_error(D);
-  gd_close(D);
+
+  E.scalar[0] = NULL;
+  gd_free_entry_strings(&E);
+
+  n = gd_entry(D, "AdataZ", &E);
+
+  gd_discard(D);
 
   unlink(data);
-  unlink(format);
   unlink(format1);
+  unlink(format);
   rmdir(filedir);
 
-  CHECKI(e1, GD_E_OK);
-  CHECKI(e2, GD_E_OK);
-  CHECKS(val, "A string.");
+  CHECKI(e1, GD_E_BAD_CODE);
+  CHECKI(e2, 0);
+  CHECKI(n, 0);
+  CHECKI(E.EN(raw,spf), 11);
+  gd_free_entry_strings(&E);
 
   return r;
 }

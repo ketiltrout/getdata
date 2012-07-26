@@ -35,7 +35,7 @@ int main(void)
   mkdir(filedir, 0777);
 
   memset(&E, 0, sizeof(E));
-  E.field = "data";
+  E.field = "AdataZ";
   E.field_type = GD_RAW_ENTRY;
   E.fragment_index = 1;
   E.EN(raw,spf) = 2;
@@ -52,6 +52,7 @@ int main(void)
   gd_add(D, &E);
   e1 = gd_error(D);
 
+  E.field = "data";
   E.field_type = GD_CONST_ENTRY;
   E.EN(scalar,const_type) = GD_UINT8;
   E.fragment_index = 99; /* ignored */

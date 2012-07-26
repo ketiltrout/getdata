@@ -45,8 +45,13 @@ static gd_entry_t *_GD_FixName(DIRFILE *restrict D, char **restrict buffer,
 
   dtrace("%p, %p, \"%s\", %i, %p", D, buffer, name, frag, offset);
 
-  /* Apply prefix and suffix */
-  *buffer = ptr = _GD_MungeFromFrag(D, NULL, frag, name, offset);
+  /* Check prefix and suffix */
+  if (_GD_CheckCodeAffixes(D, NULL, name, frag)) {
+    dreturn("%p", NULL);
+    return NULL;
+  }
+    
+  *buffer = ptr = _GD_Strdup(D, name);
 
   if (ptr == NULL) {
     free(ptr);
@@ -78,7 +83,8 @@ static gd_entry_t *_GD_FixName(DIRFILE *restrict D, char **restrict buffer,
     sprintf(temp2, "%s/%s", P->field, ptr);
     free(*buffer);
     *buffer = temp2;
-  }
+  } else
+    *offset = 0;
 
   dreturn("%p (\"%s\", %i)", P, *buffer, *offset);
   return P;
@@ -148,8 +154,8 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
     temp_buffer[offset - 1] = '/';
     strcpy(temp_buffer + offset, entry->field);
   } else {
-    /* this will munge the name and take care of detecting Barth-style metafield
-     * definitions */
+    /* this will check for affixes and take care of detecting Barth-style
+     * metafield definitions */
     P = _GD_FixName(D, &temp_buffer, entry->field, entry->fragment_index,
         &offset);
 
@@ -275,6 +281,18 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
       if (E->EN(lincom,n_fields) < 1 || E->EN(lincom,n_fields) > GD_MAX_LINCOM)
         _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_ENTRY_NFIELDS, NULL,
             E->EN(lincom,n_fields), NULL);
+      
+      for (i = 0; i < E->EN(lincom,n_fields); ++i) {
+        _GD_CheckCodeAffixes(D, NULL, entry->in_fields[i],
+            entry->fragment_index);
+        _GD_CheckCodeAffixes(D, NULL, entry->scalar[i], entry->fragment_index);
+        _GD_CheckCodeAffixes(D, NULL, entry->scalar[i + GD_MAX_LINCOM],
+            entry->fragment_index);
+      }
+
+      if (D->error)
+        break;
+
       else {
         if (entry->comp_scal) {
           int cs = 0;
@@ -310,15 +328,34 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
     case GD_LINTERP_ENTRY:
       E->e->u.linterp.table_len = -1;
 
+      if (_GD_CheckCodeAffixes(D, NULL, entry->in_fields[0],
+            entry->fragment_index))
+      {
+        break;
+      }
+
       E->in_fields[0] = _GD_Strdup(D, entry->in_fields[0]);
       E->EN(linterp,table) = _GD_Strdup(D, entry->EN(linterp,table));
       break;
     case GD_MULTIPLY_ENTRY:
     case GD_DIVIDE_ENTRY:
+      if (_GD_CheckCodeAffixes(D, NULL, entry->in_fields[0],
+            entry->fragment_index) || _GD_CheckCodeAffixes(D, NULL,
+              entry->in_fields[1], entry->fragment_index))
+      {
+        break;
+      }
+
       E->in_fields[0] = _GD_Strdup(D, entry->in_fields[0]);
       E->in_fields[1] = _GD_Strdup(D, entry->in_fields[1]);
       break;
     case GD_RECIP_ENTRY:
+      if (_GD_CheckCodeAffixes(D, NULL, entry->in_fields[0],
+            entry->fragment_index))
+      {
+        break;
+      }
+
       E->in_fields[0] = _GD_Strdup(D, entry->in_fields[0]);
 
       copy_scalar[0] = 1;
@@ -337,6 +374,12 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
       E->EN(bit,numbits) = entry->EN(bit,numbits);
       E->EN(bit,bitnum) = entry->EN(bit,bitnum);
 
+      if (_GD_CheckCodeAffixes(D, NULL, entry->in_fields[0],
+            entry->fragment_index))
+      {
+        break;
+      }
+
       E->in_fields[0] = _GD_Strdup(D, entry->in_fields[0]);
       if (E->EN(bit,numbits) < 1)
         _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_ENTRY_NUMBITS, NULL,
@@ -352,12 +395,25 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
     case GD_PHASE_ENTRY:
       E->EN(phase,shift) = entry->EN(phase,shift);
 
+      if (_GD_CheckCodeAffixes(D, NULL, entry->in_fields[0],
+            entry->fragment_index))
+      {
+        break;
+      }
+
       E->in_fields[0] = _GD_Strdup(D, entry->in_fields[0]);
       copy_scalar[0] = 1;
       break;
     case GD_WINDOW_ENTRY:
       E->EN(window,windop) = entry->EN(window,windop);
       E->EN(window,threshold) = entry->EN(window,threshold);
+
+      if (_GD_CheckCodeAffixes(D, NULL, entry->in_fields[0],
+            entry->fragment_index) || _GD_CheckCodeAffixes(D, NULL,
+              entry->in_fields[1], entry->fragment_index))
+      {
+        break;
+      }
 
       E->in_fields[0] = _GD_Strdup(D, entry->in_fields[0]);
       E->in_fields[1] = _GD_Strdup(D, entry->in_fields[1]);
@@ -369,6 +425,14 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
     case GD_MPLEX_ENTRY:
       E->EN(mplex,count_val) = entry->EN(mplex,count_val);
       E->EN(mplex,count_max) = entry->EN(mplex,count_max);
+
+      if (_GD_CheckCodeAffixes(D, NULL, entry->in_fields[0],
+            entry->fragment_index) || _GD_CheckCodeAffixes(D, NULL,
+              entry->in_fields[1], entry->fragment_index))
+      {
+        break;
+      }
+
       E->in_fields[0] = _GD_Strdup(D, entry->in_fields[0]);
       E->in_fields[1] = _GD_Strdup(D, entry->in_fields[1]);
       E->e->u.mplex.type = GD_NULL;
@@ -430,28 +494,35 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
       {
         _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_ENTRY_NFIELDS, NULL,
             E->EN(polynom,poly_ord), NULL);
+      } else {
+        _GD_CheckCodeAffixes(D, NULL, entry->in_fields[0],
+            entry->fragment_index);
+        _GD_CheckCodeAffixes(D, NULL, entry->in_fields[1],
+            entry->fragment_index);
       }
-      else {
-        if (entry->comp_scal) {
-          int cs = 0;
-          memcpy(E->EN(polynom,ca), entry->EN(polynom,ca), sizeof(double) * 2 *
-              (E->EN(polynom,poly_ord) + 1));
-          for (i = 0; i <= E->EN(polynom,poly_ord); ++i) {
-            E->EN(polynom,a)[i] = creal(E->EN(polynom,ca)[i]);
-            if (cimag(E->EN(polynom,ca)[i]))
-              cs = 1;
-          }
-          E->comp_scal = cs;
-        } else {
-          memcpy(E->EN(polynom,a), entry->EN(polynom,a), sizeof(double) *
-              (E->EN(polynom,poly_ord) + 1));
-          for (i = 0; i <= E->EN(polynom,poly_ord); ++i)
-            _gd_r2c(E->EN(polynom,ca)[i], E->EN(polynom,a)[i]);
-          E->comp_scal = 0;
-        }
 
-        E->in_fields[0] = _GD_Strdup(D, entry->in_fields[0]);
+      if (D->error)
+        break;
+
+      if (entry->comp_scal) {
+        int cs = 0;
+        memcpy(E->EN(polynom,ca), entry->EN(polynom,ca), sizeof(double) * 2 *
+            (E->EN(polynom,poly_ord) + 1));
+        for (i = 0; i <= E->EN(polynom,poly_ord); ++i) {
+          E->EN(polynom,a)[i] = creal(E->EN(polynom,ca)[i]);
+          if (cimag(E->EN(polynom,ca)[i]))
+            cs = 1;
+        }
+        E->comp_scal = cs;
+      } else {
+        memcpy(E->EN(polynom,a), entry->EN(polynom,a), sizeof(double) *
+            (E->EN(polynom,poly_ord) + 1));
+        for (i = 0; i <= E->EN(polynom,poly_ord); ++i)
+          _gd_r2c(E->EN(polynom,ca)[i], E->EN(polynom,a)[i]);
+        E->comp_scal = 0;
       }
+
+      E->in_fields[0] = _GD_Strdup(D, entry->in_fields[0]);
 
       for (i = 0; i < E->EN(polynom,poly_ord); ++i)
         copy_scalar[i] = 1;
@@ -468,6 +539,11 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
     if (!copy_scalar[i] || entry->scalar[i] == NULL)
       E->scalar[i] = NULL;
     else {
+      if (_GD_CheckCodeAffixes(D, NULL, entry->scalar[i],
+            entry->fragment_index))
+      {
+        break;
+      }
       E->scalar[i] = _GD_Strdup(D, entry->scalar[i]);
       E->scalar_ind[i] = entry->scalar_ind[i];
     }
@@ -1195,7 +1271,7 @@ int gd_add_window(DIRFILE *D, const char *field_code, const char *in_field,
 /* add a MPLEX entry */
 int gd_add_mplex(DIRFILE *D, const char *field_code, const char *in_field,
     const char *count_field, int count_val, int count_max, int fragment_index)
-gd_nothrow
+  gd_nothrow
 {
   gd_entry_t E;
   int error;
@@ -1337,7 +1413,7 @@ int gd_madd(DIRFILE* D, const gd_entry_t* entry, const char* parent) gd_nothrow
 /* add a META LINCOM entry */
 int gd_madd_lincom(DIRFILE* D, const char* parent, const char* field_code,
     int n_fields, const char** in_fields, const double* m, const double* b)
-gd_nothrow
+  gd_nothrow
 {
   int i, error;
   gd_entry_t L;
@@ -1792,7 +1868,7 @@ int gd_madd_window(DIRFILE *D, const char *parent, const char *field_code,
 /* add a META MPLEX entry */
 int gd_madd_mplex(DIRFILE *D, const char *parent, const char *field_code,
     const char *in_field, const char *count_field, int count_val, int count_max)
-gd_nothrow
+  gd_nothrow
 {
   int error;
   gd_entry_t E;
@@ -1919,9 +1995,9 @@ static int _GD_AddAlias(DIRFILE *restrict D, const char *restrict parent,
 {
   unsigned u;
   int offset;
-  char *munged_code;
+  char *munged_code = NULL;
   void *ptr;
-  gd_entry_t *E, *P = NULL;
+  gd_entry_t *E = NULL, *P = NULL;
   dtrace("%p, \"%s\", \"%s\", \"%s\", %i", D, parent, field_code, target,
       fragment_index);
 
@@ -1948,16 +2024,14 @@ static int _GD_AddAlias(DIRFILE *restrict D, const char *restrict parent,
     P = _GD_FindField(D, parent, D->entry, D->n_entries, 1, NULL);
     if (P == NULL) {
       _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_MISSING, NULL, 0, parent);
-      dreturn("%i", -1);
-      return -1;
+      goto add_alias_error;
     }
     fragment_index = P->fragment_index;
 
     /* make sure it's not a meta field already */
     if (P->e->n_meta == -1) {
       _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_INVALID, NULL, 0, parent);
-      dreturn("%i", -1);
-      return -1;
+      goto add_alias_error;
     }
 
     offset = strlen(parent) + 1;
@@ -1968,15 +2042,12 @@ static int _GD_AddAlias(DIRFILE *restrict D, const char *restrict parent,
       strcpy(munged_code + offset, field_code);
     }
   } else
-    /* this will munge the name and take care of detecting Barth-style metafield
-     * definitions */
+    /* this will check for affixes and take care of detecting Barth-style
+     * metafield definitions */
     P = _GD_FixName(D, &munged_code, field_code, fragment_index, &offset);
 
-  if (D->error) {
-    free(munged_code);
-    dreturn("%i", -1);
-    return -1;
-  }
+  if (D->error)
+    goto add_alias_error;
 
   /* check alias name */
   if (munged_code && _GD_ValidateField(munged_code + offset, D->standards, 1, 0,
@@ -1985,35 +2056,28 @@ static int _GD_AddAlias(DIRFILE *restrict D, const char *restrict parent,
     _GD_SetError(D, GD_E_BAD_CODE, GD_E_CODE_INVALID, NULL, 0, field_code);
   } else if (_GD_FindField(D, munged_code, D->entry, D->n_entries, 1, &u))
     _GD_SetError(D, GD_E_DUPLICATE, 0, NULL, 0, munged_code);
+  else
+    _GD_CheckCodeAffixes(D, NULL, target, fragment_index); /* check target */
 
-  if (D->error) {
-    free(munged_code);
-    dreturn("%i", -1);
-    return -1;
-  }
+  if (D->error)
+    goto add_alias_error;
 
   ptr = _GD_Realloc(D, D->entry, (D->n_entries + 1) * sizeof(gd_entry_t*));
-  if (ptr == NULL) {
-    free(munged_code);
-    dreturn("%i", -1);
-    return -1;
-  }
+  if (ptr == NULL)
+    goto add_alias_error;
   D->entry = (gd_entry_t **)ptr;
 
   /* create and store */
   E = (gd_entry_t *)_GD_Malloc(D, sizeof(gd_entry_t));
-  if (E == NULL) {
-    dreturn("%i", -1);
-    return -1;
-  }
+  if (E == NULL)
+    goto add_alias_error;
+
   memset(E, 0, sizeof(gd_entry_t));
   E->e = (struct _gd_private_entry *)_GD_Malloc(D,
       sizeof(struct _gd_private_entry));
-  if (E->e == NULL) {
-    free(E);
-    dreturn("%i", -1);
-    return -1;
-  }
+  if (E->e == NULL)
+    goto add_alias_error;
+
   memset(E->e, 0, sizeof(struct _gd_private_entry));
 
   E->field = munged_code;
@@ -2023,6 +2087,7 @@ static int _GD_AddAlias(DIRFILE *restrict D, const char *restrict parent,
   E->e->calculated = 1;
 
   if (D->error) {
+    _GD_FreeE(D, E, 1);
     dreturn("%i", -1);
     return -1;
   }
@@ -2042,12 +2107,17 @@ static int _GD_AddAlias(DIRFILE *restrict D, const char *restrict parent,
     D->entry_list_validity = 0;
   }
 
-
   /* Update aliases */
   _GD_UpdateAliases(D, 0);
 
   dreturn("%i", 0);
   return 0;
+
+add_alias_error:
+  free(E);
+  free(munged_code);
+  dreturn("%i", -1);
+  return -1;
 }
 
 int gd_add_alias(DIRFILE *D, const char *alias_name, const char *target_code,
@@ -2077,6 +2147,8 @@ int gd_madd_alias(DIRFILE *D, const char *parent, const char *alias_name,
   int ret;
 
   dtrace("%p, \"%s\", \"%s\", \"%s\"", D, parent, alias_name, target_code);
+
+  _GD_ClearError(D);
 
   ret = _GD_AddAlias(D, parent, alias_name, target_code, 0);
 
