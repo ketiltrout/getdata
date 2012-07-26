@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_add_alias 3 "1 January 2012" "Version 0.8.0" "GETDATA"
+.TH gd_add_alias 3 "26 July 2012" "Version 0.8.1" "GETDATA"
 .SH NAME
 gd_add_alias, gd_madd_alias \(em add a field to a dirfile
 .SH SYNOPSIS
@@ -62,8 +62,8 @@ The library was unable to allocate memory.
 .B GD_E_BAD_CODE
 The
 .IR alias_name
-parameter contained invalid characters or was missing the indicated fragment's
-field prefix or suffix. Alternately, the
+contained invalid characters; or it or an input field did not contain the
+affected fragment's prefix or suffix. Alternately, the
 .I parent
 field code was not found, or was already a metafield.
 .TP
