@@ -53,7 +53,7 @@ int main(void)
   };
   uint16_t c[8];
   unsigned char data_data[256];
-  int fd, i, error, n, v, r = 0;
+  int fd, i, error, n, v, h1, h2, r = 0;
   DIRFILE *D;
 
   memset(c, 0, 16);
@@ -74,6 +74,7 @@ int main(void)
   close(fd);
 
   D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
+  h1 = gd_hidden(D, "AdYZ");
   gd_rewrite_fragment(D, GD_ALL_FRAGMENTS);
   error = gd_error(D);
   gd_close(D);
@@ -81,6 +82,7 @@ int main(void)
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
   v = gd_dirfile_standards(D, GD_VERSION_CURRENT);
   n = gd_getdata(D, "ar", 4, 0, 8, 0, GD_UINT16, c);
+  h2 = gd_hidden(D, "AdYZ");
 
   gd_close(D);
 
@@ -90,6 +92,8 @@ int main(void)
   rmdir(filedir);
 
   CHECKI(error,0);
+  CHECKI(h1,1);
+  CHECKI(h2,1);
   CHECKI(n,8);
   CHECKI(v,9);
 

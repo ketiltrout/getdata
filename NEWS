@@ -11,6 +11,8 @@ New in version 0.8.1:
   * BUG FIX: A number of minor memory leaks, mostly occurring when the library
     encounters an error, have been fixed.
 
+  * BUG FIX: /HIDDEN directives weren't being written for aliases.
+
   * WIN32 BUG FIX: On Windows, the parser can now properly handle hexadecimal
     floating point.
 

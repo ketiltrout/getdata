@@ -372,216 +372,218 @@ static void _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
     _GD_WriteFieldCode(D, stream, me, E->in_fields[0], permissive,
         D->standards);
     fputc('\n', stream);
-    dreturnvoid();
-    return;
-  }
+  } else {
+    ptr = E->field;
 
-  ptr = E->field;
+    /* From Standards Version 7 and on, just use Barth-style */
+    if (meta && D->standards < 7) {
+      fputs("META ", stream);
+      _GD_StringEscapeise(stream, ptr, 1, permissive, D->standards);
+      fputc(' ', stream);
+      ptr = strchr(E->field, '/') + 1;
+    }
 
-  /* From Standards Version 7 and on, just use Barth-style */
-  if (meta && D->standards < 7) {
-    fputs("META ", stream);
-    _GD_StringEscapeise(stream, ptr, 1, permissive, D->standards);
-    fputc(' ', stream);
-    ptr = strchr(E->field, '/') + 1;
-  }
+    /* field name */
+    _GD_PadField(D, stream, me, ptr, max_len, permissive, D->standards);
 
-  /* field name */
-  _GD_PadField(D, stream, me, ptr, max_len, permissive, D->standards);
-
-  switch(E->field_type) {
-    case GD_RAW_ENTRY:
-      fprintf(stream, " RAW%s %s ", pretty ? "     " : "",
-          (permissive || D->standards >= 5) ?  _GD_TypeName(D,
-            E->EN(raw,data_type)) : _GD_OldTypeName(D, E->EN(raw,data_type)));
-      _GD_WriteConst(D, stream, me, permissive, GD_UINT16, &E->EN(raw,spf),
-          E->scalar[0], E->scalar_ind[0], "\n");
-      break;
-    case GD_LINCOM_ENTRY:
-      fprintf(stream, " LINCOM%s %i", pretty ? "  " : "",
-          E->EN(lincom,n_fields));
-      for (i = 0; i < E->EN(lincom,n_fields); ++i) {
-        fputc(' ', stream);
-        _GD_WriteFieldCode(D, stream, me, E->in_fields[i], permissive,
+    switch(E->field_type) {
+      case GD_RAW_ENTRY:
+        fprintf(stream, " RAW%s %s ", pretty ? "     " : "",
+            (permissive || D->standards >= 5) ?  _GD_TypeName(D,
+              E->EN(raw,data_type)) : _GD_OldTypeName(D, E->EN(raw,data_type)));
+        _GD_WriteConst(D, stream, me, permissive, GD_UINT16, &E->EN(raw,spf),
+            E->scalar[0], E->scalar_ind[0], "\n");
+        break;
+      case GD_LINCOM_ENTRY:
+        fprintf(stream, " LINCOM%s %i", pretty ? "  " : "",
+            E->EN(lincom,n_fields));
+        for (i = 0; i < E->EN(lincom,n_fields); ++i) {
+          fputc(' ', stream);
+          _GD_WriteFieldCode(D, stream, me, E->in_fields[i], permissive,
+              D->standards);
+          fputc(' ', stream);
+          if (E->comp_scal) {
+            _GD_WriteConst(D, stream, me, permissive, GD_COMPLEX128,
+                &E->EN(lincom,cm)[i], E->scalar[i], E->scalar_ind[i], " ");
+            _GD_WriteConst(D, stream, me, permissive, GD_COMPLEX128,
+                &E->EN(lincom,cb)[i], E->scalar[i + GD_MAX_LINCOM],
+                E->scalar_ind[i + GD_MAX_LINCOM], "");
+          } else {
+            _GD_WriteConst(D, stream, me, permissive, GD_FLOAT64,
+                &E->EN(lincom,m)[i], E->scalar[i], E->scalar_ind[i], " ");
+            _GD_WriteConst(D, stream, me, permissive, GD_FLOAT64,
+                &E->EN(lincom,b)[i], E->scalar[i + GD_MAX_LINCOM],
+                E->scalar_ind[i + GD_MAX_LINCOM], "");
+          }
+        }
+        fputc('\n', stream);
+        break;
+      case GD_LINTERP_ENTRY:
+        fprintf(stream, " LINTERP%s ", pretty ? " " : "");
+        _GD_WriteFieldCode(D, stream, me, E->in_fields[0], permissive,
             D->standards);
         fputc(' ', stream);
-        if (E->comp_scal) {
-          _GD_WriteConst(D, stream, me, permissive, GD_COMPLEX128,
-              &E->EN(lincom,cm)[i], E->scalar[i], E->scalar_ind[i], " ");
-          _GD_WriteConst(D, stream, me, permissive, GD_COMPLEX128,
-              &E->EN(lincom,cb)[i], E->scalar[i + GD_MAX_LINCOM],
-              E->scalar_ind[i + GD_MAX_LINCOM], "");
-        } else {
-          _GD_WriteConst(D, stream, me, permissive, GD_FLOAT64,
-              &E->EN(lincom,m)[i], E->scalar[i], E->scalar_ind[i], " ");
-          _GD_WriteConst(D, stream, me, permissive, GD_FLOAT64,
-              &E->EN(lincom,b)[i], E->scalar[i + GD_MAX_LINCOM],
-              E->scalar_ind[i + GD_MAX_LINCOM], "");
+        _GD_StringEscapeise(stream, E->EN(linterp,table), 0, permissive,
+            D->standards);
+        fputc('\n', stream);
+        break;
+      case GD_BIT_ENTRY:
+        fprintf(stream, " BIT%s ", pretty ? "     " : "");
+        _GD_WriteFieldCode(D, stream, me, E->in_fields[0], permissive,
+            D->standards);
+        fputc(' ', stream);
+        _GD_WriteConst(D, stream, me, permissive, GD_INT_TYPE, &E->EN(bit,bitnum),
+            E->scalar[0], E->scalar_ind[0], " ");
+        _GD_WriteConst(D, stream, me, permissive, GD_INT_TYPE,
+            &E->EN(bit,numbits), E->scalar[1], E->scalar_ind[1], "\n");
+        break;
+      case GD_DIVIDE_ENTRY:
+        fprintf(stream, " DIVIDE%s ", pretty ? "  " : "");
+        _GD_WriteFieldCode(D, stream, me, E->in_fields[0], permissive,
+            D->standards);
+        fputc(' ', stream);
+        _GD_WriteFieldCode(D, stream, me, E->in_fields[1], permissive,
+            D->standards);
+        fputc('\n', stream);
+        break;
+      case GD_RECIP_ENTRY:
+        fprintf(stream, " RECIP%s ", pretty ? "   " : "");
+        _GD_WriteFieldCode(D, stream, me, E->in_fields[0], permissive,
+            D->standards);
+        fputc(' ', stream);
+        _GD_WriteConst(D, stream, me, permissive, GD_COMPLEX128,
+            &E->EN(recip,cdividend), E->scalar[0], E->scalar_ind[0], "\n");
+        break;
+      case GD_MULTIPLY_ENTRY:
+        fputs(" MULTIPLY ", stream);
+        _GD_WriteFieldCode(D, stream, me, E->in_fields[0], permissive,
+            D->standards);
+        fputc(' ', stream);
+        _GD_WriteFieldCode(D, stream, me, E->in_fields[1], permissive,
+            D->standards);
+        fputc('\n', stream);
+        break;
+      case GD_PHASE_ENTRY:
+        fprintf(stream, " PHASE%s ", pretty ? "   " : "");
+        _GD_WriteFieldCode(D, stream, me, E->in_fields[0], permissive,
+            D->standards);
+        fputc(' ', stream);
+        _GD_WriteConst(D, stream, me, permissive, GD_INT64, &E->EN(phase,shift),
+            E->scalar[0], E->scalar_ind[0], "\n");
+        break;
+      case GD_POLYNOM_ENTRY:
+        fprintf(stream, " POLYNOM%s ", pretty ? " " : "");
+        _GD_WriteFieldCode(D, stream, me, E->in_fields[0], permissive,
+            D->standards);
+        fputc(' ', stream);
+        for (i = 0; i <= E->EN(polynom,poly_ord); ++i)
+          if (E->comp_scal)
+            _GD_WriteConst(D, stream, me, permissive, GD_COMPLEX128,
+                &E->EN(polynom,ca)[i], E->scalar[i], E->scalar_ind[i],
+                (i == E->EN(polynom,poly_ord)) ?  "\n" : " ");
+          else
+            _GD_WriteConst(D, stream, me, permissive, GD_FLOAT64,
+                &E->EN(polynom,a)[i], E->scalar[i], E->scalar_ind[i],
+                (i == E->EN(polynom,poly_ord)) ?  "\n" : " ");
+        break;
+      case GD_SBIT_ENTRY:
+        fprintf(stream, " SBIT%s ", pretty ? "    " : "");
+        _GD_WriteFieldCode(D, stream, me, E->in_fields[0], permissive,
+            D->standards);
+        fputc(' ', stream);
+        _GD_WriteConst(D, stream, me, permissive, GD_INT_TYPE, &E->EN(bit,bitnum),
+            E->scalar[0], E->scalar_ind[0], " ");
+        _GD_WriteConst(D, stream, me, permissive, GD_INT_TYPE,
+            &E->EN(bit,numbits), E->scalar[1], E->scalar_ind[1], "\n");
+        break;
+      case GD_WINDOW_ENTRY:
+        fprintf(stream, " WINDOW%s ", pretty ? "  " : "");
+        _GD_WriteFieldCode(D, stream, me, E->in_fields[0], permissive,
+            D->standards);
+        fputc(' ', stream);
+        _GD_WriteFieldCode(D, stream, me, E->in_fields[1], permissive,
+            D->standards);
+        fprintf(stream, " %s ", _GD_WindopName(D, E->EN(window,windop)));
+        switch (E->EN(window,windop)) {
+          case GD_WINDOP_EQ:
+          case GD_WINDOP_NE:
+            _GD_WriteConst(D, stream, me, permissive, GD_INT64,
+                &E->EN(window,threshold.i), E->scalar[0], E->scalar_ind[0],
+                "\n");
+            break;
+          case GD_WINDOP_SET:
+          case GD_WINDOP_CLR:
+            _GD_WriteConst(D, stream, me, permissive, GD_UINT64,
+                &E->EN(window,threshold.u), E->scalar[0], E->scalar_ind[0],
+                "\n");
+            break;
+          default:
+            _GD_WriteConst(D, stream, me, permissive, GD_FLOAT64,
+                &E->EN(window,threshold.r), E->scalar[0], E->scalar_ind[0],
+                "\n");
+            break;
         }
-      }
-      fputc('\n', stream);
-      break;
-    case GD_LINTERP_ENTRY:
-      fprintf(stream, " LINTERP%s ", pretty ? " " : "");
-      _GD_WriteFieldCode(D, stream, me, E->in_fields[0], permissive,
-          D->standards);
-      fputc(' ', stream);
-      _GD_StringEscapeise(stream, E->EN(linterp,table), 0, permissive,
-          D->standards);
-      fputc('\n', stream);
-      break;
-    case GD_BIT_ENTRY:
-      fprintf(stream, " BIT%s ", pretty ? "     " : "");
-      _GD_WriteFieldCode(D, stream, me, E->in_fields[0], permissive,
-          D->standards);
-      fputc(' ', stream);
-      _GD_WriteConst(D, stream, me, permissive, GD_INT_TYPE, &E->EN(bit,bitnum),
-          E->scalar[0], E->scalar_ind[0], " ");
-      _GD_WriteConst(D, stream, me, permissive, GD_INT_TYPE,
-          &E->EN(bit,numbits), E->scalar[1], E->scalar_ind[1], "\n");
-      break;
-    case GD_DIVIDE_ENTRY:
-      fprintf(stream, " DIVIDE%s ", pretty ? "  " : "");
-      _GD_WriteFieldCode(D, stream, me, E->in_fields[0], permissive,
-          D->standards);
-      fputc(' ', stream);
-      _GD_WriteFieldCode(D, stream, me, E->in_fields[1], permissive,
-          D->standards);
-      fputc('\n', stream);
-      break;
-    case GD_RECIP_ENTRY:
-      fprintf(stream, " RECIP%s ", pretty ? "   " : "");
-      _GD_WriteFieldCode(D, stream, me, E->in_fields[0], permissive,
-          D->standards);
-      fputc(' ', stream);
-      _GD_WriteConst(D, stream, me, permissive, GD_COMPLEX128,
-          &E->EN(recip,cdividend), E->scalar[0], E->scalar_ind[0], "\n");
-      break;
-    case GD_MULTIPLY_ENTRY:
-      fputs(" MULTIPLY ", stream);
-      _GD_WriteFieldCode(D, stream, me, E->in_fields[0], permissive,
-          D->standards);
-      fputc(' ', stream);
-      _GD_WriteFieldCode(D, stream, me, E->in_fields[1], permissive,
-          D->standards);
-      fputc('\n', stream);
-      break;
-    case GD_PHASE_ENTRY:
-      fprintf(stream, " PHASE%s ", pretty ? "   " : "");
-      _GD_WriteFieldCode(D, stream, me, E->in_fields[0], permissive,
-          D->standards);
-      fputc(' ', stream);
-      _GD_WriteConst(D, stream, me, permissive, GD_INT64, &E->EN(phase,shift),
-          E->scalar[0], E->scalar_ind[0], "\n");
-      break;
-    case GD_POLYNOM_ENTRY:
-      fprintf(stream, " POLYNOM%s ", pretty ? " " : "");
-      _GD_WriteFieldCode(D, stream, me, E->in_fields[0], permissive,
-          D->standards);
-      fputc(' ', stream);
-      for (i = 0; i <= E->EN(polynom,poly_ord); ++i)
-        if (E->comp_scal)
-          _GD_WriteConst(D, stream, me, permissive, GD_COMPLEX128,
-              &E->EN(polynom,ca)[i], E->scalar[i], E->scalar_ind[i],
-              (i == E->EN(polynom,poly_ord)) ?  "\n" : " ");
-        else
-          _GD_WriteConst(D, stream, me, permissive, GD_FLOAT64,
-              &E->EN(polynom,a)[i], E->scalar[i], E->scalar_ind[i],
-              (i == E->EN(polynom,poly_ord)) ?  "\n" : " ");
-      break;
-    case GD_SBIT_ENTRY:
-      fprintf(stream, " SBIT%s ", pretty ? "    " : "");
-      _GD_WriteFieldCode(D, stream, me, E->in_fields[0], permissive,
-          D->standards);
-      fputc(' ', stream);
-      _GD_WriteConst(D, stream, me, permissive, GD_INT_TYPE, &E->EN(bit,bitnum),
-          E->scalar[0], E->scalar_ind[0], " ");
-      _GD_WriteConst(D, stream, me, permissive, GD_INT_TYPE,
-          &E->EN(bit,numbits), E->scalar[1], E->scalar_ind[1], "\n");
-      break;
-    case GD_WINDOW_ENTRY:
-      fprintf(stream, " WINDOW%s ", pretty ? "  " : "");
-      _GD_WriteFieldCode(D, stream, me, E->in_fields[0], permissive,
-          D->standards);
-      fputc(' ', stream);
-      _GD_WriteFieldCode(D, stream, me, E->in_fields[1], permissive,
-          D->standards);
-      fprintf(stream, " %s ", _GD_WindopName(D, E->EN(window,windop)));
-      switch (E->EN(window,windop)) {
-        case GD_WINDOP_EQ:
-        case GD_WINDOP_NE:
-          _GD_WriteConst(D, stream, me, permissive, GD_INT64,
-              &E->EN(window,threshold.i), E->scalar[0], E->scalar_ind[0], "\n");
-          break;
-        case GD_WINDOP_SET:
-        case GD_WINDOP_CLR:
-          _GD_WriteConst(D, stream, me, permissive, GD_UINT64,
-              &E->EN(window,threshold.u), E->scalar[0], E->scalar_ind[0], "\n");
-          break;
-        default:
-          _GD_WriteConst(D, stream, me, permissive, GD_FLOAT64,
-              &E->EN(window,threshold.r), E->scalar[0], E->scalar_ind[0], "\n");
-          break;
-      }
-      break;
-    case GD_MPLEX_ENTRY:
-      fprintf(stream, " MPLEX%s ", pretty ? "   " : "");
-      _GD_WriteFieldCode(D, stream, me, E->in_fields[0], permissive,
-          D->standards);
-      fputc(' ', stream);
-      _GD_WriteFieldCode(D, stream, me, E->in_fields[1], permissive,
-          D->standards);
-      fputc(' ', stream);
-      _GD_WriteConst(D, stream, me, permissive, GD_INT_TYPE,
-          &E->EN(mplex,count_val), E->scalar[0], E->scalar_ind[0], "");
-      if (E->EN(mplex,count_max) > 0 || E->scalar[1]) {
+        break;
+      case GD_MPLEX_ENTRY:
+        fprintf(stream, " MPLEX%s ", pretty ? "   " : "");
+        _GD_WriteFieldCode(D, stream, me, E->in_fields[0], permissive,
+            D->standards);
+        fputc(' ', stream);
+        _GD_WriteFieldCode(D, stream, me, E->in_fields[1], permissive,
+            D->standards);
         fputc(' ', stream);
         _GD_WriteConst(D, stream, me, permissive, GD_INT_TYPE,
-            &E->EN(mplex,count_max), E->scalar[1], E->scalar_ind[1], "\n");
-      } else
+            &E->EN(mplex,count_val), E->scalar[0], E->scalar_ind[0], "");
+        if (E->EN(mplex,count_max) > 0 || E->scalar[1]) {
+          fputc(' ', stream);
+          _GD_WriteConst(D, stream, me, permissive, GD_INT_TYPE,
+              &E->EN(mplex,count_max), E->scalar[1], E->scalar_ind[1], "\n");
+        } else
+          fputc('\n', stream);
+        break;
+      case GD_CONST_ENTRY:
+        fprintf(stream, " CONST%s %s ", pretty ? "   " : "", _GD_TypeName(D,
+              E->EN(scalar,const_type)));
+        if (E->EN(scalar,const_type) & GD_SIGNED)
+          fprintf(stream, "%" PRIi64 "\n", *(int64_t*)E->e->u.scalar.d);
+        else if (E->EN(scalar,const_type) & GD_IEEE754)
+          fprintf(stream, "%.15g\n", *(double*)E->e->u.scalar.d);
+        else if (E->EN(scalar,const_type) & GD_COMPLEX)
+          fprintf(stream, "%.15g;%.15g\n", *(double*)E->e->u.scalar.d,
+              *((double*)E->e->u.scalar.d + 1));
+        else
+          fprintf(stream, "%" PRIu64 "\n", *(uint64_t*)E->e->u.scalar.d);
+        break;
+      case GD_CARRAY_ENTRY:
+        fprintf(stream, " CARRAY%s %s", pretty ? "  " : "", _GD_TypeName(D,
+              E->EN(scalar,const_type)));
+        if (E->EN(scalar,const_type) & GD_SIGNED)
+          for (z = 0; z < E->EN(scalar,array_len); ++z)
+            fprintf(stream, " %" PRIi64, ((int64_t*)E->e->u.scalar.d)[z]);
+        else if (E->EN(scalar,const_type) & GD_IEEE754)
+          for (z = 0; z < E->EN(scalar,array_len); ++z)
+            fprintf(stream, " %.15g", ((double*)E->e->u.scalar.d)[z]);
+        else if (E->EN(scalar,const_type) & GD_COMPLEX)
+          for (z = 0; z < E->EN(scalar,array_len); ++z)
+            fprintf(stream, " %.15g;%.15g", ((double*)E->e->u.scalar.d)[2 * z],
+                ((double*)E->e->u.scalar.d)[2 * z + 1]);
+        else
+          for (z = 0; z < E->EN(scalar,array_len); ++z)
+            fprintf(stream, " %" PRIu64, ((uint64_t*)E->e->u.scalar.d)[z]);
         fputc('\n', stream);
-      break;
-    case GD_CONST_ENTRY:
-      fprintf(stream, " CONST%s %s ", pretty ? "   " : "", _GD_TypeName(D,
-            E->EN(scalar,const_type)));
-      if (E->EN(scalar,const_type) & GD_SIGNED)
-        fprintf(stream, "%" PRIi64 "\n", *(int64_t*)E->e->u.scalar.d);
-      else if (E->EN(scalar,const_type) & GD_IEEE754)
-        fprintf(stream, "%.15g\n", *(double*)E->e->u.scalar.d);
-      else if (E->EN(scalar,const_type) & GD_COMPLEX)
-        fprintf(stream, "%.15g;%.15g\n", *(double*)E->e->u.scalar.d,
-            *((double*)E->e->u.scalar.d + 1));
-      else
-        fprintf(stream, "%" PRIu64 "\n", *(uint64_t*)E->e->u.scalar.d);
-      break;
-    case GD_CARRAY_ENTRY:
-      fprintf(stream, " CARRAY%s %s", pretty ? "  " : "", _GD_TypeName(D,
-            E->EN(scalar,const_type)));
-      if (E->EN(scalar,const_type) & GD_SIGNED)
-        for (z = 0; z < E->EN(scalar,array_len); ++z)
-          fprintf(stream, " %" PRIi64, ((int64_t*)E->e->u.scalar.d)[z]);
-      else if (E->EN(scalar,const_type) & GD_IEEE754)
-        for (z = 0; z < E->EN(scalar,array_len); ++z)
-          fprintf(stream, " %.15g", ((double*)E->e->u.scalar.d)[z]);
-      else if (E->EN(scalar,const_type) & GD_COMPLEX)
-        for (z = 0; z < E->EN(scalar,array_len); ++z)
-          fprintf(stream, " %.15g;%.15g", ((double*)E->e->u.scalar.d)[2 * z],
-              ((double*)E->e->u.scalar.d)[2 * z + 1]);
-      else
-        for (z = 0; z < E->EN(scalar,array_len); ++z)
-          fprintf(stream, " %" PRIu64, ((uint64_t*)E->e->u.scalar.d)[z]);
-      fputc('\n', stream);
-      break;
-    case GD_STRING_ENTRY:
-      fprintf(stream, " STRING%s ", pretty ? "  " : "");
-      _GD_StringEscapeise(stream, E->e->u.string, 0, permissive, D->standards);
-      fputc('\n', stream);
-      break;
-    case GD_INDEX_ENTRY:
-    case GD_ALIAS_ENTRY:
-    case GD_NO_ENTRY:
-      _GD_InternalError(D);
-      break;
+        break;
+      case GD_STRING_ENTRY:
+        fprintf(stream, " STRING%s ", pretty ? "  " : "");
+        _GD_StringEscapeise(stream, E->e->u.string, 0, permissive,
+            D->standards);
+        fputc('\n', stream);
+        break;
+      case GD_INDEX_ENTRY:
+      case GD_ALIAS_ENTRY:
+      case GD_NO_ENTRY:
+        _GD_InternalError(D);
+        break;
+    }
   }
 
   if (!D->error && E->hidden && (permissive || D->standards >= 9)) {

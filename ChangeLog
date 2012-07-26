@@ -1,3 +1,6 @@
+2012-07-26   D. V. Wiebe <getdata@ketiltrout.net> svn:751
+	* src/flush.c (_GD_FieldSpec): Write /HIDDEN directives for /ALIASes.
+
 2012-07-26   D. V. Wiebe <getdata@ketiltrout.net> svn:749
 	* src/parse.c (_GD_SetScalar _GD_ParseLincom _GD_ParseLinterp
 	_GD_ParseMultiply _GD_ParseRecip _GD_ParseWindow _GD_ParseMplex
