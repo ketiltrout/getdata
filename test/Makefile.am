@@ -329,6 +329,8 @@ SPF_TESTS=spf spf_alias spf_alias_missing spf_alias_meta \
 					spf_divide spf_lincom spf_multiply \
 					spf_polynom spf_recip spf_recurse
 
+TABLE_TESTS=table table_code table_type
+
 TELL_TESTS=tell tell64
 
 TRUNC_TESTS=trunc trunc_dir trunc_rdonly trunc_rofs trunc_truncsub
@@ -363,9 +365,9 @@ TESTS=$(ADD_TESTS)      $(ALIAS_TESTS)    $(ALTER_TESTS)    $(ASCII_TESTS)    \
 			$(NENTRIES_TESTS) $(NFIELDS_TESTS)  $(NFRAMES_TESTS)  $(NMETA_TESTS)    \
 			$(OPEN_TESTS)     $(PARSE_TESTS)    $(PROTECT_TESTS)  $(PUT_TESTS)      \
 			$(REF_TESTS)      $(REPR_TESTS)     $(SEEK_TESTS)     $(SIE_TESTS)      \
-			$(SLIM_TESTS)     $(SPF_TESTS)      $(SVLIST_TESTS)   $(TELL_TESTS)     \
-			$(TRUNC_TESTS)    $(UNCLUDE_TESTS)  $(VERSION_TESTS)  $(VLIST_TESTS)    \
-			$(XZ_TESTS)       $(ZZIP_TESTS)     $(ZZSLIM_TESTS)
+			$(SLIM_TESTS)     $(SPF_TESTS)      $(SVLIST_TESTS)   $(TABLE_TESTS)    \
+			$(TELL_TESTS)     $(TRUNC_TESTS)    $(UNCLUDE_TESTS)  $(VERSION_TESTS)  \
+			$(VLIST_TESTS)    $(XZ_TESTS)       $(ZZIP_TESTS)     $(ZZSLIM_TESTS)
 
 check_PROGRAMS=$(TESTS)
 

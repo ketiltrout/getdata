@@ -22,7 +22,7 @@
 use GetData;
 use Math::Complex;
 use strict;
-use Test::More tests => 1303;
+use Test::More tests => 1305;
 
 my $ne = 0;
 my ($s, @a, %h);
@@ -163,7 +163,7 @@ lincom LINCOM data 1.1 2.2 INDEX 2.2 3.3;4.4 linterp const const
 /META data mlut LINTERP DATA ./lut
 const CONST FLOAT64 5.5
 carray CARRAY FLOAT64 1.1 2.2 3.3 4.4 5.5 6.6
-linterp LINTERP data /look/up/file
+linterp LINTERP data ./lut
 polynom POLYNOM data 1.1 2.2 2.2 3.3;4.4 const const
 bit BIT data 3 4
 sbit SBIT data 5 6
@@ -352,7 +352,7 @@ CheckString2(21, 1, $h{'field'}, "linterp");
 CheckNum2(21, 2, $h{'field_type'}, $GetData::LINTERP_ENTRY);
 CheckNum2(21, 3, $h{'fragment_index'}, 0);
 CheckString2(21, 4, $h{'in_fields'}, "data");
-CheckString2(21, 5, $h{'table'}, "/look/up/file");
+CheckString2(21, 5, $h{'table'}, "./lut");
 
 # 22: get_entry check
 %h = $_->entry("bit");
@@ -1045,7 +1045,7 @@ CheckNum(79, $s, $GetData::LITTLE_ENDIAN | $GetData::NOT_ARM_ENDIAN);
 # 80: dirfilename
 $s = $_->dirfilename;
 CheckOK(80);
-CheckString(80, $s, "dirfile");
+CheckEOString(80, $s, "dirfile");
 
 # 81: parent_fragment
 $s = $_->parent_fragment(1);
@@ -1701,6 +1701,11 @@ window));
 # 240: gd_mplex_lookback
 $_->mplex_lookback($GetData::LOOKBACK_ALL);
 CheckOK(240);
+
+# 241: raw_filename
+$s = $_->linterp_tablename("linterp");
+CheckOK(241);
+CheckEOString(241, $s, "dirfile/lut");
 
 
 

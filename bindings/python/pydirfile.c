@@ -2658,6 +2658,32 @@ static PyObject* gdpy_dirfile_entrylist(struct gdpy_dirfile_t* self,
   return pylist;
 }
 
+static PyObject* gdpy_dirfile_linterptablename(struct gdpy_dirfile_t* self,
+    PyObject* args, PyObject* keys)
+{
+  dtrace("%p, %p, %p", self, args, keys);
+
+  char* keywords[] = { "field_code", NULL };
+  const char* field_code;
+  char* filename;
+
+  if (!PyArg_ParseTupleAndKeywords(args, keys,
+        "s:pygetdata.dirfile.linterp_tablename", keywords, &field_code))
+  {
+    dreturn ("%p", NULL);
+    return NULL;
+  }
+
+  filename = gd_linterp_tablename(self->D, field_code);
+
+  PYGD_CHECK_ERROR(self->D, NULL);
+
+  PyObject* pyobj = PyString_FromString(filename);
+  free(filename);
+  dreturn("%p", pyobj);
+  return pyobj;
+}
+
 static PyGetSetDef gdpy_dirfile_getset[] = {
   { "error", (getter)gdpy_dirfile_geterror, NULL,
     "The numerical error code encountered by the last call to the GetData\n"
@@ -2918,6 +2944,14 @@ static PyMethodDef gdpy_dirfile_methods[] = {
     "hide(field_code)\n\n"
       "Sets the hidden flag on the specified field.  See gd_hide(3)."
   },
+  {"linterp_tablename", (PyCFunction)gdpy_dirfile_linterptablename,
+    METH_VARARGS | METH_KEYWORDS,
+    "linterp_tablename(field_code)\n\n"
+      "Return the pathname of the look-up table (LUT) on disk used by the\n"
+      /* ------- handy ruler ---------------------------------------------| */
+      "LINTERP field specified by 'field_code'.  See\n"
+      "gd_linterp_tablename(3)."
+  },
   {"mcarrays", (PyCFunction)gdpy_dirfile_mcarrays, METH_VARARGS | METH_KEYWORDS,
     "mcarrays(parent, return_type [, as_list])\n\n"
       "Retrieve all CARRAY metafields, and their values, for the parent\n"
@@ -2996,7 +3030,6 @@ static PyMethodDef gdpy_dirfile_methods[] = {
       "Return a count of entries in the database.  If 'parent' is given,\n"
       "metafields under 'parent' will be considered, otherwise top-level\n"
       "fields are counted.  If given, 'type' should be either one of the\n"
-      /* ------- handy ruler ---------------------------------------------| */
       "the pygetdata.*_ENTRY symbols, or else one of the special\n"
       "pygetdata.*_ENTRIES symbols; if not given, 'type' defaults to\n"
       "pygetdata.ALL_ENTRIES.  If given 'flags' should be a bitwise or'd\n"

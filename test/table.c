@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2012 D. V. Wiebe
+/* Copyright (C) 2012 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -18,26 +18,24 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Global metadata check */
 #include "test.h"
 
-#include <inttypes.h>
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <string.h>
 #include <errno.h>
-#include <stdio.h>
 
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *format_data = "data1 CONST UINT8 1\n";
+  const char *format_data = "linterp LINTERP INDEX table\n";
+  unsigned char data_data[256];
   int fd, error, r = 0;
+  char *path;
   DIRFILE *D;
-  char *name;
 
   rmdirfile();
   mkdir(filedir, 0777);
@@ -47,16 +45,24 @@ int main(void)
   close(fd);
 
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  name = strdup(gd_dirfilename(D));
+  path = gd_linterp_tablename(D, "linterp");
   error = gd_error(D);
+
   gd_close(D);
 
   unlink(format);
   rmdir(filedir);
 
-  CHECKI(error, GD_E_OK);
-  CHECKEOS(name, "dirfile");
-  free(name);
+  CHECKI(error, 0);
+  /* This only checks whether the end of the returned path is what we expect.
+   * This should work, since we can guarantee that both "dirfile" and "data"
+   * aren't symlinks. */
+#if GD_DIRSEP == '/'
+  CHECKEOS(path,"dirfile/table");
+#else
+  CHECKEOS(path,"dirfile\\table");
+#endif
+  free(path);
 
   return r;
 }

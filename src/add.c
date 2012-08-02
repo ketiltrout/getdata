@@ -256,7 +256,11 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
       E->e->u.raw.file[0].idata = E->e->u.raw.file[1].idata = -1;
       E->e->u.raw.file[0].subenc = GD_ENC_UNKNOWN;
 
-      if ((E->e->u.raw.filebase = _GD_Strdup(D, E->field)) == NULL)
+      E->e->u.raw.filebase = _GD_MungeCode(D, NULL,
+          D->fragment[entry->fragment_index].prefix,
+          D->fragment[entry->fragment_index].suffix, NULL, NULL, E->field,
+          &offset, 0);
+      if (D->error)
         break;
 
       if ((E->EN(raw,spf) = entry->EN(raw,spf)) == 0)

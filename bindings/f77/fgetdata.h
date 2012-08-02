@@ -744,6 +744,10 @@ void F77_FUNC(gdgemx, GDGEMX) (char *in_field, int32_t *in_field_l,
     char *count_field, int32_t *count_field_l, int32_t *val, int32_t *max,
     int32_t *fragment_index, const int32_t *dirfile, const char *field_code,
     const int32_t *field_code_l);
+
+void F77_FUNC(gdlttn, GDLTTN) (char *name, int32_t *name_l,
+    const int32_t *dirfile, const char *field_code,
+    const int32_t *field_code_l);
 #ifdef __cplusplus
 }
 #endif

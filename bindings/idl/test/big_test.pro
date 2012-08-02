@@ -57,7 +57,7 @@ printf,1,'/META data mconst CONST COMPLEX128 3.3;4.4'
 printf,1,'/META data mlut LINTERP DATA ./lut'
 printf,1,'const CONST FLOAT64 5.5'
 printf,1,'carray CARRAY FLOAT64 1.1 2.2 3.3 4.4 5.5 6.6'
-printf,1,'linterp LINTERP data /look/up/file'
+printf,1,'linterp LINTERP data ./lut'
 printf,1,'polynom POLYNOM data 1.1 2.2 2.2 3.3;4.4 const const'
 printf,1,'bit BIT data 3 4'
 printf,1,'sbit SBIT data 5 6'
@@ -214,7 +214,7 @@ nume += check_simple2(21, 1, n.field_type, !GD.LINTERP_ENTRY)
 nume += check_simple2(21, 2, n.field, "linterp")
 nume += check_simple2(21, 3, n.fragment, 0)
 nume += check_simple2(21, 4, n.in_fields, [ "data" ])
-nume += check_simple2(21, 5, n.table, "/look/up/file")
+nume += check_simple2(21, 5, n.table, "./lut")
 
 ;  22: gd_entry (bit)
 n = gd_entry(d, "bit")
@@ -804,7 +804,7 @@ nume += check_simple(79, n, (!GD.LITTLE_ENDIAN + !GD.NOT_ARM_ENDIAN))
 ;  80: dirfilename
 n = gd_dirfilename(d)
 nume += check_ok(80, d)
-nume += check_simple(80, n, "test_dirfile")
+nume += check_eostring(80, n, "test_dirfile")
 
 ;  81: gd_parent_fragment
 n = gd_parent_fragment(d, fragment=1)
@@ -1377,9 +1377,14 @@ nume += check_simple(239, n, ["INDEX", "bit", "data", "div", "lincom", $
   "new2", "new21", "new4", "new6", "new7", "new8", "phase", "polynom", $
   "recip", "sbit", "window"])
 
-; 239: gd_mplex_lookback check
+; 240: gd_mplex_lookback check
 gd_mplex_lookback, d, /ALL
 nume += check_ok(240, d)
+
+; 241: gd_linterp_tablename
+n = gd_linterp_tablename(d, 'linterp')
+nume += check_ok(241, d)
+nume += check_eostring(241, n, "test_dirfile/lut")
 
 
 

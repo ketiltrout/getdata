@@ -178,6 +178,8 @@ namespace GetData {
           const char* prefix = NULL, const char* suffix = NULL,
           unsigned long flags = 0) const;
 
+      char *LinterpTableName(const char *field_code);
+
       int MAdd(GetData::Entry &entry, const char *parent) const;
 
       int MAddAlias(const char* parent, const char* name, const char* target)

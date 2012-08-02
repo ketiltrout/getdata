@@ -819,3 +819,49 @@ int gd_validate(DIRFILE *D, const char *field_code_in) gd_nothrow
   dreturn("%i", 0);
   return 0;
 }
+
+char *gd_linterp_tablename(DIRFILE *D, const char *field_code_in) gd_nothrow
+{
+  int repr;
+  gd_entry_t *E;
+  char *field_code, *table;
+
+  dtrace("%p, \"%s\"", D, field_code_in);
+
+  if (D->flags & GD_INVALID) {
+    _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  _GD_ClearError(D);
+
+  E = _GD_FindFieldAndRepr(D, field_code_in, &field_code, &repr, NULL, 1, 1);
+
+  if (D->error) {
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  if (field_code != field_code_in)
+    free(field_code);
+
+  if (E->field_type != GD_LINTERP_ENTRY) {
+    _GD_SetError(D, GD_E_BAD_FIELD_TYPE, GD_E_FIELD_BAD, NULL, 0, field_code);
+    dreturn("%p", NULL);
+    return NULL;
+  }
+
+  /* initialise */
+  if (E->e->u.linterp.table_file == NULL)
+    if (_GD_SetTablePath(D, E, E->e)) {
+      dreturn("%p", NULL);
+      return NULL;
+    }
+
+  table = _GD_MakeFullPath(D, E->e->u.linterp.table_dirfd,
+      E->e->u.linterp.table_file, 1);
+
+  dreturn("%s", table);
+  return table;
+}

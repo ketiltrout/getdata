@@ -20,9 +20,10 @@
  */
 #include "internal.h"
 
-/* This is nothing other than what the caller gave us.  Presumably it should
- * be better at keeping track of such things than us, but this is present in
- * the event that it is not. */
+/* This is a canonicalised version of the path specified in the open call.
+ * In the presence of third parties modifying symlinks after dirfile open, the
+ * caller is unable to determine the actual path to the dirfile that was
+ * opened if we don't help out. */
 const char *gd_dirfilename(DIRFILE* D) gd_nothrow
 {
   dtrace("%p", D);
@@ -35,8 +36,8 @@ const char *gd_dirfilename(DIRFILE* D) gd_nothrow
 
   _GD_ClearError(D);
 
-  dreturn("\"%s\"", D->name);
-  return D->name;
+  dreturn("\"%s\"", D->dir[0].path);
+  return D->dir[0].path;
 }
 
 const char *gd_reference(DIRFILE* D, const char* field_code) gd_nothrow

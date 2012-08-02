@@ -4012,3 +4012,23 @@ void F77_FUNC(gdentn, GDENTN) (char *name, int32_t *name_l,
   free(pa);
   dreturn("%i", *name_l);
 }
+
+/* gd_linterp_tablename wrapper */
+void F77_FUNC(gdlttn, GDLTTN) (char *name, int32_t *name_l,
+    const int32_t *dirfile, const char *field_code, const int32_t *field_code_l)
+{
+  char *fc, *fn;
+
+  dtrace("%p, %i, %i, %p, %i", name, *name_l, *dirfile, field_code,
+      *field_code_l);
+
+  fn = gd_linterp_tablename(_GDF_GetDirfile(*dirfile), _GDF_CString(&fc,
+        field_code, *field_code_l));
+
+  _GDF_FString(name, name_l, fn);
+
+  free(fc);
+  free(fn);
+
+  dreturn("%i", *name_l);
+}

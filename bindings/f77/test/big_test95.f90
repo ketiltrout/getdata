@@ -203,6 +203,7 @@ program big_test
   character (len=flen), dimension(nfields + 11) :: fields
   character (len=flen), dimension(nfields + 11) :: flist
   character (len=GD_FIELD_LEN) :: str
+  character (len=4096) :: path
   integer(1), dimension(80) :: datadata
   integer :: i, d, n, l, ne
   real :: fl
@@ -245,7 +246,7 @@ program big_test
   write(1, *) '/META data mlut LINTERP DATA ./lut'
   write(1, *) 'const CONST FLOAT64 5.5'
   write(1, *) 'carray CARRAY FLOAT64 1.1 2.2 3.3 4.4 5.5 6.6'
-  write(1, *) 'linterp LINTERP data /look/up/file'
+  write(1, *) 'linterp LINTERP data ./lut'
   write(1, *) 'polynom POLYNOM data 1.1 2.2 2.2 3.3;4.4 const const'
   write(1, *) 'bit BIT data 3 4'
   write(1, *) 'sbit SBIT data 5 6'
@@ -656,7 +657,7 @@ program big_test
   call check_int2(ne, 21, 1, n, GD_LINTERP_ENTRY)
   call check_int2(ne, 21, 2, ent%fragment_index, 0)
   call check_str2(ne, 21, 3, ent%field(1), 'data')
-  call check_str2(ne, 21, 4, ent%field(2), '/look/up/file')
+  call check_str2(ne, 21, 4, ent%field(2), './lut')
 
 ! 22: fgd_entry (bit) check
   n = fgd_entry(d, 'bit', ent)
@@ -1461,11 +1462,11 @@ program big_test
   call check_int(ne, 79, n, (GD_LITTLE_ENDIAN + GD_NOT_ARM_ENDIAN))
 
 ! 80: fgd_dirfilename check
-  l = GD_FIELD_LEN
-  call fgd_dirfilename(str, l, d, 0)
+  l = 4096
+  call fgd_dirfilename(path, l, d, 0)
   call check_ok(ne, 80, d)
-  call check_int(ne, 80, l, GD_FIELD_LEN)
-  call check_str(ne, 80, str, 'test95_dirfile')
+  call check_int(ne, 80, l, 4096)
+  call check_eos(ne, 80, path, 'test95_dirfile')
 
 ! 81: fgd_parent_fragment check
   n = fgd_parent_fragment(d, 1)
@@ -2558,6 +2559,11 @@ program big_test
 ! 240: fgd_mplex_lookback check
   call fgd_mplex_lookback(d, GD_LOOKBACK_ALL)
   call check_ok(ne, 240, d)
+
+! 241: fgd_raw_filename check
+  str = fgd_linterp_tablename(d, "linterp")
+  call check_ok(ne, 241, d)
+  call check_eos(ne, 241, str, 'test95_dirfile'//DIRSEP//'lut')
 
 
  

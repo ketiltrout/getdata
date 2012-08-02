@@ -566,3 +566,8 @@ const char** Dirfile::EntryList(const char *parent, int type,
 {
   return gd_entry_list(D, parent, type, flags);
 }
+
+char* Dirfile::LinterpTableName(const char *field_code)
+{
+  return gd_linterp_tablename(D, field_code);
+}

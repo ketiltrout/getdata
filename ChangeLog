@@ -1,3 +1,23 @@
+2012-08-02   D. V. Wiebe <getdata@ketiltrout.net> svn:752
+	* src/globals.c (gd_dirfilename): Return the full path.
+	* test/global_name.c: Update.
+
+	* src/add.c (_GD_Add): Properly compute filebase.
+
+	* src/entry.c (gd_linterp_tablename): Added.
+	* test/table.c test/table_code. test/table_type.c: Added.
+	* bindings/cxx/dirfile.cpp (Dirfile::LinterpTableName)
+	bindings/perl/simple_funcs.xsin (linterp_tablename)
+	bindings/f77/getdata.f90.in (fgd_linterp_tablename) bindings/f77/fgetdata.c
+	(GDLTTN) bindings/idl/getdata.c (gdidl_get_linterp_tablename)
+	bindings/python/pydirfile.c (gdpy_dirfile_linterptablename): Added.
+	* bindings/perl/simple_funcs.pl: Handle returning malloc'd string.
+
+	* bindings/cxx/test/big_test.cpp bindings/perl/test/big_test.t
+	bindings/f77/test/big_test.f bindings/f77/test/big_test95.f90
+	bindings/idl/test/big_test.pro bindings/python/test/big_test.py: Add test
+	241.  Update tests 21 and 80.
+
 2012-07-26   D. V. Wiebe <getdata@ketiltrout.net> svn:751
 	* src/flush.c (_GD_FieldSpec): Write /HIDDEN directives for /ALIASes.
 

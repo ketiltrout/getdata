@@ -147,7 +147,7 @@ int main(void)
     "/META data mlut LINTERP DATA ./lut\n"
     "const CONST FLOAT64 5.5\n"
     "carray CARRAY FLOAT64 1.1 2.2 3.3 4.4 5.5 6.6\n"
-    "linterp LINTERP data /look/up/file\n"
+    "linterp LINTERP data ./lut\n"
     "polynom POLYNOM data 1.1 2.2 2.2 3.3;4.4 const const\n"
     "bit BIT data 3 4\n"
     "sbit SBIT data 5 6\n"
@@ -338,7 +338,7 @@ int main(void)
   CHECK_INT2(21,1,ent->Type(),LinterpEntryType);
   CHECK_INT2(21,2,ent->FragmentIndex(),0);
   CHECK_STRING2(21,3,ent->Input(),"data");
-  CHECK_STRING2(21,4,ent->Table(),"/look/up/file");
+  CHECK_STRING2(21,4,ent->Table(),"./lut");
   delete ent;
 
   // 22: Dirfile::Entry / BitEntry check
@@ -997,7 +997,7 @@ int main(void)
   // 80: Dirfile::Name check
   str = d->Name();
   CHECK_OK(80);
-  CHECK_STRING(80,str,"dirfile");
+  CHECK_EOSTRING(80,str,"dirfile");
 
   // 81: Fragment::Parent check
   frag = d->Fragment(1);
@@ -1726,6 +1726,13 @@ int main(void)
   // 240: gd_mplex_lookback
   d->MplexLookback(GD_LOOKBACK_ALL);
   CHECK_OK(240);
+
+  // 241: gd_linterp_tablename check
+  tok = d->LinterpTableName("linterp");
+  CHECK_OK(241);
+  sprintf(buf, "dirfile%clut", GD_DIRSEP);
+  CHECK_EOSTRING(241,tok,buf);
+  free(tok);
 
 
 

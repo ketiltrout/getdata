@@ -252,3 +252,4 @@
 238 F9.... fgd_entry_name_max
 239 F9CIpP gd_entry_list
 240 F9CIpP gd_mplex_lookback
+241 F9CIpP gd_linterp_tablename

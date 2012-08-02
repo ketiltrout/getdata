@@ -237,6 +237,8 @@ C     Corresponding to gd_include(3)
       EXTERNAL GDINCL
 C     Corresponding to gd_invalid_dirfile(3)
       EXTERNAL GDINVD
+C     Corresponding to gd_linterp_tablename(3)
+      EXTERNAL GDLTTN
 C     Corresponding to gd_mconstants(3) (sort of)
       EXTERNAL GDMCOS
 C     Corresponding to gd_madd_alias(3)

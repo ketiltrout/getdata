@@ -104,7 +104,7 @@ file.write(
     "/META data mlut LINTERP DATA ./lut\n"
     "const CONST FLOAT64 5.5\n"
     "carray CARRAY FLOAT64 1.1 2.2 3.3 4.4 5.5 6.6\n"
-    "linterp LINTERP data /look/up/file\n"
+    "linterp LINTERP data ./lut\n"
     "polynom POLYNOM data 1.1 2.2 2.2 3.3;4.4 const const\n"
     "bit BIT data 3 4\n"
     "sbit SBIT data 5 6\n"
@@ -387,7 +387,7 @@ CheckSimple2(21,1,ent.field_type,pygetdata.LINTERP_ENTRY)
 CheckSimple2(21,2,ent.field_type_name,"LINTERP_ENTRY")
 CheckSimple2(21,3,ent.fragment,0)
 CheckSimple2(21,4,ent.in_fields,( "data", ))
-CheckSimple2(21,5,ent.table,"/look/up/file")
+CheckSimple2(21,5,ent.table,"./lut")
 
 # 22: entry (bit) check
 try:
@@ -1009,7 +1009,7 @@ except:
 
 # 80: dirfilename check
 try:
-  CheckSimple(80,d.name,"dirfile")
+  CheckEOS(80,d.name,"dirfile")
 except:
   CheckOK(80)
 
@@ -1987,6 +1987,13 @@ try:
 except:
   CheckOK2(240, 2)
 CheckSimple(240, n, pygetdata.LOOKBACK_ALL)
+
+# 241: raw_filename check
+try:
+  n = d.linterp_tablename("linterp")
+except:
+  CheckOK(241)
+CheckEOS(241,n,"dirfile/lut")
 
 
 

@@ -2868,4 +2868,15 @@ entry_len)
   end if
 end subroutine
 
+function fgd_linterp_tablename (dirfile, field_code)
+  character (len=GD_MAX_LINE_LENGTH) :: fgd_linterp_tablename
+  integer, intent(in) :: dirfile
+  character (len=*), intent(in) :: field_code
+
+  integer :: l = GD_MAX_LINE_LENGTH
+
+  call gdlttn (fgd_linterp_tablename, l, dirfile, TRIM(field_code), &
+  LEN_TRIM(field_code))
+end function
+
 end module

@@ -245,7 +245,7 @@ C     Write the test dirfile
       WRITE(1, *) '/META data mlut LINTERP DATA ./lut'
       WRITE(1, *) 'const CONST FLOAT64 5.5'
       WRITE(1, *) 'carray CARRAY FLOAT64 1.1 2.2 3.3 4.4 5.5 6.6'
-      WRITE(1, *) 'linterp LINTERP data /look/up/file'
+      WRITE(1, *) 'linterp LINTERP data ./lut'
       WRITE(1, *) 'polynom POLYNOM data 1.1 2.2 2.2 3.3;4.4
      + const const'
       WRITE(1, *) 'bit BIT data 3 4'
@@ -481,7 +481,7 @@ C     21: GDGELT check
       CALL CHKIN2(ne, 21, 1, l, flen)
       CALL CHKIN2(ne, 21, 2, n, 0)
       CALL CHKST2(ne, 21, 3, fn, 'data')
-      CALL CHKST2(ne, 21, 4, str, '/look/up/file')
+      CALL CHKST2(ne, 21, 4, str, './lut')
 
 C     22: GDGEBT check
       l = flen
@@ -1263,11 +1263,11 @@ C     79: GDGEND check
       CALL CHKINT(ne, 79, n, GD_LE + GD_NA)
 
 C     80: GDNAME check
-      l = slen
-      CALL GDNAME(str, l, d, 0)
+      l = plen
+      CALL GDNAME(path, l, d, 0)
       CALL CHKEOK(ne, 80, d)
-      CALL CHKINT(ne, 80, l, slen)
-      CALL CHKSTR(ne, 80, str, 'test_dirfile')
+      CALL CHKINT(ne, 80, l, plen)
+      CALL CHKEOS(ne, 80, path, 'test_dirfile')
 
 C     81: GDPFRG check
       CALL GDPFRG(n, d, 1)
@@ -2139,6 +2139,13 @@ C     239: GDENTN check
 C     240: GDMXLB check
       CALL GDMXLB(d, GDLB_A)
       CALL CHKEOK(ne, 240, d)
+
+C     241: GDLTTN check
+      l = plen
+      CALL GDLTTN(path, l, d, "linterp", 7)
+      CALL CHKEOK(ne, 241, d)
+      CALL CHKINT(ne, 241, l, plen)
+      CALL CHKEOS(ne, 241, path, 'test_dirfile'//DIRSEP//'lut')
 
 
 

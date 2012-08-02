@@ -25,6 +25,12 @@ New in version 0.8.1:
     metdata (gd_add(), gd_alter_entry(), &c.), supplied field codes must also
     contain the appropriate suffixes.
 
+  * gd_dirfilename() now returns a fully canonicalised version of the dirfile
+    path.
+
+  * A new function, gd_linterp_tablename() has been added which returns a fully
+    canonicalised version of the look-up table pathname for a LINTERP.
+
   * BUG FIX: gd_alter_entry() and gd_madd_alias() weren't clearing the Dirfile
     error before operation, resulting in them failing erroneously in certain
     situations.

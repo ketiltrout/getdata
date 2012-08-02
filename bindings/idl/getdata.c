@@ -5803,6 +5803,28 @@ void gdidl_mplex_lookback(int argc, IDL_VPTR argv[], char *argk)
   dreturnvoid();
 }
 
+/* @@DLM: F gdidl_get_linterp_tablename GD_LINTERP_TABLENAME 2 2 KEYWORDS */
+IDL_VPTR gdidl_get_linterp_tablename(int argc, IDL_VPTR argv[], char *argk)
+{
+  dtraceidl();
+
+  GDIDL_KW_ONLY_ERROR;
+
+  DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
+  const char *field_code = IDL_VarGetString(argv[1]);
+
+  char *name = gd_linterp_tablename(D, field_code);
+
+  GDIDL_SET_ERROR(D);
+
+  IDL_KW_FREE;
+
+  IDL_VPTR r = IDL_StrToSTRING(name);
+  free(name);
+  dreturn("%p", r);
+  return r;
+}
+
 
 /**** Module initialisation ****/
 

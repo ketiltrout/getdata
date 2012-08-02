@@ -150,9 +150,11 @@ while (<>) {
 
   print "\tCLEANUP:\n", map(printcleanup($_), @arg);
   if ($ret eq "void") {
-    print "\t\tdreturnvoid();\n\n";
+    print "\t\tdreturnvoid();\n";
   } else {
     print "\t\tdreturn(\"", &printfmt($ret), "\", ";
-    print &printmunge([$ret, "RETVAL"]), ");\n\n";
+    print &printmunge([$ret, "RETVAL"]), ");\n";
   }
+  print "\t\tsafefree(RETVAL);\n" if $ret eq "char *";
+  print "\n";
 }

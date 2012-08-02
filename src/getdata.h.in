@@ -731,6 +731,9 @@ gd_nonnull ((1,2));
 
 extern DIRFILE *gd_invalid_dirfile(void) gd_nothrow;
 
+extern char *gd_linterp_tablename(DIRFILE *D, const char *field_code) gd_nothrow
+gd_nonnull ((1, 2));
+
 extern int gd_madd(DIRFILE *dirfile, const gd_entry_t *entry,
     const char *parent) gd_nothrow gd_nonnull ((1,2,3));
 
