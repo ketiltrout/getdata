@@ -90,8 +90,8 @@ int _GD_Include(DIRFILE *D, const char *ename, const char *format_file,
   int old_standards = *standards;
   int old_pedantic = *flags & GD_PEDANTIC;
   int dirfd = -1;
-  char *temp_buf1, *temp_buf2, *sname;
-  char *base, *prefix = NULL, *suffix = NULL;
+  char *temp_buf1 = NULL, *temp_buf2, *sname = NULL;
+  char *base = NULL, *prefix = NULL, *suffix = NULL;
   void *ptr = NULL;
   FILE* new_fp = NULL;
   time_t mtime = 0;
@@ -104,84 +104,66 @@ int _GD_Include(DIRFILE *D, const char *ename, const char *format_file,
   if (++D->recurse_level >= GD_MAX_RECURSE_LEVEL) {
     _GD_SetError(D, GD_E_RECURSE_LEVEL, GD_E_RECURSE_INCLUDE, format_file,
         linenum, ename);
-    D->recurse_level--;
-    dreturn("%i", 0);
-    return 0;
+    goto include_error;
   }
 
   if (_GD_SetFieldAffixes(D, me, prefix_in, suffix_in, old_standards,
         old_pedantic, format_file, linenum, &prefix, &suffix))
   {
-    free(suffix);
-    D->recurse_level--;
-    dreturn("%i", -1);
-    return -1;
+    goto include_error;
   }
 
   /* isolate filename */
   temp_buf2 = _GD_Strdup(D, ename);
-  if (temp_buf2 == NULL) {
-    free(prefix);
-    free(suffix);
-    D->recurse_level--;
-    dreturn("%i", -1);
-    return -1;
-  }
+  if (temp_buf2 == NULL)
+    goto include_error;
   base = _GD_Strdup(D, basename(temp_buf2));
-  if (base == NULL) {
-    free(temp_buf2);
-    free(prefix);
-    free(suffix);
-    D->recurse_level--;
-    dreturn("%i", -1);
-    return -1;
-  }
   free(temp_buf2);
+  if (base == NULL)
+    goto include_error;
 
   /* isolate relative path */
   temp_buf2 = _GD_Strdup(D, ename);
-  if (temp_buf2 == NULL) {
-    free(base);
-    free(prefix);
-    free(suffix);
-    D->recurse_level--;
-    dreturn("%i", -1);
-    return -1;
-  }
+  if (temp_buf2 == NULL)
+    goto include_error;
   sname = _GD_Strdup(D, dirname(temp_buf2));
-  if (sname == NULL) {
-    free(temp_buf2);
-    free(base);
-    free(prefix);
-    free(suffix);
-    D->recurse_level--;
-    dreturn("%i", -1);
-    return -1;
-  }
   free(temp_buf2);
+  if (sname == NULL)
+    goto include_error;
 
   /* Open the containing directory */
   dirfd = _GD_GrabDir(D, D->fragment[me].dirfd, ename);
   if (dirfd == -1 && D->error == GD_E_OK)
     _GD_SetError(D, GD_E_OPEN_FRAGMENT, errno, format_file, linenum, ename);
-  if (D->error) {
-    free(prefix);
-    free(suffix);
-    free(sname);
-    D->recurse_level--;
-    dreturn("%i", -1);
-    return -1;
-  }
+  if (D->error)
+    goto include_error;
 
   temp_buf1 = _GD_MakeFullPath(D, dirfd, base, 1);
   if (temp_buf1 == NULL) {
     _GD_ReleaseDir(D, dirfd);
-    free(prefix);
-    free(suffix);
-    free(sname);
-    D->recurse_level--;
-    dreturn("%i", -1);
-    return -1;
+    goto include_error;
+  }
+
+  /* Reject weird stuff */
+  if (gd_StatAt(D, dirfd, base, &statbuf, 0)) {
+    if (!(*flags & GD_CREAT)) {
+      _GD_SetError(D, GD_E_OPEN_FRAGMENT, errno, format_file, linenum,
+          temp_buf1);
+      _GD_ReleaseDir(D, dirfd);
+      goto include_error;
+    }
+  } else {
+    if (S_ISDIR(statbuf.st_mode)) {
+      _GD_SetError(D, GD_E_OPEN_FRAGMENT, EISDIR, format_file, linenum,
+          temp_buf1);
+      _GD_ReleaseDir(D, dirfd);
+      goto include_error;
+    } else if (!S_ISREG(statbuf.st_mode)) {
+      _GD_SetError(D, GD_E_OPEN_FRAGMENT, EINVAL, format_file, linenum,
+          temp_buf1);
+      _GD_ReleaseDir(D, dirfd);
+      goto include_error;
+    }
   }
 
   /* Try to open the file */
@@ -193,14 +175,8 @@ int _GD_Include(DIRFILE *D, const char *ename, const char *format_file,
   if (i < 0) {
     _GD_SetError(D, GD_E_OPEN_FRAGMENT, errno, format_file, linenum,
         temp_buf1);
-    free(prefix);
-    free(suffix);
-    free(base);
-    free(sname);
-    free(temp_buf1);
-    D->recurse_level--;
-    dreturn("%i", -1);
-    return -1;
+    _GD_ReleaseDir(D, dirfd);
+    goto include_error;
   }
 
   new_fp = fdopen(i, ((D->flags & GD_ACCMODE) == GD_RDWR) ? "rb+" : "rb");
@@ -208,14 +184,8 @@ int _GD_Include(DIRFILE *D, const char *ename, const char *format_file,
   /* If opening the file failed, set the error code and abort parsing. */
   if (new_fp == NULL) {
     _GD_SetError(D, GD_E_OPEN_FRAGMENT, errno, format_file, linenum, temp_buf1);
-    free(prefix);
-    free(suffix);
-    free(base);
-    free(sname);
-    free(temp_buf1);
-    D->recurse_level--;
-    dreturn("%i", -1);
-    return -1;
+    _GD_ReleaseDir(D, dirfd);
+    goto include_error;
   }
 
   /* fstat the file and record the mtime */
@@ -226,16 +196,9 @@ int _GD_Include(DIRFILE *D, const char *ename, const char *format_file,
   ptr = _GD_Realloc(D, D->fragment,
       (++D->n_fragment) * sizeof(struct gd_fragment_t));
   if (ptr == NULL) {
+    _GD_ReleaseDir(D, dirfd);
     D->n_fragment--;
-    fclose(new_fp);
-    free(prefix);
-    free(suffix);
-    free(base);
-    free(sname);
-    free(temp_buf1);
-    D->recurse_level--;
-    dreturn("%i", -1);
-    return -1;
+    goto include_error;
   }
   D->fragment = (struct gd_fragment_t *)ptr;
 
@@ -285,12 +248,10 @@ int _GD_Include(DIRFILE *D, const char *ename, const char *format_file,
   /* catch alloc errors */
   if (D->error) {
     D->n_fragment--;
+    temp_buf1 = prefix = suffix = base = NULL;
     fclose(new_fp);
-    free(prefix);
-    free(suffix);
-    D->recurse_level--;
-    dreturn("%i", -1);
-    return -1;
+    _GD_ReleaseDir(D, dirfd);
+    goto include_error;
   }
 
   *ref_name = _GD_ParseFragment(new_fp, D, D->n_fragment - 1, standards, flags,
@@ -311,6 +272,16 @@ int _GD_Include(DIRFILE *D, const char *ename, const char *format_file,
   D->recurse_level--;
   dreturn("%i", D->n_fragment - 1);
   return D->n_fragment - 1;
+
+include_error:
+  free(prefix);
+  free(suffix);
+  free(base);
+  free(sname);
+  free(temp_buf1);
+  D->recurse_level--;
+  dreturn("%i", -1);
+  return -1;
 }
 
 int gd_include_affix(DIRFILE* D, const char* file, int fragment_index,

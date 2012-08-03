@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_fragment_affix 3 "1 January 2012" "Version 0.8.0" "GETDATA"
+.TH gd_fragment_affix 3 "2 August 2012" "Version 0.8.1" "GETDATA"
 .SH NAME
 gd_fragment_affix \(em report the field affixes of a fragment of a dirfile database
 .SH SYNOPSIS
@@ -50,7 +50,7 @@ argument must point to a valid DIRFILE object previously created by a call to
 .SH RETURN VALUE
 Upon successful completion,
 .BR gd_fragment_affix ()
-returns zero.  The prefix and suffix are reported in
+returns zero.  If non-empty, the prefix and suffix are reported in
 .BR malloc (3)'d
 buffers whose addresses are returned in
 .BI * prefix
@@ -58,6 +58,8 @@ and
 .BI * suffix\fR.
 They should be deallocated by the caller when no longer needed by calling
 .BR free (3).
+If the fragment prefix or suffix is the empty string, NULL is returned in the
+corresponding pointer.
 
 On error, -1 is returned and sets the dirfile error to a non-zero error value.
 In this case, the values of

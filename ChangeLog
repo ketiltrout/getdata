@@ -1,3 +1,6 @@
+2012-08-02   D. V. Wiebe <getdata@ketiltrout.net> svn:753
+	* src/include.c (_GD_Include): Reject non-regular files as fragments.
+
 2012-08-02   D. V. Wiebe <getdata@ketiltrout.net> svn:752
 	* src/globals.c (gd_dirfilename): Return the full path.
 	* test/global_name.c: Update.

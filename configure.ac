@@ -1,4 +1,4 @@
-dnl Copyright (C) 2008-2011 D. V. Wiebe
+dnl Copyright (C) 2008-2012 D. V. Wiebe
 dnl
 dnllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll
 dnl
@@ -22,6 +22,15 @@ dnl
 m4_include([m4/version.m4])
 
 AC_INIT([GetData],[getdata_version],[getdata-devel@lists.sourceforge.net])
+
+AC_COPYRIGHT(
+[Parts of this program are copyright (C) 2008-2012 D. V. Wiebe.
+
+These parts may be redistributed and/or modified under the terms of the GNU
+Lesser General Public License as published by the Free Software Foundation;
+either version 2.1 of the License, or (at your option) any later version.
+See the file COPYING for details.]
+)
 
 AC_DEFINE([GETDATA_MAJOR], [getdata_major], [ The major version number ])
 AC_DEFINE([GETDATA_MINOR], [getdata_minor], [ The minor version number ])
@@ -325,6 +334,7 @@ case "${host}" in
 esac
 AC_MSG_RESULT([$gd_unaligned_ok])
 
+dnl FDIRSEP is used in Fortran, where '\' should not be escaped.
 AC_MSG_CHECKING([the directory separator])
 case "${host}" in
   *-*-djgpp|*-*-mingw32) GD_FDIRSEP=\\; GD_DIRSEP=\\\\ ;;

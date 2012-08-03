@@ -13,6 +13,9 @@ New in version 0.8.1:
 
   * BUG FIX: /HIDDEN directives weren't being written for aliases.
 
+  * BUG FIX: The parser now fails properly on /INCLUDEs which specify paths
+    which don't point to regular files.
+
   * WIN32 BUG FIX: On Windows, the parser can now properly handle hexadecimal
     floating point.
 
