@@ -1,3 +1,10 @@
+2012-08-04   D. V. Wiebe <getdata@ketiltrout.net> svn:755
+	* src/parse.c (_GD_ParseFragment): Don't resize instring unnecessarily.
+
+2012-08-04   D. V. Wiebe <getdata@ketiltrout.net> svn:754
+	* src/parse.c (_GD_ParseDirective): Delete free reference on encountered
+	one in a subfragment.
+
 2012-08-02   D. V. Wiebe <getdata@ketiltrout.net> svn:753
 	* src/include.c (_GD_Include): Reject non-regular files as fragments.
 

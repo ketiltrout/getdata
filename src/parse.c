@@ -2306,15 +2306,15 @@ char *_GD_ParseFragment(FILE *restrict fp, DIRFILE *restrict D, int me,
           &outstring, tok_pos);
 
     if (D->error == GD_E_FORMAT) {
-      /* we guarantee a buffer size of at least GD_MAX_LINE_LENGTH */
-      if (n < GD_MAX_LINE_LENGTH) {
-        char *ptr = (char *)_GD_Realloc(D, instring, GD_MAX_LINE_LENGTH);
-        if (ptr == NULL)
-          break;
-        instring = ptr;
-      }
       /* call the callback for this error */
       if (D->sehandler != NULL) {
+        /* we guarantee a buffer size of at least GD_MAX_LINE_LENGTH */
+        if (n < GD_MAX_LINE_LENGTH) {
+          char *ptr = (char *)_GD_Realloc(D, instring, GD_MAX_LINE_LENGTH);
+          if (ptr == NULL)
+            break;
+          instring = ptr;
+        }
         pdata.dirfile = D;
         pdata.suberror = D->suberror;
         pdata.linenum = linenum;
