@@ -261,9 +261,9 @@ PARSE_TESTS=parse_alias parse_alias_code parse_alias_dup parse_alias_meta \
 						parse_include_absolute parse_include_absrel parse_include_dir \
 						parse_include_loop parse_include_nonexistent parse_include_prefix \
 						parse_include_prefix_dup parse_include_preprefix \
-						parse_include_relabs parse_include_relrel parse_include_slash \
-						parse_include_suffix parse_include_sufsuffix parse_index \
-						parse_lincom parse_lincom_ncols1 parse_lincom_ncols2 \
+						parse_include_ref parse_include_relabs parse_include_relrel \
+						parse_include_slash parse_include_suffix parse_include_sufsuffix \
+						parse_index parse_lincom parse_lincom_ncols1 parse_lincom_ncols2 \
 						parse_lincom_nfields parse_lincom_nofields parse_lincom_non \
 						parse_lincom_non_ncols parse_lincom_scalar parse_linterp \
 						parse_linterp_ncols parse_malias parse_malias_dup \
