@@ -1,3 +1,8 @@
+2012-08-04   D. V. Wiebe <getdata@ketiltrout.net> svn:757
+	* src/include.c (_GD_Include): Return the correct fragment index, not just
+	D->n_fragment - 1.
+	* test/include_sub.c: Added.
+
 2012-08-04   D. V. Wiebe <getdata@ketiltrout.net> svn:755
 	* src/parse.c (_GD_ParseFragment): Don't resize instring unnecessarily.
 

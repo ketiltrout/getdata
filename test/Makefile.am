@@ -203,7 +203,8 @@ HIDE_TESTS=hide hide_hidden hide_unhide
 
 INCLUDE_TESTS=include include_accmode include_affix include_auto include_cb \
 							include_creat include_ignore include_index include_invalid \
-							include_nonexistent include_pc include_ref include_syntax
+							include_nonexistent include_pc include_ref include_sub \
+							include_syntax
 
 INDEX_TESTS=index index_domain index_range
 

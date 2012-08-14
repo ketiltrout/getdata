@@ -38,6 +38,9 @@ New in version 0.8.1:
     error before operation, resulting in them failing erroneously in certain
     situations.
 
+  * BUG FIX: When including an existing fragment which itself has subfragments,
+    gd_include() no longer returns the wrong fragment index.
+
   Bindings Changes:
 
   * F77 BUG FIX: A memory leak has been fixed in GDALLC.

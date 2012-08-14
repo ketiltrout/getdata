@@ -83,10 +83,11 @@ static int _GD_SetFieldAffixes(DIRFILE *D, int me, const char *prefix_in,
 /* Include a format file fragment -- returns the mew fragment index, or
  * -1 on error */
 int _GD_Include(DIRFILE *D, const char *ename, const char *format_file,
-    int linenum, char **ref_name, int me, const char *prefix_in,
+    int linenum, char **ref_name, int parent, const char *prefix_in,
     const char *suffix_in, int *standards, unsigned long *flags, int resolve)
 {
   int i;
+  int me = D->n_fragment;
   int old_standards = *standards;
   int old_pedantic = *flags & GD_PEDANTIC;
   int dirfd = -1;
@@ -98,7 +99,7 @@ int _GD_Include(DIRFILE *D, const char *ename, const char *format_file,
   struct stat statbuf;
 
   dtrace("%p, \"%s\", \"%s\", %p, %i, %i, \"%s\", \"%s\", %p, %p, %i", D, ename,
-      format_file, ref_name, linenum, me, prefix_in, suffix_in, standards,
+      format_file, ref_name, linenum, parent, prefix_in, suffix_in, standards,
       flags, resolve);
 
   if (++D->recurse_level >= GD_MAX_RECURSE_LEVEL) {
@@ -107,7 +108,7 @@ int _GD_Include(DIRFILE *D, const char *ename, const char *format_file,
     goto include_error;
   }
 
-  if (_GD_SetFieldAffixes(D, me, prefix_in, suffix_in, old_standards,
+  if (_GD_SetFieldAffixes(D, parent, prefix_in, suffix_in, old_standards,
         old_pedantic, format_file, linenum, &prefix, &suffix))
   {
     goto include_error;
@@ -132,7 +133,7 @@ int _GD_Include(DIRFILE *D, const char *ename, const char *format_file,
     goto include_error;
 
   /* Open the containing directory */
-  dirfd = _GD_GrabDir(D, D->fragment[me].dirfd, ename);
+  dirfd = _GD_GrabDir(D, D->fragment[parent].dirfd, ename);
   if (dirfd == -1 && D->error == GD_E_OK)
     _GD_SetError(D, GD_E_OPEN_FRAGMENT, errno, format_file, linenum, ename);
   if (D->error)
@@ -202,48 +203,47 @@ int _GD_Include(DIRFILE *D, const char *ename, const char *format_file,
   }
   D->fragment = (struct gd_fragment_t *)ptr;
 
-  D->fragment[D->n_fragment - 1].bname = base;
-  D->fragment[D->n_fragment - 1].cname = temp_buf1;
-  D->fragment[D->n_fragment - 1].ename = _GD_Strdup(D, ename);
-  D->fragment[D->n_fragment - 1].enc_data = NULL;
-  D->fragment[D->n_fragment - 1].modified = 0;
-  D->fragment[D->n_fragment - 1].parent = me;
-  D->fragment[D->n_fragment - 1].dirfd = dirfd;
-  D->fragment[D->n_fragment - 1].encoding = *flags & GD_ENCODING;
-  D->fragment[D->n_fragment - 1].byte_sex =
+  D->fragment[me].bname = base;
+  D->fragment[me].cname = temp_buf1;
+  D->fragment[me].ename = _GD_Strdup(D, ename);
+  D->fragment[me].enc_data = NULL;
+  D->fragment[me].modified = 0;
+  D->fragment[me].parent = parent;
+  D->fragment[me].dirfd = dirfd;
+  D->fragment[me].encoding = *flags & GD_ENCODING;
+  D->fragment[me].byte_sex =
 #ifdef WORDS_BIGENDIAN
     (*flags & GD_LITTLE_ENDIAN) ? GD_LITTLE_ENDIAN : GD_BIG_ENDIAN
 #else
     (*flags & GD_BIG_ENDIAN) ? GD_BIG_ENDIAN : GD_LITTLE_ENDIAN
 #endif
     ;
-  D->fragment[D->n_fragment - 1].ref_name = NULL;
-  D->fragment[D->n_fragment - 1].frame_offset = D->fragment[me].frame_offset;
-  D->fragment[D->n_fragment - 1].protection = GD_PROTECT_NONE;
-  D->fragment[D->n_fragment - 1].prefix = prefix;
-  D->fragment[D->n_fragment - 1].suffix = suffix;
-  D->fragment[D->n_fragment - 1].mtime = mtime;
-  D->fragment[D->n_fragment - 1].vers =
-    (*flags & GD_PEDANTIC) ? 1ULL << *standards : 0;
+  D->fragment[me].ref_name = NULL;
+  D->fragment[me].frame_offset = D->fragment[parent].frame_offset;
+  D->fragment[me].protection = GD_PROTECT_NONE;
+  D->fragment[me].prefix = prefix;
+  D->fragment[me].suffix = suffix;
+  D->fragment[me].mtime = mtime;
+  D->fragment[me].vers = (*flags & GD_PEDANTIC) ? 1ULL << *standards : 0;
 
   /* compute the (relative) subdirectory name */
   if (sname[0] == '.' && sname[1] == '\0') {
     /* dirname is the same as the parent fragment's */
-    D->fragment[D->n_fragment - 1].sname = (D->fragment[me].sname) ?
-      _GD_Strdup(D, D->fragment[me].sname) : NULL;
+    D->fragment[me].sname = (D->fragment[parent].sname) ?
+      _GD_Strdup(D, D->fragment[parent].sname) : NULL;
     free(sname);
-  } else if (D->fragment[me].sname && _GD_AbsPath(sname)) {
+  } else if (D->fragment[parent].sname && _GD_AbsPath(sname)) {
     /* have both a relative dirname and the parent's sname; squish them
      * together */
-    D->fragment[D->n_fragment - 1].sname = (char*)_GD_Malloc(D, strlen(sname) +
-        strlen(D->fragment[me].sname) + 2);
-    if (D->fragment[D->n_fragment - 1].sname)
-      sprintf(D->fragment[D->n_fragment - 1].sname, "%s%c%s",
-          D->fragment[me].sname, GD_DIRSEP, sname);
+    D->fragment[me].sname = (char*)_GD_Malloc(D, strlen(sname) +
+        strlen(D->fragment[parent].sname) + 2);
+    if (D->fragment[me].sname)
+      sprintf(D->fragment[me].sname, "%s%c%s", D->fragment[parent].sname,
+          GD_DIRSEP, sname);
     free(sname);
   } else
     /* just save the sname */
-    D->fragment[D->n_fragment - 1].sname = sname;
+    D->fragment[me].sname = sname;
 
   /* catch alloc errors */
   if (D->error) {
@@ -254,8 +254,7 @@ int _GD_Include(DIRFILE *D, const char *ename, const char *format_file,
     goto include_error;
   }
 
-  *ref_name = _GD_ParseFragment(new_fp, D, D->n_fragment - 1, standards, flags,
-      resolve);
+  *ref_name = _GD_ParseFragment(new_fp, D, me, standards, flags, resolve);
 
   fclose(new_fp);
 
@@ -270,8 +269,8 @@ int _GD_Include(DIRFILE *D, const char *ename, const char *format_file,
   }
 
   D->recurse_level--;
-  dreturn("%i", D->n_fragment - 1);
-  return D->n_fragment - 1;
+  dreturn("%i", me);
+  return me;
 
 include_error:
   free(prefix);
