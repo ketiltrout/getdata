@@ -34,6 +34,10 @@
 #define isnan _isnan
 #endif
 
+#if defined HAVE__FINITE && ! defined HAVE_ISFINITE
+#define isfinite _finite
+#endif
+
 /* System call kludge for Win32 */
 #if defined __MSVCRT__ && defined MSYS_SHELL
 #include <process.h>
