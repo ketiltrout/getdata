@@ -62,7 +62,7 @@ int main(void)
   CHECKI(error, 0);
   CHECKI(n, 8);
   for (i = 0; i < 8; ++i)
-    CHECKUi(i,c[i],0x5000000000000028 + i * 0x0200000000000001);
+    CHECKUi(i,c[i],0x5000000000000028U + i * 0x0200000000000001U);
 
   gd_close(D);
 

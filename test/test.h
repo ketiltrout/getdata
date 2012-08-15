@@ -34,7 +34,8 @@
 #define isnan _isnan
 #endif
 
-#if defined HAVE__FINITE && ! defined HAVE_ISFINITE
+#if defined HAVE__FINITE && \
+  (! defined HAVE_DECL_ISFINITE || HAVE_DECL_ISFINITE == 0)
 #define isfinite _finite
 #endif
 

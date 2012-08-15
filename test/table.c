@@ -32,7 +32,6 @@ int main(void)
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
   const char *format_data = "linterp LINTERP INDEX table\n";
-  unsigned char data_data[256];
   int fd, error, r = 0;
   char *path;
   DIRFILE *D;
