@@ -1,3 +1,7 @@
+2012-08-15   D. V. Wiebe <getdata@ketiltrout.net> svn:760
+	* src/internal (_GD_IsDirSep): Added.
+	* src/common.c (_GD_CanonicalPath): Call _GD_IsDirSep
+
 2012-08-15   D. V. Wiebe <getdata@ketiltrout.net> svn:759
 	GetData-0.8.1rc1:
 

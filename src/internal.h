@@ -619,6 +619,7 @@ ssize_t getdelim(char**, size_t*, int, FILE*);
 #endif
 
 /* path malarkey */
+#define _GD_IsDirSep(c) (((c) == GD_DIRSEP) || ((c) == '/'))
 #if defined _WIN32 || defined _WIN64
 # define _GD_AbsPath(s)  (s && ((s)[0] == '/' || (s)[0] == GD_DIRSEP || \
                                   ((s)[0] != '\0' && (s)[1] == ':')))

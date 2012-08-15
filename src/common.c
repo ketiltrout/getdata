@@ -1067,7 +1067,7 @@ char *_GD_CanonicalPath(const char *car, const char *cdr)
   /* now step through work, building up res as appropriate */
   for (end = cur ; !last_element; cur = end) {
     /* look for the next GD_DIRSEP or NUL */
-    for (; *end != '\0' && *end != GD_DIRSEP; ++end)
+    for (; *end != '\0' && !_GD_IsDirSep(*end); ++end)
       ;
 
     /* end of string */
@@ -1088,8 +1088,8 @@ char *_GD_CanonicalPath(const char *car, const char *cdr)
       /* don't strip the leading GD_DIRSEP */
       if (res_len > res_root) {
         /* find the last GD_DIRSEP, but don't strip the leading GD_DIRSEP */
-        for(ptr = res + res_len - 1; *ptr != GD_DIRSEP && ptr > res + res_root;
-            --ptr)
+        for(ptr = res + res_len - 1;
+            !_GD_IsDirSep(*ptr) && ptr > res + res_root; --ptr)
           ;
 
         /* strip the .. if possible, otherwise append it */
@@ -1109,7 +1109,7 @@ char *_GD_CanonicalPath(const char *car, const char *cdr)
         }
         res = ptr;
       }
-      if (res_len > 1 && res[res_len - 1] != GD_DIRSEP)
+      if (res_len > 1 && !_GD_IsDirSep(res[res_len - 1]))
         res[res_len++] = GD_DIRSEP;
       strcpy(res + res_len, cur);
       res_len += len - 1;
@@ -1181,7 +1181,7 @@ char *_GD_CanonicalPath(const char *car, const char *cdr)
           } else if (res_len > res_root) {
             /* strip the symlink name from res */
             char *rptr;
-            for (rptr = res + res_len - 1; *rptr != GD_DIRSEP; --rptr)
+            for (rptr = res + res_len - 1; !_GD_IsDirSep(*rptr); --rptr)
               ;
             *(rptr + 1) = '\0';
             res_len = (rptr - res) + 1;
@@ -1201,7 +1201,7 @@ char *_GD_CanonicalPath(const char *car, const char *cdr)
             char *new_work, slash[2] = { GD_DIRSEP, 0 };
             len = strlen(end) + slen + 2;
 
-            if (*(ptr + slen - 1) == GD_DIRSEP) {
+            if (_GD_IsDirSep(*(ptr + slen - 1))) {
               slash[0] = '\0';
               len--;
             }
