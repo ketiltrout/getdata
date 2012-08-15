@@ -1978,9 +1978,9 @@ static void _GD_ParseAlias(DIRFILE *restrict D, char **restrict name,
 /* _GD_ParseDirective: Actually parse a single format file line.
  *       Returns 1 if a match was made.
  */
-static int _GD_ParseDirective(DIRFILE *restrict D, char **in_cols, int n_cols,
+static int _GD_ParseDirective(DIRFILE *D, char **in_cols, int n_cols,
     int me, int *restrict standards, int linenum, char **restrict ref_name,
-    unsigned long *restrict flags, char **outstring, const char *tok_pos)
+    unsigned long *flags, char **outstring, const char *tok_pos)
 {
   const char* ptr;
   char *munged_code;
@@ -2257,8 +2257,8 @@ void _GD_UpdateAliases(DIRFILE *D, int reset)
  *
  *       Returns NULL unless this fragment contains a REFERENCE directive.
  */
-char *_GD_ParseFragment(FILE *restrict fp, DIRFILE *restrict D, int me,
-    int *restrict standards, unsigned long *restrict flags, int resolve)
+char *_GD_ParseFragment(FILE *restrict fp, DIRFILE *D, int me,
+    int *restrict standards, unsigned long *flags, int resolve)
 {
   char *instring = NULL;
   char *outstring = NULL;

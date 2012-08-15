@@ -1,4 +1,4 @@
-New in version 0.8.1:
+New in version 0.8.1rc1:
 
   Library Changes:
 
@@ -15,6 +15,10 @@ New in version 0.8.1:
 
   * BUG FIX: The parser now fails properly on /INCLUDEs which specify paths
     which don't point to regular files.
+
+  * BUG FIX: Fixed a bug which would result in the parser getting confused over
+    the current Standards Version, potentially leading to rejected valid
+    dirfiles.  Reported by Daniel Flanigan.
 
   * WIN32 BUG FIX: On Windows, the parser can now properly handle hexadecimal
     floating point.

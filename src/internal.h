@@ -1114,8 +1114,8 @@ DIRFILE *_GD_Open(DIRFILE*, int, const char*, unsigned long,
 gd_entry_t *_GD_ParseFieldSpec(DIRFILE *restrict, int, char**,
     const gd_entry_t *restrict, const char *restrict, int, int, int, int,
     unsigned long, int, char**, const char*);
-char *_GD_ParseFragment(FILE *restrict, DIRFILE *restrict, int, int *restrict,
-    unsigned long int *restrict, int);
+char *_GD_ParseFragment(FILE *restrict, DIRFILE *, int, int *restrict,
+    unsigned long int *, int);
 void _GD_ReadLinterpFile(DIRFILE *restrict, gd_entry_t *restrict);
 void *_GD_Realloc(DIRFILE *restrict, void *restrict, size_t size);
 void _GD_ReleaseDir(DIRFILE *D, int dirfd);

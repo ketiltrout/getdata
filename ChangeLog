@@ -1,4 +1,10 @@
-2012-08-04   D. V. Wiebe <getdata@ketiltrout.net> svn:757
+2012-08-15   D. V. Wiebe <getdata@ketiltrout.net> svn:759
+	GetData-0.8.1rc1:
+
+	* src/parse.c (_GD_ParseDirective _GD_ParseFragment): Remove inappropriate
+	restrict keywords.  Reported by Daniel Flanigan.
+
+2012-08-14   D. V. Wiebe <getdata@ketiltrout.net> svn:757
 	* src/include.c (_GD_Include): Return the correct fragment index, not just
 	D->n_fragment - 1.
 	* test/include_sub.c: Added.
