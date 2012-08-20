@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_entry 3 "21 April 2012" "Version 0.8.0" "GETDATA"
+.TH gd_entry 3 "15 August 2012" "Version 0.8.1" "GETDATA"
 .SH NAME
 gd_entry \(em retrieve a dirfile field's metadata
 .SH SYNOPSIS
@@ -523,7 +523,10 @@ typedef struct {
 .PP
 The
 .I table
-member is the pathname to the look up table on disk.
+member is the pathname to the look up table on disk.  This the path as it appars
+in the format specification.  It may be a path relative to the fragment
+directory.  For an canonicalised, absolute version of this path, see
+.BR gd_linterp_tablename (3).
 .PP
 The
 .I in_fields
@@ -942,7 +945,7 @@ element is the imaginary part.
 .BR gd_error (3),
 .BR gd_error_string (3),
 .BR gd_field_list (3),
-.BR gd_mplex_lookback (3),
 .BR gd_fragmentname (3),
-.BR gd_getdata (3),
+.BR gd_linterp_tablename (3)
+.BR gd_mplex_lookback (3),
 .BR gd_raw_filename (3)

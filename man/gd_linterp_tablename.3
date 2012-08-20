@@ -38,6 +38,16 @@ If
 .I field_code
 contains a valid representation suffix, it will be ignored.
 
+Note: this function returns a fully canonicalised, absolute path.  The value of
+the
+.I table
+member in a
+.B gd_entry_t
+object (see
+.BR gd_entry (3))
+is the path which appears in the format specification on disk, which may be a
+path relative to the fragment directory.
+
 .SH RETURN VALUE
 On success,
 .BR gd_linterp_tablename ()
