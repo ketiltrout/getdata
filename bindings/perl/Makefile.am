@@ -20,14 +20,15 @@
 #
 AUTOMAKE_OPTIONS = foreign
 
-EXTRA_DIST=funclist.pl GetData.xs simple_funcs.pl simple_funcs.xsin typemap \
-					 GetData.pm.in MANIFEST.in test/big_test.t test/callback.t
-
 if GETDATA_DEBUG
 TEST_VERBOSE=verbose=1
 endif
 
-PERL_TESTS=t/big_test.t t/callback.t
+plTESTS=t/big_test.t t/callback.t
+PERL_TESTS=$(addprefix ${srcdir}/, $(plTESTS))
+
+EXTRA_DIST=funclist.pl GetData.xs simple_funcs.pl simple_funcs.xsin typemap \
+					 GetData.pm.in MANIFEST.in ${plTESTS}
 
 man3dir=${perlmandir}
 nodist_man3_MANS=blib/libdoc/GetData.$(PERL_MAN3EXT)
@@ -37,12 +38,8 @@ nodist_perl_SCRIPTS=blib/lib/GetData.pm
 perlautogetdatadir=${perldir}/auto/GetData
 nodist_perlautogetdata_SCRIPTS=blib/arch/auto/GetData/GetData.bs blib/arch/auto/GetData/GetData.so
 
-t lib:
-	mkdir -p $@
-
-t/%.t: test/%.t
-	$(MAKE) t
-	cat $< > $@
+lib:
+	mkdir $@
 
 lib/GetData.xs: GetData.xs
 	$(MAKE) lib
@@ -90,7 +87,7 @@ clean-local:
 		$(PERL) Build clean; \
 	fi
 	rm -f $(BUILT_SOURCES) make_parameters.sed MYMETA.yml MYMETA.json GetData.pm
-	rm -rf Build _build MANIFEST t build.stamp
+	rm -rf Build _build MANIFEST build.stamp
 
 uninstall-hook:
 	rmdir $(DESTDIR)${perlautogetdatadir}
