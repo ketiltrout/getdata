@@ -26,7 +26,7 @@ endmacro()
 #TODO add configure
 add_definitions(
   -DPACKAGE_NAME=\"GetData\"
-  -DPACKAGE_VERSION=\"0.8.0\"
+  -DPACKAGE_VERSION=\"0.8.x\"
   -DPACKAGE_BUGREPORT=\"getdata-devel@lists.sourceforge.net\"
   -DUNALIGNED_ACCESS_OK
   )
