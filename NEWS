@@ -1,3 +1,13 @@
+New in version 0.8.2a:
+
+  Library Changes:
+
+  * BUG FIX: Trying to read data from the first sample of an MPLEX no longer
+    results in an internal error if the first sample of the index doesn't match
+    the target value.
+
+|==============================================================================|
+
 New in version 0.8.1:
 
   Library Changes:

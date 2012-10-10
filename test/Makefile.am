@@ -184,13 +184,14 @@ GET_TESTS=get64 get_affix get_bad_code get_bit get_carray get_carray_len \
 					get_int8 get_int16 get_int32 get_int64 get_invalid get_lincom1 \
 					get_lincom2 get_lincom3 get_lincom_noin get_lincom_non \
 					get_lincom_null get_lincom_spf get_linterp get_linterp_noin \
-					get_linterp_notab get_linterp_sort get_mplex get_mplex_lb \
-					get_mplex_lball get_mplex_nolb get_multiply get_multiply_noin \
-					get_nonexistent get_null get_off64 get_phase get_phase_affix \
-					get_polynom get_polynom_noin get_recip get_recip_const get_recurse \
-					get_rofs get_sbit get_sf get_ss get_type get_uint16 get_uint32 \
-					get_uint64 get_window get_window_clr get_window_ge get_window_gt \
-					get_window_le get_window_lt get_window_ne get_window_set get_zero
+					get_linterp_notab get_linterp_sort get_mplex get_mplex_bof \
+					get_mplex_lb get_mplex_lball get_mplex_nolb get_multiply \
+					get_multiply_noin get_nonexistent get_null get_off64 get_phase \
+					get_phase_affix get_polynom get_polynom_noin get_recip \
+					get_recip_const get_recurse get_rofs get_sbit get_sf get_ss get_type \
+					get_uint16 get_uint32 get_uint64 get_window get_window_clr \
+					get_window_ge get_window_gt get_window_le get_window_lt \
+					get_window_ne get_window_set get_zero
 
 GLOBAL_TESTS=global_flags global_name global_ref global_ref_empty global_ref_set
 

@@ -1095,7 +1095,11 @@ void _GD_LinterpData(DIRFILE *restrict, void *restrict, gd_type_t, int,
 int _GD_ListEntry(const gd_entry_t *E, int meta, int hidden, int noalias,
     int special, gd_entype_t type);
 char *_GD_MakeFullPath(DIRFILE *restrict, int, const char *restrict, int);
+#ifdef USE_MODULES
 #define _GD_MakeFullPathOnly gd_MakeFullPathOnly
+#else
+#define gd_MakeFullPathOnly _GD_MakeFullPathOnly
+#endif
 char *_GD_MakeFullPathOnly(const DIRFILE *D, int dirfd, const char *name);
 int _GD_MakeTempFile(const DIRFILE*, int, char*);
 void *_GD_Malloc(DIRFILE *D, size_t size);

@@ -20,8 +20,8 @@ dnl 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 m4_define(getdata_major,    0)
 m4_define(getdata_minor,    8)
-m4_define(getdata_revision, 1)
-m4_define(getdata_extra,    [])
+m4_define(getdata_revision, 2)
+m4_define(getdata_extra,    [a])
 m4_define(getdata_version,
           getdata_major.getdata_minor.getdata_revision[]getdata_extra)
 

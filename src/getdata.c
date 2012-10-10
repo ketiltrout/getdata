@@ -1714,7 +1714,8 @@ static size_t _GD_DoMplex(DIRFILE *restrict D, gd_entry_t *restrict E,
     if (lb_start < 0)
       lb_start = 0;
 
-    do {
+    /* stop if we're at the start of the lookback or we found the value */
+    while (lb_sample == -1 && chunk_start > lb_start) {
       /* the size of the next chunk */
       size_t i, n_read3, chunk_size = chunk_start - lb_start;
       int *tmpbuf2;
@@ -1750,8 +1751,7 @@ static size_t _GD_DoMplex(DIRFILE *restrict D, gd_entry_t *restrict E,
         }
       } while (i-- != 0);
       free(tmpbuf2);
-      /* stop if we're at the start of the lookback or we found the value */
-    } while (lb_sample == -1 && chunk_start > lb_start);
+    }
 
     /* read the value of the start, if found */
     if (lb_sample >= 0) {

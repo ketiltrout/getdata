@@ -1,3 +1,9 @@
+2012-10-10   D. V. Wiebe <getdata@ketiltrout.net> svn:771
+	* src/getdata.c (_GD_DoMplex): Check we're at the BOF before trying to do a
+	lookback.
+
+	* src/internal.h: Only export gd_MakeFullPathOnly when using modules.
+
 2012-08-20   D. V. Wiebe <getdata@ketiltrout.net> svn:767
 	GetData-0.8.1 released.
 
