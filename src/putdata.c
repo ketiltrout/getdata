@@ -108,7 +108,7 @@ static size_t _GD_DoRawOut(DIRFILE *restrict D, gd_entry_t *restrict E,
     return 0;
   }
 
-  n_wrote = _GD_WriteOut(D, E, _gd_ef + E->e->u.raw.file[0].subenc, databuffer,
+  n_wrote = _GD_WriteOut(E, _gd_ef + E->e->u.raw.file[0].subenc, databuffer,
       E->EN(raw,data_type), ns, 0);
 
   if (n_wrote < 0) {

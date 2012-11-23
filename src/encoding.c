@@ -450,14 +450,12 @@ int _GD_FiniRawIO(DIRFILE *D, const gd_entry_t *E, int fragment, int flags)
 }
 
 /* Perform a RAW field write */
-ssize_t _GD_WriteOut(DIRFILE *D gd_unused_d, const gd_entry_t *E,
-    const struct encoding_t *enc, const void *ptr, gd_type_t type, size_t n,
-    int temp)
+ssize_t _GD_WriteOut(const gd_entry_t *E, const struct encoding_t *enc,
+    const void *ptr, gd_type_t type, size_t n, int temp)
 {
   ssize_t n_wrote;
 
-  dtrace("%p, %p, %p, %p, 0x%X, %" PRNsize_t ", %i", D, E, enc, ptr, type, n,
-      temp);
+  dtrace("%p, %p, %p, 0x%X, %" PRNsize_t ", %i", E, enc, ptr, type, n, temp);
 
   if (temp)
     n_wrote = (*enc->write)(E->e->u.raw.file + 1, ptr, type, n);

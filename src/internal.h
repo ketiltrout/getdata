@@ -1140,8 +1140,8 @@ void _GD_UpdateAliases(DIRFILE*, int);
 int _GD_ValidateField(const char*, int, int, int, int*);
 off64_t _GD_WriteSeek(DIRFILE *restrict, gd_entry_t *restrict,
     const struct encoding_t *restrict, off64_t, unsigned int mode);
-ssize_t _GD_WriteOut(DIRFILE*, const gd_entry_t*, const struct encoding_t*,
-    const void*, gd_type_t, size_t, int);
+ssize_t _GD_WriteOut(const gd_entry_t*, const struct encoding_t*, const void*,
+    gd_type_t, size_t, int);
 
 /* generic I/O methods */
 int _GD_GenericMove(int, struct _gd_raw_file *restrict, int, char *restrict);

@@ -213,8 +213,7 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned long encoding,
         _GD_FixEndianness((char *)buffer, E->e->u.raw.size, nread);
     }
 
-    nwrote = _GD_WriteOut(D, E, enc_out, buffer, E->EN(raw,data_type), nread,
-        1);
+    nwrote = _GD_WriteOut(E, enc_out, buffer, E->EN(raw,data_type), nread, 1);
 
     if (nwrote < nread) {
       _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[1].name, errno, NULL);

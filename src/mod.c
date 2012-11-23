@@ -381,7 +381,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
             buffer2 = ptr;
           }
 
-          nwrote = _GD_WriteOut(D, E, enc, buffer1, Q.EN(raw,data_type), ns_out,
+          nwrote = _GD_WriteOut(E, enc, buffer1, Q.EN(raw,data_type), ns_out,
               1);
 
           if (nwrote < ns_out) {
