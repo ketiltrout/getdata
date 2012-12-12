@@ -10,6 +10,7 @@ set(tests_ignored
   lzma_get lzma_nframes
   legacy_get legacy_get_put legacy_get_rofs legacy_nframes legacy_nonexistent legacy_put legacy_spf
   open_eaccess
+  open_sym_a open_sym_al open_sym_at open_sym_c open_sym_cl open_sym_ct open_sym_p open_sym_pl open_sym_pt
   slim_get slim_nframes slim_put
   trunc_rofs
   xz_get xz_nframes
