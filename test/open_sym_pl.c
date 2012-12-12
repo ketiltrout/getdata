@@ -1,4 +1,4 @@
-/* Copyright (C) 2011-2012 D. V. Wiebe
+/* Copyright (C) 2012 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -18,59 +18,40 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Test include */
 #include "test.h"
 
 #include <stdlib.h>
-#include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <string.h>
-#include <errno.h>
 
 int main(void)
 {
-#if defined GD_NO_GETCWD
+#if ! defined HAVE_SYMLINK
   return 77;
 #else
-  const char *filedir = "dirfile";
+  const char *filedir = "dirfile/link";
   const char *format = "dirfile/format";
-  const char *format1 = "dirfile/format1";
-  const char *format_data1 = "INCLUDE ";
-  const char *format_data2 = "/dirfile/format1\n";
-  const char *format1_data = "data RAW UINT8 11\n";
-  int cwd_size = 2048;
-  char *ptr, *cwd = NULL;
-  int fd, r = 0;
+  const char *targ = "../dirfile/";
+  int error, r = 0;
   DIRFILE *D;
-  unsigned int spf;
 
   rmdirfile();
-  mkdir(filedir, 0777);
+  mkdir("dirfile", 0777);
+  close(open(format, O_CREAT | O_EXCL | O_WRONLY, 0666));
 
-  gdtest_getcwd(ptr, cwd, cwd_size);
-
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format_data1, strlen(format_data1));
-  gd_pathwrite(fd, cwd);
-  write(fd, format_data2, strlen(format_data2));
-  close(fd);
-
-  fd = open(format1, O_CREAT | O_EXCL | O_WRONLY, 0666);
-  write(fd, format1_data, strlen(format1_data));
-  close(fd);
+  /* make a symlink */
+  symlink(targ, filedir);
 
   D = gd_open(filedir, GD_RDONLY | GD_VERBOSE);
-  spf = gd_spf(D, "data");
+  error = gd_error(D);
   gd_close(D);
 
-  unlink(format1);
   unlink(format);
   rmdir(filedir);
 
-  CHECKU(spf, 11);
-  free(cwd);
+  CHECKI(error, 0);
   return r;
 #endif
 }

@@ -1,6 +1,11 @@
 New in version 0.8.2a:
 
   Library Changes:
+  
+  * BUG FIX: A trailing symlink (i.e. situations where a symlink is the last
+    element of a path) no longer confuses GetData when the target of the
+    symlink: (1) is absolute, or (2) starts with "../".  Reported by S. J.
+    Benton.
 
   * BUG FIX: Trying to read data from the first sample of an MPLEX no longer
     results in an internal error if the first sample of the index doesn't match
@@ -86,7 +91,8 @@ New in version 0.8.0:
 
   * Literal integers in the format may now be specified in octal (using
     0####) or hexidecimal (using 0x##### or 0X#####) in addition to
-    decimal.
+    decimal.  C99-standard hexidecimal floating point literals (0x##.##p##,
+    &c.) are also accepted.
 
   * The /INCLUDE directive can take two additional, optional parameters
     which specify a prefix and/or suffix used to modify the entry names of

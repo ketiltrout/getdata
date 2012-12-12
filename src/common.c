@@ -1183,13 +1183,21 @@ char *_GD_CanonicalPath(const char *car, const char *cdr)
             char *rptr;
             for (rptr = res + res_len - 1; !_GD_IsDirSep(*rptr); --rptr)
               ;
-            *(rptr + 1) = '\0';
-            res_len = (rptr - res) + 1;
+
+            /* don't strip the root /; but do strip a previous DIRSEP */
+            if ((size_t)(rptr - res) < res_root) {
+              *(rptr + 1) = '\0';
+              res_len = (rptr - res) + 1;
+            } else {
+              *rptr = '\0';
+              res_len = rptr - res;
+            }
           }
 
           /* now make a new work buffer of "target/remaining", asusming
            * remaining is non-null, otherwise, just use target */
           if (*end == '\0') {
+            last_element = 0;
             free(work);
             end = work = strdup(target);
             if (work == NULL) {

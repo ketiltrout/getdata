@@ -1,3 +1,16 @@
+2012-12-12   D. V. Wiebe <getdata@ketiltrout.net> svn:773
+	* src/common.c (_GD_CanonicalPath): Don't bail early when encountering a
+	trailing absolute symlink.
+
+	* src/common.c (_GD_CanonicalPath): Strip DIRSEP along with a symlink name
+	from res when necessary.
+
+	* test/test.h test/parse_include_absolute.c test/parse_include_absrel.c
+	test/parse_include_relabs.c: Abstract getcwd in the header.
+	* test/open_sym_a.c test/open_sym_al.c test/open_sym_at.c test/open_sym_c.c
+	test/open_sym_cl.c test/open_sym_ct.c test/open_sym_p.c test/open_sym_pl.c
+	test/open_sym_pt.c: Added.
+
 2012-11-22   D. V. Wiebe <getdata@ketiltrout.net> svn:772
 	* src/encoding.c (_GD_WriteOut): Remove unnecessary DIRFILE parameter.
 

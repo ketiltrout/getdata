@@ -1,4 +1,4 @@
-/* Copyright (C) 2011 D. V. Wiebe
+/* Copyright (C) 2011-2012 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -31,10 +31,9 @@
 
 int main(void)
 {
-#if defined HAVE_GETCWD || defined HAVE__GETCWD
-#ifdef HAVE__GETCWD
-#define getcwd _getcwd
-#endif
+#if defined GD_NO_GETCWD
+  return 77;
+#else
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
   const char *format1 = "dirfile/format1";
@@ -52,13 +51,7 @@ int main(void)
   rmdirfile();
   mkdir(filedir, 0777);
 
-  do {
-    ptr = (char*)realloc(cwd, cwd_size *= 2);
-    if (ptr == NULL) {
-      fprintf(stderr, "out of memory for cwd!\n");
-      exit(1);
-    }
-  } while (!getcwd(cwd = ptr, cwd_size));
+  gdtest_getcwd(ptr, cwd, cwd_size);
 
   fd = open(format, O_CREAT | O_EXCL | O_WRONLY, 0666);
   write(fd, format_data1, strlen(format_data1));
@@ -86,7 +79,5 @@ int main(void)
   CHECKU(spf, 11);
   free(cwd);
   return r;
-#else
-  return 77;
 #endif
 }

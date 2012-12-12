@@ -84,6 +84,24 @@ int gd_system(const char* command)
 #define gd_pathwrite(x,y) write(x,y,strlen(y))
 #endif
 
+/* getcwd abstraction */
+#if defined HAVE_GETCWD || defined HAVE__GETCWD
+# ifdef HAVE__GETCWD
+#  define getcwd _getcwd
+# endif
+# define gdtest_getcwd(ptr,cwd,cwd_size) \
+  do { \
+    ptr = (char*)realloc(cwd, cwd_size *= 2); \
+    if (ptr == NULL) { \
+      fprintf(stderr, "out of memory for cwd!\n"); \
+      exit(1); \
+    } \
+  } while (!getcwd(cwd = ptr, cwd_size));
+#else
+# define GD_NO_GETCWD
+#endif
+
+
 #define CHECK(e,n,nf,vf,...) \
   do { if (e) { r = 1; \
     fprintf(stderr, #n " = " nf " (expected " vf ")\n", __VA_ARGS__); } \
