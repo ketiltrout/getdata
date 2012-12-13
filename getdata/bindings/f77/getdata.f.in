@@ -1,0 +1,378 @@
+C     Copyright (C) 2008-2012 D. V. Wiebe
+C
+C     CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+C
+C     This file is part of the GetData project.
+C
+C     GetData is free software; you can redistribute it and/or modify it under
+C     the terms of the GNU Lesser General Public License as published by the
+C     Free Software Foundation; either version 2.1 of the License, or (at your
+C     option) any later version.
+C    
+C     GetData is distributed in the hope that it will be useful, but WITHOUT
+C     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+C     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
+C     License for more details.
+C    
+C     You should have received a copy of the GNU Lesser General Public License
+C     along with GetData; if not, write to the Free Software Foundation, Inc.,
+C     51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+C
+
+C     Fortran 77 parameters for GetData.  This file defines handy
+C     constants useful to Fortran programs.
+
+      @PARAMETERS@
+
+C Externals
+C     Corresponding to gd_alter_affixes(3)
+      EXTERNAL GDAAFX
+C     Corresponding to gd_add_alias(3)
+      EXTERNAL GDADAL
+C     Corresponding to gd_add_bit(3)
+      EXTERNAL GDADBT
+C     Corresponding to gd_add_carray(3)
+      EXTERNAL GDADCA
+C     Corresponding to gd_add_clincom(3)
+      EXTERNAL GDADCL
+C     Corresponding to gd_add_const(3)
+      EXTERNAL GDADCO
+C     Corresponding to gd_add_cpolynom(3)
+      EXTERNAL GDADCP
+C     Corresponding to gd_add_crecip(3)
+      EXTERNAL GDADCR
+C     Corresponding to gd_add_divide(3)
+      EXTERNAL GDADDV
+C     Corresponding to gd_add_lincom(3)
+      EXTERNAL GDADLC
+C     Corresponding to gd_add_linterp(3)
+      EXTERNAL GDADLT
+C     Corresponding to gd_add_multiply(3)
+      EXTERNAL GDADMT
+C     Corresponding to gd_add_mplex(3)
+      EXTERNAL GDADMX
+C     Corresponding to gd_add_phase(3)
+      EXTERNAL GDADPH
+C     Corresponding to gd_add_polynom(3)
+      EXTERNAL GDADPN
+C     Corresponding to gd_add_recip(3)
+      EXTERNAL GDADRC
+C     Corresponding to gd_add_raw(3)
+      EXTERNAL GDADRW
+C     Corresponding to gd_add_sbit(3)
+      EXTERNAL GDADSB
+C     Corresponding to gd_add_spec(3)
+      EXTERNAL GDADSP
+C     Corresponding to gd_add_string(3)
+      EXTERNAL GDADST
+C     Corresponding to gd_add_window(3)
+      EXTERNAL GDADWD
+C     Correpsonding to gd_alter_encoding(3)
+      EXTERNAL GDAENC
+C     Correpsonding to gd_alter_endianness(3)
+      EXTERNAL GDAEND
+C     Correpsonding to gd_alter_frameoffset(3)
+      EXTERNAL GDAFOF
+C     Correpsonding to gd_alter_bit(3)
+      EXTERNAL GDALBT
+C     Correpsonding to gd_alter_carray(3)
+      EXTERNAL GDALCA
+C     Correpsonding to gd_alter_clincom(3)
+      EXTERNAL GDALCL
+C     Correpsonding to gd_alter_const(3)
+      EXTERNAL GDALCO
+C     Correpsonding to gd_alter_cpolynom(3)
+      EXTERNAL GDALCP
+C     Correpsonding to gd_alter_crecip(3)
+      EXTERNAL GDALCR
+C     Correpsonding to gd_alter_divide(3)
+      EXTERNAL GDALDV
+C     Correpsonding to gd_alter_lincom(3)
+      EXTERNAL GDALLC
+C     Correpsonding to gd_alter_linterp(3)
+      EXTERNAL GDALLT
+C     Correpsonding to gd_alter_multiply(3)
+      EXTERNAL GDALMT
+C     Corresponding to gd_alter_mplex(3)
+      EXTERNAL GDALMX
+C     Correpsonding to gd_alter_phase(3)
+      EXTERNAL GDALPH
+C     Correpsonding to gd_alter_polynom(3)
+      EXTERNAL GDALPN
+C     Correpsonding to gd_alter_recip(3)
+      EXTERNAL GDALRC
+C     Correpsonding to gd_alter_raw(3)
+      EXTERNAL GDALRW
+C     Correpsonding to gd_alter_sbit(3)
+      EXTERNAL GDALSB
+C     Correpsonding to gd_alter_spec(3)
+      EXTERNAL GDALSP
+C     Correpsonding to gd_aliases(3)
+      EXTERNAL GDALSS
+C     Returns the maximum alias length
+      EXTERNAL GDALSX
+C     Corresponding to gd_alter_window(3)
+      EXTERNAL GDALWD
+C     Corresponding to gd_alter_protection(3)
+      EXTERNAL GDAPRT
+C     Alter a scalar parameter
+      EXTERNAL GDASCA
+C     Corresponding to gd_alias_target(3)
+      EXTERNAL GDATRG
+C     Corresponding to gd_carray_len(3)
+      EXTERNAL GDCALN
+C     Corresponding to gd_parser_callback(3)
+      EXTERNAL GDCLBK
+C     Corresponding to gd_close(3)
+      EXTERNAL GDCLOS
+C     Corresponding to gd_constants(3) (sort of)
+      EXTERNAL GDCONS
+C     Corresponding to gd_copen(3)
+      EXTERNAL GDCOPN
+C     Check whether an entry contains complex scalars
+      EXTERNAL GDCSCL
+C     Correpsonding to gd_delete_alias(3)
+      EXTERNAL GDDELA
+C     Correpsonding to gd_delete(3)
+      EXTERNAL GDDELE
+C     Corresponding to gd_discard(3)
+      EXTERNAL GDDSCD
+C     Corresponding to gd_desync(3)
+      EXTERNAL GDDSYN
+C     Corresponding to gd_error_count(3)
+      EXTERNAL GDECNT
+C     Corresponding to gd_entry_list(3) (sort of)
+      EXTERNAL GDENTN
+C     Returns the maximum entry name length
+      EXTERNAL GDENTX
+C     Corresponding to gd_entry_type(3)
+      EXTERNAL GDENTY
+C     Corresponding to gd_error(3)
+      EXTERNAL GDEROR
+C     Corresponding to gd_error_string(3)
+      EXTERNAL GDESTR
+C     Corresponding to gd_field_list_by_type(3) (sort of)
+      EXTERNAL GDFDNT
+C     Returns the maximum field name length
+      EXTERNAL GDFDNX
+C     Corresponding to gd_flags(3)
+      EXTERNAL GDFLAG
+C     Corresponding to gd_field_list(3) (sort of)
+      EXTERNAL GDFLDN
+C     Corresponding to gd_flush(3)
+      EXTERNAL GDFLSH
+C     Corresponding to gd_framenum_subset(3)
+      EXTERNAL GDFNSS
+C     Corresponding to gd_framenum(3)
+      EXTERNAL GDFNUM
+C     Corresponding to gd_fragment_affixes(3)
+      EXTERNAL GDFRAF
+C     Corresponding to gd_fragment_index(3)
+      EXTERNAL GDFRGI
+C     Corresponding to gd_fragmentname(3)
+      EXTERNAL GDFRGN
+C     Corresponding to gd_bof(3)
+      EXTERNAL GDGBOF
+C     Corresponding to gd_get_carray_slice(3)
+      EXTERNAL GDGCAS
+C     Corresponding to gd_entry(3) for BIT fields
+      EXTERNAL GDGEBT
+C     Corresponding to gd_entry(3) for CARRAY fields
+      EXTERNAL GDGECA
+C     Corresponding to gd_entry(3) for complex valued LINCOM fields
+      EXTERNAL GDGECL
+C     Corresponding to gd_entry(3) for CONST fields
+      EXTERNAL GDGECO
+C     Corresponding to gd_entry(3) for complex valued POLYNOM fields
+      EXTERNAL GDGECP
+C     Corresponding to gd_entry(3) for complex valued RECIP fields
+      EXTERNAL GDGECR
+C     Corresponding to gd_entry(3) for LINCOM fields
+      EXTERNAL GDGELC
+C     Corresponding to gd_entry(3) for LINTERP fields
+      EXTERNAL GDGELT
+C     Corresponding to gd_entry(3) for MULTIPLY fields
+      EXTERNAL GDGEMT
+C     Corresponding to gd_encoding(3)
+      EXTERNAL GDGENC
+C     Corresponding to gd_endianness(3)
+      EXTERNAL GDGEND
+C     Corresponding to gd_eof(3)
+      EXTERNAL GDGEOF
+C     Corresponding to gd_entry(3) for PHASE fields
+      EXTERNAL GDGEPH
+C     Corresponding to gd_entry(3) for POLYNOM fields
+      EXTERNAL GDGEPN
+C     Corresponding to gd_entry(3) for RECIP fields
+      EXTERNAL GDGERC
+C     Corresponding to gd_entry(3) for RAW fields
+      EXTERNAL GDGERW
+C     Corresponding to gd_entry(3) for SBIT fields
+      EXTERNAL GDGESB
+C     Corresponding to gd_getdata(3)
+      EXTERNAL GDGETD
+C     Corresponding to gd_entry(3) for WINDOW fields
+      EXTERNAL GDGEWD
+C     Correpsonding to gd_frameoffset(3)
+      EXTERNAL GDGFOF
+C     Corresponding to gd_protection(3)
+      EXTERNAL GDGPRT
+C     Retrieve a scalar parameter
+      EXTERNAL GDGSCA
+C     Corresponding to gd_spf(3)
+      EXTERNAL GDGSPF
+C     Corresponding to gd_get_carray(3)
+      EXTERNAL GDGTCA
+C     Corresponding to gd_get_constant(3)
+      EXTERNAL GDGTCO
+C     Corresponding to gd_get_string(3)
+      EXTERNAL GDGTST
+C     Corresponding to gd_hide(3)
+      EXTERNAL GDHIDE
+C     Corresponding to gd_hidden(3)
+      EXTERNAL GDHIDN
+C     Corresponding to gd_include_affixes(3)
+      EXTERNAL GDINCA
+C     Corresponding to gd_include(3)
+      EXTERNAL GDINCL
+C     Corresponding to gd_invalid_dirfile(3)
+      EXTERNAL GDINVD
+C     Corresponding to gd_linterp_tablename(3)
+      EXTERNAL GDLTTN
+C     Corresponding to gd_mconstants(3) (sort of)
+      EXTERNAL GDMCOS
+C     Corresponding to gd_madd_alias(3)
+      EXTERNAL GDMDAL
+C     Corresponding to gd_madd_bit(3)
+      EXTERNAL GDMDBT
+C     Corresponding to gd_madd_carray(3)
+      EXTERNAL GDMDCA
+C     Corresponding to complex valued gd_madd_clincom(3)
+      EXTERNAL GDMDCL
+C     Corresponding to gd_madd_const(3)
+      EXTERNAL GDMDCO
+C     Corresponding to gd_madd_cpolynom(3)
+      EXTERNAL GDMDCP
+C     Corresponding to gd_madd_crecip(3)
+      EXTERNAL GDMDCR
+C     Corresponding to gd_madd_divide(3)
+      EXTERNAL GDMDDV
+C     Corresponding to gd_madd_lincom(3)
+      EXTERNAL GDMDLC
+C     Corresponding to gd_madd_linterp(3)
+      EXTERNAL GDMDLT
+C     Corresponding to gd_madd_multiply(3)
+      EXTERNAL GDMDMT
+C     Corresponding to gd_madd_mplex(3)
+      EXTERNAL GDMDMX
+C     Corresponding to gd_madd_phase(3)
+      EXTERNAL GDMDPH
+C     Corresponding to gd_madd_polynom(3)
+      EXTERNAL GDMDPN
+C     Corresponding to gd_madd_recip(3)
+      EXTERNAL GDMDRC
+C     Corresponding to gd_madd_sbit(3)
+      EXTERNAL GDMDSB
+C     Corresponding to gd_madd_spec(3)
+      EXTERNAL GDMDSP
+C     Corresponding to gd_madd_string(3)
+      EXTERNAL GDMDST
+C     Corresponding to gd_madd_window(3)
+      EXTERNAL GDMDWD
+C     Corresponding to gd_mfield_list(3) (sort of)
+      EXTERNAL GDMFDN
+C     Corresponding to gd_mfield_list_by_type(3) (sort of)
+      EXTERNAL GDMFDT
+C     Corresponding to gd_metaflush(3)
+      EXTERNAL GDMFLS
+C     Returns the maximum field name length for a meta field list
+      EXTERNAL GDMFNX
+C     Correpsonding to gd_malter_spec(3)
+      EXTERNAL GDMLSP
+C     Correpsonding to gd_move_alias(3)
+      EXTERNAL GDMOVA
+C     Correpsonding to gd_move(3)
+      EXTERNAL GDMOVE
+C     Corresponding to gd_mstrings(3) (sort of)
+      EXTERNAL GDMSTS
+C     Returns the maximum length of the longest string metafield for a
+C     field
+      EXTERNAL GDMSTX
+C     Corresponding to gd_mvector_list(3) (sort of)
+      EXTERNAL GDMVEN
+C     Corresponding to gd_mplex_lookback(3)
+      EXTERNAL GDMXLB
+C     Corresponding to gd_naliases(3)
+      EXTERNAL GDNALS
+C     Corresponding to gd_dirfilename(3)
+      EXTERNAL GDNAME
+C     Corresponding to gd_nentries(3)
+      EXTERNAL GDNENT
+C     Corresponding to gd_nfields_by_type(3)
+      EXTERNAL GDNFDT
+C     Corresponding to gd_nfields(3)
+      EXTERNAL GDNFLD
+C     Corresponding to gd_nfragments(3)
+      EXTERNAL GDNFRG
+C     Corresponding to gd_nframes(3)
+      EXTERNAL GDNFRM
+C     Corresponding to gd_nmfields(3)
+      EXTERNAL GDNMFD
+C     Corresponding to gd_nmfields_by_type(3)
+      EXTERNAL GDNMFT
+C     Corresponding to gd_nmvectors(3)
+      EXTERNAL GDNMVE
+C     Deregister a callback function (ie. gd_parser_callback(..., NULL))
+      EXTERNAL GDNOCB
+C     Corresponding to gd_native_type(3)
+      EXTERNAL GDNTYP
+C     Corresponding to gd_nvectors(3)
+      EXTERNAL GDNVEC
+C     Corresponding to gd_open(3)
+      EXTERNAL GDOPEN
+C     Corresponding to gd_put_carray_slice(3)
+      EXTERNAL GDPCAS
+C     Corresponding to gd_parent_fragment(3)
+      EXTERNAL GDPFRG
+C     Corresponding to gd_put_carray(3)
+      EXTERNAL GDPTCA
+C     Corresponding to gd_put_constant(3)
+      EXTERNAL GDPTCO
+C     Corresponding to gd_put_string(3)
+      EXTERNAL GDPTST
+C     Corresponding to gd_putdata(3)
+      EXTERNAL GDPUTD
+C     Corresponding to gd_raw_close(3)
+      EXTERNAL GDRCLO
+C     Corresponding to gd_reference(3)
+      EXTERNAL GDREFE
+C     Correpsonding to gd_rename(3)
+      EXTERNAL GDRENM
+C     Corresponding to gd_rewrite_fragment(3)
+      EXTERNAL GDRFRG
+C     Corresponding to gd_raw_filename(3)
+      EXTERNAL GDRWFN
+C     Corresponding to gd_seek(3)
+      EXTERNAL GDSEEK
+C     Corresponding to gd_dirfile_standards(3)
+      EXTERNAL GDSTDV
+C     Corresponding to gd_strings(3) (sort of)
+      EXTERNAL GDSTRS
+C     Returns the length of the longest string field
+      EXTERNAL GDSTRX
+C     Corresponding to gd_sync(3)
+      EXTERNAL GDSYNC
+C     Corresponding to gd_tell(3)
+      EXTERNAL GDTELL
+C     Corresponding to gd_strtok(3)
+      EXTERNAL GDTOKE
+C     Corresponding to gd_unhide(3)
+      EXTERNAL GDUHID
+C     Corresponding to gd_uninclude(3)
+      EXTERNAL GDUINC
+C     Corresponding to gd_verbose_prefix(3)
+      EXTERNAL GDVBPX
+C     Corresponding to gd_vector_list(3) (sort of)
+      EXTERNAL GDVECN
+C     Corresponding to gd_validate(3)
+      EXTERNAL GDVLDT

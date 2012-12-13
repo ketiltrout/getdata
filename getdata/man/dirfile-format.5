@@ -1,0 +1,1554 @@
+.\" dirfile-format.5.  The dirfile format specification man page.
+.\"
+.\" Copyright (C) 2005, 2006, 2008, 2009, 2010, 2012 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH dirfile\-format 5 "12 July 2012" "Standards Version 9" "DATA FORMATS"
+.SH NAME
+dirfile\-format \(em the dirfile database format specification file
+.SH DESCRIPTION
+The
+.I dirfile format specification
+fully specifies the raw and derived time streams and auxiliary information
+for a
+.BR dirfile (5)
+database.
+
+The format specification is contained in one or more case-sensitive text files
+located in the dirfile tree.  Each file is known as a
+.IR fragment .
+The primary fragment is the file called
+.B format
+located in the base dirfile directory.  This file may contain only part of
+the format specification, and may reference other fragments (using the
+.B /INCLUDE
+directive) containing further format specification.  This inclusion mechanism
+may be nested arbitrarily deep.
+
+The explicit text encoding of these files is not specified by these Standards,
+but it must be 7\-bit ASCII compatible. Examples of acceptable character
+encodings include all the ISO\~8859 character sets
+.RI ( i.e.
+Latin-1 through Latin-10, among others), as well as the UTF-8 encoding of
+Unicode and UCS.
+
+This document primarily describes the latest version of the Standards (Version
+9); differences with previous versions are noted where relevant.  A complete
+list of changes between versions is given in the
+.B HISTORY
+section below.
+
+.SH SYNTAX
+The format specification is composed of field specification lines and directive lines,
+optionally separated by blank lines or lines containing only whitespace.
+Lines are separated by the line-feed character (0x0A).  Unless escaped (see
+below), the hash mark
+.RB ( # )
+is the comment delimiter; the comment delimiter, and any text following it to
+the end of the line, is ignored.
+
+.SS Tokens
+Both field specification lines and directive lines consist of several tokens
+separated by whitespace.  Whitespace consists of one or more whitespace
+characters.  These are: space (0x20), horizontal tab (0x09), vertical tab
+(0x0B), form-feed (0x0C), and carriage return (0x0D).  The first token of a
+directive line is always a
+.IR "reserved word" .
+The first token of a field specification line is never a reserved word.  Any
+amount of whitespace may precede the first token on a line.
+
+Since tokens are separated by whitespace, to include a whitespace character in
+a token, it must either escaped by preceding it by a backslash character
+.RB ( \e ),
+or be replaced by a
+.I character escape sequence
+(see below), or else the token must be enclosed in quotation marks
+.RB ( """" ).
+The quotation marks themselves are stripped from the token. The
+.I null-token
+(that is, the token consisting of zero characters) may be specified by a pair
+of quotation marks with nothing between them
+.RB ( """""" ).
+To include a literal quotation mark in a token, it must be escaped
+.RB ( \e" ).
+Similarly, a hash mark may be included in a token by including it in a quoted
+token or else by escaping it
+.RB ( \e# ),
+otherwise the hash mark is understood as the comment delimiter.
+
+It is a syntax error to have a line which contains unmatched quotation marks, or
+in which the last character is the backslash character.
+
+Several characters when escaped by a preceding backslash character are
+interpreted as special characters in tokens.  The character escape sequences
+are:
+.RS
+.TP
+.B \ea
+an alert (bell) character (ASCII 0x07 / U+0007)
+.TP
+.B \eb
+a backspace character (ASCII 0x08 / U+0008)
+.TP
+.B \ee
+an escape character (ASCII 0x1B / U+001B)
+.TP
+.B \ef
+a form-feed character (ASCII 0x0C / U+000C)
+.TP
+.B \en
+a line-feed character (ASCII 0x0A / U+000A)
+.TP
+.B \er
+a carriage return character (ASCII 0x0D / U+000D)
+.TP
+.B \et
+a horizontal tab character (ASCII 0x09 / U+0009)
+.TP
+.B \ev
+a vertical tab character (ASCII 0x0B / U+000B)
+.TP
+.B \e\e
+a backslash character (ASCII 0x5C / U+005C)
+.TP
+.BI \e ooo
+the single byte given by the octal number
+.I ooo 
+(1 to 3 octal digits).
+.TP
+.BI \ex hh
+the single byte given by the hexadecimal number
+.I hh
+(1 or 2 hexadecimal digits).
+.TP
+.BI \eu hhhhhhh
+the UTF-8 byte sequence encoding the Unicode code point given by the hexadecimal
+number
+.I hhhhhhh
+(1 to 7 hexadecimal digits).
+.RE
+
+Any other character which is escaped is interpreted as the character itself.
+.RI ( i.e.
+.B \ec
+is interpreted as
+.BR c ;
+also, as pointed out above,
+.B \e"
+and
+.B \e#
+are interpreted as simply
+.B """"
+and
+.BR # ,
+without their special meanings).
+
+No token may contain the NULL character (ASCII 0x00 / U+0000).  Furthermore,
+although support is present to create UTF-8 byte sequences, tokens are not
+required to be valid UTF-8 sequences.  Any byte sequence not containing the NULL
+character forms a valid token.  However, there may be further restrictions on
+allowed characters for a token in a particular situation, (for example, when
+used as a field name).
+
+Standards Version 5 and earlier do not recognise the character escape sequences,
+nor allow quoting of tokens. As a result, they prohibit both whitespace and the
+comment delimiter from being used in tokens. 
+
+.SH DIRECTIVES
+
+There are ten 
+.IR directives ,
+each specified by a different
+.IR "reserved word", 
+which cannot be used as field names in the dirfile.  As of Standards Version 8,
+all reserved words start with an initial forward slash
+.RB ( / ),
+to distinguish them from field names.  Standards Versions 5, 6, and 7 permitted
+the omission of the initial forward slash, while in Standards Version 4 and
+earlier, reserved words may not have an initial forward slash.  Like the rest of
+the format specification, directives are case sensitive.
+
+A number of the directives have
+.IR "fragment scope" .
+A directive with fragment scope only applies to the fragment in which it is
+present, plus any sub-fragments indicated by the
+.B /INCLUDE
+directive, but only if those sub-fragments don't have their own corresponding
+directive.  Directives which have fragment scope are:
+.BR /ENCODING ", " /ENDIAN ", " /FRAMEOFFSET ", and " /PROTECT .
+Because of these scoping rules, different portions of the dirfile may have
+different encodings, endiannesses, frame offsets, or protection levels.
+
+If a directive with fragment scope appears more than once in a fragment, only
+the last such directive is honoured, with the exception that the effect of
+a directive is not propagated to sub-fragments if the directive line
+appears after the sub-fragment is included.  The scoping rules of the remaining
+directives are discussed below.
+
+.TP
+.B /ALIAS
+The /ALIAS directive defines an alternate name for a field defined elsewhere in
+the format specification (called the "target").  Aliases may not be used as the
+parent field in a
+.B /META
+directive, but are in most other ways indistinguishable from the target's
+original, canonical name.  Aliases may be chained (that is, the target name
+appearing in an /ALIAS directive may itself be an alias).  In this case, the new
+alias is another name for the target's own target.  Just as there is no
+requirement that the input fields of a derived field exist,
+it is not an error for the target of an alias to not exist.  Syntax is:
+.IP
+.RS
+.B /ALIAS
+.I <name> <target>
+.RE
+.IP
+A metafield alias may defined using the
+.IR <parent-field> / <alias-name>
+syntax for
+.I name
+in the /ALIAS directive.  No restriction is placed on
+.IR target ;
+specifically, a metafield alias may target a top-level field, or a metafield
+of with a different parent; conversely, a top-level alias may target a
+metafield.
+.IP
+A metafield alias may never appear as the parent part of a metafield field code,
+even if it refers to a top-level field.  That is, given the valid format:
+.IP
+.RS
+field1 \fBRAW UINT8\fR 1
+.br
+field1/meta \fBCONST FLOAT64\fR 0.0
+.br
+field2 \fBRAW UINT8\fR 1
+.br
+\fB/ALIAS\fR field2/alias field1
+.RE
+.IP
+the metafield
+.I field1/meta
+may not be referred to as
+.IR field2/alias/meta ,
+even though
+.I field2/alias
+is a valid field code referring to
+.IR field1 .
+.IP
+The /ALIAS directive has no scope: it is processed immediately.  It appeared in
+Standards Version 9.
+.TP
+.B /ENCODING
+The /ENCODING directive specifies the encoding scheme used to encode binary
+files in the dirfile.  The encoding scheme may be one of the predefined names
+listed below, which are described in more detail in
+.BR dirfile\-encoding (5),
+or any other site-specific encoding scheme.  The predefined scheme names are:
+.RS
+.TP
+.B none
+The dirfile is unencoded.
+.TP
+.B bzip2
+The dirfile is compressed using the bzip2 compression scheme.
+.TP
+.B gzip
+The dirfile is compressed using the gzip compression scheme.
+.TP
+.B lzma
+The dirfile is compressed using the LZMA compression scheme.
+.TP
+.B slim
+The dirfile is compressed using the slim compression scheme.
+.TP
+.B sie
+The dirfile is sample-index encoded (a variant of run-length encoding).
+.TP
+.B text
+The dirfile is text encoded.
+.TP
+.B zzip
+The dirfile is compressed and encapsulated using the zzip compression scheme.
+.TP
+.B zzslim
+The dirfile is compressed and encapsulated using a combination of the zzip
+and slim compression schemes.
+.PP
+Implementations should fail gracefully when encountering an unknown encoding
+scheme.  If no encoding scheme is specified, behaviour is implementation
+dependent.  Syntax is:
+.IP
+.B /ENCODING \fI<scheme> \fR[\fI<enc-datum>\fR]
+.PP
+The
+.I enc-datum
+token provides additional data for certain encoding schemes; see
+.BR dirfile-encoding (5)
+for details.  The form of enc-datum is not specified.
+.PP
+The /ENCODING directive has
+.IR "fragment scope" .
+It appeared in Standards Version 6.  The predefined schemes
+.nh
+.BR sie ", " zzip ", and " zzslim ,
+.hy
+and the optional
+.I enc-datum
+token, appeared in Standards Version 9; the predefined scheme
+.B lzma
+appeared in Standards Version 7; all other predefined schemes appeared in
+Standards Version 6.
+.RE
+.TP
+.B /ENDIAN
+The /ENDIAN directive specifies the endianness of the raw data in the database.
+The assumed endianness of raw data in dirfiles which omit this directive is
+implementation dependent.  Syntax
+is:
+.RS
+.IP
+.B /ENDIAN
+.RB "( " big " | " little " ) [ " arm " ]"
+.PP
+where the "arm" token should be included if double precision floating point data
+are stored in the ARM middle-endian format.  The /ENDIAN directive has
+.IR "fragment scope" .
+It appeared in Standards Version 5.  The optional
+.B arm
+token appeared in Standards Version 8.
+.RE
+.TP
+.B /FRAMEOFFSET
+The /FRAMEOFFSET directive specifies the frame number of the first frame for
+which data exists in binary files associated with
+.B RAW
+fields.  Syntax is:
+.RS
+.IP
+.BI /FRAMEOFFSET\~ <integer>
+.PP
+The /FRAMEOFFSET directive has
+.IR "fragment scope" .
+It appeared in Standards Version 1.
+.RE
+.TP
+.B /HIDDEN
+The /HIDDEN directive indicates that the specified field name is
+.IR hidden .
+The difference (if any) between a field name which is
+.I hidden
+and one that is not is implementation dependent.  Hiddenness is not inherited
+by metafields of the specified field.  Hiddenness applies to the name, not the
+field itself; it does not hide all aliases of the field-name, and if field-name
+an alias, the alias is hidden, not its target.  Syntax is:
+.RS
+.IP
+.BR /HIDDEN\~ <field-name>
+.PP
+A /HIDDEN directive must appear after the specification of
+.IR field-name ,
+(which occurs either in a field specification line, or an
+.B /ALIAS
+directive, or a
+.B /META
+directive) in the same fragment.
+.PP
+The /HIDDEN directive has no scope: it is processed immediately.  It appeared in
+Standards Version 9.
+.RE
+.TP
+.B /INCLUDE
+The /INCLUDE directive specifies another file (called a
+.IR "fragment" )
+to parse for additional format specification for the dirfile.  The inclusion is
+processed immediately, before the fragment containing the /INCLUDE directive
+(the
+.IR "parent fragment" )
+is parsed further.  RAW fields specified in the included fragment are located in
+the directory containing the fragment file, and not in the directory containing
+the parent fragment, and the binary file encoding may be different for each
+fragment.  The fragment may be specified either with an absolute path, or else a
+path relative to the directory containing the parent fragment.
+.IP
+The /INCLUDE directive may optionally specify a
+.I prefix
+and/or
+.I suffix
+to apply to field names defined in the included fragment.  If present, affixes
+are applied to all field-names (including aliases) defined in the included
+fragment and any fragments it further includes.  Affixes nest, with the affixes
+of the deepest inclusion innermost.  Affixes are not applied to the names of
+binary files associated with
+.B RAW
+fields.  Syntax is:
+.RS
+.IP
+.B /INCLUDE \fI<file> \fR[\fI<prefix> \fR[\fI<suffix>\fR]]
+.PP
+To specify only a suffix, use the null-token
+.RB ( """""" )
+as
+.IR prefix .
+The /INCLUDE directive has no scope: it is processed immediately.  It appeared
+in Standards Version 3.  The optional
+.I prefix
+and
+.I suffix
+appeared in Standards Version 9.
+.RE
+.TP
+.B /META
+The /META directive specifies a metafield attached to a particular parent
+field.  The field metadata may be of any allowed type except
+.BR RAW .
+Metafields are retrieved in exactly the same way as regular field data, but the
+.I field code
+specified consists of the parent and metafield names joined with a forward
+slash:
+.RS
+.IP
+.IB <parent-field> / <meta-field>
+.PP
+META fields may not be specified before their parent field has been.  Syntax is:
+.IP
+.B /META
+.I <parent-field>
+{field specification line}
+.PP
+The
+.I <parent-field>
+code may not be an alias.  As an illustration of this concept,
+.IP
+.B /META 
+pfield meta
+.B CONST FLOAT64
+3.291882
+.PP
+provides a scalar metadatum called
+.I meta
+with value 3.291882 attached to the field
+.IR pfield .
+This particular metafield may be referred to by the
+.I field code
+"pfield/meta".  Note that different parent fields may have metafields with
+the same name, since all references to metafields must include the parent
+field name.  Metafields may not themselves have further sub-metafields.
+.PP
+As an alternative to the /META directive, starting with Standards Version 7,
+a metafield may be specified by a standard field specification line, using
+.IP
+.IB <parent-field> / <meta-field>
+.PP
+as the field name.  That is, the above example metafield could have also been
+specified as:
+.IP
+pfield/meta
+.B CONST FLOAT64
+3.291882
+.PP
+The /META directive has no scope: it is processed immediately.  It appeared in
+Standards Version 6.
+.RE
+.TP
+.B /PROTECT
+The /PROTECT directive specifies the advisory protection level of the current
+fragment and of the
+.B RAW
+fields defined therein.  The protection level indicates whether writing to the
+fragment, or the binary data on disk is permitted.  Syntax is:
+.RS
+.IP
+.BI /PROTECT\~ <level>
+.PP
+Four advisory protection levels are defined:
+.TP
+.I none
+No protection at all: data and metadata may be freely changed.  This is the
+default, if no /PROTECT directive is present.
+.TP
+.I format
+The dirfile metadata is protected from change, but
+.B RAW
+data on disk may be modified.
+.TP
+.I data
+The
+.B RAW
+data on disk is protected from change, but metadata may be modified.
+.TP
+.I all
+Both metadata and data on disk are protected from change.
+.PP
+The /PROTECT directive has
+.IR "fragment scope" .
+It appeared in Standards Version 6.
+.RE
+.TP
+.B /REFERENCE
+The /REFERENCE directive specifies the name of the field to use as the dirfile's
+reference field (see
+.BR dirfile (5)).
+If no /REFERENCE directive is specified, the first
+.B RAW
+field encountered is used as the reference field.  The /REFERENCE directive must
+specify a
+.B RAW
+field.  Syntax is:
+.RS
+.IP
+.BI /REFERENCE\~ <field-code>
+.PP
+The /REFERENCE directive has
+.IR "global scope" :
+if multiple /REFERENCE directives appear in the dirfile metadata, only the last
+such is honoured.  It appeared in Standards Version 6.
+.RE
+.TP
+.B /VERSION
+The /VERSION directive specifies the particular version of the Dirfile Standards
+to which the dirfile format specification conforms.  This directive should
+occur before any version dependent syntax is encountered.  As of Standards
+Version 6, no such syntax exists, and this directive is provided primarily to
+ease forward compatibility.  Syntax is:
+.RS
+.IP
+.BI /VERSION\~ <integer>
+.PP
+The /VERSION directive has
+.IR "immediate scope" :
+its effect is immediate, and it applies only to metadata below it, including
+and propagating downwards to sub-fragments after the directive.
+.PP
+In Standards Version 8 and earlier, its effect also propagates upwards back to
+the parent fragment, and affects subsequent metadata.  Starting with Standards
+Version 9, this no longer happens.  As a result, a /VERSION directive which
+indicates a version of 9 or later never propagates upwards; additionally,
+/VERSION directives found in subfragments included in a Version 9 or later
+fragment aren't propagated upwards into that fragment, regardless of the
+Version of the subfragments.  The /VERSION directive appeared in Standards
+Version 5.
+.RE
+
+.SH FIELD SPECIFICATION LINES
+
+Any line which does not start with a
+.I reserved word
+is assumed to be a field specification line.  A field specification line
+consists of at least two tokens.  The first token is the
+.IR "field name" .
+The second token is the
+.IR "field type" .
+Subsequent tokens are field parameters.  The meaning and number these parameters
+depends on the field type specified.
+
+.SS Field Names
+The first token in a field
+specification line is the field name.  The field name consists of one or more
+characters, excluding both ASCII control characters (the bytes 0x01 through
+0x1F), and the characters
+.IP
+.B &\t/\t;\t<\t>\t|\t.
+.PP
+which are reserved (but see below for the use of
+.B /
+to specify metafields).
+The full stop
+.RB ( . )
+is allowed in Standards Version 5 and earlier.  The ampersand, semicolon, less
+than, greater than, and vertical line
+.RB ( "& / ; < > |" )
+are allowed in Standards Version 4 and earlier.  Furthermore, due to the lack
+of an escape or quoting mechanism (see 
+.B Tokens
+above), Standards Version 5 and earlier also prohibit whitespace and the
+comment delimiter
+.RB ( # )
+in field names.
+.PP
+The field name may not be
+.IR INDEX ,
+which is a special, implicit field which contains the integer frame index.
+Standards Version 5 and earlier also prohibit
+.IR FILEFRAM ,
+which was an alias for
+.IR INDEX .
+Field names are case sensitive.  Standards Version 3 and 4 restrict field names
+to 50 characters. Standards Version 2 and earlier restrict field names to 16
+characters. Additionally, the filesystem may put restrictions on the length 
+and acceptable characters of a
+.B RAW
+field name, regardless of Standards Version. 
+
+Starting in Standards Version 7, if the field name beginning a field
+specification line contains exactly one
+.B /
+character, the line is assumed to specify a metafield.  See the
+.B /META
+directive above for further details.  A field name may not contain more than one
+.BR / .
+
+.SS Field Types
+There are fifteen field types.  Of these, twelve are of vector type
+.RB ( BIT ", " DIVIDE ", " LINCOM ", " LINTERP ", " MPLEX ", " MULTIPLY ,
+.BR PHASE ", " POLYNOM ", " RAW ", " RECIP ", " SBIT ", and " WINDOW )
+and three are of scalar type
+.RB ( CONST ", " CARRAY ", and " STRING ).
+The eleven vector field types other than
+.B RAW
+fields are also called
+.IR "derived fields" ,
+since they derive their value from one or more input fields.
+.PP
+Five of these derived fields
+.RB ( DIVIDE ", " LINCOM ", " MPLEX ", " MULTIPLY ", and " WINDOW )
+may have more than one input field.  In situations where these input fields
+have differing sample rates, the sample rate of the derived field is the same
+as the sample rate of the first (left-most) input field specified.  Furthermore,
+the input fields are synchronised by aligning them on frame boundaries, assuming
+equally-spaced sampling throughout a frame, and using the last sample of each
+input field which did not occur after the sample of the derived field being
+computed.  That is, if the first and second input fields have sample rates
+.I s1
+and
+.IR s2 ,
+the derived field also has sample rate
+.I s1
+and, for every sample of the derived field,
+.IR n ,
+the
+.IR n 'th
+sample of the first field is used (since they have the same sample rate by
+definition), and the sample number used of the second field,
+.IR m ,
+is computed as:
+.IP
+\fIm\fR = \fBfloor\fR((\fIn\fR * \fIs2\fR) / \fIs1\fR).
+.PP
+Starting in Standards Version 6, certain scalar field parameters in the field
+specifications may be specified using
+.B CONST
+or
+.B CARRAY
+fields, instead of literal values.  A list of parameters for which this is
+allowed is given below in the
+.B Field Parameters
+section.
+.PP
+The possible fields types are:
+.TP
+.B BIT
+The BIT vector field type extracts one or more bits out of an input vector
+field as an unsigned number.  Syntax is:
+.RS
+.IP
+.I <fieldname>
+.B BIT
+.I <input> <first-bit> \fR[\fI<num-bits>\fR]
+.PP
+which specifies
+.I fieldname
+to be the value of bits
+.I first-bit
+through
+.IR first-bit + num-bits -1
+of the input vector field
+.IR input ,
+when
+.I input
+is converted from its native type to an (endianness corrected) unsigned 64-bit
+integer.  If
+.I num-bits
+is omitted, it is assumed to be 1.  The
+.B SBIT
+field type is a signed version of this field type.  The optional
+.I num-bits
+parameter appeared in Standards Version 1.
+.RE
+.TP
+.B CARRAY
+The CARRAY scalar field type is a list of constants fully specified in the
+format specification metadata.  Syntax is:
+.RS
+.IP
+.I <fieldname>
+.B CARRAY
+.I <type> <value0> <value1> <value2> ...
+.PP
+where
+.I type
+may be any supported native data type (see the description of the
+.B RAW
+field type below), and
+.IR value0 ", " value1 ,
+&c. are the values of successive elements in the scalar list interpreted as
+indicated by
+.IR type .
+No limit is placed on the number of elements in a
+.BR CARRAY .
+(Note: despite being multivalued, this is not considered a vector field since
+the elements of the
+.B CARRAY
+are not indexed by frames.)  It appeared in Standards Version 8.
+.RE
+.TP
+.B CONST
+The CONST scalar field type is a constant fully specified in the format
+specification metadata.  Syntax is:
+.RS
+.IP
+.I <fieldname>
+.B CONST
+.I <type> <value>
+.PP
+where
+.I type
+may be any supported native data type (see the description of the
+.B RAW
+field type below), and
+.I value
+is the numerical value of the constant interpreted as indicated by
+.IR type .
+It appeared in Standards Version 6.
+.RE
+.TP
+.B DIVIDE
+The DIVIDE vector field type is the quotient of two vector fields.  Syntax is:
+.RS
+.IP
+.I <fieldname>
+.B DIVIDE
+.I <field1> <field1>
+.PP
+The derived field is computed as:
+.IP
+fieldname = field1 / field2.
+.PP
+It was introduced in Standards Version 8.
+.RE
+.TP
+.B LINCOM
+The LINCOM vector field type is the linear combination of one, two or three
+input vector fields.  Syntax is:
+.RS
+.IP
+.I <fieldname>
+.B LINCOM
+.RI [ <n> "] " "<field1> <a1> <b1> " [ "<field2> <a2> <b2> " [ "<field3> <a3>"
+.IR <b3> ]]
+.PP
+where
+.IR n ,
+if present, indicates the number of input vector fields (1, 2, or 3).  The
+derived field is computed as:
+.IP
+fieldname = (a1 * field1 + b1) + (a2 * field2 + b2) + (a3 * field3 + b3)
+.PP
+with the
+.I field2
+and
+.I field3
+terms included only if specified.
+
+If
+.I n
+is not specified, the number of fields is determined by looking at the supplied
+parameters.  Since it is possible to create a field code which is identical to
+a literal number, the third token on the line is assumed to be
+.I n
+if it the entire token can be parsed as a literal number using the rules
+outlined in
+.BR strtod (3).
+That is, if the field code specifying
+.I field1
+could be mistaken for a literal number,
+.I n
+must be specified to prevent ambiguity.  In standards Version 6 and earlier,
+.I n
+is mandatory.
+.RE
+.TP
+.B LINTERP
+The LINTERP vector field type specifies a table look up based on another vector
+field.  Syntax is:
+.RS
+.IP
+.I <fieldname>
+.B LINTERP
+.I <input> <table>
+.PP
+where
+.I input
+is the input vector field for the table lookup, and
+.I table
+is the path to the lookup table file for the field.  If this path is relative,
+it is assumed to be relative to the directory containing the fragment defining
+this field.  The lookup table file is an ASCII text file with two whitespace
+separated columns of
+.I x
+and
+.I y
+values.  Values are linearly interpolated between the points specified in the
+lookup table.
+.RE
+.TP
+.B MPLEX
+The MPLEX vector field type permits the multiplexing of several low sample rate
+fields into a single data field of higher sample rate.  Syntax is:
+.RS
+.IP
+.I <fieldname>
+.B MPLEX
+.I <input> <index> <count> \fR[\fI<max>\fR]
+.PP
+where
+.I input
+is the input vector containing the multiplexed fields,
+.I index
+is the vector containing the mutliplex index,
+.I count
+is the value of the multiplex index when the computed field is stored in
+.IR input ,
+and
+.I max
+is the nominal maximum value which the multiplex index takes.  If
+.I max
+is omitted, zero is assumed.  If
+.I max
+is non-zero, the relation
+.IR count " <= " max
+must hold.  Both
+.I count
+and
+.I max
+are non-negative integers.
+.PP
+At every sample
+.IR n ,
+the derived field is computed as:
+.IP
+fieldname[n] = (index == count) ? input[n] : fieldname[n - 1]
+.PP
+The
+.I index
+vector is converted to an integer type for comparison.  The value of the
+derived field before the first sample where
+.I index
+equals
+.I count
+is implementation dependent.
+.PP
+The values of
+.I count
+and
+.I max
+place no restrictions on values contained in
+.IR index .
+Specifically, samples of
+.I index
+may exceed
+.IR max .
+Particular values of
+.I index
+(including
+.IR count )
+need not be equally spaced (neither by
+.I max
+nor any other spacing);
+.I index
+need not ever take on the value
+.I count
+(in which case the value of the entirety of the output vector is
+implementation dependent).  MPLEX appeared in Standards Version 9.
+
+.RE
+.TP
+.B MULTIPLY
+The MULTIPLY vector field type is the product of two vector fields.  Syntax is:
+.RS
+.IP
+.I <fieldname>
+.B MULTIPLY
+.I <field1> <field2>
+.PP
+The derived field is computed as:
+.IP
+fieldname = field1 * field2.
+.PP
+It appeared in Standards Version 2.
+.RE
+.TP
+.B PHASE
+The PHASE vector field type shifts an input vector field by the specified number
+of samples.  Syntax is:
+.RS
+.IP
+.I <fieldname>
+.B PHASE
+.I <input> <shift>
+.PP
+which specifies
+.I fieldname
+to be the input vector field,
+.IR input ,
+shifted by
+.I shift
+samples.  A positive
+.I shift
+indicates a forward shift, towards the end-of-field.  Results of shifting past
+the beginning- or end-of-field is implementation dependent.  PHASE appeared in
+Standards Version 4.
+.RE
+.TP
+.B POLYNOM
+The POLYNOM vector field type specifies a polynomial function of a single input
+vector field.  Syntax is:
+.RS
+.IP
+.I <field_name>
+.B POLYNOM
+.I <input> <a0> <a1>
+.RI [ <a2> " [" <a3> " [" <a4> " [" <a5> ]]]]
+.PP
+where
+.I <input>
+is the input field code, and the order of the computed polynomial is determined
+by how many co-efficients are present in the specification.  The derived field
+is computed as:
+.IP
+fieldname = a0 + a1 * input + a2 * input**2 + a3 * input**3 + a4 * input**4
++ a5 * input**5
+.PP
+where
+.I **
+is the element-wise exponentiation operator, and the higher order terms are
+computed only if the corresponding co-efficients
+.RI a i
+are specified.  POLYNOM appeared in Standards Version 7.
+.RE
+.TP
+.B RAW
+The RAW vector field type specifies raw time streams on disk.  In this case, the
+field name should correspond to the name of the file containing the time stream.
+Syntax is:
+.RS
+.IP
+.I <fieldname>
+.B RAW
+.I <type> <sample-rate>
+.PP
+where
+.I sample-rate
+is the number of samples per dirfile frame for the time stream and
+.I type
+is a token specifying the native data format type:
+.RS
+.TP
+.I UINT8
+unsigned 8-bit integer
+.TP
+.I INT8
+signed (two's complement) 8-bit integer
+.TP
+.I UINT16
+unsigned 16-bit integer
+.TP
+.I INT16
+signed (two's complement) 16-bit integer
+.TP
+.I UINT32
+unsigned 32-bit integer
+.TP
+.I INT32
+signed (two's complement) 32-bit integer
+.TP
+.I UINT64
+unsigned 64-bit integer
+.TP
+.I INT64
+signed (two's complement) 64-bit integer
+.TP
+.I FLOAT32
+IEEE-754 standard 32-bit single precision floating point number
+.TP
+.I FLOAT64
+IEEE-754 standard 64-bit double precision floating point number
+.TP
+.I COMPLEX64
+a 64-bit complex number consisting of two IEEE-754 standard 32-bit single
+precision floating point numbers representing the real and imaginary parts of
+the complex number (Standards Version 7 and later)
+.TP
+.I COMPLEX128
+a 128-bit complex number consisting of two IEEE-754 standard 64-bit double
+precision floating point numbers representing the real and imaginary parts of
+the complex number (Standards Version 7 and later).
+.RE
+
+For more information on the storage of complex valued data, see dirfile(5).
+Two additional type names exist:
+.I FLOAT
+is equivalent to
+.IR FLOAT32 ,
+and
+.I DOUBLE
+is equivalent to
+.IR FLOAT64 .
+Standards Version 9 deprecates these two aliases, but still allows them.
+
+All these type names (except those for complex data, which came later) were
+introduced in Standards Version 5.  Earlier Standards Versions specified data
+types with single character type aliases:
+
+.RS
+.TP
+.I c
+UINT8
+.TP
+.I u
+UINT16
+.TP
+.I s
+INT16
+.TP
+.I U
+UINT32
+.TP
+.IR i ", " S
+INT32
+.TP
+.I f
+FLOAT32
+.TP
+.I d
+FLOAT64
+.RE
+
+Types
+.IR INT8 ", " UINT64 ", " INT64 ", " COMPLEX64 ,
+and
+.I COMPLEX128
+are not supported before Standards Version 5, so no single character type
+aliases exist for these types.  These single character type aliases were
+deprecated in Standards Version 5 and removed in Standards Version 8.
+.RE
+.TP
+.B RECIP
+The RECIP vector field type computes the reciprocal of a single input vector
+field.  Syntax is:
+.RS
+.IP
+.I <field_name>
+.B RECIP
+.I <input> <dividend>
+.PP
+where
+.I <input>
+is the input field code and
+.I <dividend>
+is a scalar quantity.  The derived field is computed as:
+.IP
+fieldname = dividend / input.
+.PP
+RECIP appeared in Standards Version 8.
+.RE
+.TP
+.B SBIT
+The SBIT vector field type extracts one or more bits out of an input vector
+field as a signed number.  Syntax is:
+.RS
+.IP
+.I <fieldname>
+.B SBIT
+.I <input> <first-bit> \fR[\fI<bits>\fR]
+.PP
+which specifies
+.I fieldname
+to be the value of bits
+.I first-bit
+through
+.IR first-bit + bits -1
+of the input vector field
+.IR input ,
+when
+.I input
+is converted from its native type to a (endianness corrected) signed 64-bit
+integer.  If
+.I bits
+is omitted, it is assumed to be 1.  The
+.B BIT
+field type is an unsigned version of this field type.  SBIT appeared in
+Standards Version 7.
+.RE
+.TP
+.B STRING
+The STRING scalar field type is a character string fully specified in the format
+file metadata.  Syntax is:
+.RS
+.IP
+.I <fieldname>
+.B STRING
+.I <value>
+.PP
+where
+.I value
+is the string value of the field.  Note that
+.I value
+is a single token.  To include whitespace in the string, enclose
+.I value
+in quotation marks
+.RB ( """" ),
+or else escape the whitespace with the backslash character
+.RB ( \e ).
+STRING appeared in Standards Version 6.
+.RE
+.TP
+.B WINDOW
+The WINDOW vector field type isolates a portion of an input vector based on a 
+comparison.  Syntax is:
+.RS
+.IP
+.I <fieldname>
+.B WINDOW
+.I <input> <check> <op> <threshold>
+.PP
+where
+.I input
+is the vector containing the data to extract,
+.I check
+is the vector on which to test the comparison,
+.I threshold
+is the value against which
+.I check
+is compared, and
+.I op
+is one of the following tokens indicating the particular comparison performed:
+.RS
+.TP
+.I EQ
+data are extracted where
+.IR check ,
+converted to a 64-bit signed integer, equals
+.IR threshold ,
+.TP
+.I GE
+data are extracted where
+.IR check ,
+converted to a 64-bit floating-point number, is greater than or equal to
+.IR threshold ,
+.TP
+.I GT
+data are extracted where
+.IR check ,
+converted to a 64-bit floating-point number, is strictly greater than
+.IR threshold ,
+.TP
+.I LE
+data are extracted where
+.IR check ,
+converted to a 64-bit floating-point number, is less than or equal to
+.IR threshold ,
+.TP
+.I LT
+data are extracted where
+.IR check ,
+converted to a 64-bit floating-point number, is strictly less than
+.IR threshold ,
+.TP
+.I NE
+data are extracted where
+.IR check ,
+converted to a 64-bit signed integer, is not equal to
+.IR threshold ,
+.TP
+.I SET
+data are extracted where at least one bit set in
+.IR threshold
+is also set in
+.IR check ,
+when converted to a 64-bit unsigned integer,
+.TP
+.I CLR
+data are extracted where at least one bit set in
+.IR threshold
+is not set in
+.IR check ,
+when converted to a 64-bit unsigned integer,
+.RE
+.PP
+The storage type of
+.I threshold
+depends on the operator, and follows the interpretation of
+.IR check .
+It may never be complex valued.
+.PP
+Outside the region extracted, the value of the derived field is implementation
+dependent.
+.PP
+Note: with the
+.B EQ
+operator, this derived field type is very similar to the MPLEX field type above.
+The primary difference is that MPLEX mandates the value of the derived field
+outside the extracted region, while WINDOW does not.  WINDOW appeared in
+Standards Version 9.
+.RE
+
+.SS Field Parameters
+All input vector field parameters should be
+.I field codes
+(see below).  Additionally, the scalar field parameters listed may be either
+literal numbers or else the
+.I field code
+of a
+.B CONST
+field containing the value, or the
+.I field code
+of a
+.B CARRAY
+followed by a left angle bracket
+.RI ( < ),
+then an non-negative integer used as the
+.B CARRAY
+element index, then a right angle bracket
+.RI ( > ),
+that is:
+.IP
+.IB fieldcode < n >
+.PP
+If the angle
+brackets and element index are omitted from a
+.B CARRAY
+field code used as a parameter, the first element in the field (index zero) is
+assumed.
+.PP
+Field parameters which may be specified using a scalar field code are:
+.RS
+.TP
+.BR BIT ", " SBIT
+.IR bitnum ", " numbits
+.TP
+.B LINCOM
+any of the
+.IR m "i, or " b i
+.TP
+.B MPLEX
+.IR count ", " max
+.TP
+.B PHASE
+.I shift
+.TP
+.B POLYNOM
+any of the
+.IR a i
+.TP
+.B RAW
+.I spf
+.TP
+.B RECIP
+.I dividend
+.TP
+.B WINDOW
+.I threshold
+.RE
+.PP
+Since it is possible to create a field code which is identical to a literal
+number, a parameter is assumed to be the field code of a scalar field only if
+the entire token cannot be parsed as a literal number using the rules outlined
+in
+.BR strtod (3).
+For example, a
+.B CONST
+field whose field code consists solely of digits can never be used as a
+parameter in a field specification line.
+
+Starting in Standards Version 7, literal complex number is specified as two
+real (floating point) numbers separated by a semicolon
+.RB ( ; )
+with no intervening whitespace.  So, for example, the tokens
+.IP
+1;0 \t 0;1 \t 4;0 \t 0;5 \t 9.313e2;74.1
+.PP
+represent, respectively, the real unit, the imaginary unit, the real number
+four, the imaginary number
+.RI 5 i ,
+and the complex number
+.RI "931.3 + 74.1" i .
+Because the semicolon character cannot be used in field names, a complex valued
+literal can never be mistaken for a field code.  This allows, among other
+things, the composition of complex valued fields from purely real input fields.
+For example, a complex valued field,
+.IR z ,
+may be created from a real valued field
+.IR re ,
+representing the real part of the complex number, and the real valued field
+.IR im ,
+representing the imaginary part of the complex number, with the following
+.B LINCOM
+specification:
+.IP
+.I z
+.B LINCOM
+.I re
+1 0
+.I im
+0;1 0
+.PP
+Starting in Standards Version 9, in additional to decimal notation, literal
+integer parameters may be specified as hexadecimal numbers, by prefixing the
+number (after an optional
+.RB ' + '
+or
+.RB ' - '
+sign) with
+.B 0x
+or
+.BR 0X ,
+or as octal numbers, by prefixing the number with
+.BR 0 ,
+as described in
+.BR strtol (3).
+Similarly, floating point literal numbers (both purely real ones and
+components of complex literals) may be specified in hexadecimal by prefixing
+them with
+.B 0x
+or
+.BR 0X ,
+and using
+.B p
+or
+.B P
+as the binary exponent prefix, as described in the C99 standard.  Both uppercase
+and lowercase hexadecimal digits may be used.  In cases where a literal
+floating point number may apear, the tokens
+.B INF
+or
+.BR INFINITY ,
+optionally preceded by a
+.RB ' + '
+or
+.RB ' - '
+sign, and
+.BR NAN ,
+optionally immediately followed by
+.RB ' ( ',
+then a sequence of characters, then
+.RB ' ) ',
+and all disregarding case, will be interpreted as the special floating point
+values explained in
+.BR strtod (3).
+
+.SS Field Codes
+When specifying the input to a field, either as a scalar parameter, or as an
+input vector field to a
+.RB non- RAW
+vector field,
+.I field codes
+are used.  A
+.I field code
+is one of:
+.IP \(bu 4
+a simple field name, possibly an alias, indicating a vector or scalar field
+.IP \(bu 4
+a parent field name, followed by a forward slash, followed by a metafield name,
+indicating a metafield.  See the description of the
+.B /META
+directive above for further details. 
+.IP \(bu 4
+either of the above, followed by a period, followed by a
+.IR "representation suffix" ,
+but only if the field or metafield specified is not a
+.B STRING
+type field.
+.PP
+A 
+.IR "representation suffix"
+may be used used to extract a real number from a complex value.  The available
+suffixes and their meanings are:
+.TP
+.B .a
+This representation indicates the angle (in radians) between the positive real
+axis and the value (ie. the complex argument).  The argument is in the range
+[-pi, pi], and a branch cut exists along the negative real axis.  At the branch
+cut, -pi is returned if the imaginary part is -0, and pi is returned if the
+imaginary part is +0.  If
+.IR z =0,
+zero is returned.
+.TP
+.B .i
+This representation indicates the projection of the value onto the imaginary
+axis (ie. the imaginary part of the number).
+.TP
+.B .m
+This representation indicates the modulus of the value (ie. its absolute
+value).
+.TP 
+.B .r
+This representation indicates the projection of the value onto the real axis
+(ie.  the real part of the number).
+.PP
+If the specified field is purely real, the representations are calculated as
+if the imaginary part was equal to +0.  For example, given a complex valued
+vector,
+.IR z ,
+a vector containing the real part of
+.IR z ", "  re_z ,
+could be produced with:
+.IP
+.I re_z
+.B PHASE
+.I z.r
+0
+.PP
+and similarly for the complex field's imaginary part, argument, and absolute
+value.  (Although it should be pointed out this simplistic an example isn't
+strictly necessary, since
+.I z.r
+could be used wherever
+.I re_z
+would be.)
+
+.SH HISTORY
+
+This document describes Versions 9 and earlier of the Dirfile Standards.
+
+Version 9 of the Standards (April 2012) added the
+.B MPLEX
+and
+.B WINDOW
+field types, the
+.B /ALIAS
+and
+.B /HIDDEN
+directives, the affixes to
+.BR /INCLUDE ,
+the 
+.BR sie ", " zzip ,
+and
+.B zzslim
+encoding schemes, along with the optional
+.I enc_datum
+token to
+.BR /ENCODING .
+It permitted specification of integer literals in octal and hexadecimal.
+Finally, it deprecated the type aliases
+.I FLOAT
+and
+.IR DOUBLE .
+
+Version 8 of the Standards (November 2010) added the
+.BR DIVIDE ", " RECIP ,
+and
+.B CARRAY
+field types, made the forward slash on reserved words mandatory, and prohibited
+using the single character data type aliases in the specification of
+.B RAW
+fields.  It also introduced the optional second
+.RI ( arm )
+token to the
+.B /ENDIAN
+directive.
+
+Version 7 of the Standards (October 2009) added the
+.B SBIT
+and
+.B POLYNOM
+field types, and the directive-less method of specifying metafields.  It also
+introduced the data types
+.I COMPLEX128
+and
+.IR COMPLEX64 ,
+along with the notion of
+.IR representations ,
+and the
+.B lzma
+encoding scheme.  Finally, it made the number of fields parameter for
+.I LINCOM
+optional.
+
+Version 6 of the Standards (October 2008) added the
+.BR /ENCODING ", " /META ", " /PROTECT ", and " /REFERENCE
+directives, and the
+.B CONST
+and
+.B STRING
+field types.  It permitted whitespace in tokens and introduced the character
+escape sequences. It allowed
+.B CONST
+fields to be used as parameters in field specification lines.  It also removed
+.I FILEFRAM
+as an alias for
+.IR INDEX ,
+and prohibited
+.BR .
+but allowed
+.B #
+and
+.B \e
+in field names.
+
+Version 5 of the Standards (August 2008) added
+.B VERSION
+and
+.BR ENDIAN ,
+slash demarcation of reserved words, and removed the restriction on field
+name length.  It introduced the data types
+.IR INT8 ", " INT64 ,
+and
+.IR UINT64 ,
+the new-style type specifiers, and increased the range of the
+.B BIT
+field type from 32 to 64 bits.  It also prohibited the characters
+.B &;<>\e|
+in field names.
+
+Version 4 of the Standards (October 2006) added the
+.B PHASE
+field type.
+
+Version 3 of the Standards (January 2006) added
+.B INCLUDE 
+and increased the allowed length of a field name from 16 to 50 characters.
+
+Version 2 of the Standards (September 2005) added the
+.B MULTIPLY
+field type.
+
+Version 1 of the Standards (November 2004) added
+.B FRAMEOFFSET
+and the optional fourth argument to the
+.B BIT
+field type.
+
+Version 0 of the Standards (before March 2003) refers to the dirfile standards
+supported by the
+.BR getdata (3)
+library originally introduced into the
+.BR kst (1)
+sources, which contained support for all other features covered by this
+document.
+
+.SH AUTHORS
+
+The dirfile specification was developed by C. B. Netterfield
+.nh
+<netterfield@astro.utoronto.ca>.
+.hy 1
+
+Since Standards Version 3, the dirfile specification has been maintained by
+D. V. Wiebe
+.nh
+<getdata@ketiltrout.net>.
+.hy 1
+
+.SH SEE ALSO
+.BR dirfile (5),
+.BR dirfile\-encoding (5)

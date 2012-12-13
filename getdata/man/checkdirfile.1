@@ -1,0 +1,67 @@
+.\" checkdirfile.1.  The checkdirfile man page.
+.\"
+.\" Copyright (C) 2010, 2012 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH checkdirfile 1 "21 February 2012" "Version 0.8.0" "GETDATA"
+.SH NAME
+checkdirfile \(em verify Dirfile database metadata
+.SH SYNOPSIS
+.nh
+.ad l
+.P
+.B checkdirfile
+.I DIRFILE
+.P
+.B checkdirfile
+.RB "[\| " \-\-help " | " \-\-version " \|]"
+.hy
+.ad n
+.SH DESCRIPTION
+Report errors in metadata of the dirfile(5) database specified by 
+.IR DIRFILE .
+
+Three separate checks are performed.  First, the format specification metadata
+is scanned for syntax errors (see dirfile-format(5)) and Dirfile Standards
+compliance.  Second, fields defined in the database are checked for
+self-consistency.  Finally, the database is queried for its length.
+.P
+.B --help
+.PD 0
+.TP
+.PD
+.B --version
+Show usage and version information and exit.
+
+.SH AUTHOR
+
+checkdirfile was written by D. V. Wiebe.
+
+.SH REPORTING BUGS
+
+Please send reports of bugs to getdata\-devel@lists.sourceforge.net
+
+The GetData home page: <http://getdata.sourceforge.net/>
+
+.SH COPYRIGHT
+
+Copyright \(co 2010 D. V. Wiebe
+
+checkdirfile is licenced under the GNU LPGL version 2.1 or later.
+
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+
+.SH SEE ALSO
+.BR dirfile (5),
+.BR dirfile-format (5)

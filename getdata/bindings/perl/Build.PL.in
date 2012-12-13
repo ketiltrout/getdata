@@ -1,0 +1,41 @@
+# @configure_input@
+
+use Module::Build;
+
+# divert up_to_date to allow consideration of simple_funcs.xs... is there an
+# easier way to do this?
+my $class = Module::Build->subclass(
+  class => "GetData::Build",
+  code => <<'SUBCLASS' );
+
+sub up_to_date {
+  my ($self, $source, $derived) = @_;
+
+  if ($source eq "lib/GetData.xs") {
+    return 0 if (not $self->up_to_date("lib/simple_funcs.xs", $derived));
+    return 0 if (not $self->up_to_date("@top_builddir@/src/getdata.h",
+      $derived));
+  }
+  return $self->SUPER::up_to_date($source, $derived);
+}
+SUBCLASS
+
+my $build = $class->new(
+  dist_abstract => "Perl bindings to the GetData library",
+  dist_author => 'The GetData Project <@PACKAGE_BUGREPORT@>',
+  dist_version_from => "GetData.pm",
+  extra_compiler_flags => ['@DEFS@', '-I@top_builddir@/src'],
+  extra_linker_flags => ['-L@top_builddir@/src/.libs/', '-lgetdata'],
+  include_dirs => '@top_srcdir@/src',
+  license => 'lgpl',
+  module_name => "GetData",
+  pm_files => { 'GetData.pm' => 'lib/GetData.pm' },
+  release_status => "testing",
+  requires => {
+    perl => '5.6.0',
+    'Math::Complex' => '1.34'
+  },
+  test_files => '@srcdir@/t/*.t',
+  xs_files => { 'lib/GetData.xs' => 'lib/GetData.xs' }
+);
+$build->create_build_script;

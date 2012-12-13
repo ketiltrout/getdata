@@ -1,0 +1,97 @@
+.\" gd_strtok.3.  The gd_strtok man page.
+.\"
+.\" Copyright (C) 2012 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_strtok 3 "28 June 2012" "Version 0.8.0" "GETDATA"
+.SH NAME
+gd_strtok \(em tokenise a string using the GetData parser
+.SH SYNOPSIS
+.B #include <getdata.h>
+.HP
+.nh
+.ad l
+.BI "char *gd_strtok(DIRFILE *" dirfile ", const char *" string );
+.hy
+.ad n
+.SH DESCRIPTION
+The
+.BR gd_strtok ()
+function parses a string into a series of tokens according to the rules of the
+Dirfile metadata syntax (see dirfile-format(5)).  The first time
+.BR gd_strtok ()
+is called, the string to be parsed should be passed in
+.IR string .
+The first token will be returned.  In subsequent calls to parse the same string,
+.I string
+should be NULL (as with
+.BR strtok (3)).
+Each time 
+.BR gd_strtok ()
+is called like this, the next token is returned.
+
+Operation of the Dirfile tokeniser varies between Dirfile Standards Versions.
+The Standards Version used is the current Version of the loaded DIRFILE
+.IR dirfile .
+Use
+.BR gd_dirfile_standards (3)
+to retrieve or change this value.  Changing the Standards Version of
+.I dirfile
+while parsing a string will affect the parsing of subsequent tokens, but does
+not affect tokens already returned.  A copy of the string is cached in the
+.I dirfile
+object.  Calling
+.BR gd_strtok ()
+with different
+.IR dirfile s
+will parse different strings.
+
+.SH RETURN VALUE
+Upon successful completion,
+.BR gd_strtok ()
+returns a copy of the first token (if
+.I string
+is non-NULL), or the subsequent token.  The token strings returned are each
+allocated with
+.BR malloc (3)
+and should be deallocated by the caller when no longer needed using
+.BR free (3).
+.PP
+If no more tokens are available, or if an error occurred, NULL is returned.
+If an error has occurred, it will also set the dirfile error a non-zero error
+value.  Possible error values are:
+.TP 8
+.B GD_E_ALLOC
+A memory allocation error occurred.
+.TP
+.B GD_E_ARGUMENT
+There was no string to parse (i.e.
+.I string
+was NULL, but no previous call specified a string to parse).
+.TP
+.B GD_E_BAD_DIRFILE
+The supplied dirfile was invalid.
+.TP
+.B GD_E_FORMAT
+A syntax error was found in the string.
+.PP
+The dirfile error may be retrieved by calling
+.BR gd_error (3).
+A descriptive error string for the last error encountered can be obtained from
+a call to
+.BR gd_error_string (3).
+
+.SH SEE ALSO
+.BR gd_dirfile_standards (3),
+.BR gd_open (3),
+.BR dirfile-format (5)

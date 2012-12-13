@@ -1,0 +1,184 @@
+UNCLEAN DATABASE RECOVERY PROCEDURE
+===================================
+
+A function returning the dreaded GD_E_UNCLEAN_DB error indicates that
+the call has left the open dirfile database in an "unclean" state.
+This document outlines procedures to recover such an unclean dirfile.
+It is expected that this process will largely be automated in the
+future.
+
+This file is current as of the GetData 0.7.0 library.
+
+0  Contents
+=-=-=-=-=-=
+
+1  Preamble
+2  Mitigation
+3  Recovery
+4  Checking
+
+
+1  Preamble
+=-=-=-=-=-=
+
+If you are not interested in the mechanism of how an unclean database
+comes about, you may skip directly to the next section (Mitigation).
+
+The GD_E_UNCLEAN_DB error may be returned by the following functions
+when they are asked to modify binary data:
+
+- dirfile_alter_encoding()
+- dirfile_alter_endianness()
+- dirfile_alter_frameoffset()
+
+If they aren't asked to modify binary data, GD_E_UNCLEAN_DB will never
+be returned.  In an abstract sense, all these functions modify binary
+data with the following procedure:
+
+1. copies are made of all the binary data files, after modification,
+for the fragment
+
+2a. If an error occurred in step one, the binary file copies are
+deleted.
+
+2b. If no error occurred in step one, the binary data files are moved
+into place.  In the case of dirfile_alter_endianness() and
+dirfile_alter_frameoffset(), the files are moved over top of the old
+files.  In the case of dirfile_alter_encoding(), the files have a new
+name, due to the differing extension, so after moving the new files,
+the old files are deleted.
+
+Steps 1 and 2a never produces GD_E_UNCLEAN_DB.  Step 2b will produce
+GD_E_UNCLEAN_DB if moving the new files fails, or if the delete of the
+old file fails.
+
+A move is accomplished through the rename(2) system call.  A delete is
+accomplished through through the unlink(2) system call.  See their man
+pages for reasons they might fail.
+
+An unclean database will suffer from one or more of the following
+problems:
+
+- Binary data files with incorrect names.
+- Both pre- and post-modification copies of the binary data.
+
+If multiple fragments are modified by a single call of these functions
+by passing GD_ALL_FRAGMENTS as the fragment index, the operation
+proceeds one fragment at a time, aborting early in the case of error.
+As a result, at most one fragment will ever be unclean (the ones
+before the unclean fragment will have been successfully modified, the
+ones after will be still in their unmodified state).
+
+
+2  Mitigation
+=-=-=-=-=-=-=
+
+Once GD_E_UNCLEAN_DB is encountered by an application, the open
+DIRFILE object should be closed using gd_close(3) or gd_discard(3)
+since further use of the dirfile may corrupt the database.  The
+GetData library encourages this behaviour by marking the database
+as invalid, which will cause most calls on the dirfile to fail.  If
+the pathname of the fragment in which the error occurred is not
+known (possibly because GD_ALL_FRAGMENTS was used),
+gd_error_string(3) may be called before closing the dirfile to get
+the pathname of the affected fragment.
+
+
+3  Recovery
+=-=-=-=-=-=
+
+The procedure for database recovery should be as follows:
+
+
+3.1  Determination of affected fragment
+---------------------------------------
+
+Before recovery can be accomplished, the unclean fragment must be
+determined.  The easiest way to do this is to call get_error_string(3)
+before closing the dirfile.  The error string for the GD_E_UNCLEAN_DB
+error contains the path to the unclean fragment.
+
+If this has not been done, the unclean fragment may be locatable by
+searching for temporary or duplicate files (see below) which haven't
+been cleaned up.
+
+
+3.2  Fragment preparation
+-------------------------
+
+Edit the unclean fragment with a text editor.  The error will have
+caused GetData to not update the fragment with the new encoding/
+endianness/frame offset.  Update this now.
+
+Make a list of RAW fields defined in the unclean fragment.
+
+
+3.3  RAW field classification
+-----------------------------
+
+Now go through the RAW field list.  Each RAW field should fall into
+one of these classes:
+
+Class A:  A temporary file exists with a name of the form
+<field_name>_XXXXXX where the "XXXXXX" represents an arbitrary set of
+six characters.  In this case there should also be a file with the
+proper binary file name, i.e. the field name, possibly appended with
+an encoding suffix.
+
+Class B: No temporary file exists, the only file is the one with the
+proper binary file name (with the new encoding suffix, if
+appropriate).
+
+Of these two classes, RAW fields of Class B can be ignored: they are
+already clean.  The RAW fields of Class A need to be cleaned.
+
+
+3.4  RAW Field Cleaning
+-----------------------
+
+Cleaning is a simple procedure: the temporary file contains the newly
+modified binary data, but it has the wrong name.  The correctly named
+binary file contains the old unmodified data.
+
+If the encoding was not changed (i.e. GD_E_UNCLEAN_DB was returned by
+a function other than dirfile_alter_encoding(3)), the field should be
+cleaned by simply moving the temporary file over top of the existing
+binary file with the correct name.
+
+If the encoding was changed (i.e. GD_E_UNCLEAN_DB was returned by
+dirfile_alter_encoding(3)), the field should be cleaned by renaming
+the temporary file and replacing the "_XXXXXX" part with the correct
+encoding suffix (see dirfile-encoding(5)).  The old file should then
+be deleted.
+
+The important point here is: the temporary file contains the correct
+data.  It must be kept.  This procedure should be repeated for each 
+RAW file in Class A.
+
+
+4  Checking
+=-=-=-=-=-=
+
+Once the dirfile has been cleaned, it should be checked by opening it
+read-only and attempting to read each of the RAW fields in the
+(formerly) unclean fragment.  If the procedure has been performed
+correctly, the expected data should be returned.
+
+If the data returned appear corrupted, it is possible that the old
+data file was not deleted; recheck the dirfile.  If an I/O error
+occurs, it is possible that the replacement file has an incorrect
+name or permissions; again, recheck the dirfile.
+
+
+-----------------------------------
+
+Copyright (C) 2008 D. V. Wiebe
+
+This document is part of the GetData project.
+
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.2 or
+any later version published by the Free Software Foundation; with no
+Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+Texts.  A copy of the license is included in the `COPYING.DOC' file
+as part of this distribution.

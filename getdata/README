@@ -1,0 +1,264 @@
+THE GETDATA PROJECT
+===================
+
+The GetData Project is the reference implementation of the Dirfile Standards.
+The Dirfile database format is designed to provide a fast, simple format for
+storing and reading binary time-ordered data.  The Dirfile Standards are
+described in detail in three Unix manual pages distributed with this package:
+dirfile(5), dirfile-format(5) and dirfile-encoding(5), which may be read before
+installation by running:
+
+  $ man man/dirfile.5
+  $ man man/dirfile-format.5
+  $ man man/dirfile-encoding.5
+
+from the top GetData Project directory (the directory containing this README
+file).  After installation, they can be read with the standard man command:
+
+  $ man dirfile
+  $ man dirfile-format
+  $ man dirfile-encoding
+
+More information on the GetData Project and the Dirfile database format may be
+found on the World Wide Web:
+
+  http://getdata.sourceforge.net/
+
+
+WARRANTY AND REDISTRIBUTION
+===========================
+
+GetData is free software; you can redistribute it and/or modify it under the
+terms of the GNU Lesser General Public License as published by the Free Software
+Foundation: either version 2.1 of the License, or (at your option) any later
+version.
+
+GetData is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public License along
+with GetData in a file called `COPYING'; if not, write to the Free Software
+Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
+
+
+CONTENTS
+========
+
+This package provides:
+  * the Dirfile Standards documents (three Unix manual pages)
+  * the C GetData library (libgetdata) including Unix manual pages
+  * Several utitilities, which also serve as examples of use:
+    - checkdirfile, which checks the metadata of a dirfile for problems
+    - dirfile2ascii, which can convert all or part of a dirfile to ASCII text
+  * several bindings to the library from other languages:
+    - C++ (libgetdata++)
+    - Fortran 77 (libfgetdata)
+    - Fortran 95 (libf95getdata)
+    - Python (pygetdata)
+    - the Interactive Data Language (IDL; idl_getdata)
+    - Perl (GetData.pm)
+
+Documentation for the various bindings, if present, can be found in files
+named `README.<language>' in the doc/ directory.  The C interface is described
+in this document and the associated man pages.
+
+A full list of features new to this release of GetData may be found in the
+file called `NEWS'.
+
+
+DIRFILE STANDARDS VERSION 9
+===========================
+
+The 0.8.0 release of the GetData Library (July 2012) is the first release to
+provide suuport the latest version of the Dirfile Standards, known as Standards
+Version 9.
+
+Standards Version 9 introduces the following:
+  * Two new field types: MPLEX and WINDOW, both meant to deal with extracting a
+    subset of their input.
+  * Field name munging via /INCLUDEs, aliases, and "hidden" names.
+  * Support for zzip-compressed dirfiles, as well as simple compression via an
+    in-built scheme called Sample Index Encoding.
+
+This is the first update to the Dirfile Standards since Standards Version 8
+(November 2010).  A full history of the Dirfile Standards can be found in the
+dirfile-format(5) man page.
+
+
+BUILDING THE LIBRARY
+====================
+
+This package may be configured and built using the GNU autotools.  Generic
+installation instructions are provided in the file called `INSTALL'.  A
+brief summary follows.  A C99-compliant compiler is required to build (but not
+to use) the package, although a compatible library with reduced functionality
+can be built with any ANSI C compiler.
+
+Most users should be able to build the package by simply executing:
+
+  $ ./configure
+  $ make
+
+from the top GetData Project directory (the directory containing this README
+file).  After the project has been built, you may (optionally) test the build by
+executing:
+
+  $ make check
+
+which will run a series of self-tests.  Finally,
+
+  $ make install
+
+will install the utilities, libraries, bindings, and documentation.
+
+The package configuration can be changed, if the default configuration is
+insufficient, before building it by passing options to ./configure.  Running
+
+  $ ./configure --help
+
+will display a brief help message summarising available options.
+
+
+PREREQUISITES
+=============
+
+The only library required to build GetData is the C Standard Library.  Several
+other external will be used if found by ./configure to provide support for
+various data encodings (typically compression schemes).  These are:
+
+- the slim compression library by Joseph Fowler;
+- the zlib library by Jean-loup Gailly and Mark Adler;
+- the bzip2 compression library by Julian Seward;
+- the lzma library, part of the XZ Utils suite by Lasse Collin, Ville Koskinen,
+  and Igor Pavlov; and,
+- the zzip library by Tomi Ollila and Guido Draheim.
+
+If these libraries are not found by configure, GetData will lack support for
+the associated encoding scheme and fail gracefully if encountering dirfiles so
+encoded.
+
+
+USING THE LIBRARY
+=================
+
+To use the library in C programs, the header file getdata.h should be included.
+This file declares all the various APIs provided by th library.  Programs
+linking to static versions of the GetData library need to be linked against the
+C Standard Math Library, in addition to GetData itself, plus any other libraries
+required for encodings supported by the library, e.g. using `-lgetdata -lm
+<other-libraries>'.
+
+The various small programs in the `util' subdirectory of the package provide
+examples of use.
+
+The checkdirfile utility was designed to report syntax errors in the format
+file(s) of the large, complex dirfiles used in the analysis of the BLAST
+experiment data.  This utility will report all syntax errors it find in the
+supplied dirfile, plus any problems in the metadata itself.
+
+Bindings exist for using the GetData library in languages other than C.  If
+language bindings exist for your particular library, a README.<language> file
+explaining its use should be present in the `doc' subdirectory.
+
+If no bindings exist for your language of choice, you will have to write your
+own.  If you are willing to have these bindings redistributed under identical
+terms as the GetData Project, we encourage you to submit them for inclusion in
+the package.
+
+
+USING MODULES
+=============
+
+Starting with GetData 0.5.0, encoding schemes which rely on optional external
+libraries (slim, gzip, bzip2, &c.) may be built as stand-alone library modules
+which will be dynamically loaded, as needed, at runtime by the core GetData
+library.  This architecture is provided to permit packaging the core GetData
+library separately from the parts of the library requiring the optional external
+libraries without having to give up the functionality these extra libraries
+provide.  To enable this behaviour, pass `--enable-modules' to ./configure.
+
+The modules are dynamically loaded via GNU libtool's portable dlopen wrapper
+library, libltdl.  The libltdl library permits dynamic loading of modules on at
+least Solaris, Linux, BSD, HP-UX, Win16, Win32, BeOS, Darwin, MacOS X.  The
+libltdl library is no longer distributed with GetData.  It can usually be found
+as part of the GNU libtool package on any modern GNU system, or else obtained
+for free from the GNU Project.
+
+GetData will fail gracefully if a library module is not found or cannot be
+opened at runtime.  In this case, the call which triggered the attempt to load
+the module will fail with the GD_E_UNSUPPORTED error.
+
+The dlopen library (and, by extension, libltdl) is notoriously not thread safe.
+As a result, if a POSIX thread implementation can be found, calls to the dynamic
+loader will be wrapped in a mutex.
+
+
+THE GETDATA HEADER FILE
+=======================
+
+The GetData header file, `getdata.h', installed in ${prefix}/include, declares
+the new API.  It also includes `getdata_legacy.h' (also installed) which
+declares the legacy API.  The legacy header should never be included directly.
+Defining the preprocessor symbol `GD_NO_LEGACY_API' before including getdata.h
+will prevent the legacy API from being declared.  In cases when the legacy API
+is declared, getdata.h will define the symbol GD_LEGACY_API, which can be used
+by callers to determine whether the legacy API is present at compile time.
+
+If the legacy API is not built (as a result of passing `--disable-legacy-api'
+to ./configure), getdata_legacy.h will not be installed, and the legacy API will
+never be declared.
+
+The default GetData API makes use of C99 features.  An ANSI C API is also
+available and can be used by defining GD_C89_API before including getdata.h.  If
+GetData was built without a C99-compliant compiler, the C99 API will be missing.
+In this case, the ANSI C API will be enabled by default (as if GD_C89_API were
+always defined) and, furthermore, getdata.h will define the symbol GD_NO_C99_API
+to indicate this.
+
+
+LARGEFILE SUPPORT
+=================
+
+When built on a platform using the GNU C Library, or another compatible
+C Library, the new GetData API will respect the feature test macros
+_LARGEFILE64_SOURCE and _FILE_OFFSET_BITS affecting largefile (> 2 GB)
+support.  If one or the other of these are to be used, they must be defined
+before including getdata.h or any Standard C Library header file.
+
+The first of these, _LARGEFILE64_SOURCE, if defined before including getdata.h,
+will enable the obsolete, transitional largefile extensions defined by the LFS.
+This will enable explicit support for large files through the definition of the
+64-bit explicit type `off64_t', and result in GetData defining the explicitly
+64-bit interfaces `gd_getdata64', `gd_putdata64', `gd_get_nframes64', &c.  This
+macro is largely obsolete, and using _FILE_OFFSET_BITS is preferred, if
+supported.
+
+The second macro, _FILE_OFFSET_BITS, determines the size of `off_t'.  If not
+defined, or defined to `32', `off_t' will be the old 32-bit type.  If, instead,
+this macro is defined to `64', `off_t' will be the largefile supporting 64-bit
+type, and calls to gd_getdata, gd_putdata, &c. will intrinsically have largefile
+support.  On 64-bit systems this macro has no effect, since a 64-bit `off_t'
+is used all the time.
+
+If your system uses the GNU C Library, the feature_test_macros(7) man page
+will provide further explanation.  On systems where these macros are
+unsupported, the gd_getdata64, &c. interfaces will never be defined, and the
+size of `off_t' will be system dependent.  In this case, GetData will likely
+lack largefile support.
+
+If you build GetData against a C Library that lacks largefile support, the
+GetData library will not support large files either, no matter what you do with
+these macros.
+
+
+AUTHOR
+======
+
+The Dirfile Standards and the GetData library were conceived and written by
+C. B. Netterfield <netterfield@astro.utoronto.ca>.
+
+Since Standards Version 3 (January 2006), the Dirfile Standards and GetData
+have been maintained by D. V. Wiebe <dvw@ketiltrout.net>.
+
+A full list of contributors is given in the file called `AUTHORS'.

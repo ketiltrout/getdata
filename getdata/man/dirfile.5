@@ -1,0 +1,140 @@
+.\" dirfile.5.  The dirfile man page.
+.\"
+.\" Copyright (C) 2005, 2006, 2008, 2009 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH dirfile 5 "1 April 2012" "Standards Version 9" "DATA FORMATS"
+.SH NAME
+dirfile \(em a filesystem-based database format for time-ordered binary data
+.SH DESCRIPTION
+The
+.I dirfile
+database format is designed to provide a fast, simple format for storing and
+reading binary time-ordered data.  Dirfiles can be read using the GetData
+library.
+
+The dirfile database is centred around one or more time-ordered data streams (a
+.IR "time stream" ).
+Each time stream is written to disk in a separate file, in its native binary
+format.  The name of these binary files correspond to the time stream's
+.IR "field name" .
+Two time streams may have different constant sampling frequencies and mechanisms
+exist within the dirfile format to ensure these time streams remain properly
+sequenced in time.
+
+To do this, the time streams in the dirfile are subdivided into
+.IR frames .
+Each frame contains an integer number of samples of each time stream.  When
+synchronous retrieval of data from more than one time stream is required,
+position in the dirfile can be specified in frames, which will ensure
+synchronicity.
+
+The binary files are all located in a central directory, known as the
+.IR "dirfile directory" .
+The dirfile as a whole may be referred to by its dirfile directory path.
+
+Included in the dirfile along with the time streams is the
+.IR "dirfile format specification" ,
+which is an ASCII text file called
+.B format
+located in the dirfile directory.  This file fully specifies the dirfile's
+metadata.  For the syntax of this file, see
+.BR dirfile\-format (5).
+
+Version 3 of the Dirfile Standards introduced the
+.I "large dirfile"
+extension.  This extension added the ability to distribute the dirfile metadata
+among multiple files (called
+.IR fragments )
+in addition to the 
+.B format
+file, as well as the ability to house portions of the database in
+.IR subdirfiles .
+These subdirfiles may be fully fledged dirfiles in their own right, but may also
+be contained within a larger, parent dirfile.  See
+.BR dirfile\-format (5)
+for information on specifying these subdirfiles.
+
+In addition to the raw fields on disk, the dirfile format specification may
+also specify
+.I derived fields
+which are calculated from one or more raw or derived time streams.  Derived
+fields behave identically to raw fields when read via GetData.  See
+.BR dirfile\-format (5)
+for a complete list of derived field types.  Dirfiles may also contain both
+numerical and character string constant
+.IR "scalar fields" ,
+also further outlined in
+.BR dirfile\-format (5).
+
+Dirfiles are designed to be written to and read simultaneously. The dirfile
+specification dictates that one particular raw field (specified either
+explicitly or implicitly by the format specification) is to be used as the
+.IR "reference field" :
+all other vector fields are assumed to have at least as many frames as the
+reference field has, and the size (in frames) of the reference field is used as
+the size of the dirfile as a whole.
+
+Version 6 of the Dirfile Standards added the ability to encode the binary files
+on disk.  Each
+.I fragment
+may have its own encoding scheme. Notably this can be used to compress these
+files.  See
+.BR dirfile\-encoding (5)
+for information on encoding schemes.
+
+.SS Complex Number Storage Format
+Version 7 of the Dirfile Standards added support for complex valued data.
+Two types of complex valued data are supported by the Dirfile Standards:
+.IP \(bu 4
+A 64-bit complex number consisting of a IEEE-754 standard 32-bit single
+precision floating point real part and a IEEE-754 standard 32-bit single
+precision floating point imaginary part, and
+.IP \(bu 4
+A 128-bit complex number consisting of a IEEE-754 standard 64-bit double
+precision floating point real part and a IEEE-754 standard 64-bit double
+precision floating point imaginary part.
+.PP
+No integer-type complex numbers are supported.
+
+Unencoded complex numbers are stored on disk in "Fortran order", that is
+with the IEEE-754 real part followed by the IEEE-754 imaginary part.  The
+specified endianness of the two components follows that of purely real floating
+point numbers.  Endianness does not affect the ordering of the real and
+imaginary parts.  This format also conforms to the C99 standard.  The latest
+C++ standard (C++98) does not specify a standard storage format for native
+complex numbers, but the upcoming standard, (C++0x) is intended to specify the
+above format for compatibility with C99
+.RI ( see :
+ISO/IEC JTC1/SC22/WG21/N1388).
+
+To aid in using complex valued data, dirfile field codes may contain a
+.I representation suffix
+which specifies a norm to apply to the complex valued data to convert it into
+purely real data.  See
+.BR dirfile\-format (5).
+
+.SH AUTHORS
+
+The Dirfile format was developed by C. B. Netterfield
+.nh
+<netterfield@astro.utoronto.ca>.
+.hy 1
+It is now maintained by D. V. Wiebe
+.nh
+<getdata@ketiltrout.net>.
+.hy 1
+
+.SH SEE ALSO
+.BR dirfile\-encoding (5),
+.BR dirfile\-format (5)

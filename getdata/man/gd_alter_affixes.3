@@ -1,0 +1,112 @@
+.\" gd_alter_affixes.3.  The gd_alter_affixes man page.
+.\"
+.\" Copyright (C) 2012 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_alter_affixes 3 "1 January 2012" "Version 0.8.0" "GETDATA"
+.SH NAME
+gd_alter_affixes \(em modify the field affixes of a fragments in a dirfile
+.SH SYNOPSIS
+.B #include <getdata.h>
+.HP
+.nh
+.ad l
+.BI "int gd_alter_affixes(DIRFILE *" dirfile ", int " fragment_index ,
+.BI "const char *" prefix ", const char *" suffix );
+.hy
+.ad n
+.SH DESCRIPTION
+The
+.BR gd_alter_affixes ()
+function sets the field prefix and suffix of fields defined in the format
+specification fragment given by
+.I fragment_index
+to
+.I prefix
+and
+.I suffix
+in the dirfile(5) database specified by
+.IR dirfile .
+
+The field prefix and suffix are appended to all field codes found in the
+specified fragment.  If the parent fragment to the modified fragment contains
+field affixes themselves, they should be included in the affixes passed to
+.BR gd_alter_affixes ().
+See EXAMPLES below for further details.  If
+.I prefix
+or
+.I suffix
+is NULL, the corresponding affix will be unchanged.  To remove an affix, set it
+to the parent fragment's corresponding affix, which may be the empty string
+("").
+
+It is not possible to set affixes on the root format file (i.e.
+.I fragment_index
+may not be zero).
+
+The
+.I dirfile
+argument must point to a valid DIRFILE object previously created by a call to
+.BR gd_open (3).
+
+.SH RETURN VALUE
+Upon successful completion,
+.BR gd_alter_affixes ()
+returns zero.  On error, it returns -1 and sets the dirfile error to a non-zero
+error value.  Possible error values are:
+.TP 8
+.B GD_E_ACCMODE
+The specified dirfile was opened read-only.
+.TP
+.B GD_E_ALLOC
+The library was unable to allocate memory.
+.TP
+.B GD_E_BAD_CODE
+The supplied
+.I prefix
+or
+.I suffix
+contained invalid characters.
+.TP
+.B GD_E_BAD_DIRFILE
+The supplied dirfile was invalid.
+.TP
+.B GD_E_BAD_INDEX
+The supplied index was out of range.
+.TP
+.B GD_E_DUPLICATE
+The supplied affixes would result in one or more field codes duplicating an
+existing field code.
+.TP
+.B GD_E_PROTECTED
+The metadata of the given fragment's parent fragment was protected from
+change.
+.PP
+The dirfile error may be retrieved by calling
+.BR gd_error (3).
+A descriptive error string for the last error encountered can be obtained from
+a call to
+.BR gd_error_string (3).
+.SH EXAMPLES
+Dealing with affixes of parent fragments is relatively straightforward.  Say,
+for instance, fragment #1 has a prefix "A" and a suffix "B" and fragment #2 is
+included from fragment #1.  In this case any prefix for fragment #2 must end
+with "A" and any suffix for fragment #2 must begin with "B".
+.SH SEE ALSO
+.BR gd_open (3),
+.BR gd_error (3),
+.BR gd_error_string (3),
+.BR gd_fragment_affixes (3),
+.BR gd_include_affix (3),
+.BR dirfile (5),
+.BR dirfile-format (5)

@@ -1,0 +1,82 @@
+.\" gd_verbose_prefix.3.  The gd_verbose_prefix man page.
+.\"
+.\" Copyright (C) 2012 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH gd_verbose_prefix 3 "1 April 2012" "Version 0.8.0" "GETDATA"
+.SH NAME
+gd_verbose_prefix \(em set the prefix on error messages printed by GetData
+.SH SYNOPSIS
+.B #include <getdata.h>
+.HP
+.nh
+.ad l
+.BI "int gd_verbose_prefix(DIRFILE *" dirfile ", const char *" prefix );
+.hy
+.ad n
+.SH DESCRIPTION
+The
+.BR gd_verbose_prefix ()
+sets the prefix printed before error messages output by the GetData library
+for the dirfile(5) database specified by
+.IR dirfile .
+If
+.I prefix
+is NULL, the current prefix (if any) is deleted and no new prefix is saved.
+
+GetData only prints error messages for a given Dirfile if opened along with the
+.B GD_VERBOSE
+flag, or if the flag has been subsequently set on the dirfile using
+.BR gd_flags (3).
+If this flag is not set, this function still updates the prefix, but GetData
+does not use it.
+.PP
+If
+.B GD_VERBOSE
+is set, when the library encounters an error, it prints the supplied prefix (if
+any), followed immediately by the error message (which is the message returned
+by
+.BR gd_error_string (3)),
+followed by a newline.  All output goes to the standard error I/O stream
+.RB ( stderr (3))
+of the caller.
+
+The 
+.I dirfile
+argument must point to a valid DIRFILE object previously created by a call to
+.BR gd_open (3).
+
+.SH RETURN VALUE
+Upon successful completion,
+.BR gd_verbose_prefix ()
+returns the zero.  On error, it returns -1 and sets the dirfile error
+to a non-zero error value.  Possible error values are:
+.TP
+.B GD_E_ALLOC
+The library was unable to allocate memory.
+.TP
+.B GD_E_BAD_DIRFILE
+The supplied dirfile was invalid.
+.PP
+The dirfile error may be retrieved by calling
+.BR gd_error (3).
+A descriptive error string for the last error encountered can be obtained from
+a call to
+.BR gd_error_string (3).
+.SH SEE ALSO
+.BR dirfile (5),
+.BR gd_flags (3),
+.BR gd_open (3),
+.BR gd_error (3),
+.BR gd_error_string (3),
+.BR stderr (3).

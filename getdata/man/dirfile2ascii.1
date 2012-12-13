@@ -1,0 +1,163 @@
+.\" dirfile2ascii.1.  The dirfile2ascii man page.
+.\"
+.\" Copyright (C) 2010, 2012 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH dirfile2ascii 1 "21 February 2012" "Version 0.8.0" "GETDATA"
+.SH NAME
+dirfile2ascii \(em output dirfile database vectors as ASCII text
+.SH SYNOPSIS
+.nh
+.ad l
+.HP
+\fBdirfile2ascii\fR [ \fIOPTION\fR ]... \fIDIRFILE\fR
+.RB "[ [ " \-a " | " \-A " | " \-e " | " \-E " | " \-F " | " \-g " | " \-G " |"
+.BR \-o " | " \-i " | " \-u " | " \-x " | " \-X " ]"
+.IR FIELD " ]..."
+.hy
+.ad n
+.SH DESCRIPTION
+Fetches data from a dirfile(5) database specified by
+.I DIRFILE
+and writes it as ASCII to standard output.  Any number of vector
+.IR FIELD s
+may be specified.  Each specified field is printed in a separate column.
+
+Mandatory arguments to long options are mandatory for short options too.
+.TP
+.BR \-d ", " \-\-delimeter =\fIdelim\fR
+separate columns by
+.IR delim .
+(Default: a single space.)
+.TP
+.BR \-f ", " \-\-first\-frame =\fIfirst_frame\fB\-\fIlast_frame\fR
+read from frame
+.I first_frame
+to frame
+.I last_frame
+(inclusive).
+.TP
+.BR \-f ", " \-\-first\-frame =\fIfirst_frame\fB:\fInframes\fR
+equivalent to \fB\-\-first\-frame\fR=\fIfirst_frame\fR
+\fB\-\-num-frames\fR=\fInframes\fR.
+.TP
+.BR \-f ", " \-\-first\-frame =\fIfirst_frame\fR
+If \fIfirst_frame\fR\~>=\~0, start reading at frame
+.IR first_frame .
+If 
+.I first_frame
+is -1 and \fB\-\-num-frames\fR=\fInframes\fR is specified, read the last
+.I nframes
+frames.  If
+.B \-\-first-frame
+is not specified, reading starts at frame zero.
+.TP
+.BR \-n ", " \-\-num\-frames =\fInframes\fR
+read at most
+.I nframes
+frames.  If not specified, or if \fBnframes\fR\~=\~0, all frames to the
+end-of-field are read.
+.TP
+.BR \-p ", " \-\-precision =\fIformat\fR
+use
+.I format
+to format output.
+.I format
+may contain any of the flag characters, a field width, and/or a precision as
+specified in
+.BR printf (3).
+It may \fInot\fR contain a length modifier.
+.TP
+.BR \-q ", " \-\-quiet
+don't write diagnostic messages on standard error.  (This is the default
+behaviour).
+.TP
+.BR \-s ", " \-\-skip =\fIframe_skip\fR
+if \fIframe_skip\fR\~>\~0, output only one sample for every
+.I frame_skip
+frames.
+.TP
+.BR \-v ", " \-\-verbose
+write diagnostic messages on standard error.
+.TP
+.BR \-z ", " \-\-fill =\fISTRING\fR
+Fill columns which go past the end of their corresponding field with the string
+.IR STRING .
+The default behaviour is to fill columns with floating-point conversions with
+.B NaN
+and columns with integer conversion with
+.BR 0 ,
+which mirrors what occurs when an attempt is made to print data from before the
+start of a field.  (Note: the default behaviour cannot be reproduced with this
+option, since
+.I STRING
+is applied to all columns, regardless of conversion type.)
+.P
+In addition to the above, each
+.I FIELD
+argument may be preceded by a short option, one of:
+.BR \-a ", " \-A ", " \-e ", " \-E ", " \-F ", " \-g ", " \-G ", " \-i ,
+.BR \-o ", " \-u ", " \-x ", " \-X ,
+indicating the conversion to be used.  See
+.BR printf (3)
+for the meaning of these conversion specifiers.  The output flags, width, and
+precision may be specified by using
+.BR \-\-precision .
+If no conversion specifier is given,
+.B %f
+is used.
+
+For conversion specifiers
+.BR %a ", " %A ", " %e ", " %E ", " %f ", " %F ", " %g ", " %G ,
+data is read from the dirfile as double precision floats.  For conversion
+specifier \fB%i\fR, data is read as 64-bit signed integers.  For conversion
+specifiers
+.BR %o ", " %u ", " %x ", " %X ,
+data is read as 64-bit unsigned integers.
+
+.SH LIMITATIONS
+No native support for printing complex data is provided.  This may be worked
+around by using dirfile(5) representation suffixes.  For example, the command
+.IP
+.B dirfile2ascii
+.I DIRFILE
+.IB FIELD .r
+.IB FIELD .i
+.P
+will print the real and imaginary parts of the complex valued field
+.I FIELD
+in the first and second columns, respectively.
+
+.SH AUTHOR
+
+dirfile2ascii was written by Matthew Truch and D. V. Wiebe.
+
+.SH REPORTING BUGS
+
+Please send reports of bugs to getdata\-devel@lists.sourceforge.net
+
+The GetData home page: <http://getdata.sourceforge.net/>
+
+.SH COPYRIGHT
+
+Copyright \(co 2010 Matthew Truch.
+
+dirfile2ascii is licenced under the GNU LPGL version 2.1 or later.
+
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+
+.SH SEE ALSO
+.BR defile (1),
+.BR dirfile (5),
+.BR printf (3)

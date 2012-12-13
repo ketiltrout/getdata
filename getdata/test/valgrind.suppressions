@@ -1,0 +1,7 @@
+{
+   libdl_fillin_rpath
+   Memcheck:Cond
+   fun:strlen
+   fun:fillin_rpath
+   fun:_dl_init_paths
+}
