@@ -26,13 +26,19 @@ from distutils.command.clean import clean as clean
 from os.path import join
 from os import unlink
 from shutil import copy
-import numpy
 
 libsrc_dir = '@top_srcdir@/src'
 libbuild_dir = '../../src'
 srcdir = '@srcdir@'
 
-includes = [ libbuild_dir, numpy.get_include() ]
+#include paths
+includes = [ libbuild_dir ]
+
+try:
+  import numpy
+  includes.append(numpy.get_include())
+except ImportError:
+  pass
 
 sources = [ 'pydirfile.c', 'pyentry.c', 'pyfragment.c', 'pygetdata.c' ]
 
