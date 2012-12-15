@@ -20,28 +20,18 @@
 #
 AUTOMAKE_OPTIONS = foreign
 
-if CC_WALL
-WALL=-Wall
-endif
-
-if GETDATA_DEBUG
-DEBUG_C = ../../src/debug.c
-endif
-
 SUBDIRS=test
 
-python_LTLIBRARIES = pygetdata.la
-LIBS=
+nodist_python_SCRIPTS = pygetdata.so
 
 BUILT_SOURCES = pyconstants.c
-AM_CFLAGS = ${WALL} -fno-strict-aliasing
-AM_CPPFLAGS = $(CPPFLAGS) $(PYTHON_CPPFLAGS) $(NUMPY_CPPFLAGS)
-pygetdata_la_LDFLAGS = -module -avoid-version \
-											 -export-symbols-regex initpygetdata
-pygetdata_la_LIBADD = $(PYTHON_LIBS) ../../src/libgetdata.la
-pygetdata_la_SOURCES = pygetdata.c pydirfile.c pyentry.c pyfragment.c \
-											 ${DEBUG_C} pygetdata.h
-nodist_pygetdata_la_SOURCES = pyconstants.c
+
+distutils_path=build/lib.${PYTHON_PLATFORM}-${PYTHON_VERSION}
+pygetdata.so: ${distutils_path}/pygetdata.so
+	cp $< $@
+
+${distutils_path}/pygetdata.so: setup.py ${BUILT_SOURCES}
+	${PYTHON} setup.py build
 
 pyconstants.c: ../make_parameters
 	../make_parameters p > $@
@@ -50,5 +40,6 @@ pyconstants.c: ../make_parameters
 	cd .. && ${MAKE} make_parameters
 
 clean-local:
-	rm -rf ${BUILT_SOURCES} *~ 
+	if [ -e setup.py ]; then ${PYTHON} setup.py clean; fi
+	rm -rf build pygetdata.so ${BUILT_SOURCES} debug.c *~ 
 

@@ -798,7 +798,6 @@ EOF
     AC_MSG_CHECKING([NumPy includes])
     NUMPY_CPPFLAGS=-I`$PYTHON -c "import numpy; print numpy.get_include()"`
     AC_MSG_RESULT([$NUMPY_CPPFLAGS])
-    AC_SUBST([NUMPY_CPPFLAGS])
 
     saved_cppflags=$CPPFLAGS
     CPPFLAGS="${CPPFLAGS} ${PYTHON_CPPFLAGS} ${NUMPY_CPPFLAGS}"
@@ -971,6 +970,7 @@ AC_CONFIG_FILES([bindings/idl/test/Makefile])
 AC_CONFIG_FILES([bindings/perl/Makefile])
 AC_CONFIG_FILES([bindings/perl/Build.PL])
 AC_CONFIG_FILES([bindings/python/Makefile])
+AC_CONFIG_FILES([bindings/python/setup.py])
 AC_CONFIG_FILES([bindings/python/test/Makefile])
 AC_CONFIG_FILES([doc/Makefile])
 if test "x$make_perlbindings" != "xno"; then

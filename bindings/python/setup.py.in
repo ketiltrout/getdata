@@ -1,0 +1,92 @@
+# Copyright (C) 2012 D. V. Wiebe
+#
+# @configure_input@
+#
+##########################################################################
+#
+# This file is part of the GetData project.
+#
+# GetData is free software; you can redistribute it and/or modify it under
+# the terms of the GNU Lesser General Public License as published by the
+# Free Software Foundation; either version 2.1 of the License, or (at your
+# option) any later version.
+#
+# GetData is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
+# License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with GetData; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+#
+from distutils.core import setup
+from distutils.extension import Extension
+from distutils.command.clean import clean as clean
+from os.path import join
+from os import unlink
+from shutil import copy
+import numpy
+
+libsrc_dir = '@top_srcdir@/src'
+libbuild_dir = '../../src'
+srcdir = '@srcdir@'
+
+includes = [ libbuild_dir, numpy.get_include() ]
+
+sources = [ 'pydirfile.c', 'pyentry.c', 'pyfragment.c', 'pygetdata.c' ]
+
+# clean copied source files in out-of-place builds; see below
+cmdclass = {}
+
+class gd_clean(clean):
+  def run(self):
+    if '@srcdir@' != '.':
+      for x in sources:
+        unlink(x)
+    clean.run(self)
+
+# deal with out-of-place (VPATH) builds
+if srcdir != '.':
+  includes.append(srcdir) # to find pygetdata.h
+
+  # if we don't do this, the object files will end up in
+  #   @top_builddir@/bindings/bindings/python,
+  # instead of
+  #   @builddir@/build/temp.<whatever>
+  # like they're supposed to.  It seems to work, but it's a little crazier
+  # than we're willing to deal with.
+  for x in sources:
+    copy(join(srcdir, x), x)
+
+  # handle clean up
+  cmdclass['clean'] = gd_clean
+
+# now add this built source; it always ends up where distutils wants it to be
+sources.append('pyconstants.c')
+
+# add debug sources
+if @GETDATA_DEBUG@:
+  copy(join(libsrc_dir, 'debug.c'), 'debug.c') # see comment above
+  sources.append('debug.c')
+  includes.append(libsrc_dir) # to find internal.h
+
+setup(
+    name = 'pygetdata',
+    version = '@VERSION@',
+    cmdclass = cmdclass,
+    ext_modules = [
+      Extension('pygetdata',
+        sources = sources,
+        depends = [
+          join(srcdir, 'pygetdata.h'),
+          join(libbuild_dir, 'gd_config.h'),
+          join(libbuild_dir, 'getdata.h')
+          ],
+        include_dirs = includes,
+        library_dirs = [ join(libbuild_dir, '.libs') ],
+        libraries = [ 'getdata' ],
+        define_macros = [ ('HAVE_CONFIG_H','1') ]
+        )
+      ]
+    )

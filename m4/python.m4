@@ -98,49 +98,24 @@ dnl python version
 AC_MSG_CHECKING([$PYTHON version])
 PYTHON_VERSION=`$PYTHON -c "import sys; print sys.version[[:3]]"`
 AC_MSG_RESULT([$PYTHON_VERSION])
+AC_SUBST([PYTHON_VERSION])
 
-dnl calculate python CPPFLAGS and LIBS
+dnl calculate python CPPFLAGS
+AC_MSG_CHECKING([Python includes])
 if test -x $PYTHON-config; then
-  if test -n "$user_python"; then
-    python_exec_prefix=`$PYTHON-config --exec-prefix`
-    PYTHON_LIBS="-L${python_exec_prefix}/lib "
-  else
-    PYTHON_LIBS=""
-  fi
   PYTHON_CPPFLAGS=`$PYTHON-config --includes 2>/dev/null`
-  PYTHON_LIBS="${PYTHON_LIBS}`$PYTHON-config --ldflags 2>/dev/null`"
 else
   python_prefix=`$PYTHON -c "import sys; print sys.prefix"`
   python_exec_prefix=`$PYTHON -c "import sys; print sys.exec_prefix"`
-  python_libdir=`$PYTHON -c "from distutils import sysconfig; print sysconfig.get_config_var('LIBDIR')"`
-  python_syslibs=`$PYTHON -c "from distutils import sysconfig; print sysconfig.get_config_var('SYSLIBS')"`
-  python_shlibs=`$PYTHON -c "from distutils import sysconfig; print sysconfig.get_config_var('SHLIBS')"`
-  python_modlibs=`$PYTHON -c "from distutils import sysconfig; print sysconfig.get_config_var('MODLIBS')"`
-
   PYTHON_CPPFLAGS="-I${python_prefix}/include/python${PYTHON_VERSION} -I${python_exec_prefix}/include/python${PYTHON_VERSION}"
-  if test -n "$user_python"; then
-    PYTHON_LIBS="-L${python_libdir} "
-  else
-    PYTHON_LIBS=""
-  fi
-  PYTHON_LIBS="${PYTHON_LIBS}$python_syslibs $python_shlibs $python_modlibs -lpython${PYTHON_VERSION}"
 fi
-AC_MSG_CHECKING([Python includes])
 AC_MSG_RESULT([$PYTHON_CPPFLAGS])
-AC_SUBST([PYTHON_CPPFLAGS])
-AC_MSG_CHECKING([Python libraries])
-AC_MSG_RESULT([$PYTHON_LIBS])
-AC_SUBST([PYTHON_LIBS])
 
-dnl header check
-saved_CPPFLAGS=${CPPFLAGS}
-CPPFLAGS="${CPPFLAGS} ${PYTHON_CPPFLAGS}"
-AC_CHECK_HEADERS(Python.h,,[have_python="no"])
-CPPFLAGS=${saved_CPPFLAGS}
-
-fi
-
-if test "x${have_python}" != "xno"; then
+dnl figure out the platform name
+AC_MSG_CHECKING([Python platform name])
+PYTHON_PLATFORM=`$PYTHON -c "from distutils import util; print util.get_platform()"`
+AC_MSG_RESULT([$PYTHON_PLATFORM])
+AC_SUBST([PYTHON_PLATFORM])
 
 dnl calculate the exec prefix
 pyexec_prefix=$exec_prefix
@@ -156,17 +131,6 @@ else
 fi
 AC_SUBST([pythondir])
 AC_MSG_RESULT([$pythondir])
-
-saved_CPPFLAGS=${CPPFLAGS}
-CPPFLAGS="${CPPFLAGS} ${PYTHON_CPPFLAGS}"
-saved_LIBS=$LIBS
-LIBS="$LIBS ${PYTHON_LIBS}"
-dnl try to compile a module
-AC_MSG_CHECKING([if we can compile a simple Python extension module])
-AC_TRY_LINK_FUNC([Py_Initialize], [ AC_MSG_RESULT([yes]) ],
-[ AC_MSG_RESULT([no]); have_python="no" ])
-CPPFLAGS=$saved_CPPFLAGS
-LIBS=$saved_LIBS
 
 fi
 ])
