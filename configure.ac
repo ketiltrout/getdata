@@ -346,6 +346,16 @@ AC_DEFINE_UNQUOTED([GD_DIRSEP], ['$GD_DIRSEP'],
                    [ The separator between directory elements ])
 AC_MSG_RESULT([$GD_FDIRSEP])
 
+case "${host}" in
+  *-pc-mingw*)
+  NO_UNDEFINED=" -no-undefined"
+  NO_DLOPEN_TESTS=1 ;;
+  *-pc-cygwin*)
+  NO_UNDEFINED=" -no-undefined -enable-auto-import"
+  NO_DLOPEN_TESTS=1 ;;
+  *) NO_DLOPEN_TESTS=0 ;;
+esac
+
 echo
 echo "*** Checking C compiler characteristics"
 echo
@@ -421,14 +431,6 @@ echo "*** Building libtool"
 echo
 LT_INIT([dlopen])
 AC_SUBST([LIBTOOL_DEPS])
-
-case "${host}" in
-  *-pc-mingw*|*-pc-cygwin*)
-  NO_UNDEFINED=" -no-undefined -enable-auto-import";
-  NO_DLOPEN_TESTS=1 ;;
-  *) NO_DLOPEN_TESTS=0 ;;
-esac
-
 LT_OUTPUT
 
 dnl libltdl stuff
