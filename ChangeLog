@@ -1,4 +1,10 @@
-2012-12-13   D. V. Wiebe <getdata@ketiltrout.net> svn:783
+2012-01-15   D. V. Wiebe <getdata@ketiltrout.net> svn:785
+	* m4/floatordering.m4: Split from m4/compiler.m4
+
+	* src/parse.c (_GD_ParseRaw _GD_ParseMplex): Fix types in _GD_SetScalar
+	calls.
+
+2013-01-04   D. V. Wiebe <getdata@ketiltrout.net> svn:783
 	* configure.ac: powerpc64 also supports fast unaligned access.  Reported by
 	Dinar Valeev.
 

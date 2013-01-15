@@ -1,3 +1,12 @@
+New in version 0.8.3a:
+
+  Library Changes:
+  
+  * BUG FIX: Several bugs on big ended systems have been fixed.  Reported by
+  Dinar Valeev.
+
+|==============================================================================|
+
 New in version 0.8.2:
 
   Library Changes:

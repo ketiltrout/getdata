@@ -316,7 +316,7 @@ static gd_entry_t *_GD_ParseRaw(DIRFILE *restrict D,
     _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_BAD_TYPE, format_file, line,
         in_cols[2]);
   else if ((E->scalar[0] = _GD_SetScalar(D, in_cols[3], &E->EN(raw,spf),
-          GD_UINT16, me, format_file, line, E->scalar_ind, NULL, standards,
+          GD_UINT_TYPE, me, format_file, line, E->scalar_ind, NULL, standards,
           pedantic)) == NULL)
   {
     E->e->calculated = 1;
@@ -772,13 +772,13 @@ static gd_entry_t *_GD_ParseMplex(DIRFILE *restrict D,
   E->in_fields[1] = _GD_MungeFromFrag(D, NULL, me, in_cols[3], &offset);
 
   E->scalar[0] = _GD_SetScalar(D, in_cols[4], &E->EN(mplex,count_val),
-      GD_UINT16, me, format_file, line, E->scalar_ind, NULL, standards,
+      GD_INT_TYPE, me, format_file, line, E->scalar_ind, NULL, standards,
       pedantic);
 
   /* the count max, if present */
   if (n_cols > 5) {
     E->scalar[1] = _GD_SetScalar(D, in_cols[5], &E->EN(mplex,count_max),
-        GD_UINT16, me, format_file, line, E->scalar_ind + 1, NULL, standards,
+        GD_INT_TYPE, me, format_file, line, E->scalar_ind + 1, NULL, standards,
         pedantic);
     if (E->EN(mplex,count_max) < 0)
       _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_MPLEXVAL, format_file, line,
