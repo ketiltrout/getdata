@@ -206,7 +206,7 @@ int _GD_CalculateEntry(DIRFILE *restrict D, gd_entry_t *restrict E, int err)
 
   switch(E->field_type) {
     case GD_RAW_ENTRY:
-      _GD_GetScalar(D, E, 0, GD_UINT16, &E->EN(raw,spf), err);
+      _GD_GetScalar(D, E, 0, GD_UINT_TYPE, &E->EN(raw,spf), err);
       break;
     case GD_POLYNOM_ENTRY:
       E->comp_scal = 0;

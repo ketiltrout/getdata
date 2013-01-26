@@ -257,7 +257,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
   switch(E->field_type) {
     case GD_RAW_ENTRY:
       j = _GD_AlterScalar(D, N->EN(raw,spf) && N->EN(raw,spf) != E->EN(raw,spf),
-          GD_UINT16, &Q.EN(raw,spf), &N->EN(raw,spf), Q.scalar, Q.scalar_ind,
+          GD_UINT_TYPE, &Q.EN(raw,spf), &N->EN(raw,spf), Q.scalar, Q.scalar_ind,
           N->scalar[0], N->scalar_ind[0], E->e->calculated, E->fragment_index);
 
       if (j & GD_AS_ERROR)
@@ -293,7 +293,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
         struct encoding_t *enc;
 
         if (j & GD_AS_NEED_RECALC)
-          if (gd_get_constant(D, Q.scalar[0], GD_UINT16, &Q.EN(raw,spf)))
+          if (gd_get_constant(D, Q.scalar[0], GD_UINT_TYPE, &Q.EN(raw,spf)))
             break;
 
         nf = BUFFER_SIZE / _gd_max(E->e->u.raw.size,

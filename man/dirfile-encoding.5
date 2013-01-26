@@ -1,6 +1,6 @@
 .\" dirfile-encoding.5.  The dirfile-encoding man page.
 .\"
-.\" Copyright (C) 2008, 2009, 2010, 2012 D. V. Wiebe
+.\" Copyright (C) 2008, 2009, 2010, 2012, 2013 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH dirfile-encoding 5 "1 April 2012" "Standards Version 9" "DATA FORMATS"
+.TH dirfile-encoding 5 "26 January 2013" "Standards Version 9" "DATA FORMATS"
 .SH NAME
 dirfile-encoding \(em dirfile database encoding schemes
 .SH DESCRIPTION
@@ -192,6 +192,11 @@ does not support function which modify binary files.  The file extension of the
 Slim Encoding is
 .BR .slm .
 
+Using the Slim Encoding with GetData may result in unexpected, but manageable,
+memory usage.  See the
+.BR gd_getdata (3)
+manual page for details.
+
 .SS Text Encoding
 
 The Text Encoding replaces the binary data files with 7-bit ASCII files
@@ -249,6 +254,11 @@ flag passed to
 is required to read ZZSlim encoded data.  The file extension of the ZZSlim
 Encoding is
 .BR .zip .
+
+Using the ZZSlim Encoding with GetData may result in unexpected, but manageable,
+memory usage.  See the
+.BR gd_getdata (3)
+manual page for details.
 
 .SH AUTHOR
 

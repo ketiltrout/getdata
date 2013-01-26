@@ -135,7 +135,7 @@ static void _GD_DeReference(DIRFILE *restrict D, gd_entry_t *restrict E,
 
   switch(E->field_type) {
     case GD_RAW_ENTRY:
-      _GD_DeReferenceOne(D, E, C, check, 0, GD_UINT16, &E->EN(raw,spf));
+      _GD_DeReferenceOne(D, E, C, check, 0, GD_UINT_TYPE, &E->EN(raw,spf));
       break;
     case GD_POLYNOM_ENTRY:
       for (i = 0; i <= E->EN(polynom,poly_ord); ++i) {

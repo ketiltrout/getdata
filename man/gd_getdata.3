@@ -1,6 +1,6 @@
 .\" gd_getdata.3.  The gd_getdata man page.
 .\"
-.\" Copyright (C) 2008, 2009, 2010, 2011, 2012 D. V. Wiebe
+.\" Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_getdata 3 "1 April 2012" "Version 0.8.0" "GETDATA"
+.TH gd_getdata 3 "26 January 2013" "Version 0.8.3" "GETDATA"
 .SH NAME
 gd_getdata \(em retrieve data from a dirfile database
 .SH SYNOPSIS
@@ -349,16 +349,26 @@ unspecified, and may have been modified by this call, even though
 .BR gd_getdata ()
 will report zero samples returned on error.
 
+Reading slim-compressed data (see defile-encoding(5)), may cause unexpected
+memory usage.  This is because slimlib internally caches open decompressed files
+as they are read, and getdata doesn't close data files between
+.BR gd_getdata ()
+calls for efficiency's sake.  Memory used by this internal slimlib buffer can be
+reclaimed by calling
+.BR df_raw_close (3)
+on fields when finished reading them.
+
 .SH SEE ALSO
 .BR dirfile (5),
 .BR dirfile-encoding (5),
-.BR gd_open (3),
 .BR gd_get_constant (3),
+.BR gd_get_string (3),
 .BR gd_error (3),
 .BR gd_error_string (3),
 .BR gd_mplex_lookback (3),
 .BR gd_nframes (3),
+.BR gd_open (3),
+.BR gd_raw_close (3),
 .BR gd_seek (3),
 .BR gd_spf (3),
-.BR gd_get_string (3),
 .BR gd_putdata (3)

@@ -1,3 +1,8 @@
+2012-01-26   D. V. Wiebe <getdata@ketiltrout.net> svn:787
+	* src/del.c (_GD_DeReference) src/entry.c (_GD_CalculateEntry) src/flush.c
+	(_GD_FieldSpec)	 src/mod.c (_GD_Change): Fix data type (size) of
+	EN(raw,spf) in function calls.
+
 2012-01-15   D. V. Wiebe <getdata@ketiltrout.net> svn:785
 	* m4/floatordering.m4: Split from m4/compiler.m4
 

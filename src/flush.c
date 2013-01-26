@@ -391,7 +391,7 @@ static void _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
         fprintf(stream, " RAW%s %s ", pretty ? "     " : "",
             (permissive || D->standards >= 5) ?  _GD_TypeName(D,
               E->EN(raw,data_type)) : _GD_OldTypeName(D, E->EN(raw,data_type)));
-        _GD_WriteConst(D, stream, me, permissive, GD_UINT16, &E->EN(raw,spf),
+        _GD_WriteConst(D, stream, me, permissive, GD_UINT_TYPE, &E->EN(raw,spf),
             E->scalar[0], E->scalar_ind[0], "\n");
         break;
       case GD_LINCOM_ENTRY:
@@ -432,8 +432,8 @@ static void _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
         _GD_WriteFieldCode(D, stream, me, E->in_fields[0], permissive,
             D->standards);
         fputc(' ', stream);
-        _GD_WriteConst(D, stream, me, permissive, GD_INT_TYPE, &E->EN(bit,bitnum),
-            E->scalar[0], E->scalar_ind[0], " ");
+        _GD_WriteConst(D, stream, me, permissive, GD_INT_TYPE,
+            &E->EN(bit,bitnum), E->scalar[0], E->scalar_ind[0], " ");
         _GD_WriteConst(D, stream, me, permissive, GD_INT_TYPE,
             &E->EN(bit,numbits), E->scalar[1], E->scalar_ind[1], "\n");
         break;
