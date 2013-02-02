@@ -911,42 +911,47 @@ mxArray *gdmx_from_entry(const gd_entry_t *E)
     case GD_BIT_ENTRY:
     case GD_SBIT_ENTRY:
       mxSetField(lhs, 0, "in_fields", mxCreateString(E->in_fields[0]));
-      mxSetField(lhs, 0, "bitnum", gdmx_from_int(E->bitnum));
-      mxSetField(lhs, 0, "numbits", gdmx_from_int(E->numbits));
+      mxSetField(lhs, 0, "bitnum", gdmx_from_int(E->EN(bit,bitnum)));
+      mxSetField(lhs, 0, "numbits", gdmx_from_int(E->EN(bit,numbits)));
       nscalar = 2;
       break;
     case GD_CARRAY_ENTRY:
-      mxSetField(lhs, 0, "array_len", gdmx_from_size_t(E->array_len));
+      mxSetField(lhs, 0, "array_len",
+          gdmx_from_size_t(E->EN(scalar,array_len)));
       /* fallthrough */
     case GD_CONST_ENTRY:
-      mxSetField(lhs, 0, "const_type", gdmx_from_gd_type(E->const_type));
+      mxSetField(lhs, 0, "const_type",
+          gdmx_from_gd_type(E->EN(scalar,const_type)));
       break;
     case GD_INDEX_ENTRY:
     case GD_STRING_ENTRY:
       break;
     case GD_LINCOM_ENTRY:
       mxSetField(lhs, 0, "in_fields",
-          gdmx_from_nstring_list((const char**)E->in_fields, E->n_fields));
+          gdmx_from_nstring_list((const char**)E->in_fields,
+            E->EN(lincom,n_fields)));
       if (E->comp_scal) {
-        mxSetField(lhs, 0, "m", gdmx_from_data(E->cm, GD_COMPLEX128,
-              E->n_fields));
-        mxSetField(lhs, 0, "b", gdmx_from_data(E->cb, GD_COMPLEX128,
-              E->n_fields));
+        mxSetField(lhs, 0, "m", gdmx_from_data(E->EN(lincom,cm), GD_COMPLEX128,
+              E->EN(lincom,n_fields)));
+        mxSetField(lhs, 0, "b", gdmx_from_data(E->EN(lincom,cb), GD_COMPLEX128,
+              E->EN(lincom,n_fields)));
       } else {
-        mxSetField(lhs, 0, "m", gdmx_from_data(E->m, GD_FLOAT64, E->n_fields));
-        mxSetField(lhs, 0, "b", gdmx_from_data(E->b, GD_FLOAT64, E->n_fields));
+        mxSetField(lhs, 0, "m", gdmx_from_data(E->EN(lincom,m), GD_FLOAT64,
+              E->EN(lincom,n_fields)));
+        mxSetField(lhs, 0, "b", gdmx_from_data(E->EN(lincom,b), GD_FLOAT64,
+              E->EN(lincom,n_fields)));
       }
       nscalar = GD_MAX_LINCOM * 2;
       break;
     case GD_LINTERP_ENTRY:
       mxSetField(lhs, 0, "in_fields", mxCreateString(E->in_fields[0]));
-      mxSetField(lhs, 0, "table", mxCreateString(E->table));
+      mxSetField(lhs, 0, "table", mxCreateString(E->EN(linterp,table)));
       break;
     case GD_MPLEX_ENTRY:
       mxSetField(lhs, 0, "in_fields",
           gdmx_from_nstring_list((const char**)E->in_fields, 2));
-      mxSetField(lhs, 0, "count_val", gdmx_from_int(E->count_val));
-      mxSetField(lhs, 0, "count_max", gdmx_from_int(E->count_max));
+      mxSetField(lhs, 0, "count_val", gdmx_from_int(E->EN(mplex,count_val)));
+      mxSetField(lhs, 0, "count_max", gdmx_from_int(E->EN(mplex,count_max)));
       nscalar = 2;
       break;
     case GD_MULTIPLY_ENTRY:
@@ -956,40 +961,40 @@ mxArray *gdmx_from_entry(const gd_entry_t *E)
       break;
     case GD_PHASE_ENTRY:
       mxSetField(lhs, 0, "in_fields", mxCreateString(E->in_fields[0]));
-      mxSetField(lhs, 0, "shift", gdmx_from_llong(E->shift));
+      mxSetField(lhs, 0, "shift", gdmx_from_llong(E->EN(phase,shift)));
       nscalar = 1;
       break;
     case GD_POLYNOM_ENTRY:
       mxSetField(lhs, 0, "in_fields", mxCreateString(E->in_fields[0]));
       if (E->comp_scal) {
-        mxSetField(lhs, 0, "a", gdmx_from_data(E->ca, GD_COMPLEX128,
-              E->poly_ord + 1));
+        mxSetField(lhs, 0, "a", gdmx_from_data(E->EN(polynom,ca), GD_COMPLEX128,
+              E->EN(polynom,poly_ord) + 1));
       } else {
-        mxSetField(lhs, 0, "a", gdmx_from_data(E->a, GD_FLOAT64,
-              E->poly_ord + 1));
+        mxSetField(lhs, 0, "a", gdmx_from_data(E->EN(polynom,a), GD_FLOAT64,
+              E->EN(polynom,poly_ord) + 1));
       }
-      nscalar = E->poly_ord + 1;
+      nscalar = E->EN(polynom,poly_ord) + 1;
       break;
     case GD_RAW_ENTRY:
-      mxSetField(lhs, 0, "data_type", gdmx_from_gd_type(E->data_type));
-      mxSetField(lhs, 0, "spf", gdmx_from_uint(E->spf));
+      mxSetField(lhs, 0, "data_type", gdmx_from_gd_type(E->EN(raw,data_type)));
+      mxSetField(lhs, 0, "spf", gdmx_from_uint(E->EN(raw,spf)));
       nscalar = 1;
       break;
     case GD_RECIP_ENTRY:
       mxSetField(lhs, 0, "in_fields", mxCreateString(E->in_fields[0]));
       if (E->comp_scal)
         mxSetField(lhs, 0, "dividend",
-            gdmx_from_cdouble((double*)&E->cdividend));
+            gdmx_from_cdouble((double*)&E->EN(recip,cdividend)));
       else
-        mxSetField(lhs, 0, "dividend", gdmx_from_double(E->dividend));
+        mxSetField(lhs, 0, "dividend", gdmx_from_double(E->EN(recip,dividend)));
       nscalar = 1;
       break;
     case GD_WINDOW_ENTRY:
       mxSetField(lhs, 0, "in_fields",
           gdmx_from_nstring_list((const char**)E->in_fields, 2));
-      mxSetField(lhs, 0, "windop", gdmx_from_windop(E->windop));
-      mxSetField(lhs, 0, "threshold", gdmx_from_triplet(E->threshold,
-            E->windop));
+      mxSetField(lhs, 0, "windop", gdmx_from_windop(E->EN(window,windop)));
+      mxSetField(lhs, 0, "threshold", gdmx_from_triplet(E->EN(window,threshold),
+            E->EN(window,windop)));
       nscalar = 1;
       break;
     default:
@@ -1057,11 +1062,11 @@ void gdmx_free_entry(gd_entry_t *E)
   if (E) {
     switch (E->field_type) {
       case GD_LINCOM_ENTRY:
-        ni = E->n_fields;
+        ni = E->EN(lincom,n_fields);
         ns = ni * 2;
         break;
       case GD_LINTERP_ENTRY:
-        mxFree(E->table);
+        mxFree(E->EN(linterp,table));
       case GD_DIVIDE_ENTRY:
       case GD_MULTIPLY_ENTRY:
         ni = 2;
@@ -1077,7 +1082,7 @@ void gdmx_free_entry(gd_entry_t *E)
         break;
       case GD_POLYNOM_ENTRY:
         ni = 1;
-        ns = E->poly_ord + 1;
+        ns = E->EN(polynom,poly_ord) + 1;
         break;
       case GD_RAW_ENTRY:
         ni = 1;
@@ -1138,12 +1143,12 @@ static int gdmx_convert_in_fields(const mxArray *str,
 }
 
 static int gdmx_convert_entry_array(const mxArray *str,
-    const struct gdmx_context_t *ctx, const char *field, complex double *d,
+    const struct gdmx_context_t *ctx, const char *field, GD_DCOMPLEXV(d),
     size_t nelem)
 {
   size_t i;
   mxArray *a;
-  complex double *v;
+  GD_DCOMPLEXP_t v;
   struct gdmx_context_t ectx = { ctx->name, field, ctx->num };
 
   dtrace("%p, %p, \"%s\", %p, %zu", str, ctx, field, d, nelem);
@@ -1152,7 +1157,7 @@ static int gdmx_convert_entry_array(const mxArray *str,
   v = gdmx_convert_array(a, &ectx, GD_COMPLEX128, &nelem);
 
   for (i = 0; i < nelem; ++i)
-    d[i] = v[i];
+    _gd_ca2c(d[i],v,i);
 
   mxFree(v);
 
@@ -1194,81 +1199,85 @@ gd_entry_t *gdmx_to_entry(const mxArray **rhs, int n, unsigned flags)
     case GD_SBIT_ENTRY:
       gdmx_convert_in_fields(rhs[n], &ctx, E);
       gdmx_convert_struct_scalar(rhs[n], &ctx, "bitnum", GD_INT_TYPE,
-          &E->bitnum);
+          &E->EN(bit,bitnum));
       gdmx_convert_struct_scalar(rhs[n], &ctx, "numbits", GD_INT_TYPE,
-          &E->numbits);
+          &E->EN(bit,numbits));
       break;
     case GD_CARRAY_ENTRY:
       gdmx_convert_struct_scalar(rhs[n], &ctx, "array_len", GD_UINT64, &s);
-      E->array_len = (size_t)s;
+      E->EN(scalar,array_len) = (size_t)s;
       /* fallthrough */
     case GD_CONST_ENTRY:
       gdmx_convert_struct_scalar(rhs[n], &ctx, "const_type", GD_INT_TYPE, &v);
-      E->const_type = v;
+      E->EN(scalar,const_type) = v;
       break;
     case GD_DIVIDE_ENTRY:
     case GD_MULTIPLY_ENTRY:
       gdmx_convert_in_fields(rhs[n], &ctx, E);
       break;
     case GD_LINCOM_ENTRY:
-      E->n_fields = gdmx_convert_in_fields(rhs[n], &ctx, E);
+      E->EN(lincom,n_fields) = gdmx_convert_in_fields(rhs[n], &ctx, E);
       E->comp_scal = 1;
-      gdmx_convert_entry_array(rhs[n], &ctx, "m", E->cm, E->n_fields);
-      gdmx_convert_entry_array(rhs[n], &ctx, "b", E->cb, E->n_fields);
+      gdmx_convert_entry_array(rhs[n], &ctx, "m", E->EN(lincom,cm),
+          E->EN(lincom,n_fields));
+      gdmx_convert_entry_array(rhs[n], &ctx, "b", E->EN(lincom,cb),
+          E->EN(lincom,n_fields));
       break;
     case GD_LINTERP_ENTRY:
       gdmx_convert_in_fields(rhs[n], &ctx, E);
-      E->table = gdmx_convert_struct_string(rhs[n], &ctx, "table");
+      E->EN(linterp,table) = gdmx_convert_struct_string(rhs[n], &ctx, "table");
       break;
     case GD_MPLEX_ENTRY:
       gdmx_convert_in_fields(rhs[n], &ctx, E);
       gdmx_convert_struct_scalar(rhs[n], &ctx, "count_val", GD_INT_TYPE,
-          &E->count_val);
+          &E->EN(mplex,count_val));
       gdmx_convert_struct_scalar(rhs[n], &ctx, "count_max", GD_INT_TYPE,
-          &E->count_max);
+          &E->EN(mplex,count_max));
       break;
     case GD_PHASE_ENTRY:
       gdmx_convert_in_fields(rhs[n], &ctx, E);
-      gdmx_convert_struct_scalar(rhs[n], &ctx, "shift", GD_INT64, &E->shift);
+      gdmx_convert_struct_scalar(rhs[n], &ctx, "shift", GD_INT64,
+          &E->EN(phase,shift));
       break;
     case GD_POLYNOM_ENTRY:
       gdmx_convert_in_fields(rhs[n], &ctx, E);
       E->comp_scal = 1;
-      E->poly_ord = gdmx_convert_entry_array(rhs[n], &ctx, "a", E->ca,
-          GD_MAX_POLYORD + 1) - 1;
+      E->EN(polynom,poly_ord) = gdmx_convert_entry_array(rhs[n], &ctx, "a",
+          E->EN(polynom,ca), GD_MAX_POLYORD + 1) - 1;
       break;
     case GD_RAW_ENTRY:
       gdmx_convert_struct_scalar(rhs[n], &ctx, "data_type", GD_INT_TYPE, &v);
-      E->data_type = v;
-      gdmx_convert_struct_scalar(rhs[n], &ctx, "spf", GD_UINT_TYPE, &E->spf);
+      E->EN(raw,data_type) = v;
+      gdmx_convert_struct_scalar(rhs[n], &ctx, "spf", GD_UINT_TYPE,
+          &E->EN(raw,spf));
       nscalar = 1;
       break;
     case GD_RECIP_ENTRY:
       gdmx_convert_in_fields(rhs[n], &ctx, E);
       E->comp_scal = 1;
       gdmx_convert_struct_scalar(rhs[n], &ctx, "dividend", GD_COMPLEX128,
-          &E->cdividend);
+          &E->EN(recip,cdividend));
       break;
     case GD_STRING_ENTRY:
       break;
     case GD_WINDOW_ENTRY:
       gdmx_convert_in_fields(rhs[n], &ctx, E);
       gdmx_convert_struct_scalar(rhs[n], &ctx, "windop", GD_INT_TYPE, &v);
-      E->windop = v;
+      E->EN(window,windop) = v;
       switch (v) {
         case GD_WINDOP_EQ:
         case GD_WINDOP_NE:
           gdmx_convert_struct_scalar(rhs[n], &ctx, "threshold", GD_INT64,
-              &E->threshold.i);
+              &E->EN(window,threshold).i);
           break;
         case GD_WINDOP_SET:
         case GD_WINDOP_CLR:
           gdmx_convert_struct_scalar(rhs[n], &ctx, "threshold", GD_UINT64,
-              &E->threshold.u);
+              &E->EN(window,threshold).u);
           break;
         default:
           gdmx_convert_struct_scalar(rhs[n], &ctx, "threshold", GD_FLOAT64,
-              &E->threshold.r);
+              &E->EN(window,threshold).r);
           break;
       }
       break;

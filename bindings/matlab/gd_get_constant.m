@@ -20,8 +20,8 @@
 
 function n = gd_get_constant(D, field_code, varargin)
 if (numel(varargin) > 0)
-  n = gd_get_carray_slice(D, field_code, 0, 1, varargin{1})
+  n = gd_get_carray_slice(D, field_code, 0, 1, varargin{1});
 else
-  n = gd_get_carray_slice(D, field_code, 0, 1)
+  n = gd_get_carray_slice(D, field_code, 0, 1);
 end
 end

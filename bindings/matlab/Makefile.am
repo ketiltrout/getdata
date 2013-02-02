@@ -90,7 +90,8 @@ libgetdata_matlab_la_LIBADD=../../src/libgetdata.la
 libgetdata_matlab_la_CPPFLAGS=${MATLAB_CPPFLAGS}
 
 %.@mexext@: %.c libgetdata-matlab.la
-	${MEX} -I../../src -L.libs -L../../src/.libs -lgetdata-matlab -lgetdata $<
+	${MEX} -I${top_srcdir}/src -I../../src -L.libs -L../../src/.libs \
+		-lgetdata-matlab -lgetdata $<
 
 getdata_constants.m: ../make_parameters
 	../make_parameters m > $@

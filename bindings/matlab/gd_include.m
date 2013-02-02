@@ -19,5 +19,5 @@
 % 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 function n = gd_include(D, file, parent, flags)
-  n = gd_include_affix(D, file, parent, flags)
+  n = gd_include_affix(D, file, parent, flags);
 end

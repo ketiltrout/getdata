@@ -1,3 +1,6 @@
+2012-02-02   D. V. Wiebe <getdata@ketiltrout.net> svn:790
+	* bindings/matlab/matlab.c: ANSI C.
+
 2012-02-02   D. V. Wiebe <getdata@ketiltrout.net> svn:789
 	* bindings/python/pyentry.c (gdpy_set_scalar_from_pyobj): Add missing data
 	types.

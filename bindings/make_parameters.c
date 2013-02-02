@@ -26,7 +26,7 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#define NO_GETDATA_LEGACY_API
+#define GD_NO_LEGACY_API
 #include "getdata.h"
 
 /* The type parameter:

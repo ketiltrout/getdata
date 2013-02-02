@@ -19,5 +19,5 @@
 % 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 function gd_put_carray(D, field_code, data)
-  gd_put_carray_slice(D, field_code, 0, data)
+  gd_put_carray_slice(D, field_code, 0, data);
 end

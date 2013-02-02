@@ -1038,9 +1038,7 @@ try
 
   % 77: atler const
   try
-    gd_get_constant(D, 'new11')
     gd_alter_const(D, 'new11', GD.FLOAT64);
-    gd_get_constant(D, 'new11')
   catch exc
     ne = ne + check_ok2(exc, 77, 1);
   end
@@ -1127,21 +1125,21 @@ try
 
   % 87: gd_alter_encoding
   try
-    gd_alter_encoding(D, GD.SLIM_ENCODED, 1, 0)
+    gd_alter_encoding(D, GD.SLIM_ENCODED, 1, 0);
   catch exc
     ne = ne + check_ok(exc, 87);
   end
 
   % 88: gd_alter_endiannness
   try
-    gd_alter_endianness(D, GD.BIG_ENDIAN, 1, 0)
+    gd_alter_endianness(D, GD.BIG_ENDIAN, 1, 0);
   catch exc
     ne = ne + check_ok(exc, 88);
   end
 
   % 89: gd_alter_spec
   try
-    gd_alter_spec(D, 'new10 PHASE in5 3', 0)
+    gd_alter_spec(D, 'new10 PHASE in5 3', 0);
   catch exc
     ne = ne + check_ok2(exc, 89, 1);
   end
@@ -1172,7 +1170,7 @@ try
 
   % 91: gd_malter_spec
   try
-    gd_malter_spec(D, 'mnew10 PHASE in4 11', 'data', 0)
+    gd_malter_spec(D, 'mnew10 PHASE in4 11', 'data', 0);
   catch exc
     ne = ne + check_ok2(exc, 91, 1);
   end
@@ -1341,7 +1339,7 @@ try
 
   % 148: add entry (recip) check
   try
-    gd_add_recip(D, 'new16', 'in3', 33.3, 0)
+    gd_add_recip(D, 'new16', 'in3', 33.3, 0);
   catch exc
     ne = ne + check_ok2(exc, 148, 1);
   end
@@ -1662,21 +1660,21 @@ try
 
   % 208: sync
   try
-    gd_sync(D, 'data')
+    gd_sync(D, 'data');
   catch exc
     ne = ne + check_ok(exc, 208);
   end
 
   % 209: sync
   try
-    gd_flush(D, 'data')
+    gd_flush(D, 'data');
   catch exc
     ne = ne + check_ok(exc, 209);
   end
 
   % 210: metaflush
   try
-    gd_metaflush(D)
+    gd_metaflush(D);
   catch exc
     ne = ne + check_ok(exc, 210);
   end
@@ -1939,7 +1937,7 @@ try
 
   % 233: raw_close
   try
-    gd_raw_close(D, 'data')
+    gd_raw_close(D, 'data');
   catch exc
     ne = ne + check_ok(exc, 233);
   end
@@ -1988,7 +1986,7 @@ try
 
   % 240: gd_mplex_lookback
   try
-    gd_mplex_lookback(D, GD.LOOKBACK_ALL)
+    gd_mplex_lookback(D, GD.LOOKBACK_ALL);
   catch exc
     ne = ne + check_ok(exc, 240);
   end

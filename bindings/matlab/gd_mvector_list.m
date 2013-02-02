@@ -19,6 +19,6 @@
 % 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 function field_list = gd_mvector_list(D, parent)
-  GD = getdata_constants()
+  GD = getdata_constants();
   field_list = gd_entry_list(D, parent, GD.VECTOR_ENTRIES, 0);
 end
