@@ -256,7 +256,7 @@ is a reference to an array, the first is taken as a type code specifing the
 conversion type, and the second is taken as the data:
 
     $dirfile->putdata("field_code", $first_frame, $first_sample,
-                      $GetData::UINT8, @data)
+                      $GetData::UINT8, \@data)
 
 =item 4.
 

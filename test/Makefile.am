@@ -43,16 +43,17 @@ ADD_TESTS=add add_affix add_alias add_alias_affix add_alias_meta add_bit \
 					add_multiply_invalid add_phase add_phase_invalid add_polynom \
 					add_protect add_raw add_raw_include add_raw_invalid add_raw_spf \
 					add_raw_type add_rdonly add_recip add_resolv add_sbit add_scalar \
-					add_scalar_carray add_sort add_spec add_spec_directive \
-					add_spec_invalid add_spec_meta add_spec_resolv add_string \
-					add_string_affix add_type add_window add_window_op
+					add_scalar_carray add_scalar_carray_bad add_sort add_spec \
+					add_spec_directive add_spec_invalid add_spec_meta add_spec_resolv \
+					add_string add_string_affix add_type add_window add_window_op
 
 ALIAS_TESTS=alias_list alias_list_alias alias_list_missing alias_num \
 						alias_num_alias alias_num_missing alias_target alias_target_alias \
 						alias_target_missing
 
 ALTER_TESTS=alter_bit_bitnum alter_bit_numbits alter_carray_len \
-						alter_carray_type alter_const alter_cpolynom alter_crecip \
+						alter_carray_type alter_const alter_const_c2r alter_cpolynom \
+						alter_crecip \
 						alter_crecip89 alter_crecip_zero alter_divide alter_entry \
 						alter_entry_affix alter_entry_hidden alter_entry_recode \
 						alter_entry_scalar2a alter_entry_scalar2n alter_entry_scalar3 \

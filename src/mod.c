@@ -865,7 +865,7 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
             ? (double)*(int64_t*)E->e->u.scalar.d
             : (double)*(uint64_t*)E->e->u.scalar.d;
           ((double*)Qe.u.scalar.d)[1] = 0;
-        } else if (type == GD_IEEE754)
+        } else if (type == GD_FLOAT64)
           *(double*)Qe.u.scalar.d = (E->EN(scalar,const_type) & GD_COMPLEX) ?
             *(double*)E->e->u.scalar.d : (E->EN(scalar,const_type) & GD_SIGNED)
             ? (double)*(int64_t*)E->e->u.scalar.d

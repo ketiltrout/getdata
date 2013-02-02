@@ -184,7 +184,7 @@ have unspecified results.
 .SS Scalar Parameter Members
 A gd_entry_t describing any field type which permits non-literal scalar field
 parameters
-.RB ( BIT ", " LINCOM ", " MPLEX ", " PHASE ", " POLYNOM ", " RECIP ", " RAW ,
+.RB ( BIT ", " LINCOM ", " MPLEX ", " PHASE ", " POLYNOM ", " RAW ", " RECIP ,
 .BR SBIT ", or " WINDOW )
 will also provide:
 .PP
@@ -258,15 +258,15 @@ Only the first
 + 1 elements are initialised.
 .IP \(bu
 For
-.B RECIP
-fields, the first element corresponds to
-.IR cdividend .
-The remainder are uninitialised.
-.IP \(bu
-For
 .B RAW
 fields, the first element corresponds to
 .IR spf .
+The remainder are uninitialised.
+.IP \(bu
+For
+.B RECIP
+fields, the first element corresponds to
+.IR cdividend .
 The remainder are uninitialised.
 .IP \(bu
 For
@@ -700,6 +700,44 @@ The elements of
 are the real parts of the corresponding elements of
 .IR ca .
 
+.SS RAW Members
+A gd_entry_t describing a
+.B RAW
+entry, will also provide:
+.PP
+.in +4n
+.nf
+.fam C
+typedef struct {
+  ...
+
+  unsigned int  spf;          /* samples per frame on disk */
+  gd_type_t     data_type;    /* data type on disk */
+
+  ...
+} gd_entry_t;
+.fam
+.fi
+.in
+.PP
+The
+.I spf
+member contains the samples per frame of the binary data on disk.  If this value
+was specified as a scalar field code, this will be the numerical value of that
+field, and
+.IR scalar [0]
+will contain the field code itself, otherwise
+.IR scalar [0]
+will be NULL.
+.PP
+The
+.I data_type
+member indicates the data type of the binary data on disk.  See
+.BR gd_getdata (3)
+for a list of valid values that a variable of type
+.B gd_type_t
+may take.
+
 .SS RECIP Members
 A gd_entry_t describing a
 .B RECIP
@@ -746,44 +784,6 @@ will be NULL.  The
 .I dividend
 member contains the real part of
 .IR cdividend .
-
-.SS RAW Members
-A gd_entry_t describing a
-.B RAW
-entry, will also provide:
-.PP
-.in +4n
-.nf
-.fam C
-typedef struct {
-  ...
-
-  unsigned int  spf;          /* samples per frame on disk */
-  gd_type_t     data_type;    /* data type on disk */
-
-  ...
-} gd_entry_t;
-.fam
-.fi
-.in
-.PP
-The
-.I spf
-member contains the samples per frame of the binary data on disk.  If this value
-was specified as a scalar field code, this will be the numerical value of that
-field, and
-.IR scalar [0]
-will contain the field code itself, otherwise
-.IR scalar [0]
-will be NULL.
-.PP
-The
-.I data_type
-member indicates the data type of the binary data on disk.  See
-.BR gd_getdata (3)
-for a list of valid values that a variable of type
-.B gd_type_t
-may take.
 
 .SS STRING Members
 A gd_entry_t describing a

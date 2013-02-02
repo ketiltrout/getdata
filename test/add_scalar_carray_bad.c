@@ -18,48 +18,56 @@
  * along with GetData; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/* Test field modifying */
 #include "test.h"
-
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-#include <inttypes.h>
-#include <errno.h>
-#include <stdio.h>
 
 int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *format_data = "const CONST FLOAT32 8.3\n";
-  int fd, ret, error, n, r = 0;
+  int error, r = 0;
   DIRFILE *D;
-  double d;
+
+  gd_entry_t E, e;
+  memset(&E, 0, sizeof(E));
+  E.field = "data";
+  E.field_type = GD_LINCOM_ENTRY;
+  E.fragment_index = 0;
+  E.EN(lincom,n_fields) = 1;
+  E.comp_scal = 0;
+  E.in_fields[0] = "INDEX";
+  E.EN(lincom,m)[0] = 1.;
+  E.scalar[0] = NULL;
+  E.scalar[0 + GD_MAX_LINCOM] = "c";
+  E.scalar_ind[0 + GD_MAX_LINCOM] = -1;
 
   rmdirfile();
-  mkdir(filedir, 0777);
-
-  fd = open(format, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0666);
-  write(fd, format_data, strlen(format_data));
-  close(fd);
-
-  D = gd_open(filedir, GD_RDWR | GD_VERBOSE);
-  ret = gd_alter_const(D, "const", GD_UINT8);
+  D = gd_open(filedir, GD_RDWR | GD_CREAT | GD_VERBOSE);
+  gd_add_spec(D, "c CARRAY INT64 1 2 3 4", 0);
+  gd_add(D, &E);
   error = gd_error(D);
-  n = gd_get_constant(D, "const", GD_FLOAT64, &d);
+
+  /* check */
+  gd_entry(D, "data", &e);
+  if (gd_error(D))
+    r = 1;
+  else {
+    CHECKI(e.field_type, GD_LINCOM_ENTRY);
+    CHECKI(e.fragment_index, 0);
+    CHECKI(e.EN(lincom,n_fields), 1);
+    CHECKF(e.EN(lincom,m)[0], 1);
+    CHECKF(e.EN(lincom,b)[0], 1);
+    CHECKP(e.scalar[0]);
+    CHECKS(e.scalar[0 + GD_MAX_LINCOM], "c");
+    CHECKI(e.scalar_ind[0 + GD_MAX_LINCOM], 0);
+    gd_free_entry_strings(&e);
+  }
 
   gd_close(D);
 
   unlink(format);
   rmdir(filedir);
 
-  CHECKI(error, 0);
-  CHECKI(n, 0);
-  CHECKI(ret, 0);
-  CHECKF(d, 8.);
+  CHECKI(error, GD_E_OK);
 
   return r;
 }

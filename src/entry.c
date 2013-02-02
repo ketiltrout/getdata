@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2012 D. V. Wiebe
+/* Copyright (C) 2008-2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -174,6 +174,9 @@ static void _GD_GetScalar(DIRFILE *restrict D, gd_entry_t *restrict E, int i,
       if (C->field_type == GD_CONST_ENTRY) {
         index = 0;
         E->scalar_ind[i] = -1;
+      } else if (index < 0) {
+        /* a CARRAY masquerading as a CONST; default to the first element */
+        index = E->scalar_ind[i] = 0;
       }
 
       if ((D->flags & GD_ACCMODE) == GD_RDWR)

@@ -569,8 +569,8 @@ CheckSimple2(35,1,ent.field_type,pygetdata.SBIT_ENTRY)
 CheckSimple2(35,2,ent.field_type_name,"SBIT_ENTRY")
 CheckSimple2(35,3,ent.fragment,0)
 CheckSimple2(35,4,ent.in_fields,( "in2", ))
-CheckSimple2(35,5,ent.numbits,14)
-CheckSimple2(35,6,ent.bitnum,15)
+CheckSimple2(35,5,ent.bitnum,14)
+CheckSimple2(35,6,ent.numbits,15)
 
 # 36: add / entry (mult) check
 ent = pygetdata.entry(pygetdata.MULTIPLY_ENTRY, "new9", 0, ("in1", "in2"))

@@ -5,6 +5,14 @@ New in version 0.8.3a:
   * BUG FIX: Several bugs on big-ended systems have been fixed.  Reported by
   Dinar Valeev.
 
+  * BUG FIX: Adding an entry via gd_[m]add() with a negative CARRAY scalar index
+  no longer results in an internal error or worse when the added field is later
+  read.
+
+  * BUG FIX: Changing a CONST field to a real floating point type using
+  gd_alter_const() (or similar) no longer results in the value of the field
+  being corrupted.
+
   Bindings Changes:
 
   * Bindings for MATLAB have been added.

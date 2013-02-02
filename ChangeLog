@@ -1,3 +1,19 @@
+2012-02-02   D. V. Wiebe <getdata@ketiltrout.net> svn:789
+	* bindings/python/pyentry.c (gdpy_set_scalar_from_pyobj): Add missing data
+	types.
+	* bindings/python/pyentry.c (gdpy_set_entry_from_tuple gdpy_entry_setspf
+	gdpy_entry_setbitnum gdpy_entry_setnumbits gdpy_entry_setcountval
+	gdpy_entry_setcountmax): Fix data type in gdpy_set_scalar_from_pyobj calls.
+
+	* src/entry.c (_GD_GetScalar): Handle bogus CARRAY indices.
+
+	* src/mod.c (_GD_Change): Fix floating point CONST conversions.
+
+	* test/add_scalar_carray_bad.c test/alter_const_c2r.c: Added.
+
+	* bindings/python/test/big_test.py: Fix the part of test 35 that the
+	previous fix broke.
+
 2012-02-02   D. V. Wiebe <getdata@ketiltrout.net> svn:788
 	* src/debug.c (gd_colclear): Added.
 

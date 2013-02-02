@@ -96,24 +96,50 @@ static void gdpy_set_scalar_from_pyobj(PyObject* pyobj, gd_type_t type,
     *scalar = gdpy_dup_pystring(pyobj);
   else {
     *scalar = NULL;
-    if (type == GD_INT64)
-      *(int64_t*)data = (int64_t)PyLong_AsLongLong(pyobj);
-    else if (type == GD_COMPLEX128)
-      *(double complex*)data = gdpy_as_complex(pyobj);
-    else if (type == GD_FLOAT64)
-      *(double*)data = PyFloat_AsDouble(pyobj);
-    else if (type == GD_INT16)
-      *(int16_t*)data = PyLong_AsLong(pyobj);
-    else if (type == GD_UINT16)
-      *(uint16_t*)data = PyLong_AsUnsignedLong(pyobj);
-    else if (type == GD_UINT64) {
-      if (PyLong_Check(pyobj))
-        *(uint64_t*)data = PyLong_AsUnsignedLongLong(pyobj);
-      else
-        *(uint64_t*)data = PyInt_AsUnsignedLongLongMask(pyobj);
-    } else
+    switch (type) {
+      case GD_UINT8:
+        *(uint8_t*)data = (uint8_t)PyInt_AsUnsignedLongMask(pyobj);
+        break;
+      case GD_INT8:
+        *(int8_t*)data = (int8_t)PyInt_AsLong(pyobj);
+        break;
+      case GD_UINT16:
+        *(uint16_t*)data = (uint16_t)PyInt_AsUnsignedLongMask(pyobj);
+        break;
+      case GD_INT16:
+        *(int16_t*)data = (int16_t)PyInt_AsLong(pyobj);
+        break;
+      case GD_UINT32:
+        *(uint32_t*)data = (uint32_t)PyLong_AsUnsignedLong(pyobj);
+        break;
+      case GD_INT32:
+        *(int32_t*)data = (int32_t)PyLong_AsLong(pyobj);
+        break;
+      case GD_UINT64:
+        if (PyLong_Check(pyobj))
+          *(uint64_t*)data = PyLong_AsUnsignedLongLong(pyobj);
+        else
+          *(uint64_t*)data = PyInt_AsUnsignedLongLongMask(pyobj);
+        break;
+      case GD_INT64:
+        *(int64_t*)data = (int64_t)PyLong_AsLongLong(pyobj);
+        break;
+      case GD_FLOAT32:
+        *(float*)data = (float)PyFloat_AsDouble(pyobj);
+        break;
+      case GD_FLOAT64:
+        *(double*)data = PyFloat_AsDouble(pyobj);
+        break;
+      case GD_COMPLEX64:
+        *(float complex*)data = gdpy_as_complex(pyobj);
+        break;
+      case GD_COMPLEX128:
+        *(double complex*)data = gdpy_as_complex(pyobj);
+        break;
+      default:
         PyErr_Format(PyExc_RuntimeError,
               "unexpected field type (%x) inside %s", type, __func__);
+    }
   }
 
   dreturnvoid();
@@ -187,7 +213,7 @@ static void gdpy_set_entry_from_tuple(gd_entry_t *E, PyObject* tuple,
         PyErr_SetString(PyExc_ValueError,
             "'pygetdata.entry' invalid data type");
 
-      gdpy_set_scalar_from_pyobj(PyTuple_GetItem(tuple, 1), GD_UINT16,
+      gdpy_set_scalar_from_pyobj(PyTuple_GetItem(tuple, 1), GD_UINT_TYPE,
           &E->scalar[0], &E->spf);
       break;
     case GD_LINCOM_ENTRY:
@@ -283,10 +309,10 @@ static void gdpy_set_entry_from_tuple(gd_entry_t *E, PyObject* tuple,
         return;
       }
 
-      gdpy_set_scalar_from_pyobj(PyTuple_GetItem(tuple, 1), GD_INT16,
+      gdpy_set_scalar_from_pyobj(PyTuple_GetItem(tuple, 1), GD_INT_TYPE,
           &E->scalar[0], &E->bitnum);
       if (size > 2)
-        gdpy_set_scalar_from_pyobj(PyTuple_GetItem(tuple, 2), GD_INT16,
+        gdpy_set_scalar_from_pyobj(PyTuple_GetItem(tuple, 2), GD_INT_TYPE,
             &E->scalar[1], &E->numbits);
       else {
         E->numbits = 1;
@@ -445,10 +471,10 @@ static void gdpy_set_entry_from_tuple(gd_entry_t *E, PyObject* tuple,
         return;
       }
 
-      gdpy_set_scalar_from_pyobj(PyTuple_GetItem(tuple, 2), GD_UINT16,
+      gdpy_set_scalar_from_pyobj(PyTuple_GetItem(tuple, 2), GD_INT_TYPE,
           &E->scalar[0], &E->count_val);
 
-      gdpy_set_scalar_from_pyobj(PyTuple_GetItem(tuple, 3), GD_UINT16,
+      gdpy_set_scalar_from_pyobj(PyTuple_GetItem(tuple, 3), GD_INT_TYPE,
           &E->scalar[1], &E->count_max);
       break;
     case GD_CARRAY_ENTRY:
@@ -1035,7 +1061,7 @@ static int gdpy_entry_setspf(struct gdpy_entry_t* self, PyObject *value,
     return -1;
   }
 
-  gdpy_set_scalar_from_pyobj(value, GD_UINT16, &scalar, &spf);
+  gdpy_set_scalar_from_pyobj(value, GD_UINT_TYPE, &scalar, &spf);
 
   if (PyErr_Occurred()) {
     free(scalar);
@@ -1421,7 +1447,7 @@ static int gdpy_entry_setbitnum(struct gdpy_entry_t* self, PyObject *value,
     return -1;
   }
 
-  gdpy_set_scalar_from_pyobj(value, GD_INT16, &scalar, &bitnum);
+  gdpy_set_scalar_from_pyobj(value, GD_INT_TYPE, &scalar, &bitnum);
   if (PyErr_Occurred()) {
     free(scalar);
     dreturn("%i", -1);
@@ -1476,7 +1502,7 @@ static int gdpy_entry_setnumbits(struct gdpy_entry_t* self, PyObject *value,
     return -1;
   }
 
-  gdpy_set_scalar_from_pyobj(value, GD_INT16, &scalar, &numbits);
+  gdpy_set_scalar_from_pyobj(value, GD_INT_TYPE, &scalar, &numbits);
 
   if (PyErr_Occurred()) {
     dreturn("%i", -1);
@@ -1646,7 +1672,7 @@ static int gdpy_entry_setcountval(struct gdpy_entry_t* self, PyObject *value,
     return -1;
   }
 
-  gdpy_set_scalar_from_pyobj(value, GD_UINT16, &scalar, &count_val);
+  gdpy_set_scalar_from_pyobj(value, GD_INT_TYPE, &scalar, &count_val);
 
   if (PyErr_Occurred()) {
     dreturn("%i", -1);
@@ -1698,7 +1724,7 @@ static int gdpy_entry_setcountmax(struct gdpy_entry_t* self, PyObject *value,
     return -1;
   }
 
-  gdpy_set_scalar_from_pyobj(value, GD_UINT16, &scalar, &count_max);
+  gdpy_set_scalar_from_pyobj(value, GD_INT_TYPE, &scalar, &count_max);
 
   if (PyErr_Occurred()) {
     dreturn("%i", -1);
