@@ -1,4 +1,4 @@
-dnl Copyright (C) 2008-2012 D. V. Wiebe
+dnl Copyright (C) 2008-2013 D. V. Wiebe
 dnl
 dnllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll
 dnl
@@ -24,7 +24,7 @@ m4_include([m4/version.m4])
 AC_INIT([GetData],[getdata_version],[getdata-devel@lists.sourceforge.net])
 
 AC_COPYRIGHT(
-[Parts of this program are copyright (C) 2008-2012 D. V. Wiebe.
+[Parts of this program are copyright (C) 2008-2013 D. V. Wiebe.
 
 These parts may be redistributed and/or modified under the terms of the GNU
 Lesser General Public License as published by the Free Software Foundation;
@@ -143,8 +143,9 @@ dnl bindings, globally
 make_cxxbindings="yes"
 make_f77bindings="yes"
 make_pybindings="yes"
-make_perlbindings="yes"
 make_idlbindings="yes"
+make_perlbindings="yes"
+make_matlabbindings="yes"
 AC_ARG_ENABLE(bindings, AS_HELP_STRING([--disable-bindings],
               [don't build any bindings, just build the C library]),
               [
@@ -154,6 +155,7 @@ AC_ARG_ENABLE(bindings, AS_HELP_STRING([--disable-bindings],
                  make_pybindings="no"
                  make_idlbindings="no"
                  make_perlbindings="no"
+                 make_matlabbindings="no"
                fi
               ])
 
@@ -260,6 +262,19 @@ if test "x$disable_c99" = "xyes"; then
 else
   AC_MSG_RESULT([$make_perlbindings])
 fi
+
+dnl MATLAB bindings
+AC_ARG_ENABLE(matlab, AS_HELP_STRING([--disable-matlab],
+              [don't build the MATLAB bindings]),
+              [
+               case "${enableval}" in
+                 no) make_matlabbindings="no" ;;
+                 *) make_matlabbindings="yes" ;;
+               esac
+              ])
+
+AC_MSG_CHECKING([whether to include the MATLAB bindings])
+AC_MSG_RESULT([$make_matlabbindings])
 
 dnl Modules
 AC_ARG_ENABLE(modules, AS_HELP_STRING([--enable-modules],
@@ -847,6 +862,17 @@ if test "x$make_perlbindings" = "xyes"; then
   fi
 fi
 
+dnl matlab
+if test "x$make_matlabbindings" = "xyes"; then
+  echo
+  echo "*** Configuring MATLAB bindings"
+  echo
+  GD_MATLAB
+  if test "x$have_matlab" = "xno"; then
+    make_matlabbindings=no
+  fi
+fi
+
 dnl external encodings
 GD_CHECK_ENCODING([bzip2],[bz2],[BZ2_bzReadOpen],[bzlib.h],[bzip2],[bunzip2],[])
 GD_CHECK_ENCODING([gzip],[z],[gzopen],[zlib.h],[gzip],[gunzip],[])
@@ -970,6 +996,8 @@ AC_CONFIG_FILES([bindings/f77/test/test_getdata.f])
 AC_CONFIG_FILES([bindings/idl/Makefile])
 AC_CONFIG_FILES([bindings/idl/makedlm.sh])
 AC_CONFIG_FILES([bindings/idl/test/Makefile])
+AC_CONFIG_FILES([bindings/matlab/Makefile])
+AC_CONFIG_FILES([bindings/matlab/test/Makefile])
 AC_CONFIG_FILES([bindings/perl/Makefile])
 AC_CONFIG_FILES([bindings/perl/Build.PL])
 AC_CONFIG_FILES([bindings/python/Makefile])
@@ -1013,10 +1041,12 @@ AM_CONDITIONAL(MAKE_F95BINDINGS, [test "x$make_f95bindings" = "xyes"])
 AM_CONDITIONAL(MAKE_PYBINDINGS, [test "x$make_pybindings" = "xyes"])
 AM_CONDITIONAL(MAKE_IDLBINDINGS, [test "x$make_idlbindings" = "xyes"])
 AM_CONDITIONAL(MAKE_PERLBINDINGS, [test "x$make_perlbindings" = "xyes"])
+AM_CONDITIONAL(MAKE_MATLABBINDINGS, [test "x$make_matlabbindings" = "xyes"])
 AM_CONDITIONAL(USE_MODULES, [test "x$use_modules" != "xno"])
 AM_CONDITIONAL(TEST_PYTHON, [test "x$NO_DLOPEN_TESTS" = "x0"])
 AM_CONDITIONAL(TEST_IDL, [test "x$NO_DLOPEN_TESTS" = "x0"])
 AM_CONDITIONAL(TEST_PERL, [test "x$HAVE_Test__Harness" = "xyes"])
+AM_CONDITIONAL(TEST_MATLAB, [test "x$NO_DLOPEN_TESTS" = "x0"])
 AM_CONDITIONAL(HAVE_DIFF, [test "x$DIFF" != "x"])
 AM_CONDITIONAL(USE_ZZSLIM, [test "x$use_zzslim" = "xyes"])
 AM_CONDITIONAL(GDIDL_EXTERNAL, [false])
@@ -1050,6 +1080,12 @@ if test "x$make_idlbindings" != "xno"; then
   BINDINGS_BUILT="${BINDINGS_BUILT} IDL"
 else
   BINDINGS_LEFT="${BINDINGS_LEFT} IDL"
+fi
+
+if test "x$make_matlabbindings" != "xno"; then
+  BINDINGS_BUILT="${BINDINGS_BUILT} MATLAB"
+else
+  BINDINGS_LEFT="${BINDINGS_LEFT} MATLAB"
 fi
 
 if test "x$make_perlbindings" != "xno"; then

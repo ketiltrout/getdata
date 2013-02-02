@@ -34,6 +34,10 @@ if MAKE_IDLBINDINGS
 IDL_SUBDIR=idl
 endif
 
+if MAKE_MATLABBINDINGS
+MATLAB_SUBDIR=matlab
+endif
+
 if MAKE_PYBINDINGS
 PY_SUBDIR=python
 endif
@@ -47,11 +51,13 @@ noinst_PROGRAMS=make_parameters
 make_parameters_SOURCES = make_parameters.c
 nodist_make_parameters_SOURCES = ../src/getdata.h ../src/gd_config.h
 
-SUBDIRS = . ${F77_SUBDIR} ${CXX_SUBDIR} ${PY_SUBDIR} ${IDL_SUBDIR} \
-					${PERL_SUBDIR}
+SUBDIRS = . ${F77_SUBDIR} ${CXX_SUBDIR} ${IDL_SUBDIR} ${MATLAB_SUBDIR} \
+					${PY_SUBDIR} ${PERL_SUBDIR}
 
-make_parameters$(EXEEXT): $(make_parameters_SOURCES) $(nodist_make_parameters_SOURCES)
-	${BUILDCC} $(DEFS) -I../src -o make_parameters$(EXEEXT) $(srcdir)/$(make_parameters_SOURCES)
+make_parameters$(EXEEXT): $(make_parameters_SOURCES) \
+				    $(nodist_make_parameters_SOURCES)
+	${BUILDCC} $(DEFS) -I../src -o make_parameters$(EXEEXT) \
+		$(srcdir)/$(make_parameters_SOURCES)
 
 clean-local:
 	rm -rf *~ 

@@ -1,3 +1,15 @@
+2012-02-02   D. V. Wiebe <getdata@ketiltrout.net> svn:788
+	* src/debug.c (gd_colclear): Added.
+
+	* src/protect.c (gd_protection gd_alter_protection): Fix error reporting for
+	GD_E_BAD_INDEX.
+
+	* m4/matlab.m4 bindings/matlab: Added.
+	* configure.ac bindings/Makefile.am: Added MATLAB config.
+	* bindings/make_parameters.c (MatLab): Added.
+
+	* bindings/python/test/big_test.py: Fixed tests 35 and 67.
+
 2012-01-26   D. V. Wiebe <getdata@ketiltrout.net> svn:787
 	* src/del.c (_GD_DeReference) src/entry.c (_GD_CalculateEntry) src/flush.c
 	(_GD_FieldSpec)	 src/mod.c (_GD_Change): Fix data type (size) of

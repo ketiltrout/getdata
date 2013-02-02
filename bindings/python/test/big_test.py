@@ -562,15 +562,15 @@ except:
   CheckOK2(35,1)
 
 try:
-  ent = d.entry("sbit")
+  ent = d.entry("new8")
 except:
   CheckOK2(35,2)
 CheckSimple2(35,1,ent.field_type,pygetdata.SBIT_ENTRY)
 CheckSimple2(35,2,ent.field_type_name,"SBIT_ENTRY")
 CheckSimple2(35,3,ent.fragment,0)
-CheckSimple2(35,4,ent.in_fields,( "data", ))
-CheckSimple2(35,5,ent.numbits,6)
-CheckSimple2(35,6,ent.bitnum,5)
+CheckSimple2(35,4,ent.in_fields,( "in2", ))
+CheckSimple2(35,5,ent.numbits,14)
+CheckSimple2(35,6,ent.bitnum,15)
 
 # 36: add / entry (mult) check
 ent = pygetdata.entry(pygetdata.MULTIPLY_ENTRY, "new9", 0, ("in1", "in2"))
@@ -959,14 +959,14 @@ except:
   CheckOK(64)
 CheckSimple(64,n,["mnew1"])
 
-# 65: nmfields_by_type check
+# 65: nmvectors check
 try:
   n = d.nmvectors("data")
 except:
   CheckOK(65)
 CheckSimple(65,n,8)
 
-# 66: mfield_list_by_type check
+# 66: mvector_list check
 try:
   n = d.mvector_list("data")
 except:
@@ -974,24 +974,24 @@ except:
 CheckSimple(66,n,['mlut', 'mnew1', 'mnew3', 'mnew6', 'mnew7', 'mnew8', 'mnew9',
   'mnew10'])
 
-# 183: alter / raw check
+# 67: alter / raw check
 ent = pygetdata.entry(pygetdata.RAW_ENTRY, "new1", 0,
     {"type": pygetdata.FLOAT32, "spf": 4})
 try:
   n = d.alter("new1", ent)
 except:
-  CheckOK2(183,1)
+  CheckOK2(67,1)
 
 try:
   ent = d.entry("new1")
 except:
-  CheckOK(183,2)
-CheckSimple2(183,1,ent.field_type,pygetdata.RAW_ENTRY)
-CheckSimple2(183,2,ent.field_type_name,"RAW_ENTRY")
-CheckSimple2(183,3,ent.fragment,0)
-CheckSimple2(183,4,ent.data_type,pygetdata.FLOAT32)
-CheckSimple2(183,5,ent.data_type_name,"FLOAT32")
-CheckSimple2(183,6,ent.spf,4)
+  CheckOK(67,2)
+CheckSimple2(67,1,ent.field_type,pygetdata.RAW_ENTRY)
+CheckSimple2(67,2,ent.field_type_name,"RAW_ENTRY")
+CheckSimple2(67,3,ent.fragment,0)
+CheckSimple2(67,4,ent.data_type,pygetdata.FLOAT32)
+CheckSimple2(67,5,ent.data_type_name,"FLOAT32")
+CheckSimple2(67,6,ent.spf,4)
 
 # 78: encoding check
 try:
@@ -1122,7 +1122,7 @@ CheckSimple2(92,2,ent.field_type_name,"MULTIPLY_ENTRY")
 CheckSimple2(92,3,ent.fragment,1)
 CheckSimple2(92,4,ent.in_fields,( "in1", "in2"))
 
-# 93: move check
+# 93: rename check
 try:
   d.rename("new9", "newer", 0)
 except:
@@ -1244,7 +1244,7 @@ CheckSimple2(146,1,ent.field_type,pygetdata.DIVIDE_ENTRY)
 CheckSimple2(146,2,ent.fragment,0)
 CheckSimple2(146,3,ent.in_fields,( "in1", "in2"))
 
-# 148: add / entry (divide) check
+# 148: add / entry (recip) check
 ent = pygetdata.entry(pygetdata.RECIP_ENTRY, "new16", 0, ("in3", 33.3))
 try:
   d.add(ent)
@@ -1260,7 +1260,7 @@ CheckSimple2(148,2,ent.fragment,0)
 CheckSimple2(148,3,ent.in_fields,( "in3",))
 CheckSimple2(148,4,ent.dividend,33.3)
 
-# 149: add / entry (mult) check
+# 149: madd / entry (div) check
 ent = pygetdata.entry(pygetdata.DIVIDE_ENTRY, "mnew14", 0,
     {"in_field1": "in3", "in_field2": "in2"})
 try:
@@ -1276,7 +1276,7 @@ CheckSimple2(149,1,ent.field_type,pygetdata.DIVIDE_ENTRY)
 CheckSimple2(149,2,ent.fragment,0)
 CheckSimple2(149,3,ent.in_fields,( "in3", "in2"))
 
-# 151: add / entry (mult) check
+# 151: madd / entry (recip) check
 ent = pygetdata.entry(pygetdata.RECIP_ENTRY, "mnew16", 0,
     {"in_field": "in3", "dividend": "const"})
 try:
@@ -1687,7 +1687,7 @@ CheckSimple2(211, 3, ent.windop, pygetdata.WINDOP_LT)
 CheckSimple2(211, 4, ent.in_fields, ( 'linterp', 'mult' ))
 CheckSimple2(211, 5, ent.threshold, 4.1)
 
-# 212: gd_add_mplex check
+# 212: gd_add_window check
 ent = pygetdata.entry(pygetdata.WINDOW_ENTRY, "new18", 0,
     ("in1", "in2", pygetdata.WINDOP_NE, 32))
 try:
@@ -1705,7 +1705,7 @@ CheckSimple2(212, 3, ent.windop, pygetdata.WINDOP_NE)
 CheckSimple2(212, 4, ent.in_fields, ( 'in1', 'in2' ))
 CheckSimple2(212, 5, ent.threshold, 32)
 
-# 214: gd_madd_mplex check
+# 214: gd_madd_window check
 ent = pygetdata.entry(pygetdata.WINDOW_ENTRY, "mnew18", 0,
     ("in2", "in3", pygetdata.WINDOP_SET, 128))
 try:
@@ -1723,7 +1723,7 @@ CheckSimple2(214, 3, ent.windop, pygetdata.WINDOP_SET)
 CheckSimple2(214, 4, ent.in_fields, ( 'in2', 'in3' ))
 CheckSimple2(214, 5, ent.threshold, 128)
 
-# 217: gd_alter_mplex check
+# 217: gd_alter_window check
 ent = pygetdata.entry(pygetdata.WINDOW_ENTRY, "new18", 0, { "threshold": 32e3,
   "in_field1": "in3", "in_field2": "in4", "windop": pygetdata.WINDOP_GE })
 try:
@@ -1988,7 +1988,7 @@ except:
   CheckOK2(240, 2)
 CheckSimple(240, n, pygetdata.LOOKBACK_ALL)
 
-# 241: raw_filename check
+# 241: linterp_tablename check
 try:
   n = d.linterp_tablename("linterp")
 except:

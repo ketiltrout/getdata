@@ -33,7 +33,7 @@ int gd_protection(DIRFILE* D, int fragment_index) gd_nothrow
   }
 
   if (fragment_index < 0 || fragment_index >= D->n_fragment) {
-    _GD_SetError(D, GD_E_BAD_INDEX, 0, NULL, 0, NULL);
+    _GD_SetError(D, GD_E_BAD_INDEX, 0, NULL, fragment_index, NULL);
     dreturn("%i", -1);
     return -1;
   }
@@ -64,7 +64,7 @@ int gd_alter_protection(DIRFILE *D, int protection_level, int fragment_index)
   }
 
   if (fragment_index < GD_ALL_FRAGMENTS || fragment_index >= D->n_fragment) {
-    _GD_SetError(D, GD_E_BAD_INDEX, 0, NULL, 0, NULL);
+    _GD_SetError(D, GD_E_BAD_INDEX, 0, NULL, fragment_index, NULL);
     dreturn("%i", -1);
     return -1;
   }

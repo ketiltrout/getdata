@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2012 D. V. Wiebe
+/* Copyright (C) 2008-2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -460,6 +460,59 @@ void Perl(void)
   printf("/\n");
 }
 
+/* Since this file gets installed, we're a little more chatty here than usual */
+void MatLab(void)
+{
+  int i;
+
+  fputs("% Copyright (C) 2013 D. V. Wiebe\n%\n%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
+      "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n%\n"
+      "% This file is part of the GetData project.\n%\n"
+      "% GetData is free software; you can redistribute it and/or modify it "
+      "under\n"
+      "% the terms of the GNU Lesser General Public License as published by "
+      "the\n"
+      "% Free Software Foundation; either version 2.1 of the License, or (at "
+      "your\n"
+      "% option) any later version.\n%\n"
+      "% GetData is distributed in the hope that it will be useful, but "
+      "WITHOUT\n"
+      "% ANY WARRANTY; without even the implied warranty of MERCHANTABILITY "
+      "or\n"
+      "% FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public\n"
+      "% License for more details.\n%\n"
+      "% You should have received a copy of the GNU Lesser General Public "
+      "License\n"
+      "% along with GetData; if not, write to the Free Software Foundation, "
+      "Inc.,\n"
+      "% 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA\n\n", stdout);
+
+  fputs("% getdata_constants:\n"
+      "% ------------------\n"
+      "% This function defines a structure containing various constants used "
+      "by\n"
+      "% the GetData MATLAB bindings.  Typically it is called by doing "
+      "something\n"
+      "% like:\n%\n"
+      "%   >> GD = getdata_constants()\n%\n"
+      "% which then allows you to use constants like 'GD.RDWR' when required "
+      "by\n"
+      "% the bindings.\n%\n"
+      "% For details on the GetData MATLAB bindings see the file "
+      "README.matlab\n"
+      "% distributed with the GetData source.\n", stdout);
+
+  fputs("function GD = getdata_constants()\n"
+      "  GD = struct(...\n"
+      "    'VERSION', '" VERSION "'", stdout);
+
+  for (i = 0; constant_list[i].lname != NULL; ++i)
+    printf(", ...\n    '%s', int32(%li)", constant_list[i].sname,
+        constant_list[i].value);
+
+  printf(" ...\n  );\nend\n");
+}
+
 int main(int argc, char* argv[])
 {
   if (argv[1][0] == 'f')
@@ -470,6 +523,10 @@ int main(int argc, char* argv[])
     IDL();
   else if (argv[1][0] == 'P')
     Perl();
+  else if (argv[1][0] == 'm')
+    MatLab();
+  else
+    return 1;
 
   return 0;
 }

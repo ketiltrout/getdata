@@ -169,7 +169,6 @@ int strerror_r(int errnum, char *buf, size_t buflen)
  * extension and has subsequently been POSIXised in POSIX.1-2008.
  */
 #ifndef HAVE_GETDELIM
-#define GD_SSIZE_T_MAX ((ssize_t)((size_t)-1>>1))
 ssize_t getdelim(char **lineptr, size_t *n, int delim, FILE *stream)
 {
   size_t nread;

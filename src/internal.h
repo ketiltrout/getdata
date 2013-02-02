@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 C. Barth Netterfield
- * Copyright (C) 2005-2012 D. V. Wiebe
+ * Copyright (C) 2005-2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -218,6 +218,13 @@ double cimag(double complex z);
 #define SIZEOF_UNSIGNED_INT (sizeof(unsigned int))
 #endif
 
+#ifndef SIZEOF_SIZE_T
+#define SIZEOF_SIZE_T (sizeof(size_t))
+#endif
+
+#define GD_SSIZE_T_MAX ((ssize_t)((size_t)-1>>1))
+#define GD_SIZE_T_MAX ((size_t)-1)
+
 #define GD_INT_TYPE ((gd_type_t)(SIZEOF_INT | GD_SIGNED))
 #define GD_UINT_TYPE ((gd_type_t)(SIZEOF_UNSIGNED_INT))
 
@@ -322,6 +329,7 @@ _gd_static_inline int64_t gd_put_unalinged64(int64_t v, void *p)
 const char* gd_colnil(void);
 const char* gd_coladd(void);
 const char* gd_colsub(void);
+void gd_colclear(void);
 #define dtracevoid() printf("%s %s()\n", gd_coladd(), __FUNCTION__)
 #define dtrace(fmt, ...) printf("%s %s(" fmt ")\n", gd_coladd(), \
     __FUNCTION__, ##__VA_ARGS__)

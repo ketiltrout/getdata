@@ -1,4 +1,4 @@
-/* Copyright (C) 2008, 2010 D. V. Wiebe
+/* Copyright (C) 2008, 2010, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -46,4 +46,10 @@ const char* gd_colsub(void)
     gd_debug_col[--gd_col_count] = '\0';
 
   return buffer;
+}
+
+void gd_colclear(void)
+{
+  gd_col_count = 0;
+  gd_debug_col[0] = '\0';
 }

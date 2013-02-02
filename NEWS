@@ -5,6 +5,10 @@ New in version 0.8.3a:
   * BUG FIX: Several bugs on big-ended systems have been fixed.  Reported by
   Dinar Valeev.
 
+  Bindings Changes:
+
+  * Bindings for MATLAB have been added.
+
 |==============================================================================|
 
 New in version 0.8.2:
