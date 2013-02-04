@@ -67,7 +67,7 @@ static size_t _GD_DoRawOut(DIRFILE *restrict D, gd_entry_t *restrict E,
     return 0;
   }
 
-  if (_gd_ef[E->e->u.raw.file[0].subenc].flags & GD_EF_ECOR) {
+  if (gd_ef_[E->e->u.raw.file[0].subenc].flags & GD_EF_ECOR) {
     /* convert to/from middle-ended doubles */
     if ((E->EN(raw,data_type) == GD_FLOAT64 || E->EN(raw,data_type) ==
           GD_COMPLEX128) &&
@@ -99,7 +99,7 @@ static size_t _GD_DoRawOut(DIRFILE *restrict D, gd_entry_t *restrict E,
     return 0;
   }
 
-  if (_GD_WriteSeek(D, E, _gd_ef + E->e->u.raw.file[0].subenc, s0,
+  if (_GD_WriteSeek(D, E, gd_ef_ + E->e->u.raw.file[0].subenc, s0,
         GD_FILE_WRITE) == -1)
   {
     _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
@@ -108,7 +108,7 @@ static size_t _GD_DoRawOut(DIRFILE *restrict D, gd_entry_t *restrict E,
     return 0;
   }
 
-  n_wrote = _GD_WriteOut(E, _gd_ef + E->e->u.raw.file[0].subenc, databuffer,
+  n_wrote = _GD_WriteOut(E, gd_ef_ + E->e->u.raw.file[0].subenc, databuffer,
       E->EN(raw,data_type), ns, 0);
 
   if (n_wrote < 0) {
@@ -129,7 +129,7 @@ static size_t _GD_DoLinterpOut(DIRFILE *restrict D, gd_entry_t *restrict E,
   size_t n_wrote;
   int dir = -1, i;
   double *tmpbuf;
-  struct _gd_lut *tmp_lut;
+  struct gd_lut_ *tmp_lut;
 
   dtrace("%p, %p, %lli, %" PRNsize_t ", 0x%X, %p", D, E, (long long)first_samp,
       num_samp, data_type, data_in);
@@ -193,8 +193,8 @@ static size_t _GD_DoLinterpOut(DIRFILE *restrict D, gd_entry_t *restrict E,
   }
 
   /* Make the reverse lut */
-  tmp_lut = (struct _gd_lut *)_GD_Malloc(D, E->e->u.linterp.table_len *
-      sizeof(struct _gd_lut));
+  tmp_lut = (struct gd_lut_ *)_GD_Malloc(D, E->e->u.linterp.table_len *
+      sizeof(struct gd_lut_));
   if (tmp_lut == NULL) {
     free(tmpbuf);
     dreturn("%i", 0);

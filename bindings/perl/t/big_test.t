@@ -26,6 +26,8 @@ use Test::More tests => 1305;
 
 my $ne = 0;
 my ($s, @a, %h);
+select STDERR; $| = 1;
+select STDOUT; $| = 1;
 
 sub isn {
   cmp_ok (

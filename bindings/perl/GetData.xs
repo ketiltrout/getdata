@@ -1,4 +1,4 @@
-/* Copyright (C) 2011-2012 D. V. Wiebe
+/* Copyright (C) 2011-2013 D. V. Wiebe
  *
  **************************************************************************
  *
@@ -50,8 +50,8 @@
 #endif
 
 /* fake data types to simplify our typemap */
-typedef complex double gdp_complex_in;
-typedef _Complex double gdpu_complex;
+typedef GD_DCOMPLEXP_t gdp_complex_in;
+typedef GD_DCOMPLEXA(gdpu_complex);
 typedef int gdpu_bitnum_t;
 typedef int gdpu_numbits_t;
 typedef gd_shift_t gdpu_shift_t;
@@ -72,7 +72,7 @@ typedef const char gdpu_char;
 #define GDP_PUSHiv(s)       XPUSHs(sv_2mortal(newSViv(s)))
 #define GDP_PUSHnv(s)       XPUSHs(sv_2mortal(newSVnv(s)))
 #define GDP_PUSHrv(s)       XPUSHs(sv_2mortal(newRV_noinc((SV*)s)))
-#define GDP_PUSHcmp(s)      XPUSHs(sv_2mortal(gdp_newSVcmp(s)))
+#define GDP_PUSHcmp(r,i)    XPUSHs(sv_2mortal(gdp_newSVcmp(r,i)))
 #define GDP_PUSHrvavpv(s,n) XPUSHs(sv_2mortal(gdp_newRVavpv((const char**)s,n)))
 #define GDP_PUSHrvavcmp(s,n) XPUSHs(sv_2mortal(gdp_newRVavcmp(s,n)))
 #define GDP_PUSHrvavnv(s,n) XPUSHs(sv_2mortal(gdp_newRVavnv(s,n)))
@@ -110,12 +110,11 @@ static gd_type_t gdp_get_type(SV **sv, const char *pkg, const char *func)
   return GD_FLOAT64;
 }
 
-/* convert a Perl object into a c99 complex number */
-static complex double gdp_cmp_to_c99(SV *src, int *ok, const char* pkg,
-  const char *func)
+/* convert a Perl object into a complex number */
+static void gdp_convert_cmp(GD_DCOMPLEXP_t val, SV *src, int *ok,
+    const char* pkg, const char *func)
 {
-  dtrace("%p, %p, \"%s\", \"%s\"", src, ok, pkg, func);
-  double complex val = 0;
+  dtrace("%p, %p, %p, \"%s\", \"%s\"", val, src, ok, pkg, func);
 
   if (sv_isa(src, "Math::Complex")) {
     HV *hv = (HV *)SvRV(src);
@@ -132,7 +131,7 @@ static complex double gdp_cmp_to_c99(SV *src, int *ok, const char* pkg,
       SV **a = av_fetch(data, 1, 0);
       if (m == NULL || a == NULL)
         croak("%s::%s() - Malformed Math::Complex object", pkg, func);
-      val = SvNV(*m) * cexp(SvNV(*a));
+      gd_po2cp_(val, SvNV(*m), SvNV(*a));
     } else {
       SV **sv = gdp_hv_fetchs(hv, "cartesian", 0);
       if (sv == NULL || !SvROK(*sv) || SvTYPE(SvRV(*sv)) != SVt_PVAV)
@@ -143,16 +142,16 @@ static complex double gdp_cmp_to_c99(SV *src, int *ok, const char* pkg,
       SV **i = av_fetch(data, 1, 0);
       if (r == NULL || i == NULL)
         croak("%s::%s() - Malformed Math::Complex object", pkg, func);
-      val = SvNV(*r) + _Complex_I * SvNV(*i);
+      gd_li2cp_(val, SvNV(*r), SvNV(*i));
     }
-  } else if (ok) /* if ok is non-NULL, the caller is prepared to handle
-                      non-complex data */
-      *ok = 0;
-    else
-      val = SvNV(src);
+  } else if (ok) {
+    /* if ok is non-NULL, the caller is prepared to handle non-complex data */
+    *ok = 0;
+  } else {
+    gd_rs2cp_(val, SvNV(src));
+  }
 
-  dreturn("%g;%g", creal(val), cimag(val));
-  return val;
+  dreturn("(%g;%g)", crealp(val), cimagp(val));
 }
 
 #define GDP_EHASH_FETCH(key) \
@@ -161,7 +160,8 @@ static complex double gdp_cmp_to_c99(SV *src, int *ok, const char* pkg,
     croak("%s::%s() - Missing required key '" key "' in entry hash", pkg, func)
 
 #define GDP_EHASH_FETCH_CMP(key,member) do { \
-    GDP_EHASH_FETCH(key); E->member = gdp_cmp_to_c99(*v, NULL, pkg, func); \
+    GDP_EHASH_FETCH(key); \
+    gdp_convert_cmp(gd_csp_(E->member), *v, NULL, pkg, func); \
   } while(0)
 
 #define GDP_EHASH_FETCH_IV(key,member,type) \
@@ -183,7 +183,7 @@ static complex double gdp_cmp_to_c99(SV *src, int *ok, const char* pkg,
   } while(0)
 
 /* populate a complex double array in gd_entry_t */
-static void gdp_fetch_cmp_list(complex double *c, HV *hv, const char* key,
+static void gdp_fetch_cmp_list(GD_DCOMPLEXV(c), HV *hv, const char* key,
   int n, const char *pkg, const char *func)
 {
   dtrace("%p, %p, \"%s\", %i, \"%s\", \"%s\"", c, hv, key, n, pkg, func);
@@ -199,7 +199,7 @@ static void gdp_fetch_cmp_list(complex double *c, HV *hv, const char* key,
   for (i = 0; i < n; ++i) {
     v = av_fetch((AV*)*v, i, 0);
     if (v)
-      c[i] = gdp_cmp_to_c99(*v, NULL, pkg, func);
+      gdp_convert_cmp(gd_cap_(c,i), *v, NULL, pkg, func);
   }
 
   dreturnvoid();
@@ -290,28 +290,29 @@ static void gdp_to_entry(gd_entry_t *E, SV *sv, const char *pkg,
     case GD_BIT_ENTRY:
     case GD_SBIT_ENTRY:
       GDP_EHASH_FETCH_PV("in_fields", in_fields[0]);
-      GDP_EHASH_FETCH_UV("bitnum", bitnum, int);
-      GDP_EHASH_FETCH_UV("numbits", bitnum, int);
+      GDP_EHASH_FETCH_UV("bitnum", EN(bit,bitnum), int);
+      GDP_EHASH_FETCH_UV("numbits", EN(bit,numbits), int);
       gdp_fetch_scalars(E, (HV*)sv, 0x3, pkg, func);
       break;
     case GD_CARRAY_ENTRY:
-      GDP_EHASH_FETCH_IV("array_len", array_len, size_t);
+      GDP_EHASH_FETCH_IV("array_len", EN(scalar,array_len), size_t);
       /* fallthrough */
     case GD_CONST_ENTRY:
-      GDP_EHASH_FETCH_UV("const_type", const_type, gd_type_t);
+      GDP_EHASH_FETCH_UV("const_type", EN(scalar,const_type), gd_type_t);
       break;
     case GD_LINCOM_ENTRY:
-      GDP_EHASH_FETCH_IV("n_fields", n_fields, int);
-      n = (E->n_fields > GD_MAX_LINCOM) ? GD_MAX_LINCOM : E->n_fields;
+      GDP_EHASH_FETCH_IV("n_fields", EN(lincom,n_fields), int);
+      n = (E->EN(lincom,n_fields) > GD_MAX_LINCOM) ? GD_MAX_LINCOM
+        : E->EN(lincom,n_fields);
       gdp_fetch_in_fields(E->in_fields, sv, n, pkg, func);
       E->comp_scal = 1;
-      gdp_fetch_cmp_list(E->cm, (HV*)sv, "cm", n, pkg, func);
-      gdp_fetch_cmp_list(E->cb, (HV*)sv, "cb", n, pkg, func);
+      gdp_fetch_cmp_list(E->EN(lincom,cm), (HV*)sv, "cm", n, pkg, func);
+      gdp_fetch_cmp_list(E->EN(lincom,cb), (HV*)sv, "cb", n, pkg, func);
       gdp_fetch_scalars(E, (HV*)sv, ((1 << n) - 1) * 9, pkg, func);
       break;
     case GD_LINTERP_ENTRY:
       GDP_EHASH_FETCH_PV("in_fields", in_fields[0]);
-      GDP_EHASH_FETCH_PV("table", table);
+      GDP_EHASH_FETCH_PV("table", EN(linterp,table));
       break;
     case GD_MULTIPLY_ENTRY:
     case GD_DIVIDE_ENTRY:
@@ -319,50 +320,51 @@ static void gdp_to_entry(gd_entry_t *E, SV *sv, const char *pkg,
       break;
     case GD_PHASE_ENTRY:
       GDP_EHASH_FETCH_PV("in_fields", in_fields[0]);
-      GDP_EHASH_FETCH_IV("shift", shift, gd_shift_t);
+      GDP_EHASH_FETCH_IV("shift", EN(phase,shift), gd_shift_t);
       gdp_fetch_scalars(E, (HV*)sv, 1, pkg, func);
       break;
     case GD_POLYNOM_ENTRY:
       GDP_EHASH_FETCH_PV("in_fields", in_fields[0]);
-      GDP_EHASH_FETCH_IV("poly_ord", poly_ord, int);
-      n = (E->poly_ord > GD_MAX_POLYORD) ? GD_MAX_POLYORD : E->poly_ord;
+      GDP_EHASH_FETCH_IV("poly_ord", EN(polynom,poly_ord), int);
+      n = (E->EN(polynom,poly_ord) > GD_MAX_POLYORD) ? GD_MAX_POLYORD
+        : E->EN(polynom,poly_ord);
       E->comp_scal = 1;
-      gdp_fetch_cmp_list(E->ca, (HV*)sv, "ca", n, pkg, func);
+      gdp_fetch_cmp_list(E->EN(polynom,ca), (HV*)sv, "ca", n, pkg, func);
       gdp_fetch_scalars(E, (HV*)sv, (1 << (n + 1)) - 1, pkg, func);
       break;
     case GD_RECIP_ENTRY:
       GDP_EHASH_FETCH_PV("in_fields", in_fields[0]);
       E->comp_scal = 1;
-      GDP_EHASH_FETCH_CMP("cdividend", cdividend);
+      GDP_EHASH_FETCH_CMP("cdividend", EN(recip,cdividend));
       gdp_fetch_scalars(E, (HV*)sv, 1, pkg, func);
       break;
     case GD_WINDOW_ENTRY:
       gdp_fetch_in_fields(E->in_fields, sv, 2, pkg, func);
-      GDP_EHASH_FETCH_IV("windop", windop, gd_windop_t);
-      switch(E->windop) {
+      GDP_EHASH_FETCH_IV("windop", EN(window,windop), gd_windop_t);
+      switch(E->EN(window,windop)) {
         case GD_WINDOP_EQ:
         case GD_WINDOP_NE:
-          GDP_EHASH_FETCH_IV("threshold", threshold.i, int64_t);
+          GDP_EHASH_FETCH_IV("threshold", EN(window,threshold).i, int64_t);
           break;
         case GD_WINDOP_SET:
         case GD_WINDOP_CLR:
-          GDP_EHASH_FETCH_UV("threshold", threshold.u, uint64_t);
+          GDP_EHASH_FETCH_UV("threshold", EN(window,threshold).u, uint64_t);
           break;
         default:
-          GDP_EHASH_FETCH_NV("threshold", threshold.r);
+          GDP_EHASH_FETCH_NV("threshold", EN(window,threshold).r);
           break;
       }
       gdp_fetch_scalars(E, (HV*)sv, 1, pkg, func);
       break;
     case GD_MPLEX_ENTRY:
       gdp_fetch_in_fields(E->in_fields, sv, 2, pkg, func);
-      GDP_EHASH_FETCH_UV("count_val", count_val, int);
-      GDP_EHASH_FETCH_UV("count_max", count_max, int);
+      GDP_EHASH_FETCH_UV("count_val", EN(mplex,count_val), int);
+      GDP_EHASH_FETCH_UV("count_max", EN(mplex,count_max), int);
       gdp_fetch_scalars(E, (HV*)sv, 0x3, pkg, func);
       break;
     case GD_RAW_ENTRY:
-      GDP_EHASH_FETCH_UV("spf", spf, unsigned int);
-      GDP_EHASH_FETCH_UV("data_type", data_type, gd_type_t);
+      GDP_EHASH_FETCH_UV("spf", EN(raw,spf), unsigned int);
+      GDP_EHASH_FETCH_UV("data_type", EN(raw,data_type), gd_type_t);
       gdp_fetch_scalars(E, (HV*)sv, 1, pkg, func);
       break;
     case GD_NO_ENTRY:
@@ -382,7 +384,7 @@ static void gdp_convert_from_perl(void *dest, SV *src, gd_type_t type,
   const char *pkg, const char *func)
 {
   dtrace("%p, %p, %03x, \"%s\", \"%s\"", dest, src, type, pkg, func);
-  double complex c;
+  GD_DCOMPLEXA(c);
   int cmp = 1;
 
   /* undef results in randomness */
@@ -392,7 +394,7 @@ static void gdp_convert_from_perl(void *dest, SV *src, gd_type_t type,
   }
 
   /* check for and convert complex data */
-  c = gdp_cmp_to_c99(src, &cmp, pkg, func);
+  gdp_convert_cmp(gd_csp_(c), src, &cmp, pkg, func);
 
   switch (type) {
     case GD_UINT8:
@@ -426,10 +428,16 @@ static void gdp_convert_from_perl(void *dest, SV *src, gd_type_t type,
       *(double*)dest = cmp ? (double)creal(c) : (double)SvNV(src);
       break;
     case GD_COMPLEX64:
-      *(complex float*)dest = cmp ? (complex float)c : (complex float)SvNV(src);
+      if (cmp)
+        gd_cs2ca_(dest,0,c,float);
+      else
+        gd_rs2ca_(dest,0,SvNV(src),float);
       break;
     case GD_COMPLEX128:
-      *(complex double*)dest = cmp ? c : (complex double)SvNV(src);
+      if (cmp)
+        gd_cs2ca_(dest,0,c,double);
+      else
+        gd_rs2ca_(dest,0,SvNV(src),double);
       break;
     case GD_NULL:
     case GD_UNKNOWN:
@@ -538,10 +546,11 @@ static gd_type_t gdp_to_voidp(void *dest, SV *src, gd_type_t hint,
     type = GD_UINT8;
   } else {
     int cmp = 0;
-    complex double c = gdp_cmp_to_c99(src, &cmp, pkg, func);
+    GD_DCOMPLEXA(c);
+    gdp_convert_cmp(gd_csp_(c), src, &cmp, pkg, func);
 
     if (cmp) {
-      memcpy(dest, &c, sizeof(complex double));
+      gd_cs2ca_(dest, 0, c, double);
       type = GD_COMPLEX128;
     } else if (SvNOK(src)) {
       *(double*)dest = SvNV(src);
@@ -568,24 +577,31 @@ static gd_type_t gdp_to_voidp(void *dest, SV *src, gd_type_t hint,
   return type;
 }
 
-static SV *gdp_newSVcmp(double complex v)
+static SV *gdp_newSVcmp(double r, double i)
 {
   SV **dummy;
   SV *sv;
+  AV *av;
+  HV *hv, *stash;
+
+  dtrace("%g; %g", r, i);
+
   /* build a list containing the data, and take it's reference */
-  AV *av = newAV();
+  av = newAV();
   av_extend(av, 1);
-  av_store(av, 0, newSVnv(creal(v)));
-  av_store(av, 1, newSVnv(cimag(v)));
+  av_store(av, 0, newSVnv(r));
+  av_store(av, 1, newSVnv(i));
   sv = newRV_noinc((SV*)av);
 
   /* create a Math::Complex object */
-  HV *hv = newHV();
+  hv = newHV();
   dummy = hv_store(hv, "p_dirty", 7, newSVuv(1), 0);
   dummy = hv_store(hv, "c_dirty", 7, newSVuv(0), 0);
   dummy = hv_store(hv, "cartesian", 9, sv, 0);
-  HV *stash = gv_stashpv("Math::Complex", GV_ADD);
+  stash = gv_stashpv("Math::Complex", GV_ADD);
   sv = sv_bless(newRV_noinc((SV*)hv), stash);
+
+  dreturn("%p", sv);
   return sv;
 }
 
@@ -607,7 +623,7 @@ static SV *gdp_newRVavpv(const char **l, size_t n)
 }
 
 /* convert a complex double * into a reference to a list of complex data */
-static SV *gdp_newRVavcmp(const complex double *l, size_t n)
+static SV *gdp_newRVavcmp(GD_DCOMPLEXV(l), size_t n)
 {
   dtrace("%p, %zi", l, n);
   SV *rv;
@@ -616,7 +632,7 @@ static SV *gdp_newRVavcmp(const complex double *l, size_t n)
   av_extend(av, n - 1);
 
   for (i = 0; i < n; ++i)
-    av_store(av, i, gdp_newSVcmp(l[i]));
+    av_store(av, i, gdp_newSVcmp(creal(l[i]), cimag(l[i])));
 
   rv = newRV_noinc((SV*)av);
   dreturn("%p", rv);
@@ -800,8 +816,10 @@ static int gdp_parser_callback(gd_parser_data_t *pdata, void *extra)
 
 #define GDP_UNPACKC(t) \
   if (sp) for (i = 0; i < n; ++i) \
-                    XPUSHs(sv_2mortal(gdp_newSVcmp(((t*)data)[i]))); \
-  else for (i = 0; i < n; ++i) av_store(av, i, gdp_newSVcmp(((t*)data)[i]));
+      XPUSHs(sv_2mortal(gdp_newSVcmp(((t*)data)[2 * i], \
+              ((t*)data)[2 * i + 1]))); \
+  else for (i = 0; i < n; ++i) av_store(av, i, \
+      gdp_newSVcmp(((t*)data)[2 * i], ((t*)data)[2 * i + 1]));
 
 /* unpack data. If sp is NULL, return an AV, otherwise push it onto the perl
  * stack; returns the updated stack pointer */
@@ -853,10 +871,10 @@ static void * gdp_unpack(SV **sp, const void *data, size_t n, gd_type_t type)
       GDP_UNPACKN(double);
       break;
     case GD_COMPLEX64:
-      GDP_UNPACKC(complex float);
+      GDP_UNPACKC(float);
       break;
     case GD_COMPLEX128:
-      GDP_UNPACKC(complex double);
+      GDP_UNPACKC(double);
       break;
     case GD_UNKNOWN:
     case GD_NULL:
@@ -1034,7 +1052,7 @@ get_constant(dirfile, field_code, return_type)
     GDP_UNDEF_ON_ERROR(safefree(data_out));
 
     if (type == GD_COMPLEX128)
-      RETVAL = gdp_newSVcmp(*(complex double*)data_out);
+      RETVAL = gdp_newSVcmp(((double*)data_out)[0], ((double*)data_out)[1]);
     else if (type == GD_FLOAT64)
       RETVAL = newSVnv(*(double*)data_out);
     else if (type == GD_INT64)
@@ -1132,35 +1150,35 @@ entry(dirfile, field_code)
           GDP_PUSHpvn("in_fields");
           GDP_PUSHpvz(E.in_fields[0]);
           GDP_PUSHpvn("bitnum");
-          GDP_PUSHuv(E.bitnum);
+          GDP_PUSHuv(E.EN(bit,bitnum));
           GDP_PUSHpvn("numbits");
-          GDP_PUSHuv(E.numbits);
+          GDP_PUSHuv(E.EN(bit,numbits));
           sp = gdp_store_scalars(sp, &E, 0x3);
           break;
         case GD_CARRAY_ENTRY:
           GDP_PUSHpvn("array_len");
-          GDP_PUSHuv(E.array_len);
+          GDP_PUSHuv(E.EN(scalar,array_len));
           /* fallthrough */
         case GD_CONST_ENTRY:
           GDP_PUSHpvn("const_type");
-          GDP_PUSHuv(E.const_type);
+          GDP_PUSHuv(E.EN(scalar,const_type));
           break;
         case GD_LINCOM_ENTRY:
           GDP_PUSHpvn("n_fields");
-          GDP_PUSHiv(E.n_fields);
+          GDP_PUSHiv(E.EN(lincom,n_fields));
           GDP_PUSHpvn("in_fields");
-          GDP_PUSHrvavpv(E.in_fields, E.n_fields);
+          GDP_PUSHrvavpv(E.in_fields, E.EN(lincom,n_fields));
           GDP_PUSHpvn("m");
-          GDP_PUSHrvavcmp(E.cm, E.n_fields);
+          GDP_PUSHrvavcmp(E.EN(lincom,cm), E.EN(lincom,n_fields));
           GDP_PUSHpvn("b");
-          GDP_PUSHrvavcmp(E.cb, E.n_fields);
-          sp = gdp_store_scalars(sp, &E, ((1 << E.n_fields) - 1) * 9);
+          GDP_PUSHrvavcmp(E.EN(lincom,cb), E.EN(lincom,n_fields));
+          sp = gdp_store_scalars(sp, &E, ((1 << E.EN(lincom,n_fields)) - 1) * 9);
           break;
         case GD_LINTERP_ENTRY:
           GDP_PUSHpvn("in_fields");
           GDP_PUSHpvz(E.in_fields[0]);
           GDP_PUSHpvn("table");
-          GDP_PUSHpvz(E.table);
+          GDP_PUSHpvz(E.EN(linterp,table));
           break;
         case GD_MULTIPLY_ENTRY:
         case GD_DIVIDE_ENTRY:
@@ -1171,49 +1189,51 @@ entry(dirfile, field_code)
           GDP_PUSHpvn("in_fields");
           GDP_PUSHpvz(E.in_fields[0]);
           GDP_PUSHpvn("shift");
-          GDP_PUSHiv(E.shift);
+          GDP_PUSHiv(E.EN(phase,shift));
           sp = gdp_store_scalars(sp, &E, 1);
           break;
         case GD_POLYNOM_ENTRY:
           GDP_PUSHpvn("poly_ord");
-          GDP_PUSHiv(E.poly_ord);
+          GDP_PUSHiv(E.EN(polynom,poly_ord));
           GDP_PUSHpvn("in_fields");
           GDP_PUSHpvz(E.in_fields[0]);
           GDP_PUSHpvn("a");
-          GDP_PUSHrvavcmp(E.ca, E.poly_ord + 1);
-          sp = gdp_store_scalars(sp, &E, (1 << (E.poly_ord + 1)) - 1);
+          GDP_PUSHrvavcmp(E.EN(polynom,ca), E.EN(polynom,poly_ord) + 1);
+          sp = gdp_store_scalars(sp, &E,
+              (1 << (E.EN(polynom,poly_ord) + 1)) - 1);
           break;
         case GD_RECIP_ENTRY:
           GDP_PUSHpvn("in_fields");
           GDP_PUSHpvz(E.in_fields[0]);
           GDP_PUSHpvn("dividend");
-          GDP_PUSHcmp(E.cdividend);
+          GDP_PUSHcmp(creal(E.EN(recip,cdividend)),
+              cimag(E.EN(recip,cdividend)));
           sp = gdp_store_scalars(sp, &E, 1);
           break;
         case GD_RAW_ENTRY:
           GDP_PUSHpvn("spf");
-          GDP_PUSHuv(E.spf);
+          GDP_PUSHuv(E.EN(raw,spf));
           GDP_PUSHpvn("data_type");
-          GDP_PUSHuv(E.data_type);
+          GDP_PUSHuv(E.EN(raw,data_type));
           sp = gdp_store_scalars(sp, &E, 1);
           break;
         case GD_WINDOW_ENTRY:
           GDP_PUSHpvn("in_fields");
           GDP_PUSHrvavpv(E.in_fields, 2);
           GDP_PUSHpvn("windop");
-          GDP_PUSHiv(E.windop);
+          GDP_PUSHiv(E.EN(window,windop));
           GDP_PUSHpvn("threshold");
-          switch(E.windop) {
+          switch(E.EN(window,windop)) {
             case GD_WINDOP_EQ:
             case GD_WINDOP_NE:
-              GDP_PUSHiv(E.threshold.i);
+              GDP_PUSHiv(E.EN(window,threshold).i);
               break;
             case GD_WINDOP_SET:
             case GD_WINDOP_CLR:
-              GDP_PUSHuv(E.threshold.u);
+              GDP_PUSHuv(E.EN(window,threshold).u);
               break;
             default:
-              GDP_PUSHnv(E.threshold.r);
+              GDP_PUSHnv(E.EN(window,threshold).r);
               break;
           }
           sp = gdp_store_scalars(sp, &E, 1);
@@ -1222,9 +1242,9 @@ entry(dirfile, field_code)
           GDP_PUSHpvn("in_fields");
           GDP_PUSHrvavpv(E.in_fields, 2);
           GDP_PUSHpvn("count_val");
-          GDP_PUSHuv(E.count_val);
+          GDP_PUSHuv(E.EN(mplex,count_val));
           GDP_PUSHpvn("count_max");
-          GDP_PUSHuv(E.count_max);
+          GDP_PUSHuv(E.EN(mplex,count_max));
           sp = gdp_store_scalars(sp, &E, 0x3);
           break;
         case GD_INDEX_ENTRY:

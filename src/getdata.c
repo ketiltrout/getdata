@@ -204,11 +204,11 @@ static void _GD_FillFileFrame(void *dataout, gd_type_t rtype, off64_t s0,
       break;
     case GD_COMPLEX64:
       for (i = 0; i < n; i++)
-        _gd_r2ca(dataout, i, i + s0, float);
+        gd_rs2ca_(dataout, i, i + s0, float);
       break;
     case GD_COMPLEX128:
       for (i = 0; i < n; i++)
-        _gd_r2ca(dataout, i, i + s0, double);
+        gd_rs2ca_(dataout, i, i + s0, double);
       break;
     default:
       break;
@@ -293,7 +293,7 @@ static size_t _GD_DoRaw(DIRFILE *restrict D, gd_entry_t *restrict E, off64_t s0,
       return 0;
     }
 
-    if ((*_gd_ef[E->e->u.raw.file[0].subenc].seek)(E->e->u.raw.file, s0,
+    if ((*gd_ef_[E->e->u.raw.file[0].subenc].seek)(E->e->u.raw.file, s0,
           E->EN(raw,data_type), GD_FILE_READ) == -1)
     {
       _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
@@ -303,7 +303,7 @@ static size_t _GD_DoRaw(DIRFILE *restrict D, gd_entry_t *restrict E, off64_t s0,
     }
 
     samples_read =
-      (*_gd_ef[E->e->u.raw.file[0].subenc].read)(E->e->u.raw.file,
+      (*gd_ef_[E->e->u.raw.file[0].subenc].read)(E->e->u.raw.file,
           databuffer + n_read * E->e->u.raw.size, E->EN(raw,data_type), ns);
 
     if (samples_read == -1) {
@@ -313,7 +313,7 @@ static size_t _GD_DoRaw(DIRFILE *restrict D, gd_entry_t *restrict E, off64_t s0,
       return 0;
     }
 
-    if (_gd_ef[E->e->u.raw.file[0].subenc].flags & GD_EF_ECOR) {
+    if (gd_ef_[E->e->u.raw.file[0].subenc].flags & GD_EF_ECOR) {
       /* convert to/from middle-ended doubles */
       if ((E->EN(raw,data_type) == GD_FLOAT64 ||
             E->EN(raw,data_type) == GD_COMPLEX128) &&
@@ -1004,8 +1004,8 @@ static size_t _GD_DoLincom(DIRFILE *restrict D, gd_entry_t *restrict E,
   /* Some dirfiles use "bar LINCOM foo 1 0" to rename <foo> to <bar>.  I
    * recommend using "bar PHASE foo 0" in this case, but we'll accomodate them
    * as much as we can.  Suggested by MDT. */
-  if (E->EN(lincom,n_fields) == 1 && _gd_ccmpl(E->EN(lincom,cm)[0],1,0) &&
-      _gd_ccmpl(E->EN(lincom,cb)[0],0,0))
+  if (E->EN(lincom,n_fields) == 1 && gd_ccmpl_(E->EN(lincom,cm)[0],1,0) &&
+      gd_ccmpl_(E->EN(lincom,cb)[0],0,0))
   {
     dreturn("%" PRNsize_t, n_read);
     return n_read;

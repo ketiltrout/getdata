@@ -204,15 +204,15 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
     return NULL;
   }
 
-  E->e = (struct _gd_private_entry *)_GD_Malloc(D,
-      sizeof(struct _gd_private_entry));
+  E->e = (struct gd_private_entry_ *)_GD_Malloc(D,
+      sizeof(struct gd_private_entry_));
   if (E->e == NULL) {
     free(E);
     free(temp_buffer);
     dreturn("%p", NULL);
     return NULL;
   }
-  memset(E->e, 0, sizeof(struct _gd_private_entry));
+  memset(E->e, 0, sizeof(struct gd_private_entry_));
   E->e->calculated = 0;
   E->field_type = entry->field_type;
 
@@ -317,8 +317,8 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
           memcpy(E->EN(lincom,b), entry->EN(lincom,b), sizeof(double) *
               E->EN(lincom,n_fields));
           for (i = 0; i < E->EN(lincom,n_fields); ++i) {
-            _gd_r2c(E->EN(lincom,cm)[i], E->EN(lincom,m)[i]);
-            _gd_r2c(E->EN(lincom,cb)[i], E->EN(lincom,b)[i]);
+            gd_rs2cs_(E->EN(lincom,cm)[i], E->EN(lincom,m)[i]);
+            gd_rs2cs_(E->EN(lincom,cb)[i], E->EN(lincom,b)[i]);
           }
           E->comp_scal = 0;
         }
@@ -364,12 +364,12 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
 
       copy_scalar[0] = 1;
       if (entry->comp_scal) {
-        _gd_c2c(E->EN(recip,cdividend), entry->EN(recip,cdividend));
+        gd_cs2cs_(E->EN(recip,cdividend), entry->EN(recip,cdividend));
         E->EN(recip,dividend) = creal(E->EN(recip,cdividend));
         E->comp_scal = (cimag(E->EN(recip,cdividend)) == 0) ? 0 : 1;
       } else {
         E->EN(recip,dividend) = entry->EN(recip,dividend);
-        _gd_r2c(E->EN(recip,cdividend), E->EN(recip,dividend));
+        gd_rs2cs_(E->EN(recip,cdividend), E->EN(recip,dividend));
         E->comp_scal = 0;
       }
       break;
@@ -522,7 +522,7 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
         memcpy(E->EN(polynom,a), entry->EN(polynom,a), sizeof(double) *
             (E->EN(polynom,poly_ord) + 1));
         for (i = 0; i <= E->EN(polynom,poly_ord); ++i)
-          _gd_r2c(E->EN(polynom,ca)[i], E->EN(polynom,a)[i]);
+          gd_rs2cs_(E->EN(polynom,ca)[i], E->EN(polynom,a)[i]);
         E->comp_scal = 0;
       }
 
@@ -897,8 +897,8 @@ int gd_add_clincom(DIRFILE* D, const char* field_code, int n_fields,
 
   for (i = 0; i < n_fields; ++i) {
     L.in_fields[i] = (char *)in_fields[i];
-    _gd_ca2c(L.EN(lincom,cm)[i], cm, i);
-    _gd_ca2c(L.EN(lincom,cb)[i], cb, i);
+    gd_ca2cs_(L.EN(lincom,cm)[i], cm, i);
+    gd_ca2cs_(L.EN(lincom,cb)[i], cb, i);
   }
   error = (_GD_Add(D, &L, NULL) == NULL) ? -1 : 0;
 
@@ -1125,7 +1125,7 @@ int gd_add_crecip89(DIRFILE* D, const char* field_code, const char* in_field,
   memset(&E, 0, sizeof(gd_entry_t));
   E.field = (char *)field_code;
   E.field_type = GD_RECIP_ENTRY;
-  _gd_a2c(E.EN(recip,cdividend), cdividend);
+  gd_ra2cs_(E.EN(recip,cdividend), cdividend);
   E.comp_scal = 1;
   E.in_fields[0] = (char *)in_field;
   E.fragment_index = fragment_index;
@@ -1204,7 +1204,7 @@ int gd_add_cpolynom(DIRFILE* D, const char* field_code, int poly_ord,
   E.in_fields[0] = (char *)in_field;
 
   for (i = 0; i <= poly_ord; ++i)
-    _gd_ca2c(E.EN(polynom,ca)[i], ca, i);
+    gd_ca2cs_(E.EN(polynom,ca)[i], ca, i);
 
   error = (_GD_Add(D, &E, NULL) == NULL) ? -1 : 0;
 
@@ -1489,8 +1489,8 @@ int gd_madd_clincom(DIRFILE* D, const char* parent, const char* field_code,
 
   for (i = 0; i < n_fields; ++i) {
     L.in_fields[i] = (char *)in_fields[i];
-    _gd_ca2c(L.EN(lincom,cm)[i], cm, i);
-    _gd_ca2c(L.EN(lincom,cb)[i], cb, i);
+    gd_ca2cs_(L.EN(lincom,cm)[i], cm, i);
+    gd_ca2cs_(L.EN(lincom,cb)[i], cb, i);
     L.scalar[i] = NULL;
     L.scalar[i + GD_MAX_LINCOM] = NULL;
   }
@@ -1717,7 +1717,7 @@ int gd_madd_cpolynom(DIRFILE* D, const char* parent, const char* field_code,
   E.in_fields[0] = (char *)in_field;
 
   for (i = 0; i <= poly_ord; ++i) {
-    _gd_ca2c(E.EN(polynom,ca)[i], ca, i);
+    gd_ca2cs_(E.EN(polynom,ca)[i], ca, i);
     E.scalar[i] = NULL;
   }
 
@@ -1829,7 +1829,7 @@ int gd_madd_crecip89(DIRFILE* D, const char *parent, const char* field_code,
   memset(&E, 0, sizeof(gd_entry_t));
   E.field = (char *)field_code;
   E.field_type = GD_RECIP_ENTRY;
-  _gd_a2c(E.EN(recip,cdividend), cdividend);
+  gd_ra2cs_(E.EN(recip,cdividend), cdividend);
   E.comp_scal = 1;
   E.in_fields[0] = (char *)in_field;
   error = (_GD_Add(D, &E, parent) == NULL) ? -1 : 0;
@@ -2077,12 +2077,12 @@ static int _GD_AddAlias(DIRFILE *restrict D, const char *restrict parent,
     goto add_alias_error;
 
   memset(E, 0, sizeof(gd_entry_t));
-  E->e = (struct _gd_private_entry *)_GD_Malloc(D,
-      sizeof(struct _gd_private_entry));
+  E->e = (struct gd_private_entry_ *)_GD_Malloc(D,
+      sizeof(struct gd_private_entry_));
   if (E->e == NULL)
     goto add_alias_error;
 
-  memset(E->e, 0, sizeof(struct _gd_private_entry));
+  memset(E->e, 0, sizeof(struct gd_private_entry_));
 
   E->field = munged_code;
   E->fragment_index = fragment_index;

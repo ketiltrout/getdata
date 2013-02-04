@@ -1157,7 +1157,7 @@ static int gdmx_convert_entry_array(const mxArray *str,
   v = gdmx_convert_array(a, &ectx, GD_COMPLEX128, &nelem);
 
   for (i = 0; i < nelem; ++i)
-    _gd_ca2c(d[i],v,i);
+    gd_ca2cs_(d[i],v,i);
 
   mxFree(v);
 

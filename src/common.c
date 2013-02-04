@@ -211,7 +211,7 @@ void* _GD_Alloc(DIRFILE* D, gd_type_t type, size_t n)
 
 /* compute LUT table path -- this is used by _GD_Change, so e may not be E->e */
 int _GD_SetTablePath(DIRFILE *restrict D, const gd_entry_t *restrict E,
-    struct _gd_private_entry *restrict e)
+    struct gd_private_entry_ *restrict e)
 {
   char *temp_buffer;
 
@@ -242,7 +242,7 @@ int _GD_SetTablePath(DIRFILE *restrict D, const gd_entry_t *restrict E,
 /* LUT comparison function for qsort */
 static int lutcmp(const void* a, const void* b)
 {
-  double dx = ((struct _gd_lut *)a)->x - ((struct _gd_lut *)b)->x;
+  double dx = ((struct gd_lut_ *)a)->x - ((struct gd_lut_ *)b)->x;
   return (dx < 0) ? -1 : (dx > 0) ? 1 : 0;
 }
 
@@ -251,7 +251,7 @@ static int lutcmp(const void* a, const void* b)
 void _GD_ReadLinterpFile(DIRFILE *restrict D, gd_entry_t *restrict E)
 {
   FILE *fp;
-  struct _gd_lut *ptr;
+  struct gd_lut_ *ptr;
   int i, fd;
   int dir = -1;
   char *line;
@@ -304,8 +304,8 @@ void _GD_ReadLinterpFile(DIRFILE *restrict D, gd_entry_t *restrict E)
     return;
   }
 
-  E->e->u.linterp.lut = (struct _gd_lut *)_GD_Malloc(D, buf_len *
-      sizeof(struct _gd_lut));
+  E->e->u.linterp.lut = (struct gd_lut_ *)_GD_Malloc(D, buf_len *
+      sizeof(struct gd_lut_));
 
   if (E->e->u.linterp.lut == NULL) {
     fclose(fp);
@@ -318,7 +318,7 @@ void _GD_ReadLinterpFile(DIRFILE *restrict D, gd_entry_t *restrict E)
   do {
     if (E->e->u.linterp.complex_table) {
       sscanf(line, "%lg %lg;%lg", &(E->e->u.linterp.lut[i].x), &yr, &yi);
-      _gd_l2c(E->e->u.linterp.lut[i].y.c, yr, yi);
+      gd_li2cs_(E->e->u.linterp.lut[i].y.c, yr, yi);
     } else
       sscanf(line, "%lg %lg", &(E->e->u.linterp.lut[i].x),
           &(E->e->u.linterp.lut[i].y.r));
@@ -335,8 +335,8 @@ void _GD_ReadLinterpFile(DIRFILE *restrict D, gd_entry_t *restrict E)
     i++;
     if (i >= buf_len) {
       buf_len += 100;
-      ptr = (struct _gd_lut *)_GD_Realloc(D, E->e->u.linterp.lut, buf_len *
-          sizeof(struct _gd_lut));
+      ptr = (struct gd_lut_ *)_GD_Realloc(D, E->e->u.linterp.lut, buf_len *
+          sizeof(struct gd_lut_));
 
       if (ptr == NULL) {
         free(E->e->u.linterp.lut);
@@ -360,8 +360,8 @@ void _GD_ReadLinterpFile(DIRFILE *restrict D, gd_entry_t *restrict E)
   }
 
   /* Free unused memory */
-  ptr = (struct _gd_lut *)_GD_Realloc(D, E->e->u.linterp.lut, i
-      * sizeof(struct _gd_lut));
+  ptr = (struct gd_lut_ *)_GD_Realloc(D, E->e->u.linterp.lut, i
+      * sizeof(struct gd_lut_));
 
   if (ptr == NULL) {
     free(E->e->u.linterp.lut);
@@ -376,7 +376,7 @@ void _GD_ReadLinterpFile(DIRFILE *restrict D, gd_entry_t *restrict E)
 
   /* sort the LUT */
   if (dir == -2)
-    qsort(E->e->u.linterp.lut, i, sizeof(struct _gd_lut), lutcmp);
+    qsort(E->e->u.linterp.lut, i, sizeof(struct gd_lut_), lutcmp);
 
   fclose(fp);
   dreturnvoid();
@@ -384,7 +384,7 @@ void _GD_ReadLinterpFile(DIRFILE *restrict D, gd_entry_t *restrict E)
 
 /* _GD_GetIndex: get LUT index.
 */
-static size_t _GD_GetIndex(double x, const struct _gd_lut *lut, size_t idx,
+static size_t _GD_GetIndex(double x, const struct gd_lut_ *lut, size_t idx,
     size_t n)
 {
   dtrace("%g, %p, %" PRNsize_t ", %" PRNsize_t, x, lut, idx, n);
@@ -474,7 +474,7 @@ static size_t _GD_GetIndex(double x, const struct _gd_lut *lut, size_t idx,
 */
 void _GD_LinterpData(DIRFILE *restrict D, void *restrict data, gd_type_t type,
     int complex_table, const double *restrict data_in, size_t npts,
-    const struct _gd_lut *restrict lut, size_t n_ln)
+    const struct gd_lut_ *restrict lut, size_t n_ln)
 {
   int idx = 0;
   size_t i;

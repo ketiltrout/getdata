@@ -307,7 +307,7 @@ except:
 CheckSimple2(122,2,n,[41, 33, 34, 35, 36, 46, 47, 48])
 
 # 124: putdata (complex) check
-p = [ 43.+0j, 44.+0j, 45.+0j, 46.+0j ]
+p = [ 124.+1j, 125.+2j, 126.+3j, 127.+4j ]
 try:
   n = d.putdata("data", p, pygetdata.COMPLEX, first_frame=5, first_sample=1)
 except:
@@ -318,7 +318,7 @@ try:
   n = d.getdata("data", pygetdata.INT, first_frame=5, num_frames=1, as_list=1)
 except:
   CheckOK2(124,2)
-CheckSimple2(124,2,n,[41, 43, 44, 45, 46, 46, 47, 48])
+CheckSimple2(124,2,n,[41, 124, 125, 126, 127, 46, 47, 48])
 
 # 136: putdata (auto) check
 p = [ 53.+0j, 54.+0j, 55.+0j, 56.+0j ]

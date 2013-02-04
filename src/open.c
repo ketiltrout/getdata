@@ -506,7 +506,7 @@ DIRFILE *_GD_Open(DIRFILE *D, int dirfd, const char *filedir,
   memset(D->entry[0], 0, sizeof(gd_entry_t));
   D->entry[0]->field_type = GD_INDEX_ENTRY;
   D->entry[0]->e =
-    (struct _gd_private_entry *)_GD_Malloc(D, sizeof(struct _gd_private_entry));
+    (struct gd_private_entry_ *)_GD_Malloc(D, sizeof(struct gd_private_entry_));
   D->entry[0]->field = _GD_Strdup(D, "INDEX");
   if (D->error) {
     free(dirfile);
@@ -516,7 +516,7 @@ DIRFILE *_GD_Open(DIRFILE *D, int dirfd, const char *filedir,
     dreturn("%p", D);
     return D;
   }
-  memset(D->entry[0]->e, 0, sizeof(struct _gd_private_entry));
+  memset(D->entry[0]->e, 0, sizeof(struct gd_private_entry_));
   D->entry[0]->e->calculated = 1;
 
   /* open the format file (or create it) */

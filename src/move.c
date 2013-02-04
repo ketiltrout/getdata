@@ -55,8 +55,8 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned long encoding,
   {
     subencoding = E->e->u.raw.file[0].subenc;
   } else
-    for (i = 0; _gd_ef[i].scheme != GD_ENC_UNSUPPORTED; i++) {
-      if (_gd_ef[i].scheme == encoding) {
+    for (i = 0; gd_ef_[i].scheme != GD_ENC_UNSUPPORTED; i++) {
+      if (gd_ef_[i].scheme == encoding) {
         subencoding = i;
         break;
       }
@@ -69,7 +69,7 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned long encoding,
     return -1;
   }
 
-  enc_out = _gd_ef + subencoding;
+  enc_out = gd_ef_ + subencoding;
 
   /* Check output encoding */
   if (_GD_MissingFramework(subencoding, GD_EF_CLOSE | GD_EF_SEEK | GD_EF_WRITE |
@@ -90,7 +90,7 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned long encoding,
     return -1;
   }
 
-  enc_in = _gd_ef + E->e->u.raw.file[0].subenc;
+  enc_in = gd_ef_ + E->e->u.raw.file[0].subenc;
 
   /* Need to do the ARM thing? */
   arm_endianise = (((byte_sex & GD_ARM_FLAG) && (enc_out->flags & GD_EF_ECOR)) ^
@@ -233,7 +233,7 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned long encoding,
       _GD_FiniRawIO(D, E, new_fragment, GD_FINIRAW_CLOTEMP
           | GD_FINIRAW_DISCARD);
     } else {
-      struct _gd_raw_file temp;
+      struct gd_raw_file_ temp;
       memcpy(&temp, E->e->u.raw.file, sizeof(temp));
 
       /* discard the old file */
@@ -242,7 +242,7 @@ int _GD_MogrifyFile(DIRFILE* D, gd_entry_t* E, unsigned long encoding,
       E->e->u.raw.file[0].name = NULL;
       E->e->u.raw.file[0].subenc = subencoding;
 
-      if ((*_gd_ef[E->e->u.raw.file[0].subenc].name)(D,
+      if ((*gd_ef_[E->e->u.raw.file[0].subenc].name)(D,
             (const char*)D->fragment[E->fragment_index].enc_data,
             E->e->u.raw.file, new_filebase, 0, 0))
       {

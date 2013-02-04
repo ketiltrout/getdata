@@ -1,9 +1,22 @@
+# Copyright (C) 2011-2013 D. V. Wiebe
+#
+##########################################################################
+#
+# This file is part of the GetData project.
+#
+# GetData is free software; you can redistribute it and/or modify it under
+# the terms of the GNU Lesser General Public License as published by the
+# Free Software Foundation; either version 2.1 of the License, or (at your
+# option) any later version.
+#
+# GetData is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+#
 # @configure_input@
 
 use Module::Build;
 
-# divert up_to_date to allow consideration of simple_funcs.xs... is there an
-# easier way to do this?
+# divert up_to_date to allow consideration of various other dependencies
 my $class = Module::Build->subclass(
   class => "GetData::Build",
   code => <<'SUBCLASS' );
@@ -12,8 +25,11 @@ sub up_to_date {
   my ($self, $source, $derived) = @_;
 
   if ($source eq "lib/GetData.xs") {
+    return 0 if (not $self->up_to_date("lib/typemap", $derived));
     return 0 if (not $self->up_to_date("lib/simple_funcs.xs", $derived));
     return 0 if (not $self->up_to_date("@top_builddir@/src/getdata.h",
+      $derived));
+    return 0 if (not $self->up_to_date("@top_builddir@/src/internal.h",
       $derived));
   }
   return $self->SUPER::up_to_date($source, $derived);

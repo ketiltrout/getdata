@@ -1,4 +1,4 @@
-/* Copyright (C) 2009-2011 D. V. Wiebe
+/* Copyright (C) 2009-2011, 2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -22,7 +22,7 @@
 #include "pygetdata.h"
 
 /* Fragment */
-static void gdpy_fragment_delete(struct gdpy_fragment_t* self)
+static void gdpy_fragment_delete(struct gdpy_fragment_t *self)
 {
   dtrace("%p", self);
 
@@ -31,13 +31,14 @@ static void gdpy_fragment_delete(struct gdpy_fragment_t* self)
   dreturnvoid();
 }
 
-static PyObject* gdpy_fragment_create(PyTypeObject *type, PyObject *args,
+static PyObject *gdpy_fragment_create(PyTypeObject *type, PyObject *args,
     PyObject *keys)
 {
+  struct gdpy_fragment_t *self;
+
   dtrace("%p, %p, %p", type, args, keys);
 
-  struct gdpy_fragment_t *self = (struct gdpy_fragment_t*)type->tp_alloc(type,
-      0);
+  self = (struct gdpy_fragment_t*)type->tp_alloc(type, 0);
 
   if (self)
     self->dirfile = NULL;
@@ -46,12 +47,12 @@ static PyObject* gdpy_fragment_create(PyTypeObject *type, PyObject *args,
   return (PyObject*)self;
 }
 
-static int gdpy_fragment_init(struct gdpy_fragment_t* self, PyObject *args,
+static int gdpy_fragment_init(struct gdpy_fragment_t *self, PyObject *args,
     PyObject *keys)
 {
-  dtrace("%p, %p, %p", self, args, keys);
-
   char *keywords[] = {"dirifle", "index", NULL};
+
+  dtrace("%p, %p, %p", self, args, keys);
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
         "O!i:pygetdata.fragment.__init__", keywords, &gdpy_dirfile,
@@ -67,55 +68,63 @@ static int gdpy_fragment_init(struct gdpy_fragment_t* self, PyObject *args,
   return 0;
 }
 
-static PyObject* gdpy_fragment_getindex(struct gdpy_fragment_t* self,
-    void* closure)
+static PyObject *gdpy_fragment_getindex(struct gdpy_fragment_t *self,
+    void *closure)
 {
-  dtrace("%p, %p", self, closure);
-  
-  PyObject* obj = PyInt_FromLong(self->n);
+  PyObject *pyobj;
 
-  dreturn("%p", obj);
-  return obj;
+  dtrace("%p, %p", self, closure);
+
+  pyobj = PyInt_FromLong(self->n);
+
+  dreturn("%p", pyobj);
+  return pyobj;
 }
 
-static PyObject* gdpy_fragment_getname(struct gdpy_fragment_t* self,
-    void* closure)
+static PyObject *gdpy_fragment_getname(struct gdpy_fragment_t *self,
+    void *closure)
 {
+  const char *name;
+  PyObject *pyobj;
+
   dtrace("%p, %p", self, closure);
-  
-  const char* name = gd_fragmentname(self->dirfile->D, self->n);
+
+  name = gd_fragmentname(self->dirfile->D, self->n);
 
   PYGD_CHECK_ERROR(self->dirfile->D, NULL);
 
-  PyObject* pyname = PyString_FromString(name);
+  pyobj = PyString_FromString(name);
 
-  dreturn("%p", pyname);
-  return pyname;
+  dreturn("%p", pyobj);
+  return pyobj;
 }
 
-static PyObject* gdpy_fragment_getencoding(struct gdpy_fragment_t* self,
-    void* closure)
+static PyObject *gdpy_fragment_getencoding(struct gdpy_fragment_t *self,
+    void *closure)
 {
+  unsigned long enc;
+  PyObject *pyobj;
+
   dtrace("%p, %p", self, closure);
-  
-  unsigned long enc = gd_encoding(self->dirfile->D, self->n);
+
+  enc = gd_encoding(self->dirfile->D, self->n);
 
   PYGD_CHECK_ERROR(self->dirfile->D, NULL);
 
-  PyObject* obj = PyLong_FromUnsignedLong(enc);
+  pyobj = PyLong_FromUnsignedLong(enc);
 
-  dreturn("%p", obj);
-  return obj;
+  dreturn("%p", pyobj);
+  return pyobj;
 }
 
-static PyObject* gdpy_fragment_setencoding(struct gdpy_fragment_t* self,
-    PyObject* args, PyObject* keys)
+static PyObject *gdpy_fragment_setencoding(struct gdpy_fragment_t *self,
+    PyObject *args, PyObject *keys)
 {
-  dtrace("%p, %p, %p", self, args, keys);
-
-  char* keywords[] = { "encoding", "recode", NULL };
+  char *keywords[] = { "encoding", "recode", NULL };
   unsigned long enc;
   int recode = 0;
+
+  dtrace("%p, %p, %p", self, args, keys);
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
         "k|i:pygetdata.fragment.alter_encoding", keywords, &enc, &recode))
@@ -133,29 +142,32 @@ static PyObject* gdpy_fragment_setencoding(struct gdpy_fragment_t* self,
   return Py_None;
 }
 
-static PyObject* gdpy_fragment_getendianness(struct gdpy_fragment_t* self,
-    void* closure)
+static PyObject *gdpy_fragment_getendianness(struct gdpy_fragment_t *self,
+    void *closure)
 {
+  unsigned long end;
+  PyObject *pyobj;
+
   dtrace("%p, %p", self, closure);
-  
-  unsigned long end = gd_endianness(self->dirfile->D, self->n);
+
+  end = gd_endianness(self->dirfile->D, self->n);
 
   PYGD_CHECK_ERROR(self->dirfile->D, NULL);
 
-  PyObject* obj = PyLong_FromUnsignedLong(end);
+  pyobj = PyLong_FromUnsignedLong(end);
 
-  dreturn("%p", obj);
-  return obj;
+  dreturn("%p", pyobj);
+  return pyobj;
 }
 
-static PyObject* gdpy_fragment_setendianness(struct gdpy_fragment_t* self,
-    PyObject* args, PyObject* keys)
+static PyObject *gdpy_fragment_setendianness(struct gdpy_fragment_t *self,
+    PyObject *args, PyObject *keys)
 {
-  dtrace("%p, %p, %p", self, args, keys);
-
-  char* keywords[] = { "endianness", "recode", NULL };
+  char *keywords[] = { "endianness", "recode", NULL };
   unsigned long end;
   int recode = 0;
+
+  dtrace("%p, %p, %p", self, args, keys);
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
         "k|i:pygetdata.fragment.alter_endianness", keywords, &end, &recode))
@@ -173,7 +185,7 @@ static PyObject* gdpy_fragment_setendianness(struct gdpy_fragment_t* self,
   return Py_None;
 }
 
-static PyObject* gdpy_fragment_rewrite(struct gdpy_fragment_t* self)
+static PyObject *gdpy_fragment_rewrite(struct gdpy_fragment_t *self)
 {
   dtrace("%p", self);
 
@@ -186,29 +198,32 @@ static PyObject* gdpy_fragment_rewrite(struct gdpy_fragment_t* self)
   return Py_None;
 }
 
-static PyObject* gdpy_fragment_getoffset(struct gdpy_fragment_t* self,
-    void* closure)
+static PyObject *gdpy_fragment_getoffset(struct gdpy_fragment_t *self,
+    void *closure)
 {
+  off_t offset;
+  PyObject *pyobj;
+
   dtrace("%p, %p", self, closure);
-  
-  off_t offset = gd_frameoffset(self->dirfile->D, self->n);
+
+  offset = gd_frameoffset(self->dirfile->D, self->n);
 
   PYGD_CHECK_ERROR(self->dirfile->D, NULL);
 
-  PyObject* obj = PyLong_FromLongLong((long long)offset);
+  pyobj = PyLong_FromLongLong((long long)offset);
 
-  dreturn("%p", obj);
-  return obj;
+  dreturn("%p", pyobj);
+  return pyobj;
 }
 
-static PyObject* gdpy_fragment_setoffset(struct gdpy_fragment_t* self,
-    PyObject* args, PyObject* keys)
+static PyObject *gdpy_fragment_setoffset(struct gdpy_fragment_t *self,
+    PyObject *args, PyObject *keys)
 {
-  dtrace("%p, %p, %p", self, args, keys);
-
-  char* keywords[] = { "frameoffset", "recode", NULL };
+  char *keywords[] = { "frameoffset", "recode", NULL };
   long long offset;
   int recode = 0;
+
+  dtrace("%p, %p, %p", self, args, keys);
 
   if (!PyArg_ParseTupleAndKeywords(args, keys,
         "L|i:pygetdata.fragment.alter_frameoffset", keywords, &offset, &recode))
@@ -227,42 +242,50 @@ static PyObject* gdpy_fragment_setoffset(struct gdpy_fragment_t* self,
   return Py_None;
 }
 
-static PyObject* gdpy_fragment_getparent(struct gdpy_fragment_t* self,
-    void* closure)
+static PyObject *gdpy_fragment_getparent(struct gdpy_fragment_t *self,
+    void *closure)
 {
+  int parent;
+  PyObject *pyobj;
+
   dtrace("%p, %p", self, closure);
-  
-  int parent = gd_parent_fragment(self->dirfile->D, self->n);
+
+  parent = gd_parent_fragment(self->dirfile->D, self->n);
 
   PYGD_CHECK_ERROR(self->dirfile->D, NULL);
 
-  PyObject* obj = PyInt_FromLong(parent);
+  pyobj = PyInt_FromLong(parent);
 
-  dreturn("%p", obj);
-  return obj;
+  dreturn("%p", pyobj);
+  return pyobj;
 }
 
-static PyObject* gdpy_fragment_getprotection(struct gdpy_fragment_t* self,
-    void* closure)
+static PyObject *gdpy_fragment_getprotection(struct gdpy_fragment_t *self,
+    void *closure)
 {
+  int prot;
+  PyObject *pyobj;
+
   dtrace("%p, %p", self, closure);
-  
-  int prot = gd_protection(self->dirfile->D, self->n);
+
+  prot = gd_protection(self->dirfile->D, self->n);
 
   PYGD_CHECK_ERROR(self->dirfile->D, NULL);
 
-  PyObject* obj = PyInt_FromLong(prot);
+  pyobj = PyInt_FromLong(prot);
 
-  dreturn("%p", obj);
-  return obj;
+  dreturn("%p", pyobj);
+  return pyobj;
 }
 
-static int gdpy_fragment_setprotection(struct gdpy_fragment_t* self,
+static int gdpy_fragment_setprotection(struct gdpy_fragment_t *self,
     PyObject *value, void *closure)
 {
+  int p;
+
   dtrace("%p, %p, %p", self, value, closure);
 
-  int p = PyInt_AsLong(value);
+  p = PyInt_AsLong(value);
 
   if (PyErr_Occurred()) {
     dreturn("%i", -1);
@@ -277,11 +300,12 @@ static int gdpy_fragment_setprotection(struct gdpy_fragment_t* self,
   return 0;
 }
 
-static PyObject* gdpy_fragment_getprefix(struct gdpy_fragment_t* self,
-    void* closure)
+static PyObject *gdpy_fragment_getprefix(struct gdpy_fragment_t *self,
+    void *closure)
 {
   char *prefix, *suffix;
-  
+  PyObject *pyobj;
+
   dtrace("%p, %p", self, closure);
 
   gd_fragment_affixes(self->dirfile->D, self->n, &prefix, &suffix);
@@ -294,18 +318,20 @@ static PyObject* gdpy_fragment_getprefix(struct gdpy_fragment_t* self,
     return Py_None;
   }
 
-  PyObject* obj = PyString_FromString(prefix);
+  pyobj = PyString_FromString(prefix);
 
-  dreturn("%p", obj);
-  return obj;
+  dreturn("%p", pyobj);
+  return pyobj;
 }
 
-static int gdpy_fragment_setprefix(struct gdpy_fragment_t* self,
+static int gdpy_fragment_setprefix(struct gdpy_fragment_t *self,
     PyObject *value, void *closure)
 {
+  const char *prefix;
+
   dtrace("%p, %p, %p", self, value, closure);
 
-  const char *prefix = PyString_AsString(value);
+  prefix = PyString_AsString(value);
 
   if (PyErr_Occurred()) {
     dreturn("%i", -1);
@@ -320,11 +346,12 @@ static int gdpy_fragment_setprefix(struct gdpy_fragment_t* self,
   return 0;
 }
 
-static PyObject* gdpy_fragment_getsuffix(struct gdpy_fragment_t* self,
-    void* closure)
+static PyObject *gdpy_fragment_getsuffix(struct gdpy_fragment_t *self,
+    void *closure)
 {
   char *prefix, *suffix;
-  
+  PyObject *pyobj;
+
   dtrace("%p, %p", self, closure);
 
   gd_fragment_affixes(self->dirfile->D, self->n, &prefix, &suffix);
@@ -337,18 +364,20 @@ static PyObject* gdpy_fragment_getsuffix(struct gdpy_fragment_t* self,
     return Py_None;
   }
 
-  PyObject* obj = PyString_FromString(suffix);
+  pyobj = PyString_FromString(suffix);
 
-  dreturn("%p", obj);
-  return obj;
+  dreturn("%p", pyobj);
+  return pyobj;
 }
 
-static int gdpy_fragment_setsuffix(struct gdpy_fragment_t* self,
+static int gdpy_fragment_setsuffix(struct gdpy_fragment_t *self,
     PyObject *value, void *closure)
 {
+  const char *suffix;
+
   dtrace("%p, %p, %p", self, value, closure);
 
-  const char *suffix = PyString_AsString(value);
+  suffix = PyString_AsString(value);
 
   if (PyErr_Occurred()) {
     dreturn("%i", -1);

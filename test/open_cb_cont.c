@@ -30,7 +30,7 @@
 
 static int saw_callback = 0;
 
-int callback(gd_parser_data_t *pdata __gd_unused, void *extra __gd_unused)
+int callback(gd_parser_data_t *pdata gd_unused_, void *extra gd_unused_)
 {
   saw_callback++;
 

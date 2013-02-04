@@ -1,13 +1,13 @@
 int add_bit(DIRFILE *dirfile, const char *field_code, const char *in_field,
     int bitnum, int numbits, int fragment_index=0)
 int add_clincom:add_lincom(DIRFILE *dirfile, const char *field_code,
-    int n_fields, const char **in_fields, gdp_complex_in *cm,
-    gdp_complex_in *cb, int fragment_index=0)
+    int n_fields, const char **in_fields, gdp_complex_in cm,
+    gdp_complex_in cb, int fragment_index=0)
 int add_cpolynom:add_polynom(DIRFILE *dirfile, const char *field_code,
-    int poly_ord, const char *in_field, gdp_complex_in *ca,
+    int poly_ord, const char *in_field, gdp_complex_in ca,
     int fragment_index=0)
 int add_crecip:add_recip(DIRFILE *dirfile, const char *field_code,
-    const char *in_field, _Complex double cdividend, int fragment_index=0)
+    const char *in_field, gdpu_complex cdividend, int fragment_index=0)
 int add_divide(DIRFILE *dirfile, const char *field_code, const char *in_field1,
     const char *in_field2, int fragment_index=0)
 int add_linterp(DIRFILE *dirfile, const char *field_code, const char *in_field,
@@ -25,12 +25,12 @@ int alter_bit(DIRFILE *dirfile, const char *field_code,
 int alter_carray(DIRFILE* dirfile, const char* field_code, gd_type_t const_type,
     size_t array_len)
 int alter_clincom:alter_lincom(DIRFILE *dirfile, const char *field_code,
-    gdpu_int n_fields=0, const char **in_fields=NULL, gdp_complex_in *m=NULL,
-    gdp_complex_in *b=NULL)
+    gdpu_int n_fields=0, const char **in_fields=NULL, gdp_complex_in m=NULL,
+    gdp_complex_in b=NULL)
 int alter_cpolynom:alter_polynom(DIRFILE *dirfile, const char *field_code,
-    gdpu_int poly_ord=0, gdpu_char *in_field=NULL, gdp_complex_in *a=NULL)
+    gdpu_int poly_ord=0, gdpu_char *in_field=NULL, gdp_complex_in a=NULL)
 int alter_crecip:alter_recip(DIRFILE *dirfile, const char *field_code,
-    gdpu_char *in_field=NULL, gdpu_complex cdividend=0)
+    gdpu_char *in_field=NULL, gdpu_complex cdividend)
 int alter_divide(DIRFILE *dirfile, const char *field_code,
     gdpu_char *in_field1=NULL, gdpu_char *in_field2=NULL)
 int alter_multiply(DIRFILE *dirfile, const char *field_code,
@@ -49,12 +49,12 @@ int madd_bit(DIRFILE *dirfile, const char *parent, const char *field_code,
     const char *in_field, int bitnum, int numbits)
 int madd_clincom:madd_lincom(DIRFILE *dirfile, const char *parent,
     const char *field_code, int n_fields, const char **in_fields,
-    gdp_complex_in *cm, gdp_complex_in *cb)
+    gdp_complex_in cm, gdp_complex_in cb)
 int madd_cpolynom:madd_polynom(DIRFILE *dirfile, const char *parent,
     const char *field_code, int poly_ord, const char *in_field,
-    gdp_complex_in *ca)
+    gdp_complex_in ca)
 int madd_crecip:madd_recip(DIRFILE *dirfile, const char *parent,
-    const char *field_code, const char *in_field, _Complex double cdividend)
+    const char *field_code, const char *in_field, gdpu_complex cdividend)
 int madd_divide(DIRFILE *dirfile, const char *parent, const char *field_code,
     const char *in_field1, const char *in_field2)
 int madd_linterp(DIRFILE *dirfile, const char *parent, const char *field_code,

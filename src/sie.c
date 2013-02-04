@@ -29,7 +29,7 @@ struct gd_siedata {
   int64_t d[3];
 };
 
-static int _GD_SampIndDoOpen(int fdin, struct _gd_raw_file *file,
+static int _GD_SampIndDoOpen(int fdin, struct gd_raw_file_ *file,
     struct gd_siedata *f, int swap, unsigned int mode)
 {
   int fd;
@@ -64,7 +64,7 @@ static int _GD_SampIndDoOpen(int fdin, struct _gd_raw_file *file,
   return fd;
 }
 
-int _GD_SampIndOpen(int fd, struct _gd_raw_file *file, int swap,
+int _GD_SampIndOpen(int fd, struct gd_raw_file_ *file, int swap,
     unsigned int mode)
 {
   dtrace("%i, %p, %i, 0x%X", fd, file, swap, mode);
@@ -132,7 +132,7 @@ static int _GD_Advance(struct gd_siedata *f, size_t size)
   return 0;
 }
 
-off64_t _GD_SampIndSeek(struct _gd_raw_file *file, off64_t sample,
+off64_t _GD_SampIndSeek(struct gd_raw_file_ *file, off64_t sample,
     gd_type_t data_type, unsigned int mode)
 {
   int r;
@@ -166,7 +166,7 @@ off64_t _GD_SampIndSeek(struct _gd_raw_file *file, off64_t sample,
 
   if ((mode & GD_FILE_WRITE) && sample > f->d[0]) {
     GD_DCOMPLEXM(p);
-    _gd_l2c(p, 0, 0);
+    gd_li2cs_(p, 0, 0);
     if (memcmp(f->d + 1, &p, GD_SIZE(data_type)) == 0) {
       /* in this case, just increase the current record's end */
       f->d[0] = sample;
@@ -243,7 +243,7 @@ static void *_GD_Duplicate(void *restrict d, const void *restrict s, size_t l,
   return d;
 }
 
-ssize_t _GD_SampIndRead(struct _gd_raw_file *restrict file, void *restrict ptr,
+ssize_t _GD_SampIndRead(struct gd_raw_file_ *restrict file, void *restrict ptr,
     gd_type_t data_type, size_t nelem)
 {
   int r;
@@ -300,7 +300,7 @@ static ssize_t _GD_GetNRec(struct gd_siedata *f, size_t size)
   return (ssize_t)(statbuf.st_size / size);
 }
 
-ssize_t _GD_SampIndWrite(struct _gd_raw_file *restrict file,
+ssize_t _GD_SampIndWrite(struct gd_raw_file_ *restrict file,
     const void *restrict ptr, gd_type_t data_type, size_t nelem)
 {
   ssize_t nrec;
@@ -439,7 +439,7 @@ ssize_t _GD_SampIndWrite(struct _gd_raw_file *restrict file,
   return nelem;
 }
 
-int _GD_SampIndSync(struct _gd_raw_file *file)
+int _GD_SampIndSync(struct gd_raw_file_ *file)
 {
   int ret;
   struct gd_siedata *f = (struct gd_siedata*)(file->edata);
@@ -455,7 +455,7 @@ int _GD_SampIndSync(struct _gd_raw_file *file)
   return ret;
 }
 
-int _GD_SampIndClose(struct _gd_raw_file* file)
+int _GD_SampIndClose(struct gd_raw_file_* file)
 {
   int ret;
   struct gd_siedata *f = (struct gd_siedata*)(file->edata);
@@ -476,7 +476,7 @@ int _GD_SampIndClose(struct _gd_raw_file* file)
   return 1;
 }
 
-off64_t _GD_SampIndSize(int dirfd, struct _gd_raw_file* file,
+off64_t _GD_SampIndSize(int dirfd, struct gd_raw_file_* file,
     gd_type_t data_type, int swap)
 {
   struct gd_siedata f;

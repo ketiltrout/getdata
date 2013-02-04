@@ -22,7 +22,7 @@
 
 /* The ASCII encoding uses file->edata for the stream pointer */
 
-int _GD_AsciiOpen(int fd, struct _gd_raw_file* file, int swap __gd_unused,
+int _GD_AsciiOpen(int fd, struct gd_raw_file_* file, int swap gd_unused_,
     unsigned int mode)
 {
   dtrace("%i, %p, <unused>, %u", fd, file, mode);
@@ -59,8 +59,8 @@ int _GD_AsciiOpen(int fd, struct _gd_raw_file* file, int swap __gd_unused,
   return 0;
 }
 
-off64_t _GD_AsciiSeek(struct _gd_raw_file* file, off64_t count,
-    gd_type_t data_type __gd_unused, unsigned int mode)
+off64_t _GD_AsciiSeek(struct gd_raw_file_* file, off64_t count,
+    gd_type_t data_type gd_unused_, unsigned int mode)
 {
   char line[64];
 
@@ -138,7 +138,7 @@ static void _GD_ScanFormat(char* fmt, gd_type_t data_type)
   dreturn("[\"%s\"]", fmt);
 }
 
-ssize_t _GD_AsciiRead(struct _gd_raw_file *restrict file, void *restrict ptr,
+ssize_t _GD_AsciiRead(struct gd_raw_file_ *restrict file, void *restrict ptr,
     gd_type_t data_type, size_t nmemb)
 {
   char fmt[50];
@@ -201,7 +201,7 @@ ssize_t _GD_AsciiRead(struct _gd_raw_file *restrict file, void *restrict ptr,
   return (ret) ? ret : (ssize_t)n;
 }
 
-ssize_t _GD_AsciiWrite(struct _gd_raw_file *restrict file,
+ssize_t _GD_AsciiWrite(struct gd_raw_file_ *restrict file,
     const void *restrict ptr, gd_type_t data_type, size_t nmemb)
 {
   ssize_t ret = 0;
@@ -323,7 +323,7 @@ ssize_t _GD_AsciiWrite(struct _gd_raw_file *restrict file,
   return (ret) ? ret : (ssize_t)n;
 }
 
-int _GD_AsciiSync(struct _gd_raw_file *file)
+int _GD_AsciiSync(struct gd_raw_file_ *file)
 {
   int ret;
 
@@ -340,7 +340,7 @@ int _GD_AsciiSync(struct _gd_raw_file *file)
   return ret;
 }
 
-int _GD_AsciiClose(struct _gd_raw_file* file)
+int _GD_AsciiClose(struct gd_raw_file_* file)
 {
   int ret;
 
@@ -358,8 +358,8 @@ int _GD_AsciiClose(struct _gd_raw_file* file)
   return 0;
 }
 
-off64_t _GD_AsciiSize(int dirfd, struct _gd_raw_file* file,
-    gd_type_t data_type __gd_unused, int swap __gd_unused)
+off64_t _GD_AsciiSize(int dirfd, struct gd_raw_file_* file,
+    gd_type_t data_type gd_unused_, int swap gd_unused_)
 {
   FILE* stream;
   char *buffer = NULL;

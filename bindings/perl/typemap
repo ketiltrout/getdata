@@ -1,3 +1,22 @@
+# Copyright (C) 2011-2013 D. V. Wiebe
+#
+##########################################################################
+#
+# This file is part of the GetData project.
+#
+# GetData is free software; you can redistribute it and/or modify it under
+# the terms of the GNU Lesser General Public License as published by the
+# Free Software Foundation; either version 2.1 of the License, or (at your
+# option) any later version.
+#
+# GetData is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
+# License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with GetData; if not, write to the Free Software Foundation, Inc.,
+
 TYPEMAP
 # basic C types
 const char ** T_CONST_AVPV
@@ -15,7 +34,7 @@ gd_type_t T_IV
 gd_windop_t T_IV
 
 # GetData Perl pseudotypes
-gdp_complex_in * T_COMPLEXIN
+gdp_complex_in T_COMPLEXIN
 gdpu_bitnum_t T_IV_FFFF
 gdpu_char * T_PV_NULL
 gdpu_int T_IV_ZERO
@@ -43,7 +62,7 @@ T_COMPLEXIN
     AV *av = (AV*)SvRV($arg);
     I32 i, len = av_len(av);
 
-    $var = ($type)safemalloc(sizeof(double complex) * (1 + len));
+    $var = ($type)safemalloc(2 * sizeof(double) * (1 + len));
     for (i = 0; i <= len; ++i) {
       SV **sv = av_fetch(av, i, 0);
       if (sv == NULL) {
@@ -51,7 +70,8 @@ T_COMPLEXIN
         croak(\"%s::${func_name}() - Expected array of complex numbers\",
             gdp_package);
       }
-      ${var}[i] = gdp_cmp_to_c99(*sv, NULL, gdp_package, \"${func_name}\");
+      gdp_convert_cmp(gd_cap_(${var}, i), *sv, NULL, gdp_package,
+          \"${func_name}\");
     }
   } else {
     $var = NULL;
@@ -77,7 +97,7 @@ T_CONST_AVPV
   } else
     croak(\"%s::${func_name}() - Expected array of strings\", gdp_package);
 T_COMPLEX
-  { $var = gdp_cmp_to_c99($arg, NULL, gdp_package, \"${func_name}\"); }
+  { gdp_convert_cmp(gd_csp_($var), $arg, NULL, gdp_package, \"${func_name}\"); }
 T_ENTRY
   gdp_to_entry(&$var, $arg, gdp_package, \"${func_name}\");
 T_IV_FFFF
@@ -102,9 +122,9 @@ T_PV_NULL
     $var = SvPV_nolen($arg);
 T_COMPLEX_ZERO
   if ($arg == undef)
-    $var = 0;
+    gd_rs2cs_($var, 0);
   else
-    $var = gdp_cmp_to_c99($arg, NULL, gdp_package, \"${func_name}\");
+    gdp_convert_cmp(gd_csp_($var), $arg, NULL, gdp_package, \"${func_name}\");
 T_TRIPLET
   { switch (windop) {
     case GD_WINDOP_EQ:

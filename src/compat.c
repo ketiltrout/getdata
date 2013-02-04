@@ -115,7 +115,7 @@ int gd_StatAt(const DIRFILE* D, int dirfd, const char* name, struct stat* buf,
 
 #ifndef HAVE_FSTATAT64
 int gd_StatAt64(const DIRFILE* D, int dirfd, const char* name, gd_stat64_t* buf,
-    int flags __gd_unused)
+    int flags gd_unused_)
 {
   int ret;
   char *path;
@@ -133,7 +133,7 @@ int gd_StatAt64(const DIRFILE* D, int dirfd, const char* name, gd_stat64_t* buf,
 
 #ifndef HAVE_UNLINKAT
 int gd_UnlinkAt(const DIRFILE *D, int dirfd, const char *name,
-    int flags __gd_unused)
+    int flags gd_unused_)
 {
   int ret;
   char *path;

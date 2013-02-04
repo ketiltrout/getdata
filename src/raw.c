@@ -20,7 +20,7 @@
  */
 #include "internal.h"
 
-int _GD_RawOpen(int fd, struct _gd_raw_file* file, int swap __gd_unused,
+int _GD_RawOpen(int fd, struct gd_raw_file_* file, int swap gd_unused_,
     unsigned int mode)
 {
   dtrace("%i, %p, <unused>, 0x%X", fd, file, mode);
@@ -44,8 +44,8 @@ int _GD_RawOpen(int fd, struct _gd_raw_file* file, int swap __gd_unused,
   return (file->idata < 0);
 }
 
-off64_t _GD_RawSeek(struct _gd_raw_file* file, off64_t count,
-    gd_type_t data_type, unsigned int mode __gd_unused)
+off64_t _GD_RawSeek(struct gd_raw_file_* file, off64_t count,
+    gd_type_t data_type, unsigned int mode gd_unused_)
 {
   off64_t pos;
 
@@ -70,7 +70,7 @@ off64_t _GD_RawSeek(struct _gd_raw_file* file, off64_t count,
   return count;
 }
 
-ssize_t _GD_RawRead(struct _gd_raw_file *restrict file, void *restrict ptr,
+ssize_t _GD_RawRead(struct gd_raw_file_ *restrict file, void *restrict ptr,
     gd_type_t data_type, size_t nmemb)
 {
   ssize_t nread;
@@ -88,7 +88,7 @@ ssize_t _GD_RawRead(struct _gd_raw_file *restrict file, void *restrict ptr,
   return nread;
 }
 
-ssize_t _GD_RawWrite(struct _gd_raw_file *restrict file,
+ssize_t _GD_RawWrite(struct gd_raw_file_ *restrict file,
     const void *restrict ptr, gd_type_t data_type, size_t nmemb)
 {
   ssize_t nwrote;
@@ -106,12 +106,12 @@ ssize_t _GD_RawWrite(struct _gd_raw_file *restrict file,
   return nwrote;
 }
 
-int _GD_RawSync(struct _gd_raw_file *file)
+int _GD_RawSync(struct gd_raw_file_ *file)
 {
   return fsync(file->idata);
 }
 
-int _GD_RawClose(struct _gd_raw_file *file)
+int _GD_RawClose(struct gd_raw_file_ *file)
 {
   int ret;
 
@@ -127,8 +127,8 @@ int _GD_RawClose(struct _gd_raw_file *file)
   return ret;
 }
 
-off64_t _GD_RawSize(int dirfd, struct _gd_raw_file *file, gd_type_t data_type,
-    int swap __gd_unused)
+off64_t _GD_RawSize(int dirfd, struct gd_raw_file_ *file, gd_type_t data_type,
+    int swap gd_unused_)
 {
   gd_stat64_t statbuf;
 

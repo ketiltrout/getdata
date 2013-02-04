@@ -1,4 +1,4 @@
-/* Copyright (C) 2009, 2010, 2012 D. V. Wiebe
+/* Copyright (C) 2009-2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -86,7 +86,7 @@ extern PyTypeObject gdpy_entry;
 extern PyTypeObject gdpy_fragment;
 
 extern const struct gdpy_constant_t {
-  char* name;
+  char *name;
   long value;
 } gdpy_constant_list[];
 
@@ -102,35 +102,35 @@ struct gdpy_dirfile_t {
 
 struct gdpy_entry_t {
   PyObject_HEAD
-  gd_entry_t* E;
+  gd_entry_t *E;
 };
 
 struct gdpy_fragment_t {
   PyObject_HEAD
   int n;
-  struct gdpy_dirfile_t* dirfile;
+  struct gdpy_dirfile_t *dirfile;
 };
 
 union gdpy_quadruple_value {
   uint64_t u;
   int64_t s;
   double f;
-  double complex c;
+  GD_DCOMPLEXA(c);
 };
 
-static inline double complex gdpy_as_complex(PyObject* o)
-{
-  Py_complex c = PyComplex_AsCComplex(o);
-  return c.real + _Complex_I * c.imag;
-}
+#define gdpy_as_complex(v,o) do { \
+  Py_complex c = PyComplex_AsCComplex(o); \
+  gd_li2cp_((v), c.real, c.imag); \
+} while(0)
 
+#define gdpy_from_complexp(c) PyComplex_FromDoubles((c)[0], (c)[1])
 #define gdpy_from_complex(c) PyComplex_FromDoubles(creal(c), cimag(c))
 
 extern int gdpy_convert_from_pyobj(PyObject*, union gdpy_quadruple_value*,
     gd_type_t);
 extern gd_type_t gdpy_convert_from_pylist(PyObject*, void*, gd_type_t, size_t);
-extern PyObject* gdpy_convert_to_pyobj(const void*, gd_type_t);
-extern PyObject* gdpy_convert_to_pylist(const void*, gd_type_t, size_t);
+extern PyObject *gdpy_convert_to_pyobj(const void*, gd_type_t);
+extern PyObject *gdpy_convert_to_pylist(const void*, gd_type_t, size_t);
 extern int gdpy_npytype_from_type(gd_type_t type);
 extern gd_type_t gdpy_type_from_npytype(int npytype);
 PyMODINIT_FUNC initpygetdata(void);

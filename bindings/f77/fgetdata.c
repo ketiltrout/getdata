@@ -21,14 +21,6 @@
 
 #include "fgetdata.h"
 
-#ifdef GD_NO_C99_API
-# define crealp creal
-# define cimagp creal
-#else
-# define crealp(x) creal(*x)
-# define cimagp(x) cimag(*x)
-#endif
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -613,19 +605,19 @@ void F77_FUNC(gdgecl, GDGECL) (int32_t *nfields,
     *fragment_index = E.fragment_index;
 
     _GDF_FString(infield1, infield1_l, E.in_fields[0]);
-    _gd_c2cp(m1, E.EN(lincom,cm)[0]);
-    _gd_c2cp(b1, E.EN(lincom,cb)[0]);
+    gd_cs2cp_(m1, E.EN(lincom,cm)[0]);
+    gd_cs2cp_(b1, E.EN(lincom,cb)[0]);
 
     if (E.EN(lincom,n_fields) > 1) {
       _GDF_FString(infield2, infield2_l, E.in_fields[1]);
-      _gd_c2cp(m2, E.EN(lincom,cm)[1]);
-      _gd_c2cp(b2, E.EN(lincom,cb)[1]);
+      gd_cs2cp_(m2, E.EN(lincom,cm)[1]);
+      gd_cs2cp_(b2, E.EN(lincom,cb)[1]);
     }
 
     if (E.EN(lincom,n_fields) > 2) {
       _GDF_FString(infield3, infield3_l, E.in_fields[2]);
-      _gd_c2cp(m3, E.EN(lincom,cm)[2]);
-      _gd_c2cp(b3, E.EN(lincom,cb)[2]);
+      gd_cs2cp_(m3, E.EN(lincom,cm)[2]);
+      gd_cs2cp_(b3, E.EN(lincom,cb)[2]);
     }
     gd_free_entry_strings(&E);
   }
@@ -701,16 +693,16 @@ void F77_FUNC(gdgecp, GDGECP) (int32_t *poly_ord, char *infield,
 
     switch (E.EN(polynom,poly_ord)) {
       case 5:
-        _gd_c2cp(a5, E.EN(polynom,ca)[5]);
+        gd_cs2cp_(a5, E.EN(polynom,ca)[5]);
       case 4:
-        _gd_c2cp(a4, E.EN(polynom,ca)[4]);
+        gd_cs2cp_(a4, E.EN(polynom,ca)[4]);
       case 3:
-        _gd_c2cp(a3, E.EN(polynom,ca)[3]);
+        gd_cs2cp_(a3, E.EN(polynom,ca)[3]);
       case 2:
-        _gd_c2cp(a2, E.EN(polynom,ca)[2]);
+        gd_cs2cp_(a2, E.EN(polynom,ca)[2]);
       case 1:
-        _gd_c2cp(a1, E.EN(polynom,ca)[1]);
-        _gd_c2cp(a0, E.EN(polynom,ca)[0]);
+        gd_cs2cp_(a1, E.EN(polynom,ca)[1]);
+        gd_cs2cp_(a0, E.EN(polynom,ca)[0]);
     }
     gd_free_entry_strings(&E);
   }
@@ -963,7 +955,7 @@ void F77_FUNC(gdgecr, GDGECR) (char *in_field, int32_t *in_field_l,
     *in_field_l = 0;
   else {
     _GDF_FString(in_field, in_field_l, E.in_fields[0]);
-    _gd_c2cp(cdividend, E.EN(recip,cdividend));
+    gd_cs2cp_(cdividend, E.EN(recip,cdividend));
     *fragment_index = E.fragment_index;
     gd_free_entry_strings(&E);
   }
@@ -1151,20 +1143,20 @@ void F77_FUNC(gdadcl, GDADCL) (const int32_t *dirfile, const char *field_code,
 
   if (nf > 0) {
     _GDF_CString(in_fields, in_field1, *in_field1_l);
-    _gd_cp2ca(cm, 0, m1);
-    _gd_cp2ca(cb, 0, b1);
+    gd_cp2ca_(cm, 0, m1);
+    gd_cp2ca_(cb, 0, b1);
   }
 
   if (nf > 1) {
     _GDF_CString(in_fields + 1, in_field2, *in_field2_l);
-    _gd_cp2ca(cm, 1, m2);
-    _gd_cp2ca(cb, 1, b2);
+    gd_cp2ca_(cm, 1, m2);
+    gd_cp2ca_(cb, 1, b2);
   }
 
   if (nf > 2) {
     _GDF_CString(in_fields + 2, in_field3, *in_field3_l);
-    _gd_cp2ca(cm, 2, m3);
-    _gd_cp2ca(cb, 2, b3);
+    gd_cp2ca_(cm, 2, m3);
+    gd_cp2ca_(cb, 2, b3);
   }
 
   gd_add_clincom(_GDF_GetDirfile(*dirfile), _GDF_CString(&fc, field_code,
@@ -1235,16 +1227,16 @@ void F77_FUNC(gdadcp, GDADCP) (const int32_t *dirfile, const char *field_code,
 
   switch (po) {
     case 5:
-      _gd_cp2ca(ca, 5, a5);
+      gd_cp2ca_(ca, 5, a5);
     case 4:
-      _gd_cp2ca(ca, 4, a4);
+      gd_cp2ca_(ca, 4, a4);
     case 3:
-      _gd_cp2ca(ca, 3, a3);
+      gd_cp2ca_(ca, 3, a3);
     case 2:
-      _gd_cp2ca(ca, 2, a2);
+      gd_cp2ca_(ca, 2, a2);
     case 1:
-      _gd_cp2ca(ca, 1, a1);
-      _gd_cp2ca(ca, 0, a0);
+      gd_cp2ca_(ca, 1, a1);
+      gd_cp2ca_(ca, 0, a0);
   }
 
   gd_add_cpolynom(_GDF_GetDirfile(*dirfile), _GDF_CString(&fc, field_code,
@@ -1664,20 +1656,20 @@ void F77_FUNC(gdmdcl, GDMDCL) (const int32_t *dirfile, const char *parent,
 
   if (nf > 0) {
     _GDF_CString(in_fields, in_field1, *in_field1_l);
-    _gd_cp2ca(cm, 0, m1);
-    _gd_cp2ca(cb, 0, b1);
+    gd_cp2ca_(cm, 0, m1);
+    gd_cp2ca_(cb, 0, b1);
   }
 
   if (nf > 1) {
     _GDF_CString(in_fields + 1, in_field2, *in_field2_l);
-    _gd_cp2ca(cm, 1, m2);
-    _gd_cp2ca(cb, 1, b2);
+    gd_cp2ca_(cm, 1, m2);
+    gd_cp2ca_(cb, 1, b2);
   }
 
   if (nf > 2) {
     _GDF_CString(in_fields + 2, in_field3, *in_field3_l);
-    _gd_cp2ca(cm, 2, m3);
-    _gd_cp2ca(cb, 2, b3);
+    gd_cp2ca_(cm, 2, m3);
+    gd_cp2ca_(cb, 2, b3);
   }
 
   gd_madd_clincom(_GDF_GetDirfile(*dirfile), _GDF_CString(&pa, parent,
@@ -1755,16 +1747,16 @@ void F77_FUNC(gdmdcp, GDMDCP) (const int32_t *dirfile, const char *parent,
 
   switch (po) {
     case 5:
-      _gd_cp2ca(ca, 5, a5);
+      gd_cp2ca_(ca, 5, a5);
     case 4:
-      _gd_cp2ca(ca, 4, a4);
+      gd_cp2ca_(ca, 4, a4);
     case 3:
-      _gd_cp2ca(ca, 3, a3);
+      gd_cp2ca_(ca, 3, a3);
     case 2:
-      _gd_cp2ca(ca, 2, a2);
+      gd_cp2ca_(ca, 2, a2);
     case 1:
-      _gd_cp2ca(ca, 1, a1);
-      _gd_cp2ca(ca, 0, a0);
+      gd_cp2ca_(ca, 1, a1);
+      gd_cp2ca_(ca, 0, a0);
   }
 
   gd_madd_cpolynom(_GDF_GetDirfile(*dirfile), _GDF_CString(&pa, parent,
@@ -2521,20 +2513,20 @@ void F77_FUNC(gdalcl, GDALCL) (const int32_t *dirfile, const char *field_code,
 
   if (nf > 0) {
     _GDF_CString(in_fields, in_field1, *in_field1_l);
-    _gd_cp2ca(cm, 0, m1);
-    _gd_cp2ca(cb, 0, b1);
+    gd_cp2ca_(cm, 0, m1);
+    gd_cp2ca_(cb, 0, b1);
   }
 
   if (nf > 1) {
     _GDF_CString(in_fields + 1, in_field2, *in_field2_l);
-    _gd_cp2ca(cm, 1, m2);
-    _gd_cp2ca(cb, 1, b2);
+    gd_cp2ca_(cm, 1, m2);
+    gd_cp2ca_(cb, 1, b2);
   }
 
   if (nf > 2) {
     _GDF_CString(in_fields + 2, in_field3, *in_field3_l);
-    _gd_cp2ca(cm, 2, m3);
-    _gd_cp2ca(cb, 2, b3);
+    gd_cp2ca_(cm, 2, m3);
+    gd_cp2ca_(cb, 2, b3);
   }
 
   gd_alter_clincom(_GDF_GetDirfile(*dirfile), _GDF_CString(&fc, field_code,
@@ -2605,16 +2597,16 @@ void F77_FUNC(gdalcp, GDALCP) (const int32_t *dirfile, const char *field_code,
 
   switch (po) {
     case 5:
-      _gd_cp2ca(ca, 5, a5);
+      gd_cp2ca_(ca, 5, a5);
     case 4:
-      _gd_cp2ca(ca, 4, a4);
+      gd_cp2ca_(ca, 4, a4);
     case 3:
-      _gd_cp2ca(ca, 3, a3);
+      gd_cp2ca_(ca, 3, a3);
     case 2:
-      _gd_cp2ca(ca, 2, a2);
+      gd_cp2ca_(ca, 2, a2);
     default:
-      _gd_cp2ca(ca, 1, a1);
-      _gd_cp2ca(ca, 0, a0);
+      gd_cp2ca_(ca, 1, a1);
+      gd_cp2ca_(ca, 0, a0);
   }
 
   gd_alter_cpolynom(_GDF_GetDirfile(*dirfile), _GDF_CString(&fc, field_code,

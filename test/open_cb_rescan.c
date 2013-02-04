@@ -31,7 +31,7 @@
 
 static int saw_callback = 0;
 
-int callback(gd_parser_data_t *pdata, void *extra __gd_unused)
+int callback(gd_parser_data_t *pdata, void *extra gd_unused_)
 {
   if (saw_callback)
     return GD_SYNTAX_ABORT;

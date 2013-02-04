@@ -549,7 +549,7 @@ static int _GD_Rename(DIRFILE *D, gd_entry_t *E, const char *new_name,
     }
 
     if (flags & GD_REN_DATA) {
-      struct _gd_raw_file temp;
+      struct gd_raw_file_ temp;
 
       /* check data protection */
       if (D->fragment[E->fragment_index].protection & GD_PROTECT_DATA) {
@@ -568,9 +568,9 @@ static int _GD_Rename(DIRFILE *D, gd_entry_t *E, const char *new_name,
         return -1;
       }
 
-      memcpy(&temp, E->e->u.raw.file, sizeof(struct _gd_raw_file));
+      memcpy(&temp, E->e->u.raw.file, sizeof(struct gd_raw_file_));
       temp.name = NULL;
-      if ((*_gd_ef[temp.subenc].name)(D,
+      if ((*gd_ef_[temp.subenc].name)(D,
             (const char*)D->fragment[E->fragment_index].enc_data, &temp,
             filebase, 0, 0))
       {
@@ -580,7 +580,7 @@ static int _GD_Rename(DIRFILE *D, gd_entry_t *E, const char *new_name,
         return -1;
       }
 
-      if ((*_gd_ef[temp.subenc].name)(D,
+      if ((*gd_ef_[temp.subenc].name)(D,
             (const char*)D->fragment[E->fragment_index].enc_data,
             E->e->u.raw.file, E->e->u.raw.filebase, 0, 0))
       {
@@ -590,7 +590,7 @@ static int _GD_Rename(DIRFILE *D, gd_entry_t *E, const char *new_name,
         return -1;
       }
 
-      if ((*_gd_ef[E->e->u.raw.file[0].subenc].move)(
+      if ((*gd_ef_[E->e->u.raw.file[0].subenc].move)(
             D->fragment[E->fragment_index].dirfd, E->e->u.raw.file,
             D->fragment[E->fragment_index].dirfd, temp.name))
       {

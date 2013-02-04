@@ -20,7 +20,7 @@
  */
 #include "internal.h"
 
-unsigned int _GD_NEntries(DIRFILE *D, struct _gd_private_entry *p, int type,
+unsigned int _GD_NEntries(DIRFILE *D, struct gd_private_entry_ *p, int type,
     unsigned int flags)
 {
   int i;
@@ -58,7 +58,7 @@ unsigned int gd_nentries(DIRFILE *D, const char *parent, int type,
     unsigned int flags) gd_nothrow
 {
   unsigned int n;
-  struct _gd_private_entry *p = NULL;
+  struct gd_private_entry_ *p = NULL;
 
   dtrace("%p, \"%s\", 0x%X, 0x%X", D, parent, type, flags);
 

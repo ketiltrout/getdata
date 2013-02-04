@@ -255,7 +255,7 @@ int _GD_Seek(DIRFILE *D, gd_entry_t *E, off64_t offset, unsigned int mode)
         break;
       }
 
-      if (_GD_WriteSeek(D, E, _gd_ef + E->e->u.raw.file[0].subenc, offset -
+      if (_GD_WriteSeek(D, E, gd_ef_ + E->e->u.raw.file[0].subenc, offset -
             E->EN(raw,spf) * D->fragment[E->fragment_index].frame_offset, mode)
           == -1)
       {

@@ -46,7 +46,7 @@ off64_t gd_nframes64(DIRFILE* D)
     return 0;
   }
 
-  if ((*_gd_ef[D->reference_field->e->u.raw.file[0].subenc].name)(D,
+  if ((*gd_ef_[D->reference_field->e->u.raw.file[0].subenc].name)(D,
         (const char*)D->fragment[D->reference_field->fragment_index].enc_data,
         D->reference_field->e->u.raw.file,
         D->reference_field->e->u.raw.filebase, 0, 0))
@@ -55,7 +55,7 @@ off64_t gd_nframes64(DIRFILE* D)
     return 0;
   }
 
-  nf = (*_gd_ef[D->reference_field->e->u.raw.file[0].subenc].size)(
+  nf = (*gd_ef_[D->reference_field->e->u.raw.file[0].subenc].size)(
       D->fragment[D->reference_field->fragment_index].dirfd,
       D->reference_field->e->u.raw.file,
       D->reference_field->EN(raw,data_type), _GD_FileSwapBytes(D,

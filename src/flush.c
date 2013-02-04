@@ -38,13 +38,13 @@ void _GD_Flush(DIRFILE *D, gd_entry_t *E, int syn, int clo)
   switch(E->field_type) {
     case GD_RAW_ENTRY:
       if (E->e->u.raw.file[0].idata >= 0 ||
-          ((_gd_ef[E->e->u.raw.file[0].subenc].flags & GD_EF_OOP) &&
+          ((gd_ef_[E->e->u.raw.file[0].subenc].flags & GD_EF_OOP) &&
            (E->e->u.raw.file[1].idata >= 0)))
       {
         if (syn && (D->flags & GD_ACCMODE) == GD_RDWR &&
             (E->e->u.raw.file[0].mode & GD_FILE_WRITE) &&
-            _gd_ef[E->e->u.raw.file[0].subenc].sync != NULL &&
-            (*_gd_ef[E->e->u.raw.file[0].subenc].sync)(E->e->u.raw.file))
+            gd_ef_[E->e->u.raw.file[0].subenc].sync != NULL &&
+            (*gd_ef_[E->e->u.raw.file[0].subenc].sync)(E->e->u.raw.file))
         {
           _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno,
               NULL);
@@ -966,26 +966,26 @@ int gd_flush(DIRFILE *D, const char *field_code)
   return ret;
 }
 
-#define GD_VERS_GE_1  0xFFFFFFFFFFFFFFFELU
-#define GD_VERS_GE_2  0xFFFFFFFFFFFFFFFCLU
-#define GD_VERS_GE_3  0xFFFFFFFFFFFFFFF8LU
-#define GD_VERS_GE_4  0xFFFFFFFFFFFFFFF0LU
-#define GD_VERS_GE_5  0xFFFFFFFFFFFFFFE0LU
-#define GD_VERS_GE_6  0xFFFFFFFFFFFFFFC0LU
-#define GD_VERS_GE_7  0xFFFFFFFFFFFFFF80LU
-#define GD_VERS_GE_8  0xFFFFFFFFFFFFFF00LU
-#define GD_VERS_GE_9  0xFFFFFFFFFFFFFE00LU
+#define GD_VERS_GE_1  0xFFFFFFFFFFFFFFFELLU
+#define GD_VERS_GE_2  0xFFFFFFFFFFFFFFFCLLU
+#define GD_VERS_GE_3  0xFFFFFFFFFFFFFFF8LLU
+#define GD_VERS_GE_4  0xFFFFFFFFFFFFFFF0LLU
+#define GD_VERS_GE_5  0xFFFFFFFFFFFFFFE0LLU
+#define GD_VERS_GE_6  0xFFFFFFFFFFFFFFC0LLU
+#define GD_VERS_GE_7  0xFFFFFFFFFFFFFF80LLU
+#define GD_VERS_GE_8  0xFFFFFFFFFFFFFF00LLU
+#define GD_VERS_GE_9  0xFFFFFFFFFFFFFE00LLU
 
-#define GD_VERS_LE_0  0x0000000000000001LU
-#define GD_VERS_LE_1  0x0000000000000003LU
-#define GD_VERS_LE_2  0x0000000000000007LU
-#define GD_VERS_LE_3  0x000000000000000fLU
-#define GD_VERS_LE_4  0x000000000000001fLU
-#define GD_VERS_LE_5  0x000000000000003fLU
-#define GD_VERS_LE_6  0x000000000000007fLU
-#define GD_VERS_LE_7  0x00000000000000ffLU
-#define GD_VERS_LE_8  0x00000000000001ffLU
-#define GD_VERS_LE_9  0x00000000000003ffLU
+#define GD_VERS_LE_0  0x0000000000000001LLU
+#define GD_VERS_LE_1  0x0000000000000003LLU
+#define GD_VERS_LE_2  0x0000000000000007LLU
+#define GD_VERS_LE_3  0x000000000000000fLLU
+#define GD_VERS_LE_4  0x000000000000001fLLU
+#define GD_VERS_LE_5  0x000000000000003fLLU
+#define GD_VERS_LE_6  0x000000000000007fLLU
+#define GD_VERS_LE_7  0x00000000000000ffLLU
+#define GD_VERS_LE_8  0x00000000000001ffLLU
+#define GD_VERS_LE_9  0x00000000000003ffLLU
 
 uint64_t _GD_FindVersion(DIRFILE *D)
 {

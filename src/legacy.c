@@ -569,7 +569,7 @@ int GetData(const char *filename, const char *field_code,
  * error_code?)
  */
 int GetNFrames(const char *filename, int *error_code,
-    const void *unused __gd_unused)
+    const void *unused gd_unused_)
 {
   DIRFILE* D;
   int nf;

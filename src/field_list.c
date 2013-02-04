@@ -24,7 +24,7 @@
 static const char* zero_list[1] = { NULL };
 static const gd_carray_t zero_carrays[1] = { {0, NULL} };
 
-_gd_static_inline int _GD_EntryIndex(unsigned int t)
+gd_static_inline_ int _GD_EntryIndex(unsigned int t)
 {
   int i;
 
@@ -160,7 +160,7 @@ int _GD_ListEntry(const gd_entry_t *E, int meta, int hidden, int noalias,
   return 1;
 }
 
-static const char **_GD_EntryList(DIRFILE *D, struct _gd_private_entry *p,
+static const char **_GD_EntryList(DIRFILE *D, struct gd_private_entry_ *p,
     size_t offs, int type, unsigned int flags) gd_nothrow
 {
   char** el;
@@ -255,7 +255,7 @@ const char **gd_entry_list(DIRFILE* D, const char *parent, int type,
 {
   const char **el;
   size_t offs = 0;
-  struct _gd_private_entry *p = NULL;
+  struct gd_private_entry_ *p = NULL;
 
   dtrace("%p, \"%s\", %i, %u", D, parent, type, flags);
 
@@ -461,7 +461,7 @@ const void *gd_mconstants(DIRFILE* D, const char* parent,
   int i, n;
   char* fl;
   gd_entry_t *P;
-  struct _gd_private_entry *e;
+  struct gd_private_entry_ *e;
 
   dtrace("%p, \"%s\", 0x%x", D, parent, return_type);
 
@@ -518,7 +518,7 @@ const gd_carray_t *gd_mcarrays(DIRFILE* D, const char* parent,
   int i, n;
   gd_carray_t *fl;
   gd_entry_t *P;
-  struct _gd_private_entry *e;
+  struct gd_private_entry_ *e;
 
   dtrace("%p, \"%s\", 0x%x", D, parent, return_type);
 
@@ -583,7 +583,7 @@ const char **gd_mstrings(DIRFILE* D, const char* parent) gd_nothrow
   int i, n;
   char** fl;
   gd_entry_t *P;
-  struct _gd_private_entry *e;
+  struct gd_private_entry_ *e;
 
   dtrace("%p, \"%s\"", D, parent);
 

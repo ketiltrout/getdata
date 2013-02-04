@@ -283,14 +283,14 @@ static gd_entry_t *_GD_ParseRaw(DIRFILE *restrict D,
   }
   memset(E, 0, sizeof(gd_entry_t));
 
-  E->e = (struct _gd_private_entry *)_GD_Malloc(D,
-      sizeof(struct _gd_private_entry));
+  E->e = (struct gd_private_entry_ *)_GD_Malloc(D,
+      sizeof(struct gd_private_entry_));
   if (E->e == NULL) {
     free(E);
     dreturn("%p", NULL);
     return NULL;
   }
-  memset(E->e, 0, sizeof(struct _gd_private_entry));
+  memset(E->e, 0, sizeof(struct gd_private_entry_));
 
   E->field_type = GD_RAW_ENTRY;
   E->e->u.raw.file[0].idata = E->e->u.raw.file[1].idata = -1;
@@ -361,14 +361,14 @@ static gd_entry_t *_GD_ParseLincom(DIRFILE *restrict D,
   }
   memset(E, 0, sizeof(gd_entry_t));
 
-  E->e = (struct _gd_private_entry *)_GD_Malloc(D,
-      sizeof(struct _gd_private_entry));
+  E->e = (struct gd_private_entry_ *)_GD_Malloc(D,
+      sizeof(struct gd_private_entry_));
   if (E->e == NULL) {
     free(E);
     dreturn("%p", NULL);
     return NULL;
   }
-  memset(E->e, 0, sizeof(struct _gd_private_entry));
+  memset(E->e, 0, sizeof(struct gd_private_entry_));
 
   E->field_type = GD_LINCOM_ENTRY;
 
@@ -460,14 +460,14 @@ static gd_entry_t *_GD_ParseLinterp(DIRFILE *restrict D,
   }
   memset(E, 0, sizeof(gd_entry_t));
 
-  E->e = (struct _gd_private_entry *)_GD_Malloc(D,
-      sizeof(struct _gd_private_entry));
+  E->e = (struct gd_private_entry_ *)_GD_Malloc(D,
+      sizeof(struct gd_private_entry_));
   if (E->e == NULL) {
     free(E);
     dreturn("%p", NULL);
     return NULL;
   }
-  memset(E->e, 0, sizeof(struct _gd_private_entry));
+  memset(E->e, 0, sizeof(struct gd_private_entry_));
 
   E->field_type = GD_LINTERP_ENTRY;
   E->in_fields[0] = NULL;
@@ -526,14 +526,14 @@ static gd_entry_t *_GD_ParseMultiply(DIRFILE *restrict D,
   }
   memset(E, 0, sizeof(gd_entry_t));
 
-  E->e = (struct _gd_private_entry *)_GD_Malloc(D,
-      sizeof(struct _gd_private_entry));
+  E->e = (struct gd_private_entry_ *)_GD_Malloc(D,
+      sizeof(struct gd_private_entry_));
   if (E->e == NULL) {
     free(E);
     dreturn("%p", NULL);
     return NULL;
   }
-  memset(E->e, 0, sizeof(struct _gd_private_entry));
+  memset(E->e, 0, sizeof(struct gd_private_entry_));
 
   E->field_type = GD_MULTIPLY_ENTRY;
   E->in_fields[0] = E->in_fields[1] = NULL;
@@ -589,14 +589,14 @@ static gd_entry_t *_GD_ParseRecip(DIRFILE *restrict D,
   }
   memset(E, 0, sizeof(gd_entry_t));
 
-  E->e = (struct _gd_private_entry *)_GD_Malloc(D,
-      sizeof(struct _gd_private_entry));
+  E->e = (struct gd_private_entry_ *)_GD_Malloc(D,
+      sizeof(struct gd_private_entry_));
   if (E->e == NULL) {
     free(E);
     dreturn("%p", NULL);
     return NULL;
   }
-  memset(E->e, 0, sizeof(struct _gd_private_entry));
+  memset(E->e, 0, sizeof(struct gd_private_entry_));
 
   E->field_type = GD_RECIP_ENTRY;
   E->in_fields[0] = NULL;
@@ -657,14 +657,14 @@ static gd_entry_t *_GD_ParseWindow(DIRFILE *restrict D,
   }
   memset(E, 0, sizeof(gd_entry_t));
 
-  E->e = (struct _gd_private_entry *)_GD_Malloc(D,
-      sizeof(struct _gd_private_entry));
+  E->e = (struct gd_private_entry_ *)_GD_Malloc(D,
+      sizeof(struct gd_private_entry_));
   if (E->e == NULL) {
     free(E);
     dreturn("%p", NULL);
     return NULL;
   }
-  memset(E->e, 0, sizeof(struct _gd_private_entry));
+  memset(E->e, 0, sizeof(struct gd_private_entry_));
 
   E->field_type = GD_WINDOW_ENTRY;
 
@@ -746,14 +746,14 @@ static gd_entry_t *_GD_ParseMplex(DIRFILE *restrict D,
   }
   memset(E, 0, sizeof(gd_entry_t));
 
-  E->e = (struct _gd_private_entry *)_GD_Malloc(D,
-      sizeof(struct _gd_private_entry));
+  E->e = (struct gd_private_entry_ *)_GD_Malloc(D,
+      sizeof(struct gd_private_entry_));
   if (E->e == NULL) {
     free(E);
     dreturn("%p", NULL);
     return NULL;
   }
-  memset(E->e, 0, sizeof(struct _gd_private_entry));
+  memset(E->e, 0, sizeof(struct gd_private_entry_));
 
   E->field_type = GD_MPLEX_ENTRY;
 
@@ -829,14 +829,14 @@ static gd_entry_t *_GD_ParseDivide(DIRFILE *restrict D,
   }
   memset(E, 0, sizeof(gd_entry_t));
 
-  E->e = (struct _gd_private_entry *)_GD_Malloc(D,
-      sizeof(struct _gd_private_entry));
+  E->e = (struct gd_private_entry_ *)_GD_Malloc(D,
+      sizeof(struct gd_private_entry_));
   if (E->e == NULL) {
     free(E);
     dreturn("%p", NULL);
     return NULL;
   }
-  memset(E->e, 0, sizeof(struct _gd_private_entry));
+  memset(E->e, 0, sizeof(struct gd_private_entry_));
 
   E->field_type = GD_DIVIDE_ENTRY;
   E->in_fields[0] = E->in_fields[1] = NULL;
@@ -894,14 +894,14 @@ static gd_entry_t *_GD_ParseBit(DIRFILE *restrict D, int is_signed,
   }
   memset(E, 0, sizeof(gd_entry_t));
 
-  E->e = (struct _gd_private_entry *)_GD_Malloc(D,
-      sizeof(struct _gd_private_entry));
+  E->e = (struct gd_private_entry_ *)_GD_Malloc(D,
+      sizeof(struct gd_private_entry_));
   if (E->e == NULL) {
     free(E);
     dreturn("%p", NULL);
     return NULL;
   }
-  memset(E->e, 0, sizeof(struct _gd_private_entry));
+  memset(E->e, 0, sizeof(struct gd_private_entry_));
 
   E->field_type = (is_signed) ? GD_SBIT_ENTRY : GD_BIT_ENTRY;
   E->in_fields[0] = NULL;
@@ -975,14 +975,14 @@ static gd_entry_t *_GD_ParsePhase(DIRFILE *restrict D,
   }
   memset(E, 0, sizeof(gd_entry_t));
 
-  E->e = (struct _gd_private_entry *)_GD_Malloc(D,
-      sizeof(struct _gd_private_entry));
+  E->e = (struct gd_private_entry_ *)_GD_Malloc(D,
+      sizeof(struct gd_private_entry_));
   if (E->e == NULL) {
     free(E);
     dreturn("%p", NULL);
     return NULL;
   }
-  memset(E->e, 0, sizeof(struct _gd_private_entry));
+  memset(E->e, 0, sizeof(struct gd_private_entry_));
 
   E->field_type = GD_PHASE_ENTRY;
   E->in_fields[0] = NULL;
@@ -1043,14 +1043,14 @@ static gd_entry_t *_GD_ParsePolynom(DIRFILE *restrict D,
   }
   memset(E, 0, sizeof(gd_entry_t));
 
-  E->e = (struct _gd_private_entry *)_GD_Malloc(D,
-      sizeof(struct _gd_private_entry));
+  E->e = (struct gd_private_entry_ *)_GD_Malloc(D,
+      sizeof(struct gd_private_entry_));
   if (E->e == NULL) {
     free(E);
     dreturn("%p", NULL);
     return NULL;
   }
-  memset(E->e, 0, sizeof(struct _gd_private_entry));
+  memset(E->e, 0, sizeof(struct gd_private_entry_));
 
   E->field_type = GD_POLYNOM_ENTRY;
   E->field = _GD_MungeFromFrag(D, parent, me, in_cols[0], &offset);
@@ -1155,14 +1155,14 @@ static gd_entry_t *_GD_ParseConst(DIRFILE *restrict D,
   }
   memset(E, 0, sizeof(gd_entry_t));
 
-  E->e = (struct _gd_private_entry *)_GD_Malloc(D,
-      sizeof(struct _gd_private_entry));
+  E->e = (struct gd_private_entry_ *)_GD_Malloc(D,
+      sizeof(struct gd_private_entry_));
   if (E->e == NULL) {
     free(E);
     dreturn("%p", NULL);
     return NULL;
   }
-  memset(E->e, 0, sizeof(struct _gd_private_entry));
+  memset(E->e, 0, sizeof(struct gd_private_entry_));
 
   E->field_type = GD_CONST_ENTRY;
   E->e->calculated = 1;
@@ -1247,14 +1247,14 @@ static gd_entry_t *_GD_ParseCarray(DIRFILE *restrict D,
   }
   memset(E, 0, sizeof(gd_entry_t));
 
-  E->e = (struct _gd_private_entry *)_GD_Malloc(D,
-      sizeof(struct _gd_private_entry));
+  E->e = (struct gd_private_entry_ *)_GD_Malloc(D,
+      sizeof(struct gd_private_entry_));
   if (E->e == NULL) {
     free(E);
     dreturn("%p", NULL);
     return NULL;
   }
-  memset(E->e, 0, sizeof(struct _gd_private_entry));
+  memset(E->e, 0, sizeof(struct gd_private_entry_));
 
   E->field_type = GD_CARRAY_ENTRY;
   E->e->calculated = 1;
@@ -1371,14 +1371,14 @@ static gd_entry_t *_GD_ParseString(DIRFILE *restrict D,
   }
   memset(E, 0, sizeof(gd_entry_t));
 
-  E->e = (struct _gd_private_entry *)_GD_Malloc(D,
-      sizeof(struct _gd_private_entry));
+  E->e = (struct gd_private_entry_ *)_GD_Malloc(D,
+      sizeof(struct gd_private_entry_));
   if (E->e == NULL) {
     free(E);
     dreturn("%p", NULL);
     return NULL;
   }
-  memset(E->e, 0, sizeof(struct _gd_private_entry));
+  memset(E->e, 0, sizeof(struct gd_private_entry_));
 
   E->field_type = GD_STRING_ENTRY;
   E->e->u.string = _GD_Strdup(D, in_cols[2]);
@@ -1909,14 +1909,14 @@ static void _GD_ParseAlias(DIRFILE *restrict D, char **restrict name,
   }
   memset(E, 0, sizeof(gd_entry_t));
 
-  E->e = (struct _gd_private_entry *)_GD_Malloc(D,
-      sizeof(struct _gd_private_entry));
+  E->e = (struct gd_private_entry_ *)_GD_Malloc(D,
+      sizeof(struct gd_private_entry_));
   if (E->e == NULL) {
     free(E);
     dreturnvoid();
     return;
   }
-  memset(E->e, 0, sizeof(struct _gd_private_entry));
+  memset(E->e, 0, sizeof(struct gd_private_entry_));
 
   E->field_type = GD_ALIAS_ENTRY;
   E->fragment_index = me;
@@ -2040,10 +2040,10 @@ static int _GD_ParseDirective(DIRFILE *D, char **in_cols, int n_cols,
         if (!(*flags & GD_FORCE_ENCODING)) {
           D->fragment[me].encoding = GD_ENC_UNSUPPORTED;
           for (i = 0; i < GD_N_SUBENCODINGS - 1; ++i)
-            if (strcmp(in_cols[1], _gd_ef[i].ffname) == 0) {
-              D->fragment[me].encoding = _gd_ef[i].scheme;
+            if (strcmp(in_cols[1], gd_ef_[i].ffname) == 0) {
+              D->fragment[me].encoding = gd_ef_[i].scheme;
               free(D->fragment[me].enc_data);
-              if (n_cols > 2 && _gd_ef[i].flags & GD_EF_EDAT)
+              if (n_cols > 2 && gd_ef_[i].flags & GD_EF_EDAT)
                 D->fragment[me].enc_data = _GD_Strdup(D, in_cols[2]);
               else
                 D->fragment[me].enc_data = NULL;

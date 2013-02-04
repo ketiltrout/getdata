@@ -37,7 +37,7 @@
 /* The gzip encoding scheme uses edata as a gzFile object.  If a file is
  * open, idata >= 0 otherwise idata = -1.  Writes occur out-of-place. */
 
-int _GD_GzipOpen(int fd, struct _gd_raw_file* file, int swap __gd_unused,
+int _GD_GzipOpen(int fd, struct gd_raw_file_* file, int swap gd_unused_,
     unsigned int mode)
 {
   const char *gzmode = "w";
@@ -69,7 +69,7 @@ int _GD_GzipOpen(int fd, struct _gd_raw_file* file, int swap __gd_unused,
   return 0;
 }
 
-off64_t _GD_GzipSeek(struct _gd_raw_file* file, off64_t count,
+off64_t _GD_GzipSeek(struct gd_raw_file_* file, off64_t count,
     gd_type_t data_type, unsigned int mode)
 {
   off64_t n = 0;
@@ -100,7 +100,7 @@ off64_t _GD_GzipSeek(struct _gd_raw_file* file, off64_t count,
   return n;
 }
 
-ssize_t _GD_GzipRead(struct _gd_raw_file *file, void *ptr, gd_type_t data_type,
+ssize_t _GD_GzipRead(struct gd_raw_file_ *file, void *ptr, gd_type_t data_type,
     size_t nmemb)
 {
   ssize_t n;
@@ -123,7 +123,7 @@ ssize_t _GD_GzipRead(struct _gd_raw_file *file, void *ptr, gd_type_t data_type,
   return n;
 }
 
-ssize_t _GD_GzipWrite(struct _gd_raw_file *file, const void *ptr,
+ssize_t _GD_GzipWrite(struct gd_raw_file_ *file, const void *ptr,
     gd_type_t data_type, size_t nmemb)
 {
   ssize_t n;
@@ -148,7 +148,7 @@ ssize_t _GD_GzipWrite(struct _gd_raw_file *file, const void *ptr,
 
 /* Because calling gzflush can result in degredation of compression, we avoid
  * doing anything here */
-int _GD_GzipSync(struct _gd_raw_file *file __gd_unused)
+int _GD_GzipSync(struct gd_raw_file_ *file gd_unused_)
 {
   dtrace("<unused>");
 
@@ -156,7 +156,7 @@ int _GD_GzipSync(struct _gd_raw_file *file __gd_unused)
   return 0;
 }
 
-int _GD_GzipClose(struct _gd_raw_file *file)
+int _GD_GzipClose(struct gd_raw_file_ *file)
 {
   int ret;
 
@@ -176,8 +176,8 @@ int _GD_GzipClose(struct _gd_raw_file *file)
   return 0;
 }
 
-off64_t _GD_GzipSize(int dirfd, struct _gd_raw_file *file, gd_type_t data_type,
-    int swap __gd_unused)
+off64_t _GD_GzipSize(int dirfd, struct gd_raw_file_ *file, gd_type_t data_type,
+    int swap gd_unused_)
 {
   int fd;
   uint32_t size = 0;

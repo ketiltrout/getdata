@@ -334,7 +334,7 @@ typedef enum {
   GD_WINDOP_CLR
 } gd_windop_t;
 
-struct _gd_private_entry;
+struct gd_private_entry_;
 
 typedef union {
   gd_int64_t i;
@@ -349,7 +349,7 @@ typedef union {
 # define GD_ANON(x)
 #endif
 /* Unified entry struct */
-struct _gd_unified_entry {
+struct gd_unified_entry_ {
   char *field;
   gd_entype_t field_type;
   char *in_fields[GD_MAX_LINCOM];
@@ -403,16 +403,16 @@ struct _gd_unified_entry {
     } GD_ANON(scalar);
   } GD_ANON(u);
 
-  struct _gd_private_entry *e;
+  struct gd_private_entry_ *e;
 };
 
-typedef struct _gd_unified_entry gd_entry_t;
+typedef struct gd_unified_entry_ gd_entry_t;
 
 /* The dirifle object */
-typedef struct _GD_DIRFILE DIRFILE;
+typedef struct gd_dirfile_ DIRFILE;
 
 /* Parser callback objects */
-struct _gd_callback_data {
+struct gd_callback_data_ {
   const DIRFILE *dirfile;
   int suberror;
   int linenum;
@@ -422,14 +422,14 @@ struct _gd_callback_data {
 };
 
 /* the carray list object */
-struct _gd_carray_data {
+struct gd_carray_data_ {
   size_t n;
   void *d;
 };
 
-typedef struct _gd_carray_data gd_carray_t;
+typedef struct gd_carray_data_ gd_carray_t;
 
-typedef struct _gd_callback_data gd_parser_data_t;
+typedef struct gd_callback_data_ gd_parser_data_t;
 
 typedef int (*gd_parser_callback_t)(gd_parser_data_t*, void*);
 

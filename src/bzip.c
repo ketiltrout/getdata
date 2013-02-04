@@ -51,7 +51,7 @@ struct gd_bzdata {
 /* The bzip encoding scheme uses edata as a gd_bzdata pointer.  If a file is
  * open, idata = 0 otherwise idata = -1. */
 
-static struct gd_bzdata *_GD_Bzip2DoOpen(int dirfd, struct _gd_raw_file* file)
+static struct gd_bzdata *_GD_Bzip2DoOpen(int dirfd, struct gd_raw_file_* file)
 {
   int fd;
   struct gd_bzdata *ptr;
@@ -93,8 +93,8 @@ static struct gd_bzdata *_GD_Bzip2DoOpen(int dirfd, struct _gd_raw_file* file)
   return ptr;
 }
 
-int _GD_Bzip2Open(int dirfd, struct _gd_raw_file* file, int swap __gd_unused,
-    unsigned int mode __gd_unused)
+int _GD_Bzip2Open(int dirfd, struct gd_raw_file_* file, int swap gd_unused_,
+    unsigned int mode gd_unused_)
 {
   dtrace("%i, %p, <unused>, <unused>", dirfd, file);
 
@@ -111,8 +111,8 @@ int _GD_Bzip2Open(int dirfd, struct _gd_raw_file* file, int swap __gd_unused,
   return 0;
 }
 
-off64_t _GD_Bzip2Seek(struct _gd_raw_file* file, off64_t count,
-    gd_type_t data_type, unsigned int mode __gd_unused)
+off64_t _GD_Bzip2Seek(struct gd_raw_file_* file, off64_t count,
+    gd_type_t data_type, unsigned int mode gd_unused_)
 {
   struct gd_bzdata *ptr = (struct gd_bzdata *)file->edata;
 
@@ -165,7 +165,7 @@ off64_t _GD_Bzip2Seek(struct _gd_raw_file* file, off64_t count,
   return (ptr->base + ptr->pos) / GD_SIZE(data_type);
 }
 
-ssize_t _GD_Bzip2Read(struct _gd_raw_file *restrict file, void *restrict data,
+ssize_t _GD_Bzip2Read(struct gd_raw_file_ *restrict file, void *restrict data,
     gd_type_t data_type, size_t nmemb)
 {
   char* output = (char*)data;
@@ -221,7 +221,7 @@ ssize_t _GD_Bzip2Read(struct _gd_raw_file *restrict file, void *restrict data,
   return nmemb - nbytes / GD_SIZE(data_type);
 }
 
-int _GD_Bzip2Close(struct _gd_raw_file *file)
+int _GD_Bzip2Close(struct gd_raw_file_ *file)
 {
   struct gd_bzdata *ptr = (struct gd_bzdata *)file->edata;
   dtrace("%p", file);
@@ -240,8 +240,8 @@ int _GD_Bzip2Close(struct _gd_raw_file *file)
   return 0;
 }
 
-off64_t _GD_Bzip2Size(int dirfd, struct _gd_raw_file *file, gd_type_t data_type,
-    int swap __gd_unused)
+off64_t _GD_Bzip2Size(int dirfd, struct gd_raw_file_ *file, gd_type_t data_type,
+    int swap gd_unused_)
 {
   struct gd_bzdata *ptr;
   off_t n;

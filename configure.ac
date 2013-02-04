@@ -220,12 +220,7 @@ AC_ARG_ENABLE(python, AS_HELP_STRING([--disable-python],
               ])
 
 AC_MSG_CHECKING([whether to include the Python bindings])
-if test "x$disable_c99" = "xyes"; then
-  make_pybindings="no";
-  AC_MSG_RESULT([no (requires C99 compiler)])
-else
-  AC_MSG_RESULT([$make_pybindings])
-fi
+AC_MSG_RESULT([$make_pybindings])
 
 dnl IDL bindings
 AC_ARG_ENABLE(idl, AS_HELP_STRING([--disable-idl],
@@ -238,12 +233,7 @@ AC_ARG_ENABLE(idl, AS_HELP_STRING([--disable-idl],
               ])
 
 AC_MSG_CHECKING([whether to include the IDL bindings])
-if test "x$disable_c99" = "xyes"; then
-  make_idlbindings="no";
-  AC_MSG_RESULT([no (requires C99 compiler)])
-else
-  AC_MSG_RESULT([$make_idlbindings])
-fi
+AC_MSG_RESULT([$make_idlbindings])
 
 dnl Perl bindings
 AC_ARG_ENABLE(perl, AS_HELP_STRING([--disable-perl],
@@ -256,12 +246,7 @@ AC_ARG_ENABLE(perl, AS_HELP_STRING([--disable-perl],
               ])
 
 AC_MSG_CHECKING([whether to include the Perl bindings])
-if test "x$disable_c99" = "xyes"; then
-  make_perlbindings="no";
-  AC_MSG_RESULT([no (requires C99 compiler)])
-else
-  AC_MSG_RESULT([$make_perlbindings])
-fi
+AC_MSG_RESULT([$make_perlbindings])
 
 dnl MATLAB bindings
 AC_ARG_ENABLE(matlab, AS_HELP_STRING([--disable-matlab],
@@ -381,8 +366,6 @@ if test "x$disable_c99" != "xyes"; then
   AC_PROG_CC_C99
   if test "x$ac_cv_prog_cc_c99" = "xno"; then
     disable_c99="yes"
-    make_pybindings="no"
-    make_idlbindings="no"
   fi
 fi
 if test "x$disable_c99" = "xyes"; then
@@ -836,6 +819,15 @@ if test "x$make_idlbindings" = "xyes"; then
   echo
   echo "*** Configuring interactive data language (IDL) bindings"
   echo
+  AC_MSG_CHECKING([whether C99 is supported])
+  if test "x$disable_c99" = "xno"; then
+    AC_MSG_RESULT([yes])
+  else
+    AC_MSG_RESULT([no])
+    make_idlbindings=no
+  fi
+fi
+if test "x$make_idlbindings" = "xyes"; then
   GD_IDL([5.5])
   if test "x$have_idl" = "xno"; then
     make_idlbindings="no"

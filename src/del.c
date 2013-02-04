@@ -335,7 +335,7 @@ static int _GD_Delete(DIRFILE *restrict D, gd_entry_t *restrict E,
       return -1;
     }
 
-    if ((*_gd_ef[E->e->u.raw.file[0].subenc].name)(D,
+    if ((*gd_ef_[E->e->u.raw.file[0].subenc].name)(D,
           (const char*)D->fragment[E->fragment_index].enc_data,
           E->e->u.raw.file, E->e->u.raw.filebase, 0, 0))
     {
@@ -344,7 +344,7 @@ static int _GD_Delete(DIRFILE *restrict D, gd_entry_t *restrict E,
       return -1;
     }
 
-    if ((*_gd_ef[E->e->u.raw.file[0].subenc].unlink)(
+    if ((*gd_ef_[E->e->u.raw.file[0].subenc].unlink)(
           D->fragment[E->fragment_index].dirfd, E->e->u.raw.file))
     {
       _GD_SetError(D, GD_E_RAW_IO, 0, E->e->u.raw.file[0].name, errno, NULL);
@@ -452,7 +452,7 @@ static int _GD_Delete(DIRFILE *restrict D, gd_entry_t *restrict E,
     D->value_list_validity = 0;
   } else {
     /* If this is a metafield, update its parent's lists */
-    struct _gd_private_entry *Pe = E->e->p.parent->e;
+    struct gd_private_entry_ *Pe = E->e->p.parent->e;
 
     /* search and destroy */
     for (i = 0; i < Pe->n_meta; ++i)
