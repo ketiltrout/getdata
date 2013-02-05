@@ -1103,6 +1103,8 @@ size_t _GD_DoField(DIRFILE *restrict, gd_entry_t *restrict, int, off64_t,
     size_t, gd_type_t, void *restrict);
 size_t _GD_DoFieldOut(DIRFILE *restrict, gd_entry_t *restrict, int, off64_t,
     size_t, gd_type_t, const void *restrict);
+size_t _GD_DoStringOut(DIRFILE *restrict D, gd_entry_t *restrict E,
+    const char *data_in);
 int _GD_EntryCmp(const void*, const void*);
 gd_entry_t *_GD_FindField(const DIRFILE *restrict, const char *restrict,
     gd_entry_t *const *, unsigned int, int, unsigned int *restrict);

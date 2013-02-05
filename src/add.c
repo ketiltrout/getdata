@@ -1326,7 +1326,7 @@ int gd_add_string(DIRFILE* D, const char* field_code, const char* value,
 
   /* Actually store the string, now */
   if (entry)
-    _GD_DoFieldOut(D, entry, 0, 0, 0, GD_NULL, value);
+    _GD_DoStringOut(D, entry, value);
 
   dreturn("%i", D->error ? -1 : 0);
   return D->error ? -1 : 0;
@@ -1922,7 +1922,7 @@ int gd_madd_string(DIRFILE* D, const char* parent,
 
   /* Actually store the string, now */
   if (entry)
-    _GD_DoFieldOut(D, entry, 0, 0, 0, GD_NULL, value);
+    _GD_DoStringOut(D, entry, value);
 
   dreturn("%i", D->error ? -1 : 0);
   return D->error ? -1 : 0;

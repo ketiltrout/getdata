@@ -1,3 +1,13 @@
+2012-02-02   D. V. Wiebe <getdata@ketiltrout.net> svn:792
+	* src/string.c (gd_get_string): Handle string retrieval directly instead of
+	calling _GD_DoField.
+	* src/string.c (_GD_DoStringOut): Moved from putdata.c.
+	* src/string.c (gd_put_string) src/add.c (gd_add_string gd_madd_string): Call
+	_GD_DoStringOut directly instead of _GD_DoFieldOut.
+	* src/getdata.c (_GD_DoString): Deleted.
+	* src/getdata.c (_GD_DoField) src/putdata.c (_GD_DoFieldOut): Remove string
+	processing.
+
 2012-02-02   D. V. Wiebe <getdata@ketiltrout.net> svn:790
 	* bindings/matlab/matlab.c: ANSI C.
 

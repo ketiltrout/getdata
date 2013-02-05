@@ -656,34 +656,6 @@ static size_t _GD_DoConstOut(DIRFILE *restrict D, gd_entry_t *restrict E,
   return 1;
 }
 
-static size_t _GD_DoStringOut(DIRFILE *restrict D, gd_entry_t *restrict E,
-    const char *data_in)
-{
-  char* ptr = E->e->u.string;
-
-  dtrace("%p, %p, %p", D, E, data_in);
-
-  /* check protection */
-  if (D->fragment[E->fragment_index].protection & GD_PROTECT_FORMAT) {
-    _GD_SetError(D, GD_E_PROTECTED, GD_E_PROTECTED_FORMAT, NULL, 0,
-        D->fragment[E->fragment_index].cname);
-    dreturn("%i", 0);
-    return 0;
-  }
-
-  E->e->u.string = _GD_Strdup(D, data_in);
-  if (E->e->u.string == NULL) {
-    E->e->u.string = ptr;
-    dreturn("%i", 0);
-    return 0;
-  }
-  free(ptr);
-  D->fragment[E->fragment_index].modified = 1;
-
-  dreturn("%" PRNsize_t, strlen(E->e->u.string) + 1);
-  return strlen(E->e->u.string) + 1;
-}
-
 size_t _GD_DoFieldOut(DIRFILE *restrict D, gd_entry_t *restrict E, int repr,
     off64_t first_samp, size_t num_samp, gd_type_t data_type,
     const void *restrict data_in)
@@ -762,8 +734,6 @@ size_t _GD_DoFieldOut(DIRFILE *restrict D, gd_entry_t *restrict E, int repr,
       n_wrote = _GD_DoConstOut(D, E, first_samp, num_samp, data_type, data_in);
       break;
     case GD_STRING_ENTRY:
-      n_wrote = _GD_DoStringOut(D, E, (const char *)data_in);
-      break;
     case GD_ALIAS_ENTRY:
     case GD_NO_ENTRY:
       _GD_InternalError(D);

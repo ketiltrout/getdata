@@ -1812,21 +1812,6 @@ static size_t _GD_DoConst(DIRFILE *restrict D, const gd_entry_t *restrict E,
   return 1;
 }
 
-/* _GD_DoString:  Read from a string.  Returns number of samples read (ie. the
- * length of the string plus 1).
- */
-static size_t _GD_DoString(gd_entry_t *restrict E, size_t num_samp,
-    char *restrict data_out)
-{
-  dtrace("%p, %" PRNsize_t ", %p", E, num_samp, data_out);
-
-  if (num_samp > 0 && data_out != NULL)
-    strncpy(data_out, E->e->u.string, num_samp);
-
-  dreturn("%" PRNsize_t, strlen(E->e->u.string) + 1);
-  return strlen(E->e->u.string) + 1;
-}
-
 /* _GD_DoField: Locate the field in the database and read it.
 */
 size_t _GD_DoField(DIRFILE *restrict D, gd_entry_t *restrict E, int repr,
@@ -1942,8 +1927,6 @@ size_t _GD_DoField(DIRFILE *restrict D, gd_entry_t *restrict E, int repr,
       n_read = _GD_DoConst(D, E, first_samp, num_samp, return_type, data_out);
       break;
     case GD_STRING_ENTRY:
-      n_read = _GD_DoString(E, num_samp, (char *)data_out);
-      break;
     case GD_ALIAS_ENTRY:
     case GD_NO_ENTRY:
       /* Can't get here */
