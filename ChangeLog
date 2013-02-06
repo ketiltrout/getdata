@@ -1,3 +1,8 @@
+2012-02-02   D. V. Wiebe <getdata@ketiltrout.net> svn:793
+	* src/parse.c (_GD_Tokenise): Don't falsely report an unterminated token when
+	stopping a partial tokenisation on top of a " or \.
+	* test/tok_arg.c test/tok_escape.c test/tok_quote.c: Added.
+
 2012-02-02   D. V. Wiebe <getdata@ketiltrout.net> svn:792
 	* src/string.c (gd_get_string): Handle string retrieval directly instead of
 	calling _GD_DoField.

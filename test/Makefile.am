@@ -337,6 +337,8 @@ TABLE_TESTS=table table_code table_type
 
 TELL_TESTS=tell tell64
 
+TOK_TESTS=tok_arg tok_escape tok_quote
+
 TRUNC_TESTS=trunc trunc_dir trunc_rdonly trunc_rofs trunc_truncsub
 
 UNCLUDE_TESTS=unclude unclude_del unclude_move
@@ -370,8 +372,9 @@ TESTS=$(ADD_TESTS)      $(ALIAS_TESTS)    $(ALTER_TESTS)    $(ASCII_TESTS)    \
 			$(OPEN_TESTS)     $(PARSE_TESTS)    $(PROTECT_TESTS)  $(PUT_TESTS)      \
 			$(REF_TESTS)      $(REPR_TESTS)     $(SEEK_TESTS)     $(SIE_TESTS)      \
 			$(SLIM_TESTS)     $(SPF_TESTS)      $(SVLIST_TESTS)   $(TABLE_TESTS)    \
-			$(TELL_TESTS)     $(TRUNC_TESTS)    $(UNCLUDE_TESTS)  $(VERSION_TESTS)  \
-			$(VLIST_TESTS)    $(XZ_TESTS)       $(ZZIP_TESTS)     $(ZZSLIM_TESTS)
+			$(TELL_TESTS)     $(TOK_TESTS)      $(TRUNC_TESTS)    $(UNCLUDE_TESTS)  \
+			$(VERSION_TESTS)  $(VLIST_TESTS)    $(XZ_TESTS)       $(ZZIP_TESTS)     \
+			$(ZZSLIM_TESTS)
 
 check_PROGRAMS=$(TESTS)
 

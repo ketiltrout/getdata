@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 C. Barth Netterfield
- * Copyright (C) 2005-2012 D. V. Wiebe
+ * Copyright (C) 2005-2013 D. V. Wiebe
  *
  ***************************************************************************
  *
@@ -1863,9 +1863,17 @@ int _GD_Tokenise(DIRFILE *restrict D, const char *restrict instring,
   }
   *op = '\0';
 
-  if (quotated || escaped_char) /* Unterminated token */
-    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_UNTERM, format_file, linenum,
-        NULL);
+  if (quotated || escaped_char) {
+    if (*ip == 0 || *ip == '\n') {
+      /* Unterminated token */
+      _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_UNTERM, format_file, linenum,
+          NULL);
+    } else {
+      /* a partial tokenisation where we've landed on top of " or \ when
+       * finishing up; back up a space */
+      ip--;
+    }
+  }
 
   if (pos)
     *pos = ip;
