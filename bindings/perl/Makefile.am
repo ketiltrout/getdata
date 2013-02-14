@@ -87,7 +87,7 @@ clean-local:
 		$(PERL) Build clean; \
 	fi
 	rm -f $(BUILT_SOURCES) make_parameters.sed MYMETA.yml MYMETA.json GetData.pm
-	rm -rf Build _build MANIFEST build.stamp
+	rm -rf Build _build MANIFEST build.stamp t/*~
 
 uninstall-hook:
 	rmdir $(DESTDIR)${perlautogetdatadir}

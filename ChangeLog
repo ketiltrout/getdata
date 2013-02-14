@@ -1,3 +1,7 @@
+2012-02-02   D. V. Wiebe <getdata@ketiltrout.net> svn:794
+	* bindings/cxx/test/big_test.cpp bindings/perl/t/big_test.t
+	bindings/python/test/big_test.py: Add test 243.
+
 2012-02-02   D. V. Wiebe <getdata@ketiltrout.net> svn:793
 	* src/parse.c (_GD_Tokenise): Don't falsely report an unterminated token when
 	stopping a partial tokenisation on top of a " or \.

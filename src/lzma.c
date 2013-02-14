@@ -57,7 +57,7 @@ struct gd_lzmadata {
 /* The bzip encoding scheme uses edata as a gd_lzmadata pointer.  If a file is
  * open, idata = 0 otherwise idata = -1. */
 
-static struct gd_lzmadata *_GD_LzmaDoOpen(int dirfd, struct _gd_raw_file* file)
+static struct gd_lzmadata *_GD_LzmaDoOpen(int dirfd, struct gd_raw_file_* file)
 {
   struct gd_lzmadata *ptr;
   int fd;
@@ -107,8 +107,8 @@ static struct gd_lzmadata *_GD_LzmaDoOpen(int dirfd, struct _gd_raw_file* file)
   return ptr;
 }
 
-int _GD_LzmaOpen(int dirfd, struct _gd_raw_file* file, int swap __gd_unused,
-    unsigned int mode __gd_unused)
+int _GD_LzmaOpen(int dirfd, struct gd_raw_file_* file, int swap gd_unused_,
+    unsigned int mode gd_unused_)
 {
   struct gd_lzmadata *ptr;
 
@@ -179,8 +179,8 @@ static int _GD_LzmaDecode(struct gd_lzmadata *ptr)
   return 0;
 }
 
-off64_t _GD_LzmaSeek(struct _gd_raw_file* file, off64_t count,
-    gd_type_t data_type, unsigned int mode __gd_unused)
+off64_t _GD_LzmaSeek(struct gd_raw_file_* file, off64_t count,
+    gd_type_t data_type, unsigned int mode gd_unused_)
 {
   struct gd_lzmadata *ptr = (struct gd_lzmadata *)file->edata;
 
@@ -233,7 +233,7 @@ off64_t _GD_LzmaSeek(struct _gd_raw_file* file, off64_t count,
   return file->pos;
 }
 
-ssize_t _GD_LzmaRead(struct _gd_raw_file *file, void *data, gd_type_t data_type,
+ssize_t _GD_LzmaRead(struct gd_raw_file_ *file, void *data, gd_type_t data_type,
     size_t nmemb)
 {
   char* output = (char *)data;
@@ -283,7 +283,7 @@ ssize_t _GD_LzmaRead(struct _gd_raw_file *file, void *data, gd_type_t data_type,
   return nmemb - nbytes / GD_SIZE(data_type);
 }
 
-int _GD_LzmaClose(struct _gd_raw_file *file)
+int _GD_LzmaClose(struct gd_raw_file_ *file)
 {
   struct gd_lzmadata *ptr = (struct gd_lzmadata *)file->edata;
 
@@ -303,8 +303,8 @@ int _GD_LzmaClose(struct _gd_raw_file *file)
   return 0;
 }
 
-off64_t _GD_LzmaSize(int dirfd, struct _gd_raw_file *file, gd_type_t data_type,
-    int swap __gd_unused)
+off64_t _GD_LzmaSize(int dirfd, struct gd_raw_file_ *file, gd_type_t data_type,
+    int swap gd_unused_)
 {
   struct gd_lzmadata *ptr;
   off_t n;

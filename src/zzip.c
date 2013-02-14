@@ -36,8 +36,8 @@
 /* The zzip encoding scheme looks just like the regular ol' C IO. */
 
 int _GD_ZzipName(DIRFILE *restrict D, const char *restrict enc_data,
-    struct _gd_raw_file *restrict file, const char *restrict base,
-    int temp __gd_unused, int resolv)
+    struct gd_raw_file_ *restrict file, const char *restrict base,
+    int temp gd_unused_, int resolv)
 {
   size_t enc_len;
 
@@ -82,8 +82,8 @@ int _GD_ZzipName(DIRFILE *restrict D, const char *restrict enc_data,
   return 0;
 }
 
-int _GD_ZzipOpen(int dirfd, struct _gd_raw_file* file, int swap __gd_unused,
-    unsigned int mode __gd_unused)
+int _GD_ZzipOpen(int dirfd, struct gd_raw_file_* file, int swap gd_unused_,
+    unsigned int mode gd_unused_)
 {
   char *ptr1, *ptr2;
   size_t len;
@@ -122,8 +122,8 @@ int _GD_ZzipOpen(int dirfd, struct _gd_raw_file* file, int swap __gd_unused,
   return 0;
 }
 
-off64_t _GD_ZzipSeek(struct _gd_raw_file* file, off64_t count,
-    gd_type_t data_type, unsigned int mode __gd_unused)
+off64_t _GD_ZzipSeek(struct gd_raw_file_* file, off64_t count,
+    gd_type_t data_type, unsigned int mode gd_unused_)
 {
   off64_t n;
 
@@ -139,7 +139,7 @@ off64_t _GD_ZzipSeek(struct _gd_raw_file* file, off64_t count,
   return n;
 }
 
-ssize_t _GD_ZzipRead(struct _gd_raw_file *restrict file, void *restrict data,
+ssize_t _GD_ZzipRead(struct gd_raw_file_ *restrict file, void *restrict data,
     gd_type_t data_type, size_t nmemb)
 {
   ssize_t n;
@@ -155,7 +155,7 @@ ssize_t _GD_ZzipRead(struct _gd_raw_file *restrict file, void *restrict data,
   return n;
 }
 
-int _GD_ZzipClose(struct _gd_raw_file *file)
+int _GD_ZzipClose(struct gd_raw_file_ *file)
 {
   int ret;
 
@@ -172,8 +172,8 @@ int _GD_ZzipClose(struct _gd_raw_file *file)
   return ret;
 }
 
-off64_t _GD_ZzipSize(int dirfd, struct _gd_raw_file *file, gd_type_t data_type,
-    int swap __gd_unused)
+off64_t _GD_ZzipSize(int dirfd, struct gd_raw_file_ *file, gd_type_t data_type,
+    int swap gd_unused_)
 {
   ssize_t len;
   char *ptr1, *ptr2;

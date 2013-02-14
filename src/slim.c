@@ -35,8 +35,8 @@
 /* The slim encoding scheme uses edata as a slimfile pointer.  If a file is
  * open, idata = 0 otherwise idata = -1. */
 
-int _GD_SlimOpen(int dirfd, struct _gd_raw_file* file, int swap __gd_unused,
-    unsigned int mode __gd_unused)
+int _GD_SlimOpen(int dirfd, struct gd_raw_file_* file, int swap gd_unused_,
+    unsigned int mode gd_unused_)
 {
   char *filepath;
 
@@ -63,8 +63,8 @@ int _GD_SlimOpen(int dirfd, struct _gd_raw_file* file, int swap __gd_unused,
   return 0;
 }
 
-off64_t _GD_SlimSeek(struct _gd_raw_file* file, off64_t count,
-    gd_type_t data_type, unsigned int mode __gd_unused)
+off64_t _GD_SlimSeek(struct gd_raw_file_* file, off64_t count,
+    gd_type_t data_type, unsigned int mode gd_unused_)
 {
   off64_t n;
 
@@ -82,7 +82,7 @@ off64_t _GD_SlimSeek(struct _gd_raw_file* file, off64_t count,
   return n;
 }
 
-ssize_t _GD_SlimRead(struct _gd_raw_file *restrict file, void *restrict ptr,
+ssize_t _GD_SlimRead(struct gd_raw_file_ *restrict file, void *restrict ptr,
     gd_type_t data_type, size_t nmemb)
 {
   ssize_t n;
@@ -95,7 +95,7 @@ ssize_t _GD_SlimRead(struct _gd_raw_file *restrict file, void *restrict ptr,
   return n;
 }
 
-int _GD_SlimClose(struct _gd_raw_file *file)
+int _GD_SlimClose(struct gd_raw_file_ *file)
 {
   int ret;
 
@@ -112,8 +112,8 @@ int _GD_SlimClose(struct _gd_raw_file *file)
   return ret;
 }
 
-off64_t _GD_SlimSize(int dirfd, struct _gd_raw_file *file, gd_type_t data_type,
-    int swap __gd_unused)
+off64_t _GD_SlimSize(int dirfd, struct gd_raw_file_ *file, gd_type_t data_type,
+    int swap gd_unused_)
 {
   char *filepath;
   off64_t size;

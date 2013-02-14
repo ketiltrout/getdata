@@ -144,6 +144,7 @@ int main(void)
     "lincom LINCOM data 1.1 2.2 INDEX 2.2 3.3;4.4 linterp const const\n"
     "/META data mstr STRING \"This is a string constant.\"\n"
     "/META data mconst CONST COMPLEX128 3.3;4.4\n"
+    "/META data mcarray CARRAY FLOAT64 1.9 2.8 3.7 4.6 5.5\n"
     "/META data mlut LINTERP DATA ./lut\n"
     "const CONST FLOAT64 5.5\n"
     "carray CARRAY FLOAT64 1.1 2.2 3.3 4.4 5.5 6.6\n"
@@ -192,6 +193,7 @@ int main(void)
   MplexEntry xent, *xep;
   Fragment *frag;
   gd_triplet_t thresh;
+  const gd_carray_t *carrays;
 
   char* fields[nfields + 9] = {(char*)"INDEX", (char*)"alias", (char*)"bit",
     (char*)"carray", (char*)"const", (char*)"data", (char*)"div",
@@ -200,6 +202,13 @@ int main(void)
     (char*)"string", (char*)"window", NULL, NULL, NULL, NULL, NULL, NULL, NULL,
     NULL, NULL};
   char *strings[3];
+
+  unlink(data);
+  unlink(new1);
+  unlink(format);
+  unlink(format1);
+  unlink(form2);
+  rmdir(filedir);
 
   // Write the test dirfile
   mkdir(filedir, 0777);
@@ -253,12 +262,13 @@ int main(void)
   // 9: Dirfile::NFields check
   n = d->NMFields("data");
   CHECK_OK(9);
-  CHECK_INT(9,n,3);
+  CHECK_INT(9,n,4);
 
   // 10: Dirfile::MFieldList check
   fields[0] = (char*)"mstr";
   fields[1] = (char*)"mconst";
-  fields[2] = (char*)"mlut";
+  fields[2] = (char*)"mcarray";
+  fields[3] = (char*)"mlut";
   list = d->MFieldList("data");
   CHECK_OK(10);
   CHECK_STRING_ARRAY(10,n,list[i],fields[i]);
@@ -1281,7 +1291,7 @@ int main(void)
   CHECK_DOUBLE_ARRAY(159,1,2,p[i],1.1 * (i + 3));
 
   // 167 gd_carrays
-  const gd_carray_t *carrays = d->Carrays(Float64);
+  carrays = d->Carrays(Float64);
   CHECK_OK(167);
   CHECK_NONNULL(167,carrays);
   CHECK_INT2(167,1,carrays[0].n,6);
@@ -1341,6 +1351,23 @@ int main(void)
   CHECK_INT2(179,2,ent->FragmentIndex(),0);
   CHECK_INT2(179,3,ent->ConstType(),Float64);
   CHECK_INT2(179,4,ent->ArrayLen(),4);
+  delete ent;
+
+  // 180: gd_madd_carray
+  aent.Dissociate();
+  aent.SetName("mnew17");
+  aent.SetFragmentIndex(0);
+  aent.SetType(Float64);
+  aent.SetArrayLen(2);
+  d->MAdd(aent, "data");
+  CHECK_OK2(180,1);
+
+  ent = d->Entry("data/mnew17");
+  CHECK_OK2(180,2);
+  CHECK_INT2(180,1,ent->Type(),CarrayEntryType);
+  CHECK_INT2(180,2,ent->FragmentIndex(),0);
+  CHECK_INT2(180,3,ent->ConstType(),Float64);
+  CHECK_INT2(180,4,ent->ArrayLen(),2);
   delete ent;
 
   // 181 gd_alter_carray
@@ -1685,7 +1712,7 @@ int main(void)
   n = d->NEntries("data", GD_SCALAR_ENTRIES,
       GD_ENTRIES_HIDDEN | GD_ENTRIES_NOALIAS);
   CHECK_OK2(237, 1);
-  CHECK_INT2(237, 1, n, 2);
+  CHECK_INT2(237, 1, n, 4);
   n = d->NEntries(NULL, GD_VECTOR_ENTRIES,
       GD_ENTRIES_HIDDEN | GD_ENTRIES_NOALIAS);
   CHECK_OK2(237, 2);
@@ -1733,6 +1760,16 @@ int main(void)
   sprintf(buf, "dirfile%clut", GD_DIRSEP);
   CHECK_EOSTRING(241,tok,buf);
   free(tok);
+
+  // 242: gd_carrays
+  carrays = d->MCarrays("data", Float64);
+  CHECK_OK(242);
+  CHECK_NONNULL(242,carrays);
+  CHECK_INT2(242,1,carrays[0].n,5);
+  CHECK_DOUBLE_ARRAY(242,2,5,((double*)carrays[0].d)[i],(1.9 + i * 0.9));
+  CHECK_INT2(242,3,carrays[1].n,2);
+  CHECK_DOUBLE_ARRAY(242,4,2,((double*)carrays[1].d)[i],0);
+  CHECK_INT2(242,5,carrays[2].n,0);
 
 
 

@@ -192,7 +192,7 @@
 177 F9CIpPm gd_carray_len
 178 F9CIpPm gd_entry (CARRAY)
 179 F9CIpPm gd_add_carray
-180 F9.IpPm gd_madd_carray
+180 F9CIpPm gd_madd_carray
 181 F9CI.Pm gd_alter_carray
   (test 182 is placed after test 40)
 183 F9CIpPm gd_constants (INT8)
@@ -254,3 +254,4 @@
 239 F9CIpPm gd_entry_list
 240 F9CIpPm gd_mplex_lookback
 241 F9CIpPm gd_linterp_tablename
+242 ..C-pP- gd_mcarrays

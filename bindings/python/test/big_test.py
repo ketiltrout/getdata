@@ -101,6 +101,7 @@ file.write(
     "lincom LINCOM data 1.1 2.2 INDEX 2.2 3.3;4.4 linterp const const\n"
     "/META data mstr STRING \"This is a string constant.\"\n"
     "/META data mconst CONST COMPLEX128 3.3;4.4\n"
+    "/META data mcarray CARRAY FLOAT64 1.9 2.8 3.7 4.6 5.5\n"
     "/META data mlut LINTERP DATA ./lut\n"
     "const CONST FLOAT64 5.5\n"
     "carray CARRAY FLOAT64 1.1 2.2 3.3 4.4 5.5 6.6\n"
@@ -226,14 +227,14 @@ try:
   n = d.nmfields("data")
 except:
   CheckOK(9)
-CheckSimple(9,n,3)
+CheckSimple(9,n,4)
 
 # 10: mfield_list check
 try:
   n = d.mfield_list("data")
 except:
   CheckOK(10)
-CheckSimple(10,n,["mstr", "mconst", "mlut"])
+CheckSimple(10,n,["mstr", "mconst", "mcarray", "mlut"])
 
 # 11: nframes check
 try:
@@ -1391,7 +1392,7 @@ except:
 CheckSimple2(167,1,len(n),1)
 if (pygetdata.__numpy_supported__):
   CheckSimple2(167,2,n[0][0],"carray")
-  CheckNumpy2(167,2,n[0][1],numpy.arange(1,7))
+  CheckNumpy2(167,3,n[0][1],numpy.arange(1,7))
 else:
   CheckSimple(167,n,[("carray", [1,2,3,4,5,6])])
 
@@ -1958,7 +1959,7 @@ try:
       pygetdata.ENTRIES_HIDDEN | pygetdata.ENTRIES_NOALIAS)
 except:
   CheckOK2(237, 1)
-CheckSimple2(237, 1, n, 4)
+CheckSimple2(237, 1, n, 5)
 try:
   n = d.nentries(type = pygetdata.VECTOR_ENTRIES,
       flags = pygetdata.ENTRIES_HIDDEN | pygetdata.ENTRIES_NOALIAS)
@@ -1995,6 +1996,20 @@ except:
   CheckOK(241)
 CheckEOS(241,n,"dirfile/lut")
 
+# 242: mcarrays
+try:
+  n = d.mcarrays("data", pygetdata.FLOAT)
+except:
+  CheckOK(242)
+
+CheckSimple2(242,1,len(n),2)
+if (pygetdata.__numpy_supported__):
+  CheckSimple2(242,2,n[0][0],"mcarray")
+  CheckNumpy2(242,3,n[0][1],1.9 + 0.9 * numpy.arange(0,5))
+  CheckSimple2(242,4,n[1][0],"mnew17")
+  CheckNumpy2(242,5,n[1][1],[0,0])
+else:
+  CheckSimple(242,n,[("mcarray", [1.9, 2.8, 3.7, 4.6, 5.5]), ("mnew17", [0,0])])
 
 
 

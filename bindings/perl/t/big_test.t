@@ -22,7 +22,7 @@
 use GetData;
 use Math::Complex;
 use strict;
-use Test::More tests => 1305;
+use Test::More tests => 1317;
 
 my $ne = 0;
 my ($s, @a, %h);
@@ -162,6 +162,7 @@ data RAW INT8 8
 lincom LINCOM data 1.1 2.2 INDEX 2.2 3.3;4.4 linterp const const
 /META data mstr STRING "This is a string constant."
 /META data mconst CONST COMPLEX128 3.3;4.4
+/META data mcarray CARRAY FLOAT64 1.9 2.8 3.7 4.6 5.5
 /META data mlut LINTERP DATA ./lut
 const CONST FLOAT64 5.5
 carray CARRAY FLOAT64 1.1 2.2 3.3 4.4 5.5 6.6
@@ -230,12 +231,12 @@ CheckSArray(8, \@a, @fields);
 # 9: nmfields check
 $s = $_->mfield_list("data");
 CheckOK(9);
-CheckNum(9, $s, 3);
+CheckNum(9, $s, 4);
 
 # 10: mfield_list check
 @a = $_->mfield_list("data");
 CheckOK(10);
-CheckSArray(10, \@a, qw(mstr mconst mlut));
+CheckSArray(10, \@a, qw(mstr mconst mcarray mlut));
 
 # 11: nframes check
 $s = $_->nframes;
@@ -1686,7 +1687,7 @@ CheckNum(236, $s, 0);
 $s = $_->entry_list("data", $GetData::SCALAR_ENTRIES,
   $GetData::ENTRIES_HIDDEN | $GetData::ENTRIES_NOALIAS);
 CheckOK2(237, 1);
-CheckNum2(237, 1, $s, 5);
+CheckNum2(237, 1, $s, 6);
 $s = $_->entry_list(undef, $GetData::VECTOR_ENTRIES,
   $GetData::ENTRIES_HIDDEN | $GetData::ENTRIES_NOALIAS);
 CheckOK2(237, 2);
@@ -1708,6 +1709,13 @@ CheckOK(240);
 $s = $_->linterp_tablename("linterp");
 CheckOK(241);
 CheckEOString(241, $s, "dirfile/lut");
+
+# 242: mcarrays
+@a = $_->mcarrays("data", $GetData::FLOAT64);
+CheckOK2(242, 1);
+CheckNum2(242, 2, $#a, 1);
+CheckArray2(242, 3, $a[0], 1.9, 2.8, 3.7, 4.6, 5.5 );
+CheckArray2(242, 4, $a[1], 1.8, 18 );
 
 
 
