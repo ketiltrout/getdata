@@ -115,7 +115,7 @@ AC_C_INLINE
 GD_PROG_CC_WALL
 
 dnl Declare a few feature test macros
-AC_DEFINE([GDIDL_EXTERNAL], [1], [ Define to 1 if building the GetData IDL bindings outside the GetData source tree ])
+AC_DEFINE([GD_EXTERNAL], [1], [ Define to 1 if building the GetData bindings outside the GetData source tree ])
 AC_DEFINE([_BSD_SOURCE], [], [ Expose BSD-derived definitions ])
 AC_DEFINE([_SVID_SOURCE], [], [ Expose System V-derived definitions ])
 AC_DEFINE([_POSIX_SOURCE], [], [ Expose POSIX.1-1990 conforming definitions ])
@@ -204,7 +204,7 @@ AM_CONDITIONAL(INTEL_FC_COMPILER, [test "x$gd_cv_fc_compiler_intel" == "xyes"])
 AM_CONDITIONAL(LFS_TRANSITIONAL_API, [test "x$gd_cv_type_off64_t" = "xyes"])
 AM_CONDITIONAL(TEST_IDL, [test "x$NO_DLOPEN_TESTS" = "x0"])
 AM_CONDITIONAL(HAVE_DIFF, [test "x$DIFF" != "x"])
-AM_CONDITIONAL(GDIDL_EXTERNAL, [true])
+AM_CONDITIONAL(GD_EXTERNAL, [true])
 
 dnl we do this here to avoid screwing up other tests
 LDFLAGS="${LDFLAGS}${NO_UNDEFINED}"

@@ -20,6 +20,22 @@
  */
 #include "gd_matlab.h"
 
+/*
+ % GD_ALTER_PROTECTION  Modify the byte sex of a fragment
+ %
+ %   GD_ALTER_PROTECTION(DIRFILE,LEVEL,FRAGMENT)
+ %             sets the protection level of the metadata fragment indexed by
+ %             FRAGMENT in the dirfile DIRFILE to LEVEL, which should be one of
+ %             the GD.PROTECT_[...] symbols provided by GETDATA_CONSTANTS.
+ %
+ %   The DIRFILE object should have previously been created with GD_OPEN.
+ %
+ %   See the documentation on the C API function gd_alter_protection(3) in
+ %   section 3 of the UNIX manual for more details.
+ %
+ %   See also GD_PROTECTION, GD_OPEN, GETDATA_CONSTANTS
+ */
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;

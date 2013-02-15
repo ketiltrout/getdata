@@ -1,37 +1,35 @@
-% Copyright (C) 2013 D. V. Wiebe
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-% This file is part of the GetData project.
-%
-% GetData is free software; you can redistribute it and/or modify it under
-% the terms of the GNU Lesser General Public License as published by the
-% Free Software Foundation; either version 2.1 of the License, or (at your
-% option) any later version.
-%
-% GetData is distributed in the hope that it will be useful, but WITHOUT
-% ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-% FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
-% License for more details.
-%
-% You should have received a copy of the GNU Lesser General Public License
-% along with GetData; if not, write to the Free Software Foundation, Inc.,
-% 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-
-% getdata_constants:
-% ------------------
-% This function defines a structure containing various constants used by
-% the GetData MATLAB bindings.  Typically it is called by doing something
-% like:
-%
-%   >> GD = getdata_constants()
-%
-% which then allows you to use constants like 'GD.RDWR' when required by
-% the bindings.
-%
-% For details on the GetData MATLAB bindings see the file README.matlab
-% distributed with the GetData source.
 function GD = getdata_constants()
+% GETDATA_CONSTANTS  Define GetData symbolic constants
+%
+%   GETDATA_CONSTANTS  produces a structure containing the symbolic constants
+%   used by the GetData bindings.  Member names of the structure correspond to
+%   names of symbolic constants used in the GetData C API.
+%
+%   Although it can be used in immediate context by doing something like
+%
+%     >> GETDATA_CONSTANTS.FLOAT64
+%
+%     ans =
+%
+%              136
+%
+%   it is usually assigned to a variable, which prevents having to evaluate this
+%   function more than once.  We recommend calling this variable GD:
+%
+%     >> GD = GETDATA_CONSTANTS;
+%     >> GD.FLOAT64
+%
+%     ans =
+%
+%              136
+%
+%   providing more succinct symbol names which closely resemble the cor-
+%   respondng C API symbol names (e.g. GD_FLOAT64).  In the documentation for
+%   these bindings, we assume such a GD variable has been defined, and refer to
+%   symbolic constants as GD.<...> when necessary.
+%
+%   See also GETDATA
+
   GD = struct(...
     'VERSION', '0.8.3a', ...
     'E_OK', int32(0), ...
@@ -201,3 +199,23 @@ function GD = getdata_constants()
     'MAX_LINE_LENGTH', int32(4096) ...
   );
 end
+
+% Copyright (C) 2013 D. V. Wiebe
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% This file is part of the GetData project.
+%
+% GetData is free software; you can redistribute it and/or modify it under
+% the terms of the GNU Lesser General Public License as published by the
+% Free Software Foundation; either version 2.1 of the License, or (at your
+% option) any later version.
+%
+% GetData is distributed in the hope that it will be useful, but WITHOUT
+% ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+% FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
+% License for more details.
+%
+% You should have received a copy of the GNU Lesser General Public License
+% along with GetData; if not, write to the Free Software Foundation, Inc.,
+% 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA

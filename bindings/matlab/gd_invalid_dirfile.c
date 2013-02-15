@@ -20,6 +20,19 @@
  */
 #include "gd_matlab.h"
 
+/*
+ % GD_INVALID_DIRFILE  Create an invalid dirfile object
+ %
+ %   D = GD_INVALID_DIRFILE()
+ %             creates an invalid dirfile object, D.  It should be deallocated
+ %             with GD_CLOSE or GD_DISCARD when no longer needed.
+ %
+ %   See the documentation on the C API function gd_invalid_dirfile(3) in
+ %   section 3 of the UNIX manual for more details.
+ %
+ %   See also GD_CLOSE, GD_DISCARD, GD_OPEN
+ */
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;

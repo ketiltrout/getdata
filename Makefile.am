@@ -38,10 +38,45 @@ DISTCHECK_CONFIGURE_FLAGS = --with-idl-dlm-dir="$$dc_install_base/idl" \
 														--with-perl-dir="$$dc_install_base/perl" \
 														--with-python-module-dir="$$dc_install_base/python"
 
+# matlab-only package
+matlabdist: $(DISTFILES)
+	rm -rf svn_export
+	svn export $(top_srcdir) svn_export
+	( cd svn_export && \
+		mkdir matlab_getdata && \
+		mkdir matlab_getdata/m4 && \
+		mkdir matlab_getdata/src && \
+		cp bindings/matlab/package/* matlab_getdata && \
+		cp -r bindings/matlab/Makefile.am bindings/matlab/gd_*.[cm] \
+		bindings/matlab/matlab.c bindings/matlab/gd_matlab.h bindings/matlab/test \
+		bindings/matlab/doc.tail bindings/matlab/Contents.m.head \
+		bindings/matlab/make_contents.sh.in \
+		matlab_getdata/src && \
+		cp -r bindings/make_parameters.c matlab_getdata && \
+		cp -r m4/matlab.m4 m4/compiler.m4 m4/version.m4 matlab_getdata/m4 && \
+		cp -r doc/README.matlab COPYING AUTHORS ChangeLog INSTALL NEWS \
+		matlab_getdata && \
+		( cd matlab_getdata && \
+		aclocal -I m4 && \
+		libtoolize && \
+		autoconf && \
+		autoheader && \
+		automake --add-missing --force-missing && \
+		./configure && \
+		make dist && \
+		cp matlab_${distdir}* ../.. \
+		) )
+	rm -rf svn_export
+
+matlabdistcheck: matlab_$(distdir).tar.gz
+	tar -zxvf $<
+	cd matlab_$(distdir) && ./configure && make dist && make distcheck
+	rm -rf matlab_$(distdir)
+
 # idl-only package
 idldist: $(DISTFILES)
 	rm -rf svn_export
-	svn export . svn_export
+	svn export $(top_srcdir) svn_export
 	( cd svn_export && \
 		mkdir idl_getdata && \
 		mkdir idl_getdata/m4 && \
@@ -74,7 +109,7 @@ idldistcheck: idl_$(distdir).tar.gz
 windist: $(DISTFILES)
 	rm -rf crlf_export
 	cd man && $(MAKE) htmlman
-	svn --native-eol CRLF export . crlf_export
+	svn --native-eol CRLF export $(top_srcdir) crlf_export
 	( cd crlf_export && \
 		mkdir $(distdir) && \
 		mkdir $(distdir)/bindings && \

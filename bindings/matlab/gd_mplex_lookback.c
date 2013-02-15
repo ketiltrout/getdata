@@ -20,6 +20,22 @@
  */
 #include "gd_matlab.h"
 
+/*
+ % GD_MPLEX_LOOKBACK  Set the MPLEX look-back length
+ %
+ %   GD_MPLEX_LOOKBACK(DIRFILE,LOOKBACK)
+ %             sets the lookback length to LOOKBACK, which should be a number
+ %             or the special symbol GD.LOOKBACK_ALL provided by
+ %             GETDATA_CONSTANTS.
+ %
+ %   The DIRFILE object should have previously been created with GD_OPEN.
+ %
+ %   See the documentation on the C API function gd_mplex_lookback(3) in
+ %   section 3 of the UNIX manual for more details.
+ %
+ %   See also GD_GETDATA, GD_OPEN, GETDATA_CONSTANTS
+ */
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;

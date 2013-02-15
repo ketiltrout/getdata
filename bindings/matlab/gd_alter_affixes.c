@@ -20,6 +20,25 @@
  */
 #include "gd_matlab.h"
 
+/*
+ % GD_ALTER_AFFIXES  Modify the affixes of an included fragment
+ %
+ %   GD_ALTER_ENDIANNESS(DIRFILE,FRAGMENT,PREFIX,SUFFIX)
+ %             modifies the prefix and suffix associated with the fragment
+ %             indexed by FRAGMENT in the dirfile DIRFILE.  If PREFIX or SUFFIX
+ %             is numeric zero, no change is made to the associated affix.
+ %             Otherwise, the affix is set to the value of the parameter.  To
+ %             remove an affix, set it to the empty string: ''.
+ %             Otherwise, the binary files are not modified.
+ %
+ %   The DIRFILE object should have previously been created with GD_OPEN.
+ %
+ %   See the documentation on the C API function gd_alter_affixes(3) in
+ %   section 3 of the UNIX manual for more details.
+ %
+ %   See also GD_FRAGMENT_AFFIXES, GD_INCLUDE, GD_OPEN
+ */
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;
@@ -27,14 +46,12 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   char *p = NULL, *s = NULL;
 
   GDMX_NO_LHS;
-  GDMX_CHECK_RHS2(2, 4);
+  GDMX_CHECK_RHS(4);
 
   D = gdmx_to_dirfile(prhs[0]);
   i = gdmx_to_int(prhs, 1);
-  if (nrhs > 2)
-    p = gdmx_to_string(prhs, 2, 1);
-  if (nrhs > 3)
-    s = gdmx_to_string(prhs, 3, 1);
+  p = gdmx_to_string(prhs, 2, 1);
+  s = gdmx_to_string(prhs, 3, 1);
 
   gd_alter_affixes(D, i, p, s);
 

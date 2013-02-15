@@ -20,6 +20,20 @@
  */
 #include "gd_matlab.h"
 
+/*
+ % GD_VALIDATE  flush modifications to disk
+ %
+ %   B = GD_VALIDATE(DIRFILE,FIELD_CODE)
+ %             returns boolean true, B, if FIELD_CODE is a valid field.
+ %
+ %   The DIRFILE object should have previously been created with GD_OPEN.
+ %
+ %   See the documentation on the C API function gd_validate(3) in section 3
+ %   of the UNIX manual for more details.
+ %
+ %   See also GD_OPEN
+ */
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;

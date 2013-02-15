@@ -20,6 +20,22 @@
  */
 #include "gd_matlab.h"
 
+/*
+ % GD_NATIVE_TYPE  Report the native data type of a field
+ %
+ %   T = GD_NATIVE_TYPE(DIRFILE,FIELD_CODE)
+ %             returns the native data type, T, of the field specified by
+ %             FIELD_CODE.  The returned value will be one of the data type
+ %             symbols provided by GETDATA_CONSTATNS.
+ %
+ %   The DIRFILE object should have previously been created with GD_OPEN.
+ %
+ %   See the documentation on the C API function gd_native_type(3) in section 3
+ %   of the UNIX manual for more details.
+ %
+ %   See also GD_OPEN, GETDATA_CONSTANTS
+ */
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;

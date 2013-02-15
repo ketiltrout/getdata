@@ -20,6 +20,22 @@
  */
 #include "gd_matlab.h"
 
+/*
+ % GD_PROTECTION  Report the protection level of a fragment
+ %
+ %   P = GD_PROTECTION(DIRFILE,FRAGMENT)
+ %             reports the protection level, P, of the fragment given by
+ %             FRAGMENT.  The returned value will be one of the GD.PROTECT_...
+ %             symbols provided by GETDATA_CONSTANTS.
+ %
+ %   The DIRFILE object should have previously been created with GD_OPEN.
+ %
+ %   See the documentation on the C API function gd_protection(3) in section 3
+ %   of the UNIX manual for more details.
+ %
+ %   See also GD_ALTER_PROTECTION, GD_OPEN, GETDATA_CONSTANTS
+ */
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;

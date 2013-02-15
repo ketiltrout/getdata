@@ -20,6 +20,23 @@
  */
 #include "gd_matlab.h"
 
+/*
+ % GD_ENTRY  Retrieve field metadata
+ %
+ %   E = GD_ENTRY(DIRFILE,FIELD_CODE)
+ %             returns an structure, E, containing the metadata of the field
+ %             specified by FIELD_CODE in the dirfile DIRFILE.  See GETDATA 
+ %             and the corresponding C API documentation for information on
+ %             this structure.
+ %
+ %   The DIRFILE object should have previously been created with GD_OPEN.
+ %
+ %   See the documentation on the C API function gd_entry(3) in section 3
+ %   of the UNIX manual for more details.
+ %
+ %   See also GD_ADD, GD_ENTRY_TYPE, GD_ALTER_ENTRY, GD_OPEN, GETDATA
+ */
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;

@@ -20,19 +20,37 @@
  */
 #include "gd_matlab.h"
 
+/*
+ % GD_MOVE  Move a field between fragments
+ %
+ %   GD_MOVE(DIRFILE,FIELD_CODE,NEW_FRAGMENT[,MOVE_DATA])
+ %             moves the field called FIELD_CODE to the new fragment indexed by
+ %             NEW_FRAGMENT.  If MOVE_DATA is given and non-zero, and the field
+ %             is a RAW field, the binary file associated with it will also be
+ %             moved, if necessary.
+ %
+ %   The DIRFILE object should have previously been created with GD_OPEN.
+ %
+ %   See the documentation on the C API function gd_move(3) in
+ %   section 3 of the UNIX manual for more details.
+ %
+ %   See also GD_MOVE_ALIAS, GD_OPEN
+ */
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;
   char *field_code;
-  int new_frag, move_data;
+  int new_frag, move_data = 0;
 
   GDMX_NO_LHS;
-  GDMX_CHECK_RHS(4);
+  GDMX_CHECK_RHS2(3,4);
 
   D = gdmx_to_dirfile(prhs[0]);
   field_code = gdmx_to_string(prhs, 1, 0);
   new_frag = gdmx_to_int(prhs, 2);
-  move_data = gdmx_to_int(prhs, 3);
+  if (nrhs > 3)
+    move_data = gdmx_to_int(prhs, 3);
 
   gd_move(D, field_code, new_frag, move_data);
 

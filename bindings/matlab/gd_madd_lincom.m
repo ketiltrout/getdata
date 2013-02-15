@@ -1,3 +1,24 @@
+function gd_madd_lincom(D, parent, field_code, in_fields, m, b);
+% GD_MADD_LINCOM  Add a LINCOM metafield
+%
+%   GD_MADD_LINCOM(DIRFILE,PARENT,NAME,IPUTS,M,B)
+%             adds a LINCOM metafield called NAME under PARENT to the dirfile
+%             specified by DIRFILE. The input fields are provided in the cell
+%             array INPUTS and the slopes and offsets given by the numeric
+%             arrays M and B, which may be complex valued.
+%
+%   The DIRFILE object should have previously been created with GD_OPEN.
+%
+%   See the documentation on the C API function gd_madd_lincom(3) in section 3
+%   of the UNIX manual for more details.
+%
+%   See also GD_ADD_LINCOM, GD_MADD, GD_OPEN
+
+  GD = getdata_constants();
+  gd_madd(D, struct('field', field_code, 'field_type', GD.LINCOM_ENTRY, ...
+  'in_fields', {in_fields}, 'm', m, 'b', b), parent);
+end
+
 % Copyright (C) 2013 D. V. Wiebe
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -17,9 +38,3 @@
 % You should have received a copy of the GNU Lesser General Public License
 % along with GetData; if not, write to the Free Software Foundation, Inc.,
 % 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-
-function gd_madd_lincom(D, parent, field_code, in_fields, m, b);
-  GD = getdata_constants();
-  gd_madd(D, struct('field', field_code, 'field_type', GD.LINCOM_ENTRY, ...
-  'in_fields', {in_fields}, 'm', m, 'b', b), parent);
-end

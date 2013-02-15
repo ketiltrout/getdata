@@ -20,6 +20,21 @@
  */
 #include "gd_matlab.h"
 
+/*
+ % GD_ALIASES  Retrieve a list of aliases for a field
+ %
+ %   A = GD_ALIASES(DIRFILE,NAME)
+ %             returns a cell array of strings, A, comprising all the aliases of
+ %             the field called NAME.
+ %
+ %   The DIRFILE object should have previously been created with GD_OPEN.
+ %
+ %   See the documentation on the C API function gd_aliases(3) in section 3
+ %   of the UNIX manual for more details.
+ %
+ %   See also GD_NALIASES, GD_ENTRY_LIST, GD_ALIAS_TARGET, GD_OPEN
+ */
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;

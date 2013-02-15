@@ -20,6 +20,26 @@
  */
 #include "gd_matlab.h"
 
+/*
+ % GD_OPEN  Open or create a dirfile
+ %
+ %   D = GD_OPEN(PATH[,FLAGS])
+ %             opens the dirfile PATH, returning a dirfile object, D.  If
+ %             given, FLAGS should be a bitwise or'd collection of dirfile flags
+ %             provided by GETDATA_CONSTANTS.  If omitted, FLAGS defaults to
+ %             GD.RDONLY.
+ %
+ %   Unlike in the C API, an error in GD_OPEN does not result in the creation of
+ %   an invalid dirfile (so GD_ERROR and GD_ERROR_STRING cannot be used in a
+ %   CATCH block after a failed a GD_OPEN call).  Open dirfiles should be
+ %   deallocated by calling GD_DISCARD or GD_CLOSE when no longer needed.
+ %
+ %   See the documentation on the C API function gd_open(3) in section 3
+ %   of the UNIX manual for more details.
+ %
+ %   See also GD_DISCARD, GD_CLOSE, GETDATA_CONSTANTS
+ */
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   char *filename;

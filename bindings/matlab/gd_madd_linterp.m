@@ -1,3 +1,23 @@
+function gd_madd_linterp(D, parent, field_code, in_fields, table)
+% GD_MADD_LINTERP  Add a LINTERP metafield
+%
+%   GD_MADD_LINTERP(DIRFILE,PARENT,NAME,INPUT,TABLE)
+%             adds a LINTERP metafield called NAME under PARENT to the dirfile
+%             specified by DIRFILE.  The input field is INPUT and the associated
+%             look-up table is given by the path TABLE.
+%
+%   The DIRFILE object should have previously been created with GD_OPEN.
+%
+%   See the documentation on the C API function gd_madd_linterp(3) in section 3
+%   of the UNIX manual for more details.
+%
+%   See also GD_ADD_LINTERP, GD_MADD, GD_OPEN
+
+  GD = getdata_constants();
+  gd_madd(D, struct('field', field_code, 'field_type', GD.LINTERP_ENTRY, ...
+  'in_fields', in_fields, 'table', table), parent);
+end
+
 % Copyright (C) 2013 D. V. Wiebe
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -17,9 +37,3 @@
 % You should have received a copy of the GNU Lesser General Public License
 % along with GetData; if not, write to the Free Software Foundation, Inc.,
 % 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-
-function gd_madd_linterp(D, parent, field_code, in_fields, table)
-  GD = getdata_constants();
-  gd_madd(D, struct('field', field_code, 'field_type', GD.LINTERP_ENTRY, ...
-  'in_fields', in_fields, 'table', table), parent);
-end

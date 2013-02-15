@@ -1,3 +1,23 @@
+function gd_madd_recip(D, parent, field_code, in_fields, dividend)
+% GD_MADD_RECIP  Add a RECIP metafield
+%
+%   GD_MADD_RECIP(DIRFILE,PARENT,NAME,INPUT,DIVIDEND)
+%             adds a RECIP metafield called NAME under PARENT to the dirfile
+%             specified by DIRFILE.  The input field is INPUT, and the dividend
+%             DIVIDEND.
+%
+%   The DIRFILE object should have previously been created with GD_OPEN.
+%
+%   See the documentation on the C API function gd_madd_recip(3) in section 3
+%   of the UNIX manual for more details.
+%
+%   See also GD_ADD_RECIP, GD_MADD, GD_OPEN
+
+  GD = getdata_constants();
+  gd_madd(D, struct('field', field_code, 'field_type', GD.RECIP_ENTRY, ...
+  'in_fields', {in_fields}, 'dividend', dividend), parent);
+end
+
 % Copyright (C) 2013 D. V. Wiebe
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -17,9 +37,3 @@
 % You should have received a copy of the GNU Lesser General Public License
 % along with GetData; if not, write to the Free Software Foundation, Inc.,
 % 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-
-function gd_madd_recip(D, parent, field_code, in_fields, dividend)
-  GD = getdata_constants();
-  gd_madd(D, struct('field', field_code, 'field_type', GD.RECIP_ENTRY, ...
-  'in_fields', {in_fields}, 'dividend', dividend), parent);
-end

@@ -1,3 +1,23 @@
+function gd_alter_phase(D, field_code, in_fields, shift)
+% GD_ALTER_PHASE  Modify the metadata of a PHASE field
+%
+%   GD_ALTER_PHASE(DIRFILE,NAME,INPUT,SHIFT)
+%             modifies the metadata of the PHASE field called NAME in the
+%             dirfile specified by DIRFILE.  The input field is set to INPUT,
+%             if non-zero, and the phase shift to SHIFT.
+%
+%   The DIRFILE object should have previously been created with GD_OPEN.
+%
+%   See the documentation on the C API function gd_alter_phase(3) in section 3
+%   of the UNIX manual for more details.
+%
+%   See also GD_ALTER_ENTRY, GD_OPEN
+
+  GD = getdata_constants();
+  gd_alter_entry(D, field_code, struct('field_type', GD.PHASE_ENTRY, ...
+  'in_fields', {in_fields}, 'shift', shift), 0);
+end
+
 % Copyright (C) 2013 D. V. Wiebe
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -17,9 +37,3 @@
 % You should have received a copy of the GNU Lesser General Public License
 % along with GetData; if not, write to the Free Software Foundation, Inc.,
 % 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-
-function gd_alter_phase(D, field_code, in_fields, shift)
-  GD = getdata_constants();
-  gd_alter_entry(D, field_code, struct('field_type', GD.PHASE_ENTRY, ...
-  'in_fields', {in_fields}, 'shift', shift), 0);
-end

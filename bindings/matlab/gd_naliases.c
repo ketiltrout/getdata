@@ -20,6 +20,21 @@
  */
 #include "gd_matlab.h"
 
+/*
+ % GD_NALIASES  Retrieve the number of names for a field
+ %
+ %   N = GD_NALIASES(DIRFILE,FIELD_CODE)
+ %             returns the number of aliases, N, of FIELD_CODE (including
+ %             FIELD_CODE itself.
+ %
+ %   The DIRFILE object should have previously been created with GD_OPEN.
+ %
+ %   See the documentation on the C API function gd_naliases(3) in section 3
+ %   of the UNIX manual for more details.
+ %
+ %   See also GD_ALIASES, GD_NENTRIES, GD_OPEN
+ */
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;

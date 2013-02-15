@@ -20,6 +20,20 @@
  */
 #include "gd_matlab.h"
 
+/*
+ % GD_GET_CARRAY  Retrieve STRING data
+ %
+ %   S = GD_GET_CARRAY(DIRFILE,FIELD_CODE)
+ %             retrieves the value, S, the STRING field called FIELD_CODE.
+ %
+ %   The DIRFILE object should have previously been created with GD_OPEN.
+ %
+ %   See the documentation on the C API function gd_get_string(3) in
+ %   section 3 of the UNIX manual for more details.
+ %
+ %   See also GD_PUT_STRING, GD_OPEN
+ */
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;

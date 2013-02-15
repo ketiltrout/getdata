@@ -1,3 +1,22 @@
+function gd_madd_multiply(D, parent, field_code, in1, in2)
+% GD_MADD_MULTIPLY  Add a MULTIPLY metafield
+%
+%   GD_MADD_MULTIPLY(DIRFILE,PARENT,NAME,INPUT1,INPUT2)
+%             adds a MULTIPLY metafield called NAME under PARENT to the dirfile
+%             specified by DIRFILE.  The input fields are INPUT1 and INPUT2.
+%
+%   The DIRFILE object should have previously been created with GD_OPEN.
+%
+%   See the documentation on the C API function gd_madd_multiply(3) in section 3
+%   of the UNIX manual for more details.
+%
+%   See also GD_ADD_MULTIPLY, GD_MADD, GD_OPEN
+
+  GD = getdata_constants();
+  gd_madd(D, struct('field', field_code, 'field_type', GD.MULTIPLY_ENTRY, ...
+  'in_fields', {{in1; in2}}), parent);
+end
+
 % Copyright (C) 2013 D. V. Wiebe
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -17,9 +36,3 @@
 % You should have received a copy of the GNU Lesser General Public License
 % along with GetData; if not, write to the Free Software Foundation, Inc.,
 % 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-
-function gd_madd_multiply(D, parent, field_code, in1, in2)
-  GD = getdata_constants();
-  gd_madd(D, struct('field', field_code, 'field_type', GD.MULTIPLY_ENTRY, ...
-  'in_fields', {{in1; in2}}), parent);
-end

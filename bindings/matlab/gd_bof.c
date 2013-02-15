@@ -20,6 +20,21 @@
  */
 #include "gd_matlab.h"
 
+/*
+ % GD_BOF  Report the start of data in a field
+ %
+ %   S = GD_BOF(DIRFILE,FIELD_CODE)
+ %             reports the sample number, S,  where the data of the field
+ %             specified by FIELD_CODE starts.
+ %
+ %   The DIRFILE object should have previously been created with GD_OPEN.
+ %
+ %   See the documentation on the C API function gd_bof(3) in section 3
+ %   of the UNIX manual for more details.
+ %
+ %   See also GD_EOF, GD_OPEN, GD_NFRAMES
+ */
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;

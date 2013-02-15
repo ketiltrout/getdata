@@ -20,6 +20,22 @@
  */
 #include "gd_matlab.h"
 
+/*
+ % GD_CLOSE  Save and close a dirfile
+ %
+ %   GD_CLOSE(DIRFILE)
+ %             flushes all changes and closes the dirfile DIRFILE.  The DIRFILE
+ %             object supplied will no longer be valid if this function
+ %             succeeds.
+ %
+ %   The DIRFILE object should have previously been created with GD_OPEN.
+ %
+ %   See the documentation on the C API function gd_close(3) in section 3
+ %   of the UNIX manual for more details.
+ %
+ %   See also GD_DISCARD, GD_OPEN, GD_FLUSH
+ */
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;

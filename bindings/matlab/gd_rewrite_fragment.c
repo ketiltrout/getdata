@@ -20,6 +20,21 @@
  */
 #include "gd_matlab.h"
 
+/*
+ % GD_REWRITE_FRAGMENT  Rewrite fragment metadata to disk
+ %
+ %   GD_REWRITE_FRAGMENT(DIRFILE[,FRAGMENT])
+ %             forces a rewrite of the fragment metadata on disk of the fragment
+ %             indexed by FRAGMENT, if given, or else all fragments.
+ %
+ %   The DIRFILE object should have previously been created with GD_OPEN.
+ %
+ %   See the documentation on the C API function gd_rewrite_fragment(3) in
+ %   section 3 of the UNIX manual for more details.
+ %
+ %   See also GD_METAFLUSH, GD_OPEN, GD_CLOSE
+ */
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;

@@ -20,6 +20,25 @@
  */
 #include "gd_matlab.h"
 
+/*
+ % GD_ERROR_STRING  retrieve the library error string
+ %
+ %   S = GD_ERROR_STRING(DIRFILE)
+ %             returns the error string, S, associated with the last call to the
+ %             C GetData library.  Since the MATLAB bindings throw exceptions
+ %             on library error, it is only ever useful to use this inside a
+ %             CATCH block after a GetData Library error has been thrown.  In
+ %             this case, the .message member of thrown MEXCEPTION object also
+ %             contains this string.
+ %
+ %   The DIRFILE object should have previously been created with GD_OPEN.
+ %
+ %   See the documentation on the C API function gd_error_string(3) in section 3
+ %   of the UNIX manual for more details.
+ %
+ %   See also GD_ERROR, GD_OPEN
+ */
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;

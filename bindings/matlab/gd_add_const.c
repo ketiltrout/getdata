@@ -20,6 +20,23 @@
  */
 #include "gd_matlab.h"
 
+/*
+ % GD_ADD_CONST  Add a CONST field
+ %
+ %   GD_ADD_CONST(DIRFILE,NAME,TYPE,VALUE,FRAGMENT)
+ %             adds a CONST field called NAME to the dirfile specified by
+ %             DIRFILE.  The storage type is TYPE, and the value of the field
+ %             is VALUE.  The field is added to the fragment indexed by
+ %             FRAGMENT.
+ %
+ %   The DIRFILE object should have previously been created with GD_OPEN.
+ %
+ %   See the documentation on the C API function gd_add_const(3) in section 3
+ %   of the UNIX manual for more details.
+ %
+ %   See also GD_ADD, GD_MADD_CONST, GD_OPEN
+ */
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;

@@ -1,3 +1,23 @@
+function gd_madd_polynom(D, parent, field_code, in_fields, a)
+% GD_MADD_POLYNOM  Add a POLYNOM metafield
+%
+%   GD_MADD_POLYNOM(DIRFILE,PARENT,NAME,INPUT,A)
+%             adds a POLYNOM metafield called NAME under PARENT to the dirfile
+%             specified by DIRFILE.  The input field is INPUT and the vector of
+%             co-efficients is A.
+%
+%   The DIRFILE object should have previously been created with GD_OPEN.
+%
+%   See the documentation on the C API function gd_madd_polynom(3) in section 3
+%   of the UNIX manual for more details.
+%
+%   See also GD_ADD_POLYNOM, GD_MADD, GD_OPEN
+
+  GD = getdata_constants();
+  gd_madd(D, struct('field', field_code, 'field_type', GD.POLYNOM_ENTRY, ...
+  'in_fields', {in_fields}, 'a', a), parent);
+end
+
 % Copyright (C) 2013 D. V. Wiebe
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -17,9 +37,3 @@
 % You should have received a copy of the GNU Lesser General Public License
 % along with GetData; if not, write to the Free Software Foundation, Inc.,
 % 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-
-function gd_madd_polynom(D, parent, field_code, in_fields, a)
-  GD = getdata_constants();
-  gd_madd(D, struct('field', field_code, 'field_type', GD.POLYNOM_ENTRY, ...
-  'in_fields', {in_fields}, 'a', a), parent);
-end

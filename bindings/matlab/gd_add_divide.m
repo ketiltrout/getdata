@@ -1,3 +1,23 @@
+function gd_add_divide(D, field_code, in1, in2, fragment_index)
+% GD_ADD_DIVIDE  Add a DIVIDE field
+%
+%   GD_ADD_DIVIDE(DIRFILE,NAME,INPUT1,INPUT2,FRAGMENT) 
+%             adds a DIVIDE field called NAME to the dirfile specified by
+%             DIRFILE.  The input fields are INPUT1 and INPUT2 and the field
+%             is added to the fragment indexed by FRAGMENT.
+%
+%   The DIRFILE object should have previously been created with GD_OPEN.
+%
+%   See the documentation on the C API function gd_add_divide(3) in section 3
+%   of the UNIX manual for more details.
+%
+%   See also GD_ADD, GD_MADD_DIVIDE, GD_OPEN
+
+  GD = getdata_constants();
+  gd_add(D, struct('field', field_code, 'field_type', GD.DIVIDE_ENTRY, ...
+  'fragment_index', fragment_index, 'in_fields', {{in1; in2}}));
+end
+
 % Copyright (C) 2013 D. V. Wiebe
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -17,9 +37,3 @@
 % You should have received a copy of the GNU Lesser General Public License
 % along with GetData; if not, write to the Free Software Foundation, Inc.,
 % 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-
-function gd_add_divide(D, field_code, in1, in2, fragment_index)
-  GD = getdata_constants();
-  gd_add(D, struct('field', field_code, 'field_type', GD.DIVIDE_ENTRY, ...
-  'fragment_index', fragment_index, 'in_fields', {{in1; in2}}));
-end

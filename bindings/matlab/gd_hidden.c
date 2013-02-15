@@ -20,6 +20,20 @@
  */
 #include "gd_matlab.h"
 
+/*
+ % GD_HIDDEN  Report whether a field is hidden
+ %
+ %   B = GD_HIDDEN(DIRFILE,FIELD_CODE)
+ %             returns boolean true, B, if FIELD_CODE is hidden in the metadata.
+ %
+ %   The DIRFILE object should have previously been created with GD_OPEN.
+ %
+ %   See the documentation on the C API function gd_hidden(3) in section 3
+ %   of the UNIX manual for more details.
+ %
+ %   See also GD_HIDE, GD_UNHIDE, GD_OPEN
+ */
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;

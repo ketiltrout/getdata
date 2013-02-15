@@ -129,18 +129,18 @@ fi
 
 if test "x${have_matlab}" != "xno"; then
   dnl installdir
-  default_matlabdir=$libdir/getdata/matlab
+  default_matlabbasedir=$libdir/getdata/matlab
   AC_ARG_WITH([matlab-dir], AS_HELP_STRING([--with-matlab-dir=PATH],
-        [ Install Matlab bindings in PATH.  [LIBDIR/getdata/matlab] ]),
+        [ Install Matlab bindings in PATH/getdata.  [LIBDIR/getdata/matlab] ]),
       [
       case "${withval}" in
-      (no) matlabdir=$default_matlabdir ;;
-      (*) matlabdir="${withval}"
+      (no) matlabbasedir=$default_matlabbasedir ;;
+      (*) matlabbasedir="${withval}"
       esac
-      ], [ matlabdir=$default_matlabdir ])
+      ], [ matlabbasedir=$default_matlabbasedir ])
   AC_MSG_CHECKING([matlab install directory])
-  AC_MSG_RESULT([$matlabdir])
-  AC_SUBST([matlabdir])
+  AC_MSG_RESULT([$matlabbasedir])
+  AC_SUBST([matlabbasedir])
 
   dnl mex extension
   AC_MSG_CHECKING([MEX extension])

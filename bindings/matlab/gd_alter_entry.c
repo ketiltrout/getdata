@@ -20,21 +20,43 @@
  */
 #include "gd_matlab.h"
 
+/*
+ % GD_ALTER_ENTRY  Modify field metadata
+ %
+ %   GD_ALTER_ENTRY(DIRFILE,FIELD_CODE,ENTRY[,RECODE])
+ %             modifies the metadata of the field FIELD_CODE in the dirfile
+ %             DIRFILE according to the contents of the ENTRY struct.  If
+ %             RECODE is given and non-zero, other data will be updated to
+ %             reflect metadata changes.
+ %
+ %   The DIRFILE object should have previously been created with GD_OPEN.
+ %
+ %   This function ignores both the .FIELD member and the .FRAGMENT_INDEX
+ %   member of the supplied ENTRY structure.  They may be omitted.  For a
+ %   discussion of the ENTRY structure, see GETDATA.
+ %
+ %   See the documentation on the C API function gd_alter_endianness(3) in
+ %   section 3 of the UNIX manual for more details.
+ %
+ %   See also GD_ADD, GD_OPEN, GETDATA
+ */
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;
   void *data;
   char *field_code;
   gd_entry_t *E;
-  int recode;
+  int recode = 0;
 
   GDMX_NO_LHS;
-  GDMX_CHECK_RHS(4);
+  GDMX_CHECK_RHS2(3,4);
 
   D = gdmx_to_dirfile(prhs[0]);
   field_code = gdmx_to_string(prhs, 1, 0);
   E = gdmx_to_entry(prhs, 2, GDMX_ENO_FRAG | GDMX_ENO_FIELD);
-  recode = gdmx_to_int(prhs, 3);
+  if (nrhs > 3)
+    recode = gdmx_to_int(prhs, 3);
 
   gd_alter_entry(D, field_code, E, recode);
 

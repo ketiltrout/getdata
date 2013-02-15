@@ -33,6 +33,7 @@ try
   'lincom LINCOM data 1.1 2.2 INDEX 2.2 3.3;4.4 linterp const const\n'...
   '/META data mstr STRING "This is a string constant."\n'...
   '/META data mconst CONST COMPLEX128 3.3;4.4\n'...
+  '/META data mcarray CARRAY FLOAT64 1.9 2.8 3.7 4.6 5.5\n'...
   '/META data mlut LINTERP DATA ./lut\n'...
   'const CONST FLOAT64 5.5\n'...
   'carray CARRAY FLOAT64 1.1 2.2 3.3 4.4 5.5 6.6\n'...
@@ -134,7 +135,7 @@ try
   % 9: gd_nmfields check
   try
     d = gd_nmfields(D, 'data');
-    ne = ne + check_num(8, d, 3);
+    ne = ne + check_num(9, d, 4);
   catch exc
     ne = ne + check_ok(exc, 9);
   end
@@ -142,7 +143,7 @@ try
   % 10: gd_mfield_list check
   try
     d = gd_mfield_list(D, 'data');
-    ne = ne + check_sarray(10, d, { 'mstr'; 'mconst'; 'mlut' });
+    ne = ne + check_sarray(10, d, { 'mstr'; 'mconst'; 'mcarray'; 'mlut' });
   catch exc
     ne = ne + check_ok(exc, 10);
   end
@@ -1524,7 +1525,7 @@ try
 
   % 180: add_carray
   try
-    gd_madd_carray(D, 'data', 'mnew17', GD.FLOAT64, [1.1,2.2,3.3,4.4]);
+    gd_madd_carray(D, 'data', 'mnew17', GD.FLOAT64, [1.8, 18.0]);
   catch exc
     ne = ne + check_ok2(exc, 180, 1);
   end
@@ -1535,14 +1536,14 @@ try
     ne = ne + check_num2(180, 2, d.field_type, GD.CARRAY_ENTRY);
     ne = ne + check_num2(180, 3, d.fragment_index, 0);
     ne = ne + check_num2(180, 4, d.const_type, GD.FLOAT64);
-    ne = ne + check_num2(180, 4, d.array_len, 4);
+    ne = ne + check_num2(180, 4, d.array_len, 2);
   catch exc
     ne = ne + check_ok2(exc, 180, 2);
   end
 
   try
     d = gd_get_carray(D, 'data/mnew17');
-    ne = ne + check_array(180, d, [1.1,2.2,3.3,4.4]);
+    ne = ne + check_array(180, d, [1.8, 18.0]);
   catch exc
     ne = ne + check_ok2(exc, 180, 3);
   end
@@ -1803,7 +1804,7 @@ try
 
   % 223: include_affix
   try
-    gd_include_affix(D, 'format1', 0, GD.CREAT + GD.EXCL, 'A', 'Z');
+    gd_include(D, 'format1', 0, GD.CREAT + GD.EXCL, 'A', 'Z');
   catch exc
     ne = ne + check_ok2(exc, 41, 1);
   end
@@ -1969,7 +1970,7 @@ try
   try
     d = gd_nentries(D, 'data', GD.SCALAR_ENTRIES, ...
     GD.ENTRIES_HIDDEN + GD.ENTRIES_NOALIAS);
-    ne = ne + check_num(237, d, 5);
+    ne = ne + check_num(237, d, 6);
   catch exc
     ne = ne + check_ok(exc, 237);
   end
@@ -1978,8 +1979,8 @@ try
   try
     d = gd_entry_list(D, 'data', GD.SCALAR_ENTRIES, ...
     GD.ENTRIES_HIDDEN + GD.ENTRIES_NOALIAS);
-    ne = ne + check_sarray(239, d, {'mstr', 'mconst', 'mnew11', 'mnew12', ...
-    'mnew17'});
+    ne = ne + check_sarray(239, d, {'mstr', 'mconst', 'mcarray', 'mnew11', ...
+    'mnew12', 'mnew17'});
   catch exc
     ne = ne + check_ok(exc, 239);
   end
@@ -1997,6 +1998,16 @@ try
     ne = ne + check_eostring(241, d, 'dirfile/lut');
   catch exc
     ne = ne + check_ok(exc, 241);
+  end
+
+  % 242: gd_carrays
+  try
+    d = gd_mcarrays(D, 'data');
+    ne = ne + check_num2(242, 1, length(d), 2);
+    ne = ne + check_array2(242, 2, d{1}, [1.9, 2.8, 3.7, 4.6, 5.5]);
+    ne = ne + check_array2(242, 3, d{2}, [1.8, 18.0]);
+  catch exc
+    ne = ne + check_ok(exc, 242);
   end
 
 

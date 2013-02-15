@@ -20,6 +20,23 @@
  */
 #include "gd_matlab.h"
 
+/*
+ % GD_FRAMENUM  Reverse look-up on a field
+ %
+ %   F = GD_FRAMENUM(DIRFILE,FIELD_CODE,VALUE[,START[,END]])
+ %             performs a reverse look-up on the field FIELD_CODE, reporting the
+ %             (fractional) frame number, F, where it takes on the value VALUE.
+ %             If given and non-zero, only the portion of the field between
+ %             START and END are considered.
+ %
+ %   The DIRFILE object should have previously been created with GD_OPEN.
+ %
+ %   See the documentation on the C API function gd_framenum_subset(3) in
+ %   section 3 of the UNIX manual for more details.
+ %
+ %   See also GD_BOF, GD_EOF, GD_OPEN, GD_GETDATA
+ */
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;

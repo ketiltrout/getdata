@@ -20,6 +20,20 @@
  */
 #include "gd_matlab.h"
 
+/*
+ % GD_NFRAGMETNS  Report the number of fragments in a dirfile
+ %
+ %   N = GD_NFRAGMENTS(DIRFILE)
+ %             returns the number of fragments, N, in the dirfile DIRFILE.
+ %
+ %   The DIRFILE object should have previously been created with GD_OPEN.
+ %
+ %   See the documentation on the C API function gd_nfragments(3) in section 3
+ %   of the UNIX manual for more details.
+ %
+ %   See also GD_OPEN
+ */
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;

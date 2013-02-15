@@ -20,6 +20,23 @@
  */
 #include "gd_matlab.h"
 
+/*
+ % GD_FLAGS  Modify or report dirfile flags
+ %
+ %   F = GD_FLAGS(DIRFILE,SET,RESET)
+ %             sets the operational flags of the dirfile DIRFILE according to 
+ %             SET and RESET, which should be bitwise or'd collections of the
+ %             Dirfile flags provided by GETDATA_CONSTANTS.  This function then
+ %             returns the update flag register, F.
+ %
+ %   The DIRFILE object should have previously been created with GD_OPEN.
+ %
+ %   See the documentation on the C API function gd_flags(3) in section 3
+ %   of the UNIX manual for more details.
+ %
+ %   See also GD_OPEN, GETDATA_CONSTANTS
+ */
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;

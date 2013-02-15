@@ -1,3 +1,18 @@
+function nvectors = gd_nvectors(D)
+% GD_NVECTORS  Retrieve a count of fields
+%
+%   GD_NVECTORS(DIRFILE)
+%             is equivalent to calling GD_NENTRIES(DIRFILE,0, ...
+%                                                           GD.VECTOR_ENTRIES,0)
+%
+%   For GD, see GETDATA_CONSTANTS.
+%
+%   See also GD_NENTRIES, GETDATA_CONSTANTS
+
+  GD = getdata_constants();
+  nvectors = gd_nentries(D, 0, GD.VECTOR_ENTRIES, 0);
+end
+
 % Copyright (C) 2013 D. V. Wiebe
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -17,8 +32,3 @@
 % You should have received a copy of the GNU Lesser General Public License
 % along with GetData; if not, write to the Free Software Foundation, Inc.,
 % 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-
-function nvectors = gd_nvectors(D)
-  GD = getdata_constants();
-  nvectors = gd_nentries(D, 0, GD.VECTOR_ENTRIES, 0);
-end

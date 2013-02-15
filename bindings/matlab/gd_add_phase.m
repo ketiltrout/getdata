@@ -1,3 +1,23 @@
+function gd_add_phase(D, field_code, in_fields, shift, fragment_index)
+% GD_ADD_PHASE  Add a PHASE field
+%
+%   GD_ADD_PHASE(DIRFILE,NAME,INPUT,SHIFT,FRAGMENT)
+%             adds a PHASE field called NAME to the dirfile specified by
+%             DIRFILE.  The input field is INPUT and the phase shift is SHIFT.
+%             The field is added to the fragment indexed by FRAGMENT.
+%
+%   The DIRFILE object should have previously been created with GD_OPEN.
+%
+%   See the documentation on the C API function gd_add_phase(3) in section 3
+%   of the UNIX manual for more details.
+%
+%   See also GD_ADD, GD_MADD_PHASE, GD_OPEN
+
+  GD = getdata_constants();
+  gd_add(D, struct('field', field_code, 'field_type', GD.PHASE_ENTRY, ...
+  'fragment_index', fragment_index, 'in_fields', {in_fields}, 'shift', shift));
+end
+
 % Copyright (C) 2013 D. V. Wiebe
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -17,9 +37,3 @@
 % You should have received a copy of the GNU Lesser General Public License
 % along with GetData; if not, write to the Free Software Foundation, Inc.,
 % 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-
-function gd_add_phase(D, field_code, in_fields, shift, fragment_index)
-  GD = getdata_constants();
-  gd_add(D, struct('field', field_code, 'field_type', GD.PHASE_ENTRY, ...
-  'fragment_index', fragment_index, 'in_fields', {in_fields}, 'shift', shift));
-end

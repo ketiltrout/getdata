@@ -20,6 +20,21 @@
  */
 #include "gd_matlab.h"
 
+/*
+ % GD_FRAGMENT_INDEX  Report the fragment index of a field
+ %
+ %   I = GD_FRAGMENT_INDEX(DIRFILE,FIELD_CODE)
+ %             returns the fragment index, I, of the field specified by
+ %             FIELD_CODE in the dirfile DIRFILE.
+ %
+ %   The DIRFILE object should have previously been created with GD_OPEN.
+ %
+ %   See the documentation on the C API function gd_fragment_index(3) in
+ %   section 3 of the UNIX manual for more details.
+ %
+ %   See also GD_ENTRY, GD_OPEN
+ */
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;

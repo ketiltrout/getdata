@@ -20,6 +20,22 @@
  */
 #include "gd_matlab.h"
 
+/*
+ % GD_MADD_CONST  Add a CONST metafield
+ %
+ %   GD_MADD_CONST(DIRFILE,PARENT,NAME,TYPE,VALUE)
+ %             adds a CONST metafield called NAME to the dirfile specified by
+ %             DIRFILE under parent PARENT.  The storage type is TYPE, and the
+ %             value of the field is VALUE.
+ %
+ %   The DIRFILE object should have previously been created with GD_OPEN.
+ %
+ %   See the documentation on the C API function gd_madd_const(3) in section 3
+ %   of the UNIX manual for more details.
+ %
+ %   See also GD_MADD, GD_ADD_CONST, GD_OPEN
+ */
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;

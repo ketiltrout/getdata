@@ -20,6 +20,23 @@
  */
 #include "gd_matlab.h"
 
+/*
+ % GD_STRTOK  Tokenise a string using the GetData parser
+ %
+ %   A = GD_STRTOK(DIRFILE,STRING)
+ %             Converts the string STRING into a cell array of strings, A, by
+ %             tokenising it using the GetData library parser.  Unlike the C API
+ %             this function completely tokenises the provided string at once,
+ %             returning all tokens, and should not be called repeatedly.
+ %
+ %   The DIRFILE object should have previously been created with GD_OPEN.
+ %
+ %   See the documentation on the C API function gd_strtok(3) in section 3
+ %   of the UNIX manual for more details.
+ %
+ %   See also GD_OPEN, GD_DIRFILE_STANDARDS
+ */
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;

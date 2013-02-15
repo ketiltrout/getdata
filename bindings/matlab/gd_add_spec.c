@@ -20,6 +20,22 @@
  */
 #include "gd_matlab.h"
 
+/*
+ % GD_ADD_SPEC  Add a field
+ %
+ %   GD_ADD_SPEC(DIRFILE,SPEC,FRAGMENT)
+ %             adds a field described by the field specification line SPEC to
+ %             the dirfile DIRFILE.  The field is added to the fragment indexed 
+ %             by FRAGMENT.
+ %
+ %   The DIRFILE object should have previously been created with GD_OPEN.
+ %
+ %   See the documentation on the C API function gd_add_spec(3) in section 3
+ %   of the UNIX manual for more details.
+ %
+ %   See also GD_ADD, GD_MADD_SPEC, GD_OPEN
+ */
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;

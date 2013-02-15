@@ -20,20 +20,39 @@
  */
 #include "gd_matlab.h"
 
+/*
+ % GD_ALTER_ENCODING  Modify the encoding of a fragment
+ %
+ %   GD_ALTER_ENCODING(DIRFILE,ENCODING,FRAGMENT[,RECODE])
+ %             sets the encoding of the metadata fragment indexed by FRAGMENT
+ %             in the dirfile DIRFILE to ENCODING, which should be one of the
+ %             GD.xxx_ENCODED constants provided by GETDATA_CONSTANTS.
+ %             If RECODE is given and non-zero, binary files affected by the
+ %             encoding change will be converted.  Otherwise, the binary files
+ %             are not modified.
+ %
+ %   The DIRFILE object should have previously been created with GD_OPEN.
+ %
+ %   See the documentation on the C API function gd_alter_endianness(3) in
+ %   section 3 of the UNIX manual for more details.
+ %
+ %   See also GD_ENCODING, GD_OPEN, GETDATA_CONSTANTS
+ */
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;
   void *data;
-  int i, r;
+  int i, r = 0;
   unsigned int e;
 
   GDMX_NO_LHS;
-  GDMX_CHECK_RHS(4);
+  GDMX_CHECK_RHS2(3,4);
 
   D = gdmx_to_dirfile(prhs[0]);
   e = gdmx_to_uint(prhs, 1);
   i = gdmx_to_int(prhs, 2);
-  r = gdmx_to_int(prhs, 3);
+  if (nrhs > 3)
+    r = gdmx_to_int(prhs, 3);
 
   gd_alter_encoding(D, e, i, r);
 

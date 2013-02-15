@@ -1,3 +1,14 @@
+function nfields = gd_nfields_by_type(D, type)
+% GD_NFIELDS_BY_TYPE  Retrieve a count of fields
+%
+%   GD_NFIELDS_BY_TYPE(DIRFILE,TYPE)
+%             is equivalent to calling GD_NENTRIES(DIRFILE,0,TYPE,0)
+%
+%   See also GD_NENTRIES
+
+  nfields = gd_nentries(D, 0, type, 0);
+end
+
 % Copyright (C) 2013 D. V. Wiebe
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -17,7 +28,3 @@
 % You should have received a copy of the GNU Lesser General Public License
 % along with GetData; if not, write to the Free Software Foundation, Inc.,
 % 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-
-function nfields = gd_nfields_by_type(D, type)
-  nfields = gd_nentries(D, 0, type, 0);
-end

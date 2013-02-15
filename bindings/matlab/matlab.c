@@ -19,13 +19,37 @@
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#ifdef HAVE_CONFIG_H
+#include "gd_config.h"
+#endif
+
+#ifdef GD_EXTERNAL
+# define GD_C89_API
+# define dtracevoid()
+# define dtrace(...)
+# define dprintf(...)
+# define dreturnvoid()
+# define dreturn(...)
+# define dwatch(...)
+# define GD_SIZE_T_MAX ((size_t)-1)
+# define GD_INT_TYPE ((gd_type_t)((sizeof(int)) | GD_SIGNED))
+# define GD_UINT_TYPE ((gd_type_t)(sizeof(unsigned int)))
+# define EN(t,v) u.t.v
+# define GD_DCOMPLEXP_t double *
+# define GD_DCOMPLEXV(v) double v[][2]
+# define gd_cs2cs_(a,b) do { (a)[0] = (b)[0]; (a)[1] = (b)[1]; } while(0)
+# define gd_ca2cs_(a,b,i) gd_cs2cs_((a),(b) + 2 * i)
+#else
 #include "internal.h"
+#endif
+
 #define GDMXLIB
 #include "gd_matlab.h"
 
 #ifdef HAVE_STDINT_H
 #include <stdint.h>
 #endif
+#include <string.h>
 
 #define GD_LIBCOMP "GetData:Lib:"
 static const char *gdmx_msgid[GD_N_ERROR_CODES] =
@@ -1007,6 +1031,50 @@ mxArray *gdmx_from_entry(const gd_entry_t *E)
         gdmx_from_nstring_list((const char **)E->scalar, nscalar));
     mxSetField(lhs, 0, "scalar_ind", gdmx_from_data(E->scalar_ind, GD_INT_TYPE,
           nscalar));
+  }
+
+  dreturn("%p", lhs);
+  return lhs;
+}
+
+mxArray *gdmx_from_carrays(const gd_carray_t *c, gd_type_t type)
+{
+  size_t i, n, comp;
+  mxArray *lhs;
+  mxClassID id;
+
+  dtrace("%p, 0x%X", c, type);
+
+  id = gdmx_classid(type);
+  comp = type & GD_COMPLEX;
+
+  /* count */
+  for (n = 0; c[n].n; ++n)
+    ;
+
+  lhs = mxCreateCellMatrix(1, n);
+
+  for (n = 0; c[n].n; ++n) {
+    mxArray *a = mxCreateNumericMatrix(1, c[n].n, id,
+        comp ? mxCOMPLEX : mxREAL);
+    void *pr = mxGetData(a);
+
+    if (type == GD_COMPLEX128) {
+      double *pi = mxGetImagData(a);
+      for (i = 0; i < c[n].n; ++i) {
+        ((double*)pr)[i] = ((double*)c[n].d)[2 * i];
+        pi[i] = ((double*)c[n].d)[2 * i + 1];
+      }
+    } else if (type == GD_COMPLEX64) {
+      float *pi = mxGetImagData(a);
+      for (i = 0; i < c[n].n; ++i) {
+        ((float*)pr)[i] = ((float*)c[n].d)[2 * i];
+        pi[i] = ((float*)c[n].d)[2 * i + 1];
+      }
+    } else
+      memcpy(pr, c[n].d, GD_SIZE(type) * c[n].n);
+
+    mxSetCell(lhs, n, a);
   }
 
   dreturn("%p", lhs);

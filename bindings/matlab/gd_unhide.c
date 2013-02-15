@@ -20,6 +20,20 @@
  */
 #include "gd_matlab.h"
 
+/*
+ % GD_UNHIDE  Unhide a field
+ %
+ %   GD_UNHIDE(DIRFILE,FIELD_CODE)
+ %             unhides the field called FIELD_CODE.
+ %
+ %   The DIRFILE object should have previously been created with GD_OPEN.
+ %
+ %   See the documentation on the C API function gd_unhide(3) in section 3
+ %   of the UNIX manual for more details.
+ %
+ %   See also GD_HIDDEN, GD_HIDE, GD_OPEN
+ */
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;

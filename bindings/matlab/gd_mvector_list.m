@@ -1,3 +1,18 @@
+function field_list = gd_mvector_list(D, parent)
+% GD_MVECTOR_LIST  Retrieve a list of field names
+%
+%   GD_MVECTOR_LIST(DIRFILE,PARENT)
+%             is equivalent to calling GD_ENTRY_LIST(DIRFILE,PARENT, ...
+%                                                           GD.VECTOR_ENTRIES,0)
+%
+%   For GD, see GETDATA_CONSTANTS.
+%
+%   See also GD_ENTRY_LIST, GETDATA_CONSTANTS
+
+  GD = getdata_constants();
+  field_list = gd_entry_list(D, parent, GD.VECTOR_ENTRIES, 0);
+end
+
 % Copyright (C) 2013 D. V. Wiebe
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -17,8 +32,3 @@
 % You should have received a copy of the GNU Lesser General Public License
 % along with GetData; if not, write to the Free Software Foundation, Inc.,
 % 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-
-function field_list = gd_mvector_list(D, parent)
-  GD = getdata_constants();
-  field_list = gd_entry_list(D, parent, GD.VECTOR_ENTRIES, 0);
-end

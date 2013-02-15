@@ -20,6 +20,23 @@
  */
 #include "gd_matlab.h"
 
+/*
+ % GD_ADD_CARRAY  Add a CARRAY field
+ %
+ %   GD_ADD_CARRAY(DIRFILE,NAME,TYPE,VALUES,FRAGMENT)
+ %             adds a CARRAY field called NAME to the dirfile specified by
+ %             DIRFILE.  The storage type is TYPE, and the values of the field
+ %             are in VALUES.  The field is added to the fragment indexed by
+ %             FRAGMENT.
+ %
+ %   The DIRFILE object should have previously been created with GD_OPEN.
+ %
+ %   See the documentation on the C API function gd_add_carray(3) in section 3
+ %   of the UNIX manual for more details.
+ %
+ %   See also GD_ADD, GD_MADD_CARRAY, GD_OPEN
+ */
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;

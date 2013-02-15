@@ -20,19 +20,37 @@
  */
 #include "gd_matlab.h"
 
+/*
+ % GD_ALTER_SPEC  Modify metafield metadata
+ %
+ %   GD_ALTER_SPEC(DIRFILE,SPEC,PARENT[,RECODE])
+ %             modifies the metadata of a metafield under parent field PARENT in
+ %             the dirfile DIRFILE according to the field specification line
+ %             SPEC.  If RECODE is given and non-zero, other data will be
+ %             updated to reflect metadata changes.
+ %
+ %   The DIRFILE object should have previously been created with GD_OPEN.
+ %
+ %   See the documentation on the C API function gd_malter_spec(3) in
+ %   section 3 of the UNIX manual for more details.
+ %
+ %   See also GD_ALTER_SPEC, GD_OPEN
+ */
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;
   char *spec, *parent;
-  int recode;
+  int recode = 0;
 
   GDMX_NO_LHS;
-  GDMX_CHECK_RHS(4);
+  GDMX_CHECK_RHS2(3,4);
 
   D = gdmx_to_dirfile(prhs[0]);
   spec = gdmx_to_string(prhs, 1, 0);
   parent = gdmx_to_string(prhs, 2, 0);
-  recode = gdmx_to_int(prhs, 3);
+  if (nrhs > 3)
+    recode = gdmx_to_int(prhs, 3);
 
   gd_malter_spec(D, spec, parent, recode);
 

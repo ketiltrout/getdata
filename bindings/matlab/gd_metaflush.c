@@ -20,6 +20,21 @@
  */
 #include "gd_matlab.h"
 
+/*
+ % GD_METAFLUSH  Flush metadata changes to disk
+ %
+ %   GD_METAFLUSH(DIRFILE)
+ %             flushes all pending metadata changes in the dirfile DIRFILE to
+ %             disk.
+ %
+ %   The DIRFILE object should have previously been created with GD_OPEN.
+ %
+ %   See the documentation on the C API function gd_metaflush(3) in section 3
+ %   of the UNIX manual for more details.
+ %
+ %   See also GD_CLOSE, GD_FLUSH, GD_OPEN, GD_REWRITE_FRAGMENT
+ */
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;

@@ -20,6 +20,21 @@
  */
 #include "gd_matlab.h"
 
+/*
+ % GD_PUT_CARRAY_SLICE  Modify CARRAY or CONST values
+ %
+ %   GD_PUT_CARRAY_SLICE(DIRFILE,FIELD_CODE,START,VALUES)
+ %             sets elements of the CARRAY or CONST field called FIELD_CODE
+ %             starting at element START to the values in the array VALUE.
+ %
+ %   The DIRFILE object should have previously been created with GD_OPEN.
+ %
+ %   See the documentation on the C API function gd_put_carray_slice(3) in
+ %   section 3 of the UNIX manual for more details.
+ %
+ %   See also GD_GET_CARRAY_SLICE, GD_OPEN
+ */
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;

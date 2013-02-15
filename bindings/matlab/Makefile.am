@@ -20,21 +20,13 @@
 #
 AUTOMAKE_OPTIONS = foreign
 
-if CXX_WALL
-WALL=-Wall
-endif
-
-if CXX_WEXTRA
-WEXTRA=-Wextra
-endif
-
-INCLUDES = ${WALL} $(WEXTRA) -I$(top_srcdir)/src
-
 if GETDATA_DEBUG
 DEBUG_C = ../../src/debug.c
 endif
 
 SUBDIRS=test
+
+matlabdir=$(matlabbasedir)/getdata
 
 matlabfiles=gd_add_bit.m gd_add_divide.m gd_add_lincom.m gd_add_linterp.m \
 						gd_add_mplex.m gd_add_multiply.m gd_add_phase.m gd_add_polynom.m \
@@ -44,7 +36,7 @@ matlabfiles=gd_add_bit.m gd_add_divide.m gd_add_lincom.m gd_add_linterp.m \
 						gd_alter_mplex.m gd_alter_multiply.m gd_alter_phase.m \
 						gd_alter_polynom.m gd_alter_raw.m gd_alter_recip.m gd_alter_sbit.m \
 						gd_alter_window.m gd_field_list_by_type.m gd_field_list.m \
-						gd_get_constant.m gd_include.m gd_madd_bit.m gd_madd_divide.m \
+						gd_get_constant.m gd_madd_bit.m gd_madd_divide.m \
 						gd_madd_lincom.m gd_madd_linterp.m gd_madd_mplex.m \
 						gd_madd_multiply.m gd_madd_phase.m gd_madd_polynom.m \
 						gd_madd_recip.m gd_madd_sbit.m gd_madd_window.m \
@@ -66,10 +58,11 @@ mexfiles=gd_add gd_add_alias \
 				 gd_fragment_index gd_fragmentname \
 				 gd_framenum gd_frameoffset gd_get_carray gd_get_carray_slice \
 				 gd_getdata gd_get_string \
-				 gd_hidden gd_hide gd_include_affix gd_invalid_dirfile \
+				 gd_hidden gd_hide gd_include gd_invalid_dirfile \
 				 gd_linterp_tablename gd_madd gd_madd_alias \
 				 gd_madd_carray gd_madd_const gd_madd_spec gd_madd_string \
-				 gd_malter_spec gd_mconstants gd_metaflush gd_move gd_move_alias gd_mplex_lookback \
+				 gd_malter_spec gd_mcarrays \
+				 gd_mconstants gd_metaflush gd_move gd_move_alias gd_mplex_lookback \
 				 gd_mstrings gd_naliases gd_native_type gd_nentries gd_nfragments \
 				 gd_nframes gd_open gd_parent_fragment gd_protection \
 				 gd_put_carray_slice \
@@ -78,20 +71,44 @@ mexfiles=gd_add gd_add_alias \
 				 gd_seek gd_spf gd_strings gd_strtok \
 				 gd_sync gd_tell gd_unhide gd_uninclude gd_validate gd_verbose_prefix
 
-EXTRA_DIST=$(addsuffix .c,${mexfiles})
+matlabcfiles=$(addsuffix .c,${mexfiles})
+matlabmexfiles=$(addsuffix .@mexext@,${mexfiles})
+matlabdocfiles=$(addsuffix .m,${mexfiles})
 
-matlab_SCRIPTS=$(matlabfiles)
-nodist_matlab_SCRIPTS=getdata_constants.m $(addsuffix .@mexext@,${mexfiles})
+EXTRA_DIST=$(matlabcfiles) doc.tail Contents.m.head
+
+dist_matlab_SCRIPTS=$(matlabfiles)
+nodist_matlab_SCRIPTS=Contents.m getdata_constants.m $(matlabmexfiles) \
+											$(matlabdocfiles)
 
 lib_LTLIBRARIES=libgetdata-matlab.la
 
-libgetdata_matlab_la_SOURCES=matlab.c $(DEBUG_C) gd_matlab.h
-libgetdata_matlab_la_LIBADD=../../src/libgetdata.la
+libgetdata_matlab_la_SOURCES=matlab.c gd_matlab.h
+nodist_libgetdata_matlab_la_SOURCES=$(DEBUG_C)
 libgetdata_matlab_la_CPPFLAGS=${MATLAB_CPPFLAGS}
+libgetdata_matlab_la_LDFLAGS=-version-info @MATLABGETDATA_VERSION@
+
+if GD_EXTERNAL
+libgetdata_matlab_la_LIBADD=$(GETDATA_LIBS)
+INCLUDES=$(GETDATA_CFLAGS)
+GDMX_LIBS=$(GETDATA_LIBS)
+else
+libgetdata_matlab_la_LIBADD=../../src/libgetdata.la
+INCLUDES=-I${top_srcdir}/src -I../../src
+GDMX_LIBS=-L../../src/.libs -lgetdata
+endif
+
+%.m: %.c ${srcdir}/doc.tail
+	${GREP} '^ %' $< | ${SED} -e 's/^ //' > $@
+	cat ${srcdir}/doc.tail >> $@
 
 %.@mexext@: %.c libgetdata-matlab.la
-	${MEX} -I${top_srcdir}/src -I../../src -L.libs -L../../src/.libs \
-		-lgetdata-matlab -lgetdata $<
+	${MEX} ${INCLUDES} -L.libs -lgetdata-matlab $(GDMX_LIBS) $<
+
+Contents.m: ${srcdir}/Contents.m.head make_contents.sh $(matlabfiles) \
+						$(matlabdocfiles) ${srcdir}/doc.tail
+	${SHELL} ./make_contents.sh ${srcdir} > $@
+	cat ${srcdir}/doc.tail >> $@
 
 getdata_constants.m: ../make_parameters
 	../make_parameters m > $@
@@ -100,4 +117,4 @@ getdata_constants.m: ../make_parameters
 	cd .. && ${MAKE} make_parameters
 
 clean-local:
-	rm -rf *.${mexext}
+	rm -rf $(nodist_matlab_SCRIPTS)

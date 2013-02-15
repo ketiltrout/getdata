@@ -20,6 +20,26 @@
  */
 #include "gd_matlab.h"
 
+/*
+ % GD_CONSTANTS  Fetch all CONST values
+ %
+ %   A = GD_CONSTANTS(DIRFILE[,TYPE])
+ %             returns a numeric array, A, containing all the CONST data in the
+ %             dirfile DIRFILE.  A corresponding array of field names can be
+ %             produced with GD_FIELD_LIST_BY_TYPE.  The type of the returned
+ %             data is given by TYPE, one of the data type symbols provided by
+ %             GETDATA_CONSTANTS.  If omitted, the default type, GD.FLOAT64, is
+ %             used.
+ %
+ %   The DIRFILE object should have previously been created with GD_OPEN.
+ %
+ %   See the documentation on the C API function gd_constants(3) in section 3
+ %   of the UNIX manual for more details.
+ %
+ %   See also GD_MCONSTANTS, GD_FIELD_LIST_BY_TYPE, GD_GET_CONSTANT,
+ %            GETDATA_CONSTANTS
+ */
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;

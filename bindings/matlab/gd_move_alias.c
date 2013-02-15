@@ -20,6 +20,21 @@
  */
 #include "gd_matlab.h"
 
+/*
+ % GD_MOVE_ALIAS  Move an alias between fragments
+ %
+ %   GD_MOVE_ALIAS(DIRFILE,NAME,NEW_FRAGMENT)
+ %             moves the alias called NAME to the fragment indexed by
+ %             NEW_FRAGMENT.
+ %
+ %   The DIRFILE object should have previously been created with GD_OPEN.
+ %
+ %   See the documentation on the C API function gd_move_alias(3) in
+ %   section 3 of the UNIX manual for more details.
+ %
+ %   See also GD_MOVE, GD_OPEN
+ */
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;

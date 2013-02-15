@@ -20,6 +20,22 @@
  */
 #include "gd_matlab.h"
 
+/*
+ % GD_RAW_CLOSE  Close binary files
+ %
+ %   GD_RAW_CLOSE(DIRFILE[,FIELD_CODE])
+ %             closes open binary data files associated with the dirfile
+ %             DIRFILE.  If FIELD_CODE is given and not numeric zero, only the
+ %             specified field is closed.  Otherwise all open data files closed.
+ %
+ %   The DIRFILE object should have previously been created with GD_OPEN.
+ %
+ %   See the documentation on the C API function gd_raw_close(3) in section 3
+ %   of the UNIX manual for more details.
+ %
+ %   See also GD_CLOSE, GD_SYNC, GD_FLUSH, GD_OPEN
+ */
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;

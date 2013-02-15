@@ -87,6 +87,7 @@ mxArray *gdmx_from_llong(long long);
 mxArray *gdmx_from_ulong(unsigned long);
 mxArray *gdmx_from_ullong(unsigned long long);
 
+mxArray *gdmx_from_carrays(const gd_carray_t *, gd_type_t);
 mxArray *gdmx_vector(gd_type_t, size_t, void**);
 
 /* convert from MATLAB type */

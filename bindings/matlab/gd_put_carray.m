@@ -1,3 +1,15 @@
+function gd_put_carray(D, field_code, data)
+% GD_PUT_CARRAY  Modify CARRAY values
+%
+%   GD_PUT_CARRAY(DIRFILE,FIELD_CODE,DATA)
+%             is equivalent to calling GD_PUT_ARRAY_SLICE(DIRFILE, ...
+%                                                             FIELD_CODE,0,DATA)
+%
+%   See also GD_PUT_ARRAY_SLICE
+
+  gd_put_carray_slice(D, field_code, 0, data);
+end
+
 % Copyright (C) 2013 D. V. Wiebe
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -17,7 +29,3 @@
 % You should have received a copy of the GNU Lesser General Public License
 % along with GetData; if not, write to the Free Software Foundation, Inc.,
 % 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-
-function gd_put_carray(D, field_code, data)
-  gd_put_carray_slice(D, field_code, 0, data);
-end

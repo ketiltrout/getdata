@@ -21,13 +21,30 @@
 #include "gd_matlab.h"
 #include <string.h>
 
+/*
+ % GD_CARRAYS  Fetch all CARRAY values
+ %
+ %   A = GD_CARRAYS(DIRFILE[,TYPE])
+ %             returns a cell array of numeric arrays, A, containing all the
+ %             CARRAY data in the dirfile DIRFILE.  A corresponding array of
+ %             field names can be produced with GD_FIELD_LIST_BY_TYPE.  The
+ %             type of the returned data is given by TYPE, one of the data
+ %             type symbols provided by GETDATA_CONSTANTS.  If omitted, the
+ %             default type, GD.FLOAT64, is used.
+ %
+ %   The DIRFILE object should have previously been created with GD_OPEN.
+ %
+ %   See the documentation on the C API function gd_carrays(3) in section 3
+ %   of the UNIX manual for more details.
+ %
+ %   See also GD_MCARRAYS, GD_FIELD_LIST_BY_TYPE, GD_GET_CARRAY_SLICE
+ */
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;
   gd_type_t type = GD_FLOAT64;
-  size_t i, n, comp;
   const gd_carray_t *c;
-  mxClassID id;
 
   GDMX_CHECK_RHS2(1,2);
 
@@ -35,40 +52,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   if (nrhs > 1)
     type = gdmx_to_gd_type(prhs, 1);
 
-  id = gdmx_classid(type);
-  comp = type & GD_COMPLEX;
-
   c = gd_carrays(D, type);
 
   gdmx_err(D, 0);
 
-  /* count */
-  for (n = 0; c[n].n; ++n)
-    ;
-
   /* convert to array of arrays */
-  plhs[0] = mxCreateCellMatrix(1, n);
-
-  for (n = 0; c[n].n; ++n) {
-    mxArray *a = mxCreateNumericMatrix(1, c[n].n, id,
-        comp ? mxCOMPLEX : mxREAL);
-    void *pr = mxGetData(a);
-
-    if (type == GD_COMPLEX128) {
-      double *pi = mxGetImagData(a);
-      for (i = 0; i < c[n].n; ++i) {
-        ((double*)pr)[i] = ((double*)c[n].d)[2 * i];
-        pi[i] = ((double*)c[n].d)[2 * i + 1];
-      }
-    } else if (type == GD_COMPLEX64) {
-      float *pi = mxGetImagData(a);
-      for (i = 0; i < c[n].n; ++i) {
-        ((float*)pr)[i] = ((float*)c[n].d)[2 * i];
-        pi[i] = ((float*)c[n].d)[2 * i + 1];
-      }
-    } else
-      memcpy(pr, c[n].d, GD_SIZE(type) * c[n].n);
-
-    mxSetCell(plhs[0], n, a);
-  }
+  plhs[0] = gdmx_from_carrays(c, type);
 }

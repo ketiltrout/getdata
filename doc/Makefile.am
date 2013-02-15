@@ -36,6 +36,10 @@ if MAKE_IDLBINDINGS
 READMEIDL=README.idl
 endif
 
+if MAKE_MATLABBINDINGS
+READMEMATLAB=README.matlab
+endif
+
 if MAKE_PERLBINDINGS
 READMEPERL=README.perl
 endif
@@ -45,7 +49,8 @@ READMEPYTHON=README.python
 endif
 
 dist_doc_DATA = ${READMECXX} ${READMEF77} ${READMEF95} ${READMEIDL} \
-								${READMEPERL} ${READMEPYTHON} unclean_database_recovery.txt
+								${READMEMATLAB} ${READMEPERL} ${READMEPYTHON} \
+								unclean_database_recovery.txt
 
 clean-local:
 	rm -rf *~ README.perl

@@ -20,6 +20,21 @@
  */
 #include "gd_matlab.h"
 
+/*
+ % GD_FRAMEOFFSET  Report the frame offset of a fragment
+ %
+ %   O = GD_FRAME_OFFSET(DIRFILE,FRAGMENT)
+ %             reports the frame offset of the fragment specified by FRAGMENT
+ %             in the dirfile DIRFILE.
+ %
+ %   The DIRFILE object should have previously been created with GD_OPEN.
+ %
+ %   See the documentation on the C API function gd_frame_offset(3) in section 3
+ %   of the UNIX manual for more details.
+ %
+ %   See also GD_ALTER_FRAMEOFFSET, GD_OPEN
+ */
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;

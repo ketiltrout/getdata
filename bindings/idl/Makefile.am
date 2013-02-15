@@ -26,7 +26,7 @@ endif
 
 SUBDIRS=test
 
-if GDIDL_EXTERNAL
+if GD_EXTERNAL
 GDIDL_GETDATA_LIBS=$(GETDATA_LIBS)
 else
 GDIDL_GETDATA_LIBS=../../src/libgetdata.la

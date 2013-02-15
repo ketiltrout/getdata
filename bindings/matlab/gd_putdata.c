@@ -20,6 +20,22 @@
  */
 #include "gd_matlab.h"
 
+/*
+ % GD_PUTDATA  Write vector data
+ %
+ %   GD_PUTDATA(DIRFILE,FIELD_CODE,FIRST_FRAME,FIRST_SAMPLE,DATA)
+ %             writes the data in DATA to the field called FIELD_CODE.  The
+ %             sequential samples are written starting FIRST_SAMPLE samples
+ %             after the start of frame FIRST_FRAME.
+ %
+ %   The DIRFILE object should have previously been created with GD_OPEN.
+ %
+ %   See the documentation on the C API function gd_putdata(3) in section 3
+ %   of the UNIX manual for more details.
+ %
+ %   See also GD_GETDATA, GD_PUT_CARRAY_SLICE, GD_OPEN
+ */
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;

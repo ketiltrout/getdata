@@ -20,6 +20,22 @@
  */
 #include "gd_matlab.h"
 
+/*
+ % GD_DELETE  Delete a field from a dirfile
+ %
+ %   GD_DELETE(DIRFILE,NAME[,FLAGS])
+ %             deletes the field called NAME from the dirfile DIRFILE.  If
+ %             given, FLAGS should be a bitwise or'd collection of zero or more
+ %             of the GD.DEL_... flags provided by GETDATA_CONSTANTS.
+ %
+ %   The DIRFILE object should have previously been created with GD_OPEN.
+ %
+ %   See the documentation on the C API function gd_delete_alias(3) in
+ %   section 3 of the UNIX manual for more details.
+ %
+ %   See also GD_DELETE_ALIAS, GD_OPEN, GETDATA_CONSTANTS
+ */
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;

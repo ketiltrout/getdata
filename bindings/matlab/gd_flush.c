@@ -20,6 +20,24 @@
  */
 #include "gd_matlab.h"
 
+/*
+ % GD_FLUSH  Flush and close modified data files
+ %
+ %   GD_FLUSH(DIRFILE[,FIELD_CODE])
+ %             flushes the binary data files associated with the dirfile DIRFILE
+ %             to disk, and then closes open files.  If FIELD_CODE is given and
+ %             not numeric zero, only the specified field is flushed.  Otherwise
+ %             all open data files are flushed and closed.  In this second case,
+ %             modified metadata is also flushed.
+ %
+ %   The DIRFILE object should have previously been created with GD_OPEN.
+ %
+ %   See the documentation on the C API function gd_flush(3) in section 3
+ %   of the UNIX manual for more details.
+ %
+ %   See also GD_CLOSE, GD_SYNC, GD_RAW_CLOSE, GD_OPEN
+ */
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;

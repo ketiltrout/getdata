@@ -20,6 +20,25 @@
  */
 #include "gd_matlab.h"
 
+/*
+ % GD_SEEK  Set the location of a field's I/O pointer
+ %
+ %   P = GD_SEEK(DIRFILE,FIELD_CODE,FRAME,SAMPLE,FLAGS)
+ %             places the I/O pointer of the field FIELD_CODE SAMPLE samples
+ %             after the start of frame number FRAME.  Flags should be one of
+ %             GD.SEEK_SET, GD.SEEK_CUR, or GD.SEEK_END, possibly bitwise or'd
+ %             with GD.SEEK_WRITE.  These symbols are provided by
+ %             GETDATA_CONSTANTS.  Returns the position, P, in samples, after
+ %             setting it.
+ %
+ %   The DIRFILE object should have previously been created with GD_OPEN.
+ %
+ %   See the documentation on the C API function gd_seek(3) in section 3
+ %   of the UNIX manual for more details.
+ %
+ %   See also GD_TELL, GD_GETDATA, GD_OPEN.
+ */
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;

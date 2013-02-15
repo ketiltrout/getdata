@@ -20,6 +20,23 @@
  */
 #include "gd_matlab.h"
 
+/*
+ % GD_ALTER_FRAMEOFFSET  Modify the frameoffset of a fragment
+ %
+ %   GD_ALTER_FRAMEOFFSET(DIRFILE,OFFSET,FRAGMENT[,RECODE])
+ %             sets the byte sex of the metadata fragment indexed by FRAGMENT
+ %             in the dirfile DIRFILE to OFFSET.  If RECODE is given and
+ %             non-zero, binary files affected by the offset change will be
+ %             converted.  Otherwise, the binary files are not modified.
+ %
+ %   The DIRFILE object should have previously been created with GD_OPEN.
+ %
+ %   See the documentation on the C API function gd_alter_frameoffset(3) in
+ %   section 3 of the UNIX manual for more details.
+ %
+ %   See also GD_FRAMEOFFSET, GD_OPEN, GETDATA_CONSTANTS
+ */
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;

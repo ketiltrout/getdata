@@ -20,6 +20,21 @@
  */
 #include "gd_matlab.h"
 
+/*
+ % GD_LINTER_TABLENAME  Report the pathname of binary file
+ %
+ %   P = GD_LINTER_TABLENAME(DIRFILE,FIELD_CODE)
+ %             reports the pathname, P, of the look-up table associated with the
+ %             LINTERP field specified by FIELD_CODE in the the dirfile DIRFILE.
+ %
+ %   The DIRFILE object should have previously been created with GD_OPEN.
+ %
+ %   See the documentation on the C API function gd_linterp_tablename(3) in
+ %   section 3 of the UNIX manual for more details.
+ %
+ %   See also GD_OPEN
+ */
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;

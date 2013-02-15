@@ -20,6 +20,23 @@
  */
 #include "gd_matlab.h"
 
+/*
+ % GD_ADD  Add a field
+ %
+ %   GD_ADD(DIRFILE,ENTRY)
+ %             adds a field described by ENTRY to the dirfile DIRFILE.
+ %
+ %   The DIRFILE object should have previously been created with GD_OPEN.
+ %
+ %   The ENTRY object should be an entry struct; see GETDATA and gd_entry(3) in
+ %   the UNIX manual for details.
+ %
+ %   See the documentation on the C API function gd_add(3) in section 3
+ %   of the UNIX manual for more details.
+ %
+ %   See also GD_MADD, GD_OPEN, GETDATA
+ */
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;

@@ -20,6 +20,23 @@
  */
 #include "gd_matlab.h"
 
+/*
+ % GD_MSTRINGS  Fetch all STRING metafield values
+ %
+ %   A = GD_MSTRINGS(DIRFILE,PARENT)
+ %             returns a cell array of strings, A, containing the values of all
+ %             STRING metafields under parent field PARENT.  A corresponding
+ %             array of field names can be produced with GD_MFIELD_LIST_BY_TYPE.
+ %
+ %   The DIRFILE object should have previously been created with GD_OPEN.
+ %
+ %   See the documentation on the C API function gd_mstrings(3) in section 3
+ %   of the UNIX manual for more details.
+ %
+ %   See also GD_STRINGS, GD_MFIELD_LIST_BY_TYPE, GD_GET_STRING
+ */
+
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;

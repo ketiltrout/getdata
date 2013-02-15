@@ -20,6 +20,20 @@
  */
 #include "gd_matlab.h"
 
+/*
+ % GD_ALIAS_TARGET  Report the target of an /ALIAS
+ %
+ %   T = GD_ALIAS_TARGET(DIRFILE,NAME)
+ %             returns the target, T, of the alias named NAME.
+ %
+ %   The DIRFILE object should have previously been created with GD_OPEN.
+ %
+ %   See the documentation on the C API function gd_alias_target(3) in section 3
+ %   of the UNIX manual for more details.
+ %
+ %   See also GD_ALIASES, GD_OPEN
+ */
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;

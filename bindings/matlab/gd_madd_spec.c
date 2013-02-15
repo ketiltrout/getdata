@@ -20,6 +20,21 @@
  */
 #include "gd_matlab.h"
 
+/*
+ % GD_MADD_SPEC  Add a metafield
+ %
+ %   GD_MADD_SPEC(DIRFILE,SPEC,PARENT)
+ %             adds a metafield described by the field specification line SPEC
+ %             to the dirfile DIRFILE under parent field PARENT.
+ %
+ %   The DIRFILE object should have previously been created with GD_OPEN.
+ %
+ %   See the documentation on the C API function gd_madd_spec(3) in section 3
+ %   of the UNIX manual for more details.
+ %
+ %   See also GD_MADD, GD_ADD_SPEC, GD_OPEN
+ */
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;

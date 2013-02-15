@@ -20,6 +20,22 @@
  */
 #include "gd_matlab.h"
 
+/*
+ % GD_MADD_CARRAY  Add a CARRAY field
+ %
+ %   GD_MADD_CARRAY(DIRFILE,PARENT,NAME,TYPE,VALUES)
+ %             adds a CARRAY metafield called NAME to the dirfile specified by
+ %             DIRFILE under parent field PARENT.  The storage type is TYPE,
+ %             and the values of the field are in VALUES.
+ %
+ %   The DIRFILE object should have previously been created with GD_OPEN.
+ %
+ %   See the documentation on the C API function gd_madd_carray(3) in section 3
+ %   of the UNIX manual for more details.
+ %
+ %   See also GD_MADD, GD_ADD_CARRAY, GD_OPEN
+ */
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;

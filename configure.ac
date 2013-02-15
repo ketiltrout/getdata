@@ -38,6 +38,11 @@ AC_DEFINE([GETDATA_REVISION], [getdata_revision], [ The revision number ])
 AC_DEFINE([GETDATA_VERSION_SUFFIX], ["getdata_extra"],
           [ Other qualifiers on the version number triplet (if any) ])
 
+AC_SUBST([GETDATA_MAJOR], [getdata_major])
+AC_SUBST([GETDATA_MINOR], [getdata_minor])
+AC_SUBST([GETDATA_REVISION], [getdata_revision])
+AC_SUBST([GETDATA_VERSION_SUFFIX], [getdata_extra])
+
 AC_PREREQ([2.63])
 AC_CONFIG_MACRO_DIR([m4])
 
@@ -53,6 +58,7 @@ AC_SUBST(GETDATA_IFACE_AGE, [getdata_iface_age])
 AC_SUBST(GETDATAXX_VERSION, [getdataxx_version])
 AC_SUBST(FGETDATA_VERSION, [fgetdata_version])
 AC_SUBST(F95GETDATA_VERSION, [f95getdata_version])
+AC_SUBST(MATLABGETDATA_VERSION, [matlabgetdata_version])
 
 AC_CONFIG_SRCDIR([src/getdata.c])
 AC_CONFIG_HEADER([src/gd_config.h])
@@ -315,10 +321,28 @@ echo "*** Initialising build system"
 echo
 AM_INIT_AUTOMAKE
 AC_PROG_LN_S
-AC_PROG_GREP
 AC_PROG_AWK
+AC_PROG_GREP
 AC_PROG_SED
+
+AC_ARG_VAR([DATE], \
+           [a date program which supports '+%...' conversion specifiers])
+AC_CHECK_PROGS([DATE], [date], [not found])
+
+AC_ARG_VAR([DIFF], [a POSIX-compatible diff])
 AC_CHECK_PROGS([DIFF], [diff], [])
+
+AC_ARG_VAR([JOT], [a BSD-style jot;]
+[SysV-derived systems (like GNU/Linux) may find it easier to use SEQ (q.v.)])
+AC_CHECK_PROGS([JOT], [jot], [not found])
+
+AC_ARG_VAR([PRINTF], [a POSIX-compatible printf])
+AC_CHECK_PROGS([PRINTF], [printf], [not found])
+
+AC_ARG_VAR([SEQ], [a SysV-style seq;]
+[BSD-derived systems (like MacOS X) may find it easier to use JOT (q.v.)])
+AC_CHECK_PROGS([SEQ], [seq], [not found])
+
 GD_MSYS_SHELL
 
 echo
@@ -831,15 +855,6 @@ if test "x$make_idlbindings" = "xyes"; then
   GD_IDL([5.5])
   if test "x$have_idl" = "xno"; then
     make_idlbindings="no"
-  else
-    dnl build date
-    AC_CHECK_PROGS([DATE], [date], [not found])
-    if test "x$DATE" == "xnot found"; then
-      BUILD_DATE="Build date unspecified"
-    else
-      BUILD_DATE=`$DATE`
-    fi
-    AC_SUBST([BUILD_DATE])
   fi
 fi
 
@@ -989,6 +1004,7 @@ AC_CONFIG_FILES([bindings/idl/Makefile])
 AC_CONFIG_FILES([bindings/idl/makedlm.sh])
 AC_CONFIG_FILES([bindings/idl/test/Makefile])
 AC_CONFIG_FILES([bindings/matlab/Makefile])
+AC_CONFIG_FILES([bindings/matlab/make_contents.sh])
 AC_CONFIG_FILES([bindings/matlab/test/Makefile])
 AC_CONFIG_FILES([bindings/perl/Makefile])
 AC_CONFIG_FILES([bindings/perl/Build.PL])
@@ -1041,7 +1057,7 @@ AM_CONDITIONAL(TEST_PERL, [test "x$HAVE_Test__Harness" = "xyes"])
 AM_CONDITIONAL(TEST_MATLAB, [test "x$NO_DLOPEN_TESTS" = "x0"])
 AM_CONDITIONAL(HAVE_DIFF, [test "x$DIFF" != "x"])
 AM_CONDITIONAL(USE_ZZSLIM, [test "x$use_zzslim" = "xyes"])
-AM_CONDITIONAL(GDIDL_EXTERNAL, [false])
+AM_CONDITIONAL(GD_EXTERNAL, [false])
 
 
 dnl we do this here to avoid screwing up other tests

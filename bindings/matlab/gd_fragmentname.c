@@ -20,6 +20,21 @@
  */
 #include "gd_matlab.h"
 
+/*
+ % GD_FRAGMENTNAME  Report the pathname of a metdata fragment
+ %
+ %   P = GD_FRAGMENTNAME(DIRFILE,FRAGMENT)
+ %             reports the pathname, P, of the fragment indexed by FRAGMENT in
+ %             the dirfile DIRFILE.
+ %
+ %   The DIRFILE object should have previously been created with GD_OPEN.
+ %
+ %   See the documentation on the C API function gd_fragmentname(3) in section 3
+ %   of the UNIX manual for more details.
+ %
+ %   See also GD_OPEN, GD_INCLUDE
+ */
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;

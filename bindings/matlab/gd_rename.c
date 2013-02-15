@@ -20,19 +20,36 @@
  */
 #include "gd_matlab.h"
 
+/*
+ % GD_RENAME  Rename a field or alias
+ %
+ %   GD_RENAME(DIRFILE,OLD_NAME,NEW_NAME[,FLAGS])
+ %             renames the field called OLD_NAME to NEW_NAME.  If given, FLAGS
+ %             should be zero or more of the GD.REN_... symbols provided by
+ %             GETDATA_CONSTANTS.
+ %
+ %   The DIRFILE object should have previously been created with GD_OPEN.
+ %
+ %   See the documentation on the C API function gd_rename(3) in section 3
+ %   of the UNIX manual for more details.
+ %
+ %   See also GD_OPEN
+ */
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;
   char *field_code, *new_code;
-  unsigned int flags;
+  unsigned int flags = 0;
 
   GDMX_NO_LHS;
-  GDMX_CHECK_RHS(4);
+  GDMX_CHECK_RHS2(3,4);
 
   D = gdmx_to_dirfile(prhs[0]);
   field_code = gdmx_to_string(prhs, 1, 0);
   new_code = gdmx_to_string(prhs, 2, 0);
-  flags = gdmx_to_uint(prhs, 3);
+  if (nrhs > 3)
+    flags = gdmx_to_uint(prhs, 3);
 
   gd_rename(D, field_code, new_code, flags);
 

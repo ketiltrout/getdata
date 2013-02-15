@@ -20,6 +20,21 @@
  */
 #include "gd_matlab.h"
 
+/*
+ % GD_PARENT_FRAGMENT  Report the parent of a fragment
+ %
+ %  F = GD_PARENT_FRAGMENT(DIRFILE,FRAGMENT)
+ %             reports the parent fragment index, F, of the fragment indexed by
+ %             FRAGMENT.
+ %
+ %   The DIRFILE object should have previously been created with GD_OPEN.
+ %
+ %   See the documentation on the C API function gd_parent_fragment(3) in
+ %   section 3 of the UNIX manual for more details.
+ %
+ %   See also GD_INCLUDE, GD_OPEN
+ */
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;

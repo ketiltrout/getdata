@@ -465,8 +465,57 @@ void MatLab(void)
 {
   int i;
 
-  fputs("% Copyright (C) 2013 D. V. Wiebe\n%\n%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
-      "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n%\n"
+  fputs("function GD = getdata_constants()\n", stdout);
+
+  fputs("% GETDATA_CONSTANTS  Define GetData symbolic constants\n"
+      "%\n"
+      "%   GETDATA_CONSTANTS  produces a structure containing the symbolic "
+      "constants\n"
+      "%   used by the GetData bindings.  Member names of the structure "
+      "correspond to\n"
+      "%   names of symbolic constants used in the GetData C API.\n"
+      "%\n"
+      "%   Although it can be used in immediate context by doing something "
+      "like\n"
+      "%\n"
+      "%     >> GETDATA_CONSTANTS.FLOAT64\n"
+      "%\n"
+      "%     ans =\n"
+      "%\n"
+      "%              136\n"
+      "%\n"
+      "%   it is usually assigned to a variable, which prevents having to "
+      "evaluate this\n"
+      "%   function more than once.  We recommend calling this variable GD:\n"
+      "%\n"
+      "%     >> GD = GETDATA_CONSTANTS;\n"
+      "%     >> GD.FLOAT64\n"
+      "%\n"
+      "%     ans =\n"
+      "%\n"
+      "%              136\n"
+      "%\n"
+      "%   providing more succinct symbol names which closely resemble the "
+      "cor-\n"
+      "%   respondng C API symbol names (e.g. GD_FLOAT64).  In the "
+      "documentation for\n"
+      "%   these bindings, we assume such a GD variable has been defined, and "
+      "refer to\n"
+      "%   symbolic constants as GD.<...> when necessary.\n"
+      "%\n"
+      "%   See also GETDATA\n\n", stdout);
+
+  fputs("  GD = struct(...\n"
+      "    'VERSION', '" VERSION "'", stdout);
+
+  for (i = 0; constant_list[i].lname != NULL; ++i)
+    printf(", ...\n    '%s', int32(%li)", constant_list[i].sname,
+        constant_list[i].value);
+
+  printf(" ...\n  );\nend\n");
+
+  fputs("\n% Copyright (C) 2013 D. V. Wiebe\n%\n%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
+      "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n%\n"
       "% This file is part of the GetData project.\n%\n"
       "% GetData is free software; you can redistribute it and/or modify it "
       "under\n"
@@ -485,32 +534,7 @@ void MatLab(void)
       "License\n"
       "% along with GetData; if not, write to the Free Software Foundation, "
       "Inc.,\n"
-      "% 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA\n\n", stdout);
-
-  fputs("% getdata_constants:\n"
-      "% ------------------\n"
-      "% This function defines a structure containing various constants used "
-      "by\n"
-      "% the GetData MATLAB bindings.  Typically it is called by doing "
-      "something\n"
-      "% like:\n%\n"
-      "%   >> GD = getdata_constants()\n%\n"
-      "% which then allows you to use constants like 'GD.RDWR' when required "
-      "by\n"
-      "% the bindings.\n%\n"
-      "% For details on the GetData MATLAB bindings see the file "
-      "README.matlab\n"
-      "% distributed with the GetData source.\n", stdout);
-
-  fputs("function GD = getdata_constants()\n"
-      "  GD = struct(...\n"
-      "    'VERSION', '" VERSION "'", stdout);
-
-  for (i = 0; constant_list[i].lname != NULL; ++i)
-    printf(", ...\n    '%s', int32(%li)", constant_list[i].sname,
-        constant_list[i].value);
-
-  printf(" ...\n  );\nend\n");
+      "% 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA\n", stdout);
 }
 
 int main(int argc, char* argv[])

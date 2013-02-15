@@ -20,6 +20,22 @@
  */
 #include "gd_matlab.h"
 
+/*
+ % GD_ADD_STRING  Add a STRING field
+ %
+ %   GD_ADD_STRING(DIRFILE,NAME,VALUE,FRAGMENT)
+ %             adds a STRING field called NAME to the dirfile specified by
+ %             DIRFILE.  The value of the field is set to VALUE.  The field is
+ %             added to the fragment indexed by FRAGMENT.
+ %
+ %   The DIRFILE object should have previously been created with GD_OPEN.
+ %
+ %   See the documentation on the C API function gd_add_string(3) in section 3
+ %   of the UNIX manual for more details.
+ %
+ %   See also GD_ADD, GD_MADD_STRING, GD_OPEN
+ */
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;

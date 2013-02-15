@@ -1,3 +1,24 @@
+function gd_alter_const(D, field_code, const_type)
+% GD_ALTER_CONST  Modify the metadata of a CONST field
+%
+%   GD_ALTER_CONST(DIRFILE,NAME,TYPE)
+%             modifies the metadata of the CONST field called NAME in the
+%             dirfile specified by DIRFILE, setting the storage type of the
+%             field to TYPE, which should be one of the data type symbols
+%             provided by GETDATA_CONSTANTS.
+%
+%   The DIRFILE object should have previously been created with GD_OPEN.
+%
+%   See the documentation on the C API function gd_alter_const(3) in section 3
+%   of the UNIX manual for more details.
+%
+%   See also GD_ALTER_ENTRY, GD_OPEN, GETDATA_CONSTANTS
+
+  GD = getdata_constants();
+  gd_alter_entry(D, field_code, struct('field_type', GD.CONST_ENTRY, ...
+  'const_type', const_type), 0);
+end
+
 % Copyright (C) 2013 D. V. Wiebe
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -17,9 +38,3 @@
 % You should have received a copy of the GNU Lesser General Public License
 % along with GetData; if not, write to the Free Software Foundation, Inc.,
 % 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-
-function gd_alter_const(D, field_code, const_type)
-  GD = getdata_constants();
-  gd_alter_entry(D, field_code, struct('field_type', GD.CONST_ENTRY, ...
-  'const_type', const_type), 0);
-end

@@ -20,6 +20,21 @@
  */
 #include "gd_matlab.h"
 
+/*
+ % GD_MADD_ALIAS  Add a field alias
+ %
+ %   GD_MADD_ALIAS(DIRFILE,PARENT,NAME,TARGET)
+ %             adds a field alias metafield called NAME pointing to TARGET under
+ %             parent field PARENT in the dirfile DIRFILE.
+ %
+ %   The DIRFILE object should have previously been created with GD_OPEN.
+ %
+ %   See the documentation on the C API function gd_madd_alias(3) in section 3
+ %   of the UNIX manual for more details.
+ %
+ %   See also GD_ADD_ALIAS, GD_OPEN
+ */
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;

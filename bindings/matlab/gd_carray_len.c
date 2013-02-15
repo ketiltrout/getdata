@@ -20,6 +20,21 @@
  */
 #include "gd_matlab.h"
 
+/*
+ % GD_CARRAY_LEN  Report the length of a CARRAY field
+ %
+ %   L = GD_CARRAY_LEN(DIRFILE,FIELD_CODE)
+ %             reports the length, L, of the CARRAY field specified by
+ %             FIELD_CODE.
+ %
+ %   The DIRFILE object should have previously been created with GD_OPEN.
+ %
+ %   See the documentation on the C API function gd_alter_endianness(3) in
+ %   section 3 of the UNIX manual for more details.
+ %
+ %   See also GD_ENDIANNESS, GD_OPEN, GETDATA_CONSTANTS
+ */
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;

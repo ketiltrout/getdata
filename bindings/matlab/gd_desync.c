@@ -20,6 +20,24 @@
  */
 #include "gd_matlab.h"
 
+/*
+ % GD_DESYNC  Modify the byte sex of a fragment
+ %
+ %   B = GD_DESYNC(DIRFILE[,FLAGS])
+ %             returns a boolean, B, indicating whether the dirfile DIRFILE on
+ %             disk has been changed by a third-party since having been opened
+ %             by GetData.  If given, FLAGS should be a bitwise-or'd collection
+ %             of zero or more of the GD.DESYNC_... symbols provided by
+ %             GETDATA_CONSTANTS.
+ %
+ %   The DIRFILE object should have previously been created with GD_OPEN.
+ %
+ %   See the documentation on the C API function gd_desync(3) in section 3
+ %   the UNIX manual for more details.
+ %
+ %   See also GD_OPEN, GETDATA_CONSTANTS
+ */
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;

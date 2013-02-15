@@ -20,6 +20,24 @@
  */
 #include "gd_matlab.h"
 
+/*
+ % GD_INCLUDE  Add a format metadata fragment
+ %
+ %   GD_INCLUDE(DIRFILE,PATH,PARENT,FLAGS[,PREFIX[,SUFFIX]])
+ %             adds the fragment at PATH to the open dirfile DIRFILE below the
+ %             current fragment indexed by PARENT.  FLAGS should be zero or more
+ %             Dirfile flags provided by GETDATA_CONSTANTS, bitwise-or'd
+ %             together.  If given an not numeric zero, PREFIX and SUFFIX
+ %             provide the fragment affixes.
+ %
+ %   The DIRFILE object should have previously been created with GD_OPEN.
+ %
+ %   See the documentation on the C API function gd_include_affix(3) in
+ %   section 3 of the UNIX manual for more details.
+ %
+ %   See also GD_UNINCLUDE, GD_FRAGMENT_AFFIXES, GD_ALTER_AFFIXEX, GD_OPEN
+ */
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;

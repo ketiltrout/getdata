@@ -20,6 +20,22 @@
  */
 #include "gd_matlab.h"
 
+/*
+ % GD_DISCARD  Close a dirfile
+ %
+ %   GD_DISCARD(DIRFILE)
+ %             discards all changes and closes the dirfile DIRFILE.  The DIRFILE
+ %             object supplied will no longer be valid if this function
+ %             succeeds.
+ %
+ %   The DIRFILE object should have previously been created with GD_OPEN.
+ %
+ %   See the documentation on the C API function gd_discard(3) in section 3
+ %   of the UNIX manual for more details.
+ %
+ %   See also GD_CLOSE, GD_OPEN
+ */
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;

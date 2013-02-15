@@ -28,7 +28,7 @@ matlabTESTS=big_test.m
 TESTS=$(addprefix ${srcdir}/,$(matlabTESTS))
 endif
 
-EXTRA_DIST=${matlabTESTS}
+EXTRA_DIST=${matlabTESTS} test.sh
 
 check-local: check-TESTS
 	echo $(MAKE) getdata-clean-dirs

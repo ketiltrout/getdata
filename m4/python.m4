@@ -26,9 +26,7 @@ AC_DEFUN([GD_PYTHON],
 last_python=2.7
 first_python=$1
 
-AC_CHECK_PROGS([SEQ], [seq], [not found])
 if test "x$SEQ" == "xnot found"; then
-  AC_CHECK_PROGS([JOT], [jot], [not found])
   if test "x$JOT" == "xnot found"; then
     python_prog_list="python python2"
   else

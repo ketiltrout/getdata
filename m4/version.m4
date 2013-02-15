@@ -40,3 +40,6 @@ m4_define(fgetdata_version, 4:0:2)
 
 dnl libf95getdata interface version info
 m4_define(f95getdata_version, 4:0:2)
+
+dnl libgetdata-matlab interface version info
+m4_define(matlabgetdata_version, 0:0:0)

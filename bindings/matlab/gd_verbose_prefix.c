@@ -20,6 +20,21 @@
  */
 #include "gd_matlab.h"
 
+/*
+ % GD_VERBOSE_PREFIX  set the prefix on error messages
+ %
+ %   GD_FLUSH(DIRFILE,PREFIX)
+ %             set the prefix on Library error messages printed when running in
+ %             verbose mode to PREFIX.
+ %
+ %   The DIRFILE object should have previously been created with GD_OPEN.
+ %
+ %   See the documentation on the C API function gd_verbose_prefix(3) in
+ %   section 3 of the UNIX manual for more details.
+ %
+ %   See also GD_OPEN, GD_ERROR_STRING
+ */
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;

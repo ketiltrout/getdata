@@ -20,6 +20,23 @@
  */
 #include "gd_matlab.h"
 
+/*
+ % GD_DIRFILE_STANDARDS  Change or report the Dirfile Standards Version
+ %
+ %   V = GD_DIRFILE_STANDARDS(DIRFILE[,VERSION])
+ %             if given, sets the standards version of DIRFILE to VERSION, which
+ %             may be a literal number or else one of the GD.VERSION_... symbols
+ %             provided by GETDATA_CONSTANTS.  Returns the current version
+ %             number, V, after possibly changing it.
+ %
+ %   The DIRFILE object should have previously been created with GD_OPEN.
+ %
+ %   See the documentation on the C API function gd_dirfile_standards(3) in
+ %   section 3 of the UNIX manual for more details.
+ %
+ %   See also GD_OPEN, GETDATA_CONSTANTS
+ */
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;

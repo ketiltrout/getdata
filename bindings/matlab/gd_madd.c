@@ -20,6 +20,24 @@
  */
 #include "gd_matlab.h"
 
+/*
+ % GD_MADD  Add a metafield
+ %
+ %   GD_MADD(DIRFILE,ENTRY,PARENT)
+ %             adds a metafield described by ENTRY to the dirfile DIRFILE under
+ %             parent field PARENT.
+ %
+ %   The DIRFILE object should have previously been created with GD_OPEN.
+ %
+ %   The ENTRY object should be an entry struct; see GETDATA and gd_entry(3) in
+ %   the UNIX manual for details.
+ %
+ %   See the documentation on the C API function gd_madd(3) in section 3
+ %   of the UNIX manual for more details.
+ %
+ %   See also GD_ADD, GD_OPEN, GETDATA
+ */
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;

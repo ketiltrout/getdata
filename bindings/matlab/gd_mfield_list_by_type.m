@@ -1,3 +1,14 @@
+function field_list = gd_mfield_list_by_type(D, parent, type)
+% GD_MFIELD_LIST_BY_TYPE  Retrieve a list of field names
+%
+%   GD_MFIELD_LIST_BY_TYPE(DIRFILE,PARENT,TYPE)
+%             is equivalent to calling GD_ENTRY_LIST(DIRFILE,PARENT,TYPE,0)
+%
+%   See also GD_ENTRY_LIST
+
+  field_list = gd_entry_list(D, parent, type, 0);
+end
+
 % Copyright (C) 2013 D. V. Wiebe
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -17,7 +28,3 @@
 % You should have received a copy of the GNU Lesser General Public License
 % along with GetData; if not, write to the Free Software Foundation, Inc.,
 % 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-
-function field_list = gd_mfield_list_by_type(D, parent, type)
-  field_list = gd_entry_list(D, parent, type, 0);
-end

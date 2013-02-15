@@ -32,7 +32,7 @@
 # include "gd_config.h"
 #endif
 
-#ifdef GDIDL_EXTERNAL
+#ifdef GD_EXTERNAL
 # include <complex.h>
 # include <getdata.h>
 # define dtracevoid()

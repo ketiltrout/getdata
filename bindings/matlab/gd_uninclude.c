@@ -20,20 +20,37 @@
  */
 #include "gd_matlab.h"
 
+/*
+ % GD_UNINCLUDE  Remove a metadata fragment from a dirfile
+ %
+ %   GD_FLUSH(DIRFILE,FRAGMENT[,DEL])
+ %             removes the fragment indexed by FRAGMENT from the dirfile
+ %             DIRFILE.  If DEL is given and non-zero, also deletes the file
+ %             on disk.
+ %
+ %   The DIRFILE object should have previously been created with GD_OPEN.
+ %
+ %   See the documentation on the C API function gd_uninclude(3) in section 3
+ %   of the UNIX manual for more details.
+ %
+ %   See also GD_INCLUDE, GD_OPEN
+ */
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;
   void *data;
-  int i, n;
+  int i, d = 0;
 
   GDMX_NO_LHS;
-  GDMX_CHECK_RHS(3);
+  GDMX_CHECK_RHS2(2,3);
 
   D = gdmx_to_dirfile(prhs[0]);
   i = gdmx_to_int(prhs, 1);
-  n = gdmx_to_int(prhs, 2);
+  if (nrhs > 2)
+    d = gdmx_to_int(prhs, 2);
 
-  gd_uninclude(D, i, n);
+  gd_uninclude(D, i, d);
 
   gdmx_err(D, 0);
 }

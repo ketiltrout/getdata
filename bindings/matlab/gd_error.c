@@ -20,6 +20,25 @@
  */
 #include "gd_matlab.h"
 
+/*
+ % GD_ERROR  Report the C library error code
+ %
+ %   E = GD_ERROR(DIRFILE)
+ %             returns the error code, E, associated with the last call to the
+ %             C GetData library.  This will be one of the GD.E_... symbols
+ %             provided by GETDATA_CONSTANTS.  Since the MATLAB bindings throw
+ %             exceptions on library error, it is only ever useful to use this
+ %             inside a CATCH block after a GetData Library error has been
+ %             thrown.
+ %
+ %   The DIRFILE object should have previously been created with GD_OPEN.
+ %
+ %   See the documentation on the C API function gd_error(3) in section 3
+ %   of the UNIX manual for more details.
+ %
+ %   See also GD_ERROR_STRING, GD_OPEN
+ */
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;

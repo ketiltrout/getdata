@@ -20,6 +20,22 @@
  */
 #include "gd_matlab.h"
 
+/*
+ % GD_REFERENCE  Set or report the reference field name
+ %
+ %   F = GD_REFERENCE(DIRFILE[,FIELD_CODE])
+ %             sets the reference field of DIRFILE to FIELD_CODE, if given and
+ %             not numeric zero.  Returns the reference field, F, after possibly
+ %             updating it.
+ %
+ %   The DIRFILE object should have previously been created with GD_OPEN.
+ %
+ %   See the documentation on the C API function gd_reference(3) in section 3
+ %   of the UNIX manual for more details.
+ %
+ %   See also GD_NFRAMES, GD_OPEN
+ */
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;

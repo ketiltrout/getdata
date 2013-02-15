@@ -20,6 +20,20 @@
  */
 #include "gd_matlab.h"
 
+/*
+ % GD_PUT_STRING  Modify STRING values
+ %
+ %   GD_PUT_STRING(DIRFILE,FIELD_CODE,VALUE)
+ %             sets the value of the STRING field FIELD_CODE to VALUE.
+ %
+ %   The DIRFILE object should have previously been created with GD_OPEN.
+ %
+ %   See the documentation on the C API function gd_put_string(3) in section 3
+ %   of the UNIX manual for more details.
+ %
+ %   See also GD_GET_STRING, GD_OPEN
+ */
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;

@@ -20,6 +20,22 @@
  */
 #include "gd_matlab.h"
 
+/*
+ % GD_MADD_STRING  Add a STRING field
+ %
+ %   GD_MADD_STRING(DIRFILE,PARENT,NAME,VALUE)
+ %             adds a STRING metafield called NAME to the dirfile specified by
+ %             DIRFILE under parent field PARENT.  The value of the field is
+ %             set to VALUE.
+ %
+ %   The DIRFILE object should have previously been created with GD_OPEN.
+ %
+ %   See the documentation on the C API function gd_madd_string(3) in section 3
+ %   of the UNIX manual for more details.
+ %
+ %   See also GD_MADD, GD_ADD_STRING, GD_OPEN
+ */
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;

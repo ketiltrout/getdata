@@ -20,6 +20,22 @@
  */
 #include "gd_matlab.h"
 
+/*
+ % GD_STRINGS  Fetch all STRING values
+ %
+ %   A = GD_STRINGS(DIRFILE)
+ %             returns a cell array of strings, A, containing all the STRING
+ %             data in the dirfile DIRFILE.  A corresponding array of field
+ %             names can be produced with GD_FIELD_LIST_BY_TYPE.
+ %
+ %   The DIRFILE object should have previously been created with GD_OPEN.
+ %
+ %   See the documentation on the C API function gd_strings(3) in section 3
+ %   of the UNIX manual for more details.
+ %
+ %   See also GD_MSTRINGS, GD_FIELD_LIST_BY_TYPE, GD_GET_STRING
+ */
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;

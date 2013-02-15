@@ -20,6 +20,23 @@
  */
 #include "gd_matlab.h"
 
+/*
+ % GD_FRAGMENT_AFFIXES  Retrieve the affixes of an included fragment
+ %
+ %  L = GD_FRAGMENT_AFFIXES(DIRFILE,FRAGMENT)
+ %             returns a two-element cell array containing the prefix and suffix
+ %             (in that order) of the fragment specified by FRAGMENT in the
+ %             dirfile DIRFILE.  If an affix is empty, numeric zero will be
+ %             reported in the corresponding cell.
+ %
+ %   The DIRFILE object should have previously been created with GD_OPEN.
+ %
+ %   See the documentation on the C API function gd_fragment_affixes(3) in
+ %   section 3 of the UNIX manual for more details.
+ %
+ %   See also GD_ALTER_AFFIXES, GD_INCLUDE, GD_OPEN
+ */
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;
@@ -37,4 +54,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   gdmx_err(D, 0);
 
   plhs[0] = gdmx_from_string_list((const char**)al);
+
+  free(al[0]);
+  free(al[1]);
 }

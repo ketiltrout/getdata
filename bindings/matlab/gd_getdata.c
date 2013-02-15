@@ -20,6 +20,26 @@
  */
 #include "gd_matlab.h"
 
+/*
+ % GD_GETDATA  Retrieve vector data
+ %
+ %   V = GD_GETDATA(DIRFILE,FIELD_CODE,FIRST_FRAME,FIRST_SAMP,NFRAMES,NSAMP ...
+ %                  [,TYPE])
+ %             retrieves a vector, V, of NFRAMES frames plus NSAMPLES samples of
+ %             data from the vector field FIELD_CODE starting FIRST_SAMP samples
+ %             past the start of FIRST_FRAME.  If type is given, it should be
+ %             one of the data type symbols provided by GETDATA_CONSTANTS,
+ %             otherwise the data are returned in their native type.
+ %
+ %   The DIRFILE object should have previously been created with GD_OPEN.
+ %
+ %   See the documentation on the C API function gd_getdata(3) in
+ %   section 3 of the UNIX manual for more details.
+ %
+ %   See also GD_PUTDATA, GD_OPEN
+ */
+
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;

@@ -20,6 +20,24 @@
  */
 #include "gd_matlab.h"
 
+/*
+ % GD_GET_CARRAY_SLICE  Retrieve CARRAY data
+ %
+ %   A = GD_GET_CARRAY_SLICE(DIRFILE,FIELD_CODE,START,LEN[,TYPE])
+ %             retrieves a subset, A, of the CARRAY field called FIELD_CODE.
+ %             LEN elements are retrieved, starting with element START.  If type
+ %             is given, it should be one of the data type symbols provided by
+ %             GETDATA_CONSTANTS, otherwise the data are returned in their
+ %             native type.
+ %
+ %   The DIRFILE object should have previously been created with GD_OPEN.
+ %
+ %   See the documentation on the C API function gd_get_carray_slice(3) in
+ %   section 3 of the UNIX manual for more details.
+ %
+ %   See also GD_GET_CARRAY, GD_PUT_CARRAY_SLICE, GD_OPEN, GETDATA_CONSTANTS
+ */
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;

@@ -1,8 +1,22 @@
-2012-02-02   D. V. Wiebe <getdata@ketiltrout.net> svn:794
+2012-02-15   D. V. Wiebe <getdata@ketiltrout.net> svn:795
+	* bindings/matlab/package: Added.
+	* Makefile.am: Add matlabdist and matlabdistcheck
+
+	* doc/README.matlab bindings/matlab/make_contents.sh.in
+	bindings/matlab/Contents.m.head bindings/matlab/doc.tail: Added.
+
+	* bindinag/matlab/matlab.c (gdmx_from_carrays): Added.
+	* bindings/matlab/gd_mcarrays.c: Added.
+	* bindings/matlab/test/big_test.m: Add test 243.
+
+	* bindings/matlab/gd_include.c: Renamed from gd_include_affix.c
+	* bindings/matlab/gd_include.m: Deleted.
+
+2012-02-13   D. V. Wiebe <getdata@ketiltrout.net> svn:794
 	* bindings/cxx/test/big_test.cpp bindings/perl/t/big_test.t
 	bindings/python/test/big_test.py: Add test 243.
 
-2012-02-02   D. V. Wiebe <getdata@ketiltrout.net> svn:793
+2012-02-06   D. V. Wiebe <getdata@ketiltrout.net> svn:793
 	* src/parse.c (_GD_Tokenise): Don't falsely report an unterminated token when
 	stopping a partial tokenisation on top of a " or \.
 	* test/tok_arg.c test/tok_escape.c test/tok_quote.c: Added.

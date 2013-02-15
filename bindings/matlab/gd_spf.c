@@ -20,6 +20,20 @@
  */
 #include "gd_matlab.h"
 
+/*
+ % GD_SPF  Report the samples-per-frame of a field
+ %
+ %   S = GD_SPF(DIRFILE,FIELD_CODE)
+ %             reports the samples-per-frame, S, of the field called FIELD_CODE.
+ %
+ %   The DIRFILE object should have previously been created with GD_OPEN.
+ %
+ %   See the documentation on the C API function gd_spf(3) in section 3
+ %   of the UNIX manual for more details.
+ %
+ %   See also GD_OPEN
+ */
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;

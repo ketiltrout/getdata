@@ -20,6 +20,21 @@
  */
 #include "gd_matlab.h"
 
+/*
+ % GD_TELL  Report the location of a field's I/O pointer
+ %
+ %   P = GD_TELL(DIRFILE,FIELD_CODE)
+ %             returns the position, P, in samples, of the field FIELD_CODE's
+ %             I/O pointer.
+ %
+ %   The DIRFILE object should have previously been created with GD_OPEN.
+ %
+ %   See the documentation on the C API function gd_tell(3) in section 3
+ %   of the UNIX manual for more details.
+ %
+ %   See also GD_SEEK, GD_GETDATA, GD_OPEN.
+ */
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   DIRFILE *D;
