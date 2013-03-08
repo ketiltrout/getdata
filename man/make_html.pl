@@ -157,7 +157,7 @@ while(<F>) {
   }
 
   #$html .= "[$dl+$#dlstack;$rs]";
-  if (/^\.TH (gd_\w*) 3 "(.*?)" "(.*?)"/) {
+  if (/^\.TH ([Gg][Dd]_\w*) 3 "(.*?)" "(.*?)"/) {
     $vers = $3;
     $date = $2;
     my $func = $a || $1;
@@ -365,7 +365,7 @@ $html .= "</BODY></HTML>";
 
 $html =~  s/ \* / &times; /g;
 $html =~ s/\\~/ /g;
-$html =~ s/(<B>(gd_\w*?)<\/B>\(3\))/<A HREF="$2.3.html">$1<\/A>/g;
+$html =~ s/(<B>([Gg][Dd]_\w*?)<\/B>\(3\))/<A HREF="$2.3.html">$1<\/A>/g;
 $html =~ s/(<B>(dirfile[-a-z]*)<\/B>\(5\))/<A HREF="$2.5.html">$1<\/A>/g;
 $html =~ s/([^>])(dirfile[-a-z]*)<\/B>\(5\)/$1<A HREF="$2.5.html">$2<\/A>/g;
 
