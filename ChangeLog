@@ -1,3 +1,6 @@
+2012-03-08   D. V. Wiebe <getdata@ketiltrout.net> svn:806
+	GetData-0.8.3rc1.
+
 2012-03-08   D. V. Wiebe <getdata@ketiltrout.net> svn:803
 	* src/internal.h (gd_put_unalinged64): Fix spelling.
 
