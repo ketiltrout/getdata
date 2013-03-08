@@ -425,7 +425,8 @@ int _GD_FiniRawIO(DIRFILE *D, const gd_entry_t *E, int fragment, int flags)
   if (oop_write || clotemp) {
     if (flags & GD_FINIRAW_DISCARD) {
       /* Throw away the temporary file */
-      if (gd_UnlinkAt(D, D->fragment[fragment].dirfd, E->e->u.raw.file[1].name,
+      if (E->e->u.raw.file[1].name != NULL &&
+          gd_UnlinkAt(D, D->fragment[fragment].dirfd, E->e->u.raw.file[1].name,
             0))
       {
         if (D->error == GD_E_OK)

@@ -313,7 +313,7 @@ gd_static_inline_ int64_t gd_get_unaligned64(const void *p)
 #if defined HAVE_DECL_PUT_UNALIGNED && HAVE_DECL_PUT_UNALIGNED == 1
 #define gd_put_unaligned64 put_unaligned
 #else
-gd_static_inline_ int64_t gd_put_unalinged64(int64_t v, void *p)
+gd_static_inline_ int64_t gd_put_unaligned64(int64_t v, void *p)
 {
   memcpy(p, &v, 8);
   return v;
@@ -338,12 +338,12 @@ gd_static_inline_ int64_t gd_put_unalinged64(int64_t v, void *p)
 /* Internal type conventions:
  *
  *  - samples per frame is always unsigned int
- *  - variables holding offsets or file sizes should be of type off64_t (which
- *    may be simply off_t, depending on local LFS support)
+ *  - variables holding offsets or file sizes should be of type gd_off64_t
+ *    (which may be simply off_t, if it's the right size)
  *  - variables holding object sizes or counts of items read or written should
  *    be of type size_t
  *  - public functions taking or returning types of off64_t should have both
- *    a off_t prototype and an off64_t type prototype.
+ *    a off_t prototype and a gd_off64_t type prototype.
  */
 
 #ifndef __attribute_malloc__
@@ -464,6 +464,8 @@ int _GD_ReadDir(DIR *dirp, struct dirent *entry, struct dirent **result);
 #  define gd_strtoll _strtoi64
 #elif defined(HAVE_STRTOLL)
 #  define gd_strtoll strtoll
+#elif defined(HAVE_STRTOQ)
+#  define gd_strtoll strtoq
 #else
 #  define gd_strtoll strtol
 #endif
@@ -472,6 +474,8 @@ int _GD_ReadDir(DIR *dirp, struct dirent *entry, struct dirent **result);
 #  define gd_strtoull _strtoi64
 #elif defined(HAVE_STRTOULL)
 #  define gd_strtoull strtoull
+#elif defined(HAVE_STRTOUQ)
+#  define gd_strtoll strtouq
 #else
 #  define gd_strtoull strtoul
 #endif

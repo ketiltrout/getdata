@@ -28,7 +28,7 @@ have_this_header=
 have_this_lib=
 m4_define([gd_encoding], [$1])
 AC_ARG_WITH([lib$2], AS_HELP_STRING([--with-lib$2=PREFIX],
-            [use the lib$2 installed in PREFIX [autodetect]]),
+            [use the lib$2 installed in PREFIX [default: autodetect]]),
             [
              case "${withval}" in
                no) use_[]gd_encoding="no" ;;

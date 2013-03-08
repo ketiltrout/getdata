@@ -87,12 +87,12 @@ perl5.8.2 perl5.8.1 perl5.8.0"
 
 dnl --without-perl basically does the same as --disable-perl
 AC_ARG_WITH([perl], AS_HELP_STRING([--with-perl=PATH],
-            [use the Perl interpreter located in PATH.  [autodetect]]),
+            [use the Perl interpreter located in PATH.  [default: autodetect]]),
             [
               case "${withval}" in
-                (no) have_perl="no" ;;
-                (yes) user_perl= ; have_perl= ;;
-                (*) user_perl="${withval}"; have_perl= ;;
+                no) have_perl="no" ;;
+                yes) user_perl= ; have_perl= ;;
+                *) user_perl="${withval}"; have_perl= ;;
               esac
             ], [ user_perl=; have_perl= ])
 
@@ -141,12 +141,12 @@ AC_ARG_WITH([perl-dir], AS_HELP_STRING([--with-perl-dir=PATH],
 [ Install Perl bindings in PATH.  If PATH is the special word `vendor', install
 Perl bindings into the default vendor-specific module directory (if present).
 If PATH is the special word `site', install Perl bindings into the default
-site-specific module directory.  [site] ]),
+site-specific module directory.  [default: site] ]),
     [
     case "${withval}" in
-    (vendor|site) perl_inst_type="${withval}" ;;
-    (no) perl_inst_type="site" ;;
-    (*) perl_inst_type="local"; local_perl_path="${withval}"
+    vendor|site) perl_inst_type="${withval}" ;;
+    no) perl_inst_type="site" ;;
+    *) perl_inst_type="local"; local_perl_path="${withval}" ;;
     esac
     ], [ perl_inst_type="site" ])
 

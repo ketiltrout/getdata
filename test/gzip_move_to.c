@@ -85,6 +85,7 @@ int main(void)
   /* uncompress */
   snprintf(command, 4096, "%s -f %s > /dev/null", GUNZIP, data_gz);
   if (gd_system(command)) {
+    fprintf(stderr, "command failed: %s\n", command);
     r = 1;
   } else {
     fd = open(data_raw, O_RDONLY | O_BINARY);

@@ -1,0 +1,59 @@
+.\" GD_SIZE.3.  The GD_SIZE man page.
+.\"
+.\" Copyright (C) 2013 D. V. Wiebe
+.\"
+.\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.\"
+.\" This file is part of the GetData project.
+.\"
+.\" Permission is granted to copy, distribute and/or modify this document
+.\" under the terms of the GNU Free Documentation License, Version 1.2 or
+.\" any later version published by the Free Software Foundation; with no
+.\" Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+.\" Texts.  A copy of the license is included in the `COPYING.DOC' file
+.\" as part of this distribution.
+.\"
+.TH GD_SIZE 3 "20 February 2013" "Version 0.8.3" "GETDATA"
+.SH NAME
+GD_SIZE \(em report the size of a GetData data sample
+.SH SYNOPSIS
+.B #include <getdata.h>
+.HP
+.nh
+.ad l
+.BI "int GD_SIZE(gd_type_t " type );
+.hy
+.ad n
+.SH DESCRIPTION
+The
+.BR GD_SIZE ()
+preprocessor macro returns the size (in bytes) of a single sample of data of the type
+specified by
+.IR type ,
+which should be one of the symbols
+.IP
+.nh
+.ad l
+.BR GD_NULL ", " GD_UINT8 ", " GD_INT8 ", " GD_UINT16 ", " GD_INT16 ,
+.BR GD_UINT32 ", " GD_INT32 ", " GD_FLOAT32 ", " GD_FLOAT64 ", " GD_COMPLEX64 ,
+.BR GD_COMPLEX128 ", " GD_UNKNOWN .
+.ad n
+.hy
+.PP
+Passing
+.B GD_NULL
+or
+.B GD_UNKNOWN
+to this macro will return zero.  For the other types, the value returned is simply the bit-size encoded
+in the type symbol divided by eight, so, e.g.,
+.B GD_SIZE(GD_COMPLEX64)
+will return 8.
+.PP
+No error checking is performed on
+.IR type :
+behaviour resulting from passing something other than the symbols listed above to this macro is unspecified.
+See
+.BR gd_getdata (3)
+for the meaning of the above symbols.
+.SH SEE ALSO
+.BR gd_getdata (3)

@@ -40,7 +40,7 @@ fi
 
 dnl --without-python basically does the same as --disable-python
 AC_ARG_WITH([python], AS_HELP_STRING([--with-python=PATH],
-            [use the Python interpreter located in PATH [autodetect]]),
+            [use the Python interpreter located in PATH [default: autodetect]]),
             [
               case "${withval}" in
                 no) have_python="no" ;;
@@ -50,7 +50,7 @@ AC_ARG_WITH([python], AS_HELP_STRING([--with-python=PATH],
             ], [ user_python=; have_python= ])
 
 AC_ARG_WITH([python-module-dir], AS_HELP_STRING([--with-python-module-dir=PATH],
-      [install the Python bindings into PATH [autodetect]]),
+      [install the Python bindings into PATH [default: autodetect]]),
       [
         case "${withval}" in
           no) local_python_modpath= ;;

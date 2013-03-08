@@ -21,7 +21,8 @@ dnl
 
 m4_include([m4/version.m4])
 
-AC_INIT([GetData],[getdata_version],[getdata-devel@lists.sourceforge.net])
+AC_INIT([GetData],[getdata_version],[getdata-devel@lists.sourceforge.net],,
+        [http://getdata.sourceforge.net/])
 
 AC_COPYRIGHT(
 [Parts of this program are copyright (C) 2008-2013 D. V. Wiebe.
@@ -297,7 +298,7 @@ AC_SUBST([moduledir])
 dnl LTDL
 AC_ARG_WITH([ltdl], AS_HELP_STRING([--with-ltdl=PREFIX],
               [if building modules, use the GNU ltdl library located in
-               PREFIX [autodetect]]),
+               PREFIX [default: autodetect]]),
               [
                case "${withval}" in
                  no) ltdl_prefix= ;;
@@ -348,15 +349,40 @@ GD_MSYS_SHELL
 echo
 echo "*** Checking host environment"
 echo
+
+dnl unaligned memory access
+dnl user knows best
+AC_ARG_ENABLE([fast-unaligned], AS_HELP_STRING([--enable-fast-unaligned],
+  [use fast loads and stores with non-aligned data.  WARNING: Enabling this on ]
+  [a platform which does not support fast unaligned memory access may cause ]
+  [the library to silently corrupt data. [default: autodetect]]),
+  [
+   case "${enableval}" in
+     yes) gd_unaligned_override="yes" ;;
+     no) gd_unaligned_override="no" ;;
+     *) gd_unaligned_override="check" ;;
+   esac
+   ], [gd_unaligned_override="check"])
+
 AC_MSG_CHECKING([whether ${host} supports fast unaligned memory access])
-case "${host}" in
-  i?86-*-*|powerpc*-*-*|x86_64-*-*) gd_unaligned_ok=yes;
+if test "x$gd_unaligned_override" = "xyes"; then
+  gd_unaligned_ok=yes
+  AC_MSG_RESULT([yes (forced)])
+elif test "x$gd_unaligned_override" = "xno"; then
+  gd_unaligned_ok=no
+  AC_MSG_RESULT([no (forced)])
+else
+  case "${host}" in
+    i?86-*-*|powerpc*-*-*|x86_64-*-*|armv[6789]*-*-*) gd_unaligned_ok=yes ;;
+  *) gd_unaligned_ok=no ;;
+  esac
+  AC_MSG_RESULT([$gd_unaligned_ok])
+fi
+
+if test "x$gd_unaligned_ok" = "xyes"; then
   AC_DEFINE([UNALIGNED_ACCESS_OK], [1],
             [Define to 1 if the platform supports fast unaligned memory access])
-  ;;
-  *) gd_unaligned_ok=no ;;
-esac
-AC_MSG_RESULT([$gd_unaligned_ok])
+fi
 
 dnl FDIRSEP is used in Fortran, where '\' should not be escaped.
 AC_MSG_CHECKING([the directory separator])
@@ -367,7 +393,7 @@ esac
 AC_SUBST([GD_FDIRSEP])
 AC_SUBST([GD_DIRSEP])
 AC_DEFINE_UNQUOTED([GD_DIRSEP], ['$GD_DIRSEP'],
-                   [ The separator between directory elements ])
+                   [ The directory separator between path elements ])
 AC_MSG_RESULT([$GD_FDIRSEP])
 
 case "${host}" in
@@ -482,6 +508,16 @@ if test "x${use_modules}" != "xno"; then
     AC_CHECK_HEADERS(ltdl.h)
     LIBLTDL="-lltdl"
   fi
+
+  dnl pthread
+  AC_SEARCH_LIBS([pthread_mutex_lock],[pthread],
+                 [use_pthread=yes
+                  AC_DEFINE([USE_PTHREAD], [],
+                            [Define if you have a POSIX compliant thread ]
+                            [library])
+                  ],
+                  [use_pthread=no])
+  AC_CHECK_HEADERS(pthread.h)
 fi
 AC_SUBST([LIBLTDL])
 AC_SUBST([LTDLINCL])
@@ -568,17 +604,6 @@ echo
 echo "*** Looking for additional libraries"
 echo
 AC_SEARCH_LIBS([ceil],[m])
-
-dnl pthread
-if test "x${use_modules}" != "xno"; then
-  AC_SEARCH_LIBS([pthread_mutex_lock],[pthread],
-                 [use_pthread=yes
-                  AC_DEFINE([USE_PTHREAD], [],
-                          [Define if you have a POSIX compliant thread library])
-                  ],
-                  [use_pthread=no])
-  AC_CHECK_HEADERS(pthread.h)
-fi
 
 dnl headers
 echo
@@ -734,8 +759,8 @@ AC_CHECK_FUNCS([basename _chsize _chsize_s _commit fchmod _fdopen fdopendir \
                 getcwd _getcwd getdelim gmtime_r isnan _isnan lseek64 \
                 _lseeki64 lstat lstat64 _mkdir mkfifo nan _open openat \
                 pathconf _read readdir_r readlink renameat _rmdir snprintf \
-                _snprintf stat64 _stat64 _strtoi64 strtoll _strtoui64 strtoull \
-                symlink _unlink unlinkat _write])
+                _snprintf stat64 _stat64 _strtoi64 strtoll strtoq _strtoui64 \
+                strtoull strtouq symlink _unlink unlinkat _write])
 if test "x$disable_c99" = "xno"; then
   AC_CHECK_FUNCS([cabs])
 fi
@@ -1133,6 +1158,7 @@ echo "Configuration summary: "
 echo "  ANSI C compatibility mode:     ${disable_c99}"
 echo "  Legacy API:                    ${include_legacy_api}"
 echo "  Verbose debugging:             ${enable_debug}"
+echo "  Fast unaligned memory access:  ${gd_unaligned_ok}"
 echo "  Use modules:                   ${use_modules}"
 if test "x${use_modules}" != "xno"; then
   echo "  Thread-safe dynamic loading:   ${use_pthread}"

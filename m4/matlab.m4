@@ -25,12 +25,13 @@ AC_DEFUN([GD_MEX],
 [
 dnl --without-mex basically does the same as --disable-matlab
 AC_ARG_WITH([mex], AS_HELP_STRING([--with-mex=PATH],
-            [use the MATLAB MEX compiler located at PATH.  [autodetect]]),
+            [use the MATLAB MEX compiler located at PATH.  ]
+            [[default: autodetect]]),
             [
               case "${withval}" in
-                (no) have_matlab="no" ;;
-                (yes) user_mex= ;;
-                (*) user_mex="${withval}";;
+                no) have_matlab="no" ;;
+                yes) user_mex= ;;
+                *) user_mex="${withval}";;
               esac
             ], [ user_mex= ])
 
@@ -88,12 +89,13 @@ AC_DEFUN([GD_MATLAB],
 [
 dnl --without-matlab basically does the same as --disable-matlab
 AC_ARG_WITH([matlab], AS_HELP_STRING([--with-matlab=PATH],
-            [use the MATLAB interpreter located at PATH.  [autodetect]]),
+            [use the MATLAB interpreter located at PATH.  ]
+            [[default: autodetect]]),
             [
               case "${withval}" in
-                (no) have_matlab="no" ;;
-                (yes) user_matlab= ; have_matlab= ;;
-                (*) user_matlab="${withval}"; have_matlab= ;;
+                no) have_matlab="no" ;;
+                yes) user_matlab= ; have_matlab= ;;
+                *) user_matlab="${withval}"; have_matlab= ;;
               esac
             ], [ user_matlab=; have_matlab= ])
 
@@ -131,11 +133,12 @@ if test "x${have_matlab}" != "xno"; then
   dnl installdir
   default_matlabbasedir=$libdir/getdata/matlab
   AC_ARG_WITH([matlab-dir], AS_HELP_STRING([--with-matlab-dir=PATH],
-        [ Install Matlab bindings in PATH/getdata.  [LIBDIR/getdata/matlab] ]),
+        [ Install Matlab bindings in PATH/getdata.  ]
+        [[default: LIBDIR/getdata/matlab]]),
       [
       case "${withval}" in
-      (no) matlabbasedir=$default_matlabbasedir ;;
-      (*) matlabbasedir="${withval}"
+      no) matlabbasedir=$default_matlabbasedir ;;
+      *) matlabbasedir="${withval}" ;;
       esac
       ], [ matlabbasedir=$default_matlabbasedir ])
   AC_MSG_CHECKING([matlab install directory])

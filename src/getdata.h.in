@@ -295,7 +295,7 @@ typedef unsigned int gd_spf_t;
 #define GD_SIZE32    0x004
 #define GD_SIZE64    0x008
 #define GD_SIZE128   0x010
-#define GD_SIZE(x)   (x & 0x01f)
+#define GD_SIZE(x)   ((x) & 0x01f)
 
 #define GD_SIGNED    0x020
 #define GD_IEEE754   0x080

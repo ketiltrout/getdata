@@ -1,3 +1,14 @@
+2012-03-08   D. V. Wiebe <getdata@ketiltrout.net> svn:803
+	* src/internal.h (gd_put_unalinged64): Fix spelling.
+
+	* src/encoding.c (_GD_FiniRawIO): Don't pass NULL to gd_UnlinkAt.
+
+	* man/GD_SIZE.3: Added.
+
+	* configure.ac: Turn on fast unaligned access for armv[6789] per Dinar
+	Valeev.  Also add add --enable-fast-unaligned to allow users to override the
+	check.
+
 2012-02-15   D. V. Wiebe <getdata@ketiltrout.net> svn:795
 	* bindings/matlab/package: Added.
 	* Makefile.am: Add matlabdist and matlabdistcheck
