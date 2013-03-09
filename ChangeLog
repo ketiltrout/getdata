@@ -1,3 +1,6 @@
+2012-03-09   D. V. Wiebe <getdata@ketiltrout.net> svn:807
+	* src/flush.c: C89-ify the GD_VERS_... constants.
+
 2012-03-08   D. V. Wiebe <getdata@ketiltrout.net> svn:806
 	GetData-0.8.3rc1.
 
