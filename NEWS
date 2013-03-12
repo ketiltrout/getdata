@@ -1,4 +1,4 @@
-New in version 0.8.3rc1:
+New in version 0.8.3:
 
   Library Changes:
   
@@ -12,6 +12,12 @@ New in version 0.8.3rc1:
   * BUG FIX: Changing a CONST field to a real floating point type using
   gd_alter_const() (or similar) no longer results in the value of the field
   being corrupted.
+
+  * BUG FIX: A bug in the parser's tokeniser has been fixed to prevent spurious
+  "unterminated token" syntax errors.  Typically this would only be seen when
+  using gd_strtok() to tokenise an (apparently innocuous) user-supplied string,
+  but a carefully crafted format file could also be made to get gd_open() to
+  produce it.
 
   Bindings Changes:
 

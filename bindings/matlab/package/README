@@ -1,11 +1,10 @@
-IDL BINDINGS FOR GETDATA
-========================
+MATLAB BINDINGS FOR GETDATA
+===========================
 
 This package provides bindings to the GetData library for use with the
-Interactive Data Language (IDL) developed by Research Systems, Incorporated,
-now ITT Visual Information Solutions.
+MATLAB developed by The MathWorks, Incorporated.
 
-Building the IDL bindings with this package requires a system with a copy of
+Building the MATLAB bindings with this package requires a system with a copy of
 GetData already installed.  If you do not already have the GetData library, you
 may want to download and install the entire GetData Project instead, which
 includes these bindings.  GetData source packages, as well as more information
@@ -34,13 +33,12 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
 CONTENTS
 ========
 
-This package provides bindings for the Interactive Data Language (IDL) to the
-GetData library.  Documentation for the bindings can be found in file
-`README.idl' in the top level directory.  The C interface is described in this
-document and the associated man pages.
+This package provides bindings for MATLAB to the GetData library.  Documentation
+for the bindings can be found in file `README.matlab' in the top level
+directory.
 
 A full list of features new to this release of GetData may be found in the
-file called `NEWS', including features new to this copy of the IDL bindings.
+file called `NEWS', including features new to this copy of the MATLAB bindings.
 
 
 BUILDING THE BINDINGS
@@ -48,16 +46,15 @@ BUILDING THE BINDINGS
 
 This package may be configured and built using the GNU autotools.  Generic
 installation instructions are provided in the file called `INSTALL'.  A
-brief summary follows.  A C99-compliant compiler is required to build (but not
-to use) the bindings.
+brief summary follows.
 
 Most users should be able to build the package by simply executing:
 
   $ ./configure
   $ make
 
-from the top IDL GetData directory (the directory containing this README file). 
-After the project has been built, you may (optionally) test the build by
+from the top MATLAB GetData directory (the directory containing this README
+file).  After the project has been built, you may (optionally) test the build by
 executing:
 
   $ make check
@@ -66,7 +63,7 @@ which will run a series of self-tests.  Finally,
 
   $ make install
 
-will install the bindings, and documentation.
+will install the bindings and documentation.
 
 The package configuration can be changed, if the default configuration is
 insufficient, before building it by passing options to ./configure.  Running
@@ -79,16 +76,16 @@ will display a brief help message summarising available options.
 PREREQUISITES
 =============
 
-These bindings require GetData 0.8 or newer to build, as well as an IDL
-interpreter verison 5.5 or later.  No other external libraries are required,
-save for the C Standard Library.
+These bindings require GetData 0.8 or newer to build, as well as a MATLAB
+interpreter and MEX compiler.  No other external libraries are required, save
+for the C Standard Library.
 
 
 AUTHOR
 ======
 
-The IDL GetData Bindings are maintained by D. V. Wiebe <dvw@ketiltrout.net>.
-Bug reports and other communication relevant to these bindings are best directed
+The MATLAB Bindings are maintained by D. V. Wiebe <dvw@ketiltrout.net>.  Bug
+reports and other communication relevant to these bindings are best directed
 to the GetData mailing list: <getdata-devel@lists.sourceforge.net>.
 
 A full list of contributors to the GetData Project is given in the file called
