@@ -32,7 +32,7 @@ clean-local:
 	rm -rf *~  m4/*~ README.txt
 
 %.sig: %
-	gpg -abo $@ $<
+	gpg --use-agent -abo $@ $<
 
 DISTCHECK_CONFIGURE_FLAGS = --with-idl-dlm-dir="$$dc_install_base/idl" \
 														--with-perl-dir="$$dc_install_base/perl" \
@@ -132,7 +132,8 @@ windist: $(DISTFILES)
 
 # package lists
 PACKAGES=$(distdir).tar.gz $(distdir).tar.bz2 idl_$(distdir).tar.gz \
-				 idl_$(distdir).tar.bz2 getdata_win-$(PACKAGE_VERSION).zip
+				 idl_$(distdir).tar.bz2 getdata_win-$(PACKAGE_VERSION).zip \
+				 matlab_$(distdir).tar.gz matlab_$(distdir).tar.bz2
 SIGS=$(addsuffix .sig,$(PACKAGES))
 
 # release stuff
@@ -143,4 +144,5 @@ README.txt: NEWS RELEASE_NOTES.in
 dist-post: $(SIGS)
 
 dist-push: $(PACKAGES) $(SIGS) README.txt
+	@if [ -z "${SFUSER}" ]; then echo "ERROR: SFUSER unset"; false; fi
 	rsync -avP -e ssh $^ $(SFUSER),getdata@frs.sourceforge.net:/home/frs/project/g/ge/getdata/getdata/$(PACKAGE_VERSION)/
