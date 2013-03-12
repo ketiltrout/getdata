@@ -1,3 +1,22 @@
+2012-03-12   D. V. Wiebe <getdata@ketiltrout.net> svn:818
+	* bindings/python/pydirfile.c (gdpy_dirfile_getdata): Resize the ndarray
+	before returning it, if necessary.  Also, don't try to read past the EOF in
+	read-to-end mode.
+
+	* src/fpos.c (_GD_GetFilePos): Fix computation of two input field derived
+	types to properly return MULTIPOS when necessary.
+	* test/tell_multidiv.c: Added.
+
+	* src/fpos.c (_GD_Seek): Return error if trying to place the I/O pointer
+	before sample zero.
+	* test/seek_neg.c: Added.
+
+	* src/gzip.c (_GD_GzipSeek): Allow seeking to sample zero.
+	* test/gzip_get_get2.c: Added.
+
+2012-03-12   D. V. Wiebe <getdata@ketiltrout.net> svn:815
+	GetData-0.8.3 released.
+
 2012-03-09   D. V. Wiebe <getdata@ketiltrout.net> svn:807
 	* src/flush.c: C89-ify the GD_VERS_... constants.
 

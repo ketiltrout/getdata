@@ -196,8 +196,8 @@ GET_TESTS=get64 get_affix get_bad_code get_bit get_carray get_carray_len \
 
 GLOBAL_TESTS=global_flags global_name global_ref global_ref_empty global_ref_set
 
-GZIP_TESTS=gzip_add gzip_get gzip_get_get gzip_get_put gzip_move_from \
-					 gzip_move_to gzip_nframes gzip_put gzip_put_get
+GZIP_TESTS=gzip_add gzip_get gzip_get_get gzip_get_get2 gzip_get_put \
+					 gzip_move_from gzip_move_to gzip_nframes gzip_put gzip_put_get
 
 HEADER_TESTS=header_complex
 
@@ -319,7 +319,7 @@ REPR_TESTS=repr_a repr_float32 repr_float64 repr_i repr_int16 repr_int32 \
 					 repr_real_m repr_real_r repr_uint16 repr_uint32 repr_uint64 \
 					 repr_uint8
 
-SEEK_TESTS=seek64 seek_cur seek_end seek_foffs seek_set
+SEEK_TESTS=seek64 seek_cur seek_end seek_foffs seek_neg seek_set
 
 SIE_TESTS=sie_get_big sie_get_little sie_move_from sie_move_to sie_nframes_big \
 					sie_nframes_little sie_put_big sie_put_little
@@ -335,7 +335,7 @@ SPF_TESTS=spf spf_alias spf_alias_missing spf_alias_meta \
 
 TABLE_TESTS=table table_code table_type
 
-TELL_TESTS=tell tell64
+TELL_TESTS=tell tell64 tell_multidiv
 
 TOK_TESTS=tok_arg tok_escape tok_quote
 

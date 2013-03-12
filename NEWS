@@ -1,3 +1,29 @@
+New in version 0.8.4a:
+
+  Library Changes:
+
+  * BUG FIX: Trying to position an I/O pointer to before sample zero with
+  gd_seek() now properly fails.  Previously it would allow it, causing bizarre
+  things to happen later.
+
+  * BUG FIX: Using gd_tell to get the I/O pointer position of a derived field
+  with exactly two input fields (MULTIPLY, DIVIDE, MPLEX, WINDOW) now properly
+  reports an error in the "multiposition" case (ie. when the two inputs are
+  ultimately reading from different locations in the same RAW field).
+
+  * BUG FIX: Trying to read sample zero of a gzipped RAW field the second time
+  now works as expected.  Previously, the request to reposition the I/O pointer
+  back to zero would be ignored by the gzip framework.
+
+  Bindings Changes:
+
+  * PYTHON BUG FIX: Numpy arrays returned by dirfile.getdata() are now the
+  correct length.  Previously they would always be the length requested (or the
+  length of the dirfile, if no length was explicitly given) even if fewer
+  samples were returned.  Extra elements would contain uninitialised memory.
+
+|==============================================================================|
+
 New in version 0.8.3:
 
   Library Changes:

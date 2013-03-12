@@ -74,7 +74,7 @@ off64_t _GD_GzipSeek(struct gd_raw_file_* file, off64_t count,
 {
   off64_t n = 0;
 
-  dtrace("%p, %lli, 0x%X, 0x%X", file, (long long)count, mode, data_type);
+  dtrace("%p, %lli, 0x%X, 0x%X", file, (long long)count, data_type, mode);
 
   if (file->pos == count) {
     dreturn("%lli", (long long)count);
@@ -83,7 +83,7 @@ off64_t _GD_GzipSeek(struct gd_raw_file_* file, off64_t count,
 
   count *= GD_SIZE(data_type);
 
-  if (count > 0) {
+  if (count >= 0) {
     n = (off64_t)gzseek((gzFile)file[(mode == GD_FILE_WRITE) ? 1 : 0].edata,
         (off_t)count, SEEK_SET);
 

@@ -589,7 +589,7 @@ static PyObject *gdpy_dirfile_getdata(struct gdpy_dirfile_t *self,
   PyObject *return_type_obj = NULL;
   long int num_frames = 0, num_samples = 0;
   size_t ns;
-  int as_list = 0;
+  int as_list = 0, read_to_end = 0;
   gd_type_t return_type;
   unsigned int spf = 1;
   PyObject *pyobj = NULL;
@@ -620,12 +620,6 @@ static PyObject *gdpy_dirfile_getdata(struct gdpy_dirfile_t *self,
     PYGD_CHECK_ERROR(self->D, NULL);
   }
 
-  /* get num frames/samples */
-  if (num_frames_obj == NULL && num_samples_obj == NULL) {
-    num_frames = gd_nframes(self->D);
-    PYGD_CHECK_ERROR(self->D, NULL);
-  }
-
   if (num_frames_obj) {
     num_frames = PyInt_AsLong(num_frames_obj);
     if (num_frames == -1 && PyErr_Occurred()) {
@@ -652,19 +646,32 @@ static PyObject *gdpy_dirfile_getdata(struct gdpy_dirfile_t *self,
     }
   }
 
+  /* read to end mode */
+  if (num_frames_obj == NULL && num_samples_obj == NULL)
+    read_to_end = 1;
+
   /* we need the SPF to know how many samples we have to allocate */
-  if (num_frames) {
+  if (read_to_end || num_frames) {
     spf = gd_spf(self->D, field_code);
 
     PYGD_CHECK_ERROR(self->D, NULL);
+
+    if (read_to_end) {
+      num_samples = gd_nframes(self->D) * spf;
+      PYGD_CHECK_ERROR(self->D, NULL);
+
+      /* don't read past the frame indicated by nframes */
+      num_samples -= first_frame * spf - first_sample;
+      if (num_samples < 0)
+        num_samples = 0;
+    } else
+      num_samples += num_frames * spf;
   }
 
-  ns = num_samples + num_frames * spf;
-
-  if (ns == 0) {
+  if (num_samples == 0) {
 #ifdef USE_NUMPY
     if (!as_list)
-      pyobj = PyArray_ZEROS(1, dims, NPY_INT, 0);
+      pyobj = PyArray_ZEROS(1, dims, gdpy_npytype_from_type(return_type), 0);
     else
 #endif
       pyobj = Py_BuildValue("[]");
@@ -672,21 +679,36 @@ static PyObject *gdpy_dirfile_getdata(struct gdpy_dirfile_t *self,
     void *data;
 #ifdef USE_NUMPY
     if (!as_list) {
-      dims[0] = (npy_intp)ns;
+      dims[0] = (npy_intp)num_samples;
       pyobj = PyArray_SimpleNew(1, dims, gdpy_npytype_from_type(return_type));
       data = PyArray_DATA(pyobj);
     } else
 #endif
-      data = malloc(ns * GD_SIZE(return_type));
+      data = malloc(num_samples * GD_SIZE(return_type));
 
-    ns = gd_getdata(self->D, field_code, first_frame, first_sample,
-        (size_t)num_frames, (size_t)num_samples, return_type, data);
-
+    ns = gd_getdata(self->D, field_code, first_frame, first_sample, 0, (size_t)num_samples,
+        return_type, data);
+    fprintf(stderr, "%zu/%zu\n", ns, (size_t)num_samples);
 
 #ifdef USE_NUMPY
-    if (!as_list)
+    if (!as_list) {
       PYGD_CHECK_ERROR(self->D, NULL);
-    else
+      /* resize, if necessary */
+      if (ns < num_samples) {
+        PyObject *check;
+        PyArray_Dims new_dims;
+
+        new_dims.ptr = dims;
+        new_dims.len = 1;
+        dims[0] = (npy_intp)ns;
+        check = PyArray_Resize((PyArrayObject*)pyobj, &new_dims, 0, NPY_ANYORDER);
+
+        if (check == NULL) /* error -- exception already raised */
+          return NULL;
+        Py_DECREF(check); /* Despite the docs, PyArray_Resize returns an INCREF'd Py_None on
+                             success */
+      }
+    } else
 #endif
     {
       PYGD_CHECK_ERROR2(self->D, NULL, free(data));

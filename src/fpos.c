@@ -77,8 +77,10 @@ off64_t _GD_GetFilePos(DIRFILE *D, gd_entry_t *E, off64_t index_pos)
     case GD_MPLEX_ENTRY:
       if (_GD_BadInput(D, E, 0, 1) || _GD_BadInput(D, E, 1, 1))
           break;
-      pos = _GD_GetFilePos(D, E->e->entry[0], 0);
-      pos2 = _GD_GetFilePos(D, E->e->entry[0], pos);
+      pos = _GD_GetFilePos(D, E->e->entry[0], -1);
+      if (D->error)
+        break;
+      pos2 = _GD_GetFilePos(D, E->e->entry[1], pos);
       if (!D->error && pos != pos2) {
         _GD_SetError(D, GD_E_DOMAIN, GD_E_DOMAIN_MULTIPOS, NULL, 0, NULL);
         pos = -1;
@@ -239,6 +241,12 @@ int _GD_Seek(DIRFILE *D, gd_entry_t *E, off64_t offset, unsigned int mode)
     return 1;
   }
 
+  if (offset < 0) {
+    _GD_SetError(D, GD_E_RANGE, GD_E_OUT_OF_RANGE, NULL, 0, NULL);
+    dreturn("%i", 1);
+    return 1;
+  }
+
   switch (E->field_type) {
     case GD_RAW_ENTRY:
       /* open/create the file, if necessary */
@@ -333,7 +341,7 @@ off64_t gd_seek64(DIRFILE *D, const char *field_code_in, off64_t frame_num,
       1);
 
   if (D->error) {
-    dreturn("%u", -1);
+    dreturn("%i", -1);
     return -1;
   }
 
@@ -341,7 +349,7 @@ off64_t gd_seek64(DIRFILE *D, const char *field_code_in, off64_t frame_num,
     _GD_SetError(D, GD_E_DIMENSION, GD_E_DIM_CALLER, NULL, 0, field_code);
     if (field_code != field_code_in)
       free(field_code);
-    dreturn("%u", -1);
+    dreturn("%i", -1);
     return -1;
   }
 
@@ -351,7 +359,7 @@ off64_t gd_seek64(DIRFILE *D, const char *field_code_in, off64_t frame_num,
     if (D->error) {
       if (field_code != field_code_in)
         free(field_code);
-      dreturn("%u", -1);
+      dreturn("%i", -1);
       return -1;
     }
   }
