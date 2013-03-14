@@ -792,7 +792,7 @@ static void _GD_FlushFragment(DIRFILE* D, int i, int permissive)
   if (permissive || D->standards >= 6)
     if (D->fragment[i].ref_name != NULL) {
       fputs("/REFERENCE ", stream);
-      _GD_StringEscapeise(stream, D->fragment[i].ref_name, 0, permissive,
+      _GD_WriteFieldCode(D, stream, i, D->fragment[i].ref_name, permissive,
           D->standards);
       fputc('\n', stream);
     }

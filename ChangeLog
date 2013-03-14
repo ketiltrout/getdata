@@ -1,3 +1,8 @@
+2012-03-13   D. V. Wiebe <getdata@ketiltrout.net> svn:819
+	* src/flush.c (_GD_FlushFragment): Strip affixes from field codes in
+	/REFERENCE directives.
+	* test/flush_ref.c test/parse_include_affix_ref.c: Added.
+
 2012-03-12   D. V. Wiebe <getdata@ketiltrout.net> svn:818
 	* bindings/python/pydirfile.c (gdpy_dirfile_getdata): Resize the ndarray
 	before returning it, if necessary.  Also, don't try to read past the EOF in

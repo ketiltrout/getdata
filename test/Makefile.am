@@ -163,7 +163,8 @@ FLIST_TESTS=flist flist_hidden flist_invalid flist_meta flist_meta_hidden \
 						flist_meta_invalid flist_type flist_type_hidden flist_type_invalid \
 						flist_type_meta flist_type_meta_hidden flist_type_meta_invalid
 
-FLUSH_TESTS=flush flush_all flush_bad_code flush_invalid flush_meta flush_spec
+FLUSH_TESTS=flush flush_all flush_bad_code flush_invalid flush_meta flush_ref \
+						flush_spec
 
 FOFFS_TESTS=foffs_alter foffs_get foffs_move
 
@@ -262,8 +263,9 @@ PARSE_TESTS=parse_alias parse_alias_code parse_alias_dup parse_alias_meta \
 						parse_endian_little parse_endian_slash parse_eol parse_foffs \
 						parse_foffs_include parse_foffs_slash parse_hidden \
 						parse_hidden_field parse_hidden_meta parse_include \
-						parse_include_absolute parse_include_absrel parse_include_dir \
-						parse_include_loop parse_include_nonexistent parse_include_prefix \
+						parse_include_absolute parse_include_absrel \
+						parse_include_affix_ref parse_include_dir parse_include_loop \
+						parse_include_nonexistent parse_include_prefix \
 						parse_include_prefix_dup parse_include_preprefix \
 						parse_include_ref parse_include_relabs parse_include_relrel \
 						parse_include_slash parse_include_suffix parse_include_sufsuffix \

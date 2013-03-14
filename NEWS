@@ -13,7 +13,12 @@ New in version 0.8.4a:
 
   * BUG FIX: Trying to read sample zero of a gzipped RAW field the second time
   now works as expected.  Previously, the request to reposition the I/O pointer
-  back to zero would be ignored by the gzip framework.
+  back to zero would be ignored by the gzip framework.  Reported by Alexandra
+  Rahlin.
+
+  * BUG FIX: The field code of a reference field declared in a subfragment
+  included with affixes is no longer corrupted by spurious application of the
+  affixes when the subfragment's metadata are (re-)written.  Reported by Seth.
 
   Bindings Changes:
 
