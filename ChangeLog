@@ -1,9 +1,9 @@
-2012-03-13   D. V. Wiebe <getdata@ketiltrout.net> svn:819
+2013-03-13   D. V. Wiebe <getdata@ketiltrout.net> svn:819
 	* src/flush.c (_GD_FlushFragment): Strip affixes from field codes in
 	/REFERENCE directives.
 	* test/flush_ref.c test/parse_include_affix_ref.c: Added.
 
-2012-03-12   D. V. Wiebe <getdata@ketiltrout.net> svn:818
+2013-03-12   D. V. Wiebe <getdata@ketiltrout.net> svn:818
 	* bindings/python/pydirfile.c (gdpy_dirfile_getdata): Resize the ndarray
 	before returning it, if necessary.  Also, don't try to read past the EOF in
 	read-to-end mode.
@@ -19,16 +19,16 @@
 	* src/gzip.c (_GD_GzipSeek): Allow seeking to sample zero.
 	* test/gzip_get_get2.c: Added.
 
-2012-03-12   D. V. Wiebe <getdata@ketiltrout.net> svn:815
+2013-03-12   D. V. Wiebe <getdata@ketiltrout.net> svn:815
 	GetData-0.8.3 released.
 
-2012-03-09   D. V. Wiebe <getdata@ketiltrout.net> svn:807
+2013-03-09   D. V. Wiebe <getdata@ketiltrout.net> svn:807
 	* src/flush.c: C89-ify the GD_VERS_... constants.
 
-2012-03-08   D. V. Wiebe <getdata@ketiltrout.net> svn:806
+2013-03-08   D. V. Wiebe <getdata@ketiltrout.net> svn:806
 	GetData-0.8.3rc1.
 
-2012-03-08   D. V. Wiebe <getdata@ketiltrout.net> svn:803
+2013-03-08   D. V. Wiebe <getdata@ketiltrout.net> svn:803
 	* src/internal.h (gd_put_unalinged64): Fix spelling.
 
 	* src/encoding.c (_GD_FiniRawIO): Don't pass NULL to gd_UnlinkAt.
@@ -39,7 +39,7 @@
 	Valeev.  Also add add --enable-fast-unaligned to allow users to override the
 	check.
 
-2012-02-15   D. V. Wiebe <getdata@ketiltrout.net> svn:795
+2013-02-15   D. V. Wiebe <getdata@ketiltrout.net> svn:795
 	* bindings/matlab/package: Added.
 	* Makefile.am: Add matlabdist and matlabdistcheck
 
@@ -53,16 +53,16 @@
 	* bindings/matlab/gd_include.c: Renamed from gd_include_affix.c
 	* bindings/matlab/gd_include.m: Deleted.
 
-2012-02-13   D. V. Wiebe <getdata@ketiltrout.net> svn:794
+2013-02-13   D. V. Wiebe <getdata@ketiltrout.net> svn:794
 	* bindings/cxx/test/big_test.cpp bindings/perl/t/big_test.t
 	bindings/python/test/big_test.py: Add test 243.
 
-2012-02-06   D. V. Wiebe <getdata@ketiltrout.net> svn:793
+2013-02-06   D. V. Wiebe <getdata@ketiltrout.net> svn:793
 	* src/parse.c (_GD_Tokenise): Don't falsely report an unterminated token when
 	stopping a partial tokenisation on top of a " or \.
 	* test/tok_arg.c test/tok_escape.c test/tok_quote.c: Added.
 
-2012-02-02   D. V. Wiebe <getdata@ketiltrout.net> svn:792
+2013-02-02   D. V. Wiebe <getdata@ketiltrout.net> svn:792
 	* src/string.c (gd_get_string): Handle string retrieval directly instead of
 	calling _GD_DoField.
 	* src/string.c (_GD_DoStringOut): Moved from putdata.c.
@@ -72,10 +72,10 @@
 	* src/getdata.c (_GD_DoField) src/putdata.c (_GD_DoFieldOut): Remove string
 	processing.
 
-2012-02-02   D. V. Wiebe <getdata@ketiltrout.net> svn:790
+2013-02-02   D. V. Wiebe <getdata@ketiltrout.net> svn:790
 	* bindings/matlab/matlab.c: ANSI C.
 
-2012-02-02   D. V. Wiebe <getdata@ketiltrout.net> svn:789
+2013-02-02   D. V. Wiebe <getdata@ketiltrout.net> svn:789
 	* bindings/python/pyentry.c (gdpy_set_scalar_from_pyobj): Add missing data
 	types.
 	* bindings/python/pyentry.c (gdpy_set_entry_from_tuple gdpy_entry_setspf
@@ -91,7 +91,7 @@
 	* bindings/python/test/big_test.py: Fix the part of test 35 that the
 	previous fix broke.
 
-2012-02-02   D. V. Wiebe <getdata@ketiltrout.net> svn:788
+2013-02-02   D. V. Wiebe <getdata@ketiltrout.net> svn:788
 	* src/debug.c (gd_colclear): Added.
 
 	* src/protect.c (gd_protection gd_alter_protection): Fix error reporting for
@@ -103,12 +103,12 @@
 
 	* bindings/python/test/big_test.py: Fixed tests 35 and 67.
 
-2012-01-26   D. V. Wiebe <getdata@ketiltrout.net> svn:787
+2013-01-26   D. V. Wiebe <getdata@ketiltrout.net> svn:787
 	* src/del.c (_GD_DeReference) src/entry.c (_GD_CalculateEntry) src/flush.c
 	(_GD_FieldSpec)	 src/mod.c (_GD_Change): Fix data type (size) of
 	EN(raw,spf) in function calls.
 
-2012-01-15   D. V. Wiebe <getdata@ketiltrout.net> svn:785
+2013-01-15   D. V. Wiebe <getdata@ketiltrout.net> svn:785
 	* m4/floatordering.m4: Split from m4/compiler.m4
 
 	* src/parse.c (_GD_ParseRaw _GD_ParseMplex): Fix types in _GD_SetScalar
