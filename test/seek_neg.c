@@ -35,8 +35,8 @@ int main(void)
   const char *data = "dirfile/data";
   const char *format_data = "data RAW UINT8 8\n";
   unsigned char data_data[256];
-  int fd, e1, e2, r = 0;
-  off_t m, n;
+  int fd, e1, r = 0;
+  off_t m;
   DIRFILE *D;
 
   rmdirfile();

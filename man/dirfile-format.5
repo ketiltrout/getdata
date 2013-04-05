@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH dirfile\-format 5 "12 July 2012" "Standards Version 9" "DATA FORMATS"
+.TH dirfile\-format 5 "3 April 2013" "Standards Version 9" "DATA FORMATS"
 .SH NAME
 dirfile\-format \(em the dirfile database format specification file
 .SH DESCRIPTION
@@ -808,7 +808,7 @@ fields into a single data field of higher sample rate.  Syntax is:
 .IP
 .I <fieldname>
 .B MPLEX
-.I <input> <index> <count> \fR[\fI<max>\fR]
+.I <input> <index> <count> \fR[\fI<period>\fR]
 .PP
 where
 .I input
@@ -819,18 +819,22 @@ is the vector containing the mutliplex index,
 is the value of the multiplex index when the computed field is stored in
 .IR input ,
 and
-.I max
-is the nominal maximum value which the multiplex index takes.  If
-.I max
-is omitted, zero is assumed.  If
-.I max
-is non-zero, the relation
-.IR count " <= " max
-must hold.  Both
+.IR period ,
+if present and non-zero, is the number of samples between successive occurrances
+of the value
+.I count
+in the index vector.  A
+.I period 
+of zero (or, equivalently, it's omission) indicates that either the value
+.I count
+is not equally spaced in the index vector, or else that the spacing is unknown. 
+Both
 .I count
 and
-.I max
-are non-negative integers.
+.I period
+are integers, and
+.I period
+may not be negative.
 .PP
 At every sample
 .IR n ,
@@ -850,19 +854,19 @@ is implementation dependent.
 The values of
 .I count
 and
-.I max
+.I period
 place no restrictions on values contained in
 .IR index .
 Specifically, samples of
 .I index
 may exceed
-.IR max .
+.IR period .
 Particular values of
 .I index
 (including
 .IR count )
 need not be equally spaced (neither by
-.I max
+.I period
 nor any other spacing);
 .I index
 need not ever take on the value

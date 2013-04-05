@@ -52,7 +52,7 @@ int main(void)
   CHECKS(E.in_fields[0], "in1");
   CHECKS(E.in_fields[1], "in2");
   CHECKI(E.EN(mplex,count_val), 1);
-  CHECKI(E.EN(mplex,count_max), 2);
+  CHECKI(E.EN(mplex,period), 2);
   gd_free_entry_strings(&E);
 
   return r;

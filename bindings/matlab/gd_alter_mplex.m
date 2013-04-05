@@ -1,4 +1,4 @@
-function gd_alter_mplex(D, field_code, in1, in2, count_val, count_max)
+function gd_alter_mplex(D, field_code, in1, in2, count_val, period)
 % GD_ALTER_MPLEX  Modify the metadata of a MPLEX field
 %
 %   GD_ALTER_MPLEX(DIRFILE,NAME,INPUT1,INPUT2,COUNT_VAL,COUNT_MAX)
@@ -17,7 +17,7 @@ function gd_alter_mplex(D, field_code, in1, in2, count_val, count_max)
   GD = getdata_constants();
   gd_alter_entry(D, field_code, struct('field_type', GD.MPLEX_ENTRY, ...
   'in_fields', {{in1; in2}}, 'count_val', count_val, ...
-  'count_max', count_max), 0);
+  'period', period), 0);
 end
 
 % Copyright (C) 2013 D. V. Wiebe

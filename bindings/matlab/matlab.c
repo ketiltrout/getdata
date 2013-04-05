@@ -843,7 +843,7 @@ mxArray *gdmx_from_entry(const gd_entry_t *E)
   const char *linterp_fields[] = {GDMX_COMMON_FIELDS, "in_fields", "table"};
   const int mplex_nfields = GDMX_NSCALAR + 3;
   const char *mplex_fields[] = {GDMX_COMMON_FIELDS, "in_fields", "count_val",
-    "count_max", GDMX_SCALAR_FIELDS};
+    "period", GDMX_SCALAR_FIELDS};
   const int multiply_nfields = 1;
   const char *multiply_fields[] = {GDMX_COMMON_FIELDS, "in_fields"};
   const int phase_nfields = GDMX_NSCALAR + 2;
@@ -975,7 +975,7 @@ mxArray *gdmx_from_entry(const gd_entry_t *E)
       mxSetField(lhs, 0, "in_fields",
           gdmx_from_nstring_list((const char**)E->in_fields, 2));
       mxSetField(lhs, 0, "count_val", gdmx_from_int(E->EN(mplex,count_val)));
-      mxSetField(lhs, 0, "count_max", gdmx_from_int(E->EN(mplex,count_max)));
+      mxSetField(lhs, 0, "period", gdmx_from_int(E->EN(mplex,period)));
       nscalar = 2;
       break;
     case GD_MULTIPLY_ENTRY:
@@ -1299,8 +1299,8 @@ gd_entry_t *gdmx_to_entry(const mxArray **rhs, int n, unsigned flags)
       gdmx_convert_in_fields(rhs[n], &ctx, E);
       gdmx_convert_struct_scalar(rhs[n], &ctx, "count_val", GD_INT_TYPE,
           &E->EN(mplex,count_val));
-      gdmx_convert_struct_scalar(rhs[n], &ctx, "count_max", GD_INT_TYPE,
-          &E->EN(mplex,count_max));
+      gdmx_convert_struct_scalar(rhs[n], &ctx, "period", GD_INT_TYPE,
+          &E->EN(mplex,period));
       break;
     case GD_PHASE_ENTRY:
       gdmx_convert_in_fields(rhs[n], &ctx, E);

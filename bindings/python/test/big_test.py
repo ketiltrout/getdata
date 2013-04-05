@@ -1850,7 +1850,7 @@ CheckSimple2(228, 1, ent.field_type, pygetdata.MPLEX_ENTRY)
 CheckSimple2(228, 2, ent.fragment, 0)
 CheckSimple2(228, 3, ent.count_val, 1)
 CheckSimple2(228, 4, ent.in_fields, ( 'data', 'sbit' ))
-CheckSimple2(228, 5, ent.count_max, 10)
+CheckSimple2(228, 5, ent.period, 10)
 
 # 229: gd_add_mplex check
 ent = pygetdata.entry(pygetdata.MPLEX_ENTRY, "new21", 0, ("in1", "in2", 5, 6))
@@ -1867,7 +1867,7 @@ CheckSimple2(229, 1, ent.field_type, pygetdata.MPLEX_ENTRY)
 CheckSimple2(229, 2, ent.fragment, 0)
 CheckSimple2(229, 3, ent.count_val, 5)
 CheckSimple2(229, 4, ent.in_fields, ( 'in1', 'in2' ))
-CheckSimple2(229, 5, ent.count_max, 6)
+CheckSimple2(229, 5, ent.period, 6)
 
 # 230: gd_madd_mplex check
 ent = pygetdata.entry(pygetdata.MPLEX_ENTRY, "mnew21", 0, ("in2", "in3", 0, 12))
@@ -1884,11 +1884,11 @@ CheckSimple2(230, 1, ent.field_type, pygetdata.MPLEX_ENTRY)
 CheckSimple2(230, 2, ent.fragment, 0)
 CheckSimple2(230, 3, ent.count_val, 0)
 CheckSimple2(230, 4, ent.in_fields, ( 'in2', 'in3' ))
-CheckSimple2(230, 5, ent.count_max, 12)
+CheckSimple2(230, 5, ent.period, 12)
 
 # 231: gd_alter_mplex check
 ent = pygetdata.entry(pygetdata.MPLEX_ENTRY, "new21", 0, { "count_val": 3,
-  "in_field1": "in3", "in_field2": "in4", "count_max": 7 })
+  "in_field1": "in3", "in_field2": "in4", "period": 7 })
 try:
   d.alter('new21', ent)
 except:
@@ -1902,7 +1902,7 @@ CheckSimple2(231, 1, ent.field_type, pygetdata.MPLEX_ENTRY)
 CheckSimple2(231, 2, ent.fragment, 0)
 CheckSimple2(231, 3, ent.count_val, 3)
 CheckSimple2(231, 4, ent.in_fields, ( 'in3', 'in4' ))
-CheckSimple2(231, 5, ent.count_max, 7)
+CheckSimple2(231, 5, ent.period, 7)
 
 # 232: gd_strtok check
 try:

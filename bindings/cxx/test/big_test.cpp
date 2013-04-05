@@ -1617,7 +1617,7 @@ int main(void)
   CHECK_INT2(228, 3, ent->CountVal(), 1);
   CHECK_STRING2(228, 4, ent->Input(0), "data");
   CHECK_STRING2(228, 5, ent->Input(1), "sbit");
-  CHECK_INT2(228, 6, ent->CountMax(), 10);
+  CHECK_INT2(228, 6, ent->Period(), 10);
   delete ent;
 
   // 229: Dirfile::Add / MplexEntry check
@@ -1626,7 +1626,7 @@ int main(void)
   xent.SetInput("in1", 0);
   xent.SetInput("in2", 1);
   xent.SetCountVal(5);
-  xent.SetCountMax(6);
+  xent.SetPeriod(6);
   d->Add(xent);
   CHECK_OK2(229, 1);
 
@@ -1637,7 +1637,7 @@ int main(void)
   CHECK_INT2(229, 3, ent->CountVal(), 5);
   CHECK_STRING2(229, 4, ent->Input(0), "in1");
   CHECK_STRING2(229, 5, ent->Input(1), "in2");
-  CHECK_INT2(229, 6, ent->CountMax(), 6);
+  CHECK_INT2(229, 6, ent->Period(), 6);
   delete ent;
 
   // 230: gd_madd_mplex check
@@ -1646,7 +1646,7 @@ int main(void)
   xent.SetInput("in2", 0);
   xent.SetInput("in3", 1);
   xent.SetCountVal(0);
-  xent.SetCountMax(12);
+  xent.SetPeriod(12);
   d->MAdd(xent, "data");
   CHECK_OK2(230, 1);
 
@@ -1657,7 +1657,7 @@ int main(void)
   CHECK_INT2(230, 3, ent->CountVal(), 0);
   CHECK_STRING2(230, 4, ent->Input(0), "in2");
   CHECK_STRING2(230, 5, ent->Input(1), "in3");
-  CHECK_INT2(230, 6, ent->CountMax(), 12);
+  CHECK_INT2(230, 6, ent->Period(), 12);
   delete ent;
 
   // 231: gd_alter_mplex check
@@ -1665,7 +1665,7 @@ int main(void)
   xep->SetInput("in3", 0);
   xep->SetInput("in4", 1);
   xep->SetCountVal(3);
-  xep->SetCountMax(7);
+  xep->SetPeriod(7);
   CHECK_OK2(231, 1);
   delete xep;
 
@@ -1676,7 +1676,7 @@ int main(void)
   CHECK_INT2(231, 3, ent->CountVal(), 3);
   CHECK_STRING2(231, 4, ent->Input(0), "in3");
   CHECK_STRING2(231, 5, ent->Input(1), "in4");
-  CHECK_INT2(231, 6, ent->CountMax(), 7);
+  CHECK_INT2(231, 6, ent->Period(), 7);
   delete ent;
 
   // 232: gd_tokenise

@@ -274,7 +274,7 @@ int _GD_CalculateEntry(DIRFILE *restrict D, gd_entry_t *restrict E, int err)
       break;
     case GD_MPLEX_ENTRY:
       _GD_GetScalar(D, E, 0, GD_INT_TYPE, &E->EN(mplex,count_val), err);
-      _GD_GetScalar(D, E, 1, GD_INT_TYPE, &E->EN(mplex,count_max), err);
+      _GD_GetScalar(D, E, 1, GD_INT_TYPE, &E->EN(mplex,period), err);
       break;
     case GD_NO_ENTRY:
     case GD_LINTERP_ENTRY:

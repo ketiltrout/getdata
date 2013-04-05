@@ -35,7 +35,7 @@ namespace GetData {
       MplexEntry() : Entry() { E.field_type = GD_MPLEX_ENTRY; };
 
       MplexEntry(const char* field_code, const char* in_field,
-          const char *check_Field, int count_val, int count_max,
+          const char *check_field, int count_val, int period,
           int fragment_index = 0);
 
       virtual const char *Input(int index = 0) const {
@@ -48,13 +48,13 @@ namespace GetData {
 
       virtual int CountVal() const { return E.u.mplex.count_val; };
 
-      virtual int CountMax() const { return E.u.mplex.count_max; };
+      virtual int Period() const { return E.u.mplex.period; };
 
       int SetInput(const char* field, int index);
       virtual int SetCountVal(int count_val);
       virtual int SetCountVal(const char* count_val);
-      virtual int SetCountMax(int count_max);
-      virtual int SetCountMax(const char* count_max);
+      virtual int SetPeriod(int period);
+      virtual int SetPeriod(const char* period);
 
     private:
       MplexEntry(const GetData::Dirfile *dirfile, const char* field_code) :

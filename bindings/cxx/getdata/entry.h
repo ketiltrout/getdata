@@ -224,8 +224,8 @@ namespace GetData {
         return (E.field_type == GD_MPLEX_ENTRY) ? E.u.mplex.count_val : 0;
       }
 
-      virtual int CountMax() const {
-        return (E.field_type == GD_MPLEX_ENTRY) ? E.u.mplex.count_max : 0;
+      virtual int Period() const {
+        return (E.field_type == GD_MPLEX_ENTRY) ? E.u.mplex.period : 0;
       }
 
       /* Set methods */

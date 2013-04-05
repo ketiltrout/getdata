@@ -2451,7 +2451,7 @@ program big_test
   call check_int2(ne, 228, 3, ent%count_val, 1)
   call check_str2(ne, 228, 4, ent%field(1), 'data')
   call check_str2(ne, 228, 5, ent%field(2), 'sbit')
-  call check_int2(ne, 228, 6, ent%count_max, 10)
+  call check_int2(ne, 228, 6, ent%period, 10)
 
 ! 229: fgd_add_mplex check
   call fgd_add_mplex(d, 'new21', 'in1', 'in2', 5, 6, 0)
@@ -2464,7 +2464,7 @@ program big_test
   call check_int2(ne, 229, 3, ent%count_val, 5)
   call check_str2(ne, 229, 4, ent%field(1), 'in1')
   call check_str2(ne, 229, 5, ent%field(2), 'in2')
-  call check_int2(ne, 229, 6, ent%count_max, 6)
+  call check_int2(ne, 229, 6, ent%period, 6)
 
 ! 230: fgd_madd_mplex check
   call fgd_madd_mplex(d, 'data', 'mnew21', 'in2', 'in3', 0, 12)
@@ -2477,7 +2477,7 @@ program big_test
   call check_int2(ne, 230, 3, ent%count_val, 0)
   call check_str2(ne, 230, 4, ent%field(1), 'in2')
   call check_str2(ne, 230, 5, ent%field(2), 'in3')
-  call check_int2(ne, 230, 6, ent%count_max, 12)
+  call check_int2(ne, 230, 6, ent%period, 12)
 
 ! 231: fgd_alter_mplex check
   call fgd_alter_mplex(d, 'new21', 'in3', 'in4', -1, 7)
@@ -2490,7 +2490,7 @@ program big_test
   call check_int2(ne, 231, 3, ent%count_val, 5)
   call check_str2(ne, 231, 4, ent%field(1), 'in3')
   call check_str2(ne, 231, 5, ent%field(2), 'in4')
-  call check_int2(ne, 231, 6, ent%count_max, 7)
+  call check_int2(ne, 231, 6, ent%period, 7)
 
 ! 232: fgd_strtok check
   l = slen

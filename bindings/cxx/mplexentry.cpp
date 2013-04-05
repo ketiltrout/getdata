@@ -21,11 +21,10 @@
 #include "internal.h"
 
 MplexEntry::MplexEntry(const char* field_code, const char* in_field,
-    const char* count, int count_val, int count_max,
-    int fragment_index) : Entry()
+    const char* count, int count_val, int period, int fragment_index) : Entry()
 {
   dtrace("\"%s\", \"%s\", \"%s\", %i, %i, %i", field_code,
-      in_field, count, count_val, count_max, fragment_index);
+      in_field, count, count_val, period, fragment_index);
 
   E.field = strdup(field_code);
   E.field_type = GD_MPLEX_ENTRY;
@@ -33,7 +32,7 @@ MplexEntry::MplexEntry(const char* field_code, const char* in_field,
   E.in_fields[1] = strdup(count);
   E.scalar[0] = E.scalar[1] = 0;
   E.u.mplex.count_val = count_val;
-  E.u.mplex.count_max = count_max;
+  E.u.mplex.period = period;
   E.fragment_index = fragment_index;
 
   dreturnvoid();
@@ -73,13 +72,13 @@ int MplexEntry::SetCountVal(int count_val)
   return ret;
 }
 
-int MplexEntry::SetCountMax(int count_max)
+int MplexEntry::SetPeriod(int period)
 {
   int ret = 0;
 
-  dtrace("%u", count_max);
+  dtrace("%u", period);
 
-  E.u.mplex.count_max = count_max;
+  E.u.mplex.period = period;
 
   if (D != NULL)
     ret = gd_alter_entry(D->D, E.field, &E, 0);
@@ -107,19 +106,19 @@ int MplexEntry::SetCountVal(const char *count_val)
   return r;
 }
 
-int MplexEntry::SetCountMax(const char *count_max)
+int MplexEntry::SetPeriod(const char *period)
 {
   int r = 0;
 
-  dtrace("\"%s\"", count_max);
+  dtrace("\"%s\"", period);
 
-  SetScalar(1, count_max);
+  SetScalar(1, period);
 
   if (D != NULL) {
     r = gd_alter_entry(D->D, E.field, &E, 0);
 
     if (!r)
-      r = gd_get_constant(D->D, count_max, GD_UINT16, &E.u.mplex.count_max);
+      r = gd_get_constant(D->D, period, GD_UINT16, &E.u.mplex.period);
   }
   
   dreturn("%i", r);

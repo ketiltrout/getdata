@@ -534,10 +534,10 @@ static void _GD_FieldSpec(DIRFILE* D, FILE* stream, const gd_entry_t* E,
         fputc(' ', stream);
         _GD_WriteConst(D, stream, me, permissive, GD_INT_TYPE,
             &E->EN(mplex,count_val), E->scalar[0], E->scalar_ind[0], "");
-        if (E->EN(mplex,count_max) > 0 || E->scalar[1]) {
+        if (E->EN(mplex,period) > 0 || E->scalar[1]) {
           fputc(' ', stream);
           _GD_WriteConst(D, stream, me, permissive, GD_INT_TYPE,
-              &E->EN(mplex,count_max), E->scalar[1], E->scalar_ind[1], "\n");
+              &E->EN(mplex,period), E->scalar[1], E->scalar_ind[1], "\n");
         } else
           fputc('\n', stream);
         break;

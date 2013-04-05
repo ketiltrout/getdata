@@ -759,7 +759,7 @@ ssize_t getdelim(char**, size_t*, int, FILE*);
 #define GD_E_ENTRY_POLYORD   8
 #define GD_E_ENTRY_WINDOP    9
 #define GD_E_ENTRY_CNTVAL   10
-#define GD_E_ENTRY_CNTMAX   11
+#define GD_E_ENTRY_PERIOD   11
 
 #define GD_E_SCALAR_CODE        1
 #define GD_E_SCALAR_TYPE        2

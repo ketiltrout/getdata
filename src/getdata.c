@@ -1696,15 +1696,14 @@ static size_t _GD_DoMplex(DIRFILE *restrict D, gd_entry_t *restrict E,
   else if (tmpbuf[0] != E->EN(mplex,count_val) && D->lookback) {
     /* It wasn't -- do a look-back to find the start value.  On a, say, gzipped
      * field this is expensive since it involves a rewind.  Hmm... */
-    size_t lb_cycle = E->EN(mplex,count_max);
+    size_t lb_cycle = E->EN(mplex,period);
     off64_t chunk_start = first_samp2, lb_start, lb_sample = -1;
 
-    /* if count_max is zero, use a count_max of GD_MPLEX_CYCLE or
-     * 2 * count_val, whichever is larger */
+    /* if period is zero, use a period of GD_MPLEX_CYCLE or
+     * 2 * count_val + 1, whichever is larger */
     if (lb_cycle == 0) {
-      if (E->EN(mplex,count_val) * 2 > GD_MPLEX_CYCLE)
-        lb_cycle = 2 * E->EN(mplex,count_val);
-      else
+      lb_cycle = 2 * E->EN(mplex,count_val) + 1;
+      if (lb_cycle < GD_MPLEX_CYCLE)
         lb_cycle = GD_MPLEX_CYCLE;
     }
 

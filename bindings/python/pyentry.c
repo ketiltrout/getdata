@@ -480,7 +480,7 @@ static void gdpy_set_entry_from_tuple(gd_entry_t *E, PyObject *tuple,
           &E->scalar[0], &E->EN(mplex,count_val));
 
       gdpy_set_scalar_from_pyobj(PyTuple_GetItem(tuple, 3), GD_INT_TYPE,
-          &E->scalar[1], &E->EN(mplex,count_max));
+          &E->scalar[1], &E->EN(mplex,period));
       break;
     case GD_CARRAY_ENTRY:
       E->EN(scalar,array_len) =
@@ -591,7 +591,7 @@ static void gdpy_set_entry_from_dict(gd_entry_t *E, PyObject *parms,
       key[0] = "in_field1";
       key[1] = "in_field2";
       key[2] = "count_val";
-      key[3] = "count_max";
+      key[3] = "period";
       size = 4;
       break;
     case GD_CARRAY_ENTRY:
@@ -1713,7 +1713,7 @@ static int gdpy_entry_setcountval(struct gdpy_entry_t *self, PyObject *value,
   return 0;
 }
 
-static PyObject *gdpy_entry_getcountmax(struct gdpy_entry_t *self,
+static PyObject *gdpy_entry_getperiod(struct gdpy_entry_t *self,
     void *closure)
 {
   PyObject *obj = NULL;
@@ -1722,42 +1722,42 @@ static PyObject *gdpy_entry_getcountmax(struct gdpy_entry_t *self,
 
   if (self->E->field_type == GD_MPLEX_ENTRY) {
     if (self->E->scalar[0] == NULL)
-      obj = PyInt_FromLong(self->E->EN(mplex,count_max));
+      obj = PyInt_FromLong(self->E->EN(mplex,period));
     else
       obj = PyString_FromString(self->E->scalar[0]);
   } else
     PyErr_Format(PyExc_AttributeError, "'pygetdata.entry' "
-        "attribute 'count_max' not available for entry type %s",
+        "attribute 'period' not available for entry type %s",
         gdpy_entry_type_names[self->E->field_type]);
 
   dreturn("%p", obj);
   return obj;
 }
 
-static int gdpy_entry_setcountmax(struct gdpy_entry_t *self, PyObject *value,
+static int gdpy_entry_setperiod(struct gdpy_entry_t *self, PyObject *value,
     void *closure)
 {
-  int count_max;
+  int period;
   char *scalar;
 
   dtrace("%p, %p, %p", self, value, closure);
 
   if (self->E->field_type != GD_MPLEX_ENTRY) {
     PyErr_Format(PyExc_AttributeError, "'pygetdata.entry' "
-        "attribute 'count_max' not available for entry type %s",
+        "attribute 'period' not available for entry type %s",
         gdpy_entry_type_names[self->E->field_type]);
     dreturn("%i", -1);
     return -1;
   }
 
-  gdpy_set_scalar_from_pyobj(value, GD_INT_TYPE, &scalar, &count_max);
+  gdpy_set_scalar_from_pyobj(value, GD_INT_TYPE, &scalar, &period);
 
   if (PyErr_Occurred()) {
     dreturn("%i", -1);
     return -1;
   }
 
-  self->E->EN(mplex,count_max) = count_max;
+  self->E->EN(mplex,period) = period;
   free(self->E->scalar[1]);
   self->E->scalar[1] = scalar;
 
@@ -2032,7 +2032,7 @@ static PyObject *gdpy_entry_getparms(struct gdpy_entry_t *self, void *closure)
     case GD_MPLEX_ENTRY:
       tuple = Py_BuildValue("(ssII)", self->E->in_fields[0],
           self->E->in_fields[1], (unsigned int)self->E->EN(mplex,count_val),
-          (unsigned int)self->E->EN(mplex,count_max));
+          (unsigned int)self->E->EN(mplex,period));
       break;
   }
 
@@ -2229,14 +2229,8 @@ static PyGetSetDef gdpy_entry_getset[] = {
   { "const_type", (getter)gdpy_entry_getdatatype,
     (setter)gdpy_entry_setdatatype, "An alias for the data_type attribute.",
     NULL },
-  { "count_max", (getter)gdpy_entry_getcountmax, (setter)gdpy_entry_setcountmax,
-    "The maximum value of the counter of a MPLEX field.  If this is\n"
-      "specified using a CONST scalar field, this will be the field code of\n"
-      "that field, otherwise, it will be the number itself.",
-    NULL },
   { "count_val", (getter)gdpy_entry_getcountval, (setter)gdpy_entry_setcountval,
     "The target value of the counter of a MPLEX field.  If this is\n"
-      /* ------ handy ruler ----------------------------------------------| */
       "specified using a CONST scalar field, this will be the field code of\n"
       "that field, otherwise, it will be the number itself.",
     NULL },
@@ -2320,6 +2314,13 @@ static PyGetSetDef gdpy_entry_getset[] = {
       "parameters of the entry.  This attribute may be assigned a\n"
       "dictionary, in which case it will be converted internally to the\n"
       "corresponding parameters tuple.",
+    NULL },
+  { "period", (getter)gdpy_entry_getperiod, (setter)gdpy_entry_setperiod,
+    "The number of samples between successive occurrences of the MPLEX\n"
+      "value in the index vector (or zero, if unknown or not constant).  If\n"
+      /* ------ handy ruler ----------------------------------------------| */
+      "this is specified using a CONST scalar field, this will be the field\n"
+      "code of that field, otherwise, it will be the number itself.",
     NULL },
   { "poly_ord", (getter)gdpy_entry_getpolyord, (setter)gdpy_entry_setpolyord,
     "The polynomial order of a POLYNOM field.  Modifying this will change\n"

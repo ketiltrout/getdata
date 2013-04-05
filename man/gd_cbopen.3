@@ -1,6 +1,6 @@
 .\" gd_cbopen.3.  The gd_cbopen man page.
 .\"
-.\" Copyright (C) 2008, 2009, 2010, 2011, 2012 D. V. Wiebe
+.\" Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_cbopen 3 "1 April 2012" "Version 0.8.0" "GETDATA"
+.TH gd_cbopen 3 "3 April 2013" "Version 0.8.4" "GETDATA"
 .SH NAME
 gd_cbopen, gd_open \(em open or create a dirfile
 .SH SYNOPSIS
@@ -514,8 +514,7 @@ An attempt was made to use a metafield as the parent to a new metafield.
 An attempt was made to add a RAW metafield.
 .TP
 .B GD_E_FORMAT_MPLEXVAL
-A MPLEX specification has a negative count_max or count_val, or else had
-a positive count_max, and count_val was larger than it.
+A MPLEX specification has a negative period.
 .TP
 .B GD_E_FORMAT_N_FIELDS
 The number of fields of a LINCOM field was out-of-range.

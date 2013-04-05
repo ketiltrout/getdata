@@ -382,7 +382,7 @@ static void CopyMplexEntry(struct MPlexEntryType* M, gd_entry_t* E)
   M->data_field = E->in_fields[0];
   M->cnt_field = E->in_fields[1];
   M->i = (int)E->EN(mplex,count_val);
-  M->max_i = (int)E->EN(mplex,count_max);
+  M->max_i = (int)E->EN(mplex,period);
 
   dreturnvoid();
 }

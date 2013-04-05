@@ -59,7 +59,7 @@ int main(void)
   CHECKI(E.scalar_ind[0], -1);
   CHECKI(E.scalar_ind[1], 3);
   CHECKI(E.EN(mplex,count_val), 1);
-  CHECKI(E.EN(mplex,count_max), 5);
+  CHECKI(E.EN(mplex,period), 5);
   gd_free_entry_strings(&E);
 
   return r;

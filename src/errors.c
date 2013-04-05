@@ -78,7 +78,7 @@ static const struct {
   { GD_E_FORMAT, GD_E_FORMAT_ALIAS,
     "Cannot use alias {4} as parent to a meta field on line {3} of {2}", 0 },
   { GD_E_FORMAT, GD_E_FORMAT_MPLEXVAL,
-    "Count value ({4}) exceeds maximum on line {3} of {2}", 0 },
+    "Bad MPLEX period ({4}) on line {3} of {2}", 0 },
   /* GD_E_TRUNC: 1 = suberror, 2 = filename. 3 = errno */
   { GD_E_TRUNC, 0, "Error truncating {2}: ", 1 },
   /* GD_E_CREAT: 1 = suberror, 2 = filename, 3 = errno */
@@ -139,7 +139,7 @@ static const struct {
   { GD_E_BAD_ENTRY, GD_E_ENTRY_POLYORD, "POLYNOM order out of range: {3}", 0 },
   { GD_E_BAD_ENTRY, GD_E_ENTRY_WINDOP, "Unrecognised WINDOW operator: {3}", 0 },
   { GD_E_BAD_ENTRY, GD_E_ENTRY_CNTVAL, "Count value out of range: {3}", 0 },
-  { GD_E_BAD_ENTRY, GD_E_ENTRY_CNTMAX, "Count max out of range: {3}", 0 },
+  { GD_E_BAD_ENTRY, GD_E_ENTRY_PERIOD, "MPLEX period out of range: {3}", 0 },
   /* GD_E_DUPLICATE: 4 = name */
   { GD_E_DUPLICATE, 0, "Field code already present: {4}", 0 },
   /* GD_E_DIMENSION: 2 = parent field (if any), 4 = field code */

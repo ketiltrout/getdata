@@ -1,6 +1,6 @@
 .\" gd_mplex_lookback.3.  The gd_mplex_lookback man page.
 .\"
-.\" Copyright (C) 2012 D. V. Wiebe
+.\" Copyright (C) 2012, 2013 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_mplex_lookback 3 "20 June 2012" "Version 0.8.0" "GETDATA"
+.TH gd_mplex_lookback 3 "3 April 2013" "Version 0.8.4" "GETDATA"
 .SH NAME
 gd_mplex_lookback \(em set the GetData lookback length for MPLEX fields.
 .SH SYNOPSIS
@@ -61,30 +61,33 @@ for an initial value.
 Otherwise,
 .I lookback
 should be a positive number specifying the number of
-.I MPLEX cycles
-to search.  Each
 .B MPLEX
-field has its own MPLEX cycle length, measured in samples of the index field,
-which is defined as follows:
+periods to search.  Each
+.B MPLEX
+field has its own period, measured in samples of the index field, which is
+defined as follows:
 .IP \(bu
 if the
 .B MPLEX
 field in question specifies an optional
-.I count_max
-positive parameter (see the MPLEX definition in dirfile-format(5)), its MPLEX
-cycle length is that many samples;
+.I period
+positive parameter (see the
+.B MPLEX
+definition in
+.BR dirfile-format (5)),
+its period is that many samples;
 .IP \(bu
 otherwise, if the
 .B MPLEX
 field's
 .I count_val
-is at least five, its MPLEX cycle length is twice as many samples as that value;
+is at least five, its period is one more sample than twice that value;
 .IP \(bu
-otherwise, the
-.B MPLEX
-cycle length is ten samples.
+otherwise, the period is ten samples.
 .PP
-So, given the following MPLEX definitions:
+So, given the following
+.B MPLEX
+definitions:
 .IP
 field1 \fBMPLEX\fR data_field index_field 7 12
 .br
@@ -95,22 +98,23 @@ field3 \fBMPLEX\fR data_field index_field 7
 field4 \fBMPLEX\fR data_field index_field 2
 .PP
 .I field1
-has a cycle length of 12 samples and
+has a period of 12 samples and
 .I field2
-a cycle length of 6 samples (both the value of their
-.I count_max
+a period of 6 samples (both the value of their
+.I period
 parameters);
 .I field3
-has a cycle length of 14 samples (twice it's
+has a period of 15 samples (one more than twice it's
 .IR count_val ),
 and
 .I field4
-has a cycle length of 10 samples (the default value, since its
+has a period of 10 samples (the default value, since its
 .I count_val
 is less than five).
 .PP
-The initial value of the MPLEX lookback is ten cycles.  This value is provided
-in getdata.h as
+The initial value of the
+.B MPLEX
+lookback is ten periods.  This value is provided in getdata.h as
 .BR GD_DEFAULT_LOOKBACK .
 
 This function always succeeds and returns no value.

@@ -1,3 +1,40 @@
+2013-03-13   D. V. Wiebe <getdata@ketiltrout.net> svn:825
+	* src/getdata.h.in: Renamed gd_entry_t.count_max to gd_entry_t.period.
+
+	* bindings/cxx/getdata/entry.h (Entry::Period)
+	bindings/cxx/getdata/mplexentry.h (NplexEntry::Period): Renamed from CountMax.
+	* bindings/cxx/mplexentry.cpp (MplexEntry::SetPeriod): Renamed from
+	SetCountMax.
+	* bindings/cxx/mplexentry.cpp (MplexEntry::MplexEntry)
+	bindings/f77/fgetdata.c (GDGEMX) bindings/f77/getdata.f90.in (fgd_entry
+	fgd_add fgd_madd fgd_alter_entry fgd_add_mplex fgd_madd_mplex
+	fgd_alter_mplex) bindings/idl/getdata.c (gdidl_make_idl_entry
+	gdidl_alter_mplex) bindings/matlab/gd_add_mplex.m
+	bindings/matlab/gd_alter_mplex.m bindings/matlab/gd_madd_mplex.m
+	bindings/matlab/matlab.c (gdmx_from_entry gdmx_to_entry)
+	bindings/perl/GetData.xs (gdp_to_entry entry) bindings/python/pyentry.c
+	(gdpy_set_entry_from_tuple gdpy_entry_getperiod gdpy_entry_setperiod
+	gdpy_entry_getparms): Rename count_max to period.
+
+	* src/add.c (_GD_Add): Fix range checks on MPLEX parameters.
+
+	* src/getdata.c (_GD_DoMplex): The default period is 2n+1, not 2n.
+
+	* src/internal.h: Rename GD_E_ENTRY_CNTMAX to GD_E_ENTRY_PERIOD.
+	* src/errors.c: Update GD_E_ENTRY_PERIOD and GD_E_FORMAT_MPLEXVAL messages.
+
+	* src/mod.c (_GD_Change): mplex.count_val = -1 is not a magic value.
+
+	* src/parse.c (_GD_ParseMplex): Remove incorrect restrictions count_val <=
+	period and count_val >= 0.
+
+	* bindings/idl/getdata.c (gdidl_read_idl_entry): Properly convert an IDL
+	MPLEX entry object.
+
+	* bindings/idl/getdata.c (gdidl_alter_mplex): Handle missing COUNT_VAL.
+
+	* man/dirfile-format.5: Fix and clarify MPLEX specification.
+
 2013-03-13   D. V. Wiebe <getdata@ketiltrout.net> svn:819
 	* src/flush.c (_GD_FlushFragment): Strip affixes from field codes in
 	/REFERENCE directives.

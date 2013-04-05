@@ -56,7 +56,7 @@ gd_alter_raw, gd_alter_recip, gd_alter_sbit
 .HP
 .BI "int gd_alter_mplex(DIRFILE *" dirfile ", const char *" field_name ,
 .BI "const char *" in_field ", const char *" count_field ,
-.BI "int " count_val ", int " count_max );
+.BI "int " count_val ", int " period );
 .HP
 .BI "int gd_alter_multiply(DIRFILE *" dirfile ", const char *" field_code ,
 .BI "const char *" in_field1 ", const char *" in_field2 );
@@ -170,7 +170,7 @@ any of the string parameters, also
 .IR spf ", " n_fields ", " numbits ", " cdividend ", or " dividend ;
 .TP
 .B -1\fR:
-.IR bitnum ", " count_val ", or " count_max ;
+.IR bitnum " or " period ;
 .TP
 .B GD_NULL\fR:
 .IR data_type " or " const_type ;

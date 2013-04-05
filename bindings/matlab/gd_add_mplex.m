@@ -1,5 +1,5 @@
 function gd_add_mplex(D, field_code, in_field1, in_field2, count_val, ...
-count_max, fragment_index)
+period, fragment_index)
 % GD_ADD_MPLEX  Add a MPLEX field
 %
 %   GD_ADD_MPLEX(DIRFILE,NAME,INPUT1,INPUT2,COUNT_VAL,COUNT_MAX,FRAGMENT)
@@ -19,7 +19,7 @@ count_max, fragment_index)
   GD = getdata_constants();
   gd_add(D, struct('field', field_code, 'field_type', GD.MPLEX_ENTRY, ...
   'fragment_index', fragment_index, 'in_fields', {{in_field1; in_field2}}, ...
-  'count_val', count_val, 'count_max', count_max));
+  'count_val', count_val, 'period', period));
 end
 
 % Copyright (C) 2013 D. V. Wiebe

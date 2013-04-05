@@ -593,7 +593,7 @@ IDL_VPTR gdidl_make_idl_entry(const gd_entry_t* E)
       *(IDL_INT*)(data + IDL_StructTagInfoByName(gdidl_entry_def,
             "COUNT_VAL", IDL_MSG_LONGJMP, NULL)) = E->count_val;
       *(IDL_INT*)(data + IDL_StructTagInfoByName(gdidl_entry_def,
-            "COUNT_MAX", IDL_MSG_LONGJMP, NULL)) = E->count_max;
+            "PERIOD", IDL_MSG_LONGJMP, NULL)) = E->period;
 
       IDL_StrStore((IDL_STRING*)(data + IDL_StructTagInfoByName(gdidl_entry_def,
               "SCALAR", IDL_MSG_LONGJMP, NULL)), E->scalar[0]);
@@ -668,7 +668,8 @@ void gdidl_read_idl_entry(gd_entry_t *E, IDL_VPTR v, int alter)
   if (E->field_type == GD_BIT_ENTRY || E->field_type == GD_LINTERP_ENTRY
       || E->field_type == GD_MULTIPLY_ENTRY || E->field_type == GD_PHASE_ENTRY
       || E->field_type == GD_SBIT_ENTRY || E->field_type == GD_POLYNOM_ENTRY
-      || E->field_type == GD_DIVIDE_ENTRY || E->field_type == GD_RECIP_ENTRY)
+      || E->field_type == GD_DIVIDE_ENTRY || E->field_type == GD_RECIP_ENTRY
+      || E->field_type == GD_MPLEX_ENTRY || E->field_type == GD_WINDOW_ENTRY)
   {
     o = IDL_StructTagInfoByName(v->value.s.sdef, "IN_FIELDS", action, &d);
     if (o != -1) {
@@ -974,16 +975,16 @@ void gdidl_read_idl_entry(gd_entry_t *E, IDL_VPTR v, int alter)
       if (o != -1) {
         if (d->type != IDL_TYP_INT)
           idl_abort("GD_ENTRY element COUNT_VAL must be of type INT");
-        E->bitnum = *(int16_t*)(data + o);
-      } else
-        E->bitnum = -1;
+        E->count_val = *(int16_t*)(data + o);
+      }
 
-      o = IDL_StructTagInfoByName(v->value.s.sdef, "COUNT_MAX", action, &d);
+      o = IDL_StructTagInfoByName(v->value.s.sdef, "PERIOD", action, &d);
       if (o != -1) {
         if (d->type != IDL_TYP_INT)
-          idl_abort("GD_ENTRY element COUNT_MAX must be of type INT");
-        E->numbits = *(int16_t*)(data + o);
-      }
+          idl_abort("GD_ENTRY element PERIOD must be of type INT");
+        E->period = *(int16_t*)(data + o);
+      } else
+        E->period = -1;
 
       copy_scalar[0] = copy_scalar[1] = 1;
       break;
@@ -5317,7 +5318,7 @@ void gdidl_alter_mplex(int argc, IDL_VPTR argv[], char *argk)
   typedef struct {
     IDL_KW_RESULT_FIRST_FIELD;
     GDIDL_KW_RESULT_ERROR;
-    int val, max;
+    int val, val_x, period;
     IDL_STRING in_field1;
     int in_field1_x;
     IDL_STRING in_field2;
@@ -5325,20 +5326,20 @@ void gdidl_alter_mplex(int argc, IDL_VPTR argv[], char *argk)
   } KW_RESULT;
   KW_RESULT kw;
 
-  kw.in_field1_x = kw.in_field2_x = 0;
-  kw.val = -1;
-  kw.max = -1;
+  kw.in_field1_x = kw.in_field2_x = kw.val_x = 0;
+  kw.period = -1;
   GDIDL_KW_INIT_ERROR;
 
   static IDL_KW_PAR kw_pars[] = {
     { "COUNT_FIELD", IDL_TYP_STRING, 1, 0, IDL_KW_OFFSETOF(in_field2_x),
       IDL_KW_OFFSETOF(in_field2) },
-    { "COUNT_MAX", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(max) },
-    { "COUNT_VAL", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(val) },
+    { "COUNT_VAL", IDL_TYP_INT, 1, 0, IDL_KW_OFFSETOF(val_x),
+      IDL_KW_OFFSETOF(val) },
     GDIDL_KW_PAR_ERROR,
     GDIDL_KW_PAR_ESTRING,
     { "IN_FIELD", IDL_TYP_STRING, 1, 0, IDL_KW_OFFSETOF(in_field1_x),
       IDL_KW_OFFSETOF(in_field1) },
+    { "PERIOD", IDL_TYP_INT, 1, 0, 0, IDL_KW_OFFSETOF(period) },
     { NULL }
   };
 
@@ -5347,13 +5348,22 @@ void gdidl_alter_mplex(int argc, IDL_VPTR argv[], char *argk)
   DIRFILE* D = gdidl_get_dirfile(IDL_LongScalar(argv[0]));
   const char* field_code = IDL_VarGetString(argv[1]);
 
-  if (kw.in_field1_x)
-    in_field1 = IDL_STRING_STR(&kw.in_field1);
+  /* no value specified, figure out the previous value */
+  if (!kw.val_x) {
+    gd_entry_t E;
+    gd_entry(D, field_code, &E);
+    kw.val = E.count_val;
+  }
 
-  if (kw.in_field2_x)
-    in_field2 = IDL_STRING_STR(&kw.in_field2);
+  if (!gd_error(D)) {
+    if (kw.in_field1_x)
+      in_field1 = IDL_STRING_STR(&kw.in_field1);
 
-  gd_alter_mplex(D, field_code, in_field1, in_field2, kw.val, kw.max);
+    if (kw.in_field2_x)
+      in_field2 = IDL_STRING_STR(&kw.in_field2);
+
+    gd_alter_mplex(D, field_code, in_field1, in_field2, kw.val, kw.period);
+  }
 
   GDIDL_SET_ERROR(D);
 
@@ -5855,7 +5865,6 @@ static IDL_STRUCT_TAG_DEF gdidl_entry[] = {
   { "CB",         lincom_dims, (void*)IDL_TYP_DCOMPLEX }, /* LINCOM */
   { "BITNUM",     0, (void*)IDL_TYP_INT }, /* (S)BIT */
   { "COMP_SCAL",  0, (void*)IDL_TYP_INT }, /* LINCOM / POLYNOM */
-  { "COUNT_MAX",  0, (void*)IDL_TYP_INT }, /* MPLEX */
   { "COUNT_VAL",  0, (void*)IDL_TYP_INT }, /* MPLEX */
   { "DATA_TYPE",  0, (void*)IDL_TYP_INT }, /* RAW / CONST / CARRAY */
   { "DIVIDEND",   0, (void*)IDL_TYP_DOUBLE }, /* RECIP */
@@ -5864,6 +5873,7 @@ static IDL_STRUCT_TAG_DEF gdidl_entry[] = {
   { "CM",         lincom_dims, (void*)IDL_TYP_DCOMPLEX }, /* LINCOM */
   { "N_FIELDS",   0, (void*)IDL_TYP_INT },  /* LINCOM */
   { "NUMBITS",    0, (void*)IDL_TYP_INT }, /* (S)BIT */
+  { "PERIOD",     0, (void*)IDL_TYP_INT }, /* MPLEX */
   { "POLY_ORD",   0, (void*)IDL_TYP_INT }, /* POLYNOM */
   { "SCALAR",     polynom_dims, (void*)IDL_TYP_STRING },
   { "SCALAR_IND", polynom_dims, (void*)IDL_TYP_INT },

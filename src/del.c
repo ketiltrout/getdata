@@ -204,7 +204,7 @@ static void _GD_DeReference(DIRFILE *restrict D, gd_entry_t *restrict E,
       _GD_DeReferenceOne(D, E, C, check, 0, GD_INT_TYPE,
           &E->EN(mplex,count_val));
       _GD_DeReferenceOne(D, E, C, check, 1, GD_INT_TYPE,
-          &E->EN(mplex,count_max));
+          &E->EN(mplex,period));
       break;
     case GD_NO_ENTRY:
     case GD_LINTERP_ENTRY:

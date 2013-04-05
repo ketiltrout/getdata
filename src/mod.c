@@ -785,9 +785,9 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
 
       break;
     case GD_MPLEX_ENTRY:
-      j = _GD_AlterScalar(D, N->EN(mplex,count_max) != -1 &&
-          E->EN(mplex,count_max) != N->EN(mplex,count_max), GD_INT_TYPE,
-          &Q.EN(mplex,count_max), &N->EN(mplex,count_max), Q.scalar,
+      j = _GD_AlterScalar(D, N->EN(mplex,period) != -1 &&
+          E->EN(mplex,period) != N->EN(mplex,period), GD_INT_TYPE,
+          &Q.EN(mplex,period), &N->EN(mplex,period), Q.scalar,
           Q.scalar_ind, N->scalar[0], N->scalar_ind[0], E->e->calculated,
           E->fragment_index);
 
@@ -800,11 +800,10 @@ static int _GD_Change(DIRFILE *D, const char *field_code, const gd_entry_t *N,
       if (j & GD_AS_MODIFIED)
         modified = 1;
 
-      j = _GD_AlterScalar(D, N->EN(mplex,count_val) != -1 &&
-          E->EN(mplex,count_val) != N->EN(mplex,count_val), GD_INT_TYPE,
-          &Q.EN(mplex,count_val), &N->EN(mplex,count_val), Q.scalar,
-          Q.scalar_ind, N->scalar[1], N->scalar_ind[1], E->e->calculated,
-          E->fragment_index);
+      j = _GD_AlterScalar(D, E->EN(mplex,count_val) != N->EN(mplex,count_val),
+          GD_INT_TYPE, &Q.EN(mplex,count_val), &N->EN(mplex,count_val),
+          Q.scalar, Q.scalar_ind, N->scalar[1], N->scalar_ind[1],
+          E->e->calculated, E->fragment_index);
 
       if (j & GD_AS_ERROR)
         break;
@@ -1628,14 +1627,14 @@ int gd_alter_window(DIRFILE* D, const char *field_code, const char *in_field,
 }
 
 int gd_alter_mplex(DIRFILE* D, const char *field_code, const char *in_field,
-    const char *count_field, int count_val, int count_max)
+    const char *count_field, int count_val, int period)
   gd_nothrow
 {
   int ret;
   gd_entry_t N;
 
   dtrace("%p, \"%s\", \"%s\", \"%s\", %i, %i", D, field_code, in_field,
-      count_field, count_val, count_max);
+      count_field, count_val, period);
 
   if (D->flags & GD_INVALID) {
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -1648,7 +1647,7 @@ int gd_alter_mplex(DIRFILE* D, const char *field_code, const char *in_field,
   N.in_fields[0] = (char *)in_field;
   N.in_fields[1] = (char *)count_field;
   N.EN(mplex,count_val) = count_val;
-  N.EN(mplex,count_max) = count_max;
+  N.EN(mplex,period) = period;
   N.scalar[0] = NULL;
   N.e = NULL;
 

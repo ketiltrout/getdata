@@ -1621,7 +1621,7 @@ CheckNum2(228, 1, $h{"field_type"}, $GetData::MPLEX_ENTRY);
 CheckNum2(228, 2, $h{"fragment_index"}, 0);
 CheckNum2(228, 3, $h{"count_val"}, 1);
 CheckSArray2(228, 4, $h{"in_fields"}, 'data', 'sbit');
-CheckNum2(228, 5, $h{"count_max"}, 10);
+CheckNum2(228, 5, $h{"period"}, 10);
 
 # 229: gd_add_mplex check
 $s = $_->add_mplex('new21', 'in1', 'in2', 5, 6, 0);
@@ -1633,7 +1633,7 @@ CheckNum2(229, 1, $h{"field_type"}, $GetData::MPLEX_ENTRY);
 CheckNum2(229, 2, $h{"fragment_index"}, 0);
 CheckNum2(229, 3, $h{"count_val"}, 5);
 CheckSArray2(229, 4, $h{"in_fields"}, 'in1', 'in2');
-CheckNum2(229, 5, $h{"count_max"}, 6);
+CheckNum2(229, 5, $h{"period"}, 6);
 
 # 230: gd_madd_mplex check
 $s = $_->madd_mplex('data', 'mnew21', 'in2', 'in3', 0, 12);
@@ -1645,7 +1645,7 @@ CheckNum2(230, 1, $h{"field_type"}, $GetData::MPLEX_ENTRY);
 CheckNum2(230, 2, $h{"fragment_index"}, 0);
 CheckNum2(230, 3, $h{"count_val"}, 0);
 CheckSArray2(230, 4, $h{"in_fields"}, 'in2', 'in3');
-CheckNum2(230, 5, $h{"count_max"}, 12);
+CheckNum2(230, 5, $h{"period"}, 12);
 
 # 231: gd_alter_mplex check
 $s = $_->alter_mplex('new21', 'in3', 'in4', -1, 7);
@@ -1657,7 +1657,7 @@ CheckNum2(231, 1, $h{"field_type"}, $GetData::MPLEX_ENTRY);
 CheckNum2(231, 2, $h{"fragment_index"}, 0);
 CheckNum2(231, 3, $h{"count_val"}, 5);
 CheckSArray2(231, 4, $h{"in_fields"}, 'in3', 'in4');
-CheckNum2(231, 5, $h{"count_max"}, 7);
+CheckNum2(231, 5, $h{"period"}, 7);
 
 # 232: gd_strtok check
 @a = $_->strtok('"test1 test2" test3\ test4 test5');

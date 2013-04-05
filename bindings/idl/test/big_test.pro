@@ -1295,7 +1295,7 @@ nume += check_simple2(228, 1, n.field_type, !GD.MPLEX_ENTRY)
 nume += check_simple2(228, 2, n.fragment, 0)
 nume += check_simple2(228, 3, n.count_val, 1)
 nume += check_simple2(228, 4, n.in_fields, [ 'data', 'sbit' ])
-nume += check_simple2(228, 5, n.count_max, 10)
+nume += check_simple2(228, 5, n.period, 10)
 
 ; 229: gd_add_mplex check
 gd_add_mplex, d, 'new21', 'in1', 'in2', 5, max=6
@@ -1307,7 +1307,7 @@ nume += check_simple2(229, 1, n.field_type, !GD.MPLEX_ENTRY)
 nume += check_simple2(229, 2, n.fragment, 0)
 nume += check_simple2(229, 3, n.count_val, 5)
 nume += check_simple2(229, 4, n.in_fields, [ 'in1', 'in2' ])
-nume += check_simple2(229, 5, n.count_max, 6)
+nume += check_simple2(229, 5, n.period, 6)
 
 ; 230: gd_madd_mplex check
 gd_add_mplex, d, parent='data', 'mnew21', 'in2', 'in3', 0, max=12
@@ -1319,11 +1319,11 @@ nume += check_simple2(230, 1, n.field_type, !GD.MPLEX_ENTRY)
 nume += check_simple2(230, 2, n.fragment, 0)
 nume += check_simple2(230, 3, n.count_val, 0)
 nume += check_simple2(230, 4, n.in_fields, [ 'in2', 'in3' ])
-nume += check_simple2(230, 5, n.count_max, 12)
+nume += check_simple2(230, 5, n.period, 12)
 
 ; 231: gd_alter_mplex check
 gd_alter_mplex, d, 'new21', in_field='in3', count_field='in4', count_val=2, $
-  count_max=7
+  period=7
 nume += check_ok2(231, 1, d)
 
 n = gd_entry(d, 'new21')
@@ -1332,7 +1332,7 @@ nume += check_simple2(231, 1, n.field_type, !GD.MPLEX_ENTRY)
 nume += check_simple2(231, 2, n.fragment, 0)
 nume += check_simple2(231, 3, n.count_val, 2)
 nume += check_simple2(231, 4, n.in_fields, [ 'in3', 'in4' ])
-nume += check_simple2(231, 5, n.count_max, 7)
+nume += check_simple2(231, 5, n.period, 7)
 
 ; 232: gd_strtok check
 str = gd_strtok(d, STRING='"test1 test2" test3\ test4')

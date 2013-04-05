@@ -2,6 +2,27 @@ New in version 0.8.4a:
 
   Library Changes:
 
+  * BUG FIX: Inconsistant behaviour in the library, coupled with contradictory
+  statements in the Dirfile Standards, has resulted in confusion over the
+  meaning of the final, optional, parameter in a MPLEX definition.  To be clear:
+  this parameter is simply the expected period between successive occurances of
+  the mplex value in the index vector.  It is used by GetData only to figure out
+  a resonable length of the MPLEX lookback.  To help reduce confusion, this
+  parameter has been renamed from "count_max" to "period".  The Standards have
+  also been clarified.  See also the following related bug fixes.
+
+  * BUG FIX: The count_val MPLEX parameter is not restricted to non-negative
+  numbers.
+
+  * BUG FIX: The optional period (formerly count_max) MPLEX parameter does not
+  restrict allowed values of the count_val parameter.
+
+  * BUG FIX: The default MPLEX period, if none is specified, is 2*count_val + 1,
+  not simply 2 * count_val, when count_val is greater than 5.
+
+  * BUG FIX: A count_val of -1 in gd_alter_entry or gd_[m]alter_mplex calls is
+  not a special value: it just sets the count_val to -1.
+
   * BUG FIX: Trying to position an I/O pointer to before sample zero with
   gd_seek() now properly fails.  Previously it would allow it, causing bizarre
   things to happen later.
@@ -21,6 +42,10 @@ New in version 0.8.4a:
   affixes when the subfragment's metadata are (re-)written.  Reported by Seth.
 
   Bindings Changes:
+
+  * IDL BUG FIX: Entry structs representing MPLEX fields are now properly
+  interpreted.  Previously, the underlying gd_entry_t object was being
+  incorrectly initialised.
 
   * PYTHON BUG FIX: Numpy arrays returned by dirfile.getdata() are now the
   correct length.  Previously they would always be the length requested (or the

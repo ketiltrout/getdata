@@ -44,7 +44,7 @@ int main(void)
     CHECKS(e.in_fields[1], "count");
     CHECKI(e.fragment_index, 0);
     CHECKI(e.EN(mplex,count_val), 5);
-    CHECKF(e.EN(mplex,count_max), 6);
+    CHECKF(e.EN(mplex,period), 6);
     gd_free_entry_strings(&e);
   }
 

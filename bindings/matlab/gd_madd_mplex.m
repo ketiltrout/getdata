@@ -1,5 +1,5 @@
 function gd_madd_mplex(D, parent, field_code, in_field1, in_field2, ...
-count_val, count_max)
+count_val, period)
 % GD_MADD_MPLEX  Add a MPLEX metafield
 %
 %   GD_MADD_MPLEX(DIRFILE,PARENT,NAME,INPUT1,INPUT2,COUNT_VAL,COUNT_MAX)
@@ -18,7 +18,7 @@ count_val, count_max)
   GD = getdata_constants();
   gd_madd(D, struct('field', field_code, 'field_type', GD.MPLEX_ENTRY, ...
   'in_fields', {{in_field1; in_field2}}, 'count_val', count_val, ...
-  'count_max', count_max), parent);
+  'period', period), parent);
 end
 
 % Copyright (C) 2013 D. V. Wiebe

@@ -29,7 +29,7 @@ int main(void)
 
   rmdirfile();
   D = gd_open(filedir, GD_RDWR | GD_CREAT);
-  gd_add_mplex(D, "new", "in", "count", 4, 3, 0);
+  gd_add_mplex(D, "new", "in", "count", 4, -3, 0);
   error = gd_error(D);
 
   gd_close(D);

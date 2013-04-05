@@ -141,13 +141,13 @@ int alter_window(DIRFILE *dirfile, const char *field_code, gdpu_char *in_field,
 int alter_affixes(DIRFILE *dirfile, int index, gdpu_char *prefix,
     gdpu_char *suffix=NULL)
 int add_mplex(DIRFILE *dirfile, const char *field_code, const char *in_field,
-    const char *count_field, int count_val, int count_max, int fragment_index=0)
+    const char *count_field, int count_val, int period, int fragment_index=0)
 int alter_mplex(DIRFILE *dirfile, const char *field_code,
     gdpu_char *in_field=NULL, gdpu_char *count_field=NULL, int count_val=-1,
-    int count_max=-1)
+    int period=-1)
 int madd_mplex(DIRFILE *dirfile, const char *parent, const char *field_code,
     const char *in_field, const char *count_field, int count_val,
-    int count_max)
+    int period)
 int raw_close(DIRFILE *dirfile, const char *field_code)
 int desync(DIRFILE *dirfile, unsigned int flags=0)
 unsigned long int flags(DIRFILE *dirfile, unsigned long int set=0,

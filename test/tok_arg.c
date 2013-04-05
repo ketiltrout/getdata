@@ -32,7 +32,6 @@ int main(void)
 {
   const char *filedir = "dirfile";
   const char *format = "dirfile/format";
-  const char *spec = "string STRING \"value\"";
   int e1, e2, r = 0;
   char *tok;
   DIRFILE *D;

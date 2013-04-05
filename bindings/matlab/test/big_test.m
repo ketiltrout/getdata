@@ -1866,7 +1866,7 @@ try
     ne = ne + check_num2(228, 3, d.fragment_index, 0);
     ne = ne + check_sarray2(228, 4, d.in_fields, { 'data'; 'sbit' });
     ne = ne + check_num2(228, 5, d.count_val, 1);
-    ne = ne + check_num2(228, 6, d.count_max, 10);
+    ne = ne + check_num2(228, 6, d.period, 10);
   catch exc
     ne = ne + check_ok(exc, 228);
   end
@@ -1885,7 +1885,7 @@ try
     ne = ne + check_num2(229, 3, d.fragment_index, 0);
     ne = ne + check_sarray2(229, 4, d.in_fields, { 'in1'; 'in2' });
     ne = ne + check_num2(229, 5, d.count_val, 5);
-    ne = ne + check_num2(229, 6, d.count_max, 6);
+    ne = ne + check_num2(229, 6, d.period, 6);
   catch exc
     ne = ne + check_ok2(exc, 229, 2);
   end
@@ -1904,7 +1904,7 @@ try
     ne = ne + check_num2(230, 3, d.fragment_index, 0);
     ne = ne + check_sarray2(230, 4, d.in_fields, { 'in3'; 'in2' });
     ne = ne + check_num2(230, 5, d.count_val, 0);
-    ne = ne + check_num2(230, 6, d.count_max, 12);
+    ne = ne + check_num2(230, 6, d.period, 12);
   catch exc
     ne = ne + check_ok2(exc, 230, 2);
   end
@@ -1923,7 +1923,7 @@ try
     ne = ne + check_num2(231, 3, d.fragment_index, 0);
     ne = ne + check_sarray2(231, 4, d.in_fields, { 'in4'; 'in2' });
     ne = ne + check_num2(231, 5, d.count_val, 3);
-    ne = ne + check_num2(231, 6, d.count_max, 7);
+    ne = ne + check_num2(231, 6, d.period, 7);
   catch exc
     ne = ne + check_ok2(exc, 231, 2);
   end

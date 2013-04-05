@@ -886,7 +886,7 @@ void F77_FUNC(gdgewd, GDGEWD) (char *in_field, int32_t *in_field_l,
 
 /* gd_entry wrapper for MPLEX */
 void F77_FUNC(gdgemx, GDGEMX) (char *in_field, int32_t *in_field_l,
-    char *count_field, int32_t *count_field_l, int32_t *val, int32_t *max,
+    char *count_field, int32_t *count_field_l, int32_t *val, int32_t *period,
     int32_t *fragment_index, const int32_t *dirfile, const char *field_code,
     const int32_t *field_code_l)
 {
@@ -894,7 +894,7 @@ void F77_FUNC(gdgemx, GDGEMX) (char *in_field, int32_t *in_field_l,
   gd_entry_t E;
 
   dtrace("%p, %i, %p, %i, %p, %p, %p, %i, %p, %i", in_field, *in_field_l,
-      count_field, *count_field_l, val, max, fragment_index, *dirfile,
+      count_field, *count_field_l, val, period, fragment_index, *dirfile,
       field_code, *field_code_l);
 
   if (gd_entry(_GDF_GetDirfile(*dirfile), _GDF_CString(&fc, field_code,
@@ -904,7 +904,7 @@ void F77_FUNC(gdgemx, GDGEMX) (char *in_field, int32_t *in_field_l,
     _GDF_FString(in_field, in_field_l, E.in_fields[0]);
     _GDF_FString(count_field, count_field_l, E.in_fields[1]);
     *val = E.EN(mplex,count_val);
-    *max = E.EN(mplex,count_max);
+    *period = E.EN(mplex,period);
     *fragment_index = E.fragment_index;
     gd_free_entry_strings(&E);
   }

@@ -777,21 +777,12 @@ static gd_entry_t *_GD_ParseMplex(DIRFILE *restrict D,
 
   /* the count max, if present */
   if (n_cols > 5) {
-    E->scalar[1] = _GD_SetScalar(D, in_cols[5], &E->EN(mplex,count_max),
+    E->scalar[1] = _GD_SetScalar(D, in_cols[5], &E->EN(mplex,period),
         GD_INT_TYPE, me, format_file, line, E->scalar_ind + 1, NULL, standards,
         pedantic);
-    if (E->EN(mplex,count_max) < 0)
+    if (E->scalar[1] == NULL && E->EN(mplex,period) < 0)
       _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_MPLEXVAL, format_file, line,
         in_cols[5]);
-  }
-
-  if (E->scalar[0] == NULL && E->scalar[1] == NULL &&
-      (E->EN(mplex,count_val) < 0 ||
-       (E->EN(mplex,count_max) > 0 &&
-        E->EN(mplex,count_val) >= E->EN(mplex,count_max))))
-  {
-    _GD_SetError(D, GD_E_FORMAT, GD_E_FORMAT_MPLEXVAL, format_file, line,
-        in_cols[4]);
   }
 
   if (D->error != GD_E_OK) {

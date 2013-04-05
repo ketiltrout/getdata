@@ -359,7 +359,7 @@ static void gdp_to_entry(gd_entry_t *E, SV *sv, const char *pkg,
     case GD_MPLEX_ENTRY:
       gdp_fetch_in_fields(E->in_fields, sv, 2, pkg, func);
       GDP_EHASH_FETCH_UV("count_val", EN(mplex,count_val), int);
-      GDP_EHASH_FETCH_UV("count_max", EN(mplex,count_max), int);
+      GDP_EHASH_FETCH_UV("period", EN(mplex,period), int);
       gdp_fetch_scalars(E, (HV*)sv, 0x3, pkg, func);
       break;
     case GD_RAW_ENTRY:
@@ -1243,8 +1243,8 @@ entry(dirfile, field_code)
           GDP_PUSHrvavpv(E.in_fields, 2);
           GDP_PUSHpvn("count_val");
           GDP_PUSHuv(E.EN(mplex,count_val));
-          GDP_PUSHpvn("count_max");
-          GDP_PUSHuv(E.EN(mplex,count_max));
+          GDP_PUSHpvn("period");
+          GDP_PUSHuv(E.EN(mplex,period));
           sp = gdp_store_scalars(sp, &E, 0x3);
           break;
         case GD_INDEX_ENTRY:

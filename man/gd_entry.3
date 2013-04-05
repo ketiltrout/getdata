@@ -1,6 +1,6 @@
 .\" gd_entry.3.  The gd_entry man page.
 .\"
-.\" Copyright (C) 2008, 2009, 2010, 2011, 2012 D. V. Wiebe
+.\" Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013 D. V. Wiebe
 .\"
 .\""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .\"
@@ -13,7 +13,7 @@
 .\" Texts.  A copy of the license is included in the `COPYING.DOC' file
 .\" as part of this distribution.
 .\"
-.TH gd_entry 3 "15 August 2012" "Version 0.8.1" "GETDATA"
+.TH gd_entry 3 "3 April 2013" "Version 0.8.4" "GETDATA"
 .SH NAME
 gd_entry \(em retrieve a dirfile field's metadata
 .SH SYNOPSIS
@@ -240,7 +240,7 @@ For
 fields, the first element corresponds to
 .I count_val
 and the second to
-.IR count_max .
+.IR period .
 The remainder are uninitialised.
 .IP \(bu
 For
@@ -545,7 +545,7 @@ typedef struct {
 
   const char    *in_fields[2];  /* input field codes */
   int           count_val;      /* value of the multiplex index */
-  int           count_max;      /* maximum of the multiplex index */
+  int           period;         /* samples between successive count_vals */
 
   ...
 } gd_entry_t;
@@ -564,10 +564,12 @@ member is the value of the multiplex index field when the output field is stored
 in the input field.
 .PP
 The
-.I count_max
-member is the maximum value of the multiplex index, or zero, if this is not
-specified.  This is only used to determine how far to look back for a starting
-value for the output field; see
+.I period
+member is the number of samples between successive occurrances of
+.I count_val
+in the index vector, or zero, if this is not known or constant.  This is only
+used to determine how far to look back for a starting value for the output
+field; see
 .BR gd_mplex_lookback (3).
 
 .SS MULTIPLY and DIVIDE Members
@@ -919,7 +921,7 @@ double complex|cb[3]|double|u.lincom.cb[3][2]
 double|b[3]|double|u.lincom.b[3]
 const char*|table|const char*|u.linterp.table
 int|count_val|int|u.mplex.count_val
-int|count_max|int|u.mplex.count_max
+int|period|int|u.mplex.period
 gd_shift_t|shift|gd_shift_t|u.phase.shift
 int|poly_ord|int|u.polynom.poly_ord
 double complex|ca[3]|double|u.polynom.ca[3][2]
@@ -930,8 +932,8 @@ double complex|cdividend|double|u.recip.cdividend[2]
 double|dividend|double|u.recip.dividend
 gd_type_t|const_type|gd_type_t|u.scalar.const_type
 size_t|array_len|size_t|u.scalar.array_len
-gd_windop_t|count_val|gd_windop_t|u.window.windop
-gd_triplet_t|count_max|gd_triplet_t|u.window.threshold
+gd_windop_t|windop|gd_windop_t|u.window.windop
+gd_triplet_t|threshold|gd_triplet_t|u.window.threshold
 .TE
 .PP
 In the case of complex valued data in the C89 API, the first element of the

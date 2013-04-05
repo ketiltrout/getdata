@@ -428,7 +428,7 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
       break;
     case GD_MPLEX_ENTRY:
       E->EN(mplex,count_val) = entry->EN(mplex,count_val);
-      E->EN(mplex,count_max) = entry->EN(mplex,count_max);
+      E->EN(mplex,period) = entry->EN(mplex,period);
 
       if (_GD_CheckCodeAffixes(D, NULL, entry->in_fields[0],
             entry->fragment_index) || _GD_CheckCodeAffixes(D, NULL,
@@ -441,15 +441,13 @@ static gd_entry_t *_GD_Add(DIRFILE *restrict D,
       E->in_fields[1] = _GD_Strdup(D, entry->in_fields[1]);
       E->e->u.mplex.type = GD_NULL;
 
-      if (entry->EN(mplex,count_max) < 0)
-        _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_ENTRY_CNTMAX, NULL,
-            entry->EN(mplex,count_max), NULL);
-      else if (entry->EN(mplex,count_max) > 0 &&
-          entry->EN(mplex,count_val) >= entry->EN(mplex,count_max))
-      {
+      if (entry->EN(mplex,period) < 0)
+        _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_ENTRY_PERIOD, NULL,
+            entry->EN(mplex,period), NULL);
+      else if (entry->EN(mplex,count_val) < 0)
         _GD_SetError(D, GD_E_BAD_ENTRY, GD_E_ENTRY_CNTVAL, NULL,
             entry->EN(mplex,count_val), NULL);
-      }
+
       copy_scalar[0] = copy_scalar[1] = 1;
       break;
     case GD_CONST_ENTRY:
@@ -1274,14 +1272,14 @@ int gd_add_window(DIRFILE *D, const char *field_code, const char *in_field,
 
 /* add a MPLEX entry */
 int gd_add_mplex(DIRFILE *D, const char *field_code, const char *in_field,
-    const char *count_field, int count_val, int count_max, int fragment_index)
+    const char *count_field, int count_val, int period, int fragment_index)
   gd_nothrow
 {
   gd_entry_t E;
   int error;
 
   dtrace("%p, \"%s\", \"%s\", \"%s\", %i, %i, %i", D, field_code, in_field,
-      count_field, count_val, count_max, fragment_index);
+      count_field, count_val, period, fragment_index);
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -1293,7 +1291,7 @@ int gd_add_mplex(DIRFILE *D, const char *field_code, const char *in_field,
   E.field = (char *)field_code;
   E.field_type = GD_MPLEX_ENTRY;
   E.EN(mplex,count_val) = count_val;
-  E.EN(mplex,count_max) = count_max;
+  E.EN(mplex,period) = period;
   E.in_fields[0] = (char *)in_field;
   E.in_fields[1] = (char *)count_field;
   E.fragment_index = fragment_index;
@@ -1871,14 +1869,14 @@ int gd_madd_window(DIRFILE *D, const char *parent, const char *field_code,
 
 /* add a META MPLEX entry */
 int gd_madd_mplex(DIRFILE *D, const char *parent, const char *field_code,
-    const char *in_field, const char *count_field, int count_val, int count_max)
+    const char *in_field, const char *count_field, int count_val, int period)
   gd_nothrow
 {
   int error;
   gd_entry_t E;
 
   dtrace("%p, \"%s\", \"%s\", \"%s\", \"%s\", %i, %i", D, parent, field_code,
-      in_field, count_field, count_val, count_max);
+      in_field, count_field, count_val, period);
 
   if (D->flags & GD_INVALID) {/* don't crash */
     _GD_SetError(D, GD_E_BAD_DIRFILE, 0, NULL, 0, NULL);
@@ -1890,7 +1888,7 @@ int gd_madd_mplex(DIRFILE *D, const char *parent, const char *field_code,
   E.field = (char *)field_code;
   E.field_type = GD_MPLEX_ENTRY;
   E.EN(mplex,count_val) = count_val;
-  E.EN(mplex,count_max) = count_max;
+  E.EN(mplex,period) = period;
   E.in_fields[0] = (char *)in_field;
   E.in_fields[1] = (char *)count_field;
   error = (_GD_Add(D, &E, parent) == NULL) ? -1 : 0;

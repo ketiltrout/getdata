@@ -395,7 +395,7 @@ struct gd_unified_entry_ {
     } GD_ANON(window);
     struct { /* MPLEX */
       int count_val;
-      int count_max;
+      int period;
     } GD_ANON(mplex);
     struct { /* CONST */
       gd_type_t const_type;
@@ -548,7 +548,7 @@ extern int gd_add_linterp(DIRFILE *dirfile, const char *field_code,
 gd_nonnull ((1,2,3,4));
 
 extern int gd_add_mplex(DIRFILE *dirfile, const char *field_code,
-    const char *in_field, const char *count_field, int count_val, int count_max,
+    const char *in_field, const char *count_field, int count_val, int period,
     int fragment_index) gd_nothrow gd_nonnull ((1,2,3,4));
 
 extern int gd_add_multiply(DIRFILE *dirfile, const char *field_code,
@@ -627,7 +627,7 @@ gd_nothrow gd_nonnull((1,2));
 
 extern int gd_alter_mplex(DIRFILE *dirfile, const char *field_code,
     const char *in_field, const char *count_field, int count_val,
-    int count_max) gd_nothrow gd_nonnull((1,2));
+    int period) gd_nothrow gd_nonnull((1,2));
 
 extern int gd_alter_multiply(DIRFILE *dirfile, const char *field_code,
     const char *in_field1, const char *in_field2) gd_nothrow gd_nonnull((1,2));
@@ -788,7 +788,7 @@ gd_nothrow gd_nonnull ((1,2,3,4,5));
 
 extern int gd_madd_mplex(DIRFILE *dirfile, const char *parent,
     const char *field_code, const char *in_field, const char *count_field,
-    int count_val, int count_max) gd_nothrow
+    int count_val, int period) gd_nothrow
 gd_nonnull ((1,2,3,4,5));
 
 extern int gd_madd_multiply(DIRFILE *dirfile, const char *parent,
