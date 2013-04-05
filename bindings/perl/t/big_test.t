@@ -1648,16 +1648,16 @@ CheckSArray2(230, 4, $h{"in_fields"}, 'in2', 'in3');
 CheckNum2(230, 5, $h{"period"}, 12);
 
 # 231: gd_alter_mplex check
-$s = $_->alter_mplex('new21', 'in3', 'in4', -1, 7);
+$s = $_->alter_mplex('new21', 'in3', 'in4', 7, -1);
 CheckOK2(231, 1);
 
 %h = $_->entry('new21');
 CheckOK2(231, 2);
 CheckNum2(231, 1, $h{"field_type"}, $GetData::MPLEX_ENTRY);
 CheckNum2(231, 2, $h{"fragment_index"}, 0);
-CheckNum2(231, 3, $h{"count_val"}, 5);
+CheckNum2(231, 3, $h{"count_val"}, 7);
 CheckSArray2(231, 4, $h{"in_fields"}, 'in3', 'in4');
-CheckNum2(231, 5, $h{"period"}, 7);
+CheckNum2(231, 5, $h{"period"}, 6);
 
 # 232: gd_strtok check
 @a = $_->strtok('"test1 test2" test3\ test4 test5');

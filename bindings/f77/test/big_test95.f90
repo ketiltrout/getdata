@@ -2480,17 +2480,17 @@ program big_test
   call check_int2(ne, 230, 6, ent%period, 12)
 
 ! 231: fgd_alter_mplex check
-  call fgd_alter_mplex(d, 'new21', 'in3', 'in4', -1, 7)
+  call fgd_alter_mplex(d, 'new21', 'in3', 'in4', 7, -1)
   call check_ok2(ne, 231, 1, d)
 
   n = fgd_entry(d, 'new21', ent)
   call check_ok2(ne, 231, 2, d)
   call check_int2(ne, 231, 1, n, GD_MPLEX_ENTRY)
   call check_int2(ne, 231, 2, ent%fragment_index, 0)
-  call check_int2(ne, 231, 3, ent%count_val, 5)
+  call check_int2(ne, 231, 3, ent%count_val, 7)
   call check_str2(ne, 231, 4, ent%field(1), 'in3')
   call check_str2(ne, 231, 5, ent%field(2), 'in4')
-  call check_int2(ne, 231, 6, ent%period, 7)
+  call check_int2(ne, 231, 6, ent%period, 6)
 
 ! 232: fgd_strtok check
   l = slen

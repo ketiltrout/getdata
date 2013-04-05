@@ -1,4 +1,8 @@
-2013-03-13   D. V. Wiebe <getdata@ketiltrout.net> svn:825
+2013-04-05   D. V. Wiebe <getdata@ketiltrout.net> svn:826
+	* bindings/f77/test/big_test.f bindings/f77/test/big_test95.f90
+	bindings/perl/t/big_test.t: Fix test 231.
+
+2013-04-05   D. V. Wiebe <getdata@ketiltrout.net> svn:825
 	* src/getdata.h.in: Renamed gd_entry_t.count_max to gd_entry_t.period.
 
 	* bindings/cxx/getdata/entry.h (Entry::Period)

@@ -2042,7 +2042,7 @@ C     230: GDMDMX check
       CALL CHKIN2(ne, 230, 7, j, 12)
 
 C     231: GDALMX check
-      CALL GDALMX(d, 'new21', 5, 'in3', 3, 'in4', 3, -1, 7)
+      CALL GDALMX(d, 'new21', 5, 'in3', 3, 'in4', 3, 7, -1)
       CALL CHKOK2(ne, 231, 1, d)
 
       l = flen
@@ -2052,10 +2052,10 @@ C     231: GDALMX check
       CALL CHKIN2(ne, 231, 1, i, flen)
       CALL CHKIN2(ne, 231, 2, l, flen)
       CALL CHKIN2(ne, 231, 3, n, 0)
-      CALL CHKIN2(ne, 231, 4, m, 5)
+      CALL CHKIN2(ne, 231, 4, m, 7)
       CALL CHKST2(ne, 231, 5, fields(1), 'in3')
       CALL CHKST2(ne, 231, 6, fields(2), 'in4')
-      CALL CHKIN2(ne, 231, 7, j, 7)
+      CALL CHKIN2(ne, 231, 7, j, 6)
 
 C     232: GDTOKE check
       l = slen
