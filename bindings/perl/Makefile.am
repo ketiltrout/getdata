@@ -39,7 +39,7 @@ perlautogetdatadir=${perldir}/auto/GetData
 nodist_perlautogetdata_SCRIPTS=blib/arch/auto/GetData/GetData.bs blib/arch/auto/GetData/GetData.so
 
 lib:
-	mkdir $@
+	mkdir -p $@
 
 lib/GetData.xs: GetData.xs
 	$(MAKE) lib
