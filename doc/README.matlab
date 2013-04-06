@@ -8,10 +8,10 @@ bindings.
 The compatibility library is installed in ${libdir}.  By default, the MATLAB
 files are installed in ${libdir}/getdata/matlab/getdata, although this path
 can be changed with the --with-matlab-dir option to ./configure.  To use the
-bindings, the install directory must be added to the MATLAB path.
+bindings, the installation directory must be added to the MATLAB path.
 
 Full documentation of the bindings are provided from within the MATLAB help
-system.  After installing the bindings are installed, running
+system.  After installing the bindings, running
 
   >> help getdata
 

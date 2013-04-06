@@ -228,6 +228,9 @@ namespace GetData {
         return (E.field_type == GD_MPLEX_ENTRY) ? E.u.mplex.period : 0;
       }
 
+      /* deprecated member alias */
+      virtual int gd_deprecated CountMax() const { return Period(); }
+
       /* Set methods */
       void SetName(const char* name);
 

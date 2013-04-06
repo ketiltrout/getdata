@@ -56,6 +56,15 @@ namespace GetData {
       virtual int SetPeriod(int period);
       virtual int SetPeriod(const char* period);
 
+      /* deprecated member aliases */
+      virtual int gd_deprecated CountMax() const { return Period(); };
+      virtual int gd_deprecated SetCountMax(int period) {
+        return SetPeriod(period);
+      }
+      virtual int gd_deprecated SetCountMax(const char* period) {
+        return SetPeriod(period);
+      };
+
     private:
       MplexEntry(const GetData::Dirfile *dirfile, const char* field_code) :
         Entry(dirfile, field_code) { };

@@ -1,56 +1,89 @@
 New in version 0.8.4a:
 
+  Dirfile Changes:
+
+  * CLARIFICATION: Inconsistant behaviour in the library, coupled with
+    contradictory statements in the Dirfile Standards, has resulted in confusion
+    over the meaning of the final, optional, parameter in a MPLEX definition.
+    To be clear: this parameter is simply the expected period between successive
+    occurances of the "count" value in the index vector.  (It is used by GetData
+    only to figure out a resonable length for the MPLEX lookback.)  The 
+    following clarifications and corrections have been made to the definition
+    of the MPLEX field type in dirfile-format(5):
+
+    - The final, optional parameter has been renamed from "max" to "period".
+
+    - This parameter indicates not the maximal range of the index vector, as 
+      previously stated, but the expected number of samples between successive
+      occurances of the specified "count" value in the index vector; as before,
+      it should be regarded as a hint, and does not place any actual restriction
+      on the contents of the index vector.
+
+    - The incorrect requirement that the "count" parameter be non-negative has
+      been deleted.
+
+    - The incorrect requirement that "count" be less than or equal to "max", if
+      "max" is present and non-zero, has been deleted.
+
+    - The meaning of an omitted or zero "period", indicating that the spacing of
+      "count" in the index vector is unknown or non-uniform, is now explicitly
+      stated.
+
+    - Different MPLEX fields using the same index vector may specify different
+      periods.
+    
+    See also the related library bug fixes below.
+
   Library Changes:
 
-  * BUG FIX: Inconsistant behaviour in the library, coupled with contradictory
-  statements in the Dirfile Standards, has resulted in confusion over the
-  meaning of the final, optional, parameter in a MPLEX definition.  To be clear:
-  this parameter is simply the expected period between successive occurances of
-  the mplex value in the index vector.  It is used by GetData only to figure out
-  a resonable length of the MPLEX lookback.  To help reduce confusion, this
-  parameter has been renamed from "count_max" to "period".  The Standards have
-  also been clarified.  See also the following related bug fixes.
+  * The count_max member of the gd_entry_t object has been renamed period.  The
+    corresponding dummy argument in various function prototypes has been
+    similarly renamed.
 
-  * BUG FIX: The count_val MPLEX parameter is not restricted to non-negative
-  numbers.
+  * BUG FIX: The library no longer incorrectly rejects negative count_val MPLEX
+    parameters.  Furthermore, a count_val of -1 in gd_alter_entry or
+    gd_[m]alter_mplex calls is not a special value: it just sets count_val to
+    -1.
 
-  * BUG FIX: The optional period (formerly count_max) MPLEX parameter does not
-  restrict allowed values of the count_val parameter.
+  * BUG FIX: The library no longer incorrectly rejects MPLEX fields where
+    count_val is greater than the period (formerly called count_max).
 
   * BUG FIX: The default MPLEX period, if none is specified, is 2*count_val + 1,
-  not simply 2 * count_val, when count_val is greater than 5.
-
-  * BUG FIX: A count_val of -1 in gd_alter_entry or gd_[m]alter_mplex calls is
-  not a special value: it just sets the count_val to -1.
+    not simply 2 * count_val, when count_val is greater than 5.
 
   * BUG FIX: Trying to position an I/O pointer to before sample zero with
-  gd_seek() now properly fails.  Previously it would allow it, causing bizarre
-  things to happen later.
+    gd_seek() now properly fails.  Previously it would allow it, causing bizarre
+    things to happen later.
 
   * BUG FIX: Using gd_tell to get the I/O pointer position of a derived field
-  with exactly two input fields (MULTIPLY, DIVIDE, MPLEX, WINDOW) now properly
-  reports an error in the "multiposition" case (ie. when the two inputs are
-  ultimately reading from different locations in the same RAW field).
+    with exactly two input fields (MULTIPLY, DIVIDE, MPLEX, WINDOW) now properly
+    reports an error in the "multiposition" case (ie. when the two inputs are
+    ultimately reading from different locations in the same RAW field).
 
   * BUG FIX: Trying to read sample zero of a gzipped RAW field the second time
-  now works as expected.  Previously, the request to reposition the I/O pointer
-  back to zero would be ignored by the gzip framework.  Reported by Alexandra
-  Rahlin.
+    now works as expected.  Previously, the request to reposition the I/O
+    pointer back to zero would be ignored by the gzip framework.  Reported by
+    Alexandra Rahlin.
 
   * BUG FIX: The field code of a reference field declared in a subfragment
-  included with affixes is no longer corrupted by spurious application of the
-  affixes when the subfragment's metadata are (re-)written.  Reported by Seth.
+    included with affixes is no longer corrupted by spurious application of the
+    affixes when the subfragment's metadata are (re-)written.  Reported by Seth.
 
   Bindings Changes:
 
-  * IDL BUG FIX: Entry structs representing MPLEX fields are now properly
-  interpreted.  Previously, the underlying gd_entry_t object was being
-  incorrectly initialised.
+  * C++: The Entry and MplexEntry member functions CountMax and SetCountMax have
+    been renamed to Period and SetPeriod for consistency with the changes listed
+    above.  CountMax and SetCountMax are still avaialbe as aliases, but are
+    marked deprecated.
+
+  * IDL BUG FIX: GD_ENTRY structures representing MPLEX fields are now properly
+    interpreted.  Previously, the underlying gd_entry_t object was being
+    incorrectly initialised.
 
   * PYTHON BUG FIX: Numpy arrays returned by dirfile.getdata() are now the
-  correct length.  Previously they would always be the length requested (or the
-  length of the dirfile, if no length was explicitly given) even if fewer
-  samples were returned.  Extra elements would contain uninitialised memory.
+    correct length.  Previously they would always be the length requested (or
+    the length of the dirfile, if no length was explicitly given) even if fewer
+    samples were returned.  Extra elements would contain uninitialised memory.
 
 |==============================================================================|
 
@@ -59,27 +92,28 @@ New in version 0.8.3:
   Library Changes:
   
   * BUG FIX: Several bugs on big-ended systems have been fixed.  Reported by
-  Dinar Valeev.
+    Dinar Valeev.
 
   * BUG FIX: Adding an entry via gd_[m]add() with a negative CARRAY scalar index
-  no longer results in an internal error or worse when the added field is later
-  read.
+    no longer results in an internal error or worse when the added field is
+    later read.
 
   * BUG FIX: Changing a CONST field to a real floating point type using
-  gd_alter_const() (or similar) no longer results in the value of the field
-  being corrupted.
+    gd_alter_const() (or similar) no longer results in the value of the field
+    being corrupted.
 
   * BUG FIX: A bug in the parser's tokeniser has been fixed to prevent spurious
-  "unterminated token" syntax errors.  Typically this would only be seen when
-  using gd_strtok() to tokenise an (apparently innocuous) user-supplied string,
-  but a carefully crafted format file could also be made to get gd_open() to
-  produce it.
+    "unterminated token" syntax errors.  Typically this would only be seen when
+    using gd_strtok() to tokenise an (apparently innocuous) user-supplied
+    string, but a carefully crafted format file could also be made to get
+    gd_open() to produce it.
 
   Bindings Changes:
 
   * Bindings for MATLAB have been added.
+
   * The IDL, Perl, and Python bindings no longer require a C99 compiler to be
-  built.
+    built.
 
 |==============================================================================|
 

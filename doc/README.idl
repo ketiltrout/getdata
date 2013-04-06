@@ -117,7 +117,6 @@ is essentially equivalent and is defined as:
   CB           DCOMPLEX   Array[3]
   BITNUM       INT
   COMP_SCAL    INT
-  COUNT_MAX    INT
   COUNT_VAL    INT
   DATA_TYPE    INT
   DIVIDEND     DOUBLE
@@ -126,6 +125,7 @@ is essentially equivalent and is defined as:
   CM           DCOMPLEX   Array[3]
   N_FIELDS     INT
   NUMBITS      INT
+  PERIOD       INT
   POLY_ORD     INT
   SCALAR       STRING     Array[6]
   SCALAR_IND   INT        Array[6]
@@ -445,7 +445,7 @@ PROCEDURE GD_ALTER_LINTERP, dirfile_unit, field_code, IN_FIELD=in_field,
   field metadata.  See gd_alter_linterp(3).
 
 PROCEDURE GD_ALTER_MPLEX, dirfile_unit, field_code, COUNT_FIELD=count_field,
-  COUNT_MAX=count_max, COUNT_VAL=count_val, IN_FIELD=in_field
+  PERIOD=period, COUNT_VAL=count_val, IN_FIELD=in_field
 
   This procedure modifies the metadata of the MPLEX field specified by
   'field_code', updating only those field parameters specified as keyword

@@ -231,9 +231,9 @@ unit numbers in place of C's DIRFILE pointers are:
   character (len=*), intent(in) :: field_name, in_field, table
 
 * subroutine fgd_add_mplex (dirfile, field_code, in_field, count_field,
-  count_val, count_max, fragment_index)
+  count_val, period, fragment_index)
   character(len=*), intent(in) :: field_code, in_field, count_field
-  integer, intent(in) :: dirfile, count_val, count_max, fragment_index
+  integer, intent(in) :: dirfile, count_val, period, fragment_index
 
 * subroutine fgd_add_multiply (dirfile, field_name, in_field1, in_field2,
   fragment_index)
@@ -353,9 +353,9 @@ unit numbers in place of C's DIRFILE pointers are:
   character (len=*), intent(in) :: field_name, in_field, table, parent
 
 * subroutine fgd_madd_mplex (dirfile, parent, field_code, in_field, count_field,
-  count_val, count_max)
+  count_val, period)
   character(len=*), intent(in) :: parent, field_code, in_field, count_field
-  integer, intent(in) :: dirfile, count_val, count_max
+  integer, intent(in) :: dirfile, count_val, period
 
 * subroutine fgd_madd_phase (dirfile, parent, field_name, in_field, phase)
   integer, intent(in) :: dirfile, phase
@@ -512,8 +512,8 @@ unit numbers in place of C's DIRFILE pointers are:
   character (len=*), intent(in) :: field_name, in_field, table
 
 * subroutine fgd_alter_mplex (dirfile, field_name, in_field, count_field,
-  count_val, count_max)
-  integer, intent(in) :: dirfile, count_val, count_max
+  count_val, period)
+  integer, intent(in) :: dirfile, count_val, period
   character (len=*), intent(in) :: field_name, in_field, count_field
 
 * subroutine fgd_alter_multiply (dirfile, field_name, in_field1, in_field2)
@@ -872,7 +872,7 @@ function fgd_entry_name_max (dirfile, parent, entype, flags)
   type gd_entry
     integer :: field_type, n_fields, spf, data_type, bitnum, numbits, shift
     integer :: fragment_index, comp_scal, poly_ord, array_len, windop
-    integer :: ithreshold, count_val, count_max
+    integer :: ithreshold, count_val, period
     character (len=GD_FIELD_LEN), dimension(3) :: field
     character (len=GD_FIELD_LEN), dimension(6) :: scalar
     integer, dimension(6) :: scalar_ind

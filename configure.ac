@@ -1036,9 +1036,6 @@ AC_CONFIG_FILES([bindings/perl/Build.PL])
 AC_CONFIG_FILES([bindings/python/Makefile])
 AC_CONFIG_FILES([bindings/python/test/Makefile])
 AC_CONFIG_FILES([doc/Makefile])
-if test "x$make_perlbindings" != "xno"; then
-AC_CONFIG_FILES([doc/README.perl])
-fi
 AC_CONFIG_FILES([man/Makefile])
 AC_CONFIG_FILES([man/gd_alter_encoding.3])
 AC_CONFIG_FILES([man/gd_alter_endianness.3])

@@ -177,7 +177,7 @@ if test "x${have_perl}" != "xno"; then
     GD_PERL_CONFIG([perlmandir], [siteman3direxp])
   elif test $perl_inst_type != "vendor"; then
     perldir="${local_perl_path}"
-    perlmandir="${mandir}"
+    perlmandir="${man3dir}"
   fi
 
   if test $perlmandir = "UNKNOWN"; then

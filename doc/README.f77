@@ -1132,11 +1132,11 @@ Subroutines interacting with field metadata
   specified is not of POLYNOM type, infield_len will be set to zero.  In this
   case the value of the remaining data is unspecified.
 
-* GDGEMX(infield, infield_len, countfield, countfield_len, countval, countmax,
+* GDGEMX(infield, infield_len, countfield, countfield_len, countval, period,
   fragment_index, dirfile_unit, field_code, field_code_len)
 
   Output:
-    INTEGER countval, countmax, fragment_index
+    INTEGER countval, period, fragment_index
     CHARACTER*<infield_len> infield
     CHARACTER*<countfield_len> countfield
   Input/Output:
@@ -1460,11 +1460,11 @@ Subroutines interacting with field metadata
   should be of type integer, otherwise it should be double precision.
 
 * GDALMX(dirfile_unit, field_code, field_code_len, infield, infield_len,
-  countfield, countfield_len, countval, countmax)
+  countfield, countfield_len, countval, period)
 
   Input:
     INTEGER dirfile_unit, field_code_len, infield_len, countfile_len, countval
-    INTEGER countmax
+    INTEGER period
     CHARACTER*<field_code_len> field_code
     CHARACTER*<infield_len> infield
     CHARACTER*<countfield_len> countfield
@@ -1837,11 +1837,11 @@ Subroutines which add or delete fields and aliases
     should be of type double precision.
 
 * GDADMX(dirfile_unit, field_code, field_code_len, infield, infield_len,
-  countfield, countfield_len, countval, countmax, fragment_index)
+  countfield, countfield_len, countval, period, fragment_index)
 
   Input:
     INTEGER dirfile_unit, field_code_len, infield_len, countfile_len, countval
-    INTEGER countmax, fragment_index
+    INTEGER period, fragment_index
     CHARACTER*<field_code_len> field_code
     CHARACTER*<infield_len> infield
     CHARACTER*<countfield_len> countfield
@@ -1939,7 +1939,7 @@ Subroutines which add or delete fields and aliases
 * GDMDWD(dirfile_unit, parent, field_code, field_code_len, in_field,
   in_field_len, check_field, check_field_len, windop, threshold)
 * GDMDMX(dirfile_unit, parent, field_code, field_code_len, in_field,
-  in_field_len, count_field, count_field_len, count_val, count_max)
+  in_field_len, count_field, count_field_len, count_val, period)
 * GDMDCA(dirfile_unit, parent, parent_len, field_code, field_code_len,
   const_type, array_len, data_type, data)
 * GDMDCO(dirfile_unit, parent, parent_len, field_code, field_code_len,

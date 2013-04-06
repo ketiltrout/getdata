@@ -400,7 +400,7 @@ The following methods are available:
 * virtual WindOpType Entry::WindOp()
 * virtual gd_triplet_t Entry::Threshold()
 * virtual int Entry::CountVal()
-* virtual int Entry::CountMax()
+* virtual int Entry::Period()
 
   These methods will return the corresponding member of the gd_entry_t object.
   Only methods reasonable to be queried for the given field type will return
@@ -767,7 +767,7 @@ Defined in getdata/mplex.h
 * virtual const char *MplexEntry::Scalar()
 * virtual int MplexEntry::ScalarIndex()
 * virtual int MplexEntry::CountVal()
-* virtual int MplexEntry::CountMax()
+* virtual int MplexEntry::Period()
 
   These methods, re-implemented from the Entry class, return the corresponding
   field parameter.
@@ -776,8 +776,8 @@ Defined in getdata/mplex.h
 * int MplexEntry::SetWindOp(WindOpType coeff)
 * int MplexEntry::SetCountVal(int count_val)
 * int MplexEntry::SetCountVal(const char *count_val)
-* int MplexEntry::SetCountMax(int count_max)
-* int MplexEntry::SetCountMax(const char *count_max)
+* int MplexEntry::SetPeriod(int period)
+* int MplexEntry::SetPeriod(const char *period)
 
   These functions will change the specified input field, check field, or the
   count value or max to the value or field code supplied.

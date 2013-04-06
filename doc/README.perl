@@ -6,10 +6,10 @@ Perl 5.6 or newer.  Complex data are represented within the module as
 Math::Complex objects.
 
 The GetData Perl bindings are documented in POD markup within GetData.pm.
-After installation, this documentation should be available in section @PERL_MAN3EXT@ of
+After installation, this documentation should be available in section 3 of
 the UNIX manual:
 
-  $ man @PERL_MAN3EXT@ GetData
+  $ man 3 GetData
 
 Before installation, the manual can be read using a command along the lines of
 

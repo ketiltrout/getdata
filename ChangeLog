@@ -1,3 +1,9 @@
+2013-04-06   D. V. Wiebe <getdata@ketiltrout.net> svn:827
+	* bindings/cxx/getdata/entry.h (Entry::CountMax)
+	bindings/cxx/getdata/mplexentry.h (MplexEntry::CountMax
+	MplexEntry::SetCountMax): Added (but marked deprecated) for backwards
+	compatibility.
+
 2013-04-05   D. V. Wiebe <getdata@ketiltrout.net> svn:826
 	* bindings/f77/test/big_test.f bindings/f77/test/big_test95.f90
 	bindings/perl/t/big_test.t: Fix test 231.

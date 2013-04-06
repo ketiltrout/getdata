@@ -857,11 +857,7 @@ and
 .I period
 place no restrictions on values contained in
 .IR index .
-Specifically, samples of
-.I index
-may exceed
-.IR period .
-Particular values of
+Specifically, particular values of
 .I index
 (including
 .IR count )
@@ -871,8 +867,11 @@ nor any other spacing);
 .I index
 need not ever take on the value
 .I count
-(in which case the value of the entirety of the output vector is
-implementation dependent).  MPLEX appeared in Standards Version 9.
+(in which case the value of the entirety of the derived field is
+implementation dependent).  Different MPLEX field definitions which use the
+same index vector may specify different
+.IR period s.
+MPLEX appeared in Standards Version 9.
 
 .RE
 .TP
