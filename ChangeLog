@@ -1,3 +1,6 @@
+2013-04-10   D. V. Wiebe <getdata@ketiltrout.net> svn:829
+	GetData-0.8.4rc1.
+
 2013-04-06   D. V. Wiebe <getdata@ketiltrout.net> svn:827
 	* bindings/cxx/getdata/entry.h (Entry::CountMax)
 	bindings/cxx/getdata/mplexentry.h (MplexEntry::CountMax
