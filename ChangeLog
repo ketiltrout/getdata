@@ -1,3 +1,11 @@
+2013-04-11   D. V. Wiebe <getdata@ketiltrout.net> svn:830
+	GetData-0.8.4rc2:
+
+	* bindings/perl/Build.PL.in: make include_dirs an array.  Reported by Seth.
+
+	* bindings/idl/package/configure.ac bindings/matlab/package/configure.ac:
+	Require GetData >= 0.8.4.
+
 2013-04-10   D. V. Wiebe <getdata@ketiltrout.net> svn:829
 	GetData-0.8.4rc1.
 

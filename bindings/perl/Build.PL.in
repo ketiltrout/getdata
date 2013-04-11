@@ -42,7 +42,7 @@ my $build = $class->new(
   dist_version_from => "GetData.pm",
   extra_compiler_flags => ['@DEFS@', '-I@top_builddir@/src'],
   extra_linker_flags => ['-L@top_builddir@/src/.libs/', '-lgetdata'],
-  include_dirs => '@top_srcdir@/src',
+  include_dirs => ['@top_srcdir@/src'],
   license => 'lgpl',
   module_name => "GetData",
   pm_files => { 'GetData.pm' => 'lib/GetData.pm' },
