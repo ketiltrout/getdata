@@ -55,9 +55,10 @@ This package provides:
     - C++ (libgetdata++)
     - Fortran 77 (libfgetdata)
     - Fortran 95 (libf95getdata)
-    - Python (pygetdata)
     - the Interactive Data Language (IDL; idl_getdata)
+    - MATLAB (libgetdata-matlab and associated MEX files)
     - Perl (GetData.pm)
+    - Python (pygetdata)
 
 Documentation for the various bindings, if present, can be found in files
 named `README.<language>' in the doc/ directory.  The C interface is described
@@ -138,6 +139,21 @@ If these libraries are not found by configure, GetData will lack support for
 the associated encoding scheme and fail gracefully if encountering dirfiles so
 encoded.
 
+Building bindings requires appropriate compilers/interpreters and libraries for
+the various languages.  In particular:
+
+- the C++ bindings require a C++90 compliant compiler
+- the Fortran-77 bindings require a Fortran-77 compliant compiler
+- the Fortran-95 bindings require both a Fortran-95 compliant compiler and a
+  Fortran-77 compiler (because the Fortran-95 bindings are built on top of
+  the Fortran-77 bindings)
+- the IDL bindings require a licenced IDL interpreter, version 5.5 or later;
+  they will not work on an unlicenced interpreter in timed demo mode
+- the MATLAB bindings require both a MATLAB interpreter and a MEX compiler
+- the Perl bindings require a Perl5 interpreter version 5.6 or later, as well
+  as the Math::Complex and Module::Build modules.
+- the Python bindings require Python 2.3 or later.  NumPy is also highly
+  recommended for efficient use.
 
 USING THE LIBRARY
 =================
