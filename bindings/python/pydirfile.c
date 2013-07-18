@@ -688,7 +688,6 @@ static PyObject *gdpy_dirfile_getdata(struct gdpy_dirfile_t *self,
 
     ns = gd_getdata(self->D, field_code, first_frame, first_sample, 0, (size_t)num_samples,
         return_type, data);
-    fprintf(stderr, "%zu/%zu\n", ns, (size_t)num_samples);
 
 #ifdef USE_NUMPY
     if (!as_list) {

@@ -84,7 +84,7 @@ Build: Build.PL GetData.pm lib/GetData.xs lib/simple_funcs.xs lib/typemap \
 clean-local: 
 	rm -rf lib blib
 	if test -e Build; then \
-		$(PERL) Build clean; \
+		$(PERL) Build clean || true; \
 	fi
 	rm -f $(BUILT_SOURCES) make_parameters.sed MYMETA.yml MYMETA.json GetData.pm
 	rm -rf Build _build MANIFEST build.stamp t/*~
