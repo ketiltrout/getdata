@@ -506,19 +506,25 @@ PyMODINIT_FUNC initpygetdata(void)
   int i;
   PyObject *mod;
 
+  dtracevoid();
+
   if (PyType_Ready(&gdpy_dirfile) < 0)
     return;
+  dprintf("gdpy_dirfile ready");
 
   if (PyType_Ready(&gdpy_entry) < 0)
     return;
+  dprintf("gdpy_entry ready");
 
   if (PyType_Ready(&gdpy_fragment) < 0)
     return;
+  dprintf("gdpy_fragment ready");
 
 #ifdef USE_NUMPY
   /* The following macro will cause this function to return if importing numpy
    * fails */
   import_array()
+  dprintf("imported NumPy");
 #endif
 
   mod = Py_InitModule3("pygetdata", GetDataMethods,
@@ -571,28 +577,35 @@ PyMODINIT_FUNC initpygetdata(void)
 
   if (mod == NULL)
     return;
+  dprintf("module init");
 
   Py_INCREF(&gdpy_dirfile);
   PyModule_AddObject(mod, "dirfile", (PyObject *)&gdpy_dirfile);
+  dprintf("gdpy_dirfile added");
 
   Py_INCREF(&gdpy_entry);
   PyModule_AddObject(mod, "entry", (PyObject *)&gdpy_entry);
+  dprintf("gdpy_entry added");
 
   Py_INCREF(&gdpy_fragment);
   PyModule_AddObject(mod, "fragment", (PyObject *)&gdpy_fragment);
+  dprintf("gdpy_fragment added");
 
   /* version */
   PyModule_AddObject(mod, "__version__", Py_BuildValue("(iiis)", GETDATA_MAJOR,
         GETDATA_MINOR, GETDATA_REVISION, GETDATA_VERSION_SUFFIX));
+  dprintf(".__version__ added");
 
   /* author */
   PyModule_AddStringConstant(mod, "__author__",
       "D. V. Wiebe <getdata@ketiltrout.net>");
+  dprintf(".__author__ added");
 
   /* add constants */
   for (i = 0; gdpy_constant_list[i].name != NULL; ++i)
     PyModule_AddIntConstant(mod, gdpy_constant_list[i].name,
         gdpy_constant_list[i].value);
+  dprintf("constants added");
 
   PyModule_AddIntConstant(mod, "__numpy_supported__",
 #ifdef USE_NUMPY
@@ -601,6 +614,7 @@ PyMODINIT_FUNC initpygetdata(void)
       0
 #endif
       );
+  dprintf(".__numpy_supported__ added");
 
   /* add exceptions */
   GdPy_DirfileError = PyErr_NewException("pygetdata.DirfileError",
@@ -618,4 +632,7 @@ PyMODINIT_FUNC initpygetdata(void)
     } else
       gdpy_exceptions[i] = GdPy_DirfileError;
   }
+  dprintf("Exceptions added");
+
+  dreturnvoid();
 }
