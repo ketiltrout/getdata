@@ -1,3 +1,16 @@
+2013-09-05   D. V. Wiebe <getdata@ketiltrout.net> svn:845
+	GetData-0.8.5 released.
+
+	* src/zzslim.c: 
+
+2013-07-17   D. V. Wiebe <getdata@ketiltrout.net> svn:835
+	
+	* bindings/python/pydirfile.c: Remove spurious debug printf.
+
+	* bindings/doc/Makefile.am: Fix make clean
+
+	* bindings/bindings/perl/Makefile.am: Fix make clean
+
 2013-05-14   D. V. Wiebe <getdata@ketiltrout.net> svn:832
 	GetData-0.8.4 released.
 

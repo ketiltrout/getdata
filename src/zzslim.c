@@ -37,8 +37,8 @@
  * open, idata = 0 otherwise idata = -1. */
 
 int _GD_ZzslimName(DIRFILE *restrict D, const char *restrict enc_data,
-    struct _gd_raw_file *restrict file, const char *restrict base,
-    int temp __gd_unused, int resolv)
+    struct gd_raw_file_ *restrict file, const char *restrict base,
+    int temp gd_unused_, int resolv)
 {
   size_t enc_len;
 
@@ -74,8 +74,8 @@ int _GD_ZzslimName(DIRFILE *restrict D, const char *restrict enc_data,
   return 0;
 }
 
-int _GD_ZzslimOpen(int dirfd, struct _gd_raw_file* file, int swap __gd_unused,
-    unsigned int mode __gd_unused)
+int _GD_ZzslimOpen(int dirfd, struct gd_raw_file_* file, int swap gd_unused_,
+    unsigned int mode gd_unused_)
 {
   char *filepath;
 
@@ -102,8 +102,8 @@ int _GD_ZzslimOpen(int dirfd, struct _gd_raw_file* file, int swap __gd_unused,
   return 0;
 }
 
-off64_t _GD_ZzslimSeek(struct _gd_raw_file* file, off64_t count,
-    gd_type_t data_type, unsigned int mode __gd_unused)
+off64_t _GD_ZzslimSeek(struct gd_raw_file_* file, off64_t count,
+    gd_type_t data_type, unsigned int mode gd_unused_)
 {
   off64_t n;
 
@@ -121,7 +121,7 @@ off64_t _GD_ZzslimSeek(struct _gd_raw_file* file, off64_t count,
   return n;
 }
 
-ssize_t _GD_ZzslimRead(struct _gd_raw_file *restrict file, void *restrict ptr,
+ssize_t _GD_ZzslimRead(struct gd_raw_file_ *restrict file, void *restrict ptr,
     gd_type_t data_type, size_t nmemb)
 {
   ssize_t n;
@@ -134,7 +134,7 @@ ssize_t _GD_ZzslimRead(struct _gd_raw_file *restrict file, void *restrict ptr,
   return n;
 }
 
-int _GD_ZzslimClose(struct _gd_raw_file *file)
+int _GD_ZzslimClose(struct gd_raw_file_ *file)
 {
   int ret;
 
@@ -151,8 +151,8 @@ int _GD_ZzslimClose(struct _gd_raw_file *file)
   return ret;
 }
 
-off64_t _GD_ZzslimSize(int dirfd, struct _gd_raw_file *file,
-    gd_type_t data_type, int swap __gd_unused)
+off64_t _GD_ZzslimSize(int dirfd, struct gd_raw_file_ *file,
+    gd_type_t data_type, int swap gd_unused_)
 {
   char *filepath;
   off64_t size;

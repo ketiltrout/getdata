@@ -1,4 +1,19 @@
-New in version 0.8.4rc2:
+New in verison 0.8.5:
+
+  Library Changes:
+
+  * The zzslim encoding framework, which was inadvertantly rendered
+    non-compilable in 0.8.4, should once again work.  Reported by Matthew
+    Hasselfield.
+
+  Bindings Changes:
+
+  * PYTHON BUG FIX: A spurious debugging message accidentally left in the
+    0.8.4 release has been expunged.
+
+|==============================================================================|
+
+New in version 0.8.4:
 
   Dirfile Changes:
 
